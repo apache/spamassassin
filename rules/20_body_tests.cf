@@ -118,8 +118,10 @@ describe SECTION_301		Claims compliance with SPAM regulations
 
 body EU_EMAIL_OPTOUT		/EU (?:e-?mail opt.?out|e.?commerce) directive/i
 describe EU_EMAIL_OPTOUT	Claims compliance with SPAM regulations
-body EU_200_32_CE		/Directive 200.32.CE/i
-describe EU_200_32_CE		Claims compliance with SPAM regulations
+
+#  0.00     0.00     0.00    0.00    1.00  EU_200_32_CE (no matches)
+#body EU_200_32_CE		/Directive 200.32.CE/i
+#describe EU_200_32_CE		Claims compliance with SPAM regulations
 
 body CHECK_OR_MONEY_ORDER	/check or money order/i
 describe CHECK_OR_MONEY_ORDER	Talk about a check or money order
@@ -130,8 +132,6 @@ describe SUPERLONG_LINE	        Contains a line >=199 characters long
 # fixed by ms to not allow entry field onto next line
 rawbody ASCII_FORM_ENTRY	/[^<][A-Za-z][A-Za-z]+.{1,15}?[\x09\x20]*_{30,}/
 describe ASCII_FORM_ENTRY	Contains an ASCII-formatted form
-body PRINT_OUT_AND_FAX		/print\s+out\s+and\s+fax/i
-describe PRINT_OUT_AND_FAX	Contains words 'print out and fax'
 
 body AMAZING			/\bAMAZING\b/
 describe AMAZING		Contains word 'amazing' in all-caps
@@ -196,10 +196,6 @@ describe ONE_TIME_MAILING	'one time mailing' doesn't mean it isn't spam
 # this one gets a few false positives
 body SOCIAL_SEC_NUMBER		/social security (?:number|record)/i
 describe SOCIAL_SEC_NUMBER	Talks about social security numbers
-
-# but this one almost never does, and catches *lots* of spam ;)
-body TRACE_BY_SSN		/Trace anyone by social security number/i
-describe TRACE_BY_SSN		Talks about tracing by SSN
 
 body LASER_PRINTER		/LASER PRINTER SUPPLIES/
 describe LASER_PRINTER		Discusses laser printer supplies
@@ -280,10 +276,6 @@ describe WE_HONOR_ALL		Claims to honor removal requests
 body COMMUNIGATE		/transferred with a trial version of CommuniGate/
 describe COMMUNIGATE		Sent using a trial version of CommuniGate
 
-# contrib: skod
-body AUTO_EMAIL_REMOVAL		/Auto Email Removal/
-describe AUTO_EMAIL_REMOVAL	Claims auto-email removal
-
 # this seems to be the new fashion (as of Jul 5 2002).  base64-encoded parts need to
 # be stripped before this match
 body TRACKER_ID		/^[a-z0-9]{6,}[-_a-z0-9]{12,}[a-z0-9]{6,}\s*\z/is
@@ -329,10 +321,6 @@ describe WANTS_CREDIT_CARD      Asks for credit card details
 # (contrib: WW)
 body ASKS_BILLING_ADDRESS       /\bbilling address\b/i
 describe ASKS_BILLING_ADDRESS   Asks for a billing address
-
-# (contrib: WW)
-body CYBER_FIRE_POWER           /\b(?:by|for) Cyber FirePower\!/
-describe CYBER_FIRE_POWER       mentions Cyber FirePower!, a spam-tool
 
 body UPPERCASE_25_50		eval:check_for_uppercase('25', '50')
 describe UPPERCASE_25_50	message body is 25-50% uppercase
@@ -624,11 +612,9 @@ describe VJESTIKA		Contains "Vjestika Aphrodisia"
 body TONER			/\b(?:toner|ink(?:[-\s]*jet)?|fax|copier)[-\s]+cartridge/i
 describe TONER			Contains "Toner Cartridge"
 
-body CASINO			/casino/i
-describe CASINO			Contains "Casino"
-
-body ONCE_IN_LIFETIME		/once in a lifetime opportunity/i
-describe ONCE_IN_LIFETIME	Once in a lifetime, apparently
+#  0.01     0.01     0.01    0.64    1.80  ONCE_IN_LIFETIME (low matches)
+#body ONCE_IN_LIFETIME		/once in a lifetime opportunity/i
+#describe ONCE_IN_LIFETIME	Once in a lifetime, apparently
 
 body YOUR_INCOME		/\byour income\b/i
 describe YOUR_INCOME		Doing something with my income
@@ -636,8 +622,9 @@ describe YOUR_INCOME		Doing something with my income
 body BE_AMAZED			/\bbe amazed\b/i
 describe BE_AMAZED		Apparently, you'll be amazed
 
-body ITS_EFFECTIVE		/\bit's effective\b/i
-describe ITS_EFFECTIVE		Something claims to be effective
+#  0.00     0.00     0.00    0.00    1.00  ITS_EFFECTIVE (no matches)
+#body ITS_EFFECTIVE		/\bit's effective\b/i
+#describe ITS_EFFECTIVE		Something claims to be effective
 
 body RESISTANCE_IS_FUTILE	/Replying to this email will not unsubscribe you./i
 describe RESISTANCE_IS_FUTILE	Resistance to this spam is futile
@@ -671,10 +658,6 @@ describe FOR_JUST_SOME_AMT      Contains 'for only' some amount of cash
 # suggestion following Jason Haar
 body MIME_NULL_BLOCK		/This message is in MIME format/
 describe MIME_NULL_BLOCK	Correct for MIME 'null block'
-
-# Unregistered spam tool
-body SAFEGUARD_NOTICE		/This safeguard is not inserted when using the registered version/
-describe SAFEGUARD_NOTICE	Contains signature of unregistered spam tool
 
 body     READ_TO_END            /read this (?:e-?mail )?to the end/i
 describe READ_TO_END            You'd better read all of this spam!
@@ -798,11 +781,13 @@ describe FREE_TRIAL		Free Trial
 body FREE_MEMBERSHIP	        /\bfree membership/i
 describe FREE_MEMBERSHIP	Free Membership
 
-body FREE_FLAG		        /\bfree flag/i
-describe FREE_FLAG		Free Flag
+#  0.00     0.00     0.00    0.00    1.00  FREE_FLAG (no matches)
+#body FREE_FLAG		        /\bfree flag/i
+#describe FREE_FLAG		Free Flag
 
-body FREE_HOSTING	        /\bfree hosting\b/i
-describe FREE_HOSTING		Free Hosting
+# 0.01     0.01     0.01    0.58    1.00  FREE_HOSTING (low matches)
+#body FREE_HOSTING	        /\bfree hosting\b/i
+#describe FREE_HOSTING		Free Hosting
 
 body FREE_WEBSITE	        /\bfree website/i
 describe FREE_WEBSITE		Free Website
@@ -849,8 +834,9 @@ describe CREDITORS_CALLING 	Calling Creditors
 body REFINANCE		        /\brefinance.{0,6} home\b|\bhome loan\b/i
 describe REFINANCE		Refinance Home
 
-body LIFE_INSURANCE	        /\blife insurance.{1,30}no.{1,15}exam/i
-describe LIFE_INSURANCE		No Examination life Insurance
+#  0.00     0.00     0.00    0.00    1.00  LIFE_INSURANCE (no matches)
+#body LIFE_INSURANCE	        /\blife insurance.{1,30}no.{1,15}exam/i
+#describe LIFE_INSURANCE		No Examination life Insurance
 
 #body SEARCH_ENGINE	        /\b(?:(?:submit|traffic|top).{0.10} search engines?|site ranking)\b/i
 #describe SEARCH_ENGINE		Search Engine Site Ranking
@@ -861,17 +847,20 @@ describe SEARCH_ENGINE_PROMO    Discusses search engine listings
 body OPPORTUNITY_2		/\b(?:opportunity (?:pass|of a lifetime|is knocking|for you)|(?:investment|unique) opportunity)\b/i
 describe OPPORTUNITY_2		Opportunity - What a deal!
 
-body MORE_TRAFFIC	        /\bmore (?:internet|web) traffic\b/i
-describe MORE_TRAFFIC		More Internet Traffic
+#  0.00     0.00     0.00    0.00    1.00  MORE_TRAFFIC (no matches)
+#body MORE_TRAFFIC	        /\bmore (?:internet|web) traffic\b/i
+#describe MORE_TRAFFIC		More Internet Traffic
 
 body NO_PURCHASE	        /\bno purchase\b/i
 describe NO_PURCHASE		No Purchase Necessary
 
-body NO_MIDDLEMAN	        /\bno middleman\b/i
-describe NO_MIDDLEMAN		No Middleman
+#  0.00     0.00     0.00    0.00    1.00  NO_MIDDLEMAN (no matches)
+#body NO_MIDDLEMAN	        /\bno middleman\b/i
+#describe NO_MIDDLEMAN		No Middleman
 
-body NO_SPENDING	        /\bno spending limits\b/i
-describe NO_SPENDING		No Spending Limits
+#  0.00     0.00     0.00    0.00    1.00  NO_SPENDING (no matches)
+#body NO_SPENDING	        /\bno spending limits\b/i
+#describe NO_SPENDING		No Spending Limits
 
 body NO_STRINGS		        /\bno strings attached\b/i
 describe NO_STRINGS		No Strings Attached
@@ -906,8 +895,9 @@ describe NO_INVENTORY		No Inventory
 body BUY_DIRECT		        /\bbuy direct\b/i
 describe BUY_DIRECT		Buy Direct
 
-body PRICES_WONT_LAST	        /\bprices.{0,11} last\b/i
-describe PRICES_WONT_LAST	Prices won't Last
+#  0.00     0.01     0.00    0.69    1.00  PRICES_WONT_LAST (low matches)
+#body PRICES_WONT_LAST	        /\bprices.{0,11} last\b/i
+#describe PRICES_WONT_LAST	Prices won't Last
 
 body DRASTIC_REDUCED	        /\bdrastic.{0,4} reduc/i
 describe DRASTIC_REDUCED	Drastically Reduced
@@ -945,8 +935,9 @@ describe MARKETING		Direct Marketing
 body SAVE_MONEY		        /\bsave .{0,9}(?:money|thousands|millions|up to)\b/i
 describe SAVE_MONEY		Save big money
 
-body BREAKTHROUGH	        /\bbreakthrough price/i
-describe BREAKTHROUGH		Breakthrough Pricing
+#  0.00     0.00     0.00    0.00    1.00  BREAKTHROUGH (no matches)
+#body BREAKTHROUGH	        /\bbreakthrough price/i
+#describe BREAKTHROUGH		Breakthrough Pricing
 
 body GUARANTEED_STUFF	        /\bguarantee.{0,15}(?:income|money|monthly)\b/i
 describe GUARANTEED_STUFF	Guaranteed Stuff
@@ -972,8 +963,9 @@ describe AMAZING_STUFF		Amazing Stuff
 body CASH_BONUS		        /\bcash bonus\b/i
 describe CASH_BONUS		Cash Bonus
 
-body BONUS_PAYMENT	        /\bbonus payment/i
-describe BONUS_PAYMENT		Bonus Payments
+#  0.00     0.00     0.00    0.00    1.00  BONUS_PAYMENT (no matches)
+#body BONUS_PAYMENT	        /\bbonus payment/i
+#describe BONUS_PAYMENT		Bonus Payments
 
 body SHOPPING_SPREE	        /\bshopping spree\b/i
 describe SHOPPING_SPREE		Shopping Spree
@@ -990,8 +982,9 @@ describe SIGNIFICANT		Significant Savings
 body CENTS_ON_DOLLAR	        /\bcents on the dollar\b/i
 describe CENTS_ON_DOLLAR	Cents on the Dollar
 
-body IRS		        /\bIRS .{0,15}secrets\b/i
-describe IRS			IRS Scams
+#  0.00     0.00     0.00    0.00    1.00  IRS (no matches)
+#body IRS		        /\bIRS .{0,15}secrets\b/i
+#describe IRS			IRS Scams
 
 body COUPON		        /\boff coupon/i
 describe COUPON			Offers Coupon
@@ -1026,8 +1019,9 @@ describe BREAKTHROUGH_2		Breakthrough
 body WRINKLES		        /\bwrinkle reduction\b/i
 describe WRINKLES		Removes Wrinkles
 
-body HARD_CASH		        /\bhard cash\b/i
-describe HARD_CASH		Is cash really hard?
+#  0.01     0.01     0.01    0.29    1.00  HARD_CASH (low matches)
+#body HARD_CASH		        /\bhard cash\b/i
+#describe HARD_CASH		Is cash really hard?
 
 body BIG_BUCKS		        /\bbig bucks\b/i
 describe BIG_BUCKS		Big Bucks
@@ -1125,8 +1119,9 @@ describe COMPETE		Compete for your business
 body CANCEL		        /\bcancel at any time\b/i
 describe CANCEL			Cancel at any time!
 
-body CHANGE_TERMS	        /\bstrictly based on the following terms and conditions\b/i
-describe CHANGE_TERMS		Terms and conditions
+#  0.01     0.01     0.00    0.77    1.00  CHANGE_TERMS (low matches)
+#body CHANGE_TERMS	        /\bstrictly based on the following terms and conditions\b/i
+#describe CHANGE_TERMS		Terms and conditions
 
 body RESERVES_RIGHT	        /\breserves the right\b/i
 describe RESERVES_RIGHT		Reserves the right
@@ -1140,8 +1135,9 @@ describe NEW_CUSTOMER		New Customers Only
 body PSYCHIC		        /\b(?:caring|gifted|experienced) psychic/i
 describe PSYCHIC		Psychics Scam
 
-body PHONE_CANCER	        /\bphone.{0,15}cancer\b/i
-describe PHONE_CANCER		Cell Phone Cancer Scam
+#  0.00     0.01     0.00    1.00    1.00  PHONE_CANCER (low matches)
+#body PHONE_CANCER	        /\bphone.{0,15}cancer\b/i
+#describe PHONE_CANCER		Cell Phone Cancer Scam
 
 body MEET_SINGLES	        /\bmeet .{0,12}singles|thousands of personal/i
 describe MEET_SINGLES		Meet Singles
@@ -1149,8 +1145,9 @@ describe MEET_SINGLES		Meet Singles
 body JOIN_MILLIONS	        /\bjoin (?:millions|thousands)\b/i
 describe JOIN_MILLIONS		Join Millions of Americans
 
-body BACKED_BY		        /\bbacked by [mb]illions\b/i
-describe BACKED_BY		Backed by Billions
+#  0.00     0.00     0.00    0.00    1.00  BACKED_BY (no matches)
+#body BACKED_BY		        /\bbacked by [mb]illions\b/i
+#describe BACKED_BY		Backed by Billions
 
 body EXPECT_TO_EARN	        /\bexpect to earn|earn up to\b/i
 describe EXPECT_TO_EARN		Expect to earn
@@ -1158,8 +1155,9 @@ describe EXPECT_TO_EARN		Expect to earn
 body BE_BOSS		        /\byour own boss\b/i
 describe BE_BOSS		Be your own boss
 
-body SPY_ON_FRIENDS	        /\binvestigat.{0.15} (?:friend|employee|neighbor)/i
-describe SPY_ON_FRIENDS	        Investigate your Friends!
+#  0.00     0.00     0.00    0.00    1.00  SPY_ON_FRIENDS (no matches)
+#body SPY_ON_FRIENDS	        /\binvestigat.{0.15} (?:friend|employee|neighbor)/i
+#describe SPY_ON_FRIENDS	        Investigate your Friends!
 
 body DIG_UP_INFO	        /\bdig up information\b/i
 describe DIG_UP_INFO		Dig up Dirt on Friends
@@ -1189,8 +1187,9 @@ describe FREE_PORN              Possible porn - Free Porn
 body BARELY_LEGAL               /\b(?:barely|just) legal\b/i
 describe BARELY_LEGAL           Possible porn - Barely Legal
 
-body LOLITA                     /\blolita/i
-describe LOLITA                 Possible porn - Lolita
+# 0.04     0.04     0.03    0.58    1.00  LOLITA (low matches)
+#body LOLITA                     /\blolita/i
+#describe LOLITA                 Possible porn - Lolita
 
 body MEGA_SITE                  /\bmega[ -]?sites?\b/i
 describe MEGA_SITE              Possible porn - Mega Porn
@@ -1238,8 +1237,9 @@ describe AMATEUR_PORN           Possible porn - Amateur Porn
 body CELEBRITY_PORN             /\b(?:celebrity|celebrities|celebs).{0,15}(?:sex|porn|pics|caught|nude|exposed|content)|(?:steamy|hot|nude|shocking|free|hardcore) (?:celebrity|celebrities|celebs)\b/i
 describe CELEBRITY_PORN         Possible porn - Celebrity Porn
 
-body PORN_GALLERIES             /\bhuge galleries\b/i
-describe PORN_GALLERIES         Possible porn - Galleries of Pictures
+#  0.00     0.00     0.00    0.00    1.00  PORN_GALLERIES (no matches)
+#body PORN_GALLERIES             /\bhuge galleries\b/i
+#describe PORN_GALLERIES         Possible porn - Galleries of Pictures
 
 #body UP_SKIRT                   /\bup[ -]?skirt\b/i
 #describe UP_SKIRT               Possible porn - Up Skirt
