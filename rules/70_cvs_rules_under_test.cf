@@ -478,8 +478,12 @@ header T_NIGERIAN_SUBJECT2	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*(?:request\s+(?:f
 #  0.000   0.0000   0.0000    0.500   0.11    0.01  T_RCVD_IN_MONKEYS_FORMMAIL
 #  0.000   0.0000   0.0000    0.500   0.12    0.01  T_RCVD_IN_MONKEYS_FORMMAIL
 header T_RCVD_IN_MONKEYS_FORMMAIL	rbleval:check_rbl_txt('relay', 'formmail.relays.monkeys.com.')
-describe T_RCVD_IN_MONKEYS_FORMMAIL Received via a relay in formmail.relays.monkeys.com.
+describe T_RCVD_IN_MONKEYS_FORMMAIL	Received via a relay in formmail.relays.monkeys.com.
 tflags T_RCVD_IN_MONKEYS_FORMMAIL net
+# just an experiment
+header T_RCVD_IN_MONKEYS_FORMMAIL2	rbleval:check_rbl('relay2', 'formmail.relays.monkeys.com.')
+describe T_RCVD_IN_MONKEYS_FORMMAIL2	Received via a relay in formmail.relays.monkeys.com.
+tflags T_RCVD_IN_MONKEYS_FORMMAIL2 net
 
 # quinlan: entire corpus, then last 2000 spam and 2000 ham:
 # 18.125  36.2000   0.0500    0.999   0.95    0.01  T_RCVD_IN_MONKEYS_UPL
@@ -487,10 +491,6 @@ tflags T_RCVD_IN_MONKEYS_FORMMAIL net
 header T_RCVD_IN_MONKEYS_UPL	rbleval:check_rbl_txt('relay', 'proxies.relays.monkeys.com.')
 describe T_RCVD_IN_MONKEYS_UPL	Received via a relay in proxies.relays.monkeys.com.
 tflags T_RCVD_IN_MONKEYS_UPL net
-# just an experiment
-header T_RCVD_IN_MONKEYS_UPL2	rbleval:check_rbl('relay2', 'proxies.relays.monkeys.com.')
-describe T_RCVD_IN_MONKEYS_UPL2	Received via a relay in proxies.relays.monkeys.com.
-tflags T_RCVD_IN_MONKEYS_UPL2 net
 
 # new "-notfirsthop" logic
 # quinlan: entire corpus, then last 2000 spam and 2000 ham:
@@ -540,15 +540,15 @@ tflags T_RCVD_IN_WIREHUB_PROXIES net
 # delist: automatic expiry, no fee, retested on request (free)
 header __RCVD_IN_OPM		rbleval:check_rbl('opm2', 'opm.blitzed.org.')
 tflags __RCVD_IN_OPM net
-header T_RCVD_IN_OPM_WINGATE		rbleval:check_rbl_results_for('opm2', '1')
+header T_RCVD_IN_OPM_WINGATE		rblreseval:check_rbl_results_for('opm2', '1')
 tflags T_RCVD_IN_OPM_WINGATE net
-header T_RCVD_IN_OPM_SOCKS		rbleval:check_rbl_results_for('opm2', '2')
+header T_RCVD_IN_OPM_SOCKS		rblreseval:check_rbl_results_for('opm2', '2')
 tflags T_RCVD_IN_OPM_SOCKS net
-header T_RCVD_IN_OPM_HTTP_CONNECT	rbleval:check_rbl_results_for('opm2', '4')
+header T_RCVD_IN_OPM_HTTP_CONNECT	rblreseval:check_rbl_results_for('opm2', '4')
 tflags T_RCVD_IN_OPM_HTTP_CONNECT net
-header T_RCVD_IN_OPM_ROUTER		rbleval:check_rbl_results_for('opm2', '8')
+header T_RCVD_IN_OPM_ROUTER		rblreseval:check_rbl_results_for('opm2', '8')
 tflags T_RCVD_IN_OPM_ROUTER net
-header T_RCVD_IN_OPM_HTTP_POST	rbleval:check_rbl_results_for('opm2', '16')
+header T_RCVD_IN_OPM_HTTP_POST	rblreseval:check_rbl_results_for('opm2', '16')
 tflags T_RCVD_IN_OPM_HTTP_POST net
 
 # fiveten - many blacklists, but only the bulk one performs well
@@ -560,7 +560,7 @@ header __FIVETEN	rbleval:check_rbl('fiveten', 'blackholes.five-ten-sg.com.')
 tflags __FIVETEN net
 # bulk mailers that don't require confirmed opt-in from their customers,
 # or that have have allowed known spammers to become clients.
-header T_RCVD_IN_FIVETEN_BULK	rbleval:check_rbl_results_for('fiveten', '127.0.0.4')
+header T_RCVD_IN_FIVETEN_BULK	rblreseval:check_rbl_results_for('fiveten', '127.0.0.4')
 tflags T_RCVD_IN_FIVETEN_BULK net
 
 # some additional osirusoft tests, needs more work
@@ -579,17 +579,17 @@ tflags T_RCVD_IN_OSSOCKS net
 # delist: $50 fee for T_RCVD_IN_SORBS_SPAM, others are retested on request (free)
 header T_RCVD_IN_SORBS	rbleval:check_rbl('sorbs', 'dnsbl.sorbs.net.')
 tflags T_RCVD_IN_SORBS net
-header T_RCVD_IN_SORBS_HTTP	rbleval:check_rbl_results_for('sorbs', '127.0.0.2')
+header T_RCVD_IN_SORBS_HTTP	rblreseval:check_rbl_results_for('sorbs', '127.0.0.2')
 tflags T_RCVD_IN_SORBS_HTTP net
-header T_RCVD_IN_SORBS_MISC	rbleval:check_rbl_results_for('sorbs', '127.0.0.3')
+header T_RCVD_IN_SORBS_MISC	rblreseval:check_rbl_results_for('sorbs', '127.0.0.3')
 tflags T_RCVD_IN_SORBS_MISC net
-header T_RCVD_IN_SORBS_SMTP	rbleval:check_rbl_results_for('sorbs', '127.0.0.4')
+header T_RCVD_IN_SORBS_SMTP	rblreseval:check_rbl_results_for('sorbs', '127.0.0.4')
 tflags T_RCVD_IN_SORBS_SMTP net
-header T_RCVD_IN_SORBS_SOCKS	rbleval:check_rbl_results_for('sorbs', '127.0.0.5')
+header T_RCVD_IN_SORBS_SOCKS	rblreseval:check_rbl_results_for('sorbs', '127.0.0.5')
 tflags T_RCVD_IN_SORBS_SOCKS net
-header T_RCVD_IN_SORBS_SPAM	rbleval:check_rbl_results_for('sorbs', '127.0.0.6')
+header T_RCVD_IN_SORBS_SPAM	rblreseval:check_rbl_results_for('sorbs', '127.0.0.6')
 tflags T_RCVD_IN_SORBS_SPAM net
-header T_RCVD_IN_SORBS_WEB	rbleval:check_rbl_results_for('sorbs', '127.0.0.7')
+header T_RCVD_IN_SORBS_WEB	rblreseval:check_rbl_results_for('sorbs', '127.0.0.7')
 tflags T_RCVD_IN_SORBS_WEB net
 
 # some Reynolds RBLs, may be a bad idea since they're in Australia
