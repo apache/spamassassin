@@ -625,6 +625,10 @@ describe T_HTML_TAG_BALANCE_DIV_0	HTML has excess "div" tags
 body T_HTML_TAG_BALANCE_DIV_1	eval:html_tag_balance('div', '!= 0')
 describe T_HTML_TAG_BALANCE_DIV_1	HTML has unbalanced "font" tags
 
+########################################################################
+
+header T_RCVD_BONUS_SPC_DATE	Received =~ /with SMTP;  \d\d \S\S\S /
+
 body T_HTML_TAG_BALANCE_DIV_2	eval:html_tag_balance('div', '> 0')
 describe T_HTML_TAG_BALANCE_DIV_2	HTML is missing "div" tags
 
