@@ -22,7 +22,7 @@ close OUT;
 tstprefs ("
         $default_cf_lines
         auto_whitelist_path ./log/awl/shouldbeinaccessible
-        auto_whitelist_mode 0755
+        auto_whitelist_file_mode 0755
 ");
 
 my $fh = IO::File->new_tmpfile();

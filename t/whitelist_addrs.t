@@ -18,22 +18,22 @@ q{X-Spam-Status: Yes}, 'spamyes',
 %patterns = %no_patterns;
 sarun ("--add-addr-to-whitelist whitelist_test\@whitelist.spamassassin.taint.org", \&patterns_run_cb);
 %patterns = %is_nonspam_patterns;
-ok (sarun ("-L -a -t < data/nice/002", \&patterns_run_cb));
+ok (sarun ("-L -t < data/nice/002", \&patterns_run_cb));
 ok_all_patterns();
 %patterns = %is_nonspam_patterns;
-sarun ("-L -a -t < data/spam/004", \&patterns_run_cb);
+sarun ("-L -t < data/spam/004", \&patterns_run_cb);
 ok_all_patterns();
 
 %patterns = %no_patterns;
 sarun ("--remove-addr-from-whitelist whitelist_test\@whitelist.spamassassin.taint.org", \&patterns_run_cb);
 %patterns = %is_spam_patterns;
-sarun ("-L -a -t < data/spam/004", \&patterns_run_cb);
+sarun ("-L -t < data/spam/004", \&patterns_run_cb);
 ok_all_patterns();
 
 %patterns = %no_patterns;
 sarun ("--add-addr-to-blacklist whitelist_test\@whitelist.spamassassin.taint.org", \&patterns_run_cb);
 %patterns = %is_spam_patterns;
-sarun ("-L -a -t < data/nice/002", \&patterns_run_cb);
+sarun ("-L -t < data/nice/002", \&patterns_run_cb);
 ok_all_patterns();
 
 
