@@ -496,3 +496,11 @@ header __T_OPT_HEADER_SUBJ	Subject =~ /opt\W?.{2,3}\b/i
 header __T_OPT_HEADER_RESSUBJ	Resent-Subject =~ /opt\W?.{2,3}\b/i
 header __T_OPT_HEADER_ALL	ALL =~ /opt\W?.{2,3}\b/i
 meta T_OPT_HEADER		(__T_OPT_HEADER_ALL && !__T_OPT_HEADER_SUBJ && !__T_OPT_HEADER_RESSUBJ)
+
+body     T_HTML_LINK_CLICK_HERE eval:html_eval('anchor_text', '=~ /click\s+here/i')
+body     T_HTML_LINK_MONEY      eval:html_eval('anchor_text', '=~/\s\$/')
+body     T_HTML_LINK_UNSUB      eval:html_eval('anchor_text', '=~/unsubscribe/i')
+
+score     T_HTML_LINK_CLICK_HERE 0.01
+score     T_HTML_LINK_MONEY      0.01
+score     T_HTML_LINK_UNSUB      0.01
