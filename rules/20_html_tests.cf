@@ -144,7 +144,7 @@ body HTML_FORM_ACTION_MAILTO		eval:html_test('form_action_mailto')
 describe HTML_FORM_ACTION_MAILTO	HTML includes a form which sends mail
 
 # HTML_IMAGE_AREA - lots of image area (absolute)
-# note that: 640x480 = 307200 and 800x600 = 480000
+# note that: 640x480 = 307200, 800x600 = 480000, 1024x768=786432
 body HTML_IMAGE_AREA_04		eval:html_range('image_area','400000','500000')
 body HTML_IMAGE_AREA_05		eval:html_range('image_area','500000','600000')
 body HTML_IMAGE_AREA_06		eval:html_range('image_area','600000','700000')
@@ -167,14 +167,12 @@ body HTML_IMAGE_ONLY_06		eval:html_image_only('0400','0600')
 body HTML_IMAGE_ONLY_08		eval:html_image_only('0600','0800')
 body HTML_IMAGE_ONLY_10		eval:html_image_only('0800','1000')
 body HTML_IMAGE_ONLY_12		eval:html_image_only('1000','1200')
-body HTML_IMAGE_ONLY_14		eval:html_image_only('1200','1400')
 describe HTML_IMAGE_ONLY_02	HTML has images with 0-200 bytes of words
 describe HTML_IMAGE_ONLY_04	HTML has images with 200-400 bytes of words
 describe HTML_IMAGE_ONLY_06	HTML has images with 400-600 bytes of words
 describe HTML_IMAGE_ONLY_08	HTML has images with 600-800 bytes of words
 describe HTML_IMAGE_ONLY_10	HTML has images with 800-1000 bytes of words
 describe HTML_IMAGE_ONLY_12	HTML has images with 1000-1200 bytes of words
-describe HTML_IMAGE_ONLY_14	HTML has images with 1200-1400 bytes of words
 
 # HTML_IMAGE_RATIO - more image area than text (ratio)
 body HTML_IMAGE_RATIO_02	eval:html_image_ratio('0.000','0.002')
