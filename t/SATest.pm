@@ -17,6 +17,12 @@ sub sa_t_init {
   $scr = $ENV{'SCRIPT'};
   $scr ||= "../spamassassin";
 
+  $spamd = $ENV{'SPAMD_SCRIPT'};
+  $spamd ||= "../spamd/spamd";
+
+  $spamc = $ENV{'SPAMC_SCRIPT'};
+  $spamc ||= "../spamd/spamc";
+
   (-f "t/test_dir") && chdir("t");        # run from ..
   rmtree ("log");
   mkdir ("log", 0755);
@@ -67,6 +73,71 @@ sub sarun {
   if ($sa_exitcode != 0) { return undef; }
   &checkfile ("$testname.out", $read_sub);
   1;
+}
+
+sub sdrun {
+  my $sdargs = shift;
+  my $args = shift;
+  my $read_sub = shift;
+
+  rmtree ("log/outputdir.tmp"); # some tests use this
+  mkdir ("log/outputdir.tmp", 0755);
+
+  if (defined $ENV{'SC_ARGS'}) {
+    $args = $ENV{'SC_ARGS'} . " ". $args;
+  }
+
+  start_spamd ($sdargs);
+
+  my $spamcargs = "$spamc $args";
+  $spamcargs =~ s!/!\\!g if ($^O =~ /^MS(DOS|Win)/i);
+
+  print ("\t$spamcargs\n");
+  system ("$spamcargs > log/$testname.out");
+
+  $sa_exitcode = ($?>>8);
+  if ($sa_exitcode != 0) { return undef; }
+  &checkfile ("$testname.out", $read_sub);
+
+  stop_spamd ();
+
+  1;
+}
+
+sub start_spamd {
+  my $sdargs = shift;
+
+  if (defined $ENV{'SD_ARGS'}) {
+    $sdargs = $ENV{'SD_ARGS'} . " ". $sdargs;
+  }
+
+  my $spamdargs = "$spamd -D $sdargs";
+  $spamdargs =~ s!/!\\!g if ($^O =~ /^MS(DOS|Win)/i);
+
+  print ("\t$spamdargs > log/$testname.spamd 2>&1 &\n");
+  system ("$spamdargs > log/$testname.spamd 2>&1 &");
+
+  # now find the PID
+  $spamd_pid = 0;
+  my $retries = 20;
+  while ($spamd_pid <= 0) {
+    if (open (IN, "<log/$testname.spamd")) {
+      while (<IN>) {
+	/server pid: (\d+)/ and $spamd_pid = $1;
+      }
+      close IN;
+      last if ($spamd_pid);
+    }
+
+    sleep 1;
+    if ($retries-- <= 0) { warn "spamd start failed"; return 0; }
+  }
+
+  1;
+}
+
+sub stop_spamd {
+  kill (15, $spamd_pid);
 }
 
 # ---------------------------------------------------------------------------
