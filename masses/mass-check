@@ -130,6 +130,7 @@ sub wanted {
   my $hits = $status->get_hits();
   my $tests = $status->get_names_of_tests_hit().','.
 		$status->get_names_of_subtests_hit();
+#  print STDERR $status->get_full_message_as_text();
 
   $tests = join(',', sort(split(/,/, $tests)));
 
@@ -170,16 +171,14 @@ sub wanted {
 sub logkilled {
   my ($ma, $id, $reason) = @_;
 
-  my $from = $ma->get_header ("From");
-  my $to = $ma->get_header ("To");
-  my $subj = $ma->get_header ("Subject");
-  my $msgid = $ma->get_header ("Message-Id");
-  $msgid ||= $ma->get_header ("Message-ID");
-  $msgid ||= '(??)';
-  chop ($from);
-  chop ($to);
-  chop ($subj);
-  chop ($msgid);
+  my $from = $ma->get_header("From") || 'undef';
+  my $to = $ma->get_header("To") || 'undef';
+  my $subj = $ma->get_header("Subject") || 'undef';
+  my $msgid = $ma->get_header("Message-Id") || 'undef';
+  chomp ($from);
+  chomp ($to);
+  chomp ($subj);
+  chomp ($msgid);
   print STDERR "\n" if ($opt_showdots);
   warn "# skipped killfiled message ($reason): from=$from to=$to subj=$subj msgid=$msgid id=$id\n";
 }
