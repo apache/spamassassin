@@ -95,7 +95,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.156 2002/12/27 23:34:20 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.157 2003/01/02 02:52:40 duncf Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -244,6 +244,12 @@ sub new {
   $self->{save_pattern_hits} ||= 0;
 
   $self->{bayes_scanner} = new Mail::SpamAssassin::Bayes ($self);
+
+  my $set = 0;
+  $set |= 1 unless $self->{local_tests_only};
+  $set |= 2 if $self->{bayes_scanner}->is_available();
+
+  $self->{conf}->set_score_set ($set);
 
   $self->{encapsulated_content_description} = 'original message before SpamAssassin';
 
@@ -426,6 +432,7 @@ the process.
 sub signal_user_changed {
   my $self = shift;
   my $opts = shift;
+  my $set = 0;
 
   dbg ("user has changed");
 
@@ -436,6 +443,11 @@ sub signal_user_changed {
   # reopen bayes dbs for this user
   $self->{bayes_scanner}->finish();
   $self->{bayes_scanner} = new Mail::SpamAssassin::Bayes ($self);
+
+  $set |= 1 unless $self->{local_tests_only};
+  $set |= 2 if $self->{bayes_scanner}->is_available();
+
+  $self->{conf}->set_score_set ($set);
 
   1;
 }

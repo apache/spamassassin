@@ -80,7 +80,8 @@ sub new {
   $self->{tests} = { };
   $self->{descriptions} = { };
   $self->{test_types} = { };
-  $self->{scores} = { };
+  $self->{scoreset} = [ {}, {}, {}, {} ];
+  $self->{scores} = $self->{scoreset}->[0];
   $self->{tflags} = { };
 
   # after parsing, tests are refiled into these hashes for each test type.
@@ -208,6 +209,12 @@ sub parse_scores_only {
 sub parse_rules {
   my ($self) = @_;
   $self->_parse ($_[1], 0); # don't copy $rules!
+}
+
+sub set_score_set {
+  my ($self, $set) = @_;
+  $self->{scores} = $self->{scoreset}->[$set];
+  dbg("Score set $set chosen.");
 }
 
 sub _parse {
@@ -481,8 +488,35 @@ The default score is 1.0, or 0.01 for tests whose names begin with 'T_'
 =cut
 
     if (/^score\s+(\S+)\s+(\-*[\d\.]+)$/) {
-      $self->{scores}->{$1} = $2+0.0; next;
+      $self->{scoreset}->[0]->{$1} = $2+0.0;
+      $self->{scoreset}->[1]->{$1} = $2+0.0;
+      $self->{scoreset}->[2]->{$1} = $2+0.0;
+      $self->{scoreset}->[3]->{$1} = $2+0.0;
+      next;
     }
+
+=item scores SYMBOLIC_TEST_NAME n.nn n.nn n.nn n.nn
+
+Assign scores to a given test. Scores can be positive or negative real
+numbers or integers. C<SYMBOLIC_TEST_NAME> is the symbolic name used
+by SpamAssassin as a handle for that test; for example,
+'FROM_ENDS_IN_NUMS'.
+
+The first score listed is used when both Bayes and network tests are
+disabled. The second score is used when Bayes is disabled, but network
+tests are enabled. The third score is used when Bayes is enabled and
+network tests are disabled. The fourth score is used when Bayes is
+enabled and network tests are enabled.
+
+=cut
+
+  if (/^scores\s+(\S+)\s+(\-*[\d\.]+)\s+(\-*[\d\.]+)\s+(\-*[\d\.]+)\s+(\-*[\d\.]+)/) {
+    $self->{scoreset}->[0]->{$1} = $2+0.0;
+    $self->{scoreset}->[1]->{$1} = $3+0.0;
+    $self->{scoreset}->[2]->{$1} = $4+0.0;
+    $self->{scoreset}->[3]->{$1} = $5+0.0;
+    next;
+  }
 
 =item rewrite_subject { 0 | 1 }        (default: 0)
 
