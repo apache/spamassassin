@@ -128,7 +128,7 @@ sub do_bug {
     $comment .= "\n".$messages."\n";
   }
 
-  $comment .= $freqs_hdr{$key};
+  $comment .= $cmt2;
   $comment .= $boilerplate_footer;
 
   if (!$SEND_DATA) {
