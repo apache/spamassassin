@@ -597,40 +597,6 @@ Added headers are fully configurable via the add_header configuration
 option. Please see the manpage for Mail::SpamAssassin::Conf(3) for
 more information.
 
-=head1 SPAM TRAPPING
-
-Quite often, if you've been on the internet for a while, you'll have
-accumulated a few old email accounts that nowadays get nothing but
-spam.
-
-SpamAssassin lets you set them up as aliases, as follows:
-
-=over 4
-
-=item spamtrap1: "| /path/to/spamassassin -r -w spamtrap1"
-
-=back
-
-This will add any incoming mail messages straight into spam-tracking databases,
-such as Vipul's Razor; send an explanatory reply message to the sender, from
-the I<spamtrap1> address; then drop the mail into the bit-bucket.
-
-The explanatory reply text is taken from the SpamAssassin configuration file,
-where it is stored in the C<spamtrap> lines.
-
-If you want to keep a copy of the mails, use something like this:
-
-=over 4
-
-=item spamtrap1: "| /path/to/spamassassin -r -w spamtrap1 -l /var/spam/caught"
-
-=back
-
-It is suggested you familiarise yourself with how MTAs run programs specified
-in aliases, if you plan to do this; for one thing, B<spamassassin> will not run
-under your user id in this case.  If you are nervous about this, create a user
-for spamtrapping, and set up spamassassin in its F<.forward> file.
-
 =head1 INSTALLATION
 
 The B<spamassassin> command is part of the B<Mail::SpamAssassin> Perl module.

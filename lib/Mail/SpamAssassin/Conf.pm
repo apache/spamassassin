@@ -275,10 +275,9 @@ sub new {
   # defaults for SQL based auto-whitelist
   $self->{user_awl_sql_table} = 'awl';
 
-  # for backwards compatibility, we need to set the default headers
-  # remove this except for X-Spam-Checker-Version in 2.70
-  $self->add_default_spam_headers();	# always run this first
-  $self->add_default_ham_headers();	# always run this second
+  # Make sure we add in X-Spam-Checker-Version
+  $self->{headers_spam}->{"Checker-Version"} = "SpamAssassin _VERSION_ (_SUBVERSION_) on _HOSTNAME_";
+  $self->{headers_ham}->{"Checker-Version"} = $self->{headers_spam}->{"Checker-Version"};
 
   $self;
 }
@@ -289,23 +288,6 @@ sub mtime {
 	$self->{mtime} = shift;
     }
     return $self->{mtime};
-}
-
-sub add_default_spam_headers {
-  my ($self) = @_;
-
-  $self->{headers_spam}->{"Flag"} = "_YESNOCAPS_";
-  $self->{headers_spam}->{"Status"} = "_YESNO_, hits=_HITS_ required=_REQD_ tests=_TESTS_ autolearn=_AUTOLEARN_ version=_VERSION_";
-  $self->{headers_spam}->{"Level"} = "_STARS(*)_";
-  $self->{headers_spam}->{"Checker-Version"} = "SpamAssassin _VERSION_ (_SUBVERSION_) on _HOSTNAME_";
-}
-
-sub add_default_ham_headers {
-  my ($self) = @_;
-
-  $self->{headers_ham}->{"Status"} = $self->{headers_spam}->{"Status"};
-  $self->{headers_ham}->{"Level"} = $self->{headers_spam}->{"Level"};
-  $self->{headers_ham}->{"Checker-Version"} = $self->{headers_spam}->{"Checker-Version"};
 }
 
 ###########################################################################
@@ -774,7 +756,6 @@ adding newlines via C<\n> disables any further automatic wrapping (ie:
 long header lines are possible). The lines will still be properly folded
 (marked as continuing) though.
 
-For backwards compatibility, some headers are (still) added by default.
 You can customize existing headers with add_header (only the specified
 subset of messages will be changed).
 
