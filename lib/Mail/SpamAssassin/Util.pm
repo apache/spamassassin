@@ -154,6 +154,10 @@ my %TZ = (
 	'AWST' => '+0800',
 	);
 
+# month mappings
+my %MONTH = (jan => 1, feb => 2, mar => 3, apr => 4, may => 5, jun => 6,
+	     jul => 7, aug => 8, sep => 9, oct => 10, nov => 11, dec => 12);
+
 sub local_tz {
   # standard method for determining local timezone
   my $time = time;
@@ -173,11 +177,11 @@ sub parse_rfc822_date {
 
   # now match it in parts.  Date part first:
   if (s/ (\d+) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{4}) / /i) {
-    $dd = $1; $mon = $2; $yyyy = $3;
+    $dd = $1; $mon = lc($2); $yyyy = $3;
   } elsif (s/ (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) +(\d+) \d+:\d+:\d+ (\d{4}) / /i) {
-    $dd = $2; $mon = $1; $yyyy = $3;
+    $dd = $2; $mon = lc($1); $yyyy = $3;
   } elsif (s/ (\d+) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{2,3}) / /i) {
-    $dd = $1; $mon = $2; $yyyy = $3;
+    $dd = $1; $mon = lc($2); $yyyy = $3;
   } else {
     dbg ("time cannot be parsed: $date");
     return undef;
@@ -210,12 +214,9 @@ sub parse_rfc822_date {
   # all other timezones are considered equivalent to "-0000"
   $tzoff ||= '-0000';
 
-  if (!defined $mmm && defined $mon) {
-    my @months = qw(jan feb mar apr may jun jul aug sep oct nov dec);
-    $mon = lc($mon);
-    my $i; for ($i = 0; $i < 12; $i++) {
-      if ($mon eq $months[$i]) { $mmm = $i+1; last; }
-    }
+  # months
+  if (exists $MONTH{$mon}) {
+    $mmm = $MONTH{$mon};
   }
 
   $hh ||= 0; $mm ||= 0; $ss ||= 0; $dd ||= 0; $mmm ||= 0; $yyyy ||= 0;
