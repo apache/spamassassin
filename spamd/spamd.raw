@@ -945,7 +945,7 @@ sub spawn {
 
     # unblock signals
     sigprocmask( POSIX::SIG_UNBLOCK(), $sigset )
-      or die "Can't unblock SIGINT for fork: $!\n";
+      or die "Can't unblock SIGINT/SIGCHLD for fork: $!\n";
 
     # set process name where supported
     # this will help make it clear via process listing which is child/parent
