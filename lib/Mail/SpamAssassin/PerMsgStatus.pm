@@ -137,7 +137,7 @@ sub check {
     # still skip application/image attachments though
     {
       my $fulltext = join ('', $self->{msg}->get_all_headers(), "\n",
-      				@{$self->get_raw_body_text_array()});
+                                @{$self->get_raw_body_text_array()});
       $self->do_full_tests(\$fulltext);
       $self->do_full_eval_tests(\$fulltext);
       undef $fulltext;
