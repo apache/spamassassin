@@ -21,6 +21,8 @@ BEGIN {
   our $SKIP_SPAMC_TESTS = ($NO_SPAMC_EXE ||
                            ($RUNNING_ON_WINDOWS && !$ENV{'SPAMD_HOST'})); 
   our $SKIP_SPAMD_TESTS   = $RUNNING_ON_WINDOWS; 
+  our $SSL_AVAILABLE;
+
 }
 
 # Set up for testing. Exports (as global vars):
@@ -79,6 +81,9 @@ sub sa_t_init {
   ";
 
   (-f "t/test_dir") && chdir("t");        # run from ..
+
+  $SSL_AVAILABLE = ((`$spamd --version` =~ /with SSL support/) &&
+                    (`$spamc -V` =~ /with SSL support/));
 
   # do not remove prior test results!
   # rmtree ("log");
