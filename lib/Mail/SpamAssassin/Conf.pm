@@ -204,9 +204,10 @@ sub _parse {
   my $currentfile = '(no file)';
   my $skipfile = 0;
 
-  foreach (split (/\r?\n/, $_[1])) {
-    s/\r//g; s/(^|(?<!\\))\#.*$/$1/;
-    s/^\s+//; s/\s+$//; /^$/ and next;
+  foreach (split (/\n/, $_[1])) {
+    s/^\s+|\s+$//g;  # remove leading and trailing spaces (including newlines)
+    s/(?<!\\)#.*$//; # remove comments
+    next unless($_); # skip empty lines
 
     # handle i18n
     if (s/^lang\s+(\S\S_\S\S)\s+//) { next if ($lang ne $1); }
