@@ -1584,11 +1584,9 @@ sub check_for_uppercase {
   # remove shift-JIS charset codes
   $body =~ s/\x1b\$B.*\x1b\(B//gs;
 
-  # now count upper and lower case
-  # Jul  1 2002 jm: count numerals as lower case, otherwise 'date|mail'
-  # is spam
-  my $upper = $body =~ s/([A-Z])/$1/sg;
-  my $lower = $body =~ s/([a-z0-9])/$1/sg;
+  # count numerals as lower case, otherwise 'date|mail' is spam
+  my $lower = $body =~ tr/a-z0-9//d;
+  my $upper = $body =~ tr/A-Z//;
 
   if (($upper + $lower) == 0) {
     $self->{uppercase} = 0;
@@ -1619,7 +1617,7 @@ sub check_for_yelling {
   @lines = grep(/^\S|!|\$\$|\.(?:\s|$)/, @lines);
 
   # Get rid of everything but upper AND lower case letters
-  map (s/[^A-Za-z \t]//sg, @lines);
+  map (tr/A-Za-z \t//cd, @lines);
 
   # Remove leading and trailing whitespace
   map (s/^\s+//, @lines);

@@ -902,8 +902,8 @@ sub get_decoded_stripped_body_text_array {
 
   # whitespace handling (warning: small changes have large effects!)
   $text =~ s/\n+\s*\n+/\f/gs;		# double newlines => form feed
-  $text =~ s/[ \t\n\r\x0b\xa0]+/ /gs;	# whitespace => space
-  $text =~ s/\f/\n/gs;			# form feeds => newline
+  $text =~ tr/ \t\n\r\x0b\xa0/ /s;	# whitespace => space
+  $text =~ tr/\f/\n/;			# form feeds => newline
 
   my @textary = split (/^/, $text);
   return \@textary;
