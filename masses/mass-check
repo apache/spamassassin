@@ -57,6 +57,7 @@ sub mass_check_mailbox {
 
     next unless defined ($msgid);
     $msgid =~ s/[^-_<>A-Za-z0-9\.\,\:\=\+\@]/_/gs;	# make safe
+    $msgid = "$folder:$msgid";		# so we can find it again
 
     open (STDIN, "<$tmpf");
     my $ma = Mail::Audit->new();

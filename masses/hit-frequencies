@@ -22,8 +22,11 @@ sub readlogs {
     while (<IN>) {
       /^.\s+(\d+)\s+(\S+)\s*(\S*)/ or next;
       my $hits = $1;
-      my @tests = split (/,/, $3);
+
+      $_ = $3; s/,,+/,/g;
+      my @tests = split (/,/, $_);
       foreach my $t (@tests) {
+	next if ($t eq '');
 	$freq{$t}++;
 	if ($file eq "spam.log") {
 	  $freq_spam{$t}++;
