@@ -76,7 +76,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 $VERSION = "2.40";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.106 2002/07/29 13:30:40 jmason Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.107 2002/07/29 15:09:35 jmason Exp $';
 
 sub Version { $VERSION; }
 
@@ -687,7 +687,8 @@ sub create_dotsa_dir_if_needed {
     dbg ("using \"$fname\" for user state dir");
 
     if (!-d $fname) {
-      mkpath ($fname, 0, 0700) or warn "mkdir $fname failed: $!\n";
+      # not being able to create the *dir* is not worth a warning at all times
+      mkpath ($fname, 0, 0700) or dbg ("mkdir $fname failed: $!\n");
     }
   }
 }
