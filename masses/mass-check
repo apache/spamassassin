@@ -132,19 +132,7 @@ my $updates = 10;
 my $total_count = 0;
 my $spam_count = 0;
 my $ham_count = 0;
-
-if ($opt_o) {
-  autoflush STDOUT 1;
-  print STDOUT $log_header;
-}
-else {
-  open(HAM, "> $opt_hamlog");
-  open(SPAM, "> $opt_spamlog");
-  autoflush HAM 1;
-  autoflush SPAM 1;
-  print HAM $log_header;
-  print SPAM $log_header;
-}
+my $init_results = 0;
 
 if ($opt_after && $opt_after =~ /^-\d+$/) {
   $opt_after = time + $opt_after;
@@ -192,8 +180,27 @@ sub target  {
 
 ###########################################################################
 
+sub init_results {
+  if ($opt_o) {
+    autoflush STDOUT 1;
+    print STDOUT $log_header;
+  }
+  else {
+    open(HAM, "> $opt_hamlog");
+    open(SPAM, "> $opt_spamlog");
+    autoflush HAM 1;
+    autoflush SPAM 1;
+    print HAM $log_header;
+    print SPAM $log_header;
+  }
+  $init_results = 1;
+}
+
 sub result {
   my ($class, $result, $time) = @_;
+
+  # don't open results files until we get here to avoid overwriting files
+  &init_results if !$init_results;
 
   if ($class eq "s") {
     if ($opt_o) { print STDOUT $result; } else { print SPAM $result; }
