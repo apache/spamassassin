@@ -863,6 +863,11 @@ sub get_raw_body_text_array {
       $self->{found_encoding_uuencode} = 1;
     }
 
+    # This all breaks if you don't strip off carriage returns.
+    # Both here and below.
+    # (http://bugzilla.spamassassin.org/show_bug.cgi?id=516)
+    s/\r$//;
+
     push(@{$self->{body_text_array}}, $_);
 
     next unless defined ($multipart_boundary);
@@ -875,11 +880,6 @@ sub get_raw_body_text_array {
 	$self->{found_encoding_base64} = 1;
       }
     }
-
-    # This all breaks if you don't strip off carriage returns.
-    # Both here and below.
-    # (http://bugzilla.spamassassin.org/show_bug.cgi?id=516)
-    s/\r//;
 
     if ($multipart_boundary eq $_) {
       my $starting_line = $line;
@@ -2238,7 +2238,7 @@ sub b64decodesub
 # MIME::Base64 if it's installed.
 sub generic_base64_decode {
     my ($self, $to_decode) = @_;
-    
+
     $to_decode =~ s/\r//;
     if (HAS_MIME_BASE64) {
 	my $retval;
