@@ -609,6 +609,11 @@ sub check_for_forged_yahoo_received_headers {
   if ($from !~ /yahoo\.com$/) { return 0; }
 
   my $rcvd = $self->get ('Received');
+  
+  if ( $self->get("Resent-From") && $self->get("Resent-To") ) {
+    my $xrcvd = $self->get("X-Received");
+    $rcvd = $xrcvd if ( $xrcvd );
+  }
   $rcvd =~ s/\s+/ /gs;		# just spaces, simplify the regexp
 
   # not sure about this
@@ -617,7 +622,7 @@ sub check_for_forged_yahoo_received_headers {
   if ($self->gated_through_received_hdr_remover()) { return 0; }
 
   if ($rcvd =~ /by web\S+\.mail\.yahoo\.com via HTTP/) { return 0; }
-  if ($rcvd =~ /by smtp\.\S+\.yahoo\.com with SMTP/) { return 0; }
+  if ($rcvd =~ /by smtp\S+\.yahoo\.com with SMTP/) { return 0; }
   if ($rcvd =~
       /from \[$IP_ADDRESS\] by \S+\.(?:groups|grp\.scd)\.yahoo\.com with NNFMP/) {
     return 0;
@@ -634,7 +639,7 @@ sub check_for_forged_yahoo_received_headers {
   if ($rcvd =~ /\bmailer\d+\.bulk\.scd\.yahoo\.com\b/
                 && $from =~ /\@reply\.yahoo\.com$/) { return 0; }
 
-  if ($rcvd =~ /by \w+\.\w+\.yahoo\.com \(\d+\.\d+\.\d+\/\d+\.\d+\.\d+\) id \w+/) {
+  if ($rcvd =~ /by \w+\.\w+\.yahoo\.com \(\d+\.\d+\.\d+\/\d+\.\d+\.\d+\)(?: with ESMTP)? id \w+/) {
       # possibly sent from "mail this story to a friend"
       return 0;
   }
