@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.44 2002/12/10 00:11:16 quinlan Exp $
+# $Id: HTML.pm,v 1.45 2002/12/11 06:17:39 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -362,7 +362,6 @@ sub html_text {
   {
     $self->{html}{title_text} .= $text;
   }
-  $text =~ s/\n// if $self->{html_last_tag} eq "br";
   push @{$self->{html_text}}, $text;
 }
 
