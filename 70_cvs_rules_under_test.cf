@@ -65,11 +65,8 @@ score T_MSGID_GOOD_EXCHANGE	-1.0
 body T_THIS_AINT_SPAM		/This.{0,30}is.{1,10}not?.{0,15}spam/is
 describe T_THIS_AINT_SPAM	Claims "This is not spam"
 
-# four rules to possibly replace OPT_IN
-body T_OPT_IN			/\bopt-in\b/
-body T_OPT_IN_CAPS		/(?-i:O)pt.?(?-i:I)n/i
-body T_OPT_OUT			/\bopt-out\b/
-body T_OPT_OUT_CAPS		/(?-i:O)pt.?(?-i:O)ut/i
+# this rule needs some tweaking to reduce FPs
+body T_EXCUSE_24		/you(?:'ve|'re| have| are)? receiv(?:ed|ing) this (?:e.?mail|advertisement) (?:by either|because)/i
 
 ###########################################################################
 # quinlan: I converted almost 2000 postfix anti-spam rules into SA format,
@@ -102,18 +99,6 @@ body T_Q_ONETIME1		/One[- ]?Time Mail/i
 body T_Q_ONETIME2		/this is a one[- ]?time (?:e-?mail|mailing|offer)/i
 body T_Q_ONETIME3		/Never Receive Another Mailing/i
 
-body T_Q_REMOVE1		/(?:respect|honou?r) all removal requests/i
-body T_Q_REMOVE3		/click here to be (?:permanently )?(?:removed|deleted)/i
-body T_Q_REMOVE5		/to be removed from (?:the|my|our) (?:mailing|e.?mail|opt[ -]?in)? list/i
-
-body T_Q_WEGOTYOU1		/because (?:you're|you (?:are )?)(?:registered|.{0,20}\bopt.{0,3}in)/i
-body T_Q_WEGOTYOU2		/you(?:'ve|'re| have| are)? receiv(?:ed|ing) this (?:e.?mail|advertisement) (?:by either|because)/i
-body T_Q_WEGOTYOU3		/You Registered At One Of Our/i
-body T_Q_WEGOTYOU4		/Your e.?mail Address Was Obtained/i
-body T_Q_WEGOTYOU5		/You Are Receiving This Special Offer/i
-body T_Q_WEGOTYOU6		/You Have Provided Permission/i
-
-header T_Q_DOMAINS_CHEAP	Subject =~ /(?:new extensions|domain names) now only \$\s*\d+/i
 header T_Q_AS_SEEN		Subject =~ /\bAs Seen/i
 header T_Q_DOUBLE_YOUR 		Subject =~ /Double Your/i
 header T_Q_FOR_ONLY 		Subject =~ /For Only/i
@@ -141,7 +126,8 @@ body T_Q_HOME_LOANS		/Home Loans/i
 body T_Q_INVALUABLE		/Invaluable Marketing Information/i
 body T_Q_LOCATE_ASSETS		/Locate Hidden Assets/i
 body T_Q_MILLION_EMAIL		/Million (?:\w+ )?(?:E-?mail )?Addresses/i
-body T_Q_PRODUCT_SERVICE	/PRODUCTS? or SERVICES?/i
+# do not pluralize next rule
+body T_Q_PRODUCT_SERVICE	/PRODUCT or SERVICE/i
 # similar to OFFER, but fewer FPs
 body T_Q_RECEIVE_OFFER		/Receive Special Offer/i
 body T_Q_RECEIVE_EMAIL		/Receive Third Party Email/i

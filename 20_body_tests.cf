@@ -72,6 +72,13 @@ describe REMOVE_IN_QUOTES	List removal information
 body DISCONTINUE		/\"discontinue\".{1,15}no further notices/i
 describe DISCONTINUE		List removal information
 
+body REMOVE_CLICK		/click here to be (?:permanently )?(?:removed|deleted)/i
+describe REMOVE_CLICK		Click to be removed
+body REMOVE_FROM_LIST		/to be removed from (?:the|my|our) (?:mailing|e.?mail|opt[ -]?in)? list/i
+describe REMOVE_FROM_LIST	To be removed from list
+body REMOVE_RESPECT		/(?:respect|honou?r) all removal requests/i
+describe REMOVE_RESPECT		We respect all removal requests
+
 # bug 1022: MGM_POSTCARD #2 original
 body REMOVE_POSTAL		/(?:Send(?:ing|) a (?:postal mail|postcard) to (?:Unsubscribe|Customer ?Service|remove)|unsubscribe by (?:postal mail|postcard))/i
 describe REMOVE_POSTAL		Send real mail to be unsubscribed
@@ -313,8 +320,14 @@ body ONLINE_BIZ_OPS		/online business opportunities/i
 describe ONLINE_BIZ_OPS		Wants you to do business online
 body BILLION_DOLLARS		/[BM]ILLION DOLLAR/
 describe BILLION_DOLLARS	Talks about lots of money
-body OPT_IN			/\bopt-in\b/i
-describe OPT_IN			Talks about opting in
+body OPT_IN			/\bopt-in\b/
+describe OPT_IN			Talks about opting in (lowercase version)
+body OPT_IN_CAPS		/(?-i:O)pt.?(?-i:I)n/i
+describe OPT_IN_CAPS		Talks about opting in (capitalized version)
+body OPT_OUT			/\bopt-out\b/
+describe OPT_OUT		Talks about opting out (lowercase version)
+body OPT_OUT_CAPS		/(?-i:O)pt.?(?-i:O)ut/i
+describe OPT_OUT_CAPS		Talks about opting out (capitalized version)
 body DIRECT_EMAIL		/direct e-*mail\b/i
 describe DIRECT_EMAIL		Talks about direct email
 body MASS_EMAIL			/mass e-*mail/i
@@ -374,6 +387,17 @@ body EXCUSE_16			/received this.{1,10}in error/i
 describe EXCUSE_16		I wonder how many emails they sent in error...
 body EXCUSE_18			/we do not (?:spam|send unsolicited)/i
 describe EXCUSE_18		Claims not to be spam
+
+body EXCUSE_19			/because (?:you're|you (?:are )?)(?:registered|.{0,20}\bopt.{0,3}in)/i
+describe EXCUSE_19		Claims you opted-in or registered
+body EXCUSE_20			/you registered at one of our/i
+describe EXCUSE_20		Claims you registered at their site
+body EXCUSE_21			/your e.?mail address was obtained/i
+describe EXCUSE_21		Claims your address was obtained legitimately
+body EXCUSE_22			/you are receiving this special offer/i
+describe EXCUSE_22		Claims you're receiving this offer for a reason
+body EXCUSE_23			/you have provided permission/i
+describe EXCUSE_23		Claims you have provided permission
 
 body EXCUSE_REMOVE		/to be removed from.{0,20}(?:mailings|offers)/i
 describe EXCUSE_REMOVE		Talks about how to be removed from mailings
