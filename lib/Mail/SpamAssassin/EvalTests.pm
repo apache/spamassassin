@@ -871,7 +871,6 @@ sub all_from_addrs {
   } else {
     return $self->{main}->find_all_addrs_in_line
   	($self->get ('From') .                  # std
-  	 $self->get ('Sender') .                # rfc822
   	 $self->get ('Envelope-Sender') .       # qmail: new-inject(1)
   	 $self->get ('Resent-Sender') .         # procmailrc manpage
   	 $self->get ('X-Envelope-From') .       # procmailrc manpage
