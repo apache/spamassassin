@@ -45,6 +45,7 @@ my %resphash = (
 # defaults
 my %opt = ('user-config' => 1);
 
+my @OLD_ARGV = @ARGV;    # Getopt::Long tends to clear @ARGV
 Getopt::Long::Configure ("bundling");
 GetOptions(
 	'auto-whitelist|whitelist|a' => \$opt{'auto-whitelist'},
@@ -73,6 +74,7 @@ GetOptions(
         'F=i' => sub { warn "The -F option has been removed\n" }
 
 ) or pod2usage(-exitval => $resphash{'EX_USAGE'}, -verbose => 0);
+@ARGV = @OLD_ARGV;
 
 $opt{'help'} and pod2usage(-exitval => $resphash{'EX_USAGE'}, -verbose => 0, -message => 'For more details, use "man spamd"');
 
