@@ -25,6 +25,7 @@ use File::Spec;
 use vars qw(
   $spamtest %opt $isspam $forget
   $messagecount $learnedcount $messagelimit
+  $progress $total_messages $init_results $start_time
   $synconly $learnprob @targets $bayes_override_path
 );
 
@@ -74,6 +75,7 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::ArchiveIterator;
 use Mail::SpamAssassin::Message;
 use Mail::SpamAssassin::PerMsgLearner;
+use Mail::SpamAssassin::Util::Progress;
 
 ###########################################################################
 
@@ -107,6 +109,7 @@ GetOptions(
   'local|L'              => \$opt{'local'},
   'no-sync|nosync'       => \$opt{'nosync'},
   'showdots'             => \$opt{'showdots'},
+  'progress'             => \$opt{'progress'},
   'use-ignores'          => \$opt{'use-ignores'},
   'no-rebuild|norebuild' => sub { $opt{'nosync'} = 1; warn "The --no-rebuild option has been deprecated.  Please use --no-sync instead.\n" },
 
@@ -153,6 +156,11 @@ if (defined $opt{'debug'}) {
 
 if ( $opt{'force-expire'} ) {
   $synconly = 1;
+}
+
+if ($opt{'showdots'} && $opt{'progress'}) {
+  print "--showdots and --progress may not be used together, please select just one.\n";
+  exit 0;
 }
 
 if ( !defined $isspam
@@ -383,15 +391,18 @@ eval {
     }
   );
 
-  $iter->set_functions( \&wanted, sub { } );
+  $iter->set_functions(\&wanted, \&result);
   $messagecount = 0;
   $learnedcount = 0;
 
+  $init_results = 0;
+  $start_time = time;
+
   eval { $iter->run(@targets); };
 
-  print STDERR "\n" if ( $opt{showdots} );
-  print
-"Learned from $learnedcount message(s) ($messagecount message(s) examined).\n";
+  print STDERR "\n" if ($opt{showdots});
+  $progress->final() if ($opt{progress});
+  print "Learned from $learnedcount message(s) ($messagecount message(s) examined).\n";
 
   # If we needed to make a tempfile, go delete it.
   if ( defined $tempfile ) {
@@ -428,6 +439,29 @@ sub target {
 
 ###########################################################################
 
+sub init_results {
+  $init_results = 1;
+
+  return unless $opt{'progress'};
+
+  $total_messages = $Mail::SpamAssassin::ArchiveIterator::MESSAGES;
+
+  $progress = Mail::SpamAssassin::Util::Progress->new({total => $total_messages,});
+}
+
+###########################################################################
+
+sub result {
+  my ($class, $result, $time) = @_;
+
+  # don't open results files until we get here to avoid overwriting files
+  &init_results if !$init_results;
+
+  $progress->update($messagecount) if $opt{progress};
+}
+
+###########################################################################
+
 sub wanted {
   my ( $class, $id, $time, $dataref ) = @_;
 
@@ -436,11 +470,12 @@ sub wanted {
   if ( defined($learnprob) ) {
     if ( int( rand( 1 / $learnprob ) ) != 0 ) {
       print STDERR '_' if ( $opt{showdots} );
-      return;
+      return 1;
     }
   }
 
   if ( defined($messagelimit) && $learnedcount > $messagelimit ) {
+    $progress->final() if $opt{progress};
     die 'HITLIMIT';
   }
 
@@ -471,6 +506,7 @@ sub wanted {
   undef $ma;
 
   print STDERR '.' if ( $opt{showdots} );
+  return 1;
 }
 
 ###########################################################################
@@ -514,6 +550,7 @@ Options:
  --mbox                            Input sources are in mbox format
  --mbx                             Input sources are in mbx format
  --showdots                        Show progress using dots
+ --progress                        Show progress using progress bar
  --no-sync                         Skip syncronizing the database and journal
                                    after learning
  -L, --local                       Operate locally, no network accesses
@@ -670,7 +707,13 @@ the default directories (usually C</etc/mail/spamassassin> or similar).
 
 Read user score preferences from I<prefs> (usually C<$HOME/.spamassassin/user_prefs>).
 
- =item B<-D>, B<--debug-level>
+=item B<--progress>
+
+Prints a progress bar (to STDERR) showing the current progress.  In the case
+where no valid terminal is found this option will behave very much like the
+--showdots option.
+
+=item B<-D>, B<--debug-level>
 
 Produce diagnostic output.
 
