@@ -49,11 +49,15 @@
 # define EX__MAX 77
 
 extern char *optarg;
-typedef unsigned long	in_addr_t;	/* base type for internet address */
 # endif
 #endif
 
 #ifndef INADDR_NONE
+# if (defined(__sun__) && defined(__sparc__) && !defined(__svr4__)) /* SunOS */ \
+     || (defined(hpux) || defined(__hpux)) /* HPUX */
+typedef unsigned long   in_addr_t;      /* base type for internet address */
+/* don't define for Digital UNIX or IRIX, they have it in netinet/in.h */
+# endif
 #define       INADDR_NONE             ((in_addr_t) 0xffffffff)
 #endif
 
