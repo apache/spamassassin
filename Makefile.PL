@@ -1080,7 +1080,7 @@ QSPAMC_SRC      = spamc/qmail-spamc.c spamc/utils.c
 LIBSPAMC_SRC    = spamc/libspamc.c spamc/utils.c
 
 $(SPAMC_MAKEFILE): $(SPAMC_MAKEFILE).in $(SPAMC_MAKEFILE).win
-	$(CONFIGURE) --prefix="$(I_PREFIX)" --sysconfdir="$(I_SYSCONFDIR)" --datadir="$(I_DATADIR)" --enable-ssl="$(ENABLE_SSL)"
+	$(CONFIGURE) --prefix="$(I_PREFIX)" --sysconfdir="$(I_CONFDIR)" --datadir="$(I_DATADIR)" --enable-ssl="$(ENABLE_SSL)"
 
 spamc_has_moved:
 	$(NOECHO) echo "***"
