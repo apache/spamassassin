@@ -654,22 +654,24 @@ sub expire_old_tokens_trapped {
   untie %new_toks;
 
   # This is the critical phase (moving files around), so don't allow
-  # it to be interrupted.
-  local $SIG{'INT'} = 'IGNORE';
-  local $SIG{'HUP'} = 'IGNORE';
-  local $SIG{'TERM'} = 'IGNORE';
+  # it to be interrupted.  Scope the signal changes.
+  {
+    local $SIG{'INT'} = 'IGNORE';
+    local $SIG{'HUP'} = 'IGNORE';
+    local $SIG{'TERM'} = 'IGNORE';
 
-  # now rename in the new one.  Try several extensions
-  for my $ext (@DB_EXTENSIONS) {
-    my $newf = $path.'_toks.new'.$ext;
-    my $oldf = $path.'_toks'.$ext;
-    next unless (-f $newf);
-    if (!rename ($newf, $oldf)) {
-      warn "rename $newf to $oldf failed: $!\n";
+    # now rename in the new one.  Try several extensions
+    for my $ext (@DB_EXTENSIONS) {
+      my $newf = $path.'_toks.new'.$ext;
+      my $oldf = $path.'_toks'.$ext;
+      next unless (-f $newf);
+      if (!rename ($newf, $oldf)) {
+	warn "rename $newf to $oldf failed: $!\n";
+      }
     }
   }
 
-  # Call untie_db() first so we unlock correctly etc. first
+  # Call untie_db() so we unlock correctly.
   $self->untie_db();
 
   my $done = time();
@@ -1070,78 +1072,80 @@ sub sync_journal_trapped {
 
   # This is the critical phase (moving files around), so don't allow
   # it to be interrupted.
-  local $SIG{'INT'} = 'IGNORE';
-  local $SIG{'HUP'} = 'IGNORE';
-  local $SIG{'TERM'} = 'IGNORE';
+  {
+    local $SIG{'INT'} = 'IGNORE';
+    local $SIG{'HUP'} = 'IGNORE';
+    local $SIG{'TERM'} = 'IGNORE';
 
-  # retire the journal, so we can update the db files from it in peace.
-  # TODO: use locking here
-  if (!rename ($path, $retirepath)) {
-    warn "bayes: failed rename $path to $retirepath\n";
-    return 0;
-  }
+    # retire the journal, so we can update the db files from it in peace.
+    # TODO: use locking here
+    if (!rename ($path, $retirepath)) {
+      warn "bayes: failed rename $path to $retirepath\n";
+      return 0;
+    }
 
-  # now read the retired journal
-  if (!open (JOURNAL, "<$retirepath")) {
-    warn "bayes: cannot open read $retirepath\n";
-    return 0;
-  }
+    # now read the retired journal
+    if (!open (JOURNAL, "<$retirepath")) {
+      warn "bayes: cannot open read $retirepath\n";
+      return 0;
+    }
 
 
-  # Read the journal
-  while (<JOURNAL>) {
-    $total_count++;
+    # Read the journal
+    while (<JOURNAL>) {
+      $total_count++;
 
-    if (/^t (\d+) (.*)$/) { # Token timestamp update, cache resultant entries
-      $tokens{$2} = $1+0 if ( !exists $tokens{$2} || $1+0 > $tokens{$2} );
-    } elsif (/^c (-?\d+) (-?\d+) (\d+) (.*)$/) { # Add/full token update
-      $self->tok_sync_counters ($1+0, $2+0, $3+0, $4);
-      $count++;
-    } elsif (/^n (-?\d+) (-?\d+)$/) { # update ham/spam count
-      $self->tok_sync_nspam_nham ($1+0, $2+0);
-      $count++;
-    } elsif (/^m ([hsf]) (.+)$/) { # update msgid seen database
-      if ( $1 eq "f" ) {
-        $self->seen_delete($2);
+      if (/^t (\d+) (.*)$/) { # Token timestamp update, cache resultant entries
+	$tokens{$2} = $1+0 if ( !exists $tokens{$2} || $1+0 > $tokens{$2} );
+      } elsif (/^c (-?\d+) (-?\d+) (\d+) (.*)$/) { # Add/full token update
+	$self->tok_sync_counters ($1+0, $2+0, $3+0, $4);
+	$count++;
+      } elsif (/^n (-?\d+) (-?\d+)$/) { # update ham/spam count
+	$self->tok_sync_nspam_nham ($1+0, $2+0);
+	$count++;
+      } elsif (/^m ([hsf]) (.+)$/) { # update msgid seen database
+	if ( $1 eq "f" ) {
+	  $self->seen_delete($2);
+	}
+	else {
+	  $self->seen_put($2,$1);
+	}
+	$count++;
+      } else {
+	warn "Bayes journal: gibberish entry found: $_";
       }
-      else {
-        $self->seen_put($2,$1);
+    }
+    close JOURNAL;
+
+    # Now that we've determined what tokens we need to update and their
+    # final values, update the DB.  Should be much smaller than the full
+    # journal entries.
+    while( my($k,$v) = each %tokens ) {
+      $self->tok_touch_token ($v, $k);
+
+      if ((++$count % 1000) == 0) {
+	if ($showdots) { print STDERR "."; }
+	$self->set_running_expire_tok();
       }
-      $count++;
+    }
+
+    if ($showdots) { print STDERR "\n"; }
+
+    # we're all done, so unlink the old journal file
+    unlink ($retirepath) || warn "bayes: can't unlink $retirepath: $!\n";
+
+    $self->{db_toks}->{$LAST_JOURNAL_SYNC_MAGIC_TOKEN} = $started;
+
+    my $done = time();
+    my $msg = ("synced Bayes databases from journal in ".($done - $started).
+	  " seconds: $count unique entries ($total_count total entries)");
+
+    if ($opts->{verbose}) {
+      print $msg,"\n";
     } else {
-      warn "Bayes journal: gibberish entry found: $_";
+      dbg ($msg);
     }
   }
-  close JOURNAL;
-
-  # Now that we've determined what tokens we need to update and their
-  # final values, update the DB.  Should be much smaller than the full
-  # journal entries.
-  while( my($k,$v) = each %tokens ) {
-    $self->tok_touch_token ($v, $k);
-
-    if ((++$count % 1000) == 0) {
-      if ($showdots) { print STDERR "."; }
-      $self->set_running_expire_tok();
-    }
-  }
-
-  if ($showdots) { print STDERR "\n"; }
-
-  # we're all done, so unlink the old journal file
-  unlink ($retirepath) || warn "bayes: can't unlink $retirepath: $!\n";
-
-  my $done = time();
-  my $msg = ("synced Bayes databases from journal in ".($done - $started).
-	" seconds: $count unique entries ($total_count total entries)");
-
-  if ($opts->{verbose}) {
-    print $msg,"\n";
-  } else {
-    dbg ($msg);
-  }
-
-  $self->{db_toks}->{$LAST_JOURNAL_SYNC_MAGIC_TOKEN} = $started;
 
   # else, that's the lot, we're synced.  return
   1;
