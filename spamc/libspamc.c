@@ -443,9 +443,18 @@ static void _clear_message(struct message *m)
     m->is_spam = EX_TOOBIG;
     m->score = 0.0;
     m->threshold = 0.0;
+    m->outbuf = NULL;
     m->out = NULL;
     m->out_len = 0;
     m->content_length = -1;
+}
+
+static void _use_msg_for_out(struct message *m)
+{
+	free(m->outbuf);
+	m->outbuf = NULL;
+	m->out = m->msg;
+	m->out_len = m->msg_len;
 }
 
 static int _message_read_raw(int fd, struct message *m)
@@ -837,10 +846,11 @@ int message_filter(struct transport *tp, const char *username,
     }
 
     m->is_spam = EX_TOOBIG;
-    if ((m->out = malloc(m->max_len + EXPANSION_ALLOWANCE + 1)) == NULL) {
+    if ((m->outbuf = malloc(m->max_len + EXPANSION_ALLOWANCE + 1)) == NULL) {
 	failureval = EX_OSERR;
 	goto failure;
     }
+    m->out = m->outbuf;
     m->out_len = 0;
 
 
@@ -858,9 +868,7 @@ int message_filter(struct transport *tp, const char *username,
 
     len = strlen(buf);
     if (len + strlen(PROTOCOL_VERSION) + 2 >= bufsiz) {
-	free(m->out);
-	m->out = m->msg;
-	m->out_len = m->msg_len;
+	_use_msg_for_out(m);
 	return EX_OSERR;
     }
 
@@ -870,9 +878,7 @@ int message_filter(struct transport *tp, const char *username,
 
     if (username != NULL) {
 	if (strlen(username) + 8 >= (bufsiz - len)) {
-	    free(m->out);
-	    m->out = m->msg;
-	    m->out_len = m->msg_len;
+	    _use_msg_for_out(m);
 	    return EX_OSERR;
 	}
 	strcpy(buf + len, "User: ");
@@ -881,9 +887,7 @@ int message_filter(struct transport *tp, const char *username,
 	len += strlen(buf + len);
     }
     if ((m->msg_len > 9999999) || ((len + 27) >= (bufsiz - len))) {
-	free(m->out);
-	m->out = m->msg;
-	m->out_len = m->msg_len;
+	_use_msg_for_out(m);
 	return EX_OSERR;
     }
     len += sprintf(buf + len, "Content-length: %d\r\n\r\n", m->msg_len);
@@ -896,9 +900,7 @@ int message_filter(struct transport *tp, const char *username,
 	rc = _try_to_connect_tcp(tp, &sock);
 
     if (rc != EX_OK) {
-	free(m->out);
-	m->out = m->msg;
-	m->out_len = m->msg_len;
+	_use_msg_for_out(m);
 	return rc;      /* use the error code try_to_connect_*() gave us. */
     }
 
@@ -1030,9 +1032,7 @@ int message_filter(struct transport *tp, const char *username,
     return EX_OK;
 
   failure:
-    free(m->out);
-    m->out = m->msg;
-    m->out_len = m->msg_len;
+	_use_msg_for_out(m);
     if (sock != -1) {
 	closesocket(sock);
     }
@@ -1087,8 +1087,8 @@ int message_process(struct transport *trans, char *username, int max_size,
 
 void message_cleanup(struct message *m)
 {
-    if (m->out != NULL && m->pre != NULL && m->out != m->pre+m->pre_len)
-	free(m->out);
+    if (m->outbuf)
+	free(m->outbuf);
     if (m->raw != NULL)
 	free(m->raw);
     if (m->priv != NULL)
