@@ -94,7 +94,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.138 2002/11/27 23:42:08 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.139 2002/12/05 19:09:07 jmason Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -383,7 +383,7 @@ Rebuild any cache databases; should be called after the learning process.
 
 sub rebuild_learner_caches {
   my $self = shift;
-  $self->{bayes_scanner}->recompute_all_probs();
+  $self->{bayes_scanner}->sync();
   1;
 }
 

@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Fcntl;
+use Fcntl ':DEFAULT',':flock';
 
 BEGIN { @AnyDBM_File::ISA = qw(DB_File GDBM_File NDBM_File SDBM_File); }
 use AnyDBM_File;
@@ -11,8 +11,11 @@ use constant FORMAT_FLAG        => 0xc0;        # 11000000
 use constant ONE_BYTE_FORMAT    => 0xc0;        # 11000000
 use constant TWO_LONGS_FORMAT   => 0x00;        # 00000000
 
-use constant ONE_BYTE_SSS       => 0x38;        # 00111000
-use constant ONE_BYTE_HHH       => 0x07;        # 00000111
+use constant ONE_BYTE_SSS_BITS  => 0x38;        # 00111000
+use constant ONE_BYTE_HHH_BITS  => 0x07;        # 00000111
+
+use constant ATIME_EPOCH_START  => 1038000000;  # Fri Nov 22 21:20:00 2002
+use constant ATIME_GRANULARITY  => 21600;       # 6 hours
 
 use vars qw{
     %h $k $v @DBNAMES
@@ -41,7 +44,7 @@ my $has_probs_db = 0;
 foreach my $dbname (@DBNAMES) {
   my $name = $path.'_'.$dbname;
   my $db_var = 'db_'.$dbname;
-  if (!tie %{$h{$db_var}}, "AnyDBM_File",$name, O_RDONLY,0600) {
+  if (!tie %{$h{$db_var}}, "AnyDBM_File",$name, O_RDONLY, 0600) {
     warn "Cannot open file $name: $!\n";
   }
   else {
@@ -60,13 +63,14 @@ if ($has_probs_db) {
 $ns ||= 0;
 $nn ||= 0;
 
-printf ("%3.3f %8d %8d   %s\n", 0.0, 0, 0,
+printf ("%3.3f %8d %8d %8d  %s\n", 0.0, 0, 0, 0,
 			'non-token data: db format = '.$dbformat);
-printf ("%3.3f %8d %8d   %s\n", 0.0, 0, $ns, 'non-token data: nspam');
-printf ("%3.3f %8d %8d   %s\n", 0.0, 0, $nn, 'non-token data: nham');
+printf ("%3.3f %8d %8d %8d  %s\n", 0.0, 0, $ns, 0, 'non-token data: nspam');
+printf ("%3.3f %8d %8d %8d  %s\n", 0.0, 0, $nn, 0, 'non-token data: nham');
 
 my %seen = ();
 my $prob;
+my $now = time;
 
 if (!$has_probs_db) {
   $seen{$NSPAM_MAGIC_TOKEN} = $seen{$NHAM_MAGIC_TOKEN} = 1;
@@ -76,7 +80,7 @@ for my $key ( keys(%{$h{db_toks}}) ) {
   next if (exists $seen{$key});
   $seen{$key} = 1;
 
-  my ($ts, $th) = tok_unpack ($h{db_toks}->{$key});
+  my ($ts, $th, $atime) = tok_unpack ($h{db_toks}->{$key});
   $ts ||= 0;
   $th ||= 0;
 
@@ -93,8 +97,10 @@ for my $key ( keys(%{$h{db_toks}}) ) {
     $prob = compute_prob_for_token ($ts, $th, $ns, $nn);
   }
 
+  my $age = $atime;
+
   $prob ||= 0.5;
-  printf ("%3.3f %8d %8d   %s\n", $prob, $ts, $th, $key);
+  printf ("%3.3f %8d %8d %8d  %s\n", $prob, $ts, $th, $age, $key);
 }
 
 foreach my $dbname (@DBNAMES) {
@@ -104,15 +110,22 @@ foreach my $dbname (@DBNAMES) {
 }
 
 sub tok_unpack {
-  my ($packed, $ts, $th) = unpack("CLL", $_[0] || 0);
+  my ($packed, $atime) = unpack("CS", $_[0] || 0);
 
   if (($packed & FORMAT_FLAG) == ONE_BYTE_FORMAT) {
-    $ts = ($packed & ONE_BYTE_SSS) >> 3;
-    $th = ($packed & ONE_BYTE_HHH);
+    return (($packed & ONE_BYTE_SSS_BITS) >> 3,
+                $packed & ONE_BYTE_HHH_BITS,
+                $atime || 0);
   }
-  # else use $ts and $th we just unpacked.
-
-  return ($ts, $th);
+  elsif (($packed & FORMAT_FLAG) == TWO_LONGS_FORMAT) {
+    my ($packed, $ts, $th, $atime) = unpack("CLLS", $_[0] || 0);
+    return ($ts || 0, $th || 0, $atime || 0);
+  }
+  # other formats would go here...
+  else {
+    warn "unknown packing format for Bayes db, please re-learn: $packed";
+    return (0, 0, 0);
+  }
 }
 
 
@@ -134,4 +147,21 @@ sub compute_prob_for_token {
   return ($robinson_s_dot_x + ($robn * $prob)) /
 		(ROBINSON_S_CONSTANT + $robn);
 }
+
+###########################################################################
+
+# 2-byte time format: expiry is after the time_t epoch, so time_t calculations
+# will fail before this will.
+
+sub atime_to_time_t {
+  my ($self, $atime) = @_;
+  return ($atime * ATIME_GRANULARITY) + ATIME_EPOCH_START;
+}
+
+sub time_t_to_atime {
+  my ($self, $tt) = @_;
+  return int (($tt - ATIME_EPOCH_START) / ATIME_GRANULARITY);
+}
+
+###########################################################################
 

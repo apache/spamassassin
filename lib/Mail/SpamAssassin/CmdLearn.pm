@@ -10,7 +10,8 @@ use Getopt::Long;
 use Pod::Usage;
 
 use vars qw($spamtest %opt $isspam $forget $messagecount $messagelimit
-	$learnprob);
+	$rebuildonly $learnprob
+	);
 
 ###########################################################################
 
@@ -19,6 +20,7 @@ sub cmdline_run {
 
   $isspam = $opts->{isspam};
   $forget = $opts->{forget};
+  $rebuildonly = $opts->{rebuildonly};
 
   %opt = ();
 
@@ -36,6 +38,7 @@ sub cmdline_run {
              'mh'                               => \$opt{'mh'},
              'single|s'                         => \$opt{'single'},
              'showdots'                         => \$opt{'showdots'},
+	     'no-rebuild'			=> \$opt{'norebuild'},
 
              'stopafter'                        => \$opt{'stopafter'},
 	     'learnprob=f'			=> \$opt{'learnprob'},
@@ -73,6 +76,13 @@ sub cmdline_run {
       bias_scores       => $opt{'bias-scores'},
   });
 
+  if ($opts->{rebuildonly}) {
+    $spamtest->init (1);
+    $spamtest->rebuild_learner_caches();
+    $spamtest->finish_learner();
+    return 0;
+  }
+
   $messagelimit = $opt{'stopafter'};
   $learnprob = $opt{'learnprob'};
 
@@ -83,7 +93,7 @@ sub cmdline_run {
   # run this lot in an eval block, so we can catch die's and clear
   # up the dbs.
   eval {
-    $spamtest->compile_now(1);
+    $spamtest->init (1);
 
     $SIG{INT} = \&killed;
     $SIG{TERM} = \&killed;
@@ -113,7 +123,9 @@ sub cmdline_run {
       warn "Learned from $messagecount messages.\n";
     }
 
-    $spamtest->rebuild_learner_caches();
+    if (!$opt{norebuild}) {
+      $spamtest->rebuild_learner_caches();
+    }
   };
 
   if ($@) {

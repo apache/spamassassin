@@ -37,7 +37,7 @@ if [ "$#" -gt 0 ] ; then
 fi
 
 cd $SADIR/masses
-PATH=$PATH:$SADIR:$SADIR/masses
+PATH=$SADIR:$SADIR/masses:$PATH
 
 results=$testdir/results
 tmpdir=$results/config
@@ -53,6 +53,8 @@ cp ../rules/50*.cf $tmpdir/rules
 echo "bayes_path $tmpdir/dbs/bayes" > $tmpdir/rules/99bayes_path.cf
 mkdir $tmpdir/dbs
 
+INTERLEAVE_TESTS=1
+
 # learn the lot, then forget the ones we're testing on each time.
 # faster than learning from scratch for each fold
 
@@ -61,12 +63,14 @@ mkdir $tmpdir/dbs
 
 (
 echo -n "Learning from all ham buckets..." ; date
-time sa-learn-nonspam --randseed=1 $learnargs \
+time sa-learn-nonspam --randseed=1 --no-rebuild $learnargs \
 	--config-file=$tmpdir/rules $testdir/cor/ham/*
 
 echo -n "Learning from all spam buckets..." ; date
-time sa-learn-spam --randseed=1 $learnargs \
+time sa-learn-spam --randseed=1 --no-rebuild $learnargs \
 	--config-file=$tmpdir/rules $testdir/cor/spam/*
+
+time sa-learn-rebuild $learnargs --config-file=$tmpdir/rules
 
 echo -n "Done learning. " ; date
 ) 2>&1 | tee $results/learn.log
@@ -98,20 +102,52 @@ for bucket in 1 2 3 4 5 6 7 8 9 10 ; do
   mkdir $rdir
 
   echo "Forgetting contents of test ham bucket..."
-  time sa-forget --showdots $testdir/cor/ham/bucket.$bucket
+  time sa-forget --config-file=$tmpdir/rules --showdots \
+			$testdir/cor/ham/bucket.$bucket
 
   echo "Forgetting contents of test spam bucket..."
-  time sa-forget --showdots $testdir/cor/spam/bucket.$bucket
+  time sa-forget --config-file=$tmpdir/rules --showdots \
+			$testdir/cor/spam/bucket.$bucket
 
-  echo "Running mass-check on ham bucket..."
-  time ./mass-check -c=$tmpdir/rules --showdots \
-	--bayes $testdir/cor/ham/bucket.$bucket \
-	> $rdir/nonspam.log
+  time sa-learn-rebuild --config-file=$tmpdir/rules
 
-  echo "Running mass-check on spam bucket..."
-  time ./mass-check -c=$tmpdir/rules --showdots \
-	--bayes $testdir/cor/spam/bucket.$bucket \
-	> $rdir/spam.log
+  if [ $INTERLEAVE_TESTS = 1 ] ; then
+    # now split the ham and spam test bucket into 10 sub-buckets,
+    # so we interleave ham and spam while testing. important for
+    # judging expiry effects
+    : > $rdir/nonspam.log
+    : > $rdir/spam.log
+    
+    mkdir $rdir/testbuckets
+    ( cd .. ; tools/split_corpora -n 10 -p $rdir/testbuckets/ham \
+	  $testdir/cor/ham/bucket.$bucket
+      tools/split_corpora -n 10 -p $rdir/testbuckets/spam \
+	  $testdir/cor/spam/bucket.$bucket
+    )
+
+    for subbucket in 1 2 3 4 5 6 7 8 9 10 ; do
+      echo "Running mass-check on ham test-bucket $subbucket..."
+      time ./mass-check -c=$tmpdir/rules --showdots \
+	    --bayes $rdir/testbuckets/ham.$subbucket \
+	    >> $rdir/nonspam.log
+
+      echo "Running mass-check on spam test-bucket $subbucket..."
+      time ./mass-check -c=$tmpdir/rules --showdots \
+	    --bayes $rdir/testbuckets/spam.$subbucket \
+	    >> $rdir/spam.log
+    done
+
+  else
+    echo "Running mass-check on ham bucket..."
+    time ./mass-check -c=$tmpdir/rules --showdots \
+	  --bayes $testdir/cor/ham/bucket.$bucket \
+	  > $rdir/nonspam.log
+
+    echo "Running mass-check on spam bucket..."
+    time ./mass-check -c=$tmpdir/rules --showdots \
+	  --bayes $testdir/cor/spam/bucket.$bucket \
+	  > $rdir/spam.log
+  fi
 
   echo "Reporting..."
   ./bayes-testing/draw-bayes-histogram \

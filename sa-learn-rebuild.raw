@@ -35,49 +35,45 @@ BEGIN {
 }
 
 require Mail::SpamAssassin::CmdLearn;
-exit Mail::SpamAssassin::CmdLearn::cmdline_run ({ forget => 1 });
+exit Mail::SpamAssassin::CmdLearn::cmdline_run ({ rebuildonly => 1 });
 
 # ---------------------------------------------------------------------------
 
 =head1 NAME
 
-sa-forget - train spamassassin to forget about a mail
+sa-learn-rebuild - rebuild spamassassin's Bayesian statistics databases
 
 =head1 SYNOPSIS
 
-B<sa-forget> [options] I<mailbox_or_folder>
+B<sa-learn-rebuild> [options]
 
 Options:
 
- -f folders, --folders=folders     List the folders to check
- --mh                              Check an MH directory
- -s, --single                      Check a single message
  --showdots                        Show progress using dots
- --no-rebuild                      Skip building databases after scan
  -C file, --config-file=file       Set configuration file
  -p prefs, --prefs-file=file       Set user preferences file
- -a, --auto-whitelist              Use auto-whitelists
- --whitelist-factory               Select whitelist factory
  -D, --debug-level                 Print debugging messages
  -V, --version                     Print version
  -h, --help                        Print usage message
 
 =head1 DESCRIPTION
 
-Given a set of mail messages which SpamAssassin has previously 'learnt' from,
-this command will tell it to 'forget' about those mails.
+This command allows busy sites to control the expiration of 'obsolete' data
+from SpamAssassin's Bayesian statistics databases.   Some sites may wish to
+choose times to update the databases; they should run this command from a
+scheduling service like C<cron>.  This is purely optional -- by default,
+SpamAssassin will automatically expire old data once daily.
 
-See B<sa-learn-nonspam> for more details, and an introduction to the use of
-Bayesian filtering in SpamAssassin.
+In addition, if SpamAssassin's learning commands, namely B<sa-learn-nonspam>,
+B<sa-learn-spam>, and B<sa-forget>, are run with the C<--no-rebuild> option,
+this command is required in order to complete the learning process.
+
+See B<sa-learn-nonspam> for more details on SpamAssassin's Bayesian
+filtering system.
 
 =head1 OPTIONS
 
 =over 4
-
-=item B<-a>, B<--auto-whitelist>
-
-Use auto-whitelists.  While learning, add addresses to the auto-whitelist
-as appropriate.
 
 =item B<-h>, B<--help>
 
@@ -95,22 +91,11 @@ Read user score preferences from I<prefs>.
 
 Produce diagnostic output.
 
-=item B<-M> I<factory>, B<--whitelist-factory>=I<factory>
-
-Select alternative whitelist factory.
-
-=item B<--no-rebuild>
-
-Skip the slow rebuilding step which normally takes place after changing
-database entries.  If you plan to scan many folders in a batch, it is faster to
-use this switch and run B<sa-learn-rebuild> once all the folders have been
-scanned.
-
 =back
 
 =head1 INSTALLATION
 
-The B<sa-forget> command is part of the B<Mail::SpamAssassin> Perl module.
+The B<sa-learn-rebuild> command is part of the B<Mail::SpamAssassin> Perl module.
 Install this as a normal Perl module, using C<perl -MCPAN -e shell>, or by
 hand.
 
@@ -125,7 +110,6 @@ Mail::SpamAssassin(3)
 spamassassin(1)
 sa-learn-spam(1)
 sa-learn-nonspam(1)
-sa-learn-rebuild(1)
 sa-forget(1)
 
 =head1 AUTHOR
