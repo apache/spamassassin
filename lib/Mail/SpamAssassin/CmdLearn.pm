@@ -293,7 +293,7 @@ sub wanted {
   $messagecount++;
   my $ma = Mail::SpamAssassin::MsgParser->parse ($dataref);
 
-  if ($ma->get ("X-Spam-Checker-Version")) {
+  if ($ma->get_header ("X-Spam-Checker-Version")) {
     my $newtext = $spamtest->remove_spamassassin_markup($ma);
     my @newtext = split (/^/m, $newtext);
     $dataref = \@newtext;
