@@ -304,6 +304,8 @@ rawbody WWW_REMOVEYOU_COM		/http:\/\/.*removeyou\.com/i
 describe WWW_REMOVEYOU_COM		Frequent SPAM content
 rawbody WWW_AUTOREMOVE_COM		/http:\/\/.*autoremove\.com/i
 describe WWW_AUTOREMOVE_COM		Frequent SPAM content
+rawbody WWW_CLIK4YOU_COM		/http:\/\/.*clik4you\.com/i
+describe WWW_CLIK4YOU_COM		Frequent SPAM content
 rawbody WWW_DIRECTFORCEMARKETING_COM	/http:\/\/.*directforcemarketing\.com/i
 describe WWW_DIRECTFORCEMARKETING_COM	Frequent SPAM content
 rawbody WWW_TRAFFICWOW_NET		/http:\/\/.*trafficwow\.net/i
@@ -439,7 +441,7 @@ describe MORTGAGE_RATES		Information on mortgage rates
 body TAKE_ACTION_NOW		/take action now!/i
 describe TAKE_ACTION_NOW	Tells you to 'take action now!'
 
-body THE_FOLLOWING_FORM		/the following form/
+body THE_FOLLOWING_FORM		/the following form\W/
 describe THE_FOLLOWING_FORM	Asks you to fill out a form
 
 # suggested by Nick Rothwell
@@ -598,6 +600,9 @@ describe RESISTANCE_IS_FUTILE	Resistance to this spam is futile
 body MAILMAN_CONFIRM            /We have received a request .*subscription of your email address.* to the .* mailing list/
 describe MAILMAN_CONFIRM        A MailMan confirm-your-address message
 
+body EGP_HTML_BANNER            /^<!-- \|\*\*\|begin egp html banner/
+describe EGP_HTML_BANNER        non-spam EGP banner found
+
 # contrib: thelton /at/ donet.com
 body GREAT_OFFER                /(?:offer expires|see full offer for details|great offer)/i
 describe GREAT_OFFER            Trying to offer you something
@@ -607,4 +612,16 @@ describe SUBJ_2_CREDIT          Contains 'subject to credit approval'
 
 body DEAR_SOMEBODY              /Dear [A-Z][a-z]+/
 describe DEAR_SOMEBODY          Contains 'Dear Somebody'
+
+body GAPPY_TEXT                 /(?:[a-z][^a-z]+){4,}/i
+describe GAPPY_TEXT             Contains 'G.a.p.p.y-T.e.x.t'
+
+body COPY_DVDS                  /copy.{1,20}dvd/i
+describe COPY_DVDS              Containts 'Copy DVDs'
+
+body URGENT_BIZ                 /URGENT BUSINESS/
+describe URGENT_BIZ             Containts 'URGENT BUSINESS'
+
+body EARN_PER_WEEK              /earn.{1,20}\d\d\d+.{1,30}per week/i
+describe EARN_PER_WEEK          Contains 'earn $something per week'
 
