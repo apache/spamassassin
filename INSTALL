@@ -361,10 +361,9 @@ skipped.
     default. See also 'perldoc Mail::SpamAssassin::Conf'.
 
     Also note that DCC requires that you open your firewall for DCC reply
-    packets on UDP port 6277.   Here's sample firewall rules required:
-
-      allow udp local gt 1023 to remote 6277
-      allow udp remote 6277 to local gt 1023
+    packets on UDP port 6277.   See the FAQ entry at
+    http://spamassassin.taint.org/faq/index.cgi?req=show&file=faq02.007.htp
+    for more details.
 
     If you're running a large site, processing upwards of tens of
     thousands of messages a day, the DCC maintainers have requested that
