@@ -305,7 +305,7 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
                    logmsg "PARANOID: still running as root, closing connection.";
                    die;
                }
-                logmsg "Still running as root: user not specified, ".
+                logmsg "Still running as root: user not specified with -u, ".
 		    "not found, or set to root.  Fall back to nobody.";
 		my $uid = getpwnam('nobody');
                $> = $uid;

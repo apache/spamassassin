@@ -58,8 +58,9 @@ mv tmon.out ./tmon.spam
 # don't use --loghits, this is *huge* so it'd take forever
 
 cp spam.local spam.alltime
-for f in /local/mail-archives/old/spam/* ; do
-  echo Checking $f: ; ./mass-check -c ../rules $f >> spam.alltime
-done
+# Aug 15 2002 jm: off for now
+#for f in /local/mail-archives/old/spam/* ; do
+  #echo Checking $f: ; ./mass-check -c ../rules $f >> spam.alltime
+#done
 
 echo "Done full scan"

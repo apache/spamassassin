@@ -4,7 +4,8 @@ my $DEF_RULES_DIR	= '$(DESTDIR)$(PREFIX)/share/spamassassin';
 
 my $LOCAL_RULES_DIR	= '$(DESTDIR)/etc/mail/spamassassin';
 
-my $MYCFLAGS		= '';		# this is a good place to put -g etc.
+# this is a good place to put -g, -R/usr/local/lib etc.
+my $MYCFLAGS		= '';
 
 ###########################################################################
 

@@ -3,8 +3,11 @@ package Mail::SpamAssassin::DBBasedAddrList;
 
 use strict;
 
-use Mail::SpamAssassin::PersistentAddrList;
+# tell AnyDBM_File to prefer DB_File, if possible.
+BEGIN { @AnyDBM_File::ISA = qw(DB_File GDBM_File NDBM_File SDBM_File); }
 use AnyDBM_File;
+
+use Mail::SpamAssassin::PersistentAddrList;
 use Fcntl ':DEFAULT',':flock';
 use Sys::Hostname;
 
