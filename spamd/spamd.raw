@@ -714,7 +714,8 @@ $spamtest->finish_learner();
 # the M::SA creation.
 my %conf_backup = ();
 my %msa_backup = ();
-if ($setuid_to_user) {
+# if $clients_per_child == 1, there's no point in copying configs around
+if ($setuid_to_user && $clients_per_child > 1) {
   foreach( 'username', 'user_dir', 'userstate_dir' ) {
     $msa_backup{$_} = $spamtest->{$_} if (exists $spamtest->{$_});
   }
@@ -723,11 +724,14 @@ if ($setuid_to_user) {
     die "error returned from copy_config, no Storable module?\n";
 }
 
-
-# restart handling.  do this here before compile_now() as that may
-# take a while.
+# setup signal handlers before the kids since we may have to kill them...
+# make sure this happens before setting up the pidfile to avoid a race
+# condition.  see bugzilla ticket 3443.
 my $got_sighup;
 $SIG{HUP} = \&restart_handler;
+$SIG{CHLD} = \&child_handler;
+$SIG{INT}  = \&kill_handler;
+$SIG{TERM} = \&kill_handler;
 
 # log server started, but processes watching the log to wait for connect
 # should wait until they see the pid, after signal handlers are in place
@@ -744,10 +748,6 @@ logmsg( "server started on $listeninfo (running version "
 for ( 1 .. $childlimit ) {
   spawn();
 }
-
-$SIG{CHLD} = \&child_handler;
-$SIG{INT}  = \&kill_handler;
-$SIG{TERM} = \&kill_handler;
 
 # Make the pidfile ...
 if (defined $opt{'pidfile'}) {
@@ -804,6 +804,8 @@ sub spawn {
   die "fork: $!" unless defined( $pid = fork );
 
   if ($pid) {
+    ## PARENT
+
     sigprocmask( POSIX::SIG_UNBLOCK(), $sigset )
       or die "Can't unblock SIGINT for fork: $!\n";
     $children{$pid} = 1;
@@ -811,7 +813,12 @@ sub spawn {
     return;
   }
   else {
-    $SIG{INT} = 'DEFAULT';    # make SIGINT kill us as it did before
+    ## CHILD
+
+    # Reset signal handling to default settings.
+    foreach (keys %SIG) {
+      $SIG{$_} = 'DEFAULT';
+    }
 
     # unblock signals
     sigprocmask( POSIX::SIG_UNBLOCK(), $sigset )
