@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamc_l");
-use Test; BEGIN { plan tests => ($NO_SPAMC_EXE ? 0 : 3) };
+use Test; plan tests => ($NO_SPAMC_EXE ? 0 : 3);
 
 exit if $NO_SPAMC_EXE;
 

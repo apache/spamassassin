@@ -15,12 +15,9 @@ BEGIN {
   #   <http://www.mail-archive.com/dev%40perl.apache.org/msg05466.html>
   #  -- mss, 2004-01-13
   our $RUNNING_ON_WINDOWS = ($^O =~ /^(mswin|dos|os2)/oi);
-  our $NO_SPAMC_EXE = ($RUNNING_ON_WINDOWS &&
-                       !$ENV{'SPAMC_SCRIPT'} &&
-                       !(-e "../spamc/spamc.exe"));
-  our $SKIP_SPAMC_TESTS = ($NO_SPAMC_EXE ||
-                           ($RUNNING_ON_WINDOWS && !$ENV{'SPAMD_HOST'})); 
-  our $SKIP_SPAMD_TESTS   = $RUNNING_ON_WINDOWS; 
+  our $SKIP_SPAMD_TESTS = $RUNNING_ON_WINDOWS; 
+  our $NO_SPAMC_EXE;
+  our $SKIP_SPAMC_TESTS;
   our $SSL_AVAILABLE;
 
 }
@@ -82,9 +79,15 @@ sub sa_t_init {
 
   (-f "t/test_dir") && chdir("t");        # run from ..
 
-  $SSL_AVAILABLE = ((`$spamd --version` =~ /with SSL support/) &&
-                    (`$spamc -V` =~ /with SSL support/));
-
+  $NO_SPAMC_EXE = ($RUNNING_ON_WINDOWS &&
+                   !$ENV{'SPAMC_SCRIPT'} &&
+                   !(-e "../spamc/spamc.exe"));
+  $SKIP_SPAMC_TESTS = ($NO_SPAMC_EXE ||
+                       ($RUNNING_ON_WINDOWS && !$ENV{'SPAMD_HOST'})); 
+  $SSL_AVAILABLE = ((!$SKIP_SPAMC_TESTS) &&  # no SSL test if no spamc
+                    (!$SKIP_SPAMD_TESTS) &&  # or if no local spamd
+                    (`$spamc -V` =~ /with SSL support/) &&
+                    (`$spamd --version` =~ /with SSL support/));
   # do not remove prior test results!
   # rmtree ("log");
 
