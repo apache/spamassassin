@@ -369,3 +369,115 @@ meta T_FROM_EXCESS_MIME_B	__FROM_MIME_ENCODED_B && !__FROM_NEEDS_MIME
 
 # hmmmm...
 header T_SUBJECT_MIME_ENCODED_TWICE	Subject:raw =~ /=\?\S+\?[BQ]\?.*=\?\S+\?[BQ]\?/i
+
+########################################################################
+# ratware signs
+# bug 1744
+
+# X-Mailer: BroadcastHTML Mailer
+header T_RATWARE_MAILER_01	X-Mailer =~ /BroadcastHTML Mailer/i
+describe T_RATWARE_MAILER_01	Ratware mailer 1
+
+# X-Mailer: SuperMail-2
+header T_RATWARE_MAILER_02	X-Mailer =~ /SuperMail-2/i
+describe T_RATWARE_MAILER_02	Ratware mailer 2
+
+# Shows up at bottom of email when you use unregistered version.
+body T_RATWARE_MAILER_03	/HotCast Mass E-Mailer/i
+describe T_RATWARE_MAILER_03	Ratware mailer 3
+
+header T_RATWARE_MAILER_04	X-Mailer =~ /PowerMTA\(TM\) v1\.5/
+describe T_RATWARE_MAILER_04	Sent by PowerMTA
+
+body T_RATWARE_MAILER_05 	/http:\/\/www\.adminsystem\.net \(Trial Version Only\)/
+describe T_RATWARE_MAILER_05 	Ratware mailer.
+
+# X-Mailer: mPOP Web-Mail 2.19
+header T_RATWARE_MAILER_06	X-Mailer =~ /mPOP Web-Mail/i
+describe T_RATWARE_MAILER_06	Ratware mailer 6
+
+# X-Originating-IP: [rx357.comIP]
+header T_RATWARE_MAILER_07	X-Originating-IP =~ /\[.{0,10}\.(?:com|net|org)IP\]/i
+describe T_RATWARE_MAILER_07	Ratware mailer 7
+
+# <RNDLT[32]>
+rawbody T_RATWARE_OOPS_01	/(?:<(?:\/|!|!--)?(?:RND(?:LT|MX|DG|LINE)\[?[0-9]?[0-9]?\]?|RANDOM_TEST))>/i
+describe T_RATWARE_OOPS_01	Spammer doesn't know how to use ratware properly (<>)
+
+# %RANDOM_WORD%
+rawbody T_RATWARE_OOPS_02	/\%\s?(?:RANDOM_@?(?:WORD|TEXT|NUMBERS?|CHARS?|=|NLS[0-9]|DATE_TIME)|PRIORITY_NUMBER|RND_?(?:\:.{1,10}|IMA|SYB|TEXT|URL|WORD|([UL]C_)?CHAR)|MESSAGE_BODY|BOUNDARY|STRING_CONST|CUSTOM[0-9]_)/i
+describe T_RATWARE_OOPS_02	Spammer doesn't know how to use ratware properly (%)
+
+# !RANDOM_NUMBERS!
+rawbody T_RATWARE_OOPS_03	/!RANDOM_(?:NUMBERS?|CHARS?)!/i
+describe T_RATWARE_OOPS_03	Spammer doesn't know how to use ratware properly (!!)
+
+# [RANDOMIZE]
+rawbody T_RATWARE_OOPS_04	/\[RANDOMIZE\]/i
+describe T_RATWARE_OOPS_04	Spammer doesn't know how to use ratware properly ([])
+
+# $FIRSTNAME
+rawbody T_RATWARE_OOPS_05	/\$(?:R\s?A\s?N\s?D\s?O\s?M\s?I\s?Z\s?E|(?:|FIRST|LAST)NAME|STRIPPEDUSER)/i
+describe T_RATWARE_OOPS_05	Spammer doesn't know how to use ratware properly ($)
+
+# random_subj.txt
+rawbody T_RATWARE_OOPS_06	/(?:random_subj|\\messages\\names.{0,5})\.txt/i
+describe T_RATWARE_OOPS_06	Spammer doesn't know how to use ratware properly (.txt)
+
+# http://<urlmask
+rawbody T_RATWARE_OOPS_07	/https?:\/\/.{0,20}<urlmask/i
+describe T_RATWARE_OOPS_07	Spammer doesn't know how to use ratware properly (urlmask)
+
+# <a href=ptth:\\
+rawbody T_RATWARE_OOPS_08	/<a\shref=ptth:\\\\/i
+describe T_RATWARE_OOPS_08	Spammer doesn't know how to use ratware properly (ptth)
+
+# http://www..
+rawbody T_RATWARE_OOPS_09	/http:\/\/www\.\./i
+describe T_RATWARE_OOPS_09	Spammer doesn't know how to use ratware properly (..)
+
+# http://TO_NAME@stupidspammer.net
+rawbody T_RATWARE_OOPS_10	/https?:\/\/.{0,5}TO_NAME\@/i
+describe T_RATWARE_OOPS_10	Spammer doesn't know how to use ratware properly (TO_NAME)
+
+# http://http://www
+rawbody T_RATWARE_OOPS_11	/http:\/\/.{0,10}http\:\/\/www/i
+describe T_RATWARE_OOPS_11	Spammer doesn't know how to use ratware properly (http^2)
+
+# Dear {first_name}
+rawbody T_RATWARE_OOPS_12 	/Dear \{first_name\}/i
+describe T_RATWARE_OOPS_12	Ratware vomit.
+
+# X-Mailer: Microsoft Outlook, Build 10.0.<rnds[2605,2627,2616,3416,4024,4510]>
+header T_RATWARE_MS_MAIL_VERS	X-Mailer =~ /Microsoft Outlook.{0,30}<rnds\[.{1,30}\]>/i
+describe T_RATWARE_MS_MAIL_VERS	Multiple versions for MS Outlook goof.
+
+# X-MimeOLE: Produced By Microsoft MimeOLE V6.00.<rnds[2462.0000,2479.0006,2505.0000,2600.0000,2800.1081,2800.1082,2800.1106,2800.1123,2800.1165]>
+header T_RATWARE_MS_MIME_VERS	X-MimeOLE =~ /Produced By Microsoft MimeOLE.{1,10}<rnds\[.{1,30}\]>/i
+describe T_RATWARE_MS_MIME_VERS	Multiple versions for MS MimeOLE goof.
+
+# Actually received some of these.  It's generally intentional when
+# people post to lists :)
+# $MUNGED
+header T_MUNGED_FROM		From =~ /\$?MUNGED\@/
+describe T_MUNGED_FROM		From address munged, literally.
+
+header T_MUNGED_TOCC		ToCc =~ /\$?MUNGED\@/
+describe T_MUNGED_TOCC		To/CC address munged, literally.
+
+# $FIRSTNAME
+header T_RATWARE_USER_VAR_FROM		From =~ /\$(?:FIRSTNAME|LASTNAME|STRIPPEDUSER)/i
+describe T_RATWARE_USER_VAR_FROM	From includes ratware variable
+
+header T_RATWARE_USER_VAR_TOCC		ToCc =~ /\$(?:FIRSTNAME|LASTNAME|STRIPPEDUSER)/i
+describe T_RATWARE_USER_VAR_TOCC	To/CC includes ratware variable
+
+# They took out the meta tags for frontpage, but forgot this one shows
+# up from fp also.
+rawbody __T_RATWARE_ERROR_03 	/\<\!\-\- saved from url\=\(0022\)http:\/\/internet\.e-mail \-\-\>/
+describe __T_RATWARE_ERROR_03 	Frontpage was used to create the email.
+
+meta T_RATWARE_ERROR_04 	!FRONTPAGE && __T_RATWARE_ERROR_03
+describe T_RATWARE_ERROR_04 	Made with Frontpage, but forgot to remove all entries.
+
+########################################################################
