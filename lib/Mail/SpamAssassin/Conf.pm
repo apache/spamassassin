@@ -3291,7 +3291,7 @@ sub add_to_addrlist_rcvd {
   else {
     my $re = $addr;
     $re =~ s/[\000\\\(]/_/gs;			# paranoia
-    $re =~ s/([^\*\?_a-zA-Z0-9])/\\$1/g;		# escape any possible metachars
+    $re =~ s/([^\*\?_a-zA-Z0-9])/\\$1/g;	# escape any possible metachars
     $re =~ tr/?/./;				# "?" -> "."
     $re =~ s/\*/\.\*/g;				# "*" -> "any string"
     $self->{$listname}->{$addr}{re} = qr/^${re}$/;
