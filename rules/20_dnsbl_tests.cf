@@ -228,6 +228,21 @@ header SB_NEW_BULK		eval:check_rbl_sub('senderbase', 'S23 > 6.2 && (time - S25 <
 describe SB_NEW_BULK		Sender domain is new and very high volume
 tflags SB_NEW_BULK		net
 
+# S5 = category
+# S40 = IP daily magnitude
+# S41 = IP monthly magnitude
+# note: accounting for rounding, "> 0.3" means at least a 59% volume spike
+header SB_NSP_VOLUME_SPIKE	eval:check_rbl_sub('senderbase', 'S5 =~ /NSP/ && S41 > 4.2 && S40 - S41 > 0.3')
+describe SB_NSP_VOLUME_SPIKE	Sender IP hosted at NSP has a volume spike
+tflags SB_NSP_VOLUME_SPIKE	net
+
+# S2 = organization daily magnitude
+# S9 = IP addresses used by this organization
+# note: this rule does not work as well on older mail
+header SB_HIGH_VOLUME_PER_IP	eval:check_rbl_sub('senderbase', '(S2 / S9) > 5.00')
+describe SB_HIGH_VOLUME_PER_IP	Sender organization has high volume per IP
+tflags SB_HIGH_VOLUME_PER_IP	net
+
 # ---------------------------------------------------------------------------
 # NOTE: donation tests, see README file for details
 
