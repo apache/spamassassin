@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.24 2002/10/05 22:07:33 zelgadis Exp $
+# $Id: HTML.pm,v 1.25 2002/10/07 01:46:38 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -11,10 +11,16 @@ use strict;
 # HTML decoding TODOs
 # - add URIs to list for faster URI testing
 
+my $re_loose = 'applet|basefont|center|dir|font|frame|frameset|iframe|isindex|menu|noframes|s|strike|u';
+
+my $re_strict = 'a|abbr|acronym|address|area|b|base|bdo|big|blockquote|body|br|button|caption|cite|code|col|colgroup|dd|del|dfn|div|dl|dt|em|fieldset|form|h1|h2|h3|h4|h5|h6|head|hr|html|i|img|input|ins|kbd|label|legend|li|link|map|meta|noscript|object|ol|optgroup|option|p|param|pre|q|samp|script|select|small|span|strong|style|sub|sup|table|tbody|td|textarea|tfoot|th|thead|title|tr|tt|ul|var';
+
 sub html_tag {
   my ($self, $tag, $attr, $num) = @_;
 
   $self->{html_inside}{$tag} += $num;
+
+  $self->{html}{elements}++ if $tag =~ /^(?:$re_strict|$re_loose)$/io;
   $self->{html}{tags}++;
 
   if ($num == 1) {
@@ -42,6 +48,9 @@ sub html_format {
   }
   elsif ($tag eq "br") {
     push @{$self->{html_text}}, "\n";
+  }
+  elsif ($tag eq "img" && exists $attr->{alt} && $attr->{alt} ne "") {
+    push @{$self->{html_text}}, " $attr->{alt} ";
   }
 }
 
@@ -239,6 +248,49 @@ sub html_tests {
     $self->{html}{web_bugs} = 1;
   }
 
+  # TESTING
+  if (($tag eq "img" && exists $attr->{src} &&
+       $attr->{src} =~ /(?:\?|[a-f\d]{12,})/i &&
+       $attr->{src} !~ /\.(?:jpe?g|gif|png)$/i) ||
+      ($tag =~ /^(?:body|table|tr|td)$/ && exists $attr->{background} &&
+       $attr->{background} =~ /(?:\?|[a-f\d]{12,})/i &&
+       $attr->{background} !~ /\.(?:jpe?g|gif|png)$/i))
+  {
+    $self->{html}{t_web_bugs1} = 1;
+  }
+
+  # TESTING
+  if (($tag eq "img" && exists $attr->{src} &&
+       ($attr->{src} =~ /\?/ ||
+	($attr->{src} =~ /[a-f\d]{12,}/i &&
+	 $attr->{src} !~ /\.(?:jpe?g|gif|png)$/i))) ||
+      ($tag =~ /^(?:body|table|tr|td)$/ && exists $attr->{background} &&
+       ($attr->{background} =~ /\?/ ||
+	($attr->{background} =~ /[a-f\d]{12,}/i &&
+	 $attr->{background} !~ /\.(?:jpe?g|gif|png)$/i))))
+  {
+    $self->{html}{t_web_bugs2} = 1;
+  }
+
+  # TESTING
+  if ($tag eq "img" && exists $attr->{alt} && !exists $attr->{src}) {
+    $self->{html}{img_alt_only1} = 1;
+  }
+
+  # TESTING
+  if ($tag eq "img" && exists $attr->{alt} &&
+      !(exists $attr->{src} && $attr->{src} =~ /\.(?:jpe?g|gif|png)$/i))
+  {
+    $self->{html}{img_alt_only2} = 1;
+  }
+
+  # TESTING: this is too close to HTML_WEB_BUGS to justify both rules
+  if ($tag eq "img" &&
+      exists $attr->{src} && $attr->{src} !~ /\.(?:jpe?g|gif|png)$/i)
+  {
+    $self->{html}{img_src_no_image} = 1;
+  }
+
   if ($tag eq "img") {
       $self->{html}{num_imgs}++;
 
@@ -262,7 +314,17 @@ sub html_tests {
             if ($ratio > $self->{html}{max_img_ratio});
       }
   }
-
+  if ($tag eq "input") {
+    if (exists $attr->{type} && $attr->{type} =~ /hidden/i) {
+      $self->{html}{input_type_hidden} = 1;
+    }
+    if (exists $attr->{name} && $attr->{name} =~ /(?:mail|recipient|from)/i) {
+      $self->{html}{input_name_email} = 1;
+    }
+    if (exists $attr->{value} && $attr->{value} =~ /\S+\@\S+/) {
+      $self->{html}{input_value_email} = 1;
+    }
+  }
   if ($tag =~ /^i?frame$/) {
     $self->{html}{relaying_frame} = 1;
   }
@@ -367,6 +429,14 @@ sub html_test {
 sub html_eval {
   my ($self, undef, $test, $expr) = @_;
   return exists $self->{html}{$test} && eval "qq{\Q$self->{html}{$test}\E} $expr";
+}
+
+sub html_message {
+  my ($self) = @_;
+
+  return (exists $self->{html}{elements} &&
+	  ($self->{html}{elements} >= 8 ||
+	   $self->{html}{elements} >= $self->{html}{tags} / 2));
 }
 
 sub html_range {
