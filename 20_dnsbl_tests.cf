@@ -191,7 +191,7 @@ describe DNS_FROM_RFCI_DSN	From: sender listed in dsn.rfc-ignorant.org
 tflags DNS_FROM_RFCI_DSN	net
 
 # another domain-based blacklist
-header DNS_FROM_AHBL_RHSBL	eval:check_rbl_from_host('ahbl-rhs', 'rhsbl.ahbl.org.')
+header DNS_FROM_AHBL_RHSBL	eval:check_rbl_from_host('ahbl', 'rhsbl.ahbl.org.')
 describe DNS_FROM_AHBL_RHSBL	From: sender listed in dnsbl.ahbl.org
 tflags DNS_FROM_AHBL_RHSBL	net
 
