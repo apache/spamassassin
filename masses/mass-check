@@ -3,6 +3,7 @@
 # options
 #
 # -c=file       set $cffile
+# -f=file       read list of name folders from <file>
 # --fork        use fork-based model to save RAM (used for mailbox files)
 # --all         don't skip big messages
 # --mh          use mh-style folder (directory of messages named with numbers)
@@ -50,7 +51,7 @@ use Getopt::Long;
 # flush buffer immediately so if mass-check fails or stops we don't get a corrupt line
 $|++;
 
-GetOptions("c=s", "fork", "all", "head=i", "mh", "ms", "mn", "single", "sort",
+GetOptions("c=s", "f=s", "fork", "all", "head=i", "mh", "ms", "mn", "single", "sort",
 	   "tail=i", "loghits", "nokillfile");
 
 #use Devel::Peek;
@@ -90,6 +91,13 @@ my $iter = new Mail::ArchiveIterator ({
         'opt_all' => $opt_all
   });
 
+my @targets = @ARGV;
+if ($opt_f) {
+  open (F, $opt_f) || die $!;
+  push (@targets, map { chomp; $_ } <F>);
+  close (F);
+}
+
 my $who = `id -un 2>/dev/null`; chop $who;
 my $where = `uname -n 2>/dev/null`; chop $where;
 my $when = `date`; chop $when;
@@ -98,7 +106,7 @@ print "# mass-check results from $who\@$where, on $when\n";
 print "# M:SA version ".$spamtest->Version()."\n";
 print '# CVS tag: $Name:  $',"\n";
 $iter->set_function (\&wanted);
-$iter->run (@ARGV);
+$iter->run (@targets);
 exit;
 
 ###########################################################################
