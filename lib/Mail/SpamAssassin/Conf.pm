@@ -3086,6 +3086,7 @@ sub new {
 
   $self->{rewrite_header} = { };
   $self->{user_rules_to_compile} = { };
+  $self->{user_defined_rules} = { };
   $self->{headers_spam} = { };
   $self->{headers_ham} = { };
 

@@ -924,6 +924,67 @@ sub receive_date {
 
 ###########################################################################
 
+sub setuid_to_euid {
+  return if (RUNNING_ON_WINDOWS);
+  if ($< != $>) {
+    dbg ("setting real uid from $< to match effective uid $>");
+    $< = $>;
+    if ($< != $>) { die "setuid $< to $> failed!"; }
+  }
+}
+
+# helper app command-line open
+sub helper_app_pipe_open {
+  if (RUNNING_ON_WINDOWS) {
+    return helper_app_pipe_open_windows (@_);
+  } else {
+    return helper_app_pipe_open_unix (@_);
+  }
+}
+
+sub helper_app_pipe_open_windows {
+  my ($fh, $stdinfile, $duperr2out, @cmdline) = @_;
+
+  # use a traditional open(FOO, "cmd |")
+  my $cmd = join(' ', @cmdline);
+  if ($stdinfile) { $cmd .= " < '$stdinfile'"; }
+  if ($duperr2out) { $cmd .= " 2>&1"; }
+  return open ($fh, $cmd.'|');
+}
+
+sub helper_app_pipe_open_unix {
+  my ($fh, $stdinfile, $duperr2out, @cmdline) = @_;
+
+  # do a fork-open, so we can setuid() back
+  my $pid = open ($fh, '-|');
+  if (!defined $pid) {
+    die "cannot fork: $!";
+  }
+
+  if ($pid != 0) {
+    return $pid;          # parent process; return the child pid
+  }
+
+  # else, child process.  go setuid...
+  setuid_to_euid();
+  dbg ("setuid: helper proc $$: ruid=$< euid=$>");
+
+  if ($stdinfile) {              # < $tmpfile
+    close STDIN;
+    open (STDIN, "<$stdinfile") or die "cannot open $stdinfile: $!";
+  }
+
+  if ($duperr2out) {             # 2>&1
+    close STDERR;
+    open STDERR, ">&STDOUT" or die "dup STDOUT failed: $!";
+  }
+
+  exec @cmdline;
+  die "exec failed: $!";
+}
+
+###########################################################################
+
 sub dbg { Mail::SpamAssassin::dbg (@_); }
 
 1;

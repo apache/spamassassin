@@ -207,6 +207,12 @@ sub process_dnsbl_set {
     }
     # senderbase
     elsif ($subtest =~ s/^sb://) {
+      # SB rules are not available to users
+      if ($self->{conf}->{user_defined_rules}->{$rule}) {
+        dbg ("RBL: skipping rule '$rule': not supported when user-defined");
+        next;
+      }
+
       $rdatastr =~ s/^"?\d+-//;
       $rdatastr =~ s/"$//;
       my %sb = ($rdatastr =~ m/(?:^|\|)(\d+)=([^|]+)/g);
@@ -224,11 +230,7 @@ sub process_dnsbl_set {
       my $untainted = $1;
       $subtest = $untainted;
 
-      # Mail::SpamAssassin::Util::untaint_var (\%sb);
-      # dbg ("$subtest");
-      # dbg ("$rdatastr");
-
-      $self->got_hit($rule, "SenderBase: ") if !$undef && eval "$subtest";
+      $self->got_hit($rule, "SenderBase: ") if !$undef && eval $subtest;
     }
     # bitmask
     elsif ($subtest =~ /^\d+$/) {
@@ -736,7 +738,12 @@ sub dcc_lookup {
     }
 
     dbg("DCC command: ".join(' ', $path, "-H", $opts, "< '$tmpf'", "2>&1"),'dcc',-1);
-    my $pid = open(DCC, join(' ', $path, "-H", $opts, "< '$tmpf'", "2>&1", '|')) || die "$!\n";
+
+    # my $pid = open(DCC, join(' ', $path, "-H", $opts, "< '$tmpf'", "2>&1", '|')) || die "$!\n";
+    my $pid = Mail::SpamAssassin::Util::helper_app_pipe_open(*DCC,
+                $tmpf, 1, $path, "-H", split(' ', $opts));
+    $pid or die "$!\n";
+
     my @null = <DCC>;
     close DCC;
 
@@ -869,7 +876,12 @@ sub pyzor_lookup {
     $opts =~ s/[^-A-Za-z0-9 \/_]/_/gs;	# sanitise
  
     dbg("Pyzor command: ".join(' ', $path, $opts, "check", "< '$tmpf'", "2>&1"),'pyzor',-1);
-    my $pid = open(PYZOR, join(' ', $path, $opts, "check", "< '$tmpf'", "2>&1", '|')) || die "$!\n";
+
+    #my $pid = open(PYZOR, join(' ', $path, $opts, "check", "< '$tmpf'", "2>&1", '|')) || die "$!\n";
+    my $pid = Mail::SpamAssassin::Util::helper_app_pipe_open(*PYZOR,
+                $tmpf, 1, $path, split(' ', $opts), "check");
+    $pid or die "$!\n";
+
     $response = <PYZOR>;
     close PYZOR;
 

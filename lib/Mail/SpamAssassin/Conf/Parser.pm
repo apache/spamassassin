@@ -625,6 +625,16 @@ sub add_test {
     return;
   }
 
+  # all of these rule types are regexps
+  if ($type == $Mail::SpamAssassin::Conf::TYPE_HEAD_TESTS
+        || $type == $Mail::SpamAssassin::Conf::TYPE_BODY_TESTS
+        || $type == $Mail::SpamAssassin::Conf::TYPE_FULL_TESTS
+        || $type == $Mail::SpamAssassin::Conf::TYPE_RAWBODY_TESTS
+        || $type == $Mail::SpamAssassin::Conf::TYPE_URI_TESTS)
+  {
+    return unless $self->is_regexp_valid($name, $text);
+  }
+
   $conf->{tests}->{$name} = $text;
   $conf->{test_types}->{$name} = $type;
   $conf->{tflags}->{$name} ||= '';
@@ -633,6 +643,7 @@ sub add_test {
 
   if ($self->{scoresonly}) {
     $conf->{user_rules_to_compile}->{$type} = 1;
+    $conf->{user_defined_rules}->{$name} = 1;
   }
 }
 
@@ -646,6 +657,18 @@ sub add_regression_test {
   else {
     # initialize the array, and create one element
     $conf->{regression_tests}->{$name} = [ [$ok_or_fail, $string] ];
+  }
+}
+
+sub is_regexp_valid {
+  my ($self, $name, $re) = @_;
+  if (eval { ("" =~ m{$re}); 1; }) {
+    return 1;
+
+  } else {
+    warn "invalid regexp for rule $name: $re\n";
+    $self->{conf}->{errors}++;
+    return 0;
   }
 }
 

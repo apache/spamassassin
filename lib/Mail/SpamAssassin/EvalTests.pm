@@ -3113,7 +3113,7 @@ sub html_tag_balance {
 
   $self->{html}{"inside_$tag"} =~ /^([\<\>\=\!\-\+ 0-9]+)$/;
   my $val = $1;
-  return eval "$val $expr";
+  return eval "\$val $expr";
 }
 
 sub html_image_only {
@@ -3167,7 +3167,8 @@ sub html_test {
 }
 
 sub html_eval {
-  my ($self, undef, $test, $expr) = @_;
+  my ($self, undef, $test, $rawexpr) = @_;
+  $rawexpr =~ /^([\<\>\=\!\-\+ 0-9]+)$/; my $expr = $1;
 
   # workaround bug 3320: wierd perl bug where additional, very explicit
   # untainting into a new var is required.
@@ -3175,13 +3176,24 @@ sub html_eval {
   return unless defined($tainted);
   $tainted =~ /^(.*)$/; my $val = $1;
 
-  return eval "qq{\Q$val\E} $expr";
+  # just use the value in $val, don't copy it needlessly
+  return eval "\$val $expr";
 }
 
-sub html_text {
-  my ($self, undef, $text, $expr) = @_;
+sub html_text_match {
+  my ($self, undef, $text, $regexp) = @_;
   for my $string (@{ $self->{html}{$text} }) {
-    if (defined $string && eval "qq{\Q$string\E} $expr") {
+    if (defined $string && $string =~ /${regexp}/) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
+sub html_text_not_match {
+  my ($self, undef, $text, $regexp) = @_;
+  for my $string (@{ $self->{html}{$text} }) {
+    if (defined $string && $string !~ /${regexp}/) {
       return 1;
     }
   }

@@ -286,7 +286,10 @@ sub dcc_report {
       $opts = $1;
     }
 
-    my $pid = open(DCC, join(' ', $path, "-t many", $opts, "< '$tmpf'", ">/dev/null 2>&1", '|')) || die "$!\n";
+    my $pid = Mail::SpamAssassin::Util::helper_app_pipe_open(*DCC,
+                    $tmpf, 1, $path, "-t", "many", split(' ', $opts));
+    $pid or die "$!\n";
+    my @ignored = <DCC>;
     $self->close_pipe_fh (\*DCC);
 
     alarm(0);
@@ -334,7 +337,11 @@ sub pyzor_report {
       $opts = $1;
     }
 
-    my $pid = open(PYZOR, join(' ', $path, $opts, "report", "< '$tmpf'", ">/dev/null 2>&1", '|')) || die "$!\n";
+    #my $pid = open(PYZOR, join(' ', $path, $opts, "report", "< '$tmpf'", ">/dev/null 2>&1", '|')) || die "$!\n";
+    my $pid = Mail::SpamAssassin::Util::helper_app_pipe_open(*PYZOR,
+                    $tmpf, 1, $path, split(' ', $opts), "report");
+    $pid or die "$!\n";
+    my @ignored = <PYZOR>;
     $self->close_pipe_fh (\*PYZOR);
 
     alarm(0);

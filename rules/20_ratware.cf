@@ -133,8 +133,8 @@ describe FORGED_MUA_AOL_FROM	Forged mail pretending to be from AOL (by From)
 
 # From private mail with developers.  Some top tips here!
 header __THEBAT_MUA		X-Mailer =~ /The Bat!/
-header __THEBAT_MUA_V1		X-Mailer =~ /^\QThe Bat! (v1.\E/
-header __THEBAT_MUA_V2		X-Mailer =~ /^\QThe Bat! (v2.\E/
+header __THEBAT_MUA_V1		X-Mailer =~ /^The Bat! \(v1\./
+header __THEBAT_MUA_V2		X-Mailer =~ /^The Bat! \(v2\./
 header __CTYPE_CHARSET_QUOTED	Content-Type =~ /charset=\"/i
 header __CTYPE_HAS_BOUNDARY	Content-Type =~ /boundary/i
 header __BAT_BOUNDARY		Content-Type =~ /boundary=\"?-{10}/
