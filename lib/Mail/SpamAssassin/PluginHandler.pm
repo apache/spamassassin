@@ -26,6 +26,7 @@ use Mail::SpamAssassin::Plugin;
 
 use strict;
 use bytes;
+use File::Spec;
 
 use vars qw{
   @ISA $VERSION
@@ -54,19 +55,34 @@ sub new {
 sub load_plugin {
   my ($self, $package, $path) = @_;
 
-  dbg ("plugin: loading $path");
+  my $ret;
+  if ($path) {
+    dbg ("plugin: loading $package from $path");
 
-  if (!do $path) {
+    if (!File::Spec->file_name_is_absolute ($path)) {
+      my ($vol, $dirs, $file) = File::Spec->splitpath ($self->{currentfile});
+      $path = File::Spec->catpath ($vol, $dirs, $path);
+      dbg ("plugin: fixed relative path: $path");
+    }
+    $ret = do $path;
+  }
+  else {
+    dbg ("plugin: loading $package from \@INC");
+    $ret = eval qq{ require $package; };
+  }
+
+  if (!$ret) {
     if ($@) { warn "failed to parse plugin $path: $@\n"; }
     elsif ($!) { warn "failed to load plugin $path: $!\n"; }
   }
 
   my $plugin = eval $package.q{->new ($self->{main}); };
 
-  if ($@ || !$plugin) { warn "failed to create plugin $package: $@\n"; }
+  if ($@ || !$plugin) { warn "failed to create instance of plugin $package: $@\n"; }
 
   if ($plugin) {
     $self->{main}->{plugins}->register_plugin ($plugin);
+    $self->{main}->{conf}->load_plugin_succeeded ($plugin, $package, $path);
   }
 }
 

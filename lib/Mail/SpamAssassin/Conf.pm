@@ -346,7 +346,8 @@ sub _parse {
   }                            # (eg. .utf8 or @euro)
 
   $self->{currentfile} = '(no file)';
-  my $skipfile = 0;
+  my @if_stack = ();
+  my $skip_parsing = 0;
 
   foreach (split (/\n/, $_[1])) {
     s/(?<!\\)#.*$//; # remove comments
@@ -359,8 +360,22 @@ sub _parse {
     # Versioning assertions
     if (/^file\s+start\s+(.+)$/) { $self->{currentfile} = $1; next; }
     if (/^file\s+end/) {
+      if (scalar @if_stack > 0) {
+	my $cond = pop @if_stack;
+
+	if ($cond->{type} eq 'ifplugin') {
+	  warn "unclosed 'if' in ".
+		$self->{currentfile}.": ifplugin ".$cond->{plugin}."\n";
+	} else {
+	  die "unknown 'if' type: ".$cond->{type}."\n";
+	}
+
+	$self->{errors}++;
+	@if_stack = ();
+      }
+
       $self->{currentfile} = '(no file)';
-      $skipfile = 0;
+      $skip_parsing = 0;
       next;
     }
 
@@ -375,6 +390,53 @@ sub _parse {
     # Do a better job untainting this info ...
     $value =~ /^(.*)$/;
     $value = $1;
+
+=head2 CONDITIONAL-PARSING OPTIONS
+
+=item ifplugin PluginModuleName
+
+Used to support conditional interpretation, based on whether a plugin module
+has been loaded successfully or not.  Lines between this and a corresponding
+C<endif> line, will be ignored unless the named plugin module has been loaded
+using C<loadplugin>.
+
+Note that if the end of a configuration file is reached while still inside a
+C<ifplugin> scope, a warning will be issued, but parsing will restart on
+the next file.
+
+For example:
+
+	loadplugin MyPlugin plugintest.pm
+
+	ifplugin MyPlugin
+	  header MY_PLUGIN_FOO	eval:check_for_foo()
+	  score  MY_PLUGIN_FOO	0.1
+	endif
+
+=cut
+
+    if ($key eq 'ifplugin') {
+      push (@if_stack, {
+	  type => 'ifplugin',
+	  plugin => $value,
+	  skip_parsing => $skip_parsing
+	});
+
+      if ($self->{plugins_loaded}->{$value}) {
+	# leave $skip_parsing as-is; we may not be parsing anyway in this block.
+	# in other words, support nested 'if's and 'require_version's
+      } else {
+	$skip_parsing = 1;
+      }
+      next;
+    }
+
+    # and the endif statement:
+    if ($key eq 'endif') {
+      my $cond = pop @if_stack;
+      $skip_parsing = $cond->{skip_parsing};
+      next;
+    }
 
 =head2 VERSION OPTIONS
 
@@ -398,13 +460,13 @@ ignore it.
                 "$Mail::SpamAssassin::VERSION. Maybe you need to use ".
                 "the -C switch, or remove the old config files? ".
                 "Skipping this file";
-        $skipfile = 1;
+        $skip_parsing = 1;
         $self->{errors}++;
       }
       next;
     }
 
-    if ($skipfile) { next; }
+    if ($skip_parsing) { next; }
 
     # note: no eval'd code should be loaded before the SECURITY line below.
 ###########################################################################
@@ -1786,8 +1848,8 @@ the value given.  This could be useful for implementing global or group bayes da
 
 =cut
 
-    if (/^bayes_sql_override_username\s+(.*)$/) {
-      $self->{bayes_sql_override_username} = $1; next;
+    if ($key eq 'bayes_sql_override_username') {
+      $self->{bayes_sql_override_username} = $value; next;
     }
 
 ##############
@@ -2586,8 +2648,8 @@ Example: C<cn=master,dc=koehntopp,dc=de>
 
 =cut
 
-    if (/^user_scores_ldap_username\s+(.*?)\s*$/) {
-      $self->{user_scores_ldap_username} = $1; next;
+    if ($key eq 'user_scores_ldap_username') {
+      $self->{user_scores_ldap_username} = $value; next;
     }
 
 =item user_scores_ldap_password
@@ -2596,34 +2658,31 @@ This is the password used to connect to the LDAP server.
 
 =cut
  
-    if (/^user_scores_ldap_password\s+(.*?)\s*$/) {
-      $self->{user_scores_ldap_password} = $1; next;
+    if ($key eq 'user_scores_ldap_password') {
+      $self->{user_scores_ldap_password} = $value; next;
     }
 
-=item loadplugin PluginModuleName /path/to/module.pm
+=item loadplugin PluginModuleName [/path/to/module.pm]
 
 Load a SpamAssassin plugin module.  The C<PluginModuleName> is the perl module
-name, used to create the plugin object itself.  C</path/to/module.pm> is the
-file to load, containing the module's perl code; if it's specified as a
-relative path, it's considered to be relative to the current configuration
-file.
+name, used to create the plugin object itself.
+
+C</path/to/module.pm> is the file to load, containing the module's perl code;
+if it's specified as a relative path, it's considered to be relative to the
+current configuration file.  If it is omitted, the module will be loaded
+using perl's search path (the C<@INC> array).
 
 See C<Mail::SpamAssassin::Plugin> for more details on writing plugins.
 
 =cut
 
-    # leave as RE right now
-    if (/^loadplugin\s+(\S+)\s+(\S+)$/) {
-      my $mod = $1;
-      my $path = $2;
-
-      if (!File::Spec->file_name_is_absolute ($path)) {
-	my ($vol, $dirs, $file) = File::Spec->splitpath ($self->{currentfile});
-	$path = File::Spec->catpath ($vol, $dirs, $path);
-	dbg ("loadplugin: fixed relative path: $path");
-      }
-      $self->load_plugin ($mod, $path); next;
+    if ($key eq 'loadplugin') {			# single-arg variant
+      $self->load_plugin ($value); next;
     }
+    if (/^loadplugin\s+(\S+)\s+(\S+)$/) {	# two-arg variant
+      $self->load_plugin ($1, $2); next;
+    }
+
 
 ###########################################################################
 
@@ -2861,6 +2920,11 @@ sub maybe_body_only {
 sub load_plugin {
   my ($self, $package, $path) = @_;
   $self->{main}->{plugins}->load_plugin ($package, $path);
+}
+
+sub load_plugin_succeeded {
+  my ($self, $plugin, $package, $path) = @_;
+  $self->{plugins_loaded}->{$package} = 1;
 }
 
 sub register_eval_rule {
