@@ -623,7 +623,7 @@ sub rewrite_as_spam {
 
   foreach my $header (keys %{$self->{conf}->{headers_spam}} ) {
     my $data = $self->{conf}->{headers_spam}->{$header};
-    my $line = $self->_process_header($header,$data);
+    my $line = $self->_process_header($header,$data) || "";
     $newmsg .= "X-Spam-$header: $line\n" # add even if empty
   }
 
@@ -712,7 +712,7 @@ sub rewrite_headers {
 
     foreach my $header (keys %{$self->{conf}->{headers_spam}} ) {
       my $data = $self->{conf}->{headers_spam}->{$header};
-      my $line = $self->_process_header($header,$data);
+      my $line = $self->_process_header($header,$data) || "";
       $self->{msg}->put_header ("X-Spam-$header", $line);
     }
 
@@ -721,7 +721,7 @@ sub rewrite_headers {
 
     foreach my $header (keys %{$self->{conf}->{headers_ham}} ) {
       my $data = $self->{conf}->{headers_ham}->{$header};
-      my $line = $self->_process_header($header,$data);
+      my $line = $self->_process_header($header,$data) || "";
       $self->{msg}->put_header ("X-Spam-$header", $line);
     }
 
