@@ -21,8 +21,8 @@ Mail::SpamAssassin - Mail::Audit spam detector plugin
 
 =head1 DESCRIPTION
 
-Mail::SpamAssassin is a Mail::Audit plugin to identify spam using text
-analysis and several internet-based realtime blacklists.
+Mail::SpamAssassin is a module to identify spam using text analysis and several
+internet-based realtime blacklists.
 
 Using its rule base, it uses a wide range of heuristic tests on mail headers
 and body text to identify "spam", also known as unsolicited commercial email.
@@ -30,8 +30,8 @@ and body text to identify "spam", also known as unsolicited commercial email.
 Once identified, the mail can then be optionally tagged as spam for later
 filtering using the user's own mail user-agent application.
 
-This module implements a Mail::Audit plugin, allowing SpamAssassin to be used
-in a Mail::Audit filter.  If you wish to use a command-line filter tool,
+This module also implements a Mail::Audit plugin, allowing SpamAssassin to be
+used in a Mail::Audit filter.  If you wish to use a command-line filter tool,
 try the C<spamassassin> or C<spamd> tools provided.
 
 Note that, if you're using Mail::Audit, the constructor for the Mail::Audit
@@ -87,7 +87,7 @@ $TIMELOG->{dummy}=0;
 
 $VERSION = "2.40";
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.115.2.2 2002/08/27 11:31:34 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.115.2.3 2002/08/27 23:54:52 jmason Exp $'))[2 .. 5, 8]));
 # If you hacked up your SA, add a token to identify it here. Eg.: I use "mss<number>",
 # <number> increasing with every hack. Deersoft might want to use "pro" :o)
 # "cvs" is added automatically if this file is tagged as 'Exp'erimental.
