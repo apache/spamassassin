@@ -45,7 +45,7 @@ sub new_checker {
 
   my $path;
 
-  my $umask = 0;
+  my $umask = umask 0;
   if(defined($main->{conf}->{auto_whitelist_path})) # if undef then don't worry -- empty hash!
   {
     $path = $main->sed_path ($main->{conf}->{auto_whitelist_path});
