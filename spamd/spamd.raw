@@ -217,7 +217,7 @@ GetOptions(
   'auto-whitelist|whitelist|a'      => sub { warn "The -a option has been removed.  Please look at the use_auto_whitelist config option instead.\n"; exit 2; },
 
 ) or print_usage_and_exit();
-	
+
 if ($opt{'help'}) {
   print_usage_and_exit(qq{For more details, use "man spamd".\n}, 'EX_OK');
 }
@@ -225,6 +225,25 @@ if ($opt{'version'}) {
   print_version();
   exit($resphash{'EX_OK'});
 }
+
+
+# Enable debugging, if any areas were specified.  We do this already here,
+# accessing some non-public API so we can use the convenient dbg() routine.
+my @DEBUG;
+if (defined $opt{'debug'}) {
+  if ($opt{'debug'}) {
+    @DEBUG = split(/,/, $opt{'debug'});
+    if (grep { !/^\S+$/ } @DEBUG) {
+      warn "bad areas in --debug option\n";
+    }
+  }
+  else {
+    @DEBUG = ("all");
+  }
+}
+# Don't do this at home (aka any 3rd party tools), kids!
+Mail::SpamAssassin::_init_debugger(@DEBUG);
+
 
 # bug 2228: make the values of (almost) all parameters which accept file paths
 # absolute, so they are still valid after daemonize()
@@ -728,19 +747,6 @@ if ( defined $opt{'pidfile'} ) {
     Mail::SpamAssassin::Util::untaint_file_path( $opt{'pidfile'} );
 }
 
-# set debug areas, if any specified (only useful for command-line tools)
-my @debug;
-if (defined $opt{'debug'}) {
-  if ($opt{'debug'}) {
-    @debug = split(/,/, $opt{'debug'});
-    if (grep { !/^\S+$/ } @debug) {
-      warn "bad areas in --debug option\n";
-    }
-  }
-  else {
-    @debug = ("all");
-  }
-}
 
 my $spamtest = Mail::SpamAssassin->new(
   {
@@ -748,7 +754,7 @@ my $spamtest = Mail::SpamAssassin->new(
     rules_filename       => ( $opt{'configpath'} || 0 ),
     site_rules_filename  => ( $opt{'siteconfigpath'} || 0 ),
     local_tests_only     => ( $opt{'local'} || 0 ),
-    debug                => \@debug,
+    debug                => \@DEBUG,
     paranoid             => ( $opt{'paranoid'} || 0 ),
     home_dir_for_helpers => (
       defined $opt{'home_dir_for_helpers'}
