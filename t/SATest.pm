@@ -146,7 +146,7 @@ sub start_spamd {
       last if ($spamd_pid);
     }
 
-    sleep 1;
+    sleep 2;
     if ($retries-- <= 0) {
       warn "spamd start failed";
       warn "\n\nMaybe you need to kill a running spamd process?\n\n";

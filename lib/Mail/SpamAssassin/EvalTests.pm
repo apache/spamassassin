@@ -8,6 +8,7 @@ package Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Dns;
 use Mail::SpamAssassin::Locales;
+use Mail::SpamAssassin::PhraseFreqs;
 use Mail::SpamAssassin::AutoWhitelist;
 use Time::Local;
 use strict;
@@ -111,18 +112,44 @@ sub check_for_forged_hotmail_received_headers {
   if ($to !~ /hotmail.com/) { return 0; }
 
   my $rcvd = $self->get ('Received');
+  $rcvd =~ s/\s+/ /gs;		# just spaces, simplify the regexp
 
   # Hotmail formats its received headers like this:
   # Received: from hotmail.com (f135.law8.hotmail.com [216.33.241.135])
   # spammers do not ;)
 
-  if ($rcvd !~ /from hotmail.com/) { return 0; }
-
-  $rcvd =~ s/\s+/ /gs;		# just spaces, simplify the regexp
+  #if ($rcvd !~ /from hotmail.com/) { return 0; }
 
   if ($rcvd =~ /from \S*hotmail.com \(\S+\.hotmail(?:\.msn|)\.com /) { return 0; }
   if ($rcvd =~ /from \S+ by \S+\.hotmail(?:\.msn|)\.com with HTTP\;/) { return 0; }
 
+  return 1;
+}
+
+###########################################################################
+
+sub check_for_forged_excite_received_headers {
+  my ($self) = @_;
+
+  my $to = $self->get ('To:addr');
+  if ($to !~ /excite.com/) { return 0; }
+
+  my $rcvd = $self->get ('Received');
+  $rcvd =~ s/\s+/ /gs;		# just spaces, simplify the regexp
+
+  # Excite formats its received headers like this:
+  # Received: from bucky.excite.com ([198.3.99.218]) by vaxc.cc.monash.edu.au
+  #    (PMDF V6.0-24 #38147) with ESMTP id
+  #    <01K53WHA3OGCA5W9MM@vaxc.cc.monash.edu.au> for luv@luv.asn.au;
+  #    Sat, 23 Jun 2001 13:36:20 +1000
+  # Received: from hippie.excite.com ([199.172.148.180]) by bucky.excite.com
+  #    (InterMail vM.4.01.02.39 201-229-119-122) with ESMTP id
+  #    <20010623033612.NRCY6361.bucky.excite.com@hippie.excite.com> for
+  #    <luv@luv.asn.au>; Fri, 22 Jun 2001 20:36:12 -0700
+  # spammers do not ;)
+
+  if ($rcvd =~ /from \S*excite.com /) { return 0; }
+  
   return 1;
 }
 
@@ -135,14 +162,10 @@ sub check_for_forged_yahoo_received_headers {
   if ($to !~ /yahoo.com/) { return 0; }
 
   my $rcvd = $self->get ('Received');
-
-  # Hotmail formats its received headers like this:
-  # Received: from hotmail.com (f135.law8.hotmail.com [216.33.241.135])
-  # spammers do not ;)
-
-  if ($rcvd !~ /from \S*yahoo\.com/) { return 0; }
-
   $rcvd =~ s/\s+/ /gs;		# just spaces, simplify the regexp
+
+  # not sure about this
+  #if ($rcvd !~ /from \S*yahoo\.com/) { return 0; }
 
   if ($rcvd =~ /by web\S+\.mail\.yahoo\.com via HTTP/) { return 0; }
 
@@ -499,7 +522,7 @@ sub check_for_forged_gw05_received_headers {
   # Received: from mail3.icytundra.com by gw05 with ESMTP; Thu, 21 Jun 2001 02:28:32 -0400
   my ($h1, $h2) = ($rcv =~ 
   	m/\nfrom\s(\S+)\sby\s(\S+)\swith\sESMTP\;\s+\S\S\S,\s+\d+\s+\S\S\S\s+
-			\d\d\d\d\s+\d\d:\d\d:\d\d\s+[-+]*\d\d\d\d\n$/xs);
+			\d{4}\s+\d\d:\d\d:\d\d\s+[-+]*\d{4}\n$/xs);
 
   if (defined ($h1) && defined ($h2) && $h2 !~ /\./) {
     return 1;
@@ -668,9 +691,9 @@ sub _parse_rfc822_date {
   $_ = " $date "; s/, */ /gs; s/\s+/ /gs;
 
   # now match it in parts.  Date part first:
-  if (s/ (\d+) ([A-Z][a-z][a-z]) (\d\d\d\d) / /) {
+  if (s/ (\d+) ([A-Z][a-z][a-z]) (\d{4}) / /) {
     $dd = $1; $mon = $2; $yyyy = $3;
-  } elsif (s/ ([A-Z][a-z][a-z]) +(\d+) \d+:\d+:\d+ (\d\d\d\d) / /) {
+  } elsif (s/ ([A-Z][a-z][a-z]) +(\d+) \d+:\d+:\d+ (\d{4}) / /) {
     $dd = $2; $mon = $1; $yyyy = $3;
   } elsif (s/ (\d+) ([A-Z][a-z][a-z]) (\d\d) / /) {
     $dd = $1; $mon = $2; $yyyy = $3;
@@ -688,7 +711,7 @@ sub _parse_rfc822_date {
 
   # and timezone offset. if we can't parse non-numeric zones, that's OK
   # as long as we don't worry about time diffs < 1 to 1.5 days.
-  if (s/ ([-+]\d\d\d\d) / /) {
+  if (s/ ([-+]\d{4}) / /) {
     $tzoff = $1;
   }
   $tzoff ||= '0000';
@@ -776,6 +799,15 @@ sub check_for_base64_enc_text {
   }
 
   return 0;
+}
+
+###########################################################################
+
+sub check_for_spam_phrases {
+  return Mail::SpamAssassin::PhraseFreqs::check_phrase_freqs (@_);
+}
+sub check_for_spam_phrases_scoring {
+  return Mail::SpamAssassin::PhraseFreqs::extra_score_phrase_freqs (@_);
 }
 
 ###########################################################################

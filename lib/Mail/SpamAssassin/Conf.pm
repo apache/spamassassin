@@ -111,6 +111,9 @@ sub new {
   $self->{more_spam_to} = { };
   $self->{all_spam_to} = { };
 
+  $self->{spamphrase} = { };
+  $self->{spamphrase_highest_score} = 0;
+
   # this will hold the database connection params
   $self->{user_scores_dsn} = '';
   $self->{user_scores_sql_username} = '';
@@ -623,6 +626,24 @@ The password for the database username, for the above DSN.
 =cut
     if(/^user[-_]scores[-_]sql[-_]password\s+(\S+)$/) {
       $self->{user_scores_sql_password} = $1; next;
+    }
+
+=item spamphrase score phrase ...
+
+A 2-word spam phrase, for the FREQ_SPAM_PHRASE test.
+
+=cut
+    if(/^spamphrase\s+(\d+)\s+(\S+ \S+)$/) {
+      $self->{spamphrase}->{$2} = $1; next;
+    }
+
+=item spamphrase-highest-score nnnnn
+
+The highest score of any of the spamphrases.  Used for scaling.
+
+=cut
+    if(/^spamphrase[-_]highest[-_]score\s+(\d+)$/) {
+      $self->{spamphrase_highest_score} = $1+0; next;
     }
 
 ###########################################################################

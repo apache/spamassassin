@@ -30,8 +30,10 @@ lib/Mail/SpamAssassin/MyMailAudit.pm
 lib/Mail/SpamAssassin/NoMailAudit.pm
 lib/Mail/SpamAssassin/PerMsgStatus.pm
 lib/Mail/SpamAssassin/PersistentAddrList.pm
+lib/Mail/SpamAssassin/PhraseFreqs.pm
 lib/Mail/SpamAssassin/Replier.pm
 lib/Mail/SpamAssassin/Reporter.pm
+lib/Mail/SpamAssassin/SMTP/SmartHost.pm
 masses/README
 masses/continual_evolve.sh
 masses/craig-evolve.cxx
@@ -44,11 +46,14 @@ masses/mk-baseline-results
 masses/rewrite-cf-with-new-scores
 masses/score-ranges-from-freqs
 masses/true-false-pos-neg-filter.pl
+procmailrc.example
 qmail/README
 qmail/qmail-scanner.patch
 rules/10_misc.cf
 rules/20_body_tests.cf
 rules/20_head_tests.cf
+rules/30_text_es.cf
+rules/40_spam_phrases.cf
 rules/50_scores.cf
 rules/local.cf
 rules/user_prefs.template
@@ -60,6 +65,9 @@ spamd/solaris-rc-script.sh
 spamd/spamc.c
 spamd/spamc.pod
 spamd/spamd.raw
+spamproxy/README
+spamproxy/README.SmartHost
+spamproxy/spamproxyd.raw
 sql/README
 sql/spamassassin.sql
 t/SATest.pm
@@ -86,9 +94,3 @@ t/stripmarkup.t
 t/test_dir
 tools/check_whitelist
 windows_install.pl
-lib/Mail/SpamAssassin/SMTP/SmartHost.pm
-spamproxy/README
-spamproxy/README.SmartHost
-spamproxy/spamproxyd.raw
-rules/30_text_es.cf
-procmailrc.example
