@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 #
 # <@LICENSE>
 # Copyright 2004 Apache Software Foundation
@@ -15,6 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # </@LICENSE>
+
+use strict;
 
 sub usage {
   die "
@@ -67,8 +69,8 @@ sub readrules {
     my @files = <$indir/[0-9]*.cf>;
     my $file;
     my $scores_mutable = 1;
-    %rulesfound = ();
-    %langs = ();
+    my %rulesfound = ();
+    my %langs = ();
     foreach $file (sort @files) {
       open (IN, "<$file");
       while (<IN>)
@@ -84,6 +86,7 @@ sub readrules {
 
         s/#.*$//g; s/^\s+//; s/\s+$//; next if /^$/;
 
+	# TODO: this could be overwriting stuff
         my $lang = '';
         if (s/^lang\s+(\S+)\s+//) {
           $lang = $1;
@@ -93,19 +96,20 @@ sub readrules {
           my $type = $1;
           my $name = $2;
 
-          my $issubrule = '0';
-          if ($name =~ /^__/) { $issubrule = '1'; }
-
-          $rules->{$1} ||= { };
+          $rules->{$name} ||= { };
           $rules->{$name}->{type} = $type;
           $rules->{$name}->{lang} = $lang;
-          $rules->{$name}->{issubrule} = $issubrule;
+          $rules->{$name}->{issubrule} = ($name =~ /^__/) ? '1' : '0';
           $rules->{$name}->{tflags} = '';
 
         } elsif (/^describe\s+(\S+)\s+(.+)$/) {
           $rules->{$1} ||= { };
-          $rules->{$1}->{describe} = $2;
-
+	  if ($lang) {
+	    $rules->{$1}->{describe} ||= $2;
+	  }
+	  else {
+	    $rules->{$1}->{describe} = $2;
+	  }
         } elsif (/^tflags\s+(\S+)\s+(.+)$/) {
           $rules->{$1} ||= { };
           $rules->{$1}->{tflags} = $2;
@@ -142,7 +146,7 @@ sub readrules {
 
       # if a rule didn't have a score specified, assume it's
       # mutable
-      $rules->{$name}->{mutable} = 1;
+      $rules->{$rule}->{mutable} = 1;
     }
   }
 }
