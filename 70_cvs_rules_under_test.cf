@@ -159,9 +159,6 @@ body T_REMOVE_REMOVAL_16	/remov(?:e|al).{0,16}remov(?:e|al)/i
 body T_REMOVE_REMOVAL_32	/remov(?:e|al).{0,32}remov(?:e|al)/i
 body T_REMOVE_REMOVAL_64	/remov(?:e|al).{0,64}remov(?:e|al)/i
 
-# bug 1421, possible replacement for USERPASS
-uri T_USERPASS                    m{https?://[^/\s]+?(?::[^/\s]+?)?\@}
-
 # bug 1438, possible replacement for the current HOTMAIL_FOOTER* rules
 # rename current HOTMAIL_FOOTER# to __HOTMAIL_FOOTER#, and change these too.
 meta T_ABUSED_HOTMAIL_FOOTER	HOTMAIL_FOOTER1 + HOTMAIL_FOOTER2 + HOTMAIL_FOOTER3 + HOTMAIL_FOOTER4 + HOTMAIL_FOOTER5 > 1

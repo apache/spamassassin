@@ -17,9 +17,6 @@ describe NUMERIC_HTTP_ADDR	Uses a numeric IP address in URL
 uri NORMAL_HTTP_TO_IP		/^https?\:\/\/(?:\S*\@)?\d+\.\d+\.\d+\.\d+/i
 describe NORMAL_HTTP_TO_IP	Uses a dotted-decimal IP address in URL
  	
-uri HTTP_USERNAME_USED		/^https?\:\/\/[^\s\/]+\@/is
-describe HTTP_USERNAME_USED	Uses a username in a URL
-
 uri HTTP_WITH_EMAIL_IN_URL	/^https?\:\/\/\S+=[-_\+a-z0-9\.]+\@[-_\+a-z0-9\.]+\.[-_\+a-z0-9]{2,3}(?:\&|\s)/
 describe HTTP_WITH_EMAIL_IN_URL	'remove' URL contains an email address
 
@@ -76,8 +73,8 @@ uri WEIRD_PORT			m{https?://[^/\s]+?:\d+(?<!:80)(?<!:443)(?<!:8080)(?:/|\s|$)}
 describe WEIRD_PORT		Uses non-standard port number for HTTP
 
 # looks for a username and (optional) password in an url
-uri USERPASS			m{https?://[^/\s]+?(?::.+?)?\@}
-describe USERPASS		URL contains username and (optional) password
+uri USERPASS                    m{https?://[^/\s]+?(?::[^/\s]+?)?\@}
+describe USERPASS               URL contains username and (optional) password
 
 uri WWW_AUTOREMOVE_COM		/autoremove\.com/i   
 describe WWW_AUTOREMOVE_COM	Frequent SPAM content
