@@ -117,9 +117,6 @@ meta T_NIGERIAN_BODY_4	( __NIGERIAN_BODY_1 + __NIGERIAN_BODY_2 + __NIGERIAN_BODY
 # describe T_FORGED_DEF_WHITELIST   Forged From: is in default white-list
 # tflags T_FORGED_DEF_WHITELIST     userconf
 
-# thanks to David Ritz for passing this on; ready for post-3.0.0
-header T_UNCLOSED_BRACKET   ALL =~ /\[\d+\r?\n/s
-
 # testing for Jeff, do not use!!!
 ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
 urirhsbl T_URIBL_MP fraud.rhs.mailpolice.com.   A
@@ -127,57 +124,6 @@ body     T_URIBL_MP eval:check_uridnsbl('URIBL_MP')
 describe T_URIBL_MP URI's domain appears in MailPolice fraud list
 tflags   T_URIBL_MP net
 endif	# Mail::SpamAssassin::Plugin::URIDNSBL
-
-# bug 3680: anchor tests
-body T_HTML_LINK_OPT		eval:html_text_match('anchor', '(?i)opt.?(?:out|in)')
-body T_HTML_LINK_OPT_IN		eval:html_text_match('anchor', '(?i)opt.?in')
-body T_HTML_LINK_OPT_OUT	eval:html_text_match('anchor', '(?i)opt.?out')
-
-# linked image in a short document
-body __HTML_LINK_IMAGE		eval:html_text_match('anchor', '<img>')
-body __HTML_LENGTH_1024		eval:html_eval('length', '< 1024')
-body __HTML_LENGTH_1536		eval:html_eval('length', '< 1536')
-body __HTML_LENGTH_2048		eval:html_eval('length', '< 2048')
-body __HTML_LENGTH_2650		eval:html_eval('length', '< 2650')
-body __HTML_LENGTH_3072		eval:html_eval('length', '< 3072')
-body __HTML_LENGTH_4096		eval:html_eval('length', '< 4096')
-meta T_HTML_LINK_IMAGE_512	__HTML_LENGTH_512 && __HTML_LINK_IMAGE
-meta T_HTML_LINK_IMAGE_1024	__HTML_LENGTH_1024 && __HTML_LINK_IMAGE
-meta T_HTML_LINK_IMAGE_1536	__HTML_LENGTH_1536 && __HTML_LINK_IMAGE
-meta T_HTML_LINK_IMAGE_2048	__HTML_LENGTH_2048 && __HTML_LINK_IMAGE
-meta T_HTML_LINK_IMAGE_2650	__HTML_LENGTH_2650 && __HTML_LINK_IMAGE
-meta T_HTML_LINK_IMAGE_3072	__HTML_LENGTH_3072 && __HTML_LINK_IMAGE
-meta T_HTML_LINK_IMAGE_4096	__HTML_LENGTH_4096 && __HTML_LINK_IMAGE
-
-# try using ranges
-body __HTML_LENGTH_0000_0512	eval:html_range('length', '0', '512')
-body __HTML_LENGTH_0000_1024	eval:html_range('length', '0', '1024')
-body __HTML_LENGTH_0512_1024	eval:html_range('length', '512', '1024')
-body __HTML_LENGTH_1024_1536	eval:html_range('length', '1024', '1536')
-body __HTML_LENGTH_1024_2048	eval:html_range('length', '1024', '2048')
-body __HTML_LENGTH_1536_2048	eval:html_range('length', '1536', '2048')
-
-# two
-meta T_HTML_LINK_IMAGE_ONE	__HTML_LENGTH_0000_1024 && __HTML_LINK_IMAGE
-meta T_HTML_LINK_IMAGE_TWO	__HTML_LENGTH_1024_2048 && __HTML_LINK_IMAGE
-
-# three
-meta T_HTML_LINK_IMAGE_A	__HTML_LENGTH_0000_0512 && __HTML_LINK_IMAGE
-meta T_HTML_LINK_IMAGE_B	__HTML_LENGTH_0512_1024 && __HTML_LINK_IMAGE
-meta T_HTML_LINK_IMAGE_C	__HTML_LENGTH_1024_2048 && __HTML_LINK_IMAGE
-
-# four
-meta T_HTML_LINK_IMAGE_0	__HTML_LENGTH_0000_0512 && __HTML_LINK_IMAGE
-meta T_HTML_LINK_IMAGE_1	__HTML_LENGTH_0512_1024 && __HTML_LINK_IMAGE
-meta T_HTML_LINK_IMAGE_2	__HTML_LENGTH_1024_1536 && __HTML_LINK_IMAGE
-meta T_HTML_LINK_IMAGE_3	__HTML_LENGTH_1536_2048 && __HTML_LINK_IMAGE
-
-# try allowing uppercase for the first letter to supplement LONGWORDS
-# (probably not worth it)
-body __T_LONGWORDS_A	/\b(?:[A-Za-z][a-z]{7,}\s+){6}/
-body __T_LONGWORDS_B	/\b(?:[A-Za-z][a-z]{5,}\s+){9}/
-body __T_LONGWORDS_C	/\b(?:[A-Za-z][a-z]{4,}\s+){10}/
-meta T_LONGWORDS	(__T_LONGWORDS_A + __T_LONGWORDS_B + __T_LONGWORDS_C > 2 && !LONGWORDS)
 
 ##########################################################################
 # bug 2843
