@@ -40,6 +40,10 @@ loadplugin Mail::SpamAssassin::Plugin::Pyzor
 #
 loadplugin Mail::SpamAssassin::Plugin::Razor2
 
+# SpamCop - perform SpamCop message reporting.
+#
+loadplugin Mail::SpamAssassin::Plugin::SpamCop
+
 # DomainKeys - perform DomainKeys verification.
 #
 #loadplugin Mail::SpamAssassin::Plugin::DomainKeys

@@ -258,7 +258,7 @@ sub is_dccproc_available {
   # remember any found dccproc
   $self->{main}->{conf}->{dcc_path} = $dccproc;
 
-  dbg("dcc: dccifd is available: " . $self->{main}->{conf}->{dcc_path});
+  dbg("dcc: dccproc is available: " . $self->{main}->{conf}->{dcc_path});
   return 1;
 }
 
@@ -542,3 +542,79 @@ sub dccproc_lookup {
 
   return 0;
 }
+
+# only supports dccproc right now
+sub plugin_report {
+  my ($self, $options) = @_;
+
+  return unless $self->{dcc_available};
+  return unless $self->{main}->{conf}->{use_dcc};
+
+  if (!$self->{options}->{dont_report_to_dcc} && $self->is_dccproc_available())
+  {
+    # use temporary file: open2() is unreliable due to buffering under spamd
+    my $tmpf = $options->{report}->create_fulltext_tmpfile($options->{text});
+    if ($self->dcc_report($options, $tmpf)) {
+      $options->{report}->{report_available} = 1;
+      dbg("reporter: spam reported to DCC");
+      $options->{report}->{report_return} = 1;
+    }
+    else {
+      dbg("reporter: could not report spam to DCC");
+    }
+    $options->{report}->delete_fulltext_tmpfile();
+  }
+}
+
+sub dcc_report {
+  my ($self, $options, $tmpf) = @_;
+  my $timeout = $options->{report}->{conf}->{dcc_timeout};
+
+  $options->{report}->enter_helper_run_mode();
+
+  my $oldalarm = 0;
+
+  eval {
+    local $SIG{ALRM} = sub { die "__alarm__\n" };
+    local $SIG{PIPE} = sub { die "__brokenpipe__\n" };
+
+    $oldalarm = alarm $timeout;
+
+    # note: not really tainted, this came from system configuration file
+    my $path = Mail::SpamAssassin::Util::untaint_file_path($options->{report}->{conf}->{dcc_path});
+
+    my $opts = $options->{report}->{conf}->{dcc_options} || '';
+
+    my $pid = Mail::SpamAssassin::Util::helper_app_pipe_open(*DCC,
+	$tmpf, 1, $path, "-t", "many", split(' ', $opts));
+    $pid or die "$!\n";
+
+    my @ignored = <DCC>;
+    $options->{report}->close_pipe_fh(\*DCC);
+
+    waitpid ($pid, 0);
+    alarm $oldalarm;
+  };
+
+  my $err = $@;
+
+  # do not call alarm $oldalarm here, that *may* have already taken place
+  $options->{report}->leave_helper_run_mode();
+
+  if ($err) {
+    alarm $oldalarm;  # reinstate the one we missed
+    chomp $err;
+    if ($err =~ /^__alarm__$/) {
+      dbg("reporter: DCC report timed out after $timeout seconds");
+    } elsif ($err =~ /^__brokenpipe__$/) {
+      dbg("reporter: DCC report failed: broken pipe");
+    } else {
+      warn("reporter: DCC report failed: $err\n");
+    }
+    return 0;
+  }
+
+  return 1;
+}
+
+1;
