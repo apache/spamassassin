@@ -538,6 +538,7 @@ while (1) {
       my $name = gethostbyaddr($ip, AF_INET);
 
       $ip = inet_ntoa($ip);
+      $name ||= $ip;
       if (ip_is_allowed($ip)) {
         logmsg("connection from $name [$ip] at port $port");
       } else {
