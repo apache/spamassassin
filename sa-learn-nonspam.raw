@@ -49,17 +49,17 @@ B<sa-learn-nonspam> [options] I<mailbox_or_folder>
 
 Options:
 
--f folders, --folders=folders     List the folders to check
---mh                              Check an MH directory
--s, --single                      Check a single message
---showdots                        Show progress using dots
--C file, --config-file=file       Set configuration file
--p prefs, --prefs-file=file       Set user preferences file
--a, --auto-whitelist              Use auto-whitelists
---whitelist-factory               Select whitelist factory
--D, --debug-level                 Print debugging messages
--V, --version                     Print version
--h, --help                        Print usage message
+ -f folders, --folders=folders     List the folders to check
+ --mh                              Check an MH directory
+ -s, --single                      Check a single message
+ --showdots                        Show progress using dots
+ -C file, --config-file=file       Set configuration file
+ -p prefs, --prefs-file=file       Set user preferences file
+ -a, --auto-whitelist              Use auto-whitelists
+ --whitelist-factory               Select whitelist factory
+ -D, --debug-level                 Print debugging messages
+ -V, --version                     Print version
+ -h, --help                        Print usage message
 
 =head1 DESCRIPTION
 
@@ -73,33 +73,124 @@ non-spam when it is spam or vice versa, simply rescan it correctly and the
 mistake will be corrected.
 
 SpamAssassin remembers which mail messages it's learnt already, and will not
-re-learn those messages again, unless you use the C<sa-forget> command.
+re-learn those messages again, unless you use the B<sa-forget> command.
 
 (Note: this command is not present in a released version of SpamAssassin yet.)
 
+=head1 INTRODUCTION TO BAYESIAN FILTERING
+
+(Thanks to Michael Bell for this section!)
+
+For a more lengthy description of how this works, go to
+http:///www.paulgraham.com and see "A Plan for Spam". It's reasonably
+readable, even if statistics make me break out in hives.
+
+The short semi-inaccurate version: Given training, a spam heuristics engine
+can take the most "spammy" and "nonspammy" words and apply probablistic
+analysis. Furthermore, once given a basis for the analysis, the engine can
+continue to learn iteratively by applying both it's non-Bayesian and Bayesian
+ruleset together to create evolving "intelligence".
+
+SpamAssassin 2.50 supports Bayesian spam analysis, in the form of the BAYES
+rules. This is a new feature, quite powerful, and disabled by default.
+
+The pros of Bayesian spam analysis:
+
+=over 4
+
+=item Can greatly reduce false positives and false negatives.
+
+It learns from your mail, so it's tailored to your unique e-mail flow.
+
+=item Once it starts learning, it can continue to learn from SpamAssassin
+and improve over time.
+
+A planned feature is to add 'auto-learning' to SpamAssassin, so that
+it can reliably self-train.  It's not present yet, though.
+
+=back
+
+And the cons:
+
+=over 4
+
+=item It requires a fair amount of work to get running.
+
+A lot of hand-sorting of mail is crucial.
+
+=item It's hard to explain why a message is or isn't marked as spam.
+
+By which I mean: a straightforward rule, that matches, say, "VIAGRA" is
+easy to understand. If it generates a false positive or false negative,
+it's fairly easy to understand why.
+
+With Bayesian analysis, it's all probabilities - "because the past says
+it's likely as this falls into a probablistic distribution common to past
+spam in your systems". Tell that to your users!  Tell that to the client
+when he asks "what can I do to change this". (By the way, the answer in
+this case is "use whitelisting".)
+
+=item It will take disk space and memory.
+
+The databases it maintains take quite a lot of resources to store and use.
+
+=back
+
+=head1 GETTING STARTED
+
+Still interested? Ok, here's the guidelines for getting this working.
+
+First a high-level overview:
+
+=over 4
+
+=item Build a significant sample of both spam and non-spam.
+
+I suggest several thousand of each, placed in SPAM and NONSPAM
+directories.  Yes, you MUST hand-sort this - otherwise the results won't
+be much better than SpamAssassin on its own. Verify the
+spamminess/nonspammiess of EVERY message. I urge you to avoid using a
+publicly available corpus (sample) - this must be taken from YOUR mail
+server, if it's to be statistically useful. Otherwise, the results may be
+pretty skewed.
+
+=item Use the SpamAssassin tools (more below) B<sa-learn-spam> and
+B<sa-learn-nonspam> to teach SpamAssassin about these samples.
+
+Let SpamAssassin proceed, learning stuff. When it find spam and non-spam
+it will add the "interesting tokens" to the database.
+
+=item If you need SpamAssassin to forget about specific messages, use
+B<sa-forget>.
+
+This can be applied to either spam or non-spam that has run through the
+B<sa-learn> processes. It's a bit of a hammer, really, lowering the
+weighting of the specific tokens in that message (only if that message has
+been processed before).
+
 =head1 EFFECTIVE TRAINING
 
-Learning filters (like the BAYES rules in SpamAssassin) require training to be
-effective.  If you don't train them, they won't work.  In addition, you need to
-train them with new messages regularly to keep them up-to-date, or their data
-will become stale and impact accuracy.
+Learning filters require training to be effective.  If you don't train
+them, they won't work.  In addition, you need to train them with new
+messages regularly to keep them up-to-date, or their data will become
+stale and impact accuracy.
 
-You need to train with both spam I<and> non-spam mails.  One type of mail alone
-will not have any effect.
+You need to train with both spam I<and> non-spam mails.  One type of mail
+alone will not have any effect.
 
-Note that if your mail folders contain things like forwarded spam, discussions
-of spam-catching rules, etc., this will cause trouble.  You should avoid
-scanning those messages if possible.  (An easy way to do this is to move them
-aside, into a folder which is not scanned.)
+Note that if your mail folders contain things like forwarded spam,
+discussions of spam-catching rules, etc., this will cause trouble.  You
+should avoid scanning those messages if possible.  (An easy way to do this
+is to move them aside, into a folder which is not scanned.)
 
-Another thing to be aware of, is that typically you should aim to train with at
-least 1000 messages of spam, and 1000 non-spam messages, if possible.  More is
-better, but anything over about 5000 messages does not improve accuracy
-significantly in our tests.
+Another thing to be aware of, is that typically you should aim to train
+with at least 1000 messages of spam, and 1000 non-spam messages, if
+possible.  More is better, but anything over about 5000 messages does not
+improve accuracy significantly in our tests.
 
-It's also worth noting that training with a very small quantity of non-spam,
-will produce atrocious results.  You should aim to train with at least the same
-amount, or more, non-spam data than spam.
+It's also worth noting that training with a very very small quantity of
+non-spam, will produce atrocious results.  You should aim to train with at
+least the same amount (or more if possible!) of non-spam data than spam.
 
 =head1 OPTIONS
 
@@ -114,7 +205,7 @@ as appropriate.
 
 Print help message and exit.
 
-=item B<-C> I<config>, B<--config-file>=I<config>, B<-c> I<config> (deprecated)
+=item B<-C> I<config>, B<--config-file>=I<config>
 
 Read configuration from I<config>.
 
@@ -134,9 +225,9 @@ Select alternative whitelist factory.
 
 =head1 INSTALLATION
 
-The B<sa-learn-nonspam> command is part of the B<Mail::SpamAssassin> Perl module.
-Install this as a normal Perl module, using C<perl -MCPAN -e shell>, or by
-hand.
+The B<sa-learn-nonspam> command is part of the B<Mail::SpamAssassin> Perl
+module.  Install this as a normal Perl module, using C<perl -MCPAN -e shell>,
+or by hand.
 
 =head1 ENVIRONMENT
 
@@ -150,6 +241,7 @@ spamassassin(1)
 sa-learn-spam(1)
 sa-learn-nonspam(1)
 sa-forget(1)
+http:///www.paulgraham.com, "A Plan For Spam"
 
 =head1 AUTHOR
 

@@ -49,24 +49,25 @@ B<sa-forget> [options] I<mailbox_or_folder>
 
 Options:
 
--f folders, --folders=folders     List the folders to check
---mh                              Check an MH directory
--s, --single                      Check a single message
---showdots                        Show progress using dots
--C file, --config-file=file       Set configuration file
--p prefs, --prefs-file=file       Set user preferences file
--a, --auto-whitelist              Use auto-whitelists
---whitelist-factory               Select whitelist factory
--D, --debug-level                 Print debugging messages
--V, --version                     Print version
--h, --help                        Print usage message
+ -f folders, --folders=folders     List the folders to check
+ --mh                              Check an MH directory
+ -s, --single                      Check a single message
+ --showdots                        Show progress using dots
+ -C file, --config-file=file       Set configuration file
+ -p prefs, --prefs-file=file       Set user preferences file
+ -a, --auto-whitelist              Use auto-whitelists
+ --whitelist-factory               Select whitelist factory
+ -D, --debug-level                 Print debugging messages
+ -V, --version                     Print version
+ -h, --help                        Print usage message
 
 =head1 DESCRIPTION
 
 Given a set of mail messages which SpamAssassin has previously 'learnt' from,
 this command will tell it to 'forget' about those mails.
 
-See B<sa-learn-nonspam> for more details.
+See B<sa-learn-nonspam> for more details, and an introduction to the use of
+Bayesian filtering in SpamAssassin.
 
 =head1 OPTIONS
 
@@ -81,7 +82,7 @@ as appropriate.
 
 Print help message and exit.
 
-=item B<-C> I<config>, B<--config-file>=I<config>, B<-c> I<config> (deprecated)
+=item B<-C> I<config>, B<--config-file>=I<config>
 
 Read configuration from I<config>.
 
