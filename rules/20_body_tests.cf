@@ -1063,7 +1063,7 @@ describe PRIZE			Talks about prizes
 body GETAWAY		        /\bweekend getaway/i
 describe GETAWAY		Weekend Getaway
 
-body HGH			/human growth hormone|(?-i:HGH)|H.G.H\b/i
+body HGH			/\b(?:human growth hormone|(?-i:HGH)|H.G.H)\b/i
 describe HGH			Human Growth Hormone
 
 body WEALTH		        /\bachieve .{0,15}wealth\b/i
@@ -1084,7 +1084,7 @@ describe GET_PAID		Get Paid
 body BEEN_TURNED_DOWN	        /\bbeen turned down\b/i
 describe BEEN_TURNED_DOWN	Have you been turned down?
 
-body ONE_TIME			/one.time (?:charge|investment|offer)/i
+body ONE_TIME			/\bone.time (?:charge|investment|offer)/i
 describe ONE_TIME		One Time Rip Off
 
 body COMPETE		        /\bcompete for your business\b/i
