@@ -25,9 +25,12 @@
 # Speakers of Asian languages, like Chinese, Japanese and Korean, will almost
 # definitely want to uncomment the following lines.  They will switch off some
 # rules that detect 8-bit characters, which commonly trigger on mails using CJK
-# character sets. 
+# character sets, or that assume a western-style charset is in use. 
 # 
 # score HEADER_8BITS		0
 # score HTML_COMMENT_8BITS	0
 # score SUBJ_FULL_OF_8BITS	0
+# score UPPERCASE_25_50		0
+# score UPPERCASE_50_75		0
+# score UPPERCASE_75_100	0
 
