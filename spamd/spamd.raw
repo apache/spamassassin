@@ -401,7 +401,7 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
             }
             else
             {
-                $response_header .= "Spam: False ; $msg_score / $msg_threshold";
+                $response_header .= "Spam: $response_spam_status ; $msg_score / $msg_threshold";
 	    }
             print $response_header, "\r\n\r\n";
 	    print $status->get_names_of_tests_hit,"\r\n" if ($method eq "SYMBOLS");

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-cd /home/jm/ftp/240/spamassassin/masses
+cd /home/jm/ftp/b240/spamassassin/masses
 
 mv spam.local alltime_spam.local nonspam.local logs/old
 
@@ -11,7 +11,7 @@ date
 ./local-scripts-jm/mass-check-MH-spool ; sh commands.sh
 
 date
-for f in /local/mail-archives/recent/nonspam/* ; do
+for f in /local/cor/recent/nonspam/* ; do
   echo Checking $f: ; ./mass-check --loghits --nokillfile -c ../rules $f >> nonspam.local
 done
 
@@ -19,15 +19,15 @@ done
 # recent spam data
 
 date
-for f in /local/mail-archives/recent/spam/* ; do
+for f in /local/cor/recent/spam/* ; do
   echo Checking $f: ; ./mass-check --loghits -c ../rules $f >> spam.local
 done
 
 # trap data, 27 June to 17 July 2002
 # too big. skip it for now!
-#./mass-check --loghits -c ../rules /local/mail-archives/recent/spamtrap/20020717/mbox >> spam.local
+#./mass-check --loghits -c ../rules /local/cor/recent/spamtrap/20020717/mbox >> spam.local
 date
-./mass-check --loghits -c ../rules /local/mail-archives/recent/spamtrap/20020717/nonspam.mbox >> nonspam.local
+./mass-check --loghits -c ../rules /local/cor/recent/spamtrap/20020717/nonspam.mbox >> nonspam.local
 
 # ---------------------------------------------------------------------------
 # profile a sample non-spam file (don't keep the output though, sometimes
@@ -35,7 +35,7 @@ date
 
 date
 perl -d:DProf ./mass-check -c ../rules \
-        /local/mail-archives/old/nonspam/crackmice.200106.gz > /dev/null
+        /local/cor/old/nonspam/crackmice.200106.gz > /dev/null
 dprofpp -O 100 > ./dprof.nonspam
 mv tmon.out ./tmon.nonspam
 
@@ -44,7 +44,7 @@ mv tmon.out ./tmon.nonspam
 # recent and all-time sets.
 
 date
-for f in /local/mail-archives/old/nonspam/* /local/mail-archives/recent/nonspam/*
+for f in /local/cor/old/nonspam/* /local/cor/recent/nonspam/*
 do
   echo Checking $f: ; ./mass-check --loghits -c ../rules $f >> nonspam.local
 done
@@ -56,7 +56,7 @@ done
 
 date
 perl -d:DProf ./mass-check -c ../rules \
-        /local/mail-archives/recent/spam/mbox.1.gz > /dev/null
+        /local/cor/recent/spam/mbox.1.gz > /dev/null
 dprofpp -O 100 > ./dprof.spam
 mv tmon.out ./tmon.spam
 
@@ -67,7 +67,7 @@ mv tmon.out ./tmon.spam
 date
 cp spam.local alltime_spam.local
 # Aug 15 2002 jm: off for now
-#for f in /local/mail-archives/old/spam/* ; do
+#for f in /local/cor/old/spam/* ; do
   #echo Checking $f: ; ./mass-check -c ../rules $f >> alltime_spam.local
 #done
 
