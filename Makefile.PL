@@ -46,7 +46,6 @@ WriteMakefile(
 
     'PREREQ_PM' => {
                         'File::Copy' => 0,
-                        'Mail::Audit' => 0,
                         'Net::DNS' => 0,
                   },
 
@@ -143,9 +142,9 @@ text_html_doc: doc/.made
 doc/.made: doc $(MAN1PODS) $(MAN3PODS)
 	for f in $(MAN1PODS) $(MAN3PODS) $(EXTRAPODS) ; do \
 	      pod2html $$f > doc/`echo $$f | perl -pe \
-	  	's/(lib|spamd)\///; s/\//::/g; s/\.(pod|pm)//;'`.html ; \
+	  	's/(lib|spamd)\///; s/\//_/g; s/\.(pod|pm)//;'`.html ; \
 	      pod2text $$f > doc/`echo $$f | perl -pe \
-	  	's/(lib|spamd)\///; s/\//::/g; s/\.(pod|pm)//;'`.txt ; \
+	  	's/(lib|spamd)\///; s/\//_/g; s/\.(pod|pm)//;'`.txt ; \
 	done
 	touch doc/.made
 
