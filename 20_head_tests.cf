@@ -29,6 +29,14 @@ describe TO_MALFORMED		To: has a malformed address
 header TO_LOCALPART_EQ_REAL     To =~ /^\s*(\"?)([\w%\+\-=_\.]+)\1\s*<\2\@[\w%\+\-=_\.]+>/i
 describe TO_LOCALPART_EQ_REAL   To: repeats local-part as real name
 
+# You don't want to let this match "'user@foo.bar'" <user@foo.bar>
+# (note single quotes) because some legitimate mailers seem to do that.
+header TO_ADDRESS_EQ_REAL	To =~ /^\s*"([^"@]+\@[^"@]+)"\s+<\1>\s*$/i
+describe TO_ADDRESS_EQ_REAL	To: repeats address as real name
+
+header FROM_ADDRESS_EQ_REAL	From =~ /^\s*"([^"@]+\@[^"@]+)"\s+<\1>\s*$/i
+describe FROM_ADDRESS_EQ_REAL	From: repeats address as real name
+
 header FROM_MALFORMED		From !~ /(?:\"[^\"]+\"|\S+)\@\S+\.\S+|<\S+(\!\S+){1,}>/ [if-unset: unset@unset.unset]
 describe FROM_MALFORMED		From: has a malformed address
 
@@ -290,6 +298,9 @@ describe FUDGE_MULTIHOP_RELAY	Do not double penalize if an IP is a multihop and 
 # list software) and especially don't add From:, Reply-To:, Date:, Message-ID:
 header FORGED_RCVD_FOUND	ALL =~ /\n(?:To|Importance|Content-Transfer-Encoding|Content-Type|Subject|X-Mailer|X-MSMail-Priority|X-Sender):.*\nReceived: /s
 describe FORGED_RCVD_FOUND	Possibly-forged 'Received:' header found
+
+header FORGED_RCVD_TRAIL	eval:check_for_forged_received_trail()
+describe FORGED_RCVD_TRAIL	trail of Received: headers seems to be forged
 
 header YR_MEMBERSHIP_EXCH	Subject =~ /Your Membership Exchange/
 describe YR_MEMBERSHIP_EXCH	Subject contains 'Your Membership Exchange'
