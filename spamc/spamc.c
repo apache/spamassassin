@@ -39,6 +39,13 @@
 #include <arpa/inet.h>
 #endif
 
+#ifdef SPAMC_SSL
+#include <openssl/crypto.h>
+#ifndef OPENSSL_VERSION_TEXT
+#define OPENSSL_VERSION_TEXT "OpenSSL"
+#endif
+#endif
+
 #ifdef HAVE_SYSEXITS_H
 #include <sysexits.h>
 #endif
@@ -94,13 +101,16 @@ static int timeout = 600;
 void
 print_version(void)
 {
-    fprintf(stderr, "%s version %s\n", "SpamAssassin Client", VERSION_STRING);
+    printf("%s version %s\n", "SpamAssassin Client", VERSION_STRING);
+    #ifdef SPAMC_SSL
+    printf("  compiled with SSL support (%s)\n", OPENSSL_VERSION_TEXT);
+    #endif
 }
 
 static void
 usg(char *str)
 {
-  fprintf(stderr, "%s", str);
+  printf("%s", str);
 }
 
 void
