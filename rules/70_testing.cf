@@ -166,39 +166,25 @@ header T_MANY_MX_6 From:addr =~ /\@mx\d+\..{1,30}\./i
 header T_MANY_MX_7 From:addr =~ /\@\w\d+\..{1,30}\./i
 header T_MANY_MX_8 From:addr =~ /\@\w\d+/i
 
-# fix malformed rules "broken" by change in HTML whitespace processing
-body T_DEAR_FRIEND_1	/^\s*Dear Friend\b/i
-body T_DEAR_FRIEND_2	/^\s?Dear Friend\b/i
-rawbody T_DEAR_FRIEND_3	/^Dear Friend\b/i
-rawbody T_DEAR_FRIEND_4	/^\s*Dear Friend\b/i
-rawbody T_DEAR_FRIEND_5	/^\s?Dear Friend\b/i
-
-body T_OBSCURED_EMAIL_1		/^\s*\w+\^\S+\(\w{2,3}\b/m
-body T_OBSCURED_EMAIL_2		/^\s?\w+\^\S+\(\w{2,3}\b/m
+# hmmm... body doesn't seem to work for these
 rawbody T_OBSCURED_EMAIL_3	/^\w+\^\S+\(\w{2,3}\b/m
 rawbody T_OBSCURED_EMAIL_4	/^\s*\w+\^\S+\(\w{2,3}\b/m
 rawbody T_OBSCURED_EMAIL_5	/^\s?\w+\^\S+\(\w{2,3}\b/m
+# so try looking anywhere on the line
+body T_OBSCURED_EMAIL_6		/\w+\^\S+\(\w{2,3}\b/m
+body T_OBSCURED_EMAIL_7		/\w+\^\S+\(\w{2,4}\b/m
+rawbody T_OBSCURED_EMAIL_8	/\w+\^\S+\(\w{2,3}\b/m
+rawbody T_OBSCURED_EMAIL_9	/\w+\^\S+\(\w{2,4}\b/m
+# test these for completeness
+uri T_OBSCURED_EMAIL_10		/^\w+\^\S+\(\w{2,3}\b/m
+uri T_OBSCURED_EMAIL_11		/^\s*\w+\^\S+\(\w{2,3}\b/m
+uri T_OBSCURED_EMAIL_12		/^\s?\w+\^\S+\(\w{2,3}\b/m
 
-body T_TRACKER_ID_1	/^\s*[a-z0-9]{6,24}[-_a-z0-9]{12,36}[a-z0-9]{6,24}\s*\z/is
-body T_TRACKER_ID_2	/^\s?[a-z0-9]{6,24}[-_a-z0-9]{12,36}[a-z0-9]{6,24}\s*\z/is
-rawbody T_TRACKER_ID_3	/^[a-z0-9]{6,24}[-_a-z0-9]{12,36}[a-z0-9]{6,24}\s*\z/is
-rawbody T_TRACKER_ID_4	/^\s*[a-z0-9]{6,24}[-_a-z0-9]{12,36}[a-z0-9]{6,24}\s*\z/is
-rawbody T_TRACKER_ID_5	/^\s?[a-z0-9]{6,24}[-_a-z0-9]{12,36}[a-z0-9]{6,24}\s*\z/is
-
-# tweak rule to potentially improve RANK
-body T_DOMAIN_RATIO_20	eval:check_domain_ratio('0.020')
-body T_DOMAIN_RATIO_21	eval:check_domain_ratio('0.021')
-body T_DOMAIN_RATIO_22	eval:check_domain_ratio('0.022')
-body T_DOMAIN_RATIO_23	eval:check_domain_ratio('0.023')
-body T_DOMAIN_RATIO_24	eval:check_domain_ratio('0.024')
-body T_DOMAIN_RATIO_25	eval:check_domain_ratio('0.025')
-#
-body T_DOMAIN_RATIO_27	eval:check_domain_ratio('0.027')
-body T_DOMAIN_RATIO_28	eval:check_domain_ratio('0.028')
-body T_DOMAIN_RATIO_29	eval:check_domain_ratio('0.029')
-body T_DOMAIN_RATIO_30	eval:check_domain_ratio('0.030')
-body T_DOMAIN_RATIO_31	eval:check_domain_ratio('0.031')
-body T_DOMAIN_RATIO_32	eval:check_domain_ratio('0.032')
+# another spin
+body T_TRACKER_ID_6	/[a-z0-9]{6,24}[-_a-z0-9]{12,36}[a-z0-9]{6,24}\s*\z/is
+body T_TRACKER_ID_7	/\b[a-z0-9]{6,24}[-_a-z0-9]{12,36}[a-z0-9]{6,24}\s*\z/is
+rawbody T_TRACKER_ID_8	/[a-z0-9]{6,24}[-_a-z0-9]{12,36}[a-z0-9]{6,24}\s*\z/is
+rawbody T_TRACKER_ID_9	/\b[a-z0-9]{6,24}[-_a-z0-9]{12,36}[a-z0-9]{6,24}\s*\z/is
 
 # Bug 3349, rule written by yackley
 header T_FAKE_MS_XMIME	X-MimeOLE =~ /mircosoft/i
@@ -293,3 +279,12 @@ describe  T_CT_BOUND_DDNUM	  Content-Type header has boundary in ratware form
 header   T_MSGID_CAPS  Message-ID =~ /<[A-Z]+\@[a-z]+\.[a-z]{2,4}>/
 header   T_MSGID_CAPS2  Message-ID =~ /<[A-Z]+\@(?!mailcity\.com)[a-z]+\.[a-z]{2,4}>/
 header   T_MSGID_CAPS3		Message-ID =~ /^\s*<?[A-Z]+\@(?!mailcity\.com)/
+
+# bug 3403: not decoded, as we're explicitly searching for the encoded
+# version catches all versions of IP obfuscation mentioned here:
+# http://www.pc-help.org/obscure.htm
+uri T_HEXOCTDWORD_U	m{(?:h|%68|%48)(?:t|%74|%54)(?:t|%74|%54)(?:p|%70|%50)(?:s|%73|%53)?(?::|%3a)(?:/|%2f){0,2}(?:(?:(?!\@|%40|\?).)+(?:\@|%40))*(?!123\.456\.789\.(?:999|012)|(?:2[0-4][0-9]|25[0-5]|[01]?[0-9][0-9]?)(?:$|\.(?:2[0-4][0-9]|25[0-5]|[01]?[0-9][0-9]?)(?:$|\.(?:2[0-4][0-9]|25[0-5]|[01]?[0-9][0-9]?)(?:$|\.(?:2[0-4][0-9]|25[0-5]|[01]?[0-9][0-9]?)))))(?:(?:%3[0-9]|\d)+|(?:0|%30)(?:x|%[57]8)(?:%(?:3[0-9]|[46][1-6])|[0-9A-Fa-f])+|(?:0|%30)(?:%3[0-9]|[0-7])+)(?:(?:\.|%2e)(?:%3[0-9]|\d)+|(?:0|%30)(?:x|%[57]8)(?:%(?:3[0-9]|[46][1-6])|[0-9A-Fa-f])+|(?:0|%30)(?:%3[0-9]|[0-7])+){0,3}(?:[:\?;&/\\]|%3[abABfF]|%2[6fF]|%5[cC]|$)}i
+describe T_HEXOCTDWORD_U	Uses an encoded IP address
+
+rawbody T_HEXOCTDWORD_R	m{(?:h|%68|%48)(?:t|%74|%54)(?:t|%74|%54)(?:p|%70|%50)(?:s|%73|%53)?(?::|%3a)(?:/|%2f){0,2}(?:(?:(?!\@|%40|\?).)+(?:\@|%40))*(?!123\.456\.789\.(?:999|012)|(?:2[0-4][0-9]|25[0-5]|[01]?[0-9][0-9]?)(?:$|\.(?:2[0-4][0-9]|25[0-5]|[01]?[0-9][0-9]?)(?:$|\.(?:2[0-4][0-9]|25[0-5]|[01]?[0-9][0-9]?)(?:$|\.(?:2[0-4][0-9]|25[0-5]|[01]?[0-9][0-9]?)))))(?:(?:%3[0-9]|\d)+|(?:0|%30)(?:x|%[57]8)(?:%(?:3[0-9]|[46][1-6])|[0-9A-Fa-f])+|(?:0|%30)(?:%3[0-9]|[0-7])+)(?:(?:\.|%2e)(?:%3[0-9]|\d)+|(?:0|%30)(?:x|%[57]8)(?:%(?:3[0-9]|[46][1-6])|[0-9A-Fa-f])+|(?:0|%30)(?:%3[0-9]|[0-7])+){0,3}(?:[:\?;&/\\]|%3[abABfF]|%2[6fF]|%5[cC]|$)}i
+describe T_HEXOCTDWORD_R	Uses an encoded IP address
