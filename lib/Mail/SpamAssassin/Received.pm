@@ -1,4 +1,4 @@
-# $Id: Received.pm,v 1.18 2003/06/07 23:37:26 jmason Exp $
+# $Id: Received.pm,v 1.19 2003/06/07 23:45:34 jmason Exp $
 
 # ---------------------------------------------------------------------------
 
@@ -83,10 +83,12 @@ sub parse_received_headers {
   my $first_by;
   my $in_trusted = 1;
   my $did_user_specify_trust = ($trusted->get_num_nets() > 0);
+  my $ip_in_rsvd = \$Mail::SpamAssassin::Dns::IP_IN_RESERVED_RANGE;
 
   while (defined ($relay = shift @{$self->{relays}}))
   {
-    if ($in_trusted && !$trusted->contains_ip ($relay->{ip})) {
+    if ($in_trusted && $did_user_specify_trust && !$trusted->contains_ip ($relay->{ip}))
+    {
       $in_trusted = 0;		# we're in deep water now
     }
 
@@ -130,7 +132,7 @@ sub parse_received_headers {
 
       # if the 'from' IP addr is in a reserved net range, it's not on
       # the public internet.
-      if ($relay->{ip} =~ /^${Mail::SpamAssassin::Dns::IP_IN_RESERVED_RANGE}/) {
+      if ($relay->{ip} =~ /^${ip_in_rsvd}/o) {
 	dbg ("received-header: 'from' ".$relay->{ip}." has reserved IP");
 	$inferred_as_trusted = 1;
       }
@@ -148,7 +150,7 @@ sub parse_received_headers {
       else {
 	my @ips = $self->lookup_all_ips ($relay->{by});
 	foreach my $ip (@ips) {
-	  if ($ip =~ /^${Mail::SpamAssassin::Dns::IP_IN_RESERVED_RANGE}/) {
+	  if ($ip =~ /^${ip_in_rsvd}/o) {
 	    dbg ("received-header: 'by' ".$relay->{by}." has reserved IP $ip");
 	    $inferred_as_trusted = 1;
 	  }
