@@ -67,29 +67,10 @@ sub parse_received_headers {
 
   $self->{relays} = [ ];
 
-  my $hdrs = $msg->get_header('Received');
-  $hdrs ||= '';
-
-  $hdrs =~ s/\n[ \t]+/ /gs;
-
-  # urgh, droppings. TODO: move into loop below?
-  $hdrs =~ s/\n
-	  Received:\ from\ \S*hotmail\.com\ \(\[${Mail::SpamAssassin::IP_ADDRESS}\]\)\ 
-	      by\ \S+\.hotmail.com with\ Microsoft\ SMTPSVC\(5\.0\.\S+\);
-	      \ \S+,\ \S+\ \S+\ \d{4}\ \d{2}:\d{2}:\d{2}\ \S+\n
-	      /\n/gx;
-
-  $hdrs =~ s/\n
-	  Received:\ from\ mail\ pickup\ service\ by\ hotmail\.com
-	      \ with\ Microsoft\ SMTPSVC;
-	      \ \S+,\ \S+\ \S+\ \d{4}\ \d{2}:\d{2}:\d{2}\ \S+\n
-	      /\n/gx;
-
-  my @rcvd = ($hdrs =~ /^(\S.+\S)$/gm);
-  foreach (@rcvd)
-  {
-    next if (/^$/);
-    $self->parse_received_line ($_);
+  my @hdrs = $msg->get_header('Received');
+  foreach my $line (@hdrs) {
+    $line =~ s/\n[ \t]+/ /gs;
+    $self->parse_received_line ($line);
   }
 
   $self->{relays_trusted} = [ ];

@@ -3163,7 +3163,7 @@ sub _check_spf {
   # in this situation
 
   if (!defined $lasthop) {
-    dbg ("SPF: message was delivered locally, not required");
+    dbg ("SPF: message was delivered entirely via trusted relays, not required");
     return;
   }
 
@@ -3175,7 +3175,6 @@ sub _check_spf {
     dbg ("SPF: checking HELO");
 
     # drop any hostname parts, if we can.
-if (1 && $helo) {
     my @domparts = split (/\./, $helo);
     my $numparts = scalar @domparts;
 
@@ -3187,7 +3186,6 @@ if (1 && $helo) {
 
       if ($numparts >= $partsreqd) { $helo =~ s/^[^\.]+\.//; }
     }
-}
 
   } else {
     if ($use_helo) { return; }	# we can't use the env-from reliably
