@@ -603,10 +603,16 @@ sub dccifd_lookup {
     $sock->getline() || dbg("failed read status") && die;
     $sock->getline() || dbg("failed read multistatus") && die;
 
-    $response = $sock->getline() || dbg("failed read header") && die;
-    chomp($response);
-	
-    my @null = $sock->getlines(); # flush rest of output if any
+    my @null = $sock->getlines() || dbg("failed read header") && die; # get all of the output
+
+    # The first line will be the header we want to look at
+    chomp($response = shift @null);
+    # but newer versions of DCC fold the header if it's too long...
+    while ( my $v = shift @null ) {
+      last unless ( $v =~ s/^\s+/ / );  # if this line wasn't folded, stop.
+      chomp $v;
+      $response .= $v;
+    }
 
     dbg("DCCifd: got response: $response");
   };
@@ -700,14 +706,21 @@ sub dcc_lookup {
 
     dbg("DCC command: ".join(' ', $path, "-H", $opts, "< '$tmpf'", "2>&1"),'dcc',-1);
     my $pid = open(DCC, join(' ', $path, "-H", $opts, "< '$tmpf'", "2>&1", '|')) || die "$!\n";
-    $response = <DCC>;
+    my @null = <DCC>;
     close DCC;
+
+    # The first line will be the header we want to look at
+    chomp($response = shift @null);
+    # but newer versions of DCC fold the header if it's too long...
+    while ( my $v = shift @null ) {
+      last unless ( $v =~ s/^\s+/ / );  # if this line wasn't folded, stop.
+      chomp $v;
+      $response .= $v;
+    }
 
     unless (defined($response)) {
       die ("no response\n");	# yes, this is possible
     }
-
-    chomp $response;
 
     dbg("DCC: got response: $response");
 
