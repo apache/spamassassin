@@ -467,7 +467,7 @@ my $setuid_to_user = (
 	(!$opt{'user-config'} && !($opt{'setuid-with-sql'}||$opt{'setuid-with-ldap'}))
 	) ? 0 : 1;
 
-my $copy_config_p = $setuid_to_user || $opt{'sql-config'} || $opt{'ldap-config'};
+my $copy_config_p = $setuid_to_user || $opt{'sql-config'} || $opt{'ldap-config'} || $opt{'virtual-config-dir'};
 
 my $current_user;
 
