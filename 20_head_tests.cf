@@ -131,6 +131,13 @@ header __HAS_OUTLOOK_IN_MAILER	X-Mailer =~ /\bMSCRM\b|Microsoft (?:CDO|Outlook|O
 meta MSGID_DOLLARS		(__OUTLOOK_DOLLARS_MSGID && !__HAS_OUTLOOK_IN_MAILER && !__UNUSABLE_MSGID)
 describe MSGID_DOLLARS		Message-Id has pattern used in spam
 
+# negative lookahead exempts this MUA from circa 1997-2000 
+# X-Mailer: Microsoft Outlook Express 4.71.1712.3
+# Message-ID: <01bd45da$2649cdc0$LocalHost@andrew>
+header __MSGID_DOLLARS_OK	MESSAGEID =~ /<[0-9a-f]{4,}\$[0-9a-f]{4,}\$[0-9a-f]{4,}\@\S+>/m
+header __MSGID_DOLLARS_MAYBE	MESSAGEID =~ /<\w{4,}\$\w{4,}\$(?!localhost)\w{4,}\@\S+>/mi
+meta MSGID_DOLLARS_RANDOM	__MSGID_DOLLARS_MAYBE && !__MSGID_DOLLARS_OK
+
 # bit of a ratware rule, but catches a bit more than just the one ratware
 header __MSGID_RANDY		Message-ID =~ /<[a-z\d][a-z\d\$-]{10,29}[a-z\d]\@[a-z\d][a-z\d.]{3,12}[a-z\d]>/
 # heuristic to eliminate most good Message-ID formats
