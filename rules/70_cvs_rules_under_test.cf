@@ -352,6 +352,28 @@ body T_HTML_CONSEC_IMGS17       eval:html_max_consec_imgs('80', '90')
 body T_HTML_CONSEC_IMGS18       eval:html_max_consec_imgs('90', '100')
 body T_HTML_CONSEC_IMGS19       eval:html_max_consec_imgs('100')
 
+
+
+body T_HTML_MAX_IMG_RATIO01     eval:html_max_img_ratio('0.0', '0.5')
+body T_HTML_MAX_IMG_RATIO02     eval:html_max_img_ratio('0.5', '0.999')
+meta T_HTML_MAX_IMG_RATIO02B    (T_HTML_MAX_IMG_RATIO02 && !FROM_EGROUPS)
+body T_HTML_MAX_IMG_RATIO03     eval:html_max_img_ratio('5', '10')
+meta T_HTML_MAX_IMG_RATIO03B    (T_HTML_MAX_IMG_RATIO03 && !FROM_EGROUPS)
+body T_HTML_MAX_IMG_RATIO04     eval:html_max_img_ratio('10', '20')
+body T_HTML_MAX_IMG_RATIO05     eval:html_max_img_ratio('20', '30')
+body T_HTML_MAX_IMG_RATIO06     eval:html_max_img_ratio('30', '40')
+body T_HTML_MAX_IMG_RATIO07     eval:html_max_img_ratio('40', '50')
+body T_HTML_MAX_IMG_RATIO08     eval:html_max_img_ratio('50', '75')
+body T_HTML_MAX_IMG_RATIO09     eval:html_max_img_ratio('75', '100')
+body T_HTML_MAX_IMG_RATIO10     eval:html_max_img_ratio('100')
+
+body T_HTML_MIN_IMG_RATIO1      eval:html_min_img_ratio('0.0', '0.01')
+body T_HTML_MIN_IMG_RATIO2      eval:html_min_img_ratio('0.01', '0.1')
+body T_HTML_MIN_IMG_RATIO3      eval:html_min_img_ratio('0.1', '0.25')
+body T_HTML_MIN_IMG_RATIO4      eval:html_min_img_ratio('0.25', '0.50')
+body T_HTML_MIN_IMG_RATIO5      eval:html_min_img_ratio('0.50', '0.75')
+body T_HTML_MIN_IMG_RATIO6      eval:html_min_img_ratio('0.75', '0.999')
+
 #---------------------------------------------------------
 
 meta T_HTML_NUM_IMGS01B         (T_HTML_NUM_IMGS01 && !FROM_EGROUPS)
@@ -430,6 +452,28 @@ score T_HTML_CONSEC_IMGS16       0.01
 score T_HTML_CONSEC_IMGS17       0.01
 score T_HTML_CONSEC_IMGS18       0.01
 score T_HTML_CONSEC_IMGS19       0.01
+
+
+score T_HTML_MAX_IMG_RATIO01     0.01
+score T_HTML_MAX_IMG_RATIO02     0.01
+score T_HTML_MAX_IMG_RATIO02B    0.01
+score T_HTML_MAX_IMG_RATIO03     0.01
+score T_HTML_MAX_IMG_RATIO03B    0.01
+score T_HTML_MAX_IMG_RATIO04     0.01
+score T_HTML_MAX_IMG_RATIO05     0.01
+score T_HTML_MAX_IMG_RATIO06     0.01
+score T_HTML_MAX_IMG_RATIO07     0.01
+score T_HTML_MAX_IMG_RATIO08     0.01
+score T_HTML_MAX_IMG_RATIO09     0.01
+score T_HTML_MAX_IMG_RATIO10     0.01
+
+score T_HTML_MIN_IMG_RATIO1      0.01
+score T_HTML_MIN_IMG_RATIO2      0.01
+score T_HTML_MIN_IMG_RATIO3      0.01
+score T_HTML_MIN_IMG_RATIO4      0.01
+score T_HTML_MIN_IMG_RATIO5      0.01
+score T_HTML_MIN_IMG_RATIO6      0.01
+
 
 score T_HTML_NUM_IMGS01B         0.01
 score T_HTML_NUM_IMGS02B         0.01

@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.18 2002/10/04 04:40:09 zelgadis Exp $
+# $Id: HTML.pm,v 1.19 2002/10/04 09:12:32 zelgadis Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -229,6 +229,15 @@ sub html_tests {
   if ($tag eq "img" && exists $attr->{width} && exists $attr->{height}) {
       my $area = $attr->{width} * $attr->{height};
       $self->{html}{total_image_area} += $area;
+
+      if (($attr->{width} > 0) && ($attr->{height} > 0)) {
+          my $ratio = ($attr->{width} + 0.0) / ($attr->{height} + 0.0);
+
+          $self->{html}{min_img_ratio} = $ratio
+            if ($ratio < $self->{html}{min_img_ratio});
+          $self->{html}{max_img_ratio} = $ratio
+            if ($ratio > $self->{html}{max_img_ratio});
+      }
   }
 
   if ($tag =~ /^i?frame$/) {
@@ -338,6 +347,25 @@ sub html_max_consec_imgs {
     my $consec = $self->{html}{max_consec_imgs};
     return ($consec > $min && $consec <= $max);
 } # html_max_consec_imgs()
+
+sub html_min_img_ratio {
+    my ($self, undef, $min, $max) = @_;
+
+    $max ||= "inf";
+
+    my $ratio = $self->{html}{min_img_ratio};
+    return ($ratio > $min && $ratio <= $max);
+} # html_min_img_ratio()
+
+sub html_max_img_ratio {
+    my ($self, undef, $min, $max) = @_;
+
+    $max ||= "inf";
+
+    my $ratio = $self->{html}{max_img_ratio};
+    return ($ratio > $min && $ratio <= $max);
+} # html_max_img_ratio()
+
 
 1;
 __END__
