@@ -150,7 +150,8 @@ used to test or manipulate the mail message.
 
 Note that the C<Mail::SpamAssassin> object can be re-used for further messages
 without affecting this check; in OO terminology, the C<Mail::SpamAssassin>
-object is a "factory".
+object is a "factory".   However, if you do this, be sure to call the
+C<finish()> method on the status objects when you're done with them.
 
 =cut
 
