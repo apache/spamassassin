@@ -23,7 +23,8 @@ use vars qw{
 };
 
 # sad but true. sort it out, sysadmins!
-$CCTLDS_WITH_LOTS_OF_OPEN_RELAYS = qr{(?:kr|cn|cl|ar|hk|il|th|tw|sg|za|tr|ma|ua|in|pe)};
+# Oct 30 2002 jm: added 'br' from HEAD
+$CCTLDS_WITH_LOTS_OF_OPEN_RELAYS = qr{(?:kr|cn|cl|ar|hk|il|th|tw|sg|za|tr|ma|ua|in|pe|br)};
 $ROUND_THE_WORLD_RELAYERS = qr{(?:net|com|ca)};
 
 # Here's how that RE was determined... relay rape by country (as of my
@@ -1209,11 +1210,10 @@ sub check_for_faraway_charset_in_body {
 
   my $content_type = $self->{msg}->get_header('Content-Type');
   $content_type = '' unless defined $content_type;
-  $content_type =~ /\bboundary\s*=\s*["']?(.*?)["']?(?:;|$)/i;
+  if ($content_type!~/\bboundary\s*=\s*["']?(.*?)["']?(?:;|$)/i || $1 eq '') {
+    return 0;  # No message sections to check
+  }
   my $boundary = "\Q$1\E";
-
-  # No message sections to check
-  return 0 unless ( defined $boundary );
 
   # Grab the whole mime body part
   my($mimebody) = ($$fulltext =~ /^(--$boundary\n.*
