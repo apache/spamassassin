@@ -5,7 +5,7 @@ use Pod::Text ();
 
 foreach (@ARGV) {
   $in = $_;
-  s,^(lib|spamd)/|\.(pod|pm)$,,g;
+  s,^(lib|spamd|spamc)/|\.(pod|pm)$,,g;
   tr,/,_,;
 
   # convert to HTML: doc/foo.html
