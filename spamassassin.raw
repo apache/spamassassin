@@ -546,7 +546,7 @@ If the message contains SpamAssassin markup, the markup will be stripped
 out automatically before submission.  The support modules for DCC, Pyzor,
 and Razor must be installed for spam to be reported to each service.
 SpamCop reports will have greater effect if you register and set the
-C<spamcop_submission_address> option.
+C<spamcop_to_address> option.
 
 The message will also be submitted to SpamAssassin's learning systems;
 currently this is the internal Bayesian statistical-filtering system (the
