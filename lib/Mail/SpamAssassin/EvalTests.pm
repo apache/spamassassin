@@ -215,6 +215,24 @@ sub check_for_forged_yahoo_received_headers {
   return 1;
 }
 
+sub check_for_forged_juno_received_headers {
+  my ($self) = @_;
+
+  my $from = $self->get('From:addr');
+  if($from !~ /juno.com/) { return 0; }
+
+  if($self->gated_through_received_hdr_remover()) { return 0; }
+
+  my $xmailer = $self->get('X-Mailer');
+  my $xorig = $self->get('X-Originating-IP');
+  my $rcvd = $self->get('Received');
+  if($rcvd !~ /from.*mail\.com.*\[[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\].*by/) { return 1; }
+  if($xorig !~ /[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/) { return 1; }
+  if($xmailer !~ /mail\.com/) { return 1; }
+
+  return 0;   
+}
+
 # ezmlm has a very bad habit of removing Received: headers! bad ezmlm.
 #
 sub gated_through_received_hdr_remover {
