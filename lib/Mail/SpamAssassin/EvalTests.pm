@@ -130,6 +130,24 @@ sub check_subject_for_lotsa_8bit_chars {
 
 ###########################################################################
 
+sub check_for_missing_headers {
+  my ($self) = @_;
+
+  my $hdr = $self->get ('From');
+  return 1 if ($hdr eq '');
+
+  my $hdr = $self->get ('To');
+  $hdr ||= $self->get ('Apparently-To');
+  return 1 if ($hdr eq '');
+
+  my $hdr = $self->get ('Date');
+  return 1 if ($hdr eq '');
+
+  return 0;
+}
+
+###########################################################################
+
 sub check_from_in_whitelist {
   my ($self) = @_;
   local ($_);
