@@ -121,23 +121,23 @@ sub read_db_configs {
 
 sub tie_db_readonly {
   my ($self) = @_;
-  my $main = $self->{bayes}->{main};
 
-  # return if we've already tied to the db's, using the same mode
-  # (locked/unlocked) as before.
-  return 1 if ($self->{already_tied} && $self->{is_locked} == 0);
-  $self->{already_tied} = 1;
-
-  $self->read_db_configs();
-
-  if (!defined($main->{conf}->{bayes_path})) {
-    dbg ("bayes_path not defined");
-    return 0;
-  }
   if (!HAS_DB_FILE) {
     dbg ("bayes: DB_File module not installed, cannot use Bayes");
     return 0;
   }
+
+  # return if we've already tied to the db's, using the same mode
+  # (locked/unlocked) as before.
+  return 1 if ($self->{already_tied} && $self->{is_locked} == 0);
+
+  my $main = $self->{bayes}->{main};
+  if (!defined($main->{conf}->{bayes_path})) {
+    dbg ("bayes_path not defined");
+    return 0;
+  }
+
+  $self->read_db_configs();
 
   my $path = $main->sed_path ($main->{conf}->{bayes_path});
 
@@ -172,6 +172,8 @@ sub tie_db_readonly {
   if ( $self->{db_version} < 2 ) { # older versions use scancount
     $self->{scan_count_little_file} = $path.'_msgcount';
   }
+
+  $self->{already_tied} = 1;
   return 1;
 
 failed_to_tie:
@@ -184,23 +186,23 @@ failed_to_tie:
 #
 sub tie_db_writable {
   my ($self) = @_;
-  my $main = $self->{bayes}->{main};
 
-  # return if we've already tied to the db's, using the same mode
-  # (locked/unlocked) as before.
-  return 1 if ($self->{already_tied} && $self->{is_locked} == 1);
-  $self->{already_tied} = 1;
-
-  $self->read_db_configs();
-
-  if (!defined($main->{conf}->{bayes_path})) {
-    dbg ("bayes_path not defined");
-    return 0;
-  }
   if (!HAS_DB_FILE) {
     dbg ("bayes: DB_File module not installed, cannot use Bayes");
     return 0;
   }
+
+  # return if we've already tied to the db's, using the same mode
+  # (locked/unlocked) as before.
+  return 1 if ($self->{already_tied} && $self->{is_locked} == 1);
+
+  my $main = $self->{bayes}->{main};
+  if (!defined($main->{conf}->{bayes_path})) {
+    dbg ("bayes_path not defined");
+    return 0;
+  }
+
+  $self->read_db_configs();
 
   my $path = $main->sed_path ($main->{conf}->{bayes_path});
 
@@ -258,6 +260,7 @@ sub tie_db_writable {
     dbg("bayes: new db, set db version ".$self->{db_version}." and 0 tokens");
   }
 
+  $self->{already_tied} = 1;
   return 1;
 
 failed_to_tie:
