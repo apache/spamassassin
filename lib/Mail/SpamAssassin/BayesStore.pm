@@ -1172,10 +1172,13 @@ sub tok_put {
 
     $self->{db_toks}->{$tok} = $self->tok_pack ($ts, $th, $atime);
 
-    if ( !defined($self->{db_toks}->{$NEWEST_TOKEN_AGE_MAGIC_TOKEN}) || $atime > $self->{db_toks}->{$NEWEST_TOKEN_AGE_MAGIC_TOKEN} ) {
+    my $newmagic = $self->{db_toks}->{$NEWEST_TOKEN_AGE_MAGIC_TOKEN};
+    if (!defined ($newmagic) || $atime > $newmagic) {
       $self->{db_toks}->{$NEWEST_TOKEN_AGE_MAGIC_TOKEN} = $atime;
     }
-    if ( !defined($self->{db_toks}->{$OLDEST_TOKEN_AGE_MAGIC_TOKEN}) || $atime < $self->{db_toks}->{$OLDEST_TOKEN_AGE_MAGIC_TOKEN} ) {
+
+    my $oldmagic = $self->{db_toks}->{$OLDEST_TOKEN_AGE_MAGIC_TOKEN};
+    if (!defined ($oldmagic) || $atime < $oldmagic) {
       $self->{db_toks}->{$OLDEST_TOKEN_AGE_MAGIC_TOKEN} = $atime;
     }
   }
