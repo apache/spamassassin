@@ -93,7 +93,7 @@ sub check {
   # TODO: change this to do whitelist/blacklists first? probably a plan
   # NOTE: definitely need AWL stuff last, for regression-to-mean of score
 
-  $self->remove_unwanted_headers();
+  $self->clean_spamassassin_headers();
 
   {
     # If you run timelog from within specified rules, prefix the message with
@@ -2097,13 +2097,24 @@ sub sa_die { Mail::SpamAssassin::sa_die (@_); }
 
 ###########################################################################
 
-sub remove_unwanted_headers {
+sub clean_spamassassin_headers {
   my ($self) = @_;
-  $self->{msg}->delete_header ("X-Spam-Status");
+
+  # attempt to restore original headers
+  for my $hdr (('Content-Transfer-Encoding', 'Content-Type')) {
+    my $prev = $self->{msg}->get_header ("X-Spam-Prev-$hdr");
+    if (defined $prev && $prev ne '') {
+      $self->{msg}->replace_header ($hdr, $prev);
+    }
+  }
+  # delete the SpamAssassin-added headers
   $self->{msg}->delete_header ("X-Spam-Checker-Version");
   $self->{msg}->delete_header ("X-Spam-Flag");
-  $self->{msg}->delete_header ("X-Spam-Report");
   $self->{msg}->delete_header ("X-Spam-Level");
+  $self->{msg}->delete_header ("X-Spam-Prev-Content-Transfer-Encoding");
+  $self->{msg}->delete_header ("X-Spam-Prev-Content-Type");
+  $self->{msg}->delete_header ("X-Spam-Report");
+  $self->{msg}->delete_header ("X-Spam-Status");
 }
 
 ###########################################################################
