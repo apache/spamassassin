@@ -56,6 +56,7 @@ Options:
     -s            Specify the syslog facility (default: mail)
     -D            Print debugging messages
     -c            Create user preferences files if they do not already exist
+    -a            Use per-user auto-whitelists.
 
 EOUSAGE
     exit $resphash{EX_USAGE};
@@ -75,10 +76,11 @@ sub daemonize
 
 use vars qw{
   	$opt_d $opt_h $opt_L $opt_p $opt_A $opt_x $opt_s $opt_D $opt_u
-	$opt_P $opt_c
+	$opt_P $opt_c $opt_a
 };
 
-getopts('hdLxp:A:s:Du:Pc') or usage();
+
+getopts('hdLxp:A:s:Du:Pca') or usage();
 
 $opt_h and usage();
 
@@ -113,6 +115,15 @@ my $spamtest = Mail::SpamAssassin->new({
   debug => $opt_D,
   paranoid => ($opt_P || 0),
 });
+
+$opt_a and eval
+{
+  require Mail::SpamAssassin::DBBasedAddrList;
+
+# create a factory for the persistent address list
+  my $addrlistfactory = Mail::SpamAssassin::DBBasedAddrList->new();
+  $spamtest->set_persistent_address_list_factory ($addrlistfactory);
+};
 
 $spamtest->compile_now();	# ensure all modules etc. are loaded
 $/ = "\n";			# argh, Razor resets this!  Bad Razor!
