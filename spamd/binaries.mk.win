@@ -1,0 +1,17 @@
+CC = @@CC@@
+CFLAGS = @@CFLAGS@@
+SSLCFLAGS = @@SSLCFLAGS@@
+
+LIBS = @@LIBS@@
+SSLLIBS = @@SSLLIBS@@
+
+SPAMC_FILES = @@SPAMC_FILES@@
+LIBSPAMC_FILES = @@LIBSPAMC_FILES@@
+
+
+all: spamd/spamc.exe
+
+spamd/spamc.exe: $(SPAMC_FILES) $(LIBSPAMC_FILES)
+	cd spamd
+	$(CC) $(SSLCFLAGS) $(CFLAGS) $(SPAMC_FILES) $(LIBSPAMC_FILES) $(LIBS) $(SSLLIBS)
+

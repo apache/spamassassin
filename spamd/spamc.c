@@ -9,17 +9,21 @@
 #include "libspamc.h"
 #include "utils.h"
 
-#include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#ifdef _WIN32
+#define syslog(x, y) fprintf(stderr, #y "\n")
+#else
 #include <syslog.h>
+#include <unistd.h>
+#include <netdb.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
-#include <netdb.h>
 #include <arpa/inet.h>
+#endif
 
 #ifdef HAVE_SYSEXITS_H
 #include <sysexits.h>
@@ -48,12 +52,18 @@
      || (defined(__sgi))  /* IRIX */ \
      || (defined(__osf__)) /* Digital UNIX */ \
      || (defined(hpux) || defined(__hpux)) /* HPUX */ \
-     || (defined(_WIN32) || defined(__CYGWIN__)) /* CygWin, Win32 */
+     || (defined(__CYGWIN__)) /* CygWin, Win32 */
 
 extern int optind;
 extern char *optarg;
 
 #endif
+
+#ifdef _WIN32
+#include "getopt.h"
+char* __progname = "spamc";
+#endif
+
 
 /* safe fallback defaults to on now - CRH */
 int flags = SPAMC_RAW_MODE | SPAMC_SAFE_FALLBACK;
@@ -93,7 +103,13 @@ read_args(int argc, char **argv, int *max_size, const char **username,
 {
   int opt, i, j;
 
-  while(-1 != (opt = getopt(argc,argv,"-BcrRd:e:fhyp:t:s:u:xSHU:")))
+  while(-1 != (opt = getopt(argc,argv,
+#ifndef _WIN32
+                            "-BcrRd:e:fhyp:t:s:u:xSHU:"
+#else
+                            "-BcrRd:fhyp:t:s:u:xSH"
+#endif
+)))
   {
     switch(opt)
     {
@@ -102,12 +118,14 @@ read_args(int argc, char **argv, int *max_size, const char **username,
         flags |= SPAMC_RANDOMIZE_HOSTS;
         break;
       }
+#ifndef _WIN32
     case 'U':
       {
         ptrn->type       = TRANSPORT_UNIX;
         ptrn->socketpath = optarg;
         break;
       }
+#endif
     case 'B':
       {
         flags = (flags & ~SPAMC_MODE_MASK) | SPAMC_BSMTP_MODE;
@@ -139,6 +157,7 @@ read_args(int argc, char **argv, int *max_size, const char **username,
 	ptrn->hostname = optarg;	/* fix the ptr to point to this string */
 	break;
       }
+#ifndef _WIN32
     case 'e':
       {
         if((exec_argv=malloc(sizeof(*exec_argv)*(argc-optind+2)))==NULL)
@@ -149,6 +168,7 @@ read_args(int argc, char **argv, int *max_size, const char **username,
         exec_argv[i]=NULL;
         return EX_OK;
       }
+#endif
     case 'p':
       {
 	ptrn->port = atoi(optarg);
@@ -210,6 +230,7 @@ void get_output_fd(int *fd){
         *fd=STDOUT_FILENO;
         return;
     }
+#ifndef _WIN32
     if(pipe(fds)){
         syslog(LOG_ERR, "pipe creation failed: %m");
         exit(EX_OSERR);
@@ -237,6 +258,9 @@ void get_output_fd(int *fd){
     close(fds[0]); /* no point in leaving extra fds lying around */
     execv(exec_argv[0], exec_argv);
     syslog(LOG_ERR, "exec failed: %m");
+#else
+    fprintf(stderr, "exec failed: %d\n", errno);
+#endif
     exit(EX_OSERR);
 }
 
@@ -256,8 +280,10 @@ int main (int argc, char **argv) {
   do_libspamc_unit_tests();
 #endif
 
+#ifndef _WIN32
   openlog ("spamc", LOG_CONS|LOG_PID, LOG_MAIL);
   signal (SIGPIPE, SIG_IGN);
+#endif
 
   read_args(argc,argv, &max_size, &username, &trans);
 
@@ -274,6 +300,7 @@ int main (int argc, char **argv) {
    * to our own buffer - then this won't arise as a problem.
    */
  
+#ifndef _WIN32
   if(NULL == username)
   {
   static char   userbuf[256];
@@ -289,6 +316,7 @@ int main (int argc, char **argv) {
     userbuf[sizeof userbuf - 1] = '\0';
     username = userbuf;
   }
+#endif
 
   if ((flags & SPAMC_RANDOMIZE_HOSTS) != 0) {
     /* we don't need strong randomness; this is just so we pick
@@ -304,57 +332,59 @@ int main (int argc, char **argv) {
    * we connect to the spam daemon. Mainly this involves lookup up the
    * hostname and getting the IP addresses to connect to.
    */
-  if ( (ret = transport_setup(&trans, flags)) != EX_OK )
-    goto FAIL;
-
-
+  if ( (ret = transport_setup(&trans, flags)) == EX_OK ) {
     out_fd=-1;
     m.type    = MESSAGE_NONE;
     m.max_len = max_size;
     m.timeout = timeout;
 
     ret=message_read(STDIN_FILENO, flags, &m);
-    if(ret!=EX_OK) goto FAIL;
+    if(ret==EX_OK) {
     ret=message_filter(&trans, username, flags, &m);
-    if(ret!=EX_OK) goto FAIL;
+      if(ret==EX_OK) {
     get_output_fd(&out_fd);
 
-    if(message_write(out_fd, &m)<0) {
-      goto FAIL;
-    }
+        if(message_write(out_fd, &m)>=0) {
 
     result = m.is_spam;
     if ((flags&SPAMC_CHECK_ONLY) && result != EX_TOOBIG) {
       message_cleanup (&m);
-      return result;
+            ret = result;
     } else {
       message_cleanup (&m);
+          }
+#ifdef _WIN32
+          WSACleanup();
+#endif
       return ret;
     }
+      }
+    }
+  }
 
-FAIL:
+ FAIL:
     get_output_fd(&out_fd);
 
     result = m.is_spam;
     if((flags&SPAMC_CHECK_ONLY) && result != EX_TOOBIG) {
 	/* probably, the write to stdout failed; we can still report exit code */
 	message_cleanup (&m);
-	return result;
-
+      ret = result;      
     } else if(flags&SPAMC_CHECK_ONLY || flags&SPAMC_REPORT || flags&SPAMC_REPORT_IFSPAM) {
-        full_write(out_fd, "0/0\n", 4);
+      full_write(out_fd, 1, "0/0\n", 4);
 	message_cleanup (&m);
-        return EX_NOTSPAM;
-
+      ret = EX_NOTSPAM;      
     } else {
         message_dump(STDIN_FILENO, out_fd, &m);
 	message_cleanup (&m);
         if (ret == EX_TOOBIG) {
-          return 0;
+        ret = 0;
         } else if (flags & SPAMC_SAFE_FALLBACK) {
-	  return EX_OK;
-	} else {
-	  return ret;
+        ret = EX_OK;
 	}
     }
+#ifdef _WIN32
+    WSACleanup();
+#endif
+    return ret;
 }

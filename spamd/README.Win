@@ -1,0 +1,97 @@
+Building Spamd/Spamc under Windows
+----------------------------------
+
+Spamd currently does not run under Windows, but spamc does.
+
+Spamd does work when built and run in the Cygwin unix emulation
+environment, and a pure Windows spamc can be used with it. You can
+also run a pure Windows spamc that communicates with spamd running on
+any network accessible computer. The unix sockets option is not
+supported under Windows, so only TCP/IP can be used. As of this
+writing SSL has not been tested with the Windows spamc.
+
+Building spamc for Windows requires a lot more than running it. If all
+you want to do is run spamc without the full SpamAssassin on your
+Windows machine, it is easier if you can get a binary executable from
+someone else who has built it.
+
+System Requirements
+-------------------
+
+This has only been tested with Microsoft Visual C++ 6.0. There is a
+good chance it will just work with later versions of VC++, but some
+installation files would have to be changed to use with any other
+compiler.
+
+In addition to VC++ you also have to have installed a Windows version
+of Perl and the modules that are listed as required in the general
+SpamAssassin documentation. So far the only Windows version of perl
+this has been tested with is ActivePerl.
+
+To run the spamc executable once it is built you do not need to have
+VC++ or perl installed.
+
+Spamc requires spamd to be running on some system that it can talk to
+using tcp/ip over a network or on the same machine. The test cases in
+the build process will only work if spamd has been installed under
+Cygwin on the same computer.
+
+Building
+--------
+
+To build such a combined setup, first install SpamAssassin under
+Cygwin by unpacking the source files into some directory, for example,
+/usr/local/src/spamassassin, then in a Cygwin bash shell
+
+ cd /usr/local/src/spamassassin
+ perl Makefile.PL
+ make
+ make test
+ make install
+
+This assumes that you have already installed perl and all necessary
+perl modules as described elsewhere in the SpamAssassin install
+documentation.
+
+Now that you have a working SpamAssassin under Cygwin you can use that
+to test the spamc that you will build under Windows. To set that up,
+first create a Windows environment variable in the System control
+panel. The variable is named
+
+ SPAMD_SCRIPT
+
+and set it to
+
+SPAMD_SCRIPT=start \cygwin\bin\perl -w -T /bin/spamd -x -s stderr --syslog-socket none
+
+where "\cygwin\bin\perl" is the path of the Cygwin perl executable
+file in the Windows directory system, and "/bin/spamd" is the path of
+the spamd executable that you installed under Cygwin. Be sure to
+substitute the correct path names for your installation if they are
+different from this example.
+
+Now you are ready to build SpamAssassin under Windows. Unpack the
+SpamAssassin source tree into a different directory than you used for
+building the Cygwin version, for example C:\spamassassin\. Then in a
+Windows command shell do the following.
+
+First, make sure that the environment is set up for running VC++. In
+VC++ 6.0 there is a batch file created during installation that sets
+the environment. In a typical installation that would be found at
+
+"\Program Files\Microsoft Visual Studio\VC98\Bin\VCVARS32.BAT"
+
+Also make sure that the SPAMD_SCRIPT environment variable is set in
+your command shell as described above.
+
+Then use the commands
+
+ cd \spamasassin
+ perl Makefile.PL
+ nmake
+ nmake test
+ nmake install
+
+That's it. You should now have two working versions of SpamAssassin,
+one under Cygwin and one under Windows.
+

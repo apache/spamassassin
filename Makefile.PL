@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 require 5.6.1;
 
 use strict;
@@ -6,7 +7,7 @@ use Config;
 
 use ExtUtils::MakeMaker 5.45;
 
-use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
+use constant RUNNING_ON_WINDOWS => ($^O =~ /^(mswin|dos|os2)/oi);
 
 
 my @ATT_KEYS = (
@@ -149,11 +150,6 @@ foreach my $key (@ATT_KEYS) {
 my @datafiles = map { s,^rules/,,; $_ } (<rules/*.cf>);
 my $datafiles = join(' ', (grep { /^[0-6][0-9]_/ } @datafiles), qw(user_prefs.template triplets.txt languages));
 
-# Only build spamd and spamc on non-Windows platforms
-my @SPAMD_EXE_FILES = ();
-if (!RUNNING_ON_WINDOWS) {
-  @SPAMD_EXE_FILES = ('spamd/spamc$(EXE_EXT)', 'spamd/spamd');
-}
 
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
@@ -163,7 +159,8 @@ my %makefile = (
 
     'EXE_FILES'	=> [
         'spamassassin', 'sa-learn',
-        @SPAMD_EXE_FILES
+        'spamd/spamc$(EXE_EXT)',
+        'spamd/spamd',
     ],
 
     'MAN1PODS' => {
@@ -206,6 +203,7 @@ my %makefile = (
         'spamassassin', 'sa-learn',
         'spamd/spamd', 'spamd/spamc$(EXE_EXT)',
         'spamd/libspamc.so', 'spamd/libsslspamc.so',
+        'spamd/*.o', 'spamd/*.obj',
         'spamd/binaries.mk', 'spamd/config.h', 'spamd/config.status',
         'spamd/config.cache', 'spamd/config.log', 'spamd/autom4te.cache',
         'qmail/qmail-spamc',
@@ -295,6 +293,15 @@ unless($Config{installman1dir}) {
 }
 
 
+# Windows platforms need some adjustments
+if (RUNNING_ON_WINDOWS) {
+  # Don't build spamd
+  delete $makefile{EXE_FILES}['spamd/spamd'];
+  # And require Net::DNS v0.44
+  #$makefile{PREREQ_PM}{Net::DNS} = 0.44;
+}
+
+
 $makefile{'macro'}{'ENABLE_SSL'} = yesno($opt{'enable_ssl'});
 
 if (!defined $opt{'contact_address'}) {
@@ -337,6 +344,8 @@ package MY;
 use vars qw(
   $MY_GLOBALS_ARE_SANE
 
+  $RUNNING_ON_WINDOWS
+
   @REPOSITORIES
 
   $MACRO_RE
@@ -378,6 +387,9 @@ sub init_MY_globals {
   # To assign or own macros we'll follow the first assignment string we find;
   # normally " = ".
   $EQ = undef;
+
+  # Inherit our Windows-Flag.
+  $RUNNING_ON_WINDOWS = ::RUNNING_ON_WINDOWS;
 }
 
 # Unset $SELF to avoid any leaking memory.
@@ -432,8 +444,10 @@ sub macro_ref {
 # If it is omitted, the value set in the current EU::MM instance is used.
 sub macro_def {
   my($name, $val) = (@_, undef);
+  my $MUST_NOT_HAPPEN = "THIS MUST NOT HAPPEN. PLEASE REPORT A BUG VIA <http://bugzilla.spamassassin.org>";
+  die $MUST_NOT_HAPPEN  unless defined $name;
+  die $MUST_NOT_HAPPEN  unless defined $EQ;
   $val = $SELF->{$name} unless defined $val;
-  die unless defined $EQ;
 
   return $name . $EQ . $val;
 }
@@ -705,6 +719,33 @@ sub _set_macro_PERL_TAINT {
   _set_macro_PERL_yesno('TAINT');
 }
 
+# This routine sets the value for PREPROCESS.
+#
+# There are no parameters.
+#
+# If PREPROCESS wasn't set at the command line, it chooses our default
+# perl-called preprocessor.
+sub _set_macro_PREPROCESS {
+
+  return if get_macro('PREPROCESS');
+  set_macro('PREPROCESS', join(' ', macro_ref('PERL'), qq{build/preprocessor}));
+}
+
+# This routine sets the value for CONFIGURE (spamc only).
+#
+# There are no parameters.
+#
+# If CONFIGURE wasn't set at the command line, it chooses our default
+# perl-wrapped configure.
+sub _set_macro_CONFIGURE {
+
+  return if get_macro('CONFIGURE');
+  set_macro('CONFIGURE', join(' ', macro_ref('PERL'), qq{build/configure}));
+}
+
+
+
+
 
 # Override the libscan routine so it skips SVN/CVS stuff and some common
 # patch/backup extensions.
@@ -746,8 +787,6 @@ sub MY::install {
   clean_MY_globals($self);
   return join("\n", @code);
 }
-
-
 
 
 # Now override the constants routine to add our own macros.
@@ -800,6 +839,7 @@ sub MY::constants {
       }
     }
   }
+  push(@code, qq{});
 
   # Add some additional target dirs
   {
@@ -814,6 +854,7 @@ sub MY::constants {
 
     # ... and add it to the Makefile.
     push(@code, qq{});
+    push(@code, qq{# Where to install config files});
     push(@code, macro_def('SYSCONFDIR'));
     foreach my $r (@REPOSITORIES) {
       push(@code, macro_def($r . 'SYSCONFDIR'));
@@ -841,8 +882,43 @@ sub MY::constants {
 
     # Add it to the Makefile.
     push(@code, qq{});
+    push(@code, qq{# Some details about our Perl});
     foreach my $m (qw(BIN VERSION WARN TAINT)) {
       push(@code, macro_def('PERL_' . $m));
+    }
+  }
+
+  # Set the preprocessor and configure scripts
+  {
+    _set_macro_PREPROCESS;
+    _set_macro_CONFIGURE;
+
+    # Add it to the Makefile.
+    push(@code, qq{});
+    push(@code, macro_def('PREPROCESS'));
+    push(@code, macro_def('CONFIGURE'));
+  }
+
+  # Set some additional helper/shortcut macros.
+  {
+    my($repository);
+    $repository = uc($SELF->{INSTALLDIRS}) || 'SITE';
+
+    foreach my $macro (qw(PREFIX SYSCONFDIR)) {
+      push(@code, macro_def('I_' . $macro,
+                    macro_ref($repository . $macro)));
+    }
+    foreach my $macro (qw(DATA CONF LIB)) {
+      push(@code, macro_def('I_' . $macro . 'DIR',
+                    macro_ref('INSTALL' . repository($repository) . $macro)));
+
+      if ($mm_has_destdir) {
+        push(@code, macro_def('B_' . $macro . 'DIR',
+                      macro_ref('DESTINSTALL' . repository($repository) . $macro)));
+      } else {
+        push(@code, macro_def('B_' . $macro . 'DIR',
+                      macro_ref('I_' . $macro . 'DIR')));
+      }
     }
   }
 
@@ -852,35 +928,10 @@ sub MY::constants {
 
 sub MY::postamble {
   my $self = shift;
-  my @code = ();
+  my $code = "";
   init_MY_globals($self);
 
-  my($repository);
-  $repository = uc($SELF->{INSTALLDIRS}) || 'SITE';
-
-  foreach my $macro (qw(PREFIX SYSCONFDIR)) {
-    push(@code, macro_def('I_' . $macro,
-                    macro_ref($repository . $macro)));
-  }
-  foreach my $macro (qw(DATA CONF LIB)) {
-    push(@code, macro_def('I_' . $macro . 'DIR',
-                    macro_ref('INSTALL' . repository($repository) . $macro)));
-
-    if ($mm_has_destdir) {
-      push(@code, macro_def('B_' . $macro . 'DIR',
-                    macro_ref('DESTINSTALL' . repository($repository) . $macro)));
-    } else {
-      push(@code, macro_def('B_' . $macro . 'DIR',
-                    macro_ref('I_' . $macro . 'DIR')));
-    }
-  }
-
-  my $code = join("\n", @code);
-  @code = (); # free mem
-
   $code .= <<'  EOD';
-
-PREPROCESS    = $(PERL) build/preprocessor
 
 FIXVARS		= -Mvars \
 		  -DVERSION="$(VERSION)" \
@@ -904,13 +955,14 @@ spamassassin: spamassassin.raw
 sa-learn: sa-learn.raw
 	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@
 
+
+spamd/binaries.mk:
+	$(CONFIGURE) --srcdir="spamd" --prefix="$(I_PREFIX)" --sysconfdir="$(I_SYSCONFDIR)" --datadir="$(I_DATADIR)" --enable-ssl="$(ENABLE_SSL)"
+
 spamd/spamd: spamd/spamd.raw
 	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@
 
 spamd/libspamc.so: spamd/binaries.mk $(SPAMC_SOURCES)
-	$(MAKE) -f spamd/binaries.mk $@
-
-spamd/libspamc.dll: spamd/binaries.mk $(SPAMC_SOURCES)
 	$(MAKE) -f spamd/binaries.mk $@
 
 spamd/spamc$(EXE_EXT): spamd/binaries.mk $(SPAMC_SOURCES)
@@ -919,14 +971,9 @@ spamd/spamc$(EXE_EXT): spamd/binaries.mk $(SPAMC_SOURCES)
 spamd/libsslspamc.so: spamd/binaries.mk $(SPAMC_SOURCES)
 	$(MAKE) -f spamd/binaries.mk $@
 
-spamd/libsslspamc.dll: spamd/binaries.mk $(SPAMC_SOURCES)
-	$(MAKE) -f spamd/binaries.mk $@
-
 qmail/qmail-spamc: spamd/binaries.mk $(SPAMC_SOURCES)
 	$(MAKE) -f spamd/binaries.mk $@
 
-spamd/binaries.mk: spamd/configure
-	cd spamd; ./configure --prefix="$(I_PREFIX)" --sysconfdir="$(I_SYSCONFDIR)" --datadir="$(I_DATADIR)" --enable-ssl="$(ENABLE_SSL)"
 
 conf__install:
 	-$(MKPATH) $(B_CONFDIR)

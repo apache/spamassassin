@@ -9,11 +9,38 @@
 #ifndef LIBSPAMC_H
 #define LIBSPAMC_H 1
 
+#include <stdio.h>
 #include <sys/types.h>
+#ifdef _WIN32
+#include <winsock.h>
+#else
+#include <netdb.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <netdb.h>
-#include <stdio.h>
+#endif
+
+#ifdef _WIN32
+#define EX_OK        0
+#define EX_USAGE        64
+#define EX_DATAERR      65
+#define EX_NOINPUT      66
+#define EX_NOUSER       67
+#define EX_NOHOST       68
+#define EX_UNAVAILABLE  69
+#define EX_SOFTWARE     70
+#define EX_OSERR        71
+#define EX_OSFILE       72
+#define EX_CANTCREAT    73
+#define EX_IOERR        74
+#define EX_TEMPFAIL     75
+#define EX_PROTOCOL     76
+#define EX_NOPERM       77
+#define EX_CONFIG       78
+
+#define STDIN_FILENO 0
+#define STDOUT_FILENO 1
+
+#endif
 
 #define EX_NOTSPAM		  0
 #define EX_ISSPAM		  1

@@ -6,12 +6,15 @@
  * "License".
  */
 
+#ifndef _WIN32
 #include <unistd.h>
+#include <sys/uio.h>
+#else
+typedef int ssize_t;
+#endif
 #include <errno.h>
 #include <signal.h>
 #include <sys/types.h>
-#include <sys/uio.h>
-#include <unistd.h>
 #include <stdio.h>
 #include "utils.h"
 
@@ -25,7 +28,7 @@
 /* Apr 24, 2003 sjf: made full_read and full_write void* params */
 
 /* -------------------------------------------------------------------------- */
-
+#ifndef _WIN32
 typedef void    sigfunc(int);   /* for signal handlers */
 
 sigfunc* sig_catch(int sig, void (*f)(int))
@@ -41,23 +44,38 @@ sigfunc* sig_catch(int sig, void (*f)(int))
 static void catch_alrm(int x) {
   UNUSED_VARIABLE(x);
 }
+#endif
 
 ssize_t
-fd_timeout_read (int fd, void *buf, size_t nbytes)
+fd_timeout_read (int fd, char fdflag, void *buf, size_t nbytes)
 {
   ssize_t nred;
+  int origerr;
+#ifndef _WIN32
   sigfunc* sig;
 
   sig = sig_catch(SIGALRM, catch_alrm);
   if (libspamc_timeout > 0) {
     alarm(libspamc_timeout);
   }
+#endif
 
   do {
+    if (fdflag) {
     nred = read (fd, buf, nbytes);
-  } while(nred < 0 && errno == EAGAIN);
+      origerr = errno;
+    } else {
+      nred = recv (fd, buf, nbytes, 0);
+#ifndef _WIN32
+      origerr = errno;
+#else
+      origerr = WSAGetLastError();
+#endif
+    }
+  } while(nred < 0 && origerr == EWOULDBLOCK);
 
-  if(nred < 0 && errno == EINTR)
+#ifndef _WIN32
+  if(nred < 0 && origerr == EINTR)
     errno = ETIMEDOUT;
 
   if (libspamc_timeout > 0) {
@@ -66,6 +84,7 @@ fd_timeout_read (int fd, void *buf, size_t nbytes)
 
   /* restore old signal handler */
   sig_catch(SIGALRM, sig);
+#endif
 
   return nred;
 }
@@ -74,7 +93,6 @@ int
 ssl_timeout_read (SSL *ssl, void *buf, int nbytes)
 {
   int nred;
-  sigfunc* sig;
 
 #ifndef SPAMC_SSL
   UNUSED_VARIABLE(ssl);
@@ -82,10 +100,14 @@ ssl_timeout_read (SSL *ssl, void *buf, int nbytes)
   UNUSED_VARIABLE(nbytes);
 #endif
 
+#ifndef _WIN32
+  sigfunc* sig;
+
   sig = sig_catch(SIGALRM, catch_alrm);
   if (libspamc_timeout > 0) {
     alarm(libspamc_timeout);
   }
+#endif
 
   do {
 #ifdef SPAMC_SSL
@@ -93,8 +115,9 @@ ssl_timeout_read (SSL *ssl, void *buf, int nbytes)
 #else
     nred = 0;			/* never used */
 #endif
-  } while(nred < 0 && errno == EAGAIN);
+  } while(nred < 0 && errno == EWOULDBLOCK);
 
+#ifndef _WIN32
   if(nred < 0 && errno == EINTR)
     errno = ETIMEDOUT;
 
@@ -104,6 +127,7 @@ ssl_timeout_read (SSL *ssl, void *buf, int nbytes)
 
   /* restore old signal handler */
   sig_catch(SIGALRM, sig);
+#endif
 
   return nred;
 }
@@ -111,14 +135,14 @@ ssl_timeout_read (SSL *ssl, void *buf, int nbytes)
 /* -------------------------------------------------------------------------- */
 
 int
-full_read (int fd, void *vbuf, int min, int len)
+full_read (int fd, char fdflag, void *vbuf, int min, int len)
 {
   unsigned char *buf = (unsigned char *)vbuf;
   int total;
   int thistime;
 
   for (total = 0; total < min; ) {
-    thistime = fd_timeout_read (fd, buf+total, len-total);
+    thistime = fd_timeout_read (fd, fdflag, buf+total, len-total);
 
     if (thistime < 0) {
       return -1;
@@ -156,17 +180,27 @@ full_read_ssl (SSL *ssl, unsigned char *buf, int min, int len)
 }
 
 int
-full_write (int fd, const void *vbuf, int len)
+full_write (int fd, char fdflag, const void *vbuf, int len)
 {
   const unsigned char *buf = (const unsigned char *)vbuf;
   int total;
   int thistime;
+  int origerr;
 
   for (total = 0; total < len; ) {
+    if (fdflag) {
     thistime = write (fd, buf+total, len-total);
-
+      origerr = errno;
+    } else {
+      thistime = send (fd, buf+total, len-total, 0);
+#ifndef _WIN32
+      origerr = errno;
+#else
+      origerr = WSAGetLastError();
+#endif
+    }
     if (thistime < 0) {
-      if(EINTR == errno || EAGAIN == errno) continue;
+      if(EINTR == origerr || EWOULDBLOCK == origerr) continue;
       return thistime;        /* always an error for writes */
     }
     total += thistime;
