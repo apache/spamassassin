@@ -48,9 +48,6 @@ for my $test (@tests) {
   # look for test with spaces on either side, should match report
   # lines in spam report, only exempt rules that are really unavoidable
   # and are clearly not hitting due to rules being named poorly
-  next if $test eq "LINES_OF_YELLING";
-  next if $test eq "LINES_OF_YELLING_2";
-  next if $test eq "LINES_OF_YELLING_3";
   next if $test eq "UPPERCASE_75_100";
   next if $test eq "UNIQUE_WORDS";
   $anti_patterns{"$test,"} = "P_" . $i++;
