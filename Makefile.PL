@@ -343,7 +343,8 @@ $makefile{'macro'}{'CONTACT_ADDRESS'} = $opt{'contact_address'};
 
 if (!defined $opt{'run_net_tests'}) {
   $opt{'run_net_tests'} = prompt(
-    "Run network tests (these may fail due to network problems)? (y/n)",
+    "Check network rules during 'make test' (test scripts may fail due to\n".
+    "network problems)? (y/n)",
     'n');
   print "\n";
 }
