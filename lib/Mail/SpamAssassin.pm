@@ -148,7 +148,7 @@ $IS_DEVEL_BUILD = 1;            # change for release versions
 @ISA = qw();
 
 # SUB_VERSION is now just <yyyy>-<mm>-<dd>
-$SUB_VERSION = qw{$LastChangedDate$ updated by SVN}[1];
+$SUB_VERSION = (split(/\s+/,'$LastChangedDate$ updated by SVN'))[1];
 
 # If you hacked up your SA, you should add a version_tag to you .cf files.
 # This variable should not be modified directly.
