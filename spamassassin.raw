@@ -133,12 +133,6 @@ eval {
     $doing_address_only_whitelisting = 1;
   }
 
-  my $mail;
-
-  if (!$opt{'lint'} && !$doing_address_only_whitelisting) {
-    $mail = Mail::SpamAssassin::MsgParser->parse ();
-  }
-
 # create the tester factory
   my $spamtest = new Mail::SpamAssassin ({
     rules_filename	=> $opt{'configpath'},
@@ -166,6 +160,15 @@ eval {
 
   if ($opt{'lint'}) {
     exit $spamtest->lint_rules ();
+  }
+
+  my $mail;
+
+  # Unless we're doing whitelisting activities, go ahead and parse the
+  # incoming message
+  #
+  if (!$doing_address_only_whitelisting) {
+    $mail = Mail::SpamAssassin::MsgParser->parse ();
   }
 
 # handle removing reports
