@@ -204,6 +204,36 @@ describe ADVERT_CODE		Subject: starts with advertising tag
 header ADVERT_CODE2		Subject =~ /\w.*\b(?!ADV\.)A\s*D\s*V\b/i
 describe ADVERT_CODE2		Subject: contains advertising tag
 
+###########################################################################
+# illegal characters that should be MIME encoded
+# might want to exempt users using languages that don't use Latin
+# alphabets, but do it in the eval
+
+header SUBJ_ILLEGAL_CHARS	eval:check_illegal_chars('Subject','0.00','2')
+describe SUBJ_ILLEGAL_CHARS	Subject contains too many raw illegal characters
+
+header FROM_ILLEGAL_CHARS	eval:check_illegal_chars('From','0.20','2')
+describe FROM_ILLEGAL_CHARS	From contains too many raw illegal characters
+
+header HEAD_ILLEGAL_CHARS	eval:check_illegal_chars('ALL','0.005','2')
+describe HEAD_ILLEGAL_CHARS	Header contains too many raw illegal characters
+
+###########################################################################
+# ADV tags in non-English languages
+
+# alan premselaar <alien@12inch.com>, see SpamAssassin-talk list 2003-03
+# quinlan: 2003-03-23 here are more generic Japanese iso-2022-jp codes
+# ("not yet acceptance" or "email") + "announcement"
+# FWIW, according to Peter Evans, this should be sufficient to catch the
+# UCE tag and a common attempt at evasion (using the "sue" instead of
+# "mi" Chinese character).
+header JAPANESE_UCE_SUBJECT	Subject =~ /\e\$B.*(?:L\$>5Bz|EE;R%a!<%k)9-9p/
+describe JAPANESE_UCE_SUBJECT	Subject contains a Japanese UCE tag
+
+# quinlan: "advertisement" in Russian KOI8-R
+header RUSSIAN_UCE_SUBJECT	Subject =~ /\xf0\xe5\xea\xeb\xe0\xec\xf3/
+describe RUSSIAN_UCE_SUBJECT	Subject contains a Russian UCE tag
+
 # Korean UCE Subject: lines are usually 8-bit, but are occasionally encoded
 # with quoted-printable or base64.
 #
@@ -218,6 +248,8 @@ describe ADVERT_CODE2		Subject: contains advertising tag
 #
 header KOREAN_UCE_SUBJECT	Subject =~ /[({[<][. ]*(?:\xbc\xba[. ]*\xc0\xce[. ]*)?(?:\xb1\xa4(?:[. ]*|[\x00-\x7f]{0,3})\xb0\xed|\xc1\xa4[. ]*\xba\xb8|\xc8\xab[. ]*\xba\xb8)[. ]*[)}\]>]/
 describe KOREAN_UCE_SUBJECT	Subject: contains Korean unsolicited email tag
+
+###########################################################################
 
 header FRIEND_AT_PUBLIC		To =~ /(?:yourdomain|you|your|(?<!re)public)\.(?:com|org|net)/i
 describe FRIEND_AT_PUBLIC	sent to you@you.com or similar
@@ -237,12 +269,6 @@ tflags NO_DNS_FOR_FROM          net
 
 header FROM_AND_TO_SAME		eval:check_for_from_to_same()
 describe FROM_AND_TO_SAME	From and To are the same, but not exactly
-
-header SUBJ_FULL_OF_8BITS	eval:check_subject_for_lotsa_8bit_chars()
-describe SUBJ_FULL_OF_8BITS	Subject is full of 8-bit characters
-
-header HEADER_8BITS		eval:check_all_headers_for_8bit_chars()
-describe HEADER_8BITS		Headers include 3 consecutive 8-bit characters
 
 header MDAEMON_2_7_4		Received =~ /with SMTP .MDaemon.v2.7.SP4.R./
 describe MDAEMON_2_7_4		Received via buggy SMTP server (MDaemon 2.7.4SP4R)
@@ -690,17 +716,6 @@ header __JUNO_FROM		From:addr =~ /\@juno\.com\b/i
 header __JUNO_FROM_VALID	From:addr =~ /^[a-z](?:[a-z0-9]|[-._](?![-._])){0,62}[a-z0-9]\@juno\.com\b/i
 meta FORGED_JUNO_FROM		(__JUNO_FROM && !__JUNO_FROM_VALID)
 describe FORGED_JUNO_FROM	Has invalid account name for juno.com address
-
-# alan premselaar <alien@12inch.com>, see SpamAssassin-talk list 2003-03
-# quinlan: 2003-03-23 here are more generic Japanese iso-2022-jp codes               # ("not yet acceptance" or "email") + "announcement"                                 # FWIW, according to Peter Evans, this should be sufficient to catch the UCE tag
-# and a common attempt at evasion (using the "sue" instead of "mi" Chinese
-# character).
-header JAPANESE_UCE_SUBJECT	Subject =~ /\e\$B.*(?:L\$>5Bz|EE;R%a!<%k)9-9p/
-describe JAPANESE_UCE_SUBJECT	Subject contains a Japanese UCE tag
-
-# quinlan: "advertisement" in Russian KOI8-R
-header RUSSIAN_UCE_SUBJECT	Subject =~ /\xf0\xe5\xea\xeb\xe0\xec\xf3/            
-describe RUSSIAN_UCE_SUBJECT	Subject contains a Russian UCE tag
 
 header HEADER_COUNT_CTYPE	eval:check_header_count_range('Content-Type','2','999')
 describe HEADER_COUNT_CTYPE	Multiple Content-Type headers found
