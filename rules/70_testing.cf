@@ -476,3 +476,10 @@ header T_ADVERT_CODE2	Subject =~ /\w.*\bA\s*D\s*V\b/
 
 # bug 3262
 body T_NO_COST                    /\bno (?:(?:extra|hidden) )?(?:cost|charge)\b/i
+
+# URL obfuscation services
+uri T_URL_SHORTEN_1		m{http://makeashorterlink.com/}i
+uri T_URL_SHORTEN_2		m{http://shorl.com/}i
+uri T_URL_SHORTEN_3		m{http://tinyurl.com/}i
+uri T_URL_SHORTEN_4		m{http://xrl.us/}i
+uri T_URL_SHORTEN_5		m{http://snipurl.com/}i
