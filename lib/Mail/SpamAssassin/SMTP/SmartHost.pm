@@ -1,10 +1,12 @@
 package Mail::SpamAssassin::SMTP::SmartHost;
 
 require 5.001;
-
 use strict;
-eval "use bytes";
-use vars qw($VERSION @ISA @EXPORT);
+use bytes;
+
+use vars qw(
+  $VERSION @ISA @EXPORT
+);
 
 require Exporter;
 require AutoLoader;

@@ -4,14 +4,15 @@
 
 package Mail::SpamAssassin::EncappedMessage;
 
-use Carp;
 use strict;
-eval "use bytes";
+use bytes;
+use Carp;
+
 
 use Mail::SpamAssassin::AuditMessage;
 
-use vars	qw{
-  	@ISA
+use vars qw{
+  @ISA
 };
 
 @ISA = qw(Mail::SpamAssassin::AuditMessage);

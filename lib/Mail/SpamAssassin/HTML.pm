@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.62 2002/12/29 21:40:10 quinlan Exp $
+# $Id: HTML.pm,v 1.63 2003/01/09 23:51:56 msquadrat Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -7,7 +7,7 @@ package Mail::SpamAssassin::PerMsgStatus;
 use HTML::Parser 3.00 ();
 
 use strict;
-eval "use bytes";
+use bytes;
 
 use vars qw{
   $re_loose $re_strict $events

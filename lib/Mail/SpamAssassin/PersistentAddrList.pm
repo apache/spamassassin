@@ -30,8 +30,11 @@ See C<Mail::SpamAssassin::DBBasedAddrList> for an example.
 package Mail::SpamAssassin::PersistentAddrList;
 
 use strict;
-eval "use bytes";
-use vars qw{ @ISA };
+use bytes;
+
+use vars qw{
+  @ISA
+};
 
 @ISA = qw();
 

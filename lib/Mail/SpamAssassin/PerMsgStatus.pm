@@ -31,9 +31,9 @@ class.  This object encapsulates all the per-message state.
 
 package Mail::SpamAssassin::PerMsgStatus;
 
-use Carp;
 use strict;
-eval "use bytes";
+use bytes;
+use Carp;
 
 use Text::Wrap qw();
 use POSIX qw(strftime);

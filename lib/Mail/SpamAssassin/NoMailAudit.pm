@@ -14,14 +14,15 @@
 # Perl itself.
 #
 package Mail::SpamAssassin::NoMailAudit;
-use strict;
-eval "use bytes";
 
-use Mail::SpamAssassin::Message;
+use strict;
+use bytes;
 use Fcntl qw(:DEFAULT :flock);
 
+use Mail::SpamAssassin::Message;
+
 @Mail::SpamAssassin::NoMailAudit::ISA = (
-        'Mail::SpamAssassin::Message'
+  'Mail::SpamAssassin::Message'
 );
 
 # ---------------------------------------------------------------------------

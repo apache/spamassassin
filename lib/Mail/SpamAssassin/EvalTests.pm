@@ -1,9 +1,10 @@
-#
-
 package Mail::SpamAssassin::EvalTests;
 1;
 
 package Mail::SpamAssassin::PerMsgStatus;
+
+use strict;
+use bytes;
 
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Dns;
@@ -12,15 +13,14 @@ use Mail::SpamAssassin::MailingList;
 use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::SHA1 qw(sha1);
 use Mail::SpamAssassin::TextCat;
+
 use Time::Local;
-use strict;
-eval "use bytes";
 
 use vars qw{
-	$IP_ADDRESS
-	$CCTLDS_WITH_LOTS_OF_OPEN_RELAYS
-	$ROUND_THE_WORLD_RELAYERS
-	$WORD_OBFUSCATION_CHARS 
+  $IP_ADDRESS
+  $CCTLDS_WITH_LOTS_OF_OPEN_RELAYS
+  $ROUND_THE_WORLD_RELAYERS
+  $WORD_OBFUSCATION_CHARS 
 };
 
 # sad but true. sort it out, sysadmins!

@@ -14,8 +14,13 @@ require 5.005;
 #                         or $(SYSCONFDIR)/mail/spamassassin
 # LOCAL_RULES_DIR      +  $(INST_SYSCONFDIR)/mail/spamassassin
 # INST_SITELIB	       +  $(INSTALLSITELIB)
+#
 # RUN_RAZOR1_TESTS        (prompt if Razor 1 found)
 # RUN_RAZOR2_TESTS        (prompt if Razor 2 found)
+#
+# PERL_BIN             *  current path to Perl
+# PERL_VERSION         *  current Perl version
+# PERL_WARN            *  'yes' for CVS builds; else 'no'
 #
 # * means the variable is used for build time
 # + means the variable is used for run time
@@ -51,8 +56,14 @@ $ExtUtils::MakeMaker::Recognized_Att_Keys{'PKG_DEF_RULES_DIR'} = 1;
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'LOCAL_RULES_DIR'} = 1;
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'PKG_LOCAL_RULES_DIR'} = 1;
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'INST_SITELIB'} = 1;
+
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'RUN_RAZOR1_TESTS'} = 1;
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'RUN_RAZOR2_TESTS'} = 1;
+
+$ExtUtils::MakeMaker::Recognized_Att_Keys{'PERL_BIN'} = 1;
+$ExtUtils::MakeMaker::Recognized_Att_Keys{'PERL_WARN'} = 1;
+$ExtUtils::MakeMaker::Recognized_Att_Keys{'PERL_VERSION'} = 1;
+
 
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
@@ -86,8 +97,8 @@ my %makefile = (
     'PL_FILES' => { },
 
     'PMLIBDIRS' => [ 'lib' ],
-   
-    'PM_FILTER' => '$(PERL) build/preprocessor -Mconditional -Mvars -DVERSION=$(VERSION) -DPREFIX="$(INST_PREFIX)"',
+
+    'PM_FILTER' => '$(PERL) build/preprocessor -Mconditional $(FIXBYTES) -Mvars -DVERSION="$(VERSION)" -DPREFIX="$(INST_PREFIX)"',
 
     'macro' => {
 	RULES => $rulesfiles,
@@ -95,15 +106,15 @@ my %makefile = (
 
     # be quite explicit about this; afaik CPAN.pm is sensible using this
     'PREREQ_PM' => {
-			'ExtUtils::MakeMaker' => 5.45,
-			'File::Spec' => 0.8,
-			'File::Copy' => 0,
-			'Pod::Usage' => 0,
-			'HTML::Parser' => 3.0,
-			'Text::Wrap' => 0,
-			'Time::Local' => 0,
-			'Errno' => 0,
-		  },
+	'ExtUtils::MakeMaker' => 5.45,
+	'File::Spec' => 0.8,
+	'File::Copy' => 0,
+	'Pod::Usage' => 0,
+	'HTML::Parser' => 3.0,
+	'Text::Wrap' => 0,
+	'Time::Local' => 0,
+	'Errno' => 0,
+    },
 
     'dist' => {
 		COMPRESS => 'gzip -9f', SUFFIX => 'gz',
@@ -204,20 +215,28 @@ sub MY::postamble {
     || $self->{LOCAL_RULES_DIR} || '$(SYSCONFDIR)/mail/spamassassin';
   my $localrulesdir = $self->{LOCAL_RULES_DIR} || '$(INST_SYSCONFDIR)/mail/spamassassin';
   my $instsitelib = $self->{INST_SITELIB} || '$(INSTALLSITELIB)';
-
+  
+  my $perl_bin     = $self->{PERL_BIN}     || 'this';
+  my $perl_warn    = $self->{PERL_WARN}    || 'auto';
+  my $perl_version = $self->{PERL_VERSION} || 'this';
 
 
   my $gotpods = keys(%{$self->{MAN1PODS}}) || keys(%{$self->{MAN3PODS}}) || keys(%{$self->{EXTRAPODS}}) || 0;
 
 qq#
-INST_PREFIX     = $instprefix
-SYSCONFDIR      = $sysconfdir
-INST_SYSCONFDIR = $instsysconfdir
-PKG_DEF_RULES_DIR = $pkgdefrulesdir
-DEF_RULES_DIR	= $defrulesdir
-PKG_LOCAL_RULES_DIR = $pkglocalrulesdir
-LOCAL_RULES_DIR	= $localrulesdir
-INST_SITELIB = $instsitelib
+INST_PREFIX     	= $instprefix
+SYSCONFDIR      	= $sysconfdir
+INST_SYSCONFDIR 	= $instsysconfdir
+PKG_DEF_RULES_DIR 	= $pkgdefrulesdir
+DEF_RULES_DIR		= $defrulesdir
+PKG_LOCAL_RULES_DIR	= $pkglocalrulesdir
+LOCAL_RULES_DIR		= $localrulesdir
+INST_SITELIB		= $instsitelib
+
+PERL_BIN		= $perl_bin
+PERL_WARN		= $perl_warn
+PERL_VERSION 		= $perl_version
+
 # . q#
 
 FIXVARS		= -Mvars \
@@ -227,6 +246,13 @@ FIXVARS		= -Mvars \
 		  -DLOCAL_RULES_DIR="$(LOCAL_RULES_DIR)" \
 		  -DINSTALLSITELIB="$(INST_SITELIB)"
 
+FIXBYTES	= -Mbytes \
+		  -DPERL_VERSION="$(PERL_VERSION)"
+                  
+FIXBANG		= -Msharpbang \
+		  -DPERL_BIN="$(PERL_BIN)" \
+		  -DPERL_WARN="$(PERL_WARN)"
+
 # . ($mm_version < 5.45 ? q#
 pm_to_blib: $(TO_INST_PM)
 	@ $(PERL) "-I$(INST_ARCHLIB)" "-I$(INST_LIB)" \
@@ -235,27 +261,27 @@ pm_to_blib: $(TO_INST_PM)
 	-e "ExtUtils::Install::Post545::pm_to_blib({qw{$(PM_TO_BLIB)}}, '$(INST_LIB)/auto', '$(PM_FILTER)')"# : '') . q#
 
 spamassassin: spamassassin.raw
-	$(PERL) build/preprocessor $(FIXVARS) -Msharpbang -i$? -o$@
+	$(PERL) build/preprocessor $(FIXBYTES) $(FIXVARS) $(FIXBANG) -i$? -o$@
 	$(CHMOD) $(PERM_RWX) $@
 
 sa-learn-spam: sa-learn-spam.raw
-	$(PERL) build/preprocessor $(FIXVARS) -Msharpbang -i$? -o$@
+	$(PERL) build/preprocessor $(FIXBYTES) $(FIXVARS) $(FIXBANG) -i$? -o$@
 	$(CHMOD) $(PERM_RWX) $@
 
 sa-learn-nonspam: sa-learn-nonspam.raw
-	$(PERL) build/preprocessor $(FIXVARS) -Msharpbang -i$? -o$@
+	$(PERL) build/preprocessor $(FIXBYTES) $(FIXVARS) $(FIXBANG) -i$? -o$@
 	$(CHMOD) $(PERM_RWX) $@
 
 sa-learn-rebuild: sa-learn-rebuild.raw
-	$(PERL) build/preprocessor $(FIXVARS) -Msharpbang -i$? -o$@
+	$(PERL) build/preprocessor $(FIXBYTES) $(FIXVARS) $(FIXBANG) -i$? -o$@
 	$(CHMOD) $(PERM_RWX) $@
 
 sa-forget: sa-forget.raw
-	$(PERL) build/preprocessor $(FIXVARS) -Msharpbang -i$? -o$@
+	$(PERL) build/preprocessor $(FIXBYTES) $(FIXVARS) $(FIXBANG) -i$? -o$@
 	$(CHMOD) $(PERM_RWX) $@
 
 spamd/spamd: spamd/spamd.raw
-	$(PERL) build/preprocessor $(FIXVARS) -Msharpbang -i$? -o$@
+	$(PERL) build/preprocessor $(FIXBYTES) $(FIXVARS) $(FIXBANG) -i$? -o$@
 	$(CHMOD) $(PERM_RWX) $@
 
 spamd/libspamc.so: binaries.mk

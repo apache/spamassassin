@@ -2,12 +2,12 @@
 
 package Mail::SpamAssassin::ConfSourceSQL;
 
-use Carp;
 use strict;
-eval "use bytes";
+use bytes;
+use Carp;
 
-use vars        qw{
-        @ISA
+use vars qw{
+  @ISA
 };
 
 @ISA = qw();

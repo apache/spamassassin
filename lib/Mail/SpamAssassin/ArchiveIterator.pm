@@ -5,6 +5,8 @@
 package Mail::SpamAssassin::ArchiveIterator;
 
 use strict;
+use bytes;
+
 use IO::Select;
 use IO::Socket;
 use Mail::SpamAssassin::Util;
@@ -12,7 +14,6 @@ use Mail::SpamAssassin::Util;
 use constant BIG_BYTES => 256*1024;	# 256k is a big email
 use constant BIG_LINES => BIG_BYTES/65;	# 65 bytes/line is a good approximation
 
-eval "use bytes";
 
 my $no;
 my $tz;
@@ -263,7 +264,7 @@ sub receive_date {
 sub scan_directory {
   my ($self, $class, $folder) = @_;
 
-  opendir(DIR, $folder) || die "Can't open $folder dir: $!";
+  opendir(DIR, $folder) || die "Can't open '$folder' dir: $!";
 
   # ignore ,234 (deleted or refiled messages) and MH metadata files
   # probably more to go here (TODO)
