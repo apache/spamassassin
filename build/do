@@ -43,7 +43,7 @@ if ($cmd eq 'symlink' && !SYMLINK) {
 
 # If we're supposed to link, do so.
 if ($cmd eq 'symlink') {
-  $lnk = $src;
+  $lnk = (-l $src) ? readlink($src) : $src;
 }
 
 # Shall we link?
