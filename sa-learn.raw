@@ -506,8 +506,8 @@ Options:
  --mbox                            Input sources are in mbox format
  --mbx                             Input sources are in mbx format
  --showdots                        Show progress using dots
- --no-sync                         Skip syncronizing the journal and
-                                   databases after scan
+ --no-sync                         Skip syncronizing the database and journal
+                                   after learning
  -L, --local                       Operate locally, no network accesses
  --import                          Migrate data from older version/non DB_File
                                    based databases
@@ -767,7 +767,8 @@ been removed.
 
 =item B<--sync>
 
-Syncronize the journal and databases.
+Syncronize the journal and databases.  Upon successfully syncing the
+database with the entries in the journal, the journal file is removed.
 
 =item B<--force-expire>
 
@@ -839,10 +840,20 @@ Produce diagnostic output.
 
 =item B<--no-sync>
 
-Skip the slow syncronization step which normally takes place after changing
-database entries.  If you plan to scan many folders in a batch, or to learn
-individual messages one-by-one, it is faster to use this switch and run
-C<sa-learn --sync> once all the folders have been scanned.
+Skip the slow syncronization step which normally takes place after
+changing database entries.  If you plan to learn from many folders in
+a batch, or to learn many individual messages one-by-one, it is faster
+to use this switch and run C<sa-learn --sync> once all the folders have
+been scanned.
+
+Clarification: The state of I<--no-sync> overrides the
+I<bayes_learn_to_journal> configuration option.  If not specified,
+sa-learn will learn to the database directly.  If specified, sa-learn
+will learn to the journal file.
+
+Note: I<--sync> and I<--no-sync> can be specified on the same commandline,
+which is slightly confusing.  In this case, the I<--no-sync> option is
+ignored since there is no learn operation.
 
 =item B<-L>, B<--local>
 
