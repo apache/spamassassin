@@ -1,4 +1,4 @@
-# $Id: MailingList.pm,v 1.5 2002/08/07 14:34:41 jmason Exp $
+# $Id: MailingList.pm,v 1.6 2002/08/07 14:40:22 jmason Exp $
 
 # Eval Tests to detect genuine mailing lists.
 
@@ -95,13 +95,16 @@ sub detect_ml_listbuilder {
   return 0 unless ($rcvd =~ /\blbrout\d+\.listbuilder\.com\b/i);
   return 0 unless ($rcvd =~ /\b204\.71\.191\.\d+\b/);
 
-# _______________________________________________________________________
-# Powered by List Builder
-# To unsubscribe follow the link:
-# http://lb.bcentral.com/ex/sp?c=19511&s=76CA511711046877&m=14
+  # _______________________________________________________________________
+  # Powered by List Builder
+  # To unsubscribe follow the link:
+  # http://lb.bcentral.com/ex/sp?c=19511&s=76CA511711046877&m=14
   $full = join ("\n", @{$full});
-  if ($full !~ /Powered by List Builder/) { return 0; }
-  if ($full !~ /http:\/\/lb.bcentral.com\/ex\/sp\?c=[0-9]*&s=[0-9A-Z]*&m=[0-9]*/) { return 0; }
+
+  if ($full !~ /__________________{40,}\s+Powered by List Builder\s/) { return 0; }
+  if ($full !~
+         m,\shttp://lb\.bcentral\.com/ex/sp\?c=[0-9A-Z]*&s=[0-9A-Z]*&m=[0-9A-Z]*\s,)
+         { return 0; }
 
   return 1;
 }
