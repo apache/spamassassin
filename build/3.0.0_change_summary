@@ -121,10 +121,17 @@ New rules:
 
   - SPF testing, if the Mail::SPF::Query module is installed.
 
-  - Hashcash support.
+  - added new rules and code to combat Bayes poisoning text and random
+    hashbusters; Habeas rules now verify against the Habeas user
+    list, to combat forged marks used in spam.
 
-  - Habeas rules now verify against the Habeas user list, to combat forged
-    marks used in spam.
+  - URIDNSBL rules.  These do DNSBL lookups on URLs, allowing URLs found
+    in the message body to be used in spam determination.  Added the SURBL
+    blocklist (http://www.surbl.org/).
+
+  - Spamhaus XBL and a variety of new DNSBL rules
+
+  - Hashcash support.
 
   - added Bob Menschel's 'longwords' rules
 
@@ -134,16 +141,8 @@ New rules:
 
   - added anti-fraud rules from Matt Yackley
 
-  - URIDNSBL rules.  These do DNSBL lookups on URLs, allowing URLs found
-    in the message body to be used in spam determination.  Added the SURBL
-    blocklist (http://www.surbl.org/).
-
-  - Spamhaus XBL and a variety of new DNSBL rules
-
-  - added some RHS blocklist tests based on the envelope sender address.
-
-  - added new rules and code to combat Bayes poisoning text and random
-    hashbusters.
+  - added some hostname-based blocklist tests based on the envelope
+    sender address.
 
   - a *lot* of other new rules, too many to detail here
 
@@ -158,8 +157,8 @@ Spamd:
 Infrastructure:
 
   - Plugins.  Third-party modules can now be written and loaded dynamically
-    from inside SpamAssassin, to provide support for entirely new rule types or
-    eval tests.
+    from inside SpamAssassin, to provide support for entirely new rule types
+    or eval tests.
 
   - SQL support for Bayes and AWL storage, thanks to Michael Parker.
 
@@ -191,5 +190,4 @@ Infrastructure:
     lets us do things like 'spamassassin -d --mbox file1' and have the
     functionality go over the entire mbox file. same for checks, adding to
     white/black-lists, etc.
-
 
