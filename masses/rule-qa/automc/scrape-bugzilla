@@ -7,6 +7,7 @@ our $ALLOWED_NEEDSMCERS = qr/
 use URI::Escape;
 use XML::Simple;
 use Storable;
+use Digest::SHA1 qw(sha1_base64);
 use strict;
 use bytes;
 
@@ -206,7 +207,12 @@ sub fixup_rule_code {
     next if ($n eq 'MC');   # a glitch, from the comments
 
     my $newname = $n;
-    my $rnd = int rand 999;
+
+    # use part of base64(bug.cmtnum) instead of "random" values,
+    # so it doesn't keep changing every night
+    my $rnd = sha1_base64("$bug.$cmtnum");
+    $rnd =~ /(...)$/;   # last 3 base64-its
+    $rnd = $1;
 
     # ensure it's unique; we only need to add randomness if we have already
     # seen a rule by that name
