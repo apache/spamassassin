@@ -46,7 +46,7 @@ sub sa_t_init {
   $perl_cmd .= " -w" if !defined($ENV{'TEST_PERL_WARN'})  or $ENV{'TEST_PERL_WARN'}  ne 'no';
 
   $scr = $ENV{'SCRIPT'};
-  $scr ||= "$perl_cmd ../spamassassin";
+  $scr ||= "$perl_cmd ../sa-filter";
 
   $spamd = "$perl_cmd ../spamd/spamd";
 
