@@ -182,6 +182,13 @@ sub parse_received_headers {
 	$inferred_as_trusted = 1;
       }
 
+      # if we find authentication tokens in the received header we can extend
+      # the trust boundary to that host
+      if ($relay->{auth}) {
+	dbg("received-header: authentication method ".$relay->{auth});
+	$inferred_as_trusted = 1;
+      }
+
       # can we use DNS?  If not, we cannot use this algorithm, as we
       # cannot lookup hostnames. :(
       # Consider the first relay trusted, and all others untrusted.
