@@ -1604,13 +1604,7 @@ why the IP is listed, typically a hyperlink to a database entry.
       next;
     }
     if (/^header\s+(\S+)\s+eval:(.*)$/) {
-      my ($name,$rule) = ($1, $2);
-      # Backward compatibility with old rule names -- Marc
-      if ($name =~ /^(?:T_|)RCVD_IN/ || $rule =~ /check_rbl/) {
-        $self->add_test ($name, $rule, TYPE_RBL_EVALS);
-      } else {
-        $self->add_test ($name, $rule, TYPE_HEAD_EVALS);
-      }
+      $self->add_test ($1, $2, TYPE_HEAD_EVALS);
       $self->{user_rules_to_compile} = 1 if $scoresonly;
       next;
     }
