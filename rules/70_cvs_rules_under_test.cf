@@ -176,7 +176,6 @@ body T_Q_WEGOTYOU6		/You Have Provided Permission/i
 
 header T_Q_DOMAINS_CHEAP	Subject =~ /(?:new extensions|domain names) now only \$\s*\d+/i
 header T_Q_AS_SEEN		Subject =~ /\bAs Seen/i
-header T_Q_BAD_CREDIT	 	Subject =~ /Bad Credit/i
 header T_Q_DOUBLE_YOUR 		Subject =~ /Double Your/i
 header T_Q_FOR_ONLY 		Subject =~ /For Only/i
 header T_Q_FREE_INSTANT 	Subject =~ /Free Instant/i
@@ -216,16 +215,16 @@ body T_Q_YOUR_SIZE_V1		/Your Penis Size/i
 body T_Q_YOUR_SIZE_V2		/Your (?:Penis|Dick|Sc?hlong) Size/i
 ###########################################################################
 
-header FORGED_TELESP_RCVD       Received =~ /\.(?!br).. \(\d+-\d+-\d+-\d+\.dsl\.telesp\.net\.br /
-describe FORGED_TELESP_RCVD     Contains forged hostname for a DSL IP in Brazil
+header T_FORGED_TELESP_RCVD	Received =~ /\.(?!br).. \(\d+-\d+-\d+-\d+\.dsl\.telesp\.net\.br /
+describe T_FORGED_TELESP_RCVD	Contains forged hostname for a DSL IP in Brazil
 
 # These seem to work well for me to find a "unique identifier" which
 # happens to be a rot13 email address
-body	T_ROT13_EMAIL	/^(\w+\^\S+\(\S+)(?:\s+\#+\s+\1)?\s*$/m
-describe	T_ROT13_EMAIL	Message has what looks like a ROT13 encoded email address
+body T_ROT13_EMAIL		/^(\w+\^\S+\(\S+)(?:\s+\#+\s+\1)?\s*$/m
+describe T_ROT13_EMAIL		Message has what looks like a ROT13 encoded email address
 
-body	T_ROT13_EMAIL_2	/^(\w+\^\S+\(\S+)(?:\s+\#+\s+\1)?[\s\n]*\Z/m
-describe	T_ROT13_EMAIL_2	Message has what looks like a ROT13 encoded email address
+body T_ROT13_EMAIL_2		/^(\w+\^\S+\(\S+)(?:\s+\#+\s+\1)?[\s\n]*\Z/m
+describe T_ROT13_EMAIL_2	Message has what looks like a ROT13 encoded email address
 
-body	T_ROT13_EMAIL_3	/^(\w+\^\S+\(\S+)/m
-describe	T_ROT13_EMAIL_3	Message has what looks like a ROT13 encoded email address
+body T_ROT13_EMAIL_3		/^(\w+\^\S+\(\S+)/m
+describe T_ROT13_EMAIL_3	Message has what looks like a ROT13 encoded email address
