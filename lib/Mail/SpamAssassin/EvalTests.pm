@@ -341,7 +341,7 @@ sub check_for_faraway_charset {
   $type ||= $self->get ('Content-type');
   my $locale = $ENV{'LANG'};
 
-  if ($type =~ /^.*charset=[\"](.+?)[\"]/i || $type =~ /^.*charset=(\S+?)/i) {
+  if ($type =~ /^.*charset=\"(.+?)\"/i || $type =~ /^.*charset=(\S+)/i) {
     if (!Mail::SpamAssassin::Locales::is_charset_ok_for_locale ($1, $locale)) {
       return 1;
     }
