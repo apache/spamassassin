@@ -202,8 +202,8 @@ non-spam and spam, if possible.  This will make it more accurate for your
 incoming mail.  Do this using the "sa-learn" tools, like so:
 
 	sa-learn --spam ~/Mail/saved-spam-folder
-	sa-learn --nonspam ~/Mail/inbox
-	sa-learn --nonspam ~/Mail/other-nonspam-folder
+	sa-learn --ham ~/Mail/inbox
+	sa-learn --ham ~/Mail/other-nonspam-folder
 
 Use as many mailboxes as you like.  Note that SpamAssassin will remember
 what mails it's learnt from, so you can re-run this as often as you like.
@@ -227,9 +227,9 @@ Help With SpamAssassin
 ----------------------
 
 There's a mailing list for support or discussion of SpamAssassin.  It
-lives at <spamassassin-talk@lists.sourceforge.net>.  See
-http://spamassassin.org/lists.html for the sign-up address and a
-link to the archive of past messages.
+lives at <spamassassin-users /at/ incubator.apache.org>.  See
+http://spamassassin.org/lists.html for the sign-up address and a link to
+the archive of past messages.
 
 The FAQ is here: http://wiki.spamassassin.org/w/FrequentlyAskedQuestions
 
