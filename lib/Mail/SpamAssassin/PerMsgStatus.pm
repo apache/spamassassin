@@ -1741,10 +1741,14 @@ sub do_meta_tests {
                 $expr .= "$token ";
             } else {
                 $expr .= "\$self->{tests_already_hit}->{$token} ";
+
+                # avoid "undefined" warnings by providing a default
+                # value here
+                $self->{tests_already_hit}->{$token} ||= 0;
             }
         } # foreach $token (@tokens)
 
-        #dbg ("meta expression: $expr");
+        # dbg ("meta expression: $expr");
 
         $evalstr .= '
         if (' . $expr . ') {
@@ -1759,10 +1763,8 @@ sub do_meta_tests {
     package Mail::SpamAssassin::PerMsgStatus;
 
     sub _meta_tests {
-        # Don't warn about undefined variables, since
-        # $self->{tests_already_hit} will be unitinialized for
-        # tests which weren't hit
-        local $^W; # perl 5.005 compatible!
+        # note: cannot set $^W here on perl 5.6.1 at least, it
+        # crashes meta tests.
 
         my (\$self) = \@_;
 
