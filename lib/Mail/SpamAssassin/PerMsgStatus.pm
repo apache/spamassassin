@@ -365,7 +365,7 @@ sub rewrite_as_spam {
   if($self->{main}->{conf}->{spam_level_stars} == 1) 
   {
       $self->{msg}->put_header("X-Spam-Level", "*"x int($self->{hits}));
-  }       
+  }
 
   $self->{msg}->put_header ("X-Spam-Checker-Version",
   	"SpamAssassin $Mail::SpamAssassin::VERSION ".
@@ -976,7 +976,7 @@ sub do_head_tests {
   # note: we do this only once for all head pattern tests.  Only
   # eval tests need to use stuff in here.
   $self->clear_test_state();
- 
+
   dbg ("running header regexp tests; score so far=".$self->{hits});
 
   # speedup code provided by Matt Sergeant
@@ -1002,12 +1002,12 @@ sub do_head_tests {
   }
   @negative_tests = sort { $self->{conf}{scores}{$a} <=> $self->{conf}{scores}{$b} } @negative_tests;
   @positive_tests = sort { $self->{conf}{scores}{$b} <=> $self->{conf}{scores}{$a} } @positive_tests;
-  
+
   foreach $rulename (@negative_tests, @positive_tests) {
     $rule = $self->{conf}->{head_tests}->{$rulename};
     my $def = '';
-    my ($hdrname, $testtype, $pat) = 
-    		$rule =~ /^\s*(\S+)\s*(\=|\!)\~\s*(\S.*?\S)\s*$/;
+    my ($hdrname, $testtype, $pat) =
+        $rule =~ /^\s*(\S+)\s*(\=|\!)\~\s*(\S.*?\S)\s*$/;
 
     if ($pat =~ s/\s+\[if-unset:\s+(.+)\]\s*$//) { $def = $1; }
     $hdrname =~ s/#/[HASH]/g;		# avoid probs with eval below
@@ -1017,9 +1017,10 @@ sub do_head_tests {
     $evalstr .= '
       return if $self->{stop_at_threshold} && $self->is_spam;
       if ($self->{conf}->{scores}->{q#'.$rulename.'#}) {
-	if ($self->get(q#'.$hdrname.'#, q#'.$def.'#) '.$testtype.'~ '.$pat.') {
-	  $self->got_hit (q#'.$rulename.'#, q{});
-	}
+        # warn("testing: ", $self->get(q#'.$hdrname.'#,q#'.$def.'#), " vs '.$rulename.' ($self->{conf}->{scores}->{q{'.$rulename.'}})\n");
+        if ($self->get(q#'.$hdrname.'#, q#'.$def.'#) '.$testtype.'~ '.$pat.') {
+          $self->got_hit (q#'.$rulename.'#, q{});
+        }
       }
     ';
   }
@@ -1039,7 +1040,7 @@ sub do_head_tests {
 EOT
 
   eval $evalstr;
-  
+
   if ($@) {
     warn "Failed to run header SpamAssassin tests, skipping some: $@\n";
   }
@@ -1078,13 +1079,13 @@ sub do_body_tests {
   }
   @negative_tests = sort { $self->{conf}{scores}{$a} <=> $self->{conf}{scores}{$b} } @negative_tests;
   @positive_tests = sort { $self->{conf}{scores}{$b} <=> $self->{conf}{scores}{$a} } @positive_tests;
-  
+
   foreach $rulename (@negative_tests, @positive_tests) {
     $pat = $self->{conf}->{body_tests}->{$rulename};
     $evalstr .= '
       return if $self->{stop_at_threshold} && $self->is_spam;
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
-	if ('.$pat.') { $self->got_body_pattern_hit (q{'.$rulename.'}); }
+        if ('.$pat.') { $self->got_body_pattern_hit (q{'.$rulename.'}); }
       }
     ';
   }
@@ -1230,14 +1231,14 @@ sub do_body_uri_tests {
       # warn("Got URI: $uri\n");
       push @uris, $uri;
   }
-  
+
   $self->clear_test_state();
   if ( defined &Mail::SpamAssassin::PerMsgStatus::_body_uri_tests ) {
     # ok, we've compiled this before.
     Mail::SpamAssassin::PerMsgStatus::_body_uri_tests($self, @uris);
     return;
   }
-  
+
   # otherwise build up the eval string...
   my $evalstr = '';
   my @tests = keys %{$self->{conf}{uri_tests}};
@@ -1254,13 +1255,13 @@ sub do_body_uri_tests {
   }
   @negative_tests = sort { $self->{conf}{scores}{$a} <=> $self->{conf}{scores}{$b} } @negative_tests;
   @positive_tests = sort { $self->{conf}{scores}{$b} <=> $self->{conf}{scores}{$a} } @positive_tests;
-  
+
   foreach $rulename (@negative_tests, @positive_tests) {
     $pat = $self->{conf}->{uri_tests}->{$rulename};
     $evalstr .= '
       return if $self->{stop_at_threshold} && $self->is_spam;
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
-    if ('.$pat.') { $self->got_uri_pattern_hit (q{'.$rulename.'}); }
+        if ('.$pat.') { $self->got_uri_pattern_hit (q{'.$rulename.'}); }
       }
     ';
   }
@@ -1323,13 +1324,13 @@ sub do_rawbody_tests {
   }
   @negative_tests = sort { $self->{conf}{scores}{$a} <=> $self->{conf}{scores}{$b} } @negative_tests;
   @positive_tests = sort { $self->{conf}{scores}{$b} <=> $self->{conf}{scores}{$a} } @positive_tests;
-  
+
   foreach $rulename (@negative_tests, @positive_tests) {
     $pat = $self->{conf}->{rawbody_tests}->{$rulename};
     $evalstr .= '
       return if $self->{stop_at_threshold} && $self->is_spam;
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
-	if ('.$pat.') { $self->got_body_pattern_hit (q{'.$rulename.'}); }
+        if ('.$pat.') { $self->got_body_pattern_hit (q{'.$rulename.'}); }
       }
     ';
   }
