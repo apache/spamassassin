@@ -72,13 +72,13 @@ describe SUBJ_HAS_UNIQ_ID	Subject contains a unique ID number
 header UNDISC_RECIPS		To =~ /Undisclosed.*Recipients/i
 describe UNDISC_RECIPS		To "Undisclosed.Recipients" or similar
 
-header SUBJ_ALL_CAPS		Subject !~ /[a-z]/
+header SUBJ_ALL_CAPS		Subject =~ /^[A-Z0-9\W]{4,}[^a-z]+$/
 describe SUBJ_ALL_CAPS		Subject is all capitals
 
 header MSGID_HAS_NO_AT		Message-Id !~ /\@/
 describe MSGID_HAS_NO_AT	Message-Id has no @ sign
 
-header INVALID_DATE		Date =~ / AM| PM/
+header INVALID_DATE		Date =~ / AM| PM/i
 describe INVALID_DATE		Invalid Date: header
 
 header SUBJ_HAS_Q_MARK		Subject =~ /\?/
@@ -90,10 +90,10 @@ describe ADVERT_CODE		Subject: contains advertising tag
 header FRIEND_AT_PUBLIC	To =~ /(yourdomain|you|your|public).(com|org|net)/i
 describe FRIEND_AT_PUBLIC	sent to you@you.com or similar
 
-header TO_EMPTY			To =~ /^(?:\@|\s*$)/
+header TO_EMPTY			To =~ /^(?:\@|\s*$)/ [if-unset: UNSET]
 describe TO_EMPTY		To: is empty
 
-header REPLY_TO_EMPTY		Reply-To =~ /^(?:\@|\s*$)/
+header REPLY_TO_EMPTY		Reply-To =~ /^(?:\@|\s*$)/ [if-unset: UNSET]
 describe REPLY_TO_EMPTY		Reply-To: is empty
 
 header X_EM_VER_PRESENT		X-Em-Version =~ /\S/

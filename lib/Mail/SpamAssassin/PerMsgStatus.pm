@@ -296,19 +296,30 @@ sub get_body_text {
 ###########################################################################
 
 sub get {
-  my ($self, $hdrname) = @_;
+  my ($self, $hdrname, $defval) = @_;
   local ($_);
+
 
   if ($hdrname eq 'ALL') { return $self->{msg}->get_all_headers(); }
 
   my $getaddr = 0;
   if ($hdrname =~ s/:addr$//) { $getaddr = 1; }
 
-  $_ = join ("\n", $self->{msg}->get_header ($hdrname));
+  my @hdrs = $self->{msg}->get_header ($hdrname);
+  if (defined @hdrs && $#hdrs >= 0) {
+    $_ = join ("\n", @hdrs);
+  } else {
+    $_ = undef;
+  }
+
   if ($hdrname eq 'Message-Id' && (!defined($_) || $_ eq '')) {
     $_ = join ("\n", $self->{msg}->get_header ('Message-ID'));	# news-ish
   }
-  $_ ||= 'undef';
+
+  if (!defined $_) {
+    $defval ||= '';
+    $_ = $defval;
+  }
 
   if ($getaddr) {
     s/^.*?<.+>\s*$/$1/g			# Foo Blah <jm@foo>
@@ -331,10 +342,13 @@ sub do_head_tests {
     my $hit = 0;
     $self->clear_test_state();
 
+    my $def = '';
     my ($hdrname, $testtype, $pat) = 
     		$rule =~ /^\s*(\S+)\s*(\=|\!)\~\s*(\S.*?\S)\s*$/;
 
-    $_ = $self->get ($hdrname);
+    if ($pat =~ s/\s+\[if-unset:\s+(.+)\]\s*$//i) { $def = $1; }
+    $_ = $self->get ($hdrname, $def);
+    # warn "JMD $pat $def $hdrname $_\n";
 
     if (!eval 'if ($_ '.$testtype.'~ '.$pat.') { $hit = 1; } 1;') {
       warn "Failed to run $rulename SpamAssassin test, skipping:\n".
