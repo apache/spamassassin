@@ -35,7 +35,9 @@
 #endif
 
 /* SunOS 4.1.4 patch from Tom Lipkis <tal@pss.com> */
-#if (defined(__sun__) && defined(__sparc__) && !defined(__svr4__)) || (defined(_IRIX_))
+#if (defined(__sun__) && defined(__sparc__) && !defined(__svr4__)) /* SunOS */
+     || (defined(_IRIX_))  /* IRIX */
+     || (defined(__osf__)) /* Digital UNIX */
 # ifndef EX__MAX
 # define EX__MAX 77
 extern char *optarg;
