@@ -662,8 +662,16 @@ sub _check_whitelist {
 
 sub all_from_addrs {
   my ($self) = @_;
-  # http://www.cs.tut.fi/~jkorpela/headers.html is useful here
-  return $self->{main}->find_all_addrs_in_line
+
+  # Resent- headers take priority, if present. see bug 672
+  # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=672
+  my $resent = $self->get ('Resent-From');
+  if (defined $resent && $resent =~ /\S/) {
+    return $self->{main}->find_all_addrs_in_line (
+  	 $self->get ('Resent-From'));
+
+  } else {
+    return $self->{main}->find_all_addrs_in_line
   	($self->get ('From') .                  # std
   	 $self->get ('Sender') .                # rfc822
   	 $self->get ('Envelope-Sender') .       # qmail: new-inject(1)
@@ -671,21 +679,32 @@ sub all_from_addrs {
   	 $self->get ('X-Envelope-From') .       # procmailrc manpage
   	 $self->get ('Return-Path') .           # Postfix, sendmail; rfc821
   	 $self->get ('Resent-From'));
+    # http://www.cs.tut.fi/~jkorpela/headers.html is useful here
+  }
 }
 
 sub all_to_addrs {
   my ($self) = @_;
-  # http://www.cs.tut.fi/~jkorpela/headers.html is useful here
-  return $self->{main}->find_all_addrs_in_line
-  	($self->get ('To') .                    # std
+
+  # Resent- headers take priority, if present. see bug 672
+  # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=672
+  my $resent = $self->get ('Resent-To') . $self->get ('Resent-Cc');
+  if (defined $resent && $resent =~ /\S/) {
+    return $self->{main}->find_all_addrs_in_line (
+  	 $self->get ('Resent-To') .             # std, rfc822
+  	 $self->get ('Resent-Cc'));             # std, rfc822
+
+  } else {
+    return $self->{main}->find_all_addrs_in_line (
+         $self->get ('To') .                    # std
   	 $self->get ('Apparently-To') .         # sendmail, from envelope
   	 $self->get ('Delivered-To') .          # Postfix, I think
-  	 $self->get ('Resent-To') .             # std, rfc822
-  	 $self->get ('Resent-Cc') .             # std, rfc822
   	 $self->get ('Envelope-Recipients') .   # qmail: new-inject(1)
   	 $self->get ('Apparently-Resent-To') .  # procmailrc manpage
   	 $self->get ('X-Envelope-To') .         # procmailrc manpage
          $self->get ('Cc'));                    # std
+    # http://www.cs.tut.fi/~jkorpela/headers.html is useful here
+  }
 }
 
 ###########################################################################
