@@ -515,8 +515,15 @@ sub check_for_spam_reply_to {
   my $ratio2 = $self->get_address_commonality_ratio
   				($rpto, $self->get ('To:addr'));
 
+  my $cc = $self->get ('Cc:addr');
+  my $ratio3 = 4.0;
+  if (defined $cc) {
+    $ratio3 = $self->get_address_commonality_ratio
+  				($rpto, $self->get ('Cc:addr'));
+  }
+
   # 2.0 means twice as many chars different as the same
-  if ($ratio1 > 2.0 && $ratio2 > 2.0) { return 1; }
+  if ($ratio1 > 2.0 && $ratio2 > 2.0 && $ratio3 > 2.0) { return 1; }
 
   return 0;
 }
