@@ -316,132 +316,145 @@ header __SENDERBASE		eval:check_rbl_txt('senderbase', 'sa.senderbase.org.')
 
 # S23 = domain daily magnitude
 # S25 = date of first message from this domain
-header T_SB_23_5_0_25_10 eval:check_rbl_sub('senderbase', 'S23 > 5.0 && (time - S25 < 10*86400)')
-header T_SB_23_5_0_25_20 eval:check_rbl_sub('senderbase', 'S23 > 5.0 && (time - S25 < 20*86400)')
-header T_SB_23_5_0_25_30 eval:check_rbl_sub('senderbase', 'S23 > 5.0 && (time - S25 < 30*86400)')
-header T_SB_23_5_0_25_40 eval:check_rbl_sub('senderbase', 'S23 > 5.0 && (time - S25 < 40*86400)')
-header T_SB_23_5_0_25_50 eval:check_rbl_sub('senderbase', 'S23 > 5.0 && (time - S25 < 50*86400)')
-header T_SB_23_5_0_25_60 eval:check_rbl_sub('senderbase', 'S23 > 5.0 && (time - S25 < 60*86400)')
-header T_SB_23_5_0_25_90 eval:check_rbl_sub('senderbase', 'S23 > 5.0 && (time - S25 < 90*86400)')
-header T_SB_23_5_0_25_120 eval:check_rbl_sub('senderbase', 'S23 > 5.0 && (time - S25 < 120*86400)')
-header T_SB_23_5_0_25_180 eval:check_rbl_sub('senderbase', 'S23 > 5.0 && (time - S25 < 180*86400)')
-header T_SB_23_5_2_25_10 eval:check_rbl_sub('senderbase', 'S23 > 5.2 && (time - S25 < 10*86400)')
-header T_SB_23_5_2_25_20 eval:check_rbl_sub('senderbase', 'S23 > 5.2 && (time - S25 < 20*86400)')
-header T_SB_23_5_2_25_30 eval:check_rbl_sub('senderbase', 'S23 > 5.2 && (time - S25 < 30*86400)')
-header T_SB_23_5_2_25_40 eval:check_rbl_sub('senderbase', 'S23 > 5.2 && (time - S25 < 40*86400)')
-header T_SB_23_5_2_25_50 eval:check_rbl_sub('senderbase', 'S23 > 5.2 && (time - S25 < 50*86400)')
-header T_SB_23_5_2_25_60 eval:check_rbl_sub('senderbase', 'S23 > 5.2 && (time - S25 < 60*86400)')
-header T_SB_23_5_2_25_90 eval:check_rbl_sub('senderbase', 'S23 > 5.2 && (time - S25 < 90*86400)')
-header T_SB_23_5_2_25_120 eval:check_rbl_sub('senderbase', 'S23 > 5.2 && (time - S25 < 120*86400)')
-header T_SB_23_5_2_25_180 eval:check_rbl_sub('senderbase', 'S23 > 5.2 && (time - S25 < 180*86400)')
-header T_SB_23_5_4_25_10 eval:check_rbl_sub('senderbase', 'S23 > 5.4 && (time - S25 < 10*86400)')
-header T_SB_23_5_4_25_20 eval:check_rbl_sub('senderbase', 'S23 > 5.4 && (time - S25 < 20*86400)')
-header T_SB_23_5_4_25_30 eval:check_rbl_sub('senderbase', 'S23 > 5.4 && (time - S25 < 30*86400)')
-header T_SB_23_5_4_25_40 eval:check_rbl_sub('senderbase', 'S23 > 5.4 && (time - S25 < 40*86400)')
-header T_SB_23_5_4_25_50 eval:check_rbl_sub('senderbase', 'S23 > 5.4 && (time - S25 < 50*86400)')
-header T_SB_23_5_4_25_60 eval:check_rbl_sub('senderbase', 'S23 > 5.4 && (time - S25 < 60*86400)')
-header T_SB_23_5_4_25_90 eval:check_rbl_sub('senderbase', 'S23 > 5.4 && (time - S25 < 90*86400)')
-header T_SB_23_5_4_25_120 eval:check_rbl_sub('senderbase', 'S23 > 5.4 && (time - S25 < 120*86400)')
-header T_SB_23_5_4_25_180 eval:check_rbl_sub('senderbase', 'S23 > 5.4 && (time - S25 < 180*86400)')
-header T_SB_23_5_6_25_10 eval:check_rbl_sub('senderbase', 'S23 > 5.6 && (time - S25 < 10*86400)')
-header T_SB_23_5_6_25_20 eval:check_rbl_sub('senderbase', 'S23 > 5.6 && (time - S25 < 20*86400)')
-header T_SB_23_5_6_25_30 eval:check_rbl_sub('senderbase', 'S23 > 5.6 && (time - S25 < 30*86400)')
-header T_SB_23_5_6_25_40 eval:check_rbl_sub('senderbase', 'S23 > 5.6 && (time - S25 < 40*86400)')
-header T_SB_23_5_6_25_50 eval:check_rbl_sub('senderbase', 'S23 > 5.6 && (time - S25 < 50*86400)')
-header T_SB_23_5_6_25_60 eval:check_rbl_sub('senderbase', 'S23 > 5.6 && (time - S25 < 60*86400)')
-header T_SB_23_5_6_25_90 eval:check_rbl_sub('senderbase', 'S23 > 5.6 && (time - S25 < 90*86400)')
-header T_SB_23_5_6_25_120 eval:check_rbl_sub('senderbase', 'S23 > 5.6 && (time - S25 < 120*86400)')
-header T_SB_23_5_6_25_180 eval:check_rbl_sub('senderbase', 'S23 > 5.6 && (time - S25 < 180*86400)')
-header T_SB_23_5_8_25_10 eval:check_rbl_sub('senderbase', 'S23 > 5.8 && (time - S25 < 10*86400)')
-header T_SB_23_5_8_25_20 eval:check_rbl_sub('senderbase', 'S23 > 5.8 && (time - S25 < 20*86400)')
-header T_SB_23_5_8_25_30 eval:check_rbl_sub('senderbase', 'S23 > 5.8 && (time - S25 < 30*86400)')
-header T_SB_23_5_8_25_40 eval:check_rbl_sub('senderbase', 'S23 > 5.8 && (time - S25 < 40*86400)')
-header T_SB_23_5_8_25_50 eval:check_rbl_sub('senderbase', 'S23 > 5.8 && (time - S25 < 50*86400)')
-header T_SB_23_5_8_25_60 eval:check_rbl_sub('senderbase', 'S23 > 5.8 && (time - S25 < 60*86400)')
-header T_SB_23_5_8_25_90 eval:check_rbl_sub('senderbase', 'S23 > 5.8 && (time - S25 < 90*86400)')
-header T_SB_23_5_8_25_120 eval:check_rbl_sub('senderbase', 'S23 > 5.8 && (time - S25 < 120*86400)')
-header T_SB_23_5_8_25_180 eval:check_rbl_sub('senderbase', 'S23 > 5.8 && (time - S25 < 180*86400)')
-header T_SB_23_6_0_25_10 eval:check_rbl_sub('senderbase', 'S23 > 6.0 && (time - S25 < 10*86400)')
-header T_SB_23_6_0_25_20 eval:check_rbl_sub('senderbase', 'S23 > 6.0 && (time - S25 < 20*86400)')
-header T_SB_23_6_0_25_30 eval:check_rbl_sub('senderbase', 'S23 > 6.0 && (time - S25 < 30*86400)')
-header T_SB_23_6_0_25_40 eval:check_rbl_sub('senderbase', 'S23 > 6.0 && (time - S25 < 40*86400)')
-header T_SB_23_6_0_25_50 eval:check_rbl_sub('senderbase', 'S23 > 6.0 && (time - S25 < 50*86400)')
-header T_SB_23_6_0_25_60 eval:check_rbl_sub('senderbase', 'S23 > 6.0 && (time - S25 < 60*86400)')
-header T_SB_23_6_0_25_90 eval:check_rbl_sub('senderbase', 'S23 > 6.0 && (time - S25 < 90*86400)')
-header T_SB_23_6_0_25_120 eval:check_rbl_sub('senderbase', 'S23 > 6.0 && (time - S25 < 120*86400)')
-header T_SB_23_6_0_25_180 eval:check_rbl_sub('senderbase', 'S23 > 6.0 && (time - S25 < 180*86400)')
-header T_SB_23_6_2_25_10 eval:check_rbl_sub('senderbase', 'S23 > 6.2 && (time - S25 < 10*86400)')
-header T_SB_23_6_2_25_20 eval:check_rbl_sub('senderbase', 'S23 > 6.2 && (time - S25 < 20*86400)')
-header T_SB_23_6_2_25_30 eval:check_rbl_sub('senderbase', 'S23 > 6.2 && (time - S25 < 30*86400)')
-header T_SB_23_6_2_25_40 eval:check_rbl_sub('senderbase', 'S23 > 6.2 && (time - S25 < 40*86400)')
-header T_SB_23_6_2_25_50 eval:check_rbl_sub('senderbase', 'S23 > 6.2 && (time - S25 < 50*86400)')
-header T_SB_23_6_2_25_60 eval:check_rbl_sub('senderbase', 'S23 > 6.2 && (time - S25 < 60*86400)')
-header T_SB_23_6_2_25_90 eval:check_rbl_sub('senderbase', 'S23 > 6.2 && (time - S25 < 90*86400)')
+header T_SB_23_6_2_25_060 eval:check_rbl_sub('senderbase', 'S23 > 6.2 && (time - S25 < 060*86400)')
+header T_SB_23_6_2_25_070 eval:check_rbl_sub('senderbase', 'S23 > 6.2 && (time - S25 < 070*86400)')
+header T_SB_23_6_2_25_080 eval:check_rbl_sub('senderbase', 'S23 > 6.2 && (time - S25 < 080*86400)')
+header T_SB_23_6_2_25_090 eval:check_rbl_sub('senderbase', 'S23 > 6.2 && (time - S25 < 090*86400)')
+header T_SB_23_6_2_25_100 eval:check_rbl_sub('senderbase', 'S23 > 6.2 && (time - S25 < 100*86400)')
+header T_SB_23_6_2_25_110 eval:check_rbl_sub('senderbase', 'S23 > 6.2 && (time - S25 < 110*86400)')
 header T_SB_23_6_2_25_120 eval:check_rbl_sub('senderbase', 'S23 > 6.2 && (time - S25 < 120*86400)')
+header T_SB_23_6_2_25_130 eval:check_rbl_sub('senderbase', 'S23 > 6.2 && (time - S25 < 130*86400)')
+header T_SB_23_6_2_25_140 eval:check_rbl_sub('senderbase', 'S23 > 6.2 && (time - S25 < 140*86400)')
+header T_SB_23_6_2_25_150 eval:check_rbl_sub('senderbase', 'S23 > 6.2 && (time - S25 < 150*86400)')
+header T_SB_23_6_2_25_160 eval:check_rbl_sub('senderbase', 'S23 > 6.2 && (time - S25 < 160*86400)')
+header T_SB_23_6_2_25_170 eval:check_rbl_sub('senderbase', 'S23 > 6.2 && (time - S25 < 170*86400)')
 header T_SB_23_6_2_25_180 eval:check_rbl_sub('senderbase', 'S23 > 6.2 && (time - S25 < 180*86400)')
-header T_SB_23_6_4_25_10 eval:check_rbl_sub('senderbase', 'S23 > 6.4 && (time - S25 < 10*86400)')
-header T_SB_23_6_4_25_20 eval:check_rbl_sub('senderbase', 'S23 > 6.4 && (time - S25 < 20*86400)')
-header T_SB_23_6_4_25_30 eval:check_rbl_sub('senderbase', 'S23 > 6.4 && (time - S25 < 30*86400)')
-header T_SB_23_6_4_25_40 eval:check_rbl_sub('senderbase', 'S23 > 6.4 && (time - S25 < 40*86400)')
-header T_SB_23_6_4_25_50 eval:check_rbl_sub('senderbase', 'S23 > 6.4 && (time - S25 < 50*86400)')
-header T_SB_23_6_4_25_60 eval:check_rbl_sub('senderbase', 'S23 > 6.4 && (time - S25 < 60*86400)')
-header T_SB_23_6_4_25_90 eval:check_rbl_sub('senderbase', 'S23 > 6.4 && (time - S25 < 90*86400)')
+
+header T_SB_23_6_3_25_060 eval:check_rbl_sub('senderbase', 'S23 > 6.3 && (time - S25 < 060*86400)')
+header T_SB_23_6_3_25_070 eval:check_rbl_sub('senderbase', 'S23 > 6.3 && (time - S25 < 070*86400)')
+header T_SB_23_6_3_25_080 eval:check_rbl_sub('senderbase', 'S23 > 6.3 && (time - S25 < 080*86400)')
+header T_SB_23_6_3_25_090 eval:check_rbl_sub('senderbase', 'S23 > 6.3 && (time - S25 < 090*86400)')
+header T_SB_23_6_3_25_100 eval:check_rbl_sub('senderbase', 'S23 > 6.3 && (time - S25 < 100*86400)')
+header T_SB_23_6_3_25_110 eval:check_rbl_sub('senderbase', 'S23 > 6.3 && (time - S25 < 110*86400)')
+header T_SB_23_6_3_25_120 eval:check_rbl_sub('senderbase', 'S23 > 6.3 && (time - S25 < 120*86400)')
+header T_SB_23_6_3_25_130 eval:check_rbl_sub('senderbase', 'S23 > 6.3 && (time - S25 < 130*86400)')
+header T_SB_23_6_3_25_140 eval:check_rbl_sub('senderbase', 'S23 > 6.3 && (time - S25 < 140*86400)')
+header T_SB_23_6_3_25_150 eval:check_rbl_sub('senderbase', 'S23 > 6.3 && (time - S25 < 150*86400)')
+header T_SB_23_6_3_25_160 eval:check_rbl_sub('senderbase', 'S23 > 6.3 && (time - S25 < 160*86400)')
+header T_SB_23_6_3_25_170 eval:check_rbl_sub('senderbase', 'S23 > 6.3 && (time - S25 < 170*86400)')
+header T_SB_23_6_3_25_180 eval:check_rbl_sub('senderbase', 'S23 > 6.3 && (time - S25 < 180*86400)')
+
+header T_SB_23_6_4_25_060 eval:check_rbl_sub('senderbase', 'S23 > 6.4 && (time - S25 < 060*86400)')
+header T_SB_23_6_4_25_070 eval:check_rbl_sub('senderbase', 'S23 > 6.4 && (time - S25 < 070*86400)')
+header T_SB_23_6_4_25_080 eval:check_rbl_sub('senderbase', 'S23 > 6.4 && (time - S25 < 080*86400)')
+header T_SB_23_6_4_25_090 eval:check_rbl_sub('senderbase', 'S23 > 6.4 && (time - S25 < 090*86400)')
+header T_SB_23_6_4_25_100 eval:check_rbl_sub('senderbase', 'S23 > 6.4 && (time - S25 < 100*86400)')
+header T_SB_23_6_4_25_110 eval:check_rbl_sub('senderbase', 'S23 > 6.4 && (time - S25 < 110*86400)')
 header T_SB_23_6_4_25_120 eval:check_rbl_sub('senderbase', 'S23 > 6.4 && (time - S25 < 120*86400)')
+header T_SB_23_6_4_25_130 eval:check_rbl_sub('senderbase', 'S23 > 6.4 && (time - S25 < 130*86400)')
+header T_SB_23_6_4_25_140 eval:check_rbl_sub('senderbase', 'S23 > 6.4 && (time - S25 < 140*86400)')
+header T_SB_23_6_4_25_150 eval:check_rbl_sub('senderbase', 'S23 > 6.4 && (time - S25 < 150*86400)')
+header T_SB_23_6_4_25_160 eval:check_rbl_sub('senderbase', 'S23 > 6.4 && (time - S25 < 160*86400)')
+header T_SB_23_6_4_25_170 eval:check_rbl_sub('senderbase', 'S23 > 6.4 && (time - S25 < 170*86400)')
 header T_SB_23_6_4_25_180 eval:check_rbl_sub('senderbase', 'S23 > 6.4 && (time - S25 < 180*86400)')
-header T_SB_23_6_6_25_10 eval:check_rbl_sub('senderbase', 'S23 > 6.6 && (time - S25 < 10*86400)')
-header T_SB_23_6_6_25_20 eval:check_rbl_sub('senderbase', 'S23 > 6.6 && (time - S25 < 20*86400)')
-header T_SB_23_6_6_25_30 eval:check_rbl_sub('senderbase', 'S23 > 6.6 && (time - S25 < 30*86400)')
-header T_SB_23_6_6_25_40 eval:check_rbl_sub('senderbase', 'S23 > 6.6 && (time - S25 < 40*86400)')
-header T_SB_23_6_6_25_50 eval:check_rbl_sub('senderbase', 'S23 > 6.6 && (time - S25 < 50*86400)')
-header T_SB_23_6_6_25_60 eval:check_rbl_sub('senderbase', 'S23 > 6.6 && (time - S25 < 60*86400)')
-header T_SB_23_6_6_25_90 eval:check_rbl_sub('senderbase', 'S23 > 6.6 && (time - S25 < 90*86400)')
+
+header T_SB_23_6_5_25_060 eval:check_rbl_sub('senderbase', 'S23 > 6.5 && (time - S25 < 060*86400)')
+header T_SB_23_6_5_25_070 eval:check_rbl_sub('senderbase', 'S23 > 6.5 && (time - S25 < 070*86400)')
+header T_SB_23_6_5_25_080 eval:check_rbl_sub('senderbase', 'S23 > 6.5 && (time - S25 < 080*86400)')
+header T_SB_23_6_5_25_090 eval:check_rbl_sub('senderbase', 'S23 > 6.5 && (time - S25 < 090*86400)')
+header T_SB_23_6_5_25_100 eval:check_rbl_sub('senderbase', 'S23 > 6.5 && (time - S25 < 100*86400)')
+header T_SB_23_6_5_25_110 eval:check_rbl_sub('senderbase', 'S23 > 6.5 && (time - S25 < 110*86400)')
+header T_SB_23_6_5_25_120 eval:check_rbl_sub('senderbase', 'S23 > 6.5 && (time - S25 < 120*86400)')
+header T_SB_23_6_5_25_130 eval:check_rbl_sub('senderbase', 'S23 > 6.5 && (time - S25 < 130*86400)')
+header T_SB_23_6_5_25_140 eval:check_rbl_sub('senderbase', 'S23 > 6.5 && (time - S25 < 140*86400)')
+header T_SB_23_6_5_25_150 eval:check_rbl_sub('senderbase', 'S23 > 6.5 && (time - S25 < 150*86400)')
+header T_SB_23_6_5_25_160 eval:check_rbl_sub('senderbase', 'S23 > 6.5 && (time - S25 < 160*86400)')
+header T_SB_23_6_5_25_170 eval:check_rbl_sub('senderbase', 'S23 > 6.5 && (time - S25 < 170*86400)')
+header T_SB_23_6_5_25_180 eval:check_rbl_sub('senderbase', 'S23 > 6.5 && (time - S25 < 180*86400)')
+
+header T_SB_23_6_6_25_060 eval:check_rbl_sub('senderbase', 'S23 > 6.6 && (time - S25 < 060*86400)')
+header T_SB_23_6_6_25_070 eval:check_rbl_sub('senderbase', 'S23 > 6.6 && (time - S25 < 070*86400)')
+header T_SB_23_6_6_25_080 eval:check_rbl_sub('senderbase', 'S23 > 6.6 && (time - S25 < 080*86400)')
+header T_SB_23_6_6_25_090 eval:check_rbl_sub('senderbase', 'S23 > 6.6 && (time - S25 < 090*86400)')
+header T_SB_23_6_6_25_100 eval:check_rbl_sub('senderbase', 'S23 > 6.6 && (time - S25 < 100*86400)')
+header T_SB_23_6_6_25_110 eval:check_rbl_sub('senderbase', 'S23 > 6.6 && (time - S25 < 110*86400)')
 header T_SB_23_6_6_25_120 eval:check_rbl_sub('senderbase', 'S23 > 6.6 && (time - S25 < 120*86400)')
+header T_SB_23_6_6_25_130 eval:check_rbl_sub('senderbase', 'S23 > 6.6 && (time - S25 < 130*86400)')
+header T_SB_23_6_6_25_140 eval:check_rbl_sub('senderbase', 'S23 > 6.6 && (time - S25 < 140*86400)')
+header T_SB_23_6_6_25_150 eval:check_rbl_sub('senderbase', 'S23 > 6.6 && (time - S25 < 150*86400)')
+header T_SB_23_6_6_25_160 eval:check_rbl_sub('senderbase', 'S23 > 6.6 && (time - S25 < 160*86400)')
+header T_SB_23_6_6_25_170 eval:check_rbl_sub('senderbase', 'S23 > 6.6 && (time - S25 < 170*86400)')
 header T_SB_23_6_6_25_180 eval:check_rbl_sub('senderbase', 'S23 > 6.6 && (time - S25 < 180*86400)')
-header T_SB_23_6_8_25_10 eval:check_rbl_sub('senderbase', 'S23 > 6.8 && (time - S25 < 10*86400)')
-header T_SB_23_6_8_25_20 eval:check_rbl_sub('senderbase', 'S23 > 6.8 && (time - S25 < 20*86400)')
-header T_SB_23_6_8_25_30 eval:check_rbl_sub('senderbase', 'S23 > 6.8 && (time - S25 < 30*86400)')
-header T_SB_23_6_8_25_40 eval:check_rbl_sub('senderbase', 'S23 > 6.8 && (time - S25 < 40*86400)')
-header T_SB_23_6_8_25_50 eval:check_rbl_sub('senderbase', 'S23 > 6.8 && (time - S25 < 50*86400)')
-header T_SB_23_6_8_25_60 eval:check_rbl_sub('senderbase', 'S23 > 6.8 && (time - S25 < 60*86400)')
-header T_SB_23_6_8_25_90 eval:check_rbl_sub('senderbase', 'S23 > 6.8 && (time - S25 < 90*86400)')
-header T_SB_23_6_8_25_120 eval:check_rbl_sub('senderbase', 'S23 > 6.8 && (time - S25 < 120*86400)')
-header T_SB_23_6_8_25_180 eval:check_rbl_sub('senderbase', 'S23 > 6.8 && (time - S25 < 180*86400)')
-header T_SB_23_7_0_25_10 eval:check_rbl_sub('senderbase', 'S23 > 7.0 && (time - S25 < 10*86400)')
-header T_SB_23_7_0_25_20 eval:check_rbl_sub('senderbase', 'S23 > 7.0 && (time - S25 < 20*86400)')
-header T_SB_23_7_0_25_30 eval:check_rbl_sub('senderbase', 'S23 > 7.0 && (time - S25 < 30*86400)')
-header T_SB_23_7_0_25_40 eval:check_rbl_sub('senderbase', 'S23 > 7.0 && (time - S25 < 40*86400)')
-header T_SB_23_7_0_25_50 eval:check_rbl_sub('senderbase', 'S23 > 7.0 && (time - S25 < 50*86400)')
-header T_SB_23_7_0_25_60 eval:check_rbl_sub('senderbase', 'S23 > 7.0 && (time - S25 < 60*86400)')
-header T_SB_23_7_0_25_90 eval:check_rbl_sub('senderbase', 'S23 > 7.0 && (time - S25 < 90*86400)')
-header T_SB_23_7_0_25_120 eval:check_rbl_sub('senderbase', 'S23 > 7.0 && (time - S25 < 120*86400)')
-header T_SB_23_7_0_25_180 eval:check_rbl_sub('senderbase', 'S23 > 7.0 && (time - S25 < 180*86400)')
-header T_SB_23_7_2_25_10 eval:check_rbl_sub('senderbase', 'S23 > 7.2 && (time - S25 < 10*86400)')
-header T_SB_23_7_2_25_20 eval:check_rbl_sub('senderbase', 'S23 > 7.2 && (time - S25 < 20*86400)')
-header T_SB_23_7_2_25_30 eval:check_rbl_sub('senderbase', 'S23 > 7.2 && (time - S25 < 30*86400)')
-header T_SB_23_7_2_25_40 eval:check_rbl_sub('senderbase', 'S23 > 7.2 && (time - S25 < 40*86400)')
-header T_SB_23_7_2_25_50 eval:check_rbl_sub('senderbase', 'S23 > 7.2 && (time - S25 < 50*86400)')
-header T_SB_23_7_2_25_60 eval:check_rbl_sub('senderbase', 'S23 > 7.2 && (time - S25 < 60*86400)')
-header T_SB_23_7_2_25_90 eval:check_rbl_sub('senderbase', 'S23 > 7.2 && (time - S25 < 90*86400)')
-header T_SB_23_7_2_25_120 eval:check_rbl_sub('senderbase', 'S23 > 7.2 && (time - S25 < 120*86400)')
-header T_SB_23_7_2_25_180 eval:check_rbl_sub('senderbase', 'S23 > 7.2 && (time - S25 < 180*86400)')
-header T_SB_23_7_4_25_10 eval:check_rbl_sub('senderbase', 'S23 > 7.4 && (time - S25 < 10*86400)')
-header T_SB_23_7_4_25_20 eval:check_rbl_sub('senderbase', 'S23 > 7.4 && (time - S25 < 20*86400)')
-header T_SB_23_7_4_25_30 eval:check_rbl_sub('senderbase', 'S23 > 7.4 && (time - S25 < 30*86400)')
-header T_SB_23_7_4_25_40 eval:check_rbl_sub('senderbase', 'S23 > 7.4 && (time - S25 < 40*86400)')
-header T_SB_23_7_4_25_50 eval:check_rbl_sub('senderbase', 'S23 > 7.4 && (time - S25 < 50*86400)')
-header T_SB_23_7_4_25_60 eval:check_rbl_sub('senderbase', 'S23 > 7.4 && (time - S25 < 60*86400)')
-header T_SB_23_7_4_25_90 eval:check_rbl_sub('senderbase', 'S23 > 7.4 && (time - S25 < 90*86400)')
-header T_SB_23_7_4_25_120 eval:check_rbl_sub('senderbase', 'S23 > 7.4 && (time - S25 < 120*86400)')
-header T_SB_23_7_4_25_180 eval:check_rbl_sub('senderbase', 'S23 > 7.4 && (time - S25 < 180*86400)')
-header T_SB_23_7_6_25_10 eval:check_rbl_sub('senderbase', 'S23 > 7.6 && (time - S25 < 10*86400)')
-header T_SB_23_7_6_25_20 eval:check_rbl_sub('senderbase', 'S23 > 7.6 && (time - S25 < 20*86400)')
-header T_SB_23_7_6_25_30 eval:check_rbl_sub('senderbase', 'S23 > 7.6 && (time - S25 < 30*86400)')
-header T_SB_23_7_6_25_40 eval:check_rbl_sub('senderbase', 'S23 > 7.6 && (time - S25 < 40*86400)')
-header T_SB_23_7_6_25_50 eval:check_rbl_sub('senderbase', 'S23 > 7.6 && (time - S25 < 50*86400)')
-header T_SB_23_7_6_25_60 eval:check_rbl_sub('senderbase', 'S23 > 7.6 && (time - S25 < 60*86400)')
-header T_SB_23_7_6_25_90 eval:check_rbl_sub('senderbase', 'S23 > 7.6 && (time - S25 < 90*86400)')
-header T_SB_23_7_6_25_120 eval:check_rbl_sub('senderbase', 'S23 > 7.6 && (time - S25 < 120*86400)')
-header T_SB_23_7_6_25_180 eval:check_rbl_sub('senderbase', 'S23 > 7.6 && (time - S25 < 180*86400)')
+
+tflags T_SB_23_6_2_25_060 net
+tflags T_SB_23_6_2_25_070 net
+tflags T_SB_23_6_2_25_080 net
+tflags T_SB_23_6_2_25_090 net
+tflags T_SB_23_6_2_25_100 net
+tflags T_SB_23_6_2_25_110 net
+tflags T_SB_23_6_2_25_120 net
+tflags T_SB_23_6_2_25_130 net
+tflags T_SB_23_6_2_25_140 net
+tflags T_SB_23_6_2_25_150 net
+tflags T_SB_23_6_2_25_160 net
+tflags T_SB_23_6_2_25_170 net
+tflags T_SB_23_6_2_25_180 net
+
+tflags T_SB_23_6_3_25_060 net
+tflags T_SB_23_6_3_25_070 net
+tflags T_SB_23_6_3_25_080 net
+tflags T_SB_23_6_3_25_090 net
+tflags T_SB_23_6_3_25_100 net
+tflags T_SB_23_6_3_25_110 net
+tflags T_SB_23_6_3_25_120 net
+tflags T_SB_23_6_3_25_130 net
+tflags T_SB_23_6_3_25_140 net
+tflags T_SB_23_6_3_25_150 net
+tflags T_SB_23_6_3_25_160 net
+tflags T_SB_23_6_3_25_170 net
+tflags T_SB_23_6_3_25_180 net
+
+tflags T_SB_23_6_4_25_060 net
+tflags T_SB_23_6_4_25_070 net
+tflags T_SB_23_6_4_25_080 net
+tflags T_SB_23_6_4_25_090 net
+tflags T_SB_23_6_4_25_100 net
+tflags T_SB_23_6_4_25_110 net
+tflags T_SB_23_6_4_25_120 net
+tflags T_SB_23_6_4_25_130 net
+tflags T_SB_23_6_4_25_140 net
+tflags T_SB_23_6_4_25_150 net
+tflags T_SB_23_6_4_25_160 net
+tflags T_SB_23_6_4_25_170 net
+tflags T_SB_23_6_4_25_180 net
+
+tflags T_SB_23_6_5_25_060 net
+tflags T_SB_23_6_5_25_070 net
+tflags T_SB_23_6_5_25_080 net
+tflags T_SB_23_6_5_25_090 net
+tflags T_SB_23_6_5_25_100 net
+tflags T_SB_23_6_5_25_110 net
+tflags T_SB_23_6_5_25_120 net
+tflags T_SB_23_6_5_25_130 net
+tflags T_SB_23_6_5_25_140 net
+tflags T_SB_23_6_5_25_150 net
+tflags T_SB_23_6_5_25_160 net
+tflags T_SB_23_6_5_25_170 net
+tflags T_SB_23_6_5_25_180 net
+
+tflags T_SB_23_6_6_25_060 net
+tflags T_SB_23_6_6_25_070 net
+tflags T_SB_23_6_6_25_080 net
+tflags T_SB_23_6_6_25_090 net
+tflags T_SB_23_6_6_25_100 net
+tflags T_SB_23_6_6_25_110 net
+tflags T_SB_23_6_6_25_120 net
+tflags T_SB_23_6_6_25_130 net
+tflags T_SB_23_6_6_25_140 net
+tflags T_SB_23_6_6_25_150 net
+tflags T_SB_23_6_6_25_160 net
+tflags T_SB_23_6_6_25_170 net
+tflags T_SB_23_6_6_25_180 net
 
 # demoted for further testing
 # results for recent email (last 4 days of spam, ham ranging in ages
