@@ -671,7 +671,6 @@ sub learn {
   }
 
   $msg->extract_message_metadata ($self->{main});
-
   my $body = $self->get_body_from_msg ($msg);
   my $ret;
 
@@ -942,10 +941,12 @@ sub get_body_from_msg {
     warn "msg not a ref: '$msg'";
     return [ ];
   }
+  $msg->extract_message_metadata ($self->{main});
   my $permsgstatus =
         Mail::SpamAssassin::PerMsgStatus->new($self->{main}, $msg);
 
-  my $body = $permsgstatus->get_decoded_stripped_body_text_array();
+  my $body = $msg->{metadata}->get_rendered_body_text_array();
+  # TODO! also add URI extraction to {metadata}
   push (@{$body}, $self->add_uris_for_permsgstatus($permsgstatus));
   $permsgstatus->finish();
 
