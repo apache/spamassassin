@@ -182,10 +182,13 @@ sub process_dnsbl_result {
 
   my $packet = $self->{res}->bgread($query->[BGSOCK]);
   undef $query->[BGSOCK];
-
-  return if !defined $packet;
+  return unless (defined $packet &&
+		 defined $packet->header &&
+		 defined $packet->question &&
+		 defined $packet->answer);
 
   my $question = ($packet->question)[0];
+  return if !defined $question;
 
   # NO_DNS_FOR_FROM
   if ($self->{sender_host} &&
@@ -200,6 +203,7 @@ sub process_dnsbl_result {
   }
   # DNSBL tests are here
   foreach my $answer ($packet->answer) {
+    next if !defined $answer;
     # track all responses
     $self->dnsbl_uri($question, $answer);
     # TODO: there are some CNAME returns that might be useful
