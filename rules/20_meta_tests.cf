@@ -108,3 +108,9 @@ header __MOZILLA_MUA		X-Mailer =~ /\bMozilla\b/
 header __MOZILLA_MSGID		MESSAGEID =~ /^<[A-F\d]{8}\.[A-F1-9][A-F\d]{0,7}\@\S+>$/m
 meta FORGED_MUA_MOZILLA		(__MOZILLA_MUA && !__UNUSABLE_MSGID && !__MOZILLA_MSGID)
 describe FORGED_MUA_MOZILLA	Forged mail pretending to be from Mozilla
+
+header __NMS_CGI_NOT_BUGGY      X-Mailer =~ /^NMS FormMail\.pl.*v\d/
+body __BUGGY_CGI		/Below is the result of your feedback form/
+meta BUGGY_CGI			__BUGGY_CGI && !__NMS_CGI_NOT_BUGGY
+describe BUGGY_CGI		Broken CGI script message
+
