@@ -202,18 +202,18 @@ sub _run_hashcash_for_one_string {
     # extensions are, as yet, unused by SpamAssassin
   }
   else {
-    dbg ("hashcash: version $ver stamps not yet supported");
+    dbg("hashcash: version $ver stamps not yet supported");
     return 0;
   }
 
   if (!$trial) {
-    dbg ("hashcash: no trial in stamp '$hc'");
+    dbg("hashcash: no trial in stamp '$hc'");
     return 0;
   }
 
   my $accept = $scanner->{conf}->{hashcash_accept};
   if (!$self->_check_hashcash_resource ($scanner, $accept, $rsrc)) {
-    dbg ("hashcash: resource $rsrc not accepted here");
+    dbg("hashcash: resource $rsrc not accepted here");
     return 0;
   }
 
@@ -233,7 +233,7 @@ sub _run_hashcash_for_one_string {
     $value = $bits;
   }
 
-  dbg ("hashcash token value: $value");
+  dbg("hashcash: token value: $value");
 
   if ($self->was_hashcash_token_double_spent ($scanner, $hc)) {
     $scanner->{hashcash_double_spent} = 1;
@@ -249,11 +249,11 @@ sub was_hashcash_token_double_spent {
 
   my $main = $self->{main};
   if (!$main->{conf}->{hashcash_doublespend_path}) {
-    dbg ("hashcash_doublespend_path not defined or empty");
+    dbg("hashcash: hashcash_doublespend_path not defined or empty");
     return 0;
   }
   if (!HAS_DB_FILE) {
-    dbg ("hashcash: DB_File module not installed, cannot use double-spend db");
+    dbg("hashcash: DB_File module not installed, cannot use double-spend db");
     return 0;
   }
 
@@ -270,18 +270,18 @@ sub was_hashcash_token_double_spent {
   if (!tie %spenddb, "DB_File", $path, O_RDWR|O_CREAT,
                 (oct ($main->{conf}->{hashcash_doublespend_file_mode}) & 0666))
   {
-    dbg ("hashcash: failed to tie to $path: $@ $!");
+    dbg("hashcash: failed to tie to $path: $@ $!");
     # not a serious error. TODO?
     return 0;
   }
 
   if (exists $spenddb{$token}) {
-    dbg ("hashcash: token '$token' spent already");
+    dbg("hashcash: token '$token' spent already");
     return 1;
   }
 
   $spenddb{$token} = time;
-  dbg ("hashcash: marking token '$token' as spent");
+  dbg("hashcash: marking token '$token' as spent");
 
   # TODO: expiry?
 
@@ -315,6 +315,6 @@ sub _check_hashcash_resource {
 
 ############################################################################
 
-sub dbg { Mail::SpamAssassin::dbg (@_); }
+sub dbg { Mail::SpamAssassin::dbg(@_); }
 
 1;

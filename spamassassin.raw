@@ -157,7 +157,7 @@ GetOptions(
   'add-to-whitelist|W'                      => \$opt{'add-to-whitelist'},
   'configpath|config-file|config-dir|c|C=s' => \$opt{'configpath'},
   'create-prefs!'                           => \$opt{'create-prefs'},
-  'debug-level|debug|D:s'                   => \$opt{'debug-level'},
+  'debug|D:s'                               => \$opt{'debug'},
   'error-code|exit-code|e:i'                => \$opt{'error-code'},
   'help|h|?'                                => \$opt{'help'},
   'lint'                                    => \$opt{'lint'},
@@ -209,6 +209,19 @@ if ( defined $opt{'version'} ) {
   exit($resphash{'EX_OK'});
 }
 
+# set debug areas, if any specified (only useful for command-line tools)
+my @debug;
+if (defined $opt{'debug'}) {
+  if ($opt{'debug'}) {
+    @debug = split(/,/, $opt{'debug'});
+    if (grep { !/^\S+$/ } @debug) {
+      print_usage_and_exit("bad areas in --debug option!");
+    }
+  }
+  else {
+    @debug = ("all");
+  }
+}
 
 # create the tester factory
 my $spamtest = new Mail::SpamAssassin(
@@ -217,25 +230,13 @@ my $spamtest = new Mail::SpamAssassin(
     site_rules_filename => $opt{'siteconfigpath'},
     userprefs_filename  => $opt{'prefspath'},
     local_tests_only    => $opt{'local'},
-    debug               => defined( $opt{'debug-level'} ),
+    debug               => \@debug,
     dont_copy_prefs     => ( $opt{'create-prefs'} ? 0 : 1 ),
     PREFIX              => $PREFIX,
     DEF_RULES_DIR       => $DEF_RULES_DIR,
     LOCAL_RULES_DIR     => $LOCAL_RULES_DIR,
   }
 );
-
-# set debug levels, if any specified (only useful for this command-line
-# tool really)
-if ( defined $opt{'debug-level'} && $opt{'debug-level'} ne '' ) {
-  my $levels = $opt{'debug-level'};
-  while ( $levels =~ s/^([a-z]+)=([+-]?\d+)[,;:]*//s ) {
-    $Mail::SpamAssassin::DEBUG->{$1} = $2 + 0;
-  }
-  if ( $levels !~ /^\s*$/ ) {
-    print_usage_and_exit("bad areas in --debug option ($levels)!");
-  }
-}
 
 if ( $opt{'lint'} ) {
   $spamtest->debug_diagnostics();
@@ -342,7 +343,7 @@ exit( $exitvalue || 0 );
 
 # this is never called, it's just used to shut up the warnings
 sub NEVERCALLED {
-  $Mail::SpamAssassin::DEBUG = {};
+  $Mail::SpamAssassin::DEBUG = 0;
 }
 
 ###########################################################################
@@ -665,15 +666,17 @@ the default directories (usually C</etc/mail/spamassassin> or similar).
 
 Read user score preferences from I<prefs> (usually C<$HOME/.spamassassin/user_prefs>).
 
-=item B<-D> [I<area=n,...>], B<--debug> [I<area=n,...>]
+=item B<-D> [I<area,...>], B<--debug> [I<area,...>]
 
-Produce diagnostic output. The level of diagnostic output can be set for each
-area separately; I<area> is the area of the code to instrument, and I<n> is
-a positive or negative number indicating the debug level or bitmask for that 
-area of code.  For example, to produce diagnostic output on all rules that 
-hit, use:
+Produce debugging output. If no areas are listed, all debugging information is
+printed. Diagnostic output can also be enabled for each area individually;
+I<area> is the area of the code to instrument. For example, to produce
+diagnostic output on bayes, learn, and dns, use:
 
-        spamassassin -D rulesrun=255
+        spamassassin -D bayes,learn,dns
+
+Higher priority informational messages that are suitable for logging in normal
+circumstances are available with an area of "info".
 
 =item B<-x>, B<--nocreate-prefs>
 

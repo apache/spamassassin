@@ -117,7 +117,7 @@ sub new {
   };
 
   if ($@) {
-    dbg ("failed to load Net::DNS::Resolver: $@");
+    dbg("uridnsbl: failed to load Net::DNS::Resolver: $@");
   }
 
   if ($self->{res}) {
@@ -186,7 +186,7 @@ sub parsed_metadata {
     my $dom = Mail::SpamAssassin::Util::uri_to_domain($uri);
     if ($dom) {
       if (exists $scanner->{main}->{conf}->{uridnsbl_skip_domains}->{$dom}) {
-        dbg("URIDNSBL: found domain $dom in skip list");
+        dbg("uridnsbl: found domain $dom in skip list");
       }
       else {
         $domlist{$dom} = 1;
@@ -206,7 +206,7 @@ sub parsed_metadata {
 
   # and query
   my @doms = keys %domlist;
-  dbg ("URIDNSBL: domains to query: ".join(' ',@doms));
+  dbg("uridnsbl: domains to query: ".join(' ',@doms));
   foreach my $dom (@doms) {
     $self->query_domain ($scanstate, $dom);
   }
@@ -301,12 +301,12 @@ sub check_post_dnsbl {
   # try to complete a few more
   if (!$self->complete_lookups($scanstate)) {
     my $secs_to_wait = $scan->{conf}->{uridnsbl_timeout};
-    dbg ("waiting $secs_to_wait seconds for URIDNSBL lookups to complete");
+    dbg("uridnsbl: waiting $secs_to_wait seconds for URIDNSBL lookups to complete");
     while ($secs_to_wait-- >= 0) {
       last if ($self->complete_lookups($scanstate));
       sleep 1;
     }
-    dbg ("done waiting for URIDNSBL lookups to complete");
+    dbg("uridnsbl: done waiting for URIDNSBL lookups to complete");
   }
 
   foreach my $rulename (keys %{$scanstate->{active_rules_revipbl}},
@@ -340,7 +340,8 @@ sub setup {
 sub query_domain {
   my ($self, $scanstate, $dom) = @_;
 
-  #warn "domain $dom\n"; return;
+  #warn "uridnsbl: domain $dom\n";
+  #return;
 
   $dom = lc $dom;
   return if $scanstate->{seen_domain}->{$dom}; $scanstate->{seen_domain}->{$dom}=1;
@@ -518,7 +519,7 @@ sub got_dnsbl_hit {
   my ($self, $scanstate, $ent, $str, $dom, $rulename) = @_;
 
   $str =~ s/\s+/  /gs;	# long whitespace => short
-  dbg ("URIDNSBL: domain \"$dom\" listed ($rulename): $str");
+  dbg("uridnsbl: domain \"$dom\" listed ($rulename): $str");
 
   if (!defined $scanstate->{hits}->{$rulename}) {
     $scanstate->{hits}->{$rulename} = { };
@@ -584,7 +585,7 @@ sub complete_lookups {
     elsif ($type eq 'DNSBL') {
       $self->complete_dnsbl_lookup ($scanstate, $ent, $val);
       my $totalsecs = (time - $ent->{obj}->{querystart});
-      dbg ("URIDNSBL: query for ".$ent->{obj}->{dom}." took ".
+      dbg("uridnsbl: query for ".$ent->{obj}->{dom}." took ".
 		$totalsecs." seconds to look up ($val)");
     }
 
@@ -592,11 +593,11 @@ sub complete_lookups {
     delete $scanstate->{pending_lookups}->{$key};
   }
 
-  dbg ("URIDNSBL: queries completed: ".$scanstate->{queries_completed}.
+  dbg("uridnsbl: queries completed: ".$scanstate->{queries_completed}.
 		" started: ".$scanstate->{queries_started});
 
   if (1) {
-    dbg ("URIDNSBL: queries active: ".
+    dbg("uridnsbl: queries active: ".
 	join (' ', map { "$_=$typecount{$_}" } sort keys %typecount)." at ".
 	localtime(time));
   }
@@ -614,7 +615,7 @@ sub complete_lookups {
       if ($scanstate->{last_count} == $numkeys) {
 	$scanstate->{times_count_was_same}++;
 	if ($scanstate->{times_count_was_same} > 20) {
-	  dbg ("URIDNSBL: escaping: must have lost requests");
+	  dbg("uridnsbl: escaping: must have lost requests");
 	  $self->abort_remaining_lookups ($scanstate);
 	  $stillwaiting = 0;
 	}
@@ -638,7 +639,7 @@ sub abort_remaining_lookups  {
   foreach my $key (keys %{$pending})
   {
     if (!$foundone) {
-      dbg ("URIDNSBL: aborting remaining lookups");
+      dbg("uridnsbl: aborting remaining lookups");
       $foundone = 1;
     }
 
@@ -659,12 +660,12 @@ sub close_ent_socket {
 
 sub log_dns_result {
   my $self = shift;
-  #Mail::SpamAssassin::dbg ("URIDNSBL: ".join (' ', @_));
+  #Mail::SpamAssassin::dbg("uridnsbl: ".join (' ', @_));
 }
 
 # ---------------------------------------------------------------------------
 
-sub dbg { Mail::SpamAssassin::dbg (@_); }
+sub dbg { Mail::SpamAssassin::dbg(@_); }
 
 # ---------------------------------------------------------------------------
 

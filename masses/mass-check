@@ -26,7 +26,8 @@ usage: mass-check [options] target ...
   -j=jobs       specify the number of processes to run simultaneously
   --net         turn on network checks!
   --mid         report Message-ID from each message
-  --debug       report debugging information
+  --debug=LIST  report debugging information (default is all facilities, LIST
+                is a comma-separated list of facilities)
   --progress    show progress updates during check
   --rewrite=OUT save rewritten message to OUT (default is /tmp/out)
   --showdots    print a dot for each scanned message
@@ -75,9 +76,9 @@ ENDOFUSAGE
 
 use vars qw($opt_c $opt_p $opt_f $opt_j $opt_n $opt_o $opt_all $opt_bayes
 	    $opt_debug $opt_format $opt_hamlog $opt_head $opt_loghits
-	    $opt_mid $opt_mh $opt_ms $opt_net $opt_nosort $opt_progress
-	    $opt_showdots $opt_spamlog $opt_tail $opt_rules $opt_restart
-	    $opt_loguris $opt_after $opt_before $opt_rewrite $opt_deencap);
+	    $opt_mid $opt_net $opt_nosort $opt_progress $opt_showdots
+	    $opt_spamlog $opt_tail $opt_rules $opt_restart $opt_loguris
+	    $opt_after $opt_before $opt_rewrite $opt_deencap);
 
 use FindBin;
 use lib "$FindBin::Bin/../lib";
@@ -97,7 +98,7 @@ $opt_net = 0;
 $opt_hamlog = "ham.log";
 $opt_spamlog = "spam.log";
 
-GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug",
+GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug:s",
 	   "hamlog=s", "head=i", "loghits", "mh", "mid", "ms", "net",
 	   "progress", "rewrite:s", "showdots", "spamlog=s", "tail=i",
 	   "rules=s", "restart=i", "after=s", "before=s", "loguris", "deencap=s",
@@ -115,15 +116,18 @@ if ($opt_f) {
 
 if (scalar @targets == 0) { usage(); }
 
-#if ($opt_ms) {
-#find_missed($opt_spamlog);
-#}
-#elsif ($opt_mh) {
-#find_missed($opt_hamlog);
-#}
+my @debug;
+if (defined $opt_debug) {
+  if ($opt_debug) {
+    @debug = split(/,/, $opt_debug);
+  }
+  else {
+    @debug = ("all");
+  }
+}
 
 $spamtest = new Mail::SpamAssassin ({
-  'debug'              			=> $opt_debug,
+  'debug'              			=> \@debug,
   'rules_filename'     			=> $opt_c,
   'userprefs_filename' 			=> "$opt_p/user_prefs",
   'site_rules_filename'			=> "$opt_p/local.cf",

@@ -53,17 +53,17 @@ sub safe_lock {
   my $lock_file = "$path.lock";
 
   if (-e $lock_file && -M $lock_file > (LOCK_MAX_AGE / 86400)) {
-    dbg("lock: $$ breaking stale lock: $lock_file");
-    unlink($lock_file) || warn "lock: $$ unlink of lock file $lock_file failed: $!\n";
+    dbg("locker: safe_lock $$ breaking stale lock: $lock_file");
+    unlink($lock_file) || warn "locker: safe_lock: $$ unlink of lock file $lock_file failed: $!\n";
   }
   for (my $retries = 0; $retries < $max_retries; $retries++) {
     if ($retries > 0) {
       sleep(1);
       # TODO: $self->jittery_one_second_sleep();?
     }
-    dbg("lock: $$ trying to get lock on $path with $retries retries");
+    dbg("locker: safe_lock: $$ trying to get lock on $path with $retries retries");
     if (sysopen(LOCKFILE, $lock_file, O_RDWR|O_CREAT|O_EXCL)) {
-      dbg("lock: $$ link to $lock_file: sysopen ok");
+      dbg("locker: safe_lock: $$ link to $lock_file: sysopen ok");
       close(LOCKFILE);
       return 1;
     }
@@ -73,8 +73,8 @@ sub safe_lock {
     if ((!defined($age) && $retries > $max_retries / 2) ||
 	(defined($age) && (time - $age > LOCK_MAX_AGE)))
     {
-      dbg("lock: $$ breaking stale lock: $lock_file");
-      unlink ($lock_file) || warn "lock: $$ unlink of lock file $lock_file failed: $!\n";
+      dbg("locker: safe_lock: $$ breaking stale lock: $lock_file");
+      unlink ($lock_file) || warn "locker: safe_lock: $$ unlink of lock file $lock_file failed: $!\n";
     }
   }
   return 0;
@@ -85,8 +85,8 @@ sub safe_lock {
 sub safe_unlock {
   my ($self, $path) = @_;
 
-  unlink ("$path.lock") || warn "unlock: $$ unlink failed: $path.lock\n";
-  dbg("unlock: $$ unlink $path.lock");
+  unlink ("$path.lock") || warn "locker: safe_unlock: $$ unlink failed: $path.lock\n";
+  dbg("locker: safe_unlock: $$ unlink $path.lock");
 }
 
 ###########################################################################
@@ -100,12 +100,12 @@ sub refresh_lock {
   # owns it, but this shouldn't, in theory, be an issue.
   utime time, time, "$path.lock";
 
-  dbg("refresh: $$ refresh $path.lock");
+  dbg("locker: refresh_lock: $$ refresh $path.lock");
 }
 
 ###########################################################################
 
 
-sub dbg { Mail::SpamAssassin::dbg (@_); }
+sub dbg { Mail::SpamAssassin::dbg(@_); }
 
 1;

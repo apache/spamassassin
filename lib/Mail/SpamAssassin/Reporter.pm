@@ -63,48 +63,48 @@ sub report {
   if (!$self->{options}->{dont_report_to_dcc} && $self->is_dcc_available()) {
     if ($self->dcc_report($text)) {
       $available = 1;
-      dbg ("SpamAssassin: spam reported to DCC.");
+      dbg("reporter: spam reported to DCC");
       $return = 0;
     }
     else {
-      dbg ("SpamAssassin: could not report spam to DCC.");
+      dbg("reporter: could not report spam to DCC");
     }
   }
   if (!$self->{options}->{dont_report_to_pyzor} && $self->is_pyzor_available()) {
     if ($self->pyzor_report($text)) {
       $available = 1;
-      dbg ("SpamAssassin: spam reported to Pyzor.");
+      dbg("reporter: spam reported to Pyzor");
       $return = 0;
     }
     else {
-      dbg ("SpamAssassin: could not report spam to Pyzor.");
+      dbg("reporter: could not report spam to Pyzor");
     }
   }
   if (!$self->{options}->{dont_report_to_razor} && $self->is_razor_available()) {
     if ($self->razor_report($text)) {
       $available = 1;
-      dbg ("SpamAssassin: spam reported to Razor.");
+      dbg("reporter: spam reported to Razor");
       $return = 0;
     }
     else {
-      dbg ("SpamAssassin: could not report spam to Razor.");
+      dbg("reporter: could not report spam to Razor");
     }
   }
   if (!$self->{options}->{dont_report_to_spamcop} && $self->is_spamcop_available()) {
     if ($self->spamcop_report($text)) {
       $available = 1;
-      dbg ("SpamAssassin: spam reported to SpamCop.");
+      dbg("reporter: spam reported to SpamCop");
       $return = 0;
     }
     else {
-      dbg ("SpamAssassin: could not report spam to SpamCop.");
+      dbg("reporter: could not report spam to reporter.");
     }
   }
 
   $self->delete_fulltext_tmpfile();
 
-  if ( $available == 0 ) {
-    warn "SpamAssassin: no Internet hashing methods available, so couldn't report.\n";
+  if ($available == 0) {
+    warn "reporter: no network reporting methods available, so couldn't report\n";
   }
 
   return $return;
@@ -116,18 +116,18 @@ sub revoke {
   my ($self) = @_;
   my $return = 1;
 
-  my $text = $self->{main}->remove_spamassassin_markup ($self->{msg});
+  my $text = $self->{main}->remove_spamassassin_markup($self->{msg});
 
   if (!$self->{main}->{local_tests_only}
       && !$self->{options}->{dont_report_to_razor}
       && $self->is_razor_available()) # we only work with Razor2
   {
     if ($self->razor_revoke($text)) {
-      dbg ("SpamAssassin: spam revoked from Razor.");
+      dbg("reporter: spam revoked from Razor");
       $return = 0;
     }
     else {
-      dbg ("SpamAssassin: could not revoke spam from Razor.");
+      dbg("reporter: could not revoke spam from Razor");
     }
   }
 
@@ -140,7 +140,7 @@ sub revoke {
 ###########################################################################
 # non-public methods.
 
-# This is to reset the alarm before dieing - spamd can die of a stray alarm!
+# This is to reset the alarm before die() - spamd can die of a stray alarm!
 
 sub adie {
   my $msg = shift;
@@ -156,14 +156,14 @@ sub close_pipe_fh {
   return if close ($fh);
 
   my $exitstatus = $?;
-  dbg ("raw exit code: $exitstatus");
+  dbg("reporter: raw exit code: $exitstatus");
 
   if (WIFEXITED ($exitstatus) && (WEXITSTATUS ($exitstatus))) {
-    die "Exited with non-zero exit code " . WEXITSTATUS ($exitstatus) . "\n";
+    die "reporter: exited with non-zero exit code " . WEXITSTATUS ($exitstatus) . "\n";
   }
 
   if (WIFSIGNALED ($exitstatus)) {
-    die "Exited due to signal " . WTERMSIG ($exitstatus) . "\n";
+    die "reporter: exited due to signal " . WTERMSIG ($exitstatus) . "\n";
   }
 }
 
@@ -176,7 +176,7 @@ sub razor_report {
   my $type = (defined($revoke) && $revoke) ? 'revoke' : 'report';
 
   # razor also debugs to stdout. argh. fix it to stderr...
-  if ($Mail::SpamAssassin::DEBUG->{enabled}) {
+  if ($Mail::SpamAssassin::DEBUG) {
     open (OLDOUT, ">&STDOUT");
     open (STDOUT, ">&STDERR");
   }
@@ -197,21 +197,21 @@ sub razor_report {
 
       if ($rc) {
         my %opt = (
-          debug      => $Mail::SpamAssassin::DEBUG->{enabled},
+          debug      => $Mail::SpamAssassin::DEBUG,
           foreground => 1,
           config     => $self->{conf}->{razor_config}
         );
         $rc->{opt} = \%opt;
-        $rc->do_conf() or adie($rc->errstr);
+        $rc->do_conf() or adie("reporter: razor2: " . $rc->errstr);
 
         # Razor2 requires authentication for reporting
         my $ident = $rc->get_ident
-          or adie ("Razor2 $type requires authentication");
+          or adie("reporter: razor2: $type requires authentication");
 
 	my @msg = (\$fulltext);
         my $objects = $rc->prepare_objects( \@msg )
-          or adie ("error in prepare_objects");
-        $rc->get_server_info() or adie $rc->errprefix("reportit");
+          or adie("reporter: razor2: error in prepare_objects");
+        $rc->get_server_info() or adie $rc->errprefix("reporter: razor2");
 
 	# let's reset the alarm since get_server_info() calls
 	# nextserver() which calls discover() which very likely will
@@ -219,33 +219,33 @@ sub razor_report {
 	alarm $timeout;
 
         my $sigs = $rc->compute_sigs($objects)
-          or adie ("error in compute_sigs");
+          or adie("reporter: razor2: error in compute_sigs");
 
-        $rc->connect() or adie ($rc->errprefix("reportit"));
-        $rc->authenticate($ident) or adie ($rc->errprefix("reportit"));
-        $rc->report($objects)     or adie ($rc->errprefix("reportit"));
-        $rc->disconnect() or adie ($rc->errprefix("reportit"));
+        $rc->connect() or adie($rc->errprefix("reporter: razor2"));
+        $rc->authenticate($ident) or adie($rc->errprefix("reporter: razor2"));
+        $rc->report($objects) or adie($rc->errprefix("reporter: razor2"));
+        $rc->disconnect() or adie($rc->errprefix("reporter: razor2"));
         $response = 1; # Razor 2.14 says that if we get here, we did ok.
       }
       else {
-        warn "undefined Razor2::Client::Agent\n";
+        warn "reporter: undefined Razor2::Client::Agent\n";
       }
 
       alarm 0;
-      dbg("Razor2: spam $type, response is \"$response\".");
+      dbg("reporter: razor2 spam $type, response is \"$response\".");
     };
 
     alarm 0;
 
     if ($@) {
       if ( $@ =~ /alarm/ ) {
-        dbg("razor2 $type timed out after $timeout secs.");
+        dbg("reporter: razor2 $type timed out after $timeout secs.");
       } elsif ($@ =~ /could not connect/) {
-        dbg("razor2 $type could not connect to any servers");
+        dbg("reporter: razor2 $type could not connect to any servers");
       } elsif ($@ =~ /timeout/i) {
-        dbg("razor2 $type timed out connecting to razor servers");
+        dbg("reporter: razor2 $type timed out connecting to razor servers");
       } else {
-        warn "razor2 $type failed: $! $@";
+        warn "reporter: razor2 $type failed: $! $@";
       }
       undef $response;
     }
@@ -256,7 +256,7 @@ sub razor_report {
 
   $self->leave_helper_run_mode();
 
-  if ($Mail::SpamAssassin::DEBUG->{enabled}) {
+  if ($Mail::SpamAssassin::DEBUG) {
     open (STDOUT, ">&OLDOUT");
     close OLDOUT;
   }
@@ -313,11 +313,11 @@ sub dcc_report {
  
   if ($@) {
     if ($@ =~ /^__alarm__$/) {
-      dbg ("DCC -> report timed out after $timeout secs.");
+      dbg("reporter: DCC report timed out after $timeout seconds");
    } elsif ($@ =~ /^__brokenpipe__$/) {
-      dbg ("DCC -> report failed: Broken pipe.");
+      dbg("reporter: DCC report failed: broken pipe");
     } else {
-      warn ("DCC -> report failed: $@\n");
+      warn("reporter: DCC report failed: $@\n");
     }
     return 0;
   }
@@ -365,11 +365,11 @@ sub pyzor_report {
 
   if ($@) {
     if ($@ =~ /^__alarm__$/) {
-      dbg ("Pyzor -> report timed out after $timeout secs.");
+      dbg("reporter: pyzor report timed out after $timeout seconds");
     } elsif ($@ =~ /^__brokenpipe__$/) {
-      dbg ("Pyzor -> report failed: Broken pipe.");
+      dbg("reporter: pyzor report failed: broken pipe");
     } else {
-      warn ("Pyzor -> report failed: $@\n");
+      warn("reporter: pyzor report failed: $@\n");
     }
     return 0;
   }
@@ -380,14 +380,14 @@ sub pyzor_report {
 sub smtp_dbg {
   my ($command, $smtp) = @_;
 
-  dbg("SpamCop -> sent $command");
+  dbg("reporter: SpamCop sent $command");
   my $code = $smtp->code();
   my $message = $smtp->message();
   my $debug;
   $debug .= $code if $code;
   $debug .= ($code ? " " : "") . $message if $message;
   chomp $debug;
-  dbg("SpamCop -> received $debug");
+  dbg("reporter: SpamCop received $debug");
   return 1;
 }
 
@@ -399,7 +399,7 @@ sub spamcop_report {
   $header =~ s/\r?\n\r?\n.*//s;
   my $date = Mail::SpamAssassin::Util::receive_date($header);
   if ($date && $date < time - 3*86400) {
-    warn ("SpamCop -> message older than 3 days, not reporting\n");
+    warn("reporter: SpamCop message older than 3 days, not reporting\n");
     return 0;
   }
 
@@ -477,7 +477,7 @@ EOM
 	  $smtp->quit() && smtp_dbg("QUIT", $smtp))
       {
 	# tell user we succeeded after first attempt if we previously failed
-	warn("SpamCop -> report to $exchange succeeded\n") if defined $failure;
+	warn("reporter: SpamCop report to $exchange succeeded\n") if defined $failure;
 	return 1;
       }
       my $code = $smtp->code();
@@ -486,7 +486,7 @@ EOM
     }
     $failure ||= "Net::SMTP error";
     chomp $failure;
-    warn("SpamCop -> report to $exchange failed: $failure\n");
+    warn("reporter: SpamCop report to $exchange failed: $failure\n");
   }
 
   return 0;
@@ -494,7 +494,7 @@ EOM
 
 ###########################################################################
 
-sub dbg { Mail::SpamAssassin::dbg (@_); }
+sub dbg { Mail::SpamAssassin::dbg(@_); }
 sub create_fulltext_tmpfile { Mail::SpamAssassin::PerMsgStatus::create_fulltext_tmpfile(@_) }
 sub delete_fulltext_tmpfile { Mail::SpamAssassin::PerMsgStatus::delete_fulltext_tmpfile(@_) }
 

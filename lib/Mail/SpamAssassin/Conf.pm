@@ -214,13 +214,13 @@ it from running.
       }
 
       if ($relative && !exists $self->{scoreset}->[0]->{$rule}) {
-        my $msg = "Relative score without previous setting in SpamAssassin ".
+        my $msg = "config: relative score without previous setting in ".
                     "configuration, skipping: $line";
 
         if ($self->{lint_rules}) {
           warn $msg."\n";
         } else {
-          dbg ($msg);
+          dbg($msg);
         }
         $self->{errors}++;
         return;
@@ -242,12 +242,12 @@ it from running.
         }
       }
       else {
-        my $msg = "Score configuration option without actual scores, skipping: $line";
+        my $msg = "config: score configuration option without actual scores, skipping: $line";
 
         if ($self->{lint_rules}) {
           warn $msg."\n";
         } else {
-          dbg ($msg);
+          dbg($msg);
         }
         $self->{errors}++;
         return;
@@ -570,7 +570,7 @@ converted to square brackets.)
       }
 
       # if we get here, note the issue, then we'll fail through for an error.
-      dbg("rewrite_header: ignoring $hdr, not From, Subject, or To");
+      dbg("config: rewrite_header: ignoring $hdr, not From, Subject, or To");
     }
   });
 
@@ -1969,7 +1969,7 @@ existing system rule from a C<user_prefs> file with C<spamd>.
     code => sub {
       my ($self, $key, $value, $line) = @_;
       $self->{allow_user_rules} = $value+0;
-      dbg( ($self->{allow_user_rules} ? "Allowing":"Not allowing") . " user rules!");
+      dbg("config: " . ($self->{allow_user_rules} ? "allowing":"not allowing") . " user rules!");
     }
   });
 
@@ -3265,7 +3265,7 @@ sub set_score_set {
   my ($self, $set) = @_;
   $self->{scores} = $self->{scoreset}->[$set];
   $self->{scoreset_current} = $set;
-  dbg("Score set $set chosen.");
+  dbg("config: score set $set chosen.");
 }
 
 sub get_score_set {
@@ -3358,7 +3358,7 @@ sub trim_rules {
   my @rules_to_keep = grep(/$regexp/, @all_rules);
 
   if (@rules_to_keep == 0) {
-    die "trim_rules(): All rules excluded, nothing to test.\n";
+    die "config: trim_rules: all rules excluded, nothing to test\n";
   }
 
   my @meta_tests    = grep(/$regexp/, $self->get_rule_keys('meta_tests'));
@@ -3390,7 +3390,7 @@ sub add_meta_depends {
   # @tokens now only consists of sub-rules
 
   foreach my $token (@tokens) {
-    die "meta test $meta depends on itself\n" if $token eq $meta;
+    die "config: meta test $meta depends on itself\n" if $token eq $meta;
     push(@rules, $token);
 
     # If the sub-rule is a meta-test, recurse
@@ -3545,8 +3545,8 @@ sub finish {
 
 ###########################################################################
 
-sub dbg { Mail::SpamAssassin::dbg (@_); }
-sub sa_die { Mail::SpamAssassin::sa_die (@_); }
+sub dbg { Mail::SpamAssassin::dbg(@_); }
+sub sa_die { Mail::SpamAssassin::sa_die(@_); }
 
 ###########################################################################
 

@@ -287,7 +287,7 @@ sub sanity_check_is_untied {
   # after compiling; for example, spamd will never see that the
   # number of messages has reached the bayes-scanning threshold.
   if ($self->{store}->db_readable()) {
-    warn "SpamAssassin: oops! still tied to bayes DBs, untie'ing\n";
+    warn "bayes: oops! still tied to bayes DBs, untying\n";
     $self->{store}->untie_db();
   }
 }
@@ -576,7 +576,7 @@ sub tokenize_headers {
     } else {
       $parsed{$hdr} = $val;
     }
-    dbg ("tokenize: header tokens for $hdr = \"$parsed{$hdr}\"");
+    dbg("bayes: header tokens for $hdr = \"$parsed{$hdr}\"");
   }
 
   return %parsed;
@@ -698,7 +698,7 @@ sub ignore_message {
   my $ignore = $PMS->check_from_in_list('bayes_ignore_from')
     		|| $PMS->check_to_in_list('bayes_ignore_to');
 
-  dbg("Not using Bayes, bayes_ignore_from or _to rule") if $ignore;
+  dbg("bayes: not using bayes, bayes_ignore_from or _to rule") if $ignore;
 
   return $ignore;
 }
@@ -749,7 +749,7 @@ sub learn {
   if ($@) {		# if we died, untie the dbs.
     my $failure = $@;
     $self->{store}->untie_db();
-    die $failure;
+    die "bayes: $failure";
   }
 
   return $ret;
@@ -769,12 +769,12 @@ sub learn_trapped {
 
     if (defined ($seen)) {
       if (($seen eq 's' && $isspam) || ($seen eq 'h' && !$isspam)) {
-        dbg ("$msgid: already learnt correctly, not learning twice");
+        dbg("bayes: $msgid already learnt correctly, not learning twice");
         return 0;
       } elsif ($seen !~ /^[hs]$/) {
-        warn ("db_seen corrupt: value='$seen' for $msgid. ignored");
+        warn("bayes: db_seen corrupt: value='$seen' for $msgid, ignored");
       } else {
-        dbg ("$msgid: already learnt as opposite, forgetting first");
+        dbg("bayes: $msgid already learnt as opposite, forgetting first");
 
         # kluge so that forget() won't untie the db on us ...
         my $orig = $self->{main}->{learn_caller_will_untie};
@@ -787,7 +787,7 @@ sub learn_trapped {
     
         # forget() gave us a fatal error, so propagate that up
         if ($fatal) {
-          dbg("forget() returned a fatal error, so learn() will too");
+          dbg("bayes: forget() returned a fatal error, so learn() will too");
 	  return;
         }
       }
@@ -834,7 +834,7 @@ sub learn_trapped {
 					       msgatime => $msgatime,
 					     });
 
-  dbg("bayes: Learned '$msgid', atime: $msgatime");
+  dbg("bayes: learned '$msgid', atime: $msgatime");
 
   1;
 }
@@ -877,7 +877,7 @@ sub forget {
   if ($@) {		# if we died, untie the dbs.
     my $failure = $@;
     $self->{store}->untie_db();
-    die $failure;
+    die "bayes: $failure";
   }
 
   return $ret;
@@ -902,7 +902,7 @@ sub forget_trapped {
       } elsif ($seen eq 'h') {
         $isspam = 0;
       } else {
-        dbg ("forget: msgid $msgid seen entry is neither ham nor spam, ignored");
+        dbg("bayes: forget: msgid $msgid seen entry is neither ham nor spam, ignored");
         return 0;
       }
 
@@ -911,13 +911,13 @@ sub forget_trapped {
       last;
     }
     else {
-      dbg ("forget: msgid $msgid not learnt, ignored");
+      dbg("bayes: forget: msgid $msgid not learnt, ignored");
     }
   }
 
   # This message wasn't learnt before, so return
   if (!defined $isspam) {
-    dbg("forget: no msgid from this message has been learnt, skipping message");
+    dbg("bayes: forget: no msgid from this message has been learnt, skipping message");
     return 0;
   }
   elsif ($isspam) {
@@ -990,7 +990,7 @@ sub get_body_from_msg {
 
   if (!ref $msg) {
     # I have no idea why this seems to happen. TODO
-    warn "msg not a ref: '$msg'";
+    warn "bayes: msg not a ref: '$msg'";
     return { };
   }
 
@@ -1002,7 +1002,7 @@ sub get_body_from_msg {
 
   if (!defined $msgdata) {
     # why?!
-    warn "failed to get body for ".scalar($self->get_msgid($self->{msg}))."\n";
+    warn "bayes: failed to get body for ".scalar($self->get_msgid($self->{msg}))."\n";
     return { };
   }
 
@@ -1025,10 +1025,10 @@ sub sync {
   my ($self, $sync, $expire, $opts) = @_;
   if (!$self->{conf}->{use_bayes}) { return 0; }
 
-  dbg("Syncing Bayes and expiring old tokens...");
+  dbg("bayes: syncing bayes and expiring old tokens...");
   $self->{store}->sync($opts) if ( $sync );
   $self->{store}->expire_old_tokens($opts) if ( $expire );
-  dbg("Syncing complete.");
+  dbg("bayes: syncing complete");
 
   return 0;
 }
@@ -1063,7 +1063,7 @@ sub compute_prob_for_token {
   my $prob;
 
   if ($ratios == 0 && $ration == 0) {
-    warn "oops? ratios == ration == 0";
+    warn "bayes: oops? ratios == ration == 0";
     return;
   } else {
     $prob = ($ratios) / ($ration + $ratios);
@@ -1150,14 +1150,14 @@ sub is_scan_available {
   my ($ns, $nn) = $self->{store}->nspam_nham_get();
 
   if ($ns < $self->{conf}->{bayes_min_spam_num}) {
-    dbg("bayes: Not available for scanning, only $ns spam(s) in Bayes DB < ".$self->{conf}->{bayes_min_spam_num});
+    dbg("bayes: not available for scanning, only $ns spam(s) in bayes DB < ".$self->{conf}->{bayes_min_spam_num});
     if (!$self->{main}->{learn_caller_will_untie}) {
       $self->{store}->untie_db();
     }
     return 0;
   }
   if ($nn < $self->{conf}->{bayes_min_ham_num}) {
-    dbg("bayes: Not available for scanning, only $nn ham(s) in Bayes DB < ".$self->{conf}->{bayes_min_ham_num});
+    dbg("bayes: not available for scanning, only $nn ham(s) in bayes DB < ".$self->{conf}->{bayes_min_ham_num});
     if (!$self->{main}->{learn_caller_will_untie}) {
       $self->{store}->untie_db();
     }
@@ -1189,7 +1189,7 @@ sub scan {
     $self->{raw_counts} = " ns=$ns nn=$nn ";
   }
 
-  dbg ("bayes corpus size: nspam = $ns, nham = $nn");
+  dbg("bayes: corpus size: nspam = $ns, nham = $nn");
 
   my $msgdata = $self->get_msgdata_from_permsgstatus ($permsgstatus);
 
@@ -1214,7 +1214,7 @@ sub scan {
   # If none of the tokens were found in the DB, we're going to skip
   # this message...
   if (!keys %pw) {
-    dbg ("cannot use bayes on this message; none of the tokens were found in the database");
+    dbg("bayes: cannot use bayes on this message; none of the tokens were found in the database");
     goto skip;
   }
 
@@ -1264,13 +1264,13 @@ sub scan {
     # update the atime on this token, it proved useful
     push(@touch_tokens, $_);
 
-    dbg ("bayes token '$raw_token' => $pw");
+    dbg("bayes: token '$raw_token' => $pw");
   }
 
   if (!@sorted || (REQUIRE_SIGNIFICANT_TOKENS_TO_SCORE > 0 && 
 	$#sorted <= REQUIRE_SIGNIFICANT_TOKENS_TO_SCORE))
   {
-    dbg ("cannot use bayes on this message; not enough usable tokens found");
+    dbg("bayes: cannot use bayes on this message; not enough usable tokens found");
     goto skip;
   }
 
@@ -1283,7 +1283,7 @@ sub scan {
   # Couldn't come up with a probability?
   goto skip unless defined $score;
 
-  dbg ("bayes: score = $score");
+  dbg("bayes: score = $score");
 
   # no need to call tok_touch_all unless there were significant
   # tokens and a score was returned
@@ -1305,7 +1305,7 @@ sub scan {
 
 skip:
   if (!defined $score) {
-    dbg ("bayes: not scoring message, returning undef");
+    dbg("bayes: not scoring message, returning undef");
   }
 
   # Take any opportunistic actions we can take
@@ -1371,8 +1371,8 @@ sub opportunistic_calls {
 
 ###########################################################################
 
-sub dbg { Mail::SpamAssassin::dbg (@_); }
-sub sa_die { Mail::SpamAssassin::sa_die (@_); }
+sub dbg { Mail::SpamAssassin::dbg(@_); }
+sub sa_die { Mail::SpamAssassin::sa_die(@_); }
 
 ###########################################################################
 
@@ -1400,7 +1400,7 @@ sub robinson_naive_bayes_probs_combine {
 sub chi2q {
   my ($x2, $v) = @_;
 
-  die "v must be even in chi2q(x2, v)" if $v & 1;
+  die "bayes: v must be even in chi2q(x2, v)" if $v & 1;
   my $m = $x2 / 2.0;
   my ($sum, $term);
   $sum = $term = exp(0 - $m);

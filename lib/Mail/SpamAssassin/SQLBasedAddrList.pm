@@ -117,7 +117,7 @@ sub new_checker {
 
   if (!$main->{conf}->{user_awl_dsn} ||
       !$main->{conf}->{user_awl_sql_table}) {
-    dbg("auto-whitelist (sql-based): invalid config");
+    dbg("auto-whitelist: sql-based invalid config");
     return undef;
   }
 
@@ -128,7 +128,7 @@ sub new_checker {
   my $dbh = DBI->connect($dsn, $dbuser, $dbpass, {'PrintError' => 0});
 
   if(!$dbh) {
-    dbg("auto-whitelist (sql-based): Unable to Connect to DB");
+    dbg("auto-whitelist: sql-based unable to connect to database");
     return undef;
   }
 
@@ -138,7 +138,7 @@ sub new_checker {
             'tablename' => $main->{conf}->{user_awl_sql_table},
           };
 
-  dbg("SQL Based AWL: Connected to $dsn");
+  dbg("auto-whitelist: sql-based connected to $dsn");
 
   return bless ($self, $class);
 }
@@ -180,7 +180,7 @@ sub get_addr_entry {
 
   if (!$rc) { # there was an error, but try to go on
     my $err = $self->{dbh}->errstr;
-    dbg("auto-whitelist (sql-based) get_addr_entry: SQL Error: $err");
+    dbg("auto-whitelist: sql-based get_addr_entry: SQL error: $err");
     $entry->{count} = 0;
     $entry->{totscore} = 0;
   }
@@ -191,15 +191,15 @@ sub get_addr_entry {
       $entry->{count} = $aryref->[0] || 0;
       $entry->{totscore} = $aryref->[1] || 0;
       $entry->{exists_p} = 1;
-      dbg("auto-whitelist (sql-based) get_addr_entry: Found existing entry for $addr");
+      dbg("auto-whitelist: sql-based get_addr_entry: found existing entry for $addr");
     }
     else {
-      dbg("auto-whitelist (sql-based) get_addr_entry: No entry found for $addr");
+      dbg("auto-whitelist: sql-based get_addr_entry: no entry found for $addr");
     }
   }
   $sth->finish();
 
-  dbg ("auto-whitelist (sql-based): $addr scores ".$entry->{count}.'/'.$entry->{totscore});
+  dbg("auto-whitelist: sql-based $addr scores ".$entry->{count}.'/'.$entry->{totscore});
 
   return $entry;
 }
@@ -243,10 +243,10 @@ sub add_score {
     
     if (!$rc) {
       my $err = $self->{dbh}->errstr;
-      dbg("auto-whitelist (sql-based) add_score: SQL Error: $err");
+      dbg("auto-whitelist: sql-based add_score: SQL error: $err");
     }
     else {
-      dbg("auto-whitelist (sql-based) add_score: New count: ". $entry->{count} .", new totscore: ".$entry->{totscore}." for ".$entry->{addr});
+      dbg("auto-whitelist: sql-based add_score: new count: ". $entry->{count} .", new totscore: ".$entry->{totscore}." for ".$entry->{addr});
     }
     $sth->finish();
   }
@@ -256,10 +256,10 @@ sub add_score {
     my $rc = $sth->execute($username,$email,$ip,1,$score);
     if (!$rc) {
       my $err = $self->{dbh}->errstr;
-      dbg("auto-whitelist (sql-based) add_score: SQL Error: $err");
+      dbg("auto-whitelist: sql-based add_score: SQL error: $err");
     }
     $entry->{exists_p} = 1;
-    dbg("auto-whitelist (sql-based) add_score: Created new entry for ".$entry->{addr}." with totscore: $score");
+    dbg("auto-whitelist: sql-based add_score: created new entry for ".$entry->{addr}." with totscore: $score");
     $sth->finish();
   }
   
@@ -294,13 +294,13 @@ sub remove_entry {
   if ($ip eq 'none') {
     $sql = "DELETE FROM $self->{tablename} WHERE username = ? AND email = ?";
     @args = ($username, $email);
-    dbg("auto-whitelist (sql-based) remove_entry: Removing all entries matching $email");
+    dbg("auto-whitelist: sql-based remove_entry: removing all entries matching $email");
   }
   else {
     $sql = "DELETE FROM $self->{tablename}
              WHERE username = ? AND email = ? AND ip = ?";
     @args = ($username, $email, $ip);
-    dbg("auto-whitelist (sql-based) remove_entry: Removing single entry matching ".$entry->{addr});
+    dbg("auto-whitelist: sql-based remove_entry: removing single entry matching ".$entry->{addr});
   }
 
   my $sth = $self->{dbh}->prepare($sql);
@@ -308,7 +308,7 @@ sub remove_entry {
 
   if (!$rc) {
     my $err = $self->{dbh}->errstr;
-    dbg("auto-whitelist (sql-based) remove_entry: SQL Error: $err");
+    dbg("auto-whitelist: sql-based remove_entry: SQL error: $err");
   }
   else {
     # We might normally have a dbg saying we removed the address
@@ -328,7 +328,7 @@ This method provides the necessary cleanup for the address list.
 
 sub finish {
   my ($self) = @_;
-  dbg("auto-whitelist (sql-based) finish: Disconnected from " . $self->{dsn});
+  dbg("auto-whitelist: sql-based finish: disconnected from " . $self->{dsn});
   $self->{dbh}->disconnect();
 }
 
@@ -348,12 +348,12 @@ sub _unpack_addr {
   my ($email, $ip) = split(/\|ip=/, $addr);
 
   unless ($email && $ip) {
-    dbg("auto-whitelist (sql-based): _unpack_addr: Unable to decode $addr");
+    dbg("auto-whitelist: sql-based _unpack_addr: unable to decode $addr");
   }
 
   return ($email, $ip);
 }
 
-sub dbg { Mail::SpamAssassin::dbg (@_); }
+sub dbg { Mail::SpamAssassin::dbg(@_); }
 
 1;

@@ -66,7 +66,7 @@ sub new {
   $self->{db_writable_p} = 0;
 
   if (!$self->{bayes}->{conf}->{bayes_sql_dsn}) {
-    dbg("bayes: invalid config, must set bayes_sql_dsn config variable.\n");
+    dbg("bayes: invalid config, must set bayes_sql_dsn config variable\n");
     return undef;
   }
 
@@ -77,7 +77,7 @@ sub new {
   $self->{_dbh} = undef;
 
   unless (HAS_DBI) {
-    dbg("bayes: Unable to connect to database: DBI module not available: $!");
+    dbg("bayes: unable to connect to database: DBI module not available: $!");
   }
 
   if ($self->{bayes}->{conf}->{bayes_sql_override_username}) {
@@ -92,7 +92,7 @@ sub new {
       $self->{_username} = "GLOBALBAYES";
     }
   }
-  dbg("bayes: Using username: ".$self->{_username});
+  dbg("bayes: using username: ".$self->{_username});
 
   return $self;
 }
@@ -130,7 +130,7 @@ sub tie_db_readonly {
   dbg("bayes: found bayes db version ".$self->{db_version});
 
   if ( $db_ver != $self->DB_VERSION ) {
-    warn("bayes: Database version $db_ver is different than we understand (".$self->DB_VERSION."), aborting!");
+    warn("bayes: database version $db_ver is different than we understand (".$self->DB_VERSION."), aborting!");
     $self->untie_db();
     return 0;
   }
@@ -177,7 +177,7 @@ sub tie_db_writable {
   dbg("bayes: found bayes db version ".$self->{db_version});
 
   if ( $db_ver != $self->DB_VERSION ) {
-    warn("bayes: Database version $db_ver is different than we understand (".$self->DB_VERSION."), aborting!");
+    warn("bayes: database version $db_ver is different than we understand (".$self->DB_VERSION."), aborting!");
     $self->untie_db();
     return 0;
   }
@@ -244,7 +244,7 @@ sub calculate_expire_delta {
     my $rc = $sth->execute($self->{_userid}, $newest_atime, $start * $i);
 
     unless ($rc) {
-      dbg("bayes: calculate_expire_delta: SQL Error: ".$self->{_dbh}->errstr());
+      dbg("bayes: calculate_expire_delta: SQL error: ".$self->{_dbh}->errstr());
       return undef;
     }
 
@@ -288,7 +288,7 @@ sub token_expiration {
   my $rows = $self->{_dbh}->do($sql, undef, $vars[10], $self->{_userid}, $vars[10]);
 
   unless (defined($rows)) {
-    dbg("bayes: token_expiration: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: token_expiration: SQL error: ".$self->{_dbh}->errstr());
     $deleted = 0;
     goto token_expiration_final;
   }
@@ -301,7 +301,7 @@ sub token_expiration {
   my $sth = $self->{_dbh}->prepare_cached($sql);
 
   unless (defined($sth)) {
-    dbg("bayes: token_expiration: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: token_expiration: SQL error: ".$self->{_dbh}->errstr());
     $deleted = 0;
     goto token_expiration_final;
   }
@@ -309,7 +309,7 @@ sub token_expiration {
   my $rc = $sth->execute($self->{_userid}, $too_old);
   
   unless ($rc) {
-    dbg("bayes: token_expiration: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: token_expiration: SQL error: ".$self->{_dbh}->errstr());
     $deleted = 0;
     goto token_expiration_final;
   }
@@ -320,7 +320,7 @@ sub token_expiration {
 
   # Sanity check: if we expired too many tokens, abort!
   if ($vars[3] - $count < 100000) {
-    dbg("bayes: Token Expiration would expire too many tokens, aborting.");
+    dbg("bayes: token expiration would expire too many tokens, aborting");
     # set these appropriately so the next expire pass does the first pass
     $deleted = 0;
     $newdelta = 0;
@@ -334,7 +334,7 @@ sub token_expiration {
     $rows = $self->{_dbh}->do($sql, undef, $self->{_userid}, $too_old);
 
     unless (defined($rows)) {
-      dbg("bayes: token_expiration: SQL Error: ".$self->{_dbh}->errstr());
+      dbg("bayes: token_expiration: SQL error: ".$self->{_dbh}->errstr());
       $deleted = 0;
       goto token_expiration_final;
     }
@@ -354,8 +354,8 @@ sub token_expiration {
   unless (defined($rows)) {
     # Very bad, we actually deleted the tokens, but were unable to update
     # bayes_vars with the new data.
-    dbg("bayes: token_expiration: SQL Error: ".$self->{_dbh}->errstr());
-    dbg("bayes: Bayes database now in inconsistent state, suggest a backup/restore.");
+    dbg("bayes: token_expiration: SQL error: ".$self->{_dbh}->errstr());
+    dbg("bayes: bayes database now in inconsistent state, suggest a backup/restore");
     goto token_expiration_final;
   }
 
@@ -372,7 +372,7 @@ sub token_expiration {
 
     unless (defined($rows)) {
       # not much more we can do here, so just warn the user and bail out
-      dbg("bayes: token_expiration: SQL Error: ".$self->{_dbh}->errstr());
+      dbg("bayes: token_expiration: SQL error: ".$self->{_dbh}->errstr());
       # yeah I know it's the next thing anyway, but here in case someone adds
       # additional code below this block
       goto token_expiration_final; 
@@ -438,7 +438,7 @@ sub seen_get {
   my $rc = $sth->execute($self->{_userid}, $msgid);
   
   unless ($rc) {
-    dbg("bayes: seen_get: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: seen_get: SQL error: ".$self->{_dbh}->errstr());
     return undef;
   }
 
@@ -475,7 +475,7 @@ sub seen_put {
 			       $self->{_userid}, $msgid, $flag);
   
   unless (defined($rows)) {
-    dbg("bayes: seen_put: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: seen_put: SQL error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
@@ -508,7 +508,7 @@ sub seen_delete {
 			       $self->{_userid}, $msgid);
 
   unless (defined($rows)) {
-    dbg("bayes: seen_delete: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: seen_delete: SQL error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
@@ -564,14 +564,14 @@ sub get_storage_variables {
   my $sth = $self->{_dbh}->prepare_cached($sql);
 
   unless (defined($sth)) {
-    dbg("bayes: get_storage_variables: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: get_storage_variables: SQL error: ".$self->{_dbh}->errstr());
     return (0,0,0,0,0,0,0,0,0,0,0);
   }
 
   my $rc = $sth->execute($self->{_userid});
 
   unless ($rc) {
-    dbg("bayes: get_storage_variables: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: get_storage_variables: SQL error: ".$self->{_dbh}->errstr());
     return (0,0,0,0,0,0,0,0,0,0,0);
   }
 
@@ -625,14 +625,14 @@ sub dump_db_toks {
   my $sth = $self->{_dbh}->prepare($sql);
 
   unless (defined($sth)) {
-    dbg("bayes: dump_db_toks: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: dump_db_toks: SQL error: ".$self->{_dbh}->errstr());
     return;
   }
 
   my $rc = $sth->execute($self->{_userid});
 
   unless ($rc) {
-    dbg("bayes: dump_db_toks: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: dump_db_toks: SQL error: ".$self->{_dbh}->errstr());
     return;
   }  
 
@@ -675,7 +675,7 @@ sub set_last_expire {
 			       $self->{_userid});
 
   unless (defined($rows)) {
-    dbg("bayes: set_last_expire: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: set_last_expire: SQL error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
@@ -705,14 +705,14 @@ sub get_running_expire_tok {
   my $sth = $self->{_dbh}->prepare_cached($sql);
 
   unless (defined($sth)) {
-    dbg("bayes: get_running_expire_tok: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: get_running_expire_tok: SQL error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
   my $rc = $sth->execute($self->{_userid});
 
   unless ($rc) {
-    dbg("bayes: get_running_expire_tok: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: get_running_expire_tok: SQL error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
@@ -745,7 +745,7 @@ sub set_running_expire_tok {
 			       undef,
 			       $self->{_userid}, $time);
   unless (defined($rows)) {
-    dbg("bayes: set_running_expire_tok: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: set_running_expire_tok: SQL error: ".$self->{_dbh}->errstr());
     return undef;
   }
 
@@ -773,7 +773,7 @@ sub remove_running_expire_tok {
   my $rows = $self->{_dbh}->do($sql, undef, $self->{_userid});
 
   unless (defined($rows)) {
-    dbg("bayes: remove_running_expire_tok: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: remove_running_expire_tok: SQL error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
@@ -803,14 +803,14 @@ sub tok_get {
   my $sth = $self->{_dbh}->prepare_cached($sql);
 
   unless (defined($sth)) {
-    dbg("bayes: tok_get: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: tok_get: SQL error: ".$self->{_dbh}->errstr());
     return (0,0,0);
   }
 
   my $rc = $sth->execute($self->{_userid}, $token);
 
   unless ($rc) {
-    dbg("bayes: tok_get: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: tok_get: SQL error: ".$self->{_dbh}->errstr());
     return (0,0,0);
   }
 
@@ -841,7 +841,7 @@ sub tok_get_all {
   return [] unless (defined($self->{_dbh}));
 
   my $token_list_size = scalar(@tokens);
-  dbg("bayes: tok_get_all: Token Count: $token_list_size");
+  dbg("bayes: tok_get_all: token count: $token_list_size");
   my @tok_results;
 
   my @bunch_sizes = (100, 50, 25, 5); # XXX - need to benchmark to tweak
@@ -878,14 +878,14 @@ sub tok_get_all {
       my $sth = $self->{_dbh}->prepare($dynamic_sql);
 
       unless (defined($sth)) {
-	dbg("bayes: tok_get_all: SQL Error: ".$self->{_dbh}->errstr());
+	dbg("bayes: tok_get_all: SQL error: ".$self->{_dbh}->errstr());
 	return [];
       }
 
       my $rc = $sth->execute($self->{_userid}, @bindings);
 
       unless ($rc) {
-	dbg("bayes: tok_get_all: SQL Error: ".$self->{_dbh}->errstr());
+	dbg("bayes: tok_get_all: SQL error: ".$self->{_dbh}->errstr());
 	return [];
       }
 
@@ -908,14 +908,14 @@ sub tok_get_all {
     my $sth = $self->{_dbh}->prepare($single_sql);
 
     unless (defined($sth)) {
-      dbg("bayes: tok_get_all: SQL Error: ".$self->{_dbh}->errstr());
+      dbg("bayes: tok_get_all: SQL error: ".$self->{_dbh}->errstr());
       return [];
     }
 
     my $rc = $sth->execute($self->{_userid}, $tokens[$search_index++]);
 
     unless ($rc) {
-      dbg("bayes: tok_get_all: SQL Error: ".$self->{_dbh}->errstr());
+      dbg("bayes: tok_get_all: SQL error: ".$self->{_dbh}->errstr());
       return [];
     }
 
@@ -1016,7 +1016,7 @@ sub nspam_nham_change {
   }
   else {
     # For some reason called with no delta, it's ok though so just return
-    dbg("bayes: nspam_nham_change: Called with no delta on spam or ham.");
+    dbg("bayes: nspam_nham_change: Called with no delta on spam or ham");
     return 1;
   }
 
@@ -1025,7 +1025,7 @@ sub nspam_nham_change {
 			       @bindings);
 
   unless (defined($rows)) {
-    dbg("bayes: nspam_nham_change: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: nspam_nham_change: SQL error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
@@ -1061,7 +1061,7 @@ sub tok_touch {
 			       $token, $atime);
 
   unless (defined($rows)) {
-    dbg("bayes: tok_touch: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: tok_touch: SQL error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
@@ -1079,7 +1079,7 @@ sub tok_touch {
   $rows = $self->{_dbh}->do($sql, undef, $atime, $self->{_userid}, $atime);
 
   unless (defined($rows)) {
-    dbg("bayes: tok_touch: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: tok_touch: SQL error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
@@ -1125,7 +1125,7 @@ sub tok_touch_all {
   my $rows = $self->{_dbh}->do($sql, undef, @bindings);
 
   unless (defined($rows)) {
-    dbg("bayes: tok_touch_all: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: tok_touch_all: SQL error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
@@ -1143,7 +1143,7 @@ sub tok_touch_all {
   $rows = $self->{_dbh}->do($sql, undef, $atime, $self->{_userid}, $atime);
 
   unless (defined($rows)) {
-    dbg("bayes: tok_touch_all: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: tok_touch_all: SQL error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
@@ -1177,7 +1177,7 @@ sub cleanup {
   my $toks_deleted = $self->{_dbh}->do($sql, undef, $self->{_userid});
 
   unless (defined($toks_deleted)) {
-    dbg("bayes: cleanup: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: cleanup: SQL error: ".$self->{_dbh}->errstr());
     return 0;
   }       
 
@@ -1190,7 +1190,7 @@ sub cleanup {
   my $rows = $self->{_dbh}->do($sql, undef, $self->{_userid});
 
   unless (defined($rows)) {
-    dbg("bayes: cleanup: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: cleanup: SQL error: ".$self->{_dbh}->errstr());
     return 0;
   }       
 
@@ -1280,7 +1280,7 @@ sub clear_database {
 			       undef,
 			       $self->{_userid});
   unless (defined($rows)) {
-    dbg("SQL Error removing user (bayes_vars) data: ".$self->{_dbh}->errstr());
+    dbg("bayes: SQL error removing user (bayes_vars) data: ".$self->{_dbh}->errstr());
     return 0;
   }
 
@@ -1288,7 +1288,7 @@ sub clear_database {
 			    undef,
 			    $self->{_userid});
   unless (defined($rows)) {
-    dbg("SQL Error removing seen data: ".$self->{_dbh}->errstr());
+    dbg("bayes: SQL error removing seen data: ".$self->{_dbh}->errstr());
     return 0;
   }
 
@@ -1296,7 +1296,7 @@ sub clear_database {
 			    undef,
 			    $self->{_userid});
   unless (defined($rows)) {
-    dbg("SQL Error removing token data: ".$self->{_dbh}->errstr());
+    dbg("bayes: SQL error removing token data: ".$self->{_dbh}->errstr());
     return 0;
   }
 
@@ -1340,14 +1340,14 @@ sub backup_database {
   my $sth = $self->{_dbh}->prepare($token_sql);
 
   unless (defined ($sth)) {
-    dbg("bayes: backup_database: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: backup_database: SQL error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
   my $rc = $sth->execute($self->{_userid});
 
   unless ($rc) {
-    dbg("bayes: backup_database: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: backup_database: SQL error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
@@ -1361,14 +1361,14 @@ sub backup_database {
   $sth = $self->{_dbh}->prepare($seen_sql);
 
   unless (defined ($sth)) {
-    dbg("bayes: backup_database: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: backup_database: SQL error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
   $rc = $sth->execute($self->{_userid});
 
   unless ($rc) {
-    dbg("bayes: backup_database: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: backup_database: SQL error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
@@ -1399,7 +1399,7 @@ sub restore_database {
   my ($self, $filename, $showdots) = @_;
 
   if (!open(DUMPFILE, '<', $filename)) {
-    dbg("bayes: Unable to open backup file $filename: $!");
+    dbg("bayes: unable to open backup file $filename: $!");
     return 0;
   }
 
@@ -1433,12 +1433,12 @@ sub restore_database {
     $db_version = $1;
   }
   else {
-    dbg("bayes: Database Version must be the first line in the backup file, correct and re-run.");
+    dbg("bayes: database version must be the first line in the backup file, correct and re-run");
     return 0;
   }
 
   unless ($db_version == 2 || $db_version == 3) {
-    warn("bayes: Database Version $db_version is unsupported, must be version 2 or 3.");
+    warn("bayes: database version $db_version is unsupported, must be version 2 or 3");
     return 0;
   }
 
@@ -1460,7 +1460,7 @@ sub restore_database {
 	$num_ham = $value;
       }
       else {
-	dbg("bayes: restore_database: Skipping unknown line: $line");
+	dbg("bayes: restore_database: skipping unknown line: $line");
       }
     }
     elsif ($line =~ /^t\s+/) { # token line
@@ -1475,28 +1475,28 @@ sub restore_database {
 
       if ($spam_count < 0) {
 	$spam_count = 0;
-	push(@warnings,'Spam Count < 0, resetting');
+	push(@warnings, 'spam count < 0, resetting');
 	$token_warn_p = 1;
       }
       if ($ham_count < 0) {
 	$ham_count = 0;
-	push(@warnings,'Ham Count < 0, resetting');
+	push(@warnings, 'ham count < 0, resetting');
 	$token_warn_p = 1;
       }
 
       if ($spam_count == 0 && $ham_count == 0) {
-	dbg("bayes: Token has zero spam and ham count, skipping.");
+	dbg("bayes: token has zero spam and ham count, skipping");
 	next;
       }
 
       if ($atime > time()) {
 	$atime = time();
-	push(@warnings,'atime > current time, resetting');
+	push(@warnings, 'atime > current time, resetting');
 	$token_warn_p = 1;
       }
 
       if ($token_warn_p) {
-	dbg("bayes: Token ($token) has the following warnings:\n".join("\n",@warnings));
+	dbg("bayes: token ($token) has the following warnings:\n".join("\n",@warnings));
       }
 
       if ($db_version < 3) {
@@ -1509,7 +1509,7 @@ sub restore_database {
       }
 
       unless ($self->_put_token($token, $spam_count, $ham_count, $atime)) {
-	dbg("bayes: Error inserting token for line: $line");
+	dbg("bayes: error inserting token for line: $line");
 	$error_p = 1;
       }
       $token_count++;
@@ -1520,22 +1520,22 @@ sub restore_database {
       my $msgid = $parsed_line[2];
 
       unless ($flag eq 'h' || $flag eq 's') {
-	dbg("bayes: Unknown seen flag ($flag) for line: $line, skipping");
+	dbg("bayes: unknown seen flag ($flag) for line: $line, skipping");
 	next;
       }
 
       unless ($msgid) {
-	dbg("bayes: Blank msgid for line: $line, skipping");
+	dbg("bayes: blank msgid for line: $line, skipping");
 	next;
       }
 
       unless ($self->seen_put($msgid, $flag)) {
-	dbg("bayes: Error inserting msgid in seen table for line: $line");
+	dbg("bayes: error inserting msgid in seen table for line: $line");
 	$error_p = 1;
       }
     }
     else {
-      dbg("bayes: Skipping unknown line: $line");
+      dbg("bayes: skipping unknown line: $line");
       next;
     }
   }
@@ -1544,31 +1544,31 @@ sub restore_database {
   print STDERR "\n" if ($showdots);
 
   unless (defined($num_spam)) {
-    dbg("bayes: Unable to find num spam, please check file.");
+    dbg("bayes: unable to find num spam, please check file");
     $error_p = 1;
   }
 
   unless (defined($num_ham)) {
-    dbg("bayes: Unable to find num ham, please check file.");
+    dbg("bayes: unable to find num ham, please check file");
     $error_p = 1;
   }
 
   if ($error_p) {
-    dbg("bayes: Error(s) while attempting to load $filename, clearing database, correct and Re-Run");
+    dbg("bayes: error(s) while attempting to load $filename, clearing database, correct and re-run");
     $self->clear_database();
     return 0;
   }
 
   if ($num_spam || $num_ham) {
     unless ($self->nspam_nham_change($num_spam, $num_ham)) {
-      dbg("bayes: Error updating num spam and num ham, clearing database.");
+      dbg("bayes: error updating num spam and num ham, clearing database");
       $self->clear_database();
       return 0;
     }
   }
 
-  dbg("bayes: Parsed $line_count lines.");
-  dbg("bayes: Created database with $token_count tokens based on $num_spam Spam Messages and $num_ham Ham Messages.");
+  dbg("bayes: parsed $line_count lines");
+  dbg("bayes: created database with $token_count tokens based on $num_spam spam messages and $num_ham ham messages");
 
   $self->untie_db();
 
@@ -1629,11 +1629,11 @@ sub _connect_db {
                         {'PrintError' => 0, 'AutoCommit' => 1});
 
   if (!$dbh) {
-    dbg("bayes: Unable to connect to database: ".DBI->errstr());
+    dbg("bayes: unable to connect to database: ".DBI->errstr());
     return 0;
   }
   else {
-    dbg("bayes: Database connection established");
+    dbg("bayes: database connection established");
   }
 
   $self->{_dbh} = $dbh;
@@ -1663,14 +1663,14 @@ sub _get_db_version {
   my $sth = $self->{_dbh}->prepare_cached($sql);
 
   unless (defined($sth)) {
-    dbg("bayes: _get_db_version: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: _get_db_version: SQL error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
   my $rc = $sth->execute();
 
   unless ($rc) {
-    dbg("bayes: _get_db_version: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: _get_db_version: SQL error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
@@ -1705,14 +1705,14 @@ sub _initialize_db {
   my $sthselect = $self->{_dbh}->prepare_cached($sqlselect);
 
   unless (defined($sthselect)) {
-    dbg("bayes: _initialize_db: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: _initialize_db: SQL error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
   my $rc = $sthselect->execute($self->{_username});
 
   unless ($rc) {
-    dbg("bayes: _initialize_db: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: _initialize_db: SQL error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
@@ -1735,7 +1735,7 @@ sub _initialize_db {
 			       undef,
 			       $self->{_username});
   unless (defined($rows)) {
-    dbg("bayes: _initialize_db: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: _initialize_db: SQL error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
@@ -1746,7 +1746,7 @@ sub _initialize_db {
   $rc = $sthselect->execute($self->{_username});
 
   unless ($rc) {
-    dbg("bayes: _initialize_db: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: _initialize_db: SQL error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
@@ -1756,7 +1756,7 @@ sub _initialize_db {
 
   if ($id) {
     $self->{_userid} = $id;
-    dbg("bayes: Using userid: ".$self->{_userid});
+    dbg("bayes: using userid: ".$self->{_userid});
     return 1;
   }
 
@@ -1805,7 +1805,7 @@ sub _put_token {
     my $sth = $self->{_dbh}->prepare_cached($sql);
 
     unless (defined($sth)) {
-      dbg("bayes: _put_token: SQL Error: ".$self->{_dbh}->errstr());
+      dbg("bayes: _put_token: SQL error: ".$self->{_dbh}->errstr());
       return 0;
     }
 
@@ -1816,7 +1816,7 @@ sub _put_token {
 			   $atime);
     
     unless ($rc) {
-      dbg("bayes: _put_token: SQL Error: ".$self->{_dbh}->errstr());
+      dbg("bayes: _put_token: SQL error: ".$self->{_dbh}->errstr());
       return 0;
     }
 
@@ -1828,7 +1828,7 @@ sub _put_token {
     my $rows = $self->{_dbh}->do($sql, undef, $self->{_userid});
     
     unless (defined($rows)) {
-      dbg("bayes: _put_token: SQL Error: ".$self->{_dbh}->errstr());
+      dbg("bayes: _put_token: SQL error: ".$self->{_dbh}->errstr());
       return 0;
     }
 
@@ -1838,7 +1838,7 @@ sub _put_token {
     $rows = $self->{_dbh}->do($sql, undef, $atime, $self->{_userid}, $atime);
 
     unless (defined($rows)) {
-      dbg("bayes: _put_token: SQL Error: ".$self->{_dbh}->errstr());
+      dbg("bayes: _put_token: SQL error: ".$self->{_dbh}->errstr());
       return 0;
     }
 
@@ -1851,7 +1851,7 @@ sub _put_token {
       $rows = $self->{_dbh}->do($sql, undef, $atime, $self->{_userid}, $atime);
       
       unless (defined($rows)) {
-	dbg("bayes: _put_token: SQL Error: ".$self->{_dbh}->errstr());
+	dbg("bayes: _put_token: SQL error: ".$self->{_dbh}->errstr());
 	return 0;
       }
     }
@@ -1906,7 +1906,7 @@ sub _put_token {
       my $rows = $self->{_dbh}->do($sql, undef, @args);
 
       unless (defined($rows)) {
-	dbg("bayes: _put_token: SQL Error: ".$self->{_dbh}->errstr());
+	dbg("bayes: _put_token: SQL error: ".$self->{_dbh}->errstr());
 	return 0;
       }
     }
@@ -1936,7 +1936,7 @@ sub _put_token {
       my $rows = $self->{_dbh}->do($sql, undef, @args);
 
       unless (defined($rows)) {
-	dbg("bayes: _put_token: SQL Error: ".$self->{_dbh}->errstr());
+	dbg("bayes: _put_token: SQL error: ".$self->{_dbh}->errstr());
 	return 0;
       }
     }
@@ -1951,7 +1951,7 @@ sub _put_token {
       my $rows = $self->{_dbh}->do($sql, undef, $atime, $self->{_userid}, $atime);
 
       unless (defined($rows)) {
-	dbg("bayes: _put_token: SQL Error: ".$self->{_dbh}->errstr());
+	dbg("bayes: _put_token: SQL error: ".$self->{_dbh}->errstr());
 	return 0;
       }
     }
@@ -1984,14 +1984,14 @@ sub _get_oldest_token_age {
   my $sth = $self->{_dbh}->prepare_cached($sql);
 
   unless (defined($sth)) {
-    dbg("bayes: _get_oldest_token_age: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: _get_oldest_token_age: SQL error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
   my $rc = $sth->execute($self->{_userid});
 
   unless ($rc) {
-    dbg("bayes: _get_oldest_token_age: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: _get_oldest_token_age: SQL error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
@@ -2026,14 +2026,14 @@ sub _get_num_hapaxes {
   my $sth = $self->{_dbh}->prepare_cached($sql);
 
   unless (defined($sth)) {
-    dbg("bayes: _get_num_hapaxes: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: _get_num_hapaxes: SQL error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
   my $rc = $sth->execute($self->{_userid});
 
   unless ($rc) {
-    dbg("bayes: _get_num_hapaxes: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: _get_num_hapaxes: SQL error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
@@ -2070,14 +2070,14 @@ sub _get_num_lowfreq {
   my $sth = $self->{_dbh}->prepare_cached($sql);
 
   unless (defined($sth)) {
-    dbg("bayes: _get_num_lowfreq: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: _get_num_lowfreq: SQL error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
   my $rc = $sth->execute($self->{_userid});
 
   unless ($rc) {
-    dbg("bayes: _get_num_lowfreq: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: _get_num_lowfreq: SQL error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
@@ -2088,7 +2088,7 @@ sub _get_num_lowfreq {
   return $num_lowfreq;
 }
 
-sub dbg { Mail::SpamAssassin::dbg (@_); }
-sub sa_die { Mail::SpamAssassin::sa_die (@_); }
+sub dbg { Mail::SpamAssassin::dbg(@_); }
+sub sa_die { Mail::SpamAssassin::sa_die(@_); }
 
 1;

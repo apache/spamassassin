@@ -144,9 +144,8 @@ GetOptions(
   'c'                        => \$opt{'create-prefs'},
   'create-prefs!'            => \$opt{'create-prefs'},
   'daemonize!'               => \$opt{'daemonize'},
-  'debug!'                   => \$opt{'debug'},
+  'debug|D:s'                => \$opt{'debug'},
   'd'                        => \$opt{'daemonize'},
-  'D'                        => \$opt{'debug'},
   'helper-home-dir|H:s'      => \$opt{'home_dir_for_helpers'},
   'help|h'                   => \$opt{'help'},
   'ident-timeout=f'          => \$opt{'ident-timeout'},
@@ -358,7 +357,7 @@ my $already_done_syslog_failure_warning;
 # Logging via syslog is requested. Falling back to INET and then STDERR
 # if opening a UNIX socket fails.
 if ( $log_socket ne 'file' and $log_facility ne 'null' ) {
-  warn "trying to connect to syslog/${log_socket}...\n" if $opt{'debug'};
+  warn "trying to connect to syslog/${log_socket}...\n" if defined $opt{'debug'};
   eval {
     defined( setlogsock($log_socket) ) || die $!;
 
@@ -373,7 +372,7 @@ if ( $log_socket ne 'file' and $log_facility ne 'null' ) {
   # same is true for perl 5.6.0 build on an early version of Red Hat 7!
   # In that case we try it with INET.
   if ( $err and $log_socket ne 'inet' ) {
-    if ( $opt{'debug'} ) {
+    if ( defined $opt{'debug'} ) {
       warn "connection failed: $err\n";
       warn "trying to connect to syslog/inet...\n";
     }
@@ -395,7 +394,7 @@ if ( $log_socket ne 'file' and $log_facility ne 'null' ) {
     $log_facility = 'stderr';
   }
   else {
-    warn "no error connecting to syslog/${log_socket}\n" if $opt{'debug'};
+    warn "no error connecting to syslog/${log_socket}\n" if defined $opt{'debug'};
   }
 }
 
@@ -427,10 +426,10 @@ warn "logging enabled:\n"
   : 'syslog'
   )
   . "\n"
-  if $opt{'debug'};
+  if defined $opt{'debug'};
 
 # Don't duplicate log messages in debug mode.
-if ( $log_facility eq 'stderr' and $opt{'debug'} ) {
+if ( $log_facility eq 'stderr' and defined $opt{'debug'} ) {
   warn "logging to stderr disabled: already debugging to stderr\n";
   $log_facility = 'null';
 }
@@ -472,8 +471,8 @@ die "fatal: internal error while setting up logging: values don't match:\n"
 ### End initialization of logging ##########################
 
 # REIMPLEMENT: if $log_socket is none, fall back to log_facility 'stderr'.
-# If log_fac is stderr and $opt{'debug'}, set log_fac to 'null' to avoid
-# duplicating log messages.
+# If log_fac is stderr and defined $opt{'debug'}, set log_fac to 'null' to
+# avoid duplicating log messages.
 # TVD: isn't this already done up above?
 
 # support setuid() to user unless:
@@ -601,7 +600,7 @@ if ( $opt{'socketpath'} ) {
     Type   => SOCK_STREAM,
     Listen => SOMAXCONN,
   );
-  warn("creating UNIX socket:\n" . join("\n", map { "\t$_: " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket) . "\n") if $opt{'debug'};
+  warn("creating UNIX socket:\n" . join("\n", map { "\t$_: " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket) . "\n") if defined $opt{'debug'};
   $server = new IO::Socket::UNIX(%socket)
          || die "Could not create UNIX socket on $path: $! ($@)\n";
 
@@ -648,7 +647,7 @@ elsif ( $opt{'ssl'} ) {
     SSL_key_file    => $opt{'server-key'},
     SSL_cert_file   => $opt{'server-cert'}
   );
-  warn("creating SSL socket:\n" . join("\n", map { "\t$_:  " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket) . "\n") if $opt{'debug'};
+  warn("creating SSL socket:\n" . join("\n", map { "\t$_:  " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket) . "\n") if defined $opt{'debug'};
   $server = new IO::Socket::SSL(%socket)
          || die "Could not create SSL socket on $addr:$port: $! ($@)\n";
 }
@@ -661,7 +660,7 @@ else {
     ReuseAddr => 1,
     Listen    => SOMAXCONN
   );
-  warn("creating INET socket:\n" . join("\n", map { "\t$_: " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket) . "\n") if $opt{'debug'};
+  warn("creating INET socket:\n" . join("\n", map { "\t$_: " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket) . "\n") if defined $opt{'debug'};
   $server = new IO::Socket::INET(%socket)
          || die "Could not create INET socket on $addr:$port: $! ($@)\n";
 }
@@ -706,13 +705,27 @@ if ( $opt{'username'} ) {
 
 }
 
+# set debug areas, if any specified (only useful for command-line tools)
+my @debug;
+if (defined $opt{'debug'}) {
+  if ($opt{'debug'}) {
+    @debug = split(/,/, $opt{'debug'});
+    if (grep { !/^\S+$/ } @debug) {
+      warn "bad areas in --debug option\n";
+    }
+  }
+  else {
+    @debug = ("all");
+  }
+}
+
 my $spamtest = Mail::SpamAssassin->new(
   {
     dont_copy_prefs      => $dontcopy,
     rules_filename       => ( $opt{'configpath'} || 0 ),
     site_rules_filename  => ( $opt{'siteconfigpath'} || 0 ),
     local_tests_only     => ( $opt{'local'} || 0 ),
-    debug                => ( $opt{'debug'} || 0 ),
+    debug                => \@debug,
     paranoid             => ( $opt{'paranoid'} || 0 ),
     home_dir_for_helpers => (
       defined $opt{'home_dir_for_helpers'}
@@ -770,7 +783,7 @@ setup_parent_sig_handlers();
 
 # log server started, but processes watching the log to wait for connect
 # should wait until they see the pid, after signal handlers are in place
-if ( $opt{'debug'} ) {
+if ( defined $opt{'debug'} ) {
   warn "server started on $listeninfo (running version "
     . Mail::SpamAssassin::Version() . ")\n";
 }
@@ -798,7 +811,7 @@ if (defined $opt{'pidfile'}) {
 # now allow waiting processes to connect, if they're watching the log.
 # The test suite does this!
 
-if ( $opt{'debug'} ) {
+if ( defined $opt{'debug'} ) {
   warn "server pid: $$\n";
 }
 
@@ -1348,7 +1361,7 @@ sub auth_ident {
   my $username = shift;
   my $ident_username = ident_lookup( $client, $opt{'ident-timeout'} );
   my $dn = $ident_username || 'NONE';    # display name
-  warn "ident_username = $dn, spamc_username = $username\n" if $opt{'debug'};
+  warn "ident_username = $dn, spamc_username = $username\n" if defined $opt{'debug'};
   if ( $username ne $ident_username ) {
     logmsg( "fatal: ident username ($dn) does not match "
         . "spamc username ($username)" );
@@ -1639,7 +1652,7 @@ sub logmsg {
   $msg =~ s/[\r\n]+$//;       # remove any trailing newlines
   $msg =~ s/[\x00-\x1f]/_/g;  # replace all other control chars with underscores
 
-  warn "logmsg: $msg\n" if $opt{'debug'};
+  warn "logmsg: $msg\n" if defined $opt{'debug'};
 
   # log to file:
   #   bug 1360 <http://bugzilla.spamassassin.org/show_bug.cgi?id=1360>
@@ -1722,7 +1735,7 @@ sub check_syslog_sigpipe {
 
     # now report what happend
     $msg = "SIGPIPE received, reopening log socket";
-    warn "logmsg: $msg\n" if $opt{'debug'};
+    warn "logmsg: $msg\n" if defined $opt{'debug'};
     syslog( 'warning', "%s", $msg );
 
     # if we've received multiple sigpipes, logging is probably
@@ -1803,7 +1816,7 @@ sub restart_handler {
       unlink($opt{'socketpath'}) || warn "Can't unlink $opt{'socketpath'}: $!\n";
     }
 
-    warn "server socket closed\n" if $opt{'debug'};
+    warn "server socket closed\n" if defined $opt{'debug'};
   }
   $got_sighup = 1;
 }
@@ -1811,7 +1824,7 @@ sub restart_handler {
 sub daemonize {
 
   # Pretty command line in ps
-  $0 = join ( ' ', $ORIG_ARG0, @ORIG_ARGV ) unless ( $opt{'debug'} );
+  $0 = join ( ' ', $ORIG_ARG0, @ORIG_ARGV ) unless ( defined $opt{'debug'} );
 
   # Be a nice daemon and chdir() to the root so we don't block any unmount attempts
   chdir '/' or die "Can't chdir to /: $!\n";
@@ -1937,7 +1950,7 @@ Options:
  --auth-ident                       Use ident to authenticate spamc user
  --ident-timeout=timeout            Timeout for ident connections
  -A host,..., --allowed-ips=..,..   Limit ip addresses which can connect
- -D, --debug                        Print debugging messages
+ -D, --debug[=areas]                Print debugging messages (for areas)
  -L, --local                        Use local tests only (no DNS)
  -P, --paranoid                     Die upon user errors
  -H [dir], --helper-home-dir[=dir]  Specify a different HOME directory
@@ -2197,9 +2210,17 @@ B<-A 10.> -- allow connections from any machine in the range C<10.*.*.*>.
 
 By default, connections are only accepted from localhost [127.0.0.1].
 
-=item B<-D>, B<--debug>
+=item B<-D> [I<area,...>], B<--debug> [I<area,...>]
 
-Print debugging messages
+Produce debugging output. If no areas are listed, all debugging information is
+printed. Diagnostic output can also be enabled for each area individually;
+I<area> is the area of the code to instrument. For example, to produce
+diagnostic output on bayes, learn, and dns, use:
+
+        spamassassin -D bayes,learn,dns
+
+Higher priority informational messages that are suitable for logging in normal
+circumstances are available with an area of "info".
 
 =item B<-L>, B<--local>
 

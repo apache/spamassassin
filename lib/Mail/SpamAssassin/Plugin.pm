@@ -481,7 +481,7 @@ sub inhibit_further_callbacks {
   $self->{_inhibit_further_callbacks} = 1;
 }
 
-=item dbg ($message)
+=item dbg($message)
 
 Output a debugging message C<$message>, if the SpamAssassin object is running
 with debugging turned on.
@@ -493,7 +493,7 @@ C<Mail::SpamAssassin::Plugin::dbg($msg)>.
 
 =cut
 
-sub dbg { Mail::SpamAssassin::dbg (@_); }
+sub dbg { Mail::SpamAssassin::dbg(@_); }
 
 1;
 

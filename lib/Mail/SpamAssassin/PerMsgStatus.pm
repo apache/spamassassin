@@ -136,7 +136,7 @@ sub check {
   # to do this switch if we're already using bayes ... ;)
   my $set = $self->{conf}->get_score_set();
   if (($set & 2) == 0 && $self->{main}->{bayes_scanner}->is_scan_available()) {
-    dbg("debug: Scoreset $set but Bayes is available, switching scoresets");
+    dbg("check: scoreset $set but bayes is available, switching scoresets");
     $self->{conf}->set_score_set ($set|2);
   }
 
@@ -166,7 +166,7 @@ sub check {
       # happen in Conf.pm when we switch a rules from one priority to another
       next unless ($self->{conf}->{priorities}->{$priority} > 0);
 
-      dbg("Running tests for priority: $priority");
+      dbg("check: running tests for priority: $priority");
 
       # only harvest the dnsbl queries once priority HARVEST_DNSBL_PRIORITY
       # has been reached and then only run once
@@ -240,10 +240,10 @@ sub check {
   # add 0 to force it back to numeric representation instead of string.
   $self->{score} = (sprintf "%0.3f", $self->{score}) + 0;
   
-  dbg ("is spam? score=".$self->{score}.
+  dbg("check: is spam? score=".$self->{score}.
                         " required=".$self->{conf}->{required_score});
-  dbg ("tests=".$self->get_names_of_tests_hit());
-  dbg ("subtests=".$self->get_names_of_subtests_hit());
+  dbg("check: tests=".$self->get_names_of_tests_hit());
+  dbg("check: subtests=".$self->get_names_of_subtests_hit());
   $self->{is_spam} = $self->is_spam();
 
   $self->{main}->call_plugins ("check_end", { permsgstatus => $self });
@@ -282,7 +282,7 @@ sub learn {
   # Find out what score we should consider this message to have ...
   my $score = $self->_get_autolearn_points();
 
-  dbg ("auto-learn? ham=$min, spam=$max, ".
+  dbg("learn: auto-learn? ham=$min, spam=$max, ".
                 "body-points=".$self->{body_only_points}.", ".
                 "head-points=".$self->{head_only_points}.", ".
 		"learned-points=".$self->{learned_points});
@@ -293,7 +293,7 @@ sub learn {
   } elsif ($score >= $max) {
     $isspam = 1;
   } else {
-    dbg ("auto-learn? no: inside auto-learn thresholds, not considered ham or spam");
+    dbg("learn: auto-learn? no: inside auto-learn thresholds, not considered ham or spam");
     $self->{auto_learn_status} = "no";
     return;
   }
@@ -307,33 +307,33 @@ sub learn {
 
     if ($self->{body_only_points} < $required_body_points) {
       $self->{auto_learn_status} = "no";
-      dbg ("auto-learn? no: scored as spam but too few body points (".
-                  $self->{body_only_points}." < ".$required_body_points.")");
+      dbg("learn: auto-learn? no: scored as spam but too few body points (".
+	  $self->{body_only_points}." < ".$required_body_points.")");
       return;
     }
     if ($self->{head_only_points} < $required_head_points) {
       $self->{auto_learn_status} = "no";
-      dbg ("auto-learn? no: scored as spam but too few head points (".
-                  $self->{head_only_points}." < ".$required_head_points.")");
+      dbg("learn: auto-learn? no: scored as spam but too few head points (".
+	  $self->{head_only_points}." < ".$required_head_points.")");
       return;
     }
     if ($self->{learned_points} < $learner_said_ham_points) {
       $self->{auto_learn_status} = "no";
-      dbg ("auto-learn? no: scored as spam but learner indicated ham (".
-                  $self->{learned_points}." < ".$learner_said_ham_points.")");
+      dbg("learn: auto-learn? no: scored as spam but learner indicated ham (".
+	  $self->{learned_points}." < ".$learner_said_ham_points.")");
       return;
     }
 
   } else {
     if ($self->{learned_points} > $learner_said_spam_points) {
       $self->{auto_learn_status} = "no";
-      dbg ("auto-learn? no: scored as ham but learner indicated spam (".
-                  $self->{learned_points}." > ".$learner_said_spam_points.")");
+      dbg("learn: auto-learn? no: scored as ham but learner indicated spam (".
+	  $self->{learned_points}." > ".$learner_said_spam_points.")");
       return;
     }
   }
 
-  dbg ("auto-learn? yes, ".($isspam?"spam ($score > $max)":"ham ($score < $min)"));
+  dbg("learn: auto-learn? yes, ".($isspam?"spam ($score > $max)":"ham ($score < $min)"));
 
   $self->{main}->call_plugins ("autolearn", {
       permsgstatus => $self,
@@ -354,7 +354,7 @@ sub learn {
   };
 
   if ($@) {
-    dbg ("auto-learning failed: $@");
+    dbg("learn: auto-learning failed: $@");
     $self->{auto_learn_status} = "failed";
   }
 }
@@ -393,11 +393,11 @@ sub _get_autolearn_points {
   my $scores = $self->{conf}->{scores};
 
   if (($orig_scoreset & 2) == 0) { # we don't need to recompute
-    dbg ("auto-learn: currently using scoreset $orig_scoreset.");
+    dbg("learn: auto-learn: currently using scoreset $orig_scoreset");
   }
   else {
     $new_scoreset = $orig_scoreset & ~2;
-    dbg ("auto-learn: currently using scoreset $orig_scoreset, recomputing score based on scoreset $new_scoreset.");
+    dbg("learn: auto-learn: currently using scoreset $orig_scoreset, recomputing score based on scoreset $new_scoreset");
     $scores = $self->{conf}->{scoreset}->[$new_scoreset];
   }
 
@@ -442,7 +442,7 @@ sub _get_autolearn_points {
 
   # Figure out the final value we'll use for autolearning
   $points = (sprintf "%0.3f", $points) + 0;
-  dbg ("auto-learn: message score: ".$self->{score}.", computed score for autolearn: $points");
+  dbg("learn: auto-learn: message score: ".$self->{score}.", computed score for autolearn: $points");
 
   return $points;
 }
@@ -925,7 +925,7 @@ sub qp_encode_header {
 
   $text = '=?'.$cs.'?Q?'.$text.'?=';
 
-  dbg ("encoding header in $cs: $text");
+  dbg("markup: encoding header in $cs: $text");
   return $text;
 }
 
@@ -1439,15 +1439,12 @@ sub get {
 sub ran_rule_debug_code {
   my ($self, $rulename, $ruletype, $bit) = @_;
 
-  return '' if (!$Mail::SpamAssassin::DEBUG->{enabled}
-                && !$self->{save_pattern_hits});
+  return '' if (!$Mail::SpamAssassin::DEBUG && !$self->{save_pattern_hits});
 
   my $log_hits_code = '';
   my $save_hits_code = '';
 
-  if ($Mail::SpamAssassin::DEBUG->{enabled} &&
-      ($Mail::SpamAssassin::DEBUG->{rulesrun} & $bit) != 0)
-  {
+  if ($Mail::SpamAssassin::DEBUG) {
     # note: keep this in 'single quotes' to avoid the $ & performance hit,
     # unless specifically requested by the caller.
     $log_hits_code = ': match=\'$&\'';
@@ -1460,16 +1457,10 @@ sub ran_rule_debug_code {
   }
 
   return '
-    dbg ("Ran '.$ruletype.' rule '.$rulename.' ======> got hit'.
-        $log_hits_code.'", "rulesrun", '.$bit.');
+    dbg("rules: ran '.$ruletype.' rule '.$rulename.' ======> got hit'.
+        $log_hits_code.'");
     '.$save_hits_code.'
   ';
-
-  # do we really need to see when we *don't* get a hit?  If so, it should be a
-  # separate level as it's *very* noisy.
-  #} else {
-  #  dbg ("Ran '.$ruletype.' rule '.$rulename.' but did not get hit", "rulesrun", '.
-  #      $bit.');
 }
 
 sub hash_line_for_rule {
@@ -1489,7 +1480,7 @@ sub do_head_tests {
   # eval tests need to use stuff in here.
   $self->{test_log_msgs} = ();        # clear test state
 
-  dbg ("running header regexp tests; score so far=".$self->{score});
+  dbg("rules: running header regexp tests; score so far=".$self->{score});
 
   my $doing_user_rules = 
     $self->{conf}->{user_rules_to_compile}->{$Mail::SpamAssassin::Conf::TYPE_HEAD_TESTS};
@@ -1516,7 +1507,7 @@ sub do_head_tests {
         $rule =~ /^\s*(\S+)\s*(\=|\!)\~\s*(\S.*?\S)\s*$/;
 
     if (!defined $pat) {
-      warn "invalid rule: $rulename\n";
+      warn "rules: invalid rule: $rulename\n";
       $self->{rule_errors}++;
       next;
     }
@@ -1575,7 +1566,7 @@ EOT
   eval $evalstr;
 
   if ($@) {
-    warn "Failed to run header SpamAssassin tests, skipping some: $@\n";
+    warn "rules: failed to run header tests, skipping some: $@\n";
     $self->{rule_errors}++;
   }
   else {
@@ -1589,7 +1580,7 @@ sub do_body_tests {
   my ($self, $priority, $textary) = @_;
   local ($_);
 
-  dbg ("running body-text per-line regexp tests; score so far=".$self->{score});
+  dbg("rules: running body-text per-line regexp tests; score so far=".$self->{score});
 
   my $doing_user_rules = 
     $self->{conf}->{user_rules_to_compile}->{$Mail::SpamAssassin::Conf::TYPE_BODY_TESTS};
@@ -1665,8 +1656,7 @@ EOT
   # and run it.
   eval $evalstr;
   if ($@) {
-    warn("Failed to compile body SpamAssassin tests, skipping:\n".
-              "\t($@)\n");
+    warn("rules: failed to compile body tests, skipping:\n" . "\t($@)\n");
     $self->{rule_errors}++;
   }
   else {
@@ -1790,7 +1780,7 @@ sub get_uri_list {
         }
       }
 
-      # warn("Got URI: $uri\n");
+      # warn("uri: got URI: $uri\n");
       push @uris, $uri;
     }
     while (/($Addr_spec_re)/go) {
@@ -1798,7 +1788,7 @@ sub get_uri_list {
 
       $uri = "mailto:$uri";
 
-      #warn("Got URI: $uri\n");
+      #warn("uri: got URI: $uri\n");
       push @uris, $uri;
     }
   }
@@ -1822,9 +1812,9 @@ sub get_uri_list {
   $self->{uri_list} = \@uris;
 
   # list out the URLs for debugging ...
-  if ($Mail::SpamAssassin::DEBUG->{enabled}) {
+  if ($Mail::SpamAssassin::DEBUG) {
     foreach my $nuri (@uris) {
-      dbg("uri found: $nuri");
+      dbg("uri: uri found: $nuri");
     }
   }
 
@@ -1835,7 +1825,7 @@ sub do_body_uri_tests {
   my ($self, $priority, @uris) = @_;
   local ($_);
 
-  dbg ("running uri tests; score so far=".$self->{score});
+  dbg("uri: running uri tests; score so far=".$self->{score});
 
   my $doing_user_rules = 
     $self->{conf}->{user_rules_to_compile}->{$Mail::SpamAssassin::Conf::TYPE_URI_TESTS};
@@ -1910,8 +1900,7 @@ EOT
   # and run it.
   eval $evalstr;
   if ($@) {
-    warn("Failed to compile URI SpamAssassin tests, skipping:\n".
-          "\t($@)\n");
+    warn("rules: failed to compile URI tests, skipping:\n" . "\t($@)\n");
     $self->{rule_errors}++;
   }
   else {
@@ -1925,7 +1914,7 @@ sub do_rawbody_tests {
   my ($self, $priority, $textary) = @_;
   local ($_);
 
-  dbg ("running raw-body-text per-line regexp tests; score so far=".$self->{score});
+  dbg("rules: running raw-body-text per-line regexp tests; score so far=".$self->{score});
 
   my $doing_user_rules = 
     $self->{conf}->{user_rules_to_compile}->{$Mail::SpamAssassin::Conf::TYPE_RAWBODY_TESTS};
@@ -2000,8 +1989,7 @@ EOT
   # and run it.
   eval $evalstr;
   if ($@) {
-    warn("Failed to compile body SpamAssassin tests, skipping:\n".
-              "\t($@)\n");
+    warn("rules: failed to compile body tests, skipping:\n" . "\t($@)\n");
     $self->{rule_errors}++;
   }
   else {
@@ -2015,7 +2003,7 @@ sub do_full_tests {
   my ($self, $priority, $fullmsgref) = @_;
   local ($_);
   
-  dbg ("running full-text regexp tests; score so far=".$self->{score});
+  dbg("rules: running full-text regexp tests; score so far=".$self->{score});
 
   my $doing_user_rules = 
     $self->{conf}->{user_rules_to_compile}->{$Mail::SpamAssassin::Conf::TYPE_FULL_TESTS};
@@ -2072,8 +2060,7 @@ EOT
   eval $evalstr;
 
   if ($@) {
-    warn "Failed to compile full SpamAssassin tests, skipping:\n".
-              "\t($@)\n";
+    warn "rules: failed to compile full tests, skipping:\n" . "\t($@)\n";
     $self->{rule_errors}++;
   } else {
     no strict "refs";
@@ -2114,7 +2101,7 @@ sub do_meta_tests {
   my ($self, $priority) = @_;
   local ($_);
 
-  dbg( "running meta tests; score so far=" . $self->{score} );
+  dbg("rules: running meta tests; score so far=" . $self->{score} );
 
   my $doing_user_rules = 
     $self->{conf}->{user_rules_to_compile}->{$Mail::SpamAssassin::Conf::TYPE_META_TESTS};
@@ -2201,8 +2188,8 @@ sub do_meta_tests {
   my %metas = map { $_ => 1 } @metas; # keep a small cache for fast lookups
   foreach $rulename (@metas) {
     $self->{rule_errors}++; # flag to --lint that there was an error ...
-    dbg( "Excluding meta test $rulename; unsolved meta dependencies: "
-        . join(", ", grep($metas{$_},@{ $rule_deps{$rulename} })));
+    dbg("rules: excluding meta test $rulename; unsolved meta dependencies: " .
+        join(", ", grep($metas{$_}, @{ $rule_deps{$rulename} })));
   }
 
   if (defined &{'_meta_tests_'.$clean_priority}) {
@@ -2232,7 +2219,7 @@ EOT
   eval $evalstr;
 
   if ($@) {
-    warn "Failed to run meta SpamAssassin tests, skipping some: $@\n";
+    warn "rules: failed to run meta tests, skipping some: $@\n";
     $self->{rule_errors}++;
   }
   else {
@@ -2248,7 +2235,7 @@ sub run_eval_tests {
   my ($self, $evalhash, $prepend2desc, @extraevalargs) = @_;
   local ($_);
   
-  my $debugenabled = $Mail::SpamAssassin::DEBUG->{enabled};
+  my $debugenabled = $Mail::SpamAssassin::DEBUG;
 
   my $scoreset = $self->{conf}->get_score_set();
   while (my ($rulename, $test) = each %{$evalhash}) {
@@ -2281,7 +2268,7 @@ sub run_eval_tests {
 	# we have a plugin for this.  eval its function
 	$self->register_plugin_eval_glue ($pluginobj, $function);
       } else {
-	dbg ("no method found for eval test $function");
+	dbg("rules: no method found for eval test $function");
       }
     }
 
@@ -2294,25 +2281,25 @@ sub run_eval_tests {
     };
 
     if ($@) {
-      warn "Failed to run $rulename SpamAssassin test, skipping:\n".
-                      "\t($@)\n";
+      warn "rules: failed to run $rulename test, skipping:\n" . "\t($@)\n";
       $self->{rule_errors}++;
       next;
     }
 
     if ($result) {
-        $self->got_hit ($rulename, $prepend2desc);
-        dbg("Ran run_eval_test rule $rulename ======> got hit", "rulesrun", 32) if $debugenabled;
-    } else {
-        #dbg("Ran run_eval_test rule $rulename but did not get hit", "rulesrun", 32) if $debugenabled;
+      $self->got_hit ($rulename, $prepend2desc);
+      dbg("rules: ran run_eval_test rule $rulename ======> got hit") if $debugenabled;
     }
+    #else {
+    #  dbg("rules: ran run_eval_test rule $rulename but did not get hit") if $debugenabled;
+    #}
   }
 }
 
 sub register_plugin_eval_glue {
   my ($self, $pluginobj, $function) = @_;
 
-  dbg ("registering glue method for $function ($pluginobj)");
+  dbg("plugin: registering glue method for $function ($pluginobj)");
   my $evalstr = <<"ENDOFEVAL";
 {
     package Mail::SpamAssassin::PerMsgStatus;
@@ -2329,7 +2316,7 @@ ENDOFEVAL
   eval $evalstr;
 
   if ($@) {
-    warn "Failed to run header SpamAssassin tests, skipping some: $@\n";
+    warn "rules: failed to run header tests, skipping some: $@\n";
     $self->{rule_errors}++;
   }
 }
@@ -2342,11 +2329,11 @@ sub run_rbl_eval_tests {
   local ($_);
 
   if ($self->{main}->{local_tests_only}) {
-    dbg ("local tests only, ignoring RBL eval", "rulesrun", 32);
+    dbg("rules: local tests only, ignoring RBL eval");
     return 0;
   }
   
-  my $debugenabled = $Mail::SpamAssassin::DEBUG->{enabled};
+  my $debugenabled = $Mail::SpamAssassin::DEBUG;
 
   while (my ($rulename, $test) = each %{$evalhash}) {
     my $score = $self->{conf}->{scores}->{$rulename};
@@ -2362,8 +2349,7 @@ sub run_rbl_eval_tests {
     };
 
     if ($@) {
-      warn "Failed to run $rulename RBL SpamAssassin test, skipping:\n".
-                "\t($@)\n";
+      warn "rules: failed to run $rulename RBL test, skipping:\n" . "\t($@)\n";
       $self->{rule_errors}++;
       next;
     }
@@ -2511,7 +2497,7 @@ sub get_envelope_from {
   if ($self->get ("X-Sender") =~ /\@/) {
     my $rcvd = join (' ', $self->get ("Received"));
     if ($rcvd =~ /\(fetchmail/) {
-      dbg ("X-Sender and fetchmail signatures found, cannot trust envelope-from");
+      dbg("message: X-Sender and fetchmail signatures found, cannot trust envelope-from");
       return undef;
     }
   }
@@ -2522,7 +2508,7 @@ sub get_envelope_from {
     # heuristic: this could have been relayed via a list which then used
     # a *new* Envelope-from.  check
     if ($self->get ("ALL") =~ /(?:^|\n)Received:\s.*\nX-Envelope-From:\s/s) {
-      dbg ("X-Envelope-From header found after 1 or more Received lines, cannot trust envelope-from");
+      dbg("message: X-Envelope-From header found after 1 or more Received lines, cannot trust envelope-from");
     } else {
       goto ok;
     }
@@ -2533,7 +2519,7 @@ sub get_envelope_from {
     # heuristic: this could have been relayed via a list which then used
     # a *new* Envelope-from.  check
     if ($self->get ("ALL") =~ /(?:^|\n)Received:\s.*\nEnvelope-Sender:\s/s) {
-      dbg ("Envelope-Sender header found after 1 or more Received lines, cannot trust envelope-from");
+      dbg("message: Envelope-Sender header found after 1 or more Received lines, cannot trust envelope-from");
     } else {
       goto ok;
     }
@@ -2544,7 +2530,7 @@ sub get_envelope_from {
     # heuristic: this could have been relayed via a list which then used
     # a *new* Envelope-from.  check
     if ($self->get ("ALL") =~ /(?:^|\n)Received:\s.*\nReturn-Path:\s/s) {
-      dbg ("Return-Path header found after 1 or more Received lines, cannot trust envelope-from");
+      dbg("message: Return-Path header found after 1 or more Received lines, cannot trust envelope-from");
     } else {
       goto ok;
     }
@@ -2561,8 +2547,8 @@ ok:
 
 ###########################################################################
 
-sub dbg { Mail::SpamAssassin::dbg (@_); }
-sub sa_die { Mail::SpamAssassin::sa_die (@_); }
+sub dbg { Mail::SpamAssassin::dbg(@_); }
+sub sa_die { Mail::SpamAssassin::sa_die(@_); }
 
 ###########################################################################
 

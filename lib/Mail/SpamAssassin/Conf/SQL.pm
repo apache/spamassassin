@@ -88,7 +88,7 @@ sub load {
 
    my $dsn = $self->{main}->{conf}->{user_scores_dsn};
    if(!defined($dsn) || $dsn eq '') {
-     dbg ("No DSN defined; skipping sql");
+     dbg("config: no DSN defined; skipping sql");
      return 1;
    }
 
@@ -100,7 +100,7 @@ sub load {
    };
 
    if ($@) {
-     warn "failed to load user ($username) scores from SQL database: $@\n";
+     warn "config: failed to load user ($username) scores from SQL database: $@\n";
      return 0;
    }
    return 1;
@@ -140,12 +140,12 @@ sub load_with_dbi {
         "$f_username = ".$dbh->quote($username).
         " or $f_username = '\@GLOBAL' order by $f_username asc";
      }
-     dbg("Conf::SQL: executing SQL: $sql");
+     dbg("config: Conf::SQL: executing SQL: $sql");
       my $sth = $dbh->prepare($sql);
       if($sth) {
          my $rv  = $sth->execute();
          if($rv) {
-            dbg("retrieving prefs for $username from SQL server");
+            dbg("config: retrieving prefs for $username from SQL server");
             my @row;
             my $text = '';
             while(@row = $sth->fetchrow_array()) {
@@ -157,16 +157,16 @@ sub load_with_dbi {
 	      delete $main->{conf}->{main};
             }
             $sth->finish();
-         } else { die "SQL Error: $sql\n".$sth->errstr."\n"; }
-      } else { die "SQL Error: " . $dbh->errstr . "\n"; }
+         } else { die "config: SQL error: $sql\n".$sth->errstr."\n"; }
+      } else { die "config: SQL error: " . $dbh->errstr . "\n"; }
    $dbh->disconnect();
-   } else { die "SQL Error: " . DBI->errstr . "\n"; }
+   } else { die "config: SQL error: " . DBI->errstr . "\n"; }
 }
 
 ###########################################################################
 
-sub dbg { Mail::SpamAssassin::dbg (@_); }
-sub sa_die { Mail::SpamAssassin::sa_die (@_); }
+sub dbg { Mail::SpamAssassin::dbg(@_); }
+sub sa_die { Mail::SpamAssassin::sa_die(@_); }
 
 ###########################################################################
 

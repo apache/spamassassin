@@ -168,7 +168,7 @@ sub parse_received_headers {
       # if the 'from' IP addr is in a reserved net range, it's not on
       # the public internet.
       if ($relay->{ip_is_reserved}) {
-	dbg ("received-header: 'from' ".$relay->{ip}." has reserved IP");
+	dbg("received-header: 'from' ".$relay->{ip}." has reserved IP");
 	$inferred_as_trusted = 1;
       }
 
@@ -176,7 +176,7 @@ sub parse_received_headers {
       # cannot lookup hostnames. :(
       # Consider the first relay trusted, and all others untrusted.
       if (!$self->{dns_pms}->is_dns_available()) {
-	dbg ("received-header: cannot use DNS, do not trust any hosts from here on");
+	dbg("received-header: cannot use DNS, do not trust any hosts from here on");
       }
 
       # if the 'from' IP addr shares the same class B mask (/16) as
@@ -185,7 +185,7 @@ sub parse_received_headers {
       elsif (Mail::SpamAssassin::Util::ips_match_in_16_mask
 					([ $relay->{ip} ], $first_by))
       {
-	dbg ("received-header: 'from' ".$relay->{ip}." is near to first 'by'");
+	dbg("received-header: 'from' ".$relay->{ip}." is near to first 'by'");
 	$inferred_as_trusted = 1;
       }
 
@@ -210,16 +210,16 @@ sub parse_received_headers {
 	  next if ($ip =~ /^${LOCALHOST}$/o);
 
 	  if ($ip !~ /${IP_IN_RESERVED_RANGE}/o) {
-	    dbg ("received-header: 'by' ".$relay->{by}." has public IP $ip");
+	    dbg("received-header: 'by' ".$relay->{by}." has public IP $ip");
 	    $found_non_rsvd = 1;
 	  } else {
-	    dbg ("received-header: 'by' ".$relay->{by}." has reserved IP $ip");
+	    dbg("received-header: 'by' ".$relay->{by}." has reserved IP $ip");
 	    $found_rsvd = 1;
 	  }
 	}
 
 	if ($found_rsvd && !$found_non_rsvd) {
-	  dbg ("received-header: 'by' ".$relay->{by}." has no public IPs");
+	  dbg("received-header: 'by' ".$relay->{by}." has no public IPs");
 	  $inferred_as_trusted = 1;
 	}
       }
@@ -232,7 +232,7 @@ sub parse_received_headers {
       if (!$inferred_as_trusted) {
 	if (SLOW_TRUST_BASED_ON_HELO_MXES) {
 	  if ($self->mx_of_helo_near_ip ($relay->{helo}, $relay->{ip})) {
-	    dbg ("received-header: helo $relay->{helo} is near $relay->{ip}");
+	    dbg("received-header: helo $relay->{helo} is near $relay->{ip}");
 	    $inferred_as_trusted = 1;
 	  }
 	}
@@ -241,7 +241,7 @@ sub parse_received_headers {
       if (!$inferred_as_trusted) { $in_trusted = 0; }
     }
 
-    dbg ("received-header: relay ".$relay->{ip}.
+    dbg("received-header: relay ".$relay->{ip}.
 	" trusted? ".($in_trusted ? "yes" : "no").
 	" internal? ".($in_internal ? "yes" : "no"));
 
@@ -294,8 +294,8 @@ sub parse_received_headers {
   $self->{num_relays_trusted} = scalar (@{$self->{relays_trusted}});
   $self->{num_relays_untrusted} = scalar (@{$self->{relays_untrusted}});
 
-  dbg ("metadata: X-Spam-Relays-Trusted: ".$self->{relays_trusted_str});
-  dbg ("metadata: X-Spam-Relays-Untrusted: ".$self->{relays_untrusted_str});
+  dbg("metadata: X-Spam-Relays-Trusted: ".$self->{relays_trusted_str});
+  dbg("metadata: X-Spam-Relays-Untrusted: ".$self->{relays_untrusted_str});
 }
 
 sub lookup_all_ips {
@@ -345,8 +345,9 @@ sub mx_of_helo_near_ip {
   }
   if ($mxes && Mail::SpamAssassin::Util::ips_match_in_24_mask ([ $ip ], [ @mxips ]))
   {
-    dbg ("IP address $ip is near to an MX (".join (', ', @mxips).
-					") for ".$helodom);
+    dbg("received-header: IP address $ip is near an MX (" .
+	join (", ", @mxips) .
+	") for ".$helodom);
     return 1;
   }
   return 0;
@@ -397,7 +398,7 @@ sub parse_received_line {
     # from 142.169.110.122 (SquirrelMail authenticated user synapse) by
     # mail.nomis80.org with HTTP; Sat, 3 Apr 2004 10:33:43 -0500 (EST)
     if (/ \(SquirrelMail authenticated user /) {
-      dbg ("received-header: ignored SquirrelMail injection: $_");
+      dbg("received-header: ignored SquirrelMail injection: $_");
       return;
     }
 
@@ -998,7 +999,7 @@ sub parse_received_line {
   # returned due to it being a known-crap format, let's warn so the user can
   # file a bug report or something.
 
-  dbg ("received-header: unknown format: $_");
+  dbg("received-header: unknown format: $_");
   # and skip the line entirely!  We can't parse it...
   return;
 
@@ -1009,12 +1010,12 @@ enough:
 
   # flag handovers we couldn't get an IP address from at all
   if ($ip eq '') {
-    dbg ("received-header: could not parse IP address from: $_");
+    dbg("received-header: could not parse IP address from: $_");
   }
 
   $ip = Mail::SpamAssassin::Util::extract_ipv4_addr_from_string ($ip);
   if (!$ip) {
-    dbg ("received-header: could not parse IPv4 address, assuming IPv6");
+    dbg("received-header: could not parse IPv4 address, assuming IPv6");
     return;   # ignore IPv6 handovers
   }
 
@@ -1025,7 +1026,7 @@ enough:
   # for the addr.
   if (0) {
     if ($ip eq '127.0.0.1') {
-      dbg ("received-header: ignoring localhost handover");
+      dbg("received-header: ignoring localhost handover");
       return;   # ignore localhost handovers
     }
   }
@@ -1097,7 +1098,7 @@ enough:
   # e.g. "ip" comes before "helo" will still work.
   #
   my $asstr = "[ ip=$ip rdns=$rdns helo=$helo by=$by ident=$ident envfrom=$envfrom intl=0 id=$id ]";
-  dbg ("received-header: parsed as $asstr");
+  dbg("received-header: parsed as $asstr");
   $relay->{as_string} = $asstr;
 
   my $isrsvd = ($ip =~ /${IP_IN_RESERVED_RANGE}/o);
@@ -1111,7 +1112,7 @@ enough:
 # spamcop does this, and it's a great idea ;)
 sub found_pop_fetcher_sig {
   my ($self) = @_;
-  dbg ("found fetchmail marker, restarting parse");
+  dbg("received-header: found fetchmail marker, restarting parse");
   $self->{relays} = [ ];
 }
 

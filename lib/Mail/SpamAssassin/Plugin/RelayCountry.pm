@@ -44,7 +44,7 @@ sub extract_metadata {
     $reg = IP::Country::Fast->new();
   };
   if ($@) {
-    dbg ("failed to load 'IP::Country::Fast', skipping");
+    dbg("metadata: failed to load 'IP::Country::Fast', skipping");
     return 1;
   }
 
@@ -59,11 +59,11 @@ sub extract_metadata {
 
   chop $countries;
   $msg->put_metadata ("X-Relay-Countries", $countries);
-  dbg ("metadata: X-Relay-Countries: $countries");
+  dbg("metadata: X-Relay-Countries: $countries");
 
   return 1;
 }
 
-sub dbg { Mail::SpamAssassin::dbg (@_); }
+sub dbg { Mail::SpamAssassin::dbg(@_); }
 
 1;

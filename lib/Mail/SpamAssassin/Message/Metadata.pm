@@ -116,7 +116,7 @@ sub check_language {
 
   # need about 256 bytes for reasonably accurate match (experimentally derived)
   if ($self->{languages_body_len} < 256) {
-    dbg("Message too short for language analysis");
+    dbg("metadata: message too short for language analysis");
     $self->{textcat_matches} = [];
     return;
   }
@@ -128,7 +128,7 @@ sub check_language {
   # add to metadata so Bayes gets to take a look
   $self->{msg}->put_metadata ("X-Languages", $matches_str);
 
-  dbg ("metadata: X-Languages: $matches_str");
+  dbg("metadata: X-Languages: $matches_str");
 }
 
 # ---------------------------------------------------------------------------
