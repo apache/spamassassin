@@ -1,0 +1,45 @@
+#!/usr/bin/perl -w
+
+use lib "../lib";
+use Mail::Internet;
+use Mail::SpamAssassin;
+
+sub sortbynum {
+  $a =~ m,\/(\d+)$,; my $anum = $1;
+  $b =~ m,\/(\d+)$,; my $bnum = $1;
+  ($anum <=> $bnum);
+}
+
+my $spamtest = new Mail::SpamAssassin ({
+  'rules_filename'      => "../spamassassin.cf",
+  'userprefs_filename'  => "../spamassassin.prefs",
+  'local_tests_only'    => 1
+});
+
+foreach my $folder (@ARGV) {
+  my @files = <$folder/[0-9]*>;
+
+  foreach my $mail (sort sortbynum @files) {
+    open (STDIN, "<$mail");
+    my $ma = Mail::Audit->new();
+    $ma->{noexit} = 1;
+
+    my $status = $spamtest->check ($ma);
+    $status->rewrite_mail ();
+
+    $_ = $ma->get ("X-Spam-Status");
+    /^(\S+), hits=(\S+) required=\S+ tests=(.+)\s*$/s;
+
+    my $yorn = $1;
+    my $hits = $2+0;
+    my $tests = $3;
+    $tests =~ s/\s+//gs;
+
+    $ma = undef;		# clean 'em up
+    $status = undef;
+
+    printf "%s %2d %s %s\n",
+		      (($yorn eq "Yes") ? 'Y' : '.'),
+		      $hits, $mail, $tests;
+  }
+}
