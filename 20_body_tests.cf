@@ -732,3 +732,8 @@ describe ORDER_NOW          Encourages you to waste no time in ordering
 
 rawbody OBFUSCATING_JAVASCRIPT   /charCodeAt|fromCharCode/i
 describe OBFUSCATING_JAVASCRIPT   An attempt to hide spam inside obfuscating Javascript code
+
+rawbody NUMERIC_COMMENT     /<!--\d{3,}-->/
+describe NUMERIC_COMMENT    Contains a comment with nothing but a number in it
+test NUMERIC_COMMENT     ok    Some text <!--34555--> followed by more
+test NUMERIC_COMMENT     fail  Something <!-- A comment --> and more
