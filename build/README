@@ -23,20 +23,25 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - cvs commit -m "ready to release"
 
-- run cvs2cl.pl to generate the Changes file, like so:
+- run cvs2cl to generate the Changes file, like so:
 
-  cvs2cl.pl -f Changes -l "-d'>2002-06-18'" -rb2_5_0
+  cvs2cl-branch -f Changes -l "-d'>2002-06-18'" --branch b2_5_0
 
-  replace b2_5_0 with the name of the branch you're on, or remove
-  the entire -rb2_5_0 arg if you're on HEAD.
+  replace b2_5_0 with the name of the branch you're on, or remove the
+  entire arg if you're on HEAD.  
+  
+  Note that this requires 'cvs2cl-branch' in the 'build' subdir, since
+  there are bugs in std cvs2cl.pl that otherwise result in revisions
+  on HEAD appearing in branches, if those revisions are in files created
+  after the branch was created.   (I hate cvs -- jm)
 
 - run "./build/update_stable" to build the tar.gz files.
-
-- take a copy of the MD5sum line output.
 
 - by default, they're written to ~/spamassassin.taint.org/released/ .
   This Works For Me (tm), as it's my local cvs checkout of the
   SpamAssassin website.  Copy them to wherever you want, yourself.
+
+- take a copy of the MD5sum line output.
 
 - test the tar.gz and zip files!  redo until they work!! ;)
 
@@ -102,6 +107,6 @@ SPAMASSASSIN RELEASE PROCEDURE
 - Approve the posting to SpamAssassin-Announce (the list admins
   will get a mail indicating how to do this.)
 
-lastmod: Mar 31 2003 jm 
+lastmod: May 10 2003 jm
 
 // vim:tw=74:
