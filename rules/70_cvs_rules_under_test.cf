@@ -97,28 +97,14 @@ body __HIGHBITS			/(?:[\x80-\xff].?){4,}/
 meta T_MIME_FARAWAY_CHARSET	(__MIME_FARAWAY_CHARSET && __HIGHBITS)
 tflags T_MIME_FARAWAY_CHARSET userconf
 
-body T_MIME_EXCESSIVE_BASE64		eval:check_for_mime_excessive_base64()
-describe T_MIME_EXCESSIVE_BASE64	base64 encoding without base64 header
-
 ########################################################################
 
 header __CD			exists:Content-Disposition
 header __CT			exists:Content-Type
 header __CTE			exists:Content-Transfer-Encoding
 header __MIME_VERSION		exists:MIME-Version
-header __CT_TEXT		Content-Type =~ /^text\b/
 header __CT_TEXT_PLAIN		Content-Type =~ /^text\/plain\b/
-
-# best four variants so far (rename later)
-meta T_MIME_NO_VERSION_ODD	((__CD + __CTE + __CT == 1) && !__MIME_VERSION)
-meta T_MIME_NO_VERSION_LONER	(__CD + __CTE + __CT + __MIME_VERSION == 1)
-meta T_MIME_NO_VERSION_CTYPE	(__CT && !__MIME_VERSION)
-meta T_MIME_NO_VERSION_ANY	((__CD || __CTE || __CT) && !__MIME_VERSION)
-# new test variants (at least as good as the above variants)
-meta T_MIME_HEADER_CTYPE_ONLY	(!__CD && !__CTE && __CT && !__MIME_VERSION)
-meta T_MIME_HEADER_CTYPE_ONLY2	(!__CD && !__CTE && __CT && !__MIME_VERSION && !__CT_TEXT)
-# Dec  6 2002 jm: I suggest promoting this one, the others get bad rates
-meta T_MIME_HEADER_CTYPE_ONLY3	(!__CD && !__CTE && __CT && !__MIME_VERSION && !__CT_TEXT_PLAIN)
+meta T_MIME_HEADER_CTYPE_ONLY	(!__CD && !__CTE && __CT && !__MIME_VERSION && !__CT_TEXT_PLAIN)
 
 ########################################################################
 # bug 1106: forged MUAs
@@ -147,7 +133,7 @@ score T_FORGED_MUA_IMS		1.0
 
 # Outlook
 # Note: this uses __IMS_MSGID from above
-# Dec  6 2002 jm: no hits.
+header __OUTLOOK_MUA		X-Mailer =~ /\bOutlook\b(?! IMO)/
 header __OUTLOOK_MSGID_1	MESSAGEID =~ /^<[0-9a-f]{12}\$[0-9a-f]{8}\$[0-9a-f]{8}\@\S+>$/m
 header __OUTLOOK_MSGID_2	MESSAGEID =~ /^<(?:OE[0-9A-Za-z]{25}|DAV[0-9A-Za-z]{24})\@hotmail\.com>$/m
 meta T_FORGED_MUA_OUTLOOK	(__OUTLOOK_MUA && !(__OUTLOOK_MSGID_1 || __OUTLOOK_MSGID_2 || __IMS_MSGID))
@@ -190,7 +176,6 @@ body T_BANG_EXERCISE		/\bexercis(?:e|er|es)!/i
 body T_BANG_GUARANTEE		/\bguaranteed?\!/i
 body T_BANG_MONEY		/\bmoney!/i
 body T_BANG_MORE		/\b(?-i:M)ore!/i
-body T_BANG_OFFER		/\boffer(?:ed|s)!/i
 body T_BANG_OPRAH		/\boprah!/i
 body T_BANG_QUOTE		/\b(?-i:Q)uotes?\!/i
 
@@ -367,32 +352,6 @@ body     T_HTML_LINK_CLICK_HERE eval:html_eval('anchor_text', '=~ /click\s+here/
 body     T_HTML_LINK_CLICK_CAPS eval:html_eval('anchor_text', '=~ /CLICK/')
 body     T_HTML_LINK_MONEY      eval:html_eval('anchor_text', '=~/\s\$/')
 body     T_HTML_LINK_UNSUB      eval:html_eval('anchor_text', '=~/unsubscribe/i')
-
-# Some spammers try to get multiple negative scores by adding in different
-# user-agent looking headers.  TOO_MANY_UA adds up all of our USER_AGENT
-# tests and matches if more than 1 hits.  UA_AND_XM actually matches a
-# good amount of non-spam at the moment, the above problem can trigger
-# this rule as well.
-#
-# quinlan: these don't work too well for me
-#  0.000    0.000    0.000    0.00    0.00    1.00  T_TOO_MANY_UA
-#  0.202    0.000    0.325    0.00    0.00    1.00  T_UA_AND_XM
-#
-# T_TOO_MANY_UA uses "regexp and operator": all of the tests matching
-# regexp /USER_AGENT.*/ will be strung together with "+" between them.
-#meta T_TOO_MANY_UA	( (USER_AGENT.+ +) > 1)
-#meta T_UA_AND_XM	( USER_AGENT && __HAS_X_MAILER )
-#
-# quinlan: these might work better, but I have no hits (they should be
-# syntactically correct, though)
-#
-# Nov 12 2002 jm: nothing but bad results in ALL.current. I recommend
-# drop 'em
-# 0.002   0.0000   0.0021    0.000   0.00    0.01  T_MANY_USER_AGENT
-# 0.012   0.0060   0.0145    0.292   0.02    0.01  T_MANY_X_MAILER
-#
-header T_MANY_X_MAILER		ALL =~ /(?:\nX-Mailer:.*){2}/si
-header T_MANY_USER_AGENT	ALL =~ /(?:\nUser-Agent:.*){2}/si
 
 # Nov 12 2002 jm: still not sure about this one. ALL.current reports
 # 0.108   0.4001   0.0062    0.985   0.93    1.00  T_IDENT_NOBODY
@@ -657,11 +616,6 @@ body T_FREE_ACCESS                /Free access/i
 body T_FREE_SAMPLE                /Free sample/i
 body T_GET_IT_NOW         /get it Now/i
 body T_LOW_PRICE                  /\blow.{0,4} Price/i
-body T_SALE                       /\bsales? (?:price|system|department|technology|ends|today)|\b(?:on|summer|movie|clearance|for|your|increase|super|losing|return|business|airfare) Sales?/i
-
-body T_FREE_HOSTING2             /Free hosting/i
-body T_BANG_MORE2                /\bMore!/i
-body T_BANG_QUOTE2               /\bQuotes?\!/i
 
 ######
 
