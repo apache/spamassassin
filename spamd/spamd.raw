@@ -39,6 +39,8 @@ use IO::Pipe;
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::NetSet;
+use Mail::SpamAssassin::SubProcBackChannel;
+use Mail::SpamAssassin::SpamdForkScaling qw(:pfstates);
 
 use Getopt::Long;
 use Pod::Usage;
@@ -82,6 +84,8 @@ my %resphash = (
   EX_CONFIG      => 78,    # configuration error
 );
 
+*dbg = \&Mail::SpamAssassin::dbg;
+
 
 sub print_version {
   printf("%s version %s\n", "SpamAssassin Server", Mail::SpamAssassin::Version());
@@ -109,7 +113,13 @@ sub print_usage_and_exit {
 my %opt = (
   'user-config'   => 1,
   'ident-timeout' => 5.0,
+  # scaling settings; some of these aren't actually settable via cmdline
+  'server-scale-period' => 2,   # how often to scale the # of kids, secs
+  'min-children'  => 1,         # min kids to have running
+  'min-spare'     => 1,         # min kids that must be spare
+  'max-spare'     => 2,         # max kids that should be spare
 );
+
 
 # Untaint all command-line options and ENV vars, since spamd is launched
 # as a daemon from a known-safe environment. Also store away some of the
@@ -153,7 +163,11 @@ GetOptions(
   'listen-ip|ip-address|i:s' => \$opt{'listen-ip'},
   'local!'                   => \$opt{'local'},
   'L'                        => \$opt{'local'},
+  'round-robin!'             => \$opt{'round-robin'},
+  'min-children=i'           => \$opt{'min-children'},
   'max-children|m=i'         => \$opt{'max-children'},
+  'min-spare=i'              => \$opt{'min-spare'},
+  'max-spare=i'              => \$opt{'max-spare'},
   'max-conn-per-child=i'     => \$opt{'max-conn-per-child'},
   'nouser-config|x'          => sub { $opt{'user-config'} = 0 },
   'paranoid!'                => \$opt{'paranoid'},
@@ -515,6 +529,22 @@ if ( defined $opt{'max-conn-per-child'} ) {
 $childlimit        ||= 5;
 $clients_per_child ||= 200;
 
+# ensure scaling parameters are logical
+if ($opt{'min-children'} < 1) {
+  $opt{'min-children'} = 1;
+}
+if ($opt{'min-spare'} < 0) {
+  $opt{'min-spare'} = 0;
+}
+if ($opt{'min-spare'} > $childlimit) {
+  $opt{'min-spare'} = $childlimit-1;
+}
+if ($opt{'max-spare'} < $opt{'min-spare'}) {
+  # emulate Apache behaviour:
+  # http://httpd.apache.org/docs-2.0/mod/prefork.html#maxspareservers
+  $opt{'max-spare'} = $opt{'min-spare'}+1;
+}
+
 
 my $dontcopy = 1;
 if ( $opt{'create-prefs'} ) { $dontcopy = 0; }
@@ -569,6 +599,29 @@ else {
   }
 
   $listeninfo = "port $port/tcp";
+}
+
+my $backchannel = Mail::SpamAssassin::SubProcBackChannel->new();
+my $scaling;
+if (!$opt{'round-robin'})
+{
+  my $max_children = $childlimit;
+
+  # change $childlimit to avoid churn when we startup and create loads
+  # of spare servers; when we're using scaling, it's not as important
+  # as it was with the old algorithm.
+  if ($childlimit > $opt{'max-spare'}) {
+    $childlimit = $opt{'max-spare'};
+  }
+
+  $scaling = Mail::SpamAssassin::SpamdForkScaling->new({
+        backchannel => $backchannel,
+        min_children => $opt{'min-children'},
+        max_children => $max_children,
+        min_idle => $opt{'min-spare'},
+        max_idle => $opt{'max-spare'},
+        cur_children_ref => \$childlimit
+      });
 }
 
 # Be a well-behaved daemon
@@ -747,6 +800,10 @@ if ($copy_config_p) {
 my $got_sighup;
 setup_parent_sig_handlers();
 
+my $select_mask = '';
+vec($select_mask, $server->fileno, 1) = 1;
+$backchannel->set_selector(\$select_mask);
+
 # log server started, but processes watching the log to wait for connect
 # should wait until they see the pid, after signal handlers are in place
 if ( defined $opt{'debug'} ) {
@@ -781,8 +838,16 @@ if ( defined $opt{'debug'} ) {
   warn "server pid: $$\n";
 }
 
+if ($scaling) {
+  $scaling->set_server_fh($server);
+}
+
 while (1) {
-  sleep;    # wait for a signal (ie: child's death)
+  if (!$scaling) {
+    sleep;    # wait for a signal (ie: child's death)
+  } else {
+    $scaling->main_server_poll($opt{'server-scale-period'});
+  }
 
   if ( defined $got_sighup ) {
     if (defined($opt{'pidfile'})) {
@@ -803,7 +868,7 @@ while (1) {
       . ": $!\n";
   }
 
-  for ( my $i = keys %children ; $i < $childlimit ; $i++ ) {
+  for (my $i = keys %children; $i < $childlimit; $i++) {
     spawn();
   }
 }
@@ -811,6 +876,8 @@ while (1) {
 # Kicks off a kid ...
 sub spawn {
   my $pid;
+
+  $backchannel->setup_backchannel_parent_pre_fork();
 
   # block signal for fork
   my $sigset = POSIX::SigSet->new( POSIX::SIGINT() );
@@ -826,6 +893,10 @@ sub spawn {
       or die "Can't unblock SIGINT for fork: $!\n";
     $children{$pid} = 1;
     logmsg("server successfully spawned child process, pid $pid");
+    $backchannel->setup_backchannel_parent_post_fork($pid);
+    if ($scaling) {
+      $scaling->add_child($pid);
+    }
     return;
   }
   else {
@@ -864,8 +935,22 @@ sub spawn {
     # this will help make it clear via process listing which is child/parent
     $0 = 'spamd child';
 
+    $backchannel->setup_backchannel_child_post_fork();
+    if ($scaling) {     # only do this once, for efficiency; $$ is a syscall
+      $scaling->set_my_pid($$);
+    }
+
     # handle $clients_per_child connections, then die in "old" age...
+    my $orders;
     for ( my $i = 0 ; $i < $clients_per_child ; $i++ ) {
+      if ($scaling) {
+        $scaling->update_child_status_idle();
+        $orders = $scaling->wait_for_orders(); # and sleep...
+
+        if ($orders != PFORDER_ACCEPT) {
+          logmsg ("unknown order: $orders");
+        }
+      }
 
       # use a large eval scope to catch die()s and ensure they
       # don't kill the server.
@@ -933,6 +1018,10 @@ sub accept_a_conn {
   }
 
   $client->autoflush(1);
+
+  if ($scaling) {
+    $scaling->update_child_status_busy();
+  }
 
   # keep track of start time
   my $start = time;
@@ -1503,7 +1592,7 @@ sub handle_user_sql {
 
 sub handle_user_ldap {
   my $username = shift;
-  Mail::SpamAssassin::dbg("handle_user_ldap($username)");
+  dbg("handle_user_ldap($username)");
   $spamtest->load_scoreonly_ldap($username);
   $spamtest->signal_user_changed(
     {
@@ -1626,6 +1715,7 @@ sub setup_parent_sig_handlers {
   $SIG{CHLD} = \&child_handler;
   $SIG{INT}  = \&kill_handler;
   $SIG{TERM} = \&kill_handler;
+  $SIG{PIPE} = 'IGNORE';
 }
 
 # sig handlers: child processes
@@ -1775,6 +1865,10 @@ sub child_handler {
     # remove them from our child listing
     delete $children{$pid};
 
+    if ($scaling) {
+      $scaling->child_exited($pid);
+    }
+
     unless ($main::INHIBIT_LOGGING_IN_SIGCHLD_HANDLER) {
       logmsg("handled cleanup of child pid $pid");
     }
@@ -1919,8 +2013,12 @@ Options:
  -i [ipaddr], --listen-ip=ipaddr    Listen on the IP ipaddr
  -p port, --port                    Listen on specified port
  -m num, --max-children=num         Allow maximum num children
+ --min-children=num                 Allow minimum num children
+ --min-spare=num                    Lower limit for number of spare children
+ --max-spare=num                    Upper limit for number of spare children
  --max-conn-per-child=num	    Maximum connections accepted by child 
                                     before it is respawned
+ --round-robin                      Use traditional prefork algorithm
  -q, --sql-config                   Enable SQL config (only useful with -x)
  -Q, --setuid-with-sql              Enable SQL config (only useful with -x,
                                     enables use of -H)
@@ -2236,11 +2334,45 @@ The minimum value is C<1>, the default value is C<5>.
 Please note that there is a OS specific maximum of connections that can be
 queued (Try C<perl -MSocket -e'print SOMAXCONN'> to find this maximum).
 
+Note that if you run too many servers for the amount of free RAM available, you
+run the danger of hurting performance by causing a high swap load as server
+processes are swapped in and out continually.
+
+=item B<--min-children>=I<number>
+
+The minimum number of children that will be kept running.  The minimum value is
+C<1>, the default value is C<1>.  If you have lots of free RAM, you may want to
+increase this.
+
+=item B<--min-spare>=I<number>
+
+The lower limit for the number of spare children allowed to run.  A
+spare, or idle, child is one that is not handling a scan request.   If
+there are too few spare children available, a new server will be started
+every second or so.  The default value is C<1>.
+
+=item B<--max-spare>=I<number>
+
+The upper limit for the number of spare children allowed to run.  If there
+are too many spare children, one will be killed every second or so until
+the number of idle children is in the desired range.  The default value
+is C<2>.
+
 =item B<--max-conn-per-child>=I<number>
 
 This option specifies the maximum number of connections each child
 should process before dying and letting the master spamd process spawn
 a new child.  The minimum value is C<1>, the default value is C<200>.
+
+=item B<--round-robin>
+
+By default, C<spamd> will attempt to keep a small number of "hot" child
+processes as busy as possible, and keep any others as idle as possible, using
+something similar to the Apache httpd server scaling algorithm.  This is
+accomplished by the master process coordinating the activities of the children.
+This switch will disable this scaling algorithm, and the behaviour seen in
+versions 3.0.0 and 3.0.1 will be used instead, where all processes receive an
+equal load and no scaling takes place.
 
 =item B<-H> I<directory>, B<--helper-home-dir>=I<directory>
 
