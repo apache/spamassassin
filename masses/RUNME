@@ -17,14 +17,7 @@ mv spam.local nonspam.local logs/old
 #./mass-check /local2/mail-archives/kelsey.spamtrap.gz >> spam.local
 #./mass-check /local2/mail-archives/spam.2000-2001.gz >> spam.local
 
-./mass-check /local2/mail-archives/scoop.1999.gz >> nonspam.local
-./mass-check /local2/mail-archives/oldmail.1998.gz >> nonspam.local
-
 ./mass-check-for-jm ; sh commands.sh
-
-for f in /local2/mail-archives/crackmice-old/* ; do
-  ./mass-check $f >> nonspam.local
-done
 
 # the new stuff is run on dogma and sonic now
 dog=dogma.slashnull.org
