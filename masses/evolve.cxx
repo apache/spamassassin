@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <iostream.h>
 #include <fstream.h>
 
@@ -22,13 +23,12 @@ void initializer(GAGenome &);
 
 // ---------------------------------------------------------------------------
 
-int popsize = 300;		// population size
-int generations = 1500;		// generations to run
 int threshold = 5;		// threshold of spam vs. non-spam
 
 int nn, ny, yn, yy;
 int bestnn, bestny, bestyn, bestyy;
 int progiter = 0;
+float nybias = 5.0;
 
 // ---------------------------------------------------------------------------
 
@@ -122,8 +122,69 @@ write_to_file (GARealGenome &genome, const char *fname) {
 
 // ---------------------------------------------------------------------------
 
+void usage () {
+  cerr << "usage: evolve -s size [args]\n"
+    << "\n"
+    << "  -s size = population size (300 recommended)\n"
+    << "  -b nybias = bias towards false negatives (5.0 default)\n"
+    << "\n"
+    << "  -g ngens = generations to run (1500 default)\n"
+    << "  -c conv = run until convergence (1.00 default)\n"
+    << "  -m npops = migration with multi populations (5 default)\n"
+    << "\n"
+    << "  -g and -c are mutually exclusive.\n"
+    << "  Steady-state mode is default, unless -m is used -- but currently\n"
+    << "  -m is unimplemented; you need to edit code to do it. sorry.\n"
+    <<endl;
+  exit (30);
+}
+
 int
 main (int argc, char **argv) {
+  int arg;
+  int demeMode	= 0;
+  int convergeMode = 0;
+  int npops	= 5;		// num pops (for deme mode)
+  int popsize	= 0;		// population size
+  int generations = 1500;	// generations to run
+  float pconv	= 1.00;		// threshhold for when we have converged
+  int nconv	= 300;		// how many gens back to check for convergence
+
+  while ((arg = getopt (argc, argv, "b:c:s:m:g:")) != -1) {
+    switch (arg) {
+      case 'b':
+	nybias = atof(optarg);
+	break;
+
+      case 's':
+	popsize = atoi(optarg);
+	break;
+
+      case 'm':
+	demeMode = 1;
+	fprintf (stderr, "Deme mode not supported through cmdline args yet\n");
+	usage();
+	npops = atoi(optarg);
+	break;
+
+      case 'c':
+	convergeMode = 1;
+	pconv = atof(optarg);
+	break;
+
+      case 'g':
+	demeMode = 0;
+	generations = atoi(optarg);
+	break;
+
+      case '?':
+	usage();
+	break;
+    }
+  }
+
+  if (popsize == 0) { usage(); }
+
   loadscores ();
   loadtests ();
 
@@ -143,29 +204,27 @@ main (int argc, char **argv) {
 
   // steady-state seems to give best results
   GASteadyStateGA ga(genome);
-  ga.set(gaNpopulationSize, popsize);   // population size
 
-  // alternatively, this uses multiple pops with migration
   //GADemeGA ga(genome);
-  //ga.nPopulations(5);
-  //ga.populationSize(100);
+  //ga.nPopulations(npops);
+
+  ga.populationSize(popsize);
+
+  if (convergeMode) {
+    ga.pConvergence(pconv);
+    ga.nConvergence(nconv);
+    ga.terminator(GAGeneticAlgorithm::TerminateUponConvergence);
+  } else {
+    ga.set(gaNnGenerations, generations);        // number of generations
+  }
 
   ga.minimize();		// we want to minimize the objective
-
-  // terminate once the scores converge enough (DOESN'T SEEM TO WORK)
-  //float pconv  = 0.8;          // threshhold for when we have converged
-  //int nconv    = 50;            // how many generations back to look
-  //ga.pConvergence(pconv);
-  //ga.nConvergence(nconv);
-  //ga.terminator(GAGeneticAlgorithm::TerminateUponConvergence);
-
   ga.set(gaNpCrossover, 0.6);           // probability of crossover
   ga.set(gaNpMutation, 0.05);           // probability of mutation
-  ga.set(gaNnGenerations, generations);        // number of generations
   ga.set(gaNscoreFrequency, 1);         // how often to record scores
   ga.set(gaNflushFrequency, 20);        // how often to dump scores to file
   ga.set(gaNselectScores,               // which scores should we track?
-         GAStatistics::Maximum|GAStatistics::Minimum|GAStatistics::Mean);
+         GAStatistics::AllScores);
   ga.set(gaNscoreFilename, "evolve.scores");
   ga.parameters(argc, argv);
 
@@ -181,9 +240,13 @@ main (int argc, char **argv) {
       cout << "."; cout.flush();
 
       if (gens % 400 == 0) {
+	cout << "\nProgress: gen=" << gens << " convergence="
+	  	<< ga.statistics().convergence()
+	  	<< ":\n";
+
 	genome = ga.statistics().bestIndividual();
-	cout << "\nProgress: current best genome at gen " << gens << ":\n";
 	counthits(genome); printhits (stdout);
+	write_to_file (genome, "tmp/results.in_progress");
       }
     }
   }
@@ -210,6 +273,6 @@ objective(GAGenome & c)
 {
   GARealGenome &genome = (GARealGenome &) c;
   counthits(genome);
-  return ((float) (yn * 1.0) + (ny * 6.0));
+  return ((float) yn + (ny * nybias));
 }
 

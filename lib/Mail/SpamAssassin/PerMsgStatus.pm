@@ -513,7 +513,8 @@ sub get {
   }
 
   if ($getaddr) {
-    s/^.*?<(.+)>\s*$/$1/g			# Foo Blah <jm@foo>
+    chomp;
+    s/^.*?<(.+)>\s*$/$1/g		# Foo Blah <jm@foo>
     	or s/^(.+)\s\(.*?\)\s*$/$1/g;	# jm@foo (Foo Blah)
 
   } else {
