@@ -143,7 +143,7 @@ sub cmdline_run {
     if ($@) { die $@ unless ($@ =~ /HITLIMIT/); }
 
     print STDERR "\n" if ($opt{showdots});
-    warn "Learned from $messagecount messages.\n";
+    print "Learned from $messagecount messages.\n";
 
     if (!$opt{norebuild}) {
       $spamtest->rebuild_learner_caches();

@@ -19,3 +19,6 @@ done
 # cp WebMake-${vers}-1.noarch.rpm WebMake-${vers}-1.src.rpm $WEBDIR/released
 ( cd $WEBDIR/released && cvs add -kb *SpamAssassin* )
 
+echo "md5sum of tarball:"
+cat $WEBDIR/released/Mail-SpamAssassin-$vers.tar.gz.md5
+
