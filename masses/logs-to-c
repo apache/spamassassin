@@ -16,8 +16,11 @@ my $nybias = 10;
 
 # lambda value for TCR equation, indicating the "cost" of recovering
 # from an FP.  The values are: 1 = tagged only, 9 = mailed back to
-# sender asking for token (TMDA style), 999 = deleted outright
-my $lambda = 9;
+# sender asking for token (TMDA style), 999 = deleted outright.
+# We (SpamAssassin) use a default of 5, representing "moved to
+# infrequently-read folder".
+
+my $lambda = 5;
 if ($opt_lambda) { $lambda = $opt_lambda; }
 
 my %is_spam = ();

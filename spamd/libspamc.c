@@ -551,17 +551,29 @@ int message_process(const char *hostname, int port, char *username, int max_size
     ret=message_filter(&addr, username, flags, &m);
     if(ret!=EX_OK) goto FAIL;
     if(message_write(out_fd, &m)<0) goto FAIL;
-    if(m.is_spam!=EX_TOOBIG) return m.is_spam;
+    if(m.is_spam!=EX_TOOBIG) {
+       message_cleanup(&m);
+       return m.is_spam;
+    }
+    message_cleanup(&m);
     return ret;
 
 FAIL:
    if(flags&SPAMC_CHECK_ONLY){
        full_write(out_fd, "0/0\n", 4);
+       message_cleanup(&m);
        return EX_NOTSPAM;
    } else {
        message_dump(in_fd, out_fd, &m);
+       message_cleanup(&m);
        return ret;
     }
+}
+
+void message_cleanup(struct message *m) {
+   if (m->out != NULL && m->out != m->raw) free(m->out);
+   if (m->raw != NULL) free(m->raw);
+   clear_message(m);
 }
 
 /* Aug 14, 2002 bj: Obsolete! */

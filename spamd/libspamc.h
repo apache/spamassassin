@@ -93,6 +93,10 @@ void message_dump(int in_fd, int out_fd, struct message *m);
  * EX_OK or EX_ISSPAM/EX_NOTSPAM on success, some error EX on error. */
 int message_process(const char *hostname, int port, char *username, int max_size, int in_fd, int out_fd, const int flags);
 
+/* Cleanup the resources we allocated for storing the message. Call after
+ * you're done processing. */
+void message_cleanup(struct message *m);
+
 /* Aug 14, 2002 bj: This is now legacy, don't use it. */
 int process_message(const char *hostname, int port, char *username, 
                     int max_size, int in_fd, int out_fd,
