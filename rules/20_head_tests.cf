@@ -223,8 +223,8 @@ describe DATE_IN_FUTURE_48_96	Date: is 48 to 96 hours after Received: date
 header DATE_IN_FUTURE_96_XX	eval:check_for_shifted_date('96', 'undef')
 describe DATE_IN_FUTURE_96_XX	Date: is 96 hours or more after Received: date
 
-header DATE_TEMPLATE		ALL =~ /%CURRENT_DATE_TIME/
-describe DATE_TEMPLATE		Headers contain an unresolved date template
+header UNRESOLVED_TEMPLATE	ALL =~ /^(?!(?i:X-UIDL|X-Face|To|Cc|From|Subject|References|In-Reply-To|(?:X-|Resent-|X-Original-)?Message-Id):)[\w-]+:(?:[^\n]*|\n[ \t])*%[A-Z][A-Z_-]+/m
+describe UNRESOLVED_TEMPLATE	Headers contain an unresolved template
 
 ###########################################################################
 # illegal characters that should be MIME encoded
