@@ -700,8 +700,9 @@ long lines).
 =item add_header { spam | ham | all } header_name string
 
 Customized headers can be added to the specified type of messages (spam,
-ham, or "all" to add to either).  All headers begin with C<X-Spam-> (so
-a C<header_name> Foo will generate a header called X-Spam-Foo).
+ham, or "all" to add to either).  All headers begin with C<X-Spam->
+(so a C<header_name> Foo will generate a header called X-Spam-Foo).
+header_name is restricted to the character set [A-Za-z0-9_-].
 
 C<string> can contain tags as explained above in the TAGS section.  You
 can also use C<\n> and C<\t> in the header to add newlines and tabulators
