@@ -1578,8 +1578,8 @@ sub copy_config {
   my($self, $source, $dest) = @_;
 
   # At least one of either source or dest needs to be a hash reference ...
-  unless ((defined $source && ref($source) ne 'HASH') ||
-          (defined $dest && ref($dest) ne 'HASH')) {
+  unless ((defined $source && ref($source) eq 'HASH') ||
+          (defined $dest && ref($dest) eq 'HASH')) {
     return 0;
   }
 
