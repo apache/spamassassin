@@ -390,6 +390,12 @@ sub razor2_lookup {
         my $objects = $rc->prepare_objects( \@msg )
           or die "error in prepare_objects";
         $rc->get_server_info() or die $rc->errprefix("checkit");
+        
+        # let's reset the alarm since get_server_info() calls
+        # nextserver() which calls discover() which very likely will
+        # reset the alarm for us ... how polite.  :(
+        alarm $timeout;
+        
         my $sigs = $rc->compute_sigs($objects)
           or die "error in compute_sigs";
 
