@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.508 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.509 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -381,6 +381,13 @@ uri T_URI_CASE_CHANGE	/(?:[a-z][A-Z]+){3}/
 
 # hex escape in a directory name
 uri T_HTTP_ESCAPED_DIRECTORY	/^https?\:\/\/.*?\/.*%[0-9a-f]{2}.*\//i
+
+# bug 1734: replacement rules
+header T_FROM_OFFERS_1		From:addr =~ /^From:.*\@\S*offer(?!sen)/i
+header T_FROM_OFFERS_2		From:addr =~ /^From:.*\@\S*offer(?!sen\b)/i
+header T_FROM_OFFERS_3		From:addr =~ /^From:.*\@\S*offer(?!s[eo]n)/i
+header T_FROM_OFFERS_4		From:addr =~ /^From:.*\@\S*offer(?!s[eo]n\b)/i
+header T_FROM_OFFERS_5		From:addr =~ /^From:.*\@\S*offers?(?:\b|[^a-z])/i
 
 # bug 1922:
 body __NIGERIAN_BODY_43         /\blate .{0,15}(?:father|wife|husband|general|president|daughter|son|minister).{0,20}(?:wealthy|treasure|deposit|money|left|property|known|\$|US)/i
