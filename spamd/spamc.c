@@ -273,6 +273,8 @@ int read_message(int in, int out, int max_size)
 	      response = EX_PROTOCOL; break;
 	    }
 
+	    printf("%d/%d\n",score,threshold);
+
 	    if(!strcasecmp("true",is_spam)) /* If message is indeed spam */
 	    {
 	      response = EX_ISSPAM; break;
@@ -452,9 +454,9 @@ int process_message(const char *hostname, int port, char *username, int max_size
       case HOST_NOT_FOUND:
       case NO_ADDRESS:
       case NO_RECOVERY:
-	return (CHECK_ONLY?EX_NOTSPAM:EX_NOHOST);
+	if(CHECK_ONLY) { printf("0/0\n"); return EX_NOTSPAM; } else { return EX_NOHOST; }
       case TRY_AGAIN:
-	return (CHECK_ONLY?EX_NOTSPAM:EX_TEMPFAIL);
+	if(CHECK_ONLY) { printf("0/0\n"); return EX_NOTSPAM; } else { return EX_TEMPFAIL; }
       }
     }
 
@@ -464,7 +466,10 @@ int process_message(const char *hostname, int port, char *username, int max_size
   exstatus = try_to_connect ((const struct sockaddr *) &addr, &mysock);
   if (EX_OK == exstatus)
   {
-    if(NULL == (msg_buf = malloc(max_size+1024))) return (CHECK_ONLY?EX_NOTSPAM:EX_OSERR);
+    if(NULL == (msg_buf = malloc(max_size+1024)))
+    {
+      if(CHECK_ONLY) { printf("0/0\n"); return EX_NOTSPAM; } else { return EX_OSERR; }
+    }
 
     exstatus = send_message(STDIN_FILENO,mysock,username,max_size);
     if (EX_OK == exstatus)
@@ -481,8 +486,9 @@ int process_message(const char *hostname, int port, char *username, int max_size
     }
     free(msg_buf);
   }
-  else if(CHECK_ONLY) /* If connect failed, but CHECK_ONLY then return 0 */
+  else if(CHECK_ONLY) /* If connect failed, but CHECK_ONLY then print "0/0" and return 0 */
   {
+    printf("0/0\n");
     exstatus = EX_NOTSPAM;
   }
   else if(SAFE_FALLBACK) /* If connection failed but SAFE_FALLBACK set then dump original message */
@@ -566,7 +572,7 @@ int main(int argc,char **argv)
     curr_user = getpwuid(getuid());
     if (curr_user == NULL) {
       perror ("getpwuid failed");
-      return (CHECK_ONLY?EX_NOTSPAM:EX_OSERR);
+      if(CHECK_ONLY) { printf("0/0\n"); return EX_NOTSPAM; } else { return EX_OSERR; }
     }
     username = curr_user->pw_name;
   }

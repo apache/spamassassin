@@ -17,7 +17,7 @@ spamc - client for spamd
 
 =item B<-c>
 
-Just check if the message is spam or not.  Set process exitcode to 1 is message is spam, 0 if not spam or processing failure occurs.
+Just check if the message is spam or not.  Set process exitcode to 1 is message is spam, 0 if not spam or processing failure occurs.  Will print score/threshold to stdout (as ints) or 0/0 if there was an error.
 
 =item B<-d> I<host>
 
