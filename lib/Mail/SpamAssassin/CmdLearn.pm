@@ -69,8 +69,8 @@ sub cmdline_run {
   if ($opt{'force-expire'}) {
     $rebuildonly=1;
   }
-  if ( !defined $isspam && !defined $rebuildonly && !defined $forget && !defined $opt{'dump'} ) {
-    usage(0, "Please select either --spam, --ham, --forget, --rebuild, or --dump");
+  if ( !defined $isspam && !defined $rebuildonly && !defined $forget && !defined $opt{'dump'} && !defined $opt{'folders'} ) {
+    usage(0, "Please select either --spam, --ham, --folders, --forget, --rebuild or --dump");
   }
 
   # We need to make sure the journal syncs pre-forget...
@@ -169,6 +169,9 @@ sub cmdline_run {
       open (F, $opt{folders}) || die $!;
       while (<F>) {
 	chomp;
+	if (/^(?:ham|spam):/) {
+	  push(@targets, $_);
+	}
 	target($_);
       }
       close (F);
