@@ -19,10 +19,16 @@
 use strict;
 use warnings;
 
-# try FindBin
+use File::Spec;
+
+# try to find binary
 eval {
-  use FindBin;
-  exec "$FindBin::Bin/sa-filter", @ARGV;
+  my @bin = File::Spec->splitpath($0);
+  my $bin = (($bin[0] ? File::Spec->catpath(@bin[0..1]) : $bin[1]) ||
+	   File::Spec->curdir) . "/sa-filter";
+  $bin .= ".raw" if $0 =~ /\.raw$/;
+  $bin =~ s|//sa-filter|/sa-filter|;
+  exec $bin, @ARGV;
 };
 
 # try using the PATH
