@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.495 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.496 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -141,6 +141,16 @@ meta T_MIME_HTML_NO_HTML_TAG	MIME_HTML_ONLY && !__TAG_EXISTS_HTML
 meta T_MIME_HTML_NO_BODY_TAG	MIME_HTML_ONLY && !__TAG_EXISTS_BODY
 # but we'll try this anyway
 meta T_MIME_HTML_NO_MAJOR_TAG	MIME_HTML_ONLY && !__TAG_EXISTS_HTML && !__TAG_EXISTS_BODY
+# another one...
+meta T_MIME_HTML_NO_MAJOR_TAG2	MIME_HTML_ONLY && !(__TAG_EXISTS_HTML && __TAG_EXISTS_BODY)
+
+# with __MIME_HTML_ONLY instead
+meta T_MIME_HTML_NO_HTML_TAG_B	__MIME_HTML_ONLY && !__TAG_EXISTS_HTML
+meta T_MIME_HTML_NO_BODY_TAG_B	__MIME_HTML_ONLY && !__TAG_EXISTS_BODY
+# but we'll try this anyway
+meta T_MIME_HTML_NO_MAJOR_TAG_B	__MIME_HTML_ONLY && !__TAG_EXISTS_HTML && !__TAG_EXISTS_BODY
+# another one...
+meta T_MIME_HTML_NO_MAJOR_TAG2_B	__MIME_HTML_ONLY && !(__TAG_EXISTS_HTML && __TAG_EXISTS_BODY)
 
 # 2003-02-23: quinlan
 # Message-Id: format tests
