@@ -2058,10 +2058,12 @@ sub add_test {
   $self->{tflags}->{$name} ||= '';
   $self->{source_file}->{$name} = $self->{currentfile};
 
-  # All scoresets should have a score defined, so if the one we're in doesn't, we need to set them all.
+  # All scoresets should have a score defined, so if the one we're in
+  # doesn't, we need to set them all.
+  # TODO? - nice tests should get negative scores
   if ( ! exists $self->{scores}->{$name} ) {
     # T_ rules (in a testing probationary period) get low, low scores
-    my $set_score = $name=~/^T_/ ? 0.01 : 1.0;
+    my $set_score = ($name =~/^T_/) ? 0.01 : 1.0;
     for my $index (0..3) {
       $self->{scoreset}->[$index]->{$name} = $set_score;
     }
