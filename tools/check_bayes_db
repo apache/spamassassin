@@ -133,6 +133,7 @@ sub compute_prob_for_token {
   my ($s, $n, $ns, $nn) = @_;
 
   return if ($s == 0 && $n == 0);
+  return if ($ns== 0 || $nn== 0);
   my $ratios = ($s / $ns);
   my $ration = ($n / $nn);
   my $prob;
