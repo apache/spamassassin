@@ -248,6 +248,30 @@ ignore it.
 
     if ($skipfile) { next; }
 
+=item version_tag string
+
+This tag is appended to the SA version in the X-Spam-Status header. You should
+include it when modify your ruleset, especially if you plan to distribute it.
+A good choice for I<string> is your last name or your initials followed by a
+number which you increase with each change.
+
+eg.
+
+  version_tag perkel2    # version=2.40-perkel2
+
+=cut
+
+    if(/^version[-_]tag\s+(.*)$/) {
+      my $tag = lc($1);
+      foreach (@Mail::SpamAssassin::EXTRA_VERSION) {
+        if($_ eq $tag) {
+          $tag = undef;
+          last;
+        }
+      }
+      push(@Mail::SpamAssassin::EXTRA_VERSION, $tag) if($tag);
+    }
+
     # note: no eval'd code should be loaded before the SECURITY line below.
 ###########################################################################
 
