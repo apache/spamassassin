@@ -270,7 +270,7 @@ sub parse_config {
   }
   elsif ($key eq 'uridnsbl_skip_domain') {
     foreach my $domain (split(/\s+/, $opts->{value})) {
-      $opts->{conf}->{uridnsbl_skip_domains}->{$domain} = 1;
+      $opts->{conf}->{uridnsbl_skip_domains}->{lc $domain} = 1;
     }
     $self->inhibit_further_callbacks(); return 1;
   }
