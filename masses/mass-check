@@ -70,21 +70,26 @@ sub mass_check_mailbox {
   while (!eof MBOX) {
     open (MSG, ">$tmpf");
     my $msgid = undef;
+    $count++;
+
     while (<MBOX>) {
-      /^Message-I[dD]: (.*)\s*$/ and $msgid = $1;
+      /^Message-[Ii][Dd]: (.*)\s*$/ and $msgid = $1;
+
+      if (/^$/) {
+	if (!defined ($msgid)) {
+	  $msgid = "<$count\@no_msgid_in_msg.taint.org>";
+	  print MSG "Message-Id: $msgid\n";
+	}
+      }
+
       /^From \S+ +... ... / and last;
       print MSG;
     }
     close MSG;
 
-    $count++;
-
     # switch to a fork-based model to save RAM
     if ($FORK && fork()) { wait; next; }
 
-    if (!defined ($msgid)) {
-      $msgid = "<$count\@no_msgid_in_msg>";
-    }
     $msgid = "$folder:$msgid";		# so we can find it again
     $msgid =~ s/\s/_/gs;	# make safe
 

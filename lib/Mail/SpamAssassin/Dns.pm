@@ -42,8 +42,6 @@ BEGIN {
   };
   eval {
     require Razor::Client;
-    require Razor::Signature;
-    require Razor::String;
   };
   eval {
     require MIME::Base64;
@@ -135,8 +133,6 @@ sub is_razor_available {
 
   eval {
     require Razor::Client;
-    require Razor::Signature; 
-    require Razor::String;
   };
   
   if ($@) {
@@ -174,7 +170,6 @@ sub razor_lookup {
 
   eval {
     require Razor::Client;
-    require Razor::Signature; 
     local ($^W) = 0;		# argh, warnings in Razor
 
     my $rc = Razor::Client->new ($config, %options);

@@ -387,12 +387,12 @@ sub check_for_faraway_charset {
   my @locales = split (' ', $self->{conf}->{ok_locales});
   push (@locales, $ENV{'LANG'});
 
-  if ($type =~ /^.*charset=\"(.+?)\"/i || $type =~ /^.*charset=(\S+)/i) {
-    if (!Mail::SpamAssassin::Locales::is_charset_ok_for_locales
-		      ($1, @locales))
-    {
-      return 1;
-    }
+  $type = get_charset_from_ct_line ($type);
+  if (defined $type &&
+    !Mail::SpamAssassin::Locales::is_charset_ok_for_locales
+		    ($type, @locales))
+  {
+    return 1;
   }
 
   0;
@@ -402,23 +402,30 @@ sub check_for_faraway_charset_in_body {
   my ($self, $fulltext) = @_;
 
   if ($$fulltext =~ /\n\n.*\n
-  		Content-Type:\s.{0,100}charset=([^\n]+?)\n
+  		Content-Type:\s(.{0,100}charset=[^\n]+)\n
 		/isx)
   {
     my $type = $1;
     my @locales = split (' ', $self->{conf}->{ok_locales});
     push (@locales, $ENV{'LANG'});
 
-    if ($type =~ /[\"](.+?)[\"]/i || $type =~ /^(\S+)/i) {
-      if (!Mail::SpamAssassin::Locales::is_charset_ok_for_locales
-      			($1, @locales))
-      {
-	return 1;
-      }
+    $type = get_charset_from_ct_line ($type);
+    if (defined $type &&
+      !Mail::SpamAssassin::Locales::is_charset_ok_for_locales
+		      ($type, @locales))
+    {
+      return 1;
     }
   }
 
   0;
+}
+
+sub get_charset_from_ct_line {
+  my $type = shift;
+  if ($type =~ /charset="([^"]+)"/i) { return $1; }
+  if ($type =~ /charset=(\S+)/i) { return $1; }
+  return undef;
 }
 
 ###########################################################################

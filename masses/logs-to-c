@@ -6,21 +6,11 @@ $cffile ||= "../spamassassin.cf";
 
 my @unmutated_tests = qw(
 BALANCE_FOR_LONG
-OSIRU_CONFIRMED_SPAM_SOURCE
-OSIRU_SPAMWARE_SITE
-RCVD_IN_BL_SPAMCOP_NET
-RCVD_IN_OSIRUSOFT_COM
-RCVD_IN_DUL
-RCVD_IN_RBL
-RCVD_IN_RELAYS_ORBS_ORG
-RCVD_IN_RSS
-RCVD_IN_RELAYS_ORDB_ORG
-RAZOR_CHECK
-
 COPYRIGHT_CLAIMED
 SIRCAM_SIGNATURE
 USER_IN_WHITELIST
 
+INVALID_DATE_NO_TZ
 UNDISC_RECIPS
 MAY_BE_FORGED
 HTML_WITH_BGCOLOR
@@ -28,8 +18,15 @@ FORGED_RCVD_FOUND
 NO_REAL_NAME
 PLING
 PLING_PLING
-SUBJ_HAS_Q_MARK
+USER_IN_BLACKLIST
 SUBJ_ENDS_IN_Q_MARK
+SUBJ_HAS_Q_MARK
+RAZOR_CHECK
+RCVD_IN_RELAYS_ORDB_ORG
+RCVD_IN_OSIRUSOFT_COM
+X_OSIRU_SPAM_SRC
+X_OSIRU_SPAMWARE_SITE
+
   );
 
 my $threshold = 5;
@@ -50,7 +47,6 @@ readlogs();
 
 print "Writing logs and current scores as C code...\n";
 
-system ("rm -rf tmp; mkdir tmp");
 writescores_c();
 writetests_c();
 exit 0;
@@ -116,11 +112,22 @@ sub writescores_c {
   foreach my $t (@unmutated_tests) { $is_mutatable{$t} = 0; }
   my $size = (scalar keys %{$scores}) + 1;
 
+  open (IN, "<tmp/ranges.data")
+  	or die "need to run score-ranges-from-freqs first!";
+  while (<IN>) {
+    /^(\S+) (\S+) (\S+)$/ or next;
+    $range_lo{$3} = $1+0;
+    $range_hi{$3} = $2+0;
+  }
+  close IN;
+
   open (OUT, ">tmp/scores.h");
   print OUT "
 
 int num_scores = $size;
 unsigned char is_mutatable[$size]; 	/* er, is_mutable I think ;) */
+float range_lo[$size];
+float range_hi[$size];
 float bestscores[$size];
 float scores[$size];
 char *score_names[$size];
@@ -135,6 +142,8 @@ void loadscores (void) {
     print OUT 
     " bestscores[$count] = ".$scores->{$name}.";", "\t",
     " is_mutatable[$count] = ".$is_mutatable{$name}.";", "\t",
+    " range_lo[$count] = ".$range_lo{$name}.";", "\t",
+    " range_hi[$count] = ".$range_hi{$name}.";", "\t",
     " score_names[$count] = \"".$name."\";\n";
 
     $score_c_index{$name} = $count;
