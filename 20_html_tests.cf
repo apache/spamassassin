@@ -264,8 +264,6 @@ rawbody SPAM_FORM_RETURN	/return validate_form/
 describe SPAM_FORM_RETURN	Form for checking email address
 rawbody SPAM_FORM_ACTION	/action="\&\#\d+;\&\#\d+;\&\#\d+;\&\#\d+;/i
 describe SPAM_FORM_ACTION	Obfuscated action attribute in HTML form
-rawbody OBFUSCATING_COMMENT	/[^\s>]<!--.{0,12}?-->[^\s<]/
-describe OBFUSCATING_COMMENT	HTML comments which obfuscate text
 
 rawbody HIDE_WIN_STATUS		/<[^>]+onMouseOver=[^>]+window\.status=/i
 describe HIDE_WIN_STATUS	Javascript to hide URLs in browser
