@@ -42,7 +42,7 @@ use Sys::Hostname;
 use Mail::SpamAssassin::EvalTests;
 use Mail::SpamAssassin::AutoWhitelist;
 use Mail::SpamAssassin::HTML;
-use Mail::SpamAssassin::Util;
+use Mail::SpamAssassin::Util qw(parse_rfc822_date);
 
 use constant HAS_MIME_BASE64 => eval { require MIME::Base64; };
 

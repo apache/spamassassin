@@ -12,6 +12,7 @@ use Mail::SpamAssassin::MailingList;
 use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::SHA1 qw(sha1);
 use Mail::SpamAssassin::TextCat;
+use Mail::SpamAssassin::Util qw(parse_rfc822_date);
 use Time::Local;
 use strict;
 eval "use bytes";
@@ -49,6 +50,12 @@ $WORD_OBFUSCATION_CHARS = '*_.,/|-+=';
 ###########################################################################
 # HEAD TESTS:
 ###########################################################################
+
+# if anyone can explain why I can't import this from Util.pm, I'd be
+# very appreciative!
+sub parse_rfc822_date {
+  return Mail::SpamAssassin::Util::parse_rfc822_date(@_);
+}
 
 sub check_for_from_mx {
   my ($self) = @_;
@@ -1307,7 +1314,7 @@ sub word_is_in_dictionary {
 				    @default_triplets_path;
     my $filename = $self->{main}->first_existing_path (@default_triplets_path);
 
-    unless ( defined $filename ) {
+    if (!defined $filename) {
       dbg("failed to locate the triplets.txt file");
       return 1;
     }
@@ -1587,7 +1594,7 @@ sub received_within_months {
   # filters out some false positives in old corpus mail - Allen
   my($self,$min,$max) = @_;
 
-  unless (exists($self->{date_received})) {
+  if (!exists($self->{date_received})) {
     $self->_check_date_received();
   }
   my $diff = time() - $self->{date_received};
@@ -1612,18 +1619,19 @@ sub _get_date_header_time {
   my $time;
   if (defined($date) && length($date)) {
     chomp($date);
-    $time = $self->_parse_rfc822_date($date);
+    $time = parse_rfc822_date($date);
   }
-  unless (defined($time)) {
+  if (!defined($time)) {
     $date = $self->get('Date');
     if (defined($date) && length($date)) {
       chomp($date);
-      $time = $self->_parse_rfc822_date($date);
+      $time = parse_rfc822_date($date);
     }
   }
   if (defined($time)) {
     $self->{date_header_time} = $time;
-  } else {
+  }
+  else {
     $self->{date_header_time} = undef;
   }
 }
@@ -1641,7 +1649,7 @@ sub _get_received_header_times {
   }
   # if we have no Received: headers, chances are we're archived mail
   # with a limited set of headers
-  unless (scalar(@received)) {
+  if (!scalar(@received)) {
     return;
   }
 
@@ -1655,7 +1663,8 @@ sub _get_received_header_times {
   if (scalar(@received) &&
       ($received[0] =~ m/\bby localhost with \w+ \(fetchmail-[\d.]+/)) {
     push @local, (shift @received);
-  } elsif (scalar(@local)) {
+  }
+  elsif (scalar(@local)) {
     unshift @received, (shift @local);
   }
 
@@ -1668,7 +1677,7 @@ sub _get_received_header_times {
 	my $date = $1;
 	dbg ("trying Received fetchmail header date for real time: $date",
 	     "datediff", -2);
-	my $time = $self->_parse_rfc822_date($date);
+	my $time = parse_rfc822_date($date);
 	if (defined($time) && (time() >= $time)) {
 	  dbg ("time_t from date=$time, rcvd=$date", "datediff", -2);
 	  push @fetchmail_times, $time;
@@ -1688,7 +1697,7 @@ sub _get_received_header_times {
     if ($rcvd =~ m/(\s.?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+)/) {
       my $date = $1;
       dbg ("trying Received header date for real time: $date", "datediff", -2);
-      my $time = $self->_parse_rfc822_date($date);
+      my $time = parse_rfc822_date($date);
       if (defined($time)) {
 	dbg ("time_t from date=$time, rcvd=$date", "datediff", -2);
 	push @header_times, $time;
@@ -1710,7 +1719,7 @@ sub _check_date_received {
 
   $self->{date_received} = 0;
 
-  unless (exists($self->{date_header_time})) {
+  if (!exists($self->{date_header_time})) {
     $self->_get_date_header_time();
   }
 
@@ -1718,7 +1727,7 @@ sub _check_date_received {
     push @dates_poss, $self->{date_header_time};
   }
 
-  unless (exists($self->{received_header_times})) {
+  if (!exists($self->{received_header_times})) {
     $self->_get_received_header_times();
   }
   my(@received_header_times) = @{ $self->{received_header_times} };
@@ -1730,7 +1739,7 @@ sub _check_date_received {
   }
 
   if (defined($self->{date_header_time}) && scalar(@received_header_times)) {
-    unless (exists($self->{date_diff})) {
+    if (!exists($self->{date_diff})) {
       $self->_check_date_diff();
     }
     push @dates_poss, $self->{date_header_time} - $self->{date_diff};
@@ -1751,20 +1760,20 @@ sub _check_date_diff {
 
   $self->{date_diff} = 0;
 
-  unless (exists($self->{date_header_time})) {
+  if (!exists($self->{date_header_time})) {
     $self->_get_date_header_time();
   }
 
-  unless (defined($self->{date_header_time})) {
+  if (!defined($self->{date_header_time})) {
     return;			# already have tests for this
   }
 
-  unless (exists($self->{received_header_times})) {
+  if (!exists($self->{received_header_times})) {
     $self->_get_received_header_times();
   }
   my(@header_times) = @{ $self->{received_header_times} };
 
-  unless (scalar(@header_times)) {
+  if (!scalar(@header_times)) {
     return;			# archived mail?
   }
 
@@ -1780,126 +1789,6 @@ sub _check_date_diff {
   # (experimentally, this results in the fewest false positives)
   @diffs = sort { abs($a) <=> abs($b) } @diffs;
   $self->{date_diff} = $diffs[0];
-}
-
-# timezone mappings: in case of conflicts, use RFC 2822, then most
-# common and least conflicting mapping
-my %TZ = (
-	# standard
-	'UT'   => '+0000',
-	'UTC'  => '+0000',
-	# US and Canada
-	'AST'  => '-0400',
-	'ADT'  => '-0300',
-	'EST'  => '-0500',
-	'EDT'  => '-0400',
-	'CST'  => '-0600',
-	'CDT'  => '-0500',
-	'MST'  => '-0700',
-	'MDT'  => '-0600',
-	'PST'  => '-0800',
-	'PDT'  => '-0700',
-	'HST'  => '-1000',
-	'AKST' => '-0900',
-	'AKDT' => '-0800',
-	# European
-	'GMT'  => '+0000',
-	'BST'  => '+0100',
-	'IST'  => '+0100',
-	'WET'  => '+0000',
-	'WEST' => '+0100',
-	'CET'  => '+0100',
-	'CEST' => '+0200',
-	'EET'  => '+0200',
-	'EEST' => '+0300',
-	'MSK'  => '+0300',
-	'MSD'  => '+0400',
-	# Australian
-	'AEST' => '+1000',
-	'AEDT' => '+1100',
-	'ACST' => '+0930',
-	'ACDT' => '+1030',
-	'AWST' => '+0800',
-	);
-
-sub _parse_rfc822_date {
-  my ($self, $date) = @_;
-  local ($_);
-  my ($yyyy, $mmm, $dd, $hh, $mm, $ss, $mon, $tzoff);
-
-  # make it a bit easier to match
-  $_ = " $date "; s/, */ /gs; s/\s+/ /gs;
-
-  # now match it in parts.  Date part first:
-  if (s/ (\d+) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{4}) / /i) {
-    $dd = $1; $mon = $2; $yyyy = $3;
-  } elsif (s/ (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) +(\d+) \d+:\d+:\d+ (\d{4}) / /i) {
-    $dd = $2; $mon = $1; $yyyy = $3;
-  } elsif (s/ (\d+) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{2,3}) / /i) {
-    $dd = $1; $mon = $2; $yyyy = $3;
-  } else {
-    dbg ("time cannot be parsed: $date");
-    return undef;
-  }
-
-  # handle two and three digit dates as specified by RFC 2822
-  if (defined $yyyy) {
-    if (length($yyyy) == 2 && $yyyy < 50) {
-      $yyyy += 2000;
-    }
-    elsif (length($yyyy) != 4) {
-      # three digit years and two digit years with values between 50 and 99
-      $yyyy += 1900;
-    }
-  }
-
-  # hh:mm:ss
-  if (s/ (\d?\d):(\d\d)(:(\d\d))? / /) {
-    $hh = $1; $mm = $2; $ss = $4 || 0;
-  }
-
-  # numeric timezones
-  if (s/ ([-+]\d{4}) / /) {
-    $tzoff = $1;
-  }
-  # UT, GMT, and North American timezones
-  elsif (s/\b([A-Z]{2,4})\b/ / && exists $TZ{$1}) {
-    $tzoff = $TZ{$1};
-  }
-  # all other timezones are considered equivalent to "-0000"
-  $tzoff ||= '-0000';
-
-  if (!defined $mmm && defined $mon) {
-    my @months = qw(jan feb mar apr may jun jul aug sep oct nov dec);
-    $mon = lc($mon);
-    my $i; for ($i = 0; $i < 12; $i++) {
-      if ($mon eq $months[$i]) { $mmm = $i+1; last; }
-    }
-  }
-
-  $hh ||= 0; $mm ||= 0; $ss ||= 0; $dd ||= 0; $mmm ||= 0; $yyyy ||= 0;
-
-  my $time;
-  eval {		# could croak
-    $time = timegm ($ss, $mm, $hh, $dd, $mmm-1, $yyyy);
-  };
-
-  if ($@) {
-    dbg ("time cannot be parsed: $date, $yyyy-$mmm-$dd $hh:$mm:$ss");
-    return undef;
-  }
-
-  if ($tzoff =~ /([-+])(\d\d)(\d\d)$/)	# convert to seconds difference
-  {
-    $tzoff = (($2 * 60) + $3) * 60;
-    if ($1 eq '-') {
-      $time += $tzoff;
-    } else {
-      $time -= $tzoff;
-    }
-  }
-
-  return $time;
 }
 
 ###########################################################################
@@ -2566,7 +2455,7 @@ sub check_outlook_timestamp_token {
   my $fudge = 250;
 
   $_ = $self->get ('Date');
-  $_ = $self->_parse_rfc822_date($_); $_ ||= 0;
+  $_ = parse_rfc822_date($_); $_ ||= 0;
   my $expected = int (($_ * $x) + $y);
   my $diff = $timetoken - $expected;
   dbg("time token found: $timetoken expected (from Date): $expected: $diff");
@@ -2576,7 +2465,7 @@ sub check_outlook_timestamp_token {
   $_ = $self->get ('Received');
   /(\s.?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+).*?$/;
   dbg("last date in Received: $1");
-  $_ = $self->_parse_rfc822_date($_); $_ ||= 0;
+  $_ = parse_rfc822_date($_); $_ ||= 0;
   $expected = int (($_ * $x) + $y);
   $diff = $timetoken - $expected;
   dbg("time token found: $timetoken expected (from Received): $expected: $diff");
@@ -2585,15 +2474,16 @@ sub check_outlook_timestamp_token {
   return 1;
 }
 
-# Check the cf value of a given message and return if it's within the given range
+# Check the cf value of a given message and return if it's within the
+# given range
 sub check_razor2_range {
   my ($self,$fulltext,$min,$max) = @_;
 
   # If the Razor2 general test is disabled, don't continue.
-  return 0 unless ( $self->{conf}{scores}{'RAZOR2_CHECK'} );
+  return 0 unless $self->{conf}{scores}{'RAZOR2_CHECK'};
 
   # If Razor2 hasn't been checked yet, go ahead and run it.
-  unless ( defined $self->{razor2_result} ) {
+  if (!defined $self->{razor2_result}) {
     # note: we don't use $fulltext. instead we get the raw message,
     # unfiltered, for razor2 to check.  ($fulltext removes MIME
     # parts etc.)
@@ -2601,7 +2491,7 @@ sub check_razor2_range {
     $self->razor2_lookup (\$full);
   }
 
-  if ( $self->{razor2_cf_score} >= $min && $self->{razor2_cf_score} <= $max ) {
+  if ($self->{razor2_cf_score} >= $min && $self->{razor2_cf_score} <= $max) {
     $self->test_log(sprintf ("cf: %3d", $self->{razor2_cf_score}));
     return 1;
   }
