@@ -227,7 +227,9 @@ sub wanted {
   my $extra = join(",", @extra);
 
 #  $status->rewrite_mail();
-#  print STDERR $status->get_full_message_as_text();
+#  open(REWRITE, "> /tmp/out");
+#  print REWRITE $status->get_full_message_as_text();
+#  close(REWRITE);
 
   $id =~ s/\s/_/g;
 
