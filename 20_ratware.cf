@@ -30,12 +30,11 @@ describe RATWARE_VC_IPA		Bulk email software fingerprint (VC_IPA) found in heade
 
 # Note that the tests which look at the "ALL" pseudoheader are slower than
 # the specific header.
-header RATWARE_GROUPMAIL	ALL =~ /Group Mail/
-describe RATWARE_GROUPMAIL	Bulk email software fingerprint (Group Mail) found in headers
 header RATWARE_GR		X-Mailer =~ /GRMessageQueue/
 describe RATWARE_GR		Bulk email software fingerprint (GRMessageQueue) found in headers
 header RATWARE_OE_PI		X-Mailer =~ /Out[Ll]ook Express 3\.14159/
 describe RATWARE_OE_PI		X-Mailer contains "OutLook Express 3.14159"
+# 100% overlap with X-Stormpost-To: header, but seems wise to leave it in
 header RATWARE_STORM		X-Mailer =~ /StormPost/
 describe RATWARE_STORM		Bulk email software fingerprint (StormPost) found in headers
 uri RATWARE_STORM_URI		m{http://\S+/sp/t\.pl\?id=\d+:\d+}i

@@ -261,8 +261,8 @@ body MAIL_IN_ORDER_FORM		/\b(?:Mail-in|secure|ez|credit.card|fax this) Order For
 describe MAIL_IN_ORDER_FORM	Contains mail-in order form
 
 # (contrib: skod)
-body FOR_INSTANT_ACCESS		/INSTANT ACCESS/i
-describe FOR_INSTANT_ACCESS	Instant Access button
+body INSTANT_ACCESS             /\binstant access\b/i
+describe INSTANT_ACCESS         offers "instant access"
 
 # (contrib: skod)
 body UNIVERSITY_DIPLOMAS	/\b(?:college|university)\s+diplomas/i
