@@ -181,7 +181,6 @@ sub wanted {
 
   if (defined($messagelimit) && $messagecount > $messagelimit)
 					{ die 'HITLIMIT'; }
-  $messagecount++;
 
   my $ma = Mail::SpamAssassin::NoMailAudit->new ('data' => $dataref);
 
@@ -194,6 +193,10 @@ sub wanted {
 
   $ma->{noexit} = 1;
   my $status = $spamtest->learn ($ma, $id, $isspam, $forget);
+
+  if ($status->did_learn()) {
+    $messagecount++;
+  }
 
   $status->finish();
   undef $ma;            # clean 'em up

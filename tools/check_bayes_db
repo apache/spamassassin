@@ -19,7 +19,8 @@ use constant ATIME_GRANULARITY  => 21600;       # 6 hours
 
 use vars qw{
     %h $k $v @DBNAMES
-    $NSPAM_MAGIC_TOKEN $NHAM_MAGIC_TOKEN
+    $NSPAM_MAGIC_TOKEN $NHAM_MAGIC_TOKEN $LAST_EXPIRE_MAGIC_TOKEN
+    $NTOKENS_MAGIC_TOKEN $OLDEST_TOKEN_AGE_MAGIC_TOKEN
     $opt_dbpath $opt_min_hits $opt_max_hits $opt_regexp
     $robinson_x $robinson_s_dot_x 
   };
@@ -31,6 +32,9 @@ GetOptions("dbpath=s", "min-hits=i", "max-hits=i", "regexp=s");
 
 $NSPAM_MAGIC_TOKEN = '**NSPAM';
 $NHAM_MAGIC_TOKEN = '**NHAM';
+$OLDEST_TOKEN_AGE_MAGIC_TOKEN = '**OLDESTAGE';
+$LAST_EXPIRE_MAGIC_TOKEN = '**LASTEXPIRE';
+$NTOKENS_MAGIC_TOKEN = '**NTOKENS';
 
 use constant ROBINSON_S_CONSTANT => 0.53;
 $robinson_x = 0.43;
@@ -39,44 +43,41 @@ $robinson_s_dot_x = ($robinson_x * ROBINSON_S_CONSTANT);
 my $path = $opt_dbpath;
 $path ||= $ENV{HOME}."/.spamassassin/bayes";
 
-my $has_probs_db = 0;
-
 foreach my $dbname (@DBNAMES) {
   my $name = $path.'_'.$dbname;
   my $db_var = 'db_'.$dbname;
   if (!tie %{$h{$db_var}}, "AnyDBM_File",$name, O_RDONLY, 0600) {
     warn "Cannot open file $name: $!\n";
   }
-  else {
-    if ($dbname eq 'probs') { $has_probs_db = 1; }
-  }
 }
 
-my $dbformat = 'on-the-fly probs';
-my $ns = $h{db_toks}->{$NSPAM_MAGIC_TOKEN};
-my $nn = $h{db_toks}->{$NHAM_MAGIC_TOKEN};
-if ($has_probs_db) {
-  $dbformat = 'pre-computed probs';
-  $ns ||= $h{db_probs}->{$NSPAM_MAGIC_TOKEN};	# older version
-  $nn ||= $h{db_probs}->{$NHAM_MAGIC_TOKEN};
-}
-$ns ||= 0;
-$nn ||= 0;
+my $dbformat = 'on-the-fly probs, expiry';
+my $ns = $h{db_toks}->{$NSPAM_MAGIC_TOKEN} || 0;
+my $nn = $h{db_toks}->{$NHAM_MAGIC_TOKEN} || 0;
+my $nt = $h{db_toks}->{$NTOKENS_MAGIC_TOKEN} || 0;
+my $le = $h{db_toks}->{$LAST_EXPIRE_MAGIC_TOKEN} || 0;
+my $oa = $h{db_toks}->{$OLDEST_TOKEN_AGE_MAGIC_TOKEN} || 0;
 
 printf ("%3.3f %8d %8d %8d  %s\n", 0.0, 0, 0, 0,
 			'non-token data: db format = '.$dbformat);
 printf ("%3.3f %8d %8d %8d  %s\n", 0.0, 0, $ns, 0, 'non-token data: nspam');
 printf ("%3.3f %8d %8d %8d  %s\n", 0.0, 0, $nn, 0, 'non-token data: nham');
+printf ("%3.3f %8d %8d %8d  %s\n", 0.0, 0, $nt, 0, 'non-token data: ntokens');
+printf ("%3.3f %8d %8d %8d  %s\n", 0.0, 0, $oa, 0, 'non-token data: oldest age');
+printf ("%3.3f %8d %8d %8d  %s (%s)\n", 0.0, 0, 0, 0,
+			 'non-token data: last expire', scalar(localtime($le)));
 
 my %seen = ();
 my $prob;
 my $now = time;
 
-if (!$has_probs_db) {
-  $seen{$NSPAM_MAGIC_TOKEN} = $seen{$NHAM_MAGIC_TOKEN} = 1;
-}
-
 for my $key ( keys(%{$h{db_toks}}) ) {
+  next if ($key eq $NSPAM_MAGIC_TOKEN
+          || $key eq $NHAM_MAGIC_TOKEN
+          || $key eq $LAST_EXPIRE_MAGIC_TOKEN
+          || $key eq $NTOKENS_MAGIC_TOKEN
+          || $key eq $OLDEST_TOKEN_AGE_MAGIC_TOKEN);
+
   next if (exists $seen{$key});
   $seen{$key} = 1;
 
@@ -88,14 +89,7 @@ for my $key ( keys(%{$h{db_toks}}) ) {
   next if ($opt_max_hits && (($ts + $th) > $opt_max_hits));
   next if ($opt_regexp && ($key !~ /$opt_regexp/o));
 
-  if ($has_probs_db) {
-    $prob = $h{db_probs}->{$key};
-    if (defined $prob) {
-      $prob = unpack ('f', $prob);
-    }
-  } else {
-    $prob = compute_prob_for_token ($ts, $th, $ns, $nn);
-  }
+  $prob = compute_prob_for_token ($ts, $th, $ns, $nn);
 
   my $age = $atime;
 
