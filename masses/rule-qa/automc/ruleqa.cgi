@@ -104,7 +104,7 @@ my $tmpl = q{
   <input type=checkbox name=s_age !s_age!> Show freqs by message age<br/>
   <input type=checkbox name=s_all !s_all!> Show freqs by contributor<br/>
   <br/>
-  <input type=checkbox name=s_overlap !s_overlap!> Show overlaps between rules<br/>
+  <input type=checkbox name=s_overlap !s_overlap!> Show overlaps between rules <em>(too slow, not implemented yet)</em><br/>
   <br/>
   Date to display: <input type=textfield name=date value="!date!"><br/>
   <br/>
