@@ -1338,19 +1338,6 @@ this option to 0.
     type => $CONF_TYPE_BOOL
   });
 
-=item learn_with_whitelist		(Default: 0)
-
-If this option is set the AWL database will also be affected when a message
-is learned by the bayes database, due to an autolearn or a call to sa-learn.
-
-=cut
-
-  push (@cmds, {
-    setting => 'learn_with_whitelist',
-    default => 0,
-    type => $CONF_TYPE_BOOL
-  });
-
 =item bayes_sql_override_username
 
 Used by BayesStore::SQL storage implementation.
