@@ -115,3 +115,14 @@ header __X_BEENTHERE		exists:X-BeenThere
 header __IDENT_NOBODY_LOCALHOST Received =~ /\bident[:=]nobody\@localhost\b/i
 meta IDENT_NOBODY		(__IDENT_NOBODY && !__IDENT_NOBODY_LOCALHOST && !__REGSITE_COM && !((FORGOTTEN_PASSWORD + __X_BEENTHERE + KNOWN_MAILING_LIST) > 1))
 describe IDENT_NOBODY		Received lines include an 'ident:nobody' string
+
+header __SANE_MSGID_4	MESSAGEID =~ /^<[^<>\\ \t\n\r\x0b\x80-\xff]+\@[^<>\\ \t\n\r\x0b\x80-\xff]+>\s*$/m
+header __HAS_MSGID		MESSAGEID =~ /\S/
+header __MSGID_COMMENT		MESSAGEID =~ /\(.*\)/m
+meta INVALID_MSGID		__HAS_MSGID && !(__SANE_MSGID_4 || __MSGID_COMMENT)
+describe INVALID_MSGID		Message-Id is not valid, according to RFC 2822
+
+header __MOZILLA_MUA		X-Mailer =~ /\bMozilla\b/
+header __MOZILLA_MSGID3         MESSAGEID =~ /^<[A-F\d]{8}\.[A-F1-9][A-F\d]{0,7}\@\S+>$/m
+meta FORGED_MUA_MOZILLA      (__MOZILLA_MUA && !__UNUSABLE_MSGID && !__MOZILLA_MSGID3)
+describe FORGED_MUA_MOZILLA  Forged mail pretending to be from Mozilla (3)

@@ -189,3 +189,6 @@ tflags UNDESIRED_LANGUAGE_BODY          userconf
 
 body BODY_8BITS			/[\x80-\xff]{8,}/
 describe BODY_8BITS		Body includes 8 consecutive 8-bit characters
+
+rawbody MIME_DEFICIENT_QP	eval:check_for_mime('mime_qp_illegal')
+describe MIME_DEFICIENT_QP	Deficient quoted-printable encoding in body
