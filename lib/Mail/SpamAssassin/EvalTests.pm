@@ -11,8 +11,8 @@ use Mail::SpamAssassin::Locales;
 use Mail::SpamAssassin::MailingList;
 use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::PhraseFreqs;
+use Mail::SpamAssassin::SHA1 qw(sha1);
 use Mail::SpamAssassin::TextCat;
-use Digest::SHA1 qw(sha1_hex);
 use Time::Local;
 use strict;
 
@@ -1526,7 +1526,7 @@ sub message_is_habeas_swe {
     $text =~ tr/A-Z/a-z/;
     $text =~ tr/ / /s;
     $text =~ s/\/?>/\/>/;
-    return sha1_hex($text) eq "42ab3d716380503f66c4d44017c7f37b04458a9a";
+    return sha1($text) eq "42ab3d716380503f66c4d44017c7f37b04458a9a";
   }
   return 0;
 }
