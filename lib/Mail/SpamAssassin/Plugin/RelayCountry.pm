@@ -8,7 +8,7 @@ RelayCountry - add message metadata indicating the country code of each relay
 
 =head1 REQUIREMENT
 
-This plugin requires the IP::Country::Fast module from CPAN.
+This plugin requires the IP::Country module from CPAN.
 
 =cut
 
