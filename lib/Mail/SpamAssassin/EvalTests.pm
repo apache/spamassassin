@@ -397,7 +397,8 @@ sub _mta_added_message_id {
   my ($self) = @_;
 
   my @received = grep(/\S/, split(/\n/, $self->get('Received')));
-  my $id = $self->get('MESSAGEID');
+  my $id = $self->get('Resent-Message-ID') || $self->get('Message-ID');
+  return 0 unless defined($id) && $id;
   my $local = 1;
 
   # general method to detect local messages
@@ -418,14 +419,9 @@ sub _mta_added_message_id {
   {
     $local = 2;
   }
-  # qmail does not seem to add a Message-ID header.  Note: as with Postfix,
-  # this is not an exemption.
-  if ($#received > 0 &&
-      $received[$#received - 1] =~ /\(qmail.*?\)/ &&
-      $received[$#received] =~ /\bfrom \S+\b.*\bby \S+ with SMTP\;/s)
-  {
-    $local = 3;
-  }
+
+  # Message-ID headers added by qmail generally include the current local
+  # date and time instead of an ID, so no exemption is needed for qmail.
 
   # Note: these tests intentionally do not exempt localhost!
   for (my $i = 0; $i <= $#received; $i++) {
@@ -2318,6 +2314,22 @@ sub _check_mime_header {
     $self->{mime_base64_encoded_text} = 1;
   }
 
+  if ($ctype =~ /^text/ &&
+      $cte =~ /base64/ &&
+      $charset !~ /utf-8/ &&
+      !($cd && $cd =~ /^(?:attachment|inline)/))
+  {
+    $self->{t_mime_base64_encoded_text} = 1;
+  }
+
+  if ($cte =~ /base64/ && !$name) {
+    $self->{t_mime_base64_without_name} = 1;
+  }
+
+  if ($cte =~ /base64/ && $charset =~ /iso-8859/) {
+    $self->{t_mime_base64_iso_8859} = 1;
+  }
+
   if ($ctype =~ /^text\/html/ &&
       !(defined($charset) && $charset) &&
       !($cd && $cd =~ /^(?:attachment|inline)/))
@@ -2375,11 +2387,11 @@ sub _check_attachments {
   my $qp_count = 0;		# QP-encoded bytes in QP regions
 
   # MIME header information
-  my $ctype;			# Content-Type
-  my $cte;			# Content-Transfer-Encoding
-  my $cd;			# Content-Disposition
-  my $charset;			# charset
-  my $name;			# name or filename
+  my $ctype = 0;		# Content-Type
+  my $cte = 0;			# Content-Transfer-Encoding
+  my $cd = 0;			# Content-Disposition
+  my $charset = 0;		# charset
+  my $name = 0;			# name or filename
 
   # regular expressions
   my $re_boundary = qr/\bboundary\s*=\s*["']?(.*?)["']?(?:;|$)/i;
@@ -2401,17 +2413,26 @@ sub _check_attachments {
   $self->{mime_qp_illegal} = 0;
   $self->{mime_qp_ratio} = 0;
   $self->{mime_suspect_name} = 0;
+  $self->{t_mime_base64_encoded_text} = 0;
+  $self->{t_mime_base64_iso_8859} = 0;
+  $self->{t_mime_base64_without_name} = 0;
 
   # message headers
   $ctype = $self->get('Content-Type');
   $cte = $self->get('Content-Transfer-Encoding');
+  $cd = $self->get('Content-Disposition');
   chomp($cte = defined($cte) ? lc($cte) : "");
   if ($ctype =~ /$re_boundary/m && $1 ne '') {
     push (@boundary, "\Q$1\E");
   }
-  if ($ctype =~ /^text\//i && $cte =~ /base64/) {
-    $self->{mime_base64_encoded_text} = 1;
-  }
+
+  # check MIME headers in message header
+  if ($ctype =~ /$re_charset/) { $charset = lc($1); }
+  if ($ctype =~ /$re_name/) { $name = lc($1); }
+  if ($ctype =~ /$re_ctype/) { $ctype = lc($1); }
+  if ($cte =~ /$re_cte/) { $cte = lc($1); }
+  if ($cd =~ /$re_cd/) { $cd = lc($1); }
+  $self->_check_mime_header($ctype, $cte, $cd, $charset, $name);
 
   # Note: We don't use rawbody because it removes MIME parts.  Instead,
   # we get the raw unfiltered body.  We must not change any lines and
