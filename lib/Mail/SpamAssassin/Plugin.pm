@@ -208,8 +208,6 @@ C<options> is a reference to a hash containing these options:
 
 =over 4
 
-=item line
-
 =item conf
 
 The C<Mail::SpamAssassin::Conf> object on which the configuration
