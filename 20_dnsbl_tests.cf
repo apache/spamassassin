@@ -206,28 +206,37 @@ describe RCVD_IN_DYNABLOCK	Sent from dynamic IP address to remote relay
 tflags RCVD_IN_DYNABLOCK	net
 
 # ---------------------------------------------------------------------------
+# NOTE: donation tests, see README file for details
 
-# NOTE: semi-commercial test, see README file for details
 header RCVD_IN_BL_SPAMCOP_NET	rbleval:check_rbl_txt('spamcop', 'bl.spamcop.net.')
 describe RCVD_IN_BL_SPAMCOP_NET	Received via a relay in bl.spamcop.net
 tflags RCVD_IN_BL_SPAMCOP_NET   net
 
 # ---------------------------------------------------------------------------
-
 # NOTE: commercial tests, see README file for details
+
 header RCVD_IN_MAPS_RBL		rbleval:check_rbl('rbl', 'blackholes.mail-abuse.org.')
 describe RCVD_IN_MAPS_RBL	Relay in RBL, http://www.mail-abuse.org/rbl/
 tflags RCVD_IN_MAPS_RBL		net
-
-header RCVD_IN_MAPS_RSS		rbleval:check_rbl('rss', 'relays.mail-abuse.org.')
-describe RCVD_IN_MAPS_RSS	Relay in RSS, http://www.mail-abuse.org/rss/
-tflags RCVD_IN_MAPS_RSS		net
 
 header RCVD_IN_MAPS_DUL		rbleval:check_rbl('dialup-notfirsthop', 'dialups.mail-abuse.org.')
 describe RCVD_IN_MAPS_DUL	Relay in DUL, http://www.mail-abuse.org/dul/
 tflags RCVD_IN_MAPS_DUL		net
 
+header RCVD_IN_MAPS_RSS		rbleval:check_rbl('rss', 'relays.mail-abuse.org.')
+describe RCVD_IN_MAPS_RSS	Relay in RSS, http://www.mail-abuse.org/rss/
+tflags RCVD_IN_MAPS_RSS		net
+
 header RCVD_IN_MAPS_NML		rbleval:check_rbl('nml', 'nonconfirm.mail-abuse.org.')
 describe RCVD_IN_MAPS_NML	Relay in NML, http://www.mail-abuse.org/nml/
 tflags RCVD_IN_MAPS_NML		net
 
+# if you're subscribed to RBL+, then comment out the above rules (just the
+# "header" lines, not the "describe" or "tflags" lines) and uncomment the
+# below lines
+#header RCVD_IN_MAPS_RBL	rbleval:check_rbl('rblplus', 'rbl-plus.mail-abuse.org.', '1')
+#header RCVD_IN_MAPS_DUL	rbleval:check_rbl('rblplus-notfirsthop', 'rbl-plus.mail-abuse.org.', '2')
+#header RCVD_IN_MAPS_RSS	rbleval:check_rbl_sub('rblplus', '4')
+#header RCVD_IN_MAPS_OPS	rbleval:check_rbl_sub('rblplus', '8')
+#describe RCVD_IN_MAPS_OPS	Relay in OPS, http://www.mail-abuse.org/ops/
+#tflags RCVD_IN_MAPS_OPS		net
