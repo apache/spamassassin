@@ -118,7 +118,7 @@ sub razor_lookup {
     return 0;
   }
 
-  my @msg = split (/\n/, $fulltext);
+  my @msg = split (/^/m, $$fulltext);
 
   $site =~ /^(\S+):(\d+)$/;
   my $Rserver = $1;
@@ -140,6 +140,8 @@ sub razor_lookup {
 
     $sig = Razor::Signature->hash (\@msg);
     undef @msg;		# no longer needed
+
+    dbg ("Razor signature: $sig");
 
     my %message;
     $message{'key'} = $sig;

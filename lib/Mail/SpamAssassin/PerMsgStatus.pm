@@ -686,9 +686,10 @@ sub run_eval_tests {
   local ($_);
 
   while (($rulename, $evalsub) = each %{$evalhash}) {
+    next if ($self->{conf}->{scores}->{$rulename} == 0);
+
     my $result;
     $self->clear_test_state();
-    next if ($self->{conf}->{scores}->{$rulename} == 0);
 
     @args = ();
     if (scalar @extraevalargs >= 0) { push (@args, '@extraevalargs'); }
