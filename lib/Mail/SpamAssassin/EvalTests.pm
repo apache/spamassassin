@@ -1231,10 +1231,11 @@ sub check_rbl_backend {
 
   # now, make a list of all the IPs in the external set, for use in
   # notfirsthop testing.  this will often be more IPs than found
-  # in @fullips.
+  # in @fullips.  It includes the IPs that are trusted, but
+  # not in internal_networks.
   my @fullexternal = map {
 	(!$_->{internal}) ? ( $_->{ip} ) : ()
-      } @{$self->{relays_untrusted}};
+      } @{$self->{relays_trusted}};
   push (@fullexternal, @fullips);	# add untrusted set too
 
   # Make sure a header significantly improves results before adding here
@@ -1255,7 +1256,9 @@ sub check_rbl_backend {
   # relays, so we can return right now.
   return 0 unless (scalar @ips + scalar @originating > 0);
 
-  dbg("Got the following IPs: ".join(", ", @ips), "rbl", -3);
+  dbg("rbl: IPs found: full-external: ".join(", ", @fullips).
+	" untrusted: ".join(", ", @ips).
+	" originating: ".join(", ", @originating), "rbl", -3);
 
   if (scalar @ips + scalar @originating > 0) {
     # If name is foo-notfirsthop, check all addresses except for
@@ -1299,7 +1302,7 @@ sub check_rbl_backend {
       }
     }
   }
-  dbg("But only inspecting the following IPs: ".join(", ", @ips), "rbl", -3);
+  dbg("rbl: only inspecting the following IPs: ".join(", ", @ips), "rbl", -3);
 
   eval {
     foreach my $ip (@ips) {
@@ -1382,9 +1385,10 @@ sub ip_list_uniq_and_strip_reserved {
   foreach my $ip (@origips) {
     next unless $ip;
     next if (exists ($seen{$ip})); $seen{$ip} = 1;
-    if (!($ip =~ /${IP_IN_RESERVED_RANGE}/o)) { push(@ips, $ip); }
+    next if ($ip =~ /${IP_IN_RESERVED_RANGE}/o);
+    push(@ips, $ip);
   }
-  @ips;
+  return @ips;
 }
 
 ###########################################################################
