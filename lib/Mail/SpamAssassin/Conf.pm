@@ -1261,7 +1261,7 @@ setting.  Example:
     setting => 'bayes_ignore_header',
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      push (@{$self->{bayes_ignore_headers}}, $value);
+      push (@{$self->{bayes_ignore_headers}}, split(/\s+/, $value));
     }
   });
 
