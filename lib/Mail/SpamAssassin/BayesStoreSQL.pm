@@ -179,7 +179,10 @@ This method is unused for the SQL based implementation.
 
 sub untie_db {
   my ($self) = @_;
-  # not used for SQL based implementation
+
+  return unless (defined($self->{_dbh}));
+
+  $self->{_dbh}->disconnect();
 }
 
 =head2 calculate_expire_delta
@@ -251,7 +254,7 @@ sub token_expiration {
 
   my $rows = $self->{_dbh}->do($sql, undef, $self->{_username}, $too_old);
 
-  if (!defined($rows)) {
+  unless (defined($rows)) {
     dbg("bayes: actual_expire: SQL Error: ".$self->{_dbh}->errstr());
     return 0;
   }
@@ -265,13 +268,13 @@ sub token_expiration {
   $self->set_last_expire(time());
   $self->_set_last_expire_reduce($deleted);
 
-  # Call untie_db() first so we unlock correctly etc. first
-  $self->untie_db();
-
   my $kept = $self->_get_token_count();
 
   $num_hapaxes = $self->_get_num_hapaxes() if ($opts->{verbose});
   $num_lowfreq = $self->_get_num_lowfreq() if ($opts->{verbose});
+
+  # Call untie_db() first so we unlock correctly etc. first
+  $self->untie_db();
 
   return ($kept, $deleted, $num_hapaxes, $num_lowfreq);
 }
@@ -1060,7 +1063,7 @@ sub _initialize_db {
 
 =head2 _token_atime
 
-private instance (Integer) _token_atime (String $token)
+private instance (Boolean) _token_atime (String $token)
 
 Description:
 This method returns a given tokens atime, it also serves to tell us
@@ -1162,8 +1165,6 @@ sub _put_token {
 
   my $existing_atime = $self->_token_atime($token);
 
-  my $sql;
-
   if ($spam_count == 0 && $ham_count == 0) {
     return 1;
   }
@@ -1174,9 +1175,9 @@ sub _put_token {
     # if we are unable to find an entry.
     return 1 if ($spam_count < 0 || $ham_count < 0);
 
-    $sql = "INSERT INTO bayes_token
-             (username, token, spam_count, ham_count, atime)
-            VALUES (?,?,?,?,?)";
+    my $sql = "INSERT INTO bayes_token
+               (username, token, spam_count, ham_count, atime)
+               VALUES (?,?,?,?,?)";
 
     my $sth = $self->{_dbh}->prepare_cached($sql);
 
@@ -1200,36 +1201,70 @@ sub _put_token {
     dbg("bayes: new token ($token) inserted");
   }
   else {
-    my $sql = "UPDATE bayes_token
-                  SET spam_count = spam_count + ?,
-                      ham_count = ham_count + ?,
-                      atime = ?
-                WHERE username = ?
-                  AND token = ?";
+    my $update_atime_p = 1;
 
-    # If the existing atime is already greater then keep it.
-    # XXX - A future enhancement might be to just omit the update
-    #       of atime in this case, but that would give us one extra
-    #       SQL statement to cache, so I'm not sure if the trade off
-    #       is worth it.
-    $atime = $existing_atime if ($existing_atime > $atime);
+    # if the existing atime is already >= the one we are going to set, then don't bother
+    $update_atime_p = 0 if ($existing_atime >= $atime);
 
-    my $sth = $self->{_dbh}->prepare_cached($sql);
+    if ($spam_count) {
+      my $sql;
+      my @args;
+      if ($update_atime_p) {
+	$sql = "UPDATE bayes_token
+                   SET spam_count = spam_count + ?,
+                       atime = ?
+                 WHERE username = ?
+                   AND token = ?
+                   AND spam_count + ? >= 0";
+	@args = ($spam_count, $atime, $self->{_username}, $token, $spam_count);
+	$update_atime_p = 0;
+      }
+      else {
+	$sql = "UPDATE bayes_token
+                   SET spam_count = spam_count + ?
+                 WHERE username = ?
+                   AND token = ?
+                   AND spam_count + ? >= 0";
+	@args = ($spam_count, $self->{_username}, $token, $spam_count);
+      }
 
-    unless (defined($sth)) {
-      dbg("bayes: _put_token: SQL Error: ".$self->{_dbh}->errstr());
-      return 0;
+      my $rows = $self->{_dbh}->do($sql, undef, @args);
+
+      unless (defined($rows)) {
+	dbg("bayes: _put_token: SQL Error: ".$self->{_dbh}->errstr());
+	return 0;
+      }
     }
 
-    my $rc = $sth->execute($spam_count, $ham_count, $atime,
-			   $self->{_username}, $token);
-    
-    unless ($rc) {
-      dbg("bayes: _put_token: SQL Error: ".$self->{_dbh}->errstr());
-      return 0;
+    if ($ham_count) {
+      my $sql;
+      my @args;
+      if ($update_atime_p) {
+	$sql = "UPDATE bayes_token
+                   SET ham_count = ham_count + ?,
+                       atime = ?
+                 WHERE username = ?
+                   AND token = ?
+                   AND ham_count + ? >= 0";
+	@args = ($ham_count, $atime, $self->{_username}, $token, $ham_count);
+      }
+      else {
+	$sql = "UPDATE bayes_token
+                   SET ham_count = ham_count + ?
+                 WHERE username = ?
+                   AND token = ?
+                   AND ham_count + ? >= 0";
+	@args = ($ham_count, $self->{_username}, $token, $ham_count);
+      }
+
+      my $rows = $self->{_dbh}->do($sql, undef, @args);
+
+      unless (defined($rows)) {
+	dbg("bayes: _put_token: SQL Error: ".$self->{_dbh}->errstr());
+	return 0;
+      }
     }
-    
-    $sth->finish();
+
     dbg("bayes: token ($token) updated");
   }
   return 1;
