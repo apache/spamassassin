@@ -121,7 +121,7 @@ sub html_render {
   $self->{html_invisible_text} = [];
   $self->{html_last_tag} = 0;
 
-  $self->{html}{length} += length($text);
+  $self->{html}{length} += $1 if (length($text) =~ m/^(\d+)$/);	# untaint
 
   # NOTE: We *only* need to fix the rendering when we verify that it
   # differs from what people see in their MUA.  Testing is best done with
