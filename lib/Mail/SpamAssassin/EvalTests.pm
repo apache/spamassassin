@@ -1752,6 +1752,33 @@ sub check_for_spam_phrases_scoring {
 
 ###########################################################################
 
+sub check_for_fake_aol_relay_in_rcvd {
+  my ($self) = @_;
+  local ($_);
+
+  $_ = $self->get ('Received'); s/\s/ /gs;
+
+  # this is the hostname format used by AOL for their relays. Spammers love 
+  # forging it.  Don't make it more specific to match aol.com only, though --
+  # there's another set of spammers who generate fake hostnames to go with
+  # it!
+  if (/ rly-[a-z][a-z]\d\d\./i) {
+    return 0 if /ESMTP id (?:RELAY|MAILRELAY|MAILIN)/; # AOLish
+    return 1;
+  }
+
+# spam: Received: from unknown (HELO mta05bw.bigpond.com) (80.71.176.130) by
+#    rly-xw01.mx.aol.com with QMQP; Sat, 15 Jun 2002 23:37:16 -0000
+
+# non: Received: from  rly-xj02.mx.aol.com (rly-xj02.mail.aol.com [172.20.116.39]) by
+#    omr-r05.mx.aol.com (v83.35) with ESMTP id RELAYIN7-0501132011; Wed, 01
+#    May 2002 13:20:11 -0400
+
+  return 0;
+}
+
+###########################################################################
+
 sub check_for_missing_headers { return 0; } # obsolete test
 
 1;

@@ -176,6 +176,9 @@ describe NO_MX_FOR_FROM		No MX records for the From: domain
 header KNOWN_BAD_DIALUPS	eval:check_for_bad_dialup_ips()
 describe KNOWN_BAD_DIALUPS	Received via known spam-harbouring dialups
 
+header FORGED_AOL_RCVD	        eval:check_for_fake_aol_relay_in_rcvd()
+describe FORGED_AOL_RCVD	Received forged, contains fake AOL relays
+
 header FROM_AND_TO_SAME_1	eval:check_for_from_to_same('exact_both')
 describe FROM_AND_TO_SAME_1	From and To the same (1)
 
@@ -211,7 +214,6 @@ describe SMTPD_IN_RCVD		Received via SMTPD32 server (SMTPD32-n.n)
 
 header POST_IN_RCVD		Received =~ / Post\.(?:sk|cz)/
 describe POST_IN_RCVD		Received contains fake 'Post.cz' hostname
-
 
 # Multizone / Multi meaning BLs first
 
