@@ -325,7 +325,7 @@ sub expire_old_tokens_trapped {
   if ($showdots) { print STDERR "\n"; }
 
   foreach my $tok (keys %{$self->{db_toks}}) {
-    next if ($tok =~ /^\*\*[A-Z]/); # skip magic tokens
+    next if ($tok =~ /^\*\*[A-Z]+$/); # skip magic tokens
 
     my ($ts, $th, $atime) = $self->tok_get ($tok);
 
@@ -703,7 +703,7 @@ sub tok_put {
   $ts ||= 0;
   $th ||= 0;
 
-  if ( $tok =~ /^\*\*[A-Z]/ ) { # magic token prefix?  Ignore it!
+  if ( $tok =~ /^\*\*[A-Z]+$/ ) { # magic token?  Ignore it!
     return;
   }
 
