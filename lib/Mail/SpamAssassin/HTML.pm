@@ -923,6 +923,11 @@ sub display_text {
 sub html_text {
   my ($self, $text) = @_;
 
+  # note: this comes back from HTML::Parser as UTF-8-tainted.  Enforce byte
+  # mode by repacking the string in byte mode, to avoid 'Malformed UTF-8
+  # character (unexpected non-continuation byte)' warnings
+  $text = pack ("C0A*", $text);
+
   # text that is not part of body
   if (exists $self->{html}{inside_script} && $self->{html}{inside_script} > 0)
   {
