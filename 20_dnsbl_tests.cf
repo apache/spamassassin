@@ -24,35 +24,7 @@ require_version @@VERSION@@
 #
 # Note that currently TXT queries cannot be used for these, since the
 # DNSBLs do not return the A type (127.0.0.x) as part of the TXT reply.
-# Well, at least Osirusoft and NJABL don't, it seems, as of Apr 7 2003.
-
-# ---------------------------------------------------------------------------
-# Osirusoft
-# URL: http://relays.osirusoft.com/
-
-header RCVD_IN_OSIRU	eval:check_rbl('osirusoft', 'relays.osirusoft.com.')
-describe RCVD_IN_OSIRU	OSIRU: Sent via relay in relays.osirusoft.com
-tflags RCVD_IN_OSIRU	net
-
-header RCVD_IN_OSIRU_RELAY	eval:check_rbl_sub('osirusoft', '127.0.0.2')
-describe RCVD_IN_OSIRU_RELAY	OSIRU: sender is Confirmed Open Relay
-tflags RCVD_IN_OSIRU_RELAY	net
-
-header RCVD_IN_OSIRU_DIALUP	eval:check_rbl('osirusoft-notfirsthop', 'relays.osirusoft.com.', '127.0.0.3')
-describe RCVD_IN_OSIRU_DIALUP	OSIRU: sender is dial-up IP address
-tflags RCVD_IN_OSIRU_DIALUP	net
-
-header RCVD_IN_OSIRU_SPAM_SRC	eval:check_rbl_sub('osirusoft', '127.0.0.4')
-describe RCVD_IN_OSIRU_SPAM_SRC	OSIRU: sender is Confirmed Spam Source
-tflags RCVD_IN_OSIRU_SPAM_SRC	net
-
-header RCVD_IN_OSIRU_SPAMWARE	eval:check_rbl_sub('osirusoft', '127.0.0.6')
-describe RCVD_IN_OSIRU_SPAMWARE	OSIRU: sender is Spamware site or vendor
-tflags RCVD_IN_OSIRU_SPAMWARE	net
-
-header RCVD_IN_OSIRU_PROXY	eval:check_rbl_sub('osirusoft', '127.0.0.9')
-describe RCVD_IN_OSIRU_PROXY	OSIRU: sender is open proxy server
-tflags RCVD_IN_OSIRU_PROXY	net
+# Well, at least NJABL doesn't, it seems, as of Apr 7 2003.
 
 # ---------------------------------------------------------------------------
 # NJABL
