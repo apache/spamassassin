@@ -140,6 +140,28 @@ describe FORGED_IMS_HTML	IMS can't send HTML message only
 meta FORGED_THEBAT_HTML		(__THEBAT_MUA_V1 && MIME_HTML_ONLY)
 describe FORGED_THEBAT_HTML	The Bat! can't send HTML message only
 
+# bug 2513
+header __REPTO_OVERQUOTE	Reply-To =~ /"[\w. -]+"\s*\</
+meta REPTO_OVERQUOTE_THEBAT	__REPTO_OVERQUOTE && __THEBAT_MUA
+describe REPTO_OVERQUOTE_THEBAT	The Bat! doesn't do quoting like this
+
+# bug 2513
+header __REPTO_QUOTE		Reply-To =~ /".*"\s*\</
+meta REPTO_QUOTE_AOL		__REPTO_QUOTE && __AOL_MUA
+describe REPTO_QUOTE_AOL	AOL doesn't do quoting like this
+
+meta REPTO_QUOTE_IMS		__REPTO_QUOTE && __IMS_MUA
+describe REPTO_QUOTE_IMS	IMS doesn't do quoting like this
+
+meta REPTO_QUOTE_MSN		__REPTO_QUOTE && (__FROM_MSN_COM || __AT_MSN_MSGID)
+describe REPTO_QUOTE_MSN	MSN doesn't do quoting like this
+
+meta REPTO_QUOTE_QUALCOMM	__REPTO_QUOTE && __ANY_QUALCOMM_MUA
+describe REPTO_QUOTE_QUALCOMM	Qualcomm/Eudora doesn't do quoting like this
+
+meta REPTO_QUOTE_YAHOO		__REPTO_QUOTE && (__FROM_YAHOO_COM || __AT_YAHOO_MSGID)
+describe REPTO_QUOTE_YAHOO	Yahoo! doesn't do quoting like this
+
 # bug 1561
 # stronger version of USER_AGENT_APPLEMAIL
 # Apple Mail doesn't send text/html at all (unless it's an attachment)
