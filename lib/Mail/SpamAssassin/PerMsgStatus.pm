@@ -35,7 +35,7 @@ use strict;
 use bytes;
 use Carp;
 
-use Text::Wrap qw();
+use Text::Wrap ();
 use POSIX qw(strftime);
 
 use Mail::SpamAssassin::EvalTests;

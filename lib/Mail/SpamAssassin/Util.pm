@@ -26,9 +26,11 @@ require Exporter;
 @EXPORT = qw(local_tz);
 
 use Mail::SpamAssassin;
+
 use File::Spec;
 use Time::Local;
-use Sys::Hostname qw();
+use Sys::Hostname (); # don't import hostname() into this namespace!
+
 
 use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
 

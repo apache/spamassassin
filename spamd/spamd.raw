@@ -38,7 +38,7 @@ use POSIX qw(:sys_wait_h);
 use POSIX qw(setsid);
 use Errno;
 
-use Cwd qw();
+use Cwd ();
 use File::Spec;
 use File::Path;
 
