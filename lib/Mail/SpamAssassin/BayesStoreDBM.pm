@@ -853,7 +853,7 @@ sub cleanup {
   my $conf = $self->{bayes}->{main}->{conf};
   my $umask = umask(0777 - (oct ($conf->{bayes_file_mode}) & 0666));
   if (!open (OUT, ">>".$path)) {
-    warn "cannot write to $path, Bayes db update ignored\n";
+    warn "cannot write to $path, Bayes db update ignored: $!\n";
     umask $umask; # reset umask
     return;
   }
