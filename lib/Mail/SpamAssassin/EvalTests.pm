@@ -1789,22 +1789,6 @@ sub nonspace_length {
 }
 
 # TESTING XXX this needs to be cleaned up, maybe moved to HTML.pm
-sub image_count_ratio {
-  my ($self, $body, $min, $max) = @_;
-
-  return 0 unless exists $self->{html}{num_imgs} && $self->{html}{num_imgs} > 0;
-
-  if (!exists $self->{nonspace}) {
-    nonspace_length($self, $body, 0, 0);
-  }
-
-  $self->{image_count_ratio} = $self->{nonspace} / $self->{html}{num_imgs};
-
-  return ($self->{image_count_ratio} > $min &&
-	  $self->{image_count_ratio} <= $max);
-}
-
-# TESTING XXX this needs to be cleaned up, maybe moved to HTML.pm
 sub image_area_ratio {
   my ($self, $body, $min, $max) = @_;
 
@@ -2057,49 +2041,23 @@ sub check_for_mime_faraway_charset {
   return $self->{mime_faraway_charset};
 }
 
-# HTML only 
-sub check_for_mime_html_text_only {
-  my ($self) = @_;
-
-  my $ctype = $self->get('Content-Type');
-  return 1 if (defined($ctype) && $ctype =~ m@text/html@i);
-
-  $self->_check_attachments unless exists $self->{mime_body_ctype_count};
-  return ($self->{mime_body_ctype_count} > 0 &&
-	  $self->{mime_body_ctype_count} == $self->{mime_body_html_count});
-}
-
-# HTML without text/plain
-sub check_for_mime_html_without_plain {
-  my ($self) = @_;
-
-  my $ctype = $self->get('Content-Type');
-  return 1 if (defined($ctype) && $ctype =~ m@text/html@i);
-
-  $self->_check_attachments unless exists $self->{mime_body_ctype_count};
-  return ($self->{mime_body_ctype_count} > 0 &&
-	  $self->{mime_body_html_count} > 0 &&
-	  $self->{mime_body_text_count} == 0);
-}
-
-# HTML and images only
-sub check_for_mime_html_images_only {
-  my ($self) = @_;
-
-  my $ctype = $self->get('Content-Type');
-  return 1 if (defined($ctype) && $ctype =~ m@text/html@i);
-
-  $self->_check_attachments unless exists $self->{mime_body_ctype_count};
-  return ($self->{mime_body_ctype_count} > 0 &&
-	  ($self->{mime_body_html_count} + $self->{mime_body_image_count} ==
-	   $self->{mime_body_ctype_count}));
-}
-
 sub check_for_mime_html_no_charset {
   my ($self) = @_;
 
   $self->_check_attachments unless exists $self->{mime_html_no_charset};
   return $self->{mime_html_no_charset};
+}
+
+# HTML without some other type of MIME text part
+sub check_for_mime_html_only {
+  my ($self) = @_;
+
+  my $ctype = $self->get('Content-Type');
+  return 1 if (defined($ctype) && $ctype =~ m@text/html@i);
+
+  $self->_check_attachments unless exists $self->{mime_body_html_count};
+  return ($self->{mime_body_html_count} > 0 &&
+	  $self->{mime_body_text_count} == 0);
 }
 
 sub check_for_mime_missing_boundary {
@@ -2133,16 +2091,11 @@ sub check_for_microsoft_executable {
 sub _check_mime_header {
   my ($self, $ctype, $cte, $cd, $charset, $name) = @_;
 
-  $self->{mime_body_ctype_count}++ unless $ctype =~ m@^multipart/@i;
-
   if ($ctype =~ m@^text/html@i) {
     $self->{mime_body_html_count}++;
   }
   elsif ($ctype =~ m@^(?:text|message)@i) {
     $self->{mime_body_text_count}++;
-  }
-  elsif ($ctype =~ m@^image/@i) {
-    $self->{mime_body_image_count}++;
   }
 
   if ($ctype =~ /^text/ &&
@@ -2221,9 +2174,7 @@ sub _check_attachments {
   # results
   $self->{microsoft_executable} = 0;
   $self->{mime_base64_encoded_text} = 0;
-  $self->{mime_body_ctype_count} = 0;
   $self->{mime_body_html_count} = 0;
-  $self->{mime_body_image_count} = 0;
   $self->{mime_body_text_count} = 0;
   $self->{mime_faraway_charset} = 0;
   $self->{mime_html_no_charset} = 0;
