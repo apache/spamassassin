@@ -155,9 +155,11 @@ sub run {
 	    last;
 	  }
 	  if ($line =~ /^RESULT ([hs])/ || $line eq "START\n") {
-	    chop($result);
 	    print { $socket } (@messages ? (shift @messages) : "exit") . "\n";
-	    $self->process_a_result($1, $result) if defined($1) && $result;
+	    if ($result) {
+	      chop $result;	# need to chop the \n before RESULT
+	      $self->process_a_result($1, $result) if defined($1);
+	    }
 	    last;
 	  }
 	  $result .= $line;
