@@ -113,7 +113,7 @@ sub razor_report {
     open (STDOUT, ">&STDERR");
   }
 
-  Mail::SpamAssassin::PerMsgStatus::enter_helper_run_mode();
+  $self->enter_helper_run_mode();
 
   # Use Razor2 if it's available
   eval { require Razor2::Client::Agent; };
@@ -225,7 +225,7 @@ sub razor_report {
     }
   }
 
-  Mail::SpamAssassin::PerMsgStatus::leave_helper_run_mode();
+  $self->leave_helper_run_mode();
 
   if ($Mail::SpamAssassin::DEBUG->{enabled}) {
     open (STDOUT, ">&OLDOUT");
@@ -250,7 +250,7 @@ sub dcc_report {
   my $timeout=$self->{conf}->{dcc_timeout};
 
   timelog("DCC -> Starting report ($timeout secs max)", "dcc", 1);
-  Mail::SpamAssassin::PerMsgStatus::enter_helper_run_mode();
+  $self->enter_helper_run_mode();
 
   # use a temp file here -- open2() is unreliable, buffering-wise,
   # under spamd. :(
@@ -278,7 +278,7 @@ sub dcc_report {
   };
 
   alarm 0;
-  Mail::SpamAssassin::PerMsgStatus::leave_helper_run_mode();
+  $self->leave_helper_run_mode();
  
   if ($@) {
     if ($@ =~ /^__alarm__$/) {
@@ -303,7 +303,7 @@ sub pyzor_report {
   my $timeout=$self->{conf}->{pyzor_timeout};
 
   timelog("Pyzor -> Starting report ($timeout secs max)", "pyzor", 1);
-  Mail::SpamAssassin::PerMsgStatus::enter_helper_run_mode();
+  $self->enter_helper_run_mode();
 
   # use a temp file here -- open2() is unreliable, buffering-wise,
   # under spamd. :(
@@ -331,7 +331,7 @@ sub pyzor_report {
   };
 
   alarm 0;
-  Mail::SpamAssassin::PerMsgStatus::leave_helper_run_mode();
+  $self->leave_helper_run_mode();
 
   if ($@) {
     if ($@ =~ /^__alarm__$/) {
@@ -365,5 +365,7 @@ sub is_razor_available {
   Mail::SpamAssassin::PerMsgStatus::is_razor1_available(@_);
 }
 
+sub enter_helper_run_mode { Mail::SpamAssassin::PerMsgStatus::enter_helper_run_mode(@_); }
+sub leave_helper_run_mode { Mail::SpamAssassin::PerMsgStatus::leave_helper_run_mode(@_); }
 
 1;
