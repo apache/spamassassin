@@ -255,7 +255,7 @@ sub expire_old_tokens_trapped {
 
   # How many tokens do we want to keep?
   my $goal_reduction = int($self->{expiry_max_db_size} * $self->{expiry_pct});
-  dbg("bayes: expiry check keep size, ".$self->{expiry_pct}*100."% of max: $goal_reduction");
+  dbg("bayes: expiry check keep size, ".$self->{expiry_pct}." * max: $goal_reduction");
   # Make sure we keep at least 100000 tokens in the DB
   if ( $goal_reduction < 100000 ) {
     $goal_reduction = 100000;
