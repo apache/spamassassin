@@ -33,8 +33,10 @@ sub cmdline_run {
 	     'ham|nonspam'			=> sub { $isspam = 0; },
 	     'rebuild'				=> \$rebuildonly,
 	     'forget'				=> \$forget,
-             'config-file|C=s'                  => \$opt{'config-file'},
-             'prefs-file|p=s'                   => \$opt{'prefs-file'},
+
+             'configpath|config-file|config-dir|c|C=s' => \$opt{'configpath'},
+             'prefspath|prefs-file|p=s'          => \$opt{'prefspath'},
+             'siteconfigpath=s'                  => \$opt{'siteconfigpath'},
 
 	     'folders|f=s'			=> \$opt{'folders'},
              'showdots'                         => \$opt{'showdots'},
@@ -91,8 +93,9 @@ sub cmdline_run {
 
   # create the tester factory
   $spamtest = new Mail::SpamAssassin ({
-    rules_filename	=> $opt{'config-file'},
-    userprefs_filename  => $opt{'prefs-file'},
+    rules_filename      => $opt{'configpath'},
+    site_rules_filename => $opt{'siteconfigpath'},
+    userprefs_filename  => $opt{'prefspath'},
     debug               => defined($opt{'debug-level'}),
     local_tests_only    => 1,
     dont_copy_prefs     => 1,

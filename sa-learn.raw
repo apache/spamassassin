@@ -75,8 +75,9 @@ Options:
  --showdots                        Show progress using dots
  --no-rebuild                      Skip building databases after scan
  -L, --local			   Operate locally, no network accesses
- -C file, --config-file=file       Path to standard configuration dir
- -p prefs, --prefs-file=file       Set user preferences file
+ -C path, --configpath=path, --config-file=path   Path to standard configuration dir
+ -p prefs, --prefspath=file, --prefs-file=file    Set user preferences file
+ --siteconfigpath=path             Path for site configs (def: /etc/mail/spamassassin)
  -D, --debug-level                 Print debugging messages
  -V, --version                     Print version
  -h, --help                        Print usage message
@@ -349,15 +350,21 @@ display based on a regular expression.
 
 Print help message and exit.
 
-=item B<-C> I<config>, B<--config-file>=I<config>
+=item B<-C> I<path>, B<--configpath>=I<path>, B<--config-file>=I<path>
 
-Read configuration from I<config>.
+Use the specified path for locating the distributed configuration files.
+Ignore the default directories (usually C</usr/share/spamassassin> or similar).
 
-=item B<-p> I<prefs>, B<--prefs-file>=I<prefs>
+=item B<--siteconfigpath>=I<path>
 
-Read user score preferences from I<prefs>.
+Use the specified path for locating site-specific configuration files.  Ignore
+the default directories (usually C</etc/mail/spamassassin> or similar).
 
-=item B<-D>, B<--debug-level>
+=item B<-p> I<prefs>, B<--prefspath>=I<prefs>, B<--prefs-file>=I<prefs>
+
+Read user score preferences from I<prefs> (usually C<$HOME/.spamassassin/user_prefs>).
+
+ =item B<-D>, B<--debug-level>
 
 Produce diagnostic output.
 
