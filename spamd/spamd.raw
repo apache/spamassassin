@@ -1345,9 +1345,15 @@ program.
 See the README file in the C<spamd> directory of the SpamAssassin distribution
 for more details.
 
-Note: Although spamd will check per-user config files for every message, any
-changes to the system-wide config files will require restarting spamd for
-the changes to take effect.
+Note: Although C<spamd> will check per-user config files for every message, any
+changes to the system-wide config files will require either restarting spamd
+or forcing it to reload itself via B<SIGHUP> for the changes to take effect.
+
+Note: If C<spamd> receives a B<SIGHUP>, it internally reloads itself, which means
+that it will change its pid and might not restart at all if its environment
+changed  (ie. if it can't change back into its own directory).  If you plan
+to use B<SIGHUP>, you should always start C<spamd> with the B<-r> switch to know its
+current pid.
 
 =head1 OPTIONS
 
@@ -1620,7 +1626,12 @@ Listen on UNIX domain path I<pathname> instead of a TCP socket.
 Perl 5.005_03 seems to have a bug, which spamd triggers, causing messages to
 pass through unscanned.  Upgrading to Perl 5.6 seems to fix the problem, so
 that's the current workaround.  More information can be found at
-http://www.hughes-family.org/bugzilla/show_bug.cgi?id=497
+http://bugzilla.spamassassin.org/show_bug.cgi?id=497
+
+The module IO::Socket::INET from Perl 5.005 needs too much time to shut down
+the port, so when spamd receives the HUP signal to reload itself, it will die
+because it can't open that port. Updating IO::Socket or (better) to Perl 5.6
+or later should help.
 
 The C<-m> switch seems to trigger signal-handling bugs in many versions
 of Perl.
