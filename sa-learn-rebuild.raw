@@ -50,6 +50,7 @@ B<sa-learn-rebuild> [options]
 Options:
 
  --showdots                        Show progress using dots
+ --force-expire			   Force an expiry run
  -C file, --config-file=file       Set configuration file
  -p prefs, --prefs-file=file       Set user preferences file
  -D, --debug-level                 Print debugging messages
@@ -74,6 +75,15 @@ filtering system.
 =head1 OPTIONS
 
 =over 4
+
+=item B<--showdots>
+
+Print a '.' character, as a progress meter.
+
+=item B<--force-expire>
+
+Force a database expiration run.  Normally, tokens are expired twice
+every C<bayes_expiry_days> days.
 
 =item B<-h>, B<--help>
 

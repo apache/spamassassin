@@ -40,6 +40,7 @@ sub cmdline_run {
              'single|s'                         => \$opt{'single'},
              'showdots'                         => \$opt{'showdots'},
 	     'no-rebuild'			=> \$opt{'norebuild'},
+	     'force-expire'			=> \$opt{'force-expire'},
 
              'stopafter'                        => \$opt{'stopafter'},
 	     'learnprob=f'			=> \$opt{'learnprob'},
@@ -75,6 +76,7 @@ sub cmdline_run {
   $spamtest->init_learner({
       use_whitelist     => $opt{'auto-whitelist'},
       bias_scores       => $opt{'bias-scores'},
+      force_expire	=> $opt{'force-expire'},
   });
 
   if ($opts->{rebuildonly}) {
