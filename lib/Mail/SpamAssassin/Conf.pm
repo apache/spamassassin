@@ -55,6 +55,9 @@ sub new {
   $self->{ok_locales} = '';
 
   $self->{whitelist_from} = [ ];
+  $self->{blacklist_from} = [ ];
+  $self->{whitelist_from_doms} = [ ];
+  $self->{blacklist_from_doms} = [ ];
 
   # this will hold the database connection params
   $self->{user_scores_dsn} = '';
@@ -99,8 +102,20 @@ sub _parse {
 
     # note: no eval'd code should be loaded before the SECURITY line below.
     #
+    if (/^whitelist_from\s+\*\@(\S+)\s*$/) {
+      push (@{$self->{whitelist_from_doms}}, $1); next;
+    }
+
+    if (/^blacklist_from\s+\*\@(\S+)\s*$/) {
+      push (@{$self->{blacklist_from_doms}}, $1); next;
+    }
+
     if (/^whitelist_from\s+(\S+)\s*$/) {
       push (@{$self->{whitelist_from}}, $1); next;
+    }
+
+    if (/^blacklist_from\s+(\S+)\s*$/) {
+      push (@{$self->{blacklist_from}}, $1); next;
     }
 
     if (/^describe\s+(\S+)\s+(.*)$/) {

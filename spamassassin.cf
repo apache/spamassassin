@@ -262,8 +262,12 @@ describe MSG_ID_ADDED_BY_MTA	'Message-Id' was added by a relay
 header MANY_FROMS		From =~ /^[^\"\<\(]+, [^\"\<\(]+$/
 describe MANY_FROMS		'From' contains more than one address
 
+# *so* many spams come from here.
 header FROM_BTAMAIL		From =~ /\@btamail.net.cn/i
 describe FROM_BTAMAIL		From an address @btamail.net.cn
+
+header USER_IN_BLACKLIST	eval:check_from_in_blacklist()
+describe USER_IN_BLACKLIST	From: address is in the user's black-list
 
 ###########################################################################
 

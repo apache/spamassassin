@@ -133,12 +133,34 @@ sub check_subject_for_lotsa_8bit_chars {
 sub check_from_in_whitelist {
   my ($self) = @_;
   local ($_);
-  $_ = $self->get ('From:addr');
+  $_ = lc $self->get ('From:addr');
 
   foreach my $addr (@{$self->{conf}->{whitelist_from}}) {
-    if ($_ eq $addr) {
-      return 1;
-    }
+    if ($_ eq $addr) { return 1; }
+  }
+
+  s/[^\@]+\@//gs;	# jm@jmason.org => jmason.org
+  foreach my $addr (@{$self->{conf}->{whitelist_from_doms}}) {
+    if ($_ eq $addr) { return 1; }
+  }
+
+  return 0;
+}
+
+###########################################################################
+
+sub check_from_in_blacklist {
+  my ($self) = @_;
+  local ($_);
+  $_ = lc $self->get ('From:addr');
+
+  foreach my $addr (@{$self->{conf}->{blacklist_from}}) {
+    if ($_ eq $addr) { return 1; }
+  }
+
+  s/[^\@]+\@//gs;	# jm@jmason.org => jmason.org
+  foreach my $addr (@{$self->{conf}->{blacklist_from_doms}}) {
+    if ($_ eq $addr) { return 1; }
   }
 
   return 0;
