@@ -633,6 +633,10 @@ sub report_as_spam {
 
   $self->init(1);
 
+  # Let's make sure the markup was removed first ...
+  my @msg = split (/^/m, $self->remove_spamassassin_markup($mail));
+  $mail = Mail::SpamAssassin::NoMailAudit->new ('data' => \@msg);
+
   $mail = $self->encapsulate_mail_object ($mail);
 
   # learn as spam if enabled
@@ -674,6 +678,10 @@ sub revoke_as_spam {
   local ($_);
 
   $self->init(1);
+
+  # Let's make sure the markup was removed first ...
+  my @msg = split (/^/m, $self->remove_spamassassin_markup($mail));
+  $mail = Mail::SpamAssassin::NoMailAudit->new ('data' => \@msg);
 
   $mail = $self->encapsulate_mail_object ($mail);
 
