@@ -104,21 +104,7 @@ This method will add a score of -100 to the given address -- effectively
 sub add_known_good_address {
   my ($self, $addr) = @_;
 
-  if (!defined $self->{checker}) {
-    return undef;		# no factory defined; we can't check
-  }
-
-  $addr = lc $addr;
-  $addr =~ s/[\000\;\'\"\!\|]/_/gs;	# paranoia
-  my $entry = $self->{checker}->get_addr_entry ($addr);
-
-  # remove any old entries (will remove per-ip entries as well)
-  if ($entry->{count} > 0) {
-    $self->{checker}->remove_entry ($entry);
-  }
-  $self->{checker}->add_score($entry,-100);
-
-  return 0;
+  return $self->modify_address($addr, -100);
 }
 
 ###########################################################################
@@ -133,39 +119,39 @@ This method will add a score of 100 to the given address -- effectively
 sub add_known_bad_address {
   my ($self, $addr) = @_;
 
-  if (!defined $self->{checker}) {
-    return undef;		# no factory defined; we can't check
-  }
-
-  $addr = lc $addr;
-  $addr =~ s/[\000\;\'\"\!\|]/_/gs;	# paranoia
-  my $entry = $self->{checker}->get_addr_entry ($addr);
-
-  # remove any old entries (will remove per-ip entries as well)
-  if ($entry->{count} > 0) {
-    $self->{checker}->remove_entry ($entry);
-  }
-  $self->{checker}->add_score($entry,100);
-
-  return 0;
+  return $self->modify_address($addr, 100);
 }
-
-
 
 ###########################################################################
 
 sub remove_address {
   my ($self, $addr) = @_;
 
+  return $self->modify_address($addr, undef);
+}
+
+sub modify_address {
+  my ($self, $addr, $score) = @_;
+
   if (!defined $self->{checker}) {
     return undef;		# no factory defined; we can't check
   }
 
   $addr = lc $addr;
   $addr =~ s/[\000\;\'\"\!\|]/_/gs;	# paranoia
-
   my $entry = $self->{checker}->get_addr_entry ($addr);
-  $self->{checker}->remove_entry ($entry) and return 1;
+
+  # remove address
+  if (!defined($score)) {
+    $self->{checker}->remove_entry($entry);
+    return 1;
+  }
+  # add score
+  if ($entry->{count} > 0) {
+    # remove any old entries (will remove per-ip entries as well)
+    $self->{checker}->remove_entry($entry);
+  }
+  $self->{checker}->add_score($entry, $score);
 
   return 0;
 }
