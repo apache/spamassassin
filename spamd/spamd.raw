@@ -37,7 +37,9 @@ my %resphash = (
 		EX_CONFIG      => 78, # configuration error
 		);
 
-my %opt = ();
+# defaults
+my %opt = ('user-config' => 1);
+
 Getopt::Long::Configure ("bundling");
 GetOptions(
 	'auto-whitelist|whitelist|a' => \$opt{'auto-whitelist'},
