@@ -492,7 +492,7 @@ sub base64_encode {
 
   $_ = pack("u57", $_);
   s/^.//mg;
-  tr| -_`|A-Za-z0-9+/A|;
+  tr| -_`|A-Za-z0-9+/A|; # -> #`# <- kluge against vim syntax issues
   s/(A+)$/'=' x length $1/e;
   return $_;
 }
@@ -508,7 +508,7 @@ sub portable_getpwuid {
     eval ' sub _getpwuid_wrapper { getpwuid($_[0]); } ';
   } else {
     dbg("util: defining getpwuid() wrapper using 'unknown' as username");
-    eval ' sub _getpwuid_wrapper { fake_getpwuid($_[0]); } ';
+    eval ' sub _getpwuid_wrapper { _fake_getpwuid($_[0]); } ';
   }
 
   if ($@) {
@@ -518,7 +518,7 @@ sub portable_getpwuid {
   }
 }
 
-sub fake_getpwuid {
+sub _fake_getpwuid {
   return (
     'unknown',		# name,
     'x',		# passwd,
