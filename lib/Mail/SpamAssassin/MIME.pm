@@ -1,4 +1,4 @@
-# $Id: MIME.pm,v 1.3 2003/09/24 21:33:32 felicity Exp $
+# $Id: MIME.pm,v 1.4 2003/09/25 03:38:03 felicity Exp $
 
 package Mail::SpamAssassin::MIME;
 use strict;
@@ -14,7 +14,6 @@ sub new {
     raw_headers => {},
 
     body_parts  => [],
-    attachments => [],
     };
 
   bless($self,$class);
@@ -77,39 +76,23 @@ sub raw_header {
 }
 
 sub add_body_part {
-  my($self, $raw_type, $decoded, $raw, $boundary) = @_;
-  $boundary ||= '';
+  my($self, $raw_type, $opts) = @_;
+
   my $type = $raw_type;
   $type     ||= 'text/plain';
   $type =~ s/;.*$//;            # strip everything after first semi-colon
   $type =~ s/[^a-zA-Z\/]//g;    # strip inappropriate chars
-  my $part =
-    {
+
+  my $part = {
     type     => $type,
-    raw_type => $raw_type,
-    decoded  => $decoded,
-    raw      => $raw,
-    boundary => $boundary,
-    };
+  };
+
+  while( my($k,$v) = each %{$opts} ) {
+    $part->{$k} = $v;
+  }
+
   $part->{parsed} = [] if ( $type eq "text/html" );
   push @{ $self->{body_parts} }, $part;
-}
-
-sub add_attachment {
-  my($self, $raw_type, $decoded, $name, $raw, $boundary) = @_;
-  my $type = $raw_type;
-  $type     ||= 'text/plain';
-  $type =~ s/;.*$//;            # strip everything after first semi-colon
-  $type =~ s/[^a-zA-Z\/]//g;    # strip inappropriate chars
-  push @{ $self->{attachments} },
-    {
-    filename => $name,
-    type     => $type,
-    raw_type => $raw_type,
-    decoded  => $decoded,
-    raw      => $raw,
-    boundary => $boundary,
-    };
 }
 
 sub body {
@@ -137,21 +120,6 @@ sub body {
 sub bodies {
   my $self = shift;
   return @{ $self->{body_parts} };
-}
-
-sub attachment {
-  my $self = shift;
-  return $self->{attachments}[shift];
-}
-
-sub attachments {
-  my $self = shift;
-  return @{ $self->{attachments} };
-}
-
-sub num_attachments {
-  my $self = shift;
-  return scalar @{ $self->{attachments} };
 }
 
 sub dbg { Mail::SpamAssassin::dbg (@_); }

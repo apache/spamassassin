@@ -1,4 +1,4 @@
-# $Id: Parser.pm,v 1.4 2003/09/24 22:01:12 felicity Exp $
+# $Id: Parser.pm,v 1.5 2003/09/25 03:38:04 felicity Exp $
 
 package Mail::SpamAssassin::MIME::Parser;
 use strict;
@@ -141,31 +141,25 @@ sub parse_body {
   }
   else {
     dbg("Regular attachment\n");
-    $self->decode_attachment( $msg, $_msg, $boundary, $body );
+    $self->decode_body( $msg, $_msg, $boundary, $body );
   }
 
   if ( !$msg->body() ) {
     dbg("No message body found. Reparsing as blank.\n");
-    my $part_array  = [];
     my $part_msg = Mail::SpamAssassin::MIME->new();
-    $self->decode_body( $msg, $part_msg, $boundary, $part_array );
+    $self->decode_body( $msg, $part_msg, $boundary, [] );
   }
 }
 
 sub parse_multipart_alternate {
   my($self, $msg, $_msg, $boundary, $body ) = @_;
 
-  my $preamble = '';
-
   dbg("m/a got boundary: $boundary\n");
 
-  # extract preamble (normally contains "This message is in Multipart/MIME format")
+  # ignore preamble per RFC 1521
   while ( my $line = shift @{$body} ) {
     last if $line =~ /^\-\-\Q$boundary\E$/;
-    $preamble .= $line;
   }
-
-  dbg("preamble: [[$preamble]]\n");
 
   my $in_body = 0;
 
@@ -188,14 +182,7 @@ sub parse_multipart_alternate {
           if ( $part_array->[ scalar @{$part_array} - 1 ] eq '' );
       }
 
-      # assume body part if it's text
-      if ( $part_msg->header('content-type') =~ /^text/i ) {
-        $self->decode_body( $msg, $part_msg, $boundary, $part_array );
-      }
-      else {
-        dbg("Likely virus?\n");
-        $self->decode_attachment( $msg, $part_msg, $boundary, $part_array );
-      }
+      $self->decode_body( $msg, $part_msg, $boundary, $part_array );
       last if $line =~ /^\-\-\Q$boundary\E\-\-$/;
       $in_body  = 0;
       $part_msg = Mail::SpamAssassin::MIME->new();
@@ -237,15 +224,11 @@ sub parse_multipart_mixed {
   my($self, $msg, $_msg, $boundary, $body) = @_;
 
   dbg("m/m Got boundary: $boundary\n");
-  my $preamble = '';
 
-  # extract preamble (normally contains "This message is in Multipart/MIME format")
+  # ignore preamble per RFC 1521
   while ( my $line = shift @{$body} ) {
     last if $line =~ /^\-\-\Q$boundary\E$/;
-    $preamble .= $line;
   }
-
-  dbg("Extracted preamble: [[$preamble]]\n");
 
   my $part_msg =
     Mail::SpamAssassin::MIME->new();    # just used for headers storage
@@ -317,18 +300,14 @@ sub parse_normal {
   $self->decode_body( $msg, $_msg, $boundary, $body );
 }
 
-use File::Path qw(rmtree);
-
 sub _decode_header {
   my ( $encoding, $cte, $data ) = @_;
 
   if ( $cte eq 'B' ) {
-
     # base 64 encoded
     return MIME::Base64::decode_base64($data);
   }
   elsif ( $cte eq 'Q' ) {
-
     # quoted printable
     return MIME::QuotedPrint::decode_qp($data);
   }
@@ -352,21 +331,20 @@ sub decode_header {
 sub decode_body {
   my($self, $msg, $part_msg, $boundary, $body ) = @_;
 
-  my ( $type, $content ) = $self->decode( $part_msg, $body );
-
-  dbg("got body: $type\n");
-
-  $msg->add_body_part( $type, $content, $body, $boundary );
-}
-
-sub decode_attachment {
-  my($self, $msg, $part_msg, $boundary, $body ) = @_;
-
   dbg("decoding attachment\n");
 
   my ( $type, $content, $filename ) = $self->decode( $part_msg, $body );
 
-  $msg->add_attachment( $type, $content, $filename, $body, $boundary );
+  my $opts = {
+  	decoded => $content,
+	raw => $body,
+	boundary => $boundary,
+	headers => $part_msg->{headers},
+	raw_headers => $part_msg->{raw_headers},
+  };
+  $opts->{name} = $filename if ( $filename );
+
+  $msg->add_body_part( $type, $opts );
 }
 
 sub decode {
