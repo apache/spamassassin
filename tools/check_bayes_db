@@ -17,33 +17,35 @@ use constant ONE_BYTE_HHH       => 0x07;        # 00000111
 use vars qw{
     %h $k $v @DBNAMES
     $NSPAM_MAGIC_TOKEN $NHAM_MAGIC_TOKEN
-    $opt_dbpath $opt_min_hits $opt_max_hits
+    $opt_dbpath $opt_min_hits $opt_max_hits $opt_regexp
     $robinson_x $robinson_s_dot_x 
   };
 
 use Getopt::Long;
-GetOptions("dbpath=s", "min-hits=i", "max-hits=i");
+GetOptions("dbpath=s", "min-hits=i", "max-hits=i", "regexp=s");
 
-@DBNAMES = qw(toks probs);
+@DBNAMES = qw(toks);
 
 $NSPAM_MAGIC_TOKEN = '**NSPAM';
 $NHAM_MAGIC_TOKEN = '**NHAM';
 
-use constant ROBINSON_S_CONSTANT => 0.30;
-$robinson_x = 0.5;
+use constant ROBINSON_S_CONSTANT => 0.53;
+$robinson_x = 0.43;
 $robinson_s_dot_x = ($robinson_x * ROBINSON_S_CONSTANT);
 
 my $path = $opt_dbpath;
 $path ||= $ENV{HOME}."/.spamassassin/bayes";
 
-my $has_probs_db = 1;
+my $has_probs_db = 0;
 
 foreach my $dbname (@DBNAMES) {
   my $name = $path.'_'.$dbname;
   my $db_var = 'db_'.$dbname;
   if (!tie %{$h{$db_var}}, "AnyDBM_File",$name, O_RDONLY,0600) {
     warn "Cannot open file $name: $!\n";
-    if ($dbname eq 'probs') { $has_probs_db = 0; }
+  }
+  else {
+    if ($dbname eq 'probs') { $has_probs_db = 1; }
   }
 }
 
@@ -80,6 +82,7 @@ for my $key ( keys(%{$h{db_toks}}) ) {
 
   next if ($opt_min_hits && (($ts + $th) < $opt_min_hits));
   next if ($opt_max_hits && (($ts + $th) > $opt_max_hits));
+  next if ($opt_regexp && ($key !~ /$opt_regexp/o));
 
   if ($has_probs_db) {
     $prob = $h{db_probs}->{$key};
