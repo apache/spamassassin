@@ -12,6 +12,8 @@ body REMOVE_ES_03             /(?:Si |)(usted |)desea(?:s|) ser (?:borrado|remov
 describe REMOVE_ES_03           Claims you can be removed in Spanish
 body REMOVE_ES_04             /para no recibir mas mensajes/i
 describe REMOVE_ES_04           Claims you can be removed in Spanish
+body REMOVE_ES_05		/un email.{1,10}y procedo a eliminarle de mi base de datos/i
+describe REMOVE_ES_05		If you send an email you will be OptOut
 
 body REMOVE_ES_05		/Si no desea ser incluido en futuros envíos/
 describe REMOVE_ES_05		Claims you can opt-out
@@ -33,6 +35,9 @@ lang es describe EXCUSE_ES_05         El correo como alternativa comercial
 lang es body ES_ES_GRATIS	/ES.{1,14}GRATIS/
 lang es describe ES_ES_GRATIS	NOS CHILLAN PARA DECIR QUE ES GRATIS
 lang es score ES_ES_GRATIS	1.4
+
+lang es body INTERESADO		/Si le interesa el tema contesteme (solamente )?a este email/i
+lang es describe INTERESADO	Nos animan a contestar si estamos interesados
 
 ## Recursos generales de spammers
 #
