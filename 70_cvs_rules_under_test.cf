@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.563 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.564 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -636,3 +636,10 @@ describe T_AOL_FAKE_NAME          From: includes a real name, but AOL software c
 header __T_AOL_MAIL               From =~ /.*\@aol\.com/
 meta T_AOL_FAKE_MAIL              (__AOL_MUA && !__T_AOL_MAIL)
 describe T_AOL_FAKE_MAIL          From: does not show an aol.com address, but email send using AOL software
+
+# interesting!  looks like spammer misdirection.
+header T_HAS_X_ORIG_EMAIL	X-Originating-Email =~ /\S/
+describe T_HAS_X_ORIG_EMAIL	Has an 'X-Originating-Email' header
+header T_HAS_X_ORIG_HOST	X-Originating-Host =~ /^\[/
+describe T_HAS_X_ORIG_HOST	Has an 'X-Originating-Host' header
+
