@@ -14,8 +14,9 @@ describe T_DOMAIN_4U2     Domain name containing "4u", "u2" or variants.
 body T_USER_4U2           /\b\S*(?:4u|u2|2u|you2|4you|2you|foryou)\S*\@\S*\.(?:net|com|org)\b/
 describe T_USER_4U2       Local part containing "4u", "u2" or variants.
 
-header T_FROM_4U2         From =~ /4u|u2|2u|you2|4you|2you|foryou/i
-describe T_FROM_4U2       From contains "4u", "u2" or variants.
+#  0.00     0.00     0.00    0.00    1.00  T_FROM_4U2 (no matches)
+#header T_FROM_4U2         From =~ /4u|u2|2u|you2|4you|2you|foryou/i
+#describe T_FROM_4U2       From contains "4u", "u2" or variants.
 
 # bug 680
 body T_MEMBER_2           /\b(?:free|special|paid|dear|gold|opt.in|valued|because you are an?|be a|becoming a|sent to) .{0,9}members?\b/i
