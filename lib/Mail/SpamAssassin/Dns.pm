@@ -229,6 +229,7 @@ sub load_resolver {
     $self->{res} = Net::DNS::Resolver->new;
     if (defined $self->{res}) {
       $self->{no_resolver} = 0;
+      $self->{res}->retry(1); # If it fails, it fails
     }
     1;
   };   #  or warn "eval failed: $@ $!\n";
