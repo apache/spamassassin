@@ -15,6 +15,9 @@ part (ensuring the original message is completely preserved and easier to
 recover).  If you do not want to modify the body of incoming spam, use the
 "report_safe" option.
 
+The "report_header" and "defang_mime" options are also deprecated as a
+result.  Read the docs for "report_safe" for details.
+
 Please note that the use of the following commandline parameters for
 spamassassin and spamd have been deprecated!  They will still work in
 the 2.5x series (a warning will be displayed), but they will be removed
