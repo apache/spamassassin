@@ -2810,12 +2810,41 @@ sub check_for_mizspeeling_ratware {
   return 1;
 }
 
-sub check_for_rdns_helo_mismatch {
+sub check_for_rdns_helo_mismatch {	# T_FAKE_HELO_*
   my ($self, $rdns, $helo) = @_;
 
+  my $firstuntrusted = 1;
   foreach my $relay (@{$self->{relays_untrusted}}) {
-    if ($relay->{helo} =~ /${helo}$/ && $relay->{rdns} !~ /${rdns}$/)
-    {
+    my $wasfirst = $firstuntrusted;
+    $firstuntrusted = 0;
+
+    # did the machine HELO as a \S*something\.com machine?
+    if ($relay->{helo} !~ /${helo}$/) { next; }
+
+    my $claimed = $relay->{rdns};
+    if ($claimed =~ /${rdns}$/ && $wasfirst) {
+      # the first untrusted Received: hdr is inserted by a trusted MTA.
+      # so if the rDNS pattern matches, we're good, skip it
+      next;
+    }
+
+    if ($claimed =~ /${rdns}$/ && !$wasfirst) {
+      # it's a possibly-forged rDNS lookup.  Do a verification lookup
+      # to ensure the host really does match what the rDNS lookup
+      # claims it is.
+      if ($self->is_dns_available()) {
+	my $vrdns = $self->lookup_ptr ($relay->{ip});
+	if ($vrdns ne $claimed) {
+	  dbg ("rdns/helo mismatch: helo=$relay->{helo} ".	
+		"claimed-rdns=$claimed true-rdns=$vrdns");
+	  return 1;
+	  # TODO: instead, we should set a flag and check it later for
+	  # another test; but that relies on complicated test ordering
+	}
+      }
+    }
+
+    if ($claimed !~ /${rdns}$/) {
       if (!$self->is_dns_available()) { 
 	if ($relay->{rdns_not_in_headers}) {
 	  # that's OK then; it's just the MTA which picked it up,
@@ -2826,7 +2855,7 @@ sub check_for_rdns_helo_mismatch {
       }
 
       # otherwise there *is* a mismatch
-      dbg ("rdns/helo mismatch: helo=$relay->{helo} rdns=$relay->{rdns}");
+      dbg ("rdns/helo mismatch: helo=$relay->{helo} rdns=$claimed");
       return 1;
     }
   }
