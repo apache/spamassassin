@@ -1083,17 +1083,9 @@ sub finish {
 	  permsgstatus => $self
 	});
 
-  delete $self->{main};
-  delete $self->{msg};
-  delete $self->{conf};
-  delete $self->{res};
-  delete $self->{score};
-  delete $self->{test_names_hit};
-  delete $self->{subtest_names_hit};
-  delete $self->{test_logs};
-  delete $self->{replacelines};
-
-  $self = { };
+  foreach(keys %{$self}) {
+    delete $self->{$_};
+  }
 }
 
 ###########################################################################

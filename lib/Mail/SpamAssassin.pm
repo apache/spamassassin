@@ -389,7 +389,14 @@ sub check_message_text {
   my ($self, $mailtext) = @_;
   my $msg = $self->parse($mailtext, 1);
   my $result = $self->check($msg);
-  $msg->finish_metadata();	# avoid GC leaks
+
+  # Kill off the metadata ...
+  # Do _NOT_ call normal finish() here.  PerMsgStatus has a copy of
+  # the message.  So killing it here will cause things like
+  # rewrite_message() to fail. <grrr>
+  #
+  $msg->finish_metadata();
+
   return $result;
 }
 
@@ -1188,7 +1195,9 @@ sub finish {
     delete $self->{bayes_scanner};
   }
 
-  $self = { };
+  foreach(keys %{$self}) {
+    delete $self->{$_};
+  }
 }
 
 ###########################################################################
@@ -1508,6 +1517,10 @@ sub get_cf_files_in_dir {
 
 sub call_plugins {
   my $self = shift;
+
+  # We could potentially get called after a finish(), so just return.
+  return unless $self->{plugins};
+
   my $subname = shift;
   return $self->{plugins}->callback ($subname, @_);
 }

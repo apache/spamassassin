@@ -38,7 +38,7 @@
 
 # ---------------------------------------------------------------------------
 
-package Mail::SpamAssassin::Received;
+package Mail::SpamAssassin::Message::Metadata::Received;
 1;
 
 package Mail::SpamAssassin::Message::Metadata;
@@ -60,12 +60,12 @@ use constant SLOW_TRUST_BASED_ON_HELO_MXES => 0;
 # ---------------------------------------------------------------------------
 
 sub parse_received_headers {
-  my ($self, $msg) = @_;
+  my ($self, $main, $msg) = @_;
 
   # argh.  this is only used to perform DNS lookups.
   # TODO! we need to get Dns.pm code into a class that is NOT
   # part of Mail::SpamAssassin::PerMsgStatus to avoid this crap!
-  $self->{dns_pms} = Mail::SpamAssassin::PerMsgStatus->new($self->{main}, $msg);
+  $self->{dns_pms} = Mail::SpamAssassin::PerMsgStatus->new($main, $msg);
 
   $self->{relays} = [ ];
 
@@ -84,8 +84,8 @@ sub parse_received_headers {
   $self->{relays_untrusted_str} = '';
 
   # now figure out what relays are trusted...
-  my $trusted = $self->{conf}->{trusted_networks};
-  my $internal = $self->{conf}->{internal_networks};
+  my $trusted = $main->{conf}->{trusted_networks};
+  my $internal = $main->{conf}->{internal_networks};
   my $relay;
   my $first_by;
   my $in_trusted = 1;
@@ -263,6 +263,9 @@ sub parse_received_headers {
     }
   }
   delete $self->{relays};		# tmp, no longer needed
+
+  # drop the temp PerMsgStatus object
+  $self->{dns_pms}->finish();
   delete $self->{dns_pms};
 
   chop ($self->{relays_trusted_str});	# remove trailing ws

@@ -52,8 +52,8 @@ use strict;
 use bytes;
 
 use Mail::SpamAssassin;
-use Mail::SpamAssassin::Received;
 use Mail::SpamAssassin::TextCat;
+use Mail::SpamAssassin::Message::Metadata::Received;
 
 use constant MAX_BODY_LINE_LENGTH =>        2048;
 
@@ -77,35 +77,28 @@ sub new {
 sub extract {
   my ($self, $msg, $main) = @_;
 
-  # add pointers temporarily
-  $self->{main} = $main;
-  $self->{conf} = $main->{conf};
-
   # pre-chew Received headers
-  $self->parse_received_headers ($msg);
+  $self->parse_received_headers ($main, $msg);
 
   # and identify the language (if we're going to do that), before we
   # run any Bayes tests, so they can use that as a token
-  $self->check_language();
+  $self->check_language($main->{conf});
 
-  $self->{main}->call_plugins ("extract_metadata", { msg => $msg });
-
-  # remove pointers to avoid circular refs, which break GC'ing
-  delete $self->{main};
-  delete $self->{conf};
+  $main->call_plugins ("extract_metadata", { msg => $msg });
 }
 
 sub finish {
   my ($self) = @_;
   delete $self->{msg};
+  delete $self->{strings};
 }
 
 # ---------------------------------------------------------------------------
 
 sub check_language {
-  my ($self) = @_;
+  my ($self, $conf) = @_;
 
-  my @languages = split (' ', $self->{conf}->{ok_languages});
+  my @languages = split (' ', $conf->{ok_languages});
   if (grep { $_ eq "all" } @languages) {
     # user doesn't care what lang it's in, so return.
     # TODO: might want to have them as bayes tokens all the same, though.

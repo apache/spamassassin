@@ -439,10 +439,9 @@ sub wanted {
   my $ma = Mail::SpamAssassin->parse($dataref);
 
   if ( $ma->get_header("X-Spam-Checker-Version") ) {
-    my $newtext = $spamtest->remove_spamassassin_markup($ma);
-    my @newtext = split ( /^/m, $newtext );
-    $dataref = \@newtext;
-    $ma      = Mail::SpamAssassin->parse($dataref);
+    my $new_ma = $spamtest->parse($spamtest->remove_spamassassin_markup($ma), 1);
+    $ma->finish();
+    $ma = $new_ma;
   }
 
   my $status = $spamtest->learn( $ma, undef, $spam, $forget );
