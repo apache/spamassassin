@@ -3373,4 +3373,20 @@ sub check_phish_mismatch {
   return 0;
 }
 
+sub check_ratware_envelope_from {
+  my ($self) = @_;
+
+  my $to = $self->get('To:addr');
+  my $from = $self->get('EnvelopeFrom');
+
+  return 0 unless ($to && $from);
+
+  if ($to =~ /^([^@]+)@(.+)$/) {
+    my($user,$dom) = ($1,$2);
+    return 1 if ($from =~ /\b$dom.$user@/i);
+  }
+
+  return 0;
+}
+
 1;
