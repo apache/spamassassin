@@ -118,6 +118,7 @@ sub check {
   # to do this switch if we're already using bayes ... ;)
   my $set = $self->{conf}->get_score_set();
   if ( ($set & 2) == 0 && $self->{main}->{bayes_scanner}->is_scan_available() ) {
+    dbg("debug: Scoreset $set but Bayes is available, switching scoresets");
     $self->{conf}->set_score_set ($set|2);
   }
 

@@ -811,11 +811,11 @@ sub is_scan_available {
   my ($ns, $nn) = $self->{store}->nspam_nham_get();
 
   if ($ns < $self->{conf}->{bayes_min_spam_num}) {
-    dbg("debug: Only $ns spam(s) in Bayes DB < ".$self->{conf}->{bayes_min_spam_num});
+    dbg("bayes: Not available for scanning, only $ns spam(s) in Bayes DB < ".$self->{conf}->{bayes_min_spam_num});
     return 0;
   }
   if ($nn < $self->{conf}->{bayes_min_ham_num}) {
-    dbg("debug: Only $nn ham(s) in Bayes DB < ".$self->{conf}->{bayes_min_ham_num});
+    dbg("bayes: Not available for scanning, only $nn ham(s) in Bayes DB < ".$self->{conf}->{bayes_min_ham_num});
     return 0;
   }
 
