@@ -179,8 +179,6 @@ sub tie_db_writable {
   my ($self) = @_;
   my $main = $self->{bayes}->{main};
 
-  return 0; # THEO - KLUGE, REMOVE THIS AFTER FIGURING OUT ATIME ISSUE!
-
   # return if we've already tied to the db's, using the same mode
   # (locked/unlocked) as before.
   return 1 if ($self->{already_tied} && $self->{is_locked} == 1);
@@ -533,6 +531,7 @@ sub expire_old_tokens_trapped {
   $new_toks{$NSPAM_MAGIC_TOKEN} = $self->{db_toks}->{$NSPAM_MAGIC_TOKEN};
   $new_toks{$NHAM_MAGIC_TOKEN} = $self->{db_toks}->{$NHAM_MAGIC_TOKEN};
   $new_toks{$NTOKENS_MAGIC_TOKEN} = $kept + $reprieved;
+  $new_toks{$DB_VERSION_MAGIC_TOKEN} = DB_VERSION;
 
   # now untie so we can do renames
   untie %{$self->{db_toks}};
@@ -579,7 +578,7 @@ sub expiry_due {
 
   # is the database too small for expiry?  (Do *not* use "scalar keys",
   # as this will iterate through the entire db counting them!)
-  my @magic = get_magic_tokens();
+  my @magic = $self->get_magic_tokens();
   my $ntoks = $magic[3];
 
   dbg("Bayes DB expiry: Tokens in DB: $ntoks, Expiry min size: ".$self->{expiry_min_db_size},'bayes','-1');
@@ -799,6 +798,7 @@ sub add_touches_to_journal {
   $self->{string_to_journal} = '';
 }
 
+# Return a qr'd RE to match a token with the correct format's magic token
 sub get_magic_re {
   my ($self, $db_ver) = @_;
 
@@ -892,10 +892,6 @@ sub sync_journal_trapped {
     } else {
       warn "Bayes journal: gibberish entry found: $_";
     }
-
-#    if ($showdots && ($count % 1000) == 0) {
-#      print STDERR ".";
-#    }
   }
   close JOURNAL;
 
