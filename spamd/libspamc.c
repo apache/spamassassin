@@ -90,7 +90,7 @@ static const int EXPANSION_ALLOWANCE = 16384;
 static const char *PROTOCOL_VERSION="SPAMC/1.2";
 
 static int
-try_to_connect (const struct sockaddr *argaddr, const struct hostent *hent,
+try_to_connect (const struct sockaddr *argaddr, struct hostent *hent,
                 int hent_port, int *sockptr)
 {
 #ifdef USE_TCP_NODELAY
@@ -102,8 +102,11 @@ try_to_connect (const struct sockaddr *argaddr, const struct hostent *hent,
   int numloops;
   int hostnum = 0;
   struct sockaddr_in addrbuf, *addr;
-  char addrlistbuf[4096], **addrlist;
-  int addrlistlen = 0;
+  struct in_addr inaddrlist[256];
+
+  /* NOTE: do not call syslog() (unless you are about to return) before
+   * we take a copy of the h_addr_list.
+   */
 
   /* only one set of connection targets can be used.  assert this */
   if (argaddr == NULL && hent == NULL) {
@@ -116,25 +119,30 @@ try_to_connect (const struct sockaddr *argaddr, const struct hostent *hent,
 
   /* take a copy of the h_addr_list part of the struct hostent */
   if (hent != NULL) {
-    for (hostnum=0; hent->h_addr_list[hostnum] != 0; hostnum++)
-    {
-      int siz = sizeof(*(hent->h_addr_list[hostnum]));
+    memset (inaddrlist, 0, sizeof(inaddrlist));
 
-      if (addrlistlen+siz >= 4096) {
-	syslog (LOG_ERR, "too many address in hostent, out of room! %d %d",
-		hostnum, addrlistlen);
+    for (hostnum=0; hent->h_addr_list[hostnum] != 0; hostnum++) {
+      if (hostnum > 255) {
+	syslog (LOG_ERR, "too many address in hostent (%d), ignoring others",
+	                    hostnum);
+	break;
+      }
+
+      if (hent->h_addr_list[hostnum] == NULL) {
+	/* shouldn't happen */
+	syslog (LOG_ERR, "hent->h_addr_list[hostnum] == NULL! foo!");
 	return EX_SOFTWARE;
       }
 
-      memcpy (addrlistbuf+addrlistlen,
-			hent->h_addr_list[hostnum], siz);
-      addrlist[hostnum] = (addrlistbuf+addrlistlen);
-      addrlistlen += siz;
+      memcpy ((void *) &(inaddrlist[hostnum]),
+		(void *) hent->h_addr_list[hostnum],
+		sizeof (struct in_addr));
     }
   }
 
-  /* DO NOT use hent after this point, syslog() may overwrite it */
+  hent = NULL; /* cannot use hent after this point, syslog() may overwrite it */
 
+  syslog (LOG_ERR, "dbg: socket");
   if(-1 == (mysock = socket(PF_INET,SOCK_STREAM,0)))
   {
     origerr = errno;    /* take a copy before syslog() */
@@ -178,6 +186,7 @@ try_to_connect (const struct sockaddr *argaddr, const struct hostent *hent,
 #endif
 
   for (numloops=0; numloops < MAX_CONNECT_RETRIES; numloops++) {
+    syslog (LOG_ERR, "dbg: loop %d", numloops);
     if (argaddr != NULL) {
       addr = (struct sockaddr_in *) argaddr;     /* use the one provided */
     } else {
@@ -185,11 +194,19 @@ try_to_connect (const struct sockaddr *argaddr, const struct hostent *hent,
       memset(&addrbuf, 0, sizeof(addrbuf));
       addrbuf.sin_family=AF_INET;
       addrbuf.sin_port=htons(hent_port);
-      memcpy (&addrbuf.sin_addr, addrlist[numloops % hostnum],
+
+      if (sizeof(addrbuf.sin_addr) != sizeof(struct in_addr)) {	/* shouldn't happen */
+	syslog (LOG_ERR,	
+		"foo! sizeof(sockaddr.sin_addr) != sizeof(struct in_addr)");
+	return EX_SOFTWARE;
+      }
+
+      memcpy (&addrbuf.sin_addr, &(inaddrlist[numloops % hostnum]),
                         sizeof(addrbuf.sin_addr));
       addr = &addrbuf;
     }
 
+    syslog (LOG_ERR, "dbg: connect() to spamd at %s", inet_ntoa(((struct sockaddr_in *)addr)->sin_addr));
     status = connect(mysock,(const struct sockaddr *) addr, sizeof(*addr));
 
     if (status < 0)
@@ -447,7 +464,7 @@ static int _message_filter(const struct sockaddr *addr,
     len+=i=snprintf(buf+len, bufsiz-len, "\r\n");
     if(i<0 || len >= bufsiz){ free(m->out); m->out=m->msg; m->out_len=m->msg_len; return EX_OSERR; }
 
-    if((i=try_to_connect(addr, hent, hent_port, &sock))!=EX_OK){
+    if((i=try_to_connect(addr, (struct hostent *) hent, hent_port, &sock))!=EX_OK){
         free(m->out); m->out=m->msg; m->out_len=m->msg_len;
         return i;
     }
