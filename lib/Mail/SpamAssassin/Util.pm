@@ -753,6 +753,12 @@ sub uri_to_domain {
     $uri = Mail::SpamAssassin::Util::RegistrarBoundaries::trim_domain ($uri);
   }
   
+  # domains don't have whitespace
+  return if ($uri =~ /\s/);
+
+  # domains at least have two parts
+  return if ($uri !~ /\S+\.\S+/);
+
   # $uri is now the domain only
   return $uri;
 }
