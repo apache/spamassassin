@@ -229,14 +229,14 @@ If you use Mail::Audit already:
 
 If you use KMail:
 
-  - http://kmail.kde.org/download.html mentions:
+  - http://kmail.kde.org/tools.html mentions:
 
     The filter setup is the work of five minutes (if that!) if you have a
     working spamassassin set up.
 
     The filter in question is "<any header><matches regexp> ."
 
-    The action is "<pipe through> spamassassin -P"
+    The action is "<pipe through> spamassassin -P -F 0"
 
     Then, in the advanced options, uncheck the "If this filter matches,
     stop processing here" box. If you keep this filter at the top, it will
