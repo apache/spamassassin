@@ -601,52 +601,72 @@ sub check {
 
     if($version > 1.0)
     {
-	while(1)
-	{
-	    $_ = $client->getline;
-	    if(!defined $_)
-	    {
-		protocol_error ("(EOF during headers)");
-		return 1;
-	    }
+        while(1)
+        {
+            my $line = $client->getline;
+            if(!defined $line)
+            {
+                protocol_error ("(EOF during headers)");
+                return 1;
+            }
+            $line =~ s/\r\n$//;
+            last unless $line;
 
-	    if (/^\r\n/s) { last; }
+            my($header, $value) = split(/:\s*/, $line, 2);
+            if (!defined $value)
+            {
+                protocol_error($_);
+                return 1;
+            }
+            $header = lc($header);
 
-	    # We'll run handle user unless we've been told not
-	    # to process per-user config files.  Otherwise
-	    # we'll check and see if we need to try SQL
-	    # lookups.  If $opt{'user-config'} is true, we need to try
-	    # their config file and then do the SQL lookup.
-	    # If $opt{'user-config'} IS NOT true, we skip the conf file and
-	    # only need to do the SQL lookup if $opt{'sql-config'} IS
-	    # true.  (I got that wrong the first time.)
+            # We'll run handle user unless we've been told not
+            # to process per-user config files.  Otherwise
+            # we'll check and see if we need to try SQL
+            # lookups.  If $opt{'user-config'} is true, we need to try
+            # their config file and then do the SQL lookup.
+            # If $opt{'user-config'} IS NOT true, we skip the conf file and
+            # only need to do the SQL lookup if $opt{'sql-config'} IS
+            # true.  (I got that wrong the first time.)
 
-	    if (/^User: (.*)\r\n/)
-	    {
-		$current_user = $1;
-		auth_ident($current_user) if $opt{'auth-ident'};
+            if ($header eq 'user')
+            {
+                if ($value !~ /^([\x20-\x7F]+)$/i) # any 7bit char except ctrls
+                {
+                    protocol_error($line);
+                    return 1;
+                }
 
-		if (!$opt{'user-config'})
-		{
-		  if ($opt{'sql-config'}) {
-		    handle_user_sql($current_user);
-		  } elsif ($opt{'virtual-config'} || $opt{'virtual-config-dir'}) {
-		    handle_virtual_user($current_user);
-		  } elsif ($opt{'setuid-with-sql'}) {
-		    handle_user_setuid_with_sql($current_user);
-		    $setuid_to_user = 1; #to benefit from any paranoia.
-		  }
-		} else {
-		  handle_user($current_user);
-		  if ($opt{'sql-config'}) {
-		    handle_user_sql($current_user);
-		  }
-		}
-	    }
-	    if (/^Content-length: ([0-9]*)\r\n/i) {
-		$expected_length = $1;
-	    }
-	}
+                $current_user = $1;
+                auth_ident($current_user) if $opt{'auth-ident'};
+
+                if (!$opt{'user-config'})
+                {
+                  if ($opt{'sql-config'}) {
+                    handle_user_sql($current_user);
+                  } elsif ($opt{'virtual-config'} || $opt{'virtual-config-dir'}) {
+                    handle_virtual_user($current_user);
+                  } elsif ($opt{'setuid-with-sql'}) {
+                    handle_user_setuid_with_sql($current_user);
+                    $setuid_to_user = 1; #to benefit from any paranoia.
+                  }
+                } else {
+                  handle_user($current_user);
+                  if ($opt{'sql-config'}) {
+                    handle_user_sql($current_user);
+                  }
+                }
+            }
+            elsif ($header eq 'content-length')
+            {
+                if ($value !~ /^(\d+)$/)
+                {
+                    protocol_error($line);
+                    return 1;
+                }
+                $expected_length = $1;
+            }
+        }
     }
 
     if ( $setuid_to_user && $> == 0 )
@@ -656,16 +676,16 @@ sub check {
             die;
         }
         logmsg "Still running as root: user not specified with -u, ".
-	     "not found, or set to root.  Fall back to nobody.";
+             "not found, or set to root.  Fall back to nobody.";
         my ($uid,$gid) = (getpwnam('nobody'))[2,3];
-        $uid =~ /^(\d+)$/ and $uid = $1;	# de-taint
-        $gid =~ /^(\d+)$/ and $gid = $1;	# de-taint
+        $uid =~ /^(\d+)$/ and $uid = $1;        # de-taint
+        $gid =~ /^(\d+)$/ and $gid = $1;        # de-taint
 
-	$) = "$gid $gid"; # eGID
+        $) = "$gid $gid"; # eGID
         $> = $uid; # eUID
         if ( !defined($uid) || ($> != $uid and $> != ($uid-2**32))) {
             logmsg "fatal: setuid to nobody failed";
-	    die;
+            die;
         }
     }
 
@@ -719,11 +739,11 @@ sub check {
     my $response_spam_status = "";
     my $was_it_spam;
     if ($status->is_spam) {
-	$response_spam_status = $method eq "REPORT_IFSPAM" ? "Yes" : "True";
-	$was_it_spam = 'identified spam';
+        $response_spam_status = $method eq "REPORT_IFSPAM" ? "Yes" : "True";
+        $was_it_spam = 'identified spam';
     } else {
-	$response_spam_status = $method eq "REPORT_IFSPAM" ? "No" : "False";
-	$was_it_spam = 'clean message';
+        $response_spam_status = $method eq "REPORT_IFSPAM" ? "No" : "False";
+        $was_it_spam = 'clean message';
     }
 
     my $spamhdr = "Spam: $response_spam_status ; $msg_score / $msg_threshold";
@@ -735,24 +755,24 @@ sub check {
         my $msg_resp = join '',$mail->header,"\n",@{$mail->body};
         my $msg_resp_length = length($msg_resp);
         if($version >= 1.3) # Spamc protocol 1.3 means multi hdrs are OK
-	{
-	    print $client "SPAMD/1.1 $resphash{$resp} $resp\r\n",
-	   		"Content-length: $msg_resp_length\r\n",
-			$spamhdr."\r\n",
-			"\r\n", $msg_resp;
+        {
+            print $client "SPAMD/1.1 $resphash{$resp} $resp\r\n",
+                           "Content-length: $msg_resp_length\r\n",
+                        $spamhdr."\r\n",
+                        "\r\n", $msg_resp;
         }
         elsif($version >= 1.2) # Spamc protocol 1.2 means it accepts content-length
-	{
-	    print $client "SPAMD/1.1 $resphash{$resp} $resp\r\n",
-	   		"Content-length: $msg_resp_length\r\n",
-			"\r\n", $msg_resp;
+        {
+            print $client "SPAMD/1.1 $resphash{$resp} $resp\r\n",
+                           "Content-length: $msg_resp_length\r\n",
+                        "\r\n", $msg_resp;
         }
         else # Earlier than 1.2 didn't accept content-length
         {
-	    print $client "SPAMD/1.0 $resphash{$resp} $resp\r\n", $msg_resp;
-	}
+            print $client "SPAMD/1.0 $resphash{$resp} $resp\r\n", $msg_resp;
+        }
     }
-    else		# $method eq 'CHECK' et al
+    else                # $method eq 'CHECK' et al
     {
       print $client "SPAMD/1.1 $resphash{$resp} $resp\r\n"; 
 
@@ -763,37 +783,37 @@ sub check {
         my $msg_resp = '';
 
         if($method eq "REPORT" or
-		  ($method eq "REPORT_IFSPAM" and $status->is_spam))
-	{
+                  ($method eq "REPORT_IFSPAM" and $status->is_spam))
+        {
           $msg_resp = $status->get_report;
         }
         elsif($method eq "REPORT_IFSPAM") {
-	  # message is ham, $msg_resp remains empty
-	}
-	elsif($method eq "SYMBOLS") {
+          # message is ham, $msg_resp remains empty
+        }
+        elsif($method eq "SYMBOLS") {
           $msg_resp = $status->get_names_of_tests_hit;
-	  $msg_resp .= "\r\n" if ($version < 1.3);
+          $msg_resp .= "\r\n" if ($version < 1.3);
         }
         else {
           die "unknown method $method";
         }
 
         if($version >= 1.3) # Spamc protocol > 1.2 means multi hdrs are OK
-	{
-	    printf $client "Content-length: %d\r\n%s\r\n\r\n%s",
-			length($msg_resp), $spamhdr, $msg_resp;
+        {
+            printf $client "Content-length: %d\r\n%s\r\n\r\n%s",
+                        length($msg_resp), $spamhdr, $msg_resp;
         }
-	else {
-	    printf $client "%s\r\n\r\n%s",
-			$spamhdr, $msg_resp;
-	}
+        else {
+            printf $client "%s\r\n\r\n%s",
+                        $spamhdr, $msg_resp;
+        }
       }
     }
 
     logmsg "$was_it_spam ($msg_score/$msg_threshold) for $current_user:$> in ".
-	sprintf("%.1f", time - $start) ." seconds, $actual_length bytes.";
+        sprintf("%.1f", time - $start) ." seconds, $actual_length bytes.";
 
-    $status->finish();	# added by jm to allow GC'ing
+    $status->finish();        # added by jm to allow GC'ing
 }
 
 sub protocol_error {
