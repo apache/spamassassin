@@ -78,11 +78,24 @@ $IP_IN_RESERVED_RANGE = qr{^(?:
 # ---------------------------------------------------------------------------
 # match the various ways of saying "localhost".
 # 
-$LOCALHOST = qr{(?:
-                  localhost(?:\.localdomain|)|
-                  127\.0\.0\.1|
-                  ::ffff:127\.0\.0\.1
-                )}oxi;
+$LOCALHOST = qr/
+		    (?:
+		      # as a string
+		      localhost(?:\.localdomain)?
+		    |
+		      \b(?<!:)	# ensure no "::" IPv4 marker before this one
+		      # plain IPv4
+		      127\.0\.0\.1 \b
+		    |
+		      # IPv4 mapped in IPv6
+		      0{0,4} : (?:0{0,4}\:){1,2} ffff: 
+		      127\.0\.0\.1 \b
+		    |
+		      # pure-IPv6 address
+		      (?<!:)
+		      (?:0{0,4}\:){0,7} 1 
+		    )
+		  /oxi;
 
 # ---------------------------------------------------------------------------
 # an IP address, in IPv4 format only.

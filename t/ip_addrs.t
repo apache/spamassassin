@@ -26,7 +26,7 @@ my $sa = Mail::SpamAssassin->new({
     rules_filename => "$prefix/rules",
 });
 
-plan tests => 47;
+plan tests => 58;
 
 sub tryone {
   my ($pat, $testip) = @_;
@@ -79,4 +79,16 @@ ok (!tryone ($Mail::SpamAssassin::IP_ADDRESS, "FEDC:BA98:7654:3210:FEDC:BA98:765
 ok (!tryone ($Mail::SpamAssassin::IP_ADDRESS, "3ffe:fffff:100:f101:210:a4ff:fee3:9566"));
 ok (tryone ($Mail::SpamAssassin::IP_ADDRESS, "ff02:0:0:0:0:0:1"));
 ok (tryone ($Mail::SpamAssassin::IP_ADDRESS, "ff02:0:0:0:0:0:2"));
+
+ok (tryone ($Mail::SpamAssassin::LOCALHOST, "localhost"));
+ok (tryone ($Mail::SpamAssassin::LOCALHOST, "localhost.localdomain"));
+ok (tryone ($Mail::SpamAssassin::LOCALHOST, "127.0.0.1"));
+ok (tryone ($Mail::SpamAssassin::LOCALHOST, "::ffff:127.0.0.1"));
+ok (tryone ($Mail::SpamAssassin::LOCALHOST, ":::ffff:127.0.0.1"));
+ok (tryone ($Mail::SpamAssassin::LOCALHOST, "0000:0000:0000:ffff:127.0.0.1"));
+ok (tryone ($Mail::SpamAssassin::LOCALHOST, "::1"));
+ok (tryone ($Mail::SpamAssassin::LOCALHOST, "0:0:0:0:0:0:0:1"));
+ok (!tryone ($Mail::SpamAssassin::LOCALHOST, "3ffe:fffff:100:f101:210:a4ff:fee3:9566"));
+ok (!tryone ($Mail::SpamAssassin::LOCALHOST, "::192.168.0.1"));
+ok (!tryone ($Mail::SpamAssassin::LOCALHOST, "notlocalhost"));
 
