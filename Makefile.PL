@@ -1,5 +1,4 @@
-use 5.005;
-use ExtUtils::MakeMaker 5.45;
+require 5.005;
 
 # RPM builders, or people building in their home dirs:
 # set PREFIX (default = /usr)
@@ -8,69 +7,53 @@ use ExtUtils::MakeMaker 5.45;
 #
 # You can also override the automatic ./configure step by just
 # running that yourself first.
-
+#
 ###########################################################################
 
-$ExtUtils::MakeMaker::Recognized_Att_Keys{'SYSCONFDIR'} = 1;
-
+use strict;
 use Config;
 use ExtUtils::MakeMaker;
 
-# do this in perl, it's more portable
-my @rulesfiles = map { substr($_, 6) } (<rules/*.cf>);
-my $rulesfiles = join(' ', grep { /^[0-6][0-9]_/ } @rulesfiles); # Include only .cfs in the range 00-69
-$rulesfiles   .= " user_prefs.template triplets.txt languages";
+$ExtUtils::MakeMaker::Recognized_Att_Keys{'SYSCONFDIR'} = 1;
+$ExtUtils::MakeMaker::Recognized_Att_Keys{'DEF_RULES_DIR'} = 1;
+$ExtUtils::MakeMaker::Recognized_Att_Keys{'LOCAL_RULES_DIR'} = 1;
 
-sub MY::libscan {
-  my($self,$path) = @_;
-
-  return '' if ($path =~ /windows_install/
-  		|| $path =~ /fixpath/
-                );
-
-  $path;
-}
-
-unlink('t/do_razor', 't/do_razor2');
-
-if (eval { require Razor::Client }) {
-    if (prompt('Run Razor v1 tests (these may fail due to network problems)? (y/n)', "n") =~ /^y(es)?$/i) {
-        open(FILE, ">t/do_razor"); close(FILE);
-    }
-}
-
-if (eval { require Razor2::Client::Agent }) {
-    if (prompt('Run Razor v2 tests (these may fail due to network problems)? (y/n)', "n") =~ /^y(es)?$/i) {
-        open(FILE, ">t/do_razor2"); close(FILE);
-    }
-}
 
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
 
-# All the $(*MAN1*) stuff is empty/zero if Perl was Configured with -Dman1dir=none
-my %man1pods = (
-  'spamassassin'    => '$(INST_MAN1DIR)/spamassassin.$(MAN1EXT)',
-  'spamd/spamc.pod' => '$(INST_MAN1DIR)/spamc.$(MAN1EXT)',
-  'spamd/spamd'     => '$(INST_MAN1DIR)/spamd.$(MAN1EXT)',
-) if ($Config{installman1dir});
+my $mm_version = $ExtUtils::MakeMaker::VERSION;
 
-WriteMakefile(
+# Gather the rules files in the range 00-69; we do this in perl because it's more portable
+my @rulesfiles = map { s,^rules/,,; $_ } (<rules/*.cf>);
+my $rulesfiles = join(' ', (grep { /^[0-6][0-9]_/ } @rulesfiles), qw(user_prefs.template triplets.txt languages)); 
+
+
+my %makefile = (
     'NAME'	=> 'Mail::SpamAssassin',
     'VERSION_FROM' => 'lib/Mail/SpamAssassin.pm', # finds $VERSION
 
     'EXE_FILES'	=> [ 'spamassassin', 'spamd/spamc$(EXE_EXT)', 'spamd/spamd' ],
 
-    'MAN1PODS' => { %man1pods },
+    'MAN1PODS' => { 
+        'spamassassin'    => '$(INST_MAN1DIR)/spamassassin.$(MAN1EXT)',
+        'spamd/spamc.pod' => '$(INST_MAN1DIR)/spamc.$(MAN1EXT)',
+        'spamd/spamd'     => '$(INST_MAN1DIR)/spamd.$(MAN1EXT)',
+    },
 
     'PL_FILES' => { },
 
     'PMLIBDIRS' => [ 'lib' ],
-    
+   
     'PM_FILTER' => '$(PERL) build/preprocessor -Mconditional -Mvars -DVERSION=$(VERSION) -DPREFIX="$(PREFIX)"',
+
+    'macro' => {
+        RULES => $rulesfiles,
+    },
 
     # be quite explicit about this; afaik CPAN.pm is sensible using this
     'PREREQ_PM' => {
+                        'ExtUtils::MakeMaker' => 5.45,
                         'File::Spec' => 0.8,
                         'File::Copy' => 0,
                         'Pod::Usage' => 0,
@@ -93,12 +76,50 @@ WriteMakefile(
     'AUTHOR' => 'Justin Mason <jm@jmason.org>',
 
 		  #----------------------------------------
-    'ABSTRACT' => 'identify spam mail using text analysis'
+    'ABSTRACT' => 'identify spam mail using text analysis',
 
 );
 
+# MakeMaker prior to 5.45 doesn't support PM_FILTER, so we have to implement it ourselves
+if($mm_version < 5.45) {
+  $makefile{SKIP} = [ 'pm_to_blib' ];
+  $makefile{macro}{PM_FILTER} = $makefile{PM_FILTER};
+  delete $makefile{PM_FILTER};
+}
+
+# All the $(*MAN1*) stuff is empty/zero if Perl was Configured with -Dman1dir=none
+unless($Config{installman1dir}) {
+  delete $makefile{MAN1PODS};
+}
+
+WriteMakefile(%makefile);
+
+
+unlink('t/do_razor', 't/do_razor2');
+if (eval { require Razor::Client }) {
+  if (prompt('Run Razor v1 tests (these may fail due to network problems)? (y/n)', "n") =~ /^y(es)?$/i) {
+    open(FILE, ">t/do_razor"); close(FILE);
+  }
+}
+if (eval { require Razor2::Client::Agent }) {
+  if (prompt('Run Razor v2 tests (these may fail due to network problems)? (y/n)', "n") =~ /^y(es)?$/i) {
+    open(FILE, ">t/do_razor2"); close(FILE);
+  }
+}
+
+
+#######################################################################
+
+package MY;
+
+sub MY::libscan {
+  my($self,$path) = @_;
+
+  return '' if ($path !~ /\.pm$/);
+  return $path;
+}
+
 sub MY::install {
-  package MY;
   my $self = shift;
   my $inherited = $self->SUPER::install (@_);
 
@@ -111,24 +132,19 @@ sub MY::postamble {
   # do this with MakeMaker without it trying to build the perl
   # modules as .so's :(
 
-  package MY;
   my $self = shift;
 
-  my $sysconfdir = $self->{SYSCONFDIR};
-  $sysconfdir ||= '/etc';
+  my $sysconfdir  = $self->{SYSCONFDIR}      || '/etc';
+  my $defrulesdir = $self->{DEF_RULES_DIR}   || '$(PREFIX)/share/spamassassin';
+  my $locrulesdir = $self->{LOCAL_RULES_DIR} || '$(SYSCONFDIR)/mail/spamassassin';
 
   my $gotpods = keys(%{$self->{MAN1PODS}}) || keys(%{$self->{MAN3PODS}}) || keys(%{$self->{EXTRAPODS}}) || 0;
 
-
 qq#
-
-RULES		= $rulesfiles
 SYSCONFDIR      = $sysconfdir
-
-#. q#
-
-DEF_RULES_DIR	= $(PREFIX)/share/spamassassin
-LOCAL_RULES_DIR	= $(SYSCONFDIR)/mail/spamassassin
+DEF_RULES_DIR	= $defrulesdir
+LOCAL_RULES_DIR	= $locrulesdir
+# . q#
 
 FIXVARS		= -Mvars \
 		  -DVERSION="$(VERSION)" \
@@ -137,7 +153,12 @@ FIXVARS		= -Mvars \
 		  -DLOCAL_RULES_DIR="$(LOCAL_RULES_DIR)" \
 		  -DINSTALLSITELIB="$(INSTALLSITELIB)"
 
-pm_to_blib: spamassassin doc/.made
+# . ($mm_version < 5.45 ? q#
+pm_to_blib: $(TO_INST_PM)
+	@$(PERL) "-I$(INST_ARCHLIB)" "-I$(INST_LIB)" \
+        "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" -Ibuild \
+	-MExtUtils::Install -Mpreprocessor \
+	-e "ExtUtils::Install::Post545::pm_to_blib({qw{$(PM_TO_BLIB)}}, '$(INST_LIB)/auto', '$(PM_FILTER)')"# : '') . q#
 
 spamassassin: spamassassin.raw
 	$(PERL) build/preprocessor $(FIXVARS) -Msharpbang <$? >$@
