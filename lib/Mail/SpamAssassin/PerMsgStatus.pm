@@ -1178,6 +1178,21 @@ sub get_decoded_stripped_body_text_array {
 
     $text = join('', $before, @{$self->{html_text}});
 
+    # Clean up *more* obfuscatory comment styles that HTML::Parser won't
+    # parse, but common MUAs like Outlook will (for some reason).  We do
+    # this after HTML::Parser, even though this means we may eat &lt;&gt;
+    # tag examples, because it's faster to do it here.
+    #
+    # NOTE: HTML::Parser can cope with: <?xml pis>, <? with space>,
+    # so we don't need to fix them here.
+    #
+    $text =~ s{<(?:
+	![^>]*		# <!invalid comment style>
+	|\s[^>]*	# < foo >
+	|\/\s[^>]*	# </ foo >
+	|\s*		# <> or < >
+    )>}{}gsx;
+
     if ($raw > 0) {
       my $space = ($before =~ tr/ \t\n\r\x0b\xa0/ \t\n\r\x0b\xa0/);
       $self->{html}{non_uri_len} = length($before);
@@ -1197,7 +1212,6 @@ sub get_decoded_stripped_body_text_array {
     } # if ($raw > 0)
     delete $self->{html_last_tag};
 
-    $text =~ s/<![^>]*>//g;
   } # if HTML
 
   # whitespace handling (warning: small changes have large effects!)
