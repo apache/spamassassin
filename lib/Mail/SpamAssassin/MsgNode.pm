@@ -81,8 +81,7 @@ sub find_parts {
 }
 
 # We have 2 functions in find_parts() to optimize out the penalty of
-# 'already_parsed' (in Message), $onlyleaves, $re,
-# and $recursive over and over again.
+# $onlyleaves, $re, and $recursive over and over again.
 #
 sub _find_parts {
   my ($self, $re, $onlyleaves, $recursive) = @_;

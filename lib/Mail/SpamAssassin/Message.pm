@@ -60,17 +60,18 @@ use vars qw(@ISA);
 sub new {
   my $class = shift;
   $class = ref($class) || $class;
-  my %opts = @_;
-  my $self = $class->SUPER::new(%opts);
+#  my %opts = @_;
+#  my $self = $class->SUPER::new(%opts);
+  my $self = $class->SUPER::new();
 
   $self->{pristine_headers} =	'';
   $self->{pristine_body} =	'';
-  $self->{already_parsed} =	1;
+  $self->{already_parsed} =	0;
 
-  # allow callers to set certain options ...
-  foreach ( 'already_parsed' ) {
-    $self->{$_} = $opts{$_} if ( exists $opts{$_} );
-  }
+#  # allow callers to set certain options ...
+#  foreach ( 'already_parsed' ) {
+#    $self->{$_} = $opts{$_} if ( exists $opts{$_} );
+#  }
 
   bless($self,$class);
 

@@ -346,7 +346,7 @@ sub parse {
   }
 
   # Generate the main object and parse the appropriate MIME-related headers into it.
-  my $msg = Mail::SpamAssassin::Message->new(already_parsed => 0);
+  my $msg = Mail::SpamAssassin::Message->new();
   my $header = '';
 
   # Go through all the headers of the message
