@@ -1,3 +1,118 @@
+2003-09-12 00:10  msquadrat
+
+	* Makefile.PL: bug 2434: that META.yml stuff was introduced with
+	EU::MM 6.06_03, not 6.0 (wish it never was).
+
+2003-09-12 00:06  felicity
+
+	* spamassassin.spec: bug 2435: man page installs need to be
+	overridden to deal with perl issues in different RH versions.  RH9
+	builds a debuginfo package by default, which is useless for us, so
+	disable it.
+
+2003-09-12 00:04  quinlan
+
+	* INSTALL, Makefile.PL, README, lib/Mail/SpamAssassin/HTML.pm: bug
+	2436: require HTML::Parser 3.24 plus a few minor documentation
+	fixes
+
+2003-09-10 23:27  msquadrat
+
+	* Makefile.PL, build/preprocessor: bug 2388: Enable taint mode and
+	warnings for the installed scripts perl default (can be disabled
+	with PERL_WARN=no PERL_TAINT=no when building). Also fix some bugs
+	in the DESTDIR hacks related to the INSTALLMAN* dirs.
+
+2003-09-10 23:21  quinlan
+
+	* spamassassin.raw, spamd/spamd.raw: reverting accidental commits
+	from mss
+
+2003-09-10 17:25  quinlan
+
+	* lib/Mail/SpamAssassin/: BayesStore.pm, CmdLearn.pm: bug 2430:
+	uninitialized value and taint warnings for sa-learn
+
+2003-09-10 04:54  felicity
+
+	* lib/Mail/SpamAssassin/Received.pm: bug 2429: If the 'by' host in
+	the first untrusted line is not resolvable at all, the code would
+	extend trust to that line and possibly beyond.
+
+2003-09-10 03:36  msquadrat
+
+	* rules/20_ratware.cf: bug 2415: disable FORGED_MUA_THEBAT_BOUN for
+	The Bat! 2.0 until we have some data
+
+2003-09-10 03:30  msquadrat
+
+	* INSTALL, MANIFEST, Makefile.PL, PACKAGING, spamassassin.raw,
+	spamassassin.spec, debian/rules, spamd/spamd.raw: bugs 2388, 2374,
+	2386, 1540: fix various bugs and incompatibilities to EU::MMs >=
+	6.0 in the build system; please read PACKAGING for information on
+	the new command line variables
+
+2003-09-10 00:29  quinlan
+
+	* MANIFEST: add t/sha1.t
+
+2003-09-08 16:50  quinlan
+
+	* lib/Mail/SpamAssassin/SHA1.pm, t/sha1.t: bug 2383: SHA1.pm
+	generates wrong hash on 64 bit platforms
+
+2003-09-08 12:35  felicity
+
+	* lib/Mail/SpamAssassin/BayesStore.pm: bug 2390: RPM's perl
+	requires script had issues with our "import" code and was getting
+	confused by the "use" statement in the eval block.
+
+2003-09-08 06:45  quinlan
+
+	* lib/Mail/SpamAssassin/Conf.pm, rules/10_misc.cf: bug 1320: add
+	report in headers is broken in 2.60-rc3
+
+2003-09-08 06:40  quinlan
+
+	* rules/20_body_tests.cf: bug 2364: GTUBE and AWL interaction
+
+2003-09-08 01:07  quinlan
+
+	* lib/Mail/SpamAssassin/Bayes.pm: bug 2413: chi formula error
+
+2003-09-07 06:18  quinlan
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: bug 2394: Incorrect line
+	wrapping in PerMsgStatus.pm
+
+2003-09-06 17:45  msquadrat
+
+	* lib/Mail/SpamAssassin/CmdLearn.pm: bug 2412: use a default prefix
+	"bayes" if --dbpath points to a directory
+
+2003-09-03 17:34  felicity
+
+	* lib/Mail/SpamAssassin/Conf.pm: bug 2400: when the bayes autolearn
+	thresholds were changed in 10_misc.cf, the defaults in the code
+	weren't.
+
+2003-08-29 06:02  quinlan
+
+	* lib/Mail/SpamAssassin/Conf.pm: small documentation change
+
+2003-08-29 05:52  quinlan
+
+	* lib/Mail/SpamAssassin/Conf.pm: just fixing some awkward grammar
+
+2003-08-29 00:19  jmason
+
+	* lib/Mail/SpamAssassin.pm: 2.60 rc4 (or hopefully full release)
+	devel cycle started
+
+2003-08-29 00:10  jmason
+
+	* Changes: 2.60 rc3 RELEASED
+
 2003-08-29 00:09  jmason
 
 	* Changes, lib/Mail/SpamAssassin.pm: redo release with correct
