@@ -50,7 +50,11 @@ describe TO_ADDRESS_EQ_REAL	To: repeats address as real name
 header UNDISC_RECIPS		To =~ /^undisclosed-recipients?:\s*;$/
 describe UNDISC_RECIPS		Valid-looking To "undisclosed-recipients"
 
-header FAKED_UNDISC_RECIPS	To =~ /undisclosed[-_ ]*recipient(?:s[^:]|[^s])/i
+# also 100% valid
+header OUTLOOK_UNDISC_RECIPS	To =~ /<Undisclosed-Recipient:;>/
+describe OUTLOOK_UNDISC_RECIPS	MS-Outlook-style To "<Undisclosed-Recipient:;>"
+
+header FAKED_UNDISC_RECIPS	To =~ /undisclosed[_ ]*recipient(?:s[^:]|[^s])/i
 describe FAKED_UNDISC_RECIPS	Faked To "Undisclosed-Recipients"
 
 header TO_INVESTORS		To =~ /\bInvestors\@/
