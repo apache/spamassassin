@@ -100,9 +100,9 @@ describe PRINT_OUT_AND_FAX	Contains words 'print out and fax'
 body AMAZING			/AMAZING/
 describe AMAZING		Contains word 'AMAZING'
 body GUARANTEE			/GUARANTEE/
-describe GUARANTEE		Contains word 'GUARANTEE'
+describe GUARANTEE		Contains word 'guarantee' in all-caps
 body PROFITS			/PROFITS/
-describe PROFITS		Contains word 'PROFITS'
+describe PROFITS		Contains word 'profits' in all-caps
 body NO_QS_ASKED		/NO QUESTIONS ASKED/
 describe NO_QS_ASKED		Doesn't ask any questions
 body FULL_REFUND		/FULL REFUND/
@@ -111,6 +111,8 @@ body FOR_FREE			/for FREE/
 describe FOR_FREE		No such thing as a free lunch
 body ONE_HUNDRED_PC_FREE	/100% FREE/
 describe ONE_HUNDRED_PC_FREE	No such thing as a free lunch
+body ONE_HUNDRED_PC_GUAR	/100% GUARANTEED/i
+describe ONE_HUNDRED_PC_GUAR	One hundred percent guaranteed
 body MONEY_MAKING		/money making/i
 describe MONEY_MAKING		Discusses money making
 body BULK_EMAIL			/bulk e-*mail/i
@@ -143,7 +145,7 @@ body INCREASE_TRAFFIC		/increase.{1,15} traffic\b/i
 describe INCREASE_TRAFFIC	Instructions on how to boost traffic
 
 # contrib: Duncan
-body ONE_TIME_MAILING		/this\b.{0,20}\b(?:one|1).time\b.{0,20}\bmail/i
+body ONE_TIME_MAILING		/this\b.{0,20}\b(?:one|1).time\b.{0,20}\b(?:mail|offer)/i
 describe ONE_TIME_MAILING	'one time mailing' doesn't mean it isn't spam
 
 # this one gets a few false positives
@@ -202,7 +204,7 @@ body EXCUSE_14			/you do not wish to receive further /i
 describe EXCUSE_14		Tells you how to stop further SPAM
 body EXCUSE_15			/this (?:|e?-?mail )is not (?:spam|unsolicited)/i
 describe EXCUSE_15		Claims to be legitimate email
-body EXCUSE_16			/have received this (?:e?-?mail|message) in error[, ]* or/
+body EXCUSE_16			/received this (?:e?-?mail|message) in error[, ]* or/
 describe EXCUSE_16		I wonder how many emails they sent in error...
 body EXCUSE_17			/received.{0,15} by mistake/i
 describe EXCUSE_17		Suspect you might have received the message by mistake
@@ -563,4 +565,9 @@ describe CASINO			Contains "Casino"
 body MYCASINOBUILDER		/MYCASINOBUILDER.COM/i
 describe MYCASINOBUILDER	Contains "mycasinobuilder.com"
 
+body ONCE_IN_LIFETIME		/once in a lifetime opportunity/i
+describe ONCE_IN_LIFETIME	Once in a lifetime, apparently
+
+body YOUR_INCOME		/\byour income\b/i
+describe YOUR_INCOME		Doing something with my income
 
