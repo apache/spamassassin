@@ -1,12 +1,28 @@
 Pick it up from:
 
-  http://SpamAssassin.org/released/Mail-SpamAssassin-2.60-rc5.tar.gz
-  http://SpamAssassin.org/released/Mail-SpamAssassin-2.60-rc5.zip
+  http://SpamAssassin.org/released/Mail-SpamAssassin-2.60-rc6.tar.gz
+  http://SpamAssassin.org/released/Mail-SpamAssassin-2.60-rc6.tar.bz2
+  http://SpamAssassin.org/released/Mail-SpamAssassin-2.60-rc6.zip
 
-md5sums:
+md5sum:
+  ffabc6756210a745475b76bc10c4f1b7  Mail-SpamAssassin-2.60-rc6.tar.gz
+  9ccdb03cf8516a2d69e188339833d502  Mail-SpamAssassin-2.60-rc6.tar.bz2
+  037c774377e5b9aac57b01070df64f99  Mail-SpamAssassin-2.60-rc6.zip
 
-  f139350d41271ad2858227cd79800eef  Mail-SpamAssassin-2.60-rc5.tar.gz
-  57603fbe604048a870bcec1f1c460765  Mail-SpamAssassin-2.60-rc5.zip
+sha1sum:
+  20862c80552c636c80df12d0a4682fcea3cc5310  Mail-SpamAssassin-2.60-rc6.tar.gz
+  6a4cb638dc5799ac2be2dcb9da12af40f97d0851  Mail-SpamAssassin-2.60-rc6.tar.bz2
+  f401f7363c81ecb9715f9868ba2908481986e4e4  Mail-SpamAssassin-2.60-rc6.zip
+
+The release files also have a .asc accompanying them.  The file serves
+as an external GPG signature for the given release file.  The signing
+key is available via the wwwkeys.pgp.net keyserver, as well as
+http://www.spamassassin.org/released/GPG-SIGNING-KEY
+
+The key information is:
+
+pub  1024D/265FA05B 2003-06-09 SpamAssassin Signing Key <release@spamassassin.org>
+     Key fingerprint =3D 26C9 00A4 6DD4 0CD5 AD24  F6D7 DEE0 1987 265F A05B
 
 
 Changes since 2.5x:
@@ -52,8 +68,13 @@ Changes since 2.5x:
 
 - HTML::Parser 3.24 or higher is now required
 
-- taint mode is now enabled by default for Perl 5.6 and later for improved
-  security
+- taint mode is now enabled by default (for perl versions 5.6.0 and
+  higher) for extra security
+
+- timelog code has been removed
+
+- Makefile variables were changed to use DESTDIR instead of the various
+  INST_* variables.  Please read the PACKAGING file for more information.
 
 - lots of bugs fixed and new rules added. ;)
 
@@ -97,39 +118,7 @@ Other notes:
   taint mode by default, there's a Razor2.patch file which needs to be
   applied to Razor2.  Documentation exists in the patch file.
 
-
-Changes since 2.60 rc4:
-
-- misc documentation fixes
-
-- include information about patching Razor2 to be more taint safe,
-  since SpamAssassin uses taint mode by default now.
-
-- set BAYES_40 and BAYES_44 to be -0.001 instead of +0.001
-
-- bug 2302: to determine if SpamAssassin markup is in the message,
-  use X-Spam-Checker-Version instead of X-Spam-Status since the latter
-  is no longer required
-
-- bug 2395: when removing SpamAssassin markup from the message, remove
-  any custom headers that would be added by the site/user configuration
-
-- bug 2442: taint mode detection may not always work if what calls
-  SpamAssassin had untainted certain environment variables.  SpamAssassin
-  will now try much harder to detect taint mode.
-
-- bug 2445: if "always_add_headers 1" is enabled and a message hits zero
-  rules, an uninitialized value warning could occur.
-
-- bug 2450: if SA is run in taint mode, instead of resetting PATH to a
-  given directory set, untaint the current PATH directories.  also,
-  make sure the PATH seperators were correct for the given platform.
-
-- bug 2452: perl 5.005 could overwrite the local.cf file during install
-  if it already existed
-
-- bug 2460: perl 5.005's glob function is not taint safe, so disable
-  globbing in perl 5.005 running in taint mode
-
-- bug 2463: use of environment variables may cause uninitialized value
-  warnings when calling Razor, DCC, or Pyzor due to environment copying
+- DB_File is now the only DB/perl library used for Bayes.  We found
+  there were too many problems with supporting all of the other DB
+  libraries out there and standardized on the one that gave us the least
+  number of issues.
