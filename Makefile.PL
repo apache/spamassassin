@@ -142,7 +142,6 @@ spamd/spamc: spamd/spamc.c spamd/libspamc.c
 			-o $@ $(CFLDFLAGS) $(CFLIBS)
 
 inst_cfs: $(LOCAL_RULES_DIR) $(DEF_RULES_DIR) $(DEF_RULES_DIR)/user_prefs.template $(LOCAL_RULES_DIR)/local.cf
-	$(RM_F) $(DEF_RULES_DIR)/*; \
 	for file in $(RULES) ; do \
 	  $(CP) rules/$$file $(DEF_RULES_DIR)/$$file; \
 	done; \
@@ -157,15 +156,16 @@ $(LOCAL_RULES_DIR)/local.cf: rules/local.cf
 	else true ; fi
 
 $(DEF_RULES_DIR):
-	mkdir -p $(DEF_RULES_DIR)
+	$(MKPATH) $(DEF_RULES_DIR); \
+	$(RM_F) $(DEF_RULES_DIR)/*
 
 $(LOCAL_RULES_DIR):
 	if [ ! -d $(LOCAL_RULES_DIR) ] ; then \
-	  mkdir -p $(LOCAL_RULES_DIR) ; \
+	  $(MKPATH) $(LOCAL_RULES_DIR) ; \
 	else true ; fi
 
 doc:
-	mkdir -p doc
+	$(MKPATH) doc
 
 text_html_doc: doc/.made
 	@true
