@@ -1798,6 +1798,7 @@ sub setup_child_sig_handlers {
   # note: all the signals changed in setup_parent_sig_handlers() must
   # be reset to appropriate values here!
   $SIG{HUP} = $SIG{CHLD} = $SIG{INT} = $SIG{TERM} = 'DEFAULT';
+  $SIG{PIPE} = 'IGNORE';
 }
 
 sub logmsg {
@@ -1872,6 +1873,8 @@ sub logmsg_syslog {
   else {
     check_syslog_sigpipe($msg);       # check for SIGPIPE anyway (bug 3625)
   }
+
+  $SIG{PIPE} = 'IGNORE';
 }
 
 sub check_syslog_sigpipe {
