@@ -182,8 +182,14 @@ sub _check_spf {
     dbg ("SPF: checking EnvelopeFrom (helo=$helo, ip=$ip, envfrom=$sender)");
   }
 
-  if (!$ip || !$helo) {
-    dbg ("SPF: cannot get IP or HELO, cannot use SPF");
+  # this test could probably stand to be more strict, but try to test
+  # any invalid HELO hostname formats with a header rule
+  if ($ishelo && ($helo =~ /^\d+\.\d+\.\d+\.\d+$/ || $helo =~ /^[^.]+$/)) {
+    dbg ("SPF: cannot check HELO of '$helo', skipping");
+    return;
+  }
+  if (!$helo) {
+    dbg ("SPF: cannot get HELO, cannot use SPF");
     return;
   }
 
@@ -198,10 +204,11 @@ sub _check_spf {
     if ($Mail::SPF::Query::VERSION < 1.996) {
       die "Mail::SPF::Query 1.996 or later required, this is $Mail::SPF::Query::VERSION\n";
     }
-    $query = Mail::SPF::Query->new (ip => $ip, sender => $sender, helo => $helo,
-		debug => $Mail::SpamAssassin::DEBUG->{rbl},
-		trusted => 1
-	      );
+    $query = Mail::SPF::Query->new (ip => $ip,
+				    sender => $sender,
+				    helo => $helo,
+				    debug => $Mail::SpamAssassin::DEBUG->{rbl},
+				    trusted => 1);
   };
 
   if ($@) {
