@@ -2331,17 +2331,10 @@ sub _check_mime_header {
 
   if ($ctype =~ /^text/ &&
       $cte =~ /base64/ &&
-      !($cd && $cd =~ /^(?:attachment|inline)/))
-  {
-    $self->{mime_base64_encoded_text} = 1;
-  }
-
-  if ($ctype =~ /^text/ &&
-      $cte =~ /base64/ &&
       $charset !~ /utf-8/ &&
       !($cd && $cd =~ /^(?:attachment|inline)/))
   {
-    $self->{t_mime_base64_encoded_text} = 1;
+    $self->{mime_base64_encoded_text} = 1;
   }
 
   if ($cte =~ /base64/ && !$name) {
@@ -2352,21 +2345,7 @@ sub _check_mime_header {
       $cte =~ /base64/ &&
       $charset =~ /\b(?:us-ascii|iso-8859-(?:[12349]|1[0345])|windows-(?:125[0247]))\b/)
   {
-    $self->{t_mime_base64_latin} = 1;
-  }
-
-  if (!($name && $cd =~ /attachment/) &&
-      $cte =~ /base64/ &&
-      $charset =~ /\b(?:us-ascii|iso-8859-(?:[12349]|1[0345])|windows-(?:125[0247]))\b/)
-  {
-    $self->{t_mime_base64_latin2} = 1;
-  }
-
-  if (!($name || $cd =~ /attachment/) &&
-      $cte =~ /base64/ &&
-      $charset =~ /\b(?:us-ascii|iso-8859-(?:[12349]|1[0345])|windows-(?:125[0247]))\b/)
-  {
-    $self->{t_mime_base64_latin3} = 1;
+    $self->{mime_base64_latin} = 1;
   }
 
   if ($cte =~ /quoted-printable/ && $cd =~ /inline/ && !$charset) {
@@ -2447,6 +2426,7 @@ sub _check_attachments {
   # results
   $self->{microsoft_executable} = 0;
   $self->{mime_base64_encoded_text} = 0;
+  $self->{mime_base64_latin} = 0;
   $self->{mime_body_html_count} = 0;
   $self->{mime_body_text_count} = 0;
   $self->{mime_faraway_charset} = 0;
@@ -2459,11 +2439,7 @@ sub _check_attachments {
   $self->{mime_suspect_name} = 0;
   $self->{t_mime_base64_blanks} = 0;
   $self->{t_mime_base64_count} = 0;
-  $self->{t_mime_base64_encoded_text} = 0;
   $self->{t_mime_base64_illegal} = 0;
-  $self->{t_mime_base64_latin} = 0;
-  $self->{t_mime_base64_latin2} = 0;
-  $self->{t_mime_base64_latin3} = 0;
   $self->{t_mime_base64_short_lines} = 0;
   $self->{t_mime_base64_without_name} = 0;
   $self->{t_mime_qp_count} = 0;
