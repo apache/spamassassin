@@ -23,6 +23,7 @@ Mail::SpamAssassin::PluginHandler - SpamAssassin plugin handler
 package Mail::SpamAssassin::PluginHandler;
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Plugin;
+use Mail::SpamAssassin::Util;
 
 use strict;
 use bytes;
@@ -58,6 +59,12 @@ sub load_plugin {
 
   my $ret;
   if ($path) {
+    # At least Perl 5.8.0 seems to confuse $cwd internally at some point -- we
+    # need to use an absolute path here else we get a "File not found" error.
+    # <http://bugzilla.spamassassin.org/show_bug.cgi?id=3717>
+    $path = Mail::SpamAssassin::Util::untaint_file_path(
+              File::Spec->rel2abs($path)
+	    );
     dbg ("plugin: loading $package from $path");
     $ret = do $path;
   }
