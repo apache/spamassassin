@@ -123,6 +123,117 @@ sub check_for_from_to_equivalence {
 
 ###########################################################################
 
+# The MTA probably added the Message-ID if either of the following is true:
+#
+# (1) The Message-ID: comes before a Received: header.
+#
+# (2) The Message-ID is the first header after all Received headers and
+#     the From address domain is not the same as the Message-ID domain and
+#     the Message-ID domain matches the last Received "by" domain.
+#
+# These two tests could be combined into a single rule, but they are
+# separated because the first test is more accurate than the second test.
+# However, we only run the primary function once for better performance.
+
+my $cache_mta_id;
+my $cache_mta_first;
+my $cache_mta_later;
+
+sub check_for_mta_message_id {
+  my ($self, $id) = @_;
+
+  $cache_mta_first = 0;
+  $cache_mta_later = 0;
+
+  my $all = $self->get ('ALL');
+  my $later_mta;
+
+  if ($all =~ /\nMessage-(ID|Id|id):.*\nReceived:/s) {
+    # Message-ID is before a Received
+    $later_mta = 1;
+  }
+  elsif ($all =~ /\nReceived:[^\n]*\n([\t ][^\n]*\n)*Message-(ID|Id|id):/s) {
+    # Message-ID is not before a Received but is directly after a Received
+    $later_mta = 0;
+  }
+  else {
+    # go fish
+    return;
+  }
+
+  # exempt certain Message-Id headers (could backfire so be prepared to remove)
+  return if $id =~ /\@.*(localhost\.localdomain|linux\.local|yahoo)/;
+
+  # no further checks in simple case
+  if ($later_mta) {
+    $cache_mta_later = 1;
+    return;
+  }
+
+  # further checks required
+  my $from = $self->get ('From:addr');
+  my $received = $self->get ('Received');
+  my @relay;
+  my $first;
+
+  # BUG: From:addr sometimes contains whitespace
+  $from =~ s/\s+//g;
+
+  # strip down to the host name
+  $id =~ s/.*\@//;
+  $id =~ s/[>\s]+$//;
+  $id = lc($id);
+  $from =~ s/.*\@//;
+  $from = lc($from);
+  while ($received =~ s/[\t ]+by[\t ]+(\w+([\w.-]+\.)+\w+)//i) {
+    push (@relay, $1);
+  }
+  $first = lc(pop(@relay));
+
+  # need to have a dot (test for addr-spec validity should be in another test)
+  return if ($id !~ /\./ || $from !~ /\./);
+
+  # strip down to last two parts of hostname
+  $id =~ s/.*\.(\S+\.\S+)$/$1/;
+  $from =~ s/.*\.(\S+\.\S+)$/$1/;
+
+  # if $from equals $id, then message is much less likely to be spam
+  return if $from eq $id;
+
+  # strip down the first relay now
+  $first =~ s/.*\.(\S+\.\S+)$/$1/;
+
+  # finally, the test
+  if ($first eq $id) {
+    $cache_mta_first = 1;
+    return;
+  }
+}
+
+sub check_for_mta_message_id_first {
+  my ($self) = @_;
+
+  my $id = $self->get ('Message-Id');
+  if (!defined($cache_mta_id) || $id ne $cache_mta_id) {
+      $cache_mta_id = $id;
+      check_for_mta_message_id($self, $id);
+  }
+  return $cache_mta_first;
+}
+
+sub check_for_mta_message_id_later {
+  my ($self) = @_;
+
+  my $id = $self->get ('Message-Id');
+  if (!defined($cache_mta_id) || $id ne $cache_mta_id) {
+      $cache_mta_id = $id;
+      check_for_mta_message_id($self, $id);
+  }
+  return $cache_mta_later;
+}
+
+###########################################################################
+
 # FORGED_HOTMAIL_RCVD
 sub check_for_forged_hotmail_received_headers {
   my ($self) = @_;
