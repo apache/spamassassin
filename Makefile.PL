@@ -147,6 +147,7 @@ doc/.made: doc $(MAN1PODS) $(MAN3PODS)
 	  	's/(lib|spamd)\///; s/\//_/g; s/\.(pod|pm)//;'`.txt ; \
 	done
 	touch doc/.made
+	-rm -f pod2htm*
 
 };
 }
