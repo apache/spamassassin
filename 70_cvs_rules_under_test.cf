@@ -115,24 +115,6 @@ rawbody T_MIME_BASE64_SHORT_LINES	eval:check_for_mime('t_mime_base64_short_lines
 rawbody T_MIME_BASE64_WITHOUT_NAME	eval:check_for_mime('t_mime_base64_without_name')
 rawbody T_MIME_QP_INLINE_NO_CHARSET	eval:check_for_mime('t_mime_qp_inline_no_charset')
 
-# 2003-02-28: quinlan
-# Note: I'll probably rename these later if they get added.
-header T_MSG_ID_ADDED_BY_MTA_SHORT	eval:mta_added_message_id('short')
-header T_MSG_ID_ADDED_BY_MTA_LATER	eval:mta_added_message_id('later')
-header T_MSG_ID_ADDED_BY_MTA_BACKUP	eval:mta_added_message_id('backup')
-tflags T_MSG_ID_ADDED_BY_MTA_BACKUP	net
-# 2003-03-25
-# replace MSG_ID_ADDED_BY_MTA_2 since it matches some missed by above tests
-header __MSG_ID_BEFORE_RECEIVED	ALL =~ /\nMessage-(?:ID|Id|id):.*\nReceived:/s
-header __MSG_ID_YAHOODOO_1	Message-Id =~ /\@[a-z0-9.-]+\.(?:yahoo|wanadoo)(?:\.[a-z]{2,3}){1,2}>/
-header __MSG_ID_YAHOODOO_2	MESSAGEID =~ /\@[a-z0-9.-]+\.(?:yahoo|wanadoo)(?:\.[a-z]{2,3}){1,2}>/
-meta T_MSG_ID_ADDED_BY_MTA_HEADER_1	(__MSG_ID_BEFORE_RECEIVED)
-meta T_MSG_ID_ADDED_BY_MTA_HEADER_2	(__MSG_ID_BEFORE_RECEIVED && !__MSG_ID_YAHOODOO_1)
-meta T_MSG_ID_ADDED_BY_MTA_HEADER_3	(__MSG_ID_BEFORE_RECEIVED && !__MSG_ID_YAHOODOO_2)
-meta T_MSG_ID_ADDED_BY_MTA_HEADER_4	(__MSG_ID_BEFORE_RECEIVED && !T_MSG_ID_ADDED_BY_MTA_SHORT && !T_MSG_ID_ADDED_BY_MTA_LATER && !T_MSG_ID_ADDED_BY_MTA_BACKUP)
-meta T_MSG_ID_ADDED_BY_MTA_HEADER_5	(__MSG_ID_BEFORE_RECEIVED && !T_MSG_ID_ADDED_BY_MTA_SHORT && !T_MSG_ID_ADDED_BY_MTA_LATER && !T_MSG_ID_ADDED_BY_MTA_BACKUP && !__MSG_ID_YAHOODOO_1)
-meta T_MSG_ID_ADDED_BY_MTA_HEADER_6	(__MSG_ID_BEFORE_RECEIVED && !T_MSG_ID_ADDED_BY_MTA_SHORT && !T_MSG_ID_ADDED_BY_MTA_LATER && !T_MSG_ID_ADDED_BY_MTA_BACKUP && !__MSG_ID_YAHOODOO_2)
-
 # 2003-03-02: quinlan
 header T_NO_DNS_FOR_RECIPS_ONE		eval:check_for_recips_dns('1','2')
 header T_NO_DNS_FOR_RECIPS_TWO		eval:check_for_recips_dns('2','3')

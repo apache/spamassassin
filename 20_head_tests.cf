@@ -129,6 +129,25 @@ describe MSGID_NO_HOST 		Message-Id has no hostname
 header MSGID_OUTLOOK_TIME	eval:check_outlook_timestamp_token()
 describe MSGID_OUTLOOK_TIME 	Message-Id is fake (in Outlook Express format)
 
+###########################################################################
+
+header MSG_ID_ADDED_BY_MTA_SHORT	eval:mta_added_message_id('short')
+description MSG_ID_ADDED_BY_MTA_SHORT	Message-Id was added by a relay
+
+header MSG_ID_ADDED_BY_MTA_LATER	eval:mta_added_message_id('later')
+description MSG_ID_ADDED_BY_MTA_LATER	Message-Id was added by a relay
+
+header MSG_ID_ADDED_BY_MTA_BACKUP	eval:mta_added_message_id('backup')
+description MSG_ID_ADDED_BY_MTA_BACKUP	Message-Id was added by a relay
+tflags MSG_ID_ADDED_BY_MTA_BACKUP	net
+
+header __MSG_ID_BEFORE_RECEIVED		ALL =~ /\nMessage-Id:.*\nReceived:/si
+header __MSG_ID_BEFORE_OKAY		Message-Id =~ /\@[a-z0-9.-]+\.(?:yahoo|wanadoo)(?:\.[a-z]{2,3}){1,2}>/
+meta MSG_ID_ADDED_BY_MTA_HEADER		(__MSG_ID_BEFORE_RECEIVED && !__MSG_ID_BEFORE_OKAY)
+description MSG_ID_ADDED_BY_MTA_HEADER	Message-Id was added by a relay
+
+###########################################################################
+
 header INVALID_DATE		Date !~ /^\s*(?:(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), )?[0-3 ]?[0-9] (?:Jan|Feb|Ma[ry]|Apr|Ju[nl]|Aug|Sep|Oct|Nov|Dec) (?:[12][901])?[0-9]{2} [0-2][0-9](?:\:[0-5][0-9]){1,2} (?:[+-][0-9]{4}|UT|[A-Z]{2,3}T)(?:\s+\(.*\))?\s*$/ [if-unset: Wed, 31 Jul 2002 16:41:57 +0200]
 describe INVALID_DATE		Invalid Date: header (not RFC 2822)
 
@@ -440,13 +459,6 @@ describe X_PRIORITY_HIGH	Sent with 'X-Priority' set to high
 
 header X_MSMAIL_PRIORITY_HIGH	X-Msmail-Priority =~ /^High/
 describe X_MSMAIL_PRIORITY_HIGH	Sent with 'X-Msmail-Priority' set to high
-
-
-header MSG_ID_ADDED_BY_MTA_2	eval:check_for_mta_message_id_later()
-describe MSG_ID_ADDED_BY_MTA_2	'Message-Id' was added by a relay (2)
-
-header MSG_ID_ADDED_BY_MTA_3	eval:check_for_mta_message_id_first()
-describe MSG_ID_ADDED_BY_MTA_3	'Message-Id' was added by a relay (3)
 
 header MANY_FROMS		From =~ /^[^\"\<\(]+, [^\"\<\(]+$/
 describe MANY_FROMS		'From' contains more than one address
