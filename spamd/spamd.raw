@@ -6,9 +6,10 @@
 # which is included as the file named "License"            #
 ############################################################
 
-my $DEF_RULES_DIR = '@@DEF_RULES_DIR@@';  # substituted at install time
-my $LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';  # substituted at install time
-use lib '@@INSTALLSITELIB@@'; # substituted at install time
+my $PREFIX = '@@PREFIX@@';  # substituted at 'make' time
+my $DEF_RULES_DIR = '@@DEF_RULES_DIR@@';  # substituted at 'make' time
+my $LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';  # substituted at 'make' time
+use lib '@@INSTALLSITELIB@@'; # substituted at 'make' time
 
 use lib '../lib';	# added by jm for use inside the distro
 use strict;
@@ -121,6 +122,7 @@ my $spamtest = Mail::SpamAssassin->new({
     debug => ($opt{'debug'} || 0),
     paranoid => ($opt{'paranoid'} || 0),
     home_dir_for_helpers => (defined $opt{'home_dir_for_helpers'} ? $opt{'home_dir_for_helpers'} : $orighome),
+    PREFIX => $PREFIX,
     DEF_RULES_DIR => $DEF_RULES_DIR,
     LOCAL_RULES_DIR => $LOCAL_RULES_DIR
 });

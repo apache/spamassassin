@@ -64,9 +64,14 @@ sub check_address {
     $self->{entry} = $self->{checker}->get_addr_entry ($addr."|ip=".$origip);
   }
 
-  if (!defined $self->{entry}) {
-    # fall back to more general style
-    $self->{entry} = $self->{checker}->get_addr_entry ($addr);
+  if (!defined $self->{entry} || $self->{entry}->{count} == 0) {
+    # fall back to more general style, no IP address
+    my $noip = $self->{checker}->get_addr_entry ($addr);
+
+    if (defined $noip && $noip->{count} != 0) {
+      # it's defined and it has entries, use that
+      $self->{entry} = $noip;
+    }
   }
 
   if($self->{entry}->{count} == 0) { return undef; }
@@ -89,6 +94,12 @@ sub add_score {
     return undef;		# no factory defined; we can't check
   }
 
+  # give long-running correspondents a chance to get out of the
+  # AWL blacklist by adding a factor for the count itself.
+  # 5 seems to allow folks who get (3,4,3,2,4,5,...) to dig
+  # themselves out, after 6 messages.
+  $score = $score - ($self->{entry}->{count} * 5);
+
   $self->{checker}->add_score($self->{entry},$score);
 }
 
@@ -104,21 +115,7 @@ This method will add a score of -100 to the given address -- effectively
 sub add_known_good_address {
   my ($self, $addr) = @_;
 
-  if (!defined $self->{checker}) {
-    return undef;		# no factory defined; we can't check
-  }
-
-  $addr = lc $addr;
-  $addr =~ s/[\000\;\'\"\!\|]/_/gs;	# paranoia
-  my $entry = $self->{checker}->get_addr_entry ($addr);
-
-  # remove any old entries (will remove per-ip entries as well)
-  if ($entry->{count} > 0) {
-    $self->{checker}->remove_entry ($entry);
-  }
-  $self->{checker}->add_score($entry,-100);
-
-  return 0;
+  return $self->modify_address($addr, -100);
 }
 
 ###########################################################################
@@ -133,39 +130,41 @@ This method will add a score of 100 to the given address -- effectively
 sub add_known_bad_address {
   my ($self, $addr) = @_;
 
-  if (!defined $self->{checker}) {
-    return undef;		# no factory defined; we can't check
-  }
-
-  $addr = lc $addr;
-  $addr =~ s/[\000\;\'\"\!\|]/_/gs;	# paranoia
-  my $entry = $self->{checker}->get_addr_entry ($addr);
-
-  # remove any old entries (will remove per-ip entries as well)
-  if ($entry->{count} > 0) {
-    $self->{checker}->remove_entry ($entry);
-  }
-  $self->{checker}->add_score($entry,100);
-
-  return 0;
+  return $self->modify_address($addr, 100);
 }
-
-
 
 ###########################################################################
 
 sub remove_address {
   my ($self, $addr) = @_;
 
+  return $self->modify_address($addr, undef);
+}
+
+###########################################################################
+
+sub modify_address {
+  my ($self, $addr, $score) = @_;
+
   if (!defined $self->{checker}) {
-    return undef;		# no factory defined; we can't check
+    return undef;               # no factory defined; we can't check
   }
 
   $addr = lc $addr;
-  $addr =~ s/[\000\;\'\"\!\|]/_/gs;	# paranoia
-
+  $addr =~ s/[\000\;\'\"\!\|]/_/gs;     # paranoia
   my $entry = $self->{checker}->get_addr_entry ($addr);
-  $self->{checker}->remove_entry ($entry) and return 1;
+
+  # remove any old entries (will remove per-ip entries as well)
+  # always call this regardless, as the current entry may have 0
+  # scores, but the per-ip one may have more
+  $self->{checker}->remove_entry($entry);
+
+  # remove address only, no new score to add
+  if (!defined($score)) { return 1; }
+
+  # else add score. get a new entry first
+  $entry = $self->{checker}->get_addr_entry ($addr);
+  $self->{checker}->add_score($entry, $score);
 
   return 0;
 }

@@ -1674,18 +1674,21 @@ sub do_awl_tests {
 
       if(defined($meanscore))
       {
-          $delta = ($meanscore - $self->{hits})*$self->{main}->{conf}->{auto_whitelist_factor};
+          $delta = ($meanscore - $self->{hits}) * $self->{main}->{conf}->{auto_whitelist_factor};
       }
 
-      if($delta != 0)
-      {
+      # Update the AWL *before* adding the new score, otherwise
+      # early high-scoring messages are reinforced compared to
+      # later ones.  See
+      # http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=159704
+      #
+      $whitelist->add_score($self->{hits});
+
+      if($delta != 0) {
           $self->_handle_hit("AWL",$delta,"AWL: ","Auto-whitelist adjustment");
       }
 
       dbg("Post AWL score: ".$self->{hits});
-
-      # Update the AWL
-      $whitelist->add_score($self->{hits});
       $whitelist->finish();
       1;
     };

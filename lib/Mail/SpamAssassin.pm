@@ -91,7 +91,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.115.2.10 2002/09/05 18:10:29 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.115.2.11 2002/09/24 18:51:37 jmason Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -333,6 +333,22 @@ sub report_as_spam {
 
 ###########################################################################
 
+=item $f->add_address_to_whitelist ($addr)
+
+Given a string containing an email address, add it to the automatic
+whitelist database.
+
+=cut
+
+sub add_address_to_whitelist {
+  my ($self, $addr) = @_;
+  my $list = Mail::SpamAssassin::AutoWhitelist->new($self);
+  if ($list->add_known_good_address ($addr)) {
+    print "SpamAssassin auto-whitelist: adding address: $addr\n";
+  }
+  $list->finish();
+}
+
 =item $f->add_all_addresses_to_whitelist ($mail)
 
 Given a mail message, find as many addresses in the usual headers (To, Cc, From
@@ -353,6 +369,22 @@ sub add_all_addresses_to_whitelist {
 }
 
 ###########################################################################
+
+=item $f->remove_address_from_whitelist ($addr)
+
+Given a string containing an email address, remove it from the automatic
+whitelist database.
+
+=cut
+
+sub remove_address_from_whitelist {
+  my ($self, $addr) = @_;
+  my $list = Mail::SpamAssassin::AutoWhitelist->new($self);
+  if ($list->remove_address ($addr)) {
+    print "SpamAssassin auto-whitelist: removing address: $addr\n";
+  }
+  $list->finish();
+}
 
 =item $f->remove_all_addresses_from_whitelist ($mail)
 
@@ -376,6 +408,22 @@ sub remove_all_addresses_from_whitelist {
 
 ###########################################################################
 
+=item $f->add_address_to_blacklist ($addr)
+
+Given a string containing an email address, add it to the automatic
+whitelist database with a high score, effectively blacklisting them.
+
+=cut
+
+sub add_address_to_blacklist {
+  my ($self, $addr) = @_;
+  my $list = Mail::SpamAssassin::AutoWhitelist->new($self);
+  if ($list->add_known_bad_address ($addr)) {
+    print "SpamAssassin auto-whitelist: blacklisting address: $addr\n";
+  }
+  $list->finish();
+}
+
 =item $f->add_all_addresses_to_blacklist ($mail)
 
 Given a mail message, find as many addresses in the usual headers (To,
@@ -390,7 +438,7 @@ sub add_all_addresses_to_blacklist {
   my $list = Mail::SpamAssassin::AutoWhitelist->new($self);
   foreach my $addr ($self->find_all_addrs_in_mail ($mail_obj)) {
     if ($list->add_known_bad_address ($addr)) {
-      print "SpamAssassin auto-whitelist: adding address: $addr\n";
+      print "SpamAssassin auto-whitelist: blacklisting address: $addr\n";
     }
   }
   $list->finish();
@@ -859,11 +907,7 @@ sub sed_path {
   return undef if (!defined $path);
   $path =~ s/__local_rules_dir__/$self->{LOCAL_RULES_DIR} || ''/ges;
   $path =~ s/__def_rules_dir__/$self->{DEF_RULES_DIR} || ''/ges;
-  $path =~ s/__prefix__/$Config{prefix}/gs;
-  $path =~ s/__sitelib__/$Config{sitelib}/gs;
-  $path =~ s/__vendorlib__/$Config{vendorlib}/gs;
-  $path =~ s/__installsitelib__/$Config{installsitelib}/gs;
-  $path =~ s/__installvendorlib__/$Config{installvendorlib}/gs;
+  $path =~ s/__prefix__/$self->{PREFIX} || $Config{prefix}/gs;
   $path =~ s/^\~([^\/]*)/$self->expand_name($1)/es;
   $path;
 }
@@ -959,6 +1003,7 @@ sub find_all_addrs_in_mail {
   my %done = ();
 
   foreach $_ (@addrlist) {
+    s/^mailto://;       # from Outlook "forwarded" message
     next if defined ($done{$_}); $done{$_} = 1;
     push (@ret, $_);
   }
