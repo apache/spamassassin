@@ -18,11 +18,11 @@ void WriteString(PGAContext *ctx, FILE *fp, int p, int pop);
 void showSummary(PGAContext *ctx);
 
 const double threshold = 5.0;
-const double nybias = 5.0;
-const double mutation_rate = 0.21;
+const double nybias = 10.0;
+const double mutation_rate = 0.01;
 const double crossover_rate = 0.66;
-const int pop_size = 10;
-const int replace_num = 2;
+const int pop_size = 100;
+const int replace_num = 25;
 const int maxiter = 10000;
 
 void init_data()
