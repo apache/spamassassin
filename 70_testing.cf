@@ -43,7 +43,6 @@ tflags   T_URIBL_MP net
 endif	# Mail::SpamAssassin::Plugin::URIDNSBL
 
 ##########################################################################
-# bug 2843
 
 header   T_LEADINGPREP       From =~ /^(?:A|About|All|An|And|Any|As|At|Be|Best|Bulk|Cash|Earn|Easy|Fast|Find|For|Free|From|Get|Hi|Home|In|Instant|Is|It|Its|Limited|Lose|Love|Make|Need|New|No|Save|Sex|She|Special|Stock|Stop|Take|Test|There|This|To|Try|Want|We|What|Where|Why|You|Your)[_ ]/i
 describe T_LEADINGPREP       From begins with preposition or similar word
@@ -51,55 +50,35 @@ describe T_LEADINGPREP       From begins with preposition or similar word
 header    T_WORTHCASH        Subject =~ /\b(?:Worth|Win|take|extra|earn|dollars|Short|need|claim|free|get|opinions?|surveys?)\b.{0,15}(?:fast)?(?:C[a\@]sh|M[0o]ney)\b/i
 describe  T_WORTHCASH        Subject mentions something is worth cash
 
-header    T_FOREVER       Subject =~ /\bf[\W_]?(?:\[\]|\(\)|[o0\*\xD2-\xD6\xF2-\xF6])[\W_]?[r\xAE][\W_]?[e3\*\xC8-\xCB\xE8-\xEB][\W_]?[vu][\W_]?[e3\*\xC8-\xCB\xE8-\xEB][\W_]?[r\xAE]\b/i
-describe  T_FOREVER       Forever in Subject
-
-header    T_SUBJPROVEN        Subject =~ /\bp[\W_]?[r\xAE][\W_]?(?:\[\]|\(\)|[o0\*\xD2-\xD6\xF2-\xF6])[\W_]?[vu][\W_]?[e3\*\xC8-\xCB\xE8-\xEB][\W_]?[n\xD1\xF1]\b/i
-describe  T_SUBJPROVEN        Proven in Subject
-
-header    T_SUBJDEBT         Subject =~ /[d\xD0][\W_]?[e3\*\xC8-\xCB\xE8-\xEB][\W_]?[b8\xDF][\W_]?t/i
-describe  T_SUBJDEBT         Subject mentions debt
-
+# TVD: I'm against single word rules, although these do seem to work ok, total
+# nightly results:
+# 0.099   0.1251   0.0028    0.978   0.59    0.01  T_INVESTORS
+# 0.173   0.2192   0.0074    0.967   0.63    0.01  T_PAYING
+# 0.134   0.1702   0.0019    0.989   0.62    0.01  T_PENIS
 header    T_INVESTORS         Subject =~ /investors/i
 describe  T_INVESTORS         Subject mentions investors
-
 header    T_PAYING            Subject =~ /Paying/i
 describe  T_PAYING            Subject mentions Paying for something
-
-header    T_SUBJDRUGS       Subject =~ /[vu][\W_]?[il1:\|\*\xCC-\xCF\xEC-\xEF][\W_]?[a4\*\@\xC0-\xC5\xAA\xE0-\xE5][\W_]?[g6][\W_]?[r\xAE][\W_]?[a4\*\@\xC0-\xC5\xAA\xE0-\xE5]/i
-describe  T_SUBJDRUGS       Subject mentions known spam subject
-
-header    T_MEDICATION   Subject =~ /(?:\/\\\/\\|\/V\\|rn|[m])[\W_]?[e3\*\xC8-\xCB\xE8-\xEB][\W_]?[d\xD0][\W_]?[il1:\|\*\xCC-\xCF\xEC-\xEF][\W_]?[c\xC7\xE7\xA2\xA9][\W_]?[a4\*\@\xC0-\xC5\xAA\xE0-\xE5][\W_]?t[\W_]?[il1:\|\*\xCC-\xCF\xEC-\xEF][\W_]?(?:\[\]|\(\)|[o0\*\xD2-\xD6\xF2-\xF6])[\W_]?[n\xD1\xF1]/i
-describe  T_MEDICATION   Subject mentions medication
-
-header    T_MEDS          Subject =~ /m(e|3)ds/i
-describe  T_MEDS          Meds in subject
-
-header    T_CONSONANTS        Subject =~ /\b[bcghjklmnpqrstvwxz]{6,20}\b/
-describe  T_CONSONANTS        Subject contains consecutive consonants in "word"
-
-header    T_SPAMWORDS      Subject =~ /(?!tion)t[\W_]?[il1:\|\*\xCC-\xCF\xEC-\xEF][\W_]?(?:\[\]|\(\)|[o0\*\xD2-\xD6\xF2-\xF6])[\W_]?[n\xD1\xF1]/i
-describe  T_SPAMWORDS      masked spam word(s) in subject
-
-header    T_SPAMWORDS2      Subject =~ /(?!\bcheap(er)?)\b[c\xC7\xE7\xA2\xA9][\W_]?h[\W_]?[e3\*\xC8-\xCB\xE8-\xEB][\W_]?[a4\*\@\xC0-\xC5\xAA\xE0-\xE5][\W_]?p([e3\*\xC8-\xCB\xE8-\xEB][\W_]?[r\xAE])?/i
-describe  T_SPAMWORDS2      masked spam word(s) in subject
-
 header    T_PENIS          Subject =~ /\bpenis\b/i
 describe  T_PENIS          masked spam word(s) in subject
 
-header    T_SPAMWORDS4      Subject =~ /(?!\bpenis\b)\bp[\W_]?[e3\*\xC8-\xCB\xE8-\xEB][\W_]?[n\xD1\xF1][\W_]?[il1:\|\*\xCC-\xCF\xEC-\xEF][\W_]?[s5\$\xA7]\b/i
-describe  T_SPAMWORDS4      masked spam word(s) in subject
-
+# TVD: works well for most people, but do we want to start putting in static BLs?
+# 0.381   0.4811   0.0194    0.961   0.69    0.01  T_TELESPRLY
 header   T_TELESPRLY            Received =~ /dsl\.telesp\.net\.br/
 describe T_TELESPRLY            Spam passed through known spam relay domain
 
 ##########################################################################
 
+# 1.972   2.4562   0.2249    0.916   0.64    0.01  T_NORMAL_HTTP_TO_IP
 body T_NORMAL_HTTP_TO_IP	eval:check_numeric_http()
 
 ########################################################################
 
 # bug 3999
+# 0.767   0.9738   0.0204    0.980   0.77    0.01  T_PRIORITY_NO_NAME_BOTH_REF
+# 0.791   0.9887   0.0796    0.926   0.67    0.01  T_PRIORITY_NO_NAME_BOTH
+# 1.533   1.9166   0.1490    0.928   0.66    0.01  T_PRIORITY_NO_NAME_ONE_REF
+# 1.548   1.9174   0.2128    0.900   0.63    0.01  T_PRIORITY_NO_NAME_ONE
 header __HAS_REFERENCES		exists:References
 meta T_PRIORITY_NO_NAME_BOTH		((__HAS_X_PRIORITY && __HAS_MSMAIL_PRI) && !__HAS_X_MAILER && !__IS_EXCH && !__USER_AGENT)
 meta T_PRIORITY_NO_NAME_ONE		((__HAS_X_PRIORITY + __HAS_MSMAIL_PRI == 1) && !__HAS_X_MAILER && !__IS_EXCH && !__USER_AGENT)
@@ -110,17 +89,12 @@ meta T_PRIORITY_NO_NAME_ONE_REF		((__HAS_X_PRIORITY + __HAS_MSMAIL_PRI == 1) && 
 
 # remove evals if these aren't promoted
 header T_UNPARSEABLE_RELAY  eval:check_relays_unparseable()
-#
+
 header T_NO_RELAYS      eval:check_no_relays()
 tflags T_NO_RELAYS      nice
-#
+
 header __NO_RCVD        exists:Received
 meta T_NO_RCVD        (!__NO_RCVD)
-
-# possible IDN spoofing attack: http://www.shmoo.com/idn/homograph.txt
-# not expecting any hits on this (yet)
-uri T_HIGH_CODEPAGE_URI         /^https?:\/\/[^\/]*\&\#(?:\d{4,}|[3456789]\d\d);/i
-
 
 ########################################################################
 # tvd: these are unusable, results from total nightly run:
@@ -152,9 +126,22 @@ body T_HTML_SCRIPT_EXPR_4	eval:html_text_match('script', ';.*;.*;.*;')
 body T_HTML_SCRIPT_EXPR_5	eval:html_text_match('script', ';.*;.*;.*;.*;')
 ########################################################################
 
-header T_NUMINTERUPTUS		Subject =~ /\b[a-z]{2,}\d+[a-z]{2,}/i
-header T_CRAZYCASE		Subject =~ /\b[a-z]{2,}[A-Z]+[a-z]{2,}/
-header T_PUNCTUSINTERUPTUS	Subject =~ m%\b[A-Z]{2,}[^/\sa-z0-9:+,@._=&'-]+[A-Z]{2,}%i
+# catch non-RFC2047 compliant messages
+# Apple Mail has a bug where headers will have whitespace around the encoded
+# text, so try to ignore that
+header T_BAD_ENC_HEADER		ALL =~ /=\?[^?\s]+\?[^?\s]\?[^?]*\s/
+header T_BAD_ENC_HEADER2	ALL =~ /=\?[^?\s]+\?[^?\s]\?\s*[^?]+\s(?!\?=)/
+
+# these don't hit a lot, but it's a definite obfuscation technique
+uri T_HTTP_BAD_HOST_CHAR	m@^https?://[^/]*[\000-\037\200-\377]@i
+
+# possible IDN spoofing attack: http://www.shmoo.com/idn/homograph.txt
+# not expecting any hits on this (yet)
+uri T_HIGH_CODEPAGE_URI         /^https?:\/\/[^\/]*\&\#(?:\d{4,}|[3456789]\d\d);/i
+
+########################################################################
+
+#### PHRASE OBFUSCATION RULES ####
 
 # these need to have "decently long" words.  things like "sex" FP too easily
 # in normal use, ala: "jackson's ex-wife" vs "Best S E X you"
@@ -195,9 +182,6 @@ body T_INT_PILLS	eval:check_obfu_word('pills')
 # TVD: my FPs for this are from last names in sentences.
 # ala "... see Dave Price's results for ..."
 body T_INT_PRICES	eval:check_obfu_word('prices')
-
-# these don't hit a lot, but it's a definite obfuscation technique
-uri T_HTTP_BAD_HOST_CHAR	m@^https?://[^/]*[\000-\037\200-\377]@i
 
 # use ReplaceTags
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
@@ -805,8 +789,29 @@ replace_rules T_OBFU_XANAX_W3_P3
 
 endif   #ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 
-# catch non-RFC2047 compliant messages
-# Apple Mail has a bug where headers will have whitespace around the encoded
-# text, so try to ignore that
-header T_BAD_ENC_HEADER		ALL =~ /=\?[^?\s]+\?[^?\s]\?[^?]*\s/
-header T_BAD_ENC_HEADER2	ALL =~ /=\?[^?\s]+\?[^?\s]\?\s*[^?]*\s(?!\?=)/
+header    T_FOREVER       Subject =~ /\bf[\W_]?(?:\[\]|\(\)|[o0\*\xD2-\xD6\xF2-\xF6])[\W_]?[r\xAE][\W_]?[e3\*\xC8-\xCB\xE8-\xEB][\W_]?[vu][\W_]?[e3\*\xC8-\xCB\xE8-\xEB][\W_]?[r\xAE]\b/i
+describe  T_FOREVER       Forever in Subject
+
+header    T_SUBJPROVEN        Subject =~ /\bp[\W_]?[r\xAE][\W_]?(?:\[\]|\(\)|[o0\*\xD2-\xD6\xF2-\xF6])[\W_]?[vu][\W_]?[e3\*\xC8-\xCB\xE8-\xEB][\W_]?[n\xD1\xF1]\b/i
+describe  T_SUBJPROVEN        Proven in Subject
+
+header    T_SUBJDEBT         Subject =~ /[d\xD0][\W_]?[e3\*\xC8-\xCB\xE8-\xEB][\W_]?[b8\xDF][\W_]?t/i
+describe  T_SUBJDEBT         Subject mentions debt
+
+header    T_SUBJDRUGS       Subject =~ /[vu][\W_]?[il1:\|\*\xCC-\xCF\xEC-\xEF][\W_]?[a4\*\@\xC0-\xC5\xAA\xE0-\xE5][\W_]?[g6][\W_]?[r\xAE][\W_]?[a4\*\@\xC0-\xC5\xAA\xE0-\xE5]/i
+describe  T_SUBJDRUGS       Subject mentions known spam subject
+
+header    T_MEDICATION   Subject =~ /(?:\/\\\/\\|\/V\\|rn|[m])[\W_]?[e3\*\xC8-\xCB\xE8-\xEB][\W_]?[d\xD0][\W_]?[il1:\|\*\xCC-\xCF\xEC-\xEF][\W_]?[c\xC7\xE7\xA2\xA9][\W_]?[a4\*\@\xC0-\xC5\xAA\xE0-\xE5][\W_]?t[\W_]?[il1:\|\*\xCC-\xCF\xEC-\xEF][\W_]?(?:\[\]|\(\)|[o0\*\xD2-\xD6\xF2-\xF6])[\W_]?[n\xD1\xF1]/i
+describe  T_MEDICATION   Subject mentions medication
+
+header    T_MEDS          Subject =~ /m(e|3)ds/i
+describe  T_MEDS          Meds in subject
+
+header    T_SPAMWORDS      Subject =~ /(?!tion)t[\W_]?[il1:\|\*\xCC-\xCF\xEC-\xEF][\W_]?(?:\[\]|\(\)|[o0\*\xD2-\xD6\xF2-\xF6])[\W_]?[n\xD1\xF1]/i
+describe  T_SPAMWORDS      masked spam word(s) in subject
+
+header    T_SPAMWORDS2      Subject =~ /(?!\bcheap(er)?)\b[c\xC7\xE7\xA2\xA9][\W_]?h[\W_]?[e3\*\xC8-\xCB\xE8-\xEB][\W_]?[a4\*\@\xC0-\xC5\xAA\xE0-\xE5][\W_]?p([e3\*\xC8-\xCB\xE8-\xEB][\W_]?[r\xAE])?/i
+describe  T_SPAMWORDS2      masked spam word(s) in subject
+
+header    T_SPAMWORDS4      Subject =~ /(?!\bpenis\b)\bp[\W_]?[e3\*\xC8-\xCB\xE8-\xEB][\W_]?[n\xD1\xF1][\W_]?[il1:\|\*\xCC-\xCF\xEC-\xEF][\W_]?[s5\$\xA7]\b/i
+describe  T_SPAMWORDS4      masked spam word(s) in subject
