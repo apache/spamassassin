@@ -2872,12 +2872,16 @@ For example:
 	  score  MY_PLUGIN_FOO	0.1
 	endif
 
-=item require_version n.nn
+=item require_version n.n.n
 
-Indicates that the entire file, from this line on, requires a certain version
-of SpamAssassin to run.  If an older or newer version of SpamAssassin tries to
-read configuration from this file, it will output a warning instead, and
-ignore it.
+Indicates that the entire file, from this line on, requires a certain
+version of SpamAssassin to run.  If a different (older or newer) version
+of SpamAssassin tries to read the configuration from this file, it will
+output a warning instead, and ignore it.
+
+Note: The version must be in the internal SpamAssassin version format
+which is: x.yyyzzz.  x is major version, y is minor version, and z is
+maintenance version.  So 3.0.0 is 3.000000, and 3.4.80 is 3.004080.
 
 =cut
 
