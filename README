@@ -303,9 +303,11 @@ So, to summarise:
 
   - /etc/spamassassin.prefs:
 
-  	Site default preferences, for system admins to create, modify,
-	and set defaults for users preferences files.  Takes precedence
-	over the above prefs file, if it exists.
+	Site default preferences, for system admins to create, modify, and
+	set defaults for users preferences files.  Takes precedence over
+	the above prefs file, if it exists.   Do not put system-wide
+	settings in here; put them in /etc/spamassassin.cf instead.
+	This file is just a template for users to change.
 
   - $USER_HOME/.spamassassin.cf:
 

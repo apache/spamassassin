@@ -957,8 +957,10 @@ score BADTRANS_WORM                 10.0
 # a shortcut around SpamAssassin.
 
 whitelist_from	billing@networksolutions.com
-whitelist_from  auto-confirm@amazon.com
+whitelist_from  *@amazon.com
+whitelist_from  *@amazon.co.uk
 whitelist_from  *@ebay.com
+whitelist_from	*@ora-info.ora.com		# O'Reilly
 
 ###########################################################################
 # Automatic-whitelist directory, for the default directory-based whitelist
