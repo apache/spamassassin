@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -w -T
 
 # options
 #
@@ -54,8 +54,13 @@ use vars qw($opt_c $opt_f $opt_j $opt_n $opt_o $opt_all $opt_bayes
 	    $opt_showdots $opt_spamlog $opt_tail $opt_rules $opt_restart
 	    $opt_after $opt_rewrite);
 
-use FindBin;
-use lib "$FindBin::Bin/../lib";
+BEGIN {
+  use FindBin;
+  my $local = "$FindBin::Bin/../lib";
+  $local = $1 if $local =~ /^(\S+)$/;
+  push(@INC, $local);
+}
+
 eval "use bytes";
 use Mail::SpamAssassin::ArchiveIterator;
 use Mail::SpamAssassin;
