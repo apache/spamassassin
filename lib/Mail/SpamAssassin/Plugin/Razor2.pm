@@ -125,7 +125,7 @@ Currently this is left to Razor to decide.
 
 sub razor2_access {
   my ($self, $fulltext, $type) = @_;
-  my $timeout=$self->{main}->{conf}->{razor_timeout};
+  my $timeout = $self->{main}->{conf}->{razor_timeout};
   my $return = 0;
   my @results = ();
 
@@ -139,9 +139,6 @@ sub razor2_access {
 
   Mail::SpamAssassin::PerMsgStatus::enter_helper_run_mode($self);
   my $oldalarm = 0;
-
-  # note: adie() is obsolete as a result of $oldalarm; alarms will always
-  # be reset this way
 
   eval {
     local ($^W) = 0;    # argh, warnings in Razor
@@ -158,16 +155,19 @@ sub razor2_access {
 	foreground => 1,
 	config => $self->{main}->{conf}->{razor_config}
       };
+      # no facility prefix on this die
       $rc->do_conf() or die "$debug: " . $rc->errstr;
 
       # Razor2 requires authentication for reporting
       my $ident;
       if ($type ne 'check') {
+	# no facility prefix on this die
 	$ident = $rc->get_ident
-	    or die("reporter: razor2: $type requires authentication");
+	    or die("$type requires authentication");
       }
 
       my @msg = ($fulltext);
+      # no facility prefix on this die
       my $objects = $rc->prepare_objects(\@msg)
 	  or die "$debug: error in prepare_objects";
       unless ($rc->get_server_info()) {
@@ -180,6 +180,7 @@ sub razor2_access {
       # reset the alarm for us ... how polite.  :(
       alarm $timeout;
 
+      # no facility prefix on this die
       my $sigs = $rc->compute_sigs($objects)
 	  or die "$debug: error in compute_sigs";
 
@@ -299,6 +300,7 @@ sub razor2_access {
 
   if ($err) {
     alarm $oldalarm;    # just in case
+    chomp $err;
     if ($err =~ /alarm/) {
       dbg("$debug: razor2 $type timed out after $timeout seconds");
     } elsif ($err =~ /(?:could not connect|network is unreachable)/) {

@@ -242,13 +242,15 @@ sub pyzor_lookup {
     close PYZOR;
 
     if (!@response) {
-      die("pyzor: no response\n");	# yes, this is possible
+      # this exact string is needed below
+      die("no response\n");	# yes, this is possible
     }
     map { chomp } @response;
     dbg("pyzor: got response: " . join("\\n", @response));
 
     if ($response[0] =~ /^Traceback/) {
-      die("pyzor: internal error\n");
+      # this exact string is needed below
+      die("internal error\n");
     }
 
     # note: this must be called BEFORE leave_helper_run_mode()
