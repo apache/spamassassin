@@ -1030,7 +1030,9 @@ sub scan_mbx {
         if (!Mail::SpamAssassin::Util::am_running_on_windows()) {
           $home = (Mail::SpamAssassin::Util::portable_getpwuid($<))[7];
         } else {
-          $home = File::Spec->catpath($ENV{'HOMEDRIVE'}, $ENV{'HOMEPATH'});
+          my $vol = $ENV{'HOMEDRIVE'} || 'C:';
+          my $dir = $ENV{'HOMEPATH'} || '\\';
+          $home = File::Spec->catpath($vol, $dir, '');
         }
 
         # Fall back to no replacement at all.
