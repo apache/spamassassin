@@ -142,10 +142,6 @@ score T_FORGED_MUA_MOZILLA3     1.0
 header   T_SENDER_NO_REVERSE    eval:check_for_sender_no_reverse()
 describe T_SENDER_NO_REVERSE    No reverse lookup for sender's IP
 
-#bug 1010
-body T_CHECK_EMAIL_ISFREE	eval:check_email_isfree()
-describe T_CHECK_EMAIL_ISFREE Body contains an e-mail address listed by Email::IsFree
-
 ########################################################################
 # bug 1192
 
