@@ -187,6 +187,7 @@ body __TAG_EXISTS_HEAD		eval:html_tag_exists('head')
 body __TAG_EXISTS_HTML		eval:html_tag_exists('html')
 body __TAG_EXISTS_META		eval:html_tag_exists('meta')
 
+header __ANY_QUALCOMM_MUA       X-Mailer =~ /\bQUALCOMM\b/
 meta FORGED_QUALCOMM_TAGS	(__ANY_QUALCOMM_MUA && __MIME_HTML && !__TAG_EXISTS_HTML)
 describe FORGED_QUALCOMM_TAGS	QUALCOMM mailers can't send HTML in this format
 
