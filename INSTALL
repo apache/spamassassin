@@ -230,8 +230,14 @@ skipped.
 
   - Net::DNS        (from CPAN)
 
-    Used to check the RBL, RSS, DUL etc. and perform MX checks.
-    Recommended.
+    Used for all DNS-based tests (SBL, XBL, SpamCop, DSBL, etc.),
+    perform MX checks, and is also used when manually reporting spam to
+    SpamCop.  Recommended.
+
+
+  - Net::SMTP        (from CPAN)
+
+    Used when manually reporting spam to SpamCop.
 
 
   - Mail::SPF::Query     (from CPAN)

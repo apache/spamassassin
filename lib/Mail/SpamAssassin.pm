@@ -615,9 +615,10 @@ sub signal_user_changed {
 
 =item $f->report_as_spam ($mail, $options)
 
-Report a mail, encapsulated in a C<Mail::SpamAssassin::Message> object, as human-verified spam.
-This will submit the mail message to live, collaborative, spam-blocker
-databases, allowing other users to block this message.
+Report a mail, encapsulated in a C<Mail::SpamAssassin::Message> object, as
+human-verified spam.  This will submit the mail message to live,
+collaborative, spam-blocker databases, allowing other users to block this
+message.
 
 It will also submit the mail to SpamAssassin's Bayesian learner.
 
@@ -626,20 +627,21 @@ can be:
 
 =over 4
 
-=item dont_report_to_razor
-
-Inhibits reporting of the spam to Razor; useful if you know it's already
-been listed there.
-
 =item dont_report_to_dcc
 
-Inhibits reporting of the spam to DCC; useful if you know it's already
-been listed there.
+Inhibits reporting of the spam to DCC.
 
 =item dont_report_to_pyzor
 
-Inhibits reporting of the spam to Pyzor; useful if you know it's already
-been listed there.
+Inhibits reporting of the spam to Pyzor.
+
+=item dont_report_to_razor
+
+Inhibits reporting of the spam to Razor.
+
+=item dont_report_to_spamcop
+
+Inhibits reporting of the spam to SpamCop.
 
 =back
 
@@ -665,9 +667,10 @@ sub report_as_spam {
 
 =item $f->revoke_as_spam ($mail, $options)
 
-Revoke a mail, encapsulated in a C<Mail::SpamAssassin::Message> object, as human-verified ham
-(non-spam).  This will revoke the mail message from live, collaborative,
-spam-blocker databases, allowing other users to block this message.
+Revoke a mail, encapsulated in a C<Mail::SpamAssassin::Message> object, as
+human-verified ham (non-spam).  This will revoke the mail message from live,
+collaborative, spam-blocker databases, allowing other users to block this
+message.
 
 It will also submit the mail to SpamAssassin's Bayesian learner as nonspam.
 
