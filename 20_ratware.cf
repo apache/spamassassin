@@ -16,8 +16,9 @@ header RATWARE_06	ALL =~ /Cognigen/
 describe RATWARE_06	Bulk email software fingerprint (06) found in headers
 header RATWARE_07	ALL =~ /Cyber-Bomber/
 describe RATWARE_07	Bulk email software fingerprint (07) found in headers
-header RATWARE_08	ALL =~ /Crescent/
-describe RATWARE_08	Bulk email software fingerprint (08) found in headers
+# found in nonspam: not ratware
+#header RATWARE_08	ALL =~ /Crescent/
+#describe RATWARE_08	Bulk email software fingerprint (08) found in headers
 header RATWARE_09	ALL =~ /DiffondiCool/
 describe RATWARE_09	Bulk email software fingerprint (09) found in headers
 header RATWARE_10	ALL =~ /Dynamic Mail Server/
