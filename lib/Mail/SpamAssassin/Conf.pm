@@ -2352,9 +2352,11 @@ ignore these for scoring.
 
 =item tflags SYMBOLIC_TEST_NAME [ {net|nice|learn|userconf|noautolearn} ]
 
-Used to set flags on a test.  These flags are used in the score-determination
-back end system for details of the test's behaviour.  The following flags can
-be set:
+Used to set flags on a test.  These flags are used in the
+score-determination back end system for details of the test's
+behaviour.  Please see C<bayes_auto_learn> and C<use_auto_whitelist>
+for more information about tflag interaction with those systems.
+The following flags can be set:
 
 =over 4
 
@@ -2380,8 +2382,7 @@ The test requires training before it can be used.
 =item noautolearn
 
 The test will explicitly be ignored when calculating the score for
-learning systems.  For more information about tflags and the interaction
-with autolearning, please see the C<bayes_auto_learn> documentation.
+learning systems.
 
 =back
 
@@ -2542,10 +2543,15 @@ toward that long-term average.  This can increase or decrease the score
 for messages, depending on the long-term behavior of the particular
 correspondent.
 
-For more information about the auto-whitelist system, please look at the
-the C<Automatic Whitelist System> section of the README file.  The
-auto-whitelist is not intended as a general-purpose replacement for static
-whitelist entries added to your config files.
+For more information about the auto-whitelist system, please look
+at the the C<Automatic Whitelist System> section of the README file.
+The auto-whitelist is not intended as a general-purpose replacement
+for static whitelist entries added to your config files.
+
+Note that certain tests are ignored when determining the final
+message score:
+
+ - rules with tflags set to 'noautolearn'
 
 =cut
 
