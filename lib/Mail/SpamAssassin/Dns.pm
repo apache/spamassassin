@@ -24,22 +24,25 @@ $IS_DNS_AVAILABLE = undef;
 ###########################################################################
 
 sub do_rbl_lookup {
-  my ($self, $dom, $found) = @_;
+  my ($self, $dom, $ip, $found) = @_;
   return $found if $found;
 
-  my $q = $self->{res}->search ($dom); if ($q) {
+  my $q = $self->{res}->search ($dom);
+  if ($q) {
     foreach my $rr ($q->answer) {
       if ($rr->type eq "A") {
 	my $addr = $rr->address();
 
-	if ($addr ne '127.0.0.2') {
+	if ($addr ne '127.0.0.2' && $addr ne '127.0.0.3') {
 	  $self->test_log ("RBL check: found relay ".$dom.", type: ".$addr);
 	} else {
 	  # 127.0.0.2 is the traditional boolean indicator, don't log it
+	  # 127.0.0.3 now also means "is a dialup IP"
 	  $self->test_log ("RBL check: found relay ".$dom);
 	}
 
 	$self->{rbl_IN_As_found} .= $addr.' ';
+	$self->{rbl_matches_found} .= $ip.' ';
 	return ($found+1);
       }
     }

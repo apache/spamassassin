@@ -112,7 +112,7 @@ describe INVALID_DATE		Invalid Date: header (has AM/PM)
 header INVALID_DATE_NO_TZ	Date =~ /^..., .. ... .... ..:..:..$/
 describe INVALID_DATE_NO_TZ	Invalid Date: header (no timezone)
 
-header SUBJ_HAS_Q_MARK		Subject =~ /\?[^\?]+\s*$/
+header SUBJ_HAS_Q_MARK		Subject =~ /\?.{2,}$/
 describe SUBJ_HAS_Q_MARK	Subject: contains a question mark
 
 header SUBJ_ENDS_IN_Q_MARK	Subject =~ /\?+\s*$/
@@ -148,6 +148,18 @@ describe BAD_HELO_WARNING	Fake name used in SMTP HELO command
 header SUBJ_FULL_OF_8BITS	eval:check_subject_for_lotsa_8bit_chars()
 describe SUBJ_FULL_OF_8BITS	Subject is full of 8-bit characters
 
+header RCVD_IN_RELAYS_ORDB_ORG	eval:check_rbl('relays.ordb.org.')
+describe RCVD_IN_RELAYS_ORDB_ORG Received via a relay in relays.ordb.org
+
+header RCVD_IN_OSIRUSOFT_COM	eval:check_rbl('relays.osirusoft.com.')
+describe RCVD_IN_OSIRUSOFT_COM	Received via a relay in relays.osirusoft.com
+
+header OSIRU_CONFIRMED_SPAM_SOURCE eval:check_rbl_results_for('127.0.0.4')
+describe OSIRU_CONFIRMED_SPAM_SOURCE Osirusoft.com: sender is Confirmed Spam Source
+
+header OSIRU_SPAMWARE_SITE	eval:check_rbl_results_for('127.0.0.6')
+describe OSIRU_SPAMWARE_SITE	Osirusoft.com: sender is a Spamware site or vendor
+
 header RCVD_IN_RBL		eval:check_rbl('blackholes.mail-abuse.org.')
 describe RCVD_IN_RBL		Received via RBL-listed relay, see http://www.mail-abuse.org/rbl/
 
@@ -156,22 +168,6 @@ describe RCVD_IN_RSS		Received via RSS-listed relay, see http://www.mail-abuse.o
 
 header RCVD_IN_DUL		eval:check_rbl('dialups.mail-abuse.org.')
 describe RCVD_IN_DUL		Received from a dialup IP, see http://www.mail-abuse.org/dul/
-
-header RCVD_IN_RELAYS_ORDB_ORG	eval:check_rbl('relays.ordb.org.')
-describe RCVD_IN_RELAYS_ORDB_ORG Received via a relay in relays.ordb.org
-
-header RCVD_IN_OSIRUSOFT_COM	eval:check_rbl('relays.osirusoft.com.')
-describe RCVD_IN_OSIRUSOFT_COM	Received from an IP in Osirusoft zone, see http://relays.osirusoft.com/
-
-# no longer used; this already scores 1 point from the RBL check anyway
-# header OSIRU_SPAM_SOURCE	eval:check_rbl_results_for('127.0.0.3')
-# describe OSIRU_SPAM_SOURCE	Osirusoft says sender is a Dialup Spam Source
-
-header OSIRU_CONFIRMED_SPAM_SOURCE	eval:check_rbl_results_for('127.0.0.4')
-describe OSIRU_CONFIRMED_SPAM_SOURCE	Osirusoft says sender is a Confirmed Spam Source
-
-header OSIRU_SPAMWARE_SITE	eval:check_rbl_results_for('127.0.0.6')
-describe OSIRU_SPAMWARE_SITE	Osirusoft says sender is a Spamware vendor or site
 
 header FORGED_RCVD_FOUND	ALL =~ /\n(?:Date|Subject|From):.*\nReceived: .*\n\n/s
 describe FORGED_RCVD_FOUND	Possibly-forged 'Received:' header found
@@ -442,6 +438,10 @@ score RCVD_IN_RSS		1
 
 # Received via a dialup IP address listed in http://www.mail-abuse.org/dul/
 score RCVD_IN_DUL		1
+
+# confirmed codes from Osirusoft
+score OSIRU_CONFIRMED_SPAM_SOURCE	3
+score OSIRU_SPAMWARE_SITE	5
 
 # found an X-Em-Version: header, used by spamware vendor to track their
 # "customers" (spam spyware)

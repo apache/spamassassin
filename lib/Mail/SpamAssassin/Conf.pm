@@ -65,7 +65,8 @@ sub parse_rules {
   $self->{unnamed_counter} = 'aaaaa';
 
   foreach $_ (split (/\n/, $rules)) {
-    s/\r//g; s/(?<!\\)\#.*$//; s/^\s+//; s/\s+$//; /^$/ and next;
+    s/\r//g; s/(?:^|(?<!\\))\#.*$//;
+    s/^\s+//; s/\s+$//; /^$/ and next;
 
     if (/^header\s+(\S+)\s+eval:(.*)$/) {
       $self->add_test ($1, $2, $type_head_evals); next;
