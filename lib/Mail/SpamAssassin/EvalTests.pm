@@ -649,7 +649,33 @@ sub check_from_in_whitelist {
     if ($self->_check_whitelist ($self->{conf}->{whitelist_from}, $_)) {
       return 1;
     }
+    if ($self->_check_whitelist_rcvd ($self->{conf}->{whitelist_from_rcvd}, $_)) {
+      return 1;
+    }
   }
+}
+
+###########################################################################
+
+sub _check_whitelist_rcvd {
+  my ($self, $list, $addr) = @_;
+  $addr = lc $addr;
+  # study $addr; # study isn't worth it for strings this size.
+  foreach my $white_addr (keys %{$list}) {
+    my $regexp = $list->{$white_addr}{re};
+    my $domain = $list->{$white_addr}{domain};
+    # warn("checking $addr against $regexp + $domain\n");
+    if ($addr =~ /$regexp/i) {
+      # warn("Looking for $domain\n");
+      my $rcvd = $self->get('Received');
+      if ($rcvd =~ /from.*\b\Q$domain\E.*[\[\(][0-9]+\.[0-9]+\.[0-9]+\.[0-9]+[\]\)].*\bby\b/) {
+        # warn("Found it.\n");
+        return 1;
+      }
+    }
+  }
+
+  return 0;
 }
 
 ###########################################################################
@@ -661,27 +687,7 @@ sub _check_whitelist {
   study $addr;
   foreach my $regexp (values %{$list}) {
     if ($addr =~ /$regexp/i) {
-        # Address in the whitelist, but lets just check the last two parts of the domain is in the received headers...
-        my $domain = $regexp;
-        $domain =~ s/.*\@//;
-        $domain =~ s/^\.\*//g;
-        $domain =~ s/\$\)$//;
-        $domain =~ s/\\//g;
-        if ($domain =~ /.*\..*\./ && $domain =~ /(\w{4,}\.\w+)$/) {
-            # more than 4 chars at end, probably not a country code
-            # and more the 1 dots
-            $domain = $1;
-        }
-        # warn("Looking for $domain\n");
-        if ($domain) {
-            my $rcvd = $self->get('Received');
-            if ($rcvd =~ /from.*\b\Q$domain\E.*[\[\(][0-9]+\.[0-9]+\.[0-9]+\.[0-9]+[\]\)].*\bby\b/) {
-                # warn("Found it.\n");
-                return 1;
-            }
-            return 0;
-        }
-        return 1;
+      return 1;
     }
   }
 
