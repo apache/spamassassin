@@ -7,7 +7,6 @@
 #
 # PLEASE read the file @PREFIX@/share/doc/spamassassin/spamd/README.spamd,
 # especially the section about security.
-#
 
 # PROVIDE: spamd
 # REQUIRE: LOGIN
@@ -31,7 +30,10 @@ command="@PREFIX@/bin/spamd"
 pidfile="/var/run/${name}.pid"
 sig_stop="TERM"
 command_args="-d -r ${pidfile}"
+
+# default values, may be overridden by setting them in /etc/rc.conf
 spamd_flags="-H -c -a"
+spamd=NO
 
 INTERPRETER_SUPPORT=@INTERPRETER_SUPPORT@
 
