@@ -107,7 +107,7 @@ score SUBJ_REMOVE		4
 score MAILTO_WITH_SUBJ_REMOVE	4
 score MAILTO_WITH_SUBJ		3
 score JAVASCRIPT		6
-score UNSAFE_JAVASCRIPT		10
+score UNSAFE_JAVASCRIPT		3
 score CLICK_HERE_LINK		3
 score SPAM_FORM			3
 score SPAM_FORM_RETURN		3
@@ -135,4 +135,9 @@ score EXCUSE_8			2
 score EXCUSE_9			2
 score GREEN_EXCUSE_1		3
 score GREEN_EXCUSE_2		3
+
+###########################################################################
+# Compensation for common false positives.
+
+score BALANCE_FOR_LONG		-2
 

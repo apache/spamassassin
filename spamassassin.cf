@@ -120,8 +120,11 @@ describe RCVD_IN_RELAYS_ORBS_ORG Received via a relay in relays.orbs.org
 body REMOVE_SUBJ		/remove.*subject/i
 body SUBJ_REMOVE		/subject.*remove/i
 body REPLY_REMOVE_SUBJECT	/reply.*remove.*subject/i
+body A_HREF_TO_IP		/href\s*=3?d?["']?http:\/\/\d+\.\d+\.\d+\.\d+\:?\d*\//i
+body MAILTO_LINK		/=3?d?["']?mailto:/i
 body MAILTO_WITH_SUBJ_REMOVE	/mailto:.*\?subject=.*remove/i
 body MAILTO_WITH_SUBJ		/mailto:.*\?subject=/i
+body FORM_W_MAILTO_ACTION	/action=3?d?["']?mailto:/i
 body REMOVE_IN_QUOTES		/\"remove\"/i
 
 body JAVASCRIPT			/<SCRIPT LANGUAGE=[^ ]*"JavaScript">/i
@@ -179,9 +182,6 @@ body EXCUSE_9		/If you do.*n.*t want to receive emails on this subject/i
 body GREEN_EXCUSE_1	/using email instead can significantly reduce this/i
 body GREEN_EXCUSE_2	/the trees, save the planet, use email!/i
 
-body BALANCE_FOR_LONG		eval:check_for_very_long_text()
-describe BALANCE_FOR_LONG	Message text is over 500 lines long
-
 body FREE_PRIORITY_MAIL		/FREE PRIORITY MAIL SHIPPING/i
 body LIMITED_TIME_ONLY		/LIMITED TIME ONLY/i
 
@@ -189,8 +189,13 @@ body WE_HONOR_ALL		/We honor ALL remove requests/i
 
 body PORN_1			/\bbarely\b.*\blegal\b/i
 body PORN_2			/\bwild\b.*\bhardcore\b/i
-body PORN_3			/(?:(?:\bcum|\bteen|\baction\b|\bhot\b).*)+/i
+body PORN_3			/(?:(?:\bcum|\bteen|\baction\b|\bhot\b).*){2,}/i
 
 body TRACKER_ID			/^\s*\W{4,} \w{10,} \W{4,}\s*$/
 
+###########################################################################
+# Compensation for common false positives.
+
+body BALANCE_FOR_LONG		eval:check_for_very_long_text()
+describe BALANCE_FOR_LONG	Message text is over 500 lines long
 
