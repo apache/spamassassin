@@ -17,7 +17,7 @@ use bytes;
 
 use vars qw (
   @ISA @EXPORT
-  $AM_TAINTED
+  $AM_TAINTED $HOSTNAME $FQHOSTNAME
 );
 
 require Exporter;
@@ -28,6 +28,9 @@ require Exporter;
 use Mail::SpamAssassin;
 use File::Spec;
 use Time::Local;
+use Sys::Hostname;
+
+BEGIN { $HOSTNAME = hostname(); }
 
 use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
 
@@ -317,6 +320,24 @@ sub extract_ipv4_addr_from_string {
   # these if we could extract them, as the DNSBLs don't provide a way
   # to query them!  TODO, eventually, once IPv6 spam starts to appear ;)
   return;
+}
+
+###########################################################################
+# get the current host's fully-qualified domain name, if possible.  If
+# not possible, return the unqualified hostname.
+
+sub fq_hostname {
+  if (defined $FQHOSTNAME) { return $FQHOSTNAME; }
+
+  my $hname = $HOSTNAME;
+  if ($hname !~ /\./) {
+    my @names = grep(/^\Q${hname}\E\./o,
+				map { split } (gethostbyname($hname))[0 .. 1]);
+    $hname = $names[0] if (scalar @names > 0);
+  }
+
+  $FQHOSTNAME = $hname;
+  return $FQHOSTNAME;
 }
 
 ###########################################################################

@@ -6,15 +6,12 @@ use bytes;
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Locker;
 use Mail::SpamAssassin::Util;
-use Sys::Hostname;
 use File::Spec;
 use Time::Local;
 
 use vars qw{
-  @ISA $HOSTNAME
+  @ISA
 };
-
-BEGIN { $HOSTNAME = hostname(); }
 
 @ISA = qw(Mail::SpamAssassin::Locker);
 
@@ -42,9 +39,10 @@ sub safe_lock {
 
   $max_retries ||= 30;
 
+  my $hname = Mail::SpamAssassin::Util::fq_hostname();
   my $lock_file = "$path.lock";
   my $lock_tmp = Mail::SpamAssassin::Util::untaint_file_path
-					("$path.lock.$HOSTNAME.$$");
+					("$path.lock.$hname.$$");
 
   my $umask = 077;
   if (!open(LTMP, ">$lock_tmp")) {
@@ -59,7 +57,7 @@ sub safe_lock {
     if ($retries > 0) {
       select(undef, undef, undef, (rand(1.0) + 0.5));
     }
-    print LTMP "$HOSTNAME.$$\n";
+    print LTMP "$hname.$$\n";
     dbg("lock: $$ trying to get lock on $path with $retries retries");
     if (link($lock_tmp, $lock_file)) {
       dbg("lock: $$ link to $lock_file: link ok");

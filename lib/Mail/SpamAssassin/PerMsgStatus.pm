@@ -576,7 +576,8 @@ sub rewrite_as_spam {
   # This is the new message.
   # jm: add a SpamAssassin Received header to note markup time etc.
   # emulates the fetchmail style.
-  my $newmsg = "Received: from localhost [127.0.0.1] by " . hostname . "\n" .
+  my $newmsg = "Received: from localhost [127.0.0.1] by " .
+	    Mail::SpamAssassin::Util::fq_hostname() . "\n" .
 	"\twith SpamAssassin (" . Mail::SpamAssassin::Version() . " " .
 	    $Mail::SpamAssassin::SUB_VERSION . ");\n" .
 	"\t" . strftime("%a, %d %b %Y %H:%M:%S ", localtime) .
@@ -785,7 +786,7 @@ sub _get_tag {
 
 	    SUBVERSION => sub { $Mail::SpamAssassin::SUB_VERSION },
 
-	    HOSTNAME => sub { hostname() },
+	    HOSTNAME => sub { Mail::SpamAssassin::Util::fq_hostname(); },
 
 	    CONTACTADDRESS => sub { $self->{conf}->{report_contact}; },
 

@@ -9,7 +9,6 @@ use AnyDBM_File;
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Util;
-use Sys::Hostname;
 use File::Basename;
 use File::Spec;
 use File::Path;
