@@ -57,6 +57,9 @@ describe OUTLOOK_UNDISC_RECIPS	MS-Outlook-style To "<Undisclosed-Recipient:;>"
 header FAKED_UNDISC_RECIPS	To =~ /undisclosed[_ ]*recipient(?:s[^:]|[^s])/i
 describe FAKED_UNDISC_RECIPS	Faked To "Undisclosed-Recipients"
 
+header FAKED_UNDISC_RECIPS_AT	To =~ /undisclosed-recipient: \@[a-z]/i
+describe FAKED_UNDISC_RECIPS_AT	Faked To "Undisclosed-Recipients" @ some address
+
 header TO_INVESTORS		To =~ /\bInvestors\@/
 describe TO_INVESTORS		To: non-existent 'Investors' address
 
