@@ -149,20 +149,13 @@ describe MSGID_RANDY		Message-Id has pattern used in spam
 
 ###########################################################################
 
-header MSGID_FROM_MTA_SHORT	eval:mta_added_message_id('short')
-describe MSGID_FROM_MTA_SHORT	Message-Id was added by a relay
-
-header MSGID_FROM_MTA_LATER	eval:mta_added_message_id('later')
-describe MSGID_FROM_MTA_LATER	Message-Id was added by a relay
-
-header MSGID_FROM_MTA_BACKUP	eval:mta_added_message_id('backup')
-describe MSGID_FROM_MTA_BACKUP	Message-Id was added by a relay
-tflags MSGID_FROM_MTA_BACKUP	net
-
-header __MSGID_BEFORE_RECEIVED		ALL =~ /\nMessage-Id:.*\nReceived:/si
-header __MSGID_BEFORE_OKAY		Message-Id =~ /\@[a-z0-9.-]+\.(?:yahoo|wanadoo)(?:\.[a-z]{2,3}){1,2}>/
-meta MSGID_FROM_MTA_HEADER		(__MSGID_BEFORE_RECEIVED && !__MSGID_BEFORE_OKAY)
+header __MSGID_BEFORE_RECEIVED	ALL =~ /\nMessage-Id:.*\nReceived:/si
+header __MSGID_BEFORE_OKAY	Message-Id =~ /\@[a-z0-9.-]+\.(?:yahoo|wanadoo)(?:\.[a-z]{2,3}){1,2}>/
+meta MSGID_FROM_MTA_HEADER	(__MSGID_BEFORE_RECEIVED && !__MSGID_BEFORE_OKAY)
 describe MSGID_FROM_MTA_HEADER	Message-Id was added by a relay
+
+header MSGID_FROM_MTA_ID	eval:message_id_from_mta()
+describe MSGID_FROM_MTA_ID	Message-Id for external message added locally
 
 header MSGID_FROM_MTA_HOTMAIL	Message-Id =~ /<MC\d{1,2}-F{1,2}\w{21,22}\@\S*hotmail\.com>/
 describe MSGID_FROM_MTA_HOTMAIL	Message-Id was added by a hotmail.com relay

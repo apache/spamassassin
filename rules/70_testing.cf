@@ -477,22 +477,26 @@ header T_ADVERT_CODE2	Subject =~ /\w.*\bA\s*D\s*V\b/
 # bug 3262
 body T_NO_COST                    /\bno (?:(?:extra|hidden) )?(?:cost|charge)\b/i
 
-# URL obfuscation services
-uri T_URL_SHORTEN_1		m{http://makeashorterlink\.com/}i
-uri T_URL_SHORTEN_2		m{http://shorl\.com/}i
-uri T_URL_SHORTEN_3		m{http://tinyurl\.com/}i
-uri T_URL_SHORTEN_4		m{http://xrl\.us/}i
-uri T_URL_SHORTEN_5		m{http://snipurl\.com/}i
-uri T_URL_SHORTEN_6		m{http://lin\.kz/}i
-
-# possible replacement for MTA_FROM_MTA_SHORT
-# maybe delete MSGID_FROM_MTA_LATER and MSGID_FROM_MTA_BACKUP too
-header T_MSGID_FROM_MTA_1	eval:message_id_from_mta_1()
-header T_MSGID_FROM_MTA_2	eval:message_id_from_mta_2()
-header T_MSGID_FROM_MTA_3	eval:message_id_from_mta_3()
-header T_MSGID_FROM_MTA_4	eval:message_id_from_mta_4()
-
 # bug 3268
 body T_REDIRECTOR       eval:check_for_http_redirector()
 describe T_REDIRECTOR	Message has HTTP redirector URI
 
+# obviously a URI rule, replaces LOTS_OF_STUFF
+# rawbody seems to do better than uri which is somewhat troubling
+uri T_LOTS_OF_STUFF_1		/\b(?:\d{1,3}[,\.])+\d{3}.{0,20}\b(?:pics|pictures|images|photos|movies)/i
+uri T_LOTS_OF_STUFF_2		/\b(?:\d{1,3}[,\.])+\d{3}.{0,20}\b(?:pics|pictures|images|photos|movies|imgs?)/i
+uri T_LOTS_OF_STUFF_3	/\b(?:\d{1,3}[,\.])+\d{3}.{0,20}\b(?:pics?|pictures?|images?|photos?|movies?|imgs?)/i
+rawbody T_LOTS_OF_STUFF_4	/\b(?:\d{1,3}[,\.])+\d{3}.{0,20}\b(?:pics|pictures|images|photos|movies)/i
+rawbody T_LOTS_OF_STUFF_5	/\b(?:\d{1,3}[,\.])+\d{3}.{0,20}\b(?:pics|pictures|images|photos|movies|imgs?)/i
+rawbody T_LOTS_OF_STUFF_6	/\b(?:\d{1,3}[,\.])+\d{3}.{0,20}\b(?:pics?|pictures?|images?|photos?|movies?|imgs?)/i
+
+# possible replacement rule for TO_HAS_SPACES
+# the old rule tested To:addr but we changed the :addr code, so this is
+# based on my corpus hits from 2.6x.
+header T_TO_HAS_SPACES_1	To =~ /[ \t]$/
+header T_TO_HAS_SPACES_2	To =~ /[ \t]$/m
+
+# just an experiment
+header __MSGID_BEFORE_2RECEIVED	ALL =~ /\nMessage-Id:.*\nReceived:.*\nReceived:/si
+meta T_MSGID_FROM_MTA_HEADER_1	(__MSGID_BEFORE_2RECEIVED && !__MSGID_BEFORE_OKAY)
+meta T_MSGID_FROM_MTA_HEADER_2	(__MSGID_BEFORE_2RECEIVED)
