@@ -60,7 +60,7 @@ q{
 pm_to_blib: spamassassin
 
 spamassassin: spamassassin.raw
-	$(PERL) fixpath.pl $< $@
+	$(PERL) fixpath.pl spamassassin.raw $@
 	$(CHMOD) $(PERM_RWX) $@
 
 inst_cfs: spamassassin.cf spamassassin.prefs
