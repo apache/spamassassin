@@ -347,8 +347,14 @@ describe LINES_OF_YELLING_3     3 WHOLE LINES OF YELLING DETECTED
 # these tests doesn't actually use rawbody since rawbody isn't raw enough;
 # they must be written very carefully to avoid modifying the original content
 
+rawbody BASE64_ENC_TEXT		eval:check_for_mime_base64_encoded_text()
+describe BASE64_ENC_TEXT	Message text disguised using base-64 encoding
+
 rawbody  MIME_EXCESSIVE_QP	eval:check_for_mime_excessive_qp()
 describe MIME_EXCESSIVE_QP	Excessive quoted-printable encoding in body
+
+rawbody MIME_HTML_NO_CHARSET	eval:check_for_mime_html_no_charset()
+describe MIME_HTML_NO_CHARSET	Message text in HTML without specified charset
 
 rawbody  MIME_LONG_LINE_QP	eval:check_for_mime_long_line_qp()
 describe MIME_LONG_LINE_QP	Quoted-printable line longer than 76 characters
@@ -521,9 +527,6 @@ describe HTML_EMBEDS		HTML with embedded plugin object
 # (contrib: WW)
 body INTERNET_TERROR_RANT       /At the time of this mailing the return email address is a bonafide legitimate return email address that was signed up for with the express purpose.{0,30}internet terrorists\./si
 describe INTERNET_TERROR_RANT   Cyber FirePower! rant about losing dropboxes
-
-full BASE64_ENC_TEXT		eval:check_for_base64_enc_text()
-describe BASE64_ENC_TEXT	Message text disguised using base-64 encoding
 
 body CHARSET_FARAWAY		eval:check_for_faraway_charset()
 describe CHARSET_FARAWAY	Character set indicates a foreign language
