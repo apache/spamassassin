@@ -530,6 +530,12 @@ describe PRIORITY_NO_NAME	Message has priority setting, but no X-Mailer
 header SUBJ_FREE_CAP		Subject =~ /\bFRE{2,}\b/
 describe SUBJ_FREE_CAP		Subject contains the word 'FREE'
 
+header SUB_FREE_OFFER           Subject =~ /^fre{2,}\b/i
+describe SUB_FREE_OFFER         Subject starts with "Free"
+
+header SUB_HELLO                Subject =~ /^hello\b/i
+describe SUB_HELLO              Subject starts with "Hello"
+
 header VAR_REF_IN_RECEIVED      Received =~ /from \$\S+ \(/
 describe VAR_REF_IN_RECEIVED    Received contains a $variable reference
 
@@ -583,5 +589,3 @@ header MIME_BOUND_HEX14      Content-Type =~ /boundary=\"==[0-9a-f]{14}\"/
 header MIME_BOUND_EQS_DASHES Content-Type =~ /boundary=\"==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==\"/
 header MIME_BOUND_MIME_BOUND Content-Type =~ /boundary=\"MIME_BOUNDARY-\d\d\d\d\d-\d-\d\d\d\d\d\d\d\d\d\d\"/
 header MIME_BOUND_MAIL_BOUND Content-Type =~ /boundary=\"___MAIL_BOUNDARY____\"/
-
-
