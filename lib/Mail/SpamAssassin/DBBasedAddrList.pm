@@ -40,7 +40,7 @@ sub new_checker {
     'main'		=> $main,
     'accum'             => { },
     'is_locked'		=> 0,
-    'lock_file'		=> ''
+    'locked_file'	=> ''
   };
 
   my $path;
@@ -49,9 +49,8 @@ sub new_checker {
   {
     $path = $main->sed_path ($main->{conf}->{auto_whitelist_path});
 
-    my $lock_file = Mail::SpamAssassin::Util::safe_lock ($path);
-    if (defined $lock_file) {
-      $self->{lock_file} = $lock_file;
+    if (Mail::SpamAssassin::Util::safe_lock($path)) {
+      $self->{locked_file} = $path;
       $self->{is_locked} = 1;
       dbg("Tie-ing to DB file R/W in $path");
       tie %{$self->{accum}},"AnyDBM_File",$path,
@@ -73,8 +72,10 @@ sub new_checker {
   return $self;
 
 failed_to_tie:
-  unlink($self->{lock_file}) ||
-     dbg ("Couldn't unlink " . $self->{lock_file} . ": $!\n");
+  if ($self->{is_locked}) {
+    Mail::SpamAssassin::Util::safe_unlock($self->{locked_file});
+    $self->{is_locked} = 0;
+  }
   die "Cannot open auto_whitelist_path $path: $!\n";
 }
 
@@ -82,12 +83,12 @@ failed_to_tie:
 
 sub finish {
   my $self = shift;
-  dbg("DB addr list: untie-ing and destroying lockfile.");
+  dbg("DB addr list: untie-ing and unlocking.");
   untie %{$self->{accum}};
   if ($self->{is_locked}) {
     dbg ("DB addr list: file locked, breaking lock.");
-    unlink($self->{lock_file}) or
-		dbg ("Couldn't unlink " . $self->{lock_file} . ": $!\n");
+    Mail::SpamAssassin::Util::safe_unlock($self->{locked_file));
+    $self->{is_locked} = 0;
   }
   # TODO: untrap signals to unlock the db file here
 }
