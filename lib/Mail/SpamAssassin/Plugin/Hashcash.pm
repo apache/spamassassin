@@ -174,6 +174,9 @@ sub _run_hashcash {
   # call down to {msg} so that we can get it as an array of
   # individual headers
   my @hdrs = $scanner->{msg}->get_header ("X-Hashcash");
+  if (scalar @hdrs == 0) {
+    @hdrs = $scanner->{msg}->get_header ("Hashcash");
+  }
 
   foreach my $hc (@hdrs) {
     my $value = $self->_run_hashcash_for_one_string($scanner, $hc);
