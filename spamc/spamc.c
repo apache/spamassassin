@@ -100,7 +100,7 @@ void print_usage(void)
     printf("  -h                  Print this help message and exit.\n");
     printf("  -H                  Randomize IP addresses for the looked-up hostname.\n");
     printf("  -p port             Specify port for connection to spamd.\n"
-           "                      [default: 783\n");
+           "                      [default: 783]\n");
     printf("  -r                  Print full report for messages identified as spam.\n");
     printf("  -R                  Print full report for all messages.\n");
     printf("  -s size             Specify maximum message size, in bytes.\n"
@@ -232,7 +232,8 @@ read_args(int argc, char **argv,
                 break;
             }
             
-            case '?':{
+            case '?':
+            {
                 syslog(LOG_ERR, "invalid usage");
                 /* NOTE: falls through to usage case below... */
             }
