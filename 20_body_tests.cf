@@ -1028,9 +1028,8 @@ describe CANT_LIVE_WITHOUT	Can't live without?
 body NAME_BRAND		        /\b(?:famous name brand|major brand)\b/i
 describe NAME_BRAND		Name Brand
 
-body DIET		        /\b(?:without|no) (?:excercis|diet)ing|weight loss|\b(?:extra|lose|lost|losing).{0,9} (?:pounds|weight|inches)|burn.{1,10}fat\b/i
+body DIET		        /\b(?:(?:without|no) (?:exercis|diet)ing|weight loss|(?:extra|lose|lost|losing).{0,9} (?:pounds|weight|inches)|burn.{1,10}fat)\b/i
 describe DIET			Lose Weight Spam
-
 
 body LONG_DISTANCE	        /\b(?:Unlimited|per minute|free).{1,9}Long Distance/i
 describe LONG_DISTANCE		Long Distance Phone Offer
