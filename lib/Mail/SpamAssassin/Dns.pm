@@ -449,7 +449,6 @@ sub razor2_lookup {
 
 sub is_dcc_available {
   my ($self) = @_;
-  my (@resp);
 
   if ($self->{main}->{local_tests_only}) {
     dbg ("local tests only, ignoring DCC");
@@ -472,7 +471,7 @@ sub is_dcc_available {
     return 0;
   }
 
-  dbg ("DCC is available: ".join(" ", @resp));
+  dbg ("DCC is available: ".$self->{conf}->{dcc_path});
   return 1;
 }
 
@@ -576,7 +575,6 @@ sub dcc_lookup {
 
 sub is_pyzor_available {
   my ($self) = @_;
-  my (@resp);
 
   if ($self->{main}->{local_tests_only}) {
     dbg ("local tests only, ignoring Pyzor");
@@ -599,7 +597,7 @@ sub is_pyzor_available {
     return 0;
   }
 
-  dbg ("Pyzor is available: ".join(" ", @resp));
+  dbg ("Pyzor is available: ".$self->{conf}->{pyzor_path});
   return 1;
 }
 
