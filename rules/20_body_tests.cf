@@ -312,12 +312,13 @@ describe SEXY_PICS              Sexy pictures
 
 # this seems to be the new fashion (as of Jul 5 2002).  base64-encoded parts need to
 # be stripped before this match
-rawbody TRACKER_ID		/^[a-z0-9]{3,}[-_a-z0-9]{15,}[a-z0-9]{3,}\s*$/is
+rawbody TRACKER_ID		/^[a-z0-9]{6,}[-_a-z0-9]{12,}[a-z0-9]{6,}\s*$/is
 
 describe TRACKER_ID		Incorporates a tracking ID number
 test TRACKER_ID     ok          2174Hzdm0-105YUqT8863DiDg0-616mqbE4931HEBc0-732qBHd6314l52
 test TRACKER_ID     ok          ofsknxxdqgtgqvsoiytkivajvtj
 test TRACKER_ID     fail        <!-- ADMINISTRIVIA -->
+test TRACKER_ID     fail        Donau-Dampfschifffahrts-Kapitaen
 
 # heh heh heh... tags used to (presumably) generate those anti-Razor random IDs
 body MARKUP_RAND                /{%RAND%}/
