@@ -96,21 +96,25 @@ to keep from skipping messages based on size.
 Specifies how many messages should be run at the same time, as well as the
 method with which to scan for the messages.
 
-If the value is 0, the list of messages will be kept in memory, and
-only 1 message at a time will be processed by the wanted subroutine.
+If the value is 0, the list of messages to process will be kept in memory,
+and only 1 message at a time will be processed by the wanted subroutine.
 Restarting is not allowed.
 
-If the value is 1, the list of messages will be kept in a temporary file,
-and only 1 message at a time will be processed by the wanted subroutine.
-Restarting is not allowed.  A child process will be forked to determine the
-list of messages.
+If the value is 1, the list of messages to process will be kept in a
+temporary file, and only 1 message at a time will be processed by the
+wanted subroutine.  Restarting is not allowed.
 
-If the value is 2 or higher, the list of messages will be kept in a
-temporary file, and the process will split into a parent/child mode.
-The option value number of children will be forked off and each child will
-process messages via the wanted subroutine in parallel.  Restarting is
-allowed.  A separate child process will be forked to determine the list
-of messages.
+If the value is 2 or higher, the list of messages to process will be kept
+in a temporary file, and the process will split into a parent/child mode.
+The option value number of children will be forked off and each child
+will process messages via the wanted subroutine in parallel.  Restarting
+is allowed.
+
+B<NOTE:> For C<opt_j> >= 1, an extra child process will be created to
+determine the list of messages, sort the list, everything as appropriate.
+This will keep the list in memory (possibly multiple copies) before
+writing the final list to a temporary file which will be used for
+processing.  The list generation child will exit, freeing up the memory.
 
 =item opt_n
 
