@@ -151,13 +151,13 @@ body MAILBITS_EMAIL             /This is a free service provided by MailBits\.co
 describe MAILBITS_EMAIL         recommended page from MailBits.com
 tflags MAILBITS_EMAIL		nice
 
-body GROUPS_YAHOO_1             /Your use of Yahoo! Groups is subject to the/
-describe GROUPS_YAHOO_1         Modified Yahoo! Groups test
+body GROUPS_YAHOO_1             /^Your use of Yahoo! Groups is subject to http:\/\/\Qdocs.yahoo.com\E\/info\/terms\//
+describe GROUPS_YAHOO_1         Yahoo! Groups message
 tflags GROUPS_YAHOO_1		nice
 
 # Evites trigger false positives
 body EVITE                      /(?:evite\.citysearch\.com|evite\.com)/
-describe EVITE                  Claw back some for evite
+describe EVITE                  Claw back some for Evite
 tflags EVITE		        nice
 
 # Has a proper .sig - probably clean
