@@ -21,7 +21,7 @@
 if [ -f /etc/sysconfig/spamassassin ] ; then
         . /etc/sysconfig/spamassassin
 else
-        SPAMDOPTIONS="-d -c -a"
+        SPAMDOPTIONS="-d -c -a -m5 -H"
 fi
 
 [ -f /usr/bin/spamd -o -f /usr/local/bin/spamd ] || exit 0
