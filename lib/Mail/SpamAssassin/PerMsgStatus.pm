@@ -58,6 +58,7 @@ sub new {
     'hits'              => 0,
     'test_logs'         => '',
     'test_names_hit'    => [ ],
+    'cache_ALL_hdrs_string' => undef,
     'tests_already_hit' => { },
   };
 
@@ -923,7 +924,12 @@ sub get {
   my ($self, $hdrname, $defval) = @_;
   local ($_);
 
-  if ($hdrname eq 'ALL') { return $self->{msg}->get_all_headers(); }
+  if ($hdrname eq 'ALL') {
+    if (!defined $self->{cache_ALL_hdrs_string}) {
+      $self->{cache_ALL_hdrs_string} = $self->{msg}->get_all_headers();
+    }
+    return $self->{cache_ALL_hdrs_string};
+  }
 
   my $getaddr = 0;
   if ($hdrname =~ s/:addr$//) { $getaddr = 1; }
