@@ -32,7 +32,7 @@ use strict;
 use bytes;
 
 use Mail::SpamAssassin::BayesStore;
-use Mail::SpamAssassin::SHA1 qw(sha1);
+use Digest::SHA1 qw(sha1);
 
 use vars qw( @ISA );
 

@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 use strict;
 use Test;
 use Mail::SpamAssassin;
-use Mail::SpamAssassin::SHA1;
+use Digest::SHA1;
 
 my %files = (
 	"$prefix/t/data/nice/mime1" => [
@@ -103,7 +103,7 @@ foreach my $k ( sort keys %files ) {
 	  $res = '';
 	}
 	else {
-	  $res = Mail::SpamAssassin::SHA1::sha1_hex($parts[0]->decode());
+	  $res = Digest::SHA1::sha1_hex($parts[0]->decode());
 	}
 	#print ">> $res\n";
         $res = $res eq $_;

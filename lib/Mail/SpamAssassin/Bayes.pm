@@ -52,7 +52,7 @@ use bytes;
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::PerMsgStatus;
-use Mail::SpamAssassin::SHA1 qw(sha1 sha1_hex);
+use Digest::SHA1 qw(sha1 sha1_hex);
 
 use vars qw{
   @ISA

@@ -185,6 +185,14 @@ These modules are required for SpamAssassin to build and run:
 
 These additional modules are required for SpamassAssin to run:
 
+  - Digest::SHA1    (from CPAN)
+
+    The Digest::SHA1 module is used as a cryptographic hash for some
+    tests and the Bayes subsystem.  It is also used by Razor2.
+
+    If you use Debian, you can get Digest::SHA1 from the libdigest-sha1-perl
+    package.
+
   - HTML::Parser >= 3.24 (from CPAN)
 
     Version 3.29 or later is recommended.
@@ -231,18 +239,6 @@ skipped.
     There seems to be a bug in libdb 4.1.25, which is distributed by
     default on some versions of Linux.  See
     http://wiki.apache.org/spamassassin/DbFileSleepBug for details.
-
-
-  - Digest::SHA1    (from CPAN)
-
-    The Digest::SHA1 module will speed up some cryptographic hash tests,
-    but is not required (although it may be required by another module).
-
-    If you make use of the bayes rules this module is strongly
-    recommended.
-
-    If you use Debian, you can get Digest::SHA1 from the libdigest-sha1-perl
-    package.
 
 
   - Net::DNS        (from CPAN)
