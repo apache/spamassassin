@@ -392,7 +392,10 @@ score SUBJ_ALL_CAPS		1
 score MSGID_HAS_NO_AT		1
 
 # Invalid Date: header
-score INVALID_DATE		2
+score INVALID_DATE		3
+
+# Invalid Date:, no timezone
+score INVALID_DATE_NO_TZ	2
 
 # Subject: ends in a question mark
 score SUBJ_HAS_Q_MARK		1
@@ -415,7 +418,7 @@ score NO_MX_FOR_FROM		1
 score KNOWN_BAD_DIALUPS		2
 
 # From: and To: the same address
-score FROM_AND_TO_SAME		1
+score FROM_AND_TO_SAME		3
 
 # Headers contain a warning from the MTA which received the first
 # mail, indicating a fake name was used in the SMTP HELO command.
@@ -509,6 +512,15 @@ score CYBER_FIRE_POWER		4
 score INTERNET_TERROR_RANT	8
 score RELAYING_FRAME		5
 score BASE64_ENC_TEXT		4
+
+# some re-scored tests: statistical analysis of my mail spool indicates
+# these scores work well without causing false positives.
+score CALL_888			3
+score CALL_1_800		3
+score CLICK_BELOW		3
+score OPT_IN			2
+score REMOVAL_INSTRUCTIONS	3
+score FORGED_HOTMAIL_RCVD	3
 
 ###########################################################################
 # Compensation for common false positives.
