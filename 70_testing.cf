@@ -553,7 +553,7 @@ describe T_FAKED_IP_IN_RCVD	Received: contains a name with a faked IP-address
 
 # replaces VIAGRA
 # Cialis needs a leading \b
-body T_DRUG_ED_CAPS	/(?:\bCIALIS|LEVITRA|VIAGRA)/i
+body T_DRUG_ED_CAPS	/(?:\bCIALIS|LEVITRA|VIAGRA)/
 describe T_DRUG_ED_CAPS	Mentions an E.D. drug
 
 # Should catch Atriks, for one
