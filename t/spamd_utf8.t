@@ -2,11 +2,23 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_utf8");
-use Test; BEGIN { plan tests => ($SKIP_SPAMD_TESTS ? 0 : 3) };
+my $am_running;
+my $testlocale = 'en_US.UTF-8';	# ensure we test in UTF-8 locale
 
-exit if $SKIP_SPAMD_TESTS;
+use Test; BEGIN {
+  my $havelocale = 1;
+  open (IN, "LANG=$testlocale perl -e 'exit 0' 2>&1 |");
+  while (<IN>) {
+    /Please check that your locale settings/ and ($havelocale = 0);
+  }
+  close IN;
 
-$ENV{'LANG'} = 'en_US.UTF-8';	# ensure we test in UTF-8 locale
+  $am_running = (!$SKIP_SPAMD_TESTS && $havelocale);
+  plan tests => ($am_running ? 3 : 0);
+};
+
+exit unless $am_running;
+$ENV{'LANG'} = $testlocale;
 
 # ---------------------------------------------------------------------------
 
@@ -20,4 +32,6 @@ q{ X-Spam-Flag: YES}, 'flag',
 
 ok (sdrun ("-L", "< data/spam/008", \&patterns_run_cb));
 ok_all_patterns();
+exit;
 
+# ---------------------------------------------------------------------------
