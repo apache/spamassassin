@@ -323,7 +323,13 @@ describe FUDGE_MULTIHOP_RELAY	Do not double penalize if an IP is a multihop and 
 
 # don't add headers without testing for false positives (usually Unix MTAs and
 # list software) and especially don't add From:, Reply-To:, Date:, Message-ID:
-header FORGED_RCVD_FOUND	ALL =~ /\n(?:To|Importance|Content-Transfer-Encoding|Content-Type|Subject|X-Mailer|X-MSMail-Priority|X-Sender):.*\nReceived: /s
+#
+# Jul 11 2002 jm: removed some headers, as it now gets a 5:1
+# false-positive-to-spam ratio!  headers: Content-Transfer-Encoding,
+# Content-Type, X-Mailer, X-Sender.  v important to test this against a good
+# corpus of mailing list hosts like Yahoo, or webmail systems.
+#
+header FORGED_RCVD_FOUND	ALL =~ /\n(?:To|Importance|Subject|X-MSMail-Priority):.*\nReceived: /s
 describe FORGED_RCVD_FOUND	Possibly-forged 'Received:' header found
 
 header FORGED_RCVD_TRAIL	eval:check_for_forged_received_trail()

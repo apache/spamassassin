@@ -249,66 +249,12 @@ describe COMMUNIGATE		Sent using a trial version of CommuniGate
 body AUTO_EMAIL_REMOVAL		/Auto Email Removal/
 describe AUTO_EMAIL_REMOVAL	Claims auto-email removal
 
-body PORN_1			/\bbarely\b.{0,15}\blegal\b/i
-describe PORN_1			Uses words and phrases which indicate porn (1)
-body PORN_2			/\bwild\b.{0,15}\bhard[ -]?core\b/i
-describe PORN_2			Uses words and phrases which indicate porn (2)
-
 full PORN_3			eval:porn_word_test()
 describe PORN_3			Uses words and phrases which indicate porn (3)
 
-
 # (contrib: skod)
-body PORN_6			/\b(?:\d+\+? xxx pictures|xxx photos?)/i
+body PORN_6			/\b(?:\d+\+? xxx pictures|xxx photos?)\b/i
 describe PORN_6			Uses words and phrases which indicate porn (6)
-
-body PORN_7			/Free XXX/i
-describe PORN_7			Uses words and phrases which indicate porn (7)
-
-body PORN_8			/\b(?:video|movie|teen|ware|mp3)z/
-describe PORN_8			Uses words and phrases which indicate porn (8)
-
-# Words which will almost never be seen outside of porn spam
-body     PORN_9                 /\b(?:sex|gay|slut|whore|\bcum|f.ck|adult|xxx)[ -]?fest|\bcum[ -]?shot|\bcum[ -]?dumpster/i
-describe PORN_9                 Uses words and phrases which indicate porn (9)
-
-
-# Words which mainly show up in porn spam
-body     PORN_10                /\b(?:lolita|slut|whore|porn|skank|(?:babes|tit(?:tie)?s|puss(?:y|ies)|bi(?!-)|(?:Asian|Japanese|oriental)\s+(?:girls|schoolgirls))\b)|(?:[^x]|\b)xxx(?:[^x]|\b)|gang[ -]?bang|free pics/i
-describe PORN_10                Uses words and phrases which indicate porn (10)
-
-
-# Words which often show up in spam, but also show up somewhat often in
-# non-spam.
-# jm: removed "webcam", often appears in nonspam. better to match for it where
-# another porn term appears nearby (see below).
-body     PORN_11                /\b(?:hard[ -]?core|amateur\b)/i
-describe PORN_11                Uses words and phrases which may indicate porn (11)
-
-
-# Like PORN_3, but it only needs to match two terms intead of three. To
-# compensate for only matching two terms, so as to not generate too many
-# false positives, there can only be up to seven characters between terms,
-# rather than the 15 for PORN_3; it also uses a shorter list of terms.
-body     PORN_12                /\b(?:lolita|xxx|sex|slut|whore|hottest|hard-?core|horn|virgin|naught|web.?cam|le[sz]|skank|tit|puss|adult|fuck)/i and /(?:(?:\blolita|(?:[^x]|\b)xxx(?:[^x]|\b)|\bsex|\bslut|\bwhore|\bhottest\b|hard-?core|\bhorny\b|\bhorniest\b|\bvirgin|\bnaughty\b|\bnaughtiest\b|\bweb.?cam|\ble[sz]b(?:ian|o)|\bskank|\btits\b|\btitties\b|\bpussy\b|\bpussies\b|\badult\b|\bfuck).{0,7}){2,}/i
-describe PORN_12                Uses words and phrases which indicate porn (12)
-
-
-body     PORN_13                /must be (?:at least|over) 18/i
-describe PORN_13                Uses words and phrases which may indicate porn (13)
-
-
-# Like PORN_11, but phrases which are *really* likely to show up in non-porn
-# jm: removed "pics", too many FPs; removed "my name is", had a 4:1 FP ratio in my corpus
-body     PORN_14                /\b18 years? old\b/i
-describe PORN_14                Uses words and phrases which may indicate porn (14)
-
-
-body SEXY_PICS                  /sexy pictures/i
-describe SEXY_PICS              Sexy pictures
-
-# tracker IDs have mutated in the last 6 months; this now seems to get no hits
-#rawbody TRACKER_ID		/^[^<]\W{3,5} (?:[a-z]{10,}|[A-Z]{10,}) \W{3,5}[^>]\s*$/
 
 # this seems to be the new fashion (as of Jul 5 2002).  base64-encoded parts need to
 # be stripped before this match
@@ -752,15 +698,15 @@ describe RISK_FREE              Risk free.  Suuurreeee....
 body     AS_SEEN_ON             /seen on\b\s*(?:TV|ABC|NBC|CBS|CNN|Oprah|USA Today|48 Hours|New York Times|\w+\s+TV|:)/i
 describe AS_SEEN_ON             As seen on national TV!
 
-body     NOT_INTENDED           /not intended for residents ?(:of|in)/i
+body     NOT_INTENDED           /not intended for residents ?(:of|in)\b/i
 describe NOT_INTENDED           Not intended for residents of XYZ.
 
 # This phrase appears in many pyramid scheme mails in which
 # "My Wife Jody" testimonials are absent
-body     COPY_ACCURATELY        /copy.{1,10}name.{1,10}address.{1,10}ACCURATELY/i
+body     COPY_ACCURATELY        /copy.{1,10}name.{1,10}address.{1,10}ACCURATELY\b/i
 describe COPY_ACCURATELY        Common pyramid scheme phrase (1)
 
-body     SEE_FOR_YOURSELF       /See (?:for|it) yourself/i
+body     SEE_FOR_YOURSELF       /See (?:for|it) yourself\b/i
 describe SEE_FOR_YOURSELF       See for yourself
 
 # Jul  3 2002 jm: made into a rawbody test so it actually tests line-by-line. Otherwise
@@ -770,7 +716,7 @@ describe SEE_FOR_YOURSELF       See for yourself
 rawbody DOUBLE_CAPSWORD		/\b([A-Z]{4,})\b.{0,50}\b\1\b/
 describe DOUBLE_CAPSWORD	A word in all caps repeated on the line
 
-body ORDER_NOW                  /order (?:now|soon|fast|quickly|while)/i
+body ORDER_NOW                  /order (?:now|soon|fast|quickly|while)\b/i
 describe ORDER_NOW              Encourages you to waste no time in ordering
 
 rawbody OBFUSCATING_JAVASCRIPT   /charCodeAt|fromCharCode/i
@@ -788,76 +734,76 @@ test OBFUSCATING_COMMENT fail   Not a <!-- problem --> here
 
 ## Contrib: Mark Perkel
 
-body OFFSHORE_SCAM		/offshore .{0,20}(?:credit card|companies|account|financ|website)/i
+body OFFSHORE_SCAM		/\boffshore\b.{0,20}(?:credit card|companies|account|financ|websites?)\b/i
 describe OFFSHORE_SCAM		Off Shore Scams
 
-body VACATION_SCAM		/(?:free|mini-?|dream|special).{0,10}vacation|vacation (?:offer|promotion|package|for two|getaway)/i
+body VACATION_SCAM		/\b(?:free|mini-?|dream|special).{0,10}vacation|vacation (?:offer|promotion|package|for two|getaway)\b/i
 describe VACATION_SCAM		Vacation Offers
 
-body WHY_PAY_MORE		/why pay more/i
+body WHY_PAY_MORE		/\bwhy pay more\b/i
 describe WHY_PAY_MORE		Why Pay More?
 
-body CONGRATULATIONS		/congratulations! you/i
+body CONGRATULATIONS		/\bcongratulations! you\b/i
 describe CONGRATULATIONS	Congratulations - you've been scammed?
 
-body SIGN_UP			/free sign up|sign up today/i
+body SIGN_UP			/\b(?:free sign up|sign up today)\b/i
 describe SIGN_UP		Sign up Free Today
 
-body FREE_CELL_PHONE		/free .{0,12}cell phone/i
+body FREE_CELL_PHONE		/free .{0,12}cell phone\b/i
 describe FREE_CELL_PHONE	Free Cell Phone
 
-body FREE_PREVIEW		/free preview/i
+body FREE_PREVIEW		/free preview\b/i
 describe FREE_PREVIEW		Free Preview
 
-body FREE_ACCESS		/free access/i
+body FREE_ACCESS		/free access\b/i
 describe FREE_ACCESS		Free Access
 
-body FREE_LEADS			/free leads/i
+body FREE_LEADS			/free leads\b/i
 describe FREE_LEADS		Free Leads
 
-body FREE_TICKETS		/free ticket/i
+body FREE_TICKETS		/free ticket\b/i
 describe FREE_TICKETS		Free Tickets
 
-body OFFER			/(?:free|special|trial) offer/i
+body OFFER			/(?:free|special|trial) offer\b/i
 describe OFFER			Free Offer
 
-body OFFER_EXPIRE		/offer expires/i
+body OFFER_EXPIRE		/offer expires\b/i
 describe OFFER_EXPIRE		Offer Expires
 
-body FREE_QUOTE			/free quote/i
+body FREE_QUOTE			/free quote\b/i
 describe FREE_QUOTE		Free Quote
 
-body FREE_INSTALL		/free installation/i
+body FREE_INSTALL		/free installation\b/i
 describe FREE_INSTALL		Free Installation
 
-body FREE_SAMPLE		/free sample/i
+body FREE_SAMPLE		/free sample\b/i
 describe FREE_SAMPLE		Free Sample
 
-body FREE_DVD			/free dvd/i
+body FREE_DVD			/free dvd\b/i
 describe FREE_DVD		Free DVD
 
-body FREE_INVESTMENT		/free investment/i
+body FREE_INVESTMENT		/free investment\b/i
 describe FREE_INVESTMENT	Free Investment 
 
-body INVESTMENT			/investment decision/i
+body INVESTMENT			/investment decision\b/i
 describe INVESTMENT		Investment Decision
 
-body FREE_TRIAL			/free trial/i
+body FREE_TRIAL			/free trial\b/i
 describe FREE_TRIAL		Free Trial
 
-body FREE_MEMBERSHIP		/free membership/i
+body FREE_MEMBERSHIP		/free membership\b/i
 describe FREE_MEMBERSHIP	Free Membership
 
-body FREE_FLAG			/free flag/i
+body FREE_FLAG			/free flag\b/i
 describe FREE_FLAG		Free Flag
 
-body FREE_HOSTING		/free hosting/i
+body FREE_HOSTING		/free hosting\b/i
 describe FREE_HOSTING		Free Hosting
 
-body FREE_WEBSITE		/free web/i
+body FREE_WEBSITE		/free website/i
 describe FREE_WEBSITE		Free Website
 
-body CREDIT_CARD		/credit card.{1,10}(?:offer|debt|decision)/i
+body CREDIT_CARD		/credit card.{1,10}(?:offer|debt|decision)\b/i
 describe CREDIT_CARD		Credit Card Offers
 
 body NO_CREDIT_CHECK		/no credit check/i
@@ -980,9 +926,6 @@ describe INCREDIBLE		Things incredible
 body FIND_ANYTHING		/find out anything/i
 describe FIND_ANYTHING		Find out Anything
 
-body FARM_SEX			/(?:farm|animal) (?:sex|fucking|action)/i
-describe FARM_SEX		Sex with Animals
-
 body SEDUCTION			/(?:seduc|attract).{0,8} (?:ebook|opposite sex|women)/i
 describe SEDUCTION		Score with babes!
 
@@ -1065,164 +1008,244 @@ describe LONG_DISTANCE		Long Distance Phone Offer
 body REVERSE_AGING		/reverses? aging/i
 describe REVERSE_AGING		Reverses Aging
 
-body HAIR_LOSS			/(?:thinn?ing|restore|grow|new) hair|hair loss/i
+body HAIR_LOSS		        /(?:thinn?ing|restore|grow|new) hair|hair loss/i
 describe HAIR_LOSS		Cures Baldness
 
-body CABLE_CONVERTER		/cable converter/i
+body CABLE_CONVERTER	        /cable converter/i
 describe CABLE_CONVERTER	Cable Converter
 
-body LUXURY_CAR			/luxury car/i
+body LUXURY_CAR		        /luxury car/i
 describe LUXURY_CAR		Luxury Car
 
-body PROTECT_ASSETS		/(?:judgement|lein|divorce|seizure) proof/i
+body PROTECT_ASSETS	        /(?:judgement|lein|divorce|seizure) proof/i
 describe PROTECT_ASSETS		Protect Assets
 
-body BREAKTHROUGH_2		/(?:revolutionary|medical) breakthrough/i
+body BREAKTHROUGH_2	        /(?:revolutionary|medical) breakthrough/i
 describe BREAKTHROUGH_2		Breakthrough
 
-body WRINKLES			/wrinkle reduction/i
+body WRINKLES		        /wrinkle reduction/i
 describe WRINKLES		Removes Wrinkles
 
-body HARD_CASH			/hard cash/i
+body HARD_CASH		        /hard cash/i
 describe HARD_CASH		Is cash really hard?
 
-body BIG_BUCKS			/big bucks/i
+body BIG_BUCKS		        /big bucks/i
 describe BIG_BUCKS		They are all the same size
 
-body BUY_JUDGEMENTS		/(?:purchase|collect|divorce) {0,20} judgements/i
+body BUY_JUDGEMENTS	        /(?:purchase|collect|divorce) {0,20} judgements/i
 describe BUY_JUDGEMENTS		Purchase Judgements
 
-body LYING_EYES			/believe your eyes/i
+body LYING_EYES		        /believe your eyes/i
 describe LYING_EYES		Will not Belive your Eyes!
 
-body WHILE_YOU_SLEEP		/while you sleep/i
+body WHILE_YOU_SLEEP	        /while you sleep/i
 describe WHILE_YOU_SLEEP	While you Sleep
 
-body WHILE_SUPPLIES		/while supplies last/i
+body WHILE_SUPPLIES	        /while supplies last/i
 describe WHILE_SUPPLIES		While Supplies Last
 
-body RICH			/make you rich|get rich quick/i
+body RICH		        /(?:make you rich|get rich quick)/i
 describe RICH			If only it were that easy
 
-body WINNING			/you.{0,4} (?:won|a winner)|register to win|sweepstakes/i
+body WINNING		        /you.{0,4} (?:won|a winner)|register to win|sweepstakes/i
 describe WINNING		Who really wins?
 
-body PROMOTION			/special promotion/i
+body PROMOTION		        /special promotion/i
 describe PROMOTION		Special Promotion
 
-body HIDDEN_CHARGES		/hidden charges/i
+body HIDDEN_CHARGES	        /hidden charges/i
 describe HIDDEN_CHARGES		Talks about Hidden Charges
 
-body GET_STARTED_NOW		/get started now/i
+body GET_STARTED_NOW	        /get started now/i
 describe GET_STARTED_NOW	Get Started Now
 
-body GET_IT_NOW			/get it now/i
+body GET_IT_NOW		        /get it now/i
 describe GET_IT_NOW		Get it now!
 
-body ONLY_COST			/only .{0,9}\$/i
+body ONLY_COST		        /only .{0,9}\$/i
 describe ONLY_COST		Only $$$
 
-body SAVE_BUCKS			/save \$/i
+body SAVE_BUCKS		        /save \$/i
 describe SAVE_BUCKS		Save $$$
 
-body FINANCIAL			/financial(?:ly|) free/i
+body FINANCIAL		        /financial(?:ly|) free/i
 describe FINANCIAL 		Financial Freedom
 
-body FORWARD_LOOKING		/contains forward-looking statements/i
+body FORWARD_LOOKING	        /contains forward-looking statements/i
 describe FORWARD_LOOKING	Stock Disclaimer Statement
 
-body DISCLAIMER			/disclaimer/i
+body DISCLAIMER		        /disclaimer/i
 describe DISCLAIMER		Message contains disclaimer
 
-body SATISFACTION		/satisfaction .{0,9}gauranteed|not .{0,9}satisfied/i
+body SATISFACTION	        /satisfaction .{0,9}gauranteed|not .{0,9}satisfied/i
 describe SATISFACTION		Satisfaction Guaranteed
 
-body PRIZE			/claim.{0,9} prize/i
+body PRIZE		        /claim.{0,9} prize/i
 describe PRIZE			Talks about prizes
 
-body GETAWAY			/weekend getaway/i
+body GETAWAY		        /weekend getaway/i
 describe GETAWAY		Weekend Getaway
 
-body HGH			/human growth hormone/i
+body HGH		        /human growth hormone/i
 describe HGH			Human Growth Hormone
 
-body WEALTH			/achieve .{0,15}wealth/i
+body WEALTH		        /achieve .{0,15}wealth/i
 describe WEALTH			Achieve Wealth
 
-body GIVING_AWAY		/giving away/i
+body GIVING_AWAY	        /giving away/i
 describe GIVING_AWAY		They're just giving it away!
 
-body EASY_TERMS			/easy terms/i
+body EASY_TERMS		        /easy terms/i
 describe EASY_TERMS		Easy Terms
 
-body EXTRA_CASH			/extra cash/i
+body EXTRA_CASH		        /extra cash/i
 describe EXTRA_CASH		Offers Extra Cash
 
-body GET_PAID			/get paid/i
+body GET_PAID		        /get paid/i
 describe GET_PAID		Get Paid
 
-body BEEN_TURNED_DOWN		/been turned down/i
+body BEEN_TURNED_DOWN	        /been turned down/i
 describe BEEN_TURNED_DOWN	Have you been turned down?
 
-body ONE_TIME			/one time (?:charge|investment)/i
+body ONE_TIME		        /one time (?:charge|investment)/i
 describe ONE_TIME		One time charge/investment
 
-body COMPETE			/compete for your business/i
+body COMPETE		        /compete for your business/i
 describe COMPETE		Compete for your business
 
-body CANCEL			/cancel at any time/i
+body CANCEL		        /cancel at any time/i
 describe CANCEL			Cancel at any time!
 
-body SELECTED			/you.{0.9} been selected/i
+body SELECTED		        /you.{0.9} been selected/i
 describe SELECTED		You've been selected! Lucky You!
 
-body CHANGE_TERMS		/terms and conditions/i
+body CHANGE_TERMS	        /terms and conditions/i
 describe CHANGE_TERMS		Terms and conditions
 
-body RESERVES_RIGHT		/reserves the right/i
+body RESERVES_RIGHT	        /reserves the right/i
 describe RESERVES_RIGHT		Reserves the right
 
-body NO_COMBINE			/with any other offer/i
+body NO_COMBINE		        /with any other offer/i
 describe NO_COMBINE		Can not be combined with any other offer
 
-body NEW_CUSTOMER		/new customers only/i
+body NEW_CUSTOMER	        /new customers only/i
 describe NEW_CUSTOMER		New Customers Only
 
-body PSYCHIC			/(?:caring|gifted|experienced) psychic/i
+body PSYCHIC		        /(?:caring|gifted|experienced) psychic/i
 describe PSYCHIC		Psychics Scam
 
-body PHONE_CANCER		/phone.{0,15}cancer/i
+body PHONE_CANCER	        /phone.{0,15}cancer/i
 describe PHONE_CANCER		Cell Phone Cancer Scam
 
-body MEET_SINGLES		/meet .{0,12}singles|thousands of personal/i
+body MEET_SINGLES	        /meet .{0,12}singles|thousands of personal/i
 describe MEET_SINGLES		Meet Singles
 
-body JOIN_MILLIONS		/join (?:millions|thousands)/i
+body JOIN_MILLIONS	        /join (?:millions|thousands)/i
 describe JOIN_MILLIONS		Join Millions of Americans
 
-body BACKED_BY			/backed by (?:millions|billions)/i
+body BACKED_BY		        /backed by (?:millions|billions)/i
 describe BACKED_BY		Backed by Billions
 
-body EXPECT_TO_EARN		/expect to earn|earn up to/i
+body EXPECT_TO_EARN	        /expect to earn|earn up to/i
 describe EXPECT_TO_EARN		Expect to earn
 
-body BE_BOSS			/your own boss/i
+body BE_BOSS		        /your own boss/i
 describe BE_BOSS		Be your own boss
 
-body SPY_ON_FRIENDS		/investigat.{0.15} (?:friend|employee|neighbor)/i
-describe SPY_ON_FRIENDS		/Investigate your Friends!
+body SPY_ON_FRIENDS	        /investigat.{0.15} (?:friend|employee|neighbor)/i
+describe SPY_ON_FRIENDS	        Investigate your Friends!
 
-body DIG_UP_INFO		/dig up information/i
+body DIG_UP_INFO	        /dig up information/i
 describe DIG_UP_INFO		Dig up Dirt on Friends
 
-body MLM			/MLM|multi[ -]level[ -]marketing/i
+body MLM		        /(?:MLM|multi.level.marketing)/i
 describe MLM			Multi Level Marketing
 
-body UNCLAIMED_MONEY		/unclaimed (?:funds|money)/i
+body UNCLAIMED_MONEY	        /unclaimed (?:funds|money)/i
 describe UNCLAIMED_MONEY	People just leave money laying around
 
-body FREE_CAP			/FREE/
+body FREE_CAP		        /FREE/
 describe FREE_CAP		FREE in Uppercase
 
 body SERIOUS_CASH		/serious cash/i
 describe SERIOUS_CASH		Serious cash
+
+# new porn rules from Marc Perkel
+body LARGE_COLLECTION           /\b(?:[0-9,]{5,9}|hundreds|thousands|millions|tons)\b.{0,15}\b(?:movies|video|xxx|celeb|streaming|live|pic|photo|images)\b/i
+describe LARGE_COLLECTION       Possible porn - Large Number of movies, pics
+
+body FREE_PORN                  /\bfree (?:porn|xxx|adult)\b/i
+describe FREE_PORN              Possible porn - Free Porn
+
+body BARELY_LEGAL               /\b(?:barely|just) legal\b/i
+describe BARELY_LEGAL           Possible porn - Barely Legal
+
+body LOLITA                     /\blolita\b/i
+describe LOLITA                 Possible porn - Lolita
+
+body MEGA_SITE                  /\bmega[ -]?sites?\b/i
+describe MEGA_SITE              Possible porn - Mega Porn
+
+body CUM_SHOT                   /\bcum[ -]?shot\b/i
+describe CUM_SHOT               Possible porn - Cum Shot
+
+body BIG_BOOBS                  /\bbig boobs\b/i
+describe BIG_BOOBS              Possible porn - Big Boobs
+
+body ALL_CAP_PORN               /\b(?:ORGY|FUCKING|FETISH|WEBCAM|VOYEUR|ANAL|CUM)\b/
+describe ALL_CAP_PORN           Possible porn - in ALL CAPS
+
+body PAY_SITE                   /\bpay[ -]?sites?\b/i
+describe PAY_SITE               Possible porn - Pay Site
+
+body FARM_PORN                  /\b(?:farm|animal) .{0,9}(?:sex|fuck\S+|action)\b/i
+describe FARM_PORN              Possible porn - Sex with Animals
+
+body SEX_FEST                   /\b(?:sex|gay|slut|whore|cum|f[\.\*u][\.\*c]k|suck|adult|xxx|teen)[ -]?fest\b/i
+describe SEX_FEST               Possible porn - Porn Fest
+
+body LIVE_PORN                  /\blive .{0,9}(?:fuck|sex|naked|girl|virgin|teen|cam|porn)/i
+describe LIVE_PORN              Possible porn - Live Porn
+
+body HARDCORE_PORN              /\bhard[ -]?core .{0,9}(?:teen|virgin|cheerleader|amat[eu][eu]r)\b|\bextreme hardcore\b/i
+describe HARDCORE_PORN          Possible porn - Hardcore Porn
+
+body HOT_NASTY          /\b(?:horny|nasty|hot|wild|young|horniest|nasiest|hottest|wildest|youngest|best|biggest|largest|naughty)\b.{0,9}\b(?:virgin|asian|cheerleader|sex|selection|fuck|fucking|anal|lesbian|incest|chick|pics|movies|video|gay|porn|hardcore|schoolgirls|amat[eu][eu]r|slut|adult|cum|xxx|sites?)\b/i
+describe HOT_NASTY              Possible porn - Hot, Nasty, Wild, Young
+
+body NASTY_GIRLS                /\b(?:horniest|nasiest|hottest|wildest) .{0,9}(?:girls|women|teen)\b/i
+describe NASTY_GIRLS            Possible porn - Nasty Girls
+
+body CAM_PORN                   /\bcam (?:girls|sex)\b|\b(?:hidden|voyeur|bathroom|shower|naughty) .{0,9}cam\b/i
+describe CAM_PORN               Possible porn - Sex on Camera
+
+body AMATUER_PORN               /\bamat[eu][eu]r .{0,9}(?:sex|porn|star|sites?|college|babes|action|pics)|real amat[eu][eu]r\b/i
+describe AMATUER_PORN           Possible porn - Amateur Porn
+
+body CELEBRITY_PORN             /\bceleb.{0,15}(?:sex|porn|pics|caught|nude|exposed)\b/i
+describe CELEBRITY_PORN         Possible porn - Celebrity Porn
+
+body PORN_GALLERIES             /\bhuge galleries\b/i
+describe PORN_GALLERIES         Possible porn - Galleries of Pictures
+
+body UP_SKIRT                   /\bup[ -]?skirt\b/i
+describe UP_SKIRT               Possible porn - Up Skirt
+
+body ADULT_SITE                 /\badult.{0,9}(?:entertainment|sites?|industry|only|business|membership)\b/i
+describe ADULT_SITE             Possible porn - Adult Web Sites
+
+body UNCENSORED                 /\buncensored (?:pics|photo)/i
+describe UNCENSORED             Possible porn - Uncensored Photos
+
+body MUST_BE_18                 /\bmust be (?:at least|over) 18\b/i
+describe MUST_BE_18             Possible porn - Must be 18
+
+body INSTANT_ACCESS             /\binstant access\b/i
+describe INSTANT_ACCESS         Possible porn - Offers Instant Access
+
+body RAPE                       /\b(?:virgin|gang|teen|amat[eu][eu]r) rape|rape (?:sites?|sex)\b/i
+describe RAPE                   Possible porn - Rape
+
+body LESBIAN                    /\b(?:xxx|horny|hot|young) lesbian|lesbian (?:sites?|action|bitch)\b/i
+describe LESBIAN                Possible porn - Lesbian Site
+
