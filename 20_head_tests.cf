@@ -235,7 +235,10 @@ header HEAD_ILLEGAL_CHARS	eval:check_illegal_chars('ALL','0.005','2')
 describe HEAD_ILLEGAL_CHARS	Header contains too many raw illegal characters
 
 ###########################################################################
-# ADV tags in non-English languages
+# ADV tags in various languages
+
+header ENGLISH_UCE_SUBJECT	Subject =~ /^[^0-9a-z]*adv(?:ert)?\b/i
+describe ENGLISH_UCE_SUBJECT	Subject contains an English UCE tag
 
 # alan premselaar <alien@12inch.com>, see SpamAssassin-talk list 2003-03
 # quinlan: 2003-03-23 here are more generic Japanese iso-2022-jp codes
@@ -613,11 +616,11 @@ describe MIME_HEADER_CTYPE_ONLY 'Content-Type' found without required MIME heade
 header WITH_LC_SMTP		Received =~ /\swith\ssmtp;\s/
 describe WITH_LC_SMTP		Received line contains spam-sign (lowercase smtp)
 
-header FROM_NO_LOWER		From !~ /[a-z]/
-describe FROM_NO_LOWER          'From' has no lower-case characters
+header FROM_NO_LOWER		From:addr !~ /[a-z]/ [if-unset: x@example.com]
+describe FROM_NO_LOWER		From address has no lower-case characters
 
 header SUBJ_BUY                 Subject =~ /^buy/i
-describe SUBJ_BUY               'Subject' starts with Buy, Buying
+describe SUBJ_BUY               Subject line starts with Buy or Buying
 
 header __FROM_HAS_UNDERLINE_NUMS	From =~ /_\S?(?:[a-z]+\w*?\d+|\d+\w*?[a-z]+)\w*\@/i
 meta FROM_HAS_ULINE_NUMS		(!REPLY_TO_ULINE_NUMS && __FROM_HAS_UNDERLINE_NUMS)

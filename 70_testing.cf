@@ -31,6 +31,9 @@
 # to protect against the possibility?
 header T_FRAGMENTED_MESSAGE	Content-Type =~ /message\/partial/i
 
+# I'm curious, may help explain more ALL_TRUSTED fps
+body T_SA_MARKED_UP     /Spam detection software, running on the system /
+
 ########################################################################
 
 # IADB
@@ -48,12 +51,6 @@ tflags __RCVD_IN_IADB_T		net nice
 header T_RCVD_IN_IADB_LIST_T	eval:check_rbl_sub('iadbtr', '127.0.0.1')
 describe T_RCVD_IN_IADB_LIST_T	Sender is listed in ISIPP IADB
 tflags T_RCVD_IN_IADB_LIST_T	net nice
-
-# REIMPLEMENT: ADVERT_CODE tests.
-header T_ADVERT_CODE	Subject =~ /^[^0-9a-z]*adv(?:ert)?\b/i
-# may need a negative lookahead between in front of first \b for "ADV."
-header T_ADVERT_CODE2A	Subject =~ /\w.*\bA\s*D\s*V\b/
-header T_ADVERT_CODE2B	Subject =~ /\w.*\b(?!ADV\.)A\s*D\s*V\b/
 
 ###########################################################################
 # Matt Kettler's antidrug.cf ruleset.  bug 3009
@@ -297,18 +294,6 @@ describe T_DRUGS_THREE 	Refers to three different kinds of drugs
 # however, I know of no "normal" 4-item combinations.
 meta T_DRUGS_MANYKINDS	(T_DRUGS_ERECTILE + T_DRUGS_DIET + T_DRUGS_PAIN + T_DRUGS_SLEEP + T_DRUGS_MUSCLE + T_DRUGS_ANXIETY + T_DRUGS_DEPRESSION >3)
 describe T_DRUGS_MANYKINDS 	Refers to at least four kinds of drugs
-
-###########################################################################
-
-# I'm curious, may help explain more ALL_TRUSTED fps
-body T_SA_MARKED_UP     /Spam detection software, running on the system /
-
-# bug 3351
-# possible replacements for FROM_NO_LOWER
-header T_FROM_NO_LOWER_1	From !~ /[a-z]/ [if-unset: x@example.com]
-header T_FROM_NO_LOWER_2	From:raw !~ /[a-z]/ [if-unset: x@example.com]
-header T_FROM_NO_LOWER_3	From:addr !~ /[a-z]/ [if-unset: x@example.com]
-header T_FROM_NO_LOWER_4	From:addr !~ /[a-z]/
 
 ########################################################################
 
