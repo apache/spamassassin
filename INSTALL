@@ -117,13 +117,6 @@ These modules are required for spamassassin to run.
     If you use Debian, you can get HTML::Parser from the libhtml-parser-perl
     package.
 
-  - Digest::SHA1  (from CPAN)
-
-    The Digest::SHA1 module is required for some cryptographic hash tests.
-
-    If you use Debian, you can get Digest::SHA1 from the libdigest-sha1-perl
-    package.
-
 Optional Additional Modules
 ---------------------------
 
@@ -228,7 +221,13 @@ skipped.
 	install Mail::Audit
 	quit
 
+  - Digest::SHA1  (from CPAN)
 
+    The Digest::SHA1 module will speed up some cryptographic hash tests,
+    but is not required (although it may be required by another module).
+
+    If you use Debian, you can get Digest::SHA1 from the libdigest-sha1-perl
+    package.
 
 Using SpamAssassin
 ------------------
