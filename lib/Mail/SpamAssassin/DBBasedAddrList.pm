@@ -47,9 +47,6 @@ sub new_checker {
 sub get_addr_entry {
   my ($self, $addr) = @_;
 
-  $addr = lc $addr;
-  $addr =~ s/\000/_/gs;		# paranoia
-
   my $entry = {
 	addr			=> $addr,
   };

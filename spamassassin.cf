@@ -973,8 +973,9 @@ whitelist_from	*@ora-info.ora.com		# O'Reilly
 # backend.  By default, each user has their own, in their ~/.spamassassin
 # directory with mode 0700, but for system-wide SpamAssassin use, you may
 # want to share this across all users; uncomment and customise the below
-# lines.
+# lines.  (Make sure the mode has --x bits set.)
 
 # auto_whitelist_path        /var/spool/spamassassin/auto-whitelist
-# auto_whitelist_file_mode  0777
-# auto_whitelist_threshold	3
+# auto_whitelist_file_mode   0777
+# auto_whitelist_threshold   3
+
