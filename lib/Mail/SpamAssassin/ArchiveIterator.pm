@@ -84,9 +84,9 @@ sub run {
     my $messages;
 
     # message-array
-    ($MESSAGES,$messages) = $self->message_array(\@targets);
+    $MESSAGES = $self->message_array(\@targets);
 
-    while ($message = (shift @{$messages})) {
+    while ($message = $self->next_message()) {
       my ($class, undef, $date) = index_unpack($message);
       $result = $self->run_message($message);
       &{$self->{result_sub}}($class, $result, $date) if $result;
@@ -122,8 +122,8 @@ sub run {
 	    }
 
 	    # if messages remain, and we don't need to restart, send a message
-	    if (($MESSAGES>$total_count) && !$needs_restart) {
-	      print { $socket } (shift @{$messages}) . "\n";
+	    if (($MESSAGES > $total_count) && !$needs_restart) {
+	      print { $socket } $self->next_message() . "\n";
 	      $total_count++;
 	      #warn ">> recv: $MESSAGES $total_count\n";
 	    }
@@ -142,9 +142,9 @@ sub run {
 	    last; # this will get out of the read for this client
 	  }
 	  elsif ($line eq "START\n") {
-	    if ($MESSAGES>$total_count) {
+	    if ($MESSAGES > $total_count) {
 	      # we still have messages, send one to child
-	      print { $socket } (shift @{$messages}) . "\n";
+	      print { $socket } $self->next_message() . "\n";
 	      $total_count++;
 	      #warn ">> new: $MESSAGES $total_count\n";
 	    }
@@ -163,7 +163,7 @@ sub run {
 	}
 
         # some error happened during the read!
-        if ( !defined $line || !$line ) {
+        if (!defined $line || !$line) {
           $needs_restart = 1;
           warn "Got an undef from readline?!?  Restarting all children, probably lost some results. :(\n";
           $select->remove($socket);
@@ -174,7 +174,7 @@ sub run {
 
       # If there are still messages to process, and we need to restart
       # the children, and all of the children are idle, let's go ahead.
-      if ($needs_restart && $select->count() == 0 && ($MESSAGES>$total_count)) {
+      if ($needs_restart && $select->count() == 0 && ($MESSAGES > $total_count)) {
 	$needs_restart = 0;
 
 	#warn "debug: Needs restart, $MESSAGES total, $total_count done.\n";
@@ -262,7 +262,23 @@ sub message_array {
     }
     push @messages, (splice @s), (splice @h);
   }
-  return (scalar(@messages),\@messages);
+  my $tmpf;
+  ($tmpf, $self->{messageh}) = Mail::SpamAssassin::Util::secure_tmpfile();
+  unlink $tmpf;
+  my $count = scalar @messages;
+  my $message;
+  while ($message = shift @messages) {
+    print { $self->{messageh} } "$message\n";
+  }
+  seek ($self->{messageh}, 0, 0);
+  return $count;
+}
+
+sub next_message {
+  my ($self) = @_;
+  my $line = readline $self->{messageh};
+  chomp $line if defined $line;
+  return $line;
 }
 
 sub start_children {
@@ -523,33 +539,41 @@ sub scan_mailbox {
     }
     mail_open($file) or return;
     
+    my $start = 0;		# start of a message
+    my $where = 0;		# current byte offset
+    my $first = '';		# first line of message
     my $header = '';		# header text
-    my $offset = undef;	# byte offset of this message
-    while (defined($_=<INPUT>)) {
-      # Note: This will give the start of the message as the start of
-      # the line _following_ the mbox seperator.
-      #
-      if ( /^From / .. /^\r?$/ ) {
-        if ( $_ eq "\n" || $_ eq "\r\n" ) {
-	  my $t;
-	  if ($self->{opt_n}) {
-	    $t = $no++;
-	  } else {
-	    $t = $self->receive_date($header);
-	    $header = '';
-	    if ( !$self->message_is_useful_by_date($t)) {
-	      undef $offset;
-	      next;
-	    }
+    my $in_header = 0;		# are in we a header?
+    while (!eof INPUT) {
+      my $offset = $start;	# byte offset of this message
+      my $header = $first;	# remember first line
+      while (<INPUT>) {
+	if ($in_header) {
+	  if (/^$/) {
+	    $in_header = 0;
 	  }
-	  $self->{$class}->{index_pack($class, "m", $t, "$file.$offset")} = $t;
-	  undef $offset;
-        }
-	elsif ( !defined $offset ) {
-	  $offset = tell INPUT;
+	  else {
+	    $header .= $_;
+	  }
 	}
-
-        $header .= $_;
+	if (substr($_,0,5) eq "From ") {
+	  $in_header = 1;
+	  $first = $_;
+	  $start = $where;
+	  $where = tell INPUT;
+	  last;
+	}
+	$where = tell INPUT;
+      }
+      if ($header) {
+	my $t;
+	if ($self->{opt_n}) {
+	  $t = $no++;
+	} else {
+	  $t = $self->receive_date($header);
+	  next if !$self->message_is_useful_by_date($t);
+	}
+	$self->{$class}->{index_pack($class, "m", $t, "$file.$offset")} = $t;
       }
     }
     close INPUT;

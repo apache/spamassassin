@@ -42,6 +42,7 @@ use Config;
 use File::Spec;
 use Time::Local;
 use Sys::Hostname (); # don't import hostname() into this namespace!
+use Fcntl;
 
 use constant HAS_MIME_BASE64 => eval { require MIME::Base64; };
 use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
@@ -623,6 +624,41 @@ sub URLEncode {
     else {
       return join("",@characters);
     }
+}
+
+###########################################################################
+
+# thanks to http://www2.picante.com:81/~gtaylor/autobuse/ for this
+# code.
+sub secure_tmpfile {
+  my $tmpdir = File::Spec->tmpdir();
+  if (!$tmpdir) {
+    die "cannot write to a temporary directory! set TMP or TMPDIR in env";
+  }
+
+  $tmpdir = Mail::SpamAssassin::Util::untaint_file_path ($tmpdir);
+  my $template = $tmpdir."/sa.$$.";
+
+  my $reportfile;
+  my $umask = 0;
+  do {
+    # we do not rely on the obscurity of this name for security...
+    # we use a average-quality PRG since this is all we need
+    my $suffix = join ('',
+		       (0..9, 'A'..'Z','a'..'z')[rand 62,
+						 rand 62,
+						 rand 62,
+						 rand 62,
+						 rand 62,
+						 rand 62]);
+    $reportfile = $template . $suffix;
+
+    # ...rather, we require O_EXCL|O_CREAT to guarantee us proper
+    # ownership of our file; read the open(2) man page.
+  } while (! sysopen (TMPFILE, $reportfile, O_RDWR|O_CREAT|O_EXCL, 0600));
+  umask $umask;
+
+  return ($reportfile, \*TMPFILE);
 }
 
 ###########################################################################
