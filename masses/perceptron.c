@@ -44,6 +44,7 @@
 #endif
 
 #define OUTPUT_FILE "perceptron.scores"
+#define SCORE_RANGES 1
 
 void init_wheel ();
 void destroy_wheel ();
@@ -156,7 +157,7 @@ void init_weights () {
 
 	bias = drand48() - 0.5;
 	for (i = 0; i < num_scores; i++) {
-		weights[i] = drand48() - 0.5;
+		weights[i] = range_lo[i] + drand48() * (range_hi[i] - range_lo[i]);
 	}
 }
 
@@ -202,27 +203,23 @@ void write_weights (FILE * fp) {
 	 * outputs some nice statistics about the learned classifier. */
 	fprintf (fp,"\n# SUMMARY for threshold %3.1f:\n", threshold);
 	fprintf (fp,
-			"# Correctly non-spam: %6d  %4.2f%%  (%4.2f%% of non-spam corpus)\n",
+			"# Correctly non-spam: %6d  %4.2f%%\n",
 			ga_nn,
-			(ga_nn / (float) num_tests) * 100.0,
-			(ga_nn / (float) num_nonspam) * 100.0);
+			(ga_nn / (float) num_ham) * 100.0);
 	fprintf (fp,
-			"# Correctly spam:     %6d  %4.2f%%  (%4.2f%% of spam corpus)\n",
+			"# Correctly spam:     %6d  %4.2f%%\n",
 			ga_yy,
-			(ga_yy / (float) num_tests) * 100.0,
 			(ga_yy / (float) num_spam) * 100.0);
 	fprintf (fp,
-			"# False positives:    %6d  %4.2f%%  (%4.2f%% of nonspam)\n",
+			"# False positives:    %6d  %4.2f%%\n",
 			ga_ny,
-			(ga_ny / (float) num_tests) * 100.0,
-			(ga_ny / (float) num_nonspam) * 100.0);
+			(ga_ny / (float) num_ham) * 100.0);
 	fprintf (fp,
-			"# False negatives:    %6d  %4.2f%%  (%4.2f%% of spam)\n",
+			"# False negatives:    %6d  %4.2f%%\n",
 			ga_yn,
-			(ga_yn / (float) num_tests) * 100.0,
 			(ga_yn / (float) num_spam) * 100.0);
 
-	fprintf (fp,"# Average score for spam:  %3.3f    nonspam: %3.1f\n",(ynscore+yyscore)/((double)(ga_yn+ga_yy)),(nyscore+nnscore)/((double)(ga_nn+ga_ny)));
+	fprintf (fp,"# Average score for spam:  %3.3f    ham: %3.1f\n",(ynscore+yyscore)/((double)(ga_yn+ga_yy)),(nyscore+nnscore)/((double)(ga_nn+ga_ny)));
 	fprintf (fp,"# Average for false-pos:   %3.3f  false-neg: %3.1f\n",(nyscore/(double)ga_ny),(ynscore/(double)ga_yn));
 
 	fprintf (fp,"# TOTAL:              %6d  %3.2f%%\n\n", num_tests, 100.0);
@@ -334,21 +331,21 @@ void train (int num_epochs, double learning_rate) {
 			for (i = 0; i < num_tests_hit[random_test]; i++) {
 				int idx = tests_hit[random_test][i];
 				weights[idx] += delta;
-	
+
+#ifdef SCORE_RANGES
 				/* Constrain the weights so that nice rules are always <= 0 etc. */
 				if ( range_lo[idx] >= 0 && weights[idx] < 0 ) {
 					weights[idx] = 0;
 				} else if ( range_hi[idx] <= 0 && weights[idx] > 0 ) {
 					weights[idx] = 0;
 				}
-
-				/*
+#else
 				if ( weights[idx] < score_to_weight(range_lo[idx]) ) {
 					weights[idx] = score_to_weight(range_lo[idx]);
 				} else if ( weights[idx] > score_to_weight(range_hi[idx]) ) {
 					weights[idx] = score_to_weight(range_hi[idx]);
 				}
-				*/
+#endif
 			}
 		}
 	}
