@@ -254,23 +254,12 @@ sub learn {
   if (!$self->{conf}->{use_bayes}) { return; }
   if ($self->{disable_auto_learning}) { return; }
 
-  # require that hits be *both* above/below the auto_learn_threshold
-  # *and* above/below the required_hits threshold plus/minus a "safety"
-  # zone.
-  my $auto_learn_safety = 4;
-
   # Figure out min/max for autolearning.
   # Default to specified auto_learn_threshold settings
   my $min = $self->{conf}->{auto_learn_threshold_nonspam};
   my $max = $self->{conf}->{auto_learn_threshold_spam};
 
-  # Now see if the safety settings are lower/higher and change if necessary.
-  my $tmp = $self->{conf}->{required_hits} - $auto_learn_safety;
-  $min = $tmp if ( $tmp < $min );
-  $tmp = $self->{conf}->{required_hits} + $auto_learn_safety;
-  $max = $tmp if ( $tmp > $max );
-
-  dbg ("auto-learn? safety=$auto_learn_safety, ham=$min, spam=$max, ".
+  dbg ("auto-learn? ham=$min, spam=$max, ".
 		"body-hits=".$self->{body_only_hits}.", ".
 		"head-hits=".$self->{head_only_hits});
 
