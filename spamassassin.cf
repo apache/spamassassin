@@ -112,8 +112,8 @@ describe INVALID_DATE		Invalid Date: header (has AM/PM)
 header INVALID_DATE_NO_TZ	Date =~ /^..., .. ... .... ..:..:..$/
 describe INVALID_DATE_NO_TZ	Invalid Date: header (no timezone)
 
-header SUBJ_HAS_Q_MARK		Subject =~ /\?.*\S/
-describe SUBJ_HAS_Q_MARK	Subject: has a question mark
+header SUBJ_HAS_Q_MARK		Subject =~ /\?[^\?]+\s*$/
+describe SUBJ_HAS_Q_MARK	Subject: contains a question mark
 
 header SUBJ_ENDS_IN_Q_MARK	Subject =~ /\?+\s*$/
 describe SUBJ_ENDS_IN_Q_MARK	Subject: ends in a question mark
