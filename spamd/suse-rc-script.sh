@@ -109,7 +109,7 @@ case "$1" in
 	## Stop daemon with killproc(8) and if this fails
 	## set echo the echo return value.
 
-	killproc -TERM $SPAMD_BIN
+	killproc -TERM spamd
 
 	# Remember status and be verbose
 	rc_status -v
