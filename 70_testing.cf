@@ -287,3 +287,7 @@ tflags T_DNS_FROM_SECURITYSAGE	net
 header T_DNS_FROM_AHBL_RHSBL	eval:check_rbl_envfrom('t_ahbl', 'rhsbl.ahbl.org.')
 tflags T_DNS_FROM_AHBL_RHSBL	net
 
+##########################################################################
+
+# bug 2127
+body T_AS_SEEN_ON		/seen on\s*(?:T\.?V|A\.?B\.?C|N\.?B\.?C|C\.?B\.?S|C\.?N\.?N|Oprah|U\.?S\.?A\.? Today|48 Hours|New York Times|\w+\s+T\.?V|:)/i
