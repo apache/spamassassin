@@ -479,3 +479,6 @@ endif   #ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 
 # catch non-RFC2047 compliant messages
 header T_BAD_ENC_HEADER		ALL =~ /=\?[^?\s]+\?[^?\s]\?[^?]*\s/
+
+# 0.112   0.1282   0.0000    1.000   1.00    0.01  T_PHISH_MISMATCH
+body T_PHISH_MISMATCH	eval:check_phish_mismatch()
