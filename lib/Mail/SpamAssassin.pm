@@ -459,6 +459,11 @@ sub init_learner {
   my $self = shift;
   my $opts = shift;
   dbg ("Initialising learner");
+
+  # Make sure we're already initialized ...
+  $self->init(1);
+
+  # Set any other options that need setting ...
   if (defined $opts->{force_expire}) { $self->{learn_force_expire} = $opts->{force_expire}; }
   if (defined $opts->{learn_to_journal}) { $self->{learn_to_journal} = $opts->{learn_to_journal}; }
   if (defined $opts->{caller_will_untie}) { $self->{learn_caller_will_untie} = $opts->{caller_will_untie}; }
@@ -1125,8 +1130,9 @@ sub finish {
 sub init {
   my ($self, $use_user_pref) = @_;
 
+  # Allow init() to be called multiple times, but only run once.
   if (defined $self->{_initted}) {
-    # seed PRNG whenever the process id changes
+    # If the PID changes, reseed the PRNG
     if ($self->{_initted} != $$) {
       $self->{_initted} = $$;
       srand;
@@ -1134,10 +1140,11 @@ sub init {
     return;
   }
 
+  # Note that this PID has run init()
   $self->{_initted} = $$;
 
   #fix spamd reading root prefs file
-  unless (defined $use_user_pref) {
+  if (!defined $use_user_pref) {
     $use_user_pref = 1;
   }
 
@@ -1202,23 +1209,24 @@ sub init {
     warn "No configuration text or files found! Please check your setup.\n";
   }
 
+  # Go and parse the config!
   $self->{conf}->{main} = $self;
   $self->{conf}->parse_rules ($self->{config_text});
   $self->{conf}->finish_parsing ();
   delete $self->{conf}->{main};	# to allow future GC'ing
-
   delete $self->{config_text};
 
+  # Initialize the Bayes subsystem
   $self->{bayes_scanner} = new Mail::SpamAssassin::Bayes ($self);
+  $self->{'learn_to_journal'} = $self->{conf}->{bayes_learn_to_journal};
 
+  # Figure out/set our initial scoreset
   my $set = 0;
   $set |= 1 unless $self->{local_tests_only};
   $set |= 2 if $self->{bayes_scanner}->is_scan_available();
-
   $self->{conf}->set_score_set ($set);
 
-  $self->init_learner({ 'learn_to_journal' => $self->{conf}->{bayes_learn_to_journal} });
-
+  # Deal with autowhitelist
   if ($self->{conf}->{use_auto_whitelist} &&
       $self->{conf}->{auto_whitelist_factory})
   {
