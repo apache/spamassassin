@@ -402,10 +402,17 @@ header ROUND_THE_WORLD		eval:check_for_round_the_world_received_revdns()
 describe ROUND_THE_WORLD	Received: says mail sent around the world (DNS)
 tflags ROUND_THE_WORLD          net
 
+header MISSING_DATE             Date =~ /^UNSET$/ [if-unset: UNSET]
+describe MISSING_DATE           Missing Date: header
+
 # this is a quite common false positive, as it's legal to remove a To but leave
 # a CC. so don't score it high.
 header MISSING_HEADERS		eval:check_for_missing_to_header()
 describe MISSING_HEADERS	Missing To: header
+
+header __HAS_SUBJECT		exists:Subject
+meta MISSING_SUBJECT		!__HAS_SUBJECT
+describe MISSING_SUBJECT	Missing Subject: header
 
 header SUSPICIOUS_RECIPS	eval:similar_recipients('0.6','1.2')
 describe SUSPICIOUS_RECIPS	Similar addresses in recipient list
@@ -571,9 +578,6 @@ meta MIME_BOUND_NEXTPART	(__NEXTPART_ALL && !__NEXTPART_NORMAL)
 describe MIME_BOUND_NEXTPART	Spam tool pattern in MIME boundary
 header MIME_BOUND_RKFINDY       Content-Type =~ /boundary=\"=_NextPart_2rfkindysadvnqw3nerasdf\"/
 describe MIME_BOUND_RKFINDY     Spam tool pattern in MIME boundary (rfkindy)
-
-header DATE_MISSING             Date =~ /^UNSET$/ [if-unset: UNSET]
-describe DATE_MISSING           Missing Date: header
 
 header TO_INVESTORS             To =~ /\bInvestors\@/
 describe TO_INVESTORS           To: non-existent 'Investors' address
