@@ -477,3 +477,8 @@ header T_MSGID_LONG_D_135	MESSAGEID =~ /\@.{135,}>/m
 header T_MSGID_LONG_D_140	MESSAGEID =~ /\@.{140,}>/m
 header T_MSGID_LONG_D_145	MESSAGEID =~ /\@.{145,}>/m
 header T_MSGID_LONG_D_150	MESSAGEID =~ /\@.{150,}>/m
+
+# bug 2563: false positives
+body T_BODY_ENHANCEMENT		/\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b|\binches\b).{0,50}\b(?:penis|male organ|pee[ -]?pee|dick|sc?hlong|wh?anger|breast(?!\s+cancer))/i
+body T_BODY_ENHANCEMENT2		/\b(?:penis|male organ|pee[ -]?pee|dick|sc?hlong|wh?anger|breast(?!\s+cancer)).{0,50}\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b|\binches\b)/i
+
