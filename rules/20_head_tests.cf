@@ -1,5 +1,5 @@
 # SpamAssassin rules file: tests.
-# $Id: 20_head_tests.cf,v 1.162.2.14 2002/09/02 23:23:44 quinlan Exp $
+# $Id: 20_head_tests.cf,v 1.162.2.15 2002/09/03 19:55:02 quinlan Exp $
 ###########################################################################
 
 require_version 2.41
@@ -299,7 +299,7 @@ tflags HABEAS_VIOLATOR		net
 
 header RCVD_IN_BONDEDSENDER	rbleval:check_rbl('relay', 'query.bondedsender.org.')
 describe RCVD_IN_BONDEDSENDER	Bonded sender, see http://www.bondedsender.org/referred.html
-tflags RCVD_IN_BONDEDSENDER	net
+tflags RCVD_IN_BONDEDSENDER	net nice
 
 
 # NOTE: commercial test, see README file for details
