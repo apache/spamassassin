@@ -1654,7 +1654,6 @@ sub check_for_faraway_charset {
     # number of 8-bit chars in the body text first.
 
     $body = join ("\n", @$body);
-    $body =~ s/\b(?:URI:\S+)//g;	# strip URIs out
     if ($self->are_more_high_bits_set ($body)) {
       return 1;
     }
@@ -2128,9 +2127,6 @@ sub check_for_uppercase {
 
     # remove shift-JIS charset codes
     $line =~ s/\x1b\$B.*\x1b\(B//gs;
-
-    # remove URIs
-    $line =~ s/URI:\S+//gs;
 
     $len += length($line);
 
@@ -3557,7 +3553,6 @@ sub _multipart_alternative_difference {
 
       if ( $type eq 'text/html' ) {
         foreach my $w ( grep(/\w/,split(/\s+/,$rnd)) ) {
-          next if ( $w =~ /^URI:/ );
 	  #dbg("HTML: $w");
           $html{$w}++;
         }
