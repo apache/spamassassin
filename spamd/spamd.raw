@@ -45,6 +45,7 @@ my %resphash = (
 # defaults
 my %opt = ('user-config' => 1);
 
+my @OLD_ARGV = @ARGV;    # Getopt::Long tends to clear @ARGV
 Getopt::Long::Configure ("bundling");
 GetOptions(
 	'auto-whitelist|whitelist|a' => \$opt{'auto-whitelist'},
@@ -73,6 +74,7 @@ GetOptions(
         'F=i' => sub { warn "The -F option has been removed\n" }
 
 ) or pod2usage(-exitval => $resphash{'EX_USAGE'}, -verbose => 0);
+@ARGV = @OLD_ARGV;
 
 $opt{'help'} and pod2usage(-exitval => $resphash{'EX_USAGE'}, -verbose => 0, -message => 'For more details, use "man spamd"');
 
@@ -104,8 +106,9 @@ if ($opt{'create-prefs'}) { $dontcopy = 0; }
 my $extrapid = 5000;
 $extrapid = $opt{'max-children'} if defined($opt{'max-children'}) && $opt{'max-children'} > 0;
 
-
+my $orighome;
 if (defined $ENV{'HOME'}) {
+    $orighome = $ENV{'HOME'};   # keep a copy for use by Razor, Pyzor etc.
     delete $ENV{'HOME'}; # we do not want to use this when running spamd
 }
 
@@ -116,6 +119,7 @@ my $spamtest = Mail::SpamAssassin->new({
     stop_at_threshold => ($opt{'stop-at-threshold'} || 0),
     debug => ($opt{'debug'} || 0),
     paranoid => ($opt{'paranoid'} || 0),
+    home_dir_for_helpers => $orighome,
     DEF_RULES_DIR => $DEF_RULES_DIR,
     LOCAL_RULES_DIR => $LOCAL_RULES_DIR
 });
@@ -798,7 +802,6 @@ sub daemonize
 my @allowed_nets;
 sub set_allowed_ip {
     foreach (@_){
-        # don't warn here: it'll go not STDERR, not syslog
         #warn "Allowing connections from '$_'.\n";
         my ($ip, $bits) = m#^\s*(\d+\.\d+\.\d+\.\d+)(?:/(\d+))?\s*$#
                 or die "illegal network address given: '$_'.  Aborting.\n";
@@ -820,6 +823,10 @@ sub ip_is_allowed {
 sub my_inet_aton { unpack("N", pack("C4", split(/\./, $_[0]))) }
 
 
+#-S, --stop-at-threshold            Stop tests after the threshold is reached
+#=item B<-S>, B<--stop-at-threshold>
+#Stop spam checking as soon as the spam threshold is reached, to increase
+#performance. This option also turns off Razor reporting.
 
 =head1 NAME
 
@@ -850,7 +857,6 @@ Options:
  -D, --debug                        Print debugging messages
  -L, --local                        Use local tests only (no DNS)
  -P, --paranoid                     Die upon user errors
- -S, --stop-at-threshold            Stop tests after the threshold is reached
 
 
 =head1 OPTIONS
@@ -906,8 +912,8 @@ database.
 =item B<-V>, B<--virtual-config>=I<directory>
 
 This option specifies a directory which will contain per-user preference
-files.  The files are in the format of I<username>.prefs.  A
-I<default>.prefs file will be used if an individual user config is not
+files.  The files are in the format of B<I<username>.prefs>.  A
+B<default.prefs> file will be used if an individual user config is not
 found.
 
 Note that this B<requires> that B<-x> is used, and cannot be combined with
@@ -966,11 +972,6 @@ Print debugging messages
 
 Perform only local tests on all mail.  In other words, skip DNS and other
 network tests.  Works the same as the C<-L> flag to C<spamassassin(1)>.
-
-=item B<-S>, B<--stop-at-threshold>
-
-Stop spam checking as soon as the spam threshold is reached, to increase
-performance. This option also turns off Razor reporting.
 
 =item B<-P>, B<--paranoid>
 

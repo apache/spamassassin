@@ -61,6 +61,8 @@ sub new {
     'test_names_hit'    => [ ],
     'tests_already_hit' => { },
     'hdr_cache'         => { },
+    'rule_errors'       => 0,
+    'are_subrules_scored' => 0,
   };
 
   $self->{conf} = $self->{main}->{conf};
@@ -162,6 +164,8 @@ sub check {
     # Do AWL tests last, since these need the score to have already been calculated
     $self->do_awl_tests();
   }
+
+  $self->delete_fulltext_tmpfile();
 
   dbg ("is spam? score=".$self->{hits}.
   			" required=".$self->{conf}->{required_hits}.
@@ -1166,6 +1170,7 @@ EOT
 
   if ($@) {
     warn "Failed to run header SpamAssassin tests, skipping some: $@\n";
+    $self->{rule_errors}++;
   }
   else {
     Mail::SpamAssassin::PerMsgStatus::_head_tests($self);
@@ -1597,6 +1602,7 @@ EOT
   if ($@) {
     warn "Failed to compile full SpamAssassin tests, skipping:\n".
 	      "\t($@)\n";
+    $self->{rule_errors}++;
   } else {
     Mail::SpamAssassin::PerMsgStatus::_full_tests($self, $fullmsgref);
   }
@@ -1753,6 +1759,7 @@ EOT
 
     if ($@) {
         warn "Failed to run header SpamAssassin tests, skipping some: $@\n";
+        $self->{rule_errors}++;
     } else {
         Mail::SpamAssassin::PerMsgStatus::_meta_tests($self);
     }
@@ -1814,6 +1821,7 @@ sub run_eval_tests {
     if ($@) {
       warn "Failed to run $rulename SpamAssassin test, skipping:\n".
       		"\t($@)\n";
+      $self->{rule_errors}++;
       next;
     }
 
@@ -1864,6 +1872,7 @@ sub run_rbl_eval_tests {
 	if ($@) {
 	  warn "Failed to run $rulename RBL SpamAssassin test, skipping:\n".
 		    "\t($@)\n";
+          $self->{rule_errors}++;
 	  next;
 	}
 
@@ -1911,7 +1920,7 @@ sub _handle_hit {
     my ($self, $rule, $score, $area, $desc) = @_;
 
     # ignore meta-match sub-rules.
-    if ($rule =~ /^__/) { return; }
+    if ($rule =~ /^__/ && !$self->{are_subrules_scored}) { return; }
 
     $score = sprintf("%2.1f",$score);
     $self->{hits} += $score;
@@ -2079,6 +2088,71 @@ sub remove_unwanted_headers {
   $self->{msg}->delete_header ("X-Spam-Flag");
   $self->{msg}->delete_header ("X-Spam-Report");
   $self->{msg}->delete_header ("X-Spam-Level");
+}
+
+###########################################################################
+
+# this is a lazily-written temporary file containing the full text
+# of the message, for use with external programs like pyzor and
+# dccproc, to avoid hangs due to buffering issues.   Methods that
+# need this, should call $self->create_fulltext_tmpfile($fulltext)
+# to retrieve the temporary filename; it will be created if it has
+# not already been.
+#
+# (SpamAssassin3 note: we should use tmp files to hold the message
+# for 3.0 anyway, as noted by Matt previously; this will then
+# be obsolete.)
+#
+sub create_fulltext_tmpfile {
+  my ($self, $fulltext) = @_;
+
+  if (defined $self->{fulltext_tmpfile}) {
+    return $self->{fulltext_tmpfile};
+  }
+
+  my ($tmpf, $tmpfh) = secure_tmpfile();
+  print $tmpfh $$fulltext;
+  close $tmpfh;
+
+  $self->{fulltext_tmpfile} = $tmpf;
+
+  return $self->{fulltext_tmpfile};
+}
+
+sub delete_fulltext_tmpfile {
+  my ($self) = @_;
+  if (defined $self->{fulltext_tmpfile}) {
+    unlink $self->{fulltext_tmpfile};
+  }
+}
+
+use Fcntl;
+
+# thanks to http://www2.picante.com:81/~gtaylor/autobuse/ for this
+# code.
+sub secure_tmpfile {
+  my $tmpdir = '/tmp';
+  if (defined $ENV{'TMPDIR'}) { $tmpdir = $ENV{'TMPDIR'}; }
+  my $template = $tmpdir."/sa.$$.";
+
+  my $reportfile;
+  do {
+      # we do not rely on the obscurity of this name for security...
+      # we use a average-quality PRG since this is all we need
+      my $suffix = join ('',
+                         (0..9, 'A'..'Z','a'..'z')[rand 62,
+                                                   rand 62,
+                                                   rand 62,
+                                                   rand 62,
+                                                   rand 62,
+                                                   rand 62]);
+      $reportfile = $template . $suffix;
+
+      # ...rather, we require O_EXCL|O_CREAT to guarantee us proper
+      # ownership of our file; read the open(2) man page.
+  } while (! sysopen (TMPFILE, $reportfile, O_WRONLY|O_CREAT|O_EXCL, 0600));
+
+  return ($reportfile, \*TMPFILE);
 }
 
 ###########################################################################

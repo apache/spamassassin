@@ -5,9 +5,11 @@
 #   grep SUBJECT_FREQ spam.log | ./mass-check-results-to-mbox | grep Subject:
 
 my $grep = undef;
+my $annotate = 0;
 while ($#ARGV >= 0) {
   $_ = $ARGV[0]; shift;
-  if ($ARGV[0] eq '-grep') { $grep = $ARGV[0]; shift; }
+  if ($_ eq '-grep') { $grep = $ARGV[0]; shift; }
+  if ($_ eq '-annotate') { $annotate = 1; }
 }
 
 while (<>) {
@@ -18,20 +20,22 @@ while (<>) {
   if ($mail =~ /^(\S+):</) {
     my $msgp = find_in_mailbox ($mail);
     if (defined $msgp) {
+      $annotate and unshift (@$msgp, "X-Mass-Check-Id: $mail\n");
       handle ($msgp);
     } else {
-      warn "failed to find $mail\n";
+      mywarn ("failed to find message for $mail\n");
     }
 
   } else {
     if ($mail =~ /\.gz$/) {
-      open (IN, "gunzip -cd $mail |") or warn "gunzip $mail failed: $@";
+      open (IN, "gunzip -cd $mail |") or mywarn ("gunzip $mail failed: $@");
     } elsif ($mail =~ /\.bz2$/) {
-      open (IN, "bzip2 -cd $mail |") or warn "bunzip2 $mail failed: $@";
+      open (IN, "bzip2 -cd $mail |") or mywarn ("bunzip2 $mail failed: $@");
     } else {
-      open (IN, "<$mail") or warn "open $mail failed: $@";
+      open (IN, "<$mail") or mywarn ("open $mail failed: $@");
     }
     my @msg = (<IN>); close IN;
+    $annotate and unshift (@msg, "X-Mass-Check-Id: $mail\n");
     handle (\@msg);
   }
 }
@@ -51,11 +55,11 @@ sub find_in_mailbox {
 
   # failed. have to (re-|)open.
   if ($folder =~ /\.gz$/) {
-    open (MBOX, "gunzip -cd $folder |") or warn "gunzip $folder failed: $@";
+    open (MBOX, "gunzip -cd $folder |") or mywarn ("gunzip $folder failed: $@");
   } elsif ($folder =~ /\.bz2$/) {
-    open (MBOX, "bzip2 -cd $folder |") or warn "bunzip2 $folder failed: $@";
+    open (MBOX, "bzip2 -cd $folder |") or mywarn ("bunzip2 $folder failed: $@");
   } else {
-    open (MBOX, "<$folder") or warn "open $folder failed: $@";
+    open (MBOX, "<$folder") or mywarn ("open $folder failed: $@");
   }
 
   $CURRENT_MBOX_OPEN = $folder;
@@ -113,3 +117,7 @@ sub handle {
   print STDOUT @$msgp, "\n";
 }
 
+sub mywarn {
+  warn @_;
+  if ($annotate) { print "X-Mass-Check-Warning: ".join ('',@_)."\n"; }
+}

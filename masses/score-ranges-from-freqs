@@ -15,8 +15,10 @@ my $num_nonspam;
 my $num_total;
 
 my %mutable_tests = ();
-my $tflags;
-readtflags();
+
+if (!defined $argcffile) { $argcffile = "../rules"; }
+system ("./parse-rules-for-masses -d \"$argcffile\"") and die;
+require "./tmp/rules.pl";
 
 while (<>) {
   /^\s*([\d\.]+)\s+([\d\.]+)\s+([\d\.]+)\s+([\d\.]+)\s+\S+\s+(.+)\s*$/ or next;
@@ -35,11 +37,16 @@ while (<>) {
   }
   next if ($test eq '(all messages as %)');
 
+  if (!defined ($rules{$test})) {
+    warn "rule $test no longer exists; ignoring\n";
+    next;
+  }
+
   $freq{$test} = $overall;
   $freq_spam{$test} = $spam;
   $freq_nonspam{$test} = $nonspam;
 
-  my $tflags = $tflags->{$test}; $tflags ||= '';
+  my $tflags = $rules{$test}->{tflags}; $tflags ||= '';
   if ($tflags =~ /\b(?:net|userconf)\b/) {
     $mutable_tests{$test} = 0;
   } else {
@@ -70,15 +77,23 @@ while (<>) {
 system ("mkdir tmp >/dev/null 2>&1");
 open (OUT, ">tmp/ranges.data");
 foreach my $test (sort { $soratio{$b} <=> $soratio{$a} } keys %freq) {
+  if (!defined ($rules{$test})) {
+    warn "no rule $test";
+    print OUT ("0 0 0 $test\n");
+    next;
+  }
+
   my $overall = $freq{$test};
   my $spam = $freq_spam{$test};
   my $nonspam = $freq_nonspam{$test};
   my $soratio = $soratio{$test};
   my $mutatable = $mutable_tests{$test};
-  my $tflags = $tflags->{$test}; $tflags ||= '';
+  my $tflags = $rules{$test}->{tflags}; $tflags ||= '';
 
   if (!$mutatable) {
-    printf OUT ("%3.1f %3.1f 0 $test\n", 0, 0);
+    printf OUT ("%3.1f %3.1f 0 $test\n",
+                         $rules{$test}->{score},
+                         $rules{$test}->{score});
     next;
   }
 
@@ -123,28 +138,5 @@ sub ratio_in_0to1_to_range {
     $hi = 1.0;          # some "wiggle room"
   }
   ($lo, $hi);
-}
-
-sub readtflags {
-  $tflags = { };
-
-  my @files;
-  if (!defined $argcffile) { $argcffile = "../rules"; }
-
-  if (-d $argcffile ) {
-    @files = <$argcffile/[0-9]*.cf>;
-  } else {
-    @files = ($argcffile);
-  }
-
-  foreach $cffile (@files) {
-    print "Reading tflags from \"$cffile\"...\n";
-    open (IN, "<$cffile") or warn "cannot read $cffile\n";
-    while (<IN>) {
-      s/#.*$//g; s/^\s+//; s/\s+$//;
-      if (/^tflags\s+(\S+)\s+(.+)$/) { $tflags->{$1} = $2; }
-    }
-    close IN;
-  }
 }
 

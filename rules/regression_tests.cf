@@ -1,4 +1,4 @@
-# $Id: regression_tests.cf,v 1.16 2002/08/23 04:45:04 hughescr Exp $
+# $Id: regression_tests.cf,v 1.17 2002/08/28 17:18:57 jmason Exp $
 #
 test BIG_FONT      fail    <font size=3D2>
 test BIG_FONT      ok      <font size=3D+2>
@@ -215,4 +215,10 @@ test HTML_WIN_OPEN fail The window.open() function
 test HTML_WIN_BLUR ok <script> win=window.open("http://foo/") win.blur() window.focus() </script>
 test HTML_WIN_BLUR ok <body onload='win=window.open("http://foo/"); win.blur()'>
 test HTML_WIN_BLUR fail The win.blur() function
+
+test __OUTLOOK_FW_MSG ok Subject: FW: White Stripes Tour!
+test __OUTLOOK_FW_MSG ok Subject: Fw: Thank you yourself
+test __OUTLOOK_FW_MSG fail Subject: Fwd: Dracula
+test __OUTLOOK_FW_MSG fail Subject: fw:                                       . qBQyzOWqKYggZT0oDJzp41nd
+test __OUTLOOK_FW_MSG fail Subject: FW:>Re: Spruce up your life!DGKJWI
 

@@ -21,8 +21,8 @@ Mail::SpamAssassin - Mail::Audit spam detector plugin
 
 =head1 DESCRIPTION
 
-Mail::SpamAssassin is a Mail::Audit plugin to identify spam using text
-analysis and several internet-based realtime blacklists.
+Mail::SpamAssassin is a module to identify spam using text analysis and several
+internet-based realtime blacklists.
 
 Using its rule base, it uses a wide range of heuristic tests on mail headers
 and body text to identify "spam", also known as unsolicited commercial email.
@@ -30,8 +30,8 @@ and body text to identify "spam", also known as unsolicited commercial email.
 Once identified, the mail can then be optionally tagged as spam for later
 filtering using the user's own mail user-agent application.
 
-This module implements a Mail::Audit plugin, allowing SpamAssassin to be used
-in a Mail::Audit filter.  If you wish to use a command-line filter tool,
+This module also implements a Mail::Audit plugin, allowing SpamAssassin to be
+used in a Mail::Audit filter.  If you wish to use a command-line filter tool,
 try the C<spamassassin> or C<spamd> tools provided.
 
 Note that, if you're using Mail::Audit, the constructor for the Mail::Audit
@@ -87,7 +87,7 @@ $TIMELOG->{dummy}=0;
 
 $VERSION = "2.40";
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.115 2002/08/20 23:10:05 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.116 2002/08/28 17:17:47 jmason Exp $'))[2 .. 5, 8]));
 # If you hacked up your SA, add a token to identify it here. Eg.: I use "mss<number>",
 # <number> increasing with every hack. Deersoft might want to use "pro" :o)
 # "cvs" is added automatically if this file is tagged as 'Exp'erimental.
@@ -181,6 +181,12 @@ already exist. (default: 0)
 If set to 1, the patterns hit can be retrieved from the
 C<Mail::SpamAssassin::PerMsgStatus> object.  Used for debugging.
 
+=item home_dir_for_helpers
+
+If set, the B<HOME> environment variable will be set to this value
+when using test applications that require their configuration data,
+such as Razor, Pyzor and DCC.
+
 =back
 
 If none of C<rules_filename>, C<userprefs_filename>, or C<config_text> is set,
@@ -222,6 +228,7 @@ sub new {
   $self->{conf} ||= new Mail::SpamAssassin::Conf ($self);
 
   $self->{save_pattern_hits} ||= 0;
+
   $self;
 }
 
@@ -593,6 +600,39 @@ sub compile_now {
   }
 
   1;
+}
+
+###########################################################################
+
+=item $failed = $f->lint_rules ()
+
+Syntax-check the current set of rules.  Returns the number of 
+syntax errors discovered, or 0 if the configuration is valid.
+
+=cut
+
+sub lint_rules {
+  my ($self) = @_;
+
+  dbg ("ignore: using a test message to lint rules");
+  my @testmsg = ("From: ignore\@compiling.spamassassin.taint.org\n", 
+    "Subject: \n",
+    "Message-Id:  <".time."\@lint_rules>\n", "\n",
+    "I need to make this message body somewhat long so TextCat preloads\n"x20);
+
+  $self->{lint_rules} = $self->{conf}->{lint_rules} = 1;
+  $self->{syntax_errors} = 0;
+  $self->{rule_errors} = 0;
+
+  $self->init(1);
+  $self->{syntax_errors} += $self->{conf}->{errors};
+
+  my $mail = Mail::SpamAssassin::NoMailAudit->new(data => \@testmsg);
+  my $status = $self->check($mail);
+  $self->{syntax_errors} += $status->{rule_errors};
+  $status->finish();
+
+  return ($self->{syntax_errors});
 }
 
 ###########################################################################

@@ -7,7 +7,8 @@ vers=`build/get_version`
 # delete old CVS files
 find . -name '.#*' -print | xargs rm -f
 
-make clean ; perl Makefile.PL ; make
+make clean ; perl Makefile.PL 
+make; make; make                # third time lucky!
 
 make text_html_doc
 make distcheck
