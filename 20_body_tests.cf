@@ -1,5 +1,5 @@
 # SpamAssassin rules file: tests.
-# $Id: 20_body_tests.cf,v 1.239 2002/08/26 16:53:35 msquadrat Exp $
+# $Id: 20_body_tests.cf,v 1.240 2002/08/28 17:18:23 jmason Exp $
 # 
 # note: body tests are run with long lines, so be sure to limit the
 # size of searches; use ".{0,30}" instead of ".*" to avoid huge
@@ -426,11 +426,17 @@ describe MIME_LONG_LINE_QP	Quoted-printable line longer than 76 characters
 rawbody  MIME_MISSING_BOUNDARY	eval:check_for_mime_missing_boundary()
 describe MIME_MISSING_BOUNDARY	MIME section missing boundary
 
+###########################################################################
+# Actually indicates virii, typically; just used here to clean corpora.
+
 rawbody  MICROSOFT_EXECUTABLE	eval:check_for_microsoft_executable()
 describe MICROSOFT_EXECUTABLE	Message includes Microsoft executable program
+# todo: better tflags category for these tests
+tflags MICROSOFT_EXECUTABLE userconf
 
 rawbody  MIME_SUSPECT_NAME	eval:check_for_mime_suspect_name()
 describe MIME_SUSPECT_NAME	MIME filename does not match content
+tflags MIME_SUSPECT_NAME userconf
 
 ###########################################################################
 # some full-text matches; note the [3D=\s"']* bits of the patterns, which
@@ -556,9 +562,11 @@ describe INTERNET_TERROR_RANT   Cyber FirePower! rant about losing dropboxes
 
 body CHARSET_FARAWAY		eval:check_for_faraway_charset()
 describe CHARSET_FARAWAY	Character set indicates a foreign language
+tflags CHARSET_FARAWAY          userconf
 
 full CHARSET_FARAWAY_BODY	eval:check_for_faraway_charset_in_body()
 describe CHARSET_FARAWAY_BODY	Character set indicates foreign language body
+tflags CHARSET_FARAWAY_BODY     userconf
 
 body UNDESIRED_LANGUAGE_BODY		eval:check_language()
 describe UNDESIRED_LANGUAGE_BODY	Written in an undesired language
@@ -766,11 +774,6 @@ describe FREE_TRIAL		Free Trial
 
 body FREE_MEMBERSHIP	        /\bfree membership/i
 describe FREE_MEMBERSHIP	Free Membership
-
-#  0.00     0.00     0.00    0.00    1.00  FREE_FLAG (no matches)
-#body FREE_FLAG		        /\bfree flag/i
-#describe FREE_FLAG		Free Flag
-
 
 body FREE_WEBSITE	        /\bfree website/i
 describe FREE_WEBSITE		Free Website
@@ -1335,8 +1338,6 @@ body ONCE_IN_LIFETIME           /once in a lifetime opportunity/i
 describe ONCE_IN_LIFETIME       Once in a lifetime, apparently
 rawbody SAFEGUARD_NOTICE        /This safeguard is not inserted when using the registered version/s
 describe SAFEGUARD_NOTICE       Contains signature of unregistered spam tool
-body FREE_FLAG                  /\bfree flag/i
-describe FREE_FLAG              Free Flag
 body MORE_TRAFFIC               /\bmore (?:internet|web) traffic\b/i
 describe MORE_TRAFFIC           More Internet Traffic
 body NO_MIDDLEMAN               /\bno middleman\b/i

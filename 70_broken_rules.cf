@@ -61,18 +61,17 @@ score BIG_BUCKS			     1.0
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  BUGGY_CGI_ES
-body BUGGY_CGI_ES		/Aqui esta el resultado de su formulario/i
-describe BUGGY_CGI_ES		Broken Spanish CGI script message
-lang fr describe BUGGY_CGI_ES   Réponse a un formulaire jamais rempli (en espagnol)
-score BUGGY_CGI_ES                   1.0
+#body BUGGY_CGI_ES		/Aqui esta el resultado de su formulario/i
+#describe BUGGY_CGI_ES		Broken Spanish CGI script message
+#lang fr describe BUGGY_CGI_ES   Réponse a un formulaire jamais rempli (en espagnol)
+#score BUGGY_CGI_ES                   1.0
 #
 #
-#   0.000    0.000    0.000    0.00    1.00  BUGGY_CGI_PT_2
 #   0.000    0.000    0.000    0.00    4.00  BUGGY_CGI_PT
-body BUGGY_CGI_PT		/Abaixo o resultado do preenchimento do Formulario/
-describe BUGGY_CGI_PT		Broken Portuguese CGI script message
-lang fr describe BUGGY_CGI_PT   Réponse a un formulaire jamais rempli (en portugais)
-score BUGGY_CGI_PT                   4.0
+#body BUGGY_CGI_PT		/Abaixo o resultado do preenchimento do Formulario/
+#describe BUGGY_CGI_PT		Broken Portuguese CGI script message
+#lang fr describe BUGGY_CGI_PT   Réponse a un formulaire jamais rempli (en portugais)
+#score BUGGY_CGI_PT                   4.0
 #
 #
 #
@@ -103,12 +102,12 @@ describe CLICK_TO_REMOVE_3	Click-to-remove with PHP/ASP action found
 #
 #
 #   0.000    0.000    0.000    0.00    2.67  CORRUPT_MSGID
-header CORRUPT_MSGID		Message-Id =~ /\@Received: /
-describe CORRUPT_MSGID		'Message-Id' contains bits of Received header
-lang de describe CORRUPT_MSGID            'Message-Id' enthaelt Teile des Received Headers
-lang es describe CORRUPT_MSGID		'Message-Id' contiene pedazos de la cabecera Received
-lang fr describe CORRUPT_MSGID   L'entête Message-Id: contient des morceaux de l'entête Received:
-score CORRUPT_MSGID                  2.665
+#header CORRUPT_MSGID		Message-Id =~ /\@Received: /
+#describe CORRUPT_MSGID		'Message-Id' contains bits of Received header
+#lang de describe CORRUPT_MSGID            'Message-Id' enthaelt Teile des Received Headers
+#lang es describe CORRUPT_MSGID		'Message-Id' contiene pedazos de la cabecera Received
+#lang fr describe CORRUPT_MSGID   L'entête Message-Id: contient des morceaux de l'entête Received:
+#score CORRUPT_MSGID                  2.665
 #
 #
 #   0.035    0.048    0.027    0.64    1.56  DONT_DELETE
@@ -234,11 +233,7 @@ lang fr describe FROM_MISSING   L'entête From: est absent
 score FROM_MISSING                   4.257
 #
 #
-#   1.097    0.513    1.450    0.26    1.00  FROM_NAME_NO_SPACES
-lang fr describe FROM_NAME_NO_SPACES	Le nom de l'entête From: ne contient aucune espace
 #
-#
-#   0.429    0.043    0.662    0.06   -1.00  FWD_MSG_2
 #   0.534    0.593    0.499    0.54   -1.00  FWD_MSG
 header FWD_MSG                  Subject =~ /Fwd:\s/
 describe FWD_MSG                Forwarded email
@@ -267,9 +262,6 @@ body HTML_COMMENT_UNIQUE_ID	eval:html_test('comment_unique_id')
 describe HTML_COMMENT_UNIQUE_ID	Contains a comment with nothing but unique ID
 #
 #
-#   0.004    0.003    0.005    0.42    1.00  INCREASE_SALES
-lang fr describe INCREASE_SALES Propose d'augmenter les ventes
-#
 #
 #   0.000    0.001    0.000    1.00    1.00  INCREDIBLE
 body INCREDIBLE		        /\bincredible secrets\b/i
@@ -288,10 +280,6 @@ score INCREDIBLE		     1.0
 #score ITS_EFFECTIVE                  1.0
 #body ITS_EFFECTIVE              /\bit's effective\b/i
 #describe ITS_EFFECTIVE          Something claims to be effective
-#
-#
-#   0.094    0.100    0.090    0.53    1.00  KNOWN_BAD_DIALUPS
-lang fr describe KNOWN_BAD_DIALUPS      Mèl reçu depuis un FAI hébergeant des SPAMeurs
 #
 #
 #   0.000    0.000    0.000    0.00    3.90  LASER_PRINTER
@@ -409,17 +397,11 @@ describe NO_SELLING             Claims not to be selling anything
 #
 #   1.297    1.989    0.878    0.69   -0.30  OUTLOOK_FW_MSG
 header __OUTLOOK_FW_MSG         Subject =~ /\[?F[Ww]:\s/
-meta OUTLOOK_FW_MSG             (__OUTLOOK_FW_MSG && __HAS_OUTLOOK_IN_MAILER)
 
+meta OUTLOOK_FW_MSG             (__OUTLOOK_FW_MSG && __HAS_OUTLOOK_IN_MAILER)
 describe OUTLOOK_FW_MSG         Forwarded email (Outlook style)
 tflags OUTLOOK_FW_MSG		nice
-score   OUTLOOK_FW_MSG          -0.3
-
-test __OUTLOOK_FW_MSG ok Subject: FW: White Stripes Tour!
-test __OUTLOOK_FW_MSG ok Subject: Fw: Thank you yourself
-test __OUTLOOK_FW_MSG fail Subject: Fwd: Dracula
-test __OUTLOOK_FW_MSG fail Subject: fw:                                       . qBQyzOWqKYggZT0oDJzp41nd
-test __OUTLOOK_FW_MSG fail Subject: FW:>Re: Spruce up your life!DGKJWI
+score OUTLOOK_FW_MSG            -0.3
 #
 #
 #   0.008    0.003    0.011    0.23    0.50  OUTLOOK_UNDISC_RECIPS
@@ -683,9 +665,6 @@ lang pl describe SHORT_RECEIVED_LINE	'Received:' zawiera zbyt d³ugi adres.
 score SHORT_RECEIVED_LINE            4.251
 #
 #
-#   0.046    0.002    0.073    0.02    1.00  SIGNATURE_DELIM
-lang fr describe SIGNATURE_DELIM        Contient le délimiteur standard pour les signatures
-#
 #
 #   0.006    0.009    0.004    0.67    1.00  SIGNIFICANT
 body SIGNIFICANT	        /\bsignificant savings\b/i
@@ -716,10 +695,10 @@ test SPAM_REDIRECTOR ok http://wwp.icq.com/?http://anothersite.com/
 #
 #
 #   0.000    0.000    0.000    0.00    4.00  STAINLESS_STEEL
-uri STAINLESS_STEEL             /www.BuyStainlessOnline.com/i
-describe STAINLESS_STEEL        Stainless Steel Network Spam
-lang fr describe STAINLESS_STEEL        Contient une référence à www.BuyStainlessOnline.com, fréquement trouvée dans du spam
-score STAINLESS_STEEL                4.0
+#uri STAINLESS_STEEL             /www.BuyStainlessOnline.com/i
+#describe STAINLESS_STEEL        Stainless Steel Network Spam
+#lang fr describe STAINLESS_STEEL        Contient une référence à www.BuyStainlessOnline.com, fréquement trouvée dans du spam
+#score STAINLESS_STEEL                4.0
 #
 #
 #   0.307    0.301    0.311    0.49   -1.00  SUBJECT_HAS_DATE
@@ -816,27 +795,6 @@ tflags   T_NASD_FINANCIAL           nice
 score T_NASD_FINANCIAL -1.0
 #
 #
-#   0.000    0.000    0.001    0.00    1.00  T_SAVINGS
-#
-#
-#   0.001    0.000    0.002    0.00    1.00  T_SUBJ_FREE_CAP
-#
-#
-
-#
-#
-#   0.018    0.000    0.028    0.00    1.00  T_TRADEMARK
-#
-#
-#   0.000    0.000    0.001    0.00    1.00  T_UNLIMITED
-#
-#
-#   0.004    0.000    0.006    0.00    1.00  T_USER_4U2
-#
-#
-#   0.042    0.000    0.067    0.00    1.00  UNIFIED_PATCH
-lang fr describe UNIFIED_PATCH  Contient quelque chose qui ressemble a un patch en format diff -u
-#
 #
 #   0.033    0.013    0.045    0.22    1.00  URI_IS_POUND
 score URI_IS_POUND                   2.026
@@ -849,6 +807,21 @@ header USER_AGENT_AOL		X-Mailer   =~ /^AOL (?:[5-7]\.0 )?for (?:Win|Mac).* sub \
 describe USER_AGENT_AOL		X-Mailer header indicates a non-spam MUA (AOL)
 tflags USER_AGENT_AOL        nice
 score USER_AGENT_AOL            -0.1
+#
+#
+#   0.000    0.000    0.000    0.00   -1.00  USER_AGENT_GNUS_UA
+header USER_AGENT_GNUS_UA	User-Agent =~ /^Gnus v\d(?:\.\d+){1,2}\/X?Emacs \d+\.\d+/
+describe USER_AGENT_GNUS_UA	User-Agent header indicates a non-spam MUA (Gnus)
+tflags USER_AGENT_GNUS_UA    nice
+score USER_AGENT_GNUS_UA        -1.0
+#
+#
+#   0.029    0.078    0.000    1.00   -1.00  USER_AGENT_GNUS_XM
+#score USER_AGENT_GNUS_XM        -0.1
+#header USER_AGENT_GNUS_XM      X-Mailer   =~ /^Gnus\/\d\.\d+ /
+#describe USER_AGENT_GNUS_XM    X-Mailer header indicates a non-spam MUA (Gnus)
+#tflags USER_AGENT_GNUS_XM nice
+#score USER_AGENT_GNUS_XM -1.0
 #
 #
 #   9.021   15.707    4.979    0.76   -1.00  USER_AGENT_OE
@@ -886,8 +859,8 @@ describe WEB4PORNO_URL          Frequent SPAM content
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  WWW_DIRECTFORCEMARKETING_COM
-uri WWW_DIRECTFORCEMARKETING_COM    /directforcemarketing\.com/i   
-describe WWW_DIRECTFORCEMARKETING_COM   Frequent SPAM content   
+#uri WWW_DIRECTFORCEMARKETING_COM    /directforcemarketing\.com/i   
+#describe WWW_DIRECTFORCEMARKETING_COM   Frequent SPAM content   
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  WWW_NETSITESFORFREE_NET
@@ -921,12 +894,6 @@ lang es describe YR_MEMBERSHIP_EXCH	Subject contiene 'Your Membership Exchange'
 lang fr describe YR_MEMBERSHIP_EXCH     L'entête Subject: contient 'your membership exchange'
 lang pl describe YR_MEMBERSHIP_EXCH	Temat zawiera 'Your Membership Exchange'
 score YR_MEMBERSHIP_EXCH             4.2
-
-# replaced with MULTIPART_SIGNED
-header PGP_SIGNATURE            Content-Type =~ /protocol=.?application\/pgp-signature.?;/i
-describe PGP_SIGNATURE          Contains a PGP-signed message (signature attached)
-tflags PGP_SIGNATURE            nice
-score PGP_SIGNATURE             -3
 
 #   0.001    0.002    0.000    1.00    2.00  RATWARE_UPROAR
 #header RATWARE_UPROAR          X-Mailer =~ /Uproar Mass Mailer/

@@ -2,40 +2,40 @@
 
 # Leaving some of these without "lang es" because they show up in english language
 # inboxes
-# $Id: 25_body_tests_es.cf,v 1.28 2002/08/23 04:45:04 hughescr Exp $
+# $Id: 25_body_tests_es.cf,v 1.29 2002/08/28 17:18:35 jmason Exp $
 
-body REMOVE_ES_01             /(?:Para no|Si (?:U(?:ste)?d\. )?no (?:deseas?|qui?er[ée]s)) (?:seguir )?recibi(?:r|endo) (?:en el futuro )?(?:ninguna otra|m.s|estos)?\s?(?:correos?|mensajes?|publicidad|informaci.n|ofertas?|(?:e-?)?mails? promocional(?:es)?)/
-describe REMOVE_ES_01         Claims you can be removed in Spanish
+lang es body REMOVE_ES_01             /(?:Para no|Si (?:U(?:ste)?d\. )?no (?:deseas?|qui?er[ée]s)) (?:seguir )?recibi(?:r|endo) (?:en el futuro )?(?:ninguna otra|m.s|estos)?\s?(?:correos?|mensajes?|publicidad|informaci.n|ofertas?|(?:e-?)?mails? promocional(?:es)?)/
+lang es describe REMOVE_ES_01         Claims you can be removed in Spanish
 
-body REMOVE_ES_02             /(?:Para ser (?:elimina|removi)do|Si quieres? salir) de (?:nuestra|esta) lista,? (?:sera removido|responda el mail|solo tienes? que marcar)/i
-describe REMOVE_ES_02           Claims you can be removed in Spanish
+lang es body REMOVE_ES_02             /(?:Para ser (?:elimina|removi)do|Si quieres? salir) de (?:nuestra|esta) lista,? (?:sera removido|responda el mail|solo tienes? que marcar)/i
+lang es describe REMOVE_ES_02           Claims you can be removed in Spanish
 
-body REMOVE_ES_03             /(?:Si|o)(?: U(?:ste)?d\.?)? deseas? (?:que le (?:borre|remova|elimine)mos|ser (?:borra|removi|elimina)do) (?:por favor |de (?:cualquier listado futuro,?|(?:la|nuestra) (?:lista(?: de (?:(?:e-?)?mail|correo))?|base de datos)) )?(?:s.lo )?(?:por favor|responda|env.(?:ar|e(?:nos)?|a) (?:un )?(?:e-?)?mail|haga)/i
-describe REMOVE_ES_03           Claims you can be removed in Spanish
+lang es body REMOVE_ES_03             /(?:Si|o)(?: U(?:ste)?d\.?)? deseas? (?:que le (?:borre|remova|elimine)mos|ser (?:borra|removi|elimina)do) (?:por favor |de (?:cualquier listado futuro,?|(?:la|nuestra) (?:lista(?: de (?:(?:e-?)?mail|correo))?|base de datos)) )?(?:s.lo )?(?:por favor|responda|env.(?:ar|e(?:nos)?|a) (?:un )?(?:e-?)?mail|haga)/i
+lang es describe REMOVE_ES_03           Claims you can be removed in Spanish
 
-body REMOVE_ES_04             /(?:si desea|para) no recibir mas (?:nuestras promocione|mensaje)s/i
-describe REMOVE_ES_04           Claims you can be removed in Spanish
+lang es body REMOVE_ES_04             /(?:si desea|para) no recibir mas (?:nuestras promocione|mensaje)s/i
+lang es describe REMOVE_ES_04           Claims you can be removed in Spanish
 
-body REMOVE_ES_05		/un email.{1,10}y procedo a eliminarle de mi base de datos/i
-describe REMOVE_ES_05		If you send an email you will be OptOut
+lang es body REMOVE_ES_05		/un email.{1,10}y procedo a eliminarle de mi base de datos/i
+lang es describe REMOVE_ES_05		If you send an email you will be OptOut
 
-body REMOVE_ES_06		/Si no desea ser incluido en futuros env.os/i
-describe REMOVE_ES_06		Claims you can opt-out
+lang es body REMOVE_ES_06		/Si no desea ser incluido en futuros env.os/i
+lang es describe REMOVE_ES_06		Claims you can opt-out
 
-body REMOVE_ES_07		/Si (?:este mensaje|esta publicidad) no es de su inter.s,? (?:(?:te|le) pedimos disculpas|por favor env.e un (?:e-?)?mail)/i
-describe REMOVE_ES_07		Claims you can opt-out
+lang es body REMOVE_ES_07		/Si (?:este mensaje|esta publicidad) no es de su inter.s,? (?:(?:te|le) pedimos disculpas|por favor env.e un (?:e-?)?mail)/i
+lang es describe REMOVE_ES_07		Claims you can opt-out
 
-body SUBSCRIBE_ES_01		/Si usted desea Agregarse a nuestra base de datos/i
-describe SUBSCRIBE_ES_01	If you want to subscribe...
+lang es body SUBSCRIBE_ES_01		/Si usted desea Agregarse a nuestra base de datos/i
+lang es describe SUBSCRIBE_ES_01	If you want to subscribe...
 
-body EXCUSE_ES_01             /est(?:o|e (?:mensaje|(?:e-?)mail)|a carta) no (?:es|(?:puede ser|se) considera(?:d[oa])?) .?SPAM.?,? (?:(?:puesto|ya) que|mientras)/i
-describe EXCUSE_ES_01         Claims not to be spam in Spanish
+lang es body EXCUSE_ES_01             /est(?:o|e (?:mensaje|(?:e-?)mail)|a carta) no (?:es|(?:puede ser|se) considera(?:d[oa])?) .?SPAM.?,? (?:(?:puesto|ya) que|mientras)/i
+lang es describe EXCUSE_ES_01         Claims not to be spam in Spanish
 
-body EXCUSE_ES_02             /Me he tomado la libertad de enviarle este mail por/i
-describe EXCUSE_ES_02         Someone fell free to send you a message in Spanish
+lang es body EXCUSE_ES_02             /Me he tomado la libertad de enviarle este mail por/i
+lang es describe EXCUSE_ES_02         Someone fell free to send you a message in Spanish
 
-body EXCUSE_ES_03             /Este (?:es un )?(?:mensaje|(?:e-?)?mail|correo) (?:llega a usted gracias a|ha sido enviado por solicitud de|no solicitado enviado a petici.n de)/i
-describe EXCUSE_ES_03         Someone requested an spammer to spam you in Spanish
+lang es body EXCUSE_ES_03             /Este (?:es un )?(?:mensaje|(?:e-?)?mail|correo) (?:llega a usted gracias a|ha sido enviado por solicitud de|no solicitado enviado a petici.n de)/i
+lang es describe EXCUSE_ES_03         Someone requested an spammer to spam you in Spanish
 
 lang es body EXCUSE_ES_05             /Enviamos este mail por considerar la difusi[óo]n (?:a trav[ée]s de|del) correo electr[óo]nico una alternativa econ[óo]mica/i
 lang es describe EXCUSE_ES_05         El correo como alternativa comercial
