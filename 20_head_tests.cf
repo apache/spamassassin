@@ -428,8 +428,14 @@ header __CTYPE_IS_HTML          Content-Type =~ /^text\/html\b/
 meta CTYPE_JUST_HTML		(!__RCVD_BY_HOTMAIL && __CTYPE_IS_HTML)
 describe CTYPE_JUST_HTML	HTML-only mail, with no text version
 
-header ROUND_THE_WORLD		eval:check_for_round_the_world_received()
-describe ROUND_THE_WORLD	Received: says mail bounced all around the world
+# this variant is local, using the Received hdr itself...
+header ROUND_THE_WORLD_LOCAL	eval:check_for_round_the_world_received_helo()
+describe ROUND_THE_WORLD_LOCAL	Received: says mail bounced around the world (HELO)
+
+# and this one uses a DNS reverse lookup.  so now we can use a version
+# of this test without a net connection, or in mass-check etc.
+header ROUND_THE_WORLD		eval:check_for_round_the_world_received_revdns()
+describe ROUND_THE_WORLD	Received: says mail bounced around the world (DNS)
 tflags ROUND_THE_WORLD          net
 
 # this is a quite common false positive, as it's legal to remove a To but leave
