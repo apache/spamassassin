@@ -43,180 +43,181 @@ typedef int ssize_t;
 
 /* -------------------------------------------------------------------------- */
 #ifndef _WIN32
-typedef void    sigfunc(int);   /* for signal handlers */
+typedef void sigfunc(int);	/* for signal handlers */
 
-sigfunc* sig_catch(int sig, void (*f)(int))
+sigfunc *sig_catch(int sig, void (*f) (int))
 {
-  struct sigaction act, oact;
-  act.sa_handler = f;
-  act.sa_flags = 0;
-  sigemptyset(&act.sa_mask);
-  sigaction(sig, &act, &oact);
-  return oact.sa_handler;
+    struct sigaction act, oact;
+    act.sa_handler = f;
+    act.sa_flags = 0;
+    sigemptyset(&act.sa_mask);
+    sigaction(sig, &act, &oact);
+    return oact.sa_handler;
 }
 
-static void catch_alrm(int x) {
-  UNUSED_VARIABLE(x);
+static void catch_alrm(int x)
+{
+    UNUSED_VARIABLE(x);
 }
 #endif
 
-ssize_t
-fd_timeout_read (int fd, char fdflag, void *buf, size_t nbytes)
+ssize_t fd_timeout_read(int fd, char fdflag, void *buf, size_t nbytes)
 {
-  ssize_t nred;
-  int origerr;
+    ssize_t nred;
+    int origerr;
 #ifndef _WIN32
-  sigfunc* sig;
+    sigfunc *sig;
 
-  sig = sig_catch(SIGALRM, catch_alrm);
-  if (libspamc_timeout > 0) {
-    alarm(libspamc_timeout);
-  }
-#endif
-
-  do {
-    if (fdflag) {
-    nred = read (fd, buf, nbytes);
-      origerr = errno;
-    } else {
-      nred = recv (fd, buf, nbytes, 0);
-#ifndef _WIN32
-      origerr = errno;
-#else
-      origerr = WSAGetLastError();
-#endif
+    sig = sig_catch(SIGALRM, catch_alrm);
+    if (libspamc_timeout > 0) {
+	alarm(libspamc_timeout);
     }
-  } while(nred < 0 && origerr == EWOULDBLOCK);
-
-#ifndef _WIN32
-  if(nred < 0 && origerr == EINTR)
-    errno = ETIMEDOUT;
-
-  if (libspamc_timeout > 0) {
-    alarm(0);
-  }
-
-  /* restore old signal handler */
-  sig_catch(SIGALRM, sig);
 #endif
 
-  return nred;
+    do {
+	if (fdflag) {
+	    nred = read(fd, buf, nbytes);
+	    origerr = errno;
+	}
+	else {
+	    nred = recv(fd, buf, nbytes, 0);
+#ifndef _WIN32
+	    origerr = errno;
+#else
+	    origerr = WSAGetLastError();
+#endif
+	}
+    } while (nred < 0 && origerr == EWOULDBLOCK);
+
+#ifndef _WIN32
+    if (nred < 0 && origerr == EINTR)
+	errno = ETIMEDOUT;
+
+    if (libspamc_timeout > 0) {
+	alarm(0);
+    }
+
+    /* restore old signal handler */
+    sig_catch(SIGALRM, sig);
+#endif
+
+    return nred;
 }
 
-int
-ssl_timeout_read (SSL *ssl, void *buf, int nbytes)
+int ssl_timeout_read(SSL * ssl, void *buf, int nbytes)
 {
-  int nred;
+    int nred;
 
 #ifndef _WIN32
-  sigfunc* sig;
+    sigfunc *sig;
 
-  sig = sig_catch(SIGALRM, catch_alrm);
-  if (libspamc_timeout > 0) {
-    alarm(libspamc_timeout);
-  }
+    sig = sig_catch(SIGALRM, catch_alrm);
+    if (libspamc_timeout > 0) {
+	alarm(libspamc_timeout);
+    }
 #endif
 
-  do {
+    do {
 
 #ifdef SPAMC_SSL
-    nred = SSL_read (ssl, buf, nbytes);
+	nred = SSL_read(ssl, buf, nbytes);
 #else
-    UNUSED_VARIABLE(ssl);
-    UNUSED_VARIABLE(buf);
-    UNUSED_VARIABLE(nbytes);
-    nred = 0;			/* never used */
+	UNUSED_VARIABLE(ssl);
+	UNUSED_VARIABLE(buf);
+	UNUSED_VARIABLE(nbytes);
+	nred = 0;		/* never used */
 #endif
 
-  } while(nred < 0 && errno == EWOULDBLOCK);
+    } while (nred < 0 && errno == EWOULDBLOCK);
 
 #ifndef _WIN32
-  if(nred < 0 && errno == EINTR)
-    errno = ETIMEDOUT;
+    if (nred < 0 && errno == EINTR)
+	errno = ETIMEDOUT;
 
-  if (libspamc_timeout > 0) {
-    alarm(0);
-  }
+    if (libspamc_timeout > 0) {
+	alarm(0);
+    }
 
-  /* restore old signal handler */
-  sig_catch(SIGALRM, sig);
+    /* restore old signal handler */
+    sig_catch(SIGALRM, sig);
 #endif
 
-  return nred;
+    return nred;
 }
 
 /* -------------------------------------------------------------------------- */
 
-int
-full_read (int fd, char fdflag, void *vbuf, int min, int len)
+int full_read(int fd, char fdflag, void *vbuf, int min, int len)
 {
-  unsigned char *buf = (unsigned char *)vbuf;
-  int total;
-  int thistime;
+    unsigned char *buf = (unsigned char *) vbuf;
+    int total;
+    int thistime;
 
-  for (total = 0; total < min; ) {
-    thistime = fd_timeout_read (fd, fdflag, buf+total, len-total);
+    for (total = 0; total < min;) {
+	thistime = fd_timeout_read(fd, fdflag, buf + total, len - total);
 
-    if (thistime < 0) {
-      return -1;
-    } else if (thistime == 0) {
-      /* EOF, but we didn't read the minimum.  return what we've read
-       * so far and next read (if there is one) will return 0. */
-      return total;
+	if (thistime < 0) {
+	    return -1;
+	}
+	else if (thistime == 0) {
+	    /* EOF, but we didn't read the minimum.  return what we've read
+	     * so far and next read (if there is one) will return 0. */
+	    return total;
+	}
+
+	total += thistime;
     }
-
-    total += thistime;
-  }
-  return total;
+    return total;
 }
 
-int
-full_read_ssl (SSL *ssl, unsigned char *buf, int min, int len)
+int full_read_ssl(SSL * ssl, unsigned char *buf, int min, int len)
 {
-  int total;
-  int thistime;
+    int total;
+    int thistime;
 
-  for (total = 0; total < min; ) {
-    thistime = ssl_timeout_read (ssl, buf+total, len-total);
+    for (total = 0; total < min;) {
+	thistime = ssl_timeout_read(ssl, buf + total, len - total);
 
-    if (thistime < 0) {
-      return -1;
-    } else if (thistime == 0) {
-      /* EOF, but we didn't read the minimum.  return what we've read
-       * so far and next read (if there is one) will return 0. */
-      return total;
+	if (thistime < 0) {
+	    return -1;
+	}
+	else if (thistime == 0) {
+	    /* EOF, but we didn't read the minimum.  return what we've read
+	     * so far and next read (if there is one) will return 0. */
+	    return total;
+	}
+
+	total += thistime;
     }
-
-    total += thistime;
-  }
-  return total;
+    return total;
 }
 
-int
-full_write (int fd, char fdflag, const void *vbuf, int len)
+int full_write(int fd, char fdflag, const void *vbuf, int len)
 {
-  const unsigned char *buf = (const unsigned char *)vbuf;
-  int total;
-  int thistime;
-  int origerr;
+    const unsigned char *buf = (const unsigned char *) vbuf;
+    int total;
+    int thistime;
+    int origerr;
 
-  for (total = 0; total < len; ) {
-    if (fdflag) {
-    thistime = write (fd, buf+total, len-total);
-      origerr = errno;
-    } else {
-      thistime = send (fd, buf+total, len-total, 0);
+    for (total = 0; total < len;) {
+	if (fdflag) {
+	    thistime = write(fd, buf + total, len - total);
+	    origerr = errno;
+	}
+	else {
+	    thistime = send(fd, buf + total, len - total, 0);
 #ifndef _WIN32
-      origerr = errno;
+	    origerr = errno;
 #else
-      origerr = WSAGetLastError();
+	    origerr = WSAGetLastError();
 #endif
+	}
+	if (thistime < 0) {
+	    if (EINTR == origerr || EWOULDBLOCK == origerr)
+		continue;
+	    return thistime;	/* always an error for writes */
+	}
+	total += thistime;
     }
-    if (thistime < 0) {
-      if(EINTR == origerr || EWOULDBLOCK == origerr) continue;
-      return thistime;        /* always an error for writes */
-    }
-    total += thistime;
-  }
-  return total;
+    return total;
 }

@@ -81,7 +81,8 @@
 
 
 /* Aug 14, 2002 bj: A struct for storing a message-in-progress */
-typedef enum {
+typedef enum
+{
     MESSAGE_NONE,
     MESSAGE_ERROR,
     MESSAGE_RAW,
@@ -91,26 +92,32 @@ typedef enum {
 
 struct libspamc_private_message;
 
-struct message {
+struct message
+{
     /* Set before passing the struct on! */
-    int max_len;  /* messages larger than this will return EX_TOOBIG */
-    int timeout;  /* timeout for read() system calls */
+    int max_len;		/* messages larger than this will return EX_TOOBIG */
+    int timeout;		/* timeout for read() system calls */
 
     /* Filled in by message_read */
     message_type_t type;
-    char *raw; int raw_len;   /* Raw message buffer */
-    char *pre; int pre_len;   /* Pre-message data (e.g. SMTP commands) */
-    char *msg; int msg_len;   /* The message */
-    char *post; int post_len; /* Post-message data (e.g. SMTP commands) */
+    char *raw;
+    int raw_len;		/* Raw message buffer */
+    char *pre;
+    int pre_len;		/* Pre-message data (e.g. SMTP commands) */
+    char *msg;
+    int msg_len;		/* The message */
+    char *post;
+    int post_len;		/* Post-message data (e.g. SMTP commands) */
     int content_length;
 
     /* Filled in by filter_message */
-    int is_spam;              /* EX_ISSPAM if the message is spam, EX_NOTSPAM
-                                 if not */
-    float score, threshold;   /* score and threshold */
-    char *out; int out_len;   /* Output from spamd. Either the filtered
-                                 message, or the check-only response. Or else,
-                                 a pointer to msg above. */
+    int is_spam;		/* EX_ISSPAM if the message is spam, EX_NOTSPAM
+				   if not */
+    float score, threshold;	/* score and threshold */
+    char *out;
+    int out_len;		/* Output from spamd. Either the filtered
+				   message, or the check-only response. Or else,
+				   a pointer to msg above. */
 
     /* these members added in SpamAssassin version 2.60: */
     struct libspamc_private_message *priv;
@@ -140,25 +147,26 @@ struct message {
  * code just loops over that same address.
  */
 #define TRANSPORT_LOCALHOST 0x01	/* TCP to localhost only */
-#define	TRANSPORT_TCP	    0x02	/* standard TCP socket	 */
-#define TRANSPORT_UNIX	    0x03	/* UNIX domain socket	 */
+#define	TRANSPORT_TCP	    0x02	/* standard TCP socket   */
+#define TRANSPORT_UNIX	    0x03	/* UNIX domain socket    */
 
-#define TRANSPORT_MAX_HOSTS 256		/* max hosts we can failover between */
+#define TRANSPORT_MAX_HOSTS 256	/* max hosts we can failover between */
 
-struct transport {
-	int		type;
+struct transport
+{
+    int type;
 
-	const char	*socketpath;	/* for UNIX dommain socket      */
-	const char	*hostname;	/* for TCP sockets              */
+    const char *socketpath;	/* for UNIX dommain socket      */
+    const char *hostname;	/* for TCP sockets              */
 
-	unsigned short	port;		/* for TCP sockets              */
+    unsigned short port;	/* for TCP sockets              */
 
-	struct in_addr	hosts[TRANSPORT_MAX_HOSTS];
-	int		nhosts;
+    struct in_addr hosts[TRANSPORT_MAX_HOSTS];
+    int nhosts;
 };
 
 extern void transport_init(struct transport *tp);
-extern int  transport_setup(struct transport *tp, int flags);
+extern int transport_setup(struct transport *tp, int flags);
 
 /* Aug 14, 2002 bj: New interface functions */
 
@@ -179,7 +187,7 @@ long message_write(int out_fd, struct message *m);
  * no failover is done.
  */
 int message_filter(struct transport *tp, const char *username,
-		int flags, struct message *m);
+		   int flags, struct message *m);
 
 /* Dump the message. If there is any data in the message (typically, m->type
  * will be MESSAGE_ERROR) it will be message_writed. Then, fd_in will be piped
@@ -190,16 +198,16 @@ void message_dump(int in_fd, int out_fd, struct message *m);
 /* Do a message_read->message_filter->message_write sequence, handling errors
  * appropriately with dump_message or appropriate CHECK_ONLY output. Returns
  * EX_OK or EX_ISSPAM/EX_NOTSPAM on success, some error EX on error. */
-int message_process(struct transport *trans, char *username, int max_size, int in_fd, int out_fd, const int flags);
+int message_process(struct transport *trans, char *username, int max_size,
+		    int in_fd, int out_fd, const int flags);
 
 /* Cleanup the resources we allocated for storing the message. Call after
  * you're done processing. */
 void message_cleanup(struct message *m);
 
 /* Aug 14, 2002 bj: This is now legacy, don't use it. */
-int process_message(struct transport *tp, char *username, 
-                    int max_size, int in_fd, int out_fd,
-                    const int check_only, const int safe_fallback);
+int process_message(struct transport *tp, char *username,
+		    int max_size, int in_fd, int out_fd,
+		    const int check_only, const int safe_fallback);
 
 #endif
-
