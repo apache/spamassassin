@@ -126,8 +126,12 @@ sub new {
   $self->{auto_whitelist_file_mode} = '0600';	# as string, with --x bits
   $self->{auto_whitelist_factor} = 0.5;
 
+  $self->{bayes_path} = "~/.spamassassin/bayes";
+  $self->{bayes_file_mode} = "0700";	# as string, with --x bits
+
+  $self->{auto_learn} = 1;
+
   $self->{rewrite_subject} = 0;
-  $self->{detailed_phrase_score} = 0;
   $self->{spam_level_stars} = 1;
   $self->{spam_level_char} = '*';
   $self->{subject_tag} = '*****SPAM*****';
@@ -163,9 +167,6 @@ sub new {
   $self->{whitelist_to} = { };
   $self->{more_spam_to} = { };
   $self->{all_spam_to} = { };
-
-  $self->{spamphrase} = { };
-  $self->{spamphrase_highest_score} = 0;
 
   # this will hold the database connection params
   $self->{user_scores_dsn} = '';
@@ -432,18 +433,6 @@ sub-rules, and are not scored or listed in the 'tests hit' reports.
 
     if (/^score\s+(\S+)\s+(\-*[\d\.]+)$/) {
       $self->{scores}->{$1} = $2+0.0; next;
-    }
-
-=item detailed_phrase_score { 0 | 1 }        (default: 0)
-
-This option displays all matches for "contains phrases frequently found in spam"
-Note that this is disabled by default because it can output huge headers (800
-words and more than 8KB in some cases)
-
-=cut
-
-    if (/^detailed[-_]phrase[-_]score\s+(\d+)$/) {
-      $self->{detailed_phrase_score} = $1+0; next;
     }
 
 =item rewrite_subject { 0 | 1 }        (default: 0)
@@ -822,6 +811,18 @@ C<factor> = 1 means just use the long-term mean; C<factor> = 0 mean just use the
 =cut
     if (/^auto[-_]whitelist[-_]factor\s+(.*)$/) {
       $self->{auto_whitelist_factor} = $1; next;
+    }
+
+=item auto_learn ( 0 | 1 )	(default: 1)
+
+Whether SpamAssassin should automatically feed high-scoring mails (or
+low-scoring mails, for non-spam) into its learning systems.  The only learning
+system supported currently, is a naive Bayesian classifier.
+
+=cut
+
+    if (/^auto[-_]learn\s+(.*)$/) {
+      $self->{auto_learn} = $1+0; next;
     }
 
 =item describe SYMBOLIC_TEST_NAME description ...
@@ -1492,6 +1493,22 @@ SpamAssassin use, you may want to share this across all users.
       $self->{auto_whitelist_path} = $1; next;
     }
 
+=item bayes_path /path/to/file	(default: ~/.spamassassin/bayes)
+
+Path for Bayesian probabilities databases.  Several databases will be created,
+with this as the base, with _count, _probs etc. appended to this filename.
+
+By default, each user has their own, in their C<~/.spamassassin> directory
+with mode 0700, but for system-wide SpamAssassin use, you may want to share
+this across all users.  However it should be noted that Bayesian filtering may
+work better with a database per user.
+
+=cut
+
+    if (/^bayes[-_]path\s+(.*)$/) {
+      $self->{bayes_path} = $1; next;
+    }
+
 =item timelog_path /path/to/dir		(default: NULL)
 
 If you set this value, razor will try to create logfiles for each message I
@@ -1517,6 +1534,17 @@ things will go wrong.
 =cut
     if (/^auto[-_]whitelist[-_]file[-_]mode\s+(.*)$/) {
       $self->{auto_whitelist_file_mode} = $1; next;
+    }
+
+=item bayes_file_mode		(default: 0700)
+
+The file mode bits used for the Bayesian filtering database files.
+Make sure this has the relevant execute-bits set (--x), otherwise
+things will go wrong.
+
+=cut
+    if (/^bayes[-_]file[-_]mode\s+(.*)$/) {
+      $self->{bayes_file_mode} = $1; next;
     }
 
 =item user-scores-dsn DBI:databasetype:databasename:hostname:port
@@ -1555,24 +1583,6 @@ The table user preferences are stored in, for the above DSN.
 =cut
     if(/^user[-_]scores[-_]sql[-_]table\s+(\S+)$/) {
       $self->{user_scores_sql_table} = $1; next;
-    }
-
-=item spamphrase score phrase ...
-
-A 2-word spam phrase, for the FREQ_SPAM_PHRASE test.
-
-=cut
-    if(/^spamphrase\s+(\d+)\s+(\S+ \S+)$/) {
-      $self->{spamphrase}->{$2} = $1; next;
-    }
-
-=item spamphrase-highest-score nnnnn
-
-The highest score of any of the spamphrases.  Used for scaling.
-
-=cut
-    if(/^spamphrase[-_]highest[-_]score\s+(\d+)$/) {
-      $self->{spamphrase_highest_score} = $1+0; next;
     }
 
 ###########################################################################

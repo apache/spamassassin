@@ -61,6 +61,7 @@ use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::ConfSourceSQL;
 use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::NoMailAudit;
+use Mail::SpamAssassin::Bayes;
 
 use File::Basename;
 use File::Path;
@@ -68,6 +69,7 @@ use File::Spec 0.8;
 use File::Copy;
 use Cwd;
 use Config;
+use strict;
 
 # Load Time::HiRes if it's available
 BEGIN {
@@ -92,7 +94,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.133 2002/10/21 16:02:30 matt_sergeant Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.134 2002/10/22 19:11:10 jmason Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -240,6 +242,8 @@ sub new {
 
   $self->{save_pattern_hits} ||= 0;
 
+  $self->{bayes_scanner} = new Mail::SpamAssassin::Bayes ($self);
+
   $self;
 }
 
@@ -247,8 +251,8 @@ sub new {
 
 =item $status = $f->check ($mail)
 
-Check a mail, encapsulated in a C<Mail::Audit> object, to determine if
-it is spam or not.
+Check a mail, encapsulated in a C<Mail::Audit> or
+C<Mail::SpamAssassin::Message> object, to determine if it is spam or not.
 
 Returns a C<Mail::SpamAssassin::PerMsgStatus> object which can be
 used to test or manipulate the mail message.
@@ -278,6 +282,115 @@ sub check {
   timelog("Done checking message", "msgcheck", 2);
   timelog("Done running SpamAssassin", "SAfull", 2);
   $msg;
+}
+
+###########################################################################
+
+=item $status = $f->learn ($mail, $id, $isspam, $forget)
+
+Learn from a mail, encapsulated in a C<Mail::Audit> or
+C<Mail::SpamAssassin::Message> object.
+
+If C<$isspam> is set, the mail is assumed to be spam, otherwise it will
+be learnt as non-spam.
+
+If C<$forget> is set, the attributes of the mail will be removed from
+both the non-spam and spam learning databases.
+
+C<$id> is an optional message-identification string, used internally
+to tag the message.  If it is C<undef>, the Message-Id of the message
+will be used.  It should be unique to that message.
+
+Returns a C<Mail::SpamAssassin::PerMsgLearner> object which can be used to
+manipulate the learning process for each mail.
+
+Note that the C<Mail::SpamAssassin> object can be re-used for further messages
+without affecting this check; in OO terminology, the C<Mail::SpamAssassin>
+object is a "factory".   However, if you do this, be sure to call the
+C<finish()> method on the learner objects when you're done with them.
+
+C<learn()> and C<check()> can be run using the same factory.  C<init_learner()>
+must be called before using this method.
+
+=cut
+
+sub learn {
+  my ($self, $mail_obj, $id, $isspam, $forget) = @_;
+  local ($_);
+
+  timelog("Starting SpamAssassin Learn", "SAfull", 1);
+  $self->init(1);
+  timelog("Init completed");
+  my $mail = $self->encapsulate_mail_object ($mail_obj);
+  my $msg = Mail::SpamAssassin::PerMsgLearner->new($self, $mail, $id);
+  $TIMELOG->{mesgid} = $id;
+  $TIMELOG->{mesgid} =~ s#/#-#g;
+  timelog("Created message object, learning from message", "msglearn", 1);
+
+  if ($forget) {
+    $msg->forget();
+  } elsif ($isspam) {
+    $msg->learn_spam();
+  } else {
+    $msg->learn_ham();
+  }
+
+  timelog("Done learning from message", "msglearn", 2);
+  timelog("Done running SpamAssassin", "SAfull", 2);
+  $msg;
+}
+
+###########################################################################
+
+=item $f->init_learner ( [ { opt => val, ... } ] )
+
+Initialise learning.  You may pass the following attribute-value pairs to this
+method.
+
+=over 4
+
+=item use_whitelist
+
+Whether or not to add addresses to the automatic whitelist while learning.
+(optional, default 0)
+
+=back
+
+=cut
+
+sub init_learner {
+  my $self = shift;
+  my $opts = shift;
+  dbg ("Initialising learner");
+  if ($opts->{use_whitelist}) { $self->{learn_with_whitelist} = 1; }
+  1;
+}
+
+###########################################################################
+
+=item $f->rebuild_learner_caches ()
+
+Rebuild any cache databases; should be called after the learning process.
+
+=cut
+
+sub rebuild_learner_caches {
+  my $self = shift;
+  $self->{bayes_scanner}->recompute_all_probs();
+  1;
+}
+
+=item $f->finish_learner ()
+
+Finish learning.
+
+=cut
+
+sub finish_learner {
+  my $self = shift;
+  my $opts = shift;
+  $self->{bayes_scanner}->finish();
+  1;
 }
 
 ###########################################################################
@@ -668,8 +781,13 @@ sub compile_now {
 
   dbg ("ignore: test message to precompile patterns and load modules");
   $self->init($use_user_prefs);
+
   my $mail = Mail::SpamAssassin::NoMailAudit->new(data => \@testmsg);
-  $self->check($mail)->finish();
+  my $encapped = $self->encapsulate_mail_object ($mail);
+  my $status = Mail::SpamAssassin::PerMsgStatus->new($self, $encapped,
+                        { disable_auto_learning => 1 } );
+  $status->check();
+  $status->finish();
 
   # load SQL modules now as well
   my $dsn = $self->{conf}->{user_scores_dsn};
@@ -706,7 +824,11 @@ sub lint_rules {
   $self->{syntax_errors} += $self->{conf}->{errors};
 
   my $mail = Mail::SpamAssassin::NoMailAudit->new(data => \@testmsg);
-  my $status = $self->check($mail);
+  my $encapped = $self->encapsulate_mail_object ($mail);
+  my $status = Mail::SpamAssassin::PerMsgStatus->new($self, $encapped,
+                        { disable_auto_learning => 1 } );
+  $status->check();
+
   $self->{syntax_errors} += $status->{rule_errors};
   $status->finish();
 
@@ -782,6 +904,10 @@ sub init {
   $self->{conf}->finish_parsing ();
 
   delete $self->{config_text};
+
+  if ($self->{conf}->{auto_learn}) {
+    $self->init_learner({ });
+  }
 
   # TODO -- open DNS cache etc. if necessary
 }

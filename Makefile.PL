@@ -39,10 +39,14 @@ my %makefile = (
     'VERSION_FROM' => 'lib/Mail/SpamAssassin.pm', # finds $VERSION
 
     'EXE_FILES'	=> [ 'spamassassin', 'spamd/spamc$(EXE_EXT)', 'spamd/spamd',
+			'sa-learn-spam', 'sa-learn-nonspam', 'sa-forget'
 		],
 
     'MAN1PODS' => { 
 	'spamassassin'    => '$(INST_MAN1DIR)/spamassassin.$(MAN1EXT)',
+	'sa-learn-spam'    => '$(INST_MAN1DIR)/sa-learn-spam.$(MAN1EXT)',
+	'sa-learn-nonspam'    => '$(INST_MAN1DIR)/sa-learn-nonspam.$(MAN1EXT)',
+	'sa-forget'    => '$(INST_MAN1DIR)/sa-forget.$(MAN1EXT)',
 	'spamd/spamc.pod' => '$(INST_MAN1DIR)/spamc.$(MAN1EXT)',
 	'spamd/spamd'     => '$(INST_MAN1DIR)/spamd.$(MAN1EXT)',
     },
@@ -75,7 +79,7 @@ my %makefile = (
 	      },
 
     'clean' => { FILES =>
-	'pod2htm* spamassassin '.
+	'pod2htm* spamassassin sa-forget sa-learn-spam sa-learn-nonspam '.
 	'spamd/spamc$(EXE_EXT) spamd/libspamc.so spamd/spamd doc '.
 	'binaries.mk config.h config.status config.cache config.log'
     },
@@ -182,6 +186,18 @@ pm_to_blib: $(TO_INST_PM)
 	-e "ExtUtils::Install::Post545::pm_to_blib({qw{$(PM_TO_BLIB)}}, '$(INST_LIB)/auto', '$(PM_FILTER)')"# : '') . q#
 
 spamassassin: spamassassin.raw
+	$(PERL) build/preprocessor $(FIXVARS) -Msharpbang -i$? -o$@
+	$(CHMOD) $(PERM_RWX) $@
+
+sa-learn-spam: sa-learn-spam.raw
+	$(PERL) build/preprocessor $(FIXVARS) -Msharpbang -i$? -o$@
+	$(CHMOD) $(PERM_RWX) $@
+
+sa-learn-nonspam: sa-learn-nonspam.raw
+	$(PERL) build/preprocessor $(FIXVARS) -Msharpbang -i$? -o$@
+	$(CHMOD) $(PERM_RWX) $@
+
+sa-forget: sa-forget.raw
 	$(PERL) build/preprocessor $(FIXVARS) -Msharpbang -i$? -o$@
 	$(CHMOD) $(PERM_RWX) $@
 

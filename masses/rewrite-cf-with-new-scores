@@ -9,21 +9,21 @@ if (!defined $newscores) {
 
 # read the skipped scores and their previous values
 my %skipped_scores = ();
-my ($name, $base, $muta);
-open (IN, "<tmp/scores.data");
-while (<IN>) {
-  chomp;
-  /^n(.*)$/ and $name = $1;
-  /^b(.*)$/ and $base = $1;
-  /^m(.*)$/ and $muta = $1;
-
-  if (/^\./ && defined($name)) {
-    if ($name =~ /^__/)             # meta-test subrules
-      { $skipped_scores{$name} = $base; }
-  }
-}
+#my ($name, $base, $muta);
+#open (IN, "<tmp/scores.data");
+#while (<IN>) {
+#chomp;
+#/^n(.*)$/ and $name = $1;
+#/^b(.*)$/ and $base = $1;
+#/^m(.*)$/ and $muta = $1;
+#
+#if (/^\./ && defined($name)) {
+#if ($name =~ /^__/)             # meta-test subrules
+#{ $skipped_scores{$name} = $base; }
+#}
+#}
 #if ($muta == 0) { $skipped_scores{$name} = $base; }
-close IN;
+#close IN;
 
 system ("./parse-rules-for-masses") and die;
 require "./tmp/rules.pl";

@@ -121,6 +121,16 @@ Mail::SpamAssassin::Conf class (run the following command to read it:
 	"~/.spamassassin/user_prefs" file, if they like.  (spamd disables
 	this for security and increased speed.)
 
+  - $USER_HOME/.spamassassin/bayes*
+
+	Statistics databases used for Bayesian filtering.  If they do
+	not exist, they will be created by SpamAssassin.
+
+	Spamd users may wish to create a shared set of bayes databases;
+	the "bayes_path" and "bayes_file_mode" configuration settings
+	can be used to do this.
+
+
 After installation, try "perldoc Mail::SpamAssassin::Conf" to see what
 can be set. Common first-time tweaks include:
 
@@ -156,6 +166,22 @@ can be set. Common first-time tweaks include:
 	If you expect to receive mail in non-ISO-8859 character sets (ie.
 	Chinese, Cyrillic, Japanese, Korean, or Thai) then set this.
 
+
+Learning
+--------
+
+Since SpamAssassin now includes a Bayesian learning filter (in version
+2.50 on), it is worthwhile training SpamAssassin with your collection of
+non-spam and spam, if possible.  This will make it more accurate for your
+incoming mail.  Do this using the "sa-learn-spam" and "sa-learn-nonspam"
+commands, like so:
+
+	sa-learn-spam ~/Mail/saved-spam-folder
+	sa-learn-nonspam ~/Mail/inbox
+	sa-learn-nonspam ~/Mail/other-nonspam-folder
+
+Use as many mailboxes as you like.  Note that SpamAssassin will remember
+what mails it's learnt from, so you can re-run this as often as you like.
 
 
 Locali[sz]ation

@@ -86,7 +86,7 @@ if ($opt_p) {
   $hdr_spam = ($num_spam / $hdr_all) * 100.0;
   $hdr_nonspam = ($num_nonspam / $hdr_all) * 100.0;
   $hdr_all = 100.0;             # this is obvious
-  printf "%7.3f  %7.3f  %7.3f  %6.2f  %6.2f  %6.2f  (all messages as %%)\n",
+  printf "%7.3f  %7.4f  %7.4f  %6.2f  %6.2f  %6.2f  (all messages as %%)\n",
   	$hdr_all, $hdr_spam, $hdr_nonspam,
         soratio ($num_spam,$num_nonspam), 0, 0;
 
@@ -132,9 +132,13 @@ foreach my $test (keys %freq_spam, keys %freq_nonspam) {
 
   # now, given the S/O ratio (0.0 to 1.0) and match%s (0.0 to 100.0),
   # come up with a ranking.
-  #
-  my $rank = $soratio * ($fsadj / (($fnadj || 0.0008) * 10));
-  $rank = log($rank+0.001);
+
+  # old system
+  #my $rank = $soratio * ($fsadj / (($fnadj || 0.0008) * 10));
+  #$rank = log($rank+0.001);
+
+  # new system: allows a few more 99% hitters into the first page
+  my $rank = (($soratio**3) * 2000) + ($fsadj*3);
 
   $ranking{$test} = $rank;
   $rank_hi = $rank if ($rank > $rank_hi);
@@ -177,7 +181,7 @@ foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
   }
 
   if ($opt_p) {
-    printf "%7.3f  %7.3f  %7.3f  %6.2f  %6.2f  %6.2f  %s\n",
+    printf "%7.3f  %7.4f  %7.4f  %6.2f  %6.2f  %6.2f  %s\n",
   	$fa, $fs, $fn, $soratio, $ranking{$test}, $scores{$test}, $test;
 
   } elsif ($opt_x) {
@@ -263,7 +267,7 @@ sub soratio {
   if ($s + $n > 0) {
       return $s / ($s + $n);
   } else {
-      return 0;
+      return 0.5;		# no results -> not effective
   }
 }
 

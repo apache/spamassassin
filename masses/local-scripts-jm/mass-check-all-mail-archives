@@ -10,7 +10,7 @@ date
 
 date
 for f in /local/cor/recent/nonspam/* ; do
-  echo Checking $f: ; ./mass-check --loghits --nokillfile -c ./jm-mass-check-rules $f >> nonspam.local
+  echo Checking $f: ; ./mass-check --nokillfile --bayes -c ./jm-mass-check-rules $f >> nonspam.local
 done
 
 # ---------------------------------------------------------------------------
@@ -18,14 +18,14 @@ done
 
 date
 for f in /local/cor/recent/spam/* ; do
-  echo Checking $f: ; ./mass-check --loghits -c ./jm-mass-check-rules $f >> spam.local
+  echo Checking $f: ; ./mass-check --bayes -c ./jm-mass-check-rules $f >> spam.local
 done
 
 # trap data, 27 June to 17 July 2002
 # too big. skip it for now!
 #./mass-check --loghits -c ./jm-mass-check-rules /local/cor/recent/spamtrap/20020717/mbox >> spam.local
 date
-./mass-check --loghits -c ./jm-mass-check-rules /local/cor/recent/spamtrap/20020717/nonspam.mbox >> nonspam.local
+./mass-check --bayes -c ./jm-mass-check-rules /local/cor/recent/spamtrap/20020717/nonspam.mbox >> nonspam.local
 
 # ---------------------------------------------------------------------------
 # profile a sample non-spam file (don't keep the output though, sometimes
@@ -44,7 +44,7 @@ mv tmon.out ./tmon.nonspam
 date
 for f in /local/cor/old/nonspam/* /local/cor/recent/nonspam/*
 do
-  echo Checking $f: ; ./mass-check --loghits -c ./jm-mass-check-rules $f >> nonspam.local
+  echo Checking $f: ; ./mass-check --bayes -c ./jm-mass-check-rules $f >> nonspam.local
 done
 
 # ---------------------------------------------------------------------------
