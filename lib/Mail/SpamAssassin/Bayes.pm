@@ -67,9 +67,21 @@ $IGNORED_HDRS = qr{(?: Sender			# misc noise
 
 		  # List headers: ignore. a spamfiltering mailing list will
 		  # become a nonspam sign.
-		  |List-Unsubscribe |List-Subscribe |List-Owner |X-List-Host
-		  |X-Mailman-Version |X-Beenthere |List-Post |List-Help
-		  |X-Original-Date |List-Archive |List-Id |Mail-Followup-To
+		  |(?:X-)?List-(?:Archive|Help|Id|Owner|Post|Subscribe
+				|Unsubscribe|Host|Id|Manager|Admin|Comment
+				|Name|Url)
+		  |X-Mailman-Version |X-Beenthere
+		  |X-Original-Date |Mail-Followup-To
+		  |X-List|(?:X-)?Mailing-List
+		  |X-Converted-To-Plain-Text
+		  |X-eGroups-(?:Return|From)
+		  |X-MDMailing-List
+		  |X-XEmacs-List
+		  |X-Unsub(?:scribe)?
+
+		  # gatewayed through mailing list (thanks to Allen Smith)
+		  |(?:X-)?Resent-(?:From|To|Date)
+		  |(?:X-)?Original-(?:From|To|Date)
 
 		  # Spamfilter/virus-scanner headers: too easy to chain from
 		  # these
@@ -79,6 +91,10 @@ $IGNORED_HDRS = qr{(?: Sender			# misc noise
 		  |X-MDaemon-Deliver-To |X-Virus-Scanned |X-Spam-hits |X-Spam
 		  |X-Spam-Score |X-Mass-Check-Id |X-Pyzor
 		  |X-Filtered-BY |X-Scanner
+		  |X-AP-Spam-(?:Score|Status) |X-RIPE-Spam-Status
+		  |X-SpamCop-.+
+		  |X-Scanned-By |X-SMTPD |(?:X-)?Spam-Apparently-To
+		  |SPAM
 
 		  # some noisy Outlook headers that add no good clues:
 		  |Content-Class |Thread-Index |Thread-Topic
@@ -88,6 +104,12 @@ $IGNORED_HDRS = qr{(?: Sender			# misc noise
 		  |Status |Content-Length
 		  |Lines |X-UID	|X-UIDL
 		  |Replied |Forwarded
+
+		  # Annotations from VM: (thanks to Allen Smith)
+		  |X-VM-(?:Bookmark|IMAP-Retrieved|Labels|Last-Modified
+			 |POP-Retrieved|Summary-Format|VHeader|v\d-Data
+			 |Message-Order)
+
 		)}x;
 
 # Note only the presence of these headers, in order to reduce the
@@ -138,17 +160,17 @@ use constant USE_ROBINSON_FX_EQUATION_FOR_LOW_FREQS => 1;
 
 # Value for 'x' in the f(w) equation.
 # "Let x = the number used when n [hits] is 0."
-use constant ROBINSON_X_CONSTANT => 0.43;
+use constant ROBINSON_X_CONSTANT => 0.32;
 
 # Value for 's' in the f(w) equation.  "We can see s as the "strength" (hence
 # the use of "s") of an original assumed expectation ... relative to how
 # strongly we want to consider our actual collected data."  Low 's' means
 # trust collected data more strongly.
-use constant ROBINSON_S_CONSTANT => 0.53;
+use constant ROBINSON_S_CONSTANT => 0.35;
 
 # Should we ignore tokens with probs very close to the middle ground (.5)?
 # tokens need to be outside the [ .5-MPS, .5+MPS ] range to be used.
-use constant ROBINSON_MIN_PROB_STRENGTH => 0.36;
+use constant ROBINSON_MIN_PROB_STRENGTH => 0.3;
 
 # note: these seem to work well for Gary-combining.
 #use constant ROBINSON_X_CONSTANT => 0.6;
