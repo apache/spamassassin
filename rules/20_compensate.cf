@@ -6,6 +6,10 @@ header GENUINE_EBAY_RCVD        eval:check_for_from_domain_in_received_headers('
 describe GENUINE_EBAY_RCVD      Message from eBay
 tflags GENUINE_EBAY_RCVD	nice
 
+header ORDER_STATUS             Subject =~ / order\b/i
+describe ORDER_STATUS           Subject looks like order info
+tflags ORDER_STATUS             nice
+
 header   APPROVED_BY            Approved-By =~ /./
 describe APPROVED_BY            Has an Approved-By moderated list header
 tflags APPROVED_BY		nice
@@ -188,6 +192,10 @@ tflags BALANCE_FOR_LONG		nice
 body BALANCE_FOR_LONG_20K       eval:check_for_very_long_text('20000')
 describe BALANCE_FOR_LONG_20K   Message text is over 20K in size
 tflags BALANCE_FOR_LONG_20K	nice
+
+body BALANCE_FOR_LONG_40K       eval:check_for_very_long_text('40000')
+describe BALANCE_FOR_LONG_40K   Message text is over 40K in size
+tflags BALANCE_FOR_LONG_40K	nice
 
 rawbody PATCH_UNIFIED_DIFF	/^\@\@ [-+0-9]+,[0-9]+ [-+0-9]+,[0-9]+ \@\@$/
 describe PATCH_UNIFIED_DIFF	Contains what looks like a patch from diff -u
