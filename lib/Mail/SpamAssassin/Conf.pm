@@ -155,7 +155,7 @@ sub new {
   $self->{user_rules_to_compile} = 0;
   $self->{fold_headers} = 1;
   $self->{always_add_headers} = 1;
-  $self->{always_add_report} = 1;
+  $self->{always_add_report} = 0;
 
   $self->{use_dcc} = 1;
   $self->{dcc_path} = undef; # Browse PATH
