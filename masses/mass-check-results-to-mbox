@@ -5,11 +5,11 @@
 #   grep SUBJECT_FREQ spam.log | ./mass-check-results-to-mbox | grep Subject:
 
 my $grep = undef;
-my $annotate = 0;
+my $annotate = 1;
 while ($#ARGV >= 0) {
   $_ = $ARGV[0]; shift;
   if ($_ eq '-grep') { $grep = $ARGV[0]; shift; }
-  if ($_ eq '-annotate') { $annotate = 1; }
+  if ($_ eq '-noannotate') { $annotate = 0; }
 }
 
 while (<>) {

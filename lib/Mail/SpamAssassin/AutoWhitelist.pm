@@ -78,7 +78,9 @@ sub check_address {
 
 =item awl->add_score($score);
 
-This method will add the score to the current entry
+This method will add half the score to the current entry.  Half the
+score is used, so that repeated use of the same From and IP address
+combination will gradually reduce the score.
 
 =cut
 
@@ -89,7 +91,8 @@ sub add_score {
     return undef;		# no factory defined; we can't check
   }
 
-  $self->{checker}->add_score($self->{entry},$score);
+  $score /= 2;
+  $self->{checker}->add_score($self->{entry}, $score);
 }
 
 ###########################################################################
