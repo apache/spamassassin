@@ -50,7 +50,7 @@ your man(1) program or perldoc(1).
 =head1 DESCRIPTION
 
 SpamAssassin is an intelligent email filter which uses a diverse range of
-tests to identify unsolicited bulk email, more commonly known as "Spam".
+tests to identify unsolicited bulk email, more commonly known as "spam".
 These tests are applied to email headers and content to classify email
 using advanced statistical methods.  In addition, SpamAssassin has a
 modular architecture that allows other technologies to be quickly wielded
@@ -137,9 +137,9 @@ From those two directories, SpamAssassin will first read files ending in
 lexical order (most files begin with two numbers to make the sorting
 order obvious).
 
-In other words, it will read F<10_misc.cf> before F<50_scores.cf> and
-F<20_body_tests.cf> before F<20_head_tests.cf>.  Options in later files
-will override earlier files.
+In other words, it will read F<init.pre> first, then F<10_misc.cf> before
+F<50_scores.cf> and F<20_body_tests.cf> before F<20_head_tests.cf>.
+Options in later files will override earlier files.
 
 Individual user preferences are loaded from the location specified on
 the C<sa-filter>, C<sa-learn>, or C<spamd> command line (see respective
@@ -174,7 +174,7 @@ C<spamd> in the default configuration.
 
 =head2 TAGGING FOR SPAM MAILS
 
-By default, all messages with a calculated score of 5.0 or more are
+By default, all messages with a calculated score of 5.0 or higher are
 tagged as spam.
 
 If an incoming message is tagged as spam, instead of modifying the
