@@ -66,14 +66,11 @@ total, and a peak of up to 35M to do this same job.
 Bugs
 ----
 
-There are no known bugs with this setup, but it has been little used to date.
-In particular it has only undergone moderate load testing, and only undergone
-any testing at all (or compilation for that matter) on Linux systems.  I would
-therefore NOT recommend puting this program into a critical production
-environment yet, but highly encourage its use in development/testing
-environments which would like to use SA for filtering.  If you discover
-compilation, runtime, or load-performance bugs, please notify
-craig@hughes-family.org so he can work on fixing it.
+There are no known bugs with this setup.  Several reasonable sized sites are
+now running it on their production mail systems.  However, you should still
+test it completely in *your environment* before trusting all your mail to it.
+If you discover compilation, runtime, or load-performance bugs, please notify
+the SpamAssassing-Talk mailing list (SpamAssassin-Talk@lists.sourceforge.net
 
 Network Protocol
 ----------------
