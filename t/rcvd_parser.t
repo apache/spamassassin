@@ -17,8 +17,8 @@ if (-e 'test_dir') {            # running from test directory, not ..
 }
 
 use lib '.'; use lib 't';
-use SATest; sa_t_init("rcvd_parser");
-use Test; BEGIN { plan tests => 41 };
+use SATest; sa_t_init();
+use Test; BEGIN { plan tests => 42 };
 
 
 use strict;
@@ -465,7 +465,7 @@ q{
 },
 q{
 
-Received: from list.brainbuzz.com (63.146.189.86:23198)
+Received: from list.brainbuzz.com ([63.146.189.86]:23198)
     by mx1.yourtech.net with [XMail 1.20 ESMTP Server]
     id <S72E> for <jjjjjjjjjj@obfuscatedellingson.org> from <bounce-cscommunity-11965901@list.obfuscatedzzzzzzz.com>; Sat, 18 Sep 2004 23:17:54 -0500
 
