@@ -102,6 +102,12 @@ sub new {
 
 ###########################################################################
 
+=item $status->check ()
+
+Runs the SpamAssassin rules against the message pointed to by the object.
+
+=cut
+
 sub check {
   my ($self) = @_;
   local ($_);
@@ -507,6 +513,7 @@ sub get_score {
   return $self->{score};
 }
 
+# left as backward compatibility
 sub get_hits {
   my ($self) = @_;
   return $self->{score};
@@ -526,6 +533,7 @@ sub get_required_score {
   return $self->{conf}->{required_score};
 }
 
+# left as backward compatibility
 sub get_required_hits {
   my ($self) = @_;
   return $self->{conf}->{required_score};
@@ -695,7 +703,9 @@ sub rewrite_mail {
   }
 }
 
-# rewrite the entire message as spam (headers and body)
+# rewrite the message in report_safe mode
+# should not be called directly, use rewrite_mail instead
+#
 sub rewrite_report_safe {
   my ($self) = @_;
 
@@ -852,6 +862,9 @@ EOM
   return $newmsg;
 }
 
+# rewrite the message in non-report_safe mode (just headers)
+# should not be called directly, use rewrite_mail instead
+#
 sub rewrite_no_report_safe {
   my ($self) = @_;
 
@@ -1211,7 +1224,6 @@ sub extract_message_metadata {
 }
 
 ###########################################################################
-# Non-public methods from here on.
 
 sub get_decoded_body_text_array {
   return $_[0]->{msg}->get_decoded_body_text_array();
@@ -1222,6 +1234,86 @@ sub get_decoded_stripped_body_text_array {
 }
 
 ###########################################################################
+
+=item $status->get (header_name [, default_value])
+
+Returns a message header, pseudo-header, real name or address.
+C<header_name> is the name of a mail header, such as 'Subject', 'To',
+etc.  If C<default_value> is given, it will be used if the requested
+C<header_name> does not exist.
+
+Appending C<:raw> to the header name will inhibit decoding of quoted-printable
+or base-64 encoded strings.
+
+Appending C<:addr> to the header name will cause everything except
+the first email address to be removed from the header.  For example,
+all of the following will result in "example@foo":
+
+=over 4
+
+=item example@foo
+
+=item example@foo (Foo Blah)
+
+=item example@foo, example@bar
+
+=item display: example@foo (Foo Blah), example@bar ;
+
+=item Foo Blah <example@foo>
+
+=item "Foo Blah" <example@foo>
+
+=item "'Foo Blah'" <example@foo>
+
+=back
+
+Appending C<:name> to the header name will cause everything except
+the first real name to be removed from the header.  For example,
+all of the following will result in "Foo Blah"
+
+=over 4
+
+=item example@foo (Foo Blah)
+
+=item example@foo (Foo Blah), example@bar
+
+=item display: example@foo (Foo Blah), example@bar ;
+
+=item Foo Blah <example@foo>
+
+=item "Foo Blah" <example@foo>
+
+=item "'Foo Blah'" <example@foo>
+
+=back
+
+There are several special pseudo-headers that can be specified:
+
+=over 4
+
+=item C<ALL> can be used to mean the text of all the message's headers.
+
+=item C<ToCc> can be used to mean the contents of both the 'To' and 'Cc'
+headers.
+
+=item C<EnvelopeFrom> is the address used in the 'MAIL FROM:' phase of the SMTP
+transaction that delivered this message, if this data has been made available
+by the SMTP server.
+
+=item C<MESSAGEID> is a symbol meaning all Message-Id's found in the message;
+some mailing list software moves the real 'Message-Id' to 'Resent-Message-Id'
+or 'X-Message-Id', then uses its own one in the 'Message-Id' header.  The value
+returned for this symbol is the text from all 3 headers, separated by newlines.
+
+=item C<X-Spam-Relays-Untrusted> is the generated metadata of untrusted relays
+the message has passed through
+
+=item C<X-Spam-Relays-Trusted> is the generated metadata of trusted relays
+the message has passed through
+
+=back
+
+=cut
 
 sub get {
   my ($self, $request, $defval) = @_;
@@ -1650,16 +1742,23 @@ my $domain      = qq<(?:$domain_ref|$domain_lit)>;
 # Finally, the address-spec regex (more or less)
 my $Addr_spec_re   = qr<$local_part\s*\@\s*$domain>o;
 
-# Returns an array of all URIs found in the message.  It takes
-# a combination of the URIs found in the rendered body and the
-# URIs found when parsing the HTML in the message.  The array will
-# include the "raw" URI as well as "slightly cooked" versions --
-# ie: 'http://%77&#00119;%77.example.com/' will get turned into:
-# ( 'http://%77&#00119;%77.example.com/', 'http://www.example.com/' )
-# -- this lets us run rules against both the original and "correct"
-# versions easily.
-#
-# This really belongs in metadata
+# TVD: This really belongs in metadata
+
+=item $status->get_uri_list ()
+
+Returns an array of all unique URIs found in the message.  It takes
+a combination of the URIs found in the rendered (decoded and HTML
+stripped) body and the URIs found when parsing the HTML in the message.
+Will also set $status->{uri_domain_count} (count of unique domains)
+and $status->{uri_list} (the array as returned by this function).
+
+The returned array will include the "raw" URI as well as
+"slightly cooked" versions.  For example, the single URI
+'http://%77&#00119;%77.example.com/' will get turned into:
+( 'http://%77&#00119;%77.example.com/', 'http://www.example.com/' )
+
+=cut
+
 sub get_uri_list {
   my ($self) = @_;
 
@@ -2482,17 +2581,20 @@ sub sa_die { Mail::SpamAssassin::sa_die (@_); }
 
 ###########################################################################
 
-# this is a lazily-written temporary file containing the full text
-# of the message, for use with external programs like pyzor and
-# dccproc, to avoid hangs due to buffering issues.   Methods that
-# need this, should call $self->create_fulltext_tmpfile($fulltext)
-# to retrieve the temporary filename; it will be created if it has
-# not already been.
-#
-# (SpamAssassin3 note: we should use tmp files to hold the message
-# for 3.0 anyway, as noted by Matt previously; this will then
-# be obsolete.)
-#
+=item $status->create_fulltext_tmpfile (fulltext_ref)
+
+This function creates a temporary file containing the passed scalar
+reference data (typically the full/pristine text of the message).
+This is typically used by external programs like pyzor and dccproc, to
+avoid hangs due to buffering issues.   Methods that need this, should
+call $self->create_fulltext_tmpfile($fulltext) to retrieve the temporary
+filename; it will be created if it has not already been.
+
+Note: This can only be called once until $status->delete_fulltext_tmpfile() is
+called.
+
+=cut
+
 sub create_fulltext_tmpfile {
   my ($self, $fulltext) = @_;
 
@@ -2508,6 +2610,13 @@ sub create_fulltext_tmpfile {
 
   return $self->{fulltext_tmpfile};
 }
+
+=item $status->delete_fulltext_tmpfile ()
+
+Will cleanup after a $status->create_fulltext_tmpfile() call.  Deletes the
+temporary file and uncaches the filename.
+
+=cut
 
 sub delete_fulltext_tmpfile {
   my ($self) = @_;
