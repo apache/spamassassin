@@ -1064,13 +1064,19 @@ sub all_from_addrs {
   if (defined $resent && $resent =~ /\S/) {
     @addrs = $self->{main}->find_all_addrs_in_line ($resent);
 
-  } else {
-    @addrs = $self->{main}->find_all_addrs_in_line
-  	($self->get ('From') .                  # std
-  	 $self->get ('Envelope-Sender') .       # qmail: new-inject(1)
-  	 $self->get ('Resent-Sender') .         # procmailrc manpage
-  	 $self->get ('X-Envelope-From') .       # procmailrc manpage
-  	 $self->get ('EnvelopeFrom'));          # SMTP envelope
+  }
+  else {
+    # bug 2292: Used to use find_all_addrs_in_line() with the same
+    # headers, but the would catch addresses in comments which caused
+    # FNs for things like whitelist_from.  Since all of these are From
+    # headers, there should only be 1 address in each anyway, so use the
+    # :addr code...
+    @addrs = grep { defined($_) && length($_) > 0 }
+        ($self->get ('From:addr'),                  # std
+         $self->get ('Envelope-Sender:addr'),       # qmail: new-inject(1)
+         $self->get ('Resent-Sender:addr'),         # procmailrc manpage
+         $self->get ('X-Envelope-From:addr'),       # procmailrc manpage
+         $self->get ('EnvelopeFrom:addr'));	    # SMTP envelope
     # http://www.cs.tut.fi/~jkorpela/headers.html is useful here
   }
 
