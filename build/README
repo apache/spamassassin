@@ -5,8 +5,16 @@ SPAMASSASSIN DEVELOPMENT SNAPSHOT PROCEDURE
 - cd to the directory for the codebase you want the devel tree to
   come from
 
-    su - release
-    cd ~release/versions/cvshead
+    ssh minotaur.apache.org
+    cd [checkedoutdir]
+
+- ensure the required code and data is available for the build scripts:
+
+    ~/sabuildtools
+    ~/sasigningkey
+    ~/perl584
+
+  All can be copied from ~jm on minotaur if required.
 
 - run "./build/update_devel" to build the tar.gz files
 
@@ -21,8 +29,11 @@ SPAMASSASSIN RELEASE PROCEDURE
 - cd to the directory for the codebase you want the release to
   come from
 
-    su - release
-    cd ~release/versions/cvshead
+    ssh minotaur.apache.org
+    cd [checkedoutdir]
+
+- ensure the required code and data is available for the build scripts:
+  see above.
 
 - edit lib/Mail/SpamAssassin.pm and comment the $IS_DEVEL_BUILD
   line.   Ensure the correct version number is present in $VERSION
