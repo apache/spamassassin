@@ -28,22 +28,10 @@ require_version @@VERSION@@
 
 ###########################################################################
 
-header FAKE_HELO_AOL		eval:check_for_rdns_helo_mismatch("aol\.com","aol\.com")
-describe FAKE_HELO_AOL		Host HELO did not match rDNS: aol.com
-header FAKE_HELO_HOTMAIL	eval:check_for_rdns_helo_mismatch("hotmail(?:\.msn)?\.com","hotmail\.com")
-describe FAKE_HELO_HOTMAIL	Host HELO did not match rDNS: hotmail.com
-header FAKE_HELO_SHAW_CA	eval:check_for_rdns_helo_mismatch("shaw(?:\.ca|cable\.net)","shaw\.ca")
-describe FAKE_HELO_SHAW_CA	Host HELO did not match rDNS: shaw.ca
-header FAKE_HELO_NETSCAPE_COM	eval:check_for_rdns_helo_mismatch("(?:netscape|netcenter|aol)\.(?:com|net)","netscape\.com")
-describe FAKE_HELO_NETSCAPE_COM	Host HELO did not match rDNS: netscape.com
 header FAKE_HELO_MSN		eval:check_for_rdns_helo_mismatch("msn\.com","msn\.com")
 describe FAKE_HELO_MSN		Host HELO did not match rDNS: msn.com
-header FAKE_HELO_MAIL_RU	eval:check_for_rdns_helo_mismatch("mail\.ru","mail\.ru")
-describe FAKE_HELO_MAIL_RU	Host HELO did not match rDNS: mail.ru
 header FAKE_HELO_MAIL_COM	eval:check_for_rdns_helo_mismatch("mail\.com","mail\.com")
 describe FAKE_HELO_MAIL_COM	Host HELO did not match rDNS: mail.com
-header FAKE_HELO_FLASHMAIL	eval:check_for_rdns_helo_mismatch("flashmail\.com","flashmail\.com")
-describe FAKE_HELO_FLASHMAIL	Host HELO did not match rDNS: flashmail.com
 header FAKE_HELO_EMAIL_COM	eval:check_for_rdns_helo_mismatch("email\.com","email\.com")
 describe FAKE_HELO_EMAIL_COM	Host HELO did not match rDNS: email.com
 header FAKE_HELO_CARAMAIL	eval:check_for_rdns_helo_mismatch("caramail\.com","caramail\.com")
@@ -56,10 +44,90 @@ header FAKE_HELO_MAILCITY	eval:check_for_rdns_helo_mismatch("(?:mailcity|lycos)\
 describe FAKE_HELO_MAILCITY	Host HELO did not match rDNS: mailcity.com
 header FAKE_HELO_LYCOS		eval:check_for_rdns_helo_mismatch("lycos\S*","lycos\.com")
 describe FAKE_HELO_LYCOS	Host HELO did not match rDNS: lycos.com
-header FAKE_HELO_JUNO		eval:check_for_rdns_helo_mismatch("(?:untd|juno)\.com","juno\.com")
-describe FAKE_HELO_JUNO		Host HELO did not match rDNS: juno.com
-header FAKE_HELO_YAHOO		eval:check_for_rdns_helo_mismatch("yahoo\.com","yahoo\.com")
-describe FAKE_HELO_YAHOO	Host HELO did not match rDNS: yahoo.com
 header FAKE_HELO_YAHOO_CA	eval:check_for_rdns_helo_mismatch("yahoo\.ca","yahoo\.ca")
 describe FAKE_HELO_YAHOO_CA	Host HELO did not match rDNS: yahoo.ca
+
+# ---------------------------------------------------------------------------
+# Interesting new feature; spamware HELO'ing, from a dialup IP addr,
+# using that IP's rDNS entry.  We can catch this easily.  There aren't
+# many legit mailservers calling themselves
+# 'dhcp024-210-034-053.columbus.rr.com'. ;)
+#
+# Note the '^[^\]]+ ' stanza: this ensures that we only match spamware
+# connecting to a trusted relay; if a mail came from a dynamic addr but
+# was relayed through their smarthost, that's fine.
+
+# dhcp024-210-034-053.columbus.rr.com [24.210.34.53]
+# c-66-176-16-108.se.client2.attbi.com [66.176.16.108]
+# c-67-168-174-61.client.comcast.net [67.168.174.61]
+# NNN-NNN-NNN-NNN.fibertel.com.ar
+# NN.NN.NNN.NNN.ap.yournet.ne.jp
+# NN.NNN.NN-NN.rev.gaoland.net
+# vaise-1-82-67-44-166.fbx.proxad.net [82.67.44.166]
+# lns-vlq-11-62-147-186-141.adsl.proxad.net [62.147.186.141]
+# dsl-200-95-109-107.prod-infinitum.com.mx [200.95.109.107]
+# port-212-202-77-203.reverse.qsc.de [212.202.77.203]
+# pool-151-203-32-68.bos.east.verizon.net [151.203.32.68]
+# c-67-164-133-216.client.comcast.net [67.164.133.216]
+# 200-171-228-6.customer.telesp.net.br [200.171.228.6]
+# modemcable090.28-201-24.mc.videotron.ca [24.201.28.90]
+# 80-218-47-160.dclient.hispeed.ch [80.218.47.160]
+# cdm-68-226-239-16.laft.cox-internet.com [68.226.239.16]
+# d53-64-35-171.nap.wideopenwest.com [64.53.171.35]
+# 74.67-201-80.adsl.skynet.be [80.201.67.74]
+# 12-218-225-223.client.mchsi.com [12.218.225.223]
+# (require an alpha first, as legit HELO'ing-as-IP-address is hit otherwise)
+header HELO_DYNAMIC_IPADDR X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z]\S*\d+[^\d\s]\d+[^\d\s]\d+[^\d\s]\d+[^\d\s][^\.]*\.\S+\.\S+/i
+describe HELO_DYNAMIC_IPADDR Relay HELO'd using suspicious hostname (IP addr 1)
+
+# dhcp024-210-034-053.columbus.rr.com [24.210.34.53]
+# catv-506237d8.miskcatv.broadband.hu [80.98.55.216]
+# node-c-8b22.a2000.nl
+# cm89.omega139.maxonline.com.sg
+# cm114.gamma208.maxonline.com.sg
+header HELO_DYNAMIC_DHCP X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S*(?:cm|catv|docsis|cable|dsl|dhcp|cpe|node)\S*\d+[^\d\s]+\d+/i
+describe HELO_DYNAMIC_DHCP Relay HELO'd using suspicious hostname (DHCP)
+
+# fia83-8.dsl.hccnet.nl [62.251.8.83]
+# fia160-115-100.dsl.hccnet.nl [80.100.115.160]
+header HELO_DYNAMIC_HCC   X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S*\d+[^\d\s]+\d+\S*\.(?:docsis|cable|dsl|adsl|dhcp|cpe)\./i
+describe HELO_DYNAMIC_HCC Relay HELO'd using suspicious hostname (HCC)
+
+# h0002a5d76857.ne.client2.attbi.com [65.96.12.59]
+header HELO_DYNAMIC_ATTBI  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+\d+\S+\.client2\.attbi\.com/i
+describe HELO_DYNAMIC_ATTBI Relay HELO'd using suspicious hostname (ATTBI.com)
+
+# CPE0004e2372711-CM000a73666706.cpe.net.cable.rogers.com
+# CPE00e0184f0eba-CM014490118324.cpe.net.cable.rogers.com [24.43.109.140]
+header HELO_DYNAMIC_ROGERS X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=CPE\d+\S+\.rogers\.com/i
+describe HELO_DYNAMIC_ROGERS Relay HELO'd using suspicious hostname (Rogers)
+
+# ca-morpark-cuda1-zone7-b-159.vnnyca.adelphia.net[67.23.129.159]
+# tn-greenvillecuda1cable7a-36.atlaga.adelphia.net [68.171.113.36]
+# ky-richmond2a-123.rhmdky.adelphia.net [68.71.36.123]
+# ny-lackawannacadent4-chtwga3a-b-117.buf.adelphia.net [68.71.205.117]
+# fl-edel-u2-c3c-233.pbc.adelphia.net [68.64.89.233]
+header HELO_DYNAMIC_ADELPHIA X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z]{2}-\S+-\d{1,3}\.[a-z]{3,8}\.adelphia\.net/i
+describe HELO_DYNAMIC_ADELPHIA Relay HELO'd using suspicious hostname (Adelphia)
+
+# pD9E4F89F.dip.t-dialin.net [217.228.248.159]
+header HELO_DYNAMIC_DIALIN X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z][A-F0-9]+\.dip\./
+describe HELO_DYNAMIC_DIALIN Relay HELO'd using suspicious hostname (T-Dialin)
+
+# 0xd5aaf40b.dhcp.kabelnettet.dk
+# 0x50a46949.virnxx11.adsl-dhcp.tele.dk
+header HELO_DYNAMIC_HEXIP X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=0x[a-f0-9]{8}\./
+describe HELO_DYNAMIC_HEXIP Relay HELO'd using suspicious hostname (Hex IP)
+
+# 118.Red-80-35-201.pooles.rima-tde.net
+header HELO_DYNAMIC_SPLIT_IP X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\d+\.\S+\d+[^\d\s]\d+[^\d\s]\d+[^\d\s]/
+describe HELO_DYNAMIC_SPLIT_IP Relay HELO'd using suspicious hostname (Split IP)
+
+# YahooBB219173000034.bbtec.net [219.173.0.34]
+header HELO_DYNAMIC_YAHOOBB X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=YahooBB/i
+describe HELO_DYNAMIC_YAHOOBB Relay HELO'd using suspicious hostname (YahooBB)
+
+# ool-18be1aaf.dyn.optonline.net [24.190.26.175]
+header HELO_DYNAMIC_OOL X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+\.dyn\.optonline\.net/
+describe HELO_DYNAMIC_OOL Relay HELO'd using suspicious hostname (OptOnline)
 
