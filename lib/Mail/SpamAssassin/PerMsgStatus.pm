@@ -861,6 +861,29 @@ sub _replace_tags {
   return $text;
 }
 
+sub _get_tag_value_for_yesno {
+  my $self   = shift;
+  
+  return $self->{is_spam} ? "Yes" : "No";
+}
+
+sub _get_tag_value_for_score {
+  my $self   = shift;
+  
+  my $score  = sprintf("%2.1f", $self->{score});
+  my $rscore = $self->_get_tag_value_for_required_score();
+  
+  # Do some rounding tricks to avoid the 5.0!=5.0-phenomenon,
+  # see <http://bugzilla.spamassassin.org/show_bug.cgi?id=2607>
+  return $score if $self->{is_spam} or $score <= $rscore;
+  return $rscore - 0.1;
+}
+
+sub _get_tag_value_for_required_score {
+  my $self  = shift;
+  return sprintf("%2.1f", $self->{conf}->{required_score});
+}
+
 sub _get_tag {
   my $self = shift;
   my $tag = shift;
@@ -868,17 +891,16 @@ sub _get_tag {
 
   # tag data also comes from $self->{tag_data}->{TAG}
 
-  %tags = ( YESNOCAPS => sub { $self->{is_spam} ? "YES" : "NO"; },
+  %tags = ( YESNO     => sub {    $self->_get_tag_value_for_yesno() },
+  
+            YESNOCAPS => sub { uc $self->_get_tag_value_for_yesno() },
 
-            YESNO => sub { $self->{is_spam} ? "Yes" : "No"; },
+            SCORE => sub { $self->_get_tag_value_for_score() },
+            HITS  => sub { $self->_get_tag_value_for_score() },
 
-            HITS => sub { sprintf ("%2.1f", int ($self->{score} * 10) / 10); },
+            REQD  => sub { $self->_get_tag_value_for_required_score() },
 
-	    SCORE => sub { sprintf ("%2.1f", int ($self->{score} * 10) / 10); },
-
-            REQD => sub { sprintf ("%2.1f", $self->{conf}->{required_score}); },
-
-            VERSION => sub { return Mail::SpamAssassin::Version()},
+            VERSION => sub { Mail::SpamAssassin::Version() },
 
             SUBVERSION => sub { $Mail::SpamAssassin::SUB_VERSION },
 
