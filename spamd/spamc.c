@@ -142,6 +142,11 @@ int read_message(int in, int out, int max_size)
     if(read(in,&buf[bytes],1) == 0) /* read header one byte at a time */
     {
       /* Read to end of message!  Must be because this is version <1.0 server */
+      if(bytes < 100)
+      {
+	/* No, this wasn't a <1.0 server, it's a comms break! */
+	response = EX_IOERR;
+      }
       /* No need to copy buf to out_buf here, because since header_read is unset that'll happen below */
       break;
     }
