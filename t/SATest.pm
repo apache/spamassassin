@@ -23,6 +23,8 @@ sub sa_t_init {
   $spamc = $ENV{'SPAMC_SCRIPT'};
   $spamc ||= "../spamd/spamc";
 
+  $scr_cf_args = "";
+
   (-f "t/test_dir") && chdir("t");        # run from ..
   rmtree ("log");
   mkdir ("log", 0755);
@@ -45,6 +47,13 @@ sub tstfile {
   print OUT $file; close OUT;
 }
 
+sub tstprefs {
+  my $lines = shift;
+  open (OUT, ">log/tst.cf") or die;
+  print OUT $lines; close OUT;
+  $scr_cf_args = "-p log/tst.cf";
+}
+
 # Run spamassassin. Calls back with the output.
 # in $args: arguments to run with
 # in $read_sub: callback for the output (should read from <IN>).
@@ -63,6 +72,7 @@ sub sarun {
   if (defined $ENV{'SA_ARGS'}) {
     $args = $ENV{'SA_ARGS'} . " ". $args;
   }
+  $args = $scr_cf_args . " " . $args;
 
   # added fix for Windows tests from Rudif
   my $scrargs = "$scr $args";
