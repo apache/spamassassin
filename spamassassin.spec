@@ -1,7 +1,7 @@
 %define name spamassassin
 %define real_name Mail-SpamAssassin
-%define version 2.11
-%define real_version 2.11
+%define version 2.20
+%define real_version 2.20
 %define release 1
 %define initdir %{_initrddir}
 
@@ -14,6 +14,7 @@ Group: Networking/Mail
 URL: http://spamassassin.org/
 Source: http://spamassassin.org/devel/Mail-SpamAssassin-%{real_version}.tar.gz
 Patch: spamassassin-migrate.patch
+Patch1: findbin.patch
 Requires: perl >= 5.004
 Buildroot: %{_tmppath}/%{name}-root
 Prefix: %{_prefix}
@@ -24,11 +25,19 @@ Distribution: SpamAssassin
 %define __find_requires /usr/lib/rpm/find-requires.perl
 
 %description
-SpamAssassin provides you with a way to reduce if not completely eliminate Unsolicited Commercial Email (SPAM) from your incoming email.  It can be invoked by a MDA such as sendmail or postfix, or can be called from a procmail script, .forward file, etc.  It uses a genetic-algorithm evolved scoring system to identify messages which look spammy, then adds headers to the message so they can be filtered by the user's mail reading software.  This distribution includes the spamd/spamc components which create a server that considerably speeds processing of mail.
+SpamAssassin provides you with a way to reduce if not completely eliminate
+Unsolicited Commercial Email (SPAM) from your incoming email.  It can
+be invoked by a MDA such as sendmail or postfix, or can be called from
+a procmail script, .forward file, etc.  It uses a genetic-algorithm
+evolved scoring system to identify messages which look spammy, then
+adds headers to the message so they can be filtered by the user's mail
+reading software.  This distribution includes the spamd/spamc components
+which create a server that considerably speeds processing of mail.
 
 %prep -q
 %setup -q -n %{real_name}-%{real_version}
 %patch -p1
+%patch1 -p1
 
 %build
 %{__perl} Makefile.PL PREFIX=%{prefix}
@@ -59,9 +68,9 @@ fi
 
 %files -f %{name}-%{version}-filelist
 %defattr(-,root,root)
-/etc/mail/spamassassin
 %doc README Changes TODO sample-nonspam.txt sample-spam.txt spamd/README.spamd doc
 %config(noreplace) %{initdir}/spamassassin
+%config(noreplace) %{_sysconfdir}/mail/spamassassin
 
 %clean
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
@@ -75,6 +84,11 @@ if [ -f /etc/mail/spamassassin.cf ]; then
 fi
 
 %changelog
+* Fri Apr 19 2002 Theo Van Dinter <felicity@kluge.net>
+- Updated for 2.20 release
+- made /etc/mail/spamassassin a config directory so local.cf doesn't get wiped out
+- added a patch to remove findbin stuff
+
 * Wed Feb 27 2002 Craig Hughes <craig@hughes-family.org>
 - Updated for 2.1 release
 
