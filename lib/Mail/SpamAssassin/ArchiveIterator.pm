@@ -136,7 +136,7 @@ sub run {
 	    exit;
 	  }
 	  $result = $self->run_message($line);
-	  print { $parent[$i] } $result . "\nRESULT $line\n";
+	  print { $parent[$i] } "$result\nRESULT $line\n";
 	}
 	exit;
       }
@@ -176,7 +176,7 @@ sub run {
 
 ############################################################################
 
-sub mass_check_open {
+sub mail_open {
   my ($file) = @_;
 
   my $expr;
@@ -281,7 +281,7 @@ sub scan_directory {
       next;
     }
     my $header;
-    mass_check_open($mail) or next;
+    mail_open($mail) or next;
     while (<INPUT>) {
       last if /^$/;
       $header .= $_;
@@ -299,7 +299,7 @@ sub scan_file {
     return;
   }
   my $header;
-  mass_check_open($mail) or return;
+  mail_open($mail) or return;
   while (<INPUT>) {
     last if /^$/;
     $header .= $_;
@@ -311,7 +311,10 @@ sub scan_file {
 sub scan_mailbox {
   my ($self, $class, $folder) = @_;
 
-  mass_check_open($folder) or return;
+  if ($folder =~ /\.(?:gz|bz2)$/) {
+    die "compressed mbox folders are not supported at this time\n";
+  }
+  mail_open($folder) or return;
 
   my $start = 0;		# start of a message
   my $where = 0;		# current byte offset
@@ -366,7 +369,7 @@ sub run_message {
 sub run_file {
   my ($self, $where) = @_;
 
-  mass_check_open($where) or return;
+  mail_open($where) or return;
   # skip too-big mails
   if (! $self->{opt_all} && -s INPUT > BIG_BYTES) {
     close INPUT;
@@ -383,7 +386,7 @@ sub run_mailbox {
 
   my ($file, $offset) = ($where =~ m/(.*)\.(\d+)$/);
   my @msg;
-  mass_check_open($file) or return;
+  mail_open($file) or return;
   seek(INPUT,$offset,0);
   my $past = 0;
   while (<INPUT>) {
