@@ -450,17 +450,11 @@ header RATWARE ALL =~ /(?:4\.\.72\.1712\.3|ACE Contact Manager|Aristotle Mail|Av
 describe RATWARE 		Bulk email software fingerprints found in headers
 
 # contrib: Craig (total regexp wizardry here ;)
-header SUSPICIOUS_RECIPS        To =~ /(@[-a-z0-9_.]{2,}).*(?:\1.*){9,}/is
-describe SUSPICIOUS_RECIPS      To: contains similar domains at least 10 times
+header SUSPICIOUS_RECIPS        ToCc =~ /(@[-a-z0-9_.]{2,}).*(?:\1.*){8,}/is
+describe SUSPICIOUS_RECIPS      To: and Cc: contain similar domains at least 8 times
 
-header SUSPICIOUS_CC_RECIPS	Cc =~ /(@[-a-z0-9_.]{2,}).*(?:\1.*){9,}/is
-describe SUSPICIOUS_CC_RECIPS	Cc: contains similar domains at least 10 times
-
-header VERY_SUSP_RECIPS		To =~ /\b([a-z][a-z])[^@,]{0,20}(@[-a-z0-9_\.]{0,3}).{0,40}?(?:\1[^@]*\2.{0,20}?){4,}/is
-describe VERY_SUSP_RECIPS       To: contains similar usernames at least 5 times
-
-header VERY_SUSP_CC_RECIPS	Cc =~ /\b([a-z][a-z])[^@,]{0,20}(@[-a-z0-9_\.]{0,3}).{0,40}?(?:\1[^@]*\2.{0,20}?){4,}/is
-describe VERY_SUSP_CC_RECIPS	Cc: contains similar usernames at least 5 times
+header VERY_SUSP_RECIPS		ToCc =~ /\b([a-z][a-z])[^@,<>\(\) ]{0,20}(@[-a-z0-9_\.]{3}).{0,80}?(?:\1[^@,<>\(\) ]{0,20}\2.{0,80}?){5,}/is
+describe VERY_SUSP_RECIPS       To: and Cc: contain similar usernames at least 5 times
 
 header USER_IN_WHITELIST_TO     eval:check_to_in_whitelist()
 describe USER_IN_WHITELIST_TO   User is listed in 'whitelist_to'
