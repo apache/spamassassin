@@ -90,7 +90,11 @@ void init_data()
 int main(int argc, char **argv) {
     PGAContext *ctx;
     int i,p;
-#ifndef USE_MPI
+
+#ifdef USE_MPI
+    MPI_Init(&argc, &argv);
+#endif
+//#ifndef USE_MPI
     int arg;
 
     while ((arg = getopt (argc, argv, "b:s:C")) != -1) {
@@ -112,11 +116,8 @@ int main(int argc, char **argv) {
           break;
       }
     }
-#endif
+//#endif
 
-#ifdef USE_MPI
-     MPI_Init(&argc, &argv);
-#endif
      init_data();
 
      ctx = PGACreate(&argc, argv, PGA_DATATYPE_REAL, num_scores, PGA_MINIMIZE);
@@ -138,12 +139,12 @@ int main(int argc, char **argv) {
      //PGASetMutationOrCrossoverFlag(ctx, PGA_TRUE);
 
      // jm: try out using ranges instead of our own mutator
-     PGASetMutationBoundedFlag(ctx, PGA_FALSE);
-     PGASetUserFunction(ctx, PGA_USERFUNCTION_MUTATION, (void *)myMutation);
-
      //PGASetMutationBoundedFlag(ctx, PGA_FALSE);
-     //PGASetMutationType(ctx, PGA_MUTATION_RANGE);
-     //PGASetRealInitRange (ctx, range_lo, range_hi);
+     //PGASetUserFunction(ctx, PGA_USERFUNCTION_MUTATION, (void *)myMutation);
+
+     PGASetMutationBoundedFlag(ctx, PGA_FALSE);
+     PGASetMutationType(ctx, PGA_MUTATION_RANGE);
+     PGASetRealInitRange (ctx, range_lo, range_hi);
 
      //PGASetCrossoverType(ctx, PGA_CROSSOVER_ONEPT);
      PGASetCrossoverProb(ctx, crossover_rate);
