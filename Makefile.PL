@@ -156,9 +156,9 @@ doc/.made: doc $(MAN1PODS) $(MAN3PODS)
 	echo $(MAN1PODS) $(MAN3PODS)
 	for f in $(MAN1PODS) $(MAN3PODS) $(EXTRAPODS) ; do \
 	      pod2html $$f > doc/`echo $$f | $(PERL) -pe \
-	        's/(lib|spamd)\///; tr/\//_/; s/\.(pod|pm)$//;'`.html ; \
+	        's/(lib|spamd)\///; tr/\//_/; s/\.(pod|pm)$$//;'`.html ; \
 	      pod2text $$f > doc/`echo $$f | $(PERL) -pe \
-	        's/(lib|spamd)\///; tr/\//_/; s/\.(pod|pm)$//;'`.txt ; \
+	        's/(lib|spamd)\///; tr/\//_/; s/\.(pod|pm)$$//;'`.txt ; \
 	done
 	touch doc/.made
 	$(RM_F) pod2htm*
