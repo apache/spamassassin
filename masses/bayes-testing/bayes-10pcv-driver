@@ -11,8 +11,8 @@
 # "cor/ham".  Here's how to do this:
 
 #   cd TEST
-#   SADIR/tools/split_corpora -l 2000 -p cor/spam/bucket spf1 spf2 spf3 ...
-#   SADIR/tools/split_corpora -l 2000 -p cor/ham/bucket ham1 ham2 ham3 ...
+#   SADIR/tools/split_corpora -n 10 -l 2000 -p cor/spam/bucket spf1 spf2 spf3 ...
+#   SADIR/tools/split_corpora -n 10 -l 2000 -p cor/ham/bucket ham1 ham2 ham3 ...
 #
 # SADIR = top-level directory of SpamAssassin distro
 # TEST  = the directory where the corpus and results are to be written
@@ -58,13 +58,17 @@ echo "Learning from all spam buckets..."
 sa-learn-spam --config-file=$tmpdir/rules $testdir/cor/spam/*
 
 backup_dbs () {
-  echo "Backing up full learned dbs..."
+  echo "Backing up full learned DBs..."
   ( cd $tmpdir; tar cvf learned-all.tar dbs )
 }
 restore_dbs () {
-  echo "Restoring full learned dbs..."
+  echo "Restoring full learned DBs..."
   ( cd $tmpdir; tar xf learned-all.tar )
 }
+
+echo "Dumping bayes DB..."
+( cd .. ; tools/check_bayes_db --dbpath=$tmpdir/dbs/bayes ) \
+      > $results/bayes_db.dump
 
 backup_dbs
 
@@ -92,14 +96,14 @@ for bucket in 1 2 3 4 5 6 7 8 9 10 ; do
 	--bayes $testdir/cor/spam/bucket.$bucket \
 	> $rdir/spam.log
 
-  echo "Dumping bayes DB..."
-  ( cd .. ; ./tools/check_bayes_db --dbpath=$tmpdir/dbs/bayes ) \
-	> $rdir/bayes_db.dump
-
   echo "Reporting..."
   ./bayes-testing/draw-bayes-histogram \
 	$rdir/spam.log $rdir/nonspam.log \
 	> $rdir/hist
+
+  ./bayes-testing/bayes-thresholds \
+	$rdir/spam.log $rdir/nonspam.log \
+	> $rdir/thresholds
 
 done
 rm -rf $tmpdir
