@@ -957,7 +957,8 @@ sub get_raw_body_text_array {
 
 	if (/^Content-Type: (\S+?\/\S+?)(?:\;|\s|$)/i) {
 	  $ctype = $1;
-	  if ($ctype =~ /^(text\/\S+|message\/\S+|multipart\/alternative)/i) {
+	  if ($ctype =~ /^(text\/\S+|message\/\S+|multipart\/alternative|multipart\/related)/i)
+	  {
 	    $ctypeistext = 1; next;
 	  } else {
 	    $ctypeistext = 0; next;
