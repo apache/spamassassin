@@ -14,16 +14,20 @@ use Mail::SpamAssassin::Util;
 use constant BIG_BYTES => 256*1024;	# 256k is a big email
 use constant BIG_LINES => BIG_BYTES/65;	# 65 bytes/line is a good approximation
 
-
 my $no;
 my $tz;
+#my $MESSAGES;
 
 BEGIN {
   $no = 1;
   $tz = local_tz();
 }
 
-my @ISA = qw();
+use vars qw {
+  $MESSAGES
+};
+
+my @ISA = qw($MESSAGES);
 
 ###########################################################################
 
@@ -97,15 +101,16 @@ sub run {
     }
     push @messages, (splice @s), (splice @h);
   }
+  $MESSAGES = scalar(@messages);
 
   if ($self->{opt_j} == 1) {
     my $message;
     my $class;
     my $result;
     while ($message = (shift @messages)) {
-      $class = substr($message, 0, 1);
+      my ($class, undef, $date) = index_unpack($message);
       $result = $self->run_message($message);
-      &{$self->{result_sub}}($class, $result) if $result;
+      &{$self->{result_sub}}($class, $result, $date) if $result;
     }
   }
   elsif ($self->{opt_j} > 1) {
