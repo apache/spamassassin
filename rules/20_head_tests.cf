@@ -300,7 +300,7 @@ describe VERY_SUSP_RECIPS       To: contains similar usernames at least 10 times
 header VERY_SUSP_CC_RECIPS	Cc =~ /\b([a-z][a-z])[^@]{0,20}(@[-a-z0-9_\.]{0,30}).{0,30}?(?:\1[^@]*\2.{0,20}?){9,}/is
 describe VERY_SUSP_CC_RECIPS	Cc: contains similar usernames at least 10 times
 
-header Q_FOR_SELLER		Subject =~ /Question for seller/
+header Q_FOR_SELLER		Subject =~ /Question.*(for|to|from eBay).*(seller|Member)/
 describe Q_FOR_SELLER		Subject is an eBay question
 
 header USER_IN_WHITELIST_TO     eval:check_to_in_whitelist()

@@ -69,7 +69,7 @@ use vars	qw{
 @ISA = qw();
 
 $VERSION = "2.1";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.59 2002/01/23 08:01:53 jmason Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.60 2002/01/25 04:35:23 jmason Exp $';
 
 sub Version { $VERSION; }
 
@@ -770,8 +770,10 @@ sub find_all_addrs_in_line {
   my @addrs = ();
   while ($line =~ s/([-a-z0-9_\+\:\.\/]+
 	      \@[-a-z0-9_\+\:\.\/]+
-	      \.[-a-z0-9_\+\:\/]{2,3})//ix)
-  { push (@addrs, $1); }
+	      \.[-a-z0-9_\+\:\.\/]+)//ix)
+  {
+    push (@addrs, $1);
+  }
 
   return @addrs;
 }

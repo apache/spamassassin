@@ -325,7 +325,9 @@ sub check_to_in_whitelist {
   foreach $_ ($self->{main}->find_all_addrs_in_line
   			($self->get ('To') . $self->get ('Cc')))
   {
-    return $self->_check_whitelist ($self->{conf}->{whitelist_to}, $_);
+    if ($self->_check_whitelist ($self->{conf}->{whitelist_to}, $_)) {
+      return 1;
+    }
   }
 }
 
@@ -339,7 +341,9 @@ sub check_to_in_more_spam {
   foreach $_ ($self->{main}->find_all_addrs_in_line
   			($self->get ('To') . $self->get ('Cc')))
   {
-    return $self->_check_whitelist ($self->{conf}->{more_spam_to}, $_);
+    if ($self->_check_whitelist ($self->{conf}->{more_spam_to}, $_)) {
+      return 1;
+    }
   }
 }
 
@@ -353,7 +357,9 @@ sub check_to_in_all_spam {
   foreach $_ ($self->{main}->find_all_addrs_in_line
   			($self->get ('To') . $self->get ('Cc')))
   {
-    return $self->_check_whitelist ($self->{conf}->{all_spam_to}, $_);
+    if ($self->_check_whitelist ($self->{conf}->{all_spam_to}, $_)) {
+      return 1;
+    }
   }
 }
 
