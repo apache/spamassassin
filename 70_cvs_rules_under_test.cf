@@ -385,3 +385,75 @@ meta T_X_PRI_MISMATCH_HI	(__X_PRI_HI && __HAS_MSMAIL_PRI && !__X_MSPRI_HI)
 meta T_X_PRI_MISMATCH_MD	(__X_PRI_MD && __HAS_MSMAIL_PRI && !__X_MSPRI_MD)
 meta T_X_PRI_MISMATCH_LO	(__X_PRI_LO && __HAS_MSMAIL_PRI && !__X_MSPRI_LO)
 
+# bug 1757
+body T_HELLO_ADDRESS		/(?:Hi|Hello|Dear)[, ]?.{0,30}@\S/i
+describe T_HELLO_ADDRESS	Greets you by address, not by name
+
+# bug 1756
+body T_GENERIC_VIAGRA		/Generic Viagra/
+describe T_GENERIC_VIAGRA	Mentions Generic Viagra
+
+# bug 1801
+uri T_IP_LINK_PLUS	/^https?\:\/\/(?:\S*\@)?\d+\.\d+\.\d+\.\d+.{0,20}(?:cgi|click|ads|id\=)/i
+describe T_IP_LINK_PLUS		Dotted-decimal IP address followed by GCI, clickthru, etc.
+
+uri T_YAHOO_REDIR			/^https?\:\/\/rd.yahoo.com\/[0-9]{4,}/i
+describe T_YAHOO_REDIR		Yahoo Redirect
+
+uri T_ASIAN_LINKS			/(?:^https?\:\/\/|^mailto\:).{0,20}\.(?:kr|jp)\//i
+describe T_ASIAN_LINKS		Links to Korea, Japan, etc.
+
+uri T_BIZ_LINKS			/(?:^https?\:\/\/|^mailto\:).{0,20}\.bi?z/i
+describe T_BIZ_LINKS		Links to .biz .bz
+
+uri T_MORTGAGE_LINKS		/(?:^https?\:\/\/|^mailto\:).{0,20}(?:low|about)mortgage/i
+describe T_MORTGAGE_LINKS		Links to discount mortgage spammers
+
+uri T_STRANGE_CHAR_LINKS		/^https?\:\/\/.{0,20}(?:[%@]|=2E)/i
+describe T_STRANGE_CHAR_LINKS	Links with strange characters
+
+uri T_SEX_BANNED_LINKS	/(?:^https?\:\/\/|^mailto\:).{0,15}(?:hugefist|enlargepills|yourpenis|freakyfarm|latex-teens|animalobsession|bukkakehouse)/i
+describe T_SEX_BANNED_LINKS	Links to Sex Sites
+
+uri T_SEX_PHRASE_LINKS	/(?:^https?\:\/\/|^mailto\:).{0,20}(?:bimbos|farmsex|porn.*mail|girls4u|cumslut)/i
+describe T_SEX_PHRASE_LINKS	Links with Sex Phrases
+
+uri T_PHRASE_COMBO_LINKS	/(?:^https?\:\/\/|^mailto\:).(?:free|hot|cash|money|click|track|gold|platinum|bargain|prize|save).{0,15}(?:click|track|cash|money|offer|deal|card|quotes|promo)/i
+describe T_PHRASE_COMBO_LINKS	Links containing suspicious phrase combinations 
+
+uri T_SUSPICIOUS_LINKS	/(?:^https?\:\/\/|^mailto\:).{0,25}(?:poker\.net|get-deal|bargain[zs\-]|clicks|spree|members\=|lotto|offer[sz]|4you)/i
+describe T_SUSPICIOUS_LINKS	Links containing suspicious phrases
+
+uri T_BANNED_LINKS1	/(?:^https?\:\/\/|^mailto\:).{0,20}(?:needanewjob|valodata|jutan|bridgewater|youngblue|rocketfibre|shopnow|affistats|priceisright|compare-lender)/i
+describe T_BANNED_LINKS1		Links to Banned Companies 1
+
+uri T_BANNED_LINKS2	/(?:^https?\:\/\/|^mailto\:).{0,20}(?:ientry|mybill|dyfyi|farmsex|affinitycommerce|unsecured-credit|e-centives|fyi01|clicktrack|emailads|zizi|vistaprint)/i
+describe T_BANNED_LINKS2		Links to Banned Companies 2
+
+uri T_BANNED_LINKS3	/(?:^https?\:\/\/|^mailto\:).{0,20}(?:radarline|optilc|biosweep|dealnetwork|myobmail|yourvling|xeemo|incestuals|mnjmtech|escript|m0rtage)/i
+describe T_BANNED_LINKS3		Links to Banned Companies 3
+
+uri T_BANNED_LINKS4	/(?:^https?\:\/\/|^mailto\:).{0,20}(?:ltracker|premiumsmail|rxmedical|bannedcd|raveonmail|postdirect|5moni|gammae|freeht|ns-hosting|domainsforeveryone)/i
+describe T_BANNED_LINKS4		Links to Banned Companies 4
+
+uri T_BANNED_LINKS5	/(?:^https?\:\/\/|^mailto\:).{0,20}(?:freedigitalppv|fastbustzone|dailycomnet|zoanmail|ew01|executive-level|cyberforce|adserver|flipside.com|faqchat)/i
+describe T_BANNED_LINKS5		Links to Banned Companies 5
+
+uri T_BANNED_LINKS6	/(?:^https?\:\/\/|^mailto\:).{0,20}(?:dforyi|totemmail|addsaturation)/i
+describe T_BANNED_LINKS6		Links to Banned Companies 6
+
+rawbody T_HREF_3D			/(?:href|src)=3D\"/i
+describe T_HREF_3D		Uses href=3D Trick
+
+# bug 1803
+body T_GAPPY_PORN			/\b(?:s.e.x|p.o.r.n|x.x.x|f.u.c.k|p.a.r.t.y|t.e.e.n|f.u.n|h.o.t)/i
+describe T_GAPPY_PORN		G.a.p.p.y - P.o.r.n
+
+# bug 1575
+header T_X_HEADER_PITCHID exists:X-Header-Pitchid
+describe T_X_HEADER_PITCHID Has X-Header-Pitchid header
+
+# bug 1743
+header T_WS_PHRASE                To =~ /\s*"\s"\s/
+describe T_WS_PHRASE              Phrase part of address is a space
+
