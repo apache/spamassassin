@@ -45,15 +45,28 @@ BEGIN {
   }
 }
 
-$default_rules_1 = '/etc/spamassassin.cf';
-$default_rules_2 = $Config{installsitelib}.'/spamassassin.cf';
+@default_rules_path = qw(
+	./spamassassin.cf
+	../spamassassin.cf
+	/etc/spamassassin.cf
+	__installsitelib__/spamassassin.cf
+);
 
-$default_prefs_1 = '/etc/spamassassin.prefs';
-$default_prefs_2 = $Config{installsitelib}.'/spamassassin.prefs';
-$default_userprefs = $ENV{'HOME'}.'/.spamassassin.cf';
+@default_prefs_path = qw(
+	/etc/spamassassin.prefs
+	__installsitelib__/spamassassin.prefs
+);
+
+@default_userprefs_path = qw(
+	./spamassassin.prefs
+	../spamassassin.prefs
+	~/.spamassassin.cf
+);
 
 sub usage {
   my $ver = Mail::SpamAssassin::Version();
+  my $rules = join ("\n\t\t\t\t", @default_rules_path);
+  my $prefs = join ("\n\t\t\t\t", @default_userprefs_path);
   die <<EOUSAGE;
 
 Usage: spamassassin [option ...] < mailmessage > output
@@ -63,11 +76,10 @@ Options:
   -t               only testing
 
   -c config        configuration file
-                   (default: $default_rules_1
-                          or $default_rules_2 )
+                   (default:	$rules )
 
   -p prefs         user preferences file
-                   (default: $default_userprefs )
+                   (default:	$prefs )
 
   -D		   log diagnostic messages
 
@@ -108,21 +120,22 @@ my $mail = Mail::Audit->new();
 # (This implementation does other stuff though, such as -t support, and setting
 # up the user's rules files if they don't exist; ignore that stuff.)
 
-$opt_c ||= $default_rules_1;
-if (!-f $opt_c) { $opt_c = $default_rules_2; }
+$opt_c = first_existing_path (@default_rules_path);
 
 if (!defined $opt_p) {
-  $opt_p = $default_userprefs;
+  $opt_p = first_existing_path (@default_userprefs_path);
 
   if (!-f $opt_p) {
     # copy in the default one for later editing
 
-    my $defprefs = $default_prefs_1;
-    if (!-f $defprefs) { $defprefs = $default_prefs_2; }
+    my $defprefs = first_existing_path (@default_prefs_path);
     use File::Copy;
-    copy ($defprefs, $opt_p);
-
-    warn "Created user preferences file: $opt_p\n";
+    if (copy ($defprefs, $opt_p)) {
+      warn "Created user preferences file: $opt_p\n";
+    } else {
+      warn "Failed to create user preferences file\n".
+      		"\"$opt_p\" from default \"$defprefs\".\n";
+    }
   }
 }
 
@@ -145,6 +158,23 @@ if ($opt_t) {				# support -t
 }
 
 $mail->accept();
+exit;
+
+sub sed_path {
+  my $path = shift;
+  $path =~ s/__installsitelib__/$Config{installsitelib}/gs;
+  $path =~ s/\~/$ENV{HOME}/gs;
+  $path;
+}
+
+sub first_existing_path {
+  my $path;
+  foreach my $path (@_) { 
+    $path = sed_path ($path);
+    if (-e $path) { return $path; }
+  }
+  $path;
+}
 
 # ---------------------------------------------------------------------------
 
