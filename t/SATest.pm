@@ -15,7 +15,8 @@ BEGIN {
   #   <http://www.mail-archive.com/dev%40perl.apache.org/msg05466.html>
   #  -- mss, 2004-01-13
   our $RUNNING_ON_WINDOWS = ($^O =~ /^(mswin|dos|os2)/oi);
-  our $SKIP_SPAMD_TESTS   = ($RUNNING_ON_WINDOWS && !$ENV{'SPAMD_SCRIPT'}); 
+  our $SKIP_SPAMC_TESTS   = ($RUNNING_ON_WINDOWS && !$ENV{'SPAMD_HOST'}); 
+  our $SKIP_SPAMD_TESTS   = $RUNNING_ON_WINDOWS; 
 }
 
 # Set up for testing. Exports (as global vars):
@@ -44,8 +45,7 @@ sub sa_t_init {
   $scr = $ENV{'SCRIPT'};
   $scr ||= "$perl_cmd ../spamassassin";
 
-  $spamd = $ENV{'SPAMD_SCRIPT'};
-  $spamd ||= "$perl_cmd ../spamd/spamd";
+  $spamd = "$perl_cmd ../spamd/spamd";
 
   $spamc = $ENV{'SPAMC_SCRIPT'};
   $spamc ||= "../spamc/spamc";
@@ -53,6 +53,8 @@ sub sa_t_init {
   $salearn = $ENV{'SALEARN_SCRIPT'};
   $salearn ||= "$perl_cmd ../sa-learn";
 
+  $spamdhost = $ENV{'SPAMD_HOST'};
+  $spamdhost ||= "localhost";
   $spamdport = $ENV{'SPAMD_PORT'};
   $spamdport ||= 48373;		# whatever
   $spamd_cf_args = "-C log/test_rules_copy";
@@ -216,11 +218,9 @@ sub salearnrun {
 }
 
 sub scrun {
-  $spamd_never_started = 1;
   spamcrun (@_, 0);
 }
 sub scrunwithstderr {
-  $spamd_never_started = 1;
   spamcrun (@_, 1);
 }
 
@@ -234,9 +234,9 @@ sub spamcrun {
   }
 
   my $spamcargs;
-  if($args !~ /\b(?:-p\s*[0-9]+|-o|-U)\b/)
+  if($args !~ /\b(?:-p\s*[0-9]+|-U)\b/)
   {
-    $spamcargs = "$spamc -p $spamdport $args";
+    $spamcargs = "$spamc -d $spamdhost -p $spamdport $args";
   }
   else
   {
@@ -299,12 +299,11 @@ sub sdrun {
 }
 
 sub start_spamd {
+
+  return if $SKIP_SPAMD_TESTS;
+
   my $spamd_extra_args = shift;
 
-  if ($SKIP_SPAMD_TESTS) {
-    warn "spamd tests cannot be run on this platform\n";
-    return;
-  }
   return if (defined($spamd_pid) && $spamd_pid > 0);
 
   rmtree ("log/outputdir.tmp"); # some tests use this
@@ -397,8 +396,7 @@ sub start_spamd {
 }
 
 sub stop_spamd {
-  return 0 if defined($spamd_never_started);
-  return 0 if defined($spamd_already_killed);
+  return 0 if ( defined($spamd_already_killed) || $SKIP_SPAMD_TESTS);
 
   $spamd_pid ||= 0;
   if ( $spamd_pid <= 1) {
@@ -410,13 +408,13 @@ sub stop_spamd {
 
     # wait for it to exit, before returning.
     for my $waitfor (0 .. 5) {
-      if (kill (0, $spamd_pid) == 0) { last; }
+      my $killstat;
+      if (($killstat = kill (0, $spamd_pid)) == 0) { last; }
       print ("Waiting for spamd at pid $spamd_pid to exit...\n");
       sleep 1;
     }
 
     $spamd_pid = 0;
-    undef $spamd_never_started;
     $spamd_already_killed = 1;
     return $killed;
   }
