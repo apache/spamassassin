@@ -2734,11 +2734,11 @@ See C<Mail::SpamAssassin::Plugin> for more details on writing plugins.
 
 =cut
 
-    if ($key eq 'loadplugin') {			# single-arg variant
-      $self->load_plugin ($value); next;
-    }
     if (/^loadplugin\s+(\S+)\s+(\S+)$/) {	# two-arg variant
       $self->load_plugin ($1, $2); next;
+    }
+    elsif ($key eq 'loadplugin') {		# single-arg variant
+      $self->load_plugin ($value); next;
     }
 
 
