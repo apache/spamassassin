@@ -930,7 +930,10 @@ sub get_decoded_stripped_body_text_array {
 
     $hp->parse($text);
     $hp->eof;
-    $text = join('', $before, @{$self->{html_text}});
+
+    # turn off utf8-ness to fix a warn "bug" on 5.6.1
+    $text = pack("C0A*", 
+	join('', $before, @{$self->{html_text}}));
 
     if ($raw > 0) {
       my $non_uri_len = 0;
