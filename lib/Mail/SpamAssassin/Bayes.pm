@@ -328,9 +328,6 @@ sub read_db_configs {
 sub tokenize {
   my ($self, $msg, $msgdata) = @_;
 
-  # cache the magic token regexp...
-  $self->{magic_re} = $self->{store}->get_magic_re();
-
   # the body
   my @tokens = map { $self->tokenize_line ($_, '', 1) }
                                     @{$msgdata->{bayes_token_body}};
@@ -389,7 +386,7 @@ sub tokenize_line {
     }
   }
 
-  my $magic_re = $self->{magic_re};
+  my $magic_re = $self->{store}->get_magic_re();
 
   foreach my $token (split) {
     $token =~ s/^[-'"\.,]+//;        # trim non-alphanum chars at start or end

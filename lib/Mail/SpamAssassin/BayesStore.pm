@@ -682,7 +682,7 @@ operation.
 
 sub cleanup {
   my ($self) = @_;
-  die "touches_cleanup: not implemented\n";
+  die "cleanup: not implemented\n";
 }
 
 =head2 get_magic_re
@@ -696,7 +696,7 @@ This method returns a regexp which indicates a magic token.
 
 sub get_magic_re {
   my ($self) = @_;
-  die "is_magic_token: not implemented\n";
+  die "get_magic_re: not implemented\n";
 }
 
 =head2 sync
