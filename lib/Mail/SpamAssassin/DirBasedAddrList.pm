@@ -34,6 +34,7 @@ sub new_checker {
     'main'		=> $main,
   };
 
+  if(!defined($main->{conf}->{auto_whitelist_path})) { die "auto_whitelist_path not set"; }
   $self->{dir} = $main->{conf}->{auto_whitelist_path};
   $self->{mode} = oct ($main->{conf}->{auto_whitelist_file_mode});
 

@@ -356,6 +356,11 @@ sub handle_user {
     create_default_cf_if_needed ($cf_file, $username);
     $spamtest->read_scoreonly_config ($cf_file);
     $spamtest->load_scoreonly_sql ($username);
+
+    if(!defined($spamtest->{conf}->{auto_whitelist_path}))
+    {
+	$spamtest->{conf}->{auto_whitelist_path} = "$dir/.spamassassin/auto_whitelist";
+    }
     return 1;
 }
 
