@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.15 2002/09/26 14:37:48 jmason Exp $
+# $Id: HTML.pm,v 1.16 2002/09/27 01:41:52 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -221,10 +221,10 @@ sub html_tests {
   if ($tag =~ /^(?:object|embed)$/) {
     $self->{html}{embeds} = 1;
   }
-  if ($tag eq "title") {
-    if (!exists $self->{html_inside}{body} || $self->{html_inside}{body} == 0) {
-      $self->{html}{title_text} = "";
-    }
+  if ($tag eq "title" &&
+      !(exists $self->{html_inside}{body} && $self->{html_inside}{body} > 0))
+  {
+    $self->{html}{title_text} = "";
   }
 }
 
@@ -238,7 +238,7 @@ sub html_text {
     return;
   }
   return if (exists $self->{html_inside}{style} && $self->{html_inside}{style} > 0);
-  if ((!exists $self->{html_inside}{body} || $self->{html_inside}{body} == 0) &&
+  if (!(exists $self->{html_inside}{body} && $self->{html_inside}{body} > 0) &&
         exists $self->{html_inside}{title} && $self->{html_inside}{title} > 0)
   {
     $self->{html}{title_text} .= $text;
