@@ -74,13 +74,12 @@ sub new {
     'rule_errors'       => 0,
     'disable_auto_learning' => 0,
     'auto_learn_status' => undef,
+    'conf'		=> $main->{conf},
   };
 
   if (defined $opts && $opts->{disable_auto_learning}) {
     $self->{disable_auto_learning} = 1;
   }
-
-  $self->{conf} = $self->{main}->{conf};
 
   # used with "mass-check --loghits"
   if ($self->{main}->{save_pattern_hits}) {
