@@ -212,6 +212,9 @@ describe CHARSET_FARAWAY	Character set indicates a foreign language
 header NONEXISTENT_CHARSET	Content-Type =~ /charset=.?DEFAULT/
 describe NONEXISTENT_CHARSET	Character set doesn't exist
 
+header CHARSET_FARAWAY_HEADERS	eval:check_for_faraway_charset_in_headers()
+describe CHARSET_FARAWAY_HEADERS A foreign language charset used in headers
+
 header X_MAILER_GIBBERISH	X-Mailer =~ /^[A-Fa-f0-9\.]{48,}$/
 describe X_MAILER_GIBBERISH	'X-Mailer' line contains gibberish
 
