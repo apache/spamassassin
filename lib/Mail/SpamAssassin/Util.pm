@@ -751,14 +751,12 @@ sub uri_to_domain {
   if ($uri !~ /^\d+\.\d+\.\d+\.\d+$/) { 
     # get rid of hostname part of domain, understanding delegation
     $uri = Mail::SpamAssassin::Util::RegistrarBoundaries::trim_domain($uri);
+
+    # ignore invalid domains
+    return unless
+        (Mail::SpamAssassin::Util::RegistrarBoundaries::is_domain_valid($uri));
   }
   
-  # domains don't have whitespace
-  return if ($uri =~ /\s/);
-
-  # domains at least have two parts
-  return if ($uri !~ /\S+\.\S+/);
-
   # $uri is now the domain only
   return $uri;
 }
