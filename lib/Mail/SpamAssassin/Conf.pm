@@ -271,6 +271,8 @@ sub new {
   $self->{trusted_networks} = Mail::SpamAssassin::NetSet->new();
   $self->{internal_networks} = Mail::SpamAssassin::NetSet->new();
 
+  $self->{envelope_sender_header} = undef;
+
   # this will hold the database connection params
   $self->{user_scores_dsn} = '';
   $self->{user_scores_sql_username} = '';
@@ -915,6 +917,52 @@ be blacklisted.  Same format as C<blacklist_from>.
 
     if ( $key eq 'blacklist_to' ) {
       $self->add_to_addrlist ('blacklist_to', split (/\s+/, $value)); next;
+    }
+
+=item envelope_sender_header Name-Of-Header
+
+SpamAssassin will attempt to discover the address used in the 'MAIL FROM:'
+phase of the SMTP transaction that delivered this message, if this data has
+been made available by the SMTP server.  This is used in the C<EnvelopeFrom>
+pseudo-header, and for various rules such as SPF checking.
+
+By default, various MTAs will use different headers, such as the following:
+
+    X-Envelope-From
+    Envelope-Sender
+    X-Sender
+    Return-Path
+
+SpamAssassin will attempt to use these, if some heuristics (such as the header
+placement in the message, or the absence of fetchmail signatures) appear to
+indicate that they are safe to use.  However, it may choose the wrong headers
+in some mailserver configurations.  (More discussion of this can be found
+in bug 2142 in the SpamAssassin BugZilla.)
+
+To avoid this heuristic failure, the C<envelope_sender_header> setting may be
+helpful.  Name the header that your MTA adds to messages containing the address
+used at the MAIL FROM step of the SMTP transaction.
+
+If the header in question contains C<E<lt>> or C<E<gt>> characters at the start
+and end of the email address in the right-hand side, as in the SMTP
+transaction, these will be stripped.
+
+If the header is not found in a message, or if it's value does not contain an
+C<@> sign, SpamAssassin will fall back to its default heuristics.
+
+(Note for MTA developers: we would prefer if the use of a single header be
+avoided in future, since that precludes 'downstream' spam scanning.
+C<http://wiki.apache.org/spamassassin/EnvelopeSenderInReceived> details a
+better proposal using the Received headers.)
+
+example:
+
+    envelope_sender_header X-SA-Exim-Mail-From
+
+=cut
+
+    if ( $key eq 'envelope_sender_header' ) {
+      $self->{envelope_sender_header} = $value; next;
     }
 
 =back

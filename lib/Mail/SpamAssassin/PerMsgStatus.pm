@@ -2258,6 +2258,16 @@ sub get_envelope_from {
 
   my $envf;
 
+  # Use the 'envelope-sender-header' header that the user has specified.
+  # We assume this is correct, *even* if the fetchmail/X-Sender screwup
+  # appears.
+  my $cfhdr = $self->{conf}->{envelope_sender_header};
+  if (defined $cfhdr) {
+    if ($self->get ($cfhdr) =~ /\@/) {
+      goto ok;
+    }
+  }
+
   # WARNING: a lot of list software adds an X-Sender for the original env-from
   # (including Yahoo! Groups).  Unfortunately, fetchmail will pick it up and
   # reuse it as the env-from for *its* delivery -- even though the list software
