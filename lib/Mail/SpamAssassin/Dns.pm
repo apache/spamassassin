@@ -164,14 +164,20 @@ sub razor_lookup {
     'debug'	=> $Mail::SpamAssassin::DEBUG
   );
 
+  # razor also debugs to stdout. argh. fix it to stderr...
+  if ($Mail::SpamAssassin::DEBUG) {
+    open (OLDOUT, ">&STDOUT");
+    open (STDOUT, ">&STDERR");
+  }
+
   eval {
     require Razor::Client;
     require Razor::Signature; 
     local ($^W) = 0;		# argh, warnings in Razor
 
-    my $rc = Razor::Client->new($config, %options);
+    my $rc = Razor::Client->new ($config, %options);
 
-    if ($Razor::Client::VERSION == "1.12") {
+    if ($Razor::Client::VERSION >= 1.12) {
       my $respary = $rc->check ('spam' => \@msg);
       # response can be "0" or "1". there can be many responses.
       # so if we get 5 responses, and one of them's 1, we
@@ -189,6 +195,12 @@ sub razor_lookup {
     } else {
       warn ("$! $@");
     }
+  }
+
+  # razor also debugs to stdout. argh. fix it to stderr...
+  if ($Mail::SpamAssassin::DEBUG) {
+    open (STDOUT, ">&OLDOUT");
+    close OLDOUT;
   }
 
   if ((defined $response) && ($response+0)) { return 1; }
