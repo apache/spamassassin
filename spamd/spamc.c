@@ -28,7 +28,7 @@ int send_message(int in,int out)
   size_t bytes;
   char buf[8192];
 
-  bytes = snprintf(buf,"PROCESS SPAMC/1.0\r\n");
+  bytes = snprintf(buf,8192,"PROCESS SPAMC/1.0\r\n");
 
   do
   {
