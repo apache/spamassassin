@@ -35,6 +35,7 @@ usage: mass-check [options] target ...
   log options
   -o            write all logs to stdout
   --loghits     log the text hit for patterns (useful for debugging)
+  --loguris	log the URIs found
   --hamlog=log  use <log> as ham log ('ham.log' is default)
   --spamlog=log use <log> as spam log ('spam.log' is default)
  
@@ -70,7 +71,7 @@ use vars qw($opt_c $opt_f $opt_j $opt_n $opt_o $opt_all $opt_bayes
 	    $opt_debug $opt_format $opt_hamlog $opt_head $opt_loghits
 	    $opt_mid $opt_mh $opt_ms $opt_net $opt_nosort $opt_progress
 	    $opt_showdots $opt_spamlog $opt_tail $opt_rules $opt_restart
-	    $opt_after $opt_rewrite);
+	    $opt_loguris $opt_after $opt_rewrite);
 
 use FindBin;
 use lib "$FindBin::Bin/../lib";
@@ -91,7 +92,7 @@ $opt_spamlog = "spam.log";
 GetOptions("c=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug",
 	   "hamlog=s", "head=i", "loghits", "mh", "mid", "ms", "net",
 	   "progress", "rewrite:s", "showdots", "spamlog=s", "tail=i",
-	   "rules=s", "restart=i", "after=s",
+	   "rules=s", "restart=i", "after=s", "loguris",
 	   "dir" => sub { $opt_format = "dir"; },
 	   "file" => sub { $opt_format = "file"; },
 	   "mbox" => sub { $opt_format = "mbox"; },
@@ -251,13 +252,23 @@ sub wanted {
     $ma = $new_ma;
   }
 
-  my $status = $spamtest->check($ma);
+  # log-uris support
+  my $status;
+  my @uris;
+  if ($opt_loguris) {
+    my $pms = Mail::SpamAssassin::PerMsgStatus->new ($spamtest, $ma);
+    @uris = $pms->get_uri_list ();
+    $pms->finish();
+
+  } else {
+    $status = $spamtest->check($ma);
+  }
 
   my @extra;
   if (defined($time)) {
     push(@extra, "time=$time");
   }
-  if (defined $status->{bayes_score}) {
+  if ($status && defined $status->{bayes_score}) {
     push(@extra, "bayes=" . $status->{bayes_score});
   }
   if ($opt_mid) {
@@ -276,10 +287,22 @@ sub wanted {
     push(@extra, "mid=$mid");
   }
 
-  my $yorn = $status->is_spam() ? 'Y' : '.';
-  my $score = $status->get_score();
-  my $tests = join(",", sort(grep(length,$status->get_names_of_tests_hit(),$status->get_names_of_subtests_hit())));
-  my $extra = join(",", @extra);
+  my $yorn;
+  my $score;
+  my $tests;
+  my $extra;
+
+  if ($opt_loguris) {
+    $yorn = '.';
+    $score = 0;
+    $tests = join (" ", sort @uris);
+    $extra = '';
+  } else {
+    $yorn = $status->is_spam() ? 'Y' : '.';
+    $score = $status->get_score();
+    $tests = join(",", sort(grep(length,$status->get_names_of_tests_hit(),$status->get_names_of_subtests_hit())));
+    $extra = join(",", @extra);
+  }
 
   if (defined $opt_rewrite) {
     open(REWRITE, "> " . ($opt_rewrite ? $opt_rewrite : "/tmp/out"));
@@ -310,7 +333,7 @@ sub wanted {
     }
   }
 
-  $status->finish();
+  if (defined $status) { $status->finish(); }
   $ma->finish();
   undef $ma;		# clean 'em up
   undef $status;

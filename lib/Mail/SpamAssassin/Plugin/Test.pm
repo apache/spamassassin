@@ -10,6 +10,9 @@ To try this out, write these lines to /etc/mail/spamassassin/plugintest.cf:
 package Mail::SpamAssassin::Plugin::Test;
 
 use Mail::SpamAssassin::Plugin;
+use strict;
+use bytes;
+
 use vars qw(@ISA);
 @ISA = qw(Mail::SpamAssassin::Plugin);
 

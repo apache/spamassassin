@@ -1935,17 +1935,6 @@ only characters in the ranges A-Z, a-z, 0-9, -, _ and / are permitted.
     }
 
 ###########################################################################
-
-    if ($self->{main}->call_plugins ("parse_config", {
-		line => $_,
-		user_config => $scoresonly
-	    }))
-    {
-      # a plugin dealt with it successfully.
-      next;
-    }
-
-###########################################################################
     # SECURITY: no eval'd code should be loaded before this line.
     #
     if ($scoresonly && !$self->{allow_user_rules}) { goto failed_line; }
@@ -2756,6 +2745,22 @@ See C<Mail::SpamAssassin::Plugin> for more details on writing plugins.
 ###########################################################################
 
 failed_line:
+
+    # last ditch: try to see if the plugins know what to do with it
+    if ($self->{main}->call_plugins ("parse_config", {
+		key => $key,
+		value => $value,
+		line => $_,
+		conf => $self,
+		user_config => $scoresonly
+	    }))
+    {
+      # a plugin dealt with it successfully.
+      next;
+    }
+
+###########################################################################
+
     my $msg = "Failed to parse line in SpamAssassin configuration, ".
                         "skipping: $_";
 

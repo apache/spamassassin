@@ -250,6 +250,9 @@ sub harvest_dnsbl_queries {
 	push(@left, $query);
       }
     }
+
+    $self->{main}->call_plugins ("check_tick", { permsgstatus => $self });
+
     last unless @left;
     last if time >= $timeout;
     @waiting = @left;
@@ -283,6 +286,7 @@ sub harvest_dnsbl_queries {
     $self->{tag_data}->{RBL} .= "<$dnsuri>" .
 	" [" . join(", ", @{ $answers }) . "]\n";
   }
+
   chomp $self->{tag_data}->{RBL} if defined $self->{tag_data}->{RBL};
 }
 

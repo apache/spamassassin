@@ -49,6 +49,7 @@ It is held in two forms:
 
 package Mail::SpamAssassin::MsgMetadata;
 use strict;
+use bytes;
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Received;

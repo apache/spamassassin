@@ -69,6 +69,7 @@ sub load_plugin {
   else {
     dbg ("plugin: loading $package from \@INC");
     $ret = eval qq{ require $package; };
+    $path = "(from \@INC)";
   }
 
   if (!$ret) {
@@ -103,13 +104,13 @@ sub callback {
   foreach my $plugin (@{$self->{plugins}}) {
     $plugin->{_inhibit_further_callbacks} = 0;
 
-    dbg ("plugin: calling $subname on $plugin");
     my $methodref = $plugin->can ($subname);
 
     if (defined $methodref) {
       eval {
 	$ret = &$methodref ($plugin, @_);
       };
+      if ($ret) { dbg ("plugin: ${plugin}->${subname} => $ret"); }
     }
 
     if ($plugin->{_inhibit_further_callbacks}) {

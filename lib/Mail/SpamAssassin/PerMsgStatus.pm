@@ -143,6 +143,8 @@ sub check {
     # do head tests
     $self->do_head_tests();
 
+    $self->{main}->call_plugins ("check_tick", { permsgstatus => $self });
+
     # do body tests with decoded portions
     {
       my $decoded = $self->get_decoded_stripped_body_text_array();
@@ -156,6 +158,7 @@ sub check {
       $self->do_body_eval_tests($decoded);
       undef $decoded;
     }
+    $self->{main}->call_plugins ("check_tick", { permsgstatus => $self });
 
     # do rawbody tests with raw text portions
     {
@@ -166,6 +169,7 @@ sub check {
       $self->do_body_uri_tests($bodytext);
       undef $bodytext;
     }
+    $self->{main}->call_plugins ("check_tick", { permsgstatus => $self });
 
     # and do full tests: first with entire, full, undecoded message
     # use get_all_headers instead of 
@@ -184,6 +188,7 @@ sub check {
 
     # finish the DNS results
     $self->rbl_finish();
+    $self->{main}->call_plugins ("check_post_dnsbl", { permsgstatus => $self });
 
     # Do meta rules second-to-last
     $self->do_meta_tests();
@@ -2020,6 +2025,19 @@ sub got_uri_pattern_hit {
 # the clearing of the test state is now inlined as:
 #
 # $self->{test_log_msgs} = ();        # clear test state
+#
+# except for this public API for plugin use:
+
+=item $status->clear_test_state()
+
+Clear test state, including test log messages from C<$status->test_log()>.
+
+=cut
+
+sub clear_test_state {
+    my ($self) = @_;
+    $self->{test_log_msgs} = ();
+}
 
 sub _handle_hit {
     my ($self, $rule, $score, $area, $desc) = @_;
