@@ -399,7 +399,11 @@ sub razor2_lookup {
           $response = 0;
         }
         else {
-          $rc->connect() or die $rc->errprefix("checkit");
+          if (!$rc->connect()) {
+            # provide a better error message when servers are unavailable,
+            # than "Bad file descriptor Died".
+            die "could not connect to any servers\n";
+          }
           $rc->check($objects) or die $rc->errprefix("checkit");
           $rc->disconnect() or die $rc->errprefix("checkit");
           $response = $objects->[0]->{spam};

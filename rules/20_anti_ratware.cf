@@ -1,5 +1,5 @@
 # Non-spam mailers
-# $Id: 20_anti_ratware.cf,v 1.15 2002/09/04 18:36:49 jmason Exp $
+# $Id: 20_anti_ratware.cf,v 1.16 2002/09/10 14:31:28 jmason Exp $
 
 header USER_AGENT_PINE		Message-Id =~ /^<Pine\.[A-Z]{3}\.\d\.[0-9A-Z]+\./
 describe USER_AGENT_PINE	Message-Id indicates a non-spam MUA (Pine)

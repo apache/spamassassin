@@ -10,10 +10,6 @@ change your setup to use procmail as detailed below.
 If you used spamassassin to filter your mail and then something else wrote
 it into a folder for you, then you should be fine.
 
-Also note that SpamAssassin now uses Berkeley DB files for it's
-auto-whitelist database by default; on some platforms, you may find
-that your old auto-whitelist is now ignored.
-
 
 Installing SpamAssassin
 -----------------------
@@ -167,7 +163,7 @@ skipped.
     Razor has a large number of dependencies on CPAN modules.  Feel free
     to skip installing it, if this makes you nervous; SpamAssassin will
     still work well without it.
-
+    
 
   - DCC    http://www.rhyolite.com/anti-spam/dcc/
 
@@ -199,7 +195,7 @@ skipped.
 
     Pyzor requires at least Python 2.2.1 which can be found at
     http://www.python.org/ .
-
+ 
     To install Pyzor, download the latest revision from
     https://sourceforge.net/project/showfiles.php?group_id=50000 and
     perform the following steps:
@@ -225,7 +221,7 @@ skipped.
     If you want to use SpamAssassin with Mail::Audit, you will (obviously)
     require the Mail::Audit module, and any modules it requires (there's
     lots of them, unfortunately).
-
+    
     Additionally, Mail::Internet is required if you wish to use the
     "-r/-w" options of the spamassassin program (reporting and replying,
     for spam-trap mail accounts).
@@ -341,12 +337,20 @@ If you want to use SpamAssassin site-wide:
 
 
 
-Other installation notes:
+Other Installation Notes
+------------------------
+
 
   - SpamAssassin now uses a temporary file in /tmp (or $TMPDIR, if that's
     set in the environment) for Pyzor and DCC checks.  Make sure that this
-    directory is not either (a) writable by other users, or (b) shared over
-    NFS, for security.
+    directory is either (a) not writable by other users, or (b) not shared
+    over NFS, for security.
+
+
+  - You can create your own system-wide rules files in
+    /etc/mail/spamassassin; their filenames should end in ".cf".  Multiple
+    files will be read, and SpamAssassin will not overwrite these files
+    when installing a new version.
 
 
   - The auto-whitelist is enabled using the -a flag to spamassassin or

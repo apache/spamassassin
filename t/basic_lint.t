@@ -12,5 +12,5 @@ q{  }, 'anything',
 
 );
 
-sarun ("--lint", \&patterns_run_cb);
+sarun ("-L --lint", \&patterns_run_cb);
 ok_all_patterns();

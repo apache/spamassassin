@@ -1,5 +1,5 @@
 # SpamAssassin rules file: tests.
-# $Id: 20_body_tests.cf,v 1.250 2002/09/09 04:54:37 zelgadis Exp $
+# $Id: 20_body_tests.cf,v 1.251 2002/09/10 14:31:28 jmason Exp $
 # 
 # note: body tests are run with long lines, so be sure to limit the
 # size of searches; use ".{0,30}" instead of ".*" to avoid huge
@@ -1386,6 +1386,7 @@ body INTL_EXEC_GUILD            /International Executive Guild/
 describe INTL_EXEC_GUILD        Well known SPAM senders
 body IN_ACCORDANCE_WITH_LAWS    /has been sent in accordance with/
 describe IN_ACCORDANCE_WITH_LAWS Claims to be in accordance with some Spam law
+
 
 body ANOTHER_NET_AD             /Another Internet Ad campaign produced/
 describe ANOTHER_NET_AD         Tells you it's an ad

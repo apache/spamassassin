@@ -13,18 +13,17 @@ make; make; make                # third time lucky!
 make text_html_doc
 make distcheck
 
-echo $vers > $WEBDIR/latest_version
-
 echo "Creating 'Changes' file from CVS change log..."
-cvs2cl.pl -f Changes
+cvs2cl.pl -f Changes -l "-d'>2002-06-18'"
+
+echo $vers > $WEBDIR/latest_version
 
 rm -rf $WEBDIR/dist $WEBDIR/doc
 mkdir $WEBDIR/dist
 
-tar cf - \
-	--exclude=CVS --exclude='.#*'	\
-	--exclude="logs" --exclude='*.tar.gz' --exclude='*.zip' \
-	. | ( cd $WEBDIR/dist ; tar xf - )
+tar cf - --exclude=CVS --exclude='.#*'  \
+         --exclude="logs" --exclude='*.tar.gz' --exclude='*.zip' \
+         . | ( cd $WEBDIR/dist ; tar xf - )
 
 tar cf - --exclude=CVS --exclude='.#*' doc | ( cd $WEBDIR ; tar xf - )
 
