@@ -371,7 +371,6 @@ int message_filter(const struct sockaddr *addr, char *username, int flags, struc
     if(i<0 || len >= bufsiz){ free(m->out); m->out=m->msg; m->out_len=m->msg_len; return EX_OSERR; }
 
     if((i=try_to_connect(addr, &sock))!=EX_OK){
-        free(buf);
         free(m->out); m->out=m->msg; m->out_len=m->msg_len;
         return i;
     }
