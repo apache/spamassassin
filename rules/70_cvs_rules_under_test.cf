@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.512 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.513 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -269,6 +269,14 @@ tflags T_RCVD_IN_SORBS_BLOCK net
 header T_RCVD_IN_SORBS_ZOMBIE	rbleval:check_rbl_sub('sorbs', '127.0.0.9')
 tflags T_RCVD_IN_SORBS_ZOMBIE net
 
+# some dial-up lists that seem decent, worth testing some more
+header T_RCVD_IN_DUL_BOFH rbleval:check_rbl('pdl-notfirsthop', 'pdl.bofh.it.')
+header T_RCVD_IN_DUN_DNSRBL rbleval:check_rbl('dun-notfirsthop', 'dun.dnsrbl.net.')
+header T_RCVD_IN_DUL_AUPADS rbleval:check_rbl('duinv-notfirsthop', 'duinv.aupads.org.')
+tflags T_RCVD_IN_DUL_BOFH net
+tflags T_RCVD_IN_DUN_DNSRBL net
+tflags T_RCVD_IN_DUL_AUPADS net
+
 # bug 1017: domain-based blacklists, experimental
 # dsn.rfc-ignorant.org
 header T_DNS_FROM_RFCI_DSN	rbleval:check_rbl_from_host('rfci-dsn', 'dsn.rfc-ignorant.org.')
@@ -279,6 +287,16 @@ tflags T_DNS_FROM_RFCI_DSN net
 header T_RCVD_IN_ALL	rbleval:check_rbl('xxx', 'blocked.secnap.net.')
 tflags T_RCVD_IN_ALL net
 score T_RCVD_IN_ALL 0.001
+
+# bug 1733: SenderBase
+# sa.senderbase.org for SpamAssassin queries
+# test.senderbase.org for everything else (until SenderBase is in production)
+header __SENDERBASE rbleval:check_rbl_txt('senderbase', 'sa.senderbase.org.')
+tflags __SENDERBASE net
+
+# SenderBase test rule, should have same results as RCVD_IN_BONDEDSENDER
+header T_RCVD_IN_BONDEDSENDER rbleval:check_rbl_sub('senderbase', 'defined(S45) && S45 eq "Y"')
+tflags T_RCVD_IN_BONDEDSENDER net
 
 # OK, a whole batch of faked-HELO detection rules.  These work by checking
 # for hosts HELOing in a certain domain, but without rDNS matching that.
