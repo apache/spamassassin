@@ -153,7 +153,7 @@ my @OPTIONAL_MODULES = (
   module => 'DBI',
   version => '0.00',
   desc => 'If you intend to use SpamAssassin with an SQL database backend for
-  user configuration data, Bayes storage, or AWL storage, you will need
+  user configuration data, Bayes storage, or other storage, you will need
   to have these installed; both the basic DBI module and the driver for
   your database.',
 },

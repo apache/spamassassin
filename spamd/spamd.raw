@@ -216,9 +216,6 @@ GetOptions(
   # last in 2.4
   'stop-at-threshold|S' => sub { warn "The -S option has been deprecated and is no longer supported, ignoring.\n" },
 
-  # last in 2.6
-  'auto-whitelist|whitelist|a'      => sub { warn "The -a option has been removed.  Please look at the use_auto_whitelist config option instead.\n"; exit 2; },
-
 ) or print_usage_and_exit();
 
 if ($opt{'help'}) {
@@ -1642,7 +1639,7 @@ sub handle_virtual_config_dir {
   }
 
   # assume that $userdir will be a writable directory we can
-  # use for AWL, Bayes dbs etc.
+  # use for Bayes dbs etc.
   $spamtest->signal_user_changed(
     {
       username => $username,
@@ -1710,7 +1707,7 @@ sub handle_user_setuid_with_sql {
     }
   }
 
-  my $spam_conf_dir = $dir . '/.spamassassin';    #needed for AWL, Bayes, etc.
+  my $spam_conf_dir = $dir . '/.spamassassin';    #needed for Bayes, etc.
   if ( !-d $spam_conf_dir ) {
     if ( mkdir $spam_conf_dir, 0700 ) {
       logmsg("info: created $spam_conf_dir for $username.");
@@ -1754,7 +1751,7 @@ sub handle_user_setuid_with_ldap {
     }
   }
 
-  my $spam_conf_dir = $dir . '/.spamassassin';    #needed for AWL, Bayes, etc.
+  my $spam_conf_dir = $dir . '/.spamassassin';    #needed for Bayes, etc.
   if ( !-d $spam_conf_dir ) {
     if ( mkdir $spam_conf_dir, 0700 ) {
       logmsg("info: created $spam_conf_dir for $username.");
@@ -2238,7 +2235,7 @@ only it is using an LDAP server.
 Turn on SQL lookups even when per-user config files have been disabled
 with B<-x> and also setuid to the user.  This is useful for spamd hosts
 which want to load user preferences from an SQL database but also wish to
-support the use of B<-a> (AWL) and B<-H> (Helper home directories.)
+support the use of B<-H> (Helper home directories.)
 
 =item B<--setuid-with-ldap>
 
@@ -2282,8 +2279,7 @@ All others will be replaced by underscores (C<_>).
 This path must be a writable directory.  It will be created if it does not
 already exist.  If a file called B<user_prefs> exists in this directory (note:
 B<not> in a C<.spamassassin> subdirectory!), it will be loaded as the user's
-preferences.  The auto-whitelist and/or Bayes databases for that user will be
-stored in this directory.
+preferences.  The Bayes databases for that user will be stored in this directory.
 
 Note that this B<requires> that B<-x> is used, and cannot be combined with
 SQL- or LDAP-based configuration.

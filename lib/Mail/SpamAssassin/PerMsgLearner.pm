@@ -53,7 +53,6 @@ use warnings;
 use bytes;
 
 use Mail::SpamAssassin;
-use Mail::SpamAssassin::AutoWhitelist;
 use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::Bayes;
 

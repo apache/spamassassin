@@ -53,7 +53,9 @@ loadplugin Mail::SpamAssassin::Plugin::SpamCop
 #
 #loadplugin Mail::SpamAssassin::Plugin::MSExec
 
+# AWL - do auto-whitelist checks
+loadplugin Mail::SpamAssassin::Plugin::AWL
+
 # AutoLearnThreshold - threshold-based discriminator for Bayes auto-learning
 #
 loadplugin Mail::SpamAssassin::Plugin::AutoLearnThreshold
-
