@@ -165,13 +165,12 @@ my %makefile = (
     'EXE_FILES' => {
       'sa-filter.raw'    => 'sa-filter',
       'sa-learn.raw'     => 'sa-learn',
-      'spamassassin.pod' => 'spamassassin',
       'spamc/spamc.c'    => 'spamc/spamc$(EXE_EXT)',
       'spamd/spamd.raw'  => 'spamd/spamd',
     },
 
     'MAN1PODS' => {
-        'spamassassin.pod' => '$(INST_MAN1DIR)/spamassassin.$(MAN1EXT)',
+        'spamassassin'     => '$(INST_MAN1DIR)/spamassassin.$(MAN1EXT)',
         'sa-filter'        => '$(INST_MAN1DIR)/sa-filter.$(MAN1EXT)',
         'sa-learn'         => '$(INST_MAN1DIR)/sa-learn.$(MAN1EXT)',
         'spamc/spamc.pod'  => '$(INST_MAN1DIR)/spamc.$(MAN1EXT)',
@@ -214,8 +213,6 @@ my %makefile = (
     'clean' => { FILES => join(' ' =>
         'sa-filter', 'sa-learn',
         
-        'spamassassin',
-
         'spamd/spamd',
 
         'spamc/spamc$(EXE_EXT)',
@@ -884,7 +881,7 @@ sub MY::install {
 
   foreach (@code) {
     # Add our install targets as a dependency to all top-level install targets
-    s/^(install(?:_[a-z]+)?\s*::?\s*.*)$/$1 conf__install data__install/;
+    s/^(install(?:_[a-z]+)?\s*::?\s*.*)$/$1 bin__install conf__install data__install/;
 
     # Now do the DESTDIR hack, if necessary.
     next if !$mm_needs_destdir;
@@ -1045,61 +1042,6 @@ sub MY::constants {
   return join("\n", @code);
 }
 
-# Fix up the $(CP) command to support symlinks, add $(LN_S) to create them
-sub MY::tools_other {
-  my $self = shift;
-  my @code = split(/\n/, $self->SUPER::tools_other(@_));
-  init_MY_globals($self);
-  
-  foreach my $line (@code) {
-    # Skip comments
-    next if $line =~ /^\s*#/;
-     # Skip everything which isn't a var assignment.
-    next unless line_has_macro_def($line);
-    
-    # Store the assignment string if necessary.
-    set_EQ_from_line($line);
-  
-    # Skip all but the CP definement one
-    my $macro = get_macro_name_from_line($line);
-    
-    if ($macro eq 'CP') {
-      set_macro('CP', join(' ', macro_ref('PERLRUN'), qq{build/do}, qq{copy}));
-    }
-    elsif ($macro eq 'MV') {
-      set_macro('MV', join(' ', macro_ref('PERLRUN'), qq{build/do}, qq{move}));
-    }
-    else {
-      next;
-    }
-    $line = macro_def($macro);
-  }
-  
-  set_macro('LN_S', join(' ', macro_ref('PERLRUN'), qq{build/do}, qq{symlink}));
-  push(@code, macro_def('LN_S'));
-  
-  clean_MY_globals($self);
-  return join("\n", @code);
-}
-
-sub MY::installbin {
-  my $self = shift;
-  my @code = split(/\n/, $self->SUPER::installbin(@_));
-  init_MY_globals($self);
-  
-  foreach my $line (@code) {
-    # Skip comments
-    next if $line =~ /^\s*#/;
-    
-    # Don't do the fixin() step, we already did it manually and it makes 
-    # problems with the symlink
-    $line =~ s/\$\(FIXIN\).*$/\$(NOECHO)\$(NOOP)/;
-  }
-  
-  clean_MY_globals($self);
-  return join("\n", @code);
-}
-
 # Override some vars in the dist section.
 sub MY::dist {
   my $self = shift;
@@ -1125,22 +1067,6 @@ sub MY::dist {
   return join("\n", @code);
 }
 
-#sub MY::test_via_harness {
-#  my $self = shift;
-#  my @code = split(/\n/, $self->SUPER::test_via_harness(@_));
-#  init_MY_globals($self);
-# 
-#  foreach my $line (@code) {
-#    # Insert an -It before the -e switch, keep the quoting.
-#    $line =~ s/(\s["']?)(-e)(["']?\s)/$1-It$3$1$2$3/;
-#  }
-# 
-#  clean_MY_globals($self);
-#  return join("\n", @code);
-#}
-
-
-
 sub MY::postamble {
   my $self = shift;
   my $code = "";
@@ -1161,9 +1087,6 @@ FIXBANG		= -Msharpbang \
 		  -DPERL_WARN="$(PERL_WARN)" \
 		  -DPERL_TAINT="$(PERL_TAINT)"
 
-
-spamassassin: sa-filter
-	$(LN_S) $? $@
 
 sa-filter: sa-filter.raw
 	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@
@@ -1220,6 +1143,15 @@ qmail/qmail-spamc$(EXE_EXT): spamc/qmail-spamc$(EXE_EXT)
 	$(MAKE_SPAMC_OLD)
 	$(CHMOD) $(PERM_RWX) $@
 
+# try to figure out where sa-filter is going to be installed
+ifeq "$(INSTALLDIRS)" "site"
+INSTALLSCRIPTREALLY = $(INSTALLSITEBIN)
+else
+INSTALLSCRIPTREALLY = $(INSTALLSCRIPT)
+endif
+
+bin__install:
+	$(PERL) -MFile::Copy -e 'chdir q{$(INSTALLSCRIPTREALLY)}; $$symlink_exists = eval { symlink("",""); 1 }; if ($$symlink_exists) { symlink(q{sa-filter}, q{spamassassin}); } else { copy(q{sa-filter}, q{spamassassin}); }'
 
 conf__install:
 	-$(MKPATH) $(B_CONFDIR)
