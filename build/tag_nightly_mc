@@ -1,0 +1,6 @@
+#!/bin/sh
+
+cd /home/jm/ftp/spamassassin
+cvs -z3 update -dP
+cvs tag -F CURRENT_CORPORA_SUBMIT_VERSION
+

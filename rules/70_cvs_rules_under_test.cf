@@ -623,7 +623,8 @@ body T_EARN_MONEY /\b(?:earn|make|making|made|received?|discounted)\s+(?:up\s+to
 describe T_EARN_MONEY        Message talks about earning money
 
 # thanks to Jason Staples for this suggestion. Sendmail and other MTAs
-# will query the Ident server on a relay; Squid proxies should not be
+# will often query the ident server on a relay; Squid proxies should not be
+# sending mail.
 
 header T_IDENT_SQUID    Received =~ /ident[:=]squid\b/i
 describe T_IDENT_SQUID  Message was sent by a Squid HTTP proxy
