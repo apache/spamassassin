@@ -613,7 +613,7 @@ present) from the original spam message:
 =item Subject: header
 
 The string C<*****SPAM*****> is also prepended to the subject,
-unless the C<rewrite_subject 0> configuration option is given.
+if the C<rewrite_subject 1> configuration option is given.
 
 =item From: header
 
@@ -625,20 +625,29 @@ unless the C<rewrite_subject 0> configuration option is given.
 
 =back
 
-And these headers are added:
+And (by default) these headers are added:
 
 =over 4
 
 =item X-Spam-Status: header
 
-A string, C<Yes, hits=nn required=nn> is set in this header to reflect
-the filter status.
+A string, C<Yes, hits=nn required=nn tests=xxx,xxx
+autolearn=(ham|spam|no)> is set in this header to reflect the filter
+status.
 
 =item X-Spam-Flag: header
 
 Set to C<YES>.
 
 =item X-Spam-Report: header
+
+=back
+
+Please note that the headers that added are now fully configurable via
+the add_header option. Please see the manpage for
+Mail::SpamAssassin::Conf(3) for more information.
+
+=over 4
 
 =item spam mail body text
 
@@ -647,16 +656,21 @@ if the message is marked as spam.
 
 =back
 
-=head2 TAGGING FOR HAM (NON-SPAM) MAILS
+=head2 DEFAULT TAGGING FOR HAM (NON-SPAM) MAILS
 
 =over 4
 
 =item X-Spam-Status: header
 
-A string, C<No, hits=nn required=nn> is set in this header to reflect
-the filter status.
+A string, C<No, hits=nn required=nn tests=xxx,xxx
+autolearn=(ham|spam|no)> is set in this header to reflect the filter
+status.
 
 =back
+
+Added headers are fully configurable via the add_header configuration
+option. Please see the manpage for Mail::SpamAssassin::Conf(3) for
+more information.
 
 =head1 SPAM TRAPPING
 
