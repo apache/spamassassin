@@ -108,7 +108,7 @@ sub razor_report {
     alarm 10;
 
     my $rc = Razor::Client->new ($config, %options);
-    die "undefined Razor::Client\n" if (!$rc);
+    die "Problem while loading Razor: $!" if (!$rc);
 
     my $ver = $Razor::Client::VERSION;
     if ($ver >= 1.12) {
