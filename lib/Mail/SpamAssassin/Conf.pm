@@ -157,37 +157,40 @@ name is still accepted, but is deprecated.
 
 =item score SYMBOLIC_TEST_NAME n.nn [ n.nn n.nn n.nn ]
 
-Assign scores (the number of points for a hit) to a given test. Scores can
-be positive or negative real numbers or integers. C<SYMBOLIC_TEST_NAME> is
-the symbolic name used by SpamAssassin for that test; for example,
-'FROM_ENDS_IN_NUMS'.
+Assign scores (the number of points for a hit) to a given test.
+Scores can be positive or negative real numbers or integers.
+C<SYMBOLIC_TEST_NAME> is the symbolic name used by SpamAssassin for
+that test; for example, 'FROM_ENDS_IN_NUMS'.
 
-If only one valid score is listed, then that score is always used for a
-test.
+If only one valid score is listed, then that score is always used
+for a test.
 
-If four valid scores are listed, then the score that is used depends on how
-SpamAssassin is being used. The first score is used when both Bayes and
-network tests are disabled. The second score is used when Bayes is disabled,
-but network tests are enabled. The third score is used when Bayes is enabled
-and network tests are disabled. The fourth score is used when Bayes is
-enabled and network tests are enabled.
+If four valid scores are listed, then the score that is used depends
+on how SpamAssassin is being used. The first score is used when
+both Bayes and network tests are disabled (score set 0). The second
+score is used when Bayes is disabled, but network tests are enabled
+(score set 1). The third score is used when Bayes is enabled and
+network tests are disabled (score set 2). The fourth score is used
+when Bayes is enabled and network tests are enabled (score set 3).
 
 Setting a rule's score to 0 will disable that rule from running.
 
-If the first score value is surrounded by parenthesis '()', then that
-value is considered to be relative to the already set score.  ie: '(3)'
-means increase the score for this rule by 3 points in all score sets.
-'(3) (0) (3) (0)' means increase the score for this rule by 3 in score
-sets 0 and 2 only.
+If any of the score values are surrounded by parenthesis '()', then
+all of the scores in the line are considered to be relative to the
+already set score.  ie: '(3)' means increase the score for this
+rule by 3 points in all score sets.  '(3) (0) (3) (0)' means increase
+the score for this rule by 3 in score sets 0 and 2 only.
 
-If no score is given for a test by the end of the configuration, the
-default score is 1.0, or 0.01 for tests whose names begin with 'T_'
-(this is used to indicate a rule in testing).
+If no score is given for a test by the end of the configuration, a
+default score is assigned: a score of 1.0 is used for all tests,
+except those who names begin with 'T_' (this is used to indicate a
+rule in testing) which receive 0.01.
 
-Note that test names which begin with '__' are indirect rules used to
-compose meta-match rules and can also act as prerequisites to other rules.
-They are not scored or listed in the 'tests hit' reports, but assigning a
-score of 0 to an indirect rule will disable it.
+Note that test names which begin with '__' are indirect rules used
+to compose meta-match rules and can also act as prerequisites to
+other rules.  They are not scored or listed in the 'tests hit'
+reports, but assigning a score of 0 to an indirect rule will disable
+it from running.
 
 =cut
 
