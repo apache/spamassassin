@@ -172,7 +172,6 @@ score FREE_SAMPLE		     1.0
 score FREE_TICKETS		     1.0
 score FREE_TRIAL		     1.0
 score FREE_WEBSITE		     1.0
-score FREQ_SPAM_PHRASE               2.417
 score FRIEND_AT_PUBLIC               0.999
 score FROM_AND_TO_SAME_1             0.5
 score FROM_AND_TO_SAME_2             -2.5
@@ -392,8 +391,16 @@ score SMTPD_IN_RCVD                  2.096
 score SOCIAL_SEC_NUMBER              1.0
 score SPAM_FORM                      0.218
 score SPAM_FORM_RETURN               3.205
-score SPAM_PHRASES_020               2.139
-score SPAM_PHRASES_040               2.424
+score SPAM_PHRASE_00_01              -0.2
+score SPAM_PHRASE_01_02              -0.2
+score SPAM_PHRASE_02_03              -0.1
+score SPAM_PHRASE_03_05              -0.1
+score SPAM_PHRASE_05_08              0.1
+score SPAM_PHRASE_08_13              0.5
+score SPAM_PHRASE_13_21              1.5
+score SPAM_PHRASE_21_34              2.0
+score SPAM_PHRASE_34_55              2.5
+score SPAM_PHRASE_55_XX              3.0
 score SPAM_REDIRECTOR                1.706
 score SPY_ON_FRIENDS		     1.0
 score STOCK_ALERT                    2.965
@@ -606,7 +613,6 @@ score REMOVE_ES_03                   1.0
 score REMOVE_ES_04                   1.0
 score REMOVE_ES_05                   1.0
 score SPAM_FORM_INPUT                1.0
-score SPAM_PHRASES_100               1.0
 score STAINLESS_STEEL                4.0
 score TO_INVESTORS                   0.0
 score X_FIX_PRESENT                  1.0
