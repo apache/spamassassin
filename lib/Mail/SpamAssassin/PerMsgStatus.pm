@@ -917,8 +917,8 @@ sub get_decoded_stripped_body_text_array {
     $text =~ s/<(?:table|td)\s[^>]*\bbackground$URI_in_tag>/URI:$1 /ogis;
   
     # Get rid of all remaing HTML and XML tags
-    $text =~ s/<[?!\s]*[:a-z0-9]+\b[^>]*>//gis;
-    $text =~ s/<\/[:a-z0-9]+>//gis;
+    $text =~ s/<[a-z][:a-z0-9]+\b[^>]*>//gis;
+    $text =~ s/<\/\s*[a-z][:a-z0-9]+\s*>//gis;
   }
 
   my @textary = split (/^/, $text);
