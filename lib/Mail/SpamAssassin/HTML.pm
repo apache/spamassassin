@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.55 2002/12/17 09:49:48 quinlan Exp $
+# $Id: HTML.pm,v 1.56 2002/12/18 21:22:58 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -294,6 +294,14 @@ sub html_tests {
   {
     $self->{html}{title_text} = "";
   }
+  if ($tag eq "meta" &&
+      exists $attr->{'http-equiv'} &&
+      exists $attr->{content} &&
+      $attr->{'http-equiv'} =~ /Content-Type/i &&
+      $attr->{content} =~ /\bcharset\s*=\s*["']?([^"']+)/i)
+  {
+    $self->{html}{charsets} .= exists $self->{html}{charsets} ? " $1" : $1;
+  }
 
   $self->{html}{anchor_text} ||= "" if ($tag eq "a");
 }
@@ -409,6 +417,27 @@ sub html_image_ratio {
 		   $self->{html}{image_area} > 0);
   my $ratio = $self->{html}{non_space_len} / $self->{html}{image_area};
   return ($ratio > $min && $ratio <= $max);
+}
+
+sub html_charset_faraway {
+  my ($self) = @_;
+
+  return 0 unless exists $self->{html}{charsets};
+
+  my @locales = $self->get_my_locales();
+  return 0 if grep { $_ eq "all" } @locales;
+
+  my $okay = 0;
+  my $bad = 0;
+  for my $c (split(' ', $self->{html}{charsets})) {
+    if (Mail::SpamAssassin::Locales::is_charset_ok_for_locales($c, @locales)) {
+      $okay++;
+    }
+    else {
+      $bad++;
+    }
+  }
+  return ($bad && ($bad >= $okay));
 }
 
 sub html_tag_exists {

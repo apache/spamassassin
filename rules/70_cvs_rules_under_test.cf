@@ -368,6 +368,10 @@ describe T_PROMOTE_YOUR_BUSINESS  Wants to help promote your business
 header T_X_BEENTHERE		exists:X-BeenThere
 describe T_X_BEENTHERE	X-BeenThere header exists
 
+# HTML charset tests
+body __HTML_CHARSET_FARAWAY	eval:html_charset_faraway()
+meta T_HTML_CHARSET_FARAWAY	(__HTML_CHARSET_FARAWAY && __HIGHBITS)
+
 # from bug 662
 header T_ADDR_FREE		From =~ /\b(?-i:F)ree(?-i:[ A-Z]).*</i
 describe T_ADDR_FREE		From Address contains FREE
