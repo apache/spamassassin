@@ -157,7 +157,6 @@ my %makefile = (
     # will be converted later on).  Use the source file name as the key and
     # the executable as the value.
     'EXE_FILES' => {
-      'sa-filter.raw'    => 'sa-filter',
       'spamassassin.raw'    => 'spamassassin',
       'sa-learn.raw'     => 'sa-learn',
       'sa-update.raw'    => 'sa-update',
@@ -167,7 +166,6 @@ my %makefile = (
 
     'MAN1PODS' => {
         'spamassassin'     => '$(INST_MAN1DIR)/spamassassin.$(MAN1EXT)',
-        'sa-filter'        => '$(INST_MAN1DIR)/sa-filter.$(MAN1EXT)',
         'sa-learn'         => '$(INST_MAN1DIR)/sa-learn.$(MAN1EXT)',
         'sa-update'        => '$(INST_MAN1DIR)/sa-update.$(MAN1EXT)',
         'spamc/spamc.pod'  => '$(INST_MAN1DIR)/spamc.$(MAN1EXT)',
@@ -208,7 +206,7 @@ my %makefile = (
     },
 
     'clean' => { FILES => join(' ' =>
-        'sa-filter', 'sa-learn', 'sa-update', 'spamassassin',
+        'sa-learn', 'sa-update', 'spamassassin',
         
         'spamd/spamd',
 
@@ -1095,9 +1093,6 @@ FIXBANG		= -Msharpbang \
 		  -DPERL_TAINT="$(PERL_TAINT)"
 
 
-sa-filter: sa-filter.raw
-	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@
-
 spamassassin: spamassassin.raw
 	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@
 
@@ -1156,10 +1151,9 @@ qmail/qmail-spamc$(EXE_EXT): spamc/qmail-spamc$(EXE_EXT)
 	$(MAKE_SPAMC_OLD)
 	$(CHMOD) $(PERM_RWX) $@
 
-
-bin__install: $(INST_SCRIPT)/sa-filter
-        # $(RM_F) $(B_SCRIPTDIR)/spamassassin
-        # $(SYMLINK) $(INST_SCRIPT)/sa-filter $(B_SCRIPTDIR)/spamassassin
+#bin__install: $(INST_SCRIPT)/sa-filter
+#        # $(RM_F) $(B_SCRIPTDIR)/spamassassin
+#        # $(SYMLINK) $(INST_SCRIPT)/sa-filter $(B_SCRIPTDIR)/spamassassin
 
 conf__install:
 	-$(MKPATH) $(B_CONFDIR)
