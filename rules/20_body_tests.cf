@@ -92,6 +92,8 @@ rawbody HTTP_USERNAME_USED	/http\:\/\/[^\s\/]+\@/is
 describe HTTP_USERNAME_USED	Uses a username in a URL
 rawbody HTTP_WITH_EMAIL_IN_URL	/http\:\/\/\S+=[-_\+a-z0-9\.]+\@[-_\+a-z0-9\.]+\.[-_\+a-z0-9]{2,3}(?:\&|\s)/
 describe HTTP_WITH_EMAIL_IN_URL	'remove' URL contains an email address
+rawbody HTTP_ESCAPED_HOST       /http\:\/\/[^\/]*%/
+describe HTTP_ESCAPED_HOST      Uses %-escapes inside a URL's hostname
 
 rawbody SUPERLONG_LINE		/^[^<]{199,}$/m
 describe SUPERLONG_LINE		Contains a line >=199 characters long
