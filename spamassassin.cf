@@ -23,6 +23,11 @@
 #   body SYMBOLIC_TEST_NAME	eval:name_of_eval_method([args])
 #	(this is evaluated for the entire message body, not for each line)
 #
+#   full SYMBOLIC_TEST_NAME	/pattern/modifiers
+#	(Evaluated for the entire message body as one string.
+#       If you plan to use the default weight (1), you can omit the
+#       SYMBOLIC_TEST_NAME and just use "." instead.
+#
 #   full SYMBOLIC_TEST_NAME	eval:name_of_eval_method([args])
 #	(this is evaluated for the entire message, headers and all)
 #
@@ -35,7 +40,8 @@
 
 # Default template. Try to keep it under 76 columns (inside the the dots below).
 # Bear in mind that EVERY line will be prefixed with "SPAM: " in order to make
-# it clear what's been added, so you lose 6 columns right there.
+# it clear what's been added, and allow other filters to *remove* spamfilter
+# modifications, so you lose 6 columns right there.
 #
 #      ......................................................................
 report -------------------- Start SpamAssassin results ----------------------
@@ -128,16 +134,10 @@ describe RAZOR_CHECK		Listed in Razor, see http://razor.sourceforge.net/
 body REMOVE_SUBJ		/remove.*subject/i
 body SUBJ_REMOVE		/subject.*remove/i
 body REPLY_REMOVE_SUBJECT	/reply.*remove.*subject/i
-body A_HREF_TO_IP		/href\s*=3?d?["']?http:\/\/\d+\.\d+\.\d+\.\d+\:?\d*\//i
-body MAILTO_LINK		/=3?d?["']?mailto:/i
-body MAILTO_WITH_SUBJ_REMOVE	/mailto:.*\?subject=.*remove/i
-body MAILTO_WITH_SUBJ		/mailto:.*\?subject=/i
-body FORM_W_MAILTO_ACTION	/action=3?d?["']?mailto:/i
 body REMOVE_IN_QUOTES		/\"remove\"/i
 
 body JAVASCRIPT			/<SCRIPT LANGUAGE=[^ ]*"JavaScript">/i
 body UNSAFE_JAVASCRIPT		/on(?:Blur|Error|KeyDown|KeyUp|Load|MouseOver|Resize|Unload)/i
-body CLICK_HERE_LINK		/CLICK HERE[^A-Z]*<\/A>/i
 body HTML_WITH_BGCOLOR		/<body .*bgcolor=\S+/i
 body SPAM_FORM			/CHANGE EMAIL ADDRESS IN ACTION OF FORM/
 body SPAM_FORM_RETURN		/return validate_form/
@@ -203,6 +203,18 @@ body TRACKER_ID			/^\s*\W{4,} \w{10,} \W{4,}\s*$/
 
 body OPPORTUNITY		/OPPORTUNITY/
 body PURE_PROFIT		/PURE PROFIT/
+
+###########################################################################
+# some full-text matches; note the [3D=\s"']* bits of the patterns, which
+# match some gibberish produced by quoted-printable encoding of HTML, often
+# in the middle of a HTML "attribute=value" pair.
+
+full CLICK_HERE_LINK		/click here.{0,20}<\/a>/is
+full A_HREF_TO_IP		/href[3D=\s\"\']*http:\/\/\d+\.\d+\.\d+\.\d+\:?\d*\//is
+full MAILTO_LINK		/=[3D=\s"']*mailto:/is
+full MAILTO_WITH_SUBJ_REMOVE	/mailto:\S+\?subject=[3D=\s"']*remove/is
+full MAILTO_WITH_SUBJ		/mailto:\S+\?subject=/is
+full FORM_W_MAILTO_ACTION	/action=[3D=\s"']*mailto:/is
 
 ###########################################################################
 # Compensation for common false positives.
