@@ -130,9 +130,7 @@ uri DAILY_PXE			/http:\/\/(?:pxe|fx)\./i
 describe DAILY_PXE		Spam URL pattern, DailyPromotions server link
 
 uri E_MAILPROMO_URL		/\be-mailpromo\.net/
-uri E_MAILPROMO_MAILTO		/mailto:\S+[.@]e-mailpromo\.net/
 describe E_MAILPROMO_URL	Includes a link to a likely spammer domain (e-mailpromo.net)
-describe E_MAILPROMO_MAILTO	Includes a link to a likely spammer email domain (e-mailpromo.net)
 
 uri BARGAIN_URL			/bargains?\.(?:com|biz)/
-
+describe BARGAIN_URL		Includes a link to a likely spammer domain
