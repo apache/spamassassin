@@ -25,12 +25,17 @@ BEGIN {
         || !-e '@@INSTALLSITELIB@@/Mail/SpamAssassin.pm')
   {
     # These are common paths where the SA libs might be found.
-    foreach (qw(lib ../lib/site_perl
-                ../lib/spamassassin ../share/spamassassin/lib))
-    {
-      my $dir = File::Spec->catdir($bin, split('/', $_));
-      if(-f File::Spec->catfile($dir, "Mail", "SpamAssassin.pm")) {
-        unshift(@INC, $dir); last;
+    if ( -e $bin.'/blib/lib/Mail/SpamAssassin.pm' ) { # doing "make test" ??
+      unshift(@INC, $bin.'/blib/lib');
+    }
+    else {
+      foreach (qw(lib ../lib/site_perl
+                  ../lib/spamassassin ../share/spamassassin/lib))
+      {
+        my $dir = File::Spec->catdir($bin, split('/', $_));
+        if(-f File::Spec->catfile($dir, "Mail", "SpamAssassin.pm")) {
+          unshift(@INC, $dir); last;
+        }
       }
     }
   }
