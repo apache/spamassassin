@@ -1179,17 +1179,46 @@ sub do_body_uri_tests {
       $uri =~ s/^<(.*)>$/$1/;
 
       # Use <BASE HREF="URI"> to turn relative links into
-      # absolute links
+      # absolute links.
+      #
+      # Even If it is a base URI, Leave $uri alone, and test it like a
+      # normal in case our munging of $base_uri messes something up
       if ($uri =~ s/^BASEURI://i) {
-        $base_uri = $uri;
+        # A base URI will be ignored by browsers unless it is an
+        # absolute URI of a standrd protocol
+        if ($uri =~ m{^(?:ftp|https?)://}i) {
+          $base_uri = $uri;
 
-        # Make sure it ends in a slash
-        $base_uri .= "/" unless($base_uri =~ /\/$/);
-        next;
-      }
+          # Remove trailing filename, if any; base URIs can have the
+          # form of "http://foo.com/index.html"
+          $base_uri =~ s{^([a-z]+://[^/]+/.*?)[^/\.]+\.[^/\.]{2,4}$} {$1}i;
+
+          # Make sure it ends in a slash
+          $base_uri .= "/" unless($base_uri =~ m{/$});
+        } # if ($uri =~ m{^(?:ftp|https?)://})
+      } # if ($uri =~ s/^BASEURI://i)
 
       $uri =~ s/^URI://i;
-      $uri = "${base_uri}$uri" unless $uri =~ /^[a-z]+:/i;
+
+      # Does the uri start with "http://", "mailto:", "javascript:" or
+      # such?  If not, we probaly need to put the base URI in front
+      # of it.
+      if ($uri !~ /^[a-z]+:/i) {
+        # If it's a hostname that was just sitting out in the
+        # open, without a protocol, and not inside of an HTML tag,
+        # the we should add the proper protocol in front, rather
+        # than using the base URI.
+        if ($uri =~ /^www\d?\./i) {
+          $uri = "http://$uri";
+        }
+        elsif ($uri =~ /^ftp\./i) {
+          $uri = "ftp://$uri";
+        }
+        else {
+          $uri = "${base_uri}$uri";
+        }
+      } # if ($uri !~ /^[a-z]+:/i)
+
       # warn("Got URI: $uri\n");
       push @uris, $uri;
   }
