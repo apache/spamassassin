@@ -50,42 +50,17 @@ use vars	qw{
 sub new {
   my $class = shift;
   $class = ref($class) || $class;
-  my ($main, $audit) = @_;
+  my ($main, $msg) = @_;
 
   my $self = {
     'main'		=> $main,
+    'msg'		=> $msg,
     'hits'		=> 0,
     'test_logs'		=> '',
     'tests_already_hit' => { },
   };
 
   $self->{conf} = $self->{main}->{conf};
-
-  # test Mail::Audit for new-style encapsulation of the Mail::Internet
-  # message object.
-  my ($hdr, $val);
-  foreach my $hdrtest (qw(From To Subject Message-Id Date Sender)) {
-    $val = $audit->get ($hdrtest);
-    if (defined $val) { $hdr = $hdrtest; last; }
-  }
-
-  if (!defined $val) {			# ah, just make one up
-    $hdr = 'X-SpamAssassin-Test-Header'; $val = 'x';
-  }
-
-  # now try using one of the new methods...
-  if (eval q{
-		$audit->replace_header ($hdr, $val);
-		1;
-	})
-  {
-    dbg ("using Mail::Audit message-encapsulation code");
-    $self->{msg} = new Mail::SpamAssassin::EncappedMessage ($main, $audit);
-
-  } else {
-    dbg ("using Mail::Audit exposed-message-object code");
-    $self->{msg} = new Mail::SpamAssassin::ExposedMessage ($main, $audit);
-  }
 
   bless ($self, $class);
   $self;
@@ -364,11 +339,7 @@ sub do_body_tests {
   my $body = $self->{msg}->get_body();
   while (($rulename, $evalsub) = each %{$self->{conf}->{body_evals}}) {
     $evalsub =~ s/\s*\((.*?)\)\s*$//;
-    if (defined $1 && $1 ne '') {
-      $args = ', '.$1;
-    } else {
-      $args = '';
-    }
+    $args = ''; if (defined $1 && $1 ne '') { $args = ', '.$1; }
 
     $self->clear_test_state();
     my $result;
@@ -380,6 +351,26 @@ sub do_body_tests {
     }
     if ($result) { $self->got_body_hit ($rulename); }
   }
+
+
+
+  my $full = $self->{msg}->get_all_headers()."\n".join ('', @{$body});
+  while (($rulename, $evalsub) = each %{$self->{conf}->{full_evals}}) {
+    $evalsub =~ s/\s*\((.*?)\)\s*$//;
+    $args = ''; if (defined $1 && $1 ne '') { $args = ', '.$1; }
+
+    $self->clear_test_state();
+    my $result;
+    if (!eval '$result = $self->'.$evalsub.'($full'.$args.'); 1;')
+    {
+      warn "Failed to run $rulename SpamAssassin test, skipping:\n".
+      		"\t($@)\n";
+      next;
+    }
+    if ($result) { $self->got_full_hit ($rulename); }
+  }
+
+
 
   my $textary = $self->get_body_text();
   $self->clear_test_state();
@@ -432,6 +423,11 @@ sub got_hit {
 sub got_body_hit {
   my ($self, $rule) = @_;
   $self->handle_hit ($rule, 'BODY: ', $self->{conf}->{body_tests}->{$rule});
+}
+
+sub got_full_hit {
+  my ($self, $rule) = @_;
+  $self->handle_hit ($rule, '', $self->{conf}->{full_evals}->{$rule});
 }
 
 sub test_log {

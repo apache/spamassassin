@@ -21,7 +21,10 @@
 #       SYMBOLIC_TEST_NAME and just use "." instead.
 #
 #   body SYMBOLIC_TEST_NAME	eval:name_of_eval_method([args])
-#	(this is evaluated for the entire message, not for each line)
+#	(this is evaluated for the entire message body, not for each line)
+#
+#   full SYMBOLIC_TEST_NAME	eval:name_of_eval_method([args])
+#	(this is evaluated for the entire message, headers and all)
 #
 #   describe SYMBOLIC_TEST_NAME Textual description of test
 #       (body pattern tests don't require a description.)
@@ -114,6 +117,13 @@ describe RCVD_IN_DUL		Received from a dialup IP, see http://www.mail-abuse.org/d
 
 header RCVD_IN_RELAYS_ORBS_ORG	eval:check_rbl('relays.orbs.org.')
 describe RCVD_IN_RELAYS_ORBS_ORG Received via a relay in relays.orbs.org
+
+###########################################################################
+
+full RAZOR_CHECK		eval:check_razor()
+describe RAZOR_CHECK		Listed in Vipul's Razor spam network
+
+razor_server			razor.vipul.net:2702
 
 ###########################################################################
 

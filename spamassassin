@@ -75,6 +75,8 @@ Options:
  
   -t               only testing
 
+  -r               mail message is verified as spam, report it
+
   -c config        configuration file
                    (default:	$rules )
 
@@ -93,10 +95,10 @@ require Mail::SpamAssassin;
 require Mail::Audit;
 
 use vars qw{
-  $opt_t $opt_c $opt_p $opt_h $opt_V $opt_D
+  $opt_t $opt_c $opt_p $opt_h $opt_V $opt_D $opt_r
 };
 
-getopts ('tc:p:hVD') or usage();
+getopts ('tc:p:hVDr') or usage();
 
 if (defined $opt_h) { usage(); }
 if (defined $opt_V) {
@@ -144,6 +146,11 @@ my $spamtest = new Mail::SpamAssassin ({
   'userprefs_filename'	=> $opt_p,
   'debug'		=> $opt_D
 });
+
+if ($opt_r) {
+  $spamtest->report_as_spam ($mail);
+  exit;
+}
 
 my $status = $spamtest->check ($mail);
 $status->rewrite_mail ();
