@@ -28,7 +28,7 @@ describe REMOVE_ES_07		Claims you can opt-out
 body SUBSCRIBE_ES_01		/Si usted desea Agregarse a nuestra base de datos/i
 describe SUBSCRIBE_ES_01	If you want to subscribe...
 
-body EXCUSE_ES_01             /(?:esto|este (?:e-?)mail|esta carta) no (?:puede ser|se) considera(?:d[oa])? .?SPAM.?,? (?:ya que|mientras)/i
+body EXCUSE_ES_01             /(?:esto|este (?:mensaje|(?:e-?)mail)|esta carta) no (?:es|(?:puede ser|se) considera(?:d[oa])?) .?SPAM.?,? (?:(?:puesto|ya) que|mientras)/i
 describe EXCUSE_ES_01         Claims not to be spam in Spanish
 
 body EXCUSE_ES_02             /Me he tomado la libertad de enviarle este mail por/i
@@ -101,7 +101,7 @@ lang es describe GANADORES_ES_02	Ha sido ganador.
 lang es body PORNO_GRATIS_ES		/porno .{3,5} gratis/i
 lang es describe PORNO_GRATIS_ES	Porno gratis.
 
-lang es body MAS_INFORMACION_ES		/para (m.s|mayor) informaci.n/i
+lang es body MAS_INFORMACION_ES		/para (?:m.s|mayor) informaci.n/i
 lang es describe MAS_INFORMACION_ES	Mas informacion.
 
 lang es body INFORMACION_RESERVA_ES	/Informaci.n y reserva/i
