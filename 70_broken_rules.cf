@@ -80,8 +80,8 @@
 #header ALL_CAPS_HEADER		ALL =~ /\n(?:TO|FROM|SUBJECT|DATE):/s
 #describe ALL_CAPS_HEADER	Header with all capitals found
 #
-#header MSG_ID_ADDED_BY_MTA	Message-Id =~ / \(added by (?!postmaster\@wanadoo\.fr)/
-#describe MSG_ID_ADDED_BY_MTA	'Message-Id' was added by a relay
+#header MSGID_ADDED_BY_MTA	Message-Id =~ / \(added by (?!postmaster\@wanadoo\.fr)/
+#describe MSGID_ADDED_BY_MTA	'Message-Id' was added by a relay
 #
 #header FROM_MALFORMED           From !~ /(?:\"[^\"]+\"|\S+)\@\S+\.\S+|<\S+(?:\!\S+)+>/ [if-unset: unset@unset.unset]
 #describe FROM_MALFORMED         From: has a malformed address
