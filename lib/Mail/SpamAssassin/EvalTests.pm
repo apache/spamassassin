@@ -17,7 +17,7 @@ use strict;
 use vars qw{
 	$CCTLDS_WITH_LOTS_OF_OPEN_RELAYS
 	$ROUND_THE_WORLD_RELAYERS
-	@PORN_WORDS
+	@PORN_WORDS $WORD_OBFUSCATION_CHARS 
 };
 
 # sad but true. sort it out, sysadmins!
@@ -63,6 +63,8 @@ qr(\bs[\*\.\-\?]ck)i, qr(\bf[\*\.\-\?]ck)i, qr(\bs[\*\.\-\?]x\b)i
 # it or not!
 
 );
+
+$WORD_OBFUSCATION_CHARS = '*_.,/|-+=';
 
 ###########################################################################
 # HEAD TESTS:
@@ -643,7 +645,6 @@ sub check_from_in_whitelist {
 sub _check_whitelist {
   my ($self, $list, $addr) = @_;
   $addr = lc $addr;
-
   if (defined ($list->{$addr})) { return 1; }
 
   study $addr;
@@ -654,16 +655,25 @@ sub _check_whitelist {
   return 0;
 }
 
+sub all_to_addrs {
+  my ($self) = @_;
+  return $self->{main}->find_all_addrs_in_line
+  	($self->get ('To') .
+  	 $self->get ('Apparently-To') .
+  	 $self->get ('Delivered-To') .
+  	 $self->get ('Resent-To') .
+         $self->get ('Cc'));
+}
+
 ###########################################################################
 
-my $obfu_chars = '*_.,/|-+=';
 sub check_obfuscated_words {
-    my ($self, $body) = @_;
-
-    foreach my $line (@$body) {
-        while ($line =~ /[\w$obfu_chars]/) {
-        }
-    }
+  my ($self, $body) = @_;
+  foreach my $line (@$body) {
+      while ($line =~ /[\w$WORD_OBFUSCATION_CHARS]/) {
+        # TODO, it seems ;)
+      }
+  }
 }
 
 ###########################################################################
@@ -681,9 +691,7 @@ sub check_from_in_blacklist {
 sub check_to_in_whitelist {
   my ($self) = @_;
   local ($_);
-  foreach $_ ($self->{main}->find_all_addrs_in_line
-  			($self->get ('To') . $self->get ('Cc')))
-  {
+  foreach $_ ($self->all_to_addrs()) {
     if ($self->_check_whitelist ($self->{conf}->{whitelist_to}, $_)) {
       return 1;
     }
@@ -697,9 +705,7 @@ sub check_to_in_whitelist {
 sub check_to_in_more_spam {
   my ($self) = @_;
   local ($_);
-  foreach $_ ($self->{main}->find_all_addrs_in_line
-  			($self->get ('To') . $self->get ('Cc')))
-  {
+  foreach $_ ($self->all_to_addrs()) {
     if ($self->_check_whitelist ($self->{conf}->{more_spam_to}, $_)) {
       return 1;
     }
@@ -713,9 +719,7 @@ sub check_to_in_more_spam {
 sub check_to_in_all_spam {
   my ($self) = @_;
   local ($_);
-  foreach $_ ($self->{main}->find_all_addrs_in_line
-  			($self->get ('To') . $self->get ('Cc')))
-  {
+  foreach $_ ($self->all_to_addrs()) {
     if ($self->_check_whitelist ($self->{conf}->{all_spam_to}, $_)) {
       return 1;
     }
