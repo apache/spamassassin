@@ -17,8 +17,9 @@ describe FROM_HAS_MIXED_NUMS	From: contains numbers mixed in with letters
 header FROM_NO_USER		From =~ /(?:^\@|<\@| \@[^<]*$|<>)/ [if-unset: unset@unset.unset]
 describe FROM_NO_USER		From: has no local-part before @ sign
 
-header FROM_NAME_NO_SPACES	From =~ /(^(?!=\?)\S{7,}\s*<\S+\@\S+>|\(\S{7,}\)$)/
-describe FROM_NAME_NO_SPACES	From: no spaces in name
+# bad rule: about 2/3 false positives!
+#header FROM_NAME_NO_SPACES	From =~ /(^(?!=\?)\S{7,}\s*<\S+\@\S+>|\(\S{7,}\)$)/
+#describe FROM_NAME_NO_SPACES	From: no spaces in name
 
 header TO_NO_USER		To =~ /(?:^\@|<\@| \@[^<]*$|<>)/ [if-unset: unset@unset.unset]
 describe TO_NO_USER		To: has no local-part before @ sign
@@ -345,8 +346,9 @@ describe YR_MEMBERSHIP_EXCH	Subject contains 'Your Membership Exchange'
 header LOTS_OF_CC_LINES		eval:check_lots_of_cc_lines()
 describe LOTS_OF_CC_LINES	Lots and lots of Cc: headers
 
-header FROM_NAME_EQ_FROM_ADDR	From =~ /^\s*"([^"@]+\@[^"@]+)"\s+<\1>\s*$/i
-describe FROM_NAME_EQ_FROM_ADDR	'From:' address also used as sender's real name
+# gets very bad FP rate
+#header FROM_NAME_EQ_FROM_ADDR	From =~ /^\s*"([^"@]+\@[^"@]+)"\s+<\1>\s*$/i
+#describe FROM_NAME_EQ_FROM_ADDR 'From:' address also used as sender's real name
 
 header FORGED_HOTMAIL_RCVD	eval:check_for_forged_hotmail_received_headers()
 describe FORGED_HOTMAIL_RCVD	Forged hotmail.com 'Received:' header found

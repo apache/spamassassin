@@ -1460,6 +1460,9 @@ sub check_for_uppercase {
   # join lines together
   $body = join('', @lines);
 
+  # remove shift-JIS charset codes
+  $body =~ s/\x1b\$B.*\x1b\(B//gs;
+
   # now count upper and lower case
   # Jul  1 2002 jm: count numerals as lower case, otherwise 'date|mail'
   # is spam
