@@ -751,20 +751,20 @@ score RATWARE_EMWAC                  1.0
 score SOME_BREAKTHROUGH              0.5
 score SELECTED_YOU                   0.5
 score MIME_BOUND_NEXTPART            1.0
-score BAYES_00        		     -4.0
-score BAYES_01        		     -2.0
-score BAYES_10       		     -0.5
-score BAYES_20        		     -0.1
-score BAYES_30         		     0.01
-score BAYES_40        		     0.01
-score BAYES_44         		     0.01
-score BAYES_50         		     0.01
-score BAYES_56         		     0.01
-score BAYES_60         		     0.01
-score BAYES_70         		     0.1
-score BAYES_80         		     0.5
-score BAYES_90         		     2.0
-score BAYES_99          	     4.0
+score BAYES_00        		     0 0 -4.0 -4.0
+score BAYES_01        		     0 0 -2.0 -2.0
+score BAYES_10       		     0 0 -0.5 -0.5
+score BAYES_20        		     0 0 -0.1 -0.1
+score BAYES_30         		     0 0 0.01 0.01
+score BAYES_40        		     0 0 0.01 0.01
+score BAYES_44         		     0 0 0.01 0.01
+score BAYES_50         		     0 0 0.01 0.01
+score BAYES_56         		     0 0 0.01 0.01
+score BAYES_60         		     0 0 0.01 0.01
+score BAYES_70         		     0 0 0.1 0.1
+score BAYES_80         		     0 0 0.5 0.5
+score BAYES_90         		     0 0 2.0 2.0
+score BAYES_99          	     0 0 4.0 4.0
 
 # End of GA-evolved scores.
 
@@ -774,7 +774,7 @@ score BAYES_99          	     4.0
 #
 # The scores from isolated GA runs have two digits after the decimal point.
 
-# GTUBE - Generic Test for Unsolicited Bulk Email
+# GTUBE - Generic Test for Unsollicited Bulk Email
 score GTUBE			     1000
 
 # HTML control test
@@ -782,53 +782,53 @@ score HTML_MESSAGE                   0.01
 
 # miscellaneous network tests
 
-score BAD_HELO_WARNING               2.29
-score NO_MX_FOR_FROM                 3.09
-score ROUND_THE_WORLD                2.80
+score BAD_HELO_WARNING               0 2.29 0 2.29
+score NO_MX_FOR_FROM                 0 3.09 0 3.09
+score ROUND_THE_WORLD                0 2.80 0 2.80
 
 # message digest tests
 
-score RAZOR2_CHECK                   3.91
-score RAZOR2_CF_RANGE_01_10          0.01
-score RAZOR2_CF_RANGE_11_20          0.01
-score RAZOR2_CF_RANGE_21_30          0.01
-score RAZOR2_CF_RANGE_31_40          0.01
-score RAZOR2_CF_RANGE_41_50          0.01
-score RAZOR2_CF_RANGE_51_60          0.01
-score RAZOR2_CF_RANGE_61_70          0.01
-score RAZOR2_CF_RANGE_71_80          0.01
-score RAZOR2_CF_RANGE_81_90          0.01
-score RAZOR2_CF_RANGE_91_100         0.01
-score DCC_CHECK                      2.66
-score PYZOR_CHECK                    2.50
+score RAZOR2_CHECK                   0 3.91 0 3.91
+score RAZOR2_CF_RANGE_01_10          0 0 0 0.01
+score RAZOR2_CF_RANGE_11_20          0 0 0 0.01
+score RAZOR2_CF_RANGE_21_30          0 0 0 0.01
+score RAZOR2_CF_RANGE_31_40          0 0 0 0.01
+score RAZOR2_CF_RANGE_41_50          0 0 0 0.01
+score RAZOR2_CF_RANGE_51_60          0 0 0 0.01
+score RAZOR2_CF_RANGE_61_70          0 0 0 0.01
+score RAZOR2_CF_RANGE_71_80          0 0 0 0.01
+score RAZOR2_CF_RANGE_81_90          0 0 0 0.01
+score RAZOR2_CF_RANGE_91_100         0 0 0 0.01
+score DCC_CHECK                      0 2.66 0 2.66
+score PYZOR_CHECK                    0 2.50 0 2.50
 
 # Razor v1 is no longer used by default
 score RAZOR_CHECK                    0
 
 # DNS blacklists
 
-score RCVD_IN_RELAYS_ORDB_ORG        0.61
-score RCVD_IN_OSIRUSOFT_COM          0.38
-score X_OSIRU_DUL                    0.62
-score X_OSIRU_DUL_FH                 0.36
-score X_OSIRU_OPEN_RELAY             2.72
-score X_OSIRU_SPAMWARE_SITE          0.30
-score X_OSIRU_SPAM_SRC               2.73
-score RCVD_IN_RFCI                   2.28
-score RCVD_IN_ORBS                   2.25
-score RCVD_IN_DSBL                   3.25
-score RCVD_IN_MULTIHOP_DSBL          0.81
-score RCVD_IN_SBL                    3.18
-score RCVD_IN_UNCONFIRMED_DSBL       0.77
-score RCVD_IN_VISI                   2.62
-score RCVD_IN_BONDEDSENDER           -10.0
+score RCVD_IN_RELAYS_ORDB_ORG        0 0.61 0 0.61
+score RCVD_IN_OSIRUSOFT_COM          0 0.38 0 0.38
+score X_OSIRU_DUL                    0 0.62 0 0.62
+score X_OSIRU_DUL_FH                 0 0.36 0 0.36
+score X_OSIRU_OPEN_RELAY             0 2.72 0 2.72
+score X_OSIRU_SPAMWARE_SITE          0 0.30 0 0.30
+score X_OSIRU_SPAM_SRC               0 2.73 0 2.73
+score RCVD_IN_RFCI                   0 2.28 0 2.28
+score RCVD_IN_ORBS                   0 2.25 0 2.25
+score RCVD_IN_DSBL                   0 3.25 0 3.25
+score RCVD_IN_MULTIHOP_DSBL          0 0.81 0 0.81
+score RCVD_IN_SBL                    0 3.18 0 3.18
+score RCVD_IN_UNCONFIRMED_DSBL       0 0.77 0 0.77
+score RCVD_IN_VISI                   0 2.62 0 2.62
+score RCVD_IN_BONDEDSENDER           0 -10.0 0 -10.0
 
 # provisional scores, just added.  need GA run once we get the data
-score RCVD_IN_OPM                    1.00
-score RCVD_IN_NJABL                  0.01
-score X_NJABL_OPEN_PROXY             2.00
-score X_NJABL_DIALUP                 0.50
-# note: RCVD_IN_NJABL has low score, as the X_NJABL rules decipher
+score RCVD_IN_OPM                    0 1.00 0 1.00
+score RCVD_IN_NJABL                  0 0.01 0 0.01
+score X_NJABL_OPEN_PROXY             0 2.00 0 2.00
+score X_NJABL_DIALUP                 0 0.50 0 0.50
+# note: RCVD_IN_NJABL has low score, as the X_NJABL rules 0 decipher 0 decipher
 # its results
 
 # ok_languages and ok_locales
@@ -846,9 +846,9 @@ score MIME_SUSPECT_NAME              0.1
 
 # Habeas scores
 
-score HABEAS_SWE                     -4.0
-score HABEAS_HIL                     4.0
-score HABEAS_VIOLATOR                8.0
+score HABEAS_SWE                     0 -4.0 0 -4.0
+score HABEAS_HIL                     0 4.0 0 4.0
+score HABEAS_VIOLATOR                0 8.0 0 8.0
 
 # unscored by default -- commercial services.  If you pay for these,
 # give them a score so they will be checked.
