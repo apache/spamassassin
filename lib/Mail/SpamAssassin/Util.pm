@@ -198,8 +198,12 @@ sub untaint_var {
     return @{$_} if wantarray;
   }
   elsif (ref eq 'HASH') {
-    foreach my $k (keys %{$_}) {
-      ${$_}{untaint_var($k)} = untaint_var(${$_}{$k});
+    while (my ($k, $v) = each %{$_}) {
+      if (!defined $v && $_ == \%ENV) {
+	delete ${$_}{$k};
+	next;
+      }
+      ${$_}{untaint_var($k)} = untaint_var($v);
     }
     return %{$_} if wantarray;
   }

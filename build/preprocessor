@@ -138,8 +138,8 @@ sub do_stdin {
     $perl_warn = '';
   }
 
-  # Taint mode is enabled per default
-  my $perl_taint = ' -T';
+  # Taint mode is enabled per default except on 5.005
+  my $perl_taint = (($] < 5.006) ? '' : ' -T');
   # The taint mode can be disabled with -DPERL_TAINT=<yes|no>
   if ($defines{'PERL_TAINT'} and $defines{'PERL_TAINT'} eq 'no') {
     $perl_taint = '';
