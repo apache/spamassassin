@@ -910,17 +910,12 @@ sub uri_list_canonify {
     $nuri =~ s#^(https?:)/{0,2}#$1//#i;
 
     # http://www.foo.biz?id=3 -> http://www.foo.biz/?id=3
-    $nuri =~ s@^(https?://[^/?]+)\?@$1/?@;
+    $nuri =~ s@^(https?://[^/?]+)\?@$1/?@i;
 
     # deal with encoding of chars, this is just the set of printable
     # chars minus ' ' (that is, dec 33-126, hex 21-7e)
     $nuri =~ s/\&\#0*(3[3-9]|[4-9]\d|1[01]\d|12[0-6]);/sprintf "%c",$1/ge;
-    $nuri =~ s/\&\#x0*(2[1-9]|[3-6][a-f0-9]|7[0-9a-e]);/sprintf "%c",hex($1)/gei;
-
-    # deal with the %## encoding if necessary
-    if ($nuri =~ /\%[0-9a-fA-F]{2}/) {
-      $nuri = Mail::SpamAssassin::Util::url_encode($nuri);
-    }
+    $nuri =~ s/\&\#x0*(2[1-9]|[3-6][a-fA-F0-9]|7[0-9a-eA-E]);/sprintf "%c",hex($1)/ge;
 
     # put the new URI on the new list if it's different
     if ($nuri ne $uri) {
@@ -929,10 +924,34 @@ sub uri_list_canonify {
 
     # deal with wierd hostname parts, remove user/pass, etc.
     if ($nuri =~ m{^(https?://)([^/]+)(\/.*)?$}i) {
-      my ($proto, $host, $rest) = ($1,$2,$3);
+      my($proto, $host, $rest) = ($1,$2,$3);
 
       # not required
       $rest ||= '';
+
+      # bug 4146: deal with non-US ASCII 7-bit chars in the host portion
+      # of the URI according to RFC 1738 that's invalid, and the tested
+      # browsers (Firefox, IE) remove them before usage...
+      if ($host =~ tr/\000-\040\200-\377//d) {
+        push(@nuris, join ('', $proto, $host, $rest));
+      }
+
+      # deal with the %## encoding if necessary
+      # only worry about decoding stuff as an obfuscation technique?
+      # encoding isn't allowed in anything but $rest, so just deal with it
+      # there.
+      if ($rest =~ /\%[0-9a-fA-F]{2}/) {
+        $rest = Mail::SpamAssassin::Util::url_encode($rest);
+        push(@nuris, join ('', $proto, $host, $rest));
+      }
+
+      # deal with http redirectors.  strip off one level of redirector
+      # and add back to the array.  the foreach loop will go over those
+      # and deal appropriately.
+      # bug 3308: redirectors like yahoo only need one '/' ... <grrr>
+      if ($rest =~ m{(https?:/{0,2}.+)$}i) {
+        push(@uris, $1);
+      }
 
       ########################
       ## TVD: known issue, if host has multiple combinations of the following,
@@ -952,6 +971,7 @@ sub uri_list_canonify {
       if ($host =~ s/[^0-9A-Za-z]+$//) {
         push(@nuris, join ('', $proto, $host, $rest));
       }
+
       ########################
 
       # deal with 'http://213.172.0x1f.13/', decode encoded octets
@@ -974,14 +994,7 @@ sub uri_list_canonify {
       elsif ($host =~ /^[0-9]+$/) {
         push(@nuris, join ('', $proto, decode_ulong_to_ip($host), $rest));
       }
-    }
 
-    # deal with http redirectors.  strip off one level of redirector
-    # and add back to the array.  the foreach loop will go over those
-    # and deal appropriately.
-    # bug 3308: redirectors like yahoo only need one '/' ... <grrr>
-    if ($nuri =~ m{^https?://.+?(https?:/{0,2}.+)$}i) {
-      push(@uris, $1);
     }
   }
 
