@@ -322,8 +322,6 @@ sub html_whitespace {
 sub push_uri {
   my ($self, $uri) = @_;
 
-  $uri ||= '';
-
   # URIs don't have leading/trailing whitespace ...
   $uri =~ s/^\s+//;
   $uri =~ s/\s+$//;
@@ -337,16 +335,36 @@ sub html_uri {
 
   # ordered by frequency of tag groups
   if ($tag =~ /^(?:body|table|tr|td)$/) {
-    $self->push_uri($attr->{background});
+    if (defined $attr->{background}) {
+      if ($attr->{background} eq '') {
+        $self->put_results('blank_background' => $tag);
+      }
+      $self->push_uri($attr->{background});
+    }
   }
   elsif ($tag =~ /^(?:a|area|link)$/) {
-    $self->push_uri($attr->{href});
+    if (defined $attr->{href}) {
+      if ($attr->{href} eq '') {
+        $self->put_results('blank_href' => $tag)
+      }
+      $self->push_uri($attr->{href});
+    }
   }
   elsif ($tag =~ /^(?:img|frame|iframe|embed|script)$/) {
-    $self->push_uri($attr->{src});
+    if (defined $attr->{src}) {
+      if ($attr->{src} eq '') {
+        $self->put_results('blank_src' => $tag)
+      }
+      $self->push_uri($attr->{src});
+    }
   }
   elsif ($tag eq "form") {
-    $self->push_uri($attr->{action});
+    if (defined $attr->{action}) {
+      if ($attr->{action} eq '') {
+        $self->put_results('blank_action' => $tag)
+      }
+      $self->push_uri($attr->{action});
+    }
   }
   elsif ($tag eq "base") {
     if (my $uri = $attr->{href}) {
@@ -1064,10 +1082,10 @@ sub target_uri {
     $result .= "//" . $t{authority};
   }
   $result .= $t{path};
-  if ($t{query}) {
+  if (defined $t{query}) {
     $result .= "?" . $t{query};
   }
-  if ($t{fragment}) {
+  if (defined $t{fragment}) {
     $result .= "#" . $t{fragment};
   }
   return $result;

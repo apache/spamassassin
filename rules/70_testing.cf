@@ -315,3 +315,10 @@ describe T_TRACKING           There is a tracking header in the email
 # bug 2554
 body T_HOT_NASTY /\b(?=[dehklnswxy])(?:horny|nasty|hot|wild|young|horniest|nastiest|hottest|wildest|youngest|naughty|dirtiest|slutty|kinky|lusty|extreme|xxx+)\b.{0,9}\b(?=[acfghilmpsvx])(?:virgins?\b|asian|cheerleader|sex|selection|fuck|fucking|anal\b|lesb(?:ian|o)|incest|chicks?|pics|movies|video|gay\b|porn|h[a\@]rdcore|schoolgirls|amateur|slut|adult|cum\b|xxx|sites?|hotties|shit)/i
 body T_BEST_PORN /\b(?:best|biggest|largest|most|free|ultimate)\b.{0,9}\b(?:virgins?\b|anal\b|lesbians?|incest|porno?|h[a\@]rdcore|sluts?|xxx+)/i
+
+# bug 3439
+uri	T_EMPTY_URI		/^$/
+body	T_EMPTY_URI_HREF	eval:html_test('blank_href')
+body	T_EMPTY_URI_SRC		eval:html_test('blank_src')
+body	T_EMPTY_URI_ACTION	eval:html_test('blank_action')
+body	T_EMPTY_URI_BG		eval:html_test('blank_background')
