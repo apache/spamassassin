@@ -30,7 +30,6 @@ header __FROM_JUST_NUMBER       From:addr =~ /^\d+\@/
 header __FROM_PHONE             From:addr =~ /^\d{3}(?:[-.]?\d{3}[-.]?\d{4}|\d{7})\@/
 meta FROM_ALL_NUMS              (__FROM_JUST_NUMBER && !__FROM_PHONE)
 describe FROM_ALL_NUMS          From an address that is all numbers (non-phone)
-score FROM_ALL_NUMS             0.5
 
 describe FROM_OFFERS		From address is "at something-offers"
 header FROM_OFFERS		From:addr =~ /\@\S*offers/i
