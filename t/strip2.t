@@ -24,7 +24,7 @@ sarun ("-d < $MUNGED > $OUTPUT", \&patterns_run_cb);
 ok(diff($INPUT,$OUTPUT));
 
 # create the -P output
-sarun ("-L -P < $INPUT > $MUNGED", \&patterns_run_cb);
+sarun ("-L < $INPUT > $MUNGED", \&patterns_run_cb);
 sarun ("-d < $MUNGED > $OUTPUT", \&patterns_run_cb);
 ok(diff($INPUT,$OUTPUT));
 

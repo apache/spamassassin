@@ -27,8 +27,7 @@ for($_=shift @ARGV; defined($_); $_=shift @ARGV)
 	open (STDIN, "<$_");
 	    my @msglines = (<STDIN>);
 	    my $mail = Mail::SpamAssassin::NoMailAudit->new (
-                                data => \@msglines,
-                                add_From_line => 0
+                                data => \@msglines
                          );
 
 	    my $status = $spamtest->check($mail);

@@ -34,8 +34,7 @@ sub usage {
 
 }
 
-my %opt = ( 'add-from' => 1,
-	    'create-prefs' => 1);
+my %opt = ( 'create-prefs' => 1);
 
 eval {
   require Mail::SpamAssassin;
@@ -45,7 +44,6 @@ eval {
 
   Getopt::Long::Configure("bundling");
   GetOptions(
-	     'pipe!' => \$opt{'pipe'}, 'P' => \$opt{'pipe'},
 	     'auto-whitelist' => \$opt{'auto-whitelist'}, 'a' => \$opt{'auto-whitelist'},
 	     'error-code|exit-code|e:i' => \$opt{'error-code'},
 	     'help|h' => \$opt{'help'},
@@ -54,7 +52,6 @@ eval {
 	     'add-to-whitelist|W' => \$opt{'add-to-whitelist'},
 	     'remove-from-whitelist|R' => \$opt{'remove-from-whitelist'},
 	     'add-to-blacklist' => \$opt{'add-to-blacklist'},
-	     'add-from!' => \$opt{'add-from'}, 'F=i' => \$opt{'add-from'},
 	     'warning-from|w=s' => \$opt{'warning-from'},
 	     'log-to-mbox|l=s' => \$opt{'log-to-mbox'},
 	     'local!' => \$opt{'local'}, 'L' => \$opt{'local'},
@@ -66,7 +63,14 @@ eval {
 	     'version|V' => \$opt{'version'},
 	     'create-prefs!', => \$opt{'create-prefs'}, 'x' => sub {$opt{'create-prefs'}=0},
 	     'whitelist-factory|M=s' => \$opt{'whitelist-factory'},
-             'debug-level|Z=s' => \$opt{'debug-level'}
+             'debug-level|Z=s' => \$opt{'debug-level'},
+
+             # NOTE: ignored for backwards compatibility. will be stripped
+             # in a future release.
+	     'add-from!' => sub { warn "The --add-from option has been removed.\n" },
+	     'F=i' => sub { warn "The -F option has been removed.\n" },
+	     'pipe|P' => sub { warn "The -P option has been removed.\n" }
+
   ) or usage(0, "Unknown option!");
 
   if (defined $opt{'help'}) { usage(0, "For more information read the spamassassin man page"); }
@@ -90,7 +94,7 @@ EOVERSION
 # resend() methods (which are proxied transparently).  Lovely.
 #
 use Mail::SpamAssassin::NoMailAudit;
-my $mail = Mail::SpamAssassin::NoMailAudit->new ( add_From_line => ($opt{'add-from'} || 0) );
+my $mail = Mail::SpamAssassin::NoMailAudit->new ();
 
 # For Mail::Audit users -- this is the magic. Just create a Mail::SpamAssassin
 # object like this, then run the check() method as below; if it returns a
@@ -218,19 +222,10 @@ my $mail = Mail::SpamAssassin::NoMailAudit->new ( add_From_line => ($opt{'add-fr
   }
 
 # if we're piping it, deliver it to stdout.
-  if ($opt{'test-mode'} || $opt{'pipe'}) {
-    print $mail->header(), "\n", join ('', @{$mail->body()});
-    if (defined $opt{'error-code'} && $status->is_spam ()) { exit ($opt{'error-code'} || 5) ; }
-    exit;
-  }
-
-# else, store it to the mail spool (thx to Mail::Audit)
-# $MAIL: std on unix
-# $DEFAULT: set by procmail
-  my $where = $ENV{'MAIL'} || $ENV{'DEFAULT'} || undef;
-  $mail->accept($where);
-  if (defined $opt{'error-code'} && $status->is_spam ()) { exit ($opt{'error-code'} || 5); }
+  print $mail->header(), "\n", join ('', @{$mail->body()});
+  if (defined $opt{'error-code'} && $status->is_spam ()) { exit ($opt{'error-code'} || 5) ; }
   exit;
+
 };
 
 if ($@) {	
@@ -238,23 +233,6 @@ if ($@) {
   warn $@;
   exit 70;		# == EX_SOFTWARE in sysexits.h. caught by MTA
 }
-
-# check for an assortment of crap that Mail::Audit cannot deal with: DOS
-# line-endings, extra 'From ' lines, etc.
-#
-sub pre_chew_for_mail_audit {
-    my ($msglines) = @_;
-
-    my @newhdrs = (); while ($_ = shift (@{$msglines})) {
-      /^From / and next;	# may fix the #1 M:A bug ;)
-      s/\r\n/\n/s;		# clean off \r\n's
-      push (@newhdrs, $_);
-      /^$/ and last;
-    }
-
-    unshift (@{$msglines}, @newhdrs);
-}
-
 
 # this is never called, it's just used to shut up the warnings
 sub NEVERCALLED {
@@ -271,21 +249,18 @@ spamassassin - mail filter to identify spam using text analysis
 
 =over
 
-=item spamassassin [option ...] < mailmessage
-
-=item spamassassin -P [option ...] < mailmessage > output
+=item spamassassin [option ...] < mailmessage > output
 
 Options:
 
+ -P, --pipe                         Deliver to STDOUT (now default)
  -a, --auto-whitelist, --whitelst   Use auto-whitelists
  -h, --help                         Print usage message
- -P, --pipe                         Pipe message, don't deliver
  -e, --error-code, --exit-code      Exit with a non-zero exit code for spam
  -t, --test-mode                    Pipe message through and add extra report
  -r, --report                       Report message as spam
  -W, --add-to-whitelist             Add addresses in mail to whitelist
  -R, --remove-from-whitelist        Remove addresses in mail from whitelist
- -F 0|1, --add-from, --noadd-from   Remove/add 'From ' line (default: add)
  -w fromaddr, --warning-from=addr   Send a warning mail to sender from fromaddr
  -l filename, --log-to-mbox=file    Log messages to a mbox file
  -L, --local                        Local tests only (no online tests)
@@ -306,16 +281,16 @@ Options:
 
 =item B<-P>, B<--pipe>
 
-Normally SpamAssassin will write the rewritten message to the mail spool by
-default.  The B<-P> parameter will cause it to pipe the output to STDOUT
-instead.
+The B<-P> parameter will cause SpamAssassin to pipe the output to STDOUT.
+This is now the default mode of operation.
 
 =item B<-a>, B<--auto-whitelist>, B<--whitelist>
 
-Use auto-whitelists.  Auto-whitelists track the long-term average score for each sender
-and then shift the score of new messages toward that long-term average.  This can increase
-or decrease the score for messages, depending on the long-term behavior of the
-particular correspondent.  See the README file for more details.
+Use auto-whitelists.  Auto-whitelists track the long-term average score for
+each sender and then shift the score of new messages toward that long-term
+average.  This can increase or decrease the score for messages, depending on
+the long-term behavior of the particular correspondent.  See the README file
+for more details.
 
 =item B<-e>, B<--error-code>, B<--exit-code>
 
@@ -350,12 +325,6 @@ STDIN, to the automatic whitelist.
 
 Remove all email addresses, in the headers and body of the mail message read
 from STDIN, from the automatic whitelist.
-
-=item B<-F> I<0 | 1>, B<--add-from>, B<--no-add-from>
-
-Ensure that the output email message either always starts with a 'From ' line
-(I<1>) for UNIX mbox format, or ensure that this line is stripped from
-the output (I<0>).  (default: add)
 
 =item B<-w> I<fromaddr>, B<--warning-from>=I<fromaddr>
 

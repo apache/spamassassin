@@ -38,8 +38,7 @@ my %resphash = (
 		);
 
 # defaults
-my %opt = ('user-config' => 1,
-	   'add-from' => 1);
+my %opt = ('user-config' => 1);
 
 Getopt::Long::Configure ("bundling");
 GetOptions(
@@ -60,10 +59,14 @@ GetOptions(
 	'user-config!' => \$opt{'user-config'}, 'x' => sub{$opt{'user-config'}=0},
 	'allowed-ips|A=s' => \@{$opt{'allowed-ip'}},
 	'debug!', => \$opt{'debug'}, 'D' => \$opt{'debug'},
-	'add-from!' => \$opt{'add-from'}, 'F=i' => \$opt{'add-from'},
 	'local!' => \$opt{'local'}, 'L' => \$opt{'local'},
 	'paranoid!' => \$opt{'paranoid'}, 'P' => \$opt{'paranoid'},
-	'stop-at-threshold!' => \$opt{'stop-at-threshold'}, 'S' => \$opt{'stop-at-threshold'}
+	'stop-at-threshold!' => \$opt{'stop-at-threshold'}, 'S' => \$opt{'stop-at-threshold'},
+
+        # will be stripped in future release
+	'add-from!' => sub { warn "The --add-from option has been removed\n" },
+        'F=i' => sub { warn "The -F option has been removed\n" }
+
 ) or pod2usage(-exitval => $resphash{'EX_USAGE'}, -verbose => 0);
 
 $opt{'help'} and pod2usage(-exitval => $resphash{'EX_USAGE'}, -verbose => 0, -message => 'For more details, use "man spamd"');
@@ -324,8 +327,7 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
 		$actual_length += length;
 	    }
 	    my $mail = Mail::SpamAssassin::NoMailAudit->new (
-                                data => \@msglines,
-                                add_From_line => $opt{'add-from'}
+                                data => \@msglines
                          );
 
 	    # Check length if we're supposed to
@@ -450,8 +452,7 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
 		$actual_length += length;
 	    }
 	    my $mail = Mail::SpamAssassin::NoMailAudit->new (
-                                data => \@msglines,
-                                add_From_line => $opt{'add-from'}
+                                data => \@msglines
                          );
 
 	    # Check length if we're supposed to
@@ -788,7 +789,6 @@ Options:
  -x, --nouser-config                Disable user config files
  -A host,..., --allowed-ips=..,..   Limit ip addresses which can connect
  -D, --debug                        Print debugging messages
- -F 0|1, --add-from, --noadd-from   Remove/add 'From ' line (default: add)
  -L, --local                        Use local tests only (no DNS)
  -P, --paranoid                     Die upon user errors
  -S, --stop-at-threshold            Stop tests after the threshold is reached
@@ -916,12 +916,6 @@ performance. This option also turns off Razor reporting.
 
 Die on user errors (for the user passed from spamc) instead of falling back to
 user I<nobody> and using the default configuration.
-
-=item B<-F> I<0 | 1>, B<--add-from>, B<--noadd-from>
-
-Ensure that the output email message either always starts with a 'From ' line
-(I<1>) for UNIX mbox format, or ensure that this line is stripped from the
-output (I<0>).  (default: 1)
 
 =item B<-m> I<number>, B<--max-children>=I<number>
 
