@@ -881,12 +881,12 @@ sub handle_user
 	    create_default_cf_if_needed ($cf_file, $username, $dir);
 	    $spamtest->read_scoreonly_config ($cf_file);
 	    $spamtest->signal_user_changed ({ username => $username,
-					    user_dir => "$dir/.spamassassin" });
+					    user_dir => "$dir" });
 	} else {
 	    my $sysnam = get_user_from_address ($username);
 	    $spamtest->read_scoreonly_config ($cf_file);
 	    $spamtest->signal_user_changed ({ username => $sysnam,
-					    user_dir => "$dir/.spamassassin" })
+					    user_dir => "$dir" })
 	}
 
     } else {
