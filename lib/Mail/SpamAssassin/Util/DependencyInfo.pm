@@ -43,13 +43,15 @@ my @MODULES = (
 },
 {
   'module' => 'Storable',
-  'version' => '0.00',
+  'version' => '2.13',
   'desc' => 'This is a required module if you use spamd and allow user
   configurations to be used (ie: you don\'t use -x, -u, -q/--sql-config,
   -Q/--setuid-with-sql, --ldap-config, or --setuid-with-ldap).  Third
   party utilities may also require this module for the same
   functionality.  Storable is used to shift configuration when a spamd
-  process switches between users.',
+  process switches between users.  Version 2.13 is required, since it
+  fixes a bug that causes hangs under heavy load on multiprocessor
+  Linux machines.',
 },
 );
 
