@@ -115,7 +115,7 @@ package MY;
 sub MY::libscan {
   my($self,$path) = @_;
 
-  return '' if ($path !~ /\.pm$/ && $path !~ /spamc/);
+  return '' if ($path =~ /windows_install/ || $path =~ /\.(orig|diff|patch|bak|backup|my)$/i);
   return $path;
 }
 
