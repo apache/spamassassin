@@ -48,14 +48,16 @@ Options:
     -A host,...   Set list of authorized ip addresses which can connect to this server
                     (defaults to 127.0.0.1 only)
     -p port       Listen on the specific port (otherwise default is port 22874)
+    -x            Disable user config files
+    -s            Specify the syslog facility (default: mail)
 
 EOUSAGE
     exit $resphash{EX_USAGE};
 }
 
-use vars qw{ $opt_h $opt_L $opt_p $opt_A };
+use vars qw{ $opt_h $opt_L $opt_p $opt_A $opt_x $opt_s };
 
-getopts('hLp:A:') or usage();
+getopts('hLxp:A:s:') or usage();
 
 $opt_h and usage();
 
@@ -68,6 +70,17 @@ if($opt_A)
 else
 {
     @allowed_clients = qw (127.0.0.1);
+}
+
+# This can be changed on the command line with the -s flag
+my $log_facility;
+if($opt_s)
+{
+    $log_facility = $opt_s;
+}
+else
+{
+    $log_facility = 'mail';
 }
 
 my $spamtest = Mail::SpamAssassin->new({
@@ -84,7 +97,7 @@ setlogsock('unix');
 # jm: NOTE: this should probably just openlog() once, in parent pid, for
 # efficiency (TODO)
 sub logmsg {
-  openlog('spamd','cons,pid','mail'); syslog('info',"@_"); closelog();
+  openlog('spamd','cons,pid',$log_facility); syslog('info',"@_"); closelog();
 }
 
 my $port = $opt_p || 22874;
@@ -146,7 +159,7 @@ for ( $waitedpid = 0;
                         return 1;
                     }
                     if (/^\r\n/s) { last; }
-                    if(/^User: (.*)\r\n/)
+                    if((/^User: (.*)\r\n/) && (! $opt_x))
                     {
                         my $username = $1;
                         my @pw = getpwnam($username);

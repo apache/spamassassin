@@ -33,6 +33,23 @@ whitelist_from		monty@roscom.com
 # as being possibly spam in a foreign language.
 ok_locales		en
 
+# By default, the subject lines of suspected spam will be tagged.
+# This can be disabled here.
+#
+# rewrite_subject 0
+
+# By default, spamassassin will include its report in the body
+# of suspected spam. Enabling this causes the report to go in the
+# headers instead.
+#
+# report_header 1
+
+# By default, spamassassin will change the Content-type: header of
+# suspected spam to "text/plain". This is a safety feature. If you
+# prefer to leave the Content-type header alone, set this to 0.
+#
+# defang_mime 0
+
 ###########################################################################
 # Add your own customised scores for some tests below.  The default scores are
 # read from the installed "spamassassin.cf" file, but you can override them
