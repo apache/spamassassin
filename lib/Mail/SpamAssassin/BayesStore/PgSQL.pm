@@ -47,7 +47,8 @@ use vars qw( @ISA );
 @ISA = qw( Mail::SpamAssassin::BayesStore::SQL );
 
 # We need this so we can import the pg_types, since this is a DBD::Pg specific module it should be ok
-use DBD::Pg qw(:pg_types);
+# YUCK! This little require/import trick is required for the rpm stuff
+BEGIN { require DBD::Pg; import DBD::Pg qw(:pg_types); }
 
 =head1 METHODS
 
