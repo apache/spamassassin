@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.589 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.590 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -203,17 +203,8 @@ uri T_SUSPICIOUS_LINKS_10	m@(?:^https?://|^mailto:).{0,25}4you@i
 
 ######
 
-# bug 1876
-rawbody		T_PUSHHERELINK		/<a[^>]*>[^<]*((push|go)\s(here|this) |cease.{1,10}mail)[^<]*<\/a>/i
-describe	T_PUSHHERELINK		Link asks you to "push here" or "go here" or "cease mail" or the like
-# yuck... rawbody!  also "(foo|bar)" instead of "(?:foo|bar)"
-body T_HTML_PUSH_HERE	eval:html_eval('anchor_text', '=~ /(?:push|go)\s(?:here|this)|cease.{1,10}mail/i')
-
-# bug 1634:
-# needed to readd X_MAILING_LIST as dependency, modify T_MAC_EUDORA_MUA for new version
-header __T_MAC_EUDORA_MUA         X-Mailer =~ /Eudora for (?:Macintosh|Mac OS X)/
-header __PALM_EUDORA_MUA	X-Mailer =~ /^Eudora \d+.\d+ for PalmOS\b/
-meta T_FORGED_MUA_EUDORA          (__EUDORA_MUA && !__EUDORA_MSGID && !__UNUSABLE_MSGID && !__HAS_X_LOOP && !__HAS_X_MAILING_LIST && !__T_MAC_EUDORA_MUA && !__PALM_EUDORA_MUA && !__OLD_EUDORA1 && !(__OLD_EUDORA2 && !__QUALCOMM))
+body T_HTML_PUSH_HERE		eval:html_eval('anchor_text', '=~ /(?:push|go)\s(?:here|this)|cease.{1,10}mail/i')
+describe T_HTML_PUSH_HERE	Link asks you to "push here" or the like
 
 ######################################################################
 
