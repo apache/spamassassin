@@ -39,8 +39,7 @@ foreach my $folder (@ARGV) {
 
 sub mass_check_mh_folder {
   my $folder = shift;
-  my @files = <$folder/[0-9]*>;
-
+  my @files = <"$folder/[0-9]*">;
   foreach my $mail (sort sortbynum @files) {
     if ($mail =~ /\.gz$/) {
       open (STDIN, "gunzip -cd $mail |") or warn "gunzip $mail failed: $@";
