@@ -452,7 +452,7 @@ meta     MISSING_MIMEOLE	(__HAS_MSMAIL_PRI && !__HAS_MIMEOLE && !__HAS_SQUIRRELM
 describe MISSING_MIMEOLE	Message has X-MSMail-Priority, but no X-MimeOLE
 
 header __HAS_X_MAILER		exists:X-Mailer
-header __HAS_OUTLOOK_IN_MAILER	X-Mailer =~ /Microsoft (CDO|Outlook)\b/
+header __HAS_OUTLOOK_IN_MAILER	X-Mailer =~ /Microsoft (CDO|Outlook|Office Outlook)\b/
 meta MISSING_OUTLOOK_NAME	((__HAS_MIMEOLE || __HAS_MSMAIL_PRI) && __HAS_X_MAILER && !__HAS_OUTLOOK_IN_MAILER && !__HAS_SQUIRRELMAIL_IN_MAILER)
 describe MISSING_OUTLOOK_NAME	Message looks like Outlook, but isn't
 
