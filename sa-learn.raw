@@ -102,7 +102,7 @@ http:///www.paulgraham.com and see "A Plan for Spam". It's reasonably
 readable, even if statistics make me break out in hives.
 
 The short semi-inaccurate version: Given training, a spam heuristics engine
-can take the most "spammy" and "nonspammy" words and apply probablistic
+can take the most "spammy" and "hammy" words and apply probablistic
 analysis. Furthermore, once given a basis for the analysis, the engine can
 continue to learn iteratively by applying both it's non-Bayesian and Bayesian
 ruleset together to create evolving "intelligence".
@@ -159,9 +159,9 @@ First a high-level overview:
 
 =item Build a significant sample of both spam and non-spam.
 
-I suggest several thousand of each, placed in SPAM and NONSPAM directories or
+I suggest several thousand of each, placed in SPAM and HAM directories or
 mailboxes.  Yes, you MUST hand-sort this - otherwise the results won't be much
-better than SpamAssassin on its own. Verify the spamminess/nonspammiess of
+better than SpamAssassin on its own. Verify the spamminess/haminess of
 EVERY message.  You're urged to avoid using a publicly available corpus (sample) -
 this must be taken from YOUR mail server, if it's to be statistically useful.
 Otherwise, the results may be pretty skewed.
@@ -169,7 +169,7 @@ Otherwise, the results may be pretty skewed.
 =item Use this tool to teach SpamAssassin about these samples, like so:
 
 	sa-learn --no-rebuild --spam /path/to/spam/folder
-	sa-learn --no-rebuild --nonspam /path/to/nonspam/folder
+	sa-learn --no-rebuild --ham /path/to/ham/folder
 	...
 
 Let SpamAssassin proceed, learning stuff. When it finds spam and non-spam
@@ -192,7 +192,7 @@ been processed before).
 
 =item Learning from single messages uses a command like this:
 
-	cat mailmessage | sa-learn --nonspam --single
+	cat mailmessage | sa-learn --ham --no-rebuild --single
 
 This is handy for binding to a key in your mail user agent.  It's very fast, as
 all the time-consuming stuff is deferred until you run with the C<--rebuild>
@@ -244,7 +244,7 @@ this:
 =item 1. Supervised learning
 
 This means keeping a copy of all or most of your mail, separated into spam
-and nonspam piles, and periodically re-training using those.  It produces
+and ham piles, and periodically re-training using those.  It produces
 the best results, but requires more work from you, the user.
 
 (An easy way to do this, by the way, is to create a new folder for
@@ -351,8 +351,8 @@ not perform network access while learning; but future versions may.
 
 =head1 INSTALLATION
 
-The B<sa-learn-nonspam> command is part of the B<Mail::SpamAssassin> Perl
-module.  Install this as a normal Perl module, using C<perl -MCPAN -e shell>,
+The B<sa-learn> command is part of the B<Mail::SpamAssassin> Perl module.
+Install this as a normal Perl module, using C<perl -MCPAN -e shell>,
 or by hand.
 
 =head1 ENVIRONMENT
