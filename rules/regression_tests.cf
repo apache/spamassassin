@@ -8,6 +8,14 @@ test BIG_FONT      ok      <font size="3">
 test BIG_FONT      ok      <font size="+3">
 test BIG_FONT      fail    <font size="small">
 test BIG_FONT      fail    <font face="serif">
+test BIG_FONT ok                <font size="5"> foo </font>
+test BIG_FONT ok                <font size="+2"> foo </font>
+test BIG_FONT ok                <font size="3"> foo </font>
+test BIG_FONT fail              <font size="2"> foo </font>
+test BIG_FONT fail              <font size="+1"> foo </font>
+test BIG_FONT fail              <font size="-1"> foo </font>
+test BIG_FONT fail              <font size="1"> foo </font>
+
 test DEAR_EMAIL ok Dear duncf@rogers.com,
 test DEAR_EMAIL fail Dear Duncan!
 test DEAR_SOMETHING ok Dear IT professional,
@@ -200,4 +208,28 @@ test FWD_MSG fail Subject: Re: RE: FWD: search results        .       .       .
 test FWD_MSG_2 ok Subject: Thanks, Lucky, for helping to kill gnutella (fwd)
 test FWD_MSG_2 ok Subject: Version 1.1.8 of the DCC (fwd)
 test FWD_MSG_2 fail Subject: this is not (fwd) valid
+
+# note: have to use "." instead of "#", as it's the comment char
+test HTML_TEXT_FF0000 fail <body bgcolor=.ff0000>foo</body>
+test HTML_TEXT_FF0000 ok <font face="Verdana" color=.ff0000>foo</font>
+test HTML_TEXT_FF0000 ok <font face="Verdana" color='.ff0000'>foo</font>
+test HTML_TEXT_FF0000 ok <font face="Verdana" color=".ff0000">foo</font>
+test HTML_TEXT_FF0000 ok <font color=".ff0000" size="+4">foo</font>
+
+test SAVE_ON_INSURANCE      ok Compare and Save Instantly On Your Auto Insurance
+
+test TRACKER_ID     ok          2174Hzdm0-105YUqT8863DiDg0-616mqbE4931HEBc0-732qBHd6314l52
+test TRACKER_ID     ok          ofsknxxdqgtgqvsoiytkivajvtj
+test TRACKER_ID     fail        <!-- ADMINISTRIVIA -->
+test TRACKER_ID     fail        Donau-Dampfschifffahrts-Kapitaen
+
+test OBFUSCATING_COMMENT ok     This is a te<!--foo-->st
+test OBFUSCATING_COMMENT fail   Not a <!-- problem --> here
+test OBFUSCATING_COMMENT fail   This <tag><!-- neither --></tag> I hope
+
+test NUMERIC_COMMENT     ok     Some text <!--34555--> followed by more
+test NUMERIC_COMMENT     fail   Something <!-- A comment --> and more
+
+test FROM_EGROUPS  ok           sentto-2537484-52529-1020428367-Sxm=olswang.com@returns.groups.yahoo.com
+test FROM_EGROUPS  fail         spammer@returns.groups.yahoo.com
 
