@@ -666,24 +666,45 @@ sub token_expiration {
   $new_toks{$OLDEST_TOKEN_AGE_MAGIC_TOKEN} = $oldest;
   $new_toks{$LAST_EXPIRE_REDUCE_MAGIC_TOKEN} = $deleted;
 
-  # now untie so we can do renames
-  untie %{$self->{db_toks}};
-  untie %new_toks;
+  # Sanity check: if we expired too many tokens, abort!
+  if ($kept < 100000) {
+    dbg("bayes: Token Expiration would expire too many tokens, aborting.");
+    # set the magic tokens appropriately
+    # make sure the next expire run does a first pass
+    $self->{db_toks}->{$LAST_EXPIRE_MAGIC_TOKEN} = time();
+    $self->{db_toks}->{$LAST_EXPIRE_REDUCE_MAGIC_TOKEN} = 0;
+    $self->{db_toks}->{$LAST_ATIME_DELTA_MAGIC_TOKEN} = 0;
 
-  # This is the critical phase (moving files around), so don't allow
-  # it to be interrupted.  Scope the signal changes.
-  {
-    local $SIG{'INT'} = 'IGNORE';
-    local $SIG{'TERM'} = 'IGNORE';
-    local $SIG{'HUP'} = 'IGNORE' if (!Mail::SpamAssassin::Util::am_running_on_windows());
+    # remove the new DB
+    untie %new_toks;
+    for my $ext (@DB_EXTENSIONS) { unlink ($tmpdbname.$ext); }
 
-    # now rename in the new one.  Try several extensions
-    for my $ext (@DB_EXTENSIONS) {
-      my $newf = $tmpdbname.$ext;
-      my $oldf = $path.'_toks'.$ext;
-      next unless (-f $newf);
-      if (!rename ($newf, $oldf)) {
-	warn "rename $newf to $oldf failed: $!\n";
+    # reset the results for the return
+    $kept = $vars[3];
+    $deleted = 0;
+    $num_hapaxes = 0;
+    $num_lowfreq = 0;
+  }
+  else {
+    # now untie so we can do renames
+    untie %{$self->{db_toks}};
+    untie %new_toks;
+
+    # This is the critical phase (moving files around), so don't allow
+    # it to be interrupted.  Scope the signal changes.
+    {
+      local $SIG{'INT'} = 'IGNORE';
+      local $SIG{'TERM'} = 'IGNORE';
+      local $SIG{'HUP'} = 'IGNORE' if (!Mail::SpamAssassin::Util::am_running_on_windows());
+
+      # now rename in the new one.  Try several extensions
+      for my $ext (@DB_EXTENSIONS) {
+        my $newf = $tmpdbname.$ext;
+        my $oldf = $path.'_toks'.$ext;
+        next unless (-f $newf);
+        if (!rename ($newf, $oldf)) {
+	  warn "rename $newf to $oldf failed: $!\n";
+        }
       }
     }
   }

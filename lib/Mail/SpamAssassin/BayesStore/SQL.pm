@@ -251,6 +251,7 @@ sub token_expiration {
 
   my $num_hapaxes;
   my $num_lowfreq;
+  my $deleted;
 
   # Figure out how old is too old...
   my $too_old = $vars[10] - $newdelta; # tooold = newest - delta
@@ -264,52 +265,97 @@ sub token_expiration {
 
   unless (defined($rows)) {
     dbg("bayes: token_expiration: SQL Error: ".$self->{_dbh}->errstr());
-    return 0;
+    $deleted = 0;
+    goto token_expiration_final;
   }
 
-  $sql = "DELETE from bayes_token
+  # Check to make sure the expire won't remove too many tokens
+  $sql = "SELECT count(token) FROM bayes_token
            WHERE id = ?
              AND atime < ?";
 
-  # Do the expire
-  $sql = "DELETE from bayes_token WHERE id = ? and atime < ?";
+  my $sth = $self->{_dbh}->prepare_cached($sql);
 
-  $rows = $self->{_dbh}->do($sql, undef, $self->{_userid}, $too_old);
-
-  unless (defined($rows)) {
+  unless (defined($sth)) {
     dbg("bayes: token_expiration: SQL Error: ".$self->{_dbh}->errstr());
-    return 0;
+    $deleted = 0;
+    goto token_expiration_final;
   }
 
-  my $deleted = $rows;
+  my $rc = $sth->execute($self->{_userid}, $too_old);
+  
+  unless ($rc) {
+    dbg("bayes: token_expiration: SQL Error: ".$self->{_dbh}->errstr());
+    $deleted = 0;
+    goto token_expiration_final;
+  }
 
+  my ($count) = $sth->fetchrow_array();
+
+  $sth->finish();
+
+  # Sanity check: if we expired too many tokens, abort!
+  if ($vars[3] - $count < 100000) {
+    dbg("bayes: Token Expiration would expire too many tokens, aborting.");
+    # set these appropriately so the next expire pass does the first pass
+    $deleted = 0;
+    $newdelta = 0;
+  }
+  else {
+    # Do the expire
+    $sql = "DELETE from bayes_token
+             WHERE id = ?
+               AND atime < ?";
+
+    $rows = $self->{_dbh}->do($sql, undef, $self->{_userid}, $too_old);
+
+    unless (defined($rows)) {
+      dbg("bayes: token_expiration: SQL Error: ".$self->{_dbh}->errstr());
+      $deleted = 0;
+      goto token_expiration_final;
+    }
+
+    $deleted = $rows;
+  }
+
+  # Update the magic tokens as appropriate
   $sql = "UPDATE bayes_vars SET token_count = token_count - ?,
                                 last_expire = ?,
                                 last_atime_delta = ?,
                                 last_expire_reduce = ?
-           WHERE id = ?";
+				WHERE id = ?";
 
   $rows = $self->{_dbh}->do($sql, undef, $deleted, time(), $newdelta, $deleted, $self->{_userid});
 
   unless (defined($rows)) {
+    # Very bad, we actually deleted the tokens, but were unable to update
+    # bayes_vars with the new data.
     dbg("bayes: token_expiration: SQL Error: ".$self->{_dbh}->errstr());
-    return 0;
+    dbg("bayes: Bayes database now in inconsistent state, suggest a backup/restore.");
+    goto token_expiration_final;
   }
 
-  # Now lets update the oldest_token_age value, shouldn't need to worry about newest_token_age
-  # slight race condition here, but the chance is small that we'll insert a new token with
-  # such an old atime
-  my $oldest_token_age = $self->_get_oldest_token_age();
+  # If we didn't remove any tokens, the oldest token age wouldn't have changed
+  if ($deleted) {
+    # Now lets update the oldest_token_age value, shouldn't need to worry about
+    # newest_token_age. There is a slight race condition here, but the chance is
+    # small that we'll insert a new token with such an old atime
+    my $oldest_token_age = $self->_get_oldest_token_age();
 
-  $sql = "UPDATE bayes_vars SET oldest_token_age = ? WHERE id = ?";
+    $sql = "UPDATE bayes_vars SET oldest_token_age = ? WHERE id = ?";
 
-  $rows = $self->{_dbh}->do($sql, undef, $oldest_token_age, $self->{_userid});
+    $rows = $self->{_dbh}->do($sql, undef, $oldest_token_age, $self->{_userid});
 
-  unless (defined($rows)) {
-    dbg("bayes: token_expiration: SQL Error: ".$self->{_dbh}->errstr());
-    return 0;
+    unless (defined($rows)) {
+      # not much more we can do here, so just warn the user and bail out
+      dbg("bayes: token_expiration: SQL Error: ".$self->{_dbh}->errstr());
+      # yeah I know it's the next thing anyway, but here in case someone adds
+      # additional code below this block
+      goto token_expiration_final; 
+    }
   }
 
+token_expiration_final:
   my $kept = $vars[3] - $deleted;
 
   $num_hapaxes = $self->_get_num_hapaxes() if ($opts->{verbose});
