@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.529 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.530 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -309,10 +309,6 @@ header __X_MSPRI_LO		X-Msmail-Priority =~ /^Low/
 meta T_X_PRI_MISMATCH_HI	(__X_PRI_HI && __HAS_MSMAIL_PRI && !__X_MSPRI_HI)
 meta T_X_PRI_MISMATCH_MD	(__X_PRI_MD && __HAS_MSMAIL_PRI && !__X_MSPRI_MD)
 meta T_X_PRI_MISMATCH_LO	(__X_PRI_LO && __HAS_MSMAIL_PRI && !__X_MSPRI_LO)
-
-# bug 1801
-uri T_IP_LINK_PLUS	/^https?\:\/\/(?:\S*\@)?\d+\.\d+\.\d+\.\d+.{0,20}(?:cgi|click|ads|id\=)/i
-describe T_IP_LINK_PLUS		Dotted-decimal IP address followed by GCI, clickthru, etc.
 
 # Justin says Yahoo stopped using this hostname entirely (which makes me
 # wonder if spammers will still use it and whether it will work on our
