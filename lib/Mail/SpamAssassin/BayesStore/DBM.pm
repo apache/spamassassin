@@ -774,8 +774,12 @@ sub seen_put {
     $self->defer_update ("m $seen $msgid");
   }
   else {
-    $self->{db_seen}->{$msgid} = $seen;
+    $self->_seen_put_direct($msgid, $seen);
   }
+}
+sub _seen_put_direct {
+  my ($self, $msgid, $seen) = @_;
+  $self->{db_seen}->{$msgid} = $seen;
 }
 
 sub seen_delete {
@@ -785,8 +789,12 @@ sub seen_delete {
     $self->defer_update ("m f $msgid");
   }
   else {
-    delete $self->{db_seen}->{$msgid};
+    $self->_seen_delete_direct($msgid);
   }
+}
+sub _seen_delete_direct {
+  my ($self, $msgid) = @_;
+  delete $self->{db_seen}->{$msgid};
 }
 
 ###########################################################################
@@ -1191,10 +1199,10 @@ sub _sync_journal_trapped {
 	$count++;
       } elsif (/^m ([hsf]) (.+)$/) { # update msgid seen database
 	if ( $1 eq "f" ) {
-	  $self->seen_delete($2);
+	  $self->_seen_delete_direct($2);
 	}
 	else {
-	  $self->seen_put($2,$1);
+	  $self->_seen_put_direct($2,$1);
 	}
 	$count++;
       } else {
