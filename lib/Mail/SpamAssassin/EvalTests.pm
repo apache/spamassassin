@@ -113,17 +113,6 @@ sub check_for_bad_dialup_ips {
 
 ###########################################################################
 
-sub check_for_from_to_equivalence {
-  my ($self) = @_;
-  my $from = $self->get ('From:addr');
-  my $to = $self->get ('To:addr');
-
-  if ($from eq '' && $to eq '') { return 0; }
-  return lc($from) eq lc($to);
-}
-
-###########################################################################
-
 # The MTA probably added the Message-ID if either of the following is true:
 #
 # (1) The Message-ID: comes before a Received: header.
