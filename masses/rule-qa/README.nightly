@@ -15,44 +15,27 @@ Recommended stuff:
    $HOME/cvs/spamassassin        - the tree (checked out with the correct tag)
    $HOME/cvs/spamassassin/corpus - the corpus description (for "mass-check -f")
 
- - $HOME/.corpus contains various settings:
+ - $HOME/.corpus contains various settings, see corpus.example in this
+   directory.
 
-   # location of corpus file (mass-check -f $corpus)
-   corpus=/home/corpus/corpus
+ - A cron job (hours for tagtime and corpus-nightly for your
+   local time, this is US/Pacific, adjust appropriately for your
+   timezone)
 
-   # location for summary results
-   html=/home/html/root/users/corpus
+   The "tagtime" and "corpus-nightly" cron jobs should be run twice a
+   day to handle daylight savings since cron does not.  They exit if
+   it's 0800-0859 or 1000-1059 UTC (which means you can "corpus-nightly"
+   any other time of day if you want).
 
-   # location of tagtime file
-   tagtime=/home/corpus/log/tagtime
+   The "corpus-hourly" script only needs to be run if you are producing
+   optional mass-check summary reports.
 
-   # temporary working directory for summary results
-   tmp=/home/corpus/tmp
-
-   # subversion directory location
-   tree=/home/corpus/svn/spamassassin
-
-   # rsync username and password
-   username=joe
-   password=xyzzy
-
-   # weekly and nightly mass-check options
-   opts_weekly="--restart=500 --tail=15000 --net -j 8 -f /home/corpus/mail/corpus"
-   opts_nightly="--restart=500 --tail=15000 -f /home/corpus/mail/corpus"
-
-   # weekly and nightly mass-check user_prefs files
-   prefs_weekly=/home/corpus/mail/user_prefs.weekly
-   prefs_nightly=/home/corpus/mail/user_prefs.nightly
-
- - the following cron job (hours for tagtime and corpus-nightly for your
-   local time, this is US/Pacific)
-
-The "tagtime" and "corpus-nightly" cron jobs run twice a day due to
-daylight savings, but exit if it's 0800-0859 or 1000-1059 UTC (which
-means you can "corpus-nightly" any other time of day if you want).
+   "pyzor discover" only needs to be run if you are running Pyzor.
 
 ------- start of cut text --------------
-0 1,2 * * * /home/corpus/scripts/corpus-tagtime
-10 1,2 * * * /home/corpus/scripts/corpus-nightly >/home/corpus/log/nightly 2>&1
-30 * * * * /home/corpus/scripts/corpus-hourly >/home/corpus/log/hourly 2>&1
+PATH=/home/corpus/scripts:/usr/local/bin:/usr/local/sbin:/bin:/sbin:/usr/bin:/usr/sbin
+0 1,2 * * * corpus-tagtime
+10 1,2 * * * corpus-nightly >/home/corpus/log/nightly 2>&1
+30 * * * * corpus-hourly >/home/corpus/log/hourly 2>&1
+5 1 * * * pyzor discover >/dev/null 2>/dev/null
 ------- end ----------------------------

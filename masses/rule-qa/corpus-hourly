@@ -73,7 +73,12 @@ sub update {
 	close(FIND);
 	if (! $files) {
 	    print STDERR "no new corpus files\n";
-	    exit 0;
+	    if (rand(24) > 1) {
+		exit 0;
+	    }
+	    else {
+		print STDERR "updating anyway\n";
+	    }
 	}
     }
     open(RSYNC, "> rsync.last");
@@ -147,18 +152,26 @@ sub time_filter {
 
 sub current {
     for my $class ("DETAILS", "HTML", "NET") {
-	for my $age ("new", "all", "age", "1day", "2day", "7day") {
+#	for my $age ("new", "all", "age", "1day", "2day", "7day") {
+	for my $age ("new", "all", "age") {
+	    print STDERR "generating $class.$age\n";
+
+	    next if ($class eq "NET" && $age !~ /^(?:new|all|age|7day)$/);
+
 	    my @ham = grep { /^ham/ } @files;
 	    my @spam = grep { /^spam/ } @files;
 
-	    chdir $opt{corpus};
+	    print STDERR "ham: " . join(' ', @ham) . "\n";
+	    print STDERR "spam: " . join(' ', @spam) . "\n";
 
-	    next if ($class eq "NET" && $age !~ /^(?:new|all|age|7day)$/);
+	    chdir $opt{corpus};
 
 	    # net vs. local
 	    if ($class eq "NET") {
 		@ham = grep { /-net-/ } @ham;
 		@spam = grep { /-net-/ } @spam;
+		print STDERR "ham: " . join(' ', @ham) . "\n";
+		print STDERR "spam: " . join(' ', @spam) . "\n";
 	    }
 	    else {
 		# if both net and local exist, use newer
@@ -173,30 +186,30 @@ sub current {
 		}
 		while (my ($user, $count) = each %ham) {
 		    if ($count > 1) {
-			my @matches = grep { m/-$user\.log$/ } @ham;
-			my $new;
-			for (@matches) {
-			    if (!defined $new || -M $_ < -M $new) {
-				$new = $_;
-			    }
+			my $nightly = "ham-$user.log";
+			my $weekly = "ham-net-$user.log";
+			if ($revision{$nightly} >= $revision{$weekly}) {
+			    @ham = grep { $_ ne $weekly } @ham;
 			}
-			next unless $new;
-			@ham = grep { !/-$user\.log$/ || $_ eq $new } @ham;
+			else {
+			    @ham = grep { $_ ne $nightly } @ham;
+			}
 		    }
 		}
 		while (my ($user, $count) = each %spam) {
 		    if ($count > 1) {
-			my @matches = grep { m/-$user\.log$/ } @spam;
-			my $new;
-			for (@matches) {
-			    if (!defined $new || -M $_ < -M $new) {
-				$new = $_;
-			    }
+			my $nightly = "spam-$user.log";
+			my $weekly = "spam-net-$user.log";
+			if ($revision{$nightly} >= $revision{$weekly}) {
+			    @spam = grep { $_ ne $weekly } @spam;
 			}
-			next unless $new;
-			@spam = grep { !/-$user\.log$/ || $_ eq $new } @spam;
+			else {
+			    @spam = grep { $_ ne $nightly } @spam;
+			}
 		    }
 		}
+		print STDERR "ham: " . join(' ', @ham) . "\n";
+		print STDERR "spam: " . join(' ', @spam) . "\n";
 	    }
 	    
 	    # age
@@ -210,17 +223,23 @@ sub current {
 		}
 		@spam = grep { $revision{$_} eq $wanted } @spam;
 		@ham = grep { $revision{$_} eq $wanted } @ham;
+		print STDERR "ham: " . join(' ', @ham) . "\n";
+		print STDERR "spam: " . join(' ', @spam) . "\n";
 	    }
 	    elsif ($age =~ /^(?:new|all|age)$/) {
 		@ham = grep { -M "$_" < -M $opt{tagtime} } @ham;
 		@spam = grep { -M "$_" < -M $opt{tagtime} } @spam;
 		@ham = grep { $revision{$_} eq $revision } @ham;
 		@spam = grep { $revision{$_} eq $revision } @spam;
+		print STDERR "ham: " . join(' ', @ham) . "\n";
+		print STDERR "spam: " . join(' ', @spam) . "\n";
 	    }
 	    elsif ($age =~ /(\d+)day/) {
 		my $mtime = $1;
 		@ham = grep { -M "$_" < $mtime } @ham;
 		@spam = grep { -M "$_" < $mtime } @spam;
+		print STDERR "ham: " . join(' ', @ham) . "\n";
+		print STDERR "spam: " . join(' ', @spam) . "\n";
 	    }
 	    
 	    open(OUT, "> $opt{html}/$class.$age");

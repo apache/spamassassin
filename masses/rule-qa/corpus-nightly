@@ -28,10 +28,11 @@ fi
 cd $tree
 
 # find current revision
-rm -f weekly-versions.txt
-rm -f nightly-versions.txt
-wget http://rsync.spamassassin.org/weekly-versions.txt
-wget http://rsync.spamassassin.org/nightly-versions.txt
+rm -f weekly-versions.txt nightly-versions.txt
+if ! wget --tries=120 --wait=30 http://rsync.spamassassin.org/weekly-versions.txt http://rsync.spamassassin.org/nightly-versions.txt; then
+	echo "wget failed" 1>&2
+	exit 0
+fi
 if [ -n "$net" ]; then
 	revision=$(tail -1 weekly-versions.txt|awk '{print $2}')
 else
@@ -42,14 +43,18 @@ fi
 set +e
 retry=0
 while true; do
+	killall -TERM svn
+	sleep 10
+	killall -KILL svn
 	if svn update -r $revision; then
 		break;
 	fi
 	if [ $retry -eq 120 ]; then
+		echo "svn update failed" 1>&2
 		exit 1
 	fi
 	retry=$(( $retry + 1 ))
-	sleep 30
+	sleep 20
 done
 set -e
 
@@ -75,6 +80,22 @@ fi
 uptime
 date > test.end
 
-# submit results
-rsync -CPcvuzb --timeout=120 ham.log $username@rsync.spamassassin.org::corpus/ham-$net$username.log
-rsync -CPcvuzb --timeout=120 spam.log $username@rsync.spamassassin.org::corpus/spam-$net$username.log
+# results name
+mv spam.log spam-$net$username.log
+mv ham.log ham-$net$username.log
+
+# rsync
+set +e
+retry=0
+while true; do
+	if rsync -CPcvuzb --timeout=120 spam-$net$username.log ham-$net$username.log $username@rsync.spamassassin.org::corpus/; then
+		break;
+	fi
+	if [ $retry -eq 120 ]; then
+		echo "rsync failed" 1>&2
+		exit 1
+	fi
+	retry=$(( $retry + 1 ))
+	sleep 30
+done
+set -e

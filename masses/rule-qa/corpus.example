@@ -1,0 +1,26 @@
+# location of corpus file (mass-check -f $corpus)
+corpus=/home/corpus/corpus
+
+# location for summary results
+html=/home/html/root/users/corpus
+
+# location of tagtime file
+tagtime=/home/corpus/log/tagtime
+
+# temporary working directory for summary results
+tmp=/home/corpus/tmp
+
+# subversion directory location
+tree=/home/corpus/svn/spamassassin
+
+# rsync username and password
+username=joe
+password=xyzzy
+
+# weekly and nightly mass-check options
+opts_weekly="--restart=500 --tail=15000 --net -j 8 -f /home/corpus/mail/corpus"
+opts_nightly="--restart=500 --tail=15000 -f /home/corpus/mail/corpus"
+
+# weekly and nightly mass-check user_prefs files
+prefs_weekly=/home/corpus/mail/user_prefs.weekly
+prefs_nightly=/home/corpus/mail/user_prefs.nightly
