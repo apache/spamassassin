@@ -43,9 +43,18 @@ http://spamassassin.taint.org/ and install that like so:
 	make
 	make install		[as root]
 
-You will require the Mail::Audit and Net::DNS Perl modules (although if
-Net::DNS is not supplied, SpamAssassin will still work, just not as
-effectively).
+You will require the Mail::Audit module, and any modules it requires.   In
+addition, these modules will be used for some checks, if available.  If they
+are not available, SpamAssassin will still work, just not as effectively.
+
+  - Net::DNS	(from CPAN)
+
+    Used to check the RBL, RSS, DUL etc. and perform MX checks.
+
+  - Razor	http://razor.sourceforge.net/
+
+    Used to check message signatures against Vipul's Razor collaborative
+    filtering network.
 
 
 
