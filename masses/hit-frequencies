@@ -2,11 +2,11 @@
 
 use FindBin;
 use Getopt::Std;
-getopts("fm:M:X:l:L:pxhc:a");
+getopts("fm:M:X:l:L:pxhc:at:");
 
 use vars qw {
   $opt_f $opt_m $opt_M $opt_X $opt_p $opt_x $opt_h $opt_l $opt_L $opt_c
-  $opt_a
+  $opt_a $opt_t
 };
 
 sub usage {
@@ -16,6 +16,7 @@ sub usage {
     -c p   use p as the rules directory
     -f     falses. count only false-negative or false-positive matches
     -m RE  print rules matching regular expression
+    -t RE  print rules with tflags matching regular expression
     -M RE  only consider log entries matching regular expression
     -X RE  don't consider log entries matching regular expression
     -l LC  also print language specific rules for lang code LC (or 'all')
@@ -162,8 +163,9 @@ foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
   my $fa = $fs+$fn;
 
   next if ($opt_m && $test !~ m/$opt_m/);	# match certain tests
+  next if ($opt_t && $rules{$test}->{tflags} !~ /$opt_t/); # match tflags
 
-  if (!$opt_a) {
+  if (!$opt_a && !$opt_t) {
     next if ($rules{$test}->{tflags} =~ /net/);   # not net tests
     next if ($rules{$test}->{tflags} =~ /userconf/); # or userconf
   }
