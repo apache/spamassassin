@@ -1,0 +1,57 @@
+#!/usr/bin/perl -w
+
+my %freq_spam = ();
+my %freq_nonspam = ();
+
+readlogs();
+readscores();
+
+  printf "%10s  %10s  %10s  %s\n",
+  	"OVERALL", "NONSPAM", "SPAM", "NAME";
+
+foreach my $test (sort { $freq{$b} <=> $freq{$a} } keys %freq) {
+  printf "%10d  %10d  %10d  %s\n",
+  	$freq{$test}, $freq_spam{$test}, $freq_nonspam{$test}, $test;
+}
+exit;
+
+sub readlogs {
+  foreach my $file ("spam.log", "nonspam.log") {
+    open (IN, "<$file");
+
+    while (<IN>) {
+      /^.\s+(\d+)\s+(\S+)\s*(\S*)/ or next;
+      my $hits = $1;
+      my @tests = split (/,/, $3);
+      foreach my $t (@tests) {
+	$freq{$t}++;
+	if ($file eq "spam.log") {
+	  $freq_spam{$t}++;
+	} else {
+	  $freq_nonspam{$t}++;
+	}
+      }
+    } 
+    close IN;
+  }
+}
+
+
+sub readscores {
+  open (IN, "<../spamassassin.cf");
+  while (<IN>) {
+    s/#.*$//g; s/^\s+//; s/\s+$//;
+
+    if (/^(header|body|full)\s+(\S+)\s+/) {
+      $freq{$2} ||= 0;
+      $freq_spam{$2} ||= 0;
+      $freq_nonspam{$2} ||= 0;
+    } elsif (/^score\s+(\S+)\s+(.+)$/) {
+      $freq{$1} ||= 0;
+      $freq_spam{$1} ||= 0;
+      $freq_nonspam{$1} ||= 0;
+    }
+  }
+  close IN;
+}
+
