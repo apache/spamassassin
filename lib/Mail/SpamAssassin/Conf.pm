@@ -433,6 +433,10 @@ SpamAssassin as a handle for that test; for example, 'FROM_ENDS_IN_NUMS'.
 Note that test names which begin with '__' are reserved for meta-match
 sub-rules, and are not scored or listed in the 'tests hit' reports.
 
+Test names should not start with a number, and must contain only alphanumerics
+and underscores.  It is suggested that lower-case characters not be used, as an
+informal convention.
+
 =cut
 
     if (/^score\s+(\S+)\s+(\-*[\d\.]+)$/) {
