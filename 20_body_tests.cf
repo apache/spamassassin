@@ -21,7 +21,6 @@ describe SPAM_PHRASES_040	spam-phrase score is over 40
 full SPAM_PHRASES_100		eval:check_for_spam_phrases_scoring("100")
 describe SPAM_PHRASES_100	spam-phrase score is over 100
 
-
 ###########################################################################
 
 body REMOVE_SUBJ		/remove.{1,15}subject/i
@@ -43,8 +42,18 @@ describe SLIGHTLY_UNSAFE_JAVASCRIPT	JavaScript code which can easily be executed
 rawbody HTML_WITH_BGCOLOR	/<body [^>]*bgcolor[=3d\"\'\#]+[0-9a-e][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]/is
 describe HTML_WITH_BGCOLOR	HTML mail with non-white background
 
-rawbody  BIG_FONT               /<\s*FONT\s[^>]*size\s*=(?:3D)?\s*['\"]?\s*(?:\+[23456789]|(?:[3456789]|\d{2,}))/is
+rawbody  BIG_FONT               /<\s*FONT\s[^>]*size\s*=(3D(\d{2,}|\+[23456789]|[3456789])|\s*["'](\d{2,}|\+[23456789]|[3456789]))/is
 describe BIG_FONT               FONT Size +2 and up or 3 and up
+test BIG_FONT      fail    <font size=3D2>
+test BIG_FONT      ok      <font size=3D+2>
+test BIG_FONT      ok      <font size=3D3>
+test BIG_FONT      ok      <font size=3D+3>
+test BIG_FONT      fail    <font size="2">
+test BIG_FONT      ok      <font size="+2">
+test BIG_FONT      ok      <font size="3">
+test BIG_FONT      ok      <font size="+3">
+test BIG_FONT      fail    <font size="small">
+test BIG_FONT      fail    <font face="serif">
 
 rawbody SPAM_FORM		/CHANGE EMAIL ADDRESS IN ACTION OF FORM/
 describe SPAM_FORM		Form for changing email address
@@ -63,8 +72,8 @@ body BUGGY_CGI_DE_3		/Diese Daten wurden Ihnen von Ihrem OnlineFormular/i
 describe BUGGY_CGI_DE_3		Broken German CGI script message (3)
 body BUGGY_CGI_ES		/Aqui esta el resultado de su formulario/i
 describe BUGGY_CGI_ES		Broken Spanish CGI script message
-body BUGGY_CGI_PT_2		/E-mail adicional do usuario. Enviado/i
-describe BUGGY_CGI_PT_2		Broken Portuguese CGI script message (2)
+body BUGGY_CGI_ES_2		/E-mail adicional do usuario. Enviado/i
+describe BUGGY_CGI_ES_2		Broken Spanish CGI script message (2)
 body BUGGY_CGI_PT		/Abaixo o resultado do preenchimento do Formulario/
 describe BUGGY_CGI_PT		Broken Portuguese CGI script message
 
@@ -148,7 +157,7 @@ body INCREASE_TRAFFIC		/increase.{1,15} traffic\b/i
 describe INCREASE_TRAFFIC	Instructions on how to boost traffic
 
 # contrib: Duncan
-body ONE_TIME_MAILING		/this\b.{0,20}\b(?:one|1).time\b.{0,20}\b(?:(?:e-?)?mail|offer)/i
+body ONE_TIME_MAILING		/this\b.{0,20}\b(?:one|1).time\b.{0,20}\b(?:mail|offer)/i
 describe ONE_TIME_MAILING	'one time mailing' doesn't mean it isn't spam
 
 # this one gets a few false positives
@@ -250,7 +259,8 @@ describe PORN_1			Uses words and phrases which indicate porn (1)
 body PORN_2			/\bwild\b.{0,15}\bhard[ -]?core\b/i
 describe PORN_2			Uses words and phrases which indicate porn (2)
 
-full PORN_3			eval:porn_word_test()
+# updated by: skod & Craig & jm
+body PORN_3			/(?:(?:\blolita|\bcum|\borg[iy]|\bwild|fuck|\bteen|\baction\b|spunk|\bpussy\b|\bpussies\b|suck\b|sucking\b|\bhot\b|\bhottest\b|\bvoyeur|\ble[sz]b(?:ian|o)|\banal\b|\binterracial|\basian\b|\bamateur|\bsex+\b|\bslut|explicit|(?:[^x]|\b)xxx(?:[^x]|\b)|\blive\b|celebrity|\blick|\bsuck|\bdorm\b|webcam|\bass\b|\bschoolgirl\b|\bstrip|\bhorny\b|\bhorniest\b|\berotic|\boral\b|\bpenis\b|\bhardcore\b|\bblow[ -]*job|\bnast(?:y|iest)\b|\bporn|\bwhore|\bsex[ -]?fest|\bnaked|\bnude|\bvirgin|\bnaughty\b|\bnaughtiest\b|\bgirls\b|\bcelebs?\b|\bbabes\b|\badult\b|\bskank|\btits\b|\btitties\b).{0,15}){3,}/i
 describe PORN_3			Uses words and phrases which indicate porn (3)
 
 test     PORN_3      ok         Wild Asian hot peppers
@@ -451,9 +461,6 @@ describe REMOVAL_INSTRUCTIONS	Gives instructions for removal from list
 body THIS_AINT_SPAM             /This.{0,30}is not (?:a )?spam/is
 describe THIS_AINT_SPAM         Claims "This is not spam"
 
-body THIS_AINT_JUNK             /This.{0,30}is not (?:a )?junk (?:email)?/is
-describe THIS_AINT_JUNK         Claims "This is not junk email"
-
 # (contrib: WW)
 body WE_HATE_SPAM               /We .{0,30}oppose the use of SPAM/is
 describe WE_HATE_SPAM           Says "We strongly oppose the use of SPAM email"
@@ -539,19 +546,22 @@ describe CHARSET_FARAWAY_BODY	Character set indicates foreign language body
 body NIGERIAN_SCAM		/BASED ON INFORMATION GATHERED ABOUT YOU, WE BELIEVE\s*YOU WOULD BE IN A POSITION TO HELP US IN TRANSFER/i
 describe NIGERIAN_SCAM		Nigerian scam, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
 
-body NIGERIAN_SCAM_2 /(?:(?:bank|government|republic).{1,10}(?:nigeria|sierra leone|zimbabwe|botswana)|(?:nigeria|sierra leone|zimbabwe|botswana).{1,10}(?:national|government|embassy|chamber|bank|petroleum))/i
+body NIGERIAN_SCAM_2 /\b(?:Government|Federal Republic)\b of Nigeria|Nigerian? \b(?:NATIONAL|Government|embassy|chamber of commerce)\b/i
 describe NIGERIAN_SCAM_2	Mutated Nigerian scams, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
 
-body NIGERIAN_SCAM_4 /\b(wife|widow|son|husband)\b.{0,60}\b(?:Abacha|Kabila|Sekou?|Stojiljkovic|Bangura)\b/i
+body NIGERIAN_SCAM_3            /(?:Bank of Nigeria|Nigerian? National Petroleum)/i
+describe NIGERIAN_SCAM_3        Nigerian Bank or Petroleum scam, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
+
+body NIGERIAN_SCAM_4 /\b(wife|widow|son|husband)\b.{0,60}\b(?:Abacha|Kabila|Sekou?|Stojiljkovic)\b/i
 describe NIGERIAN_SCAM_4        Nigerian widow needs your help, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
 
-body NIGERIAN_SCAM_5 /\b(?:Abacha|Kabila|Sekou?|Stojiljkovic|Bangura)\b.{0,60}\b(wife|widow|son|husband)\b/i
+body NIGERIAN_SCAM_5 /\b(?:Abacha|Kabila|Sekou?|Stojiljkovic)\b.{0,60}\b(wife|widow|son|husband)\b/i
 describe NIGERIAN_SCAM_5        Nigerian widow needs your help, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
 
-body NIGERIAN_SCAM_6 /\b(?:late|former|past|new|Nigerian|military)\b.{0,20}\bhead of state/i
+body NIGERIAN_SCAM_6 /\b(?:late|former|new|Nigerian|military)\b.{0,20}\bhead of state/i
 describe NIGERIAN_SCAM_6        Mutated Nigerian scams (6)
 
-body NIGERIAN_SCAM_7 /\b(?:late|former|past)\b.{0,40}\b(?:Abacha|Kabila|Sekou?|Stojiljkovic|Bangura)\b|\b(?:Abacha|Kabila|Sekou?|Stojiljkovic|Bangura)\b.{0,40}\b(?:late|former|past)\b/i
+body NIGERIAN_SCAM_7 /\b(?:late|former)\b.{0,40}\b(?:Abacha|Kabila|Sekou?|Stojiljkovic)\b|\b(?:Abacha|Kabila|Sekou?|Stojiljkovic)\b.{0,40}\b(?:late|former)\b/i
 describe NIGERIAN_SCAM_7        Mutated Nigerian scams (7)
 
 body NIGERIAN_SCAM_8 /\b(?:Tribunal|War Crimes|Hague)\b.{0,60}\b(?:Vlajko|Stojiljkovic)\b|\b(?:Vlajko|Stojiljkovic)\b.{0,60}\b(?:Tribunal|War Crimes|Hague)\b/i 
@@ -560,10 +570,10 @@ describe NIGERIAN_SCAM_8        Mutated Nigerian scams (8)
 body US_DOLLARS			/Million\b.{0,40}\b(?:United States? Dollars|USD|U\.? ?S\.? Dollar)/i
 describe US_DOLLARS		Nigerian scam key phrase
 
-body US_DOLLARS_2               /(?:\$|usd).?\d{1,3}(?:\.\d)?.?m\b/i
-describe US_DOLLARS_2           Nigerian scam key phrase ($NNN.N m/USDNNN.N m)
+body US_DOLLARS_2               /(?:\$|usd)\d{2,3}(?:\.\d)?m\b/i
+describe US_DOLLARS_2           Nigerian scam key phrase ($NN.Nm/USDNN.Nm)
 
-body US_DOLLARS_3               /(?:\$|usd).?\d{1,3}[,.]\d{3}[,.]\d{3}(?:[,.]\d\d)?/i
+body US_DOLLARS_3               /(?:\$|usd ?)\d{1,3},\d{3},\d{3}(?:\.\d\d)?/i
 describe US_DOLLARS_3           Nigerian scam key phrase ($NN,NNN,NNN.NN)
 
 rawbody UNNEEDED_HTML_ENCODING	/font=3E/i
