@@ -652,6 +652,8 @@ sub _parse_rfc822_date {
   # now match it in parts.  Date part first:
   if (s/ (\d+) ([A-Z][a-z][a-z]) (\d\d\d\d) / /) {
     $dd = $1; $mon = $2; $yyyy = $3;
+  } elsif (s/ ([A-Z][a-z][a-z]) +(\d+) \d+:\d+:\d+ (\d\d\d\d) / /) {
+    $dd = $2; $mon = $1; $yyyy = $3;
   } elsif (s/ (\d+) ([A-Z][a-z][a-z]) (\d\d) / /) {
     $dd = $1; $mon = $2; $yyyy = 2000 + $3;	# bizarre
   }
