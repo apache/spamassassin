@@ -69,7 +69,7 @@ sub safe_lock {
 
       if (!defined($lock_age) || $lock_age < $now - $max_lock_age) {
         #we got a stale lock, break it
-        dbg("lock: breaking stale lockfile: age=$lock_age now=$now");
+        dbg("lock: breaking stale lockfile: age=".(defined $lock_age?$lock_age:"undef")." now=$now");
         unlink $lock_file;
       }
 
