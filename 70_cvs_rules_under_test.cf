@@ -24,6 +24,10 @@ describe T_RCVD_6_CAPS_ESMTP_ID		Received header forged by spam tool (6-caps ESM
 header T_DATE_SPAMWARE_Y2K		Date =~ /^[A-Z][a-z]{2}, \d\d [A-Z][a-z]{2} [0-6]\d \d\d:\d\d:\d\d [A-Z]{3}$/
 describe T_DATE_SPAMWARE_Y2K		Date header uses unusual Y2K formatting
 
+# quinlan: I worked at a company that used CorporateTime which very annoyingly
+# always used an ISO-8859-1 encoded header even when the Subject: did not have
+# a non-ASCII character.  I think other false positives are likely due to
+# similarly broken software.
 header __SUBJ_BASE64			Subject:raw =~ /=\?[^\?]+\?B\?/
 header __SUBJ_QP			Subject:raw =~ /=\?[^\?]+\?Q\?/
 header __SUBJ_HAS_NON_ASCII		Subject =~ /[\x00-\x06\x0e-\x1f\x80-\xff]/
@@ -50,8 +54,11 @@ meta T_INVALID_DATE_2		(__INVALID_DATE && !__XM_FOXMAIL && !__XM_EARTHLINK)
 describe T_INVALID_DATE_2	Invalid Date: header (not RFC 2822)
 
 # Wierd.  Can only assume this is caused by PEBKAC on the sending side...
-meta T_SEZ_HTML_BUT_NOT	(MIME_HTML_ONLY && !HTML_MESSAGE)
-describe T_SEZ_HTML_BUT_NOT	Claims to be HTML, but is actually plain text
+meta T_HTML_WITHOUT_HTML_1	(MIME_HTML_ONLY && !HTML_MESSAGE)
+describe T_HTML_WITHOUT_HTML_1	Claims to be HTML, but there is no HTML text
+# uses __MIME_HTML test from below and eval in EvalTests.pm (at least for now)
+meta T_HTML_WITHOUT_HTML_2	(__MIME_HTML && !HTML_MESSAGE)
+describe T_HTML_WITHOUT_HTML_2	Claims to be HTML, but there is no HTML text
 
 # Jul  3 2002 jm: modified PENIS_ENLARGE patterns: removed "add", replaced with "inches",
 # because that seems to be another typical word in the pattern.
@@ -91,6 +98,7 @@ header __HTML_DOCTYPE_MUA	X-Mailer =~ /\b(?:Internet Mail Service|Microsoft Outl
 header __HTML_CTYPE_HEADER	Content-Type =~ /text\/html/i
 rawbody __HTML_CTYPE_BODY	/^Content-Type:\s*text\/html/i
 meta __HTML_CTYPE		(__HTML_CTYPE_HEADER || __HTML_CTYPE_BODY)
+# note: that __MIME_HTML test is now used above, at least for now
 body __MIME_HTML		eval:check_for_mime_html()
 # 4. test variations
 meta T_HTML_NO_DOCTYPE_01	(MIME_HTML_ONLY && HTML_MESSAGE && __HTML_DOCTYPE_MUA && !__HTML_DOCTYPE)
@@ -113,19 +121,22 @@ meta T_HTML_NO_DOCTYPE_14	(__MIME_HTML && __HTML_DOCTYPE_MUA && !__HTML_TAG_EXIS
 header T_FORGED_RCVD_HELO	eval:check_for_forged_received_helo()
 header T_RCVD_NUMERIC_HELO	Received =~ /helo[= ]\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/i
 
-# 2003-02-23: quinlan
-# bug 1529: Example of MIME_HTML_ONLY avoidance trick
-# testing ideas for misbalanced multipart/alternative parts
-#body T_MULTIPART_TRICK_00_10	eval:check_for_mime_multipart_trick('.0','.1')
-#body T_MULTIPART_TRICK_10_20	eval:check_for_mime_multipart_trick('.1','.2')
-#body T_MULTIPART_TRICK_20_30	eval:check_for_mime_multipart_trick('.2','.3')
-#body T_MULTIPART_TRICK_30_40	eval:check_for_mime_multipart_trick('.3','.4')
-#body T_MULTIPART_TRICK_40_50	eval:check_for_mime_multipart_trick('.4','.5')
-#body T_MULTIPART_TRICK_50_60	eval:check_for_mime_multipart_trick('.5','.6')
-#body T_MULTIPART_TRICK_60_70	eval:check_for_mime_multipart_trick('.6','.7')
-#body T_MULTIPART_TRICK_70_80	eval:check_for_mime_multipart_trick('.7','.8')
-#body T_MULTIPART_TRICK_80_90	eval:check_for_mime_multipart_trick('.8','.9')
-#body T_MULTIPART_TRICK_90_100	eval:check_for_mime_multipart_trick('.9','1.0')
+# 2003-02-25: quinlan
+# Whee... more HTML tests!
+# note uses __MIME_HTML
+header __ANY_OUTLOOK_MUA	X-Mailer =~ /^Microsoft Outlook\b/
+header __ANY_IMS_MUA		X-Mailer =~ /^Internet Mail Service\b/
+header __ANY_AOL_MUA		X-Mailer =~ /^AOL\b/
+header __ANY_QUALCOMM_MUA	X-Mailer =~ /^QUALCOMM\b/
+body __TAG_EXISTS_BODY		eval:html_tag_exists('body')
+body __TAG_EXISTS_DIV		eval:html_tag_exists('div')
+body __TAG_EXISTS_HEAD		eval:html_tag_exists('head')
+body __TAG_EXISTS_HTML		eval:html_tag_exists('html')
+body __TAG_EXISTS_META		eval:html_tag_exists('meta')
+meta T_HTML_FAKED_OUTLOOK	(__ANY_OUTLOOK_MUA && __MIME_HTML && !(__TAG_EXISTS_BODY && __TAG_EXISTS_DIV && __TAG_EXISTS_HEAD && __TAG_EXISTS_HTML && __TAG_EXISTS_META))
+meta T_HTML_FAKED_IMS		(__ANY_IMS_MUA && __MIME_HTML && !(__TAG_EXISTS_BODY && __TAG_EXISTS_HEAD && __TAG_EXISTS_HTML && __TAG_EXISTS_META))
+meta T_HTML_FAKED_AOL		(__ANY_AOL_MUA && __MIME_HTML && !__TAG_EXISTS_HTML)
+meta T_HTML_FAKED_QUALCOMM	(__ANY_QUALCOMM_MUA && __MIME_HTML && !__TAG_EXISTS_HTML)
 
 # bug 1416, possible replacement for AS_SEEN_ON
 body     T_AS_SEEN_ON             /seen on\b\s*(?:T\.?V\.?|ABC|NBC|CBS|CNN|Oprah|USA Today|48 Hours|New York Times|\w+\s+T\.?V\.?|:)/i
