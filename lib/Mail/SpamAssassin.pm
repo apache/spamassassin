@@ -95,8 +95,8 @@ use vars qw{
   @site_rules_path
 };
 
-$VERSION = "3.0.0";              # update after release
-$IS_DEVEL_BUILD = 1;            # change for release versions
+$VERSION = "3.000000";     # update after release (same format as perl $])
+$IS_DEVEL_BUILD = 1;       # change for release versions
 
 @ISA = qw();
 
@@ -110,7 +110,7 @@ if (defined $IS_DEVEL_BUILD && $IS_DEVEL_BUILD) {
   push(@EXTRA_VERSION, ( 'r' . qw{$LastChangedRevision$ updated by SVN}[1] ));
 }
 
-sub Version { join('-', $VERSION, @EXTRA_VERSION) }
+sub Version { $VERSION=~/^(\d+)\.(\d\d\d)(\d\d\d)$/; join('-', sprintf("%d.%d.%d",$1,$2,$3), @EXTRA_VERSION) }
 
 $HOME_URL = "http://spamassassin.org/";
 

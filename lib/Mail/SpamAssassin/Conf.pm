@@ -612,18 +612,23 @@ ignore it.
 =cut
 
     if ( $key eq 'require_version' ) {
-      my $req_version = $value;
-      $req_version =~ s/^\@\@VERSION\@\@$/$Mail::SpamAssassin::VERSION/;
+      # if it wasn't replaced during install, assume current version ...
+      next if ($value eq "\@\@VERSION\@\@");
 
-      # earlier versions used !=
-      # starting with 3.0.0, perl doesn't like != so it was switched to ne
-      # we should probably allow "require_version 3.0" be good for all
-      # "3.0.x" versions - tvd
-      #
-      if ($Mail::SpamAssassin::VERSION ne $req_version) {
+      my $ver = $Mail::SpamAssassin::VERSION;
+
+      # if we want to allow "require_version 3.0" be good for all
+      # "3.0.x" versions:
+      ## make sure it's a numeric value
+      #$value += 0.0;
+      ## convert 3.000000 -> 3.0, stay backwards compatible ...
+      #$ver =~ s/^(\d+)\.(\d{1,3}).*$/sprintf "%d.%d", $1, $2/e;
+      #$value =~ s/^(\d+)\.(\d{1,3}).*$/sprintf "%d.%d", $1, $2/e;
+
+      if ($ver ne $value) {
         warn "configuration file \"$self->{currentfile}\" requires version ".
-                "$req_version of SpamAssassin, but this is code version ".
-                "$Mail::SpamAssassin::VERSION. Maybe you need to use ".
+                "$value of SpamAssassin, but this is code version ".
+                "$ver. Maybe you need to use ".
                 "the -C switch, or remove the old config files? ".
                 "Skipping this file";
         $skip_parsing = 1;
