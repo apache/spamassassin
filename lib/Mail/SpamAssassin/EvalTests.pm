@@ -672,10 +672,17 @@ sub check_for_faraway_charset_in_body {
 
 sub check_for_faraway_charset_in_headers {
   my ($self) = @_;
+  my $hdr;
 
   my @locales = $self->get_my_locales();
   for my $h (qw(From Subject)) {
-    my $hdr = $self->get($h);
+# Can't use just get() because it un-mime header
+    my @hdrs = $self->{msg}->get_header ($h);
+    if ($#hdrs >= 0) {
+      $hdr = join (" ", @hdrs);
+    } else {
+      $hdr = '';
+    }
     while ($hdr =~ /=\?(.+?)\?.\?.*?\?=/g) {
       Mail::SpamAssassin::Locales::is_charset_ok_for_locales($1, @locales)
 	  or return 1;

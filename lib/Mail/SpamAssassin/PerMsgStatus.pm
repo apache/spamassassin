@@ -782,6 +782,8 @@ sub decode_mime_bit {
   if ($encoding =~ /^US-ASCII$/i
   	|| $encoding =~ /^ISO-8859-\d+$/i
   	|| $encoding =~ /^UTF-8$/i
+	|| $encoding =~ /KOI8-\w$/i
+	|| $encoding =~ /^WINDOWS-125\d$/i
       )
   {
     # keep 8-bit stuff. forget mapping charsets though
