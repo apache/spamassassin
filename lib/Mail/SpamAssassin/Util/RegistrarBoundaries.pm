@@ -966,7 +966,7 @@ $TWO_LEVEL_DOMAINS = qr{ (?:
   ac\.zw |
   co\.zw |
   gov\.zw |
-  org\.zw |
+  org\.zw
 
   )
 }ix;
