@@ -69,7 +69,7 @@ use vars	qw{
 @ISA = qw();
 
 $VERSION = "2.20";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.76 2002/03/27 00:24:37 hughescr Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.77 2002/04/06 19:28:30 hughescr Exp $';
 
 sub Version { $VERSION; }
 
@@ -595,11 +595,17 @@ sub read_cf {
 }
 
 sub create_dotsa_dir_if_needed {
-  my ($self) = @_;
+  my ($self,$userdir) = @_;
 
   # user state directory
   my $fname = $self->{userstate_dir};
   $fname ||= $self->first_existing_path (@default_userstate_dir);
+  #
+  # If vpopmail is enabled then set fname to virtual homedir
+  #
+  if (defined $userdir) {
+    $fname = "$userdir/.spamassassin";
+  }
 
   if (defined $fname && !$self->{dont_copy_prefs}) {
     dbg ("using \"$fname\" for user state dir");
@@ -617,11 +623,19 @@ Copy default prefs file into home directory for later use and modification.
 =cut
 
 sub create_default_prefs {
-  my ($self,$fname,$user) = @_;
+  #
+  # $userdir will only exist if vpopmail config is enabled thru spamd
+  # Its value will be the virtual user's maildir
+  #
+  my ($self,$fname,$user,$userdir) = @_;
 
   if (!$self->{dont_copy_prefs} && !-f $fname)
   {
-    $self->create_dotsa_dir_if_needed();
+    #
+    # Pass on the value of $userdir for virtual users in vpopmail
+    # otherwise it is empty and the user's normal homedir is used
+    #
+    $self->create_dotsa_dir_if_needed($userdir);
 
     # copy in the default one for later editing
     my $defprefs = $self->first_existing_path
