@@ -36,7 +36,7 @@ sub check_phrase_freqs {
   # kill ignored stopwords -- too small for us to match
   $text =~ s/ (?:to|of|in|a|an|and|the|on|if|or) / /gs;
 
-  # msg_len_factor: 1000 = 200 words of 5 chars avg.  so a message of 
+  # msg_len_factor: 1000 = 200 words of 5 chars avg.  so a message of
   # 2000 chars will score 1/2 as much to compensate for having more phrases
   #
   my $msg_len_factor;
@@ -46,10 +46,21 @@ sub check_phrase_freqs {
 
   # print "words found: $text\n";
 
-  my $lastword;
-  while ($text =~ /([a-z]{3,20})\b/ig) {
-    if (defined $lastword) { test_word_pair ($self, $lastword, $1); }
-    $lastword = $1;
+  my $word;
+  my $lastword = "9s1aYzpl";	# random value to avoid defined() test in loop
+  my $phrase;
+  my $freq;
+
+  # increase the maximum word if longer words appear in 40_spam_phrases.cf
+  while ($text =~ /\b([a-z]{3,15})\b/ig) {
+    $word = lc($1);
+    $phrase = "$lastword $word";
+    $lastword = $word;
+    $freq = $self->{conf}->{spamphrase}->{$phrase};
+    if (defined $freq) {
+      $self->{phrase_score} += $freq * 10;
+      $self->{phrase_hits_hash}->{$phrase} = $freq;
+    }
   }
 
   while ($text =~ /!/g) {
@@ -90,19 +101,6 @@ sub extra_score_phrase_freqs {
   my ($self, $fulltext, $threshold) = @_;
   if (defined($self->{phrase_score}) and $self->{phrase_score} > $threshold) { return 1; }
   return 0;
-}
-
-###########################################################################
-
-sub test_word_pair {
-  my ($self, $word1, $word2) = @_;
-
-  my $w = lc $word1." ".$word2;
-  my $freq = $self->{conf}->{spamphrase}->{$w};
-  return if (!defined $freq);
-
-  $self->{phrase_score} += $freq*10;
-  $self->{phrase_hits_hash}->{$w} = $freq;
 }
 
 ###########################################################################
