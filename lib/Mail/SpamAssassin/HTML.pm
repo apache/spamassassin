@@ -719,6 +719,11 @@ sub html_comment {
   $self->{html}{comment_text} .= "$text\n";
   $self->{html}{total_comment_length} += length($text) + 7; # "<!--" + "-->"
 
+  if ($self->{html_last_tag} eq "div" &&
+      $text =~ /Converted from text\/plain format/)
+  {
+    $self->{html}{t_html_converted} = 1;
+  }
   if (exists $self->{html}{"inside_script"} && $self->{html}{"inside_script"} > 0)
   {
     if ($text =~ /\b(?:$events)\b/io)

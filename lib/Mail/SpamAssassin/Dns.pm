@@ -263,8 +263,12 @@ sub process_dnsbl_set {
       }
     }
     # regular expression
-    elsif ($rdatastr =~ /\Q$subtest\E/) {
-      $self->dnsbl_hit($rule, $question, $answer);
+    else {
+      my $test = qr/$subtest/;
+      if ($rdatastr =~ /$test/) {
+	print STDERR "here for $rule $question $answer\n";
+	$self->dnsbl_hit($rule, $question, $answer);
+      }
     }
   }
 }
