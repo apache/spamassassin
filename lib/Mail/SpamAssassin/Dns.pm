@@ -392,7 +392,7 @@ sub razor2_lookup {
         $rc->do_conf() or die $rc->errstr;
 
 	# If we're a DOS formatted file, make sure the blank line between
-	# header and body has a carriage return (\r) in it.  This seems to
+	# header and body has no carriage return (\r) in it.  This seems to
 	# confuse Razor, so let's get rid of it.
 	$$fulltext =~ s/\n\r\n/\n\n/;
 
