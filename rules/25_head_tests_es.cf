@@ -1,0 +1,12 @@
+# spanish spamassassin header test.
+#
+# please be aware that values are just my estimates
+# and could be wrong. Use with care.
+# contact info: <jesus.climent@hispalinux.es>
+
+lang es header ES_OFERTA	ALL =~ /(?:oferta|publicidad|promoci(?:ó|o)n)/i
+lang es describe ES_OFERTA	Publicidad por e-mail
+lang es score ES_OFERTA		1.5
+
+lang es header ES_GRATIS	ALL =~ /gratis/i
+lang es describe ES_GRATIS	Contiene la palabra gratis en las cabeceras
