@@ -130,7 +130,7 @@ my %makefile = (
 	'spamd/spamc$(EXE_EXT) spamd/libspamc.so spamd/spamd doc '.
 	'spamd/sslspamc$(EXE_EXT) spamd/libsslspamc.so '.
 	'binaries.mk config.h config.status config.cache config.log '.
-	'qmail/qmail-spamc '
+	'qmail/qmail-spamc t/do_razor t/do_razor1 t/do_razor2 '
     },
 
     'AUTHOR' => 'Justin Mason <jm@jmason.org>',
@@ -173,30 +173,37 @@ WriteMakefile(%makefile);
 
 #######################################################################
 
-unlink('t/do_razor', 't/do_razor2');
-my $runrazor1tests = 0;
-my $runrazor2tests = 0;
-
 # what a PITA.  we can't get at MakeMaker's parsed args. do it ourselves,
 # again....
-$_ = join (' ', @ARGV);
-if (/\bRUN_RAZOR1_TESTS=y/) { $runrazor1tests = 1; }
-elsif (/\bRUN_RAZOR1_TESTS=n/) { $runrazor1tests = 0; }
-elsif (eval { require Razor::Client }) {
-  if (prompt('Run Razor v1 tests (these may fail due to network problems)? (y/n)', "n") =~ /^y(es)?$/i)
-				{ $runrazor1tests = 1; }
+my $argv = join (' ', @ARGV);
+
+for (my $v = 1; $v <= 2; $v++) {
+  my $do;
+
+  $do = ($argv =~ /\bRUN_RAZOR${v}_TESTS?=(.)/)[0];
+
+  if (!defined($do)) {
+    if ($v == 1) {
+      $do = ! eval { require Razor::Client };
+    }
+    elsif ($v == 2) {
+      $do = ! eval { require Razor2::Client::Agent };
+    }
+
+    if (!$do) {
+      prompt("Run Razor v${v} tests (these may fail due to network problems)? (y/n)", 'n') =~ /^(.)/;
+      $do = $1;
+    }
+  }
+  
+  $do =~ tr/y1/0/c;
+ 
+  unlink("t/do_razor${v}"); 
+  if ($do) {
+    open(FLAG, ">t/do_razor${v}") && close(FLAG);
+  }
 }
 
-$_ = join (' ', @ARGV); # again; never know what prompt() might do
-if (/\bRUN_RAZOR2_TESTS=y/) { $runrazor2tests = 1; }
-elsif (/\bRUN_RAZOR2_TESTS=n/) { $runrazor2tests = 0; }
-elsif (eval { require Razor2::Client::Agent }) {
-  if (prompt('Run Razor v2 tests (these may fail due to network problems)? (y/n)', "n") =~ /^y(es)?$/i)
-				{ $runrazor2tests = 1; }
-}
-
-if ($runrazor1tests) { open(FILE, ">t/do_razor"); close(FILE); }
-if ($runrazor2tests) { open(FILE, ">t/do_razor2"); close(FILE); }
 
 #######################################################################
 
