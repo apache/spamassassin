@@ -290,3 +290,11 @@ header T_HEADI_08	ALL =~ /\nMIME-Version:[^\n]{0,80}\nX-MessageOrder:[^\n]{0,80}
 header T_HEADI_09	ALL =~ /\nReply-To:[^\n]{0,80}\nDate:[^\n]{0,80}\nMIME-Version:/si
 header T_HEADI_10	ALL =~ /\nSubject:[^\n]{0,160}\nReply-To:[^\n]{0,80}\nDate:/si
 header T_HEADI_11	ALL =~ /\nX-MessageOrder:[^\n]{0,80}\nContent-Type:[^\n]{0,80}/si
+
+# I have a feeling these are well-caught already, better tests may exist
+header T_MID_DM_15	Message-ID =~ /<[0-9a-f]{4}01c4[0-9a-f]{4}\$[0-9a-f]{8}\$[0-9a-f]{8}@\S+>/
+meta T_RATWARE_DM_15	T_MID_DM_15 && !__HAS_X_MAILER
+
+# simple enough to test
+meta T_RATWARE_SOMETHING	__MSGID_DOLLARS_OK && !__HAS_X_MAILER
+meta T_RATWARE_WHATEVER		__OUTLOOK_DOLLARS_MSGID && !__HAS_X_MAILER
