@@ -1016,20 +1016,35 @@ sub scan_mbx {
 
 ############################################################################
 
-sub fix_globs {
-  my ($self, $path) = @_;
+{
+  my $home;
 
-  # replace leading tilde with home dir: ~/abc => /home/jm/abc
-  $path =~ s!^~/!$ENV{'HOME'}/!;
+  sub fix_globs {
+    my ($self, $path) = @_;
 
-  # protect/escape spaces: ./Mail/My Letters => ./Mail/My\ Letters
-  $path =~ s/([^\\])(\s)/$1\\$2/g;
+    unless (defined $home) {
+      $home = $ENV{'HOME'};
 
-  my @paths;
+      # No $HOME set?  Try to find it, portably.
+      unless ($home) {
+        if (!Mail::SpamAssassin::Util::am_running_on_windows()) {
+          $home = (Mail::SpamAssassin::Util::portable_getpwuid($<))[7];
+        } else {
+          $home = File::Spec->catpath($ENV{'HOMEDRIVE'}, $ENV{'HOMEPATH'});
+        }
 
-  # apply csh-style globs: ./corpus/*.mbox => er, you know what it does ;)
-  @paths = glob $path;
-  return @paths;
+        # Fall back to no replacement at all.
+	$home ||= '~';
+      }
+    }
+    $path =~ s,^~/,${home}/,;
+
+    # protect/escape spaces: ./Mail/My Letters => ./Mail/My\ Letters
+    $path =~ s/([^\\])(\s)/$1\\$2/g;
+
+    # return csh-style globs: ./corpus/*.mbox => er, you know what it does ;)
+    return glob($path);
+  }
 }
 
 ############################################################################
