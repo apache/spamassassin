@@ -223,9 +223,9 @@ sub find_missed {
 }
 
 sub readscores {
-  print "Reading scores from \"$cffile\"...\n";
+  warn "Reading scores from \"$cffile\"...\n";
   system ("./parse-rules-for-masses -d \"$cffile\"") and die;
-  my %scores;
+  use vars qw(%scores);
   require "./tmp/rules.pl";
   return \%scores;
 }
