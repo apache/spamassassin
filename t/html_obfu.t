@@ -10,7 +10,7 @@ use Test; BEGIN { plan tests => 6 };
 q{ BULK_EMAIL } => '',
 q{ GUARANTEED_100_PERCENT } => '',
 q{ NEVER_ANOTHER } => '',
-q{ NATURAL_VIAGRA } => '',
+q{ HERBAL_VIAGRA } => '',
 q{ UCE_MAIL_ACT } => '',
 q{ EXCUSE_13 } => ''
 );
