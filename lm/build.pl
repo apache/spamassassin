@@ -1,7 +1,5 @@
 #!/usr/bin/perl -w
 
-# Copyright (C) 2002  Daniel Quinlan
-#
 # *.lm = old format, uses '_' as separator
 # *.ln = new format, uses NULL as separator
 #
