@@ -359,9 +359,6 @@ describe FORGED_YAHOO_RCVD	'From' yahoo.com does not match 'Received' headers
 header FORGED_JUNO_RCVD		eval:check_for_forged_juno_received_headers()
 describe FORGED_JUNO_RCVD	'From' juno.com does not match 'Received' headers
 
-header GENUINE_EBAY_RCVD        eval:check_for_from_domain_in_received_headers('ebay.com', 'true')
-describe GENUINE_EBAY_RCVD	Message from eBay
-
 header FORGED_EBAY_RCVD         eval:check_for_from_domain_in_received_headers('ebay.com', 'false')
 describe FORGED_EBAY_RCVD	'From' ebay.com does not match 'Received' headers
 
@@ -475,17 +472,6 @@ describe ORDER_STATUS           Subject looks like order info
 header GAPPY_SUBJECT            Subject =~ /\b(?:[a-z][-_\.\,\:\;\'\~\s]{1,3}){4,}/i
 describe GAPPY_SUBJECT          'Subject' contains G.a.p.p.y-T.e.x.t
 
-# This is a Bugzilla bug status report e-mail and probably OK
-header BUGZILLA_BUG		eval:message_from_bugzilla()
-describe BUGZILLA_BUG		Looks like a Bugzilla bug
-
-header DEBIAN_BTS_BUG		eval:message_from_debian_bts()
-describe DEBIAN_BTS_BUG		Looks like a Debian BTS bug
-
-# give a negative score to Majordomo results.
-header   MAJORDOMO              Subject =~ /Majordomo (?:request )?results/
-describe MAJORDOMO              From Majordomo
-
 header   PLEASE_READ            Subject =~ /please read/i
 describe PLEASE_READ            Please read this!  Please oh please oh please!
 
@@ -498,17 +484,15 @@ describe PLEASE_READ            Please read this!  Please oh please oh please!
 # Headers that seem to only be used by a single spamming software and
 # are found together in the same message:
 # 1. X-MailingID and X-ServerHost
-# 2. X-EM-Registration and X-EM-Version
-# 3. X-Stormpost-To and X-List-Unsubscribe
+# 2. X-Stormpost-To and X-List-Unsubscribe
+#
+# not spammish: X-EM-Registration, X-EM-Version
 
 # these headers have very high correlation with spam
 header BCC			exists:Bcc
 header COMMENT			exists:Comment
 header DATE_WARNING		exists:Date-warning
 header X_ANTIABUSE		exists:X-AntiAbuse
-# causes FPs
-#header X_EM_REGISTRATION	exists:X-EM-Registration
-#header X_EM_VER_PRESENT	exists:X-EM-Version
 header X_ENC_PRESENT		exists:X-Encoding
 header X_ESMTP			exists:x-esmtp
 header X_FIX_PRESENT		exists:X-Fix
@@ -525,17 +509,6 @@ header X_SMTPEXP_VERSION	exists:X-SMTPExp-Version
 header X_STORMPOST_TO		exists:X-Stormpost-To
 header X_X_PRESENT		exists:X-x
 header COMPLAIN_TO		exists:Complain-To
-
-# these headers have very low correlation with spam
-header CRON_ENV			exists:X-Cron-Env
-header IN_REP_TO		exists:In-Reply-To
-header REFERENCES		exists:References
-header RESENT_TO		exists:Resent-To
-header USER_AGENT		exists:User-Agent
-header X_AUTH_WARNING		exists:X-Authentication-Warning
-header X_LOOP			exists:X-Loop
-header X_MAILING_LIST		exists:X-Mailing-List
-header X_ACCEPT_LANG            exists:X-Accept-Language
 
 header   MIME_ODD_CASE		ALL =~ /\nMiME-Version: /s
 describe MIME_ODD_CASE		MiME-Version header (oddly capitalized)
@@ -555,81 +528,6 @@ describe PRIORITY_NO_NAME	Message has priority setting, but no X-Mailer
 header   PARTIAL_RFC_2369	eval:partial_rfc_2369()
 describe PARTIAL_RFC_2369	not compliant with RFC 2369 or otherwise fishy
 
-header PGP_SIGNATURE_2		Content-Type =~ /protocol=.?application\/pgp-signature.?;/i
-describe PGP_SIGNATURE_2	Contains a PGP-signed message (signature attached)
-
-header   KNOWN_MAILING_LIST     eval:detect_mailing_list()
-describe KNOWN_MAILING_LIST     Email came from some known mailing list software
-
-header   EXCHANGE_SERVER        X-Mailer =~ /Internet Mail Service \([\d\.]+\)/
-describe EXCHANGE_SERVER        Came via Internet Mail Service plugin
-
-header   APPROVED_BY            Approved-By =~ /./
-describe APPROVED_BY            Has an Approved-By moderated list header
-
 header SUBJ_FREE_CAP		Subject =~ /\bFREE\b/
 describe SUBJ_FREE_CAP		Subject contains the word 'FREE'
-
-header NMS_CGI_NOT_BUGGY        X-Mailer =~ /^NMS FormMail.pl.*v\d/
-describe NMS_CGI_NOT_BUGGY      Not Matt's Scripts formmail.pl
-
-# some non-spam rules from http://www.darkmere.gen.nz/2002/0628.html
-header Q_FOR_SELLER		Subject =~ /Question.*(for|to|from eBay).*(seller|Member)/
-describe Q_FOR_SELLER		Subject is an eBay question
-
-header SUBJECT_HAS_DATE         Subject =~ /1?\d[-\/][1-3]?\d[-\/](20)?02/
-describe SUBJECT_HAS_DATE       Subject contains a date
-
-header FROM_NEWS_LIST           From =~ /(\@news|\@list)/i
-describe FROM_NEWS_LIST         From: has a news or list hostname in FQDN
-
-header FROM_US_PHONE            From =~ /^[2-9]\d{9}\@/
-describe FROM_US_PHONE          From: looks like US Telephone Number
-
-header SUBJECT_IS_NEWS          Subject =~ /(in review|news|list)/i
-describe SUBJECT_IS_NEWS        Subject contains news newsletter list daily, weekly or monthly
-
-header SUBJECT_FREQ             Subject =~ /(monday|daily|week|monthly)/i
-describe SUBJECT_FREQ           Subject contains monday daily week or monthly
-
-header SUBJECT_MONTH            Subject =~ /(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/i
-describe SUBJECT_MONTH          Subject has month in it probable newsletter
-
-header FROM_EGROUPS     X-eGroups-Return =~ /^sentto-.*\@returns.groups.yahoo.com$/
-describe FROM_EGROUPS   Appears to be from yahoo groups
-test FROM_EGROUPS  ok   sentto-2537484-52529-1020428367-Sxm=olswang.com@returns.groups.yahoo.com
-test FROM_EGROUPS  fail spammer@returns.groups.yahoo.com
-
-header FWD_MSG                  Subject =~ /\[?Fwd?:?\s*/
-describe FWD_MSG                Forwarded email
-
-body HOTMAIL_FOOTER1             /Send and receive Hotmail on your mobile device: /
-describe HOTMAIL_FOOTER1        Common footer for Hotmail
-
-body HOTMAIL_FOOTER2            /Get your FREE download of MSN Explorer at /
-describe HOTMAIL_FOOTER2        Common footer for Hotmail
-
-body HOTMAIL_FOOTER3            /Get Your Private, Free E-mail from MSN Hotmail at http:\/\/www\.hotmail\.com\./
-describe HOTMAIL_FOOTER3        Common footer for Hotmail
-
-body HOTMAIL_FOOTER4            /Join the world's largest e-mail service with MSN Hotmail\./
-describe HOTMAIL_FOOTER4        Common footer for Hotmail
-
-body HOTMAIL_FOOTER5            /Chat with friends online, try MSN Messenger: /
-describe HOTMAIL_FOOTER5        Common footer for Hotmail
-
-body MSN_FOOTER1                /MSN Photos is the easiest way to share and print your photos: /
-describe MSN_FOOTER1            Common footer for MSN
-
-body MSN_FOOTER2                /Remove my e-mail address from Gaming Zone /
-describe MSN_FOOTER2            Common footer for MSN
-
-body MAILBITS_EMAIL             /This is a free service provided by MailBits\.com\./
-describe MAILBITS_EMAIL         recommended page from MailBits.com
-
-body GROUPS_YAHOO_1             /Your use of Yahoo! Groups is subject to the/
-describe GROUPS_YAHOO_1         Modified Yahoo! Groups test
-
-body GROUPS_MSN                 /http:\/\/communities\.msn\.com\/contact/
-describe GROUPS_MSN             MSN Communities
 
