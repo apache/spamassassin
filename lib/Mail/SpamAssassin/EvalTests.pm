@@ -3353,7 +3353,7 @@ sub check_ratware_name_id {
   my $mid = $self->get('MESSAGEID');
   my $from = $self->get('From');
   if ($mid =~ m/<[A-Z]{28}\.([^>]+?)>/) {
-     if ($from =~ m/\"[^\"]+\"\s*<$1>/) {
+     if ($from =~ m/\"[^\"]+\"\s*<\Q$1\E>/) {
        return 1;
      }
   }
@@ -3383,7 +3383,11 @@ sub check_ratware_envelope_from {
 
   if ($to =~ /^([^@]+)@(.+)$/) {
     my($user,$dom) = ($1,$2);
-    return 1 if ($from =~ /\b$dom.$user@/i);
+    $dom = Mail::SpamAssassin::Util::RegistrarBoundaries::trim_domain($dom);
+    return unless
+        (Mail::SpamAssassin::Util::RegistrarBoundaries::is_domain_valid($dom));
+
+    return 1 if ($from =~ /\b\Q$dom\E.\Q$user\E@/i);
   }
 
   return 0;
