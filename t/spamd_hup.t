@@ -24,9 +24,12 @@ print "HUPing spamd at pid $pid1...\n";
 ok ($pid1 != 0 and kill ('HUP', $pid1));
 
 print "Waiting for spamd at pid $pid1 to restart...\n";
-my $timeout = 5;
+# note that the wait period increases the longer it takes,
+# 20 retries works out to a total of 60 seconds
+my $timeout = 20;
+my $wait = 0;
 do {
-  sleep 1;
+  sleep (int($wait++ / 4) + 1) if $timeout > 0;
   $timeout--;
 } while(!-e $pid_file && $timeout);
 ok (-e $pid_file);
