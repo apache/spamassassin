@@ -1110,7 +1110,3 @@ score BAYES_99 0.001 0.001 4.300 2.791
 #meta __USER_AGENT_XIMIAN	(__XIMIAN_MSGID && __XIMIAN_MUA)
 #meta T_USER_AGENT_XIMIAN	__USER_AGENT_XIMIAN && !T_FORGED_USER_AGENT
 #meta T_FORGED_MUA_XIMIAN	__XIMIAN_MUA && !__UNUSABLE_MSGID && !__USER_AGENT_XIMIAN
-
-#header RCVD_IN_RELAYS_ORDB_ORG	rbleval:check_rbl('ordb', 'relays.ordb.org.')
-#describe RCVD_IN_RELAYS_ORDB_ORG Received via a relay in relays.ordb.org
-#tflags RCVD_IN_RELAYS_ORDB_ORG  net
