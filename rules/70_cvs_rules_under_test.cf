@@ -389,7 +389,6 @@ describe T_URI_UNPRINTABLE	URI contains unprintable characters
 # 29.483  69.2323   0.0285    1.000   1.00    0.01  T_MPART_ALT_DIFF_95
 # 29.771  69.8892   0.0421    0.999   1.00    0.01  T_MPART_ALT_DIFF_90
 #
-#
 body T_MPART_ALT_DIFF_90      eval:multipart_alternative_difference('90', '100')
 body T_MPART_ALT_DIFF_95      eval:multipart_alternative_difference('95', '100')
 body T_MPART_ALT_DIFF_96      eval:multipart_alternative_difference('96', '100')
@@ -454,13 +453,6 @@ describe T_MSGID_SPAM_2_A	Message-ID has known spammer pattern
 header T_MSGID_SPAM_2_B		MESSAGEID =~ /<[A-Z]{7}-000[0-9]{10}\@[a-z]*>/
 describe T_MSGID_SPAM_2_B	Message-ID has known spammer pattern
 
-# Comment is a spam sign when following <DIV>
-rawbody T_HTML_CONVERTED	m{<DIV><!-- Converted from text/plain format -->}
-describe T_HTML_CONVERTED	HTML conversion tool used by spam
-
-body T_HTML_CONVERTED_2		eval:html_test('t_html_converted')
-describe T_HTML_CONVERTED_2	HTML conversion tool used by spam
-
 # another Message-Id format (pick one as MSGID_SPAM_3)
 header T_MSGID_SPAM_3_5		Message-Id =~ /<[a-z]{5,}\@(\S+\.)+\S+>/
 describe T_MSGID_SPAM_3_5	Message-ID has known spammer pattern
@@ -469,3 +461,14 @@ describe T_MSGID_SPAM_3_6	Message-ID has known spammer pattern
 header T_MSGID_SPAM_3_7		Message-Id =~ /<[a-z]{7,}\@(\S+\.)+\S+>/
 describe T_MSGID_SPAM_3_7	Message-ID has known spammer pattern
 
+# evil spam tool
+# Message-ID generator algorithm:
+# letter: 1/2 (pick a-z) | 1/2 (pick 0-9)
+# 10-29 letters: 1/8 (pick $) | 1/8 (pick -) | 3/8 (pick a-z) | 3/8 (pick 0-9)
+# letter: 1/2 (pick a-z) | 1/2 (pick 0-9)
+# @
+# letter: 2/3 (pick a-z) | 1/3 (pick 0-9)
+# 3-12 letters: 1/8 (pick .) | 7/12 (pick a-z) | 7/24 (pick 0-9)
+# letter: 2/3 (pick a-z) | 1/3 (pick 0-9)
+header T_MSGID_EVIL_SPAM_1	MESSAGEID =~ /<[a-z\d][a-z\d\$-]+[a-z\d]\@[a-z\d][a-z\d.]+[a-z\d]>/
+header T_MSGID_EVIL_SPAM_2	MESSAGEID =~ /<[a-z\d][a-z\d\$-]{10,29}[a-z\d]\@[a-z\d][a-z\d.]{3,12}[a-z\d]>/

@@ -713,7 +713,7 @@ sub html_comment {
   if ($self->{html_last_tag} eq "div" &&
       $text =~ /Converted from text\/plain format/)
   {
-    $self->{html}{t_html_converted} = 1;
+    $self->{html}{div_converted} = 1;
   }
   if (exists $self->{html}{"inside_script"} && $self->{html}{"inside_script"} > 0)
   {
