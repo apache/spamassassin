@@ -76,30 +76,54 @@ describe HTML_70_90		Message is 70-90% HTML tags
 body HTML_90_100		eval:html_percentage('90','100')
 describe HTML_90_100		Message is 90-100% HTML tags
 
-body TABLE_THICK_BORDER		eval:html_table_thick_border()
+body TABLE_THICK_BORDER		eval:html_test('thick_border')
 describe TABLE_THICK_BORDER	HTML table has thick border
 
-body JAVASCRIPT			eval:html_javascript()
+body JAVASCRIPT			eval:html_test('javascript')
 describe JAVASCRIPT		JavaScript code
 
-body JAVASCRIPT_VERY_UNSAFE	eval:html_javascript_very_unsafe()
+body JAVASCRIPT_VERY_UNSAFE	eval:html_test('javascript_very_unsafe')
 describe JAVASCRIPT_VERY_UNSAFE	Auto-executing JavaScript code
 
-body HTML_WITH_BGCOLOR		eval:html_bgcolor()
+body HTML_WITH_BGCOLOR		eval:html_test('bgcolor_nonwhite')
 describe HTML_WITH_BGCOLOR	HTML mail with non-white background
 
-body BIG_FONT			eval:html_big_font()
+body BIG_FONT			eval:html_test('big_font')
 describe BIG_FONT		FONT Size +2 and up or 3 and up
 
-body WEB_BUGS			eval:html_web_bugs()
+body WEB_BUGS			eval:html_test('web_bugs')
 describe WEB_BUGS		Image tag with an ID code to identify you
+
+body HTML_FONT_COLOR_NOHASH	eval:html_test('font_color_nohash')
+describe HTML_FONT_COLOR_NOHASH	HTML font color is missing # character
+
+body HTML_FONT_COLOR_GRAY	eval:html_test('font_color_gray')
+describe HTML_FONT_COLOR_GRAY	HTML font color has gray hexadecimal code
+
+body HTML_FONT_COLOR_ODD	eval:html_test('font_color_odd')
+describe HTML_FONT_COLOR_ODD	HTML font color has odd hexadecimal code
+
+body HTML_FONT_COLOR_NAME	eval:html_test('font_color_name')
+describe HTML_FONT_COLOR_NAME	HTML font color has unusual name
+
+body HTML_FONT_INVISIBLE	eval:html_test('font_invisible')
+describe HTML_FONT_INVISIBLE	HTML font color is same as background
+
+body HTML_FONT_FACE_BAD		eval:html_test('font_face_bad')
+describe HTML_FONT_FACE_BAD	HTML font face is not a word
+
+body HTML_FONT_FACE_ODD		eval:html_test('font_face_odd')
+describe HTML_FONT_FACE_ODD	HTML font face is not a commonly used face
+
+body HTML_FONT_FACE_CAPS	eval:html_test('font_face_caps')
+describe HTML_FONT_FACE_CAPS	HTML font face has excess capital characters
 
 # many spammers seem to do this nowadays (and probably track
 # their customers with it).  (contrib: WW)
-body RELAYING_FRAME		eval:html_relaying_frame()
+body RELAYING_FRAME		eval:html_test('relaying_frame')
 describe RELAYING_FRAME		Frame wanted to load outside URL
 
-body HTML_EMBEDS		eval:html_embeds()
+body HTML_EMBEDS		eval:html_test('embeds')
 describe HTML_EMBEDS		HTML with embedded plugin object
 
 ###########################################################################
