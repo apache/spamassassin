@@ -1,5 +1,5 @@
 
-OPT = -g -O6
+OPT = -g -O2
 GALIB =	./galib245
 PGALIB = pgapack
 
@@ -8,6 +8,7 @@ all:
 
 evolve: tmp/tests.h evolve.o
 	g++ -Wall $(OPT) -fexceptions -L$(GALIB)/ga evolve.o -o evolve -lga -lm
+	# cp evolve evolve.unstripped
 	strip evolve
 
 craig-evolve: tmp/tests.h craig-evolve.cxx

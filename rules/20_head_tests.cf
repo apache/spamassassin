@@ -143,6 +143,9 @@ describe RCVD_IN_OSIRUSOFT_COM	Received via a relay in relays.osirusoft.com
 header RCVD_IN_ORBZ		eval:check_rbl('relay', 'inputs.orbz.org.')
 describe RCVD_IN_ORBZ		Received via a relay in inputs.orbz.org
 
+header RCVD_IN_RFCI		eval:check_rbl('rfci', 'ipwhois.rfc-ignorant.org.')
+describe RCVD_IN_RFCI		Received via a relay in ipwhois.rfc-ignorant.org
+
 # Overzealous, blocking sparklist.com and yahoogroups with Confirmed Spam
 # Source records.  not recommended.
 #header RCVD_IN_5_10	 eval:check_rbl('relay', 'blackholes.five-ten-sg.com.')
