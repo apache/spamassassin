@@ -135,7 +135,6 @@ sub html_end {
   $self->put_results(comment => $self->{comment});
   $self->put_results(title => $self->{title});
   $self->put_results(anchor => $self->{anchor});
-  $self->put_results(blank_uri => $self->{blank_uri});
 
   # final result hashes
   $self->put_results(inside => $self->{inside});
@@ -337,33 +336,21 @@ sub html_uri {
   # ordered by frequency of tag groups
   if ($tag =~ /^(?:body|table|tr|td)$/) {
     if (defined $attr->{background}) {
-      if ($attr->{background} eq '') {
-	push(@{$self->{blank_uri}}, $tag);
-      }
       $self->push_uri($attr->{background});
     }
   }
   elsif ($tag =~ /^(?:a|area|link)$/) {
     if (defined $attr->{href}) {
-      if ($attr->{href} eq '') {
-	push(@{$self->{blank_uri}}, $tag);
-      }
       $self->push_uri($attr->{href});
     }
   }
   elsif ($tag =~ /^(?:img|frame|iframe|embed|script)$/) {
     if (defined $attr->{src}) {
-      if ($attr->{src} eq '') {
-	push(@{$self->{blank_uri}}, $tag);
-      }
       $self->push_uri($attr->{src});
     }
   }
   elsif ($tag eq "form") {
     if (defined $attr->{action}) {
-      if ($attr->{action} eq '') {
-	push(@{$self->{blank_uri}}, $tag);
-      }
       $self->push_uri($attr->{action});
     }
   }
