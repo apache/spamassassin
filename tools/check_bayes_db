@@ -1,2 +1,3 @@
 #!/bin/sh
+echo "check_bayes_db is deprecated.  Please use 'sa-learn --dump'!" >&2
 sa-learn --dump "$@"
