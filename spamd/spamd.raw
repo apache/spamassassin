@@ -984,18 +984,30 @@ sub check {
   my $actual_length = 0;
   my $msgid;
   my $rmsgid;
+  my $thisid = undef;
   while ( $_ = $client->getline() ) {
     if ( ( $actual_length == 0 ) .. /^$/ ) {    # still in header
+      if ( $thisid ) {
+        if (/^[ \t]/) {                         # folded line
+	  $$thisid .= $_;
+	}
+	else {
+          while ( $$thisid =~ s/\([^\(\)]*\)// )
+            { }                              # remove comments and
+          $$thisid =~ s/^\s+|\s+$//g;        # leading and trailing spaces
+          $$thisid =~ s/\s+/ /g;             # collapse spaces
+          $$thisid =~ s/^.*?<(.*?)>.*$/$1/;  # keep only the id itself
+          $$thisid =~ s/[^\x21-\x7e]/?/g;    # replace all weird chars
+          $$thisid =~ s/[<>]/?/g;            # plus all dangling angle brackets
+          $$thisid =~ s/^(.+)$/<$1>/;        # re-bracket the id (if not empty)
+
+          $thisid = undef;
+	}
+      }
+      
       if (/^(Resent-)?Message-Id:\s+(.*?)\s*$/i) {
-        my $id = $1 ? \$rmsgid : \$msgid;
-        $$id = $2 || '';
-        while ( $$id =~ s/\([^\(\)]*\)// ) { }
-        ;                                       # remove comments and
-        $$id =~ s/^\s+|\s+$//g;          # leading and trailing spaces
-        $$id =~ s/^.*?<(.*?)>.*$/$1/;    # keep only the id itself
-        $$id =~ s/[^\x21-\x7e]/?/g;      # replace all weird chars
-        $$id =~ s/[<>]/?/g;              # plus all dangling angle brackets
-        $$id =~ s/^(.+)$/<$1>/;          # re-bracket the id (if not empty)
+        $thisid   = $1 ? \$rmsgid : \$msgid;
+        $$thisid .= $2 || '';
       }
     }
     push ( @msglines, $_ );
