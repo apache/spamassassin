@@ -928,7 +928,8 @@ sub rewrite_no_report_safe {
     push(@pristine_headers, "X-Spam-$header: $line\n");
   }
 
-  return join('', @pristine_headers, "\n", $self->{msg}->get_pristine_body());
+  my $separator = $self->{msg}->{missing_head_body_separator} ? '' : "\n";
+  return join('', @pristine_headers, $separator, $self->{msg}->get_pristine_body());
 }
 
 sub qp_encode_header {
