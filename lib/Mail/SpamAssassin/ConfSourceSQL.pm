@@ -151,7 +151,6 @@ sub load_with_dbi {
             while(@row = $sth->fetchrow_array()) {
                $text .= "$row[0]\t$row[1]\n";
             }
-dbg("Returned text is:\n$text");
             if($text ne '') {
             	$main->{conf}->parse_scores_only(join('',$text));
             }
