@@ -642,5 +642,8 @@ body T_HTML_FONT_LARGE_SIZE_2	eval:html_eval('max_size', '> 6')
 body T_HTML_FONT_LARGE_SIZE_3	eval:html_eval('max_size', '> 7')
 body T_HTML_FONT_LARGE_SIZE_4	eval:html_eval('max_size', '> 8')
 
+body T_HTML_TAG_EXISTS_MARQUEE	eval:html_tag_exists('marquee')
+describe T_HTML_TAG_EXISTS_MARQUEE	HTML has "marquee" tag
+
 # bug 1985
 body T_URGENT_BIZ /urgent.{0,16}(?:assistance|business|buy|confidential|notice|proposal|reply|request|response)/i
