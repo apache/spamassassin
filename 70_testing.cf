@@ -44,7 +44,7 @@ header __SUBJECT_TEMPLATE	Subject =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
 header __REF_TEMPLATE		References =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
 header __REP_TEMPLATE		In-Reply-To =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
 header __MID_TEMPLATE		MESSAGEID =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
-meta T_INCOMPLETE_TEMPLATE	(__HEADERTEMPLATE && !__UIDL_TEMPLATE && !__XFACE_TEMPLATE && !__TOCC_TEMPLATE && !__FROM_TEMPLATE && !__SUBJECT_TEMPLATE && !__REF_TEMPLATE && !__REP_TEMPLATE && !__MID_TEMPLATE)
+meta T_INCOMPLETE_TEMPLATE	(__HEADER_TEMPLATE && !__UIDL_TEMPLATE && !__XFACE_TEMPLATE && !__TOCC_TEMPLATE && !__FROM_TEMPLATE && !__SUBJECT_TEMPLATE && !__REF_TEMPLATE && !__REP_TEMPLATE && !__MID_TEMPLATE)
 
 ########################################################################
 
