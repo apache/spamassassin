@@ -297,6 +297,18 @@ sub parse_rfc822_date {
   return $time;
 }
 
+sub time_to_rfc822_date {
+  my($time) = @_;
+
+  my @days = qw/Sun Mon Tue Wed Thu Fri Sat/;
+  my @months = qw/Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec/;
+  my @localtime = localtime($time || time);
+  $localtime[5]+=1900;
+
+  sprintf("%s, %02d %s %4d %02d:%02d:%02d %s", $days[$localtime[6]], $localtime[3],
+    $months[$localtime[4]], @localtime[5,2,1,0], local_tz());
+}
+
 ###########################################################################
 
 sub portable_getpwuid {

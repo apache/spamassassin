@@ -36,7 +36,6 @@ use bytes;
 use Carp;
 
 use Text::Wrap ();
-use POSIX qw(strftime);
 
 use Mail::SpamAssassin::EvalTests;
 use Mail::SpamAssassin::AutoWhitelist;
@@ -580,8 +579,7 @@ sub rewrite_as_spam {
 	    Mail::SpamAssassin::Util::fq_hostname() . "\n" .
 	"\twith SpamAssassin (" . Mail::SpamAssassin::Version() . " " .
 	    $Mail::SpamAssassin::SUB_VERSION . ");\n" .
-	"\t" . strftime("%a, %d %b %Y %H:%M:%S ", localtime) .
-	    Mail::SpamAssassin::Util::local_tz() . "\n";
+	"\t" . Mail::SpamAssassin::Util::time_to_rfc822_date() . "\n";
 
   # remove first line if it is "From "
   if ($original =~ s/^(From (.*?)\n)//s) {
@@ -796,8 +794,7 @@ sub _get_tag {
 	    },
 
 	    DATE => sub {
-	      strftime("%a, %d %b %Y %H:%M:%S ", localtime)
-		. Mail::SpamAssassin::Util::local_tz();
+	      Mail::SpamAssassin::Util::time_to_rfc822_date();
 	    },
 
 	    STARS => sub {
