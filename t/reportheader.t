@@ -10,9 +10,9 @@ $ENV{'LC_ALL'} = 'C';             # a cheat, but we need the patterns to work
 
 %patterns = (
 
-q{ This mail is probably spam.  The original message has been attached
-along with this report, so you can recognize or block similar unwanted
-mail in future.  See http://spamassassin.org/tag/ for more details. },
+q{ Spam detection software (installed by you, your system administrator, or
+your internet service provider) has identified an incoming email as
+possible spam. },
 	'spam-report-body',
 q{ Subject: There yours for FREE!}, 'subj',
 q{ X-Spam-Status: Yes, hits=}, 'status',
