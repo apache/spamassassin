@@ -228,10 +228,11 @@ sub cmdline_run {
     eval {
       $iter->run (@targets);
     };
-    if ($@) { die $@ unless ($@ =~ /HITLIMIT/); }
 
     print STDERR "\n" if ($opt{showdots});
     print "Learned from $learnedcount message(s) ($messagecount message(s) examined).\n";
+
+    if ($@) { die $@ unless ($@ =~ /HITLIMIT/); }
   };
 
   if ($@) {
@@ -285,8 +286,12 @@ sub wanted {
 
   $ma->{noexit} = 1;
   my $status = $spamtest->learn ($ma, undef, $isspam, $forget);
+  my $learned = $status->did_learn();
 
-  if ($status->did_learn()) {
+  if (!defined $learned) { # undef=learning unavailable
+    die "ERROR: the Bayes learn function returned an error, please re-run with -D for more information\n";
+  }
+  elsif ($learned == 1) { # 1=message was learned.  0=message wasn't learned
     $learnedcount++;
   }
 

@@ -659,7 +659,7 @@ sub learn_trapped {
   if (defined ($seen)) {
     if (($seen eq 's' && $isspam) || ($seen eq 'h' && !$isspam)) {
       dbg ("$msgid: already learnt correctly, not learning twice");
-      return;
+      return 0;
     } elsif ($seen !~ /^[hs]$/) {
       warn ("db_seen corrupt: value='$seen' for $msgid. ignored");
     } else {
