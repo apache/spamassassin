@@ -656,5 +656,8 @@ header __IMS_BOUNDARY		Content-Type =~ /\n\s+boundary=\"----_=_NextPart_[\dA-F]+
 meta T_FORGED_IMS_CTYPE		(__ANY_IMS_MUA && !__IMS_BOUNDARY)
 describe T_FORGED_IMS_CTYPE	Forged mail pretending to be from IMS (boundary)
 
-
+# NOTE: uses __ANY_QUALCOMM_MUA from above
+header __EUD_STYLE_FROM		From =~ /^[^\"].+[^\"] <[^>]+>$/
+meta T_FORGED_MUA_EUDORA_FROM	(__ANY_QUALCOMM_MUA && !__EUD_STYLE_FROM)
+describe T_FORGED_MUA_EUDORA_FROM Forged mail pretending to be from Eudora (by From)
 
