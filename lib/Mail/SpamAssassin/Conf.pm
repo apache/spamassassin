@@ -81,7 +81,7 @@ sub new {
   $self->{descriptions} = { };
   $self->{test_types} = { };
   $self->{scoreset} = [ {}, {}, {}, {} ];
-  $self->{scores} = $self->{scoreset}->[0];
+  $self->set_score_set (0);
   $self->{tflags} = { };
 
   # after parsing, tests are refiled into these hashes for each test type.
