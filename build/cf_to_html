@@ -30,6 +30,7 @@ foreach my $t (@testnames) {
   $test =~ s,<,&lt;,gs;
   $test =~ s,>,&gt;,gs;
   $test =~ s,\|,| ,gs;		# allow line breaks on pipes
+  $test =~ s,\$,(dollar) ,gs;
 
   my $bgcolor = '';
   if ($n % 2 == 0) { $bgcolor = ' bgcolor=#ccffcc'; }
