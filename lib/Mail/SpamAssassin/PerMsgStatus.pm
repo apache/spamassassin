@@ -74,8 +74,6 @@ sub check {
   # we do ALL the tests, even if a spam triggers lots of them early on.
   # this lets us see ludicrously spammish mails (score: 40) etc., which
   # we can then immediately submit to spamblocking services.
-  # Also, if parts of the message contain encoded bits (quoted-printable
-  # or base64), we test *both*.
   #
   # TODO: change this to do whitelist/blacklists first? probably a plan
 
@@ -84,22 +82,20 @@ sub check {
   {
     $self->do_head_tests();
 
-    # do body tests with raw text portions
-    {
-      my $bodytext = $self->get_raw_body_text_array();
-      $self->do_body_tests($bodytext);
-      $self->do_body_eval_tests($bodytext);
-      undef $bodytext;
-    }
-
     # do body tests with decoded portions
     {
-      my $decoded = $self->get_decoded_body_text_array();
-      if (defined $decoded) {
-	$self->do_body_tests($decoded);
-	$self->do_body_eval_tests($decoded);
-      }
+      my $decoded = $self->get_decoded_stripped_body_text_array();
+      $self->do_body_tests($decoded);
+      $self->do_body_eval_tests($decoded);
       undef $decoded;
+    }
+
+    # do rawbody tests with raw text portions
+    {
+      my $bodytext = $self->get_decoded_body_text_array();
+      $self->do_rawbody_tests($bodytext);
+      $self->do_rawbody_eval_tests($bodytext);
+      undef $bodytext;
     }
 
     # and do full tests: first with entire, full, undecoded message
@@ -110,19 +106,6 @@ sub check {
       $self->do_full_tests(\$fulltext);
       $self->do_full_eval_tests(\$fulltext);
       undef $fulltext;
-    }
-
-    # then with decoded message
-    {
-      my $decoded = $self->get_decoded_body_text_array();
-      if (defined $decoded) {
-	my $fulltext = join ('', $self->{msg}->get_all_headers(), "\n",
-				  @{$decoded});
-	$self->do_full_tests(\$fulltext);
-	$self->do_full_eval_tests(\$fulltext);
-	undef $fulltext;
-      }
-      undef $decoded;
     }
 
     $self->do_head_eval_tests();
@@ -649,8 +632,47 @@ sub get_decoded_body_text_array {
     return \@ary;
 
   } else {
-    return undef;
+    return $textary;
   }
+}
+
+###########################################################################
+
+sub get_decoded_stripped_body_text_array {
+  my ($self) = @_;
+  local ($_);
+
+  my $bodytext = $self->get_decoded_body_text_array();
+
+  my $text = '';
+  foreach $_ (@{$bodytext}) {
+    /^SPAM: / and next;         # SpamAssassin markup
+    /^--/ and next;		# MIME bits
+    /Content-.*: / and next;	# MIME bits
+    s/=$//gis;			# QP line endings
+    $text .= $_;
+  }
+
+  # sort out escaped QP markup
+  $text =~ s/=20/ /gis;
+  $text =~ s/=3E/>/gis;         # spam trick, disguise HTML
+  $text =~ s/=[0-9a-f][0-9a-f]//gis;
+
+  $text =~ s/\n\n+/<p>/gs;	# keep paragraph breaks
+
+  # strip HTML tags and entities
+  $text =~ s/(?:\&\#0147;|\&\#0148;|\&quot;)/"/gs;
+  $text =~ s/\&\#0146;/'/gs;
+  $text =~ s/\&[-_a-zA-Z0-9]+;/ /gs;
+  $text =~ s/\s+/ /gs;
+
+  $text =~ s/<p>/\n\n/gis;	# reinsert para breaks
+
+  $text =~ s/<[a-z0-9]+\b[^>]*>//gis;
+  $text =~ s/<\/[a-z0-9]+>//gis;
+
+  my @textary = split (/^/, $text);
+  return \@textary;
 }
 
 ###########################################################################
@@ -769,8 +791,6 @@ sub do_head_tests {
   my $evalstr = '';
 
   while (($rulename, $rule) = each %{$self->{conf}->{head_tests}}) {
-    next unless ($self->{conf}->{scores}->{$rulename});
-
     my $def = '';
     my ($hdrname, $testtype, $pat) = 
     		$rule =~ /^\s*(\S+)\s*(\=|\!)\~\s*(\S.*?\S)\s*$/;
@@ -782,8 +802,10 @@ sub do_head_tests {
       # dbg ("header regexp test '.$rulename.'");
 
     $evalstr .= '
-      if ($self->get(q#'.$hdrname.'#, q#'.$def.'#) '.$testtype.'~ '.$pat.') {
-	$self->got_hit (q{'.$rulename.'}, q{});
+      if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
+	if ($self->get(q#'.$hdrname.'#, q#'.$def.'#) '.$testtype.'~ '.$pat.') {
+	  $self->got_hit (q{'.$rulename.'}, q{});
+	}
       }
     ';
   }
@@ -829,9 +851,10 @@ sub do_body_tests {
   # build up the eval string...
   my $evalstr = '';
   while (($rulename, $pat) = each %{$self->{conf}->{body_tests}}) {
-    next unless ($self->{conf}->{scores}->{$rulename});
     $evalstr .= '
-      if ('.$pat.') { $self->got_body_pattern_hit (q{'.$rulename.'}); }
+      if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
+	if ('.$pat.') { $self->got_body_pattern_hit (q{'.$rulename.'}); }
+      }
     ';
   }
 
@@ -863,6 +886,58 @@ EOT
   }
 }
 
+sub do_rawbody_tests {
+  my ($self, $textary) = @_;
+  my ($rulename, $pat);
+  local ($_);
+
+  dbg ("running raw-body-text per-line regexp tests; score so far=".$self->{hits});
+
+  $self->clear_test_state();
+  if ( defined &Mail::SpamAssassin::PerMsgStatus::_rawbody_tests ) {
+    # ok, we've compiled this before.
+    Mail::SpamAssassin::PerMsgStatus::_rawbody_tests($self, @$textary);
+    return;
+  }
+
+  # build up the eval string...
+  my $evalstr = '';
+  while (($rulename, $pat) = each %{$self->{conf}->{rawbody_tests}}) {
+    $evalstr .= '
+      if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
+	if ('.$pat.') { $self->got_body_pattern_hit (q{'.$rulename.'}); }
+      }
+    ';
+  }
+
+  # generate the loop that goes through each line...
+  $evalstr = <<"EOT";
+{
+  package Mail::SpamAssassin::PerMsgStatus;
+
+  sub _rawbody_tests {
+    my \$self = shift;
+    foreach (\@_) {
+        $evalstr
+	;
+    }
+  }
+
+  1;
+}
+EOT
+
+  # and run it.
+  eval $evalstr;
+  if ($@) {
+      warn("Failed to compile body SpamAssassin tests, skipping:\n".
+	      "\t($@)\n");
+  }
+  else {
+    Mail::SpamAssassin::PerMsgStatus::_rawbody_tests($self, @$textary);
+  }
+}
+
 sub do_full_tests {
   my ($self, $fullmsgref) = @_;
   my ($rulename, $pat);
@@ -880,10 +955,11 @@ sub do_full_tests {
   # build up the eval string...
   my $evalstr = '';
   while (($rulename, $pat) = each %{$self->{conf}->{full_tests}}) {
-    next unless ($self->{conf}->{scores}->{$rulename});
     $evalstr .= '
-      if ($$fullmsgref =~ '.$pat.') {
-	$self->got_body_pattern_hit (q{'.$rulename.'});
+      if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
+	if ($$fullmsgref =~ '.$pat.') {
+	  $self->got_body_pattern_hit (q{'.$rulename.'});
+	}
       }
     ';
   }
@@ -922,6 +998,11 @@ sub do_head_eval_tests {
 sub do_body_eval_tests {
   my ($self, $bodystring) = @_;
   $self->run_eval_tests ($self->{conf}->{body_evals}, 'BODY: ', $bodystring);
+}
+
+sub do_rawbody_eval_tests {
+  my ($self, $bodystring) = @_;
+  $self->run_eval_tests ($self->{conf}->{rawbody_evals}, 'RAW: ', $bodystring);
 }
 
 sub do_full_eval_tests {

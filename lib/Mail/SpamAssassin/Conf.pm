@@ -45,6 +45,7 @@ use strict;
 use vars	qw{
   	@ISA $type_body_tests $type_head_tests $type_head_evals
 	$type_body_evals $type_full_tests $type_full_evals
+	$type_rawbody_tests $type_rawbody_evals
 };
 
 @ISA = qw();
@@ -55,6 +56,8 @@ $type_body_tests = 103;
 $type_body_evals = 104;
 $type_full_tests = 105;
 $type_full_evals = 106;
+$type_rawbody_tests = 107;
+$type_rawbody_evals = 108;
 
 ###########################################################################
 
@@ -80,6 +83,8 @@ sub new {
   $self->{body_evals} = { };
   $self->{full_tests} = { };
   $self->{full_evals} = { };
+  $self->{rawbody_tests} = { };
+  $self->{rawbody_evals} = { };
 
   $self->{required_hits} = 5.0;
   $self->{auto_report_threshold} = 25.0;
@@ -528,10 +533,8 @@ Define a body pattern test.  C<pattern> is a Perl regular expression.
 
 The 'body' in this case is the textual parts of the message body; any non-text
 MIME parts are stripped, and the message decoded from Quoted-Printable or
-Base-64-encoded format if necessary.
-
-Currently, SpamAssassin also tests 'body' tests against the undecoded
-message as well, but this is likely to change soon.
+Base-64-encoded format if necessary.  All HTML tags and line breaks will be
+removed before matching.
 
 =item body SYMBOLIC_TEST_NAME eval:name_of_eval_method([args])
 
@@ -545,13 +548,33 @@ Define a body eval test.  See above.
       $self->add_test ($1, $2, $type_body_tests); next;
     }
 
+=item rawbody SYMBOLIC_TEST_NAME /pattern/modifiers
+
+Define a raw-body pattern test.  C<pattern> is a Perl regular expression.
+
+The 'raw body' of a message is the text, including all textual parts.
+The text will be decoded from base64 or quoted-printable encoding, but
+HTML tags and line breaks will still be present.
+
+=item rawbody SYMBOLIC_TEST_NAME eval:name_of_eval_method([args])
+
+Define a raw-body eval test.  See above.
+
+=cut
+    if (/^rawbody\s+(\S+)\s+eval:(.*)$/) {
+      $self->add_test ($1, $2, $type_rawbody_evals); next;
+    }
+    if (/^rawbody\s+(\S+)\s+(.*)$/) {
+      $self->add_test ($1, $2, $type_rawbody_tests); next;
+    }
+
 =item full SYMBOLIC_TEST_NAME /pattern/modifiers
 
 Define a full-body pattern test.  C<pattern> is a Perl regular expression.
 
-The 'full body' of a message is the text, including all textual parts, but
-undecoded.  Currently, SpamAssassin also tests 'full' tests against the decoded
-message as well, but this may change soon.
+The 'full body' of a message is the un-decoded text, including all parts
+(including images or other attachments).  SpamAssassin no longer tests
+full tests against decoded text; use L<rawbody> for that.
 
 =item full SYMBOLIC_TEST_NAME eval:name_of_eval_method([args])
 
@@ -672,6 +695,8 @@ sub finish_parsing {
     elsif ($type == $type_head_tests) { $self->{head_tests}->{$name} = $text; }
     elsif ($type == $type_head_evals) { $self->{head_evals}->{$name} = $text; }
     elsif ($type == $type_body_evals) { $self->{body_evals}->{$name} = $text; }
+    elsif ($type == $type_rawbody_tests) { $self->{rawbody_tests}->{$name} = $text; }
+    elsif ($type == $type_rawbody_evals) { $self->{rawbody_evals}->{$name} = $text; }
     elsif ($type == $type_full_tests) { $self->{full_tests}->{$name} = $text; }
     elsif ($type == $type_full_evals) { $self->{full_evals}->{$name} = $text; }
     else {
