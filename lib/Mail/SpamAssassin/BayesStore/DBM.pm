@@ -457,7 +457,7 @@ sub calculate_expire_delta {
   # do the first pass, figure out atime delta
   my ($tok, $packed);
   while (($tok, $packed) = each %{$self->{db_toks}}) {
-    next if ($tok =~ /MAGIC_RE/); # skip magic tokens
+    next if ($tok =~ MAGIC_RE); # skip magic tokens
     
     my ($ts, $th, $atime) = $self->tok_unpack ($packed);
 
@@ -521,7 +521,7 @@ sub token_expiration {
   # Go ahead and do the move to new db/expire run now ...
   my ($tok, $packed);
   while (($tok, $packed) = each %{$self->{db_toks}}) {
-    next if ($tok =~ /MAGIC_RE/); # skip magic tokens
+    next if ($tok =~ MAGIC_RE); # skip magic tokens
 
     my ($ts, $th, $atime) = $self->tok_unpack ($packed);
 
@@ -761,7 +761,7 @@ sub dump_db_toks {
   my ($self, $template, $regex, @vars) = @_;
 
   while( my($tok, $tokvalue) = each %{$self->{db_toks}}) {
-    next if ($tok =~ /MAGIC_RE/); # skip magic tokens
+    next if ($tok =~ MAGIC_RE); # skip magic tokens
     next if (defined $regex && ($tok !~ /$regex/o));
 
     # We have the value already, so just unpack it.
@@ -1098,7 +1098,7 @@ sub tok_put {
   $th ||= 0;
 
   # Ignore magic tokens, the don't go in this way ...
-  return if ($tok =~ /MAGIC_RE/);
+  return if ($tok =~ MAGIC_RE);
 
   # use defined() rather than exists(); the latter is not supported
   # by NDBM_File, believe it or not.  Using defined() did not
