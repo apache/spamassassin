@@ -69,7 +69,7 @@ use vars	qw{
 @ISA = qw();
 
 $VERSION = "2.21";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.81 2002/05/31 02:09:01 quinlan Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.82 2002/06/01 14:31:55 quinlan Exp $';
 
 sub Version { $VERSION; }
 
@@ -525,9 +525,17 @@ sub init {
     my $fname = $self->first_existing_path (@default_rules_path);
     $self->{rules_filename} or $self->{config_text} .= $self->read_cf ($fname, 'default rules dir');
 
+    if (-f "$fname/languages") {
+	$self->{languages_filename} = "$fname/languages";
+    }
+
     $fname = $self->{rules_filename};
     $fname ||= $self->first_existing_path (@site_rules_path);
     $self->{config_text} .= $self->read_cf ($fname, 'site rules dir');
+
+    if (-f "$fname/languages") {
+	$self->{languages_filename} = "$fname/languages";
+    }
 
     if ( $use_user_pref != 0 ) {
       $self->create_dotsa_dir_if_needed();
