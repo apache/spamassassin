@@ -1,25 +1,14 @@
 #!/usr/bin/perl -w -T
 
-use vars qw(
-  $PREFIX
-  $DEF_RULES_DIR $LOCAL_RULES_DIR
-  $LIB_DIR
-);
-
-BEGIN {
-  # The values of the following vars are substituted at 'make' time
-  $PREFIX          = q{@@PREFIX@@};
-  $DEF_RULES_DIR   = q{@@DEF_RULES_DIR@@};
-  $LOCAL_RULES_DIR = q{@@LOCAL_RULES_DIR@@};
-  $LIB_DIR         = q{@@INSTALLSITELIB@@};
-}
-use lib $LIB_DIR;
-
-
 use strict;
 
 use File::Spec;
 
+my $PREFIX = '@@PREFIX@@';  # substituted at 'make' time
+my $DEF_RULES_DIR = '@@DEF_RULES_DIR@@';  # substituted at 'make' time
+my $LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';  # substituted at 'make' time
+
+use lib '@@INSTALLSITELIB@@';  # substituted at 'make' time
 
 BEGIN {
   # Locate locally installed SA libraries *without* using FindBin, which generates
@@ -66,7 +55,7 @@ sub usage {
     my ($verbose, $message) = @_;
     my $ver = Mail::SpamAssassin::Version();
 
-    print STDERR "SpamAssassin version $ver\n";
+    print "SpamAssassin version $ver\n";
     pod2usage(-verbose => $verbose, -message => $message, -exitval => 64);
 
 }
@@ -104,8 +93,8 @@ eval {
 	     'test-mode|test|t'                  => \$opt{'test-mode'},
              'lint'                              => \$opt{'lint'},
 	     'debug-level|debug|D:s'             => \$opt{'debug-level'},
-	     'help|h|?'                          => \$opt{'__help'},
-	     'version|V'                         => \$opt{'__version'},
+	     'version|V'                         => \$opt{'version'},
+	     'help|h|?'                          => \$opt{'help'},
 
              # NOTE: ignored for backwards compatibility. will be stripped
              # in a future release.
@@ -114,20 +103,9 @@ eval {
 	     'add-from!' => sub { warn "The --add-from option has been removed.\n" },
 	     'stop-at-threshold|S' => sub { warn "The -S option has been removed.\n" },
   ) or usage(0, "Unknown option!");
-  if (defined $opt{'__help'}) { usage(0, "For more information read the spamassassin man page"); }
-  if (defined $opt{'__version'}) {
-    print join("\n",
-      "SpamAssassin version " . Mail::SpamAssassin::Version(),
-      "",
-      "Perl version:",
-      map({ "  $_" } sprintf("%1.6f", $])),
-      "Library locations:",
-      map({ "  $_" } @INC),
-      "Rule locations:",
-      map({ "  $_" } ($LOCAL_RULES_DIR, $DEF_RULES_DIR)),
-      "System language:",
-      map({ "  $_" } map({ "$_=" . ($ENV{$_} || 'C') } (sort(grep {/^LC_[A-Z]+$/} keys %ENV), 'LANG'))),
-    ) . "\n";
+  if (defined $opt{'help'}) { usage(0, "For more information read the spamassassin man page"); }
+  if (defined $opt{'version'}) {
+    print "SpamAssassin version " . Mail::SpamAssassin::Version() . "\n";
     exit 0;
   }
 
