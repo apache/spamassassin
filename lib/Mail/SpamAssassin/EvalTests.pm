@@ -2360,6 +2360,13 @@ sub _check_mime_header {
     $self->{t_mime_base64_latin2} = 1;
   }
 
+  if (!($name || $cd =~ /attachment/) &&
+      $cte =~ /base64/ &&
+      $charset =~ /\b(?:us-ascii|iso-8859-(?:[12349]|1[0345])|windows-(?:125[0247]))\b/)
+  {
+    $self->{t_mime_base64_latin3} = 1;
+  }
+
   if ($cte =~ /quoted-printable/ && $cd =~ /inline/ && !$charset) {
     $self->{t_mime_qp_inline_no_charset} = 1;
   }
@@ -2454,6 +2461,7 @@ sub _check_attachments {
   $self->{t_mime_base64_illegal} = 0;
   $self->{t_mime_base64_latin} = 0;
   $self->{t_mime_base64_latin2} = 0;
+  $self->{t_mime_base64_latin3} = 0;
   $self->{t_mime_base64_short_lines} = 0;
   $self->{t_mime_base64_without_name} = 0;
   $self->{t_mime_qp_count} = 0;
