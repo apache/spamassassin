@@ -32,6 +32,9 @@ Because simplistic checksums of spam can be easily defeated, the main
 DCC checksums are fuzzy and ignore aspects of messages.  The fuzzy
 checksums are changed as spam evolves.
 
+Note that DCC is disabled by default in C<init.pre> because it is not
+open source.  See the DCC license for more details.
+
 See http://www.rhyolite.com/anti-spam/dcc/ for more information about
 DCC.
 
