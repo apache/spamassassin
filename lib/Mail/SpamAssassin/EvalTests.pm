@@ -2469,7 +2469,6 @@ sub _check_attachments {
   $self->{mime_checked_attachments} = 1;
 
   # results
-  $self->{microsoft_executable} = 0;
   $self->{mime_base64_blanks} = 0;
   $self->{mime_base64_count} = 0;
   $self->{mime_base64_encoded_text} = 0;
@@ -2521,9 +2520,6 @@ sub _check_attachments {
     my $previous = '';
     foreach ( @{$p->raw()} ) {
       if ( $cte =~ /base64/i ) {
-        if ($previous =~ /^$/ && /^TV[pq]QAA[MI]AAAAEAA[8A]A/) {
-	  $self->{microsoft_executable} = 1;
-        }
         if ($previous =~ /^\s*$/ && /^\s*$/) {
 	  $self->{mime_base64_blanks} = 1;
         }
@@ -2540,9 +2536,6 @@ sub _check_attachments {
 	$part_bytes[$part] += length;
       }
 
-      if ($previous =~ /^begin [0-7]{3} ./ && /^M35J0``,````\$````/) {
-        $self->{microsoft_executable} = 1;
-      }
       if ($where != 1 && $cte eq "quoted-printable" && ! /^SPAM: /) {
         if (length > 77) {
 	  $self->{mime_qp_long_line} = 1;

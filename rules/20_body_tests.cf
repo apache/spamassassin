@@ -182,12 +182,6 @@ rawbody MIME_QP_NO_CHARSET	eval:check_for_mime('mime_qp_inline_no_charset')
 describe MIME_QP_NO_CHARSET	Quoted-printable inline text with no charset
 
 # actually indicates viruses, typically; just used here to clean corpora.
-rawbody  MICROSOFT_EXECUTABLE	eval:check_for_mime('microsoft_executable')
-describe MICROSOFT_EXECUTABLE	Message includes Microsoft executable program
-# todo: better tflags category for these tests
-tflags MICROSOFT_EXECUTABLE userconf
-
-# actually indicates viruses, typically; just used here to clean corpora.
 rawbody  MIME_SUSPECT_NAME	eval:check_for_mime('mime_suspect_name')
 describe MIME_SUSPECT_NAME	MIME filename does not match content
 # todo: better tflags category for these tests
