@@ -412,3 +412,9 @@ uri T_URI_3896_36	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{8,}\.biz\/\S{25,}/i
 
 # bug 2863
 uri T_URI_PARSE_BUG       /(?:\%0[01]|\0).*\@/
+
+# few random rule ideas...
+header T_MSGID_MULTIPLE_AT	MESSAGEID =~ /<[^>]*\@[^>]*\@/
+
+header __MSGID_DOLLARS_ANY	MESSAGEID =~ /^<\w{12}\$\w{8}\$\w{8}\@\S+>$/m
+meta T_MSGID_DOLLARS_RANDOM	__MSGID_DOLLARS_ANY && !__OUTLOOK_DOLLARS_MSGID
