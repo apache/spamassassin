@@ -583,12 +583,6 @@ score UPPERCASE_25_50 0.028 0.207 0.039 0.026
 score UPPERCASE_50_75 0.350 0.928 0.017 0.000
 score UPPERCASE_75_100 0 0.539 0.029 0.000
 score URG_BIZ 0.288 0.030 1.064 1.808
-score URIBL_AB_SURBL 0 2.007 0 0.417
-score URIBL_OB_SURBL 0 1.996 0 3.213
-score URIBL_PH_SURBL 0 0.839 0 2.000
-score URIBL_SBL 0 0.629 0 0.996
-score URIBL_SC_SURBL 0 3.897 0 4.263
-score URIBL_WS_SURBL 0 0.539 0 1.462
 score URI_4YOU 1.027 1.812 0.898 1.966
 score URI_AFFILIATE 2.243 0 1.808 2.052
 score URI_IS_POUND 0 0.333 0 0
@@ -695,6 +689,16 @@ score SPF_HELO_PASS -0.001
 score SPF_HELO_FAIL 0 0.405 0 0.001
 score SPF_HELO_SOFTFAIL 0 1.002 0 3.140
 endif # Mail::SpamAssassin::Plugin::SPF
+
+# URIDNSBL
+ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
+score URIBL_AB_SURBL 0 2.007 0 0.417
+score URIBL_OB_SURBL 0 1.996 0 3.213
+score URIBL_PH_SURBL 0 0.839 0 2.000
+score URIBL_SBL 0 0.629 0 0.996
+score URIBL_SC_SURBL 0 3.897 0 4.263
+score URIBL_WS_SURBL 0 0.539 0 1.462
+endif # Mail::SpamAssassin::Plugin::URIDNSBL
 
 # MAPS
 # MAPS is a commercial service.  If you pay for them, assign a score
