@@ -439,7 +439,7 @@ sub parse_received_line {
 
     if (/Exim/) {
       # one of the HUGE number of Exim formats :(
-      # This must be scriptable.
+      # This must be scriptable.  (update: it is. cf bug 3950, 3582)
 
       # Received: from [61.174.163.26] (helo=host) by sc8-sf-list1.sourceforge.net with smtp (Exim 3.31-VA-mm2 #1 (Debian)) id 18t2z0-0001NX-00 for <razor-users@lists.sourceforge.net>; Wed, 12 Mar 2003 01:57:10 -0800
       # Received: from [218.19.142.229] (helo=hotmail.com ident=yiuhyotp) by yzordderrex with smtp (Exim 3.35 #1 (Debian)) id 194BE5-0005Zh-00; Sat, 12 Apr 2003 03:58:53 +0100
@@ -477,6 +477,27 @@ sub parse_received_line {
       # 2002 18:57:06 +1300
       if (/^from (\S+) \[(${IP_ADDRESS})\](:\d+)? by (\S+) /) {
 	$rdns= $1; $ip = $2; $helo = $1; $by = $4; goto enough;
+      }
+
+      # attempt to deal with other odd Exim formats; just match little bits
+      # of the header.
+      # Received: from helene8.i.pinwand.net (helene.cats.ms) [10.0.8.6.13219]
+      # (mail) by lisbeth.i.pinwand.net with esmtp (Exim 3.35 #1 (Debian)) id
+      # 1CO5y7-0001vC-00; Sun, 31 Oct 2004 04:01:23 +0100
+      if (/^from (\S+) /) {
+        $rdns= $1;      # assume this is the rDNS, not HELO.  is this appropriate?
+      }
+      if (/ \((\S+)\) /) {
+        $helo = $1;
+      }
+      if (/ \[(${IP_ADDRESS})(?:\.\d+)?\] /) {
+        $ip = $1;
+      }
+      if (/by (\S+) /) {
+        $by = $1;
+        # now, if we have a "by" and an IP, that's enough for most uses;
+        # we have to make do with that.
+        if ($ip) { goto enough; }
       }
 
       # else it's probably forged. fall through

@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rcvd_parser");
-use Test; BEGIN { plan tests => 35 };
+use Test; BEGIN { plan tests => 36 };
 
 
 use strict;
@@ -52,6 +52,28 @@ Received: from 0 ([61.31.135.91]) by bass.bass.com.eg with Microsoft SMTPSVC(5.0
 } => q{
 
 [ ip=61.31.135.91 rdns= helo=0 by=bass.bass.com.eg ident= envfrom= intl=0 id= ]
+
+},
+q{
+
+Received: from helene8.i.pinwand.net (helene.cats.ms) [10.0.8.6.13219] (mail)
+     by lisbeth.i.pinwand.net with esmtp (Exim 3.35 #1 (Debian))
+     id 1CO5y7-0001vC-00; Sun, 31 Oct 2004 04:01:23 +0100
+
+} => q{
+
+[ ip=10.0.8.6 rdns=helene8.i.pinwand.net helo=helene.cats.ms by=lisbeth.i.pinwand.net ident= envfrom= intl=0 id=1CO5y7-0001vC-00 ]
+
+},
+q{
+
+Received: from helene8.i.pinwand.net (helene.cats.ms) [10.0.8.6.13219] (mail)
+     by lisbeth.i.pinwand.net with esmtp (Exim 3.35 #1 (Debian))
+     id 1CO5y7-0001vC-00; Sun, 31 Oct 2004 04:01:23 +0100
+
+} => q{
+
+[ ip=10.0.8.6 rdns=helene8.i.pinwand.net helo=helene.cats.ms by=lisbeth.i.pinwand.net ident= envfrom= intl=0 id=1CO5y7-0001vC-00 ]
 
 },
 q{
