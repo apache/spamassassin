@@ -1,4 +1,70 @@
 ------------------------------------------------------------------------
+r45998 | quinlan | 2004-09-13 19:34:52 +0000 (Mon, 13 Sep 2004) | 2 lines
+
+bug 3768: add simple Debian packaging files
+
+------------------------------------------------------------------------
+r45996 | felicity | 2004-09-13 18:48:29 +0000 (Mon, 13 Sep 2004) | 1 line
+
+bug 3774: had a carryover 'touid touid' for setting euid from the egid code, which requires two numbers instead of just one.  This broke on the FreeBSD perl.
+------------------------------------------------------------------------
+r45937 | mss | 2004-09-12 14:20:59 +0000 (Sun, 12 Sep 2004) | 2 lines
+
+bug 3775: Kris Koehntopp's mail address has changed.
+
+------------------------------------------------------------------------
+r45873 | felicity | 2004-09-11 07:39:14 +0000 (Sat, 11 Sep 2004) | 1 line
+
+we generally refer to ArchiveIterator 'dir' mode as maildir, but it's not, so be a little clearer about that
+------------------------------------------------------------------------
+r45870 | quinlan | 2004-09-11 07:12:22 +0000 (Sat, 11 Sep 2004) | 3 lines
+
+not quite maildir format, don't use wikipedia for our documentation in
+a manual page, use C<> around uwashington URL
+
+------------------------------------------------------------------------
+r45866 | felicity | 2004-09-11 05:15:47 +0000 (Sat, 11 Sep 2004) | 1 line
+
+clear up the documentation about file vs dir vs mbox vs mbx
+------------------------------------------------------------------------
+r43688 | mss | 2004-09-10 20:11:49 +0000 (Fri, 10 Sep 2004) | 2 lines
+
+POD fix:  Truncated SYNOPSIS lines to 80 chars.  Mostly by removing the default values -- they are in the long description of the option and adding default values for *all* description would make the SYNOPSIS long and complex.  So everybody who wants to know the defaults should read the man page.  (I'm thinking about breaking the SYNOPSIS into several parts to make it less confusing.)
+
+------------------------------------------------------------------------
+r43686 | mss | 2004-09-10 19:45:11 +0000 (Fri, 10 Sep 2004) | 2 lines
+
+Sort OPTIONS alphabetically.
+
+------------------------------------------------------------------------
+r43683 | quinlan | 2004-09-10 18:49:56 +0000 (Fri, 10 Sep 2004) | 2 lines
+
+add Gentoo instructions
+
+------------------------------------------------------------------------
+r43642 | quinlan | 2004-09-10 05:25:50 +0000 (Fri, 10 Sep 2004) | 2 lines
+
+the command line tool is spamc, so rephrase a bit here
+
+------------------------------------------------------------------------
+r43641 | quinlan | 2004-09-10 05:15:39 +0000 (Fri, 10 Sep 2004) | 2 lines
+
+touch up Debian documentation
+
+------------------------------------------------------------------------
+r43640 | quinlan | 2004-09-10 02:02:40 +0000 (Fri, 10 Sep 2004) | 2 lines
+
+remove Sys::Syslog because it's in Perl 5.6.1 and later, other tweaks
+
+------------------------------------------------------------------------
+r43637 | felicity | 2004-09-09 23:31:14 +0000 (Thu, 09 Sep 2004) | 1 line
+
+prep rc5 devel
+------------------------------------------------------------------------
+r43635 | felicity | 2004-09-09 22:50:14 +0000 (Thu, 09 Sep 2004) | 1 line
+
+prepping, again, for 3.0.0rc4
+------------------------------------------------------------------------
 r43629 | jm | 2004-09-09 19:36:26 +0000 (Thu, 09 Sep 2004) | 1 line
 
 MANIFEST updated to include some more recent perceptron scripts/input
