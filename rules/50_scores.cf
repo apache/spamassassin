@@ -515,7 +515,6 @@ score NIGERIAN_SCAM                  1.0
 score NIGERIAN_SCAM_8                1.0
 score ONLINE_BIZ_OPS                 1.0
 score PRINT_OUT_AND_FAX              1.0
-score RCVD_IN_VISI                   1.0
 score REMOVE_ES_01                   1.0
 score REMOVE_ES_02                   1.0
 score REMOVE_ES_03                   1.0
@@ -650,16 +649,18 @@ score RAZOR2_CHECK		     3.5
 score DCC_CHECK                      2.0
 score PYZOR_CHECK                    3.0
 
-score RCVD_IN_RELAYS_ORDB_ORG	     2.0
+score RCVD_IN_RELAYS_ORDB_ORG	     2.5
 score RCVD_IN_OSIRUSOFT_COM	     2.0
 score X_OSIRU_DUL_FH		    -1.5
 score X_OSIRU_SPAM_SRC		     2.0
-score X_OSIRU_SPAMWARE_SITE	     5.0
+score X_OSIRU_SPAMWARE_SITE	     4.0
 score RCVD_IN_RFCI		     0.5
-score RCVD_IN_ORBS                   2.0
+score RCVD_IN_ORBS                   3.0
 score RCVD_IN_DSBL                   3.0
 score RCVD_IN_MULTIHOP_DSBL          1.0
 score RCVD_IN_SBL                    3.0
+score RCVD_IN_UNCONFIRMED_DSBL       0.5
+score RCVD_IN_VISI                   2.0
 
 # The fudge scores below expect that you use the following scores for MAPS
 #score RCVD_IN_VARBL		     4.5
