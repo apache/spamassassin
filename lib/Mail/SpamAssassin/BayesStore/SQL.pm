@@ -1413,6 +1413,9 @@ sub restore_database {
     return 0;
   }
 
+  my $token_error_count = 0;
+  my $seen_error_count = 0;
+
   while (my $line = <DUMPFILE>) {
     chomp($line);
     $line_count++;
@@ -1481,7 +1484,7 @@ sub restore_database {
 
       unless ($self->_put_token($token, $spam_count, $ham_count, $atime)) {
 	dbg("bayes: Error inserting token for line: $line");
-	$error_p = 1;
+	$token_error_count++;
       }
       $token_count++;
     }
@@ -1502,12 +1505,24 @@ sub restore_database {
 
       unless ($self->seen_put($msgid, $flag)) {
 	dbg("bayes: Error inserting msgid in seen table for line: $line");
-	$error_p = 1;
+	$seen_error_count++;
       }
     }
     else {
       dbg("bayes: Skipping unknown line: $line");
       next;
+    }
+
+    if ($token_error_count >= 20) {
+      warn "Encountered too many errors (20) while parsing token line, reverting to empty database and exiting.\n";
+      $self->clear_database();
+      return 0;
+    }
+
+    if ($seen_error_count >= 20) {
+      warn "Encountered too many errors (20) while parsing seen lines, reverting to empty database and exiting.\n";
+      $self->clear_database();
+      return 0;
     }
   }
   close(DUMPFILE);
