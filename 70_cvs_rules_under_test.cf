@@ -47,3 +47,23 @@ score T_MIME_BOUND_TEP		1.0
 
 header T_MIME_BOUND_MULTIPART	Content-Type =~ /Multipart.?Boundary/
 score T_MIME_BOUND_MULTIPART	1.0
+
+# results for quinlan
+#  0.149    0.458    0.000    1.00    0.72    0.50  T_FROM_TOPICA
+header T_FROM_TOPICA		From:addr =~ /\@(?:\w+\.)?email-publisher\.com$/
+describe T_FROM_TOPICA		From an address at email-publisher.com
+score T_FROM_TOPICA		0.5
+
+# results for quinlan
+#  0.245    0.727    0.013    0.98    0.57    0.50  T_FROM_ALL_NUMS
+header __FROM_JUST_NUMBER	From:addr =~ /^\d+\@/
+header __FROM_PHONE		From:addr =~ /^\d{3}(?:[-.]?\d{3}[-.]?\d{4}|\d{7})\@/
+meta T_FROM_ALL_NUMS		(__FROM_JUST_NUMBER && !__FROM_PHONE)
+describe T_FROM_ALL_NUMS	From an address that is all numbers (non-phone)
+score T_FROM_ALL_NUMS		0.5
+
+# results for quinlan
+#  0.456    1.400    0.000    1.00    0.79    0.50  T_EASY_MONEY
+body T_EASY_MONEY		/\b(?:easy|big|fast)\s*(?:money|cash|bucks|(?-i:E)uros)\b/i
+describe T_EASY_MONEY		Body claims "easy money" or similar
+score T_EASY_MONEY		0.5
