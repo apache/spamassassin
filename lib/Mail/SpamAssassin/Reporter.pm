@@ -273,8 +273,8 @@ sub spamcop_report {
   my $header = $original;
   $header =~ s/\r?\n\r?\n.*//s;
   my $date = Mail::SpamAssassin::Util::receive_date($header);
-  if ($date && $date < time - 3*86400) {
-    warn("reporter: SpamCop message older than 3 days, not reporting\n");
+  if ($date && $date < time - 2*86400) {
+    warn("reporter: SpamCop message older than 2 days, not reporting\n");
     return 0;
   }
 
