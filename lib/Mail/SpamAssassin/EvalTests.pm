@@ -3324,24 +3324,53 @@ sub check_host_domain_ratio {
 
 ###########################################################################
 
-sub check_obfu_word {
-  my($self, $body, $word) = @_;
+{
+  my %obfu_cache = ();
 
-  my $new = $word;
-  $new =~ s/(\w)/${1}\\W+/g;
-  $new =~ s/\\W\+$//;
-  $new =~ s/a/\[a@\]/gi;
-  $new =~ s/o/\[o0\]/gi;
-  $new =~ s/i/\[i1|\]/gi;
-  $new =~ s/l/\[l1|\]/gi;
-  $new =~ s/v/(?:v|\\\/)/gi;
+  sub check_obfu_word {
+    my($self, $body, $word) = @_;
 
-  foreach (@{$body}) {
-    next if /\b$word\b/i;
-    return 1 if /$new/i;
+    # force lowercase since we're case insensitive anyway
+    $word = lc $word;
+
+    my $new;
+    unless ($obfu_cache{$word}) {
+      $new = $word;
+
+      # turn "foo" into "f\W*o\W*o" to match interuptus
+      # deal with character obfuscation below
+      $new =~ s/(\w)/${1}\\W*/g;
+      $new =~ s/\\W\*$//;
+
+      # 1337 speak
+      $new =~ s/a/\[a@\]/g;
+      $new =~ s/e/\[e3\]/g;
+      $new =~ s/o/\[o0\]/g;
+      $new =~ s/i/\[i1|\]/g;
+      $new =~ s/l/\[l1|\]/g;
+
+      # v -> \/
+      $new =~ s/v/(?:v|\\\/)/g;
+
+      # mad skillz yo
+      $new =~ s/s$/\[sz\]/g;
+
+      # cache both the word and the new RE
+      push(@{$obfu_cache{$word}}, qr/\b$word\b/i, qr/\b$new\b/i);
+    }
+
+    # this word will be cached now, use that version
+    ($word,$new) = @{$obfu_cache{$word}};
+
+    foreach (@{$body}) {
+      if (!/$word/ && /$new/) {
+	#warn ">> $new\n$_\n\n";
+        return 1;
+      }
+    }
+
+    return 0;
   }
-
-  return 0;
 }
 
 ###########################################################################
