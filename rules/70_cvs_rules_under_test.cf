@@ -127,6 +127,14 @@ meta T_HTML_FAKED_IMS		(__ANY_IMS_MUA && __MIME_HTML && !(__TAG_EXISTS_BODY && _
 meta T_HTML_FAKED_AOL		(__ANY_AOL_MUA && __MIME_HTML && !__TAG_EXISTS_HTML)
 meta T_HTML_FAKED_QUALCOMM	(__ANY_QUALCOMM_MUA && __MIME_HTML && !__TAG_EXISTS_HTML)
 
+# 2003-03-06: quinlan
+# bug 1261
+rawbody T_BASE64_ENC_TEXT		eval:check_for_mime('t_mime_base64_encoded_text')
+
+# 2003-03-06: quinlan
+rawbody T_MIME_BASE64_WITHOUT_NAME	eval:check_for_mime('t_mime_base64_without_name')
+rawbody T_MIME_BASE64_ISO_8859		eval:check_for_mime('t_mime_base64_iso_8859')
+
 # 2003-02-28: quinlan
 # Note: I'll probably rename these later if they get added.
 header T_MSG_ID_ADDED_BY_MTA_SHORT	eval:mta_added_message_id('short')
@@ -170,6 +178,14 @@ body T_REMOVE_REMOVAL_64	/remov(?:e|al).{0,64}remov(?:e|al)/i
 rawbody T_REMOVE_REMOVAL_16R	/remov(?:e|al).{0,16}remov(?:e|al)/i
 rawbody T_REMOVE_REMOVAL_32R	/remov(?:e|al).{0,32}remov(?:e|al)/i
 rawbody T_REMOVE_REMOVAL_64R	/remov(?:e|al).{0,64}remov(?:e|al)/i
+
+# 2003-03:06: quinlan
+# bug possible replacements for ADVERT_CODE and ADVERT_CODE2
+header T_ADVERT_CODE_A		Subject =~ /^\W*(?!ADV\.)ADV\b/i
+#
+header T_ADVERT_CODE2_A		Subject =~ /\w.*\bA\s*D\s*V\b/i
+header T_ADVERT_CODE2_B		Subject =~ /\w.*\b(?!ADV\.)A\s*D\s*V\b/i
+header T_ADVERT_CODE2_C		Subject =~ /\w.*[^A-Z ]A\s*D\s*V[^A-Z ]/i
 
 # 2003-03-04: quinlan (my final attempt at this idea)
 # bug 821: test for "good" RFC2369 headers (was: reverse SUSPECT_LIST_HEADERS)
