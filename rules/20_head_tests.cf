@@ -27,6 +27,9 @@ require_version @@VERSION@@
 header HEAD_LONG		eval:check_for_long_header()
 describe HEAD_LONG		Message headers are very long
 
+header MISSING_HB_SEP		eval:check_for_missing_hb_separator()
+describe MISSING_HB_SEP		Missing blank line between message header and body
+
 header NO_REAL_NAME		From =~ /^["\s]*\<?\S+\@\S+\>?\s*$/
 describe NO_REAL_NAME		From: does not include a real name
 

@@ -3280,8 +3280,12 @@ sub check_for_illegal_ip {
 
 sub check_for_long_header {
   my ($self) = @_;
-
   return defined $self->{msg}->{'truncated_header'};
+}
+
+sub check_for_missing_hb_separator {
+  my ($self) = @_;
+  return defined $self->{msg}->{'missing_head_body_separator'};
 }
 
 1;
