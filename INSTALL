@@ -221,6 +221,11 @@ skipped.
 Note: SpamAssassin will not warn you if these are installed, but the
 version is too low for them to be used.
 
+  - MIME::Base64
+
+    This module is highly recommended to increase the speed with which
+    Base64 encoded messages/mail parts are decoded.
+
   - DB_File (from CPAN, included in many distributions)
 
     Used to store data on-disk, for the Bayes-style logic and
