@@ -672,6 +672,14 @@ describe YR_MEMBERSHIP_EXCH     Subject contains 'Your Membership Exchange'
 # jm: somehow these guys keep slipping through, and they're very persistent.
 # they use both azoogle.com and azogle.com, but this header is always
 # in this format.
-header AZOOGLE                X-Info =~ /service to abuse\@azoogle\.com$/
-describe AZOOGLE              From azoogle.com, azogle.com, etc.
+header AZOOGLE			X-Info =~ /service to abuse\@azoogle\.com$/
+describe AZOOGLE		From azoogle.com, azogle.com, etc.
+
+header SUBJECT_APPROVED		Subject =~ /approv(?:ed|al).?[.!*]/i
+describe SUBJECT_APPROVED	Subject talks about being approved
+
+header __OPT_HEADER_SUBJ	ALL =~ /^(?:Resent-)?Subject:.*opt.?(in|out|oem|ed|ion-in|[\d@])(?:\b|\d|\@)/im
+header __OPT_HEADER_ALL		ALL =~ /opt.?(?:in|out|oem|ed|ion-in|[\d@])(?:\b|\d|\@)/i
+meta OPT_HEADER			(__OPT_HEADER_ALL && !__OPT_HEADER_SUBJ)
+describe OPT_HEADER		Headers include an "opt"ed phrase
 

@@ -45,9 +45,10 @@ describe REFERENCES		Has a valid-looking References header
 tflags REFERENCES               nice
 
 # these headers have very low correlation with spam
+header __USER_AGENT		exists:User-Agent
+meta USER_AGENT			( __USER_AGENT && ((USER_AGENT.+ +) < 1) )
 header CRON_ENV                 exists:X-Cron-Env
 header IN_REP_TO                exists:In-Reply-To
-header USER_AGENT               exists:User-Agent
 header X_AUTH_WARNING           exists:X-Authentication-Warning
 header X_MAILING_LIST           exists:X-Mailing-List
 header X_LOOP                   exists:X-Loop
