@@ -122,7 +122,7 @@ sub readscores {
 }
 
 sub writescores_c {
-  my $size = (scalar keys %{$scores}) + 100; # allow expansion without recompile
+  my $size = (scalar keys %{$scores}); # adding 100 here makes the GA take a lot longer since the genome's 100 genes longer! plus messes up scores output - crh
 
   open (DAT, ">tmp/scores.data");
   print DAT "N$size\n";
