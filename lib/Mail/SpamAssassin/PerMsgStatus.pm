@@ -1113,9 +1113,9 @@ sub do_head_tests {
         $_ = shift;
         if ($self->get(q#'.$hdrname.'#, q#'.$def.'#) '.$testtype.'~ '.$pat.') {
            $self->got_hit (q#'.$rulename.'#, q{});
-	   dbg("Ran header regex rule '.$rulename.' ======> got hit", "rulesrun", 1);
+	   dbg("Ran header regex rule '.$rulename.' ======> got hit", "rulesrun", 1) if $Mail::SpamAssassin::DEBUG->{enabled};
         } else {
-	   dbg("Ran header regex rule '.$rulename.' but did not get hit", "rulesrun", 1);
+	   dbg("Ran header regex rule '.$rulename.' but did not get hit", "rulesrun", 1) if $Mail::SpamAssassin::DEBUG->{enabled};
 	}
     }
     ';
@@ -1195,9 +1195,9 @@ sub do_body_tests {
            $_ = shift;
            if ('.$pat.') { 
 	       $self->got_body_pattern_hit (q{'.$rulename.'}); 
-	       dbg("Ran body-text regex rule '.$rulename.' ======> got hit", "rulesrun", 2);
+	       dbg("Ran body-text regex rule '.$rulename.' ======> got hit", "rulesrun", 2) if $Mail::SpamAssassin::DEBUG->{enabled};
 	   } else {
-	       dbg("Ran body-text regex rule '.$rulename.' but did not get hit", "rulesrun", 2);
+	       dbg("Ran body-text regex rule '.$rulename.' but did not get hit", "rulesrun", 2) if $Mail::SpamAssassin::DEBUG->{enabled};
 	   }
     }
     ';
@@ -1394,9 +1394,9 @@ sub do_body_uri_tests {
        $_ = shift;
        if ('.$pat.') { 
            $self->got_uri_pattern_hit (q{'.$rulename.'});
-	   dbg("Ran uri test rule '.$rulename.' ======> got hit", "rulesrun", 4);
+	   dbg("Ran uri test rule '.$rulename.' ======> got hit", "rulesrun", 4) if $Mail::SpamAssassin::DEBUG->{enabled};
        } else {
-	   dbg("Ran uri test rule '.$rulename.' but did not get hit", "rulesrun", 4);
+	   dbg("Ran uri test rule '.$rulename.' but did not get hit", "rulesrun", 4) if $Mail::SpamAssassin::DEBUG->{enabled};
        }
     }
     ';
@@ -1479,9 +1479,9 @@ sub do_rawbody_tests {
        $_ = shift;
        if ('.$pat.') { 
            $self->got_body_pattern_hit (q{'.$rulename.'});
-	   dbg("Ran body_pattern_hit rule '.$rulename.' ======> got hit", "rulesrun", 8);
+	   dbg("Ran body_pattern_hit rule '.$rulename.' ======> got hit", "rulesrun", 8) if $Mail::SpamAssassin::DEBUG->{enabled};
        } else {
-	   dbg("Ran body_pattern_hit rule '.$rulename.' but did not get hit", "rulesrun", 8);
+	   dbg("Ran body_pattern_hit rule '.$rulename.' but did not get hit", "rulesrun", 8) if $Mail::SpamAssassin::DEBUG->{enabled};
        }
     }
     ';
@@ -1556,9 +1556,9 @@ sub do_full_tests {
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
 	if ($$fullmsgref =~ '.$pat.') {
 	  $self->got_body_pattern_hit (q{'.$rulename.'});
-	  dbg("Ran full-text regex rule '.$rulename.' =====> got hit", "rulesrun", 16);
+	  dbg("Ran full-text regex rule '.$rulename.' =====> got hit", "rulesrun", 16) if $Mail::SpamAssassin::DEBUG->{enabled};
 	} else {
-	  dbg("Ran full-text regex rule '.$rulename.' but did not get hit", "rulesrun", 16);
+	  dbg("Ran full-text regex rule '.$rulename.' but did not get hit", "rulesrun", 16) if $Mail::SpamAssassin::DEBUG->{enabled};
 	}
       }
     ';
@@ -1705,19 +1705,18 @@ sub run_eval_tests {
         $result = $self->$evalsub(@args);
     };
 
-    if ($result) {
-	dbg("Ran run_eval_test rule $rulename ======> got hit", "rulesrun", 32);
-    } else {
-	dbg("Ran run_eval_test rule $rulename but did not get hit", "rulesrun", 32);
-    }
-
     if ($@) {
       warn "Failed to run $rulename SpamAssassin test, skipping:\n".
       		"\t($@)\n";
       next;
     }
 
-    if ($result) { $self->got_hit ($rulename, $prepend2desc); }
+    if ($result) {
+	$self->got_hit ($rulename, $prepend2desc);
+	dbg("Ran run_eval_test rule $rulename ======> got hit", "rulesrun", 32) if $Mail::SpamAssassin::DEBUG->{enabled};
+    } else {
+	dbg("Ran run_eval_test rule $rulename but did not get hit", "rulesrun", 32) if $Mail::SpamAssassin::DEBUG->{enabled};
+    }
   }
 }
 
@@ -1750,19 +1749,18 @@ sub run_rbl_eval_tests {
     # A run with $job eq 0 is just to start DNS queries
     if ($needresult eq 1)
     {
-	if ($result) {
-	    dbg("Ran run_rbl_eval_test rule $rulename ======> got hit", "rulesrun", 64);
-	} else {
-	    dbg("Ran run_rbl_eval_test rule $rulename but did not get hit", "rulesrun", 64);
-	}
-
 	if ($@) {
 	  warn "Failed to run $rulename RBL SpamAssassin test, skipping:\n".
 		    "\t($@)\n";
 	  next;
 	}
 
-	if ($result) { $self->got_hit ($rulename, "RBL: "); }
+	if ($result) {
+	    $self->got_hit ($rulename, "RBL: ");
+	    dbg("Ran run_rbl_eval_test rule $rulename ======> got hit", "rulesrun", 64) if $Mail::SpamAssassin::DEBUG->{enabled};
+	} else {
+	    dbg("Ran run_rbl_eval_test rule $rulename but did not get hit", "rulesrun", 64) if $Mail::SpamAssassin::DEBUG->{enabled};
+	}
     }
   }
 }
