@@ -816,7 +816,7 @@ int message_filter(struct transport *tp, const char *username,
     float version;
     int response;
     int failureval;
-    SSL_CTX *ctx;
+    SSL_CTX *ctx = NULL;
     SSL *ssl = NULL;
     SSL_METHOD *meth;
 
