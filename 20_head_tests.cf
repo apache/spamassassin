@@ -144,6 +144,9 @@ header __MSGID_BEFORE_OKAY		Message-Id =~ /\@[a-z0-9.-]+\.(?:yahoo|wanadoo)(?:\.
 meta MSGID_FROM_MTA_HEADER		(__MSGID_BEFORE_RECEIVED && !__MSGID_BEFORE_OKAY)
 describe MSGID_FROM_MTA_HEADER	Message-Id was added by a relay
 
+header MSGID_FROM_MTA_HOTMAIL	Message-Id =~ /<MC\d{1,2}-F{1,2}\w{21,22}\@\S*hotmail\.com>/
+describe MSGID_FROM_MTA_HOTMAIL	Message-Id was added by a hotmail.com relay
+
 ###########################################################################
 
 header DATE_SPAMWARE_Y2K	Date =~ /^[A-Z][a-z]{2}, \d\d [A-Z][a-z]{2} [0-6]\d \d\d:\d\d:\d\d [A-Z]{3}$/

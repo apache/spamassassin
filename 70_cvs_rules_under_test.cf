@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.556 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.557 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -68,11 +68,6 @@ describe T_RATWARE_RCVD_BONUS_SPC Received headers forged (extra spaces)
 
 # 2003-02-23: quinlan
 # Message-Id: format tests
-# hotmail (this rule makes me nervous, I wonder if any of us gets
-# enough hotmail ham to get a good score for it)
-# 2003-05-25: tvd
-# it actually is a strong spamsign for me.  almost 1% of spam, 0 fps.
-header T_MSGID_ADDED_BY_HOTMAIL	Message-Id =~ /<MC\d{1,2}-F{1,2}\w{21,22}\@\S*hotmail\.com>/
 # 13 hexadecimal digits instead of 12
 header T_MSGID_OUTLOOK_HEX	Message-Id =~ /<[a-f0-9]{13}\$[a-f0-9]{8}\$[a-f0-9]{8}\@/
 # this one high correlation with ratware "EMWAC SMTPRS"
