@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rcvd_parser");
-use Test; BEGIN { plan tests => 30 };
+use Test; BEGIN { plan tests => 34 };
 
 
 use strict;
@@ -42,6 +42,48 @@ Received: from asterix.laurier.org (lns-p19-8-82-65-66-244.adsl.proxad.net [82.6
 } => q{
 
 [ ip=213.228.0.129 rdns=postfix3-2.free.fr helo=postfix3-2.free.fr by=totor.example.net ident=foobar envfrom= id= ] [ ip=82.65.66.244 rdns=lns-p19-8-82-65-66-244.adsl.proxad.net helo=asterix.laurier.org by=postfix3-2.free.fr ident= envfrom= id=7BACDC372 ]
+
+},
+q{
+
+Received: from 0 ([61.31.135.91]) by bass.bass.com.eg with Microsoft SMTPSVC(5.0.2195.6713);
+         Tue, 21 Sep 2004 08:59:06 +0300
+
+} => q{
+
+[ ip=61.31.135.91 rdns= helo=0 by=bass.bass.com.eg ident= envfrom= intl=0 id= ]
+
+},
+q{
+
+      Received: from inet-vrs-05.redmond.corp.microsoft.com ([157.54.6.157])
+        by INET-IMC-05.redmond.corp.microsoft.com with Microsoft
+        SMTPSVC(5.0.2195.6624); Thu, 6 Mar 2003 12:02:35 -0800
+
+} => q{
+
+[ ip=157.54.6.157 rdns= helo=inet-vrs-05.redmond.corp.microsoft.com by=INET-IMC-05.redmond.corp.microsoft.com ident= envfrom= id= ]
+
+},
+q{
+
+      Received: from tthompson ([217.35.105.172] unverified) by
+        mail.neosinteractive.com with Microsoft SMTPSVC(5.0.2195.5329);
+        Tue, 11 Mar 2003 13:23:01 +0000
+
+} => q{
+
+[ ip=217.35.105.172 rdns= helo=tthompson by=mail.neosinteractive.com ident= envfrom= id= ]
+
+},
+q{
+
+      Received: from 0 ([61.31.138.57] RDNS failed) by nccdi.com with
+        Microsoft SMTPSVC(6.0.3790.0); Thu, 23 Sep 2004 08:51:06 -0700
+
+} => q{
+
+[ ip=61.31.138.57 rdns= helo=0 by=nccdi.com ident= envfrom= id= ]
 
 },
 q{
