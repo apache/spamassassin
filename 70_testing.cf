@@ -159,18 +159,17 @@ meta T_HTML_LINK_IMAGE_BUG_4	T_HTML_LINK_IMAGE_BUG_1 && T_HTML_LINK_IMAGE2
 meta T_HTML_LINK_IMAGE_BUG_5	T_HTML_LINK_IMAGE_BUG_2 && T_HTML_LINK_IMAGE2
 meta T_HTML_LINK_IMAGE_BUG_6	T_HTML_LINK_IMAGE_BUG_3 && T_HTML_LINK_IMAGE2
 
-body T_HTML_EXTRA_CLOSE_0	eval:html_test('extra_close')
-body T_HTML_EXTRA_CLOSE_1	eval:html_eval('extra_close', '> 1')
-body T_HTML_EXTRA_CLOSE_2	eval:html_eval('extra_close', '> 2')
-body T_HTML_EXTRA_CLOSE_4	eval:html_eval('extra_close', '> 4')
-body T_HTML_EXTRA_CLOSE_8	eval:html_eval('extra_close', '> 8')
-body T_HTML_EXTRA_CLOSE_16	eval:html_eval('extra_close', '> 16')
-
-body T_HTML_EXTRA_CLOSE_B	eval:html_range('extra_close_ratio', '0.01', '0.02')
-body T_HTML_EXTRA_CLOSE_C	eval:html_range('extra_close_ratio', '0.02', '0.04')
-body T_HTML_EXTRA_CLOSE_D	eval:html_range('extra_close_ratio', '0.04', '0.08')
-body T_HTML_EXTRA_CLOSE_E	eval:html_range('extra_close_ratio', '0.08', '0.16')
-body T_HTML_EXTRA_CLOSE_F	eval:html_range('extra_close_ratio', '0.16', '0.32')
+body T_HTML_EXTRA_CLOSE_06	eval:html_range('closed_extra_ratio', '0.06', 'inf')
+body T_HTML_EXTRA_CLOSE_07	eval:html_range('closed_extra_ratio', '0.07', 'inf')
+body T_HTML_EXTRA_CLOSE_08	eval:html_range('closed_extra_ratio', '0.08', 'inf')
+body T_HTML_EXTRA_CLOSE_09	eval:html_range('closed_extra_ratio', '0.09', 'inf')
+body T_HTML_EXTRA_CLOSE_10	eval:html_range('closed_extra_ratio', '0.10', 'inf')
+body T_HTML_EXTRA_CLOSE_11	eval:html_range('closed_extra_ratio', '0.11', 'inf')
+body T_HTML_EXTRA_CLOSE_12	eval:html_range('closed_extra_ratio', '0.12', 'inf')
+body T_HTML_EXTRA_CLOSE_13	eval:html_range('closed_extra_ratio', '0.13', 'inf')
+body T_HTML_EXTRA_CLOSE_14	eval:html_range('closed_extra_ratio', '0.14', 'inf')
+body T_HTML_EXTRA_CLOSE_15	eval:html_range('closed_extra_ratio', '0.15', 'inf')
+body T_HTML_EXTRA_CLOSE_16	eval:html_range('closed_extra_ratio', '0.16', 'inf')
 
 # try allowing uppercase for the first letter
 body __T_LONGWORDS_A	/\b(?:[A-Za-z][a-z]{7,}\s+){6}/
