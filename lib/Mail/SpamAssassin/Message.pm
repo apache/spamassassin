@@ -124,13 +124,12 @@ sub new {
 
   # Go through all the headers of the message
   my $header = '';
-  my $mbxsep = MBX_SEPERATOR;
   while ( my $last = shift @message ) {
     if ( $last =~ /^From\s/ ) {
 	# mbox formated mailbox
 	$self->{'mbox_sep'} = $last;
 	next;
-    } elsif ($last =~ /$mbxsep/) {
+    } elsif ($last =~ MBX_SEPERATOR) {
 	# Munge the mbx message seperator into mbox format as a sort of
 	# de facto portability standard in SA's internals.  We need to
 	# to this so that Mail::SpamAssassin::Util::parse_rfc822_date
@@ -142,18 +141,18 @@ sub new {
 	    # $4 = hour
 	    # $5 = min
 	    # $6 = sec
-	    my @arr = localtime(timelocal($6,$5,$4,$1,$MONTH{lc($2)}-1,$3)) ;
-	    my $address ;
+	    my @arr = localtime(timelocal($6,$5,$4,$1,$MONTH{lc($2)}-1,$3));
+	    my $address;
 	    foreach (@message) {
 		if (/From:\s[^<]+<([^>]+)>/) {
-		    $address = $1 ;
-		    last ;
+		    $address = $1;
+		    last;
 		} elsif (/From:\s([^<^>]+)/) {
-		    $address = $1 ;
-		    last ;
+		    $address = $1;
+		    last;
 		}
 	    }
-	    $self->{'mbox_sep'} = "From $address $DAY_OF_WEEK[$arr[6]] $2 $1 $4:$5:$6 $3\n" ;
+	    $self->{'mbox_sep'} = "From $address $DAY_OF_WEEK[$arr[6]] $2 $1 $4:$5:$6 $3\n";
 	    next;
 	}
     }
