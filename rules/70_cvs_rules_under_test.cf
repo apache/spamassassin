@@ -55,16 +55,6 @@ meta T_FROM_ALL_NUMS		(__FROM_JUST_NUMBER && !__FROM_PHONE)
 describe T_FROM_ALL_NUMS	From an address that is all numbers (non-phone)
 score T_FROM_ALL_NUMS		0.5
 
-# results for quinlan
-#  0.482    1.454    0.013    0.99    0.61    0.50  T_SOME_BREAKTHROUGH
-body T_SOME_BREAKTHROUGH	/(?:science|medical|major|scientific|fundamental|technology|revolutionary)\s+breakthrough/i
-score T_SOME_BREAKTHROUGH	0.5
-
-# results for quinlan
-#  0.193    0.592    0.000    1.00    0.74    0.50  T_SELECTED_YOU
-body T_SELECTED_YOU		/(?:you (?:have been|were) selected|we (?:have )?selected you)/i
-score T_SELECTED_YOU		0.5
-
 body T_HTML_UNTITLED_TITLE	eval:html_eval('title_text', '=~ /Untitled/i')
 describe T_HTML_UNTITLED_TITLE	HTML title contains "Untitled"
 score T_HTML_UNTITLED_TITLE	2.5
@@ -73,18 +63,9 @@ body T_HTML_EMPTY_TITLE		eval:html_eval('title_text', '!~ /\S/s')
 describe T_HTML_EMPTY_TITLE	HTML title contains no text
 score T_HTML_EMPTY_TITLE	2.5
 
-# Sep 23 2002 jm: another spamhaus rule
-header T_QVES_COM               Received =~ /by email.qves.com with Microsoft/
-describe T_QVES_COM             Sent by a known spamhaus (qves)
-score T_QVES_COM                3.0
-
 uri T_ADCLICK                   m,\Qhttp://www.adclick.ws/p\E,
 describe T_ADCLICK              Contains adclick URL
 score T_ADCLICK                 2.0
-
-# real hotmail outgoings use 'mc1-s3.law16...' or 'f206..' etc.
-header T_FORGED_MX_HOTMAIL      Received =~ /^from mx\d+\.hotmail\.com /m
-score T_FORGED_MX_HOTMAIL       2.0
 
 # bug 1022: MGM_POSTCARD #1
 body T_UNSUBSCRIBE_POSTCARD	/send a postcard to Unsubscribe/
@@ -112,12 +93,6 @@ score T_UNSUBSCRIBE_WTF		2.0
 header T_RATWARE_CDO		X-Mailer =~ /Microsoft CDO for Windows 2000/
 describe T_RATWARE_CDO		Sent from "Microsoft CDO for Windows 2000" 
 score T_RATWARE_CDO		1.0
-
-# results for quinlan:
-# 0.421    1.292    0.000    1.00    0.79    1.00  T_RATWARE_EMWAC
-header T_RATWARE_EMWAC		Received =~ /EMWAC SMTPRS/
-describe T_RATWARE_EMWAC	Sent via a relay running "EMWAC SMTPRS"
-score T_RATWARE_EMWAC		1.0
 
 # results for quinlan:
 # 0.368    1.131    0.000    1.00    0.78    1.00  T_RATWARE_THEBAT
