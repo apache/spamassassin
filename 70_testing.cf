@@ -104,23 +104,6 @@ meta T_SPF_HELO_PASS_NO_SBL	(SPF_HELO_PASS && !RCVD_IN_SBL)
 tflags T_SPF_PASS_NO_SBL	net nice
 tflags T_SPF_HELO_PASS_NO_SBL	net nice
 
-# long-term test
-# IP-based volume and date of first email might be better considering
-# that SBL is a domain blacklist, but this is a start
-header __SENDERBASE_VOL_SPIKE	eval:check_rbl_sub('senderbase', 'S23 > S24 + 1')
-header __SENDERBASE_45_DAYS	eval:check_rbl_sub('senderbase', '(time - S25 > 45*86400)')
-header __SENDERBASE_90_DAYS	eval:check_rbl_sub('senderbase', '(time - S25 > 90*86400)')
-header __SENDERBASE_180_DAYS	eval:check_rbl_sub('senderbase', '(time - S25 > 180*86400)')
-header __SENDERBASE_360_DAYS	eval:check_rbl_sub('senderbase', '(time - S25 > 360*86400)')
-meta T_SPF_PASS_NO_SBL_45D	(SPF_PASS && !RCVD_IN_SBL && !__SENDERBASE_VOL_SPIKE && __SENDERBASE_45_DAYS)
-meta T_SPF_PASS_NO_SBL_90D	(SPF_PASS && !RCVD_IN_SBL && !__SENDERBASE_VOL_SPIKE && __SENDERBASE_90_DAYS)
-meta T_SPF_PASS_NO_SBL_180D	(SPF_PASS && !RCVD_IN_SBL && !__SENDERBASE_VOL_SPIKE && __SENDERBASE_180_DAYS)
-meta T_SPF_PASS_NO_SBL_360D	(SPF_PASS && !RCVD_IN_SBL && !__SENDERBASE_VOL_SPIKE && __SENDERBASE_360_DAYS)
-tflags T_SPF_PASS_NO_SBL_45D net nice
-tflags T_SPF_PASS_NO_SBL_90D net nice
-tflags T_SPF_PASS_NO_SBL_180D net nice
-tflags T_SPF_PASS_NO_SBL_360D net nice
-
 # Carl Hutzler of AOL says: "block on sight" (mail sent 07 May 2004 to discuss
 # at lists.surbl.org).  not much hits for me, but let's see for everyone else
 uri T_REDIR_AOL_CLICKTHRU     /www\.aol\.com\/ams\/clickThruRedirect\.adp/i
@@ -133,33 +116,23 @@ uri T_REDIR_AOL_CLICKTHRU     /www\.aol\.com\/ams\/clickThruRedirect\.adp/i
 header T_FAKE_HELO_MAIL_COM_DOM  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=(?:\S+\.|)(?:(?:mail|email|iname|cheerful|consultant|europe|mindless|myself|post|techie|usa|writeme|2die4|artlover|bikerider|catlover|cliffhanger|cutey|doglover|gardener|hot-shot|inorbit|loveable|mad\.scientist|playful|poetic|popstar|saintly|seductive|soon|whoever|winning|witty|yours|africamail|arcticmail|asia|australiamail|europe|japan|samerica|usa|berlin|dublin|london|madrid|moscowmail|munich|nycmail|paris|rome|sanfranmail|singapore|tokyo|accountant|adexec|allergist|alumnidirector|archaeologist|chemist|clerk|columnist|comic|consultant|counsellor|deliveryman|diplomats|doctor|dr|engineer|execs|financier|geologist|graphic-designer|insurer|journalist|lawyer|legislator|lobbyist|minister|optician|pediatrician|presidency|priest|publicist|realtyagent|registerednurses|repairman|representative|rescueteam|scientist|sociologist|teacher|techietechnologist|umpire)\.com|(?:programmer|earthling|hairdresser)\.net|musician\.org) /i
 header T_FAKE_HELO_MAIL_COM_DOM2  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=(?:(?:mail|email|iname|cheerful|consultant|europe|mindless|myself|post|techie|usa|writeme|2die4|artlover|bikerider|catlover|cliffhanger|cutey|doglover|gardener|hot-shot|inorbit|loveable|mad\.scientist|playful|poetic|popstar|saintly|seductive|soon|whoever|winning|witty|yours|africamail|arcticmail|asia|australiamail|europe|japan|samerica|usa|berlin|dublin|london|madrid|moscowmail|munich|nycmail|paris|rome|sanfranmail|singapore|tokyo|accountant|adexec|allergist|alumnidirector|archaeologist|chemist|clerk|columnist|comic|consultant|counsellor|deliveryman|diplomats|doctor|dr|engineer|execs|financier|geologist|graphic-designer|insurer|journalist|lawyer|legislator|lobbyist|minister|optician|pediatrician|presidency|priest|publicist|realtyagent|registerednurses|repairman|representative|rescueteam|scientist|sociologist|teacher|techietechnologist|umpire)\.com|(?:programmer|earthling|hairdresser)\.net|musician\.org) /i
 
-# cream of the rules removed from old releases, may need some work
-body T_GREAT_OFFER_A		/offer expires/i
-body T_GREAT_OFFER_B		/see full offer for details/i
-body T_GREAT_OFFER_C		/great offer/i
+# worth it?
 body T_SAVE_BUCKS		/\bsave \$/i
 
 # concept: you have a choice + something great
-body T_OFFER_BY_CHOICE_1	/\b(?:wish|want|question|unsubscrib\w+|discontinue|remove).{0,64}\b(?:gift|offer|special|promotion)/i
-body T_OFFER_BY_CHOICE_2	/\b(?:wish|want|question|unsub\w+|discontinue|remove).{0,64}\b(?:gift|offer|special|promotion)/i
-body T_OFFER_BY_CHOICE_3	/\b(?:wish|want|question|unsubscrib\w+|discontinue|remove|permission).{0,64}\b(?:gift|offer|special|promotion)/i
-body T_OFFER_BY_CHOICE_4	/\b(?:wish|want|question|unsub\w+|discontinue|remove|permission).{0,64}\b(?:gift|offer|special|promotion)/i
-body T_OFFER_BY_CHOICE_5	/\b(?:wish|want|question|unsubscrib\w+|(?:dis)?continue|remove|permission).{0,64}\b(?:gift|offer|special|promotion)/i
-body T_OFFER_BY_CHOICE_6	/\b(?:wish|want|question|unsub\w+|(?:dis)?continue|remove|permission).{0,64}\b(?:gift|offer|special|promotion)/i
-body T_OFFER_BY_CHOICE_7	/\b(?:wish|want|question|unsubscrib\w+|discontinue|remove).{0,64}\b(?:gift|offer|special|promotion|coupon|discount)/i
-body T_OFFER_BY_CHOICE_8	/\b(?:wish|want|question|unsub\w+|discontinue|remove).{0,64}\b(?:gift|offer|special|promotion|coupon|discount)/i
-body T_OFFER_BY_CHOICE_9	/\b(?:wish|want|question|unsubscrib\w+|discontinue|remove|permission).{0,64}\b(?:gift|offer|special|promotion|coupon|discount)/i
-body T_OFFER_BY_CHOICE_10	/\b(?:wish|want|question|unsub\w+|discontinue|remove|permission).{0,64}\b(?:gift|offer|special|promotion|coupon|discount)/i
-body T_OFFER_BY_CHOICE_11	/\b(?:wish|want|question|unsubscrib\w+|(?:dis)?continue|remove|permission).{0,64}\b(?:gift|offer|special|promotion|coupon|discount)/i
-body T_OFFER_BY_CHOICE_12	/\b(?:wish|want|question|unsub\w+|(?:dis)?continue|remove|permission).{0,64}\b(?:gift|offer|special|promotion|coupon|discount)/i
-body T_OFFER_BY_CHOICE_13	/\b(?:wish|want|question|unsubscrib\w+|discontinue|remove).{0,64}\b(?:gift|offer|special|promotion|coupon|discount|reward)/i
-body T_OFFER_BY_CHOICE_14	/\b(?:wish|want|question|unsub\w+|discontinue|remove).{0,64}\b(?:gift|offer|special|promotion|coupon|discount|reward)/i
-body T_OFFER_BY_CHOICE_15	/\b(?:wish|want|question|unsubscrib\w+|discontinue|remove|permission).{0,64}\b(?:gift|offer|special|promotion|coupon|discount|reward)/i
-body T_OFFER_BY_CHOICE_16	/\b(?:wish|want|question|unsub\w+|discontinue|remove|permission).{0,64}\b(?:gift|offer|special|promotion|coupon|discount|reward)/i
-body T_OFFER_BY_CHOICE_17	/\b(?:wish|want|question|unsubscrib\w+|(?:dis)?continue|remove|permission).{0,64}\b(?:gift|offer|special|promotion|coupon|discount|reward)/i
-body T_OFFER_BY_CHOICE_18	/\b(?:wish|want|question|unsub\w+|(?:dis)?continue|remove|permission).{0,64}\b(?:gift|offer|special|promotion|coupon|discount|reward)/i
+body T_SPECIAL_BY_CHOICE_0	/\b(?:wish|want|question|unsubscrib\w+|discontinue|remove).{0,64}\b(?:gift|offer|special|promotion|coupon|discount|reward)/i
+body T_SPECIAL_BY_CHOICE_1	/\b(?:wish|want|question|unsub\w+|discontinue|remove).{0,64}\b(?:gift|offer|special|promotion|coupon|discount|reward)/i
+# A-F change "discontinue" to "continue"
+body T_SPECIAL_BY_CHOICE_A	/\b(?:wish|want|question|unsubscrib\w+|continue|remove).{0,64}\b(?:gift|offer|special|promotion|coupon|discount|reward)/i
+body T_SPECIAL_BY_CHOICE_B	/\b(?:wish|want|question|unsub\w+|continue|remove).{0,64}\b(?:gift|offer|special|promotion|coupon|discount|reward)/i
+# C-D drop "want"
+body T_SPECIAL_BY_CHOICE_C	/\b(?:wish|question|unsubscrib\w+|continue|remove).{0,64}\b(?:gift|offer|special|promotion|coupon|discount|reward)/i
+body T_SPECIAL_BY_CHOICE_D	/\b(?:wish|question|unsub\w+|continue|remove).{0,64}\b(?:gift|offer|special|promotion|coupon|discount|reward)/i
+# E-F drop "offer"
+body T_SPECIAL_BY_CHOICE_E	/\b(?:wish|want|question|unsubscrib\w+|continue|remove).{0,64}\b(?:gift|special|promotion|coupon|discount|reward)/i
+body T_SPECIAL_BY_CHOICE_F	/\b(?:wish|want|question|unsub\w+|continue|remove).{0,64}\b(?:gift|special|promotion|coupon|discount|reward)/i
 
-# emoved some old ones
+# removed some old ones
 header T_MANY_MX_5	From:addr =~ /\@mx\d{2,4}\..{1,20}\./i
 header T_MANY_MX_7	From:addr =~ /\@\w\d+\..{1,30}\./i
 header T_MANY_MX_9	ALL =~ /\@mx\d{2,4}\..{1,20}\./i
@@ -177,12 +150,6 @@ header T_MANY_MX_19	From:addr =~ /\@\w{1,4}\d+\..*\./i
 header T_MANY_MX_20	From:addr =~ /\@\w{0,5}\d+\..*\./i
 header T_MANY_MX_21	From:addr =~ /\@\w{1,5}\d+\..*\./i
 # dip at length of 5, so stop here
-
-# another spin
-body T_TRACKER_ID_6	/[a-z0-9]{6,24}[-_a-z0-9]{12,36}[a-z0-9]{6,24}\s*\z/is
-body T_TRACKER_ID_7	/\b[a-z0-9]{6,24}[-_a-z0-9]{12,36}[a-z0-9]{6,24}\s*\z/is
-rawbody T_TRACKER_ID_8	/[a-z0-9]{6,24}[-_a-z0-9]{12,36}[a-z0-9]{6,24}\s*\z/is
-rawbody T_TRACKER_ID_9	/\b[a-z0-9]{6,24}[-_a-z0-9]{12,36}[a-z0-9]{6,24}\s*\z/is
 
 # Updated test rules for fraud, uses existing rules and updated rules
 body __T_FRAUD_92	/youre? country/i
@@ -242,19 +209,6 @@ meta T_NIGERIAN_BODY_2	( __NIGERIAN_BODY_1 + __NIGERIAN_BODY_2 + __NIGERIAN_BODY
 meta T_NIGERIAN_BODY_3	( __NIGERIAN_BODY_1 + __NIGERIAN_BODY_2 + __NIGERIAN_BODY_3 + __NIGERIAN_BODY_5 + __NIGERIAN_BODY_6 + __NIGERIAN_BODY_7 + __NIGERIAN_BODY_8 + __NIGERIAN_BODY_9 + __NIGERIAN_BODY_10 + __NIGERIAN_BODY_11 + __NIGERIAN_BODY_12 + __NIGERIAN_BODY_13 + __NIGERIAN_BODY_14 + __NIGERIAN_BODY_16 + __NIGERIAN_BODY_17 + __NIGERIAN_BODY_18 + __NIGERIAN_BODY_19 + __NIGERIAN_BODY_20 + __NIGERIAN_BODY_21 + __NIGERIAN_BODY_22 + __NIGERIAN_BODY_25 + __NIGERIAN_BODY_26 + __NIGERIAN_BODY_27 + __NIGERIAN_BODY_28 + __NIGERIAN_BODY_29 + __NIGERIAN_BODY_30 + __NIGERIAN_BODY_31 + __NIGERIAN_BODY_32 + __NIGERIAN_BODY_33 + __NIGERIAN_BODY_34 + __NIGERIAN_BODY_35 + __NIGERIAN_BODY_36 + __NIGERIAN_BODY_37 + __NIGERIAN_BODY_39 + __NIGERIAN_BODY_40 + __NIGERIAN_BODY_41 + __NIGERIAN_BODY_42 + __NIGERIAN_BODY_43 + __NIGERIAN_BODY_44 + __NIGERIAN_BODY_45 + __NIGERIAN_BODY_46 + __T_FRAUD_92 + __T_FRAUD_110 + __T_FRAUD_2 + __T_FRAUD_102 + __T_FRAUD_144 + __T_FRAUD_235 + __T_FRAUD_258 + __T_FRAUD_113 + __T_FRAUD_44 + __T_FRAUD_81 + __T_FRAUD_58 + __T_FRAUD_259 + __T_FRAUD_149 + __T_FRAUD_236 + __T_FRAUD_249 + __T_FRAUD_125 + __T_FRAUD_252 + __T_FRAUD_132 + __T_FRAUD_227 + __T_FRAUD_100 + __T_FRAUD_26 + __T_FRAUD_88 + __T_FRAUD_16 + __T_FRAUD_240 + __T_FRAUD_157 + __T_FRAUD_46 + __T_FRAUD_133 + __T_FRAUD_228 + __T_FRAUD_120 + __T_FRAUD_114 + __T_FRAUD_142 + __T_FRAUD_94 + __T_FRAUD_146 + __T_FRAUD_96 + __T_FRAUD_41 + __T_FRAUD_216 + __T_FRAUD_137 + __T_FRAUD_82 + __T_FRAUD_251 + __T_FRAUD_19 + __T_FRAUD_254 + __T_FRAUD_241 + __T_FRAUD_35 + __T_FRAUD_217 + __T_FRAUD_221 + __T_FRAUD_124 + __T_FRAUD_18 + __T_FRAUD_42 + __T_FRAUD_31 + __T_FRAUD_115 + __T_FRAUD_3 + __T_FRAUD_220 ) > 3
 meta T_NIGERIAN_BODY_4	( __NIGERIAN_BODY_1 + __NIGERIAN_BODY_2 + __NIGERIAN_BODY_3 + __NIGERIAN_BODY_5 + __NIGERIAN_BODY_6 + __NIGERIAN_BODY_7 + __NIGERIAN_BODY_8 + __NIGERIAN_BODY_9 + __NIGERIAN_BODY_10 + __NIGERIAN_BODY_11 + __NIGERIAN_BODY_12 + __NIGERIAN_BODY_13 + __NIGERIAN_BODY_14 + __NIGERIAN_BODY_16 + __NIGERIAN_BODY_17 + __NIGERIAN_BODY_18 + __NIGERIAN_BODY_19 + __NIGERIAN_BODY_20 + __NIGERIAN_BODY_21 + __NIGERIAN_BODY_22 + __NIGERIAN_BODY_25 + __NIGERIAN_BODY_26 + __NIGERIAN_BODY_27 + __NIGERIAN_BODY_28 + __NIGERIAN_BODY_29 + __NIGERIAN_BODY_30 + __NIGERIAN_BODY_31 + __NIGERIAN_BODY_32 + __NIGERIAN_BODY_33 + __NIGERIAN_BODY_34 + __NIGERIAN_BODY_35 + __NIGERIAN_BODY_36 + __NIGERIAN_BODY_37 + __NIGERIAN_BODY_39 + __NIGERIAN_BODY_40 + __NIGERIAN_BODY_41 + __NIGERIAN_BODY_42 + __NIGERIAN_BODY_43 + __NIGERIAN_BODY_44 + __NIGERIAN_BODY_45 + __NIGERIAN_BODY_46 + __T_FRAUD_92 + __T_FRAUD_110 + __T_FRAUD_2 + __T_FRAUD_102 + __T_FRAUD_144 + __T_FRAUD_235 + __T_FRAUD_258 + __T_FRAUD_113 + __T_FRAUD_44 + __T_FRAUD_81 + __T_FRAUD_58 + __T_FRAUD_259 + __T_FRAUD_149 + __T_FRAUD_236 + __T_FRAUD_249 + __T_FRAUD_125 + __T_FRAUD_252 + __T_FRAUD_132 + __T_FRAUD_227 + __T_FRAUD_100 + __T_FRAUD_26 + __T_FRAUD_88 + __T_FRAUD_16 + __T_FRAUD_240 + __T_FRAUD_157 + __T_FRAUD_46 + __T_FRAUD_133 + __T_FRAUD_228 + __T_FRAUD_120 + __T_FRAUD_114 + __T_FRAUD_142 + __T_FRAUD_94 + __T_FRAUD_146 + __T_FRAUD_96 + __T_FRAUD_41 + __T_FRAUD_216 + __T_FRAUD_137 + __T_FRAUD_82 + __T_FRAUD_251 + __T_FRAUD_19 + __T_FRAUD_254 + __T_FRAUD_241 + __T_FRAUD_35 + __T_FRAUD_217 + __T_FRAUD_221 + __T_FRAUD_124 + __T_FRAUD_18 + __T_FRAUD_42 + __T_FRAUD_31 + __T_FRAUD_115 + __T_FRAUD_3 + __T_FRAUD_220 ) > 4
 
-
-# bug 3395
-header    T_YAHOO_MSGID_CAPS          Message-ID =~ /<[A-Z]+\@yahoo.com>/
-describe  T_YAHOO_MSGID_CAPS          Message-ID has all-caps@yahoo.com
-
-# bug 3399
-header T_MSGID_CAPS1	Message-ID =~ /<[A-Z]+\@[a-z]+\.[a-z]{2,4}>/
-header T_MSGID_CAPS2	Message-ID =~ /<[A-Z]+\@(?!(?:mailcity|whowhere)\.com)[a-z]+\.[a-z]{2,4}>/
-header T_MSGID_CAPS3	Message-ID =~ /^\s*<?[A-Z]+\@(?!(?:mailcity|whowhere)\.com)/
-header T_MSGID_CAPS4	MESSAGEID =~ /<[A-Z]+\@[a-z]+\.[a-z]{2,4}>/
-header T_MSGID_CAPS5	MESSAGEID =~ /<[A-Z]+\@(?!(?:mailcity|whowhere)\.com)[a-z]+\.[a-z]{2,4}>/
-header T_MSGID_CAPS6	MESSAGEID =~ /^\s*<?[A-Z]+\@(?!(?:mailcity|whowhere)\.com)/
-
 # bug 3410
 header __RFC_IGNORANT		eval:check_rbl_envfrom('rfci_envfrom', 'fulldom.rfc-ignorant.org.')
 tflags __RFC_IGNORANT		net
@@ -283,10 +237,11 @@ header T_DNS_FROM_RFC_BOGUSMX	eval:check_rbl_sub('rfci_envfrom', '127.0.0.8')
 describe T_DNS_FROM_RFC_BOGUSMX	Envelope sender listed in bogusmx.rfc-ignorant.org
 tflags T_DNS_FROM_RFC_BOGUSMX	net
 
-# double check that both are never listed
+# double check that both are never listed together
 meta T_DNS_FROM_RFC_WHOIS_C	(T_DNS_FROM_RFC_WHOIS_A && T_DNS_FROM_RFC_WHOIS_B)
 
 # test AHBL using envelope-from
 header T_DNS_FROM_AHBL_RHSBL	eval:check_rbl_envfrom('ahbl-rhs2', 'rhsbl.ahbl.org.')
 describe T_DNS_FROM_AHBL_RHSBL	Envelope sender listed in dnsbl.ahbl.org
 tflags T_DNS_FROM_AHBL_RHSBL	net
+
