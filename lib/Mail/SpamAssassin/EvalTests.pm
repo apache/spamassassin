@@ -35,19 +35,19 @@ sub check_for_from_mx {
   return 0 unless (/\@(\S+)/);
   $_ = $1;
 
+  $self->load_Net_DNS_Resolver();
   my $found_mx = 0;
-  eval '
-    use Net::DNS; my $res = new Net::DNS::Resolver;
 
+  eval q{
     # First check that DNS is available, if not do not perform this check
     # Try 5 times to protect against temporary outages
-    if (mx($res, $EXISTING_DOMAIN)) {
+    if ($self->{res}->mx ($EXISTING_DOMAIN)) {
       for my $i (1..5) {
-	if (mx ($res, $_)) { $found_mx = 1; last; }
+	if ($self->{res}->mx ($_)) { $found_mx = 1; last; }
 	sleep 10;
       }
     }
-  1;' or $found_mx = 1;     # return OK if Net:DNS is not available
+  1; } or $found_mx = 1;     # return OK if Net:DNS is not available
 
   (!$found_mx);
 }
@@ -116,37 +116,40 @@ sub check_rbl {
   }
 
   init_rbl_check_reserved_ips();
+  $self->load_Net_DNS_Resolver();
   my $found = 0;
 
   eval q{
-    use Net::DNS; my $res = new Net::DNS::Resolver;
-
-    sub do_rbl_lookup {
-      return if $found;
-      my $q = $res->search ($_[0]); if ($q) {
-	foreach my $rr ($q->answer) {
-	  if ($rr->type eq "A") {
-	    $found++;
-	    $self->test_log ("RBL check: found relay ".$_[0]);
-	  }
-	}
-      }
-    }
-
     # First check that DNS is available, if not do not perform this check.
     # Stop after the first positive.
-    my @mx = mx ($res, $EXISTING_DOMAIN);
+    my @mx = $self->{res}->mx ($EXISTING_DOMAIN);
     if ($#mx >= 0) {
       foreach my $ip (@ips) {
 	next if ($ip =~ /${IP_IN_RESERVED_RANGE}/o);
 	next unless ($ip =~ /(\d+)\.(\d+)\.(\d+)\.(\d+)/);
-	&do_rbl_lookup ("$4.$3.$2.$1.".$rbl_domain);
+	$found = $self->do_rbl_lookup ("$4.$3.$2.$1.".$rbl_domain, $found);
       }
     }
   };
 
   $found;
 }
+
+sub do_rbl_lookup {
+  my ($self, $dom, $found) = @_;
+  return $found if $found;
+
+  my $q = $self->{res}->search ($dom); if ($q) {
+    foreach my $rr ($q->answer) {
+      if ($rr->type eq "A") {
+	$self->test_log ("RBL check: found relay ".$_[0]);
+	return ($found+1);
+      }
+    }
+  }
+  return 0;
+}
+
 
 # Initialize a regexp for reserved IPs, i.e. ones that could be
 # used inside a company and be the first or second relay hit by
@@ -200,5 +203,13 @@ sub check_for_very_long_text {
 }
 
 ###########################################################################
+
+sub load_Net_DNS_Resolver {
+  my ($self) = @_;
+
+  if (defined $self->{res}) { return; }
+  eval q{ use Net::DNS; $self->{res} = new Net::DNS::Resolver; 1; }
+  	or warn "eval failed: $@ $!\n";
+}
 
 1;
