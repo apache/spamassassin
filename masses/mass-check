@@ -22,7 +22,9 @@ use vars qw($opt_c $opt_f $opt_all $opt_head $opt_mh $opt_ms $opt_mn
 	    $opt_single $opt_sort $opt_tail);
 
 use FindBin;
+use lib "$FindBin::Bin/lib";
 use lib "$FindBin::Bin/../lib";
+use Mail::ArchiveIterator;
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::NoMailAudit;
 use Getopt::Long;
@@ -49,9 +51,6 @@ elsif ($opt_mn) {
   find_missed('nonspam.log');
 }
 
-my $FORK = 0;
-if ($opt_f) { $FORK = 1; }
-
 $spamtest = new Mail::SpamAssassin ({
   'rules_filename'      => $cffile,
   'userprefs_filename'  => "$FindBin::Bin/spamassassin.prefs",
@@ -62,9 +61,17 @@ $spamtest = new Mail::SpamAssassin ({
 
 $spamtest->compile_now(1);
 
-my $count = 0;
-
-mass_check_all_folders (\&wanted, @ARGV);
+my $iter = new Mail::ArchiveIterator ({
+        'opt_fork' => $opt_f,
+        'opt_mh' => $opt_mh,
+        'opt_single' => $opt_single,
+        'opt_sort' => $opt_sort,
+        'opt_head' => $opt_head,
+        'opt_tail' => $opt_tail,
+        'opt_all' => $opt_all
+  });
+$iter->set_function (\&wanted);
+$iter->run (@ARGV);
 exit;
 
 ###########################################################################
@@ -74,6 +81,8 @@ sub wanted {
 
   # my $ma = Mail::Audit->new('data' => \@msg);
   my $ma = Mail::SpamAssassin::NoMailAudit->new ('data' => $dataref);
+
+  #my $msgid = $ma->get_header("Message-Id");
 
   $ma->{noexit} = 1;
   $spamtest->remove_spamassassin_markup($ma);
@@ -112,194 +121,9 @@ sub wanted {
   undef $status;
 
 # system ("ps alxww | grep mass-check | grep perl | grep -v grep");#JMD
-  if ($FORK) { exit; }
 }
 
 ###########################################################################
-
-sub mass_check_all_folders {
-  my $sub = shift;
-
-  foreach my $folder (@_) {
-    if ($folder =~ /\.tar$/)
-    {
-	# it's an MH or Cyrus folder or Maildir in a tar file
-	require Archive::Tar;   # jm: require avoids warning
-	mass_check_tar_file($sub, $folder);
-    }
-    elsif (-d $folder &&
-	   ($opt_mh || -f "$folder/1" || -f "$folder/1.gz" || -f "$folder/cyrus.index"))
-    {
-      # it's an MH folder or a Cyrus mailbox
-      mass_check_mh_folder($sub, $folder);
-    }
-    elsif (-d $folder && -d "$folder/cur" && -d "$folder/new" )
-    {
-      # Maildir!
-      mass_check_maildir($sub, $folder);
-    }
-    elsif (-f $folder && $opt_single)
-    {
-      # single message (for testing that variables are cleared appropriately)
-      mass_check_single($sub, $folder);
-    }
-    elsif (-f $folder) {
-      mass_check_mailbox($sub, $folder);
-    }
-  }
-}
-
-sub mass_check_tar_file {
-  my $sub = shift;
-  my $filename = shift;
-  my $tar = Archive::Tar->new();
-  $tar->read($filename);
-  my @files = $tar->list_files(['name']);
-  foreach my $mail (@files) {
-      next if $mail =~ m#/$# or $mail =~ /cyrus\.(index|header|cache)/;
-      my $msg_data = $tar->get_content($mail);
-      my @msg = split("\n",$tar->get_content($mail));
-      $mail =~ s/\s/_/g;
-      &$sub ($mail, \@msg);
-  }
-}
-
-sub mass_check_mh_folder {
-  my $sub = shift;
-  my $folder = shift;
-  opendir(DIR, $folder) || die "Can't open $folder dir: $!";
-  my @files = grep { -f } map { "$folder/$_" } grep { /^[0-9]/ } readdir(DIR);
-  closedir(DIR);
-
-  @files = sortbynum(@files) if $opt_sort;
-  splice(@files, $opt_head) if $opt_head;
-  splice(@files, 0, -$opt_tail) if $opt_tail;
-  foreach my $mail (@files)
-  {
-    if ($mail =~ /\.gz$/) {
-      open (STDIN, "gunzip -cd $mail |") or warn "gunzip $mail failed: $@";
-    } elsif ($mail =~ /\.bz2$/) {
-      open (STDIN, "bzip2 -cd $mail |") or warn "bunzip2 $mail failed: $@";
-    } else {
-      open (STDIN, "<$mail") or warn "open $mail failed: $@";
-    }
-
-    # skip too-big mails
-    if (! $opt_all && -s STDIN > 250*1024) { close STDIN; next; }
-    my @msg = (<STDIN>);
-    close STDIN;
-
-    &$sub ($mail, \@msg);
-  }
-}
-
-sub mass_check_maildir {
-  my $sub = shift;
-  my $folder = shift;
-  opendir(CURDIR, "$folder/cur") || die "Can't open $folder/cur dir: $!";
-  opendir(NEWDIR, "$folder/new") || die "Can't open $folder/new dir: $!";
-  my @files;
-  push @files, grep { -f } map { "$folder/cur/$_" } readdir(CURDIR);
-  push @files, grep { -f } map { "$folder/new/$_" } readdir(NEWDIR);
-  closedir(CURDIR);
-  closedir(NEWDIR);
-
-  @files = sortbynum(@files) if $opt_sort;
-  splice(@files, $opt_head) if $opt_head;
-  splice(@files, 0, -$opt_tail) if $opt_tail;
-  foreach my $mail (@files)
-  {
-    if ($mail =~ /\.gz$/) {
-      open (STDIN, "gunzip -cd $mail |") or warn "gunzip $mail failed: $@";
-    } elsif ($mail =~ /\.bz2$/) {
-      open (STDIN, "bzip2 -cd $mail |") or warn "bunzip2 $mail failed: $@";
-    } else {
-      open (STDIN, "<$mail") or warn "open $mail failed: $@";
-    }
-
-    # skip too-big mails
-    if (! $opt_all && -s STDIN > 250*1024) { close STDIN; next; }
-    my @msg = (<STDIN>);
-    close STDIN;
-
-    &$sub ($mail, \@msg);
-  }
-}
-
-sub mass_check_single {
-  my $sub = shift;
-  my $folder = shift;
-
-  if ($folder =~ /\.gz$/) {
-    open (STDIN, "gunzip -cd $folder |") or warn "gunzip $folder failed: $@";
-  } elsif ($folder =~ /\.bz2$/) {
-    open (STDIN, "bzip2 -cd $folder |") or warn "bunzip2 $folder failed: $@";
-  } else {
-    open (STDIN, "<$folder") or warn "open $folder failed: $@";
-  }
-
-  # skip too-big mails
-  if (! $opt_all && -s STDIN > 250*1024) { close STDIN; next; }
-  my @msg = (<STDIN>);
-  close STDIN;
-
-  &$sub ($folder, \@msg);
-}
-
-sub mass_check_mailbox {
-  my $sub = shift;
-  my $folder = shift;
-
-  if ($folder =~ /\.gz$/) {
-    open (MBOX, "gunzip -cd $folder |") or warn "gunzip $folder failed: $@";
-  } elsif ($folder =~ /\.bz2$/) {
-    open (MBOX, "bzip2 -cd $folder |") or warn "bunzip2 $folder failed: $@";
-  } else {
-    open (MBOX, "<$folder") or warn "open $folder failed: $@";
-  }
-  while (<MBOX>) { /^From \S+ +... ... / and last; }
-
-  while (!eof MBOX) {
-    my @msg = ();
-    my $msgid = undef;
-    my $hits = '';
-    $count++;
-
-    while (<MBOX>) {
-      /^Message-[Ii][Dd]: (.*)\s*$/ and $msgid = $1;
-      /^X-Spam-Status: .* tests=(.*)$/ and $hits = $1;
-
-      if (/^$/) {
-	if (!defined ($msgid)) {
-	  $msgid = "<$count\@no_msgid_in_msg.taint.org>";
-	  push (@msg, "Message-Id: $msgid\n");
-	}
-      }
-
-      /^From \S+ +... ... / and last;
-      push (@msg, $_);
-    }
-
-    if (! $opt_all && scalar @msg > 1000) { next; }	# too big
-
-    # switch to a fork-based model to save RAM
-    if ($FORK && fork()) { wait; next; }
-
-    $msgid = "$folder:$msgid";	# so we can find it again
-    $msgid =~ s/\s/_/gs;	# make safe
-
-    &$sub ($msgid, \@msg);
-  }
-
-  close MBOX;
-}
-
-sub sortbynum {
-    return map { $_->[0] }
-	sort { $a->[1] <=> $b->[1] } map { [$_, /\/(\d+).*$/] } @_;
-}
-
-############################################################################
 
 sub find_missed {
   my $file = shift;
