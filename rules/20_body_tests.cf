@@ -177,6 +177,9 @@ describe HTML_FONT_FACE_ODD	HTML font face is not a commonly used face
 body HTML_FONT_FACE_CAPS	eval:html_test('font_face_caps')
 describe HTML_FONT_FACE_CAPS	HTML font face has excess capital characters
 
+body HTML_FORM_ACTION_MAILTO	eval:html_test('form_action_mailto')
+describe HTML_FORM_ACTION_MAILTO	HTML includes a form which sends mail
+
 body HTML_JAVASCRIPT		eval:html_test('javascript')
 describe HTML_JAVASCRIPT	JavaScript code
 
@@ -661,8 +664,6 @@ rawbody MAILTO_WITH_SUBJ_REMOVE		/mailto:.{0,64}\@.{0,64}\?subject=(?:\"|3D)*(?:
 # uses these to handle auto-subscribe/unsubscribe features
 rawbody MAILTO_LINK		/=[3D=\s"']*mailto:/is
 describe MAILTO_LINK		Includes a URL link to send an email
-rawbody FORM_W_MAILTO_ACTION	/action=[3D=\s"']*mailto:/is
-describe FORM_W_MAILTO_ACTION	Includes a form which will send an email
 body AOL_USERS_LINK		/AOL\s+Users\s+Click/is
 describe AOL_USERS_LINK		Includes a link for AOL users to click
 
