@@ -68,12 +68,8 @@ describe FURTHER_TRANSMISSIONS  Claims compliance with spam regulations
 body CHECK_OR_MONEY_ORDER	/check or money order/i
 describe CHECK_OR_MONEY_ORDER	Talk about a check or money order
 
-body AMAZING			/\bAMAZING\b/
-describe AMAZING		Contains word 'amazing' in all-caps
 body GUARANTEE			/\bGUARANTEE\b/
 describe GUARANTEE		Contains word 'guarantee' in all-caps
-body PROFITS			/\bPROFITS\b/
-describe PROFITS		Contains word 'profits' in all-caps
 body NO_QS_ASKED		/\bNO QUESTIONS ASKED\b/i
 describe NO_QS_ASKED		Doesn't ask any questions
 body FULL_REFUND		/full refund|refunds? your money in full/i
@@ -750,12 +746,6 @@ describe WHILE_SUPPLIES		While Supplies Last
 body RICH		        /\b(?:make you rich|get rich quick)\b/i
 describe RICH			If only it were that easy
 
-body WINNING_CAP                /WINNING/
-describe WINNING_CAP            Winning in Caps
-
-body WINNER_CAP                 /WINNER/
-describe WINNER_CAP             Winner in Caps
-
 body WINNER                     /\byou.{0,4} a winner|register to win/i
 describe WINNER                 Claims you are a winner
 
@@ -785,9 +775,6 @@ describe FINANCIAL 		Financial Freedom
 
 body FORWARD_LOOKING	        /\bcontains forward-looking statements\b/i
 describe FORWARD_LOOKING	Stock Disclaimer Statement
-
-body DISCLAIMER		        /\bdisclaimer\b/i
-describe DISCLAIMER		Message contains disclaimer
 
 body SATISFACTION	        /\bsatisfaction .{0,9}g(?:ua|au)ranteed|not .{0,9}satisfied\b/i
 describe SATISFACTION		Satisfaction Guaranteed
