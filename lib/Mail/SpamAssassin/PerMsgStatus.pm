@@ -579,10 +579,11 @@ sub rewrite_as_spam {
   # This is the new message.
   # jm: add a SpamAssassin Received header to note markup time etc.
   # emulates the fetchmail style.
-  my $newmsg = "Received: from localhost [127.0.0.1] by ".hostname."\n".
-	"\twith SpamAssassin (". Mail::SpamAssassin::Version()." ".
-	    $Mail::SpamAssassin::SUB_VERSION . ");\n".
-	"\t". strftime ("%a, %d %b %Y %H:%M:%S %z", localtime)."\n";
+  my $newmsg = "Received: from localhost [127.0.0.1] by " . hostname . "\n" .
+	"\twith SpamAssassin (" . Mail::SpamAssassin::Version() . " " .
+	    $Mail::SpamAssassin::SUB_VERSION . ");\n" .
+	"\t" . strftime("%a, %d %b %Y %H:%M:%S ", localtime) .
+	    Mail::SpamAssassin::Util::local_tz() . "\n";
 
   # remove first line if it is "From "
   if ($original =~ s/^(From (.*?)\n)//s) {
@@ -1529,7 +1530,7 @@ my $schemeRE = qr/(?:https?|ftp|mailto|javascript|file)/;
 my $uricCheat = $uricSet;
 $uricCheat =~ tr/://d;
 
-my $schemelessRE = qr/(?<!\.)(?:www\.|ftp\.)/;
+my $schemelessRE = qr/(?<![.=])(?:www\.|ftp\.)/;
 my $uriRe = qr/\b(?:$schemeRE:[$uricCheat]|$schemelessRE)[$uricSet#]*/o;
 
 # Taken from Email::Find (thanks Tatso!)
