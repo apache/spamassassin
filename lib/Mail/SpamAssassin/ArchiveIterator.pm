@@ -209,6 +209,7 @@ sub first_date {
 sub receive_date {
   my ($self, $header) = @_;
 
+  $header ||= '';
   $header =~ s/\n[ \t]+/ /gs;	# fix continuation lines
 
   my @rcvd = ($header =~ /^Received:(.*)/img);
