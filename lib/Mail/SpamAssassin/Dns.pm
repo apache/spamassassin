@@ -245,6 +245,8 @@ sub is_dcc_available {
   }
 }
 
+use Symbol qw(gensym);
+
 sub dcc_lookup {
   my ($self, $fulltext) = @_;
   my $response = undef;
@@ -266,6 +268,9 @@ sub dcc_lookup {
     local $SIG{PIPE} = sub { die "brokenpipe\n" };
 
     alarm(10);
+
+    $dccin = gensym();
+    $dccout = gensym();
 
     $pid = open2($dccout, $dccin, 'dccproc -H '.$self->{conf}->{dcc_options}.' 2>&1');
 
