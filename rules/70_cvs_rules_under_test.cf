@@ -143,15 +143,6 @@ header __X_BULKMAIL			exists:X-Bulkmail
 header __FROM_CARTALK			From =~ /\@cartalk\.com$/
 meta T_X_BULKMAIL_2			( __X_BULKMAIL && !__FROM_CARTALK )
 
-# possible additions to NIGERIA rules
-# 12/26 quinlan: 2 and 3 look promotable to me, 1 seems like the hit
-# rate is too low (0.0210% for a 4 person check).  Need to be renamed
-# and integrated with other NIGERIA rules (or whatever we want to call
-# them)
-body T_SCAM_419_1		/MOHAMMED(?:\.|=2e)?\s?ABACHA/i
-body T_SCAM_419_2		/(?:government|bank) of nigeria/i
-body T_SCAM_419_3		/nigerian? (?:national|government)/i
-
 # Dec 24 2002 jm: random check
 # 12/25 - tvd - great for quinlan (2.69%), hits under .05% for everyone else, no fps
 # quinlan: just a note that I didn't write the rule :-)
