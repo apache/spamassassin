@@ -426,8 +426,13 @@ rawbody T_HREF_3D			/(?:href|src)=3D\"/i
 describe T_HREF_3D		Uses href=3D Trick
 
 # bug 1803
-body T_GAPPY_PORN			/\b(?:s.e.x|p.o.r.n|x.x.x|f.u.c.k|p.a.r.t.y|t.e.e.n|f.u.n|h.o.t)/i
-describe T_GAPPY_PORN		G.a.p.p.y - P.o.r.n
+body T_GAPPY_PORN_01                       /\b(?:s\We\Wx|p\Wo\Wr\Wn|x\Wx\Wx|f\Wu\Wc\Wk|p\Wa\Wr\Wt\Wy|t\We\We\Wn|f\Wu\Wn|h\Wo\Wt)/i
+describe T_GAPPY_PORN_01           G.a.p.p.y - P.o.r.n
+
+body T_GAPPY_PORN_02                       /\b(?:s\.e\.x|p\.o\.r\.n|x\.x\.x|f\.u\.c\.k|p\.a\.r\.t\.y|t\.e\.e\.n|f\.u\.n|h\.o\.t)/i
+describe T_GAPPY_PORN_02           G.a.p.p.y - P.o.r.n
+
+
 
 # bug 1575
 header T_X_HEADER_PITCHID exists:X-Header-Pitchid
