@@ -54,6 +54,14 @@ switch:
 
  make test TEST_VERBOSE=1
 
+Options set using 'config'
+--------------------------
+
+The test suite accepts some configuration information to identify optional
+features that should be tested, or to provide environment-specific settings
+needed to test some features (such as an LDAP server or SQL server to use
+testing those subsystems).   See 'config.dist' for details.
+
 Options set using environment variables
 ---------------------------------------
 
