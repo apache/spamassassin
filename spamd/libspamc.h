@@ -1,6 +1,7 @@
 #ifndef LIBSPAMC_H
 #define LIBSPAMC_H 1
 
+#include "../config.h"
 #include <sys/types.h>
 #include <sys/socket.h>
 

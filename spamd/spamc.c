@@ -12,16 +12,34 @@
 #include <stdio.h>
 #include <string.h>
 #include <syslog.h>
-#include <sysexits.h>
-#include <time.h>
-#include <signal.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <netdb.h>
 #include <arpa/inet.h>
+
+#ifdef HAVE_SYSEXITS_H
+#include <sysexits.h>
+#endif
+#ifdef HAVE_ERRNO_H
+#include <errno.h>
+#endif
+#ifdef HAVE_SYS_ERRNO_H
+#include <sys/errno.h>
+#endif
+#ifdef HAVE_TIME_H
+#include <time.h>
+#endif
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+#ifdef HAVE_SIGNAL_H
+#include <signal.h>
+#endif
+#ifdef HAVE_PWD_H
 #include <pwd.h>
+#endif
 
 /* SunOS 4.1.4 patch from Tom Lipkis <tal@pss.com> */
 #if (defined(__sun__) && defined(__sparc__) && !defined(__svr4__)) /* SunOS */ \

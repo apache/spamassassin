@@ -5,64 +5,63 @@
  * The text of this license is included in the SpamAssassin distribution in the file named "License"
  */
 
+#include "libspamc.h"
+#include "utils.h"
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <syslog.h>
-#include <sysexits.h>
-#include <errno.h>
-#include <time.h>
-#include <sys/time.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <netdb.h>
 #include <arpa/inet.h>
-#include "libspamc.h"
-#include "utils.h"
+
+#ifdef HAVE_SYSEXITS_H
+#include <sysexits.h>
+#endif
+#ifdef HAVE_ERRNO_H
+#include <errno.h>
+#endif
+#ifdef HAVE_SYS_ERRNO_H
+#include <sys/errno.h>
+#endif
+#ifdef HAVE_TIME_H
+#include <time.h>
+#endif
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
 
 #define MAX_CONNECT_RETRIES 3
 #define CONNECT_RETRY_SLEEP 1
 
 /* RedHat 5.2 doesn't define Shutdown 2nd Parameter Constants */
 /* KAM 12-4-01 */
-#ifndef SHUT_RD
+#ifndef HAVE_SHUT_RD
 #define SHUT_RD (0)   /* No more receptions.  */
-#endif
-#ifndef SHUT_WR
-#define SHUT_WR (1)   /* No more receptions or transmissions.  */
-#endif
-#ifndef SHUT_RDWR
+#define SHUT_WR (1)   /* No more transmissions.  */
 #define SHUT_RDWR (2) /* No more receptions or transmissions.  */
 #endif
 
-/* SunOS 4.1.4 patch from Tom Lipkis <tal@pss.com> */
-#if (defined(__sun__) && defined(__sparc__) && !defined(__svr4__)) /* SunOS */ \
-     || (defined(__sgi))  /* IRIX */ \
-     || (defined(__osf__)) /* Digital UNIX */ \
-     || (defined(hpux) || defined(__hpux)) /* HPUX */
-# ifndef h_errno
-# define h_errno errno
-# endif
+#ifndef HAVE_H_ERRNO
+#define h_errno errno
+#endif
 
+#ifndef HAVE_OPTARG
 extern char *optarg;
 #endif
 
-#ifndef INADDR_NONE
-# if (defined(__sun__) && defined(__sparc__) && !defined(__svr4__)) /* SunOS */ \
-     || (defined(hpux) || defined(__hpux)) /* HPUX */
-typedef unsigned long   in_addr_t;      /* base type for internet address */
-/* don't define for Digital UNIX or IRIX, they have it in netinet/in.h */
-# endif
-#define       INADDR_NONE             ((in_addr_t) 0xffffffff)
+#ifndef HAVE_INADDR_NONE
+#define INADDR_NONE             ((in_addr_t) 0xffffffff)
 #endif
 
 /* jm: turned off for now, it should not be necessary. */
 #undef USE_TCP_NODELAY
 
-#ifndef EX__MAX
+#ifndef HAVE_EX__MAX
 /* jm: very conservative figure, should be well out of range on almost all NIXes */
 #define EX__MAX 200 
 #endif

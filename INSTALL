@@ -356,6 +356,11 @@ Other installation notes:
     spamd.
 
 
+  - spamc can now be built as a shared library for use with milters or
+    to link into other existing programs; simply run "make libspamc.so"
+    to build this.
+
+
   - If you get spammed, it is helpful to everyone else if you re-run
     spamassassin with the "-r" option to report the message in question as
     "verified spam".  This will add it to Vipul's Razor
