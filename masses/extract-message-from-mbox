@@ -25,8 +25,8 @@ sub usage {
 ";
 }
 
+usage() if($opt_h || !defined($ARGV[0]));
 my $offset = $ARGV[0];
-usage() if($opt_h || !$offset);
 
 
 if($opt_f) {
@@ -53,9 +53,9 @@ sub do_stdin {
       $found = $offset <= 0;
     }
     else {
-      print;
-      last if($found == 3);
       $found++ if(/^From /);
+      last if($found == 3);
+      print;
     }
   }
 }
