@@ -50,6 +50,7 @@ WriteMakefile(
 
     'PREREQ_PM' => {
                         'File::Copy' => 0,
+                        'Pod::Usage' => 0,
                   },
 
     'dist' => {
