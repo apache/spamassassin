@@ -1,4 +1,5 @@
 # SpamAssassin rules file: tests.
+# $Id: 20_head_tests.cf,v 1.163 2002/08/23 04:45:04 hughescr Exp $
 ###########################################################################
 
 require_version 2.40
@@ -282,6 +283,12 @@ tflags RCVD_IN_RFCI             net
 header HABEAS_HIL		rbleval:check_rbl('hil', 'hil.habeas.com.')
 describe HABEAS_HIL		Sender is on www.habeas.com Habeas Infringer List
 tflags HABEAS_HIL		net
+
+# bondedsender.org provides an RBL-style whitelist for trusted relays
+
+header RCVD_IN_BONDEDSENDER	rbleval:check_rbl('relay', 'query.bondedsender.org.')
+describe RCVD_IN_BONDEDSENDER	If this is spam, visit www.bondedsender.com for a reward
+tflags RCVD_IN_BONDEDSENDER	net
 
 
 # NOTE: commercial test, see README file for details

@@ -2,6 +2,7 @@
 
 # Leaving some of these without "lang es" because they show up in english language
 # inboxes
+# $Id: 25_body_tests_es.cf,v 1.28 2002/08/23 04:45:04 hughescr Exp $
 
 body REMOVE_ES_01             /(?:Para no|Si (?:U(?:ste)?d\. )?no (?:deseas?|qui?er[ée]s)) (?:seguir )?recibi(?:r|endo) (?:en el futuro )?(?:ninguna otra|m.s|estos)?\s?(?:correos?|mensajes?|publicidad|informaci.n|ofertas?|(?:e-?)?mails? promocional(?:es)?)/
 describe REMOVE_ES_01         Claims you can be removed in Spanish
