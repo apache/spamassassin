@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rcvd_parser");
-use Test; BEGIN { plan tests => 28 };
+use Test; BEGIN { plan tests => 29 };
 
 
 use strict;
@@ -53,6 +53,19 @@ Received: from klqe.net (unknown [192.168.50.50])
 } => q{
 
 [ ip=192.168.50.50 rdns= helo=klqe.net by=mail.dropinsolutions.com ident= envfrom= ]
+
+},
+q{
+
+Received: from Minstrel ([82.0.67.38]) by mta07-svc.ntlworld.com
+  (InterMail vM.4.01.03.37 201-229-121-137-20020806) with ESMTP
+  id <20031220035023.GCFK2588.mta07-svc.ntlworld.com@Minstrel>
+  for <postmaster@internetgremlin.com>;
+  Sat, 20 Dec 2003 03:50:23 +0000
+
+} => q{
+
+  [ ip=82.0.67.38 rdns= helo=Minstrel by=mta07-svc.ntlworld.com ident= envfrom= ]
 
 },
 q{

@@ -1671,8 +1671,11 @@ The default is 5.
 
 What networks or hosts are 'trusted' in your setup.   B<Trusted> in this case
 means that relay hosts on these networks are considered to not be potentially
-operated by spammers, open relays, or open proxies.  DNS blacklist checks
-will never query for hosts on these networks.
+operated by spammers, open relays, or open proxies.  A trusted host could
+conceivably relay spam, but will not originate it, and will not forge header
+data. DNS blacklist checks will never query for hosts on these networks. 
+
+Internal networks can be specified using the C<internal_networks> setting.
 
 If a C</mask> is specified, it's considered a CIDR-style 'netmask', specified
 in bits.  If it is not specified, but less than 4 octets are specified with a

@@ -489,6 +489,9 @@ header T_SB_23_7_6_25_120 eval:check_rbl_sub('senderbase', 'S23 > 7.6 && (time -
 header T_SB_23_7_6_25_180 eval:check_rbl_sub('senderbase', 'S23 > 7.6 && (time - S25 < 180*86400)')
 
 # test 
+# jm: IMO, we should come up with a new way to test *just* the URIs in RHSBL
+# style, it would be *much* more efficient than doing NS and A lookups, and
+# would be harder for spammers to evade.
 ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
 
 uridnsbl_timeout 2
@@ -499,3 +502,4 @@ describe T_URIBL_SC_SURBL	Contains a URL listed in the SC SURBL blocklist
 tflags T_URIBL_SC_SURBL		net
 
 endif   # Mail::SpamAssassin::Plugin::URIDNSBL
+
