@@ -274,7 +274,7 @@ describe AUTO_EMAIL_REMOVAL	Claims auto-email removal
 
 # this seems to be the new fashion (as of Jul 5 2002).  base64-encoded parts need to
 # be stripped before this match
-rawbody TRACKER_ID		/^[a-z0-9]{6,}[-_a-z0-9]{12,}[a-z0-9]{6,}\s*$/is
+body TRACKER_ID		/^[a-z0-9]{6,}[-_a-z0-9]{12,}[a-z0-9]{6,}\s*\z/is
 
 describe TRACKER_ID		Incorporates a tracking ID number
 test TRACKER_ID     ok          2174Hzdm0-105YUqT8863DiDg0-616mqbE4931HEBc0-732qBHd6314l52

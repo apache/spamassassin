@@ -102,6 +102,6 @@ sub mbox_search {
 
 sub handle {
   my $msgp = shift;
-  print STDOUT @$msgp;
+  print STDOUT @$msgp, "\n";
 }
 
