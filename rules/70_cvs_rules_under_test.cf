@@ -517,7 +517,7 @@ tflags T_RCVD_IN_FIVETEN_BULK net
 # retest all of the rest (since check_rbl_sub wasn't used before)
 header T_RCVD_IN_FIVETEN_SPAM	rbleval:check_rbl_sub('fiveten', '127.0.0.2')
 tflags T_RCVD_IN_FIVETEN_SPAM net
-header T_RCVD_IN_FIVETEN_DIALUP	rbleval:check_rbl_sub('fiveten', '127.0.0.3')
+header T_RCVD_IN_FIVETEN_DIALUP	rbleval:check_rbl('fiveten-notfirsthop', 'blackholes.five-ten-sg.com.', '127.0.0.3')
 tflags T_RCVD_IN_FIVETEN_DIALUP net
 header T_RCVD_IN_FIVETEN_MULTISTAGE	rbleval:check_rbl_sub('fiveten', '127.0.0.5')
 tflags T_RCVD_IN_FIVETEN_MULTISTAGE net
@@ -580,16 +580,6 @@ tflags T_FROM_IN_DEADBEEF net
 # bandwidth-pigs
 header T_FROM_IN_PIGS		rbleval:check_rbl_from('pigs', 'bandwidth-pigs.monkeys.com.')
 tflags T_FROM_IN_PIGS net
-
-# bug 1853: Allow primary RBL tests to match only on certain responses
-header T_NJABL_DIALUP		rbleval:check_rbl('njabl-notfirsthop', 'dnsbl.njabl.org.', '127.0.0.3')
-tflags T_NJABL_DIALUP		net
-#
-header T_OSIRU_DUL		rbleval:check_rbl('osirusoft-notfirsthop', 'relays.osirusoft.com.', '127.0.0.3')
-tflags T_OSIRU_DUL		net
-#
-header T_RCVD_IN_FIVETEN_DIALUP_NFH	rbleval:check_rbl('fiveten-notfirsthop', 'blackholes.five-ten-sg.com.', '127.0.0.3')
-tflags T_RCVD_IN_FIVETEN_DIALUP_NFH net
 
 # OK, a whole batch of faked-HELO detection rules.  These work by checking
 # for hosts HELOing in a certain domain, but without rDNS matching that.

@@ -37,8 +37,7 @@ header X_OSIRU_OPEN_RELAY	rbleval:check_rbl_sub('osirusoft', '127.0.0.2')
 describe X_OSIRU_OPEN_RELAY	DNSBL: sender is Confirmed Open Relay
 tflags X_OSIRU_OPEN_RELAY	net
 
-# TODO: problem.  cannot use this!
-header X_OSIRU_DUL		rbleval:check_rbl_sub('osirusoft', '127.0.0.3')
+header X_OSIRU_DUL		rbleval:check_rbl('osirusoft-notfirsthop', 'relays.osirusoft.com.', '127.0.0.3')
 describe X_OSIRU_DUL		DNSBL: sender ip address in in a dialup block
 tflags X_OSIRU_DUL		net
 
@@ -61,7 +60,7 @@ header X_NJABL_OPEN_PROXY	rbleval:check_rbl_sub('njabl', '127.0.0.2')
 describe X_NJABL_OPEN_PROXY	NJABL: sender is proxy/relay/formmail/spam-source
 tflags X_NJABL_OPEN_PROXY	net
  	
-header X_NJABL_DIALUP		rbleval:check_rbl_sub('njabl', '127.0.0.3')
+header X_NJABL_DIALUP		rbleval:check_rbl('njabl-notfirsthop', 'dnsbl.njabl.org.', '127.0.0.3')
 describe X_NJABL_DIALUP		NJABL: sender is on dialup/dynamic IP
 tflags X_NJABL_DIALUP		net
 
