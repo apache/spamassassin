@@ -713,6 +713,7 @@ sub _check_received_helos {
     #
     $self->{faked_dotcom_helo} = 0;
     if ($helo_host =~ /(?:\.|^)(lycos\.com|lycos\.co\.uk|hotmail\.com
+		|localhost\.com|excite\.com|caramail\.com
 		|cs\.com|aol\.com|msn\.com|yahoo\.com|drizzle\.com)$/ix)
     {
       my $dom = $1;
