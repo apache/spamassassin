@@ -204,10 +204,11 @@ installed:
   - Storable (from CPAN)
 
     This is a required module if you use spamd and allow children to
-    handle more than one client connection before quitting. Third
-    party utilities may also require this module for the same
-    functionality.  Storable is used to shift configuration when a
-    spamd process switches between users.
+    handle more than one client connection before quitting. Third party
+    utilities may also require this module for the same functionality.
+    Storable is used to shift configuration when a spamd process switches
+    between users.  Version 2.13 is required, since it fixes a bug that
+    causes hangs under heavy load on multiprocessor Linux machines.
 
     Debian: apt-get install libstorable-perl
     Gentoo: emerge dev-perl/Storable
