@@ -25,7 +25,7 @@ $KNOWN_BAD_DIALUP_RANGES = q(
 );
 
 # sad but true. sort it out, sysadmins!
-$CCTLDS_WITH_LOTS_OF_OPEN_RELAYS = qr{(?:kr|cn|cl|ar|hk|us|il|th|tw|sg|za|tr|ma|ua|in|pe)};
+$CCTLDS_WITH_LOTS_OF_OPEN_RELAYS = qr{(?:kr|cn|cl|ar|hk|il|th|tw|sg|za|tr|ma|ua|in|pe)};
 $ROUND_THE_WORLD_RELAYERS = qr{(?:net|com|ca)};
 
 # Here's how that RE was determined... relay rape by country (as of my
