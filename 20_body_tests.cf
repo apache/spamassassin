@@ -780,6 +780,11 @@ describe NUMERIC_COMMENT        Contains a comment with nothing but a number in 
 test NUMERIC_COMMENT     ok     Some text <!--34555--> followed by more
 test NUMERIC_COMMENT     fail   Something <!-- A comment --> and more
 
+rawbody  OBFUSCATING_COMMENT    /\S<!--.{0,12}?-->\S/
+describe OBFUSCATING_COMMENT    HTML comments which obfuscate text
+test OBFUSCATING_COMMENT ok     This is a te<!--foo-->st
+test OBFUSCATING_COMMENT fail   Not a <!-- problem --> here
+
 ## Contrib: Mark Perkel
 
 body OFFSHORE_SCAM		/offshore .{0,20}(?:credit card|companies|account|financ|website)/i
