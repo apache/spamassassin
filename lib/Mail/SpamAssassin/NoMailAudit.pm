@@ -195,6 +195,7 @@ sub get_all_headers {
     next unless defined($entry);
 
     my $text = $hdr.": ".$entry->{$num};
+    if ($text !~ /\n$/s) { $text .= "\n"; }
     push (@lines, $text);
   }
 
