@@ -1,0 +1,181 @@
+# SpamAssassin rules file.
+#
+# The format is easy to grok:
+#
+#   report line-of-spam-report-text
+#       (some template items supported are:)
+#       _HITS_: the number of hits the message triggered
+#       _REQD_: the required hits to be considered spam
+#       _SUMMARY_: the full details of what hits were triggered
+#       _VER_: SpamAssassin version
+#       _HOME_: SpamAssassin home URL
+#
+#   header SYMBOLIC_TEST_NAME	header op pattern
+#	(The operations allowed (so far) are: =~  and: !~)
+#
+#   header SYMBOLIC_TEST_NAME	eval:name_of_eval_method([args])
+#
+#   body SYMBOLIC_TEST_NAME	/pattern/modifiers
+#	(Evaluated for each text or HTML line in the message body.
+#       If you plan to use the default weight (1), you can omit the
+#       SYMBOLIC_TEST_NAME and just use "." instead.
+#
+#   body SYMBOLIC_TEST_NAME	eval:name_of_eval_method([args])
+#	(this is evaluated for the entire message, not for each line)
+#
+#   describe SYMBOLIC_TEST_NAME Textual description of test
+#       (body pattern tests don't require a description.)
+#
+# # starts a comment, whitespace is not significant.
+#
+###########################################################################
+
+# Default template. Try to keep it under 76 columns (inside the the dots below).
+# Bear in mind that EVERY line will be prefixed with "SPAM: " in order to make
+# it clear what's been added, so you lose 6 columns right there.
+#
+#      ......................................................................
+report -------------------- Start SpamAssassin results ----------------------
+report This mail is probably spam.  The original message has been altered
+report so you can recognise or block similar unwanted mail in future, using
+report the built-in mail filtering support in your mail reader.
+report 
+report Content analysis details:   (_HITS_ hits, _REQD_ required)
+report _SUMMARY_
+report -------------------- End of SpamAssassin results ---------------------
+#      ......................................................................
+
+
+header NO_REAL_NAME		From =~ /^\s*\<?\S+\@\S+\>?\s*$/
+describe NO_REAL_NAME		From: does not include a real name
+
+header FROM_ENDS_IN_NUMS	From =~ /\d+\@/
+describe FROM_ENDS_IN_NUMS	From: ends in numbers
+
+header PLING_PLING		Subject =~ /\!+/
+describe PLING_PLING		Subject has lots of exclamation marks
+
+header SUBJ_HAS_UNIQ_ID		Subject =~ /\s+(?:\s{6,}[-a-z0-9]{4,}|[-:\#\(\[]+[-a-zA-Z0-9]{4,}[\]\)]+|[-:\#][-a-zA-Z0-9]{4,})$/
+describe SUBJ_HAS_UNIQ_ID	Subject contains a unique ID number
+
+header UNDISC_RECIPS		To =~ /Undisclosed.*Recipients/i
+describe UNDISC_RECIPS		To "Undisclosed.Recipients" or similar
+
+header SUBJ_ALL_CAPS		Subject !~ /[a-z]/
+describe SUBJ_ALL_CAPS		Subject is all capitals
+
+header MSGID_HAS_NO_AT		Message-Id !~ /\@/
+describe MSGID_HAS_NO_AT	Message-Id has no @ sign
+
+header INVALID_DATE		Date =~ / AM| PM/
+describe INVALID_DATE		Invalid Date: header
+
+header SUBJ_HAS_Q_MARK		Subject =~ /\?/
+describe SUBJ_HAS_Q_MARK	Subject: ends in a question mark
+
+header ADVERT_CODE		Subject =~ /ADV:/
+describe ADVERT_CODE		Subject: contains advertising tag
+
+header FRIEND_AT_PUBLIC	To =~ /(yourdomain|you|your|public).(com|org|net)/i
+describe FRIEND_AT_PUBLIC	sent to you@you.com or similar
+
+header TO_EMPTY			To =~ /^(?:\@|\s*$)/
+describe TO_EMPTY		To: is empty
+
+header REPLY_TO_EMPTY		Reply-To =~ /^\@/
+describe REPLY_TO_EMPTY		Reply-To: is empty
+
+header NO_MX_FOR_FROM		eval:check_for_from_mx()
+describe NO_MX_FOR_FROM		No MX records for the From: domain
+
+header KNOWN_BAD_DIALUPS	eval:check_for_bad_dialup_ips()
+describe KNOWN_BAD_DIALUPS	Received via known spam-harbouring dialups
+
+header FROM_AND_TO_SAME		eval:check_for_from_to_equivalence()
+describe FROM_AND_TO_SAME	From and To the same address
+
+header BAD_HELO_WARNING		eval:check_for_bad_helo()
+describe BAD_HELO_WARNING	Fake name used in SMTP HELO command
+
+header SUBJ_FULL_OF_8BITS	eval:check_subject_for_lotsa_8bit_chars()
+describe SUBJ_FULL_OF_8BITS	Subject is full of 8-bit characters
+
+header RCVD_IN_RBL		eval:check_rbl('rbl.maps.vix.com')
+describe RCVD_IN_RBL		Received via a relay listed in the RBL
+
+header RCVD_IN_RELAYS_ORBS_ORG	eval:check_rbl('relays.orbs.org')
+describe RCVD_IN_RELAYS_ORBS_ORG Received via a relay in relays.orbs.org
+
+header RCVD_IN_MAIL_ABUSE_ORG	eval:check_rbl('relays.mail-abuse.org')
+describe RCVD_IN_MAIL_ABUSE_ORG	Received via a relay in relays.mail-abuse.org
+
+###########################################################################
+
+body REMOVE_SUBJ		/remove.*subject/i
+body SUBJ_REMOVE		/subject.*remove/i
+body REPLY_REMOVE_SUBJECT	/reply.*remove.*subject/i
+body MAILTO_WITH_SUBJ_REMOVE	/mailto:.*\?subject=.*remove/i
+body MAILTO_WITH_SUBJ		/mailto:.*\?subject=/i
+body REMOVE_IN_QUOTES		/\"remove\"/i
+
+body JAVASCRIPT			/<SCRIPT LANGUAGE=[^ ]*"JavaScript">/i
+body UNSAFE_JAVASCRIPT		/on(?:Blur|Error|KeyDown|KeyUp|Load|MouseOver|Resize|Unload)/i
+body CLICK_HERE_LINK		/CLICK HERE[^A-Z]*<\/A>/i
+body HTML_WITH_BGCOLOR		/<body .*bgcolor=\S+/i
+body SPAM_FORM			/CHANGE EMAIL ADDRESS IN ACTION OF FORM/
+body SPAM_FORM_RETURN		/return validate_form/
+body SPAM_FORM_INPUT		/<input name=.*submit type=.*submit value=.*" *Submit By E-Mail *">/i
+
+body SENT_IN_COMPLIANCE		/message .*sen(?:d|t) in compliance (?:of|with)/
+body PARA_A_2_C_OF_1618		/Paragraph .a.*2.*C. of S. 1618/i
+body BILL_1618			/Bill.*1618.*TITLE.*III/i
+body S_1618			/S.\s*1618\s*-\s*SECTION\s*301/i
+body SECTION_301		/SECTION\s*301/
+
+body NUMERIC_HTTP_ADDR		/http\:\/\/\d+\//i
+body SUPERLONG_LINE		/.{99,}/
+body ASCII_FORM_ENTRY		/[A-Za-z].* _{30,}/
+
+body AMAZING			/AMAZING/
+body GUARANTEE			/GUARANTEE/
+body PROFITS			/PROFITS/
+body FOR_FREE			/for FREE/
+body MONEY_MAKING		/money making/i
+body BULK_EMAIL			/bulk e-*mail/i
+body DEAR_FRIEND		/Dear Friend/
+body CASHCASHCASH		/\${5,}/
+body CALL_NOW			/CALL NOW/
+body CALL_888			/call.*888-\d+-\d+/i
+body ONLINE_BIZ_OPS		/online business opportunities/i
+body REMOVAL_INSTRUCTIONS	/Removal instructions/i
+body BILLION_DOLLARS		/[BM]ILLION DOLLARS/
+body OPT_IN			/opt-in/i
+body DIRECT_EMAIL		/direct e-*mail/i
+body MASS_EMAIL			/mass e-*mail/i
+
+body INTL_EXEC_GUILD		/International Executive Guild/
+body ANOTHER_NET_AD		/Another Internet Ad campaign produced/
+body LASER_PRINTER		/LASER PRINTER SUPPLIES/
+body DIGITAL_FX1		/Digital FX1/
+body OFFICE_OF_MD		/The Office of *The Managing Director/
+body BRAND_NEW_PAGER		/BRAND NEW Pager FREE/
+
+body EXCUSE_1			/You were sent this message because/i
+body EXCUSE_2			/If you did not opt.in/i
+body EXCUSE_3			/to be removed (?:from|send|reply)/i
+body EXCUSE_4			/To Be Removed,? Please/i
+body EXCUSE_5			/that your email address is removed/i
+body EXCUSE_6			/to remove yourself/i
+body EXCUSE_7			/you would like to be removed/i
+body EXCUSE_8			/requests to be taken off our mailing list/
+body EXCUSE_9		/If you do.*n.*t want to receive emails on this subject/i
+
+body GREEN_EXCUSE_1	/using email instead can significantly reduce this/i
+body GREEN_EXCUSE_2	/the trees, save the planet, use email!/i
+
+body BALANCE_FOR_LONG		eval:check_for_very_long_text()
+describe BALANCE_FOR_LONG	Message text is over 500 lines long
+
+body FREE_PRIORITY_MAIL		/FREE PRIORITY MAIL SHIPPING/i
+body LIMITED_TIME_ONLY		/LIMITED TIME ONLY/i
+
