@@ -1,11 +1,12 @@
 
+OPT = -O6
 GALIB =	/local2/galib245
 
 all: evolve
 	strip evolve
 
 evolve: tmp/tests.h evolve.o
-	g++ -Wall -O6 -fexceptions -L$(GALIB)/ga evolve.o -o evolve -lga -lm
+	g++ -Wall $(OPT) -fexceptions -L$(GALIB)/ga evolve.o -o evolve -lga -lm
 
 tmp/tests.h: spam.log nonspam.log tmp/ranges.data
 	./logs-to-c
@@ -19,7 +20,7 @@ freqs: spam.log nonspam.log
 	./hit-frequencies > freqs
 
 %.o: %.cxx
-	g++ -Wall -O6 -fexceptions -I$(GALIB) -c $< -o $@
+	g++ -Wall $(OPT) -fexceptions -I$(GALIB) -c $< -o $@
 
 clean:
 	rm -rf *.o evolve tmp

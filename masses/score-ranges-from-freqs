@@ -23,6 +23,7 @@ while (<>) {
   $ratio{$test} = $ratio;
 }
 
+system ("mkdir tmp >/dev/null 2>&1");
 open (OUT, ">tmp/ranges.data");
 foreach my $test (sort { $ratio{$b} <=> $ratio{$a} } keys %freq) {
   my $overall = $freq{$test};
@@ -39,8 +40,8 @@ foreach my $test (sort { $ratio{$b} <=> $ratio{$a} } keys %freq) {
   my ($lo, $hi) = ratio_in_200_to_range($ratio);
 
   printf OUT ("%3.1f %3.1f $test\n", $lo, $hi);
-  printf ("range: %3.1f %3.1f $test ($spam / $nonspam = $ratio)\n",
-  	$lo, $hi);
+  printf "range: %3.1f %3.1f $test ($spam / $nonspam = $ratio)\n",
+  	$lo, $hi;
 }
 close OUT;
 exit;
