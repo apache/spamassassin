@@ -266,6 +266,10 @@ sub lookup_ptr {
   my ($self, $dom) = @_;
 
   return undef unless $self->load_resolver();
+  if ($self->{main}->{local_tests_only}) {
+    dbg ("local tests only, not looking up PTR");
+    return undef;
+  }
 
   dbg ("looking up PTR record for '$dom'");
   my $name = '';

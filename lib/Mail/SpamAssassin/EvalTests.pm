@@ -625,11 +625,14 @@ sub check_for_round_the_world_received {
 
 gotone:
   my $revdns = $self->lookup_ptr ($relayerip);
+  if (!defined $revdns) { $revdns = '(unknown)'; }
 
   dbg ("round-the-world: mail relayed through $relay by ".	
   	"$relayerip (HELO $relayer, rev DNS says $revdns");
 
-  if ($revdns =~ /\.${ROUND_THE_WORLD_RELAYERS}$/oi) {
+  if ($revdns =~ /\.${ROUND_THE_WORLD_RELAYERS}$/oi ||
+      $relayer =~ /\.${ROUND_THE_WORLD_RELAYERS}$/oi)
+  {
     dbg ("round-the-world: yep, I think so");
     return 1;
   }
