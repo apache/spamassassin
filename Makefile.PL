@@ -141,7 +141,7 @@ my %makefile = (
 );
 
 # MakeMaker prior to 5.45 doesn't support PM_FILTER, so we have to implement it ourselves
-if($mm_version < 5.45) {
+if($mm_version <= 5.45) {
 warn <<ITSALLSOSTUPID;
 
 Your version of ExtUtils::MakeMaker is a pre-5.45. We need to include a
@@ -282,7 +282,7 @@ FIXBANG		= -Msharpbang \
 
 SPAMC_SOURCES = spamd/spamc.c qmail/qmail-spamc.c spamd/libspamc.c spamd/utils.c
 
-# . ($mm_version < 5.45 ? q#
+# . ($mm_version <= 5.45 ? q#
 pm_to_blib: $(TO_INST_PM)
 	@ $(PERL) "-I$(INST_ARCHLIB)" "-I$(INST_LIB)" \
 	"-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" -Ibuild \
