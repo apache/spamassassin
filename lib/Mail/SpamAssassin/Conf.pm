@@ -208,14 +208,12 @@ sub _parse {
   my $skipfile = 0;
 
   foreach (split (/\n/, $_[1])) {
-    s/^\s+|\s+$//g;  # remove leading and trailing spaces (including newlines)
     s/(?<!\\)#.*$//; # remove comments
-    s/\s+$//g;       # remove spaces before comments
+    s/^\s+|\s+$//g;  # remove leading and trailing spaces (including newlines)
     next unless($_); # skip empty lines
 
     # handle i18n
-    if (s/^lang\s+(\S\S_\S\S)\s+//) { next if ($lang ne $1); }
-    if (s/^lang\s+(\S\S)\s+//) { my $l = $1; next if ($lang !~ /${l}$/i); }
+    if (s/^lang\s+(\S+)\s+//) { next if ($lang !~ /^$1/i); }
 
     # Versioning assertions
     if (/^file\s+start\s+(.+)\s*$/) { $currentfile = $1; next; }
