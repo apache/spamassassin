@@ -270,95 +270,607 @@ header T_RATWARE_HASH_3 Message-ID =~ /^<\d{8}[a-zA-Z0-9]{14}@/
 
 # use ReplaceTags
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-body T_INT_AFFORDABLE2	/(?!affordable)<A><F><F><O><R><D><A><B><L><E>/i
-body T_INT_ANXIETY2	/(?!anxiety)<A><N><X><I><E><T><Y>/i
-body T_INT_BILLION2	/(?!billion)<B><I><L><L><I><O><N>/i
-body T_INT_CELEBREX2	/(?!celebrex)<C><E><L><E><B><R><E><X>/i
-body T_INT_CIALIS2	/(?!cialis)<C><I><A><L><I><S>/i
-body T_INT_CREDIT2	/(?!credit)<C><R><E><D><I><T>/i
-body T_INT_ERECT2	/(?!erection)<E><R><E><C><T><I><O><N>/i
-body T_INT_FREE2	/(?!free)<F><R><E><E>/i
-body T_INT_HUNDREDS2	/(?!hundreds)<H><U><N><D><R><E><D><S>/i
-body T_INT_LEVITRA2	/(?!levitra)<L><E><V><I><T><R><A>/i
-body T_INT_MILF2	/(?!milf)<M><I><L><F>/i
-body T_INT_MILLION2	/(?!million)<M><I><L><L><I><O><N>/i
-body T_INT_MONEY2	/(?!money)<M><O><N><E><Y>/i
-body T_INT_MORTGAGE2	/(?!mortgage)<M><O><R><T><G><A><G><E>/i
-body T_INT_OBLIGATION2	/(?!obligation)<O><B><L><I><G><A><T><I><O><N>/i
-body T_INT_OFFERS2	/(?!offers)<O><F><F><E><R><S>/i
-body T_INT_PENIS2	/(?!penis)<P><E><N><I><S>/i
-body T_INT_PHARMACY2	/(?!pharmacy)<P><H><A><R><M><A><C><Y>/i
-body T_INT_PHENT2	/(?!phentermine)<P><H><E><N><T><E><R><M><I><N><E>/i
-body T_INT_PRESCRIPT2	/(?!prescription)<P><R><E><S><C><R><I><P><T><I><O><N>/i
-body T_INT_PROFIT2	/(?!profit)<P><R><O><F><I><T>/i
-body T_INT_REFINANCE2	/(?!refinance)<R><E><F><I><N><A><N><C><E>/i
-body T_INT_ROLEX2	/(?!rolex)<R><O><L><E><X>/i
-body T_INT_SOFTWARE2	/(?!software)<S><O><F><T><W><A><R><E>/i
-body T_INT_THOUSANDS2	/(?!thousands)<T><H><O><U><S><A><N><D><S>/i
-body T_INT_VALIUM2	/(?!valium)<V><A><L><I><U><M>/i
-body T_INT_VIAGRA2	/(?!viagra)<V><I><A><G><R><A>/i
-body T_INT_VICODIN2	/(?!vicodin)<V><I><C><O><D><I><N>/i
-body T_INT_VIOXX2	/(?!vioxx)<V><I><O><X><X>/i
-body T_INT_XANAX2	/(?!xanax)<X><A><N><A><X>/i
-body T_INT_PILLS2	/(?!pills)<P><I><L><L><S>/i
-body T_INT_PRICES2	/(?!prices)<P><R><I><C><E><S>/i
-replace_rules T_INT_AFFORDABLE2 T_INT_ANXIETY2 T_INT_BILLION2 T_INT_CELEBREX2 T_INT_CIALIS2 T_INT_CREDIT2 T_INT_ERECT2 T_INT_FREE2 T_INT_HUNDREDS2 T_INT_LEVITRA2 T_INT_MILF2 T_INT_MILLION2 T_INT_MONEY2 T_INT_MORTGAGE2 T_INT_OBLIGATION2 T_INT_OFFERS2 T_INT_PENIS2 T_INT_PHARMACY2 T_INT_PHENT2 T_INT_PRESCRIPT2 T_INT_PROFIT2 T_INT_REFINANCE2 T_INT_ROLEX2 T_INT_SOFTWARE2 T_INT_THOUSANDS2 T_INT_VALIUM2 T_INT_VIAGRA2 T_INT_VICODIN2 T_INT_VIOXX2 T_INT_XANAX2 T_INT_PILLS2 T_INT_PRICES2
 
-# bug 2166
-body T_OBFU_COST	/(?!cost)<C><O><S><T>/i
-body T_OBFU_MEDICATION	/(?!medication)<M><E><D><I><C><A><T><I><O><N>/i
-body T_OBFU_PATIENTS	/(?!patients)<P><A><T><I><E><N><T><S>/i
-body T_OBFU_PHARMACIES	/(?!pharmacies)<P><H><A><R><M><A><C><I><E><S>/i
-body T_OBFU_PLEASE	/(?!please)<P><L><E><A><S><E>/i
-body T_OBFU_REMOVE	/(?!remove)<R><E><M><O><V><E>/i
-body T_OBFU_SAVE	/(?!save)<S><A><V><E>/i
-replace_rules T_OBFU_COST
-replace_rules T_OBFU_MEDICATION
-replace_rules T_OBFU_PATIENTS
-replace_rules T_OBFU_PHARMACIES
-replace_rules T_OBFU_PLEASE
-replace_rules T_OBFU_REMOVE
-replace_rules T_OBFU_SAVE
+# experimental interrupts
+replace_inter	W1	\W?
+replace_inter	W2	\W{0,2}
+replace_inter	W3	\W{0,3}
 
-# bug 2584
-body T_OBFU_DICK	/(?!dick)<D><I><C><K>/i
-body T_OBFU_DOCTORS	/(?!doctors)<D><O><C><T><O><R><S>/i
-body T_OBFU_ENLARGE	/(?!enlarge)<E><N><L><A><R><G><E>/i
-body T_OBFU_GUARANTEE	/(?!guarantee)<G><U><A><R><A><N><T><E><E>/i
-replace_rules T_OBFU_DICK
-replace_rules T_OBFU_DOCTORS
-replace_rules T_OBFU_ENLARGE
-replace_rules T_OBFU_GUARANTEE
+# experimental repeats
+replace_post	P2	{1,2}
+replace_post	P3	{1,3}
 
-# bug 2886 and bug 3478
+body T_OBFU_AFFORDABLE	/(?!affordable)<A><F><F><O><R><D><A><B><L><E>/i
+body T_OBFU_AFFORDABLE_W1_P2	/<inter W1><post P2>(?!affordable)<A><F><F><O><R><D><A><B><L><E>/i
+body T_OBFU_AFFORDABLE_W1_P3	/<inter W1><post P3>(?!affordable)<A><F><F><O><R><D><A><B><L><E>/i
+body T_OBFU_AFFORDABLE_W2_P2	/<inter W2><post P2>(?!affordable)<A><F><F><O><R><D><A><B><L><E>/i
+body T_OBFU_AFFORDABLE_W2_P3	/<inter W2><post P3>(?!affordable)<A><F><F><O><R><D><A><B><L><E>/i
+body T_OBFU_AFFORDABLE_W3_P2	/<inter W3><post P2>(?!affordable)<A><F><F><O><R><D><A><B><L><E>/i
+body T_OBFU_AFFORDABLE_W3_P3	/<inter W3><post P3>(?!affordable)<A><F><F><O><R><D><A><B><L><E>/i
 body T_OBFU_AMBIEN	/(?!ambien)<A><M><B><I><E><N>/i
-body T_OBFU_PHENTER	/(?!phenter)<P><H><E><N><T><E><R>/i
-body T_OBFU_PHERENTERMINE	/(?!pherentermine)<P><H><E><R><E><N><T><E><R><M><I><N><E>/i
-body T_OBFU_SOMA	/(?!soma)<S><O><M><A>/i
-body T_OBFU_TRAMADOL	/(?!tramadol)<T><R><A><M><A><D><O><L>/i
-replace_rules T_OBFU_AMBIEN
-replace_rules T_OBFU_PHENTER
-replace_rules T_OBFU_PHERENTERMINE
-replace_rules T_OBFU_SOMA
-replace_rules T_OBFU_TRAMADOL
-
-# bug 2989
+body T_OBFU_AMBIEN_W1_P2	/<inter W1><post P2>(?!ambien)<A><M><B><I><E><N>/i
+body T_OBFU_AMBIEN_W1_P3	/<inter W1><post P3>(?!ambien)<A><M><B><I><E><N>/i
+body T_OBFU_AMBIEN_W2_P2	/<inter W2><post P2>(?!ambien)<A><M><B><I><E><N>/i
+body T_OBFU_AMBIEN_W2_P3	/<inter W2><post P3>(?!ambien)<A><M><B><I><E><N>/i
+body T_OBFU_AMBIEN_W3_P2	/<inter W3><post P2>(?!ambien)<A><M><B><I><E><N>/i
+body T_OBFU_AMBIEN_W3_P3	/<inter W3><post P3>(?!ambien)<A><M><B><I><E><N>/i
+body T_OBFU_ANXIETY	/(?!anxiety)<A><N><X><I><E><T><Y>/i
+body T_OBFU_ANXIETY_W1_P2	/<inter W1><post P2>(?!anxiety)<A><N><X><I><E><T><Y>/i
+body T_OBFU_ANXIETY_W1_P3	/<inter W1><post P3>(?!anxiety)<A><N><X><I><E><T><Y>/i
+body T_OBFU_ANXIETY_W2_P2	/<inter W2><post P2>(?!anxiety)<A><N><X><I><E><T><Y>/i
+body T_OBFU_ANXIETY_W2_P3	/<inter W2><post P3>(?!anxiety)<A><N><X><I><E><T><Y>/i
+body T_OBFU_ANXIETY_W3_P2	/<inter W3><post P2>(?!anxiety)<A><N><X><I><E><T><Y>/i
+body T_OBFU_ANXIETY_W3_P3	/<inter W3><post P3>(?!anxiety)<A><N><X><I><E><T><Y>/i
+body T_OBFU_BILLION	/(?!billion)<B><I><L><L><I><O><N>/i
+body T_OBFU_BILLION_W1_P2	/<inter W1><post P2>(?!billion)<B><I><L><L><I><O><N>/i
+body T_OBFU_BILLION_W1_P3	/<inter W1><post P3>(?!billion)<B><I><L><L><I><O><N>/i
+body T_OBFU_BILLION_W2_P2	/<inter W2><post P2>(?!billion)<B><I><L><L><I><O><N>/i
+body T_OBFU_BILLION_W2_P3	/<inter W2><post P3>(?!billion)<B><I><L><L><I><O><N>/i
+body T_OBFU_BILLION_W3_P2	/<inter W3><post P2>(?!billion)<B><I><L><L><I><O><N>/i
+body T_OBFU_BILLION_W3_P3	/<inter W3><post P3>(?!billion)<B><I><L><L><I><O><N>/i
+body T_OBFU_CELEBREX	/(?!celebrex)<C><E><L><E><B><R><E><X>/i
+body T_OBFU_CELEBREX_W1_P2	/<inter W1><post P2>(?!celebrex)<C><E><L><E><B><R><E><X>/i
+body T_OBFU_CELEBREX_W1_P3	/<inter W1><post P3>(?!celebrex)<C><E><L><E><B><R><E><X>/i
+body T_OBFU_CELEBREX_W2_P2	/<inter W2><post P2>(?!celebrex)<C><E><L><E><B><R><E><X>/i
+body T_OBFU_CELEBREX_W2_P3	/<inter W2><post P3>(?!celebrex)<C><E><L><E><B><R><E><X>/i
+body T_OBFU_CELEBREX_W3_P2	/<inter W3><post P2>(?!celebrex)<C><E><L><E><B><R><E><X>/i
+body T_OBFU_CELEBREX_W3_P3	/<inter W3><post P3>(?!celebrex)<C><E><L><E><B><R><E><X>/i
+body T_OBFU_CIALIS	/(?!cialis)<C><I><A><L><I><S>/i
+body T_OBFU_CIALIS_W1_P2	/<inter W1><post P2>(?!cialis)<C><I><A><L><I><S>/i
+body T_OBFU_CIALIS_W1_P3	/<inter W1><post P3>(?!cialis)<C><I><A><L><I><S>/i
 body T_OBFU_CLICK	/(?!click)<C><L><I><C><K>/i
+body T_OBFU_CLICK_W1_P2	/<inter W1><post P2>(?!click)<C><L><I><C><K>/i
+body T_OBFU_CLICK_W1_P3	/<inter W1><post P3>(?!click)<C><L><I><C><K>/i
+body T_OBFU_CLICK_W2_P2	/<inter W2><post P2>(?!click)<C><L><I><C><K>/i
+body T_OBFU_CLICK_W2_P3	/<inter W2><post P3>(?!click)<C><L><I><C><K>/i
+body T_OBFU_CLICK_W3_P2	/<inter W3><post P2>(?!click)<C><L><I><C><K>/i
+body T_OBFU_CLICK_W3_P3	/<inter W3><post P3>(?!click)<C><L><I><C><K>/i
+body T_OBFU_COST	/(?!cost)<C><O><S><T>/i
+body T_OBFU_COST_W1_P2	/<inter W1><post P2>(?!cost)<C><O><S><T>/i
+body T_OBFU_COST_W1_P3	/<inter W1><post P3>(?!cost)<C><O><S><T>/i
+body T_OBFU_CREDIT	/(?!credit)<C><R><E><D><I><T>/i
+body T_OBFU_DOCTORS	/(?!doctors)<D><O><C><T><O><R><S>/i
+body T_OBFU_DOCTORS_W1_P2	/<inter W1><post P2>(?!doctors)<D><O><C><T><O><R><S>/i
+body T_OBFU_DOCTORS_W1_P3	/<inter W1><post P3>(?!doctors)<D><O><C><T><O><R><S>/i
+body T_OBFU_DOCTORS_W2_P2	/<inter W2><post P2>(?!doctors)<D><O><C><T><O><R><S>/i
+body T_OBFU_DOCTORS_W2_P3	/<inter W2><post P3>(?!doctors)<D><O><C><T><O><R><S>/i
+body T_OBFU_DOCTORS_W3_P2	/<inter W3><post P2>(?!doctors)<D><O><C><T><O><R><S>/i
+body T_OBFU_DOCTORS_W3_P3	/<inter W3><post P3>(?!doctors)<D><O><C><T><O><R><S>/i
+body T_OBFU_ENLARGE	/(?!enlarge)<E><N><L><A><R><G><E>/i
+body T_OBFU_ENLARGE_W1_P2	/<inter W1><post P2>(?!enlarge)<E><N><L><A><R><G><E>/i
+body T_OBFU_ENLARGE_W1_P3	/<inter W1><post P3>(?!enlarge)<E><N><L><A><R><G><E>/i
+body T_OBFU_ENLARGE_W2_P2	/<inter W2><post P2>(?!enlarge)<E><N><L><A><R><G><E>/i
+body T_OBFU_ENLARGE_W2_P3	/<inter W2><post P3>(?!enlarge)<E><N><L><A><R><G><E>/i
+body T_OBFU_ENLARGE_W3_P2	/<inter W3><post P2>(?!enlarge)<E><N><L><A><R><G><E>/i
+body T_OBFU_ENLARGE_W3_P3	/<inter W3><post P3>(?!enlarge)<E><N><L><A><R><G><E>/i
+body T_OBFU_ERECT	/(?!erection)<E><R><E><C><T><I><O><N>/i
+body T_OBFU_ERECT_W1_P2	/<inter W1><post P2>(?!erection)<E><R><E><C><T><I><O><N>/i
+body T_OBFU_ERECT_W1_P3	/<inter W1><post P3>(?!erection)<E><R><E><C><T><I><O><N>/i
+body T_OBFU_ERECT_W2_P2	/<inter W2><post P2>(?!erection)<E><R><E><C><T><I><O><N>/i
+body T_OBFU_ERECT_W2_P3	/<inter W2><post P3>(?!erection)<E><R><E><C><T><I><O><N>/i
+body T_OBFU_ERECT_W3_P2	/<inter W3><post P2>(?!erection)<E><R><E><C><T><I><O><N>/i
+body T_OBFU_ERECT_W3_P3	/<inter W3><post P3>(?!erection)<E><R><E><C><T><I><O><N>/i
 body T_OBFU_FOLLOW	/(?!follow)<F><O><L><L><O><W>/i
-body T_OBFU_MOVE	/(?!move)<M><O><V><E>/i
+body T_OBFU_FOLLOW_W1_P2	/<inter W1><post P2>(?!follow)<F><O><L><L><O><W>/i
+body T_OBFU_FOLLOW_W1_P3	/<inter W1><post P3>(?!follow)<F><O><L><L><O><W>/i
+body T_OBFU_FOLLOW_W2_P2	/<inter W2><post P2>(?!follow)<F><O><L><L><O><W>/i
+body T_OBFU_FOLLOW_W2_P3	/<inter W2><post P3>(?!follow)<F><O><L><L><O><W>/i
+body T_OBFU_FOLLOW_W3_P2	/<inter W3><post P2>(?!follow)<F><O><L><L><O><W>/i
+body T_OBFU_FOLLOW_W3_P3	/<inter W3><post P3>(?!follow)<F><O><L><L><O><W>/i
+body T_OBFU_FREE	/(?!free)<F><R><E><E>/i
+body T_OBFU_FREE_W1_P2	/<inter W1><post P2>(?!free)<F><R><E><E>/i
+body T_OBFU_FREE_W1_P3	/<inter W1><post P3>(?!free)<F><R><E><E>/i
+body T_OBFU_FREE_W2_P2	/<inter W2><post P2>(?!free)<F><R><E><E>/i
+body T_OBFU_FREE_W2_P3	/<inter W2><post P3>(?!free)<F><R><E><E>/i
+body T_OBFU_FREE_W3_P2	/<inter W3><post P2>(?!free)<F><R><E><E>/i
+body T_OBFU_FREE_W3_P3	/<inter W3><post P3>(?!free)<F><R><E><E>/i
+body T_OBFU_GUARANTEE	/(?!guarantee)<G><U><A><R><A><N><T><E><E>/i
+body T_OBFU_GUARANTEE_W1_P2	/<inter W1><post P2>(?!guarantee)<G><U><A><R><A><N><T><E><E>/i
+body T_OBFU_GUARANTEE_W1_P3	/<inter W1><post P3>(?!guarantee)<G><U><A><R><A><N><T><E><E>/i
+body T_OBFU_GUARANTEE_W2_P2	/<inter W2><post P2>(?!guarantee)<G><U><A><R><A><N><T><E><E>/i
+body T_OBFU_GUARANTEE_W2_P3	/<inter W2><post P3>(?!guarantee)<G><U><A><R><A><N><T><E><E>/i
+body T_OBFU_GUARANTEE_W3_P2	/<inter W3><post P2>(?!guarantee)<G><U><A><R><A><N><T><E><E>/i
+body T_OBFU_GUARANTEE_W3_P3	/<inter W3><post P3>(?!guarantee)<G><U><A><R><A><N><T><E><E>/i
+body T_OBFU_HUNDREDS	/(?!hundreds)<H><U><N><D><R><E><D><S>/i
+body T_OBFU_LEVITRA	/(?!levitra)<L><E><V><I><T><R><A>/i
+body T_OBFU_LEVITRA_W1_P2	/<inter W1><post P2>(?!levitra)<L><E><V><I><T><R><A>/i
+body T_OBFU_LEVITRA_W1_P3	/<inter W1><post P3>(?!levitra)<L><E><V><I><T><R><A>/i
+body T_OBFU_LEVITRA_W2_P2	/<inter W2><post P2>(?!levitra)<L><E><V><I><T><R><A>/i
+body T_OBFU_LEVITRA_W2_P3	/<inter W2><post P3>(?!levitra)<L><E><V><I><T><R><A>/i
+body T_OBFU_LEVITRA_W3_P2	/<inter W3><post P2>(?!levitra)<L><E><V><I><T><R><A>/i
+body T_OBFU_LEVITRA_W3_P3	/<inter W3><post P3>(?!levitra)<L><E><V><I><T><R><A>/i
+body T_OBFU_MEDICATION	/(?!medication)<M><E><D><I><C><A><T><I><O><N>/i
+body T_OBFU_MEDICATION_W1_P2	/<inter W1><post P2>(?!medication)<M><E><D><I><C><A><T><I><O><N>/i
+body T_OBFU_MEDICATION_W1_P3	/<inter W1><post P3>(?!medication)<M><E><D><I><C><A><T><I><O><N>/i
+body T_OBFU_MEDICATION_W2_P2	/<inter W2><post P2>(?!medication)<M><E><D><I><C><A><T><I><O><N>/i
+body T_OBFU_MEDICATION_W2_P3	/<inter W2><post P3>(?!medication)<M><E><D><I><C><A><T><I><O><N>/i
+body T_OBFU_MEDICATION_W3_P2	/<inter W3><post P2>(?!medication)<M><E><D><I><C><A><T><I><O><N>/i
+body T_OBFU_MEDICATION_W3_P3	/<inter W3><post P3>(?!medication)<M><E><D><I><C><A><T><I><O><N>/i
+body T_OBFU_MILLION	/(?!million)<M><I><L><L><I><O><N>/i
+body T_OBFU_MILLION_W1_P2	/<inter W1><post P2>(?!million)<M><I><L><L><I><O><N>/i
+body T_OBFU_MILLION_W1_P3	/<inter W1><post P3>(?!million)<M><I><L><L><I><O><N>/i
+body T_OBFU_MILLION_W2_P2	/<inter W2><post P2>(?!million)<M><I><L><L><I><O><N>/i
+body T_OBFU_MILLION_W2_P3	/<inter W2><post P3>(?!million)<M><I><L><L><I><O><N>/i
+body T_OBFU_MILLION_W3_P2	/<inter W3><post P2>(?!million)<M><I><L><L><I><O><N>/i
+body T_OBFU_MILLION_W3_P3	/<inter W3><post P3>(?!million)<M><I><L><L><I><O><N>/i
+body T_OBFU_MONEY	/(?!money)<M><O><N><E><Y>/i
+body T_OBFU_MONEY_W1_P2	/<inter W1><post P2>(?!money)<M><O><N><E><Y>/i
+body T_OBFU_MONEY_W1_P3	/<inter W1><post P3>(?!money)<M><O><N><E><Y>/i
+body T_OBFU_MONEY_W2_P2	/<inter W2><post P2>(?!money)<M><O><N><E><Y>/i
+body T_OBFU_MONEY_W2_P3	/<inter W2><post P3>(?!money)<M><O><N><E><Y>/i
+body T_OBFU_MONEY_W3_P2	/<inter W3><post P2>(?!money)<M><O><N><E><Y>/i
+body T_OBFU_MONEY_W3_P3	/<inter W3><post P3>(?!money)<M><O><N><E><Y>/i
+body T_OBFU_MORTGAGE	/(?!mortgage)<M><O><R><T><G><A><G><E>/i
+body T_OBFU_MORTGAGE_W1_P2	/<inter W1><post P2>(?!mortgage)<M><O><R><T><G><A><G><E>/i
+body T_OBFU_MORTGAGE_W1_P3	/<inter W1><post P3>(?!mortgage)<M><O><R><T><G><A><G><E>/i
+body T_OBFU_MORTGAGE_W2_P2	/<inter W2><post P2>(?!mortgage)<M><O><R><T><G><A><G><E>/i
+body T_OBFU_MORTGAGE_W2_P3	/<inter W2><post P3>(?!mortgage)<M><O><R><T><G><A><G><E>/i
+body T_OBFU_MORTGAGE_W3_P2	/<inter W3><post P2>(?!mortgage)<M><O><R><T><G><A><G><E>/i
+body T_OBFU_MORTGAGE_W3_P3	/<inter W3><post P3>(?!mortgage)<M><O><R><T><G><A><G><E>/i
+body T_OBFU_OBLIGATION_W1_P2	/<inter W1><post P2>(?!obligation)<O><B><L><I><G><A><T><I><O><N>/i
+body T_OBFU_OBLIGATION_W1_P3	/<inter W1><post P3>(?!obligation)<O><B><L><I><G><A><T><I><O><N>/i
+body T_OBFU_OBLIGATION_W2_P2	/<inter W2><post P2>(?!obligation)<O><B><L><I><G><A><T><I><O><N>/i
+body T_OBFU_OBLIGATION_W2_P3	/<inter W2><post P3>(?!obligation)<O><B><L><I><G><A><T><I><O><N>/i
+body T_OBFU_OBLIGATION_W3_P2	/<inter W3><post P2>(?!obligation)<O><B><L><I><G><A><T><I><O><N>/i
+body T_OBFU_OBLIGATION_W3_P3	/<inter W3><post P3>(?!obligation)<O><B><L><I><G><A><T><I><O><N>/i
+body T_OBFU_OFFERS	/(?!offers)<O><F><F><E><R><S>/i
+body T_OBFU_PATIENTS	/(?!patients)<P><A><T><I><E><N><T><S>/i
+body T_OBFU_PATIENTS_W1_P2	/<inter W1><post P2>(?!patients)<P><A><T><I><E><N><T><S>/i
+body T_OBFU_PATIENTS_W1_P3	/<inter W1><post P3>(?!patients)<P><A><T><I><E><N><T><S>/i
+body T_OBFU_PATIENTS_W2_P2	/<inter W2><post P2>(?!patients)<P><A><T><I><E><N><T><S>/i
+body T_OBFU_PATIENTS_W2_P3	/<inter W2><post P3>(?!patients)<P><A><T><I><E><N><T><S>/i
+body T_OBFU_PATIENTS_W3_P2	/<inter W3><post P2>(?!patients)<P><A><T><I><E><N><T><S>/i
+body T_OBFU_PATIENTS_W3_P3	/<inter W3><post P3>(?!patients)<P><A><T><I><E><N><T><S>/i
 body T_OBFU_PHARMAC	/(?!pharmac)<P><H><A><R><M><A><C>/i
+body T_OBFU_PHARMAC_W1_P2	/<inter W1><post P2>(?!pharmac)<P><H><A><R><M><A><C>/i
+body T_OBFU_PHARMAC_W1_P3	/<inter W1><post P3>(?!pharmac)<P><H><A><R><M><A><C>/i
+body T_OBFU_PHARMAC_W2_P2	/<inter W2><post P2>(?!pharmac)<P><H><A><R><M><A><C>/i
+body T_OBFU_PHARMAC_W2_P3	/<inter W2><post P3>(?!pharmac)<P><H><A><R><M><A><C>/i
+body T_OBFU_PHARMAC_W3_P2	/<inter W3><post P2>(?!pharmac)<P><H><A><R><M><A><C>/i
+body T_OBFU_PHARMAC_W3_P3	/<inter W3><post P3>(?!pharmac)<P><H><A><R><M><A><C>/i
+body T_OBFU_PHARMACIES	/(?!pharmacies)<P><H><A><R><M><A><C><I><E><S>/i
+body T_OBFU_PHARMACIES_W1_P2	/<inter W1><post P2>(?!pharmacies)<P><H><A><R><M><A><C><I><E><S>/i
+body T_OBFU_PHARMACIES_W1_P3	/<inter W1><post P3>(?!pharmacies)<P><H><A><R><M><A><C><I><E><S>/i
+body T_OBFU_PHARMACIES_W2_P2	/<inter W2><post P2>(?!pharmacies)<P><H><A><R><M><A><C><I><E><S>/i
+body T_OBFU_PHARMACIES_W2_P3	/<inter W2><post P3>(?!pharmacies)<P><H><A><R><M><A><C><I><E><S>/i
+body T_OBFU_PHARMACIES_W3_P2	/<inter W3><post P2>(?!pharmacies)<P><H><A><R><M><A><C><I><E><S>/i
+body T_OBFU_PHARMACIES_W3_P3	/<inter W3><post P3>(?!pharmacies)<P><H><A><R><M><A><C><I><E><S>/i
+body T_OBFU_PHARMACY	/(?!pharmacy)<P><H><A><R><M><A><C><Y>/i
+body T_OBFU_PHARMACY_W1_P2	/<inter W1><post P2>(?!pharmacy)<P><H><A><R><M><A><C><Y>/i
+body T_OBFU_PHARMACY_W1_P3	/<inter W1><post P3>(?!pharmacy)<P><H><A><R><M><A><C><Y>/i
+body T_OBFU_PHARMACY_W2_P2	/<inter W2><post P2>(?!pharmacy)<P><H><A><R><M><A><C><Y>/i
+body T_OBFU_PHARMACY_W2_P3	/<inter W2><post P3>(?!pharmacy)<P><H><A><R><M><A><C><Y>/i
+body T_OBFU_PHARMACY_W3_P2	/<inter W3><post P2>(?!pharmacy)<P><H><A><R><M><A><C><Y>/i
+body T_OBFU_PHARMACY_W3_P3	/<inter W3><post P3>(?!pharmacy)<P><H><A><R><M><A><C><Y>/i
+body T_OBFU_PHENT	/(?!phentermine)<P><H><E><N><T><E><R><M><I><N><E>/i
+body T_OBFU_PHENT_W1_P2	/<inter W1><post P2>(?!phentermine)<P><H><E><N><T><E><R><M><I><N><E>/i
+body T_OBFU_PHENT_W1_P3	/<inter W1><post P3>(?!phentermine)<P><H><E><N><T><E><R><M><I><N><E>/i
+body T_OBFU_PHENT_W2_P2	/<inter W2><post P2>(?!phentermine)<P><H><E><N><T><E><R><M><I><N><E>/i
+body T_OBFU_PHENT_W2_P3	/<inter W2><post P3>(?!phentermine)<P><H><E><N><T><E><R><M><I><N><E>/i
+body T_OBFU_PHENT_W3_P2	/<inter W3><post P2>(?!phentermine)<P><H><E><N><T><E><R><M><I><N><E>/i
+body T_OBFU_PHENT_W3_P3	/<inter W3><post P3>(?!phentermine)<P><H><E><N><T><E><R><M><I><N><E>/i
+body T_OBFU_PHENTER	/(?!phenter)<P><H><E><N><T><E><R>/i
+body T_OBFU_PHENTER_W1_P2	/<inter W1><post P2>(?!phenter)<P><H><E><N><T><E><R>/i
+body T_OBFU_PHENTER_W1_P3	/<inter W1><post P3>(?!phenter)<P><H><E><N><T><E><R>/i
+body T_OBFU_PHENTER_W2_P2	/<inter W2><post P2>(?!phenter)<P><H><E><N><T><E><R>/i
+body T_OBFU_PHENTER_W2_P3	/<inter W2><post P3>(?!phenter)<P><H><E><N><T><E><R>/i
+body T_OBFU_PHENTER_W3_P2	/<inter W3><post P2>(?!phenter)<P><H><E><N><T><E><R>/i
+body T_OBFU_PHENTER_W3_P3	/<inter W3><post P3>(?!phenter)<P><H><E><N><T><E><R>/i
+body T_OBFU_PHERENTERMINE	/(?!pherentermine)<P><H><E><R><E><N><T><E><R><M><I><N><E>/i
+body T_OBFU_PHERENTERMINE_W1_P2	/<inter W1><post P2>(?!pherentermine)<P><H><E><R><E><N><T><E><R><M><I><N><E>/i
+body T_OBFU_PHERENTERMINE_W1_P3	/<inter W1><post P3>(?!pherentermine)<P><H><E><R><E><N><T><E><R><M><I><N><E>/i
+body T_OBFU_PHERENTERMINE_W2_P2	/<inter W2><post P2>(?!pherentermine)<P><H><E><R><E><N><T><E><R><M><I><N><E>/i
+body T_OBFU_PHERENTERMINE_W2_P3	/<inter W2><post P3>(?!pherentermine)<P><H><E><R><E><N><T><E><R><M><I><N><E>/i
+body T_OBFU_PHERENTERMINE_W3_P2	/<inter W3><post P2>(?!pherentermine)<P><H><E><R><E><N><T><E><R><M><I><N><E>/i
+body T_OBFU_PHERENTERMINE_W3_P3	/<inter W3><post P3>(?!pherentermine)<P><H><E><R><E><N><T><E><R><M><I><N><E>/i
 body T_OBFU_PICTURE	/(?!picture)<P><I><C><T><U><R><E>/i
+body T_OBFU_PICTURE_W1_P2	/<inter W1><post P2>(?!picture)<P><I><C><T><U><R><E>/i
+body T_OBFU_PICTURE_W1_P3	/<inter W1><post P3>(?!picture)<P><I><C><T><U><R><E>/i
+body T_OBFU_PICTURE_W2_P2	/<inter W2><post P2>(?!picture)<P><I><C><T><U><R><E>/i
+body T_OBFU_PICTURE_W2_P3	/<inter W2><post P3>(?!picture)<P><I><C><T><U><R><E>/i
+body T_OBFU_PICTURE_W3_P2	/<inter W3><post P2>(?!picture)<P><I><C><T><U><R><E>/i
+body T_OBFU_PICTURE_W3_P3	/<inter W3><post P3>(?!picture)<P><I><C><T><U><R><E>/i
+body T_OBFU_PLEASE	/(?!please)<P><L><E><A><S><E>/i
+body T_OBFU_PLEASE_W1_P2	/<inter W1><post P2>(?!please)<P><L><E><A><S><E>/i
+body T_OBFU_PLEASE_W1_P3	/<inter W1><post P3>(?!please)<P><L><E><A><S><E>/i
+body T_OBFU_PLEASE_W2_P2	/<inter W2><post P2>(?!please)<P><L><E><A><S><E>/i
+body T_OBFU_PLEASE_W2_P3	/<inter W2><post P3>(?!please)<P><L><E><A><S><E>/i
+body T_OBFU_PLEASE_W3_P2	/<inter W3><post P2>(?!please)<P><L><E><A><S><E>/i
+body T_OBFU_PLEASE_W3_P3	/<inter W3><post P3>(?!please)<P><L><E><A><S><E>/i
+body T_OBFU_PRESCRIPT	/(?!prescription)<P><R><E><S><C><R><I><P><T><I><O><N>/i
+body T_OBFU_PRESCRIPT_W1_P2	/<inter W1><post P2>(?!prescription)<P><R><E><S><C><R><I><P><T><I><O><N>/i
+body T_OBFU_PRESCRIPT_W1_P3	/<inter W1><post P3>(?!prescription)<P><R><E><S><C><R><I><P><T><I><O><N>/i
+body T_OBFU_PRESCRIPT_W2_P2	/<inter W2><post P2>(?!prescription)<P><R><E><S><C><R><I><P><T><I><O><N>/i
+body T_OBFU_PRESCRIPT_W2_P3	/<inter W2><post P3>(?!prescription)<P><R><E><S><C><R><I><P><T><I><O><N>/i
+body T_OBFU_PRESCRIPT_W3_P2	/<inter W3><post P2>(?!prescription)<P><R><E><S><C><R><I><P><T><I><O><N>/i
+body T_OBFU_PRESCRIPT_W3_P3	/<inter W3><post P3>(?!prescription)<P><R><E><S><C><R><I><P><T><I><O><N>/i
+body T_OBFU_PRICES	/(?!prices)<P><R><I><C><E><S>/i
+body T_OBFU_PRICES_W1_P2	/<inter W1><post P2>(?!prices)<P><R><I><C><E><S>/i
+body T_OBFU_PRICES_W1_P3	/<inter W1><post P3>(?!prices)<P><R><I><C><E><S>/i
+body T_OBFU_PRICES_W2_P2	/<inter W2><post P2>(?!prices)<P><R><I><C><E><S>/i
+body T_OBFU_PRICES_W2_P3	/<inter W2><post P3>(?!prices)<P><R><I><C><E><S>/i
+body T_OBFU_PRICES_W3_P2	/<inter W3><post P2>(?!prices)<P><R><I><C><E><S>/i
+body T_OBFU_PRICES_W3_P3	/<inter W3><post P3>(?!prices)<P><R><I><C><E><S>/i
+body T_OBFU_PROFIT	/(?!profit)<P><R><O><F><I><T>/i
+body T_OBFU_PROFIT_W1_P2	/<inter W1><post P2>(?!profit)<P><R><O><F><I><T>/i
+body T_OBFU_PROFIT_W1_P3	/<inter W1><post P3>(?!profit)<P><R><O><F><I><T>/i
 body T_OBFU_PUSH	/(?!push)<P><U><S><H>/i
+body T_OBFU_REFINANCE	/(?!refinance)<R><E><F><I><N><A><N><C><E>/i
+body T_OBFU_REFINANCE_W1_P2	/<inter W1><post P2>(?!refinance)<R><E><F><I><N><A><N><C><E>/i
+body T_OBFU_REFINANCE_W1_P3	/<inter W1><post P3>(?!refinance)<R><E><F><I><N><A><N><C><E>/i
+body T_OBFU_REFINANCE_W2_P2	/<inter W2><post P2>(?!refinance)<R><E><F><I><N><A><N><C><E>/i
+body T_OBFU_REFINANCE_W2_P3	/<inter W2><post P3>(?!refinance)<R><E><F><I><N><A><N><C><E>/i
+body T_OBFU_REFINANCE_W3_P2	/<inter W3><post P2>(?!refinance)<R><E><F><I><N><A><N><C><E>/i
+body T_OBFU_REFINANCE_W3_P3	/<inter W3><post P3>(?!refinance)<R><E><F><I><N><A><N><C><E>/i
+body T_OBFU_REMOVE	/(?!remove)<R><E><M><O><V><E>/i
+body T_OBFU_REMOVE_W1_P2	/<inter W1><post P2>(?!remove)<R><E><M><O><V><E>/i
+body T_OBFU_REMOVE_W1_P3	/<inter W1><post P3>(?!remove)<R><E><M><O><V><E>/i
+body T_OBFU_REMOVE_W2_P2	/<inter W2><post P2>(?!remove)<R><E><M><O><V><E>/i
+body T_OBFU_REMOVE_W2_P3	/<inter W2><post P3>(?!remove)<R><E><M><O><V><E>/i
+body T_OBFU_REMOVE_W3_P2	/<inter W3><post P2>(?!remove)<R><E><M><O><V><E>/i
+body T_OBFU_REMOVE_W3_P3	/<inter W3><post P3>(?!remove)<R><E><M><O><V><E>/i
+body T_OBFU_ROLEX	/(?!rolex)<R><O><L><E><X>/i
+body T_OBFU_ROLEX_W1_P2	/<inter W1><post P2>(?!rolex)<R><O><L><E><X>/i
+body T_OBFU_ROLEX_W1_P3	/<inter W1><post P3>(?!rolex)<R><O><L><E><X>/i
+body T_OBFU_ROLEX_W2_P2	/<inter W2><post P2>(?!rolex)<R><O><L><E><X>/i
+body T_OBFU_ROLEX_W2_P3	/<inter W2><post P3>(?!rolex)<R><O><L><E><X>/i
+body T_OBFU_ROLEX_W3_P2	/<inter W3><post P2>(?!rolex)<R><O><L><E><X>/i
+body T_OBFU_ROLEX_W3_P3	/<inter W3><post P3>(?!rolex)<R><O><L><E><X>/i
+body T_OBFU_SOFTWARE	/(?!software)<S><O><F><T><W><A><R><E>/i
+body T_OBFU_SOFTWARE_W1_P2	/<inter W1><post P2>(?!software)<S><O><F><T><W><A><R><E>/i
+body T_OBFU_SOFTWARE_W1_P3	/<inter W1><post P3>(?!software)<S><O><F><T><W><A><R><E>/i
+body T_OBFU_SOFTWARE_W2_P2	/<inter W2><post P2>(?!software)<S><O><F><T><W><A><R><E>/i
+body T_OBFU_SOFTWARE_W2_P3	/<inter W2><post P3>(?!software)<S><O><F><T><W><A><R><E>/i
+body T_OBFU_SOFTWARE_W3_P2	/<inter W3><post P2>(?!software)<S><O><F><T><W><A><R><E>/i
+body T_OBFU_SOFTWARE_W3_P3	/<inter W3><post P3>(?!software)<S><O><F><T><W><A><R><E>/i
 body T_OBFU_SUBMIT	/(?!submit)<S><U><B><M><I><T>/i
-body T_OBFU_VISIT	/(?!visit)<V><I><S><I><T>/i
+body T_OBFU_THOUSANDS	/(?!thousands)<T><H><O><U><S><A><N><D><S>/i
+body T_OBFU_THOUSANDS_W1_P2	/<inter W1><post P2>(?!thousands)<T><H><O><U><S><A><N><D><S>/i
+body T_OBFU_THOUSANDS_W1_P3	/<inter W1><post P3>(?!thousands)<T><H><O><U><S><A><N><D><S>/i
+body T_OBFU_THOUSANDS_W2_P2	/<inter W2><post P2>(?!thousands)<T><H><O><U><S><A><N><D><S>/i
+body T_OBFU_THOUSANDS_W2_P3	/<inter W2><post P3>(?!thousands)<T><H><O><U><S><A><N><D><S>/i
+body T_OBFU_THOUSANDS_W3_P2	/<inter W3><post P2>(?!thousands)<T><H><O><U><S><A><N><D><S>/i
+body T_OBFU_THOUSANDS_W3_P3	/<inter W3><post P3>(?!thousands)<T><H><O><U><S><A><N><D><S>/i
+body T_OBFU_TRAMADOL	/(?!tramadol)<T><R><A><M><A><D><O><L>/i
+body T_OBFU_TRAMADOL_W1_P2	/<inter W1><post P2>(?!tramadol)<T><R><A><M><A><D><O><L>/i
+body T_OBFU_TRAMADOL_W1_P3	/<inter W1><post P3>(?!tramadol)<T><R><A><M><A><D><O><L>/i
+body T_OBFU_TRAMADOL_W2_P2	/<inter W2><post P2>(?!tramadol)<T><R><A><M><A><D><O><L>/i
+body T_OBFU_TRAMADOL_W2_P3	/<inter W2><post P3>(?!tramadol)<T><R><A><M><A><D><O><L>/i
+body T_OBFU_TRAMADOL_W3_P2	/<inter W3><post P2>(?!tramadol)<T><R><A><M><A><D><O><L>/i
+body T_OBFU_TRAMADOL_W3_P3	/<inter W3><post P3>(?!tramadol)<T><R><A><M><A><D><O><L>/i
+body T_OBFU_VALIUM	/(?!valium)<V><A><L><I><U><M>/i
+body T_OBFU_VALIUM_W1_P2	/<inter W1><post P2>(?!valium)<V><A><L><I><U><M>/i
+body T_OBFU_VALIUM_W1_P3	/<inter W1><post P3>(?!valium)<V><A><L><I><U><M>/i
+body T_OBFU_VALIUM_W2_P2	/<inter W2><post P2>(?!valium)<V><A><L><I><U><M>/i
+body T_OBFU_VALIUM_W2_P3	/<inter W2><post P3>(?!valium)<V><A><L><I><U><M>/i
+body T_OBFU_VALIUM_W3_P2	/<inter W3><post P2>(?!valium)<V><A><L><I><U><M>/i
+body T_OBFU_VALIUM_W3_P3	/<inter W3><post P3>(?!valium)<V><A><L><I><U><M>/i
+body T_OBFU_VIAGRA	/(?!viagra)<V><I><A><G><R><A>/i
+body T_OBFU_VIAGRA_W1_P2	/<inter W1><post P2>(?!viagra)<V><I><A><G><R><A>/i
+body T_OBFU_VIAGRA_W1_P3	/<inter W1><post P3>(?!viagra)<V><I><A><G><R><A>/i
+body T_OBFU_VIAGRA_W2_P2	/<inter W2><post P2>(?!viagra)<V><I><A><G><R><A>/i
+body T_OBFU_VIAGRA_W2_P3	/<inter W2><post P3>(?!viagra)<V><I><A><G><R><A>/i
+body T_OBFU_VIAGRA_W3_P2	/<inter W3><post P2>(?!viagra)<V><I><A><G><R><A>/i
+body T_OBFU_VIAGRA_W3_P3	/<inter W3><post P3>(?!viagra)<V><I><A><G><R><A>/i
+body T_OBFU_VICODIN	/(?!vicodin)<V><I><C><O><D><I><N>/i
+body T_OBFU_VICODIN_W1_P2	/<inter W1><post P2>(?!vicodin)<V><I><C><O><D><I><N>/i
+body T_OBFU_VICODIN_W1_P3	/<inter W1><post P3>(?!vicodin)<V><I><C><O><D><I><N>/i
+body T_OBFU_VICODIN_W2_P2	/<inter W2><post P2>(?!vicodin)<V><I><C><O><D><I><N>/i
+body T_OBFU_VICODIN_W2_P3	/<inter W2><post P3>(?!vicodin)<V><I><C><O><D><I><N>/i
+body T_OBFU_VICODIN_W3_P2	/<inter W3><post P2>(?!vicodin)<V><I><C><O><D><I><N>/i
+body T_OBFU_VICODIN_W3_P3	/<inter W3><post P3>(?!vicodin)<V><I><C><O><D><I><N>/i
+body T_OBFU_VIOXX	/(?!vioxx)<V><I><O><X><X>/i
+body T_OBFU_VIOXX_W1_P2	/<inter W1><post P2>(?!vioxx)<V><I><O><X><X>/i
+body T_OBFU_VIOXX_W1_P3	/<inter W1><post P3>(?!vioxx)<V><I><O><X><X>/i
+body T_OBFU_VIOXX_W2_P2	/<inter W2><post P2>(?!vioxx)<V><I><O><X><X>/i
+body T_OBFU_VIOXX_W2_P3	/<inter W2><post P3>(?!vioxx)<V><I><O><X><X>/i
+body T_OBFU_VIOXX_W3_P2	/<inter W3><post P2>(?!vioxx)<V><I><O><X><X>/i
+body T_OBFU_VIOXX_W3_P3	/<inter W3><post P3>(?!vioxx)<V><I><O><X><X>/i
+body T_OBFU_VISIT_W1_P2	/<inter W1><post P2>(?!visit)<V><I><S><I><T>/i
+body T_OBFU_VISIT_W1_P3	/<inter W1><post P3>(?!visit)<V><I><S><I><T>/i
+body T_OBFU_XANAX	/(?!xanax)<X><A><N><A><X>/i
+body T_OBFU_XANAX_W1_P2	/<inter W1><post P2>(?!xanax)<X><A><N><A><X>/i
+body T_OBFU_XANAX_W1_P3	/<inter W1><post P3>(?!xanax)<X><A><N><A><X>/i
+body T_OBFU_XANAX_W2_P2	/<inter W2><post P2>(?!xanax)<X><A><N><A><X>/i
+body T_OBFU_XANAX_W2_P3	/<inter W2><post P3>(?!xanax)<X><A><N><A><X>/i
+body T_OBFU_XANAX_W3_P2	/<inter W3><post P2>(?!xanax)<X><A><N><A><X>/i
+body T_OBFU_XANAX_W3_P3	/<inter W3><post P3>(?!xanax)<X><A><N><A><X>/i
+
+replace_rules T_OBFU_AFFORDABLE
+replace_rules T_OBFU_AFFORDABLE_W1_P2
+replace_rules T_OBFU_AFFORDABLE_W1_P3
+replace_rules T_OBFU_AFFORDABLE_W2_P2
+replace_rules T_OBFU_AFFORDABLE_W2_P3
+replace_rules T_OBFU_AFFORDABLE_W3_P2
+replace_rules T_OBFU_AFFORDABLE_W3_P3
+replace_rules T_OBFU_AMBIEN
+replace_rules T_OBFU_AMBIEN_W1_P2
+replace_rules T_OBFU_AMBIEN_W1_P3
+replace_rules T_OBFU_AMBIEN_W2_P2
+replace_rules T_OBFU_AMBIEN_W2_P3
+replace_rules T_OBFU_AMBIEN_W3_P2
+replace_rules T_OBFU_AMBIEN_W3_P3
+replace_rules T_OBFU_ANXIETY
+replace_rules T_OBFU_ANXIETY_W1_P2
+replace_rules T_OBFU_ANXIETY_W1_P3
+replace_rules T_OBFU_ANXIETY_W2_P2
+replace_rules T_OBFU_ANXIETY_W2_P3
+replace_rules T_OBFU_ANXIETY_W3_P2
+replace_rules T_OBFU_ANXIETY_W3_P3
+replace_rules T_OBFU_BILLION
+replace_rules T_OBFU_BILLION_W1_P2
+replace_rules T_OBFU_BILLION_W1_P3
+replace_rules T_OBFU_BILLION_W2_P2
+replace_rules T_OBFU_BILLION_W2_P3
+replace_rules T_OBFU_BILLION_W3_P2
+replace_rules T_OBFU_BILLION_W3_P3
+replace_rules T_OBFU_CELEBREX
+replace_rules T_OBFU_CELEBREX_W1_P2
+replace_rules T_OBFU_CELEBREX_W1_P3
+replace_rules T_OBFU_CELEBREX_W2_P2
+replace_rules T_OBFU_CELEBREX_W2_P3
+replace_rules T_OBFU_CELEBREX_W3_P2
+replace_rules T_OBFU_CELEBREX_W3_P3
+replace_rules T_OBFU_CIALIS
+replace_rules T_OBFU_CIALIS_W1_P2
+replace_rules T_OBFU_CIALIS_W1_P3
 replace_rules T_OBFU_CLICK
+replace_rules T_OBFU_CLICK_W1_P2
+replace_rules T_OBFU_CLICK_W1_P3
+replace_rules T_OBFU_CLICK_W2_P2
+replace_rules T_OBFU_CLICK_W2_P3
+replace_rules T_OBFU_CLICK_W3_P2
+replace_rules T_OBFU_CLICK_W3_P3
+replace_rules T_OBFU_COST
+replace_rules T_OBFU_COST_W1_P2
+replace_rules T_OBFU_COST_W1_P3
+replace_rules T_OBFU_CREDIT
+replace_rules T_OBFU_DOCTORS
+replace_rules T_OBFU_DOCTORS_W1_P2
+replace_rules T_OBFU_DOCTORS_W1_P3
+replace_rules T_OBFU_DOCTORS_W2_P2
+replace_rules T_OBFU_DOCTORS_W2_P3
+replace_rules T_OBFU_DOCTORS_W3_P2
+replace_rules T_OBFU_DOCTORS_W3_P3
+replace_rules T_OBFU_ENLARGE
+replace_rules T_OBFU_ENLARGE_W1_P2
+replace_rules T_OBFU_ENLARGE_W1_P3
+replace_rules T_OBFU_ENLARGE_W2_P2
+replace_rules T_OBFU_ENLARGE_W2_P3
+replace_rules T_OBFU_ENLARGE_W3_P2
+replace_rules T_OBFU_ENLARGE_W3_P3
+replace_rules T_OBFU_ERECT
+replace_rules T_OBFU_ERECT_W1_P2
+replace_rules T_OBFU_ERECT_W1_P3
+replace_rules T_OBFU_ERECT_W2_P2
+replace_rules T_OBFU_ERECT_W2_P3
+replace_rules T_OBFU_ERECT_W3_P2
+replace_rules T_OBFU_ERECT_W3_P3
 replace_rules T_OBFU_FOLLOW
-replace_rules T_OBFU_MOVE
+replace_rules T_OBFU_FOLLOW_W1_P2
+replace_rules T_OBFU_FOLLOW_W1_P3
+replace_rules T_OBFU_FOLLOW_W2_P2
+replace_rules T_OBFU_FOLLOW_W2_P3
+replace_rules T_OBFU_FOLLOW_W3_P2
+replace_rules T_OBFU_FOLLOW_W3_P3
+replace_rules T_OBFU_FREE
+replace_rules T_OBFU_FREE_W1_P2
+replace_rules T_OBFU_FREE_W1_P3
+replace_rules T_OBFU_FREE_W2_P2
+replace_rules T_OBFU_FREE_W2_P3
+replace_rules T_OBFU_FREE_W3_P2
+replace_rules T_OBFU_FREE_W3_P3
+replace_rules T_OBFU_GUARANTEE
+replace_rules T_OBFU_GUARANTEE_W1_P2
+replace_rules T_OBFU_GUARANTEE_W1_P3
+replace_rules T_OBFU_GUARANTEE_W2_P2
+replace_rules T_OBFU_GUARANTEE_W2_P3
+replace_rules T_OBFU_GUARANTEE_W3_P2
+replace_rules T_OBFU_GUARANTEE_W3_P3
+replace_rules T_OBFU_HUNDREDS
+replace_rules T_OBFU_LEVITRA
+replace_rules T_OBFU_LEVITRA_W1_P2
+replace_rules T_OBFU_LEVITRA_W1_P3
+replace_rules T_OBFU_LEVITRA_W2_P2
+replace_rules T_OBFU_LEVITRA_W2_P3
+replace_rules T_OBFU_LEVITRA_W3_P2
+replace_rules T_OBFU_LEVITRA_W3_P3
+replace_rules T_OBFU_MEDICATION
+replace_rules T_OBFU_MEDICATION_W1_P2
+replace_rules T_OBFU_MEDICATION_W1_P3
+replace_rules T_OBFU_MEDICATION_W2_P2
+replace_rules T_OBFU_MEDICATION_W2_P3
+replace_rules T_OBFU_MEDICATION_W3_P2
+replace_rules T_OBFU_MEDICATION_W3_P3
+replace_rules T_OBFU_MILLION
+replace_rules T_OBFU_MILLION_W1_P2
+replace_rules T_OBFU_MILLION_W1_P3
+replace_rules T_OBFU_MILLION_W2_P2
+replace_rules T_OBFU_MILLION_W2_P3
+replace_rules T_OBFU_MILLION_W3_P2
+replace_rules T_OBFU_MILLION_W3_P3
+replace_rules T_OBFU_MONEY
+replace_rules T_OBFU_MONEY_W1_P2
+replace_rules T_OBFU_MONEY_W1_P3
+replace_rules T_OBFU_MONEY_W2_P2
+replace_rules T_OBFU_MONEY_W2_P3
+replace_rules T_OBFU_MONEY_W3_P2
+replace_rules T_OBFU_MONEY_W3_P3
+replace_rules T_OBFU_MORTGAGE
+replace_rules T_OBFU_MORTGAGE_W1_P2
+replace_rules T_OBFU_MORTGAGE_W1_P3
+replace_rules T_OBFU_MORTGAGE_W2_P2
+replace_rules T_OBFU_MORTGAGE_W2_P3
+replace_rules T_OBFU_MORTGAGE_W3_P2
+replace_rules T_OBFU_MORTGAGE_W3_P3
+replace_rules T_OBFU_OBLIGATION_W1_P2
+replace_rules T_OBFU_OBLIGATION_W1_P3
+replace_rules T_OBFU_OBLIGATION_W2_P2
+replace_rules T_OBFU_OBLIGATION_W2_P3
+replace_rules T_OBFU_OBLIGATION_W3_P2
+replace_rules T_OBFU_OBLIGATION_W3_P3
+replace_rules T_OBFU_OFFERS
+replace_rules T_OBFU_PATIENTS
+replace_rules T_OBFU_PATIENTS_W1_P2
+replace_rules T_OBFU_PATIENTS_W1_P3
+replace_rules T_OBFU_PATIENTS_W2_P2
+replace_rules T_OBFU_PATIENTS_W2_P3
+replace_rules T_OBFU_PATIENTS_W3_P2
+replace_rules T_OBFU_PATIENTS_W3_P3
 replace_rules T_OBFU_PHARMAC
+replace_rules T_OBFU_PHARMAC_W1_P2
+replace_rules T_OBFU_PHARMAC_W1_P3
+replace_rules T_OBFU_PHARMAC_W2_P2
+replace_rules T_OBFU_PHARMAC_W2_P3
+replace_rules T_OBFU_PHARMAC_W3_P2
+replace_rules T_OBFU_PHARMAC_W3_P3
+replace_rules T_OBFU_PHARMACIES
+replace_rules T_OBFU_PHARMACIES_W1_P2
+replace_rules T_OBFU_PHARMACIES_W1_P3
+replace_rules T_OBFU_PHARMACIES_W2_P2
+replace_rules T_OBFU_PHARMACIES_W2_P3
+replace_rules T_OBFU_PHARMACIES_W3_P2
+replace_rules T_OBFU_PHARMACIES_W3_P3
+replace_rules T_OBFU_PHARMACY
+replace_rules T_OBFU_PHARMACY_W1_P2
+replace_rules T_OBFU_PHARMACY_W1_P3
+replace_rules T_OBFU_PHARMACY_W2_P2
+replace_rules T_OBFU_PHARMACY_W2_P3
+replace_rules T_OBFU_PHARMACY_W3_P2
+replace_rules T_OBFU_PHARMACY_W3_P3
+replace_rules T_OBFU_PHENT
+replace_rules T_OBFU_PHENT_W1_P2
+replace_rules T_OBFU_PHENT_W1_P3
+replace_rules T_OBFU_PHENT_W2_P2
+replace_rules T_OBFU_PHENT_W2_P3
+replace_rules T_OBFU_PHENT_W3_P2
+replace_rules T_OBFU_PHENT_W3_P3
+replace_rules T_OBFU_PHENTER
+replace_rules T_OBFU_PHENTER_W1_P2
+replace_rules T_OBFU_PHENTER_W1_P3
+replace_rules T_OBFU_PHENTER_W2_P2
+replace_rules T_OBFU_PHENTER_W2_P3
+replace_rules T_OBFU_PHENTER_W3_P2
+replace_rules T_OBFU_PHENTER_W3_P3
+replace_rules T_OBFU_PHERENTERMINE
+replace_rules T_OBFU_PHERENTERMINE_W1_P2
+replace_rules T_OBFU_PHERENTERMINE_W1_P3
+replace_rules T_OBFU_PHERENTERMINE_W2_P2
+replace_rules T_OBFU_PHERENTERMINE_W2_P3
+replace_rules T_OBFU_PHERENTERMINE_W3_P2
+replace_rules T_OBFU_PHERENTERMINE_W3_P3
 replace_rules T_OBFU_PICTURE
+replace_rules T_OBFU_PICTURE_W1_P2
+replace_rules T_OBFU_PICTURE_W1_P3
+replace_rules T_OBFU_PICTURE_W2_P2
+replace_rules T_OBFU_PICTURE_W2_P3
+replace_rules T_OBFU_PICTURE_W3_P2
+replace_rules T_OBFU_PICTURE_W3_P3
+replace_rules T_OBFU_PLEASE
+replace_rules T_OBFU_PLEASE_W1_P2
+replace_rules T_OBFU_PLEASE_W1_P3
+replace_rules T_OBFU_PLEASE_W2_P2
+replace_rules T_OBFU_PLEASE_W2_P3
+replace_rules T_OBFU_PLEASE_W3_P2
+replace_rules T_OBFU_PLEASE_W3_P3
+replace_rules T_OBFU_PRESCRIPT
+replace_rules T_OBFU_PRESCRIPT_W1_P2
+replace_rules T_OBFU_PRESCRIPT_W1_P3
+replace_rules T_OBFU_PRESCRIPT_W2_P2
+replace_rules T_OBFU_PRESCRIPT_W2_P3
+replace_rules T_OBFU_PRESCRIPT_W3_P2
+replace_rules T_OBFU_PRESCRIPT_W3_P3
+replace_rules T_OBFU_PRICES
+replace_rules T_OBFU_PRICES_W1_P2
+replace_rules T_OBFU_PRICES_W1_P3
+replace_rules T_OBFU_PRICES_W2_P2
+replace_rules T_OBFU_PRICES_W2_P3
+replace_rules T_OBFU_PRICES_W3_P2
+replace_rules T_OBFU_PRICES_W3_P3
+replace_rules T_OBFU_PROFIT
+replace_rules T_OBFU_PROFIT_W1_P2
+replace_rules T_OBFU_PROFIT_W1_P3
 replace_rules T_OBFU_PUSH
+replace_rules T_OBFU_REFINANCE
+replace_rules T_OBFU_REFINANCE_W1_P2
+replace_rules T_OBFU_REFINANCE_W1_P3
+replace_rules T_OBFU_REFINANCE_W2_P2
+replace_rules T_OBFU_REFINANCE_W2_P3
+replace_rules T_OBFU_REFINANCE_W3_P2
+replace_rules T_OBFU_REFINANCE_W3_P3
+replace_rules T_OBFU_REMOVE
+replace_rules T_OBFU_REMOVE_W1_P2
+replace_rules T_OBFU_REMOVE_W1_P3
+replace_rules T_OBFU_REMOVE_W2_P2
+replace_rules T_OBFU_REMOVE_W2_P3
+replace_rules T_OBFU_REMOVE_W3_P2
+replace_rules T_OBFU_REMOVE_W3_P3
+replace_rules T_OBFU_ROLEX
+replace_rules T_OBFU_ROLEX_W1_P2
+replace_rules T_OBFU_ROLEX_W1_P3
+replace_rules T_OBFU_ROLEX_W2_P2
+replace_rules T_OBFU_ROLEX_W2_P3
+replace_rules T_OBFU_ROLEX_W3_P2
+replace_rules T_OBFU_ROLEX_W3_P3
+replace_rules T_OBFU_SOFTWARE
+replace_rules T_OBFU_SOFTWARE_W1_P2
+replace_rules T_OBFU_SOFTWARE_W1_P3
+replace_rules T_OBFU_SOFTWARE_W2_P2
+replace_rules T_OBFU_SOFTWARE_W2_P3
+replace_rules T_OBFU_SOFTWARE_W3_P2
+replace_rules T_OBFU_SOFTWARE_W3_P3
 replace_rules T_OBFU_SUBMIT
-replace_rules T_OBFU_VISIT
+replace_rules T_OBFU_THOUSANDS
+replace_rules T_OBFU_THOUSANDS_W1_P2
+replace_rules T_OBFU_THOUSANDS_W1_P3
+replace_rules T_OBFU_THOUSANDS_W2_P2
+replace_rules T_OBFU_THOUSANDS_W2_P3
+replace_rules T_OBFU_THOUSANDS_W3_P2
+replace_rules T_OBFU_THOUSANDS_W3_P3
+replace_rules T_OBFU_TRAMADOL
+replace_rules T_OBFU_TRAMADOL_W1_P2
+replace_rules T_OBFU_TRAMADOL_W1_P3
+replace_rules T_OBFU_TRAMADOL_W2_P2
+replace_rules T_OBFU_TRAMADOL_W2_P3
+replace_rules T_OBFU_TRAMADOL_W3_P2
+replace_rules T_OBFU_TRAMADOL_W3_P3
+replace_rules T_OBFU_VALIUM
+replace_rules T_OBFU_VALIUM_W1_P2
+replace_rules T_OBFU_VALIUM_W1_P3
+replace_rules T_OBFU_VALIUM_W2_P2
+replace_rules T_OBFU_VALIUM_W2_P3
+replace_rules T_OBFU_VALIUM_W3_P2
+replace_rules T_OBFU_VALIUM_W3_P3
+replace_rules T_OBFU_VIAGRA
+replace_rules T_OBFU_VIAGRA_W1_P2
+replace_rules T_OBFU_VIAGRA_W1_P3
+replace_rules T_OBFU_VIAGRA_W2_P2
+replace_rules T_OBFU_VIAGRA_W2_P3
+replace_rules T_OBFU_VIAGRA_W3_P2
+replace_rules T_OBFU_VIAGRA_W3_P3
+replace_rules T_OBFU_VICODIN
+replace_rules T_OBFU_VICODIN_W1_P2
+replace_rules T_OBFU_VICODIN_W1_P3
+replace_rules T_OBFU_VICODIN_W2_P2
+replace_rules T_OBFU_VICODIN_W2_P3
+replace_rules T_OBFU_VICODIN_W3_P2
+replace_rules T_OBFU_VICODIN_W3_P3
+replace_rules T_OBFU_VIOXX
+replace_rules T_OBFU_VIOXX_W1_P2
+replace_rules T_OBFU_VIOXX_W1_P3
+replace_rules T_OBFU_VIOXX_W2_P2
+replace_rules T_OBFU_VIOXX_W2_P3
+replace_rules T_OBFU_VIOXX_W3_P2
+replace_rules T_OBFU_VIOXX_W3_P3
+replace_rules T_OBFU_VISIT_W1_P2
+replace_rules T_OBFU_VISIT_W1_P3
+replace_rules T_OBFU_XANAX
+replace_rules T_OBFU_XANAX_W1_P2
+replace_rules T_OBFU_XANAX_W1_P3
+replace_rules T_OBFU_XANAX_W2_P2
+replace_rules T_OBFU_XANAX_W2_P3
+replace_rules T_OBFU_XANAX_W3_P2
+replace_rules T_OBFU_XANAX_W3_P3
 
 endif   #ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 
