@@ -92,11 +92,10 @@ my %makefile = (
 		],
 
     'MAN1PODS' => { 
-	'spamassassin'                       => '$(INST_MAN1DIR)/spamassassin.$(MAN1EXT)',
-	'blib/lib/Mail/SpamAssassin/Conf.pm' => '$(INST_MAN1DIR)/spamassassin.conf.$(MAN1EXT)',
-	'sa-learn'                           => '$(INST_MAN1DIR)/sa-learn.$(MAN1EXT)',
-	'spamd/spamc.pod'                    => '$(INST_MAN1DIR)/spamc.$(MAN1EXT)',
-	'spamd/spamd'                        => '$(INST_MAN1DIR)/spamd.$(MAN1EXT)',
+	'spamassassin'    => '$(INST_MAN1DIR)/spamassassin.$(MAN1EXT)',
+	'sa-learn'        => '$(INST_MAN1DIR)/sa-learn.$(MAN1EXT)',
+	'spamd/spamc.pod' => '$(INST_MAN1DIR)/spamc.$(MAN1EXT)',
+	'spamd/spamd'     => '$(INST_MAN1DIR)/spamd.$(MAN1EXT)',
     },
 
     'PL_FILES' => { },
