@@ -482,8 +482,10 @@ sub tok_get {
 sub nspam_nham_get {
   my ($self) = @_;
   my $ns = $self->{db_toks}->{$NSPAM_MAGIC_TOKEN};
+  if (!$ns || $ns =~ /\D/) { $ns = 0; }
   my $nn = $self->{db_toks}->{$NHAM_MAGIC_TOKEN};
-  ($ns || 0, $nn || 0);
+  if (!$nn || $nn =~ /\D/) { $nn = 0; }
+  ($ns, $nn);
 }
 
 sub get_running_expire_tok {
