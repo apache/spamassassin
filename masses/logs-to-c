@@ -61,8 +61,8 @@ print "Reading per-message hit stat logs and scores...\n";
 my ($num_tests, $num_spam, $num_ham);
 my ($ga_yy, $ga_ny, $ga_yn, $ga_nn, $yyscore, $ynscore, $nyscore, $nnscore);
 
-readlogs();
 read_ranges();
+readlogs();
 
 if ($justcount) {
   $nybias = $nybias*($num_spam / $num_ham);
@@ -360,12 +360,13 @@ sub read_ranges {
     my $mut = $3+0;
 
     if ($allrules{$t}->{issubrule}) {
+      # warn "ignoring '$t': is sub-rule\n";    # no need to warn
       $ignored_rule{$t} = 1;
       $mutable_tests{$t} = 0;
       next;
     }
     if (($range_lo{$t} == $range_hi{$t}) && (! $range_lo{$t})) {
-      #warn "ignored rule: score and range == 0: $t\n";
+      warn "ignoring '$t': score and range == 0\n";
       $ignored_rule{$t} = 1;
       $mutable_tests{$t} = 0;
       next;
@@ -385,6 +386,7 @@ sub read_ranges {
       $mutable_tests{$t} = 1;
     }
     unless ($mutable_tests{$t} || $scores{$t}) {
+      warn "ignoring '$t': immutable and score == 0\n";
       $ignored_rule{$t} = 1;
     }
   }
@@ -394,7 +396,10 @@ sub read_ranges {
   foreach my $t (sort keys %allrules) {
     next if (exists($range_lo{$t}));
     if ($allrules{$t}->{issubrule}) {
-      $ignored_rule{$t} = 1;
+      if (!$ignored_rule{$t}) {
+        # warn "ignoring '$t': is sub-rule\n";  # no need to warn here
+        $ignored_rule{$t} = 1;
+      }
       $mutable_tests{$t} = 0;
       next;
     }
@@ -404,7 +409,10 @@ sub read_ranges {
       $mutable_tests{$t} = 0;
     }
     unless ($mutable_tests{$t} || $scores{$t}) {
-      $ignored_rule{$t} = 1;
+      if (!$ignored_rule{$t}) {
+        warn "ignoring '$t': immutable and score == 0\n";
+        $ignored_rule{$t} = 1;
+      }
     }
     $index_to_rule[$count] = $t;
     $count++;

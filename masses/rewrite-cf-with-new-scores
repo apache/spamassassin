@@ -52,12 +52,15 @@ while (<STDIN>) {
 open (IN, "<$oldscores") or die "cannot open $oldscores";
 my $out = '';
 my $pre = '';
+my %seenscoreforrule = ();
 
 # read until '# Start of generated scores', removing scores from our
 # new list if we come across them.
 while (<IN>) {
   if (/^\s*score\s+(\S+)\s/) {
-    delete $gascorelines{$1};
+    my $name = $1;
+    $seenscoreforrule{$name} = 1;
+    delete $gascorelines{$name};
     next unless (exists ($rules{$name}) && $rules{$name}->{issubrule} == 0);
   }
   $pre .= $_;
@@ -69,6 +72,7 @@ while (<IN>) {
   if (/^\s*score\s+\S+/) {
     my($score,$name,@scores) = split;
     @{$oldscores{$name}} = @scores;
+    $seenscoreforrule{$name} = 1;
   }
 
   /^# End of generated scores/ and last;
@@ -91,6 +95,7 @@ while (<IN>) {
       $_ = join(" ","score",$name,generate_scores(@scores))."\n";
     }
     delete $gascorelines{$name};
+    $seenscoreforrule{$name} = 1;
   }
   $out .= $_;
 }
@@ -108,10 +113,37 @@ foreach my $name (@gascoreorder) {
 
   # Set appropriate scoreset value
   $scores[$scoreset] = $_;
+  delete $oldscores{$name};
+  $seenscoreforrule{$name} = 1;
 
   # Create new score line
   print join(" ","score",$name,generate_scores(@scores)),"\n";
 }
+
+# output any tests that were in the old scores file, but not in
+# the GA output
+# TODO: currently, I'm assuming that if the GA didn't use it,
+# we must not assign the rule a score.
+foreach my $name (sort keys %oldscores) {
+  delete $oldscores{$name};
+  $seenscoreforrule{$name} = 1;
+
+  # my @scores = @{$oldscores{$name}} if ( exists $oldscores{$name} );
+  my @scores = (0, 0, 0, 0);
+  print join(" ","score",$name,generate_scores(@scores)),"\n";
+}
+
+# now do the same for what's in tmp/rules.pl
+foreach my $name (sort keys %rules) {
+  next if ($seenscoreforrule{$name});
+  next if ($rules{$name}->{issubrule});
+  delete $oldscores{$name};
+
+  # my @scores = @{$oldscores{$name}} if ( exists $oldscores{$name} );
+  my @scores = (0, 0, 0, 0);
+  print join(" ","score",$name,generate_scores(@scores)),"\n";
+}
+
 print "\n", $out;
 
 sub generate_scores {
