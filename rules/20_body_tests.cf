@@ -231,8 +231,13 @@ describe VIAGRA			Plugs Viagra
 body NATURAL_VIAGRA             /\bnatural viagra\b/i
 describe NATURAL_VIAGRA         Plugs "Natural Viagra"
 
-body HERBAL_VIAGRA              /\bherbal viagra\b/i
+# NB: Made it also match "Herbal V" - a viagra alternative
+body HERBAL_VIAGRA              /\bherbal v(?:iagra)?\b/i
 describe HERBAL_VIAGRA          Plugs "Herbal Viagra"
+
+# NB: Also seems to be a diabetes drug, so don't let it score high
+body VIGORA                     /bVigora\b/
+describe VIGORA                 Some sort of viagra alternative
 
 body TARGETED                   /\btargeted (?:traffic|e-?mail|internet|leads?)\b/i
 describe TARGETED               Targeted Traffic / Email Addresses

@@ -570,6 +570,8 @@ describe KNOWN_MAILING_LIST     Email came from some known mailing list software
 header   EXCHANGE_SERVER        X-Mailer =~ /Internet Mail Service \([\d\.]+\)/
 describe EXCHANGE_SERVER        Came via Internet Mail Service plugin
 
+header   APPROVED_BY            Approved-By =~ /./
+describe APPROVED_BY            Has an Approved-By moderated list header
+
 header SUBJ_FREE_CAP		Subject =~ /\bFREE\b/
 describe SUBJ_FREE_CAP		Subject contains the word 'FREE'
-
