@@ -229,6 +229,7 @@ sub rendered {
 
   if ( !exists $self->{'rendered'} ) {
     my $text = $self->decode();
+    my $raw = length($text);
 
     # render text/html always, or any other text part as text/html based
     # on a heuristic which simulates a certain common mail client
@@ -237,10 +238,27 @@ sub rendered {
 	  _html_near_start($1)
         )
        ) {
+      $self->{'rendered_type'} = 'text/html';
       my $html = Mail::SpamAssassin::HTML->new();		# object
+      my @lines = @{$html->html_render($text)};
       $self->{rendered} = join('', @{$html->html_render($text)});	# rendered text
       $self->{html_results} = $html->get_results();		# needed in eval tests
-      $self->{'rendered_type'} = 'text/html';
+
+      my $space = 0;
+      $self->{html_results}{non_uri_len} = 0;
+      for my $line (@lines) {
+        $line = pack ('C0A*', $line);
+        $space += ($line =~ tr/ \t\n\r\x0b\xa0/ \t\n\r\x0b\xa0/);
+        $self->{html_results}{non_uri_len} += length($line);
+        for my $uri ($line =~ m/\b(URI:\S+)/g) {
+          $self->{html_results}{non_uri_len} -= length($uri);
+        }
+      }
+      $self->{html_results}{non_space_len} = $self->{html_results}{non_uri_len} - $space;
+      $self->{html_results}{ratio} = ($raw - $self->{html_results}{non_uri_len}) / $raw;
+      if (exists $self->{html_results}{total_comment_length} && $self->{html_results}{non_uri_len} > 0) {
+        $self->{html_results}{total_comment_ratio} = $self->{html_results}{total_comment_length} / $self->{html_results}{non_uri_len};
+      }
     }
     else {
       $self->{'rendered_type'} = $self->{'type'};

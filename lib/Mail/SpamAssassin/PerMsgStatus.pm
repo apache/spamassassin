@@ -1001,42 +1001,14 @@ sub get_decoded_stripped_body_text_array {
     if ( defined $rnd ) {
       # Only text/* types are rendered ...
       $text .= $text ? "\n$rnd" : $rnd;
+
+      # TVD - if there are multiple parts, what should we do?
+      $self->{html} = $p->{html_results} if ( $type eq 'text/html' );
     }
     else {
       $text .= $text ? "\n".$p->decode() : $p->decode();
     }
   }
-
-#  # do HTML conversions if necessary
-#  if ($text =~ m/<(?:$Mail::SpamAssassin::HTML::re_strict|$Mail::SpamAssassin::HTML::re_loose|!--|!doctype)(?:\s|>)/ois) {
-#    my $raw = length($text);
-#    my $before = substr($text, 0, $-[0], '');
-#
-#    # render
-#    $self->{html_text} = $self->{html_mod}->html_render($text);
-#    $self->{html} = $self->{html_mod}->get_results();
-#
-#    $text = join('', $before, @{$self->{html_text}});
-#
-#    if ($raw > 0) {
-#      my $space = ($before =~ tr/ \t\n\r\x0b\xa0/ \t\n\r\x0b\xa0/);
-#      $self->{html}{non_uri_len} = length($before);
-#      for my $line (@{$self->{html_text}}) {
-#        $line = pack ('C0A*', $line);
-#        $space += ($line =~ tr/ \t\n\r\x0b\xa0/ \t\n\r\x0b\xa0/);
-#        $self->{html}{non_uri_len} += length($line);
-#        for my $uri ($line =~ m/\b(URI:\S+)/g) {
-#          $self->{html}{non_uri_len} -= length($uri);
-#        }
-#      }
-#      $self->{html}{non_space_len} = $self->{html}{non_uri_len} - $space;
-#      $self->{html}{ratio} = ($raw - $self->{html}{non_uri_len}) / $raw;
-#      if (exists $self->{html}{total_comment_length} && $self->{html}{non_uri_len} > 0) {
-#        $self->{html}{total_comment_ratio} = $self->{html}{total_comment_length} / $self->{html}{non_uri_len};
-#      }
-#    } # if ($raw > 0)
-#    delete $self->{html_last_tag};
-#  } # if HTML
 
   # whitespace handling (warning: small changes have large effects!)
   $text =~ s/\n+\s*\n+/\f/gs;                # double newlines => form feed
