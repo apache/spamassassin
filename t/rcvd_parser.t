@@ -41,7 +41,7 @@ Received: from asterix.laurier.org (lns-p19-8-82-65-66-244.adsl.proxad.net [82.6
 
 } => q{
 
-[ ip=213.228.0.129 rdns=postfix3-2.free.fr helo=postfix3-2.free.fr by=totor.example.net ident=foobar envfrom= id= ] [ ip=82.65.66.244 rdns=lns-p19-8-82-65-66-244.adsl.proxad.net helo=asterix.laurier.org by=postfix3-2.free.fr ident= envfrom= id= ]
+[ ip=213.228.0.129 rdns=postfix3-2.free.fr helo=postfix3-2.free.fr by=totor.example.net ident=foobar envfrom= id= ] [ ip=82.65.66.244 rdns=lns-p19-8-82-65-66-244.adsl.proxad.net helo=asterix.laurier.org by=postfix3-2.free.fr ident= envfrom= id=7BACDC372 ]
 
 },
 q{
@@ -52,7 +52,7 @@ Received: from klqe.net (unknown [192.168.50.50])
 
 } => q{
 
-[ ip=192.168.50.50 rdns= helo=klqe.net by=mail.dropinsolutions.com ident= envfrom= id= ]
+[ ip=192.168.50.50 rdns= helo=klqe.net by=mail.dropinsolutions.com ident= envfrom= id=62F9114047 ]
 
 },
 q{
@@ -65,7 +65,7 @@ Received: from Minstrel ([82.0.67.38]) by mta07-svc.ntlworld.com
 
 } => q{
 
-  [ ip=82.0.67.38 rdns= helo=Minstrel by=mta07-svc.ntlworld.com ident= envfrom= id= ]
+  [ ip=82.0.67.38 rdns= helo=Minstrel by=mta07-svc.ntlworld.com ident= envfrom= id=20031220035023.GCFK2588.mta07-svc.ntlworld.com@Minstrel ]
 
 },
 q{
@@ -100,7 +100,7 @@ Received: from hotmail.com (something.com [65.54.245.95]) at just after 10pm by 
 
 } => q{
 
-  [ ip=65.54.245.95 rdns=something.com helo=hotmail.com by=Daffy.timing.com ident= envfrom= id=foo@example.com ]
+  [ ip=65.54.245.95 rdns=something.com helo=hotmail.com by=Daffy.timing.com ident= envfrom=foo@example.com id= ]
 
 },
 q{
@@ -112,7 +112,7 @@ Received: from asterix.laurier.org (lns-p19-8-82-65-66-244.adsl.proxad.net [82.6
 	for <michel@example.net>; Fri, 14 Nov 2003 09:05:49 +0100 (CET) 
 } => q{
 
-[ ip=213.228.0.139 rdns=postfix3-2.free.fr helo=postfix3-2.free.fr by=totor.example.net ident=foobar envfrom= id= ] [ ip=82.65.66.244 rdns=lns-p19-8-82-65-66-244.adsl.proxad.net helo=asterix.laurier.org by=postfix3-2.free.fr ident= envfrom= id= ]
+[ ip=213.228.0.139 rdns=postfix3-2.free.fr helo=postfix3-2.free.fr by=totor.example.net ident=foobar envfrom= id= ] [ ip=82.65.66.244 rdns=lns-p19-8-82-65-66-244.adsl.proxad.net helo=asterix.laurier.org by=postfix3-2.free.fr ident= envfrom= id=7BACDC372 ]
 
 },
 q{
@@ -157,7 +157,7 @@ Received: from Dwsf@aol.com
 
 } => q{
 
-[ ip=64.12.136.4 rdns= helo=imo-m01.mx.aol.com by=xxx.com ident= envfrom= id= ]
+[ ip=64.12.136.4 rdns= helo=imo-m01.mx.aol.com by=xxx.com ident= envfrom= id=875522 ]
 
 },
 q{
@@ -180,7 +180,7 @@ Received: from a1200 ([24.83.2.7])
 
 } => q{
 
-[ ip=66.199.2.3 rdns=bigass1.example.com helo= by=slim1.example.com ident= envfrom= id= ] [ ip=24.83.2.4 rdns=a1200 helo= by=bigass1.example.com ident= envfrom= id= ] [ ip=66.199.2.5 rdns=ns1.example.com helo=bigass1.example.com by=fiat.example.edu ident= envfrom= id= ] [ ip=24.83.2.6 rdns=a1200 helo= by=bigass1.example.com ident= envfrom= id= ] [ ip=24.83.2.7 rdns=a1200 helo= by=bigass1.example.com ident= envfrom= id= ]
+[ ip=66.199.2.3 rdns=bigass1.example.com helo= by=slim1.example.com ident= envfrom= id= ] [ ip=24.83.2.4 rdns=a1200 helo= by=bigass1.example.com ident= envfrom= id= ] [ ip=66.199.2.5 rdns=ns1.example.com helo=bigass1.example.com by=fiat.example.edu ident= envfrom= id=i06MBJ6U020255 ] [ ip=24.83.2.6 rdns=a1200 helo= by=bigass1.example.com ident= envfrom= id= ] [ ip=24.83.2.7 rdns=a1200 helo= by=bigass1.example.com ident= envfrom= id= ]
 
 },
 q{
@@ -258,7 +258,7 @@ Received: from dyn-81-166-39-132.ppp.tiscali.fr (81.166.39.132) by cpmail.dk.tis
 
 } => q{
 
-[ ip=81.166.39.132 rdns=dyn-81-166-39-132.ppp.tiscali.fr helo=dyn-81-166-39-132.ppp.tiscali.fr by=cpmail.dk.tiscali.com ident= envfrom= id= ]
+[ ip=81.166.39.132 rdns=dyn-81-166-39-132.ppp.tiscali.fr helo=dyn-81-166-39-132.ppp.tiscali.fr by=cpmail.dk.tiscali.com ident= envfrom= id=3FE6899B004FE7A4 ]
 
 },
 q{
@@ -270,7 +270,7 @@ Received: from unknown (HELO [81.64.159.45]) ([81.64.159.45])
 
 } => q{
 
-[ ip=81.64.159.45 rdns= helo=!81.64.159.45! by=212.198.2.120 ident= envfrom= id=xyz@example.org ]
+[ ip=81.64.159.45 rdns= helo=!81.64.159.45! by=212.198.2.120 ident= envfrom=xyz@example.org id= ]
 
 },
 q{
@@ -298,33 +298,33 @@ q{
 
 Received: from email.com (unknown [222.32.65.3])
 	by eclectic.kluge.net (Postfix) with ESMTP id 33DC4416F20
-	for <city@kluge.net>; Mon,  1 Mar 2004 01:09:44 -0500 (EST)
+	for <unknown@kluge.net>; Mon,  1 Mar 2004 01:09:44 -0500 (EST)
 
 } => q{
 
-[ ip=222.32.65.3 rdns= helo=email.com by=eclectic.kluge.net ident= envfrom= id= ]
+[ ip=222.32.65.3 rdns= helo=email.com by=eclectic.kluge.net ident= envfrom= id=33DC4416F20 ]
 
 },
 q{
 
 Received: from kluge.net (unknown [222.156.78.32])
 	by eclectic.kluge.net (Postfix) with SMTP id CE1BA416F20
-	for <jay@kluge.net>; Mon,  1 Mar 2004 13:11:31 -0500 (EST)
+	for <unknown@kluge.net>; Mon,  1 Mar 2004 13:11:31 -0500 (EST)
 
 } => q{
 
-[ ip=222.156.78.32 rdns= helo=kluge.net by=eclectic.kluge.net ident= envfrom= id= ]
+[ ip=222.156.78.32 rdns= helo=kluge.net by=eclectic.kluge.net ident= envfrom= id=CE1BA416F20 ]
 
 },
 q{
 
 Received: from xjwrvjq (unknown [222.54.106.152])
 	by eclectic.kluge.net (Postfix) with SMTP id ED474416F20
-	for <cyoung@eclectic.kluge.net>; Tue,  2 Mar 2004 12:51:44 -0500
+	for <unknown@eclectic.kluge.net>; Tue,  2 Mar 2004 12:51:44 -0500
 
 } => q{
 
-[ ip=222.54.106.152 rdns= helo=xjwrvjq by=eclectic.kluge.net ident= envfrom= id= ]
+[ ip=222.54.106.152 rdns= helo=xjwrvjq by=eclectic.kluge.net ident= envfrom= id=ED474416F20 ]
 
 },
 q{
@@ -340,7 +340,7 @@ Received: from 212.202.243.194 ([212.202.243.194] helo=blackstar) by
 
 } => q{
 
-  [ ip=217.110.206.5 rdns=europa21.inetsiteworld.net helo=europa21.inetsiteworld.net by=mx1.redhat.com ident= envfrom= id= ] [ ip=127.0.0.1 rdns=localhost helo=SpamControl_operated_by_INetSiteWorld by=europa21.inetsiteworld.net ident= envfrom= id= ] [ ip=212.202.243.194 rdns= helo=blackstar by=SpamControl_operated_by_INetSiteWorld ident= envfrom= id= ]
+  [ ip=217.110.206.5 rdns=europa21.inetsiteworld.net helo=europa21.inetsiteworld.net by=mx1.redhat.com ident= envfrom= id=i28CUmST012272 ] [ ip=127.0.0.1 rdns=localhost helo=SpamControl_operated_by_INetSiteWorld by=europa21.inetsiteworld.net ident= envfrom= id=i28CNuck014319 ] [ ip=212.202.243.194 rdns= helo=blackstar by=SpamControl_operated_by_INetSiteWorld ident= envfrom= id= ]
 
 },
 q{
@@ -360,7 +360,7 @@ Received: from 83-70-48-2.bas2.dbn.dublin.eircom.net (HELO ?192.168.23.32?) (83.
 
 } => q{
 
-[ ip=159.134.118.16 rdns=mail00.svc.cra.dublin.eircom.net helo=mail00.svc.cra.dublin.eircom.net by=amgod.boxhost.net ident= envfrom= id= ] [ ip=83.70.48.2 rdns=83-70-48-2.bas2.dbn.dublin.eircom.net helo=?192.168.23.32? by=mail00.svc.cra.dublin.eircom.net ident= envfrom= id= ]
+[ ip=159.134.118.16 rdns=mail00.svc.cra.dublin.eircom.net helo=mail00.svc.cra.dublin.eircom.net by=amgod.boxhost.net ident= envfrom= id=0ACFC31014D ] [ ip=83.70.48.2 rdns=83-70-48-2.bas2.dbn.dublin.eircom.net helo=?192.168.23.32? by=mail00.svc.cra.dublin.eircom.net ident= envfrom= id= ]
 
 },
 q{
@@ -383,7 +383,7 @@ Received: from localhost (wwwwww@localhost)
 
 } => q{
   
-[ ip=128.200.80.6 rdns=smtp3.es.uci.edu helo=smtp3.es.uci.edu by=amgod.boxhost.net ident= envfrom= id= ] [ ip=128.200.80.22 rdns=rigel.oac.uci.edu helo=rigel.oac.uci.edu by=smtp3.es.uci.edu ident= envfrom= id= ]
+[ ip=128.200.80.6 rdns=smtp3.es.uci.edu helo=smtp3.es.uci.edu by=amgod.boxhost.net ident= envfrom= id=87D0A310091 ] [ ip=128.200.80.22 rdns=rigel.oac.uci.edu helo=rigel.oac.uci.edu by=smtp3.es.uci.edu ident= envfrom= id=i2907ZaF008726 ]
   
 },
 q{
