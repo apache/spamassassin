@@ -28,6 +28,16 @@ use of the resources that PostgreSQL offers.  In addition, please make
 sure that you follow the instructions below for loading the proper
 procedural language and installing the tables and stored procedure.
 
+There is also a MySQL specific storage driver available to provides a
+small boost in performance.  It requires version 4.1 or above of the
+MySQL database software to work properly.  In addition, it provides
+rollback on error functionality if you create your bayes database
+table using the InnoDB storage engine (ie s/MyISAM/InnoDB/ on the
+bayes_mysql.sql file).  WARNING: Using this module with a version of
+MySQL < 4.1 could have unexpected results.  To use the MySQL 4.1+
+specific module set your bayes_store_module directive accordingly:
+bayes_store_module               Mail::SpamAssassin::BayesStore::MySQL
+
 Additional configuration directives provided by BayesSQL:
 
 bayes_sql_dsn			   DBI:driver:database:hostname[:port]
