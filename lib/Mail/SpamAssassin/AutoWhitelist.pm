@@ -86,8 +86,10 @@ sub add_known_good_address {
   my $entry = $self->{checker}->get_addr_entry ($addr);
   if ($entry->{count} < $self->{threshold}) {
     $self->{checker}->add_permanent_entry ($entry);
+    return 1;
   }
-  return 1;
+
+  return 0;
 }
 
 ###########################################################################
