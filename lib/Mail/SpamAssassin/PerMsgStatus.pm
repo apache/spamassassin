@@ -222,7 +222,7 @@ sub get_report {
 =item $status->rewrite_mail ()
 
 Rewrite the mail message.  This will add headers, and possibly body text, to
-reflect it's spam or not-spam status.
+reflect its spam or not-spam status.
 
 The modifications made are as follows:
 
@@ -230,12 +230,18 @@ The modifications made are as follows:
 
 =item Subject: header for spam mails
 
-The string C<*****SPAM*****> is prepended to the subject.
+The string C<*****SPAM*****> is prepended to the subject,
+unless the C<rewrite_subject 0> configuration option is given.
 
 =item X-Spam-Status: header for spam mails
 
 A string, C<Yes, hits=nn required=nn tests=...> is set in this header to
 reflect the filter status.  The keys in this string are as follows:
+
+=item X-Spam-Report: header for spam mails
+
+The SpamAssassin report is added to the mail header if
+the C<report_header = 1> configuration option is given.
 
 =over 4
 
@@ -258,7 +264,8 @@ content that could "call back" to the spammer.
 
 =item spam mail body text
 
-The SpamAssassin report is added to top of the mail message body.
+The SpamAssassin report is added to top of the mail message body,
+unless the C<report_header 1> configuration option is given.
 
 =item X-Spam-Status: header for non-spam mails
 
@@ -320,9 +327,11 @@ sub rewrite_as_spam {
   }
 
   # First, rewrite the subject line.
-  $_ = $srcmsg->get_header ("Subject"); $_ ||= '';
-  s/^/\*\*\*\*\*SPAM\*\*\*\*\* /g;
-  $self->{msg}->replace_header ("Subject", $_);
+  if ($self->{conf}->{rewrite_subject}) {
+    $_ = $srcmsg->get_header ("Subject"); $_ ||= '';
+    s/^/\*\*\*\*\*SPAM\*\*\*\*\* /g;
+    $self->{msg}->replace_header ("Subject", $_);
+  }
 
   # add some headers...
 
@@ -342,10 +351,19 @@ sub rewrite_as_spam {
     $self->{msg}->replace_header ("X-Spam-Prev-Content-Type", $ct);
   }
 
-  my $lines = $srcmsg->get_body();
-  unshift (@{$lines}, split (/$/, $self->{report}));
-  $lines->[0] =~ s/\n//;
-  $self->{msg}->replace_body ($lines);
+  if ($self->{conf}->{report_header}) {
+    my $report = $self->{report};
+    $report =~ s/^\s*\n//gm;	# Empty lines not allowed in header.
+    $report =~ s/^\s*/  /gm;	# Ensure each line begins with whitespace.
+    $report = "Detailed Report\n" . $report;
+    $self->{msg}->put_header ("X-Spam-Report", $report);
+
+  } else {
+    my $lines = $srcmsg->get_body();
+    unshift (@{$lines}, split (/$/, $self->{report}));
+    $lines->[0] =~ s/\n//;
+    $self->{msg}->replace_body ($lines);
+  }
 
   $self->{msg}->get_mail_object;
 }

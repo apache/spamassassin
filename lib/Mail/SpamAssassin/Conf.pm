@@ -49,6 +49,8 @@ sub new {
   $self->{report_template} = '';
   $self->{spamtrap_template} = '';
   $self->{razor_config} = $ENV{'HOME'}."/razor.conf";
+  $self->{rewrite_subject} = 1;
+  $self->{report_header} = 0;
 
   $self->{whitelist_from} = [ ];
 
@@ -106,7 +108,7 @@ sub _parse {
       $self->{scores}->{$1} = $2+0.0; next;
     }
 
-    if (/^report\s*(.*)$/) {
+    if (/^report\s+(.*)$/) {
       $report_template .= $1."\n"; next;
     }
 
@@ -116,6 +118,14 @@ sub _parse {
 
     if (/^auto_report_threshold\s+(\d+)$/) {
       $self->{auto_report_threshold} = $1+0; next;
+    }
+
+    if (/^rewrite_subject\s+(\d+)$/) {
+      $self->{rewrite_subject} = $1+0; next;
+    }
+
+    if (/^report_header\s+(\d+)$/) {
+      $self->{report_header} = $1+0; next;
     }
 
     # SECURITY: no eval'd code should be loaded before this line.
