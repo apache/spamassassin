@@ -607,7 +607,7 @@ sub get_raw_body_text_array {
       substr($_, 0, 4096) = '';
     }
 
-    push (@{$self->{body_text_array}}, $_);
+    push(@{$self->{body_text_array}}, $_);
 
     next unless defined ($multipart_boundary);
     # MIME-only from here on.
@@ -773,7 +773,7 @@ sub get_decoded_stripped_body_text_array {
   # There might be things in comments we'd want to look at, like
   # SCRIPT and STYLE content, but that can be taken care of with
   # rawbody tests.
-  $text =~ s/<!--[^\-]*-->//gs;
+  $text =~ s/<!--([^\-]|-(?!->))*-->//g;
 
   # Try to put paragraph breaks where'd they'd be in HTML.  There's
   # an optional "/" before the ends of some tags in case it's XML style.
