@@ -598,6 +598,9 @@ sub check {
 		  }
 		} else {
 		  handle_user($current_user);
+		  if ($opt{'sql-config'}) {
+		    handle_user_sql($current_user);
+		  }
 		}
 	    }
 	    if (/^Content-length: ([0-9]*)\r\n/i) {
