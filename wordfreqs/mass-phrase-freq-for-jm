@@ -1,8 +1,8 @@
 #!/bin/sh
 #
 # Given a large set of MH folders, in multiple MH trees, generate a list of
-# tests hit by each message.   Output the test lists into "spam.wf" and
-# "nonspam.wf".
+# tests hit by each message.   Output the test lists into "spam.local" and
+# "nonspam.local".
 #
 # This then gives us a statistical base to test weight changes against.
 
@@ -37,9 +37,9 @@ for maildir in $MAILDIRS ; do
     if perl -e '@pats = qw('"$ARE_SPAM"'); $_ = q('"$folder"');
 		foreach $pat (@pats) { exit 0 if /\/$pat$/; } exit 1;'
     then
-      echo "./mass-phrase-freq $folder >> spam.wf" >> commands.sh
+      echo "./mass-phrase-freq $folder >> spam.local" >> commands.sh
     else
-      echo "./mass-phrase-freq $folder >> nonspam.wf" >> commands.sh
+      echo "./mass-phrase-freq $folder >> nonspam.local" >> commands.sh
     fi
   done
 done
