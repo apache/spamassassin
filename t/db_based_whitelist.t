@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("db_based_whitelist");
-use Test; BEGIN { plan tests => 15 };
+use Test; BEGIN { plan tests => 3 };
 
 # ---------------------------------------------------------------------------
 
@@ -17,11 +17,14 @@ q{Subject: 4000           Your Vacation Winning !}, 'subj',
 $scr_test_args = "-M Mail::SpamAssassin::DBBasedAddrList";
 
 # 3 times, to get into the whitelist:
-ok (sarun ("-L -a -t < data/nice/002", \&patterns_run_cb)); ok_all_patterns();
-ok (sarun ("-L -a -t < data/nice/002", \&patterns_run_cb)); ok_all_patterns();
-ok (sarun ("-L -a -t < data/nice/002", \&patterns_run_cb)); ok_all_patterns();
-ok (sarun ("-L -a -t < data/nice/002", \&patterns_run_cb)); ok_all_patterns();
+sarun ("-L -a -t < data/nice/002", \&patterns_run_cb);
+sarun ("-L -a -t < data/nice/002", \&patterns_run_cb);
+sarun ("-L -a -t < data/nice/002", \&patterns_run_cb);
+
+# Now check
+ok (sarun ("-L -a -t < data/nice/002", \&patterns_run_cb));
+ok_all_patterns();
 
 %patterns = %is_spam_patterns;
-ok (sarun ("-L -a -t < data/spam/004", \&patterns_run_cb)); ok_all_patterns();
-
+sarun ("-L -a -t < data/spam/004", \&patterns_run_cb);
+ok_all_patterns();

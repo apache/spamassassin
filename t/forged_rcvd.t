@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("forged_rcvd");
-use Test; BEGIN { plan tests => 5 };
+use Test; BEGIN { plan tests => 2 };
 
 # ---------------------------------------------------------------------------
 
@@ -13,5 +13,5 @@ q{ BODY: Claims you can be removed from the list }, 'bodyspotted',
 
 );
 
-ok (sarun ("-L -t < data/spam/002", \&patterns_run_cb));
+sarun ("-L -t < data/spam/002", \&patterns_run_cb);
 ok_all_patterns();

@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_port");
-use Test; BEGIN { plan tests => 15 };
+use Test; BEGIN { plan tests => 8 };
 
 # ---------------------------------------------------------------------------
 
@@ -19,6 +19,6 @@ q{ From: does not include a real name}, 'noreal',
 
 );
 
-ok (sdrun ("-L -p 18972", "-p 18972 < data/spam/001", \&patterns_run_cb));
+ok(sdrun ("-L -p 18972", "-p 18972 < data/spam/001", \&patterns_run_cb));
 ok_all_patterns();
 

@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spam");
-use Test; BEGIN { plan tests => 25 };
+use Test; BEGIN { plan tests => 13 };
 
 # ---------------------------------------------------------------------------
 
@@ -24,5 +24,5 @@ q{ BODY: Nobody's perfect }, 'remove',
 
 );
 
-ok (sarun ("-t < data/spam/001", \&patterns_run_cb));
+ok (sarun ("-L -t < data/spam/001", \&patterns_run_cb));
 ok_all_patterns();
