@@ -1,0 +1,31 @@
+Spamassassin Daemon
+===================
+
+
+The purpose of this program is to provide a daemonized version of the spamassassin executable.  The goal is improving throughput performance for automated mail checking.  This document is a brief synopsis of how spamc/spamd work, and how to use them effectively.
+
+
+Spamd
+-----
+
+Spamd is the workhorse of the spamc/spamd pair -- it loads an instance of the spamassassin filters, and then listens as a daemon for incoming requests to process messages.  By default, spamd listens on port 22874, but this is specifiable on the command line.  When spamd receives a connection, it spawns a child to handle the request.  The child will expect to read an email message from the network socket, which should then be closed for writing on the other end (so spamd receives an EOF).  spamd will then use SA to rewrite the message, and dump the processed message back to the socket before closing the connection.  The child process then dies.  In theory, this child-forking should be quite efficient, since on most OSes the fork will not actually copy any memory until the child attempts to write to a memory page, and then only the dirty page(s) will be copied.  This means the entire perl engine and the SA regular expressions, etc. will only be loaded once and then be reused by all the children, saving a lot of overhead.
+
+Spamc
+-----
+
+Spamc is the client half of the pair.  It should be used in place of 'spamassassin -P' in scripts to process mail.  It will read the mail from stdin, and spool it to its connection to spamd, then read the result back and print it to stdout.  Spamc has extremely low overhead in loading, so it should be much faster to load than the whole spamassassin program (and a perl VM).
+
+Installation
+------------
+
+For now spamc/spamd must be installed separately from the main SpamAssassin distribution.  Simply enter this directory and 'make', then copy the two executables to where you want them.  Then, configure your system to run spamd in the background, and where your mailer invokes 'spamassassin -P' instead invoke 'spamc'.  It's that easy!
+
+Performance
+-----------
+
+So how much faster is this than just using spamassassin -P?  Well, on my 400MHz K6-2 mail server, spamassassin -P process a 11689 byte message in about 3.36 seconds, spamc/spamd processes the same message in about 0.86 seconds, or about 4 times faster.  With bigger messages, the difference is less pronounced; a 115855 byte message takes about 5 seconds with spamassassin -P, and 2.5 seconds with spamc/spamd, or about 2 times faster.  However, if many messages are being processed in parallel, the spamc/spamd combination will likely be much more efficient, since spamassassin -P has much higher overhead starting up, and will consume more non-shared memory than will spamc/spamd.  For example, on the 115855 byte message, spamc consumes *no* heap memory (and very little on the stack), where spamassassin -P uses over 15MB of heap space and a peak of 3.5M.  In processing the 115855 byte message 10 times in parrallel, spamd uses just 22M of heap, with a peak of only 2.5M spamassassin -P would have used 150M total, and a peak of up to 35M to do this same job.
+
+Bugs
+----
+
+There are no known bugs with this setup, but it has been little used to date.  In particular it has only undergone moderate load testing, and only undergone any testing at all (or compilation for that matter) on Linux systems.  I would therefore NOT recommend puting this program into a critical production environment yet, but highly encourage its use in development/testing environments which would like to use SA for filtering.  If you discover compilation, runtime, or load-performance bugs, please notify craig@hughes-family.org so he can work on fixing it.
