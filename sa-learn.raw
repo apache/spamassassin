@@ -71,7 +71,6 @@ Options:
  -L, --local			   Operate locally, no network accesses
  -C file, --config-file=file       Path to standard configuration dir
  -p prefs, --prefs-file=file       Set user preferences file
- --whitelist-factory               Select whitelist factory
  -D, --debug-level                 Print debugging messages
  -V, --version                     Print version
  -h, --help                        Print usage message
@@ -324,10 +323,6 @@ Read user score preferences from I<prefs>.
 =item B<-D>, B<--debug-level>
 
 Produce diagnostic output.
-
-=item B<-M> I<factory>, B<--whitelist-factory>=I<factory>
-
-Select alternative whitelist factory.
 
 =item B<--no-rebuild>
 
