@@ -400,7 +400,7 @@ above).
 sub rewrite_mail {
   my ($self) = @_;
 
-  if ($self->{is_spam} && $self->{report_safe}) {
+  if ($self->{is_spam} && $self->{conf}->{report_safe}) {
     $self->rewrite_as_spam();
   }
   else {
