@@ -5,6 +5,7 @@
  */
 
 #include "libspamc.h"
+#include "utils.h"
 
 #include <unistd.h>
 #include <stdlib.h>
@@ -31,16 +32,19 @@
 extern char *optarg;
 #endif
 
-int SAFE_FALLBACK=-1; /* default to on now - CRH */
+/* safe fallback defaults to on now - CRH */
+int flags = SPAMC_RAW_MODE | SPAMC_SAFE_FALLBACK;
 
-int CHECK_ONLY=0;
-
+/* Aug 14, 2002 bj: global to hold -e command */
+char **exec_argv;
 
 void print_usage(void)
 {
-  printf("Usage: spamc [-d host] [-p port] [-c] [-f] [-h]\n");
+  printf("Usage: spamc [-d host] [-p port] [-B] [-c] [-f] [-h] [-e command [args]]\n");
+  printf("-B: BSMTP mode - expect input to be a single SMTP-formatted message\n");
   printf("-c: check only - print score/threshold and exit code set to 0 if message is not spam, 1 if spam\n");
   printf("-d host: specify host to connect to  [default: localhost]\n");
+  printf("-e command [args]: Command to output to instead of stdout. MUST BE THE LAST OPTION.\n");
   printf("-f: fallback safely - in case of comms error, dump original message unchanges instead of setting exitcode\n");
   printf("-h: print this help message\n");
   printf("-p port: specify port for connection [default: 783]\n");
@@ -48,24 +52,39 @@ void print_usage(void)
   printf("-u username: specify the username for spamd to process this message under\n");
 }
 
-void
+int
 read_args(int argc, char **argv, char **hostname, int *port, int *max_size, char **username)
 {
-  int opt;
+  int opt, i, j;
 
-  while(-1 != (opt = getopt(argc,argv,"cd:fhp:t:s:u:")))
+  while(-1 != (opt = getopt(argc,argv,"-Bcd:e:fhp:t:s:u:")))
   {
     switch(opt)
     {
+    case 'B':
+      {
+        flags = (flags & ~SPAMC_MODE_MASK) | SPAMC_BSMTP_MODE;
+        break;
+      }
     case 'c':
       {
-	CHECK_ONLY = -1;
+        flags |= SPAMC_CHECK_ONLY;
 	break;
       }
     case 'd':
       {
 	*hostname = optarg;	/* fix the ptr to point to this string */
 	break;
+      }
+    case 'e':
+      {
+        if((exec_argv=malloc(sizeof(*exec_argv)*(argc-optind+2)))==NULL)
+            return EX_OSERR;
+        for(i=0, j=optind-1; j<argc; i++, j++){
+            exec_argv[i]=argv[j];
+        }
+        argv[opt]=NULL;
+        return EX_OK;
       }
     case 'p':
       {
@@ -74,7 +93,7 @@ read_args(int argc, char **argv, char **hostname, int *port, int *max_size, char
       }
     case 'f':
       {
-	SAFE_FALLBACK = -1;
+        flags |= SPAMC_SAFE_FALLBACK;
 	break;
       }
     case 'u':
@@ -92,22 +111,65 @@ read_args(int argc, char **argv, char **hostname, int *port, int *max_size, char
       /* NOTE: falls through to usage case below... */
     }
     case 'h':
+    case 1:
       {
 	print_usage();
 	exit(EX_USAGE);
       }
     }
   }
+  return EX_OK;
 }	
 
-int
-main(int argc,char **argv)
-{
+void get_output_fd(int *fd){
+    int fds[2];
+    pid_t pid;
+    
+    if(*fd!=-1) return;
+    if(exec_argv==NULL){
+        *fd=STDOUT_FILENO;
+        return;
+    }
+    if(pipe(fds)){
+        syslog(LOG_ERR, "pipe creation failed: %m");
+        exit(EX_OSERR);
+    }
+    pid=fork();
+    if(pid<0){
+        syslog(LOG_ERR, "fork failed: %m");
+        exit(EX_OSERR);
+    } else if(pid==0){
+        /* child process */
+        /* Normally you'd expect the parent process here, however that would
+         * screw up an invoker waiting on the death of the parent. So instead,
+         * we fork a child to feed the data and have the parent exec the new
+         * prog */
+        close(fds[0]);
+        *fd=fds[1];
+        return;
+    }
+    /* parent process (see above) */
+    close(fds[1]);
+    if(dup2(fds[0], STDIN_FILENO)){
+        syslog(LOG_ERR, "redirection of stdin failed: %m");
+        exit(EX_OSERR);
+    }
+    close(fds[0]); /* no point in leaving extra fds lying around */
+    execv(exec_argv[0], exec_argv);
+    syslog(LOG_ERR, "exec failed: %m");
+    exit(EX_OSERR);
+}
+
+int main(int argc, char **argv){
   int port = 783;
   int max_size = 250*1024;
   char *hostname = "127.0.0.1";
   char *username = NULL;
   struct passwd *curr_user;
+  struct sockaddr addr;
+  int ret;
+  struct message m;
+  int out_fd;
 
   openlog ("spamc", LOG_CONS|LOG_PID, LOG_MAIL);
   signal (SIGPIPE, SIG_IGN);
@@ -119,11 +181,34 @@ main(int argc,char **argv)
     curr_user = getpwuid(getuid());
     if (curr_user == NULL) {
       perror ("getpwuid failed");
-      if(CHECK_ONLY) { printf("0/0\n"); return EX_NOTSPAM; } else { return EX_OSERR; }
+            if(flags&SPAMC_CHECK_ONLY) { printf("0/0\n"); return EX_NOTSPAM; } else { return EX_OSERR; }
     }
     username = curr_user->pw_name;
   }
 
-  return process_message(hostname, port, username, max_size, STDIN_FILENO,
-                STDOUT_FILENO, CHECK_ONLY, SAFE_FALLBACK);
+    out_fd=-1;
+    m.type=MESSAGE_NONE;
+
+    ret=lookup_host(hostname, port, &addr);
+    if(ret!=EX_OK) goto FAIL;
+
+    m.max_len=max_size;
+    ret=message_read(STDIN_FILENO, flags, &m);
+    if(ret!=EX_OK) goto FAIL;
+    ret=message_filter(&addr, username, flags, &m);
+    if(ret!=EX_OK) goto FAIL;
+    get_output_fd(&out_fd);
+    if(message_write(out_fd, &m)<0) goto FAIL;
+    if(m.is_spam!=EX_TOOBIG) return m.is_spam;
+    return ret;
+
+FAIL:
+    get_output_fd(&out_fd);
+    if(flags&SPAMC_CHECK_ONLY){
+        full_write(out_fd, "0/0\n", 4);
+        return EX_NOTSPAM;
+    } else {
+        message_dump(STDIN_FILENO, out_fd, &m);
+        return ret;
+    }
 }

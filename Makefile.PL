@@ -132,12 +132,12 @@ spamd/spamd: spamd/spamd.raw
 	$(PERL) fixpath.pl $(FIXPATHFLAGS) spamd/spamd.raw $@
 	$(CHMOD) $(PERM_RWX) $@
 
-spamd/libspamc.so: spamd/libspamc.c
-	$(CFCC) $(CFCCDLFLAGS) $(CFOPTIMIZE) spamd/libspamc.c \
+spamd/libspamc.so: spamd/libspamc.c spamd/utils.c
+	$(CFCC) $(CFCCDLFLAGS) $(CFOPTIMIZE) spamd/libspamc.c spamd/utils.c \
 			-o $@ $(CFLDDLFLAGS) $(CFLIBS)
 
-spamd/spamc: spamd/spamc.c spamd/libspamc.c
-	$(CFCC) $(CFCCFLAGS) $(CFOPTIMIZE) spamd/spamc.c spamd/libspamc.c \
+spamd/spamc: spamd/spamc.c spamd/libspamc.c spamd/utils.c
+	$(CFCC) $(CFCCFLAGS) $(CFOPTIMIZE) spamd/spamc.c spamd/libspamc.c spamd/utils.c \
 			-o $@ $(CFLDFLAGS) $(CFLIBS)
 
 inst_cfs: $(LOCAL_RULES_DIR) $(DEF_RULES_DIR) $(LOCAL_RULES_DIR)/local.cf

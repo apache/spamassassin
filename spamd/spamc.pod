@@ -7,13 +7,17 @@ spamc - client for spamd
 
 =over
 
-=item spamc [-c] [-d host] [-f] [-h] [-p port] [-s max_size] [-u username]
+=item spamc [-c] [-d host] [-f] [-h] [-p port] [-s max_size] [-u username] [-e command [args]]
 
 =back
 
 =head1 OPTIONS
 
 =over
+
+=item B<-B>
+
+Assume input is a single BSMTP-formatted message. In other words, spamc will pull out everything between the DATA line and the lone-dot line to feed to spamd, and will place the spamd output back in the same envelope (thus, any SIZE extension in your BSMTP file will cause many problems).
 
 =item B<-c>
 
@@ -22,6 +26,12 @@ Just check if the message is spam or not.  Set process exitcode to 1 is message 
 =item B<-d> I<host>
 
 Connect to spamd server on given host
+
+=item B<-e> I<command> I<[args]>
+
+Instead of writing to stdout, pipe the output to I<command>'s standard input. Note that there is a very slight chance mail will be lost here, because if the fork-and-exec fails there's no place to put the mail message...
+
+Note that this must be the LAST command line option, as everything after the B<-e> is taken as arguments to the command (it's like I<rxvt> or I<xterm>).
 
 =item B<-f>
 
