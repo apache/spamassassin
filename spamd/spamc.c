@@ -4,17 +4,19 @@
  * The text of this license is included in the SpamAssassin distribution in the file named "License"
  */
 
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <fcntl.h>
+#include <syslog.h>
 #include <sysexits.h>
 #include <errno.h>
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <netdb.h>
 #include <arpa/inet.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <stdlib.h>
-#include <syslog.h>
 
 void print_usage(void)
 {
@@ -90,11 +92,11 @@ int read_message(int in, int out)
   return response;
 }
 
-int process_message(in_addr_t host, int port)
+int
+try_to_connect (const struct sockaddr *addr, int *sockptr)
 {
+  int value;
   int mysock;
-  struct sockaddr_in addr;
-  int value=1;
   int origerr;
 
   if(-1 == (mysock = socket(PF_INET,SOCK_STREAM,0)))
@@ -113,9 +115,12 @@ int process_message(in_addr_t host, int port)
     case ENOBUFS:
     case ENOMEM:
       return EX_OSERR;
+    default:
+      return EX_SOFTWARE;
     }
   }
   
+  value = 1;		/* make this explicit! */
   if(-1 == setsockopt(mysock,0,TCP_NODELAY,&value,sizeof(value)))
   {
     switch(errno)
@@ -131,11 +136,7 @@ int process_message(in_addr_t host, int port)
     }
   }
 
-  addr.sin_family = AF_INET;
-  addr.sin_port = htons(port);
-  addr.sin_addr.s_addr = host;
-
-  if(-1 == connect(mysock,(const struct sockaddr *)&addr,sizeof(addr)))
+  if(connect(mysock,(const struct sockaddr *) addr, sizeof(*addr)) < 0)
   {
     origerr = errno;	/* take a copy before syslog() */
     syslog (LOG_ERR, "connect() to spamd failed: %m");
@@ -156,48 +157,73 @@ int process_message(in_addr_t host, int port)
       return EX_UNAVAILABLE;
     case EACCES:
       return EX_NOPERM;
+    default:
+      return EX_SOFTWARE;
     }
   }
-	
-  if(0 == (value = send_message(STDIN_FILENO,mysock)))
-  {
-    value = read_message(mysock,STDOUT_FILENO);
-  }
 
-  return value;
+  *sockptr = mysock;
+  return 0;
 }
 
-void read_args(int argc, char **argv, in_addr_t *host, int *port)
+int process_message(const char *hostname, int port)
 {
-  int opt;
+  int exstatus;
+  int mysock;
+  struct sockaddr_in addr;
   struct hostent *hent;
   int origherr;
-	
+
+  memset (&addr, 0, sizeof(addr));
+  addr.sin_family = AF_INET;
+  addr.sin_port = htons(port);
+
+  /* first, try to mangle it directly into an addr.  This will work
+   * for numeric IP addresses, but not for hostnames...
+   */
+  if (!inet_aton(hostname, &addr.sin_addr)) {
+    /* If that failed, we can use gethostbyname() to resolve it.
+     */
+    if (NULL == (hent = gethostbyname(hostname))) {
+      origherr = h_errno;	/* take a copy before syslog() */
+      syslog (LOG_ERR, "gethostbyname(%s) failed: h_errno=%d",
+		    hostname, origherr);
+      switch(origherr)
+      {
+      case HOST_NOT_FOUND:
+      case NO_ADDRESS:
+      case NO_RECOVERY:
+	exit(EX_NOHOST);
+      case TRY_AGAIN:
+	exit(EX_TEMPFAIL);
+      }
+    }
+
+    memcpy (&addr.sin_addr, hent->h_addr, sizeof(addr.sin_addr));
+  }
+
+  exstatus = try_to_connect ((const struct sockaddr *) &addr, &mysock);
+  if (0 == exstatus) {
+    exstatus = send_message(STDIN_FILENO,mysock);
+    if (0 == exstatus) {
+      exstatus = read_message(mysock,STDOUT_FILENO);
+    }
+  }
+
+  return exstatus;	/* return the last failure code */
+}
+
+void read_args(int argc, char **argv, char **hostname, int *port)
+{
+  int opt;
+
   while(-1 != (opt = getopt(argc,argv,"d:p:h")))
   {
     switch(opt)
     {
     case 'd':
       {
-	if(hent = gethostbyname(optarg))
-	{
-	  *host = *((in_addr_t *)(hent->h_addr_list[0]));
-	}
-	else
-	{
-	  origherr = h_errno;	/* take a copy before syslog() */
-	  syslog (LOG_ERR, "gethostbyname(%s) failed: h_errno=%d: %m",
-	      		optarg, origherr);
-	  switch(origherr)
-	  {
-	  case HOST_NOT_FOUND:
-	  case NO_ADDRESS:
-	  case NO_RECOVERY:
-	    exit(EX_NOHOST);
-	  case TRY_AGAIN:
-	    exit(EX_TEMPFAIL);
-	  }
-	}
+	*hostname = optarg;	/* fix the ptr to point to this string */
 	break;
       }
     case 'p':
@@ -221,14 +247,14 @@ void read_args(int argc, char **argv, in_addr_t *host, int *port)
 int main(int argc,char **argv)
 {
   int port = 22874;
-  in_addr_t host = (in_addr_t)0;
+  char *hostname = "localhost";
 
   srand(time(NULL));
   openlog ("spamc", LOG_CONS|LOG_PID, LOG_MAIL);
 
-  read_args(argc,argv,&host,&port);
+  read_args(argc,argv,&hostname,&port);
     
-  return process_message(host,port);
+  return process_message(hostname,port);
 }
 
   

@@ -38,14 +38,18 @@ void printhits (FILE *fout) {
   fprintf (fout, "# SUMMARY:            %6d / %6d\n#\n",
       	ny, yn);
 
-  fprintf (fout, "# Correctly non-spam: %6d  %3.2f%%\n",
-        nn, (nn / (float) num_tests) * 100.0);
-  fprintf (fout, "# Correctly spam:     %6d  %3.2f%%\n",
-        yy, (yy / (float) num_tests) * 100.0);
-  fprintf (fout, "# False positives:    %6d  %3.2f%%\n",
-        ny, (ny / (float) num_tests) * 100.0);
-  fprintf (fout, "# False negatives:    %6d  %3.2f%%\n",
-        yn, (yn / (float) num_tests) * 100.0);
+  fprintf (fout, "# Correctly non-spam: %6d  %3.2f%%  (%3.2f%% overall)\n",
+        nn, (nn / (float) num_nonspam) * 100.0,
+        (nn / (float) num_tests) * 100.0);
+  fprintf (fout, "# Correctly spam:     %6d  %3.2f%%  (%3.2f%% overall)\n",
+        yy, (yy / (float) num_spam) * 100.0,
+	(yy / (float) num_tests) * 100.0);
+  fprintf (fout, "# False positives:    %6d  %3.2f%%  (%3.2f%% overall)\n",
+        ny, (ny / (float) num_nonspam) * 100.0,
+	(ny / (float) num_tests) * 100.0);
+  fprintf (fout, "# False negatives:    %6d  %3.2f%%  (%3.2f%% overall)\n",
+        yn, (yn / (float) num_spam) * 100.0,
+	(yn / (float) num_tests) * 100.0);
   fprintf (fout, "# TOTAL:              %6d  %3.2f%%\n#\n",
         num_tests, 100.0);
 }
@@ -271,10 +275,11 @@ main (int argc, char **argv) {
   while(!ga.done()) {
     ga.step();
     gens++;
-    if (gens % 6 == 0) {
+
+    if (gens % 5 == 0) {
       cout << "."; cout.flush();
 
-      if (gens % 400 == 0) {
+      if (gens % 300 == 0) {
 	cout << "\nProgress: gen=" << gens << " convergence="
 	  	<< ga.statistics().convergence()
 	  	<< ":\n";
@@ -300,14 +305,21 @@ main (int argc, char **argv) {
 }
 
 // add up all the incorrect diagnoses, and use that as the fitness
-// score.  Since we're trying to minimise the objective this should
-// work OK.
+// score.  Since we're trying to minimise the objective, this should
+// work OK -- we want it to be as low as possible.
 //
 float
 objective(GAGenome & c)
 {
   GARealGenome &genome = (GARealGenome &) c;
   counthits(genome);
-  return ((float) yn + (ny * nybias));
+
+  // old version; just use the # of messages
+  // return ((float) yn + (ny * nybias));
+
+  // new version: use the proportion of messages to messages in the
+  // correct category.
+  return (float) ((yn / (float) num_spam)
+    		+ ((ny * nybias) / (float) num_nonspam));
 }
 
