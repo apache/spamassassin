@@ -1274,7 +1274,7 @@ sub get {
 
     if (defined) {
       if ($getaddr) {
-	chomp; s/\r?\n//gs;
+	s/\r?\n//gs;
 	s/\s*\(.*?\)//g;            # strip out the (comments)
 	s/^[^<]*?<(.*?)>.*$/$1/;    # "Foo Blah" <jm@foo> or <jm@foo>
 	s/, .*$//gs;                # multiple addrs on one line: return 1st
