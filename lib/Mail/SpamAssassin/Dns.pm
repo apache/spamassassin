@@ -170,9 +170,14 @@ sub razor_lookup {
 
   eval {
     require Razor::Client;
+    require Razor::Agent;
     local ($^W) = 0;		# argh, warnings in Razor
 
     my $rc = Razor::Client->new ($config, %options);
+    die "undefined Razor::Client\n" if (!$rc);
+
+    local $SIG{ALRM} = sub { die "alarm\n" };
+    alarm 10;
 
     if ($Razor::Client::VERSION >= 1.12) {
       my $respary = $rc->check ('spam' => \@msg);
@@ -184,13 +189,15 @@ sub razor_lookup {
     } else {
       $response = $rc->check (\@msg);
     }
+
+    alarm 0;
   };
 
   if ($@) {
     if ($@ eq "timeout\n") {
       warn "razor check timed out after $timeout secs.\n";
     } else {
-      warn ("$! $@");
+      warn ("razor check skipped: $! $@");
     }
   }
 

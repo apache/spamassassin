@@ -219,6 +219,7 @@ sub check_rbl {
   return 0 unless ($#ips >= 0);
 
   # First check that DNS is available, if not do not perform this check
+  return 0 if $self->{conf}->{skip_rbl_checks};
   return 0 unless $self->is_dns_available();
   $self->load_resolver();
 
@@ -255,6 +256,7 @@ sub check_rbl_results_for {
   my ($self, $set, $addr) = @_;
 
   dbg ("checking RBL results in set $set for $addr");
+  return 0 if $self->{conf}->{skip_rbl_checks};
   return 0 unless $self->is_dns_available();
   return 0 unless defined ($self->{$set});
   return 0 unless defined ($self->{$set}->{rbl_IN_As_found});
