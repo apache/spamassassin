@@ -66,7 +66,7 @@ uri WEIRD_PORT			m{https?://[^/\s]+?:\d+(?<!:80)(?<!:443)(?<!:8080)(?:/|\s|$)}
 describe WEIRD_PORT		Uses non-standard port number for HTTP
 
 # looks for a (maybe empty) username and (optional) password in an url
-uri USERPASS			m{https?://[^/\s]*?(?::[^/\s]+?)?\@}
+uri USERPASS                    m{^https?://[^/\s]*?(?::[^/\s]+?)?\@}
 describe USERPASS               URL contains username and (optional) password
 
 uri URI_IS_POUND		m{\#$}

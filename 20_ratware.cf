@@ -37,7 +37,7 @@ describe RATWARE_JPFREE		Bulk email fingerprint (jpfree) found
 # Note that the tests which look at the "ALL" pseudoheader are slower than
 # the specific header.
 # 100% overlap with X-Stormpost-To: header, but seems wise to leave it in
-uri RATWARE_STORM_URI		m{http://\S+/sp/t\.pl\?id=\d+:\d+}i
+uri RATWARE_STORM_URI		m{^http://\S{1,100}/sp/t\.pl\?id=\d+:\d+}i
 describe RATWARE_STORM_URI	Bulk email fingerprint (StormPost) found
 header RATWARE_OE_MALFORMED	X-Mailer =~ /^Microsoft Outlook Express \d(?:\.\d+){3} \w+$/
 describe RATWARE_OE_MALFORMED	X-Mailer has malformed Outlook Express version

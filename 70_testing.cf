@@ -387,10 +387,6 @@ body T_REDIRS_10	eval:redirect_num('10')
 body T_REDIRS_15	eval:redirect_num('15')
 body T_REDIRS_20	eval:redirect_num('20')
 
-# bug 3967
-uri T_RATWARE_STORM_URI	m{^http://\S{1,100}/sp/t\.pl\?id=\d+:\d+}i
-uri T_USERPASS                    m{^https?://[^/\s]*?(?::[^/\s]+?)?\@}
-
 ##########################################################################
 
 # bug 3570
