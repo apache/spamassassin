@@ -1084,6 +1084,8 @@ sub tok_touch_all {
 
   return 0 unless (defined($self->{_dbh}));
 
+  return 1 unless (scalar(@{$tokens}));
+
   my $sql = "UPDATE bayes_token SET atime = ? WHERE id = ? AND token IN (";
 
   my @bindings = ($atime, $self->{_userid});
