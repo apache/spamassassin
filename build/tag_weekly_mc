@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# 59 8 * * * /home/jm/ftp/spamassassin/build/tag_nightly_mc > /dev/null 2>&1
+# 59 8 6 * * /home/jm/ftp/spamassassin/build/tag_weekly_mc > /dev/null 2>&1
 
 cd /home/jm/ftp/spamassassin
 export CVS_RSH=ssh
@@ -10,5 +10,5 @@ if TZ=UTC date | perl -e ' /^... ... .. 08:/ and exit 0; exit 1; '
 then true ; else exit ; fi
 
 cvs -z3 update -dP
-cvs rtag -aF CURRENT_CORPORA_SUBMIT_VERSION .
+cvs rtag -aF CURRENT_CORPORA_WEEKLY_VERSION .
 
