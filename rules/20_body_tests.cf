@@ -120,8 +120,18 @@ describe WEIRD_QUOTING	Weird repeated double-quotation marks in body
 # these tests doesn't actually use rawbody since rawbody isn't raw enough;
 # they must be written very carefully to avoid modifying the original content
 
+# MIME Content-Transfer-Encoding control rules
+rawbody __MIME_BASE64		eval:check_for_mime('mime_base64_count')
+describe __MIME_BASE64		Includes a base64 attachment
+
+rawbody __MIME_QP		eval:check_for_mime('mime_qp_count')
+describe __MIME_QP		Includes a quoted-printable attachment
+
 rawbody MIME_BASE64_BLANKS	eval:check_for_mime('mime_base64_blanks')
 describe MIME_BASE64_BLANKS	Extra blank lines in base64 encoding
+
+rawbody MIME_BASE64_ILLEGAL	eval:check_for_mime('mime_base64_illegal')
+describe MIME_BASE64_ILLEGAL	base64 attachment uses illegal characters
 
 rawbody MIME_BASE64_LATIN	eval:check_for_mime('mime_base64_latin')
 describe MIME_BASE64_LATIN	Latin alphabet text disguised using base64 encoding
@@ -132,17 +142,23 @@ describe MIME_BASE64_NO_NAME	base64 attachment does not have a file name
 rawbody MIME_BASE64_TEXT	eval:check_for_mime('mime_base64_encoded_text')
 describe MIME_BASE64_TEXT	Message text disguised using base64 encoding
 
-rawbody MIME_EXCESSIVE_QP	eval:check_for_mime_excessive_qp('0.011')
-describe MIME_EXCESSIVE_QP	Excessive quoted-printable encoding in body
-
 rawbody MIME_HTML_NO_CHARSET	eval:check_for_mime('mime_html_no_charset')
 describe MIME_HTML_NO_CHARSET	Message text in HTML without specified charset
 
-rawbody  MIME_LONG_LINE_QP	eval:check_for_mime('mime_long_line_qp')
-describe MIME_LONG_LINE_QP	Quoted-printable line longer than 76 characters
-
 rawbody  MIME_MISSING_BOUNDARY	eval:check_for_mime('mime_missing_boundary')
 describe MIME_MISSING_BOUNDARY	MIME section missing boundary
+
+rawbody MIME_QP_DEFICIENT	eval:check_for_mime('mime_qp_illegal')
+describe MIME_QP_DEFICIENT	Deficient quoted-printable encoding in body
+
+rawbody MIME_QP_EXCESSIVE	eval:check_for_mime_excessive_qp('0.011')
+describe MIME_QP_EXCESSIVE	Excessive quoted-printable encoding in body
+
+rawbody MIME_QP_INLINE_NO_CHARSET	eval:check_for_mime('mime_qp_inline_no_charset')
+describe MIME_QP_INLINE_NO_CHARSET	Quoted-printable inline text with no charset
+
+rawbody  MIME_QP_LONG_LINE	eval:check_for_mime('mime_qp_long_line')
+describe MIME_QP_LONG_LINE	Quoted-printable line longer than 76 characters
 
 # actually indicates viruses, typically; just used here to clean corpora.
 rawbody  MICROSOFT_EXECUTABLE	eval:check_for_mime('microsoft_executable')
@@ -176,9 +192,6 @@ tflags UNDESIRED_LANGUAGE_BODY          userconf
 body BODY_8BITS			eval:check_for_body_8bits()
 describe BODY_8BITS		Body includes 8 consecutive 8-bit characters
 tflags BODY_8BITS		userconf
-
-rawbody MIME_DEFICIENT_QP	eval:check_for_mime('mime_qp_illegal')
-describe MIME_DEFICIENT_QP	Deficient quoted-printable encoding in body
 
 # Send-Safe ratware (from Alan Curry)
 # random alphanumerics, separated into groups of 16 by dashes (the first

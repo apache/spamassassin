@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.88 2003/05/18 21:27:11 quinlan Exp $
+# $Id: HTML.pm,v 1.89 2003/05/19 22:49:57 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -451,55 +451,20 @@ sub html_tests {
     {
       $self->{html}{web_bugs} = 1;
     }
-    if (/\?/ || !/\.(?:jpe?g|gif|png|bmp)\b/i) {
+    if (/\.(?:pl|cgi|php|asp|jsp|cfm)\b/i) {
       $self->{html}{t_web_bugs_0} = 1;
     }
-    if (/\?/ || (!/\.(?:jpe?g|gif|png|bmp)\b/i && !/^cid:/)) {
+    if (/\b\/\b.*\.(?:pl|cgi|php|asp|jsp|cfm)\b/i) {
       $self->{html}{t_web_bugs_1} = 1;
     }
-    if (/\?/ && !/\.(?:jpe?g|gif|png|bmp)\b/i) {
+    if (m@\b/\b.*(?:\bcgi\b|\.(?:pl|cgi|php|asp|jsp|cfm)\b)@i) {
       $self->{html}{t_web_bugs_2} = 1;
     }
-    if (/\?/ && !/\.(?:jpe?g|gif|png|bmp)\b/i && !/^cid:/) {
+    if (m@^\w+://[^/]+/.*\.(?:pl|cgi|php|asp|jsp|cfm)\b@i) {
       $self->{html}{t_web_bugs_3} = 1;
     }
-    if (/\.(?:pl|cgi|php|asp|jsp|cfm)\b/i) {
+    if (m@^\w+://[^/]+/.*(\bcgi\b|\.(?:pl|cgi|php|asp|jsp|cfm)\b)@i) {
       $self->{html}{t_web_bugs_4} = 1;
-    }
-    if (/\.(?:aspx?|pl|php[34]?|jsp|cfm|cgi)\b/i) {
-      $self->{html}{t_web_bugs_5} = 1;
-    }
-    if (/\?/ && /\.(?:pl|cgi|php|asp|jsp|cfm)\b/i) {
-      $self->{html}{t_web_bugs_6} = 1;
-    }
-    if (/\?/ && /\.(?:aspx?|pl|php[34]?|jsp|cfm|cgi)\b/i) {
-      $self->{html}{t_web_bugs_7} = 1;
-    }
-    if (/\?/ || /\.(?:pl|cgi|php|asp|jsp|cfm)\b/i) {
-      $self->{html}{t_web_bugs_8} = 1;
-    }
-    if (/\?/ || /\.(?:aspx?|pl|php[34]?|jsp|cfm|cgi)\b/i) {
-      $self->{html}{t_web_bugs_9} = 1;
-    }
-    if ((/\?/ && !/\.(?:jpe?g|gif|png|bmp)\b/i) ||
-	/\.(?:pl|cgi|php|asp|jsp|cfm)\b/i)
-    {
-      $self->{html}{t_web_bugs_10} = 1;
-    }
-    if ((/\?/ && !/\.(?:jpe?g|gif|png|bmp)\b/i && !/^cid:/) ||
-	/\.(?:pl|cgi|php|asp|jsp|cfm)\b/i)
-    {
-      $self->{html}{t_web_bugs_11} = 1;
-    }
-    if ((/\?/ && !/\.(?:jpe?g|gif|png|bmp)\b/i) ||
-	/\.(?:aspx?|pl|php[34]?|jsp|cfm|cgi)\b/i)
-    {
-      $self->{html}{t_web_bugs_12} = 1;
-    }
-    if ((/\?/ && !/\.(?:jpe?g|gif|png|bmp)\b/i && !/^cid:/) ||
-	/\.(?:aspx?|pl|php[34]?|jsp|cfm|cgi)\b/i)
-    {
-      $self->{html}{t_web_bugs_13} = 1;
     }
   }
   if ($tag eq "img" && exists $attr->{width} && exists $attr->{height}) {
@@ -523,38 +488,31 @@ sub html_tests {
     if ($width <= 1 && $height <= 1) {
       $self->{html}{image_web_bugs} = 1;
     }
-    # test rules
-    if ((($width < 4 && $height < 4) || ($area <= 25)) && exists $attr->{src})
-    {  
-      if ($attr->{src} =~ /\.(?:pl|cgi|php|asp|jsp|cfm)\b/i)
-      {
-	$self->{html}{t_image_web_bugs_0} = 1;
-      }
-      if ($attr->{src} =~ /\.(?:aspx?|pl|php[34]?|jsp|cfm|cgi)\b/i)
-      {
-	$self->{html}{t_image_web_bugs_1} = 1;
-      }
+    # any specified width and height is intended to match this rule
+    if (exists $attr->{src} &&
+	$attr->{src} =~ /\.(?:pl|cgi|php|asp|jsp|cfm)\b/i)
+    {
+      $self->{html}{t_image_web_bugs_0} = 1;
     }
-    if ((($width < 8 || $height < 8) || ($area <= 100)) && exists $attr->{src})
-    {  
-      if ($attr->{src} =~ /\.(?:pl|cgi|php|asp|jsp|cfm)\b/i)
-      {
-	$self->{html}{t_image_web_bugs_2} = 1;
-      }
-      if ($attr->{src} =~ /\.(?:aspx?|pl|php[34]?|jsp|cfm|cgi)\b/i)
-      {
-	$self->{html}{t_image_web_bugs_3} = 1;
-      }
+    if (exists $attr->{src} &&
+	$attr->{src} =~ /\b\/\b.*\.(?:pl|cgi|php|asp|jsp|cfm)\b/i)
+    {
+      $self->{html}{t_image_web_bugs_1} = 1;
     }
-    if (exists $attr->{src}) {  
-      if ($attr->{src} =~ /\.(?:pl|cgi|php|asp|jsp|cfm)\b/i)
-      {
-	$self->{html}{t_image_web_bugs_4} = 1;
-      }
-      if ($attr->{src} =~ /\.(?:aspx?|pl|php[34]?|jsp|cfm|cgi)\b/i)
-      {
-	$self->{html}{t_image_web_bugs_5} = 1;
-      }
+    if (exists $attr->{src} &&
+	$attr->{src} =~ m@\b/\b.*(?:\bcgi\b|\.(?:pl|cgi|php|asp|jsp|cfm)\b)@i)
+    {
+      $self->{html}{t_image_web_bugs_2} = 1;
+    }
+    if (exists $attr->{src} &&
+	$attr->{src} =~ m@^\w+://[^/]+/.*\.(?:pl|cgi|php|asp|jsp|cfm)\b@i)
+    {
+      $self->{html}{t_image_web_bugs_3} = 1;
+    }
+    if (exists $attr->{src} &&
+	$attr->{src} =~ m@^\w+://[^/]+/.*(?:\bcgi\b|\.(?:pl|cgi|php|asp|jsp|cfm)\b)@i)
+    {
+      $self->{html}{t_image_web_bugs_4} = 1;
     }
   }
   if ($tag eq "form" && exists $attr->{action}) {

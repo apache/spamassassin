@@ -2108,10 +2108,10 @@ sub _check_mime_header {
   }
 
   if ($cte =~ /base64/) {
-    $self->{t_mime_base64_count}++;
+    $self->{mime_base64_count}++;
   }
   elsif ($cte =~ /quoted-printable/) {
-    $self->{t_mime_qp_count}++;
+    $self->{mime_qp_count}++;
   }
 
   if ($ctype =~ /^text/ &&
@@ -2134,7 +2134,7 @@ sub _check_mime_header {
   }
 
   if ($cte =~ /quoted-printable/ && $cd =~ /inline/ && !$charset) {
-    $self->{t_mime_qp_inline_no_charset} = 1;
+    $self->{mime_qp_inline_no_charset} = 1;
   }
 
   if ($ctype =~ /^text\/html/ &&
@@ -2211,22 +2211,22 @@ sub _check_attachments {
   # results
   $self->{microsoft_executable} = 0;
   $self->{mime_base64_blanks} = 0;
+  $self->{mime_base64_count} = 0;
   $self->{mime_base64_encoded_text} = 0;
+  $self->{mime_base64_illegal} = 0;
   $self->{mime_base64_latin} = 0;
   $self->{mime_base64_no_name} = 0;
   $self->{mime_body_html_count} = 0;
   $self->{mime_body_text_count} = 0;
   $self->{mime_faraway_charset} = 0;
   $self->{mime_html_no_charset} = 0;
-  $self->{mime_long_line_qp} = 0;
   $self->{mime_missing_boundary} = 0;
+  $self->{mime_qp_count} = 0;
   $self->{mime_qp_illegal} = 0;
   $self->{mime_qp_inline_no_charset} = 0;
+  $self->{mime_qp_long_line} = 0;
   $self->{mime_qp_ratio} = 0;
   $self->{mime_suspect_name} = 0;
-  $self->{t_mime_base64_count} = 0;
-  $self->{t_mime_base64_illegal} = 0;
-  $self->{t_mime_qp_count} = 0;
 
   # message headers
   $ctype = $self->get('Content-Type');
@@ -2273,7 +2273,7 @@ sub _check_attachments {
 	$self->{mime_base64_blanks} = 1;
       }
       if ($cte =~ /base64/ && (m@[^A-Za-z0-9+/=\n]@ || m/=[^=\s]/)) {
-	$self->{t_mime_base64_illegal} = 1;
+	$self->{mime_base64_illegal} = 1;
       }
       if ($self->{mime_html_no_charset} &&
 	  $ctype =~ /^text\/html/ &&
@@ -2299,7 +2299,7 @@ sub _check_attachments {
     }
     if ($where != 1 && $cte eq "quoted-printable" && ! /^SPAM: /) {
       if (length > 77) {
-	$self->{mime_long_line_qp} = 1;
+	$self->{mime_qp_long_line} = 1;
       }
       $qp_bytes += length;
       # check for illegal substrings (RFC 2045), hexadecimal values 7F-FF and
