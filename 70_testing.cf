@@ -88,16 +88,12 @@ tflags T_SPF_PASS_NO_SBL	net nice
 meta T_SPF_HELO_PASS_NO_SBL	(SPF_HELO_PASS && !RCVD_IN_SBL)
 tflags T_SPF_HELO_PASS_NO_SBL	net nice
 
-# Carl Hutzler of AOL says: "block on sight" (mail sent 07 May 2004 to discuss
-# at lists.surbl.org).  not much hits for me, but let's see for everyone else
-uri T_REDIR_AOL_CLICKTHRU     /www\.aol\.com\/ams\/clickThruRedirect\.adp/i
-
-body T_SAVE_BUCKS		/\bsave \$/i
-
 # after all that work, the best two (which are not great), maybe let the
 # perceptron decide between these two before promoting one
 header T_MANY_MX_5	From:addr =~ /\@mx\d{2,4}\..{1,20}\./i
 header T_MANY_MX_10	From:addr =~ /\@\w\d+\..*\./i
+header T_MANY_MX_5_E	EnvelopeFrom =~ /\@mx\d{2,4}\..{1,20}\./i
+header T_MANY_MX_10_E	EnvelopeFrom =~ /\@\w\d+\..*\./i
 
 # Updated test rules for fraud, uses existing rules and updated rules
 body __T_FRAUD_92	/youre? country/i
@@ -173,7 +169,7 @@ describe T_RCVD_IN_CSMA_BL	Received via a blocked site in bl.csma.biz
 tflags T_RCVD_IN_CSMA_BL	net
 
 header T_DNS_FROM_SECURITYSAGE	eval:check_rbl_envfrom('securitysage', 'blackhole.securitysage.com.')
-describe T_RCVD_IN_SECURITYSAGE	Envelope sender in blackholes.securitysage.com
+describe T_DNS_FROM_SECURITYSAGE	Envelope sender in blackholes.securitysage.com
 tflags T_DNS_FROM_SECURITYSAGE	net
 
 ########################################################################
