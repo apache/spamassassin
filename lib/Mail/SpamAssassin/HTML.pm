@@ -694,11 +694,6 @@ sub html_tests {
     {
       $self->put_results(web_bugs => 1);
     }
-    if (exists $attr->{src} &&
-	$attr->{src} =~ /\?[^=]+=\b/)
-    {
-      $self->put_results(web_bugs_2 => 1);
-    }
   }
   if ($tag eq "form" && exists $attr->{action}) {
     $self->put_results(form_action_mailto => 1) if $attr->{action} =~ /mailto:/i
