@@ -39,12 +39,12 @@ my %makefile = (
     'VERSION_FROM' => 'lib/Mail/SpamAssassin.pm', # finds $VERSION
 
     'EXE_FILES'	=> [ 'spamassassin', 'spamd/spamc$(EXE_EXT)', 'spamd/spamd',
-                ],
+		],
 
     'MAN1PODS' => { 
-        'spamassassin'    => '$(INST_MAN1DIR)/spamassassin.$(MAN1EXT)',
-        'spamd/spamc.pod' => '$(INST_MAN1DIR)/spamc.$(MAN1EXT)',
-        'spamd/spamd'     => '$(INST_MAN1DIR)/spamd.$(MAN1EXT)',
+	'spamassassin'    => '$(INST_MAN1DIR)/spamassassin.$(MAN1EXT)',
+	'spamd/spamc.pod' => '$(INST_MAN1DIR)/spamc.$(MAN1EXT)',
+	'spamd/spamd'     => '$(INST_MAN1DIR)/spamd.$(MAN1EXT)',
     },
 
     'PL_FILES' => { },
@@ -54,29 +54,29 @@ my %makefile = (
     'PM_FILTER' => '$(PERL) build/preprocessor -Mconditional -Mvars -DVERSION=$(VERSION) -DPREFIX="$(PREFIX)"',
 
     'macro' => {
-        RULES => $rulesfiles,
+	RULES => $rulesfiles,
     },
 
     # be quite explicit about this; afaik CPAN.pm is sensible using this
     'PREREQ_PM' => {
-                        'ExtUtils::MakeMaker' => 5.45,
-                        'File::Spec' => 0.8,
-                        'File::Copy' => 0,
-                        'Pod::Usage' => 0,
-                        'HTML::Parser' => 3.0,
-                        'Text::Wrap' => 0,
-                        'Time::Local' => 0,
-                        'Errno' => 0,
-                  },
+			'ExtUtils::MakeMaker' => 5.45,
+			'File::Spec' => 0.8,
+			'File::Copy' => 0,
+			'Pod::Usage' => 0,
+			'HTML::Parser' => 3.0,
+			'Text::Wrap' => 0,
+			'Time::Local' => 0,
+			'Errno' => 0,
+		  },
 
     'dist' => {
-      		COMPRESS => 'gzip -9f', SUFFIX => 'gz',
-	      	DIST_DEFAULT => 'tardist'
+		COMPRESS => 'gzip -9f', SUFFIX => 'gz',
+		DIST_DEFAULT => 'tardist'
 	      },
 
     'clean' => { FILES =>
 	'pod2htm* spamassassin '.
-        'spamd/spamc$(EXE_EXT) spamd/libspamc.so spamd/spamd doc '.
+	'spamd/spamc$(EXE_EXT) spamd/libspamc.so spamd/spamd doc '.
 	'binaries.mk config.h config.status config.cache config.log'
     },
 
@@ -115,7 +115,7 @@ if (/\bRUN_RAZOR1_TESTS=y/) { $runrazor1tests = 1; }
 elsif (/\bRUN_RAZOR1_TESTS=n/) { $runrazor1tests = 0; }
 elsif (eval { require Razor::Client }) {
   if (prompt('Run Razor v1 tests (these may fail due to network problems)? (y/n)', "n") =~ /^y(es)?$/i)
-                                { $runrazor1tests = 1; }
+				{ $runrazor1tests = 1; }
 }
 
 $_ = join (' ', @ARGV); # again; never know what prompt() might do
@@ -123,7 +123,7 @@ if (/\bRUN_RAZOR2_TESTS=y/) { $runrazor2tests = 1; }
 elsif (/\bRUN_RAZOR2_TESTS=n/) { $runrazor2tests = 0; }
 elsif (eval { require Razor2::Client::Agent }) {
   if (prompt('Run Razor v2 tests (these may fail due to network problems)? (y/n)', "n") =~ /^y(es)?$/i)
-                                { $runrazor2tests = 1; }
+				{ $runrazor2tests = 1; }
 }
 
 if ($runrazor1tests) { open(FILE, ">t/do_razor"); close(FILE); }
@@ -199,16 +199,16 @@ binaries.mk: configure
 	./configure
 
 inst_cfs: $(LOCAL_RULES_DIR) $(LOCAL_RULES_DIR)/local.cf
-	$(RM_F) $(DEF_RULES_DIR)
-        $(MKPATH) $(DEF_RULES_DIR)
+	$(RM_RF) $(DEF_RULES_DIR)
+	$(MKPATH) $(DEF_RULES_DIR)
 	$(PERL) build/preprocessor $(FIXVARS) -Irules -O$(DEF_RULES_DIR) $(RULES)
-	$(CHMOD) $(PERM_RW) $(DEF_RULES_DIR)
+	$(CHMOD) $(PERM_RWX) $(DEF_RULES_DIR)
 
 $(LOCAL_RULES_DIR):
 	$(MKPATH) $@
 
 $(LOCAL_RULES_DIR)/local.cf: rules/local.cf
-        $(PERL) -e 'use File::Copy; (-f "$@") or copy ("$?", "$@");'
+	$(PERL) -e 'use File::Copy; (-f "$@") or copy ("$?", "$@");'
 
 text_html_doc: made-doc-stamp
 	$(NOOP)
