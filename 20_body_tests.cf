@@ -729,3 +729,6 @@ describe DOUBLE_CAPSWORD	A word in all caps repeated on the line
 
 body ORDER_NOW              /order (?:now|soon|fast|quickly|while)/i
 describe ORDER_NOW          Encourages you to waste no time in ordering
+
+rawbody OBFUSCATING_JAVASCRIPT   /charCodeAt|fromCharCode/i
+describe OBFUSCTING_JAVASCRIPT   An attempt to hide spam inside obfuscating Javascript code
