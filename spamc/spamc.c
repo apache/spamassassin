@@ -166,7 +166,7 @@ print_usage(void)
 
 int
 read_args(int argc, char **argv,
-          int *max_size, const char **username,
+          int *max_size, char **username,
           struct transport *ptrn)
 {
 #ifndef _WIN32
@@ -336,11 +336,8 @@ get_output_fd(int *fd)
 	*fd = STDOUT_FILENO;
 	return;
     }
-#ifdef _WIN32
-    libspamc_log(flags, LOG_CRIT, "THIS MUST NOT HAPPEN AS -e IS NOT SUPPORTED UNDER WINDOWS.");
-    exit(EX_OSERR);
-#endif
     
+#ifndef _WIN32
     /* Create a pipe for communication between child and parent. */
     if (pipe(pipe_fds)) {
 	libspamc_log(flags, LOG_ERR, "pipe creation failed: %m");
@@ -378,7 +375,65 @@ get_output_fd(int *fd)
     
     /* Whoa, something failed... */
     libspamc_log(flags, LOG_ERR, "exec failed: %m");
+#else
+    libspamc_log(flags, LOG_CRIT, "THIS MUST NOT HAPPEN AS -e IS NOT SUPPORTED UNDER WINDOWS.");
+#endif
     exit(EX_OSERR);
+}
+
+
+/**
+ * Determines the username of the uid spamc is running under.
+ *
+ * If the program's caller didn't identify the user to run as, use the
+ * current user for this. Note that we're not talking about UNIX perm-
+ * issions, but giving SpamAssassin a username so it can do per-user
+ * configuration (whitelists & the like).
+ *
+ * Allocates memory for the username, returns EX_OK if successful.
+ */
+int
+get_current_user(char **username)
+{
+#ifdef _WIN32
+
+    return EX_OK;
+    
+#else
+    struct passwd *curr_user;
+    
+    /* Get the passwd information for the effective uid spamc is running
+     * under. Setting errno to zero is recommended in the manpage.
+     */
+    errno = 0;
+    curr_user = getpwuid(geteuid());
+    if (curr_user == NULL) {
+        perror("getpwuid() failed");
+        goto fail;
+    }
+    
+    /* Since "curr_user" points to static library data, we don't wish to
+     * risk some other part of the system overwriting it, so we copy the 
+     * username to our own buffer -- then this won't arise as a problem.
+     */
+    *username = strdup(curr_user->pw_name);
+    if (*username == NULL) {
+        goto fail;
+    }
+
+    return EX_OK;
+    
+fail:
+    /* FIXME: The handling of SPAMC_CHECK_ONLY should probably be moved to 
+     *        the end of main()
+     */
+    if (flags & SPAMC_CHECK_ONLY) {
+        printf("0/0\n");
+        return EX_NOTSPAM;
+    }
+    return EX_OSERR;
+    
+#endif
 }
 
 
@@ -386,7 +441,7 @@ int
 main(int argc, char *argv[])
 {
     int max_size;
-    const char *username;
+    char *username;
     struct transport trans;
     struct message m;
     int out_fd = -1;
@@ -411,41 +466,13 @@ main(int argc, char *argv[])
    if ((ret = read_args(argc, argv, &max_size, &username, &trans)) != EX_OK)
        return ret;
 
-#ifndef _WIN32
-    /**********************************************************************
-     * DETERMINE USER
-     *
-     * If the program's caller didn't identify the user to run as, use the
-     * current user for this. Note that we're not talking about UNIX perm-
-     * issions, but giving SpamAssassin a username so it can do per-user
-     * configuration (whitelists & the like).
-     *
-     * Since "curr_user" points to static library data, we don't wish to
-     * risk some other part of the system overwriting it, so we copy the 
-     * username to our own buffer -- then this won't arise as a problem.
-     */
-    if (username == NULL) {
-	static char userbuf[256];
-	struct passwd *curr_user;
-
-	curr_user = getpwuid(geteuid());
-	if (curr_user == NULL) {
-	    perror("getpwuid failed");
-	    if (flags & SPAMC_CHECK_ONLY) {
-		printf("0/0\n");
-		return EX_NOTSPAM;
-	    }
-	    return EX_OSERR;
-	}
-        
-	memset(userbuf, 0, sizeof userbuf);
-	strncpy(userbuf, curr_user->pw_name, sizeof userbuf - 1);
-	userbuf[sizeof userbuf - 1] = '\0';
-	username = userbuf;
-    }
-#endif
-
-    if ((flags & SPAMC_RANDOMIZE_HOSTS) != 0) {
+   if (username == NULL) {
+       ret = get_current_user(&username);
+       if ( ret != EX_OK )
+           goto finish;
+   }
+       
+   if ((flags & SPAMC_RANDOMIZE_HOSTS) != 0) {
 	/* we don't need strong randomness; this is just so we pick
 	 * a random host for loadbalancing.
 	 */
@@ -472,9 +499,14 @@ main(int argc, char *argv[])
 #endif
     ret = transport_setup(&trans, flags);
     if (ret == EX_OK) {
+	
 	ret = message_read(STDIN_FILENO, flags, &m);
+	
 	if (ret == EX_OK) {
+	    
 	    ret = message_filter(&trans, username, flags, &m);
+	    free(username); username = NULL;
+	    
 	    if (ret == EX_OK) {
 		get_output_fd(&out_fd);
 
@@ -496,6 +528,7 @@ main(int argc, char *argv[])
 	    }
 	}
     }
+    free(username);
 
 /* FAIL: */
     get_output_fd(&out_fd);
