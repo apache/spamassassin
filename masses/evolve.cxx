@@ -80,7 +80,7 @@ void writescores (FILE *fout) {
 
 // ---------------------------------------------------------------------------
 
-void counthitsfromscores () {
+void fullcounthitsfromscores () {
   int file;
   float hits;
   int i;
@@ -121,7 +121,7 @@ void counthitsfromscores () {
   ynscore = ((float) ynint);		// / 5.0;
 }
 
-void quickcounthitsfromgenome (GARealGenome &genome) {
+void quickcounthitsfromscores () {
   int file;
   float hits;
   int i;
@@ -133,7 +133,7 @@ void quickcounthitsfromgenome (GARealGenome &genome) {
     hits = 0.0;
     
     for (i = num_tests_hit[file]-1; i >= 0; i--) {
-      hits += genome[tests_hit[file][i]];
+      hits += scores[tests_hit[file][i]];
     }
 
     // Craig: good tips, this should be faster
@@ -155,28 +155,34 @@ void quickcounthitsfromgenome (GARealGenome &genome) {
 
 // ---------------------------------------------------------------------------
 
-void fullcounthitsfromgenome (GARealGenome &genome) {
+void copygenometoscores (GARealGenome &genome) {
   int i;
 
+  for (i = 0; i < num_scores; i++) {
+    if (is_mutatable[i]) {
+      scores[i] = genome[i];
+      if (scores[i] == 0.0) { scores[i] = 0.1; }
+      else if (scores[i] < range_lo[i]) { scores[i] = range_lo[i]; }
+      else if (scores[i] > range_hi[i]) { scores[i] = range_hi[i]; }
+
+    } else {
+      scores[i] = bestscores[i];	// use the standard one
+    }
+  }
+}
+
+void fullcounthitsfromgenome (GARealGenome &genome) {
   if (genome.length() != num_scores) {
     cerr << "len != numscores: "<<genome.length()<<"  "<<num_scores<<endl;
     exit(1);
   }
+  copygenometoscores (genome);
+  fullcounthitsfromscores ();
+}
 
-  for (i = 0; i < num_scores; i++) {
-    scores[i] = genome[i];
-  }
-
-  // good point Craig, no need to do this. commented copying code
-  /*
-  if (is_mutatable[i]) {
-    scores[i] = genome[i];
-    if (scores[i] == 0.0) { scores[i] = 0.1; }
-  } else {
-    scores[i] = bestscores[i];	// use the standard one
-  }
-  */
-  counthitsfromscores ();
+void quickcounthitsfromgenome (GARealGenome &genome) {
+  copygenometoscores (genome);
+  quickcounthitsfromscores ();
 }
 
 // ---------------------------------------------------------------------------
@@ -330,7 +336,7 @@ main (int argc, char **argv) {
       scores[i] = bestscores[i];
     }
 
-    counthitsfromscores();
+    fullcounthitsfromscores();
     printhits (stdout);
     exit (0);
   }
@@ -340,6 +346,7 @@ main (int argc, char **argv) {
   GARandomSeed();	// use time ^ $$
 
   // allow scores from -0.5 to 4.0 inclusive, in jumps of 0.1
+  // each test has it's own range within this
   GARealAlleleSetArray allelesetarray;
   fill_allele_set (&allelesetarray);
   GARealGenome genome(allelesetarray, objective);
