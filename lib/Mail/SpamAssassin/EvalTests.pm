@@ -2232,7 +2232,7 @@ sub _check_attachments {
   $self->{mime_suspect_name} = 0;
 
   $ctype = $self->get('Content-Type');
-  if ($ctype =~ /$re_boundary/) {
+  if ($ctype =~ /$re_boundary/ && $1 ne '') {
     push (@boundary, "\Q$1\E");
   }
   if ($ctype =~ /^text\//i) {
