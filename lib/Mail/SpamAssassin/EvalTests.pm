@@ -3315,12 +3315,4 @@ sub check_unresolved_template {
 
 ###########################################################################
 
-sub redirect_num {
-  my($self, undef, $min) = @_;
-  if (!defined $self->{redirect_num}) {
-    $self->get_uri_list();
-  }
-  return(defined $min ? $self->{redirect_num} >= $min : 0);
-}
-
 1;
