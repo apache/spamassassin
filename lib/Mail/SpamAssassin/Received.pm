@@ -49,28 +49,7 @@ use Mail::SpamAssassin::Dns;
 use Mail::SpamAssassin::PerMsgStatus;
 
 use vars qw{
-  $LOCALHOST $CCTLDS_WITH_SUBDELEGATION $IP_ADDRESS $IPV4_ADDRESS
-  $IP_IN_RESERVED_RANGE
 };
-
-$IPV4_ADDRESS = $Mail::SpamAssassin::PerMsgStatus::IPV4_ADDRESS;
-$IP_ADDRESS = $Mail::SpamAssassin::PerMsgStatus::IP_ADDRESS;
-$IP_IN_RESERVED_RANGE = $Mail::SpamAssassin::PerMsgStatus::IP_IN_RESERVED_RANGE;
-
-$LOCALHOST = qr{(?:
-		  localhost(?:\.localdomain|)|
-		  127\.0\.0\.1|
-		  ::ffff:127\.0\.0\.1
-		)}ixo;
-
-# http://www.bestregistrar.com/help/ccTLD.htm lists these
-$CCTLDS_WITH_SUBDELEGATION = qr{
-	(?:ac| ae| ar| at| au| az| bb| bm| br| bs| ca| cn| co|
-	cr| cu| cy| do| ec| eg| fj| ge| gg| gu| hk| hu| id| il| im|
-	in| je| jo| jp| kr| la| lb| lc| lv| ly| mm| mo| mt| mx| my|
-	na| nc| np| nz| pa| pe| ph| pl| py| ru| sg| sh| sv| sy| th|
-	tn| tr| tw| ua| ug| uk| uy| ve| vi| yu| za)
-}ixo;
 
 # Should trust be computed based on the MX records of hostnames used in
 # HELO?  Disabled; too slow.
@@ -95,7 +74,7 @@ sub parse_received_headers {
 
   # urgh, droppings. TODO: move into loop below?
   $hdrs =~ s/\n
-	  Received:\ from\ \S*hotmail\.com\ \(\[${IP_ADDRESS}\]\)\ 
+	  Received:\ from\ \S*hotmail\.com\ \(\[${Mail::SpamAssassin::IP_ADDRESS}\]\)\ 
 	      by\ \S+\.hotmail.com with\ Microsoft\ SMTPSVC\(5\.0\.\S+\);
 	      \ \S+,\ \S+\ \S+\ \d{4}\ \d{2}:\d{2}:\d{2}\ \S+\n
 	      /\n/gx;
@@ -242,9 +221,9 @@ sub parse_received_headers {
 	my $found_non_rsvd = 0;
 	my $found_rsvd = 0;
 	foreach my $ip (@ips) {
-	  next if ($ip =~ /^${LOCALHOST}$/o);
+	  next if ($ip =~ /^${Mail::SpamAssassin::LOCALHOST}$/o);
 
-	  if ($ip !~ /${IP_IN_RESERVED_RANGE}/o) {
+	  if ($ip !~ /${Mail::SpamAssassin::IP_IN_RESERVED_RANGE}/o) {
 	    dbg ("received-header: 'by' ".$relay->{by}." has public IP $ip");
 	    $found_non_rsvd = 1;
 	  } else {
@@ -361,42 +340,6 @@ sub lookup_all_ips {
   return @ips;
 }
 
-sub ips_match_in_16_mask {
-  my ($self, $ipset1, $ipset2) = @_;
-  my ($b1, $b2);
-
-  foreach my $ip1 (@{$ipset1}) {
-    foreach my $ip2 (@{$ipset2}) {
-      next unless defined $ip1;
-      next unless defined $ip2;
-      next unless ($ip1 =~ /^(\d+\.\d+\.)/); $b1 = $1;
-      next unless ($ip2 =~ /^(\d+\.\d+\.)/); $b2 = $1;
-
-      if ($b1 eq $b2) { return 1; }
-    }
-  }
-
-  return 0;
-}
-
-sub ips_match_in_24_mask {
-  my ($self, $ipset1, $ipset2) = @_;
-  my ($b1, $b2);
-
-  foreach my $ip1 (@{$ipset1}) {
-    foreach my $ip2 (@{$ipset2}) {
-      next unless defined $ip1;
-      next unless defined $ip2;
-      next unless ($ip1 =~ /^(\d+\.\d+\.\d+\.)/); $b1 = $1;
-      next unless ($ip2 =~ /^(\d+\.\d+\.\d+\.)/); $b2 = $1;
-
-      if ($b1 eq $b2) { return 1; }
-    }
-  }
-
-  return 0;
-}
-
 sub mx_of_helo_near_ip {
   my ($self, $helo, $ip) = @_;
 
@@ -405,8 +348,8 @@ sub mx_of_helo_near_ip {
   # TODO: should we just traverse down the chain instead of this;
   # e.g. "foo.bar.baz.co.uk" would be "bar.baz.co.uk", "baz.co.uk",
   # instead of just "baz.co.uk" straight away?
-  if ($helo =~ /\.${CCTLDS_WITH_SUBDELEGATION}$/) {
-    if ($helo =~ /\.([^\.]+\.[^\.]+\.${CCTLDS_WITH_SUBDELEGATION})$/) {
+  if (Mail::SpamAssassin::Util::is_in_subdelegated_cctld ($helo)) {
+    if ($helo =~ /\.([^\.]+\.[^\.]+\.[^\.]+)$/) {
       $helodomain = $1;
     }
   } else {
@@ -443,6 +386,7 @@ sub parse_received_line {
   my $ident = '';
   my $envfrom = '';
   my $mta_looked_up_dns = 0;
+  my $IP_ADDRESS = $Mail::SpamAssassin::IP_ADDRESS;
 
   # Received: (qmail 27981 invoked by uid 225); 14 Mar 2003 07:24:34 -0000
   # Received: (qmail 84907 invoked from network); 13 Feb 2003 20:59:28 -0000
@@ -973,11 +917,11 @@ sub parse_received_line {
   # with SMTP id h2R2iivG093740; Wed, 26 Mar 2003 20:44:44 -0600 
   # (CST) (envelope-from x@x.org)
   # Received: from localhost (localhost [127.0.0.1]) (uid 500) by mail with local; Tue, 07 Jan 2003 11:40:47 -0600
-  if (/^from ${LOCALHOST} \((?:\S+\@|)${LOCALHOST}[\) ]/) { return; }
+  if (/^from ${Mail::SpamAssassin::LOCALHOST} \((?:\S+\@|)${Mail::SpamAssassin::LOCALHOST}[\) ]/) { return; }
 
   # Received: from olgisoft.com (127.0.0.1) by 127.0.0.1 (EzMTS MTSSmtp
   # 1.55d5) ; Thu, 20 Mar 03 10:06:43 +0100 for <asrg@ietf.org>
-  if (/^from \S+ \((?:\S+\@|)${LOCALHOST}\) /) { return; }
+  if (/^from \S+ \((?:\S+\@|)${Mail::SpamAssassin::LOCALHOST}\) /) { return; }
 
   # Received: from casper.ghostscript.com (raph@casper [127.0.0.1]) h148aux8016336verify=FAIL); Tue, 4 Feb 2003 00:36:56 -0800
   # TODO: could use IPv6 localhost
@@ -1123,7 +1067,7 @@ enough:
   dbg ("received-header: parsed as $asstr");
   $relay->{as_string} = $asstr;
 
-  my $isrsvd = ($ip =~ /${IP_IN_RESERVED_RANGE}/o);
+  my $isrsvd = ($ip =~ /${Mail::SpamAssassin::IP_IN_RESERVED_RANGE}/o);
   $relay->{ip_is_reserved} = $isrsvd;
 
   # add it to an internal array so Eval tests can use it
@@ -1136,11 +1080,6 @@ sub found_pop_fetcher_sig {
   my ($self) = @_;
   dbg ("found fetchmail marker, restarting parse");
   $self->{relays} = [ ];
-}
-
-sub is_in_subdelegated_cctld {
-  my ($domain) = @_;
-  return ($domain =~ /\.${CCTLDS_WITH_SUBDELEGATION}$/);
 }
 
 sub dbg { Mail::SpamAssassin::dbg(@_); }

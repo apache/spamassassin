@@ -41,6 +41,8 @@ use Time::Local;
 use Sys::Hostname (); # don't import hostname() into this namespace!
 use Fcntl;
 
+###########################################################################
+
 use constant HAS_MIME_BASE64 => eval { require MIME::Base64; };
 use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
 
@@ -699,6 +701,21 @@ sub secure_tmpfile {
   umask $umask;
 
   return ($reportfile, \*TMPFILE);
+}
+
+###########################################################################
+
+sub is_in_subdelegated_cctld {
+  my ($domain) = @_;
+
+  # http://www.bestregistrar.com/help/ccTLD.htm lists these
+  return ($domain =~ /\.
+	  (?:ac| ae| ar| at| au| az| bb| bm| br| bs| ca| cn| co|
+	  cr| cu| cy| do| ec| eg| fj| ge| gg| gu| hk| hu| id| il| im|
+	  in| je| jo| jp| kr| la| lb| lc| lv| ly| mm| mo| mt| mx| my|
+	  na| nc| np| nz| pa| pe| ph| pl| py| ru| sg| sh| sv| sy| th|
+	  tn| tr| tw| ua| ug| uk| uy| ve| vi| yu| za)
+	$/ixo);
 }
 
 ###########################################################################

@@ -64,6 +64,7 @@ use bytes;
 
 require 5.006_001;
 
+use Mail::SpamAssassin::Constants;
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::ConfSourceSQL;
 use Mail::SpamAssassin::ConfSourceLDAP;

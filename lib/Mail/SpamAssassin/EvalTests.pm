@@ -38,7 +38,6 @@ use File::Basename;
 use constant HAS_DB_FILE => eval { require DB_File; };
 
 use vars qw{
-  $IP_ADDRESS $IPV4_ADDRESS
   $CCTLDS_WITH_LOTS_OF_OPEN_RELAYS
   $ROUND_THE_WORLD_RELAYERS
   $WORD_OBFUSCATION_CHARS 
@@ -64,27 +63,6 @@ $ROUND_THE_WORLD_RELAYERS = qr{(?:net|com|ca)};
 # http://www.isc.org/ds/WWW-200107/. I used both hostcount and domain counts
 # for figuring this. any ccTLD with > about 40000 domains is left out of this
 # regexp.  Then I threw in some unscientific seasoning to taste. ;)
-
-# an IP address, in IPv4 format only.
-$IPV4_ADDRESS = qr/\b(?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
-		    (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
-		    (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
-		    (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)
-		  \b/x;
-
-# an IP address, in IPv4, IPv4-mapped-in-IPv6, or IPv6 format.  NOTE: cannot
-# just refer to $IPV4_ADDRESS, due to perl bug reported in nesting qr//s. :(
-#
-$IP_ADDRESS = qr/\b (?:IPv6:|) (?: (?:0*:0*:ffff:(?:0*:|)|) # IPv4-mapped-in-IPv6
-		    (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
-                    (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
-                    (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
-                    (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)
-		  | # an IPv6 address, seems to always be at least 6 words
-		    [a-f0-9]{0,4} \:[a-f0-9]{0,4}
-		    \:[a-f0-9]{0,4} \:[a-f0-9]{0,4}
-		    \:[a-f0-9]{0,4} \:[a-f0-9]{0,4} (?:\:[a-f0-9]{0,4})*
-		  )\b/ix;
 
 $WORD_OBFUSCATION_CHARS = '*_.,/|-+=';
 
@@ -436,7 +414,7 @@ sub _check_for_forged_received {
 	# allow private IP addrs here, could be a legit screwup
 	if ($hclassb && $fclassb && 
 		$hclassb ne $fclassb &&
-		!($hlo =~ /${IP_IN_RESERVED_RANGE}/o))
+		!($hlo =~ /${Mail::SpamAssassin::IP_IN_RESERVED_RANGE}/o))
 	{
 	  dbg ("forged-HELO: massive mismatch on IP-addr HELO: '$hlo' != '$fip'");
 	  $self->{mismatch_ip_helo}++;
@@ -494,7 +472,7 @@ sub _check_for_forged_hotmail_received_headers {
         /from mail pickup service by hotmail\.com with Microsoft SMTPSVC;/);
 
   my $ip = $self->get ('X-Originating-Ip');
-  if ($ip =~ /$IP_ADDRESS/) { $ip = 1; } else { $ip = 0; }
+  if ($ip =~ /${Mail::SpamAssassin::IP_ADDRESS}/) { $ip = 1; } else { $ip = 0; }
 
   # Hotmail formats its received headers like this:
   # Received: from hotmail.com (f135.law8.hotmail.com [216.33.241.135])
@@ -577,7 +555,7 @@ sub check_for_forged_eudoramail_received_headers {
   $rcvd =~ s/\s+/ /gs;		# just spaces, simplify the regexp
 
   my $ip = $self->get ('X-Sender-Ip');
-  if ($ip =~ /$IP_ADDRESS/) { $ip = 1; } else { $ip = 0; }
+  if ($ip =~ /${Mail::SpamAssassin::IP_ADDRESS}/) { $ip = 1; } else { $ip = 0; }
 
   # Eudoramail formats its received headers like this:
   # Received: from Unknown/Local ([?.?.?.?]) by shared1-mail.whowhere.com;
@@ -647,7 +625,7 @@ sub check_for_forged_yahoo_received_headers {
   if ($rcvd =~ /by web\S+\.mail\.yahoo\.com via HTTP/) { return 0; }
   if ($rcvd =~ /by smtp\S+\.yahoo\.com with SMTP/) { return 0; }
   if ($rcvd =~
-      /from \[$IP_ADDRESS\] by \S+\.(?:groups|grp\.scd)\.yahoo\.com with NNFMP/) {
+      /from \[${Mail::SpamAssassin::IP_ADDRESS}\] by \S+\.(?:groups|grp\.scd)\.yahoo\.com with NNFMP/) {
     return 0;
   }
 
@@ -683,12 +661,12 @@ sub check_for_forged_juno_received_headers {
   my $rcvd = $self->get('Received');
 
   if (!$xorig) {  # New style Juno has no X-Originating-IP header, and other changes
-    if($rcvd !~ /from.*\b(?:juno|untd)\.com.*[\[\(]$IP_ADDRESS[\]\)].*by/
+    if($rcvd !~ /from.*\b(?:juno|untd)\.com.*[\[\(]${Mail::SpamAssassin::IP_ADDRESS}[\]\)].*by/
         && $rcvd !~ / cookie\.(?:juno|untd)\.com /) { return 1; }
     if($xmailer !~ /Juno /) { return 1; }
   } else {
-    if($rcvd !~ /from.*\bmail\.com.*\[$IP_ADDRESS\].*by/) { return 1; }
-    if($xorig !~ /$IP_ADDRESS/) { return 1; }
+    if($rcvd !~ /from.*\bmail\.com.*\[${Mail::SpamAssassin::IP_ADDRESS}\].*by/) { return 1; }
+    if($xorig !~ /${Mail::SpamAssassin::IP_ADDRESS}/) { return 1; }
     if($xmailer !~ /\bmail\.com/) { return 1; }
   }
 
@@ -1301,7 +1279,7 @@ sub check_rbl_backend {
   for my $header ('X-Originating-IP', 'X-Apparently-From') {
     my $str = $self->get($header);
     next unless defined $str;
-    push (@originating, ($str =~ m/($IP_ADDRESS)/g));
+    push (@originating, ($str =~ m/(${Mail::SpamAssassin::IP_ADDRESS})/g));
   }
 
   # Let's go ahead and trim away all Reserved ips (KLC)
@@ -1441,7 +1419,7 @@ sub ip_list_uniq_and_strip_reserved {
   foreach my $ip (@origips) {
     next unless $ip;
     next if (exists ($seen{$ip})); $seen{$ip} = 1;
-    next if ($ip =~ /${IP_IN_RESERVED_RANGE}/o);
+    next if ($ip =~ /${Mail::SpamAssassin::IP_IN_RESERVED_RANGE}/o);
     push(@ips, $ip);
   }
   return @ips;
@@ -1755,7 +1733,7 @@ sub _check_for_round_the_world_received {
   #     Fri, 30 Nov 2001 08:57:47 +1000
   if ($rcvd =~ /
   	\nfrom\b.{0,20}\s(\S+\.${CCTLDS_WITH_LOTS_OF_OPEN_RELAYS})\s\(.{0,200}
-  	\nfrom\b.{0,20}\s([-_A-Za-z0-9.]+)\s.{0,30}\[($IPV4_ADDRESS)\]
+  	\nfrom\b.{0,20}\s([-_A-Za-z0-9.]+)\s.{0,30}\[(${Mail::SpamAssassin::IPV4_ADDRESS})\]
   /osix) { $relay = $1; $relayer = $2; $relayerip = $3; goto gotone; }
 
   return 0;
@@ -2271,15 +2249,16 @@ sub _check_language {
   # more than 0.02% false positives.  only used for text < 2048 bytes in
   # length
   my %mistakable = ('sco' => 'en');
+  my $len = $self->{msg}->{metadata}->{languages_body_len};
 
   # see if any matches are okay
   foreach my $match (@matches) {
     $match =~ s/\..*//;
-    if ($self->{languages_body_len} < 2048 && exists $mistakable{$match}) {
+    if ($len < 2048 && exists $mistakable{$match}) {
       $match = $mistakable{$match};
     }
     foreach my $language (@languages) {
-      if ($self->{languages_body_len} < 2048 && exists $mistakable{$language}) {
+      if ($len < 2048 && exists $mistakable{$language}) {
 	$language = $mistakable{$language};
       }
       if ($match eq $language) {
@@ -3173,7 +3152,7 @@ if (1 && $helo) {
 
     if ($numparts > 0) {
       my $partsreqd = 2;
-      if (Mail::SpamAssassin::PerMsgStatus::is_in_subdelegated_cctld ($helo)) {
+      if (Mail::SpamAssassin::Util::is_in_subdelegated_cctld ($helo)) {
         $partsreqd = 3;
       }
 

@@ -620,6 +620,9 @@ sub extract_message_metadata {
 
 sub get_metadata {
   my ($self, $hdr) = @_;
+  if (!$self->{metadata}) {
+    warn "oops! get_metadata() called after finish_metadata()"; return;
+  }
   $self->{metadata}->{strings}->{$hdr};
 }
 
@@ -629,6 +632,9 @@ sub get_metadata {
 
 sub put_metadata {
   my ($self, $hdr, $text) = @_;
+  if (!$self->{metadata}) {
+    warn "oops! put_metadata() called after finish_metadata()"; return;
+  }
   $self->{metadata}->{strings}->{$hdr} = $text;
 }
 
@@ -638,6 +644,9 @@ sub put_metadata {
 
 sub delete_metadata {
   my ($self, $hdr) = @_;
+  if (!$self->{metadata}) {
+    warn "oops! delete_metadata() called after finish_metadata()"; return;
+  }
   delete $self->{metadata}->{strings}->{$hdr};
 }
 
@@ -648,6 +657,9 @@ sub delete_metadata {
 sub get_all_metadata {
   my ($self) = @_;
 
+  if (!$self->{metadata}) {
+    warn "oops! get_all_metadata() called after finish_metadata()"; return;
+  }
   my @ret = ();
   foreach my $key (sort keys %{$self->{metadata}->{strings}}) {
     push (@ret, $key, ": ", $self->{metadata}->{strings}->{$key}, "\n");
@@ -667,7 +679,7 @@ this will free up some memory.
 
 sub finish_metadata {
   my ($self) = @_;
-  if ($self->{metadata}) {
+  if (defined ($self->{metadata})) {
     $self->{metadata}->finish();
     delete $self->{metadata};
   }

@@ -223,6 +223,10 @@ sub check {
   $self->{report} = $report;
 
   $self->{main}->call_plugins ("check_end", { permsgstatus => $self });
+
+  # tell the message object to clean up its metadata, we won't need
+  # it any more
+  $self->{msg}->finish_metadata();
 }
 
 ###########################################################################
@@ -971,10 +975,6 @@ sub finish {
   $self->{main}->call_plugins ("per_msg_finish", {
 	  permsgstatus => $self
 	});
-
-  # tell the message object to clean up its metadata, we won't need
-  # it any more
-  $self->{msg}->finish_metadata();
 
   delete $self->{main};
   delete $self->{msg};
