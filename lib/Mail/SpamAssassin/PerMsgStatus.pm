@@ -258,7 +258,7 @@ sub learn {
   {
     $isspam = 0;
   } elsif ($self->{hits} >= $self->{conf}->{auto_learn_threshold_spam}
-	&& $self->{hits} >= $self->{conf}->{required_hits} - $auto_learn_safety)
+	&& $self->{hits} >= $self->{conf}->{required_hits} + $auto_learn_safety)
   {
     $isspam = 1;
   } else {
@@ -266,18 +266,20 @@ sub learn {
     return;
   }
 
-  my $required_body_hits = 3;
-  my $required_head_hits = 3;
+  if ($isspam) {
+    my $required_body_hits = 3;
+    my $required_head_hits = 3;
 
-  if ($self->{body_only_hits} < $required_body_hits) {
-    dbg ("auto-learn? no: too few body hits (".
-		$self->{body_only_hits}." < ".$required_body_hits.")");
-    return;
-  }
-  if ($self->{head_only_hits} < $required_head_hits) {
-    dbg ("auto-learn? no: too few head hits (".
-		$self->{head_only_hits}." < ".$required_head_hits.")");
-    return;
+    if ($self->{body_only_hits} < $required_body_hits) {
+      dbg ("auto-learn? no: too few body hits (".
+		  $self->{body_only_hits}." < ".$required_body_hits.")");
+      return;
+    }
+    if ($self->{head_only_hits} < $required_head_hits) {
+      dbg ("auto-learn? no: too few head hits (".
+		  $self->{head_only_hits}." < ".$required_head_hits.")");
+      return;
+    }
   }
 
   dbg ("auto-learning from this message. is spam? $isspam");
