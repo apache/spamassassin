@@ -193,10 +193,6 @@ describe RCVD_IN_RELAYS_ORDB_ORG Received via a relay in relays.ordb.org
 header RCVD_IN_OSIRUSOFT_COM	eval:check_rbl('relay', 'relays.osirusoft.com.')
 describe RCVD_IN_OSIRUSOFT_COM	Received via a relay in relays.osirusoft.com
 
-# ORBZ is indifinitely suspended
-#header RCVD_IN_ORBZ		eval:check_rbl('relay', 'inputs.orbz.org.')
-#describe RCVD_IN_ORBZ		Received via a relay in inputs.orbz.org
-
 header RCVD_IN_VISI		eval:check_rbl('relay', 'relays.visi.com.')
 describe RCVD_IN_VISI		Received via a relay in relays.visi.com
 
@@ -232,6 +228,20 @@ describe RCVD_IN_DUL		Received from dialup, see http://www.mail-abuse.org/dul/
 
 # NOTE: commercial test, see README file for details
 header RCVD_IN_BL_SPAMCOP_NET	eval:check_rbl('spamcop', 'bl.spamcop.net.')
+
+# DSBL catches open relays, badly-installed CGI scripts and open SOCKS and
+# HTTP proxies.  list.dsbl.org lists servers tested by "trusted" users,
+# multihop.dsbl.org lists servers which open SMTP servers relay through,
+# unconfirmed.dsbl.org lists servers tested by "untrusted" users.
+# See http://dsbl.org/ for full details.
+header RCVD_IN_DSBL            eval:check_rbl('dsbl', 'list.dsbl.org')
+describe RCVD_IN_DSBL          Received via a relay in list.dsbl.org
+
+header RCVD_IN_MULTIHOP_DSBL   eval:check_rbl('dsbl', 'multihop.dsbl.org')
+describe RCVD_IN_MULTIHOP_DSBL Received via a relay in multihop.dsbl.org
+
+header RCVD_IN_UNCONFIRMED_DSBL        eval:check_rbl('dsbl', 'unconfirmed.dsbl.org')
+describe RCVD_IN_UNCONFIRMED_DSBL      Received via a relay in unconfirmed.dsbl.org
 describe RCVD_IN_BL_SPAMCOP_NET	Received via a relay in bl.spamcop.net
 
 # don't add headers without testing for false positives (usually Unix MTAs and
