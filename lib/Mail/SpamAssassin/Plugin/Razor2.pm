@@ -239,9 +239,14 @@ sub razor2_access {
 	        if ( exists $cf->{resp} ) {
 	          for (my $response=0;$response<@{$cf->{resp}};$response++) {
 	            my $tmp = $cf->{resp}->[$response];
-	      	    my $tmpcf = $tmp->{cf} || 0; # Part confidence
-	      	    my $tmpct = $tmp->{ct} || 0; # Part contested?
+	      	    my $tmpcf = $tmp->{cf}; # Part confidence
+	      	    my $tmpct = $tmp->{ct}; # Part contested?
 		    my $engine = $cf->{sent}->[$response]->{e};
+
+		    # These should always be set, but just in case ...
+                    $tmpcf = 0 unless defined $tmpcf;
+                    $tmpct = 0 unless defined $tmpcf;
+                    $engine = 0 unless defined $engine;
 
 		    push(@results,
 		      { part => $part, engine => $engine, contested => $tmpct, confidence => $tmpcf });
