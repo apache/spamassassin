@@ -11,7 +11,7 @@
 ###########################################################################
 
 # should be fixed now
-header T_INVALID_MSGID		Message-Id !~ /^<(?:[a-zA-Z0-9.!\#\$%&'*\+\/=?\^_{}|~-]+|\".+\")\@(?:[a-zA-Z0-9.-]+|\[\d{1,3}(?:\.\d{1,3}){3}\])>(?:\s*\(.*\))?\s*$/ [if-unset: <NO@MSGID>]
+header T_INVALID_MSGID		Message-Id !~ /^<(?:[a-zA-Z0-9.,!\#\$%&'*\+\/=?\^_{}|~-]+|\".+\")\@(?:[a-zA-Z0-9_.-]+|\[\d{1,3}(?:\.\d{1,3}){3}\])>(?:\s*\(.*\))?\s*$/ [if-unset: <NO@MSGID>]
 describe T_INVALID_MSGID	Message-Id is not valid, according to RFC 2822
 
 # results for quinlan
