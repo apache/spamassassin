@@ -4,7 +4,7 @@ Mail::SpamAssassin - Mail::Audit spam detector plugin
 
 =head1 SYNOPSIS
 
-  my $mail = Mail::SpamAssassin::MyMailAudit->new();
+  my $mail = Mail::SpamAssassin::NoMailAudit->new();
 
   my $spamtest = Mail::SpamAssassin->new();
   my $status = $spamtest->check ($mail);
@@ -69,7 +69,7 @@ use vars	qw{
 @ISA = qw();
 
 $VERSION = "2.1";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.64 2002/02/06 22:05:08 hughescr Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.65 2002/02/10 01:37:29 hughescr Exp $';
 
 sub Version { $VERSION; }
 

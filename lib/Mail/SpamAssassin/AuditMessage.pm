@@ -5,7 +5,7 @@ package Mail::SpamAssassin::AuditMessage;
 use Carp;
 use strict;
 
-use Mail::SpamAssassin::MyMailAudit;
+use Mail::SpamAssassin::NoMailAudit;
 use Mail::SpamAssassin::Message;
 
 use vars        qw{
@@ -18,7 +18,7 @@ use vars        qw{
 
 sub create_new {
   my ($self, @args) = @_;
-  return Mail::SpamAssassin::MyMailAudit->new(@args);
+  return Mail::SpamAssassin::NoMailAudit->new(@args);
 }
 
 sub get_header {
