@@ -172,13 +172,6 @@ meta T_FORGED_MUA_AOL		(__AOL_MUA && !__AOL_MSGID)
 describe T_FORGED_MUA_AOL	Forged mail pretending to be from AOL
 score T_FORGED_MUA_AOL		1.0
 
-# Internet Mail Service
-header __IMS_MUA		X-Mailer =~ /Internet Mail Service/
-header __IMS_MSGID		MESSAGEID =~ /^<[A-F\d]{36,40}\@\S+>$/
-meta T_FORGED_MUA_IMS		(__IMS_MUA && !__IMS_MSGID)
-describe T_FORGED_MUA_IMS	Forged mail pretending to be from IMS
-score T_FORGED_MUA_IMS		1.0
-
 # Mozilla
 header __MOZILLA_MUA		X-Mailer =~ /\bMozilla\b/
 header __MOZILLA_MSGID		MESSAGEID =~ /^<[A-F\d]{8}\.[A-F\d]{4,8}\@\S+>$/
@@ -186,18 +179,21 @@ meta T_FORGED_MUA_MOZILLA	(__MOZILLA_MUA && !__MOZILLA_MSGID)
 describe T_FORGED_MUA_MOZILLA	Forged mail pretending to be from Mozilla
 score T_FORGED_MUA_MOZILLA	1.0
 
+# Internet Mail Service
+header __IMS_MUA		X-Mailer =~ /Internet Mail Service/
+header __IMS_MSGID		MESSAGEID =~ /^<[A-F\d]{36,40}\@\S+>$/
+meta T_FORGED_MUA_IMS		(__IMS_MUA && !__IMS_MSGID)
+describe T_FORGED_MUA_IMS	Forged mail pretending to be from IMS
+score T_FORGED_MUA_IMS		1.0
+
 # Outlook
+# Note: this uses __IMS_MSGID from above
 header __OUTLOOK_MUA		X-Mailer =~ /\bOutlook\b(?! IMO)/
 header __OUTLOOK_MSGID_1	MESSAGEID =~ /^<[0-9a-f]{12}\$[0-9a-f]{8}\$[0-9a-f]{8}\@\S+>$/
-header __OUTLOOK_MSGID_2	MESSAGEID =~ /^<OE[0-9A-Za-z]{25}\@hotmail\.com>$/
-header __OUTLOOK_MSGID_3	MESSAGEID =~ /^<DAV[0-9A-Za-z]{24}\@hotmail\.com>$/
-meta T_FORGED_MUA_OUTLOOK	(__OUTLOOK_MUA && !(__OUTLOOK_MSGID_1 || __OUTLOOK_MSGID_2 || __OUTLOOK_MSGID_3))
+header __OUTLOOK_MSGID_2	MESSAGEID =~ /^<(?:OE[0-9A-Za-z]{25}|DAV[0-9A-Za-z]{24})\@hotmail\.com>$/
+meta T_FORGED_MUA_OUTLOOK	(__OUTLOOK_MUA && !(__OUTLOOK_MSGID_1 || __OUTLOOK_MSGID_2 || __IMS_MSGID))
 describe T_FORGED_MUA_OUTLOOK	Forged mail pretending to be from Outlook
 score T_FORGED_MUA_OUTLOOK	1.0
-# bug #1143, trying second proposed solution
-# note: this uses part of the T_FORGED_MUA_IMS rule
-header __IMS_MSGID		MESSAGEID =~ /^<[A-F\d]{36,40}\@\S+>$/
-meta T_FORGED_MUA_OUTLOOK2	(__OUTLOOK_MUA && !(__OUTLOOK_MSGID_1 || __OUTLOOK_MSGID_2 || __OUTLOOK_MSGID_3 || __IMS_MSGID))
 
 # Outlook IMO (Internet Mail Only)
 header __OIMO_MUA		X-Mailer =~ /Outlook IMO/
