@@ -115,14 +115,14 @@ my %makefile = (
     # be quite explicit about this; afaik CPAN.pm is sensible using this
     'PREREQ_PM' => {
 	'ExtUtils::MakeMaker' => 5.45 *0, # we have compatibility code in build/preprocessor.pm
-	'File::Spec'   => 0.8,            # older versions lack some routines we need
-	'File::Copy'   => 2.02,           # this version is shipped with 5.005_03, the oldest version known to work
-	'Pod::Usage'   => 1.10,           # all versions prior to this do seem to be buggy
-	'HTML::Parser' => 3.0,            # the HTML code is based on this parser
-	'Text::Wrap'   => 98.112902,      # this version is shipped with 5.005_03, the oldest version known to work
-	'Sys::Syslog'  => 0,
-	'Time::Local'  => 0,
-	'Errno'        => 0,
+	'File::Spec'    => 0.8,           # older versions lack some routines we need
+	'File::Copy'    => 2.02,          # this version is shipped with 5.005_03, the oldest version known to work
+	'Pod::Usage'    => 1.10,          # all versions prior to this do seem to be buggy
+	'HTML::Parser'  => 3.0,           # the HTML code is based on this parser
+	'Text::Wrap'    => 98.112902,     # this version is shipped with 5.005_03, the oldest version known to work
+	'Sys::Hostname' => 0,
+	'Time::Local'   => 0,
+	'Errno'         => 0,
     },
 
     'dist' => {
