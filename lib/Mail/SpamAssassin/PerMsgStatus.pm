@@ -677,11 +677,16 @@ sub rewrite_as_spam {
       next if ( exists $already_added{lc $hdr} );
       my @hdrtext = $self->{msg}->get_pristine_header($hdr);
       $already_added{lc $hdr}++;
-      foreach ( @hdrtext ) {
-	if ( lc $hdr eq "received" ) { # add Received at the top ...
-          $newmsg = "$hdr: $_$newmsg";
-	}
-	else { # if not Received, add at the bottom ...
+
+      if ( lc $hdr eq "received" ) { # add Received at the top ...
+	  my $rhdr = "";
+	  foreach (@hdrtext) {
+            $rhdr .= "$hdr: $_";
+	  }
+	  $newmsg = "$rhdr$newmsg";
+      }
+      else {
+        foreach ( @hdrtext ) {
           $newmsg .= "$hdr: $_";
 	}
       }
