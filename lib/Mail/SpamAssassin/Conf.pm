@@ -1346,8 +1346,8 @@ against the relays except for the very first one; this allows SpamAssassin to
 catch dialup-sent spam, without penalizing people who properly relay through
 their ISP.
 
-See also C<trusted_networks>, to specify which the relays you trust.  This
-is a much better way to control DNSBL-checking behaviour, and C<num_check_received>
+See the C<trusted_networks> option to specify which relays you trust.  This is
+a much better way to control DNSBL-checking behaviour, and C<num_check_received>
 is deprecated as a result.
 
 =cut
@@ -1950,15 +1950,20 @@ SMTP server, that's legitimate, and so should not gain points.  If there
 is only one hop, that will be queried anyway, as it should be relaying
 via its outgoing SMTP server instead of sending directly to your MX.
 
-=item Selecting just the most recent untrusted Received header
+=item Selecting IPs by whether they are trusted
 
-When checking a 'nice' DNSBL (a DNS whitelist?), you cannot trust
-Received headers further back than the very first 'untrusted' one.
-This is accomplished by naming the set 'foo-lastuntrusted'.
+When checking a 'nice' DNSBL (a DNS whitelist), you cannot trust the IP
+addresses in Received headers that were not added by trusted relays.  To test
+the first IP address that can be trusted, name the set 'foo-firsttrusted'.
+That should test the IP address of the relay that connected to the most remote
+trusted relay.
 
-Note that this requires that C<trusted_networks> be correct.  For simple cases,
-it will be, but for a complex network, or if you're running with DNS checks off
-or with C<-L>, you may get better results by setting that parameter.
+In addition, you can test all untrusted IP addresses by naming the set
+'foo-untrusted'.
+
+Note that this requires that SpamAssassin know which relays are trusted.  For
+simple cases, SpamAssassin can make a good estimate.  For complex cases, you
+may get better results by setting C<trusted_networks> manually.
 
 =back
 

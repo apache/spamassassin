@@ -1176,15 +1176,17 @@ sub check_rbl_backend {
     if ($set =~ /-notfirsthop$/) {
       if (scalar @ips > 1) { pop @ips; }
     }
-    # If name is foo-lastuntrusted, check only the Received header just
-    # before it enters our trusted networks; that's the only one we can
-    # trust the IP address from (since our relay added that hdr).
-    elsif ($set =~ /-lastuntrusted$/) {
-      if (@ips) {
+    # If name is foo-firsttrusted, check only the Received header just
+    # after it enters our trusted networks; that's the only one we can
+    # trust the IP address from (since our relay added that header).
+    # And if name is foo-untrusted, check any untrusted IP address.
+    elsif ($set =~ /-(first|un)trusted$/) {
+      push(@ips, @originating);
+      if ($1 eq "first") {
 	@ips = ( $ips[0] );
       }
       else {
-	@ips = ( $originating[0] );
+	shift @ips;
       }
     }
     else {
