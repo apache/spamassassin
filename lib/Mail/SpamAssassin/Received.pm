@@ -1,4 +1,4 @@
-# $Id: Received.pm,v 1.19 2003/06/07 23:45:34 jmason Exp $
+# $Id: Received.pm,v 1.20 2003/06/08 00:21:03 jmason Exp $
 
 # ---------------------------------------------------------------------------
 
@@ -276,8 +276,12 @@ sub parse_received_line {
       # This must be scriptable.
 
       # Received: from [61.174.163.26] (helo=host) by sc8-sf-list1.sourceforge.net with smtp (Exim 3.31-VA-mm2 #1 (Debian)) id 18t2z0-0001NX-00 for <razor-users@lists.sourceforge.net>; Wed, 12 Mar 2003 01:57:10 -0800
-      if (/^from \[(${IP_ADDRESS})\] \(helo=(\S+)\) by (\S+) /) {
-	$ip = $1; $helo = $2; $by = $3; goto enough;
+      # Received: from [218.19.142.229] (helo=hotmail.com ident=yiuhyotp) by yzordderrex with smtp (Exim 3.35 #1 (Debian)) id 194BE5-0005Zh-00; Sat, 12 Apr 2003 03:58:53 +0100
+      if (/^from \[(${IP_ADDRESS})\] \((.*?)\) by (\S+) /) {
+	$ip = $1; my $sub = $2; $by = $3;
+	$sub =~ s/helo=(\S+)// and $helo = $1;
+	$sub =~ s/ident=(\S+)// and $ident = $1;
+	goto enough;
       }
 
       # Received: from sc8-sf-list1-b.sourceforge.net ([10.3.1.13] helo=sc8-sf-list1.sourceforge.net) by sc8-sf-list2.sourceforge.net with esmtp (Exim 3.31-VA-mm2 #1 (Debian)) id 18t301-0007Bh-00; Wed, 12 Mar 2003 01:58:13 -0800
@@ -731,6 +735,7 @@ sub parse_received_line {
   # ------------------------------------------------------------------------
   # FALL-THROUGH: OK, let's try some general patterns
   if (/^from (\S+)[^-A-Za-z0-9\.]/) { $helo = $1; }
+  if (/^helo=(\S+)[^-A-Za-z0-9\.]/) { $helo = $1; }
   if (/\[(${IP_ADDRESS})\]/) { $ip = $1; }
   if (/ by (\S+)[^-A-Za-z0-9\.]/) { $by = $1; }
   if (defined $ip && defined $by) { goto enough; }
@@ -790,7 +795,12 @@ enough:
     if (!$self->is_dns_available()) {
       $relay->{rdns_not_in_headers} = 1;
     } else {
-      $rdns = $self->lookup_ptr ($ip); $rdns ||= '';
+      $rdns = $self->lookup_ptr ($ip);
+
+      if (!$rdns) {
+	$relay->{no_reverse_dns} = 1;
+	$rdns = $ip;		# default no-rDNS to be the IP
+      }
     }
   }
   $relay->{rdns} = $rdns;
@@ -803,6 +813,7 @@ enough:
   # e.g. "ip" comes before "helo" will still work.
   #
   my $asstr = "[ ip=$ip rdns=$rdns helo=$helo by=$by ident=$ident ]";
+  dbg ("received-header: parsed as $asstr");
   $relay->{as_string} = $asstr;
 
   my $isrsvd = ($ip =~ /^${IP_IN_RESERVED_RANGE}$/o);
