@@ -20,250 +20,333 @@ use strict;
 
 use File::Spec;
 
-my $PREFIX = '@@PREFIX@@';  # substituted at 'make' time
-my $DEF_RULES_DIR = '@@DEF_RULES_DIR@@';  # substituted at 'make' time
-my $LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';  # substituted at 'make' time
+my $PREFIX          = '@@PREFIX@@';             # substituted at 'make' time
+my $DEF_RULES_DIR   = '@@DEF_RULES_DIR@@';      # substituted at 'make' time
+my $LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';    # substituted at 'make' time
 
-use lib '@@INSTALLSITELIB@@';  # substituted at 'make' time
+use lib '@@INSTALLSITELIB@@';                   # substituted at 'make' time
 
 BEGIN {
+
   # Locate locally installed SA libraries *without* using FindBin, which generates
   # warnings and causes more trouble than its worth.  We don't need to be too
   # smart about this BTW.
   my @bin = File::Spec->splitpath($0);
-  my $bin = ($bin[0] ? File::Spec->catpath(@bin[0..1]) : $bin[1])  # /home/jm/foo -> /home/jm
-            || File::Spec->curdir;                                 # foo          -> .
+  my $bin = (
+    $bin[0]
+    ? File::Spec->catpath( @bin[ 0 .. 1 ] )
+    : $bin[1]
+    )                                           # /home/jm/foo -> /home/jm
+    || File::Spec->curdir;                      # foo          -> .
 
   # check to make sure it wasn't just installed in the normal way.
   # note that ./lib/Mail/SpamAssassin.pm takes precedence, for
   # building SpamAssassin on a machine where an old version is installed.
-  if (-e $bin.'/lib/Mail/SpamAssassin.pm'
-        || !-e '@@INSTALLSITELIB@@/Mail/SpamAssassin.pm')
+  if ( -e $bin . '/lib/Mail/SpamAssassin.pm'
+    || !-e '@@INSTALLSITELIB@@/Mail/SpamAssassin.pm' )
   {
+
     # Firstly, are we running "make test" in the "t" dir?  the test files
     # *need* to use 'blib', so that 'use bytes' is removed for pre-5.6 perls
     # beforehand by the preproc.  However, ./spamassassin does not, as the
     # preproc will have stripped out the "use rule files from cwd" code from
     # Mail::SpamAssassin.  So we want to use blib just for the t scripts.
     if ( $bin eq '../' && -e '../blib/lib/Mail/SpamAssassin.pm' ) {
-      unshift(@INC, '../blib/lib');
+      unshift ( @INC, '../blib/lib' );
     }
     else {
+
       # These are common paths where the SA libs might be found.
-      foreach (qw(lib ../lib/site_perl
-                  ../lib/spamassassin ../share/spamassassin/lib))
+      foreach (
+        qw(lib ../lib/site_perl
+        ../lib/spamassassin ../share/spamassassin/lib)
+        )
       {
-        my $dir = File::Spec->catdir($bin, split('/', $_));
-        if(-f File::Spec->catfile($dir, "Mail", "SpamAssassin.pm")) {
-          unshift(@INC, $dir); last;
+        my $dir = File::Spec->catdir( $bin, split ( '/', $_ ) );
+        if ( -f File::Spec->catfile( $dir, "Mail", "SpamAssassin.pm" ) ) {
+          unshift ( @INC, $dir );
+          last;
         }
       }
     }
   }
 }
 
-
 use Getopt::Long;
 use Pod::Usage;
-
+use Mail::SpamAssassin;
+use Mail::SpamAssassin::ArchiveIterator;
 
 sub usage {
-    my ($verbose, $message) = @_;
-    my $ver = Mail::SpamAssassin::Version();
+  my ( $verbose, $message ) = @_;
+  my $ver = Mail::SpamAssassin::Version();
 
-    print "SpamAssassin version $ver\n";
-    pod2usage(-verbose => $verbose, -message => $message, -exitval => 64);
+  print "SpamAssassin version $ver\n";
+  pod2usage( -verbose => $verbose, -message => $message, -exitval => 64 );
 
 }
 
-my %opt = ( 'create-prefs' => 1);
+my %opt = ( 'create-prefs' => 1, 'format' => 'detect' );
+my $doing_whitelist_operation = 0;
+my @targets                   = ();
+my $exitvalue;
 
-eval {
-  require Mail::SpamAssassin;
+# gnu_getopt is not available in Getopt::Long 2.24, see bug 732
+# gnu_compat neither.
+Getopt::Long::Configure(
+  qw(bundling no_getopt_compat no_auto_abbrev no_ignore_case));
+GetOptions(
+  'remove-from-whitelist|R'           => \$opt{'remove-from-whitelist'},
+  'add-to-whitelist|W'                => \$opt{'add-to-whitelist'},
+  'add-to-blacklist'                  => \$opt{'add-to-blacklist'},
+  'remove-addr-from-whitelist=s'      => \$opt{'remove-addr-from-whitelist'},
+  'add-addr-to-whitelist=s'           => \$opt{'add-addr-to-whitelist'},
+  'add-addr-to-blacklist=s'           => \$opt{'add-addr-to-blacklist'},
+  'local-only|local|L'                => \$opt{'local'},
+  'remove-markup|despamassassinify|d' => \$opt{'remove-markup'},
+  'revoke|k'                          => \$opt{'revoke'},
+  'report|r'                          => \$opt{'report'},
+  'configpath|config-file|config-dir|c|C=s' => \$opt{'configpath'},
+  'prefspath|prefs-file|p=s'                => \$opt{'prefspath'},
+  'siteconfigpath=s'                        => \$opt{'siteconfigpath'},
+  'create-prefs!'                           => \$opt{'create-prefs'},
+  'x'                                       => sub { $opt{'create-prefs'} = 0 },
+  'error-code|exit-code|e:i'                => \$opt{'error-code'},
+  'test-mode|test|t'                        => \$opt{'test-mode'},
+  'lint'                                    => \$opt{'lint'},
+  'debug-level|debug|D:s'                   => \$opt{'debug-level'},
+  'version|V'                               => \$opt{'version'},
+  'help|h|?'                                => \$opt{'help'},
+  'mbox'                                    => sub { $opt{'format'} = 'mbox'; },
 
-  # gnu_getopt is not available in Getopt::Long 2.24, see bug 732
-  # gnu_compat neither.
-  Getopt::Long::Configure(qw(bundling no_getopt_compat no_auto_abbrev no_ignore_case));
-  GetOptions(
-	     'remove-from-whitelist|R'           => \$opt{'remove-from-whitelist'},
-	     'add-to-whitelist|W'                => \$opt{'add-to-whitelist'},
-	     'add-to-blacklist'                  => \$opt{'add-to-blacklist'},
-	     'remove-addr-from-whitelist=s'      => \$opt{'remove-addr-from-whitelist'},
-	     'add-addr-to-whitelist=s'           => \$opt{'add-addr-to-whitelist'},
-	     'add-addr-to-blacklist=s'           => \$opt{'add-addr-to-blacklist'},
-	     'local-only|local|L'                => \$opt{'local'},
-	     'remove-markup|despamassassinify|d' => \$opt{'remove-markup'},
-             'revoke|k'                          => \$opt{'revoke'},
-	     'report|r'                          => \$opt{'report'},
-	     'configpath|config-file|config-dir|c|C=s' => \$opt{'configpath'},
-	     'prefspath|prefs-file|p=s'          => \$opt{'prefspath'},
-	     'siteconfigpath=s'                  => \$opt{'siteconfigpath'},
-	     'create-prefs!'                     => \$opt{'create-prefs'},
-	     'x'                                 => sub { $opt{'create-prefs'} = 0 },
-	     'error-code|exit-code|e:i'          => \$opt{'error-code'},
-	     'test-mode|test|t'                  => \$opt{'test-mode'},
-             'lint'                              => \$opt{'lint'},
-	     'debug-level|debug|D:s'             => \$opt{'debug-level'},
-	     'version|V'                         => \$opt{'version'},
-	     'help|h|?'                          => \$opt{'help'},
-
-             # NOTE: ignored for backwards compatibility. will be stripped
-             # in a future release.
-	     'whitelist-factory|M=s' => sub { warn "The -M option has been removed.\n" },
-	     'auto-whitelist|a' => sub { warn "The -a option has been removed.\n" },
-	     'warning-from|w=s' => sub { warn "The -w option has been removed.\n" },
-	     'log-to-mbox|l=s' => sub { warn "The -l option has been removed.\n" },
-  ) or usage(0, "Unknown option!");
-  if (defined $opt{'help'}) { usage(0, "For more information read the spamassassin man page"); }
-  if (defined $opt{'version'}) {
-    print "SpamAssassin version " . Mail::SpamAssassin::Version() . "\n";
-    exit 0;
-  }
-
-  my $doing_whitelist_operation = 0;
-  my $doing_address_only_whitelisting = 0;
-
-  if ($opt{'remove-from-whitelist'} or $opt{'add-to-whitelist'} or $opt{'add-to-blacklist'}) {
-    $doing_whitelist_operation = 1;
-  }
-
-  if ($opt{'remove-addr-from-whitelist'} or $opt{'add-addr-to-whitelist'} or $opt{'add-addr-to-blacklist'}) {
-    $doing_whitelist_operation = 1;
-    $doing_address_only_whitelisting = 1;
-  }
+  # NOTE: ignored for backwards compatibility. will be stripped
+  # in a future release.
+  'whitelist-factory|M=s' => sub { warn "The -M option has been removed.\n" },
+  'auto-whitelist|a'      => sub { warn "The -a option has been removed.\n" },
+  'warning-from|w=s'      => sub { warn "The -w option has been removed.\n" },
+  'log-to-mbox|l=s'       => sub { warn "The -l option has been removed.\n" },
+  )
+  or usage( 0, "Unknown option!" );
+if ( defined $opt{'help'} ) {
+  usage( 0, "For more information read the spamassassin man page" );
+}
+if ( defined $opt{'version'} ) {
+  print "SpamAssassin version " . Mail::SpamAssassin::Version() . "\n";
+  exit 0;
+}
 
 # create the tester factory
-  my $spamtest = new Mail::SpamAssassin ({
-    rules_filename	=> $opt{'configpath'},
-    site_rules_filename	=> $opt{'siteconfigpath'},
-    userprefs_filename	=> $opt{'prefspath'},
-    local_tests_only	=> $opt{'local'},
-    debug             => defined($opt{'debug-level'}),
-    dont_copy_prefs   => ($opt{'create-prefs'} ? 0 : 1),
-    PREFIX            => $PREFIX,
-    DEF_RULES_DIR     => $DEF_RULES_DIR,
-    LOCAL_RULES_DIR   => $LOCAL_RULES_DIR,
-  });
+my $spamtest = new Mail::SpamAssassin(
+  {
+    rules_filename      => $opt{'configpath'},
+    site_rules_filename => $opt{'siteconfigpath'},
+    userprefs_filename  => $opt{'prefspath'},
+    local_tests_only    => $opt{'local'},
+    debug               => defined( $opt{'debug-level'} ),
+    dont_copy_prefs     => ( $opt{'create-prefs'} ? 0 : 1 ),
+    PREFIX              => $PREFIX,
+    DEF_RULES_DIR       => $DEF_RULES_DIR,
+    LOCAL_RULES_DIR     => $LOCAL_RULES_DIR,
+  }
+);
 
 # set debug levels, if any specified (only useful for this command-line
 # tool really)
-  if (defined $opt{'debug-level'} && $opt{'debug-level'} ne '') {
-    my $levels = $opt{'debug-level'};
-    while ($levels =~ s/^([a-z]+)=([+-]?\d+)[,;:]*//s) {
-      $Mail::SpamAssassin::DEBUG->{$1} = $2 + 0;
+if ( defined $opt{'debug-level'} && $opt{'debug-level'} ne '' ) {
+  my $levels = $opt{'debug-level'};
+  while ( $levels =~ s/^([a-z]+)=([+-]?\d+)[,;:]*//s ) {
+    $Mail::SpamAssassin::DEBUG->{$1} = $2 + 0;
+  }
+  if ( $levels !~ /^\s*$/ ) {
+    usage( 0, "bad areas in --debug option ($levels)!" );
+  }
+}
+
+if ( $opt{'lint'} ) {
+  exit $spamtest->lint_rules();
+}
+
+if ( $opt{'remove-addr-from-whitelist'}
+  or $opt{'add-addr-to-whitelist'}
+  or $opt{'add-addr-to-blacklist'} )
+{
+  $spamtest->init(1);
+
+  if ( $opt{'add-addr-to-whitelist'} ) {
+    $spamtest->add_address_to_whitelist( $opt{'add-addr-to-whitelist'} );
+  }
+  elsif ( $opt{'remove-addr-from-whitelist'} ) {
+    $spamtest->remove_address_from_whitelist(
+      $opt{'remove-addr-from-whitelist'} );
+  }
+  elsif ( $opt{'add-addr-to-blacklist'} ) {
+    $spamtest->add_address_to_blacklist( $opt{'add-addr-to-blacklist'} );
+  }
+  else {
+    die "oops! unhandled whitelist operation";
+  }
+
+  exit(0);
+}
+
+# if we're going to do white/black-listing, let's prep now...
+if ( $opt{'remove-from-whitelist'}
+  or $opt{'add-to-whitelist'}
+  or $opt{'add-to-blacklist'} )
+{
+  $doing_whitelist_operation = 1;
+  $spamtest->init(1);
+}
+
+###########################################################################
+
+# Everything below here needs ArchiveIterator ...
+my $iter = new Mail::SpamAssassin::ArchiveIterator(
+  {
+    'opt_j'   => 0,
+    'opt_n'   => 1,
+    'opt_all' => 1,
+  }
+);
+
+$iter->set_functions( \&wanted, sub { } );
+
+# add leftover args as targets
+# no arguments means they want stdin:
+push ( @ARGV, '-' ) if ( !@ARGV );
+@targets = map { join ( ":", '', $opt{'format'}, $_ ) } @ARGV;
+
+# mbox handling doesn't deal with STDIN, so make a temp file if they
+# want STDIN.  do it here since they may specify "-" on the commandline
+# instead of leaving it as the default.
+#
+my $tempfile;
+if ( $targets[0] =~ /:mbox:-$/ ) {
+  my $handle;
+
+  local $/ = undef;    # go into slurp mode
+  ( $tempfile, $handle ) = Mail::SpamAssassin::Util::secure_tmpfile();
+  print {$handle} <STDIN>;
+  close $handle;
+
+  # re-aim the targets at the tempfile instead of STDIN
+  $targets[0] =~ s/:-$/:$tempfile/;
+}
+
+# Go run the messages!
+eval { $iter->run(@targets); };
+
+# If we needed to make a tempfile, go delete it now.
+if ( defined $tempfile ) {
+  unlink $tempfile;
+}
+
+# if the eval died from something, report it here and return an error.
+if ($@) { die $@; }
+
+# Ok, exit!
+exit( $exitvalue || 0 );
+
+###########################################################################
+
+# this is never called, it's just used to shut up the warnings
+sub NEVERCALLED {
+  $Mail::SpamAssassin::DEBUG = {};
+}
+
+###########################################################################
+
+# make sure it only returns false values so that result_sub() isn't called...
+sub wanted {
+  my $dataref = $_[3];
+  my $mail    = $spamtest->parse($dataref);
+
+  # This is a short cut -- doing white/black-list?  Do it and return quickly.
+  if ($doing_whitelist_operation) {
+    if ( $opt{'add-to-whitelist'} ) {
+      $spamtest->add_all_addresses_to_whitelist($mail);
     }
-    if ($levels !~ /^\s*$/) {
-      usage(0, "bad areas in --debug option ($levels)!");
+    elsif ( $opt{'remove-from-whitelist'} ) {
+      $spamtest->remove_all_addresses_from_whitelist($mail);
     }
-  }
-
-  if ($opt{'lint'}) {
-    exit $spamtest->lint_rules ();
-  }
-
-  my $mail;
-
-  # Unless we're doing whitelisting activities, go ahead and parse the
-  # incoming message
-  #
-  if (!$doing_address_only_whitelisting) {
-    $mail = $spamtest->parse ();
-  }
-
-# handle removing reports
-  if ($opt{'remove-markup'}) {
-    # If we're not going to retest, just remove the markup and print it out
-    if (!$opt{'test-mode'}) {
-      print $spamtest->remove_spamassassin_markup ($mail);
-      exit(0);
+    elsif ( $opt{'add-to-blacklist'} ) {
+      $spamtest->add_all_addresses_to_blacklist($mail);
     }
     else {
+      warn "oops! unhandled whitelist operation";
+    }
+
+    $mail->finish();
+    return;
+  }
+
+  # handle removing reports
+  if ( $opt{'remove-markup'} ) {
+
+    # If we're not going to retest, just remove the markup and print it out
+    if ( !$opt{'test-mode'} ) {
+      print $spamtest->remove_spamassassin_markup ($mail);
+      $mail->finish();
+      return;
+    }
+    else {
+
       # remove the markup and retest it...  a little more tricky ...
       # go ahead and remove the markup, then fake that the clean version
       # was what was sent in
       #
-      my $new_mail = $spamtest->parse ($spamtest->remove_spamassassin_markup ($mail));
+      my $new_mail =
+        $spamtest->parse( $spamtest->remove_spamassassin_markup($mail) );
       $mail->finish();
       $mail = $new_mail;
     }
   }
 
-# handle unconditional reportage
-  if ($opt{'report'}) {
+  # handle reporting and revoking
+  if ( $opt{'report'} || $opt{'revoke'} ) {
+
     # Make sure the message is clean first ...
-    my $new_mail = $spamtest->parse ($spamtest->remove_spamassassin_markup ($mail));
+    my $new_mail =
+      $spamtest->parse( $spamtest->remove_spamassassin_markup($mail) );
     $mail->finish();
 
-    if ( $spamtest->report_as_spam ($new_mail) ) {
-      warn "Warning, unable to report spam\nFor more information, re-run with -D option to see debug output.\n";
-    }
-    exit(0);
-  }
-
-# handle revoke
-  if ($opt{'revoke'}) {
-    # Make sure the message is clean first ...
-    my $new_mail = $spamtest->parse ($spamtest->remove_spamassassin_markup ($mail));
-    $mail->finish();
-
-    if ( $spamtest->revoke_as_spam ($new_mail) ) {
-      warn "Warning, unable to revoke spam\nFor more information, re-run with -D option to see debug output.\n";
-    }
-    exit(0);
-  }
-
-  if ($@) { warn $@; }
-
-  if ($doing_whitelist_operation) {
-    # read the config!
-    $spamtest->init (1);
-
-    if ($opt{'add-to-whitelist'}) {
-      $spamtest->add_all_addresses_to_whitelist ($mail);
-    } elsif ($opt{'remove-from-whitelist'}) {
-      $spamtest->remove_all_addresses_from_whitelist ($mail);
-    } elsif ($opt{'add-to-blacklist'}) {
-      $spamtest->add_all_addresses_to_blacklist ($mail);
-    } elsif ($opt{'add-addr-to-whitelist'}) {
-      $spamtest->add_address_to_whitelist ($opt{'add-addr-to-whitelist'});
-      exit;
-    } elsif ($opt{'remove-addr-from-whitelist'}) {
-      $spamtest->remove_address_from_whitelist ($opt{'remove-addr-from-whitelist'});
-      exit;
-    } elsif ($opt{'add-addr-to-blacklist'}) {
-      $spamtest->add_address_to_blacklist ($opt{'add-addr-to-blacklist'});
-      exit;
-    } else {
-      die "oops! unhandled whitelist operation";
+    my $failed;
+    if ( $opt{'report'} && $spamtest->report_as_spam($new_mail) ) {
+      $failed = 'report';
     }
 
-    # don't need to log here -- it's already been done
-    exit(0);
+    if ( $opt{'revoke'} && $spamtest->revoke_as_spam($new_mail) ) {
+      $failed = 'revoke';
+    }
+
+    if ($failed) {
+      warn "Warning, unable to $failed message\n";
+      warn "For more information, re-run with -D option to see debug output.\n";
+    }
+
+    $new_mail->finish();
+    return;
   }
 
-  # not reporting? OK, do checks instead.  Create a status object which
-  # holds details of the message's spam/not-spam status.
-  my $status = $spamtest->check ($mail);
+  # OK, do checks and put out the message.
+  my $status = $spamtest->check($mail);
   print $status->rewrite_mail ();
 
-  if ($opt{'test-mode'}) {
+  if ( $opt{'test-mode'} ) {
     print $status->get_report();
   }
 
-  if (defined $opt{'error-code'} && $status->is_spam ()) { exit ($opt{'error-code'} || 5) ; }
-  exit;
+  # if this message was spam, set the exit value appropriately.
+  if ( defined $opt{'error-code'} && $status->is_spam() && !defined $exitvalue )
+  {
+    $exitvalue = $opt{'error-code'} || 5;
+  }
 
-};
+  # clean up after ourselves
+  $mail->finish();
+  $status->finish();
 
-if ($@) {
-  # eval failed; we died somewhere in there.
-  warn $@;
-  exit 70;		# == EX_SOFTWARE in sysexits.h. caught by MTA
-}
-
-# this is never called, it's just used to shut up the warnings
-sub NEVERCALLED {
-  $Mail::SpamAssassin::DEBUG = { };
+  return;
 }
 
 # ---------------------------------------------------------------------------
@@ -297,7 +380,7 @@ Options:
  -x, --nocreate-prefs              Don't create user preferences file
  -e, --exit-code                   Exit with a non-zero exit code if the
                                    tested message was spam
- -l filename, --log-to-mbox=file   Log messages to a mbox file
+ --mbox				   read in messages from a mbox file
  -t, --test-mode                   Pipe message through and add extra
                                    report to the bottom
  --lint                            Lint the rule set: report syntax errors
@@ -336,6 +419,9 @@ Print help message and exit.
 Test mode.  Pipe message through and add extra report.  Note that the report
 text assumes that the message is spam, since in normal use it is only visible
 in this case.  Pay attention to the score instead.
+
+If you run this with B<-d>, the message will first have SpamAssassin
+markup removed before being tested.
 
 If you run tests with the B<-a> option, the scores will be added to the AWL.
 This may not be what you want to do.  If it is not, then don't use B<-a -t>.
@@ -426,11 +512,6 @@ Remove the named email address from the automatic whitelist.  Note that
 you must be running C<spamassassin> or C<spamd> with the B<-a> switch.
 See the B<-a> documentation for more information.
 
-=item B<-l> I<filename>, B<--log-to-mbox>=I<filename>
-
-Log all mail messages that pass through the filter, to an mbox-format file
-named by I<filename>.  Handy for use with B<-r> and B<-w>.
-
 =item B<-L>, B<--local>
 
 Do only the ''local'' tests, ones that do not require an internet connection to
@@ -481,6 +562,12 @@ hit, use:
 =item B<-x>, B<--nocreate-prefs>
 
 Disable creation of user preferences file.
+
+=back
+
+=item B<--mbox>
+
+Specify that the input message(s) are in mbox format.
 
 =back
 
