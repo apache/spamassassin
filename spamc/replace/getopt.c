@@ -104,7 +104,8 @@ getopt(int argc, char* const *argv, const char *optstr)
         optind++;
         return(optiserr(argc, argv, optind-1, optstr, optchr, OPTERRCOLON));
     }
-    if(!(cp = strchr(optstr, argv[optind][optchr])))
+    cp = strchr(optstr, argv[optind][optchr]);
+    if(!cp)
     {
         int errind = optind;
         int errchr = optchr;

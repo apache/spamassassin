@@ -22,6 +22,7 @@
 #include <sys/socket.h>
 #else
 typedef int ssize_t;
+#include <io.h>
 #endif
 #include <errno.h>
 #include <signal.h>
@@ -202,7 +203,7 @@ int full_read_ssl(SSL * ssl, unsigned char *buf, int min, int len)
 
 int full_write(int fd, char fdflag, const void *vbuf, int len)
 {
-    const unsigned char *buf = (const unsigned char *) vbuf;
+    const char *buf = (const char *) vbuf;
     int total;
     int thistime;
     int origerr;

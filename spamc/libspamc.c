@@ -28,6 +28,7 @@
 #define vsnprintf _vsnprintf
 #define strcasecmp stricmp
 #define sleep Sleep
+#include <io.h>
 #else
 #include <syslog.h>
 #include <unistd.h>
@@ -470,7 +471,7 @@ static int _message_read_raw(int fd, struct message *m)
 
 static int _message_read_bsmtp(int fd, struct message *m)
 {
-    off_t i, j;
+    unsigned int i, j;
     char prev;
 
     _clear_message(m);
@@ -642,11 +643,11 @@ void message_dump(int in_fd, int out_fd, struct message *m)
 
 static int
 _spamc_read_full_line(struct message *m, int flags, SSL * ssl, int sock,
-		      char *buf, int *lenp, int bufsiz)
+		      char *buf, size_t *lenp, size_t bufsiz)
 {
     int failureval;
-    int bytesread = 0;
-    int len;
+    size_t bytesread = 0;
+    size_t len;
 
     UNUSED_VARIABLE(m);
 
@@ -805,8 +806,8 @@ int message_filter(struct transport *tp, const char *username,
 		   int flags, struct message *m)
 {
     char buf[8192];
-    int bufsiz = (sizeof(buf) / sizeof(*buf)) - 4;	/* bit of breathing room */
-    int len;
+    size_t bufsiz = (sizeof(buf) / sizeof(*buf)) - 4; /* bit of breathing room */
+    size_t len;
     int sock = -1;
     int rc;
     char versbuf[20];

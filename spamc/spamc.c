@@ -237,7 +237,7 @@ read_args(int argc, char **argv,
             }
             case 'p':
             {
-                ptrn->port = atoi(optarg);
+                ptrn->port = (unsigned short)atoi(optarg);
                 break;
             }
             case 'r':

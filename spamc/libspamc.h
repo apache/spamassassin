@@ -104,17 +104,17 @@ struct libspamc_private_message;
 struct message
 {
     /* Set before passing the struct on! */
-    int max_len;		/* messages larger than this will return EX_TOOBIG */
+    unsigned int max_len; /* messages larger than this will return EX_TOOBIG */
     int timeout;		/* timeout for read() system calls */
 
     /* Filled in by message_read */
     message_type_t type;
     char *raw;
-    int raw_len;		/* Raw message buffer */
+    unsigned int raw_len;		/* Raw message buffer */
     char *pre;
     int pre_len;		/* Pre-message data (e.g. SMTP commands) */
     char *msg;
-    int msg_len;		/* The message */
+    unsigned int msg_len;		/* The message */
     char *post;
     int post_len;		/* Post-message data (e.g. SMTP commands) */
     int content_length;
