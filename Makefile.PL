@@ -715,7 +715,7 @@ sub MY::libscan {
 
   return q{} if $path =~ m{
                   windows_install|
-                  (^|/)CVS(/|$)|
+                  (^|/)(CVS|\.svn)(/|$)|
                   [/.](orig|old|rej|diff|patch|bak|backup|my)$
                 }ix;
 
