@@ -188,6 +188,8 @@ sub razor_report {
         dbg("razor2 report timed out after $timeout secs.");
       } elsif ($@ =~ /could not connect/) {
         dbg("razor2 report could not connect to any servers");
+      } elsif ($@ =~ /timeout/i) {
+        dbg("razor2 report timed out connecting to razor servers");
       } else {
         warn "razor2 report failed: $! $@";
       }
