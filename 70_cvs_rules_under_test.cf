@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.643 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.644 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -96,6 +96,16 @@ header T_RCVD_IN_CBL	eval:check_rbl_txt('cbl', 'cbl.abuseat.org.')
 describe T_RCVD_IN_CBL	Received via a relay in cbl.abuseat.org
 tflags T_RCVD_IN_CBL	net
 score T_RCVD_IN_CBL	0.1
+
+header T_RCVD_IN_SORBS_BADCONF	eval:check_rbl_sub('sorbs', '127.0.0.11')
+describe T_RCVD_IN_SORBS_BADCONF SORBS: sender uses invalid DNS A or MX records
+tflags T_RCVD_IN_SORBS_BADCONF	net
+score T_RCVD_IN_SORBS_BADCONF	0.1
+
+header T_RCVD_IN_SORBS_NOMAIL	eval:check_rbl_sub('sorbs', '127.0.0.12')
+describe T_RCVD_IN_SORBS_NOMAIL	SORBS: sender is not expected to send mail
+tflags T_RCVD_IN_SORBS_NOMAIL	net
+score T_RCVD_IN_SORBS_NOMAIL	0.1
 
 # SPF support.  "pass" is nice, "fail" is bad, "softfail" is bad, but
 # not as bad as "fail".
