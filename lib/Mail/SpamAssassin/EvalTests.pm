@@ -805,7 +805,7 @@ sub check_subject_for_lotsa_8bit_chars {
   my ($self) = @_;
   local ($_);
 
-  $_ = $self->get('Subject');
+  $_ = $self->get('Subject:raw');
 
   # cut [ and ] because 8-bit posts to mailing lists may not get
   # hit otherwise. e.g.: Subject: [ILUG] X�uX .  Also cut
