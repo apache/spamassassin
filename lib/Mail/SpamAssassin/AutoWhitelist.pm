@@ -44,6 +44,8 @@ sub check_address {
     return 0;		# no factory defined; we can't check
   }
 
+  $addr = lc $addr;
+  $addr =~ s/[\000\;\'\"\!]/_/gs;	# paranoia
   $self->{entry} = $self->{checker}->get_addr_entry ($addr);
 
   if ($self->{entry}->{count} >= $self->{threshold}) {
@@ -84,7 +86,10 @@ sub add_known_good_address {
   # this could be short-circuited, but for now I can't see a need.
   # other backend implementors can have a go, if they do.
 
+  $addr = lc $addr;
+  $addr =~ s/[\000\;\'\"\!]/_/gs;	# paranoia
   my $entry = $self->{checker}->get_addr_entry ($addr);
+
   if ($entry->{count} < $self->{threshold}) {
     $self->{checker}->add_permanent_entry ($entry);
     return 1;
