@@ -186,6 +186,16 @@ describe HTML_OBFUSCATE_70_80	Message is 70% to 80% HTML obfuscation
 describe HTML_OBFUSCATE_80_90	Message is 80% to 90% HTML obfuscation
 describe HTML_OBFUSCATE_90_100	Message is 90% to 100% HTML obfuscation
 
+# backhair - idea from backhair set by Jennifer Wheeler and Adam Lopresto.
+body HTML_BACKHAIR_1		eval:html_range('backhair_count', '0', '1')
+body HTML_BACKHAIR_2		eval:html_range('backhair_count', '1', '4')
+body HTML_BACKHAIR_4		eval:html_range('backhair_count', '4', '8')
+body HTML_BACKHAIR_8		eval:html_range('backhair_count', '8', 'inf')
+describe HTML_BACKHAIR_1	HTML tags used to obfuscate words
+describe HTML_BACKHAIR_2	HTML tags used to obfuscate words
+describe HTML_BACKHAIR_4	HTML tags used to obfuscate words
+describe HTML_BACKHAIR_8	HTML tags used to obfuscate words
+
 # HTML attribute testing
 body HTML_ATTR_BAD		eval:html_range('attr_bad','0.75','1.0')
 describe HTML_ATTR_BAD		HTML has many bad attributes in tags
