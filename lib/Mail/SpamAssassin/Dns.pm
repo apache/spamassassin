@@ -286,11 +286,11 @@ sub harvest_dnsbl_queries {
   }
   # register hits
   while (my ($rule, $logs) = each %{ $self->{dnsresult} }) {
-    if (!defined $self->{tests_already_hit}->{$rule}) {
-      $self->got_hit($rule, "RBL: ");
-    }
     for my $log (keys %{$logs}) {
       $self->test_log($log) if $log;
+    }
+    if (!defined $self->{tests_already_hit}->{$rule}) {
+      $self->got_hit($rule, "RBL: ");
     }
   }
 }
