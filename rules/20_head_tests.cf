@@ -1,5 +1,5 @@
 # SpamAssassin rules file: tests.
-# $Id: 20_head_tests.cf,v 1.162.2.5 2002/08/23 11:26:53 hughescr Exp $
+# $Id: 20_head_tests.cf,v 1.162.2.6 2002/08/26 17:10:54 jmason Exp $
 ###########################################################################
 
 require_version 2.40
@@ -540,18 +540,19 @@ describe VAR_REF_IN_RECEIVED    Received contains a $variable reference
 header RCVD_FAKE_HELO_DOTCOM    Received =~ /^from (msn|yahoo|yourwebsite|lycos|excite|aol|drizzle|localhost|koreanmail|allexecs|mydomain|juno|eudoramail|compuserve|desertmail)\.com \(/
 describe RCVD_FAKE_HELO_DOTCOM  Received contains a faked HELO hostname
 
-header USERNAME_IN_SUBJECT      eval:check_for_to_in_subject(1)
+header USERNAME_IN_SUBJECT      eval:check_for_to_in_subject(3)
 describe USERNAME_IN_SUBJECT    To: username at front of subject
-header USERNAME_IN_SUBJECT_2    eval:check_for_to_in_subject(2)
-describe USERNAME_IN_SUBJECT_2  To: username at front of subject (2)
-header USERNAME_IN_SUBJECT_3    eval:check_for_to_in_subject(3)
-describe USERNAME_IN_SUBJECT_3  To: username at front of subject (3)
-header USERNAME_IN_SUBJECT_4    eval:check_for_to_in_subject(4)
-describe USERNAME_IN_SUBJECT_4  To: username at front of subject (4)
-header USERNAME_IN_SUBJECT_5    eval:check_for_to_in_subject(5)
-describe USERNAME_IN_SUBJECT_5  To: username at front of subject (5)
-header USERNAME_IN_SUBJECT_6    eval:check_for_to_in_subject(6)
-describe USERNAME_IN_SUBJECT_6  To: username at front of subject (6)
+# these all hit pretty much exactly the same messages ;)
+#header USERNAME_IN_SUBJECT_2    eval:check_for_to_in_subject(2)
+#describe USERNAME_IN_SUBJECT_2  To: username at front of subject (2)
+#header USERNAME_IN_SUBJECT_3    eval:check_for_to_in_subject(1)
+#describe USERNAME_IN_SUBJECT_3  To: username at front of subject (1)
+#header USERNAME_IN_SUBJECT_4    eval:check_for_to_in_subject(4)
+#describe USERNAME_IN_SUBJECT_4  To: username at front of subject (4)
+#header USERNAME_IN_SUBJECT_5    eval:check_for_to_in_subject(5)
+#describe USERNAME_IN_SUBJECT_5  To: username at front of subject (5)
+#header USERNAME_IN_SUBJECT_6    eval:check_for_to_in_subject(6)
+#describe USERNAME_IN_SUBJECT_6  To: username at front of subject (6)
 
 header LOSE_POUNDS              Subject =~ /\bLose .*(?:pounds|lbs|weight)/i
 describe LOSE_POUNDS            Subject talks about losing pounds
