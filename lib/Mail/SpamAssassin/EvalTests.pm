@@ -638,9 +638,14 @@ sub check_for_missing_to_header {
 sub check_from_in_whitelist {
   my ($self) = @_;
   local ($_);
-  $_ = $self->get ('From:addr');
-  return $self->_check_whitelist ($self->{conf}->{whitelist_from}, $_);
+  foreach $_ ($self->all_from_addrs()) {
+    if ($self->_check_whitelist ($self->{conf}->{whitelist_from}, $_)) {
+      return 1;
+    }
+  }
 }
+
+###########################################################################
 
 sub _check_whitelist {
   my ($self, $list, $addr) = @_;
@@ -655,14 +660,32 @@ sub _check_whitelist {
   return 0;
 }
 
+sub all_from_addrs {
+  my ($self) = @_;
+  # http://www.cs.tut.fi/~jkorpela/headers.html is useful here
+  return $self->{main}->find_all_addrs_in_line
+  	($self->get ('From') .                  # std
+  	 $self->get ('Sender') .                # rfc822
+  	 $self->get ('Envelope-Sender') .       # qmail: new-inject(1)
+  	 $self->get ('Resent-Sender') .         # procmailrc manpage
+  	 $self->get ('X-Envelope-From') .       # procmailrc manpage
+  	 $self->get ('Return-Path') .           # Postfix, sendmail; rfc821
+  	 $self->get ('Resent-From'));
+}
+
 sub all_to_addrs {
   my ($self) = @_;
+  # http://www.cs.tut.fi/~jkorpela/headers.html is useful here
   return $self->{main}->find_all_addrs_in_line
-  	($self->get ('To') .
-  	 $self->get ('Apparently-To') .
-  	 $self->get ('Delivered-To') .
-  	 $self->get ('Resent-To') .
-         $self->get ('Cc'));
+  	($self->get ('To') .                    # std
+  	 $self->get ('Apparently-To') .         # sendmail, from envelope
+  	 $self->get ('Delivered-To') .          # Postfix, I think
+  	 $self->get ('Resent-To') .             # std, rfc822
+  	 $self->get ('Resent-Cc') .             # std, rfc822
+  	 $self->get ('Envelope-Recipients') .   # qmail: new-inject(1)
+  	 $self->get ('Apparently-Resent-To') .  # procmailrc manpage
+  	 $self->get ('X-Envelope-To') .         # procmailrc manpage
+         $self->get ('Cc'));                    # std
 }
 
 ###########################################################################
@@ -681,8 +704,11 @@ sub check_obfuscated_words {
 sub check_from_in_blacklist {
   my ($self) = @_;
   local ($_);
-  $_ = $self->get ('From:addr');
-  return $self->_check_whitelist ($self->{conf}->{blacklist_from}, $_);
+  foreach $_ ($self->all_from_addrs()) {
+    if ($self->_check_whitelist ($self->{conf}->{blacklist_from}, $_)) {
+      return 1;
+    }
+  }
 }
 
 ###########################################################################
