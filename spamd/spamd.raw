@@ -359,8 +359,8 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
 	    }
             if ($method eq "REPORT_IFSPAM") {
                 $response_header .= "X-Spam-Status: $response_spam_status, hits=$msg_score required=$msg_threshold tests="
-                    . $status->get_names_of_tests_hit 
-                    . " version=$Mail::SpamAssassin::VERSION";
+                    . $status->get_names_of_tests_hit
+                    . " version=" . Mail::SpamAssassin::Version();
             }
             else
             {

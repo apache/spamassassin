@@ -180,9 +180,10 @@ sub check {
   my $hit = sprintf ("%1.2f", $self->{hits});
   s/_HITS_/$hit/gs;
 
+  my $ver = Mail::SpamAssassin::Version();
   s/_REQD_/$self->{conf}->{required_hits}/gs;
   s/_SUMMARY_/$self->{test_logs}/gs;
-  s/_VER_/$Mail::SpamAssassin::VERSION/gs;
+  s/_VER_/$ver/gs;
   s/_HOME_/$Mail::SpamAssassin::HOME_URL/gs;
   s/^/SPAM: /gm;
 
@@ -418,8 +419,10 @@ sub rewrite_as_spam {
   }
 
   $self->{msg}->put_header ("X-Spam-Checker-Version",
-  	"SpamAssassin $Mail::SpamAssassin::VERSION ".
-	"($Mail::SpamAssassin::SUB_VERSION)");
+    "SpamAssassin " .
+    Mail::SpamAssassin::Version() .
+    " ($Mail::SpamAssassin::SUB_VERSION)"
+  );
 
   # defang HTML mail; change it to text-only.
   if ($self->{conf}->{defang_mime}) {
@@ -535,7 +538,7 @@ sub _build_status_line {
     $line .= "\ttests=none\n";
   }
 
-  $line .= "\tversion=" . $Mail::SpamAssassin::VERSION;
+  $line .= "\tversion=" . Mail::SpamAssassin::Version();
 
   # If the configuration says no folded headers, unfold what we have.
   if ( ! $self->{conf}->{fold_headers} ) {
