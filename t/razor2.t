@@ -2,7 +2,12 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("razor2");
-use Test; BEGIN { plan tests => 2 };
+use Test; BEGIN { plan tests => 2,
+        onfail => sub {
+          warn "\n\nNote: this may not be an SpamAssassin bug, as Razor tests can\n".
+                "fail due to problems with the Razor servers.\n\n";
+        }
+};
 
 # ---------------------------------------------------------------------------
 
@@ -20,7 +25,7 @@ if ($@) {
 
 %patterns = (
 
-q{ Listed in Razor }, 'spam',
+q{ Listed in Razor2 }, 'spam',
 
 );
 
@@ -37,9 +42,10 @@ skip_all_patterns($razor_not_available);
 %patterns = ();
 %anti_patterns = (
 
-q{ Listed in Razor }, 'nonspam',
+q{ Listed in Razor2 }, 'nonspam',
 
 );
 
 sarun ("-t < data/nice/001", \&patterns_run_cb);
 skip_all_patterns($razor_not_available);
+
