@@ -47,9 +47,7 @@ describe UNSUB_PAGE     URL of page called "unsubscribe"
 uri REMOVE_PAGE     /^https?:\/\/[^\/]+\/.*?remove/
 describe REMOVE_PAGE        URL of page called "remove"
 
-uri MAILTO_WITH_SUBJ_REMOVE /^mailto:\S+\?subject=[3D=\s"']*remove/is
-describe MAILTO_WITH_SUBJ_REMOVE Includes a URL link to send an email with the subject 'remove'
-
+# MAILTO_WITH_SUBJ_REMOVE is now a rawbody test
 uri MAILTO_WITH_SUBJ    /^mailto:\S+\?subject=/is
 describe MAILTO_WITH_SUBJ   Includes a link to send a mail with a subject
 
@@ -103,3 +101,5 @@ describe WWW_REMOVEYOU_COM      Frequent SPAM content
 uri YELLOWSUN           /yellowsun01\.com/i   
 describe YELLOWSUN          Frequent SPAM content
 
+uri BTAMAIL_URL		/btamail\.net\.cn/i
+describe BTAMAIL_URL	Frequent SPAM content
