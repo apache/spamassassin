@@ -39,7 +39,7 @@ sub cmdline_run {
              'auto-whitelist|a'                 => \$opt{'auto-whitelist'},
              'bias-scores|b'                    => \$opt{'bias-scores'},
 
-             'debug-level|D:s'                  => \$opt{'debug-level'},
+             'debug-level|D'                    => \$opt{'debug-level'},
              'version|V'                        => \$opt{'version'},
              'help|h|?'                         => \$opt{'help'},
              #'<>'                               => \&add_folder,
@@ -88,9 +88,6 @@ sub cmdline_run {
   my $where = `uname -n 2>/dev/null`; chop $where;
   my $when = `date`; chop $when;
 
-  print "# sa-learn-spam results from $who\@$where, on $when\n";
-  print "# M:SA version ".$spamtest->Version()."\n";
-  print '# CVS tag: $Name:  $',"\n";
   $iter->set_function (\&wanted);
   $iter->run (@targets);
   print STDERR "\n" if ($opt{showdots});
