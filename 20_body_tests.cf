@@ -693,28 +693,15 @@ body CHARSET_FARAWAY		eval:check_for_faraway_charset()
 describe CHARSET_FARAWAY	Character set indicates a foreign language
 tflags CHARSET_FARAWAY          userconf
 
-full CHARSET_FARAWAY_BODY	eval:check_for_faraway_charset_in_body()
-describe CHARSET_FARAWAY_BODY	Character set indicates foreign language body
-tflags CHARSET_FARAWAY_BODY     userconf
+rawbody __MIME_CHARSET_FARAWAY	eval:check_for_mime_faraway_charset()
+body __HIGHBITS			/(?:[\x80-\xff].?){4,}/
+meta MIME_CHARSET_FARAWAY	(__MIME_CHARSET_FARAWAY && __HIGHBITS)
+describe MIME_CHARSET_FARAWAY	MIME character set indicates foreign language
+tflags MIME_CHARSET_FARAWAY	userconf
 
 body UNDESIRED_LANGUAGE_BODY		eval:check_language()
 describe UNDESIRED_LANGUAGE_BODY	Written in an undesired language
 tflags UNDESIRED_LANGUAGE_BODY          userconf
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 body NIGERIAN_TRANSACTION_1   /\b(?:financial|confiden(?:tial|ce)|safe(?:ty)?|mutual|secret|success(?:ful)?|risk-?free|details).{1,30}\btransaction\b/i
 describe NIGERIAN_TRANSACTION_1       illegal Nigerian transactions (1)
