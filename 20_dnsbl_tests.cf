@@ -191,6 +191,11 @@ header DNS_FROM_AHBL_RHSBL	eval:check_rbl_from_host('ahbl', 'rhsbl.ahbl.org.')
 describe DNS_FROM_AHBL_RHSBL	From: sender listed in dnsbl.ahbl.org
 tflags DNS_FROM_AHBL_RHSBL	net
 
+# another domain-based blacklist
+header DNS_FROM_SECURITYSAGE	eval:check_rbl_envfrom('securitysage', 'blackhole.securitysage.com.')
+describe DNS_FROM_SECURITYSAGE	Envelope sender in blackholes.securitysage.com
+tflags DNS_FROM_SECURITYSAGE	net
+
 # sa-hil.habeas.com for SpamAssassin queries
 # hil.habeas.com for other queries
 header HABEAS_INFRINGER		eval:check_rbl_swe('hil', 'sa-hil.habeas.com.')
