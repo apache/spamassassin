@@ -148,6 +148,8 @@ header __CD			exists:Content-Disposition
 header __CT			exists:Content-Type
 header __CTE			exists:Content-Transfer-Encoding
 header __MIME_VERSION		exists:MIME-Version
+header __CT_TEXT		Content-Type =~ /^text\b/
+header __CT_TEXT_PLAIN		Content-Type =~ /^text\/plain\b/
 
 # best four variants so far (rename later)
 meta T_MIME_NO_VERSION_ODD	((__CD + __CTE + __CT == 1) && !__MIME_VERSION)
@@ -156,6 +158,8 @@ meta T_MIME_NO_VERSION_CTYPE	(__CT && !__MIME_VERSION)
 meta T_MIME_NO_VERSION_ANY	((__CD || __CTE || __CT) && !__MIME_VERSION)
 # new test variants (at least as good as the above variants)
 meta T_MIME_HEADER_CTYPE_ONLY	(!__CD && !__CTE && __CT && !__MIME_VERSION)
+meta T_MIME_HEADER_CTYPE_ONLY2	(!__CD && !__CTE && __CT && !__MIME_VERSION && !__CT_TEXT)
+meta T_MIME_HEADER_CTYPE_ONLY3	(!__CD && !__CTE && __CT && !__MIME_VERSION && !__CT_TEXT_PLAIN)
 
 ########################################################################
 # bug 1106: forged MUAs
@@ -177,15 +181,10 @@ score T_FORGED_MUA_IMS		1.0
 
 # Mozilla
 header __MOZILLA_MUA		X-Mailer =~ /\bMozilla\b/
-header __MOZILLA_MSGID		Message-Id =~ /^<[A-F\d]{8}\.[A-F\d]{6,8}\@\S+>$/
+header __MOZILLA_MSGID		Message-Id =~ /^<[A-F\d]{8}\.[A-F\d]{4,8}\@\S+>$/
 meta T_FORGED_MUA_MOZILLA	(__MOZILLA_MUA && !__MOZILLA_MSGID)
 describe T_FORGED_MUA_MOZILLA	Forged mail pretending to be from Mozilla
 score T_FORGED_MUA_MOZILLA	1.0
-
-header __MOZILLA_WEB		X-Mailer =~ /\bvia\s+https?:\/\//i
-header __MOZILLA_MSGID2		Message-Id =~ /^<[A-F\d]{8}\.[A-F\d]{4,8}\@\S+>$/
-meta T_FORGED_MUA_MOZILLA2	(__MOZILLA_MUA && !__MOZILLA_MSGID2 && !__MOZILLA_WEB)
-meta T_FORGED_MUA_MOZILLA3	(__MOZILLA_MUA && !__MOZILLA_MSGID2)
 
 # Outlook
 header __OUTLOOK_MUA		X-Mailer =~ /\bOutlook\b(?! IMO)/
