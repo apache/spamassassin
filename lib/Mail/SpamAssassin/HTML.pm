@@ -29,7 +29,7 @@ use vars qw($re_loose $re_strict $re_other @ISA @EXPORT @EXPORT_OK);
 
 require Exporter;
 @ISA = qw(HTML::Parser Exporter);
-@EXPORT = qw(get_results);
+@EXPORT = qw(get_results name_to_rgb);
 @EXPORT_OK = qw();
 
 # elements defined by the HTML 4.01 and XHTML 1.0 DTDs (do not change them!)
@@ -134,9 +134,6 @@ sub html_end {
   $self->put_results(length => $self->{length});
   $self->put_results(min_size => $self->{min_size});
   $self->put_results(max_size => $self->{max_size});
-  $self->put_results(flex_hex1 => $self->{flex_hex1});
-  $self->put_results(flex_hex2 => $self->{flex_hex2});
-  $self->put_results(flex_hex3 => $self->{flex_hex3});
   if (exists $self->{tags}) {
     $self->put_results(closed_extra_ratio =>
 		       ($self->{closed_extra} / $self->{tags}));
@@ -229,9 +226,6 @@ sub parse {
   $self->{closed_extra} = 0;
   $self->{text} = [];		# rendered text
   $self->{text_invisible} = '';	# vec of invisibility state in $self->{text}
-  $self->{flex_hex1} = 0;
-  $self->{flex_hex2} = 0;
-  $self->{flex_hex3} = 0;
 
   $self->{length} += $1 if (length($text) =~ m/^(\d+)$/);	# untaint
 
@@ -471,7 +465,7 @@ sub text_style {
       next unless exists $ok_attributes{$tag}{$name};
       if ($name eq "text" || $name eq "color") {
 	# two different names for text color
-	$new{fgcolor} = $self->_name_to_rgb($attr->{$name});
+	$new{fgcolor} = name_to_rgb($attr->{$name});
       }
       elsif ($name eq "size" && $attr->{size} =~ /^\s*([+-]\d+)/) {
 	# relative font size
@@ -480,7 +474,7 @@ sub text_style {
       else {
 	if ($name eq "bgcolor") {
 	  # overwrite with hex value, $new{bgcolor} is set below
-	  $attr->{bgcolor} = $self->_name_to_rgb($attr->{bgcolor});
+	  $attr->{bgcolor} = name_to_rgb($attr->{bgcolor});
 	}
 	if ($name eq "size" && $attr->{size} !~ /^\s*([+-])(\d+)/) {
 	  # attribute is malformed
@@ -968,13 +962,16 @@ my %html_color = (
   yellowgreen => 0x9acd32,
 );
 
-sub _name_to_rgb {
-  my ($self, $color) = @_;
+sub name_to_rgb {
+  my $color = lc $_[0];
 
-  $color = lc($color);
+  # strip leading and trailing whitespace, but not interior whitespace
+  $color =~ s/^\s+//;
+  $color =~ s/\s+$//;
 
   # named colors
-  if (my $hex = $html_color{$color}) {
+  my $hex = $html_color{$color};
+  if (defined $hex) {
     return sprintf("#%06x", $hex);
   }
 
@@ -995,15 +992,6 @@ sub _name_to_rgb {
   # replace non-hex characters with 0
   $color =~ tr/0-9a-f/0/c;
 
-  # flex hex test
-  if ($color ne $original) {
-    my $h = ($original =~ /[^0-9a-f]/);
-    my $l = (length($original) != 6);
-    # XXX - three tests to try out
-    $self->{flex_hex1}++ if $h xor $l;
-    $self->{flex_hex2}++ if !$h || !$l;
-    $self->{flex_hex3}++ if !$h && $l;
-  }
   return "#" . $color;
 }
 
