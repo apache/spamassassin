@@ -246,17 +246,14 @@ sub run {
 
   # non-forking model (generally sa-learn), everything in a single process
   if ($self->{opt_j} == 0) {
-    my $message;
-    my $class;
-    my $result;
     my $messages;
 
     # message-array
     ($MESSAGES, $messages) = $self->message_array(\@targets);
 
-    while ($message = shift @{$messages}) {
-      my ($class, undef, $date) = index_unpack($message);
-      $result = $self->run_message($message);
+    while (my $message = shift @{$messages}) {
+#      my ($class, undef, $date) = index_unpack($message);
+      my($class, undef, $date, undef, $result) = $self->run_message($message);
       &{$self->{result_sub}}($class, $result, $date) if $result;
     }
   }
@@ -288,15 +285,11 @@ sub run {
     # only do 1 process, message list in a temp file, no restarting
     if ($self->{opt_j} == 1 && !defined $self->{opt_restart}) {
       my $message;
-      my $class;
-      my $result;
       my $messages;
       my $total_count = 0;
 
-      while (($MESSAGES > $total_count) && ($message = $self->next_message()))
-      {
-        my ($class, undef, $date) = index_unpack($message);
-        $result = $self->run_message($message);
+      while (($MESSAGES > $total_count) && ($message = $self->next_message())) {
+        my($class, undef, $date, undef, $result) = $self->run_message($message);
         &{$self->{result_sub}}($class, $result, $date) if $result;
 	$total_count++;
       }
@@ -534,8 +527,15 @@ sub start_children {
 	  close $parent;
 	  exit;
 	}
-	$result = $self->run_message($line);
+
+	my($class, $format, $date, $where, $result) = $self->run_message($line);
 	$result ||= '';
+
+	# If opt_n is set, the input date was -1, so reset it if possible
+        if ($self->{opt_n} && $class && $format && defined $date && $where) {
+	  $line = index_pack($class, $format, $date, $where);
+        }
+
 	print "$result\nRESULT $line\n";
       }
       exit;
@@ -635,8 +635,7 @@ sub scan_directory {
 
   foreach my $mail (@files) {
     if ($self->{opt_n}) {
-      $self->{$class}->{index_pack($class, "f", $no, $mail)} = $no;
-      $no++;
+      $self->{$class}->{index_pack($class, "f", -1, $mail)} = $no++;
       next;
     }
     my $header;
@@ -656,8 +655,7 @@ sub scan_file {
   my ($self, $class, $mail) = @_;
 
   if ($self->{opt_n}) {
-    $self->{$class}->{index_pack($class, "f", $no, $mail)} = $no;
-    $no++;
+    $self->{$class}->{index_pack($class, "f", -1, $mail)} = $no++;
     return;
   }
   my $header;
@@ -727,13 +725,13 @@ sub scan_mailbox {
       if ($header) {
 	my $t;
 	if ($self->{opt_n}) {
-	  $t = $no++;
+	  $self->{$class}->{index_pack($class, "m", -1, "$file.$offset")} = $no++;
 	}
 	else {
 	  $t = Mail::SpamAssassin::Util::receive_date($header);
 	  next if !$self->message_is_useful_by_date($t);
+	  $self->{$class}->{index_pack($class, "m", $t, "$file.$offset")} = $t;
 	}
-	$self->{$class}->{index_pack($class, "m", $t, "$file.$offset")} = $t;
       }
     }
     close INPUT;
@@ -789,12 +787,12 @@ sub scan_mbx {
 
 		my $t;
 		if ($self->{opt_n}) {
-		    $t = $no++;
+		  $self->{$class}->{index_pack($class, "b", -1, "$file.$offset")} = $no++;
 		} else {
-		    $t = Mail::SpamAssassin::Util::receive_date($header);
-		    next if !$self->message_is_useful_by_date($t);
+		  $t = Mail::SpamAssassin::Util::receive_date($header);
+		  next if !$self->message_is_useful_by_date($t);
+		  $self->{$class}->{index_pack($class, "b", $t, "$file.$offset")} = $t;
 		}
-		$self->{$class}->{index_pack($class, "b", $t, "$file.$offset")} = $t;
 		seek(INPUT, $offset + $size, 0);
 	    } else {
 		die "archive-iterator: error: failure to read message body!\n";
@@ -812,18 +810,18 @@ sub run_message {
   my ($class, $format, $date, $mail) = index_unpack($msg);
 
   if ($format eq "f") {
-    return $self->run_file($class, $mail, $date);
+    return $self->run_file($class, $format, $mail, $date);
   }
   elsif ($format eq "m") {
-    return $self->run_mailbox($class, $mail, $date);
+    return $self->run_mailbox($class, $format, $mail, $date);
   }
   elsif ($format eq "b") {
-    return $self->run_mbx($class, $mail, $date);
+    return $self->run_mbx($class, $format, $mail, $date);
   }
 }
 
 sub run_file {
-  my ($self, $class, $where, $date) = @_;
+  my ($self, $class, $format, $where, $date) = @_;
 
   mail_open($where) or return;
   # skip too-big mails
@@ -831,17 +829,30 @@ sub run_file {
     close INPUT;
     return;
   }
-  my @msg = (<INPUT>);
+  my @msg;
+  my $header = '';
+  while(<INPUT>) {
+    if (!$header && /^$/) {
+      $header = join('', @msg);
+    }
+
+    push(@msg, $_);
+  }
   close INPUT;
 
-  &{$self->{wanted_sub}}($class, $where, $date, \@msg);
+  if ($date == -1) {
+    $date = Mail::SpamAssassin::Util::receive_date($header);
+  }
+
+  return($class, $format, $date, $where, &{$self->{wanted_sub}}($class, $where, $date, \@msg));
 }
 
 sub run_mailbox {
-  my ($self, $class, $where, $date) = @_;
+  my ($self, $class, $format, $where, $date) = @_;
 
   my ($file, $offset) = ($where =~ m/(.*)\.(\d+)$/);
   my @msg;
+  my $header = '';
   mail_open($file) or return;
   seek(INPUT,$offset,0);
   my $past = 0;
@@ -852,38 +863,60 @@ sub run_mailbox {
     else {
       $past = 1;
     }
+
     # skip too-big mails
     if (! $self->{opt_all} && @msg > BIG_LINES) {
       close INPUT;
       return;
     }
+
+    if (!$header && /^$/) {
+      $header = join('', @msg);
+    }
+
     push (@msg, $_);
   }
   close INPUT;
-  &{$self->{wanted_sub}}($class, $where, $date, \@msg);
+
+  if ($date == -1) {
+    $date = Mail::SpamAssassin::Util::receive_date($header);
+  }
+
+  return($class, $format, $date, $where, &{$self->{wanted_sub}}($class, $where, $date, \@msg));
 }
 
 sub run_mbx {
-    my ($self, $class, $where, $date) = @_;
+  my ($self, $class, $format, $where, $date) = @_;
 
-    my ($file, $offset) = ($where =~ m/(.*)\.(\d+)$/);
-    my @msg;
+  my ($file, $offset) = ($where =~ m/(.*)\.(\d+)$/);
+  my @msg;
+  my $header = '';
 
-    mail_open($file) or return;
-    seek(INPUT, $offset, 0);
+  mail_open($file) or return;
+  seek(INPUT, $offset, 0);
     
-    while (<INPUT>) {
-	last if ($_ =~ MBX_SEPARATOR);
+  while (<INPUT>) {
+    last if ($_ =~ MBX_SEPARATOR);
 	
-	# skip mails that are too big
-	if (! $self->{opt_all} && @msg > BIG_LINES) {
-	    close INPUT;
-	    return;
-	}
-	push (@msg, $_);
+    # skip mails that are too big
+    if (! $self->{opt_all} && @msg > BIG_LINES) {
+      close INPUT;
+      return;
     }
-    close INPUT;
-    &{$self->{wanted_sub}}($class, $where, $date, \@msg);
+
+    if (!$header && /^$/) {
+      $header = join('', @msg);
+    }
+
+    push (@msg, $_);
+  }
+  close INPUT;
+
+  if ($date == -1) {
+    $date = Mail::SpamAssassin::Util::receive_date($header);
+  }
+
+  return($class, $format, $date, $where, &{$self->{wanted_sub}}($class, $where, $date, \@msg));
 }
 
 ############################################################################
