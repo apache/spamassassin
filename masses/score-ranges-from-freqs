@@ -1,89 +1,137 @@
 #!/usr/bin/perl -w
 
+# use this to  debug the SORatio -> score-range mapping:
+#for $rat (0.1, 0.3, 0.5, 0.7, 1.0) {
+#my ($lo, $hi) = ratio_in_0to1_to_range($rat); warn "JMD $rat $lo $hi";
+#} die;
+
+my $argcffile = shift @ARGV;
+
 my %freq_spam = ();
 my %freq_nonspam = ();
 
 my $num_spam;
 my $num_nonspam;
+my $num_total;
+
+my %mutable_tests = ();
+my $tflags;
+readtflags();
 
 while (<>) {
-  /^\s+(\d+)\s+(\d+)\s+(\d+)\s+(.+)\s*$/ or next;
+  /^\s*([\d\.]+)\s+([\d\.]+)\s+([\d\.]+)\s+([\d\.]+)\s+\S+\s+(.+)\s*$/ or next;
 
   my $overall = $1+0;
   my $spam = $2+0;
   my $nonspam = $3+0;
-  my $test = $4;
+  my $soratio = $4+0;
+  my $test = $5;
 
   if ($test eq '(all messages)') {
     $num_spam = $spam;
     $num_nonspam = $nonspam;
+    $num_total = $spam+$nonspam;
     next;
   }
+  next if ($test eq '(all messages as %)');
 
   $freq{$test} = $overall;
   $freq_spam{$test} = $spam;
   $freq_nonspam{$test} = $nonspam;
 
-  $mutatable{$test} = 1;
-  if ($spam + $nonspam < 5) {
-    $mutatable{$test} = 0;
-    $ratio{$test} = 0;
+  my $tflags = $tflags->{$test}; $tflags ||= '';
+  if ($tflags =~ /\bnet\b/) {
+    $mutable_tests{$test} = 0;
+  } else {
+    $mutable_tests{$test} = 1;
+  }
+
+  if ($overall < 0.01) {        # less than 0.01% of messages were hit
+    $mutable_tests{$test} = 0;
+    $soratio{$test} = 0;
 
   } else {
     if ($nonspam == 0) {
-      $nonspam = 1;	# avoid / by 0
+      $nonspam = 0.001;	# avoid / by 0
       $spam *= 20;	# give the spam score a bonus to make up
     }
-    my $ratio = $spam / $nonspam;
-    $ratio{$test} = $ratio;
+
+    # "nice" tests should always match more nonspam than spam. 
+    # the figure so that 0.0 = bad, 1.0 = good, instead of the reverse.
+    #
+    if ($tflags =~ /\bnice\b/) {
+      $soratio = 1.0 - $soratio;
+    }
+
+    $soratio{$test} = $soratio;
   }
 }
 
 system ("mkdir tmp >/dev/null 2>&1");
 open (OUT, ">tmp/ranges.data");
-foreach my $test (sort { $ratio{$b} <=> $ratio{$a} } keys %freq) {
+foreach my $test (sort { $soratio{$b} <=> $soratio{$a} } keys %freq) {
   my $overall = $freq{$test};
   my $spam = $freq_spam{$test};
   my $nonspam = $freq_nonspam{$test};
-  my $ratio = $ratio{$test};
-  my $mutatable = $mutatable{$test};
+  my $soratio = $soratio{$test};
+  my $mutatable = $mutable_tests{$test};
 
   if (!$mutatable) {
     printf OUT ("%3.1f %3.1f 0 $test\n", 0, 0);
     next;
   }
 
-  if ($ratio > 200.0) { $ratio = 200.0; }	# set a ceiling
-  if ($ratio < 1.0) { $ratio = 1.0; }		# and floor
-
-  # now we have a number between 1.0 and 200.0 indicating how
+  # now we have a number between 0.0 and 1.0 indicating how
   # effective the test is. Come up with a reasonable range
   # for scores based on this.
-  my ($lo, $hi) = ratio_in_200_to_range($ratio);
+  my ($lo, $hi) = ratio_in_0to1_to_range($soratio);
 
   printf OUT ("%3.1f %3.1f 1 $test\n", $lo, $hi);
-  #printf "range: %3.1f %3.1f $test ($spam / $nonspam = $ratio)\n",
+  #printf "range: %3.1f %3.1f $test ($spam / $nonspam = $soratio)\n",
   #$lo, $hi;
 }
 close OUT;
 exit;
 
-sub ratio_in_200_to_range {
+sub ratio_in_0to1_to_range {
   my $ratio = shift;
 
-  # the current algo maps 200.0 to a range between 1.0 and 5.0,
-  # and 1.0 to a range between 0.1 and 1.0.
+  # the current algo maps 1.0 to a range between 1.0 and 5.0,
+  # and 0.01 to a range between 0.1 and 1.0.
 
-  my $hi_lo = 200 / 1.0;
-  my $hi_hi = 200 / 5.0;
-  my $lo_lo =   1 / 0.1;
-  my $lo_hi =   1 / 1.0;
+  my $hi_lo = 1.0 / 1.0;
+  my $hi_hi = 1.0 / 5.0;
+  my $lo_lo = 0.1 / 0.1;
+  my $lo_hi = 0.1 / 1.0;
 
   my $lo_diff = abs($lo_lo - $hi_lo);
   my $hi_diff = abs($lo_hi - $hi_hi);
 
-  my $lo = ($ratio / (($ratio/200) * $lo_diff + $lo_lo));
-  my $hi = ($ratio / (($ratio/200) * $hi_diff + $lo_hi));
+  my $lo = ($ratio / ($ratio * $lo_diff + $lo_lo));
+  my $hi = ($ratio / ($ratio * $hi_diff + $lo_hi));
   ($lo, $hi);
+}
+
+sub readtflags {
+  $tflags = { };
+
+  my @files;
+  if (!defined $argcffile) { $argcffile = "../rules"; }
+
+  if (-d $argcffile ) {
+    @files = <$argcffile/[0-9]*.cf>;
+  } else {
+    @files = ($argcffile);
+  }
+
+  foreach $cffile (@files) {
+    print "Reading tflags from \"$cffile\"...\n";
+    open (IN, "<$cffile") or warn "cannot read $cffile\n";
+    while (<IN>) {
+      s/#.*$//g; s/^\s+//; s/\s+$//;
+      if (/^tflags\s+(\S+)\s+(.+)$/) { $tflags->{$1} = $2; }
+    }
+    close IN;
+  }
 }
 

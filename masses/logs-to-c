@@ -2,94 +2,14 @@
 
 my $argcffile = shift @ARGV;
 
-my @unmutated_tests = qw(
-USER_IN_ALL_SPAM_TO
-USER_IN_MORE_SPAM_TO
-USER_IN_WHITELIST_TO
-A_FROM_IN_AUTO_WLIST
-USER_IN_WHITELIST
-USER_IN_BLACKLIST
-
-A_HREF_TO_IP
-ANOTHER_NET_AD
-BRAND_NEW_PAGER
-BUGGY_CGI_DE
-BUGGY_CGI_DE_2
-BUGGY_CGI_DE_3
-BUGGY_CGI_ES
-BUGGY_CGI_PT_2
-CLICKSFORMONEY_NET
-DCC_CHECK
-DIFF_C_PATCH
-EGP_HTML_BANNER
-EMAIL_HARVEST
-EU_200_32_CE
-E_WEBHOSTCENTRAL_URL
-EXCUSE_5
-EXCUSE_9
-EXCUSE_ES_02
-EXCUSE_ES_03
-EXCUSE_ES_04
-FREEMEGS_URL
-FREEWEBCO_NET_URL
-FREEWEBHOSTINGCENTRAL
-FROM_FORGED_HOTMAIL
-FROM_UGETMORE
-HUNZA_DIET_BREAD
-INTERNET_TERROR_RANT
-JUST_MAILED_PAGE
-LASER_PRINTER
-LONG_NUMERIC_HTTP_ADDR
-MAIL_IN_ORDER_FORM
-NIGERIAN_SCAM
-NIGERIAN_SCAM_3
-NIGERIAN_SCAM_8
-NO_MX_FOR_FROM
-OE_PI
-PORN_2
-PRINT_OUT_AND_FAX
-Q_FOR_SELLER
-RAZOR_CHECK
-RCVD_IN_BL_SPAMCOP_NET
-RCVD_IN_DSBL
-RCVD_IN_DUL
-RCVD_IN_MULTIHOP_DSBL
-RCVD_IN_ORBS
-RCVD_IN_OSIRUSOFT_COM
-RCVD_IN_RBL
-RCVD_IN_RELAYS_ORDB_ORG
-RCVD_IN_RFCI
-RCVD_IN_RSS
-RCVD_IN_UNCONFIRMED_DSBL
-RCVD_IN_VISI
-REMOVE_ES_01
-REMOVE_ES_02
-REMOVE_ES_04
-SEXY_PICS
-SHOES_GUY
-SPAM_FORM_INPUT
-SPAM_PHRASES_100
-STAINLESS_STEEL
-TO_INVESTORS
-UNDESIRED_LANGUAGE_BODY
-USER_IN_ALL_SPAM_TO
-USER_IN_BLACKLIST
-USER_IN_MORE_SPAM_TO
-USER_IN_WHITELIST_TO
-WEB4PORNO_URL
-X_OSIRU_SPAM_SRC
-X_OSIRU_SPAMWARE_SITE
-X_UIDL_SPAMSIGN
-YR_MEMBERSHIP_EXCH
-
-  );
-
 my $threshold = 5;
 my $iterlimit = 0;
 
 my %is_spam = ();
 my %tests_hit = ();
+my %mutable_tests = ();
 
+my $tflags;
 my $scores;
 readscores();
 my $origscores = $scores;
@@ -124,7 +44,7 @@ sub readlogs {
       foreach my $tst (split (/,/, $_)) {
 	next if ($tst eq '');
 	if (!defined $scores->{$tst}) {
-	  warn "unknown test in $file, ignored: $tst\n";
+          #warn "unknown test in $file, ignored: $tst\n";
 	  next;
 	}
 	push (@tests, $tst);
@@ -148,6 +68,7 @@ sub readlogs {
 
 
 sub readscores {
+  $tflags = { };
   $scores = { };
 
   my @files;
@@ -169,6 +90,8 @@ sub readscores {
       $scores->{$2} ||= 1;
     } elsif (/^score\s+(\S+)\s+(.+)$/) {
       $scores->{$1} = $2;
+    } elsif (/^tflags\s+(\S+)\s+(.+)$/) {
+      $tflags->{$1} = $2;
     }
   }
   close IN;
@@ -183,7 +106,7 @@ sub writescores_c {
 
   my $count = 0;
   foreach my $name (sort keys %{$scores}) {
-    if (!defined $is_mutatable{$name}) { $is_mutatable{$name} = 1; } else { $range_lo{$name} = $range_hi{$name} = $scores->{$name}; }
+    if (!defined $mutable_tests{$name}) { $mutable_tests{$name} = 1; } else { $range_lo{$name} = $range_hi{$name} = $scores->{$name}; }
 
     $range_lo{$name} ||= 0.1;
     $range_hi{$name} ||= 1.5;
@@ -191,7 +114,7 @@ sub writescores_c {
     print DAT ".".$count."\n";
     print DAT "n".$name."\n";
     print DAT "b".$scores->{$name}."\n";
-    print DAT "m".$is_mutatable{$name}."\n";
+    print DAT "m".$mutable_tests{$name}."\n";
     print DAT "l".$range_lo{$name}."\n";
     print DAT "h".$range_hi{$name}."\n";
 
@@ -275,9 +198,6 @@ unsigned short tests_hit[$total][$max_hits_per_msg];
 }
 
 sub read_ranges {
-  %is_mutatable = ();
-  foreach my $t (@unmutated_tests) { $is_mutatable{$t} = 0; }
-
   if (!-f 'tmp/ranges.data') {
     system ("make tmp/ranges.data");
   }
@@ -291,7 +211,8 @@ sub read_ranges {
     my $t = $4;
     $range_lo{$t} = $1+0;
     $range_hi{$t} = $2+0;
-    my $mut = $3+0; if (!$mut) { $is_mutatable{$t} = 0; }
+    my $mut = $3+0;
+    if (!$mut) { $mutable_tests{$t} = 0; } else { $mutable_tests{$t} = 1; }
   }
   close IN;
 }

@@ -38,7 +38,12 @@ void init_data()
 {
   int  rank;
 
+#ifdef USE_MPI
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+#else 
+  rank = 0;
+#endif
+
   if (rank == 0) {
     loadtests();
     loadscores();
@@ -46,6 +51,7 @@ void init_data()
     printf("nybias normalized to %f\n",nybias);
   }
 
+#ifdef USE_MPI
   MPI_Bcast(num_tests_hit, num_tests, MPI_CHAR, 0, MPI_COMM_WORLD);
   MPI_Bcast(&nybias, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast(is_spam, num_tests, MPI_CHAR, 0, MPI_COMM_WORLD);
@@ -56,12 +62,15 @@ void init_data()
   MPI_Bcast(range_hi, num_scores, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast(bestscores, num_scores, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast(scores, num_scores, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+#endif
 }
 
 int main(int argc, char **argv) {
      PGAContext *ctx;
 
+#ifdef USE_MPI
      MPI_Init(&argc, &argv);
+#endif
      init_data();
 
      ctx = PGACreate(&argc, argv, PGA_DATATYPE_REAL, num_scores, PGA_MINIMIZE);
@@ -110,7 +119,9 @@ int main(int argc, char **argv) {
 
      PGADestroy(ctx);
 
+#ifdef USE_MPI
      MPI_Finalize();
+#endif
 
      return(0);
 }
@@ -121,6 +132,7 @@ double ynscore,nyscore,yyscore,nnscore;
 double score_msg(PGAContext *ctx, int p, int pop, int i)
 {
   double msg_score = 0.0;
+
   // For every test the message hit on
   for(int j=num_tests_hit[i]-1; j>=0; j--)
   {
@@ -232,7 +244,13 @@ void dump(FILE *fp)
 void WriteString(PGAContext *ctx, FILE *fp, int p, int pop)
 {
   int rank;
+
+#ifdef USE_MPI
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+#else
+  rank = 0;
+#endif
+
   if(0 == rank)
   {
     evaluate(ctx,p,pop);
@@ -248,7 +266,13 @@ void WriteString(PGAContext *ctx, FILE *fp, int p, int pop)
 void showSummary(PGAContext *ctx)
 {
   int rank;
+
+#ifdef USE_MPI
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+#else
+  rank = 0;
+#endif
+
   if(0 == rank)
   {
     if(0 == PGAGetGAIterValue(ctx) % 300)
