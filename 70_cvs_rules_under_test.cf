@@ -47,6 +47,10 @@ meta T_FROM_ALL_NUMS		(__FROM_JUST_NUMBER && !__FROM_PHONE)
 describe T_FROM_ALL_NUMS	From an address that is all numbers (non-phone)
 score T_FROM_ALL_NUMS		0.5
 
+# results for quinlan
+body T_SOME_BREAKTHROUGH	/(?:science|medical|major|scientific|fundamental|technology|revolutionary)\s+breakthrough/i
+score T_SOME_BREAKTHROUGH	0.5
+
 # jm: somehow these guys keep slipping through, and they're very persistent.
 # they use both azoogle.com and azogle.com, but this header is always
 # in this format.
