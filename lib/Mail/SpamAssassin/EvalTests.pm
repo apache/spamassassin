@@ -1033,7 +1033,7 @@ sub _check_date_diff {
   my $time = $self->_parse_rfc822_date ($date);
 
   # parse_rfc822_date failed
-  return if ($time == -1);
+  return if !defined($time);
 
   # use second date. otherwise fetchmail Received: hdrs will screw it up
   my @rcvddatestrs = ($rcvd =~ /\s.?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+/g);
@@ -1041,7 +1041,7 @@ sub _check_date_diff {
   foreach $rcvd (@rcvddatestrs) {
     dbg ("trying Received header date for real time: $rcvd");
     $rcvd = $self->_parse_rfc822_date ($rcvd);
-    if ($rcvd != -1) {
+    if (defined($rcvd)) {
       push (@rcvddates, $rcvd);
     }
   }
@@ -1084,16 +1084,22 @@ sub _parse_rfc822_date {
     $dd = $1; $mon = $2; $yyyy = $3;
   } elsif (s/ (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) +(\d+) \d+:\d+:\d+ (\d{4}) / /i) {
     $dd = $2; $mon = $1; $yyyy = $3;
-  } elsif (s/ (\d+) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d\d) / /i) {
+  } elsif (s/ (\d+) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{2,3}) / /i) {
     $dd = $1; $mon = $2; $yyyy = $3;
   } else {
     dbg ("time cannot be parsed: $date");
-    return -1;
+    return undef;
   }
 
-  if (defined $yyyy && $yyyy < 100) {
-    # psycho Y2K crap
-    $yyyy = $3; if ($yyyy < 70) { $yyyy += 2000; } else { $yyyy += 1900; }
+  # handle two and three digit dates as specified by RFC 2822
+  if (defined $yyyy) {
+    if (length($yyyy) == 2 && $yyyy < 50) {
+      $yyyy += 2000;
+    }
+    elsif (length($yyyy) != 4) {
+      # three digit years and two digit years with values between 50 and 99
+      $yyyy += 1900;
+    }
   }
 
   # hh:mm:ss
@@ -1134,7 +1140,7 @@ sub _parse_rfc822_date {
 
   if ($@) {
     dbg ("time cannot be parsed: $date, $yyyy-$mmm-$dd $hh:$mm:$ss");
-    return -1;
+    return undef;
   }
 
   if ($tzoff =~ /([-+])(\d\d)(\d\d)$/)	# convert to seconds difference
