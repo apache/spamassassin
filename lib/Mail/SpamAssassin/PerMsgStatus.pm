@@ -1106,7 +1106,6 @@ sub get {
         s/\s+/ /g;			# reduce whitespace to single space
         s/^\s+//;			# leading wsp
         s/\s+$//;			# trailing wsp
-        s/,.*$//;			# multiple addrs on one line? remove all but first
 
         if ($getaddr) {
        	  # Get the email address out of the header
@@ -1122,6 +1121,7 @@ sub get {
 	  #
           s/\s*\(.*?\)//g;		# strip out the (comments)
           s/^[^<]*?<(.*?)>.*$/$1/;	# "Foo Blah" <jm@foo> or <jm@foo>
+          s/,.*$//;			# multiple addrs on one line? remove all but first
         }
         elsif ($getname) {
 	  # Get the real name out of the header
