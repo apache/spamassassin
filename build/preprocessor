@@ -32,6 +32,7 @@
 #                        PERL_WARN.
 
 
+use strict;
 use Config;
 use File::Spec;
 
@@ -39,6 +40,8 @@ my %modules = ();
 my %defines = ();
 
 my @infiles = ();
+my $infile;
+my $outfile;
 my $indir;
 my $outdir;
 
