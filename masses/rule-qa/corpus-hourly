@@ -17,16 +17,30 @@ nice(10);
 
 my $configuration = "$ENV{HOME}/.corpus";
 my %opt;
+my $revision = "unknown";
+my %revision;
 my @files;
 my $skip = '';
 
 &configure;
+&version;
 &init;
 &update;
 &locate;
 &rename;
 &current;
 &clean_up;
+
+sub version {
+    my $line;
+    if (open(TESTING, "$opt{tree}/rules/70_cvs_rules_under_test.cf")) {
+	chomp($line = <TESTING>);
+	if ($line =~ m/.*Revision:\s*(\S+).*/) {
+	    $revision = $1;
+	}
+	close(TESTING);
+    }
+}
 
 sub configure {
     # does rough equivalent of source
@@ -68,21 +82,23 @@ sub locate {
     @files = grep { /^(?:spam|nonspam|ham)-(?:net-)?\w+\.log$/ && -f "$opt{corpus}/$_" && -M _ < 10 } @files;
     @files = grep {
 	my $time = 0;
-	my $version = 0;
+	my $tag = 0;
+	$revision{$_} = "unknown";
 	open(FILE, "$opt{corpus}/$_");
 	while (my $line = <FILE>) {
 	    last if $line !~ /^#/;
 	    $time++ if $line =~ /\b(?!08)\d\d:\d\d:\d\d\b/;
-	    $version++ if $line =~ /CURRENT_CORPORA_SUBMIT_VERSION/;
+	    $tag++ if $line =~ /CURRENT_CORPORA_SUBMIT_VERSION/;
+	    $revision{$_} = $1 if $line =~ m/CVS revision:\s*(\S+)/;
 	}
 	close(FILE);
 	if (!$time) {
 	    $skip .= "# skipped $_: time is between 0800 UTC and 0900 UTC\n";
 	}
-	if (!$version) {
+	if (!$tag) {
 	    $skip .= "# skipped $_: tag not CURRENT_CORPORA_SUBMIT_VERSION\n";
 	}
-	($time && $version);
+	($time && $tag);
     } @files;
 }
 
@@ -120,10 +136,10 @@ sub sort_all {
 
 sub current {
     for my $class ("DETAILS", "HTML", "NET", "ALL") {
-	my @ham = grep { /^(?:nonspam|ham)/ } @files;
-	my @spam = grep { /^spam/ } @files;
-	
 	for my $age ("new", "1day", "2day", "7day", "10day") {
+	    my @ham = grep { /^(?:nonspam|ham)/ } @files;
+	    my @spam = grep { /^spam/ } @files;
+
 	    chdir $opt{corpus};
 
 	    next if ($class eq "NET" && $age ne "10day");
@@ -151,6 +167,8 @@ sub current {
 	    if ($age eq "new") {
 		@ham = grep { -M "$_" < -M $opt{tagtime} } @ham;
 		@spam = grep { -M "$_" < -M $opt{tagtime} } @spam;
+		@ham = grep { $revision{$_} eq $revision } @ham;
+		@spam = grep { $revision{$_} eq $revision } @spam;
 	    }
 	    elsif ($age =~ /(\d+)day/) {
 		my $mtime = $1;
@@ -161,8 +179,12 @@ sub current {
 	    open(OUT, "> $opt{html}/$class.$age");
 	    print OUT "# ham results used: " . join(" ", @ham) . "\n";
 	    print OUT "# spam results used: " . join(" ", @spam) . "\n";
-	    print OUT $skip if $skip;
-	    print OUT "\n";
+	    for (@ham) {
+		print OUT "# $_=$revision{$_}\n" if $revision{$_} ne $revision;
+	    }
+	    for (@spam) {
+		print OUT "# $_=$revision{$_}\n" if $revision{$_} ne $revision;
+	    }
 
 	    if ($class eq "ALL") {
 		my %spam;
