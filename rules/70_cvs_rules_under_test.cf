@@ -115,6 +115,12 @@ body T_CONSOLIDATE_DEBT		/(?:consolidate .{0,9} (?:debt|credit|bills)|debt[ -]?(
 # possible replacement for EXCUSE_FUTURE
 body T_EXCUSE_FUTURE		/to be removed from.{0,20}(?:mailings|offers)/i
 
+# four rules to possibly replace OPT_IN
+body T_OPT_IN			/\bopt-in\b/
+body T_OPT_IN_CAPS		/(?-i:O)pt.?(?-i:I)n/i
+body T_OPT_OUT			/\bopt-out\b/
+body T_OPT_OUT_CAPS		/(?-i:O)pt.?(?-i:O)ut/i
+
 ###########################################################################
 # quinlan: I converted almost 2000 postfix anti-spam rules into SA format,
 # tested many permutations of each, refined some into better rules, and
@@ -141,16 +147,16 @@ body T_Q_INSTANT_QUOTE		/free.{0,12}(?:(?:instant|express|online|no.?obligation)
 body T_Q_MORTGAGE_BEST		/(?:low(?:est|er)?|free|second|rate|best|refinanc(?:e|ing)|online|instant) mortgage/i
 body T_Q_MORTGAGE_PITCH		/mortgage (?:rates?|quotes?|approv(?:al|ed)|payment|interest|loans?|app(?:\b|lication))/i
 
+# similar to THIS_AINT_SPAM
 body T_Q_OKAY1			/cannot be considered spam/i
+# similar to SENT_IN_COMPLIANCE
 body T_Q_OKAY2			/sent (?:to you )?in compliance (?:with|of)/i
+# similar to various 1618 rules
 body T_Q_OKAY3			/Under Bill s.?1618/i
 
 body T_Q_ONETIME1		/One[- ]?Time Mail/i
 body T_Q_ONETIME2		/this is a one[- ]?time (?:e-?mail|mailing|offer)/i
 body T_Q_ONETIME3		/Never Receive Another Mailing/i
-
-body T_Q_OPT_IN			/(?-i:O)pt.?(?-i:I)n/i
-body T_Q_OPT_OUT		/(?-i:O)pt.?(?-i:O)ut/i
 
 rawbody T_Q_PROGRAM_FILE	/name=\".*\.(?:asd|bat|chm|com|dll|exe|hta|lnk|js|jse|ocx|pif|scr|shb|shm|shs|vb|vbe|vbs|vxd|wsf|wsh)\"/i
 
@@ -205,6 +211,7 @@ body T_Q_MILLION_EMAIL		/Million (?:\w+ )?(?:E-?mail )?Addresses/i
 body T_Q_NOT_ADVISOR		/not a registered investment advisor/i
 body T_Q_PRODUCT_SERVICE_V1	/PRODUCT or SERVICE/i
 body T_Q_PRODUCT_SERVICE_V2	/PRODUCTS? or SERVICES?/i
+# similar to OFFER, but fewer FPs
 body T_Q_RECEIVE_OFFER		/Receive Special Offer/i
 body T_Q_RECEIVE_EMAIL		/Receive Third Party Email/i
 body T_Q_REFINANCE_HOME		/Refinance Your Home/i
