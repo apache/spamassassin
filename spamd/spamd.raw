@@ -201,6 +201,12 @@ my $error_before_reaper;
 
 sub REAPER {
     $error_before_reaper = $!;  # take a copy before cleanupchildren()
+    while ( my $kid = waitpid(-1, &WNOHANG) > 0 ) {
+        $extrapid++;
+#        Mail::SpamAssassin::dbg("cleaned up kid $kid, pool=$extrapid");
+#        Something tells me we shouldn't call stuff in a sighandler.
+    }   # Don't let people tell you this isn't needed!
+
     $SIG{CHLD} = \&REAPER;
 }
 
@@ -814,6 +820,7 @@ sub kill_handler
     exit 0;
 }
 
+# Remember to change this in REAPER too if you change anything!
 sub cleanupchildren {
     while ( my $kid = waitpid(-1, &WNOHANG) > 0 ) {
         $extrapid++;
