@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_port");
-use Test; BEGIN { plan tests => 17 };
+use Test; BEGIN { plan tests => 15 };
 
 # ---------------------------------------------------------------------------
 
@@ -12,7 +12,6 @@ q{ Subject: *****SPAM***** There yours for FREE!}, 'subj',
 q{ X-Spam-Status: Yes, hits=}, 'status',
 q{ X-Spam-Flag: YES}, 'flag',
 q{ Valid-looking To "undisclosed-recipients"}, 'undisc',
-q{ Missing Date: header}, 'date',
 q{ Subject has an exclamation mark}, 'apling',
 q{ From: ends in numbers}, 'endsinnums',
 q{ From: does not include a real name}, 'noreal',

@@ -142,20 +142,45 @@ sub _get_or_create_header_object {
 
 # ---------------------------------------------------------------------------
 
+sub _get_header_list {
+    my ($self, $hdr) = @_;
+  # OK, we want to do a case-insensitive match here on the header name
+  # So, first I'm going to pick up an array of the actual capitalizations used:
+  my @cap_hdrs = grep(/^$hdr$/i, keys(%{$self->{headers}}));
+
+  # And now pick up all the entries into a list
+  my @entries = map($self->{headers}->{$_},@cap_hdrs);
+
+  return @entries;
+}
+
 sub get_header {
   my ($self, $hdr) = @_;
 
-  my $entry = $self->{headers}->{$hdr};
+  # And now pick up all the entries into a list
+  my @entries = $self->_get_header_list($hdr);
 
   if (!wantarray) {
-    if (!defined $entry || $entry->{count} < 1) { return undef; }
-    return $entry->{0};
+      # If there is no header like that, return undef
+      if (scalar(@entries) < 1 ) { return undef; }
+      foreach my $entry (@entries)
+      {
+	  if($entry->{count} > 0) { return $entry->{0}; }
+      }
+      return undef;
 
   } else {
-    if (!defined $entry || $entry->{count} < 1) { return ( ); }
-    my @ret = ();
-    foreach my $i (0 .. ($entry->{count}-1)) { push (@ret, $entry->{$i}); }
-    return @ret;
+
+      if(scalar(@entries) < 1) { return ( ); }
+
+      my @ret = ();
+      # loop through each entry and collect all the individual matching lines
+      foreach my $entry (@entries)
+      {
+	  foreach my $i (0 .. ($entry->{count}-1)) { push (@ret, $entry->{$i}); }
+      }
+
+      return @ret;
   }
 }
 
@@ -209,11 +234,19 @@ sub get_all_headers {
 sub replace_header {
   my ($self, $hdr, $text) = @_;
 
-  if (!defined $self->{headers}->{$hdr}) {
+  # Get all the headers that might match
+  my @entries = $self->_get_header_list($hdr);
+
+  if (scalar(@entries) < 1) {
     return $self->put_header($hdr, $text);
   }
 
-  $self->{headers}->{$hdr}->{0} = $text;
+  foreach my $entry (@entries)
+  {
+      if($entry->{count} > 0) { $entry->{0} = $text; return; }
+  }
+
+  return $self->put_header($hdr, $text);
 }
 
 sub delete_header {
