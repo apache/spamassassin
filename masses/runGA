@@ -1,6 +1,6 @@
 #!/bin/sh
 
-SCORESET="1"
+SCORESET="0"
 NAME="set$SCORESET"
 
 if [ ! -f "ORIG/ham-$NAME.log" -o ! -f "ORIG/spam-$NAME.log" ]; then
