@@ -861,7 +861,7 @@ sub MY::libscan {
 
   return q{} if $path =~ m{
                   (^|/)(CVS|\.svn)(/|$)|
-                  [/.](orig|old|rej|r\d+|diff|patch|bak|backup|mine|my)$
+                  [/.](orig|old|rej|r\d+|diff|patch|bak|backup|mine|my|swp)$
                 }ix;
 
   clean_MY_globals($self);
