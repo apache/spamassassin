@@ -332,9 +332,16 @@ rawbody T_BAYESBUSTER_LINE_15I	/^([a-z]{3,} ){15,}<br>$/i
 header T_RCVD_IN_XBL      eval:check_rbl_txt('xbl', 'xbl.spamhaus.org.')
 describe T_RCVD_IN_XBL    Received via a relay in Spamhaus XBL
 tflags T_RCVD_IN_XBL      net
-score T_RCVD_IN_XBL       1
 
 # reported by Kurtis Rader, bug 2890
 uri T_MSN_REDIR		/^http:\/\/shopping\.msn\.com\/trackurl\.aspx\?/i
 describe T_MSN_REDIR	Has MSN Redirect URI
+
+# Catches e.g. 'Re: EFDNOX, a thousand dollars', 'Re: ZJXQAOBK, dont know
+# anything', 'Re: ODLI, came the noise' but misses 'Re: MNCYU, thought: of
+# testing'.  Has to avoid FPs like 'Re: SIGSEGV, where are you?', 'Re: EXMH,
+# Metamail and RH8.0'.
+#
+header T_RE_UC_3WORDS	Subject =~ /^[rR][eE]: [A-Z]{3,12},(?:\s[A-Z][a-z]+){3}$/
+describe T_RE_UC_3WORDS	Has Subject in form "Re: UPPERCASE, word word word"
 
