@@ -50,9 +50,6 @@ header T_MSGID_GOOD_EXCHANGE	Message-Id =~ /^<[A-Z]{28}\.\S+\@\S+>$/
 tflags T_MSGID_GOOD_EXCHANGE	nice
 score T_MSGID_GOOD_EXCHANGE	-1.0
 
-uri T_ADMANMAIL			/^http:\/\/admanmail\.com\//
-describe T_ADMANMAIL		Contains URL of frequent spam site
-
 # one or both of these may need to factor in ok_languages or ok_locales
 body T_UNPRINTABLE		/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]{3,}/
 body T_HIGHBIT			/[\x80-\xff]{8,}/
@@ -463,3 +460,15 @@ score T_HEX_HOST	0.01
 uri T_HTTP_ESCAPED_URI_SUSPICIOUS	m@%(?:2[147-9a-e]|3[0-9]|4[1-9a-f]|[56][0-9a-f]|7[0-9a-e])@i
 describe T_HTTP_ESCAPED_URI_SUSPICIOUS      Uses unnecessary %-escapes inside a URL's path
 score T_HTTP_ESCAPED_URI_SUSPICIOUS 0.01
+
+# Most/all of these require that From addresses do not start with numbers.
+# let's see how this does... (jm)
+header T_FROM_NUM_AT_WEBMAIL    From:addr =~ /^\d\S+\@(?:msn\.com|flashmail\.com|mailexcite\.com|prodigy\.net|yahoo\.\S+|hotmail\.com|eudoramail\.com|aol\.com|excite\.com|email\.com|earthlink\.net|geocities\.com|hknetmail\.com|angelfire\.com)/i
+describe T_FROM_NUM_AT_WEBMAIL  From address is webmail, but starts with a number
+score T_FROM_NUM_AT_WEBMAIL     0.01
+
+# actually, this looks really good!
+header T_FROM_OFFERS            From:addr =~ /offers\S*\@/
+describe T_FROM_OFFERS          From address is "offers at something"
+score T_FROM_OFFERS             0.01
+
