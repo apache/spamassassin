@@ -50,14 +50,15 @@ Options:
     -p port       Listen on the specific port (otherwise default is port 22874)
     -x            Disable user config files
     -s            Specify the syslog facility (default: mail)
+    -D            Print debugging messages
 
 EOUSAGE
     exit $resphash{EX_USAGE};
 }
 
-use vars qw{ $opt_h $opt_L $opt_p $opt_A $opt_x $opt_s };
+use vars qw{ $opt_h $opt_L $opt_p $opt_A $opt_x $opt_s $opt_D };
 
-getopts('hLxp:A:s:') or usage();
+getopts('hLxp:A:s:D') or usage();
 
 $opt_h and usage();
 
@@ -117,6 +118,10 @@ bind(Server, sockaddr_in($port, INADDR_ANY))        || die "bind: $!";
 listen(Server,SOMAXCONN)                            || die "listen: $!";
 
 logmsg "server started on port $port";
+if ($opt_D) {
+  warn "server started on port $port\n";
+  warn "server pid: $$\n";
+}
 
 my $waitedpid = 0;
 my $paddr;
