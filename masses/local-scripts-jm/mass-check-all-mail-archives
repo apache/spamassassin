@@ -42,7 +42,7 @@ mv tmon.out ./tmon.nonspam
 # recent and all-time sets.
 
 date
-for f in /local/cor/old/nonspam/* /local/cor/recent/nonspam/*
+for f in /local/cor/old/nonspam/*
 do
   echo Checking $f: ; ./mass-check --bayes -c ./jm-mass-check-rules $f >> nonspam.local
 done
