@@ -2,6 +2,10 @@
 Upgrade Notes
 -------------
 
+"spamd" now has a default max-children setting of 5; no more than 5 child
+scanner processes will be run in parallel.  Previously, there was no
+default limit unless you specified the "-m" switch when starting spamd.
+
 The SpamAssassin 2.6x release series will be the last set of releases to
 officially support perl versions earlier than perl 5.6.0.  If you are
 using an earlier release, you will need to upgrade when SpamAssassin 2.70

@@ -237,9 +237,13 @@ $log_facility = 'null'   if $log_facility eq 'stderr' # don't duplicate log
 my $dontcopy = 1;
 if ($opt{'create-prefs'}) { $dontcopy = 0; }
 
-my $extrapid = 5000;
-undef($opt{'max-children'}) unless defined($opt{'max-children'}) && $opt{'max-children'} > 0;
-$extrapid = $opt{'max-children'} if defined($opt{'max-children'});
+my $kidslimit = 5;	# max number of kids allowed
+my $kidsfree = 5;	# number we can spawn before hitting $kidslimit
+if ($opt{'max-children'} && $opt{'max-children'} > 0) {
+  $kidslimit = $kidsfree = $opt{'max-children'};
+} else {
+  $kidslimit = $kidsfree = 99999;
+}
 
 # Untaint the pidfile path before we use it
 if (defined $opt{'pidfile'}) {
@@ -480,7 +484,7 @@ while (1) {
     next if ($n == -1 && $! == &Errno::EINTR);
     die "select failed: $!" if ($n <= 0);
 
-    if ($opt{'max-children'}) {
+    if ($kidslimit) {
       while (my ($kid, $pipe) = each %pipes) {
         # Since the pipe is never written, it will only become readable when
         # the other end closes it (on exit) so we could read the EOF. Thus, if
@@ -492,8 +496,8 @@ while (1) {
         next unless vec($rd, $pipe->fileno(), 1);
         vec($readvec, $pipe->fileno(), 1) = 0;
         delete ($pipes{$kid});
-        $extrapid++;
-        Mail::SpamAssassin::dbg("cleaned up kid $kid, pool=$extrapid");
+        $kidsfree++;
+        Mail::SpamAssassin::dbg("cleaned up kid $kid, pool=$kidsfree");
 
         # We reaped a kid, so listen for connects again
         vec($readvec, $server->fileno, 1) = 1;
@@ -501,13 +505,13 @@ while (1) {
     }
 
     if (vec($rd, $server->fileno, 1)) {
-      if ($opt{'max-children'} && $extrapid <= 0) {
+      if ($kidslimit && $kidsfree <= 0) {
         # Since we can't accept any connects until we reap a kid, don't bother
         # selecting on Server until we do so. We have to do this test here
         # instead of in &spawn because we need the select loop to watch for
         # kids.
         vec($readvec, $server->fileno, 1) = 0;
-        logmsg "hit max-children limit (".$opt{'max-children'}."): waiting for some to exit";
+        logmsg "hit max-children limit (".$kidslimit."): waiting for some to exit";
         next;
       }
 
@@ -834,7 +838,7 @@ sub spawn {
     my $pid;
     my $pipe;
 
-    if ($opt{'max-children'}) {
+    if ($kidslimit) {
       $pipe=IO::Pipe->new();
       if (!defined($pipe)) {
         logmsg "pipe failed: $!";
@@ -842,14 +846,14 @@ sub spawn {
       }
     }
 
-    $extrapid--;
+    $kidsfree--;
 
     if (!defined($pid = fork)) {
       logmsg "cannot fork: $!";
-      $extrapid++;
+      $kidsfree++;
       return;
     } elsif ($pid) {
-      if ($opt{'max-children'}) {
+      if ($kidslimit) {
         $pipe->reader();
         $pipes{$pid} = $pipe;
         vec($readvec, $pipe->fileno(), 1) = 1;
@@ -858,7 +862,7 @@ sub spawn {
     }
     # else I'm the child -- go spawn
 
-    if ($opt{'max-children'}) {
+    if ($kidslimit) {
       $pipe->writer();
       %pipes = ();  # No point in keeping the other kid pipes, close them all
     }
@@ -1304,8 +1308,8 @@ Options:
  -d, --daemonize                    Daemonize
  -h, --help                         Print usage message.
  -i ipaddr, --listen-ip=ipaddr,...  Listen on the IP ipaddr (default: 127.0.0.1)
- -m num, --max-children num         Allow maximum num children
  -p port, --port                    Listen on specified port (default: 783)
+ -m num, --max-children num         Allow maximum num children (default: 5)
  -q, --sql-config                   Enable SQL config (only useful with -x)
  -Q, --setuid-with-sql              Enable SQL config (only useful with -x,
                                     enables use of -H)
@@ -1579,11 +1583,11 @@ user I<nobody> and using the default configuration.
 
 Specify a maximum number of children to spawn. Spamd will wait until another
 child finishes before forking again. Meanwhile, incoming connections will be
-queued.
+queued.  Set to C<0> or a negative number to disable this functionality.  The
+default value is C<5>.
 
 Please note that there is a OS specific maximum of connections that can be
-queued (Try C<perl -MSocket -e'print SOMAXCONN'> to find this maximum). Also,
-this option causes spamd to create an extra pipe for each child.
+queued (Try C<perl -MSocket -e'print SOMAXCONN'> to find this maximum).
 
 =item B<-H> I<directory>, B<--helper-home-dir>=I<directory>
 
