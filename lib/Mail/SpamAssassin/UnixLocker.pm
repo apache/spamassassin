@@ -2,9 +2,7 @@ package Mail::SpamAssassin::UnixLocker;
 
 use strict;
 use bytes;
-use Fcntl;
 
-use Fcntl ':DEFAULT',':flock';
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Locker;
 use Mail::SpamAssassin::Util;
@@ -33,7 +31,7 @@ sub new {
 # Attempt to create a file lock, using NFS-safe locking techniques.
 #
 # Locking code adapted from code by Alexis Rosen <alexis@panix.com>
-# by Kelsey Cummings <kgc@sonic.net>, with scattered mods by jm
+# by Kelsey Cummings <kgc@sonic.net>, with mods by jm and quinlan
 
 use constant LOCK_MAX_AGE => 300;	# seconds 
 use constant LOCK_MAX_RETRIES => 30;	# average 1 per second
@@ -48,40 +46,39 @@ sub safe_lock {
 					("$path.lock.$HOSTNAME.$$");
 
   my $umask = 077;
-  if ( !open(LTMP, ">$lock_tmp") ) {
+  if (!open(LTMP, ">$lock_tmp")) {
       umask $umask;
-      die "cannot create tmp lockfile $lock_tmp for $lock_file: $!\n";
+      die "lock: $$ cannot create tmp lockfile $lock_tmp for $lock_file: $!\n";
   }
   umask $umask;
   autoflush LTMP 1;
-  dbg("lock: created $lock_tmp");
+  dbg("lock: $$ created $lock_tmp");
 
   for (my $retries = 0; $retries < LOCK_MAX_RETRIES; $retries++) {
     if ($retries > 0) {
-      my $sleep = rand(1.0) + 0.5;
-      select(undef, undef,undef, $sleep);
+      select(undef, undef, undef, (rand(1.0) + 0.5));
     }
     print LTMP "$HOSTNAME.$$\n";
     dbg("lock: $$ trying to get lock on $path with $retries retries");
     if (link($lock_tmp, $lock_file)) {
-      dbg("lock: link to $lock_file: link ok");
+      dbg("lock: $$ link to $lock_file: link ok");
       $is_locked = 1;
       last;
     }
     # link _may_ return false even if the link _is_ created
     @stat = stat($lock_tmp);
     if ($stat[3] > 1) {
-      dbg("lock: link to $lock_file: stat ok");
+      dbg("lock: $$ link to $lock_file: stat ok");
       $is_locked = 1;
       last;
     }
-    # check to see how old the lockfile is
+    # check age of lockfile ctime
     my $now = ($#stat < 11 ? undef : $stat[10]);
     @stat = stat($lock_file);
     my $lock_age = ($#stat < 11 ? undef : $stat[10]);
     if (!defined($lock_age) || ($now - $lock_age) > LOCK_MAX_AGE) {
       # we got a stale lock, break it
-      dbg("lock: breaking stale $lock_file: age=" .
+      dbg("lock: $$ breaking stale $lock_file: age=" .
 	  (defined $lock_age ? $lock_age : "undef") . " now=$now");
       unlink $lock_file;
     }
@@ -98,8 +95,8 @@ sub safe_lock {
 sub safe_unlock {
   my ($self, $path) = @_;
 
-  unlink "$path.lock";
-  dbg("unlock: unlink $path.lock");
+  unlink "$path.lock" || warn "unlock: $$ unlink failed: $path.lock\n";
+  dbg("unlock: $$ unlink $path.lock");
 }
 
 ###########################################################################
