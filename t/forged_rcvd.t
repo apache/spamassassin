@@ -8,8 +8,8 @@ use Test; BEGIN { plan tests => 2 };
 
 %patterns = (
 
-q{ Possibly-forged 'Received:' header found }, 'rcvdspotted',
-q{ BODY: Claims you can be removed from the list }, 'bodyspotted',
+q{ ,FORGED_RCVD_FOUND }, 'rcvdspotted',
+q{ ,VACATION_SCAM }, 'bodyspotted',
 
 );
 

@@ -4,6 +4,8 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("reportheader");
 use Test; BEGIN { plan tests => 14 };
 
+$ENV{'LANG'} = 'C';             # a cheat, but we need the patterns to work
+
 # ---------------------------------------------------------------------------
 
 %patterns = (

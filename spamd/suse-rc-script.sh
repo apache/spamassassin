@@ -115,7 +115,7 @@ case "$1" in
 	rc_status -v
 	;;
     try-restart)
-	## Stop the service and if this succeeds (i.e. the
+	## Stop the service and if this succeeds (i.e. the 
 	## service was running before), start it again.
 	## Note: try-restart is not (yet) part of LSB (as of 0.7.5)
 	$0 status >/dev/null &&  $0 restart
