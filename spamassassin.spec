@@ -1,7 +1,7 @@
 %define name spamassassin
 %define real_name Mail-SpamAssassin
-%define version 2.1
-%define real_version 2.1
+%define version 2.11
+%define real_version 2.11
 %define release 1
 %define initdir %{_initrddir}
 
