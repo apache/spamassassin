@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.99 2003/10/15 04:58:10 quinlan Exp $
+# $Id: HTML.pm,v 1.100 2003/10/15 07:53:11 quinlan Exp $
 
 # HTML decoding TODOs
 # - add URIs to list for faster URI testing
@@ -71,6 +71,7 @@ sub html_render {
   $self->{html}{shouting} = 0;
   $self->{html}{max_shouting} = 0;
   $self->{html}{total_comment_ratio} = 0;
+  $self->{html}{title_index} = -1;
 
   $self->{html_text} = [];
   $self->{html_last_tag} = 0;
@@ -565,8 +566,13 @@ sub html_tests {
     $self->{html}{embeds} = 1;
   }
   if ($tag eq "title") {
-    $self->{html}{title_text} = "" unless defined $self->{html}{title_tag};
-    $self->{html}{title_tag}++;
+    $self->{html}{title_index}++;
+    $self->{html}{title_text} = "" if ($self->{html}{title_index} == 0);
+
+    # begin test code
+    $self->{html}{t_title}->[$self->{html}{title_index}] = "";
+    # end test code
+
     # begin test code
     if (exists $self->{html}{"inside_body"} &&
 	$self->{html}{"inside_body"} > 0)
@@ -592,7 +598,7 @@ sub html_tests {
     {
       $self->{html}{t_title_misplaced_4}++;
     }
-    if ($self->{html}{title_tag} > 1)
+    if ($self->{html}{title_index} > 0)
     {
       $self->{html}{t_title_extra}++;
     }
@@ -645,7 +651,9 @@ sub html_text {
 
   if (exists $self->{html}{"inside_title"} && $self->{html}{"inside_title"} > 0)
   {
-    $self->{html}{title_text} .= $text if ($self->{html}{title_tag} == 1);
+    $self->{html}{title_text} .= $text if ($self->{html}{title_index} == 0);
+    $self->{html}{t_title}->[$self->{html}{title_index}] .= $text;
+    print STDERR $self->{html}{title_index} . "\t" .  $self->{html}{t_title}->[$self->{html}{title_index}] . "\n";
   }
 
   $self->html_font_invisible($text) if $text =~ /[^ \t\n\r\f\x0b\xa0]/;
