@@ -259,6 +259,36 @@ sub lookup_mx {
   return $ret;
 }
 
+sub lookup_ptr {
+  my ($self, $dom) = @_;
+
+  return undef unless $self->load_resolver();
+
+  dbg ("looking up PTR record for '$dom'");
+  my $name = '';
+
+  eval {
+        my $query = $self->{res}->search($dom);
+        if ($query) {
+	  foreach my $rr ($query->answer) {
+	    if ($rr->type eq "PTR") {
+	      $name = $rr->ptrdname; last;
+	    }
+	  }
+        }
+
+  };
+  if ($@) {
+    # 71 == EX_OSERR.  PTR lookups are not supposed to crash and burn!
+    sa_die (71, "PTR lookup died: $@ $!\n");
+  }
+
+  dbg ("PTR for '$dom': '$name'");
+
+  # note: undef is never returned, unless DNS is unavailable.
+  return $name;
+}
+
 sub is_dns_available {
   my ($self) = @_;
 
