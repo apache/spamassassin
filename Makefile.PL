@@ -51,6 +51,7 @@ WriteMakefile(
 
     # be quite explicit about this; afaik CPAN.pm is sensible using this
     'PREREQ_PM' => {
+                        'Digest::SHA1' => 0,
                         'File::Spec' => 0,
                         'File::Copy' => 0,
                         'Pod::Usage' => 0,
