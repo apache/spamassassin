@@ -1237,7 +1237,6 @@ sub lint_rules {
 
   $self->{lint_rules} = $self->{conf}->{lint_rules} = 1;
   $self->{syntax_errors} = 0;
-  $self->{rule_errors} = 0;
 
   $self->init(1);
   $self->{syntax_errors} += $self->{conf}->{errors};

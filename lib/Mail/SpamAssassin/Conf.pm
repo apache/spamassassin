@@ -487,6 +487,9 @@ include it when modify your ruleset, especially if you plan to distribute it.
 A good choice for I<string> is your last name or your initials followed by a
 number which you increase with each change.
 
+The version_tag will be lowercased, and any non-alphanumeric or period
+character will be replaced by an underscore.
+
 e.g.
 
   version_tag myrules1    # version=2.41-myrules1
@@ -751,9 +754,6 @@ sub-rules, and are not scored or listed in the 'tests hit' reports.
 If no score is given for a test, the default score is 1.0, or 0.01 for
 tests whose names begin with 'T_' (this is used to indicate a rule in
 testing).
-
-By convention, rule names are be all uppercase and have a length of no
-more than 22 characters.
 
 =cut
 
@@ -2015,9 +2015,10 @@ rules are not supported, even if you use C<x> as a modifier.
 If the C<[if-unset: STRING]> tag is present, then C<STRING> will
 be used if the header is not found in the mail message.
 
-Test names should not start with a number, and must contain only alphanumerics
-and underscores.  It is suggested that lower-case characters not be used, as an
-informal convention.  Dashes are not allowed.
+Test names should not start with a number, and must contain only
+alphanumerics and underscores.  It is suggested that lower-case characters
+not be used, and names have a length of no more than 22 characters,
+as an informal convention.  Dashes are not allowed.
 
 Note that test names which begin with '__' are reserved for meta-match
 sub-rules, and are not scored or listed in the 'tests hit' reports.
@@ -2766,12 +2767,43 @@ failed_line:
     $self->{errors}++;
   }
 
-  # All scoresets should have a score defined, so if this one doesn't,
-  # we should set a default...  Do this here instead of add_test
-  # because mostly 'score' occurs after the rule is specified, so why
-  # set the scores to default, then set them again at 'score'?
+  # Let's do some linting here ...
+  # This is here, BTW, so we can check for $self->{tests} easily before
+  # finish_parsing() is called and deletes it.
+  if ($self->{lint_rules}) {
+    # Check for description and score issues in lint fashion
+    while ( my($k,$v) = each %{$self->{descriptions}} ) {
+      if (length($v) > 50) {
+        warn "warning: description for $k is over 50 chars\n";
+        $self->{errors}++;
+      }
+      if (!exists $self->{tests}->{$k}) {
+        warn "warning: description exists for non-existent rule $k\n";
+        $self->{errors}++;
+      }
+    }
+
+    while ( my($k) = each %{$self->{scores}} ) {
+      if (!exists $self->{tests}->{$k}) {
+        warn "warning: score set for non-existent rule $k\n";
+        $self->{errors}++;
+      }
+    }
+  }
+
+  # we should set a default score for all valid rules...  Do this here
+  # instead of add_test because mostly 'score' occurs after the rule is
+  # specified, so why set the scores to default, then set them again at
+  # 'score'?
   # 
   while ( my($k,$v) = each %{$self->{tests}} ) {
+    if ($self->{lint_rules}) {
+      if (length($k) > 22 && $k !~ /^__/ && $k !~ /^T_/) {
+        warn "warning: rule '$k' is over 22 chars\n";
+        $self->{errors}++;
+      }
+    }
+
     if ( ! exists $self->{scores}->{$k} ) {
       # T_ rules (in a testing probationary period) get low, low scores
       my $set_score = ($k =~/^T_/) ? 0.01 : 1.0;
@@ -2788,6 +2820,14 @@ failed_line:
 
 sub add_test {
   my ($self, $name, $text, $type) = @_;
+
+  # Don't allow invalid names ...
+  if ($name !~ /^\w+$/) {
+    warn "error: rule '$name' has invalid characters (not Alphanumeric + Underscore)\n";
+    $self->{errors}++;
+    return;
+  }
+
   $self->{tests}->{$name} = $text;
   $self->{test_types}->{$name} = $type;
   $self->{tflags}->{$name} ||= '';
