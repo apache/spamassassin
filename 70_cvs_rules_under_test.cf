@@ -148,3 +148,18 @@ meta T_MISSING_OUTLOOK_NAME	((__HAS_MIMEOLE || __HAS_MSMAIL_PRI) && __HAS_X_MAIL
 # This will change USER_AGENT as well
 # Basically exists:User-Agent && !FAKE_USER_AGENT
 meta T_FAKE_USER_AGENT ( USER_AGENT_PINE + USER_AGENT_MUTT + USER_AGENT_MOZILLA_UA + USER_AGENT_MOZILLA_XM + USER_AGENT_MACOE + USER_AGENT_ENTOURAGE + USER_AGENT_KMAIL + USER_AGENT_IMP + USER_AGENT_TONLINE + USER_AGENT_APPLEMAIL + USER_AGENT_GNUS_UA + USER_AGENT_GNUS_XM + USER_AGENT_VM + USER_AGENT_MSN + USER_AGENT_FORTE + USER_AGENT_XIMIAN ) > 1
+
+# bug 1316
+# 12/28 - tvd - someone mentioned that there's a standard to the mutt
+# message-id.  Sure enough, unless mutt is compiled to send messages anonymously:
+# From 0.93.2 - 1.2.5.1, it was essentially:
+#  snprintf (buf, sizeof (buf), "<%d%02d%02d%02d%02d%02d.%c%d@%s>",
+#            tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour,
+#            tm->tm_min, tm->tm_sec, MsgIdPfx, getpid (), fqdn);
+#  MsgIdPfx = (MsgIdPfx == 'Z') ? 'A' : MsgIdPfx + 1;
+# The code from mutt 1.4 is adds a 'G' for some reason:
+#  snprintf (buf, sizeof (buf), "<%d%02d%02d%02d%02d%02d.G%c%d@%s>",
+header __VALID_MUTT_MSGID	Message-Id =~ /^<[1-9]\d{3}[01]\d[0-3]\d[0-2]\d(?:[0-5]\d){2}\.G?[A-Z]\d+\@[a-zA-Z0-9._-]+>$/
+header __USER_AGENT_MUTT	User-Agent =~ m@^Mutt/\d(?:\.\d+){1,4}@
+meta T_USER_AGENT_MUTT		__USER_AGENT_MUTT && __VALID_MUTT_MSGID
+meta T_FORGED_MUA_MUTT		__USER_AGENT_MUTT && !__VALID_MUTT_MSGID
