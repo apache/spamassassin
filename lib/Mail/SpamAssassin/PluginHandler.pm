@@ -157,6 +157,10 @@ sub callback {
     eval {
       $ret = &$methodref ($plugin, @_);
     };
+    if ($@) {
+      warn "plugin: eval failed: $@";
+    }
+
     if ($ret) {
       #dbg("plugin: ${plugin}->${methodref} => $ret");
       $overallret = $ret;
