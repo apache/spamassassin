@@ -278,8 +278,9 @@ for ( $waitedpid = 0;
 		print "SPAMD/1.0 $resphash{$resp} $resp\r\n",
 		      $msg_resp;
 	    }
-
-	    logmsg "processed successfully for $current_user:$> in ".
+	    my $was_it_spam;
+	    if($status->is_spam) { $was_it_spam = 'identified spam'; } else { $was_it_spam = 'clean message'; }
+	    logmsg "$was_it_spam for $current_user:$> in ".
 			 sprintf("%3d", time - $start) ." seconds.\n";
 
 	    $status->finish();	# added by jm to allow GC'ing
