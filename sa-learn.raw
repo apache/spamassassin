@@ -434,9 +434,7 @@ message-count of the last expiry run, the message-count of the oldest token in
 the database, and the message-count of the current message (to the nearest
 5000).
 
-This is a database file, using the first one of the following database modules
-that SpamAssassin can find in your perl installation: C<DB_File>, C<GDBM_File>,
-C<NDBM_File>, or C<SDBM_File>.
+This is a database file, using C<DB_File>.
 
 =item bayes_seen
 
@@ -445,9 +443,7 @@ so that SpamAssassin can avoid re-learning a message it's already seen,
 and so it can reverse the training if you later decide that message
 was previously learnt incorrectly.
 
-This is a database file, using the first one of the following database modules
-that SpamAssassin can find in your perl installation: C<DB_File>, C<GDBM_File>,
-C<NDBM_File>, or C<SDBM_File>.
+This is a database file, using C<DB_File>.
 
 =item bayes_journal
 
