@@ -44,7 +44,7 @@ sub extract {
   my $offset = shift;
   my $found = 0;
 
-  open (IN, "<$file");
+  open (IN, "<$file") || die "Could not open $file: $!\n";
 
   while(<IN>) {
 
@@ -63,6 +63,7 @@ sub extract {
 sub masscheck {
   while (<STDIN>) {
     my $mail = (split(/\s+/, $_))[2];
+    $mail =~ tr/_/ /;
     if ($mail =~ /^(.*)\.(\d+)$/) {
       extract($1, $2);
     } else { # could just be a filename. Lets print it anyway.
