@@ -589,6 +589,7 @@ sub do_head_tests {
   while (($rulename, $rule) = each %{$self->{conf}->{head_tests}}) {
     my $hit = 0;
     $self->clear_test_state();
+    next if ($self->{conf}->{scores}->{$rulename} == 0);
 
     my $def = '';
     my ($hdrname, $testtype, $pat) = 
@@ -619,6 +620,7 @@ sub do_body_tests {
   # build up the eval string...
   my $evalstr = '';
   while (($rulename, $pat) = each %{$self->{conf}->{body_tests}}) {
+    next if ($self->{conf}->{scores}->{$rulename} == 0);
     $evalstr .= '
       if ('.$pat.') { $self->got_body_pattern_hit (q{'.$rulename.'}); }
     ';
@@ -645,6 +647,7 @@ sub do_full_tests {
   # build up the eval string...
   my $evalstr = '';
   while (($rulename, $pat) = each %{$self->{conf}->{full_tests}}) {
+    next if ($self->{conf}->{scores}->{$rulename} == 0);
     $evalstr .= '
       if ($$fullmsgref =~ '.$pat.') { $self->got_hit (q{'.$rulename.'}, q{}); }
     ';
@@ -685,6 +688,7 @@ sub run_eval_tests {
   while (($rulename, $evalsub) = each %{$evalhash}) {
     my $result;
     $self->clear_test_state();
+    next if ($self->{conf}->{scores}->{$rulename} == 0);
 
     @args = ();
     if (scalar @extraevalargs >= 0) { push (@args, '@extraevalargs'); }

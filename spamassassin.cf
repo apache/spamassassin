@@ -160,6 +160,7 @@ describe OSIRU_CONFIRMED_SPAM_SOURCE Osirusoft.com: sender is Confirmed Spam Sou
 header OSIRU_SPAMWARE_SITE	eval:check_rbl_results_for('127.0.0.6')
 describe OSIRU_SPAMWARE_SITE	Osirusoft.com: sender is a Spamware site or vendor
 
+# NOTE: commercial tests, see README file for details
 header RCVD_IN_RBL		eval:check_rbl('blackholes.mail-abuse.org.')
 describe RCVD_IN_RBL		Received via RBL-listed relay, see http://www.mail-abuse.org/rbl/
 
@@ -168,6 +169,10 @@ describe RCVD_IN_RSS		Received via RSS-listed relay, see http://www.mail-abuse.o
 
 header RCVD_IN_DUL		eval:check_rbl('dialups.mail-abuse.org.')
 describe RCVD_IN_DUL		Received from a dialup IP, see http://www.mail-abuse.org/dul/
+
+# NOTE: commercial test, see README file for details
+header RCVD_IN_BL_SPAMCOP_NET	eval:check_rbl('bl.spamcop.net.')
+describe RCVD_IN_BL_SPAMCOP_NET	Received via a relay in bl.spamcop.net
 
 header FORGED_RCVD_FOUND	ALL =~ /\n(?:Date|Subject|From):.*\nReceived: .*\n\n/s
 describe FORGED_RCVD_FOUND	Possibly-forged 'Received:' header found
@@ -431,17 +436,8 @@ score BAD_HELO_WARNING		4
 # to receive mails in non-ISO-Latin-1 charsets, set this to 0!
 score SUBJ_FULL_OF_8BITS	5
 
-# Received via a relay listed in the RBL (see maps.vix.com/rbl)
-score RCVD_IN_RBL		10
-
 # Received via a relay listed in relays.orbs.org
 score RCVD_IN_RELAYS_ORBS_ORG	1
-
-# Received via a relay listed in http://www.mail-abuse.org/rss/
-score RCVD_IN_RSS		1
-
-# Received via a dialup IP address listed in http://www.mail-abuse.org/dul/
-score RCVD_IN_DUL		1
 
 # confirmed codes from Osirusoft
 score OSIRU_CONFIRMED_SPAM_SOURCE	3
@@ -460,6 +456,18 @@ score FROM_FORGED_HOTMAIL	1
 
 # spam-tool gibberish in the X-Mailer line
 score X_MAILER_GIBBERISH	4
+
+# Received via a relay listed in the RBL (see maps.vix.com/rbl)
+score RCVD_IN_RBL		0
+
+# Received via a relay listed in http://www.mail-abuse.org/rss/
+score RCVD_IN_RSS		0
+
+# Received via a dialup IP address listed in http://www.mail-abuse.org/dul/
+score RCVD_IN_DUL		0
+
+# Received via an IP listed in SpamCop blacklist
+score RCVD_IN_BL_SPAMCOP_NET	0
 
 ###########################################################################
 
