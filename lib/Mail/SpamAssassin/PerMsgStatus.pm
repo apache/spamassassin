@@ -1194,6 +1194,28 @@ sub get_decoded_stripped_body_text_array {
     my $before = substr($text, 0, length($1));
     $text = substr($text, length($1));
 
+    # Bug #1551: HTML declarations, like <!foo>, are being used by spammers
+    # for obfuscation, and they aren't stripped out by HTML::Parser.
+    # We have to strip these out *before* the parser is invoked, because
+    # otherwise a spammer could do "&lt;! body of message &gt;", which
+    # would get turned into "<! body of message >" by the parser, and then
+    # the whole body message would be stripped.
+
+    # Also take care of things like < foo > or </ foo > or <>
+
+    # NOTE: HTML::Parser can cope with: <?xml pis>, <? with space>,
+    # so we don't need to fix them here.
+
+    $text =~
+      s{<(?:
+         !           # The start of either an HTML comment or declaration...
+         (?!--)[^>]* # But *not* followed by "--", so it isn't a comment...
+
+         |\s[^>]*    # < foo >
+         |/\s[^>]*   # </ foo >
+         |\s*        # <> or < >
+         )>}{}gsx;
+
     $self->{html_text} = [];
     $self->{html_last_tag} = 0;
     my $hp = HTML::Parser->new(
@@ -1215,21 +1237,6 @@ sub get_decoded_stripped_body_text_array {
     $hp->eof;
 
     $text = join('', $before, @{$self->{html_text}});
-
-    # Clean up *more* obfuscatory comment styles that HTML::Parser won't
-    # parse, but common MUAs like Outlook will (for some reason).  We do
-    # this after HTML::Parser, even though this means we may eat &lt;&gt;
-    # tag examples, because it's faster to do it here.
-    #
-    # NOTE: HTML::Parser can cope with: <?xml pis>, <? with space>,
-    # so we don't need to fix them here.
-    #
-    $text =~ s{<(?:
-	![^>]*		# <!invalid comment style>
-	|\s[^>]*	# < foo >
-	|\/\s[^>]*	# </ foo >
-	|\s*		# <> or < >
-    )>}{}gsx;
 
     if ($raw > 0) {
       my $space = ($before =~ tr/ \t\n\r\x0b\xa0/ \t\n\r\x0b\xa0/);
