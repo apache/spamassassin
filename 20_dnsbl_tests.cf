@@ -31,8 +31,8 @@ header RCVD_IN_OSIRUSOFT_COM	rbleval:check_rbl('osirusoft', 'relays.osirusoft.co
 describe RCVD_IN_OSIRUSOFT_COM	Received via a relay in relays.osirusoft.com
 tflags RCVD_IN_OSIRUSOFT_COM    net
 
-# X prefix was used to insure that it was run at the end, but it's not needed
-# anymore since we run the rule with rblreseval -- Marc
+# the X prefixes were originally needed to ensure that these rules were
+# run last, but ordering is not necessary now.
 header X_OSIRU_OPEN_RELAY	rbleval:check_rbl_sub('osirusoft', '127.0.0.2')
 describe X_OSIRU_OPEN_RELAY	DNSBL: sender is Confirmed Open Relay
 tflags X_OSIRU_OPEN_RELAY	net
