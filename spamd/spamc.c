@@ -38,8 +38,14 @@
 #if (defined(__sun__) && defined(__sparc__) && !defined(__svr4__)) /* SunOS */
      || (defined(_IRIX_))  /* IRIX */
      || (defined(__osf__)) /* Digital UNIX */
+     || (defined(hpux) || defined(__hpux)) /* HPUX */
+# ifndef h_errno
+# define h_errno errno
+# endif
+
 # ifndef EX__MAX
 # define EX__MAX 77
+
 extern char *optarg;
 typedef unsigned long	in_addr_t;	/* base type for internet address */
 # endif
