@@ -1309,11 +1309,11 @@ sub tok_unpack {
   $value ||= 0;
 
   my ($packed, $atime);
-  if ( $self->{db_version} == 0 ) {
-    ($packed, $atime) = unpack("CS", $value);
-  }
-  elsif ( $self->{db_version} == 1 || $self->{db_version} == 2 ) {
+  if ( $self->{db_version} == 1 || $self->{db_version} == 2 ) {
     ($packed, $atime) = unpack("CV", $value);
+  }
+  elsif ( $self->{db_version} == 0 ) {
+    ($packed, $atime) = unpack("CS", $value);
   }
 
   if (($packed & FORMAT_FLAG) == ONE_BYTE_FORMAT) {
@@ -1323,14 +1323,14 @@ sub tok_unpack {
   }
   elsif (($packed & FORMAT_FLAG) == TWO_LONGS_FORMAT) {
     my ($packed, $ts, $th, $atime);
-    if ( $self->{db_version} == 0 ) {
-      ($packed, $ts, $th, $atime) = unpack("CLLS", $value);
+    if ( $self->{db_version} == 2 ) {
+      ($packed, $ts, $th, $atime) = unpack("CVVV", $value);
     }
     elsif ( $self->{db_version} == 1 ) {
       ($packed, $ts, $th, $atime) = unpack("CVVV", $value);
     }
-    elsif ( $self->{db_version} == 2 ) {
-      ($packed, $ts, $th, $atime) = unpack("CVVV", $value);
+    elsif ( $self->{db_version} == 0 ) {
+      ($packed, $ts, $th, $atime) = unpack("CLLS", $value);
     }
     return ($ts || 0, $th || 0, $atime || 0);
   }
