@@ -298,7 +298,6 @@ describe FILL_OUT_HERE          Looks like something to fill out
 # it's there.  *boggle* (contrib: WW)
 body WANTS_CREDIT_CARD          /\bcredit.?card\b/i
 describe WANTS_CREDIT_CARD      Asks for credit card details
-score WANTS_CREDIT_CARD         2
 
 # (contrib: WW)
 body ASKS_BILLING_ADDRESS       /\bbilling address\b/i
@@ -498,6 +497,10 @@ score GREEN_EXCUSE_2		3
 score FILTERED_BY_WORLDREMOVE	3
 
 score WEB_BUGS			5
+
+score FILL_OUT_HERE		2
+score CYBER_FIRE_POWER		4
+score INTERNET_TERROR_RANT	8
 
 ###########################################################################
 # Compensation for common false positives.
