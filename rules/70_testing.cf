@@ -476,3 +476,6 @@ replace_rules T_OBFU_SUBMIT
 replace_rules T_OBFU_VISIT
 
 endif   #ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
+
+# catch non-RFC2047 compliant messages
+header T_BAD_ENC_HEADER		ALL =~ /=\?[^?\s]+\?[^?\s]\?[^?]*\s/

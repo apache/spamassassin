@@ -87,7 +87,17 @@ my %files = (
 	],
 );
 
-my $numtests = 0;
+# initialize SpamAssassin
+my $sa = Mail::SpamAssassin->new({
+    rules_filename => "$prefix/t/log/test_rules_copy",
+    site_rules_filename => "$prefix/t/log/test_default.cf",
+    userprefs_filename  => "$prefix/masses/spamassassin/user_prefs",
+    local_tests_only    => 1,
+    debug             => 0,
+    dont_copy_prefs   => 1,
+});
+
+my $numtests = 5;
 while ( my($k,$v) = each %files ) {
   $numtests += @{$v};
 }
@@ -96,7 +106,7 @@ plan tests => $numtests;
 
 foreach my $k ( sort keys %files ) {
   open(INP, $k) || die "Can't find $k:$!";
-  my $mail = Mail::SpamAssassin->parse(\*INP, 1);
+  my $mail = $sa->parse(\*INP, 1);
   close(INP);
 
   my $res = join("\n",$mail->content_summary());
@@ -124,4 +134,39 @@ foreach my $k ( sort keys %files ) {
       shift @parts;
     }
   }
+  $mail->finish();
 }
+
+my @msg;
+my $subject;
+my $mail;
+
+@msg = ("Subject: =?ISO-8859-1?Q?a?=\n", "\n");
+$mail = $sa->parse(\@msg);
+$subject = $mail->get_header("Subject");
+$mail->finish();
+ok($subject eq "a\n");
+
+@msg = ("Subject: =?ISO-8859-1?Q?a?= b\n", "\n");
+$mail = $sa->parse(\@msg);
+$subject = $mail->get_header("Subject");
+$mail->finish();
+ok($subject eq "a b\n");
+
+@msg = ("Subject: =?ISO-8859-1?Q?a?=   \t =?ISO-8859-1?Q?b?=\n", "\n");
+$mail = $sa->parse(\@msg);
+$subject = $mail->get_header("Subject");
+$mail->finish();
+ok($subject eq "ab\n");
+
+@msg = ("Subject: =?ISO-8859-1?Q?a?=\n", " =?ISO-8859-1?Q?_b?=\n", "\n");
+$mail = $sa->parse(\@msg);
+$subject = $mail->get_header("Subject");
+$mail->finish();
+ok($subject eq "a b\n");
+
+@msg = ("Subject: =?ISO-8859-1?Q?a?=\n", " =?ISO-8859-1?Q?_b?= mem_brain =?  invalid ?=\n", "\n");
+$mail = $sa->parse(\@msg);
+$subject = $mail->get_header("Subject");
+$mail->finish();
+ok($subject eq "a b mem_brain =?  invalid ?=\n");

@@ -480,6 +480,10 @@ sub __decode_header {
   }
   elsif ( $cte eq 'Q' ) {
     # quoted printable
+
+    # the RFC states that in the encoded text, "_" is equal to "=20"
+    $data =~ s/_/=20/g;
+
     return Mail::SpamAssassin::Util::qp_decode($data);
   }
   else {
@@ -500,8 +504,13 @@ sub _decode_header {
 
   return $header unless $header =~ /=\?/;
 
+  # multiple encoded sections must ignore the interim whitespace.
+  # to avoid possible FPs with (\s+(?==\?))?, look for the whole RE
+  # separated by whitespace.
+  1 while ($header =~ s/(=\?[\w_-]+\?[bqBQ]\?[^?]+\?=)\s+(=\?[\w_-]+\?[bqBQ]\?[^?]+\?=)/$1$2/g);
+
   $header =~
-    s/=\?([\w_-]+)\?([bqBQ])\?(.*?)\?=/__decode_header($1, uc($2), $3)/ge;
+    s/=\?([\w_-]+)\?([bqBQ])\?([^?]+)\?=/__decode_header($1, uc($2), $3)/ge;
 
   return $header;
 }
