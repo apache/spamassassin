@@ -13,18 +13,24 @@ whitelist_from	support@register.com
 whitelist_from	nytdirect@nytimes.com
 whitelist_from	petitions@petitiononline.com
 
-whitelist_from  *fatbrain.com
-whitelist_from  *amazon.com
-whitelist_from  *amazon.co.uk
-whitelist_from  *ebay.com
-whitelist_from	*ora.com		# O'Reilly
+whitelist_from  *@*.fatbrain.com
+whitelist_from  *@fatbrain.com
+whitelist_from  *@amazon.com
+whitelist_from  *@*.amazon.com
+whitelist_from  *@amazon.co.uk
+whitelist_from  *@*.amazon.co.uk
+whitelist_from  *@ebay.com
+whitelist_from  *@*.ebay.com
+whitelist_from	*@ora.com		# O'Reilly
+whitelist_from  *@*.ora.com
 whitelist_from  *@walmart.com
 whitelist_from  *@bn.com
 whitelist_from  *@paypal.com
 whitelist_from  *@online.telstra.com.au
 
 whitelist_from  *@yahoo-inc.com         # Subscriptions required
-whitelist_from  *mypoints.com          # Subscriptions required
+whitelist_from  *@mypoints.com          # Subscriptions required
+whitelist_from  *@*.mypoints.com
 
 # bugtraq: can contain malicious Javascript etc.
 whitelist_from  *@securityfocus.com
