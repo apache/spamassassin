@@ -248,7 +248,7 @@ double evaluate(PGAContext *ctx, int p, int pop)
 
   double ynweight,nyweight;
 
-#if 1
+#if 0
 
   // just count how far they were from the threshold, in each case
   ynweight = (ga_yn * threshold) - ynscore;
