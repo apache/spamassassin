@@ -49,7 +49,7 @@ Options:
                     (defaults to 127.0.0.1 only)
     -i ipaddr     Listen on the specified IP address (defaults to 127.0.0.1,
                   use 0.0.0.0 to listen on all available addresses)
-    -p port       Listen on the specific port (otherwise default is port 22874)
+    -p port       Listen on the specific port (otherwise default is port 783)
     -u username   Run as named user, instead of running setuid to spamc user
     -d		  Daemonize, detach from parent process
     -x            Disable user config files
@@ -141,7 +141,7 @@ sub logmsg; # forward declaration
 setlogsock('unix');
 openlog('spamd','cons,pid',$log_facility);
 
-my $port = $opt_p || 22874;
+my $port = $opt_p || 783;
 my $addr = gethostbyname($opt_i || '127.0.0.1');
 my $proto = getprotobyname('tcp');
 

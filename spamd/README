@@ -8,12 +8,20 @@ automated mail checking.  This document is a brief synopsis of how spamc/spamd
 work, and how to use them effectively.
 
 
+Changes since 1.x
+-----------------
+
+Spamd now listens on port 783, instead of 22874.  If you're keeping spamc and
+spamd in sync (which you should be!), and running spamd as root (the default),
+you won't even notice this.
+
+
 Spamd
 -----
 
 Spamd is the workhorse of the spamc/spamd pair -- it loads an instance of the
 spamassassin filters, and then listens as a daemon for incoming requests to
-process messages.  By default, spamd listens on port 22874, but this is
+process messages.  By default, spamd listens on port 783, but this is
 specifiable on the command line.  When spamd receives a connection, it spawns a
 child to handle the request.  The child will expect to read an email message
 from the network socket, which should then be closed for writing on the other
@@ -55,34 +63,14 @@ basis at least some caution is advisable.
 
 System-level security:
 
-By default spamd and spamc use port 22874, on 99% of the systems which spamd 
-runs, this is considered an utrusted port .. any user may bind to that port. 
-This means that if spamd falls over any user may bind to that port and read 
-your mail and return fake mail at their lesiure.
-
-If you are running spamd on a system where users have access to run 
-processes (common examples include: shells,cgi,procmail filters,servlets) 
-or are concerned about potential priveledge escalation if someone did manage 
-to gain shell access (a common feat unfortunately) you may wish to consider 
-running spamd on a port below 1024. 783 is a reasonable choice, unassigned 
-and unlikely to clash with anything you're running,. If it does, use a 
-different port. Spamd must be started as root for this to work, however it 
-neednt run as root.
-
-Using spamd on this port is easy, if you are using the debian-style
-init script, add "-p 783" to OPTIONS in /etc/defaults/spamassin or
-/etc/spamd.conf. If you use other init scripts modify them directly
-to invoke spamd with the "-p 783" option. You must also invoke
-spamc with this option when using it.
-
-In short: if you can run it on a low port, do. Nothing to lose
-          and plenty to gain.
-
-Spamd has the facility to run as a non-root user, this has potential
-security payoffs. If a fault is found in spamd or spamassassin code,
-any third party linked-libraries or imported perl modules there is 
-the potential for abuse of both the running uid of spamd, and the
-uid of the username suppplied by spamc (and this can be any username)
+Spamd has the facility to run as a non-root user, this has potential security
+payoffs. If a fault is found in spamd or spamassassin code, any third party
+linked-libraries or imported perl modules there is the potential for abuse of
+both the running uid of spamd, and the uid of the username supplied by spamc
+(and this could be any user).   If you do not need to let your users define
+their own rules, maintain their own whitelists, or have non-world-readable
+home and ~/.spamassassin directories, then just set spamd up to run with
+the "-u username" option.
 
 When run as root, spamd will change uid's to the user inoking spamc in 
 order to read and write to their configurations. This functionality
@@ -99,7 +87,7 @@ spamc clients to make spamd:
  (2.)  change the contents of other users configurations (whitelisting)
  (3.)  grab CPU time as that user -- this is an issue on ulimit'd systems
 
-if users do not have the opportunity to invoke spamc themselves, and
+If users do not have the opportunity to invoke spamc themselves, and
 the network is secure, running spamd as root is the preferred option,
 Be clear that the issues above dont affect you. Note: if you use mysql
 for per-user configuration on systems, you will remain vulnerable to
@@ -116,12 +104,12 @@ can users connect?      yes      no           yes     no
                                safe as non-root
                                           |
                                           |
-                                  some depcrecation
+                                  some deprecation
 
 Network security:
 
 If you use spamd across a network and spamc connects from other hosts,
-You should ensure (as with all services) the security of your network
+you should ensure (as with all services) the security of your network
 segments. Mail is sent as plaintext, and is prone to packet sniffing and
 spoofing techniques if you are on an insecure network. If you cannot avoid
 this consider using an encrypted transport layer, such as a VPN, ssh
