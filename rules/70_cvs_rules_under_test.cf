@@ -88,20 +88,6 @@ body T_UNSUBSCRIBE_WTF		/(?:(?:customer ?service|unsubscribe|remov[ae]).{0,16}\b
 describe T_UNSUBSCRIBE_WTF	Send a postcard/letter/fax to unsubscribe
 score T_UNSUBSCRIBE_WTF		2.0
 
-# results for quinlan:
-# 0.333    1.023    0.000    1.00    0.77    1.00  T_RATWARE_CDO
-header T_RATWARE_CDO		X-Mailer =~ /Microsoft CDO for Windows 2000/
-describe T_RATWARE_CDO		Sent from "Microsoft CDO for Windows 2000" 
-score T_RATWARE_CDO		1.0
-
-# results for quinlan:
-# 0.368    1.131    0.000    1.00    0.78    1.00  T_RATWARE_THEBAT
-# results for msquadrat:
-# 4.328    3.189    4.372    0.42    0.28    0.30  USER_AGENT_THEBAT 
-header T_RATWARE_THEBAT		X-Mailer =~ /The Bat/
-describe T_RATWARE_THEBAT	Sent from "The Bat"
-score T_RATWARE_THEBAT		1.0
-
 # intended to replace URGENT_BIZ
 body T_URGENT_BIZ		/URGENT.{0,16}(?:ASSISTANCE|BUSINESS|BUY|CONFIDENTIAL|NOTICE|PROPOSAL)/i
 describe T_URGENT_BIZ		Contains URGENT matter
