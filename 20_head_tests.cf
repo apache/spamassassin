@@ -377,9 +377,7 @@ header USER_IN_ALL_SPAM_TO      eval:check_to_in_all_spam()
 describe USER_IN_ALL_SPAM_TO    User is listed in 'all_spam_to'
 tflags USER_IN_ALL_SPAM_TO      userconf nice
 
-# the old version allowed more non-letter characters to be considered
-# spacing, but suffered from somewhat higher false positive rates
-header GAPPY_SUBJECT		Subject =~ /\b(?:[a-z][-_. ]{1,3}){4,}/i
+header GAPPY_SUBJECT		Subject =~ /\b(?:[a-z]([-_. =~\/:,*!\@\#\$\%\^&+;\"\'<>\\])\1{0,2}){4,}/i
 describe GAPPY_SUBJECT		Subject: contains G.a.p.p.y-T.e.x.t
 
 ### header existence tests (description is added automatically)
