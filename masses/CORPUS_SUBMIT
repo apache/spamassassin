@@ -16,7 +16,7 @@ Instructions at:
 9. Run a mass-check for ham and spam together (one mass-check run)
 10. rename ham.log and spam.log to ham-yourname.log and spam-yourname.log
     (ie for Craig Hughes: ham-craig.log and spam-craig.log)
-9. rsync -CPcvuzb ham-yourname.log spam-yourname.log belphegore.hughes-family.org::corpus
+9. rsync -CPcvzb ham-yourname.log spam-yourname.log belphegore.hughes-family.org::corpus
 
 That should do it.  In the future when you re-run this procedure
 (starting from the top to get latest CVS rules), the rsync bit should
