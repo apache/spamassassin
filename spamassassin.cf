@@ -305,10 +305,10 @@ describe SUSPICIOUS_RECIPS      To: contains same domain at least 10 times
 header SUSPICIOUS_CC_RECIPS	Cc =~ /(@[-a-z0-9_.]+).*(?:\1.*){9,}/is
 describe SUSPICIOUS_CC_RECIPS	Cc: contains same domain at least 10 times
 
-header VERY_SUSP_RECIPS         To =~ /(..)[^@]*(@[-a-z0-9_.]+).*(?:\1[^@]*\2.*){9,}/is
+header VERY_SUSP_RECIPS         To =~ /([a-z][a-z])[^@]*(@[-a-z0-9_.]+).*(?:\1[^@]*\2.*){9,}/is
 describe VERY_SUSP_RECIPS       To: contains very similar addresses 10 times
 
-header VERY_SUSP_CC_RECIPS	Cc =~ /(..)[^@]*(@[-a-z0-9_.]+).*(?:\1[^@]*\2.*){9,}/is
+header VERY_SUSP_CC_RECIPS	Cc =~ /([a-z][a-z])[^@]*(@[-a-z0-9_.]+).*(?:\1[^@]*\2.*){9,}/is
 describe VERY_SUSP_CC_RECIPS	Cc: contains very similar addresses 10 times
 
 header Q_FOR_SELLER		Subject =~ /Question for seller/
@@ -347,7 +347,8 @@ full SENT_IN_COMPLIANCE		/message .{0,10}sen(?:d|t) in compliance (?:of|with)/
 full PARA_A_2_C_OF_1618		/Paragraph .a.{0,10}2.{0,10}C. of S. 1618/i
 full BILL_1618			/Bill.{0,10}1618.{0,10}TITLE.{0,10}III/i
 full S_1618			/S..{0,10}1618.{0,10}-.{0,10}SECTION.{0,10}301/i
-full SECTION_301		/SECTION.{0,10}301/
+full SECTION_301		/SECTION.{0,10}301/i
+full EU_EMAIL_OPTOUT		/EU Email Opt.?out Directive/i
 
 body POPLAUNCH			/StealthLaunch PopLaunch.\s/
 body CHECK_OR_MONEY_ORDER	/check or money order/i
@@ -382,6 +383,10 @@ body MASS_EMAIL			/mass e-*mail/i
 body EMAIL_MARKETING		/e-*mail marketing/i
 body PRODUCED_AND_SENT_OUT	/This a.?d is produced and sent out by/
 body INCREASE_TRAFFIC		/increase.* traffic/i
+
+# contrib: Duncan
+body ONE_TIME_MAILING		/is a (?:one|1).time mailing/i
+describe ONE_TIME_MAILING	'one time mailing' doesn't mean it isn't spam
 
 # this one gets a few false positives
 body SOCIAL_SEC_NUMBER		/social security (?:number|record)/i
@@ -885,6 +890,7 @@ score X_MSMAIL_PRIORITY_HIGH         1.4
 score INCREASE_TRAFFIC		     1.4
 score REMOVAL_INSTRUCTIONS	     2.0
 score X_PRIORITY_HIGH                1.4
+score ONE_TIME_MAILING		     2.0
 score YR_MEMBERSHIP_EXCH             4.0
 
 # End of GA-evolved scores.
