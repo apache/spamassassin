@@ -3582,14 +3582,14 @@ sub _multipart_alternative_difference {
 
 ###########################################################################
 
-sub domain_ratio {
+sub check_domain_ratio {
   my($self, $body, $ratio) = @_;
   my $length = (length(join('', @{$body})) || 1);
-  if (!defined $self->{domains}) {
+  if (!defined $self->{uri_domain_count}) {
     $self->get_uri_list();
   }
-  return 0 if !defined $self->{domains};
-  return (($self->{domains} / $length) > $ratio);
+  return 0 if !defined $self->{uri_domain_count};
+  return (($self->{uri_domain_count} / $length) > $ratio);
 }
 
 ###########################################################################

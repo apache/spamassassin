@@ -1440,26 +1440,14 @@ my $domain      = qq<(?:$domain_ref|$domain_lit)>;
 # Finally, the address-spec regex (more or less)
 my $Addr_spec_re   = qr<$local_part\s*\@\s*$domain>o;
 
-# Discard all but one of identical successive entries in an array.
-# The input must be sorted if you want the returned array to be
-# without identical entries.
-sub _uniq {
-  my $previous;
-  my @uniq;
-  if (@_) {
-    push(@uniq, ($previous = shift(@_)));
-  }
-  foreach my $current (@_) {
-    next if ($current eq $previous);
-    push(@uniq, ($previous = $current));
-  }
-  return @uniq;
-}
-
+# This really belongs in metadata
 sub get_uri_list {
   my ($self, $textary) = @_;
 
-  #$self->{found_bad_uri_encoding} = 0;
+  # use cached answer if available
+  if (defined $self->{uri_list}) {
+    return @{$self->{uri_list}};
+  }
 
   $textary ||= $self->get_decoded_body_text_array();
   my ($rulename, $pat, @uris);
@@ -1509,45 +1497,40 @@ sub get_uri_list {
     push @uris, @{ $self->{html}{uri} };
   }
 
-  # Make sure we catch bad encoding tricks ...
-  foreach my $uri ( @uris ) {
-    next if ( $uri =~ /^mailto:/i );
+  # make sure we catch bad encoding tricks
+  for my $uri (@uris) {
+    next if $uri =~ /^mailto:/i;
 
-    # bug 2844
     # http://www.foo.biz?id=3 -> http://www.foo.biz/?id=3
     $uri =~ s/^(https?:\/\/[^\/\?]+)\?/$1\/?/;
 
-    # deal with encoding of chars ...
-    # this is just the set of printable chars, minus ' ' (aka: dec 33-126, hex 21-7e)
-    #
+    # deal with encoding of chars, this is just the set of printable
+    # chars minus ' ' (that is, dec 33-126, hex 21-7e)
     $uri =~ s/\&\#0*(3[3-9]|[4-9]\d|1[01]\d|12[0-6]);/sprintf "%c",$1/e;
     $uri =~ s/\&\#x0*(2[1-9]|[3-6][a-f0-9]|7[0-9a-e]);/sprintf "%c",hex($1)/ei;
 
-    my($nuri, $unencoded, $encoded) = Mail::SpamAssassin::Util::URLEncode($uri);
-    if ( $nuri ne $uri ) {
+    my ($nuri, $unencoded, $encoded) =
+      Mail::SpamAssassin::Util::url_encode($uri);
+    if ($nuri ne $uri) {
       push(@uris, $nuri);
-
-      # allow some unencodings to be ok ...
-      # This is essentially HTTP_EXCESSIVE_ESCAPES ...
-      #if ( $unencoded =~ /[a-zA-Z0-9\/]/ ) {
-      #  $self->{found_bad_uri_encoding} = 1;
-      #}
     }
   }
 
   # remove duplicates
-  @uris = _uniq(sort(@uris));
+  my %uris;
+  $uris{$_} = 1 for @uris;
+  @uris = keys %uris;
 
   # get domain list
-  my @domains;
+  my %domains;
   for (@uris) {
     my $domain = Mail::SpamAssassin::Util::uri_to_domain($_);
-    push @domains, $domain if $domain;
+    $domains{$domain} = 1 if $domain;
   }
-  @domains = _uniq(sort(@domains));
-  $self->{domains} = scalar @domains;
 
+  $self->{uri_domain_count} = keys %domains;
   $self->{uri_list} = \@uris;
+
   dbg("uri tests: Done uriRE");
   return @{$self->{uri_list}};
 }

@@ -601,37 +601,39 @@ sub parse_content_type {
 
 ###########################################################################
 
-sub URLEncode {
-    my($url)=@_;
-    my(@characters)=split(/(\%[0-9a-fA-F]{2})/,$url);
-    my(@unencoded) = ();
-    my(@encoded) = ();
+sub url_encode {
+  my ($url) = @_;
+  my (@characters) = split(/(\%[0-9a-fA-F]{2})/, $url);
+  my (@unencoded) = ();
+  my (@encoded) = ();
 
-    foreach(@characters) {
-	if ( /\%[0-9a-fA-F]{2}/ ) {		# Escaped character set ...
-	    # IF it is in the range of 0x00-0x20 or 0x7f-0xff
-	    #    or it is one of  "<", ">", """, "#", "%",
-	    #                     ";", "/", "?", ":", "@", "=" or "&"
-	    # THEN preserve its encoding
-	    unless ( /(20|7f|[0189a-fA-F][0-9a-fA-F])/i
-		    || /2[2356fF]|3[a-fA-F]|40/i )
-	    {
-		s/\%([2-7][0-9a-fA-F])/sprintf "%c",hex($1)/e;
-		push(@unencoded, $_);
-	    }
-	}
-	else {					# Other stuff
-	    # 0x00-0x20, 0x7f-0xff, <, >, and " ... "
-	    s/([\000-\040\177-\377\074\076\042])
-	     /push(@encoded,$1) && sprintf "%%%02x",unpack("C",$1)/egx;
-	}
+  foreach (@characters) {
+    # escaped character set ...
+    if (/\%[0-9a-fA-F]{2}/) {
+      # IF it is in the range of 0x00-0x20 or 0x7f-0xff
+      #    or it is one of  "<", ">", """, "#", "%",
+      #                     ";", "/", "?", ":", "@", "=" or "&"
+      # THEN preserve its encoding
+      unless (/(20|7f|[0189a-fA-F][0-9a-fA-F])/i
+	      || /2[2356fF]|3[a-fA-F]|40/i)
+      {
+	s/\%([2-7][0-9a-fA-F])/sprintf "%c", hex($1)/e;
+	push(@unencoded, $_);
+      }
     }
-    if (wantarray) {
-      return(join("",@characters), join("",@unencoded), join("",@encoded));
-    }
+    # other stuff
     else {
-      return join("",@characters);
+      # 0x00-0x20, 0x7f-0xff, <, >, and " ... "
+      s/([\000-\040\177-\377\074\076\042])
+	  /push(@encoded, $1) && sprintf "%%%02x", unpack("C",$1)/egx;
     }
+  }
+  if (wantarray) {
+    return(join("", @characters), join("", @unencoded), join("", @encoded));
+  }
+  else {
+    return join("", @characters);
+  }
 }
 
 ###########################################################################
