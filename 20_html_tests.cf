@@ -67,11 +67,6 @@ describe HTML_SHOUTING9		HTML has very strong "shouting" markup
 body HTML_TABLE_THICK_BORDER		eval:html_test('thick_border')
 describe HTML_TABLE_THICK_BORDER	HTML table has thick border
 
-body __HTML_CHARSET_FARAWAY	eval:html_charset_faraway()
-meta HTML_CHARSET_FARAWAY	(__HTML_CHARSET_FARAWAY && __HIGHBITS)
-describe HTML_CHARSET_FARAWAY	A foreign language charset used in HTML markup
-tflags HTML_CHARSET_FARAWAY	userconf
-
 body HTML_COMMENT_EMAIL		eval:html_test('comment_email')
 describe HTML_COMMENT_EMAIL	HTML comment contains email address
 
@@ -80,10 +75,6 @@ describe HTML_COMMENT_SKY	HTML comment contains SKY database codes
 
 body HTML_COMMENT_8BITS		eval:html_test('comment_8bit')
 describe HTML_COMMENT_8BITS	HTML comment has 3 consecutive 8-bit characters
-
-body __HTML_COMMENT_RATIO	eval:html_range('total_comment_ratio','0.70','1.00')
-describe HTML_COMMENT_RATIO	HTML comments are large percentage of message
-meta HTML_COMMENT_RATIO		__HTML_COMMENT_RATIO && MIME_HTML_ONLY
 
 body HTML_COMMENT_SAVED_URL	eval:html_test('comment_saved_url')
 describe HTML_COMMENT_SAVED_URL	HTML message is a saved web page
@@ -261,6 +252,21 @@ describe HTML_TITLE_EMPTY	HTML title contains no text
 
 body HTML_TITLE_UNTITLED	eval:html_eval('title_text', '=~ /Untitled/i')
 describe HTML_TITLE_UNTITLED	HTML title contains "Untitled"
+
+###########################################################################
+# meta tests
+
+body __HTML_CHARSET_FARAWAY	eval:html_charset_faraway()
+meta HTML_CHARSET_FARAWAY	(__HTML_CHARSET_FARAWAY && __HIGHBITS)
+describe HTML_CHARSET_FARAWAY	A foreign language charset used in HTML markup
+tflags HTML_CHARSET_FARAWAY	userconf
+
+meta HTML_MIME_NO_HTML_TAG	__MIME_HTML_ONLY && !__TAG_EXISTS_HTML
+describe HTML_MIME_NO_HTML_TAG	HTML-only message, but there is HTML tag
+
+body __HTML_COMMENT_RATIO	eval:html_range('total_comment_ratio','0.70','1.00')
+describe HTML_COMMENT_RATIO	HTML comments are large percentage of message
+meta HTML_COMMENT_RATIO		__HTML_COMMENT_RATIO && MIME_HTML_ONLY
 
 ###########################################################################
 # rawbody HTML tests

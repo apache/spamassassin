@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.504 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.505 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -49,23 +49,13 @@ meta T_INVALID_DATE_2		(__INVALID_DATE && !__XM_BAD_DATE_MUAS)
 describe T_INVALID_DATE_2	Invalid Date: header (not RFC 2822)
 
 # Wierd.  Can only assume this is caused by PEBKAC on the sending side...
-meta T_HTML_WITHOUT_HTML	(__MIME_HTML && !HTML_MESSAGE)
+meta T_HTML_WITHOUT_HTML_1	(__MIME_HTML && !__TAG_EXISTS_HTML)
+meta T_HTML_WITHOUT_HTML_2	(__MIME_HTML && !(__TAG_EXISTS_HTML && HTML_MESSAGE))
+meta T_HTML_WITHOUT_HTML_3	(__MIME_HTML && !(__TAG_EXISTS_HTML || HTML_MESSAGE))
 describe T_HTML_WITHOUT_HTML	Claims to be HTML, but there is no HTML text
-# more variations...
-meta T_HTML_WITHOUT_HTML_A	(__MIME_HTML && !HTML_MESSAGE && !__TAG_EXISTS_HTML)
-meta T_HTML_WITHOUT_HTML_B	(__MIME_HTML && !HTML_MESSAGE && !__TAG_EXISTS_BODY)
-meta T_HTML_WITHOUT_HTML_C	(__MIME_HTML && !HTML_MESSAGE && !(__TAG_EXISTS_HTML || __TAG_EXISTS_BODY))
-meta T_HTML_WITHOUT_HTML_D	(__MIME_HTML && !HTML_MESSAGE && !(__TAG_EXISTS_HTML && __TAG_EXISTS_BODY))
-meta T_HTML_WITHOUT_HTML_E	(__MIME_HTML && !__TAG_EXISTS_HTML)
-meta T_HTML_WITHOUT_HTML_F	(__MIME_HTML && !__TAG_EXISTS_BODY)
-meta T_HTML_WITHOUT_HTML_G	(__MIME_HTML && !(__TAG_EXISTS_HTML || __TAG_EXISTS_BODY))
-meta T_HTML_WITHOUT_HTML_H	(__MIME_HTML && !(__TAG_EXISTS_HTML && __TAG_EXISTS_BODY))
 
-# no major tag rules
-meta T_MIME_HTML_NO_HTML_TAG	__MIME_HTML_ONLY && !__TAG_EXISTS_HTML
-# this is perhaps a bit overoptimized...
-meta T_MIME_HTML_NO_MAJOR_TAG1	MIME_HTML_ONLY && !(__TAG_EXISTS_HTML && __TAG_EXISTS_BODY)
-meta T_MIME_HTML_NO_MAJOR_TAG2	(__MIME_HTML_ONLY && !__TAG_EXISTS_HTML) || (MIME_HTML_ONLY && !__TAG_EXISTS_BODY)
+# just delete if no better than existing HTML_COMMENT_RATIO
+meta T_HTML_COMMENT_RATIO		__HTML_COMMENT_RATIO && __MIME_HTML_ONLY
 
 # 2003-05-15
 # possible replacements for current HTML_IMAGE_WEB_BUGS test
@@ -74,7 +64,6 @@ body T_HTML_IMAGE_WEB_BUGS_1	eval:html_test('t_image_web_bugs_1')
 body T_HTML_IMAGE_WEB_BUGS_2	eval:html_test('t_image_web_bugs_2')
 body T_HTML_IMAGE_WEB_BUGS_3	eval:html_test('t_image_web_bugs_3')
 body T_HTML_IMAGE_WEB_BUGS_4	eval:html_test('t_image_web_bugs_4')
-body T_HTML_IMAGE_WEB_BUGS_5	eval:html_test('t_image_web_bugs_5')
 
 # possible replacements for current HTML_WEB_BUGS test
 body T_HTML_WEB_BUGS_0		eval:html_test('t_web_bugs_0')
@@ -82,15 +71,6 @@ body T_HTML_WEB_BUGS_1		eval:html_test('t_web_bugs_1')
 body T_HTML_WEB_BUGS_2		eval:html_test('t_web_bugs_2')
 body T_HTML_WEB_BUGS_3		eval:html_test('t_web_bugs_3')
 body T_HTML_WEB_BUGS_4		eval:html_test('t_web_bugs_4')
-body T_HTML_WEB_BUGS_5		eval:html_test('t_web_bugs_5')
-body T_HTML_WEB_BUGS_6		eval:html_test('t_web_bugs_6')
-body T_HTML_WEB_BUGS_7		eval:html_test('t_web_bugs_7')
-body T_HTML_WEB_BUGS_8		eval:html_test('t_web_bugs_8')
-body T_HTML_WEB_BUGS_9		eval:html_test('t_web_bugs_9')
-body T_HTML_WEB_BUGS_10		eval:html_test('t_web_bugs_10')
-body T_HTML_WEB_BUGS_11		eval:html_test('t_web_bugs_11')
-body T_HTML_WEB_BUGS_12		eval:html_test('t_web_bugs_12')
-body T_HTML_WEB_BUGS_13		eval:html_test('t_web_bugs_13')
 
 # 2003-02-25: quinlan
 # Whee... more HTML tests!
@@ -102,14 +82,6 @@ body T_HTML_WEB_BUGS_13		eval:html_test('t_web_bugs_13')
 # ... place with brother rule in 20_ratware.cf
 header __ANY_QUALCOMM_MUA	X-Mailer =~ /^QUALCOMM\b/
 meta T_FORGED_QUALCOMM_TAGS	(__ANY_QUALCOMM_MUA && __MIME_HTML && !__TAG_EXISTS_HTML)
-
-# MIME Content-Transfer-Encoding control rules
-rawbody T_MIME_BASE64			eval:check_for_mime('t_mime_base64_count')
-rawbody T_MIME_QP			eval:check_for_mime('t_mime_qp_count')
-
-# 2003-03-06: quinlan
-rawbody T_MIME_BASE64_ILLEGAL		eval:check_for_mime('t_mime_base64_illegal')
-rawbody T_MIME_QP_INLINE_NO_CHARSET	eval:check_for_mime('t_mime_qp_inline_no_charset')
 
 # quinlan: 2003-03-15
 # these all appear in the same low-scoring spammer for me, but they
