@@ -11,9 +11,6 @@ require_version @@VERSION@@
 uri NUMERIC_HTTP_ADDR		/^https?\:\/\/\d{7,}/is
 describe NUMERIC_HTTP_ADDR	Uses a numeric IP address in URL
 
-uri LONG_NUMERIC_HTTP_ADDR	/^https?\:\/\/000\d+/is
-describe LONG_NUMERIC_HTTP_ADDR	Uses a long numeric IP address in URL
-
 uri NORMAL_HTTP_TO_IP		/^https?\:\/\/(?:\S*\@)?\d+\.\d+\.\d+\.\d+/i
 describe NORMAL_HTTP_TO_IP	Uses a dotted-decimal IP address in URL
  	
@@ -66,10 +63,6 @@ describe MAILTO_TO_SPAM_ADDR	Includes a link to a likely spammer email address
 uri MAILTO_TO_REMOVE		/^mailto:.*?remove/is
 describe MAILTO_TO_REMOVE	Includes a 'remove' email address
 
-# one spamhaus uses servers numbered like this:
-uri HTTP_NUMBER_WORD		/^https?:\/\/(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty)\./i
-describe HTTP_NUMBER_WORD	URL contains spamhaus signature: numbered servers
-
 uri JAVASCRIPT_URI		/^javascript:/i
 describe JAVASCRIPT_URI		Javascript protocol in a URI
 
@@ -86,40 +79,16 @@ describe USERPASS		URL contains username and (optional) password
 
 uri WWW_AUTOREMOVE_COM		/autoremove\.com/i   
 describe WWW_AUTOREMOVE_COM	Frequent SPAM content
- 	
-uri E_WEBHOSTCENTRAL_URL	/e-webhostcentral\.com/i
-describe E_WEBHOSTCENTRAL_URL	Frequent SPAM content
- 	
-uri FREEMEGS_URL		/25freemegs\.com/i
-describe FREEMEGS_URL		Frequent SPAM content   
- 	
-uri FREEWEBCO_NET_URL		/freewebco\.net/i
-describe FREEWEBCO_NET_URL	Frequent SPAM content
- 	
-uri FREEWEBHOSTINGCENTRAL	/freewebhostingcentral/i   
-describe FREEWEBHOSTINGCENTRAL	Frequent SPAM content  
- 	
+
 uri URI_IS_POUND		m{\#$}
 describe URI_IS_POUND		Filename is just a '\#'; probably a JS trick
- 	
-uri WEB4PORNO_URL		/web4porno\.com/i
-describe WEB4PORNO_URL		Frequent SPAM content
- 	
-uri WWW_NETSITESFORFREE_NET		/netsitesforfree\.net/i
-describe WWW_NETSITESFORFREE_NET	Frequent SPAM content
- 	
-uri WWW_REMOVEYOU_COM		/removeyou\.com/i
-describe WWW_REMOVEYOU_COM	Frequent SPAM content
 
-uri YELLOWSUN			/yellowsun01\.com/i   
-describe YELLOWSUN		Frequent SPAM content
- 	
 uri BTAMAIL_URL			/btamail\.net\.cn/i
 describe BTAMAIL_URL		Frequent SPAM content
  	
 uri CHINA_URL			/(?:freehost|yada)china\.com/i
 describe CHINA_URL		Frequent SPAM content
- 	
+
 uri MAILTO_TO_B2BMAIL		/^mailto:[^\s\@]{1,20}\@b2b-?mail\./is
 describe MAILTO_TO_B2BMAIL	Includes a link to a likely spammer email address (b2b-mail)
 

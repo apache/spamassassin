@@ -58,8 +58,6 @@ header RATWARE_CARETOP		X-Mailer =~ /Caretop 2604/
 describe RATWARE_CARETOP	Bulk email software fingerprint (Caretop) found in headers
 header RATWARE_LC_OUTLOOK	X-Mailer =~ /^outlook$/
 describe RATWARE_LC_OUTLOOK	Bulk email software fingerprint ("outlook") found in headers
-header RATWARE_V3161		ALL =~ /V3,1,6,1/
-describe RATWARE_V3161		Bulk email software fingerprint (V3161) found in headers
 header RATWARE_EMWAC		Received =~ /EMWAC SMTPRS/
 describe RATWARE_EMWAC		Bulk email software fingerprint ("EMWAC SMTPRS") found in headers
 header RATWARE_BANG_HASH        X-Mailer =~ /!.*\#.*\*/
