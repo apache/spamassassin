@@ -27,7 +27,7 @@ score ALL_CAPS_HEADER                1.624
 score ALL_NATURAL                    2.291
 score AMAZING                        2.764
 score AOL_USERS_LINK                 0.626
-score ASCII_FORM_ENTRY               -1.660
+score ASCII_FORM_ENTRY               0.500
 score ASKS_BILLING_ADDRESS           -0.152
 score AS_SEEN_ON                     2.235
 score AUTO_EMAIL_REMOVAL             1.750
@@ -38,7 +38,6 @@ score BIG_FONT                       2.056
 score BILLION_DOLLARS                3.060
 score BILL_1618                      4.609
 score BUGGY_CGI                      3.368
-score BUGZILLA_BUG                   0.921
 score BULK_EMAIL                     0.884
 score CALL_FREE                      0.687
 score CALL_NOW                       4.732
@@ -70,7 +69,7 @@ score DATE_IN_PAST_12_24             1.703
 score DATE_IN_PAST_24_48             2.611
 score DATE_IN_PAST_48_96             2.479
 score DATE_IN_PAST_96_XX             0.938
-score DATE_MISSING                   -2.140
+score DATE_MISSING                   2.000
 score DATE_WARNING                   3.088
 score DATE_YEAR_ZERO_FIRST           1.142
 score DEAR_EMAIL                     2.350
@@ -103,10 +102,9 @@ score FAKED_UNDISC_RECIPS            3.461
 score FILTERED_BY_WORLDREMOVE        2.626
 score FORGED_EUDORAMAIL_RCVD         4.585
 score FORGED_GW05_RCVD               4.851
-score FORGED_HOTMAIL_RCVD            -0.356
+score FORGED_HOTMAIL_RCVD            0.500
 score FORGED_JUNO_RCVD               4.430
 score FORGED_RCVD_FOUND              0.008
-score FORGED_RCVD_TRAIL              1.000
 score FORGED_YAHOO_RCVD              1.454
 score FORM_W_MAILTO_ACTION           3.239
 score FOR_FREE                       1.127
@@ -117,8 +115,6 @@ score FREE_MONEY                     0.244
 score FREE_PRIORITY_MAIL             0.718
 score FREQ_SPAM_PHRASE               2.417
 score FRIEND_AT_PUBLIC               0.999
-score FROM_ADDRESS_EQ_REAL           1.000
-score FROM_AND_TO_SAME               -2.071
 score FROM_BTAMAIL                   3.516
 score FROM_ENDS_IN_NUMS              0.382
 score FROM_HAS_MIXED_NUMS            2.578
@@ -135,7 +131,7 @@ score GAPPY_SUBJECT                  0.975
 score GAPPY_TEXT                     0.393
 score GENTLE_FEROCITY                4.196
 score GREAT_OFFER                    0.445
-score GREEN_EXCUSE_1                 -2.019
+score GREEN_EXCUSE_1                 3.116
 score GREEN_EXCUSE_2                 3.831
 score GUARANTEE                      1.500
 score HOME_EMPLOYMENT                2.882
@@ -149,7 +145,7 @@ score HTTP_USERNAME_USED             1.512
 score HTTP_WITH_EMAIL_IN_URL         2.648
 score IMPOTENCE                      2.570
 score INCREASE_SOMETHING             0.399
-score INTL_EXEC_GUILD                -0.039
+score INTL_EXEC_GUILD                0.781
 score INVALID_DATE                   0.475
 score INVALID_DATE_TZ_ABSURD         4.395
 score INVALID_MSGID                  1.848
@@ -184,12 +180,11 @@ score MIME_MISSING_BOUNDARY          3.887
 score MIME_NULL_BLOCK                -0.975
 score MIME_ODD_CASE                  4.339
 score MISSING_HEADERS                1.073
-score MONEY_BACK                     -0.239
-score MONEY_MAKING                   -0.687
+score MONEY_BACK                     1.500
+score MONEY_MAKING                   2.500
 score MONSTERHUT                     1.295
 score MORTGAGE_RATES                 4.354
 score MSGID_CHARS_SPAM               2.058
-score MSGID_CHARS_WEIRD              -2.178
 score MSGID_HAS_NO_AT                2.150
 score MSGID_SPAMSIGN_1               3.458
 score MSG_ID_ADDED_BY_MTA            3.967
@@ -211,7 +206,7 @@ score NO_DISSAPOINTMENT              0.689
 score NO_EXPERIENCE                  4.239
 score NO_OBLIGATION                  1.884
 score NO_QS_ASKED                    2.413
-score NO_REAL_NAME                   -1.068
+score NO_REAL_NAME                   0.500
 score NO_SELLING                     1.489
 score NUMERIC_HTTP_ADDR              1.754
 score ONCE_IN_LIFETIME               1.802
@@ -297,7 +292,6 @@ score TAKE_ACTION_NOW                2.675
 score THE_FOLLOWING_FORM             1.988
 score THIS_AINT_SPAM                 0.854
 score TONER                          1.403
-score TO_ADDRESS_EQ_REAL             1.000
 score TO_BE_REMOVED_REPLY            3.985
 score TO_EMPTY                       1.446
 score TO_LOCALPART_EQ_REAL           0.483
@@ -346,7 +340,6 @@ score X_MAILER_GIBBERISH             3.062
 score X_MAIL_ID_PRESENT              2.192
 score X_MESSAGE_ID                   0.648
 score X_MSMAIL_PRIORITY_HIGH         -0.886
-score X_NOT_PRESENT                  -1.920
 score X_PMFLAGS_PRESENT              3.093
 score X_PRECEDENCE_REF               4.555
 score X_PRIORITY_HIGH                0.896
@@ -416,6 +409,7 @@ score RCVD_IN_BL_SPAMCOP_NET	     0.0
 score BALANCE_FOR_LONG		    -2.0
 score UNIFIED_PATCH		    -5.0
 score DIFF_C_PATCH		    -5.0
+score BUGZILLA_BUG		    -2.0
 score MAILMAN_CONFIRM               -4.0
 score EVITE			    -5.0
 score YAHOO_MSGID_ADDED             -2.4
