@@ -354,7 +354,9 @@ sub check_razor2 {
   # do it this way to make it easier to get out the results later from the
   # netcache plugin
   ($return, @results) = $self->razor2_access($full, 'check');
-  $self->{main}->call_plugins ('process_razor_result', \@results);
+  $self->{main}->call_plugins ('process_razor_result',
+  	{ results => \@results, permsgstatus => $permsgstatus }
+  );
 
   foreach my $result (@results) {
     if (exists $result->{result}) {
