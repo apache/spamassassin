@@ -717,11 +717,6 @@ sub html_comment {
   my ($self, $text) = @_;
 
   $self->{html}{comment_text} .= "$text\n";
-  $self->{html}{comment_8bit} = 1 if $text =~ /[\x80-\xff]{3,}/;
-  $self->{html}{comment_email} = 1 if $text =~ /\S+\@\S+/;
-  $self->{html}{comment_egp} = 1 if $text =~ /\S+begin egp html banner\S+/;
-  $self->{html}{comment_saved_url} = 1 if $text =~ /<!-- saved from url=\(\d{4}\)/;
-  $self->{html}{comment_sky} = 1 if $text =~ /SKY-(?:Email-Address|Database|Mailing|List)/;
   $self->{html}{total_comment_length} += length($text) + 7; # "<!--" + "-->"
 
   if (exists $self->{html}{"inside_script"} && $self->{html}{"inside_script"} > 0)

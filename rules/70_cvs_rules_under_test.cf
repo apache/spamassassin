@@ -461,12 +461,6 @@ describe T_MSGID_SPAM_2		Message-ID has known spammer pattern
 rawbody T_HTML_CONVERTED	m{<DIV><!-- Converted from text/plain format -->}
 describe T_HTML_CONVERTED	HTML conversion tool used by spam
 
-# quinlan: testing moving some comment rules from code to here
-body T_HTML_COMMENT_EMAIL	eval:html_eval('comment_text', '=~ /\S+\@\S+/')
-body T_HTML_COMMENT_SKY		eval:html_eval('comment_text', '=~ /SKY-(?:Email-Address|Database|Mailing|List)/')
-body T_HTML_COMMENT_8BITS	eval:html_eval('comment_text', '=~ /[\x80-\xff]{3,}/')
-body T_HTML_COMMENT_SAVED_URL	eval:html_eval('comment_text', '=~ /<!-- saved from url=\(\d{4}\)/')
-
 # another Message-Id format (pick one as MSGID_SPAM_3)
 header T_MSGID_SPAM_3_5		Message-Id =~ /<[a-z]{5,}\@(\S+\.)+\S+>/
 describe T_MSGID_SPAM_3_5	Message-ID has known spammer pattern
