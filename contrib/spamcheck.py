@@ -2,7 +2,7 @@
 
 # spamcheck.py: spam tagging support for Postfix/Cyrus
 #
-# Copyright (C) 2002 James Henstridge
+# Copyright (C) 2002, 2003 James Henstridge
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -18,31 +18,32 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-#
 # Spam Assassin filter to fit in between postfix (or other MTA) and
-# Cyrus IMAP (or other MDA).  To hook it up, simply add a line like
-# the following to postfix's master.cf:
+# Cyrus IMAP (or other MDA).  To hook it up, simply copy the
+# spamcheck.py and spamd.py files to postfix's libexec directory and
+# add a line like the following to postfix's master.cf:
 #
 # spamcheck	unix	-	n	n	-	-	pipe
 #     flags=R user=cyrus
-#     argv=/usr/bin/spamcheck.py -s ${sender} -r ${user} -l unix:/...
+#     argv=/usr/libexec/postfix/spamcheck.py -s ${sender} -r ${user} -l unix:/...
 #
 # then in main.cf, set the mailbox_transport to spamcheck.  A copy of
-# spamcheck will be started for each incomming message.  Spamcheck will
-# contact the local spamd process to handle the message, then send the
-# mail on to the LMTP socket.
+# spamcheck will be started for each incomming message.  The spamcheck
+# script will contact the IMAP server's LMTP socket to check whether
+# the user exists, get spamd to process the message and then pass the
+# message to the IMAP server.
 
-import sys, string
+import sys
 import re, getopt
 import smtplib, socket
-import exceptions
+import spamd
 
-# EX_TEMPFAIL is 75 on every Unix I've checked, but...
-# check /usr/include/sysexits.h if you have odd problems.
-USAGE = 64
-DATAERR = 65
-NOUSER = 67
-TEMPFAIL = 75
+# exit statuses taken from <sysexits.h>
+EX_OK       = 0
+EX_USAGE    = 64
+EX_DATAERR  = 65
+EX_NOUSER   = 67
+EX_TEMPFAIL = 75
 
 # this class hacks smtplib's SMTP class into a shape where it will
 # successfully pass a message off to Cyrus's LMTP daemon.
@@ -69,32 +70,18 @@ class LMTP(smtplib.SMTP):
             host = host[5:]
             self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             if self.debuglevel > 0: print 'connect:', host
-            try:
-              self.sock.connect(host)
-            except socket.error:
-              sys.exit(TEMPFAIL)
+            self.sock.connect(host)
         else:
-            i = string.find(host, ':')
-            if i >= 0:
-                host, port = host[:i], host[i+1:]
-                try: port = int(port)
-                except string.atoi_error:
-                    raise socket.error, "non numeric port"
-            if not port: port = LMTP_PORT
+            port = LMTP_PORT
+            if ':' in host:
+                hose, port = host.split(':', 1)
+                port = int(port)
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             if self.debuglevel > 0: print 'connect:', (host, port)
             self.sock.connect((host, port))
         (code, msg) = self.getreply()
         if self.debuglevel > 0: print 'connect:', msg
         return (code, msg)
-
-    def putcmd(self, cmd, args=""):
-        """Send a command to the server."""
-        if args:
-            str = '%s %s%s' % (cmd, args, smtplib.CRLF)
-        else:
-            str = '%s%s' % (cmd, smtplib.CRLF)
-        self.send(str)
 
     def lhlo(self, name='localhost'):
         """ LMTP 'lhlo' command.
@@ -110,149 +97,66 @@ class LMTP(smtplib.SMTP):
             return (code, msg)
         self.does_esmtp = 1
         # parse the lhlo response
-        resp = string.split(self.lhlo_resp, '\n')
+        resp = self.lhlo_resp.split('\n')
         del resp[0]
         for each in resp:
             m = re.match(r'(?P<feature>[A-Za-z0-9][A-Za-z0-9\-]*)',each)
             if m:
-                feature = string.lower(m.group("feature"))
-                params = string.strip(m.string[m.end("feature"):])
+                feature = m.group("feature").lower()
+                params = m.string[m.end("feature"):].strip()
                 self.lmtp_features[feature] = params
         return (code, msg)
 
     # make sure bits of code that tries to EHLO actually LHLO instead
     ehlo = lhlo
 
-    def mail(self, sender, options=[]):
-        optionlist = ''
-        if options and self.does_esmtp:
-            optionlist = ' ' + string.join(options, ' ')
-        self.putcmd('mail', 'FROM:%s%s' % (smtplib.quoteaddr(sender), optionlist))
-        return self.getreply()
-    def rcpt(self, recip, options=[]):
-        optionlist = ''
-        if options and self.does_esmtp:
-            optionlist = ' ' + string.join(options, ' ')
-        self.putcmd('rcpt', 'TO:%s%s' % (smtplib.quoteaddr(recip), optionlist))
-        return self.getreply()
+def process_message(spamd_host, lmtp_host, sender, recipient):
+    try:
+        lmtp = LMTP(lmtp_host)
+    except:
+        sys.exit(EX_TEMPFAIL)
+    #lmtp.set_debuglevel(2)
+    code, msg = lmtp.lhlo()
+    if code != 250: sys.exit(EX_TEMPFAIL)
 
-response_pat = re.compile(r'^SPAMD/([\d.]+)\s+(-?\d+)\s+(.*)')
+    # connect to the LMTP server
+    code, msg = lmtp.mail(sender)
+    if code != 250: sys.exit(1)
+    code, msg = lmtp.rcpt(recipient)
+    if code == 550: sys.exit(EX_NOUSER)
+    if code != 250: sys.exit(EX_TEMPFAIL)
 
-def spamcheck(spamd_host, spamd_port, user, data):
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect((spamd_host, spamd_port))
-
-    PROTOCOL_VERSION = "SPAMC/1.2"
-
-    header = 'PROCESS %s\r\nUser: %s\r\nContent-length: %s\r\n\r\n' % \
-        (PROTOCOL_VERSION, user, len(data))
-
-    sock.send(header)
-    sock.send(data)
-    sock.shutdown(1) # shut down the writing half of the socket
-
-    fd = sock.makefile('rb')
-    
-    # read the response back from the spamd server
-    header_read = 0
-    header = fd.readline()
-    match = response_pat.match(header)
-    if not match:
-        raise RuntimeError, "bad response header"
-    if match.group(2) != '0':
-        raise RuntimeError, "bad response code %s" % match.group(3)
-
-    content_length = -1
-    header = fd.readline()
-    while header and header != '\r\n':
-        if header[:15] == 'Content-length:':
-            content_length = int(header[15:])
-        header = fd.readline()
-
-    if header != '\r\n':
-        raise IOError, "expected blank line after headers"
-
-    # return the spam checked message
-    return fd.read()
-
-def process_message(spamd_host, spamd_port, lmtp_host, sender, recipient):
-    CHUNKSIZE = 256 * 1024
     # read in the first chunk of the message
-    
+    CHUNKSIZE = 256 * 1024
     data = sys.stdin.read(CHUNKSIZE)
 
-    # is the message smaller than the maximum size?
+    # if data is less than chunk size, check it
     if len(data) < CHUNKSIZE:
+        connection = spamd.SpamdConnection(spamd_host)
+        connection.addheader('User', recipient)
         try:
-            checked_data = spamcheck(spamd_host, spamd_port, recipient, data)
-            # get rid of From ... line if present
-            if checked_data[:5] == 'From ':
-                nl = string.find(checked_data, '\n')
-                if nl >= 0: checked_data = checked_data[nl+1:]
-        except:
-            sys.stderr.write('%s: %s\n' % sys.exc_info()[:2])
-            checked_data = data # fallback
+            connection.check(spamd.PROCESS, data)
+            data = connection.response_message
+        except spamd.error, e:
+            sys.stderr.write('spamcheck: %s' % str(e))
 
-        try:
-            lmtp = LMTP(lmtp_host)
-        except:
-            sys.exit(TEMPFAIL)
-
-        code, msg = lmtp.lhlo()
-        if code != 250: sys.exit(TEMPFAIL)
-
-        #lmtp.set_debuglevel(1)
-        try:
-            lmtp.sendmail(sender, recipient, checked_data)
-        except smtplib.SMTPRecipientsRefused, e:
-            if e.recipients.has_key(recipient):
-                if e.recipients[recipient][0] == 550:
-                    sys.exit(NOUSER)
-                else:
-                    sys.exit(TEMPFAIL)  # XXXX sort this out
-        except smtplib.SMTPDataError, errors:
-            if errors.smtp_code/100 == 4:
-                sys.exit(TEMPFAIL)
-            else:
-                sys.exit(DATAERR)
-    else:
-        # too much data.  Just pass it through unchanged
-        try:
-            lmtp = LMTP(lmtp_host)
-        except:
-            sys.exit(TEMPAIL)
-        code, msg = lmtp.lhlo()
-        if code != 250: sys.exit(TEMPFAIL)
-        #lmtp.set_debuglevel(1)
-
-        code, msg = lmtp.mail(sender)
-        if code != 250: sys.exit(TEMPFAIL)
-        code, msg = lmtp.rcpt(recipient)
-        if code == 550: sys.exit(NOUSER)
-        if code != 250: sys.exit(TEMPFAIL)
-
-        # send the data in chunks
-        lmtp.putcmd("data")
-        code, msg = lmtp.getreply()
-        if code != 354: sys.exit(TEMPFAIL)
+    # send the data in chunks
+    lmtp.putcmd("data")
+    code, msg = lmtp.getreply()
+    if code != 354: sys.exit(EX_TEMPFAIL)
+    lmtp.send(smtplib.quotedata(data))
+    
+    data = sys.stdin.read(CHUNKSIZE)
+    while data != '':
         lmtp.send(smtplib.quotedata(data))
-        data = ''
         data = sys.stdin.read(CHUNKSIZE)
-        while data != '':
-            lmtp.send(smtplib.quotedata(data))
-            data = ''
-            data = sys.stdin.read(CHUNKSIZE)
-        lmtp.send('\r\n.\r\n')
+    lmtp.send('\r\n.\r\n')
  
-        code, msg = lmtp.getreply()
-        if code/100 == 4:
-            sys.exit(TEMPFAIL)
-        elif code != 250:
-            sys.exit(DATAERR)
+    code, msg = lmtp.getreply()
+    if code != 250: sys.exit(EX_TEMPFAIL)
 
 def main(argv):
-    spamd_host = 'localhost'
-    spamd_port = 783
+    spamd_host = ''
     lmtp_host = None
     sender = None
     recipient = None
@@ -260,28 +164,28 @@ def main(argv):
         opts, args = getopt.getopt(argv[1:], 's:r:l:')
     except getopt.error, err:
         sys.stderr.write('%s: %s\n' % (argv[0], err))
-        sys.exit(USAGE)
+        sys.exit(EX_USAGE)
     for opt, arg in opts:
         if opt == '-s': sender = arg
-        elif opt == '-r': recipient = string.lower(arg)
+        elif opt == '-r': recipient = arg.lower()
         elif opt == '-l': lmtp_host = arg
         else:
             sys.stderr.write('unexpected argument\n')
-            sys.exit(USAGE)
+            sys.exit(EX_USAGE)
     if args:
         sys.stderr.write('unexpected argument\n')
-        sys.exit(USAGE)
+        sys.exit(EX_USAGE)
     if not lmtp_host or not sender or not recipient:
         sys.stderr.write('required argument missing\n')
-        sys.exit(USAGE)
+        sys.exit(EX_USAGE)
 
     try:
-        process_message(spamd_host, spamd_port, lmtp_host, sender, recipient)
-    except SystemExit, status:
-        raise SystemExit, status
+        process_message(spamd_host, lmtp_host, sender, recipient)
+    except SystemExit:
+        raise # let SystemExit through ...
     except:
         sys.stderr.write('%s: %s\n' % sys.exc_info()[:2])
-        sys.exit(TEMPFAIL)
+        sys.exit(1)
 
 if __name__ == '__main__':
     main(sys.argv)
