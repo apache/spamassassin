@@ -16,12 +16,12 @@ mv spam.log nonspam.log logs/old
 cat logs/contrib/nonspam.log* > nonspam.log
 cat logs/contrib/spam.log* > spam.log
 
-./download-trapped-spam
-./mass-check /local2/mail-archives/spamtrap/mbox >> spam.log
+# ./download-trapped-spam
+# ./mass-check /local2/mail-archives/spamtrap/mbox >> spam.log
+
 ./mass-check /local2/mail-archives/kelsey.spamtrap.gz >> spam.log
 ./mass-check /local2/mail-archives/spam.2000-2001.gz >> spam.log
 
-./mass-check /local2/mail-archives/crackmice >> nonspam.log
 ./mass-check /local2/mail-archives/scoop.1999 >> nonspam.log
 ./mass-check /local2/mail-archives/oldmail.1998 >> nonspam.log
 
@@ -30,6 +30,11 @@ cat logs/contrib/spam.log* > spam.log
 for f in /local2/mail-archives/crackmice-old/* ; do
   ./mass-check $f >> nonspam.log
 done
+
+rsync -vrze ssh dogma.slashnull.org:ftp/spamassassin/masses/spam.log spam.dogma
+cat spam.dogma >> spam.log
+rsync -vrze ssh dogma.slashnull.org:ftp/spamassassin/masses/nonspam.log nonspam.dogma
+cat nonspam.dogma >> nonspam.log
 
 ./mk-baseline-results
 ./hit-frequencies > freqs
