@@ -722,24 +722,30 @@ sub check_for_forward_date {
 
   my $now;
 
-  if ($rcvd =~ /\s(\S\S\S, .?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+)/) {
-    $rcvd = $1;
-    dbg ("using Received header date for real time: $rcvd");
-    $now = $self->_parse_rfc822_date ($rcvd);
-  } else {
-    dbg ("failed to find Received header date, using current system time");
-    $now = time();
+  # use second date. otherwise fetchmail Received: hdrs will screw it up
+  my @rcvddatestrs = ($rcvd =~ /\s\S\S\S, .?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+/g);
+  my @rcvddates = ();
+  foreach $rcvd (@rcvddatestrs) {
+    dbg ("trying Received header date for real time: $rcvd");
+    push (@rcvddates, $self->_parse_rfc822_date ($rcvd));
   }
 
-  my $diff = $now - $time; if ($diff < 0) { $diff = -$diff; }
-  dbg ("time_t from date=$time, rcvd=$now, diff=$diff");
-
-  if ($diff > (60 * 60 * 24 * 4)) {	# 4 days far enough?
-    dbg ("too far from current time, raising flag");
-    return 1;
+  if ($#rcvddates <= 0) {
+    dbg ("no Received headers found, not raising flag");
+    return 0;
   }
 
-  0;
+  foreach $rcvd (@rcvddates) {
+    my $diff = $rcvd - $time; if ($diff < 0) { $diff = -$diff; }
+    dbg ("time_t from date=$time, rcvd=$rcvd, diff=$diff");
+
+    if ($diff < (60 * 60 * 24 * 4)) {	# 4 days far enough?
+      dbg ("within time range, not raising flag");
+      return 0;
+    }
+  }
+
+  return 1;
 }
 
 sub _parse_rfc822_date {
