@@ -459,10 +459,10 @@ ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
 
 uridnsbl_timeout 2
 
-urirhsbl	T_URIBL_SA_SURBL	sa.surbl.org.	A
-header		T_URIBL_SA_SURBL	eval:check_uridnsbl('T_URIBL_SA_SURBL')
-describe	T_URIBL_SA_SURBL	Contains a URL listed in the SA SURBL blocklist
-tflags		T_URIBL_SA_SURBL	net
+urirhsbl	T_URIBL_WS_SURBL	ws.surbl.org.	A
+header		T_URIBL_WS_SURBL	eval:check_uridnsbl('T_URIBL_WS_SURBL')
+describe	T_URIBL_WS_SURBL	Contains a URL listed in the WS SURBL blocklist
+tflags		T_URIBL_WS_SURBL	net
 
 endif   # Mail::SpamAssassin::Plugin::URIDNSBL
 
