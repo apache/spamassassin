@@ -128,13 +128,21 @@ sub parse_headers {
 }
 
 sub _add_header_to_entry {
-  my ($self, $entry, $hdr, $line) = @_;
+  my ($self, $entry, $hdr, $line, $order) = @_;
+
+  # Do a normal push if no specific order # is set.
+  $order ||= @{$self->{header_order}};
 
   # ensure we have line endings
   $line .= "\n" unless $line =~ /\n$/;
 
+  # Store this header
   $entry->{$entry->{count}} = $line;
-  push (@{$self->{header_order}}, $hdr.":".$entry->{count});
+
+  # Push the header and which count it is in header_order
+  splice @{$self->{header_order}}, $order, 0, $hdr.":".$entry->{count};
+
+  # Increase the count of this header type
   $entry->{count}++;
 }
 
@@ -217,10 +225,10 @@ sub get_header {
 }
 
 sub put_header {
-  my ($self, $hdr, $text) = @_;
+  my ($self, $hdr, $text, $order) = @_;
 
   my $entry = $self->_get_or_create_header_object ($hdr);
-  $self->_add_header_to_entry ($entry, $hdr, $text);
+  $self->_add_header_to_entry ($entry, $hdr, $text, $order);
   if (!$entry->{original}) { $entry->{added} = 1; }
 }
 
@@ -254,12 +262,27 @@ sub get_all_headers {
 sub replace_header {
   my ($self, $hdr, $text) = @_;
 
-  # perhaps we should check $self->{header_order} and put the new version
-  # where the old one was?  This shouldn't be required anywhere though.
-  # tvd, 2003.02.23
+  # Figure out where the first case insensitive header of this name is stored.
+  # We'll use this to add the new header with the same case and in the order.
+  my($casehdr,$order) = ($hdr,undef);
+  my $lchdr = lc "$hdr:0"; # just lc it once
 
+  # Now find the header
+  for ( my $count = 0; $count <= @{$self->{header_order}}; $count++ ) {
+    next unless (lc $self->{header_order}->[$count] eq $lchdr);
+
+    # Remember where in the order the header is, and the case of said header.
+    $order = $count;
+    ($casehdr = $self->{header_order}->[$count]) =~ s/:\d+$//;
+
+    last;
+  }
+
+  # Remove all instances of this header
   $self->delete_header ($hdr);
-  return $self->put_header($hdr, $text);
+
+  # Add the new header with correctly cased header and in the right place
+  return $self->put_header($casehdr, $text, $order);
 }
 
 sub delete_header {
