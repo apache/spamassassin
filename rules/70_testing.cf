@@ -309,3 +309,7 @@ body T_HTML_SCRIPT_EXPR_2	eval:html_text_match('script', ';.*;')
 body T_HTML_SCRIPT_EXPR_3	eval:html_text_match('script', ';.*;.*;')
 body T_HTML_SCRIPT_EXPR_4	eval:html_text_match('script', ';.*;.*;.*;')
 body T_HTML_SCRIPT_EXPR_5	eval:html_text_match('script', ';.*;.*;.*;.*;')
+
+header T_NUMINTERUPTUS		Subject =~ /\b[a-z]{2,}\d+[a-z]{2,}/i
+header T_CRAZYCASE		Subject =~ /\b[a-z]{2,}[A-Z]+[a-z]{2,}/
+header T_PUNCTUSINTERUPTUS	Subject =~ m%\b[A-Z]{2,}[^/\sa-z0-9:+,@._=&'-]+[A-Z]{2,}%i
