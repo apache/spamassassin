@@ -23,7 +23,7 @@ use warnings;
 use bytes;
 
 use vars qw (
-  @MODULES @OPTIONAL_MODULES $EXIT_STATUS
+  @MODULES @OPTIONAL_MODULES $EXIT_STATUS $WARNINGS
 );
 
 my @MODULES = (
@@ -43,15 +43,13 @@ my @MODULES = (
 },
 {
   'module' => 'Storable',
-  'version' => '2.13',
+  'version' => '0.00',      # 0.00 required, 2.13 is optional (below)
   'desc' => 'This is a required module if you use spamd and allow user
   configurations to be used (ie: you don\'t use -x, -u, -q/--sql-config,
   -Q/--setuid-with-sql, --ldap-config, or --setuid-with-ldap).  Third
   party utilities may also require this module for the same
   functionality.  Storable is used to shift configuration when a spamd
-  process switches between users.  Version 2.13 is required, since it
-  fixes a bug that causes hangs under heavy load on multiprocessor
-  Linux machines.',
+  process switches between users.',
 },
 );
 
@@ -82,6 +80,22 @@ my @OPTIONAL_MODULES = (
 
   - version 0.34 or higher on Unix systems
   - version 0.46 or higher on Windows systems',
+},
+{
+  'module' => 'Storable',
+  'version' => '2.13',
+  'desc' => 'This is a required module if you use spamd and allow user
+  configurations to be used (ie: you don\'t use -x, -u, -q/--sql-config,
+  -Q/--setuid-with-sql, --ldap-config, or --setuid-with-ldap).  Third
+  party utilities may also require this module for the same
+  functionality.  Storable is used to shift configuration when a spamd
+  process switches between users. 
+
+  If you plan to run SpamAssassin on a multiprocessor Linux machine, or one
+  with a hyperthreaded CPU like a Pentium 4, it is strongly recommended that
+  you ensure version 2.13 (or newer) is installed.  This fixes a bug that
+  causes hangs under heavy load with that hardware configuration.',
+
 },
 {
   module => 'Net::SMTP',
@@ -182,6 +196,7 @@ sub long_diagnostics {
   print "checking module dependencies and their versions...\n";
 
   $EXIT_STATUS = 0;
+  $WARNINGS = 0;
   foreach my $moddef (@MODULES) {
     try_module(1, $moddef, \$summary);
   }
@@ -190,6 +205,10 @@ sub long_diagnostics {
   }
 
   print $summary;
+  if ($EXIT_STATUS || $WARNINGS) {
+    print "\nWarning: some functionality may not be available.\n".
+            "Please read the above report before continuing!\n\n";
+  }
   return $EXIT_STATUS;
 }
 
@@ -216,18 +235,27 @@ sub try_module {
   if ($not_installed) {
     $errtype = "is not installed.";
   } else {
-    $errtype = "is not installed,\nor is not an up-to-date version.";
+    $errtype = "is installed,\nbut is not an up-to-date version.";
   }
 
   print "\n", ("*" x 75), "\n";
   if ($required) {
     $EXIT_STATUS++;
     print "\aERROR: the required $pretty_name ${pretty_version}module $errtype";
-    $$summref .= "REQUIRED module missing: $pretty_name\n";
+    if ($not_installed) {
+      $$summref .= "REQUIRED module missing: $pretty_name\n";
+    } else {
+      $$summref .= "REQUIRED module out of date: $pretty_name\n";
+    }
   }
   else {
+    $WARNINGS++;
     print "NOTE: the optional $pretty_name ${pretty_version}module $errtype";
-    $$summref .= "optional module missing: $pretty_name\n";
+    if ($not_installed) {
+      $$summref .= "optional module missing: $pretty_name\n";
+    } else {
+      $$summref .= "optional module out of date: $pretty_name\n";
+    }
   }
 
   print "\n\n".$desc."\n\n";
