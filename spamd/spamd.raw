@@ -39,7 +39,7 @@ sub usage
 {
     warn <<EOUSAGE;
 
-Usage: spamd [-L] [-p port]
+Usage: spamd [options]
 
 Options:
 
@@ -48,6 +48,7 @@ Options:
     -A host,...   Set list of authorized ip addresses which can connect to this server
                     (defaults to 127.0.0.1 only)
     -p port       Listen on the specific port (otherwise default is port 22874)
+    -u username   Run as named user, instead of running setuid to spamc user
     -x            Disable user config files
     -s            Specify the syslog facility (default: mail)
     -D            Print debugging messages
@@ -56,9 +57,11 @@ EOUSAGE
     exit $resphash{EX_USAGE};
 }
 
-use vars qw{ $opt_h $opt_L $opt_p $opt_A $opt_x $opt_s $opt_D };
+use vars qw{
+  	$opt_h $opt_L $opt_p $opt_A $opt_x $opt_s $opt_D $opt_u
+};
 
-getopts('hLxp:A:s:D') or usage();
+getopts('hLxp:A:s:Du:') or usage();
 
 $opt_h and usage();
 
@@ -118,10 +121,27 @@ setsockopt(Server,SOL_SOCKET,SO_REUSEADDR,pack("l", 1)) || die "setsockopt: $!";
 bind(Server, sockaddr_in($port, INADDR_ANY))        || die "bind: $!";
 listen(Server,SOMAXCONN)                            || die "listen: $!";
 
+# support non-root use (after we bind to the port)
+my $setuid_to_user = 0;
+if ($opt_u) {
+    my $uuid = getpwnam($opt_u);
+    if (!defined $uuid || $uuid == 0) {
+	die "fatal: cannot run as nonexistent user or root with -u option\n";
+    }
+    $> = $uuid;		# effective uid
+    $< = $uuid;		# real uid. we now cannot setuid anymore
+    if ($> != $uuid) {
+	die "fatal: setuid to uid $uuid failed\n";
+    }
+
+} elsif ($> == 0) {
+    $setuid_to_user = 1;
+}
+
 logmsg "server started on port $port";
 if ($opt_D) {
-  warn "server started on port $port\n";
-  warn "server pid: $$\n";
+    warn "server started on port $port\n";
+    warn "server pid: $$\n";
 }
 
 my $waitedpid = 0;
@@ -171,6 +191,12 @@ for ( $waitedpid = 0;
                     }
                 }	
 	    }
+
+	    if ($setuid_to_user && $> == 0) {
+		logmsg "running as root, but no User: header was found";
+		die;		# avoid processing mail as root
+	    }
+
 	    my $resp = "EX_OK";
 	    # Now read in message
 	    my $mail = Mail::Audit->new();
@@ -238,8 +264,18 @@ sub spawn {
 
 sub handle_user {
     my $username = shift;
-    my @pw = getpwnam($username);
-    my $cf_file = $pw[7]."/.spamassassin.cf";
+    my ($name,$pwd,$uid,$gid,$quota,$comment,$gcos,$dir,$etc) =
+    				getpwnam($username);
+
+    if ($setuid_to_user) {
+      $> = $uid;
+      if ($> != $uid) {
+	logmsg "setuid to $uid failed";
+	die;		# make it fatal to avoid security breaches
+      }
+    }
+
+    my $cf_file = $dir."/.spamassassin.cf";
 
     create_default_cf_if_needed ($cf_file, $username);
     $spamtest->read_scoreonly_config ($cf_file);
@@ -269,7 +305,7 @@ spamd - daemonized version of spamassassin
 
 =head1 SYNOPSIS
 
-spamd [-h] [-L] [-p port] [-A host,...]
+spamd [options]
 
 =head1 OPTIONS
 
@@ -291,7 +327,12 @@ The list is one of valid IP addresses, separated by commas.
 
 =item B<-p> I<port>
 
-Optionally specifies the port number for the server to listen on
+Optionally specifies the port number for the server to listen on.
+
+=item B<-u> I<username>
+
+Run as the named user.  The alternative, default behaviour is to setuid() to
+the user running C<spamc>, if C<spamd> is running as root.
 
 =back
 
