@@ -533,6 +533,8 @@ sub get_raw_body_text_array {
     $end_boundary = "--$1--\n";
   }
 
+  my $ctypeistext = 1;
+
   # we build up our own copy from the Mail::Audit message-body array
   # reference, skipping MIME parts. this should help keep down in-memory
   # text size.
@@ -566,22 +568,31 @@ sub get_raw_body_text_array {
     }
 
     if ($multipart_boundary eq $_) {
-      while (defined ($_ = $bodyref->[$line++])) {
-	last if (/^$/);
+      for ($line++; defined($_ = $bodyref->[$line]); $line++) {
+	push (@{$self->{body_text_array}}, $_);
 
-	if (/^Content-[Tt]ype: (text\/\S+|multipart\/alternative)/) {
+	if (/^$/) { last; }
+
+	if (/^Content-[Tt]ype: (\S+?\/\S+?)(?:\;|\s|$)/) {
 	  $ctype = $1;
-	  push (@{$self->{body_text_array}}, $_);
-	  next;
+	  if ($ctype =~ /^(text\/\S+|multipart\/alternative)/) {
+	    $ctypeistext = 1; next;
+	  } else {
+	    $ctypeistext = 0; next;
+	  }
 	}
       }
 
       last unless defined $_;
 
-      # skip this attachment, it's non-text.
-      while (defined ($_ = $bodyref->[$line++])) {
-	if ($end_boundary eq $_) { last; }
-	if ($multipart_boundary eq $_) { $line--; last; }
+      if (!$ctypeistext) {
+	# skip this attachment, it's non-text.
+	push (@{$self->{body_text_array}}, "[skipped $ctype attachment]\n");
+
+	for ($line++; defined($_ = $bodyref->[$line]); $line++) {
+	  if ($end_boundary eq $_) { last; }
+	  if ($multipart_boundary eq $_) { $line--; last; }
+	}
       }
     }
   }
