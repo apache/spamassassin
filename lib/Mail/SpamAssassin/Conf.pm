@@ -1673,6 +1673,7 @@ add_header all Level _STARS(*)_
    if(/^spam_level_stars\s+(\d+)$/) {
      if ($1 == 0) {
        delete $self->{headers_ham}->{"Level"};
+       delete $self->{headers_spam}->{"Level"};
      }
      next;
    }
@@ -1697,6 +1698,7 @@ add_header all Level _STARS(.)_
 
    if(/^spam_level_char\s+(.)$/) {
      $self->{headers_ham}->{"Level"} = "_STARS($1)_";
+     $self->{headers_spam}->{"Level"} = "_STARS($1)_";
      next;
    }
 
