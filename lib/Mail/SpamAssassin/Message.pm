@@ -913,6 +913,8 @@ sub finish {
 
   # Clean ourself up
   $self->finish_metadata();
+  undef $self->{pristine_headers};
+  undef $self->{pristine_body};
   delete $self->{pristine_headers};
   delete $self->{pristine_body};
   delete $self->{text_decoded};

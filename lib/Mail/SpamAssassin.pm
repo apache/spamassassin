@@ -1328,6 +1328,8 @@ sub init {
   $self->{conf}->parse_rules ($self->{config_text});
   $self->{conf}->finish_parsing ();
   delete $self->{conf}->{main};	# to allow future GC'ing
+
+  undef $self->{config_text};   # ensure it's actually freed
   delete $self->{config_text};
 
   # Initialize the Bayes subsystem
