@@ -1427,7 +1427,7 @@ sub _check_date_diff {
   my @received = grep(/\S/, split(/\n/, $self->get ('Received')));
   # if we have no Received: headers, chances are we're archived mail
   # with a limited set of headers
-  return if (! scalar @received);
+  return if (! @received);
 
   # a Resent-Date: header takes precedence over any Date: header
   my $date = $self->get ('Resent-Date');
@@ -1448,7 +1448,7 @@ sub _check_date_diff {
   if ($received[0] =~ /\bfrom (?:localhost\s|(\S+ ){1,2}\S*\b127\.0\.0\.1\b)|qmail \d+ invoked by uid \d+/) {
     push @local, (shift @received);
   }
-  if ($received[0] =~ /\bby localhost with \w+ \(fetchmail-[\d.]+/) {
+  if (@received && $received[0] =~ /\bby localhost with \w+ \(fetchmail-[\d.]+/) {
     push @local, (shift @received);
   }
   elsif (@local) {
@@ -1469,7 +1469,7 @@ sub _check_date_diff {
     }
   }
 
-  if (! scalar @diffs) {
+  if (! @diffs) {
     dbg ("no dates found in Received headers, returning", "datediff", -1);
     return;
   }
