@@ -89,12 +89,6 @@ describe MIME_HTML_ONLY_MULTI	Multipart message only has text/html MIME parts
 rawbody  MIME_QP_LONG_LINE	eval:check_for_mime('mime_qp_long_line')
 describe MIME_QP_LONG_LINE	Quoted-printable line longer than 76 chars
 
-# actually indicates viruses, typically; just used here to clean corpora.
-rawbody  MIME_SUSPECT_NAME	eval:check_for_mime('mime_suspect_name')
-describe MIME_SUSPECT_NAME	MIME filename does not match content
-# todo: better tflags category for these tests
-tflags MIME_SUSPECT_NAME userconf
-
 # note: __HIGHBITS is used by HTML_CHARSET_FARAWAY
 rawbody __MIME_CHARSET_FARAWAY	eval:check_for_mime('mime_faraway_charset')
 body __HIGHBITS			/(?:[\x80-\xff].?){4,}/
