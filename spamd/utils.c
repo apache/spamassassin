@@ -22,6 +22,7 @@
 /* Aug 14, 2002 bj: EINTR and EAGAIN aren't fatal, are they? */
 /* Aug 14, 2002 bj: moved these to utils.c */
 /* Jan 13, 2003 ym: added timeout functionality */
+/* Apr 24, 2003 sjf: made full_read and full_write void* params */
 
 /* -------------------------------------------------------------------------- */
 
@@ -38,7 +39,7 @@ sigfunc* sig_catch(int sig, void (*f)(int))
 }
 
 static void catch_alrm(int x) {
-  /* dummy */
+  UNUSED_VARIABLE(x);
 }
 
 ssize_t
@@ -75,6 +76,12 @@ ssl_timeout_read (SSL *ssl, void *buf, int nbytes)
   int nred;
   sigfunc* sig;
 
+#ifndef SPAMC_SSL
+  UNUSED_VARIABLE(ssl);
+  UNUSED_VARIABLE(buf);
+  UNUSED_VARIABLE(nbytes);
+#endif
+
   sig = sig_catch(SIGALRM, catch_alrm);
   if (libspamc_timeout > 0) {
     alarm(libspamc_timeout);
@@ -104,8 +111,9 @@ ssl_timeout_read (SSL *ssl, void *buf, int nbytes)
 /* -------------------------------------------------------------------------- */
 
 int
-full_read (int fd, unsigned char *buf, int min, int len)
+full_read (int fd, void *vbuf, int min, int len)
 {
+  unsigned char *buf = (unsigned char *)vbuf;
   int total;
   int thistime;
 
@@ -126,8 +134,9 @@ full_read (int fd, unsigned char *buf, int min, int len)
 }
 
 int
-full_write (int fd, const unsigned char *buf, int len)
+full_write (int fd, const void *vbuf, int len)
 {
+  const unsigned char *buf = (const unsigned char *)vbuf;
   int total;
   int thistime;
 

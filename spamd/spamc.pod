@@ -135,6 +135,17 @@ as follows:
     EX_NOPERM       77  permission denied
     EX_CONFIG       78  configuration error
 
+=item B<-U> I<socketpath>
+
+Connect to C<spamd> via UNIX domain socket I<socketpath> instead of a
+TCP/IP connection.
+
+=item B<-H>
+
+For TCP/IP sockets, randomize the IP addresses returned from a DNS name
+lookup (when more than one IP is returned). This provides for a kind of
+hostname-base load balancing.
+
 =back
 
 =head1 DESCRIPTION

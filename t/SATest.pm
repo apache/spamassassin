@@ -151,7 +151,7 @@ sub spamcrun {
   }
 
   my $spamcargs;
-  if($args !~ /(?:-p\s*[0-9]+|-o)/)
+  if($args !~ /\b(?:-p\s*[0-9]+|-o|-U)\b/)
   {
     $spamcargs = "$spamc -p $spamdport $args";
   }
@@ -181,7 +181,7 @@ sub spamcrun_background {
   }
 
   my $spamcargs;
-  if($args !~ /(?:-p\s*[0-9]+|-o)/)
+  if($args !~ /\b(?:-p\s*[0-9]+|-o|-U)\b/)
   {
     $spamcargs = "$spamc -p $spamdport $args";
   }
@@ -225,7 +225,7 @@ sub start_spamd {
   if($sdargs !~ /(?:-C\s*[^-]\S+)/) {
     $sdargs = $spamd_cf_args . " ". $sdargs;
   }
-  if($sdargs !~ /(?:-p\s*[0-9]+|-o)/)
+  if($sdargs !~ /(?:-p\s*[0-9]+|-o|--socketpath)/)
   {
     $spamdargs = "$spamd -D -p $spamdport $sdargs";
   }

@@ -11,6 +11,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
 #include <netdb.h>
 #include <stdio.h>
 
@@ -33,6 +34,9 @@
 
 /* Feb  1 2003 jm: might as well fix bug 191 as well */
 #define SPAMC_SYMBOLS        (1<<24)
+
+/* 2003/04/16 SJF: randomize hostname order (quasi load balancing) */
+#define SPAMC_RANDOMIZE_HOSTS (1<<23)
 
 
 /* Aug 14, 2002 bj: A struct for storing a message-in-progress */
@@ -71,6 +75,48 @@ struct message {
     struct libspamc_private_message *priv;
 };
 
+/*------------------------------------------------------------------------
+ * TRANSPORT (2004/04/16 - SJF)
+ *
+ * The code to connect with the daemon has gotten more complicated: support
+ * for SSL, fallback to multiple hosts, and using UNIX domain sockets. The
+ * code has gotten ugly with way too many parameters being passed all around.
+ *
+ * So we've created this object to hold all the info required to connect with
+ * the remote site, including a self-contained list of all the IP addresses
+ * in the event this is using TCP sockets. These multiple IPs can be obtained
+ * only from DNS returning more than one A record for a single name, and
+ * this allows for fallback.
+ *
+ * We also allow a kind of quasi-load balancing, where we take the list of
+ * A records from DNS and randomize them before starting out - this lets
+ * us spread the load out among multiple servers if desired. The idea for
+ * load balancing goes to Jeremy Zawodny.
+ *
+ * By putting all our data here, we remove "fallback" from being a special
+ * case. We may find ourselves with several IP addresses, but if the user
+ * disables fallback, we set the IP address count to one. Now the connect
+ * code just loops over that same address.
+ */
+#define TRANSPORT_LOCALHOST 0x01	/* TCP to localhost only */
+#define	TRANSPORT_TCP	    0x02	/* standard TCP socket	 */
+#define TRANSPORT_UNIX	    0x03	/* UNIX domain socket	 */
+
+struct transport {
+	int		type;
+
+	const char	*socketpath;	/* for UNIX dommain socket      */
+	const char	*hostname;	/* for TCP sockets              */
+
+	unsigned short	port;		/* for TCP sockets              */
+
+	struct in_addr	hosts[256];
+	int		nhosts;
+};
+
+extern void transport_init(struct transport *tp);
+extern int  transport_setup(struct transport *tp, int flags);
+
 /* Aug 14, 2002 bj: New interface functions */
 
 /* Read in a message from the fd, with the mode specified in the flags.
@@ -84,31 +130,13 @@ int message_read(int in_fd, int flags, struct message *m);
  * the "score/threshold" line. */
 long message_write(int out_fd, struct message *m);
 
-/* Pass the message through spamd (at addr) as the specified user, with the
- * given flags. Returns EX_OK on success, or various errors on error. If it was
- * successful, message_write will print either the CHECK_ONLY output, or the
- * filtered message in the appropriate output format. */
-int message_filter(const struct sockaddr *addr, char *username, int flags, struct message *m);
-
-/* Convert the host/port into a struct sockaddr. Returns EX_OK on success, or
- * else an error EX. */
-int lookup_host(const char *hostname, int port, struct sockaddr *a);
-
-/* Pass the message through one of a set of spamd's. This variant will handle
- * multiple spamd machines; if a connect failure occurs, it will fail-over to
- * the next one in the struct hostent. Otherwise identical to message_filter().
+/* Process the message through the spamd filter, making as many connection
+ * attempts as are implied by the transport structure. To make this do
+ * failover, more than one host is defined, but if there is only one there,
+ * no failover is done.
  */
-int message_filter_with_failover (const struct hostent *hent, int port, char
-    *username, int flags, struct message *m);
-
-/* Convert the host into a struct hostent, for use with
- * message_filter_with_failover() above. Returns EX_OK on success, or else an
- * error EX.  Note that the data filled into hent is from gethostbyname()'s
- * static storage, so any call to gethostbyname() between
- * lookup_host_for_failover() and message_filter_with_failover() will overwrite
- * this.  Take a copy, and use that instead, if you think a call may occur in
- * your code, or library code that you use (such as syslog()). */
-int lookup_host_for_failover(const char *hostname, struct hostent *hent);
+int message_filter(struct transport *tp, const char *username,
+		int flags, struct message *m);
 
 /* Dump the message. If there is any data in the message (typically, m->type
  * will be MESSAGE_ERROR) it will be message_writed. Then, fd_in will be piped
@@ -119,14 +147,14 @@ void message_dump(int in_fd, int out_fd, struct message *m);
 /* Do a message_read->message_filter->message_write sequence, handling errors
  * appropriately with dump_message or appropriate CHECK_ONLY output. Returns
  * EX_OK or EX_ISSPAM/EX_NOTSPAM on success, some error EX on error. */
-int message_process(const char *hostname, int port, char *username, int max_size, int in_fd, int out_fd, const int flags);
+int message_process(struct transport *trans, char *username, int max_size, int in_fd, int out_fd, const int flags);
 
 /* Cleanup the resources we allocated for storing the message. Call after
  * you're done processing. */
 void message_cleanup(struct message *m);
 
 /* Aug 14, 2002 bj: This is now legacy, don't use it. */
-int process_message(const char *hostname, int port, char *username, 
+int process_message(struct transport *tp, char *username, 
                     int max_size, int in_fd, int out_fd,
                     const int check_only, const int safe_fallback);
 

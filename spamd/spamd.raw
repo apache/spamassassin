@@ -81,6 +81,7 @@ foreach (keys %ENV) {
 my @OLD_ARGV = @ARGV;    # Getopt::Long tends to clear @ARGV
 Getopt::Long::Configure ("bundling");
 GetOptions(
+  'socketpath=s'                => \$opt{'socketpath'},
   'auto-whitelist|whitelist|a'  => \$opt{'auto-whitelist'},
   'create-prefs!'               => \$opt{'create-prefs'},
     'c'                         => \$opt{'create-prefs'},
@@ -120,22 +121,42 @@ GetOptions(
   'server-cert=s'               => \$opt{'server-cert'},
 
   # will be stripped in future release
-  'add-from!' => sub { warn "The --add-from option has been removed\n" },
-  'F=i'       => sub { warn "The -F option has been removed\n" },
-  'S'       => sub { warn "The -S option has been removed\n" },
-  'stop-at-threshold!'       => sub { warn "The --stop-at-threshold option has been removed\n" },
+  'add-from!'	=> sub { warn "The --add-from option has been removed\n" },
+  'F=i'		=> sub { warn "The -F option has been removed\n" },
+  'S'		=> sub { warn "The -S option has been removed\n" },
+  'stop-at-threshold!' => sub { warn "The --stop-at-threshold option has been removed\n" },
 
 ) or pod2usage(-exitval => $resphash{'EX_USAGE'}, -verbose => 0);
 @ARGV = @OLD_ARGV;
 
 $opt{'help'} and pod2usage(-exitval => $resphash{'EX_USAGE'}, -verbose => 0, -message => 'For more details, use "man spamd"');
 
-# These can be changed on command line with -A flag
-if(@{$opt{'allowed-ip'}}) {
-  set_allowed_ip(split /,/, join(',', @{$opt{'allowed-ip'}}));
+# sanity checking on parameters: if --socketpath is used, it means that we're using
+# UNIX domain sockets, none of the IP params are allowed. The code would probably
+# work ok if we didn't check it, but it's better if we detect the error and report
+# it lest the admin find surprises.
+
+if ( defined $opt{'socketpath'}
+     and (( @{$opt{'allowed-ip'}} > 0 )
+        or defined $opt{'ssl'}
+        or defined $opt{'auth-ident'}
+        or defined $opt{'port'} ))
+{
+  pod2usage(-exitval => $resphash{'EX_USAGE'}, -verbose => 0, -message =>
+    "ERROR: --socketpath mutually exclusive with --allowed-ip/--ssl/--port params");
 }
-else {
-  set_allowed_ip('127.0.0.1');
+
+
+# These can be changed on command line with -A flag
+# but only if we're not using UNIX domain sockets
+if ( not defined $opt{'socketpath'} )
+{
+  if(@{$opt{'allowed-ip'}}) {
+    set_allowed_ip(split /,/, join(',', @{$opt{'allowed-ip'}}));
+  }
+  else {
+    set_allowed_ip('127.0.0.1');
+  }
 }
 
 # ident-based spamc user authentication
@@ -217,15 +238,59 @@ if ($log_facility ne 'stderr') {
   }
 }
 
-my $port = $opt{'port'} || 783;
-my $addr = (gethostbyname($opt{'listen-ip'} || '127.0.0.1'))[0];
-my $proto = getprotobyname('tcp');
+my($port, $addr, $proto);
+my($listeninfo);             # just for reporting
 
-($port) = $port =~ /^(\d+)$/ or die "invalid port\n";
+if ( defined $opt{'socketpath'} )
+{
+  $listeninfo = "UNIX domain socket " . $opt{'socketpath'};
+}
+else
+{
+  $port = $opt{'port'} || 783;
+  $addr = (gethostbyname($opt{'listen-ip'} || '127.0.0.1'))[0];
+  $proto = getprotobyname('tcp');
+
+  ($port) = $port =~ /^(\d+)$/ or die "invalid port\n";
+
+  $listeninfo = "port $port/tcp";
+}
 
 # Be a well-behaved daemon
 my $server;
-if ($opt{'ssl'}) {
+if ( $opt{'socketpath'} ) {
+  my $path = $opt{'socketpath'};
+
+  #---------------------------------------------------------------------
+  # see if the socket is in use: if we connect to the current socket, it
+  # means that spamd is already running, so we have to bail on our own.
+  # Yes, there is a window here: best we can do for now. There is almost
+  # certainly a better way, but we don't know it. Yet.
+
+  if ( -e $path )
+  {
+    if ( new IO::Socket::UNIX(Peer => $path, Type => SOCK_STREAM) )
+    {
+        # we connected successfully: must alreadybe running
+
+        undef $opt{'socketpath'};  # so exit handlers won't unlink it!
+
+        die "spamd already running on $path, exiting\n";
+    }
+    else
+    {
+        unlink $path;
+    }
+  }
+
+  $server = new IO::Socket::UNIX(Local => $path,
+                                 Type => SOCK_STREAM,
+                                 Listen => SOMAXCONN
+  ) || die "Could not create UNIX socket on $path: $! $@\n";
+
+  chmod 0666, $path;          # make sure everybody can talk to it
+}
+elsif ($opt{'ssl'}) {
   $server = new IO::Socket::SSL(LocalAddr => $addr,
                                 LocalPort => $port,
                                 Proto => $proto,
@@ -264,6 +329,12 @@ if ($opt{'username'}) {
   if (defined $opt{'pidfile'}) {
     chown $uuid, -1, $opt{'pidfile'}
       || die "fatal: could not chown '$opt{'pidfile'}' to uid $uuid\n";
+  }
+
+  # ditto with the socket file
+  if (defined $opt{'socketpath'}) {
+    chown $uuid, -1, $opt{'socketpath'}
+      || die "fatal: could not chown '$opt{'socketpath'}' to uid $uuid\n";
   }
   
   # Change GID
@@ -310,12 +381,13 @@ $SIG{TERM} = \&kill_handler;
 
 # now allow waiting processes to connect, if they're watching the log.
 # The test suite does this!
+
 if ($opt{'debug'}) {
-  warn "server started on port $port (running version ". Mail::SpamAssassin::Version().")\n";
+  warn "server started on $listeninfo (running version ". Mail::SpamAssassin::Version().")\n";
   warn "server pid: $$\n";
 }
 
-logmsg("server started on port $port (running version ". Mail::SpamAssassin::Version(). ")");
+logmsg("server started on $listeninfo (running version ". Mail::SpamAssassin::Version(). ")");
 
 my $current_user;
 my $client;
@@ -396,16 +468,21 @@ while (1) {
 
     my $start = time;
 
-    my($port, $ip) = sockaddr_in($client->peername);
-    my $name = gethostbyaddr($ip, AF_INET);
-
-    $ip = inet_ntoa($ip);
-    if (ip_is_allowed($ip)) {
-        logmsg("connection from $name [$ip] at port $port");
+    if ( $opt{'socketpath'} )
+    {
+      logmsg("got connection over " . $opt{'socketpath'});
     } else {
+      my($port, $ip) = sockaddr_in($client->peername);
+      my $name = gethostbyaddr($ip, AF_INET);
+
+      $ip = inet_ntoa($ip);
+      if (ip_is_allowed($ip)) {
+        logmsg("connection from $name [$ip] at port $port");
+      } else {
         logmsg("unauthorized connection from $name [$ip] at port $port");
         $client->close;
         next;
+      }
     }
 
     spawn sub {
@@ -1015,6 +1092,9 @@ sub kill_handler
     logmsg "server killed by SIG$sig, shutting down";
     $server->close;
     defined($opt{'pidfile'}) and unlink($opt{'pidfile'});
+
+    # the UNIX domain socket
+    defined($opt{'socketpath'}) and unlink($opt{'socketpath'});
     exit 0;
 }
 
@@ -1025,6 +1105,9 @@ sub restart_handler {
     if (!eof Server) {
       shutdown (Server, 2);
       close Server;
+
+      # the UNIX domain socket
+      defined($opt{'socketpath'}) and unlink($opt{'socketpath'});
     }
     $got_sighup = 1;
 }
@@ -1166,6 +1249,7 @@ Options:
   --ssl                             Run an SSL server
   --server-key keyfile              Specify an SSL keyfile
   --server-cert certfile            Specify an SSL certificate
+  --socketpath=path                 Listen on given UNIX domain socket
 
 =head1 DESCRIPTION
 
@@ -1433,6 +1517,10 @@ Specify the SSL key file to use for SSL connections.
 =item B<--server-cert> I<certfile>
 
 Specify the SSL certificate file to use for SSL connections.
+
+=item B<--socketpath> I<pathname>
+
+Listen on UNIX domain path I<pathname> instead of a TCP socket.
 
 =back
 

@@ -131,10 +131,10 @@ use constant TST_CHEW_BODY_URIS => 0;
 use constant TST_CHEW_BODY_MAILTOS => 0;
 use constant TST_HDRS_TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
 use constant TST_BODY_TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
-use constant PROB_BOUND_LOWER => 0.000;
-use constant PROB_BOUND_UPPER => 1.000;
+use constant PROB_BOUND_LOWER => 0.001;
+use constant PROB_BOUND_UPPER => 0.999;
 use constant CHI_ROBINSON_X_CONSTANT  => 0.538;
-use constant CHI_ROBINSON_S_CONSTANT  => 0.373;
+use constant CHI_ROBINSON_S_CONSTANT  => 0.150;
 use constant CHI_ROBINSON_MIN_PROB_STRENGTH  => 0.346;
 
 

@@ -12,12 +12,14 @@
 
 #include <unistd.h>
 #include <stdlib.h>
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include <syslog.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <sys/un.h>
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
 
@@ -42,10 +44,15 @@
 
 /* RedHat 5.2 doesn't define Shutdown 2nd Parameter Constants */
 /* KAM 12-4-01 */
-#ifndef HAVE_SHUT_RD
-#define SHUT_RD (0)   /* No more receptions.  */
-#define SHUT_WR (1)   /* No more transmissions.  */
-#define SHUT_RDWR (2) /* No more receptions or transmissions.  */
+/* SJF 2003/04/25 - now test for macros directly */
+#ifndef SHUT_RD
+#  define SHUT_RD 0	/* no more receptions */
+#endif
+#ifndef SHUT_WR
+#  define SHUT_WR 1	/* no more transmissions */
+#endif
+#ifndef SHUT_RDWR
+#  define SHUT_RDWR 2	/* no more receptions or transmissions */
 #endif
 
 #ifndef HAVE_H_ERRNO
@@ -96,6 +103,293 @@ struct libspamc_private_message {
 
 int libspamc_timeout = 0;
 
+/*
+ * translate_connect_errno()
+ *
+ *	Given a UNIX error number obtained (probably) from "connect(2)",
+ *	translate this to a failure code. This module is shared by both
+ *	transport modules - UNIX and TCP.
+ *
+ *	This should ONLY be called when there is an error.
+ */
+static int
+translate_connect_errno(int err)
+{
+	switch (err)
+	{
+	  case EBADF:
+	  case EFAULT:
+	  case ENOTSOCK:
+	  case EISCONN:
+	  case EADDRINUSE:
+	  case EINPROGRESS:
+	  case EALREADY:
+	  case EAFNOSUPPORT:
+		return EX_SOFTWARE;
+
+	  case ECONNREFUSED:
+	  case ETIMEDOUT:
+	  case ENETUNREACH:
+		return EX_UNAVAILABLE;
+
+	  case EACCES:
+		return EX_NOPERM;
+
+	  default:
+		return EX_SOFTWARE;
+	}
+}
+
+/*
+ * opensocket()
+ *
+ *	Given a socket type (PF_INET or PF_UNIX), try to create this socket
+ *	and store the FD in the pointed-to place. If it's successful, do any
+ *	other setup required to make the socket ready to use, such as setting
+ *	TCP_NODELAY mode, and in any case we return EX_OK if all is well.
+ *
+ *	Upon failure we return one of the other EX_??? error codes.
+ */
+static int opensocket(int type, int *psock)
+{
+const char *typename;
+int	    proto = 0;
+
+	assert(psock != 0);
+
+	/*----------------------------------------------------------------
+	 * Create a few induction variables that are implied by the socket
+	 * type given by the user. The typename is strictly used for debug
+	 * reporting.
+	 */
+	if ( type == PF_UNIX )
+	{
+		typename = "PF_UNIX";
+	}
+	else
+	{
+		typename = "PF_INET";
+		proto    = IPPROTO_TCP;
+	}
+
+#ifdef DO_CONNECT_DEBUG_SYSLOGS
+	syslog (DEBUG_LEVEL, "dbg: create socket(%s)", typename);
+#endif
+
+	if ( (*psock = socket(type, SOCK_STREAM, proto)) < 0 )
+	{
+	int	origerr;
+
+		/*--------------------------------------------------------
+		 * At this point we had a failure creating the socket, and
+		 * this is pretty much fatal. Translate the error reason
+		 * into something the user can understand.
+		 */
+		origerr = errno;    /* take a copy before syslog() */
+
+		syslog (LOG_ERR, "socket(%s) to spamd failed: %m", typename);
+
+		switch (origerr)
+		{
+		  case EPROTONOSUPPORT:
+		  case EINVAL:
+			return EX_SOFTWARE;
+
+		  case EACCES:
+			return EX_NOPERM;
+
+		  case ENFILE:
+		  case EMFILE:
+		  case ENOBUFS:
+		  case ENOMEM:
+			return EX_OSERR;
+
+		  default:
+			return EX_SOFTWARE;
+		}
+	}
+
+
+	/*----------------------------------------------------------------
+	 * Do a bit of setup on the TCP socket if required. Notes above
+	 * suggest this is probably not set
+	 */
+#ifdef USE_TCP_NODELAY
+	{
+		int one = 1;
+
+		if ( type == PF_INET
+		 &&  setsockopt(*psock, 0, TCP_NODELAY, &one, sizeof one) != 0 )
+		{
+			switch(errno)
+			{
+			  case EBADF:
+			  case ENOTSOCK:
+			  case ENOPROTOOPT:
+			  case EFAULT:
+				syslog(LOG_ERR,
+				   "setsockopt(TCP_NODELAY) failed: %m");
+				close (*psock);
+				return EX_SOFTWARE;
+
+			  default:
+				break;            /* ignored */
+			}
+		}
+	}
+#endif /* USE_TCP_NODELAY */
+
+	return EX_OK;	/* all is well */
+}
+
+/*
+ * try_to_connect_unix()
+ *
+ *	Given a transport handle that implies using a UNIX domain
+ *	socket, try to make a connection to it and store the resulting
+ *	file descriptor in *sockptr. Return is EX_OK if we did it,
+ *	and some other error code otherwise.
+ */
+static int
+try_to_connect_unix (struct transport *tp, int *sockptr)
+{
+int mysock, status, origerr;
+struct sockaddr_un addrbuf;
+int ret;
+
+	assert(tp             != 0);
+	assert(sockptr        != 0);
+	assert(tp->socketpath != 0);
+
+	/*----------------------------------------------------------------
+	 * If the socket itself can't be created, this is a fatal error.
+	 */
+	if ( (ret = opensocket(PF_UNIX, &mysock)) != EX_OK )
+		return ret;
+
+	/* set up the UNIX domain socket */
+	memset(&addrbuf, 0, sizeof addrbuf);
+	addrbuf.sun_family = AF_UNIX;
+	strncpy(addrbuf.sun_path, tp->socketpath, sizeof addrbuf.sun_path - 1);
+
+#ifdef DO_CONNECT_DEBUG_SYSLOGS
+	syslog (DEBUG_LEVEL, "dbg: connect(AF_UNIX) to spamd at %s",
+		addrbuf.sun_path);
+#endif
+
+	status = connect(mysock, (struct sockaddr *) &addrbuf, sizeof(addrbuf));
+
+	origerr = errno;
+
+	if ( status >= 0 )
+	{
+#ifdef DO_CONNECT_DEBUG_SYSLOGS
+		syslog(DEBUG_LEVEL, "dbg: connect(AF_UNIX) ok");
+#endif
+
+		*sockptr = mysock;
+
+		return EX_OK;
+	}
+
+	syslog(LOG_ERR, "connect(AF_UNIX) to spamd %s failed: %m",
+		addrbuf.sun_path);
+
+	close(mysock);
+
+	return translate_connect_errno(origerr);
+}
+
+/*
+ * try_to_connect_tcp()
+ *
+ *	Given a transport that implies a TCP connection, either to
+ *	localhost or a list of IP addresses, attempt to connect. The
+ *	list of IP addresses has already been randomized (if requested)
+ *	and limited to just one if fallback has been enabled.
+ */
+static int
+try_to_connect_tcp (const struct transport *tp, int *sockptr)
+{
+int	numloops;
+int	origerr = 0;
+int	ret;
+
+	assert(tp        != 0);
+	assert(sockptr   != 0);
+	assert(tp->nhosts > 0);
+
+#ifdef DO_CONNECT_DEBUG_SYSLOGS
+	for (numloops = 0; numloops < tp->nhosts; numloops++)
+	{
+		syslog(LOG_ERR, "dbg: %d/%d: %s",
+			numloops+1, tp->nhosts, inet_ntoa(tp->hosts[numloops]));
+	}
+#endif
+
+	for (numloops = 0; numloops < MAX_CONNECT_RETRIES; numloops++)
+	{
+	struct sockaddr_in addrbuf;
+	const int          hostix = numloops % tp->nhosts;
+	int                status, mysock;
+	const char	 * ipaddr;
+
+		/*--------------------------------------------------------
+		 * We always start by creating the socket, as we get only
+		 * one attempt to connect() on each one. If this fails,
+		 * we're done.
+		 */
+		if ( (ret = opensocket(PF_INET, &mysock)) != EX_OK )
+			return ret;
+
+		memset(&addrbuf, 0, sizeof(addrbuf));
+
+		addrbuf.sin_family = AF_INET;
+		addrbuf.sin_port   = htons(tp->port);
+		addrbuf.sin_addr   = tp->hosts[hostix];
+
+		ipaddr = inet_ntoa(addrbuf.sin_addr);
+
+#ifdef DO_CONNECT_DEBUG_SYSLOGS
+		syslog (DEBUG_LEVEL,
+			"dbg: connect(AF_INET) to spamd at %s (try #%d of %d)",
+			ipaddr,
+			numloops+1,
+			MAX_CONNECT_RETRIES);
+#endif
+
+		status = connect(mysock, (struct sockaddr *)&addrbuf, sizeof(addrbuf));
+
+		if (status != 0)
+		{
+			syslog (LOG_ERR,
+			"connect(AF_INET) to spamd at %s failed, retrying (#%d of %d): %m",
+				ipaddr, numloops+1, MAX_CONNECT_RETRIES);
+
+			close(mysock);
+
+			sleep(CONNECT_RETRY_SLEEP);
+		}
+		else
+		{
+#ifdef DO_CONNECT_DEBUG_SYSLOGS
+			syslog(DEBUG_LEVEL,
+				"dbg: connect(AF_INET) to spamd at %s done",
+				ipaddr);
+#endif
+			*sockptr = mysock;
+
+			return EX_OK;
+		}
+	}
+
+	syslog (LOG_ERR, "connection attempt to spamd aborted after %d retries",
+		MAX_CONNECT_RETRIES);
+
+	return translate_connect_errno(origerr);
+}
+
+#if 0
 static int
 try_to_connect (const struct sockaddr *argaddr, struct hostent *hent,
                 int hent_port, int *sockptr)
@@ -323,6 +617,7 @@ try_to_connect (const struct sockaddr *argaddr, struct hostent *hent,
      return EX_SOFTWARE;
   }
 }
+#endif
 
 /* Aug 14, 2002 bj: Reworked things. Now we have message_read, message_write,
  * message_dump, lookup_host, message_filter, and message_process, and a bunch
@@ -345,7 +640,7 @@ static int
 message_read_raw(int fd, struct message *m){
     clear_message(m);
     if((m->raw=malloc(m->max_len+1))==NULL) return EX_OSERR;
-    m->raw_len=full_read(fd, (unsigned char *) m->raw, m->max_len+1, m->max_len+1);
+    m->raw_len=full_read(fd, m->raw, m->max_len+1, m->max_len+1);
     if(m->raw_len<=0){
         free(m->raw); m->raw=NULL; m->raw_len=0;
         return EX_IOERR;
@@ -368,7 +663,7 @@ static int message_read_bsmtp(int fd, struct message *m){
     if((m->raw=malloc(m->max_len+1))==NULL) return EX_OSERR;
 
     /* Find the DATA line */
-    m->raw_len=full_read(fd, (unsigned char *) m->raw, m->max_len+1, m->max_len+1);
+    m->raw_len=full_read(fd, m->raw, m->max_len+1, m->max_len+1);
     if(m->raw_len<=0){
         free(m->raw); m->raw=NULL; m->raw_len=0;
         return EX_IOERR;
@@ -453,7 +748,7 @@ long message_write(int fd, struct message *m){
 
     if (m->priv->flags&SPAMC_CHECK_ONLY) {
 	if(m->is_spam==EX_ISSPAM || m->is_spam==EX_NOTSPAM){
-	    return full_write(fd, (unsigned char *) m->out, m->out_len);
+	    return full_write(fd, m->out, m->out_len);
 
 	} else {
 	    syslog(LOG_ERR, "oops! SPAMC_CHECK_ONLY is_spam: %d\n", m->is_spam);
@@ -468,13 +763,13 @@ long message_write(int fd, struct message *m){
         return -1;
 
       case MESSAGE_ERROR:
-        return full_write(fd, (unsigned char *) m->raw, m->raw_len);
+        return full_write(fd, m->raw, m->raw_len);
 
       case MESSAGE_RAW:
-        return full_write(fd, (unsigned char *) m->out, m->out_len);
+        return full_write(fd, m->out, m->out_len);
 
       case MESSAGE_BSMTP:
-        total=full_write(fd, (unsigned char *) m->pre, m->pre_len);
+        total=full_write(fd, m->pre, m->pre_len);
         for(i=0; i<m->out_len; ){
 	    jlimit = (off_t) (sizeof(buffer)/sizeof(*buffer)-4);
             for(j=0; i < (off_t) m->out_len &&
@@ -491,9 +786,9 @@ long message_write(int fd, struct message *m){
                     buffer[j++]=m->out[i++];
                 }
             }
-            total+=full_write(fd, (unsigned char *) buffer, j);
+            total+=full_write(fd, buffer, j);
         }
-        return total+full_write(fd, (unsigned char *) m->post, m->post_len);
+        return total+full_write(fd, m->post, m->post_len);
 
       default:
         syslog(LOG_ERR, "Unknown message type %d\n", m->type);
@@ -508,8 +803,8 @@ void message_dump(int in_fd, int out_fd, struct message *m){
     if(m!=NULL && m->type!=MESSAGE_NONE) {
         message_write(out_fd, m);
     }
-    while((bytes=full_read(in_fd, (unsigned char *) buf, 8192, 8192))>0){
-        if (bytes!=full_write(out_fd, (unsigned char *) buf, bytes)) {
+    while((bytes=full_read(in_fd, buf, 8192, 8192))>0){
+        if (bytes!=full_write(out_fd, buf, bytes)) {
             syslog(LOG_ERR, "oops! message_dump of %d returned different", bytes);
         }
     }
@@ -522,6 +817,8 @@ _spamc_read_full_line (struct message *m, int flags, SSL *ssl, int sock,
     int failureval;
     int bytesread = 0;
     int len;
+
+    UNUSED_VARIABLE(m);
 
     /* Now, read from spamd */
     for(len=0; len<bufsiz-1; len++) {
@@ -558,6 +855,8 @@ _handle_spamd_header (struct message *m, int flags, char *buf, int len)
 {
     char is_spam[6];
 
+    UNUSED_VARIABLE(len);
+
     /* Feb 12 2003 jm: actually, I think sccanf is working fine here ;)
      * let's stick with it for this parser.
      */
@@ -585,14 +884,13 @@ _handle_spamd_header (struct message *m, int flags, char *buf, int len)
     return EX_PROTOCOL;
 }
 
-static int _message_filter(const struct sockaddr *addr,
-                const struct hostent *hent, int hent_port, char *username,
+int message_filter(struct transport *tp, const char *username,
                 int flags, struct message *m)
 {
     char buf[8192];
     int bufsiz = (sizeof(buf) / sizeof(*buf)) - 4; /* bit of breathing room */
     int len, i;
-    int sock;
+    int sock, rc;
     float version;
     int response;
     int failureval;
@@ -607,7 +905,9 @@ static int _message_filter(const struct sockaddr *addr,
       SSL_load_error_strings();
       ctx = SSL_CTX_new(meth);
 #else
-      (void) ssl; (void) meth; (void) ctx;	/* avoid "unused" warnings */
+      UNUSED_VARIABLE(ssl);
+      UNUSED_VARIABLE(meth);
+      UNUSED_VARIABLE(ctx);
       syslog(LOG_ERR, "spamc not built with SSL support");
       return EX_SOFTWARE;
 #endif
@@ -644,8 +944,12 @@ static int _message_filter(const struct sockaddr *addr,
 
     libspamc_timeout = m->timeout;
 
-    if((i=try_to_connect(addr, (struct hostent *) hent,
-			hent_port, &sock)) != EX_OK)
+    if ( tp->socketpath )
+        rc = try_to_connect_unix(tp, &sock);
+    else
+        rc = try_to_connect_tcp(tp, &sock);
+
+    if ( rc != EX_OK )
     {
         free(m->out); m->out=m->msg; m->out_len=m->msg_len;
         return i;
@@ -666,8 +970,8 @@ static int _message_filter(const struct sockaddr *addr,
       SSL_write(ssl, m->msg, m->msg_len);
 #endif
     } else {
-      full_write(sock, (unsigned char *) buf, len);
-      full_write(sock, (unsigned char *) m->msg, m->msg_len);
+      full_write(sock, buf, len);
+      full_write(sock, m->msg, m->msg_len);
       shutdown(sock, SHUT_WR);
     }
 
@@ -716,7 +1020,7 @@ static int _message_filter(const struct sockaddr *addr,
 	  len = ssl_timeout_read (ssl, m->out+m->out_len,
 		     m->max_len+EXPANSION_ALLOWANCE+1-m->out_len);
 	} else{
-	  len = full_read (sock, (unsigned char *) m->out+m->out_len,
+	  len = full_read (sock, m->out+m->out_len,
 		     m->max_len+EXPANSION_ALLOWANCE+1-m->out_len,
 		     m->max_len+EXPANSION_ALLOWANCE+1-m->out_len);
 	}
@@ -754,49 +1058,17 @@ failure:
     return failureval;
 }
 
-static int _lookup_host(const char *hostname, struct hostent *out_hent)
-{
-    struct hostent *hent = NULL;
-    int origherr;
 
-    /* no need to try using inet_addr(), gethostbyname() will do that */
-
-    if (NULL == (hent = gethostbyname(hostname))) {
-        origherr = h_errno;	/* take a copy before syslog() */
-        syslog (LOG_ERR, "gethostbyname(%s) failed: h_errno=%d",
-                hostname, origherr);
-        switch(origherr)
-        {
-        case HOST_NOT_FOUND:
-        case NO_ADDRESS:
-        case NO_RECOVERY:
-                  return EX_NOHOST;
-        case TRY_AGAIN:
-                  return EX_TEMPFAIL;
-                default:
-                  return EX_OSERR;
-        }
-    }
-
-    memcpy (out_hent, hent, sizeof(struct hostent));
-
-    return EX_OK;
-}
-
-int message_process(const char *hostname, int port, char *username, int max_size, int in_fd, int out_fd, const int flags){
-    struct hostent hent;
+int message_process(struct transport *trans, char *username, int max_size, int in_fd, int out_fd, const int flags){
     int ret;
     struct message m;
 
     m.type=MESSAGE_NONE;
 
-    ret=lookup_host_for_failover(hostname, &hent);
-    if(ret!=EX_OK) goto FAIL;
-    
     m.max_len=max_size;
     ret=message_read(in_fd, flags, &m);
     if(ret!=EX_OK) goto FAIL;
-    ret=message_filter_with_failover(&hent, port, username, flags, &m);
+    ret=message_filter(trans, username, flags, &m);
     if(ret!=EX_OK) goto FAIL;
     if(message_write(out_fd, &m)<0) goto FAIL;
     if(m.is_spam!=EX_TOOBIG) {
@@ -808,7 +1080,7 @@ int message_process(const char *hostname, int port, char *username, int max_size
 
 FAIL:
    if(flags&SPAMC_CHECK_ONLY){
-       full_write(out_fd, (unsigned char *) "0/0\n", 4);
+       full_write(out_fd, "0/0\n", 4);
        message_cleanup(&m);
        return EX_NOTSPAM;
    } else {
@@ -826,41 +1098,176 @@ void message_cleanup(struct message *m) {
 }
 
 /* Aug 14, 2002 bj: Obsolete! */
-int process_message(const char *hostname, int port, char *username, int max_size, int in_fd, int out_fd, const int my_check_only, const int my_safe_fallback){
+int process_message(struct transport *tp, char *username, int max_size, int in_fd, int out_fd, const int my_check_only, const int my_safe_fallback){
     int flags;
 
     flags=SPAMC_RAW_MODE;
     if(my_check_only) flags|=SPAMC_CHECK_ONLY;
     if(my_safe_fallback) flags|=SPAMC_SAFE_FALLBACK;
 
-    return message_process(hostname, port, username, max_size, in_fd, out_fd, flags);
+    return message_process(tp, username, max_size, in_fd, out_fd, flags);
 }
 
-/* public APIs, which call into the static code and enforce sockaddr-OR-hostent
- * conventions */
-
-int lookup_host(const char *hostname, int port, struct sockaddr *out_addr)
+/*
+ * init_transport()
+ *
+ *	Given a pointer to a transport structure, set it to "all empty".
+ *	The default is a localhost connection.
+ */
+void transport_init(struct transport *tp)
 {
-  struct sockaddr_in *addr = (struct sockaddr_in *)out_addr;
-  struct hostent hent;
-  int ret;
+	assert(tp != 0);
 
-  memset(&out_addr, 0, sizeof(out_addr));
-  addr->sin_family=AF_INET;
-  addr->sin_port=htons(port);
-  ret = _lookup_host(hostname, &hent);
-  memcpy (&(addr->sin_addr), hent.h_addr, sizeof(addr->sin_addr));
-  return ret;
+	memset(tp, 0, sizeof *tp);
+
+	tp->type = TRANSPORT_LOCALHOST;
+	tp->port = 783;
 }
 
-int lookup_host_for_failover(const char *hostname, struct hostent *hent) {
-  return _lookup_host(hostname, hent);
+/*
+ * randomize_hosts()
+ *
+ *	Given the transport object that contains one or more IP addresses
+ *	in this "hosts" list, rotate it by a random number of shifts to
+ *	randomize them - this is a kind of load balancing. It's possible
+ *	that the random number will be 0, which says not to touch. We don't
+ *	do anything unless 
+ */
+
+static void randomize_hosts(struct transport *tp)
+{
+int     rnum;
+
+	assert(tp != 0);
+
+	if ( tp->nhosts <= 1 ) return;
+
+	rnum = rand() % tp->nhosts;
+
+	while ( rnum-- > 0 )
+	{
+	struct in_addr  tmp = tp->hosts[0];
+	int             i;
+
+		for (i = 1; i < tp->nhosts; i++ )
+			tp->hosts[i-1] = tp->hosts[i];
+
+		tp->hosts[i-1] = tmp;
+	}
 }
 
-int message_filter(const struct sockaddr *addr, char *username, int flags,
-                struct message *m)
-{ return _message_filter (addr, NULL, 0, username, flags, m); }
+/*
+ * transport_setup()
+ *
+ *	Given a "transport" object that says how we're to connect to the
+ *	spam daemon, perform all the initial setup required to make the
+ *	connection process a smooth one. The main work is to do the host
+ *	name lookup and copy over all the IP addresses to make a local copy
+ *	so they're not kept in the resolver's static state.
+ *
+ *	Here we also manage quasi-load balancing and failover: if we're
+ *	doing load balancing, we randomly "rotate" the list to put it in
+ *	a different order, and then if we're not doing failover we limit
+ *	the hosts to just one. This way *all* connections are done with
+ *	the intention of failover - makes the code a bit more clear.
+ */
+int transport_setup(struct transport *tp, int flags)
+{
+struct hostent *hp = 0;
+char           **addrp;
 
-int message_filter_with_failover (const struct hostent *hent, int port,
-                char *username, int flags, struct message *m)
-{ return _message_filter (NULL, hent, port, username, flags, m); }
+	assert(tp != 0);
+
+	switch ( tp->type )
+	{
+	  case TRANSPORT_UNIX:
+		assert(tp->socketpath != 0);
+		return EX_OK;
+
+	  case TRANSPORT_LOCALHOST:
+		tp->hosts[0].s_addr = inet_addr("127.0.0.1");
+		tp->nhosts          = 1;
+		return EX_OK;
+
+	  case TRANSPORT_TCP:
+		if (NULL == (hp = gethostbyname(tp->hostname)))
+		{
+		int	origherr = h_errno;  /* take a copy before syslog() */
+
+			syslog (LOG_ERR, "gethostbyname(%s) failed: h_errno=%d",
+				tp->hostname, origherr);
+			switch (origherr)
+			{
+			  case HOST_NOT_FOUND:
+			  case NO_ADDRESS:
+			  case NO_RECOVERY:
+				return EX_NOHOST;
+			  case TRY_AGAIN:
+				return EX_TEMPFAIL;
+			  default:
+				return EX_OSERR;
+			}
+		}
+
+		/*--------------------------------------------------------
+		 * If we have no hosts at all, or if they are some other
+	 	 * kind of address family besides IPv4, then we really
+		 * just have no hosts at all.
+		 */
+		if ( hp->h_addr_list[0] == 0 )
+		{
+			/* no hosts in this list */
+			return EX_NOHOST;
+		}
+
+		if ( hp->h_length   != sizeof tp->hosts[0]
+		  || hp->h_addrtype != AF_INET )
+		{
+			/* FAIL - bad size/protocol/family? */
+			return EX_NOHOST;
+		}
+
+		/*--------------------------------------------------------
+		 * Copy all the IP addresses into our private structure.
+		 * This gets them out of the resolver's static area and
+		 * means we won't ever walk all over the list with other
+		 * calls.
+		 *
+		 * ==TODO: check that we don't copy more than we have room for
+		 */
+		tp->nhosts = 0;
+
+		for (addrp = hp->h_addr_list; *addrp; addrp++)
+		{
+			memcpy(&tp->hosts[tp->nhosts], *addrp,
+				sizeof tp->hosts[0]);
+
+			tp->nhosts++;
+		}
+
+		/*--------------------------------------------------------
+		 * QUASI-LOAD-BALANCING
+		 *
+		 * If the user wants to do quasi load balancing, "rotate"
+		 * the list by a random amount based on the current time.
+		 * This may later be truncated to a single item. This is
+		 * meaningful only if we have more than one host.
+		 */
+		if ( (flags & SPAMC_RANDOMIZE_HOSTS)  &&  tp->nhosts > 1 )
+		{
+			randomize_hosts(tp);
+		}
+
+		/*--------------------------------------------------------
+		 * If the user wants no fallback, simply truncate the host
+		 * list to just one - this pretends that this is the extent
+		 * of our connection list - then it's not a special case.
+		 */
+		if ( !(flags & SPAMC_SAFE_FALLBACK)  &&  tp->nhosts > 1 )
+		{
+			/* truncating list */
+			tp->nhosts = 1;
+		}
+	}
+	return EX_OK;
+}
