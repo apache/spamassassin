@@ -87,7 +87,8 @@ meta T_IDENT_NOBODY		(__IDENT_NOBODY && !__REGSITE_COM)
 describe T_IDENT_NOBODY		Message was sent by nobody
 score T_IDENT_NOBODY		1.0
 # Allen's version
-meta T_IDENT_NOBODY2		(__IDENT_NOBODY && !__REGSITE_COM && !((FORGOTTEN_PASSWORD + SUBJECT_IS_LIST + T_X_BEENTHERE + KNOWN_MAILING_LIST) > 1))
+header __X_BEENTHERE		exists:X-BeenThere
+meta T_IDENT_NOBODY2		(__IDENT_NOBODY && !__REGSITE_COM && !((FORGOTTEN_PASSWORD + SUBJECT_IS_LIST + __X_BEENTHERE + KNOWN_MAILING_LIST) > 1))
 
 # Dec 20 2002 jm: let's try and catch these spammers out
 header __XIMIAN_MUA	     X-Mailer =~ /^(?:Ximian Evolution|Evolution\/\d+\.)/
@@ -156,12 +157,6 @@ describe T_SUBJ_BUY		Subject starts with Buy, Buying
 header __FROM_HAS_UNDERLINE_NUMS	From =~ /_\S?(?:[a-z]+\w*?\d+|\d+\w*?[a-z]+)\w*\@/i
 meta T_FROM_HAS_UNDERLINE_NUMS		(!T_REPLY_TO_HAS_UNDERLINE_NUMS && __FROM_HAS_UNDERLINE_NUMS)
 describe T_FROM_HAS_UNDERLINE_NUMS	From: contains an underline and numbers/letters
-
-# from bug 1173
-# drop it; lots of spam comes via MM lists, esp. since I've seen spammers using
-# MM-specific web crawlers, so this is not a good rule
-#header T_X_BEENTHERE		exists:X-BeenThere
-#describe T_X_BEENTHERE	X-BeenThere header exists
 
 # 708
 # quinlan FP: "at some point you offered" (match on the last three words)
