@@ -124,13 +124,13 @@ describe FULL_REFUND		Offers a full refund
 # note Marc Perkel's fix: require capital-F Free.  better -- less FPs
 body FOR_FREE			/\bfor (?-i:F)ree\b/i
 describe FOR_FREE		No such thing as a free lunch (1)
-body ONE_HUNDRED_PC_FREE	/\b(?:100%|completely|totally|absolutely) (?-i:F)ree/i
-describe ONE_HUNDRED_PC_FREE	No such thing as a free lunch (2)
+body COMPLETELY_FREE		/\b(?:100%|completely|totally|absolutely) (?-i:F)ree/i
+describe COMPLETELY_FREE	No such thing as a free lunch (2)
 
 body NO_COST                    /\bno (?:cost|charge)\b/i
 describe NO_COST                No such thing as a free lunch (3)
-body ONE_HUNDRED_PC_GUAR	/100% GUARANTEED/i
-describe ONE_HUNDRED_PC_GUAR	One hundred percent guaranteed
+body GUARANTEED_100_PERCENT	/100% GUARANTEED/i
+describe GUARANTEED_100_PERCENT	One hundred percent guaranteed
 body MONEY_MAKING		/money making/i
 describe MONEY_MAKING		Discusses money making
 body BULK_EMAIL			/bulk e-*mail/i

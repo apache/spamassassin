@@ -210,17 +210,18 @@ rawbody PGP_SIGNATURE           /-----BEGIN PGP SIGNATURE-----/
 describe PGP_SIGNATURE          Contains a PGP-signed message
 tflags PGP_SIGNATURE		nice
 
-body BALANCE_FOR_LONG           eval:check_for_very_long_text('10000')
-describe BALANCE_FOR_LONG       Message text is over 10K in size
-tflags BALANCE_FOR_LONG		nice
-
-body BALANCE_FOR_LONG_20K       eval:check_for_very_long_text('20000')
-describe BALANCE_FOR_LONG_20K   Message text is over 20K in size
-tflags BALANCE_FOR_LONG_20K	nice
-
-body BALANCE_FOR_LONG_40K       eval:check_for_very_long_text('40000')
-describe BALANCE_FOR_LONG_40K   Message text is over 40K in size
-tflags BALANCE_FOR_LONG_40K	nice
+# too many false matches, see bug #670
+#body BALANCE_FOR_LONG           eval:check_for_very_long_text('10000')
+#describe BALANCE_FOR_LONG       Message text is over 10K in size
+#tflags BALANCE_FOR_LONG		nice
+#
+#body BALANCE_FOR_LONG_20K       eval:check_for_very_long_text('20000')
+#describe BALANCE_FOR_LONG_20K   Message text is over 20K in size
+#tflags BALANCE_FOR_LONG_20K	nice
+#
+#body BALANCE_FOR_LONG_40K       eval:check_for_very_long_text('40000')
+#describe BALANCE_FOR_LONG_40K   Message text is over 40K in size
+#tflags BALANCE_FOR_LONG_40K	nice
 
 rawbody PATCH_UNIFIED_DIFF	/^\@\@ [-+0-9]+,[0-9]+ [-+0-9]+,[0-9]+ \@\@$/
 describe PATCH_UNIFIED_DIFF	Contains what looks like a patch from diff -u
