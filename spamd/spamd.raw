@@ -51,7 +51,8 @@ Options:
   -d		  Daemonize, detach from parent process
   -h              Print this usage message and exit
   -i addr         Listen on the specified IP address (default: 127.0.0.1,
-                  use 0.0.0.0 to listen on all available addresses) or UNIX socket.
+                  use 0.0.0.0 to listen on all available addresses) or
+		  UNIX socket path (default: ./socket) if -o selected.
   -o              Use UNIX socket.
   -p port         Listen on the specific port (default: 783)
   -q              Enable SQL config (only useful with -x)
@@ -678,10 +679,12 @@ Detach from starting process and run in background (daemonize).
 
 Print a brief help message, then exit without further action.
 
-=item B<-i> I<ipaddress>
+=item B<-i> I<address>
 
-Tells spamd to listen on the specified IP address [defaults to 127.0.0.1].  Use
+If using TCP, tells spamd to listen on the specified IP address [defaults to 127.0.0.1].  Use
 0.0.0.0 to listen on all interfaces.
+
+If using UNIX sockets (B<-o> option) then specify the path to use [defaults to F<./socket>].
 
 =item B<-o>
 
