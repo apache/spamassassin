@@ -1,6 +1,6 @@
 require 5.005;
 
-my $DEF_RULES_DIR	= '$(PREFIX)/share/spamassassin';
+my $DEF_RULES_DIR	= '$(DESTDIR)$(PREFIX)/share/spamassassin';
 
 my $LOCAL_RULES_DIR	= '/etc/mail/spamassassin';
 
@@ -83,7 +83,7 @@ sub MY::postamble {
     # do this with MakeMaker without it trying to build the perl
     # modules as .so's :(
 
-qq{
+qq#
 
 RULES		= $rulesfiles
 
@@ -98,7 +98,7 @@ CFLDDLFLAGS	= $Config{lddlflags}
 DEF_RULES_DIR	= $DEF_RULES_DIR
 LOCAL_RULES_DIR	= $LOCAL_RULES_DIR
 
-}. q{
+#. q#
 
 pm_to_blib: spamassassin doc/.made
 
@@ -159,5 +159,6 @@ doc/.made: doc $(MAN1PODS) $(MAN3PODS)
 	touch doc/.made
 	-rm -f pod2htm*
 
-};
+#;
+
 }
