@@ -1,0 +1,39 @@
+
+
+
+- spammers have been targeting our nice rules to get themselves negative
+  overall scores, so those rules are now much less strongly-scored.  also added
+  a "TOO_MANY_MUA" rule that will catch multiple user agent headers.
+
+- Bayes expiry: some bugs fixed (bug 1706, bug 1869), previous versions occasionally
+  expired the wrong data, hurting Bayes effectiveness over time
+
+- a potential bug in stdio could cause Bayes journal data to be corrupted by
+  multiple simultaneous writes to the same area of the journal, fixed.
+
+- REPORT should use local report template, not default
+
+- allow ~ and space in paths for Windows
+
+- X-Spam-Checker-Version differed in format, depending on if the message was
+  considered spam or not, fixed.
+
+- spamc: failures under locales where "," is the decimal point char, fixed
+
+- sa-learn was sending non-error output to stdout, fixed
+
+- limit X-Spam-Level to show a max score of 100, to avoid RFC-uncompliant mails
+
+- Bayes documentation improved
+
+- spamd taint mode problem with ARGV fixed
+
+- REPORT_IFSPAM would occasionally cause warnings in syslog if message was ham.
+
+- libspamc was closing fds it didn't open
+
+- spamd fails to create ~/.spamassassin when running setuid with SQL, fixed
+
+- removed RCVD_IN_VISI, since that DNSBL is no longer available
+
+
