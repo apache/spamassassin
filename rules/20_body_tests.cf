@@ -539,7 +539,7 @@ describe NIGERIAN_SCAM_7        Mutated Nigerian scams (7)
 body NIGERIAN_SCAM_8 /\b(?:Tribunal|War Crimes|Hague)\b.{0,60}\b(?:Vlajko|Stojiljkovic)\b|\b(?:Vlajko|Stojiljkovic)\b.{0,60}\b(?:Tribunal|War Crimes|Hague)\b/i 
 describe NIGERIAN_SCAM_8        Mutated Nigerian scams (8)
 
-body US_DOLLARS			/Million\b.{0,40}\b(?:United States? Dollars|USD|U\.? ?S\.? Dollar)/i
+body US_DOLLARS			/Million\b.{0,40}\b(?:United States? Dollars|USD\b|U\.? ?S\.? Dollar)/i
 describe US_DOLLARS		Nigerian scam key phrase
 
 body US_DOLLARS_2               /(?:\$|usd).?\d{1,3}(?:\.\d)?.?m\b/i
