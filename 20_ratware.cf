@@ -104,7 +104,8 @@ describe FORGED_MUA_IMS         Forged mail pretending to be from IMS
 # Note: this uses __IMS_MSGID from above
 header __OUTLOOK_MUA            X-Mailer =~ /\bOutlook\b(?! IMO| Express Mac)/
 header __OUTLOOK_MSGID_1        MESSAGEID =~ /^<[0-9a-f]{12}\$[0-9a-f]{8}\$[0-9a-f]{8}\@\S+>$/m
-header __OUTLOOK_MSGID_2        MESSAGEID =~ /^<(?:OE[0-9A-Za-z]{25}|DAV[0-9A-Za-z]{24})\@hotmail\.com>$/m
+# See bug 1488 for details
+header __OUTLOOK_MSGID_2        MESSAGEID =~ /^<[A-Za-z0-9-]{7}[A-Za-z0-9]{20}\@hotmail\.com>$/m
 meta FORGED_MUA_OUTLOOK         (__OUTLOOK_MUA && !__UNUSABLE_MSGID && !(__OUTLOOK_MSGID_1 || __OUTLOOK_MSGID_2 || __IMS_MSGID))
 describe FORGED_MUA_OUTLOOK     Forged mail pretending to be from MS Outlook
 
