@@ -26,11 +26,6 @@
 #
 ########################################################################
 
-# partial messages; currently-theoretical attack
-# unsurprisingly this hits 0/0 right now.  But should we promote it anyway
-# to protect against the possibility?
-header T_FRAGMENTED_MESSAGE	Content-Type =~ /message\/partial/i
-
 # I'm curious, may help explain more ALL_TRUSTED fps
 body T_SA_MARKED_UP     /Spam detection software, running on the system /
 
@@ -114,18 +109,6 @@ meta T_NIGERIAN_BODY_4	( __NIGERIAN_BODY_1 + __NIGERIAN_BODY_2 + __NIGERIAN_BODY
 
 ########################################################################
 
-# McFadden Associates - SpamAssassin Recipe
-# 1/20/2004 - http://bl.csma.biz/
-header T_RCVD_IN_CSMA_BL	eval:check_rbl('csma_bl', 'bl.csma.biz.')
-describe T_RCVD_IN_CSMA_BL	Received via a blocked site in bl.csma.biz
-tflags T_RCVD_IN_CSMA_BL	net
-
-header T_DNS_FROM_SECURITYSAGE	eval:check_rbl_envfrom('securitysage', 'blackhole.securitysage.com.')
-describe T_DNS_FROM_SECURITYSAGE	Envelope sender in blackholes.securitysage.com
-tflags T_DNS_FROM_SECURITYSAGE	net
-
-########################################################################
-
 # header T_FORGED_IN_WHITELIST      eval:check_forged_in_whitelist()
 # describe T_FORGED_IN_WHITELIST    Forged From: is in user's white-list
 # tflags T_FORGED_IN_WHITELIST      userconf
@@ -136,11 +119,6 @@ tflags T_DNS_FROM_SECURITYSAGE	net
 
 # thanks to David Ritz for passing this on; ready for post-3.0.0
 header T_UNCLOSED_BRACKET   ALL =~ /\[\d+\r?\n/s
-
-# A particularly persistent .tw spammer sending broken messages; gets past
-# my installation :( .  Happily, they always HELO with "0".
-header T_HELO_0     X-Spam-Relays-Untrusted =~ / helo=0 /
-
 
 # bug 2554, bug 2619
 body T_HOT_NASTY          /\b(?=[dehklnswxy])(?:horny|nasty|hot|wild|young(?!\s+adult)|horniest|nastiest|hottest|wildest|youngest|naughty|dirtiest|slutty|kinky|lusty|extreme|xxx+)\b.{0,9}\b(?=[acfghilmpsvx])(?:virgins?\b|asian|cheerleader|sex|selection|fuck|fucking|anal\b|lesb(?:ian|o)|incest|chicks?|pics|movies|video|gay\b|porn|h[a\@]rdcore|schoolgirls|amateur|slut|adult\b|cum\b|xxx|sites?|hotties|shit)/i
@@ -163,26 +141,16 @@ body T_HTML_LINK_OPT_OUT	eval:html_text_match('anchor', '(?i)opt.?out')
 
 body T_HTML_LINK_IMAGE		eval:html_text_match('anchor', '<img>')
 body T_HTML_LINK_IMAGE2		eval:html_text_match('anchor', '^<img>$')
-body T_HTML_IMAGE_ONLY_28	eval:html_image_only('2400','2800')
-body T_HTML_IMAGE_ONLY_32	eval:html_image_only('2800','3200')
-body T_HTML_IMAGE_RATIO_10	eval:html_image_ratio('0.008','0.010')
-body T_HTML_IMAGE_RATIO_12	eval:html_image_ratio('0.010','0.012')
 
+# this seems to improve results... more work needed here
 meta T_HTML_LINK_IMAGE_ONLY_04	(T_HTML_LINK_IMAGE && HTML_IMAGE_ONLY_04)
 meta T_HTML_LINK_IMAGE_ONLY_08	(T_HTML_LINK_IMAGE && HTML_IMAGE_ONLY_08)
 meta T_HTML_LINK_IMAGE_ONLY_12	(T_HTML_LINK_IMAGE && HTML_IMAGE_ONLY_12)
 meta T_HTML_LINK_IMAGE_ONLY_16	(T_HTML_LINK_IMAGE && HTML_IMAGE_ONLY_16)
 meta T_HTML_LINK_IMAGE_ONLY_20	(T_HTML_LINK_IMAGE && HTML_IMAGE_ONLY_20)
 meta T_HTML_LINK_IMAGE_ONLY_24	(T_HTML_LINK_IMAGE && HTML_IMAGE_ONLY_24)
-meta T_LINK_HTML_IMAGE_ONLY_28	(T_HTML_LINK_IMAGE && T_HTML_IMAGE_ONLY_28)
-meta T_LINK_HTML_IMAGE_ONLY_32	(T_HTML_LINK_IMAGE && T_HTML_IMAGE_ONLY_32)
-
-meta T_HTML_LINK_IMAGE_RATIO_02	(T_HTML_LINK_IMAGE && HTML_IMAGE_RATIO_02)
-meta T_HTML_LINK_IMAGE_RATIO_04	(T_HTML_LINK_IMAGE && HTML_IMAGE_RATIO_04)
-meta T_HTML_LINK_IMAGE_RATIO_06	(T_HTML_LINK_IMAGE && HTML_IMAGE_RATIO_06)
-meta T_HTML_LINK_IMAGE_RATIO_08	(T_HTML_LINK_IMAGE && HTML_IMAGE_RATIO_08)
-meta T_LINK_HTML_IMAGE_RATIO_10	(T_HTML_LINK_IMAGE && T_HTML_IMAGE_RATIO_10)
-meta T_LINK_HTML_IMAGE_RATIO_12	(T_HTML_LINK_IMAGE && T_HTML_IMAGE_RATIO_12)
+meta T_LINK_HTML_IMAGE_ONLY_28	(T_HTML_LINK_IMAGE && HTML_IMAGE_ONLY_28)
+meta T_LINK_HTML_IMAGE_ONLY_32	(T_HTML_LINK_IMAGE && HTML_IMAGE_ONLY_32)
 
 body T_HTML_LINK_IMAGE_BUG_1	eval:html_test('t_anchor_image_bug_1')
 body T_HTML_LINK_IMAGE_BUG_2	eval:html_test('t_anchor_image_bug_2')
@@ -198,7 +166,6 @@ body T_HTML_EXTRA_CLOSE_4	eval:html_eval('extra_close', '> 4')
 body T_HTML_EXTRA_CLOSE_8	eval:html_eval('extra_close', '> 8')
 body T_HTML_EXTRA_CLOSE_16	eval:html_eval('extra_close', '> 16')
 
-body T_HTML_EXTRA_CLOSE_A	eval:html_range('extra_close_ratio', '0.00', '0.01')
 body T_HTML_EXTRA_CLOSE_B	eval:html_range('extra_close_ratio', '0.01', '0.02')
 body T_HTML_EXTRA_CLOSE_C	eval:html_range('extra_close_ratio', '0.02', '0.04')
 body T_HTML_EXTRA_CLOSE_D	eval:html_range('extra_close_ratio', '0.04', '0.08')
@@ -223,11 +190,7 @@ describe T_BLANKNAME    Sender has blanked out name
 header    T_COPYDVD           Subject =~ /(?:c[o0]py dvd|dvd.{1,15}c[o0]py|dvd magic)/i
 describe  T_COPYDVD           Subject mentions copying DVDs
 
-header    T_FREEPPV           Subject =~ /free ?p[a\@]y[ -]?per[ -]?view/i
-describe  T_FREEPPV           Subject mentions free pay-per-view 
 
-header    T_TONER             Subject =~ /\b(?:printer[-\s]*)?(?:l[a\@]ser[-\s]*)?(?:t[o0]ner|ink(?:[-\s]*jet)?|f[a\@]x|copier)[-\s]+(?:c[a\@]rtridge|supply)/i
-describe  T_TONER             Subject contains Toner or Ink Cartridge
 
 header    T_GETPAID      Subject =~ /[g6][\W_]?[e3\*\xC8-\xCB\xE8-\xEB][\W_]?t p[\W_]?[a4\*\@\xC0-\xC5\xAA\xE0-\xE5][\W_]?[il1:\|\*\xCC-\xCF\xEC-\xEF][\W_]?[d\xD0]/i
 describe  T_GETPAID      Subject mentions getting paid for something
@@ -235,8 +198,6 @@ describe  T_GETPAID      Subject mentions getting paid for something
 header    T_MAKEMONEY            Subject =~ /(?:(?:save|make)[ -].{0,15}money[ -](?:in|on)|(?:free|grant|saving|with our|(?:claim|keep) your) money|money machine)/i
 describe  T_MAKEMONEY            Subject mentions money in phrase that implies spam
 
-header    T_STOCKMARKET      Subject =~ /STOCK MARKET/i
-describe  T_STOCKMARKET      Subject mentions a/the STOCK MARKET 
 
 header    T_WORTHCASH        Subject =~ /\b(?:Worth|Win|take|extra|earn|dollars|Short|need|claim|free|get|opinions?|surveys?)\b.{0,15}(?:fast)?(?:C[a\@]sh|M[0o]ney)\b/i
 describe  T_WORTHCASH        Subject mentions something is worth cash
@@ -292,20 +253,8 @@ describe  T_PENIS          masked spam word(s) in subject
 header    T_SPAMWORDS4      Subject =~ /(?!\bpenis\b)\bp[\W_]?[e3\*\xC8-\xCB\xE8-\xEB][\W_]?[n\xD1\xF1][\W_]?[il1:\|\*\xCC-\xCF\xEC-\xEF][\W_]?[s5\$\xA7]\b/i
 describe  T_SPAMWORDS4      masked spam word(s) in subject
 
-header    T_MIXEDCHAR       Subject =~ /[a-z]{1,5}[0-9]{1,5}[a-z]{1,5}[0-9]{1,5}[a-z]{1,5}[0-9]{1,5}/
-describe  T_MIXEDCHAR       Subject has multiple mixed chars in one "word"
-
-header    T_RNDSPM1   Subject =~ /\b[cjnqstuvwxz][bgjqu]\b/i
-describe  T_RNDSPM1   Subject contains random-text spamsign
-                                         
-header    T_RNDSPM2   Subject =~ /\be[bfjkopqv]\b/i
-describe  T_RNDSPM2   Subject contains random-text spamsign
-
 header    T_RNDSPM3   Subject =~ /\b[abehikmpqrsvwxyz]a[bjkquvz]\b/i
 describe  T_RNDSPM3   Subject contains random-text spamsign
-
-header    T_RNDSPM4   Subject =~ /\bx[bfghjklnpqrstwz][bfghjklnpqrstwz]\b/i
-describe  T_RNDSPM4   Subject contains random-text spamsign
 
 header    T_RNDSPM5   Subject =~ / [fghjklnqrtz]{3} /i
 describe  T_RNDSPM5   Subject contains random-text spamsign
@@ -315,9 +264,6 @@ describe  T_RNDSPM6   Subject contains random-text spamsign
 
 header    T_RNDSPM7   Subject =~ /\b[bcdfghjklnpqrvwz]{5}\b/i
 describe  T_RNDSPM7   Subject contains random-text spamsign
-
-header    T_RNDSPM8      Subject =~ /\b[bcdghjklmnpqrstvwxz]{6}\b/i
-describe  T_RNDSPM8      Subject contains random-text spamsign
 
 header    T_RNDSPM9      Subject =~ /\b[bcdfghjklmnpqrstvwxz]{7}\b/i
 describe  T_RNDSPM9      Subject contains random-text spamsign
@@ -331,44 +277,18 @@ describe T_TELESPRLY            Spam passed through known spam relay domain
 header   T_INDYLIB       X-Library=~ /Indy 10.00.14-B/
 describe T_INDYLIB       Uses spam-only version of Indy library
 
-header   T_JLH               exists:X-JLH
-describe T_JLH               X-JLH header found, possible spamsign
-
-header   T_TRACKING           ALL =~ /-tracking/i
-describe T_TRACKING           There is a tracking header in the email
-
 ##########################################################################
 
 # bug 2554
 body T_HOT_NASTY /\b(?=[dehklnswxy])(?:horny|nasty|hot|wild|young|horniest|nastiest|hottest|wildest|youngest|naughty|dirtiest|slutty|kinky|lusty|extreme|xxx+)\b.{0,9}\b(?=[acfghilmpsvx])(?:virgins?\b|asian|cheerleader|sex|selection|fuck|fucking|anal\b|lesb(?:ian|o)|incest|chicks?|pics|movies|video|gay\b|porn|h[a\@]rdcore|schoolgirls|amateur|slut|adult|cum\b|xxx|sites?|hotties|shit)/i
 body T_BEST_PORN /\b(?:best|biggest|largest|most|free|ultimate)\b.{0,9}\b(?:virgins?\b|anal\b|lesbians?|incest|porno?|h[a\@]rdcore|sluts?|xxx+)/i
 
-# bug 3439
-uri	T_EMPTY_URI		/^$/
-
-meta	T_EMPTY_URI_HREF	T_EMPTY_URI_HREF_A || T_EMPTY_URI_HREF_AREA || T_EMPTY_URI_HREF_LINK
-body	T_EMPTY_URI_HREF_A	eval:html_text_match('blank_uri', '^a$')
-body	T_EMPTY_URI_HREF_AREA	eval:html_text_match('blank_uri', '^area$')
-body	T_EMPTY_URI_HREF_LINK	eval:html_text_match('blank_uri', '^link$')
-
-meta	T_EMPTY_URI_BG		T_EMPTY_URI_BG_BODY || T_EMPTY_URI_BG_TABLE || T_EMPTY_URI_BG_TD || T_EMPTY_URI_BG_TR
-body	T_EMPTY_URI_BG_BODY	eval:html_text_match('blank_uri', '^body$')
-body	T_EMPTY_URI_BG_TABLE	eval:html_text_match('blank_uri', '^table$')
-body	T_EMPTY_URI_BG_TD	eval:html_text_match('blank_uri', '^td$')
-body	T_EMPTY_URI_BG_TR	eval:html_text_match('blank_uri', '^tr$')
-
-meta	T_EMPTY_URI_SRC		T_EMPTY_URI_SRC_IMG || T_EMPTY_URI_SRC_FRAME || T_EMPTY_URI_SRC_IFRAME || T_EMPTY_URI_SRC_EMBED || T_EMPTY_URI_SRC_SCRIPT
 body	T_EMPTY_URI_SRC_IMG	eval:html_text_match('blank_uri', '^img$')
-body	T_EMPTY_URI_SRC_FRAME	eval:html_text_match('blank_uri', '^frame$')
 body	T_EMPTY_URI_SRC_IFRAME	eval:html_text_match('blank_uri', '^iframe$')
-body	T_EMPTY_URI_SRC_EMBED	eval:html_text_match('blank_uri', '^embed$')
-body	T_EMPTY_URI_SRC_SCRIPT	eval:html_text_match('blank_uri', '^script$')
 
 # can only be from "form"
-body	T_EMPTY_URI_ACTION	eval:html_text_match('blank_uri', '^form$')
 
 # bug 3499
-body T_MPART_ALT_DIFF1_1    eval:multipart_alternative_difference_count('1','1')
 body T_MPART_ALT_DIFF2_1    eval:multipart_alternative_difference_count('2','1')
 body T_MPART_ALT_DIFF3_1    eval:multipart_alternative_difference_count('3','1')
 body T_MPART_ALT_DIFF4_1    eval:multipart_alternative_difference_count('4','1')
@@ -376,7 +296,6 @@ body T_MPART_ALT_DIFF5_1    eval:multipart_alternative_difference_count('5','1')
 body T_MPART_ALT_DIFF8_1    eval:multipart_alternative_difference_count('8','1')
 body T_MPART_ALT_DIFF10_1   eval:multipart_alternative_difference_count('10','1')
 
-body T_MPART_ALT_DIFF1_5    eval:multipart_alternative_difference_count('1','5')
 body T_MPART_ALT_DIFF2_5    eval:multipart_alternative_difference_count('2','5')
 body T_MPART_ALT_DIFF3_5    eval:multipart_alternative_difference_count('3','5')
 body T_MPART_ALT_DIFF4_5    eval:multipart_alternative_difference_count('4','5')
@@ -384,7 +303,6 @@ body T_MPART_ALT_DIFF5_5    eval:multipart_alternative_difference_count('5','5')
 body T_MPART_ALT_DIFF8_5    eval:multipart_alternative_difference_count('8','5')
 body T_MPART_ALT_DIFF10_5   eval:multipart_alternative_difference_count('10','5')
 
-body T_MPART_ALT_DIFF1_10   eval:multipart_alternative_difference_count('1','10')
 body T_MPART_ALT_DIFF2_10   eval:multipart_alternative_difference_count('2','10')
 body T_MPART_ALT_DIFF3_10   eval:multipart_alternative_difference_count('3','10')
 body T_MPART_ALT_DIFF4_10   eval:multipart_alternative_difference_count('4','10')
@@ -392,7 +310,6 @@ body T_MPART_ALT_DIFF5_10   eval:multipart_alternative_difference_count('5','10'
 body T_MPART_ALT_DIFF8_10   eval:multipart_alternative_difference_count('8','10')
 body T_MPART_ALT_DIFF10_10  eval:multipart_alternative_difference_count('10','10')
 
-body T_MPART_ALT_DIFF1_20   eval:multipart_alternative_difference_count('1','20')
 body T_MPART_ALT_DIFF2_20   eval:multipart_alternative_difference_count('2','20')
 body T_MPART_ALT_DIFF3_20   eval:multipart_alternative_difference_count('3','20')
 body T_MPART_ALT_DIFF4_20   eval:multipart_alternative_difference_count('4','20')
@@ -404,32 +321,11 @@ body T_MPART_ALT_DIFF10_20  eval:multipart_alternative_difference_count('10','20
 uri T_BIZ_TLD		/^(?:https?:\/\/|mailto:)[^\/]+\.biz(?![-a-z0-9])/i
 
 # catch mails with redirector looking pieces associated with it.
-body T_REDIRS_2		eval:redirect_num('2')
-body T_REDIRS_3		eval:redirect_num('3')
-body T_REDIRS_4		eval:redirect_num('4')
-body T_REDIRS_5		eval:redirect_num('5')
-body T_REDIRS_8		eval:redirect_num('8')
-body T_REDIRS_10	eval:redirect_num('10')
-body T_REDIRS_15	eval:redirect_num('15')
-body T_REDIRS_20	eval:redirect_num('20')
 
 ##########################################################################
 
 # bug 3570
 # anti-phishing rules, will probably have a low hit-rate
-header   __RCVD_USBANK		Received =~ /\busbank\.com\b/i
-header   __FROM_USBANK		From =~ /\busbank\.com\b/i
-uri      __URI_USBANK		m{^https?://.{0,32}\busbank\.com\b}i
-meta     T_FORGED_USBANK	(__FROM_USBANK && __URI_USBANK && !__RCVD_USBANK)
-
-header   __RCVD_PAYPAL		Received =~ /\.paypal\.com\b/i
-header   __FROM_PAYPAL		From =~ /[\@\.]paypal\.com\b/i
-uri      __URI_PAYPAL		m{^https?://.{0,32}\bpaypal\.com\b}i
-meta     T_FORGED_PAYPAL	(__FROM_PAYPAL && __URI_PAYPAL && !__RCVD_PAYPAL)
-describe T_FORGED_PAYPAL	Message appears to be forged, (paypal.com)
-meta     T_FORGED_PAYPAL_C	(__FROM_PAYPAL && !__RCVD_PAYPAL)
-describe T_FORGED_PAYPAL_C	Has Paypal from, no Paypal received header.
-
 header   __RCVD_EBAY		Received =~ /(?:email)?[^\s@]ebay\.com\b/i
 header   __FROM_EBAY		From =~ /\@(?:email)?ebay\.com\b/i
 uri      __URI_EBAY		m{^https?://.{0,32}\bebay\.com\b}i
@@ -447,43 +343,6 @@ header   __FROM_SUNTRUST	From =~ /[\@\.]suntrust\.com\b/i
 uri      __URI_SUNTRUST		m{^https?://.{0,32}\bsuntrust\.com\b}i
 meta     T_FORGED_SUNTRUST	(__FROM_SUNTRUST && __URI_SUNTRUST && !__RCVD_SUNTRUST)
 describe T_FORGED_SUNTRUST	Message appears to be forged, (suntrust.com)
-
-header   __RCVD_ABOUT_COM	Received =~ /\babout\.com\b/i
-header   __FROM_ABOUT_COM	From =~ /\babout\.com\b/i
-uri      __URI_ABOUT_COM	m{^https?://.{0,32}\babout\.com\b}i
-meta     T_FORGED_ABOUT		(!__RCVD_ABOUT_COM && __FROM_ABOUT_COM && !__URI_ABOUT_COM)
-describe T_FORGED_ABOUT		Message appears to be forged, (about.com)
-
-header   __AT_YAHOO_MSGID	MESSAGEID =~ /\@yahoo\.com\b/i
-header   __FROM_YAHOO_COM	From =~ /\@yahoo\.com\b/i
-meta     T_FORGED_MSGID_YAHOO	(__AT_YAHOO_MSGID && !__FROM_YAHOO_COM)
-describe T_FORGED_MSGID_YAHOO	Message-ID is forged, (yahoo.com)
-
-header   __AT_MSN_MSGID		MESSAGEID =~ /\@msn\.com\b/i
-header   __FROM_MSN_COM		From =~ /\@msn\.com\b/i
-meta     T_FORGED_MSGID_MSN	(__AT_MSN_MSGID && (!__FROM_MSN_COM && !__FROM_HOTMAIL_COM && !__FROM_YAHOO_COM))
-describe T_FORGED_MSGID_MSN	Message-ID is forged, (msn.com)
-
-header   __AT_HOTMAIL_MSGID	MESSAGEID =~ /\@hotmail\.com\b/i
-header   __FROM_HOTMAIL_COM	From =~ /\@hotmail\.com\b/i
-meta     T_FORGED_MSGID_HOTMAIL	(__AT_HOTMAIL_MSGID && (!__FROM_HOTMAIL_COM && !__FROM_MSN_COM && !__FROM_YAHOO_COM))
-describe T_FORGED_MSGID_HOTMAIL	Message-ID is forged, (hotmail.com)
-
-header   __AT_AOL_MSGID		MESSAGEID =~ /\@aol\.com\b/i
-header   __FROM_AOL_COM		From =~ /\@aol\.com\b/i
-meta     T_FORGED_MSGID_AOL	(__AT_AOL_MSGID && !__FROM_AOL_COM)
-describe T_FORGED_MSGID_AOL	Message-ID is forged, (aol.com)
-
-header   __AT_EXCITE_MSGID	MESSAGEID =~ /\@excite\.com\b/i
-header   __MY_RCVD_EXCITE	Received =~ /\.excite\.com\b/i
-meta     T_FORGED_MSGID_EXCITE	(__AT_EXCITE_MSGID && !__MY_RCVD_EXCITE)
-describe T_FORGED_MSGID_EXCITE	Message-ID is forged, (excite.com)
-
-header   __AT_CBS_MSGID		MESSAGEID =~ /\@cbs\.com\b/i
-header   __FROM_CBS_COM		From =~ /\@cbs\.com\b/i
-header   __MY_RCVD_CBS		Received =~ /\.cbs\.com\b/i
-meta     T_FORGED_MSGID_CBS	(__AT_CBS_MSGID && !__FROM_CBS_COM && !__MY_RCVD_CBS)
-describe T_FORGED_MSGID_CBS	Message-ID is forged, (cbs.com)
 
 uri      T_SPOOF_COM2OTH 	m{^https?://(?:\w+\.)+?com\.(?:\w+\.){2,}}i
 describe T_SPOOF_COM2OTH	 a.com.b.c
@@ -506,4 +365,12 @@ rawbody __INTERRUPTUS           /(?:[a-zA-Z0-9]<[\/ ]{0,2}?(?!br)(?!p)(?!sup)(?!
 meta T_INTERRUPTUS              MIME_HTML_ONLY && __INTERRUPTUS
 describe T_INTERRUPTUS          Hypertextus Interruptus - HTML-obfuscated text
 
+##########################################################################
 
+# try From: instead of EnvelopeFrom
+header T_DNS_FROM_SECURITYSAGE	eval:check_rbl_from_host('t_securitysage', 'blackhole.securitysage.com.')
+tflags T_DNS_FROM_SECURITYSAGE	net
+
+# try EnvelopeFrom instead of From:
+header T_DNS_FROM_AHBL_RHSBL	eval:check_rbl_envfrom('t_ahbl', 'rhsbl.ahbl.org.')
+tflags T_DNS_FROM_AHBL_RHSBL	net
