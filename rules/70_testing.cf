@@ -573,14 +573,6 @@ body T_DOMAIN_RATIO_048		eval:domain_ratio('0.048')
 body T_DOMAIN_RATIO_049		eval:domain_ratio('0.049')
 body T_DOMAIN_RATIO_050		eval:domain_ratio('0.050')
 
-# best of new version
-header T_RCVD_DOUBLE_IP_SPAM_1	Received =~ /from\s+\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+by\s+\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3};/
-
-# replace RCVD_DOUBLE_IP_LOOSE
-meta T_RCVD_DOUBLE_IP_LOOSE	(!RCVD_DOUBLE_IP_SPAM && !T_RCVD_DOUBLE_IP_SPAM_1 && __DOUBLE_IP_LOOSE)
-# maybe use both together?
-meta T_RCVD_DOUBLE_IP_TIGHT	(RCVD_DOUBLE_IP_SPAM || T_RCVD_DOUBLE_IP_SPAM_1)
-
 # bug 2220
 meta T_DIGEST_MULTIPLE       RAZOR2_CHECK + DCC_CHECK + PYZOR_CHECK > 1
 describe T_DIGEST_MULTIPLE   Message hits more than one network digest check

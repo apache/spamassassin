@@ -308,12 +308,17 @@ describe RCVD_NUMERIC_HELO	Received: contains a numeric HELO
 header RCVD_BY_IP	Received =~ /\bby\s+\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b/
 describe RCVD_BY_IP	Received by mail server with no name
 
-header RCVD_DOUBLE_IP_SPAM	Received =~ /from \[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\] by \d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} with/
-describe RCVD_DOUBLE_IP_SPAM	Bulk email fingerprint (double IP) found
-
+# two reliable signatures
+header __DOUBLE_IP_SPAM_1	Received =~ /from \[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\] by \d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} with/
+header __DOUBLE_IP_SPAM_2	Received =~ /from\s+\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+by\s+\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3};/
+# loose match
 header __DOUBLE_IP_LOOSE	Received =~ /(?:\b(?:from|by)\b.{1,4}\b\d{1,3}[._-]\d{1,3}[._-]\d{1,3}[._-]\d{1,3}(?<!127\.0\.0\.1)\b.{0,4}){2}/i
-meta RCVD_DOUBLE_IP_LOOSE	(!RCVD_DOUBLE_IP_SPAM && __DOUBLE_IP_LOOSE)
-describe RCVD_DOUBLE_IP_LOOSE	Received: by and from look like IP addresses
+# spam signature
+meta RCVD_DOUBLE_IP_SPAM	(__DOUBLE_IP_SPAM_1 || __DOUBLE_IP_SPAM_2)
+describe RCVD_DOUBLE_IP_SPAM	Bulk email fingerprint (double IP) found
+# other matches
+meta RCVD_DOUBLE_IP_LOOSE	(__DOUBLE_IP_LOOSE && !RCVD_DOUBLE_IP_SPAM)
+describe RCVD_DOUBLE_IP_LOOSE   Received: by and from look like IP addresses
 
 header SMTPD_IN_RCVD		Received =~ /\(SMTPD32-\d+\..+\)/
 describe SMTPD_IN_RCVD		Received via SMTPD32 server (SMTPD32-n.n)
