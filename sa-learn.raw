@@ -338,7 +338,7 @@ Select alternative whitelist factory.
 
 Skip the slow rebuilding step which normally takes place after changing
 database entries.  If you plan to scan many folders in a batch, it is faster to
-use this switch and run B<sa-learn-rebuild> once all the folders have been
+use this switch and run C<sa-learn --rebuild> once all the folders have been
 scanned.
 
 =item B<-L>, B<--local>
