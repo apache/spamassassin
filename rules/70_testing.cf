@@ -320,3 +320,9 @@ header T_MSGID_CHARS_COLON	MESSAGEID =~ /\:/
 header T_MSGID_CHARS_BANG	MESSAGEID =~ /\!/
 header T_MSGID_CLOSE_TWICE_1	MESSAGEID =~ />.*>/
 header T_MSGID_CLOSE_TWICE_2	MESSAGEID =~ />>/
+
+# I've added a few different versions just in case the first hits ham to hard
+header T_MANY_MX_1 From =~ /\@mx\d{2,4}\..{1,30}\./i
+header T_MANY_MX_2 From =~ /\@mx\d{2,4}\..{1,30}\.(?:biz|us)/i
+header T_MANY_MX_3 From =~ /\@mx[2-9]\d{1,3}\..{1,30}\./i
+header T_MANY_MX_4 From:addr =~ /\@mx\d{1,4}\..{1,30}\./i
