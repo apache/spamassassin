@@ -664,3 +664,15 @@ describe T_RATWARE_FAKED_AOL_UA	AOL clients don't use the User-Agent header
 uri T_URI_HTTP_TO_HEX_IP	/^https?:\/\/(?:[^\@]*\@|)0x[0-9a-f]{8}/i
 describe T_URI_HTTP_TO_HEX_IP	URI contains a link to a hexadecimal IP address
 
+# bug 2996: HTML attribute testing
+body T_HTML_ATTR_00	eval:html_range('attr_bad','0.0','0.2')
+body T_HTML_ATTR_20	eval:html_range('attr_bad','0.2','0.4')
+body T_HTML_ATTR_40	eval:html_range('attr_bad','0.4','0.6')
+body T_HTML_ATTR_60	eval:html_range('attr_bad','0.6','0.8')
+body T_HTML_ATTR_80	eval:html_range('attr_bad','0.8','1.0')
+		
+body T_HTML_ATTR_UNIQUE_00	eval:html_range('attr_unique_bad','0.0','0.2')
+body T_HTML_ATTR_UNIQUE_20	eval:html_range('attr_unique_bad','0.2','0.4')
+body T_HTML_ATTR_UNIQUE_40	eval:html_range('attr_unique_bad','0.4','0.6')
+body T_HTML_ATTR_UNIQUE_60	eval:html_range('attr_unique_bad','0.6','0.8')
+body T_HTML_ATTR_UNIQUE_80	eval:html_range('attr_unique_bad','0.8','1.0')
