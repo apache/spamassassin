@@ -120,7 +120,8 @@ sub razor_report {
       if ($rc) {
         my %opt = (
           debug      => $Mail::SpamAssassin::DEBUG,
-          foreground => 1
+          foreground => 1,
+          config     => $self->{main}->{conf}->{razor_config}
         );
         $rc->{opt} = \%opt;
         $rc->do_conf() or die $rc->errstr;
@@ -163,6 +164,7 @@ sub razor_report {
   else {
     my @msg = split (/^/m, $fulltext);
     my $config = $self->{main}->{conf}->{razor_config};
+    $config ||= $self->{main}->sed_path ("~/razor.conf");
     my %options = (
       'debug'     => $Mail::SpamAssassin::DEBUG
     );

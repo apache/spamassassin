@@ -266,7 +266,8 @@ sub razor_lookup {
         my %opt = (
             debug      => ($Mail::SpamAssassin::DEBUG->{enabled} and
                  $Mail::SpamAssassin::DEBUG->{razor} < -2), 
-	    foreground => 1
+	    foreground => 1,
+            config     => $self->{conf}->{razor_config}
         );
         $rc->{opt} = \%opt;
         $rc->do_conf() or die $rc->errstr;
@@ -318,6 +319,7 @@ sub razor_lookup {
       alarm $timeout;
   
       my $config = $self->{conf}->{razor_config};
+      $config ||= $self->{main}->sed_path ("~/razor.conf");
       my %options = (
         'debug'	=> ($Mail::SpamAssassin::DEBUG->{enabled} and $Mail::SpamAssassin::DEBUG->{razor} < -2)
       );
