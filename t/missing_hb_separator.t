@@ -115,12 +115,11 @@ $mail->finish();
 
 #####
 
-@msg = ("Content-Type: multipart/related; boundary=foobar\n",
-	"This is a test\n",
-	"--foobar\n",
+@msg = ('Content-Type: multipart/related; boundary="foobar:"'."\n",
+	"--foobar:\n",
 	"Content-Type: text/plain\n",
 	"XJS*C4JDBQADN1.NSBN3*2IDNEN*GTUBE-STANDARD-ANTI-UBE-TEST-EMAIL*C.34X\n",
-	"--foobar--\n");
+	"--foobar:--\n");
 $mail = $sa->parse(\@msg, 1);
 $status = $sa->check($mail);
 
