@@ -1376,17 +1376,21 @@ describe FREE_PREVIEW           Contains 'free preview' with capitals
 body FREE_HOSTING               /(?-i:F)ree hosting/i
 describe FREE_HOSTING           Contains 'free hosting' with capitals
 
-body USER_4U2                   /\b\S{0,20}(?:[42](?:yo)?u|foryou|you2)\S{1,20}\@\S{1,20}\.(?:net|com|org)\b/
-describe USER_4U2               Local part containing "4u", "u2" or variants.
+# http://www.hughes-family.org/bugzilla/show_bug.cgi?id=678
+body USER_4U2                   /\b\S{0,20}(?:[^0-9][42](?:yo)?u|for-*you)(?:[.-]\S{1,20})?\@\S{1,20}\.(?:net|com|org|info)\b/
+describe USER_4U2               Local part containing a "4u" variant
 
-body FREE_ACCESS                /(?-i:F)ree access/i  
+body DOMAIN_4U2                 /[\@\.]\S{0,20}(?:[^0-9][42](?:yo)?u|for-*you)(?:[.-]\S{1,20})?\.(?:net|com|org|info)\b/
+describe DOMAIN_4U2             Domain name containing a "4u" variant
+
+body FREE_ACCESS                /(?-i:F)ree access/i
 describe FREE_ACCESS            Contains 'free access' with capitals
 
 body FREE_SAMPLE                /(?-i:F)ree sample/i
 describe FREE_SAMPLE            Contains 'free sample' with capitals
 
 # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=629
-body MONTH_TRIAL                /(?:month|day) .{0,9}trial/i 
+body MONTH_TRIAL                /(?:month|day) .{0,9}trial/i
 describe MONTH_TRIAL            Month Trial Offer
 
 # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=630
@@ -1399,6 +1403,8 @@ describe MEMBER_2       Being a Member
 
 body GET_IT_NOW         /get it (?-i:N)ow/i
 describe GET_IT_NOW     Contains 'Get it now' with capitals
+<<<<<<< 20_body_tests.cf
+=======
 
 # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=678
 body DOMAIN_4U2         /[\@\.]\S{0,20}(?:[42](?:yo)?u|foryou|you2)\S{1,20}\.(?:net|com|org)\b/
@@ -1428,3 +1434,4 @@ describe HTML_WIN_OPEN     Javascript to open a new window
 rawbody HTML_WIN_BLUR      /(?:<script>.{0,200}|<[^>]+)\.blur\s*\(\s*\)/i
 describe HTML_WIN_BLUR     Javascript to move windows around
 
+>>>>>>> 1.221
