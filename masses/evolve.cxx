@@ -386,6 +386,7 @@ main (int argc, char **argv) {
   ga.set(gaNscoreFilename, "evolve.scores");
   ga.parameters(argc, argv);
 
+  unlink ("evolve.scores");
   cout << "Run this to watch progress scores:" << endl
     	<< "\ttail -f evolve.scores" << endl;
   cout << "evolving...\n";
