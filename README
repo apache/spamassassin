@@ -2,7 +2,8 @@ Welcome to SpamAssassin!
 ------------------------
 
 SpamAssassin is a mail filter which attempts to identify spam using
-text analysis and several internet-based realtime blacklists.
+a variety of mechanisms including text analysis, Bayesian filtering, 
+DNS blocklists, and collaborative filtering databases.
 
 Using its rule base, it uses a wide range of heuristic tests on mail
 headers and body text to identify "spam", also known as unsolicited
@@ -13,11 +14,14 @@ later filtering using the user's own mail user-agent application.
 
 SpamAssassin typically differentiates successfully between spam and
 non-spam in between 95% and 100% of cases, depending on what kind of
-mail you get.
+mail you get and your training of its Bayesian filter.  Specifically,
+SpamAssassin has been shown to produce around 0.9% false negatives (spam
+that was missed) and around 0.1% false positives (ham incorrectly marked
+as spam).  See the rules/STATISTICS*.txt files for more information.
 
 SpamAssassin also includes support for reporting spam messages
-automatically, and/or manually, to collaborative filtering databases such
-as Vipul's Razor [1].
+automatically, and/or manually, to collaborative filtering databases
+such as Vipul's Razor [1].
 
 	[1]: http://razor.sourceforge.net/
 
@@ -26,11 +30,11 @@ perform filtering, along with the "Mail::SpamAssassin" module set
 which allows SpamAssassin to be used in spam-protection proxy SMTP or
 POP/IMAP server, or a variety of different spam-blocking scenarios.
 
-In addition, Craig Hughes has contributed "spamd", a daemonized
-version of SpamAssassin, which runs persistently.  Using "spamc", a
-lightweight C client, this allows an MTA to process large volumes of
-mail through SpamAssassin without having to fork/exec a perl
-interpreter for each one.
+In addition, "spamd", a daemonized version of SpamAssassin which
+runs persistently, is available.  Using its counterpart, "spamc",
+a lightweight client written in C, an MTA can process large volumes of
+mail through SpamAssassin without having to fork/exec a perl interpreter
+for each message.
 
 If you have questions about SpamAssassin, please check the Wiki[2] to
 see if someone has already posted an answer to your question. (The
@@ -45,23 +49,15 @@ Bugzilla[4].
 
 Please also be sure to read the man pages.
 
-SpamAssassin is an effort undergoing incubation at the Apache Software
-Foundation (ASF), sponsored by the Apache Board of
-Directors. Incubation is required of all newly accepted projects until
-a further review indicates that the infrastructure, communications,
-and decision making process have stabilized in a manner consistent
-with other successful ASF projects. While incubation status is not
-necessarily a reflection of the completeness or stability of the code,
-it does indicate that the project has yet to be fully endorsed by the
-ASF.
+SpamAssassin is a project of the Apache Software Foundation (ASF).
 
 
 Upgrading SpamAssassin
 ----------------------
 
 IMPORTANT: If you are upgrading from a previous major version of
-SpamAssassin, please be sure to read the notes in UPGRADE to find out what
-has changed in a non-backwards compatible way.
+SpamAssassin, please be sure to read the notes in UPGRADE to find out
+what has changed in a non-backwards compatible way.
 
 
 Installing SpamAssassin
@@ -196,17 +192,17 @@ can be set. Common first-time tweaks include:
 Learning
 --------
 
-Since SpamAssassin now includes a Bayesian learning filter (in version
-2.50 on), it is worthwhile training SpamAssassin with your collection of
-non-spam and spam, if possible.  This will make it more accurate for your
-incoming mail.  Do this using the "sa-learn" tools, like so:
+SpamAssassin includes a Bayesian learning filter, so it is worthwhile
+training SpamAssassin with your collection of non-spam and spam,
+if possible.  This will make it more accurate for your incoming mail.
+Do this using the "sa-learn" tools, like so:
 
 	sa-learn --spam ~/Mail/saved-spam-folder
 	sa-learn --ham ~/Mail/inbox
 	sa-learn --ham ~/Mail/other-nonspam-folder
 
 Use as many mailboxes as you like.  Note that SpamAssassin will remember
-what mails it's learnt from, so you can re-run this as often as you like.
+what mails it has learnt from, so you can re-run this as often as you like.
 
 
 Locali[sz]ation
@@ -231,8 +227,7 @@ lives at <spamassassin-users /at/ incubator.apache.org>.  See
 http://spamassassin.org/lists.html for the sign-up address and a link to
 the archive of past messages.
 
-The FAQ is here: http://wiki.spamassassin.org/w/FrequentlyAskedQuestions
-
+Much more info is at http://wiki.apache.org/spamassassin/FrontPage
 
 Commercial Tests
 ----------------
@@ -290,8 +285,8 @@ simply forward their mails to.  See the spamassassin manual page for more
 details.
 
 The default address-list implementation,
-Mail::SpamAssassin::DBBasedAddrList, uses Berkeley DB files to store the
-addresses.
+Mail::SpamAssassin::DBBasedAddrList, uses Berkeley DB files to store
+the addresses.
 
 
 
