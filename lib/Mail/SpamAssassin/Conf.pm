@@ -2289,7 +2289,7 @@ ignore these for scoring.
       next;
     }
 
-=item tflags SYMBOLIC_TEST_NAME [ { net | nice | learn | userconf } ... ]
+=item tflags SYMBOLIC_TEST_NAME [ {net|nice|learn|userconf|noautolearn} ]
 
 Used to set flags on a test.  These flags are used in the score-determination
 back end system for details of the test's behaviour.  The following flags can
@@ -2315,6 +2315,10 @@ specific tests).
 =item  learn
 
 The test requires training before it can be used.
+
+=item noautolearn
+
+The test will be ignored when calculating the score for learning systems.
 
 =back
 
