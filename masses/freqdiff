@@ -148,7 +148,7 @@ sub read_argv {
 	$line++;
 	$last = $type;
 	# "sort | uniq -c" format
-	if (/^\s*(\d+|\d+\.\d+)\s+(.*)/) {
+	if (/^\s*(-?\d+|\d+\.\d+)\s+(.*)/) {
 	    $type = 1;
 	    $freq{$2} = $1;
 	}
