@@ -97,7 +97,7 @@ $SUB_VERSION = (split(/\s+/,'$LastChangedDate: 2004-01-11 14:21:28 -0500 (Sun, 1
 # "mss<number>", <number> increasing with every hack.
 @EXTRA_VERSION = qw();
 if (defined $IS_DEVEL_BUILD && $IS_DEVEL_BUILD) {
-  push(@EXTRA_VERSION, ( 'r' . qw{$LastChangedRevision: 6141 $ updated by SVN}[1] ));
+  push(@EXTRA_VERSION, "svn");
 }
 
 sub Version { join('-', $VERSION, @EXTRA_VERSION) }
