@@ -33,6 +33,14 @@
 #include <arpa/inet.h>
 #include <pwd.h>
 
+/* SunOS 4.1.4 patch from Tom Lipkis <tal@pss.com> */
+#ifndef EX__MAX
+/* SunOS lacks these */
+#define EX__MAX 77
+extern char *optarg;
+typedef unsigned long	in_addr_t;	/* base type for internet address */
+#endif
+
 #ifndef INADDR_NONE
 #define       INADDR_NONE             ((in_addr_t) 0xffffffff)
 #endif
