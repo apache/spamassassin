@@ -1,5 +1,5 @@
 # SpamAssassin rules file: tests.
-# $Id: 20_head_tests.cf,v 1.172 2002/09/02 19:01:06 msquadrat Exp $
+# $Id: 20_head_tests.cf,v 1.173 2002/09/02 23:34:58 quinlan Exp $
 ###########################################################################
 
 require_version 2.41
@@ -264,11 +264,10 @@ header RCVD_IN_DSBL            rbleval:check_rbl('relay', 'list.dsbl.org')
 describe RCVD_IN_DSBL          Received via a relay in list.dsbl.org
 tflags RCVD_IN_DSBL             net
 
-# Warning, several  big ISP's mail relays  (not open to outside  people) are
-# listed on multihop. Do not set a high score on this.
-# Note too that those IPs often are listed in unconfirmed.dsbl.org at the same
-# time, so make sure that the score FUDGE_MULTIHOP_RELAY cancels one of the
-# two scores -- Marc
+# Warning, several big ISP's mail relays (not open to outside people)
+# are listed on multihop. Do not set a high score on this.  Note too
+# that those IPs often are listed in unconfirmed.dsbl.org at the same
+# time.
 header RCVD_IN_MULTIHOP_DSBL   rbleval:check_rbl('multihop', 'multihop.dsbl.org')
 describe RCVD_IN_MULTIHOP_DSBL Received via a relay in multihop.dsbl.org
 tflags RCVD_IN_MULTIHOP_DSBL   net
@@ -324,26 +323,6 @@ tflags RCVD_IN_DUL              net
 header RCVD_IN_DUL_FH		rbleval:check_rbl('dialup-firsthop', 'dialups.mail-abuse.org.')
 describe RCVD_IN_DUL_FH	Received from first hop dialup, see http://www.mail-abuse.org/dul/
 tflags RCVD_IN_DUL_FH           net
-
-
-# Now, you can apply rules to counter for the effect of two similar BLs matching
-# together -- Marc
-header FUDGE_DUL_MAPS_OSIRU	rblreseval:check_two_rbl_results('osirusoft', "127.0.0.3", 'dialup', "127.0.0.3")
-describe FUDGE_DUL_MAPS_OSIRU	Do not double penalize for MAPS DUL and Osirusoft DUL
-tflags FUDGE_DUL_MAPS_OSIRU     net
-
-header FUDGE_RELAY_OSIRU	rblreseval:check_two_rbl_results('osirusoft', "127.0.0.2", 'relay', "127.0.0.2")
-describe FUDGE_RELAY_OSIRU	Do not double penalize for being an open relay on Osirusoft and another RBL
-tflags FUDGE_RELAY_OSIRU        net
-
-header FUDGE_DUL_OSIRU_FH	rblreseval:check_two_rbl_results('osirusoft-dul-firsthop', "127.0.0.3", 'dialup-firsthop', "127.0.0.3")
-describe FUDGE_DUL_OSIRU_FH	Do not double compensate for MAPS DUL and Osirusoft DUL first hop dialup
-tflags FUDGE_DUL_OSIRU_FH       net
-
-header FUDGE_MULTIHOP_RELAY	rblreseval:check_two_rbl_results('multihop', "127.0.0.2", 'relay', "127.0.0.2")
-describe FUDGE_MULTIHOP_RELAY	Do not double penalize if an IP is a multihop and an open relay
-tflags FUDGE_MULTIHOP_RELAY     net
-
 
 # don't add headers without testing for false positives (usually Unix MTAs and
 # list software) and especially don't add From:, Reply-To:, Date:, Message-ID:
