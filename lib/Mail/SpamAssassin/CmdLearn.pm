@@ -236,6 +236,22 @@ sub cmdline_run {
       target('-');
     }
 
+    # mbox doesn't deal with STDIN, so make a temp file if they want STDIN.
+    # do it here since they may specify "-" on the commandline
+    #
+    my $tempfile;
+    if ( $targets[0] =~ /:mbox:-$/ ) {
+      my $handle;
+
+      local $/=undef;  # go into slurp mode
+      ($tempfile, $handle) = Mail::SpamAssassin::Util::secure_tmpfile();
+      print { $handle } <STDIN>;
+      close $handle;
+
+      # re-aim the targets at the tempfile instead of STDIN
+      $targets[0] =~ s/:-$/:$tempfile/;
+    }
+
     my $iter = new Mail::SpamAssassin::ArchiveIterator ({
 	'opt_j' => 0,
 	'opt_n' => 1,
@@ -252,6 +268,11 @@ sub cmdline_run {
 
     print STDERR "\n" if ($opt{showdots});
     print "Learned from $learnedcount message(s) ($messagecount message(s) examined).\n";
+
+    # If we needed to make a tempfile, go delete it.
+    if ( defined $tempfile ) {
+      unlink $tempfile;
+    }
 
     if ($@) { die $@ unless ($@ =~ /HITLIMIT/); }
   };
