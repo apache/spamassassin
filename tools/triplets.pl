@@ -1,5 +1,8 @@
 #!/usr/bin/perl
 
+# Procudes the rules/triplets.txt file used by
+# Eval::check_for_unique_subject_id()
+
 use strict;
 
 my $FRAG_LEN = 3;
@@ -8,7 +11,7 @@ my %fragments = ();
 my $word_num = 0;
 
 if (@ARGV == 0) {
-    print STDERR "Usage: triplets.pl dict_file > triplets.txt\n";
+    print STDERR "Usage: triplets.pl dict_file1 [dict_file2 ...] > triplets.txt\n";
     exit(1);
 }
 
@@ -41,7 +44,7 @@ while(<>) {
   }
 }
 
-print STDER "\n\n$word_num words processed\n";
+print STDERR "\n\n$word_num words processed\n";
 
 
 print join("\n", keys(%fragments)), "\n";
