@@ -96,10 +96,12 @@ you will need to either
   and write to.  You will also need to set the 'bayes_file_mode' setting
   to 0666 so that created files are shared, too.
 
-  2. Alternatively, get the users to train a Bayes database individually,
-  for each user.  Not quite so easy (at least until we implement
-  auto-training in SpamAssassin at some future point).
+  2. Alternatively, let the users train their individual Bayes database.
 
+We have implemented an auto-learning algorithm (option 'auto_learn',
+on by default) which can use high-scoring and low-scoring (options
+'auto_learn_threshold_spam' and 'auto_learn_threshold_nonspam') mails
+to improve classification efficiency.
 
 Security And User-Spoofing Clients
 ----------------------------------
