@@ -110,3 +110,35 @@ meta T_HTML_NO_DOCTYPE_12	(__MIME_HTML && __HTML_DOCTYPE_MUA && !__HTML_DOCTYPE)
 # bug 1533: new Received: header forgery tests using HELO
 header T_FORGED_RCVD_HELO	eval:check_for_forged_received_helo()
 header T_RCVD_NUMERIC_HELO	Received =~ /helo[= ]\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/i
+
+# bug 1416, possible replacement for AS_SEEN_ON
+body     T_AS_SEEN_ON             /seen on\b\s*(?:T\.?V\.?|ABC|NBC|CBS|CNN|Oprah|USA Today|48 Hours|New York Times|\w+\s+T\.?V\.?|:)/i
+
+# bug 1380
+meta T_OUTLOOK_FAKED              ( __OUTLOOK_MUA && __MIME_HTML_ONLY )
+#describe OUTLOOK_FAKED          Outlook can't send HTML message only
+#lang fr describe OUTLOOK_FAKED  Outlook ne sait pas envoyer de mail en HTML pur sans texte brut.
+#score OUTLOOK_FAKED             3
+
+# bug 1421, possible replacement for USERPASS
+uri T_USERPASS                    m{https?://[^/\s]+?(?::[^/\s]+?)?\@}
+
+# bug 1438, possible replacement for the current HOTMAIL_FOOTER* rules
+# rename current HOTMAIL_FOOTER# to __HOTMAIL_FOOTER#, and change these too.
+meta T_ABUSED_HOTMAIL_FOOTER	HOTMAIL_FOOTER1 + HOTMAIL_FOOTER2 + HOTMAIL_FOOTER3 + HOTMAIL_FOOTER4 + HOTMAIL_FOOTER5 > 1
+meta T_HOTMAIL_FOOTER1		HOTMAIL_FOOTER1 && !T_ABUSED_HOTMAIL_FOOTER
+meta T_HOTMAIL_FOOTER2		HOTMAIL_FOOTER2 && !T_ABUSED_HOTMAIL_FOOTER
+meta T_HOTMAIL_FOOTER3		HOTMAIL_FOOTER3 && !T_ABUSED_HOTMAIL_FOOTER
+meta T_HOTMAIL_FOOTER4		HOTMAIL_FOOTER4 && !T_ABUSED_HOTMAIL_FOOTER
+meta T_HOTMAIL_FOOTER5		HOTMAIL_FOOTER5 && !T_ABUSED_HOTMAIL_FOOTER
+
+# bug 1406, possible replacement for URI_IS_POUND
+uri T_URI_IS_POUND               /^\#$/  
+uri T_URI_ENDS_IN_POUND        /^[^?]+\#$/ 
+
+# bug 1336
+header T_TO_FILENAME           To =~ /^<C:\\/
+#describe TO_FILENAME         "To" header contains a filename
+
+# bug 1394, possible replacement for ORDER_NOW
+body T_ORDER_NOW                  /\border (?:now|soon|fast|quickly|while|today)\b/i
