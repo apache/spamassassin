@@ -575,6 +575,10 @@ sub check_for_bad_helo {
   $relayer =~ s/^\s+//; $relayer =~ s/\s+$//;
   $claimed =~ s/^\s+//; $claimed =~ s/\s+$//;
 
+  # If reverse DNS differs from claimed on a lookback injection,
+  # then it's probably because of a bad configuration
+  return 0 if ($relayip eq "127.0.0.1");
+
   if ($relayer eq $claimed) { goto telling_truth; }
   if (defined $relayip && defined $claimip && $relayip eq $claimip)
                          { goto telling_truth; }
