@@ -1,4 +1,4 @@
-# $Id: Parser.pm,v 1.7 2003/09/29 03:05:05 felicity Exp $
+# $Id: Parser.pm,v 1.8 2003/09/29 03:53:18 felicity Exp $
 
 package Mail::SpamAssassin::MIME::Parser;
 use strict;
@@ -303,14 +303,6 @@ sub _decode_header {
   my ( $encoding, $cte, $data ) = @_;
 
   if ( $cte eq 'B' ) {
-    # remove invalid chars
-    if ( $data =~ tr{A-Za-z0-9+/=}{}cd ) {
-	# invalid, but ignorable, chars in base64 ...
-    }
-    if ( $data =~ s/=([^=])/A$1/g ) {
-	# invalid = in base64 data area
-    }
-
     # base 64 encoded
     return MIME::Base64::decode_base64($data);
   }
@@ -374,21 +366,8 @@ sub decode {
   elsif ( lc( $msg->header('content-transfer-encoding') ) eq 'base64' ) {
     dbg("decoding B64 file\n");
 
-    # We have to deal with a potentially bad base64 encoding...
-    my $data = join("", @{$body});
-
-    # remove invalid chars
-    if ( $data =~ tr{A-Za-z0-9+/=}{}cd ) {
-	# invalid, but ignorable, chars in base64 ...
-    }
-    if ( $data =~ s/=([^=])/A$1/g ) {
-	# invalid = in base64 data area
-    }
-    # Now reset the body to be the single, now valid, base64 string
-    @{$body} = ( $data );
-
     # Generate the decoded output
-    my $output = [ MIME::Base64::decode_base64($data) ];
+    my $output = [ MIME::Base64::decode_base64(join("", @{$body})) ];
 
     # If it has a filename, figure it out.
     my $type = $msg->header('content-type');
