@@ -300,6 +300,10 @@ describe RCVD_NUMERIC_HELO	Received: contains a numeric HELO
 header FAKED_IP_IN_RCVD		Received =~ /from [-0-9a-z\._]+_\[\d+\.\d+\.\d+\.\d+\] /i
 describe FAKED_IP_IN_RCVD	Received: contains a name with a faked IP-address
 
+# no legit mailer claims that their mailserver has no name
+header RCVD_BY_IP	Received =~ /from \S+ \[\S+\] by [0-9\.]+ with ESMTP id/
+describe RCVD_BY_IP	Received by mail server with no name
+
 header SMTPD_IN_RCVD		Received =~ /\(SMTPD32-\d+\..+\)/
 describe SMTPD_IN_RCVD		Received via SMTPD32 server (SMTPD32-n.n)
 

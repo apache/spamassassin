@@ -331,7 +331,10 @@ describe HTML_NONELEMENT_90_100	90% to 100% of HTML elements are non-standard
 body HTML_TITLE_EMPTY		eval:html_title('!~ /\S/s')
 describe HTML_TITLE_EMPTY	HTML title contains no text
 
-body HTML_TITLE_UNTITLED	eval:html_title('=~ /untitled/i')
+body HTML_TITLE_EXTRA		eval:html_test('title_extra')
+describe HTML_TITLE_EXTRA	HTML has more than one title
+
+body HTML_TITLE_UNTITLED	eval:html_title('=~ /untitled|new page \d+/i')
 describe HTML_TITLE_UNTITLED	HTML title contains "Untitled"
 
 ###########################################################################

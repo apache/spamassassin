@@ -133,8 +133,14 @@ describe BIZ_TLD		Contains a URL in the BIZ top-level domain
 uri      HTTP_ENTITIES_HOST	m{https?://[^\s\">/]*\&\#[\da-f]+}i
 describe HTTP_ENTITIES_HOST	URI obscured with character entities
 
-uri	YAHOO_REDIR		/^https?\:\/\/rd\.yahoo\.com\/(?:[0-9]{4,}|partner\b|dir\b)/i
-describe YAHOO_REDIR		Has Yahoo Redirect URI
+uri YAHOO_RD_REDIR		m{^https?\://rd\.yahoo\.com/(?:[0-9]{4,}|partner\b|dir\b)}i
+describe YAHOO_RD_REDIR		Has Yahoo Redirect URI
+
+uri YAHOO_SRD_REDIR		m{^https?://.*\bsrd\.yahoo\.com/}i
+describe YAHOO_SRD_REDIR	Has Yahoo Redirect URI
+
+uri YAHOO_DRS_REDIR		m{^https?://drs\.yahoo\.com/}i
+describe YAHOO_DRS_REDIR	Has Yahoo Redirect URI
 
 uri MORTGAGE_LINKS		/(?:^https?\:\/\/|^mailto\:).{0,20}(?:low|about)mortgage/i
 describe MORTGAGE_LINKS		Message has link to mortgage URI
