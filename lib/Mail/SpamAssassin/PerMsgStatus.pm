@@ -1022,11 +1022,11 @@ sub extract_message_metadata {
 # Non-public methods from here on.
 
 sub get_decoded_body_text_array {
-  return $_[0]->{msg}->{metadata}->get_decoded_body_text_array();
+  return $_[0]->{msg}->get_decoded_body_text_array();
 }
 
 sub get_decoded_stripped_body_text_array {
-  return $_[0]->{msg}->{metadata}->get_rendered_body_text_array();
+  return $_[0]->{msg}->get_rendered_body_text_array();
 }
 
 ###########################################################################

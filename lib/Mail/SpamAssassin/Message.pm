@@ -513,6 +513,88 @@ sub _parse_normal {
 
 # ---------------------------------------------------------------------------
 
+sub get_rendered_body_text_array {
+  my ($self) = @_;
+
+  if (exists $self->{text_rendered}) { return $self->{text_rendered}; }
+  local ($_);
+
+  $self->{text_rendered} = [];
+
+  # Find all parts which are leaves
+  my @parts = $self->find_parts(qr/^(?:text|message)\b/i,1);
+  return $self->{text_rendered} unless @parts;
+
+  # Go through each part
+  my $text = $self->get_header ('subject') || '';
+  for(my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
+    my $p = $parts[$pt];
+
+    # put a blank line between parts ...
+    $text .= "\n" if ( $text );
+
+    my($type, $rnd) = $p->rendered(); # decode this part
+    if ( defined $rnd ) {
+      # Only text/* types are rendered ...
+      $text .= $rnd;
+
+      # TVD - if there are multiple parts, what should we do?
+      # right now, just use the last one ...
+      $self->{html} = $p->{html_results} if ( $type eq 'text/html' );
+    }
+    else {
+      $text .= $p->decode();
+    }
+  }
+
+  # whitespace handling (warning: small changes have large effects!)
+  $text =~ s/\n+\s*\n+/\f/gs;                # double newlines => form feed
+  $text =~ tr/ \t\n\r\x0b\xa0/ /s;        # whitespace => space
+  $text =~ tr/\f/\n/;                        # form feeds => newline
+
+  my @textary = split_into_array_of_short_lines ($text);
+  $self->{text_rendered} = \@textary;
+
+  return $self->{text_rendered};
+}
+
+# ---------------------------------------------------------------------------
+
+sub get_decoded_body_text_array {
+  my ($self) = @_;
+
+  if (defined $self->{text_decoded}) { return $self->{text_decoded}; }
+  $self->{text_decoded} = [ ];
+
+  # Find all parts which are leaves
+  my @parts = $self->find_parts(qr/^(?:text|message)\b/i,1);
+  return $self->{text_decoded} unless @parts;
+
+  # Go through each part
+  for(my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
+    push(@{$self->{text_decoded}}, "\n") if ( @{$self->{text_decoded}} );
+    push(@{$self->{text_decoded}}, split_into_array_of_short_lines($parts[$pt]->decode()));
+  }
+
+  return $self->{text_decoded};
+}
+
+# ---------------------------------------------------------------------------
+
+sub split_into_array_of_short_lines {
+  my @result = ();
+  foreach my $line (split (/^/m, $_[0])) {
+    while (length ($line) > MAX_BODY_LINE_LENGTH) {
+      push (@result, substr($line, 0, MAX_BODY_LINE_LENGTH));
+      substr($line, 0, MAX_BODY_LINE_LENGTH) = '';
+    }
+    push (@result, $line);
+  }
+  @result;
+}
+
+# ---------------------------------------------------------------------------
+
 =item $str = get_metadata($hdr)
 
 =cut
@@ -613,6 +695,8 @@ sub finish {
   $self->finish_metadata();
   delete $self->{pristine_headers};
   delete $self->{pristine_body};
+  delete $self->{text_decoded};
+  delete $self->{text_rendered};
 
   # Destroy the tree ...
   $self->SUPER::finish();
