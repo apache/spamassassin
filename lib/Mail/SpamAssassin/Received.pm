@@ -1,4 +1,4 @@
-# $Id: Received.pm,v 1.37 2003/11/20 07:22:23 jmason Exp $
+# $Id: Received.pm,v 1.38 2003/11/24 05:18:33 jmason Exp $
 
 # ---------------------------------------------------------------------------
 
@@ -696,12 +696,9 @@ sub parse_received_line {
     if (/^from (\S+) \(HELO ([^\)]+)\) \((\S+@)?\[?(${IP_ADDRESS})\]?\).* by (\S+) /)
     {
       $mta_looked_up_dns = 1;
-      $rdns = $1; $helo = $2; $ident = $3; $ip = $4; $by = $5;
-      if ($ident !~ /\@$/) {
-	$by = $ip; $ip = $ident; undef $ident;
-      } else {
-	$ident =~ s/\@$//;
-      }
+      $rdns = $1; $helo = $2; $ident = (defined $3) ? $3 : '';
+      $ip = $4; $by = $5;
+      if ($ident) { $ident =~ s/\@$//; }
       goto enough;
     }
 
@@ -711,12 +708,9 @@ sub parse_received_line {
       $mta_looked_up_dns = 1;
       # http://bugzilla.spamassassin.org/show_bug.cgi?id=2744 notes that
       # if HELO == rDNS, qmail drops it.
-      $rdns = $1; $helo = $rdns; $ident = $2; $ip = $3; $by = $4;
-      if ($ident !~ /\@$/) {
-	$by = $ip; $ip = $ident; undef $ident;
-      } else {
-	$ident =~ s/\@$//;
-      }
+      $rdns = $1; $helo = $rdns; $ident = (defined $2) ? $2 : '';
+      $ip = $3; $by = $4;
+      if ($ident) { $ident =~ s/\@$//; }
       goto enough;
     }
 
