@@ -931,7 +931,14 @@ sub get_decoded_stripped_body_text_array {
     $hp->parse($text);
     $hp->eof;
     $text = join('', $before, @{$self->{html_text}});
-    $self->{html}{ratio} = ($raw - length($text)) / $raw if $raw;
+
+    if ($raw > 0) {
+      my $non_uri_len = 0;
+      for ($before, grep(!/^URI:/, @{$self->{html_text}})) {
+        $non_uri_len += length($_);
+      }
+      $self->{html}{ratio} = ($raw - $non_uri_len) / $raw;
+    } # if ($raw > 0)
     delete $self->{html_last_tag};
   }
 
