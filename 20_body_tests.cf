@@ -869,7 +869,7 @@ describe LIFE_INSURANCE		No Examination life Insurance
 body SEARCH_ENGINE	        /\b(?:(?:submit|traffic|top).{0.10} search engines?|site ranking)\b/i
 describe SEARCH_ENGINE		Search Engine Site Ranking
 
-body SEARCH_ENGINE_PROMO        /\b(?:(?:submitt?|list)(?:ed|ing|s)?|place(?:d|ment))\s+.{0,15}\b(?:in|to)\b.{0,15}\b(?:(?:top|best|major|largest|biggest).{0,15}\b)?(?:search(?:ing)?\s*(?:engine|site)|director(?:y|ies))\b/is
+body SEARCH_ENGINE_PROMO        /\b(?:(?:submitt?|list)(?:ed|ing|s)?|place(?:d|ment))\b.{0,15}\b(?:in|to).{0,15}\b(?:search(?:ing|)\s*(?:engine|site)|director(?:y|ies))s?\b/is
 describe SEARCH_ENGINE_PROMO    Discusses search engine listings
 
 body OPPORTUNITY_2		/\b(?:opportunity (?:pass|of a lifetime|is knocking|for you)|(?:investment|unique) opportunity)\b/i
@@ -1248,8 +1248,8 @@ describe NASTY_GIRLS            Possible porn - Nasty Girls
 body CAM_PORN                   /cam (?:girls|sex)\b|\b(?:hidden|voyeur|bathroom|shower|naughty) .{0,9}cam\b/i
 describe CAM_PORN               Possible porn - Sex on Camera
 
-body AMATUER_PORN               /\bamat[eu][eu]r .{0,9}(?:sex|porn|star|sites?|college|babes|action|pics)|real amat[eu][eu]r/i
-describe AMATUER_PORN           Possible porn - Amateur Porn
+body AMATEUR_PORN               /\bamat[eu][eu]r .{0,9}(?:sex|porn|star|sites?|college|babes|action|pics)|real amat[eu][eu]r/i
+describe AMATEUR_PORN           Possible porn - Amateur Porn
 
 body CELEBRITY_PORN             /\bceleb.{0,15}(?:sex|porn|pics|caught|nude|exposed)\b/i
 describe CELEBRITY_PORN         Possible porn - Celebrity Porn
@@ -1319,3 +1319,4 @@ describe SAVE_THOUSANDS         Save big money
 
 body REFINANCE_YOUR_HOME        /\brefinance your (?:current|) (?:home|house)\b/i
 describe REFINANCE_YOUR_HOME    "Refinance your home"
+
