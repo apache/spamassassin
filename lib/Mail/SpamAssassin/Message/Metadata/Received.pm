@@ -963,24 +963,23 @@ sub parse_received_line {
   # ------------------------------------------------------------------------
   # IGNORED LINES: generally local-to-local or non-TCP/IP handovers
 
+  # Received: by faerber.muc.de (OpenXP/32 v3.9.4 (Win32) alpha @
+  # 2003-03-07-1751d); 07 Mar 2003 22:10:29 +0000
+  # Received: by x.x.org (bulk_mailer v1.13); Wed, 26 Mar 2003 20:44:41 -0600
+  # Received: by SPIDERMAN with Internet Mail Service (5.5.2653.19) id <19AF8VY2>; Tue, 25 Mar 2003 11:58:27 -0500
+  # Received: by oak.ein.cz (Postfix, from userid 1002) id DABBD1BED3;
+  # Thu, 13 Feb 2003 14:02:21 +0100 (CET)
+  # ignore any lines starting with "by", we want the "from"s!
+  if (/^by /) { return; }
+
   # from qmail-scanner-general-admin@lists.sourceforge.net by alpha by uid 7791 with qmail-scanner-1.14 (spamassassin: 2.41. Clear:SA:0(-4.1/5.0):. Processed in 0.209512 secs)
   if (/^from \S+\@\S+ by \S+ by uid \S+ /) { return; }
-
-  # Received: by x.x.org (bulk_mailer v1.13); Wed, 26 Mar 2003 20:44:41 -0600
-  if (/^by (\S+) \(bulk_mailer /) { return; }
 
   # Received: from DSmith1204@aol.com by imo-m09.mx.aol.com (mail_out_v34.13.) id 7.53.208064a0 (4394); Sat, 11 Jan 2003 23:24:31 -0500 (EST)
   if (/^from \S+\@\S+ by \S+ /) { return; }
 
   # Received: from Unknown/Local ([?.?.?.?]) by mailcity.com; Fri, 17 Jan 2003 15:23:29 -0000
   if (/^from Unknown\/Local \(/) { return; }
-
-  # Received: by SPIDERMAN with Internet Mail Service (5.5.2653.19) id <19AF8VY2>; Tue, 25 Mar 2003 11:58:27 -0500
-  if (/^by \S+ with Internet Mail Service \(/) { return; }
-
-  # Received: by oak.ein.cz (Postfix, from userid 1002) id DABBD1BED3;
-  # Thu, 13 Feb 2003 14:02:21 +0100 (CET)
-  if (/^by (\S+) \(Postfix, from userid /) { return; }
 
   # Received: from localhost (mailnull@localhost) by x.org (8.12.6/8.9.3) 
   # with SMTP id h2R2iivG093740; Wed, 26 Mar 2003 20:44:44 -0600 
@@ -998,11 +997,6 @@ sub parse_received_line {
 
   # Received: from (AUTH: e40a9cea) by vqx.net with esmtp (courier-0.40) for <asrg@ietf.org>; Mon, 03 Mar 2003 14:49:28 +0000
   if (/^from \(AUTH: (\S+)\) by (\S+) with /) { return; }
-
-  # Received: by faerber.muc.de (OpenXP/32 v3.9.4 (Win32) alpha @
-  # 2003-03-07-1751d); 07 Mar 2003 22:10:29 +0000
-  # ignore any lines starting with "by", we want the "from"s!
-  if (/^by \S+ /) { return; }
 
   # Received: FROM ca-ex-bridge1.nai.com BY scwsout1.nai.com ;
   # Fri Feb 07 10:18:12 2003 -0800
