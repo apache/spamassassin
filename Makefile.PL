@@ -99,7 +99,7 @@ sub MY::postamble {
   my $sysconfdir = $self->{SYSCONFDIR};
   $sysconfdir ||= '/etc';
 
-  my $gotpods = (%{$self->{MAN1PODS}}) + (%{$self->{MAN3PODS}}) + (%{$self->{EXTRAPODS}});
+  my $gotpods = keys(%{$self->{MAN1PODS}}) || keys(%{$self->{MAN3PODS}}) || keys(%{$self->{EXTRAPODS}}) || 0;
 
 
 qq#
