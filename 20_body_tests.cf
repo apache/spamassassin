@@ -433,7 +433,7 @@ describe TO_BE_REMOVED_REPLY    Says: "to be removed, reply via email" or simila
 body TO_UNSUB_REPLY		/\bto\b.{0,20}\bunsubscribe.{0,20}\breply\b/is
 describe TO_UNSUB_REPLY		Says: "to unsubscribe, reply via email" or similar
 
-body REMOVAL_INSTRUCTIONS	/REMOVAL INSTRUCTIONS/i
+body REMOVAL_INSTRUCTIONS	/\b(?:REMOVAL|UNSUBSCRIBE) INSTRUCTIONS/i
 describe REMOVAL_INSTRUCTIONS	Gives instructions for removal from list
 
 # (contrib: WW)
