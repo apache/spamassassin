@@ -89,8 +89,7 @@ sub run {
 
     # message-array
     ($MESSAGES,$messages) = $self->message_array(\@targets);
-
-#warn ">> total: $MESSAGES\n";
+    #warn ">> total: $MESSAGES\n";
 
     # feed childen
     while ($select->count()) {
@@ -99,19 +98,24 @@ sub run {
 	my $line;
 	while ($line = readline $socket) {
 	  if ($line =~ /^RESULT (.+)$/) {
-	  my($class,$type,$date) = index_unpack($1);
+	    my($class,$type,$date) = index_unpack($1);
+	    #warn ">> RESULT: $class, $type, $date\n";
 
-#warn ">> RESULT: $class, $type, $date\n";
-	    $needs_restart = 1 if ( defined $self->{opt_restart} && ($total_count % $self->{opt_restart}) == 0 );
+	    if (defined $self->{opt_restart} &&
+		($total_count % $self->{opt_restart}) == 0)
+	    {
+	      $needs_restart = 1;
+	    }
 
-	    # If there are still messages, and we don't need to restart, send a message.
-	    if ( ($MESSAGES>$total_count) && !$needs_restart ) {
+	    # if messages remain, and we don't need to restart, send a message
+	    if (($MESSAGES>$total_count) && !$needs_restart) {
 	      print { $socket } (shift @{$messages}) . "\n";
 	      $total_count++;
-#warn ">> recv: $MESSAGES $total_count\n";
+	      #warn ">> recv: $MESSAGES $total_count\n";
 	    }
-	    else { # stop listening on this child since we're done with it.
-#warn ">> removeresult: $needs_restart $MESSAGES $total_count\n";
+	    else {
+	      # stop listening on this child since we're done with it.
+	      #warn ">> removeresult: $needs_restart $MESSAGES $total_count\n";
 	      $select->remove($socket);
 	    }
 
@@ -124,35 +128,40 @@ sub run {
 	    last; # this will get out of the read for this client
 	  }
 	  elsif ($line eq "START\n") {
-	    if ( $MESSAGES>$total_count ) { # we still have messages, send one to child
+	    if ($MESSAGES>$total_count) {
+	      # we still have messages, send one to child
 	      print { $socket } (shift @{$messages}) . "\n";
 	      $total_count++;
-#warn ">> new: $MESSAGES $total_count\n";
+	      #warn ">> new: $MESSAGES $total_count\n";
 	    }
-	    else { # no more messages, so stop listening on this child
-#warn ">> removestart: $needs_restart $MESSAGES $total_count\n";
+	    else {
+	      # no more messages, so stop listening on this child
+	      #warn ">> removestart: $needs_restart $MESSAGES $total_count\n";
 	      $select->remove($socket);
 	    }
 
 	    last; # this will get out of the read for this client
 	  }
-	  else { # result line, remember it.
+	  else {
+	    # result line, remember it.
 	    $result .= $line;
 	  }
 	}
       }
 
-#warn ">> out of loop, $MESSAGES $total_count $needs_restart ".$select->count()."\n";
+      #warn ">> out of loop, $MESSAGES $total_count $needs_restart ".$select->count()."\n";
 
-      # If there are still messages to process, and we need to restart the children, let's go ahead.
-      if ( $needs_restart && $select->count() == 0 && ($MESSAGES>$total_count) ) {
+      # If there are still messages to process, and we need to restart
+      # the children, let's go ahead.
+      if ($needs_restart && $select->count() == 0 && ($MESSAGES>$total_count))
+      {
 	$needs_restart = 0;
 
-#warn "debug: Needs restart, $MESSAGES total, $total_count done.\n";
-        $self->reap_children($self->{opt_j}, \@child, \@pid);
+	#warn "debug: Needs restart, $MESSAGES total, $total_count done.\n";
+	$self->reap_children($self->{opt_j}, \@child, \@pid);
 	@child=();
 	@pid=();
-        $self->start_children($self->{opt_j}, \@child, \@pid, $select);
+	$self->start_children($self->{opt_j}, \@child, \@pid, $select);
       }
     }
     # reap children
@@ -230,14 +239,15 @@ sub start_children {
       select($old);
 
       $socket->add($child->[$i]);
-#warn "debug: starting new child $i (pid ",$pid->[$i],")\n";
+      #warn "debug: starting new child $i (pid ",$pid->[$i],")\n";
       next;
     }
     elsif (defined $pid->[$i]) {
       my $result;
       my $line;
       close $child->[$i];
-      select($parent); $|++; # print to parent by default, turn off buffering
+      select($parent);
+      $| = 1;	# print to parent by default, turn off buffering
       print "START\n";
       while ($line = readline $parent) {
 	chomp $line;
@@ -261,7 +271,7 @@ sub reap_children {
   my($self, $count, $socket, $pid) = @_;
 
   for (my $i = 0; $i < $count; $i++) {
-#warn "debug: killing child $i (pid ",$pid->[$i],")\n";
+    #warn "debug: killing child $i (pid ",$pid->[$i],")\n";
     print { $socket->[$i] } "exit\n"; # tell the child to die.
     my $line = readline $socket->[$i]; # read its END statement.
     close $socket->[$i];
@@ -373,7 +383,8 @@ sub scan_directory {
     # cyrus metadata: http://unix.lsa.umich.edu/docs/imap/imap-lsa-srv_3.html
     @files = grep { /^\S+$/ && !/^cyrus\.(?:index|header|cache|seen)/ }
 			readdir(DIR);
-  } else {
+  }
+  else {
     # ignore ,234 (deleted or refiled messages) and MH metadata dotfiles
     @files = grep { /^[^,.]\S*$/ } readdir(DIR);
   }
@@ -523,7 +534,7 @@ sub fix_globs {
 
   # replace leading tilde with home dir: ~/abc => /home/jm/abc
   $path =~ s/^~/$ENV{'HOME'}/;
-  
+
   # protect/escape spaces: ./Mail/My Letters => ./Mail/My\ Letters
   $path =~ s/([^\\])(\s)/$1\\$2/g;
 
