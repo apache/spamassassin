@@ -649,3 +649,25 @@ describe T_RCVD_ILLEGAL_IP  Received contains illegal IP address
 
 # bug 2017
 body T_HTML_WEB_BUGS		eval:html_test('t_web_bugs')
+
+# test for HELO != IP or HELO != RDNS
+header T_RCVD_HELO_NE_BOTH1	eval:check_for_helo_both_mismatch()
+header T_RCVD_HELO_NE_BOTH2	eval:check_for_helo_both_mismatch('helo_reserved')
+header T_RCVD_HELO_NE_BOTH3	eval:check_for_helo_both_mismatch('ip_reserved')
+header T_RCVD_HELO_NE_BOTH4	eval:check_for_helo_both_mismatch('rdns_reserved')
+header T_RCVD_HELO_NE_BOTH5	eval:check_for_helo_both_mismatch('helo_reserved', 'ip_reserved')
+header T_RCVD_HELO_NE_BOTH6	eval:check_for_helo_both_mismatch('helo_reserved', 'rdns_reserved')
+header T_RCVD_HELO_NE_BOTH7	eval:check_for_helo_both_mismatch('ip_reserved', 'rdns_reserved')
+header T_RCVD_HELO_NE_BOTH8	eval:check_for_helo_both_mismatch('helo_reserved, 'ip_reserved', 'rdns_reserved')
+
+# test for HELO != IP
+header T_RCVD_HELO_NE_IP1	eval:check_for_helo_ip_mismatch()
+header T_RCVD_HELO_NE_IP2	eval:check_for_helo_ip_mismatch('helo_reserved')
+header T_RCVD_HELO_NE_IP3	eval:check_for_helo_ip_mismatch('ip_reserved')
+header T_RCVD_HELO_NE_IP4	eval:check_for_helo_ip_mismatch('helo_reserved', 'ip_reserved')
+
+# test for HELO != RDNS
+header T_RCVD_HELO_NE_RDNS1	eval:check_for_helo_rdns_mismatch()
+header T_RCVD_HELO_NE_RDNS2	eval:check_for_helo_rdns_mismatch('helo_reserved')
+header T_RCVD_HELO_NE_RDNS3	eval:check_for_helo_rdns_mismatch('rdns_reserved')
+header T_RCVD_HELO_NE_RDNS4	eval:check_for_helo_rdns_mismatch('helo_reserved', 'rdns_reserved')
