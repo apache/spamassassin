@@ -26,6 +26,9 @@
 #include <stdio.h>
 #include <string.h>
 #ifdef _WIN32
+#include <io.h>
+#include <fcntl.h>
+#include <process.h>
 #define syslog(x, y) fprintf(stderr, #y "\n")
 #else
 #include <syslog.h>
@@ -114,7 +117,7 @@ int
 read_args(int argc, char **argv, int *max_size, const char **username,
 	struct transport *ptrn)
 {
-  int opt, i, j;
+  int opt;
 
   while(-1 != (opt = getopt(argc,argv,
 #ifndef _WIN32
@@ -173,6 +176,7 @@ read_args(int argc, char **argv, int *max_size, const char **username,
 #ifndef _WIN32
     case 'e':
       {
+        int i, j;
         if((exec_argv=malloc(sizeof(*exec_argv)*(argc-optind+2)))==NULL)
             return EX_OSERR;
         for(i=0, j=optind-1; j<argc; i++, j++){
@@ -235,9 +239,10 @@ read_args(int argc, char **argv, int *max_size, const char **username,
 }	
 
 void get_output_fd(int *fd){
+#ifndef _WIN32
     int fds[2];
     pid_t pid;
-    
+#endif    
     if(*fd!=-1) return;
     if(exec_argv==NULL){
         *fd=STDOUT_FILENO;
@@ -345,11 +350,19 @@ int main (int argc, char **argv) {
    * we connect to the spam daemon. Mainly this involves lookup up the
    * hostname and getting the IP addresses to connect to.
    */
-  if ( (ret = transport_setup(&trans, flags)) == EX_OK ) {
-    out_fd=-1;
     m.type    = MESSAGE_NONE;
+  m.out = NULL;
+  m.raw = NULL;
+  m.priv = NULL;
     m.max_len = max_size;
     m.timeout = timeout;
+  m.is_spam = EX_NOHOST; // default err code if can't reach the daemon
+#ifdef _WIN32
+  setmode(STDIN_FILENO, O_BINARY);
+  setmode(STDOUT_FILENO, O_BINARY);
+#endif
+  if ( (ret = transport_setup(&trans, flags)) == EX_OK ) {
+    out_fd=-1;
 
     ret=message_read(STDIN_FILENO, flags, &m);
     if(ret==EX_OK) {
@@ -375,7 +388,7 @@ int main (int argc, char **argv) {
     }
   }
 
- FAIL:
+/* FAIL: */
     get_output_fd(&out_fd);
 
     result = m.is_spam;
