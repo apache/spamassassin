@@ -3007,7 +3007,7 @@ For example:
 
 An alias for C<if plugin(PluginModuleName)>.
 
-=item require_version n.n.n
+=item require_version n.nnnnnn
 
 Indicates that the entire file, from this line on, requires a certain
 version of SpamAssassin to run.  If a different (older or newer) version
