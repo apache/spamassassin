@@ -1812,7 +1812,7 @@ sub get_uri_list {
 
   for (@$textary) {
     # NOTE: do not modify $_ in this loop
-    while (/($uriRe)/go) {
+    while (/($uriRe)/igo) {
       my $uri = $1;
 
       $uri =~ s/^<(.*)>$/$1/;
