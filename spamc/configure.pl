@@ -70,7 +70,7 @@ print join(' ', $Config{'perlpath'}, "version.h.pl") . "\n";
   # Got to check for defined because the script returns shell error level!
   unless (defined do $0) {
     $0 = $Z;
-    die $@ ? $@ : "Can't exec `$::args[0]': $!";
+    die $@ ? $@ : "Can't exec `version.h.pl': $!";
   }
 }
 
