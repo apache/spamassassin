@@ -2109,16 +2109,16 @@ general running of SpamAssassin.
 
 =item bayes_path /path/to/file	(default: ~/.spamassassin/bayes)
 
-Path for Bayesian probabilities databases.  Several databases will be created,
-with this as the base, with C<_toks>, C<_seen> etc. appended to this filename;
-so the default setting results in files called C<~/.spamassassin/bayes_seen>,
-C<~/.spamassassin/bayes_toks> etc.
+Partial filename path (this is not a directory name) for Bayes probabilities
+databases.  Several databases will be created, with this as the base, with
+C<_toks>, C<_seen>, etc. appended to this filename.  The default setting
+results in files called C<~/.spamassassin/bayes_seen>,
+C<~/.spamassassin/bayes_toks>, etc.
 
-By default, each user has their own, in their C<~/.spamassassin> directory with
-mode 0700/0600, but for system-wide SpamAssassin use, you may want to reduce
-disk space usage by sharing this across all users.  (However it should be noted
-that Bayesian filtering appears to be more effective with an individual
-database per user.)
+By default, each user has their own in their C<~/.spamassassin> directory with
+mode 0700/0600.  For system-wide SpamAssassin use, you may want to reduce disk
+space usage by sharing this across all users.  However, Bayes appears to be
+more effective with individual user databases.
 
 =cut
 
@@ -2126,7 +2126,18 @@ database per user.)
     setting => 'bayes_path',
     is_admin => 1,
     default => '__userstate__/bayes',
-    type => $CONF_TYPE_STRING
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      unless (defined $value) {
+	return $MISSING_REQUIRED_VALUE;
+      }
+      # not sure if we should test this here or in bayes, but bayes_path
+      # is used in a lot of places, so this is here
+      if (-d $value) {
+	return $INVALID_VALUE;
+      }
+     $self->{bayes_path} = $value;
+    }
   });
 
 =item bayes_file_mode		(default: 0700)
