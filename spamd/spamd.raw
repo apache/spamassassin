@@ -1225,9 +1225,13 @@ sub handle_virtual_config_dir
 }
 
 sub handle_user_sql {
-  unless($spamtest->load_scoreonly_sql(@_)) {
+  my ($username) = @_;
+
+  unless($spamtest->load_scoreonly_sql($username)) {
     return 0;
   }
+  $spamtest->signal_user_changed({username => $username,
+				  user_dir => undef});
   return 1;
 }
 
@@ -1236,6 +1240,8 @@ sub handle_user_ldap
     my $username = shift;
     Mail::SpamAssassin::dbg("handle_user_ldap($username)");
     $spamtest->load_scoreonly_ldap ($username);
+    $spamtest->signal_user_changed({username => $username,
+				    user_dir => undef});
     return 1;
 }
 
