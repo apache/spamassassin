@@ -461,7 +461,7 @@ ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
 
 uridnsbl_timeout 2
 
-uridnsbl T_URIBL_SC_SURBL	sc.surbl.org.	TXT
+urirhsbl T_URIBL_SC_SURBL	sc.surbl.org.	A
 header T_URIBL_SC_SURBL		eval:check_uridnsbl('T_URIBL_SC_SURBL')
 describe T_URIBL_SC_SURBL	Contains a URL listed in the SC SURBL blocklist
 tflags T_URIBL_SC_SURBL		net
