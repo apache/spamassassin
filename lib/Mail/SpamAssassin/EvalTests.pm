@@ -996,52 +996,81 @@ gotone:
 
 ###########################################################################
 
-sub check_for_forward_date {
+my $cache_date_rcvd;
+my $cache_date_diff;
+
+sub check_for_shifted_date {
+  my ($self, $min, $max) = @_;
+
+  my $rcvd = $self->get ('Received');
+  if (!defined($cache_date_rcvd) || $rcvd ne $cache_date_rcvd) {
+    $cache_date_rcvd = $rcvd;
+    $cache_date_diff = $self->_check_date_diff();
+  }
+  return (($min eq 'undef' || $cache_date_diff >= (60 * 60 * $min)) &&
+	  ($max eq 'undef' || $cache_date_diff < (60 * 60 * $max)));
+}
+
+sub _check_date_diff {
   my ($self) = @_;
   local ($_);
 
-  my $date = $self->get ('Date');
   my $rcvd = $self->get ('Received');
-
   # if we have no Received: headers, chances are we're archived mail
   # with a limited set of hdrs. return 0.
   if (!defined $rcvd || $rcvd eq '') {
     return 0;
   }
 
+  # a Resent-Date: header takes precedence over any Date: header
+  my $date = $self->get ('Resent-Date');
+  if (!defined $date || $date eq '') {
+      $date = $self->get ('Date');
+  }
   # don't barf here; just return an OK return value, as there's already
   # a good test for this.
   if (!defined $date || $date eq '') { return 0; }
-  
+
   chomp ($date);
   my $time = $self->_parse_rfc822_date ($date);
 
-  my $now;
+  # parse_rfc822_date failed
+  if (! $time) { return 0; }
 
   # use second date. otherwise fetchmail Received: hdrs will screw it up
-  my @rcvddatestrs = ($rcvd =~ /\s\S\S\S, .?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+/g);
+  my @rcvddatestrs = ($rcvd =~ /\s.?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+/g);
   my @rcvddates = ();
   foreach $rcvd (@rcvddatestrs) {
     dbg ("trying Received header date for real time: $rcvd");
-    push (@rcvddates, $self->_parse_rfc822_date ($rcvd));
-  }
-
-  if ($#rcvddates <= 0) {
-    dbg ("no Received headers found, not raising flag");
-    return 0;
-  }
-
-  foreach $rcvd (@rcvddates) {
-    my $diff = $rcvd - $time; if ($diff < 0) { $diff = -$diff; }
-    dbg ("time_t from date=$time, rcvd=$rcvd, diff=$diff");
-
-    if ($diff < (60 * 60 * 24 * 4)) {	# 4 days far enough?
-      dbg ("within time range, not raising flag");
-      return 0;
+    $rcvd = $self->_parse_rfc822_date ($rcvd);
+    if ($rcvd) {
+      push (@rcvddates, $rcvd);
     }
   }
 
-  return 1;
+  if ($#rcvddates <= 0) {
+    dbg ("no dates found in Received headers, not raising flag");
+    return 0;
+  }
+
+  my @diffs;
+
+  foreach $rcvd (@rcvddates) {
+    my $diff = $time - $rcvd;
+    dbg ("time_t from date=$time, rcvd=$rcvd, diff=$diff");
+    push(@diffs, $diff);
+  }
+
+  # if the last Received: header has no difference, then we choose to
+  # exclude it
+  if ($#diffs > 0 && $diffs[$#diffs] == 0) {
+    pop(@diffs);
+  }
+
+  # use the date with the smallest absolute difference
+  # (experimentally, this results in the fewest false positives)
+  @diffs = sort { abs($a) <=> abs($b) } @diffs;
+  return $diffs[0];
 }
 
 sub _parse_rfc822_date {
@@ -1053,12 +1082,15 @@ sub _parse_rfc822_date {
   $_ = " $date "; s/, */ /gs; s/\s+/ /gs;
 
   # now match it in parts.  Date part first:
-  if (s/ (\d+) ([A-Z][a-z][a-z]) (\d{4}) / /) {
+  if (s/ (\d+) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{4}) / /i) {
     $dd = $1; $mon = $2; $yyyy = $3;
-  } elsif (s/ ([A-Z][a-z][a-z]) +(\d+) \d+:\d+:\d+ (\d{4}) / /) {
+  } elsif (s/ (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) +(\d+) \d+:\d+:\d+ (\d{4}) / /i) {
     $dd = $2; $mon = $1; $yyyy = $3;
-  } elsif (s/ (\d+) ([A-Z][a-z][a-z]) (\d\d) / /) {
+  } elsif (s/ (\d+) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d\d) / /i) {
     $dd = $1; $mon = $2; $yyyy = $3;
+  } else {
+    dbg ("time cannot be parsed: $date");
+    return 0;
   }
 
   if (defined $yyyy && $yyyy < 100) {
@@ -1067,19 +1099,29 @@ sub _parse_rfc822_date {
   }
 
   # hh:mm:ss
-  if (s/ ([\d\s]\d):(\d\d):(\d\d) / /) {
-    $hh = $1; $mm = $2; $ss = $3;
+  if (s/ ([\d\s]\d):(\d\d)(:(\d\d))? / /) {
+    $hh = $1; $mm = $2; $ss = $4 || 0;
   }
 
-  # and timezone offset. if we can't parse non-numeric zones, that's OK
-  # as long as we don't worry about time diffs < 1 to 1.5 days.
+  # numeric timezones
   if (s/ ([-+]\d{4}) / /) {
     $tzoff = $1;
   }
-  $tzoff ||= '0000';
+  # UT, GMT, and North American timezones
+  elsif (s/ (UT|GMT|[ECMP][DS]T) / /) {
+    if    ($1 eq "UT"  || $1 eq "GMT") { $tzoff = "+0000"; }
+    elsif ($1 eq "EDT")                { $tzoff = "-0400"; }
+    elsif ($1 eq "EST" || $1 eq "CDT") { $tzoff = "-0500"; }
+    elsif ($1 eq "CST" || $1 eq "MDT") { $tzoff = "-0600"; }
+    elsif ($1 eq "MST" || $1 eq "PDT") { $tzoff = "-0700"; }
+    elsif ($1 eq "PST")                { $tzoff = "-0800"; }
+  }
+  # all other timezones are considered equivalent to "-0000"
+  $tzoff ||= '-0000';
 
   if (!defined $mmm && defined $mon) {
-    my @months = qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
+    my @months = qw(jan feb mar apr may jun jul aug sep oct nov dec);
+    $mon = lc($mon);
     my $i; for ($i = 0; $i < 12; $i++) {
       if ($mon eq $months[$i]) { $mmm = $i+1; last; }
     }
@@ -1101,14 +1143,16 @@ sub _parse_rfc822_date {
   {
     $tzoff = (($2 * 60) + $3) * 60;
     if ($1 eq '-') {
-      $time -= $tzoff;
-    } else {
       $time += $tzoff;
+    } else {
+      $time -= $tzoff;
     }
   }
 
   return $time;
 }
+
+###########################################################################
 
 sub subject_is_all_caps {
    my ($self) = @_;
