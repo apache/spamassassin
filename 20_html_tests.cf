@@ -75,19 +75,20 @@ describe HTML_SHOUTING9		HTML has very strong "shouting" markup
 body HTML_TABLE_THICK_BORD		eval:html_test('thick_border')
 describe HTML_TABLE_THICK_BORD	HTML table has thick border
 
-body HTML_COMMENT_EMAIL		eval:html_test('comment_email')
+# HTML comment tests
+body HTML_COMMENT_EMAIL		eval:html_eval('comment_text', '=~ /\S+\@\S+/')
 describe HTML_COMMENT_EMAIL	HTML comment contains email address
 
 body HTML_COMMENT_SHOUTING	eval:html_test('comment_shouting')
 describe HTML_COMMENT_SHOUTING	HTML comment inside of "shouting" markup
 
-body HTML_COMMENT_SKY		eval:html_test('comment_sky')
+body HTML_COMMENT_SKY		eval:html_eval('comment_text', '=~ /SKY-(?:Email-Address|Database|Mailing|List)/')
 describe HTML_COMMENT_SKY	HTML comment contains SKY database codes
 
-body HTML_COMMENT_8BITS		eval:html_test('comment_8bit')
+body HTML_COMMENT_8BITS		eval:html_eval('comment_text', '=~ /[\x80-\xff]{3,}/')
 describe HTML_COMMENT_8BITS	HTML comment has 3 consecutive 8-bit chars
 
-body HTML_COMMENT_SAVED_URL	eval:html_test('comment_saved_url')
+body HTML_COMMENT_SAVED_URL	eval:html_eval('comment_text', '=~ /<!-- saved from url=\(\d{4}\)/')
 describe HTML_COMMENT_SAVED_URL	HTML message is a saved web page
 
 body HTML_EMBEDS		eval:html_test('embeds')

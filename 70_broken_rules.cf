@@ -381,10 +381,6 @@
 #tflags HOTMAIL_FOOTER5		nice
 #score HOTMAIL_FOOTER5 -0.122 0 0 0
 
-#body HTML_COMMENT_EGP		eval:html_test('comment_egp')
-#describe HTML_COMMENT_EGP	HTML comment contains non-spam Yahoo! Groups banner
-#tflags HTML_COMMENT_EGP		nice
-
 #header IN_REP_TO                exists:In-Reply-To
 #describe IN_REP_TO		Has a In-Reply-To header
 #tflags IN_REP_TO                nice
