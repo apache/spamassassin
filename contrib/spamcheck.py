@@ -35,6 +35,7 @@
 import sys, string
 import re, getopt
 import smtplib, socket
+import exceptions
 
 # EX_TEMPFAIL is 75 on every Unix I've checked, but...
 # check /usr/include/sysexits.h if you have odd problems.
@@ -68,7 +69,10 @@ class LMTP(smtplib.SMTP):
             host = host[5:]
             self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             if self.debuglevel > 0: print 'connect:', host
-            self.sock.connect(host)
+            try:
+              self.sock.connect(host)
+            except socket.error:
+              sys.exit(TEMPFAIL)
         else:
             i = string.find(host, ':')
             if i >= 0:
