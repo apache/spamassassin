@@ -308,28 +308,15 @@ body T_NORMAL_HTTP_TO_IP	eval:check_numeric_http()
 
 ########################################################################
 
-# revisit EMPTY_MESSAGE... briefly
-header __HAS_TOCC	ToCc =~ /\w/
-meta T_EMPTY_MESSAGE_1	(!__HAS_SUBJECT && !__HAS_TOCC && !__NONEMPTY_BODY)
-meta T_EMPTY_MESSAGE_2	((!__HAS_SUBJECT && !__HAS_TOCC) || !__MIME_ATTACHMENT) && !__NONEMPTY_BODY
-meta T_EMPTY_MESSAGE_3	(!__HAS_SUBJECT || !__HAS_TOCC || !__MIME_ATTACHMENT) && !__NONEMPTY_BODY
-
-# increase gap to 3 or 4
-header T_SUBJECT_SEXUAL_3		Subject =~ /[s5][e3\xE8-\xEB]x[u\xB5\xF9-\xFC][a4\xE0-\xE6@][l!|1](?:[l!|1]y)?.{0,3}[e3\xE8-\xEB]xp[l!|1][i1!|l\xEC-\xEF]c[i1!|l\xEC-\xEF]t/i
-header T_SUBJECT_SEXUAL_4		Subject =~ /[s5][e3\xE8-\xEB]x[u\xB5\xF9-\xFC][a4\xE0-\xE6@][l!|1](?:[l!|1]y)?.{0,4}[e3\xE8-\xEB]xp[l!|1][i1!|l\xEC-\xEF]c[i1!|l\xEC-\xEF]t/i
-# add E for final I
-header T_SUBJECT_SEXUAL_5		Subject =~ /[s5][e3\xE8-\xEB]x[u\xB5\xF9-\xFC][a4\xE0-\xE6@][l!|1](?:[l!|1]y)?.{0,3}[e3\xE8-\xEB]xp[l!|1][i1!|l\xEC-\xEF]c[i1!|lE\xEC-\xEF]t/i
-header T_SUBJECT_SEXUAL_6		Subject =~ /[s5][e3\xE8-\xEB]x[u\xB5\xF9-\xFC][a4\xE0-\xE6@][l!|1](?:[l!|1]y)?.{0,4}[e3\xE8-\xEB]xp[l!|1][i1!|l\xEC-\xEF]c[i1!|lE\xEC-\xEF]t/i
-# use [ct] instead of final c and t
-header T_SUBJECT_SEXUAL_7		Subject =~ /[s5][e3\xE8-\xEB]x[u\xB5\xF9-\xFC][a4\xE0-\xE6@][l!|1](?:[l!|1]y)?.{0,3}[e3\xE8-\xEB]xp[l!|1][i1!|l\xEC-\xEF][ct][i1!|lE\xEC-\xEF][ct]/i
-header T_SUBJECT_SEXUAL_8		Subject =~ /[s5][e3\xE8-\xEB]x[u\xB5\xF9-\xFC][a4\xE0-\xE6@][l!|1](?:[l!|1]y)?.{0,4}[e3\xE8-\xEB]xp[l!|1][i1!|l\xEC-\xEF][ct][i1!|lE\xEC-\xEF][ct]/i
-
 # short message-ids
-header T_MSGID_SHORT_4	MESSAGEID =~ /^.{1,4}$/
 header T_MSGID_SHORT_5	MESSAGEID =~ /^.{1,5}$/
 header T_MSGID_SHORT_6	MESSAGEID =~ /^.{1,6}$/
 header T_MSGID_SHORT_7	MESSAGEID =~ /^.{1,7}$/
 header T_MSGID_SHORT_8	MESSAGEID =~ /^.{1,8}$/
+header T_MSGID_SHORT_9	MESSAGEID =~ /^.{1,9}$/
+header T_MSGID_SHORT_10	MESSAGEID =~ /^.{1,10}$/
+header T_MSGID_SHORT_11	MESSAGEID =~ /^.{1,11}$/
+header T_MSGID_SHORT_12	MESSAGEID =~ /^.{1,12}$/
 
 # no To or Cc
 header __CC_UNSET	Cc =~ /^UNSET$/ [if-unset: UNSET]
@@ -341,20 +328,16 @@ meta T_TO_CC_NONE	!__CC_EXISTS && !__TO_EXISTS
 header T_TOCC_UNSET	ToCc =~ /^UNSET$/ [if-unset: UNSET]
 header __TOCC_EXISTS	exists:ToCc
 meta T_TOCC_NONE	!__TOCC_EXISTS
-
-# another unsubscribe
-uri T_URI_UNSUBSCRIBE_1	/\b(?:gone|opened|out)\.php/i
-uri T_URI_UNSUBSCRIBE_2	/\b(?:gone|opened|out)\.(?:pl|cgi|php|asp|jsp|cfm)\b/i
-
-# some body rules
-body T_QUALIFY_FOR_THIS		/qualify for \w{1,5} (?:special|new|promotion)/i
-body T_FREE_SHIPPING		/\bfree shipping\b/i
-body T_HOT_NEW_PROMOTIONAL	/\bhot new promotional\b/i
-body T_INVEST_ADVICE_1		/\binvestment advice/i
-body T_INVEST_ADVICE_2		/\binvestment advisor/i
-body T_INVEST_ADVICE_3		/\binvestment advi[cs]/i
-body T_INVEST_ADVICE_4		/\binvestment expert/i
-body T_INVEST_ADVICE_5		/\binvestment (?:advi[cs]|expert)/i
+# consider Bcc:
+header __BCC_EXISTS	exists:Bcc
+meta T_TO_CC_UNSET_NOBCC	T_TO_CC_UNSET && !__BCC_EXISTS
+meta T_TO_CC_NONE_NOBCC	T_TO_CC_NONE && !__BCC_EXISTS
+meta T_TOCC_UNSET_NOBCC	T_TOCC_UNSET && !__BCC_EXISTS
+meta T_TOCC_NONE_NOBCC	T_TOCC_NONE && !__BCC_EXISTS
+meta T_TO_CC_UNSET_XBCC	T_TO_CC_UNSET + __BCC_EXISTS == 1
+meta T_TO_CC_NONE_XBCC	T_TO_CC_NONE + __BCC_EXISTS == 1
+meta T_TOCC_UNSET_XBCC	T_TOCC_UNSET + __BCC_EXISTS == 1
+meta T_TOCC_NONE_XBCC	T_TOCC_NONE + __BCC_EXISTS == 1
 
 # X-Mailer rules
 header T_X_MAILER_SPAM_1	X-Mailer !~ m{[A-Z0-9.]} [if-unset: Foo 1.0]

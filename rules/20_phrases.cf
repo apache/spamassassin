@@ -344,3 +344,12 @@ body __RUDE_HTML_3	/This message contains an HTML formatted message but your ema
 body __RUDE_HTML_4	/Your mailer do not support HTML messages. Switch to a better mailer/i
 meta RUDE_HTML		__RUDE_HTML_1 || __RUDE_HTML_2 || __RUDE_HTML_3 || __RUDE_HTML_4
 describe RUDE_HTML	Spammer message says you need an HTML mailer
+
+body INVESTMENT_ADVICE		/\binvestment advice/i
+describe INVESTMENT_ADVICE	Message mentions investment advice
+
+body INVESTMENT_EXPERT		/\binvestment expert/i
+describe INVESTMENT_EXPERT	Message mentions investment expert
+
+body QUALIFY_FOR_THIS		/qualify for \w{1,5} (?:special|new|promotion)/i
+describe QUALIFY_FOR_THIS	Qualify for this special...
