@@ -187,8 +187,8 @@ main (int argc, char **argv) {
 
   GARandomSeed();	// use time ^ $$
 
-  // allow scores from 0.0 to 5.0 inclusive, in jumps of 0.1
-  GARealAlleleSet alleles (0.0, 5.0, 0.1,
+  // allow scores from 0.1 to 5.0 inclusive, in jumps of 0.1
+  GARealAlleleSet alleles (0.1, 5.0, 0.1,
       		GAAllele::INCLUSIVE, GAAllele::INCLUSIVE);
 
   GARealGenome genome(num_scores, alleles, objective);
@@ -233,7 +233,7 @@ main (int argc, char **argv) {
   while(!ga.done()) {
     ga.step();
     gens++;
-    if (gens % 20 == 0) {
+    if (gens % 6 == 0) {
       cout << "."; cout.flush();
 
       if (gens % 400 == 0) {

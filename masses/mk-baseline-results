@@ -39,6 +39,7 @@ sub counthits {
     my $hits = 0;
 
     foreach my $test (@{$tests_hit{$file}}) {
+      next if ($test eq '');
       $hits += $scores->{$test};
     }
 
@@ -83,7 +84,9 @@ sub readlogs {
     while (<IN>) {
       /^.\s+(\d+)\s+(\S+)\s*(\S*)/ or next;
       my $hits = $1;
-      my @tests = split (/,/, $3);
+
+      $_ = $3; s/,+/,/g;
+      my @tests = split (/,/, $_);
 
       # $prevhits{$count} = $hits;
       $tests_hit{$count} = \@tests;

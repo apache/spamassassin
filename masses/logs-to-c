@@ -43,9 +43,11 @@ sub readlogs {
     open (IN, "<$file");
 
     while (<IN>) {
-      /^.\s+(\d+)\s+(\S+)\s*(\S*)/ or next;
+      /^.\s+(\d+)\s+\S+\s*/ or next;
       my $hits = $1;
-      my @tests = split (/,/, $3);
+
+      $_ = $'; s/,,+/,/g; s/^\s+//; s/\s+$//;
+      my @tests = split (/,,*/, $_);
 
       # $prevhits{$count} = $hits;
       $tests_hit{$count} = \@tests;
@@ -141,23 +143,28 @@ unsigned short tests_hit[$total][$max_hits_per_msg];
 
   for ($file = 0; $file < $total; $file++)
   {
-    my $num_tests_hit = scalar @{$tests_hit{$file}};
-
     print DAT ".".$file."\n";
-    print DAT "n".$num_tests_hit."\n";
-    print DAT "s".$is_spam{$file}."\n";
 
-    my $count = 0;
+    my $out = '';
+    $out .= "s".$is_spam{$file}."\n";
+
+    my $num_tests_hit = 0;
     foreach my $test (@{$tests_hit{$file}}) {
+      if ($test eq '') { next; }
+
       if (!defined $score_c_index{$test}) {
 	warn "test with no C index: $test\n";
       }
-      print DAT "t".$score_c_index{$test}."\n";
-      $count++;
-      if ($count >= $max_hits_per_msg) {
+
+      $num_tests_hit++;
+      $out .= "t".$score_c_index{$test}."\n";
+
+      if ($num_tests_hit >= $max_hits_per_msg) {
 	die "Need to increase \$max_hits_per_msg";
       }
     }
+
+    print DAT "n".$num_tests_hit."\n".$out;
   }
   close DAT;
 }

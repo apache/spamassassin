@@ -10,17 +10,21 @@ mv spam.log nonspam.log logs/old
 cat logs/contrib/nonspam.log* > nonspam.log
 cat logs/contrib/spam.log* > spam.log
 
-./mass-check ./spamtrap/mbox >> spam.log
+./mass-check /local2/mail-archives/spamtrap/mbox >> spam.log
 ./mass-check /local2/mail-archives/crackmice >> nonspam.log
-for f in /local2/mail-archives/cm2/cmarc/* ; do
-  ./mass-check $f >> nonspam.log
-done
+./mass-check /local2/mail-archives/scoop.1999 >> nonspam.log
+./mass-check /local2/mail-archives/oldmail.1998 >> nonspam.log
 
 ./mass-check-for-jm ; sh commands.sh
+
+for f in /local2/mail-archives/crackmice-old/* ; do
+  ./mass-check $f >> nonspam.log
+done
 
 ./mk-baseline-results
 ./hit-frequencies > freqs
 
+make clean
 make
 date
 ./continual_evolve.sh -s 500 -b 8.0 -c 1.00
