@@ -17,7 +17,6 @@
 #  0.911    2.799    0.000    1.00    0.84    1.00  T_MIME_BOUND_DASH_DIGIT
 #  0.131    0.404    0.000    1.00    0.71    1.00  T_MIME_BOUND_MANY_HEX
 #  0.123    0.377    0.000    1.00    0.71    1.00  T_MIME_BOUND_TEP
-#  0.096    0.296    0.000    1.00    0.69    1.00  T_MIME_BOUND_MULTIPART
 
 # This may need tweaking if new NextPart formats appear.
 header __NEXTPART_ALL		Content-Type =~ /NextPart/
@@ -34,9 +33,6 @@ score T_MIME_BOUND_MANY_HEX	1.0
 header T_MIME_BOUND_TEP		Content-Type =~ /boundary="TEP-\d{9,10}\.\d{10}\.\d{10}"/
 score T_MIME_BOUND_TEP		1.0
 
-header T_MIME_BOUND_MULTIPART	Content-Type =~ /Multipart.?Boundary/
-score T_MIME_BOUND_MULTIPART	1.0
-
 # results for quinlan
 #  0.149    0.458    0.000    1.00    0.72    0.50  T_FROM_TOPICA
 header T_FROM_TOPICA		From:addr =~ /\@(?:\w+\.)?email-publisher\.com$/
@@ -50,12 +46,6 @@ header __FROM_PHONE		From:addr =~ /^\d{3}(?:[-.]?\d{3}[-.]?\d{4}|\d{7})\@/
 meta T_FROM_ALL_NUMS		(__FROM_JUST_NUMBER && !__FROM_PHONE)
 describe T_FROM_ALL_NUMS	From an address that is all numbers (non-phone)
 score T_FROM_ALL_NUMS		0.5
-
-# results for quinlan
-#  0.456    1.400    0.000    1.00    0.79    0.50  T_EASY_MONEY
-body T_EASY_MONEY		/\b(?:easy|big|fast)\s*(?:money|cash|bucks|(?-i:E)uros)\b/i
-describe T_EASY_MONEY		Body claims "easy money" or similar
-score T_EASY_MONEY		0.5
 
 # jm: somehow these guys keep slipping through, and they're very persistent.
 # they use both azoogle.com and azogle.com, but this header is always
