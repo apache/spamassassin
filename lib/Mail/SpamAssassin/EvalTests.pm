@@ -2286,32 +2286,6 @@ sub _check_mime_header {
       }
     }
   }
-
-  if ($name && $ctype ne "application/octet-stream") {
-    # MIME_SUSPECT_NAME triggered here
-    $name =~ s/.*\.//;
-    $ctype =~ s@/(x-|vnd\.)@/@;
-
-    if (((($name eq "txt") || ($name =~ /^[px]?html?$/) ||
-	  ($name eq "xml")) &&
-	 ($ctype !~
-	  m@^text/(?:plain|[px]?html?|english|sgml|xml|enriched|richtext)@) &&
-	 ($ctype !~ m@^message/external-body@)) # RFC-Editor emails...
-	|| ((($name =~ /^(?:jpe?g|tiff?)$/) || ($name eq "gif") ||
-	     ($name eq "png"))
-	    && ($ctype !~ m@^image/@)
-	    && ($ctype !~ m@^application/mac-binhex@))
-	|| ($name eq "vcf" && $ctype ne "text/vcard")
-	|| ($name =~ /^(?:bat|com|exe|pif|scr|swf|vbs)$/
-	    && $ctype !~ m@^application/@)
-	|| ($name eq "doc" && $ctype !~ m@^application/.*word$@)
-	|| ($name eq "ppt" && $ctype !~ m@^application/.*(?:powerpoint|ppt)$@)
-	|| ($name eq "xls" && $ctype !~ m@^application/.*excel$@)
-       )
-    {
-      $self->{mime_suspect_name} = 1;
-    }
-  }
 }
 
 sub _check_attachments {
@@ -2349,7 +2323,6 @@ sub _check_attachments {
   # $self->{mime_qp_inline_no_charset} = 0;
   $self->{mime_qp_long_line} = 0;
   $self->{mime_qp_ratio} = 0;
-  $self->{mime_suspect_name} = 0;
 
   # Get all parts ...
   foreach my $p ($self->{msg}->find_parts(qr/./)) {

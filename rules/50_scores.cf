@@ -573,9 +573,6 @@ score CHARSET_FARAWAY_HEADER 3.200
 score HTML_CHARSET_FARAWAY 0.500
 score MIME_CHARSET_FARAWAY 2.450
 
-# highly generic tests for viruses that are scored just high enough to run
-score MIME_SUSPECT_NAME 0.100
-
 # accessdb lookups
 score ACCESSDB 0
 
@@ -682,6 +679,12 @@ ifplugin Mail::SpamAssassin::Plugin::TextCat
 score UNWANTED_LANGUAGE_BODY 2.800
 score BODY_8BITS 1.500
 endif # Mail::SpamAssassin::Plugin::TextCat
+
+# AntiVirus
+ifplugin Mail::SpamAssassin::Plugin::AntiVirus
+score MICROSOFT_EXECUTABLE 0.100
+score MIME_SUSPECT_NAME 0.100
+endif # Mail::SpamAssassin::Plugin::AntiVirus
 
 # MAPS
 # MAPS is a commercial service.  If you pay for these, assign a score
