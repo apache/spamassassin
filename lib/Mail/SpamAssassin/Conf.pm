@@ -444,7 +444,7 @@ e.g.
 =item unwhitelist_from add@ress.com
 
 Used to override a default whitelist_from entry, so for example a distribution
-whitelist_from can be overriden in a local.cf file, or an individual user can
+whitelist_from can be overridden in a local.cf file, or an individual user can
 override a whitelist_from entry in their own C<user_prefs> file.
 The specified email address has to match exactly the address previously
 used in a whitelist_from line.
@@ -502,7 +502,7 @@ these are often targets for spammer spoofing.
 =item unwhitelist_from_rcvd add@ress.com
 
 Used to override a default whitelist_from_rcvd entry, so for example a
-distribution whitelist_from_rcvd can be overriden in a local.cf file,
+distribution whitelist_from_rcvd can be overridden in a local.cf file,
 or an individual user can override a whitelist_from_rcvd entry in
 their own C<user_prefs> file.
 
@@ -536,7 +536,7 @@ non-spam, but which the user doesn't want.  Same format as C<whitelist_from>.
 =item unblacklist_from add@ress.com
 
 Used to override a default blacklist_from entry, so for example a distribution blacklist_from
-can be overriden in a local.cf file, or an individual user can override a blacklist_from entry
+can be overridden in a local.cf file, or an individual user can override a blacklist_from entry
 in their own C<user_prefs> file.
 
 e.g.
@@ -554,7 +554,7 @@ e.g.
 =item whitelist_to add@ress.com
 
 If the given address appears as a recipient in the message headers
-(Resent-To, To, Cc, obvious envelope receipient, etc,) the mail will
+(Resent-To, To, Cc, obvious envelope recipient, etc.) the mail will
 be whitelisted.  Useful if you're deploying SpamAssassin system-wide,
 and don't want some users to have their mail filtered.  Same format
 as C<whitelist_from>.
@@ -586,7 +586,7 @@ See above.
 =item blacklist_to add@ress.com
 
 If the given address appears as a recipient in the message headers
-(Resent-To, To, Cc, obvious envelope receipient, etc,) the mail will
+(Resent-To, To, Cc, obvious envelope recipient, etc.) the mail will
 be blacklisted.  Same format as C<blacklist_from>.
 
 =cut
@@ -811,7 +811,7 @@ If using report_safe, a few of the headers from the original message
 are copied into the wrapper header (From, To, Cc, Subject, Date, etc.)
 If you want to have other headers copied as well, you can add them
 using this option.  You can specify multiple headers on the same line,
-seperated by spaces, or you can just use multiple lines.
+separated by spaces, or you can just use multiple lines.
 
 =cut
 
