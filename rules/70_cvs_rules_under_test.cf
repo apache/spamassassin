@@ -564,25 +564,16 @@ score T_QUOTED_EMAIL_TEXT              -0.2
 score T_CLICK_HERE_LINK                0.317
 tflags T_QUOTED_EMAIL_TEXT nice
 
-# Potentially FP-prone, especially if you talk about optics. but it
-# matches a few messages that don't get properly marked otherwise. - tvd
-#
-# quinlan results (my FPs were all of the form "foo-opt" where "foo-opt"
-# was a project to optimize "foo")
-#  0.185    0.361    0.078    0.82    0.40    1.00  T_OPT_HEADER
-#
-header __T_OPT_HEADER_SUBJ	Subject =~ /opt\W?.{2,3}\b/i
-header __T_OPT_HEADER_RESSUBJ	Resent-Subject =~ /opt\W?.{2,3}\b/i
-header __T_OPT_HEADER_ALL	ALL =~ /opt\W?.{2,3}\b/i
-meta T_OPT_HEADER		(__T_OPT_HEADER_ALL && !__T_OPT_HEADER_SUBJ && !__T_OPT_HEADER_RESSUBJ)
-#
-# modified version with no FPs and slightly better SPAM%
-# quinlan results
-#  0.145    0.382    0.000    1.00    0.72    1.00  T_OPT_HEADER2
-#
-header __T_OPT_HEADER_SUBJ2	ALL =~ /^(?:Resent-)?Subject:.*opt.?(in|out|oem|[\d@])(?:\b|\d|\@)/im
-header __T_OPT_HEADER_ALL2	ALL =~ /opt.?(?:in|out|oem|[\d@])(?:\b|\d|\@)/i
-meta T_OPT_HEADER2		(__T_OPT_HEADER_ALL2 && !__T_OPT_HEADER_SUBJ2)
+# New version of T_OPT_HEADER which merges the original and Dan's
+# T_OPT_HEADER2 versions.  For me it gives results in between the 2 with
+# no false positives.  Basically, the addition to T_OPT_HEADER2 is "ed"
+# and "ion-in"... -tvd
+#  0.496   1.2714   0.0218    0.98    0.00    0.01  T_OPT_HEADER  <-- original
+#  0.419   1.1050   0.0000    1.00    1.00    0.01  T_OPT_HEADER2 <-- dan's
+#  0.446   1.1763   0.0000    1.00    1.00    0.01  T_OPT_HEADER3 <-- new one
+header __T_OPT_HEADER_SUBJ     ALL =~ /^(?:Resent-)?Subject:.*opt.?(in|out|oem|ed|ion-in|[\d@])(?:\b|\d|\@)/im
+header __T_OPT_HEADER_ALL      ALL =~ /opt.?(?:in|out|oem|ed|ion-in|[\d@])(?:\b|\d|\@)/i
+meta T_OPT_HEADER              (__T_OPT_HEADER_ALL && !__T_OPT_HEADER_SUBJ)
 
 body     T_HTML_LINK_CLICK_HERE eval:html_eval('anchor_text', '=~ /click\s+here/i')
 body     T_HTML_LINK_MONEY      eval:html_eval('anchor_text', '=~/\s\$/')
