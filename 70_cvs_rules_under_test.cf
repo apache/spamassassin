@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.569 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.570 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -345,19 +345,6 @@ describe T_HREF_3D		Uses href=3D Trick
 rawbody		T_PUSHHERELINK		/<a[^>]*>[^<]*((push|go)\s(here|this) |cease.{1,10}mail)[^<]*<\/a>/i
 describe	T_PUSHHERELINK		Link asks you to "push here" or "go here" or "cease mail" or the like
 
-# bug 1734: replacement rules
-# bwaaaah!
-header T_FROM_OFFERS_01		From:addr =~ /\@\S*offers(?!en)/i
-header T_FROM_OFFERS_02		From:addr =~ /\@\S*offers(?!en\b)/i
-header T_FROM_OFFERS_03		From:addr =~ /\@\S*offers(?![eo]n)/i
-header T_FROM_OFFERS_04		From:addr =~ /\@\S*offers(?![eo]n\b)/i
-header T_FROM_OFFERS_05		From:addr =~ /\@\S*offers(?:\b|[^a-z])/i
-header T_FROM_OFFERS_06		From:addr =~ /\@\S*offers(?:\b|[^a-z])/i
-header T_FROM_OFFERS_07		From:addr =~ /\@\S*offers(?!en)(?:\b|.)/i
-header T_FROM_OFFERS_08		From:addr =~ /\@\S*offers(?!en\b)(?:\b|.)/i
-header T_FROM_OFFERS_09		From:addr =~ /\@\S*offers(?![eo]n)(?:\b|.)/i
-header T_FROM_OFFERS_10		From:addr =~ /\@\S*offers(?![eo]n\b)(?:\b|.)/i
-
 # bug 1634:
 # needed to readd X_MAILING_LIST as dependency, modify T_MAC_EUDORA_MUA for new version
 header __T_MAC_EUDORA_MUA         X-Mailer =~ /Eudora for (?:Macintosh|Mac OS X)/
@@ -380,6 +367,7 @@ meta T_SUBJ_FULL_OF_8BITS	(SUBJ_FULL_OF_8BITS && !__MIMEOLE)
 ######################################################################
 # new 8BIT rules - brute force!
 
+# T_SUBJ_ILLEGAL_00_02 looks best
 header T_SUBJ_ILLEGAL_00_02	eval:check_illegal_chars('Subject','0.00','2')
 header T_SUBJ_ILLEGAL_01_02	eval:check_illegal_chars('Subject','0.01','2')
 header T_SUBJ_ILLEGAL_02_02	eval:check_illegal_chars('Subject','0.02','2')
@@ -387,6 +375,7 @@ header T_SUBJ_ILLEGAL_03_02	eval:check_illegal_chars('Subject','0.03','2')
 header T_SUBJ_ILLEGAL_04_02	eval:check_illegal_chars('Subject','0.04','2')
 header T_SUBJ_ILLEGAL_05_02	eval:check_illegal_chars('Subject','0.05','2')
 
+# T_FROM_ILLEGAL_18_02 looks best
 header T_FROM_ILLEGAL_10_02	eval:check_illegal_chars('From','0.10','2')
 header T_FROM_ILLEGAL_11_02	eval:check_illegal_chars('From','0.11','2')
 header T_FROM_ILLEGAL_12_02	eval:check_illegal_chars('From','0.12','2')
@@ -404,6 +393,7 @@ header T_FROM_ILLEGAL_23_02	eval:check_illegal_chars('From','0.23','2')
 header T_FROM_ILLEGAL_24_02	eval:check_illegal_chars('From','0.24','2')
 header T_FROM_ILLEGAL_25_02	eval:check_illegal_chars('From','0.25','2')
 
+# T_HEAD_ILLEGAL_005_02 looks best
 header T_HEAD_ILLEGAL_000_02	eval:check_illegal_chars('ALL','0.000','2')
 header T_HEAD_ILLEGAL_001_02	eval:check_illegal_chars('ALL','0.001','2')
 header T_HEAD_ILLEGAL_002_02	eval:check_illegal_chars('ALL','0.002','2')
@@ -436,9 +426,6 @@ header T_HEAD_ILLEGAL_028_02	eval:check_illegal_chars('ALL','0.028','2')
 header T_HEAD_ILLEGAL_029_02	eval:check_illegal_chars('ALL','0.029','2')
 
 ######################################################################
-
-# bug 274
-header T_FRIEND_AT_PUBLIC	To =~ /(?:yourdomain|you|your|(?<!re)public)\.(?:com|org|net)/i
 
 # a new ratware-forgery format
 header T_LC_ESMTP_RCVD    Received =~ /^from (?:unknown|\d+\.\d+\.\d+\.\d+) \(\S+\) by \S+ with esmtp; /
