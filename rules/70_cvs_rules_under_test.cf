@@ -124,3 +124,10 @@ uri T_BARGAIN_URL		/bargains?\.(?:com|biz)/
 #http://professional.homestead.com/splash.ffhtml?ref=3564&target=www.homestead.com/splash.html%3F3564%26target%3Dwww.hspromos.com/webring.html
 uri T_PROMO_URL			/promo(?:tion)?s?\.(?:com|biz)/
 
+# bug 1316
+# 12/28 - tvd - The goal is to catch when spammers use multiple user agents
+# we had a similar rule before for preemption, but now there's actually a report of this in the wild,
+# so I wanted to put the rule in and see what happens.
+# This will change USER_AGENT as well
+# Basically exists:User-Agent && !FAKE_USER_AGENT
+meta T_FAKE_USER_AGENT ( USER_AGENT_PINE + USER_AGENT_MUTT + USER_AGENT_MOZILLA_UA + USER_AGENT_MOZILLA_XM + USER_AGENT_MACOE + USER_AGENT_ENTOURAGE + USER_AGENT_KMAIL + USER_AGENT_IMP + USER_AGENT_TONLINE + USER_AGENT_APPLEMAIL + USER_AGENT_GNUS_UA + USER_AGENT_GNUS_XM + USER_AGENT_VM + USER_AGENT_MSN + USER_AGENT_FORTE + USER_AGENT_XIMIAN ) > 1
