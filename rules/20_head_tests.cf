@@ -39,9 +39,7 @@ describe TO_LOCALPART_EQ_REAL   To: repeats local-part as real name
 # (note single quotes) because some legitimate mailers seem to do that.
 header TO_ADDRESS_EQ_REAL	To =~ /^\s*"([^"@]+\@[^"@]+)"\s+<\1>\s*$/i
 describe TO_ADDRESS_EQ_REAL	To: repeats address as real name
-
-header FROM_ADDRESS_EQ_REAL	From =~ /^\s*"([^"@]+\@[^"@]+)"\s+<\1>\s*$/i
-describe FROM_ADDRESS_EQ_REAL	From: repeats address as real name
+# The "From" equiv is already set up as FROM_NAME_EQ_FROM_ADDR.
 
 header FROM_MALFORMED		From !~ /(?:\"[^\"]+\"|\S+)\@\S+\.\S+|<\S+(\!\S+){1,}>/ [if-unset: unset@unset.unset]
 describe FROM_MALFORMED		From: has a malformed address
