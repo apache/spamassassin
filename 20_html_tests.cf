@@ -339,6 +339,9 @@ tflags HTML_CHARSET_FARAWAY	userconf
 meta HTML_MIME_NO_HTML_TAG	MIME_HTML_ONLY && !__TAG_EXISTS_HTML
 describe HTML_MIME_NO_HTML_TAG	HTML-only message, but there is no HTML tag
 
+meta HTML_MISSING_CTYPE		(!__MIME_HTML && HTML_MESSAGE)
+describe HTML_MISSING_CTYPE	Message is HTML without HTML Content-Type
+
 ###########################################################################
 # rawbody HTML tests
 
