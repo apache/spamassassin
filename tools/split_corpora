@@ -32,8 +32,10 @@ my @IN_FILES    = @ARGV;
 
 usage() if (@IN_FILES == 0);
 
-my @bucket_fhs = ();
+my @targets = ();
+foreach (@IN_FILES) { push (@targets, "ham:dir:$_"); }
 
+my @bucket_fhs = ();
 foreach my $bucket (1 .. $num_buckets) {
   my $bucket_fh = new FileHandle();
 
@@ -46,12 +48,17 @@ foreach my $bucket (1 .. $num_buckets) {
 
 my $current_bucket = 0;
 
-my $iter = new Mail::SpamAssassin::ArchiveIterator({ });
-$iter->set_function(\&wanted);
+my $iter = new Mail::SpamAssassin::ArchiveIterator({
+        'opt_j' => 1,
+        'opt_n' => 1,
+        'opt_all' => 1,
+  });
+
+$iter->set_functions(\&wanted, sub { });
 my $messagecount = 0;
 
 eval {
-  $iter->run(@IN_FILES);
+  $iter->run(@targets);
 };
 if ($@) { die $@ unless ($@ =~ /HITLIMIT/); }
 
@@ -65,7 +72,7 @@ if ($opt_l && $messagecount < $opt_l) {
 #############################################
 
 sub wanted {
-  my ($msg_id, $data_ref) = @_;
+  my ($msg_id, $time, $data_ref) = @_;
 
   if ($opt_l && $messagecount++ > $opt_l) { die 'HITLIMIT'; }
 
@@ -78,3 +85,4 @@ sub wanted {
 
   $current_bucket = ($current_bucket + 1) % $num_buckets;
 } # wanted()
+
