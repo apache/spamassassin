@@ -127,15 +127,7 @@ my $spamtest = Mail::SpamAssassin->new({
     paranoid => ($opt_P || 0),
 });
 
-$opt_a and eval
-{
-    require Mail::SpamAssassin::DBBasedAddrList;
-
-    # create a factory for the persistent address list
-    my $addrlistfactory = Mail::SpamAssassin::DBBasedAddrList->new();
-    $spamtest->set_persistent_address_list_factory ($addrlistfactory);
-};
-
+# Do whitelist later in tmp dir. Side effect: this will be done as -u user.
 
 sub spawn;  # forward declaration
 sub logmsg; # forward declaration
@@ -174,8 +166,33 @@ if ($opt_u) {
     $setuid_to_user = 1;
 }
 
+
+# We should set $ENV{HOME} in /tmp.
+$ENV{'HOME'} = (-d '/tmp' ? '/tmp' : $ENV{TMP} || $ENV{TEMP})."/spamassassin-$$"; 
+mkdir("$ENV{'HOME'}",0700)
+    or die "fatal: Can't create $ENV{'HOME'}";
+mkdir("$ENV{'HOME'}/.spamassassin", 0700)
+    or die "fatal: Can't create $ENV{'HOME'}/.spamassassin";
+
+# This might be slightly paranoid. Good.
+
+$opt_a and eval
+{
+    require Mail::SpamAssassin::DBBasedAddrList;
+
+    # create a factory for the persistent address list
+    my $addrlistfactory = Mail::SpamAssassin::DBBasedAddrList->new();
+    $spamtest->set_persistent_address_list_factory ($addrlistfactory);
+};
+
 $spamtest->compile_now(0);	# ensure all modules etc. are loaded
 $/ = "\n";			# argh, Razor resets this!  Bad Razor!
+
+unlink <$ENV{HOME}/.spamassassin/*>,<$ENV{HOME}/*>;
+rmdir "$ENV{HOME}/.spamassassin";
+rmdir $ENV{HOME};
+system "/bin/rm -Rf /tmp/spamassassin-$$";
+delete $ENV{'HOME'};
 
 my $current_user;
 my $paddr;
