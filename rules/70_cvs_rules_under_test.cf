@@ -175,6 +175,9 @@ describe T_HTTP_ENTITIES_HOST URI obscured with character entities
 uri      T_HTTP_EXCESSIVE_ENTITIES m{^https?://\S*\&\#(?:0?3[0-9]|0?[46][1-9a-f]|0?[57][\da])}i
 describe T_HTTP_EXCESSIVE_ENTITIES Completely unnecessary %-escapes inside a URL
 
+body T_HTML_COMMENT_BLANK	eval:html_test('comment_blank')
+body T_HTML_COMMENT_NO_ALPHANUM	eval:html_test('comment_no_alphanum')
+
 ###########################################################################
 
 # tvd - 2003.02.26, trying to strengthen the anti-ratware rules
