@@ -343,6 +343,19 @@ header RCVD_IN_DUL_FH		rbleval:check_rbl('dialup-firsthop', 'dialups.mail-abuse.
 describe RCVD_IN_DUL_FH	Received from first hop dialup, see http://www.mail-abuse.org/dul/
 tflags RCVD_IN_DUL_FH           net
 
+header RCVD_IN_NJABL    rbleval:check_rbl('njabl', 'dnsbl.njabl.org.')
+describe RCVD_IN_NJABL  Received via a relay in dnsbl.njabl.org
+tflags RCVD_IN_NJABL    net
+
+# note: X_ prefix so X_NJABL_OPEN_PROXY happens after RCVD_IN_NJABL.
+header X_NJABL_OPEN_PROXY    rbleval:check_rbl_results_for('njabl', '127.0.0.2')
+describe X_NJABL_OPEN_PROXY  NJABL: sender is proxy/relay/formmail/spam-source
+tflags X_NJABL_OPEN_PROXY    net
+
+header X_NJABL_DIALUP    rbleval:check_rbl_results_for('njabl', '127.0.0.3')
+describe X_NJABL_DIALUP  NJABL: sender is on dialup/dynamic IP
+tflags X_NJABL_DIALUP    net
+
 header FORGED_RCVD_TRAIL	eval:check_for_forged_received_trail()
 describe FORGED_RCVD_TRAIL	trail of Received: headers seems to be forged
 
@@ -622,6 +635,8 @@ header MIME_BOUND_MAIL_BOUND	Content-Type =~ /boundary=\"____MAIL_BOUNDARY____\"
 describe MIME_BOUND_MAIL_BOUND	Spam tool pattern in MIME boundary
 header MIME_BOUND_TEP		Content-Type =~ /boundary="TEP-\d{9,10}\.\d{10}\.\d{10}"/
 describe MIME_BOUND_TEP		Spam tool pattern in MIME boundary
+header MIME_BOUND_RKFINDY       Content-Type =~ /boundary=\"=_NextPart_2rfkindysadvnqw3nerasdf\"/
+describe MIME_BOUND_RKFINDY     Spam tool pattern in MIME boundary (rfkindy)
 
 # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=699
 header MICROSOFT		exists:microsoft

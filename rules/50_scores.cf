@@ -742,6 +742,7 @@ score USER_AGENT_GNUS_XM             -1.0
 score MIME_BOUND_DASH_DIGIT          1.0
 score MIME_BOUND_MANY_HEX            1.0
 score MIME_BOUND_TEP                 1.0
+score MIME_BOUND_RKFINDY             1.0
 score FORGED_MX_HOTMAIL              2.0
 score RCVD_BY_QVES_COM               3.0
 score RATWARE_EMWAC                  1.0
@@ -805,8 +806,13 @@ score RCVD_IN_UNCONFIRMED_DSBL       0.77
 score RCVD_IN_VISI                   2.62
 score RCVD_IN_BONDEDSENDER           -10.0
 
-# provisional score, just added.  needs GA run once we get the data
+# provisional scores, just added.  need GA run once we get the data
 score RCVD_IN_OPM                    1.00
+score RCVD_IN_NJABL                  0.01
+score X_NJABL_OPEN_PROXY             2.00
+score X_NJABL_DIALUP                 0.50
+# note: RCVD_IN_NJABL has low score, as the X_NJABL rules decipher
+# its results
 
 # ok_languages and ok_locales
 
