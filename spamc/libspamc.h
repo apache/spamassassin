@@ -73,8 +73,6 @@
 
 #define EX_NOTSPAM		  0
 #define EX_ISSPAM		  1
-#define EX_LEARNED		  5
-#define EX_NOTLEARNED	          6
 #define EX_TOOBIG		866
 
 /* Aug 14, 2002 bj: Bitflags instead of lots of bool parameters */
