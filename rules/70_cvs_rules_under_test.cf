@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.621 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.622 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -24,4 +24,13 @@
 # http://bugzilla.spamassassin.org/show_bug.cgi?id=2087
 ###header T_RATWARE_OE_DM	X-Mailer =~ /^Microsoft Outlook Express [\d\.]+ DM$/
 
+# a referral ID
+###uri T_REF_ID			/[\?\&]RefID/
+
+# http://bugzilla.spamassassin.org/show_bug.cgi?id=2089
+###header T_DATE_EXTRA_SPACE	Date =~ /^..., .\d ... \d\d\d\d \d\d:\d\d:\d\d  [\+\-]\d\d\d\d$/
+
+# another one for bug 2089, may be more useful:
+###full __END_HASHBUSTER_1		/\n\[[a-z0-9]+\]\n\s*\Z/
+###meta T_RATWARE_2089		(NO_REAL_NAME && TO_ADDRESS_EQ_REAL && __END_HASHBUSTER_1)
 
