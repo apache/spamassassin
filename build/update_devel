@@ -15,11 +15,12 @@ make distcheck
 
 echo $vers > $WEBDIR/latest_version
 
-rm -f Mail-SpamAssassin-$vers.tar.gz Mail-SpamAssassin-$vers.zip
+rm -f Mail-SpamAssassin-$vers.tar.bz2 Mail-SpamAssassin-$vers.tar.gz Mail-SpamAssassin-$vers.zip
 make tardist
 make zipdist
+gzip -dc Mail-SpamAssassin-$vers.tar.gz | bzip2 -9c - > Mail-SpamAssassin-$vers.tar.bz2
 
-for ext in tar.gz zip ; do
+for ext in tar.bz2 tar.gz zip ; do
   if [ $minivers != $vers ] ; then
     mv Mail-SpamAssassin-$minivers.$ext Mail-SpamAssassin-$vers.$ext
   fi

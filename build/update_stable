@@ -11,12 +11,12 @@ build/update_devel
 rm -rf $WEBDIR/doc
 tar cf - --exclude=CVS --exclude='.#*' doc | ( cd $WEBDIR ; tar xf - )
 
-for ext in tar.gz.md5 zip.md5 ; do
+for ext in tar.bz2.md5 tar.gz.md5 zip.md5 ; do
   cp $WEBDIR/devel/Mail-SpamAssassin-$vers.$ext \
 	$WEBDIR/released/Mail-SpamAssassin-$vers.$ext
 done
 
-for ext in tar.gz zip ; do
+for ext in tar.bz2 tar.gz zip ; do
   cp $WEBDIR/devel/Mail-SpamAssassin-$vers.$ext \
 	$WEBDIR/released/Mail-SpamAssassin-$vers.$ext
 
@@ -30,7 +30,9 @@ done
 # cp WebMake-${vers}-1.noarch.rpm WebMake-${vers}-1.src.rpm $WEBDIR/released
 ( cd $WEBDIR/released && cvs add -kb *SpamAssassin* )
 
-echo "md5sum of tarball:"
-cat $WEBDIR/released/Mail-SpamAssassin-$vers.tar.gz.md5
+echo "md5sum of archive files:"
+cat $WEBDIR/released/Mail-SpamAssassin-$vers.tar.gz.md5 \
+ $WEBDIR/released/Mail-SpamAssassin-$vers.tar.bz2.md5 \
+ $WEBDIR/released/Mail-SpamAssassin-$vers.zip.md5
 
 
