@@ -44,6 +44,7 @@ Installing SpamAssassin
 The easiest way to do this is using CPAN.pm, like so:
 
 	perl -MCPAN -e shell
+	o conf prerequisites_policy ask
 	install Mail::SpamAssassin
 	quit
 
@@ -54,12 +55,13 @@ http://spamassassin.taint.org/ and install that like so:
 	cd spamassassin-*
 	perl Makefile.PL
 	make
-	make install		[as root]
+	make install				[as root]
 
 You will require the Mail::Audit module, and any modules it requires.  Here's
 how to install this using CPAN.pm:
 
 	perl -MCPAN -e shell
+	o conf prerequisites_policy ask
 	install Mail::Audit
 	quit
 
@@ -74,26 +76,37 @@ next version will work OK.  In the meantime, you may wish to apply the
 patch yourself; see the file "MailAudit.patch" in this directory in that
 case.
 
+
+
+Optional Additional Modules
+---------------------------
+
 In addition, the following modules will be used for some checks, if available.
 If they are not available, SpamAssassin will still work, just not as
 effectively -- some of the spam-detection tests will have to be skipped.
+
 
   - Net::DNS	(from CPAN)
 
     Used to check the RBL, RSS, DUL etc. and perform MX checks.
 
 	perl -MCPAN -e shell
+	o conf prerequisites_policy ask
 	install Net::DNS
 	quit
 
   - Razor	http://razor.sourceforge.net/
 
     Used to check message signatures against Vipul's Razor collaborative
-    filtering network.  (Note that Razor itself requires several perl modules;
-    at the time of writing, these are Persistence::Object::Simple, Net::Daemon,
-    Digest::SHA1, and Mail::Internet).
+    filtering network.  Razor is currently in prototype, so it's not yet
+    available from CPAN -- you have to download it from the URL above.
+
+    Note that Razor itself requires several perl modules; at the time of
+    writing, these are Persistence::Object::Simple, Net::Daemon, Digest::SHA1,
+    and Mail::Internet:
 
 	perl -MCPAN -e shell
+	o conf prerequisites_policy ask
 	install Persistence::Object::Simple
 	install Net::Daemon
 	install Digest::SHA1
@@ -108,107 +121,113 @@ Using SpamAssassin
 
 Steps to take for every installation:
 
-    - Install Mail::Audit and Mail::SpamAssassin on your mail server, as above.
+  - Install Mail::Audit and Mail::SpamAssassin on your mail server, as above.
 
-    - Test it:
+  - Test it:
 
-    	spamassassin -t < sample-nonspam.txt > nonspam.out
-    	spamassassin -t < sample-spam.txt > spam.out
+      spamassassin -t < sample-nonspam.txt > nonspam.out
+      spamassassin -t < sample-spam.txt > spam.out
 
-      Verify (using a text viewer, ie. "less" or "notepad") that nonspam.out
-      has not been tagged as spam, and that spam.out has.  The files should
-      contain the full text and headers of the messages, the "spam.out" message
-      should be annotated with a report from SpamAssassin, and there should be
-      no errors when you run the commands.
+    Verify (using a text viewer, ie. "less" or "notepad") that nonspam.out
+    has not been tagged as spam, and that spam.out has.  The files should
+    contain the full text and headers of the messages, the "spam.out" message
+    should be annotated with "****SPAM****" in the subject line and a report
+    from SpamAssassin, and there should be no errors when you run the
+    commands.
 
-      (Note that there may be a warning from -w about a deprecated usage
-      in Net::DNS; this is totally harmless, but ugly. Until Net::DNS is
-      fixed this is unavoidable) :(
+    Even though sample-nonspam.txt is not spam, nonspam.out will contain a
+    SpamAssassin report anyway.  This is a side-effect of the "-t" (test)
+    switch.  However, there should be less than 5 hits accumulated; when the
+    "-t" switch is not in use, the report text would not be added.
 
-      If the commands do not work, DO NOT PROCEED TO THE NEXT STEP, as you
-      will lose mail!
+    (Also, if you use Perl 5.6, there may be a warning from Perl's -w switch
+    about a deprecated usage in Net::DNS; this is totally harmless, but ugly.
+    Until Net::DNS is fixed this is unavoidable. :( )
+
+    If the commands do not work, DO NOT PROCEED TO THE NEXT STEP, as you
+    will lose mail!
 
 
 
 If you want to use Mail::Audit:
 
-    - run "perldoc Mail::SpamAssassin" and take a look at the synopsis, it
-      outlines what you need to add to your audit script.
+  - run "perldoc Mail::SpamAssassin" and take a look at the synopsis, it
+    outlines what you need to add to your audit script.
 
-    - Copy the configuration files (see CUSTOMISING, below) to a known
-      location, so your script can set the appropriate options for
-      Mail::SpamAssassin to load them.
+  - Copy the configuration files (see CUSTOMISING, below) to a known
+    location, so your script can set the appropriate options for
+    Mail::SpamAssassin to load them.
 
 
 
 If you're using procmail:
 
-    - Make a backup of your .procmailrc (if it exists).
+  - Make a backup of your .procmailrc (if it exists).
 
-    	cp ~/.procmailrc ~/.procmailrc.bak
+      cp ~/.procmailrc ~/.procmailrc.bak
 
-    - add the following lines to ~/.procmailrc, at the top of the file
-      before any existing recipes:
+  - add the following lines to ~/.procmailrc, at the top of the file
+    before any existing recipes:
 
-        :0fhw
-        | spamassassin -P
+      :0fhw
+      | spamassassin -P
 
-        :0:  
-        * ^Subject:.*\*\*\*\*SPAM\*\*\*\*
-        caughtspam
+      :0:  
+      * ^Subject:.*\*\*\*\*SPAM\*\*\*\*
+      caughtspam
 
-      That'll process all mail through SA, and refile spam messages to
-      a folder called "caughtspam" in your home directory.
+    That'll process all mail through SA, and refile spam messages to
+    a folder called "caughtspam" in your home directory.
 
-    - Send yourself a mail message, and ensure it gets to you.  If it does not,
-      copy your old backed-up .procmailrc file back into place and ask your
-      sysadmin for help!  Here's commands to do that:
+  - Send yourself a mail message, and ensure it gets to you.  If it does not,
+    copy your old backed-up .procmailrc file back into place and ask your
+    sysadmin for help!  Here's commands to do that:
 
-      	cp ~/.procmailrc.bak ~/.procmailrc
-	echo "Help!" | mail root
+      cp ~/.procmailrc.bak ~/.procmailrc
+      echo "Help!" | mail root
 
 
 
 If you don't use any mail filter just yet:
 
-    - Make a backup of your .forward (if it exists).
+  - Make a backup of your .forward (if it exists).
 
-    	cp ~/.forward ~/.forward.bak
+      cp ~/.forward ~/.forward.bak
 
-    - Change your ~/.forward file so it reads like this:
+  - Change your ~/.forward file so it reads like this:
 
-    	"| spamassassin || exit 75"
+      "| spamassassin || exit 75"
 
-    - Send yourself a mail message, and ensure it gets to you.  If it does not,
-      copy your old backed-up .forward file back into place and ask your
-      sysadmin for help!  Here's commands to do that:
+  - Send yourself a mail message, and ensure it gets to you.  If it does not,
+    copy your old backed-up .forward file back into place and ask your
+    sysadmin for help!  Here's commands to do that:
 
-      	cp ~/.forward.bak ~/.forward
-	echo "Help!" | mail root
+      cp ~/.forward.bak ~/.forward
+      echo "Help!" | mail root
 
 
 
 Other installation notes:
 
-    - If you get spammed, it is helpful to everyone else if you re-run
-      spamassassin with the "-r" option to report the message in question as
-      "verified spam".  This will add it to Vipul's Razor
-      (http://razor.sourceforge.net/), a collaborative spam filtering network.
+  - If you get spammed, it is helpful to everyone else if you re-run
+    spamassassin with the "-r" option to report the message in question as
+    "verified spam".  This will add it to Vipul's Razor
+    (http://razor.sourceforge.net/), a collaborative spam filtering network.
 
-	spamassassin -r < spam-message
+      spamassassin -r < spam-message
 
-      If you use mutt as your mail reader, this macro will bind the X key
-      to report a spam message.
+    If you use mutt as your mail reader, this macro will bind the X key
+    to report a spam message.
 
-	macro index X "| spamassassin -r"
+      macro index X "| spamassassin -r"
 
-      This is, of course, optional -- but you'll get lots of good-netizen
-      karma. ;)
+    This is, of course, optional -- but you'll get lots of good-netizen
+    karma. ;)
 
-    - Quite often, if you've been on the internet for a while, you'll have
-      accumulated a few old email accounts that nowadays get nothing but spam.
-      You can set these up as spam traps using SpamAssassin; see the ''SPAM
-      TRAPPING'' section of the spamassassin manual page for details.
+  - Quite often, if you've been on the internet for a while, you'll have
+    accumulated a few old email accounts that nowadays get nothing but spam.
+    You can set these up as spam traps using SpamAssassin; see the ''SPAM
+    TRAPPING'' section of the spamassassin manual page for details.
 
 
 Customising
