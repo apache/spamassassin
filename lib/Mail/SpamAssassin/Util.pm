@@ -835,6 +835,7 @@ sub uri_list_canonify {
   # make sure we catch bad encoding tricks
   my @nuris = ();
   for my $uri (@uris) {
+    # we're interested in http:// and so on, skip mailto:
     next if $uri =~ /^mailto:/i;
 
     # sometimes we catch URLs on multiple lines
@@ -844,57 +845,59 @@ sub uri_list_canonify {
     $uri =~ s/^\s+//;
     $uri =~ s/\s+$//;
 
-    # Make a copy so we don't trash the original
+    # Make a copy so we don't trash the original in the array
     my $nuri = $uri;
 
     # http:www.foo.biz -> http://www.foo.biz
     $nuri =~ s#^(https?:)/{0,2}#$1//#i;
 
     # http://www.foo.biz?id=3 -> http://www.foo.biz/?id=3
-    $nuri =~ s/^(https?:\/\/[^\/\?]+)\?/$1\/?/;
+    $nuri =~ s@^(https?://[^/?]+)\?@$1/?@;
 
     # deal with encoding of chars, this is just the set of printable
     # chars minus ' ' (that is, dec 33-126, hex 21-7e)
     $nuri =~ s/\&\#0*(3[3-9]|[4-9]\d|1[01]\d|12[0-6]);/sprintf "%c",$1/ge;
     $nuri =~ s/\&\#x0*(2[1-9]|[3-6][a-f0-9]|7[0-9a-e]);/sprintf "%c",hex($1)/gei;
 
-    # deal with wierd hostname parts
-    if ($nuri =~ /^(https?:\/\/)([^\/]+)(\.?\/.*)$/i) {
+    # deal with the %## encoding
+    $nuri = Mail::SpamAssassin::Util::url_encode($nuri);
+
+    # put the new URI on the new list if it's different
+    if ($nuri ne $uri) {
+      push(@nuris, $nuri);
+    }
+
+    # deal with wierd hostname parts, remove user/pass, etc.
+    if ($nuri =~ m{^(https?://)([^/]+)(\.?/.*)?$}i) {
       my ($proto, $host, $rest) = ($1,$2,$3);
 
-      # remove "www.fakehostname.com@" username part
-      $host =~ s/^[^\@]+\@//gs;
+      # not required
+      $rest ||= '';
 
-      # deal with 'http://213.172.0x1f.13/'; decode encoded octets
-      if ($host =~ /^([0-9a-fx]*\.)([0-9a-fx]*\.)([0-9a-fx]*\.)([0-9a-fx]*)$/ix)
-      {
+      # remove "www.fakehostname.com@" username part
+      if ($host =~ s/^[^\@]+\@//gs) {
+        push(@nuris, join ('', $proto, $host, $rest));
+      }
+
+      # deal with 'http://213.172.0x1f.13/', decode encoded octets
+      if ($host =~ /^([0-9a-fx]*\.)([0-9a-fx]*\.)([0-9a-fx]*\.)([0-9a-fx]*)$/ix) {
         my (@chunk) = ($1,$2,$3,$4);
         for my $octet (0 .. 3) {
           $chunk[$octet] =~ s/^0x([0-9a-f][0-9a-f])/sprintf "%d",hex($1)/gei;
         }
-        my $parsed = join ('', $proto, @chunk, $rest);
-        if ($parsed ne $nuri) { push(@nuris, $parsed); }
+        push(@nuris, join ('', $proto, @chunk, $rest));
       }
 
       # "http://0x7f000001/"
-      if ($host =~ /^0x[0-9a-f]+$/i) {
+      elsif ($host =~ /^0x[0-9a-f]+$/i) {
         $host =~ s/^0x([0-9a-f]+)/sprintf "%d",hex($1)/gei;
-        $host = decode_ulong_to_ip ($host);
-        my $parsed = join ('', $proto, $host, $rest);
-        push(@nuris, $parsed);
+        push(@nuris, join ('', $proto, decode_ulong_to_ip($host), $rest));
       }
 
       # "http://1113343453/"
-      if ($host =~ /^[0-9]+$/) {
-        $host = decode_ulong_to_ip ($host);
-        my $parsed = join ('', $proto, $host, $rest);
-        push(@nuris, $parsed);
+      elsif ($host =~ /^[0-9]+$/) {
+        push(@nuris, join ('', $proto, decode_ulong_to_ip($host), $rest));
       }
-    }
-
-    $nuri = Mail::SpamAssassin::Util::url_encode($nuri);
-    if ($nuri ne $uri) {
-      push(@nuris, $nuri);
     }
 
     # deal with http redirectors.  strip off one level of redirector

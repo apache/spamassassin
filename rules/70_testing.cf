@@ -466,7 +466,7 @@ uri      T_SPOOF_COM2COM	 m{^https?://(?:\w+\.)+?com\.(?:\w+\.)+?com}i
 describe T_SPOOF_COM2COM 	a.com.b.com
 
 # CDNs (Akamai (edgesuite), Speedera, and NYUD, so far) do this, so skip them.
-uri      T_SPOOF_OURI		m{^https?:/{0,2}(?:[^@/]+@)*?(?:[a-z0-9_-]+?\.){2,}(?:com|net|org|biz|info|edu|www)(?!\.(?:\w+\.)?(?:edgesuite|nyud|speedera)\.net)(?:\.[a-z0-9_%-]+?){2,}(?:(?::|%3a)\d+)?}i
+uri      T_SPOOF_OURI		m{^https?://(?:[a-z0-9_-]+?\.){2,}(?:com|net|org|biz|info|edu|www)(?!\.(?:\w+\.)?(?:edgesuite|nyud|speedera)\.net)(?:\.[a-z0-9_%-]+?){2,}(?:(?::|%3a)\d+)?}i
 describe T_SPOOF_OURI	 	URL has items in odd places
 
 ##########################################################################
