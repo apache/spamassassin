@@ -112,32 +112,22 @@ meta T_IDENT_NOBODY3		(__IDENT_NOBODY && !__IDENT_NOBODY_LOCALHOST && !__REGSITE
 header   T_SENDER_NO_REVERSE    eval:check_for_sender_no_reverse()
 describe T_SENDER_NO_REVERSE    No reverse lookup for sender's IP
 
-# Here are some tests for weird double quoting in the body (I tried 37
-# variations, these are the best 10, in rough order best RANK to worst
-# RANK). - quinlan
-# P.S. I feel really icky after writing these.
-body T_BODY_QUOTES_01	/(["'])\1\S{0,15}(["'])\1/
-body T_BODY_QUOTES_02	/(["']{2})\S{0,15}\1/
-body T_BODY_QUOTES_03	/(["'\222\223\224\262\263\271])\1\S{0,15}(["'\222\223\224\262\263\271])\1/
-body T_BODY_QUOTES_04	/(["'\222\223\224\262\263\271]{2})\S{0,15}\1/
-body T_BODY_QUOTES_05	/['\222\223\224\262\263\271]{2}\S{0,15}['\222\223\224\262\263\271]{2}/
-body T_BODY_QUOTES_06	/["'\222\223\224\262\263\271]{2}.{0,15}["\222\223\224\262\263\271]{2}/
-body T_BODY_QUOTES_07	/(["'\222\223\224\262\263\271]{2}).{0,15}\1/
-body T_BODY_QUOTES_08	/(["'])\1.{0,15}(["'])\1/
-body T_BODY_QUOTES_09	/(["']{2}).{0,15}\1/
-body T_BODY_QUOTES_10	/(["'\222\223\224\262\263\271])\1.{0,15}(["'\222\223\224\262\263\271])\1/
+# test for weird double quoting in the body
+# updated last on 12/24 - quinlan
+body T_BODY_QUOTES	/[\042\047\222\223\224\262\263\271]{2}\S{0,16}[\042\222\223\224\262\263\271]{2}/
+
+# small improvement on NORMAL_HTTP_TO_IP
+# adds "http://foo@210.192.111.79/" which is used in spam sometimes
+uri T_NORMAL_HTTP_TO_IP_1	/^https?\:\/\/(?:\S*\@)?\d+\.\d+\.\d+\.\d+/i
+describe T_NORMAL_HTTP_TO_IP_1	Uses a dotted-decimal IP address in URL
+uri T_NORMAL_HTTP_TO_IP_2	/^https?\:\/\/(?:[^\/]*\@)?\d+\.\d+\.\d+\.\d+/i
+describe T_NORMAL_HTTP_TO_IP_2	Uses a dotted-decimal IP address in URL
+uri T_NORMAL_HTTP_TO_IP_3	/^https?\:\/\/[^\/]*\d+\.\d+\.\d+\.\d+/i
+describe T_NORMAL_HTTP_TO_IP_3	Uses a dotted-decimal IP address in URL
 
 #bug 1010
 body T_CHECK_EMAIL_ISFREE	eval:check_email_isfree()
 describe T_CHECK_EMAIL_ISFREE Body contains an e-mail address listed by Email::IsFree
-
-# numeric mailto
-# Dec 20 2002 jm: my FPs *do not* contain this pattern! does.. not.. compute...
-# ok, it's the implicit addition of "mailto:" for mail-addr lookalikes, which
-# also includes user@host CVSroot specs etc.  Let's try using a rawbody pattern.
-# 12/22 - tvd - most people don't have any hits, only jm (.33%) and quinlan (.02%)
-# I say drop it - jm
-rawbody T_NUMERIC_MAILTO_ADDR	/\bmailto:[^\s\@]{1,20}\@\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/is
 
 # bug 1014
 # from Allen
