@@ -266,6 +266,10 @@ sub _parse {
       next;
     }
 
+    # convert all dashes in setting name to underscores.
+    # Simplifies regexps below...
+    1 while s/^(\S+)\-(\S+)/$1_$2/g;
+
 =item require_version n.nn
 
 Indicates that the entire file, from this line on, requires a certain version
@@ -275,7 +279,7 @@ ignore it.
 
 =cut
 
-    if (/^require[-_]version\s+(.*)$/) {
+    if (/^require_version\s+(.*)$/) {
       my $req_version = $1;
       $req_version =~ s/^\@\@VERSION\@\@$/$Mail::SpamAssassin::VERSION/;
       if ($Mail::SpamAssassin::VERSION != $req_version) {
@@ -305,7 +309,7 @@ e.g.
 
 =cut
 
-    if(/^version[-_]tag\s+(.*)$/) {
+    if(/^version_tag\s+(.*)$/) {
       my $tag = lc($1);
       $tag =~ tr/a-z0-9./_/c;
       foreach (@Mail::SpamAssassin::EXTRA_VERSION) {
@@ -352,7 +356,7 @@ e.g.
 
 =cut
 
-    if (/^whitelist[-_]from\s+(.+)$/) {
+    if (/^whitelist_from\s+(.+)$/) {
       $self->add_to_addrlist ('whitelist_from', split (' ', $1)); next;
     }
 
@@ -369,7 +373,7 @@ e.g.
 
 =cut
 
-    if (/^unwhitelist[-_]from\s+(.+)$/) {
+    if (/^unwhitelist_from\s+(.+)$/) {
       $self->remove_from_addrlist ('whitelist_from', split (' ', $1)); next;
     }
 
@@ -387,7 +391,7 @@ e.g.
 
 =cut
 
-    if (/^whitelist[-_]from[-_]rcvd\s+(\S+)\s+(\S+)$/) {
+    if (/^whitelist_from_rcvd\s+(\S+)\s+(\S+)$/) {
       $self->add_to_addrlist_rcvd ('whitelist_from_rcvd', $1, $2);
       next;
     }
@@ -406,7 +410,7 @@ e.g.
 
 =cut
 
-    if (/^unwhitelist[-_]from\s+(.+)$/) {
+    if (/^unwhitelist_from\s+(.+)$/) {
       $self->remove_from_addrlist_rcvd('whitelist_from_rcvd', split (' ', $1));
       next;
     }
@@ -418,7 +422,7 @@ non-spam, but which the user doesn't want.  Same format as C<whitelist_from>.
 
 =cut
 
-    if (/^blacklist[-_]from\s+(.+)$/) {
+    if (/^blacklist_from\s+(.+)$/) {
       $self->add_to_addrlist ('blacklist_from', split (' ', $1)); next;
     }
 
@@ -435,7 +439,7 @@ e.g.
 
 =cut
 
-    if (/^unblacklist[-_]from\s+(.+)$/) {
+    if (/^unblacklist_from\s+(.+)$/) {
       $self->remove_from_addrlist ('blacklist_from', split (' ', $1)); next;
     }
 
@@ -460,13 +464,13 @@ See above.
 
 =cut
 
-    if (/^whitelist[-_]to\s+(.+)$/) {
+    if (/^whitelist_to\s+(.+)$/) {
       $self->add_to_addrlist ('whitelist_to', split (' ', $1)); next;
     }
-    if (/^more[-_]spam[-_]to\s+(.+)$/) {
+    if (/^more_spam_to\s+(.+)$/) {
       $self->add_to_addrlist ('more_spam_to', split (' ', $1)); next;
     }
-    if (/^all[-_]spam[-_]to\s+(.+)$/) {
+    if (/^all_spam_to\s+(.+)$/) {
       $self->add_to_addrlist ('all_spam_to', split (' ', $1)); next;
     }
 
@@ -483,7 +487,7 @@ choose to do so, only delete messages with an exceptionally high score such as
 
 =cut
 
-    if (/^required[-_]hits\s+(\S+)$/) {
+    if (/^required_hits\s+(\S+)$/) {
       $self->{required_hits} = $1+0.0; next;
     }
 
@@ -535,7 +539,7 @@ be enabled here.
 
 =cut
 
-    if (/^rewrite[-_]subject\s+(\d+)$/) {
+    if (/^rewrite_subject\s+(\d+)$/) {
       $self->{rewrite_subject} = $1+0; next;
     }
 
@@ -547,7 +551,7 @@ This can be disabled here.
 
 =cut
 
-   if (/^fold[-_]headers\s+(\d+)$/) {
+   if (/^fold_headers\s+(\d+)$/) {
      $self->{fold_headers} = $1+0; next;
    }
 
@@ -560,7 +564,7 @@ B<always_add_report>.
 
 =cut
 
-   if (/^always[-_]add[-_]headers\s+(\d+)$/) {
+   if (/^always_add_headers\s+(\d+)$/) {
      $self->{always_add_headers} = $1+0; next;
    }
 
@@ -575,7 +579,7 @@ and why it was not tagged as spam.  See also B<always_add_headers>.
 
 =cut
 
-   if (/^always[-_]add[-_]report\s+(\d+)$/) {
+   if (/^always_add_report\s+(\d+)$/) {
      $self->{always_add_report} = $1+0; next;
    }
 
@@ -591,7 +595,7 @@ This can be useful for MUA rule creation.
 
 =cut
 
-   if(/^spam[-_]level[-_]stars\s+(\d+)$/) {
+   if(/^spam_level_stars\s+(\d+)$/) {
       $self->{spam_level_stars} = $1+0; next;
    }
 
@@ -607,7 +611,7 @@ X-Spam-Level: .......
 
 =cut
 
-   if(/^spam[-_]level[-_]char\s+(.)$/) {
+   if(/^spam_level_char\s+(.)$/) {
       $self->{spam_level_char} = $1; next;
    }
 
@@ -619,7 +623,7 @@ score for this message. _REQD_ will be replaced with the threshold.
 
 =cut
 
-    if (/^subject[-_]tag\s+(.+)$/) {
+    if (/^subject_tag\s+(.+)$/) {
       $self->{subject_tag} = $1; next;
     }
 
@@ -636,7 +640,7 @@ some headers and no changes will be made to the body.
 
 =cut
 
-    if (/^report[-_]safe\s+(\d+)$/) {
+    if (/^report_safe\s+(\d+)$/) {
       $self->{report_safe} = $1+0; next;
     }
 
@@ -648,7 +652,7 @@ shorter reports, set this to C<1>.
 
 =cut
 
-    if (/^use[-_]terse[-_]report\s+(\d+)$/) {
+    if (/^use_terse_report\s+(\d+)$/) {
       $self->{use_terse_report} = $1+0; next;
     }
 
@@ -659,7 +663,7 @@ for you, set this to 1.
 
 =cut
 
-    if (/^skip[-_]rbl[-_]checks\s+(\d+)$/) {
+    if (/^skip_rbl_checks\s+(\d+)$/) {
       $self->{skip_rbl_checks} = $1+0; next;
     }
 
@@ -817,7 +821,7 @@ example:
 
 =cut
 
-    if (/^ok[-_]languages\s+(.+)$/) {
+    if (/^ok_languages\s+(.+)$/) {
       $self->{ok_languages} = $1; next;
     }
 
@@ -873,7 +877,7 @@ example:
 
 =cut
 
-    if (/^ok[-_]locales\s+(.+)$/) {
+    if (/^ok_locales\s+(.+)$/) {
       $self->{ok_locales} = $1; next;
     }
 
@@ -969,7 +973,7 @@ Clear the report template.
 
 =cut
 
-    if (/^clear[-_]report[-_]template$/) {
+    if (/^clear_report_template$/) {
       $self->{report_template} = ''; next;
     }
 
@@ -984,7 +988,7 @@ C<clear-report-template> to restart.
 
 =cut
 
-    if (/^unsafe[-_]report\b\s*(.*?)$/) {
+    if (/^unsafe_report\b\s*(.*?)$/) {
       $self->{unsafe_report_template} .= $1."\n"; next;
     }
 
@@ -994,7 +998,7 @@ Clear the unsafe_report template.
 
 =cut
 
-    if (/^clear[-_]unsafe[-_]report[-_]template$/) {
+    if (/^clear_unsafe_report_template$/) {
       $self->{unsafe_report_template} = ''; next;
     }
 
@@ -1006,7 +1010,7 @@ C</usr/share/spamassassin> for an example.
 
 =cut
 
-    if (/^terse[-_]report\b\s*(.*?)$/) {
+    if (/^terse_report\b\s*(.*?)$/) {
       $self->{terse_report_template} .= $1."\n"; next;
     }
 
@@ -1016,7 +1020,7 @@ Clear the terse-report template.
 
 =cut
 
-    if (/^clear[-_]terse[-_]report[-_]template$/) {
+    if (/^clear_terse_report_template$/) {
       $self->{terse_report_template} = ''; next;
     }
 
@@ -1039,7 +1043,7 @@ Clear the spamtrap template.
 
 =cut
 
-    if (/^clear[-_]spamtrap[-_]template$/) {
+    if (/^clear_spamtrap_template$/) {
       $self->{spamtrap_template} = ''; next;
     }
 
@@ -1049,7 +1053,7 @@ Whether to use DCC, if it is available.
 
 =cut
 
-    if (/^use[-_]dcc\s+(\d+)$/) {
+    if (/^use_dcc\s+(\d+)$/) {
       $self->{use_dcc} = $1; next;
     }
 
@@ -1060,7 +1064,7 @@ the results
 
 =cut
 
-    if (/^dcc[-_]timeout\s+(\d+)$/) {
+    if (/^dcc_timeout\s+(\d+)$/) {
       $self->{dcc_timeout} = $1+0; next;
     }
 
@@ -1082,15 +1086,15 @@ The default is 999999 for all these options.
 
 =cut
 
-    if (/^dcc[-_]body[-_]max\s+(\d+)/) {
+    if (/^dcc_body_max\s+(\d+)/) {
       $self->{dcc_body_max} = $1+0; next;
     }
 
-    if (/^dcc[-_]fuz1[-_]max\s+(\d+)/) {
+    if (/^dcc_fuz1_max\s+(\d+)/) {
       $self->{dcc_fuz1_max} = $1+0; next;
     }
 
-    if (/^dcc[-_]fuz2[-_]max\s+(\d+)/) {
+    if (/^dcc_fuz2_max\s+(\d+)/) {
       $self->{dcc_fuz2_max} = $1+0; next;
     }
 
@@ -1104,7 +1108,7 @@ The default is to not add the header.
 
 =cut
 
-    if (/^dcc[-_]add[-_]header\s+(\d+)$/) {
+    if (/^dcc_add_header\s+(\d+)$/) {
       $self->{dcc_add_header} = $1+0; next;
     }
 
@@ -1114,7 +1118,7 @@ Whether to use Pyzor, if it is available.
 
 =cut
 
-    if (/^use[-_]pyzor\s+(\d+)$/) {
+    if (/^use_pyzor\s+(\d+)$/) {
       $self->{use_pyzor} = $1; next;
     }
 
@@ -1125,7 +1129,7 @@ the results.
 
 =cut
 
-    if (/^pyzor[-_]timeout\s+(\d+)$/) {
+    if (/^pyzor_timeout\s+(\d+)$/) {
       $self->{pyzor_timeout} = $1+0; next;
     }
 
@@ -1139,7 +1143,7 @@ The default is 5.
 
 =cut
 
-    if (/^pyzor[-_]max\s+(\d+)/) {
+    if (/^pyzor_max\s+(\d+)/) {
       $self->{pyzor_max} = $1+0; next;
     }
 
@@ -1153,7 +1157,7 @@ The default is to not add the header.
 
 =cut
 
-    if (/^pyzor[-_]add[-_]header\s+(\d+)$/) {
+    if (/^pyzor_add_header\s+(\d+)$/) {
       $self->{pyzor_add_header} = $1+0; next;
     }
 
@@ -1166,7 +1170,7 @@ Specify options to the pyzor command. Please note that only
 
 =cut
 
-    if (/^pyzor[-_]options\s+([A-Za-z0-9 -\/]+)/) {
+    if (/^pyzor_options\s+([A-Za-z0-9 -\/]+)/) {
       $self->{pyzor_options} = $1; next;
     }
 
@@ -1183,7 +1187,7 @@ See dialup_codes for more details and an example
 
 =cut
 
-    if (/^num[-_]check[-_]received\s+(\d+)$/) {
+    if (/^num_check_received\s+(\d+)$/) {
       $self->{num_check_received} = $1+0; next;
     }
 
@@ -1194,7 +1198,7 @@ Whether to use Razor version 1, if it is available.
 
 =cut
 
-    if (/^use[-_]razor1\s+(\d+)$/) {
+    if (/^use_razor1\s+(\d+)$/) {
       $self->{use_razor1} = $1; next;
     }
 
@@ -1204,7 +1208,7 @@ Whether to use Razor version 2, if it is available.
 
 =cut
 
-    if (/^use[-_]razor2\s+(\d+)$/) {
+    if (/^use_razor2\s+(\d+)$/) {
       $self->{use_razor2} = $1; next;
     }
 
@@ -1215,7 +1219,7 @@ the results
 
 =cut
 
-    if (/^razor[-_]timeout\s+(\d+)$/) {
+    if (/^razor_timeout\s+(\d+)$/) {
       $self->{razor_timeout} = $1; next;
     }
 
@@ -1225,7 +1229,7 @@ Whether to use the naive-Bayesian-style classifier built into SpamAssassin.
 
 =cut
 
-    if (/^use[-_]bayes\s+(\d+)$/) {
+    if (/^use_bayes\s+(\d+)$/) {
       $self->{use_bayes} = $1; next;
     }
 
@@ -1238,7 +1242,7 @@ out
 
 =cut
 
-    if (/^rbl[-_]timeout\s+(\d+)$/) {
+    if (/^rbl_timeout\s+(\d+)$/) {
       $self->{rbl_timeout} = $1+0; next;
     }
 
@@ -1249,7 +1253,7 @@ times, waiting 5 seconds each time.
 
 =cut
 
-    if (/^check[-_]mx[-_]attempts\s+(\S+)$/) {
+    if (/^check_mx_attempts\s+(\S+)$/) {
       $self->{check_mx_attempts} = $1+0; next;
     }
 
@@ -1259,7 +1263,7 @@ How many seconds to wait before retrying an MX check.
 
 =cut
 
-    if (/^check[-_]mx[-_]delay\s+(\S+)$/) {
+    if (/^check_mx_delay\s+(\S+)$/) {
       $self->{check_mx_delay} = $1+0; next;
     }
 
@@ -1279,7 +1283,7 @@ dns_available test: server1.tld server2.tld server3.tld
 
 =cut
 
-    if (/^dns[-_]available\s+(yes|no|test|test:\s+.+)$/) {
+    if (/^dns_available\s+(yes|no|test|test:\s+.+)$/) {
       $self->{dns_available} = ($1 or "test"); next;
     }
 
@@ -1299,7 +1303,7 @@ from the score toward the mean.  C<factor> = 1 means just use the long-term
 mean; C<factor> = 0 mean just use the calculated score.
 
 =cut
-    if (/^auto[-_]whitelist[-_]factor\s+(.*)$/) {
+    if (/^auto_whitelist_factor\s+(.*)$/) {
       $self->{auto_whitelist_factor} = $1; next;
     }
 
@@ -1314,7 +1318,7 @@ Note that tests with tflags set to 'learn' (the Bayesian rules) or 'userconf'
 
 =cut
 
-    if (/^auto[-_]learn\s+(.*)$/) {
+    if (/^auto_learn\s+(.*)$/) {
       $self->{auto_learn} = $1+0; next;
     }
 
@@ -1325,7 +1329,7 @@ SpamAssassin's learning systems automatically as a non-spam message.
 
 =cut
 
-    if (/^auto[-_]learn[-_]threshold[-_]nonspam\s+(.*)$/) {
+    if (/^auto_learn_threshold_nonspam\s+(.*)$/) {
       $self->{auto_learn_threshold_nonspam} = $1+0; next;
     }
 
@@ -1336,7 +1340,7 @@ SpamAssassin's learning systems automatically as a spam message.
 
 =cut
 
-    if (/^auto[-_]learn[-_]threshold[-_]spam\s+(.*)$/) {
+    if (/^auto_learn_threshold_spam\s+(.*)$/) {
       $self->{auto_learn_threshold_spam} = $1+0; next;
     }
 
@@ -1354,7 +1358,7 @@ setting.  Example:
 	bayes_ignore_header X-Upstream-SomethingElse
 
 =cut
-    if (/^bayes[-_]ignore[-_]header\s+(.*)$/) {
+    if (/^bayes_ignore_header\s+(.*)$/) {
       push (@{$self->{bayes_ignore_headers}}, $1); next;
     }
 
@@ -1394,7 +1398,7 @@ server load. It is not recommended.
 =cut
 
 
-    if (/^allow[-_]user[-_]rules\s+(\d+)$/) {
+    if (/^allow_user_rules\s+(\d+)$/) {
       $self->{allow_user_rules} = $1+0; 
       dbg( ($self->{allow_user_rules} ? "Allowing":"Not allowing") . " user rules!"); next;
     }
@@ -1465,7 +1469,7 @@ score Z_FUDGE_DUL_OSIRU_FH	1.5
 
 =cut
 
-    if (/^dialup[-_]codes\s+(.*)$/) {
+    if (/^dialup_codes\s+(.*)$/) {
 	$self->{dialup_codes} = eval $1;
 	next;
     }
@@ -1737,7 +1741,7 @@ Currently this is left to Razor to decide.
 
 =cut
 
-    if (/^razor[-_]config\s+(.*)$/) {
+    if (/^razor_config\s+(.*)$/) {
       $self->{razor_config} = $1; next;
     }
 
@@ -1750,7 +1754,7 @@ use this, as the current PATH will have been cleared.
 
 =cut
 
-    if (/^pyzor[-_]path\s+(.+)$/) {
+    if (/^pyzor_path\s+(.+)$/) {
       $self->{pyzor_path} = $1; next;
     }
 
@@ -1763,7 +1767,7 @@ use this, as the current PATH will have been cleared.
 
 =cut
 
-    if (/^dcc[-_]path\s+(.+)$/) {
+    if (/^dcc_path\s+(.+)$/) {
       $self->{dcc_path} = $1; next;
     }
 
@@ -1776,7 +1780,7 @@ The default is C<-R>
 
 =cut
 
-    if (/^dcc[-_]options\s+([A-Z -]+)/) {
+    if (/^dcc_options\s+([A-Z -]+)/) {
       $self->{dcc_options} = $1; next;
     }
 
@@ -1788,7 +1792,7 @@ SpamAssassin use, you may want to share this across all users.
 
 =cut
 
-    if (/^auto[-_]whitelist[-_]path\s+(.*)$/) {
+    if (/^auto_whitelist_path\s+(.*)$/) {
       $self->{auto_whitelist_path} = $1; next;
     }
 
@@ -1804,7 +1808,7 @@ probably be more effective with an individual database per user.
 
 =cut
 
-    if (/^bayes[-_]path\s+(.*)$/) {
+    if (/^bayes_path\s+(.*)$/) {
       $self->{bayes_path} = $1; next;
     }
 
@@ -1820,7 +1824,7 @@ needed, chmod the log directory to 1777, and adjust later.
 
 =cut
 
-    if (/^timelog[-_]path\s+(.*)$/) {
+    if (/^timelog_path\s+(.*)$/) {
       $Mail::SpamAssassin::TIMELOG->{logpath}=$1; next;
     }
 
@@ -1831,7 +1835,7 @@ The resulting file will not have any execute bits set (the umask is set
 to 111).
 
 =cut
-    if (/^auto[-_]whitelist[-_]file[-_]mode\s+(.*)$/) {
+    if (/^auto_whitelist_file_mode\s+(.*)$/) {
       $self->{auto_whitelist_file_mode} = $1; next;
     }
 
@@ -1842,7 +1846,7 @@ The resulting file will not have any execute bits set (the umask is set
 to 111).
 
 =cut
-    if (/^bayes[-_]file[-_]mode\s+(.*)$/) {
+    if (/^bayes_file_mode\s+(.*)$/) {
       $self->{bayes_file_mode} = $1; next;
     }
 
@@ -1853,7 +1857,7 @@ once) when classifying?  This produces significantly better hit-rates, but
 increases database size by about a factor of 8 to 10.
 
 =cut
-    if (/^bayes[-_]use[-_]hapaxes\s+(.*)$/) {
+    if (/^bayes_use_hapaxes\s+(.*)$/) {
       $self->{bayes_use_hapaxes} = $1; next;
     }
 
@@ -1865,7 +1869,7 @@ more 'extreme' output results, but may be more resistant to changes
 in corpus size etc.
 
 =cut
-    if (/^bayes[-_]use[-_]chi2[-_]combining\s+(.*)$/) {
+    if (/^bayes_use_chi2_combining\s+(.*)$/) {
       $self->{bayes_use_chi2_combining} = $1; next;
     }
 
@@ -1876,7 +1880,7 @@ database will never be shrunk below this many entries. 100000 entries
 is roughly equivalent to a 5Mb database file.
 
 =cut
-    if (/^bayes[-_]expiry[-_]min[-_]db[-_]size\s+(\d+)$/) {
+    if (/^bayes_expiry_min_db_size\s+(\d+)$/) {
       $self->{bayes_expiry_min_db_size} = $1; next;
     }
 
@@ -1889,7 +1893,7 @@ considerably.  Unless you're testing expiration, you do not want to use
 this.
 
 =cut
-    if (/^bayes[-_]expiry[-_]use[-_]scan[-_]count\s+(.*)$/) {
+    if (/^bayes_expiry_use_scan_count\s+(.*)$/) {
       $self->{bayes_expiry_use_scan_count} = $1; next;
     }
 
@@ -1901,7 +1905,7 @@ the database below the C<bayes_expiry_min_db_size> size).  (Requires
 C<bayes_expiry_use_scan_count> be 0.)
 
 =cut
-    if (/^bayes[-_]expiry[-_]days\s+(.*)$/) {
+    if (/^bayes_expiry_days\s+(.*)$/) {
       $self->{bayes_expiry_days} = $1; next;
     }
 
@@ -1913,7 +1917,7 @@ shrink the database below the C<bayes_expiry_min_db_size> size).
 (Requires C<bayes_expiry_use_scan_count> be 1.)
 
 =cut
-    if (/^bayes[-_]expiry[-_]scan[-_]count\s+(.*)$/) {
+    if (/^bayes_expiry_scan_count\s+(.*)$/) {
       $self->{bayes_expiry_scan_count} = $1; next;
     }
 
@@ -1924,7 +1928,7 @@ used to connect.  Example: C<DBI:mysql:spamassassin:localhost>
 
 =cut
 
-    if (/^user[-_]scores[-_]dsn\s+(\S+)$/) {
+    if (/^user_scores_dsn\s+(\S+)$/) {
       $self->{user_scores_dsn} = $1; next;
     }
 
@@ -1933,7 +1937,7 @@ used to connect.  Example: C<DBI:mysql:spamassassin:localhost>
 The authorized username to connect to the above DSN.
 
 =cut
-    if(/^user[-_]scores[-_]sql[-_]username\s+(\S+)$/) {
+    if(/^user_scores_sql_username\s+(\S+)$/) {
       $self->{user_scores_sql_username} = $1; next;
     }
 
@@ -1942,7 +1946,7 @@ The authorized username to connect to the above DSN.
 The password for the database username, for the above DSN.
 
 =cut
-    if(/^user[-_]scores[-_]sql[-_]password\s+(\S+)$/) {
+    if(/^user_scores_sql_password\s+(\S+)$/) {
       $self->{user_scores_sql_password} = $1; next;
     }
 
@@ -1951,7 +1955,7 @@ The password for the database username, for the above DSN.
 The table user preferences are stored in, for the above DSN.
 
 =cut
-    if(/^user[-_]scores[-_]sql[-_]table\s+(\S+)$/) {
+    if(/^user_scores_sql_table\s+(\S+)$/) {
       $self->{user_scores_sql_table} = $1; next;
     }
 
