@@ -283,9 +283,9 @@ tflags RCVD_IN_MULTIHOP_DSBL   net
 # Users can request a double hit and double score by changing 'relay' with
 # 'unconfirmed_dsbl' or something like that, but I don't think it should be
 # a default  -- Marc
-header X_RCVD_IN_UNCONFIRMED_DSBL        rbleval:check_rbl('relay', 'unconfirmed.dsbl.org')
-describe X_RCVD_IN_UNCONFIRMED_DSBL      Received via a relay in unconfirmed.dsbl.org
-tflags X_RCVD_IN_UNCONFIRMED_DSBL        net
+header RCVD_IN_UNCONFIRMED_DSBL        rbleval:check_rbl('relay', 'unconfirmed.dsbl.org')
+describe RCVD_IN_UNCONFIRMED_DSBL      Received via a relay in unconfirmed.dsbl.org
+tflags RCVD_IN_UNCONFIRMED_DSBL        net
 
 
 # Other miscellaneous RBLs are listed here:
@@ -312,9 +312,9 @@ header RCVD_IN_DUL		rbleval:check_rbl('dialup', 'dialups.mail-abuse.org.')
 describe RCVD_IN_DUL		Received from dialup, see http://www.mail-abuse.org/dul/
 tflags RCVD_IN_DUL              net
 
-header X_RCVD_IN_DUL_FH		rbleval:check_rbl('dialup-firsthop', 'dialups.mail-abuse.org.')
-describe X_RCVD_IN_DUL_FH	Received from first hop dialup, see http://www.mail-abuse.org/dul/
-tflags X_RCVD_IN_DUL_FH         net
+header RCVD_IN_DUL_FH		rbleval:check_rbl('dialup-firsthop', 'dialups.mail-abuse.org.')
+describe RCVD_IN_DUL_FH	Received from first hop dialup, see http://www.mail-abuse.org/dul/
+tflags RCVD_IN_DUL_FH           net
 
 
 # Now, you can apply rules to counter for the effect of two similar BLs matching
