@@ -129,14 +129,6 @@ describe T_USERNAME_IN_SUBJECT2   To: username listed in Subject: (ucfirst)
 header T_USERNAME_IN_SUBJECT3     eval:check_for_to_in_subject('3')
 describe T_USERNAME_IN_SUBJECT3   Full To: address listed at front of Subject:
 
-# catches a few spams missed by MSGID_OUTLOOK_INVALID
-meta T_MSGID_DOLLARS_1		(__OUTLOOK_DOLLARS_MSGID && !__HAS_OUTLOOK_IN_MAILER && !__UNUSABLE_MSGID)
-meta T_MSGID_DOLLARS_2		(__OE_MSGID_2 && !__HAS_OUTLOOK_IN_MAILER && !__UNUSABLE_MSGID)
-header __T_DOLLAR_MUA_1		X-Mailer =~ /^Microsoft (?:CDO|Outlook)/
-header __T_DOLLAR_MUA_2		X-Mailer =~ /^Microsoft (?:CDO|Outlook(?: 8|,Build 10| Express [456]|(?:IMO|CWS), Build 9))/
-meta T_MSGID_DOLLARS_3		(__OUTLOOK_DOLLARS_MSGID && !__T_DOLLAR_MUA_1 && !__UNUSABLE_MSGID)
-meta T_MSGID_DOLLARS_4		(__OUTLOOK_DOLLARS_MSGID && !__T_DOLLAR_MUA_2 && !__UNUSABLE_MSGID)
-
 # This is hitting nothing.  Maybe it's gone again...
 header T_RCVD_IN_PDL	 	rbleval:check_rbl_txt('pdl-notfirsthop', 'dialups.visi.com.')
 describe T_RCVD_IN_PDL		Received via a relay in PDL, http://www.pan-am.ca/pdl/
