@@ -309,27 +309,11 @@ body T_NORMAL_HTTP_TO_IP	eval:check_numeric_http()
 ########################################################################
 
 # short message-ids
-# full id #1
-header T_MSGID_SHORT_A15	MESSAGEID =~ /^.{1,15}$/
-header T_MSGID_SHORT_A16	MESSAGEID =~ /^.{1,16}$/
-# local part #1
-header T_MSGID_SHORT_LP_0_1	MESSAGEID =~ /<.{0,1}\@/
-header T_MSGID_SHORT_LP_0_2	MESSAGEID =~ /<.{0,2}\@/
-header T_MSGID_SHORT_LP_0_3	MESSAGEID =~ /<.{0,3}\@/
-header T_MSGID_SHORT_LP_0_4	MESSAGEID =~ /<.{0,4}\@/
-header T_MSGID_SHORT_LP_0_5	MESSAGEID =~ /<.{0,5}\@/
-# combo #1
-meta T_MSGID_SHORT_LP_0_1A	T_MSGID_SHORT_LP_0_1 && T_MSGID_SHORT_A15
-meta T_MSGID_SHORT_LP_0_2A	T_MSGID_SHORT_LP_0_2 && T_MSGID_SHORT_A15
-meta T_MSGID_SHORT_LP_0_3A	T_MSGID_SHORT_LP_0_3 && T_MSGID_SHORT_A15
-meta T_MSGID_SHORT_LP_0_4A	T_MSGID_SHORT_LP_0_4 && T_MSGID_SHORT_A15
-meta T_MSGID_SHORT_LP_0_5A	T_MSGID_SHORT_LP_0_5 && T_MSGID_SHORT_A15
-# combo #2
-meta T_MSGID_SHORT_LP_0_1B	T_MSGID_SHORT_LP_0_1 && T_MSGID_SHORT_A16
-meta T_MSGID_SHORT_LP_0_2B	T_MSGID_SHORT_LP_0_2 && T_MSGID_SHORT_A16
-meta T_MSGID_SHORT_LP_0_3B	T_MSGID_SHORT_LP_0_3 && T_MSGID_SHORT_A16
-meta T_MSGID_SHORT_LP_0_4B	T_MSGID_SHORT_LP_0_4 && T_MSGID_SHORT_A16
-meta T_MSGID_SHORT_LP_0_5B	T_MSGID_SHORT_LP_0_5 && T_MSGID_SHORT_A16
+header T_MSGID_SHORT_A		MESSAGEID =~ /^.{1,15}$/
+header T_MSGID_SHORT_B		MESSAGEID =~ /^.{1,15}$/m
+header T_MSGID_SHORT_C		Message-Id =~ /^.{1,15}$/
+meta T_MSGID_SHORT_D		(T_MSGID_SHORT_A || T_MSGID_SHORT_B)
+meta T_MSGID_SHORT_E		(T_MSGID_SHORT_A || T_MSGID_SHORT_C)
 
 # some testing work on case-sensitive names
 header T_HEADER_01	ALL =~ /\nAlternate-Recipient:/
@@ -403,25 +387,11 @@ header T_HEADER_70	ALL =~ /\nX-srk:/
 header T_HEADER_71	ALL =~ /\nX-tri:/
 header T_HEADER_72	ALL =~ /\nX-yd:/
 
-meta T_HEADER_01_TO_10	(T_HEADER_33 || T_HEADER_16 || T_HEADER_07 || T_HEADER_58 || T_HEADER_01 || T_HEADER_08 || T_HEADER_05 || T_HEADER_03 || T_HEADER_49 || T_HEADER_12)
-meta T_HEADER_11_TO_20	(T_HEADER_04 || T_HEADER_71 || T_HEADER_11 || T_HEADER_02 || T_HEADER_10 || T_HEADER_29 || T_HEADER_41 || T_HEADER_43 || T_HEADER_24 || T_HEADER_23)
-meta T_HEADER_21_TO_30	(T_HEADER_22 || T_HEADER_21 || T_HEADER_20 || T_HEADER_62 || T_HEADER_69 || T_HEADER_14 || T_HEADER_09 || T_HEADER_15 || T_HEADER_25 || T_HEADER_06)
-meta T_HEADER_31_TO_40	(T_HEADER_46 || T_HEADER_31 || T_HEADER_30 || T_HEADER_13 || T_HEADER_26 || T_HEADER_48 || T_HEADER_68 || T_HEADER_61 || T_HEADER_47 || T_HEADER_18)
-meta T_HEADER_41_TO_46	(T_HEADER_44 || T_HEADER_53 || T_HEADER_45 || T_HEADER_34 || T_HEADER_70 || T_HEADER_54)
-
-# without T_HEADER_40
-meta T_HEADER_TOP_10	T_HEADER_01_TO_10
-meta T_HEADER_TOP_20	T_HEADER_01_TO_10 || T_HEADER_11_TO_20
-meta T_HEADER_TOP_30	T_HEADER_01_TO_10 || T_HEADER_11_TO_20 || T_HEADER_21_TO_30
-meta T_HEADER_TOP_40	T_HEADER_01_TO_10 || T_HEADER_11_TO_20 || T_HEADER_21_TO_30 || T_HEADER_31_TO_40
-meta T_HEADER_TOP_46	T_HEADER_01_TO_10 || T_HEADER_11_TO_20 || T_HEADER_21_TO_30 || T_HEADER_31_TO_40 || T_HEADER_41_TO_46
-
-# add in T_HEADER_40 - very low FP rate, but not perfect
-meta T_HEADER_TOP_10_B	T_HEADER_01_TO_10 || T_HEADER_40
-meta T_HEADER_TOP_20_B	T_HEADER_01_TO_10 || T_HEADER_11_TO_20 || T_HEADER_40
-meta T_HEADER_TOP_30_B	T_HEADER_01_TO_10 || T_HEADER_11_TO_20 || T_HEADER_21_TO_30 || T_HEADER_40
-meta T_HEADER_TOP_40_B	T_HEADER_01_TO_10 || T_HEADER_11_TO_20 || T_HEADER_21_TO_30 || T_HEADER_31_TO_40 || T_HEADER_40
-meta T_HEADER_TOP_46_B	T_HEADER_01_TO_10 || T_HEADER_11_TO_20 || T_HEADER_21_TO_30 || T_HEADER_31_TO_40 || T_HEADER_41_TO_46 || T_HEADER_40
+# case-sensitive rule
+# only significant rules with no FPs, hit recently, on 2+ corpuses
+header T_HEADER_SPAM	ALL =~ /^(Alternate-Recipient|Antivirus|Approved|Delivery-Notification|Disclose-Recipients|Error-path|Language|Location|Mime-Subversion|Newsletter-ID|PID|Rot|UID|X-BounceTrace|X-CS-IP|X-Company-Address|X-Company-City|X-Company-Country|X-Company-State|X-Company-Zip|X-E(?:[Mm]ail)?|X-Encoding|X-Originating-Company|X-RMD-Text|X-SG4|X-SP-Track-ID|X-Webmail-Time|X-bounce-to):/m
+# try case-insensitive, for kicks
+header T_HEADER_SPAM_I	ALL =~ /^(Alternate-Recipient|Antivirus|Approved|Delivery-Notification|Disclose-Recipients|Error-path|Language|Location|Mime-Subversion|Newsletter-ID|PID|Rot|UID|X-BounceTrace|X-CS-IP|X-Company-Address|X-Company-City|X-Company-Country|X-Company-State|X-Company-Zip|X-E(?:[Mm]ail)?|X-Encoding|X-Originating-Company|X-RMD-Text|X-SG4|X-SP-Track-ID|X-Webmail-Time|X-bounce-to):/mi
 
 # bug 2004 - trivial rules
 rawbody T_HTML_FONT_SIZE_0PX	/<font\b[^>]+0px/i
@@ -430,21 +400,5 @@ rawbody T_HTML_FONT_COLOR_WHITE	/<font\b[^>]+white/i
 ########################################################################
 
 # case matters for this one
-uri T_URI_UPPER_LOWER_01	m{(?i:https?)://([A-Z][a-z]+\.)+\S+\.(?:com|biz|info)}
-uri T_URI_UPPER_LOWER_02	m{(?i:https?)://([A-Z][a-z]+\.){2,}\S+\.(?:com|biz|info)}
-uri T_URI_UPPER_LOWER_03	m{(?i:https?)://([A-Z][a-z]+\.){1,2}\S+\.(?:com|biz|info)}
-uri T_URI_UPPER_LOWER_04	m{(?i:https?)://([A-Z][a-z]+\.)+\S+\.com}
-uri T_URI_UPPER_LOWER_05	m{(?i:https?)://([A-Z][a-z]+\.){2,}\S+\.com}
-uri T_URI_UPPER_LOWER_06	m{(?i:https?)://([A-Z][a-z]+\.){1,2}\S+\.com}
-uri T_URI_UPPER_LOWER_07	m{(?i:https?)://([A-Z][a-z]+\.)+\S+\.[a-z]{2,4}\b}
-uri T_URI_UPPER_LOWER_08	m{(?i:https?)://([A-Z][a-z]+\.){2,}\S+\.[a-z]{2,4}\b}
-uri T_URI_UPPER_LOWER_09	m{(?i:https?)://([A-Z][a-z]+\.){1,2}\S+\.[a-z]{2,4}\b}
-uri T_URI_UPPER_LOWER_10	m{(?i:https?)://([A-Z][a-z]+\.)+[A-Za-z\d-]+\.(?:com|biz|info)}
-uri T_URI_UPPER_LOWER_11	m{(?i:https?)://([A-Z][a-z]+\.){2,}[A-Za-z\d-]+\.(?:com|biz|info)}
-uri T_URI_UPPER_LOWER_12	m{(?i:https?)://([A-Z][a-z]+\.){1,2}[A-Za-z\d-]+\.(?:com|biz|info)}
-uri T_URI_UPPER_LOWER_13	m{(?i:https?)://([A-Z][a-z]+\.)+[A-Za-z\d-]+\.com}
-uri T_URI_UPPER_LOWER_14	m{(?i:https?)://([A-Z][a-z]+\.){2,}[A-Za-z\d-]+\.com}
-uri T_URI_UPPER_LOWER_15	m{(?i:https?)://([A-Z][a-z]+\.){1,2}[A-Za-z\d-]+\.com}
-uri T_URI_UPPER_LOWER_16	m{(?i:https?)://([A-Z][a-z]+\.)+[A-Za-z\d-]+\.[a-z]{2,4}\b}
-uri T_URI_UPPER_LOWER_17	m{(?i:https?)://([A-Z][a-z]+\.){2,}[A-Za-z\d-]+\.[a-z]{2,4}\b}
-uri T_URI_UPPER_LOWER_18	m{(?i:https?)://([A-Z][a-z]+\.){1,2}[A-Za-z\d-]+\.[a-z]{2,4}\b}
+uri T_URI_UPPER_LOWER_A	m{(?i:https?)://([A-Z][a-z]+\.){2,}[A-Za-z\d-]+\.[a-z]{2,4}\b}
+uri T_URI_UPPER_LOWER_B	m{(?i:https?)://([A-Z][a-z]+\.){2,}[A-Za-z\d-]+\.[a-z]{2,4}(?:[?/]|$)}
