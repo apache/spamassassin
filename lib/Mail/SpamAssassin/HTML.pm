@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.36 2002/10/19 02:24:16 quinlan Exp $
+# $Id: HTML.pm,v 1.37 2002/10/20 05:32:18 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -269,22 +269,6 @@ sub html_tests {
   {
     if (/\?/ || (/[a-f\d]{12,}/i && ! /\.(?:jpe?g|gif|png)$/i)) {
       $self->{html}{web_bugs} = 1;
-    }
-  }
-
-  if ($tag =~ /^(?:body|table|tr|td|th)$/ && 
-      exists $attr->{background} && ($_ = $attr->{background}))
-  {
-    if (/\?/ || (/[a-f\d]{12,}/i && ! /\.(?:jpe?g|gif|png)$/i)) {
-      $self->{html}{web_bugs_background} = 1;
-    }
-  }
-
-  if ($tag eq "img" &&
-      exists $attr->{src} && ($_ = $attr->{src}))
-  {
-    if (/\?/ || (/[a-f\d]{12,}/i && ! /\.(?:jpe?g|gif|png)$/i)) {
-      $self->{html}{web_bugs_src} = 1;
     }
   }
 
