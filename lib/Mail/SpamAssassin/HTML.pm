@@ -263,7 +263,7 @@ sub parse {
   # undecoded UTF-8 will give garbage when decoding entities at ..'
   {
     local $SIG{__WARN__} = sub {
-      warn @_ unless ($_[0] =~ /^Parsing of undecoded UTF-8/);
+      warn @_ unless (defined $_[0] && $_[0] =~ /^Parsing of undecoded UTF-8/);
     };
 
     $self->SUPER::parse(pack('C0A*', $text));
