@@ -744,7 +744,7 @@ describe FINANCIAL 		Financial Freedom
 body FORWARD_LOOKING	        /\bcontains forward-looking statements\b/i
 describe FORWARD_LOOKING	Stock Disclaimer Statement
 
-body SATISFACTION	        /\bsatisfaction .{0,9}g(?:ua|au)ranteed|not .{0,9}satisfied\b/i
+body SATISFACTION		/\bsatisfaction .{0,9}g(?:ua|au)ranteed\b/i
 describe SATISFACTION		Satisfaction Guaranteed
 
 body PRIZE		        /\bclaim.{0,9} prize/i
