@@ -9,10 +9,12 @@ Note for Users Upgrading to SpamAssassin 3.0.0
   modules as they may have changed from old versions.  The INSTALL
   document has the modules and version requirements listed.
 
-- SpamAssassin 3.0.0 has a significantly different API (Application
-  Program Interface) from the 2.x series of code.  This means that if you
-  use SpamAssassin through a third-party utility (milter, etc,) you need
-  to make sure you have an updated version which supports 3.0.0.
+- SpamAssassin 3.0.0 has a significantly different API (Application Program
+  Interface) from the 2.x series of code.  This means that if you use
+  SpamAssassin through a third-party utility (milter, etc,) you need to make
+  sure you have an updated version which supports 3.0.0, such as:
+  
+    - MIMEDefang: version 2.42 or later.
 
 - The --auto-whitelist, --whitelist and -a options for "spamd" and
   "spamassassin" to turn on the auto-whitelist have been removed and
