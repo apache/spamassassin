@@ -3367,14 +3367,14 @@ sub check_host_domain_ratio {
       }
 
       # cache both the word and the new RE
-      push(@{$obfu_cache{$word}}, qr/\b$word\b/i, qr/\b$new\b/i);
+      $obfu_cache{$word} = qr/\b(?!$word)$new\b/i;
     }
 
     # this word will be cached now, use that version
-    ($word,$new) = @{$obfu_cache{$word}};
+    $new = $obfu_cache{$word};
 
     foreach (@{$body}) {
-      if (/$new/ && !/$word/) {
+      if (/$new/) {
 	#warn ">> $new\n$_\n\n";
         return 1;
       }
