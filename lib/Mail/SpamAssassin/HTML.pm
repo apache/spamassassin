@@ -903,35 +903,7 @@ sub html_tests {
 
     # begin test code
     $self->{html}{t_title}->[$self->{html}{title_index}] = "";
-    # end test code
-
-    # begin test code
-    if (exists $self->{html}{"inside_body"} &&
-	$self->{html}{"inside_body"} > 0)
-    {
-      $self->{html}{t_title_misplaced_1}++;
-    }
-    if (!(exists $self->{html}{"inside_head"} &&
-	  $self->{html}{"inside_head"} > 0))
-    {
-      $self->{html}{t_title_misplaced_2}++;
-    }
-    if (exists $self->{html}{"inside_body"} &&
-	$self->{html}{"inside_body"} > 0 &&
-	!(exists $self->{html}{"inside_head"} &&
-	  $self->{html}{"inside_head"} > 0))
-    {
-      $self->{html}{t_title_misplaced_3}++;
-    }
-    if ((exists $self->{html}{"inside_body"} &&
-	$self->{html}{"inside_body"} > 0) ||
-	!(exists $self->{html}{"inside_head"} &&
-	  $self->{html}{"inside_head"} > 0))
-    {
-      $self->{html}{t_title_misplaced_4}++;
-    }
-    if ($self->{html}{title_index} > 0)
-    {
+    if ($self->{html}{title_index} > 0) {
       $self->{html}{t_title_extra}++;
     }
     # end test code

@@ -60,21 +60,15 @@ header T_TIME_OVER_4444	ALL =~ /\D23[67][0-9][0-9][0-9]\D/
 # replacements for PORN_4; split out sub-patterns as some are more FP-prone
 # than others.
 uri T_PORN_URL_XXX	/^https?:\/\/[\w\.-]*xxx[\w-]*\./
-uri T_PORN_URL_SEX	/^https?:\/\/[\w\.-]*(?<!es|ba)(?<!dle|sus)sex[\w-]*\./
-uri T_PORN_URL_SEX2	/^https?:\/\/[\w\.-]*(?<!es|ba)(?<!dle|sus)sex(?!press)[\w-]*\./
+uri T_PORN_URL_SEX	/^https?:\/\/[\w\.-]*(?<!es|ba)(?<!dle|sus)sex(?!press)[\w-]*\./
 uri T_PORN_URL_ANAL	/^https?:\/\/[\w\.-]*anal(?!og|y[sz])[\w-]*\./
 uri T_PORN_URL_SLUT	/^https?:\/\/[\w\.-]*slut[\w-]*\./
 uri T_PORN_URL_CUM	/^https?:\/\/[\w\.-]*(?<!cir)(?<!\bdo)cum(?!ul|be?r|b?en)[\w-]*\./
 uri T_PORN_URL_LUST	/^https?:\/\/[\w\.-]*lust(?!(?<=illust)(?:rat|rious)|(?<=clust)er)[\w-]*\./
 uri T_PORN_URL_PANT	/^https?:\/\/[\w\.-]*pant(?:y|ies)[\w-]*\./
 uri T_PORN_URL_SUCK	/^https?:\/\/[\w\.-]*suck[\w-]*\./
-uri T_PORN_URL_TEEN1	/^https?:\/\/[\w\.-]*(?<!thir|four|eigh|nine)(?<!fif|six)(?<!seven)teen[\w-]*\./
-# yes, some bright lad made up "eleventeenth" as a word
-uri T_PORN_URL_TEEN2	/^https?:\/\/[\w\.-]*(?<!thir|four|eigh|nine)(?<!fif|six)(?<!seven)(?<!eleven|twelve)teen[\w-]*\./
-uri T_PORN_URL_TEEN3	/^https?:\/\/[\w\.-]*(?<!thir|four|eigh|nine)(?<!fif|six)(?<!seven)teen(?!th)[\w-]*\./
+uri T_PORN_URL_TEEN	/^https?:\/\/[\w\.-]*(?<!thir|four|eigh|nine)(?<!fif|six)(?<!seven)teen(?!th)[\w-]*\./
 uri T_PORN_URL_MISC	/^https?:\/\/[\w\.-]*(pussy|nympho|porn|hard-?core|taboo|whore|voyeur|lesbian|gurlpages|naughty|lolita|schoolgirl|kooloffer|erotic)[\w-]*\./
-
-header T_KOREAN_UCE_SUBJECT	Subject:raw =~ /\?B\?KLGksO0p/
 
 header T_DATE_DOUBLE_DASH	Date =~ /:\d\d --\d\d\d\d$/
 
@@ -210,14 +204,6 @@ meta T_ENTITY_OTHER2_M		(T_ENTITY_OTHER2_R || T_ENTITY_OTHER2_B)
 ########################################################################
 # HTML title rules
 
-# title not in head and/or in body
-body T_HTML_TITLE_MISPLACED_1	eval:html_test('t_title_misplaced_1')
-body T_HTML_TITLE_MISPLACED_2	eval:html_test('t_title_misplaced_2')
-body T_HTML_TITLE_MISPLACED_3	eval:html_test('t_title_misplaced_3')
-body T_HTML_TITLE_MISPLACED_4	eval:html_test('t_title_misplaced_4')
-meta T_HTML_TITLE_MISPLACED_M1	(T_HTML_TITLE_MISPLACED_1 && T_HTML_TITLE_MISPLACED_2)
-meta T_HTML_TITLE_MISPLACED_M2	(T_HTML_TITLE_MISPLACED_1 || T_HTML_TITLE_MISPLACED_2)
-
 # this won't work well until we parse HTML documents separately
 body T_HTML_TITLE_EXTRA		eval:html_test('t_title_extra')
 
@@ -312,14 +298,18 @@ header T_NETIP_RCVD		Received =~ /netIP with HTTP\;/
 header T_NETIP_BOUND		Content-Type =~ /boundary="--ALT--[A-Z]{4}\d/
 
 # several variants of same rule idea
-header T_XORIGIP_INVALID	X-Originating-IP =~ /[^\[\]\s\.\d]/
-header T_XORIGIP_BAD		X-Originating-IP !~ /\[?(?:\d{1,3}\.){3}\d{1,3}\]?/ [if-unset: 0.0.0.0] 
-header T_XORIGIP_WRONG		X-Originating-IP !~ /^\[?(?:\d{1,3}\.){3}\d{1,3}\]?$/ [if-unset: 0.0.0.0] 
+header T_XORIGIP_NOT_IPV4_1		X-Originating-IP !~ /\[?(?:\d{1,3}\.){3}\d{1,3}\]?/ [if-unset: 0.0.0.0] 
+header T_XORIGIP_NOT_IPV4_2		X-Originating-IP !~ /^\[?(?:\d{1,3}\.){3}\d{1,3}\]?$/ [if-unset: 0.0.0.0] 
+header T_XORIGIP_NOT_IPV4_3		X-Originating-IP !~ /^\s*\[?(?:\d{1,3}\.){3}\d{1,3}\]?\s*$/ [if-unset: 0.0.0.0] 
+header T_XORIGIP_NOT_IPV4_4		X-Originating-IP !~ /^[^\d.]*\[?(?:\d{1,3}\.){3}\d{1,3}\]?[^\d.]*$/ [if-unset: 0.0.0.0] 
+describe T_XORIGIP_NOT_IPV4	X-Originating-IP doesn't look like IPv4 address
 
 # some tests to catch long lines of random dictionary words
 # this could be slow, being a rawbody rule, but if it works well maybe
 # we should consider a way to spot these kinds of auto-generated
 # text patterns efficiently...
+# quinlan: I think the unique word tests might do a better job of this,
+#          this seems very specific to one spamware program.
 rawbody T_BAYESBUSTER_LINE_12	/^([a-z]{3,} ){12,}<[Bb][Rr]>$/
 rawbody T_BAYESBUSTER_LINE_15	/^([a-z]{3,} ){15,}<[Bb][Rr]>$/
 rawbody T_BAYESBUSTER_LINE_15I	/^([a-z]{3,} ){15,}<br>$/i
@@ -598,21 +588,12 @@ describe T_HTML_TAG_BALANCE_FONT_1	HTML is missing "font" close tags
 body T_HTML_TAG_BALANCE_FONT_2	eval:html_tag_balance('font', '> 1')
 describe T_HTML_TAG_BALANCE_FONT_2	HTML is missing some "font" close tags
 
-body T_HTML_TAG_BALANCE_DIV_0	eval:html_tag_balance('div', '< 0')
-describe T_HTML_TAG_BALANCE_DIV_0	HTML has excess "div" tags
-
 body T_HTML_TAG_BALANCE_DIV_1	eval:html_tag_balance('div', '!= 0')
 describe T_HTML_TAG_BALANCE_DIV_1	HTML has unbalanced "font" tags
-
-########################################################################
-
-header T_RCVD_BONUS_SPC_DATE	Received =~ /with SMTP;  \d\d \S\S\S /
 
 body T_HTML_TAG_BALANCE_DIV_2	eval:html_tag_balance('div', '> 0')
 describe T_HTML_TAG_BALANCE_DIV_2	HTML is missing "div" tags
 
-body T_HTML_FONT_SMALL_SIZE	eval:html_eval('min_size', '< 3')
-body T_HTML_FONT_SMALL_SIZE_0	eval:html_eval('min_size', '< 2')
 body T_HTML_FONT_SMALL_SIZE_1	eval:html_eval('min_size', '< 1')
 body T_HTML_FONT_SMALL_SIZE_2	eval:html_eval('min_size', '< 0')
 body T_HTML_FONT_SMALL_SIZE_3	eval:html_eval('min_size', '< -1')
@@ -625,14 +606,16 @@ body T_HTML_FONT_LARGE_SIZE_2	eval:html_eval('max_size', '> 6')
 body T_HTML_FONT_LARGE_SIZE_3	eval:html_eval('max_size', '> 7')
 body T_HTML_FONT_LARGE_SIZE_4	eval:html_eval('max_size', '> 8')
 
+########################################################################
+
+header T_RCVD_BONUS_SPC_DATE	Received =~ /with SMTP;  \d\d \S\S\S /
+
 # bug 1985
 body T_URGENT_BIZ /urgent.{0,16}(?:assistance|business|buy|confidential|notice|proposal|reply|request|response)/i
 
 # bug 2950
 uri T_GOOGLE_IMAGES	m{^http://images\.google(\.\S+)?\.[a-z]{2,3}/imgres\?}i
 uri T_GOOGLE_REDIR	m{^http://www\.google(\.\S+)?\.[a-z]{2,3}/url\?}i
-uri T_REDIRECTOR_1	m{^https?://.*https?://}i
-uri T_REDIRECTOR_2	m{^(?:[^:/?\#]+)://.*(?:[^:/?\#]+)://}
 
 header T_RATWARE_FAKED_AOL_UA	User-Agent =~ /^AOL /
 describe T_RATWARE_FAKED_AOL_UA	AOL clients don't use the User-Agent header
