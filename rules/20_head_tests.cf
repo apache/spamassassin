@@ -249,7 +249,7 @@ tflags X_OSIRU_SPAMWARE_SITE    net
 
 header X_OSIRU_DUL_FH		rbleval:check_rbl('osirusoft-dul-firsthop', 'relays.osirusoft.com.')
 describe X_OSIRU_DUL_FH		Received from first hop dialup listed in relays.osirusoft.com
-tflags X_OSIRU_DUL_FH           net
+tflags X_OSIRU_DUL_FH           net nice
 
 
 # Now, single zone BLs follow:
