@@ -758,7 +758,7 @@ determine that SpamAssassin is running.
       next;
     }
 
-=item report_safe_copy_headers header_name
+=item report_safe_copy_headers header_name ...
 
 If using report_safe, a few of the headers from the original message
 are copied into the wrapper header (From, To, Cc, Subject, Date, etc.)
