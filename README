@@ -113,7 +113,7 @@ the below lines.  If you already have a .procmailrc file, add the lines
 to the top of your .procmailrc file:
 
 :0fw
-| /home/user/bin/SpamAssassin/spamassassin -P -c /home/user/bin/SpamAssassin/rules
+| /home/user/bin/SpamAssassin/spamassassin -c /home/user/bin/SpamAssassin/rules
 
   The above line filters all incoming mail through SpamAssassin and tags
 probable spam with a unique header.  If you would prefer to have spam
@@ -245,7 +245,7 @@ skipped.
     "-r/-w" options of the spamassassin program (reporting and replying,
     for spam-trap mail accounts).
 
-    If you use procmail, KMail, 'spamassassin -P', or you plan to use
+    If you use procmail, KMail, 'spamassassin', or you plan to use
     'spamd', you will *not* need these.
 
     Here's how to install them using CPAN.pm:
@@ -306,7 +306,7 @@ If you use KMail:
 
     The filter in question is "<any header><matches regexp> ."
 
-    The action is "<pipe through> spamassassin -P -F 0"
+    The action is "<pipe through> spamassassin"
 
     Then, in the advanced options, uncheck the "If this filter matches,
     stop processing here" box. If you keep this filter at the top, it will

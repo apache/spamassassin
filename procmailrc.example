@@ -1,8 +1,8 @@
-
+# Pipe the mail through spamassassin
 :0fw
-| spamassassin -P
+| spamassassin
 
+# Move it to the "caughtspam" mbox if it was tagged as spam
 :0:
 * ^X-Spam-Status: Yes
 caughtspam
-
