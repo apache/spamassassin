@@ -70,7 +70,7 @@ sub parse_headers {
   my ($prevhdr, $hdr, $val, $entry);
 
   while (defined ($_ = shift @{$self->{textarray}})) {
-    # warn "JMD $_";
+    # warn "parse_headers $_";
     if (/^\r*$/) { last; }
 
     $entry = $hdr = $val = undef;

@@ -209,6 +209,10 @@ skipped.
 
         dcc.rhyolite.com,-         RTT+0 ms    anon
 
+    Note that MIMEDefang users may need to set the 'dcc_path'
+    configuration setting, since MIMEDefang does not set a PATH by
+    default.
+
 
   - Pyzor    http://pyzor.sourceforge.net/
 
@@ -236,8 +240,12 @@ skipped.
 		/usr/lib/python2.2/site-packages/pyzor \
 		/usr/bin/pyzor /usr/bin/pyzord
 
-   Read the INSTALL document if you want to setup your own Pyzor server and
-   signature store.  Otherwise, you can just use the public servers.
+    Read the INSTALL document if you want to setup your own Pyzor server and
+    signature store.  Otherwise, you can just use the public servers.
+
+    Note that MIMEDefang users may need to set the 'pyzor_path'
+    configuration setting, since MIMEDefang does not set a PATH by
+    default.
 
 
   - Mail::Audit, Mail::Internet, Net::SMTP	(from CPAN)
