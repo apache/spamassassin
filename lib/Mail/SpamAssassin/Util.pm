@@ -843,7 +843,7 @@ sub uri_list_canonify {
     # and add back to the array.  the foreach loop will go over those
     # and deal appropriately.
     # bug 3308: redirectors like yahoo only need one '/' ... <grrr>
-    if ($nuri =~ m{^https?://.+?(https?:/{0,2}.+)$}) {
+    if ($nuri =~ m{^https?://.+?(https?:/{0,2}.+)$}i) {
       push(@uris, $1);
     }
   }
