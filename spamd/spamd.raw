@@ -86,8 +86,9 @@ my %opt = (
 # Testing for taintedness only works before detainting %ENV
 Mail::SpamAssassin::Util::am_running_in_taint_mode();
 
-# First untaint the environment -- need to do this before Cwd::cwd(), else
-# it will croak.
+# First clean PATH and untaint the environment -- need to do this before
+# Cwd::cwd(), else it will croak.
+Mail::SpamAssassin::Util::clean_path_in_taint_mode();
 Mail::SpamAssassin::Util::untaint_var(\%ENV);
 
 # The zeroth argument will be replaced in daemonize().
@@ -415,8 +416,6 @@ if ($opt{'username'}) {
     $setuid_to_user = 1;
   }
 }
-
-Mail::SpamAssassin::Util::clean_path_in_taint_mode();
 
 # restart handling.  do this here before compile_now() as that may
 # take a while.
