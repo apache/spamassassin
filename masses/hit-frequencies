@@ -62,7 +62,8 @@ foreach my $test (sort {
   my $fa = $freq{$test};
   my $fs = $freq_spam{$test}; $fs ||= 0;
   my $fn = $freq_nonspam{$test}; $fn ||= 0;
-  $score{$test} ||= 1.0;
+
+  if (!defined $score{$test}) { $score{$test} ||= 1.0; }
 
   # adjust based on corpora sizes (and cvt to % while we're at it)
   my $fsadj = ($fs / ($num_spam)) * 100.0;
