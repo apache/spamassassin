@@ -136,10 +136,15 @@ sub tie_db_readonly {
 
   $self->read_db_configs();
 
-  my $path = $main->sed_path ($main->{conf}->{bayes_path});
+  my $path = $main->sed_path($main->{conf}->{bayes_path});
 
-  my $found=0;
-  for my $ext (@DB_EXTENSIONS) { if (-f $path.'_toks'.$ext) { $found=1; last; } }
+  my $found = 0;
+  for my $ext (@DB_EXTENSIONS) {
+    if (-f $path.'_toks'.$ext) {
+      $found = 1;
+      last;
+    }
+  }
 
   if (!$found) {
     dbg("bayes: no dbs present, cannot tie DB R/O: ${path}_toks");
@@ -152,7 +157,7 @@ sub tie_db_readonly {
     dbg("bayes: $$ tie-ing to DB file R/O $name");
     # untie %{$self->{$db_var}} if (tied %{$self->{$db_var}});
     tie %{$self->{$db_var}},"DB_File",$name, O_RDONLY,
-		 (oct ($main->{conf}->{bayes_file_mode}) & 0666)
+		 (oct($main->{conf}->{bayes_file_mode}) & 0666)
        or goto failed_to_tie;
   }
 
@@ -160,7 +165,7 @@ sub tie_db_readonly {
   dbg("bayes: found bayes db version ".$self->{db_version});
 
   # If the DB version is one we don't understand, abort!
-  if ( $self->_check_db_version() != 0 ) {
+  if ($self->_check_db_version() != 0) {
     warn("bayes: bayes db version ".$self->{db_version}." is not able to be used, aborting!");
     $self->untie_db();
     return 0;
@@ -198,7 +203,7 @@ sub tie_db_writable {
   # if we've already tied the db's using the same mode
   # (locked/unlocked) as we want now, freshen the lock and return.
   if ($self->{already_tied} && $self->{is_locked} == 1) {
-    $main->{locker}->refresh_lock ($self->{locked_file});
+    $main->{locker}->refresh_lock($self->{locked_file});
     return 1;
   }
 
@@ -209,16 +214,21 @@ sub tie_db_writable {
 
   $self->read_db_configs();
 
-  my $path = $main->sed_path ($main->{conf}->{bayes_path});
+  my $path = $main->sed_path($main->{conf}->{bayes_path});
 
-  my $found=0;
-  for my $ext (@DB_EXTENSIONS) { if (-f $path.'_toks'.$ext) { $found=1; last; } }
+  my $found = 0;
+  for my $ext (@DB_EXTENSIONS) {
+    if (-f $path.'_toks'.$ext) {
+      $found = 1;
+      last;
+    }
+  }
 
-  my $parentdir = dirname ($path);
+  my $parentdir = dirname($path);
   if (!-d $parentdir) {
     # run in an eval(); if mkpath has no perms, it calls die()
     eval {
-      mkpath ($parentdir, 0, (oct ($main->{conf}->{bayes_file_mode}) & 0777));
+      mkpath($parentdir, 0, (oct($main->{conf}->{bayes_file_mode}) & 0777));
     };
   }
 
@@ -228,7 +238,7 @@ sub tie_db_writable {
   } else {
     $tout = 10;
   }
-  if ($main->{locker}->safe_lock ($path, $tout)) {
+  if ($main->{locker}->safe_lock($path, $tout)) {
     $self->{locked_file} = $path;
     $self->{is_locked} = 1;
   } else {
@@ -242,7 +252,7 @@ sub tie_db_writable {
     my $db_var = 'db_'.$dbname;
     dbg("bayes: $$ tie-ing to DB file R/W $name");
     tie %{$self->{$db_var}},"DB_File",$name, O_RDWR|O_CREAT,
-		 (oct ($main->{conf}->{bayes_file_mode}) & 0666)
+		 (oct($main->{conf}->{bayes_file_mode}) & 0666)
        or goto failed_to_tie;
   }
   umask $umask;
@@ -255,11 +265,11 @@ sub tie_db_writable {
   # DB version update and do it if necessary if either has a problem,
   # fail immediately
   #
-  if ( $found && !$self->_upgrade_db() ) {
+  if ($found && !$self->_upgrade_db()) {
     $self->untie_db();
     return 0;
   }
-  elsif ( !$found ) { # new DB, make sure we know that ...
+  elsif (!$found) { # new DB, make sure we know that ...
     $self->{db_version} = $self->{db_toks}->{$DB_VERSION_MAGIC_TOKEN} = $self->DB_VERSION;
     $self->{db_toks}->{$NTOKENS_MAGIC_TOKEN} = 0; # no tokens in the db ...
     dbg("bayes: new db, set db version ".$self->{db_version}." and 0 tokens");
@@ -280,7 +290,7 @@ failed_to_tie:
   }       
 
   if ($self->{is_locked}) {
-    $self->{bayes}->{main}->{locker}->safe_unlock ($self->{locked_file});
+    $self->{bayes}->{main}->{locker}->safe_unlock($self->{locked_file});
     $self->{is_locked} = 0;
   }
   warn "bayes: cannot open bayes databases ${path}_* R/W: tie failed: $err\n";
@@ -304,10 +314,10 @@ sub _upgrade_db {
   my $umask; # used later for umask modifications
 
   # If the DB is the latest version, no problem.
-  return 1 if ( $verschk == 0 );
+  return 1 if ($verschk == 0);
 
   # If the DB is a newer version that we know what to do with ... abort!
-  if ( $verschk == 1 ) {
+  if ($verschk == 1) {
     warn("bayes: bayes db version ".$self->{db_version}." is newer than we understand, aborting!");
     return 0;
   }
@@ -321,25 +331,25 @@ sub _upgrade_db {
   # since DB_File will not shrink a database (!!), we need to *create*
   # a new one instead.
   my $main = $self->{bayes}->{main};
-  my $path = $main->sed_path ($main->{conf}->{bayes_path});
+  my $path = $main->sed_path($main->{conf}->{bayes_path});
   my $name = $path.'_toks';
 
   # older version's journal files are likely not in the same format as the new ones, so remove it.
   my $jpath = $self->_get_journal_filename();
-  if ( -f $jpath ) {
+  if (-f $jpath) {
     dbg("bayes: old journal file found, removing");
-    warn "bayes: couldn't remove $jpath: $!" if ( !unlink $jpath );
+    warn "bayes: couldn't remove $jpath: $!" if (!unlink $jpath);
   }
 
-  if ( $self->{db_version} < 2 ) {
+  if ($self->{db_version} < 2) {
     dbg("bayes: upgrading database format from v".$self->{db_version}." to v2");
     $self->set_running_expire_tok();
 
-    my($DB_NSPAM_MAGIC_TOKEN, $DB_NHAM_MAGIC_TOKEN, $DB_NTOKENS_MAGIC_TOKEN);
-    my($DB_OLDEST_TOKEN_AGE_MAGIC_TOKEN, $DB_LAST_EXPIRE_MAGIC_TOKEN);
+    my ($DB_NSPAM_MAGIC_TOKEN, $DB_NHAM_MAGIC_TOKEN, $DB_NTOKENS_MAGIC_TOKEN);
+    my ($DB_OLDEST_TOKEN_AGE_MAGIC_TOKEN, $DB_LAST_EXPIRE_MAGIC_TOKEN);
 
     # Magic tokens for version 0, defined as '**[A-Z]+'
-    if ( $self->{db_version} == 0 ) {
+    if ($self->{db_version} == 0) {
       $DB_NSPAM_MAGIC_TOKEN			= '**NSPAM';
       $DB_NHAM_MAGIC_TOKEN			= '**NHAM';
       $DB_NTOKENS_MAGIC_TOKEN			= '**NTOKENS';
@@ -367,7 +377,7 @@ sub _upgrade_db {
     my %new_toks;
     $umask = umask 0;
     $res = tie %new_toks, "DB_File", "${name}.new", O_RDWR|O_CREAT|O_EXCL,
-          (oct ($main->{conf}->{bayes_file_mode}) & 0666);
+          (oct($main->{conf}->{bayes_file_mode}) & 0666);
     umask $umask;
     return 0 unless $res;
     undef $res;
@@ -390,8 +400,8 @@ sub _upgrade_db {
     while (($tok, $packed) = each %{$self->{db_toks}}) {
       next if ($tok =~ /^(?:\*\*[A-Z]+$|\015\001\007\011\003)/); # skip magic tokens
 
-      my ($ts, $th, $atime) = $self->tok_unpack ($packed);
-      $new_toks{$tok} = $self->tok_pack ($ts, $th, $newatime);
+      my ($ts, $th, $atime) = $self->tok_unpack($packed);
+      $new_toks{$tok} = $self->tok_pack($ts, $th, $newatime);
 
       # Refresh the lock every so often...
       if (($count++ % 1000) == 0) {
@@ -412,9 +422,9 @@ sub _upgrade_db {
 
     # older versions used scancount, so kill the stupid little file ...
     my $msgc = $path.'_msgcount';
-    if ( -f $msgc ) {
+    if (-f $msgc) {
       dbg("bayes: old msgcount file found, removing");
-      if ( !unlink $msgc ) {
+      if (!unlink $msgc) {
         warn "bayes: couldn't remove $msgc: $!";
       }
     }
@@ -433,7 +443,7 @@ sub _upgrade_db {
     # re-tie to the new db in read-write mode ...
     $umask = umask 0;
     $res = tie %{$self->{db_toks}},"DB_File", $name, O_RDWR|O_CREAT,
-	 (oct ($main->{conf}->{bayes_file_mode}) & 0666);
+	 (oct($main->{conf}->{bayes_file_mode}) & 0666);
     umask $umask;
     return 0 unless $res;
     undef $res;
@@ -443,7 +453,7 @@ sub _upgrade_db {
   }
 
   # Version 3 of the database converts all existing tokens to SHA1 hashes
-  if ( $self->{db_version} == 2 ) {
+  if ($self->{db_version} == 2) {
     dbg("bayes: upgrading database format from v".$self->{db_version}." to v3");
     $self->set_running_expire_tok();
 
@@ -465,7 +475,7 @@ sub _upgrade_db {
     my %new_toks;
     $umask = umask 0;
     $res = tie %new_toks, "DB_File", "${name}.new", O_RDWR|O_CREAT|O_EXCL,
-          (oct ($main->{conf}->{bayes_file_mode}) & 0666);
+          (oct($main->{conf}->{bayes_file_mode}) & 0666);
     umask $umask;
     return 0 unless $res;
     undef $res;
@@ -510,7 +520,7 @@ sub _upgrade_db {
       my $newf = $name.'.new'.$ext;
       my $oldf = $name.$ext;
       next unless (-f $newf);
-      if (!rename ($newf, $oldf)) {
+      if (!rename($newf, $oldf)) {
         warn "bayes: rename $newf to $oldf failed: $!\n";
         return 0;
       }
@@ -529,7 +539,7 @@ sub _upgrade_db {
     $self->{db_version} = 3; # need this for other functions which check
   }
 
-  # if ( $self->{db_version} == 3 ) {
+  # if ($self->{db_version} == 3) {
   #   ...
   #   $self->{db_version} = 4; # need this for other functions which check
   # }
@@ -581,10 +591,11 @@ sub calculate_expire_delta {
     
     my ($ts, $th, $atime) = $self->tok_unpack ($packed);
 
-    # Go through from $start * 1 to $start * 512, mark how many tokens we would expire
+    # Go through from $start * 1 to $start * 512, mark how many tokens
+    # we would expire
     my $token_age = $newest_atime - $atime;
-    for( my $i = 1; $i <= $max_expire_mult; $i<<=1 ) {
-      if ( $token_age >= $start * $i ) {
+    for (my $i = 1; $i <= $max_expire_mult; $i<<=1) {
+      if ($token_age >= $start * $i) {
         $delta{$i}++;
       }
       else {
@@ -610,7 +621,7 @@ sub token_expiration {
   # since DB_File will not shrink a database (!!), we need to *create*
   # a new one instead.
   my $main = $self->{bayes}->{main};
-  my $path = $main->sed_path ($main->{conf}->{bayes_path});
+  my $path = $main->sed_path($main->{conf}->{bayes_path});
 
   # use a temporary PID-based suffix just in case another one was
   # created previously by an interrupted expire
@@ -632,7 +643,8 @@ sub token_expiration {
   my $showdots = $opts->{showdots};
   if ($showdots) { print STDERR "\n"; }
 
-  # We've chosen a new atime delta if we've gotten here, so record it for posterity.
+  # We've chosen a new atime delta if we've gotten here, so record it
+  # for posterity.
   $new_toks{$LAST_ATIME_DELTA_MAGIC_TOKEN} = $newdelta;
 
   # Figure out how old is too old...
@@ -647,9 +659,10 @@ sub token_expiration {
 
     if ($atime < $too_old) {
       $deleted++;
-    } else {
+    }
+    else {
       # if token atime > newest, reset to newest ...
-      if ( $atime > $vars[10] ) {
+      if ($atime > $vars[10]) {
         $atime = $vars[10];
       }
 
@@ -739,17 +752,19 @@ sub token_expiration {
 sub sync_due {
   my ($self) = @_;
 
-  return 0 if ( $self->{db_version} < $self->DB_VERSION ); # don't bother doing old db versions
+  # don't bother doing old db versions
+  return 0 if ($self->{db_version} < $self->DB_VERSION);
 
   my $conf = $self->{bayes}->{main}->{conf};
-  return 0 if ( $conf->{bayes_journal_max_size} == 0 );
+  return 0 if ($conf->{bayes_journal_max_size} == 0);
 
   my @vars = $self->get_storage_variables();
   dbg("bayes: DB journal sync: last sync: ".$vars[7],'bayes','-1');
 
   ## Ok, should we do a sync?
 
-  # Not if the journal file doesn't exist, it's not a file, or it's 0 bytes long.
+  # Not if the journal file doesn't exist, it's not a file, or it's 0
+  # bytes long.
   return 0 unless (stat($self->_get_journal_filename()) && -f _);
 
   # Yes if the file size is larger than the specified maximum size.
@@ -839,9 +854,9 @@ sub get_storage_variables {
 
   my $db_ver = $self->{db_toks}->{$DB_VERSION_MAGIC_TOKEN};
 
-  if ( !$db_ver || $db_ver =~ /\D/ ) { $db_ver = 0; }
+  if (!$db_ver || $db_ver =~ /\D/) { $db_ver = 0; }
 
-  if ( $db_ver >= 2 ) {
+  if ($db_ver >= 2) {
     my $DB2_LAST_ATIME_DELTA_MAGIC_TOKEN	= "\015\001\007\011\003LASTATIMEDELTA";
     my $DB2_LAST_EXPIRE_MAGIC_TOKEN		= "\015\001\007\011\003LASTEXPIRE";
     my $DB2_LAST_EXPIRE_REDUCE_MAGIC_TOKEN	= "\015\001\007\011\003LASTEXPIREREDUCE";
@@ -867,7 +882,7 @@ sub get_storage_variables {
       $self->{db_toks}->{$DB2_NEWEST_TOKEN_AGE_MAGIC_TOKEN},
     );
   }
-  elsif ( $db_ver == 0 ) {
+  elsif ($db_ver == 0) {
     my $DB0_NSPAM_MAGIC_TOKEN = '**NSPAM';
     my $DB0_NHAM_MAGIC_TOKEN = '**NHAM';
     my $DB0_OLDEST_TOKEN_AGE_MAGIC_TOKEN = '**OLDESTAGE';
@@ -889,7 +904,7 @@ sub get_storage_variables {
       0,
     );
   }
-  elsif ( $db_ver == 1 ) {
+  elsif ($db_ver == 1) {
     my $DB1_NSPAM_MAGIC_TOKEN			= "\015\001\007\011\003NSPAM";
     my $DB1_NHAM_MAGIC_TOKEN			= "\015\001\007\011\003NHAM";
     my $DB1_OLDEST_TOKEN_AGE_MAGIC_TOKEN	= "\015\001\007\011\003OLDESTAGE";
@@ -912,8 +927,10 @@ sub get_storage_variables {
     );
   }
 
-  foreach ( @values ) {
-    if ( !$_ || $_ =~ /\D/ ) { $_ = 0; }
+  foreach (@values) {
+    if (!$_ || $_ =~ /\D/) {
+      $_ = 0;
+    }
   }
 
   return @values;
@@ -922,7 +939,7 @@ sub get_storage_variables {
 sub dump_db_toks {
   my ($self, $template, $regex, @vars) = @_;
 
-  while( my($tok, $tokvalue) = each %{$self->{db_toks}}) {
+  while (my ($tok, $tokvalue) = each %{$self->{db_toks}}) {
     next if ($tok =~ MAGIC_RE); # skip magic tokens
     next if (defined $regex && ($tok !~ /$regex/o));
 
@@ -1060,7 +1077,7 @@ sub cleanup {
 
     # argh, write failure, give up
     if (!defined $len || $len < 0) {
-      $len = 0 unless ( defined $len );
+      $len = 0 unless (defined $len);
       warn "bayes: write failed to Bayes journal $path ($len of $nbytes)!\n";
       last;
     }
@@ -1093,7 +1110,7 @@ sub cleanup {
 sub get_magic_re {
   my ($self) = @_;
 
-  if ( !defined $self->{db_version} || $self->{db_version} >= 1 ) {
+  if (!defined $self->{db_version} || $self->{db_version} >= 1) {
     return MAGIC_RE;
   }
 
@@ -1120,7 +1137,9 @@ sub _sync_journal {
   my $path = $self->_get_journal_filename();
 
   # if $path doesn't exist, or it's not a file, or is 0 bytes in length, return
-  if ( !stat($path) || !-f _ || -z _ ) { return 0; }
+  if (!stat($path) || !-f _ || -z _) {
+    return 0;
+  }
 
   eval {
     local $SIG{'__DIE__'};	# do not run user die() traps in here
@@ -1157,9 +1176,12 @@ sub _sync_journal_trapped {
   my $showdots = $opts->{showdots};
   my $retirepath = $path.".old";
 
-  # if $path doesn't exist, or it's not a file, or is 0 bytes in length, return
-  # we have to check again since the file may have been removed by a recent bayes db upgrade ...
-  if ( !stat($path) || !-f _ || -z _ ) { return 0; }
+  # if $path doesn't exist, or it's not a file, or is 0 bytes in length,
+  # return we have to check again since the file may have been removed
+  # by a recent bayes db upgrade ...
+  if (!stat($path) || !-f _ || -z _) {
+    return 0;
+  }
 
   if (!-r $path) { # will we be able to read the file?
     warn "bayes: bad permissions on journal, can't read: $path\n";
@@ -1193,7 +1215,7 @@ sub _sync_journal_trapped {
 
       if (/^t (\d+) (.+)$/) { # Token timestamp update, cache resultant entries
 	my $tok = pack("H*",$2);
-	$tokens{$tok} = $1+0 if ( !exists $tokens{$tok} || $1+0 > $tokens{$tok} );
+	$tokens{$tok} = $1+0 if (!exists $tokens{$tok} || $1+0 > $tokens{$tok});
       } elsif (/^c (-?\d+) (-?\d+) (\d+) (.+)$/) { # Add/full token update
 	my $tok = pack("H*",$4);
 	$self->tok_sync_counters ($1+0, $2+0, $3+0, $tok);
@@ -1202,7 +1224,7 @@ sub _sync_journal_trapped {
 	$self->tok_sync_nspam_nham ($1+0, $2+0);
 	$count++;
       } elsif (/^m ([hsf]) (.+)$/) { # update msgid seen database
-	if ( $1 eq "f" ) {
+	if ($1 eq "f") {
 	  $self->_seen_delete_direct($2);
 	}
 	else {
@@ -1218,7 +1240,7 @@ sub _sync_journal_trapped {
     # Now that we've determined what tokens we need to update and their
     # final values, update the DB.  Should be much smaller than the full
     # journal entries.
-    while( my($k,$v) = each %tokens ) {
+    while (my ($k,$v) = each %tokens) {
       $self->tok_touch_token ($v, $k);
 
       if ((++$count % 1000) == 0) {
@@ -1257,7 +1279,7 @@ sub tok_touch_token {
   # If the new atime is < the old atime, ignore the update
   # We figure that we'll never want to lower a token atime, so abort if
   # we try.  (journal out of sync, etc.)
-  return if ( $oldatime >= $atime );
+  return if ($oldatime >= $atime);
 
   $self->tok_put ($tok, $ts, $th, $atime);
 }
@@ -1269,7 +1291,7 @@ sub tok_sync_counters {
   $th += $dh; if ($th < 0) { $th = 0; }
 
   # Don't roll the atime of tokens backwards ...
-  $atime = $oldatime if ( $oldatime > $atime );
+  $atime = $oldatime if ($oldatime > $atime);
 
   $self->tok_put ($tok, $ts, $th, $atime);
 }
@@ -1327,7 +1349,7 @@ sub _get_journal_filename {
   my ($self) = @_;
 
   my $main = $self->{bayes}->{main};
-  return $main->sed_path ($main->{conf}->{bayes_path}."_journal");
+  return $main->sed_path($main->{conf}->{bayes_path}."_journal");
 }
 
 ###########################################################################
@@ -1437,7 +1459,7 @@ sub clear_database {
 
   return 0 unless ($self->tie_db_writable());
 
-  my $path = $self->{bayes}->{main}->sed_path ($self->{bayes}->{main}->{conf}->{bayes_path});
+  my $path = $self->{bayes}->{main}->sed_path($self->{bayes}->{main}->{conf}->{bayes_path});
 
   foreach my $dbname (@DBNAMES, 'journal') {
     my $name = $path.'_'.$dbname;
@@ -1493,7 +1515,7 @@ sub restore_database {
   }
 
   my $main = $self->{bayes}->{main};
-  my $path = $main->sed_path ($main->{conf}->{bayes_path});
+  my $path = $main->sed_path($main->{conf}->{bayes_path});
 
   # use a temporary PID-based suffix just in case another one was
   # created previously by an interrupted expire
@@ -1760,10 +1782,10 @@ sub tok_unpack {
   $value ||= 0;
 
   my ($packed, $atime);
-  if ( $self->{db_version} >= 1 ) {
+  if ($self->{db_version} >= 1) {
     ($packed, $atime) = unpack("CV", $value);
   }
-  elsif ( $self->{db_version} == 0 ) {
+  elsif ($self->{db_version} == 0) {
     ($packed, $atime) = unpack("CS", $value);
   }
 
@@ -1774,10 +1796,10 @@ sub tok_unpack {
   }
   elsif (($packed & FORMAT_FLAG) == TWO_LONGS_FORMAT) {
     my ($packed, $ts, $th, $atime);
-    if ( $self->{db_version} >= 1 ) {
+    if ($self->{db_version} >= 1) {
       ($packed, $ts, $th, $atime) = unpack("CVVV", $value);
     }
-    elsif ( $self->{db_version} == 0 ) {
+    elsif ($self->{db_version} == 0) {
       ($packed, $ts, $th, $atime) = unpack("CLLS", $value);
     }
     return ($ts || 0, $th || 0, $atime || 0);
@@ -1802,12 +1824,12 @@ sub tok_pack {
 ###########################################################################
 
 sub db_readable {
-  my($self) = @_;
+  my ($self) = @_;
   return $self->{already_tied};
 }
 
 sub db_writable {
-  my($self) = @_;
+  my ($self) = @_;
   return $self->{already_tied} && $self->{is_locked};
 }
 
