@@ -85,12 +85,6 @@ describe RATWARE_DIRECT_EMAIL	Bulk email software fingerprint (Direct Email) fou
 # (yet) chain from other meta tests.
 header __UNUSABLE_MSGID         eval:check_messageid_not_usable()
 
-# The Bat! forgeries
-header __THEBAT_MUA             X-Mailer =~ /The Bat!/
-header __THEBAT_MSGID           MESSAGEID =~ /^<\d+\.\d+\@\S+>$/m
-meta FORGED_MUA_THEBAT          (__THEBAT_MUA && !__THEBAT_MSGID)
-describe FORGED_MUA_THEBAT      Forged mail pretending to be from The Bat!
-
 # forgeries of MSN Explorer.  See "20_anti_ratware.cf" for the meta subrules
 meta FORGED_MUA_MSN		(__USER_AGENT_MSN && (!__HAS_XOAT || !__HAS_XOIP))
 describe FORGED_MUA_MSN		Forged mail pretending to be from MSN
@@ -148,12 +142,12 @@ header __BAT_MSGID		MESSAGEID =~ /^<\d{2,12}\.\d{14}\@\S+>$/
 header __CTYPE_CHARSET_QUOTED	Content-Type =~ /charset=\"/i
 header __CTYPE_HAS_BOUNDARY	Content-Type =~ /boundary/i
 header __BAT_BOUNDARY		Content-Type =~ /boundary=\"?-{10}/
-meta FORGED_BAT_MSGID		(__THEBAT_MUA && !__UNUSABLE_MSGID && !__BAT_MSGID)
-meta FORGED_BAT_CHARSET		(__THEBAT_MUA && __CTYPE_CHARSET_QUOTED)
-meta FORGED_BAT_BOUNDARY	(__THEBAT_MUA && __CTYPE_HAS_BOUNDARY && !__BAT_BOUNDARY)
-describe FORGED_BAT_MSGID	Forged mail pretending to be from The Bat! (mid)
-describe FORGED_BAT_CHARSET	Forged mail pretending to be from The Bat! (charset)
-describe FORGED_BAT_BOUNDARY	Forged mail pretending to be from The Bat! (boundary)
+meta FORGED_MUA_THEBAT		(__THEBAT_MUA && !__UNUSABLE_MSGID && !__BAT_MSGID)
+meta FORGED_MUA_THEBAT_CS	(__THEBAT_MUA && __CTYPE_CHARSET_QUOTED)
+meta FORGED_MUA_THEBAT_BOUND	(__THEBAT_MUA && __CTYPE_HAS_BOUNDARY && !__BAT_BOUNDARY)
+describe FORGED_MUA_THEBAT	Forged mail pretending to be from The Bat! (mid)
+describe FORGED_MUA_THEBAT_CS	Forged mail pretending to be from The Bat! (charset)
+describe FORGED_MUA_THEBAT_BOUND Forged mail pretending to be from The Bat! (boundary)
 
 
 meta FORGED_OUTLOOK_HTML	(__OUTLOOK_MUA && __MIME_HTML_ONLY)
