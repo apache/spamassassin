@@ -237,10 +237,10 @@ describe NOT_ADVISOR		Not registered investment advisor
 body FREE_CONSULTATION		/FREE CONSULTATION/i
 describe FREE_CONSULTATION	Offers a consultation for nothing
 
-body SOME_BREAKTHROUGH		/(?:science|medical|major|scientific|fundamental|technology|revolutionary)\s+breakthrough/i
+body SOME_BREAKTHROUGH		/\b(?:science|medical|major|scientific|fundamental|technology|revolutionary)\s+breakthrough/i
 describe SOME_BREAKTHROUGH	Describes some sort of breakthrough
 
-body SELECTED_YOU		/(?:you (?:have been|were) selected|we (?:have )?selected you)/i
+body SELECTED_YOU		/\b(?:you (?:have been|were) selected|\bwe (?:have )?selected you)/i
 describe SELECTED_YOU		They have selected you for something
 
 # somehow "/name.*\bcredit.?card\b/is" won't match, even if
@@ -718,7 +718,7 @@ describe LONG_DISTANCE		Long Distance Phone Offer
 body REVERSE_AGING	        /\breverses? aging\b/i
 describe REVERSE_AGING		Reverses Aging
 
-body HAIR_LOSS		        /\b(?:thinn?ing|restore|grow|new) hair|hair loss/i
+body HAIR_LOSS			/\b(?:thinn?ing|restore|grow|new) hair|\bhair loss/i
 describe HAIR_LOSS		Cures Baldness
 
 body CABLE_CONVERTER	        /\bcable (?:converter|descrambler)/i
@@ -745,7 +745,7 @@ describe WHILE_SUPPLIES		While Supplies Last
 body RICH		        /\b(?:make you rich|get rich quick)\b/i
 describe RICH			If only it were that easy
 
-body WINNER                     /\byou.{0,4} a winner|register to win/i
+body WINNER                     /\byou.{0,4} a winner|\bregister to win/i
 describe WINNER                 Claims you are a winner
 
 body YOU_WON                    /\byou(?:\'ve| have)? won[^\'\w]/i
@@ -853,7 +853,7 @@ describe VIAGRA_ONLINE          Fast Viagra Delivery
 body VIAGRA_COMBO               /\bviagra .{0,15}(?:phentermine|xenical|tenuate|zyban|propecia)\b/i
 describe VIAGRA_COMBO           Viagra and other drugs
 
-body ONLINE_PHARMACY		/online pharmacy|(?:drugs|medications) online/i
+body ONLINE_PHARMACY		/\bonline pharmacy|\b(?:drugs|medications) online/i
 describe ONLINE_PHARMACY	Online Pharmacy
 
 body CONFIDENTIAL_ORDER		/confidential.{0,9} order/i
@@ -865,8 +865,8 @@ describe HIDDEN_ASSETS          'Hidden' assets
 body SAVE_THOUSANDS             /\bsave (?:thousands|millions)\b/i
 describe SAVE_THOUSANDS         Save big money
 
-body MARKETING_PARTNERS         /(?:marketing|network) partner|partner (?:web)?site/i
-describe MARKETING_PARTNERS     Claims you registered with some kind of partner
+body MARKETING_PARTNERS		/\b(?:marketing|network) partner|\bpartner (?:web)?site/i
+describe MARKETING_PARTNERS	Claims you registered with some kind of partner
 
 # note the tense used, hopefully it won't hit FPs this way
 body PRIORITY_MAIL              /\b[Aa]ll\b.{0,20}\b[Oo]rders\b.{1,20}\bPriority Mail\b/
@@ -1093,5 +1093,6 @@ describe WE_HATE_SPAM2		Mailer is against spam -- aren't we all?
 body	UP_TO_OR_MORES		/up to \S+( \S+)? or more/i
 describe UP_TO_OR_MORES		Has generic 'up to X or more' noise
 
-body	VERB_UP_TO_OR_MORES	/(add|lose|make|save) up to \S+( \S+)? or more/i
+body VERB_UP_TO_OR_MORES	/\b(add|lose|make|save) up to \S+( \S+)? or more/i
 describe VERB_UP_TO_OR_MORES	Has '(add|lose|make|save) up to X or more' noise
+

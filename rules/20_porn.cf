@@ -54,10 +54,10 @@ describe BEST_PORN		Possible porn - Best, Largest Porn Collections
 body NASTY_GIRLS                /\b(?:horniest|nasty|nastiest|hottest|wildest|slutty|xxx+)\b.{0,9}\b(?:girl|women|teen|babe)/i
 describe NASTY_GIRLS            Possible porn - Nasty Girls
 
-body AMATEUR_PORN               /\bamateur .{0,9}(?:sex|porn|star|sites?|college|babes|action|pics|trash|gang|rape)|(?:real|best) amateur/i
+body AMATEUR_PORN               /\bamateur .{0,9}(?:sex|porn|star|sites?|college|babes|action|pics|trash|gang|rape)|\b(?:real|best) amateur/i
 describe AMATEUR_PORN           Possible porn - Amateur Porn
 
-body CELEBRITY_PORN		/\b(?:celebrity|celebrities|celebs).{0,15}(?:sex|porn|pics|caught|nude|exposed|content)|(?:steamy|hot|nude|shocking|free|h[a\@]rdcore) (?:celebrity|celebrities|celebs)\b/i
+body CELEBRITY_PORN		/\bceleb(?:rity|rities|s).{0,15}(?:sex|porn|pics|caught|nude|exposed|content)|\b(?:steamy|hot|nude|shocking|free|h[a\@]rdcore) celeb(?:rity|rities|s)/i
 describe CELEBRITY_PORN		Possible porn - Celebrity Porn
 
 body ADULT_SITE                 /\badult.{0,9}(?:entertainment|sites?|industry|only|business|membership)/i
@@ -69,7 +69,7 @@ describe MUST_BE_18             Possible porn - Must be 18
 body INSTANT_ACCESS             /\binstant access\b/i
 describe INSTANT_ACCESS         Possible porn - Offers Instant Access
 
-body RAPE                       /\b(?:virgin|gang|teen|amateur) rape|rape (?:sites?|sex)\b/i
+body RAPE                       /\b(?:virgin|gang|teen|amateur) rape|\brape (?:sites?|sex)\b/i
 describe RAPE                   Possible porn - Rape
 
 body LESBIAN                    /\b(?:xxx|horny|hot|young) lesbian|lesbian (?:sites?|action|bitch)/i
@@ -91,7 +91,7 @@ describe PORN_GALLERIES         Possible porn - Galleries of Pictures
 body PORN_15                    /(?:college|eating|licking|spears|tight|wet|shaved|voyeur|young|teen(?:age)?).{0,16}pussy/i
 describe PORN_15 		Possible porn - various types of feline
 
-body PORN_16                    /(?:nasty|teen|dir(?:ty|iest)?|little).{0,16}\bsluts?/i 
+body PORN_16			/\b(?:nasty|teen|dir(?:ty|iest)?|little).{0,16}\bsluts?/i 
 describe PORN_16 		Possible porn - nasty, dirty, little etc.
 
 body LOTS_OF_STUFF              /\b(?:\d{1,3}[,\.])+\d{3}.{0,20}\b(?:pics|pictures|images|photos|movies)/i         
