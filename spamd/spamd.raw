@@ -1041,9 +1041,8 @@ sub check {
   my $actual_length = 0;
   while ( $_ = $client->getline() ) {
     $actual_length += length($_);
-    last if (defined $expected_length && $actual_length >= $expected_length);
-
     push(@msglines, $_);    
+    last if (defined $expected_length && $actual_length >= $expected_length);
   }
   
   # Now parse *only* the message headers; the MIME tree won't be generated 
