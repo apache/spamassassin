@@ -1066,6 +1066,10 @@ sub sync_journal_trapped {
   my $showdots = $opts->{showdots};
   my $retirepath = $path.".old";
 
+  # if $path doesn't exist, or it's not a file, or is 0 bytes in length, return
+  # we have to check again since the file may have been removed by a recent bayes db upgrade ...
+  if ( !stat($path) || !-f _ || -z _ ) { return 0; }
+
   if (!-r $path) { # will we be able to read the file?
     warn "bayes: bad permissions on journal, can't read: $path\n";
     return 0;
