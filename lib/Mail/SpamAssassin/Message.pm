@@ -168,7 +168,7 @@ sub new {
     }
 
     # NB: Really need to figure out special folding rules here!
-    if ( $current =~ /^[ \t]+\S/ ) {
+    if ( $current =~ /^[ \t]/ ) {
       # append continuations if there's a header in process
       if ($header) {
         $header .= $current;
@@ -687,7 +687,12 @@ sub _parse_multipart {
 
 	# if there's a blank line separator, that's good.  if there isn't,
 	# it's a body line, so drop through.
-	next if (/^\r?$/);
+	if (/^\r?$/) {
+	  next;
+	}
+	else {
+          $self->{'missing_mime_head_body_separator'} = 1;
+	}
       }
     }
 

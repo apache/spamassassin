@@ -3246,6 +3246,10 @@ sub check_for_missing_hb_separator {
   my ($self) = @_;
   return defined $self->{msg}->{'missing_head_body_separator'};
 }
+sub check_for_missing_mime_hb_separator {
+  my ($self) = @_;
+  return defined $self->{msg}->{'missing_mime_head_body_separator'};
+}
 
 ###########################################################################
 
