@@ -46,6 +46,19 @@ my $events = 'on(?:activate|afterupdate|beforeactivate|beforecopy|beforecut|befo
 # other non-standard tags
 $re_other = 'o:\w+/?|x-sigsep|x-tab';
 
+# style attributes
+my %ok_attribute = (
+		 text => [qw(body)],
+		 color => [qw(basefont font)],
+		 bgcolor => [qw(body table tr td th marquee)],
+		 face => [qw(basefont font)],
+		 size => [qw(basefont font)],
+		 link => [qw(body)],
+		 alink => [qw(body)],
+		 vlink => [qw(body)],
+		 background => [qw(body marquee)],
+		 );
+
 my %tested_colors;
 
 sub new {
@@ -62,13 +75,12 @@ sub new {
 sub html_init {
   my ($self) = @_;
 
-  push @{ $self->{bgcolor_color} }, "#ffffff";
-  push @{ $self->{bgcolor_tag} }, "default";
-  push @{ $self->{fgcolor_color} }, "#000000";
-  push @{ $self->{fgcolor_tag} }, "default";
-  undef %tested_colors;
-
-  return $self;
+  undef $self->{text_style};
+  my %default = (tag => "default",
+		 fgcolor => "#000000",
+		 bgcolor => "#ffffff",
+		 size => 3);
+  push @{ $self->{text_style} }, \%default;
 }
 
 sub get_results {
@@ -159,11 +171,9 @@ sub html_tag {
   $self->{html}{"inside_$tag"} += $num;
   $self->{html}{"inside_$tag"} = 0 if $self->{html}{"inside_$tag"} < 0;
 
-  if ($tag =~ /^(?:body|table|tr|th|td)$/) {
-    $self->html_bgcolor($tag, $attr, $num);
-  }
-  if ($tag =~ /^(?:body|font)$/) {
-    $self->html_fgcolor($tag, $attr, $num);
+  # TODO: cover other changes
+  if ($tag =~ /^(?:body|font|table|tr|th|td|big|small)$/) {
+    $self->text_style($tag, $attr, $num);
   }
 
   if ($num == 1) {
@@ -452,131 +462,184 @@ sub name_to_rgb {
   return $html_color{$_[0]} || $name_color{$_[0]} || $_[0];
 }
 
-sub pop_bgcolor {
+# this might not be quite right, may need to pay attention to table nesting
+sub close_tag_tr {
   my ($self) = @_;
 
-  pop @{ $self->{bgcolor_color} };
-  pop @{ $self->{bgcolor_tag} };
+  # don't close if never opened
+  return if !grep { $_->{tag} eq "tr" } @{ $self->{text_style} };
+
+  my $tag;
+  while (@{ $self->{text_style} } && ($tag = $self->{text_style}[-1]->{tag})) {
+    if ($tag =~ /^(?:font|td|tr)$/) {
+      pop @{ $self->{text_style} };
+    }
+    else {
+      last;
+    }
+  }
 }
 
-sub html_bgcolor {
+# this might not be quite right, may need to pay attention to table nesting
+sub close_tag_td {
+  my ($self) = @_;
+
+  # don't close if never opened
+  return if !grep { $_->{tag} eq "td" } @{ $self->{text_style} };
+
+  my $tag;
+  while (@{ $self->{text_style} } && ($tag = $self->{text_style}[-1]->{tag})) {
+    if ($tag =~ /^(?:font|td)$/) {
+      pop @{ $self->{text_style} };
+    }
+    else {
+      last;
+    }
+  }
+}
+
+sub close_tag {
+  my ($self, $tag) = @_;
+
+  # don't close if never opened
+  return if !grep { $_->{tag} eq $tag } @{ $self->{text_style} };
+
+  # close everything up to and including tag
+  while (my %current = %{ pop @{ $self->{text_style} } }) {
+    last if $current{tag} eq $tag;
+  }
+}
+
+# body, font, table, tr, th, td, big, small
+# TODO: implement <basefont> support
+sub text_style {
   my ($self, $tag, $attr, $num) = @_;
 
+  # treat <th> as <td>
+  $tag = "td" if $tag eq "th";
+
+  # open
   if ($num == 1) {
+    # HTML browsers generally only use first <body> for colors,
+    # so only push if we haven't seen a body tag yet
+    if ($tag eq "body") {
+      # TODO: skip if we've already seen body
+    }
+
     # close elements with optional end tags
-    if ($tag eq "body") {
-      # compromise between HTML browsers generally only using first
-      # body and some messages including multiple HTML attachments:
-      # pop everything except first body color
-      while ($self->{bgcolor_tag}[-1] !~ /^(?:default|body)$/) {
-	$self->pop_bgcolor();
+    $self->close_tag_tr() if $tag eq "tr";
+    $self->close_tag_td() if $tag eq "td";
+
+    # copy current text state
+    my %new = %{ $self->{text_style}[-1] };
+
+    # change tag name!
+    $new{tag} = $tag;
+
+    # big and small tags
+    if ($tag eq "big") {
+      $new{size} += 1;
+      push @{ $self->{text_style} }, \%new;
+      return;
+    }
+    if ($tag eq "small") {
+      $new{size} -= 1;
+      push @{ $self->{text_style} }, \%new;
+      return;
+    }
+
+    # tag attributes
+    for my $name (keys %$attr) {
+      next unless (grep { $_ eq $tag } @{ $ok_attribute{$name} });
+      if ($name =~ /^(?:text|color)$/) {
+	# two different names for text color
+	$new{fgcolor} = name_to_rgb(lc($attr->{$name}));
+	$self->html_font_color_tests($attr->{$name});
+      }
+      elsif ($name eq "size" && $attr->{size} =~ /^\s*([+-]\d+)/) {
+	# relative font size
+	$new{size} += $1;
+      }
+      else {
+	# overwrite
+	if ($name eq "bgcolor") {
+	  $attr->{bgcolor} = name_to_rgb(lc($attr->{bgcolor}));
+	  # one test
+	  if ($tag eq "body" && $attr->{bgcolor} !~ /^\#?ffffff$/) {
+	    $self->{html}{bgcolor_nonwhite} = 1;
+	  }
+	}
+	if ($name eq "size" && $attr->{size} !~ /^\s*([+-])(\d+)/) {
+	  # attribute is malformed
+	}
+	else {
+	  # attribute is probably okay
+	  $new{$name} = $attr->{$name};
+	}
       }
     }
-    if ($tag eq "tr") {
-      while ($self->{bgcolor_tag}[-1] =~ /^t[hd]$/) {
-	$self->pop_bgcolor();
-      }
-      $self->pop_bgcolor() if $self->{bgcolor_tag}[-1] eq "tr";
-    }
-    elsif ($tag =~ /^t[hd]$/) {
-      $self->pop_bgcolor() if $self->{bgcolor_tag}[-1] =~ /^t[hd]$/;
-    }
-    # figure out new bgcolor
-    my $bgcolor;
-    if (exists $attr->{bgcolor}) {
-      $bgcolor = name_to_rgb(lc($attr->{bgcolor}));
-    }
-    else {
-      $bgcolor = $self->{bgcolor_color}[-1];
-    }
-    # tests
-    if ($tag eq "body" && $bgcolor !~ /^\#?ffffff$/) {
-      $self->{html}{bgcolor_nonwhite} = 1;
-    }
-    # push new bgcolor
-    push @{ $self->{bgcolor_color} }, $bgcolor;
-    push @{ $self->{bgcolor_tag} }, $tag;
+    push @{ $self->{text_style} }, \%new;
   }
+  # explicitly close a tag
   else {
-    # close elements
-    if ($tag eq "body") {
-      $self->pop_bgcolor() if $self->{bgcolor_tag}[-1] eq "body";
-    }
-    elsif ($tag eq "table") {
-      while ($self->{bgcolor_tag}[-1] =~ /^t[rhd]$/) {
-	$self->pop_bgcolor();
-      }
-      $self->pop_bgcolor() if $self->{bgcolor_tag}[-1] eq "table";
-    }
-    elsif ($tag eq "tr") {
-      while ($self->{bgcolor_tag}[-1] =~ /^t[hd]$/) {
-	$self->pop_bgcolor();
-      }
-      $self->pop_bgcolor() if $self->{bgcolor_tag}[-1] eq "tr";
-    }
-    elsif ($tag =~ /^t[hd]$/) {
-      $self->pop_bgcolor() if $self->{bgcolor_tag}[-1] =~ /^t[hd]$/;
+    if ($tag ne "body") {
+      # don't close body since browsers seem to render text after </body>
+      $self->close_tag($tag);
     }
   }
 }
 
-sub pop_fgcolor {
-  my ($self) = @_;
+sub html_font_color_tests {
+  my ($self, $color) = @_;
 
-  pop @{ $self->{fgcolor_color} };
-  pop @{ $self->{fgcolor_tag} };
-}
+  my $bg = $self->{text_style}[-1]->{fgcolor};
+  my $fg = lc($color);
 
-sub html_fgcolor {
-  my ($self, $tag, $attr, $num) = @_;
-
-  if ($num == 1) {
-    if ($tag eq "body") {
-      # compromise between HTML browsers generally only using first
-      # body and some messages including multiple HTML attachments:
-      # pop everything except first body color
-      while ($self->{fgcolor_tag}[-1] !~ /^(?:default|body)$/) {
-	$self->pop_fgcolor();
-      }
+  if ($fg =~ /^\#?[0-9a-f]{6}$/ && $fg !~ /^\#?(?:00|33|66|80|99|cc|ff){3}$/) {
+    $self->{html}{font_color_unsafe} = 1;
+  }
+  if ($fg !~ /^\#?[0-9a-f]{6}$/ && !exists $html_color{$fg}) {
+    $self->{html}{font_color_name} = 1;
+  }
+  if ($fg =~ /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/) {
+    my ($h, $s, $v) = rgb_to_hsv(hex($1), hex($2), hex($3));
+    if (!defined($h)) {
+      $self->{html}{font_gray} = 1 unless ($v == 0 || $v == 255);
     }
-    # figure out new fgcolor
-    my $fgcolor;
-    if ($tag eq "font" && exists $attr->{color}) {
-      $fgcolor = name_to_rgb(lc($attr->{color}));
+    elsif ($h < 30 || $h >= 330) {
+      $self->{html}{font_red} = 1;
     }
-    elsif ($tag eq "body" && exists $attr->{text}) {
-      $fgcolor = name_to_rgb(lc($attr->{text}));
+    elsif ($h < 90) {
+      $self->{html}{font_yellow} = 1;
     }
-    else {
-      $fgcolor = $self->{fgcolor_color}[-1];
+    elsif ($h < 150) {
+      $self->{html}{font_green} = 1;
     }
-    # push new fgcolor
-    push @{ $self->{fgcolor_color} }, $fgcolor;
-    push @{ $self->{fgcolor_tag} }, $tag;
+    elsif ($h < 210) {
+      $self->{html}{font_cyan} = 1;
+    }
+    elsif ($h < 270) {
+      $self->{html}{font_blue} = 1;
+    }
+    elsif ($h < 330) {
+      $self->{html}{font_magenta} = 1;
+    }
   }
   else {
-    # close elements
-    if ($tag eq "body") {
-      $self->pop_fgcolor() if $self->{fgcolor_tag}[-1] eq "body";
-    }
-    if ($tag eq "font") {
-      $self->pop_fgcolor() if $self->{fgcolor_tag}[-1] eq "font";
-    }
+    $self->{html}{font_color_unknown} = 1;
   }
 }
 
 sub html_font_invisible {
   my ($self, $text) = @_;
 
-  my $fg = $self->{fgcolor_color}[-1];
-  my $bg = $self->{bgcolor_color}[-1];
-
-  return if exists $tested_colors{"$fg\000$bg"};
-  $tested_colors{"$fg\000$bg"}++;
+  my $fg = $self->{text_style}[-1]->{fgcolor};
+  my $bg = $self->{text_style}[-1]->{bgcolor};
 
   # invisibility
   if (substr($fg,-6) eq substr($bg,-6)) {
     $self->{html}{font_invisible} = 1;
+    return 0;
   }
   # near-invisibility
   elsif ($fg =~ /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/) {
@@ -602,6 +665,7 @@ sub html_font_invisible {
       }
     }
   }
+  return 1;
 }
 
 sub html_tests {
@@ -636,45 +700,6 @@ sub html_tests {
 				     ($size =~ /\-(\d+)/ && $1 >= 3));
     $self->{html}{big_font} = 1 if (($size =~ /^\s*(\d+)/ && $1 > 3) ||
 				    ($size =~ /\+(\d+)/ && $1 >= 1));
-  }
-  if ($tag eq "font" && exists $attr->{color}) {
-    my $bg = $self->{bgcolor_color}[-1];
-    my $fg = lc($attr->{color});
-    if ($fg =~ /^\#?[0-9a-f]{6}$/ && $fg !~ /^\#?(?:00|33|66|80|99|cc|ff){3}$/)
-    {
-      $self->{html}{font_color_unsafe} = 1;
-    }
-    if ($fg !~ /^\#?[0-9a-f]{6}$/ && !exists $html_color{$fg})
-    {
-      $self->{html}{font_color_name} = 1;
-    }
-    if ($fg =~ /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/) {
-      my ($h, $s, $v) = rgb_to_hsv(hex($1), hex($2), hex($3));
-      if (!defined($h)) {
-	$self->{html}{font_gray} = 1 unless ($v == 0 || $v == 255);
-      }
-      elsif ($h < 30 || $h >= 330) {
-	$self->{html}{font_red} = 1;
-      }
-      elsif ($h < 90) {
-	$self->{html}{font_yellow} = 1;
-      }
-      elsif ($h < 150) {
-	$self->{html}{font_green} = 1;
-      }
-      elsif ($h < 210) {
-	$self->{html}{font_cyan} = 1;
-      }
-      elsif ($h < 270) {
-	$self->{html}{font_blue} = 1;
-      }
-      elsif ($h < 330) {
-	$self->{html}{font_magenta} = 1;
-      }
-    }
-    else {
-      $self->{html}{font_color_unknown} = 1;
-    }
   }
   if ($tag eq "font" && exists $attr->{face}) {
     #print STDERR "FONT " . $attr->{face} . "\n";
