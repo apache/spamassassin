@@ -1965,14 +1965,13 @@ EOT
 
 ###########################################################################
 
-
+# note: this is called once for every eval on every message so
+# performance is important
 sub mk_param {
   my $param = shift;
 
-  my @ret = ();
-  while ($param =~ s/^\s*['"](.*?)['"](?:,|)\s*//) {
-    push (@ret, $1);
-  }
+  # it would be nice if the quotes were optional for numeric arguments
+  my @ret = ($param =~ m/['"](.*?)['"]\s*(?:,\s*|$)/g);
   return @ret;
 }
 
