@@ -1,5 +1,5 @@
 # SpamAssassin rules file: scores.
-# $Id: 50_scores.cf,v 1.197.2.20 2002/09/04 08:39:27 quinlan Exp $
+# $Id: 50_scores.cf,v 1.197.2.21 2002/09/05 12:13:29 jmason Exp $
 ###########################################################################
 # Default scores.   Note that if a test is named in the files, but a score is
 # not assigned here, the default score will be set to 1.
@@ -319,7 +319,7 @@ score LOW_PAYMENT                    2.472
 score LOW_PRICE                      -1.162
 score LUXURY_CAR                     2.473
 score LYING_EYES                     3.060
-score MAILER_DAEMON                  2.536
+score MAILER_DAEMON                  -0.536
 score MAILTO_LINK                    -0.583
 score MAILTO_TO_REMOVE               0.710
 score MAILTO_TO_SPAM_ADDR            1.032
