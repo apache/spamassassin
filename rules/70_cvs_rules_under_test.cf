@@ -422,10 +422,6 @@ meta T_MIME_HTML_NO_MAJOR_TAG	MIME_HTML_ONLY && !__TAG_EXISTS_HTML && !__TAG_EXI
 # color stuff
 body T_HTML_FONT_COLOR_NAME	eval:html_test('t_font_color_name')
 describe T_HTML_FONT_COLOR_NAME	HTML font color has unusual name
-# nearly invisible text
-body T_HTML_FONT_NEAR_INVISIBLE_12	eval:html_test('t_font_near_invisible_12')
-body T_HTML_FONT_NEAR_INVISIBLE_14	eval:html_test('t_font_near_invisible_14')
-body T_HTML_FONT_NEAR_INVISIBLE_16	eval:html_test('t_font_near_invisible_16')
 
 # alan premselaar <alien@12inch.com>, see SpamAssassin-talk list
 header T_JAPANESE_UCE_SUBJECT_3	Subject =~ /L\$\>5Bz9\-9p\"\(/

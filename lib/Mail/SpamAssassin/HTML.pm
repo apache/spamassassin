@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.76 2003/04/11 07:33:31 quinlan Exp $
+# $Id: HTML.pm,v 1.77 2003/04/12 03:44:46 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -343,16 +343,12 @@ sub html_font_invisible {
       # maximum distance is 191.151823601032
       my $distance = ((0.2126*$r)**2 + (0.7152*$g)**2 + (0.0722*$b)**2)**0.5;
 
-      # the text is very difficult to read if the distance is under 12
+      # the text is very difficult to read if the distance is under 12,
+      # a limit of 14 to 16 might be okay if the usage significantly
+      # increases (near-invisible text is at about 0.95% of spam and
+      # 1.25% of HTML spam right now), but please test any changes first
       if ($distance < 12) {
-	$self->{html}{"t_font_near_invisible_12"} = 1;
-      }
-      # try a few last distances just to be sure
-      if ($distance < 14) {
-	$self->{html}{"t_font_near_invisible_14"} = 1;
-      }
-      if ($distance < 16) {
-	$self->{html}{"t_font_near_invisible_16"} = 1;
+	$self->{html}{"font_near_invisible"} = 1;
       }
     }
   }
