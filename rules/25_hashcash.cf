@@ -24,7 +24,7 @@
 
 # Requires the Mail::SpamAssassin::Plugin::Hashcash plugin be loaded.
 
-ifplugin Mail::SpamAssassin::Plugins::Hashcash
+ifplugin Mail::SpamAssassin::Plugin::Hashcash
 
 header HASHCASH_20            eval:check_hashcash_value('20', '21')
 header HASHCASH_21            eval:check_hashcash_value('21', '22')
@@ -49,4 +49,4 @@ header HASHCASH_2SPEND        eval:check_hashcash_double_spend()
 describe HASHCASH_2SPEND      HashCash token already spent in another mail
 tflags HASHCASH_2SPEND        userconf
 
-endif   # Mail::SpamAssassin::Plugins::Hashcash
+endif   # Mail::SpamAssassin::Plugin::Hashcash

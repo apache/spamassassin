@@ -7,7 +7,7 @@ use Test; BEGIN { plan tests => 2 };
 # ---------------------------------------------------------------------------
 
 %patterns = (
-q{ T_HASHCASH_24 }, 'hashcash24',
+q{ HASHCASH_24 }, 'hashcash24',
 );
 
 tstprefs ('
@@ -19,7 +19,7 @@ sarun ("-L -t < data/nice/001", \&patterns_run_cb);
 ok_all_patterns();
 
 %patterns = (
-q{ T_HASHCASH_2SPEND }, '2spend',
+q{ HASHCASH_2SPEND }, '2spend',
 );
 
 sarun ("-L -t < data/nice/001", \&patterns_run_cb);

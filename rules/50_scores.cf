@@ -935,7 +935,7 @@ score BAYES_99 0 0 5.400 5.400
 #
 # Hashcash
 #
-ifplugin Mail::SpamAssassin::Plugins::Hashcash
+ifplugin Mail::SpamAssassin::Plugin::Hashcash
 score HASHCASH_20             -0.5
 score HASHCASH_21             -0.7
 score HASHCASH_22             -1.0
@@ -944,5 +944,5 @@ score HASHCASH_24             -3.0
 score HASHCASH_25             -4.0
 score HASHCASH_HIGH           -5.0
 score HASHCASH_2SPEND         0.1
-endif # Mail::SpamAssassin::Plugins::Hashcash
+endif # Mail::SpamAssassin::Plugin::Hashcash
 
