@@ -85,9 +85,10 @@ void counthitsfromscores () {
   float hits;
   int i;
   int overthresh;
+  int nyint = 0;
+  int ynint = 0;
 
   nn = ny = yn = yy = 0;
-  nyscore = ynscore = 0.0;
   for (file = 0; file < num_tests; file++) {
     hits = 0.0;
     for (i = num_tests_hit[file]-1; i >= 0; i--) {
@@ -105,19 +106,22 @@ void counthitsfromscores () {
       if (overthresh) {
 	yy++;
       } else {
-	yn++; ynscore += ((threshold - hits) / 5.0) + 1.0;
+	yn++; nyint += (int) (hits - threshold) + 5;
       }
     } else {
       if (overthresh) {
-	ny++; nyscore += ((hits - threshold) / 5.0) + 1.0;
+	ny++; ynint += (int) (threshold - hits) + 5;
       } else {
 	nn++;
       }
     }
   }
+
+  nyscore = ((float) nyint);		// / 5.0;
+  ynscore = ((float) ynint);		// / 5.0;
 }
 
-void counthitsfromgenome (GARealGenome &genome) {
+void quickcounthitsfromgenome (GARealGenome &genome) {
   int file;
   float hits;
   int i;
@@ -151,24 +155,29 @@ void counthitsfromgenome (GARealGenome &genome) {
 
 // ---------------------------------------------------------------------------
 
-  /*
-void counthits (GARealGenome &genome) {
+void fullcounthitsfromgenome (GARealGenome &genome) {
   int i;
 
   if (genome.length() != num_scores) {
-    cerr << "len != numscores: "<<len<<"  "<<num_scores<<endl;
+    cerr << "len != numscores: "<<genome.length()<<"  "<<num_scores<<endl;
     exit(1);
   }
+
+  for (i = 0; i < num_scores; i++) {
+    scores[i] = genome[i];
+  }
+
   // good point Craig, no need to do this. commented copying code
+  /*
   if (is_mutatable[i]) {
     scores[i] = genome[i];
     if (scores[i] == 0.0) { scores[i] = 0.1; }
   } else {
     scores[i] = bestscores[i];	// use the standard one
   }
-  counthitsfromgenome(genome);
-}
   */
+  counthitsfromscores ();
+}
 
 // ---------------------------------------------------------------------------
 
@@ -180,7 +189,7 @@ float
 objective(GAGenome & c)
 {
   GARealGenome &genome = (GARealGenome &) c;
-  counthitsfromgenome(genome);
+  quickcounthitsfromgenome(genome);
 
   if (sleepTime) { usleep(sleepTime); }
 
@@ -205,7 +214,7 @@ write_to_file (GARealGenome &genome, const char *fname) {
   FILE *fout;
   char namebuf[255];
 
-  counthitsfromgenome(genome);
+  fullcounthitsfromgenome (genome);
   snprintf (namebuf, 255, "%s", fname);
   fout = fopen (namebuf, "w");
   printhits (fout);
@@ -388,7 +397,7 @@ main (int argc, char **argv) {
 	  	<< ":\n";
 
 	genome = ga.statistics().bestIndividual();
-	counthitsfromgenome(genome); printhits (stdout);
+	fullcounthitsfromgenome (genome); printhits (stdout);
 	write_to_file (genome, "tmp/results.in_progress");
       }
     }
@@ -398,7 +407,7 @@ main (int argc, char **argv) {
   genome = ga.statistics().bestIndividual();
 
   cout << "Best genome found:" << endl;
-  counthitsfromgenome(genome);
+  fullcounthitsfromgenome (genome);
   printhits (stdout);
   //cout << "Stats:\n" << ga.statistics() << endl;
 
