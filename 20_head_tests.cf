@@ -351,3 +351,9 @@ describe MAJORDOMO              From Majordomo
 
 header   PLEASE_READ            Subject =~ /please read/i
 describe PLEASE_READ            Please read this!  Please oh please oh please!
+
+header   X_AUTH_WARNING         X-Authentication-Warning =~ /./
+describe X_AUTH_WARNING         X-Authentication-Warning header exists
+
+header   DATE_WARNING           Date-warning =~ /./
+describe DATE_WARNING           Date-warning header exists
