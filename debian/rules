@@ -41,7 +41,6 @@ configure-stamp:
 
 	perl Makefile.PL INSTALLDIRS=vendor \
 	 PREFIX=$(CURDIR)/debian/$(packagei)/usr \
-	 VENDORPREFIX=$(CURDIR)/debian/$(packagei)/usr \
 	 SYSCONFDIR=$(CURDIR)/debian/$(packagei)/etc \
 	 INST_PREFIX=/usr INST_SYSCONFDIR=/etc \
 	 PKG_LOCAL_RULES_DIR=$(CURDIR)/debian/$(packagei)/etc/spamassassin \
@@ -68,13 +67,10 @@ clean:
 
 	dh_clean
 
-debian/po/templates.pot: debian/spamassassin.templates
-	debconf-updatepo
 
 # Spamassassin ONLY
 
 build-indep: build-indep-stamp
-build-indep-stamp: configure debian/po/templates.pot
 
 	dh_testdir
 
