@@ -742,12 +742,23 @@ sub get_decoded_stripped_body_text_array {
 
   my $bodytext = $self->get_decoded_body_text_array();
 
+   my $ctype = $self->{msg}->get_header ('Content-Type');
+   $ctype ||=  '';
+ 
+   # if it's a multipart MIME message, skip the MIME-definition stuff
+   my $boundary;
+   if ($ctype =~ /boundary="(.*)"/) {
+     $boundary = $1;
+   }
+ 
   my $text = "Subject: " . $self->get('subject', '') . "\n\n";
   my $lastwasmime = 0;
   foreach $_ (@{$bodytext}) {
     /^SPAM: / and next;         # SpamAssassin markup
 
-    /^--/ and $lastwasmime=1 and next;		# MIME bits
+    defined $boundary and $_ eq "--$boundary\n" and $lastwasmime=1 and next;           # MIME start
+    defined $boundary and $_ eq "--$boundary--\n" and next;                            # MIME end
+
     if ($lastwasmime) {
       /^$/ and $lastwasmime=0;
       /Content-.*: / and next;
@@ -821,8 +832,6 @@ sub get_decoded_stripped_body_text_array {
   # Get rid of all remaing HTML and XML tags
   $text =~ s/<[?!\s]*[:a-z0-9]+\b[^>]*>//gis;
   $text =~ s/<\/[:a-z0-9]+>//gis;
-
-  #print "JMD $text";
 
   my @textary = split (/^/, $text);
   return \@textary;
