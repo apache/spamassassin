@@ -451,6 +451,9 @@ describe REMOVAL_INSTRUCTIONS	Gives instructions for removal from list
 body THIS_AINT_SPAM             /This.{0,30}is not (?:a )?spam/is
 describe THIS_AINT_SPAM         Claims "This is not spam"
 
+body THIS_AINT_JUNK             /This.{0,30}is not (?:a )?junk (?:email)?/is
+describe THIS_AINT_JUNK         Claims "This is not junk email"
+
 # (contrib: WW)
 body WE_HATE_SPAM               /We .{0,30}oppose the use of SPAM/is
 describe WE_HATE_SPAM           Says "We strongly oppose the use of SPAM email"
