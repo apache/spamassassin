@@ -10,7 +10,7 @@ use Test; BEGIN { plan tests => 8 };
 q{ Subject: Re: [SAtalk] auto-whitelisting}, 'subj',
 );
 %is_spam_patterns = (
-q{Subject: *****SPAM***** 4000           Your Vacation Winning !}, 'subj',
+q{ X-Spam-Status: Yes}, 'status',
 );
 
 %patterns = %is_nonspam_patterns;

@@ -17,7 +17,7 @@ SPAM: so you can recognise or block similar unwanted mail in future.
 SPAM: See http://spamassassin.org/tag/ for more details.  },
 	'x-spam-report-header',
 
-q{ Subject: *****SPAM***** There yours for FREE!}, 'subj',
+q{ Subject: There yours for FREE!}, 'subj',
 q{ X-Spam-Status: Yes, hits=}, 'status',
 q{ X-Spam-Flag: YES}, 'flag',
 q{ Valid-looking To "undisclosed-recipients"}, 'undisc',
@@ -33,6 +33,7 @@ q{ Uses a dotted-decimal IP address in URL }, 'dotteddec',
 
 tstprefs ("
 	report_header 1
+        use_terse_report 0
 	");
 
 sarun ("-L -t < data/spam/001", \&patterns_run_cb);
