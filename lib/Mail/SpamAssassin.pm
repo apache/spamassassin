@@ -69,11 +69,11 @@ use vars	qw{
 @ISA = qw();
 
 $VERSION = "2.0";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.52 2002/01/03 02:39:29 jmason Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.53 2002/01/07 05:06:59 jmason Exp $';
 
 sub Version { $VERSION; }
 
-$HOME_URL = "http://spamassassin.taint.org/";
+$HOME_URL = "http://spamassassin.org/";
 
 $DEBUG = 0;
 
@@ -793,7 +793,7 @@ C<Net::DNS>
 
 =head1 MORE DOCUMENTATION
 
-See also http://spamassassin.taint.org/ for more information.
+See also http://spamassassin.org/ for more information.
 
 =head1 SEE ALSO
 
@@ -813,7 +813,7 @@ SpamAssassin is distributed under Perl's Artistic license.
 The latest version of this library is likely to be available from CPAN
 as well as:
 
-  http://spamassassin.taint.org/
+  http://spamassassin.org/
 
 =cut
 

@@ -11,8 +11,8 @@ Version: %{version}
 Release: %{release}
 License: Artistic
 Group: Networking/Mail
-URL: http://spamassassin.taint.org/
-Source: http://spamassassin.taint.org/devel/Mail-SpamAssassin-%{real_version}.tar.gz
+URL: http://spamassassin.org/
+Source: http://spamassassin.org/devel/Mail-SpamAssassin-%{real_version}.tar.gz
 Requires: perl >= 5.004
 Buildroot: %{_tmppath}/%{name}-root
 Prefix: %{_prefix}
