@@ -169,7 +169,7 @@ foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
   next if ($opt_t && $rules{$test}->{tflags} !~ /$opt_t/); # match tflags
 
   if (!$opt_a && !$opt_t) {
-    next if ($rules{$test}->{tflags} =~ /net/);   # not net tests
+    next if ($rules{$test}->{tflags} =~ /net/ && ($opt_s % 2 == 0));   # not net tests
     next if ($rules{$test}->{tflags} =~ /userconf/); # or userconf
   }
 
