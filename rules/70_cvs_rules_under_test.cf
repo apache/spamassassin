@@ -92,6 +92,12 @@ score T_UNSUBSCRIBE_WTF		2.0
 body T_URGENT_BIZ		/URGENT.{0,16}(?:ASSISTANCE|BUSINESS|BUY|CONFIDENTIAL|NOTICE|PROPOSAL)/i
 describe T_URGENT_BIZ		Contains URGENT matter
 
+body T_HTML_COMMENT_EMAIL	eval:html_test('comment_email')
+describe T_HTML_COMMENT_EMAIL	HTML comment contains email address
+
+body T_HTML_COMMENT_SKY		eval:html_test('comment_sky')
+describe T_HTML_COMMENT_SKY	HTML comment contains SKY database codes
+
 # Needs testing
 body T_QUOTE_TWICE_1            /^> >\s/
 describe T_QUOTE_TWICE_1        Contains twice quoted reply
