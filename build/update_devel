@@ -29,7 +29,10 @@ mkdir $WEBDIR/dist
 tar cf - --exclude=CVS --exclude='.#*' . | ( cd $WEBDIR/dist ; tar xf - )
 tar cf - --exclude=CVS --exclude='.#*' doc | ( cd $WEBDIR ; tar xf - )
 
-( cd $WEBDIR/dist ; make clean distclean )
+( cd $WEBDIR/dist ;
+  make clean distclean;
+  rm -rf masses/*.log masses/logs
+)
 ( cd $WEBDIR/devel ; cvs add -kb *SpamAssassin* )
 
 ls -l $WEBDIR/devel
