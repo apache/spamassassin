@@ -545,3 +545,22 @@ header T_DATE_COMMA     Received =~ /\bwith \S+\; [A-Z][a-z][a-z],\s+\d\d\s+\d\d
 # anything not an address
 header __HAS_MSN_FROM2         From:addr =~ /(?:hotmail|msn)\.com/i
 meta T_FAKED_HOTMAIL_DAV         (__HAS_MSN_RCVD_DAV && __HAS_MSN_ORIG_EMAIL && !__HAS_MSN_FROM2)
+
+# some HTML rules to try
+body T_HTML_TAG_BALANCE_FONT_0	eval:html_tag_balance('font', '!= 0')
+describe T_HTML_TAG_BALANCE_FONT_0	HTML has unbalanced "font" tags
+
+body T_HTML_TAG_BALANCE_FONT_1	eval:html_tag_balance('font', '> 0')
+describe T_HTML_TAG_BALANCE_FONT_1	HTML is missing "font" close tags
+
+body T_HTML_TAG_BALANCE_FONT_2	eval:html_tag_balance('font', '> 1')
+describe T_HTML_TAG_BALANCE_FONT_2	HTML is missing some "font" close tags
+
+body T_HTML_TAG_BALANCE_DIV_0	eval:html_tag_balance('div', '< 0')
+describe T_HTML_TAG_BALANCE_DIV_0	HTML has excess "div" tags
+
+body T_HTML_TAG_BALANCE_DIV_1	eval:html_tag_balance('div', '!= 0')
+describe T_HTML_TAG_BALANCE_DIV_1	HTML has unbalanced "font" tags
+
+body T_HTML_TAG_BALANCE_DIV_2	eval:html_tag_balance('div', '> 0')
+describe T_HTML_TAG_BALANCE_DIV_2	HTML is missing "div" tags
