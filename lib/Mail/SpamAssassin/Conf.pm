@@ -184,8 +184,10 @@ If no score is given for a test by the end of the configuration, the
 default score is 1.0, or 0.01 for tests whose names begin with 'T_'
 (this is used to indicate a rule in testing).
 
-Note that test names which begin with '__' are reserved for meta-match
-sub-rules, and are not scored or listed in the 'tests hit' reports.
+Note that test names which begin with '__' are indirect rules used to
+compose meta-match rules and can also act as prerequisites to other rules.
+They are not scored or listed in the 'tests hit' reports, but assigning a
+score of 0 to an indirect rule will disable it.
 
 =cut
 
