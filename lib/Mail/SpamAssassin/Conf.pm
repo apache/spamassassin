@@ -134,6 +134,7 @@ sub new {
   $self->{ok_languages} = '';
   $self->{allow_user_rules} = 0;
   $self->{user_rules_to_compile} = 0;
+  $self->{fold_headers} = 1;
 
   $self->{dcc_body_max} = 999999;
   $self->{dcc_fuz1_max} = 999999;
@@ -355,6 +356,18 @@ disabled here.
     if (/^rewrite[-_]subject\s+(\d+)$/) {
       $self->{rewrite_subject} = $1+0; next;
     }
+
+=item fold_headers { 0 | 1 }        (default: 1)
+
+By default, the X-Spam-Status header will be whitespace folded, in other words,
+it will be broken up into multiple lines instead of one very long one.
+This can be disabled here.
+
+=cut
+
+   if (/^fold[-_]headers\s+(\d+)$/) {
+     $self->{fold_headers} = $1+0; next;
+   }
 
 =item spam_level_stars { 0 | 1 }        (default: 1)
 
