@@ -835,7 +835,7 @@ describe COMPARE_RATES          Compare Rates
 body SAVE_UP_TO                 /\b(?-i:S)ave up to\b/i
 describe SAVE_UP_TO             Save Up To
 
-body LOW_PAYMENT	        /\b(?:reduce|low).{0.12} payment/i
+body LOW_PAYMENT	        /\b(?:reduce|low).{0,12} payment/i
 describe LOW_PAYMENT		Lower Monthly Payment
 
 body CONSOLIDATE_DEBT	        /\b(?:consolidate .{0,9} (?:debt|credit)|debt (?:consolidation|elimination))\b/i
