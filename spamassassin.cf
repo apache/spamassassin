@@ -88,6 +88,13 @@ describe NO_REAL_NAME		From: does not include a real name
 header FROM_ENDS_IN_NUMS	From =~ /\d+\@/
 describe FROM_ENDS_IN_NUMS	From: ends in numbers
 
+# (contrib: David Hull)
+header FROM_NO_USER		From =~ /(?:^|<| )\@/
+describe FROM_NO_USER		From: has no local-part before @ sign
+
+header TO_NO_USER		To =~ /(?:^|<| )\@/
+describe TO_NO_USER		To: has no local-part before @ sign
+
 header PLING			Subject =~ /\!/
 describe PLING			Subject has an exclamation mark
 
@@ -343,9 +350,9 @@ body SHOES_GUY			/(?:(?:Lingui|Guilin).*){2,}/i
 # will always be there ;)
 body PRINT_FORM_SIGNATURE	/Signature:.*_________________/i
 
-body EXCUSE_1			/You were sent this message because/i
+body EXCUSE_1			/You (?:were sent|have received) this message because/i
 body EXCUSE_2			/If you did not opt.in/i
-body EXCUSE_3			/to be (?:removed|deleted) (?:from|send|reply|mail|email)/i
+body EXCUSE_3			/to (?:be removed|be deleted|no longer receive th(?:is|ese) messages?) (?:from|send|reply|[e-]*mail)/i
 body EXCUSE_4			/To Be Removed,? Please/i
 body EXCUSE_5			/that your email address is removed/i
 
@@ -354,18 +361,20 @@ body EXCUSE_6			/(?:wish to|click to|To) remove yourself/
 
 body EXCUSE_7			/you (?:wish|want|would like|desire) to be removed/i
 body EXCUSE_8			/requests to be taken off our mailing list/
-body EXCUSE_9		/If you do.*n.*t want to receive emails on this subject/i
-body EXCUSE_10			/if you (?:wish|care) not to (?:be contacted again|receive any\s*more solicitations)/i
+body EXCUSE_9		/If you do.*n.*t (?:want|wish|care) to receive emails (?:on this subject|in the future)/i
+body EXCUSE_10			/if you (?:want|wish|care) not to (?:be contacted again|receive any\s*more solicitations)/i
 body EXCUSE_11			/you.*(?:name|mail).*(?:was|were).*list/i
 body EXCUSE_12			/this (?:e?-?mail|message) has reached you in error/i
 body EXCUSE_13			/mail was sent to you because /i
 body EXCUSE_14			/you do not wish to receive further /i
-body EXCUSE_15			/this is not spam/i
+body EXCUSE_15			/this is not (?:spam|unsolicited)/i
 body EXCUSE_16			/have received this (?:e?-?mail|message) in error[, ]* or/
 body EXCUSE_17			/received .* by mistake/i
 
 body GREEN_EXCUSE_1	/using email instead can significantly reduce this/i
 body GREEN_EXCUSE_2	/the trees, save the planet, use email!/i
+
+body VIAGRA			/VIAGRA/
 
 body FREE_PRIORITY_MAIL		/FREE PRIORITY MAIL SHIPPING/i
 body LIMITED_TIME_ONLY		/LIMITED TIME ONLY/i
@@ -376,9 +385,14 @@ body FILTERED_BY_WORLDREMOVE	/filtered by WorldRemove/
 
 body COMMUNIGATE		/transferred with a trial version of CommuniGate/
 
+# contrib: skod
+body AUTO_EMAIL_REMOVAL		/Auto Email Removal/
+
 body PORN_1			/\bbarely\b.*\blegal\b/i
 body PORN_2			/\bwild\b.*\bhardcore\b/i
-body PORN_3			/(?:(?:\bcum|\bteen|\baction\b|\bspunk\b|\bpussy\b|\bpussies\b|\bsuck\b|\bsucking\b|\bhot\b|\bhottest\b).*){3,}/i
+
+# updated by: skod
+body PORN_3			/(?:(?:\bcum|\borgy\b|\bwild|\bfuck|\bteen|\baction\b|\bspunk\b|\bpussy\b|\bpussies\b|\bsuck\b|\bsucking\b|\bhot\b|\bhottest\b).*){3,}/i
 
 body TRACKER_ID			/^\W{4,6} (?:[a-z]{10,}|[A-Z]{10,}) \W{4,6}\s*$/
 
@@ -400,6 +414,10 @@ body WWW_NETSITESFORFREE_NET	/http:\/\/.*netsitesforfree\.net/i
 
 body FREE_CONSULTATION		/FREE CONSULTATION/i
 body INCREASE_SALES		/INCREASE SALES/i
+
+# (contrib: Matt Sergeant)
+body LARGE_HEX			/[0-9a-fA-F]{40,}/
+score LARGE_HEX			2
 
 # somehow "/name.*\bcredit.?card\b/is" won't match, even if
 # it's there.  *boggle* (contrib: WW)
@@ -432,8 +450,8 @@ full CLICK_BELOW		/click below/is
 full CLICK_TO_REMOVE_MAILTO     /\bclick to remove\b.{0,50}mailto:.{0,20}\@.+\..+/is
 describe CLICK_TO_REMOVE_MAILTO Click-to-remove with mailto: found
 
-# (contrib: WW)
-full TO_BE_REMOVED_REPLY        /\bto\b.{0,60}\bremove.{0,60}\breply\b/is
+# (contrib: WW, mod by David Hull)
+full TO_BE_REMOVED_REPLY        /\bto\b.{0,60}\b(?:remove|unsubscribe).{0,60}\breply\b/is
 describe TO_BE_REMOVED_REPLY    Says: "to be removed, reply via email" or similar
 
 # (contrib: WW)
@@ -461,6 +479,9 @@ describe A_HREF_TO_IP		Link to an IP-address instead of a named host
 
 full A_HREF_TO_REMOVE		/href[3D=\s\"\']*\S+(?:unsubscribe|remove)/i
 describe A_HREF_TO_REMOVE	Link to a URL containing "remove"
+
+body REMOVE_SCRIPT		/http:\/\/.*cgi.*\/(?:unsubscribe|remove)\./
+describe REMOVE_SCRIPT		URL of CGI script called "remove"
 
 # include the \n\n so we don't match mailto's in the headers!  Some list software
 # uses these to handle auto-subscribe/unsubscribe features
