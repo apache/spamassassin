@@ -2349,7 +2349,7 @@ sub check_razor2 {
   # note: we don't use $fulltext. instead we get the raw message,
   # unfiltered, for razor2 to check.  ($fulltext removes MIME
   # parts etc.)
-  my $full = $self->get_full_message_as_text();
+  my $full = $self->{msg}->get_pristine();
   return $self->razor2_lookup (\$full);
 }
 
@@ -2364,7 +2364,7 @@ sub check_pyzor {
   # note: we don't use $fulltext. instead we get the raw message,
   # unfiltered, for pyzor to check.  ($fulltext removes MIME
   # parts etc.)
-  my $full = $self->get_full_message_as_text();
+  my $full = $self->{msg}->get_pristine();
   return $self->pyzor_lookup (\$full);
 }
 
@@ -2385,7 +2385,7 @@ sub check_dcc {
   # note: we don't use $fulltext. instead we get the raw message,
   # unfiltered, for DCC to check.  ($fulltext removes MIME
   # parts etc.)
-  my $full = $self->get_full_message_as_text();
+  my $full = $self->{msg}->get_pristine();
   return $self->dcc_lookup (\$full);
 }
 
@@ -2533,7 +2533,7 @@ sub check_razor2_range {
     # note: we don't use $fulltext. instead we get the raw message,
     # unfiltered, for razor2 to check.  ($fulltext removes MIME
     # parts etc.)
-    my $full = $self->get_full_message_as_text();
+    my $full = $self->{msg}->get_pristine();
     $self->razor2_lookup (\$full);
   }
 
