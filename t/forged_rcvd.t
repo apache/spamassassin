@@ -8,7 +8,7 @@ use Test; BEGIN { plan tests => 2 };
 
 %patterns = (
 
-q{ ,FORGED_RCVD_FOUND }, 'rcvdspotted',
+q{ ,INVALID_DATE }, 'invdate',
 q{ ,VACATION_SCAM }, 'bodyspotted',
 
 );
