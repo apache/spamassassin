@@ -1,17 +1,18 @@
 #!/bin/sh
 
-. $HOME/.corpus
-
 # $HOME/.corpus should contain settings for these values:
 #
 # tree=/home/corpus/cvs/spamassassin
 # username=joe
 # password=xyzzy
 
+. $HOME/.corpus
+
 renice 10 -p $$
 
 set -x
 set -e
+export RSYNC_PASSWORD=$password
 export TIME="%e,%U,%S"
 export TZ=UTC
 
@@ -21,46 +22,46 @@ if date | egrep -q '^... ... .. (08|10):'; then
 fi
 
 # day of week
-if date | egrep -q '^Sat'; then
+if date | egrep -q '^Sat' || [ "$1" = "net" ]; then
 	net="net-"
 else
 	net=""
 fi
 
+# enter tree
+cd $tree
 
-cd $tree/masses
+# random sleep
+perl -e 'sleep int(rand(600));'
 
-if [ "$1" = "update" ]; then
-	# random sleep
-	perl -e 'sleep int(rand(300));'
-	# update
-	cd ..
-	set +e
-	for retry in 0 1 2 4 8 16 32 64; do
-		if cvs -z3 update -dP -r CURRENT_CORPORA_SUBMIT_VERSION; then
-			break;
-		fi
-		if [ $retry -eq 64 ]; then
-			exit 1
-		fi
-		sleep $(( 60 * $retry ))
-	done
-	set -e
-	cd masses
-
-	# run test
-	rm -f spamassassin/bayes*
-	date > test.start
-	if date | egrep -q '^Sat'; then
-		./mass-check --net -j 6 -f /home/corpus/mail/corpus
-	else
-		./mass-check -f /home/corpus/mail/corpus
+# update
+set +e
+retry=0
+while true; do
+	if cvs -z3 update -dP -r CURRENT_CORPORA_SUBMIT_VERSION; then
+		break;
 	fi
-	uptime
-	date > test.end
+	if [ $retry -eq 120 ]; then
+		exit 1
+	fi
+	retry=$(( $retry + 1 ))
+	sleep 30
+done
+set -e
+
+# run test
+cd masses
+rm -f spamassassin/bayes*
+rm -f razor-agent.log
+date > test.start
+if [ -n "$net" ]; then
+	./mass-check --net -j 8 -f /home/corpus/mail/corpus
+else
+	./mass-check -f /home/corpus/mail/corpus
 fi
+uptime
+date > test.end
 
 # submit results
-export RSYNC_PASSWORD=$password
-rsync -CPcvuzb --timeout=60 ham.log $username@belphegore.hughes-family.org::corpus/ham-$net$username.log
-rsync -CPcvuzb --timeout=60 spam.log $username@belphegore.hughes-family.org::corpus/spam-$net$username.log
+rsync -CPcvuzb --timeout=60 ham.log $username@rsync.kluge.net::corpus/ham-$net$username.log
+rsync -CPcvuzb --timeout=60 spam.log $username@rsync.kluge.net::corpus/spam-$net$username.log
