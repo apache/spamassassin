@@ -231,7 +231,37 @@ for the users.  Note that the "/usr/lib/perl5/site_perl/5.005" path changes,
 depending on your OS and the version of perl you have installed
 (unfortunately).
 
+These paths are pretty ugly, but since SpamAssassin uses Perl's
+Makefile-building system for portability and compatibility with CPAN, they're
+currently unavoidable.  However, if you prefer, you can move these files into
+/etc after installation, and SpamAssassin will pick them up from there
+instead.
+
 There is no difference in interpretation between the rules file and the
 preferences file, so users can add new rules for their own use in the
 "~/.spamfilter.cf" file, if they like.
+
+
+Locali[sz]ation
+---------------
+
+All text displayed to users is taken from the configuration files.
+This means that you can translate messages, test descriptions, and
+templates into other languages.
+
+If you do so, I would *really* appreciate if you could send a copy back of the
+updated messages; mail them to <spamassassin-talk@lists.sourceforge.net> .
+Hopefully if it takes off, I can add them to the distribution as "official"
+translations and build in support for this.  You will, of course, get credited
+for this work ;)
+
+
+Help With SpamAssassin
+----------------------
+
+There's a mailing list for support or discussion of SpamAssassin.  It lives at
+<spamassassin-talk@lists.sourceforge.net>.  See
+http://spamassassin.taint.org/lists.html for the sign-up address and a link to
+the archive of past messages.
+
 

@@ -57,6 +57,7 @@ sub new {
     'msg'		=> $msg,
     'hits'		=> 0,
     'test_logs'		=> '',
+    'test_names_hit'	=> '',
     'tests_already_hit' => { },
   };
 
@@ -157,8 +158,18 @@ The string C<*****SPAM*****> is prepended to the subject.
 
 =item X-Spam-Status: header for spam mails
 
-A string, C<Yes, hits=nn required=nn> is set in this header to reflect
-the filter status.
+A string, C<Yes, hits=nn required=nn tests=...> is set in this header to
+reflect the filter status.  The keys in this string are as follows:
+
+=over 4
+
+=item hits=nn The number of hits the message triggered.
+
+=item required=nn The threshold at which a mail is marked as spam.
+
+=item tests=... The symbolic names of tests which were triggered.
+
+=back
 
 =item X-Spam-Flag: header for spam mails
 
@@ -175,8 +186,9 @@ The SpamAssassin report is added to top of the mail message body.
 
 =item X-Spam-Status: header for non-spam mails
 
-A string, C<No, hits=nn required=nn> is set in this header to reflect
-the filter status.
+A string, C<No, hits=nn required=nn tests=...> is set in this header to reflect
+the filter status.  The keys in this string are the same as for spam mails (see
+above).
 
 =back
 
@@ -232,8 +244,10 @@ sub rewrite_as_spam {
   $self->{msg}->replace_header ("Subject", $_);
 
   # add some headers...
-  $_ = sprintf ("Yes, hits=%d required=%d",
-  			$self->{hits}, $self->{required_hits});
+  $self->{test_names_hit} =~ s/,$//;
+
+  $_ = sprintf ("Yes, hits=%d required=%d tests=%s",
+	$self->{hits}, $self->{required_hits}, $self->{test_names_hit});
 
   $self->{msg}->put_header ("X-Spam-Status", $_);
   $self->{msg}->put_header ("X-Spam-Flag", 'YES');
@@ -259,8 +273,10 @@ sub rewrite_as_spam {
 sub rewrite_as_non_spam {
   my ($self) = @_;
 
-  $_ = sprintf ("No, hits=%d required=%d", $self->{hits},
-        $self->{required_hits});
+  $self->{test_names_hit} =~ s/,$//;
+
+  $_ = sprintf ("No, hits=%d required=%d tests=%s",
+	$self->{hits}, $self->{required_hits}, $self->{test_names_hit});
   $self->{msg}->put_header ("X-Spam-Status", $_);
   $self->{msg}->{audit};
 }
@@ -523,6 +539,8 @@ sub handle_hit {
 
   my $score = $self->{conf}->{scores}->{$rule};
   $self->{hits} += $score;
+
+  $self->{test_names_hit} .= $rule.",";
 
   $self->{test_logs} .= sprintf ("%-16s %s%s\n%s",
 		"Hit! (".$score." point".($score == 1 ? "":"s").")",
