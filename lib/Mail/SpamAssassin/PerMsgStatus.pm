@@ -937,25 +937,10 @@ sub get_decoded_body_text_array {
       next;
     }
 
-    # Hunt down uuencoded bits ...
-    my $uu_region = 0;
     $p->decode(); # decode this part
     push(@{$self->{decoded_body_text_array}}, "\n") if ( @{$self->{decoded_body_text_array}} );
-    foreach my $line ( @{$p->{'decoded'}} ) {
-      push(@{$self->{decoded_body_text_array}}, $self->split_into_array_of_short_lines($line));
-
-      # look for uuencoded text
-      if ($uu_region == 0 && $line =~ /^begin [0-7]{3} .*/) {
-        $uu_region = 1;
-      }
-      elsif ($uu_region == 1 && $line =~ /^[\x21-\x60]{1,61}$/) {
-        $uu_region = 2;
-      }
-      elsif ($uu_region == 2 && $line =~ /^end$/) {
-        $self->{found_encoding_uuencode} = 1;
-        last;
-      }
-    }
+    push(@{$self->{decoded_body_text_array}},
+      map { $self->split_into_array_of_short_lines($_) } @{$p->{'decoded'}} );
   }
 
   return $self->{decoded_body_text_array};
