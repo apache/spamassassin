@@ -132,7 +132,7 @@ sub new {
   # to receive the correct values.
 
   $self->{auto_whitelist_path} = "__userstate__/auto-whitelist";
-  $self->{auto_whitelist_file_mode} = '0600';
+  $self->{auto_whitelist_file_mode} = '0700';
   $self->{auto_whitelist_factor} = 0.5;
 
   $self->{auto_learn} = 1;
@@ -175,7 +175,7 @@ sub new {
 
   $self->{use_bayes} = 1;
   $self->{bayes_path} = "__userstate__/bayes";
-  $self->{bayes_file_mode} = "0600";
+  $self->{bayes_file_mode} = "0700";
   $self->{bayes_use_hapaxes} = 1;
   $self->{bayes_use_chi2_combining} = 0;
   $self->{bayes_expiry_min_db_size} = 100000;
@@ -1790,10 +1790,11 @@ with this as the base, with C<_toks>, C<_seen> etc. appended to this filename;
 so the default setting results in files called C<~/.spamassassin/bayes_seen>,
 C<~/.spamassassin/bayes_toks> etc.
 
-By default, each user has their own, in their C<~/.spamassassin> directory
-with mode 0700, but for system-wide SpamAssassin use, you may want to share
-this across all users.  However it should be noted that Bayesian filtering
-appears to be more effective with an individual database per user.
+By default, each user has their own, in their C<~/.spamassassin> directory with
+mode 0700/0600, but for system-wide SpamAssassin use, you may want to reduce
+disk space usage by sharing this across all users.  (However it should be noted
+that Bayesian filtering appears to be more effective with an individual
+database per user.)
 
 =cut
 
@@ -1817,22 +1818,26 @@ needed, chmod the log directory to 1777, and adjust later.
       $Mail::SpamAssassin::TIMELOG->{logpath}=$1; next;
     }
 
-=item auto_whitelist_file_mode		(default: 0600)
+=item auto_whitelist_file_mode		(default: 0700)
 
 The file mode bits used for the automatic-whitelist directory or file.
-The resulting file will not have any execute bits set (the umask is set
-to 111).
+
+Make sure you specify this using the 'x' mode bits set, as it may also be used
+to create directories.  However, if a file is created, the resulting file will
+not have any execute bits set (the umask is set to 111).
 
 =cut
     if (/^auto_whitelist_file_mode\s+(.*)$/) {
       $self->{auto_whitelist_file_mode} = $1; next;
     }
 
-=item bayes_file_mode		(default: 0600)
+=item bayes_file_mode		(default: 0700)
 
 The file mode bits used for the Bayesian filtering database files.
-The resulting file will not have any execute bits set (the umask is set
-to 111).
+
+Make sure you specify this using the 'x' mode bits set, as it may also be used
+to create directories.  However, if a file is created, the resulting file will
+not have any execute bits set (the umask is set to 111).
 
 =cut
     if (/^bayes_file_mode\s+(.*)$/) {

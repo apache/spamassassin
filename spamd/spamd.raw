@@ -437,6 +437,7 @@ sub check {
 	    {
 		$current_user = $1;
 		auth_ident($current_user) if $opt{'auth-ident'};
+
 		if (!$opt{'user-config'})
 		{
 		  if ($opt{'sql-config'}) {
@@ -457,25 +458,25 @@ sub check {
 	}
     }
 
-   if ( $setuid_to_user && $> == 0 )
-   {
-       if ($spamtest->{paranoid}) {
-	   logmsg "PARANOID: still running as root, closing connection.";
-	   die;
-       }
-	logmsg "Still running as root: user not specified with -u, ".
-	    "not found, or set to root.  Fall back to nobody.";
-	my $uid = getpwnam('nobody');
-       $> = $uid;
-       if ( !defined($uid) || ($> != $uid and $> != ($uid-2**32))) {
-	   logmsg "fatal: setuid to nobody failed";
-	   die;
-       }
+    if ( $setuid_to_user && $> == 0 )
+    {
+        if ($spamtest->{paranoid}) {
+            logmsg "PARANOID: still running as root, closing connection.";
+            die;
+        }
+        logmsg "Still running as root: user not specified with -u, ".
+	     "not found, or set to root.  Fall back to nobody.";
+        my $uid = getpwnam('nobody');
+        $> = $uid;
+        if ( !defined($uid) || ($> != $uid and $> != ($uid-2**32))) {
+            logmsg "fatal: setuid to nobody failed";
+	    die;
+        }
     }
 
-   if ($opt{'sql-config'} && !defined($current_user)) {
-     handle_user_sql('nobody');
-   }
+    if ($opt{'sql-config'} && !defined($current_user)) {
+        handle_user_sql('nobody');
+    }
 
     my $resp = "EX_OK";
 
@@ -665,20 +666,18 @@ sub handle_user
 	#if we are given a username, but can't look it up,
 	#Maybe NIS is down? lets break out here to allow
 	#them to get 'defaults' when we are not running paranoid.
-	logmsg "handle_user() -> unable to find user [$userid]!";
+	logmsg "handle_user: unable to find user '$userid'!";
 	return 0;
     }
 
     if ($setuid_to_user) {
 	$> = $uid;
-       if ( !defined($uid) || ($> != $uid and $> != ($uid-2**32))) {
-           logmsg "fatal: setuid to $username failed";
+        if ( !defined($uid) || ($> != $uid and $> != ($uid-2**32))) {
+            logmsg "fatal: setuid to $username failed";
 	    die;		# make it fatal to avoid security breaches
-	}
-	else
-	{
+	} else {
 	   logmsg "info: setuid to $username succeeded";
-    }
+	}
     }
 
     #
@@ -709,7 +708,8 @@ sub handle_user
     } else {
 	create_default_cf_if_needed ($cf_file, $username);
 	$spamtest->read_scoreonly_config ($cf_file);
-	$spamtest->signal_user_changed ({ username => $username });
+	$spamtest->signal_user_changed ({ username => $username,
+					    user_dir => $dir });
     }
 
     return 1;
@@ -1166,7 +1166,8 @@ the user running C<spamc>, if C<spamd> is running as root.
 =item B<-x>, B<--nouser-config>, B<--user-config>
 
 Turn off(on) per-user config files.  All users will just get the default
-configuration.
+configuration.   The default behaviour is for per-user configuration
+to be off.
 
 =item B<--auth-ident>
 

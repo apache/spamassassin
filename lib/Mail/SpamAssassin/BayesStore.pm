@@ -10,6 +10,7 @@ use AnyDBM_File;
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Util;
 use Sys::Hostname;
+use File::Basename;
 use File::Spec;
 use File::Path;
 
@@ -179,6 +180,14 @@ sub tie_db_writable {
   }
 
   my $path = $main->sed_path ($main->{conf}->{bayes_path});
+
+  my $parentdir = dirname ($path);
+  if (!-d $parentdir) {
+    # run in an eval(); if mkpath has no perms, it calls die()
+    eval {
+      mkpath ($parentdir, 0, (oct ($main->{conf}->{bayes_file_mode}) & 0777));
+    };
+  }
 
   if ($main->{locker}->safe_lock ($path)) {
     $self->{locked_file} = $path;
