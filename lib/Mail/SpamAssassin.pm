@@ -69,7 +69,7 @@ use vars	qw{
 @ISA = qw();
 
 $VERSION = "2.20";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.70 2002/03/04 17:51:15 hughescr Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.71 2002/03/06 11:23:35 matt_sergeant Exp $';
 
 sub Version { $VERSION; }
 
@@ -169,7 +169,7 @@ sub new {
 
   if (defined $self->{debug}) { $DEBUG = $self->{debug}+0; }
 
-  $self->{conf} = new Mail::SpamAssassin::Conf ($self);
+  $self->{conf} ||= new Mail::SpamAssassin::Conf ($self);
   $self;
 }
 

@@ -38,6 +38,7 @@ sub report {
 
   if (!$self->{main}->{local_tests_only}
   	&& !$self->{options}->{dont_report_to_razor}
+    && !$self->{main}->{stop_at_threshold}
 	&& $self->is_razor_available())
   {
     if ($self->razor_report($text)) {

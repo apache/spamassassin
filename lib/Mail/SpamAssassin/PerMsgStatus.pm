@@ -60,6 +60,7 @@ sub new {
   };
 
   $self->{conf} = $self->{main}->{conf};
+  $self->{stop_at_threshold} = $self->{main}->{stop_at_threshold};
 
   bless ($self, $class);
   $self;
@@ -151,7 +152,8 @@ spam-like.
 
 sub is_spam {
   my ($self) = @_;
-  return $self->{is_spam};
+  # changed to test this so sub-tests can ask "is_spam" during a run
+  return ($self->{hits} >= $self->{conf}->{required_hits});
 }
 
 ###########################################################################
@@ -658,7 +660,7 @@ sub get_decoded_stripped_body_text_array {
 
   my $bodytext = $self->get_decoded_body_text_array();
 
-  my $text = '';
+  my $text = "Subject: " . $self->get('subject', '') . "\n\n";
   my $lastwasmime = 0;
   foreach $_ (@{$bodytext}) {
     /^SPAM: / and next;         # SpamAssassin markup
@@ -831,7 +833,23 @@ sub do_head_tests {
   my ($rulename, $rule);
   my $evalstr = '';
 
-  while (($rulename, $rule) = each %{$self->{conf}->{head_tests}}) {
+  my @tests = keys %{$self->{conf}{head_tests}};
+  my @negative_tests;
+  my @positive_tests;
+  # add negative tests;
+  foreach my $test (@tests) {
+    if ($self->{conf}{scores}{$test} < 0) {
+      push @negative_tests, $test;
+    }
+    else {
+      push @positive_tests, $test;
+    }
+  }
+  @negative_tests = sort { $self->{conf}{scores}{$a} <=> $self->{conf}{scores}{$b} } @negative_tests;
+  @positive_tests = sort { $self->{conf}{scores}{$b} <=> $self->{conf}{scores}{$a} } @positive_tests;
+  
+  foreach $rulename (@negative_tests, @positive_tests) {
+    $rule = $self->{conf}->{head_tests}->{$rulename};
     my $def = '';
     my ($hdrname, $testtype, $pat) = 
     		$rule =~ /^\s*(\S+)\s*(\=|\!)\~\s*(\S.*?\S)\s*$/;
@@ -842,6 +860,7 @@ sub do_head_tests {
 
     # dbg ("header regexp test '.$rulename.'");
     $evalstr .= '
+      return if $self->{stop_at_threshold} && $self->is_spam;
       if ($self->{conf}->{scores}->{q#'.$rulename.'#}) {
 	if ($self->get(q#'.$hdrname.'#, q#'.$def.'#) '.$testtype.'~ '.$pat.') {
 	  $self->got_hit (q#'.$rulename.'#, q{});
@@ -890,8 +909,25 @@ sub do_body_tests {
 
   # build up the eval string...
   my $evalstr = '';
-  while (($rulename, $pat) = each %{$self->{conf}->{body_tests}}) {
+  my @tests = keys %{$self->{conf}{body_tests}};
+  my @negative_tests;
+  my @positive_tests;
+  # add negative tests;
+  foreach my $test (@tests) {
+    if ($self->{conf}{scores}{$test} < 0) {
+      push @negative_tests, $test;
+    }
+    else {
+      push @positive_tests, $test;
+    }
+  }
+  @negative_tests = sort { $self->{conf}{scores}{$a} <=> $self->{conf}{scores}{$b} } @negative_tests;
+  @positive_tests = sort { $self->{conf}{scores}{$b} <=> $self->{conf}{scores}{$a} } @positive_tests;
+  
+  foreach $rulename (@negative_tests, @positive_tests) {
+    $pat = $self->{conf}->{body_tests}->{$rulename};
     $evalstr .= '
+      return if $self->{stop_at_threshold} && $self->is_spam;
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
 	if ('.$pat.') { $self->got_body_pattern_hit (q{'.$rulename.'}); }
       }
@@ -1007,8 +1043,25 @@ sub do_body_uri_tests {
   
   # otherwise build up the eval string...
   my $evalstr = '';
-  while (($rulename, $pat) = each %{$self->{conf}->{uri_tests}}) {
+  my @tests = keys %{$self->{conf}{uri_tests}};
+  my @negative_tests;
+  my @positive_tests;
+  # add negative tests;
+  foreach my $test (@tests) {
+    if ($self->{conf}{scores}{$test} < 0) {
+      push @negative_tests, $test;
+    }
+    else {
+      push @positive_tests, $test;
+    }
+  }
+  @negative_tests = sort { $self->{conf}{scores}{$a} <=> $self->{conf}{scores}{$b} } @negative_tests;
+  @positive_tests = sort { $self->{conf}{scores}{$b} <=> $self->{conf}{scores}{$a} } @positive_tests;
+  
+  foreach $rulename (@negative_tests, @positive_tests) {
+    $pat = $self->{conf}->{uri_tests}->{$rulename};
     $evalstr .= '
+      return if $self->{stop_at_threshold} && $self->is_spam;
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
     if ('.$pat.') { $self->got_uri_pattern_hit (q{'.$rulename.'}); }
       }
@@ -1059,8 +1112,25 @@ sub do_rawbody_tests {
 
   # build up the eval string...
   my $evalstr = '';
-  while (($rulename, $pat) = each %{$self->{conf}->{rawbody_tests}}) {
+  my @tests = keys %{$self->{conf}{rawbody_tests}};
+  my @negative_tests;
+  my @positive_tests;
+  # add negative tests;
+  foreach my $test (@tests) {
+    if ($self->{conf}{scores}{$test} < 0) {
+      push @negative_tests, $test;
+    }
+    else {
+      push @positive_tests, $test;
+    }
+  }
+  @negative_tests = sort { $self->{conf}{scores}{$a} <=> $self->{conf}{scores}{$b} } @negative_tests;
+  @positive_tests = sort { $self->{conf}{scores}{$b} <=> $self->{conf}{scores}{$a} } @positive_tests;
+  
+  foreach $rulename (@negative_tests, @positive_tests) {
+    $pat = $self->{conf}->{rawbody_tests}->{$rulename};
     $evalstr .= '
+      return if $self->{stop_at_threshold} && $self->is_spam;
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
 	if ('.$pat.') { $self->got_body_pattern_hit (q{'.$rulename.'}); }
       }
@@ -1111,8 +1181,25 @@ sub do_full_tests {
 
   # build up the eval string...
   my $evalstr = '';
-  while (($rulename, $pat) = each %{$self->{conf}->{full_tests}}) {
+  my @tests = keys %{$self->{conf}{full_tests}};
+  my @negative_tests;
+  my @positive_tests;
+  # add negative tests;
+  foreach my $test (@tests) {
+    if ($self->{conf}{scores}{$test} < 0) {
+      push @negative_tests, $test;
+    }
+    else {
+      push @positive_tests, $test;
+    }
+  }
+  @negative_tests = sort { $self->{conf}{scores}{$a} <=> $self->{conf}{scores}{$b} } @negative_tests;
+  @positive_tests = sort { $self->{conf}{scores}{$b} <=> $self->{conf}{scores}{$a} } @positive_tests;
+  
+  foreach $rulename (@negative_tests, @positive_tests) {
+    $pat = $self->{conf}->{full_tests}->{$rulename};
     $evalstr .= '
+      return if $self->{stop_at_threshold} && $self->is_spam;
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
 	if ($$fullmsgref =~ '.$pat.') {
 	  $self->got_body_pattern_hit (q{'.$rulename.'});
@@ -1219,6 +1306,7 @@ sub run_eval_tests {
 
   foreach my $rulename (sort keys %{$evalhash}) {
     next unless ($self->{conf}->{scores}->{$rulename});
+    return if $self->{stop_at_threshold} && $self->is_spam;
     my $evalsub = $evalhash->{$rulename};
 
     my $result;
