@@ -148,8 +148,19 @@ describe MIME_HTML_NO_CHARSET	Message text in HTML without specified charset
 rawbody  MIME_MISSING_BOUNDARY	eval:check_for_mime('mime_missing_boundary')
 describe MIME_MISSING_BOUNDARY	MIME section missing boundary
 
-body MIME_MULTIPART_SHORT	eval:check_mime_multipart_ratio('0.00','0.01')
-describe MIME_MULTIPART_SHORT	Alternative plain text is much shorter than HTML
+body MIME_HTML_MOSTLY		eval:check_mime_multipart_ratio('0.00','0.01')
+describe MIME_HTML_MOSTLY	Multipart message almost all text/html MIME parts
+
+# Steve Linford via Charlie Watts: good test!
+header __RCVD_BY_HOTMAIL	Received =~ / by hotmail\.com /
+body __MIME_HTML_ONLY		eval:check_for_mime_html_only()
+meta MIME_HTML_ONLY		(!__RCVD_BY_HOTMAIL && __MIME_HTML_ONLY)
+describe MIME_HTML_ONLY		Message only has text/html MIME parts
+
+# only works for multipart/alternative
+header __CTYPE_MULTIPART_ALT	Content-Type =~ /multipart\/alternative/i
+meta MIME_HTML_ONLY_MULTI	(__CTYPE_MULTIPART_ALT && __MIME_HTML_ONLY)
+describe MIME_HTML_ONLY_MULTI	Multipart message only has text/html MIME parts
 
 rawbody MIME_QP_DEFICIENT	eval:check_for_mime('mime_qp_illegal')
 describe MIME_QP_DEFICIENT	Deficient quoted-printable encoding in body

@@ -47,17 +47,6 @@ describe UPPERCASE_75_100       message body is 75-100% uppercase
 meta PLING_PLING                (!__ISO_2022_JP_DELIM && __PLING_PLING)
 describe PLING_PLING            Subject has lots of exclamation marks
 
-# Steve Linford via Charlie Watts: good test!
-header __RCVD_BY_HOTMAIL	Received =~ / by hotmail\.com /
-body __MIME_HTML_ONLY		eval:check_for_mime_html_only()
-meta MIME_HTML_ONLY		(!__RCVD_BY_HOTMAIL && __MIME_HTML_ONLY)
-describe MIME_HTML_ONLY		Message only has text/html MIME parts
-
-# only works for multipart/alternative
-header __CTYPE_MULTIPART_ALT	Content-Type =~ /multipart\/alternative/i
-meta MIME_HTML_ONLY_MULTI	(__CTYPE_MULTIPART_ALT && __MIME_HTML_ONLY)
-describe MIME_HTML_ONLY_MULTI	Multipart message only has text/html MIME parts
-
 ##############################################################################
 
 # tvd - I really wish there was a better way to do this, but ...
