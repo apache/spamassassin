@@ -425,11 +425,11 @@ sub razor2_lookup {
 	  alarm 0;
 
 	  # so $objects->[0] is the first (only) message, and ->{spam} is a general yes/no
-          $self->{razor2_result} = $response = $objects->[0]->{spam};
+          $self->{razor2_result} = $response = $objects->[0]->{spam} || 0;
 	  # good for debugging, but leave this off!
 	  #use Data::Dumper;
 	  #print Dumper($objects),"\n";
-	  #
+
 	  # ->{p} is for each part of the message
 	  # so go through each part, taking the highest cf we find
 	  # of any part that isn't contested (ct).  This helps avoid false
