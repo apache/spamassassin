@@ -15,22 +15,22 @@ BEGIN {
 # ---------------------------------------------------------------------------
 
 %patterns = (
-	q{ <dns:15.35.17.212.blocked.secnap.net> [127.0.0.2] } => 'P_1',
-	q{ <dns:226.149.120.193.blocked.secnap.net> [127.0.0.2] } => 'P_2',
-	q{ <dns:18.13.119.61.blocked.secnap.net> [127.0.0.2] } => 'P_3',
-	q{ <dns:134.88.73.210.blocked.secnap.net> [127.0.0.2] } => 'P_4',
-	q{ <dns:98.3.137.144.blocked.secnap.net> [127.0.0.2] } => 'P_5',
-	q{ RCVD_IN_BLOCKED } => 'P_6',
+	q{ <dns:15.35.17.212.dnsbltest.spamassassin.org> [127.0.0.2] } => 'P_1',
+	q{ <dns:226.149.120.193.dnsbltest.spamassassin.org> [127.0.0.2] } => 'P_2',
+	q{ <dns:18.13.119.61.dnsbltest.spamassassin.org> [127.0.0.2] } => 'P_3',
+	q{ <dns:134.88.73.210.dnsbltest.spamassassin.org> [127.0.0.2] } => 'P_4',
+	q{ <dns:98.3.137.144.dnsbltest.spamassassin.org> [127.0.0.2] } => 'P_5',
+	q{ RCVD_IN_TEST } => 'P_6',
 	     );
 
 %anti_patterns = (
-	q{ <dns:127.0.0.1.blocked.secnap.net> [127.0.0.2] } => 'A_1',
+	q{ <dns:127.0.0.1.dnsbltest.spamassassin.org> [127.0.0.2] } => 'A_1',
 		  );
 
 tstprefs ("
-	header RCVD_IN_BLOCKED eval:check_rbl('blocked', 'blocked.secnap.net.')
-	describe RCVD_IN_BLOCKED BLOCKED: sender is any address
-	tflags RCVD_IN_BLOCKED net
+	header RCVD_IN_TEST eval:check_rbl('satest', 'dnsbltest.spamassassin.org.')
+	describe RCVD_IN_TEST TEST: sender is any address
+	tflags RCVD_IN_TEST net
 	add_header all RBL _RBL_
 	");
 
