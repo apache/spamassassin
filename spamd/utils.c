@@ -134,6 +134,28 @@ full_read (int fd, void *vbuf, int min, int len)
 }
 
 int
+full_read_ssl (SSL *ssl, unsigned char *buf, int min, int len)
+{
+  int total;
+  int thistime;
+
+  for (total = 0; total < min; ) {
+    thistime = ssl_timeout_read (ssl, buf+total, len-total);
+
+    if (thistime < 0) {
+      return -1;
+    } else if (thistime == 0) {
+      /* EOF, but we didn't read the minimum.  return what we've read
+       * so far and next read (if there is one) will return 0. */
+      return total;
+    }
+
+    total += thistime;
+  }
+  return total;
+}
+
+int
 full_write (int fd, const void *vbuf, int len)
 {
   const unsigned char *buf = (const unsigned char *)vbuf;

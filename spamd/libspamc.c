@@ -1098,7 +1098,8 @@ int message_filter(struct transport *tp, const char *username,
 	}
 
 	if (flags&SPAMC_USE_SSL) {
-	  len = ssl_timeout_read (ssl, m->out+m->out_len,
+	  len = full_read_ssl (ssl, (unsigned char *) m->out+m->out_len,
+		     m->max_len+EXPANSION_ALLOWANCE+1-m->out_len,
 		     m->max_len+EXPANSION_ALLOWANCE+1-m->out_len);
 	} else{
 	  len = full_read (sock, m->out+m->out_len,
