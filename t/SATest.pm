@@ -25,7 +25,8 @@ sub sa_t_init {
 
   $spamdport = 48373;		# whatever
 
-  $scr_cf_args = "";
+  $scr_cf_args = "-c ../rules";
+  $scr_pref_args = "";
   $scr_test_args = "";
 
   (-f "t/test_dir") && chdir("t");        # run from ..
@@ -54,7 +55,7 @@ sub tstprefs {
   my $lines = shift;
   open (OUT, ">log/tst.cf") or die;
   print OUT $lines; close OUT;
-  $scr_cf_args = "-p log/tst.cf";
+  $scr_pref_args = "-p log/tst.cf";
 }
 
 # Run spamassassin. Calls back with the output.
@@ -78,7 +79,7 @@ sub sarun {
   if (defined $ENV{'SA_ARGS'}) {
     $args = $ENV{'SA_ARGS'} . " ". $args;
   }
-  $args = "$scr_cf_args $scr_test_args $args";
+  $args = "$scr_cf_args $scr_pref_args $scr_test_args $args";
 
   # added fix for Windows tests from Rudif
   my $scrargs = "$scr $args";
