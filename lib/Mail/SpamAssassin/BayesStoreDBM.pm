@@ -357,7 +357,7 @@ sub _upgrade_db {
     # deal with the data tokens
     my ($tok, $packed);
     while (($tok, $packed) = each %{$self->{db_toks}}) {
-      next if ($tok =~ /^(?:\*\*[A-Z]+$|\015\001\007\011\003)/; # skip magic tokens
+      next if ($tok =~ /^(?:\*\*[A-Z]+$|\015\001\007\011\003)/); # skip magic tokens
 
       my ($ts, $th, $atime) = $self->tok_unpack ($packed);
       $new_toks{$tok} = $self->tok_pack ($ts, $th, $newatime);
