@@ -1,5 +1,5 @@
 # SpamAssassin rules file: scores.
-# $Id: 50_scores.cf,v 1.204 2002/08/26 17:37:12 jmason Exp $
+# $Id: 50_scores.cf,v 1.205 2002/08/26 22:06:31 msquadrat Exp $
 ###########################################################################
 # Default scores.   Note that if a test is named in the files, but a score is
 # not assigned here, the default score will be set to 1.
@@ -523,6 +523,8 @@ score USER_AGENT_KMAIL          -1.0
 score USER_AGENT_IMP            -1.0
 score USER_AGENT_TONLINE        -1.0
 score USER_AGENT_APPLEMAIL      -1.0
+score USER_AGENT_GNUS_UA        -1.0
+score USER_AGENT_GNUS_XM        -1.0
 
 # ratware scores
 score RATWARE_GROUPMAIL		2.0
@@ -564,6 +566,7 @@ score PATCH_CONTEXT_DIFF	    -5.0
 score PATCH_UNIFIED_DIFF	    -5.0
 score BUGZILLA_BUG		    -2.0
 score DEBIAN_BTS_BUG		    -4.0
+score SOURCEFORGE_BUG		    -4.0
 score MAILMAN_CONFIRM               -4.0
 score YAHOO_MSGID_ADDED             -2.4
 score Q_FOR_SELLER                  -4.0
