@@ -450,25 +450,35 @@ describe T_DRUGS_DEPRESSION 	Contains a ref to a prescription antidepressant
 # (jm: this is ridiculous.  I've had to make these descriptions unreadable
 # because of the absurd 50-char limit. grrr!!)
 meta T_DRUGS_DIET_EREC	(T_DRUGS_ERECTILE && T_DRUGS_DIET)
-describe T_DRUGS_DIET_EREC 	Has refs to both an E.D. and a diet drug
+describe T_DRUGS_DIET_EREC 	Refers to both an E.D. and a diet drug
 meta T_DRUGS_PAIN_EREC	(T_DRUGS_ERECTILE && T_DRUGS_PAIN)
-describe T_DRUGS_PAIN_EREC 	Has refs to both an E.D. and a painkiller
+describe T_DRUGS_PAIN_EREC 	Refers to both an E.D. and a painkiller
 meta T_DRUGS_DEPR_EREC	(T_DRUGS_ERECTILE && T_DRUGS_DEPRESSION)
-describe T_DRUGS_DEPR_EREC 	Has refs to both an E.D. and antidepressant
+describe T_DRUGS_DEPR_EREC 	Refers to both an E.D. and antidepressant
 meta T_DRUGS_ANXIETY_EREC (T_DRUGS_ERECTILE && T_DRUGS_ANXIETY)
-describe T_DRUGS_ANXIETY_EREC 	Has refs to both an E.D. and anti-anxiety drug
+describe T_DRUGS_ANXIETY_EREC 	Refers to both an E.D. and anti-anxiety drug
 meta T_DRUGS_DIET_PAIN	(T_DRUGS_DIET && T_DRUGS_PAIN)
-describe T_DRUGS_DIET_PAIN Has refs to diet drugs and painkillers
+describe T_DRUGS_DIET_PAIN Refers to diet drugs and painkillers
 meta T_DRUGS_SLEEP_EREC	(T_DRUGS_ERECTILE && T_DRUGS_SLEEP)
-describe T_DRUGS_SLEEP_EREC 	Has refs to an E.D. and prescription sleep aid
+describe T_DRUGS_SLEEP_EREC 	Refers to an E.D. and prescription sleep aid
 
-#this last rule is SA 2.5x and higher only
+# Justin, if it's hard to describe, maybe it's not the right rule concept...
+# try a more natural meta rule and see how it works
+# the idea is to also see if the weird combinations are really needed,
+# I'm not really sure it's lower FP-wise anyway since someone could be
+# legitimately talking about bad drug interactions or something else
+# non-weird.
+meta T_DRUGS_TWO	(T_DRUGS_ERECTILE + T_DRUGS_DIET + T_DRUGS_PAIN + T_DRUGS_SLEEP + T_DRUGS_MUSCLE + T_DRUGS_ANXIETY + T_DRUGS_DEPRESSION == 2)
+describe T_DRUGS_TWO 	Refers to two different kinds of drugs
+meta T_DRUGS_THREE	(T_DRUGS_ERECTILE + T_DRUGS_DIET + T_DRUGS_PAIN + T_DRUGS_SLEEP + T_DRUGS_MUSCLE + T_DRUGS_ANXIETY + T_DRUGS_DEPRESSION == 3)
+describe T_DRUGS_THREE 	Refers to three different kinds of drugs
+
 # note: some 3 item combos are "normal" ie: a patient might legitimately
 # be prescribed depression, anxiety and sleep aid drugs all at once.
 # however, I know of no "normal" 4-item combinations.
 # don't use this rule with a sum-total that fires off for 3 or less
-meta T_DRUGS_MANYKINDS	(T_DRUGS_ERECTILE + T_DRUGS_DIET + T_DRUGS_PAIN + T_DRUGS_SLEEP + T_DRUGS_MUSCLE + T_DRUGS_ANXIETY + T_DRUGS_DEPRESSION >3)
-describe T_DRUGS_MANYKINDS 	contains refs to four different kinds of drugs
+meta T_DRUGS_MANY	(T_DRUGS_ERECTILE + T_DRUGS_DIET + T_DRUGS_PAIN + T_DRUGS_SLEEP + T_DRUGS_MUSCLE + T_DRUGS_ANXIETY + T_DRUGS_DEPRESSION > 3)
+describe T_DRUGS_MANY 	Refers to many different kinds of drugs
 
 # I'm curious, may help explain more ALL_TRUSTED fps
 body T_SA_MARKED_UP     /Spam detection software, running on the system /
