@@ -158,9 +158,10 @@ tflags DNS_FROM_RFC_WHOIS	net
 
 # this is 127.0.0.6 if querying fullip.rfc-ignorant.org, but since there
 # is only one right now, we might as well get the TXT record version
-header RCVD_IN_RFC_IPWHOIS	eval:check_rbl_txt('ipwhois-notfirsthop', 'ipwhois.rfc-ignorant.org.')
-describe RCVD_IN_RFC_IPWHOIS	Sent via a relay in ipwhois.rfc-ignorant.org
-tflags RCVD_IN_RFC_IPWHOIS	net
+# 2004-10-21: disabled since ipwhois is going away
+#header RCVD_IN_RFC_IPWHOIS	eval:check_rbl_txt('ipwhois-notfirsthop', 'ipwhois.rfc-ignorant.org.')
+#describe RCVD_IN_RFC_IPWHOIS	Sent via a relay in ipwhois.rfc-ignorant.org
+#tflags RCVD_IN_RFC_IPWHOIS	net
 
 # 127.0.0.7 is the response for an entire TLD in whois.rfc-ignorant.org,
 # but it has too many false positives.
