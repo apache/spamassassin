@@ -20,10 +20,12 @@ rsync -vrz $RSYNC_USERNAME@belphegore.hughes-family.org::corpus/. all-results
 
 # now grep out the ones built today, and put copies into "uptodate"
 today=`date +"%b %e"`   # "Oct 17"
+yday=`date +"%b %e" --date='yesterday'`   # "Oct 16"
+
 rm -rf uptodate; mkdir uptodate >/dev/null 2>&1
 rm -rf timestamps; mkdir timestamps >/dev/null 2>&1
 for f in all-results/*.log ; do
-  if grep "mass-check results from" $f | grep "$today" > dates ; then
+  if grep "mass-check results from" $f | egrep "$today|$yday" > dates ; then
     cp $f uptodate
     sort dates | tail -1 > timestamps/`basename $f`
   fi
