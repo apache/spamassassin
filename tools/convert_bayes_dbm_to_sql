@@ -1,0 +1,242 @@
+#!/usr/bin/perl -w
+
+# WARNING: This script is VERY rough and provided only as a template
+# for moving the DB based bayes files to a SQL database.  You should
+# do backups and that sort of thing before attempting to use this
+# script.
+
+# Also, no sort of locking is provided so it's suggested that you make
+# sure nothing is accessing the bayes files you are attempting to
+# convert.
+
+use strict;
+
+use DB_File;
+use DBI;
+
+use Getopt::Long;
+
+use vars qw( %toks_db %seen_db $opt_dbpath $opt_username $opt_dsn $opt_ok
+	     $opt_dbusername $opt_dbpassword $opt_help $last_atime_delta
+	     $last_expire $last_expire_reduce $ham_count $spam_count);
+
+
+# These are the magic tokens we use to track stuff in the DB.
+# The format is '^M^A^G^I^C' followed by any string you want.
+# None of the control chars will be in a real token.
+my $DB_VERSION_MAGIC_TOKEN         = "\015\001\007\011\003DBVERSION";
+my $LAST_ATIME_DELTA_MAGIC_TOKEN   = "\015\001\007\011\003LASTATIMEDELTA";
+my $LAST_EXPIRE_MAGIC_TOKEN        = "\015\001\007\011\003LASTEXPIRE";
+my $LAST_EXPIRE_REDUCE_MAGIC_TOKEN = "\015\001\007\011\003LASTEXPIREREDUCE";
+my $LAST_JOURNAL_SYNC_MAGIC_TOKEN  = "\015\001\007\011\003LASTJOURNALSYNC";
+my $NEWEST_TOKEN_AGE_MAGIC_TOKEN   = "\015\001\007\011\003NEWESTAGE";
+my $NHAM_MAGIC_TOKEN               = "\015\001\007\011\003NHAM";
+my $NSPAM_MAGIC_TOKEN              = "\015\001\007\011\003NSPAM";
+my $NTOKENS_MAGIC_TOKEN            = "\015\001\007\011\003NTOKENS";
+my $OLDEST_TOKEN_AGE_MAGIC_TOKEN   = "\015\001\007\011\003OLDESTAGE";
+my $RUNNING_EXPIRE_MAGIC_TOKEN     = "\015\001\007\011\003RUNNINGEXPIRE";
+
+
+GetOptions("dbpath=s",
+           "username=s",
+           "dsn=s",
+           "dbusername=s",
+	   "dbpassword=s",
+           "help",
+           "ok");
+
+sub usage {
+  print "This program takes the following arguments:\n";
+  print "--username <username> - This is who's bayes data you are loading.\n";
+  print "                        It should match exactly what spassassin or\n";
+  print "                        spamd will be using.\n";
+  print "--dsn <dsn> - This is the database DSN.  It should be in the form:\n";
+  print "              DBI:driver:database:hostname[:port]\n";
+  print "              Consult your database drivers docs for more info.\n";
+  print "--dbpath <path>  - path to the bayes files you wish to\n";
+  print "                   convert. Default is to use \n";
+  print "                   \$ENV{HOME}/.spamassassin/bayes\n";
+  print "                   A _toks and _seen will be added to the given path.\n";
+  print "--dbusername <username> - Needed if your DBI driver requires a username.\n";
+  print "--dbpassword <password> - Needed if your DBI driver requires a password.\n";
+  print "--ok - Basically a sanity check that you understand how dangerous this script is.\n";
+  print "\n\n";
+  print "WARNING: This script is VERY rough and not well tested.  You should\n";
+  print "use extreme caution when working with it.  Including backing up your\n";
+  print "data and all that other good stuff.\n";
+  print "Passing of the --ok flag means you read this warning.\n";
+  print "\n";
+  exit;
+}
+
+usage() if ($opt_help);
+
+if (!$opt_ok) {
+  usage();
+}
+
+my $path = $opt_dbpath || $ENV{HOME}."/.spamassassin/bayes";
+my $dsn = $opt_dsn || "dbi:mysql:spamassassin:";
+
+my $username = $opt_username || `whoami`;
+chomp($username);
+
+my $toks_name = "${path}_toks";
+my $seen_name = "${path}_seen";
+
+print "Converting DBM bayes database to SQL database for $username.\n";
+
+my $dbh = DBI->connect($dsn, $opt_dbusername, $opt_dbpassword);
+
+unless ($dbh) {
+  print "Unable to connect to database ($dsn): ".DBI->errstr()."\n";
+  exit;
+}
+
+my ($varcount) = $dbh->selectrow_array("SELECT count(*) FROM bayes_vars WHERE username = '$username'");
+
+my ($tokcount) = $dbh->selectrow_array("SELECT count(*) FROM bayes_token WHERE username = '$username'");
+
+if ($varcount || $tokcount) {
+  print "User: $username has existing data, please remove then re-run.\n";
+  exit;
+}
+
+tie %toks_db, "DB_File", $toks_name, O_RDONLY, 0600
+  or die "Cannot open file $toks_name: $!\n";
+
+if ($toks_db{$DB_VERSION_MAGIC_TOKEN} != 2) {
+  print "This conversion script only works with version 2 bayes DBM files.\n";
+  exit;
+}
+
+my $sql = "INSERT INTO bayes_token (username, token, spam_count, ham_count, atime) values (?,?,?,?,?)";
+my $sth = $dbh->prepare($sql);
+
+my $tokens = 0;
+
+# Initalize a few variables in case we end up not finding them in the database.
+$last_atime_delta = 0;
+$last_expire = 0;
+$last_expire_reduce = 0;
+
+foreach my $key ( keys(%toks_db) ) {
+  next if ($key eq $DB_VERSION_MAGIC_TOKEN);
+  next if ($key eq $NHAM_MAGIC_TOKEN);
+  next if ($key eq $NSPAM_MAGIC_TOKEN);
+  next if ($key eq $RUNNING_EXPIRE_MAGIC_TOKEN);
+  next if ($key eq $NTOKENS_MAGIC_TOKEN);
+  next if ($key eq $LAST_JOURNAL_SYNC_MAGIC_TOKEN);
+  next if ($key eq $NEWEST_TOKEN_AGE_MAGIC_TOKEN);
+  next if ($key eq $OLDEST_TOKEN_AGE_MAGIC_TOKEN);
+
+  if ($key eq $LAST_ATIME_DELTA_MAGIC_TOKEN) {
+    $last_atime_delta = $toks_db{$LAST_ATIME_DELTA_MAGIC_TOKEN};
+    next;
+  }
+
+  if ($key eq $LAST_EXPIRE_MAGIC_TOKEN) {
+    $last_expire = $toks_db{$LAST_EXPIRE_MAGIC_TOKEN};
+    next;
+  }
+
+  if ($key eq $LAST_EXPIRE_REDUCE_MAGIC_TOKEN) {
+    $last_expire_reduce = $toks_db{$LAST_EXPIRE_REDUCE_MAGIC_TOKEN};
+    next;
+  }
+
+  my ($spam, $ham, $atime) = &tok_unpack($toks_db{$key});
+  my $rc = $sth->execute($username, $key, $spam, $ham, $atime);
+  if ($rc) {
+    $tokens++;
+  }
+  else {
+    print "Error creating entry for: $key -- $spam -- $ham -- $atime\n";
+  }
+  $sth->finish();
+}
+
+tie %seen_db,  "DB_File", $seen_name, O_RDONLY, 0600
+  or die "Cannot open file $toks_name: $!\n";
+
+$ham_count = 0;
+$spam_count = 0;
+
+$sql = "INSERT INTO bayes_seen (username, msgid, flag) VALUES (?,?,?)";
+$sth = $dbh->prepare($sql);
+
+foreach my $key (keys(%seen_db)) {
+  my $msgid = $key;
+  my $flag = $seen_db{$key};
+
+  next if ($flag ne 'h' && $flag ne 's');
+
+  my $rc = $sth->execute($username, $key, $flag);
+
+  if ($rc) {
+    if ($flag eq 'h') {
+      $ham_count++;
+    }
+    elsif ($flag eq 's') {
+      $spam_count++;
+    }
+  }
+  else {
+    print "Error creating entry for: $msgid -- $flag\n";
+  }
+  $sth->finish();
+}
+
+print "Token Count: $tokens\n";
+print "Ham Count:   $ham_count\n";
+print "Spam Count:  $spam_count\n";
+print "\nNOTE: It's possible that the above numbers may not match up exactly with\n";
+print "\n      what an sa-learn --dump magic shows.  Not sure why that is, but\n";
+print "\n      as long as it's not a huge difference I wouldn't worry about it.\n";
+
+$sql = "INSERT INTO bayes_vars (username, spam_count, ham_count, last_expire, last_atime_delta, last_expire_reduce) VALUES (?,?,?,?,?,?)";
+
+$sth = $dbh->prepare($sql);
+
+my $rc = $sth->execute($username, $spam_count, $ham_count, $last_expire, $last_atime_delta, $last_expire_reduce);
+
+unless ($rc) {
+  print "Error updating bayes_vars: ".DBI->errstr()."\n";
+  exit;
+}
+
+print "Conversion done.\n";
+
+
+
+
+
+use constant FORMAT_FLAG        => 0xc0;        # 11000000
+use constant ONE_BYTE_FORMAT    => 0xc0;        # 11000000
+use constant TWO_LONGS_FORMAT   => 0x00;        # 00000000
+
+use constant ONE_BYTE_SSS_BITS  => 0x38;        # 00111000
+use constant ONE_BYTE_HHH_BITS  => 0x07;        # 00000111
+
+sub tok_unpack {
+  my ($value) = @_;
+  $value ||= 0;
+
+  my ($packed, $atime) = unpack("CV", $value);
+
+  if (($packed & FORMAT_FLAG) == ONE_BYTE_FORMAT) {
+    return (($packed & ONE_BYTE_SSS_BITS) >> 3,
+	    $packed & ONE_BYTE_HHH_BITS,
+	    $atime || 0);
+  }
+  elsif (($packed & FORMAT_FLAG) == TWO_LONGS_FORMAT) {
+    my ($packed, $ts, $th, $atime) = unpack("CVVV", $value);
+    return ($ts || 0, $th || 0, $atime || 0);
+  }
+  # other formats would go here...
+  else {
+    warn "unknown packing format for Bayes db, please re-learn: $packed";
+    return (0, 0, 0);
+  }
+}
+

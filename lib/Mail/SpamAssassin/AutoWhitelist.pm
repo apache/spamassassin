@@ -108,8 +108,11 @@ sub check_address {
       if (defined $noipent->{count} && $noipent->{count} > 0) {
 	dbg ("AWL: found entry w/o IP address for $addr: replacing with $origip");
 	$self->{checker}->remove_entry($noipent);
-	$self->{entry} = $noipent;
-	$self->{entry}->{addr} = $fulladdr;
+        # Now assign proper entry the count and totscore values of the no ip entry
+        # instead of assigning the whole value to avoid wiping out any information added
+        # to the previous entry.
+	$self->{entry}->{count} = $noipent->{count};
+	$self->{entry}->{totscore} = $noipent->{totscore};
       }
     }
   }

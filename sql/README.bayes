@@ -1,0 +1,125 @@
+
+Using A SQL Database for Bayesian Storage Module
+-------------------------------------------------------
+
+SpamAssassin can now store users' bayesian filter data in a SQL
+database. The  most common use for a system like this would be for
+users to be able to have per user bayesian filter data on systems
+where users may not have a home directory to store the data.
+
+In order to activate the SQL based bayesian storage you have to
+configure spamassassin and spamd to use a different bayes storage
+module.  This can be done via a setting in the global configuration
+file.
+
+The directives required to turn on the SQL based bayesian storage are:
+
+bayes_store_module		   Mail::SpamAssassin::BayesStoreSQL
+
+This directive is used by the Bayes module to determine which storage
+module should be used.  If not set it will default to:
+Mail::SpamAssassin::BayesStoreDBM
+
+bayes_sql_dsn			   DBI:driver:database:hostname[:port]
+bayes_sql_username		   dbusername
+bayes_sql_password		   dbpassword
+
+The bayes_sql_dsn directive describes the data source name that will
+be used to create the connection to your SQL server.  It MUST be in
+the format as listed above.  <driver> should be the DBD driver that
+you have installed to access your database (initially tested with
+MySQL, PostgreSQL, SQLite, and DBD::CSV).  <database> must be the name
+of the database that you created to store the bayes data
+tables. <hostname> is the name of the host that contains the SQL
+database  server.  <port> is the optional port number where your
+database server is listening.
+
+In addition to the global configuration directives there is a user
+preference:
+
+bayes_sql_override_username	   someusername
+
+This directive, if used, will override the username used for storing
+data in the database.  This could be used to group users together to
+share bayesian filter data.
+
+Requirements
+------------
+
+In order for SpamAssassin to work with your SQL database, you must
+have the perl DBI module installed, AS WELL AS the DBD driver/module
+for your specific database.  For example, if using MySQL as your
+RDBMS, you must have the DBD::mysql module installed.  Check CPAN for
+the latest versions of DBI and your database driver/module. 
+
+The BayesStoreSQL module was tested with:
+
+DBI-1.38
+DBD-mysql-2.9002
+perl v5.8.0
+
+But older versions should work fine as the SQL code in SpamAssassin is as 
+simple as could be.
+
+Database Schema
+---------------
+
+The database schema for storage of the bayesian filter data contains
+several different tables.  Several sample SQL schemas have been
+included in to help in setting up your database.  The schemas contain
+the minimum tables and columns necessary to work with the code as
+written.  You are free to add other columns as needed for your local
+implementation.  Presently there is no way to override the table and
+column names used by the BayesStoreSQL code, this feature may be added
+in the future.
+
+Example setup of bayes tables for MySQL:
+
+This assumes that you have already created a database for use with
+spamassassin and setup a username/password that can access that database.
+(See "Creating A Database In MySQL", in "sql/README", if you don't have a
+suitable database ready.)
+
+To install the tables using the included example, use the following command:
+
+mysql -h <hostname> -u <adminusername> -p databasename < bayes_mysql.sql
+Enter password: <adminpassword>
+
+Once you have created the database and added the tables, just add the
+required lines to your global configuration file (local.cf).
+
+Testing SpamAssassin/SQL
+------------------------
+
+To test your SQL setup, and debug any possible problems, you should
+start spamd with the -D option, which will keep spamd in the
+foreground, and will output debug message to the terminal. You should
+then test spamd with a message by calling spamc.  You can use the
+sample-spam.txt file with the following command:
+
+cat sample-spam.txt | spamc
+
+Watch the debug output from spamd and look for the following debug
+line:
+
+debug: bayes: Database connection established
+debug: bayes: Using username: <username>
+
+If you do not see the above text, then the SQL query was not
+successful, and you should see any error messages reported.
+
+This code has been tested using MySQL as the RDMS, with basic tests
+against PostgreSQL and SQLite.  It does require a database that allows
+you to refer to a column on the right hand side of an expression (ie
+update foo set bar = bar + 1).  Any database driver that allows for
+that usage should work with the BayesStoreSQL code.  NOTE: You may
+find that some implementations do not provide a significant advantage
+over using the default DBM implementation.  If you find a driver that
+should work and has issues, please report them to the SADev list.
+
+******
+NB:  This should be considered BETA, and the interface, schema, or
+overall operation of SQL support may change at any time with future
+releases of SA.
+******
+

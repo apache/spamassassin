@@ -1,6 +1,6 @@
 
-Using SpamAssassin With An SQL Database
----------------------------------------
+Loading SpamAssassin User Preferences From An SQL Database
+----------------------------------------------------------
 
 SpamAssassin can now load users' score files from an SQL database.  The concept
 here is to have a web application (PHP/perl/ASP/etc.) that will allow users to
@@ -77,12 +77,18 @@ Note that you can either use just the mail recipient's username for the
 you can use the entire recipient's email address, e.g. "user@example.com", and
 use the full varchar(100).
 
-Included is a default table that can be safely used in your own setup.  To
-use the default table, you must first create a database, and a username/password
-that can access that database.  To install the table, use the following 
-command:
+Included is a default table that can be safely used in your own setup.  To use
+the default table, you must first create a database, and a username/password
+that can access that database.
 
-mysql -h <hostname> -u <username> -p <password> databasename < spamassasin.sql
+To create a database, if one does not already exist, see "Creating A Database
+In MySQL" below.
+
+
+To install the table, use the following command:
+
+mysql -h <hostname> -u <adminusername> -p <databasename> < spamassasin.sql
+Enter password: <adminpassword>
 
 This will create the following table:
 
@@ -115,6 +121,21 @@ before spamc.  An example /etc/procmailrc:
 
 Also note that spamd may need the "-q" switch so it knows to look up users in
 the SQL table instead of /etc/passwd.  See "man spamd".
+
+
+Creating A Database In MySQL
+----------------------------
+
+Here's the command to create a database, and user/password pair to access
+it, for MySQL:
+
+mysql -h <hostname> -u <adminusername> -p
+Enter password: <adminpassword>
+mysql> use mysql;
+mysql> insert into user (Host, User, Password) values('localhost','<username>', password('<password>'));
+mysql> insert into db (Host, Db, User, Select_priv) values('localhost','<databasename>','<username>','Y');
+mysql> create database <databasename>;
+mysql> quit
 
 
 Testing SpamAssassin/SQL

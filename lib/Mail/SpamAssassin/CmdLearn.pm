@@ -170,9 +170,9 @@ sub cmdline_run {
       $spamtest->{conf}->{bayes_path} = $bayes_override_path;
     }
 
-    my $ret = $spamtest->{bayes_scanner}->{store}->upgrade_old_dbm_files();
+    my $ret = $spamtest->{bayes_scanner}->{store}->perform_upgrade();
     $spamtest->finish_learner();
-    return (!(defined $ret && $ret == 2));
+    return (!$ret);
   }
 
   $spamtest->init_learner({

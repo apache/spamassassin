@@ -1,0 +1,275 @@
+#!/usr/bin/perl
+
+use Data::Dumper;
+use lib '.'; use lib 't';
+use SATest; sa_t_init("bayes");
+use Test;
+
+BEGIN { 
+  if (-e 't/test_dir') {
+    chdir 't';
+  }
+
+  if (-e 'test_dir') {
+    unshift(@INC, '../blib/lib');
+  }
+
+  plan tests => 43
+};
+
+tstlocalrules ("
+        bayes_learn_to_journal 0
+");
+
+use Mail::SpamAssassin;
+use Mail::SpamAssassin::MsgParser;
+
+my $sa = create_saobj();
+
+$sa->init();
+
+ok($sa);
+
+ok($sa->{bayes_scanner});
+
+ok(!$sa->{bayes_scanner}->is_scan_available());
+
+open(MAIL,"< data/spam/001");
+
+my $raw_message = do {
+  local $/;
+  <MAIL>;
+};
+
+close(MAIL);
+ok($raw_message);
+
+my @msg;
+foreach my $line (split(/^/m,$raw_message)) {
+  $line =~ s/\r$//;
+  push(@msg, $line);
+}
+
+my $mail = Mail::SpamAssassin::MsgParser->parse( \@msg );
+
+ok($mail);
+
+my $body = $sa->{bayes_scanner}->get_body_from_msg($mail);
+
+ok($body);
+
+my ($wc, @toks) = $sa->{bayes_scanner}->tokenize($mail, $body);
+
+ok($wc > 0);
+
+ok(scalar(@toks) > 0);
+
+my $msgid = $sa->{bayes_scanner}->get_msgid($mail);
+
+ok($msgid eq '9PS291LhupY');
+
+ok($sa->{bayes_scanner}->{store}->tie_db_writable());
+
+ok(!$sa->{bayes_scanner}->{store}->seen_get($msgid));
+
+$sa->{bayes_scanner}->{store}->untie_db();
+
+ok($sa->{bayes_scanner}->learn(1, $mail));
+
+ok(!$sa->{bayes_scanner}->learn(1, $mail));
+
+ok($sa->{bayes_scanner}->{store}->tie_db_writable());
+
+ok($sa->{bayes_scanner}->{store}->seen_get($msgid) eq 's');
+
+$sa->{bayes_scanner}->{store}->untie_db();
+
+ok($sa->{bayes_scanner}->{store}->tie_db_writable());
+
+my $tokerror = 0;
+foreach my $tok (@toks) {
+  my ($spam, $ham, $atime) = $sa->{bayes_scanner}->{store}->tok_get($tok);
+  if ($spam == 0 || $ham > 0) {
+    $tokerror = 1;
+  }
+}
+ok(!$tokerror);
+
+$sa->{bayes_scanner}->{store}->untie_db();
+
+ok($sa->{bayes_scanner}->learn(0, $mail));
+
+ok($sa->{bayes_scanner}->{store}->tie_db_writable());
+
+ok($sa->{bayes_scanner}->{store}->seen_get($msgid) eq 'h');
+
+$sa->{bayes_scanner}->{store}->untie_db();
+
+ok($sa->{bayes_scanner}->{store}->tie_db_writable());
+
+$tokerror = 0;
+foreach my $tok (@toks) {
+  my ($spam, $ham, $atime) = $sa->{bayes_scanner}->{store}->tok_get($tok);
+  if ($spam  > 0 || $ham == 0) {
+    $tokerror = 1;
+  }
+}
+ok(!$tokerror);
+
+$sa->{bayes_scanner}->{store}->untie_db();
+
+ok($sa->{bayes_scanner}->forget($mail));
+
+ok($sa->{bayes_scanner}->{store}->tie_db_writable());
+
+ok(!$sa->{bayes_scanner}->{store}->seen_get($msgid));
+
+$sa->{bayes_scanner}->{store}->untie_db();
+
+undef $sa;
+
+sa_t_init('bayes'); # this wipes out what is there and begins anew
+
+# make sure we learn to a journal
+tstlocalrules ("
+        bayes_learn_to_journal 1
+");
+
+$sa = create_saobj();
+
+$sa->init();
+
+# Slight cheat here, because when you learn only to journal it fails
+# to actually create the bayes_toks and bayes_seen files because we
+# are tieing read only, this will create the files for us and allow
+# things to continue
+ok($sa->{bayes_scanner}->{store}->tie_db_writable());
+
+ok(!-e 'log/user_state/bayes_journal');
+
+ok($sa->{bayes_scanner}->learn(1, $mail));
+
+ok(-e 'log/user_state/bayes_journal');
+
+$sa->{bayes_scanner}->sync(1); # always returns 0, so no need to check return
+
+ok(!-e 'log/user_state/bayes_journal');
+
+ok(-e 'log/user_state/bayes_seen');
+
+ok(-e 'log/user_state/bayes_toks');
+
+undef $sa;
+
+sa_t_init('bayes'); # this wipes out what is there and begins anew
+
+# make sure we learn to a journal
+tstlocalrules ("
+bayes_learn_to_journal 0
+bayes_min_spam_num 10
+bayes_min_ham_num 10
+");
+
+# we get to bastardize the existing pattern matching code here.  It lets us provide
+# our own checking callback and keep using the existing ok_all_patterns call
+%patterns = ( 1 => 'Learned from message' );
+
+ok(salearnrun("--spam data/spam", \&check_examined));
+ok_all_patterns();
+
+ok(salearnrun("--ham data/nice", \&check_examined));
+ok_all_patterns();
+
+ok(salearnrun("--ham data/whitelists", \&check_examined));
+ok_all_patterns();
+
+%patterns = ( 'non-token data: bayes db version' => 'db version' );
+ok(salearnrun("--dump magic", \&patterns_run_cb));
+ok_all_patterns();
+
+use constant SCAN_USING_PERL_CODE_TEST => 1;
+# jm: off! not working for some reason.   Mind you, this is
+# not a supported way to call these APIs!  so no biggie
+
+if (SCAN_USING_PERL_CODE_TEST) {
+$sa = create_saobj();
+
+$sa->init();
+
+open(MAIL,"< ../sample-nonspam.txt");
+
+$raw_message = do {
+  local $/;
+  <MAIL>;
+};
+
+close(MAIL);
+
+@msg = ();
+foreach my $line (split(/^/m,$raw_message)) {
+  $line =~ s/\r$//;
+  push(@msg, $line);
+}
+
+$mail = Mail::SpamAssassin::MsgParser->parse( \@msg );
+
+$body = $sa->{bayes_scanner}->get_body_from_msg($mail);
+
+my $msgstatus = Mail::SpamAssassin::PerMsgStatus->new($sa, $mail);
+
+ok($msgstatus);
+
+my $score = $sa->{bayes_scanner}->scan($msgstatus, $mail, $body);
+
+# Pretty much we can't count on the data returned with such little training
+# so just make sure that the score wasn't equal to .5 which is the default
+# return value.
+print "\treturned score: $score\n";
+ok($score != .5);
+
+open(MAIL,"< ../sample-spam.txt");
+
+$raw_message = do {
+  local $/;
+  <MAIL>;
+};
+
+close(MAIL);
+
+@msg = ();
+foreach my $line (split(/^/m,$raw_message)) {
+  $line =~ s/\r$//;
+  push(@msg, $line);
+}
+
+$mail = Mail::SpamAssassin::MsgParser->parse( \@msg );
+
+$body = $sa->{bayes_scanner}->get_body_from_msg($mail);
+
+$msgstatus = Mail::SpamAssassin::PerMsgStatus->new($sa, $mail);
+
+$score = $sa->{bayes_scanner}->scan($msgstatus, $mail, $body);
+
+# Pretty much we can't count on the data returned with such little training
+# so just make sure that the score wasn't equal to .5 which is the default
+# return value.
+ok($score != .5);
+
+}
+
+sub check_examined {
+  local ($_);
+  my $string = shift;
+
+  if (defined $string) {
+    $_ = $string;
+  } else {
+    $_ = join ('', <IN>);
+  }
+
+  if ($_ =~ /Learned from \d+ message\(s\) \(\d+ message\(s\) examined\)/) {
+    $found{'Learned from message'}++;
+  }
+}
+
+

@@ -400,8 +400,15 @@ skipped.
   - Time::HiRes    (from CPAN)
 
     If this module is installed, the processing times are logged more
-    exactly by spamd.
+    precisely by spamd.
 
+
+  - DBI *and* DBD driver/modules for your database  (from CPAN)
+
+    If you intend to use SpamAssassin with an SQL database backend for
+    user configuration data, Bayes storage, or AWL storage, you will need
+    to have these installed; both the basic DBI module and the driver for
+    your database.
 
 
 What Next?

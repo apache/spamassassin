@@ -14,103 +14,77 @@
 # limitations under the License.
 # </@LICENSE>
 
+=head1 NAME
+
+Mail::SpamAssassin::BayesStore - Bayesian Storage Module
+
+=head1 SYNOPSIS
+
+=head1 DESCRIPTION
+
+This is the public API for the Bayesian store methods.  Any implementation of
+the storage module must implement these methods.
+
+=cut
+
 package Mail::SpamAssassin::BayesStore;
 
 use strict;
 use bytes;
-use Fcntl;
 
-use Mail::SpamAssassin;
-use Mail::SpamAssassin::Util;
-use File::Basename;
-use File::Spec;
-use File::Path;
+=head1 METHODS
 
-use constant HAS_DB_FILE => eval { require DB_File; };
+=head2 new
 
-use vars qw{
-  @ISA
-  @DBNAMES @DB_EXTENSIONS
-  $NSPAM_MAGIC_TOKEN $NHAM_MAGIC_TOKEN $LAST_EXPIRE_MAGIC_TOKEN $LAST_JOURNAL_SYNC_MAGIC_TOKEN
-  $NTOKENS_MAGIC_TOKEN $OLDEST_TOKEN_AGE_MAGIC_TOKEN $LAST_EXPIRE_REDUCE_MAGIC_TOKEN
-  $RUNNING_EXPIRE_MAGIC_TOKEN $DB_VERSION_MAGIC_TOKEN $LAST_ATIME_DELTA_MAGIC_TOKEN
-  $NEWEST_TOKEN_AGE_MAGIC_TOKEN
-};
+public class (Mail::SpamAssassin::BayesStore) new (Mail::SpamAssassin::Bayes $bayes)
 
-@ISA = qw();
+Description:
+This method creates a new instance of the Mail::SpamAssassin::BayesStore
+object.  You must pass in an instance of the Mail::SpamAssassin:Bayes object,
+which is stashed for use throughout the module.
 
-# db layout (quoting Matt):
-#
-# > need five db files though to make it real fast:
-# [probs] 1. ngood and nbad (two entries, so could be a flat file rather 
-# than a db file).	(now 2 entries in db_toks)
-# [toks]  2. good token -> number seen
-# [toks]  3. bad token -> number seen (both are packed into 1 entry in 1 db)
-# [probs]  4. Consolidated good token -> probability
-# [probs]  5. Consolidated bad token -> probability
-# > As you add new mails, you update the entry in 2 or 3, then regenerate
-# > the entry for that token in 4 or 5.
-# > Then as you test a new mail, you just need to pull the probability
-# > direct from 4 and 5, and generate the overall probability. A simple and
-# > very fast operation. 
-#
-# jm: we use probs as overall probability. <0.5 = ham, >0.5 = spam
-#
-# update: probs is no longer maintained as a db, to keep on-disk and in-core
-# usage down.
-#
-# also, added a new one to support forgetting, auto-learning, and
-# auto-forgetting for refiled mails:
-# [seen]  6. a list of Message-IDs of messages already learnt from. values
-# are 's' for learnt-as-spam, 'h' for learnt-as-ham.
-#
-# and another, called [scancount] to model the scan-count for expiry.
-# This is not a database.  Instead it increases by one byte for each
-# message scanned (note: scanned, not learned).
-
-@DBNAMES = qw(toks seen);
-
-# Possible file extensions used by the kinds of database files DB_File
-# might create.  We need these so we can create a new file and rename
-# it into place.
-@DB_EXTENSIONS = ('', '.db');
-
-# These are the magic tokens we use to track stuff in the DB.
-# The format is '^M^A^G^I^C' followed by any string you want.
-# None of the control chars will be in a real token.
-$DB_VERSION_MAGIC_TOKEN		= "\015\001\007\011\003DBVERSION";
-$LAST_ATIME_DELTA_MAGIC_TOKEN	= "\015\001\007\011\003LASTATIMEDELTA";
-$LAST_EXPIRE_MAGIC_TOKEN	= "\015\001\007\011\003LASTEXPIRE";
-$LAST_EXPIRE_REDUCE_MAGIC_TOKEN	= "\015\001\007\011\003LASTEXPIREREDUCE";
-$LAST_JOURNAL_SYNC_MAGIC_TOKEN	= "\015\001\007\011\003LASTJOURNALSYNC";
-$NEWEST_TOKEN_AGE_MAGIC_TOKEN	= "\015\001\007\011\003NEWESTAGE";
-$NHAM_MAGIC_TOKEN		= "\015\001\007\011\003NHAM";
-$NSPAM_MAGIC_TOKEN		= "\015\001\007\011\003NSPAM";
-$NTOKENS_MAGIC_TOKEN		= "\015\001\007\011\003NTOKENS";
-$OLDEST_TOKEN_AGE_MAGIC_TOKEN	= "\015\001\007\011\003OLDESTAGE";
-$RUNNING_EXPIRE_MAGIC_TOKEN	= "\015\001\007\011\003RUNNINGEXPIRE";
-
-use constant DB_VERSION => 2;	# what version of DB do we use?
-
-###########################################################################
+=cut
 
 sub new {
-  my $class = shift;
+  my ($class, $bayes) = @_;
+
   $class = ref($class) || $class;
-  my ($bayes) = @_;
+
   my $self = {
-    'bayes'             => $bayes,
-    'already_tied'	=> 0,
-    'is_locked'		=> 0,
-    'string_to_journal' => '',
-    'db_version'	=> undef,
-  };
+	      'bayes'                => $bayes,
+	      'supported_db_version' => 0,
+	      'db_version'	     => undef,
+	     };
+
   bless ($self, $class);
 
   $self;
 }
 
-###########################################################################
+=head2 DB_VERSION
+
+public instance (Integer) DB_VERSION ()
+
+Description:
+This method returns the currently supported database version for the
+implementation.
+
+=cut
+
+sub DB_VERSION {
+  my ($self) = @_;
+  return $self->{supported_db_version};
+}
+
+=head2 read_db_configs
+
+public instance () read_db_configs ()
+
+Description:
+This method reads any needed config variables from the configuration
+object and then calls the Mail::SpamAssassin::Bayes read_db_configs method.
+
+=cut
 
 sub read_db_configs {
   my ($self) = @_;
@@ -133,342 +107,95 @@ sub read_db_configs {
   $self->{bayes}->read_db_configs();
 }
 
-###########################################################################
+=head2 tie_db_readonly
+
+public instance (Boolean) tie_db_readonly ()
+
+Description:
+This method opens up the database in readonly mode.
+
+=cut
 
 sub tie_db_readonly {
   my ($self) = @_;
-
-  if (!HAS_DB_FILE) {
-    dbg ("bayes: DB_File module not installed, cannot use Bayes");
-    return 0;
-  }
-
-  # return if we've already tied to the db's, using the same mode
-  # (locked/unlocked) as before.
-  return 1 if ($self->{already_tied} && $self->{is_locked} == 0);
-
-  my $main = $self->{bayes}->{main};
-  if (!defined($main->{conf}->{bayes_path})) {
-    dbg ("bayes_path not defined");
-    return 0;
-  }
-
-  $self->read_db_configs();
-
-  my $path = $main->sed_path ($main->{conf}->{bayes_path});
-
-  my $found=0;
-  for my $ext (@DB_EXTENSIONS) { if (-f $path.'_toks'.$ext) { $found=1; last; } }
-
-  if (!$found) {
-    dbg ("bayes: no dbs present, cannot scan: ${path}_toks");
-    return 0;
-  }
-
-  foreach my $dbname (@DBNAMES) {
-    my $name = $path.'_'.$dbname;
-    my $db_var = 'db_'.$dbname;
-    dbg("bayes: $$ tie-ing to DB file R/O $name");
-    # untie %{$self->{$db_var}} if (tied %{$self->{$db_var}});
-    tie %{$self->{$db_var}},"DB_File",$name, O_RDONLY,
-		 (oct ($main->{conf}->{bayes_file_mode}) & 0666)
-       or goto failed_to_tie;
-  }
-
-  $self->{db_version} = ($self->get_magic_tokens())[6];
-  dbg("bayes: found bayes db version ".$self->{db_version});
-
-  # If the DB version is one we don't understand, abort!
-  if ( $self->check_db_version() ) {
-    dbg("bayes: bayes db version ".$self->{db_version}." is newer than we understand, aborting!");
-    $self->untie_db();
-    return 0;
-  }
-
-  if ( $self->{db_version} < 2 ) { # older versions use scancount
-    $self->{scan_count_little_file} = $path.'_msgcount';
-  }
-
-  $self->{already_tied} = 1;
-  return 1;
-
-failed_to_tie:
-  warn "Cannot open bayes databases ${path}_* R/O: tie failed: $!\n";
-  return 0;
+  die "tie_db_readonly: not implemented\n";
 }
 
-# tie() to the databases, read-write and locked.  Any callers of
-# this should ensure they call untie_db() afterwards!
-#
+=head2 tie_db_writable
+
+public instance (Boolean) tie_db_writable ()
+
+Description:
+This method opens up the database in writable mode.
+
+Any callers of this methods should ensure that they call untie_db()
+afterwards.
+
+=cut
+
 sub tie_db_writable {
   my ($self) = @_;
-
-  if (!HAS_DB_FILE) {
-    dbg ("bayes: DB_File module not installed, cannot use Bayes");
-    return 0;
-  }
-
-  # return if we've already tied to the db's, using the same mode
-  # (locked/unlocked) as before.
-  return 1 if ($self->{already_tied} && $self->{is_locked} == 1);
-
-  my $main = $self->{bayes}->{main};
-  if (!defined($main->{conf}->{bayes_path})) {
-    dbg ("bayes_path not defined");
-    return 0;
-  }
-
-  $self->read_db_configs();
-
-  my $path = $main->sed_path ($main->{conf}->{bayes_path});
-
-  my $found=0;
-  for my $ext (@DB_EXTENSIONS) { if (-f $path.'_toks'.$ext) { $found=1; last; } }
-
-  my $parentdir = dirname ($path);
-  if (!-d $parentdir) {
-    # run in an eval(); if mkpath has no perms, it calls die()
-    eval {
-      mkpath ($parentdir, 0, (oct ($main->{conf}->{bayes_file_mode}) & 0777));
-    };
-  }
-
-  my $tout;
-  if ($main->{learn_wait_for_lock}) {
-    $tout = 300;       # TODO: Dan to write better lock code
-  } else {
-    $tout = 10;
-  }
-  if ($main->{locker}->safe_lock ($path, $tout)) {
-    $self->{locked_file} = $path;
-    $self->{is_locked} = 1;
-  } else {
-    warn "Cannot open bayes databases ${path}_* R/W: lock failed: $!\n";
-    return 0;
-  }
-
-  my $umask = umask 0;
-  foreach my $dbname (@DBNAMES) {
-    my $name = $path.'_'.$dbname;
-    my $db_var = 'db_'.$dbname;
-    dbg("bayes: $$ tie-ing to DB file R/W $name");
-    tie %{$self->{$db_var}},"DB_File",$name, O_RDWR|O_CREAT,
-		 (oct ($main->{conf}->{bayes_file_mode}) & 0666)
-       or goto failed_to_tie;
-  }
-  umask $umask;
-
-  # set our cache to what version DB we're using
-  $self->{db_version} = ($self->get_magic_tokens())[6];
-  dbg("bayes: found bayes db version ".$self->{db_version});
-
-  # figure out if we can read the current DB and if we need to do a
-  # DB version update and do it if necessary if either has a problem,
-  # fail immediately
-  #
-  if ( $found && $self->upgrade_db() ) {
-    $self->untie_db();
-    return 0;
-  }
-  elsif ( !$found ) { # new DB, make sure we know that ...
-    $self->{db_version} = $self->{db_toks}->{$DB_VERSION_MAGIC_TOKEN} = DB_VERSION;
-    $self->{db_toks}->{$NTOKENS_MAGIC_TOKEN} = 0; # no tokens in the db ...
-    dbg("bayes: new db, set db version ".$self->{db_version}." and 0 tokens");
-  }
-
-  $self->{already_tied} = 1;
-  return 1;
-
-failed_to_tie:
-  my $err = $!;
-  umask $umask;
-  if ($self->{is_locked}) {
-    $self->{bayes}->{main}->{locker}->safe_unlock ($self->{locked_file});
-    $self->{is_locked} = 0;
-  }
-  warn "Cannot open bayes databases ${path}_* R/W: tie failed: $err\n";
-  return 0;
+  die "tie_db_writable: not implemented\n";
 }
 
-# Do we understand how to deal with this DB version?
-sub check_db_version {
-  my ($self) = @_;
-  my $db_ver = ($self->get_magic_tokens())[6];
+=head2 untie_db
 
-  if ( $db_ver > DB_VERSION ) { # current DB is newer, ignore the DB!
-    warn "bayes: Found DB Version $db_ver, but can only handle up to version ".DB_VERSION."\n";
-    return 1;
-  }
+public instance () untie_db ()
 
-  return 0;
-}
+Description:
+This method unties the database.
 
-# Check to see if we need to upgrade the DB, and do so if necessary
-sub upgrade_db {
-  my ($self) = @_;
-
-  return 0 if ( $self->{db_version} == DB_VERSION );
-  if ( $self->check_db_version() ) {
-    dbg("bayes: bayes db version ".$self->{db_version}." is newer than we understand, aborting!");
-    return 1;
-  }
-
-  # If the current DB version is lower than the new version, upgrade!
-  # Do conversions in order so we can go 1 -> 3, make sure to update $self->{db_version}
-
-  dbg("bayes: detected bayes db format ".$self->{db_version}.", upgrading");
-
-  # since DB_File will not shrink a database (!!), we need to *create*
-  # a new one instead.
-  my $main = $self->{bayes}->{main};
-  my $path = $main->sed_path ($main->{conf}->{bayes_path});
-  my $name = $path.'_toks';
-
-  # older version's journal files are likely not in the same format as the new ones, so remove it.
-  my $jpath = $self->get_journal_filename();
-  if ( -f $jpath ) {
-    dbg("bayes: old journal file found, removing.");
-    warn "Couldn't remove $jpath: $!" if ( !unlink $jpath );
-  }
-
-  if ( $self->{db_version} < 2 ) {
-    dbg ("bayes: upgrading database format from v".$self->{db_version}." to v2");
-
-    my($DB_NSPAM_MAGIC_TOKEN, $DB_NHAM_MAGIC_TOKEN, $DB_NTOKENS_MAGIC_TOKEN);
-    my($DB_OLDEST_TOKEN_AGE_MAGIC_TOKEN, $DB_LAST_EXPIRE_MAGIC_TOKEN);
-
-    # Magic tokens for version 0, defined as '**[A-Z]+'
-    if ( $self->{db_version} == 0 ) {
-      $DB_NSPAM_MAGIC_TOKEN			= '**NSPAM';
-      $DB_NHAM_MAGIC_TOKEN			= '**NHAM';
-      $DB_NTOKENS_MAGIC_TOKEN			= '**NTOKENS';
-      #$DB_OLDEST_TOKEN_AGE_MAGIC_TOKEN		= '**OLDESTAGE';
-      #$DB_LAST_EXPIRE_MAGIC_TOKEN		= '**LASTEXPIRE';
-      #$DB_SCANCOUNT_BASE_MAGIC_TOKEN		= '**SCANBASE';
-      #$DB_RUNNING_EXPIRE_MAGIC_TOKEN		= '**RUNNINGEXPIRE';
-    }
-    else {
-      $DB_NSPAM_MAGIC_TOKEN			= "\015\001\007\011\003NSPAM";
-      $DB_NHAM_MAGIC_TOKEN			= "\015\001\007\011\003NHAM";
-      $DB_NTOKENS_MAGIC_TOKEN			= "\015\001\007\011\003NTOKENS";
-      #$DB_OLDEST_TOKEN_AGE_MAGIC_TOKEN		= "\015\001\007\011\003OLDESTAGE";
-      #$DB_LAST_EXPIRE_MAGIC_TOKEN		= "\015\001\007\011\003LASTEXPIRE";
-      #$DB_SCANCOUNT_BASE_MAGIC_TOKEN		= "\015\001\007\011\003SCANBASE";
-      #$DB_RUNNING_EXPIRE_MAGIC_TOKEN		= "\015\001\007\011\003RUNNINGEXPIRE";
-    }
-
-    # remember when we started ...
-    my $started = time;
-    my $newatime = $started;
-
-    # use O_EXCL to avoid races (bonus paranoia, since we should be locked
-    # anyway)
-    my %new_toks;
-    my $umask = umask 0;
-    tie %new_toks, "DB_File", "${name}.new", O_RDWR|O_CREAT|O_EXCL,
-          (oct ($main->{conf}->{bayes_file_mode}) & 0666) or return 1;
-    umask $umask;
-
-    # add the magic tokens to the new db.
-    $new_toks{$NSPAM_MAGIC_TOKEN} = $self->{db_toks}->{$DB_NSPAM_MAGIC_TOKEN};
-    $new_toks{$NHAM_MAGIC_TOKEN} = $self->{db_toks}->{$DB_NHAM_MAGIC_TOKEN};
-    $new_toks{$NTOKENS_MAGIC_TOKEN} = $self->{db_toks}->{$DB_NTOKENS_MAGIC_TOKEN};
-    $new_toks{$DB_VERSION_MAGIC_TOKEN} = 2; # we're now a DB version 2 file
-    $new_toks{$OLDEST_TOKEN_AGE_MAGIC_TOKEN} = $newatime;
-    $new_toks{$LAST_EXPIRE_MAGIC_TOKEN} = $newatime;
-    $new_toks{$NEWEST_TOKEN_AGE_MAGIC_TOKEN} = $newatime;
-    $new_toks{$LAST_JOURNAL_SYNC_MAGIC_TOKEN} = $newatime;
-    $new_toks{$LAST_ATIME_DELTA_MAGIC_TOKEN} = 0;
-    $new_toks{$LAST_EXPIRE_REDUCE_MAGIC_TOKEN} = 0;
-
-    my $magic_re = $self->get_magic_re($self->{db_version});
-
-    # deal with the data tokens
-    my ($tok, $packed);
-    while (($tok, $packed) = each %{$self->{db_toks}}) {
-      next if ($tok =~ /$magic_re/); # skip magic tokens
-
-      my ($ts, $th, $atime) = $self->tok_unpack ($packed);
-      $new_toks{$tok} = $self->tok_pack ($ts, $th, $newatime);
-    }
-
-
-    # now untie so we can do renames
-    untie %{$self->{db_toks}};
-    untie %new_toks;
-
-    # This is the critical phase (moving files around), so don't allow
-    # it to be interrupted.
-    local $SIG{'INT'} = 'IGNORE';
-    local $SIG{'HUP'} = 'IGNORE';
-    local $SIG{'TERM'} = 'IGNORE';
-
-    # older versions used scancount, so kill the stupid little file ...
-    my $msgc = $path.'_msgcount';
-    if ( -f $msgc ) {
-      dbg("bayes: old msgcount file found, removing.");
-      if ( !unlink $msgc ) {
-        warn "Couldn't remove $msgc: $!";
-      }
-    }
-
-    # now rename in the new one.  Try several extensions
-    for my $ext (@DB_EXTENSIONS) {
-      my $newf = $name.'.new'.$ext;
-      my $oldf = $name.$ext;
-      next unless (-f $newf);
-      if (!rename ($newf, $oldf)) {
-        warn "rename $newf to $oldf failed: $!\n";
-        return 1;
-      }
-    }
-
-    # re-tie to the new db in read-write mode ...
-    tie %{$self->{db_toks}},"DB_File", $name, O_RDWR|O_CREAT,
-	 (oct ($main->{conf}->{bayes_file_mode}) & 0666) or return 1;
-
-    dbg ("bayes: upgraded database format from v".$self->{db_version}." to v2 in ".(time - $started)." seconds");
-    $self->{db_version} = 2; # need this for other functions which check
-  }
-
-  # if ( $self->{db_version} == 2 ) {
-  #   ...
-  #   $self->{db_version} = 3; # need this for other functions which check
-  # }
-  # ... and so on.
-
-  return 0;
-}
-
-###########################################################################
+=cut
 
 sub untie_db {
   my $self = shift;
-  dbg("bayes: $$ untie-ing");
-
-  foreach my $dbname (@DBNAMES) {
-    my $db_var = 'db_'.$dbname;
-
-    if (exists $self->{$db_var}) {
-      dbg ("bayes: $$ untie-ing $db_var");
-      untie %{$self->{$db_var}};
-      delete $self->{$db_var};
-    }
-  }
-
-  if ($self->{is_locked}) {
-    dbg ("bayes: files locked, now unlocking lock");
-    $self->{bayes}->{main}->{locker}->safe_unlock ($self->{locked_file});
-    $self->{is_locked} = 0;
-  }
-
-  $self->{already_tied} = 0;
-  $self->{db_version} = undef;
+  die "untie_db: not implemented\n";
 }
 
-###########################################################################
+=head2 calculate_expire_delta
 
-# Do an expiry run.
+public instance (\%) calculate_expire_delta (Integer $newest_atime,
+                                             Integer $start,
+                                             Integer $max_expire_mult)
+
+Description:
+This method performs a calculation on the data to determine the optimum
+atime for token expiration.
+
+=cut
+
+sub calculate_expire_delta {
+  my ($self, $newest_atime, $start, $max_expire_mult) = @_;
+  die "calculate_expire_delta: not implemented\n";
+}
+
+=head2 token_expiration
+
+public instance (Integer, Integer,
+                 Integer, Integer) token_expiration(\% $opts,
+                                                    Integer $newest_atime,
+                                                    Integer $newdelta)
+
+Description:
+This method performs the database specific expiration of tokens based on
+the passed in C<$newest_atime> and C<$newdelta>.
+
+=cut
+
+sub token_expiration {
+  my ($self, $opts, $newest_atime, $newdelta) = @_;
+  die "token_expiration: not implemented\n";
+}
+
+=head2 expire_old_tokens
+
+public instance (Boolean) expire_old_tokens (\% hashref)
+
+Description:
+This method expires old tokens from the database.
+
+=cut
+
 sub expire_old_tokens {
   my ($self, $opts) = @_;
   my $ret;
@@ -492,6 +219,16 @@ sub expire_old_tokens {
   $ret;
 }
 
+=head2 expire_old_tokens_trapped
+
+public instance (Boolean) expire_old_tokens_trapped (\% $opts)
+
+Description:
+This methods does the actual token expiration.
+
+XXX More docs here about the methodology and what not
+=cut
+
 sub expire_old_tokens_trapped {
   my ($self, $opts) = @_;
 
@@ -504,27 +241,8 @@ sub expire_old_tokens_trapped {
     return 0;
   }
 
-  my $deleted = 0;
-  my $kept = 0;
-  my $num_lowfreq = 0;
-  my $num_hapaxes = 0;
   my $started = time();
-  my @magic = $self->get_magic_tokens();
-
-  # since DB_File will not shrink a database (!!), we need to *create*
-  # a new one instead.
-  my $main = $self->{bayes}->{main};
-  my $path = $main->sed_path ($main->{conf}->{bayes_path});
-
-  # use a temporary PID-based suffix just in case another one was
-  # created previously by an interrupted expire
-  my $tmpsuffix = "expire$$";
-  my $tmpdbname = $path.'_toks.'.$tmpsuffix;
-
-  my $magic_re = $self->get_magic_re(DB_VERSION);
-
-  # Figure out atime delta as necessary
-  my $too_old = 0;
+  my @vars = $self->get_storage_variables();
 
   # How many tokens do we want to keep?
   my $goal_reduction = int($self->{expiry_max_db_size} * 0.75); # expire to 75% of max_db
@@ -535,32 +253,32 @@ sub expire_old_tokens_trapped {
     dbg("bayes: expiry keep size too small, resetting to 100,000 tokens");
   }
   # Now turn goal_reduction into how many to expire.
-  $goal_reduction = $magic[3] - $goal_reduction;
-  dbg("bayes: token count: ".$magic[3].", final goal reduction size: $goal_reduction");
+  $goal_reduction = $vars[3] - $goal_reduction;
+  dbg("bayes: token count: ".$vars[3].", final goal reduction size: $goal_reduction");
 
   if ( $goal_reduction < 1000 ) { # too few tokens to expire, abort.
     dbg("bayes: reduction goal of $goal_reduction is under 1,000 tokens.  skipping expire.");
-    $self->{db_toks}->{$LAST_EXPIRE_MAGIC_TOKEN} = time();
+    $self->set_last_expire(time());
     $self->remove_running_expire_tok(); # this won't be cleaned up, so do it now.
     return 1; # we want to indicate things ran as expected
   }
 
   # Estimate new atime delta based on the last atime delta
   my $newdelta = 0;
-  if ( $magic[9] > 0 ) {
+  if ( $vars[9] > 0 ) {
     # newdelta = olddelta * old / goal;
     # this may seem backwards, but since we're talking delta here,
     # not actual atime, we want smaller atimes to expire more tokens,
     # and visa versa.
     #
-    $newdelta = int($magic[8] * $magic[9] / $goal_reduction);
+    $newdelta = int($vars[8] * $vars[9] / $goal_reduction);
   }
 
   # Calculate size difference between last expiration token removal
   # count and the current goal removal count.
-  my $ratio = ($magic[9] == 0 || $magic[9] > $goal_reduction) ? $magic[9]/$goal_reduction : $goal_reduction/$magic[9];
+  my $ratio = ($vars[9] == 0 || $vars[9] > $goal_reduction) ? $vars[9]/$goal_reduction : $goal_reduction/$vars[9];
 
-  dbg("bayes: First pass?  Current: ".time().", Last: ".$magic[4].", atime: ".$magic[8].", count: ".$magic[9].", newdelta: $newdelta, ratio: $ratio");
+  dbg("bayes: First pass?  Current: ".time().", Last: ".$vars[4].", atime: ".$vars[8].", count: ".$vars[9].", newdelta: $newdelta, ratio: $ratio");
 
   ## ESTIMATION PHASE
   #
@@ -577,32 +295,16 @@ sub expire_old_tokens_trapped {
   # - difference of last reduction to current goal reduction is > 50%
   #   if the two values are out of balance, estimating atime is going to be funky, recompute
   #
-  if ( (time() - $magic[4] > 86400*30) || ($magic[8] < 43200) || ($magic[9] < 1000) || ($newdelta < 43200) || ($ratio > 1.5) ) {
+  if ( (time() - $vars[4] > 86400*30) || ($vars[8] < 43200) || ($vars[9] < 1000)
+       || ($newdelta < 43200) || ($ratio > 1.5) ) {
     dbg("bayes: Can't use estimation method for expiry, something fishy, calculating optimal atime delta (first pass)");
+
     my $start = 43200; # exponential search starting at ...?  1/2 day, 1, 2, 4, 8, 16, ...
-    my %delta = (); # use a hash since an array is going to be very sparse
     my $max_expire_mult = 512; # $max_expire_mult * $start = max expire time (256 days), power of 2.
 
-    # do the first pass, figure out atime delta
-    my ($tok, $packed);
-    while (($tok, $packed) = each %{$self->{db_toks}}) {
-      next if ($tok =~ /$magic_re/); # skip magic tokens
+    my %delta = $self->calculate_expire_delta($vars[10], $start, $max_expire_mult);
 
-      my ($ts, $th, $atime) = $self->tok_unpack ($packed);
-
-      # Go through from $start * 1 to $start * 512, mark how many tokens we would expire
-      my $token_age = $magic[10] - $atime;
-      for( my $i = 1; $i <= $max_expire_mult; $i<<=1 ) {
-        if ( $token_age >= $start * $i ) {
-          $delta{$i}++;
-	}
-	else {
-	  # If the token age is less than the expire delta, it'll be
-	  # less for all upcoming checks too, so abort early.
-	  last;
-	}
-      }
-    }
+    return 0 unless (%delta);
 
     # This will skip the for loop if debugging isn't enabled ...
     if ( $Mail::SpamAssassin::DEBUG->{'enabled'} ) {
@@ -612,7 +314,7 @@ sub expire_old_tokens_trapped {
 	  dbg("bayes: ".$start*$i."\t".(exists $delta{$i} ? $delta{$i} : 0));
       }
     }
-
+  
     # Now figure out which max_expire_mult value gives the closest results to goal_reduction, without
     # going over ...  Go from the largest delta backwards so the reduction size increases
     # (tokens that expire at 4 also expire at 3, 2, and 1, so 1 will always be the largest expiry...)
@@ -621,7 +323,7 @@ sub expire_old_tokens_trapped {
       next unless exists $delta{$max_expire_mult};
       if ($delta{$max_expire_mult} > $goal_reduction) {
         $max_expire_mult<<=1; # the max expire is actually the next power of 2 out
-	last;
+        last;
       }
     }
 
@@ -637,7 +339,7 @@ sub expire_old_tokens_trapped {
     #
     if ( !exists $delta{$max_expire_mult} || $delta{$max_expire_mult} < 1000 ) {
       dbg("bayes: couldn't find a good delta atime, need more token difference, skipping expire.");
-      $self->{db_toks}->{$LAST_EXPIRE_MAGIC_TOKEN} = time();
+      $self->set_last_expire(time());
       $self->remove_running_expire_tok(); # this won't be cleaned up, so do it now.
       return 1; # we want to indicate things ran as expected
     }
@@ -649,92 +351,7 @@ sub expire_old_tokens_trapped {
     dbg("bayes: Can do estimation method for expiry, skipping first pass.");
   }
 
-  # clean out any leftover db copies from previous runs
-  for my $ext (@DB_EXTENSIONS) { unlink ($tmpdbname.$ext); }
-
-  # use O_EXCL to avoid races (bonus paranoia, since we should be locked
-  # anyway)
-  my %new_toks;
-  my $umask = umask 0;
-  tie %new_toks, "DB_File", $tmpdbname, O_RDWR|O_CREAT|O_EXCL,
-	       (oct ($main->{conf}->{bayes_file_mode}) & 0666);
-  umask $umask;
-  my $oldest;
-
-  my $showdots = $opts->{showdots};
-  if ($showdots) { print STDERR "\n"; }
-
-  # We've chosen a new atime delta if we've gotten here, so record it for posterity.
-  $new_toks{$LAST_ATIME_DELTA_MAGIC_TOKEN} = $newdelta;
-
-  # Figure out how old is too old...
-  $too_old = $magic[10] - $newdelta; # tooold = newest - delta
-
-  # Go ahead and do the move to new db/expire run now ...
-  my ($tok, $packed);
-  while (($tok, $packed) = each %{$self->{db_toks}}) {
-    next if ($tok =~ /$magic_re/); # skip magic tokens
-
-    my ($ts, $th, $atime) = $self->tok_unpack ($packed);
-
-    if ($atime < $too_old) {
-      $deleted++;
-    } else {
-      $new_toks{$tok} = $self->tok_pack ($ts, $th, $atime); $kept++;
-      if (!defined($oldest) || $atime < $oldest) { $oldest = $atime; }
-      if ($ts + $th == 1) {
-	$num_hapaxes++;
-      } elsif ($ts < 8 && $th < 8) {
-	$num_lowfreq++;
-      }
-    }
-
-    if ((($kept + $deleted) % 1000) == 0) {
-      if ($showdots) { print STDERR "."; }
-      $self->set_running_expire_tok();
-    }
-  }
-
-  # and add the magic tokens.  don't add the expire_running token.
-  $new_toks{$DB_VERSION_MAGIC_TOKEN} = DB_VERSION;
-
-  # We haven't changed messages of each type seen, so just copy over.
-  $new_toks{$NSPAM_MAGIC_TOKEN} = $magic[1];
-  $new_toks{$NHAM_MAGIC_TOKEN} = $magic[2];
-
-  # We magically haven't removed the newest token, so just copy that value over.
-  $new_toks{$NEWEST_TOKEN_AGE_MAGIC_TOKEN} = $magic[10];
-
-  # The rest of these have been modified, so replace as necessary.
-  $new_toks{$NTOKENS_MAGIC_TOKEN} = $kept;
-  $new_toks{$LAST_EXPIRE_MAGIC_TOKEN} = time();
-  $new_toks{$OLDEST_TOKEN_AGE_MAGIC_TOKEN} = $oldest;
-  $new_toks{$LAST_EXPIRE_REDUCE_MAGIC_TOKEN} = $deleted;
-
-  # now untie so we can do renames
-  untie %{$self->{db_toks}};
-  untie %new_toks;
-
-  # This is the critical phase (moving files around), so don't allow
-  # it to be interrupted.  Scope the signal changes.
-  {
-    local $SIG{'INT'} = 'IGNORE';
-    local $SIG{'HUP'} = 'IGNORE';
-    local $SIG{'TERM'} = 'IGNORE';
-
-    # now rename in the new one.  Try several extensions
-    for my $ext (@DB_EXTENSIONS) {
-      my $newf = $tmpdbname.$ext;
-      my $oldf = $path.'_toks'.$ext;
-      next unless (-f $newf);
-      if (!rename ($newf, $oldf)) {
-	warn "rename $newf to $oldf failed: $!\n";
-      }
-    }
-  }
-
-  # Call untie_db() so we unlock correctly.
-  $self->untie_db();
+  my ($kept, $deleted, $num_hapaxes, $num_lowfreq) = $self->token_expiration($opts, $newdelta, @vars);
 
   my $done = time();
 
@@ -742,6 +359,7 @@ sub expire_old_tokens_trapped {
   my $msg2 = "$kept entries kept, $deleted deleted";
 
   if ($opts->{verbose}) {
+
     my $hapax_pc = ($num_hapaxes * 100) / $kept;
     my $lowfreq_pc = ($num_lowfreq * 100) / $kept;
     print "$msg\n$msg2\n";
@@ -751,53 +369,46 @@ sub expire_old_tokens_trapped {
     dbg ("$msg: $msg2");
   }
 
-  1;
+  return 1;
 }
 
-###########################################################################
+=head2 sync_due
 
-# Is a journal sync due?
-sub journal_sync_due {
+public instance (Boolean) sync_due ()
+
+Description:
+This methods determines if a sync is due.
+
+=cut
+
+sub sync_due {
   my ($self) = @_;
-
-  return 0 if ( $self->{db_version} < DB_VERSION ); # don't bother doing old db versions
-
-  my $conf = $self->{bayes}->{main}->{conf};
-  return 0 if ( $conf->{bayes_journal_max_size} == 0 );
-
-  my @magic = $self->get_magic_tokens();
-  dbg("Bayes DB journal sync: last sync: ".$magic[7],'bayes','-1');
-
-  ## Ok, should we do a sync?
-
-  # Not if the journal file doesn't exist, it's not a file, or it's 0 bytes long.
-  return 0 unless (stat($self->get_journal_filename()) && -f _);
-
-  # Yes if the file size is larger than the specified maximum size.
-  return 1 if (-s _ > $conf->{bayes_journal_max_size});
-
-  # Yes if it's been at least a day since the last sync.
-  return 1 if (time - $magic[7] > 86400);
-
-  # No, I guess not.
-  return 0;
+  die "sync_due: not implemented\n";
 }
 
-# Is an expiry run due to occur?
+=head2 expiry_due
+
+public instance (Boolean) expiry_due ()
+
+Description:
+This methods determines if an expire is due.
+
+=cut
+
 sub expiry_due {
   my ($self) = @_;
 
   $self->read_db_configs();	# make sure this has happened here
 
-  # is the database too small for expiry?  (Do *not* use "scalar keys",
-  # as this will iterate through the entire db counting them!)
-  my @magic = $self->get_magic_tokens();
-  my $ntoks = $magic[3];
-
   # If force expire was called, do the expire no matter what.
   return 1 if ($self->{bayes}->{main}->{learn_force_expire});
 
-  my $last_expire = time() - $magic[4];
+  # is the database too small for expiry?  (Do *not* use "scalar keys",
+  # as this will iterate through the entire db counting them!)
+  my @vars = $self->get_storage_variables();
+  my $ntoks = $vars[3];
+
+  my $last_expire = time() - $vars[4];
   if (!$self->{bayes}->{main}->{ignore_safety_expire_timeout}) {
     # if we're not ignoring the safety timeout, don't run an expire more
     # than once every 12 hours.
@@ -809,14 +420,14 @@ sub expiry_due {
     return 0 if ($last_expire < 300);
   }
 
-  dbg("Bayes DB expiry: Tokens in DB: $ntoks, Expiry max size: ".$self->{expiry_max_db_size}.", Oldest atime: ".$magic[5].", Newest atime: ".$magic[10].", Last expire: ".$magic[4].", Current time: ".time(),'bayes','-1');
+  dbg("Bayes DB expiry: Tokens in DB: $ntoks, Expiry max size: ".$self->{expiry_max_db_size}.", Oldest atime: ".$vars[5].", Newest atime: ".$vars[10].", Last expire: ".$vars[4].", Current time: ".time(),'bayes','-1');
 
   my $conf = $self->{bayes}->{main}->{conf};
   if ($ntoks <= 100000 ||			# keep at least 100k tokens
       $conf->{bayes_auto_expire} == 0 ||	# config says don't expire
       $self->{expiry_max_db_size} > $ntoks ||	# not enough tokens to cause an expire
-      $magic[10]-$magic[5] < 43200 ||		# delta between oldest and newest < 12h
-      $self->{db_version} < DB_VERSION		# ignore old db formats
+      $vars[10]-$vars[5] < 43200 ||		# delta between oldest and newest < 12h
+      $self->{db_version} < $self->DB_VERSION # ignore old db formats
       ) {
     return 0;
   }
@@ -824,686 +435,315 @@ sub expiry_due {
   return 1;
 }
 
-###########################################################################
-# db_seen reading APIs
+=head2 seen_get
+
+public instance (Char) seen_get (String $msgid)
+
+Description:
+This method retrieves the stored value, if any, for C<$msgid>.  The return
+value is the stored string ('s' for spam and 'h' for ham) or undef if
+C<$msgid> is not found.
+
+=cut
 
 sub seen_get {
   my ($self, $msgid) = @_;
-  $self->{db_seen}->{$msgid};
+  die "seen_get: not implemented\n";
 }
+
+=head2 seen_put
+
+public instance (Boolean) seen_put (String $msgid, Char $flag)
+
+Description:
+This method records C<$msgid> as the type given by C<$flag>.  C<$flag> is
+one of two values 's' for spam and 'h' for ham.
+
+=cut
 
 sub seen_put {
-  my ($self, $msgid, $seen) = @_;
-
-  if ($self->{bayes}->{main}->{learn_to_journal}) {
-    $self->defer_update ("m $seen $msgid");
-  }
-  else {
-    $self->{db_seen}->{$msgid} = $seen;
-  }
+  my ($self, $msgid, $flag) = @_;
+  die "seen_put: not implemented\n";
 }
+
+=head2 seen_delete
+
+public instance (Boolean) seen_delete (String $msgid)
+
+Description:
+This method removes C<$msgid> from storage.
+
+=cut
 
 sub seen_delete {
   my ($self, $msgid) = @_;
-
-  if ($self->{bayes}->{main}->{learn_to_journal}) {
-    $self->defer_update ("m f $msgid");
-  }
-  else {
-    delete $self->{db_seen}->{$msgid};
-  }
+  die "seen_delete: not implemented\n";
 }
 
-###########################################################################
-# db reading APIs
+=head2 get_storage_variables
 
-sub tok_get {
-  my ($self, $tok) = @_;
-  $self->tok_unpack ($self->{db_toks}->{$tok});
-}
- 
-sub nspam_nham_get {
+public instance (@) get_storage_variables ()
+
+Description:
+This method retrieves the various administrative variables used by
+the Bayes storage implementation.
+
+The values returned in the array are in the following order:
+
+0: scan count base
+
+1: number of spam
+
+2: number of ham
+
+3: number of tokens in db
+
+4: last expire atime
+
+5: oldest token in db atime
+
+6: db version value
+
+7: last journal sync
+
+8: last atime delta
+
+9: last expire reduction count
+
+10: newest token in db atime
+
+=cut
+
+sub get_storage_variables {
   my ($self) = @_;
-  my @magic = $self->get_magic_tokens();
-  ($magic[1], $magic[2]);
+  die "get_storage_variables: not implemented\n";
 }
 
-# return the magic tokens in a specific order:
-# 0: scan count base
-# 1: number of spam
-# 2: number of ham
-# 3: number of tokens in db
-# 4: last expire atime
-# 5: oldest token in db atime
-# 6: db version value
-# 7: last journal sync
-# 8: last atime delta
-# 9: last expire reduction count
-# 10: newest token in db atime
-#
-sub get_magic_tokens {
-  my ($self) = @_;
-  my @values;
+=head2 dump_db_toks
 
-  my $db_ver = $self->{db_toks}->{$DB_VERSION_MAGIC_TOKEN};
-  if ( !$db_ver || $db_ver =~ /\D/ ) { $db_ver = 0; }
+public instance () dump_db_toks (String $template, String $regex, @ @vars)
 
-  if ( $db_ver == 0 ) {
-    my $DB0_NSPAM_MAGIC_TOKEN = '**NSPAM';
-    my $DB0_NHAM_MAGIC_TOKEN = '**NHAM';
-    my $DB0_OLDEST_TOKEN_AGE_MAGIC_TOKEN = '**OLDESTAGE';
-    my $DB0_LAST_EXPIRE_MAGIC_TOKEN = '**LASTEXPIRE';
-    my $DB0_NTOKENS_MAGIC_TOKEN = '**NTOKENS';
-    my $DB0_SCANCOUNT_BASE_MAGIC_TOKEN = '**SCANBASE';
+Description:
+This method loops over all tokens, computing the probability for the token
+and then printing it out according to the passed in template.
 
-    @values = (
-      $self->{db_toks}->{$DB0_SCANCOUNT_BASE_MAGIC_TOKEN},
-      $self->{db_toks}->{$DB0_NSPAM_MAGIC_TOKEN},
-      $self->{db_toks}->{$DB0_NHAM_MAGIC_TOKEN},
-      $self->{db_toks}->{$DB0_NTOKENS_MAGIC_TOKEN},
-      $self->{db_toks}->{$DB0_LAST_EXPIRE_MAGIC_TOKEN},
-      $self->{db_toks}->{$DB0_OLDEST_TOKEN_AGE_MAGIC_TOKEN},
-      0,
-      0,
-      0,
-      0,
-      0,
-    );
-  }
-  elsif ( $db_ver == 1 ) {
-    my $DB1_NSPAM_MAGIC_TOKEN			= "\015\001\007\011\003NSPAM";
-    my $DB1_NHAM_MAGIC_TOKEN			= "\015\001\007\011\003NHAM";
-    my $DB1_OLDEST_TOKEN_AGE_MAGIC_TOKEN	= "\015\001\007\011\003OLDESTAGE";
-    my $DB1_LAST_EXPIRE_MAGIC_TOKEN		= "\015\001\007\011\003LASTEXPIRE";
-    my $DB1_NTOKENS_MAGIC_TOKEN			= "\015\001\007\011\003NTOKENS";
-    my $DB1_SCANCOUNT_BASE_MAGIC_TOKEN		= "\015\001\007\011\003SCANBASE";
+=cut
 
-    @values = (
-      $self->{db_toks}->{$DB1_SCANCOUNT_BASE_MAGIC_TOKEN},
-      $self->{db_toks}->{$DB1_NSPAM_MAGIC_TOKEN},
-      $self->{db_toks}->{$DB1_NHAM_MAGIC_TOKEN},
-      $self->{db_toks}->{$DB1_NTOKENS_MAGIC_TOKEN},
-      $self->{db_toks}->{$DB1_LAST_EXPIRE_MAGIC_TOKEN},
-      $self->{db_toks}->{$DB1_OLDEST_TOKEN_AGE_MAGIC_TOKEN},
-      1,
-      0,
-      0,
-      0,
-      0,
-    );
-  }
-  elsif ( $db_ver == 2 ) {
-    my $DB2_LAST_ATIME_DELTA_MAGIC_TOKEN	= "\015\001\007\011\003LASTATIMEDELTA";
-    my $DB2_LAST_EXPIRE_MAGIC_TOKEN		= "\015\001\007\011\003LASTEXPIRE";
-    my $DB2_LAST_EXPIRE_REDUCE_MAGIC_TOKEN	= "\015\001\007\011\003LASTEXPIREREDUCE";
-    my $DB2_LAST_JOURNAL_SYNC_MAGIC_TOKEN	= "\015\001\007\011\003LASTJOURNALSYNC";
-    my $DB2_NEWEST_TOKEN_AGE_MAGIC_TOKEN	= "\015\001\007\011\003NEWESTAGE";
-    my $DB2_NHAM_MAGIC_TOKEN			= "\015\001\007\011\003NHAM";
-    my $DB2_NSPAM_MAGIC_TOKEN			= "\015\001\007\011\003NSPAM";
-    my $DB2_NTOKENS_MAGIC_TOKEN			= "\015\001\007\011\003NTOKENS";
-    my $DB2_OLDEST_TOKEN_AGE_MAGIC_TOKEN	= "\015\001\007\011\003OLDESTAGE";
-    my $DB2_RUNNING_EXPIRE_MAGIC_TOKEN		= "\015\001\007\011\003RUNNINGEXPIRE";
-
-    @values = (
-      0,
-      $self->{db_toks}->{$DB2_NSPAM_MAGIC_TOKEN},
-      $self->{db_toks}->{$DB2_NHAM_MAGIC_TOKEN},
-      $self->{db_toks}->{$DB2_NTOKENS_MAGIC_TOKEN},
-      $self->{db_toks}->{$DB2_LAST_EXPIRE_MAGIC_TOKEN},
-      $self->{db_toks}->{$DB2_OLDEST_TOKEN_AGE_MAGIC_TOKEN},
-      2,
-      $self->{db_toks}->{$DB2_LAST_JOURNAL_SYNC_MAGIC_TOKEN},
-      $self->{db_toks}->{$DB2_LAST_ATIME_DELTA_MAGIC_TOKEN},
-      $self->{db_toks}->{$DB2_LAST_EXPIRE_REDUCE_MAGIC_TOKEN},
-      $self->{db_toks}->{$DB2_NEWEST_TOKEN_AGE_MAGIC_TOKEN},
-    );
-  }
-
-
-  foreach ( @values ) {
-    if ( !$_ || $_ =~ /\D/ ) { $_ = 0; }
-  }
-
-  return @values;
+sub dump_db_toks {
+  my ($self, $template, $regex, @vars) = @_;
+  die "dump_db_toks: not implemented\n";
 }
 
+=head2 set_last_expire
 
-## Don't bother using get_magic_tokens here.  This token should only
-## ever exist when we're running expire, so we don't want to convert it if
-## it's there and we're not expiring ...
+public instance (Boolean) _set_last_expire (Integer $time)
+
+Description:
+This method sets the last expire time.
+
+=cut
+
+sub set_last_expire {
+  my ($self, $time) = @_;
+  die "set_last_expire: not implemented\n";
+}
+
+=head2 get_running_expire_tok
+
+public instance (Time) get_running_expire_tok ()
+
+Description:
+This method determines if an expire is currently running and returns the time
+the expire started.
+
+=cut
+
 sub get_running_expire_tok {
   my ($self) = @_;
-  my $running = $self->{db_toks}->{$RUNNING_EXPIRE_MAGIC_TOKEN};
-  if (!$running || $running =~ /\D/) { return undef; }
-  return $running;
+  die "get_running_expire_tok: not implemented\n";
 }
+
+=head2 set_running_expire_tok
+
+public instance (Time) set_running_expire_tok ()
+
+Description:
+This method sets the running expire time to the current time.
+
+=cut
 
 sub set_running_expire_tok {
   my ($self) = @_;
-  $self->{db_toks}->{$RUNNING_EXPIRE_MAGIC_TOKEN} = time();
+  die "set_running_expire_tok: not implemented\n";
 }
+
+=head2 remove_running_expire_tok
+
+public instance (Boolean) remove_running_expire_tok ()
+
+Description:
+This method removes a currently set running expire time.
+
+=cut
 
 sub remove_running_expire_tok {
   my ($self) = @_;
-  delete $self->{db_toks}->{$RUNNING_EXPIRE_MAGIC_TOKEN};
+  die "remove_running_expire_tok: not implemented\n";
 }
 
-###########################################################################
+=head2 tok_get
 
-# db abstraction: allow deferred writes, since we will be frequently
-# writing while checking.
+public instance (Integer, Integer, Time) tok_get (String $token)
+
+Description:
+This method retrieves the specified token (C<$token>) from storage and returns
+it's spam count, ham acount and last access time.
+
+=cut
+
+sub tok_get {
+  my ($self, $token) = @_;
+  die "tok_get: not implemented\n";
+}
+
+=head2 tok_count_change
+
+public instance (Boolean) tok_count_change (Integer $spam_count,
+                                            Integer $ham_count,
+                                            String $token,
+                                            Time $atime)
+
+Description:
+This method takes a C<$spam_count> and C<$ham_count> and adds it to
+C<$token> along with updating C<$token>s atime with C<$atime>.
+
+=cut
 
 sub tok_count_change {
-  my ($self, $ds, $dh, $tok, $atime) = @_;
-
-  $atime = 0 unless defined $atime;
-
-  if ($self->{bayes}->{main}->{learn_to_journal}) {
-    $self->defer_update ("c $ds $dh $atime $tok");
-  } else {
-    $self->tok_sync_counters ($ds, $dh, $atime, $tok);
-  }
+  my ($self, $spam_count, $ham_count, $token, $atime) = @_;
+  die "tok_count_change: not implemented\n";
 }
- 
+
+=head2 nspam_nham_get
+
+public instance (Integer, Integer) nspam_nham_get ()
+
+Description:
+This method retrieves the total number of spam and the total number of spam
+currently under storage.
+
+=cut
+
+sub nspam_nham_get {
+  my ($self) = @_;
+  die "nspam_nham_get: not implemented\n";
+}
+
+=head2 nspam_nham_change
+
+public instance (Boolean) nspam_nham_change (Integer $num_spam,
+                                             Integer $num_ham)
+
+Description:
+This method updates the number of spam and the number of ham in the database.
+
+=cut
+
 sub nspam_nham_change {
-  my ($self, $ds, $dh) = @_;
-
-  if ($self->{bayes}->{main}->{learn_to_journal}) {
-    $self->defer_update ("n $ds $dh");
-  } else {
-    $self->tok_sync_nspam_nham ($ds, $dh);
-  }
+  my ($self, $num_spam, $num_ham) = @_;
+  die "nspam_nham_change: not implemented\n";
 }
+
+=head2 tok_touch
+
+public instance (Boolean) tok_touch (String $token,
+                                     Time $atime)
+
+Description:
+This method updates the given tokens (C<$token>) access time.
+
+=cut
 
 sub tok_touch {
-  my ($self, $tok, $atime) = @_;
-  $self->defer_update ("t $atime $tok");
+  my ($self, $token, $atime) = @_;
+  die "tok_touch: not implemanted\n";
 }
 
-sub defer_update {
-  my ($self, $str) = @_;
-  $self->{string_to_journal} .= "$str\n";
-}
+=head2 cleanup
 
-###########################################################################
+public instance (Boolean) cleanup ()
 
-sub add_touches_to_journal {
+Description:
+This method performs any cleanup necessary before moving onto the next
+operation.
+
+=cut
+
+sub cleanup {
   my ($self) = @_;
-
-  my $nbytes = length ($self->{string_to_journal});
-  return if ($nbytes == 0);
-
-  my $path = $self->get_journal_filename();
-
-  # use append mode, write atomically, then close, so simultaneous updates are
-  # not lost
-  my $conf = $self->{bayes}->{main}->{conf};
-  my $umask = umask(0777 - (oct ($conf->{bayes_file_mode}) & 0666));
-  if (!open (OUT, ">>".$path)) {
-    warn "cannot write to $path, Bayes db update ignored\n";
-    umask $umask; # reset umask
-    return;
-  }
-
-  # do not use print() here, it will break up the buffer if it's >8192 bytes,
-  # which could result in two sets of tokens getting mixed up and their
-  # touches missed.
-  my $writ = 0;
-  while ($writ < $nbytes) {
-    my $len = syswrite (OUT, $self->{string_to_journal}, $nbytes-$writ);
-
-    if (!defined $len || $len < 0) {
-      # argh, write failure, give up
-      $len = 0 unless ( defined $len );
-      warn "write failed to Bayes journal $path ($len of $nbytes)!\n";
-      last;
-    }
-
-    $writ += $len;
-    if ($len < $nbytes) {
-      # this should not happen on filesystem writes!  Still, try to recover
-      # anyway, but be noisy about it so the admin knows
-      warn "partial write to Bayes journal $path ($len of $nbytes), recovering.\n";
-      $self->{string_to_journal} = substr ($self->{string_to_journal}, $len);
-    }
-  }
-
-  if (!close OUT) {
-    warn "cannot write to $path, Bayes db update ignored\n";
-  }
-  umask $umask; # reset umask
-
-  $self->{string_to_journal} = '';
+  die "touches_cleanup: not implemented\n";
 }
 
-# Return a qr'd RE to match a token with the correct format's magic token
-sub get_magic_re {
-  my ($self, $db_ver) = @_;
+=head2 is_magic_token
 
-  if ( $db_ver >= 1 ) {
-    return qr/^\015\001\007\011\003/;
-  }
+public instance (Boolean) is_magic_token (string $token)
 
-  # When in doubt, assume v0
-  return qr/^\*\*[A-Z]+$/;
+Description:
+This method determines if a given token is "magic" or special to the
+implementation.
+
+=cut
+
+sub is_magic_token {
+  my ($self, $token) = @_;
+  die "is_magic_token: not implemented\n";
 }
 
-###########################################################################
-# And this method reads the journal and applies the changes in one
-# (locked) transaction.
+=head2 sync
 
-sub sync_journal {
+public instance (Boolean) sync (\% $opts)
+
+Description:
+This method performs a sync of the database.
+
+=cut
+
+sub sync {
   my ($self, $opts) = @_;
-  my $ret = 0;
-
-  my $path = $self->get_journal_filename();
-
-  # if $path doesn't exist, or it's not a file, or is 0 bytes in length, return
-  if ( !stat($path) || !-f _ || -z _ ) { return 0; }
-
-  eval {
-    local $SIG{'__DIE__'};	# do not run user die() traps in here
-    if ($self->tie_db_writable()) {
-      $ret = $self->sync_journal_trapped($opts, $path);
-    }
-  };
-  my $err = $@;
-
-  # ok, untie from write-mode if we can
-  if (!$self->{bayes}->{main}->{learn_caller_will_untie}) {
-    $self->untie_db();
-  }
-
-  # handle any errors that may have occurred
-  if ($err) {
-    warn "bayes: $err\n";
-    return 0;
-  }
-
-  $ret;
+  die "sync: not implemented\n";
 }
 
-sub sync_journal_trapped {
-  my ($self, $opts, $path) = @_;
+=head2 scan_count_get
 
-  # Flag that we're doing work
-  $self->set_running_expire_tok();
+public instance (Integer) scan_count_get ()
 
-  my $started = time();
-  my $count = 0;
-  my $total_count = 0;
-  my %tokens = ();
-  my $showdots = $opts->{showdots};
-  my $retirepath = $path.".old";
+Description:
+This method gets the current scan count, if used by the implementation.
 
-  # if $path doesn't exist, or it's not a file, or is 0 bytes in length, return
-  # we have to check again since the file may have been removed by a recent bayes db upgrade ...
-  if ( !stat($path) || !-f _ || -z _ ) { return 0; }
-
-  if (!-r $path) { # will we be able to read the file?
-    warn "bayes: bad permissions on journal, can't read: $path\n";
-    return 0;
-  }
-
-  # This is the critical phase (moving files around), so don't allow
-  # it to be interrupted.
-  {
-    local $SIG{'INT'} = 'IGNORE';
-    local $SIG{'HUP'} = 'IGNORE';
-    local $SIG{'TERM'} = 'IGNORE';
-
-    # retire the journal, so we can update the db files from it in peace.
-    # TODO: use locking here
-    if (!rename ($path, $retirepath)) {
-      warn "bayes: failed rename $path to $retirepath\n";
-      return 0;
-    }
-
-    # now read the retired journal
-    if (!open (JOURNAL, "<$retirepath")) {
-      warn "bayes: cannot open read $retirepath\n";
-      return 0;
-    }
-
-
-    # Read the journal
-    while (<JOURNAL>) {
-      $total_count++;
-
-      if (/^t (\d+) (.*)$/) { # Token timestamp update, cache resultant entries
-	$tokens{$2} = $1+0 if ( !exists $tokens{$2} || $1+0 > $tokens{$2} );
-      } elsif (/^c (-?\d+) (-?\d+) (\d+) (.*)$/) { # Add/full token update
-	$self->tok_sync_counters ($1+0, $2+0, $3+0, $4);
-	$count++;
-      } elsif (/^n (-?\d+) (-?\d+)$/) { # update ham/spam count
-	$self->tok_sync_nspam_nham ($1+0, $2+0);
-	$count++;
-      } elsif (/^m ([hsf]) (.+)$/) { # update msgid seen database
-	if ( $1 eq "f" ) {
-	  $self->seen_delete($2);
-	}
-	else {
-	  $self->seen_put($2,$1);
-	}
-	$count++;
-      } else {
-	warn "Bayes journal: gibberish entry found: $_";
-      }
-    }
-    close JOURNAL;
-
-    # Now that we've determined what tokens we need to update and their
-    # final values, update the DB.  Should be much smaller than the full
-    # journal entries.
-    while( my($k,$v) = each %tokens ) {
-      $self->tok_touch_token ($v, $k);
-
-      if ((++$count % 1000) == 0) {
-	if ($showdots) { print STDERR "."; }
-	$self->set_running_expire_tok();
-      }
-    }
-
-    if ($showdots) { print STDERR "\n"; }
-
-    # we're all done, so unlink the old journal file
-    unlink ($retirepath) || warn "bayes: can't unlink $retirepath: $!\n";
-
-    $self->{db_toks}->{$LAST_JOURNAL_SYNC_MAGIC_TOKEN} = $started;
-
-    my $done = time();
-    my $msg = ("synced Bayes databases from journal in ".($done - $started).
-	  " seconds: $count unique entries ($total_count total entries)");
-
-    if ($opts->{verbose}) {
-      print $msg,"\n";
-    } else {
-      dbg ($msg);
-    }
-  }
-
-  # else, that's the lot, we're synced.  return
-  1;
-}
-
-sub tok_touch_token {
-  my ($self, $atime, $tok) = @_;
-  my ($ts, $th, $oldatime) = $self->tok_get ($tok);
-
-  # If the new atime is < the old atime, ignore the update
-  # We figure that we'll never want to lower a token atime, so abort if
-  # we try.  (journal out of sync, etc.)
-  return if ( $oldatime >= $atime );
-
-  $self->tok_put ($tok, $ts, $th, $atime);
-}
-
-sub tok_sync_counters {
-  my ($self, $ds, $dh, $atime, $tok) = @_;
-  my ($ts, $th, $oldatime) = $self->tok_get ($tok);
-  $ts += $ds; if ($ts < 0) { $ts = 0; }
-  $th += $dh; if ($th < 0) { $th = 0; }
-
-  # Don't roll the atime of tokens backwards ...
-  $atime = $oldatime if ( $oldatime > $atime );
-
-  $self->tok_put ($tok, $ts, $th, $atime);
-}
-
-sub tok_put {
-  my ($self, $tok, $ts, $th, $atime) = @_;
-  $ts ||= 0;
-  $th ||= 0;
-
-  if ( $tok =~ /^\015\001\007\011\003/ ) { # magic token?  Ignore it!
-    return;
-  }
-
-  # use defined() rather than exists(); the latter is not supported
-  # by NDBM_File, believe it or not.  Using defined() did not
-  # indicate any noticeable speed hit in my testing. (Mar 31 2003 jm)
-  my $exists_already = defined $self->{db_toks}->{$tok};
-
-  if ($ts == 0 && $th == 0) {
-    return if (!$exists_already); # If the token doesn't exist, just return
-    $self->{db_toks}->{$NTOKENS_MAGIC_TOKEN}--;
-    delete $self->{db_toks}->{$tok};
-  } else {
-    if (!$exists_already) { # If the token doesn't exist, raise the token count
-      $self->{db_toks}->{$NTOKENS_MAGIC_TOKEN}++;
-    }
-
-    $self->{db_toks}->{$tok} = $self->tok_pack ($ts, $th, $atime);
-
-    my $newmagic = $self->{db_toks}->{$NEWEST_TOKEN_AGE_MAGIC_TOKEN};
-    if (!defined ($newmagic) || $atime > $newmagic) {
-      $self->{db_toks}->{$NEWEST_TOKEN_AGE_MAGIC_TOKEN} = $atime;
-    }
-
-    # Make sure to check for either !defined or "" ...  Apparently
-    # sometimes the DB module doesn't return the value correctly. :(
-    my $oldmagic = $self->{db_toks}->{$OLDEST_TOKEN_AGE_MAGIC_TOKEN};
-    if (!defined ($oldmagic) || $oldmagic eq "" || $atime < $oldmagic) {
-      $self->{db_toks}->{$OLDEST_TOKEN_AGE_MAGIC_TOKEN} = $atime;
-    }
-  }
-}
-
-sub tok_sync_nspam_nham {
-  my ($self, $ds, $dh) = @_;
-  my ($ns, $nh) = ($self->get_magic_tokens())[1,2];
-  if ($ds) { $ns += $ds; } if ($ns < 0) { $ns = 0; }
-  if ($dh) { $nh += $dh; } if ($nh < 0) { $nh = 0; }
-  $self->{db_toks}->{$NSPAM_MAGIC_TOKEN} = $ns;
-  $self->{db_toks}->{$NHAM_MAGIC_TOKEN} = $nh;
-}
-
-###########################################################################
-
-sub get_journal_filename {
-  my ($self) = @_;
-
-  if (defined $self->{journal_live_path}) {
-    return $self->{journal_live_path};
-  }
-
-  my $main = $self->{bayes}->{main};
-  my $fname = $main->sed_path ($main->{conf}->{bayes_path}."_journal");
-
-  $self->{journal_live_path} = $fname;
-  return $self->{journal_live_path};
-}
-
-###########################################################################
+=cut
 
 sub scan_count_get {
   my ($self) = @_;
-
-  if ( $self->{db_version} < 2 ) {
-    my ($count) = $self->get_magic_tokens();
-    my $path = $self->{scan_count_little_file};
-    $count += (defined $path && -e $path ? -s _ : 0);
-    return $count;
-  }
-
-  0;
+  die "scan_count_get: not implemented\n";
 }
 
-###########################################################################
+=head2 perform_upgrade
 
-# this is called directly from sa-learn(1).
-sub upgrade_old_dbm_files {
+public instance (Boolean) perform_upgrade (\% $opts)
+
+Description:
+This method is a utility method that performs any necessary upgrades
+between versions.  It should know how to handle previous versions and
+what needs to happen to upgrade them.
+
+A true return value indicates success.
+
+=cut
+
+sub perform_upgrade {
   my ($self, $opts) = @_;
-  my $ret = 0;
-
-  eval {
-    local $SIG{'__DIE__'};	# do not run user die() traps in here
-
-    use File::Basename;
-    use File::Copy;
-
-    # bayes directory
-    my $main = $self->{bayes}->{main};
-    my $path = $main->sed_path($main->{conf}->{bayes_path});
-    my $dir = dirname($path);
-
-    # make temporary copy since old dbm and new dbm may have same name
-    opendir(DIR, $dir) || die "can't opendir $dir: $!";
-    my @files = grep { /^bayes_(?:seen|toks)(?:\.\w+)?$/ } readdir(DIR);
-    closedir(DIR);
-    if (@files < 2 || !grep(/bayes_seen/,@files) || !grep(/bayes_toks/,@files))
-    {
-      die "unable to find bayes_toks and bayes_seen, stopping\n";
-    }
-    # untaint @files (already safe after grep)
-    @files = map { /(.*)/, $1 } @files;
-
-    for (@files) {
-      my $src = "$dir/$_";
-      my $dst = "$dir/old_$_";
-      copy($src, $dst) || die "can't copy $src to $dst: $!\n";
-    }
-
-    # delete previous to make way for import
-    for (@files) { unlink("$dir/$_"); }
-
-    # import
-    if ($self->tie_db_writable()) {
-      $ret += $self->upgrade_old_dbm_files_trapped("$dir/old_bayes_seen",
-						   $self->{db_seen});
-      $ret += $self->upgrade_old_dbm_files_trapped("$dir/old_bayes_toks",
-						   $self->{db_toks});
-    }
-
-    if ($ret == 2) {
-      print "import successful, original files saved with \"old\" prefix\n";
-    }
-    else {
-      print "import failed, original files saved with \"old\" prefix\n";
-    }
-  };
-  my $err = $@;
-
-  $self->untie_db();
-
-  # if we died, untie the dbm files
-  if ($err) {
-    warn "bayes upgrade_old_dbm_files: $err\n";
-    return 0;
-  }
-  $ret;
+  die "perform_upgrade: not implemented\n";
 }
-
-sub upgrade_old_dbm_files_trapped {
-  my ($self, $filename, $output) = @_;
-
-  my $count;
-  my %in;
-
-  print "upgrading to DB_File, please be patient: $filename\n";
-
-  # try each type of file until we find one with > 0 entries
-  for my $dbm ('DB_File', 'GDBM_File', 'NDBM_File', 'SDBM_File') {
-    $count = 0;
-    # wrap in eval so it doesn't run in general use.  This accesses db
-    # modules directly.
-    # Note: (bug 2390), the 'use' needs to be on the same line as the eval
-    # for RPM dependency checks to work properly.  It's lame, but...
-    eval 'use ' . $dbm . ';
-      tie %in, "' . $dbm . '", $filename, O_RDONLY, 0600;
-      %{ $output } = %in;
-      $count = scalar keys %{ $output };
-      untie %in;
-    ';
-    if ($@) {
-      print "$dbm: $dbm module not installed, nothing copied.\n";
-      dbg("error was: $@");
-    }
-    elsif ($count == 0) {
-      print "$dbm: no database of that kind found, nothing copied.\n";
-    }
-    else {
-      print "$dbm: copied $count entries.\n";
-      return 1;
-    }
-  }
-
-  return 0;
-}
-
-###########################################################################
-
-# token marshalling format for db_toks.
-
-# Since we may have many entries with few hits, especially thousands of hapaxes
-# (1-occurrence entries), use a flexible entry format, instead of simply "2
-# packed ints", to keep the memory and disk space usage down.  In my
-# 18k-message test corpus, only 8.9% have >= 8 hits in either counter, so we
-# can use a 1-byte representation for the other 91% of low-hitting entries
-# and save masses of space.
-
-# This looks like: XXSSSHHH (XX = format bits, SSS = 3 spam-count bits, HHH = 3
-# ham-count bits).  If XX in the first byte is 11, it's packed as this 1-byte
-# representation; otherwise, if XX in the first byte is 00, it's packed as
-# "CLL", ie. 1 byte and 2 32-bit "longs" in perl pack format.
-
-# Savings: roughly halves size of toks db, at the cost of a ~10% slowdown.
-
-use constant FORMAT_FLAG	=> 0xc0;	# 11000000
-use constant ONE_BYTE_FORMAT	=> 0xc0;	# 11000000
-use constant TWO_LONGS_FORMAT	=> 0x00;	# 00000000
-
-use constant ONE_BYTE_SSS_BITS	=> 0x38;	# 00111000
-use constant ONE_BYTE_HHH_BITS	=> 0x07;	# 00000111
-
-sub tok_unpack {
-  my ($self, $value) = @_;
-  $value ||= 0;
-
-  my ($packed, $atime);
-  if ( $self->{db_version} == 0 ) {
-    ($packed, $atime) = unpack("CS", $value);
-  }
-  elsif ( $self->{db_version} == 1 || $self->{db_version} == 2 ) {
-    ($packed, $atime) = unpack("CV", $value);
-  }
-
-  if (($packed & FORMAT_FLAG) == ONE_BYTE_FORMAT) {
-    return (($packed & ONE_BYTE_SSS_BITS) >> 3,
-		$packed & ONE_BYTE_HHH_BITS,
-		$atime || 0);
-  }
-  elsif (($packed & FORMAT_FLAG) == TWO_LONGS_FORMAT) {
-    my ($packed, $ts, $th, $atime);
-    if ( $self->{db_version} == 0 ) {
-      ($packed, $ts, $th, $atime) = unpack("CLLS", $value);
-    }
-    elsif ( $self->{db_version} == 1 ) {
-      ($packed, $ts, $th, $atime) = unpack("CVVV", $value);
-    }
-    elsif ( $self->{db_version} == 2 ) {
-      ($packed, $ts, $th, $atime) = unpack("CVVV", $value);
-    }
-    return ($ts || 0, $th || 0, $atime || 0);
-  }
-  # other formats would go here...
-  else {
-    warn "unknown packing format for Bayes db, please re-learn: $packed";
-    return (0, 0, 0);
-  }
-}
-
-sub tok_pack {
-  my ($self, $ts, $th, $atime) = @_;
-  $ts ||= 0; $th ||= 0; $atime ||= 0;
-  if ($ts < 8 && $th < 8) {
-    return pack ("CV", ONE_BYTE_FORMAT | ($ts << 3) | $th, $atime);
-  } else {
-    return pack ("CVVV", TWO_LONGS_FORMAT, $ts, $th, $atime);
-  }
-}
-
-###########################################################################
 
 sub dbg { Mail::SpamAssassin::dbg (@_); }
 sub sa_die { Mail::SpamAssassin::sa_die (@_); }

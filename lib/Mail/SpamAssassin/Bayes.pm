@@ -47,7 +47,6 @@ use strict;
 use bytes;
 
 use Mail::SpamAssassin;
-use Mail::SpamAssassin::BayesStore;
 use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::SHA1 qw(sha1);
 
@@ -220,6 +219,7 @@ use constant MAX_TOKEN_LENGTH => 15;
 sub new {
   my $class = shift;
   $class = ref($class) || $class;
+
   my ($main) = @_;
   my $self = {
     'main'              => $main,
@@ -235,7 +235,21 @@ sub new {
   };
   bless ($self, $class);
 
-  $self->{store} = new Mail::SpamAssassin::BayesStore ($self);
+  if ($self->{conf}->{bayes_store_module}) {
+    my $module = $self->{conf}->{bayes_store_module};
+    my $store;
+
+    eval '
+      require '.$module.';
+      $store = '.$module.'->new($self);
+    ';
+    if ($@) { die $@; }
+    $self->{store} = $store;
+  }
+  else {
+    require Mail::SpamAssassin::BayesStoreDBM;
+    $self->{store} = Mail::SpamAssassin::BayesStoreDBM->new($self);
+  }
 
   $self;
 }
@@ -326,9 +340,6 @@ sub tokenize_line {
 
   my $in_headers = ($tokprefix ne '');
 
-  my($bv) = ($self->{store}->get_magic_tokens())[6];
-  my $magic_re = $self->{store}->get_magic_re($bv);
-
   # include quotes, .'s and -'s for URIs, and [$,]'s for Nigerian-scam strings,
   # and ISO-8859-15 alphas.  Do not split on @'s; better results keeping it.
   # Some useful tokens: "$31,000,000" "www.clock-speed.net" "f*ck" "Hits!"
@@ -354,7 +365,7 @@ sub tokenize_line {
     $token =~ s/^[-'"\.,]+//;        # trim non-alphanum chars at start or end
     $token =~ s/[-'"\.,]+$//;        # so we don't get loads of '"foo' tokens
 
-    next if ( $token =~ /$magic_re/ ); # skip false magic tokens
+    next if ( $self->{store}->is_magic_token($token) ); # skip false magic tokens
 
     # *do* keep 3-byte tokens; there's some solid signs in there
     my $len = length($token);
@@ -714,9 +725,9 @@ sub learn_trapped {
   }
 
   $self->{store}->seen_put ($msgid, ($isspam ? 's' : 'h'));
-  $self->{store}->add_touches_to_journal();
-
+  $self->{store}->cleanup();
   dbg("bayes: Learned '$msgid'");
+
   1;
 }
 
@@ -800,7 +811,7 @@ sub forget_trapped {
   }
 
   $self->{store}->seen_delete ($msgid);
-  $self->{store}->add_touches_to_journal();
+  $self->{store}->cleanup();
   1;
 }
 
@@ -872,8 +883,8 @@ sub sync {
   my ($self, $sync, $expire, $opts) = @_;
   if (!$self->{conf}->{use_bayes}) { return 0; }
 
-  dbg("Syncing Bayes journal and expiring old tokens...");
-  $self->{store}->sync_journal($opts) if ( $sync );
+  dbg("Syncing Bayes and expiring old tokens...");
+  $self->{store}->sync($opts) if ( $sync );
   $self->{store}->expire_old_tokens($opts) if ( $expire );
   dbg("Syncing complete.");
 
@@ -884,9 +895,13 @@ sub sync {
 
 # compute the probability that that token is spammish
 sub compute_prob_for_token {
-  my ($self, $token, $ns, $nn) = @_;
+  my ($self, $token, $ns, $nn, $s, $n, $atime) = @_;
 
-  my ($s, $n, $atime) = $self->{store}->tok_get ($token);
+  # we allow the caller to give us the token information, just
+  # to save a potentially expensive lookup
+  if (!defined($s) || !defined($n) || !defined($atime)) {
+    ($s, $n, $atime) = $self->{store}->tok_get ($token);
+  }
   return if ($s == 0 && $n == 0);
 
   if (!USE_ROBINSON_FX_EQUATION_FOR_LOW_FREQS) {
@@ -1094,7 +1109,7 @@ sub scan {
     print "#Bayes-Raw-Counts: $self->{raw_counts}\n";
   }
 
-  $self->{store}->add_touches_to_journal();
+  $self->{store}->cleanup();
 
   $self->opportunistic_calls();
   $self->{store}->untie_db();
@@ -1109,17 +1124,17 @@ skip:
 sub opportunistic_calls {
   my($self) = @_;
 
-  # Is an expire or journal sync running?
+  # Is an expire or sync running?
   my $running_expire = $self->{store}->get_running_expire_tok();
   if ( defined $running_expire && $running_expire+$OPPORTUNISTIC_LOCK_VALID > time() ) { return; }
 
-  # handle expiry and journal syncing
+  # handle expiry and syncing
   if ($self->{store}->expiry_due()) {
     $self->{store}->set_running_expire_tok();
     $self->sync(1,1);
     # don't need to unlock since the expire will have done that. ;)
   }
-  elsif ( $self->{store}->journal_sync_due() ) {
+  elsif ( $self->{store}->sync_due() ) {
     $self->{store}->set_running_expire_tok();
     $self->sync(1,0);
     $self->{store}->remove_running_expire_tok();
@@ -1219,8 +1234,11 @@ sub dump_bayes_db {
 
   return 0 unless $self->{conf}->{use_bayes};
   return 0 unless $self->{store}->tie_db_readonly();
+  
+  my @vars = $self->{store}->get_storage_variables();
 
-  my($sb,$ns,$nh,$nt,$le,$oa,$bv,$js,$ad,$er,$na) = $self->{store}->get_magic_tokens();
+  my($sb,$ns,$nh,$nt,$le,$oa,$bv,$js,$ad,$er,$na) = @vars;
+
   $sb = $self->{store}->scan_count_get() if ( $bv < 1 ); # we want current scan count, not scan base count
 
   my $template = '%3.3f %10d %10d %10d  %s'."\n";
@@ -1242,18 +1260,8 @@ sub dump_bayes_db {
   }
 
   if ( $toks ) {
-    my $magic_re = $self->{store}->get_magic_re($bv);
-
-    foreach my $tok (keys %{$self->{store}->{db_toks}}) {
-      next if ($tok =~ /$magic_re/); # skip magic tokens
-      next if (defined $regex && ($tok !~ /$regex/o));
-
-      my $prob = $self->compute_prob_for_token($tok, $ns, $nh);
-      $prob ||= 0.5;
-
-      my ($ts, $th, $atime) = $self->{store}->tok_get ($tok);
-      printf $template,$prob,$ts,$th,$atime,$tok;
-    }
+    # let the store sort out the db_toks
+    $self->{store}->dump_db_toks($template, $regex, @vars);
   }
 
   if (!$self->{main}->{learn_caller_will_untie}) {

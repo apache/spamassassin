@@ -236,6 +236,15 @@ sub new {
   $self->{bayes_min_spam_num} = 200;
   $self->{bayes_learn_during_report} = 1;
 
+  # Allow alternate bayes storage implementation
+  $self->{bayes_store_module} = '';
+
+  # Used for SQL based Bayes implementation
+  $self->{bayes_sql_dsn} = '';
+  $self->{bayes_sql_username} = '';
+  $self->{bayes_sql_password} = '';
+  $self->{bayes_sql_override_username} = '';
+
   $self->{use_hashcash} = 1;
   $self->{hashcash_accept} = { };
   $self->{hashcash_doublespend_path} = '__userstate__/hashcash_seen';
@@ -262,6 +271,9 @@ sub new {
   # "user_scores_sql_field_username", "...preference", "...value" and
   # "...scope", and finally, 'user_scores_sql_table'.  Defaults are "username",
   # "preference", "value", "spamassassin" and "userpref".
+
+  # defaults for SQL based auto-whitelist
+  $self->{user_awl_sql_table} = 'awl';
 
   # for backwards compatibility, we need to set the default headers
   # remove this except for X-Spam-Checker-Version in 2.70
@@ -1759,7 +1771,18 @@ this option to 0.
       $self->{bayes_learn_during_report} = $value+0; next;
     }
 
-=back
+=item bayes_sql_override_username
+
+Used by BayesStoreSQL storage implementation.
+
+If this options is set the BayesStoreSQL module will override the set username with
+the value given.  This could be useful for implementing global or group bayes databases.
+
+=cut
+
+    if (/^bayes_sql_override_username\s+(.*)$/) {
+      $self->{bayes_sql_override_username} = $1; next;
+    }
 
 ##############
 
@@ -2413,6 +2436,57 @@ delay before the updates are actually committed to the Bayes database.
       $self->{bayes_learn_to_journal} = $value+0; next;
     }
 
+=item bayes_store_module
+
+If this option is set, the module given will be used as an alternate to the default
+bayes storage mechanism.  It must conform to the published storage specification
+(see Mail::SpamAssassin::BayesStore).
+
+=cut
+
+    if (/^bayes_store_module\s+(.*)$/) {
+      my $module = $1;
+      $module =~ /^([_A-Za-z0-9:]+)$/;
+      $self->{bayes_store_module} = $1;
+      next;
+    }
+
+=item bayes_sql_dsn DBI::databasetype:databasename:hostname:port
+
+Used for BayesStoreSQL storage implementation.
+
+This option give the connect string used to connect to the SQL based Bayes storage.
+
+=cut
+
+    if (/^bayes_sql_dsn\s+(\S+)$/) {
+      $self->{bayes_sql_dsn} = $1; next;
+    }
+
+=item bayes_sql_username
+
+Used by BayesStoreSQL storage implementation.
+
+This option gives the username used by the above DSN.
+
+=cut
+
+    if (/^bayes_sql_username\s+(\S+)$/) {
+      $self->{bayes_sql_username} = $1; next;
+    }
+
+=item bayes_sql_password
+
+Used by BayesStoreSQL storage implementation.
+
+This option gives the password used by the above DSN.
+
+=cut
+
+    if (/^bayes_sql_password\s+(\S+)$/) {
+      $self->{bayes_sql_password} = $1; next;
+    }
+
 =item user_scores_dsn DBI:databasetype:databasename:hostname:port
 
 If you load user scores from an SQL database, this will set the DSN
@@ -2462,6 +2536,43 @@ See C<Mail::SpamAssassin::Plugin> for more details on writing plugins.
     # leave as RE right now
     if (/^loadplugin\s+(\S+)\s+(\S+)$/) {
       $self->load_plugin ($1, $2); next;
+    }
+
+=item user_awl_dsn DBI:databasetype:databasename:hostname:port
+
+If you load user auto-whitelists from an SQL database, this will set the DSN
+used to connect.  Example: C<DBI:mysql:spamassassin:localhost>
+
+=cut
+    if (/^user_awl_dsn\s+(\S+)$/) {
+      $self->{user_awl_dsn} = $1; next;
+    }
+
+=item user_awl_sql_username username
+
+The authorized username to connect to the above DSN.
+
+=cut
+    if(/^user_awl_sql_username\s+(\S+)$/) {
+      $self->{user_awl_sql_username} = $1; next;
+    }
+
+=item user_awl_sql_password password
+
+The password for the database username, for the above DSN.
+
+=cut
+    if(/^user_awl_sql_password\s+(\S+)$/) {
+      $self->{user_awl_sql_password} = $1; next;
+    }
+
+=item user_awl_sql_table tablename
+
+The table user auto-whitelists are stored in, for the above DSN.
+
+=cut
+    if(/^user_awl_sql_table\s+(\S+)$/) {
+      $self->{user_awl_sql_table} = $1; next;
     }
 
 ###########################################################################

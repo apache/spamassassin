@@ -50,15 +50,22 @@ sub sa_t_init {
   $spamc = $ENV{'SPAMC_SCRIPT'};
   $spamc ||= "../spamc/spamc";
 
+  $salearn = $ENV{'SALEARN_SCRIPT'};
+  $salearn ||= "$perl_cmd ../sa-learn";
+
   $spamdport = $ENV{'SPAMD_PORT'};
   $spamdport ||= 48373;		# whatever
   $spamd_cf_args = "-C log/test_rules_copy";
   $spamd_localrules_args = " --siteconfigpath log/localrules.tmp";
   $scr_localrules_args =   " --siteconfigpath log/localrules.tmp";
+  $salearn_localrules_args =   " --siteconfigpath log/localrules.tmp";
 
   $scr_cf_args = "-C log/test_rules_copy";
   $scr_pref_args = "-p log/test_default.cf";
+  $salearn_cf_args = "-C log/test_rules_copy";
+  $salearn_pref_args = "-p log/test_default.cf";
   $scr_test_args = "";
+  $salearn_test_args = "";
   $set_test_prefs = 0;
   $default_cf_lines = "
     bayes_path ./log/user_state/bayes
@@ -160,6 +167,40 @@ sub sarun {
   system ("$scrargs > log/$testname.${Test::ntest}");
   $sa_exitcode = ($?>>8);
   if ($sa_exitcode != 0) { return undef; }
+  &checkfile ("$testname.${Test::ntest}", $read_sub);
+  1;
+}
+
+# Run salearn. Calls back with the output.
+# in $args: arguments to run with
+# in $read_sub: callback for the output (should read from <IN>).
+# This is called with no args.
+#
+# out: $salearn_exitcode global: exitcode from sitescooper
+# ret: undef if sitescooper fails, 1 for exit 0
+#
+sub salearnrun {
+  my $args = shift;
+  my $read_sub = shift;
+
+  rmtree ("log/outputdir.tmp"); # some tests use this
+  mkdir ("log/outputdir.tmp", 0755);
+
+  %found = ();
+  %found_anti = ();
+
+  if (defined $ENV{'SA_ARGS'}) {
+    $args = $ENV{'SA_ARGS'} . " ". $args;
+  }
+  $args = "$salearn_cf_args $salearn_localrules_args $salearn_pref_args $salearn_test_args $args";
+
+  # added fix for Windows tests from Rudif
+  my $salearnargs = "$salearn $args";
+  $salearnargs =~ s!/!\\!g if ($^O =~ /^MS(DOS|Win)/i);
+  print ("\t$salearnargs\n");
+  system ("$salearnargs > log/$testname.${Test::ntest}");
+  $salearn_exitcode = ($?>>8);
+  if ($salearn_exitcode != 0) { return undef; }
   &checkfile ("$testname.${Test::ntest}", $read_sub);
   1;
 }
@@ -351,6 +392,31 @@ sub stop_spamd {
     return $killed;
   }
 }
+
+sub create_saobj {
+  my ($args) = shift; # lets you override/add arguments
+
+  # YUCK, these file/dir names should be some sort of variable, at
+  # least we keep their definition in the same file for the moment.
+  my %setup_args = ( rules_filename => 'log/test_rules_copy',
+		     site_rules_filename => 'log/localrules.tmp',
+		     userprefs_filename => 'log/test_default.cf',
+		     userstate_dir => 'log/user_state',
+		   );
+
+  # override default args
+  foreach my $arg (keys %$args) {
+    $setup_args{$arg} = $args->{$arg};
+  }
+
+  # We'll assume that the test has setup INC correctly
+  require Mail::SpamAssassin;
+
+  my $sa = Mail::SpamAssassin->new(\%setup_args);
+
+  return $sa;
+}
+  
 
 # ---------------------------------------------------------------------------
 

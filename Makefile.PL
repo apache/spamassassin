@@ -214,8 +214,9 @@ my %makefile = (
 
         'doc', 'pod2htm*',
 
-        't/do_net', 't/log',
+        't/bayessql.cf', 't/do_net', 't/log', 't/sql_based_whitelist.cf',
       )
+
     },
 
     'AUTHOR'   => 'Justin Mason <jm@jmason.org>',
@@ -339,6 +340,54 @@ else {
 }
 $makefile{'macro'}{'RUN_NET_TESTS'} = yesno($opt{'run_net_tests'});
 
+$opt{'run_awl_sql_tests'} = prompt('Run SQL Based AutoWhitelist Tests (additional information required) (y/n)', "n");
+print "\n";
+
+$opt{'run_awl_sql_tests'} = bool($opt{'run_awl_sql_tests'});
+if ($opt{'run_awl_sql_tests'}) {
+  my $user_awl_dsn = prompt("SQL AWL DSN (user_awl_dsn): ", "dbi:mysql:spamassassin:localhost");
+  my $user_awl_sql_username = prompt("SQL AWL DB username (user_awl_sql_username): ", "");
+  my $user_awl_sql_password = prompt("SQL AWL DB password (user_awl_sql_password): ", "");
+  my $user_awl_sql_table = prompt("SQL AWL tablename (user_awl_sql_table): ", "awl") || 'awl';
+  print "\n";
+
+  open(FILE, ">t/sql_based_whitelist.cf");
+  print FILE "user_awl_dsn $user_awl_dsn\n";
+  # These two can be blank and the conf parser doesn't really like
+  # blank variables, so do not print them if blank
+  print FILE "user_awl_sql_username $user_awl_sql_username\n" if ($user_awl_sql_username);
+  print FILE "user_awl_sql_password $user_awl_sql_password\n" if ($user_awl_sql_password);
+  print FILE "user_awl_sql_table $user_awl_sql_table\n";
+
+  close(FILE);
+}
+else {
+  unlink("t/sql_based_whitelist.cf");
+}
+
+$opt{'run_bayes_sql_tests'} = prompt("Run Bayes SQL storage tests (additional information required)? (y/n)", 'n');
+print "\n";
+
+$opt{'run_bayes_sql_tests'} = bool($opt{'run_bayes_sql_tests'});
+if ($opt{'run_bayes_sql_tests'}) {
+  my $bayes_sql_dsn = prompt("Bayes SQL DSN (bayes_sql_dsn): ", "dbi:mysql:spamassassin:localhost");
+  my $bayes_sql_username = prompt("Bayes SQL DB username (bayes_sql_username): ", "");
+  my $bayes_sql_password = prompt("Bayes SQL DB password (bayes_sql_password): ", "");
+  print "\n";
+  
+  open(FILE, ">t/bayessql.cf");
+  print FILE "bayes_sql_dsn $bayes_sql_dsn\n";
+  # These two can be blank and the conf parser doesn't really like
+  # blank variables, so do not print them if blank
+  print FILE "bayes_sql_username $bayes_sql_username\n" if ($bayes_sql_username);
+  print FILE "bayes_sql_password $bayes_sql_password\n" if ($bayes_sql_password);
+  close(FILE);
+}
+else {
+  unlink("t/bayessql.cf");
+}
+
+#######################################################################
 
 # Now dump the Makefile
 WriteMakefile(%makefile);
