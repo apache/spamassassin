@@ -22,6 +22,14 @@
 #   and re-distribute it in any way you see fit, for personal or business
 #   use, for inclusion in any free or for-profit product, royalty-free
 #   and with no further obligation to the author.
+#
+# Copyright (C) 2002  Daniel Quinlan
+# (adapted public domain code into a module)
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of either the Artistic License or the GNU General
+# Public License as published by the Free Software Foundation; either
+# version 2 of the License, or (at your option) any later version.
 
 package Mail::SpamAssassin::SHA1;
 
