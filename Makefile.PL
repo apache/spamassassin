@@ -613,9 +613,11 @@ sub set_macro {
 #   INSTALLPERLCONF -> INSTALLCONF
 # Actually, its a bit more complex than that but we follow that simple mapping
 # for our vars; one also has to know when to call this function and when not.
+# If the second parameter is set, always the PERL variant is used.
 sub repository {
-  my($repository) = (@_);
+  my($repository, $default) = (@_);
 
+  return '' if $default;
   return '' if $repository eq 'PERL';
   return $repository;
 }
@@ -1026,17 +1028,15 @@ sub MY::constants {
       push(@code, macro_def('I_' . $macro,
                     macro_ref($repository . $macro)));
     }
-    # The SCRIPTDIR is the same for each repository.  Luckily do we need only
-    # the I_-variant.
-    push(@code, macro_def('I_SCRIPTDIR', macro_ref('INSTALLSCRIPT')));
-    # For the following we need bot the B_- and the I_-variants.
-    foreach my $macro (qw(DATA CONF LIB)) {
+    # For the following we need bot the B_- and the I_-variants.  But the
+    # SCRIPT macro is the same for all repositories.
+    foreach my $macro (qw(SCRIPT DATA CONF LIB)) {
       push(@code, macro_def('I_' . $macro . 'DIR',
-                    macro_ref('INSTALL' . repository($repository) . $macro)));
+                    macro_ref('INSTALL' . repository($repository, $macro eq 'SCRIPT') . $macro)));
 
       if ($mm_has_destdir) {
         push(@code, macro_def('B_' . $macro . 'DIR',
-                      macro_ref('DESTINSTALL' . repository($repository) . $macro)));
+                      macro_ref('DESTINSTALL' . repository($repository, $macro eq 'SCRIPT') . $macro)));
       } else {
         push(@code, macro_def('B_' . $macro . 'DIR',
                       macro_ref('I_' . $macro . 'DIR')));
@@ -1154,8 +1154,8 @@ qmail/qmail-spamc$(EXE_EXT): spamc/qmail-spamc$(EXE_EXT)
 
 
 bin__install: $(INST_SCRIPT)/sa-filter
-	$(RM_F) $(I_SCRIPTDIR)/spamassassin
-	$(SYMLINK) $(INST_SCRIPT)/sa-filter $(I_SCRIPTDIR)/spamassassin
+	$(RM_F) $(B_SCRIPTDIR)/spamassassin
+	$(SYMLINK) $(INST_SCRIPT)/sa-filter $(B_SCRIPTDIR)/spamassassin
 
 conf__install:
 	-$(MKPATH) $(B_CONFDIR)
