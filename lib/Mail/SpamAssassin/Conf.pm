@@ -1114,13 +1114,16 @@ the SpamCop system.
 
 =item trusted_networks ip.add.re.ss[/mask] ...   (default: none)
 
-What networks or hosts are 'trusted' in your setup.   B<Trusted> in this case
+What networks or hosts are 'trusted' in your setup.  B<Trusted> in this case
 means that relay hosts on these networks are considered to not be potentially
 operated by spammers, open relays, or open proxies.  A trusted host could
 conceivably relay spam, but will not originate it, and will not forge header
 data. DNS blacklist checks will never query for hosts on these networks. 
 
-Internal networks can be specified using the C<internal_networks> setting.
+MXes for your domain(s) and internal relays should B<also> be specified using
+the C<internal_networks> setting. When there are 'trusted' hosts that
+are not MXes or internal relays for your domain(s) they should B<only> be
+specified in C<trusted_networks>.
 
 If a C</mask> is specified, it's considered a CIDR-style 'netmask', specified
 in bits.  If it is not specified, but less than 4 octets are specified with a
@@ -1197,8 +1200,10 @@ What networks or hosts are 'internal' in your setup.   B<Internal> means that
 relay hosts on these networks are considered to be MXes for your domain(s), or
 internal relays.  This uses the same format as C<trusted_networks>, above.
 
-This value is used when checking 'dial-up' or dynamic IP address blocklists, in
-order to detect direct-to-MX spamming.
+This value is used when checking 'dial-up' or dynamic IP address
+blocklists, in order to detect direct-to-MX spamming. Trusted relays
+that accept mail directly from dial-up connections should not be
+listed in C<internal_networks>. List them only in C<trusted_networks>.
 
 If C<trusted_networks> is set and C<internal_networks> is not, the value
 of C<trusted_networks> will be used for this parameter.
