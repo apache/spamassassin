@@ -195,8 +195,39 @@ sub rewrite_mail {
 sub rewrite_as_spam {
   my ($self) = @_;
 
+  # message we'll be reading original values from. Normally the
+  # same as $self->{msg} (the target message for the rewritten
+  # mail), but if it already had spamassassin markup, we'll need
+  # to create a new $srcmsg to hold a 'cleaned-up' version.
+  my $srcmsg = $self->{msg};
+
+  if ($self->{msg}->get_header ("X-Spam-Status")) {
+    # the mail already has spamassassin markup. Remove it!
+    # bit messy this; we need to get the mail as a string,
+    # remove the spamassassin markup in it, then re-create
+    # a Mail::Audit object using a reference to the text 
+    # array (why not a string, ghod only knows).
+
+    my $text = $self->{main}->remove_spamassassin_markup ($self->{msg});
+    my @textary = split (/^/m, $text);
+    my %opts = ( 'data', \@textary );
+    my $audit = Mail::Audit->new (%opts);
+
+    # agh, we have to do this ourself?! why won't M::A do it right?
+    # for some reason it puts headers in the body
+    # while ($_ = shift @textary) { /^$/ and last; }
+    # $self->{msg}->replace_body (\@textary);
+
+    $srcmsg = $self->{main}->encapsulate_audit ($audit);
+
+    # delete the SpamAssassin-added headers in the target message.
+    $self->{msg}->delete_header ("X-Spam-Status");
+    $self->{msg}->delete_header ("X-Spam-Flag");
+    $self->{msg}->delete_header ("X-Spam-Prev-Content-Type");
+  }
+
   # First, rewrite the subject line.
-  $_ = $self->{msg}->get_header ("Subject"); $_ ||= '';
+  $_ = $srcmsg->get_header ("Subject"); $_ ||= '';
   s/^/\*\*\*\*\*SPAM\*\*\*\*\* /g;
   $self->{msg}->replace_header ("Subject", $_);
 
@@ -208,8 +239,8 @@ sub rewrite_as_spam {
   $self->{msg}->put_header ("X-Spam-Flag", 'YES');
 
   # defang HTML mail; change it to text-only.
-  my $ct = $self->{msg}->get_header ("Content-Type");
-  $ct ||= $self->{msg}->get_header ("Content-type");
+  my $ct = $srcmsg->get_header ("Content-Type");
+  $ct ||= $srcmsg->get_header ("Content-type");
 
   if (defined $ct && $ct ne '' && $ct ne 'text/plain') {
     $self->{msg}->replace_header ("Content-Type", "text/plain");
@@ -217,7 +248,7 @@ sub rewrite_as_spam {
     $self->{msg}->replace_header ("X-Spam-Prev-Content-Type", $ct);
   }
 
-  my $lines = $self->{msg}->get_body();
+  my $lines = $srcmsg->get_body();
   unshift (@{$lines}, split (/$/, $self->{report}));
   ${$lines}[0] =~ s/\n//;
   $self->{msg}->replace_body ($lines);
