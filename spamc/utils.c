@@ -24,12 +24,11 @@
 
 #ifdef _MSC_VER
 /* ignore MSVC++ warnings that are annoying and hard to remove:
- 4100 unreferenced formal parameter
  4115 named type definition in parentheses
  4127 conditional expression is constant
  4514 unreferenced inline function removed
  */
-#pragma warning( disable : 4100 4115 4127 4514 )
+#pragma warning( disable : 4115 4127 4514 )
 #endif
 
 typedef int ssize_t;

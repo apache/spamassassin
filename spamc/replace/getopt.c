@@ -32,15 +32,12 @@ int optind = 1;
 int opterr = 1;
 int optopt;
 
-/* ignore warning "unreferenced formal parameter" */
-#ifdef _MSC_VER
-#pragma warning( disable : 4100 )
-#endif
-
 static int
 optiserr(int argc, char * const *argv, int oint, const char *optstr,
          int optchr, int err)
 {
+    (void) argc;  /* not used */
+    (void) optstr; /* not used */
     if(opterr)
     {
         fprintf(stderr, "Error in argument %d, char %d: ", oint, optchr+1);

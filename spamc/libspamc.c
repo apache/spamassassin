@@ -329,6 +329,8 @@ static int _try_to_connect_unix(struct transport *tp, int *sockptr)
 
     return _translate_connect_errno(origerr);
 #else
+    (void) tp; /* not used. suppress compiler warning */
+    (void) sockptr; /* not used. suppress compiler warning */
     return EX_OSERR;
 #endif
 }
@@ -1314,6 +1316,7 @@ libspamc_log (int flags, int level, char *msg, ...)
 #ifndef _WIN32
         syslog (level, "%s", buf);
 #else
+        (void) level;  /* not used. suppress compiler warning */
         fprintf (stderr, "%s\n", buf);
 #endif
     }
