@@ -137,20 +137,21 @@ sub do_rbl_lookup {
     return 0;
   } else {
     timelog("RBL -> Waiting for result on $dom", "rbl", 1);
-    $socket=$self->{dnscache}->{rbl}->{$dom}->{socket};
+    $socket=\$self->{dnscache}->{rbl}->{$dom}->{socket};
     
-    while (not $self->{res}->bgisready($socket)) {
+    while (not $self->{res}->bgisready($$socket)) {
       last if (time - $self->{dnscache}->{rbl}->{$dom}->{time} > $maxwait);
       sleep 1;
     }
 
-    if (not $self->{res}->bgisready($socket)) {
+    if (not $self->{res}->bgisready($$socket)) {
       timelog("RBL -> Timeout on $dom", "rbl", 2);
       dbg("Query for $dom timed out after $maxwait seconds", "rbl", -1);
+      undef($$socket);
       return 0;
     } else {
-      my $packet = $self->{res}->bgread($socket);
-      undef($socket);
+      my $packet = $self->{res}->bgread($$socket);
+      undef($$socket);
       foreach $_ ($packet->answer) {
 	dbg("Query for $dom yielded: ".$_->rdatastr, "rbl", -2);
 	if ($_->type eq "A") {
