@@ -1278,11 +1278,14 @@ body CONFIDENTIAL_ORDER		/confidential.{0,9} order/i
 describe CONFIDENTIAL_ORDER	Confidentially on all orders
 
 body HIDDEN_ASSETS              /hidden assets/i
-describe HIDDEN_ASSETS          Hidden Assets
+describe HIDDEN_ASSETS          'Hidden' assets
 
 body SAVE_THOUSANDS             /\bsave (?:thousands|millions)\b/i
 describe SAVE_THOUSANDS         Save big money
 
 body REFINANCE_YOUR_HOME        /\brefinance your (?:current|) (?:home|house)\b/i
 describe REFINANCE_YOUR_HOME    "Refinance your home"
+
+body MARKETING_PARTNERS         /marketing partner|partner site/i
+describe MARKETING_PARTNERS     Claims you registered with some kind of partner
 
