@@ -210,6 +210,7 @@ describe FROM_AND_TO_SAME_6	From and To are same (6)
 
 header BAD_HELO_WARNING		eval:check_for_bad_helo()
 describe BAD_HELO_WARNING	Fake name used in SMTP HELO command
+tflags BAD_HELO_WARNING         net
 
 header SUBJ_FULL_OF_8BITS	eval:check_subject_for_lotsa_8bit_chars()
 describe SUBJ_FULL_OF_8BITS	Subject is full of 8-bit characters
@@ -225,9 +226,6 @@ describe FAKED_IP_IN_RCVD	Received: contains a name with a faked IP-address
 
 header SMTPD_IN_RCVD		Received =~ /\(SMTPD32-\d+\..+\)/
 describe SMTPD_IN_RCVD		Received via SMTPD32 server (SMTPD32-n.n)
-
-header POST_IN_RCVD		Received =~ / Post\.(?:sk|cz)/
-describe POST_IN_RCVD		Received contains fake 'Post.cz' hostname
 
 # Multizone / Multi meaning BLs first
 
@@ -496,12 +494,10 @@ describe PLEASE_READ            Please read this!  Please oh please oh please!
 # X-Message-Id
 
 # these headers have very high correlation with spam
-header BCC			exists:Bcc
 header COMMENT			exists:Comment
 header DATE_WARNING		exists:Date-warning
 header X_ENC_PRESENT		exists:X-Encoding
 header X_ESMTP			exists:x-esmtp
-header X_FIX_PRESENT		exists:X-Fix
 header X_LIBRARY		exists:X-Library
 header X_LIST_UNSUBSCRIBE	exists:X-List-Unsubscribe
 header X_MAIL_ID_PRESENT	exists:X-MailingID

@@ -175,10 +175,6 @@ body MSN_FOOTER1                /MSN Photos is the easiest way to share and prin
 describe MSN_FOOTER1            Common footer for MSN
 tflags MSN_FOOTER1		nice
 
-body MSN_FOOTER2                /Remove my e-mail address from Gaming Zone /
-describe MSN_FOOTER2            Common footer for MSN
-tflags MSN_FOOTER2		nice
-
 body MAILBITS_EMAIL             /This is a free service provided by MailBits\.com\./
 describe MAILBITS_EMAIL         recommended page from MailBits.com
 tflags MAILBITS_EMAIL		nice
@@ -242,7 +238,7 @@ rawbody PATCH_CONTEXT_DIFF	/^\*{3} \S+\s+.{10,}\b\d{2}:\d{2}:\d{2}\s/
 describe PATCH_CONTEXT_DIFF	Contains what looks like a patch from diff -c
 tflags PATCH_CONTEXT_DIFF	nice
 
-body DISCLAIMER_LEGALESE        /This e?-?mail.{1,20}confidential.{1,20}legally privileged/
+body DISCLAIMER_LEGALESE        /This e?-?mail.{1,20}confidential.{1,20}legally privileged/i
 describe DISCLAIMER_LEGALESE    Contains what looks like an 'E-Mail Disclaimer'
 tflags DISCLAIMER_LEGALESE	nice
 
