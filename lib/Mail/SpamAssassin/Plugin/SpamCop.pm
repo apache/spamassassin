@@ -203,8 +203,8 @@ sub spamcop_report {
 	      );
 
   # truncate message
-  if (length($original) > 64*1024) {
-    substr($original,(64*1024)) = "\n[truncated by SpamAssassin]\n";
+  if (length($original) > $self->{conf}->{spamcop_max_report_size}*1024) {
+    substr($original,($self->{conf}->{spamcop_max_report_size}*1024)) = "\n[truncated by SpamAssassin]\n";
   }
 
   my $body = <<"EOM";
