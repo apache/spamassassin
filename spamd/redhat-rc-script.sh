@@ -3,9 +3,9 @@
 # spamassassin This script starts and stops the spamd daemon
 #
 # chkconfig: 2345 80 30
-#
-# description: spamd is a daemon process which uses SpamAssassin to check
-#              email messages for SPAM.  It is normally called by spamc
+# processname: spamd
+# description: spamd is a daemon process which uses SpamAssassin to check \
+#              email messages for SPAM.  It is normally called by spamc \
 #	       from a MDA.
 
 # Source function library.
