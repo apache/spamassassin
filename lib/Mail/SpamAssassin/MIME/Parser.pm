@@ -1,68 +1,38 @@
-# $Id: Parser.pm,v 1.17 2003/10/01 05:31:56 felicity Exp $
+=head1 NAME
+
+Mail::SpamAssassin::MIME::Parser - parse, decode, and render MIME body parts
+
+=head1 SYNOPSIS
+
+=head1 DESCRIPTION
+
+This module will take a RFC2822-esque formatted message and create
+an object with all of the MIME body parts included.  Those parts will
+be decoded as necessary, and text/html parts will be rendered into a
+standard text format, suitable for use in SpamAssassin.
+
+=head1 METHODS
+
+=over 4
+
+=cut
 
 package Mail::SpamAssassin::MIME::Parser;
 use strict;
-
-# MIME Message parser, for email and nntp engines.
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::MIME;
 use MIME::Base64;
 use MIME::QuotedPrint;
 
-=head2 This is how mail messages can come in:
+=item parse()
 
-=over 4
+Unlike most modules, Mail::SpamAssassin::MIME::Parser will not return an
+object of the same type, but rather a Mail::SpamAssassin::MIME object.
+To use it, simply call C<Mail::SpamAssassin::MIME::Parser->parse($msg)>,
+where $msg is a scalar with the entire contents of the mesage.
 
-=item 1. Plain text
-
-Plain text messages come in with a content-type of text/plain. They
-may contain attachments as UU Encoded strings.
-
-=item 2. HTML text
-
-Straight HTML messages come in with a content-type of text/html. They
-may not contain attachments as far as I'm aware.
-
-=item 3. Mixed text, html and maybe other.
-
-These messages come in as MIME messages with the content-type of
-multipart/alternative (alternate means you get to pick which view of the
-message to display, as all must contain the same basic information).
-
-There may not be attachments this way as far as I'm aware.
-
-=item 4. Plain text with attachments
-
-Here the content-type is multipart/mixed. The first part of the multipart
-message is the the plain
- text message (after the preamble, that is), with
-a content type of text/plain. The remaining parts are attachments.
-
-=item 5. HTML text with attachments
-
-Again, the content-type is multipart/mixed. The first part of the multipart
-message is the html message, with a content-type of text/html. The
-remaining parts are attachments.
-
-=item 6. Mixed text, html with attachments
-
-Here the main part of the message has a content-type of multipart/mixed. The
-first part has a content-type of multipart/alternative, and is identical to
-item 3 above. The remaining parts are the attachments.
-
-=item 7. Report.
-
-This is a delivery status report. It comes with the main part of the message
-having a content-type of multipart/report, the first one or two parts of which
-may be textual content of some sort, and the last seems to be of type
-message/rfc822. 
-
-=back
-
-Overall this is a fairly naive way to view email messages, as the
-attachments can be email messages themselves, and thus it gets very
-recursive. But this should be enough for us to deal with right now.
+More information should go here. ;)
 
 =cut
 
@@ -447,3 +417,11 @@ sub dbg { Mail::SpamAssassin::dbg (@_); }
 
 1;
 __END__
+
+=back
+
+=head1 SEE ALSO
+
+C<Mail::SpamAssassin>
+C<spamassassin>
+
