@@ -1358,7 +1358,18 @@ been hit or not hit.  For example:
 meta META1        TEST1 && !(TEST2 || TEST3)
 
 Note that English language operators ("and", "or") will be treated as
-rule names, and that there is no XOR operator.
+rule names, and that there is no C<XOR> operator.
+
+=item meta SYMBOLIC_TEST_NAME boolean arithmetic expression
+
+Can also define a boolean arithmetic expression in terms of other
+tests, with a hit test having the value "1" and an unhit test having
+the value "0".  For example:
+
+meta META2        (3 * TEST1 - 2 * TEST2) > 0
+
+Note that Perl builtins and functions, like C<abs()>, B<can't> be
+used, and will be treated as rule names.
 
 If you want to define a meta-rule, but do not want its individual sub-rules to
 count towards the final score unless the entire meta-rule matches, give the
