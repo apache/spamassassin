@@ -13,6 +13,7 @@ use Mail::SpamAssassin::MailingList;
 use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::SHA1 qw(sha1);
 use Mail::SpamAssassin::TextCat;
+use Fcntl;
 
 use Time::Local;
 
@@ -2795,6 +2796,85 @@ sub check_blank_line_ratio {
   }
 
   return ( ($min == 0 && $self->{blank_line_ratio}->{$minlines} <= $max) || ($self->{blank_line_ratio}->{$minlines} > $min && $self->{blank_line_ratio}->{$minlines} <= $max) );
+}
+
+sub check_access_database {
+  my($self, $path) = @_;
+  my %access;
+  my %ok = map { $_ => 1 } qw/ OK SKIP /;
+  my %bad = map { $_ => 1 } qw/ REJECT ERROR DISCARD /;
+
+  $path = $self->{main}->sed_path ($path);
+  dbg("Tie-ing to DB file R/O in $path");
+  if ( tie %access,"AnyDBM_File",$path, O_RDONLY ) {
+    my @addrs = $self->{main}->find_all_addrs_in_line
+               ($self->get ('From') .                  # std
+                $self->get ('Envelope-Sender') .       # qmail: new-inject(1)
+                $self->get ('Resent-Sender') .         # procmailrc manpage
+                $self->get ('X-Envelope-From') .       # procmailrc manpage
+                $self->get ('Return-Path') .           # Postfix, sendmail; rfc821
+                $self->get ('Resent-From'));
+
+    my $rcvd = $self->get ('Received');
+    my @lookfor = ();
+
+    # Look for "From:" versions as well!
+    foreach my $from ( @addrs ) {
+      # $user."\@"
+      # rotate through $domain and check
+      my($user,$domain) = split(/\@/, $from,2);
+      push(@lookfor, "From:$from",$from);
+      if ( $user ) {
+        push(@lookfor, "From:$user\@", "$user\@");
+      }
+      if ( $domain ) {
+        while( $domain =~ /\./ ) {
+          push(@lookfor, "From:$domain", $domain);
+          $domain =~ s/^[^.]*\.//;
+        }
+        push(@lookfor, "From:$domain", $domain);
+      }
+    }
+
+    if ( defined $rcvd && $rcvd =~ /($IP_ADDRESS)/o ) {
+      # IP
+      # net (rotate over IP)
+      my($ip) = $1;
+      $ip =~ tr/0-9.//cd;
+      while( $ip =~ /\./ ) {
+        push(@lookfor, "From:$ip", $ip);
+	$ip =~ s/\.[^.]*$//;
+      }
+      push(@lookfor, "From:$ip", $ip);
+    }
+
+    my $retval = 0;
+    my %cache = ();
+    foreach ( @lookfor ) {
+      next if ( $cache{$_}++ );
+      my $result = $access{$_} || next;
+
+      my($type) = split(/:/,$result);
+      if ( exists $ok{$type} ) {
+	dbg("accessdb hit OK: $type, $_");
+        $retval = 0;
+	last;
+      }
+      if ( exists $bad{$type} ) {
+        $retval = 1;
+	dbg("accessdb hit not-OK: $type, $_");
+      }
+    }
+
+    dbg("Untie-ing DB file $path");
+    untie %access;
+
+    return $retval;
+  }
+  else {
+    dbg("Cannot open accessdb $path R/O: $!");
+  }
+  0;
 }
 
 1;

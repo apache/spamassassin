@@ -503,3 +503,11 @@ describe T_RATWARE_RCVD_BONUS_SPC Received headers forged (extra spaces)
 
 meta T_MIME_HTML_NO_HTML_TAG	MIME_HTML_ONLY && !__TAG_EXISTS_HTML
 meta T_MIME_HTML_NO_BODY_TAG	MIME_HTML_ONLY && !__TAG_EXISTS_BODY
+
+# this code uses an access database (sendmail, postfix, etc.)
+# Since you need to actively create an accessdb to use it, I'm forcing the score to 0.
+# If you have an accessdb, feel free to override the score in your own config. :)
+header T_ACCESSDB	eval:check_access_database('/etc/mail/access-full.db')
+describe T_ACCESSDB Would have been caught by accessdb
+tflags T_ACCESSDB userconf
+score T_ACCESSDB 0
