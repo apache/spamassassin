@@ -70,7 +70,7 @@ sub try_domains {
 }
 
 ok(try_domains('javascript:{some crap}', undef));
-ok(try_domains('mailto:nobody@example.com', 'example.com'));
+ok(try_domains('mailto:nobody@example.com', undef));
 ok(try_domains('http://66.92.69.221/', '66.92.69.221'));
 ok(try_domains('http://www.spamassassin.org:8080/lists.html', 'spamassassin.org'));
 ok(try_domains('http://www.spamassassin.org/lists.html#some_tag', 'spamassassin.org'));
