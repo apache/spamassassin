@@ -388,7 +388,7 @@ int process_message(const char *hostname, int port, char *username, int max_size
   return exstatus;	/* return the last failure code */
 }
 
-void read_args(int argc, char **argv, char **hostname, int *port, int *max_size)
+void read_args(int argc, char **argv, char **hostname, int *port, int *max_size, char **username)
 {
   int opt;
 
@@ -413,7 +413,7 @@ void read_args(int argc, char **argv, char **hostname, int *port, int *max_size)
       }
     case 'u':
       {
-	syslog (LOG_WARNING, "usage: -u arg obsolete, ignored");
+	*username = optarg;
 	break;
       }
     case 's':
@@ -444,14 +444,17 @@ int main(int argc,char **argv)
 
   openlog ("spamc", LOG_CONS|LOG_PID, LOG_MAIL);
 
-  curr_user = getpwuid(getuid());
-  if (curr_user == NULL) {
-    perror ("getpwuid failed");
-    return EX_OSERR;
-  }
-  username = curr_user->pw_name;
+  read_args(argc,argv,&hostname,&port,&max_size,&username);
 
-  read_args(argc,argv,&hostname,&port,&max_size);
+  if(NULL == username)
+  {
+    curr_user = getpwuid(getuid());
+    if (curr_user == NULL) {
+      perror ("getpwuid failed");
+      return EX_OSERR;
+    }
+    username = curr_user->pw_name;
+  }
 
   return process_message(hostname,port,username,max_size);
 }
