@@ -123,10 +123,10 @@ describe FULL_REFUND		Offers a full refund
 
 # note Marc Perkel's fix: require capital-F Free.  better -- less FPs
 body FOR_FREE			/\bfor (?-i:F)ree\b/i
-
 describe FOR_FREE		No such thing as a free lunch (1)
-body ONE_HUNDRED_PC_FREE	/\b(?:100%|completely|totally|absolutely) FREE/i
+body ONE_HUNDRED_PC_FREE	/\b(?:100%|completely|totally|absolutely) (?-i:F)ree/i
 describe ONE_HUNDRED_PC_FREE	No such thing as a free lunch (2)
+
 body NO_COST                    /\bno (?:cost|charge)\b/i
 describe NO_COST                No such thing as a free lunch (3)
 body ONE_HUNDRED_PC_GUAR	/100% GUARANTEED/i
@@ -1144,7 +1144,7 @@ describe SERIOUS_CASH		Serious cash
 #              PORN RULES                 #
 ###########################################
 
-body LARGE_COLLECTION           /\b(?:[0-9,]{5,9}|hundreds|thousands|millions|tons)\b.{0,15}\b(?:movies|video|xxx|celeb|streaming|live|pic|photo|images)/i
+body LARGE_COLLECTION           /\b(?:[0-9,]{5,9}\s|hundreds|thousands|millions|tons)\b.{0,15}\b(?:movies|video|xxx|celeb|streaming|live|pic|photo|images)/i
 describe LARGE_COLLECTION       Possible porn - Large Number of movies, pics
 
 body FREE_PORN                  /\bfree (?:porn|xxx|adult)/i
