@@ -14,7 +14,7 @@ describe T_DOMAIN_4U2     Domain name containing "4u", "u2" or variants.
 body T_USER_4U2           /\b\S*(?:4u|u2|2u|you2|4you|2you|foryou)\S*\@\S*\.(?:net|com|org)\b/
 describe T_USER_4U2       Local part containing "4u", "u2" or variants.
 
-header FROM_4U2         From =~ /4u|u2|2u|you2|4you|2you|foryou/i
+header T_FROM_4U2         From =~ /4u|u2|2u|you2|4you|2you|foryou/i
 describe T_FROM_4U2       From contains "4u", "u2" or variants.
 
 # bug 680
@@ -74,4 +74,17 @@ describe T_SUBJ_FREE_CAP          Subject contains FREE in CAPS
 
 body T_PORN_MEMBERSHIP            /\b(?:vip|adult|porn|x.rated) membership/i
 describe T_PORN_MEMBERSHIP        Possible Porn - Porn Membership
+
+# http://www.hughes-family.org/bugzilla/show_bug.cgi?id=640
+header T_SAVINGS             Subject =~ /\bsave\s+(?:on\s+your|up\s+to|big|over|at\s+least|\d+\%|you)\b/i
+describe T_SAVINGS        Subject talks about savings
+
+# http://www.hughes-family.org/bugzilla/show_bug.cgi?id=629
+body T_MONTH_TRIAL                /(?:month|day) .{0,9}trial/i
+describe T_MONTH_TRIAL            Month Trial Offer
+
+# http://www.hughes-family.org/bugzilla/show_bug.cgi?id=632
+body T_LOW_PRICE                  /\blow.{0,4} (?-i:P)rice/i
+describe T_LOW_PRICE              Lowest Price
+
 
