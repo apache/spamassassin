@@ -151,6 +151,9 @@ describe RCVD_IN_RSS		Received via RSS-listed relay, see http://www.mail-abuse.o
 header RCVD_IN_DUL		eval:check_rbl('dialups.mail-abuse.org.')
 describe RCVD_IN_DUL		Received from a dialup IP, see http://www.mail-abuse.org/dul/
 
+header RCVD_IN_OSIRUSOFT_COM	eval:check_rbl('relays.osirusoft.com.')
+describe RCVD_IN_OSIRUSOFT_COM	Received from an IP in Osirusoft zone, see http://relays.osirusoft.com/
+
 header RCVD_IN_RELAYS_ORDB_ORG	eval:check_rbl('relays.ordb.org.')
 describe RCVD_IN_RELAYS_ORDB_ORG Received via a relay in relays.ordb.org
 
