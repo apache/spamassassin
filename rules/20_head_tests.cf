@@ -33,10 +33,10 @@ describe TO_LOCALPART_EQ_REAL   To: repeats local-part as real name
 header FROM_MALFORMED		From !~ /(?:\"[^\"]+\"|\S+)\@\S+\.\S+|<\S+(\!\S+){1,}>/ [if-unset: unset@unset.unset]
 describe FROM_MALFORMED		From: has a malformed address
 
-header PLING			Subject =~ /\!/
+header PLING			Subject =~ /!/
 describe PLING			Subject has an exclamation mark
 
-header PLING_PLING		Subject =~ /\!\!\!+/
+header PLING_PLING		Subject =~ /!!!+/
 describe PLING_PLING		Subject has lots of exclamation marks
 
 header SUBJ_HAS_UNIQ_ID		eval:check_for_unique_subject_id()
