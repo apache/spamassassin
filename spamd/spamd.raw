@@ -227,6 +227,7 @@ if ($opt{'debug'}) {
 }
 logmsg "server started on port $port (running version ".Mail::SpamAssassin::Version().")";
 
+while (1) {
 for ( ; ($paddr = accept(Client,Server)) ; close Client)
 {
 
@@ -567,6 +568,8 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
 
     cleanupchildren;
 }
+}
+die "Somehow, we got to line 571!";
 
 sub protocol_error {
     local $_ = shift;
