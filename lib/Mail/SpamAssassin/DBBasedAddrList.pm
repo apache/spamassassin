@@ -87,7 +87,7 @@ sub finish {
   untie %{$self->{accum}};
   if ($self->{is_locked}) {
     dbg ("DB addr list: file locked, breaking lock.");
-    Mail::SpamAssassin::Util::safe_unlock($self->{locked_file));
+    Mail::SpamAssassin::Util::safe_unlock($self->{locked_file});
     $self->{is_locked} = 0;
   }
   # TODO: untrap signals to unlock the db file here
