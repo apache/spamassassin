@@ -1229,14 +1229,10 @@ sub do_head_tests {
       return;
   }
 
-  my ($rulename, $rule);
   my $evalstr = '';
   my $evalstr2 = '';
 
-  my @tests = keys %{$self->{conf}{head_tests}};
-
-  foreach $rulename (@tests) {
-    $rule = $self->{conf}->{head_tests}->{$rulename};
+  while (my($rulename, $rule) = each %{$self->{conf}{head_tests}}) {
     my $def = '';
     my ($hdrname, $testtype, $pat) =
         $rule =~ /^\s*(\S+)\s*(\=|\!)\~\s*(\S.*?\S)\s*$/;
@@ -1300,7 +1296,6 @@ EOT
 
 sub do_body_tests {
   my ($self, $textary) = @_;
-  my ($rulename, $pat);
   local ($_);
 
   dbg ("running body-text per-line regexp tests; score so far=".$self->{hits});
@@ -1316,11 +1311,8 @@ sub do_body_tests {
   # build up the eval string...
   my $evalstr = '';
   my $evalstr2 = '';
-  my @tests = keys %{$self->{conf}{body_tests}};
 
-  foreach $rulename (@tests) {
-    $pat = $self->{conf}->{body_tests}->{$rulename};
-
+  while (my($rulename, $pat) = each %{$self->{conf}{body_tests}}) {
     $evalstr .= '
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
         # call procedurally as it is faster.
@@ -1494,7 +1486,6 @@ sub get_uri_list {
 
 sub do_body_uri_tests {
   my ($self, $textary) = @_;
-  my ($rulename, $pat);
   local ($_);
 
   dbg ("running uri tests; score so far=".$self->{hits});
@@ -1511,10 +1502,8 @@ sub do_body_uri_tests {
   # otherwise build up the eval string...
   my $evalstr = '';
   my $evalstr2 = '';
-  my @tests = keys %{$self->{conf}{uri_tests}};
 
-  foreach $rulename (@tests) {
-    $pat = $self->{conf}->{uri_tests}->{$rulename};
+  while (my($rulename, $pat) = each %{$self->{conf}{uri_tests}}) {
 
     $evalstr .= '
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
@@ -1564,7 +1553,6 @@ EOT
 
 sub do_rawbody_tests {
   my ($self, $textary) = @_;
-  my ($rulename, $pat);
   local ($_);
 
   dbg ("running raw-body-text per-line regexp tests; score so far=".$self->{hits});
@@ -1580,10 +1568,8 @@ sub do_rawbody_tests {
   # build up the eval string...
   my $evalstr = '';
   my $evalstr2 = '';
-  my @tests = keys %{$self->{conf}{rawbody_tests}};
 
-  foreach $rulename (@tests) {
-    $pat = $self->{conf}->{rawbody_tests}->{$rulename};
+  while (my($rulename, $pat) = each %{$self->{conf}{rawbody_tests}}) {
 
     $evalstr .= '
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
@@ -1633,7 +1619,6 @@ EOT
 
 sub do_full_tests {
   my ($self, $fullmsgref) = @_;
-  my ($rulename, $pat);
   local ($_);
   
   dbg ("running full-text regexp tests; score so far=".$self->{hits});
@@ -1650,9 +1635,7 @@ sub do_full_tests {
   my $evalstr = '';
   my @tests = keys %{$self->{conf}{full_tests}};
 
-  foreach $rulename (@tests) {
-    $pat = $self->{conf}->{full_tests}->{$rulename};
-
+  while (my($rulename, $pat) = each %{$self->{conf}{full_tests}}) {
     $evalstr .= '
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
 	if ($$fullmsgref =~ '.$pat.') {
