@@ -111,3 +111,13 @@ describe BARGAIN_URL		Includes a link to a likely spammer domain
 uri URI_PXLG			m{http://(?:www\.)?pxlg\.com}i
 describe URI_PXLG		Frequent Spam Content
 
+# this is actually effective.  What are they doing over there?
+uri BZ_TLD			/^http:\/\/[^\/]+\.bz(?:\/|$)/i
+describe BZ_TLD			Contains a URL in the BZ top-level domain    
+
+# Matt Cline
+# Pretty good for most folks, except for jm: I have a really stupid
+# e-commerce bunch obfuscating their URLs with this for some reason. screw 'em
+uri      HTTP_ENTITIES_HOST	m{https?://[^\s\">/]*\&\#[\da-f]+}i
+describe HTTP_ENTITIES_HOST	URI obscured with character entities
+

@@ -159,3 +159,33 @@ describe FORGED_AOL_HTML	AOL can't send HTML message only
 meta FORGED_IMS_HTML		(__IMS_MUA && __MIME_HTML_ONLY)
 describe FORGED_IMS_HTML	IMS can't send HTML message only
 
+# bug 1561
+# stronger version of USER_AGENT_APPLEMAIL
+# Apple Mail doesn't send text/html at all (unless it's an attachment)
+# It'll send text/plain, or multipart/alternative with text/plain and text/enriched parts (boundary of
+# "Apple-Mail-\d--\d+").  It can, however, send a multipart/mixed with a single text/html attachment, so
+# don't use MIME_HTML_ONLY.                                                          # perhaps limit CTYPE to "text/plain", "multipart/alternative" with "text/plain" and "text/enhanced", or                                                                  # "multipart/mixed"?
+header __X_MAILER_APPLEMAIL     X-Mailer        =~ /^Apple Mail \(\d\.\d+\)$/
+header __MSGID_APPLEMAIL        Message-Id      =~ /^<[0-9A-F]{8}-(?:[0-9A-F]{4}-){3}[0-9A-F]{12}\@\S+>$/
+header __MIME_VERSION_APPLEMAIL Mime-Version    =~ /^1\.0 \(Apple Message framework v\d+\)$/
+meta __USER_AGENT_APPLEMAIL     !__CTYPE_HTML && __X_MAILER_APPLEMAIL && ( __MSGID_APPLEMAIL || __MIME_VERSION_APPLEMAIL )
+meta FORGED_MUA_APPLEMAIL	(__X_MAILER_APPLEMAIL && !__UNUSABLE_MSGID && !__USER_AGENT_APPLEMAIL)
+describe FORGED_MUA_APPLEMAIL	AppleMail can't send HTML message only
+
+# 2003-02-23: quinlan
+# some useful meta rule sub-elements
+body __MIME_HTML                eval:check_for_mime_html()
+header __CTYPE_HTML             Content-Type =~ /text\/html/i
+header __ANY_AOL_MUA            X-Mailer =~ /^AOL\b/
+header __ANY_IMS_MUA            X-Mailer =~ /^Internet Mail Service\b/
+body __TAG_EXISTS_BODY          eval:html_tag_exists('body')
+body __TAG_EXISTS_HEAD          eval:html_tag_exists('head')
+body __TAG_EXISTS_HTML          eval:html_tag_exists('html')
+body __TAG_EXISTS_META          eval:html_tag_exists('meta')
+
+meta HTML_FAKED_AOL		(__ANY_AOL_MUA && __MIME_HTML && !__TAG_EXISTS_HTML)
+describe HTML_FAKED_AOL		AOL can't send HTML in this format
+
+meta HTML_FAKED_IMS		(__ANY_IMS_MUA && __MIME_HTML && !(__TAG_EXISTS_BODY && __TAG_EXISTS_HEAD && __TAG_EXISTS_HTML && __TAG_EXISTS_META))
+describe HTML_FAKED_IMS		IMS can't send HTML in this format
+

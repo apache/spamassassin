@@ -678,3 +678,26 @@ header __ID_REPLY_TO		Reply-To:addr =~ /\d{3}.*\d{3}.*\@/
 header __ID_RETURN_PATH		Return-path:addr =~ /\d{3}.*\d{3}.*\@/
 meta ID_UNIQUE			(ID_X_LIST_UNSUBSCRIBE && __ID_RETURN_PATH && __ID_REPLY_TO)
 
+# 2003-04-12
+# juno.com anti-forgery rule based on valid juno.com account names
+# reference: http://www.juno.com/legal/spam.html
+# quinlan: not a lot of hits for me, but maybe it will work better for others
+header __JUNO_FROM		From:addr =~ /\@juno\.com\b/i
+# more restrictive interpretation of their valid account name rules,
+# don't allow any of the permitted non-alphanumeric characters to be
+# repeated, this should probably be verified
+header __JUNO_FROM_VALID	From:addr =~ /^[a-z](?:[a-z0-9]|[-._](?![-._])){0,62}[a-z0-9]\@juno\.com\b/i
+meta FORGED_JUNO_FROM		(__JUNO_FROM && !__JUNO_FROM_VALID)
+describe FORGED_JUNO_FROM	Claims to be from juno.com, but uses an invalid account name
+
+# alan premselaar <alien@12inch.com>, see SpamAssassin-talk list 2003-03
+# quinlan: 2003-03-23 here are more generic Japanese iso-2022-jp codes               # ("not yet acceptance" or "email") + "announcement"                                 # FWIW, according to Peter Evans, this should be sufficient to catch the UCE tag
+# and a common attempt at evasion (using the "sue" instead of "mi" Chinese
+# character).
+header JAPANESE_UCE_SUBJECT	Subject =~ /\e\$B.*(?:L\$>5Bz|EE;R%a!<%k)9-9p/
+describe JAPANESE_UCE_SUBJECT	Subject contains a Japanese UCE tag
+
+# quinlan: "advertisement" in Russian KOI8-R
+header RUSSIAN_UCE_SUBJECT	Subject =~ /\xf0\xe5\xea\xeb\xe0\xec\xf3/            
+describe RUSSIAN_UCE_SUBJECT	Subject contains a Russian UCE tag
+
