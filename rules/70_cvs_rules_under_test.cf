@@ -158,13 +158,6 @@ body T__NIGERIAN_BODY_1		/\b(?:financial|confiden(?:tial|ce)|safe|mutual|secret|
 
 ########################################################################
 
-# 12/25 - tvd - this FPs on Car Talk newsletters, the hit rate is pretty
-# low all around (likely to just remove), but let's try a meta exception anyway.
-header T_X_BULKMAIL			exists:X-Bulkmail
-header __X_BULKMAIL			exists:X-Bulkmail
-header __FROM_CARTALK			From =~ /\@cartalk\.com$/
-meta T_X_BULKMAIL_2			( __X_BULKMAIL && !__FROM_CARTALK )
-
 # Dec 24 2002 jm: random check
 # 12/25 - tvd - great for quinlan (2.69%), hits under .05% for everyone else, no fps
 # quinlan: just a note that I didn't write the rule :-)
