@@ -393,17 +393,21 @@ The default tagging operations that take place are detailed in L</TAGGING>.
 The rule base, text templates, and rule description text are loaded from the
 configuration files.
 
-The default configuration file is F<$Config{installsitelib}/spamassassin.cf>.
-This file will always be read first.
+By default, configuration data is loaded from the first existing directory in:
+F</usr/local/share/spamassassin>;F</usr/share/spamassassin>;F<./rules>;F<../rules>
 
-F</etc/spamassassin.cf> (or the file specified with C<-c>)  will be read next,
-if it exists.  This is a good place to add your own site-wide preferences.
+The, configuration data in the first existing directory in:
+F</usr/local/etc/spamassassin>;F</usr/pkg/etc/spamassassin>;F</usr/etc/spamassassin>;F</etc/mail/spamassassin>;F</etc/spamassassin>
+are used to override any values which had already been set
+
+Spamassassin will read *.cf in these directories, in alphanumeric order within each directory
+(similar to SysV-style startup scripts).  In other words, it will read F<10_misc.cf> before F<50_scores.cf> and F<20_body_tests.cf> before F<20_head_test.cf>.  Options in later files will override earlier files.
 
 The user preferences (such as scores to attach to each rule), are loaded from
 the file specified in the B<-p> argument.  If this is not specified,
-F<~/.spamassassin.cf> is used if it exists.  C<spamassassin> will create this
-file if it does not exist, using F<$Config{installsitelib}/spamassassin.prefs>
-as a template.
+F<~/.spamassassin/user_prefs> is used if it exists.  C<spamassassin> will create this
+file if it does not exist, using F<user_prefs.template> as a template.  This file will be looked for in 
+F</etc/spamassassin/user_prefs.template>;F</usr/local/share/spamassassin/user_prefs.template>;F</usr/share/spamassassin/user_prefs.template>
 
 =head1 TAGGING
 
