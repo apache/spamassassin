@@ -3555,4 +3555,16 @@ sub _multipart_alternative_difference {
 
 ###########################################################################
 
+sub domain_ratio {
+  my($self, $body, $ratio) = @_;
+  my $length = (length(join('', @{$body})) || 1);
+  if (!defined $self->{domains}) {
+    $self->get_uri_list();
+  }
+  return 0 if !defined $self->{domains};
+  return (($self->{domains} / $length) > $ratio);
+}
+
+###########################################################################
+
 1;

@@ -1500,6 +1500,15 @@ sub get_uri_list {
   # remove duplicates
   @uris = _uniq(sort(@uris));
 
+  # get domain list
+  my @domains;
+  for (@uris) {
+    my $domain = Mail::SpamAssassin::Util::uri_to_domain($_);
+    push @domains, $domain if $domain;
+  }
+  @domains = _uniq(sort(@domains));
+  $self->{domains} = scalar @domains;
+
   $self->{uri_list} = \@uris;
   dbg("uri tests: Done uriRE");
   return @{$self->{uri_list}};

@@ -705,6 +705,37 @@ sub secure_tmpfile {
 
 ###########################################################################
 
+sub uri_to_domain {
+  my ($uri) = @_;
+
+  #return if ($uri =~ /^mailto:/i);	# not mailto's, please (TODO?)
+  return if ($uri =~ /^javascript:/i);
+
+  $uri =~ s,^mailto:\/*,,gs;	# drop the protocol
+  $uri =~ s,#.*$,,gs;		# drop fragment
+  $uri =~ s,^[a-z]+://,,gs;	# drop the protocol
+  $uri =~ s,^[^/]*\@,,gs;	# username/passwd
+  $uri =~ s,[/\?\&].*$,,gs;	# path/cgi params
+  $uri =~ s,:\d+$,,gs;		# port
+
+  return if $uri =~ /\%/; # skip undecoded URIs.
+  # we'll see the decoded version as well
+
+  # keep IPs intact
+  if ($uri !~ /^\d+\.\d+\.\d+\.\d+$/) { 
+    # get rid of hostname part of domain, understanding delegation
+    if (Mail::SpamAssassin::Util::is_in_subdelegated_cctld($uri)) {
+      $uri = $1 if $uri =~ /\.([^\.]+\.[^\.]+\.[^\.]+)$/;
+    }
+    else {
+      $uri = $1 if $uri =~ /\.([^\.]+\.[^\.]+)$/;
+    }
+  }
+  
+  # $uri is now the domain only
+  return $uri;
+}
+
 sub is_in_subdelegated_cctld {
   my ($domain) = @_;
 

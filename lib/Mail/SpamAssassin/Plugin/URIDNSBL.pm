@@ -46,6 +46,7 @@ The maximum number of domains to look up.
 package Mail::SpamAssassin::Plugin::URIDNSBL;
 
 use Mail::SpamAssassin::Plugin;
+use Mail::SpamAssassin::Util;
 use strict;
 use bytes;
 
@@ -130,7 +131,7 @@ sub parsed_metadata {
   # the URI was found so we can ignore hammy decoys.
   my %domlist = ( );
   foreach my $uri ($scanner->get_uri_list()) {
-    my $dom = $self->uri_to_domain($scanstate, $uri);
+    my $dom = Mail::SpamAssassin::Util::uri_to_domain($uri);
     if ($dom) { $domlist{$dom} = 1; }
   }
 
@@ -216,42 +217,6 @@ sub check_post_dnsbl {
       $scan->got_hit ($rulename, "");
     }
   }
-}
-
-# ---------------------------------------------------------------------------
-
-sub uri_to_domain {
-  my ($self, $scanstate, $uri) = @_;
-
-  #return if ($uri =~ /^mailto:/i);	# not mailto's, please (TODO?)
-  return if ($uri =~ /^javascript:/i);
-
-  $uri =~ s,^mailto:\/*,,gs; # drop the protocol
-  $uri =~ s,^[a-z]+://,,gs;	# drop the protocol
-  $uri =~ s,^[^/]*\@,,gs;	# username/passwd
-  $uri =~ s,[/\?\&].*$,,gs;	# path/cgi params
-  $uri =~ s,:\d+$,,gs;	# port
-
-  return if $uri =~ /\%/; # skip undecoded URIs.
-  # we'll see the decoded version as well
-
-  if ($uri =~ /^\d+\.\d+\.\d+\.\d+$/) { 
-    # keep IPs intact
-  } else {
-    # get rid of hostname part of domain, understanding delegation
-    if (Mail::SpamAssassin::Util::is_in_subdelegated_cctld ($uri)) {
-      if ($uri =~ /\.([^\.]+\.[^\.]+\.[^\.]+)$/) {
-	$uri = $1;
-      }
-    } else {
-      if ($uri =~ /\.([^\.]+\.[^\.]+)$/) {
-	$uri = $1;
-      }
-    }
-  }
-  
-  # $uri is now the domain only
-  return $uri;
 }
 
 # ---------------------------------------------------------------------------
