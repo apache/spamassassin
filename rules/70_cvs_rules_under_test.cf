@@ -372,10 +372,10 @@ meta T_USER_AGENT_XIMIAN	__USER_AGENT_XIMIAN && !T_FORGED_USER_AGENT
 meta T_FORGED_MUA_XIMIAN	__XIMIAN_MUA && !__USER_AGENT_XIMIAN
 
 # duncf
-body EMAIL_ROT13     /\b[a-z(\]-]+\^[a-z-]+\((?:pbz|arg|bet|pn)\b/
-test EMAIL_ROT13 ok  qhabs^ebtref(pbz
-test EMAIL_ROT13 ok  zxrggyre^riv-vap(pbz
-test EMAIL_ROT13 fail	duncf@rogers.com
+body T_EMAIL_ROT13     /\b[a-z(\]-]+\^[a-z-]+\((?:pbz|arg|bet|pn)\b/
+test T_EMAIL_ROT13 ok  qhabs^ebtref(pbz
+test T_EMAIL_ROT13 ok  zxrggyre^riv-vap(pbz
+test T_EMAIL_ROT13 fail	duncf@rogers.com
 
 # bug 1561
 # stronger version of USER_AGENT_APPLEMAIL
@@ -388,6 +388,6 @@ test EMAIL_ROT13 fail	duncf@rogers.com
 header __X_MAILER_APPLEMAIL	X-Mailer	=~ /^Apple Mail \(\d\.\d+\)$/
 header __MSGID_APPLEMAIL	Message-Id	=~ /^<[0-9A-F]{8}-(?:[0-9A-F]{4}-){3}[0-9A-F]{12}\@\S+>$/
 header __MIME_VERSION_APPLEMAIL	Mime-Version	=~ /^1\.0 \(Apple Message framework v\d+\)$/
-meta __USER_AGENT_APPLEMAIL	!__HTML_CTYPE_HEADER && __X_MAILER_APPLEMAIL && ( __MSGID_APPLEMAIL || __MIME_VERSION_APPLEMAIL )
+meta __USER_AGENT_APPLEMAIL	!__CTYPE_HTML && __X_MAILER_APPLEMAIL && ( __MSGID_APPLEMAIL || __MIME_VERSION_APPLEMAIL )
 meta T_USER_AGENT_APPLEMAIL	__USER_AGENT_APPLEMAIL && !T_FORGED_USER_AGENT
 meta T_FORGED_MUA_APPLEMAIL	__X_MAILER_APPLEMAIL && !__USER_AGENT_APPLEMAIL
