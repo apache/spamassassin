@@ -238,7 +238,13 @@ header T_FROM_DELPHI_BASIC	From:addr =~ /\@delphi\.com/i
 body T_RANDO_MIZE		/\$RAN[DOMI]*\s+[DOMI]*ZE/
 
 # yet another open Yahoo! redirector
-uri T_YAHOO_REDIR		/^http:\/\/srd\.yahoo\.com\//i
+uri T_YAHOO_REDIR_1		m{^http://srd\.yahoo\.com/}i
+uri T_YAHOO_REDIR_2		m{^http://srd\.yahoo\.com/.*(?:[^:/?\#]+)://}i
+# these are decent, maybe figure out the FPs to improve
+uri T_YAHOO_REDIR_3		m{^http://(?:srd|drs|rd)\.yahoo\.com/}i
+uri T_YAHOO_REDIR_4		m{^http://(?:srd|drs|rd)\.yahoo\.com/.*(?:[^:/?\#]+)://}i
+uri T_YAHOO_REDIR_5		m{^http://(\S+\.)*(?:srd|drs|rd)\.yahoo\.com/}i
+uri T_YAHOO_REDIR_6		m{^http://(\S+\.)*(?:srd|drs|rd)\.yahoo\.com/.*(?:[^:/?\#]+)://}i
 
 header T_HASHCASH_20		eval:check_hashcash_value('20', '21')
 header T_HASHCASH_21		eval:check_hashcash_value('21', '22')
@@ -480,103 +486,6 @@ header T_MSGID_SPAM_3_6		Message-Id =~ /<[a-z]{6,}\@(\S+\.)+\S+>/
 describe T_MSGID_SPAM_3_6	Message-ID has known spammer pattern
 header T_MSGID_SPAM_3_7		Message-Id =~ /<[a-z]{7,}\@(\S+\.)+\S+>/
 describe T_MSGID_SPAM_3_7	Message-ID has known spammer pattern
-
-# evil spam tool
-# Message-ID generator algorithm:
-# letter: 1/2 (pick a-z) | 1/2 (pick 0-9)
-# 10-29 letters: 1/8 (pick $) | 1/8 (pick -) | 3/8 (pick a-z) | 3/8 (pick 0-9)
-# letter: 1/2 (pick a-z) | 1/2 (pick 0-9)
-# @
-# letter: 2/3 (pick a-z) | 1/3 (pick 0-9)
-# 3-12 letters: 1/8 (pick .) | 7/12 (pick a-z) | 7/24 (pick 0-9)
-# letter: 2/3 (pick a-z) | 1/3 (pick 0-9)
-header __MSGID_ESPAM		Message-ID =~ /<[a-z\d][a-z\d\$-]{10,29}[a-z\d]\@[a-z\d][a-z\d.]{3,12}[a-z\d]>/
-# eliminate hex runs
-header __MSGID_IDIOM_0		Message-ID =~ /\b[a-f\d]{8}/
-header __MSGID_IDIOM_1		Message-ID =~ /\b[a-f\d]{8}\b/
-header __MSGID_IDIOM_2		Message-ID =~ /\b(?:[a-f\d]{12}|[a-f\d]{8})\b/
-# eliminate digit runs
-header __MSGID_IDIOM_3		Message-ID =~ /\d{8}/
-header __MSGID_IDIOM_4		Message-ID =~ /\d{10}/
-header __MSGID_IDIOM_5		Message-ID =~ /\b\d{8}/
-# eliminate plausible hostnames
-header __MSGID_IDIOM_6		Message-ID =~ /\@\D{2,}>/
-header __MSGID_IDIOM_7		Message-ID =~ /\@(?:\D{2,}|(?:\d{1,3}\.){3}\d{1,3})>/
-header __MSGID_IDIOM_8		Message-ID =~ /\@(?:[a-z\d]+\.)?\D{2,}>/
-meta T_MSGID_EVIL_1	(__MSGID_ESPAM && !__MSGID_IDIOM_0)
-meta T_MSGID_EVIL_2	(__MSGID_ESPAM && !__MSGID_IDIOM_1)
-meta T_MSGID_EVIL_3	(__MSGID_ESPAM && !__MSGID_IDIOM_2)
-meta T_MSGID_EVIL_4	(__MSGID_ESPAM && !__MSGID_IDIOM_0 && !__MSGID_IDIOM_3)
-meta T_MSGID_EVIL_5	(__MSGID_ESPAM && !__MSGID_IDIOM_0 && !__MSGID_IDIOM_4)
-meta T_MSGID_EVIL_6	(__MSGID_ESPAM && !__MSGID_IDIOM_0 && !__MSGID_IDIOM_5)
-meta T_MSGID_EVIL_7	(__MSGID_ESPAM && !__MSGID_IDIOM_1 && !__MSGID_IDIOM_3)
-meta T_MSGID_EVIL_8	(__MSGID_ESPAM && !__MSGID_IDIOM_1 && !__MSGID_IDIOM_4)
-meta T_MSGID_EVIL_9	(__MSGID_ESPAM && !__MSGID_IDIOM_1 && !__MSGID_IDIOM_5)
-meta T_MSGID_EVIL_10	(__MSGID_ESPAM && !__MSGID_IDIOM_2 && !__MSGID_IDIOM_3)
-meta T_MSGID_EVIL_11	(__MSGID_ESPAM && !__MSGID_IDIOM_2 && !__MSGID_IDIOM_4)
-meta T_MSGID_EVIL_12	(__MSGID_ESPAM && !__MSGID_IDIOM_2 && !__MSGID_IDIOM_5)
-meta T_MSGID_EVIL_13	(__MSGID_ESPAM && !__MSGID_IDIOM_0 && !__MSGID_IDIOM_6)
-meta T_MSGID_EVIL_14	(__MSGID_ESPAM && !__MSGID_IDIOM_1 && !__MSGID_IDIOM_6)
-meta T_MSGID_EVIL_15	(__MSGID_ESPAM && !__MSGID_IDIOM_2 && !__MSGID_IDIOM_6)
-meta T_MSGID_EVIL_16	(__MSGID_ESPAM && !__MSGID_IDIOM_0 && !__MSGID_IDIOM_3 && !__MSGID_IDIOM_6)
-meta T_MSGID_EVIL_17	(__MSGID_ESPAM && !__MSGID_IDIOM_0 && !__MSGID_IDIOM_4 && !__MSGID_IDIOM_6)
-meta T_MSGID_EVIL_18	(__MSGID_ESPAM && !__MSGID_IDIOM_0 && !__MSGID_IDIOM_5 && !__MSGID_IDIOM_6)
-meta T_MSGID_EVIL_19	(__MSGID_ESPAM && !__MSGID_IDIOM_1 && !__MSGID_IDIOM_3 && !__MSGID_IDIOM_6)
-meta T_MSGID_EVIL_20	(__MSGID_ESPAM && !__MSGID_IDIOM_1 && !__MSGID_IDIOM_4 && !__MSGID_IDIOM_6)
-meta T_MSGID_EVIL_21	(__MSGID_ESPAM && !__MSGID_IDIOM_1 && !__MSGID_IDIOM_5 && !__MSGID_IDIOM_6)
-meta T_MSGID_EVIL_22	(__MSGID_ESPAM && !__MSGID_IDIOM_2 && !__MSGID_IDIOM_3 && !__MSGID_IDIOM_6)
-meta T_MSGID_EVIL_23	(__MSGID_ESPAM && !__MSGID_IDIOM_2 && !__MSGID_IDIOM_4 && !__MSGID_IDIOM_6)
-meta T_MSGID_EVIL_24	(__MSGID_ESPAM && !__MSGID_IDIOM_2 && !__MSGID_IDIOM_5 && !__MSGID_IDIOM_6)
-meta T_MSGID_EVIL_25	(__MSGID_ESPAM && !__MSGID_IDIOM_0 && !__MSGID_IDIOM_7)
-meta T_MSGID_EVIL_26	(__MSGID_ESPAM && !__MSGID_IDIOM_1 && !__MSGID_IDIOM_7)
-meta T_MSGID_EVIL_27	(__MSGID_ESPAM && !__MSGID_IDIOM_2 && !__MSGID_IDIOM_7)
-meta T_MSGID_EVIL_28	(__MSGID_ESPAM && !__MSGID_IDIOM_0 && !__MSGID_IDIOM_3 && !__MSGID_IDIOM_7)
-meta T_MSGID_EVIL_29	(__MSGID_ESPAM && !__MSGID_IDIOM_0 && !__MSGID_IDIOM_4 && !__MSGID_IDIOM_7)
-meta T_MSGID_EVIL_30	(__MSGID_ESPAM && !__MSGID_IDIOM_0 && !__MSGID_IDIOM_5 && !__MSGID_IDIOM_7)
-meta T_MSGID_EVIL_31	(__MSGID_ESPAM && !__MSGID_IDIOM_1 && !__MSGID_IDIOM_3 && !__MSGID_IDIOM_7)
-meta T_MSGID_EVIL_32	(__MSGID_ESPAM && !__MSGID_IDIOM_1 && !__MSGID_IDIOM_4 && !__MSGID_IDIOM_7)
-meta T_MSGID_EVIL_33	(__MSGID_ESPAM && !__MSGID_IDIOM_1 && !__MSGID_IDIOM_5 && !__MSGID_IDIOM_7)
-meta T_MSGID_EVIL_34	(__MSGID_ESPAM && !__MSGID_IDIOM_2 && !__MSGID_IDIOM_3 && !__MSGID_IDIOM_7)
-meta T_MSGID_EVIL_35	(__MSGID_ESPAM && !__MSGID_IDIOM_2 && !__MSGID_IDIOM_4 && !__MSGID_IDIOM_7)
-meta T_MSGID_EVIL_36	(__MSGID_ESPAM && !__MSGID_IDIOM_2 && !__MSGID_IDIOM_5 && !__MSGID_IDIOM_7)
-meta T_MSGID_EVIL_37	(__MSGID_ESPAM && !__MSGID_IDIOM_0 && !__MSGID_IDIOM_8)
-meta T_MSGID_EVIL_38	(__MSGID_ESPAM && !__MSGID_IDIOM_1 && !__MSGID_IDIOM_8)
-meta T_MSGID_EVIL_39	(__MSGID_ESPAM && !__MSGID_IDIOM_2 && !__MSGID_IDIOM_8)
-meta T_MSGID_EVIL_40	(__MSGID_ESPAM && !__MSGID_IDIOM_0 && !__MSGID_IDIOM_3 && !__MSGID_IDIOM_8)
-meta T_MSGID_EVIL_41	(__MSGID_ESPAM && !__MSGID_IDIOM_0 && !__MSGID_IDIOM_4 && !__MSGID_IDIOM_8)
-meta T_MSGID_EVIL_42	(__MSGID_ESPAM && !__MSGID_IDIOM_0 && !__MSGID_IDIOM_5 && !__MSGID_IDIOM_8)
-meta T_MSGID_EVIL_43	(__MSGID_ESPAM && !__MSGID_IDIOM_1 && !__MSGID_IDIOM_3 && !__MSGID_IDIOM_8)
-meta T_MSGID_EVIL_44	(__MSGID_ESPAM && !__MSGID_IDIOM_1 && !__MSGID_IDIOM_4 && !__MSGID_IDIOM_8)
-meta T_MSGID_EVIL_45	(__MSGID_ESPAM && !__MSGID_IDIOM_1 && !__MSGID_IDIOM_5 && !__MSGID_IDIOM_8)
-meta T_MSGID_EVIL_46	(__MSGID_ESPAM && !__MSGID_IDIOM_2 && !__MSGID_IDIOM_3 && !__MSGID_IDIOM_8)
-meta T_MSGID_EVIL_47	(__MSGID_ESPAM && !__MSGID_IDIOM_2 && !__MSGID_IDIOM_4 && !__MSGID_IDIOM_8)
-meta T_MSGID_EVIL_48	(__MSGID_ESPAM && !__MSGID_IDIOM_2 && !__MSGID_IDIOM_5 && !__MSGID_IDIOM_8)
-meta T_MSGID_EVIL_49	(__MSGID_ESPAM && (__MSGID_IDIOM_0 + __MSGID_IDIOM_3 + __MSGID_IDIOM_6 < 2))
-meta T_MSGID_EVIL_50	(__MSGID_ESPAM && (__MSGID_IDIOM_0 + __MSGID_IDIOM_4 + __MSGID_IDIOM_6 < 2))
-meta T_MSGID_EVIL_51	(__MSGID_ESPAM && (__MSGID_IDIOM_0 + __MSGID_IDIOM_5 + __MSGID_IDIOM_6 < 2))
-meta T_MSGID_EVIL_52	(__MSGID_ESPAM && (__MSGID_IDIOM_1 + __MSGID_IDIOM_3 + __MSGID_IDIOM_6 < 2))
-meta T_MSGID_EVIL_53	(__MSGID_ESPAM && (__MSGID_IDIOM_1 + __MSGID_IDIOM_4 + __MSGID_IDIOM_6 < 2))
-meta T_MSGID_EVIL_54	(__MSGID_ESPAM && (__MSGID_IDIOM_1 + __MSGID_IDIOM_5 + __MSGID_IDIOM_6 < 2))
-meta T_MSGID_EVIL_55	(__MSGID_ESPAM && (__MSGID_IDIOM_2 + __MSGID_IDIOM_3 + __MSGID_IDIOM_6 < 2))
-meta T_MSGID_EVIL_56	(__MSGID_ESPAM && (__MSGID_IDIOM_2 + __MSGID_IDIOM_4 + __MSGID_IDIOM_6 < 2))
-meta T_MSGID_EVIL_57	(__MSGID_ESPAM && (__MSGID_IDIOM_2 + __MSGID_IDIOM_5 + __MSGID_IDIOM_6 < 2))
-meta T_MSGID_EVIL_58	(__MSGID_ESPAM && (__MSGID_IDIOM_0 + __MSGID_IDIOM_3 + __MSGID_IDIOM_7 < 2))
-meta T_MSGID_EVIL_59	(__MSGID_ESPAM && (__MSGID_IDIOM_0 + __MSGID_IDIOM_4 + __MSGID_IDIOM_7 < 2))
-meta T_MSGID_EVIL_60	(__MSGID_ESPAM && (__MSGID_IDIOM_0 + __MSGID_IDIOM_5 + __MSGID_IDIOM_7 < 2))
-meta T_MSGID_EVIL_61	(__MSGID_ESPAM && (__MSGID_IDIOM_1 + __MSGID_IDIOM_3 + __MSGID_IDIOM_7 < 2))
-meta T_MSGID_EVIL_62	(__MSGID_ESPAM && (__MSGID_IDIOM_1 + __MSGID_IDIOM_4 + __MSGID_IDIOM_7 < 2))
-meta T_MSGID_EVIL_63	(__MSGID_ESPAM && (__MSGID_IDIOM_1 + __MSGID_IDIOM_5 + __MSGID_IDIOM_7 < 2))
-meta T_MSGID_EVIL_64	(__MSGID_ESPAM && (__MSGID_IDIOM_2 + __MSGID_IDIOM_3 + __MSGID_IDIOM_7 < 2))
-meta T_MSGID_EVIL_65	(__MSGID_ESPAM && (__MSGID_IDIOM_2 + __MSGID_IDIOM_4 + __MSGID_IDIOM_7 < 2))
-meta T_MSGID_EVIL_66	(__MSGID_ESPAM && (__MSGID_IDIOM_2 + __MSGID_IDIOM_5 + __MSGID_IDIOM_7 < 2))
-meta T_MSGID_EVIL_67	(__MSGID_ESPAM && (__MSGID_IDIOM_0 + __MSGID_IDIOM_4 + __MSGID_IDIOM_8 < 2))
-meta T_MSGID_EVIL_68	(__MSGID_ESPAM && (__MSGID_IDIOM_0 + __MSGID_IDIOM_5 + __MSGID_IDIOM_8 < 2))
-meta T_MSGID_EVIL_69	(__MSGID_ESPAM && (__MSGID_IDIOM_1 + __MSGID_IDIOM_3 + __MSGID_IDIOM_8 < 2))
-meta T_MSGID_EVIL_70	(__MSGID_ESPAM && (__MSGID_IDIOM_1 + __MSGID_IDIOM_4 + __MSGID_IDIOM_8 < 2))
-meta T_MSGID_EVIL_71	(__MSGID_ESPAM && (__MSGID_IDIOM_1 + __MSGID_IDIOM_5 + __MSGID_IDIOM_8 < 2))
-meta T_MSGID_EVIL_72	(__MSGID_ESPAM && (__MSGID_IDIOM_2 + __MSGID_IDIOM_3 + __MSGID_IDIOM_8 < 2))
-meta T_MSGID_EVIL_73	(__MSGID_ESPAM && (__MSGID_IDIOM_2 + __MSGID_IDIOM_4 + __MSGID_IDIOM_8 < 2))
-meta T_MSGID_EVIL_74	(__MSGID_ESPAM && (__MSGID_IDIOM_2 + __MSGID_IDIOM_5 + __MSGID_IDIOM_8 < 2))
 
 # some simple subject rules to catch a persistent spammer
 header T_SUBJ_XANAX		Subject =~ /x.{0,2}a.{0,2}n.{0,2}a.{0,2}x/i
