@@ -757,55 +757,16 @@ score X_PRI_MISMATCH_HI 0.001
 score X_SERV_HOST_PRESENT 0.001
 score X_STORMPOST_TO 0.001
 score YAHOO_SRD_REDIR 0.001
-
-# End of generated scores.
-
-# Scores for tests that are scored manually or with isolated rescore runs.
-# Most are net tests, userconf tests, tests occuring with very low frequency,
-# or tests with many false positives.
-
-# GTUBE - Generic Test for Unsolicited Bulk Email
-score GTUBE 1000.000
-
-# long header test
-score HEAD_LONG 2.5
-
-# HTML control test
-score HTML_MESSAGE 0.009 0.001 0.010 0.005
-
-#
-# miscellaneous network tests
-#
-
 score DNS_FROM_RFC_DSN 0 0.000 0 0.013
 score NO_DNS_FOR_FROM 0 1.105 0 1.650
 score ROUND_THE_WORLD 0 1.638 0 0.299
-
-#
-# message digest tests
-#
-
 score DIGEST_MULTIPLE 0 0.435 0 0.001
-
-## Vipul's Razor: http://razor.sourceforge.net/
 score RAZOR2_CHECK 0 0.213 0 0.626
 score RAZOR2_CF_RANGE_11_50 0 0.042 0 0.019
 score RAZOR2_CF_RANGE_51_100 0 1.587 0 2.136
-
-## Distributed Checksum Clearinghouse: http://www.rhyolite.com/anti-spam/dcc/
 score DCC_CHECK 0 1.489 0 0.155
-
-## Pyzor: http://pyzor.sourceforge.net/
 score PYZOR_CHECK 0 1.935 0 0.648
-
-#
-# DNS Blacklists
-# note that top-level tests need to be non-zero for sub-tests to work
-#
-
 score RCVD_IN_BL_SPAMCOP_NET 0 1.783 0 1.603
-score RCVD_IN_BSP_OTHER 0 -0.1 0 -0.1
-score RCVD_IN_BSP_TRUSTED 0 -4.3 0 -4.3
 score RCVD_IN_DSBL 0 2.767 0 2.900
 score RCVD_IN_NJABL_CGI 0 0.1 0 0.100
 score RCVD_IN_NJABL_DUL 0 1.580 0 1.708
@@ -825,90 +786,19 @@ score RCVD_IN_SORBS_SOCKS 0 1.603 0 0.927
 score RCVD_IN_SORBS_WEB 0 0.000 0 0.353
 score RCVD_IN_SORBS_ZOMBIE 0 0.948 0 0.918
 score RCVD_IN_XBL 0 2.333 0 4.923
-
-# right-hand side
-
 score DNS_FROM_AHBL_RHSBL 0 0.025 0 0.469
 score DNS_FROM_RFC_ABUSE 0 0.135 0 0.454
 score DNS_FROM_RFC_BOGUSMX 0 1.099 0 1.701
 score DNS_FROM_RFC_POST 0 1.470 0 0.687
 score DNS_FROM_RFC_WHOIS 0 0.502 0 0.001
-
-# SenderBase
-
 score SB_NEW_BULK 0 0.724 0 0.690
 score SB_NSP_VOLUME_SPIKE 0 0.662 0 0.255
-
-# URIBL
-
 score URIBL_SBL 0 0.765 0 1.723
 score URIBL_SC_SURBL 0 3.831 0 3.752
 score URIBL_WS_SURBL 0 0.652 0 1.823
 score URIBL_PH_SURBL 0 0.689 0 1.0
 score URIBL_OB_SURBL 0 1.792 0 1.000
 score URIBL_AB_SURBL 0 2.508 0 1.000
-
-# unscored by default -- commercial/donation services.  If you pay for
-# these, give them a score so they will be checked.
-#
-# 0.5 to 1.0 is probably good for the DUL scores
-# 1.5 to 2.0 is probably good for the rest
-
-score RCVD_IN_MAPS_RBL 0
-score RCVD_IN_MAPS_DUL 0
-score RCVD_IN_MAPS_RSS 0
-score RCVD_IN_MAPS_NML 0
-
-# unscored by default -- requires a $50 payment to be delisted.  If you
-# want to use this, give it a score so it will be checked.  Note that
-# in our testing, we found the accuracy to be quite low (hits 5.2%
-# of spam, but 0.6% of non-spam).
-
-
-#
-# User Configured Tests
-#
-
-# ok_languages and ok_locales
-
-score BODY_8BITS 1.500
-score CHARSET_FARAWAY 3.200
-score CHARSET_FARAWAY_HEADER 3.200
-score HTML_CHARSET_FARAWAY 0.500
-score MIME_CHARSET_FARAWAY 2.450
-score UNWANTED_LANGUAGE_BODY 2.800
-
-# highly generic tests for viruses that are scored just high enough to run
-
-score MIME_SUSPECT_NAME 0.100
-
-# accessdb lookups
-score ACCESSDB 0
-
-# rescore never changes the whitelist/blacklist scores
-
-score USER_IN_BLACKLIST 100.000
-score USER_IN_WHITELIST -100.000
-score USER_IN_DEF_WHITELIST -15.000
-score USER_IN_BLACKLIST_TO 10.000
-
-# Not really false positives but the user wants spam!
-
-score USER_IN_WHITELIST_TO -6.000
-score USER_IN_MORE_SPAM_TO -20.000
-score USER_IN_ALL_SPAM_TO -100.000
-
-#
-# Habeas: http://www.habeas.com/
-#
-
-score HABEAS_INFRINGER 0 0.579 0 0.125
-score HABEAS_USER 0 -8.0 0 -8.0
-
-#
-# Bayesian Classifier
-#
-
 score BAYES_00 0 0 -9.983 -2.599
 score BAYES_05 0 0 -9.556 -0.413
 score BAYES_10 0 0 -3.671 -1.951
@@ -919,9 +809,55 @@ score BAYES_90 0 0 1.329 2.087
 score BAYES_95 0 0 1.365 2.063
 score BAYES_99 0 0 1.673 1.886
 
-#
+# End of generated scores.
+
+# Scores for tests that are scored manually or with isolated rescore runs.
+# Most are net tests, userconf tests, tests occuring with very low frequency,
+# or tests with many false positives.
+
+# GTUBE - Generic Test for Unsolicited Bulk Email
+score GTUBE 1000.000
+
+# long header test
+score HEAD_LONG 2.5
+
+# HTML control test
+score HTML_MESSAGE 0.001
+
+# ok_languages and ok_locales
+score BODY_8BITS 1.500
+score CHARSET_FARAWAY 3.200
+score CHARSET_FARAWAY_HEADER 3.200
+score HTML_CHARSET_FARAWAY 0.500
+score MIME_CHARSET_FARAWAY 2.450
+score UNWANTED_LANGUAGE_BODY 2.800
+
+# highly generic tests for viruses that are scored just high enough to run
+score MIME_SUSPECT_NAME 0.100
+
+# accessdb lookups
+score ACCESSDB 0
+
+# rescore never changes the whitelist/blacklist scores
+score USER_IN_BLACKLIST 100.000
+score USER_IN_WHITELIST -100.000
+score USER_IN_DEF_WHITELIST -15.000
+score USER_IN_BLACKLIST_TO 10.000
+
+# not really false positives but the user wants spam!
+score USER_IN_WHITELIST_TO -6.000
+score USER_IN_MORE_SPAM_TO -20.000
+score USER_IN_ALL_SPAM_TO -100.000
+
+# Bonded Sender: http://www.bondedsender.com/ 
+score RCVD_IN_BSP_OTHER 0 -0.1 0 -0.1
+score RCVD_IN_BSP_TRUSTED 0 -4.3 0 -4.3
+
+# Habeas: http://www.habeas.com/
+score HABEAS_INFRINGER 0 16.0 0 16.0
+score HABEAS_USER 0 -8.0 0 -8.0
+
 # Hashcash
-#
 ifplugin Mail::SpamAssassin::Plugin::Hashcash
 score HASHCASH_20 -0.500
 score HASHCASH_21 -0.700
@@ -933,12 +869,10 @@ score HASHCASH_HIGH -5.000
 score HASHCASH_2SPEND 0.100
 endif # Mail::SpamAssassin::Plugin::Hashcash
 
-#
 # SPF                                              
 # Note that the benefit for a valid SPF record is deliberately minimal; it's
 # likely that more spammers would quickly move to setting valid SPF records
 # otherwise.  The penalties for an *incorrect* record, however, are large.  ;)
-#
 ifplugin Mail::SpamAssassin::Plugin::SPF
 score SPF_PASS -0.001
 score SPF_FAIL 0 0.000 0 0.875
@@ -948,3 +882,9 @@ score SPF_HELO_FAIL 0 0.405 0 0.001
 score SPF_HELO_SOFTFAIL 0 1.002 0 3.140
 endif # Mail::SpamAssassin::Plugin::SPF
 
+# MAPS
+# MAPS is a commercial service.  If you pay for them, asign
+score RCVD_IN_MAPS_RBL 0
+score RCVD_IN_MAPS_DUL 0
+score RCVD_IN_MAPS_RSS 0
+score RCVD_IN_MAPS_NML 0
