@@ -35,9 +35,11 @@ describe SPAM_FORM_INPUT	Form for verifying email address
 body BUGGY_CGI			/Below is the result of your feedback form/
 describe BUGGY_CGI		Broken CGI script message
 body BUGGY_CGI_DE		/Neue Mail aus dem Fitzshop Briefkasten./
-describe BUGGY_CGI_DE		Broken german CGI script message
+describe BUGGY_CGI_DE		Broken German CGI script message
 body BUGGY_CGI_DE_2		/Diese Mail wurde &uuml;bertragen von/
-describe BUGGY_CGI_DE_2		Broken german CGI script message
+describe BUGGY_CGI_DE_2		Broken German CGI script message
+body BUGGY_CGI_PT		/Abaixo o resultado do preenchimento do Formulario/
+describe BUGGY_CGI_PT		Broken Portuguese CGI script message
 
 # these are now full tests instead of body tests, to catch QP-encoded
 # split lines
