@@ -21,6 +21,10 @@ if ($@) {
 	$razor_not_available = "Razor2 is not installed.";
 }
 
+my $ident = $ENV{'HOME'}.'/.razor/identity';
+if (!-r $ident) {
+	$razor_not_available = "razor-register has not been run, or $ident is unreadable.";
+}
 
 
 %patterns = (
