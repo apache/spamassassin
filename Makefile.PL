@@ -2,10 +2,20 @@ require 5.005;
 
 my $DEF_RULES_DIR	= '$(DESTDIR)$(PREFIX)/share/spamassassin';
 
+# RPM builders, or people building in their home dirs:
+# set SYSCONFDIR in the environment to override from /etc .
+#
 my $LOCAL_RULES_DIR	= '$(DESTDIR)/etc/mail/spamassassin';
+if (defined $ENV{'SYSCONFDIR'}) {
+   $LOCAL_RULES_DIR	= '$(SYSCONFDIR)/mail/spamassassin';
+}
 
 # this is a good place to put -g, -R/usr/local/lib etc.
 my $MYCFLAGS		= '';
+
+# we should really migrate to an autoconf configure script...
+# ExtUtils::MakeMaker just can't handle files outside of the site_perl
+# tree.
 
 ###########################################################################
 
