@@ -83,8 +83,10 @@ my %resphash = (
 
 
 sub print_version {
-  print "SpamAssassin Server version " . Mail::SpamAssassin::Version() . "\n"
-      . "  running on Perl version " . join(".", map { $_ * 1 } ($] =~ /(\d)\.(\d{3})(\d{3})/ )) . "\n";
+  printf("%s version %s\n", "SpamAssassin Server", Mail::SpamAssassin::Version());
+  printf("  running on Perl %s\n", join(".", map { $_*1 } ($] =~ /(\d)\.(\d{3})(\d{3})/)));
+  eval { require IO::Socket::SSL; };
+  printf("  with SSL support (%s %s)\n", "IO::Socket::SSL", $IO::Socket::SSL::VERSION) unless ($@);
 }
 
 sub print_usage_and_exit {
