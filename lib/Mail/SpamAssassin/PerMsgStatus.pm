@@ -37,7 +37,6 @@ use Carp;
 
 use Text::Wrap qw();
 use POSIX qw(strftime);
-use Sys::Hostname;
 
 use Mail::SpamAssassin::EvalTests;
 use Mail::SpamAssassin::AutoWhitelist;

@@ -17,7 +17,7 @@ use bytes;
 
 use vars qw (
   @ISA @EXPORT
-  $AM_TAINTED $HOSTNAME $FQHOSTNAME
+  $AM_TAINTED
 );
 
 require Exporter;
@@ -28,9 +28,7 @@ require Exporter;
 use Mail::SpamAssassin;
 use File::Spec;
 use Time::Local;
-use Sys::Hostname;
-
-BEGIN { $HOSTNAME = hostname(); }
+use Sys::Hostname qw();
 
 use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
 
@@ -361,21 +359,37 @@ sub extract_ipv4_addr_from_string {
 }
 
 ###########################################################################
-# get the current host's fully-qualified domain name, if possible.  If
-# not possible, return the unqualified hostname.
+{
+  my($hostname, $fq_hostname);
 
-sub fq_hostname {
-  if (defined $FQHOSTNAME) { return $FQHOSTNAME; }
+# get the current host's unqalified domain name (better: return whatever
+# Sys::Hostname thinks out hostname is, might also be a full qualified one)
+  sub hostname {
+    return $hostname if defined($hostname);
 
-  my $hname = $HOSTNAME;
-  if ($hname !~ /\./) {
-    my @names = grep(/^\Q${hname}\E\./o,
-				map { split } (gethostbyname($hname))[0 .. 1]);
-    $hname = $names[0] if (scalar @names > 0);
+    # Sys::Hostname isn't taint safe and might fall back to `hostname`. So we've
+    # got to clean PATH before we may call it.
+    clean_path_in_taint_mode();
+    $hostname = Sys::Hostname::hostname();
+
+    return $hostname;
   }
 
-  $FQHOSTNAME = $hname;
-  return $FQHOSTNAME;
+# get the current host's fully-qualified domain name, if possible.  If
+# not possible, return the unqualified hostname.
+  sub fq_hostname {
+    return $fq_hostname if defined($fq_hostname);
+
+    $fq_hostname = hostname();
+    if ($fq_hostname !~ /\./) { # hostname doesn't contain a dot, so it can't be a FQDN
+      my @names = grep(/^\Q${fq_hostname}.\E/o,                         # grep only FQDNs
+                    map { split } (gethostbyname($fq_hostname))[0 .. 1] # from all aliases
+                  );
+      $fq_hostname = $names[0] if (@names); # take the first FQDN, if any 
+    }
+
+    return $fq_hostname;
+  }
 }
 
 ###########################################################################
