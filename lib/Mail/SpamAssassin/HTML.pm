@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.74 2003/04/07 07:55:35 quinlan Exp $
+# $Id: HTML.pm,v 1.75 2003/04/09 10:02:43 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -23,11 +23,16 @@ $re_strict = 'a|abbr|acronym|address|area|b|base|bdo|big|blockquote|body|br|butt
 # loose list of HTML events
 $events = 'on(?:activate|afterupdate|beforeactivate|beforecopy|beforecut|beforedeactivate|beforeeditfocus|beforepaste|beforeupdate|blur|change|click|contextmenu|controlselect|copy|cut|dblclick|deactivate|errorupdate|focus|focusin|focusout|help|keydown|keypress|keyup|load|losecapture|mousedown|mouseenter|mouseleave|mousemove|mouseout|mouseover|mouseup|mousewheel|move|moveend|movestart|paste|propertychange|readystatechange|reset|resize|resizeend|resizestart|select|submit|timeerror|unload)';
 
+my %tested_colors;
+
 sub html_init {
   my ($self) = @_;
 
   push @{ $self->{bgcolor_color} }, "#ffffff";
   push @{ $self->{bgcolor_tag} }, "default";
+  push @{ $self->{fgcolor_color} }, "#000000";
+  push @{ $self->{fgcolor_tag} }, "default";
+  undef %tested_colors;
 }
 
 sub html_tag {
@@ -40,6 +45,9 @@ sub html_tag {
 
   if ($tag =~ /^(?:body|table|tr|th|td)$/) {
     $self->html_bgcolor($tag, $attr, $num);
+  }
+  if ($tag =~ /^(?:body|font)$/) {
+    $self->html_fgcolor($tag, $attr, $num);
   }
 
   if ($num == 1) {
@@ -194,7 +202,7 @@ sub name_to_rgb {
   return $html_color{$_[0]} || $name_color{$_[0]} || $_[0];
 }
 
-sub pop_color {
+sub pop_bgcolor {
   my ($self) = @_;
 
   pop @{ $self->{bgcolor_color} };
@@ -211,17 +219,17 @@ sub html_bgcolor {
       # body and some messages including multiple HTML attachments:
       # pop everything except first body color
       while ($self->{bgcolor_tag}[-1] !~ /^(?:default|body)$/) {
-	$self->pop_color();
+	$self->pop_bgcolor();
       }
     }
     if ($tag eq "tr") {
       while ($self->{bgcolor_tag}[-1] =~ /^t[hd]$/) {
-	$self->pop_color();
+	$self->pop_bgcolor();
       }
-      $self->pop_color() if $self->{bgcolor_tag}[-1] eq "tr";
+      $self->pop_bgcolor() if $self->{bgcolor_tag}[-1] eq "tr";
     }
     elsif ($tag =~ /^t[hd]$/) {
-      $self->pop_color() if $self->{bgcolor_tag}[-1] =~ /^t[hd]$/;
+      $self->pop_bgcolor() if $self->{bgcolor_tag}[-1] =~ /^t[hd]$/;
     }
     # figure out new bgcolor
     my $bgcolor;
@@ -242,26 +250,116 @@ sub html_bgcolor {
   else {
     # close elements
     if ($tag eq "body") {
-      $self->pop_color() if $self->{bgcolor_tag}[-1] eq "body";
+      $self->pop_bgcolor() if $self->{bgcolor_tag}[-1] eq "body";
     }
     elsif ($tag eq "table") {
       while ($self->{bgcolor_tag}[-1] =~ /^t[rhd]$/) {
-	$self->pop_color();
+	$self->pop_bgcolor();
       }
-      $self->pop_color() if $self->{bgcolor_tag}[-1] eq "table";
+      $self->pop_bgcolor() if $self->{bgcolor_tag}[-1] eq "table";
     }
     elsif ($tag eq "tr") {
       while ($self->{bgcolor_tag}[-1] =~ /^t[hd]$/) {
-	$self->pop_color();
+	$self->pop_bgcolor();
       }
-      $self->pop_color() if $self->{bgcolor_tag}[-1] eq "tr";
+      $self->pop_bgcolor() if $self->{bgcolor_tag}[-1] eq "tr";
     }
     elsif ($tag =~ /^t[hd]$/) {
-      $self->pop_color() if $self->{bgcolor_tag}[-1] =~ /^t[hd]$/;
+      $self->pop_bgcolor() if $self->{bgcolor_tag}[-1] =~ /^t[hd]$/;
     }
   }
 }
   
+sub pop_fgcolor {
+  my ($self) = @_;
+
+  pop @{ $self->{fgcolor_color} };
+  pop @{ $self->{fgcolor_tag} };
+}
+
+sub html_fgcolor {
+  my ($self, $tag, $attr, $num) = @_;
+
+  if ($num == 1) {
+    if ($tag eq "body") {
+      # compromise between HTML browsers generally only using first
+      # body and some messages including multiple HTML attachments:
+      # pop everything except first body color
+      while ($self->{fgcolor_tag}[-1] !~ /^(?:default|body)$/) {
+	$self->pop_fgcolor();
+      }
+    }
+    # figure out new fgcolor
+    my $fgcolor;
+    if ($tag eq "font" && exists $attr->{color}) {
+      $fgcolor = name_to_rgb(lc($attr->{color}));
+    }
+    elsif ($tag eq "body" && exists $attr->{text}) {
+      $fgcolor = name_to_rgb(lc($attr->{text}));
+    }
+    else {
+      $fgcolor = $self->{fgcolor_color}[-1];
+    }
+    # push new fgcolor
+    push @{ $self->{fgcolor_color} }, $fgcolor;
+    push @{ $self->{fgcolor_tag} }, $tag;
+  }
+  else {
+    # close elements
+    if ($tag eq "body") {
+      $self->pop_fgcolor() if $self->{fgcolor_tag}[-1] eq "body";
+    }
+    if ($tag eq "font") {
+      $self->pop_fgcolor() if $self->{fgcolor_tag}[-1] eq "font";
+    }
+  }
+}
+
+sub html_font_invisible {
+  my ($self, $text) = @_;
+
+  my $fg = $self->{fgcolor_color}[-1];
+  my $bg = $self->{bgcolor_color}[-1];
+
+  return if exists $tested_colors{"$fg\000$bg"};
+  $tested_colors{"$fg\000$bg"}++;
+
+  # invisibility
+  if (substr($fg,-6) eq substr($bg,-6)) {
+    $self->{html}{font_invisible} = 1;
+  }
+  # near-invisibility
+  elsif ($fg =~ /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/) {
+    my ($r1, $g1, $b1) = (hex($1), hex($2), hex($3));
+
+    if ($bg =~ /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/) {
+      my ($r2, $g2, $b2) = (hex($1), hex($2), hex($3));
+
+      my $r = ($r1 - $r2);
+      my $g = ($g1 - $g2);
+      my $b = ($b1 - $b2);
+
+      # weighted geometric distance
+      my $d1 = ((0.2126*$r)**2 + (0.7152*$g)**2 + (0.0722*$b)**2)**0.5;
+      # weighted color difference
+      my $d2 = (0.2126*abs($r) + 0.7152*abs($g) + 0.0722*abs($b));
+
+      # scale to 0..765
+      $d1 *= (765/191.151823601032);
+      $d2 *= 3.0;
+
+      for (my $delta = 16; $delta <= 256; $delta += 16) {
+	if ($d1 < $delta) {
+	  $self->{html}{"t_font_invisible1_$delta"} = 1;
+	}
+	if ($d2 < $delta) {
+	  $self->{html}{"t_font_invisible2_$delta"} = 1;
+	}
+      }
+    }
+  }
+}
+
 sub html_tests {
   my ($self, $tag, $attr, $num) = @_;
 
@@ -291,10 +389,6 @@ sub html_tests {
     $self->{html}{big_font} = 1 if (($attr->{size} =~ /^\s*(\d+)/ && $1 > 3) ||
 			    ($attr->{size} =~ /\+(\d+)/ && $1 >= 1));
   }
-  if ($tag eq "font" && defined $self->{html}{color}) {
-    # note: should also test for invisibility when bgcolor changes!
-    undef $self->{html}{color};
-  }
   if ($tag eq "font" && exists $attr->{color}) {
     my $bg = $self->{bgcolor_color}[-1];
     my $fg = lc($attr->{color});
@@ -309,36 +403,6 @@ sub html_tests {
     if ($fg !~ /^\#?[0-9a-f]{6}$/ && !exists $html_color{$fg})
     {
       $self->{html}{t_font_color_name} = 1;
-    }
-    $fg = name_to_rgb($fg);
-    $self->{html}{color} = $fg;
-    if (substr($fg,-6) eq substr($bg,-6)) {
-      $self->{html}{font_invisible} = 1;
-      for (my $delta = 16; $delta <= 256; $delta += 16) {
-	$self->{html}{"t_font_invisible1_$delta"} = 1;
-	$self->{html}{"t_font_invisible2_$delta"} = 1;
-      }
-    }
-    elsif ($fg =~ /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/) {
-      my ($r1, $g1, $b1) = (hex($1), hex($2), hex($3));
-      my ($h1, $s1, $v1) = rgb_to_hsv(hex($r1), hex($g1), hex($b1));
-
-      if ($bg =~ /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/) {
-	my ($r2, $g2, $b2) = (hex($1), hex($2), hex($3));
-	my ($h2, $s2, $v2) = rgb_to_hsv(hex($r2), hex($g2), hex($b2));
-
-	my $d1 = (($r1 - $r2)**2 + ($g1 - $g2)**2 + ($b1 - $b2)**2)**0.5;
-	my $d2 = abs($r1 - $r2) + abs($g1 - $g2) + abs($b1 - $b2);
-
-	for (my $delta = 16; $delta <= 256; $delta += 16) {
-	  if ($d1 < $delta) {
-	    $self->{html}{"t_font_invisible1_$delta"} = 1;
-	  }
-	  if ($d2 < $delta) {
-	    $self->{html}{"t_font_invisible2_$delta"} = 1;
-	  }
-	}
-      }
     }
     if ($fg =~ /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/) {
       my ($h, $s, $v) = rgb_to_hsv(hex($1), hex($2), hex($3));
@@ -480,6 +544,8 @@ sub html_text {
   {
     $self->{html}{title_text} .= $text;
   }
+
+  $self->html_font_invisible($text) if $text =~ /[^ \t\n\r\f\x0b\xa0]/;
 
   $text =~ s/^\n//s if $self->{html_last_tag} eq "br";
   push @{$self->{html_text}}, $text;
