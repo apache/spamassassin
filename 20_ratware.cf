@@ -299,3 +299,8 @@ describe RATWARE_BOUND_PIECE	Bulk email fingerprint (piece boundary) found
 header __RATWARE_NAME_ID	eval:check_ratware_name_id()
 meta RATWARE_NAME_ID		__RATWARE_0_TZ_DATE && __RATWARE_NAME_ID
 describe RATWARE_NAME_ID	Bulk email fingerprint (msgid from) found
+
+header __MSGID_MS_HASH Message-ID =~ /^<[a-f0-9]{12}\$[a-f0-9]{8}\$[a-f0-9]{8}@/
+header __MIMEOLE_MS X-MIMEOLE =~ /^Produced By Microsoft MimeOLE/
+meta RATWARE_MS_HASH __MSGID_MS_HASH && !__MIMEOLE_MS
+describe RATWARE_MS_HASH	Bulk email fingerprint (msgid ms hash) found

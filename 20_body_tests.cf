@@ -150,3 +150,6 @@ body __LONGWORDS_B	/\b(?:[a-z]{6,}[\s\.]+){9}/
 body __LONGWORDS_C	/\b(?:[a-z]{5,}[\s\.]+){10}/
 meta LONGWORDS		(__LONGWORDS_A + __LONGWORDS_B + __LONGWORDS_C > 1)
 describe LONGWORDS	Long string of long words
+
+body HTTPS_IP_MISMATCH	eval:check_https_ip_mismatch()
+describe HTTPS_IP_MISMATCH	IP to HTTPS link found in HTML

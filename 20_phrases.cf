@@ -356,3 +356,6 @@ describe PRICES_ARE_AFFORDABLE	Message says that prices aren't too expensive
 
 body REPLICA_ROLEX /\breplica.{1,20}rolex/i
 describe REPLICA_ROLEX	Message talks about a replica watch
+
+body EM_ROLEX /[^\s\w.]rolex/i
+describe EM_ROLEX	Message puts emphasis on the watch manufacturer
