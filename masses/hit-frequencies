@@ -1,21 +1,32 @@
 #!/usr/bin/perl -w
+# $Id: hit-frequencies,v 1.28.2.6 2002/09/02 12:10:40 msquadrat Exp $
 
 use Getopt::Std;
-getopts("fm:px");
+getopts("fm:l:L:pxh");
+
+use vars qw {
+  $opt_f $opt_m $opt_p $opt_x $opt_h $opt_l $opt_L
+};
 
 sub usage {
-  die "hit-frequencies [-f] [-m RE] [-p] [-x] [spam log] [nonspam log]
+  die "hit-frequencies [-f] [-m RE] [-l LC] [-p] [-x] [spam log] [nonspam log]
 
     -f     falses. count only false-negative or false-positive matches
     -m RE  print rules matching regular expression
+    -l LC  also print language specific rules for lang code LC (or 'all')
+    -L LC  only print language specific rules for lang code LC (or 'all')
     -p     percentages. implies -x
     -x     extended output, with S/O ratio and scores
+
+    options -l and -L are mutually exclusive.
 
     if either the spam or and nonspam logs are unspecified, the defaults
     are \"spam.log\" and \"nonspam.log\" in the cwd.
 
 ";
 }
+
+usage() if($opt_h || ($opt_l && $opt_L));
 
 if ($opt_p) {
   $opt_x = 1;
@@ -26,12 +37,19 @@ my %freq_nonspam = ();
 my $num_spam = 0;
 my $num_nonspam = 0;
 my %ranking = ();
+my $ok_lang = '';
 
 readscores();
 
+$ok_lang = lc ($opt_l || $opt_L || '');
+if ($ok_lang eq 'all') { $ok_lang = '.'; }
+
 foreach my $key (keys %rules) {
-  if ($rules{$key}->{lang} ne '') {
-    # todo: do we want to keep lang-specific freqs?
+
+  if ( ($opt_L && !$rules{$key}->{lang}) ||
+       ($rules{$key}->{lang} &&
+         (!$ok_lang || $rules{$key}->{lang} !~ /^$ok_lang/i)
+     ) ) {
     delete $rules{$key} ; next;
   }
 
@@ -154,10 +172,10 @@ exit;
 
 sub readlogs {
   my $spam = $ARGV[0] || "spam.log";
-  my $nonspam = $ARGV[1] || "nonspam.log";
+  my $nonspam = $ARGV[1] || (-f "good.log" ? "good.log" : "nonspam.log");
 
   foreach my $file ($spam, $nonspam) {
-    open (IN, "<$file");
+    open (IN, "<$file") || die "Could not open file '$file': $!";
 
     my $isspam = 0; ($file eq $spam) and $isspam = 1;
 

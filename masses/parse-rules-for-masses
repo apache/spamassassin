@@ -106,6 +106,8 @@ sub readrules {
 
 sub writerules {
   my $outfile = shift;
+  # quick hack to create the tmp directory
+  system ("mkdir -p $outfile 2>/dev/null ; rmdir $outfile 2>/dev/null");
 
   open (OUT, ">$outfile") or die "cannot write to $outfile";
   print OUT "# dumped at ".`date`."\n";
