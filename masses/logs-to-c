@@ -464,7 +464,7 @@ sub evaluate {
 
   my $sr = ($nspamspam / $nspam) * 100.0;
   my $sp = ($nspamspam / ($nspamspam + $nlegitspam)) * 100.0;
-  printf "# TCR: %3.6f  SpamRecall: %3.3f%%  SpamPrec: %3.3f%%", $tcr, $sr, $sp;
+  printf "# TCR: %3.6f  SpamRecall: %3.3f%%  SpamPrec: %3.3f%%\n", $tcr, $sr, $sp;
 }
 
 __DATA__
