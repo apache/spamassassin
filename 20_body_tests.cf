@@ -242,7 +242,7 @@ body PORN_2			/\bwild\b.{0,15}\bhardcore\b/i
 describe PORN_2			Uses words and phrases which indicate porn (2)
 
 # updated by: skod & Craig & jm
-body PORN_3			/(?:(?:\bcum|\borg[iy]|\bwild|fuck|\bteen|\baction\b|spunk|\bpussy\b|\bpussies\b|suck\b|sucking\b|\bhot\b|\bhottest\b|\bvoyeur|\ble[sz]b(?:ian|o)|\banal\b|\binterracial|\basian\b|\bamateur|\bsex+\b|\bslut|explicit|xxx[^x]|\blive\b|celebrity|\blick|\bsuck|\bdorm\b|webcam|\bass\b|\bschoolgirl\b|\bstrip|\bhorny\b|\bhorniest\b|\berotic|\boral\b|\bpenis\b|\bhardcore\b|\bblow[ -]*job|\bnast(?:y|iest)\b|\bporn).{0,15}){3,}/i
+body PORN_3			/(?:(?:\blolita|\bcum|\borg[iy]|\bwild|fuck|\bteen|\baction\b|spunk|\bpussy\b|\bpussies\b|suck\b|sucking\b|\bhot\b|\bhottest\b|\bvoyeur|\ble[sz]b(?:ian|o)|\banal\b|\binterracial|\basian\b|\bamateur|\bsex+\b|\bslut|explicit|xxx[^x]|\blive\b|celebrity|\blick|\bsuck|\bdorm\b|webcam|\bass\b|\bschoolgirl\b|\bstrip|\bhorny\b|\bhorniest\b|\berotic|\boral\b|\bpenis\b|\bhardcore\b|\bblow[ -]*job|\bnast(?:y|iest)\b|\bporn).{0,15}){3,}/i
 describe PORN_3			Uses words and phrases which indicate porn (3)
 
 # (contrib: skod)
@@ -260,7 +260,7 @@ body     PORN_9                 /(?:sex|gay|slut|whore|cum|f.ck|adult|xxx)[ -]?f
 describe PORN_9                 Uses words and phrases which indicate porn (9)
 
 # Words which mainly show up in porn spam
-body     PORN_10                /\bslut|\bwhore|\bxxx\b|\bporn|\b(?:Asian|Japanese|oriental)\s+(?:girls|schoolgirls)\b|\bbabes\b|gang[ -]?bang|\bskank|\btits\b|\btitties\b|\bpussy\b|\bpussies\b/i
+body     PORN_10                /\blolita|\bslut|\bwhore|\bxxx\b|\bporn|\b(?:Asian|Japanese|oriental)\s+(?:girls|schoolgirls)\b|\bbabes\b|gang[ -]?bang|\bskank|\btits\b|\btitties\b|\bpussy\b|\bpussies\b/i
 describe PORN_10                Uses words and phrases which indicate porn (10)
 
 # Words which often show up in spam, but also show up somewhat often in
@@ -272,7 +272,7 @@ describe PORN_11                Uses words and phrases which indicate porn (11)
 # compensate for only matching two terms, so as to not generate too many
 # false positives, there can only be up to seven characters between terms,
 # rather than the 15 for PORN_3; it also uses a shorter list of terms.
-body     PORN_12                /(?:(?:\bxxx|\bsex|\bslut|\bwhore|\bhottest\b|hard-?core|\bhorny\b|\bhorniest\b|\bvirgin|\bnaughty\b|\bnaughtiest\b|\bweb.?cam|\ble[sz]b(?:ian|o)|\bskank|\btits\b|\btitties\b|\bpussy\b|\bpussies\b|\badult\b|\bfuck).{0,7}){2,}/i
+body     PORN_12                /(?:(?:\blolita|\bxxx|\bsex|\bslut|\bwhore|\bhottest\b|hard-?core|\bhorny\b|\bhorniest\b|\bvirgin|\bnaughty\b|\bnaughtiest\b|\bweb.?cam|\ble[sz]b(?:ian|o)|\bskank|\btits\b|\btitties\b|\bpussy\b|\bpussies\b|\badult\b|\bfuck).{0,7}){2,}/i
 describe PORN_12                Uses words and phrases which indicate porn (12)
 
 body     PORN_13                /must be (?:at least|over) 18/i
