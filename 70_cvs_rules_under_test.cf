@@ -114,3 +114,8 @@ header T_RATWARE_THEBAT		X-Mailer =~ /The Bat/
 describe T_RATWARE_THEBAT	Sent from "The Bat"
 score T_RATWARE_THEBAT		1.0
 
+# Needs testing
+body T_QUOTE_TWICE              /> >\s/
+describe T_QUOTE_TWICE          Contains twice quoted reply
+score T_QUOTE_TWICE             -1.0
+
