@@ -155,58 +155,18 @@ sub _run_hashcash {
   if (defined $scanner->{hashcash_value}) { return $scanner->{hashcash_value}; }
 
   $scanner->{hashcash_value} = 0;
-
+  my $hc = $scanner->get ("X-Hashcash");
   # X-Hashcash: 0:031118:camram-spam@camram.org:c068b58ade6dcbaf
-  # or:
-  # X-hashcash: 1:20:040803:hashcash@freelists.org::6dcdb3a3ad4e1b86:1519d
-  # X-hashcash: 1:20:040803:jm@jmason.org::6b484d06469ccb28:8838a
-  # X-hashcash: 1:20:040803:adam@cypherspace.org::a1cbc54bf0182ea8:5d6a0
-
-  # call down to {msg} so that we can get it as an array of
-  # individual headers
-  my @hdrs = $scanner->{msg}->get_header ("X-Hashcash");
-
-  foreach my $hc (@hdrs) {
-    my $value = $self->_run_hashcash_for_one_string($scanner, $hc);
-    if ($value) {
-      # remove the "double-spend" bool if we did find a usable string;
-      # this happens when one string is already spent, but another
-      # string has not yet been.
-      delete $scanner->{hashcash_double_spent};
-      return $value;
-    }
-  }
-  return 0;
-}
-
-sub _run_hashcash_for_one_string {
-  my ($self, $scanner, $hc) = @_;
 
   if (!$hc) { return 0; }
-  $hc =~ s/\s+//gs;       # remove whitespace from multiline, folded tokens
 
   # untaint the string for paranoia, making sure not to allow \n \0 \' \"
   $hc =~ /^([-A-Za-z0-9\xA0-\xFF:_\/\%\@\.\,\= \*\+]+)$/; $hc = $1;
   if (!$hc) { return 0; }
 
-  my ($ver, $bits, $date, $rsrc, $exts, $rand, $trial);
-  if ($hc =~ /^0:/) {
-    ($ver, $date, $rsrc, $trial) = split (/:/, $hc, 4);
-  }
-  elsif ($hc =~ /^1:/) {
-    ($ver, $bits, $date, $rsrc, $exts, $rand, $trial) =
-                                    split (/:/, $hc, 7);
-    # extensions are, as yet, unused by SpamAssassin
-  }
-  else {
-    dbg ("hashcash: version $ver stamps not yet supported");
-    return 0;
-  }
-
-  if (!$trial) {
-    dbg ("hashcash: no trial in stamp '$hc'");
-    return 0;
-  }
+  my ($ver, $date, $rsrc, $trial);
+  ($ver, $date, $rsrc, $trial) = ($hc =~ /(\S+):(\S+):(\S+):(\S+)/ );
+  if (!$trial) { return 0; }
 
   my $accept = $scanner->{conf}->{hashcash_accept};
   if (!$self->_check_hashcash_resource ($scanner, $accept, $rsrc)) {
@@ -288,8 +248,7 @@ sub _check_hashcash_resource {
   foreach my $regexp (values %{$list})
   {
     # allow %u == current username
-    # \\ is added by $conf->add_to_addrlist()
-    $regexp =~ s/\\\%u/$scanner->{main}->{username}/gs;
+    $regexp =~ s/\%u/$scanner->{main}->{username}/gs;
 
     if ($addr =~ /$regexp/i) {
       return 1;
