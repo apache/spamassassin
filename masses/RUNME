@@ -15,11 +15,20 @@ MAILDIRS="$HOME/Mail $HOME/Mail.old"
 # consistent!
 ARE_SPAM="Sapm Spam MissedSpam"
 
-echo ":> spam.log nonspam.log" > commands.sh
+# skipped folders.
+SKIPPED="drafts outbox"
+
+echo ": > spam.log nonspam.log" > commands.sh
 for maildir in $MAILDIRS ; do
-  for folder in $MAILDIRS/* ; do
+  for folder in $maildir/* ; do
     [ -d "$folder" ] || continue
     [ -f "$folder/1" ] || continue
+
+    if perl -e '@pats = qw('"$SKIPPED"'); $_ = q('"$folder"');
+		foreach $pat (@pats) { exit 0 if /\/$pat$/; } exit 1;'
+    then
+      continue
+    fi
 
     echo "echo Checking $folder:" >> commands.sh
     if perl -e '@pats = qw('"$ARE_SPAM"'); $_ = q('"$folder"');
