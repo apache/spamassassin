@@ -1,4 +1,4 @@
-# $Id: Received.pm,v 1.34 2003/11/15 02:44:49 jmason Exp $
+# $Id: Received.pm,v 1.35 2003/11/15 02:58:12 jmason Exp $
 
 # ---------------------------------------------------------------------------
 
@@ -523,11 +523,22 @@ sub parse_received_line {
       goto enough;
     }
 
-    # Received: from localhost (unknown [127.0.0.1])
-    # by cabbage.jmason.org (Postfix) with ESMTP id A96E18BD97
-    # for <jm@localhost>; Thu, 13 Mar 2003 15:23:15 -0500 (EST)
     if (/ \(Postfix\) with/) {
+      # Received: from localhost (unknown [127.0.0.1])
+      # by cabbage.jmason.org (Postfix) with ESMTP id A96E18BD97
+      # for <jm@localhost>; Thu, 13 Mar 2003 15:23:15 -0500 (EST)
       if ( /^from (\S+) \((\S+) \[(${IP_ADDRESS})\]\) by (\S+) / ) {
+	$mta_looked_up_dns = 1;
+	$helo = $1; $rdns = $2; $ip = $3; $by = $4;
+	if ($rdns eq 'unknown') { $rdns = ''; }
+	goto enough;
+      }
+
+      # Received: from 207.8.214.3 (unknown[211.94.164.65])
+      # by puzzle.pobox.com (Postfix) with SMTP id 9029AFB732;
+      # Sat,  8 Nov 2003 17:57:46 -0500 (EST)
+      # (Pobox.com version: reported in bug 2745)
+      if ( /^from (\S+) \((\S+)\[(${IP_ADDRESS})\]\) by (\S+) / ) {
 	$mta_looked_up_dns = 1;
 	$helo = $1; $rdns = $2; $ip = $3; $by = $4;
 	if ($rdns eq 'unknown') { $rdns = ''; }
