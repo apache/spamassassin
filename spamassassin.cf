@@ -311,6 +311,9 @@ describe VERY_SUSP_RECIPS       To: contains very similar addresses 10 times
 header VERY_SUSP_CC_RECIPS	Cc =~ /(..)[^@]*(@[-a-z0-9_.]+).*(?:\1[^@]*\2.*){9,}/is
 describe VERY_SUSP_CC_RECIPS	Cc: contains very similar addresses 10 times
 
+header Q_FOR_SELLER		Subject =~ /Question for seller/
+describe Q_FOR_SELLER		Subject is an eBay question
+
 ###########################################################################
 
 full RAZOR_CHECK		eval:check_razor()
@@ -923,6 +926,7 @@ score BALANCE_FOR_LONG		    -2.0
 score COPYRIGHT_CLAIMED		    -2.0
 score USER_IN_WHITELIST		    -100.0
 score A_FROM_IN_AUTO_WLIST	    -10.0
+score Q_FOR_SELLER		    -4.0
 
 ###########################################################################
 # Some not-quite-spam scores; block common virii with these.  (it's feature
@@ -953,6 +957,8 @@ score BADTRANS_WORM                 10.0
 # a shortcut around SpamAssassin.
 
 whitelist_from	billing@networksolutions.com
+whitelist_from  auto-confirm@amazon.com
+whitelist_from  *@ebay.com
 
 ###########################################################################
 # Automatic-whitelist directory, for the default directory-based whitelist
