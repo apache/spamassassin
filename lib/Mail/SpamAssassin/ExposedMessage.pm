@@ -6,45 +6,34 @@ package Mail::SpamAssassin::ExposedMessage;
 use Carp;
 use strict;
 
-use Mail::Audit;
-use Mail::SpamAssassin::Message;
+use Mail::SpamAssassin::AuditMessage;
 
 use vars	qw{
   	@ISA
 };
 
-@ISA = qw(Mail::SpamAssassin::Message);
-
-###########################################################################
-
-sub new {
-  my $class = shift;
-  $class = ref($class) || $class;
-  my $self = $class->SUPER::new (@_);
-  bless ($self, $class);
-  $self;
-}
+@ISA = qw(Mail::SpamAssassin::AuditMessage);
 
 ###########################################################################
 
 sub replace_header {
   my ($self, $hdr, $val) = @_;
-  $self->{audit}->{obj}->head->replace ($hdr, $val);
+  $self->{mail_object}->{obj}->head->replace ($hdr, $val);
 }
 
 sub delete_header {
   my ($self, $hdr) = @_;
-  $self->{audit}->{obj}->head->delete ($hdr);
+  $self->{mail_object}->{obj}->head->delete ($hdr);
 }
 
 sub get_body {
   my ($self) = @_;
-  $self->{audit}->{obj}->body();
+  $self->{mail_object}->{obj}->body();
 }
 
 sub replace_body {
   my ($self, $aryref) = @_;
-  $self->{audit}->{obj}->body ($aryref);
+  $self->{mail_object}->{obj}->body ($aryref);
 }
 
 1;

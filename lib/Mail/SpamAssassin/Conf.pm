@@ -5,8 +5,6 @@ package Mail::SpamAssassin::Conf;
 use Carp;
 use strict;
 
-use Mail::Audit;
-
 use vars	qw{
   	@ISA $type_body_tests $type_head_tests $type_head_evals
 	$type_body_evals $type_full_tests $type_full_evals

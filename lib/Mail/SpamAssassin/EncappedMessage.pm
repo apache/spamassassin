@@ -7,44 +7,34 @@ package Mail::SpamAssassin::EncappedMessage;
 use Carp;
 use strict;
 
-use Mail::Audit;
+use Mail::SpamAssassin::AuditMessage;
 
 use vars	qw{
   	@ISA
 };
 
-@ISA = qw(Mail::SpamAssassin::Message);
-
-###########################################################################
-
-sub new {
-  my $class = shift;
-  $class = ref($class) || $class;
-  my $self = $class->SUPER::new (@_);
-  bless ($self, $class);
-  $self;
-}
+@ISA = qw(Mail::SpamAssassin::AuditMessage);
 
 ###########################################################################
 
 sub replace_header {
   my ($self, $hdr, $text) = @_;
-  $self->{audit}->replace_header ($hdr, $text);
+  $self->{mail_object}->replace_header ($hdr, $text);
 }
 
 sub delete_header {
   my ($self, $hdr) = @_;
-  $self->{audit}->delete_header ($hdr);
+  $self->{mail_object}->delete_header ($hdr);
 }
 
 sub get_body {
   my ($self) = @_;
-  $self->{audit}->body();
+  $self->{mail_object}->body();
 }
 
 sub replace_body {
   my ($self, $aryref) = @_;
-  $self->{audit}->body ($aryref);
+  $self->{mail_object}->body ($aryref);
 }
 
 1;

@@ -4,7 +4,7 @@ Mail::SpamAssassin - Mail::Audit spam detector plugin
 
 =head1 SYNOPSIS
 
-  my $mail = Mail::Audit->new();
+  my $mail = Mail::SpamAssassin::MyMailAudit->new();
 
   my $spamtest = Mail::SpamAssassin->new();
   my $status = $spamtest->check ($mail);
@@ -157,12 +157,12 @@ C<finish()> method on the status objects when you're done with them.
 =cut
 
 sub check {
-  my ($self, $audit) = @_;
+  my ($self, $mail_obj) = @_;
   local ($_);
 
   $self->init();
-  my $mail = $self->encapsulate_audit ($audit);
-  my $msg = new Mail::SpamAssassin::PerMsgStatus ($self, $mail);
+  my $mail = $self->encapsulate_mail_object ($mail_obj);
+  my $msg = Mail::SpamAssassin::PerMsgStatus->new($self, $mail);
   $msg->check();
   $msg;
 }
@@ -178,12 +178,12 @@ databases, allowing other users to block this message.
 =cut
 
 sub report_as_spam {
-  my ($self, $audit) = @_;
+  my ($self, $mail_obj) = @_;
   local ($_);
 
   $self->init();
-  my $mail = $self->encapsulate_audit ($audit);
-  my $msg = new Mail::SpamAssassin::Reporter ($self, $mail);
+  my $mail = $self->encapsulate_mail_object ($mail_obj);
+  my $msg = Mail::SpamAssassin::Reporter->new($self, $mail);
   $msg->report();
 }
 
@@ -200,11 +200,11 @@ sender of the reply message.
 =cut
 
 sub reply_with_warning {
-  my ($self, $audit, $replysender) = @_;
+  my ($self, $mail_obj, $replysender) = @_;
   local ($_);
 
   $self->init();
-  my $mail = $self->encapsulate_audit ($audit);
+  my $mail = $self->encapsulate_mail_object ($mail_obj);
   my $msg = new Mail::SpamAssassin::Replier ($self, $mail);
   $msg->reply ($replysender);
 }
@@ -219,11 +219,11 @@ as the report, or X-Spam-Status headers) stripped.
 =cut
 
 sub remove_spamassassin_markup {
-  my ($self, $audit) = @_;
+  my ($self, $mail_obj) = @_;
   local ($_);
 
   $self->init();
-  my $mail = $self->encapsulate_audit ($audit);
+  my $mail = $self->encapsulate_mail_object ($mail_obj);
   my $hdrs = $mail->get_all_headers();
 
   # remove DOS line endings
@@ -370,14 +370,21 @@ sub first_existing_path {
 
 ###########################################################################
 
-sub encapsulate_audit {
-  my ($self, $audit) = @_;
+sub encapsulate_mail_object {
+  my ($self, $mail_obj) = @_;
 
   # first, check to see if this is not actually a Mail::Audit object;
   # it could also be an already-encapsulated Mail::Audit wrapped inside
   # a Mail::SpamAssassin::Message.
-  if ($audit->{is_spamassassin_wrapper_object}) {
-    return $audit;
+  if ($mail_obj->{is_spamassassin_wrapper_object}) {
+    return $mail_obj;
+  }
+  
+  if ($self->{use_my_mail_class}) {
+    my $class = $self->{use_my_mail_class};
+    (my $file = $class) =~ s/::/\//g;
+    require "$file.pm";
+    return $class->new($mail_obj);
   }
 
   if (!defined $self->{mail_audit_supports_encapsulation}) {
@@ -385,7 +392,7 @@ sub encapsulate_audit {
     # message object.
     my ($hdr, $val);
     foreach my $hdrtest (qw(From To Subject Message-Id Date Sender)) {
-      $val = $audit->get ($hdrtest);
+      $val = $mail_obj->get ($hdrtest);
       if (defined $val) { $hdr = $hdrtest; last; }
     }
 
@@ -395,7 +402,7 @@ sub encapsulate_audit {
 
     # now try using one of the new methods...
     if (eval q{
-		  $audit->replace_header ($hdr, $val);
+		  $mail_obj->replace_header ($hdr, $val);
 		  1;
 	  })
     {
@@ -408,9 +415,13 @@ sub encapsulate_audit {
   }
 
   if ($self->{mail_audit_supports_encapsulation}) {
-    return new Mail::SpamAssassin::EncappedMessage ($self, $audit);
+    require Mail::SpamAssassin::EncappedMessage;
+    # warning: Changed indirect object syntax here because of new() function 
+    # above which may bite us in the foot some time. See Damian Conway's book for details
+    return Mail::SpamAssassin::EncappedMessage->new($mail_obj);
   } else {
-    return new Mail::SpamAssassin::ExposedMessage ($self, $audit);
+    require Mail::SpamAssassin::ExposedMessage;
+    return Mail::SpamAssassin::ExposedMessage->new($mail_obj);
   }
 }
 
