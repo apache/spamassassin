@@ -90,6 +90,8 @@ header RATWARE_HASH_1     X-Mailer =~ /^\w+!\w+\#\w+\*$/
 describe RATWARE_HASH_1   Bulk email software fingerprint (hash 1) found in headers
 header RATWARE_HASH_2     X-Mailer =~ /^[A-Za-z0-9\._]{16,}$/
 describe RATWARE_HASH_2   Bulk email software fingerprint (hash 2) found in headers
+header RATWARE_OE_PI       X-Mailer =~ /OutLook Express 3\.14159/
+describe RATWARE_OE_PI     X-Mailer contains 'OutLook Express 3.14159'
 
 
 # commented all of these until they get some hits ;)
