@@ -311,10 +311,6 @@ uri T_URI_NO_WWW_ANY_CGI_START_2_2	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.[^.]{7,}\.
 
 ########################################################################
 
-# bug 2563: false positives
-body T_BODY_ENHANCEMENT		/\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b|\binches\b).{0,50}\b(?:penis|male organ|pee[ -]?pee|dick|sc?hlong|wh?anger|breast(?!\s+cancer))/i
-body T_BODY_ENHANCEMENT2		/\b(?:penis|male organ|pee[ -]?pee|dick|sc?hlong|wh?anger|breast(?!\s+cancer)).{0,50}\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b|\binches\b)/i
-
 # remove evals if these aren't promoted
 header T_UNPARSEABLE_RELAY  eval:check_relays_unparseable()
 #
