@@ -245,3 +245,6 @@ body T_SCAM_419_3		/nigerian? (?:national|government)/i
 uri T_BARGAIN_URL		/bargains?\.(?:com|biz)/
 uri T_PROMO_URL			/promo(?:|tion)s?\.(?:com|biz)/
 
+# bug 765, 12/23 -tvd
+body	ENTER_TO_LOSE		/\benter to win\b/i
+describe ENTER_TO_LOSE		Has 'enter to win' but you lose privacy.
