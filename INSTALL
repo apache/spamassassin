@@ -6,6 +6,11 @@ Interface) from the 2.x series of code.  This means that if you use
 SpamAssassin through a third-party utility (milter, etc,) you need to
 make sure you have an updated version which supports 3.0.
 
+If you are using a UNIX machine with all database files on local disks,
+and no sharing of those databases across NFS filesystems, you can use a
+more efficient, but non-NFS-safe, locking mechanism.   Do this by adding
+the line "lock_method flock" to the /etc/mail/spamassassin/local.cf file.
+
 
 Note For Users Upgrading From SpamAssassin 2.5x
 -----------------------------------------------

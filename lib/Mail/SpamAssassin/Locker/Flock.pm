@@ -61,26 +61,42 @@ sub safe_lock {
 
   dbg("lock: $$ created $lock_file");
 
-  for (my $retries = 0; $retries < $max_retries; $retries++) {
-    if ($retries > 0) { $self->jittery_one_second_sleep(); }
-    dbg("lock: $$ trying to get lock on $path with $retries retries");
+  # use a SIGALRM-based timer -- more efficient than second-by-second
+  # sleeps
+  eval {
+    local $SIG{ALRM} = sub { die "alarm\n" };
+    dbg("lock: $$ trying to get lock on $path with $max_retries timeout");
+
+    # max_retries is basically seconds! so use it for the timeout
+    alarm($max_retries);
 
     # HELLO!?! IO::File doesn't have a flock() method?!
     if (flock ($fh, LOCK_EX|LOCK_NB)) {
+      alarm(0);
+
       dbg("lock: $$ link to $lock_file: link ok");
       $is_locked = 1;
-      last;
+
+      # just to be nice: let people know when it was locked
+      $fh->print ("$$\n");
+      $fh->flush ();
+
+      # keep the FD around - we need to keep the lockfile open or the lock
+      # is unlocked!
+      $self->{lock_fhs} ||= { };
+      $self->{lock_fhs}->{$path} = $fh;
+    }
+  };
+
+  alarm(0); # if we die'd above, need to reset here
+  if ($@) {
+    if ($@ =~ /alarm/) {
+      dbg ("lock: $$ timed out after $max_retries secs.");
+    } else {
+      die $@;
     }
   }
 
-  # just to be nice: let people know when it was locked
-  $fh->print ("$$\n");
-  $fh->flush ();
-
-  # keep the FD around - we need to keep the lockfile open or the lock
-  # is unlocked!
-  $self->{lock_fhs} ||= { };
-  $self->{lock_fhs}->{$path} = $fh;
   return $is_locked;
 }
 
