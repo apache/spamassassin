@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rcvd_parser");
-use Test; BEGIN { plan tests => 42 };
+use Test; BEGIN { plan tests => 43 };
 
 
 use strict;
@@ -156,7 +156,24 @@ Received: from 24.8.231.233 by by1fd.bay1.hotmail.msn.com with HTTP;
 
 } => q{
 
-  [ ip=65.54.245.95 rdns=bay1-f95.bay1.hotmail.com helo=hotmail.com by=Daffy.timing.com ident= envfrom= id= auth= ] [ ip=24.8.231.233 rdns= helo= by=by1fd.bay1.hotmail.msn.com ident= envfrom= id= auth= ]
+  [ ip=65.54.245.95 rdns=bay1-f95.bay1.hotmail.com helo=hotmail.com by=Daffy.timing.com ident= envfrom= id= auth= ] [ ip=24.8.231.233 rdns= helo= by=by1fd.bay1.hotmail.msn.com ident= envfrom= id= auth=HTTP ]
+
+},
+q{
+
+Received: (qmail 22147 invoked by uid 526); 6 Feb 2005 21:11:38 -0000
+Received: from 156.56.111.196 by blazing.arsecandle.org (envelope-from <gentoo-announce-return-530-rod=arsecandle.org@lists.gentoo.org>, uid 502) with qmail-scanner-1.24
+ (clamdscan: 0.80/594. f-prot: 4.4.2/3.14.11.
+ Clear:RC:0(156.56.111.196):.
+ Processed in 0.288806 secs); 06 Feb 2005 21:11:38 -0000
+DomainKey-Status: no signature
+Received: from lists.gentoo.org (HELO parrot.gentoo.org) (156.56.111.196)
+  by blazing.arsecandle.org with (DHE-RSA-AES256-SHA encrypted) SMTP; 6 Feb 2005 21:11:37 -0000
+Received: (qmail 3988 invoked by uid 89); 6 Feb 2005 21:11:12 +0000
+
+} => q{
+
+  [ ip=156.56.111.196 rdns=lists.gentoo.org helo=parrot.gentoo.org by=blazing.arsecandle.org ident= envfrom=gentoo-announce-return-530-rod=arsecandle.org@lists.gentoo.org id= auth= ]
 
 },
 q{

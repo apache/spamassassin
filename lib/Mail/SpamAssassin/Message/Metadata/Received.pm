@@ -97,9 +97,28 @@ sub parse_received_headers {
   my $LOCALHOST = LOCALHOST;
 
   foreach my $line ( $msg->get_header('Received') ) {
+
+    # qmail-scanner support hack: we may have had one of these set from the
+    # previous (read: more recent) Received header.   if so, add it on to this
+    # header's set, since that's the handover it was describing.
+
+    my $qms_env_from;
+    if ($self->{qmail_scanner_env_from}) {
+      $qms_env_from = $self->{qmail_scanner_env_from};
+      delete $self->{qmail_scanner_env_from};
+    }
+
     $line =~ s/\n[ \t]+/ /gs;
     my $relay = $self->parse_received_line ($line);
+
     next unless $relay;
+
+    # hack for qmail-scanner, as described above; add in the saved
+    # metadata
+    if ($qms_env_from) {
+      $relay->{envfrom} = $qms_env_from;
+      $self->make_relay_as_string($relay);
+    }
 
     # trusted_networks matches?
     if ($in_trusted && $did_user_specify_trust && !$relay->{auth} && !$trusted->contains_ip ($relay->{ip}))
@@ -233,19 +252,19 @@ sub parse_received_headers {
 
     if ($in_trusted) {
       push (@{$self->{relays_trusted}}, $relay);
-      $self->{relays_trusted_str} .= $relay->{as_string}." ";
     } else {
       push (@{$self->{relays_untrusted}}, $relay);
-      $self->{relays_untrusted_str} .= $relay->{as_string}." ";
     }
   }
+
+  $self->{relays_trusted_str} = join(' ', map { $_->{as_string} }
+                    @{$self->{relays_trusted}});
+  $self->{relays_untrusted_str} = join(' ', map { $_->{as_string} }
+                    @{$self->{relays_untrusted}});
 
   # drop the temp PerMsgStatus object
   $self->{dns_pms}->finish();
   delete $self->{dns_pms};
-
-  chop ($self->{relays_trusted_str});	# remove trailing ws
-  chop ($self->{relays_untrusted_str});	# remove trailing ws
 
   # OK, we've now split the relay list into trusted and untrusted.
 
@@ -967,6 +986,32 @@ sub parse_received_line {
   # Fri Feb 07 10:18:12 2003 -0800
   if (/^FROM \S+ BY \S+ \; /) { return; }
 
+  # Internal Amazon traffic
+  # Received: from dc-mail-3102.iad3.amazon.com by mail-store-2001.amazon.com with ESMTP (peer crosscheck: dc-mail-3102.iad3.amazon.com)
+  if (/^from \S+\.amazon\.com by \S+\.amazon\.com with ESMTP \(peer crosscheck: /) { return; }
+
+  # Received: from GWGC6-MTA by gc6.jefferson.co.us with Novell_GroupWise; Tue, 30 Nov 2004 10:09:15 -0700
+  if (/^from [^\.]+ by \S+ with Novell_GroupWise; /) { return; }
+
+  # Received: from no.name.available by [165.224.43.143] via smtpd (for [165.224.216.89]) with ESMTP; Fri, 28 Jan 2005 13:06:39 -0500
+  # Received: from no.name.available by [165.224.216.88] via smtpd (for lists.sourceforge.net [66.35.250.206]) with ESMTP; Fri, 28 Jan 2005 15:42:30 -0500
+  # These are from an internal host protected by a Raptor firewall, to hosts
+  # outside the firewall.  We can only ignore the handover since we don't have
+  # enough info in those headers; however, from googling, it appears that
+  # all samples are cases where the handover is safely ignored.
+  if (/^from no\.name\.available by \S+ via smtpd \(for /) { return; }
+
+  # from 156.56.111.196 by blazing.arsecandle.org (envelope-from <gentoo-announce-return-530-rod=arsecandle.org@lists.gentoo.org>, uid 502) with qmail-scanner-1.24 (clamdscan: 0.80/594. f-prot: 4.4.2/3.14.11. Clear:RC:0(156.56.111.196):. Processed in 0.288806 secs); 06 Feb 2005 21:11:38 -0000
+  # these are safe to ignore.  the previous handover line has the full
+  # details of the handover described here, it's just qmail-scanner
+  # logging a little more.
+  if (/^from \S+ by \S+ \(.{0,100}\) with qmail-scanner/) {
+    $envfrom =~ s/^\s*<*//gs; $envfrom =~ s/>*\s*$//gs;
+    $envfrom =~ s/[\s\0\#\[\]\(\)\<\>\|]/!/gs;
+    $self->{qmail_scanner_env_from} = $envfrom; # hack!
+    return;
+  }
+
   # ------------------------------------------------------------------------
   # HANDOVERS WE KNOW WE CAN'T DEAL WITH: TCP transmission, but to MTAs that
   # just don't log enough info for us to use (ie. no IP address present).
@@ -978,7 +1023,7 @@ sub parse_received_line {
   # Received: from MATT_LINUX by hippo.star.co.uk via smtpd (for mail.webnote.net [193.120.211.219]) with SMTP; 3 Jul 2002 15:43:50 UT
   # Received: from cp-its-ieg01.mail.saic.com by cpmx.mail.saic.com for me@jmason.org; Tue, 23 Jul 2002 14:09:10 -0700
   if (/^from \S+ by \S+ (?:with|via|for|\()/) { goto unparseable; }
-
+  
   # Received: from virtual-access.org by bolero.conactive.com ; Thu, 20 Feb 2003 23:32:58 +0100
   if (/^from (\S+) by (\S+) *\;/) {
     goto unparseable;	# can't trust this
@@ -1002,6 +1047,7 @@ sub parse_received_line {
 
 unparseable:
 
+  dbg("received-header: unparseable: $_");
   $self->{num_relays_unparseable}++;
   return;
 
@@ -1094,21 +1140,27 @@ enough:
   $relay->{rdns} = $rdns;
   $relay->{lc_rdns} = lc $rdns;
 
-  # as-string rep. use spaces so things like Bayes can tokenize them easily.
-  # NOTE: when tokenizing or matching, be sure to note that new
-  # entries may be added to this string later.   However, the *order*
-  # of entries must be preserved, so that regexps that assume that
-  # e.g. "ip" comes before "helo" will still work.
-  #
-  my $asstr = "[ ip=$ip rdns=$rdns helo=$helo by=$by ident=$ident envfrom=$envfrom intl=0 id=$id auth=$auth ]";
-  dbg("received-header: parsed as $asstr");
-  $relay->{as_string} = $asstr;
+  $self->make_relay_as_string($relay);
 
   my $is_private = ($ip =~ /${IP_PRIVATE}/o);
   $relay->{ip_private} = $is_private;
 
   # add it to an internal array so Eval tests can use it
   return $relay;
+}
+
+sub make_relay_as_string {
+  my ($self, $relay) = @_;
+
+  # as-string rep. use spaces so things like Bayes can tokenize them easily.
+  # NOTE: when tokenizing or matching, be sure to note that new
+  # entries may be added to this string later.   However, the *order*
+  # of entries must be preserved, so that regexps that assume that
+  # e.g. "ip" comes before "helo" will still work.
+  #
+  my $asstr = "[ ip=$relay->{ip} rdns=$relay->{rdns} helo=$relay->{helo} by=$relay->{by} ident=$relay->{ident} envfrom=$relay->{envfrom} intl=0 id=$relay->{id} auth=$relay->{auth} ]";
+  dbg("received-header: parsed as $asstr");
+  $relay->{as_string} = $asstr;
 }
 
 # restart the parse if we find a fetchmail marker or similar.
