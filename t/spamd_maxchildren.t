@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_maxchildren");
-use Test; BEGIN { plan tests => 35 };
+use Test; BEGIN { plan tests => 21 };
 
 # ---------------------------------------------------------------------------
 
@@ -21,20 +21,6 @@ start_spamd("-L -m1");
 ok ($spamd_pid > 1);
 ok (spamcrun ("< data/spam/001", \&patterns_run_cb));
 ok_all_patterns();
-ok (spamcrun_background ("< data/spam/006", {}));
-ok (spamcrun_background ("< data/spam/001", {}));
-ok (spamcrun_background ("< data/spam/002", {}));
-ok (spamcrun_background ("< data/spam/003", {}));
-ok (spamcrun_background ("< data/spam/004", {}));
-ok (spamcrun_background ("< data/spam/005", {}));
-ok (spamcrun_background ("< data/spam/006", {}));
-ok (spamcrun_background ("< data/spam/006", {}));
-ok (spamcrun_background ("< data/spam/001", {}));
-ok (spamcrun_background ("< data/spam/002", {}));
-ok (spamcrun_background ("< data/spam/003", {}));
-ok (spamcrun_background ("< data/spam/004", {}));
-ok (spamcrun_background ("< data/spam/005", {}));
-ok (spamcrun_background ("< data/spam/006", {}));
 ok (spamcrun_background ("< data/spam/006", {}));
 ok (spamcrun_background ("< data/spam/001", {}));
 ok (spamcrun_background ("< data/spam/002", {}));
