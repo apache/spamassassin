@@ -949,10 +949,15 @@ sub get_decoded_stripped_body_text_array {
 
   my @textary = split (/^/, $text);
 
-  # add any URIs we discovered while parsing...
-  if (!defined $Mail::SpamAssassin::Bayes::TST_INHIBIT_URIS_IN_BODY_TEXT) {
-  push (@textary, $self->get_uri_list());
-  }
+# 2002-12-10 quinlan: this is not needed because URIs already appear
+# in the body and it also slows things down since it will cause
+# get_uri_list() to be called twice on each message instead of once.
+# In addition, it adds the URLs without intermediate whitespace.
+#
+#  # add any URIs we discovered while parsing...
+#  if (!defined $Mail::SpamAssassin::Bayes::TST_INHIBIT_URIS_IN_BODY_TEXT) {
+#  push (@textary, $self->get_uri_list());
+#  }
 
   return \@textary;
 }
