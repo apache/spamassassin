@@ -410,7 +410,7 @@ sub handle_hit {
   my $score = $self->{conf}->{scores}->{$rule};
   $self->{hits} += $score;
 
-  $self->{test_logs} .= sprintf ("   %-16s %s%s\n%s",
+  $self->{test_logs} .= sprintf ("%-16s %s%s\n%s",
 		"Hit! (".$score." point".($score == 1 ? "":"s").")",
 		$area, $desc, $self->{test_log_msgs});
 }
@@ -432,7 +432,7 @@ sub got_full_hit {
 
 sub test_log {
   my ($self, $msg) = @_;
-  $self->{test_log_msgs} .= sprintf ("%19s [%s]\n", "", $msg);
+  $self->{test_log_msgs} .= sprintf ("%16s [%s]\n", "", $msg);
 }
 
 ###########################################################################

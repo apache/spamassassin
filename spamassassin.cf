@@ -120,10 +120,8 @@ describe RCVD_IN_RELAYS_ORBS_ORG Received via a relay in relays.orbs.org
 
 ###########################################################################
 
-full RAZOR_CHECK		eval:check_razor()
-describe RAZOR_CHECK		Listed in Vipul's Razor spam network
-
-razor_server			razor.vipul.net:2702
+full RAZOR_CHECK		eval:check_razor('razor.vipul.net:2702')
+describe RAZOR_CHECK		Listed in Razor, see http://razor.sourceforge.net/
 
 ###########################################################################
 
