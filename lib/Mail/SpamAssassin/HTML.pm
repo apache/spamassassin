@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.32 2002/10/11 09:39:10 quinlan Exp $
+# $Id: HTML.pm,v 1.33 2002/10/11 22:31:56 felicity Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -461,12 +461,23 @@ sub html_message {
 sub html_range {
   my ($self, undef, $test, $min, $max) = @_;
 
-  $max ||= "inf";
-
   return 0 unless exists $self->{html}{$test};
 
   $test = $self->{html}{$test};
-  return ($test > $min && $test <= $max);
+
+  # not all perls understand what "inf" means, so we need to do
+  # non-numeric tests!  urg!
+  if ( !defined $max || $max eq "inf" ) {
+    return ( $test eq "inf" ) ? 1 : ($test > $min);
+  }
+  elsif ( $test eq "inf" ) {
+    # $max < inf, so $test == inf means $test > $max
+    return 0;
+  }
+  else {
+    # if we get here everything should be a number
+    return ($test > $min && $test <= $max);
+  }
 }
 
 1;

@@ -481,7 +481,11 @@ score T_FROM_OFFERS             0.01
 
 # These three have had their ' ' (space) with \s+ for slightly better
 # results on my corpus.  If it looks good for everyone, these can replace
-# the non-T_ version.
+# the non-T_ version.  Ignore the scores, they're just there to
+# avoid confusion.
 rawbody T_CLICK_HERE_LINK               /click\s+here.{0,100}<\/a>/is
 rawbody T_CLICK_HERE_CAPS_LINK  /CLICK\s+HERE.{0,100}<\/[aA]>/s
 rawbody T_QUOTED_EMAIL_TEXT     /^>+\s+.{60,72}$/
+score T_CLICK_HERE_CAPS_LINK           0.634
+score T_QUOTED_EMAIL_TEXT              -0.2
+score T_CLICK_HERE_LINK                0.317
