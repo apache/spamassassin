@@ -13,8 +13,10 @@ while ($#ARGV >= 0) {
 }
 
 while (<>) {
+  s/^[^\s:]+://;  # filenames, from "grep foo *"
+
   next if /^#/;
-  /^.\s+\d+\s+(\S+) / or next;
+  /^.\s+-?\d+\s+(\S+) / or next;
   my $mail = $1;
 
   if ($mail =~ /^(\S+):</) {
