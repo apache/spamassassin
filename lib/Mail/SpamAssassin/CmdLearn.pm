@@ -1,4 +1,4 @@
-package Mail::SpamAssassin::Learn;
+package Mail::SpamAssassin::CmdLearn;
 
 use strict;
 
