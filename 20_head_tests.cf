@@ -128,7 +128,7 @@ describe SUBJ_HAS_Q_MARK	Subject: contains a question mark
 header SUBJ_ENDS_IN_Q_MARK	Subject =~ /\?+\s*$/
 describe SUBJ_ENDS_IN_Q_MARK	Subject: ends in a question mark
 
-header ADVERT_CODE		Subject =~ /(^\s*|\s+)ADV:/i
+header ADVERT_CODE		Subject =~ /(^\s*|\s+)ADV([\s:-]|$)/i
 describe ADVERT_CODE		Subject: contains advertising tag
 
 # KOREAN_UCE_SUBJECT tests for 8-bit characters, it will not catch a very small
