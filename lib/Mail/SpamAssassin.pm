@@ -837,7 +837,7 @@ sub remove_spamassassin_markup {
   my ($self, $mail_obj) = @_;
   local ($_);
 
-  my $mbox = $mail_obj->get_mbox_seperator() || '';
+  my $mbox = $mail_obj->get_mbox_separator() || '';
 
   dbg("Removing Markup");
 
