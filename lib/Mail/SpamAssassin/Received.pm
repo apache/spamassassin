@@ -1,4 +1,4 @@
-# $Id: Received.pm,v 1.2 2003/04/05 21:08:20 jmason Exp $
+# $Id: Received.pm,v 1.3 2003/04/05 21:27:42 jmason Exp $
 
 package Mail::SpamAssassin::Received;
 1;
@@ -55,10 +55,15 @@ sub parse_received_headers {
   chop ($self->{relays_untrusted_str}); # remove trailing ws
 
   # add the stringified representation to the message object, so Bayes
-  # and rules can use it
-  $self->{msg}->delete_header ("X-SA-Relays-Untrusted");
-  $self->{msg}->put_header ("X-SA-Relays-Untrusted",
+  # and rules can use it.  Note that rule_tests.t does not impl put_header,
+  # so protect against that here.
+  if ($self->{msg}->can ("delete_header")) {
+    $self->{msg}->delete_header ("X-SA-Relays-Untrusted");
+  }
+  if ($self->{msg}->can ("put_header")) {
+    $self->{msg}->put_header ("X-SA-Relays-Untrusted",
 				$self->{relays_untrusted_str});
+  }
 
   # be helpful; save some cumbersome typing
   $self->{num_relays_untrusted} = scalar (@{$self->{relays_untrusted}});
@@ -570,7 +575,7 @@ sub parse_received_line {
   # here may be movable too; no need to lookup trusted IPs all the time.
   if ($rdns eq '') {
     dbg ("received-header: lookup PTR: $ip");
-    $rdns = $self->lookup_ptr ($ip);
+    $rdns = $self->lookup_ptr ($ip); $rdns ||= '';
   }
 
   # add spaces so things like Bayes can tokenize them easily
