@@ -5,6 +5,9 @@ SPAMASSASSIN DEVELOPMENT SNAPSHOT PROCEDURE
 - cd to the directory for the codebase you want the devel tree to
   come from
 
+    su - release
+    cd ~release/versions/cvshead
+
 - run "./build/update_devel" to build the tar.gz files
 
 - by default, they're written to ~/spamassassin.taint.org/devel/ .  This
@@ -17,6 +20,9 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - cd to the directory for the codebase you want the release to
   come from
+
+    su - release
+    cd ~release/versions/cvshead
 
 - edit lib/Mail/SpamAssassin.pm and comment the $IS_DEVEL_BUILD
   line.   Ensure the correct version number is present in $VERSION
@@ -50,10 +56,16 @@ SPAMASSASSIN RELEASE PROCEDURE
   distribution that should be, and to ensure all files that are listed
   in the MANIFEST also exist in SVN.
 
+    make distcheck
+
 - run "make disttest" to ensure all tests pass once the distribution
   is fully packaged.
 
+    make disttest
+
 - run "./build/update_stable" to build the tar.gz files.
+
+    ./build/update_stable
 
 - by default, they're written to ~/spamassassin.taint.org/released/ .
   This Works For Me (tm), as it's my local cvs checkout of the
@@ -114,7 +126,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - run this to update the mirrors:
 
-  ~/lib/html_spamassassin_put.rsync
+    ~/lib/html_spamassassin_put.rsync
 
 - upload to CPAN at http://pause.cpan.org/
 
