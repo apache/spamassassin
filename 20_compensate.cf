@@ -103,9 +103,17 @@ header FROM_US_PHONE            From =~ /^[2-9]\d{9}\@/
 describe FROM_US_PHONE          From: looks like US Telephone Number
 tflags FROM_US_PHONE		nice
 
-header SUBJECT_IS_NEWS          Subject =~ /\b(?:in review|news|list)\b/i
-describe SUBJECT_IS_NEWS        Subject contains news newsletter list daily, weekly or monthly
+header SUBJECT_IS_LIST          Subject =~ /\blist\b/i
+describe SUBJECT_IS_LIST        Subject contains newsletter header (list)
+tflags SUBJECT_IS_LIST		nice
+
+header SUBJECT_IS_NEWS          Subject =~ /\bnews\b/i
+describe SUBJECT_IS_NEWS        Subject contains newsletter header (news)
 tflags SUBJECT_IS_NEWS		nice
+
+header SUBJECT_IS_IN_REVIEW     Subject =~ /\bin review\b/i
+describe SUBJECT_IS_IN_REVIEW   Subject contains newsletter header (in review)
+tflags SUBJECT_IS_IN_REVIEW	nice
 
 header SUBJECT_FREQ             Subject =~ /\b(?:monday|daily|weekly|monthly)\b/i
 describe SUBJECT_FREQ           Subject contains a frequency - probable newsletter
