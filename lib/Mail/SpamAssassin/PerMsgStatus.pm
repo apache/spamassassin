@@ -755,7 +755,7 @@ sub rewrite_headers {
   my ($self) = @_;
 
   # put the pristine headers into an array
-  my(@pristine_headers) = $self->{msg}->get_pristine_header() =~ /^([^:]+:[ ]+(?:.*\n(?:\s+\S.*\n)*))/mig;
+  my(@pristine_headers) = $self->{msg}->get_pristine_header() =~ /^([^:]+:\s*(?:.*\n(?:\s+\S.*\n)*))/mig;
   my $addition = 'headers_ham';
 
   if($self->{is_spam}) {
