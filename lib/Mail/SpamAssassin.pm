@@ -49,7 +49,7 @@ using the user's own mail user-agent application or at the mail transfer
 agent.
 
 If you wish to use a command-line filter tool, try the C<spamassassin>
-or C<spamd> tools provided.
+or the C<spamd>/C<spamc> tools provided.
 
 SpamAssassin also includes support for reporting spam messages to collaborative
 filtering databases, such as Vipul's Razor ( http://razor.sourceforge.net/ ).
