@@ -268,46 +268,36 @@ meta T_PRIORITY_NO_NAME_ONE_REF		((__HAS_X_PRIORITY + __HAS_MSMAIL_PRI == 1) && 
 # bug 2513
 # try per-MUA rules
 header __REPTO_OVERQUOTE		Reply-To =~ /"[\w. -]+"\s*\</
-meta T_REPTO_OVERQUOTE_AOL		__REPTO_OVERQUOTE && __AOL_MUA
-meta T_REPTO_OVERQUOTE_MSN1		__REPTO_OVERQUOTE && __FROM_MSN_COM
-meta T_REPTO_OVERQUOTE_MSN2		__REPTO_OVERQUOTE && __AT_MSN_MSGID
-meta T_REPTO_OVERQUOTE_QUALCOMM		__REPTO_OVERQUOTE && __ANY_QUALCOMM_MUA
 meta T_REPTO_OVERQUOTE_THEBAT		__REPTO_OVERQUOTE && __THEBAT_MUA
-meta T_REPTO_OVERQUOTE_YAHOO1		__REPTO_OVERQUOTE && __FROM_YAHOO_COM
-meta T_REPTO_OVERQUOTE_YAHOO2		__REPTO_OVERQUOTE && __AT_YAHOO_MSGID
 #
 header __REPTO_QUOTE			Reply-To =~ /".*"\s*\</
 meta T_REPTO_QUOTE_AOL			__REPTO_QUOTE && __AOL_MUA
 meta T_REPTO_QUOTE_IMS			__REPTO_QUOTE && __IMS_MUA
 meta T_REPTO_QUOTE_MSN1			__REPTO_QUOTE && __FROM_MSN_COM
 meta T_REPTO_QUOTE_MSN2			__REPTO_QUOTE && __AT_MSN_MSGID
+meta T_REPTO_QUOTE_MSN3			__REPTO_QUOTE && (__FROM_MSN_COM || __AT_MSN_MSGID)
 meta T_REPTO_QUOTE_QUALCOMM		__REPTO_QUOTE && __ANY_QUALCOMM_MUA
 meta T_REPTO_QUOTE_THEBAT		__REPTO_QUOTE && __THEBAT_MUA
 meta T_REPTO_QUOTE_YAHOO1		__REPTO_QUOTE && __FROM_YAHOO_COM
 meta T_REPTO_QUOTE_YAHOO2		__REPTO_QUOTE && __AT_YAHOO_MSGID
+meta T_REPTO_QUOTE_YAHOO3		__REPTO_QUOTE && (__FROM_YAHOO_COM || __AT_YAHOO_MSGID)
 
 # bug 3896: URIs in various TLDs, other than 3rd level www
-uri T_URI_NO_WWW_BIZ_1	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{7,}\.biz\/\S{15,}/i
-uri T_URI_NO_WWW_INFO_1	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{7,}\.info\/\S{15,}/i
-# change \w to [^.]
-uri T_URI_NO_WWW_BIZ_2	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.[^.]{7,}\.biz\/\S{15,}/i
-uri T_URI_NO_WWW_INFO_2	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.[^.]{7,}\.info\/\S{15,}/i
-# looks kinda like CGI
-uri T_URI_NO_WWW_BIZ_CGI_1	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{7,}\.biz\/(?=\S{15,})\S*\?/i
-uri T_URI_NO_WWW_INFO_CGI_1	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{7,}\.info\/(?=\S{15,})\S*\?/i
-# change \w to [^.]
-uri T_URI_NO_WWW_BIZ_CGI_2	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.[^.]{7,}\.biz\/(?=\S{15,})\S*\?/i
-uri T_URI_NO_WWW_INFO_CGI_2	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.[^.]{7,}\.info\/(?=\S{15,})\S*\?/i
-# CGI at beginning
-uri T_URI_NO_WWW_BIZ_CGI_START_1	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{7,}\.biz\/\?\S{15,}/i
-uri T_URI_NO_WWW_INFO_CGI_START_1	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{7,}\.info\/\?\S{15,}/i
-uri T_URI_NO_WWW_BIZ_CGI_START_2	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.[^.]{7,}\.biz\/\?\S{15,}/i
-uri T_URI_NO_WWW_INFO_CGI_START_2	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.[^.]{7,}\.info\/\?\S{15,}/i
-# any domain
-uri T_URI_NO_WWW_ANY_CGI_START_34_1	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{7,}\.[a-z]{3,4}\/\?\S{15,}/i
-uri T_URI_NO_WWW_ANY_CGI_START_34_2	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.[^.]{7,}\.[a-z]{3,4}\/\?\S{15,}/i
-uri T_URI_NO_WWW_ANY_CGI_START_2_1	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{7,}\.\w+\.[a-z]{2}\/\?\S{15,}/i
-uri T_URI_NO_WWW_ANY_CGI_START_2_2	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.[^.]{7,}\.\w+\.[a-z]{2}\/\?\S{15,}/i
+# nearly done rules
+uri URI_NO_WWW_INFO_CGI_1	/^https?:\/\/[^\/]+(?<!\/www)\.[^.]{7,}\.info\/(?=\S{15,})\S*\?/i
+uri URI_NO_WWW_BIZ_CGI_1	/^https?:\/\/[^\/]+(?<!\/www)\.[^.]{7,}\.biz\/(?=\S{15,})\S*\?/i
+# any TLD except .info and .biz
+uri URI_NO_WWW_ANY_CGI_1A	/^https?:\/\/[^\/]+(?<!\/www)\.[^.]{7,}\.(?!biz|info)[a-z]{2,4}\/\?\S{14,}/i
+# any ending except .info and .biz
+uri URI_NO_WWW_ANY_CGI_1B	/^https?:\/\/[^\/]+(?<!\/www)\.[^.]{7,}\.(?!biz|info)[a-z][^.]+\/\?\S{14,}/i
+
+# but try making https?:// optional
+uri URI_NO_WWW_INFO_CGI_2	/^(?:https?:\/\/)?[^\/]+(?<!\/www)\.[^.]{7,}\.info\/(?=\S{15,})\S*\?/i
+uri URI_NO_WWW_BIZ_CGI_2	/^(?:https?:\/\/)?[^\/]+(?<!\/www)\.[^.]{7,}\.biz\/(?=\S{15,})\S*\?/i
+# any TLD except .info and .biz
+uri URI_NO_WWW_ANY_CGI_2A	/^(?:https?:\/\/)?[^\/]+(?<!\/www)\.[^.]{7,}\.(?!biz|info)[a-z]{2,4}\/\?\S{14,}/i
+# any ending except .info and .biz
+uri URI_NO_WWW_ANY_CGI_2B	/^(?:https?:\/\/)?[^\/]+(?<!\/www)\.[^.]{7,}\.(?!biz|info)[^.]+\/\?\S{14,}/i
 
 ########################################################################
 
