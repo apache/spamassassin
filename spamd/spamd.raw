@@ -575,16 +575,10 @@ if ($setuid_to_user) {
     die "error returned from copy_config, no Storable module?\n";
 }
 
-$opt{'daemonize'} and daemonize();
-
-if ( defined( $opt{'pidfile'} ) ) {
+if ( defined $opt{'pidfile'} ) {
   $opt{'pidfile'} =
     Mail::SpamAssassin::Util::untaint_file_path( $opt{'pidfile'} );
-  open PIDF, ">$opt{'pidfile'}" or warn "Can't write to PID file: $!";
-  print PIDF "$$\n";
-  close PIDF;
 }
-
 # support non-root use (after we bind to the port)
 if ( $opt{'username'} ) {
   my ( $uuid, $ugid ) = ( getpwnam( $opt{'username'} ) )[ 2, 3 ];
@@ -595,10 +589,10 @@ if ( $opt{'username'} ) {
   $uuid =~ /^(\d+)$/ and $uuid = $1;    # de-taint
   $ugid =~ /^(\d+)$/ and $ugid = $1;    # de-taint
 
-  # make sure we can unlink it later
-  if ( defined $opt{'pidfile'} ) {
-    chown $uuid, -1, $opt{'pidfile'}
-      || die "fatal: could not chown '$opt{'pidfile'}' to uid $uuid\n";
+  # remove the pidfile if it exists.  we'll create it anew later.
+  if ( defined $opt{'pidfile'} && -f $opt{'pidfile'} ) {
+    unlink $opt{'pidfile'}
+      || die "fatal: could not unlink '$opt{'pidfile'}'\n";
   }
 
   # ditto with the socket file
@@ -618,6 +612,20 @@ if ( $opt{'username'} ) {
     die "fatal: setuid to uid $uuid failed\n";
   }
 
+}
+
+
+## DAEMONIZE! ##
+
+$opt{'daemonize'} and daemonize();
+
+# Make the pidfile ...
+if ( defined $opt{'pidfile'} && open PIDF, ">$opt{'pidfile'}" ) {
+  print PIDF "$$\n";
+  close PIDF;
+}
+else {
+  warn "Can't write to PID file: $!\n";
 }
 
 # restart handling.  do this here before compile_now() as that may
