@@ -261,5 +261,4 @@ sub try_module {
   }
 
   print "\n\n".$desc."\n\n";
-  sleep 2;
 }
