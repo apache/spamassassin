@@ -169,6 +169,10 @@ sub new {
 
     # NB: Really need to figure out special folding rules here!
     if ( $current =~ /^[ \t]/ ) {
+      unless ($current =~ /\S/) {
+        $self->{'obsolete_folding_whitespace'} = 1;
+      }
+
       # append continuations if there's a header in process
       if ($header) {
         $header .= $current;

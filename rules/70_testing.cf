@@ -142,6 +142,9 @@ uri T_HIGH_CODEPAGE_URI         /^https?:\/\/[^\/]*\&\#(?:\d{4,}|[3456789]\d\d);
 header T_MISSING_MIME_HB_SEP		eval:check_for_missing_mime_hb_separator()
 describe T_MISSING_MIME_HB_SEP		Missing blank line between MIME header and body
 
+header T_OBSOLETE_WS_FOLDING		eval:check_for_obsfw()
+describe T_OBSOLETE_WS_FOLDING		Header uses obsolete whitespace folding method
+
 ########################################################################
 
 #### PHRASE OBFUSCATION RULES ####
