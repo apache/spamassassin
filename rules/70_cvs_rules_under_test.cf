@@ -85,6 +85,7 @@ meta T_MIME_HTML_NO_DOCTYPE	(__MIME_HTML && !__HTML_TAG_EXISTS_DOCTYPE)
 # Whee... more HTML tests!
 # Note: these use __MIME_HTML, we might need to exempt MIME attachments from
 # that rule
+# Apr 10 2003 jm: AOL and IMO are ready to promote I reckon
 header __ANY_OUTLOOK_MUA	X-Mailer =~ /^Microsoft Outlook\b/
 header __ANY_IMS_MUA		X-Mailer =~ /^Internet Mail Service\b/
 header __ANY_AOL_MUA		X-Mailer =~ /^AOL\b/
@@ -123,15 +124,6 @@ body     T_AS_SEEN_ON             /seen on\b\s*(?:T\.?V\.?|ABC|NBC|CBS|CNN|Oprah
 # bug 1380
 meta T_FAKED_THEBAT		(__THEBAT_MUA && __MIME_HTML_ONLY)
 
-# quinlan: 2003-03-10, updated 2003-03-22
-# reply to a numbered address
-header T_ID_REPLY_TO_REPLY	Reply-To:addr =~ /reply.*\d{4}.*\@/i
-# unsubscribe from a numbered address
-header T_ID_X_LIST_UNSUBSCRIBE	X-List-Unsubscribe:addr =~ /\d{3}.*\d{3}.*\@/
-header __ID_REPLY_TO		Reply-To:addr =~ /\d{3}.*\d{3}.*\@/
-header __ID_RETURN_PATH		Return-path:addr =~ /\d{3}.*\d{3}.*\@/
-meta T_ID_UNIQUE		(T_ID_X_LIST_UNSUBSCRIBE && __ID_RETURN_PATH && __ID_REPLY_TO)
-
 # quinlan: 2003-03-15
 # these all appear in the same low-scoring spammer for me, but they
 # might differ for others so I'm trying some different URLs, check
@@ -164,12 +156,6 @@ meta T_HOTMAIL_FOOTER5		HOTMAIL_FOOTER5 && !T_ABUSED_HOTMAIL_FOOTER
 # Apr  1 2003 jm: virtually useless hits.  I say let it die
 uri T_URI_IS_POUND		/^\#$/
 uri T_URI_ENDS_IN_POUND		/^[^?]+\#$/
-
-# bug 1336
-header T_TO_FILENAME           To =~ /^<C:\\/
-#describe TO_FILENAME         "To" header contains a filename
-# Apr  1 2003 jm: angle for a few more hits
-header T_TO_FILENAME_2         To =~ /<[CDEF]:/
 
 # bug 1394, possible replacement for ORDER_NOW
 body T_ORDER_NOW                  /\border (?:now|soon|fast|quickly|while|today)\b/i
@@ -471,14 +457,9 @@ body T_HTML_FONT_INVISIBLE2_224		eval:html_test('t_font_invisible2_224')
 body T_HTML_FONT_INVISIBLE2_240		eval:html_test('t_font_invisible2_240')
 body T_HTML_FONT_INVISIBLE2_256		eval:html_test('t_font_invisible2_256')
 
-# I get these enough that I think a rule may be good for them. :)
-#   0.722   1.2360   0.0000    1.000   1.00    0.01  T_URI_PXLG
-uri T_URI_PXLG		m{http://(?:www\.)?pxlg\.com}i
-describe T_URI_PXLG	URL references pxlg.com
-
 # alan premselaar <alien@12inch.com>, see SpamAssassin-talk list
-header T_SUBJ_JAPAN_SPAM	Subject =~ /L\$\>5Bz9\-9p\"\(/
-describe T_SUBJ_JAPAN_SPAM	Subject: contains Japanese mandatory unsolicited mail tag
+header T_JAPANESE_UCE_SUBJECT_3	Subject =~ /L\$\>5Bz9\-9p\"\(/
+describe T_JAPANESE_UCE_SUBJECT_3 Subject: contains Japanese mandatory unsolicited mail tag
 # quinlan: 2003-03-23 here are more generic Japanese iso-2022-jp codes
 # ("not yet acceptance" or "email") + "announcement"
 header T_JAPANESE_UCE_SUBJECT_0	Subject =~ /\e\$B.*(?:L\$>5Bz|EE;R%a!<%k)9-9p/
@@ -522,10 +503,6 @@ describe T_FORGED_MUA_EUDORA_FROM Forged mail pretending to be from Eudora (by F
 # Catches spams sent by illiterate spammer ("secks", "whoarez" etc.)
 header T_RATWARE_MIZSPEELING	eval:check_for_mizspeeling_ratware()
 describe T_RATWARE_MIZSPEELING	Sent using spammer tool (mizspeeling)
-
-# ho ho ho
-body T_WALAA		/instructions and walaa\b/i
-describe T_WALAA	Illiterate spammer cannot spell 'voila'
 
 # new version
 header T_NIGERIAN_SUBJECT2	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*(?:request\s+(?:for\s+)?)?(?:very )?urgent\s+(?:(?:and|&)\s+(?:(?:completely|100\%)\s+))?(?:confidential|assistance|business|attention|reply|responses?|help)\b/i
