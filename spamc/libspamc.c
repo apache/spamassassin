@@ -472,7 +472,12 @@ static int _message_read_raw(int fd, struct message *m)
     }
     m->type = MESSAGE_ERROR;
     if (m->raw_len > m->max_len)
+    {
+        libspamc_log(m->priv->flags, LOG_ERR,
+                "skipped message, greater than max message size (%d bytes)",
+                m->max_len);
 	return EX_TOOBIG;
+    }
     m->type = MESSAGE_RAW;
     m->msg = m->raw;
     m->msg_len = m->raw_len;
@@ -1060,65 +1065,65 @@ int message_process(struct transport *trans, char *username, int max_size,
     m.max_len = max_size;
     ret = message_read(in_fd, flags, &m);
     if (ret != EX_OK)
-	goto FAIL;
+        goto FAIL;
     ret = message_filter(trans, username, flags, &m);
     if (ret != EX_OK)
-	goto FAIL;
+        goto FAIL;
     if (message_write(out_fd, &m) < 0)
-	goto FAIL;
+        goto FAIL;
     if (m.is_spam != EX_TOOBIG) {
-	message_cleanup(&m);
-	return m.is_spam;
+        message_cleanup(&m);
+        return m.is_spam;
     }
     message_cleanup(&m);
     return ret;
 
   FAIL:
     if (flags & SPAMC_CHECK_ONLY) {
-	full_write(out_fd, 1, "0/0\n", 4);
-	message_cleanup(&m);
-	return EX_NOTSPAM;
+        full_write(out_fd, 1, "0/0\n", 4);
+        message_cleanup(&m);
+        return EX_NOTSPAM;
     }
     else {
-	message_dump(in_fd, out_fd, &m);
-	message_cleanup(&m);
-	return ret;
+        message_dump(in_fd, out_fd, &m);
+        message_cleanup(&m);
+        return ret;
     }
 }
 
 void message_cleanup(struct message *m)
 {
     if (m->outbuf)
-	free(m->outbuf);
+        free(m->outbuf);
     if (m->raw != NULL)
-	free(m->raw);
+        free(m->raw);
     if (m->priv != NULL)
-	free(m->priv);
+        free(m->priv);
     _clear_message(m);
 }
 
 /* Aug 14, 2002 bj: Obsolete! */
 int process_message(struct transport *tp, char *username, int max_size,
-		    int in_fd, int out_fd, const int my_check_only,
-		    const int my_safe_fallback)
+                    int in_fd, int out_fd, const int my_check_only,
+                    const int my_safe_fallback)
 {
     int flags;
 
     flags = SPAMC_RAW_MODE;
     if (my_check_only)
-	flags |= SPAMC_CHECK_ONLY;
+        flags |= SPAMC_CHECK_ONLY;
     if (my_safe_fallback)
-	flags |= SPAMC_SAFE_FALLBACK;
+        flags |= SPAMC_SAFE_FALLBACK;
 
     return message_process(tp, username, max_size, in_fd, out_fd, flags);
 }
 
 /*
- * init_transport()
- *
- *	Given a pointer to a transport structure, set it to "all empty".
- *	The default is a localhost connection.
- */
+* init_transport()
+*
+*	Given a pointer to a transport structure, set it to "all empty".
+*	The default is a localhost connection.
+*/
 void transport_init(struct transport *tp)
 {
     assert(tp != 0);
@@ -1131,14 +1136,14 @@ void transport_init(struct transport *tp)
 }
 
 /*
- * randomize_hosts()
- *
- *	Given the transport object that contains one or more IP addresses
- *	in this "hosts" list, rotate it by a random number of shifts to
- *	randomize them - this is a kind of load balancing. It's possible
- *	that the random number will be 0, which says not to touch. We don't
- *	do anything unless 
- */
+* randomize_hosts()
+*
+*	Given the transport object that contains one or more IP addresses
+*	in this "hosts" list, rotate it by a random number of shifts to
+*	randomize them - this is a kind of load balancing. It's possible
+*	that the random number will be 0, which says not to touch. We don't
+*	do anything unless 
+*/
 
 static void _randomize_hosts(struct transport *tp)
 {
@@ -1147,36 +1152,36 @@ static void _randomize_hosts(struct transport *tp)
     assert(tp != 0);
 
     if (tp->nhosts <= 1)
-	return;
+        return;
 
     rnum = rand() % tp->nhosts;
 
     while (rnum-- > 0) {
-	struct in_addr tmp = tp->hosts[0];
-	int i;
+        struct in_addr tmp = tp->hosts[0];
+        int i;
 
-	for (i = 1; i < tp->nhosts; i++)
-	    tp->hosts[i - 1] = tp->hosts[i];
+        for (i = 1; i < tp->nhosts; i++)
+            tp->hosts[i - 1] = tp->hosts[i];
 
-	tp->hosts[i - 1] = tmp;
+        tp->hosts[i - 1] = tmp;
     }
 }
 
 /*
- * transport_setup()
- *
- *	Given a "transport" object that says how we're to connect to the
- *	spam daemon, perform all the initial setup required to make the
- *	connection process a smooth one. The main work is to do the host
- *	name lookup and copy over all the IP addresses to make a local copy
- *	so they're not kept in the resolver's static state.
- *
- *	Here we also manage quasi-load balancing and failover: if we're
- *	doing load balancing, we randomly "rotate" the list to put it in
- *	a different order, and then if we're not doing failover we limit
- *	the hosts to just one. This way *all* connections are done with
- *	the intention of failover - makes the code a bit more clear.
- */
+* transport_setup()
+*
+*	Given a "transport" object that says how we're to connect to the
+*	spam daemon, perform all the initial setup required to make the
+*	connection process a smooth one. The main work is to do the host
+*	name lookup and copy over all the IP addresses to make a local copy
+*	so they're not kept in the resolver's static state.
+*
+*	Here we also manage quasi-load balancing and failover: if we're
+*	doing load balancing, we randomly "rotate" the list to put it in
+*	a different order, and then if we're not doing failover we limit
+*	the hosts to just one. This way *all* connections are done with
+*	the intention of failover - makes the code a bit more clear.
+*/
 int transport_setup(struct transport *tp, int flags)
 {
     struct hostent *hp = 0;
@@ -1187,8 +1192,8 @@ int transport_setup(struct transport *tp, int flags)
     WSADATA wsaData;
     int nCode;
     if ((nCode = WSAStartup(MAKEWORD(1, 1), &wsaData)) != 0) {
-	printf("WSAStartup() returned error code %d\n", nCode);
-	return EX_OSERR;
+        printf("WSAStartup() returned error code %d\n", nCode);
+        return EX_OSERR;
     }
 
 #endif
@@ -1200,89 +1205,89 @@ int transport_setup(struct transport *tp, int flags)
     switch (tp->type) {
 #ifndef _WIN32
     case TRANSPORT_UNIX:
-	assert(tp->socketpath != 0);
-	return EX_OK;
+        assert(tp->socketpath != 0);
+        return EX_OK;
 #endif
     case TRANSPORT_LOCALHOST:
-	tp->hosts[0].s_addr = inet_addr("127.0.0.1");
-	tp->nhosts = 1;
-	return EX_OK;
+        tp->hosts[0].s_addr = inet_addr("127.0.0.1");
+        tp->nhosts = 1;
+        return EX_OK;
 
     case TRANSPORT_TCP:
-	if (NULL == (hp = gethostbyname(tp->hostname))) {
-	    int origherr = h_errno;	/* take a copy before syslog() */
+        if (NULL == (hp = gethostbyname(tp->hostname))) {
+            int origherr = h_errno;	/* take a copy before syslog() */
 
-	    libspamc_log(flags, LOG_ERR, "gethostbyname(%s) failed: h_errno=%d",
-		    tp->hostname, origherr);
-	    switch (origherr) {
-	    case HOST_NOT_FOUND:
-	    case NO_ADDRESS:
-	    case NO_RECOVERY:
-		return EX_NOHOST;
-	    case TRY_AGAIN:
-		return EX_TEMPFAIL;
-	    default:
-		return EX_OSERR;
-	    }
-	}
+            libspamc_log(flags, LOG_ERR, "gethostbyname(%s) failed: h_errno=%d",
+                    tp->hostname, origherr);
+            switch (origherr) {
+            case HOST_NOT_FOUND:
+            case NO_ADDRESS:
+            case NO_RECOVERY:
+                return EX_NOHOST;
+            case TRY_AGAIN:
+                return EX_TEMPFAIL;
+            default:
+                return EX_OSERR;
+            }
+        }
 
-		/*--------------------------------------------------------
-		 * If we have no hosts at all, or if they are some other
-	 	 * kind of address family besides IPv4, then we really
-		 * just have no hosts at all.
-		 */
-	if (hp->h_addr_list[0] == 0) {
-	    /* no hosts in this list */
-	    return EX_NOHOST;
-	}
+                /*--------------------------------------------------------
+                * If we have no hosts at all, or if they are some other
+                * kind of address family besides IPv4, then we really
+                * just have no hosts at all.
+                */
+        if (hp->h_addr_list[0] == 0) {
+            /* no hosts in this list */
+            return EX_NOHOST;
+        }
 
-	if (hp->h_length != sizeof tp->hosts[0]
-	    || hp->h_addrtype != AF_INET) {
-	    /* FAIL - bad size/protocol/family? */
-	    return EX_NOHOST;
-	}
+        if (hp->h_length != sizeof tp->hosts[0]
+            || hp->h_addrtype != AF_INET) {
+            /* FAIL - bad size/protocol/family? */
+            return EX_NOHOST;
+        }
 
-		/*--------------------------------------------------------
-		 * Copy all the IP addresses into our private structure.
-		 * This gets them out of the resolver's static area and
-		 * means we won't ever walk all over the list with other
-		 * calls.
-		 */
-	tp->nhosts = 0;
+                /*--------------------------------------------------------
+                * Copy all the IP addresses into our private structure.
+                * This gets them out of the resolver's static area and
+                * means we won't ever walk all over the list with other
+                * calls.
+                */
+        tp->nhosts = 0;
 
-	for (addrp = hp->h_addr_list; *addrp; addrp++) {
-	    if (tp->nhosts >= TRANSPORT_MAX_HOSTS - 1) {
-		libspamc_log(flags, LOG_ERR, "hit limit of %d hosts, ignoring remainder",
-		       TRANSPORT_MAX_HOSTS - 1);
-		break;
-	    }
+        for (addrp = hp->h_addr_list; *addrp; addrp++) {
+            if (tp->nhosts >= TRANSPORT_MAX_HOSTS - 1) {
+                libspamc_log(flags, LOG_ERR, "hit limit of %d hosts, ignoring remainder",
+                      TRANSPORT_MAX_HOSTS - 1);
+                break;
+            }
 
-	    memcpy(&tp->hosts[tp->nhosts], *addrp, sizeof tp->hosts[0]);
+            memcpy(&tp->hosts[tp->nhosts], *addrp, sizeof tp->hosts[0]);
 
-	    tp->nhosts++;
-	}
+            tp->nhosts++;
+        }
 
-		/*--------------------------------------------------------
-		 * QUASI-LOAD-BALANCING
-		 *
-		 * If the user wants to do quasi load balancing, "rotate"
-		 * the list by a random amount based on the current time.
-		 * This may later be truncated to a single item. This is
-		 * meaningful only if we have more than one host.
-		 */
-	if ((flags & SPAMC_RANDOMIZE_HOSTS) && tp->nhosts > 1) {
-	    _randomize_hosts(tp);
-	}
+                /*--------------------------------------------------------
+                * QUASI-LOAD-BALANCING
+                *
+                * If the user wants to do quasi load balancing, "rotate"
+                * the list by a random amount based on the current time.
+                * This may later be truncated to a single item. This is
+                * meaningful only if we have more than one host.
+                */
+        if ((flags & SPAMC_RANDOMIZE_HOSTS) && tp->nhosts > 1) {
+            _randomize_hosts(tp);
+        }
 
-		/*--------------------------------------------------------
-		 * If the user wants no fallback, simply truncate the host
-		 * list to just one - this pretends that this is the extent
-		 * of our connection list - then it's not a special case.
-		 */
-	if (!(flags & SPAMC_SAFE_FALLBACK) && tp->nhosts > 1) {
-	    /* truncating list */
-	    tp->nhosts = 1;
-	}
+                /*--------------------------------------------------------
+                * If the user wants no fallback, simply truncate the host
+                * list to just one - this pretends that this is the extent
+                * of our connection list - then it's not a special case.
+                */
+        if (!(flags & SPAMC_SAFE_FALLBACK) && tp->nhosts > 1) {
+            /* truncating list */
+            tp->nhosts = 1;
+        }
     }
     return EX_OK;
 }
@@ -1329,12 +1334,12 @@ libspamc_log (int flags, int level, char *msg, ...)
 /* --------------------------------------------------------------------------- */
 
 /*
- * Unit tests.  Must be built externally, e.g.:
- *
- * gcc -g -DLIBSPAMC_UNIT_TESTS spamd/spamc.c spamd/libspamc.c spamd/utils.c -o libspamctest
- * ./libspamctest
- *
- */
+* Unit tests.  Must be built externally, e.g.:
+*
+* gcc -g -DLIBSPAMC_UNIT_TESTS spamd/spamc.c spamd/libspamc.c spamd/utils.c -o libspamctest
+* ./libspamctest
+*
+*/
 #ifdef LIBSPAMC_UNIT_TESTS
 
 static void _test_locale_safe_string_to_float_val(float input)
@@ -1346,14 +1351,14 @@ static void _test_locale_safe_string_to_float_val(float input)
     sprintf(inputstr, "%f", input);
     output = _locale_safe_string_to_float(inputstr, 99);
     if (input == output) {
-	return;
+        return;
     }
 
     /* could be a rounding error.  print as string and compare those */
     sprintf(cmpbuf1, "%f", input);
     sprintf(cmpbuf2, "%f", output);
     if (!strcmp(cmpbuf1, cmpbuf2)) {
-	return;
+        return;
     }
 
     printf("FAIL: input=%f != output=%f\n", input, output);
@@ -1362,9 +1367,9 @@ static void _test_locale_safe_string_to_float_val(float input)
 static void unit_test_locale_safe_string_to_float(void)
 {
     float statictestset[] = {	/* will try both +ve and -ve */
-	0.1, 0.01, 0.001, 0.0001, 0.00001, 0.000001,
-	9.1, 9.91, 9.991, 9.9991, 9.99991, 9.999991,
-	0.0			/* end of set constant */
+        0.1, 0.01, 0.001, 0.0001, 0.00001, 0.000001,
+        9.1, 9.91, 9.991, 9.9991, 9.99991, 9.999991,
+        0.0			/* end of set constant */
     };
     float num;
     int i;
@@ -1372,14 +1377,14 @@ static void unit_test_locale_safe_string_to_float(void)
     printf("starting unit_test_locale_safe_string_to_float\n");
     /* tests of precision */
     for (i = 0; statictestset[i] != 0.0; i++) {
-	_test_locale_safe_string_to_float_val(statictestset[i]);
-	_test_locale_safe_string_to_float_val(-statictestset[i]);
-	_test_locale_safe_string_to_float_val(1 - statictestset[i]);
-	_test_locale_safe_string_to_float_val(1 + statictestset[i]);
+        _test_locale_safe_string_to_float_val(statictestset[i]);
+        _test_locale_safe_string_to_float_val(-statictestset[i]);
+        _test_locale_safe_string_to_float_val(1 - statictestset[i]);
+        _test_locale_safe_string_to_float_val(1 + statictestset[i]);
     }
     /* now exhaustive, in steps of 0.01 */
     for (num = -1000.0; num < 1000.0; num += 0.01) {
-	_test_locale_safe_string_to_float_val(num);
+        _test_locale_safe_string_to_float_val(num);
     }
     printf("finished unit_test_locale_safe_string_to_float\n");
 }
