@@ -36,7 +36,7 @@ sub safe_lock {
   my $lock_tries = 30;
   my $is_locked = 0;
   my @s;
-  $lock_tmp = Mail::SpamAssassin::Util::untaint_file_path ($lock_tmp);
+  $lock_tmp = untaint_file_path ($lock_tmp);
 
   open(LTMP, ">".$lock_tmp) or
 	  die "Cannot create tmp lockfile $lock_tmp for $lock_file: $!\n";
@@ -94,7 +94,7 @@ sub safe_lock {
 sub find_executable_in_env_path {
   my ($filename) = @_;
 
-  Mail::SpamAssassin::Util::clean_path_in_taint_mode();
+  clean_path_in_taint_mode();
   foreach my $path (File::Spec->path()) {
     my $fname = File::Spec->catfile ($path, $filename);
     if (-x $fname) {

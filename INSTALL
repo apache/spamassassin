@@ -79,20 +79,21 @@ Mike Nolan <nolan AT naic dot edu> has built this, and here's his directions:
 Note for Perl 5.8 Users (incl Red Hat 8)
 ----------------------------------------
 
-Perl 5.8 now uses Unicode internally by default, which causes trouble
-for SpamAssassin (and almost all other reasonably complex pieces of
-perl code!), which uses a few byte-oriented character operations.
+Perl 5.8 now uses Unicode internally by default, which causes trouble for
+SpamAssassin (and almost all other reasonably complex pieces of perl
+code!).
 
-We've worked around this in most places, as far as we know, but there
-may still be some issues.  In addition, there is a speed hit.
+We've worked around this in most places, as far as we know, but there may
+still be some issues.  In addition, there is a speed hit, which it would
+be nice to avoid.
 
 Setting the LANG environment variable before any invocation of
-SpamAssassin will fix it:
+SpamAssassin sometimes seems to help fix it:
 
   export LANG=en_US
 
-As far as we know, any setting of LANG that does not include "utf8"
-will work fine.
+Notably, the LANG setting must not include "utf8".   However, some folks
+have reported that this makes no difference.
 
 
 Installing SpamAssassin for Personal Use (Not System-Wide)

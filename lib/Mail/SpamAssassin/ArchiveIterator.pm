@@ -124,7 +124,7 @@ sub mass_check_mh_folder {
 
     # skip too-big mails
     if (! $self->{opt_all} && -s STDIN > 250*1024) {
-      warn "Skipping message, too large (>250k)";
+      warn "Skipping message, too large (>250k): $mail\n";
       return;
     }
     my @msg = (<STDIN>);
@@ -212,7 +212,6 @@ sub mass_check_mailbox {
     my @msg = ();
     my $in_header = 1;
     my $msgid = undef;
-    my $hits = '';
     $count++;
 
     while (<MBOX>) {
@@ -226,7 +225,6 @@ sub mass_check_mailbox {
       }
       if ($in_header) {
         /^Message-Id: (.*?)\s*$/i        and $msgid = $1;
-        /^X-Spam-Status: .* tests=(.*)$/ and $hits  = $1;
       }
 
       /^From \S+ +... ... / and last;
