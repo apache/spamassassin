@@ -93,9 +93,6 @@ sub _parse {
   my ($self, $rules, $scoresonly) = @_;
   local ($_);
 
-  my $report_template = '';
-  my $spamtrap_template = '';
-
   foreach $_ (split (/\n/, $rules)) {
     s/\r//g; s/(^|(?<!\\))\#.*$/$1/;
     s/^\s+//; s/\s+$//; /^$/ and next;
@@ -130,12 +127,20 @@ sub _parse {
       $self->{scores}->{$1} = $2+0.0; next;
     }
 
+    if (/^clear-report-template$/) {
+      $self->{report_template} = ''; next;
+    }
+
     if (/^report\b\s*(.*?)$/) {
-      $report_template .= $1."\n"; next;
+      $self->{report_template} .= $1."\n"; next;
+    }
+
+    if (/^clear-spamtrap-template$/) {
+      $self->{spamtrap_template} = ''; next;
     }
 
     if (/^spamtrap\s*(.*?)$/) {
-      $spamtrap_template .= $1."\n"; next;
+      $self->{spamtrap_template} .= $1."\n"; next;
     }
 
     if (/^auto_report_threshold\s+(\d+)$/) {
@@ -197,14 +202,6 @@ sub _parse {
 
 failed_line:
     dbg ("Failed to parse line in SpamAssassin configuration, skipping: $_");
-  }
-
-  if ($report_template ne '') {
-    $self->{report_template} = $report_template;
-  }
-
-  if ($spamtrap_template ne '') {
-    $self->{spamtrap_template} = $spamtrap_template;
   }
 }
 
