@@ -872,7 +872,7 @@ sub handle_user_setuid_with_sql
     my $spam_conf_dir = $dir . '/.spamassassin';  #needed for AWL, Bayes, etc.
     if ( ! -d $spam_conf_dir )
     {
-       if ( mkdir $spam_conf_dir )
+       if ( mkdir $spam_conf_dir, 0700 )
        {
           logmsg "info: created $spam_conf_dir for $username.";
        }
