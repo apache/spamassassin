@@ -79,21 +79,21 @@ if ($opt_p) {
     printf "%7s %7s %7s  %6s  %6s  %6s  %s\n",
   	"OVERALL%", "SPAM%", "NONSPAM%", "S/O", "RANK", "SCORE", "NAME";
   }
-  printf "%7d  %7d  %7d  %6.2f  %6.2f  %6.2f  (all messages)\n",
+  printf "%7d  %7d  %7d  %7.3f %6.2f  %6.2f  (all messages)\n",
   	$hdr_all, $hdr_spam, $hdr_nonspam,
         soratio ($num_spam,$num_nonspam), 0, 0;
 
   $hdr_spam = ($num_spam / $hdr_all) * 100.0;
   $hdr_nonspam = ($num_nonspam / $hdr_all) * 100.0;
   $hdr_all = 100.0;             # this is obvious
-  printf "%7.3f  %7.4f  %7.4f  %6.2f  %6.2f  %6.2f  (all messages as %%)\n",
+  printf "%7.3f  %7.4f  %7.4f  %7.3f %6.2f  %6.2f  (all messages as %%)\n",
   	$hdr_all, $hdr_spam, $hdr_nonspam,
         soratio ($num_spam,$num_nonspam), 0, 0;
 
 } elsif ($opt_x) {
   printf "%7s  %7s  %7s  %6s  %6s  %s\n",
   	"OVERALL", "SPAM", "NONSPAM", "S/O", "SCORE", "NAME";
-  printf "%7d  %7d  %7d  %6.2f  %6.2f  %6.2f  (all messages)\n",
+  printf "%7d  %7d  %7d  %7.3f %6.2f  %6.2f  (all messages)\n",
   	$hdr_all, $hdr_spam, $hdr_nonspam,
         soratio ($num_spam,$num_nonspam), 0, 0;
 
@@ -181,11 +181,11 @@ foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
   }
 
   if ($opt_p) {
-    printf "%7.3f  %7.4f  %7.4f  %6.2f  %6.2f  %6.2f  %s\n",
+    printf "%7.3f  %7.4f  %7.4f  %7.3f %6.2f  %6.2f  %s\n",
   	$fa, $fs, $fn, $soratio, $ranking{$test}, $scores{$test}, $test;
 
   } elsif ($opt_x) {
-    printf "%7d  %7d  %7d  %6.2f  %6.2f  %6.2f  %s\n",
+    printf "%7d  %7d  %7d  %7.3f %6.2f %6.2f  %s\n",
   	$fa, $fs, $fn, $soratio, $ranking{$test}, $scores{$test}, $test;
 
   } else {
