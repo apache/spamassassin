@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.38 2002/10/30 16:50:07 jmason Exp $
+# $Id: HTML.pm,v 1.39 2002/11/24 10:06:37 zelgadis Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -396,6 +396,24 @@ sub html_comment {
   $self->{html}{comment_saved_url} = 1 if $text =~ /<!-- saved from url=\(\d{4}\)/;
   $self->{html}{comment_sky} = 1 if $text =~ /SKY-(?:Email-Address|Database|Mailing|List)/;
   $self->{html}{comment_unique_id} = 1 if $text =~ /<!--\s*(?:[\d.]+|[a-f\d]{5,}|\S{10,})\s*-->/i;
+
+  if (exists $self->{html_inside}{script} && $self->{html_inside}{script} > 0)
+  {
+    ### TEST CODE
+    if ($text =~ /\b($events)\b/io)
+    {
+      $self->{html}{t_html_event} = 1;
+    }
+    if ($text =~ /\bon(?:blur|contextmenu|focus|load|resize|submit|unload)\b/)
+    {
+      $self->{html}{t_html_event_unsafe} = 1;
+    }
+    ### END TEST CODE
+    if ($text =~ /\.open\s*\(/) { $self->{html}{window_open} = 1; }
+    if ($text =~ /\.blur\s*\(/) { $self->{html}{window_blur} = 1; }
+    if ($text =~ /\.focus\s*\(/) { $self->{html}{window_focus} = 1; }
+    return;
+  }
 
   if (exists $self->{html_inside}{style} && $self->{html_inside}{style} > 0) { 
     if ($text =~ /font(?:-size)?:\s*([\d\.]+)(p[tx])/i) {
