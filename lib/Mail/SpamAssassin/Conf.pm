@@ -179,7 +179,11 @@ use strict;
 use bytes;
 
 use vars qw{
-  @ISA $VERSION
+  @ISA $VERSION $DEFAULT_COMMANDS
+  $CONF_TYPE_STRING $CONF_TYPE_BOOL
+  $CONF_TYPE_NUMERIC $CONF_TYPE_HASH_KEY_VALUE
+  $CONF_TYPE_ADDRLIST $CONF_TYPE_TEMPLATE
+  $INVALID_VALUE
 };
 
 @ISA = qw();
@@ -205,441 +209,70 @@ my @rule_types = ("body_tests", "uri_tests", "uri_evals",
 
 $VERSION = 'bogus';     # avoid CPAN.pm picking up version strings later
 
+# these are variables instead of constants so that other classes can
+# access them; if they're constants, they'd have to go in Constants.pm
+$CONF_TYPE_STRING           = 1;
+$CONF_TYPE_BOOL             = 2;
+$CONF_TYPE_NUMERIC          = 3;
+$CONF_TYPE_HASH_KEY_VALUE   = 4;
+$CONF_TYPE_ADDRLIST         = 5;
+$CONF_TYPE_TEMPLATE         = 6;
+$INVALID_VALUE              = -999;
+
+# search for "sub new {" to find the start of the code
 ###########################################################################
 
-sub new {
-  my $class = shift;
-  $class = ref($class) || $class;
-  my $self = {
-    main => shift
-  }; bless ($self, $class);
+sub set_default_commands {
+  return if (defined $DEFAULT_COMMANDS);
 
-  $self->{errors} = 0;
-  $self->{tests} = { };
-  $self->{descriptions} = { };
-  $self->{test_types} = { };
-  $self->{scoreset} = [ {}, {}, {}, {} ];
-  $self->{scoreset_current} = 0;
-  $self->set_score_set (0);
-  $self->{tflags} = { };
-  $self->{source_file} = { };
-
-  # after parsing, tests are refiled into these hashes for each test type.
-  # this allows e.g. a full-text test to be rewritten as a body test in
-  # the user's ~/.spamassassin.cf file.
-  $self->{body_tests} = { };
-  $self->{uri_tests}  = { };
-  $self->{uri_evals}  = { }; # not used/implemented yet
-  $self->{head_tests} = { };
-  $self->{head_evals} = { };
-  $self->{body_evals} = { };
-  $self->{full_tests} = { };
-  $self->{full_evals} = { };
-  $self->{rawbody_tests} = { };
-  $self->{rawbody_evals} = { };
-  $self->{meta_tests} = { };
-
-  $self->{eval_plugins} = { };
-
-  # testing stuff
-  $self->{regression_tests} = { };
-
-  $self->{required_score} = 5.0;
-  $self->{report_charset} = '';
-  $self->{report_template} = '';
-  $self->{unsafe_report_template} = '';
-  $self->{spamtrap_template} = '';
-
-  $self->{num_check_received} = 9;
-
-  $self->{use_razor2} = 1;
-  $self->{razor_config} = undef;
-  $self->{razor_timeout} = 10;
-
-  $self->{rbl_timeout} = 15;
-
-  # this will be sedded by implementation code, so ~ is OK.
-  # using "__userstate__" is recommended for defaults, as it allows
-  # Mail::SpamAssassin module users who set that configuration setting,
-  # to receive the correct values.
-
-  $self->{use_auto_whitelist} = 1;
-  $self->{auto_whitelist_factory} = "Mail::SpamAssassin::DBBasedAddrList";
-  $self->{auto_whitelist_path} = "__userstate__/auto-whitelist";
-  $self->{auto_whitelist_file_mode} = '0700';
-  $self->{auto_whitelist_factor} = 0.5;
-  $self->{auto_whitelist_db_modules} = "DB_File GDBM_File NDBM_File SDBM_File";
-
-  $self->{subject_tag} = '*****SPAM*****';
-  $self->{rewrite_header} = { };
-  $self->{to_tag} = 'SPAM';
-  $self->{report_safe} = 1;
-  $self->{report_contact} = 'the administrator of that system';
-  $self->{report_hostname} = '';
-  $self->{skip_rbl_checks} = 0;
-  $self->{dns_available} = "test";
-  $self->{check_mx_attempts} = 2;
-  $self->{check_mx_delay} = 5;
-  $self->{ok_locales} = 'all';
-  $self->{ok_languages} = 'all';
-  $self->{lock_method} = '';
-  $self->{allow_user_rules} = 0;
-  $self->{user_rules_to_compile} = { };
-  $self->{fold_headers} = 1;
-  $self->{headers_spam} = { };
-  $self->{headers_ham} = { };
-
-  $self->{use_dcc} = 1;
-  $self->{dcc_path} = undef; # Browse PATH
-  $self->{dcc_body_max} = 999999;
-  $self->{dcc_fuz1_max} = 999999;
-  $self->{dcc_fuz2_max} = 999999;
-  $self->{dcc_timeout} = 10;
-  $self->{dcc_options} = '-R';
-
-  $self->{use_pyzor} = 1;
-  $self->{pyzor_path} = undef; # Browse PATH
-  $self->{pyzor_max} = 5;
-  $self->{pyzor_timeout} = 10;
-  $self->{pyzor_options} = '';
-
-  $self->{use_bayes} = 1;		# Bayes Master On/Off Switch
-  $self->{use_bayes_rules} = 1;		# Disable BAYES_* rules
-  $self->{bayes_auto_learn} = 1;	# Disable Bayes autolearning
-  $self->{bayes_auto_learn_threshold_nonspam} = 0.1;
-  $self->{bayes_auto_learn_threshold_spam} = 12.0;
-  $self->{bayes_learn_to_journal} = 0;
-  $self->{bayes_path} = "__userstate__/bayes";
-  $self->{bayes_file_mode} = "0700";
-  $self->{bayes_use_hapaxes} = 1;
-  $self->{bayes_use_chi2_combining} = 1;
-  $self->{bayes_expiry_max_db_size} = 150000;
-  $self->{bayes_expiry_pct} = 0.75;
-  $self->{bayes_expiry_period} = 43200;
-  $self->{bayes_expiry_max_exponent} = 9;
-  $self->{bayes_auto_expire} = 1;
-  $self->{bayes_journal_max_size} = 102400;
-  $self->{bayes_ignore_headers} = [ ];
-  $self->{bayes_min_ham_num} = 200;
-  $self->{bayes_min_spam_num} = 200;
-  $self->{bayes_learn_during_report} = 1;
-  $self->{bayes_ignore_from} = { };
-  $self->{bayes_ignore_to} = { };
-
-  # Allow alternate bayes storage implementation
-  $self->{bayes_store_module} = '';
-
-  # Used for SQL based Bayes implementation
-  $self->{bayes_sql_dsn} = '';
-  $self->{bayes_sql_username} = '';
-  $self->{bayes_sql_password} = '';
-  $self->{bayes_sql_override_username} = '';
-
-  $self->{whitelist_from} = { };
-  $self->{whitelist_allows_relays} = { };
-  $self->{blacklist_from} = { };
-
-  $self->{blacklist_to} = { };
-  $self->{whitelist_to} = { };
-  $self->{more_spam_to} = { };
-  $self->{all_spam_to} = { };
-
-  $self->{trusted_networks} = Mail::SpamAssassin::NetSet->new();
-  $self->{internal_networks} = Mail::SpamAssassin::NetSet->new();
-
-  $self->{envelope_sender_header} = undef;
-
-  # this will hold the database connection params
-  $self->{user_scores_dsn} = '';
-  $self->{user_scores_sql_username} = '';
-  $self->{user_scores_sql_password} = '';
-
-  # defaults for SQL based auto-whitelist
-  $self->{user_awl_sql_table} = 'awl';
-
-  $self->{user_scores_ldap_username} = 'username';
-  $self->{user_scores_ldap_password} = '';
-
-  # Make sure we add in X-Spam-Checker-Version
-  $self->{headers_spam}->{"Checker-Version"} = "SpamAssassin _VERSION_ (_SUBVERSION_) on _HOSTNAME_";
-  $self->{headers_ham}->{"Checker-Version"} = $self->{headers_spam}->{"Checker-Version"};
-
-  $self;
-}
-
-sub mtime {
-    my $self = shift;
-    if (@_) {
-	$self->{mtime} = shift;
-    }
-    return $self->{mtime};
-}
-
-###########################################################################
-
-sub parse_scores_only {
-  my ($self) = @_;
-  $self->_parse ($_[1], 1); # don't copy $rules!
-}
-
-sub parse_rules {
-  my ($self) = @_;
-  $self->_parse ($_[1], 0); # don't copy $rules!
-}
-
-sub set_score_set {
-  my ($self, $set) = @_;
-  $self->{scores} = $self->{scoreset}->[$set];
-  $self->{scoreset_current} = $set;
-  dbg("Score set $set chosen.");
-}
-
-sub get_score_set {
-  my($self) = @_;
-  return $self->{scoreset_current};
-}
-
-sub get_rule_types {
-  my ($self) = @_;
-
-  return @rule_types;
-}
-
-sub get_rule_keys {
-  my ($self, $test_type, $priority) = @_;
-
-  # special case rbl_evals since they do not have a priority
-  if ($test_type eq 'rbl_evals') {
-    return keys(%{$self->{$test_type}});
-  }
-
-  if (defined($priority)) {
-    return keys(%{$self->{$test_type}->{$priority}});
-  }
-  else {
-    my @rules;
-    foreach my $priority (keys(%{$self->{priorities}})) {
-      push(@rules, keys(%{$self->{$test_type}->{$priority}}));
-    }
-    return @rules;
-  }
-}
-
-sub get_rule_value {
-  my ($self, $test_type, $rulename, $priority) = @_;
-
-  # special case rbl_evals since they do not have a priority
-  if ($test_type eq 'rbl_evals') {
-    return keys(%{$self->{$test_type}->{$rulename}});
-  }
-
-  if (defined($priority)) {
-    return $self->{$test_type}->{$priority}->{$rulename};
-  }
-  else {
-    foreach my $priority (keys(%{$self->{priorities}})) {
-      if (exists($self->{$test_type}->{$priority}->{$rulename})) {
-	return $self->{$test_type}->{$priority}->{$rulename};
-      }
-    }
-    return undef; # if we get here we didn't find the rule
-  }
-}
-
-sub delete_rule {
-  my ($self, $test_type, $rulename, $priority) = @_;
-
-  # special case rbl_evals since they do not have a priority
-  if ($test_type eq 'rbl_evals') {
-    return delete($self->{$test_type}->{$rulename});
-  }
-
-  if (defined($priority)) {
-    return delete($self->{$test_type}->{$priority}->{$rulename});
-  }
-  else {
-    foreach my $priority (keys(%{$self->{priorities}})) {
-      if (exists($self->{$test_type}->{$priority}->{$rulename})) {
-	return delete($self->{$test_type}->{$priority}->{$rulename});
-      }
-    }
-    return undef; # if we get here we didn't find the rule
-  }
-}
-
-# trim_rules ($regexp)
+# -------------------------------------------------------------------------
+# here's how the config setting blocks work.  Each is a hashref which
+# may contain these keys:
 #
-# Remove all rules that don't match the given regexp (or are sub-rules of
-# meta-tests that match the regexp).
+# setting: the name of the setting it modifies, e.g. "required_score".
+# this also doubles as the default for 'command' (below).
+# THIS IS REQUIRED.
+#
+# command: the command string used in the config file for this setting.
+# optional; 'setting' will be used for the command if this is omitted.
+#
+# aliases: an [aryref] of other aliases for the same command.  optional.
+#
+# type:    the type of this setting:
+#            - $CONF_TYPE_STRING: string
+#            - $CONF_TYPE_NUMERIC: numeric value (float or int)
+#            - $CONF_TYPE_BOOL: boolean (0 or 1)
+#            - $CONF_TYPE_TEMPLATE: template, like "report"
+#            - $CONF_TYPE_ADDRLIST: address list, like "whitelist_from"
+#            - $CONF_TYPE_HASH_KEY_VALUE: hash key/value pair,
+#              like "describe" or tflags
+#          if this is set, a 'code' block is assigned based on the type.
+#
+# code:    a subroutine to deal with the setting.  only used if 'type'
+# is not set.  ONE OF 'code' OR 'type' IS REQUIRED.
+#
+# default: the default value for the setting.  may be omitted if the default
+# value is a non-scalar type, which should be set in the Conf ctor.  note for
+# path types: using "__userstate__" is recommended for defaults, as it allows
+# Mail::SpamAssassin module users who set that configuration setting, to
+# receive the correct values.
+#
+# is_priv: set to 1 if this setting requires 'allow_user_rules' when
+# run from spamd.
+#
+# is_admin: set to 1 if this setting can only be set in the system-wide
+# config when run from spamd.
+#
+# is_frequent: set to 1 if this value occurs frequently in the config.
+# this means its looked up first for speed.
+#
+# note that this array can be extended by plugins, by adding the new
+# config settings to the $conf->{registered_commands} array ref.
+# -------------------------------------------------------------------------
 
-sub trim_rules {
-  my ($self, $regexp) = @_;
-
-  my @all_rules;
-
-  foreach my $rule_type ($self->get_rule_types()) {
-    push(@all_rules, $self->get_rule_keys($rule_type));
-  }
-
-  my @rules_to_keep = grep(/$regexp/, @all_rules);
-
-  if (@rules_to_keep == 0) {
-    die "trim_rules(): All rules excluded, nothing to test.\n";
-  }
-
-  my @meta_tests    = grep(/$regexp/, $self->get_rule_keys('meta_tests'));
-  foreach my $meta (@meta_tests) {
-    push(@rules_to_keep, $self->add_meta_depends($meta))
-  }
-
-  my %rules_to_keep_hash = ();
-
-  foreach my $rule (@rules_to_keep) {
-    $rules_to_keep_hash{$rule} = 1;
-  }
-
-  foreach my $rule_type ($self->get_rule_types()) {
-    foreach my $rule ($self->get_rule_keys($rule_type)) {
-      $self->delete_rule($rule_type, $rule)
-        if (!$rules_to_keep_hash{$rule});
-    }
-  }
-} # trim_rules()
-
-sub add_meta_depends {
-  my ($self, $meta) = @_;
-
-  my @rules = ();
-
-  my @tokens = $self->get_rule_value('meta_tests', $meta) =~ m/(\w+)/g;
-
-  @tokens = grep(!/^\d+$/, @tokens);
-  # @tokens now only consists of sub-rules
-
-  foreach my $token (@tokens) {
-    die "meta test $meta depends on itself\n" if $token eq $meta;
-    push(@rules, $token);
-
-    # If the sub-rule is a meta-test, recurse
-    if ($self->get_rule_value('meta_tests', $token)) {
-      push(@rules, $self->add_meta_depends($token));
-    }
-  } # foreach my $token (@tokens)
-
-  return @rules;
-} # add_meta_depends()
-
-sub is_rule_active {
-  my ($self, $test_type, $rulename, $priority) = @_;
-
-  # special case rbl_evals since they do not have a priority
-  if ($test_type eq 'rbl_evals') {
-    return 0 unless ($self->{$test_type}->{$rulename});
-    return ($self->{scores}->{$rulename});
-  }
-
-  # first determine if the rule is defined
-  if (defined($priority)) {
-    # we have a specific priority
-    return 0 unless ($self->{$test_type}->{$priority}->{$rulename});
-  }
-  else {
-    # no specific priority so we must loop over all currently defined
-    # priorities to see if the rule is defined
-    my $found_p = 0;
-    foreach my $priority (keys %{$self->{priorities}}) {
-      if ($self->{$test_type}->{$priority}->{$rulename}) {
-	$found_p = 1;
-	last;
-      }
-    }
-    return 0 unless ($found_p);
-  }
-
-  return ($self->{scores}->{$rulename});
-}
-
-sub _parse {
-  my ($self, undef, $scoresonly) = @_; # leave $rules in $_[1]
-  local ($_);
-
-  $self->{scoresonly} = $scoresonly;
-
-  # Language selection:
-  # See http://www.gnu.org/manual/glibc-2.2.5/html_node/Locale-Categories.html
-  # and http://www.gnu.org/manual/glibc-2.2.5/html_node/Using-gettextized-software.html
-  my $lang = $ENV{'LANGUAGE'}; # LANGUAGE has the highest precedence but has a
-  if ($lang) {                 # special format: The user may specify more than
-    $lang =~ s/:.*$//;         # one language here, colon separated. We use the
-  }                            # first one only (lazy bums we are :o)
-  $lang ||= $ENV{'LC_ALL'};
-  $lang ||= $ENV{'LC_MESSAGES'};
-  $lang ||= $ENV{'LANG'};
-  $lang ||= 'C';               # Nothing set means C/POSIX
-
-  if ($lang =~ /^(C|POSIX)$/) {
-    $lang = 'en_US';           # Our default language
-  } else {
-    $lang =~ s/[@.+,].*$//;    # Strip codeset, modifier/audience, etc.
-  }                            # (eg. .utf8 or @euro)
-
-  $self->{currentfile} = '(no file)';
-  my @curfile_stack = ();
-  my @if_stack = ();
-  my $skip_parsing = 0;
-  my @conf_lines = split (/\n/, $_[1]);
-
-  while (defined ($_ = shift @conf_lines)) {
-    s/(?<!\\)#.*$//; # remove comments
-    s/^\s+|\s+$//g;  # remove leading and trailing spaces (including newlines)
-    next unless($_); # skip empty lines
-
-    # handle i18n
-    if (s/^lang\s+(\S+)\s+//) { next if ($lang !~ /^$1/i); }
-
-    # File/line number assertions
-    if (/^file\s+start\s+(.+)$/) {
-      push (@curfile_stack, $self->{currentfile});
-      $self->{currentfile} = $1;
-      next;
-    }
-
-    if (/^file\s+end/) {
-      if (scalar @if_stack > 0) {
-	my $cond = pop @if_stack;
-
-	if ($cond->{type} eq 'ifplugin') {
-	  warn "unclosed 'if' in ".
-		$self->{currentfile}.": ifplugin ".$cond->{plugin}."\n";
-	} else {
-	  die "unknown 'if' type: ".$cond->{type}."\n";
-	}
-
-	$self->{errors}++;
-	@if_stack = ();
-      }
-      $skip_parsing = 0;
-
-      my $curfile = pop @curfile_stack;
-      if (defined $curfile) {
-        $self->{currentfile} = $curfile;
-      } else {
-        $self->{currentfile} = '(no file)';
-      }
-      next;
-    }
-
-    # convert all dashes in setting name to underscores.
-    # Simplifies regexps below...
-    1 while s/^(\S+)\-(\S+)/$1_$2/g;
-
-    my($key, $value) = split(/\s+/, $_, 2);
-    $key = lc $key;
-    $value = '' unless ( defined $value );
-
-    # Do a better job untainting this info ...
-    $value =~ /^(.*)$/;
-    $value = $1;
+  # push each config item like this, to avoid a POD bug; it can't just accept
+  # ( { ... }, { ... }, { ...} ) otherwise POD parsing dies.
+  my @cmds = ();
 
 =head2 PREPROCESSING OPTIONS
 
@@ -649,15 +282,6 @@ sub _parse {
 
 Include configuration lines from C<filename>.   Relative paths are considered
 relative to the current configuration file or user preferences file.
-
-=cut
-
-    if ($key eq 'include') {
-      $value = $self->fix_path_relative_to_current_file($value);
-      my $text = $self->{main}->read_cf ($value, 'included file');
-      unshift (@conf_lines, split (/\n/, $text));
-      next;
-    }
 
 =item ifplugin PluginModuleName
 
@@ -679,31 +303,6 @@ For example:
 	  score  MY_PLUGIN_FOO	0.1
 	endif
 
-=cut
-
-    if ($key eq 'ifplugin') {
-      push (@if_stack, {
-	  type => 'ifplugin',
-	  plugin => $value,
-	  skip_parsing => $skip_parsing
-	});
-
-      if ($self->{plugins_loaded}->{$value}) {
-	# leave $skip_parsing as-is; we may not be parsing anyway in this block.
-	# in other words, support nested 'if's and 'require_version's
-      } else {
-	$skip_parsing = 1;
-      }
-      next;
-    }
-
-    # and the endif statement:
-    if ($key eq 'endif') {
-      my $cond = pop @if_stack;
-      $skip_parsing = $cond->{skip_parsing};
-      next;
-    }
-
 =back
 
 =head2 VERSION OPTIONS
@@ -719,36 +318,11 @@ ignore it.
 
 =cut
 
-    if ( $key eq 'require_version' ) {
-      # if it wasn't replaced during install, assume current version ...
-      next if ($value eq "\@\@VERSION\@\@");
-
-      my $ver = $Mail::SpamAssassin::VERSION;
-
-      # if we want to allow "require_version 3.0" be good for all
-      # "3.0.x" versions:
-      ## make sure it's a numeric value
-      #$value += 0.0;
-      ## convert 3.000000 -> 3.0, stay backwards compatible ...
-      #$ver =~ s/^(\d+)\.(\d{1,3}).*$/sprintf "%d.%d", $1, $2/e;
-      #$value =~ s/^(\d+)\.(\d{1,3}).*$/sprintf "%d.%d", $1, $2/e;
-
-      if ($ver ne $value) {
-        warn "configuration file \"$self->{currentfile}\" requires version ".
-                "$value of SpamAssassin, but this is code version ".
-                "$ver. Maybe you need to use ".
-                "the -C switch, or remove the old config files? ".
-                "Skipping this file";
-        $skip_parsing = 1;
-        $self->{errors}++;
-      }
-      next;
+  push (@cmds, {
+    setting => 'require_version',
+    code => sub {
     }
-
-    if ($skip_parsing) { next; }
-
-    # note: no eval'd code should be loaded before the SECURITY line below.
-###########################################################################
+  });
 
 =item version_tag string
 
@@ -766,18 +340,18 @@ e.g.
 
 =cut
 
-    if( $key eq 'version_tag' ) {
+  push (@cmds, {
+    setting => 'version_tag',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
       my $tag = lc($value);
       $tag =~ tr/a-z0-9./_/c;
       foreach (@Mail::SpamAssassin::EXTRA_VERSION) {
-        if($_ eq $tag) {
-          $tag = undef;
-          last;
-        }
+        if($_ eq $tag) { $tag = undef; last; }
       }
       push(@Mail::SpamAssassin::EXTRA_VERSION, $tag) if($tag);
-      next;
     }
+  });
 
 =back
 
@@ -819,9 +393,10 @@ e.g.
 
 =cut
 
-    if ( $key eq 'whitelist_from' ) {
-      $self->add_to_addrlist ('whitelist_from', split (/\s+/, $value)); next;
-    }
+  push (@cmds, {
+    setting => 'whitelist_from',
+    type => $CONF_TYPE_ADDRLIST
+  });
 
 =item unwhitelist_from add@ress.com
 
@@ -838,9 +413,13 @@ e.g.
 
 =cut
 
-    if ( $key eq 'unwhitelist_from' ) {
-      $self->remove_from_addrlist ('whitelist_from', split (/\s+/, $value)); next;
+  push (@cmds, {
+    setting => 'unwhitelist_from',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      $self->remove_from_addrlist ('whitelist_from', split (/\s+/, $value));
     }
+  });
 
 =item whitelist_from_rcvd addr@lists.sourceforge.net sourceforge.net
 
@@ -872,14 +451,21 @@ these are often targets for spammer spoofing.
 
 =cut
 
-    if ( $key eq 'whitelist_from_rcvd' ) {
+  push (@cmds, {
+    setting => 'whitelist_from_rcvd',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
       $self->add_to_addrlist_rcvd ('whitelist_from_rcvd', split(/\s+/, $value));
-      next;
     }
-    if ( $key eq 'def_whitelist_from_rcvd' ) {
+  });
+
+  push (@cmds, {
+    setting => 'def_whitelist_from_rcvd',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
       $self->add_to_addrlist_rcvd ('def_whitelist_from_rcvd', split(/\s+/, $value));
-      next;
     }
+  });
 
 =item whitelist_allows_relays add@ress.com
 
@@ -908,9 +494,10 @@ e.g.
 
 =cut
 
-    if ( $key eq 'whitelist_allows_relays' ) {
-      $self->add_to_addrlist ('whitelist_allows_relays', split (/\s+/, $value)); next;
-    }
+  push (@cmds, {
+    setting => 'whitelist_allows_relays',
+    type => $CONF_TYPE_ADDRLIST
+  });
 
 =item unwhitelist_from_rcvd add@ress.com
 
@@ -929,11 +516,14 @@ e.g.
 
 =cut
 
-    if ( $key eq 'unwhitelist_from_rcvd' ) {
+  push (@cmds, {
+    setting => 'unwhitelist_from_rcvd',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
       $self->remove_from_addrlist_rcvd('whitelist_from_rcvd', split (/\s+/, $value));
       $self->remove_from_addrlist_rcvd('def_whitelist_from_rcvd', split (/\s+/, $value));
-      next;
     }
+  });
 
 =item blacklist_from add@ress.com
 
@@ -942,9 +532,10 @@ non-spam, but which the user doesn't want.  Same format as C<whitelist_from>.
 
 =cut
 
-    if ( $key eq 'blacklist_from' ) {
-      $self->add_to_addrlist ('blacklist_from', split (/\s+/, $value)); next;
-    }
+  push (@cmds, {
+    setting => 'blacklist_from',
+    type => $CONF_TYPE_ADDRLIST
+  });
 
 =item unblacklist_from add@ress.com
 
@@ -959,9 +550,14 @@ e.g.
 
 =cut
 
-    if ( $key eq 'unblacklist_from' ) {
-      $self->remove_from_addrlist ('blacklist_from', split (/\s+/, $value)); next;
+
+  push (@cmds, {
+    setting => 'unblacklist_from',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      $self->remove_from_addrlist ('blacklist_from', split (/\s+/, $value));
     }
+  });
 
 
 =item whitelist_to add@ress.com
@@ -1003,15 +599,18 @@ See above.
 
 =cut
 
-    if ( $key eq 'whitelist_to' ) {
-      $self->add_to_addrlist ('whitelist_to', split (/\s+/, $value)); next;
-    }
-    if ( $key eq 'more_spam_to' ) {
-      $self->add_to_addrlist ('more_spam_to', split (/\s+/, $value)); next;
-    }
-    if ( $key eq 'all_spam_to' ) {
-      $self->add_to_addrlist ('all_spam_to', split (/\s+/, $value)); next;
-    }
+  push (@cmds, {
+    setting => 'whitelist_to',
+    type => $CONF_TYPE_ADDRLIST
+  });
+  push (@cmds, {
+    setting => 'more_spam_to',
+    type => $CONF_TYPE_ADDRLIST
+  });
+  push (@cmds, {
+    setting => 'all_spam_to',
+    type => $CONF_TYPE_ADDRLIST
+  });
 
 =item blacklist_to add@ress.com
 
@@ -1021,9 +620,11 @@ be blacklisted.  Same format as C<blacklist_from>.
 
 =cut
 
-    if ( $key eq 'blacklist_to' ) {
-      $self->add_to_addrlist ('blacklist_to', split (/\s+/, $value)); next;
-    }
+
+  push (@cmds, {
+    setting => 'blacklist_to',
+    type => $CONF_TYPE_ADDRLIST
+  });
 
 =item envelope_sender_header Name-Of-Header
 
@@ -1067,9 +668,11 @@ example:
 
 =cut
 
-    if ( $key eq 'envelope_sender_header' ) {
-      $self->{envelope_sender_header} = $value; next;
-    }
+  push (@cmds, {
+    setting => 'envelope_sender_header',
+    default => undef,
+    type => $CONF_TYPE_STRING
+  });
 
 =back
 
@@ -1092,9 +695,12 @@ name is still accepted, but is deprecated.
 
 =cut
 
-    if ( ($key eq 'required_hits') || ($key eq 'required_score') ) {
-      $self->{required_score} = $value+0.0; next;
-    }
+  push (@cmds, {
+    setting => 'required_score',
+    aliases => ['required_hits'],       # backwards compat
+    default => 5,
+    type => $CONF_TYPE_NUMERIC
+  });
 
 =item score SYMBOLIC_TEST_NAME n.nn [ n.nn n.nn n.nn ]
 
@@ -1130,42 +736,47 @@ sub-rules, and are not scored or listed in the 'tests hit' reports.
 
 =cut
 
-  if ( $key eq 'score' ) {
-    my($rule, @scores) = split(/\s+/, $value);
+  push (@cmds, {
+    setting => 'score',
+    is_frequent => 1,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      my($rule, @scores) = split(/\s+/, $value);
 
-    my $relative = (@scores > 0 && $scores[0] =~ /^\(\d+(\.\d+)?\)$/) ? 1 : 0;
-    if ($relative && !exists $self->{scoreset}->[0]->{$rule}) {
-      my $msg = "Relative score without previous setting in SpamAssassin configuration, ".
-                        "skipping: $_";
+      my $relative = (@scores > 0 && $scores[0] =~ /^\(\d+(\.\d+)?\)$/) ? 1 : 0;
+      if ($relative && !exists $self->{scoreset}->[0]->{$rule})
+      {
+        my $msg = "Relative score without previous setting in SpamAssassin ".
+                    "configuration, skipping: $_";
 
-      if ($self->{lint_rules}) {
-        warn $msg."\n";
-      } else {
-        dbg ($msg);
+        if ($self->{lint_rules}) {
+          warn $msg."\n";
+        } else {
+          dbg ($msg);
+        }
+        $self->{errors}++;
+        return;
       }
-      $self->{errors}++;
-      next;
-    }
 
-    if (@scores == 4) {
-      for my $index (0..3) {
-	my $score = $relative ?
-	  $self->{scoreset}->[$index]->{$rule} + $scores[$index] :
-	  $scores[$index];
+      if (@scores == 4) {
+        for my $index (0..3) {
+          my $score = $relative ?
+            $self->{scoreset}->[$index]->{$rule} + $scores[$index] :
+            $scores[$index];
 
-	$self->{scoreset}->[$index]->{$rule} = $score + 0.0;
+          $self->{scoreset}->[$index]->{$rule} = $score + 0.0;
+        }
+      }
+      elsif (@scores > 0) {
+        my $score = $relative ?
+          $self->{scoreset}->[0]->{$rule} + $scores[0] : $scores[0];
+
+        for my $index (0..3) {
+          $self->{scoreset}->[$index]->{$rule} = $score + 0.0;
+        }
       }
     }
-    elsif (@scores > 0) {
-      my $score = $relative ?
-        $self->{scoreset}->[0]->{$rule} + $scores[0] : $scores[0];
-
-      for my $index (0..3) {
-	$self->{scoreset}->[$index]->{$rule} = $score + 0.0;
-      }
-    }
-    next;
-  }
+  });
 
 =back
 
@@ -1188,7 +799,10 @@ STRING. (They will be converted to square brackets.)
 
 =cut
 
-    if ( $key eq 'rewrite_header' ) {
+  push (@cmds, {
+    setting => 'rewrite_header',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
       my($hdr, $string) = split(/\s+/, $value, 2);
       $hdr = ucfirst(lc($hdr));
 
@@ -1196,12 +810,13 @@ STRING. (They will be converted to square brackets.)
       if ($hdr =~ /^(?:From|Subject|To)$/) {
         $string =~ tr/()/[]/;
         $self->{rewrite_header}->{$hdr} = $string;
-        next;
+        return;
       }
 
       # if we get here, note the issue, then we'll fail through for an error.
       dbg("rewrite_header: ignoring $hdr, not From, Subject, or To");
     }
+  });
 
 =item fold_headers { 0 | 1 }        (default: 1)
 
@@ -1215,9 +830,11 @@ long lines).
 
 =cut
 
-   if ( $key eq 'fold_headers' ) {
-     $self->{fold_headers} = $value+0; next;
-   }
+  push (@cmds, {
+    setting => 'fold_headers',
+    default => 1,
+    type => $CONF_TYPE_BOOL
+  });
 
 =item add_header { spam | ham | all } header_name string
 
@@ -1243,38 +860,44 @@ See also C<clear_headers> for removing headers.
 
 Here are some examples (these are the defaults):
 
- add_header spam Flag _YESNOCAPS_
- add_header all Status _YESNO_, score=_SCORE__ required=_REQD_ tests=_TESTS_ autolearn=_AUTOLEARN_ version=_VERSION_
- add_header all Level _STARS(*)_
- add_header all Checker-Version SpamAssassin _VERSION_ (_SUBVERSION_) on _HOSTNAME_
+add_header spam Flag _YESNOCAPS_
+add_header all Status _YESNO_, score=_SCORE__ required=_REQD_ tests=_TESTS_ autolearn=_AUTOLEARN_ version=_VERSION_
+add_header all Level _STARS(*)_
+add_header all Checker-Version SpamAssassin _VERSION_ (_SUBVERSION_) on _HOSTNAME_
 
 =cut
 
-    # easier to do RE here ...
-    if (/^add_header\s+(ham|spam|all)\s+([A-Za-z0-9_-]+)\s+(.*?)\s*$/) {
-      my ($type, $name, $line) = ($1, $2, $3);
-      if ($line =~ /^"(.*)"$/) {
-	$line = $1;
+  push (@cmds, {
+    setting => 'add_header',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value !~ /^(ham|spam|all)\s+([A-Za-z0-9_-]+)\s+(.*?)\s*$/) {
+        return $INVALID_VALUE;
+      }
+
+      my ($type, $name, $hline) = ($1, $2, $3);
+      if ($hline =~ /^"(.*)"$/) {
+        $hline = $1;
       }
       my @line = split(
-                   /\\\\/,    # split at backslashes,
-                   "$line\n"  # newline needed to make trailing backslashes work
-                 );
+                  /\\\\/,     # split at backslashes,
+                  $hline."\n" # newline needed to make trailing backslashes work
+                );
       map {
         s/\\t/\t/g; # expand tabs
         s/\\n/\n/g; # expand newlines
         s/\\.//g;   # purge all other escapes
       } @line;
-      $line = join("\\", @line);
-      chop($line);  # remove dummy newline again
+      $hline = join("\\", @line);
+      chop($hline);  # remove dummy newline again
       if (($type eq "ham") || ($type eq "all")) {
-	$self->{headers_ham}->{$name} = $line;
+        $self->{headers_ham}->{$name} = $hline;
       }
       if (($type eq "spam") || ($type eq "all")) {
-	$self->{headers_spam}->{$name} = $line;
+        $self->{headers_spam}->{$name} = $hline;
       }
-      next;
     }
+  });
 
 =item remove_header { spam | ham | all } header_name
 
@@ -1291,19 +914,25 @@ determine that SpamAssassin is running.
 
 =cut
 
-    if (/^remove_header\s+(ham|spam|all)\s+([A-Za-z0-9_-]+)\s*$/) {
-      my ($type, $name) = ($1, $2);
+  push (@cmds, {
+    setting => 'remove_header',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value !~ /^(ham|spam|all)\s+([A-Za-z0-9_-]+)\s*$/) {
+        return $INVALID_VALUE;
+      }
 
-      next if ( $name eq "Checker-Version" );
+      my ($type, $name) = ($1, $2);
+      return if ( $name eq "Checker-Version" );
 
       if (($type eq "ham") || ($type eq "all")) {
-	delete $self->{headers_ham}->{$name};
+        delete $self->{headers_ham}->{$name};
       }
       if (($type eq "spam") || ($type eq "all")) {
-	delete $self->{headers_spam}->{$name};
+        delete $self->{headers_spam}->{$name};
       }
-      next;
     }
+  });
 
 =item clear_headers
 
@@ -1318,15 +947,18 @@ determine that SpamAssassin is running.
 
 =cut
 
-    if ( $key eq 'clear_headers' ) {
+  push (@cmds, {
+    setting => 'clear_headers',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
       for my $name (keys %{ $self->{headers_ham} }) {
-	delete $self->{headers_ham}->{$name} if $name ne "Checker-Version";
+        delete $self->{headers_ham}->{$name} if $name ne "Checker-Version";
       }
       for my $name (keys %{ $self->{headers_spam} }) {
-	delete $self->{headers_spam}->{$name} if $name ne "Checker-Version";
+        delete $self->{headers_spam}->{$name} if $name ne "Checker-Version";
       }
-      next;
     }
+  });
 
 =item report_safe_copy_headers header_name ...
 
@@ -1338,10 +970,13 @@ separated by spaces, or you can just use multiple lines.
 
 =cut
 
-   if ( $key eq 'report_safe_copy_headers' ) {
-     push(@{$self->{report_safe_copy_headers}}, split(/\s+/, $value));
-     next;
-   }
+  push (@cmds, {
+    setting => 'report_safe_copy_headers',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      push(@{$self->{report_safe_copy_headers}}, split(/\s+/, $value));
+    }
+  });
 
 =item report_safe { 0 | 1 | 2 }	(default: 1)
 
@@ -1366,13 +1001,17 @@ B<report_safe> to 0.
 
 =cut
 
-    if ( $key eq 'report_safe' ) {
+  push (@cmds, {
+    setting => 'report_safe',
+    default => 1,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
       $self->{report_safe} = $value+0;
       if (! $self->{report_safe}) {
-	$self->{headers_spam}->{"Report"} = "_REPORT_";
+        $self->{headers_spam}->{"Report"} = "_REPORT_";
       }
-      next;
     }
+  });
 
 =item report_charset CHARSET		(default: unset)
 
@@ -1381,9 +1020,11 @@ is attached to spam mail messages.
 
 =cut
 
-    if ( $key eq 'report_charset' ) {
-      $self->{report_charset} = $value; next;
-    }
+  push (@cmds, {
+    setting => 'report_charset',
+    default => '',
+    type => $CONF_TYPE_STRING
+  });
 
 =item report ...some text for a report...
 
@@ -1399,14 +1040,11 @@ Tags can be included as explained above.
 
 =cut
 
-    if ( $key eq 'report' ) {
-      my $report = $value;
-      if ( $report =~ /^"(.*?)"$/ ) {
-        $report = $1;
-      }
-
-      $self->{report_template} .= "$report\n"; next;
-    }
+  push (@cmds, {
+    command => 'report',
+    setting => 'report_template',
+    type => $CONF_TYPE_TEMPLATE
+  });
 
 =item clear_report_template
 
@@ -1414,9 +1052,12 @@ Clear the report template.
 
 =cut
 
-    if ( $key eq 'clear_report_template' ) {
-      $self->{report_template} = ''; next;
-    }
+  push (@cmds, {
+    command => 'clear_report_template',
+    setting => 'report_template',
+    default => '',
+    code => \&set_template_clear
+  });
 
 =item report_contact ...text of contact address...
 
@@ -1426,9 +1067,11 @@ of the system the scanner is running on is also included.
 
 =cut
 
-    if ( $key eq 'report_contact' ) {
-      $self->{report_contact} = $value; next;
-    }
+  push (@cmds, {
+    setting => 'report_contact',
+    default => 'the administrator of that system',
+    type => $CONF_TYPE_STRING
+  });
 
 =item report_hostname ...hostname to use...
 
@@ -1438,9 +1081,11 @@ SpamAssassin calls itself.
 
 =cut
 
-    if ( $key eq 'report_hostname' ) {
-      $self->{report_hostname} = $value; next;
-    }
+  push (@cmds, {
+    setting => 'report_hostname',
+    default => '',
+    type => $CONF_TYPE_STRING
+  });
 
 =item unsafe_report ...some text for a report...
 
@@ -1455,14 +1100,12 @@ Tags can be used in this template (see above for details).
 
 =cut
 
-    if ( $key eq 'unsafe_report' ) {
-      my $report = $value;
-      if ( $report =~ /^"(.*?)"$/ ) {
-        $report = $1;
-      }
-
-      $self->{unsafe_report_template} .= "$report\n"; next;
-    }
+  push (@cmds, {
+    command => 'unsafe_report',
+    setting => 'unsafe_report_template',
+    default => '',
+    type => $CONF_TYPE_TEMPLATE
+  });
 
 =item clear_unsafe_report_template
 
@@ -1470,9 +1113,11 @@ Clear the unsafe_report template.
 
 =cut
 
-    if ( $key eq 'clear_unsafe_report_template' ) {
-      $self->{unsafe_report_template} = ''; next;
-    }
+  push (@cmds, {
+    command => 'clear_unsafe_report_template',
+    setting => 'unsafe_report_template',
+    code => \&set_template_clear
+  });
 
 =item spamtrap ...some text for spamtrap reply mail...
 
@@ -1485,13 +1130,12 @@ Unfortunately tags can not be used with this option.
 
 =cut
 
-    if ( $key eq 'spamtrap' ) {
-      my $report = $value;
-      if ( $report =~ /^"(.*?)"$/ ) {
-        $report = $1;
-      }
-      $self->{spamtrap_template} .= "$report\n"; next;
-    }
+  push (@cmds, {
+    command => 'spamtrap',
+    setting => 'spamtrap_template',
+    default => '',
+    type => $CONF_TYPE_TEMPLATE
+  });
 
 =item clear_spamtrap_template
 
@@ -1499,9 +1143,11 @@ Clear the spamtrap template.
 
 =cut
 
-    if ( $key eq 'clear_spamtrap_template' ) {
-      $self->{spamtrap_template} = ''; next;
-    }
+  push (@cmds, {
+    command => 'clear_spamtrap_template',
+    setting => 'spamtrap_template',
+    code => \&set_template_clear
+  });
 
 =item describe SYMBOLIC_TEST_NAME description ...
 
@@ -1515,10 +1161,11 @@ length to no more than 50 characters.
 
 =cut
 
-    if ( $key eq 'describe' ) {
-      my($k,$v) = split(/\s+/, $value, 2);
-      $self->{descriptions}->{$k} = $v; next;
-    }
+  push (@cmds, {
+    setting => 'describe',
+    is_frequent => 1,
+    type => $CONF_TYPE_HASH_KEY_VALUE
+  });
 
 =back
 
@@ -1690,9 +1337,11 @@ Select the languages to allow from the list below:
 
 =cut
 
-    if ( $key eq 'ok_languages' ) {
-      $self->{ok_languages} = $value; next;
-    }
+  push (@cmds, {
+    setting => 'ok_languages',
+    default => 'all',
+    type => $CONF_TYPE_STRING
+  });
 
 =back
 
@@ -1744,9 +1393,11 @@ Select the locales to allow from the list below:
 
 =cut
 
-    if ( $key eq 'ok_locales' ) {
-      $self->{ok_locales} = $value; next;
-    }
+  push (@cmds, {
+    setting => 'ok_locales',
+    default => 'all',
+    type => $CONF_TYPE_STRING
+  });
 
 =back
 
@@ -1760,9 +1411,11 @@ Whether to use DCC, if it is available.
 
 =cut
 
-    if ( $key eq 'use_dcc' ) {
-      $self->{use_dcc} = $value+0; next;
-    }
+  push (@cmds, {
+    setting => 'use_dcc',
+    default => 1,
+    type => $CONF_TYPE_BOOL
+  });
 
 =item dcc_timeout n              (default: 10)
 
@@ -1771,9 +1424,11 @@ the results
 
 =cut
 
-    if ( $key eq 'dcc_timeout' ) {
-      $self->{dcc_timeout} = $value+0; next;
-    }
+  push (@cmds, {
+    setting => 'dcc_timeout',
+    default => 10,
+    type => $CONF_TYPE_NUMERIC
+  });
 
 =item dcc_body_max NUMBER
 
@@ -1793,17 +1448,21 @@ The default is 999999 for all these options.
 
 =cut
 
-    if ( $key eq 'dcc_body_max' ) {
-      $self->{dcc_body_max} = $value+0; next;
-    }
-
-    if ( $key eq 'dcc_fuz1_max' ) {
-      $self->{dcc_fuz1_max} = $value+0; next;
-    }
-
-    if ( $key eq 'dcc_fuz2_max' ) {
-      $self->{dcc_fuz2_max} = $value+0; next;
-    }
+  push (@cmds, {
+    setting => 'dcc_body_max',
+    default => 999999,
+    type => $CONF_TYPE_NUMERIC
+  },
+  {
+    setting => 'dcc_fuz1_max',
+    default => 999999,
+    type => $CONF_TYPE_NUMERIC
+  },
+  {
+    setting => 'dcc_fuz2_max',
+    default => 999999,
+    type => $CONF_TYPE_NUMERIC
+  });
 
 
 =item use_pyzor ( 0 | 1 )		(default: 1)
@@ -1812,9 +1471,11 @@ Whether to use Pyzor, if it is available.
 
 =cut
 
-    if ( $key eq 'use_pyzor' ) {
-      $self->{use_pyzor} = $value+0; next;
-    }
+  push (@cmds, {
+    setting => 'use_pyzor',
+    default => 1,
+    type => $CONF_TYPE_BOOL
+  });
 
 =item pyzor_timeout n              (default: 10)
 
@@ -1823,9 +1484,11 @@ the results.
 
 =cut
 
-    if ( $key eq 'pyzor_timeout' ) {
-      $self->{pyzor_timeout} = $value+0; next;
-    }
+  push (@cmds, {
+    setting => 'pyzor_timeout',
+    default => 10,
+    type => $CONF_TYPE_NUMERIC
+  });
 
 =item pyzor_max NUMBER
 
@@ -1837,9 +1500,11 @@ The default is 5.
 
 =cut
 
-    if ( $key eq 'pyzor_max' ) {
-      $self->{pyzor_max} = $value+0; next;
-    }
+  push (@cmds, {
+    setting => 'pyzor_max',
+    default => 5,
+    type => $CONF_TYPE_NUMERIC
+  });
 
 =item trusted_networks ip.add.re.ss[/mask] ...   (default: none)
 
@@ -1896,12 +1561,15 @@ then it's trusted
 
 =cut
 
-    if ( $key eq 'trusted_networks' ) {
+  push (@cmds, {
+    setting => 'trusted_networks',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
       foreach my $net (split (/\s+/, $value)) {
-	$self->{trusted_networks}->add_cidr ($net);
+        $self->{trusted_networks}->add_cidr ($net);
       }
-      next;
     }
+  });
 
 =item clear_trusted_networks
 
@@ -1909,9 +1577,13 @@ Empty the list of trusted networks.
 
 =cut
 
-    if ( $key eq 'clear_trusted_networks' ) {
-      $self->{trusted_networks} = Mail::SpamAssassin::NetSet->new(); next;
+  push (@cmds, {
+    setting => 'clear_trusted_networks',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      $self->{trusted_networks} = Mail::SpamAssassin::NetSet->new();
     }
+  });
 
 =item internal_networks ip.add.re.ss[/mask] ...   (default: none)
 
@@ -1931,12 +1603,15 @@ SpamAssassin is running will be considered external.
 
 =cut
 
-    if ( $key eq 'internal_networks' ) {
+  push (@cmds, {
+    setting => 'internal_networks',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
       foreach my $net (split (/\s+/, $value)) {
-	$self->{internal_networks}->add_cidr ($net);
+        $self->{internal_networks}->add_cidr ($net);
       }
-      next;
     }
+  });
 
 =item clear_internal_networks
 
@@ -1944,9 +1619,13 @@ Empty the list of internal networks.
 
 =cut
 
-    if ( $key eq 'clear_internal_networks' ) {
-      $self->{internal_networks} = Mail::SpamAssassin::NetSet->new(); next;
+  push (@cmds, {
+    setting => 'clear_internal_networks',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      $self->{internal_networks} = Mail::SpamAssassin::NetSet->new();
     }
+  });
 
 =item use_razor2 ( 0 | 1 )		(default: 1)
 
@@ -1954,9 +1633,11 @@ Whether to use Razor version 2, if it is available.
 
 =cut
 
-    if ( $key eq 'use_razor2' ) {
-      $self->{use_razor2} = $value+0; next;
-    }
+  push (@cmds, {
+    setting => 'use_razor2',
+    default => 1,
+    type => $CONF_TYPE_BOOL
+  });
 
 =item razor_timeout n		(default: 10)
 
@@ -1965,9 +1646,11 @@ the results
 
 =cut
 
-    if ( $key eq 'razor_timeout' ) {
-      $self->{razor_timeout} = $value+0; next;
-    }
+  push (@cmds, {
+    setting => 'razor_timeout',
+    default => 10,
+    type => $CONF_TYPE_NUMERIC
+  });
 
 =item use_bayes ( 0 | 1 )		(default: 1)
 
@@ -1977,9 +1660,11 @@ operations.
 
 =cut
 
-    if ( $key eq 'use_bayes' ) {
-      $self->{use_bayes} = $value+0; next;
-    }
+  push (@cmds, {
+    setting => 'use_bayes',
+    default => 1,
+    type => $CONF_TYPE_BOOL
+  });
 
 =item use_bayes_rules ( 0 | 1 )		(default: 1)
 
@@ -1989,9 +1674,11 @@ auto and manual learning enabled.
 
 =cut
 
-    if ( $key eq 'use_bayes_rules' ) {
-      $self->{use_bayes_rules} = $value+0; next;
-    }
+  push (@cmds, {
+    setting => 'use_bayes_rules',
+    default => 1,
+    type => $CONF_TYPE_BOOL
+  });
 
 =item skip_rbl_checks { 0 | 1 }   (default: 0)
 
@@ -2000,9 +1687,11 @@ for you, set this to 1.
 
 =cut
 
-    if ( $key eq 'skip_rbl_checks' ) {
-      $self->{skip_rbl_checks} = $value+0; next;
-    }
+  push (@cmds, {
+    setting => 'skip_rbl_checks',
+    default => 0,
+    type => $CONF_TYPE_BOOL
+  });
 
 =item rbl_timeout n		(default: 15)
 
@@ -2026,9 +1715,11 @@ within 5 seconds of the beginning of the check or they will be timed out.
 
 =cut
 
-    if ( $key eq 'rbl_timeout' ) {
-      $self->{rbl_timeout} = $value+0; next;
-    }
+  push (@cmds, {
+    setting => 'rbl_timeout',
+    default => 15,
+    type => $CONF_TYPE_NUMERIC
+  });
 
 =item check_mx_attempts n	(default: 2)
 
@@ -2037,9 +1728,11 @@ times, waiting 5 seconds each time.
 
 =cut
 
-    if ( $key eq 'check_mx_attempts' ) {
-      $self->{check_mx_attempts} = $value+0; next;
-    }
+  push (@cmds, {
+    setting => 'check_mx_attempts',
+    default => 2,
+    type => $CONF_TYPE_NUMERIC
+  });
 
 =item check_mx_delay n		(default: 5)
 
@@ -2047,9 +1740,11 @@ How many seconds to wait before retrying an MX check.
 
 =cut
 
-    if ( $key eq 'check_mx_delay' ) {
-      $self->{check_mx_delay} = $value+0; next;
-    }
+  push (@cmds, {
+    setting => 'check_mx_delay',
+    default => 5,
+    type => $CONF_TYPE_NUMERIC
+  });
 
 =item bayes_ignore_from add@ress.com
 
@@ -2076,10 +1771,10 @@ be listed.
 
 =cut
 
-
-    if (/^bayes_ignore_from\s+(.+)$/) {
-      $self->add_to_addrlist ('bayes_ignore_from', split (' ', $1)); next;
-    }
+  push (@cmds, {
+    setting => 'bayes_ignore_from',
+    type => $CONF_TYPE_ADDRLIST
+  });
 
 =item bayes_ignore_to add@ress.com
 
@@ -2088,9 +1783,10 @@ to the listed addresses.  See C<bayes_ignore_from> for details.
 
 =cut
 
-    if (/^bayes_ignore_to\s+(.+)$/) {
-      $self->add_to_addrlist ('bayes_ignore_to', split (' ', $1)); next;
-    }
+  push (@cmds, {
+    setting => 'bayes_ignore_to',
+    type => $CONF_TYPE_ADDRLIST
+  });
 
 =item dns_available { yes | test[: name1 name2...] | no }   (default: test)
 
@@ -2115,10 +1811,15 @@ that the minimum limit on fds be raised to at least 256 for safety.
 
 =cut
 
-    # RE is easier for now ...
-    if (/^dns_available\s+(yes|no|test|test:\s+.+)$/) {
-      $self->{dns_available} = ($1 or "test"); next;
+  push (@cmds, {
+    setting => 'dns_available',
+    default => 'test',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value !~ /^(yes|no|test|test:\s+.+)$/) { return $INVALID_VALUE; }
+      $self->{dns_available} = ($1 or "test");
     }
+  });
 
 =back
 
@@ -2143,9 +1844,11 @@ mean; C<factor> = 0 mean just use the calculated score.
 
 =cut
 
-    if ( $key eq 'auto_whitelist_factor' ) {
-      $self->{auto_whitelist_factor} = $value+0; next;
-    }
+  push (@cmds, {
+    setting => 'auto_whitelist_factor',
+    default => 0.5,
+    type => $CONF_TYPE_NUMERIC
+  });
 
 =item auto_whitelist_db_modules Module ...	(default: see below)
 
@@ -2161,9 +1864,11 @@ ie. a space-separated list of perl module names.  The default is:
 
 =cut
 
-    if ( $key eq 'auto_whitelist_db_modules' ) {
-      $self->{auto_whitelist_db_modules} = $value; next;
-    }
+  push (@cmds, {
+    setting => 'auto_whitelist_db_modules',
+    default => 'DB_File GDBM_File NDBM_File SDBM_File',
+    type => $CONF_TYPE_STRING
+  });
 
 =item bayes_auto_learn ( 0 | 1 )      (default: 1)
 
@@ -2173,9 +1878,9 @@ learning system supported currently is a naive-Bayesian-style classifier.
 
 Note that certain tests are ignored when determining whether a message
 should be trained upon:
- - auto-whitelist (AWL)
- - rules with tflags set to 'learn' (the Bayesian rules)
- - rules with tflags set to 'userconf' (user white/black-listing rules, etc)
+- auto-whitelist (AWL)
+- rules with tflags set to 'learn' (the Bayesian rules)
+- rules with tflags set to 'userconf' (user white/black-listing rules, etc)
 
 Also note that auto-training occurs using scores from either scoreset
 0 or 1, depending on what scoreset is used during message check.  It is
@@ -2183,9 +1888,11 @@ likely that the message check and auto-train scores will be different.
 
 =cut
 
-    if ( $key eq 'bayes_auto_learn' ) {
-      $self->{bayes_auto_learn} = $value+0; next;
-    }
+  push (@cmds, {
+    setting => 'bayes_auto_learn',
+    default => 1,
+    type => $CONF_TYPE_BOOL
+  });
 
 =item bayes_auto_learn_threshold_nonspam n.nn	(default: 0.1)
 
@@ -2194,9 +1901,11 @@ SpamAssassin's learning systems automatically as a non-spam message.
 
 =cut
 
-    if ( $key eq 'bayes_auto_learn_threshold_nonspam' ) {
-      $self->{bayes_auto_learn_threshold_nonspam} = $value+0; next;
-    }
+  push (@cmds, {
+    setting => 'bayes_auto_learn_threshold_nonspam',
+    default => 0.1,
+    type => $CONF_TYPE_NUMERIC
+  });
 
 =item bayes_auto_learn_threshold_spam n.nn	(default: 12.0)
 
@@ -2209,9 +1918,11 @@ working value for this option is 6.
 
 =cut
 
-    if ( $key eq 'bayes_auto_learn_threshold_spam' ) {
-      $self->{bayes_auto_learn_threshold_spam} = $value+0; next;
-    }
+  push (@cmds, {
+    setting => 'bayes_auto_learn_threshold_spam',
+    default => 12.0,
+    type => $CONF_TYPE_NUMERIC
+  });
 
 =item bayes_ignore_header header_name
 
@@ -2222,14 +1933,18 @@ inappropriate cues to the Bayesian classifier, allowing it
 to take a "short cut". To avoid this, list the headers using this
 setting.  Example:
 
-	bayes_ignore_header X-Upstream-Spamfilter
-	bayes_ignore_header X-Upstream-SomethingElse
+        bayes_ignore_header X-Upstream-Spamfilter
+        bayes_ignore_header X-Upstream-SomethingElse
 
 =cut
 
-    if ( $key eq 'bayes_ignore_header' ) {
-      push (@{$self->{bayes_ignore_headers}}, $value); next;
+  push (@cmds, {
+    setting => 'bayes_ignore_header',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      push (@{$self->{bayes_ignore_headers}}, $value);
     }
+  });
 
 =item bayes_min_ham_num			(Default: 200)
 
@@ -2241,13 +1956,16 @@ spam, but you can tune these up or down with these two settings.
 
 =cut
 
-    if ( $key eq 'bayes_min_ham_num' ) {
-      $self->{bayes_min_ham_num} = $value+0; next;
-    }
-
-    if ( $key eq 'bayes_min_spam_num' ) {
-      $self->{bayes_min_spam_num} = $value+0; next;
-    }
+  push (@cmds, {
+    setting => 'bayes_min_ham_num',
+    default => 200,
+    type => $CONF_TYPE_NUMERIC
+  });
+  push (@cmds, {
+    setting => 'bayes_min_spam_num',
+    default => 200,
+    type => $CONF_TYPE_NUMERIC
+  });
 
 =item bayes_learn_during_report         (Default: 1)
 
@@ -2257,9 +1975,11 @@ this option to 0.
 
 =cut
 
-    if ( $key eq 'bayes_learn_during_report' ) {
-      $self->{bayes_learn_during_report} = $value+0; next;
-    }
+  push (@cmds, {
+    setting => 'bayes_learn_during_report',
+    default => 1,
+    type => $CONF_TYPE_BOOL
+  });
 
 =item bayes_sql_override_username
 
@@ -2271,9 +1991,11 @@ group bayes databases.
 
 =cut
 
-    if ($key eq 'bayes_sql_override_username') {
-      $self->{bayes_sql_override_username} = $value; next;
-    }
+  push (@cmds, {
+    setting => 'bayes_sql_override_username',
+    default => '',
+    type => $CONF_TYPE_STRING
+  });
 
 ##############
 
@@ -2284,11 +2006,15 @@ only characters in the ranges A-Z, a-z, 0-9, -, _ and / are permitted.
 
 =cut
 
-    # leave as RE for now?
-    if (/^pyzor_options\s+([-A-Za-z0-9_\/ ]+)$/) {
+  push (@cmds, {
+    setting => 'pyzor_options',
+    default => '',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value !~ /^([-A-Za-z0-9_\/ ]+)$/) { return $INVALID_VALUE; }
       $self->{pyzor_options} = $1;
-      next;
     }
+  });
 
 =item lock_method type
 
@@ -2317,29 +2043,20 @@ The supported locking systems for C<type> are as follows:
 
 =cut
 
-    if ($key eq 'lock_method') {
+  push (@cmds, {
+    setting => 'lock_method',
+    default => '',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
       if ($value !~ /^(nfssafe|flock|win32)$/) {
-        warn "invalid value for lock_method: $value\n";
-        goto failed_line;
-
-      } else {
-        $self->{lock_method} = $value;
-        # recreate the locker
-        $self->{main}->create_locker();
+        return $INVALID_VALUE;
       }
-      next;
+      
+      $self->{lock_method} = $value;
+      # recreate the locker
+      $self->{main}->create_locker();
     }
-
-###########################################################################
-    # SECURITY: no eval'd code should be loaded before this line.
-    #
-
-    if ($scoresonly) {
-      if (!$self->{allow_user_rules}) {
-        goto failed_line;
-      }
-      dbg("Checking privileged commands in user config");
-    }
+  });
 
 =back
 
@@ -2349,7 +2066,7 @@ These settings differ from the ones above, in that they are considered
 'privileged'.  Only users running C<spamassassin> from their procmailrc's or
 forward files, or sysadmins editing a file in C</etc/mail/spamassassin>, can
 use them.   C<spamd> users cannot use them in their C<user_prefs> files, for
-security and efficiency reasons, unless allow_user_rules is enabled (and
+security and efficiency reasons, unless C<allow_user_rules> is enabled (and
 then, they may only add rules from below).
 
 =over 4
@@ -2372,10 +2089,16 @@ existing system rule from a C<user_prefs> file with C<spamd>.
 
 =cut
 
-    if ( $key eq 'allow_user_rules' ) {
+  push (@cmds, {
+    setting => 'allow_user_rules',
+    is_priv => 1,
+    default => 0,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
       $self->{allow_user_rules} = $value+0;
-      dbg( ($self->{allow_user_rules} ? "Allowing":"Not allowing") . " user rules!"); next;
+      dbg( ($self->{allow_user_rules} ? "Allowing":"Not allowing") . " user rules!");
     }
+  });
 
 =item header SYMBOLIC_TEST_NAME header op /pattern/modifiers	[if-unset: STRING]
 
@@ -2508,27 +2231,31 @@ single A record containing a bitmask of results.
 
 =cut
 
-    # easier as RE now
-    if (/^header\s+(\S+)\s+(?:rbl)?eval:(.*)$/) {
-      my ($name, $fn) = ($1, $2);
+  push (@cmds, {
+    setting => 'header',
+    is_frequent => 1,
+    is_priv => 1,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value =~ /^(\S+)\s+(?:rbl)?eval:(.*)$/) {
+        my ($name, $fn) = ($1, $2);
 
-      if ($fn =~ /^check_rbl/) {
-	$self->add_test ($name, $fn, TYPE_RBL_EVALS);
+        if ($fn =~ /^check_rbl/) {
+          $self->add_test ($name, $fn, TYPE_RBL_EVALS);
+        }
+        else {
+          $self->add_test ($name, $fn, TYPE_HEAD_EVALS);
+        }
+      }
+      elsif ($value =~ /^(\S+)\s+exists:(.*)$/) {
+        $self->add_test ($1, "$2 =~ /./", TYPE_HEAD_TESTS);
+        $self->{descriptions}->{$1} = "Found a $2 header";
       }
       else {
-	$self->add_test ($name, $fn, TYPE_HEAD_EVALS);
+        $self->add_test (split(/\s+/,$value,2), TYPE_HEAD_TESTS);
       }
-      next;
     }
-    if (/^header\s+(\S+)\s+exists:(.*)$/) {
-      $self->add_test ($1, "$2 =~ /./", TYPE_HEAD_TESTS);
-      $self->{descriptions}->{$1} = "Found a $2 header";
-      next;
-    }
-    if ( $key eq 'header' ) {
-      $self->add_test (split(/\s+/,$value,2), TYPE_HEAD_TESTS);
-      next;
-    }
+  });
 
 =item body SYMBOLIC_TEST_NAME /pattern/modifiers
 
@@ -2547,15 +2274,20 @@ Define a body eval test.  See above.
 
 =cut
 
-    # easier as RE right now
-    if (/^body\s+(\S+)\s+eval:(.*)$/) {
-      $self->add_test ($1, $2, TYPE_BODY_EVALS);
-      next;
+  push (@cmds, {
+    setting => 'body',
+    is_frequent => 1,
+    is_priv => 1,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value =~ /^(\S+)\s+eval:(.*)$/) {
+        $self->add_test ($1, $2, TYPE_BODY_EVALS);
+      }
+      else {
+        $self->add_test (split(/\s+/,$value,2), TYPE_BODY_TESTS);
+      }
     }
-    if ( $key eq 'body' ) {
-      $self->add_test (split(/\s+/,$value,2), TYPE_BODY_TESTS);
-      next;
-    }
+  });
 
 =item uri SYMBOLIC_TEST_NAME /pattern/modifiers
 
@@ -2574,10 +2306,14 @@ points of the URI, and will also be faster.
 #      $self->add_test ($1, $2, TYPE_URI_EVALS);
 #      next;
 #    }
-    if ( $key eq 'uri' ) {
+  push (@cmds, {
+    setting => 'uri',
+    is_priv => 1,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
       $self->add_test (split(/\s+/,$value,2), TYPE_URI_TESTS);
-      next;
     }
+  });
 
 =item rawbody SYMBOLIC_TEST_NAME /pattern/modifiers
 
@@ -2594,15 +2330,19 @@ Define a raw-body eval test.  See above.
 
 =cut
 
-    # easier as RE now
-    if (/^rawbody\s+(\S+)\s+eval:(.*)$/) {
-      $self->add_test ($1, $2, TYPE_RAWBODY_EVALS);
-      next;
+  push (@cmds, {
+    setting => 'rawbody',
+    is_frequent => 1,
+    is_priv => 1,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value =~ /^(\S+)\s+eval:(.*)$/) {
+        $self->add_test ($1, $2, TYPE_RAWBODY_EVALS);
+      } else {
+        $self->add_test (split(/\s+/,$value,2), TYPE_RAWBODY_TESTS);
+      }
     }
-    if ( $key eq 'rawbody' ) {
-      $self->add_test (split(/\s+/,$value,2), TYPE_RAWBODY_TESTS);
-      next;
-    }
+  });
 
 =item full SYMBOLIC_TEST_NAME /pattern/modifiers
 
@@ -2618,15 +2358,18 @@ Define a full-body eval test.  See above.
 
 =cut
 
-    # easier as RE now
-    if (/^full\s+(\S+)\s+eval:(.*)$/) {
-      $self->add_test ($1, $2, TYPE_FULL_EVALS);
-      next;
+  push (@cmds, {
+    setting => 'full',
+    is_priv => 1,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value =~ /^(\S+)\s+eval:(.*)$/) {
+        $self->add_test ($1, $2, TYPE_FULL_EVALS);
+      } else {
+        $self->add_test (split(/\s+/,$value,2), TYPE_FULL_TESTS);
+      }
     }
-    if ( $key eq 'full' ) {
-      $self->add_test (split(/\s+/,$value,2), TYPE_FULL_TESTS);
-      next;
-    }
+  });
 
 =item meta SYMBOLIC_TEST_NAME boolean expression
 
@@ -2656,10 +2399,15 @@ ignore these for scoring.
 
 =cut
 
-    if ( $key eq 'meta' ) {
+  push (@cmds, {
+    setting => 'meta',
+    is_frequent => 1,
+    is_priv => 1,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
       $self->add_test (split(/\s+/,$value,2), TYPE_META_TESTS);
-      next;
     }
+  });
 
 =item tflags SYMBOLIC_TEST_NAME [ {net|nice|learn|userconf|noautolearn} ]
 
@@ -2696,11 +2444,12 @@ The test will be ignored when calculating the score for learning systems.
 
 =cut
 
-    if ( $key eq 'tflags' ) {
-      my($k,$v) = split(/\s+/, $value, 2);
-      $self->{tflags}->{$k} = $v; next;
-      next;     # ignored in SpamAssassin modules
-    }
+  push (@cmds, {
+    setting => 'tflags',
+    is_frequent => 1,
+    is_priv => 1,
+    type => $CONF_TYPE_HASH_KEY_VALUE
+  });
 
 =item priority SYMBOLIC_TEST_NAME n
 
@@ -2709,16 +2458,11 @@ tests, are run in priority order. The default test priority is 0 (zero).
 
 =cut
 
-    if ($key eq 'priority') {
-      my ($k, $v) = split(/\s+/, $value, 2);
-      $self->{priority}->{$k} = $v;
-      next;
-    }
-
-###########################################################################
-    # SECURITY: allow_user_rules is only in affect until here.
-    #
-    if ($scoresonly) { goto failed_line; }
+  push (@cmds, {
+    setting => 'priority',
+    is_priv => 1,
+    type => $CONF_TYPE_HASH_KEY_VALUE
+  });
 
 =back
 
@@ -2742,10 +2486,15 @@ general running of SpamAssassin.
 
 =cut
 
-    # RE ...
-    if (/^test\s+(\S+)\s+(ok|fail)\s+(.*)$/) {
-      $self->add_regression_test($1, $2, $3); next;
+  push (@cmds, {
+    setting => 'test',
+    is_admin => 1,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value !~ /^(\S+)\s+(ok|fail)\s+(.*)$/) { return $INVALID_VALUE; }
+      $self->add_regression_test($1, $2, $3);
     }
+  });
 
 =item razor_config filename
 
@@ -2754,9 +2503,11 @@ Currently this is left to Razor to decide.
 
 =cut
 
-    if ( $key eq 'razor_config' ) {
-      $self->{razor_config} = $value; next;
-    }
+  push (@cmds, {
+    setting => 'razor_config',
+    is_admin => 1,
+    type => $CONF_TYPE_STRING
+  });
 
 =item pyzor_path STRING
 
@@ -2767,9 +2518,12 @@ use this, as the current PATH will have been cleared.
 
 =cut
 
-    if ( $key eq 'pyzor_path' ) {
-      $self->{pyzor_path} = $value; next;
-    }
+  push (@cmds, {
+    setting => 'pyzor_path',
+    is_admin => 1,
+    default => undef,
+    type => $CONF_TYPE_STRING
+  });
 
 =item dcc_home STRING
 
@@ -2781,9 +2535,11 @@ is found in C<dcc_home>, it will use that interface that instead of C<dccproc>.
 
 =cut
 
-    if ( $key eq 'dcc_home' ) {
-      $self->{dcc_home} = $value; next;
-    }
+  push (@cmds, {
+    setting => 'dcc_home',
+    is_admin => 1,
+    type => $CONF_TYPE_STRING
+  });
 
 =item dcc_dccifd_path STRING
 
@@ -2793,9 +2549,11 @@ If a C<dccifd> socket is found, it will use it instead of C<dccproc>.
 
 =cut
 
-    if ( $key eq 'dcc_dccifd_path' ) {
-      $self->{dcc_dccifd_path} = $value; next;
-    }
+  push (@cmds, {
+    setting => 'dcc_dccifd_path',
+    is_admin => 1,
+    type => $CONF_TYPE_STRING
+  });
 
 =item dcc_path STRING
 
@@ -2806,23 +2564,32 @@ use this, as the current PATH will have been cleared.
 
 =cut
 
-    if ( $key eq 'dcc_path' ) {
-      $self->{dcc_path} = $value; next;
-    }
+  push (@cmds, {
+    setting => 'dcc_path',
+    is_admin => 1,
+    default => undef,
+    type => $CONF_TYPE_STRING
+  });
 
 =item dcc_options options
 
 Specify additional options to the dccproc(8) command. Please note that only
 [A-Z -] is allowed (security).
 
-The default is C<-R>
+The default is C<-R>.
 
 =cut
 
-    # RE ...
-    if (/^dcc_options\s+([A-Z -]+)/) {
-      $self->{dcc_options} = $1; next;
+  push (@cmds, {
+    setting => 'dcc_options',
+    is_admin => 1,
+    default => '-R',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value !~ /^([A-Z -]+)/) { return $INVALID_VALUE; }
+      $self->{dcc_options} = $1;
     }
+  });
 
 =item use_auto_whitelist ( 0 | 1 )		(default: 1)
 
@@ -2839,9 +2606,12 @@ whitelist entries added to your config files.
 
 =cut
 
-    if ( $key eq 'use_auto_whitelist' ) {
-      $self->{use_auto_whitelist} = $value+0; next;
-    }
+  push (@cmds, {
+    setting => 'use_auto_whitelist',
+    is_admin => 1,
+    default => 1,
+    type => $CONF_TYPE_BOOL
+  });
 
 =item auto_whitelist_factory module (default: Mail::SpamAssassin::DBBasedAddrList)
 
@@ -2849,9 +2619,12 @@ Select alternative whitelist factory module.
 
 =cut
 
-    if ( $key eq 'auto_whitelist_factory' ) {
-      $self->{auto_whitelist_factory} = $value; next;
-    }
+  push (@cmds, {
+    setting => 'auto_whitelist_factory',
+    is_admin => 1,
+    default => 'Mail::SpamAssassin::DBBasedAddrList',
+    type => $CONF_TYPE_STRING
+  });
 
 =item auto_whitelist_path /path/to/file	(default: ~/.spamassassin/auto-whitelist)
 
@@ -2861,9 +2634,12 @@ SpamAssassin use, you may want to share this across all users.
 
 =cut
 
-    if ( $key eq 'auto_whitelist_path' ) {
-      $self->{auto_whitelist_path} = $value; next;
-    }
+  push (@cmds, {
+    setting => 'auto_whitelist_path',
+    is_admin => 1,
+    default => '__userstate__/auto-whitelist',
+    type => $CONF_TYPE_STRING
+  });
 
 =item bayes_path /path/to/file	(default: ~/.spamassassin/bayes)
 
@@ -2880,9 +2656,12 @@ database per user.)
 
 =cut
 
-    if ( $key eq 'bayes_path' ) {
-      $self->{bayes_path} = $value; next;
-    }
+  push (@cmds, {
+    setting => 'bayes_path',
+    is_admin => 1,
+    default => '__userstate__/bayes',
+    type => $CONF_TYPE_STRING
+  });
 
 =item auto_whitelist_file_mode		(default: 0700)
 
@@ -2894,9 +2673,12 @@ not have any execute bits set (the umask is set to 111).
 
 =cut
 
-    if ( $key eq 'auto_whitelist_file_mode' ) {
-      $self->{auto_whitelist_file_mode} = $value+0; next;
-    }
+  push (@cmds, {
+    setting => 'auto_whitelist_file_mode',
+    is_admin => 1,
+    default => '0700',
+    type => $CONF_TYPE_NUMERIC
+  });
 
 =item bayes_file_mode		(default: 0700)
 
@@ -2908,9 +2690,12 @@ not have any execute bits set (the umask is set to 111).
 
 =cut
 
-    if ( $key eq 'bayes_file_mode' ) {
-      $self->{bayes_file_mode} = $value+0; next;
-    }
+  push (@cmds, {
+    setting => 'bayes_file_mode',
+    is_admin => 1,
+    default => '0700',
+    type => $CONF_TYPE_NUMERIC
+  });
 
 =item bayes_use_hapaxes		(default: 1)
 
@@ -2920,9 +2705,11 @@ increases database size by about a factor of 8 to 10.
 
 =cut
 
-    if ( $key eq 'bayes_use_hapaxes' ) {
-      $self->{bayes_use_hapaxes} = $value+0; next;
-    }
+  push (@cmds, {
+    setting => 'bayes_use_hapaxes',
+    default => 1,
+    type => $CONF_TYPE_BOOL
+  });
 
 =item bayes_use_chi2_combining		(default: 1)
 
@@ -2933,9 +2720,11 @@ in corpus size etc.
 
 =cut
 
-    if ( $key eq 'bayes_use_chi2_combining' ) {
-      $self->{bayes_use_chi2_combining} = $value+0; next;
-    }
+  push (@cmds, {
+    setting => 'bayes_use_chi2_combining',
+    default => 1,
+    type => $CONF_TYPE_BOOL
+  });
 
 =item bayes_journal_max_size		(default: 102400)
 
@@ -2946,9 +2735,11 @@ syncing will not occur.
 
 =cut
 
-    if ( $key eq 'bayes_journal_max_size' ) {
-      $self->{bayes_journal_max_size} = $value+0; next;
-    }
+  push (@cmds, {
+    setting => 'bayes_journal_max_size',
+    default => 102400,
+    type => $CONF_TYPE_NUMERIC
+  });
 
 =item bayes_expiry_max_db_size		(default: 150000)
 
@@ -2959,9 +2750,11 @@ equivalent to a 8Mb database file.
 
 =cut
 
-    if ( $key eq 'bayes_expiry_max_db_size' ) {
-      $self->{bayes_expiry_max_db_size} = $value+0; next;
-    }
+  push (@cmds, {
+    setting => 'bayes_expiry_max_db_size',
+    default => 150000,
+    type => $CONF_TYPE_NUMERIC
+  });
 
 =item bayes_auto_expire       		(default: 1)
 
@@ -2971,9 +2764,11 @@ database surpasses the bayes_expiry_max_db_size value.
 
 =cut
 
-    if ( $key eq 'bayes_auto_expire' ) {
-      $self->{bayes_auto_expire} = $value+0; next;
-    }
+  push (@cmds, {
+    setting => 'bayes_auto_expire',
+    default => 1,
+    type => $CONF_TYPE_BOOL
+  });
 
 =item bayes_learn_to_journal  	(default: 0)
 
@@ -2985,9 +2780,11 @@ delay before the updates are actually committed to the Bayes database.
 
 =cut
 
-    if ( $key eq 'bayes_learn_to_journal' ) {
-      $self->{bayes_learn_to_journal} = $value+0; next;
-    }
+  push (@cmds, {
+    setting => 'bayes_learn_to_journal',
+    default => 0,
+    type => $CONF_TYPE_BOOL
+  });
 
 =item bayes_store_module
 
@@ -2997,12 +2794,16 @@ bayes storage mechanism.  It must conform to the published storage specification
 
 =cut
 
-    if ( $key eq 'bayes_store_module' ) {
-      my $module = $value;
-      $module =~ /^([_A-Za-z0-9:]+)$/;
+  push (@cmds, {
+    setting => 'bayes_store_module',
+    is_admin => 1,
+    default => '',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value !~ /^([_A-Za-z0-9:]+)$/) { return $INVALID_VALUE; }
       $self->{bayes_store_module} = $1;
-      next;
     }
+  });
 
 =item bayes_sql_dsn DBI::databasetype:databasename:hostname:port
 
@@ -3012,9 +2813,12 @@ This option give the connect string used to connect to the SQL based Bayes stora
 
 =cut
 
-    if ( $key eq 'bayes_sql_dsn' ) {
-      $self->{bayes_sql_dsn} = $value; next;
-    }
+  push (@cmds, {
+    setting => 'bayes_sql_dsn',
+    is_admin => 1,
+    default => '',
+    type => $CONF_TYPE_STRING
+  });
 
 =item bayes_sql_username
 
@@ -3024,9 +2828,12 @@ This option gives the username used by the above DSN.
 
 =cut
 
-    if ( $key eq 'bayes_sql_username' ) {
-      $self->{bayes_sql_username} = $value; next;
-    }
+  push (@cmds, {
+    setting => 'bayes_sql_username',
+    is_admin => 1,
+    default => '',
+    type => $CONF_TYPE_STRING
+  });
 
 =item bayes_sql_password
 
@@ -3036,9 +2843,12 @@ This option gives the password used by the above DSN.
 
 =cut
 
-    if ( $key eq 'bayes_sql_password' ) {
-      $self->{bayes_sql_password} = $value; next;
-    }
+  push (@cmds, {
+    setting => 'bayes_sql_password',
+    is_admin => 1,
+    default => '',
+    type => $CONF_TYPE_STRING
+  });
 
 =item user_scores_dsn DBI:databasetype:databasename:hostname:port
 
@@ -3059,9 +2869,12 @@ Example: C<ldap://localhost:389/dc=koehntopp,dc=de?spamassassinconfig?uid=__USER
 
 =cut
 
-    if ( $key eq 'user_scores_dsn' ) {
-      $self->{user_scores_dsn} = $value; next;
-    }
+  push (@cmds, {
+    setting => 'user_scores_dsn',
+    is_admin => 1,
+    default => '',
+    type => $CONF_TYPE_STRING
+  });
 
 =item user_scores_sql_username username
 
@@ -3069,9 +2882,12 @@ The authorized username to connect to the above DSN.
 
 =cut
 
-    if( $key eq 'user_scores_sql_username' ) {
-      $self->{user_scores_sql_username} = $value; next;
-    }
+  push (@cmds, {
+    setting => 'user_scores_sql_username',
+    is_admin => 1,
+    default => '',
+    type => $CONF_TYPE_STRING
+  });
 
 =item user_scores_sql_password password
 
@@ -3079,9 +2895,12 @@ The password for the database username, for the above DSN.
 
 =cut
 
-    if( $key eq 'user_scores_sql_password' ) {
-      $self->{user_scores_sql_password} = $value; next;
-    }
+  push (@cmds, {
+    setting => 'user_scores_sql_password',
+    is_admin => 1,
+    default => '',
+    type => $CONF_TYPE_STRING
+  });
 
 =item user_scores_sql_custom_query query
 
@@ -3134,9 +2953,11 @@ SELECT preference, value FROM _TABLE_ WHERE username = _USERNAME_ OR username = 
 
 =cut
 
-    if ($key eq 'user_scores_sql_custom_query') {
-      $self->{user_scores_sql_custom_query} = $value; next;
-    }
+  push (@cmds, {
+    setting => 'user_scores_sql_custom_query',
+    is_admin => 1,
+    type => $CONF_TYPE_STRING
+  });
 
 =item user_awl_dsn DBI:databasetype:databasename:hostname:port
 
@@ -3144,36 +2965,49 @@ If you load user auto-whitelists from an SQL database, this will set the DSN
 used to connect.  Example: C<DBI:mysql:spamassassin:localhost>
 
 =cut
-    if ( $key eq 'user_awl_dsn' ) {
-      $self->{user_awl_dsn} = $value; next;
-    }
+
+  push (@cmds, {
+    setting => 'user_awl_dsn',
+    is_admin => 1,
+    type => $CONF_TYPE_STRING
+  });
 
 =item user_awl_sql_username username
 
 The authorized username to connect to the above DSN.
 
 =cut
-    if ( $key eq 'user_awl_sql_username' ) {
-      $self->{user_awl_sql_username} = $value; next;
-    }
+
+  push (@cmds, {
+    setting => 'user_awl_sql_username',
+    is_admin => 1,
+    type => $CONF_TYPE_STRING
+  });
 
 =item user_awl_sql_password password
 
 The password for the database username, for the above DSN.
 
 =cut
-    if ( $key eq 'user_awl_sql_password' ) {
-      $self->{user_awl_sql_password} = $value; next;
-    }
+
+  push (@cmds, {
+    setting => 'user_awl_sql_password',
+    is_admin => 1,
+    type => $CONF_TYPE_STRING
+  });
 
 =item user_awl_sql_table tablename
 
 The table user auto-whitelists are stored in, for the above DSN.
 
 =cut
-    if ( $key eq 'user_awl_sql_table' ) {
-      $self->{user_awl_sql_table} = $value; next;
-    }
+
+  push (@cmds, {
+    setting => 'user_awl_sql_table',
+    is_admin => 1,
+    default => 'awl',
+    type => $CONF_TYPE_STRING
+  });
 
 =item user_scores_ldap_username
 
@@ -3183,19 +3017,25 @@ Example: C<cn=master,dc=koehntopp,dc=de>
 
 =cut
 
-    if ($key eq 'user_scores_ldap_username') {
-      $self->{user_scores_ldap_username} = $value; next;
-    }
+  push (@cmds, {
+    setting => 'user_scores_ldap_username',
+    is_admin => 1,
+    default => 'username',
+    type => $CONF_TYPE_STRING
+  });
 
 =item user_scores_ldap_password
 
 This is the password used to connect to the LDAP server.
 
 =cut
- 
-    if ($key eq 'user_scores_ldap_password') {
-      $self->{user_scores_ldap_password} = $value; next;
-    }
+
+  push (@cmds, {
+    setting => 'user_scores_ldap_password',
+    is_admin => 1,
+    default => '',
+    type => $CONF_TYPE_STRING
+  });
 
 =item loadplugin PluginModuleName [/path/to/module.pm]
 
@@ -3211,26 +3051,524 @@ See C<Mail::SpamAssassin::Plugin> for more details on writing plugins.
 
 =cut
 
-    if (/^loadplugin\s+(\S+)\s+(\S+)$/) {	# two-arg variant
-      $self->load_plugin ($1, $2); next;
+  push (@cmds, {
+    setting => 'loadplugin',
+    is_admin => 1,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value =~ /^(\S+)\s+(\S+)$/) {
+        $self->load_plugin ($1, $2);
+      } else {
+        $self->load_plugin ($value);
+      }
     }
-    elsif ($key eq 'loadplugin') {		# single-arg variant
-      $self->load_plugin ($value); next;
-    }
+  });
 
+  $DEFAULT_COMMANDS = \@cmds;
+}
 
 ###########################################################################
+
+sub new {
+  my $class = shift;
+  $class = ref($class) || $class;
+  my $self = {
+    main => shift
+  }; bless ($self, $class);
+
+  set_default_commands();
+  $self->{registered_commands} = $DEFAULT_COMMANDS;
+  $self->set_defaults_from_command_list();
+
+  $self->{errors} = 0;
+  $self->{tests} = { };
+  $self->{descriptions} = { };
+  $self->{test_types} = { };
+  $self->{scoreset} = [ {}, {}, {}, {} ];
+  $self->{scoreset_current} = 0;
+  $self->set_score_set (0);
+  $self->{tflags} = { };
+  $self->{source_file} = { };
+
+  # after parsing, tests are refiled into these hashes for each test type.
+  # this allows e.g. a full-text test to be rewritten as a body test in
+  # the user's ~/.spamassassin.cf file.
+  $self->{body_tests} = { };
+  $self->{uri_tests}  = { };
+  $self->{uri_evals}  = { }; # not used/implemented yet
+  $self->{head_tests} = { };
+  $self->{head_evals} = { };
+  $self->{body_evals} = { };
+  $self->{full_tests} = { };
+  $self->{full_evals} = { };
+  $self->{rawbody_tests} = { };
+  $self->{rawbody_evals} = { };
+  $self->{meta_tests} = { };
+  $self->{eval_plugins} = { };
+
+  # testing stuff
+  $self->{regression_tests} = { };
+
+  $self->{rewrite_header} = { };
+  $self->{user_rules_to_compile} = { };
+  $self->{headers_spam} = { };
+  $self->{headers_ham} = { };
+
+  $self->{bayes_ignore_headers} = [ ];
+  $self->{bayes_ignore_from} = { };
+  $self->{bayes_ignore_to} = { };
+
+  $self->{whitelist_from} = { };
+  $self->{whitelist_allows_relays} = { };
+  $self->{blacklist_from} = { };
+
+  $self->{blacklist_to} = { };
+  $self->{whitelist_to} = { };
+  $self->{more_spam_to} = { };
+  $self->{all_spam_to} = { };
+
+  $self->{trusted_networks} = Mail::SpamAssassin::NetSet->new();
+  $self->{internal_networks} = Mail::SpamAssassin::NetSet->new();
+
+  # Make sure we add in X-Spam-Checker-Version
+  $self->{headers_spam}->{"Checker-Version"} =
+                "SpamAssassin _VERSION_ (_SUBVERSION_) on _HOSTNAME_";
+  $self->{headers_ham}->{"Checker-Version"} =
+                $self->{headers_spam}->{"Checker-Version"};
+
+  # these are now unsettable by end-users; TODO: move out of Conf
+  $self->{num_check_received} = 9;
+  $self->{bayes_expiry_pct} = 0.75;
+  $self->{bayes_expiry_period} = 43200;
+  $self->{bayes_expiry_max_exponent} = 9;
+
+  $self;
+}
+
+sub set_defaults_from_command_list {
+  my ($self) = @_;
+  foreach my $cmd (@{$self->{registered_commands}}) {
+    # note! exists, not defined -- we want to be able to set
+    # "undef" default values.
+    if (exists($cmd->{default})) {
+      $self->{$cmd->{setting}} = $cmd->{default};
+    }
+  }
+}
+
+sub mtime {
+    my $self = shift;
+    if (@_) {
+        $self->{mtime} = shift;
+    }
+    return $self->{mtime};
+}
+
+###########################################################################
+
+sub parse_scores_only {
+  my ($self) = @_;
+  $self->_parse ($_[1], 1); # don't copy $rules!
+}
+
+sub parse_rules {
+  my ($self) = @_;
+  $self->_parse ($_[1], 0); # don't copy $rules!
+}
+
+sub set_score_set {
+  my ($self, $set) = @_;
+  $self->{scores} = $self->{scoreset}->[$set];
+  $self->{scoreset_current} = $set;
+  dbg("Score set $set chosen.");
+}
+
+sub get_score_set {
+  my($self) = @_;
+  return $self->{scoreset_current};
+}
+
+sub get_rule_types {
+  my ($self) = @_;
+
+  return @rule_types;
+}
+
+sub get_rule_keys {
+  my ($self, $test_type, $priority) = @_;
+
+  # special case rbl_evals since they do not have a priority
+  if ($test_type eq 'rbl_evals') {
+    return keys(%{$self->{$test_type}});
+  }
+
+  if (defined($priority)) {
+    return keys(%{$self->{$test_type}->{$priority}});
+  }
+  else {
+    my @rules;
+    foreach my $pri (keys(%{$self->{priorities}})) {
+      push(@rules, keys(%{$self->{$test_type}->{$pri}}));
+    }
+    return @rules;
+  }
+}
+
+sub get_rule_value {
+  my ($self, $test_type, $rulename, $priority) = @_;
+
+  # special case rbl_evals since they do not have a priority
+  if ($test_type eq 'rbl_evals') {
+    return keys(%{$self->{$test_type}->{$rulename}});
+  }
+
+  if (defined($priority)) {
+    return $self->{$test_type}->{$priority}->{$rulename};
+  }
+  else {
+    foreach my $pri (keys(%{$self->{priorities}})) {
+      if (exists($self->{$test_type}->{$pri}->{$rulename})) {
+        return $self->{$test_type}->{$pri}->{$rulename};
+      }
+    }
+    return undef; # if we get here we didn't find the rule
+  }
+}
+
+sub delete_rule {
+  my ($self, $test_type, $rulename, $priority) = @_;
+
+  # special case rbl_evals since they do not have a priority
+  if ($test_type eq 'rbl_evals') {
+    return delete($self->{$test_type}->{$rulename});
+  }
+
+  if (defined($priority)) {
+    return delete($self->{$test_type}->{$priority}->{$rulename});
+  }
+  else {
+    foreach my $pri (keys(%{$self->{priorities}})) {
+      if (exists($self->{$test_type}->{$pri}->{$rulename})) {
+        return delete($self->{$test_type}->{$pri}->{$rulename});
+      }
+    }
+    return undef; # if we get here we didn't find the rule
+  }
+}
+
+# trim_rules ($regexp)
+#
+# Remove all rules that don't match the given regexp (or are sub-rules of
+# meta-tests that match the regexp).
+
+sub trim_rules {
+  my ($self, $regexp) = @_;
+
+  my @all_rules;
+  my $rule_type;
+
+  foreach $rule_type ($self->get_rule_types()) {
+    push(@all_rules, $self->get_rule_keys($rule_type));
+  }
+
+  my @rules_to_keep = grep(/$regexp/, @all_rules);
+
+  if (@rules_to_keep == 0) {
+    die "trim_rules(): All rules excluded, nothing to test.\n";
+  }
+
+  my @meta_tests    = grep(/$regexp/, $self->get_rule_keys('meta_tests'));
+  foreach my $meta (@meta_tests) {
+    push(@rules_to_keep, $self->add_meta_depends($meta))
+  }
+
+  my %rules_to_keep_hash = ();
+
+  foreach my $rule (@rules_to_keep) {
+    $rules_to_keep_hash{$rule} = 1;
+  }
+
+  foreach $rule_type ($self->get_rule_types()) {
+    foreach my $rulekey ($self->get_rule_keys($rule_type)) {
+      $self->delete_rule($rule_type, $rulekey)
+                    if (!$rules_to_keep_hash{$rulekey});
+    }
+  }
+} # trim_rules()
+
+sub add_meta_depends {
+  my ($self, $meta) = @_;
+
+  my @rules = ();
+
+  my @tokens = $self->get_rule_value('meta_tests', $meta) =~ m/(\w+)/g;
+
+  @tokens = grep(!/^\d+$/, @tokens);
+  # @tokens now only consists of sub-rules
+
+  foreach my $token (@tokens) {
+    die "meta test $meta depends on itself\n" if $token eq $meta;
+    push(@rules, $token);
+
+    # If the sub-rule is a meta-test, recurse
+    if ($self->get_rule_value('meta_tests', $token)) {
+      push(@rules, $self->add_meta_depends($token));
+    }
+  } # foreach my $token (@tokens)
+
+  return @rules;
+} # add_meta_depends()
+
+sub is_rule_active {
+  my ($self, $test_type, $rulename, $priority) = @_;
+
+  # special case rbl_evals since they do not have a priority
+  if ($test_type eq 'rbl_evals') {
+    return 0 unless ($self->{$test_type}->{$rulename});
+    return ($self->{scores}->{$rulename});
+  }
+
+  # first determine if the rule is defined
+  if (defined($priority)) {
+    # we have a specific priority
+    return 0 unless ($self->{$test_type}->{$priority}->{$rulename});
+  }
+  else {
+    # no specific priority so we must loop over all currently defined
+    # priorities to see if the rule is defined
+    my $found_p = 0;
+    foreach my $pri (keys %{$self->{priorities}}) {
+      if ($self->{$test_type}->{$pri}->{$rulename}) {
+        $found_p = 1;
+        last;
+      }
+    }
+    return 0 unless ($found_p);
+  }
+
+  return ($self->{scores}->{$rulename});
+}
+
+###########################################################################
+
+sub build_command_luts {
+  my ($self) = @_;
+
+  return if $self->{already_built_config_lookup};
+  $self->{already_built_config_lookup} = 1;
+
+  $self->{command_luts} = { };
+  $self->{command_luts}->{frequent} = { };
+  $self->{command_luts}->{remaining} = { };
+
+  my $set;
+  foreach my $cmd (@{$self->{registered_commands}})
+  {
+    # first off, decide what set this is in.
+    if ($cmd->{is_frequent}) { $set = 'frequent'; }
+    else { $set = 'remaining'; }
+
+    # next, its priority (used to ensure frequently-used params
+    # are parsed first)
+    my $cmdname = $cmd->{command} || $cmd->{setting};
+    foreach my $name ($cmdname, @{$cmd->{aliases}}) {
+      $self->{command_luts}->{$set}->{$name} = $cmd;
+    }
+  }
+}
+
+###########################################################################
+
+sub _parse {
+  my ($self, undef, $scoresonly) = @_; # leave $rules in $_[1]
+
+  $self->{scoresonly} = $scoresonly;
+
+  # Language selection:
+  # See http://www.gnu.org/manual/glibc-2.2.5/html_node/Locale-Categories.html
+  # and http://www.gnu.org/manual/glibc-2.2.5/html_node/Using-gettextized-software.html
+  my $lang = $ENV{'LANGUAGE'}; # LANGUAGE has the highest precedence but has a
+  if ($lang) {                 # special format: The user may specify more than
+    $lang =~ s/:.*$//;         # one language here, colon separated. We use the
+  }                            # first one only (lazy bums we are :o)
+  $lang ||= $ENV{'LC_ALL'};
+  $lang ||= $ENV{'LC_MESSAGES'};
+  $lang ||= $ENV{'LANG'};
+  $lang ||= 'C';               # Nothing set means C/POSIX
+
+  if ($lang =~ /^(C|POSIX)$/) {
+    $lang = 'en_US';           # Our default language
+  } else {
+    $lang =~ s/[@.+,].*$//;    # Strip codeset, modifier/audience, etc.
+  }                            # (eg. .utf8 or @euro)
+
+  # build and get fast-access handles on the command lookup tables
+  $self->build_command_luts();
+  my $lut_frequent = $self->{command_luts}->{frequent};
+  my $lut_remaining = $self->{command_luts}->{remaining};
+
+  $self->{currentfile} = '(no file)';
+  my $skip_parsing = 0;
+  my @curfile_stack = ();
+  my @if_stack = ();
+  my @conf_lines = split (/\n/, $_[1]);
+  my $line;
+
+  while (defined ($line = shift @conf_lines)) {
+    $line =~ s/(?<!\\)#.*$//; # remove comments
+    $line =~ s/^\s+|\s+$//g;  # remove leading and trailing spaces (including newlines)
+    next unless($line); # skip empty lines
+
+    # handle i18n
+    if ($line =~ s/^lang\s+(\S+)\s+//) { next if ($lang !~ /^$1/i); }
+
+    my($key, $value) = split(/\s+/, $line, 2);
+    $key = lc $key;
+    # convert all dashes in setting name to underscores.
+    $key =~ s/-/_/g;
+
+    # Do a better job untainting this info ...
+    $value = '' unless defined($value);
+    $value =~ /^(.*)$/;
+    $value = $1;
+
+    # File/line number assertions
+    if ($key eq 'file') {
+      if ($value =~ /^start\s+(.+)$/) {
+        push (@curfile_stack, $self->{currentfile});
+        $self->{currentfile} = $1;
+        next;
+      }
+
+      if ($value =~ /^end\s/) {
+        if (scalar @if_stack > 0) {
+          my $cond = pop @if_stack;
+
+          if ($cond->{type} eq 'ifplugin') {
+            warn "unclosed 'if' in ".
+                  $self->{currentfile}.": ifplugin ".$cond->{plugin}."\n";
+          } else {
+            die "unknown 'if' type: ".$cond->{type}."\n";
+          }
+
+          $self->{errors}++;
+          @if_stack = ();
+        }
+        $skip_parsing = 0;
+
+        my $curfile = pop @curfile_stack;
+        if (defined $curfile) {
+          $self->{currentfile} = $curfile;
+        } else {
+          $self->{currentfile} = '(no file)';
+        }
+        next;
+      }
+    }
+
+    # now handle the commands.
+    if ($key eq 'include') {
+      $value = $self->fix_path_relative_to_current_file($value);
+      my $text = $self->{main}->read_cf($value, 'included file');
+      unshift (@conf_lines, split (/\n/, $text));
+      next;
+    }
+
+    if ($key eq 'ifplugin') {
+      push (@if_stack, {
+          type => 'ifplugin',
+          plugin => $value,
+          skip_parsing => $skip_parsing
+        });
+
+      if ($self->{plugins_loaded}->{$value}) {
+        # leave $skip_parsing as-is; we may not be parsing anyway in this block.
+        # in other words, support nested 'if's and 'require_version's
+      } else {
+        $skip_parsing = 1;
+      }
+      next;
+    }
+
+    # and the endif statement:
+    if ($key eq 'endif') {
+      my $lastcond = pop @if_stack;
+      $skip_parsing = $lastcond->{skip_parsing};
+      next;
+    }
+
+    if ($key eq 'require_version') {
+      # if it wasn't replaced during install, assume current version ...
+      next if ($value eq "\@\@VERSION\@\@");
+
+      my $ver = $Mail::SpamAssassin::VERSION;
+
+      # if we want to allow "require_version 3.0" be good for all
+      # "3.0.x" versions:
+      ## make sure it's a numeric value
+      #$value += 0.0;
+      ## convert 3.000000 -> 3.0, stay backwards compatible ...
+      #$ver =~ s/^(\d+)\.(\d{1,3}).*$/sprintf "%d.%d", $1, $2/e;
+      #$value =~ s/^(\d+)\.(\d{1,3}).*$/sprintf "%d.%d", $1, $2/e;
+
+      if ($ver ne $value) {
+        warn "configuration file \"$self->{currentfile}\" requires version ".
+                "$value of SpamAssassin, but this is code version ".
+                "$ver. Maybe you need to use ".
+                "the -C switch, or remove the old config files? ".
+                "Skipping this file";
+        $skip_parsing = 1;
+        $self->{errors}++;
+      }
+      next;
+    }
+
+    # preprocessing? skip all other commands
+    next if $skip_parsing;
+
+    my $cmd = $lut_frequent->{$key}; # check the frequent command set
+    if (!$cmd) {
+      $cmd = $lut_remaining->{$key}; # no? try the rest
+    }
+
+    # we've either fallen through with no match, in which case this
+    # if() will fail, or we have a match.
+    if ($cmd) {
+      if ($self->{scoresonly}) {              # reading user config from spamd
+        if ($cmd->{is_priv} && !$self->{allow_user_rules}) {
+          dbg ("config: not parsing, 'allow_user_rules' is 0: $line");
+          goto failed_line;
+        }
+        if ($cmd->{is_admin}) {
+          dbg ("config: not parsing, administrator setting: $line");
+          goto failed_line;
+        }
+      }
+
+      if (!$cmd->{code}) {
+        $self->setup_default_code_cb ($cmd);
+      }
+
+      my $ret = &{$cmd->{code}} ($self, $key, $value, $line);
+
+      if ($ret && $ret eq $INVALID_VALUE) {
+        warn "invalid value for \"$key\": $value\n";
+        $self->{errors}++;
+      } else {
+        next;
+      }
+    }
 
 failed_line:
 
     # last ditch: try to see if the plugins know what to do with it
     if ($self->{main}->call_plugins ("parse_config", {
-		key => $key,
-		value => $value,
-		line => $_,
-		conf => $self,
-		user_config => $scoresonly
-	    }))
+                key => $key,
+                value => $value,
+                line => $line,
+                conf => $self,
+                user_config => $self->{scoresonly}
+            }))
     {
       # a plugin dealt with it successfully.
       next;
@@ -3239,7 +3577,7 @@ failed_line:
 ###########################################################################
 
     my $msg = "Failed to parse line in SpamAssassin configuration, ".
-                        "skipping: $_";
+                        "skipping: $line";
 
     if ($self->{lint_rules}) {
       warn $msg."\n";
@@ -3249,12 +3587,23 @@ failed_line:
     $self->{errors}++;
   }
 
-  # Let's do some linting here ...
-  # This is here, BTW, so we can check for $self->{tests} easily before
-  # finish_parsing() is called and deletes it.
-  if ($self->{lint_rules}) {
+  $self->lint_check();
+  $self->set_default_scores();
+
+  delete $self->{scoresonly};
+}
+
+# Let's do some linting here ...
+# This is called from _parse(), BTW, so we can check for $self->{tests}
+# easily before finish_parsing() is called and deletes it.
+#
+sub lint_check {
+  my ($self) = @_;
+  my ($k, $v);
+  if ($self->{lint_rules})
+  {
     # Check for description and score issues in lint fashion
-    while ( my($k,$v) = each %{$self->{descriptions}} ) {
+    while ( ($k,$v) = each %{$self->{descriptions}} ) {
       if (length($v) > 50) {
         warn "warning: description for $k is over 50 chars\n";
         $self->{errors}++;
@@ -3265,20 +3614,24 @@ failed_line:
       }
     }
 
-    while ( my($k) = each %{$self->{scores}} ) {
-      if (!exists $self->{tests}->{$k}) {
-        warn "warning: score set for non-existent rule $k\n";
+    while ( my($sk) = each %{$self->{scores}} ) {
+      if (!exists $self->{tests}->{$sk}) {
+        warn "warning: score set for non-existent rule $sk\n";
         $self->{errors}++;
       }
     }
   }
+}
 
-  # we should set a default score for all valid rules...  Do this here
-  # instead of add_test because mostly 'score' occurs after the rule is
-  # specified, so why set the scores to default, then set them again at
-  # 'score'?
-  # 
-  while ( my($k,$v) = each %{$self->{tests}} ) {
+# we should set a default score for all valid rules...  Do this here
+# instead of add_test because mostly 'score' occurs after the rule is
+# specified, so why set the scores to default, then set them again at
+# 'score'?
+# 
+sub set_default_scores {
+  my ($self) = @_;
+  my ($k, $v);
+  while ( ($k,$v) = each %{$self->{tests}} ) {
     if ($self->{lint_rules}) {
       if (length($k) > 22 && $k !~ /^__/ && $k !~ /^T_/) {
         warn "warning: rule '$k' is over 22 chars\n";
@@ -3296,9 +3649,74 @@ failed_line:
       }
     }
   }
-
-  delete $self->{scoresonly};
 }
+
+###########################################################################
+
+sub setup_default_code_cb {
+  my ($self, $cmd) = @_;
+  my $type = $cmd->{type};
+
+  if ($type == $CONF_TYPE_STRING) {
+    $cmd->{code} = \&set_string_value;
+  }
+  elsif ($type == $CONF_TYPE_BOOL) {
+    $cmd->{code} = \&set_bool_value;
+  }
+  elsif ($type == $CONF_TYPE_NUMERIC) {
+    $cmd->{code} = \&set_numeric_value;
+  }
+  elsif ($type == $CONF_TYPE_HASH_KEY_VALUE) {
+    $cmd->{code} = \&set_hash_key_value;
+  }
+  elsif ($type == $CONF_TYPE_ADDRLIST) {
+    $cmd->{code} = \&set_addrlist_value;
+  }
+  elsif ($type == $CONF_TYPE_TEMPLATE) {
+    $cmd->{code} = \&set_template_append;
+  }
+  else {
+    die "unknown conf type $type!";
+  }
+}
+
+sub set_numeric_value {
+  my ($self, $key, $value, $line) = @_;
+  $self->{$key} = $value+0.0; }
+
+sub set_bool_value {
+  my ($self, $key, $value, $line) = @_;
+  $self->{$key} = $value+0;
+}
+
+sub set_string_value {
+  my ($self, $key, $value, $line) = @_;
+  $self->{$key} = $value;
+}
+
+sub set_hash_key_value {
+  my ($self, $key, $value, $line) = @_;
+  my($k,$v) = split(/\s+/, $value, 2);
+  $self->{$key}->{$k} = $v;
+}
+
+sub set_addrlist_value {
+  my ($self, $key, $value, $line) = @_;
+  $self->add_to_addrlist ($key, split (' ', $value));
+}
+
+sub set_template_append {
+  my ($self, $key, $value, $line) = @_;
+  if ( $value =~ /^"(.*?)"$/ ) { $value = $1; }
+  $self->{$key.'_template'} .= $value."\n";
+}
+
+sub set_template_clear {
+  my ($self, $key, $value, $line) = @_;
+  $self->{$key.'_template'} = '';
+}
+
+###########################################################################
 
 sub add_test {
   my ($self, $name, $text, $type) = @_;
@@ -3359,71 +3777,71 @@ sub finish_parsing {
     if (($type & 1) == 1) {
       my @args;
       if (my ($function, $args) = ($text =~ m/(.*?)\s*\((.*?)\)\s*$/)) {
-	if ($args) {
-	  @args = ($args =~ m/['"](.*?)['"]\s*(?:,\s*|$)/g);
+        if ($args) {
+          @args = ($args =~ m/['"](.*?)['"]\s*(?:,\s*|$)/g);
         }
-	unshift(@args, $function);
-	if ($type == TYPE_BODY_EVALS) {
-	  $self->{body_evals}->{$priority}->{$name} = \@args;
-	}
-	elsif ($type == TYPE_HEAD_EVALS) {
-	  $self->{head_evals}->{$priority}->{$name} = \@args;
-	}
-	elsif ($type == TYPE_RBL_EVALS) {
-	  # We don't do priorities for TYPE_RBL_EVALS
-	  $self->{rbl_evals}->{$name} = \@args;
-	}
-	elsif ($type == TYPE_RAWBODY_EVALS) {
-	  $self->{rawbody_evals}->{$priority}->{$name} = \@args;
-	}
-	elsif ($type == TYPE_FULL_EVALS) {
-	  $self->{full_evals}->{$priority}->{$name} = \@args;
-	}
-	#elsif ($type == TYPE_URI_EVALS) {
-	#  $self->{uri_evals}->{$priority}->{$name} = \@args;
-	#}
-	else {
-	  $self->{errors}++;
-	  sa_die(70, "unknown type $type for $name: $text");
-	}
+        unshift(@args, $function);
+        if ($type == TYPE_BODY_EVALS) {
+          $self->{body_evals}->{$priority}->{$name} = \@args;
+        }
+        elsif ($type == TYPE_HEAD_EVALS) {
+          $self->{head_evals}->{$priority}->{$name} = \@args;
+        }
+        elsif ($type == TYPE_RBL_EVALS) {
+          # We don't do priorities for TYPE_RBL_EVALS
+          $self->{rbl_evals}->{$name} = \@args;
+        }
+        elsif ($type == TYPE_RAWBODY_EVALS) {
+          $self->{rawbody_evals}->{$priority}->{$name} = \@args;
+        }
+        elsif ($type == TYPE_FULL_EVALS) {
+          $self->{full_evals}->{$priority}->{$name} = \@args;
+        }
+        #elsif ($type == TYPE_URI_EVALS) {
+        #  $self->{uri_evals}->{$priority}->{$name} = \@args;
+        #}
+        else {
+          $self->{errors}++;
+          sa_die(70, "unknown type $type for $name: $text");
+        }
       }
       else {
-	$self->{errors}++;
-	sa_die(70, "syntax error for eval function $name: $text");
+        $self->{errors}++;
+        sa_die(70, "syntax error for eval function $name: $text");
       }
     }
     # non-eval tests
     else {
       if ($type == TYPE_BODY_TESTS) {
-	$self->{body_tests}->{$priority}->{$name} = $text;
+        $self->{body_tests}->{$priority}->{$name} = $text;
       }
       elsif ($type == TYPE_HEAD_TESTS) {
-	$self->{head_tests}->{$priority}->{$name} = $text;
+        $self->{head_tests}->{$priority}->{$name} = $text;
       }
       elsif ($type == TYPE_META_TESTS) {
-	# Meta Tests must have a priority of at least META_TEST_MIN_PRIORITY,
-	# if it's lower then reset the value
-	if ($priority < META_TEST_MIN_PRIORITY) {
-	  # we need to lower the count of the old priority and raise the
-	  # count of the new priority
-	  $self->{priorities}->{$priority}--;
-	  $priority = META_TEST_MIN_PRIORITY;
-	  $self->{priorities}->{$priority}++;
-	}
-	$self->{meta_tests}->{$priority}->{$name} = $text;
+        # Meta Tests must have a priority of at least META_TEST_MIN_PRIORITY,
+        # if it's lower then reset the value
+        if ($priority < META_TEST_MIN_PRIORITY) {
+          # we need to lower the count of the old priority and raise the
+          # count of the new priority
+          $self->{priorities}->{$priority}--;
+          $priority = META_TEST_MIN_PRIORITY;
+          $self->{priorities}->{$priority}++;
+        }
+        $self->{meta_tests}->{$priority}->{$name} = $text;
       }
       elsif ($type == TYPE_URI_TESTS) {
-	$self->{uri_tests}->{$priority}->{$name} = $text;
+        $self->{uri_tests}->{$priority}->{$name} = $text;
       }
       elsif ($type == TYPE_RAWBODY_TESTS) {
-	$self->{rawbody_tests}->{$priority}->{$name} = $text;
+        $self->{rawbody_tests}->{$priority}->{$name} = $text;
       }
       elsif ($type == TYPE_FULL_TESTS) {
-	$self->{full_tests}->{$priority}->{$name} = $text;
+        $self->{full_tests}->{$priority}->{$name} = $text;
       }
       else {
-	$self->{errors}++;
-	sa_die(70, "unknown type $type for $name: $text");
+        $self->{errors}++;
+        sa_die(70, "unknown type $type for $name: $text");
       }
     }
   }
@@ -3468,7 +3886,7 @@ sub remove_from_addrlist {
   my ($self, $singlelist, @addrs) = @_;
 
   foreach my $addr (@addrs) {
-	delete($self->{$singlelist}->{$addr});
+        delete($self->{$singlelist}->{$addr});
   }
 }
 
@@ -3507,7 +3925,7 @@ sub maybe_body_only {
   return 0 if (!defined ($type));
 
   if (($type == TYPE_BODY_TESTS) || ($type == TYPE_BODY_EVALS)
-	|| ($type == TYPE_URI_TESTS) || ($type == TYPE_URI_EVALS))
+        || ($type == TYPE_URI_TESTS) || ($type == TYPE_URI_EVALS))
   {
     # some rawbody go off of headers...
     return 1;
