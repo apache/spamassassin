@@ -1,0 +1,34 @@
+#!/usr/bin/perl
+
+use File::Copy;
+
+if (scalar (@ARGV) != 3) {
+  die "Usage: $0 command source target\n"
+}
+
+my($cmd, $src, $tgt, $lnk) = @ARGV;
+
+$lnk = eval { readlink($src) };
+unless ($@) {
+  if ($cmd eq 'link') {
+    $lnk = $src;
+  }
+}
+
+unless ($lnk) {
+  if ($cmd eq 'copy') {
+    copy($src, $tgt) || die "Can't copy '$src' to '$tgt': $!\n";
+    chmod((stat($src))[2], $tgt);
+  }
+  elsif ($cmd eq 'move') {
+    move($src, $tgt) || die "Can't move '$src' to '$tgt': $!\n";
+  }
+  else {
+    die "Unknown command '$cmd'";
+  }
+}
+else {
+  symlink($lnk, $tgt) || die "Can't link '$lnk' to '$tgt': $!\n";
+}
+
+exit 0;
