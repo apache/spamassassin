@@ -109,13 +109,13 @@ case "$1" in
 	## Stop daemon with killproc(8) and if this fails
 	## set echo the echo return value.
 
-	killproc -TERM $SPAMD_BIN
+	killproc -TERM spamd
 
 	# Remember status and be verbose
 	rc_status -v
 	;;
     try-restart)
-	## Stop the service and if this succeeds (i.e. the 
+	## Stop the service and if this succeeds (i.e. the
 	## service was running before), start it again.
 	## Note: try-restart is not (yet) part of LSB (as of 0.7.5)
 	$0 status >/dev/null &&  $0 restart
