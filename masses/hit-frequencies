@@ -129,9 +129,9 @@ sub readlogs {
 
 
 sub readscores {
-	my @files = <../rules/[0-9]*.cf>;
-	my $file;
-	foreach $file (@files) {
+  my @files = <../rules/[0-9]*.cf>;
+  my $file;
+  foreach $file (@files) {
   open (IN, "<$file");
   while (<IN>) {
     s/#.*$//g; s/^\s+//; s/\s+$//;
@@ -140,11 +140,12 @@ sub readscores {
       $freq{$2} ||= 0;
       $freq_spam{$2} ||= 0;
       $freq_nonspam{$2} ||= 0;
-      $score{$1} ||= 0;
+      $score{$1} ||= 1.0;
     } elsif (/^score\s+(\S+)\s+(.+)$/) {
-      $freq{$1} ||= 0;
-      $freq_spam{$1} ||= 0;
-      $freq_nonspam{$1} ||= 0;
+      # ignore tests with no test-type!
+      #$freq{$1} ||= 0;
+      #$freq_spam{$1} ||= 0;
+      #$freq_nonspam{$1} ||= 0;
       $score{$1} = $2;
     }
   }

@@ -151,6 +151,8 @@ sub razor_report {
       dbg("Razor2: spam reported, response is \"$response\".");
     };
 
+    alarm 0;
+
     if ($@) {
       if ( $@ =~ /alarm/ ) {
         dbg("razor2 report timed out after $timeout secs.");
