@@ -94,7 +94,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.186 2003/05/09 22:36:49 felicity Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.187 2003/05/15 20:04:18 felicity Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -646,8 +646,10 @@ sub report_as_spam {
 
   $mail = $self->encapsulate_mail_object ($mail);
 
-  # learn as spam
-  $self->learn ($mail, $mail->get_header("Message-Id"), 1, 0);
+  # learn as spam if enabled
+  if ( $self->{conf}->{bayes_learn_during_report} ) {
+    $self->learn ($mail, $mail->get_header("Message-Id"), 1, 0);
+  }
 
   require Mail::SpamAssassin::Reporter;
   $mail = Mail::SpamAssassin::Reporter->new($self, $mail, $options);

@@ -174,6 +174,7 @@ sub new {
   $self->{bayes_ignore_headers} = [ ];
   $self->{bayes_min_ham_num} = 200;
   $self->{bayes_min_spam_num} = 200;
+  $self->{bayes_learn_during_report} = 1;
 
   $self->{whitelist_from} = { };
   $self->{blacklist_from} = { };
@@ -1448,6 +1449,18 @@ spam, but you can tune these up or down with these two settings.
 
     if (/^bayes_min_spam_num\s+(.*)$/) {
       $self->{bayes_min_spam_num} = $1+0; next;
+    }
+
+=item bayes_learn_during_report         (Default: 1)
+
+The Bayes system will, by default, learn any reported messages
+(spamassassin -r) as spam.  If you do not want this to happen, set
+this option to 0.
+
+=cut
+
+    if (/^bayes_learn_during_report\s+(.*)$/) {
+      $self->{bayes_learn_during_report} = $1+0; next;
     }
 
 ###########################################################################
