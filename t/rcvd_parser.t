@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rcvd_parser");
-use Test; BEGIN { plan tests => 35 };
+use Test; BEGIN { plan tests => 36 };
 
 
 use strict;
@@ -74,6 +74,18 @@ q{
 } => q{
 
 [ ip=217.35.105.172 rdns= helo=tthompson by=mail.neosinteractive.com ident= envfrom= id= ]
+
+},
+q{
+
+  Received: from mx56.pirmateh.us (64.119.196.56.rev.iwaynetworks.com
+      [64.119.196.56] (may be forged))
+      by mail.core.obfugenedata.com (8.13.1/8.13.1) with ESMTP id i8FJcSRZ007847
+      for <othmar.pfannes@obfugenedata.com>; Wed, 15 Sep 2004 21:38:31 +0200
+
+} => q{
+
+  [ ip=64.119.196.56 rdns=64.119.196.56.rev.iwaynetworks.com helo=mx56.pirmateh.us by=mail.core.obfugenedata.com ident= envfrom= intl=0 id=i8FJcSRZ007847 ]
 
 },
 q{
