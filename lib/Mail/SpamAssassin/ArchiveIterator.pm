@@ -1002,7 +1002,7 @@ sub fix_globs {
   my ($self, $path) = @_;
 
   # replace leading tilde with home dir: ~/abc => /home/jm/abc
-  $path =~ s!^~/!$ENV{'HOME'}!;
+  $path =~ s!^~/!$ENV{'HOME'}/!;
 
   # protect/escape spaces: ./Mail/My Letters => ./Mail/My\ Letters
   $path =~ s/([^\\])(\s)/$1\\$2/g;
