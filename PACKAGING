@@ -12,7 +12,7 @@ Module::Build one day) which creates a Makefile.
 ExtUtils::MakeMaker recognizes several variables which can be set at
 the command line to give the user the possibility to influence the
 contents of the generated Makefile. All macros written to the Makefile
-can be changed with a command line like this:
+can be changed on the command line like this:
 	perl Makefile.PL FOO="bar"
 This would give the (exemplary) macro 'FOO' the value 'bar'.
 
@@ -47,19 +47,19 @@ introduced with Perl 5.6.0). These have the following meanings:
 The wanted repository can be chosen by setting the variable INSTALLDIRS.
 So according to the description above should packages probably use
 	perl Makefile.PL INSTALLDIRS=vendor
-That's definitely the correct way to go for Debian, according to the
+That's definitely the correct way to go for Debian, according to their
 Perl Policy [DEBPERL]. But I've heard that the vendor stuff is either
 broken or not set on many other systems, especially Red Hat ones. Google
-might help to find more infos on this topic.
+might help to find out more on this topic.
 
 SpamAssassin needs some directories which normally aren't supported by
 ExtUtils::MakeMaker. So we had to extend its logic quite a bit. And to
 make it worse did the internal logic change extremely between the 5.x
 and 6.x series, especially for packaging stuff. We had to "backport"
 (ie. hack into) some of the functionality ExtUtils::MakeMaker 6.11 and
-later offers. That this is very error-prone is obvious. So throughout
-this text you'll find some recommendations for versions you should use.
-You should definitely use version 5.45 or later, recommended is 6.16
+later offers. It's obvious how error-prone this is. So throughout
+this text you'll find some recommendations for versions you should use;
+you should definitely use version 5.45 or later, recommended is 6.16
 and later.
 
 The following ressources might help understanding this stuff:
@@ -92,7 +92,7 @@ PREFIX:
     	perl Makefile.PL PREFIX=/foo
 
 LIB:
-  This will change the directory where the SpamAssassin libraries (.pm files
+  This will change the directory where the SpamAssassin libraries (.pm files)
   are installed. The module's architecture-independent files will be put into
   the given directory, the architecture-dependent files into a subdirectory
   with the name of the current architecture.
@@ -169,8 +169,8 @@ some final paths to the libs and the applications.
 
 Previous versions offered some complicated variables to achieve this. Those
 hacks weren't compatible to current versions of ExtUtils::MakeMaker. But
-ExtUtils::MakeMaker 6.06 (which was said to be buggy till 6.11) introduced
-a feature which is well known from the GNU build tools [GNUMAKECMD]: The
+ExtUtils::MakeMaker 6.06 introduced a feature (which is said to be buggy
+till 6.11) which is well known from the GNU build tools [GNUMAKECMD]: The
 variable DESTDIR.
 
 The value of DESTDIR is simply prepended to all other paths on make install.
@@ -185,8 +185,8 @@ dir, you would do something like this:
 	build_some_package
 
 ATTENTION: This method heavily depends on a feature introduced with a newer
-version of ExtUtils::MakeMaker. Si it's *strongly* recommended to use
-	ExtUtils::MakeMaker 6.16 or later
+version of ExtUtils::MakeMaker. So it's *strongly* recommended to use
+  ExtUtils::MakeMaker 6.16 or later
 when building packages. That module is available here [GETEUMM616]. If any
 problems occur with previous versions, please report them to [BUGZILLA].
 See also "Building with another ExtUtils::MakeMaker".
@@ -249,8 +249,8 @@ PERL_BIN:
   (like spamassassin and spamd). It makes sense to set this if you build
   SpamAssassin on some weird build host which happen to have Perl in
   /some/weird/location which is definitely not the location on the end
-  user's box. The default is the macro FULLPERL which should be the path
-  to the perl processing Makefile.PL.
+  user's box. The default is the value of the macro FULLPERL which should
+  be the path to the perl processing Makefile.PL.
 
   Sample:
     Building with some weird perl:
@@ -262,7 +262,7 @@ PERL_VERSION:
   for its version. If that fails, the version of the perl which called
   Makefile.PL is used. Sometimes one might have to correct this.
 
-  ATTENTION: The version always has o be given in the three-component style.
+  ATTENTION: The version always has to be given in the three-component style.
   So the floating-point representation of old Perls has to be "converted".
 
   Sample:
@@ -274,16 +274,16 @@ Building with another ExtUtils::MakeMaker
 -----------------------------------------
 
 It is possible to use a different version than the one which is installed.
-This is very usefule if one wants to package SpamAssassin but can't or doesn't
+This is very useful if one wants to package SpamAssassin but can't or doesn't
 want to upgrade the module installed on his machine. Follow these steps to
 success:
 
 1. Go to CPAN and look for the latest ExtUtils::MakeMaker available.
      <http://search.cpan.org/search?query=ExtUtils::MakeMaker>
-   The standalone package (currently mainatined by Michael G Schwern)
+   The standalone package (currently maintained by Michael G. Schwern)
    is needed.
 
-2. Get the tar ball and extract it in some temporary directory. For
+2. Get the tarball and extract it in some temporary directory. For
    version 6.16:
    	cd /tmp
    	wget http://search.cpan.org/CPAN/authors/id/M/MS/MSCHWERN/ExtUtils-MakeMaker-6.16.tar.gz
@@ -291,19 +291,19 @@ success:
 
 3. You will now have a directory ExtUtils-MakeMaker-X.YY (where X.YY is the
    version). Inside is a subdirectory 'lib'. Add that one to the environment
-   variable PERL5LIB, like this:
+   variable PERL5LIB, like this (when you use the Bash):
    	export PERL5LIB="/tmp/ExtUtils-MakeMaker-6.16/lib:$PERL5LIB"
 
 4. Now build SpamAssassin. As long as the PERL5LIB variable is set, the
-   updates ExtUtils::MakeMaker is used.
+   updated ExtUtils::MakeMaker is used.
 
 
 Obsolete Variables
 ------------------
 
 The following list shows variables recognized by the old build system and
-their new counterparts (no, the latter aren't in the wrong order, it actually
-was that complicated):
+their new counterparts (no, the ones in the end aren't in the wrong order,
+it actually was that complicated):
 
 old: PREFIX=/bar/foo INST_PREFIX=/foo
 new: PREFIX=/foo     DESTDIR=/bar
