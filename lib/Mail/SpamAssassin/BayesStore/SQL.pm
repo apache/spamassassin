@@ -1422,6 +1422,10 @@ sub restore_database {
     return 0;
   }
 
+  # we need to go ahead close the db connection so we can then open it up
+  # in a fresh state after clearing
+  $self->untie_db();
+
   unless ($self->tie_db_writable()) {
     return 0;
   }
@@ -1450,6 +1454,9 @@ sub restore_database {
     warn("bayes: database version $db_version is unsupported, must be version 2 or 3");
     return 0;
   }
+
+  my $token_error_count = 0;
+  my $seen_error_count = 0;
 
   while (my $line = <DUMPFILE>) {
     chomp($line);
@@ -1519,7 +1526,7 @@ sub restore_database {
 
       unless ($self->_put_token($token, $spam_count, $ham_count, $atime)) {
 	dbg("bayes: error inserting token for line: $line");
-	$error_p = 1;
+	$token_error_count++;
       }
       $token_count++;
     }
@@ -1540,12 +1547,24 @@ sub restore_database {
 
       unless ($self->seen_put($msgid, $flag)) {
 	dbg("bayes: error inserting msgid in seen table for line: $line");
-	$error_p = 1;
+	$seen_error_count++;
       }
     }
     else {
       dbg("bayes: skipping unknown line: $line");
       next;
+    }
+
+    if ($token_error_count >= 20) {
+      warn "Encountered too many errors (20) while parsing token line, reverting to empty database and exiting.\n";
+      $self->clear_database();
+      return 0;
+    }
+
+    if ($seen_error_count >= 20) {
+      warn "Encountered too many errors (20) while parsing seen lines, reverting to empty database and exiting.\n";
+      $self->clear_database();
+      return 0;
     }
   }
   close(DUMPFILE);
