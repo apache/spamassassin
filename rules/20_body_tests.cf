@@ -432,6 +432,8 @@ body MICRO_CAP_WARNING		/Investing in micro-cap securities is highly speculative
 describe MICRO_CAP_WARNING	SEC-mandated penny-stock warning -- thanks SEC
 body INVESTOR_SPEC_SHEET	/Investor Spec Sheet/i
 describe INVESTOR_SPEC_SHEET	Standard investment opportunity spam
+body NOT_ADVISOR		/not a registered investment advisor/i
+describe NOT_ADVISOR		Not a registered investment advisor
 
 body FREE_CONSULTATION		/FREE CONSULTATION/i
 describe FREE_CONSULTATION	Offers a free consultation
@@ -810,6 +812,9 @@ describe OFFER_EXPIRE		Offer Expires
 
 body FREE_QUOTE		        /\bfree quote/i
 describe FREE_QUOTE		Free Quote
+
+body FREE_QUOTE_INSTANT		/free.{0,12}(?:(?:instant|express|online|no.?obligation).{0,4})+.{0,32}\bquote/i
+describe FREE_QUOTE_INSTANT	Free express or no-obligation quote
 
 body FREE_INSTALL	        /\bfree installation\b/i
 describe FREE_INSTALL		Free Installation

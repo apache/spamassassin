@@ -91,8 +91,6 @@ header T_Q_FRIEND_PUBLIC	ALL =~ /^(to|cc|from):.*friend\@public\.com/im
 header T_Q_FIND_OUT_ANY1 	Subject =~ /Find Out Any/i
 body T_Q_FIND_OUT_ANY2		/Find Out Anything About Anyone/i
 
-body T_Q_INSTANT_QUOTE		/free.{0,12}(?:(?:instant|express|online|no.?obligation).{0,4})+.{0,32}\bquote/i
-
 body T_Q_MORTGAGE_BEST		/(?:low(?:est|er)?|free|second|rate|best|refinanc(?:e|ing)|online|instant) mortgage/i
 body T_Q_MORTGAGE_PITCH		/mortgage (?:rates?|quotes?|approv(?:al|ed)|payment|interest|loans?|app(?:\b|lication))/i
 
@@ -146,7 +144,6 @@ body T_Q_HOME_LOANS		/Home Loans/i
 body T_Q_INVALUABLE		/Invaluable Marketing Information/i
 body T_Q_LOCATE_ASSETS		/Locate Hidden Assets/i
 body T_Q_MILLION_EMAIL		/Million (?:\w+ )?(?:E-?mail )?Addresses/i
-body T_Q_NOT_ADVISOR		/not a registered investment advisor/i
 body T_Q_PRODUCT_SERVICE	/PRODUCTS? or SERVICES?/i
 # similar to OFFER, but fewer FPs
 body T_Q_RECEIVE_OFFER		/Receive Special Offer/i
