@@ -560,9 +560,10 @@ sub _parse_normal {
   if ($part_msg->{'type'} =~ /^message\b/i) {
     # Get the part ready...
     my $message = $part_msg->decode();
-    my $msg_obj = Mail::SpamAssassin::Message->new({message=>$message, parsenow=>1});
 
     if ($message) {
+      my $msg_obj = Mail::SpamAssassin::Message->new({message=>$message, parsenow=>1});
+
       # main message is a message/* part ...
       if ($msg == $part_msg) {
         $msg->add_body_part($msg_obj);
@@ -575,9 +576,9 @@ sub _parse_normal {
 
         $part_msg->add_body_part($msg_obj);
       }
-    }
 
-    return;
+      return;
+    }
   }
 
   # Add the new part as a child to the parent
