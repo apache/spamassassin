@@ -1,7 +1,7 @@
 # SpamAssassin rules file: tests.
 ###########################################################################
 
-header NO_REAL_NAME		From =~ /^\s*\<?\S+\@\S+\>?\s*$/
+header NO_REAL_NAME		From =~ /^["\s]*\<?\S+\@\S+\>?\s*$/
 describe NO_REAL_NAME		From: does not include a real name
 
 header FROM_ENDS_IN_NUMS	From =~ /\d\d\@/
