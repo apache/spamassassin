@@ -2015,14 +2015,14 @@ sub do_awl_tests {
     local $_ = lc $self->get('From:addr');
     return 0 unless /\S/;
 
-    my $rcvd = $self->get('Received');
+    # find the earliest usable "originating IP".  ignore reserved nets
     my $origip;
-
-    if ($rcvd =~ /^.*[^\d](\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/s) {
-      $origip = $1;
-    } elsif (defined $rcvd && $rcvd =~ /\S/) {
-      $rcvd =~ s/\s+/ /gs;
-      dbg ("failed to find originating IP in '$rcvd'");
+    foreach my $rly (reverse (@{$self->{relays_trusted}}, @{$self->{relays_untrusted}}))
+    {
+      next if ($rly->{ip_is_reserved});
+      if ($rly->{ip}) {
+	$origip = $rly->{ip}; last;
+      }
     }
 
     # Create the AWL object, catching 'die's
