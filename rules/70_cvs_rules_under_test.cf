@@ -259,3 +259,27 @@ describe __BILL_1618    Possible mention of bill 1618 (anti-spam bill)
 meta     T_ANTISPAM_BILL  REMOVE_IN_QUOTES && __BILL_1618
 describe T_ANTISPAM_BILL  Very likely mention of anti-spam bill
 
+# bug 727
+# also suggested was 'be your own boss' which is already in as BE_BOSS
+body T_FIRE_BOSS         /\bfire your boss\b/i
+
+# bug 710
+body T_WINNER                     /\b(?:you(?:'re| are) a|lucky|big|next) winners?\b/i
+describe T_WINNER                 Claims you are a winner
+
+body T_YOU_WON                    /\byou(?:'ve| have)? won(?!'|\w)/i
+describe T_YOU_WON                You have WON!
+
+body T_WIN		/\b(?:register|chances?|opportunity|enter|entered|players?|more|could)\b.{0,9}\bwin\b|win.{0,9}(?:!|up to|cash|big|car|now|free|\$[0-9,\.\$]+)\b/i
+describe T_WIN			Who really wins?
+
+body T_WINNING			/\bwinning (?:strategies|entry|cash|numbers?|free|!)\b|(?-i:WINNING)|award.winning|\bclaim your winnings/i
+describe T_WINNING		Winning Stuff
+
+# bug 764
+# similar to SAVE_UP_TO and SAVE_MONEY, but a little more generic
+body	T_UP_TO_OR_MORES		/up to \S+( \S+)? or more/i
+describe T_UP_TO_OR_MORES		Has generic 'up to X or more' noise
+
+body	T_VERB_UP_TO_OR_MORES	/(add|lose|make|save) up to \S+( \S+)? or more/i
+describe T_VERB_UP_TO_OR_MORES	Has '(add|lose|make|save) up to X or more' noise
