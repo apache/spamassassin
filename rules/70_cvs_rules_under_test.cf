@@ -40,9 +40,14 @@ describe T_UNNECESSARY_SUBJ_QP_ENCODING Subject encoded to hide from filters (QP
 # Catch it here (assuming one of the above doesn't catch it anyway).
 header __POSS_INVALID_DATE_TIME	Date =~ / \d{1,2}:\d{1,2}:\d{1,2} /
 header __DATE_TIME_VALID	Date =~ / \d\d:\d\d:\d\d /
+# this should be the same thing (just in one expression instead of two,
+# so it's fewer rules and a touch faster, also uses \s instead of ' '
+# to allow tabs and other whitespace)
+header __DATE_TIME_INVALID	Date =~ /\s(?!\d\d:\d\d:\d\d)\d{1,2}:\d{1,2}:\d{1,2}\s/
 header __XM_FOXMAIL		X-Mailer =~ /FoxMail/
 header __XM_EARTHLINK		X-Mailer =~ /EarthLink MailBox \d\.\d/
-meta T_INVALID_DATE_HMS	(__POSS_INVALID_DATE_TIME && !__DATE_TIME_VALID && !__XM_FOXMAIL && !__XM_EARTHLINK)
+meta T_INVALID_DATE_HMS		(__POSS_INVALID_DATE_TIME && !__DATE_TIME_VALID && !__XM_FOXMAIL && !__XM_EARTHLINK)
+meta T_INVALID_DATE_HMS_2	(__DATE_TIME_INVALID && !__XM_FOXMAIL && !__XM_EARTHLINK)
 describe T_INVALID_DATE_HMS	Date header does not use valid HH:MM:SS formatting
 
 # possible replacement for INVALID_DATE.
@@ -87,34 +92,18 @@ meta T_NIGERIAN_BODY_GOVT_4	((__NIGERIAN_CODE_CONDUCT + __NIGERIAN_CIV_SERVICE +
 meta T_NIGERIAN_BODY_GOVT_3	((__NIGERIAN_CODE_CONDUCT + __NIGERIAN_CIV_SERVICE + __NIGERIAN_HONESTY + __NIGERIAN_TOP_SECRET + __NIGERIAN_STRICT_CONF + __NIGERIAN_DISBURSE) >= 3)
 
 # 2003-02-23: quinlan
-# bug 1376: HTML mails without <!DOCTYPE>
-# 1. ways to find <!doctype> declaration
-rawbody __HTML_DOCTYPE		/<\!doctype/i
-body __HTML_TAG_EXISTS_DOCTYPE	eval:html_tag_exists('!doctype')
-# 2. mailers that reliably use <!doctype> declaration
-header __HTML_DOCTYPE_MUA	X-Mailer =~ /\b(?:Internet Mail Service|Microsoft Outlook (?:Express|CWS|IMO))\b/
-# 3. ways to detect HTML
-# HTML_MESSAGE
-header __HTML_CTYPE_HEADER	Content-Type =~ /text\/html/i
-rawbody __HTML_CTYPE_BODY	/^Content-Type:\s*text\/html/i
-meta __HTML_CTYPE		(__HTML_CTYPE_HEADER || __HTML_CTYPE_BODY)
-# note: that __MIME_HTML test is now used above, at least for now
+# some useful meta rule sub-elements
 body __MIME_HTML		eval:check_for_mime_html()
-# 4. test variations
-meta T_HTML_NO_DOCTYPE_01	(MIME_HTML_ONLY && HTML_MESSAGE && __HTML_DOCTYPE_MUA && !__HTML_DOCTYPE)
-meta T_HTML_NO_DOCTYPE_02	(MIME_HTML_ONLY && HTML_MESSAGE && __HTML_DOCTYPE_MUA && !__HTML_TAG_EXISTS_DOCTYPE)
-meta T_HTML_NO_DOCTYPE_03	(MIME_HTML_ONLY && __HTML_DOCTYPE_MUA && !__HTML_DOCTYPE)
-meta T_HTML_NO_DOCTYPE_04	(MIME_HTML_ONLY && __HTML_DOCTYPE_MUA && !__HTML_TAG_EXISTS_DOCTYPE)
-meta T_HTML_NO_DOCTYPE_05	(__HTML_CTYPE && HTML_MESSAGE && __HTML_DOCTYPE_MUA && !__HTML_DOCTYPE)
-meta T_HTML_NO_DOCTYPE_06	(__HTML_CTYPE && __HTML_DOCTYPE_MUA && !__HTML_DOCTYPE)
-meta T_HTML_NO_DOCTYPE_07	(__HTML_CTYPE_HEADER && HTML_MESSAGE && __HTML_DOCTYPE_MUA && !__HTML_DOCTYPE)
-meta T_HTML_NO_DOCTYPE_08	(__HTML_CTYPE_HEADER && HTML_MESSAGE && __HTML_DOCTYPE_MUA && !__HTML_TAG_EXISTS_DOCTYPE)
-meta T_HTML_NO_DOCTYPE_09	(__HTML_CTYPE_HEADER && __HTML_DOCTYPE_MUA && !__HTML_DOCTYPE)
-meta T_HTML_NO_DOCTYPE_10	(__HTML_CTYPE_HEADER && __HTML_DOCTYPE_MUA && !__HTML_TAG_EXISTS_DOCTYPE)
-meta T_HTML_NO_DOCTYPE_11	(__MIME_HTML && HTML_MESSAGE && __HTML_DOCTYPE_MUA && !__HTML_DOCTYPE)
-meta T_HTML_NO_DOCTYPE_12	(__MIME_HTML && __HTML_DOCTYPE_MUA && !__HTML_DOCTYPE)
-meta T_HTML_NO_DOCTYPE_13	(__MIME_HTML && HTML_MESSAGE && __HTML_DOCTYPE_MUA && !__HTML_TAG_EXISTS_DOCTYPE)
-meta T_HTML_NO_DOCTYPE_14	(__MIME_HTML && __HTML_DOCTYPE_MUA && !__HTML_TAG_EXISTS_DOCTYPE)
+header __CTYPE_HTML		Content-Type =~ /text\/html/i
+
+# 2003-02-23: quinlan
+# bug 1376: HTML without <!DOCTYPE> from mailers that always use <!DOCTYPE>
+#
+# Note: some variations of this rule actually perform better, but they all
+# overlap 96-100% with MIME_HTML_ONLY whereas this variation adds real value
+# and has a high hit rate.
+body __HTML_TAG_EXISTS_DOCTYPE	eval:html_tag_exists('!doctype')
+meta T_MIME_HTML_NO_DOCTYPE	(__MIME_HTML && !__HTML_TAG_EXISTS_DOCTYPE)
 
 # 2003-02-23: quinlan
 # bug 1533: new Received: header forgery tests using HELO
@@ -123,7 +112,8 @@ header T_RCVD_NUMERIC_HELO	Received =~ /helo[= ]\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,
 
 # 2003-02-25: quinlan
 # Whee... more HTML tests!
-# note uses __MIME_HTML
+# Note: these use __MIME_HTML, we might need to exempt MIME attachments from
+# that rule
 header __ANY_OUTLOOK_MUA	X-Mailer =~ /^Microsoft Outlook\b/
 header __ANY_IMS_MUA		X-Mailer =~ /^Internet Mail Service\b/
 header __ANY_AOL_MUA		X-Mailer =~ /^AOL\b/
@@ -196,7 +186,7 @@ describe T_HTTP_EXCESSIVE_ENTITIES Completely unnecessary %-escapes inside a URL
 header __X_MAILER_APPLEMAIL	X-Mailer	=~ /^Apple Mail \(\d\.\d+\)$/
 header __MSGID_APPLEMAIL	Message-Id	=~ /^<[0-9A-F]{8}-(?:[0-9A-F]{4}-){3}[0-9A-F]{12}\@\S+>$/
 header __MIME_VERSION_APPLEMAIL	Mime-Version	=~ /^1\.0 \(Apple Message framework v\d+\)$/
-meta T_USER_AGENT_APPLEMAIL	!__HTML_CTYPE_HEADER && __X_MAILER_APPLEMAIL && ( __MSGID_APPLEMAIL || __MIME_VERSION_APPLEMAIL )
+meta T_USER_AGENT_APPLEMAIL	!__CTYPE_HTML && __X_MAILER_APPLEMAIL && ( __MSGID_APPLEMAIL || __MIME_VERSION_APPLEMAIL )
 meta T_FORGED_MUA_APPLEMAIL	__X_MAILER_APPLEMAIL && !T_USER_AGENT_APPLEMAIL
 
 ###########################################################################
