@@ -23,6 +23,8 @@ use strict;
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::MsgContainer;
 
+use constant MAX_BODY_LINE_LENGTH =>        2048;
+
 =item parse()
 
 Unlike most modules, Mail::SpamAssassin::MsgParser will not return an
@@ -223,6 +225,15 @@ sub _parse_multipart {
     }
 
     if ($in_body) {
+      # we run into a perl bug if the lines are astronomically long (probably due
+      # to lots of regexp backtracking); so cut short any individual line over
+      # MAX_BODY_LINE_LENGTH bytes in length.  This can wreck HTML totally -- but
+      # IMHO the only reason a luser would use MAX_BODY_LINE_LENGTH-byte lines is
+      # to crash filters, anyway.
+      while (length ($_) > MAX_BODY_LINE_LENGTH) {
+        push (@{$part_array}, substr($_, 0, MAX_BODY_LINE_LENGTH)."\n");
+        substr($_, 0, MAX_BODY_LINE_LENGTH) = '';
+      }
       push ( @{$part_array}, $_ );
     }
     else {

@@ -52,18 +52,23 @@ sub new {
 # objects which match.
 #
 sub find_parts {
-  my ($self, $re) = @_;
+  my ($self, $re, $onlyleaves, $recursive) = @_;
 
   # Didn't pass an RE?  Just abort.
   return () unless $re;
 
+  $onlyleaves = 0 unless defined $onlyleaves;
+  $recursive = 1 unless defined $recursive;
   my @ret = ();
 
   # If this object matches, mark it for return.
-  if ( $self->{'type'} =~ /$re/ ) {
+  my $amialeaf = !exists $self->{'body_parts'};
+
+  if ( $self->{'type'} =~ /$re/ && (!$onlyleaves || $amialeaf) ) {
     push(@ret, $self);
   }
-  elsif ( exists $self->{'body_parts'} ) {
+  
+  if ( $recursive && !$amialeaf ) {
     # This object is a subtree root.  Search all children.
     foreach my $parts ( @{$self->{'body_parts'}} ) {
       # Add the recursive results to our results
@@ -233,11 +238,9 @@ sub rendered {
         )
        ) {
       my $html = Mail::SpamAssassin::HTML->new();		# object
-      my $html_rendered = $html->html_render($text);	# rendered text
-      my $html_results = $html->get_results();		# needed in eval tests
-    
+      $self->{rendered} = join('', @{$html->html_render($text)});	# rendered text
+      $self->{html_results} = $html->get_results();		# needed in eval tests
       $self->{'rendered_type'} = 'text/html';
-      $self->{'rendered'} = join('', @{ $html_rendered });
     }
     else {
       $self->{'rendered_type'} = $self->{'type'};

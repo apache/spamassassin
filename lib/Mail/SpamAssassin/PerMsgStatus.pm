@@ -122,7 +122,9 @@ sub check {
   # TODO: change this to do whitelist/blacklists first? probably a plan
   # NOTE: definitely need AWL stuff last, for regression-to-mean of score
 
+  # TVD: we may want to do more than just clearing out the headers, but ...
   $self->{msg}->delete_header('X-Spam-.*');
+
   $self->{learned_hits} = 0;
   $self->{body_only_hits} = 0;
   $self->{head_only_hits} = 0;
@@ -180,7 +182,7 @@ sub check {
     # still skip application/image attachments though
     {
       my $fulltext = join ('', $self->{msg}->get_all_headers(), "\n",
-                                @{$self->get_raw_body_text_array()});
+                                $self->{msg}->get_pristine_body());
       $self->do_full_tests(\$fulltext);
       $self->do_full_eval_tests(\$fulltext);
       undef $fulltext;
@@ -897,234 +899,66 @@ sub finish {
 ###########################################################################
 # Non-public methods from here on.
 
-sub get_raw_body_text_array {
-  my ($self) = @_;
-  local ($_);
-
-  if (defined $self->{body_text_array}) { return $self->{body_text_array}; }
-
-  $self->{found_encoding_base64} = 0;
-  $self->{found_encoding_quoted_printable} = 0;
-
-  my $cte = $self->{msg}->get_header ('Content-Transfer-Encoding');
-  if (defined $cte && $cte =~ /quoted-printable/i) {
-    $self->{found_encoding_quoted_printable} = 1;
-  }
-  elsif (defined $cte && $cte =~ /base64/i) {
-    $self->{found_encoding_base64} = 1;
-  }
-
-  my $ctype = $self->{msg}->get_header ('Content-Type');
-  $ctype = '' unless ( defined $ctype );
-
-  # if it's non-text, just return an empty body rather than the base64-encoded
-  # data.  If spammers start using images to spam, we'll block 'em then!
-  if ($ctype =~ /^(?:image\/|application\/|video\/)/i) {
-    $self->{body_text_array} = [ ];
-    return $self->{body_text_array};
-  }
-
-  # if it's a multipart MIME message, skip non-text parts and
-  # just assemble the body array from the text bits.
-  my $multipart_boundary;
-  my $end_boundary;
-  if ( $ctype =~ /\bboundary\s*=\s*["']?(.*?)["']?(?:;|$)/i ) {
-    $multipart_boundary = "--$1\n";
-    $end_boundary = "--$1--\n";
-  }
-
-  my $ctypeistext = 1;
-
-  # we build up our own copy from the Mail::Audit message-body array
-  # reference, skipping MIME parts. this should help keep down in-memory
-  # text size.
-  my $bodyref = $self->{msg}->get_body();
-  $self->{body_text_array} = [ ];
-
-  my $line;
-  my $uu_region = 0;
-  for ($line = 0; defined($_ = $bodyref->[$line]); $line++)
-  {
-    # we run into a perl bug if the lines are astronomically long (probably due
-    # to lots of regexp backtracking); so cut short any individual line over
-    # MAX_BODY_LINE_LENGTH bytes in length.  This can wreck HTML totally -- but
-    # IMHO the only reason a luser would use MAX_BODY_LINE_LENGTH-byte lines is
-    # to crash filters, anyway.
-
-    while (length ($_) > MAX_BODY_LINE_LENGTH) {
-      push (@{$self->{body_text_array}}, substr($_, 0, MAX_BODY_LINE_LENGTH));
-      substr($_, 0, MAX_BODY_LINE_LENGTH) = '';
-    }
-
-    # Note that all the parsing code below will, as a result, not operate on
-    # lines > MAX_BODY_LINE_LENGTH bytes; but that should be OK, given that
-    # lines of that length are not RFC-compliant anyway!
-
-    # look for uuencoded text
-    if ($uu_region == 0 && /^begin [0-7]{3} .*/) {
-      $uu_region = 1;
-    }
-    elsif ($uu_region == 1 && /^[\x21-\x60]{1,61}$/) {
-      $uu_region = 2;
-    }
-    elsif ($uu_region == 2 && /^end$/) {
-      $uu_region = 0;
-      $self->{found_encoding_uuencode} = 1;
-    }
-
-    # This all breaks if you don't strip off carriage returns.
-    # Both here and below.
-    # (http://bugzilla.spamassassin.org/show_bug.cgi?id=516)
-    s/\r$//;
-
-    push(@{$self->{body_text_array}}, $_);
-
-    next unless defined ($multipart_boundary);
-    # MIME-only from here on.
-
-    if (/^Content-Transfer-Encoding: /i) {
-      if (/quoted-printable/i) {
-        $self->{found_encoding_quoted_printable} = 1;
-      }
-      elsif (/base64/i) {
-        $self->{found_encoding_base64} = 1;
-      }
-    }
-
-    if ($multipart_boundary eq $_) {
-      my $starting_line = $line;
-      for ($line++; defined($_ = $bodyref->[$line]); $line++) {
-        s/\r//;
-
-        if (/^$/) { last; }
-
-        if (/^Content-Type: (\S+?\/\S+?)(?:\;|\s|$)/i) {
-          $ctype = $1;
-          if ($ctype =~ /^(text\/\S+|message\/\S+|multipart\/alternative|multipart\/related)/i)
-          {
-            $ctypeistext = 1; next;
-          } else {
-            $ctypeistext = 0; next;
-          }
-        }
-      }
-
-      $line = $starting_line;
-
-      last unless defined $_;
-
-      if (!$ctypeistext) {
-        # skip this attachment, it's non-text.
-        push (@{$self->{body_text_array}}, "[skipped $ctype attachment]\n");
-
-        for ($line++; defined($_ = $bodyref->[$line]); $line++) {
-          if ($end_boundary eq $_) { last; }
-          if ($multipart_boundary eq $_) { $line--; last; }
-        }
-      }
-    }
-  }
-
-  #print "dbg ".join ("", @{$self->{body_text_array}})."\n\n\n";
-  return $self->{body_text_array};
-}
-
-###########################################################################
-
 sub get_decoded_body_text_array {
   my ($self) = @_;
 
   if (defined $self->{decoded_body_text_array}) { return $self->{decoded_body_text_array}; }
 
   local ($_);
-  my $textary = $self->get_raw_body_text_array();
 
-  # TODO: doesn't yet handle checking multiple-attachment messages,
-  # where one part is qp and another is b64.  Instead the qp will
-  # be simply stripped.
+  $self->{decoded_body_text_array} = [ ];
+  $self->{found_encoding_base64} = 0;
+  $self->{found_encoding_quoted_printable} = 0;
 
-  if ($self->{found_encoding_base64}) {
-    $_ = '';
-    my $foundb64 = 0;
-    my $lastlinelength = 0;
-    my $b64lines = 0;
-    my @decoded = ();
-    foreach my $line (@{$textary}) {
-      # base64 can't have whitespace on the line or start --
-      if ($line =~ /[ \t]/ or $line =~ /^--/) {
-        # decode what we have so far
-        push (@decoded, $self->split_b64_decode ($_), $line);
-        $_ = '';
-        $foundb64 = 0;
-        next;
+  # Find all parts which are leaves
+  my @parts = $self->{msg}->find_parts(qr/./,1);
+  return $self->{decoded_body_text_array} unless @parts;
+
+  # Go through each part
+  for(my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
+    my $p = $parts[$pt];
+
+    # Mark if there's a part with base64 or qp encoding.  If we've already found at least one of each,
+    # don't bother looking for anymore of them.
+    unless ( $self->{found_encoding_base64} && $self->{found_encoding_quoted_printable} ) {
+      my $cte = $p->get_header ('Content-Transfer-Encoding');
+      if (defined $cte && $cte =~ /quoted-printable/i) {
+        $self->{found_encoding_quoted_printable} = 1;
       }
-      # This line is a different length from the last one
-      if (length($line) != $lastlinelength && !$foundb64) {
-        push (@decoded, $self->split_b64_decode ($_));
-        $_ = $line;        # Could be the first line of a base 64 part
-        $lastlinelength = length($line);
-        next;
+      elsif (defined $cte && $cte =~ /base64/i) {
+        $self->{found_encoding_base64} = 1;
       }
-      # Same length as the last line.  Starting to look like a base64 encoding
-      if ($lastlinelength == length ($line)) {
-        # Three lines the same length, with no spaces in them
-        if ($b64lines++ == 3 && length ($line) > 3) {
-          # Sounds like base64 to me!
-          $foundb64 = 1;
-        }
-        $_ .= $line;
-        next;
+    }
+
+    # For below, we really only care about textual parts
+    if ( $p->{'type'} !~ /^(?:text|message)\b/i ) {
+      # remove this part from our array
+      splice @parts, $pt--, 1;
+      next;
+    }
+
+    # Hunt down uuencoded bits ...
+    my $uu_region = 0;
+    $p->decode(); # decode this part
+    push(@{$self->{decoded_body_text_array}}, "\n") if ( @{$self->{decoded_body_text_array}} );
+    foreach my $line ( @{$p->{'decoded'}} ) {
+      push(@{$self->{decoded_body_text_array}}, $self->split_into_array_of_short_lines($line));
+
+      # look for uuencoded text
+      if ($uu_region == 0 && $line =~ /^begin [0-7]{3} .*/) {
+        $uu_region = 1;
       }
-      # Last line is shorter, so we are done.
-      if ($foundb64) {
-        $_ .= $line;
+      elsif ($uu_region == 1 && $line =~ /^[\x21-\x60]{1,61}$/) {
+        $uu_region = 2;
+      }
+      elsif ($uu_region == 2 && $line =~ /^end$/) {
+        $self->{found_encoding_uuencode} = 1;
         last;
       }
     }
-    push (@decoded, $self->split_b64_decode ($_));
-    $self->{decoded_body_text_array} = \@decoded;
-    return \@decoded;
   }
-  elsif ($self->{found_encoding_quoted_printable}) {
-    $_ = join ('', @{$textary});
-    s/\=\r?\n//gs;
-    s/\=([0-9A-F]{2})/chr(hex($1))/ge;
-    my @ary = $self->split_into_array_of_short_lines ($_);
-    $self->{decoded_body_text_array} = \@ary;
-    return \@ary;
-  }
-  elsif ($self->{found_encoding_uuencode}) {
-    # remove uuencoded regions
-    my $uu_region = 0;
-    $_ = '';
-    foreach my $line (@{$textary}) {
-      if ($uu_region == 0 && $line =~ /^begin [0-7]{3} .*/) {
-        $uu_region = 1;
-        next;
-      }
-      if ($uu_region) {
-        if ($line =~ /^[\x21-\x60]{1,61}$/) {
-          # here is where we could uudecode text if we had a use for it
-          # $decoded = unpack("%u", $line);
-          next;
-        }
-        elsif ($line =~ /^end$/) {
-          $uu_region = 0;
-          next;
-        }
-        # any malformed lines get passed through
-      }
-      $_ .= $line;
-    }
-    s/\r//;
-    my @ary = $self->split_into_array_of_short_lines ($_);
-    $self->{decoded_body_text_array} = \@ary;
-    return \@ary;
-  }
-  else {
-    $self->{decoded_body_text_array} = $textary;
-    return $textary;
-  }
+
+  return $self->{decoded_body_text_array};
 }
 
 sub split_into_array_of_short_lines {
@@ -1141,14 +975,10 @@ sub split_into_array_of_short_lines {
   @result;
 }
 
-sub split_b64_decode {
-  my ($self) = shift;
-  return $self->split_into_array_of_short_lines(
-    Mail::SpamAssassin::Util::base64_decode($_[0]));
-}
 
 ###########################################################################
 
+# this really wants to get the rendered version ...
 sub get_decoded_stripped_body_text_array {
   my ($self) = @_;
 
@@ -1156,75 +986,57 @@ sub get_decoded_stripped_body_text_array {
 
   local ($_);
 
-  my $bodytext = $self->get_decoded_body_text_array();
+  $self->{decoded_stripped_body_text_array} = [];
 
-   my $ctype = $self->{msg}->get_header ('Content-Type');
-   $ctype = '' unless ( defined $ctype );
+  # Find all parts which are leaves
+  my @parts = $self->{msg}->find_parts(qr/^(?:text|message)\b/i,1);
+  return $self->{decoded_stripped_body_text_array} unless @parts;
 
-   # if it's a multipart MIME message, skip the MIME-definition stuff
-   my $boundary;
-   if ( $ctype =~ /\bboundary\s*=\s*["']?(.*?)["']?(?:;|$)/i ) {
-     $boundary = $1;
-   }
+  # Go through each part
+  my $text = $self->get('subject') || '';
+  for(my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
+    my $p = $parts[$pt];
 
-  my $text = "";
-
-  # subject should really be added after doing HTML, move this later
-  my $subject = $self->get('subject') || '';
-  if ($subject) {
-    $text = $subject . "\n\n" . $text;
-  }
-
-  my $lastwasmime = 0;
-  foreach $_ (@{$bodytext}) {
-    /^SPAM: / and next;         # SpamAssassin markup
-
-    defined $boundary and $_ eq "--$boundary\n" and $lastwasmime=1 and next;           # MIME start
-    defined $boundary and $_ eq "--$boundary--\n" and next;                            # MIME end
-
-    if ($lastwasmime) {
-      /^$/ and $lastwasmime=0;
-      /Content-.*: /i and next;
-      /^\s/ and next;
+    my($type, $rnd) = $p->rendered(); # decode this part
+    if ( defined $rnd ) {
+      # Only text/* types are rendered ...
+      $text .= $text ? "\n$rnd" : $rnd;
     }
-
-    $text .= $_;
+    else {
+      $text .= $text ? "\n".$p->decode() : $p->decode();
+    }
   }
 
-  # Convert =xx and =\n into chars
-  $text =~ s/=([A-F0-9]{2})/chr(hex($1))/ge;
-  $text =~ s/=\n//g;
-
-  # do HTML conversions if necessary
-  if ($text =~ m/<(?:$Mail::SpamAssassin::HTML::re_strict|$Mail::SpamAssassin::HTML::re_loose|!--|!doctype)(?:\s|>)/ois) {
-    my $raw = length($text);
-    my $before = substr($text, 0, $-[0], '');
-
-    # render
-    $self->{html_text} = $self->{html_mod}->html_render($text);
-    $self->{html} = $self->{html_mod}->get_results();
-
-    $text = join('', $before, @{$self->{html_text}});
-
-    if ($raw > 0) {
-      my $space = ($before =~ tr/ \t\n\r\x0b\xa0/ \t\n\r\x0b\xa0/);
-      $self->{html}{non_uri_len} = length($before);
-      for my $line (@{$self->{html_text}}) {
-        $line = pack ('C0A*', $line);
-        $space += ($line =~ tr/ \t\n\r\x0b\xa0/ \t\n\r\x0b\xa0/);
-        $self->{html}{non_uri_len} += length($line);
-        for my $uri ($line =~ m/\b(URI:\S+)/g) {
-          $self->{html}{non_uri_len} -= length($uri);
-        }
-      }
-      $self->{html}{non_space_len} = $self->{html}{non_uri_len} - $space;
-      $self->{html}{ratio} = ($raw - $self->{html}{non_uri_len}) / $raw;
-      if (exists $self->{html}{total_comment_length} && $self->{html}{non_uri_len} > 0) {
-        $self->{html}{total_comment_ratio} = $self->{html}{total_comment_length} / $self->{html}{non_uri_len};
-      }
-    } # if ($raw > 0)
-    delete $self->{html_last_tag};
-  } # if HTML
+#  # do HTML conversions if necessary
+#  if ($text =~ m/<(?:$Mail::SpamAssassin::HTML::re_strict|$Mail::SpamAssassin::HTML::re_loose|!--|!doctype)(?:\s|>)/ois) {
+#    my $raw = length($text);
+#    my $before = substr($text, 0, $-[0], '');
+#
+#    # render
+#    $self->{html_text} = $self->{html_mod}->html_render($text);
+#    $self->{html} = $self->{html_mod}->get_results();
+#
+#    $text = join('', $before, @{$self->{html_text}});
+#
+#    if ($raw > 0) {
+#      my $space = ($before =~ tr/ \t\n\r\x0b\xa0/ \t\n\r\x0b\xa0/);
+#      $self->{html}{non_uri_len} = length($before);
+#      for my $line (@{$self->{html_text}}) {
+#        $line = pack ('C0A*', $line);
+#        $space += ($line =~ tr/ \t\n\r\x0b\xa0/ \t\n\r\x0b\xa0/);
+#        $self->{html}{non_uri_len} += length($line);
+#        for my $uri ($line =~ m/\b(URI:\S+)/g) {
+#          $self->{html}{non_uri_len} -= length($uri);
+#        }
+#      }
+#      $self->{html}{non_space_len} = $self->{html}{non_uri_len} - $space;
+#      $self->{html}{ratio} = ($raw - $self->{html}{non_uri_len}) / $raw;
+#      if (exists $self->{html}{total_comment_length} && $self->{html}{non_uri_len} > 0) {
+#        $self->{html}{total_comment_ratio} = $self->{html}{total_comment_length} / $self->{html}{non_uri_len};
+#      }
+#    } # if ($raw > 0)
+#    delete $self->{html_last_tag};
+#  } # if HTML
 
   # whitespace handling (warning: small changes have large effects!)
   $text =~ s/\n+\s*\n+/\f/gs;                # double newlines => form feed
@@ -1234,7 +1046,7 @@ sub get_decoded_stripped_body_text_array {
   my @textary = $self->split_into_array_of_short_lines ($text);
   $self->{decoded_stripped_body_text_array} = \@textary;
 
-  return \@textary;
+  return $self->{decoded_stripped_body_text_array};
 }
 
 ###########################################################################
@@ -1326,65 +1138,6 @@ sub get {
 }
 
 ###########################################################################
-
-# This function will decode MIME-encoded headers.  Note that it is ONLY
-# used from test functions, so destructive or mildly inaccurate results
-# will not have serious consequences.  Do not replace the original message
-# contents with anything decoded using this!
-#
-sub mime_decode_header {
-  my ($self, $enc) = @_;
-
-  # cf. http://www.nacs.uci.edu/indiv/ehood/MHonArc/doc/resources/charsetconverters.html
-
-  # quoted-printable encoded headers.
-  # ASCII:  =?US-ASCII?Q?Keith_Moore?= <moore@cs.utk.edu>
-  # Latin1: =?ISO-8859-1?Q?Keld_J=F8rn_Simonsen?= <keld@dkuug.dk>
-  # Latin1: =?ISO-8859-1?Q?Andr=E9_?= Pirard <PIRARD@vm1.ulg.ac.be>
-
-  if ($enc =~ s{\s*=\?([^\?]+)\?[Qq]\?([^\?]+)\?=}{
-                    $self->decode_mime_bit ($1, $2);
-              }eg)
-  {
-    my $rawenc = $enc;
-
-    # Sitck lines back together when the encoded header wraps a line eg:
-    #
-    # Subject: =?iso-2022-jp?B?WxskQjsoM1gyI0N6GyhCIBskQk4iREwkahsoQiAy?=
-    #   =?iso-2022-jp?B?MDAyLzAzLzE5GyRCOWYbKEJd?=
-
-    $enc = "";
-    my $splitenc;
-
-    foreach $splitenc (split (/\n/, $rawenc)) {
-      $enc .= $splitenc;
-    }
-    dbg ("decoded MIME header: \"$enc\"");
-  }
-
-  # handle base64-encoded headers. eg:
-  # =?UTF-8?B?Rlc6IFBhc3NpbmcgcGFyYW1ldGVycyBiZXR3ZWVuIHhtbHMgdXNp?=
-  # =?UTF-8?B?bmcgY29jb29uIC0gcmVzZW50IA==?=   (yuck)
-
-  if ($enc =~ s{\s*=\?([^\?]+)\?[Bb]\?([^\?]+)\?=}{
-                Mail::SpamAssassin::Util::base64_decode($2);
-              }eg)
-  {
-    my $rawenc = $enc;
-
-    # Sitck lines back together when the encoded header wraps a line
-
-    $enc = "";
-    my $splitenc;
-
-    foreach $splitenc (split (/\n/, $rawenc)) {
-      $enc .= $splitenc;
-    }
-    dbg ("decoded MIME header: \"$enc\"");
-  }
-
-  return $enc;
-}
 
 sub decode_mime_bit {
   my ($self, $encoding, $text) = @_;
