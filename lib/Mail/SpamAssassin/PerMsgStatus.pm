@@ -1732,8 +1732,9 @@ sub do_meta_tests {
 
         my @tokens = $rule =~ m/(\w+|[^\w\s]+)/g;
 
-        my ($token, $expr);
+        my ($token, $setupline, $expr);
 
+        $setupline = "";
         $expr = "";
         foreach $token (@tokens) {
             # Numbers can't be rule names
@@ -1741,16 +1742,16 @@ sub do_meta_tests {
                 $expr .= "$token ";
             } else {
                 $expr .= "\$self->{tests_already_hit}->{$token} ";
-
                 # avoid "undefined" warnings by providing a default
                 # value here
-                $self->{tests_already_hit}->{$token} ||= 0;
+                $setupline .= "\$self->{tests_already_hit}->{$token} ||= 0;\n";
             }
         } # foreach $token (@tokens)
 
         # dbg ("meta expression: $expr");
 
         $evalstr .= '
+        ' . $setupline . ';
         if (' . $expr . ') {
             $self->got_hit (q#'.$rulename.'#, "");
         }
