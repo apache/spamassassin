@@ -635,6 +635,9 @@ if (defined $opt{'pidfile'}) {
 # process are written with the right ownership and everything.
 preload_modules_with_tmp_homedir();
 
+# bayes DBs will be tied() at this point, so untie them and such.
+$spamtest->finish_learner();
+
 # If we're going to be switching users in check(), let's backup the
 # fresh configuration now for later restoring ...  MUST be placed after
 # the M::SA creation.
