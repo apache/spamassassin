@@ -4,75 +4,62 @@ use strict;
 
 ###########################################################################
 
-sub check_phrase_freqs {
-  my ($self, $fulltext, $threshold) = @_;
+sub _check_phrase_freqs {
+  my ($self, $body) = @_;
 
   $self->{phrase_score} = 0;
   $self->{phrase_hits_hash} = { };
-
   $self->{conf}->{spamphrase_highest_score} ||= 1;
 
-  my $text = $$fulltext;
+  my $text = join ("\n", @{$body});
 
-  # remove headers, but leave the subject line
-  $text =~ s/^.*?Subject: (.*?)\n[A-Z].*?\n\n/$1 /gs;
+  # remove "Subject:"
+  $text =~ s/^Subject://i;
 
-  $text =~ s/^SPAM: .*$//gm;
-  $text =~ s/^Content-.*: .*$//gm;
-  $text =~ s/^--.*$//gm;
-  $text =~ s/\=\n//gis;
+  # remove signature
+  my $maxsig = scalar(grep(/\S\s+\S/, @{$body})) / 3 + 1;
+  $maxsig = 15 if $maxsig > 15;
+  $text =~ s/(\S)\s*\n-- \n((.*\n){1,$maxsig}?)\s*\Z/$1/m;
 
-  # strip markup and QP
-  $text =~ s/=20/ /gis;
-  $text =~ s/=3E/>/gis;         # spam trick, disguise HTML
-  $text =~ s/=[0-9a-f][0-9a-f]//gis;
-  $text =~ s/\&[-_a-zA-Z0-9]+;/ /gs;
-  $text =~ s/<[a-z0-9]+\b[^>]*>//gis;
-  $text =~ s/<\/[a-z0-9]+>//gis;
-
-  $text =~ s/[^A-Za-z!]/ /gs;
+  # just the words
+  $text =~ s/[^A-Za-z]+/ /gs;
   $text =~ s/\s+/ /gs;
+  $text =~ tr/A-Z/a-z/;
 
   # kill ignored stopwords -- too small for us to match
   $text =~ s/ (?:to|of|in|a|an|and|the|on|if|or) / /gs;
 
-  # msg_len_factor: 1000 = 200 words of 5 chars avg.  so a message of
-  # 2000 chars will score 1/2 as much to compensate for having more phrases
-  #
-  my $msg_len_factor;
-  if(length($text) > 1000) { $msg_len_factor = 1000 / length($text); }
-  # avoid division by zero and set max factor to 1
-  else { $msg_len_factor = 1; }
-
   # print "words found: $text\n";
 
   my $word;
-  my $lastword = "9s1aYzpl";	# random value to avoid defined() test in loop
+  my $wc = 0;
+  my $lastword = "000";		# avoid defined() test in loop
   my $phrase;
   my $freq;
 
-  # increase the maximum word if longer words appear in 40_spam_phrases.cf
-  while ($text =~ /\b([a-z]{3,15})\b/ig) {
-    $word = lc($1);
+  # don't forget to increase the maximum match length if longer words
+  # appear in 40_spam_phrases.cf
+  while ($text =~ /\b([a-z]{3,15})\b/g) {
+    $word = $1;
+    $wc++;
     $phrase = "$lastword $word";
-    $lastword = $word;
     $freq = $self->{conf}->{spamphrase}->{$phrase};
     if (defined $freq) {
-      $self->{phrase_score} += $freq * 10;
+      $self->{phrase_score} += $freq;
       $self->{phrase_hits_hash}->{$phrase} = $freq;
     }
-  }
-
-  while ($text =~ /!/g) {
-    $self->{phrase_score} += 1;              # add for each excl mark
+    $lastword = $word;
   }
 
   # bring the score down to an absolute value (not based on the size
   # of the corpus used to generate them)
-  $self->{phrase_score} /= $self->{conf}->{spamphrase_highest_score};
+  $self->{phrase_score} /= ($self->{conf}->{spamphrase_highest_score} / 10);
 
-  # and then compensate for message length
-  $self->{phrase_score} *= $msg_len_factor;
+  # a message of 400 words will score 1/2 as much to compensate for
+  # having more phrases
+  if ($wc > 200) {
+      $self->{phrase_score} /= ($wc / 200);
+  }
 
   my $hit = '';
   foreach my $k (sort keys %{$self->{phrase_hits_hash}}) {
@@ -87,20 +74,18 @@ sub check_phrase_freqs {
 
   dbg ("spam-phrase score: ".$self->{phrase_score}.
   			": hits: ".$self->{phrase_hits});
-
-  if ($self->{phrase_score} > $threshold) {
-    $self->test_log (sprintf ("score: %3d, hits: %s",
-    			$self->{phrase_score}, $self->{phrase_hits}));
-    return 1;
-  }
-
-  return 0;
 }
 
-sub extra_score_phrase_freqs {
-  my ($self, $fulltext, $threshold) = @_;
-  if (defined($self->{phrase_score}) and $self->{phrase_score} > $threshold) { return 1; }
-  return 0;
+sub check_phrase_freqs {
+  my ($self, $body, $min, $max) = @_;
+
+  if (!defined($self->{phrase_score})) {
+    _check_phrase_freqs($self, $body);
+    $self->test_log(sprintf ("phrase: %3d, hits: %s",
+			     $self->{phrase_score}, $self->{phrase_hits}));
+  }
+  return (($min == 0 || $self->{phrase_score} > $min) &&
+	  ($max eq "undef" || $self->{phrase_score} <= $max));
 }
 
 ###########################################################################
