@@ -106,8 +106,9 @@ If you don't:
 
       Verify (using a text viewer, ie. "less" or "notepad") that nonspam.out
       has not been tagged as spam, and that spam.out has.  The files should
-      contain the full text and headers of the messages, and there should be no
-      errors when you run the commands.
+      contain the full text and headers of the messages, the "spam" message
+      should be annotated with a report from SpamAssassin, and there should be
+      no errors when you run the commands.
 
       If the commands do not work, DO NOT PROCEED TO THE NEXT STEP, as you
       will lose mail!
@@ -118,22 +119,22 @@ If you don't:
 
     - Change your ~/.forward file so it reads like this:
 
-    	"| /path/to/spamassassin > /var/spool/mail/username"
+    	"| /path/to/spamassassin"
 
       Where "/path/to/spamassassin" is the path to where the "spamassassin"
-      script is installed, and "/var/spool/mail/username" is the path to your
-      mail spool.
+      script is installed.
 
     - Send yourself a mail message, and ensure it gets to you.  If it does not,
       copy your old backed-up .forward file back into place and ask your
-      sysadmin for help!
+      sysadmin for help!  Here's commands to do that:
 
       	cp ~/.forward.bak ~/.forward
 	echo "Help!" | mail root
 
     - If you get spammed, it is helpful if you re-run spamassassin with the
       "-r" option to report the message in question as "verified spam".  This
-      will add it to Vipul's Razor, a collaborative spam filtering network.
+      will add it to Vipul's Razor (http://razor.sourceforge.net/), a
+      collaborative spam filtering network.
 
 	spamassassin -r < spam-message
 
