@@ -558,9 +558,15 @@ sub expire_old_tokens_trapped {
       my ($ts, $th, $atime) = $self->tok_get ($tok);
 
       # Go through from $start * 1 to $start * 512, mark how many tokens we would expire
-      for( my $i = 1; $i <= 2**$count; $i<<=1 ) {
-        if ( $magic[10] - $atime > $start * $i ) {
+      my $token_age = $magic[10] - $atime;
+      for( my $i = 1, my $j = 2**$count; $i <= $j; $i<<=1 ) {
+        if ( $token_age >= $start * $i ) {
           $delta{$i}++;
+	}
+	else {
+	  # If the token age is less than the expire delta, it'll be
+	  # less for all upcoming checks too, so abort early.
+	  last;
 	}
       }
     }
@@ -570,29 +576,27 @@ sub expire_old_tokens_trapped {
     # (tokens that expire at 4 also expire at 3, 2, and 1, so 1 will be the largest expiry...)
     #
     my $i;
-    for($i=$count+1; $i > 0; $i--) {
-      next unless exists $delta{1<<($i-1)};
-      last if ($delta{1<<($i-1)} > $goal_reduction);
+    for($i=$count+1, my $j = (1<<($i-1)); $i > 0; $i--, $j = (1<<($i-1))) {
+      next unless exists $delta{$j};
+      last if ($delta{$j} > $goal_reduction);
     }
 
     # $i is now equal to the exponent we should use ...
     # Check to see if the atime value we found is really good.
     # It's not good if:
-    # - $i > 9, this would only happen if the largest atime (smallest count) is too large
-    #   This means that the majority of tokens are very old and more
-    #   activity is needed to push the atimes up.
-    # - keys %delta == 0, this would only happen if all the tokens are newer than 12hrs.
-    #   Ditto.
+    # - $i exponent would not expire any tokens.  This means that the majority of
+    #   tokens are old or new, and more activity is required before an expiry can occur.
     # - reduction count < 1000, not enough tokens to be worth doing an expire.
     #
-    if ( $i > $count || scalar keys %delta == 0 || $delta{1<<$i} < 1000 ) {
+    $i = 1 << $i;
+    if ( !exists $delta{$i} || $delta{$i} < 1000 ) {
       dbg("bayes: couldn't find a good delta atime, need more token difference, skipping expire.");
       $self->{db_toks}->{$LAST_EXPIRE_MAGIC_TOKEN} = time();
       $self->remove_running_expire_tok(); # this won't be cleaned up, so do it now.
       return 1; # we want to indicate things ran as expected
     }
 
-    $newdelta = $start * (1 << $i);
+    $newdelta = $start * $i;
   }
 
   # use O_EXCL to avoid races (bonus paranoia, since we should be locked
@@ -739,9 +743,17 @@ sub expiry_due {
   # If force expire was called, do the expire no matter what.
   return 1 if ($self->{bayes}->{main}->{learn_force_expire});
 
-  # If something has explicitly said to ignore the safety 12hr waiting period since the last expire
-  # (mass-check), don't bother checking when the last expire ran ...
-  return 0 if (!$self->{bayes}->{main}->{ignore_safety_expire_timeout} && time() - $magic[4] < 43200);
+  my $last_expire = time() - $magic[4];
+  if (!$self->{bayes}->{main}->{ignore_safety_expire_timeout}) {
+    # if we're not ignoring the safety timeout, don't run an expire more
+    # than once every 12 hours.
+    return 0 if ($last_expire < 43200);
+  }
+  else {
+    # if we are ignoring the safety timeout (e.g.: mass-check), still
+    # limit the expiry to only one every 5 minutes.
+    return 0 if ($last_expire < 300);
+  }
 
   dbg("Bayes DB expiry: Tokens in DB: $ntoks, Expiry max size: ".$self->{expiry_max_db_size}.", Oldest atime: ".$magic[5].", Newest atime: ".$magic[10].", Last expire: ".$magic[4].", Current time: ".time(),'bayes','-1');
 
