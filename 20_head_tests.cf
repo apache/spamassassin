@@ -90,8 +90,8 @@ describe X_EM_VER_PRESENT	Found an X-Em-Version: header
 header X_PMFLAGS_PRESENT	X-PMFLAGS =~ /\S/
 describe X_PMFLAGS_PRESENT	Found an X-PMFLAGS: (all caps) header
 
-header X_UIDL_SPAMSIGN		X-UIDL =~ /[^a-f0-9]/
-describe X_UIDL_SPAMSIGN	X-UIDL: header found, contains non-hex chars
+header X_UIDL_SPAMSIGN		X-UIDL =~ /[^\x21-\x7E]/
+describe X_UIDL_SPAMSIGN	X-UIDL: header contains invalid chars
 
 header A_FROM_IN_AUTO_WLIST	eval:check_for_auto_whitelist()
 describe A_FROM_IN_AUTO_WLIST	have seen non-spam mail from same From: address
