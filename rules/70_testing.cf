@@ -509,6 +509,7 @@ meta T_MSGID_EVIL_9	(__MSGID_ESPAM && !__MSGID_IDIOM_1 && !__MSGID_IDIOM_5)
 meta T_MSGID_EVIL_10	(__MSGID_ESPAM && !__MSGID_IDIOM_2 && !__MSGID_IDIOM_3)
 meta T_MSGID_EVIL_11	(__MSGID_ESPAM && !__MSGID_IDIOM_2 && !__MSGID_IDIOM_4)
 meta T_MSGID_EVIL_12	(__MSGID_ESPAM && !__MSGID_IDIOM_2 && !__MSGID_IDIOM_5)
+header T_MSGID_EVIL_P	Message-ID ~= /(?:\$[^$-]*[$-][^$-]*[$-]|[$-][^$-]*[$-][^$-]*\$)[^@]*\@/
 
 # some simple subject rules to catch a persistent spammer
 header T_SUBJ_XANAX		Subject =~ /x.{0,2}a.{0,2}n.{0,2}a.{0,2}x/i
