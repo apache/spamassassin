@@ -292,7 +292,10 @@ tflags T_ALL_TRUSTED		nice
 header T_NETIP_RCVD		Received =~ /netIP with HTTP\;/
 header T_NETIP_BOUND		Content-Type =~ /boundary="--ALT--[A-Z]{4}\d/
 
+# several variants of same rule idea
 header T_XORIGIP_INVALID	X-Originating-IP =~ /[^\[\]\s\.\d]/
+header T_XORIGIP_BAD		X-Originating-IP !~ /\[?(?:\d{1,3}\.){3}\d{1,3}\]?/ [if-unset: 0.0.0.0] 
+header T_XORIGIP_WRONG		X-Originating-IP !~ /^\[?(?:\d{1,3}\.){3}\d{1,3}\]?$/ [if-unset: 0.0.0.0] 
 
 # some tests to catch long lines of random dictionary words
 # this could be slow, being a rawbody rule, but if it works well maybe
