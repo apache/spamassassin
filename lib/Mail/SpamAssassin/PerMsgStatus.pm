@@ -638,6 +638,7 @@ sub rewrite_as_spam {
   $newmsg .= "X-Spam-Checker-Version: SpamAssassin " .
     Mail::SpamAssassin::Version() . " (" .
     $Mail::SpamAssassin::SUB_VERSION . ")\n";
+  $newmsg .= "X-Spam-Check-Host: " . hostname . "\n";
 
   if (defined $self->{conf}->{report_safe_copy_headers}) {
     foreach my $hdr ( @{$self->{conf}->{report_safe_copy_headers}} ) {
@@ -731,6 +732,9 @@ sub rewrite_headers {
   $self->{msg}->put_header ("X-Spam-Checker-Version",
 			    "SpamAssassin " . Mail::SpamAssassin::Version() .
 			    " ($Mail::SpamAssassin::SUB_VERSION)");
+
+  # always add the hostname
+  $self->{msg}->put_header("X-Spam-Check-Host", hostname);
 
   # add version & report headers if spam, or if always_report is on
   if ($self->{is_spam} || $self->{main}->{conf}->{always_add_report}) {
