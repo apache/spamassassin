@@ -1154,6 +1154,11 @@ sub found_pop_fetcher_sig {
   $self->{relays} = [ ];
 }
 
+sub is_in_subdelegated_cctld {
+  my ($domain) = @_;
+  return ($domain =~ /\.${CCTLDS_WITH_SUBDELEGATION}$/);
+}
+
 # ---------------------------------------------------------------------------
 
 1;

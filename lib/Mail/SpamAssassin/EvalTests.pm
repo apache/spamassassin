@@ -3110,31 +3110,6 @@ sub check_for_rdns_helo_mismatch {	# T_FAKE_HELO_*
 
 ###########################################################################
 
-# SPF support
-sub check_for_spf_pass {
-  my ($self) = @_;
-  $self->_check_spf() unless $self->{spf_checked};
-  $self->{spf_pass};
-}
-
-sub check_for_spf_fail {
-  my ($self) = @_;
-  $self->_check_spf() unless $self->{spf_checked};
-  if ($self->{spf_failure_comment}) {
-    $self->test_log ($self->{spf_failure_comment});
-  }
-  $self->{spf_fail};
-}
-
-sub check_for_spf_softfail {
-  my ($self) = @_;
-  $self->_check_spf() unless $self->{spf_checked};
-  if ($self->{spf_failure_comment}) {
-    $self->test_log ($self->{spf_failure_comment});
-  }
-  $self->{spf_softfail};
-}
-
 sub check_all_trusted {
   my ($self) = @_;
   if ($self->{num_relays_untrusted} > 0) {
@@ -3144,14 +3119,74 @@ sub check_all_trusted {
   }
 }
 
-sub _check_spf {
-  my ($self) = @_;
+###########################################################################
 
-  $self->{spf_checked} = 1;
-  $self->{spf_pass} = 0;
-  $self->{spf_fail} = 0;
-  $self->{spf_softfail} = 0;
-  $self->{spf_failure_comment} = undef;
+# SPF support
+sub check_for_spf_pass {
+  my ($self) = @_;
+  $self->_check_spf(0) unless $self->{spf_checked};
+  $self->{spf_pass};
+}
+
+sub check_for_spf_fail {
+  my ($self) = @_;
+  $self->_check_spf(0) unless $self->{spf_checked};
+  if ($self->{spf_failure_comment}) {
+    $self->test_log ($self->{spf_failure_comment});
+  }
+  $self->{spf_fail};
+}
+
+sub check_for_spf_softfail {
+  my ($self) = @_;
+  $self->_check_spf(0) unless $self->{spf_checked};
+  if ($self->{spf_failure_comment}) {
+    $self->test_log ($self->{spf_failure_comment});
+  }
+  $self->{spf_softfail};
+}
+
+sub check_for_spf_helo_pass {
+  my ($self) = @_;
+  $self->_check_spf(1) unless $self->{spf_helo_checked};
+  $self->{spf_helo_pass};
+}
+
+sub check_for_spf_helo_fail {
+  my ($self) = @_;
+  $self->_check_spf(1) unless $self->{spf_helo_checked};
+  if ($self->{spf_helo_failure_comment}) {
+    $self->test_log ($self->{spf_helo_failure_comment});
+  }
+  $self->{spf_helo_fail};
+}
+
+sub check_for_spf_helo_softfail {
+  my ($self) = @_;
+  $self->_check_spf(1) unless $self->{spf_helo_checked};
+  if ($self->{spf_helo_failure_comment}) {
+    $self->test_log ($self->{spf_helo_failure_comment});
+  }
+  $self->{spf_helo_softfail};
+}
+
+sub _check_spf {
+  my ($self, $ishelo) = @_;
+
+  if ($ishelo) {
+    $self->{spf_helo_checked} = 1;
+    $self->{spf_helo_pass} = 0;
+    $self->{spf_helo_fail} = 0;
+    $self->{spf_helo_softfail} = 0;
+    $self->{spf_helo_failure_comment} = undef;
+  } else {
+    $self->{spf_checked} = 1;
+    $self->{spf_pass} = 0;
+    $self->{spf_fail} = 0;
+    $self->{spf_softfail} = 0;
+    $self->{spf_failure_comment} = undef;
+  }
+
   return unless $self->is_dns_available();
 
   my $lasthop;
@@ -3198,14 +3233,38 @@ sub _check_spf {
 
   my $ip = $lasthop->{ip};
   my $helo = $lasthop->{helo};
-  my $sender = $lasthop->{envfrom};
+  my $sender = '';
 
-  if (!$use_helo && !$sender) {
-    # we can (apparently) use whatever the current Envelope-From was,
-    # from the Return-Path, X-Envelope-From, or whatever header.
-    # it's better to get it from Received though, as that is updated
-    # hop-by-hop.
-    $sender = $self->get ("EnvelopeFrom");
+  if ($ishelo) {
+    dbg ("SPF: checking HELO");
+
+    # drop any hostname parts, if we can.
+if (1 && $helo) {
+    my @domparts = split (/\./, $helo);
+    my $numparts = scalar @domparts;
+
+    if ($numparts > 0) {
+      my $partsreqd = 2;
+      if (Mail::SpamAssassin::PerMsgStatus::is_in_subdelegated_cctld ($helo)) {
+        $partsreqd = 3;
+      }
+
+      if ($numparts >= $partsreqd) { $helo =~ s/^[^\.]+\.//; }
+    }
+}
+
+  } else {
+    if ($use_helo) { return; }	# we can't use the env-from reliably
+
+    dbg ("SPF: checking EnvelopeFrom");
+    $sender = $lasthop->{envfrom};
+    if (!$sender) {
+      # we can (apparently) use whatever the current Envelope-From was,
+      # from the Return-Path, X-Envelope-From, or whatever header.
+      # it's better to get it from Received though, as that is updated
+      # hop-by-hop.
+      $sender = $self->get ("EnvelopeFrom");
+    }
   }
 
   # if $sender is undef or "", that's OK; Mail::SPF::Query will use
@@ -3235,16 +3294,22 @@ sub _check_spf {
   $comment ||= '';
   $comment =~ s/\s+/ /gs;	# no newlines please
 
-  if ($result eq 'pass') {
-    $self->{spf_pass} = 1;
-  } elsif ($result eq 'fail') {
-    $self->{spf_fail} = 1;
-  } elsif ($result eq 'softfail') {
-    $self->{spf_softfail} = 1;
-  }
+  if ($ishelo) {
+    if ($result eq 'pass') { $self->{spf_helo_pass} = 1; }
+    elsif ($result eq 'fail') { $self->{spf_helo_fail} = 1; }
+    elsif ($result eq 'softfail') { $self->{spf_helo_softfail} = 1; }
 
-  if ($self->{spf_fail} || $self->{spf_softfail}) {
-    $self->{spf_failure_comment} = "SPF failed: $comment";
+    if ($result eq 'fail' || $result eq 'softfail') {
+      $self->{spf_helo_failure_comment} = "SPF failed: $comment";
+    }
+  } else {
+    if ($result eq 'pass') { $self->{spf_pass} = 1; }
+    elsif ($result eq 'fail') { $self->{spf_fail} = 1; }
+    elsif ($result eq 'softfail') { $self->{spf_softfail} = 1; }
+
+    if ($result eq 'fail' || $result eq 'softfail') {
+      $self->{spf_failure_comment} = "SPF failed: $comment";
+    }
   }
 
   dbg ("SPF: query for $sender/$ip/$helo: result: $result, comment: $comment");
@@ -3441,6 +3506,7 @@ sub _run_hashcash {
 
   # untaint the string for paranoia, making sure not to allow \n \0 \' \"
   $hc =~ /^([-A-Za-z0-9\xA0-\xFF:_\/\%\@\.\,\= \*\+]+)$/; $hc = $1;
+  if (!$hc) { return 0; }
 
   my ($ver, $date, $rsrc, $trial);
   ($ver, $date, $rsrc, $trial) = ($hc =~ /(\S+):(\S+):(\S+):(\S+)/ );
