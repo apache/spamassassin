@@ -44,13 +44,12 @@ WriteMakefile(
     'VERSION_FROM' => 'lib/Mail/SpamAssassin.pm', # finds $VERSION
 
     'EXE_FILES'	=> [ 'spamassassin', 'spamd/spamc',
-    		'spamd/spamd', 'spamproxy/spamproxyd' ],
+    		'spamd/spamd', ],
 
     'MAN1PODS' => {
 	    'spamassassin' => '$(INST_MAN1DIR)/spamassassin.$(MAN1EXT)',
 	    'spamd/spamc.pod' => '$(INST_MAN1DIR)/spamc.$(MAN1EXT)',
 	    'spamd/spamd' => '$(INST_MAN1DIR)/spamd.$(MAN1EXT)',
-	    'spamproxy/spamproxyd' => '$(INST_MAN1DIR)/spamproxyd.$(MAN1EXT)',
     },
 
     'PL_FILES' => { },
@@ -74,7 +73,7 @@ WriteMakefile(
 	      },
 
     'clean' => { FILES =>
-	'pod2htm* spamassassin spamd/spamc spamd/spamd spamproxy/spamproxyd doc'
+	'pod2htm* spamassassin spamd/spamc spamd/spamd doc'
     },
 
     'AUTHOR' => 'Justin Mason <jm@jmason.org>',
@@ -135,10 +134,6 @@ spamassassin: spamassassin.raw
 
 spamd/spamd: spamd/spamd.raw
 	$(PERL) fixpath.pl $(FIXPATHFLAGS) spamd/spamd.raw $@
-	$(CHMOD) $(PERM_RWX) $@
-
-spamproxy/spamproxyd: spamproxy/spamproxyd.raw
-	$(PERL) fixpath.pl $(FIXPATHFLAGS) spamproxy/spamproxyd.raw $@
 	$(CHMOD) $(PERM_RWX) $@
 
 spamd/libspamc.so: spamd/libspamc.c
