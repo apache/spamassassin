@@ -260,7 +260,7 @@ sub dcc_lookup {
   }
 
   eval {
-    use IPC::Open2;
+    require IPC::Open2;
     my ($dccin, $dccout, $pid);
 
     local $SIG{ALRM} = sub { die "alarm\n" };
