@@ -68,6 +68,7 @@ use constant DUMP_BACKUP => 8;
 #   3330 =  <ftp://ftp.rfc-editor.org/in-notes/rfc3330.txt>
 #
 # Last update
+#   2004-05-22 Daniel Quinlan - removed 58/8 and 59/8
 #   2004-03-08 Justin Mason - reimplemented removed code
 #   2003-11-07 bug 1784 changes removed due to relicensing
 #   2003-04-15 Updated - bug 1784
@@ -87,7 +88,6 @@ use constant IP_IN_RESERVED_RANGE => qr{^(?:
   2[37]|                           # 023/8, 027/8:     IANA Reserved
   3[1679]|                         # 031/8, 036/8, 037/8, 039/8: IANA Reserved
   4[12]|                           # 041/8, 042/8:     IANA Reserved
-  5[89]|                           # 058/8, 059/8:     IANA Reserved
   7[2-9]|                          # 072-079/8:        IANA Reserved
 				   # [ignoring 72 as ARIN growth space]
   8[6-9]|                          # 086-089/8:	       IANA Reserved
