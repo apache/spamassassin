@@ -237,7 +237,7 @@ sub cmdline_run {
     }
 
     my $iter = new Mail::SpamAssassin::ArchiveIterator ({
-	'opt_j' => 1,
+	'opt_j' => 0,
 	'opt_n' => 1,
 	'opt_all' => 1,
     });

@@ -77,7 +77,7 @@ sub run {
     die "set_functions never called";
   }
 
-  if ($self->{opt_j} == 1) {
+  if ($self->{opt_j} == 0) { # sa-learn-style, all in memory, etc.
     my $message;
     my $class;
     my $result;
@@ -92,18 +92,7 @@ sub run {
       &{$self->{result_sub}}($class, $result, $date) if $result;
     }
   }
-  elsif ($self->{opt_j} > 1) {
-    my $select = IO::Select->new();
-
-    my $total_count = 0;
-    my $needs_restart = 0;
-    my @child = ();
-    my @pid = ();
-    my $messages;
-
-    # Have some kids ...
-    $self->start_children($self->{opt_j}, \@child, \@pid, $select);
-
+  else { # mass-check-style, keep minimum memory usage, allow fork(), etc.
     my $tmpf;
     ($tmpf, $self->{messageh}) = Mail::SpamAssassin::Util::secure_tmpfile();
     unlink $tmpf;
@@ -125,87 +114,114 @@ sub run {
     seek ($self->{messageh}, 0, 0);
     $MESSAGES = $self->next_message();
 
-    # feed childen, make them work for it, repeat.
-    while ($select->count()) {
-      foreach my $socket ($select->can_read()) {
-	my $result = '';
-	my $line;
-	while ($line = readline $socket) {
-	  if ($line =~ /^RESULT (.+)$/) {
-	    my($class,$type,$date) = index_unpack($1);
-	    #warn ">> RESULT: $class, $type, $date\n";
+    if ($self->{opt_j} == 1) { # only one process
+      my $message;
+      my $class;
+      my $result;
+      my $messages;
 
-	    if (defined $self->{opt_restart} && ($total_count % $self->{opt_restart}) == 0) {
-	      $needs_restart = 1;
+      while ($message = $self->next_message()) {
+        my ($class, undef, $date) = index_unpack($message);
+        $result = $self->run_message($message);
+        &{$self->{result_sub}}($class, $result, $date) if $result;
+      }
+    }
+    else { # more than one process
+      my $select = IO::Select->new();
+
+      my $total_count = 0;
+      my $needs_restart = 0;
+      my @child = ();
+      my @pid = ();
+      my $messages;
+
+      # Have some kids ...
+      $self->start_children($self->{opt_j}, \@child, \@pid, $select);
+
+      # feed childen, make them work for it, repeat.
+      while ($select->count()) {
+        foreach my $socket ($select->can_read()) {
+	  my $result = '';
+	  my $line;
+	  while ($line = readline $socket) {
+	    if ($line =~ /^RESULT (.+)$/) {
+	      my($class,$type,$date) = index_unpack($1);
+	      #warn ">> RESULT: $class, $type, $date\n";
+
+	      if (defined $self->{opt_restart} && ($total_count % $self->{opt_restart}) == 0) {
+	        $needs_restart = 1;
+	      }
+
+	      # if messages remain, and we don't need to restart, send a message
+	      if (($MESSAGES > $total_count) && !$needs_restart) {
+	        print { $socket } $self->next_message() . "\n";
+	        $total_count++;
+	        #warn ">> recv: $MESSAGES $total_count\n";
+	      }
+	      else {
+	        # stop listening on this child since we're done with it.
+	        #warn ">> removeresult: $needs_restart $MESSAGES $total_count\n";
+	        $select->remove($socket);
+	      }
+
+	      # Deal with the result we got.
+	      if ($result) {
+	        chop $result;	# need to chop the \n before RESULT
+	        &{$self->{result_sub}}($class, $result, $date);
+	      }
+
+	      last; # this will get out of the read for this client
 	    }
+	    elsif ($line eq "START\n") {
+	      if ($MESSAGES > $total_count) {
+	        # we still have messages, send one to child
+	        print { $socket } $self->next_message() . "\n";
+	        $total_count++;
+	        #warn ">> new: $MESSAGES $total_count\n";
+	      }
+	      else {
+	        # no more messages, so stop listening on this child
+	        #warn ">> removestart: $needs_restart $MESSAGES $total_count\n";
+	        $select->remove($socket);
+	      }
 
-	    # if messages remain, and we don't need to restart, send a message
-	    if (($MESSAGES > $total_count) && !$needs_restart) {
-	      print { $socket } $self->next_message() . "\n";
-	      $total_count++;
-	      #warn ">> recv: $MESSAGES $total_count\n";
+	      last; # this will get out of the read for this client
 	    }
 	    else {
-	      # stop listening on this child since we're done with it.
-	      #warn ">> removeresult: $needs_restart $MESSAGES $total_count\n";
-	      $select->remove($socket);
+	      # result line, remember it.
+	      $result .= $line;
 	    }
-
-	    # Deal with the result we got.
-	    if ($result) {
-	      chop $result;	# need to chop the \n before RESULT
-	      &{$self->{result_sub}}($class, $result, $date);
-	    }
-
-	    last; # this will get out of the read for this client
 	  }
-	  elsif ($line eq "START\n") {
-	    if ($MESSAGES > $total_count) {
-	      # we still have messages, send one to child
-	      print { $socket } $self->next_message() . "\n";
-	      $total_count++;
-	      #warn ">> new: $MESSAGES $total_count\n";
-	    }
-	    else {
-	      # no more messages, so stop listening on this child
-	      #warn ">> removestart: $needs_restart $MESSAGES $total_count\n";
-	      $select->remove($socket);
-	    }
 
-	    last; # this will get out of the read for this client
-	  }
-	  else {
-	    # result line, remember it.
-	    $result .= $line;
-	  }
-	}
+          # some error happened during the read!
+          if (!defined $line || !$line) {
+            $needs_restart = 1;
+            warn "Got an undef from readline?!?  Restarting all children, probably lost some results. :(\n";
+            $select->remove($socket);
+          }
+        }
 
-        # some error happened during the read!
-        if (!defined $line || !$line) {
-          $needs_restart = 1;
-          warn "Got an undef from readline?!?  Restarting all children, probably lost some results. :(\n";
-          $select->remove($socket);
+        #warn ">> out of loop, $MESSAGES $total_count $needs_restart ".$select->count()."\n";
+
+        # If there are still messages to process, and we need to restart
+        # the children, and all of the children are idle, let's go ahead.
+        if ($needs_restart && $select->count() == 0 && ($MESSAGES > $total_count)) {
+	  $needs_restart = 0;
+
+	  #warn "debug: Needs restart, $MESSAGES total, $total_count done.\n";
+	  $self->reap_children($self->{opt_j}, \@child, \@pid);
+	  @child=();
+	  @pid=();
+	  $self->start_children($self->{opt_j}, \@child, \@pid, $select);
         }
       }
 
-      #warn ">> out of loop, $MESSAGES $total_count $needs_restart ".$select->count()."\n";
-
-      # If there are still messages to process, and we need to restart
-      # the children, and all of the children are idle, let's go ahead.
-      if ($needs_restart && $select->count() == 0 && ($MESSAGES > $total_count)) {
-	$needs_restart = 0;
-
-	#warn "debug: Needs restart, $MESSAGES total, $total_count done.\n";
-	$self->reap_children($self->{opt_j}, \@child, \@pid);
-	@child=();
-	@pid=();
-	$self->start_children($self->{opt_j}, \@child, \@pid, $select);
-      }
+      # reap children
+      $self->reap_children($self->{opt_j}, \@child, \@pid);
     }
 
+    # Ok, get rid of the tempfile now ...
     close($self->{messageh});
-    # reap children
-    $self->reap_children($self->{opt_j}, \@child, \@pid);
   }
 }
 
