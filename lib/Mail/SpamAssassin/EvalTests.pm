@@ -902,7 +902,7 @@ sub check_for_very_long_text {
 sub check_for_yelling {
     my ($self, $body) = @_;
 
-  # Make local copy of lines in the body that have some none-letters
+  # Make local copy of lines in the body that have some non-letters
     my @lines = grep(/[^A-Za-z]/, @{$body});
 
   # Get rid of everything but upper AND lower case letters
