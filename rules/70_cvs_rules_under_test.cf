@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.576 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.577 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -329,7 +329,7 @@ body T_NA_DOLLARS		/\b(?:\d{1,3})?Million\b.{0,40}\b(?:Canadian Dollar?s?|US\$|U
 # Hotmail's DAV interface uses this. heavily exploited right now, looks like.
 # as far as I can tell, it requires an msn.com or hotmail.com X-Originating-Email,
 # but allows anything for From -- so use that as a spamsign
-header __HAS_MSN_RCVD_DAV	Received =~ / by \S+\.msn\.com with HTTP\;/
+header __HAS_MSN_RCVD_DAV	Received =~ / by \S+\.(?:hotmail|msn)\.com with (?:HTTP|DAV)\;/
 header __HAS_MSN_ORIG_EMAIL	X-Originating-Email =~ /(?:|hotmail|msn)\.com\]$/
 header __HAS_MSN_FROM		From =~ /(?:|hotmail|msn)\.com\b/
 meta T_FAKED_HOTMAIL_DAV	(__HAS_MSN_RCVD_DAV && __HAS_MSN_ORIG_EMAIL && !__HAS_MSN_FROM)
@@ -337,6 +337,9 @@ describe T_FAKED_HOTMAIL_DAV	'X-Originating-Email' header does not match 'From'
 
 header T_HAS_X_ORIG_HOST	X-Originating-Host =~ /^\[/
 describe T_HAS_X_ORIG_HOST	Has an 'X-Originating-Host' header
+
+header T_HAS_HOTMAIL_DAV	Received =~ /\.(?:hotmail|msn)\.com with DAV\;/
+describe T_HAS_HOTMAIL_DAV	Came through Hotmail via DAV
 
 # bug 1580 SATISFACTION too broad?
 # Replace SATISFACTION with this if scores improve
