@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.580 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.581 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -58,9 +58,6 @@ describe T_INVALID_DATE_2	Invalid Date: header (not RFC 2822)
 header __ANY_QUALCOMM_MUA	X-Mailer =~ /^QUALCOMM\b/
 meta T_FORGED_QUALCOMM_TAGS	(__ANY_QUALCOMM_MUA && __MIME_HTML && !__TAG_EXISTS_HTML)
 
-uri      T_HTTP_EXCESSIVE_ENTITIES m{^https?://\S*\&\#(?:0?3[0-9]|0?[46][1-9a-f]|0?[57][\da])}i
-describe T_HTTP_EXCESSIVE_ENTITIES Completely unnecessary %-escapes inside a URL
-
 ###########################################################################
 
 header T_RATWARE_RCVD_BONUS_SPC	Received =~ /\) by  [a-zA-Z0-9]/
@@ -78,11 +75,6 @@ header __OL_STYLE_FROM		From =~ /\".*\" <.+>/
 header __VIA_FROM_MANGLER	Received =~ /iPlanet/
 meta T_FORGED_MUA_OUTLOOK_FROM	(__ANY_OUTLOOK_MUA && !__OL_STYLE_FROM && !__VIA_FROM_MANGLER)
 describe T_FORGED_MUA_OUTLOOK_FROM Forged mail pretending to be from Outlook (by From)
-
-# NOTE: uses __ANY_IMS_MUA from above, __CTYPE_HAS_BOUNDARY from 20_ratware.cf
-header __IMS_BOUNDARY		Content-Type =~ /\n\s+boundary=\"----_=_NextPart_[\dA-F]+_[\dA-F]+.[\dA-F]+\"/s
-meta T_FORGED_IMS_CTYPE		(__ANY_IMS_MUA && __CTYPE_HAS_BOUNDARY && !__IMS_BOUNDARY)
-describe T_FORGED_IMS_CTYPE	Forged mail pretending to be from IMS (boundary)
 
 # NOTE: uses __ANY_QUALCOMM_MUA, __VIA_FROM_MANGLER from above
 header __EUD_STYLE_FROM		From =~ /^(?:[^\"][^']+[^\"]|\".*\'.*\") <[^>]+>$/
@@ -250,45 +242,30 @@ describe T_STRANGE_CHAR_LINKS	Links with strange characters
 # I actually don't like these rules since once we start looking for them, the spammers will just change
 # domains, but ...
 # tvd - 06/01
-
-
 uri T_BANNED_LINKS3_06	m@(?:^https?://|^mailto:).{0,20}yourvling@i
-
 uri T_BANNED_LINKS4_03	m@(?:^https?://|^mailto:).{0,20}rxmedical@i
 uri T_BANNED_LINKS4_04	m@(?:^https?://|^mailto:).{0,20}bannedcd@i
 uri T_BANNED_LINKS4_09	m@(?:^https?://|^mailto:).{0,20}freeht@i
 uri T_BANNED_LINKS4_11	m@(?:^https?://|^mailto:).{0,20}domainsforeveryone@i
-
 uri T_BANNED_LINKS5_05	m@(?:^https?://|^mailto:).{0,20}ew01@i
 uri T_BANNED_LINKS5_10	m@(?:^https?://|^mailto:).{0,20}faqchat@i
-
-
 uri T_SUSPICIOUS_LINKS_04	m@(?:^https?://|^mailto:).{0,25}bargain[zs\-]@i
 uri T_SUSPICIOUS_LINKS_09	m@(?:^https?://|^mailto:).{0,25}offer[sz]@i
 uri T_SUSPICIOUS_LINKS_10	m@(?:^https?://|^mailto:).{0,25}4you@i
 
 ######
 
-rawbody T_HREF_3D			/(?:href|src)=3D\"/i
-describe T_HREF_3D		Uses href=3D Trick
-
 # bug 1876
 rawbody		T_PUSHHERELINK		/<a[^>]*>[^<]*((push|go)\s(here|this) |cease.{1,10}mail)[^<]*<\/a>/i
 describe	T_PUSHHERELINK		Link asks you to "push here" or "go here" or "cease mail" or the like
+# yuck... rawbody!  also "(foo|bar)" instead of "(?:foo|bar)"
+body T_HTML_PUSH_HERE	eval:html_eval('anchor_text', '=~ /(?:push|go)\s(?:here|this)|cease.{1,10}mail/i')
 
 # bug 1634:
 # needed to readd X_MAILING_LIST as dependency, modify T_MAC_EUDORA_MUA for new version
 header __T_MAC_EUDORA_MUA         X-Mailer =~ /Eudora for (?:Macintosh|Mac OS X)/
 header __PALM_EUDORA_MUA	X-Mailer =~ /^Eudora \d+.\d+ for PalmOS\b/
 meta T_FORGED_MUA_EUDORA          (__EUDORA_MUA && !__EUDORA_MSGID && !__UNUSABLE_MSGID && !__HAS_X_LOOP && !__HAS_X_MAILING_LIST && !__T_MAC_EUDORA_MUA && !__PALM_EUDORA_MUA && !__OLD_EUDORA1 && !(__OLD_EUDORA2 && !__QUALCOMM))
-
-# rule to compare against MIME_HTML_ONLY
-# (note similar rule: MIME_HTML_ONLY_MULTI)
-header __CTYPE_MULTIPART_MIXED	Content-Type =~ /multipart\/mixed/i
-meta T_MIME_HTML_ONLY_MULTI_MIXED	(__CTYPE_MULTIPART_MIXED && MIME_HTML_ONLY)
-#
-header __CTYPE_MULTIPART_OTHER	Content-Type =~ /multipart\/(?!mixed)(?!alternative)/i
-meta T_MIME_HTML_ONLY_MULTI_OTHER	(__CTYPE_MULTIPART_OTHER && MIME_HTML_ONLY)
 
 ######################################################################
 
@@ -327,12 +304,3 @@ describe T_HAS_X_ORIG_HOST	Has an 'X-Originating-Host' header
 
 header T_HAS_HOTMAIL_DAV	Received =~ /\.(?:hotmail|msn)\.com with DAV\;/
 describe T_HAS_HOTMAIL_DAV	Came through Hotmail via DAV
-
-# bug 1580 SATISFACTION too broad?
-# Replace SATISFACTION with this if scores improve
-body T_SATISFACTION /\bsatisfaction .{0,9}g(?:ua|au)ranteed\b/i
-describe T_SATISFACTION             Satisfaction Guaranteed
-
-# bug 1687 HOME_EMPLOYMENT FPs (homes and businesses)
-body T_HOME_EMPLOYMENT              /home\b.{0,10}(?:\bemployment|worker|business\b)/i
-describe T_HOME_EMPLOYMENT  Information on how to work at home (2)
