@@ -1008,15 +1008,8 @@ sub html_text {
     if ($last =~ /\b([^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]{1,7})\z/s) {
       my $start = length($1);
       if ($text =~ /^([^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]{1,7})\b/s) {
-	my $end = length($1);
-	$self->{html}{backhair} += ($start + $end) / 12;
-      }
-    }
-    if ($last =~ /(?:\b|\s)([^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]{1,7})\z/s) {
-      my $start = length($1);
-      if ($text =~ /^([^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]{1,7})(?:\b|\s)/s) {
-	my $end = length($1);
-	$self->{html}{backhair2} += ($start + $end) / 12;
+	my $backhair = "backhair_" . $start . "_" . length($1);
+	$self->{html}{$backhair}++;
       }
     }
   }
