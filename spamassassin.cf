@@ -343,7 +343,7 @@ describe RELAYING_FRAME		Frame wanted to load outside URL
 full INTERNET_TERROR_RANT       /At the time of this mailing the return email address is a bonafide.*legitimate return email address that was signed up for with the express purpose .*Internet terrorists\./si
 describe INTERNET_TERROR_RANT   Cyber FirePower! rant about losing dropboxes
 
-full BASE64_ENC_TEXT		/\n\n.{0,100}\nContent-Type: text\/.{0,200}\nContent-Transfer-Encoding: base64/i
+full BASE64_ENC_TEXT		eval:check_for_base64_enc_text()
 describe BASE64_ENC_TEXT	Message text disguised using base-64 encoding
 
 ###########################################################################
