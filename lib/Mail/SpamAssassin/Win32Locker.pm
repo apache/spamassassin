@@ -38,7 +38,7 @@ sub safe_lock {
 
   if (-e $lock_file && -M $lock_file > (LOCK_MAX_AGE / 86400)) {
     dbg("lock: $$ breaking stale lock: $lock_file");
-    unlink $lock_file;
+    unlink($lock_file) || warn "lock: $$ unlink of lock file $lock_file failed: $!\n";
   }
   for (my $retries = 0; $retries < $max_retries; $retries++) {
     if ($retries > 0) {
@@ -54,10 +54,10 @@ sub safe_lock {
     # check age of lockfile ctime
     my $age = ($#stat < 11 ? undef : $stat[10]);
     if ((!defined($age) && $retries > $max_retries / 2) ||
-	(time - $age > LOCK_MAX_AGE))
+	(defined($age) && (time - $age > LOCK_MAX_AGE)))
     {
       dbg("lock: $$ breaking stale lock: $lock_file");
-      unlink $lock_file;
+      unlink ($lock_file) || warn "lock: $$ unlink of lock file $lock_file failed: $!\n";
     }
   }
   return 0;
@@ -68,7 +68,7 @@ sub safe_lock {
 sub safe_unlock {
   my ($self, $path) = @_;
 
-  unlink "$path.lock" || warn "unlock: $$ unlink failed: $path.lock\n";
+  unlink ("$path.lock") || warn "unlock: $$ unlink failed: $path.lock\n";
   dbg("unlock: $$ unlink $path.lock");
 }
 

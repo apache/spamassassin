@@ -81,12 +81,12 @@ sub safe_lock {
       # we got a stale lock, break it
       dbg("lock: $$ breaking stale $lock_file: age=" .
 	  (defined $lock_age ? $lock_age : "undef") . " now=$now");
-      unlink $lock_file || warn "lock: $$ unlink of lock file $lock_file failed: $!\n";
+      unlink ($lock_file) || warn "lock: $$ unlink of lock file $lock_file failed: $!\n";
     }
   }
 
   close(LTMP);
-  unlink $lock_tmp || warn "lock: $$ unlink of temp lock $lock_tmp failed: $!\n";
+  unlink ($lock_tmp) || warn "lock: $$ unlink of temp lock $lock_tmp failed: $!\n";
 
   return $is_locked;
 }
@@ -96,7 +96,7 @@ sub safe_lock {
 sub safe_unlock {
   my ($self, $path) = @_;
 
-  unlink "$path.lock" || warn "unlock: $$ unlink failed: $path.lock\n";
+  unlink ("$path.lock") || warn "unlock: $$ unlink failed: $path.lock\n";
   dbg("unlock: $$ unlink $path.lock");
 }
 
