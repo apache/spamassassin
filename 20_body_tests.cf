@@ -13,6 +13,10 @@ full DCC_CHECK                  eval:check_dcc()
 describe DCC_CHECK              Listed in DCC, see http://www.rhyolite.com/anti-spam/dcc/dcc-tree/dcc.html
 tflags DCC_CHECK                net
 
+full PYZOR_CHECK                  eval:check_pyzor()
+describe PYZOR_CHECK              Listed in Pyzor, see http://pyzor.sourceforge.net/
+tflags PYZOR_CHECK                net
+
 full FREQ_SPAM_PHRASE		eval:check_for_spam_phrases("10")
 describe FREQ_SPAM_PHRASE	Contains phrases frequently found in spam
 
