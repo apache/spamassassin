@@ -702,17 +702,6 @@ die "Required module Storable not found!\n"
 
 $opt{'daemonize'} and daemonize();
 
-# Make the pidfile ...
-if (defined $opt{'pidfile'}) {
-  if (open PIDF, ">$opt{'pidfile'}") {
-    print PIDF "$$\n";
-    close PIDF;
-  }
-  else {
-    warn "Can't write to PID file: $!\n";
-  }
-}
-
 # should be done post-daemonize such that any files created by this
 # process are written with the right ownership and everything.
 preload_modules_with_tmp_homedir();
@@ -740,13 +729,11 @@ if ($setuid_to_user) {
 my $got_sighup;
 $SIG{HUP} = \&restart_handler;
 
-# now allow waiting processes to connect, if they're watching the log.
-# The test suite does this!
-
+# log server started, but processes watching the log to wait for connect
+# should wait until they see the pid, after signal handlers are in place
 if ( $opt{'debug'} ) {
   warn "server started on $listeninfo (running version "
     . Mail::SpamAssassin::Version() . ")\n";
-  warn "server pid: $$\n";
 }
 
 logmsg( "server started on $listeninfo (running version "
@@ -761,6 +748,24 @@ for ( 1 .. $childlimit ) {
 $SIG{CHLD} = \&child_handler;
 $SIG{INT}  = \&kill_handler;
 $SIG{TERM} = \&kill_handler;
+
+# Make the pidfile ...
+if (defined $opt{'pidfile'}) {
+  if (open PIDF, ">$opt{'pidfile'}") {
+    print PIDF "$$\n";
+    close PIDF;
+  }
+  else {
+    warn "Can't write to PID file: $!\n";
+  }
+}
+
+# now allow waiting processes to connect, if they're watching the log.
+# The test suite does this!
+
+if ( $opt{'debug'} ) {
+  warn "server pid: $$\n";
+}
 
 while (1) {
   sleep;    # wait for a signal (ie: child's death)

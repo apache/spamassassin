@@ -361,6 +361,7 @@ sub start_spamd {
                        $spamd_extra_args,
                        qq{&},
                     );
+  unlink ($spamd_stdout, $spamd_stderr, $spamd_stdlog);
   print ("\t${spamd_cmd}\n");
   system ($spamd_cmd);
 
