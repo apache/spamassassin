@@ -114,7 +114,8 @@ sub run {
     seek ($self->{messageh}, 0, 0);
     $MESSAGES = $self->next_message();
 
-    if ($self->{opt_j} == 1) { # only one process
+    # Only do 1 process, message list in a temp file, no restarting...
+    if ($self->{opt_j} == 1 && !defined $self->{opt_restart}) {
       my $message;
       my $class;
       my $result;
@@ -126,7 +127,7 @@ sub run {
         &{$self->{result_sub}}($class, $result, $date) if $result;
       }
     }
-    else { # more than one process
+    else { # more than one process or one process with restarts
       my $select = IO::Select->new();
 
       my $total_count = 0;
