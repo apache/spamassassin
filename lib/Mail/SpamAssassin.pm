@@ -83,7 +83,7 @@ $DEBUG = 0;
         /etc/spamassassin.prefs
         __installsitelib__/spamassassin.prefs
 );
-    
+
 @default_userprefs_path = qw(
         ./spamassassin.prefs 
         ../spamassassin.prefs
@@ -110,17 +110,18 @@ The filename to load preferences from. (optional)
 =item config_text
 
 The text of all rules and preferences.  If you prefer not to load the rules
-from files, read them in yourself and set this instead.
-
-If none of rules_filename, userprefs_filename, or config_text is set,
-the C<Mail::SpamAssassin> module will search for the configuration files
-in the usual installed locations.
+from files, read them in yourself and set this instead.  As a result, this will
+override the settings for C<rules_filename> and C<userprefs_filename>.
 
 =item local_tests_only
 
 If set to 1, no tests that require internet access will be performed.
 
 =back
+
+If none of C<rules_filename>, C<userprefs_filename>, or C<config_text> is set,
+the C<Mail::SpamAssassin> module will search for the configuration files in the
+usual installed locations.
 
 =cut
 
