@@ -69,7 +69,7 @@ use vars	qw{
 @ISA = qw();
 
 $VERSION = "2.0";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.53 2002/01/07 05:06:59 jmason Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.54 2002/01/14 01:56:34 jmason Exp $';
 
 sub Version { $VERSION; }
 
@@ -82,6 +82,8 @@ $DEBUG = 0;
 @default_rules_path = qw(
   	/usr/local/share/spamassassin
   	/usr/share/spamassassin
+	./rules
+	../rules
 );
 
 @site_rules_path = qw(
@@ -89,8 +91,6 @@ $DEBUG = 0;
 	/usr/pkg/etc/spamassassin
   	/etc/mail/spamassassin
   	/etc/spamassassin
-	./rules
-	../rules
 );
 @old_site_rules_path = qw(
   	/etc/mail/spamassassin.cf
