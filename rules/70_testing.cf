@@ -52,419 +52,211 @@ header T_RCVD_IN_IADB_LIST_T	eval:check_rbl_sub('iadbtr', '127.0.0.1')
 describe T_RCVD_IN_IADB_LIST_T	Sender is listed in ISIPP IADB
 tflags T_RCVD_IN_IADB_LIST_T	net nice
 
-# high daily volume for organization
-# high monthly volume for IP address
-header T_S2_83_S41_42	eval:check_rbl_sub('senderbase', 'S2 > 8.3 && S41 > 4.2')
-header T_S2_83_S41_43	eval:check_rbl_sub('senderbase', 'S2 > 8.3 && S41 > 4.3')
-header T_S2_83_S41_44	eval:check_rbl_sub('senderbase', 'S2 > 8.3 && S41 > 4.4')
-header T_S2_83_S41_45	eval:check_rbl_sub('senderbase', 'S2 > 8.3 && S41 > 4.5')
-header T_S2_83_S41_46	eval:check_rbl_sub('senderbase', 'S2 > 8.3 && S41 > 4.6')
-header T_S2_83_S41_47	eval:check_rbl_sub('senderbase', 'S2 > 8.3 && S41 > 4.7')
-header T_S2_83_S41_48	eval:check_rbl_sub('senderbase', 'S2 > 8.3 && S41 > 4.8')
-header T_S2_83_S41_49	eval:check_rbl_sub('senderbase', 'S2 > 8.3 && S41 > 4.9')
-header T_S2_83_S41_50	eval:check_rbl_sub('senderbase', 'S2 > 8.3 && S41 > 5.0')
-header T_S2_83_S41_51	eval:check_rbl_sub('senderbase', 'S2 > 8.3 && S41 > 5.1')
-header T_S2_83_S41_52	eval:check_rbl_sub('senderbase', 'S2 > 8.3 && S41 > 5.2')
-header T_S2_83_S41_53	eval:check_rbl_sub('senderbase', 'S2 > 8.3 && S41 > 5.3')
-header T_S2_83_S41_54	eval:check_rbl_sub('senderbase', 'S2 > 8.3 && S41 > 5.4')
-header T_S2_83_S41_55	eval:check_rbl_sub('senderbase', 'S2 > 8.3 && S41 > 5.5')
-header T_S2_83_S41_56	eval:check_rbl_sub('senderbase', 'S2 > 8.3 && S41 > 5.6')
-header T_S2_84_S41_42	eval:check_rbl_sub('senderbase', 'S2 > 8.4 && S41 > 4.2')
-header T_S2_84_S41_43	eval:check_rbl_sub('senderbase', 'S2 > 8.4 && S41 > 4.3')
-header T_S2_84_S41_44	eval:check_rbl_sub('senderbase', 'S2 > 8.4 && S41 > 4.4')
-header T_S2_84_S41_45	eval:check_rbl_sub('senderbase', 'S2 > 8.4 && S41 > 4.5')
-header T_S2_84_S41_46	eval:check_rbl_sub('senderbase', 'S2 > 8.4 && S41 > 4.6')
-header T_S2_84_S41_47	eval:check_rbl_sub('senderbase', 'S2 > 8.4 && S41 > 4.7')
-header T_S2_84_S41_48	eval:check_rbl_sub('senderbase', 'S2 > 8.4 && S41 > 4.8')
-header T_S2_84_S41_49	eval:check_rbl_sub('senderbase', 'S2 > 8.4 && S41 > 4.9')
-header T_S2_84_S41_50	eval:check_rbl_sub('senderbase', 'S2 > 8.4 && S41 > 5.0')
-header T_S2_84_S41_51	eval:check_rbl_sub('senderbase', 'S2 > 8.4 && S41 > 5.1')
-header T_S2_84_S41_52	eval:check_rbl_sub('senderbase', 'S2 > 8.4 && S41 > 5.2')
-header T_S2_84_S41_53	eval:check_rbl_sub('senderbase', 'S2 > 8.4 && S41 > 5.3')
-header T_S2_84_S41_54	eval:check_rbl_sub('senderbase', 'S2 > 8.4 && S41 > 5.4')
-header T_S2_84_S41_55	eval:check_rbl_sub('senderbase', 'S2 > 8.4 && S41 > 5.5')
-header T_S2_84_S41_56	eval:check_rbl_sub('senderbase', 'S2 > 8.4 && S41 > 5.6')
-header T_S2_85_S41_42	eval:check_rbl_sub('senderbase', 'S2 > 8.5 && S41 > 4.2')
-header T_S2_85_S41_43	eval:check_rbl_sub('senderbase', 'S2 > 8.5 && S41 > 4.3')
-header T_S2_85_S41_44	eval:check_rbl_sub('senderbase', 'S2 > 8.5 && S41 > 4.4')
-header T_S2_85_S41_45	eval:check_rbl_sub('senderbase', 'S2 > 8.5 && S41 > 4.5')
-header T_S2_85_S41_46	eval:check_rbl_sub('senderbase', 'S2 > 8.5 && S41 > 4.6')
-header T_S2_85_S41_47	eval:check_rbl_sub('senderbase', 'S2 > 8.5 && S41 > 4.7')
-header T_S2_85_S41_48	eval:check_rbl_sub('senderbase', 'S2 > 8.5 && S41 > 4.8')
-header T_S2_85_S41_49	eval:check_rbl_sub('senderbase', 'S2 > 8.5 && S41 > 4.9')
-header T_S2_85_S41_50	eval:check_rbl_sub('senderbase', 'S2 > 8.5 && S41 > 5.0')
-header T_S2_85_S41_51	eval:check_rbl_sub('senderbase', 'S2 > 8.5 && S41 > 5.1')
-header T_S2_85_S41_52	eval:check_rbl_sub('senderbase', 'S2 > 8.5 && S41 > 5.2')
-header T_S2_85_S41_53	eval:check_rbl_sub('senderbase', 'S2 > 8.5 && S41 > 5.3')
-header T_S2_85_S41_54	eval:check_rbl_sub('senderbase', 'S2 > 8.5 && S41 > 5.4')
-header T_S2_85_S41_55	eval:check_rbl_sub('senderbase', 'S2 > 8.5 && S41 > 5.5')
-header T_S2_85_S41_56	eval:check_rbl_sub('senderbase', 'S2 > 8.5 && S41 > 5.6')
-header T_S2_86_S41_42	eval:check_rbl_sub('senderbase', 'S2 > 8.6 && S41 > 4.2')
-header T_S2_86_S41_43	eval:check_rbl_sub('senderbase', 'S2 > 8.6 && S41 > 4.3')
-header T_S2_86_S41_44	eval:check_rbl_sub('senderbase', 'S2 > 8.6 && S41 > 4.4')
-header T_S2_86_S41_45	eval:check_rbl_sub('senderbase', 'S2 > 8.6 && S41 > 4.5')
-header T_S2_86_S41_46	eval:check_rbl_sub('senderbase', 'S2 > 8.6 && S41 > 4.6')
-header T_S2_86_S41_47	eval:check_rbl_sub('senderbase', 'S2 > 8.6 && S41 > 4.7')
-header T_S2_86_S41_48	eval:check_rbl_sub('senderbase', 'S2 > 8.6 && S41 > 4.8')
-header T_S2_86_S41_49	eval:check_rbl_sub('senderbase', 'S2 > 8.6 && S41 > 4.9')
-header T_S2_86_S41_50	eval:check_rbl_sub('senderbase', 'S2 > 8.6 && S41 > 5.0')
-header T_S2_86_S41_51	eval:check_rbl_sub('senderbase', 'S2 > 8.6 && S41 > 5.1')
-header T_S2_86_S41_52	eval:check_rbl_sub('senderbase', 'S2 > 8.6 && S41 > 5.2')
-header T_S2_86_S41_53	eval:check_rbl_sub('senderbase', 'S2 > 8.6 && S41 > 5.3')
-header T_S2_86_S41_54	eval:check_rbl_sub('senderbase', 'S2 > 8.6 && S41 > 5.4')
-header T_S2_86_S41_55	eval:check_rbl_sub('senderbase', 'S2 > 8.6 && S41 > 5.5')
-header T_S2_86_S41_56	eval:check_rbl_sub('senderbase', 'S2 > 8.6 && S41 > 5.6')
-header T_S2_87_S41_42	eval:check_rbl_sub('senderbase', 'S2 > 8.7 && S41 > 4.2')
-header T_S2_87_S41_43	eval:check_rbl_sub('senderbase', 'S2 > 8.7 && S41 > 4.3')
-header T_S2_87_S41_44	eval:check_rbl_sub('senderbase', 'S2 > 8.7 && S41 > 4.4')
-header T_S2_87_S41_45	eval:check_rbl_sub('senderbase', 'S2 > 8.7 && S41 > 4.5')
-header T_S2_87_S41_46	eval:check_rbl_sub('senderbase', 'S2 > 8.7 && S41 > 4.6')
-header T_S2_87_S41_47	eval:check_rbl_sub('senderbase', 'S2 > 8.7 && S41 > 4.7')
-header T_S2_87_S41_48	eval:check_rbl_sub('senderbase', 'S2 > 8.7 && S41 > 4.8')
-header T_S2_87_S41_49	eval:check_rbl_sub('senderbase', 'S2 > 8.7 && S41 > 4.9')
-header T_S2_87_S41_50	eval:check_rbl_sub('senderbase', 'S2 > 8.7 && S41 > 5.0')
-header T_S2_87_S41_51	eval:check_rbl_sub('senderbase', 'S2 > 8.7 && S41 > 5.1')
-header T_S2_87_S41_52	eval:check_rbl_sub('senderbase', 'S2 > 8.7 && S41 > 5.2')
-header T_S2_87_S41_53	eval:check_rbl_sub('senderbase', 'S2 > 8.7 && S41 > 5.3')
-header T_S2_87_S41_54	eval:check_rbl_sub('senderbase', 'S2 > 8.7 && S41 > 5.4')
-header T_S2_87_S41_55	eval:check_rbl_sub('senderbase', 'S2 > 8.7 && S41 > 5.5')
-header T_S2_87_S41_56	eval:check_rbl_sub('senderbase', 'S2 > 8.7 && S41 > 5.6')
-
-# high monthly volume for organization
-# high monthly volume for IP address
-header T_S3_83_S41_42	eval:check_rbl_sub('senderbase', 'S3 > 8.3 && S41 > 4.2')
-header T_S3_83_S41_43	eval:check_rbl_sub('senderbase', 'S3 > 8.3 && S41 > 4.3')
-header T_S3_83_S41_44	eval:check_rbl_sub('senderbase', 'S3 > 8.3 && S41 > 4.4')
-header T_S3_83_S41_45	eval:check_rbl_sub('senderbase', 'S3 > 8.3 && S41 > 4.5')
-header T_S3_83_S41_46	eval:check_rbl_sub('senderbase', 'S3 > 8.3 && S41 > 4.6')
-header T_S3_83_S41_47	eval:check_rbl_sub('senderbase', 'S3 > 8.3 && S41 > 4.7')
-header T_S3_83_S41_48	eval:check_rbl_sub('senderbase', 'S3 > 8.3 && S41 > 4.8')
-header T_S3_83_S41_49	eval:check_rbl_sub('senderbase', 'S3 > 8.3 && S41 > 4.9')
-header T_S3_83_S41_50	eval:check_rbl_sub('senderbase', 'S3 > 8.3 && S41 > 5.0')
-header T_S3_83_S41_51	eval:check_rbl_sub('senderbase', 'S3 > 8.3 && S41 > 5.1')
-header T_S3_83_S41_52	eval:check_rbl_sub('senderbase', 'S3 > 8.3 && S41 > 5.2')
-header T_S3_83_S41_53	eval:check_rbl_sub('senderbase', 'S3 > 8.3 && S41 > 5.3')
-header T_S3_83_S41_54	eval:check_rbl_sub('senderbase', 'S3 > 8.3 && S41 > 5.4')
-header T_S3_83_S41_55	eval:check_rbl_sub('senderbase', 'S3 > 8.3 && S41 > 5.5')
-header T_S3_83_S41_56	eval:check_rbl_sub('senderbase', 'S3 > 8.3 && S41 > 5.6')
-header T_S3_84_S41_42	eval:check_rbl_sub('senderbase', 'S3 > 8.4 && S41 > 4.2')
-header T_S3_84_S41_43	eval:check_rbl_sub('senderbase', 'S3 > 8.4 && S41 > 4.3')
-header T_S3_84_S41_44	eval:check_rbl_sub('senderbase', 'S3 > 8.4 && S41 > 4.4')
-header T_S3_84_S41_45	eval:check_rbl_sub('senderbase', 'S3 > 8.4 && S41 > 4.5')
-header T_S3_84_S41_46	eval:check_rbl_sub('senderbase', 'S3 > 8.4 && S41 > 4.6')
-header T_S3_84_S41_47	eval:check_rbl_sub('senderbase', 'S3 > 8.4 && S41 > 4.7')
-header T_S3_84_S41_48	eval:check_rbl_sub('senderbase', 'S3 > 8.4 && S41 > 4.8')
-header T_S3_84_S41_49	eval:check_rbl_sub('senderbase', 'S3 > 8.4 && S41 > 4.9')
-header T_S3_84_S41_50	eval:check_rbl_sub('senderbase', 'S3 > 8.4 && S41 > 5.0')
-header T_S3_84_S41_51	eval:check_rbl_sub('senderbase', 'S3 > 8.4 && S41 > 5.1')
-header T_S3_84_S41_52	eval:check_rbl_sub('senderbase', 'S3 > 8.4 && S41 > 5.2')
-header T_S3_84_S41_53	eval:check_rbl_sub('senderbase', 'S3 > 8.4 && S41 > 5.3')
-header T_S3_84_S41_54	eval:check_rbl_sub('senderbase', 'S3 > 8.4 && S41 > 5.4')
-header T_S3_84_S41_55	eval:check_rbl_sub('senderbase', 'S3 > 8.4 && S41 > 5.5')
-header T_S3_84_S41_56	eval:check_rbl_sub('senderbase', 'S3 > 8.4 && S41 > 5.6')
-header T_S3_85_S41_42	eval:check_rbl_sub('senderbase', 'S3 > 8.5 && S41 > 4.2')
-header T_S3_85_S41_43	eval:check_rbl_sub('senderbase', 'S3 > 8.5 && S41 > 4.3')
-header T_S3_85_S41_44	eval:check_rbl_sub('senderbase', 'S3 > 8.5 && S41 > 4.4')
-header T_S3_85_S41_45	eval:check_rbl_sub('senderbase', 'S3 > 8.5 && S41 > 4.5')
-header T_S3_85_S41_46	eval:check_rbl_sub('senderbase', 'S3 > 8.5 && S41 > 4.6')
-header T_S3_85_S41_47	eval:check_rbl_sub('senderbase', 'S3 > 8.5 && S41 > 4.7')
-header T_S3_85_S41_48	eval:check_rbl_sub('senderbase', 'S3 > 8.5 && S41 > 4.8')
-header T_S3_85_S41_49	eval:check_rbl_sub('senderbase', 'S3 > 8.5 && S41 > 4.9')
-header T_S3_85_S41_50	eval:check_rbl_sub('senderbase', 'S3 > 8.5 && S41 > 5.0')
-header T_S3_85_S41_51	eval:check_rbl_sub('senderbase', 'S3 > 8.5 && S41 > 5.1')
-header T_S3_85_S41_52	eval:check_rbl_sub('senderbase', 'S3 > 8.5 && S41 > 5.2')
-header T_S3_85_S41_53	eval:check_rbl_sub('senderbase', 'S3 > 8.5 && S41 > 5.3')
-header T_S3_85_S41_54	eval:check_rbl_sub('senderbase', 'S3 > 8.5 && S41 > 5.4')
-header T_S3_85_S41_55	eval:check_rbl_sub('senderbase', 'S3 > 8.5 && S41 > 5.5')
-header T_S3_85_S41_56	eval:check_rbl_sub('senderbase', 'S3 > 8.5 && S41 > 5.6')
-header T_S3_86_S41_42	eval:check_rbl_sub('senderbase', 'S3 > 8.6 && S41 > 4.2')
-header T_S3_86_S41_43	eval:check_rbl_sub('senderbase', 'S3 > 8.6 && S41 > 4.3')
-header T_S3_86_S41_44	eval:check_rbl_sub('senderbase', 'S3 > 8.6 && S41 > 4.4')
-header T_S3_86_S41_45	eval:check_rbl_sub('senderbase', 'S3 > 8.6 && S41 > 4.5')
-header T_S3_86_S41_46	eval:check_rbl_sub('senderbase', 'S3 > 8.6 && S41 > 4.6')
-header T_S3_86_S41_47	eval:check_rbl_sub('senderbase', 'S3 > 8.6 && S41 > 4.7')
-header T_S3_86_S41_48	eval:check_rbl_sub('senderbase', 'S3 > 8.6 && S41 > 4.8')
-header T_S3_86_S41_49	eval:check_rbl_sub('senderbase', 'S3 > 8.6 && S41 > 4.9')
-header T_S3_86_S41_50	eval:check_rbl_sub('senderbase', 'S3 > 8.6 && S41 > 5.0')
-header T_S3_86_S41_51	eval:check_rbl_sub('senderbase', 'S3 > 8.6 && S41 > 5.1')
-header T_S3_86_S41_52	eval:check_rbl_sub('senderbase', 'S3 > 8.6 && S41 > 5.2')
-header T_S3_86_S41_53	eval:check_rbl_sub('senderbase', 'S3 > 8.6 && S41 > 5.3')
-header T_S3_86_S41_54	eval:check_rbl_sub('senderbase', 'S3 > 8.6 && S41 > 5.4')
-header T_S3_86_S41_55	eval:check_rbl_sub('senderbase', 'S3 > 8.6 && S41 > 5.5')
-header T_S3_86_S41_56	eval:check_rbl_sub('senderbase', 'S3 > 8.6 && S41 > 5.6')
-header T_S3_87_S41_42	eval:check_rbl_sub('senderbase', 'S3 > 8.7 && S41 > 4.2')
-header T_S3_87_S41_43	eval:check_rbl_sub('senderbase', 'S3 > 8.7 && S41 > 4.3')
-header T_S3_87_S41_44	eval:check_rbl_sub('senderbase', 'S3 > 8.7 && S41 > 4.4')
-header T_S3_87_S41_45	eval:check_rbl_sub('senderbase', 'S3 > 8.7 && S41 > 4.5')
-header T_S3_87_S41_46	eval:check_rbl_sub('senderbase', 'S3 > 8.7 && S41 > 4.6')
-header T_S3_87_S41_47	eval:check_rbl_sub('senderbase', 'S3 > 8.7 && S41 > 4.7')
-header T_S3_87_S41_48	eval:check_rbl_sub('senderbase', 'S3 > 8.7 && S41 > 4.8')
-header T_S3_87_S41_49	eval:check_rbl_sub('senderbase', 'S3 > 8.7 && S41 > 4.9')
-header T_S3_87_S41_50	eval:check_rbl_sub('senderbase', 'S3 > 8.7 && S41 > 5.0')
-header T_S3_87_S41_51	eval:check_rbl_sub('senderbase', 'S3 > 8.7 && S41 > 5.1')
-header T_S3_87_S41_52	eval:check_rbl_sub('senderbase', 'S3 > 8.7 && S41 > 5.2')
-header T_S3_87_S41_53	eval:check_rbl_sub('senderbase', 'S3 > 8.7 && S41 > 5.3')
-header T_S3_87_S41_54	eval:check_rbl_sub('senderbase', 'S3 > 8.7 && S41 > 5.4')
-header T_S3_87_S41_55	eval:check_rbl_sub('senderbase', 'S3 > 8.7 && S41 > 5.5')
-header T_S3_87_S41_56	eval:check_rbl_sub('senderbase', 'S3 > 8.7 && S41 > 5.6')
-
-tflags T_S2_83_S41_42 net
-tflags T_S2_83_S41_43 net
-tflags T_S2_83_S41_44 net
-tflags T_S2_83_S41_45 net
-tflags T_S2_83_S41_46 net
-tflags T_S2_83_S41_47 net
-tflags T_S2_83_S41_48 net
-tflags T_S2_83_S41_49 net
-tflags T_S2_83_S41_50 net
-tflags T_S2_83_S41_51 net
-tflags T_S2_83_S41_52 net
-tflags T_S2_83_S41_53 net
-tflags T_S2_83_S41_54 net
-tflags T_S2_83_S41_55 net
-tflags T_S2_83_S41_56 net
-tflags T_S2_84_S41_42 net
-tflags T_S2_84_S41_43 net
-tflags T_S2_84_S41_44 net
-tflags T_S2_84_S41_45 net
-tflags T_S2_84_S41_46 net
-tflags T_S2_84_S41_47 net
-tflags T_S2_84_S41_48 net
-tflags T_S2_84_S41_49 net
-tflags T_S2_84_S41_50 net
-tflags T_S2_84_S41_51 net
-tflags T_S2_84_S41_52 net
-tflags T_S2_84_S41_53 net
-tflags T_S2_84_S41_54 net
-tflags T_S2_84_S41_55 net
-tflags T_S2_84_S41_56 net
-tflags T_S2_85_S41_42 net
-tflags T_S2_85_S41_43 net
-tflags T_S2_85_S41_44 net
-tflags T_S2_85_S41_45 net
-tflags T_S2_85_S41_46 net
-tflags T_S2_85_S41_47 net
-tflags T_S2_85_S41_48 net
-tflags T_S2_85_S41_49 net
-tflags T_S2_85_S41_50 net
-tflags T_S2_85_S41_51 net
-tflags T_S2_85_S41_52 net
-tflags T_S2_85_S41_53 net
-tflags T_S2_85_S41_54 net
-tflags T_S2_85_S41_55 net
-tflags T_S2_85_S41_56 net
-tflags T_S2_86_S41_42 net
-tflags T_S2_86_S41_43 net
-tflags T_S2_86_S41_44 net
-tflags T_S2_86_S41_45 net
-tflags T_S2_86_S41_46 net
-tflags T_S2_86_S41_47 net
-tflags T_S2_86_S41_48 net
-tflags T_S2_86_S41_49 net
-tflags T_S2_86_S41_50 net
-tflags T_S2_86_S41_51 net
-tflags T_S2_86_S41_52 net
-tflags T_S2_86_S41_53 net
-tflags T_S2_86_S41_54 net
-tflags T_S2_86_S41_55 net
-tflags T_S2_86_S41_56 net
-tflags T_S2_87_S41_42 net
-tflags T_S2_87_S41_43 net
-tflags T_S2_87_S41_44 net
-tflags T_S2_87_S41_45 net
-tflags T_S2_87_S41_46 net
-tflags T_S2_87_S41_47 net
-tflags T_S2_87_S41_48 net
-tflags T_S2_87_S41_49 net
-tflags T_S2_87_S41_50 net
-tflags T_S2_87_S41_51 net
-tflags T_S2_87_S41_52 net
-tflags T_S2_87_S41_53 net
-tflags T_S2_87_S41_54 net
-tflags T_S2_87_S41_55 net
-tflags T_S2_87_S41_56 net
-tflags T_S3_83_S41_42 net
-tflags T_S3_83_S41_43 net
-tflags T_S3_83_S41_44 net
-tflags T_S3_83_S41_45 net
-tflags T_S3_83_S41_46 net
-tflags T_S3_83_S41_47 net
-tflags T_S3_83_S41_48 net
-tflags T_S3_83_S41_49 net
-tflags T_S3_83_S41_50 net
-tflags T_S3_83_S41_51 net
-tflags T_S3_83_S41_52 net
-tflags T_S3_83_S41_53 net
-tflags T_S3_83_S41_54 net
-tflags T_S3_83_S41_55 net
-tflags T_S3_83_S41_56 net
-tflags T_S3_84_S41_42 net
-tflags T_S3_84_S41_43 net
-tflags T_S3_84_S41_44 net
-tflags T_S3_84_S41_45 net
-tflags T_S3_84_S41_46 net
-tflags T_S3_84_S41_47 net
-tflags T_S3_84_S41_48 net
-tflags T_S3_84_S41_49 net
-tflags T_S3_84_S41_50 net
-tflags T_S3_84_S41_51 net
-tflags T_S3_84_S41_52 net
-tflags T_S3_84_S41_53 net
-tflags T_S3_84_S41_54 net
-tflags T_S3_84_S41_55 net
-tflags T_S3_84_S41_56 net
-tflags T_S3_85_S41_42 net
-tflags T_S3_85_S41_43 net
-tflags T_S3_85_S41_44 net
-tflags T_S3_85_S41_45 net
-tflags T_S3_85_S41_46 net
-tflags T_S3_85_S41_47 net
-tflags T_S3_85_S41_48 net
-tflags T_S3_85_S41_49 net
-tflags T_S3_85_S41_50 net
-tflags T_S3_85_S41_51 net
-tflags T_S3_85_S41_52 net
-tflags T_S3_85_S41_53 net
-tflags T_S3_85_S41_54 net
-tflags T_S3_85_S41_55 net
-tflags T_S3_85_S41_56 net
-tflags T_S3_86_S41_42 net
-tflags T_S3_86_S41_43 net
-tflags T_S3_86_S41_44 net
-tflags T_S3_86_S41_45 net
-tflags T_S3_86_S41_46 net
-tflags T_S3_86_S41_47 net
-tflags T_S3_86_S41_48 net
-tflags T_S3_86_S41_49 net
-tflags T_S3_86_S41_50 net
-tflags T_S3_86_S41_51 net
-tflags T_S3_86_S41_52 net
-tflags T_S3_86_S41_53 net
-tflags T_S3_86_S41_54 net
-tflags T_S3_86_S41_55 net
-tflags T_S3_86_S41_56 net
-tflags T_S3_87_S41_42 net
-tflags T_S3_87_S41_43 net
-tflags T_S3_87_S41_44 net
-tflags T_S3_87_S41_45 net
-tflags T_S3_87_S41_46 net
-tflags T_S3_87_S41_47 net
-tflags T_S3_87_S41_48 net
-tflags T_S3_87_S41_49 net
-tflags T_S3_87_S41_50 net
-tflags T_S3_87_S41_51 net
-tflags T_S3_87_S41_52 net
-tflags T_S3_87_S41_53 net
-tflags T_S3_87_S41_54 net
-tflags T_S3_87_S41_55 net
-tflags T_S3_87_S41_56 net
-
 # two term ratio tests
-header T_S2_S9_GT_4_7	eval:check_rbl_sub('senderbase', '(S2 / S9) > 4.7')
-header T_S2_S9_GT_4_8	eval:check_rbl_sub('senderbase', '(S2 / S9) > 4.8')
-header T_S2_S9_GT_4_9	eval:check_rbl_sub('senderbase', '(S2 / S9) > 4.9')
-header T_S2_S9_GT_5_0	eval:check_rbl_sub('senderbase', '(S2 / S9) > 5.0')
-header T_S2_S9_GT_5_1	eval:check_rbl_sub('senderbase', '(S2 / S9) > 5.1')
-header T_S2_S9_GT_5_2	eval:check_rbl_sub('senderbase', '(S2 / S9) > 5.2')
-header T_S2_S9_GT_5_3	eval:check_rbl_sub('senderbase', '(S2 / S9) > 5.3')
-header T_S2_S9_GT_5_4	eval:check_rbl_sub('senderbase', '(S2 / S9) > 5.4')
-header T_S2_S9_GT_5_5	eval:check_rbl_sub('senderbase', '(S2 / S9) > 5.5')
-header T_S2_S9_GT_5_6	eval:check_rbl_sub('senderbase', '(S2 / S9) > 5.6')
+header T_S2_S9_GT_4_80	eval:check_rbl_sub('senderbase', '(S2 / S9) > 4.80')
+header T_S2_S9_GT_4_85	eval:check_rbl_sub('senderbase', '(S2 / S9) > 4.85')
+header T_S2_S9_GT_4_90	eval:check_rbl_sub('senderbase', '(S2 / S9) > 4.90')
+header T_S2_S9_GT_4_95	eval:check_rbl_sub('senderbase', '(S2 / S9) > 4.95')
+header T_S2_S9_GT_5_00	eval:check_rbl_sub('senderbase', '(S2 / S9) > 5.00')
+header T_S2_S9_GT_5_05	eval:check_rbl_sub('senderbase', '(S2 / S9) > 5.05')
+header T_S2_S9_GT_5_10	eval:check_rbl_sub('senderbase', '(S2 / S9) > 5.10')
+header T_S2_S9_GT_5_15	eval:check_rbl_sub('senderbase', '(S2 / S9) > 5.15')
+header T_S2_S9_GT_5_20	eval:check_rbl_sub('senderbase', '(S2 / S9) > 5.20')
+header T_S2_S9_GT_5_25	eval:check_rbl_sub('senderbase', '(S2 / S9) > 5.25')
+header T_S2_S9_GT_5_30	eval:check_rbl_sub('senderbase', '(S2 / S9) > 5.30')
+header T_S2_S9_GT_5_35	eval:check_rbl_sub('senderbase', '(S2 / S9) > 5.35')
 
-header T_S2_S7_GT_7_0	eval:check_rbl_sub('senderbase', '(S2 / S7) > 7.0')
-header T_S2_S7_GT_7_1	eval:check_rbl_sub('senderbase', '(S2 / S7) > 7.1')
-header T_S2_S7_GT_7_2	eval:check_rbl_sub('senderbase', '(S2 / S7) > 7.2')
-header T_S2_S7_GT_7_3	eval:check_rbl_sub('senderbase', '(S2 / S7) > 7.3')
-header T_S2_S7_GT_7_4	eval:check_rbl_sub('senderbase', '(S2 / S7) > 7.4')
-header T_S2_S7_GT_7_5	eval:check_rbl_sub('senderbase', '(S2 / S7) > 7.5')
-header T_S2_S7_GT_7_6	eval:check_rbl_sub('senderbase', '(S2 / S7) > 7.6')
-header T_S2_S7_GT_7_7	eval:check_rbl_sub('senderbase', '(S2 / S7) > 7.7')
-header T_S2_S7_GT_7_8	eval:check_rbl_sub('senderbase', '(S2 / S7) > 7.8')
-header T_S2_S7_GT_7_9	eval:check_rbl_sub('senderbase', '(S2 / S7) > 7.9')
+header T_S2_S7_GT_7_10	eval:check_rbl_sub('senderbase', '(S2 / S7) > 7.10')
+header T_S2_S7_GT_7_15	eval:check_rbl_sub('senderbase', '(S2 / S7) > 7.15')
+header T_S2_S7_GT_7_20	eval:check_rbl_sub('senderbase', '(S2 / S7) > 7.20')
+header T_S2_S7_GT_7_25	eval:check_rbl_sub('senderbase', '(S2 / S7) > 7.25')
+header T_S2_S7_GT_7_30	eval:check_rbl_sub('senderbase', '(S2 / S7) > 7.30')
+header T_S2_S7_GT_7_35	eval:check_rbl_sub('senderbase', '(S2 / S7) > 7.35')
+header T_S2_S7_GT_7_40	eval:check_rbl_sub('senderbase', '(S2 / S7) > 7.40')
+header T_S2_S7_GT_7_45	eval:check_rbl_sub('senderbase', '(S2 / S7) > 7.45')
+header T_S2_S7_GT_7_50	eval:check_rbl_sub('senderbase', '(S2 / S7) > 7.50')
+header T_S2_S7_GT_7_55	eval:check_rbl_sub('senderbase', '(S2 / S7) > 7.55')
+header T_S2_S7_GT_7_60	eval:check_rbl_sub('senderbase', '(S2 / S7) > 7.60')
+header T_S2_S7_GT_7_65	eval:check_rbl_sub('senderbase', '(S2 / S7) > 7.65')
 
-header T_S3_S9_GT_4_5	eval:check_rbl_sub('senderbase', '(S3 / S9) > 4.5')
-header T_S3_S9_GT_4_6	eval:check_rbl_sub('senderbase', '(S3 / S9) > 4.6')
-header T_S3_S9_GT_4_7	eval:check_rbl_sub('senderbase', '(S3 / S9) > 4.7')
-header T_S3_S9_GT_4_8	eval:check_rbl_sub('senderbase', '(S3 / S9) > 4.8')
-header T_S3_S9_GT_4_9	eval:check_rbl_sub('senderbase', '(S3 / S9) > 4.9')
-header T_S3_S9_GT_5_0	eval:check_rbl_sub('senderbase', '(S3 / S9) > 5.0')
-header T_S3_S9_GT_5_1	eval:check_rbl_sub('senderbase', '(S3 / S9) > 5.1')
-header T_S3_S9_GT_5_2	eval:check_rbl_sub('senderbase', '(S3 / S9) > 5.2')
-header T_S3_S9_GT_5_3	eval:check_rbl_sub('senderbase', '(S3 / S9) > 5.3')
-header T_S3_S9_GT_5_4	eval:check_rbl_sub('senderbase', '(S3 / S9) > 5.4')
+header T_S3_S9_GT_4_80	eval:check_rbl_sub('senderbase', '(S3 / S9) > 4.80')
+header T_S3_S9_GT_4_85	eval:check_rbl_sub('senderbase', '(S3 / S9) > 4.85')
+header T_S3_S9_GT_4_90	eval:check_rbl_sub('senderbase', '(S3 / S9) > 4.90')
+header T_S3_S9_GT_4_95	eval:check_rbl_sub('senderbase', '(S3 / S9) > 4.95')
+header T_S3_S9_GT_5_00	eval:check_rbl_sub('senderbase', '(S3 / S9) > 5.00')
+header T_S3_S9_GT_5_05	eval:check_rbl_sub('senderbase', '(S3 / S9) > 5.05')
+header T_S3_S9_GT_5_10	eval:check_rbl_sub('senderbase', '(S3 / S9) > 5.10')
+header T_S3_S9_GT_5_15	eval:check_rbl_sub('senderbase', '(S3 / S9) > 5.15')
+header T_S3_S9_GT_5_20	eval:check_rbl_sub('senderbase', '(S3 / S9) > 5.20')
+header T_S3_S9_GT_5_25	eval:check_rbl_sub('senderbase', '(S3 / S9) > 5.25')
+header T_S3_S9_GT_5_30	eval:check_rbl_sub('senderbase', '(S3 / S9) > 5.30')
+header T_S3_S9_GT_5_35	eval:check_rbl_sub('senderbase', '(S3 / S9) > 5.35')
 
-header T_S40_S9_GT_4_9	eval:check_rbl_sub('senderbase', '(S40 / S9) > 4.9')
-header T_S40_S9_GT_5_0	eval:check_rbl_sub('senderbase', '(S40 / S9) > 5.0')
-header T_S40_S9_GT_5_1	eval:check_rbl_sub('senderbase', '(S40 / S9) > 5.1')
-header T_S40_S9_GT_5_2	eval:check_rbl_sub('senderbase', '(S40 / S9) > 5.2')
-header T_S40_S9_GT_5_3	eval:check_rbl_sub('senderbase', '(S40 / S9) > 5.3')
-header T_S40_S9_GT_5_4	eval:check_rbl_sub('senderbase', '(S40 / S9) > 5.4')
-header T_S40_S9_GT_5_5	eval:check_rbl_sub('senderbase', '(S40 / S9) > 5.5')
-header T_S40_S9_GT_5_6	eval:check_rbl_sub('senderbase', '(S40 / S9) > 5.6')
-header T_S40_S9_GT_5_7	eval:check_rbl_sub('senderbase', '(S40 / S9) > 5.7')
-header T_S40_S9_GT_5_8	eval:check_rbl_sub('senderbase', '(S40 / S9) > 5.8')
+# this appears to be the best of the two-term ratio tests
+# S40 = IP daily magnitude
+#  S9 = IP addresses used by this organization
+header T_S40_S9_GT_4_80	eval:check_rbl_sub('senderbase', '(S40 / S9) > 4.80')
+header T_S40_S9_GT_4_85	eval:check_rbl_sub('senderbase', '(S40 / S9) > 4.85')
+header T_S40_S9_GT_4_90	eval:check_rbl_sub('senderbase', '(S40 / S9) > 4.90')
+header T_S40_S9_GT_4_95	eval:check_rbl_sub('senderbase', '(S40 / S9) > 4.95')
+header T_S40_S9_GT_5_00	eval:check_rbl_sub('senderbase', '(S40 / S9) > 5.00')
+header T_S40_S9_GT_5_05	eval:check_rbl_sub('senderbase', '(S40 / S9) > 5.05')
+header T_S40_S9_GT_5_10	eval:check_rbl_sub('senderbase', '(S40 / S9) > 5.10')
+header T_S40_S9_GT_5_15	eval:check_rbl_sub('senderbase', '(S40 / S9) > 5.15')
+header T_S40_S9_GT_5_20	eval:check_rbl_sub('senderbase', '(S40 / S9) > 5.20')
+header T_S40_S9_GT_5_25	eval:check_rbl_sub('senderbase', '(S40 / S9) > 5.25')
+header T_S40_S9_GT_5_30	eval:check_rbl_sub('senderbase', '(S40 / S9) > 5.30')
+header T_S40_S9_GT_5_35	eval:check_rbl_sub('senderbase', '(S40 / S9) > 5.35')
 
-header T_S41_S9_GT_4_6	eval:check_rbl_sub('senderbase', '(S41 / S9) > 4.6')
-header T_S41_S9_GT_4_7	eval:check_rbl_sub('senderbase', '(S41 / S9) > 4.7')
-header T_S41_S9_GT_4_8	eval:check_rbl_sub('senderbase', '(S41 / S9) > 4.8')
-header T_S41_S9_GT_4_9	eval:check_rbl_sub('senderbase', '(S41 / S9) > 4.9')
-header T_S41_S9_GT_5_0	eval:check_rbl_sub('senderbase', '(S41 / S9) > 5.0')
-header T_S41_S9_GT_5_1	eval:check_rbl_sub('senderbase', '(S41 / S9) > 5.1')
-header T_S41_S9_GT_5_2	eval:check_rbl_sub('senderbase', '(S41 / S9) > 5.2')
-header T_S41_S9_GT_5_3	eval:check_rbl_sub('senderbase', '(S41 / S9) > 5.3')
-header T_S41_S9_GT_5_4	eval:check_rbl_sub('senderbase', '(S41 / S9) > 5.4')
-header T_S41_S9_GT_5_5	eval:check_rbl_sub('senderbase', '(S41 / S9) > 5.5')
+header T_S41_S9_GT_4_60	eval:check_rbl_sub('senderbase', '(S41 / S9) > 4.60')
+header T_S41_S9_GT_4_65	eval:check_rbl_sub('senderbase', '(S41 / S9) > 4.65')
+header T_S41_S9_GT_4_70	eval:check_rbl_sub('senderbase', '(S41 / S9) > 4.70')
+header T_S41_S9_GT_4_75	eval:check_rbl_sub('senderbase', '(S41 / S9) > 4.75')
+header T_S41_S9_GT_4_80	eval:check_rbl_sub('senderbase', '(S41 / S9) > 4.80')
+header T_S41_S9_GT_4_85	eval:check_rbl_sub('senderbase', '(S41 / S9) > 4.85')
+header T_S41_S9_GT_4_90	eval:check_rbl_sub('senderbase', '(S41 / S9) > 4.90')
+header T_S41_S9_GT_4_95	eval:check_rbl_sub('senderbase', '(S41 / S9) > 4.95')
+header T_S41_S9_GT_5_00	eval:check_rbl_sub('senderbase', '(S41 / S9) > 5.00')
+header T_S41_S9_GT_5_05	eval:check_rbl_sub('senderbase', '(S41 / S9) > 5.05')
+header T_S41_S9_GT_5_10	eval:check_rbl_sub('senderbase', '(S41 / S9) > 5.10')
+header T_S41_S9_GT_5_15	eval:check_rbl_sub('senderbase', '(S41 / S9) > 5.15')
+header T_S41_S9_GT_5_20	eval:check_rbl_sub('senderbase', '(S41 / S9) > 5.20')
+header T_S41_S9_GT_5_25	eval:check_rbl_sub('senderbase', '(S41 / S9) > 5.25')
+header T_S41_S9_GT_5_30	eval:check_rbl_sub('senderbase', '(S41 / S9) > 5.30')
+header T_S41_S9_GT_5_35	eval:check_rbl_sub('senderbase', '(S41 / S9) > 5.35')
+header T_S41_S9_GT_5_40	eval:check_rbl_sub('senderbase', '(S41 / S9) > 5.40')
+header T_S41_S9_GT_5_45	eval:check_rbl_sub('senderbase', '(S41 / S9) > 5.45')
 
-tflags T_S2_S9_GT_4_7 net
-tflags T_S2_S9_GT_4_8 net
-tflags T_S2_S9_GT_4_9 net
-tflags T_S2_S9_GT_5_0 net
-tflags T_S2_S9_GT_5_1 net
-tflags T_S2_S9_GT_5_2 net
-tflags T_S2_S9_GT_5_3 net
-tflags T_S2_S9_GT_5_4 net
-tflags T_S2_S9_GT_5_5 net
-tflags T_S2_S9_GT_5_6 net
-tflags T_S2_S7_GT_7_0 net
-tflags T_S2_S7_GT_7_1 net
-tflags T_S2_S7_GT_7_2 net
-tflags T_S2_S7_GT_7_3 net
-tflags T_S2_S7_GT_7_4 net
-tflags T_S2_S7_GT_7_5 net
-tflags T_S2_S7_GT_7_6 net
-tflags T_S2_S7_GT_7_7 net
-tflags T_S2_S7_GT_7_8 net
-tflags T_S2_S7_GT_7_9 net
-tflags T_S3_S9_GT_4_5 net
-tflags T_S3_S9_GT_4_6 net
-tflags T_S3_S9_GT_4_7 net
-tflags T_S3_S9_GT_4_8 net
-tflags T_S3_S9_GT_4_9 net
-tflags T_S3_S9_GT_5_0 net
-tflags T_S3_S9_GT_5_1 net
-tflags T_S3_S9_GT_5_2 net
-tflags T_S3_S9_GT_5_3 net
-tflags T_S3_S9_GT_5_4 net
-tflags T_S40_S9_GT_4_9 net
-tflags T_S40_S9_GT_5_0 net
-tflags T_S40_S9_GT_5_1 net
-tflags T_S40_S9_GT_5_2 net
-tflags T_S40_S9_GT_5_3 net
-tflags T_S40_S9_GT_5_4 net
-tflags T_S40_S9_GT_5_5 net
-tflags T_S40_S9_GT_5_6 net
-tflags T_S40_S9_GT_5_7 net
-tflags T_S40_S9_GT_5_8 net
-tflags T_S41_S9_GT_4_6 net
-tflags T_S41_S9_GT_4_7 net
-tflags T_S41_S9_GT_4_8 net
-tflags T_S41_S9_GT_4_9 net
-tflags T_S41_S9_GT_5_0 net
-tflags T_S41_S9_GT_5_1 net
-tflags T_S41_S9_GT_5_2 net
-tflags T_S41_S9_GT_5_3 net
-tflags T_S41_S9_GT_5_4 net
-tflags T_S41_S9_GT_5_5 net
+# accounting for rounding, "> 0.2" means at least a 26% volume spike
+header T_NSP_S41_42_02	eval:check_rbl_sub('senderbase', 'S5 =~ /NSP/ && S41 > 4.2 && S40 - S41 > 0.2')
+header T_NSP_S41_43_02	eval:check_rbl_sub('senderbase', 'S5 =~ /NSP/ && S41 > 4.3 && S40 - S41 > 0.2')
+header T_NSP_S41_44_02	eval:check_rbl_sub('senderbase', 'S5 =~ /NSP/ && S41 > 4.4 && S40 - S41 > 0.2')
+header T_NSP_S41_45_02	eval:check_rbl_sub('senderbase', 'S5 =~ /NSP/ && S41 > 4.5 && S40 - S41 > 0.2')
+header T_NSP_S41_46_02	eval:check_rbl_sub('senderbase', 'S5 =~ /NSP/ && S41 > 4.6 && S40 - S41 > 0.2')
+header T_NSP_S41_47_02	eval:check_rbl_sub('senderbase', 'S5 =~ /NSP/ && S41 > 4.7 && S40 - S41 > 0.2')
+header T_NSP_S41_48_02	eval:check_rbl_sub('senderbase', 'S5 =~ /NSP/ && S41 > 4.8 && S40 - S41 > 0.2')
+header T_NSP_S41_49_02	eval:check_rbl_sub('senderbase', 'S5 =~ /NSP/ && S41 > 4.9 && S40 - S41 > 0.2')
+header T_NSP_S41_50_02	eval:check_rbl_sub('senderbase', 'S5 =~ /NSP/ && S41 > 5.0 && S40 - S41 > 0.2')
+header T_NSP_S41_51_02	eval:check_rbl_sub('senderbase', 'S5 =~ /NSP/ && S41 > 5.1 && S40 - S41 > 0.2')
+header T_NSP_S41_52_02	eval:check_rbl_sub('senderbase', 'S5 =~ /NSP/ && S41 > 5.2 && S40 - S41 > 0.2')
+header T_NSP_S41_53_02	eval:check_rbl_sub('senderbase', 'S5 =~ /NSP/ && S41 > 5.3 && S40 - S41 > 0.2')
+header T_NSP_S41_54_02	eval:check_rbl_sub('senderbase', 'S5 =~ /NSP/ && S41 > 5.4 && S40 - S41 > 0.2')
+header T_NSP_S41_55_02	eval:check_rbl_sub('senderbase', 'S5 =~ /NSP/ && S41 > 5.5 && S40 - S41 > 0.2')
+header T_NSP_S41_56_02	eval:check_rbl_sub('senderbase', 'S5 =~ /NSP/ && S41 > 5.6 && S40 - S41 > 0.2')
+
+# accounting for rounding, "> 0.3" means at least a 59% volume spike
+header T_NSP_S41_42_03	eval:check_rbl_sub('senderbase', 'S5 =~ /NSP/ && S41 > 4.2 && S40 - S41 > 0.3')
+header T_NSP_S41_43_03	eval:check_rbl_sub('senderbase', 'S5 =~ /NSP/ && S41 > 4.3 && S40 - S41 > 0.3')
+header T_NSP_S41_44_03	eval:check_rbl_sub('senderbase', 'S5 =~ /NSP/ && S41 > 4.4 && S40 - S41 > 0.3')
+header T_NSP_S41_45_03	eval:check_rbl_sub('senderbase', 'S5 =~ /NSP/ && S41 > 4.5 && S40 - S41 > 0.3')
+header T_NSP_S41_46_03	eval:check_rbl_sub('senderbase', 'S5 =~ /NSP/ && S41 > 4.6 && S40 - S41 > 0.3')
+header T_NSP_S41_47_03	eval:check_rbl_sub('senderbase', 'S5 =~ /NSP/ && S41 > 4.7 && S40 - S41 > 0.3')
+header T_NSP_S41_48_03	eval:check_rbl_sub('senderbase', 'S5 =~ /NSP/ && S41 > 4.8 && S40 - S41 > 0.3')
+header T_NSP_S41_49_03	eval:check_rbl_sub('senderbase', 'S5 =~ /NSP/ && S41 > 4.9 && S40 - S41 > 0.3')
+header T_NSP_S41_50_03	eval:check_rbl_sub('senderbase', 'S5 =~ /NSP/ && S41 > 5.0 && S40 - S41 > 0.3')
+header T_NSP_S41_51_03	eval:check_rbl_sub('senderbase', 'S5 =~ /NSP/ && S41 > 5.1 && S40 - S41 > 0.3')
+header T_NSP_S41_52_03	eval:check_rbl_sub('senderbase', 'S5 =~ /NSP/ && S41 > 5.2 && S40 - S41 > 0.3')
+header T_NSP_S41_53_03	eval:check_rbl_sub('senderbase', 'S5 =~ /NSP/ && S41 > 5.3 && S40 - S41 > 0.3')
+header T_NSP_S41_54_03	eval:check_rbl_sub('senderbase', 'S5 =~ /NSP/ && S41 > 5.4 && S40 - S41 > 0.3')
+header T_NSP_S41_55_03	eval:check_rbl_sub('senderbase', 'S5 =~ /NSP/ && S41 > 5.5 && S40 - S41 > 0.3')
+header T_NSP_S41_56_03	eval:check_rbl_sub('senderbase', 'S5 =~ /NSP/ && S41 > 5.6 && S40 - S41 > 0.3')
+
+tflags T_S2_S9_GT_4_80 net
+tflags T_S2_S9_GT_4_85 net
+tflags T_S2_S9_GT_4_90 net
+tflags T_S2_S9_GT_4_95 net
+tflags T_S2_S9_GT_5_00 net
+tflags T_S2_S9_GT_5_05 net
+tflags T_S2_S9_GT_5_10 net
+tflags T_S2_S9_GT_5_15 net
+tflags T_S2_S9_GT_5_20 net
+tflags T_S2_S9_GT_5_25 net
+tflags T_S2_S9_GT_5_30 net
+tflags T_S2_S9_GT_5_35 net
+tflags T_S2_S7_GT_7_10 net
+tflags T_S2_S7_GT_7_15 net
+tflags T_S2_S7_GT_7_20 net
+tflags T_S2_S7_GT_7_25 net
+tflags T_S2_S7_GT_7_30 net
+tflags T_S2_S7_GT_7_35 net
+tflags T_S2_S7_GT_7_40 net
+tflags T_S2_S7_GT_7_45 net
+tflags T_S2_S7_GT_7_50 net
+tflags T_S2_S7_GT_7_55 net
+tflags T_S2_S7_GT_7_60 net
+tflags T_S2_S7_GT_7_65 net
+tflags T_S3_S9_GT_4_80 net
+tflags T_S3_S9_GT_4_85 net
+tflags T_S3_S9_GT_4_90 net
+tflags T_S3_S9_GT_4_95 net
+tflags T_S3_S9_GT_5_00 net
+tflags T_S3_S9_GT_5_05 net
+tflags T_S3_S9_GT_5_10 net
+tflags T_S3_S9_GT_5_15 net
+tflags T_S3_S9_GT_5_20 net
+tflags T_S3_S9_GT_5_25 net
+tflags T_S3_S9_GT_5_30 net
+tflags T_S3_S9_GT_5_35 net
+tflags T_S40_S9_GT_4_80 net
+tflags T_S40_S9_GT_4_85 net
+tflags T_S40_S9_GT_4_90 net
+tflags T_S40_S9_GT_4_95 net
+tflags T_S40_S9_GT_5_00 net
+tflags T_S40_S9_GT_5_05 net
+tflags T_S40_S9_GT_5_10 net
+tflags T_S40_S9_GT_5_15 net
+tflags T_S40_S9_GT_5_20 net
+tflags T_S40_S9_GT_5_25 net
+tflags T_S40_S9_GT_5_30 net
+tflags T_S40_S9_GT_5_35 net
+tflags T_S41_S9_GT_4_60 net
+tflags T_S41_S9_GT_4_65 net
+tflags T_S41_S9_GT_4_70 net
+tflags T_S41_S9_GT_4_75 net
+tflags T_S41_S9_GT_4_80 net
+tflags T_S41_S9_GT_4_85 net
+tflags T_S41_S9_GT_4_90 net
+tflags T_S41_S9_GT_4_95 net
+tflags T_S41_S9_GT_5_00 net
+tflags T_S41_S9_GT_5_05 net
+tflags T_S41_S9_GT_5_10 net
+tflags T_S41_S9_GT_5_15 net
+tflags T_S41_S9_GT_5_20 net
+tflags T_S41_S9_GT_5_25 net
+tflags T_S41_S9_GT_5_30 net
+tflags T_S41_S9_GT_5_35 net
+tflags T_S41_S9_GT_5_40 net
+tflags T_S41_S9_GT_5_45 net
+tflags T_NSP_S41_42_02 net
+tflags T_NSP_S41_43_02 net
+tflags T_NSP_S41_44_02 net
+tflags T_NSP_S41_45_02 net
+tflags T_NSP_S41_46_02 net
+tflags T_NSP_S41_47_02 net
+tflags T_NSP_S41_48_02 net
+tflags T_NSP_S41_49_02 net
+tflags T_NSP_S41_50_02 net
+tflags T_NSP_S41_51_02 net
+tflags T_NSP_S41_52_02 net
+tflags T_NSP_S41_53_02 net
+tflags T_NSP_S41_54_02 net
+tflags T_NSP_S41_55_02 net
+tflags T_NSP_S41_56_02 net
+tflags T_NSP_S41_42_03 net
+tflags T_NSP_S41_43_03 net
+tflags T_NSP_S41_44_03 net
+tflags T_NSP_S41_45_03 net
+tflags T_NSP_S41_46_03 net
+tflags T_NSP_S41_47_03 net
+tflags T_NSP_S41_48_03 net
+tflags T_NSP_S41_49_03 net
+tflags T_NSP_S41_50_03 net
+tflags T_NSP_S41_51_03 net
+tflags T_NSP_S41_52_03 net
+tflags T_NSP_S41_53_03 net
+tflags T_NSP_S41_54_03 net
+tflags T_NSP_S41_55_03 net
+tflags T_NSP_S41_56_03 net
 
 ########################################################################
 
