@@ -49,6 +49,9 @@ case "$1" in
         $0 stop
         $0 start
         ;;
+  condrestart)
+       [ -e /var/lock/subsys/spamd ] && $0 restart
+       ;;
   status)
 	status spamd
 	;;

@@ -154,21 +154,18 @@ mkdir -p %{buildroot}/etc/mail/spamassassin
 if [ $1 = 1 ]; then
         /sbin/chkconfig --add spamassassin
 fi
-if [ -f /var/lock/subsys/spamassassin ]; then
-        %{initdir}/spamassassin restart 1>&2
-else
-        echo 'Run "/etc/rc.d/init.d/spamassassin start" to start the spamd daemon.'
-fi
+/sbin/service spamassassin condrestart
 
 %preun
 if [ $1 = 0 ]; then
-        if [ -f /var/lock/subsys/spamassassin ]; then
-                %{initdir}/spamassassin stop 1>&2
-        fi
+	/sbin/service spamassassin stop
         /sbin/chkconfig --del spamassassin
 fi
 
 %changelog
+* Sun Feb 02 2003 Theo Van Dinter <felicity@kluge.net>
+- instead of us trying to do a restart, call service condrestart to do
+  it for us. :)
 
 * Wed Dec 18 2002 Justin Mason <jm-spec@jmason.org>
 - fixed specfile to work with Duncan's new Makefile.PL changes
