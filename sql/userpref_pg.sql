@@ -4,4 +4,4 @@ CREATE TABLE userpref (
   preference varchar(30) NOT NULL,
   value varchar(100) NOT NULL
 );
-CREATE INDEX userpref_username_idx ON userpref(prefid);
+CREATE INDEX userpref_username_idx ON userpref(username);
