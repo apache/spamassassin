@@ -393,8 +393,9 @@ skipped.
 
     If you wish to use SSL encryption to communicate between spamc and
     spamd (the --ssl option to spamd), you need to install this
-    module. (You will also need to install the OpenSSL libraries to
-    build and run spamc)
+    module. (You will need the OpenSSL libraries and use the
+    ENABLE_SSL="yes" argument to Makefile.PL to build and run an SSL
+    compatibile spamc.)
 
 
 What Next?
