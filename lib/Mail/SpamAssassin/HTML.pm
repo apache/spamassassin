@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.28 2002/10/07 08:09:58 quinlan Exp $
+# $Id: HTML.pm,v 1.29 2002/10/07 08:48:16 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -316,6 +316,9 @@ sub html_tests {
           $self->{html}{max_img_ratio} = $ratio
             if ($ratio > $self->{html}{max_img_ratio});
       }
+  }
+  if ($tag eq "form" && exists $attr->{action}) {
+    $self->{html}{form_action_mailto} = 1 if $attr->{action} =~ /mailto:/i
   }
   if ($tag eq "input") {
     if (exists $attr->{type} && $attr->{type} =~ /hidden/i) {
