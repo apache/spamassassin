@@ -487,26 +487,29 @@ header T_RCVD_ILLEGAL_IP    Received =~ /[\s\(\[\:\=](?:(?:[01257]|22[3-9]|23[0-
 describe T_RCVD_ILLEGAL_IP  Received contains illegal IP address
 
 # test for HELO != IP or HELO != RDNS
-header T_RCVD_HELO_NE_BOTH1	eval:check_for_helo_both_mismatch()
-header T_RCVD_HELO_NE_BOTH2	eval:check_for_helo_both_mismatch('helo_reserved')
-header T_RCVD_HELO_NE_BOTH3	eval:check_for_helo_both_mismatch('ip_reserved')
-header T_RCVD_HELO_NE_BOTH4	eval:check_for_helo_both_mismatch('rdns_reserved')
-header T_RCVD_HELO_NE_BOTH5	eval:check_for_helo_both_mismatch('helo_reserved', 'ip_reserved')
-header T_RCVD_HELO_NE_BOTH6	eval:check_for_helo_both_mismatch('helo_reserved', 'rdns_reserved')
-header T_RCVD_HELO_NE_BOTH7	eval:check_for_helo_both_mismatch('ip_reserved', 'rdns_reserved')
-header T_RCVD_HELO_NE_BOTH8	eval:check_for_helo_both_mismatch('helo_reserved, 'ip_reserved', 'rdns_reserved')
+# xxx_any means hit for reserved addresses too
+header T_RCVD_HELO_NE_BOTH1	eval:helo_both_mismatch()
+header T_RCVD_HELO_NE_BOTH2	eval:helo_both_mismatch('helo_any')
+header T_RCVD_HELO_NE_BOTH3	eval:helo_both_mismatch('ip_any')
+header T_RCVD_HELO_NE_BOTH4	eval:helo_both_mismatch('rdns_any')
+header T_RCVD_HELO_NE_BOTH5	eval:helo_both_mismatch('helo_any', 'ip_any')
+header T_RCVD_HELO_NE_BOTH6	eval:helo_both_mismatch('helo_any', 'rdns_any')
+header T_RCVD_HELO_NE_BOTH7	eval:helo_both_mismatch('ip_any', 'rdns_any')
+header T_RCVD_HELO_NE_BOTH8	eval:helo_both_mismatch('helo_any, 'ip_any', 'rdns_any')
 
 # test for HELO != IP
-header T_RCVD_HELO_NE_IP1	eval:check_for_helo_ip_mismatch()
-header T_RCVD_HELO_NE_IP2	eval:check_for_helo_ip_mismatch('helo_reserved')
-header T_RCVD_HELO_NE_IP3	eval:check_for_helo_ip_mismatch('ip_reserved')
-header T_RCVD_HELO_NE_IP4	eval:check_for_helo_ip_mismatch('helo_reserved', 'ip_reserved')
+# xxx_any means hit for reserved addresses too
+header T_RCVD_HELO_NE_IP1	eval:helo_ip_mismatch()
+header T_RCVD_HELO_NE_IP2	eval:helo_ip_mismatch('helo_any')
+header T_RCVD_HELO_NE_IP3	eval:helo_ip_mismatch('ip_any')
+header T_RCVD_HELO_NE_IP4	eval:helo_ip_mismatch('helo_any', 'ip_any')
 
 # test for HELO != RDNS
-header T_RCVD_HELO_NE_RDNS1	eval:check_for_helo_rdns_mismatch()
-header T_RCVD_HELO_NE_RDNS2	eval:check_for_helo_rdns_mismatch('helo_reserved')
-header T_RCVD_HELO_NE_RDNS3	eval:check_for_helo_rdns_mismatch('rdns_reserved')
-header T_RCVD_HELO_NE_RDNS4	eval:check_for_helo_rdns_mismatch('helo_reserved', 'rdns_reserved')
+# xxx_any means hit for reserved addresses too
+header T_RCVD_HELO_NE_RDNS1	eval:helo_rdns_mismatch()
+header T_RCVD_HELO_NE_RDNS2	eval:helo_rdns_mismatch('helo_any')
+header T_RCVD_HELO_NE_RDNS3	eval:helo_rdns_mismatch('rdns_any')
+header T_RCVD_HELO_NE_RDNS4	eval:helo_rdns_mismatch('helo_any', 'rdns_any')
 
 header T_SUBJ_2_NUM_PARENS      Subject =~ /^\(\d+\).*\(\d+\)\s*$/
 describe T_SUBJ_2_NUM_PARENS    Subject contains common spam sign (2 numbers)
