@@ -212,7 +212,7 @@ sub _check_spf {
 				    sender => $sender,
 				    helo => $helo,
 				    debug => Mail::SpamAssassin::dbg_check('+rbl'),
-				    trusted => 1);
+				    trusted => 0);
   };
 
   if ($@) {
