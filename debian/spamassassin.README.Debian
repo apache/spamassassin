@@ -18,16 +18,12 @@ User-specific configuration is the automatically created
 spamassassin is called, or when spamc is used with 'spamd -c'.
 
 SpamAssassin is compatible with Razor, an online spam database.  Get the
-package razor, maintained by Robert van der Meulen. Razor version 2 is
-supported, but Debian packages don't exist yet.
+package razor, maintained by Robert van der Meulen. Please note: you
+must register razor before reporting spam with spamassassin -r. (man
+razor-admin for more info.)
 
 By default, spamassassin checks certain free RBLs. Other, commercial
 RBLs can easily be enabled. See the README for more information.
-
-Spamassassin has the character set tests turned off in
-/etc/spamassassin/65_debian.cf, since this causes problems for foreign
-users.  Please feel free to enable it, but make sure you set ok_locales
-appropriately.
 
 Spamd may not be entirely secure!  Read README.spamd before running
 spamd.
