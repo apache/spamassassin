@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.486 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.487 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -63,6 +63,20 @@ describe T_HTML_WITHOUT_HTML_2	Claims to be HTML, but there is no HTML text
 # and has a high hit rate.
 body __HTML_TAG_EXISTS_DOCTYPE	eval:html_tag_exists('!doctype')
 meta T_MIME_HTML_NO_DOCTYPE	(__MIME_HTML && !__HTML_TAG_EXISTS_DOCTYPE)
+
+# 2003-05-15
+# some variations on the HTML_IMAGE_WEB_BUGS test (aiming for higher S/O
+# ratio if possible)
+body T_HTML_IMAGE_WEB_BUGS_0	eval:html_test('t_image_web_bugs0')
+body T_HTML_IMAGE_WEB_BUGS_1	eval:html_test('t_image_web_bugs1')
+body T_HTML_IMAGE_WEB_BUGS_2	eval:html_test('t_image_web_bugs2')
+body T_HTML_IMAGE_WEB_BUGS_3	eval:html_test('t_image_web_bugs3')
+body T_HTML_IMAGE_WEB_BUGS_4	eval:html_test('t_image_web_bugs4')
+body T_HTML_IMAGE_WEB_BUGS_5	eval:html_test('t_image_web_bugs5')
+body T_HTML_IMAGE_WEB_BUGS_6	eval:html_test('t_image_web_bugs6')
+body T_HTML_IMAGE_WEB_BUGS_7	eval:html_test('t_image_web_bugs7')
+body T_HTML_IMAGE_WEB_BUGS_8	eval:html_test('t_image_web_bugs8')
+body T_HTML_IMAGE_WEB_BUGS_9	eval:html_test('t_image_web_bugs9')
 
 # 2003-02-25: quinlan
 # Whee... more HTML tests!
