@@ -189,10 +189,16 @@ describe DNS_FROM_RFCI_DSN	From: sender listed in dsn.rfc-ignorant.org
 tflags DNS_FROM_RFCI_DSN	net
 
 # sa-hil.habeas.com for SpamAssassin queries
-# hil.habeas.com for everything else
-header HABEAS_VIOLATOR		eval:check_rbl_swe('hil', 'sa-hil.habeas.com.')
-describe HABEAS_VIOLATOR	Has Habeas warrant mark and on Infringer List
-tflags HABEAS_VIOLATOR		net
+# hil.habeas.com for other filters
+header HABEAS_INFRINGER		eval:check_rbl_swe('hil', 'sa-hil.habeas.com.')
+describe HABEAS_INFRINGER	Has Habeas warrant mark and on Infringer List
+tflags HABEAS_INFRINGER		net
+
+# sa-hul.habeas.com for SpamAssassin queries
+# hul.habeas.com for other filters
+header HABEAS_USER		eval:check_rbl_swe('hul', 'sa-hul.habeas.com.')
+describe HABEAS_USER		Has Habeas warrant mark and on User List
+tflags HABEAS_USER		net nice
 
 header RCVD_IN_BSP_TRUSTED	eval:check_rbl_txt('bsp-firsttrusted', 'sa-trusted.bondedsender.org.')
 describe RCVD_IN_BSP_TRUSTED	Sender is in Bonded Sender Program (trusted relay)

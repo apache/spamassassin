@@ -2107,13 +2107,13 @@ sub message_is_habeas_swe {
 
   my $text = '';
   for (my $i = 1; $i <= 9; $i++) {
-    $text .= lc($self->get("X-Habeas-SWE-$i"));
+    $text .= (lc($self->get("X-Habeas-SWE-$i")) || return 0);
   }
   if ($text) {
-    $text =~ s,\s+, ,g;
-    $text =~ s,^\s|\s$,,g;
-    $text =~ s,/?>,/>,;
-    $self->{habeas_swe} = sha1($text) eq q(76c65d9eb65e572166a08b50fd197b29af09d43a);
+    $text =~ s/\s+/ /g;
+    $text =~ s/^\s|\s$//g;
+    $text =~ s@/?>@/>@;
+    $self->{habeas_swe} = (sha1($text) eq '76c65d9eb65e572166a08b50fd197b29af09d43a');
   }
 
   return $self->{habeas_swe};
