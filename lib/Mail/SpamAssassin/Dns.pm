@@ -579,6 +579,11 @@ sub dccifd_lookup {
     return 0;
   }
 
+  if ($$fulltext eq '') {
+    dbg ("empty message, ignoring DCCifd");
+    return 0;
+  }
+
   if ( ! $self->{conf}->{dcc_home} ) {
 	dbg ("dcc_home not defined, should not get here");
     return 0;
