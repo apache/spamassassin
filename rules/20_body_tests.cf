@@ -39,6 +39,9 @@ describe SLIGHTLY_UNSAFE_JAVASCRIPT	JavaScript code which can easily be executed
 rawbody HTML_WITH_BGCOLOR	/<body [^>]*bgcolor[=3d\"\'\#]+[0-9a-e][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]/is
 describe HTML_WITH_BGCOLOR	HTML mail with non-white background
 
+rawbody  BIG_FONT               /<\s*FONT\s[^>]*size\s*=(?:3D)?\s*['\"]?\s*(?:\+[23456789]|(?:[3456789]|\d{2,}))/is
+describe BIG_FONT               FONT Size +2 and up or 3 and up
+
 rawbody SPAM_FORM		/CHANGE EMAIL ADDRESS IN ACTION OF FORM/
 describe SPAM_FORM		Form for changing email address
 rawbody SPAM_FORM_RETURN	/return validate_form/
