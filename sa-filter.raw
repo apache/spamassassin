@@ -29,9 +29,9 @@ use lib '@@INSTALLSITELIB@@';                   # substituted at 'make' time
 
 BEGIN {
 
-  # Locate locally installed SA libraries *without* using FindBin, which generates
-  # warnings and causes more trouble than its worth.  We don't need to be too
-  # smart about this BTW.
+  # Locate locally installed SA libraries *without* using FindBin, which
+  # generates warnings and causes more trouble than its worth.  We don't
+  # need to be too smart about this BTW.
   my @bin = File::Spec->splitpath($0);
   my $bin = (
     $bin[0]
@@ -680,137 +680,6 @@ the mailbox format used within the University of Washington's IMAP
 implementation; see C<http://www.washington.edu/imap/>.
 
 =back
-
-=head1 CONFIGURATION FILES
-
-The rule base, text templates, and rule description text are loaded from the
-configuration files.
-
-By default, configuration data is loaded from the first existing directory in:
-F<@@DEF_RULES_DIR@@>;
-F<@@PREFIX@@/share/spamassassin>;
-F</usr/local/share/spamassassin>;
-F</usr/share/spamassassin> .
-
-Site-specific configuration data is used to override any values which had
-already been set.  This is loaded from the first existing directory in:
-F<@@LOCAL_RULES_DIR@@>;
-F<@@PREFIX@@/etc/mail/spamassassin>;
-F<@@PREFIX@@/etc/spamassassin>;
-F</usr/local/etc/spamassassin>;
-F</usr/pkg/etc/spamassassin>;
-F</usr/etc/spamassassin>;
-F</etc/mail/spamassassin>;
-F</etc/spamassassin> .
-
-Spamassassin will read *.cf in these directories, in alphanumeric order within
-each directory (similar to SysV-style startup scripts).  In other words, it
-will read F<10_misc.cf> before F<50_scores.cf> and F<20_body_tests.cf> before
-F<20_head_test.cf>.  Options in later files will override earlier files.
-
-The user preferences (such as scores to attach to each rule), are loaded from
-the file specified in the B<-p> argument.  If this is not specified,
-F<~/.spamassassin/user_prefs> is used if it exists.  C<spamassassin> will
-create this file if it does not exist, using F<user_prefs.template> as a
-template.  This file will be looked for in: 
-F<@@LOCAL_RULES_DIR@@>;
-F<@@PREFIX@@/etc/mail/spamassassin>;
-F<@@PREFIX@@/share/spamassassin>;
-F</etc/spamassassin>;
-F</etc/mail/spamassassin>;
-F</usr/local/share/spamassassin>;
-F</usr/share/spamassassin>.
-
-=head1 TAGGING
-
-The following two sections detail the tagging that takes place for
-messages.
-
-Note that if you use the B<-t> argument, all mails will be tagged
-as if they are spam messages.
-
-=head2 TAGGING FOR SPAM MAILS
-
-If an incoming message is tagged as spam, instead of modifying the
-original message, SpamAssassin will create a new report message and
-attach the original message as a message/rfc822 MIME part (ensuring
-the original message is completely preserved and easier to recover).
-
-The new report message inherits the following headers (if they are
-present) from the original spam message:
-
-=over 4
-
-=item Subject: header
-
-=item From: header
-
-=item To: header
-
-The above headers can be modified if the relavent C<rewrite_header>
-option is given.
-
-=item Cc: header
-
-=item Date: header
-
-=back
-
-And (by default) these headers are added:
-
-=over 4
-
-=item X-Spam-Status: header
-
-A string, C<Yes, score=nn required=nn tests=xxx,xxx
-autolearn=(ham|spam|no|unavailable|failed)> is set in this header to
-reflect the filter status.
-
-=item X-Spam-Flag: header
-
-Set to C<YES>.
-
-=item X-Spam-Report: header
-
-=back
-
-Please note that the headers that added are now fully configurable via
-the add_header option. Please see the manpage for
-Mail::SpamAssassin::Conf(3) for more information.
-
-=over 4
-
-=item spam mail body text
-
-The SpamAssassin report is added to top of the mail message body,
-if the message is marked as spam.
-
-=back
-
-=head2 DEFAULT TAGGING FOR HAM (NON-SPAM) MAILS
-
-=over 4
-
-=item X-Spam-Status: header
-
-A string, C<No, score=nn required=nn tests=xxx,xxx
-autolearn=(ham|spam|no|unavailable|failed)> is set in this header to
-reflect the filter status.
-
-=back
-
-Added headers are fully configurable via the add_header configuration
-option. Please see the manpage for Mail::SpamAssassin::Conf(3) for
-more information.
-
-=head1 INSTALLATION
-
-The B<sa-filter> command is part of the B<Mail::SpamAssassin> Perl module.
-Install this as a normal Perl module, using C<perl -MCPAN -e shell>, or by
-hand.
-
-For further details on how to install, please read the C<INSTALL> file
-from the SpamAssassin distribution.
 
 =head1 SEE ALSO
 
