@@ -15,6 +15,7 @@ use Mail::SpamAssassin::NoMailAudit;
 use Sys::Syslog qw(:DEFAULT setlogsock);
 use POSIX qw(setsid);
 use Getopt::Std;
+use POSIX ":sys_wait_h";
 
 my %resphash = (
     EX_OK          => 0,  # no problems
@@ -348,6 +349,14 @@ for ( $waitedpid = 0;
 	{
 	    protocol_error ($_);
 	}
+
+	# Clean up any defunct processes.  (Not perfect, as usually leaves at
+	# least one around until next connection, but avoids handling SIGCHLD.)
+	# Needed on SunOS, where SIGCHLD=IGNORE doesn't make it automatic.
+	my $kid;
+	do {
+	  $kid = waitpid(-1,&WNOHANG);
+	} until ($kid <= 0);
     };
 }
 
