@@ -96,3 +96,9 @@ describe T_APPLY_ONLINE           Apply Online
 body T_SALE                       /sales?  (?:price|system|department|technology|ends|today)|\b(?:on|summer|movie|clearance|for|your|increase|super|losing|return|business|airfare) (?-i:S)ales?/i
 describe T_SALE                   Stuff on Sale
 
+# http://www.hughes-family.org/bugzilla/show_bug.cgi?id=649
+body T_NASD_FINANCIAL           /\b(?:member\s+(?-i:NASD\/SIPC)|not\s+insured\s+.{0,10}(?-i:FDIC)|(?-i:FDIC)\s+insured)/i
+describe T_NASD_FINANCIAL       Message indicates a financial institute
+tflags   T_NASD_FINANCIAL           nice
+score T_NASD_FINANCIAL -1.0
+
