@@ -631,8 +631,11 @@ sub rewrite_as_spam {
   $newmsg .= "X-Spam-Flag: YES\n";
   $newmsg .= "X-Spam-Status: " . $self->_build_status_line() . "\n";
   if ($self->{main}->{conf}->{spam_level_stars} == 1) {
+    my $length = int($self->{hits});
+    if ( $length > 100 ) { $length = 100; }
+
     $newmsg .= "X-Spam-Level: " .
-      $self->{main}->{conf}->{spam_level_char} x int($self->{hits}) . "\n";
+      $self->{main}->{conf}->{spam_level_char} x $length . "\n";
   }
   $newmsg .= "X-Spam-Checker-Version: SpamAssassin " .
     Mail::SpamAssassin::Version() . " " .
@@ -711,7 +714,9 @@ sub rewrite_headers {
   if ( $self->{is_spam} || $self->{main}->{conf}->{always_add_headers} == 1) {
     $self->{msg}->put_header ("X-Spam-Status", $self->_build_status_line());
     if($self->{main}->{conf}->{spam_level_stars} == 1) {
-      $self->{msg}->put_header("X-Spam-Level", $self->{main}->{conf}->{spam_level_char} x int($self->{hits}));
+      my $length = int($self->{hits});
+      if ( $length > 100 ) { $length = 100; }
+      $self->{msg}->put_header("X-Spam-Level", $self->{main}->{conf}->{spam_level_char} x $length);
     }
   }
 
