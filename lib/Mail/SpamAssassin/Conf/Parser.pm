@@ -773,7 +773,9 @@ sub is_regexp_valid {
     return 1;
 
   } else {
-    warn "config: invalid regexp for rule $name: $re\n";
+    my $err = $@;
+    $err =~ s/ at .*? line \d+\.\n?//;
+    warn "config: invalid regexp for rule $name: $re: $err\n";
     $self->{conf}->{errors}++;
     return 0;
   }
