@@ -1,14 +1,15 @@
 #!/usr/bin/perl -w
 
 use Getopt::Std;
-getopts("xpf");
+getopts("fm:px");
 
 sub usage {
-  die "hit-frequencies [-x] [-p] [-f] [spam log] [nonspam log]
-  
-    -x: extended output, with S:N ratio and scores
-    -p: percentages. implies -x
-    -f: falses. count only false-negative or false-positive matches
+  die "hit-frequencies [-f] [-m RE] [-p] [-x] [spam log] [nonspam log]
+
+    -f     falses. count only false-negative or false-positive matches
+    -m RE  print rules matching regular expression
+    -p     percentages. implies -x
+    -x     extended output, with S/O ratio and scores
 
     if either the spam or and nonspam logs are unspecified, the defaults
     are \"spam.log\" and \"nonspam.log\" in the cwd.
@@ -89,7 +90,8 @@ foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
   my $fn = $freq_nonspam{$test}; $fn ||= 0;
   my $fa = $fs+$fn;
 
-  next if ($tflags{$test} =~ /net/);    # ignore net tests
+  next if ($opt_m && $test !~ m/$opt_m/);	# match certain tests
+  next if ($tflags{$test} =~ /net/);		# ignore net tests
 
   # adjust based on corpora sizes (and cvt to % while we're at it)
   my $fsadj = $num_spam == 0 ? 0 : ($fs / ($num_spam)) * 100.0;
