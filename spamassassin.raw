@@ -49,7 +49,8 @@ eval {
   require Mail::SpamAssassin::NoMailAudit;
 
   # gnu_getopt is not available in Getopt::Long 2.24, see bug 732
-  Getopt::Long::Configure(qw(bundling gnu_compat no_getopt_compat no_auto_abbrev no_ignore_case));
+  # gnu_compat neither.
+  Getopt::Long::Configure(qw(bundling no_getopt_compat no_auto_abbrev no_ignore_case));
   GetOptions(
 	     'whitelist-factory|M=s'             => \$opt{'whitelist-factory'},
 	     'auto-whitelist|a'                  => \$opt{'auto-whitelist'},
