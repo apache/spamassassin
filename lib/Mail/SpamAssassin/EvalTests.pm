@@ -1174,12 +1174,12 @@ sub check_rbl_backend {
 
 sub check_rbl {
   my ($self, $rule, $set, $rbl_server, $subtest) = @_;
-  $self->check_rbl_backend ($rule, $set, $rbl_server, 'A', $subtest);
+  $self->check_rbl_backend($rule, $set, $rbl_server, 'A', $subtest);
 }
 
 sub check_rbl_txt {
   my ($self, $rule, $set, $rbl_server, $subtest) = @_;
-  $self->check_rbl_backend ($rule, $set, $rbl_server, 'TXT', $subtest);
+  $self->check_rbl_backend($rule, $set, $rbl_server, 'TXT', $subtest);
 }
 
 # run for first message 
@@ -1190,6 +1190,19 @@ sub check_rbl_sub {
   return 0 unless $self->is_dns_available();
 
   $self->register_rbl_subtest($rule, $set, $subtest);
+}
+
+# check a RBL if a message is Habeas SWE
+sub check_rbl_swe {
+  my ($self, $rule, $set, $rbl_server, $subtest) = @_;
+
+  if (!defined $self->{habeas_swe}) {
+    $self->message_is_habeas_swe();
+  }
+  if (defined $self->{habeas_swe} && $self->{habeas_swe}) {
+    $self->check_rbl_backend($rule, $set, $rbl_server, 'A', $subtest);
+  }
+  return 0;
 }
 
 sub check_rbl_from {
@@ -1852,15 +1865,21 @@ sub message_from_debian_bts {
 sub message_is_habeas_swe {
   my ($self) = @_;
 
+  return $self->{habeas_swe} if defined $self->{habeas_swe};
+
+  $self->{habeas_swe} = 0;
+
   my $all = $self->get('ALL');
   if ($all =~ /\n(X-Habeas-SWE-1:.{0,512}X-Habeas-SWE-9:[^\n]{0,64}\n)/si) {
     my $text = $1;
     $text =~ tr/A-Z/a-z/;
     $text =~ tr/ / /s;
     $text =~ s/\/?>/\/>/;
-    return sha1($text) eq "42ab3d716380503f66c4d44017c7f37b04458a9a";
+    if (sha1($text) eq "42ab3d716380503f66c4d44017c7f37b04458a9a") {
+      $self->{habeas_swe} = 1;
+    }
   }
-  return 0;
+  return $self->{habeas_swe};
 }
 
 ###########################################################################
