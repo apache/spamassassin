@@ -275,23 +275,6 @@ $TWO_LEVEL_DOMAINS = qr{ (?:
   gov\.cy |
   net\.cy |
   org\.cy |
-  aero\.de |
-  aerzte\.de |
-  boerse\.de |
-  buecher\.de |
-  buero\.de |
-  coop\.de |
-  denic\.de |
-  doctoren\.de |
-  fluege\.de |
-  glueckwunsch\.de |
-  kueche\.de |
-  kuechen\.de |
-  moebel\.de |
-  museum\.de |
-  nic\.de |
-  pro\.de |
-  reisebuero\.de |
   co\.dk |
   art\.do |
   com\.do |
