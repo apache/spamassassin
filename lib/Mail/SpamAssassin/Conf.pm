@@ -1031,8 +1031,13 @@ SpamAssassin:
 
 =cut
 
-    if (/^report\b\s*(.*?)$/) {
-      $self->{report_template} .= $1."\n"; next;
+    if (/^report\b\s*(.*?)\s*$/) {
+      my $report = $1;
+      if ( $report =~ /^"(.*?)"$/ ) {
+        $report = $1;
+      }
+
+      $self->{report_template} .= "$report\n"; next;
     }
 
 =item clear_report_template

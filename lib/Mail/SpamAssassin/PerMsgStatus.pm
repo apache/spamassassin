@@ -2224,7 +2224,7 @@ sub _handle_hit {
 	$self->{test_logs} .= sprintf ("* %s -- %s%s\n%s",
 				       $score, $area, $desc, $self->{test_log_msgs});
     } else {
-        $self->{test_logs} .= sprintf ("%s %-20s %s%s\n%s",
+        $self->{test_logs} .= sprintf ("%s %-24s %s%s\n%s",
 				       $score, $rule, $area, $desc,
 				       $self->{test_log_msgs});
     }
