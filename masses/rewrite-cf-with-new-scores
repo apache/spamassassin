@@ -30,7 +30,8 @@ if (!defined $newscores || $scoreset < 0 || $scoreset >= $NUM_SCORESETS ) {
 system ("./parse-rules-for-masses -s $scoreset") and die;
 our %rules;
 if (-e "tmp/rules.pl") {
-  # Note, the spaces need to stay in front of the require to work around a RPM 4.1 problem
+  # note: the spaces need to stay in front of the require to work around
+  # a RPM 4.1 problem
   require "./tmp/rules.pl";
 }
 else {
@@ -43,7 +44,8 @@ my %gascorelines = ();
 open (STDIN, "<$newscores") or die "cannot open $newscores";
 while (<STDIN>) {
   /^score\s+(\S+)\s+(-?\d+(?:\.\d+)?)/ or next;
-  my $name = $1;  my $score = $2;
+  my $name = $1;
+  my $score = $2;
   next unless (exists ($rules{$name}) && $rules{$name}->{issubrule} == 0);
   next if ($name =~ /^__/);
   next if ($name eq '(null)');	# er, oops ;)
