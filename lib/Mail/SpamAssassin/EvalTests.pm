@@ -607,7 +607,12 @@ sub check_razor {
   return 0 if ($self->{already_checked_razor});
 
   $self->{already_checked_razor} = 1;
-  return $self->razor_lookup ($fulltext);
+
+  # note: we don't use $fulltext. instead we get the raw message,
+  # unfiltered, for razor to check.  ($fulltext removes MIME
+  # parts etc.)
+  my $full = $self->get_full_message_as_text();
+  return $self->razor_lookup (\$full);
 }
 
 sub check_for_base64_enc_text {
