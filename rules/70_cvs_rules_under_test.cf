@@ -475,3 +475,16 @@ body T_EXPERTS_SHOW_HOW		/experts show you how/i
 describe T_EXPERTS_SHOW_HOW	Experts show you how
 body T_ENHANCE_WEBSITE		/E(?i:nhance any) W(?i:ebsite)/
 describe T_ENHANCE_WEBSITE	Enhance any Website
+
+# bug 1014
+# from Allen
+uri T_MAILTO_TO_B2BMAIL		/^mailto:[^\s\@]{1,20}\@b2b-?mail\./is
+describe T_MAILTO_TO_B2BMAIL	Includes a link to a likely spammer email address (@b2b-mail)
+
+header __FROM_HAS_UNDERLINE_NUMS	From =~ /_\S?(?:[a-z]+\w*?\d+|\d+\w*?[a-z]+)\w*\@/i
+meta T_FROM_HAS_UNDERLINE_NUMS		(!T_REPLY_TO_HAS_UNDERLINE_NUMS && __FROM_HAS_UNDERLINE_NUMS)
+describe T_FROM_HAS_UNDERLINE_NUMS	From: contains an underline and numbers/letters
+
+header T_REPLY_TO_HAS_UNDERLINE_NUMS	Reply-To =~ /_\S?(?:[a-z]+\w*?\d+|\d+\w*?[a-z]+)\w*\@/i [if-unset: UNSET]
+describe T_REPLY_TO_HAS_UNDERLINE_NUMS	Reply-To: contains an underline and
+numbers/letters
