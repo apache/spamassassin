@@ -162,6 +162,12 @@ header DNS_FROM_RFCI_DSN	eval:check_rbl_from_host('rfci-dsn', 'dsn.rfc-ignorant.
 describe DNS_FROM_RFCI_DSN	From: sender listed in dsn.rfc-ignorant.org
 tflags DNS_FROM_RFCI_DSN	net
 
+# sa-hil.habeas.com for SpamAssassin queries
+# hil.habeas.com for everything else
+header HABEAS_VIOLATOR		eval:check_rbl_swe('hil', 'sa-hil.habeas.com.')
+describe HABEAS_VIOLATOR	Has Habeas warrant mark and on Infringer List
+tflags HABEAS_VIOLATOR		net
+
 header RCVD_IN_BSP_TRUSTED	eval:check_rbl_txt('bsp-firsttrusted', 'sa-trusted.bondedsender.org.')
 describe RCVD_IN_BSP_TRUSTED	Sender is in Bonded Sender Program (trusted relay)
 tflags RCVD_IN_BSP_TRUSTED	net nice
@@ -181,18 +187,6 @@ tflags RCVD_IN_BSP_OTHER	net nice
 header RCVD_IN_DYNABLOCK	eval:check_rbl_txt('dynablock-notfirsthop', 'dynablock.easynet.nl.')
 describe RCVD_IN_DYNABLOCK	Sent directly from dynamic IP address
 tflags RCVD_IN_DYNABLOCK	net
-
-# ---------------------------------------------------------------------------
-# NOTE: Habeas sender-warranted email, see http://www.habeas.com/ for details
-# sa-hil.habeas.com for SpamAssassin queries
-# hil.habeas.com for everything else
-
-header HABEAS_SWE		eval:message_is_habeas_swe()
-describe HABEAS_SWE		Has Habeas warrant mark (http://www.habeas.com/)
-
-header HABEAS_VIOLATOR		eval:check_rbl_swe('hil', 'sa-hil.habeas.com.')
-describe HABEAS_VIOLATOR	Has Habeas warrant mark and on Infringer List
-tflags HABEAS_VIOLATOR		net
 
 # ---------------------------------------------------------------------------
 # NOTE: donation tests, see README file for details
