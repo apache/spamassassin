@@ -126,9 +126,45 @@ describe RCVD_IN_SBL		Received via a relay in Spamhaus SBL
 tflags RCVD_IN_SBL		net
 
 # XBL is the Exploits Block List: http://www.spamhaus.org/xbl/
-header RCVD_IN_XBL		eval:check_rbl_sub('sblxbl', '127.0.0.[456]')
+header RCVD_IN_XBL		eval:check_rbl('sblxbl-firsttrusted', '127.0.0.[456]')
 describe RCVD_IN_XBL		Received via a relay in Spamhaus XBL
 tflags RCVD_IN_XBL		net
+
+# ---------------------------------------------------------------------------
+# RFC-Ignorant blacklists (both name and IP based)
+
+header __RFC_IGNORANT_ENVFROM	eval:check_rbl_envfrom('rfci_envfrom', 'fulldom.rfc-ignorant.org.')
+tflags __RFC_IGNORANT_ENVFROM	net
+
+header DNS_FROM_RFC_DSN		eval:check_rbl_sub('rfci_envfrom', '127.0.0.2')
+describe DNS_FROM_RFC_DSN	Envelope sender listed in dsn.rfc-ignorant.org
+tflags DNS_FROM_RFC_DSN		net
+
+header DNS_FROM_RFC_POST	eval:check_rbl_sub('rfci_envfrom', '127.0.0.3')
+describe DNS_FROM_RFC_POST	Envelope sender in postmaster.rfc-ignorant.org
+tflags DNS_FROM_RFC_POST	net
+
+header DNS_FROM_RFC_ABUSE	eval:check_rbl_sub('rfci_envfrom', '127.0.0.4')
+describe DNS_FROM_RFC_ABUSE	Envelope sender in abuse.rfc-ignorant.org
+tflags DNS_FROM_RFC_ABUSE	net
+
+header DNS_FROM_RFC_WHOIS_A	eval:check_rbl_sub('rfci_envfrom', '127.0.0.5')
+describe DNS_FROM_RFC_WHOIS_A	Envelope sender in whois.rfc-ignorant.org
+tflags DNS_FROM_RFC_WHOIS_A	net
+
+# this is 127.0.0.6 if querying fullip.rfc-ignorant.org, but since there
+# is only one right now, we might as well get the TXT record version
+header RCVD_IN_RFC_IPWHOIS	eval:check_rbl_txt('ipwhois-firsttrusted', 'ipwhois.rfc-ignorant.org.')
+describe RCVD_IN_RFC_IPWHOIS	Sent via a relay in ipwhois.rfc-ignorant.org
+tflags RCVD_IN_RFC_IPWHOIS	net
+
+header DNS_FROM_RFC_WHOIS_B	eval:check_rbl_sub('rfci_envfrom', '127.0.0.7')
+describe DNS_FROM_RFC_WHOIS_B	Envelope sender TLD in whois.rfc-ignorant.org
+tflags DNS_FROM_RFC_WHOIS_B	net
+
+header DNS_FROM_RFC_BOGUSMX	eval:check_rbl_sub('rfci_envfrom', '127.0.0.8')
+describe DNS_FROM_RFC_BOGUSMX	Envelope sender listed in bogusmx.rfc-ignorant.org
+tflags DNS_FROM_RFC_BOGUSMX	net
 
 # ---------------------------------------------------------------------------
 # Now, single zone BLs follow:
@@ -141,19 +177,11 @@ tflags RCVD_IN_XBL		net
 # transfers: yes - rsync and http, see http://dsbl.org/usage
 # pay-to-use: no
 # delist: automated/distributed
-header RCVD_IN_DSBL		eval:check_rbl_txt('dsbl', 'list.dsbl.org.')
+header RCVD_IN_DSBL		eval:check_rbl_txt('dsbl-firsttrusted', 'list.dsbl.org.')
 describe RCVD_IN_DSBL		Received via a relay in list.dsbl.org
 tflags RCVD_IN_DSBL		net
 
-# Other miscellaneous RBLs are listed here:
-header RCVD_IN_RFCI		eval:check_rbl_txt('rfci', 'ipwhois.rfc-ignorant.org.')
-describe RCVD_IN_RFCI		Sent via a relay in ipwhois.rfc-ignorant.org
-tflags RCVD_IN_RFCI		net
-
-# DSN is a domain-based blacklist
-header DNS_FROM_RFCI_DSN	eval:check_rbl_from_host('rfci-dsn', 'dsn.rfc-ignorant.org.')
-describe DNS_FROM_RFCI_DSN	From: sender listed in dsn.rfc-ignorant.org
-tflags DNS_FROM_RFCI_DSN	net
+########################################################################
 
 # another domain-based blacklist
 header DNS_FROM_AHBL_RHSBL	eval:check_rbl_from_host('ahbl', 'rhsbl.ahbl.org.')
