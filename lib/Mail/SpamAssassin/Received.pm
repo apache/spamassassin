@@ -1,4 +1,4 @@
-# $Id: Received.pm,v 1.3 2003/04/05 21:27:42 jmason Exp $
+# $Id: Received.pm,v 1.4 2003/04/05 22:24:49 felicity Exp $
 
 package Mail::SpamAssassin::Received;
 1;
@@ -157,9 +157,10 @@ sub parse_received_line {
   # by cabbage.jmason.org (Postfix) with ESMTP id A96E18BD97
   # for <jm@localhost>; Thu, 13 Mar 2003 15:23:15 -0500 (EST)
   elsif (/ \(Postfix\) with/) {
-    /^from (\S+) \((\S+) \[(${IP_ADDRESS})\]\) by (\S+) /;
-    $helo = $1; $rdns = $2; $ip = $3; $by = $4;
-    if ($rdns eq 'unknown') { $rdns = ''; }
+    if ( /^from (\S+) \((\S+) \[(${IP_ADDRESS})\]\) by (\S+) / ) {
+      $helo = $1; $rdns = $2; $ip = $3; $by = $4;
+      if ($rdns eq 'unknown') { $rdns = ''; }
+    }
   }
 
   # Received: from 213.123.174.21 by lw11fd.law11.hotmail.msn.com with HTTP;
