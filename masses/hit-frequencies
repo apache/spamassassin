@@ -189,11 +189,11 @@ foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
 
   if ($opt_p) {
     printf "%7.3f  %7.4f  %7.4f  %7.3f %6.2f  %6.2f  %s\n",
-  	$fa, $fs, $fn, $soratio, $ranking{$test}, $scores{$test}, $test;
+  	$fa, $fs, $fn, $soratio, $ranking{$test}, (split(/\s+/,$scores{$test}))[0], $test;
 
   } elsif ($opt_x) {
     printf "%7d  %7d  %7d  %7.3f %6.2f %6.2f  %s\n",
-  	$fa, $fs, $fn, $soratio, $ranking{$test}, $scores{$test}, $test;
+  	$fa, $fs, $fn, $soratio, $ranking{$test}, (split(/\s+/,$scores{$test}))[0], $test;
 
   } else {
     printf "%10d  %10d  %10d  %s\n", $fa, $fs, $fn, $test;
