@@ -61,6 +61,7 @@ sub new {
     'hits'              => 0,
     'test_logs'         => '',
     'test_names_hit'    => [ ],
+    'subtest_names_hit' => [ ],
     'tests_already_hit' => { },
     'hdr_cache'         => { },
     'rule_errors'       => 0,
@@ -259,6 +260,24 @@ sub get_names_of_tests_hit {
   my ($self) = @_;
 
   return join(',', sort(@{$self->{test_names_hit}}));
+}
+
+###########################################################################
+
+=item $list = $status->get_names_of_subtests_hit ()
+
+After a mail message has been checked, this method can be called.  It will
+return a comma-separated string, listing all the symbolic test names of the
+meta-rule sub-tests which were trigged by the mail.  Sub-tests are the
+normally-hidden rules, which score 0 and have names beginning with two
+underscores, used in meta rules.
+
+=cut
+
+sub get_names_of_subtests_hit {
+  my ($self) = @_;
+
+  return join(',', sort(@{$self->{subtest_names_hit}}));
 }
 
 ###########################################################################
@@ -634,6 +653,7 @@ sub finish {
   delete $self->{res};
   delete $self->{hits};
   delete $self->{test_names_hit};
+  delete $self->{subtest_names_hit};
   delete $self->{test_logs};
   delete $self->{replacelines};
 
@@ -2074,7 +2094,7 @@ sub _handle_hit {
     my ($self, $rule, $score, $area, $desc) = @_;
 
     # ignore meta-match sub-rules.
-    if ($rule =~ /^__/) { return; }
+    if ($rule =~ /^__/) { push(@{$self->{subtest_names_hit}}, $rule); return; }
 
     $score = sprintf("%2.1f",$score);
     $self->{hits} += $score;
