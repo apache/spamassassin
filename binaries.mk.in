@@ -7,20 +7,20 @@ LIBS = @LIBS@
 LDFLAGS = @LDFLAGS@
 LDDLFLAGS = @LDDLFLAGS@
 
-EXEEXT = @EXEEXT@
+EXE_EXT = @EXEEXT@
 SHLIBEXT = .so
 
 SPAMC_FILES = spamd/spamc.c
 
 LIBSPAMC_FILES = spamd/libspamc.c spamd/utils.c
 
-all: spamd/spamc$(EXEEXT)
+all: spamd/spamc$(EXE_EXT)
 	true
 
 libspamc: spamd/libspamc$(SHLIBEXT)
 	true
 
-spamd/spamc$(EXEEXT): $(SPAMC_FILES) $(LIBSPAMC_FILES)
+spamd/spamc$(EXE_EXT): $(SPAMC_FILES) $(LIBSPAMC_FILES)
 	$(CC) $(CFLAGS) $(SPAMC_FILES) $(LIBSPAMC_FILES) \
 		-o $@ $(LDFLAGS) $(LIBS)
 
