@@ -50,9 +50,10 @@ use vars qw{
 
 my $hp = HTML::Parser->new(
 			api_version => 3,
-			handlers => [start => [\&html_tag, "tagname,attr,'+1'"],
-				     end   => [\&html_tag, "tagname,attr,'-1'"],
-				     text  => [\&html_text, "dtext"],
+			handlers => [start => [\&html_tag,"tagname,attr,'+1'"],
+				     end => [\&html_tag,"tagname,attr,'-1'"],
+				     text => [\&html_text,"dtext"],
+				     comment => [\&html_comment,"text"],
 				     ],
 			marked_sections => 1);
 
@@ -812,6 +813,14 @@ sub html_text {
   return if (exists $html_inside{style} && $html_inside{style} > 0);
   $text =~ s/\n// if $html_last_tag eq "br";
   $html_text .= $text;
+}
+
+sub html_comment {
+  my ($text) = @_;
+
+  $html{comment_8bit} = 1 if $text =~ /[\x80-\xff]{3,}/;
+  $html{comment_saved_url} = 1 if $text =~ /<!-- saved from url=\(\d{4}\)/;
+  $html{comment_unique_id} = 1 if $text =~ /<!--\s*(?:[\d.]+|[a-f\d]{5,}|\S{10,})\s*-->/i;
 }
 
 sub get_raw_body_text_array {
