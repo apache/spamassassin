@@ -522,6 +522,7 @@ sub pre_chew_received {
 sub learn {
   my ($self, $isspam, $msg) = @_;
 
+  if (!$self->{main}->{conf}->{use_bayes}) { return; }
   if (!defined $msg) { return; }
   my $body = $self->get_body_from_msg ($msg);
   my $ret;
@@ -594,6 +595,7 @@ sub learn_trapped {
 sub forget {
   my ($self, $msg) = @_;
 
+  if (!$self->{main}->{conf}->{use_bayes}) { return; }
   if (!defined $msg) { return; }
   my $body = $self->get_body_from_msg ($msg);
   my $ret;
@@ -701,6 +703,7 @@ sub get_body_from_msg {
 
 sub sync {
   my ($self, $opts) = @_;
+  if (!$self->{main}->{conf}->{use_bayes}) { return 0; }
   $self->{store}->sync_journal($opts);
   $self->{store}->expire_old_tokens($opts);
   return 0;
@@ -817,6 +820,7 @@ sub is_available {
 sub scan {
   my ($self, $msg, $body) = @_;
 
+  if (!$self->{main}->{conf}->{use_bayes}) { goto skip; }
   if (!$self->{store}->tie_db_readonly()) { goto skip; }
 
   my ($ns, $nn) = $self->{store}->nspam_nham_get();
