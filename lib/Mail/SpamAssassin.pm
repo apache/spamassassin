@@ -1626,24 +1626,28 @@ sub find_all_addrs_in_line {
   return @addrs;
 }
 
-# usage: dbg("facility: message")
-# This is used for all low priority debugging messages.
-sub dbg {
-  return unless $Mail::SpamAssassin::DEBUG;
+###########################################################################
 
-  my $facility = "generic";
-  my $message = shift;
+sub _dbg_info_helper {
+  my($facility, $prefix, $message) = ("generic", @_);
 
   if ($message =~ /^(\S+?):\s*(.*)/s) {
     $facility = $1;
     $message = $2;
   }
 
-  if ($facilities{all} || $facilities{$facility}) {
+  if ($facilities{all} || $facilities{$prefix} || $facilities{$facility}) {
     $message =~ s/\n+$//s;
-    $message =~ s/^/debug: ${facility}:\t/mg;
+    $message =~ s/^/${prefix}: ${facility}:\t/mg;
     warn "$message\n";
   }
+}
+
+# usage: dbg("facility: message")
+# This is used for all low priority debugging messages.
+sub dbg {
+  return unless $Mail::SpamAssassin::DEBUG;
+  _dbg_info_helper("debug", @_);
 }
 
 # returns whether or not debugging is enabled in general or (if specified) for
@@ -1671,18 +1675,7 @@ sub dbg_check {
 # significant, condition.  This should be very infrequently called.
 sub info {
   return unless $Mail::SpamAssassin::INFO;
-
-  my $facility = "generic";
-  my $message = shift;
-
-  if ($message =~ /^(\S+?):\s*(.*)/) {
-    $facility = $1;
-    $message = $2;
-  }
-
-  if ($facilities{all} || $facilities{info} || $facilities{$facility}) {
-    warn "info: $facility: $message\n";
-  }
+  _dbg_info_helper("info", @_);
 }
 
 # returns whether or not info output is enabled in general or (if specified) for
@@ -1717,6 +1710,8 @@ sub sa_die {
   warn @_;
   exit $exitcode;
 }
+
+###########################################################################
 
 # private function to find out if the Storable function is available...
 sub _is_storable_available {
