@@ -854,7 +854,9 @@ sub preload_modules_with_tmp_homedir {
   # set $ENV{HOME} in /tmp while we compile and preload everything.
   # File::Spec->tmpdir uses TMPDIR, TMP, TEMP, C:/temp, /tmp etc.
   my $tmpdir = File::Spec->tmpdir();
-  die "cannot find writable tmp dir! set TMP or TMPDIR in env";
+  if (!$tmpdir) {
+    die "cannot find writable tmp dir! set TMP or TMPDIR in env";
+  }
 
   my $tmphome = File::Spec->catdir ($tmpdir, "spamassassin-$$");
   $tmphome = Mail::SpamAssassin::Util::untaint_file_path ($tmphome);
