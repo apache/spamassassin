@@ -625,8 +625,9 @@ sub dump_db_toks {
   return unless (defined($self->{_dbh}));
 
   # 0/0 tokens don't count, but in theory we shouldn't have any
-  # use RPAD to make sure we get trailing spaces in the token value
-  my $sql = "SELECT RPAD(token,5,' '), spam_count, ham_count, atime
+  my $token_select = $self->_token_select_string();
+
+  my $sql = "SELECT $token_select, spam_count, ham_count, atime
                FROM bayes_token
               WHERE id = ?
                 AND (spam_count > 0 OR ham_count > 0)";
@@ -858,12 +859,14 @@ sub tok_get_all {
   my $results_index = 0;
   my $bunch_end;
 
-  my $multi_sql = "SELECT RPAD(token,5,' '), spam_count, ham_count, atime
+  my $token_select = $self->_token_select_string();
+
+  my $multi_sql = "SELECT $token_select, spam_count, ham_count, atime
                      FROM bayes_token
                     WHERE id = ?
                       AND token IN ";
 
-  my $single_sql = "SELECT RPAD(token,5,' '), spam_count, ham_count, atime
+  my $single_sql = "SELECT $token_select, spam_count, ham_count, atime
                       FROM bayes_token
                      WHERE id = ?
                        AND token = ?";
@@ -1337,7 +1340,9 @@ sub backup_database {
   print "v\t$num_spam\tnum_spam\n";
   print "v\t$num_ham\tnum_nonspam\n";
 
-  my $token_sql = "SELECT spam_count, ham_count, atime, RPAD(token,5,' ')
+  my $token_select = $self->_token_select_string();
+
+  my $token_sql = "SELECT spam_count, ham_count, atime, $token_select
                      FROM bayes_token
                     WHERE id = ?
                       AND (spam_count > 0 OR ham_count > 0)";
@@ -1346,7 +1351,7 @@ sub backup_database {
                     FROM bayes_seen
                    WHERE id = ?";
 
-  my $sth = $self->{_dbh}->prepare($token_sql);
+  my $sth = $self->{_dbh}->prepare_cached($token_sql);
 
   unless (defined ($sth)) {
     dbg("bayes: backup_database: SQL error: ".$self->{_dbh}->errstr());
@@ -1367,7 +1372,7 @@ sub backup_database {
 
   $sth->finish();
 
-  $sth = $self->{_dbh}->prepare($seen_sql);
+  $sth = $self->{_dbh}->prepare_cached($seen_sql);
 
   unless (defined ($sth)) {
     dbg("bayes: backup_database: SQL error: ".$self->{_dbh}->errstr());
@@ -2114,6 +2119,22 @@ sub _get_num_lowfreq {
   $sth->finish();
 
   return $num_lowfreq;
+}
+
+=head2 _token_select_string
+
+private instance (String) _token_select_string
+
+Description:
+This method returns the string to be used in SELECT statements to represent
+the token column.
+
+The default is to use the RPAD function to pad the token out to 5 characters.
+
+=cut
+
+sub _token_select_string {
+  return "RPAD(token, 5, ' ')";
 }
 
 sub sa_die { Mail::SpamAssassin::sa_die(@_); }

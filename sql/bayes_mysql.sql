@@ -26,7 +26,8 @@ CREATE TABLE bayes_token (
   spam_count int(11) NOT NULL default '0',
   ham_count int(11) NOT NULL default '0',
   atime int(11) NOT NULL default '0',
-  PRIMARY KEY  (id, token)
+  PRIMARY KEY  (id, token),
+  KEY bayes_token_idx1 (token)
 ) TYPE=MyISAM;
 
 CREATE TABLE bayes_vars (
