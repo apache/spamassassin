@@ -104,7 +104,7 @@ mv -f results.log results/hf/results-$FILENAME.log
 cd results
 # now we have our ham.log and spam.log files...
 echo "[Uploading daily corpus logs]"
-rsync -qCPcvuzb *-$FILENAME $RSYNC_USER@rsync.spamassassin.org::corpus/
+rsync -qCPcvuzb *-$FILENAME.log $RSYNC_USER@rsync.spamassassin.org::corpus/
 
 echo "[Our results]"
 cat hf/results-$FILENAME.log
