@@ -112,24 +112,36 @@ sub load_with_ldap {
   my $scope  = $uri->scope;
   my $filter = $uri->filter;
   my %extn   = $uri->extensions; # unused
+
+  $filter =~ s/__USERNAME__/$username/g;
   dbg("LDAP: host=$host, port=$port, base='$base', attr=${attr[0]}, scope=$scope, filter='$filter'");
 
   my $main = $self->{main};
   my $ldapuser = $main->{conf}->{user_scores_ldap_username};
   my $ldappass = $main->{conf}->{user_scores_ldap_password};
-  dbg("LDAP: user=".$main->{conf}->{user_scores_ldap_username});
-  #dbg("LDAP: pass=".$main->{conf}->{user_scores_ldap_password});
+
+  if(!$ldapuser) {
+      undef($ldapuser);
+  } else {
+      dbg("LDAP: user='$ldapuser'");
+  }
+
+  if(!$ldappass) {
+      undef($ldappass);
+  } else {
+      # don't log this to avoid leaking sensitive info
+      # dbg("LDAP: pass='$ldappass'");
+  }
 
   my $f_attribute = $attr[0];
 
   my $ldap = Net::LDAP->new ("$host:$port", onerror => "warn");
-  if (!defined($ldapuser) || !defined($ldappass)) {
+  if (!defined($ldapuser) && !defined($ldappass)) {
     $ldap->bind;
   } else {
     $ldap->bind($ldapuser, password => $ldappass);
   }
 
-  $filter =~ s/__USERNAME__/$username/g;
   my $result = $ldap->search( base => $base,
 			      filter => $filter,
 			      scope => $scope,

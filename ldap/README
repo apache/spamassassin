@@ -15,9 +15,9 @@ database or LDAP server.
 SpamAssassin will check the global configuration file (ie. any file matching
 /etc/mail/spamassassin/*.cf) for the following settings:
 
-user_scores_dsn ldap://host:port/dc=basedn,dc=de?attr?scope?uid=__USERNAME__
-user_scores_ldap_username	bind dn
-user_scores_ldap_password	password
+  user_scores_dsn ldap://host:port/dc=basedn,dc=de?attr?scope?uid=__USERNAME__
+  user_scores_ldap_username	bind dn
+  user_scores_ldap_password	password
 
 The first option, user_scores_dsn, describes the data source name that will be
 used to create the connection to your LDAP server. You have to write the DSN as
@@ -32,7 +32,7 @@ actual username).
 
 Examples:
 
-  ldap://localhost:389/dc=koehntopp,dc=de?spamassassinconfig?sub?uid=__USERNAME__
+  ldap://localhost:389/dc=koehntopp,dc=de?spamassassin?sub?uid=__USERNAME__
   ldap://localhost:389/o=stooges?spamassassin?sub?uid=__USERNAME__
 
 
@@ -44,9 +44,18 @@ and auto_report_threshold.
 Requirements
 ------------
 
-In order for SpamAssassin to work with your SQL database, you must have
+In order for SpamAssassin to work with your LDAP database, you must have
 the perl Net::LDAP module installed. You'll also need the URI module.
 
+In order for spamd to use the LDAP driver, you will have to start spamd
+with the additional parameters '--ldap-config -x'.
+
+Each user that wants to utilise the SpamAssassin LDAP driver must add
+the 'spamassassin' attribute in their object (either manually or via the
+web interface of your making/choice) like this (see the file sa_test.ldif
+in this directory for a full database example):
+
+  spamassassin: add_header all Foo LDAP read
 
 Database Schema
 ---------------
@@ -58,7 +67,7 @@ our inetOrgPerson subclass.
 
 Here's an example for openldap's /etc/openldap/schema/inetorgperson.schema :
 
-  # spamassassin
+  # SpamAssassin
   # see http://SpamAssassin.org/ .
   attributetype ( 2.16.840.1.113730.3.1.217
           NAME 'spamassassin'
