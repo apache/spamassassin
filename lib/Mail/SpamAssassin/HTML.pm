@@ -121,7 +121,7 @@ sub html_render {
 
   # HTML::Parser 3.31, at least, converts &nbsp; into a question mark "?" for some reason.
   # Let's convert them to spaces.
-  $text=~s/&nbsp;/ /g;
+  $text =~ s/&nbsp;/ /g;
 
   my $hp = HTML::Parser->new(
 		api_version => 3,
