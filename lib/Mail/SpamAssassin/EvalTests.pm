@@ -800,41 +800,39 @@ sub check_for_unique_subject_id {
   $_ = lc $self->get ('Subject');
   study;
 
-  my $id = undef;
+  my $id = 0;
   if (/[-_\.\s]{7,}([-a-z0-9]{4,})$/
+	|| /\s{10,}(\S+)$/
 	|| /\s{3,}[-:\#\(\[]+([-a-z0-9]{4,})[\]\)]+$/
-	|| /\s{3,}[:\#\(\[]*([0-9]{4,})[\]\)]*$/
+	|| /\s{3,}[:\#\(\[]*([a-f0-9]{4,})[\]\)]*$/
 	|| /\s{3,}[-:\#]([a-z0-9]{5,})$/
 
         # (7217vPhZ0-478TLdy5829qicU9-0@26) and similar
         || /\(([-\w]{7,}\@\d+)\)$/
 
-        # Seven or more digits at the end of a subject is almost certainly
-        # a id.
+        # Seven or more digits at the end of a subject is almost certainly a id
         || /\b(\d{7,})\s*$/
 
-        # A number at the end of the subject, if it's after the end of a
-        # sentence (ending in "!" or "?"), is almost certainly an id
-        || /[!\?]\s*(\d{4,})\s*$/
+        # stuff at end of line after "!" or "?" is usually an id
+        || /[!\?]\s*(\d{4,}|\w+(-\w+)+)\s*$/
 
         # 9095IPZK7-095wsvp8715rJgY8-286-28 and similar
-        || /\b(\w{7,}-\w{7,}-\d+-\d+)\s*$/
+        || /\b(\w{7,}-\w{7,}(-\w+)*)\s*$/
+
+        # #30D7 and similar
+        || /\s#\s*([a-f0-9]{4,})\s*$/
      )
   {
     $id = $1;
   }
 
-  if (!defined($id) || $self->word_is_in_dictionary ($id)) {
-    return 0;
-  } else {
-    return 1;
-  }
+  return ($id && !$self->word_is_in_dictionary($id));
 }
 
 # word_is_in_dictionary()
 #
 # See if the word looks like an English word, by checking if each triplet
-# of letters it contains is one that can be found in the English lanugage.
+# of letters it contains is one that can be found in the English language.
 # Does not include triplets only found in proper names, or in the Latin
 # and Greek terms that might be found in a larger dictionary
 
