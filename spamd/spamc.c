@@ -15,6 +15,17 @@
 #include <time.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+/* RedHat 5.2 doesn't define Shutdown 2nd Parameter Constants */
+/* KAM 12-4-01 */
+#ifndef SHUT_RD
+#define SHUT_RD (0)   /* No more receptions.  */
+#endif
+#ifndef SHUT_WR
+#define SHUT_WR (1)   /* No more receptions or transmissions.  */
+#endif
+#ifndef SHUT_RDWR
+#define SHUT_RDWR (2) /* No more receptions or transmissions.  */
+#endif
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <netdb.h>
