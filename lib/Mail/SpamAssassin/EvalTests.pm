@@ -114,10 +114,12 @@ sub check_subject_for_lotsa_8bit_chars {
   local ($_);
   $_ = $self->get ('Subject');
 
-  my @highbits = /[\200-\377]/g; my $numhis = $#highbits+1;
+  # include [ and ] because 8-bit posts to mailing lists may not get
+  # hit otherwise. e.g.: Subject: [ILUG] 出售傳真號碼 
+  my @highbits = /[\[\] \200-\377]/g; my $numhis = $#highbits+1;
   my $numlos = length($_) - $numhis;
 
-  ($numlos < $numhis && $numhis > 3);
+  ($numlos <= $numhis && $numhis > 3);
 }
 
 ###########################################################################
