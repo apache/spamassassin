@@ -59,6 +59,8 @@ sub report {
     }
   }
 
+  $self->delete_fulltext_tmpfile();
+
   return $return;
 }
 
@@ -312,6 +314,7 @@ sub pyzor_report {
 sub dbg { Mail::SpamAssassin::dbg (@_); }
 sub timelog { Mail::SpamAssassin::timelog (@_); }
 sub create_fulltext_tmpfile { Mail::SpamAssassin::PerMsgStatus::create_fulltext_tmpfile(@_) }
+sub delete_fulltext_tmpfile { Mail::SpamAssassin::PerMsgStatus::delete_fulltext_tmpfile(@_) }
 
 # Use the Dns versions ...  At least something only needs 1 copy of code ...
 sub is_pyzor_available { Mail::SpamAssassin::PerMsgStatus::is_pyzor_available(@_); }
