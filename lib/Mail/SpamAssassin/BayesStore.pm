@@ -731,7 +731,7 @@ sub scan_count_increment_big_counter {
 
     if ($self->tie_db_writable()) {
       my $count = $self->{db_toks}->{$SCANCOUNT_BASE_MAGIC_TOKEN};
-      if (!$count || $count !~ /\d/) { $count = 0; }
+      if (!$count || $count =~ /\D/) { $count = 0; }
       $count += MAX_SIZE_FOR_SCAN_COUNT_FILE;
       $self->{db_toks}->{$SCANCOUNT_BASE_MAGIC_TOKEN} = $count;
     }
