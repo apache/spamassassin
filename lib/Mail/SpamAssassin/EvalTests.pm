@@ -2352,7 +2352,6 @@ sub _check_attachments {
   $self->{t_mime_base64_blanks} = 0;
   $self->{t_mime_base64_count} = 0;
   $self->{t_mime_base64_illegal} = 0;
-  $self->{t_mime_base64_short_lines} = 0;
   $self->{t_mime_base64_without_name} = 0;
   $self->{t_mime_qp_count} = 0;
 
@@ -2402,11 +2401,6 @@ sub _check_attachments {
       }
       if ($cte =~ /base64/ && (m@[^A-Za-z0-9+/=\n]@ || m/=[^=\s]/)) {
 	$self->{t_mime_base64_illegal} = 1;
-      }
-      if ($cte =~ /base64/ && m@^[A-Za-z0-9+/=]@ &&
-	  length($_) < 60 && length($previous) < 60)
-      {
-	$self->{t_mime_base64_short_lines} = 1;
       }
       if ($self->{mime_html_no_charset} &&
 	  $ctype =~ /^text\/html/ &&
