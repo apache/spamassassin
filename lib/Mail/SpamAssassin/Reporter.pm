@@ -37,11 +37,13 @@ sub new {
 sub report {
   my ($self) = @_;
   my $return = 1;
+  my $available = 0;
 
   my $text = $self->{main}->remove_spamassassin_markup ($self->{msg});
 
   if (!$self->{options}->{dont_report_to_razor} && $self->is_razor_available()) {
     if ($self->razor_report($text)) {
+      $available = 1;
       dbg ("SpamAssassin: spam reported to Razor.");
       $return = 0;
     }
@@ -51,6 +53,7 @@ sub report {
   }
   if (!$self->{options}->{dont_report_to_dcc} && $self->is_dcc_available()) {
     if ($self->dcc_report($text)) {
+      $available = 1;
       dbg ("SpamAssassin: spam reported to DCC.");
       $return = 0;
     }
@@ -60,6 +63,7 @@ sub report {
   }
   if (!$self->{options}->{dont_report_to_pyzor} && $self->is_pyzor_available()) {
     if ($self->pyzor_report($text)) {
+      $available = 1;
       dbg ("SpamAssassin: spam reported to Pyzor.");
       $return = 0;
     }
@@ -69,6 +73,10 @@ sub report {
   }
 
   $self->delete_fulltext_tmpfile();
+
+  if ( $available == 0 ) {
+    warn "SpamAssassin: no Internet hashing methods available, so couldn't report.\n";
+  }
 
   return $return;
 }
