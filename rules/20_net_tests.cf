@@ -34,11 +34,6 @@ require_version @@VERSION@@
 # ---------------------------------------------------------------------------
 # Message digest tests
 
-full DCC_CHECK		eval:check_dcc()
-describe DCC_CHECK	Listed in DCC (http://rhyolite.com/anti-spam/dcc/)
-tflags DCC_CHECK	net
-#reuse DCC_CHECK
-
 full PYZOR_CHECK	eval:check_pyzor()
 describe PYZOR_CHECK	Listed in Pyzor (http://pyzor.sf.net/)
 tflags PYZOR_CHECK	net

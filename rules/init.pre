@@ -28,6 +28,10 @@ loadplugin Mail::SpamAssassin::Plugin::Hashcash
 #
 loadplugin Mail::SpamAssassin::Plugin::SPF
 
+# DCC - perform DCC message checks.
+#
+loadplugin Mail::SpamAssassin::Plugin::DCC
+
 # Razor2 - perform Razor2 message checks.
 #
 loadplugin Mail::SpamAssassin::Plugin::Razor2
