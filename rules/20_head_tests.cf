@@ -138,12 +138,19 @@ describe SUBJ_ENDS_IN_Q_MARK	Subject: ends in a question mark
 header ADVERT_CODE		Subject =~ /(^\s*|\s+)ADV([\s:-]|$)/i
 describe ADVERT_CODE		Subject: contains advertising tag
 
-# KOREAN_UCE_SUBJECT tests for 8-bit characters, it will not catch a very small
-# percentage of Subject: headers containing the Korean unsolicited mail tag
-# that are encoded with quoted-printable or base64.  Rather than complicate
-# this rule, we will assume that MIME is decoded before this rule is evaluated,
-# even if that's not true yet.
-header KOREAN_UCE_SUBJECT	Subject =~ /[({[<] *(\xbc\xba\xc0\xce)?\xb1\xa4( *|\x2e)\xb0\xed *[)}\]>]/
+# Korean UCE Subject: lines are usually 8-bit, but are occasionally encoded
+# with quoted-printable or base64.
+#
+# \xbc\xba\xc0\xce means "adult"
+# \xb1\xa4\xb0\xed means "advertisement"
+# \xc1\xa4\xba\xb8 means "information"
+# \xc8\xab\xba\xb8 means "publicity"
+#
+# Each two byte sequence is one Korean letter; the spaces and periods are
+# sometimes used to obscure the words.  \xb1\xa4\xb0\xed is the most common
+# tag and is sometimes very obscured so we look harder.
+#
+header KOREAN_UCE_SUBJECT	Subject =~ /[({[<][. ]*(?:\xbc\xba[. ]*\xc0\xce[. ]*)?(?:\xb1\xa4(?:[. ]*|[\x00-\x7f]{0,3})\xb0\xed|\xc1\xa4[. ]*\xba\xb8|\xc8\xab[. ]*\xba\xb8)[. ]*[)}\]>]/
 describe KOREAN_UCE_SUBJECT	Subject: contains Korean unsolicited email tag
 
 header FRIEND_AT_PUBLIC	To =~ /(yourdomain|you|your|public).(com|org|net)/i
@@ -460,7 +467,7 @@ describe PLEASE_READ            Please read this!  Please oh please oh please!
 # 2. X-EM-Registration and X-EM-Version
 # 3. X-Stormpost-To and X-List-Unsubscribe
 
-# bad
+# these headers have very high correlation with spam
 header BCC			exists:Bcc
 header COMMENT			exists:Comment
 header DATE_WARNING		exists:Date-warning
@@ -482,25 +489,24 @@ header X_SMTPEXP_REGISTRATION	exists:X-SMTPExp-Registration
 header X_SMTPEXP_VERSION	exists:X-SMTPExp-Version
 header X_STORMPOST_TO		exists:X-Stormpost-To
 header X_X_PRESENT		exists:X-x
-# good
+# these headers have very low correlation with spam
 header CRON_ENV			exists:X-Cron-Env
 header IN_REP_TO		exists:In-Reply-To
-header X_MAILING_LIST		exists:X-Mailing-List
 header RESENT_TO		exists:Resent-To
 header USER_AGENT		exists:User-Agent
 header X_AUTH_WARNING		exists:X-Authentication-Warning
 header X_LOOP			exists:X-Loop
-header MAILING_LIST		exists:Mailing-List
+header X_MAILING_LIST		exists:X-Mailing-List
 
 
 header   MIME_ODD_CASE		ALL =~ /\nMiME-Version: /s
 describe MIME_ODD_CASE		MiME-Version header (oddly capitalized)
 
-header   X_MSMAIL_ODD_CASE	ALL =~ /\nX-Msmail-[Pp]riority:/s
-describe X_MSMAIL_ODD_CASE	X-Msmail-Priority header (oddly capitalized)
+header   OE_PI			X-Mailer =~ /OutLook Express 3\.14159/
+describe OE_PI			X-Mailer contains 'OutLook Express 3.14159'
 
-header   OE_PI                 X-Mailer =~ /OutLook Express 3\.14159/
-describe OE_PI                 X-Mailer contains 'OutLook Express 3.14159'
+header   MISSING_OUTLOOK_NAME	eval:missing_outlook_name()
+describe MISSING_OUTLOOK_NAME	Message looks like Outlook, but isn't.
 
-header PGP_SIGNATURE_2         Content-Type =~ /protocol=.?application\/pgp-signature.?;/i
-describe PGP_SIGNATURE_2       Contains a PGP-signed message (signature attached)
+header PGP_SIGNATURE_2		Content-Type =~ /protocol=.?application\/pgp-signature.?;/i
+describe PGP_SIGNATURE_2	Contains a PGP-signed message (signature attached)

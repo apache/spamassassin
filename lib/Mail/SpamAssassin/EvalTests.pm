@@ -1242,6 +1242,18 @@ sub message_from_bugzilla {
 }
 
 ###########################################################################
+
+sub missing_outlook_name {
+  my ($self) = @_;
+
+  my $mailer = $self->get ('X-Mailer');
+  my $mimeole = $self->get ('X-MimeOLE');
+  my $priority = $self->get ('X-MSMail-Priority');
+
+  return ($mimeole || $priority) && $mailer && $mailer !~ /Microsoft Outlook/;
+}
+
+###########################################################################
 # BODY TESTS:
 ###########################################################################
 
