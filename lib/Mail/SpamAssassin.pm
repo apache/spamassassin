@@ -87,7 +87,7 @@ $TIMELOG->{dummy}=0;
 
 $VERSION = "2.40";
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.115.2.1 2002/08/22 22:12:19 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.115.2.2 2002/08/27 11:31:34 jmason Exp $'))[2 .. 5, 8]));
 # If you hacked up your SA, add a token to identify it here. Eg.: I use "mss<number>",
 # <number> increasing with every hack. Deersoft might want to use "pro" :o)
 # "cvs" is added automatically if this file is tagged as 'Exp'erimental.
@@ -181,6 +181,12 @@ already exist. (default: 0)
 If set to 1, the patterns hit can be retrieved from the
 C<Mail::SpamAssassin::PerMsgStatus> object.  Used for debugging.
 
+=item home_dir_for_helpers
+
+If set, the B<HOME> environment variable will be set to this value
+when using test applications that require their configuration data,
+such as Razor, Pyzor and DCC.
+
 =back
 
 If none of C<rules_filename>, C<userprefs_filename>, or C<config_text> is set,
@@ -222,6 +228,7 @@ sub new {
   $self->{conf} ||= new Mail::SpamAssassin::Conf ($self);
 
   $self->{save_pattern_hits} ||= 0;
+
   $self;
 }
 

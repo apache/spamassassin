@@ -249,7 +249,7 @@ sub razor1_lookup {
     open (STDOUT, ">&STDERR");
   }
 
-  my $oldslash = $/;
+  $self->enter_helper_run_mode();
 
   {
     eval {
@@ -304,7 +304,7 @@ sub razor1_lookup {
     }
   }
 
-  $/ = $oldslash;		# argh! pollution!
+  $self->leave_helper_run_mode();
 
   # razor also debugs to stdout. argh. fix it to stderr...
   if ($Mail::SpamAssassin::DEBUG) {
@@ -361,7 +361,7 @@ sub razor2_lookup {
     open (STDOUT, ">&STDERR");
   }
 
-  my $oldslash = $/;
+  $self->enter_helper_run_mode();
 
   {
     eval {
@@ -426,7 +426,7 @@ sub razor2_lookup {
       }
   }
 
-  $/ = $oldslash;		# argh! pollution!
+  $self->leave_helper_run_mode();
 
   # razor also debugs to stdout. argh. fix it to stderr...
   if ($Mail::SpamAssassin::DEBUG) {
@@ -491,16 +491,17 @@ sub dcc_lookup {
   }
 
   timelog("DCC -> Starting test ($timeout secs max)", "dcc", 1);
+  $self->enter_helper_run_mode();
+
+  # use a temp file here -- open2() is unreliable, buffering-wise,
+  # under spamd. :(
+  my $tmpf = $self->create_fulltext_tmpfile($fulltext);
 
   eval {
     local $SIG{ALRM} = sub { die "alarm\n" };
     local $SIG{PIPE} = sub { die "brokenpipe\n" };
 
     alarm($timeout);
-
-    # use a temp file here -- open2() is unreliable, buffering-wise,
-    # under spamd. :(
-    my $tmpf = $self->create_fulltext_tmpfile($fulltext);
 
     my $pid = open(DCC, join(' ',
                         $self->{conf}->{dcc_path}, '-H', 
@@ -513,6 +514,8 @@ sub dcc_lookup {
     alarm(0);
     waitpid ($pid, 0);
   };
+
+  $self->leave_helper_run_mode();
 
   if ($@) {
     $response = undef;
@@ -613,16 +616,17 @@ sub pyzor_lookup {
   }
 
   timelog("Pyzor -> Starting test ($timeout secs max)", "pyzor", 1);
+  $self->enter_helper_run_mode();
+
+  # use a temp file here -- open2() is unreliable, buffering-wise,
+  # under spamd. :(
+  my $tmpf = $self->create_fulltext_tmpfile($fulltext);
 
   eval {
     local $SIG{ALRM} = sub { die "alarm\n" };
     local $SIG{PIPE} = sub { die "brokenpipe\n" };
 
     alarm($timeout);
-
-    # use a temp file here -- open2() is unreliable, buffering-wise,
-    # under spamd. :(
-    my $tmpf = $self->create_fulltext_tmpfile($fulltext);
 
     my $pid = open(PYZOR, join(' ',
                     $self->{conf}->{pyzor_path}, 'check < \''.$tmpf.'\' 2>&1 |'));
@@ -633,6 +637,8 @@ sub pyzor_lookup {
     alarm(0);
     waitpid ($pid, 0);
   };
+
+  $self->leave_helper_run_mode();
 
   if ($@) {
     $response = undef;
@@ -810,6 +816,29 @@ done:
   # jm: leaving this in!
   dbg ("is DNS available? $IS_DNS_AVAILABLE");
   return $IS_DNS_AVAILABLE;
+}
+
+###########################################################################
+
+sub enter_helper_run_mode {
+  my ($self) = @_;
+
+  dbg ("entering helper-app run mode");
+  $self->{old_slash} = $/;              # Razor pollutes this
+  $self->{old_env_home} = $ENV{'HOME'};
+  if (defined $self->{main}->{home_dir_for_helpers}) {
+    $ENV{'HOME'} = $self->{main}->{home_dir_for_helpers};
+  }
+}
+
+sub leave_helper_run_mode {
+  my ($self) = @_;
+
+  dbg ("leaving helper-app run mode");
+  $/ = $self->{old_slash};
+  if (defined $self->{old_env_home}) {
+    $ENV{'HOME'} = $self->{old_env_home};
+  }
 }
 
 ###########################################################################
