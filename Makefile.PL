@@ -159,8 +159,8 @@ my %makefile = (
 
     'EXE_FILES'	=> [
         'spamassassin', 'sa-learn',
-        'spamc/spamc$(EXE_EXT)',
-        'spamd/spamd', # must be the last one
+        'spamc/spamc',
+        'spamd/spamd',	# must be the last one
     ],
 
     'MAN1PODS' => {
@@ -203,8 +203,8 @@ my %makefile = (
 
         'spamd/spamd',
 
-        'spamc/spamc$(EXE_EXT)',
-        'spamc/qmail-spamc$(EXE_EXT)',
+        'spamc/spamc',
+        'spamc/qmail-spamc',
         'spamc/*.o*', 'spamc/replace/*.o*',
         'spamc/*.so',
         'spamc/Makefile',
@@ -1045,17 +1045,17 @@ spamc/libsslspamc.so: $(SPAMC_MAKEFILE) $(LIBSPAMC_SRC)
 spamd/libsslspamc.so: spamc/libsslspamc.so
 	$(MAKE_SPAMC_OLD)
 
-spamc/spamc$(EXE_EXT): $(SPAMC_MAKEFILE) $(SPAMC_SRC)
+spamc/spamc: $(SPAMC_MAKEFILE) $(SPAMC_SRC)
 	$(MAKE_SPAMC) $@
 
-spamd/spamc$(EXE_EXT): spamc/spamc$(EXE_EXT)
+spamd/spamc: spamc/spamc
 	$(MAKE_SPAMC_OLD)
 	$(CHMOD) $(PERM_RWX) $@
 
-spamc/qmail-spamc$(EXE_EXT): $(SPAMC_MAKEFILE) $(QSPAMC_SRC)
+spamc/qmail-spamc: $(SPAMC_MAKEFILE) $(QSPAMC_SRC)
 	$(MAKE_SPAMC) $@
 
-qmail/qmail-spamc$(EXE_EXT): spamc/qmail-spamc$(EXE_EXT)
+qmail/qmail-spamc: spamc/qmail-spamc
 	$(MKPATH) qmail
 	$(MAKE_SPAMC_OLD)
 	$(CHMOD) $(PERM_RWX) $@
