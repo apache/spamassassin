@@ -1347,8 +1347,8 @@ describe FREE_PREVIEW           Contains 'free preview' with capitals
 body FREE_HOSTING               /(?-i:F)ree hosting/i
 describe FREE_HOSTING           Contains 'free hosting' with capitals
 
-body USER_4U2           /\b\S{0,20}(?:[42](?:yo)?u|foryou|you2)\S{1,20}\@\S{1,20}\.(?:net|com|org)\b/
-describe USER_4U2       Local part containing "4u", "u2" or variants.
+body USER_4U2                   /\b\S{0,20}(?:[42](?:yo)?u|foryou|you2)\S{1,20}\@\S{1,20}\.(?:net|com|org)\b/
+describe USER_4U2               Local part containing "4u", "u2" or variants.
 
 body FREE_ACCESS                /(?-i:F)ree access/i  
 describe FREE_ACCESS            Contains 'free access' with capitals
