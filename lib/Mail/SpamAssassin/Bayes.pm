@@ -44,6 +44,7 @@ use vars qw{ @ISA @DBNAMES
   $ROBINSON_S_CONSTANT
   $ROBINSON_MIN_PROB_STRENGTH
   $N_SIGNIFICANT_TOKENS
+  $MAX_TOKEN_LENGTH
 };
 
 @ISA = qw();
@@ -73,7 +74,9 @@ $IGNORED_HDRS = qr{(?:
 		  |X-Spam-Checker-Version |X-Spam-Report
 		  |X-Spam-Flag |X-Original-Date |List-Archive
 		  |List-Id |List-Post |List-Help |X-RBL-Warning
-		  |X-MDaemon-Deliver-To
+		  |X-MDaemon-Deliver-To| X-Virus-Scanned
+		  |X-MIME-Autoconverted | Status |Content-Length
+		  |Lines |X-UID |Delivery-Date
 		)}x;
 
 # How big should the corpora be before we allow scoring using Bayesian
@@ -97,6 +100,10 @@ $N_SIGNIFICANT_TOKENS = 50;
 # Should we ignore tokens very close to the middle ground?  This value
 # is anecdotally effective.
 $ROBINSON_MIN_PROB_STRENGTH = 0.1;
+
+# How long a token should we hold onto?  (note: German speakers typically
+# will require a longer token than English ones.)
+$MAX_TOKEN_LENGTH = 20;
 
 # we have 5 databases for efficiency.  To quote Matt:
 # > need five db files though to make it real fast:
@@ -298,61 +305,94 @@ sub finish {
 
 sub tokenize {
   my ($self, $msg, $body) = @_;
+
   my $wc = 0;
-  my @tokens = ();
+  $self->{tokens} = [ ];
 
-  # TODO: should we prefix header-tokens, e.g. with "H:", so they don't
-  # modify probs for body-tokens?
-  my $hdr = $self->get_header_text ($msg);
-  for (@{$body}, $hdr) {
-    tr/A-Z/a-z/;
+  for (@{$body}) {
+    $wc += $self->tokenize_line ($_, '');
+  }
 
-    # include quotes, .'s and -'s for URIs, and [$,]'s for Nigerian-scam strings,
-    # and ISO-8859-15 alphas.  DO split on @'s, so username and domains in
-    # mail addrs are separate tokens.
-    # Some useful tokens: "$31,000,000" "www.clock-speed.net"
-    tr/-a-z0-9,_'"\$.\250\270\300-\377 / /cs;
+  my %hdrs = $self->tokenize_headers ($msg);
+  foreach my $prefix (keys %hdrs) {
+    $wc += $self->tokenize_line ($hdrs{$prefix}, "H:$prefix:");
+  }
 
-    foreach my $token (split) {
-      $token =~ s/^[-'"\.,]+//;        # trim non-alphanum chars at start or end
-      $token =~ s/[-'"\.,]+$//;        # so we don't get loads of '"foo' tokens
+  my @toks = @{$self->{tokens}}; delete $self->{tokens};
+  ($wc, @toks);
+}
 
-      next if length($token) < 3 || $token eq "and" || $token eq "the";
-      next if length($token) > 25; #TODO
-      $wc++;
-      push (@tokens, $token);
+sub tokenize_line {
+  my $self = $_[0];
+  local ($_) = $_[1];
+  my $tokprefix = $_[2];
+
+  # include quotes, .'s and -'s for URIs, and [$,]'s for Nigerian-scam strings,
+  # and ISO-8859-15 alphas.  DO split on @'s, so username and domains in
+  # mail addrs are separate tokens.
+  # Some useful tokens: "$31,000,000" "www.clock-speed.net"
+  tr/-A-Za-z0-9,_'"\$.\250\270\300-\377 / /cs;
+
+  my $wc = 0;
+
+  foreach my $token (split) {
+    $token =~ s/^[-'"\.,]+//;        # trim non-alphanum chars at start or end
+    $token =~ s/[-'"\.,]+$//;        # so we don't get loads of '"foo' tokens
+
+    next if length($token) < 3 || $token eq "and" || $token eq "the";
+    next if length($token) > $MAX_TOKEN_LENGTH;
+    $wc++;
+
+    push (@{$self->{tokens}}, $tokprefix.$token);
+
+    # now do some token abstraction; in other words, make them act like
+    # patterns instead of text copies.
+
+    # case...
+    $token =~ tr/A-Z/a-z/;
+    push (@{$self->{tokens}}, $tokprefix.$token);
+
+    # replace digits with 'N'...
+    if ($token =~ /\d/) {
+      $token =~ s/\d/N/gs; push (@{$self->{tokens}}, 'N:'.$tokprefix.$token);
     }
   }
 
-  ($wc, @tokens);
+  return $wc;
 }
 
-sub get_header_text {
+sub tokenize_headers {
   my ($self, $msg) = @_;
 
   my $hdrs = $msg->get_all_headers();
+  my %parsed = ();
 
   # we don't care about whitespace; so fix continuation lines to make the next
   # bit easier
-  $hdrs =~ s/\n[ \t]+/   /gs;
+  $hdrs =~ s/\n[ \t]+/ /gs;
 
-  # first, keep a copy of Received hdrs
+  # first, keep a copy of Received hdrs, so we can strip down to last 2
   my @rcvdlines = ($hdrs =~ /^Received: [^\n]*$/gim);
 
-  # and now delete lines for headers we don't want
+  # and now delete lines for headers we don't want (incl all Receiveds)
   $hdrs =~ s/^From \S+[^\n]+$//gim;
   $hdrs =~ s/^${IGNORED_HDRS}: [^\n]*$//gim;
 
-  # and re-add the very last received line: usually a good source of
-  # spamware tokens
-  my $lastrcvd = pop @rcvdlines;
-  if (defined $lastrcvd) { $hdrs .= $lastrcvd; }
+  # and re-add the last 2 received lines: usually a good source of
+  # spamware tokens and HELO names.
+  if ($#rcvdlines >= 0) { $hdrs .= "\n".$rcvdlines[$#rcvdlines]; }
+  if ($#rcvdlines >= 1) { $hdrs .= "\n".$rcvdlines[$#rcvdlines-1]; }
 
-  # do *not* remove the header names, they make good tokens too for
-  # spamware tracker headers like X-Track.
+  while ($hdrs =~ /^(\S+): ([^\n]*)$/gim) {
+    if (defined $parsed{$1}) {
+      $parsed{$1} .= " ".$2;
+    } else {
+      $parsed{$1} = $2;
+    }
+    dbg ("tokenize: header tokens for $1 = \"$parsed{$1}\"");
+  }
 
-  $hdrs =~ s/\s+/ /gs; dbg ("tokenize: header tokens = \"$hdrs\"");
-  return $hdrs;
+  return %parsed;
 }
 
 ###########################################################################
@@ -409,7 +449,11 @@ sub learn_trapped {
   $nn ||= 0;
 
   my ($wc, @tokens) = $self->tokenize ($msg, $body);
+  my %seen = ();
+
   for (@tokens) {
+    if ($seen{$_}) { next; } else { $seen{$_} = 1; }
+
     if ($isspam) {
       $self->{db_toks_spam}->{$_}++;
     } else {
@@ -492,7 +536,10 @@ sub forget_trapped {
   }
 
   my ($wc, @tokens) = $self->tokenize ($msg, $body);
+  my %seen = ();
   for (@tokens) {
+    if ($seen{$_}) { next; } else { $seen{$_} = 1; }
+
     if ($isspam) {
       my $count = $self->{db_toks_spam}->{$_};
       $count = (!defined $count ? 0 : ($count <= 1 ? 0 : $count-1));
@@ -703,24 +750,31 @@ sub scan {
   dbg ("bayes corpus size: nspam = $ns, nham = $nn");
 
   my ($wc, @tokens) = $self->tokenize ($msg, $body);
+  my %seen = ();
+  my $pw;
+
   my %pw = map {
-    my $pw = $self->{db_probs}->{$_};
+    if ($seen{$_}) { (); }	# exit map()
+    
+    else {
+      $seen{$_} = 1;
 
-    if (!defined $pw) {
-      $wc--; ();
+      $pw = $self->{db_probs}->{$_};
+      if (!defined $pw) { (); }	# exit map()
+      
+      else {
+	$pw = unpack ('f', $pw);
 
-    } else {
-      $pw = unpack ('f', $pw);
-
-      # enforce (max .01 (min .99 (score))) as per Graham; it allows
-      # a majority of spam clues to override 1 or 2 very-strong nonspam clues.
-      #
-      if ($pw < 0.01) {
-	($_ => 0.01);
-      } elsif ($pw > 0.99) {
-	($_ => 0.99);
-      } else {
-	($_ => $pw);
+	# enforce (max .01 (min .99 (score))) as per Graham; it allows
+	# a majority of spam clues to override 1 or 2 very-strong nonspam clues.
+	#
+	if ($pw < 0.01) {
+	  ($_ => 0.01);
+	} elsif ($pw > 0.99) {
+	  ($_ => 0.99);
+	} else {
+	  ($_ => $pw);
+	}
       }
     }
   } @tokens;
@@ -745,7 +799,7 @@ sub scan {
     $P *= (1-$pw);
     $Q *= $pw;
 
-    dbg ("bayes token '$_' => $pw (P=$P Q=$Q)");
+    dbg ("bayes token '$_' => $pw");
 
     # dump token counts as well: requires 2 more db lookups. off by default.
     #my $s = $self->{db_toks_spam}->{$_};
