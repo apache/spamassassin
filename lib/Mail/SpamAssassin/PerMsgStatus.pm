@@ -938,6 +938,7 @@ sub bayes_report_make_list {
   } @{$info}[0..$amt-1];
 }
 
+
 sub set_tag {
   my $self = shift;
   my $tag  = uc shift;
@@ -945,6 +946,7 @@ sub set_tag {
 
   $self->{tag_data}->{$tag} = $val;
 }
+
 
 sub _get_tag_value_for_yesno {
   my $self   = shift;
@@ -992,6 +994,15 @@ sub _get_tag {
             HOSTNAME => sub {
 	      $self->{conf}->{report_hostname} ||
 	      Mail::SpamAssassin::Util::fq_hostname();
+	    },
+
+	    REMOTEHOSTNAME => sub {
+	      $self->{tag_data}->{'REMOTEHOSTNAME'} ||
+	      "localhost";
+	    },
+	    REMOTEHOSTADDR => sub {
+	      $self->{tag_data}->{'REMOTEHOSTADDR'} ||
+	      "127.0.0.1";
 	    },
 
             CONTACTADDRESS => sub { $self->{conf}->{report_contact}; },
