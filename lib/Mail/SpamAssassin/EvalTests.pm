@@ -3238,10 +3238,10 @@ sub html_range {
 
   # not all perls understand what "inf" means, so we need to do
   # non-numeric tests!  urg!
-  if ( !defined $max || $max eq "inf" ) {
+  if (!defined $max || $max eq "inf") {
     return ( $test eq "inf" ) ? 1 : ($test > $min);
   }
-  elsif ( $test eq "inf" ) {
+  elsif ($test eq "inf") {
     # $max < inf, so $test == inf means $test > $max
     return 0;
   }
