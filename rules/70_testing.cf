@@ -59,16 +59,19 @@ header T_TIME_OVER_4444	ALL =~ /\D23[67][0-9][0-9][0-9]\D/
 
 # replacements for PORN_4; split out sub-patterns as some are more FP-prone
 # than others.
-uri T_PORN_URL_XXX         /^https?:\/\/[\w\.-]*xxx[\w-]*\./
-uri T_PORN_URL_SEX         /^https?:\/\/[\w\.-]*(?<!es|ba)(?<!dle|sus)sex[\w-]*\./
-uri T_PORN_URL_ANAL        /^https?:\/\/[\w\.-]*anal(?!og|y[sz])[\w-]*\./
-uri T_PORN_URL_SLUT        /^https?:\/\/[\w\.-]*slut[\w-]*\./
-uri T_PORN_URL_CUM         /^https?:\/\/[\w\.-]*(?<!cir)(?<!\bdo)cum(?!ul|be?r|b?en)[\w-]*\./
-uri T_PORN_URL_LUST        /^https?:\/\/[\w\.-]*lust(?!(?<=illust)(?:rat|rious)|(?<=clust)er)[\w-]*\./
-uri T_PORN_URL_PANT        /^https?:\/\/[\w\.-]*pant(?:y|ies)[\w-]*\./
-uri T_PORN_URL_SUCK        /^https?:\/\/[\w\.-]*suck[\w-]*\./
-uri T_PORN_URL_TEEN        /^https?:\/\/[\w\.-]*(?<!thir|four|eigh|nine)(?<!fif|six)(?<!seven)teen[\w-]*\./
-uri T_PORN_URL_MISC        /^https?:\/\/[\w\.-]*(pussy|nympho|porn|hard-?core|taboo|whore|voyeur|lesbian|gurlpages|naughty|lolita|schoolgirl|kooloffer|erotic)[\w-]*\./
+uri T_PORN_URL_XXX	/^https?:\/\/[\w\.-]*xxx[\w-]*\./
+uri T_PORN_URL_SEX	/^https?:\/\/[\w\.-]*(?<!es|ba)(?<!dle|sus)sex[\w-]*\./
+uri T_PORN_URL_ANAL	/^https?:\/\/[\w\.-]*anal(?!og|y[sz])[\w-]*\./
+uri T_PORN_URL_SLUT	/^https?:\/\/[\w\.-]*slut[\w-]*\./
+uri T_PORN_URL_CUM	/^https?:\/\/[\w\.-]*(?<!cir)(?<!\bdo)cum(?!ul|be?r|b?en)[\w-]*\./
+uri T_PORN_URL_LUST	/^https?:\/\/[\w\.-]*lust(?!(?<=illust)(?:rat|rious)|(?<=clust)er)[\w-]*\./
+uri T_PORN_URL_PANT	/^https?:\/\/[\w\.-]*pant(?:y|ies)[\w-]*\./
+uri T_PORN_URL_SUCK	/^https?:\/\/[\w\.-]*suck[\w-]*\./
+uri T_PORN_URL_TEEN1	/^https?:\/\/[\w\.-]*(?<!thir|four|eigh|nine)(?<!fif|six)(?<!seven)teen[\w-]*\./
+# yes, some bright lad made up "eleventeenth" as a word
+uri T_PORN_URL_TEEN2	/^https?:\/\/[\w\.-]*(?<!eleven|twelve|thir|four|eigh|nine)(?<!fif|six)(?<!seven)teen[\w-]*\./
+uri T_PORN_URL_TEEN3	/^https?:\/\/[\w\.-]*(?<!thir|four|eigh|nine)(?<!fif|six)(?<!seven)teen(?!th)[\w-]*\./
+uri T_PORN_URL_MISC	/^https?:\/\/[\w\.-]*(pussy|nympho|porn|hard-?core|taboo|whore|voyeur|lesbian|gurlpages|naughty|lolita|schoolgirl|kooloffer|erotic)[\w-]*\./
 
 header T_KOREAN_UCE_SUBJECT	Subject:raw =~ /\?B\?KLGksO0p/
 
