@@ -2455,4 +2455,18 @@ sub check_email_isfree {
   return 0;
 }
 
+sub check_messageid_not_usable {
+  my ($self) = @_;
+  local ($_);
+
+  # Lyris eats message-ids.  also some ezmlm, I think :(
+  $_ = $self->get ("List-Unsubscribe");
+  return 1 if (/<mailto:(?:leave-\S+|\S+-unsubscribe)\@\S+>$/);
+
+  # remainder left for Dan who owns bug 1172 ;)  Dan, suggest
+  # received_within_months('6','undef') as per Allen's patch
+
+  return 0;
+}
+
 1;
