@@ -22,13 +22,12 @@ cp Mail-SpamAssassin-$vers.tar.gz $WEBDIR/devel
 make zipdist
 cp Mail-SpamAssassin-$vers.zip $WEBDIR/devel
 
-( cd doc; tar cf - . ) | ( cd $WEBDIR/doc ; tar xf - )
-
-rm -rf $WEBDIR/dist
-mkdir -p $WEBDIR/dist
-( cd $WEBDIR/dist ; tar xfz $WEBDIR/devel/Mail-SpamAssassin-$vers.tar.gz )
-
 echo $vers > $WEBDIR/latest_version
+
+rm -rf $WEBDIR/dist $WEBDIR/doc
+mkdir $WEBDIR/dist
+tar cf - --exclude=CVS --exclude='.#*' . | ( cd $WEBDIR/dist ; tar xf - )
+tar cf - --exclude=CVS --exclude='.#*' doc | ( cd $WEBDIR ; tar xf - )
 
 ( cd $WEBDIR/devel ; cvs add -kb *SpamAssassin* )
 
