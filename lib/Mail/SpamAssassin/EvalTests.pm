@@ -3109,8 +3109,9 @@ sub _check_spf {
 
     $lasthop = $self->{relays_untrusted}->[0];
 
-    if (defined $lasthop->{envfrom}) {
+    if ($lasthop->{envfrom}) {
       # excellent, we can use this
+      dbg ("SPF: found Envelope-From in last untrusted Received header");
     } else {
       # fall back to using HELO
       dbg ("SPF: came via >0 trusted relays, using HELO instead of Envelope-From");

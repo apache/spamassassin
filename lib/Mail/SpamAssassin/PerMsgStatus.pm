@@ -2308,6 +2308,22 @@ sub get_envelope_from {
 
   my $envf;
 
+  # WARNING: a lot of list software adds an X-Sender for the original env-from
+  # (including Yahoo! Groups).  Unfortunately, fetchmail will pick it up and
+  # reuse it as the env-from for *its* delivery -- even though the list software
+  # had used a different env-from in the intervening delivery.   Hence, if this
+  # header is present, and there's a fetchmail sig in the Received lines, we
+  # cannot trust any Envelope-From headers, since they're likely to be
+  # incorrect fetchmail guesses.
+
+  if ($self->get ("X-Sender")) {
+    my $rcvd = $self->get ("Received");
+    if ($rcvd =~ /\(fetchmail/) {
+      dbg ("X-Sender and fetchmail signatures found, cannot trust envelope-from");
+      return undef;
+    }
+  }
+
   # procmailrc notes this, amavisd are adding it, we recommend it
   if ($envf = $self->get ("X-Envelope-From")) { goto ok; }
 
