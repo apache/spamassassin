@@ -9,10 +9,14 @@ loadplugin Mail::SpamAssassin::Plugin::URIDNSBL
 # normal DNSBL lookups.
 uridnsbl_timeout	2
 
-uridnsbl	URIBL_SBLXBL	sbl-xbl.spamhaus.org.	TXT
-header		URIBL_SBLXBL	eval:check_uridnsbl('URIBL_SBLXBL')
-describe	URIBL_SBLXBL	Contains a URL listed in the SBL/XBL blocklist
+# interestingly -- 0 hits from XBL.  Just use SBL
+#uridnsbl	URIBL_SBLXBL	sbl-xbl.spamhaus.org.	TXT
+#header		URIBL_SBLXBL	eval:check_uridnsbl('URIBL_SBLXBL')
+#describe	URIBL_SBLXBL	Contains a URL listed in the SBL/XBL blocklist
 tflags		URIBL_SBLXBL	net
+
+uridnsbl	URIBL_SBL	sbl.spamhaus.org.	TXT
+header		URIBL_SBL	eval:check_uridnsbl('URIBL_SBL')
 
 uridnsbl	URIBL_DSBL	list.dsbl.org.		TXT
 header		URIBL_DSBL	eval:check_uridnsbl('URIBL_DSBL')
