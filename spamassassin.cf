@@ -419,7 +419,7 @@ body FREE_PRIORITY_MAIL		/FREE PRIORITY MAIL SHIPPING/i
 body LIMITED_TIME_ONLY		/LIMITED TIME ONLY/i
 body STRONG_BUY			/strong buy/i
 
-body WE_HONOR_ALL		/we honou?r(?: all|) remove requests/i
+body WE_HONOR_ALL		/we (?:honou?r|respect)(?: all|) remov[eal] requests/i
 body FILTERED_BY_WORLDREMOVE	/filtered by WorldRemove/
 
 body COMMUNIGATE		/transferred with a trial version of CommuniGate/
@@ -430,11 +430,11 @@ body AUTO_EMAIL_REMOVAL		/Auto Email Removal/
 body PORN_1			/\bbarely\b.*\blegal\b/i
 body PORN_2			/\bwild\b.*\bhardcore\b/i
 
-# updated by: skod & Craig
-body PORN_3			/(?:(?:\bcum|\borgy\b|\bwild|\bfuck|\bteen|\baction\b|\bspunk\b|\bpussy\b|\bpussies\b|\bsuck\b|\bsucking\b|\bhot\b|\bhottest\b|\bvoyeur\b\|\blesbian\b|\banal\b|\bwebcam\b|\bass\b|\bstrip).*){3,}/i
+# updated by: skod & Craig & jm
+body PORN_3			/(?:(?:\bcum|\borg[iy]|\bwild|fuck|\bteen|\baction\b|spunk|\bpussy\b|\bpussies\b|suck\b|sucking\b|\bhot\b|\bhottest\b|\bvoyeur|\ble[sz]b(?:ian|o)|\banal\b|\binterracial|\basian\b|\bamateur|\bsex+\b|\bslut|explicit|xxx[^x]|\blive\b|celebrity|\blick|\bsuck|webcam|\bass\b|\bschoolgirl\b|\bstrip|\bhorny\b|\bhorniest\b|\b|erotic|\boral\b|\bhardcore\b|\bblow[ -]*job|\bnast(?:y|iest)\b).*){3,}/i
 describe PORN_3			Mind your language!
 
-body PORN_4 	/http:\/\/[\w\.]*(?:xxx|sex|anal|slut|pussy|cum|nympho|suck|porn|hardcore|taboo|whore|voyeur|lesbian|gurlpages|naughty|kooloffer)\w*\./
+body PORN_4 	/http:\/\/[\w\.]*(?:xxx|sex|anal|slut|pussy|cum|nympho|suck|porn|hardcore|taboo|whore|voyeur|lesbian|gurlpages|naughty|lolita|teen|schoolgirl|fetish|kooloffer|erotic)\w*\./
 describe PORN_4			Suspected porn URL
 
 # (contrib: skod)
@@ -444,6 +444,8 @@ describe PORN_5			Nymphomaniacs? Indeed!
 # (contrib: skod)
 body PORN_6			/(?:\d+\+? xxx pictures|xxx photos?)/i
 describe PORN_6			XXX pictures mentioned
+
+body PORN_7			/Free XXX/i
 
 body TRACKER_ID			/^\W{4,6} (?:[a-z]{10,}|[A-Z]{10,}) \W{4,6}\s*$/
 
