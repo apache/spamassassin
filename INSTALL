@@ -19,9 +19,11 @@ Using Linux:
 
 	Debian unstable: apt-get install spamassassin
 	Gentoo: emerge mail-filter/spamassassin
+	Fedora: yum install spamassassin
 
-Alternatively download the tarfile, zipfile, or Fedora Core RPM from
-http://spamassassin.apache.org/ and install that, like so:
+Alternatively download the tarfile, zipfile, and/or build your own RPM
+from http://spamassassin.apache.org/.  Building from tar/zip file is
+usually as simple as:
 
 	[unzip/untar the archive]
 	cd Mail-SpamAssassin-*
@@ -29,6 +31,9 @@ http://spamassassin.apache.org/ and install that, like so:
 	[option: add -DSPAMC_SSL to $CFLAGS to build an SSL-enabled spamc]
 	make
 	make install                            [as root]
+
+Please make sure to read this whole document before installing, especially
+the prerequisite information further down.
 
 To install as non-root, see the directions below.
 
