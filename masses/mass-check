@@ -160,7 +160,7 @@ elsif ($opt_after && $opt_after !~ /^-?\d+$/) {
     $opt_after = Time::ParseDate::parsedate($opt_after, GMT => 1, PREFER_PAST => 1);
   }
   else { 
-    die;
+    die "You need Time::ParseDate if you use the --after option.";
   }
 }
 
