@@ -239,9 +239,9 @@ tflags RCVD_IN_OSIRUSOFT_COM    net
 
 # X prefix was used to insure that it was run at the end, but it's not needed
 # anymore since we run the rule with rblreseval -- Marc
-header X_OSIRU_OPEN_RELAY		rbleval:check_rbl_results_for('osirusoft', '127.0.0.2')
+header X_OSIRU_OPEN_RELAY	rbleval:check_rbl_results_for('osirusoft', '127.0.0.2')
 describe X_OSIRU_OPEN_RELAY	DNSBL: sender is Confirmed Open Relay
-tflags X_OSIRU_OPEN_RELAY         net
+tflags X_OSIRU_OPEN_RELAY	net
 
 header X_OSIRU_DUL		rbleval:check_rbl_results_for('osirusoft', '127.0.0.3')
 describe X_OSIRU_DUL		DNSBL: sender ip address in in a dialup block
@@ -296,7 +296,7 @@ tflags RCVD_IN_OPM              net
 # This is effectively an open relay BL, put in in the relay set too -- Marc
 header RCVD_IN_DSBL            rbleval:check_rbl('relay', 'list.dsbl.org')
 describe RCVD_IN_DSBL          Received via a relay in list.dsbl.org
-tflags RCVD_IN_DSBL             net
+tflags RCVD_IN_DSBL            net
 
 # Warning, several big ISP's mail relays (not open to outside people)
 # are listed on multihop. Do not set a high score on this.  Note too
@@ -358,18 +358,18 @@ header RCVD_IN_DUL_FH		rbleval:check_rbl('dialup-firsthop', 'dialups.mail-abuse.
 describe RCVD_IN_DUL_FH	Received from first hop dialup, see http://www.mail-abuse.org/dul/
 tflags RCVD_IN_DUL_FH           net
 
-header RCVD_IN_NJABL    rbleval:check_rbl('njabl', 'dnsbl.njabl.org.')
-describe RCVD_IN_NJABL  Received via a relay in dnsbl.njabl.org
-tflags RCVD_IN_NJABL    net
+header RCVD_IN_NJABL		rbleval:check_rbl('njabl', 'dnsbl.njabl.org.')
+describe RCVD_IN_NJABL		Received via a relay in dnsbl.njabl.org
+tflags RCVD_IN_NJABL		net
 
 # note: X_ prefix so X_NJABL_OPEN_PROXY happens after RCVD_IN_NJABL.
-header X_NJABL_OPEN_PROXY    rbleval:check_rbl_results_for('njabl', '127.0.0.2')
-describe X_NJABL_OPEN_PROXY  NJABL: sender is proxy/relay/formmail/spam-source
-tflags X_NJABL_OPEN_PROXY    net
-
-header X_NJABL_DIALUP    rbleval:check_rbl_results_for('njabl', '127.0.0.3')
-describe X_NJABL_DIALUP  NJABL: sender is on dialup/dynamic IP
-tflags X_NJABL_DIALUP    net
+header X_NJABL_OPEN_PROXY	rbleval:check_rbl_results_for('njabl', '127.0.0.2')
+describe X_NJABL_OPEN_PROXY	NJABL: sender is proxy/relay/formmail/spam-source
+tflags X_NJABL_OPEN_PROXY	net
+ 	
+header X_NJABL_DIALUP		rbleval:check_rbl_results_for('njabl', '127.0.0.3')
+describe X_NJABL_DIALUP		NJABL: sender is on dialup/dynamic IP
+tflags X_NJABL_DIALUP		net
 
 header LOTS_OF_CC_LINES		eval:check_lots_of_cc_lines()
 describe LOTS_OF_CC_LINES	Lots and lots of Cc: headers
@@ -408,10 +408,10 @@ header FORGED_MX_HOTMAIL	Received =~ /^from mx\d+\.hotmail\.com /m
 describe FORGED_MX_HOTMAIL	Forged hotmail.com Received 'from mx' header
 
 # forgery meta-rules: more reliable than their inputs
-meta CONFIRMED_FORGED         (FORGED_RCVD_TRAIL && (FORGED_AOL_RCVD || FORGED_HOTMAIL_RCVD || FORGED_EUDORAMAIL_RCVD || FORGED_YAHOO_RCVD || FORGED_JUNO_RCVD || FORGED_GW05_RCVD || FORGED_MX_HOTMAIL))
+meta CONFIRMED_FORGED		(FORGED_RCVD_TRAIL && (FORGED_AOL_RCVD || FORGED_HOTMAIL_RCVD || FORGED_EUDORAMAIL_RCVD || FORGED_YAHOO_RCVD || FORGED_JUNO_RCVD || FORGED_GW05_RCVD || FORGED_MX_HOTMAIL))
 describe CONFIRMED_FORGED	Received headers are forged
 
-meta MULTI_FORGED             ((FORGED_AOL_RCVD + FORGED_HOTMAIL_RCVD + FORGED_EUDORAMAIL_RCVD + FORGED_YAHOO_RCVD + FORGED_JUNO_RCVD + FORGED_GW05_RCVD) > 1)
+meta MULTI_FORGED		((FORGED_AOL_RCVD + FORGED_HOTMAIL_RCVD + FORGED_EUDORAMAIL_RCVD + FORGED_YAHOO_RCVD + FORGED_JUNO_RCVD + FORGED_GW05_RCVD) > 1)
 describe MULTI_FORGED		Received headers indicate multiple forgeries
 
 # Sep 23 2002 jm: another spamhaus rule
@@ -421,9 +421,9 @@ describe RCVD_BY_QVES_COM	Sent by a known spamhaus (qves)
 header NONEXISTENT_CHARSET	Content-Type =~ /charset=.?DEFAULT/
 describe NONEXISTENT_CHARSET	Character set doesn't exist
 
-header CHARSET_FARAWAY_HEADERS	eval:check_for_faraway_charset_in_headers()
-describe CHARSET_FARAWAY_HEADERS A foreign language charset used in headers
-tflags CHARSET_FARAWAY_HEADERS	userconf
+header CHARSET_FARAWAY_HEADERS		eval:check_for_faraway_charset_in_headers()
+describe CHARSET_FARAWAY_HEADERS	A foreign language charset used in headers
+tflags CHARSET_FARAWAY_HEADERS		userconf
 
 header X_MAILER_GIBBERISH	X-Mailer =~ /^[A-Fa-f0-9\.]{48,}$/
 describe X_MAILER_GIBBERISH	'X-Mailer' line contains gibberish
@@ -562,9 +562,9 @@ header   __HAS_MSMAIL_PRI       exists:X-MSMail-Priority
 meta     MISSING_MIMEOLE	(__HAS_MSMAIL_PRI && !__HAS_MIMEOLE)
 describe MISSING_MIMEOLE	Message has X-MSMail-Priority, but no X-MimeOLE
 
-header   __HAS_X_MAILER         exists:X-Mailer
-header   __HAS_OUTLOOK_IN_MAILER X-Mailer =~ /Microsoft Outlook/
-meta     MISSING_OUTLOOK_NAME	((__HAS_MIMEOLE || __HAS_MSMAIL_PRI) && __HAS_X_MAILER && !__HAS_OUTLOOK_IN_MAILER)
+header __HAS_X_MAILER		exists:X-Mailer
+header __HAS_OUTLOOK_IN_MAILER	X-Mailer =~ /Microsoft Outlook/
+meta MISSING_OUTLOOK_NAME	((__HAS_MIMEOLE || __HAS_MSMAIL_PRI) && __HAS_X_MAILER && !__HAS_OUTLOOK_IN_MAILER)
 describe MISSING_OUTLOOK_NAME	Message looks like Outlook, but isn't
 
 header   __HAS_X_PRIORITY       exists:X-Priority
@@ -633,19 +633,19 @@ describe RCVD_FAKE_HELO_DOTCOM  Received contains a faked HELO hostname
 header RCVD_FAKE_HELO_DOTCOM_2        eval:check_for_fake_dotcom_helo()
 describe RCVD_FAKE_HELO_DOTCOM_2      Received contains a faked HELO hostname (2)
 
-header USERNAME_IN_SUBJECT      eval:check_for_to_in_subject(3)
-describe USERNAME_IN_SUBJECT    To: username at front of subject
+header USERNAME_IN_SUBJECT	eval:check_for_to_in_subject(3)
+describe USERNAME_IN_SUBJECT	To: username at front of subject
 # these all hit pretty much exactly the same messages ;)
-#header USERNAME_IN_SUBJECT_2    eval:check_for_to_in_subject(2)
-#describe USERNAME_IN_SUBJECT_2  To: username at front of subject (2)
-#header USERNAME_IN_SUBJECT_3    eval:check_for_to_in_subject(1)
-#describe USERNAME_IN_SUBJECT_3  To: username at front of subject (1)
-#header USERNAME_IN_SUBJECT_4    eval:check_for_to_in_subject(4)
-#describe USERNAME_IN_SUBJECT_4  To: username at front of subject (4)
-#header USERNAME_IN_SUBJECT_5    eval:check_for_to_in_subject(5)
-#describe USERNAME_IN_SUBJECT_5  To: username at front of subject (5)
-#header USERNAME_IN_SUBJECT_6    eval:check_for_to_in_subject(6)
-#describe USERNAME_IN_SUBJECT_6  To: username at front of subject (6)
+#header USERNAME_IN_SUBJECT_2	eval:check_for_to_in_subject(2)
+#describe USERNAME_IN_SUBJECT_2	To: username at front of subject (2)
+#header USERNAME_IN_SUBJECT_3	eval:check_for_to_in_subject(1)
+#describe USERNAME_IN_SUBJECT_3	To: username at front of subject (1)
+#header USERNAME_IN_SUBJECT_4	eval:check_for_to_in_subject(4)
+#describe USERNAME_IN_SUBJECT_4	To: username at front of subject (4)
+#header USERNAME_IN_SUBJECT_5	eval:check_for_to_in_subject(5)
+#describe USERNAME_IN_SUBJECT_5	To: username at front of subject (5)
+#header USERNAME_IN_SUBJECT_6	eval:check_for_to_in_subject(6)
+#describe USERNAME_IN_SUBJECT_6	To: username at front of subject (6)
 
 header LOSE_POUNDS              Subject =~ /\bLose .*(?:pounds|lbs|weight)/i
 describe LOSE_POUNDS            Subject talks about losing pounds
@@ -689,8 +689,8 @@ describe MIME_BOUND_RKFINDY     Spam tool pattern in MIME boundary (rfkindy)
 
 # bug 637
 # more specific FROM_HAS_MIXED_NUMS, less FPs
-header FROM_HAS_MIXED_NUMS2        From =~ /\w{2,}\d{4,}[a-z]{1,2}\d{2,}\@/i
-describe FROM_HAS_MIXED_NUMS2 From address matches known spammer format
+header FROM_HAS_MIXED_NUMS2	From =~ /\w{2,}\d{4,}[a-z]{1,2}\d{2,}\@/i
+describe FROM_HAS_MIXED_NUMS2	From address matches known spammer format
 
 header DATE_MISSING             Date =~ /^UNSET$/ [if-unset: UNSET]
 describe DATE_MISSING           Missing Date: header
@@ -732,11 +732,11 @@ meta OPT_HEADER			(__OPT_HEADER_ALL && !__OPT_HEADER_SUBJ)
 describe OPT_HEADER		Headers include an "opt"ed phrase
 
 # Most/all of these require that From addresses do not start with numbers.
-header FROM_NUM_AT_WEBMAIL    From:addr =~ /^\d\S+\@(?:msn\.com|flashmail\.com|mailexcite\.com|prodigy\.net|yahoo\.\S+|hotmail\.com|eudoramail\.com|aol\.com|excite\.com|email\.com|earthlink\.net|geocities\.com|hknetmail\.com|angelfire\.com)/i
-describe FROM_NUM_AT_WEBMAIL  From address is webmail, but starts with a number
+header FROM_NUM_AT_WEBMAIL	From:addr =~ /^\d\S+\@(?:msn\.com|flashmail\.com|mailexcite\.com|prodigy\.net|yahoo\.\S+|hotmail\.com|eudoramail\.com|aol\.com|excite\.com|email\.com|earthlink\.net|geocities\.com|hknetmail\.com|angelfire\.com)/i
+describe FROM_NUM_AT_WEBMAIL	From address is webmail, but starts with a number
 
-header FROM_WEBMAIL_ENDS_IN_NUMS6  From:addr =~ /\d\d\d\d\d\d\@(?:aol|msn|bigfoot|compuserve|excite|hotmail|juno|prodigy|yahoo)\.(?:com|net|org)/i
-describe FROM_WEBMAIL_ENDS_IN_NUMS6  From address is webmail, and ends in lots of numbers
+header FROM_WEBMAIL_ENDS_IN_NUMS6	From:addr =~ /\d\d\d\d\d\d\@(?:aol|msn|bigfoot|compuserve|excite|hotmail|juno|prodigy|yahoo)\.(?:com|net|org)/i
+describe FROM_WEBMAIL_ENDS_IN_NUMS6	From address is webmail, and ends in lots of numbers
 
 header ADDR_FREE              From =~ /\b(?-i:F)ree(?-i:[ A-Z]).*</i
 describe ADDR_FREE            From Address contains FREE
@@ -744,10 +744,10 @@ describe ADDR_FREE            From Address contains FREE
 # thanks to Jason Staples for this suggestion. Sendmail and other MTAs
 # will often query the ident server on a relay; Squid proxies should not be
 # sending mail.
-header RECEIVED_IDENT_SQUID      Received =~ /ident[:=]squid\b/i
-describe RECEIVED_IDENT_SQUID    Message was sent by a Squid HTTP proxy
-header RECEIVED_IDENT_CACHEFLOW  Received =~ /CacheFlowServer/
-describe RECEIVED_IDENT_CACHEFLOW Received contains 'CacheFlowServer' IDENT name
+header RECEIVED_IDENT_SQUID		Received =~ /ident[:=]squid\b/i
+describe RECEIVED_IDENT_SQUID		Message was sent by a Squid HTTP proxy
+header RECEIVED_IDENT_CACHEFLOW		Received =~ /CacheFlowServer/
+describe RECEIVED_IDENT_CACHEFLOW	Received contains 'CacheFlowServer' IDENT name
 
 # common spam-dropping: To: C:\VICTIMS.txt@yourmx.org
 header TO_TXT			To =~ /\.txt[\'\"]?\@/i

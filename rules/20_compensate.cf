@@ -201,7 +201,7 @@ tflags DISCLAIMER_LEGALESE	nice
 #
 #   foo@bar.com writes: > blah blah blah
 #
-body EMAIL_ATTRIBUTION         /^(?:\"|--- )?\w.{4,80} (?:wrote|writes):\s*(?:$|>)/
+body EMAIL_ATTRIBUTION          /^(?:\"|--- )?\w.{4,80} (?:wrote|writes):\s*(?:$|>)/
 describe EMAIL_ATTRIBUTION	Contains what looks like an email attribution
 tflags EMAIL_ATTRIBUTION	nice
 
@@ -276,11 +276,10 @@ meta ORIGINAL_MESSAGE		(__ORIG_MESSAGE_AGENT && __ORIG_MESSAGE_LINE)
 describe ORIGINAL_MESSAGE	Looks like a reply to a message
 tflags ORIGINAL_MESSAGE		nice
 
-
 #  3.351   0.0060   4.5117    0.001   0.97   -1.00  T_MSGID_GOOD_EXCHANGE
-header MSGID_GOOD_EXCHANGE    Message-Id =~ /^<[A-Z]{28}\.\S+\@\S+>$/
+header MSGID_GOOD_EXCHANGE	Message-Id =~ /^<[A-Z]{28}\.\S+\@\S+>$/
 describe MSGID_GOOD_EXCHANGE	Message-Id indicates the message was sent from MS Exchange
-tflags MSGID_GOOD_EXCHANGE    nice
+tflags MSGID_GOOD_EXCHANGE	nice
 
 # mailman list reminder mails are getting tagged in 2.41, adding a rule to check for these
 header __FROM_MAILMAN_OWNER     From:addr =~ /^mailman-owner@/
