@@ -83,7 +83,7 @@ sub razor_report {
 
     if ($Razor::Client::VERSION == "1.12") {
       my $respary = $rc->report ('spam' => \@msg);
-      for my $resp (@$respary) { $response .= $resp." "; }
+      for my $resp (@$respary) { $response .= $resp; }
     } else {
       $response = $rc->report ([@msg]);
     }
@@ -93,7 +93,7 @@ sub razor_report {
   
   if ($@) {
     warn "razor-report failed: $! $@";
-  } elsif ($response+0) {
+  } elsif (defined($response) && $response+0) {
     return 1;
   }
 
