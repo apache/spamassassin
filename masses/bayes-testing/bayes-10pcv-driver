@@ -53,32 +53,14 @@ cp ../rules/50*.cf $tmpdir/rules
 # TODO: for tests of these settings, read from a test-specific file
 echo "bayes_path $tmpdir/dbs/bayes
 bayes_use_chi2_combining 1
-bayes_expiry_use_scan_count 0
-bayes_expiry_scan_count 500
 " > $tmpdir/rules/30bayes_path.cf
+# bayes_expiry_use_scan_count 0
+# bayes_expiry_scan_count 500
 mkdir $tmpdir/dbs
 
-INTERLEAVE_TESTS=1
-
-# learn the lot, then forget the ones we're testing on each time.
-# faster than learning from scratch for each fold
-
-# note: we use randseed=1 so that every run will always pick the
-# same messages if --learnprob is used.
-
-(
-echo -n "Learning from all ham buckets..." ; date
-time sa-learn-nonspam --randseed=1 --no-rebuild $learnargs \
-	--config-file=$tmpdir/rules $testdir/cor/ham/*
-
-echo -n "Learning from all spam buckets..." ; date
-time sa-learn-spam --randseed=1 --no-rebuild $learnargs \
-	--config-file=$tmpdir/rules $testdir/cor/spam/*
-
-time sa-learn-rebuild $learnargs --config-file=$tmpdir/rules
-
-echo -n "Done learning. " ; date
-) 2>&1 | tee $results/learn.log
+INTERLEAVE_TESTS=0
+TEST_AGAINST_10PC=0
+LEARN_ALL_THEN_FORGET_TEST_SET=0
 
 backup_dbs () {
   echo "Backing up full learned DBs..."
@@ -86,12 +68,36 @@ backup_dbs () {
 }
 restore_dbs () {
   echo "Restoring full learned DBs..."
-  ( cd $tmpdir; tar xf learned-all.tar )
+  ( cd $tmpdir; rm -rf dbs; tar xf learned-all.tar )
 }
 
-echo "Dumping bayes DB..."
-( cd .. ; tools/check_bayes_db --dbpath=$tmpdir/dbs/bayes ) \
-      > $results/bayes_db.dump
+if [ $LEARN_ALL_THEN_FORGET_TEST_SET = 1 ] ; then
+
+  # learn the lot, then forget the ones we're testing on each time.
+  # faster than learning from scratch for each fold
+
+  # note: we use randseed=1 so that every run will always pick the
+  # same messages if --learnprob is used.
+
+  (
+  echo -n "Learning from all ham buckets..." ; date
+  time sa-learn --ham --randseed=1 --no-rebuild $learnargs \
+	  --showdots --mbox --config-file=$tmpdir/rules $testdir/cor/ham/*
+
+  echo -n "Learning from all spam buckets..." ; date
+  time sa-learn --spam --randseed=1 --no-rebuild $learnargs \
+	  --showdots --mbox --config-file=$tmpdir/rules $testdir/cor/spam/*
+
+  time sa-learn --rebuild $learnargs --config-file=$tmpdir/rules
+
+  echo -n "Done learning. " ; date
+  ) 2>&1 | tee $results/learn.log
+
+  echo "Dumping bayes DB..."
+  ( cd .. ; tools/check_bayes_db --dbpath=$tmpdir/dbs/bayes ) \
+	> $results/bayes_db.dump
+
+fi
 
 backup_dbs
 
@@ -106,15 +112,52 @@ for bucket in 1 2 3 4 5 6 7 8 9 10 ; do
   rdir=$results/bucket$bucket
   mkdir $rdir
 
-  echo "Forgetting contents of test ham bucket..."
-  time sa-forget --config-file=$tmpdir/rules --showdots \
-			$testdir/cor/ham/bucket.$bucket
+  : > $rdir/hbucketlearn
+  : > $rdir/sbucketlearn
+  : > $rdir/hbuckettest
+  : > $rdir/sbuckettest
+  for subbucket in 1 2 3 4 5 6 7 8 9 10 ; do
+    type=l
+    [ $TEST_AGAINST_10PC = 1 -a $subbucket = $bucket ] && type=t
+    [ $TEST_AGAINST_10PC = 0 -a $subbucket != $bucket ] && type=t
 
-  echo "Forgetting contents of test spam bucket..."
-  time sa-forget --config-file=$tmpdir/rules --showdots \
-			$testdir/cor/spam/bucket.$bucket
+    if [ $type = l ] ; then
+      echo "Using bucket for learn: $subbucket ..."
+      cat $testdir/cor/ham/bucket.$subbucket >> $rdir/hbucketlearn
+      cat $testdir/cor/spam/bucket.$subbucket >> $rdir/sbucketlearn
+    else
+      echo "Using bucket for test: $subbucket ..."
+      cat $testdir/cor/ham/bucket.$subbucket >> $rdir/hbuckettest
+      cat $testdir/cor/spam/bucket.$subbucket >> $rdir/sbuckettest
+    fi
+  done
 
-  time sa-learn-rebuild --config-file=$tmpdir/rules
+  if [ $LEARN_ALL_THEN_FORGET_TEST_SET = 1 ] ; then
+    echo "Forgetting contents of test ham bucket..."
+    time sa-learn --forget --config-file=$tmpdir/rules --showdots \
+			  --mbox $rdir/hbuckettest
+
+    echo "Forgetting contents of test spam bucket..."
+    time sa-learn --forget --config-file=$tmpdir/rules --showdots \
+			  --mbox $rdir/sbuckettest
+
+  else
+    echo "Learning contents of learn ham bucket..."
+    time sa-learn --ham --randseed=1 --no-rebuild $learnargs \
+	    --showdots --mbox --config-file=$tmpdir/rules $rdir/hbucketlearn
+
+    echo "Learning contents of learn spam bucket..."
+    time sa-learn --spam --randseed=1 --no-rebuild $learnargs \
+	    --showdots --mbox --config-file=$tmpdir/rules $rdir/sbucketlearn
+
+    time sa-learn --rebuild $learnargs --config-file=$tmpdir/rules
+
+    echo "Dumping bayes DB..."
+    ( cd .. ; tools/check_bayes_db --dbpath=$tmpdir/dbs/bayes ) \
+	  > $rdir/bayes_db.dump
+  fi
+
+  time sa-learn --rebuild --config-file=$tmpdir/rules
 
   if [ $INTERLEAVE_TESTS = 1 ] ; then
     # now split the ham and spam test bucket into 10 sub-buckets,
@@ -125,32 +168,32 @@ for bucket in 1 2 3 4 5 6 7 8 9 10 ; do
     
     mkdir $rdir/testbuckets
     ( cd .. ; tools/split_corpora -n 10 -p $rdir/testbuckets/ham \
-	  $testdir/cor/ham/bucket.$bucket
+			$rdir/hbuckettest
       tools/split_corpora -n 10 -p $rdir/testbuckets/spam \
-	  $testdir/cor/spam/bucket.$bucket
+			$rdir/sbuckettest
     )
 
     for subbucket in 1 2 3 4 5 6 7 8 9 10 ; do
       echo "Running mass-check on ham test-bucket $subbucket..."
       time ./mass-check -c=$tmpdir/rules --showdots \
-	    --bayes $rdir/testbuckets/ham.$subbucket \
+	    --bayes --mbox $rdir/testbuckets/ham.$subbucket \
 	    >> $rdir/nonspam.log
 
       echo "Running mass-check on spam test-bucket $subbucket..."
       time ./mass-check -c=$tmpdir/rules --showdots \
-	    --bayes $rdir/testbuckets/spam.$subbucket \
+	    --bayes --mbox $rdir/testbuckets/spam.$subbucket \
 	    >> $rdir/spam.log
     done
 
   else
     echo "Running mass-check on ham bucket..."
     time ./mass-check -c=$tmpdir/rules --showdots \
-	  --bayes $testdir/cor/ham/bucket.$bucket \
+	  --bayes --mbox $rdir/hbuckettest \
 	  > $rdir/nonspam.log
 
     echo "Running mass-check on spam bucket..."
     time ./mass-check -c=$tmpdir/rules --showdots \
-	  --bayes $testdir/cor/spam/bucket.$bucket \
+	  --bayes --mbox $rdir/sbuckettest \
 	  > $rdir/spam.log
   fi
 
@@ -162,6 +205,9 @@ for bucket in 1 2 3 4 5 6 7 8 9 10 ; do
   ./bayes-testing/bayes-thresholds \
 	$rdir/spam.log $rdir/nonspam.log \
 	> $rdir/thresholds
+
+  # remove these, they're too big.
+  rm -f $rdir/hbucketlearn $rdir/sbucketlearn $rdir/hbuckettest $rdir/sbuckettest
 
 done
 echo -n "Done test..." ; date
