@@ -871,7 +871,8 @@ sub get_raw_body_text_array {
   my $cte = $self->{msg}->get_header ('Content-Transfer-Encoding');
   if (defined $cte && $cte =~ /quoted-printable/i) {
     $self->{found_encoding_quoted_printable} = 1;
-  } elsif (defined $cte && $cte =~ /base64/) {
+  }
+  elsif (defined $cte && $cte =~ /base64/i) {
     $self->{found_encoding_base64} = 1;
   }
 
@@ -946,7 +947,8 @@ sub get_raw_body_text_array {
     if (/^Content-Transfer-Encoding: /i) {
       if (/quoted-printable/i) {
 	$self->{found_encoding_quoted_printable} = 1;
-      } elsif (/base64/i) {
+      }
+      elsif (/base64/i) {
 	$self->{found_encoding_base64} = 1;
       }
     }
@@ -1007,48 +1009,48 @@ sub get_decoded_body_text_array {
     my $b64lines = 0;
     my @decoded = ();
     foreach my $line (@{$textary}) {
-      if ($line =~ /[ \t]/ or $line =~ /^--/) {  # base64 can't have whitespace on the line or start --
-
+      # base64 can't have whitespace on the line or start --
+      if ($line =~ /[ \t]/ or $line =~ /^--/) {
 	# decode what we have so far
 	push (@decoded, $self->split_b64_decode ($_), $line);
 	$_ = '';
         $foundb64 = 0;
         next;
       }
-
-      if (length($line) != $lastlinelength && !$foundb64) { # This line is a different length from the last one
-
+      # This line is a different length from the last one
+      if (length($line) != $lastlinelength && !$foundb64) {
 	push (@decoded, $self->split_b64_decode ($_));
-        $_ = $line;                                         # Could be the first line of a base 64 part
+        $_ = $line;	# Could be the first line of a base 64 part
         $lastlinelength = length($line);
         next;
       }
-
-      if ($lastlinelength == length ($line)) {              # Same length as the last line.  Starting to look like a base64 encoding
-        if ($b64lines++ == 3) {                             # Three lines the same length, with no spaces in them
-          $foundb64 = 1;                                    # Sounds like base64 to me!
+      # Same length as the last line.  Starting to look like a base64 encoding
+      if ($lastlinelength == length ($line)) {
+	# Three lines the same length, with no spaces in them
+        if ($b64lines++ == 3 && length ($line) > 3) {
+	  # Sounds like base64 to me!
+          $foundb64 = 1;
         }
         $_ .= $line;
         next;
       }
-
-      if ($foundb64) {                                      # Last line is shorter, so we are done.
+      # Last line is shorter, so we are done.
+      if ($foundb64) {
         $_ .= $line;
         last;
       }
     }
-
     push (@decoded, $self->split_b64_decode ($_));
     return \@decoded;
-
-  } elsif ($self->{found_encoding_quoted_printable}) {
+  }
+  elsif ($self->{found_encoding_quoted_printable}) {
     $_ = join ('', @{$textary});
     s/\=\r?\n//gs;
     s/\=([0-9A-F]{2})/chr(hex($1))/ge;
     my @ary = $self->split_into_array_of_short_lines ($_);
     return \@ary;
-
-  } elsif ($self->{found_encoding_uuencode}) {
+  }
+  elsif ($self->{found_encoding_uuencode}) {
     # remove uuencoded regions
     my $uu_region = 0;
     $_ = '';
@@ -1074,7 +1076,8 @@ sub get_decoded_body_text_array {
     s/\r//;
     my @ary = $self->split_into_array_of_short_lines ($_);
     return \@ary;
-  } else {
+  }
+  else {
     return $textary;
   }
 }
