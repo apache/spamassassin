@@ -6,7 +6,9 @@
  *  cleaner.
  */
 
+extern "C" {
 #include <pgapack.h>
+}
 
 #include "tmp/scores.h"
 #include "tmp/tests.h"
