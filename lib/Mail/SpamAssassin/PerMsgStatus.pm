@@ -41,6 +41,7 @@ use POSIX qw(strftime);
 use Mail::SpamAssassin::EvalTests;
 use Mail::SpamAssassin::AutoWhitelist;
 use Mail::SpamAssassin::HTML;
+use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Received;
 use Mail::SpamAssassin::Util;
 
@@ -1484,11 +1485,13 @@ sub do_head_tests {
 
   dbg ("running header regexp tests; score so far=".$self->{hits});
 
+  my $doing_user_rules = 
+    $self->{conf}->{user_rules_to_compile}->{Mail::SpamAssassin::Conf::TYPE_HEAD_TESTS};
+
   # speedup code provided by Matt Sergeant
-  if (defined &Mail::SpamAssassin::PerMsgStatus::_head_tests
-       && !$self->{conf}->{user_rules_to_compile} ) {
-      Mail::SpamAssassin::PerMsgStatus::_head_tests($self);
-      return;
+  if (defined &Mail::SpamAssassin::PerMsgStatus::_head_tests && !$doing_user_rules) {
+    Mail::SpamAssassin::PerMsgStatus::_head_tests($self);
+    return;
   }
 
   my $evalstr = '';
@@ -1516,6 +1519,10 @@ sub do_head_tests {
       }
     ';
 
+    if ($doing_user_rules) {
+      next if (!$self->is_user_rule_sub ($rulename.'_head_test'));
+    }
+
     $evalstr2 .= '
       sub '.$rulename.'_head_test {
         my $self = shift;
@@ -1528,6 +1535,9 @@ sub do_head_tests {
       }';
 
   }
+
+  # clear out a previous version of this fn, if already defined
+  if (defined &_head_tests) { undef &_head_tests; }
 
   $evalstr = <<"EOT";
 {
@@ -1562,10 +1572,11 @@ sub do_body_tests {
 
   dbg ("running body-text per-line regexp tests; score so far=".$self->{hits});
 
+  my $doing_user_rules = 
+    $self->{conf}->{user_rules_to_compile}->{Mail::SpamAssassin::Conf::TYPE_BODY_TESTS};
+
   $self->{test_log_msgs} = ();	# clear test state
-  if ( defined &Mail::SpamAssassin::PerMsgStatus::_body_tests
-       && !$self->{conf}->{user_rules_to_compile} ) {
-    # ok, we've compiled this before. Or have we?
+  if ( defined &Mail::SpamAssassin::PerMsgStatus::_body_tests && !$doing_user_rules) {
     Mail::SpamAssassin::PerMsgStatus::_body_tests($self, @$textary);
     return;
   }
@@ -1581,6 +1592,11 @@ sub do_body_tests {
         '.$rulename.'_body_test($self,@_);
       }
     ';
+
+    if ($doing_user_rules) {
+      next if (!$self->is_user_rule_sub ($rulename.'_body_test'));
+    }
+
     $evalstr2 .= '
     sub '.$rulename.'_body_test {
            my $self = shift;
@@ -1594,6 +1610,9 @@ sub do_body_tests {
     }
     ';
   }
+
+  # clear out a previous version of this fn, if already defined
+  if (defined &_body_tests) { undef &_body_tests; }
 
   # generate the loop that goes through each line...
   $evalstr = <<"EOT";
@@ -1621,6 +1640,12 @@ EOT
   else {
     Mail::SpamAssassin::PerMsgStatus::_body_tests($self, @$textary);
   }
+}
+
+sub is_user_rule_sub {
+  my ($self, $subname) = @_;
+  return 0 if (eval 'defined &Mail::SpamAssassin::PerMsgStatus::'.$subname);
+  1;
 }
 
 # Taken from URI and URI::Find
@@ -1754,10 +1779,11 @@ sub do_body_uri_tests {
   dbg ("running uri tests; score so far=".$self->{hits});
   my @uris = $self->get_uri_list();
 
+  my $doing_user_rules = 
+    $self->{conf}->{user_rules_to_compile}->{Mail::SpamAssassin::Conf::TYPE_URI_TESTS};
+
   $self->{test_log_msgs} = ();	# clear test state
-  if ( defined &Mail::SpamAssassin::PerMsgStatus::_body_uri_tests
-       && !$self->{conf}->{user_rules_to_compile} ) {
-    # ok, we've compiled this before.
+  if (defined &Mail::SpamAssassin::PerMsgStatus::_body_uri_tests && !$doing_user_rules) {
     Mail::SpamAssassin::PerMsgStatus::_body_uri_tests($self, @uris);
     return;
   }
@@ -1774,6 +1800,10 @@ sub do_body_uri_tests {
       }
     ';
 
+    if ($doing_user_rules) {
+      next if (!$self->is_user_rule_sub ($rulename.'_uri_test'));
+    }
+
     $evalstr2 .= '
     sub '.$rulename.'_uri_test {
        my $self = shift;
@@ -1787,6 +1817,9 @@ sub do_body_uri_tests {
     }
     ';
   }
+
+  # clear out a previous version of this fn, if already defined
+  if (defined &_body_uri_tests) { undef &_body_uri_tests; }
 
   # generate the loop that goes through each line...
   $evalstr = <<"EOT";
@@ -1822,10 +1855,11 @@ sub do_rawbody_tests {
 
   dbg ("running raw-body-text per-line regexp tests; score so far=".$self->{hits});
 
+  my $doing_user_rules = 
+    $self->{conf}->{user_rules_to_compile}->{Mail::SpamAssassin::Conf::TYPE_RAWBODY_TESTS};
+
   $self->{test_log_msgs} = ();	# clear test state
-  if ( defined &Mail::SpamAssassin::PerMsgStatus::_rawbody_tests
-       && !$self->{conf}->{user_rules_to_compile} ) {
-    # ok, we've compiled this before.
+  if (defined &Mail::SpamAssassin::PerMsgStatus::_rawbody_tests && !$doing_user_rules) {
     Mail::SpamAssassin::PerMsgStatus::_rawbody_tests($self, @$textary);
     return;
   }
@@ -1841,6 +1875,11 @@ sub do_rawbody_tests {
          '.$rulename.'_rawbody_test($self, @_); # call procedurally for speed
       }
     ';
+
+    if ($doing_user_rules) {
+      next if (!$self->is_user_rule_sub ($rulename.'_rawbody_test'));
+    }
+
     $evalstr2 .= '
     sub '.$rulename.'_rawbody_test {
        my $self = shift;
@@ -1854,6 +1893,9 @@ sub do_rawbody_tests {
     }
     ';
   }
+
+  # clear out a previous version of this fn, if already defined
+  if (defined &_rawbody_tests) { undef &_rawbody_tests; }
 
   # generate the loop that goes through each line...
   $evalstr = <<"EOT";
@@ -1889,12 +1931,14 @@ sub do_full_tests {
   
   dbg ("running full-text regexp tests; score so far=".$self->{hits});
 
+  my $doing_user_rules = 
+    $self->{conf}->{user_rules_to_compile}->{Mail::SpamAssassin::Conf::TYPE_FULL_TESTS};
+
   $self->{test_log_msgs} = ();	# clear test state
 
-  if (defined &Mail::SpamAssassin::PerMsgStatus::_full_tests
-       && !$self->{conf}->{user_rules_to_compile} ) {
-      Mail::SpamAssassin::PerMsgStatus::_full_tests($self, $fullmsgref);
-      return;
+  if (defined &Mail::SpamAssassin::PerMsgStatus::_full_tests && !$doing_user_rules) {
+    Mail::SpamAssassin::PerMsgStatus::_full_tests($self, $fullmsgref);
+    return;
   }
 
   # build up the eval string...
@@ -1911,6 +1955,8 @@ sub do_full_tests {
       }
     ';
   }
+
+  if (defined &_full_tests) { undef &_full_tests; }
 
   # and compile it.
   $evalstr = <<"EOT";
@@ -2031,9 +2077,11 @@ sub do_meta_tests {
 
   dbg( "running meta tests; score so far=" . $self->{hits} );
 
+  my $doing_user_rules = 
+    $self->{conf}->{user_rules_to_compile}->{Mail::SpamAssassin::Conf::TYPE_META_TESTS};
+
   # speedup code provided by Matt Sergeant
-  if ( defined &Mail::SpamAssassin::PerMsgStatus::_meta_tests
-    && !$self->{conf}->{user_rules_to_compile} ) {
+  if ( defined &Mail::SpamAssassin::PerMsgStatus::_meta_tests && !$doing_user_rules) {
     Mail::SpamAssassin::PerMsgStatus::_meta_tests($self);
     return;
   }
@@ -2107,6 +2155,8 @@ sub do_meta_tests {
     dbg( "Excluding meta test $rulename; unsolved meta dependencies: "
         . join ( ", ", grep($metas{$_},@{ $rule_deps{$rulename} }) ) );
   }
+
+  if (defined &_meta_tests) { undef &_meta_tests; }
 
   # setup the environment for meta tests
   $evalstr = <<"EOT";

@@ -94,7 +94,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.195 2003/06/30 01:27:02 felicity Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.196 2003/07/29 03:43:25 jmason Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -165,6 +165,10 @@ following attribute-value pairs to the constructor.
 
 The filename to load spam-identifying rules from. (optional)
 
+=item site_rules_filename
+
+The filename to load site-specific spam-identifying rules from. (optional)
+
 =item userprefs_filename
 
 The filename to load preferences from. (optional)
@@ -177,15 +181,16 @@ The directory user state is stored in. (optional)
 
 The text of all rules and preferences.  If you prefer not to load the rules
 from files, read them in yourself and set this instead.  As a result, this will
-override the settings for C<rules_filename> and C<userprefs_filename>.
+override the settings for C<rules_filename>, C<site_rules_filename>,
+and C<userprefs_filename>.
 
 =item languages_filename
 
 If you want to be able to use the language-guessing rule
 C<UNDESIRED_LANGUAGE_BODY>, and are using C<config_text> instead of
-C<rules_filename> and C<userprefs_filename>, you will need to set this.  It
-should be the path to the B<languages> file normally found in the SpamAssassin
-B<rules> directory.
+C<rules_filename>, C<site_rules_filename>, and C<userprefs_filename>, you will
+need to set this.  It should be the path to the B<languages> file normally
+found in the SpamAssassin B<rules> directory.
 
 =item local_tests_only
 
@@ -216,9 +221,9 @@ effective UID under UNIX).
 
 =back
 
-If none of C<rules_filename>, C<userprefs_filename>, or C<config_text> is set,
-the C<Mail::SpamAssassin> module will search for the configuration files in the
-usual installed locations.
+If none of C<rules_filename>, C<site_rules_filename>, C<userprefs_filename>, or
+C<config_text> is set, the C<Mail::SpamAssassin> module will search for the
+configuration files in the usual installed locations.
 
 =cut
 
@@ -1173,16 +1178,21 @@ sub init {
   if (!defined $self->{config_text}) {
     $self->{config_text} = '';
 
-    my $fname = $self->first_existing_path (@default_rules_path);
-    $self->{rules_filename} or $self->{config_text} .= $self->read_cf ($fname, 'default rules dir');
+    my $fname = $self->{rules_filename};
+    $fname ||= $self->first_existing_path (@default_rules_path);
+    if ($fname) {
+      $self->{config_text} .= $self->read_cf ($fname, 'default rules dir');
 
-    if (-f "$fname/languages") {
-      $self->{languages_filename} = "$fname/languages";
+      if (-f "$fname/languages") {
+	$self->{languages_filename} = "$fname/languages";
+      }
     }
 
-    $fname = $self->{rules_filename};
+    $fname = $self->{site_rules_filename};
     $fname ||= $self->first_existing_path (@site_rules_path);
-    $self->{config_text} .= $self->read_cf ($fname, 'site rules dir');
+    if ($fname) {
+      $self->{config_text} .= $self->read_cf ($fname, 'site rules dir');
+    }
 
     if ( $use_user_pref != 0 ) {
       $self->get_and_create_userstate_dir();

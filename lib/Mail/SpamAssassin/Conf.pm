@@ -176,7 +176,7 @@ sub new {
   $self->{ok_locales} = 'all';
   $self->{ok_languages} = 'all';
   $self->{allow_user_rules} = 0;
-  $self->{user_rules_to_compile} = 0;
+  $self->{user_rules_to_compile} = { };
   $self->{fold_headers} = 1;
   $self->{headers_spam} = { };
   $self->{headers_ham} = { };
@@ -292,6 +292,8 @@ sub get_score_set {
 sub _parse {
   my ($self, undef, $scoresonly) = @_; # leave $rules in $_[1]
   local ($_);
+
+  $self->{scoresonly} = $scoresonly;
 
   # Language selection:
   # See http://www.gnu.org/manual/glibc-2.2.5/html_node/Locale-Categories.html
@@ -1832,6 +1834,9 @@ the tests each time it processes a message for a user with a rule in
 his/her C<user_prefs> file, which could have a significant effect on
 server load. It is not recommended.
 
+Note that it is not currently possible to use C<allow_user_rules> to modify an
+existing system rule from a C<user_prefs> file with C<spamd>.
+
 =cut
 
     if (/^allow_user_rules\s+(\d+)$/) {
@@ -1937,23 +1942,19 @@ why the IP is listed, typically a hyperlink to a database entry.
 =cut
     if (/^header\s+(\S+)\s+rbleval:(.*)$/) {
       $self->add_test ($1, $2, TYPE_RBL_EVALS);
-      $self->{user_rules_to_compile} = 1 if $scoresonly;
       next;
     }
     if (/^header\s+(\S+)\s+eval:(.*)$/) {
       $self->add_test ($1, $2, TYPE_HEAD_EVALS);
-      $self->{user_rules_to_compile} = 1 if $scoresonly;
       next;
     }
     if (/^header\s+(\S+)\s+exists:(.*)$/) {
       $self->add_test ($1, "$2 =~ /./", TYPE_HEAD_TESTS);
       $self->{descriptions}->{$1} = "Found a $2 header";
-      $self->{user_rules_to_compile} = 1 if $scoresonly;
       next;
     }
     if (/^header\s+(\S+)\s+(.*)$/) {
       $self->add_test ($1, $2, TYPE_HEAD_TESTS);
-      $self->{user_rules_to_compile} = 1 if $scoresonly;
       next;
     }
 
@@ -1975,12 +1976,10 @@ Define a body eval test.  See above.
 =cut
     if (/^body\s+(\S+)\s+eval:(.*)$/) {
       $self->add_test ($1, $2, TYPE_BODY_EVALS);
-      $self->{user_rules_to_compile} = 1 if $scoresonly;
       next;
     }
     if (/^body\s+(\S+)\s+(.*)$/) {
       $self->add_test ($1, $2, TYPE_BODY_TESTS);
-      $self->{user_rules_to_compile} = 1 if $scoresonly;
       next;
     }
 
@@ -1998,12 +1997,10 @@ points of the URI, and will also be faster.
 # we don't do URI evals yet - maybe later
 #    if (/^uri\s+(\S+)\s+eval:(.*)$/) {
 #      $self->add_test ($1, $2, TYPE_URI_EVALS);
-#      $self->{user_rules_to_compile} = 1 if $scoresonly;
 #      next;
 #    }
     if (/^uri\s+(\S+)\s+(.*)$/) {
       $self->add_test ($1, $2, TYPE_URI_TESTS);
-      $self->{user_rules_to_compile} = 1 if $scoresonly;
       next;
     }
 
@@ -2022,12 +2019,10 @@ Define a raw-body eval test.  See above.
 =cut
     if (/^rawbody\s+(\S+)\s+eval:(.*)$/) {
       $self->add_test ($1, $2, TYPE_RAWBODY_EVALS);
-      $self->{user_rules_to_compile} = 1 if $scoresonly;
       next;
     }
     if (/^rawbody\s+(\S+)\s+(.*)$/) {
       $self->add_test ($1, $2, TYPE_RAWBODY_TESTS);
-      $self->{user_rules_to_compile} = 1 if $scoresonly;
       next;
     }
 
@@ -2046,12 +2041,10 @@ Define a full-body eval test.  See above.
 =cut
     if (/^full\s+(\S+)\s+eval:(.*)$/) {
       $self->add_test ($1, $2, TYPE_FULL_EVALS);
-      $self->{user_rules_to_compile} = 1 if $scoresonly;
       next;
     }
     if (/^full\s+(\S+)\s+(.*)$/) {
       $self->add_test ($1, $2, TYPE_FULL_TESTS);
-      $self->{user_rules_to_compile} = 1 if $scoresonly;
       next;
     }
 
@@ -2085,7 +2078,6 @@ ignore these for scoring.
 
     if (/^meta\s+(\S+)\s+(.*)$/) {
       $self->add_test ($1, $2, TYPE_META_TESTS);
-      $self->{user_rules_to_compile} = 1 if $scoresonly;
       next;
     }
 
@@ -2436,6 +2428,8 @@ failed_line:
     }
     $self->{errors}++;
   }
+
+  delete $self->{scoresonly};
 }
 
 sub add_test {
@@ -2444,6 +2438,10 @@ sub add_test {
   $self->{test_types}->{$name} = $type;
   $self->{tflags}->{$name} ||= '';
   $self->{source_file}->{$name} = $self->{currentfile};
+
+  if ($self->{scoresonly}) {
+    $self->{user_rules_to_compile}->{$type} = 1;
+  }
 
   # All scoresets should have a score defined, so if the one we're in
   # doesn't, we need to set them all.

@@ -6,6 +6,7 @@ use Test; BEGIN { plan tests => 10 };
 
 use File::Path;
 use IO::Socket;
+use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::Conf;
 
 # ---------------------------------------------------------------------------

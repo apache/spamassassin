@@ -44,6 +44,7 @@ sub sa_t_init {
   $spamdport = $ENV{'SPAMD_PORT'};
   $spamdport ||= 48373;		# whatever
   $spamd_cf_args = "-C log/test_rules_copy";
+  $spamd_localrules_args = "";
 
   $scr_cf_args = "-C log/test_rules_copy";
   $scr_pref_args = "-p log/test_default.cf";
@@ -92,6 +93,19 @@ sub tstfile {
   my $file = shift;
   open (OUT, ">log/mail.txt") or die;
   print OUT $file; close OUT;
+}
+
+sub tstlocalrules {
+  my $lines = shift;
+
+  $set_local_rules = 1;
+
+  rmtree ("log/localrules.tmp"); # some tests use this
+  mkdir ("log/localrules.tmp", 0755);
+
+  open (OUT, ">log/localrules.tmp/00test.cf") or die;
+  print OUT $lines; close OUT;
+  $spamd_localrules_args = " --siteconfigpath log/localrules.tmp";
 }
 
 sub tstprefs {
@@ -228,7 +242,7 @@ sub start_spamd {
 
   my $spamdargs;
   if($sdargs !~ /(?:-C\s*[^-]\S+)/) {
-    $sdargs = $spamd_cf_args . " ". $sdargs;
+    $sdargs = $spamd_cf_args . " " . $spamd_localrules_args . " ". $sdargs;
   }
   if($sdargs !~ /(?:-p\s*[0-9]+|-o|--socketpath)/)
   {

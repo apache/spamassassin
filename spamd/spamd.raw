@@ -125,6 +125,7 @@ GetOptions(
   'vpopmail!'                   => \$opt{'vpopmail'},
     'v'                         => \$opt{'vpopmail'},
   'configpath|C=s'              => \$opt{'configpath'},
+  'siteconfigpath=s'            => \$opt{'siteconfigpath'},
   'user-config'                 => \$opt{'user-config'},
     'nouser-config|x'           => sub{ $opt{'user-config'} = 0 },
   'allowed-ips|A=s'             => \@{$opt{'allowed-ip'}},
@@ -155,6 +156,7 @@ $opt{'help'} and pod2usage(-exitval => $resphash{'EX_USAGE'}, -verbose => 0, -me
 # absolute, so they are still valid after daemonize()
 foreach my $opt (qw(
     configpath
+    siteconfigpath
     socketpath
     pidfile
     home_dir_for_helpers
@@ -258,6 +260,7 @@ if (defined $ENV{'HOME'}) {
 my $spamtest = Mail::SpamAssassin->new({
   dont_copy_prefs      => $dontcopy,
   rules_filename       => ($opt{'configpath'} || 0),
+  site_rules_filename  => ($opt{'siteconfigpath'} || 0),
   local_tests_only     => ($opt{'local'} || 0),
   debug                => ($opt{'debug'} || 0),
   paranoid             => ($opt{'paranoid'} || 0),
@@ -1323,6 +1326,7 @@ Options:
  -a, --auto-whitelist, --whitelist  Use auto-whitelists
  -c, --create-prefs                 Create user preferences files
  -C path, --configpath=path         Path for default config files
+ --siteconfigpath=path              Path for site configs (def: /etc/mail/spamassassin)
  -d, --daemonize                    Daemonize
  -h, --help                         Print usage message.
  -i ipaddr, --listen-ip=ipaddr,...  Listen on the IP ipaddr (default: 127.0.0.1)
@@ -1396,8 +1400,13 @@ Create user preferences files if they don't exist (default: don't).
 
 =item B<-C> I<path>, B<--configpath>=I<path>
 
-Use the specified path for locating configuration files.  Ignore the default
-directories.
+Use the specified path for locating the distributed configuration files.
+Ignore the default directories (usually C</usr/share/spamassassin> or similar).
+
+=item B<--siteconfigpath>=I<path>
+
+Use the specified path for locating site-specific configuration files.  Ignore
+the default directories (usually C</etc/mail/spamassassin> or similar).
 
 =item B<-d>, B<--daemonize>
 
