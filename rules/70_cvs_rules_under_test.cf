@@ -510,7 +510,8 @@ header T_FAKE_HELO_FLASHMAIL	eval:check_for_rdns_helo_mismatch("flashmail\.com",
 # relay for all these networks?
 header T_FAKE_HELO_EARTHLINK	eval:check_for_rdns_helo_mismatch("(?:earthlink\.net|teleport\.com|dialsprint\.net|charterpipeline\.net|mindsprint\.com|level3\.net)","earthlink\.net")
 
-header T_FAKE_HELO_JUNO		eval:check_for_rdns_helo_mismatch("juno\.com","juno\.com")
+header T_FAKE_HELO_JUNO		eval:check_for_rdns_helo_mismatch("(?:untd|juno)\.com","juno\.com")
+header T_FAKE_HELO_UNTD		eval:check_for_rdns_helo_mismatch("(?:untd|juno)\.com","untd\.com")
 header T_FAKE_HELO_YAHOO_CO_UK	eval:check_for_rdns_helo_mismatch("yahoo\.co\.uk","yahoo\.co\.uk")
 header T_FAKE_HELO_USA_NET	eval:check_for_rdns_helo_mismatch("usa\.net","usa\.net")
 header T_FAKE_HELO_FREEUK	eval:check_for_rdns_helo_mismatch("freeuk\.com","freeuk\.com")
