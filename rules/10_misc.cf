@@ -70,21 +70,21 @@ terse-report ---- End of SpamAssassin results
 #user_scores_sql_password	spamfilter
 
 ###########################################################################
-# Automatic-whitelist directory, for the default directory-based whitelist
+# Automatic-whitelist directory, for the default db-based whitelist
 # backend.  By default, each user has their own, in their ~/.spamassassin
-# directory with mode 0700, but for system-wide SpamAssassin use, you may
+# directory with mode 0600, but for system-wide SpamAssassin use, you may
 # want to share this across all users; uncomment and customise the below
 # lines.  (Make sure the mode has --x bits set.)
 
-# auto_whitelist_threshold   3
+# auto_whitelist_factor   0.5
 
 # default: per-user whitelist:
 # auto_whitelist_path        ~/.spamassassin/auto-whitelist
-# auto_whitelist_file_mode   0700
+# auto_whitelist_file_mode   0600
 
 # use this for a system-wide whitelist:
 # auto_whitelist_path        /var/spool/spamassassin/auto-whitelist
-# auto_whitelist_file_mode   0777
+# auto_whitelist_file_mode   0666
 
 ###########################################################################
 # Default prefs values: users can override these in their 

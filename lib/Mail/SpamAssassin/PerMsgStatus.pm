@@ -35,6 +35,7 @@ use Carp;
 use strict;
 
 use Mail::SpamAssassin::EvalTests;
+use Mail::SpamAssassin::AutoWhitelist;
 
 use vars	qw{
   	@ISA $base64alphabet
@@ -76,6 +77,7 @@ sub check {
   # we can then immediately submit to spamblocking services.
   #
   # TODO: change this to do whitelist/blacklists first? probably a plan
+  # NOTE: definitely need AWL stuff last, for regression-to-mean of score
 
   $self->remove_unwanted_headers();
 
@@ -110,20 +112,14 @@ sub check {
     }
 
     $self->do_head_eval_tests();
-  }
+
+    # Do AWL tests last, since these need the score to have already been calculated
+    $self->do_awl_tests();
+}
 
   dbg ("is spam? score=".$self->{hits}.
   			" required=".$self->{conf}->{required_hits});
   $self->{is_spam} = ($self->{hits} >= $self->{conf}->{required_hits});
-
-  # add it to the auto-whitelist if it's not spam
-  if (!$self->{is_spam} && defined $self->{auto_whitelist}) {
-    $self->{auto_whitelist}->increment_pass_accumulator();
-  }
-
-  if (defined $self->{auto_whitelist}) {
-    $self->{auto_whitelist}->finish();		# done with this now
-  }
 
   if ($self->{conf}->{use_terse_report}) {
     $_ = $self->{conf}->{terse_report_template};
@@ -1039,6 +1035,33 @@ sub do_rawbody_eval_tests {
 sub do_full_eval_tests {
   my ($self, $fullmsgref) = @_;
   $self->run_eval_tests ($self->{conf}->{full_evals}, '', $fullmsgref);
+}
+
+###########################################################################
+
+sub do_awl_tests {
+    my($self) = @_;
+
+    local $_ = lc $self->get('From:addr');
+    return 0 unless /\S/;
+
+    # Create the AWL object, then check
+    $self->{auto_whitelist} = Mail::SpamAssassin::AutoWhitelist->new($self->{main});
+
+    my $meanscore = $self->{auto_whitelist}->check_address($_);
+
+    dbg("AWL active, pre-score: ".$self->{hits}.", mean: ".($meanscore||'undef'));
+
+    if(defined($meanscore))
+    {
+	$self->{hits} += ($meanscore - $self->{hits})*$self->{main}->{conf}->{auto_whitelist_factor};
+    }
+
+    dbg("Post AWL score: ".$self->{hits});
+
+    # Update the AWL
+    $self->{auto_whitelist}->add_score($self->{hits});
+    $self->{auto_whitelist}->finish();		# done with this now
 }
 
 ###########################################################################

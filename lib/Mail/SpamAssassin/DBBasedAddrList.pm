@@ -134,29 +134,39 @@ sub get_addr_entry {
   };
 
   $entry->{count} = $self->{accum}->{$addr} || 0;
+  $entry->{totscore} = $self->{accum}->{$addr.'|totscore'};
 
-  dbg ("auto-whitelist (db-based): $addr scores ".$entry->{count});
+  # if we had old-style AWL DB, ie no totscore, then just pretend we never saw this address before
+  if(!defined($entry->{totscore}))
+  {
+      $entry->{totscore} = 0;
+      $entry->{count} = 0;
+  }
+
+  dbg ("auto-whitelist (db-based): $addr scores ".$entry->{count}.'/'.$entry->{totscore});
   return $entry;
 }
 
 ###########################################################################
 
-sub increment_accumulator_for_entry {
-  my ($self, $entry) = @_;
+sub add_score {
+    my($self, $entry, $score) = @_;
 
-  $self->{accum}->{$entry->{addr}} = $entry->{count}+1;
+    $entry->{count}++;
+    $entry->{totscore} += $score;
+
+    dbg("add_score: New count: ".$entry->{count}.", new totscore: ".$entry->{totscore});
+
+    $self->{accum}->{$entry->{addr}} = $entry->{count};
+    $self->{accum}->{$entry->{addr}.'|totscore'} = $entry->{totscore};
+    return $entry;
 }
 
 ###########################################################################
 
-sub add_permanent_entry {
-  my ($self, $entry) = @_;
-
-  $self->{accum}->{$entry->{addr}} = 999;
-}
-
 sub remove_entry {
   my ($self, $entry) = @_;
+  delete $self->{accum}->{$entry->{addr}};
   delete $self->{accum}->{$entry->{addr}};
 }
 

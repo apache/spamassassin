@@ -95,9 +95,9 @@ sub new {
 
   # this will be sedded by whitelist implementations, so ~ is OK
   $self->{auto_whitelist_path} = "~/.spamassassin/auto-whitelist";
-  $self->{auto_whitelist_file_mode} = '0700';	# as string, with --x bits
+  $self->{auto_whitelist_file_mode} = '0600';	# as string, with --x bits
+  $self->{auto_whitelist_factor} = 0.5;
 
-  $self->{auto_whitelist_threshold} = 3;
   $self->{rewrite_subject} = 1;
   $self->{subject_tag} = '*****SPAM*****';
   $self->{report_header} = 0;
@@ -408,10 +408,18 @@ So to simply allow all character sets through without giving them points, use
       $self->{ok_locales} = $1; next;
     }
 
-=item auto_whitelist_threshold n	(default: 3)
+=item auto_whitelist_factor n	(default: 0.5, range [0..1])
 
-How many times a mail-sender must get a mail through as non-spam before their
-address is whitelisted.
+How much towards the long-term mean for the sender to regress a message.  Basically,
+the algorithm is to track the long-term mean score of messages for the sender (C<mean>),
+and then once we have otherwise fully calculated the score for this message (C<score>),
+we calculate the final score for the message as:
+
+C<finalscore> = C<score> +  (C<mean> - C<score>) * C<factor>
+
+So if C<factor> = 0.5, then we'll move to half way between the calculated score and the mean.
+If C<factor> = 0.3, then we'll move about 1/3 of the way from the score toward the mean.
+C<factor> = 1 means just use the long-term mean; C<factor> = 0 mean just use the calculated score.
 
 =cut
     if (/^auto[-_]whitelist[-_]threshold\s*(.*)\s*$/) {

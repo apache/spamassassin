@@ -71,14 +71,17 @@ Given an email address C<$addr>, return an entry object with the details of
 that address.
 
 The entry object is a reference to a hash, which must contain at least
-one key: C<count>, which is the count of times that address has been
-encountered before.  Anything over 3 means the address is whitelisted.
+two keys: C<count>, which is the count of times that address has been
+encountered before; and C<totscore>, which is the total of all scores for
+messages associated with that address.  From these two fields, an average
+score will be calculated, and the score for the current message will be
+regressed towards that mean message score.
 
 The hash can contain whatever other data your back-end needs to store,
 under other keys.
 
 The method should never return C<undef>, or a hash that does not contain
-a C<count> key.
+a C<count> key and a C<totscore> key.
 
 =cut 
 
@@ -91,44 +94,23 @@ sub get_addr_entry {
 
 ###########################################################################
 
-=item $entry = $addrlist->increment_accumulator_for_entry ($entry);
+=item $entry = $addrlist->add_score($entry, $score);
 
-If an address is either not found in the whitelist database, or is in the
-accumulator database but has not yet reached the threshold to enter the
-whitelist, this method will be called.  It should increment the counter for
-that address in the accumulator database, creating the database entry if it
-doesn't already exist.
+This method should add the given score to the whitelist database for the
+given entry, and then return the new entry.
 
 =cut
 
-sub increment_accumulator_for_entry {
-  my ($self, $entry) = @_;
-  die "unimpled base method";	# override this
-}
-
-###########################################################################
-
-=item $entry = $addrlist->add_permanent_entry ($entry);
-
-If an address is currently in the accumulator database, but has reached the
-threshold to enter the whitelist database, this method will be called.
-
-It should add the address from the entry to the whitelist database (possibly
-removing it from the accumulator if possible and necessary).
-
-=cut
-
-sub add_permanent_entry {
-  my ($self, $entry) = @_;
-  die "unimpled base method";	# override this
+sub add_score {
+    my ($self, $entry, $score) = @_;
+    die "unimpled base method"; # override this
 }
 
 ###########################################################################
 
 =item $entry = $addrlist->remove_entry ($entry);
 
-This method should remove the given entry from the whitelist database,
-both from the accumulator and the permanent db.
+This method should remove the given entry from the whitelist database.
 
 =cut
 

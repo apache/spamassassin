@@ -186,16 +186,9 @@ my $mail = Mail::SpamAssassin::NoMailAudit->new ( add_From_line => $opt_F );
 
   } else {
 
-    # DB-file-based: probably faster:
-    #
     require Mail::SpamAssassin::DBBasedAddrList;
     $addrlistfactory = Mail::SpamAssassin::DBBasedAddrList->new();
 
-    # directory-based: may take up more disk space, and be slower, but is
-    # safer in the face of concurrency.
-    #
-    # require Mail::SpamAssassin::DirBasedAddrList;
-    # $addrlistfactory = Mail::SpamAssassin::DirBasedAddrList->new();
   }
 
   $spamtest->set_persistent_address_list_factory ($addrlistfactory);
