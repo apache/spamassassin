@@ -124,9 +124,8 @@ describe RCVD_6_CAPS_ESMTP_ID	Received header forged by spam tool (6-caps ESMTP 
 header MSGID_NO_HOST            MESSAGEID =~ /\@>(?:$|\s)/m
 describe MSGID_NO_HOST 		Message-Id has no hostname
 
-# killer test, this one!
-header MSGID_OUTLOOK_TIME	eval:check_outlook_timestamp_token()
-describe MSGID_OUTLOOK_TIME 	Message-Id is fake (in Outlook Express format)
+header MSGID_OUTLOOK_INVALID	eval:check_outlook_message_id()
+describe MSGID_OUTLOOK_INVALID	Message-Id is fake (in Outlook Express format)
 
 ###########################################################################
 
