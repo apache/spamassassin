@@ -3322,4 +3322,25 @@ sub check_host_domain_ratio {
   return 0;
 }
 
+###########################################################################
+
+sub check_obfu_word {
+  my($self, $body, $word) = @_;
+
+  my $new = $word;
+  $new =~ s/(\w)/${1}\\W+/g;
+  $new =~ s/\\W\+$//;
+  $new =~ s/o/\[o0\]/gi;
+  $new =~ s/i/\[i1\]/gi;
+  $new =~ s/l/\[l1|\]/gi;
+  $new =~ s/v/(?:v|\\\/)/gi;
+
+  foreach (@{$body}) {
+    next if /\b$word\b/i;
+    return 1 if /$new/i;
+  }
+
+  return 0;
+}
+
 1;
