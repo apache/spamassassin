@@ -531,3 +531,6 @@ describe SUBJ_FREE_CAP		Subject contains the word 'FREE'
 header VAR_REF_IN_RECEIVED      Received =~ /from \$\S+ \(/
 describe VAR_REF_IN_RECEIVED    Received contains a $variable reference
 
+header USERNAME_IN_SUBJECT      eval:check_for_to_in_subject()
+describe USERNAME_IN_SUBJECT    To: username at front of subject
+
