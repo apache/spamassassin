@@ -132,7 +132,7 @@ sub _check_recipients {
   for ('ToCc', 'Bcc') {
     my $to = $self->get($_);	# get recipients
     $to =~ s/\(.*?\)//g;	# strip out the (comments)
-    @inputs = ($to =~ m/([\w.=-]+\@\w+(?:[\w.-]+\.)+\w+)/g);
+    push(@inputs, ($to =~ m/([\w.=-]+\@\w+(?:[\w.-]+\.)+\w+)/g));
     last if scalar(@inputs) >= TOCC_SIMILAR_COUNT;
   }
 
