@@ -11,7 +11,6 @@ if [ ! -d $WEBDIR ] ; then
 fi
 
 GPGSIGN=$SA_GPGSIGN
-test -x "$GPGSIGN" || GPGSIGN=$HOME/bin/gpgsign
 test -x "$GPGSIGN" || GPGSIGN=$HOME/sabuildtools/bin/gpgsign
 
 DEVDIR=$WEBDIR/devel
