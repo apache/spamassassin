@@ -2198,8 +2198,6 @@ sub _handle_hit {
     # ignore meta-match sub-rules.
     if ($rule =~ /^__/) { push(@{$self->{subtest_names_hit}}, $rule); return; }
 
-    $score = sprintf("%2.1f",$score);
-
     my $tflags = $self->{conf}->{tflags}->{$rule}; $tflags ||= '';
 
     # ignore 'learn' or 'userconf' rules, when considering score for
@@ -2224,9 +2222,9 @@ sub _handle_hit {
 	$self->{test_logs} .= sprintf ("* % 2.1f -- %s%s\n%s",
 				       $score, $area, $desc, $self->{test_log_msgs});
     } else {
-	$self->{test_logs} .= sprintf ("%-18s %-14s%s%s\n%s",
-				       $rule,"($score points)",
-				       $area, $desc, $self->{test_log_msgs});
+        $self->{test_logs} .= sprintf ("% 2.1f %-20s %s%s\n%s",
+				       $score, $rule, $area, $desc,
+				       $self->{test_log_msgs});
     }
     $self->{test_log_msgs} = '';	# clear test logs
 }
@@ -2268,7 +2266,7 @@ sub _test_log_line {
   if ($self->{conf}->{use_terse_report}) {
     $self->{test_log_msgs} .= sprintf ("%9s [%s]\n", "", $msg);
   } else {
-    $self->{test_log_msgs} .= sprintf ("%18s [%s]\n", "", $msg);
+    $self->{test_log_msgs} .= sprintf ("%26s [%s]\n", "", $msg);
   }
 }
 
