@@ -66,6 +66,8 @@ header RATWARE_BANG_HASH        X-Mailer =~ /!.*\#.*\*/
 describe RATWARE_BANG_HASH 	Bulk email software fingerprint (bang-hash) found in headers
 header RATWARE_FLOAT            X-Mailer =~ /^\d\.\d\d/
 describe RATWARE_FLOAT 		Bulk email software fingerprint (float) found in headers
+header RATWARE_DIRECT_EMAIL		X-Mailer =~ /Direct Email/i
+describe RATWARE_DIRECT_EMAIL	Bulk email software fingerprint (Direct Email) found in headers
 
 ###########################################################################
 # Now, detect forgeries of real MUAs
@@ -120,5 +122,4 @@ header __EUDORA_MSGID           MESSAGEID =~ /^<(?:\d\d?\.){4,5}\d{14}\.[a-f0-9]
 # Note: uses X_LOOP and X_MAILING_LIST as subrules
 meta FORGED_MUA_EUDORA          (__EUDORA_MUA && !__EUDORA_MSGID && !__UNUSABLE_MSGID && !X_LOOP && !X_MAILING_LIST && !__MAC_EUDORA_MUA && !__OLD_EUDORA1 && !(__OLD_EUDORA2 && !__QUALCOMM))
 describe FORGED_MUA_EUDORA      Forged mail pretending to be from Eudora
-
 

@@ -104,3 +104,9 @@ header NIGERIAN_SUBJECT8	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*(?:appeal|request) 
 describe NIGERIAN_SUBJECT8	Subject is indicative of a Nigerian spam
 
 ##############################################################################
+
+header __IDENT_NOBODY		Received =~ /ident[:=]nobody\b/i
+header __REGSITE_COM		Received =~ /\.registeredsite\.com\s/
+header __X_BEENTHERE		exists:X-BeenThere
+header __IDENT_NOBODY_LOCALHOST Received =~ /\bident[:=]nobody\@localhost\b/i
+meta IDENT_NOBODY		(__IDENT_NOBODY && !__IDENT_NOBODY_LOCALHOST && !__REGSITE_COM && !((FORGOTTEN_PASSWORD + SUBJECT_IS_LIST + __X_BEENTHERE + KNOWN_MAILING_LIST) > 1))
