@@ -784,6 +784,11 @@ if you want to allow any language.  The default setting is C<all>.
 =item zh	chinese
 
 =back
+example:
+
+  ok_languages all		(allow all languages)
+  ok_languages en		(only allow English)
+  ok_languages en ja zh		(English, Japanese and Chinese)
 
 =cut
 
@@ -835,6 +840,11 @@ Thai
 Chinese (both simplified and traditional)
 
 =back
+
+example:
+
+  ok_locales all		(allow all character sets)
+  ok_locales ja ru th zh	(penalise Chinese messages)
 
 =cut
 
@@ -1218,6 +1228,100 @@ How many seconds to wait before retrying an MX check.
     }
 
 
+=item dns_available { yes | test[: name1 name2...] | no }   (default: test)
+
+By default, SpamAssassin will query some default hosts on the internet to
+attempt to check if DNS is working on not. The problem is that it can introduce
+some delay if your network connection is down, and in some cases it can wrongly
+guess that DNS is unavailable because the test connections failed.
+SpamAssassin includes a default set of 13 servers, among which 3 are picked
+randomly.
+
+You can however specify your own list by specifying
+
+dns_available test: server1.tld server2.tld server3.tld
+
+=cut
+
+    if (/^dns[-_]available\s+(yes|no|test|test:\s+.+)$/) {
+      $self->{dns_available} = ($1 or "test"); next;
+    }
+
+=item auto_whitelist_factor n	(default: 0.5, range [0..1])
+
+How much towards the long-term mean for the sender to regress a message.
+Basically, the algorithm is to track the long-term mean score of messages for
+the sender (C<mean>), and then once we have otherwise fully calculated the
+score for this message (C<score>), we calculate the final score for the
+message as:
+
+C<finalscore> = C<score> +  (C<mean> - C<score>) * C<factor>
+
+So if C<factor> = 0.5, then we'll move to half way between the calculated
+score and the mean.  If C<factor> = 0.3, then we'll move about 1/3 of the way
+from the score toward the mean.  C<factor> = 1 means just use the long-term
+mean; C<factor> = 0 mean just use the calculated score.
+
+=cut
+    if (/^auto[-_]whitelist[-_]factor\s+(.*)$/) {
+      $self->{auto_whitelist_factor} = $1; next;
+    }
+
+=item auto_learn ( 0 | 1 )	(default: 1)
+
+Whether SpamAssassin should automatically feed high-scoring mails (or
+low-scoring mails, for non-spam) into its learning systems.  The only learning
+system supported currently is a naive-Bayesian-style classifier.
+
+Note that tests with tflags set to 'learn' (the Bayesian rules) or 'userconf'
+(user whitelisting rules) are ignored for the purposes of auto-training.
+
+=cut
+
+    if (/^auto[-_]learn\s+(.*)$/) {
+      $self->{auto_learn} = $1+0; next;
+    }
+
+=item auto_learn_threshold_nonspam n.nn	(default -2.0)
+
+The score threshold below which a mail has to score, to be fed into
+SpamAssassin's learning systems automatically as a non-spam message.
+
+=cut
+
+    if (/^auto[-_]learn[-_]threshold[-_]nonspam\s+(.*)$/) {
+      $self->{auto_learn_threshold_nonspam} = $1+0; next;
+    }
+
+=item auto_learn_threshold_spam n.nn	(default 15.0)
+
+The score threshold above which a mail has to score, to be fed into
+SpamAssassin's learning systems automatically as a spam message.
+
+=cut
+
+    if (/^auto[-_]learn[-_]threshold[-_]spam\s+(.*)$/) {
+      $self->{auto_learn_threshold_spam} = $1+0; next;
+    }
+
+
+=item bayes_ignore_header	
+
+If you receive mail filtered by upstream mail systems, like
+a spam-filtering ISP or mailing list, and that service adds
+new headers (as most of them do), these headers may provide
+inappropriate cues to the Bayesian classifier, allowing it
+to take a "short cut". To avoid this, list the headers using this
+setting.  Example:
+
+	bayes_ignore_header X-Upstream-Spamfilter
+	bayes_ignore_header X-Upstream-SomethingElse
+
+=cut
+    if (/^bayes[-_]ignore[-_]header\s+(.*)$/) {
+      push (@{$self->{bayes_ignore_headers}}, $1); next;
+    }
+
 
 
 ###########################################################################
@@ -1576,83 +1680,6 @@ C<user_prefs> file.
 =over 4
 
 
-=item dns_available { yes | test[: name1 name2...] | no }   (default: test)
-
-By default, SpamAssassin will query some default hosts on the internet to
-attempt to check if DNS is working on not. The problem is that it can introduce
-some delay if your network connection is down, and in some cases it can wrongly
-guess that DNS is unavailable because the test connections failed.
-SpamAssassin includes a default set of 13 servers, among which 3 are picked
-randomly.
-
-You can however specify your own list by specifying
-
-dns_available test: server1.tld server2.tld server3.tld
-
-=cut
-
-    if (/^dns[-_]available\s+(yes|no|test|test:\s+.+)$/) {
-      $self->{dns_available} = ($1 or "test"); next;
-    }
-
-=item auto_whitelist_factor n	(default: 0.5, range [0..1])
-
-How much towards the long-term mean for the sender to regress a message.
-Basically, the algorithm is to track the long-term mean score of messages for
-the sender (C<mean>), and then once we have otherwise fully calculated the
-score for this message (C<score>), we calculate the final score for the
-message as:
-
-C<finalscore> = C<score> +  (C<mean> - C<score>) * C<factor>
-
-So if C<factor> = 0.5, then we'll move to half way between the calculated
-score and the mean.  If C<factor> = 0.3, then we'll move about 1/3 of the way
-from the score toward the mean.  C<factor> = 1 means just use the long-term
-mean; C<factor> = 0 mean just use the calculated score.
-
-=cut
-    if (/^auto[-_]whitelist[-_]factor\s+(.*)$/) {
-      $self->{auto_whitelist_factor} = $1; next;
-    }
-
-=item auto_learn ( 0 | 1 )	(default: 1)
-
-Whether SpamAssassin should automatically feed high-scoring mails (or
-low-scoring mails, for non-spam) into its learning systems.  The only learning
-system supported currently is a naive-Bayesian-style classifier.
-
-Note that tests with tflags set to 'learn' (the Bayesian rules) or 'userconf'
-(user whitelisting rules) are ignored for the purposes of auto-training.
-
-=cut
-
-    if (/^auto[-_]learn\s+(.*)$/) {
-      $self->{auto_learn} = $1+0; next;
-    }
-
-=item auto_learn_threshold_nonspam n.nn	(default -2.0)
-
-The score threshold below which a mail has to score, to be fed into
-SpamAssassin's learning systems automatically as a non-spam message.
-
-=cut
-
-    if (/^auto[-_]learn[-_]threshold[-_]nonspam\s+(.*)$/) {
-      $self->{auto_learn_threshold_nonspam} = $1+0; next;
-    }
-
-=item auto_learn_threshold_spam n.nn	(default 15.0)
-
-The score threshold above which a mail has to score, to be fed into
-SpamAssassin's learning systems automatically as a spam message.
-
-=cut
-
-    if (/^auto[-_]learn[-_]threshold[-_]spam\s+(.*)$/) {
-      $self->{auto_learn_threshold_spam} = $1+0; next;
-    }
-
-
 =item test SYMBOLIC_TEST_NAME (ok|fail) Some string to test against
 
 Define a regression testing string. You can have more than one regression test string
@@ -1781,23 +1808,6 @@ things will go wrong.
 =cut
     if (/^bayes[-_]file[-_]mode\s+(.*)$/) {
       $self->{bayes_file_mode} = $1; next;
-    }
-
-=item bayes_ignore_header	
-
-If you receive mail filtered by upstream mail systems, like
-a spam-filtering ISP or mailing list, and that service adds
-new headers (as most of them do), these headers may provide
-inappropriate cues to the Bayesian classifier, allowing it
-to take a "short cut". To avoid this, list the headers using this
-setting.  Example:
-
-	bayes_ignore_header X-Upstream-Spamfilter
-	bayes_ignore_header X-Upstream-SomethingElse
-
-=cut
-    if (/^bayes[-_]ignore[-_]header\s+(.*)$/) {
-      push (@{$self->{bayes_ignore_headers}}, $1); next;
     }
 
 =item bayes_use_hapaxes		(default: 1)
