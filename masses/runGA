@@ -5,6 +5,9 @@
 
 NAME="set$SCORESET"
 
+# beware!
+svn revert ../rules/50_scores.cf
+
 if [ ! -f "ORIG/ham-$NAME.log" -o ! -f "ORIG/spam-$NAME.log" ]; then
 	echo "Couldn't find logs for $NAME" >&2
 	exit 1
@@ -51,10 +54,22 @@ echo "[Generating perceptron]"
 # Generate perceptron with full logs
 make -j $numcpus SCORESET=$SCORESET > make.output 2>&1
 
-( echo "[gen run start]" ; pwd ; date ; \
-./perceptron -p 2.0 -e 100; \
-mv perceptron.scores gen-$NAME.scores ; \
-echo "[gen run end]" ; pwd ; date ) | tee gen-$NAME.out
+for threshold in 5.0 4.9 4.8 4.7 4.6 4.5 4.4 4.3 4.2 4.1 4.0; do
+	(
+	echo "[gen run start]"
+	pwd
+	date
+	./perceptron -t $threshold -p 2.0 -e 100
+	mv perceptron.scores gen-$NAME-$threshold.scores
+	echo "[gen run end]"
+	pwd
+	date
+	) | tee gen-$NAME-$threshold.out
+	svn revert ../rules/50_scores.cf
+	./rewrite-cf-with-new-scores $SCORESET ../rules/50_scores.cf gen-$NAME-$threshold.scores > /tmp/runGA.$$
+	mv /tmp/runGA.$$ ../rules/50_scores.cf
+	./fp-fn-statistics --ham ham-validate.log --spam spam-validate.log --scoreset $SCORESET > gen-$NAME-$threshold.statistics
+done
 
 else
 

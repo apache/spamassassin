@@ -386,7 +386,7 @@ sub tcr {
   my $nspamlegit = $nspam - $nspamspam;
   my $nlegitlegit = $nlegit - $nlegitspam;
 
-  my $lambda = 99;
+  my $lambda = 50;
 
   my $werr = ($lambda * $nlegitspam + $nspamlegit)
                   / ($lambda * $nlegit + $nspam);

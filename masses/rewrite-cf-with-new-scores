@@ -112,7 +112,7 @@ foreach my $name (@gascoreorder) {
   # Create new score line
   print join(" ","score",$name,generate_scores(@scores)),"\n";
 }
-print "\n", $out, "\n";
+print "\n", $out;
 
 sub generate_scores {
   my (@scores) = @_;

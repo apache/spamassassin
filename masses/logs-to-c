@@ -35,13 +35,13 @@ $opt_scoreset = 0 if ( !defined $opt_scoreset );
 
 my $nybias = 10;
 
-# lambda value for TCR equation, indicating the "cost" of recovering
-# from an FP.  The values are: 1 = tagged only, 9 = mailed back to
-# sender asking for token (TMDA style), 999 = deleted outright.
-# We (SpamAssassin) use a default of 5, representing "moved to
-# infrequently-read folder".
+# lambda value for TCR equation, representing the cost of of an FP vs. the
+# cost of a FN.  Some example values are: 1 = tagged only, 9 = mailed back
+# to sender asking for token, 999 = blocking or deleting a message.
+#
+# We roughly aim for a value representing "moved to infrequently-read folder".
 
-my $lambda = 5;
+my $lambda = 50;
 if ($opt_lambda) { $lambda = $opt_lambda; }
 
 my %is_spam = ();
@@ -82,17 +82,16 @@ sub readlogs {
     open (IN, "<$file");
 
     while (<IN>) {
-      next if /^\#/;
-      next if /^$/;
-      if($_ !~ /^.\s+([-\d]+)\s+\S+\s*/) { warn "bad line: $_"; next; }
+      next unless /^[^#]/;
+      if($_ !~ /^.\s+([-\d]+)\s+(\S+)\s*/) { warn "bad line: $_"; next; }
       my $hits = $1;
-#my $foo = $_;
+      #my $id = $2;
       $_ = $'; s/(?:bayes|time)=\S+//; s/,,+/,/g; s/^\s+//; s/\s+$//;
 
       my $score = 0;
       my @tests = ();
       foreach my $tst (split (/,/, $_)) {
-	next if ($tst eq '');
+	next unless $tst;
 	if (!defined $scores{$tst}) {
           #warn "unknown test in $file, ignored: $tst\n";
 	  next;
@@ -127,7 +126,7 @@ sub readlogs {
 	$num_ham++;
         if ($justcount) {
           if ($score >= $threshold) {
-#print "$score -- $foo";
+	    #print STDERR "FP: $id\n";
             $ga_ny++; $nyscore += $score;
           } else {
             $ga_nn++; $nnscore += $score;
@@ -464,7 +463,8 @@ sub evaluate {
 
   my $sr = ($nspamspam / $nspam) * 100.0;
   my $sp = ($nspamspam / ($nspamspam + $nlegitspam)) * 100.0;
-  printf "# TCR: %3.6f  SpamRecall: %3.3f%%  SpamPrec: %3.3f%%\n", $tcr, $sr, $sp;
+  printf "# TCR(l=%s): %3.6f  SpamRecall: %3.3f%%  SpamPrec: %3.3f%%\n",
+    $lambda, $tcr, $sr, $sp;
 }
 
 __DATA__

@@ -58,13 +58,14 @@ void train (int num_epochs, double learning_rate);
 void usage ();
 
 /* Converts a weight to a SpamAssassin score. */
-#define weight_to_score(x) (-5*(x)/bias)
-#define score_to_weight(x) (-(x)*bias/5)
+#define weight_to_score(x) (-threshold*(x)/bias)
+#define score_to_weight(x) (-(x)*bias/threshold)
 
 int wheel_size; /* The number of entries in the roulette wheel (NOT THE
 		   SIZE OF THE ROULETTE_WHEEL ARRAY!). */
 int * roulette_wheel; /* Used for roulette wheel selection. */
 double ham_preference = 2.0;
+double threshold = 5.0;
 
 double * weights; /* The weights of the single-layer perceptron. */
 double bias; /* The network bias for the single-layer perceptron. */
@@ -174,7 +175,6 @@ void write_weights (FILE * fp) {
 	int i;
 	int ga_nn, ga_yy, ga_ny, ga_yn;
 	double nnscore, yyscore, nyscore, ynscore;
-	double threshold = 5;
 
 	ga_nn = ga_yy = ga_ny = ga_yn = 0;
 	nnscore = yyscore = nyscore = ynscore = 0;
@@ -182,7 +182,7 @@ void write_weights (FILE * fp) {
 	/* Run through all of the instances in the training set and tally up
 	 * the scores. */
 	for (i = 0; i < num_nondup; i++) {
-		double score = weight_to_score(evaluate_test_nogain(i)) + 5;
+		double score = weight_to_score(evaluate_test_nogain(i)) + threshold;
 
 		if ( score >= threshold && is_spam[i] ) {
 			ga_yy += tests_count[i];
@@ -360,7 +360,9 @@ void usage () {
 			"                      tests hit (2.0 default)\n"
 			"  -e num_epochs = number of epochs to train (15 default)\n"
 			"  -l learning_rate = learning rate for gradient descent (2.0 default)\n"
+			"  -t threshold = minimum threshold for spam (5.0 default)\n"
 			"  -w weight_decay = per-epoch decay of learned weight and bias (1.0 default)\n"
+			"  -h = print this help\n"
 			"\n");
 	exit(30);
 }
@@ -372,7 +374,7 @@ int main (int argc, char ** argv) {
 	int arg;
 
 	/* Read the command line options */
-	while ((arg = getopt (argc, argv, "p:e:l:w:?")) != -1) {
+	while ((arg = getopt (argc, argv, "p:e:l:t:w:h?")) != -1) {
 		switch (arg) {
 			case 'p':
 				ham_preference = atof(optarg);
@@ -386,10 +388,15 @@ int main (int argc, char ** argv) {
 				learning_rate = atof(optarg);
 				break;
 
+			case 't':
+				threshold = atof(optarg);
+				break;
+
 			case 'w':
 				weight_decay = atof(optarg);
 				break;
 
+			case 'h':
 			case '?':
 				usage();
 				break;
