@@ -1827,6 +1827,7 @@ sub _put_token {
                    AND token = ?
                    AND ham_count + ? >= 0";
 	@args = ($ham_count, $atime, $self->{_userid}, $token, $ham_count);
+	$updated_atime_p = 1; # note the fact that we did do it
       }
       else {
 	$sql = "UPDATE bayes_token
