@@ -616,8 +616,8 @@ If C<factor> = 0.3, then we'll move about 1/3 of the way from the score toward t
 C<factor> = 1 means just use the long-term mean; C<factor> = 0 mean just use the calculated score.
 
 =cut
-    if (/^auto[-_]whitelist[-_]threshold\s*(.*)\s*$/) {
-      $self->{auto_whitelist_threshold} = $1; next;
+    if (/^auto[-_]whitelist[-_]factor\s*(.*)\s*$/) {
+      $self->{auto_whitelist_factor} = $1; next;
     }
 
 =item describe SYMBOLIC_TEST_NAME description ...
