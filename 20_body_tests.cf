@@ -270,13 +270,6 @@ describe COMMUNIGATE		Sent using a trial version of CommuniGate
 body AUTO_EMAIL_REMOVAL		/Auto Email Removal/
 describe AUTO_EMAIL_REMOVAL	Claims auto-email removal
 
-full PORN_3			eval:porn_word_test()
-describe PORN_3			Uses words and phrases which indicate porn (3)
-
-# (contrib: skod)
-body PORN_6			/\b(?:\d+\+? xxx pictures|xxx photos?)\b/i
-describe PORN_6			Uses words and phrases which indicate porn (6)
-
 # this seems to be the new fashion (as of Jul 5 2002).  base64-encoded parts need to
 # be stripped before this match
 rawbody TRACKER_ID		/^[a-z0-9]{6,}[-_a-z0-9]{12,}[a-z0-9]{6,}\s*$/is
@@ -757,69 +750,69 @@ describe OBFUSCATING_COMMENT    HTML comments which obfuscate text
 test OBFUSCATING_COMMENT ok     This is a te<!--foo-->st
 test OBFUSCATING_COMMENT fail   Not a <!-- problem --> here
 
-## Contrib: Mark Perkel
+## Contrib: Marc Perkel
 
-body OFFSHORE_SCAM		/\boffshore\b.{0,20}(?:credit card|companies|account|financ|websites?)\b/i
+body OFFSHORE_SCAM		/\boffshore\b.{0,20}(?:credit card|companies|account|financ|websites?)/i
 describe OFFSHORE_SCAM		Off Shore Scams
 
-body VACATION_SCAM		/\b(?:free|mini-?|dream|special).{0,10}vacation|vacation (?:offer|promotion|package|for two|getaway)\b/i
+body VACATION_SCAM		/\b(?:free|mini-?|dream|special).{0,10}vacation|vacation (?:offer|promotion|package|for two|getaway)/i
 describe VACATION_SCAM		Vacation Offers
 
 body WHY_PAY_MORE		/\bwhy pay more\b/i
 describe WHY_PAY_MORE		Why Pay More?
 
-body CONGRATULATIONS		/\bcongratulations! you\b/i
+body CONGRATULATIONS		/\bcongratulations! you/i
 describe CONGRATULATIONS	Congratulations - you've been scammed?
 
 body SIGN_UP			/\b(?:free sign up|sign up today)\b/i
 describe SIGN_UP		Sign up Free Today
 
-body FREE_CELL_PHONE	 /\bfree .{0,12}cell phone\b/i
+body FREE_CELL_PHONE	 	/\bfree .{0,12}(?:cell|mobile) phone/i
 describe FREE_CELL_PHONE	Free Cell Phone
 
-body FREE_PREVIEW	 /\bfree preview\b/i
+body FREE_PREVIEW		/\bfree preview\b/i
 describe FREE_PREVIEW		Free Preview
 
-body FREE_ACCESS	 /\bfree access\b/i
+body FREE_ACCESS		/\bfree access\b/i
 describe FREE_ACCESS		Free Access
 
-body FREE_LEADS		 /\bfree leads\b/i
+body FREE_LEADS			/\bfree leads\b/i
 describe FREE_LEADS		Free Leads
 
-body FREE_TICKETS	 /\bfree ticket\b/i
+body FREE_TICKETS		/\bfree ticket/i
 describe FREE_TICKETS		Free Tickets
 
-body OFFER		 /\b(?:free|special|trial) offer\b/i
+body OFFER			/\b(?:free|special|trial) offer/i
 describe OFFER			Free Offer
 
 body OFFER_EXPIRE	        /\boffer expires\b/i
 describe OFFER_EXPIRE		Offer Expires
 
-body FREE_QUOTE		        /\bfree quote\b/i
+body FREE_QUOTE		        /\bfree quote/i
 describe FREE_QUOTE		Free Quote
 
 body FREE_INSTALL	        /\bfree installation\b/i
 describe FREE_INSTALL		Free Installation
 
-body FREE_SAMPLE	        /\bfree sample\b/i
+body FREE_SAMPLE	        /\bfree sample/i
 describe FREE_SAMPLE		Free Sample
 
-body FREE_DVD		        /\bfree dvd\b/i
+body FREE_DVD		        /\bfree dvd/i
 describe FREE_DVD		Free DVD
 
-body FREE_INVESTMENT	        /\bfree investment\b/i
+body FREE_INVESTMENT	        /\bfree investment/i
 describe FREE_INVESTMENT	Free Investment 
 
-body INVESTMENT		        /\binvestment decision\b/i
+body INVESTMENT		        /\binvestment decision/i
 describe INVESTMENT		Investment Decision
 
 body FREE_TRIAL		        /\bfree trial\b/i
 describe FREE_TRIAL		Free Trial
 
-body FREE_MEMBERSHIP	        /\bfree membership\b/i
+body FREE_MEMBERSHIP	        /\bfree membership/i
 describe FREE_MEMBERSHIP	Free Membership
 
-body FREE_FLAG		        /\bfree flag\b/i
+body FREE_FLAG		        /\bfree flag/i
 describe FREE_FLAG		Free Flag
 
 body FREE_HOSTING	        /\bfree hosting\b/i
@@ -828,7 +821,7 @@ describe FREE_HOSTING		Free Hosting
 body FREE_WEBSITE	        /\bfree website/i
 describe FREE_WEBSITE		Free Website
 
-body CREDIT_CARD	        /\bcredit card.{1,10}(?:offer|debt|decision)\b/i
+body CREDIT_CARD	        /\bcredit card.{1,10}(?:offer|debt|decision)/i
 describe CREDIT_CARD		Credit Card Offers
 
 body NO_CREDIT_CHECK	        /\bno credit check\b/i
@@ -837,10 +830,10 @@ describe NO_CREDIT_CHECK	No Credit Check
 body BANKRUPTCY		        /\b(?:avoid|past) bankruptcy\b/i
 describe BANKRUPTCY		Avoid Bankruptcy
 
-body CREDIT_BUREAU	        /\ball .{0,9}credit bureau\b/i
+body CREDIT_BUREAU	        /\ball .{0,9}credit bureaus?\b/i
 describe CREDIT_BUREAU		Credit Bureaus
 
-body ACCEPT_CREDIT_CARDS        /\baccept.{1,15}credit card\b/i
+body ACCEPT_CREDIT_CARDS        /\baccept.{1,15}credit cards?\b/i
 describe ACCEPT_CREDIT_CARDS	Accept Credit Cards
 
 body BAD_CREDIT		        /\b(?:bad|poor|no|eliminate|repair|(?:re)establish|damag).{0,10} (?:credit|debt)\b/i
@@ -855,11 +848,10 @@ describe LOW_INTEREST		Lower Interest Rates
 body COMPARE_RATES              /\bcompare .{0,9}rates?\b/i
 describe COMPARE_RATES          Compare Rates
 
-# jm: made harder for FP; require a capital S
 body SAVE_UP_TO                 /\b(?-i:S)ave up to\b/i
 describe SAVE_UP_TO             Save Up To
 
-body LOW_PAYMENT	        /\b(?:reduce|low).{0.12} payment\b/i
+body LOW_PAYMENT	        /\b(?:reduce|low).{0.12} payment/i
 describe LOW_PAYMENT		Lower Monthly Payment
 
 body CONSOLIDATE_DEBT	        /\b(?:consolidate .{0,9} (?:debt|credit)|debt (?:consolidation|elimination))\b/i
@@ -881,7 +873,7 @@ body SEARCH_ENGINE_PROMO        /\b(?:(?:submitt?|list)(?:ed|ing|s)?|place(?:d|m
 describe SEARCH_ENGINE_PROMO    Discusses search engine listings
 
 body OPPORTUNITY_2		/\b(?:opportunity (?:pass|of a lifetime|is knocking|for you)|(?:investment|unique) opportunity)\b/i
-describe OPPORTUNITY_2		What a deal!
+describe OPPORTUNITY_2		Opportunity - What a deal!
 
 body MORE_TRAFFIC	        /\bmore (?:internet|web) traffic\b/i
 describe MORE_TRAFFIC		More Internet Traffic
@@ -898,13 +890,13 @@ describe NO_SPENDING		No Spending Limits
 body NO_STRINGS		        /\bno strings attached\b/i
 describe NO_STRINGS		No Strings Attached
 
-body NO_FEE		        /\bno .{0,12}fee\b/i
+body NO_FEE		        /\bno .{0,12}fees?\b/i
 describe NO_FEE			No Fees
 
 body NO_MEDICAL		        /\bno medical exam/i
 describe NO_MEDICAL		No Medical Exams
 
-body NO_AGE		        /\bno age restrictions\b/i
+body NO_AGE		        /\bno age (?:restriction|limit)/i
 describe NO_AGE			No Age Restrictions
 
 body NO_FORMS		        /\bno .{0,9}forms\b/i
@@ -916,7 +908,7 @@ describe NO_REFUND		They keep your money -- No Refund!
 body NO_GIMMICK		        /\bno gimmick\b/i
 describe NO_GIMMICK		No Gimmick
 
-body NO_INVESTMENT	        /\bno investment\b/i
+body NO_INVESTMENT	        /\bno investment/i
 describe NO_INVESTMENT		No Investment
 
 body INITIAL_INVEST	        /\binitial investment\b/i
@@ -949,7 +941,7 @@ describe WHY_WAIT		What are you waiting for
 body SUPPLIES_LIMITED	        /\bsupplies are limited\b/i
 describe SUPPLIES_LIMITED	Supplies are Limited
 
-body SECRET_RECORD	        /\bsecretly record\b/i
+body SECRET_RECORD	        /\bsecretly record/i
 describe SECRET_RECORD		Secretly Recorded
 
 body INCREDIBLE		        /\bincredible secrets\b/i
@@ -961,8 +953,8 @@ describe FIND_ANYTHING		Find out Anything
 body SEDUCTION		        /\b(?:seduc|attract).{0,8} (?:ebook|opposite sex|women)\b/i
 describe SEDUCTION		Score with babes!
 
-body MARKET_SOLUTION	        /\bmarket.{0,9} solution\b/i
-describe MARKET_SOLUTION	Marketing Solution
+body MARKET_SOLUTION	        /\bmarket.{0,9} solution/i
+describe MARKET_SOLUTION	Marketing Solutions
 
 body MARKETING		        /\bdirect marketing\b/i
 describe MARKETING		Direct Marketing
@@ -970,7 +962,7 @@ describe MARKETING		Direct Marketing
 body SAVE_MONEY		        /\bsave .{0,9}(?:money|thousands|millions|up to)\b/i
 describe SAVE_MONEY		Save big money
 
-body BREAKTHROUGH	        /\bbreakthrough price\b/i
+body BREAKTHROUGH	        /\bbreakthrough price/i
 describe BREAKTHROUGH		Breakthrough Pricing
 
 body GUARANTEED_STUFF	        /\bguarantee.{0,15}(?:income|money|monthly)\b/i
@@ -982,34 +974,31 @@ describe INCOME			Additional Income
 body EARNINGS		        /\b(?:potential (?:earnings|income)|income potential)\b/i
 describe EARNINGS		Potential Earnings
 
-body THE_BEST_RATE	        /\bthe best rate\b/i
-describe THE_BEST_RATE		The best Rate
+body THE_BEST_RATE	        /\bthe best rate/i
+describe THE_BEST_RATE		The best Rates
 
-body BEST_PRICE		        /\bbest price\b/i
-describe BEST_PRICE		Best Prices
-
-body WE_PROMISE_YOU	        /\bwe promise .{0,9}you\b/i
+body WE_PROMISE_YOU	        /\bwe promise .{0,9}you/i
 describe WE_PROMISE_YOU		Promise you ...!
 
-body OUTSTANDING_VALUE	        /\boutstanding value\b/i
-describe OUTSTANDING_VALUE	Outstanding Value
+body OUTSTANDING_VALUE	        /\boutstanding value/i
+describe OUTSTANDING_VALUE	Outstanding Values
 
-body AMAZING_STUFF	        /\bamazing (?:product|rates)\b/i
+body AMAZING_STUFF	        /\bamazing (?:product|rates)/i
 describe AMAZING_STUFF		Amazing Stuff
 
 body CASH_BONUS		        /\bcash bonus\b/i
 describe CASH_BONUS		Cash Bonus
 
-body BONUS_PAYMENT	        /\bbonus payment\b/i
+body BONUS_PAYMENT	        /\bbonus payment/i
 describe BONUS_PAYMENT		Bonus Payments
 
 body SHOPPING_SPREE	        /\bshopping spree\b/i
 describe SHOPPING_SPREE		Shopping Spree
 
-body GIFT_CERTIFICATE	        /\bgift certificate\b/i
+body GIFT_CERTIFICATE	        /\bgift certificates?/i
 describe GIFT_CERTIFICATE	Gift Certificate
 
-body FANTASTIC		        /\bfantastic {0,9}(?:price|deal|saving)\b/i
+body FANTASTIC		        /\bfantastic {0,9}(?:price|deal|saving)/i
 describe FANTASTIC		Fantastic Deal
 
 body SIGNIFICANT	        /\bsignificant savings\b/i
@@ -1018,17 +1007,16 @@ describe SIGNIFICANT		Significant Savings
 body CENTS_ON_DOLLAR	        /\bcents on the dollar\b/i
 describe CENTS_ON_DOLLAR	Cents on the Dollar
 
-body IRS		        /\birs .{0,15}secrets\b/i
+body IRS		        /\bIRS .{0,15}secrets\b/i
 describe IRS			IRS Scams
 
-body COUPON		        /\boff coupon\b/i
+body COUPON		        /\boff coupon/i
 describe COUPON			Offers Coupon
 
 body CANT_LIVE_WITHOUT	        /\bcan.{0,4} live without\b/i
 describe CANT_LIVE_WITHOUT	Can't live without?
 
-# Jul 11 2002 jm: removed "brand name" -- too many fps.
-body NAME_BRAND		        /\b(?:famous name brand|major brand)\b/i
+body NAME_BRAND		        /\b(?:famous name brand|major brand)/i
 describe NAME_BRAND		Name Brand
 
 body DIET		        /\b(?:(?:without|no) (?:exercis|diet)ing|weight loss|(?:extra|lose|lost|losing).{0,9} (?:pounds|weight|inches)|burn.{1,10}fat)\b/i
@@ -1043,7 +1031,7 @@ describe REVERSE_AGING		Reverses Aging
 body HAIR_LOSS		        /\b(?:thinn?ing|restore|grow|new) hair|hair loss/i
 describe HAIR_LOSS		Cures Baldness
 
-body CABLE_CONVERTER	        /\bcable converter\b/i
+body CABLE_CONVERTER	        /\bcable (?:converter|descrambler)/i
 describe CABLE_CONVERTER	Cable Converter
 
 body LUXURY_CAR		        /\bluxury car\b/i
@@ -1062,7 +1050,7 @@ body HARD_CASH		        /\bhard cash\b/i
 describe HARD_CASH		Is cash really hard?
 
 body BIG_BUCKS		        /\bbig bucks\b/i
-describe BIG_BUCKS		They are all the same size
+describe BIG_BUCKS		Big Bucks
 
 body BUY_JUDGEMENTS	        /\b(?:purchase|collect|divorce) {0,20} judgements\b/i
 describe BUY_JUDGEMENTS		Purchase Judgements
@@ -1079,7 +1067,7 @@ describe WHILE_SUPPLIES		While Supplies Last
 body RICH		        /\b(?:make you rich|get rich quick)\b/i
 describe RICH			If only it were that easy
 
-body WINNING		        /\byou.{0,4} (?:won|a winner)|register to win|sweepstakes/i
+body WINNING		        /\byou.{0,4} (?:won\b|a winner)|register to win|sweepstakes/i
 describe WINNING		Who really wins?
 
 body PROMOTION		        /\bspecial promotion\b/i
@@ -1091,7 +1079,7 @@ describe FREE_PASSWORD          Offers Free (often stolen) Passwords
 body HIDDEN_CHARGES	        /\bhidden charges\b/i
 describe HIDDEN_CHARGES		Talks about Hidden Charges
 
-body GET_STARTED_NOW	        /\bget started now\b/i
+body GET_STARTED_NOW	        /\bget started (?-i:N)ow\b/i
 describe GET_STARTED_NOW	Get Started Now
 
 body GET_IT_NOW		        /\bget it now\b/i
@@ -1103,7 +1091,7 @@ describe ONLY_COST		Only $$$
 body SAVE_BUCKS		        /\bsave \$/i
 describe SAVE_BUCKS		Save $$$
 
-body FINANCIAL		        /\bfinancial(?:ly|) free\b/i
+body FINANCIAL		        /\bfinancial(?:ly|) free/i
 describe FINANCIAL 		Financial Freedom
 
 body FORWARD_LOOKING	        /\bcontains forward-looking statements\b/i
@@ -1115,13 +1103,13 @@ describe DISCLAIMER		Message contains disclaimer
 body SATISFACTION	        /\bsatisfaction .{0,9}gauranteed|not .{0,9}satisfied\b/i
 describe SATISFACTION		Satisfaction Guaranteed
 
-body PRIZE		        /\bclaim.{0,9} prize\b/i
+body PRIZE		        /\bclaim.{0,9} prize/i
 describe PRIZE			Talks about prizes
 
-body GETAWAY		        /\bweekend getaway\b/i
+body GETAWAY		        /\bweekend getaway/i
 describe GETAWAY		Weekend Getaway
 
-body HGH		        /\bhuman growth hormone\b/i
+body HGH			/human growth hormone|(?-i:HGH)|H.G.H\b/i
 describe HGH			Human Growth Hormone
 
 body WEALTH		        /\bachieve .{0,15}wealth\b/i
@@ -1136,14 +1124,14 @@ describe EASY_TERMS		Easy Terms
 body EXTRA_CASH		        /\bextra cash\b/i
 describe EXTRA_CASH		Offers Extra Cash
 
-body GET_PAID		        /\bget paid\b/i
+body GET_PAID		        /\bget (?-i:P)aid\b/i
 describe GET_PAID		Get Paid
 
 body BEEN_TURNED_DOWN	        /\bbeen turned down\b/i
 describe BEEN_TURNED_DOWN	Have you been turned down?
 
-body ONE_TIME		        /\bone time (?:charge|investment)\b/i
-describe ONE_TIME		One time charge/investment
+body ONE_TIME			/one.time (?:charge|investment|offer)/i
+describe ONE_TIME		One Time Rip Off
 
 body COMPETE		        /\bcompete for your business\b/i
 describe COMPETE		Compete for your business
@@ -1160,19 +1148,19 @@ describe CHANGE_TERMS		Terms and conditions
 body RESERVES_RIGHT	        /\breserves the right\b/i
 describe RESERVES_RIGHT		Reserves the right
 
-body NO_COMBINE		        /\bwith any other offer\b/i
+body NO_COMBINE		        /\bwith any other offer/i
 describe NO_COMBINE		Can not be combined with any other offer
 
 body NEW_CUSTOMER	        /\bnew customers only\b/i
 describe NEW_CUSTOMER		New Customers Only
 
-body PSYCHIC		        /\b(?:caring|gifted|experienced) psychic\b/i
+body PSYCHIC		        /\b(?:caring|gifted|experienced) psychic/i
 describe PSYCHIC		Psychics Scam
 
 body PHONE_CANCER	        /\bphone.{0,15}cancer\b/i
 describe PHONE_CANCER		Cell Phone Cancer Scam
 
-body MEET_SINGLES	        /\bmeet .{0,12}singles|thousands of personal\b/i
+body MEET_SINGLES	        /\bmeet .{0,12}singles|thousands of personal/i
 describe MEET_SINGLES		Meet Singles
 
 body JOIN_MILLIONS	        /\bjoin (?:millions|thousands)\b/i
@@ -1187,13 +1175,12 @@ describe EXPECT_TO_EARN		Expect to earn
 body BE_BOSS		        /\byour own boss\b/i
 describe BE_BOSS		Be your own boss
 
-body SPY_ON_FRIENDS	        /\binvestigat.{0.15} (?:friend|employee|neighbor)\b/i
+body SPY_ON_FRIENDS	        /\binvestigat.{0.15} (?:friend|employee|neighbor)/i
 describe SPY_ON_FRIENDS	        Investigate your Friends!
 
 body DIG_UP_INFO	        /\bdig up information\b/i
 describe DIG_UP_INFO		Dig up Dirt on Friends
 
-# Marc Perkel: added "not"
 body MLM		        /\b(?:MLM|multi.level.marketing)\b/i
 describe MLM			Multi Level Marketing mentioned
 
@@ -1206,23 +1193,26 @@ describe UNCLAIMED_MONEY	People just leave money laying around
 body SERIOUS_CASH	        /\bserious cash\b/i
 describe SERIOUS_CASH		Serious cash
 
-# new porn rules from Marc Perkel
-body LARGE_COLLECTION           /\b(?:[0-9,]{5,9}|hundreds|thousands|millions|tons)\b.{0,15}\b(?:movies|video|xxx|celeb|streaming|live|pic|photo|images)\b/i
+###########################################
+#              PORN RULES                 #
+###########################################
+
+body LARGE_COLLECTION           /\b(?:[0-9,]{5,9}|hundreds|thousands|millions|tons)\b.{0,15}\b(?:movies|video|xxx|celeb|streaming|live|pic|photo|images)/i
 describe LARGE_COLLECTION       Possible porn - Large Number of movies, pics
 
-body FREE_PORN                  /\bfree (?:porn|xxx|adult)\b/i
+body FREE_PORN                  /\bfree (?:porn|xxx|adult)/i
 describe FREE_PORN              Possible porn - Free Porn
 
 body BARELY_LEGAL               /\b(?:barely|just) legal\b/i
 describe BARELY_LEGAL           Possible porn - Barely Legal
 
-body LOLITA                     /\blolita\b/i
+body LOLITA                     /\blolita/i
 describe LOLITA                 Possible porn - Lolita
 
 body MEGA_SITE                  /\bmega[ -]?sites?\b/i
 describe MEGA_SITE              Possible porn - Mega Porn
 
-body CUM_SHOT                   /\bcum[ -]?shot\b/i
+body CUM_SHOT                   /\bcum[ -]?shots?\b/i
 describe CUM_SHOT               Possible porn - Cum Shot
 
 body BIG_BOOBS                  /\bbig boobs\b/i
@@ -1243,19 +1233,22 @@ describe SEX_FEST               Possible porn - Porn Fest
 body LIVE_PORN                  /\blive .{0,9}(?:fuck|sex|naked|girl|virgin|teen|cam|porn)/i
 describe LIVE_PORN              Possible porn - Live Porn
 
-body HARDCORE_PORN              /\bhard[ -]?core .{0,9}(?:teen|virgin|cheerleader|amat[eu][eu]r)\b|\bextreme hardcore\b/i
+body HARDCORE_PORN              /\bhard[ -]?core .{0,9}(?:teen|virgin|cheerleader|amat[eu][eu]r)|\bextreme hardcore/i
 describe HARDCORE_PORN          Possible porn - Hardcore Porn
 
 body HOT_NASTY          /\b(?:horny|nasty|hot|wild|young|horniest|nasiest|hottest|wildest|youngest|best|biggest|largest|naughty)\b.{0,9}\b(?:virgin|asian|cheerleader|sex|selection|fuck|fucking|anal|lesbian|incest|chick|pics|movies|video|gay|porn|hardcore|schoolgirls|amat[eu][eu]r|slut|adult|cum|xxx|sites?)\b/i
 describe HOT_NASTY              Possible porn - Hot, Nasty, Wild, Young
 
-body NASTY_GIRLS                /\b(?:horniest|nasiest|hottest|wildest) .{0,9}(?:girls|women|teen)\b/i
+body BEST_PORN			/\b(?:best|biggest|largest) .{0,9}(?:virgin|anal|lesbian|incest|porn|hardcore|slut|xxx)/i
+describe BEST_PORN		Possible porn - Best, Largest Porn Collections
+
+body NASTY_GIRLS                /\b(?:horniest|nasiest|hottest|wildest) .{0,9}(?:girls|women|teen)/i
 describe NASTY_GIRLS            Possible porn - Nasty Girls
 
-body CAM_PORN                   /\bcam (?:girls|sex)\b|\b(?:hidden|voyeur|bathroom|shower|naughty) .{0,9}cam\b/i
+body CAM_PORN                   /cam (?:girls|sex)\b|\b(?:hidden|voyeur|bathroom|shower|naughty) .{0,9}cam\b/i
 describe CAM_PORN               Possible porn - Sex on Camera
 
-body AMATUER_PORN               /\bamat[eu][eu]r .{0,9}(?:sex|porn|star|sites?|college|babes|action|pics)|real amat[eu][eu]r\b/i
+body AMATUER_PORN               /\bamat[eu][eu]r .{0,9}(?:sex|porn|star|sites?|college|babes|action|pics)|real amat[eu][eu]r/i
 describe AMATUER_PORN           Possible porn - Amateur Porn
 
 body CELEBRITY_PORN             /\bceleb.{0,15}(?:sex|porn|pics|caught|nude|exposed)\b/i
@@ -1267,7 +1260,7 @@ describe PORN_GALLERIES         Possible porn - Galleries of Pictures
 body UP_SKIRT                   /\bup[ -]?skirt\b/i
 describe UP_SKIRT               Possible porn - Up Skirt
 
-body ADULT_SITE                 /\badult.{0,9}(?:entertainment|sites?|industry|only|business|membership)\b/i
+body ADULT_SITE                 /\badult.{0,9}(?:entertainment|sites?|industry|only|business|membership)/i
 describe ADULT_SITE             Possible porn - Adult Web Sites
 
 body UNCENSORED                 /\buncensored (?:pics|photo)/i
@@ -1282,8 +1275,20 @@ describe INSTANT_ACCESS         Possible porn - Offers Instant Access
 body RAPE                       /\b(?:virgin|gang|teen|amat[eu][eu]r) rape|rape (?:sites?|sex)\b/i
 describe RAPE                   Possible porn - Rape
 
-body LESBIAN                    /\b(?:xxx|horny|hot|young) lesbian|lesbian (?:sites?|action|bitch)\b/i
+body LESBIAN                    /\b(?:xxx|horny|hot|young) lesbian|lesbian (?:sites?|action|bitch)/i
 describe LESBIAN                Possible porn - Lesbian Site
+
+full PORN_3			eval:porn_word_test()
+describe PORN_3			Possible porn - Uses words and phrases which indicate porn
+
+# (contrib: skod)
+body PORN_6			/\b(?:\d+\+? xxx pictures|xxx photos?)\b/i
+describe PORN_6			Possible Porn - XXX Photos
+
+##################
+# End Porn Rules #
+##################
+
 
 body CHILD_SUPPORT              /\buncollected child support\b/i
 describe CHILD_SUPPORT          "Collect Child Support" Scam
@@ -1291,7 +1296,7 @@ describe CHILD_SUPPORT          "Collect Child Support" Scam
 body ITS_LEGAL                  /\b(?:perfectly|absolutely|100%|totally) legal\b/i
 describe ITS_LEGAL              Claims to be Legal
 
-body FREE_GRANT                 /\bfree grants? (?:of|money)\b/i
+body FREE_GRANT                 /\bfree (?-i:G)rants?\b/i
 describe FREE_GRANT             Free Grant Money
 
 body VIAGRA_ONLINE              /\bviagra .{0,25}(?:express|online|overnight)/i
@@ -1300,6 +1305,12 @@ describe VIAGRA_ONLINE          Fast Viagra Delivery
 body VIAGRA_COMBO               /\bviagra .{0,15}(?:phentermine|xenical|tenuate|zyban|propecia)\b/i
 describe VIAGRA_COMBO           Viagra and other drugs
 
+body ONLINE_PHARMACY		/online pharmacy|(?:drugs|medications) online/i
+describe ONLINE_PHARMACY	Online Pharmacy
+
+body CONFIDENTIAL_ORDER		/confidential.{0,9} order/i
+describe CONFIDENTIAL_ORDER	Confidentially on all orders
+
 body HIDDEN_ASSETS              /hidden assets/i
 describe HIDDEN_ASSETS          Hidden Assets
 
@@ -1307,5 +1318,4 @@ body SAVE_THOUSANDS             /\bsave (?:thousands|millions)\b/i
 describe SAVE_THOUSANDS         Save big money
 
 body REFINANCE_YOUR_HOME        /\brefinance your (?:current|) (?:home|house)\b/i
-describe REFINANCE_YOUR_HOME    "Refinance your home with us" - sure...
-
+describe REFINANCE_YOUR_HOME    "Refinance your home"
