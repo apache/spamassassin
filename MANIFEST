@@ -16,6 +16,7 @@ UPGRADE
 USAGE
 build/convert_pods_to_doc
 build/get_version
+build/check_dependencies
 build/preprocessor
 contrib/mbox-to-check
 contrib/run-corpora
@@ -69,6 +70,7 @@ lib/Mail/SpamAssassin/SpamdForkScaling.pm
 lib/Mail/SpamAssassin/SubProcBackChannel.pm
 lib/Mail/SpamAssassin/TextCat.pm
 lib/Mail/SpamAssassin/Util.pm
+lib/Mail/SpamAssassin/Util/DependencyInfo.pm
 lib/Mail/SpamAssassin/Util/RegistrarBoundaries.pm
 masses/CORPUS_POLICY
 masses/CORPUS_SUBMIT
@@ -380,4 +382,3 @@ tools/split_corpora
 tools/sysreport
 tools/test_extract
 tools/triplets.pl
-lib/Mail/SpamAssassin/Util/DependencyInfo.pm

@@ -427,19 +427,13 @@ else {
 }
 
 # check optional module versions
-while (my ($module, $version) = each %CURRENT_PM) {
-  my $eval = "require $module";
-  eval $eval;
-
-  if ($@) {
-    next;
-  }
-  elsif ($module->VERSION < $version) {
-    warn("Warning: optional module $module $version not found (" .
-	 $module->VERSION .
-	 " currently installed)");
-  }
+use lib 'lib';
+use Mail::SpamAssassin::Util::DependencyInfo;
+if (Mail::SpamAssassin::Util::DependencyInfo::long_diagnostics() != 0) {
+  # missing required module?  die!
+  exit 1;
 }
+
 
 #######################################################################
 
@@ -1183,7 +1177,6 @@ version.env: lib/Mail/SpamAssassin.pm Makefile
 manifest_skip:
 	sort -f < MANIFEST.SKIP > MANIFEST.SKIP.tmp
 	mv MANIFEST.SKIP.tmp MANIFEST.SKIP
-
 
 sysreport:
 	$(NOECHO) $(PERL) tools/sysreport CC=$(CC) PERL=$(PERL) PERL_BIN=$(PERL_BIN) PERL_VERSION=$(PERL_VERSION)
