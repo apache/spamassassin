@@ -189,11 +189,10 @@ sub new {
 	  $boundary = $temp_boundary if (defined $temp_boundary);
 	}
       }
-      else {
-	# There was no previous header and this is just "out there"?
-	# Ignore it!
-        next;
-      }
+
+      # we'll just ignore if there's no header already set, for now.
+
+      next;
     }
 
     # Ok, there's a header here, let's go ahead and add it in.
