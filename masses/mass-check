@@ -103,6 +103,7 @@ $opt_j = 1;
 $opt_net = 0;
 $opt_hamlog = "ham.log";
 $opt_spamlog = "spam.log";
+$opt_learn = 0;
 
 GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug:s",
 	   "hamlog=s", "head=i", "loghits", "mh", "mid", "ms", "net",
