@@ -250,6 +250,10 @@ skipped.
 	install DB_File
 	quit
 
+    There seems to be a bug in libdb 4.1.25, which is distributed by
+    default on some versions of Linux.  See
+    http://wiki.apache.org/spamassassin/DbFileSleepBug for details.
+
 
   - Digest::SHA1    (from CPAN)
 
