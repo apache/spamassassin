@@ -387,9 +387,6 @@ header T_GAPPY_SUBJECT_10C	Subject =~ /\b(?:\w[^0-9A-Za-z\xc0-\xd6\xd8-\xf6\xf8-
 header T_GAPPY_SUBJECT_11C	Subject =~ /\b(?:\w[^0-9A-Za-z\xc0-\xd6\xd8-\xf6\xf8-\xff]{1,5}){3,}/i
 header T_GAPPY_SUBJECT_12C	Subject =~ /\b(?:\w[^0-9A-Za-z\xc0-\xd6\xd8-\xf6\xf8-\xff]{1,6}){3,}/i
 
-uri T_YAHOO_REDIRECTOR		/^http:\/\/rd\.yahoo\.com/i
-describe T_YAHOO_REDIRECTOR	Uses commonly-spammed redirector URL
-
 # http://marc.theaimsgroup.com/?l=spamassassin-talk&m=105203882531351&w=2
 header T_RATWARE_X_SCANNER	X-Scanner =~ /^: /
 
@@ -427,8 +424,25 @@ describe T_GENERIC_VIAGRA	Mentions Generic Viagra
 uri T_IP_LINK_PLUS	/^https?\:\/\/(?:\S*\@)?\d+\.\d+\.\d+\.\d+.{0,20}(?:cgi|click|ads|id\=)/i
 describe T_IP_LINK_PLUS		Dotted-decimal IP address followed by GCI, clickthru, etc.
 
-uri T_YAHOO_REDIR			/^https?\:\/\/rd.yahoo.com\/[0-9]{4,}/i
-describe T_YAHOO_REDIR		Yahoo Redirect
+# try various redirects to see what works best
+uri T_YAHOO_REDIR_1		/^https?\:\/\/rd\.yahoo\.com\/[0-9]{4,}/i
+describe T_YAHOO_REDIR_1	Yahoo Redirect
+
+uri T_YAHOO_REDIR_2		/^https?\:\/\/rd\.yahoo\.com\/DailyNews\b/i
+describe T_YAHOO_REDIR_2	Yahoo Redirect
+
+uri T_YAHOO_REDIR_3		/^https?\:\/\/rd\.yahoo\.com\/dir\b/i
+describe T_YAHOO_REDIR_3	Yahoo Redirect
+
+uri T_YAHOO_REDIR_4		/^https?\:\/\/rd\.yahoo\.com\/welcome\b/i
+describe T_YAHOO_REDIR_4	Yahoo Redirect
+
+uri T_YAHOO_REDIR_5		/^https?\:\/\/rd\.yahoo\.com\/partner\b/i
+describe T_YAHOO_REDIR_5	Yahoo Redirect
+
+# alternate version found in 70_cvs_rules_under_test.cf
+uri T_YAHOO_REDIRECTOR		/^http:\/\/rd\.yahoo\.com/i
+describe T_YAHOO_REDIRECTOR	Uses commonly-spammed redirector URL
 
 uri T_ASIAN_LINKS			/(?:^https?\:\/\/|^mailto\:).{0,20}\.(?:kr|jp)\//i
 describe T_ASIAN_LINKS		Links to Korea, Japan, etc.
