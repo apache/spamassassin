@@ -743,25 +743,53 @@ enabled and network tests are enabled.
 
 Setting a rule's score to 0 will disable that rule from running.
 
+If the first score value is surrounded by parenthesis '()', then that
+value is considered to be relative to the already set score.  ie: '(3)'
+means increase the score for this rule by 3 points in all score sets.
+'(3) (0) (3) (0)' means increase the score for this rule by 3 in score
+sets 0 and 2 only.
+
+If no score is given for a test by the end of the configuration, the
+default score is 1.0, or 0.01 for tests whose names begin with 'T_'
+(this is used to indicate a rule in testing).
+
 Note that test names which begin with '__' are reserved for meta-match
 sub-rules, and are not scored or listed in the 'tests hit' reports.
-
-If no score is given for a test, the default score is 1.0, or 0.01 for
-tests whose names begin with 'T_' (this is used to indicate a rule in
-testing).
 
 =cut
 
   if ( $key eq 'score' ) {
     my($rule, @scores) = split(/\s+/, $value);
-    if (scalar @scores == 4) {
+
+    my $relative = (@scores > 0 && $scores[0] =~ /^\(\d+(\.\d+)?\)$/) ? 1 : 0;
+    if ($relative && !exists $self->{scoreset}->[0]->{$rule}) {
+      my $msg = "Relative score without previous setting in SpamAssassin configuration, ".
+                        "skipping: $_";
+
+      if ($self->{lint_rules}) {
+        warn $msg."\n";
+      } else {
+        dbg ($msg);
+      }
+      $self->{errors}++;
+      next;
+    }
+
+    if (@scores == 4) {
       for my $index (0..3) {
-	$self->{scoreset}->[$index]->{$rule} = $scores[$index] + 0.0;
+	my $score = $relative ?
+	  $self->{scoreset}->[$index]->{$rule} + $scores[$index] :
+	  $scores[$index];
+
+	$self->{scoreset}->[$index]->{$rule} = $score + 0.0;
       }
     }
-    elsif (scalar @scores > 0) {
+    elsif (@scores > 0) {
+      my $score = $relative ?
+        $self->{scoreset}->[0]->{$rule} + $scores[0] : $scores[0];
+
       for my $index (0..3) {
-	$self->{scoreset}->[$index]->{$rule} = $scores[0] + 0.0;
+	$self->{scoreset}->[$index]->{$rule} = $score + 0.0;
       }
     }
     next;
