@@ -63,3 +63,15 @@ description T_TRADEMARK     Message specifies a registered trademark
 tflags T_TRADEMARK          nice
 score T_TRADEMARK           -1.0
 
+header T_SUBJ_GUARANTEED          Subject =~ /^guaranteed|(?-i:GUARANTEE)/i
+describe T_SUBJ_GUARANTEED        Subject GUARANTEED
+
+header T_SUBJ_DOLLARS             Subject =~ /^\$[0-9.,]+\b/
+describe T_SUBJ_DOLLARS           Subject starts with dollar amount
+
+header T_SUBJ_FREE_CAP            Subject =~ /FRE{2,}|F.R.E.E\b/
+describe T_SUBJ_FREE_CAP          Subject contains FREE in CAPS
+
+body T_PORN_MEMBERSHIP            /\b(?:vip|adult|porn|x.rated) membership/i
+describe T_PORN_MEMBERSHIP        Possible Porn - Porn Membership
+
