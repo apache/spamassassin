@@ -1757,6 +1757,18 @@ sub tok_pack {
 
 ###########################################################################
 
+sub db_readable {
+  my($self) = @_;
+  return $self->{already_tied};
+}
+
+sub db_writable {
+  my($self) = @_;
+  return $self->{already_tied} && $self->{is_locked};
+}
+
+###########################################################################
+
 sub dbg { Mail::SpamAssassin::dbg (@_); }
 sub sa_die { Mail::SpamAssassin::sa_die (@_); }
 

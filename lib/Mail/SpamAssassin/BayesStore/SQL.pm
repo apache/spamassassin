@@ -1939,6 +1939,21 @@ sub _get_num_lowfreq {
   return $num_lowfreq;
 }
 
+sub db_readable {
+  my($self) = @_;
+
+  # if there's a database handle, we can read...
+  return defined $self->{_dbh};
+}
+
+sub db_writable {
+  my($self) = @_;
+
+  # since in the SA SQL code, there is no difference between R/O and
+  # R/W access, we just care if we have DB access.
+  return defined $self->{_dbh};
+}
+
 sub dbg { Mail::SpamAssassin::dbg (@_); }
 sub sa_die { Mail::SpamAssassin::sa_die (@_); }
 

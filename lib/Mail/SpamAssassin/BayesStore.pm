@@ -822,6 +822,37 @@ sub restore_database {
   die "restore_database: not implemented\n";
 }
 
+=head2 db_readable
+
+public instance (Boolean) db_readable ()
+
+Description:
+This method returns whether or not the Bayes DB is available in a
+readable state.
+
+=cut
+
+sub db_readable {
+  my ($self) = @_;
+  die "db_readable: not implemented\n";
+}
+
+=head2 db_writable
+
+public instance (Boolean) db_writable ()
+
+Description:
+This method returns whether or not the Bayes DB is available in a
+writable state.
+
+=cut
+
+sub db_writable {
+  my ($self) = @_;
+  die "db_writable: not implemented\n";
+}
+
+
 sub dbg { Mail::SpamAssassin::dbg (@_); }
 sub sa_die { Mail::SpamAssassin::sa_die (@_); }
 

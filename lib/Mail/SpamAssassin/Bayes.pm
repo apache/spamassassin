@@ -286,8 +286,8 @@ sub sanity_check_is_untied {
   # do a sanity check here.  Wierd things happen if we remain tied
   # after compiling; for example, spamd will never see that the
   # number of messages has reached the bayes-scanning threshold.
-  if ($self->{store}->{already_tied} || $self->{store}->{is_locked}) {
-    warn "SpamAssassin: oops! still tied/locked to bayes DBs, untie'ing\n";
+  if ($self->{store}->db_readable()) {
+    warn "SpamAssassin: oops! still tied to bayes DBs, untie'ing\n";
     $self->{store}->untie_db();
   }
 }
@@ -1253,13 +1253,12 @@ sub scan {
     print "#Bayes-Raw-Counts: $self->{raw_counts}\n";
   }
 
-  $self->opportunistic_calls();
-
 skip:
   if (!defined $score) {
     dbg ("bayes: not scoring message, returning undef");
   }
 
+  $self->opportunistic_calls();
   $self->{store}->cleanup();
   $self->{store}->untie_db();
 
@@ -1274,21 +1273,30 @@ skip:
 sub opportunistic_calls {
   my($self) = @_;
 
+  # If we're not already tied, abort.
+  return unless ($self->{store}->db_readable());
+
   # Is an expire or sync running?
   my $running_expire = $self->{store}->get_running_expire_tok();
   if ( defined $running_expire && $running_expire+$OPPORTUNISTIC_LOCK_VALID > time() ) { return; }
 
   # handle expiry and syncing
   if ($self->{store}->expiry_due()) {
-    $self->{store}->set_running_expire_tok();
+    # sync will bring the DB R/W as necessary, and the expire will remove
+    # the running_expire token, may untie as well.
     $self->sync(1,1);
-    # don't need to unlock since the expire will have done that. ;)
   }
   elsif ( $self->{store}->sync_due() ) {
-    $self->{store}->set_running_expire_tok();
+    # sync will bring the DB R/W as necessary, may untie as well
     $self->sync(1,0);
-    $self->{store}->remove_running_expire_tok();
+
+    # We can only remove the running_expire token if we're doing R/W
+    if ($self->{store}->db_writable()) {
+      $self->{store}->remove_running_expire_tok();
+    }
   }
+
+  return;
 }
 
 ###########################################################################
