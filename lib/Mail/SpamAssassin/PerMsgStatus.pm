@@ -770,7 +770,7 @@ sub rewrite_no_report_safe {
       # Deal with header rewriting
       foreach ( @pristine_headers ) {
         # if we're not going to do a rewrite, skip this header!
-        next if (!/^(?:From|Subject|To):/i || !exists $self->{conf}->{rewrite_header}->{$1});
+        next if (!/^(?:From|Subject|To):/i || !exists $self->{conf}->{rewrite_header}->{$_});
 
 	# pop the original version onto the end of the header array
 	push(@pristine_headers, "X-Spam-Prev-$_");
