@@ -149,6 +149,8 @@ sub add_body_part {
     $part->{$k} = $v;
   }
 
+  dbg("added part, type: $type");
+
   # Add the part to body_parts
   push @{ $self->{body_parts} }, $part;
 }

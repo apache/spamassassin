@@ -86,6 +86,13 @@ sub parse {
     $msg->header('content-type') =~ /boundary\s*=\s*["']?([^"';]+)["']?/i;
   $self->_parse_body( $msg, $msg, $boundary, \@message, 1 );
 
+  unless ( $msg->{'type'} ) {
+    $msg->{'type'} = $msg->header('content-type');
+    $msg->{'type'} ||= 'text/plain';
+    $msg->{'type'} =~ s/;.*$//;            # strip everything after first semi-colon
+    $msg->{'type'} =~ s/[^a-zA-Z\/]//g;    # strip inappropriate chars
+  }
+
   return $msg;
 }
 
@@ -112,12 +119,11 @@ sub _parse_body {
   elsif ( $type =~ /^multipart\/alternative/i ) {
     dbg("Parse multipart/alternative");
     if ( $initial ) {
-      $self->_parse_multipart_mixed( $msg, $_msg, $boundary, $body );
+      $self->_parse_multipart_alternate( $msg, $_msg, $boundary, $body );
     }
     else {
-      my $part_msg = Mail::SpamAssassin::MIME->new();
-      $self->_parse_multipart_alternate( $part_msg, $_msg, $boundary, $body );
-      $msg->add_body_part( $type, { "mime-parts" => $part_msg, } );
+      $self->_parse_multipart_alternate( $_msg, $_msg, $boundary, $body );
+      $msg->add_body_part( $type, $_msg );
     }
   }
   elsif ( $type =~ /^multipart\//i ) {
@@ -126,9 +132,8 @@ sub _parse_body {
       $self->_parse_multipart_mixed( $msg, $_msg, $boundary, $body );
     }
     else {
-      my $part_msg = Mail::SpamAssassin::MIME->new();
-      $self->_parse_multipart_mixed( $part_msg, $_msg, $boundary, $body );
-      $msg->add_body_part( $type, { "mime-parts" => $part_msg, } );
+      $self->_parse_multipart_mixed( $_msg, $_msg, $boundary, $body );
+      $msg->add_body_part( $type, $_msg );
     }
   }
   else {
