@@ -511,3 +511,5 @@ header T_RCVD_HELO_NE_RDNS4	eval:check_for_helo_rdns_mismatch('helo_reserved', '
 header T_SUBJ_2_NUM_PARENS      Subject =~ /^\(\d+\).*\(\d+\)\s*$/
 describe T_SUBJ_2_NUM_PARENS    Subject contains common spam sign (2 numbers)
 
+rawbody T_HTML_TINY_COMMENTS    /<![a-z0-9]>/i
+
