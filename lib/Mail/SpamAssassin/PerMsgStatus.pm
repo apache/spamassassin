@@ -1056,13 +1056,26 @@ sub decode_mime_bit {
 # save a bit of verbosity
 sub ran_rule_debug_code {
   my ($rulename, $ruletype, $bit) = @_;
+
+  my $dump_hits_code = '';
+  if ($Mail::SpamAssassin::DEBUG->{enabled} &&
+      ($Mail::SpamAssassin::DEBUG->{rulesrun} & $bit) != 0)
+  {
+    # note: keep this in 'single quotes' to avoid the $ & performance hit,
+    # unless specifically requested by the caller.
+    $dump_hits_code = ': match=\'$&\'';
+  }
+
   return '
-
-    dbg ("Ran '.$ruletype.' rule '.$rulename.' ======> got hit", "rulesrun", '.$bit.');
-  } else {
-    dbg ("Ran '.$ruletype.' rule '.$rulename.' but did not get hit", "rulesrun", '.$bit.');
-
+    dbg ("Ran '.$ruletype.' rule '.$rulename.' ======> got hit'.
+        $dump_hits_code.'", "rulesrun", '.$bit.');
   ';
+
+  # do we really need to see when we *don't* get a hit?  If so, it should be a
+  # separate level as it's *very* noisy.
+  #} else {
+  #  dbg ("Ran '.$ruletype.' rule '.$rulename.' but did not get hit", "rulesrun", '.
+  #      $bit.');
 }
 
 ###########################################################################
@@ -1721,7 +1734,7 @@ sub run_eval_tests {
 	$self->got_hit ($rulename, $prepend2desc);
 	dbg("Ran run_eval_test rule $rulename ======> got hit", "rulesrun", 32) if $debugenabled;
     } else {
-	dbg("Ran run_eval_test rule $rulename but did not get hit", "rulesrun", 32) if $debugenabled;
+        #dbg("Ran run_eval_test rule $rulename but did not get hit", "rulesrun", 32) if $debugenabled;
     }
   }
 }
@@ -1771,7 +1784,7 @@ sub run_rbl_eval_tests {
 	    $self->got_hit ($rulename, "RBL: ");
 	    dbg("Ran run_rbl_eval_test rule $rulename ======> got hit", "rulesrun", 64) if $debugenabled;
 	} else {
-	    dbg("Ran run_rbl_eval_test rule $rulename but did not get hit", "rulesrun", 64) if $debugenabled;
+            #dbg("Ran run_rbl_eval_test rule $rulename but did not get hit", "rulesrun", 64) if $debugenabled;
 	}
     }
   }
