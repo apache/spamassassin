@@ -963,7 +963,7 @@ sub _replace_tags {
   my $self = shift;
   my $text = shift;
 
-  $text =~ s/_(\w+?)(?:\((.*?)\))?_/${\($self->_get_tag($1,$2 || ""))}/g;
+  $text =~ s/_(\w+?)(?:\((.*?)\))?_/${\($self->_get_tag($1,$2))}/g;
   return $text;
 }
 
@@ -1032,11 +1032,17 @@ sub _get_tag_value_for_yesno {
 }
 
 sub _get_tag_value_for_score {
-  my $self   = shift;
-  
+  my ($self, $pad) = @_;
+
   my $score  = sprintf("%2.1f", $self->{score});
   my $rscore = $self->_get_tag_value_for_required_score();
-  
+
+  # padding
+  if (defined $pad && $pad =~ /^(0+| +)$/) {
+    my $count = length($1) + 3 - length($score);
+    $score = (substr($pad, 0, $count) . $score) if $count > 0;
+  }
+
   # Do some rounding tricks to avoid the 5.0!=5.0-phenomenon,
   # see <http://bugzilla.spamassassin.org/show_bug.cgi?id=2607>
   return $score if $self->{is_spam} or $score < $rscore;
@@ -1055,12 +1061,14 @@ sub _get_tag {
 
   # tag data also comes from $self->{tag_data}->{TAG}
 
+  $tag = "" unless defined $tag; # can be "0", so use defined test
+
   %tags = ( YESNO     => sub {    $self->_get_tag_value_for_yesno() },
   
             YESNOCAPS => sub { uc $self->_get_tag_value_for_yesno() },
 
-            SCORE => sub { $self->_get_tag_value_for_score() },
-            HITS  => sub { $self->_get_tag_value_for_score() },
+            SCORE => sub { $self->_get_tag_value_for_score(shift) },
+            HITS  => sub { $self->_get_tag_value_for_score(shift) },
 
             REQD  => sub { $self->_get_tag_value_for_required_score() },
 

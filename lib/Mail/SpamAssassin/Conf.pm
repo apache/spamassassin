@@ -3067,7 +3067,11 @@ optional, and the default is shown below.
 
  _YESNOCAPS_       "YES"/"NO" for is/isn't spam
  _YESNO_           "Yes"/"No" for is/isn't spam
- _SCORE_           message score
+ _SCORE(PAD)_      message score, if PAD is included and is either spaces or
+                   zeroes, then pad scores with that many spaces or zeroes
+		   (default, none)  ie: _SCORE(0)_ makes 2.4 become 02.4,
+		   _SCORE(00)_ is 002.4.  12.3 would be 12.3 and 012.3
+		   respectively.
  _REQD_            message threshold
  _VERSION_         version (eg. 3.0.0 or 3.1.0-r26142-foo1)
  _SUBVERSION_      sub-version/code revision date (eg. 2004-01-10)
