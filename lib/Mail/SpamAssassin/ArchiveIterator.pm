@@ -97,7 +97,16 @@ sub run {
 	my $result = '';
 	my $line;
 	while ($line = readline $socket) {
-	  if ($line =~ /^RESULT (.+)$/) {
+	  if ( !defined $line ) {
+	    # some error happened
+	    $needs_restart = 1;
+	    warn "Got an undef from readline?!?  Killing all children, probably lost some results. :(\n";
+	    foreach $socket ( $select->handles() ) {
+	      $select->remove($socket);
+	    }
+	    last;
+	  }
+	  elsif ($line =~ /^RESULT (.+)$/) {
 	    my($class,$type,$date) = index_unpack($1);
 	    #warn ">> RESULT: $class, $type, $date\n";
 
