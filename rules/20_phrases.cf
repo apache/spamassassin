@@ -97,7 +97,7 @@ describe MONEY_MAKING		Discusses money making
 body BULK_EMAIL			/bulk e-*mail/i
 describe BULK_EMAIL		Talks about bulk email
 body DEAR_FRIEND		/^\s*Dear Friend\b/i
-describe DEAR_FRIEND		How dear can you be if you don't know my name?
+describe DEAR_FRIEND		Dear Friend? That's not very dear!
 body DEAR_SOMETHING		/\bDear (?:IT\W|Internet|candidate|sirs?|madam|investor|travell?er|car shopper|web)\b/i
 describe DEAR_SOMETHING		Contains 'Dear (something)'
 body CALL_NOW			/\bCALL NOW/i
@@ -132,13 +132,13 @@ describe NEVER_ANOTHER		"another mailing" will "never" be "received"
 
 # contrib: Duncan
 body ONE_TIME_MAILING		/this\b.{0,20}\b(?:one|1).time\b.{0,20}\b(?:(?:e-?)?mail|offer)/i
-describe ONE_TIME_MAILING	"one time mailing" doesn't mean it isn't spam
+describe ONE_TIME_MAILING	one time mailing doesn't mean it isn't spam
 
 body MILLION_EMAIL		/million (?:\w+ )?(?:e-?mail )?addresses/i
 describe MILLION_EMAIL		Get a million email addresses
 
 body ADDRESSES_ON_CD		/addresses on cd/i
-describe ADDRESSES_ON_CD	Only thing addresses on CD are useful for is spam
+describe ADDRESSES_ON_CD	Addresses on CD are only useful for spam
 
 body EXCUSE_1			/\b(?:You (?:were sent|have received|are receiving)|You're receiving).{0,15}(?:message|e-?mail)s? because/i
 describe EXCUSE_1		Gives a lame excuse about why spam was sent
@@ -171,7 +171,7 @@ describe EXCUSE_14		Tells you how to stop further spam
 body EXCUSE_15			/this\s*(?:e?-?mail|message)? (?:is|was) (?:not|never) (?:spam|(?:sent )?unsolicited)/i
 describe EXCUSE_15		Claims to be legitimate email
 body EXCUSE_16			/received this.{1,10}in error/i
-describe EXCUSE_16		I wonder how many emails they sent in error...
+describe EXCUSE_16		I wonder how many emails they sent in error
 body EXCUSE_18			/we do not (?:spam|send unsolicited)/i
 describe EXCUSE_18		Claims not to be spam
 
@@ -180,13 +180,13 @@ describe EXCUSE_19		Claims you opted-in or registered
 body EXCUSE_20			/you registered at one of our/i
 describe EXCUSE_20		Claims you registered at their site
 body EXCUSE_21			/your e.?mail address was obtained/i
-describe EXCUSE_21		Claims your address was obtained legitimately
+describe EXCUSE_21		Claims address was obtained legitimately
 body EXCUSE_22			/you are receiving this special offer/i
-describe EXCUSE_22		Claims you're receiving this offer for a reason
+describe EXCUSE_22		You're receiving this offer for a reason
 body EXCUSE_23			/you have provided permission/i
 describe EXCUSE_23		Claims you have provided permission
 body EXCUSE_24			/you(?:'ve|'re| have| are)? receiv(?:e|ed|ing) this (?:advertisement|offer|special|recurring|paid).{0,16}\b(?:by either|because)/i
-describe EXCUSE_24		Claims you received an ad because you wanted it
+describe EXCUSE_24		Claims you wanted this ad
 
 body EXCUSE_REMOVE		/to be removed from.{0,20}(?:mailings|offers)/i
 describe EXCUSE_REMOVE		Talks about how to be removed from mailings
@@ -228,7 +228,7 @@ describe STOCK_PICK		Offers a picked stock
 body STOCK_ALERT		/stock alert/i
 describe STOCK_ALERT		Offers a alert about a stock
 body MICRO_CAP_WARNING		/Investing in micro-cap securities is highly speculative/i
-describe MICRO_CAP_WARNING	SEC-mandated penny-stock warning -- thanks SEC
+describe MICRO_CAP_WARNING	SEC-mandated penny-stock warning
 body NOT_ADVISOR		/not a registered investment advisor/i
 describe NOT_ADVISOR		Not registered investment advisor
 
@@ -288,7 +288,7 @@ describe THIS_AINT_SPAM         Claims "This is not spam"
 
 # (contrib: WW)
 body WE_HATE_SPAM               /We .{0,30}oppose the use of SPAM/is
-describe WE_HATE_SPAM           Says "We strongly oppose the use of spam email"
+describe WE_HATE_SPAM           We strongly oppose the use of spam email too
 
 body THIS_IS_AN_AD		/this message is an advertisement/i
 describe THIS_IS_AN_AD		Says "this is an advertisement" (thanks!)
@@ -304,10 +304,10 @@ describe UCE_MAIL_ACT           Mentions Spam Law "UCE-Mail Act"
 # Feb 11 2003 jm: removed "PP" from pattern, since "pp. 234-237" is std usage
 # in academic circles.  I don't think the hit-rate will be affected. ;)
 body PENIS_ENLARGE		/\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b|\binches\b).{0,50}\b(?:penis|male organ|pee[ -]?pee|dick|sc?hlong|wh?anger|breast)/i
-describe PENIS_ENLARGE		Information on getting larger penis or breasts
+describe PENIS_ENLARGE		Information on getting larger penis/breasts
 
 body PENIS_ENLARGE2		/\b(?:penis|male organ|pee[ -]?pee|dick|sc?hlong|wh?anger|breast).{0,50}\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b|\binches\b)/i
-describe PENIS_ENLARGE2		Information on getting larger penis or breasts (2)
+describe PENIS_ENLARGE2		Information on getting larger penis/breasts (2)
 
 body     IMPOTENCE              /\b(?:impotence (?:problem|cure|solution)|Premature Ejaculation|erectile dysfunction)/i
 describe IMPOTENCE              Impotence cure
@@ -372,10 +372,10 @@ describe US_DOLLARS		Talks about a million dollars
 
 # to still match all test cases
 body US_DOLLARS_2               /\s(?:\$|US\$|usd?).?\d{2,3}(?:\.\d)?.?(?:m|millions?)\b/i
-describe US_DOLLARS_2           Talks about money ($NNN.N m/USDNNN.N m/US$NN.N m)
+describe US_DOLLARS_2           Mentions money ($NNN.N m/USDNNN.N m/US$NN.N m)
 
 body US_DOLLARS_3               /(?:\$|usd).?\d{1,3}[,.]\d{3}[,.]\d{3}(?:[,.]\d\d)?/i
-describe US_DOLLARS_3           Talks about millions of dollars ($NN,NNN,NNN.NN)
+describe US_DOLLARS_3           Mentions millions of dollars ($NN,NNN,NNN.NN)
 
 body MILLION_USD              	/Million\b.{0,40}\b(?:United States? Dollars?|USD)/i
 describe MILLION_USD 		Talks about millions of dollars
@@ -461,7 +461,7 @@ body AS_SEEN_ON			/seen on\b\s*(?:T\.?V\.?|ABC|NBC|CBS|CNN|Oprah|USA Today|48 Ho
 describe AS_SEEN_ON		As seen on national TV!
 
 body     NOT_INTENDED           /not intended for residents (?:of|in)\b/i
-describe NOT_INTENDED           Not intended for residents of somewhere or other
+describe NOT_INTENDED           Not intended for residents of somewhere
 
 # This phrase appears in many pyramid scheme mails in which
 # "My Wife Jody" testimonials are absent
@@ -831,7 +831,7 @@ body SAVE_THOUSANDS             /\bsave (?:thousands|millions)\b/i
 describe SAVE_THOUSANDS         Save big money
 
 body MARKETING_PARTNERS		/\b(?:marketing|network) partner|\bpartner (?:web)?site/i
-describe MARKETING_PARTNERS	Claims you registered with some kind of partner
+describe MARKETING_PARTNERS	Claims you registered with a partner
 
 # note the tense used, hopefully it won't hit FPs this way
 body PRIORITY_MAIL              /\b[Aa]ll\b.{0,20}\b[Oo]rders\b.{1,20}\bPriority Mail\b/
@@ -897,7 +897,7 @@ describe SPAM_FORM_INPUT        Form for verifying email address
 body INTL_EXEC_GUILD            /International Executive Guild/
 describe INTL_EXEC_GUILD        Well known spam senders
 body IN_ACCORDANCE_WITH    /has been sent in accordance with/
-describe IN_ACCORDANCE_WITH Claims to be in accordance with some Spam law
+describe IN_ACCORDANCE_WITH Claims to be in accordance with some law
 
 body CHANGE_TERMS               /\bstrictly based on the following terms and conditions\b/i
 describe CHANGE_TERMS           Terms and conditions
@@ -930,7 +930,7 @@ body EARN_MONEY			/\b(?:earn|make|making|made|received?|discounted)\s+(?:up\s+to
 describe EARN_MONEY		Message talks about earning money
 
 body OBSCURED_EMAIL             /^\w+\^\S+\(\w{2,3}\b/m
-describe OBSCURED_EMAIL         Message seems to contain rot13ed email address
+describe OBSCURED_EMAIL         Message seems to contain rot13ed address
 
 body OUR_AFFILIATE_PARTNERS     /our affiliate partners/i
 describe OUR_AFFILIATE_PARTNERS Mentions their affiliate partners
@@ -954,7 +954,7 @@ body CELL_PHONE_BOOST		/\b(?:(?:boost|antenna|reception).{0,16}(?:cell|mobile|ph
 describe CELL_PHONE_BOOST	Talks about cell-phone signal improvement
 
 body OFFERS_ETC			/\b(?:(?=[cefmpruw])(?:wish|want|unsub|reward|receive|recurring|remove|permission|partner|further|future|e.?mail|continue|click).{0,64}){2}.{0,8}(?=[cdos])(?:special|offer|coupon|discount)s?\b/i
-describe OFFERS_ETC		Stop with the offers, coupons, discounts etc!
+describe OFFERS_ETC		Stop the offers, coupons, discounts etc!
 
 body BANG_BOSS        		/\bboss!/i
 describe BANG_BOSS        	Talks about your boss with an exclamation!
@@ -997,11 +997,11 @@ body	UP_TO_OR_MORES		/up to \S+(?: \S+)? or more/i
 describe UP_TO_OR_MORES		Has generic 'up to X or more' noise
 
 body VERB_UP_TO_OR_MORES	/\b(?:add|lose|make|save) up to \S+(?: \S+)? or more/i
-describe VERB_UP_TO_OR_MORES	Has 'add/lose/make/save up to X or more' noise
+describe VERB_UP_TO_OR_MORES	Has add/lose/make/save up to X or more
 
 # Feb 18 2003 jm: another Nigerian scam phrase
 body NIGERIAN_SCAM_VIRTUE	/by virtue of its nature as being utterly confidential/i
-describe NIGERIAN_SCAM_VIRTUE	Contains Nigerian scam text (virtue of its nature)
+describe NIGERIAN_SCAM_VIRTUE	Contains Nigerian Scam (virtue of its nature)
 
 # Feb 18 2003 jm: try another combo.  I'm not sure __NIGERIAN_HONESTY is req'd.
 body __NIGERIAN_CODE_CONDUCT	/\bcode of conduct\b/i

@@ -54,8 +54,8 @@ body	RAZOR2_CF_RANGE_11_50	eval:check_razor2_range('11','50')
 body	RAZOR2_CF_RANGE_51_100	eval:check_razor2_range('51','100')
 tflags  RAZOR2_CF_RANGE_11_50	net
 tflags  RAZOR2_CF_RANGE_51_100	net
-describe RAZOR2_CF_RANGE_11_50	Razor2 gives a confidence level between 11 and 50
-describe RAZOR2_CF_RANGE_51_100	Razor2 gives a confidence level between 51 and 100
+describe RAZOR2_CF_RANGE_11_50	Razor2 gives confidence between 11 and 50
+describe RAZOR2_CF_RANGE_51_100	Razor2 gives confidence between 51 and 100
 
 full DCC_CHECK		eval:check_dcc()
 describe DCC_CHECK	Listed in DCC (http://rhyolite.com/anti-spam/dcc/)
@@ -71,7 +71,6 @@ body REMOVE_IN_QUOTES		/\"remove\"/i
 describe REMOVE_IN_QUOTES	List removal information
 
 body     __BILL_1618    /\D301\D+a\W*2\W*c\D+1618\D/i
-describe __BILL_1618    Possible mention of bill 1618 (anti-spam bill)
 
 meta     ANTISPAM_BILL  REMOVE_IN_QUOTES && __BILL_1618
 describe ANTISPAM_BILL  Very likely mention of anti-spam bill
@@ -81,7 +80,7 @@ describe ANTISPAM_BILL  Very likely mention of anti-spam bill
 # note HTML_LINK_CLICK* rules in HTML parser section
 
 body CLICK_TO_REMOVE_2		/mailto:.{0,50}click.{0,50}remove/is
-describe CLICK_TO_REMOVE_2	Click-to-remove with mailto: found beforehand
+describe CLICK_TO_REMOVE_2	Click-to-remove with mailto: found
 
 # fixed by ms to not allow entry field onto next line
 rawbody ASCII_FORM_ENTRY	/[^<][A-Za-z][A-Za-z]+.{1,15}?[\x09\x20]*_{30,}/
@@ -95,9 +94,9 @@ describe TRACKER_ID	Incorporates a tracking ID number
 # heh heh heh... tags used to (presumably) generate those anti-Razor random
 # IDs.  Used by Send-Safe ratware, http://www.send-safe.com/
 body MARKUP_RAND                /\{%RAND%\}/
-describe MARKUP_RAND            RAND found, spammer didn't generate a random-ID
+describe MARKUP_RAND            RAND found, spammer tried to use a random-ID
 body MARKUP_SSPL                /SSPLTM/
-describe MARKUP_SSPL            SSPL found, spammer didn't generate a random-ID
+describe MARKUP_SSPL            SSPL found, spammer tried to use a random-ID
 
 # (contrib: Matt Sergeant)
 body LARGE_HEX  		/[0-9a-fA-F]{70,}/
@@ -114,7 +113,7 @@ body     LINES_OF_YELLING_3     eval:check_for_num_yelling_lines("3")
 describe LINES_OF_YELLING_3     3 WHOLE LINES OF YELLING DETECTED
 
 body WEIRD_QUOTING	/[\042\223\224\262\263\271]{2}\S{0,16}[\042\223\224\262\263\271]{2}/
-describe WEIRD_QUOTING	Weird repeated double-quotation marks in body
+describe WEIRD_QUOTING	Weird repeated double-quotation marks
 
 ###########################################################################
 # these tests doesn't actually use rawbody since rawbody isn't raw enough;
@@ -143,13 +142,13 @@ rawbody MIME_BASE64_TEXT	eval:check_for_mime('mime_base64_encoded_text')
 describe MIME_BASE64_TEXT	Message text disguised using base64 encoding
 
 rawbody MIME_HTML_NO_CHARSET	eval:check_for_mime('mime_html_no_charset')
-describe MIME_HTML_NO_CHARSET	Message text in HTML without specified charset
+describe MIME_HTML_NO_CHARSET	Message text in HTML without charset
 
 rawbody  MIME_MISSING_BOUNDARY	eval:check_for_mime('mime_missing_boundary')
 describe MIME_MISSING_BOUNDARY	MIME section missing boundary
 
 body MIME_HTML_MOSTLY		eval:check_mime_multipart_ratio('0.00','0.01')
-describe MIME_HTML_MOSTLY	Multipart message almost all text/html MIME parts
+describe MIME_HTML_MOSTLY	Multipart message mostly text/html MIME
 
 # Steve Linford via Charlie Watts: good test!
 body MIME_HTML_ONLY		eval:check_for_mime_html_only()
@@ -168,7 +167,7 @@ rawbody MIME_QP_EXCESSIVE	eval:check_for_mime_excessive_qp('0.011')
 describe MIME_QP_EXCESSIVE	Excessive quoted-printable encoding in body
 
 rawbody  MIME_QP_LONG_LINE	eval:check_for_mime('mime_qp_long_line')
-describe MIME_QP_LONG_LINE	Quoted-printable line longer than 76 characters
+describe MIME_QP_LONG_LINE	Quoted-printable line longer than 76 chars
 
 rawbody MIME_QP_NO_CHARSET	eval:check_for_mime('mime_qp_inline_no_charset')
 describe MIME_QP_NO_CHARSET	Quoted-printable inline text with no charset

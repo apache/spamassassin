@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.603 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.604 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -22,7 +22,7 @@
 header __OL_STYLE_FROM		From =~ /\".*\" <.+>/
 header __VIA_FROM_MANGLER	Received =~ /iPlanet/
 meta T_FORGED_MUA_OUTLOOK_FROM	(__ANY_OUTLOOK_MUA && !__OL_STYLE_FROM && !__VIA_FROM_MANGLER)
-describe T_FORGED_MUA_OUTLOOK_FROM Forged mail pretending to be from Outlook (by From)
+describe T_FORGED_MUA_OUTLOOK_FROM Forged mail pretending to be from Outlook (From)
 
 # NOTE: uses __ANY_QUALCOMM_MUA, __VIA_FROM_MANGLER from above
 header __EUD_STYLE_FROM		From =~ /^(?:[^\"][^']+[^\"]|\".*\'.*\") <[^>]+>$/
