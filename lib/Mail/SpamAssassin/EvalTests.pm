@@ -2604,8 +2604,7 @@ sub check_bayes {
   my ($self, $fulltext, $min, $max) = @_;
 
   if (!exists ($self->{bayes_score})) {
-    $self->{bayes_score} = $self->{main}->{bayes_scanner}->scan
-			      ($self->{msg}, $fulltext);
+    $self->{bayes_score} = $self->{main}->{bayes_scanner}->scan($self->{msg}, $fulltext);
   }
 
   if (($min == 0 || $self->{bayes_score} > $min) &&
