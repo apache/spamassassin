@@ -1,5 +1,5 @@
 # SpamAssassin rules file: scores.
-# $Id: 50_scores.cf,v 1.197.2.18 2002/09/02 23:23:45 quinlan Exp $
+# $Id: 50_scores.cf,v 1.197.2.19 2002/09/03 19:58:54 quinlan Exp $
 ###########################################################################
 # Default scores.   Note that if a test is named in the files, but a score is
 # not assigned here, the default score will be set to 1.
@@ -828,35 +828,35 @@ score ROUND_THE_WORLD                2.80
 
 # message digest tests
 
-score RAZOR_CHECK                    2.47
-score RAZOR2_CHECK                   3.0
-score DCC_CHECK                      2.5
+score RAZOR_CHECK                    2.64
+score RAZOR2_CHECK                   3.91
+score DCC_CHECK                      2.66
 score PYZOR_CHECK                    2.5
 
 # DNS blacklists
 
-score RCVD_IN_RELAYS_ORDB_ORG        0.96
-score RCVD_IN_OSIRUSOFT_COM          0.52
+score RCVD_IN_RELAYS_ORDB_ORG        0.61
+score RCVD_IN_OSIRUSOFT_COM          0.38
 score X_OSIRU_DUL                    0.62
-score X_OSIRU_DUL_FH                 0.73
-score X_OSIRU_OPEN_RELAY             2.83
-score X_OSIRU_SPAMWARE_SITE          0.83
-score X_OSIRU_SPAM_SRC               3.46
-score RCVD_IN_RFCI                   2.84
-score RCVD_IN_ORBS                   2.31
-score RCVD_IN_DSBL                   1.47
-score RCVD_IN_MULTIHOP_DSBL          0.46
-score RCVD_IN_SBL                    3.28
-score RCVD_IN_UNCONFIRMED_DSBL       0.81
-score RCVD_IN_VISI                   2.60
+score X_OSIRU_DUL_FH                 0.36
+score X_OSIRU_OPEN_RELAY             2.72
+score X_OSIRU_SPAMWARE_SITE          0.30
+score X_OSIRU_SPAM_SRC               2.73
+score RCVD_IN_RFCI                   2.28
+score RCVD_IN_ORBS                   2.25
+score RCVD_IN_DSBL                   3.25
+score RCVD_IN_MULTIHOP_DSBL          0.81
+score RCVD_IN_SBL                    3.18
+score RCVD_IN_UNCONFIRMED_DSBL       0.77
+score RCVD_IN_VISI                   2.62
 score RCVD_IN_BONDEDSENDER         -10.0
 
 # ok_languages and ok_locales
 
-score UNDESIRED_LANGUAGE_BODY        3.65
-score CHARSET_FARAWAY                2.61
-score CHARSET_FARAWAY_BODY           2.07
-score CHARSET_FARAWAY_HEADERS        2.58
+score UNDESIRED_LANGUAGE_BODY        3.97
+score CHARSET_FARAWAY                3.20
+score CHARSET_FARAWAY_BODY           2.45
+score CHARSET_FARAWAY_HEADERS        2.06
 
 # highly generic tests for viruses that are scored just high enough to run
 
