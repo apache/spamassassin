@@ -710,3 +710,6 @@ describe T_HTML_PLAIN_TEXT      Message is HTML pretending to be plain text
 meta     T_TEXT_ONLY            (__MIME_TEXT_ONLY && !HTML_MESSAGE)
 describe T_TEXT_ONLY            Message is plain text only
 
+# Bug 2168
+header T_BAD_MOZILLA_VERSION    User-Agent =~ /Mozilla\/5\.0\d\d/
+describe T_BAD_MOZILLA_VERSION  User-Agent claims to be Mozilla, but is malformed
