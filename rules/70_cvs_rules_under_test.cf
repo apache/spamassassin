@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.544 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.545 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -308,12 +308,6 @@ describe T_HREF_3D		Uses href=3D Trick
 # bug 1876
 rawbody		T_PUSHHERELINK		/<a[^>]*>[^<]*((push|go)\s(here|this) |cease.{1,10}mail)[^<]*<\/a>/i
 describe	T_PUSHHERELINK		Link asks you to "push here" or "go here" or "cease mail" or the like
-
-# uri case changes
-uri T_URI_CASE_CHANGE	/(?:[a-z][A-Z]+){3}/
-
-# hex escape in a directory name
-uri T_HTTP_ESCAPED_DIRECTORY	/^https?\:\/\/.*?\/.*%[0-9a-f]{2}.*\//i
 
 # bug 1734: replacement rules
 header T_FROM_OFFERS_1		From:addr =~ /\@\S*offer(?!sen)/i
