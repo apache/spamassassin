@@ -114,8 +114,8 @@ foreach my $test (sort { $ranking{$b} <=> $ranking{$a} } keys %freq) {
 
   if (!$mutatable) {
     printf OUT ("%3.3f %3.3f 0 $test\n",
-                         $rules{$test}->{score},
-                         $rules{$test}->{score});
+                         (split(/\s+/,$rules{$test}->{score}))[0],
+                         (split(/\s+/,$rules{$test}->{score}))[0]);
     next;
   }
 
