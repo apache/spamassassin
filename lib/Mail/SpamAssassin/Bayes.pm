@@ -108,7 +108,11 @@ $IGNORED_HDRS = qr{(?: (?:X-)?Sender    # misc noise
 
   # Annotations from VM: (thanks to Allen Smith)
   |X-VM-(?:Bookmark|(?:POP|IMAP)-Retrieved|Labels|Last-Modified
-    |Summary-Format|VHeader|v\d-Data|Message-Order)
+  |Summary-Format|VHeader|v\d-Data|Message-Order)
+
+  # Annotations from Gnus
+  | X-Gnus-Mail-Source
+  | Xref
 
 )}x;
 
