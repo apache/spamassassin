@@ -369,3 +369,7 @@ describe T_TERRA_ES	Contains images or links to pages hosted at 'terra.es'
 # bug 2957
 uri T_INFO_TLD			/^(?:https?:\/\/|mailto:)[^\/]+\.info(?:\/|$)/i
 describe T_INFO_TLD		Contains a URL in the INFO top-level domain    
+
+# bug 2071
+body            T_GEVALIACOFFEE           /\bGevalia (?:Coffee|Kaffe)\b/i
+describe        T_GEVALIACOFFEE           Selling Gevalia Coffee
