@@ -1,0 +1,79 @@
+#!/usr/bin/perl
+#
+# maildir-scan-headers - grep a set of mail files for patterns, and list
+# all headers specified.
+
+sub usage {
+  die "usage: maildir-scan-headers [-h headers] [--headers headers]
+	[-i] [-raw] [-sort] fileordir1 fileordir2 ...  \n";
+
+}
+
+my $wanted = '';
+my $sort = 0;
+my $casei = 0;
+my $raw = 0;
+my @files = ();
+
+use Getopt::Long qw(:config no_ignore_case);
+GetOptions(
+	"headers|h=s" => \$wanted,
+	"casei|i" => \$casei,
+	"raw" => \$raw,
+	"sort" => \$sort,
+	'help' => \&usage,
+	'<>' => sub { push (@files, $_[0]); }
+);
+
+$wanted =~ s/[ ,\|;:]+/\|/gs;
+if ($casei) {
+  $wanted = qr{(?:$wanted)}i;
+} else {
+  $wanted = qr{(?:$wanted)};
+}
+
+foreach my $file (@files) {
+  if (-d $file) {
+    use File::Find;
+    File::Find::find (sub {
+		-f $_ and do_file ($File::Find::name); 
+	      }, $file);
+  } else {
+    do_file ($file);
+  }
+}
+
+sub do_file {
+  my $file = shift;
+  return if ($file =~ /\/\,\d/);		# MH deleted mail
+
+  open (IN, "<$file") or warn "cannot read $file\n";
+
+  my $hdrs = '';
+  while (<IN>)
+  {
+    if (/^$/) { last; }
+
+    if (!$raw && /X-Spam-Flag: YES/) {
+      while (<IN>) {
+	/^Content-Description: original message before SpamAssassin/ and last;
+      }
+      $_ = <IN>; $_ = <IN>; $_ = <IN>;
+      $hdrs = '';
+      next;
+    }
+
+    $hdrs .= $_;
+  }
+  close IN;
+
+  $hdrs =~ s/(\n[ \t]+)/\\n /gs;	# folding
+  $hdrs =~ s/\|/[pipe]/gs;		# pipe chars
+
+  my @ok = ($hdrs =~ /^(${wanted}:(?: .*|))$/gom);
+  if ($sort) { @ok = sort @ok; }
+  $hdrs = join ("|", @ok);
+
+  return unless $hdrs =~ /\S/;
+  print "$file $hdrs\n";
+}
