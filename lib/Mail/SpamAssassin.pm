@@ -94,7 +94,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.176 2003/02/23 20:46:32 felicity Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.177 2003/03/02 08:02:00 zelgadis Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -281,6 +281,76 @@ sub new {
 
   $self;
 }
+
+###########################################################################
+
+=item $f->trim_rules ($regexp)
+
+Remove all rules that don't match the given regexp (or are sub-rules of
+meta-tests that match the regexp).
+
+=cut
+
+my @rule_types = ("body_tests", "uri_tests", "uri_evals",
+                  "head_tests", "head_evals", "body_evals", "full_tests",
+                  "full_evals", "rawbody_tests", "rawbody_evals",
+                  "meta_tests");
+
+sub trim_rules {
+  my ($self, $regexp) = @_;
+
+  my @all_rules;
+
+  foreach my $rule_type (@rule_types) {
+    push(@all_rules, keys(%{$self->{conf}->{$rule_type}}));
+  }
+
+  my @rules_to_keep = grep(/$regexp/, @all_rules);
+
+  if (@rules_to_keep == 0) {
+    die "trim_rules(): All rules excluded, nothing to test.\n";
+  }
+
+  my @meta_tests    = grep(/$regexp/, keys(%{$self->{conf}->{meta_tests}}));
+  foreach my $meta (@meta_tests) {
+    push(@rules_to_keep, add_meta_depends($self->{conf}, $meta))
+  }
+
+  my %rules_to_keep_hash = ();
+
+  foreach my $rule (@rules_to_keep) {
+    $rules_to_keep_hash{$rule} = 1;
+  }
+
+  foreach my $rule_type (@rule_types) {
+    foreach my $rule (keys(%{$self->{conf}->{$rule_type}})) {
+      delete $self->{conf}->{$rule_type}->{$rule}
+        if (!$rules_to_keep_hash{$rule});
+    }
+  }
+} # trim_rules()
+
+sub add_meta_depends {
+  my ($conf, $meta) = @_;
+
+  my @rules = ();
+
+  my @tokens = $conf->{meta_tests}->{$meta} =~ m/(\w+)/g;
+
+  @tokens = grep(!/^\d+$/, @tokens);
+  # @tokens now only consists of sub-rules
+
+  foreach my $token (@tokens) {
+    push(@rules, $token);
+
+    # If the sub-rule is a meta-test, recurse
+    if ($conf->{meta_tests}->{$token}) {
+      push(@rules, add_meta_depends($conf, $token));
+    }
+  } # foreach my $token (@tokens)
+
+  return @rules;
+} # add_meta_depends()
 
 ###########################################################################
 
@@ -1111,6 +1181,10 @@ sub init {
 
   if ($self->{conf}->{auto_learn}) {
     $self->init_learner({ });
+  }
+
+  if ($self->{only_these_rules}) {
+    $self->trim_rules($self->{only_these_rules});
   }
 
   # TODO -- open DNS cache etc. if necessary

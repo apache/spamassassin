@@ -11,6 +11,7 @@
 # --mid         report Message-ID from each message
 # --debug       report debugging information
 # --showdots    print a dot for each scanned message
+# --these_rules Only test rules matching the given regexp
 #
 # log options
 # -o            write all logs to stdout
@@ -44,7 +45,7 @@
 use vars qw($opt_c $opt_f $opt_j $opt_n $opt_o $opt_all $opt_bayes
 	    $opt_debug $opt_format $opt_hamlog $opt_head $opt_loghits
 	    $opt_mid $opt_mh $opt_ms $opt_net $opt_nosort $opt_showdots
-	    $opt_spamlog $opt_tail);
+	    $opt_spamlog $opt_tail $opt_these_rules);
 
 use FindBin;
 use lib "$FindBin::Bin/../lib";
@@ -64,7 +65,7 @@ $opt_spamlog = "spam.log";
 
 GetOptions("c=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug",
 	   "hamlog=s", "head=i", "loghits", "mh", "mid", "ms", "net",
-	   "showdots", "spamlog=s", "tail=i",
+	   "showdots", "spamlog=s", "tail=i", "these_rules=s",
 	   "dir" => sub { $opt_format = "dir"; },
 	   "file" => sub { $opt_format = "file"; },
 	   "mbox" => sub { $opt_format = "mbox"; },
@@ -91,6 +92,7 @@ $spamtest = new Mail::SpamAssassin ({
   'save_pattern_hits'   => $opt_loghits,
   'dont_copy_prefs'     => 1,
   'local_tests_only'    => $opt_net ? 0 : 1,
+  'only_these_rules'    => $opt_these_rules,
   PREFIX		=> '',
   DEF_RULES_DIR         => $opt_c,
   LOCAL_RULES_DIR       => '',
