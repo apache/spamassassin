@@ -1741,6 +1741,8 @@ sub do_body_uri_tests {
          if ('.$pat.') { 
             $self->got_pattern_hit (q{'.$rulename.'}, "URI: ");
             '. $self->ran_rule_debug_code ($rulename,"uri test", 4) . '
+            # Ok, we hit, stop now.
+            last;
          }
        }
     }
@@ -1829,6 +1831,8 @@ sub do_rawbody_tests {
          if ('.$pat.') { 
             $self->got_pattern_hit (q{'.$rulename.'}, "RAW: ");
             '. $self->ran_rule_debug_code ($rulename,"body_pattern_hit", 8) . '
+            # Ok, we hit, stop now.
+            last;
          }
        }
     }
