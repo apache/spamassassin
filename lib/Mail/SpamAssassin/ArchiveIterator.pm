@@ -176,8 +176,8 @@ sub new {
   if (!defined $self) { $self = { }; }
   bless ($self, $class);
 
-  $self->{opt_head} = 0 unless exists $self->{opt_head};
-  $self->{opt_tail} = 0 unless exists $self->{opt_tail};
+  $self->{opt_head} = 0 unless (defined $self->{opt_head});
+  $self->{opt_tail} = 0 unless (defined $self->{opt_tail});
 
   $self->{s} = [ ];		# spam, of course
   $self->{h} = [ ];		# ham, as if you couldn't guess
