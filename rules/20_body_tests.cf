@@ -50,36 +50,12 @@ tflags RAZOR2_CHECK	net
 # Note: The scores are set to 0 on these tests right now until they get
 # better integrated with SA overall.
 #
-body	RAZOR2_CF_RANGE_01_10	eval:check_razor2_range('01','10')
-body	RAZOR2_CF_RANGE_11_20	eval:check_razor2_range('11','20')
-body	RAZOR2_CF_RANGE_21_30	eval:check_razor2_range('21','30')
-body	RAZOR2_CF_RANGE_31_40	eval:check_razor2_range('31','40')
-body	RAZOR2_CF_RANGE_41_50	eval:check_razor2_range('41','50')
-body	RAZOR2_CF_RANGE_51_60	eval:check_razor2_range('51','60')
-body	RAZOR2_CF_RANGE_61_70	eval:check_razor2_range('61','70')
-body	RAZOR2_CF_RANGE_71_80	eval:check_razor2_range('71','80')
-body	RAZOR2_CF_RANGE_81_90	eval:check_razor2_range('81','90')
-body	RAZOR2_CF_RANGE_91_100	eval:check_razor2_range('91','100')
-describe RAZOR2_CF_RANGE_01_10	Razor2 gives a spam confidence level between 1 and 10
-describe RAZOR2_CF_RANGE_11_20	Razor2 gives a spam confidence level between 11 and 20
-describe RAZOR2_CF_RANGE_21_30	Razor2 gives a spam confidence level between 21 and 30
-describe RAZOR2_CF_RANGE_31_40	Razor2 gives a spam confidence level between 31 and 40
-describe RAZOR2_CF_RANGE_41_50	Razor2 gives a spam confidence level between 41 and 50
-describe RAZOR2_CF_RANGE_51_60	Razor2 gives a spam confidence level between 51 and 60
-describe RAZOR2_CF_RANGE_61_70	Razor2 gives a spam confidence level between 61 and 70
-describe RAZOR2_CF_RANGE_71_80	Razor2 gives a spam confidence level between 71 and 80
-describe RAZOR2_CF_RANGE_81_90	Razor2 gives a spam confidence level between 81 and 90
-describe RAZOR2_CF_RANGE_91_100	Razor2 gives a spam confidence level between 91 and 100
-tflags RAZOR2_CF_RANGE_01_10	net
-tflags RAZOR2_CF_RANGE_11_20	net
-tflags RAZOR2_CF_RANGE_21_30	net
-tflags RAZOR2_CF_RANGE_31_40	net
-tflags RAZOR2_CF_RANGE_41_50	net
-tflags RAZOR2_CF_RANGE_51_60	net
-tflags RAZOR2_CF_RANGE_61_70	net
-tflags RAZOR2_CF_RANGE_71_80	net
-tflags RAZOR2_CF_RANGE_81_90	net
-tflags RAZOR2_CF_RANGE_91_100	net
+body	RAZOR2_CF_RANGE_11_50	eval:check_razor2_range('11','50')
+body	RAZOR2_CF_RANGE_51_100	eval:check_razor2_range('51','100')
+tflags  RAZOR2_CF_RANGE_11_50	net
+tflags  RAZOR2_CF_RANGE_51_100	net
+describe RAZOR2_CF_RANGE_11_50	Razor2 gives a spam confidence level between 11 and 50
+describe RAZOR2_CF_RANGE_51_100	Razor2 gives a spam confidence level between 51 and 100
 
 full DCC_CHECK		eval:check_dcc()
 describe DCC_CHECK	Listed in DCC, see http://rhyolite.com/anti-spam/dcc/
