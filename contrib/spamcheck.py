@@ -1,5 +1,24 @@
 #!/usr/bin/env python
 
+# spamcheck.py: spam tagging support for Postfix/Cyrus
+#
+# Copyright (C) 2002 James Henstridge
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+#
 # Spam Assassin filter to fit in between postfix (or other MTA) and
 # Cyrus IMAP (or other MDA).  To hook it up, simply add a line like
 # the following to postfix's master.cf:
@@ -53,7 +72,7 @@ class LMTP(smtplib.SMTP):
             if not port: port = LMTP_PORT
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             if self.debuglevel > 0: print 'connect:', (host, port)
-            self.sock.connect(host, port)
+            self.sock.connect((host, port))
         (code, msg) = self.getreply()
         if self.debuglevel > 0: print 'connect:', msg
         return (code, msg)
@@ -110,7 +129,7 @@ response_pat = re.compile(r'^SPAMD/([\d.]+)\s+(-?\d+)\s+(.*)')
 
 def spamcheck(spamd_host, spamd_port, user, data):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect(spamd_host, spamd_port)
+    sock.connect((spamd_host, spamd_port))
 
     PROTOCOL_VERSION = "SPAMC/1.2"
 
@@ -160,8 +179,7 @@ def process_message(spamd_host, spamd_port, lmtp_host, sender, recipient):
                 nl = string.find(checked_data, '\n')
                 if nl >= 0: checked_data = checked_data[nl+1:]
         except:
-            import traceback
-            traceback.print_exc()
+            sys.stderr.write('%s: %s\n' % sys.exc_info()[:2])
             checked_data = data # fallback
         lmtp = LMTP(lmtp_host)
         code, msg = lmtp.lhlo()
@@ -212,7 +230,7 @@ def main(argv):
         sys.exit(1)
     for opt, arg in opts:
         if opt == '-s': sender = arg
-        elif opt == '-r': recipient = arg
+        elif opt == '-r': recipient = string.lower(arg)
         elif opt == '-l': lmtp_host = arg
         else:
             sys.stderr.write('unexpected argument\n')
@@ -224,7 +242,11 @@ def main(argv):
         sys.stderr.write('required argument missing\n')
         sys.exit(1)
 
-    process_message(spamd_host, spamd_port, lmtp_host, sender, recipient)
+    try:
+        process_message(spamd_host, spamd_port, lmtp_host, sender, recipient)
+    except:
+        sys.stderr.write('%s: %s\n' % sys.exc_info()[:2])
+        sys.exit(1)
 
 if __name__ == '__main__':
     main(sys.argv)
