@@ -106,14 +106,14 @@ Mail::SpamAssassin::Conf class (see the 'doc' directory).
 	default prefs file from above will be copied here for the
 	user to edit later, if they wish.
 
-	Unless you're using spamd, there is no difference in
-	interpretation between the rules file and the preferences file, so
-	users can add new rules for their own use in the
-	"~/.spamassassin.cf" file, if they like.  (spamd disables this for
-	security and increased speed.)
+        Unless you're using spamd, there is no difference in
+        interpretation between the rules file and the preferences file, so
+        users can add new rules for their own use in the
+        "~/.spamassassin/user_prefs" file, if they like.  (spamd disables
+        this for security and increased speed.)
 
-Take a look at the "Mail_SpamAssassin_Conf.txt" file in the "doc"
-directory to see what can be set.  Common first-time tweaks include:
+After installation, try "perldoc Mail::SpamAssassin::Conf" to see what
+can be set. Common first-time tweaks include:
 
   - required_hits
 
@@ -192,7 +192,7 @@ http://mail-abuse.org/rbl+/ and
 http://www.mail-abuse.org/feestructure.html .
 
 To turn on the tests, simply assign them a non-zero score, e.g. by adding
-these lines to your ~/.spamassassin.cf file:
+these lines to your ~/.spamassassin/user_prefs file:
 
     score RCVD_IN_RBL               10
     score RCVD_IN_RSS               1
