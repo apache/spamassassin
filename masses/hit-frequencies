@@ -2,7 +2,7 @@
 
 use FindBin;
 use Getopt::Std;
-getopts("fm:M:X:l:L:pxhc:");
+getopts("fm:M:X:l:L:pxhc:a");
 
 use vars qw {
   $opt_f $opt_m $opt_M $opt_X $opt_p $opt_x $opt_h $opt_l $opt_L $opt_c
