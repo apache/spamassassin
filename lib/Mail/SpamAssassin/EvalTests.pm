@@ -2062,8 +2062,8 @@ sub check_for_mime_html_text_only {
   return 1 if (defined($ctype) && $ctype =~ m@text/html@i);
 
   $self->_check_attachments unless exists $self->{mime_body_ctype_count};
-  return ($self->{mime_body_ctype_count} == 1 &&
-	  $self->{mime_body_ctype_last} =~ m@text/html@i);
+  return ($self->{mime_body_ctype_count} > 0 &&
+	  $self->{mime_body_ctype_count} == $self->{mime_body_html_count});
 }
 
 sub check_for_mime_html_no_charset {
@@ -2105,7 +2105,10 @@ sub _check_mime_header {
   my ($self, $ctype, $cte, $cd, $charset, $name) = @_;
 
   $self->{mime_body_ctype_count}++;
-  $self->{mime_body_ctype_last} = $ctype;
+
+  if ($ctype =~ m@text/html@i) {
+    $self->{mime_body_html_count}++;
+  }
 
   if ($ctype =~ /^text/ &&
       $cte =~ /base64/ &&
@@ -2184,6 +2187,7 @@ sub _check_attachments {
   $self->{microsoft_executable} = 0;
   $self->{mime_base64_encoded_text} = 0;
   $self->{mime_body_ctype_count} = 0;
+  $self->{mime_body_html_count} = 0;
   $self->{mime_faraway_charset} = 0;
   $self->{mime_html_no_charset} = 0;
   $self->{mime_long_line_qp} = 0;
