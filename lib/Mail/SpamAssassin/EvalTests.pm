@@ -1629,21 +1629,6 @@ sub check_for_num_yelling_lines {
   return ($self->{num_yelling_lines} >= $threshold);
 }
 
-sub check_html_table_border_thick {
-  my ($self) = @_;
-
-  return ($Mail::SpamAssassin::PerMsgStatus::html_border > 1);
-}
-
-# A possibility for spotting heavy HTML spam and image-only spam
-# Submitted by Michael Moncur 7/26/2002, see bug #608
-sub check_html_percentage {
-  my ($self, $body, $min, $max) = @_;
-
-  my $html_percent = $Mail::SpamAssassin::PerMsgStatus::html_ratio * 100;
-  return ($html_percent > $min && $html_percent <= $max);
-}
-
 sub check_for_mime_excessive_qp {
   my ($self) = @_;
 
@@ -1736,6 +1721,51 @@ sub check_carriage_returns {
   my $nl = ($rawbody =~ tr/\n/x/);
 
   return ($nl > 0 && ($cr / $nl) > 0.5);
+}
+
+###########################################################################
+# HTML parser tests
+###########################################################################
+
+# A possibility for spotting heavy HTML spam and image-only spam
+# Submitted by Michael Moncur 7/26/2002, see bug #608
+sub html_percentage {
+  my (undef, undef, $min, $max) = @_;
+
+  my $html_percent = $Mail::SpamAssassin::PerMsgStatus::html{ratio} * 100;
+  return ($html_percent > $min && $html_percent <= $max);
+}
+
+sub html_table_thick_border {
+  return ($Mail::SpamAssassin::PerMsgStatus::html{border} > 1);
+}
+
+sub html_javascript {
+  return $Mail::SpamAssassin::PerMsgStatus::html{javascript};
+}
+
+sub html_javascript_very_unsafe {
+  return $Mail::SpamAssassin::PerMsgStatus::html{javascript_very_unsafe};
+}
+
+sub html_bgcolor {
+  return $Mail::SpamAssassin::PerMsgStatus::html{bgcolor};
+}
+
+sub html_big_font {
+  return $Mail::SpamAssassin::PerMsgStatus::html{big_font};
+}
+
+sub html_web_bugs {
+  return $Mail::SpamAssassin::PerMsgStatus::html{web_bugs};
+}
+
+sub html_relaying_frame {
+  return $Mail::SpamAssassin::PerMsgStatus::html{relaying_frame};
+}
+
+sub html_embeds {
+  return $Mail::SpamAssassin::PerMsgStatus::html{embeds};
 }
 
 ###########################################################################

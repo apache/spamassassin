@@ -41,7 +41,7 @@ use Mail::SpamAssassin::EvalTests;
 use Mail::SpamAssassin::AutoWhitelist;
 
 use vars qw{
-  @ISA $base64alphabet $html_border $html_ratio
+  @ISA $base64alphabet %html
 };
 
 @ISA = qw();
@@ -613,53 +613,89 @@ my $html_last_tag;
 # HTML decoding TODOs
 # - add URIs to list for faster URI testing
 
-sub html_tag
-{
+sub html_tag {
   my ($tag, $attr, $num) = @_;
 
   $html_inside{$tag} += $num;
 
-#  foreach (keys %{ $attr }) {
-#    my $value = $attr->{$_};
-#    $value =~ s/\s+/ /g;
-#    print STDERR "TAG\t$tag\t$_\t$value\n";
-#  }
   if ($num == 1) {
-    my $uri;
+    &html_format($tag, $attr, $num);
+    &html_uri($tag, $attr, $num);
+    &html_tests($tag, $attr, $num);
 
-    if ($tag =~ /^(?:p|hr)$/) {
-      $html_text .= "\n\n";
-    }
-    elsif ($tag eq "br") {
-      $html_text .= "\n";
-    }
-    elsif ($tag =~ /^(?:a|area|link)$/) {
-      $html_text .= "URI:$uri " if $uri = $attr->{href};
-    }
-    elsif ($tag =~ /^(?:img|frame|iframe|embed|script)$/) {
-      $html_text .= "URI:$uri " if $uri = $attr->{src};
-    }
-    elsif ($tag eq "table") {
-      $html_text .= "URI:$uri " if $uri = $attr->{background};
-      if (exists $attr->{border} && $attr->{border} =~ /(\d+)/) {
-	$html_border = $1 if $html_border < $1;
-      }
-    }
-    elsif ($tag eq "td") {
-      $html_text .= "URI:$uri " if $uri = $attr->{background};
-    }
-    elsif ($tag eq "form") {
-      $html_text .= "URI:$uri " if $uri = $attr->{action};
-    }
-    elsif ($tag eq "base") {
-      $html_text .= "BASEURI:$uri " if $uri = $attr->{href};
-    }
     $html_last_tag = $tag;
   }
 }
 
-sub html_text
-{
+sub html_format {
+  my ($tag, $attr, $num) = @_;
+
+  if ($tag eq "p" || $tag eq "hr") {
+    $html_text .= "\n\n";
+  }
+  elsif ($tag eq "br") {
+    $html_text .= "\n";
+  }
+}
+
+sub html_uri {
+  my ($tag, $attr, $num) = @_;
+  my $uri;
+
+  if ($tag =~ /^(?:a|area|link)$/) {
+    $html_text .= "URI:$uri " if $uri = $attr->{href};
+  }
+  elsif ($tag =~ /^(?:img|frame|iframe|embed|script)$/) {
+    $html_text .= "URI:$uri " if $uri = $attr->{src};
+  }
+  elsif ($tag =~ /^(?:table|td)$/) {
+    $html_text .= "URI:$uri " if $uri = $attr->{background};
+  }
+  elsif ($tag eq "form") {
+    $html_text .= "URI:$uri " if $uri = $attr->{action};
+  }
+  elsif ($tag eq "base") {
+    $html_text .= "BASEURI:$uri " if $uri = $attr->{href};
+  }
+}
+
+sub html_tests {
+  my ($tag, $attr, $num) = @_;
+
+  if ($tag eq "table" && exists $attr->{border} && $attr->{border} =~ /(\d+)/)
+  {
+    $html{border} = $1 if !exists $html{border} || $html{border} < $1;
+  }
+  if ($tag eq "script") {
+    $html{javascript} = 1;
+  }
+  if ($tag =~ /^(?:body|frame)$/) {
+    for (keys %$attr) {
+      if (/^on(?:Load|UnLoad|BeforeUnload)$/i)
+      {
+	$html{javascript_very_unsafe} = 1;
+      }
+    }
+  }
+  if ($tag eq "body" && exists $attr->{bgcolor}) {
+    $html{bgcolor} = 1 if $attr->{bgcolor} !~ /^\#ffffff$/i;
+  }
+  if ($tag eq "font" && exists $attr->{size}) {
+    $html{big_font} = 1 if (($attr->{size} =~ /^(\d+)/ && $1 > 3) ||
+			    ($attr->{size} =~ /\+(\d+)/ && $1 > 1));
+  }
+  if ($tag eq "img" && exists $attr->{src} && $attr->{src} =~ /\?/) {
+    $html{web_bugs} = 1;
+  }
+  if ($tag =~ /^i?frame$/) {
+    $html{relaying_frame} = 1;
+  }
+  if ($tag =~ /^(?:object|embed)$/) {
+    $html{embeds} = 1;
+  }
+}
+
+sub html_text {
   my ($text) = @_;
 
   return if (exists $html_inside{script} && $html_inside{script} > 0);
@@ -943,8 +979,9 @@ sub get_decoded_stripped_body_text_array {
   $text =~ s/BASEURI://sg;
 
   # do HTML conversions if necessary
-  $html_border = 0;
-  $html_ratio = 0;
+  undef %html;
+  $html{ratio} = 0;
+  $html{border} = 0;
   if (($text =~ m/<.*>/s) || ($text =~ m/\&[-_a-zA-Z0-9]+;/s)) {
     my $raw = length($text);
 
@@ -952,7 +989,7 @@ sub get_decoded_stripped_body_text_array {
     $html_last_tag = 0;
     $hp->parse($text);
     $hp->eof;
-    $html_ratio = ($raw - length($html_text)) / $raw if $raw;
+    $html{ratio} = ($raw - length($html_text)) / $raw if $raw;
     $text = $html_text;
     undef %html_inside;
     undef $html_last_tag;
