@@ -235,9 +235,7 @@ eval {
   # not reporting? OK, do checks instead.  Create a status object which
   # holds details of the message's spam/not-spam status.
   my $status = $spamtest->check ($mail);
-  $mail = $status->rewrite_mail ();
-
-  print $mail->get_pristine();
+  print $status->rewrite_mail ();
 
   if ($opt{'test-mode'}) {
     print $status->get_report();

@@ -281,9 +281,8 @@ sub wanted {
   my $extra = join(",", @extra);
 
   if (defined $opt_rewrite) {
-    my $mail = $status->rewrite_mail();
     open(REWRITE, "> " . ($opt_rewrite ? $opt_rewrite : "/tmp/out"));
-    print REWRITE $mail->get_pristine();
+    print REWRITE $status->rewrite_mail();
     close(REWRITE);
   }
 

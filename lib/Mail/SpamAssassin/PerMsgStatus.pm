@@ -543,8 +543,8 @@ sub get_message {
 =item $status->rewrite_mail ()
 
 Rewrite the mail message.  This will at minimum add headers, and at
-maximum MIME-encapsulate the message text, to reflect its spam or
-not-spam status.
+maximum MIME-encapsulate the message text, to reflect its spam or not-spam
+status.  The function will return a scalar of the rewritten message.
 
 The actual modifications depend on the configuration (see
 C<Mail::SpamAssassin::Conf> for more information).
@@ -745,10 +745,8 @@ $original
 
 EOM
   
-  my $mbox = $self->{msg}->get_mbox_seperator();
-  $newmsg = $mbox . $newmsg if ( defined $mbox );
-  my @lines = split (/^/m,  $newmsg);
-  return Mail::SpamAssassin::MsgParser->parse(\@lines);
+  my $mbox = $self->{msg}->get_mbox_seperator() || '';
+  return $mbox . $newmsg;
 }
 
 sub rewrite_headers {
@@ -789,10 +787,8 @@ sub rewrite_headers {
     push(@pristine_headers, "X-Spam-$header: $line\n");
   }
 
-  my $mbox = $self->{msg}->get_mbox_seperator();
-  splice @pristine_headers, 0, 0, $mbox if ( defined $mbox );
-  push(@pristine_headers, "\n", split (/^/m, $self->{msg}->get_pristine_body()));
-  return Mail::SpamAssassin::MsgParser->parse(\@pristine_headers);
+  my $mbox = $self->{msg}->get_mbox_seperator() || '';
+  return join('', $mbox, @pristine_headers, "\n", $self->{msg}->get_pristine_body());
 }
 
 sub _process_header {
