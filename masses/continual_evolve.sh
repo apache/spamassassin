@@ -1,6 +1,8 @@
 #!/bin/sh
 
 count=1
+echo $$ > cont_evolve.pid
+
 while true ; do
   ./evolve $*
   mv results.evolved result.$count 
@@ -8,3 +10,4 @@ while true ; do
   count=`expr $count + 1`
 done
 
+rm -f cont_evolve.pid

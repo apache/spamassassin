@@ -29,7 +29,7 @@ int nn, ny, yn, yy;	// simple number of y/n diagnoses
 float nnscore, nyscore, ynscore, yyscore;
 
 float nybias	= 5.0;
-int sleepTime	= 0;		// time to sleep between gens
+int sleepTime	= 0;		// time to sleep during runs
 
 float float_num_spam;
 float float_num_nonspam;
@@ -159,6 +159,7 @@ objective(GAGenome & c)
 {
   GARealGenome &genome = (GARealGenome &) c;
   counthits(genome);
+
   if (sleepTime) { usleep(sleepTime); }
 
   // old old version; just use the # of messages
@@ -215,7 +216,7 @@ fill_allele_set (GARealAlleleSetArray *setary)
 void usage () {
   cerr << "usage: evolve -s size [args]\n"
     << "\n"
-    << "  -z sleeptime = time to sleep between gens, msecs (0 default)\n"
+    << "  -z sleeptime = time to sleep in msecs (0 default, 10 = 33% cpu usage)\n"
     << "  -s size = population size (300 recommended)\n"
     << "  -b nybias = bias towards false negatives (5.0 default)\n"
     << "\n"
