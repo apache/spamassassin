@@ -62,7 +62,7 @@ static int timeout = 600;
 
 void print_usage(void)
 {
-  printf("Usage: spamc [-d host] [-p port] [-B] [-c] [-f] [-h] [-x] [-e command [args]]\n");
+  printf("Usage: spamc [-d host] [-p port] [-B] [-c] [-f] [-h] [-x] [-t tout] [-e command [args]]\n");
   printf("-B: BSMTP mode - expect input to be a single SMTP-formatted message\n");
   printf("-c: check only - print score/threshold and exit code set to 0 if message is not spam, 1 if spam\n");
   printf("-d host: specify host to connect to  [default: localhost]\n");

@@ -7,7 +7,7 @@ spamc - client for spamd
 
 =over
 
-=item spamc [-c] [-d host] [-f] [-h] [-S] [-p port] [-s max_size] [-u username] [-e command [args]]
+=item spamc [-c] [-d host] [-f] [-h] [-S] [-p port] [-s max_size] [-t tout] [-u username] [-e command [args]]
 
 =back
 
@@ -24,8 +24,8 @@ SIZE extension in your BSMTP file will cause many problems).
 
 =item B<-c>
 
-Just check if the message is spam or not.  Set process exitcode to 1 is message
-is spam, 0 if not spam or processing failure occurs.  Will print
+Just check if the message is spam or not.  Set process exitcode to 1 is
+message is spam, 0 if not spam or processing failure occurs.  Will print
 score/threshold to stdout (as ints) or 0/0 if there was an error.
 
 =item B<-d> I<host>
@@ -77,6 +77,13 @@ this threshold and the message will be returned unprocessed.  Note that the
 default size is 250k, so if spamc gets handed a message bigger than this, it
 won't be passed to spamd.  The size is specified in bytes, and if you send it a
 negative number, things are quite likely to break very hard.
+
+=item B<-t> I<timeout>
+
+Set the timeout for spamc-to-spamd communications.  If spamd takes longer than
+this many seconds to reply to a message, spamc will abort the connection and
+treat this as a failure to connect; in other words the message will be
+returned unprocessed.  
 
 =item B<-u> I<username>
 
