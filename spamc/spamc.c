@@ -167,7 +167,7 @@ print_usage(void)
 /**
  * Does the command line parsing for argv[].
  *
- * Returns EX_OK or EX_NOTSPAM if successful. EX_NOTSPAM is a kludge for
+ * Returns EX_OK or EX_TEMPFAIL if successful. EX_TEMPFAIL is a kludge for
  * the cases where we want in main to return immediately; we can't exit()
  * because on Windows WSACleanup() needs to be called.
  */
@@ -308,15 +308,15 @@ read_args(int argc, char **argv,
             }
             case 'h':
             {
-                if (ret == EX_OK)
-                    ret = EX_NOTSPAM;
                 print_usage();
+                if (ret == EX_OK)
+                    ret = EX_TEMPFAIL;
                 return(ret);
             }
             case 'V':
             {
                 print_version();
-                return(EX_NOTSPAM);
+                return(EX_TEMPFAIL);
             }
         }
     }
@@ -470,7 +470,7 @@ main(int argc, char *argv[])
    max_size = 250 * 1024;
    username = NULL;
    if ((ret = read_args(argc, argv, &max_size, &username, &trans)) != EX_OK) {
-       if (ret == EX_NOTSPAM )
+       if (ret == EX_TEMPFAIL )
            ret = EX_OK;
        goto finish;
    }
