@@ -999,15 +999,16 @@ sub split_domain {
     # Split scalar domain into components
     my @domparts = split (/\./, $domain);
 
-    # Look for a lower level TLD
-    # use $#domparts to skip trying to match on TLDs that can't possibly
-    # match, but keep in mind that the hostname can be blank.
+    # Look for a sub-delegated TLD
+    # use @domparts to skip trying to match on TLDs that can't possibly
+    # match, but keep in mind that the hostname can be blank, so 4TLD needs 4,
+    # 3TLD needs 3, 2TLD needs 2 ...
     #
-    if ($#domparts >= 4 && $domain =~ /(?:\.|^)${FOUR_LEVEL_DOMAINS}$/io)     # Fire-Dept.CI.Los-Angeles.CA.US
+    if (@domparts >= 4 && $domain =~ /(?:\.|^)${FOUR_LEVEL_DOMAINS}$/io)     # Fire-Dept.CI.Los-Angeles.CA.US
     { $partsreqd = 5; }
-    elsif ($#domparts >= 3 && $domain =~ /(?:\.|^)${THREE_LEVEL_DOMAINS}$/io) # demon.co.uk
+    elsif (@domparts >= 3 && $domain =~ /(?:\.|^)${THREE_LEVEL_DOMAINS}$/io) # demon.co.uk
     { $partsreqd = 4; }
-    elsif ($#domparts >= 2 && $domain =~ /(?:\.|^)${TWO_LEVEL_DOMAINS}$/io)   # co.uk
+    elsif (@domparts >= 2 && $domain =~ /(?:\.|^)${TWO_LEVEL_DOMAINS}$/io)   # co.uk
     { $partsreqd = 3; }
 
     if (@domparts >= $partsreqd) {
