@@ -366,6 +366,7 @@ sub parse_received_line {
   my $envfrom = '';
   my $mta_looked_up_dns = 0;
   my $IP_ADDRESS = IP_ADDRESS;
+  my $LOCALHOST = LOCALHOST;
 
   # Received: (qmail 27981 invoked by uid 225); 14 Mar 2003 07:24:34 -0000
   # Received: (qmail 84907 invoked from network); 13 Feb 2003 20:59:28 -0000
@@ -903,11 +904,11 @@ sub parse_received_line {
   # with SMTP id h2R2iivG093740; Wed, 26 Mar 2003 20:44:44 -0600 
   # (CST) (envelope-from x@x.org)
   # Received: from localhost (localhost [127.0.0.1]) (uid 500) by mail with local; Tue, 07 Jan 2003 11:40:47 -0600
-  if (/^from ${Mail::SpamAssassin::LOCALHOST} \((?:\S+\@)?${Mail::SpamAssassin::LOCALHOST}[\) ]/) { return; }
+  if (/^from ${LOCALHOST} \((?:\S+\@)?${LOCALHOST}[\) ]/) { return; }
 
   # Received: from olgisoft.com (127.0.0.1) by 127.0.0.1 (EzMTS MTSSmtp
   # 1.55d5) ; Thu, 20 Mar 03 10:06:43 +0100 for <asrg@ietf.org>
-  if (/^from \S+ \((?:\S+\@)?${Mail::SpamAssassin::LOCALHOST}\) /) { return; }
+  if (/^from \S+ \((?:\S+\@)?${LOCALHOST}\) /) { return; }
 
   # Received: from casper.ghostscript.com (raph@casper [127.0.0.1]) h148aux8016336verify=FAIL); Tue, 4 Feb 2003 00:36:56 -0800
   # TODO: could use IPv6 localhost

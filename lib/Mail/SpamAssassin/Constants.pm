@@ -55,12 +55,15 @@ use constant DUMP_BACKUP => 8;
 # them using a NAT firewall. These are listed in the RBL as invalid
 # originators -- which is true, if you receive the mail directly
 # from them; however we do not, so we should ignore them.
-# cf. <http://www.iana.org/assignments/ipv4-address-space>,
-#     <http://duxcw.com/faq/network/privip.htm>,
-#     <http://duxcw.com/faq/network/autoip.htm>,
-#     <ftp://ftp.rfc-editor.org/in-notes/rfc3330.txt>
+# 
+# sources:
+#   IANA =  <http://www.iana.org/assignments/ipv4-address-space>,
+#           <http://duxcw.com/faq/network/privip.htm>,
+#   APIPA = <http://duxcw.com/faq/network/autoip.htm>,
+#   3330 =  <ftp://ftp.rfc-editor.org/in-notes/rfc3330.txt>
 #
 # Last update
+#   2004-03-08 Justin Mason - reimplemented removed code
 #   2003-11-07 bug 1784 changes removed due to relicensing
 #   2003-04-15 Updated - bug 1784
 #   2003-04-07 Justin Mason - removed some now-assigned nets
@@ -69,29 +72,30 @@ use constant DUMP_BACKUP => 8;
 #   2002-08-12 Matt Kettler - mail to SpamAssassin-devel
 #              msgid:<5.1.0.14.0.20020812211512.00a33cc0@192.168.50.2>
 #
-# **REIMPLEMENT**: This needs to be extended to re-include the ranges
-# from the RFCs and documents above.
-#
 use constant IP_IN_RESERVED_RANGE => qr{^(?:
-  192\.168|                        # 192.168/16:       Private Use
-  10|                              # 10/8:             Private Use
-  172\.(?:1[6-9]|2[0-9]|3[01])|    # 172.16-172.31/16: Private Use
+  192\.168|                        # 192.168/16:       Private Use (3330)
+  10|                              # 10/8:             Private Use (3330)
+  172\.(?:1[6-9]|2[0-9]|3[01])|    # 172.16-172.31/16: Private Use (3330)
   169\.254|                        # 169.254/16:       Private Use (APIPA)
   127|                             # 127/8:            Private Use (localhost)
-  [01257]|                         # 000-002/8, 005/8, 007/8: Reserved
-  2[37]|                           # 023/8, 027/8:     Reserved
-  3[179]|                          # 031/8, 037/8, 039/8: Reserved
-  4[12]|                           # 041/8, 042/8:     Reserved
-  5[89]|                           # 058/8, 059/8:     Reserved
-  60|                              # 060/8:            Reserved
-  7[0-9]|                          # 070-079/8:        Reserved
+  [01257]|                         # 000-002/8, 005/8, 007/8: IANA Reserved
+  2[37]|                           # 023/8, 027/8:     IANA Reserved
+  3[1679]|                         # 031/8, 036/8, 037/8, 039/8: IANA Reserved
+  4[12]|                           # 041/8, 042/8:     IANA Reserved
+  5[89]|                           # 058/8, 059/8:     IANA Reserved
+  7[2-9]|                          # 072-079/8:        IANA Reserved
+				   # [ignoring 72 as ARIN growth space]
+  8[6-9]|                          # 086-089/8:	       IANA Reserved
+				   # [ignoring 85 as RIPE growth space]
   9[0-9]|                          #  -
   1[01][0-9]|                      #  -
-  12[0-6]|                         # 126/8:            Reserved
-  197|                             # 197/8:            Reserved
-  22[23]|                          # 222/8, 223/8:     Reserved
+  12[0-6]|                         # 126/8:            IANA Reserved
+  192\.0\.2|			   # 192.0.2/24:       Reserved (3330)
+  198\.1[89]|			   # 198.18/15:        Reserved (3330)
+  197|                             # 197/8:            IANA Reserved
+  223|                             # 223/8:            IANA Reserved
   24[0-9]|                         # 240-
-  25[0-5]			   # 255/8:            Reserved
+  25[0-5]			   # 255/8:            IANA Reserved
 )\.}ox;
 
 # ---------------------------------------------------------------------------
