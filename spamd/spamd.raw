@@ -22,16 +22,16 @@ my @allowed_clients = qw (127.0.0.1);
 
 # load these now before we do any forks; saves perl interpreter
 # from looking for them in each subprocess.
-eval '
-  use Net::DNS;
-  use Net::DNS::Resolver;
-';
+eval {
+  require Net::DNS;
+  require Net::DNS::Resolver;
+};
 
-eval '
-  use Rxzor::Client;
-  use Razor::Signature; 
-  use Razor::String;
-';
+eval {
+  require Razor::Client;
+  require Razor::Signature; 
+  require Razor::String;
+};
 
 my %resphash = (
     EX_OK => 0,
@@ -179,8 +179,6 @@ for ( $waitedpid = 0;
 
 }
 
-}
-
 sub allowed {
     my $iaaddr = shift;
 
@@ -192,6 +190,8 @@ sub allowed {
     }
     
     return(0);
+}
+
 sub spawn {
     my $coderef = shift;
 
