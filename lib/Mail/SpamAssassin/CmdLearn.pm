@@ -110,6 +110,11 @@ sub cmdline_run {
 
   $spamtest->init (1);
 
+  # Add a default prefix if the path is a directory
+  if (-d $bayes_override_path) {
+    $bayes_override_path = File::Spec->catfile($bayes_override_path, 'bayes');
+  }
+
   if (defined $opt{'dump'}) {
     my($magic, $toks);
 
