@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.532 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.533 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -372,9 +372,6 @@ body     T_TRY_FOR_YOURSELF       /\btry (?:for|it|it for) yourself\b/i
 # bug 1758:
 header T_FROM_NO_USER		From =~ /(?:^\@|<\@| \@[^\)<]*$|<>)/ [if-unset: unset@unset.unset]
 header T_TO_NO_USER		To =~ /(?:^\@|<\@| \@[^\)<]*$|<>)/ [if-unset: unset@unset.unset]
-
-header T_TO_MALFORMED             To !~ /(?:(?:\"[^\"]+\"|\S+)\@\S+\.\S+|\"?[Uu]ndisclosed[- .]recipients\"?:|<\S+(?:\!\S+){1,}>|^\s*$)/ [if-unset: unset@unset.unset]
-header T_TO_MALFORMED2             To !~ /(?:(?:\"[^\"]+\"|\S+)\@\S+\.\S+|^\s*.+:\s*;|^\s*\"[^\"]+\":\s*;|^\s*\([^\)]*\)\s*$|<\S+(?:\!\S+){1,}>|^\s*$)/ [if-unset: unset@unset.unset]
 
 # bug 1634:
 # needed to readd X_MAILING_LIST as dependency, modify T_MAC_EUDORA_MUA for new version
