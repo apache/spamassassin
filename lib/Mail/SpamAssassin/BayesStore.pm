@@ -771,10 +771,7 @@ sub scan_count_increment_big_counter {
     }
   };
 
-  my $failure;
-  if ($@) {             # if we died, untie the dbs.
-    my $failure = $@;
-  }
+  my $failure = $@;
 
   if ($need_to_untie || $need_to_retie_ro) {
     $self->untie_db();
