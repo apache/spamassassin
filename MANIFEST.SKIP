@@ -1,4 +1,6 @@
+\.a$
 \.bak$
+\.dll$
 \.exe$
 \.exists$
 \.log$
@@ -7,17 +9,19 @@
 \.old$
 \.pid$
 \.so$
-\.svn\b
+\.svn/
 \.swp$
+\.tmp$
 \.tst$
-\bcore$
+\bautom4te.cache/
+\bcore(\.\d+)?$
 \bMakefile$
 \bold.cf$
 \btmon.out$
 \b[Oo][Ll][Dd]$
 \b[Oo][Uu][Tt]$
+^blib/
 ^blibdirs$
-^blib\b
 ^build/3\.\d\.\d_change_summary$
 ^build/replace_license_blocks$
 ^debian/
@@ -66,6 +70,7 @@
 ^sa_with_mail_audit$
 ^spamassassin$
 ^spamc/config\.(h|status|log)$
+^spamc/qmail-spamc$
 ^spamc/spamc$
 ^spamc/sslspamc$
 ^spamc/version.h$
@@ -74,6 +79,7 @@
 ^t/bayessql.cf$
 ^t/data/nice/cjk/
 ^t/data/whitelists/
+^t/do_net$
 ^t/log/
 ^t/rule_tests.t$
 ^t/sql_based_whitelist.cf$
