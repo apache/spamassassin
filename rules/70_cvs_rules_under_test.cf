@@ -815,7 +815,6 @@ body __AFRICAN_COUNTRY_52	/\bcape town\b/i
 
 header T_MSGID_NO_HOST		Message-Id =~ /\@>(?:$|\s)/
 
-header T_MSGID_OE_LONG_13	Message-Id =~ /<[a-f0-9]{13}\$[a-f0-9]{8}\$[a-f0-9]{8}\@/
 header T_MSGID_OE_LONG_14	Message-Id =~ /<[a-f0-9]{14}\$[a-f0-9]{8}\$[a-f0-9]{8}\@/
 header T_MSGID_OE_LONG_15	Message-Id =~ /<[a-f0-9]{15,}\$[a-f0-9]{8}\$[a-f0-9]{8}\@/
 
@@ -825,15 +824,9 @@ header T_MSGID_OE_LONG_15	Message-Id =~ /<[a-f0-9]{15,}\$[a-f0-9]{8}\$[a-f0-9]{8
 header T_MSGID_OE_SPAM_01BC 	Message-Id =~ /^<[a-f0-9]{4}(?:[^0]...|.[^1]..|..[^bc]|[^0123def])[a-f0-9]{4}\$[a-f0-9]{8}\$[a-f0-9]{8}\@/
 header T_MSGID_OE_SPAM_4651 	Message-Id =~ /^<[a-f0-9]{8}4651\$[a-f0-9]{8}\$[a-f0-9]{8}\@/
 header T_MSGID_OE_SPAM_4ZERO 	Message-Id =~ /^<[a-f0-9]{12}\$[a-f0-9]{8}\$0000[a-f0-9]{4}\@/
-# a specific, but prolific and hard-to-hit, spammer
-header T_MSGID_OE_SPAM_6B01 	Message-Id =~ /^<[a-f0-9]{12}\$[a-f0-9]{8}\$6b01a8c0\@/
 
-header T_MSGID_OE_HAM_D907 	Message-Id =~ /^<00(?:d9|07|02|0f|09|13|01|12|23|1f|16)[a-f0-9]{8}\$[a-f0-9]{8}\$[a-f0-9]{8}\@/
-header T_MSGID_OE_HAM_01BC 	Message-Id =~ /^<[a-f0-9]{4}01(?:b[def]|c[03])[a-f0-9]{4}\$[a-f0-9]{8}\$[a-f0-9]{8}\@/
-header T_MSGID_OE_HAM_3470 	Message-Id =~ /^<[a-f0-9]{8}3470\$[a-f0-9]{8}\$[a-f0-9]{8}\@/
-tflags T_MSGID_OE_HAM_D907	nice
+header T_MSGID_OE_HAM_01BC 	Message-Id =~ /^<[a-f0-9]{4}01(?:b[def]|c0)[a-f0-9]{4}\$[a-f0-9]{8}\$[a-f0-9]{8}\@/
 tflags T_MSGID_OE_HAM_01BC	nice
-tflags T_MSGID_OE_HAM_3470	nice
 
 # Nov 12 2002 jm: a test to catch spammers who HELO as a host at a big site
 # (aol, hotmail etc.) but whose rDNS lists them at some dialup ISP or another
