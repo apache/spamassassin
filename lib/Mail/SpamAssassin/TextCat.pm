@@ -53,7 +53,7 @@ sub classify {
   my @unknown = create_lm($input);
   # load model and count for each language.
   my $language = 0;
-  open(LM, $self->{main}->{rules_filename} . "/languages") || die "cannot open languages: $!\n";
+  open(LM, $self->{main}->{languages_filename}) || die "cannot open languages: $!\n";
   while (<LM>) {
     chomp;
     if (/^0 (.+)/) {
