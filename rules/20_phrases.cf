@@ -971,9 +971,9 @@ body WE_HATE_SPAM2		/\banti-spam policy\b/i
 describe WE_HATE_SPAM2		Mailer is against spam -- aren't we all?
 
 # similar to SAVE_UP_TO and SAVE_MONEY, but a little more generic
-body	UP_TO_OR_MORES		/up to \S+( \S+)? or more/i
+body	UP_TO_OR_MORES		/up to \S+(?: \S+)? or more/i
 describe UP_TO_OR_MORES		Has generic 'up to X or more' noise
 
-body VERB_UP_TO_OR_MORES	/\b(add|lose|make|save) up to \S+( \S+)? or more/i
-describe VERB_UP_TO_OR_MORES	Has '(add|lose|make|save) up to X or more' noise
+body VERB_UP_TO_OR_MORES	/\b(?:add|lose|make|save) up to \S+(?: \S+)? or more/i
+describe VERB_UP_TO_OR_MORES	Has 'add/lose/make/save up to X or more' noise
 
