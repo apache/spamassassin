@@ -68,9 +68,15 @@ body T_HTML_FORM_HIDDEN_EMAIL2	eval:html_test('t_form_hidden_email2')
 body T_HTML_WEB_BUGS_BACKGROUND	eval:html_test('web_bugs_background')
 body T_HTML_WEB_BUGS_SRC	eval:html_test('web_bugs_src')
 
-# possible improvements for HTML_JAVASCRIPT
+# replacements
 # %%% HTML_JAVASCRIPT
-body T_HTML_JAVASCRIPT		eval:html_test('t_javascript')
+# %%% HTML_JAVASCRIPT_UNSAFE
+# %%% HTML_JAVASCRIPT_VERY_UNSAFE
+body T_HTML_EVENT		eval:html_test('t_html_event')
+body T_HTML_EVENT_UNSAFE	eval:html_test('t_html_event_unsafe')
+
+# a new JAVASCRIPT rule
+body T_HTML_WIN_FOCUS		eval:html_test('window_focus')
 
 # possible replacement/supplement for FROM_BTAMAIL
 # %%% FROM_BTAMAIL
@@ -95,6 +101,18 @@ body T_FALLING_INTEREST		/falling interest/i
 
 body T_ORDER_REPORT		/order report .\s?\d from/i
 describe T_ORDER_REPORT		Order a report from someone
+
+# some body tests
+body T_BROADCAST_EMAIL		/broadcast e.?mail/i
+body T_OUR_AFFILIATE_PARTNERS	/our affiliate partners/i
+body T_OUR_BROADCAST_EMAIL	/our broadcast e.?mail/i
+body T_OUR_COMPENSATION		/our (?:full )?compensation/i
+body T_OUR_OVERWHELMING_GROWTH	/our overwhelming growth/i
+body T_OUR_POLICY_ON_SELLING	/our policy on selling/i
+body T_OUR_PRIVACY_POLICY	/our privacy policy can be found/i
+body T_OUR_READERS		/our readers (?:to|with)/i
+body T_OUR_STRICT_ANTI		/our strict anti/i
+body T_OUR_PUBLICATIONS		/our website (?:and|or) publications/i
 
 # dear user
 body T_DEAR_USER		/dear(?: \w+)? user/i
