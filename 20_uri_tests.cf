@@ -84,8 +84,8 @@ describe HTTP_NUMBER_WORD   URL contains spamhaus signature: numbered servers
 uri JAVASCRIPT_URI	/^javascript:/i
 describe JAVASCRIPT_URI	Javascript protocol in a URI
 
-uri URI_IS_POUND	/^\#$/
-describe URI_IS_POUND	URI is just a '#'; probably a JS trick
+uri URI_IS_POUND	m{\#$}
+describe URI_IS_POUND	Filename is just a '\#'; probably a JS trick
 
 uri      WEIRD_PORT             m{https?://[^/]+:\d+/}
 describe WEIRD_PORT             Uses non-standard port number for HTTP
