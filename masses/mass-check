@@ -102,7 +102,7 @@ sub mass_check_all_folders {
     if ($folder =~ /\.tar$/)
     {
 	# it's an MH or Cyrus folder or Maildir in a tar file
-	use Archive::Tar;
+	require Archive::Tar;   # jm: require avoids warning
 	mass_check_tar_file($sub, $folder);
     }
     elsif (-d $folder &&

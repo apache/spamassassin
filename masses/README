@@ -139,9 +139,9 @@ hit-frequencies :
 
 mk-baseline-results :
 
-  Compute results for the baseline scores (read from ../spamassassin.cf).
-  If you provide the name of a config file as the first argument, it'll
-  use that instead.
+  Compute results for the baseline scores (read from ../rules/*).  If you
+  provide the name of a config directory as the first argument, it'll use that
+  instead.
 
 
 continual_evolve.sh :
@@ -151,4 +151,4 @@ continual_evolve.sh :
   Handy for running overnight.
 
 
--- EOF -- lastmod: Oct 27 2001 jm 
+-- EOF -- lastmod: Jul 11 2002 jm 

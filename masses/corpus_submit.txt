@@ -8,7 +8,8 @@ https://sourceforge.net/cvs/?group_id=25457
 3. Read README to gain understanding of what mass-check does.
 4. Run mass-check against your non-spam mail archive.
 5. sort -rn +1 nonspam.log | head -20
-6. Check each of those 20 messages by hand to make sure they're not spam that slipped through.
+6. Check each of those 20 messages by hand to make sure they're not spam that
+   slipped through, or a forward of a spam message.
 7. Repeat #6 until the top 20 are "clean"
 8. rename nonspam.log to nonspam-yourname.log (ie for me nonspam-craig.log)
 9. rsync -CPcvuzb nonspam-yourname.log belphegore.hughes-family.org::corpus
