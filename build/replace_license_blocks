@@ -1,0 +1,51 @@
+#!/usr/bin/perl -i.bak
+#
+# build/replace_license_blocks file ...
+#
+# Replace a <@LICENSE> ... </@LICENSE> delimited block of comment text inside
+# an arbitrary number of files with the contents of the file named
+# 'newlicense'.   The comment character to use at start-of-line is read
+# from the file being worked on, e.g.
+#
+#     * <@LICENSE>
+#
+# will result in all lines of the license text being prefixed with "    * ".
+
+# read the new license text; die if not available
+open (IN, "<newlicense") or die "cannot read 'newlicense'";
+my $license = join ('', <IN>);
+close IN;
+
+# remove final comment if present
+$license =~ s/\n \*\/$//gs;
+# remove C comment start-of-line markers
+$license =~ s/^(?:\/\* | \* | \*\/| \*)//gm;
+
+# and fixup in-place
+$in_license_block = 0;
+
+while (<>) {
+  if ($in_license_block) {
+    # we're waiting until the end-of-license "closing tag"
+    if (s/^.+<\/\@LICENSE>//) {
+      $in_license_block = 0;
+    }
+  } else {
+    if (s{^(.+)<\@LICENSE>\s*$}{ license_with_prefix($1); }eg) {
+      $in_license_block = 1;
+    } else {
+      # a non-block form -- will be replaced with a block
+      s{^(.+)\@LICENSE\s*$}{ license_with_prefix($1); }eg;
+    }
+  }
+  print;
+}
+
+sub license_with_prefix {
+  my $prefix = shift;
+  my $text = $license; $text =~ s/^/$prefix/gm;
+
+  return $prefix."<\@LICENSE>\n".
+    $text.
+    $prefix."</\@LICENSE>\n";
+}
