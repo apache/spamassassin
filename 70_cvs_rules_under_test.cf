@@ -603,3 +603,18 @@ meta T_USER_AGENT_AOL8		(__AOL8_MUA && __AOL8_FROM && __AOL8_RCVD && __AOL8_TO)
 describe T_USER_AGENT_AOL8	User-Agent header indicates a non-spam MUA (AOL 8)
 tflags T_USER_AGENT_AOL8	nice
 
+# From private mail with developers.  Some top tips here!
+header __BAT_MSGID		MESSAGEID =~ /^<\d{2,12}\.\d{14}\@\S+>$/
+header __BAT_CTYPE_1		Content-Type =~ /\n/
+header __BAT_CTYPE_2		Content-Type =~ /charset=\"/i
+header __BAT_CTYPE_3A		Content-Type =~ /boundary/i
+header __BAT_CTYPE_3B		Content-Type =~ /boundary=\"?-{10}/
+meta T_FORGED_BAT_MSGID		(__THEBAT_MUA && !__UNUSABLE_MSGID && !__BAT_MSGID)
+meta T_FORGED_BAT_CTYPE_NL	(__THEBAT_MUA && __BAT_CTYPE_1)
+meta T_FORGED_BAT_CHARSET	(__THEBAT_MUA && __BAT_CTYPE_2)
+meta T_FORGED_BAT_BOUNDARY	(__THEBAT_MUA && __BAT_CTYPE_3A && !__BAT_CTYPE_3B)
+describe T_FORGED_BAT_MSGID	Forged mail pretending to be from The Bat! (1)
+describe T_FORGED_BAT_CTYPE_NL	Forged mail pretending to be from The Bat! (2)
+describe T_FORGED_BAT_CHARSET	Forged mail pretending to be from The Bat! (3)
+describe T_FORGED_BAT_BOUNDARY	Forged mail pretending to be from The Bat! (4)
+
