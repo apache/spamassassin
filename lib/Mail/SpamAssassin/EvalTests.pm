@@ -385,29 +385,20 @@ sub _check_for_forged_received {
   $self->{mismatch_helo} = 0;
   $self->{mismatch_from} = 0;
 
-  my @received = grep(/\S/, split(/\n/, $self->get ('Received')));
-  my @by;
-  my @from;
-  my @helo;
-  my @fromip;
+  my @fromip = map { $_->{ip} } @{$self->{relays_untrusted}};
 
-  for (my $i = 0; $i < $#received; $i++) {
-    if ($received[$i] =~ s/\bby[\t ]+(\w+(?:[\w.-]+\.)+\w+)//i) {
-      $by[$i] = lc($1);
-      $by[$i] =~ s/.*\.(\S+\.\S+)$/$1/;
-    }
-    if ($received[$i] =~ s/\bfrom[\t ]+(\w+(?:[\w.-]+\.)+\w+)//i) {
-      $from[$i] = lc($1);
-      $from[$i] =~ s/.*\.(\S+\.\S+)$/$1/;
-    }
-    if ($received[$i] =~ s/\bhelo[=\t ]+(\w+(?:[\w.-]+\.)+\w+)//i) {
-      $helo[$i] = lc($1);
-      $helo[$i] =~ s/.*\.(\S+\.\S+)$/$1/;
-    }
-    if ($received[$i] =~ s/^ \((?:\S+ |)\[(${IP_ADDRESS})\]\)//i) {
-      $fromip[$i] = $1;
-    }
+  # just pick up domains
+  my @by = map {
+		hostname_to_domain ($_->{lc_by});
+	      } @{$self->{relays_untrusted}};
+  my @from = map {
+		hostname_to_domain ($_->{lc_rdns});
+	      } @{$self->{relays_untrusted}};
+  my @helo = map {
+		hostname_to_domain ($_->{lc_helo});
+	      } @{$self->{relays_untrusted}};
 
+  for (my $i = 0; $i < $self->{num_relays_untrusted}; $i++) {
     if (defined ($from[$i]) && defined($fromip[$i])) {
       if ($from[$i] =~ /^localhost(?:\.localdomain|)$/) {
         if ($fromip[$i] eq '127.0.0.1') {
@@ -429,6 +420,16 @@ sub _check_for_forged_received {
     {
       $self->{mismatch_from}++;
     }
+  }
+}
+
+sub hostname_to_domain {
+  # TODO: deal with the .co.uk case
+  my ($hname) = @_;
+  if ($hname =~ /([^\.]+\.[^\.]+)$/) {
+    $1;
+  } else {
+    $hname;
   }
 }
 
@@ -673,9 +674,9 @@ sub check_for_from_domain_in_received_headers {
       return 0;
   }
 
-  my $rcvd = $self->get('Received');
+  my $rcvd = $self->{relays_untrusted_str};
 
-  if ($rcvd =~ /from.*\b\Q$domain\E.*[\[\(]$IP_ADDRESS[\]\)].*by.*\b\Q$domain\E/) {
+  if ($rcvd =~ / rdns=\S*\b${domain} [^\]]*by=\S*\b${domain} /) {
       $self->{from_domain_in_received}->{$domain} = 1;
       return ($desired eq 'true');
   }
@@ -804,66 +805,16 @@ telling_truth:
 sub _check_received_helos {
   my ($self) = @_;
 
-  my @received = grep(/\S/, split(/\n/, $self->get ('Received')));
+  for (my $i = 0; $i < $self->{num_relays_untrusted}; $i++) {
+    my $rcvd = $self->{relays_untrusted}->[$i];
 
-  for (my $i = 0; $i < @received; $i++) {
-    # Ignore where HELO is in reserved IP space; regexp matches
-    # "[W.X.Y.Z]" immediatly followed by a ")", which should only
-    # sho up at the end of the HELO part of a Received header
-    if ($received[$i] =~ /\[([\d.]+)\]\)/) {
-      my $ip = $1;
+    # Ignore where IP is in reserved IP space
+    next if ($rcvd->{ip} =~ /${IP_IN_RESERVED_RANGE}/o);
 
-      next if $ip =~  /${IP_IN_RESERVED_RANGE}/o;;
-    }
+    my $from_host = $rcvd->{rdns};
+    my $helo_host = $rcvd->{helo};
+    my $by_host = $rcvd->{by};
 
-    # $helo_host regexp is "([\w.-]+\.[\w.-]+)" so that at least
-    # one "." must be present, thus avoiding domainless hostnames
-    # and "(HELO hostname)" situations.
-    #
-    # $from_host and $by_host regexps are "([\w.-]+)" to exclude
-    # things like "[1.2.3.4]"; we don't deal with numeric-only
-    # addresses
-    my $from_host;
-    my $helo_host;
-    my $by_host;
-
-    # TODO: Use Allen's Received-parser code.  Allen, these regexps
-    # may help
-
-    if ($received[$i] =~
-		/from ([-\w.]+\.[-\w.]+) \(\S+ helo=([-\w.]+)\) by ([-\w.]+)/)
-    {
-      # Exim: from ns.egenix.com ([217.115.138.139] helo=www.egenix.com) by
-      # mail.python.org with esmtp (Exim 4.05) id 1829w0-0007uf-00; Thu, 17 Oct
-      # 2002 08:39:28 -0400
-      $from_host = $1; $helo_host = $2; $by_host = $3;
-    }
-    elsif ($received[$i] =~
-		/from ([-\w.]+\.[-\w.]+) \(HELO ([-\w.]+)\) \(\S+\) by ([-\w.]+)/)
-    {
-      # qmail: from 64-251-145-11-cablemodem-roll.fidnet.com (HELO gabriels)
-      # (64.251.145.11) by three.fidnet.com with SMTP; 4 Dec 2002 16:01:35 -0000
-      $from_host = $1; $helo_host = $2; $by_host = $3;
-    }
-    elsif ($received[$i] =~
-		/from ([-\w.]+\.[-\w.]+) \(\[\S+\]\).* by ([-\w.]+)/)
-    {
-      # Received: from ralph.jamiemccarthy.com ([65.88.171.80]) by red.harvee.home
-      # (8.11.6/8.11.6) with ESMTP id gB4KuQ130187 for <zzzzzzzz@tb.tf>;
-      # Wed, 4 Dec 2002 15:56:27 -0500   [helo = from == good]
-      $from_host = $helo_host = $1; $by_host = $2;
-    }
-    elsif ($received[$i] =~
-		/from ([-\w.]+) \(([-\w.]+\.[-\w.]+).* by ([-\w.]+)/)
-    {
-      # I'm pretty sure from and HELO were the wrong way around here.  e.g.  in
-      # "from lycos.co.uk (newwww-37.st1.spray.net [212.78.202.47]) by
-      # outmail-3.st1.spray.net", the HELO is 'lycos.co.uk', NOT
-      # 'newwww-37.st1.spray.net' -- the latter is from reverse DNS, and is
-      # therefore trustworthy, whereas HELO is not.  (Nov 12 2002 jm) So
-      # accordingly, I've changed the order of $from_host and $helo_host below.
-      $helo_host = $1; $from_host = $2; $by_host = $3;
-    }
     next unless defined($helo_host);
 
     # Check for a faked dotcom HELO, e.g.
@@ -946,20 +897,17 @@ sub check_for_missing_to_header {
 sub check_for_sender_no_reverse {
   my ($self) = @_;
 
-  my @received = grep(/\S/, split(/\n/, $self->get ('Received')));
+  # Sender received header is the last in the sequence
+  my $srcvd = $self->{relays_untrusted}->
+				[$self->{num_relays_untrusted} - 1];
 
-  # Ignore received lines like "(qmail 12345 invoked by uid 789)"
-  @received = grep(/\bfrom\b.*\bby\b/s, @received);
-
-  # Sender recveived header is the last in the sequence
-  my $sender_rcvd = $received[$#received];
+  return 0 unless (defined $srcvd);
 
   # Ignore if the from host is domainless (has no dot)
-  return 0 unless (defined $sender_rcvd && $sender_rcvd =~
-                   /^from (\S+\.\S+) \(\[([\d.]+)\]\)/);
+  return 0 unless ($srcvd->{rdns} =~ /\./);
 
-  my $from = $1;
-  my $ip   = $2;
+  my $from = $srcvd->{rdns};
+  my $ip   = $srcvd->{ip};
 
   return 0 if ($ip =~ /${IP_IN_RESERVED_RANGE}/o);
 
@@ -1183,25 +1131,25 @@ sub check_lots_of_cc_lines {
 sub check_rbl {
   my ($self, $set, $rbl_domain, $needresult) = @_;
   local ($_);
+
+  # First check that DNS is available, if not do not perform this check
+  return 0 if $self->{conf}->{skip_rbl_checks};
+  return 0 unless $self->is_dns_available();
+  $self->load_resolver();
+
   # How many IPs max you check in the received lines;
   my $checklast=$self->{conf}->{num_check_received} - 1;
   
   dbg ("checking RBL $rbl_domain, set $set", "rbl", -1);
 
-  my $rcv = $self->get ('Received');
-  my @fullips = ($rcv =~ /[\[\(]($IP_ADDRESS)[\]\)]/g);
-  return 0 unless ($#fullips >= 0);
+  my @fullips = map { $_->{ip} } @{$self->{relays_untrusted}};
+  return 0 unless (scalar @fullips > 0);
 
   # Let's go ahead and trim away all Reserved ips (KLC)
   my @ips = ();
   foreach my $ip (@fullips) {
     if (!($ip =~ /${IP_IN_RESERVED_RANGE}/o)) { push(@ips,$ip); }
   }
-
-  # First check that DNS is available, if not do not perform this check
-  return 0 if $self->{conf}->{skip_rbl_checks};
-  return 0 unless $self->is_dns_available();
-  $self->load_resolver();
 
   dbg("Got the following IPs: ".join(", ", @ips), "rbl", -3);
   if ($#ips > 0) {
@@ -1614,6 +1562,8 @@ sub _check_for_round_the_world_received {
   $self->{round_the_world_revdns} = 0;
   $self->{round_the_world_helo} = 0;
   my $rcvd = $self->get ('Received');
+
+  # TODO: use new Received header parser
 
   # trad sendmail/postfix fmt:
   # Received: from hitower.parkgroup.ru (unknown [212.107.207.26]) by

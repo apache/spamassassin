@@ -1,4 +1,4 @@
-# $Id: Received.pm,v 1.1 2003/04/05 20:15:09 jmason Exp $
+# $Id: Received.pm,v 1.2 2003/04/05 21:08:20 jmason Exp $
 
 package Mail::SpamAssassin::Received;
 1;
@@ -9,17 +9,25 @@ use strict;
 use bytes;
 
 use vars qw{
+  $LOCALHOST
 };
+
+$LOCALHOST = qr{(?:
+		  localhost(?:\.localdomain|)|
+		  127\.0\.0\.1|
+		  ::ffff:127\.0\.0\.1
+		)}ixo;
 
 # ---------------------------------------------------------------------------
 
 sub parse_received_headers {
   my ($self) = @_;
 
-  @{$self->{relays_untrusted}} = [ ];
+  $self->{relays_untrusted} = [ ];
+  $self->{num_relays_untrusted} = 0;
   $self->{relays_untrusted_str} = '';
 
-  my $hdrs = join ('', $self->get('Received'));
+  my $hdrs = $self->get('Received');
   $hdrs ||= '';
 
   $hdrs =~ s/\n[ \t]+/ /gs;
@@ -51,6 +59,9 @@ sub parse_received_headers {
   $self->{msg}->delete_header ("X-SA-Relays-Untrusted");
   $self->{msg}->put_header ("X-SA-Relays-Untrusted",
 				$self->{relays_untrusted_str});
+
+  # be helpful; save some cumbersome typing
+  $self->{num_relays_untrusted} = scalar (@{$self->{relays_untrusted}});
 }
 
 # TODO: evaluate trust of headers and move trusted entries from
@@ -467,7 +478,7 @@ sub parse_received_line {
   # Received: (from mailnull@localhost) by x.x.org (8.12.6/8.9.3) id
   # h2R2hmBb093695 for x-relay; Wed, 26 Mar 2003 20:43:48 -0600 (CST)
   # (envelope-from y@z.com)
-  elsif (/^\(from \S+\@localhost\) /) { return; }
+  elsif (/^\(from \S+\@${LOCALHOST}\) /) { return; }
 
   # Received: from DSmith1204@aol.com by imo-m09.mx.aol.com (mail_out_v34.13.) id 7.53.208064a0 (4394); Sat, 11 Jan 2003 23:24:31 -0500 (EST)
   elsif (/^from \S+\@\S+ by \S+ /) { return; }
@@ -486,11 +497,11 @@ sub parse_received_line {
   # with SMTP id h2R2iivG093740; Wed, 26 Mar 2003 20:44:44 -0600 
   # (CST) (envelope-from x@x.org)
   # Received: from localhost (localhost [127.0.0.1]) (uid 500) by mail with local; Tue, 07 Jan 2003 11:40:47 -0600
-  elsif (/^from localhost \((?:\S+\@|)localhost[\) ]/) { return; }
+  elsif (/^from ${LOCALHOST} \((?:\S+\@|)${LOCALHOST}[\) ]/) { return; }
 
   # Received: from olgisoft.com (127.0.0.1) by 127.0.0.1 (EzMTS MTSSmtp
   # 1.55d5) ; Thu, 20 Mar 03 10:06:43 +0100 for <asrg@ietf.org>
-  elsif (/^from \S+ \((?:\S+\@|)localhost\) /) { return; }
+  elsif (/^from \S+ \((?:\S+\@|)${LOCALHOST}\) /) { return; }
 
   # Received: from casper.ghostscript.com (raph@casper [127.0.0.1]) h148aux8016336verify=FAIL); Tue, 4 Feb 2003 00:36:56 -0800
   # TODO: could use IPv6 localhost
@@ -533,8 +544,11 @@ sub parse_received_line {
 
   # OK, line parsed; now deal with the contents
 
-  if ($ip eq '127.0.0.1') {	# ignore localhost handovers
-    return;
+  # IPv6 may contain uppercase hex digits; lc it.
+  $ip = lc $ip;
+
+  if ($ip eq '127.0.0.1' || $ip eq '::ffff:127.0.0.1') {
+    return;	# ignore localhost handovers
   }
 
   if ($rdns =~ /^unknown$/i) {
@@ -563,6 +577,8 @@ sub parse_received_line {
   my $asstr = "[ ip=$ip rdns=$rdns helo=$helo by=$by ident=$ident ] ";
   $self->{relays_untrusted_str} .= $asstr;
 
+  my $isrsvd = ($ip =~ /^${IP_IN_RESERVED_RANGE}$/o);
+
   # add it to an internal array so Eval tests can use it
   push (@{$self->{relays_untrusted}}, {
 	ip => $ip,
@@ -570,6 +586,10 @@ sub parse_received_line {
 	helo => $helo,
 	by => $by,
 	ident => $ident,
+	lc_by => (lc $by),
+	lc_rdns => (lc $rdns),
+	lc_helo => (lc $helo),
+	ip_is_reserved => $isrsvd,
 	asstr => $asstr
       });
 }
