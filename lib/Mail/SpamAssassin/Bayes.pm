@@ -293,6 +293,7 @@ sub tokenize_line {
   my $isbody = $_[3];
   local ($_) = $_[1];
 
+  my($bv) = ($self->{store}->get_magic_tokens())[6];
   my $magic_re = $self->{store}->get_magic_re($bv);
 
   # include quotes, .'s and -'s for URIs, and [$,]'s for Nigerian-scam strings,
