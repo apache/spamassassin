@@ -953,7 +953,7 @@ sub parse_received_line {
   if (/^from (\S+)[^-A-Za-z0-9\.]/) { $helo = $1; }
   if (/^helo=(\S+)[^-A-Za-z0-9\.]/) { $helo = $1; }
   if (/\[(${IP_ADDRESS})\]/) { $ip = $1; }
-  if (/ by (\S+)[^-A-Za-z0-9\.]/) { $by = $1; }
+  if (/ by (\S+)[^-A-Za-z0-9\;\.]/) { $by = $1; }
   if ($ip && $by) { goto enough; }
 
   # ------------------------------------------------------------------------
@@ -998,6 +998,7 @@ enough:
   }
 
   $envfrom =~ s/^\s*<*//gs; $envfrom =~ s/>*\s*$//gs;
+  $by =~ s/\;$//;
 
   # ensure invalid chars are stripped.  Replace with '!' to flag their
   # presence, though.  NOTE: this means "[1.2.3.4]" IP addr HELO

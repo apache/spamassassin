@@ -46,6 +46,19 @@ Received: from asterix.laurier.org (lns-p19-8-82-65-66-244.adsl.proxad.net [82.6
 },
 q{
 
+Received: from hotmail.com (bay1-f95.bay1.hotmail.com [65.54.245.95]) by Daffy.timing.com; 
+Received: from mail pickup service by hotmail.com with Microsoft SMTPSVC;
+        Tue, 16 Mar 2004 18:12:31 -0800
+Received: from 24.8.231.233 by by1fd.bay1.hotmail.msn.com with HTTP;
+        Wed, 17 Mar 2004 02:12:31 GMT
+
+} => q{
+
+  [ ip=65.54.245.95 rdns=bay1-f95.bay1.hotmail.com helo=hotmail.com by=Daffy.timing.com ident= envfrom= ] [ ip=24.8.231.233 rdns= helo= by=by1fd.bay1.hotmail.msn.com ident= envfrom= ]
+
+},
+q{
+
 Received: from postfix3-2.free.fr (foobar@213.228.0.139) 
   by totor.example.net with SMTP; 14 Nov 2003 08:05:50 -0000 
 Received: from asterix.laurier.org (lns-p19-8-82-65-66-244.adsl.proxad.net [82.65.66.244]) 
