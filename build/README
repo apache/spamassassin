@@ -23,18 +23,23 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - cvs commit -m "ready to release"
 
-- run cvs2cl to generate the Changes file, like so.  For maint branches:
+- run cvs2cl-branch to generate the Changes file, like so.  For maint
+  branches:
 
-  TZ=UTC ./build/cvs2cl-branch -f Changes -l "-d'>2002-06-18'" --branch b2_5_0
+    TZ=UTC cvs2cl-branch -f Changes -l "-d'>2002-06-18'" --branch b2_5_0
 
   for HEAD:
 
-  TZ=UTC ./build/cvs2cl-branch -f Changes -l "-d'>2002-06-18'"
+    TZ=UTC cvs2cl-branch -f Changes -l "-d'>2002-06-18'"
   
   Note that this requires 'cvs2cl-branch' in the 'build' subdir, since
   there are bugs in std cvs2cl.pl that otherwise result in revisions
   on HEAD appearing in branches, if those revisions are in files created
   after the branch was created.   (I hate cvs -- jm)
+
+  You need to download this tool from http://SpamAssassin.org/buildtools/
+  and put it in your PATH -- we no longer bundle in the distro due to
+  licensing.
 
 - run "make disttest" to ensure all tests pass once the distribution
   is fully packaged.
