@@ -420,6 +420,13 @@ body T_RAZOR2_RANGE_91_100	eval:check_razor2_range('91','100')
 
 
 # bug 1207:
+#
+# these do not work so well (daf+easmith+quinlan+rODbegbie+theo)
+#
+#  0.037   0.0720   0.0217    0.768   0.43    0.01  T_DOUBLE_SQUOTES_1
+#  0.044   0.0720   0.0326    0.688   0.31    0.01  T_DOUBLE_SQUOTES_3
+#  0.055   0.0792   0.0450    0.638   0.25    0.01  T_DOUBLE_SQUOTES_2
+#
 header T_DOUBLE_SQUOTES_1 Subject =~ /''\w+''/
 describe T_DOUBLE_SQUOTES_1 Evading word tests with two single quotes
 test T_DOUBLE_SQUOTES_1 ok  ''this'' is ''spam''
@@ -434,6 +441,21 @@ header T_DOUBLE_SQUOTES_3 Subject =~ /''.{0,15}''/
 describe T_DOUBLE_SQUOTES_3 Evading word tests with two single quotes
 test T_DOUBLE_SQUOTES_3 ok ''buy now''
 test T_DOUBLE_SQUOTES_3 fail 'asdfasdfasdf'
+
+# Here are some tests for weird double quoting in the body (I tried 37
+# variations, these are the best 10, in rough order best RANK to worst
+# RANK). - quinlan
+# P.S. I feel really icky after writing these.
+body T_BODY_QUOTES_01	/(["'])\1\S{0,15}(["'])\1/
+body T_BODY_QUOTES_02	/(["']{2})\S{0,15}\1/
+body T_BODY_QUOTES_03	/(["'\222\223\224\262\263\271])\1\S{0,15}(["'\222\223\224\262\263\271])\1/
+body T_BODY_QUOTES_04	/(["'\222\223\224\262\263\271]{2})\S{0,15}\1/
+body T_BODY_QUOTES_05	/['\222\223\224\262\263\271]{2}\S{0,15}['\222\223\224\262\263\271]{2}/
+body T_BODY_QUOTES_06	/["'\222\223\224\262\263\271]{2}.{0,15}["\222\223\224\262\263\271]{2}/
+body T_BODY_QUOTES_07	/(["'\222\223\224\262\263\271]{2}).{0,15}\1/
+body T_BODY_QUOTES_08	/(["'])\1.{0,15}(["'])\1/
+body T_BODY_QUOTES_09	/(["']{2}).{0,15}\1/
+body T_BODY_QUOTES_10	/(["'\222\223\224\262\263\271])\1.{0,15}(["'\222\223\224\262\263\271])\1/
 
 #bug 1010
 body T_CHECK_EMAIL_ISFREE	eval:check_email_isfree()
