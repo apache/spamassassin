@@ -20,7 +20,6 @@ SpamAssassin will check the global configuration file (ie. any file matching
   user_scores_dsn		DBI:driver:connection
   user_scores_sql_username	dbusername
   user_scores_sql_password	dbpassword
-  user_scores_sql_table         tablename
 
 The first option, user_scores_dsn, describes the data source name that will be
 used to create the connection to your SQL server.  It MUST be in the format
@@ -54,16 +53,24 @@ would do the same as the previous example.
 For additional information, please refer to the DBD::* documentation
 for your particular driver.
 
-If the user_scores_dsn option does not exist, SpamAssassin will not
-attempt to use SQL for retrieving users' preferences.
+The spamd server will not pay attention to SQL preferences by default,
+even with user_scores_dsn set in the config files.  You must startup
+spamd with the proper options (ie -q or -Q, see perldoc spamd for more
+information).  If the user_scores_dsn option does not exist,
+SpamAssassin will not attempt to use SQL for retrieving users'
+preferences.
 
-If spamd can not connect using user_scores_dsn, or an error occurs when querying
-the SQL server during message filtering, spam checking will not be performed
-on that message.
+While scanning a message if spamd is unable to connect to the server
+specified in user_scores_dsn or an error occurs when querying the SQL
+server then spam checking will not be performed on that message.
 
-The other two required options tells SpamAssassin to use the defined
-username and password to establish the connection.
+The user_scores_sql_username and user_scores_sql_password options are
+required if your database server requires a username and password to
+be sent on connect.
 
+If you have a table layout that differs from the default, please
+review the documentation for user_scores_sql_customer_query for
+information on how deal with a customer layout.
 
 Requirements
 ------------
@@ -87,8 +94,8 @@ is as simple as could be.
 Database Schema
 ---------------
 
-The database must contain a table named by 'user_scores_sql_table' (default
-setting: "userpref") with at least three fields:
+The database must contain a table, default name "userpref", with at
+least three fields:
 
   username varchar(100)	  # this is the username whose e-mail is being filtered
   preference varchar(30)  # the preference (whitelist_from, required_score, etc.)
@@ -105,6 +112,10 @@ use the full varchar(100).
 Included is a default table that can be safely used in your own setup.  To use
 the default table, you must first create a database, and a username/password
 that can access that database.
+
+If you wish to use a table that differs from the included default you
+should review the user_scores_sql_custom_query config option for
+information on making it work correctly.
 
 To create a database, if one does not already exist, see "Creating A Database"
 below.
@@ -167,6 +178,10 @@ mysql> insert into db (Host, Db, User, Select_priv) values('localhost','<databas
 mysql> create database <databasename>;
 mysql> quit
 
+NOTE: If you intend to use this database for Bayes and/or AWL data you
+may need to grant additional privs (ie Insert_priv, Update_priv and
+Delete_priv).  Please refer to the MySQL documentation for the proper
+method of adding these privs.
 
 To create the database for PostgreSQL, with a username/password:
 
