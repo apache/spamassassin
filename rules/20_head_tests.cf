@@ -439,3 +439,6 @@ describe MIME_ODD_CASE         MiME-Version header (oddly capitalized)
 
 header   OE_PI                 X-Mailer =~ /OutLook Express 3\.14159/
 describe OE_PI                 X-Mailer contains 'OutLook Express 3.14159'
+
+header PGP_SIGNATURE_2         Content-Type =~ /protocol=.?application\/pgp-signature.?;/i
+describe PGP_SIGNATURE_2       Contains a PGP-signed message (signature attached)

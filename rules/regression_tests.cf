@@ -53,6 +53,7 @@ test FROM_STARTS_WITH_NUMS     ok   1234matt@sergeant.org
 test FROM_STARTS_WITH_NUMS     fail matt@sergeant.org
 test FORGED_YAHOO_RCVD fail by mf1.lng.yahoo.com (8.11.1/8.11.1) id g3SDfPH19426
 test NUMERIC_HTTP_ADDR ok http://123456789/foo/bar
-test			SPAM_REDIRECTOR ok http://rd.yahoo.com/?http://somesite.com/
-test			SPAM_REDIRECTOR ok http://wwp.icq.com/?http://anothersite.com/
-
+test SPAM_REDIRECTOR ok http://rd.yahoo.com/?http://somesite.com/
+test SPAM_REDIRECTOR ok http://wwp.icq.com/?http://anothersite.com/
+test PGP_SIGNATURE_2 ok Content-Type: multipart/signed; micalg=pgp-sha1;protocol="application/pgp-signature"; boundary="n8g4imXOkfNTN/H1"
+test PGP_SIGNATURE_2 fail Content-Type: text/plain; charset=us-ascii
