@@ -34,28 +34,19 @@ package Mail::SpamAssassin::PerMsgStatus;
 use Carp;
 use strict;
 
-use HTML::Parser 3.00 ();
 use Text::Wrap qw();
 
 use Mail::SpamAssassin::EvalTests;
 use Mail::SpamAssassin::AutoWhitelist;
+use Mail::SpamAssassin::HTML;
 
 use vars qw{
-  @ISA $base64alphabet %html
+  @ISA $base64alphabet
 };
 
 @ISA = qw();
 
 ###########################################################################
-
-my $hp = HTML::Parser->new(
-			api_version => 3,
-			handlers => [start => [\&html_tag,"tagname,attr,'+1'"],
-				     end => [\&html_tag,"tagname,attr,'-1'"],
-				     text => [\&html_text,"dtext"],
-				     comment => [\&html_comment,"text"],
-				     ],
-			marked_sections => 1);
 
 sub new {
   my $class = shift;
@@ -607,222 +598,6 @@ sub finish {
 ###########################################################################
 # Non-public methods from here on.
 
-my %html_inside;
-my $html_text;
-my $html_last_tag;
-
-# HTML decoding TODOs
-# - add URIs to list for faster URI testing
-
-sub html_tag {
-  my ($tag, $attr, $num) = @_;
-
-  $html_inside{$tag} += $num;
-
-  if ($num == 1) {
-    &html_format($tag, $attr, $num);
-    &html_uri($tag, $attr, $num);
-    &html_tests($tag, $attr, $num);
-
-    $html_last_tag = $tag;
-  }
-}
-
-sub html_format {
-  my ($tag, $attr, $num) = @_;
-
-  if ($tag eq "p" || $tag eq "hr") {
-    $html_text .= "\n\n";
-  }
-  elsif ($tag eq "br") {
-    $html_text .= "\n";
-  }
-}
-
-sub html_uri {
-  my ($tag, $attr, $num) = @_;
-  my $uri;
-
-  if ($tag =~ /^(?:a|area|link)$/) {
-    $html_text .= "URI:$uri " if $uri = $attr->{href};
-  }
-  elsif ($tag =~ /^(?:img|frame|iframe|embed|script)$/) {
-    $html_text .= "URI:$uri " if $uri = $attr->{src};
-  }
-  elsif ($tag =~ /^(?:table|td)$/) {
-    $html_text .= "URI:$uri " if $uri = $attr->{background};
-  }
-  elsif ($tag eq "form") {
-    $html_text .= "URI:$uri " if $uri = $attr->{action};
-  }
-  elsif ($tag eq "base") {
-    $html_text .= "BASEURI:$uri " if $uri = $attr->{href};
-  }
-}
-
-# input values from 0 to 255
-sub rgb_to_hsv {
-  my ($r, $g, $b) = @_;
-  my ($h, $s, $v, $max, $min);
-
-  if ($r > $g) {
-    $max = $r; $min = $g;
-  }
-  else {
-    $min = $r; $max = $g;
-  }
-  $max = $b if $b > $max;
-  $min = $b if $b < $min;
-  $v = $max;
-  $s = $max ? ($max - $min) / $max : 0;
-  if ($s == 0) {
-    $h = undef;
-  }
-  else {
-    my $cr = ($max - $r) / ($max - $min);
-    my $cg = ($max - $g) / ($max - $min);
-    my $cb = ($max - $b) / ($max - $min);
-    if ($r == $max) {
-      $h = $cb - $cg;
-    }
-    elsif ($g == $max) {
-      $h = 2 + $cr - $cb;
-    }
-    elsif ($b == $max) {
-      $h = 4 + $cg - $cr;
-    }
-    $h *= 60;
-    $h += 360 if $h < 0;
-  }
-  return ($h, $s, $v);
-}
-
-# the most common HTML colors
-sub name_to_rgb {
-  $_ = $_[0];
-
-  s/^red$/#ff0000/;
-  s/^black$/#000000/;
-  s/^blue$/#0000ff/;
-  s/^white$/#ffffff/;
-  s/^navy$/#000080/;
-  s/^green$/#008000/;
-  s/^orange$/#ffa500/;
-  s/^yellow$/#ffff00/;
-  s/^fuchsia$/#ff00ff/;
-  s/^lime$/#00ff00/;
-  s/^maroon$/#800000/;
-  s/^darkblue$/#00008b/;
-  s/^gray$/#808080/;
-  s/^purple$/#800080/;
-  s/^magenta$/#ff00ff/;
-  s/^pink$/#ffc0cb/;
-
-  return $_;
-}
-
-sub html_tests {
-  my ($tag, $attr, $num) = @_;
-
-  if ($tag eq "table" && exists $attr->{border} && $attr->{border} =~ /(\d+)/)
-  {
-    $html{thick_border} = 1 if $1 > 1;
-  }
-  if ($tag eq "script") {
-    $html{javascript} = 1;
-  }
-  if ($tag =~ /^(?:body|frame)$/) {
-    for (keys %$attr) {
-      if (/^on(?:Load|UnLoad|BeforeUnload)$/i)
-      {
-	$html{javascript_very_unsafe} = 1;
-      }
-    }
-  }
-  if ($tag eq "body" && exists $attr->{bgcolor}) {
-    $html{bgcolor} = lc($attr->{bgcolor});
-    $html{bgcolor} = name_to_rgb($html{bgcolor});
-    $html{bgcolor_nonwhite} = 1 if $html{bgcolor} !~ /^\#?ffffff$/;
-  }
-  if ($tag eq "font" && exists $attr->{size}) {
-    $html{big_font} = 1 if (($attr->{size} =~ /^\s*(\d+)/ && $1 >= 3) ||
-			    ($attr->{size} =~ /\+(\d+)/ && $1 > 1));
-  }
-  if ($tag eq "font" && exists $attr->{color}) {
-    my $c = lc($attr->{color});
-    $html{font_color_nohash} = 1 if $c =~ /^[0-9a-f]{6}$/;
-    $html{font_color_unsafe} = 1 if ($c =~ /^\#?[0-9a-f]{6}$/ &&
-				     $c !~ /^\#?(?:00|33|66|80|99|cc|ff){3}$/);
-    $html{font_color_name} = 1 if ($c !~ /^\#?[0-9a-f]{6}$/ &&
-				   $c !~ /^(?:navy|gray|red|white)$/);
-    $c = name_to_rgb($c);
-    $html{font_invisible} = 1 if (exists $html{bgcolor} &&
-				  substr($c,-6) eq substr($html{bgcolor},-6));
-    if ($c =~ /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/) {
-      my ($h, $s, $v) = rgb_to_hsv(hex($1), hex($2), hex($3));
-      if (!defined($h)) {
-	$html{font_gray} = 1 unless ($v == 0 || $v == 255);
-      }
-      elsif ($h < 30 || $h >= 330) {
-	$html{font_red} = 1;
-      }
-      elsif ($h < 90) {
-	$html{font_yellow} = 1;
-      }
-      elsif ($h < 150) {
-	$html{font_green} = 1;
-      }
-      elsif ($h < 210) {
-	$html{font_cyan} = 1;
-      }
-      elsif ($h < 270) {
-	$html{font_blue} = 1;
-      }
-      elsif ($h < 330) {
-	$html{font_magenta} = 1;
-      }
-    }
-    else {
-      $html{font_color_unknown} = 1;
-    }
-  }
-  if ($tag eq "font" && exists $attr->{face}) {
-    $html{font_face_caps} = 1 if $attr->{face} =~ /[A-Z]{3}/;
-    if ($attr->{face} !~ /^[a-z][a-z -]*[a-z](?:,\s*[a-z][a-z -]*[a-z])*$/i) {
-      $html{font_face_bad} = 1;
-    }
-    for (split(/,/, lc($attr->{face}))) {
-      $html{font_face_odd} = 1 if ! /^\s*(?:arial|comic sans ms|courier new|geneva|helvetica|ms mincho|sans-serif|serif|tahoma|times new roman|verdana)\s*$/i;
-    }
-  }
-  if ($tag eq "img" && exists $attr->{src} && $attr->{src} =~ /\?/) {
-    $html{web_bugs} = 1;
-  }
-  if ($tag =~ /^i?frame$/) {
-    $html{relaying_frame} = 1;
-  }
-  if ($tag =~ /^(?:object|embed)$/) {
-    $html{embeds} = 1;
-  }
-}
-
-sub html_text {
-  my ($text) = @_;
-
-  return if (exists $html_inside{script} && $html_inside{script} > 0);
-  return if (exists $html_inside{style} && $html_inside{style} > 0);
-  $text =~ s/\n// if $html_last_tag eq "br";
-  $html_text .= $text;
-}
-
-sub html_comment {
-  my ($text) = @_;
-
-  $html{comment_8bit} = 1 if $text =~ /[\x80-\xff]{3,}/;
-  $html{comment_saved_url} = 1 if $text =~ /<!-- saved from url=\(\d{4}\)/;
-  $html{comment_unique_id} = 1 if $text =~ /<!--\s*(?:[\d.]+|[a-f\d]{5,}|\S{10,})\s*-->/i;
-}
-
 sub get_raw_body_text_array {
   my ($self) = @_;
   local ($_);
@@ -1098,19 +873,28 @@ sub get_decoded_stripped_body_text_array {
   $text =~ s/BASEURI://sg;
 
   # do HTML conversions if necessary
-  undef %html;
-  $html{ratio} = 0;
+  $self->{html} = {};
+  $self->{html}{ratio} = 0;
   if (($text =~ m/<.*>/s) || ($text =~ m/\&[-_a-zA-Z0-9]+;/s)) {
     my $raw = length($text);
 
-    $html_text = '';
-    $html_last_tag = 0;
+    $self->{html_text} = '';
+    $self->{html_last_tag} = 0;
+    my $hp = HTML::Parser->new(
+                api_version => 3,
+                handlers => [start =>   [sub { $self->html_tag(@_) },"tagname,attr,'+1'"],
+                             end =>     [sub { $self->html_tag(@_) },"tagname,attr,'-1'"],
+                             text =>    [sub { $self->html_text(@_) },"dtext"],
+                             comment => [sub { $self->html_comment(@_) },"text"],
+                ],
+                marked_sections => 1);
+    
     $hp->parse($text);
     $hp->eof;
-    $html{ratio} = ($raw - length($html_text)) / $raw if $raw;
-    $text = $html_text;
-    undef %html_inside;
-    undef $html_last_tag;
+    $self->{html}{ratio} = ($raw - length($self->{html_text})) / $raw if $raw;
+    $text = $self->{html_text};
+    delete $self->{html_inside};
+    delete $self->{html_last_tag};
   }
 
   # whitespace handling (warning: small changes have large effects!)
