@@ -96,30 +96,47 @@ $TWO_LEVEL_DOMAINS = qr{ (?:
   com\.ac |
   edu\.ac |
   gov\.ac |
-  net\.ac |
   mil\.ac |
+  net\.ac |
   org\.ac |
+  ac\.ae |
+  co\.ae |
   com\.ae |
+  gov\.ae |
   net\.ae |
   org\.ae |
+  pro\.ae |
+  sch\.ae |
+  com\.ai |
+  edu\.ai |
+  gov\.ai |
+  org\.ai |
   com\.ar |
+  edu\.ar |
+  gov\.ar |
+  int\.ar |
+  mil\.ar |
   net\.ar |
   org\.ar |
-  co\.at |
+  e164\.arpa |
   ac\.at |
+  co\.at |
+  gv\.at |
+  or\.at |
+  priv\.at |
+  asn\.au |
   com\.au |
-  org\.au |
-  gov\.au |
-  org\.au |
+  conf\.au |
+  csiro\.au |
   edu\.au |
+  gov\.au |
   id\.au |
-  oz\.au |
   info\.au |
   net\.au |
-  asn\.au |
-  csiro\.au |
+  org\.au |
+  otc\.au |
+  oz\.au |
   telememo\.au |
-  conf\.au |
   com\.az |
   net\.az |
   org\.az |
@@ -130,13 +147,17 @@ $TWO_LEVEL_DOMAINS = qr{ (?:
   belgie\.be |
   dns\.be |
   fgov\.be |
+  com\.bh |
+  edu\.bh |
+  gov\.bh |
+  net\.bh |
+  org\.bh |
   com\.bm |
   edu\.bm |
   gov\.bm |
-  org\.bm |
   net\.bm |
+  org\.bm |
   art\.br |
-  sp\.br |
   com\.br |
   etc\.br |
   g12\.br |
@@ -148,6 +169,7 @@ $TWO_LEVEL_DOMAINS = qr{ (?:
   org\.br |
   psi\.br |
   rec\.br |
+  sp\.br |
   tmp\.br |
   com\.bs |
   net\.bs |
@@ -157,6 +179,7 @@ $TWO_LEVEL_DOMAINS = qr{ (?:
   mb\.ca |
   nb\.ca |
   nf\.ca |
+  nl\.ca |
   ns\.ca |
   nt\.ca |
   nu\.ca |
@@ -166,16 +189,18 @@ $TWO_LEVEL_DOMAINS = qr{ (?:
   sk\.ca |
   yk\.ca |
   co\.ck |
-  com\.cn |
-  edu\.cn |
-  gov\.cn |
-  net\.cn |
-  org\.cn |
+  edu\.ck |
+  gov\.ck |
+  net\.ck |
+  org\.ck |
   ac\.cn |
   ah\.cn |
   bj\.cn |
+  com\.cn |
   cq\.cn |
+  edu\.cn |
   gd\.cn |
+  gov\.cn |
   gs\.cn |
   gx\.cn |
   gz\.cn |
@@ -189,12 +214,14 @@ $TWO_LEVEL_DOMAINS = qr{ (?:
   js\.cn |
   ln\.cn |
   mo\.cn |
+  net\.cn |
   nm\.cn |
   nx\.cn |
+  org\.cn |
   qh\.cn |
   sc\.cn |
-  sn\.cn |
   sh\.cn |
+  sn\.cn |
   sx\.cn |
   tj\.cn |
   tw\.cn |
@@ -209,12 +236,30 @@ $TWO_LEVEL_DOMAINS = qr{ (?:
   gov\.co |
   info\.co |
   int\.co |
-  nom\.co |
   mil\.co |
+  nom\.co |
   org\.co |
   rec\.co |
   store\.co |
   web\.co |
+  lkd\.co\.im |
+  plc\.co\.im |
+  au\.com |
+  br\.com |
+  cn\.com |
+  de\.com |
+  eu\.com |
+  gb\.com |
+  hu\.com |
+  no\.com |
+  qc\.com |
+  ru\.com |
+  sa\.com |
+  se\.com |
+  uk\.com |
+  us\.com |
+  uy\.com |
+  za\.com |
   ac\.cr |
   co\.cr |
   ed\.cr |
@@ -230,23 +275,49 @@ $TWO_LEVEL_DOMAINS = qr{ (?:
   gov\.cy |
   net\.cy |
   org\.cy |
+  aero\.de |
+  aerzte\.de |
+  boerse\.de |
+  buecher\.de |
+  buero\.de |
+  coop\.de |
+  denic\.de |
+  doctoren\.de |
+  fluege\.de |
+  glueckwunsch\.de |
+  kueche\.de |
+  kuechen\.de |
+  moebel\.de |
+  museum\.de |
+  nic\.de |
+  pro\.de |
+  reisebuero\.de |
+  co\.dk |
   art\.do |
   com\.do |
   edu\.do |
   gov\.do |
-  org\.do |
   mil\.do |
   net\.do |
+  org\.do |
   web\.do |
+  art\.dz |
+  ass\.dz |
+  com\.dz |
+  edu\.dz |
+  gov\.dz |
+  net\.dz |
+  org\.dz |
+  pol\.dz |
   com\.ec |
-  k12\.ec |
   edu\.ec |
   fin\.ec |
-  med\.ec |
   gov\.ec |
+  k12\.ec |
+  med\.ec |
   mil\.ec |
-  org\.ec |
   net\.ec |
+  org\.ec |
   com\.eg |
   edu\.eg |
   eun\.eg |
@@ -254,37 +325,50 @@ $TWO_LEVEL_DOMAINS = qr{ (?:
   net\.eg |
   org\.eg |
   sci\.eg |
+  biz\.et |
+  com\.et |
+  edu\.et |
+  gov\.et |
+  info\.et |
+  name\.et |
+  net\.et |
+  org\.et |
   ac\.fj |
   com\.fj |
   gov\.fj |
   id\.fj |
   org\.fj |
   school\.fj |
-  asso\.fr |
-  nom\.fr |
-  barreau\.fr |
-  com\.fr  |
-  prd\.fr  |
-  presse\.fr  |
-  tm\.fr  |
+  ac\.fk |
+  com\.fk |
+  gov\.fk |
+  net\.fk |
+  nom\.fk |
+  org\.fk |
   aeroport\.fr |
   assedic\.fr |
+  asso\.fr |
   avocat\.fr |
   avoues\.fr |
+  barreau\.fr |
   cci\.fr |
   chambagri\.fr |
   chirurgiens-dentistes\.fr |
+  com\.fr |
   experts-comptables\.fr |
   geometre-expert\.fr |
   gouv\.fr |
   greta\.fr |
   huissier-justice\.fr |
   medecin\.fr |
+  nom\.fr |
   notaires\.fr |
   pharmacien\.fr |
   port\.fr |
+  prd\.fr |
+  presse\.fr |
+  tm\.fr |
   veterinaire\.fr |
-  notaires\.fr |
   com\.ge |
   edu\.ge |
   gov\.ge |
@@ -292,155 +376,298 @@ $TWO_LEVEL_DOMAINS = qr{ (?:
   net\.ge |
   org\.ge |
   pvt\.ge |
-  co\.gg |
-  org\.gg |
-  sch\.gg |
   ac\.gg |
-  gov\.gg |
-  ltd\.gg |
-  ind\.gg |
-  net\.gg |
   alderney\.gg |
+  co\.gg |
+  gov\.gg |
   guernsey\.gg |
+  ind\.gg |
+  ltd\.gg |
+  net\.gg |
+  org\.gg |
   sark\.gg |
+  sch\.gg |
   com\.gu |
   edu\.gu |
-  net\.gu |
-  org\.gu |
   gov\.gu |
   mil\.gu |
+  net\.gu |
+  org\.gu |
   com\.hk |
+  edu\.hk |
+  gov\.hk |
+  idv\.hk |
   net\.hk |
   org\.hk |
-  gov\.hk |
-  edu\.hk |
-  idv\.hk |
+  2000\.hu |
+  agrar\.hu |
+  bolt\.hu |
+  casino\.hu |
+  city\.hu |
   co\.hu |
-  org\.hu |
+  erotica\.hu |
+  erotika\.hu |
+  film\.hu |
+  forum\.hu |
+  games\.hu |
+  hotel\.hu |
   info\.hu |
-  nui\.hu |
+  ingatlan\.hu |
+  jogasz\.hu |
+  konyvelo\.hu |
+  lakas\.hu |
+  media\.hu |
+  news\.hu |
+  org\.hu |
   priv\.hu |
+  reklam\.hu |
+  sex\.hu |
+  shop\.hu |
+  sport\.hu |
+  suli\.hu |
+  szex\.hu |
   tm\.hu |
+  tozsde\.hu |
+  utazas\.hu |
+  video\.hu |
   ac\.id |
   co\.id |
   go\.id |
   mil\.id |
   net\.id |
   or\.id |
-  co\.il |
-  net\.il |
-  org\.il |
   ac\.il |
+  co\.il |
   gov\.il |
+  idf\.il |
   k12\.il |
   muni\.il |
-  co\.im |
-  net\.im |
-  org\.im |
+  net\.il |
+  org\.il |
   ac\.im |
-  lkd\.co\.im |
+  co\.im |
   gov\.im |
+  net\.im |
   nic\.im |
-  plc\.co\.im |
-  co\.in |
-  net\.in |
+  org\.im |
   ac\.in |
+  co\.in |
   ernet\.in |
+  firm\.in |
+  gen\.in |
   gov\.in |
+  ind\.in |
+  mil\.in |
+  net\.in |
   nic\.in |
+  org\.in |
   res\.in |
-  co\.je |
-  net\.je |
-  org\.je |
   ac\.je |
+  co\.je |
   gov\.je |
   ind\.je |
   jersey\.je |
   ltd\.je |
+  net\.je |
+  org\.je |
   sch\.je |
   com\.jo |
-  net\.jo |
-  gov\.jo |
   edu\.jo |
-  ad\.jp |
+  gov\.jo |
+  mil\.jo |
+  net\.jo |
+  org\.jo |
   ac\.jp |
+  ad\.jp |
+  aichi\.jp |
+  akita\.jp |
+  aomori\.jp |
+  chiba\.jp |
   co\.jp |
-  net\.jp |
-  org\.jp |
+  ed\.jp |
+  ehime\.jp |
+  fukui\.jp |
+  fukuoka\.jp |
+  fukushima\.jp |
+  gifu\.jp |
+  go\.jp |
   gov\.jp |
+  gr\.jp |
+  gunma\.jp |
+  hiroshima\.jp |
+  hokkaido\.jp |
+  hyogo\.jp |
+  ibaraki\.jp |
+  ishikawa\.jp |
+  iwate\.jp |
+  kagawa\.jp |
+  kagoshima\.jp |
+  kanagawa\.jp |
+  kanazawa\.jp |
+  kawasaki\.jp |
+  kitakyushu\.jp |
+  kobe\.jp |
+  kochi\.jp |
+  kumamoto\.jp |
+  kyoto\.jp |
+  lg\.jp |
+  matsuyama\.jp |
+  mie\.jp |
+  miyagi\.jp |
+  miyazaki\.jp |
+  nagano\.jp |
+  nagasaki\.jp |
+  nagoya\.jp |
+  nara\.jp |
+  ne\.jp |
+  net\.jp |
+  niigata\.jp |
+  oita\.jp |
+  okayama\.jp |
+  okinawa\.jp |
+  org\.jp |
+  or\.jp |
+  osaka\.jp |
+  saga\.jp |
+  saitama\.jp |
+  sapporo\.jp |
+  sendai\.jp |
+  shiga\.jp |
+  shimane\.jp |
+  shizuoka\.jp |
+  takamatsu\.jp |
+  tochigi\.jp |
+  tokushima\.jp |
+  tokyo\.jp |
+  tottori\.jp |
+  toyama\.jp |
+  utsunomiya\.jp |
+  wakayama\.jp |
+  yamagata\.jp |
+  yamaguchi\.jp |
+  yamanashi\.jp |
+  yokohama\.jp |
   com\.kh |
+  edu\.kh |
+  gov\.kh |
+  mil\.kh |
   net\.kh |
   org\.kh |
+  per\.kh |
   ac\.kr |
   co\.kr |
   go\.kr |
-  nm\.kr |
+  kyonggi\.kr |
+  ne\.kr |
   or\.kr |
   pe\.kr |
   re\.kr |
+  seoul\.kr |
+  com\.kw |
+  edu\.kw |
+  gov\.kw |
+  net\.kw |
+  org\.kw |
   com\.la |
   net\.la |
   org\.la |
   com\.lb |
-  org\.lb |
-  net\.lb |
+  edu\.lb |
   gov\.lb |
   mil\.lb |
+  net\.lb |
+  org\.lb |
   com\.lc |
   edu\.lc |
   gov\.lc |
   net\.lc |
   org\.lc |
+  asn\.lv |
   com\.lv |
-  net\.lv |
-  org\.lv |
+  conf\.lv |
   edu\.lv |
   gov\.lv |
-  mil\.lv |
   id\.lv |
-  asn\.lv |
-  conf\.lv |
+  mil\.lv |
+  net\.lv |
+  org\.lv |
   com\.ly |
   net\.ly |
   org\.ly |
+  ac\.ma |
+  co\.ma |
+  net\.ma |
+  org\.ma |
+  press\.ma |
+  com\.mk |
   com\.mm |
-  net\.mm |
-  org\.mm |
   edu\.mm |
   gov\.mm |
+  net\.mm |
+  org\.mm |
   com\.mo |
-  net\.mo |
-  org\.mo |
   edu\.mo |
   gov\.mo |
+  net\.mo |
+  org\.mo |
   com\.mt |
+  edu\.mt |
   net\.mt |
   org\.mt |
+  tm\.mt |
+  uu\.mt |
   com\.mx |
   net\.mx |
   org\.mx |
   com\.my |
-  org\.my |
-  gov\.my |
   edu\.my |
+  gov\.my |
   net\.my |
+  org\.my |
+  alt\.na |
   com\.na |
-  org\.na |
+  cul\.na |
+  edu\.na |
   net\.na |
+  org\.na |
+  telecom\.na |
+  unam\.na |
   com\.nc |
   net\.nc |
   org\.nc |
+  de\.net |
+  gb\.net |
+  uk\.net |
+  ac\.ng |
+  com\.ng |
+  edu\.ng |
   gov\.ng |
+  net\.ng |
+  org\.ng |
+  sch\.ng |
   com\.ni |
+  edu\.ni |
+  gob\.ni |
+  net\.ni |
+  nom\.ni |
+  org\.ni |
+  tel\.no |
   com\.np |
+  edu\.np |
+  gov\.np |
   net\.np |
   org\.np |
-  gov\.np |
+  fax\.nr |
+  mobile\.nr |
+  mobil\.nr |
+  mob\.nr |
+  tel\.nr |
+  tlf\.nr |
   ac\.nz |
   co\.nz |
   cri\.nz |
-  gen\.nz |
   geek\.nz |
+  gen\.nz |
   govt\.nz |
   iwi\.nz |
   maori\.nz |
@@ -448,29 +675,101 @@ $TWO_LEVEL_DOMAINS = qr{ (?:
   net\.nz |
   org\.nz |
   school\.nz |
+  ac\.om |
+  biz\.om |
+  com\.om |
+  co\.om |
+  edu\.om |
+  gov\.om |
+  med\.om |
+  mod\.om |
+  museum\.om |
+  net\.om |
+  org\.om |
+  pro\.om |
+  dk\.org |
+  eu\.org |
+  ac\.pa |
   com\.pa |
+  edu\.pa |
+  gob\.pa |
   net\.pa |
   org\.pa |
-  edu\.pa |
-  ac\.pa |
-  gob\.pa |
   sld\.pa |
   com\.pe |
+  edu\.pe |
+  gob\.pe |
+  mil\.pe |
   net\.pe |
+  nom\.pe |
   org\.pe |
-  ac\.pa |
+  ac\.pg |
+  com\.pg |
+  net\.pg |
   com\.ph |
-  net\.ph |
-  org\.ph |
   mil\.ph |
+  net\.ph |
   ngo\.ph |
+  org\.ph |
+  biz\.pk |
+  com\.pk |
+  edu\.pk |
+  fam\.pk |
+  gob\.pk |
+  gok\.pk |
+  gon\.pk |
+  gop\.pk |
+  gos\.pk |
+  gov\.pk |
+  net\.pk |
+  org\.pk |
+  web\.pk |
+  agro\.pl |
+  aid\.pl |
+  atm\.pl |
+  auto\.pl |
+  biz\.pl |
   com\.pl |
+  edu\.pl |
+  gmina\.pl |
+  gsm\.pl |
+  info\.pl |
+  mail\.pl |
+  media\.pl |
+  miasta\.pl |
+  mil\.pl |
   net\.pl |
+  nieruchomosci\.pl |
+  nom\.pl |
   org\.pl |
+  pc\.pl |
+  powiat\.pl |
+  priv\.pl |
+  realestate\.pl |
+  rel\.pl |
+  sex\.pl |
+  shop\.pl |
+  sklep\.pl |
+  sos\.pl |
+  szkola\.pl |
+  targi\.pl |
+  tm\.pl |
+  tourism\.pl |
+  travel\.pl |
+  turystyka\.pl |
+  edu\.ps |
+  gov\.ps |
+  plo\.ps |
+  sec\.ps |
   com\.py |
+  edu\.py |
   net\.py |
   org\.py |
-  edu\.py |
+  com\.qa |
+  edu\.qa |
+  gov\.qa |
+  net\.qa |
+  org\.qa |
   asso\.re |
   com\.re |
   nom\.re |
@@ -478,19 +777,45 @@ $TWO_LEVEL_DOMAINS = qr{ (?:
   net\.ru |
   org\.ru |
   pp\.ru |
+  com\.sa |
+  edu\.sa |
+  gov\.sa |
+  med\.sa |
+  net\.sa |
+  org\.sa |
+  pub\.sa |
+  sch\.sa |
+  com\.sb |
+  edu\.sb |
+  gov\.sb |
+  net\.sb |
+  org\.sb |
+  com\.sd |
+  edu\.sd |
+  gov\.sd |
+  med\.sd |
+  net\.sd |
+  org\.sd |
+  sch\.sd |
   com\.sg |
-  net\.sg |
-  org\.sg |
   edu\.sg |
   gov\.sg |
+  net\.sg |
+  org\.sg |
+  per\.sg |
   com\.sh |
-  net\.sh |
-  org\.sh |
   edu\.sh |
   gov\.sh |
   mil\.sh |
-  co\.sv |
+  net\.sh |
+  org\.sh |
+  com\.sv |
+  edu\.sv |
+  gob\.sv |
+  org\.sv |
+  red\.sv |
   com\.sy |
+  gov\.sy |
   net\.sy |
   org\.sy |
   ac\.th |
@@ -499,70 +824,102 @@ $TWO_LEVEL_DOMAINS = qr{ (?:
   net\.th |
   or\.th |
   com\.tn |
-  net\.tn |
-  org\.tn |
   edunet\.tn |
-  gov\.tn |
   ens\.tn |
   fin\.tn |
-  nat\.tn |
+  gov\.tn |
   ind\.tn |
   info\.tn |
   intl\.tn |
+  nat\.tn |
+  net\.tn |
+  org\.tn |
   rnrt\.tn |
-  rnu\.tn |
   rns\.tn |
+  rnu\.tn |
   tourism\.tn |
+  bbs\.tr |
   com\.tr |
+  edu\.tr |
+  gen\.tr |
+  gov\.tr |
+  k12\.tr |
+  mil\.tr |
   net\.tr |
   org\.tr |
-  edu\.tr |
-  gov\.tr |
-  mil\.tr |
-  bbs\.tr |
-  k12\.tr |
+  at\.tt |
+  au\.tt |
+  be\.tt |
+  biz\.tt |
+  ca\.tt |
+  com\.tt |
+  co\.tt |
+  de\.tt |
+  dk\.tt |
+  edu\.tt |
+  es\.tt |
+  eu\.tt |
+  fr\.tt |
+  gov\.tt |
+  info\.tt |
+  it\.tt |
+  name\.tt |
+  net\.tt |
+  nic\.tt |
+  org\.tt |
+  pro\.tt |
+  se\.tt |
+  uk\.tt |
+  us\.tt |
   co\.tv |
   com\.tw |
+  edu\.tw |
+  gove\.tw |
+  idv\.tw |
   net\.tw |
   org\.tw |
-  edu\.tw |
-  idv\.tw |
-  gove\.tw |
   com\.ua |
-  net\.ua |
+  edu\.ua |
   gov\.ua |
+  net\.ua |
+  org\.ua |
   ac\.ug |
   co\.ug |
-  or\.ug |
   go\.ug |
-  co\.uk |
-  net\.uk |
-  org\.uk |
-  ltd\.uk |
-  plc\.uk |
-  sch\.uk |
+  or\.ug |
   ac\.uk |
+  co\.uk |
+  edu\.uk |
   gov\.uk |
-  nhs\.uk |
-  police\.uk |
+  ltd\.uk |
+  me\.uk |
   mod\.uk |
+  net\.uk |
+  nhs\.uk |
+  nic\.uk |
+  org\.uk |
+  plc\.uk |
+  police\.uk |
+  sch\.uk |
   com\.uy |
   edu\.uy |
+  gub\.uy |
+  mil\.uy |
   net\.uy |
   org\.uy |
-  com\.ve |
-  net\.ve |
-  org\.ve |
-  co\.ve |
-  edu\.ve |
-  gov\.ve |
-  mil\.ve |
   arts\.ve |
   bib\.ve |
+  com\.ve |
+  co\.ve |
+  edu\.ve |
   firm\.ve |
+  gov\.ve |
   info\.ve |
   int\.ve |
+  mil\.ve |
+  net\.ve |
   nom\.ve |
+  org\.ve |
   rec\.ve |
   store\.ve |
   tec\.ve |
@@ -570,6 +927,36 @@ $TWO_LEVEL_DOMAINS = qr{ (?:
   co\.vi |
   net\.vi |
   org\.vi |
+  ac\.vn |
+  biz\.vn |
+  com\.vn |
+  edu\.vn |
+  gov\.vn |
+  health\.vn |
+  info\.vn |
+  int\.vn |
+  name\.vn |
+  net\.vn |
+  org\.vn |
+  pro\.vn |
+  ch\.vu |
+  com\.vu |
+  de\.vu |
+  edu\.vu |
+  fr\.vu |
+  net\.vu |
+  org\.vu |
+  com\.ws |
+  edu\.ws |
+  gov\.ws |
+  net\.ws |
+  org\.ws |
+  com\.ye |
+  edu\.ye |
+  gov\.ye |
+  mil\.ye |
+  net\.ye |
+  org\.ye |
   ac\.yu |
   co\.yu |
   edu\.yu |
@@ -590,10 +977,12 @@ $TWO_LEVEL_DOMAINS = qr{ (?:
   school\.za |
   tm\.za |
   web\.za |
+  ac\.zw |
+  co\.zw |
   gov\.zw |
-  eu\.org |
-  au\.com |
-  e164\.arpa )
+  org\.zw |
+
+  )
 }ix;
 
 ###########################################################################
