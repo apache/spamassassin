@@ -50,7 +50,7 @@ sub new_checker {
   {
     $path = $main->sed_path ($main->{conf}->{auto_whitelist_path});
 
-    if (Mail::SpamAssassin::Util::safe_lock($path)) {
+    if ($main->{locker}->safe_lock ($path)) {
       $self->{locked_file} = $path;
       $self->{is_locked} = 1;
       dbg("Tie-ing to DB file R/W in $path");
@@ -76,7 +76,7 @@ sub new_checker {
 failed_to_tie:
   umask $umask;
   if ($self->{is_locked}) {
-    Mail::SpamAssassin::Util::safe_unlock($self->{locked_file});
+    $self->{main}->{locker}->safe_unlock ($self->{locked_file});
     $self->{is_locked} = 0;
   }
   die "Cannot open auto_whitelist_path $path: $!\n";
@@ -90,7 +90,7 @@ sub finish {
   untie %{$self->{accum}};
   if ($self->{is_locked}) {
     dbg ("DB addr list: file locked, breaking lock.");
-    Mail::SpamAssassin::Util::safe_unlock($self->{locked_file});
+    $self->{main}->{locker}->safe_unlock ($self->{locked_file});
     $self->{is_locked} = 0;
   }
   # TODO: untrap signals to unlock the db file here

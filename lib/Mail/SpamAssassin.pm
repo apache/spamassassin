@@ -94,7 +94,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.163 2003/01/25 22:55:44 msquadrat Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.164 2003/01/27 21:13:04 jmason Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -241,6 +241,20 @@ sub new {
   $self->{conf} ||= new Mail::SpamAssassin::Conf ($self);
 
   $self->{save_pattern_hits} ||= 0;
+
+  # this could probably be made a little faster; for now I'm going
+  # for slow but safe, by keeping in quotes
+  if (Mail::SpamAssassin::Util::am_running_on_windows()) {
+    eval '
+      use Mail::SpamAssassin::Win32Locker;
+      $self->{locker} = new Mail::SpamAssassin::Win32Locker ($self);
+    '; ($@) and die $@;
+  } else {
+    eval '
+      use Mail::SpamAssassin::UnixLocker;
+      $self->{locker} = new Mail::SpamAssassin::UnixLocker ($self);
+    '; ($@) and die $@;
+  }
 
   $self->{bayes_scanner} = new Mail::SpamAssassin::Bayes ($self);
 
