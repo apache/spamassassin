@@ -28,6 +28,7 @@ use IO::Pipe;
 use Config;
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::NoMailAudit;
+use Mail::SpamAssassin::NetSet;
 use Getopt::Long;
 use Pod::Usage;
 use Sys::Syslog qw(:DEFAULT setlogsock);
@@ -149,6 +150,7 @@ if ( defined $opt{'socketpath'}
 
 # These can be changed on command line with -A flag
 # but only if we're not using UNIX domain sockets
+my $allowed_nets = Mail::SpamAssassin::NetSet->new();
 if ( not defined $opt{'socketpath'} )
 {
   if(@{$opt{'allowed-ip'}}) {
@@ -1163,27 +1165,15 @@ sub daemonize
     Mail::SpamAssassin::dbg('daemonized.');
 }
 
-my @allowed_nets;
 sub set_allowed_ip {
     foreach (@_) {
-        my ($ip, $bits) = m#^\s*(\d+\.\d+\.\d+\.\d+)(?:/(\d+))?\s*$#
-                or die "illegal network address given: '$_'.  Aborting.\n";
-        defined $bits or $bits = 32;
-        my $mask = 0xFFffFFff  ^ ((2 ** (32-$bits)) - 1);
-        push @allowed_nets, {
-            mask => $mask,
-            ip   => my_inet_aton($ip) & $mask,
-        };
+	$allowed_nets->add_cidr ($_) or die "Aborting.\n";
     }
 }
+
 sub ip_is_allowed {
-    my $ip = my_inet_aton($_[0]);
-    foreach my $net (@allowed_nets){
-        return 1 if ($ip & $net->{mask}) == $net->{ip};
-    }
-    0;
+    $allowed_nets->contains_ip (@_);
 }
-sub my_inet_aton { unpack("N", pack("C4", split(/\./, $_[0]))) }
 
 sub preload_modules_with_tmp_homedir {
   # set $ENV{HOME} in /tmp while we compile and preload everything.
@@ -1491,15 +1481,21 @@ timeout, which is STRONGLY discouraged.  The default is 5 seconds.
 =item B<-A> I<host,...>, B<--allowed-ips>=I<host,...>
 
 Specify a list of authorized hosts or networks which can connect to this spamd
-instance. Single IP addresses can be given, or ranges of ip addresses in
-address/masklength format.  This option can be specified multiple times or can
-take a list of addresses separated by commas.  Examples:
+instance. Single IP addresses can be given, ranges of IP addresses in
+address/masklength CIDR format, or ranges of IP addresses by listing 3 or less
+octets with a trailing dot.  Hostnames are not supported, only IP addresses.
+This option can be specified multiple times, or can take a list of addresses
+separated by commas.  Examples:
 
-B<-A 10.11.12.13,10.11.12.14> -- only allow connections from 10.11.12.13 and
-10.11.12.14
+B<-A 10.11.12.13> -- only allow connections from C<10.11.12.13>.
 
--B<A 10.200.300.0/24> -- allow connections from any machine in the range
-10.200.300.*
+B<-A 10.11.12.13,10.11.12.14> -- only allow connections from C<10.11.12.13> and
+C<10.11.12.14>.
+
+B<-A 10.200.300.0/24> -- allow connections from any machine in the range
+C<10.200.300.*>.
+
+B<-A 10.> -- allow connections from any machine in the range C<10.*.*.*>.
 
 By default, connections are only accepted from localhost [127.0.0.1].
 

@@ -42,6 +42,7 @@ Where appropriate, default values are listed in parentheses.
 
 package Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Util;
+use Mail::SpamAssassin::NetSet;
 
 use strict;
 use bytes;
@@ -185,7 +186,7 @@ sub new {
   $self->{more_spam_to} = { };
   $self->{all_spam_to} = { };
 
-  $self->{trusted_networks} = [ ];
+  $self->{trusted_networks} = Mail::SpamAssassin::NetSet->new();
 
   # this will hold the database connection params
   $self->{user_scores_dsn} = '';
@@ -1295,13 +1296,16 @@ operated by spammers, open relays, or open proxies.  DNS blacklist checks
 will never query for hosts on these networks.
 
 If a C</mask> is specified, it's considered a CIDR-style 'netmask', specified
-in bits.  If it is not specified, just the single IP address specified is used,
-as if the mask was C</32>.
+in bits.  If it is not specified, but less than 4 octets are specified with a
+trailing dot, that's considered a mask to allow all addresses in the remaining
+octets.  If a mask is not specified, and there is not trailing dot, then just
+the single IP address specified is used, as if the mask was C</32>.
 
 Examples:
 
-	trusted_networks 192.168/16 127/8
-	trusted_networks 212.17.35.15
+    trusted_networks 192.168/16 127/8		# all in 192.168.*.* and 127.*.*.*
+    trusted_networks 212.17.35.15		# just that host
+    trusted_networks 127.			# all in 127.*.*.*
 
 This operates additively, so a C<trusted_networks> line after another one
 will result in all those networks becoming trusted.  To clear out the
@@ -1311,8 +1315,7 @@ existing entries, use C<clear_trusted_networks>.
 
     if (/^trusted_networks\s+(.+)$/) {
       foreach my $net (split (' ', $1)) {
-	Mail::SpamAssassin::Util::add_cidr_to_net_set
-				    ($self->{trusted_networks}, $net);
+	$self->{trusted_networks}->add_cidr ($net);
       }
       next;
     }
@@ -1324,7 +1327,7 @@ Empty the list of trusted networks.
 =cut
 
     if (/^clear_trusted_networks$/) {
-      $self->{trusted_networks} = [ ]; next;
+      $self->{trusted_networks} = Mail::SpamAssassin::NetSet->new(); next;
     }
 
 =item use_razor2 ( 0 | 1 )		(default 1)

@@ -43,6 +43,7 @@ lib/Mail/SpamAssassin/Dns.pm
 lib/Mail/SpamAssassin/EncappedMIME.pm
 lib/Mail/SpamAssassin/EncappedMessage.pm
 lib/Mail/SpamAssassin/EvalTests.pm
+lib/Mail/SpamAssassin/NetSet.pm
 lib/Mail/SpamAssassin/HTML.pm
 lib/Mail/SpamAssassin/Locales.pm
 lib/Mail/SpamAssassin/Locker.pm
@@ -190,6 +191,7 @@ t/data/spam/008
 t/data/spam/009
 t/data/spam/010
 t/data/spam/011
+t/cidrs.t
 t/data/spam/badmime.txt
 t/data/spam/base64.txt
 t/data/spam/bsmtp
@@ -238,3 +240,5 @@ tools/test_extract
 tools/translation_prep.pl
 tools/triplets.pl
 windows_install.pl
+masses/rule-qa/README.nightly
+build/cvs2cl-branch

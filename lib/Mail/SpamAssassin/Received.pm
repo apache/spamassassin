@@ -1,4 +1,4 @@
-# $Id: Received.pm,v 1.12 2003/05/19 19:33:13 felicity Exp $
+# $Id: Received.pm,v 1.13 2003/05/27 20:07:08 jmason Exp $
 
 # ---------------------------------------------------------------------------
 
@@ -83,9 +83,7 @@ sub parse_received_headers {
 
   while (defined ($relay = shift @{$self->{relays}}))
   {
-    if ($in_trusted &&
-	!Mail::SpamAssassin::Util::ip_is_in_net_set ($trusted, $relay->{ip}))
-    {
+    if ($in_trusted && $trusted->contains_ip ($relay->{ip})) {
       $in_trusted = 0;		# we're in deep water now
     }
 
