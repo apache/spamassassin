@@ -1347,6 +1347,9 @@ describe SAVE_ON_INSURANCE     Trying to sell insurance online
 body STOP_SNORING		/\bstop\s+snoring\b/i
 describe STOP_SNORING		Contains "Stop Snoring"
 
+body APPLY_FREE			/(?-i:F)ree (?-i:A)pplication|free application.{0,32}(?:today|minute|less than)/i
+describe APPLY_FREE		Free Application
+
 body APPLY_ONLINE               /\bapply (?-i:O)nline/i
 describe APPLY_ONLINE           Apply online (with capital O)
 
