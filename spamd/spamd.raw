@@ -2211,10 +2211,6 @@ will make spamd listen on the first address that name resolves to.
 
 Optionally specifies the port number for the server to listen on (default: 783).
 
-Note: If spamd is set to run as a non-root user (-u), and is to run on
-a privileged port (any < 1024), the parent will not be able to be sent
-a SIGHUP to reload the configuration.
-
 =item B<-q>, B<--sql-config>
 
 Turn on SQL lookups even when per-user config files have been disabled
@@ -2349,10 +2345,6 @@ as root.
 
 Note: "--username=root" disables the setuid() functionality and leaves
 spamd running as root.
-
-Note: If this option is set to a non-root user, and spamd is to run on
-a privileged port (any < 1024, default 783 or via -p), the parent will
-not be able to be sent a SIGHUP to reload the configuration.
 
 =item B<-x>, B<--nouser-config>, B<--user-config>
 
