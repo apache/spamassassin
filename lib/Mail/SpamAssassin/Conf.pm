@@ -887,7 +887,7 @@ SpamAssassin:
 =cut
 
     if (/^report(?:\s+(.*))?$/) {
-      $self->{report_template} .= $1."\n"; next;
+      $self->{report_template} .= ($1?$1:'')."\n"; next;
     }
 
 =item clear_report_template
@@ -909,7 +909,7 @@ C</usr/share/spamassassin> for an example.
 =cut
 
     if (/^terse[-_]report(?:\s+(.*))?$/) {
-      $self->{terse_report_template} .= $1."\n"; next;
+      $self->{terse_report_template} .= ($1?$1:'')."\n"; next;
     }
 
 =item clear-terse-report-template
@@ -932,7 +932,7 @@ C</usr/share/spamassassin> for an example.
 =cut
 
     if (/^spamtrap(?:\s+(.*))?$/) {
-      $self->{spamtrap_template} .= $1."\n"; next;
+      $self->{spamtrap_template} .= ($1?$1:'')."\n"; next;
     }
 
 =item clear_spamtrap_template
