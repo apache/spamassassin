@@ -118,6 +118,8 @@ sub _check_domainkeys {
   my $header = $scan->{msg}->get_pristine_header();
   my $body = $scan->{msg}->get_body();
 
+  $self->sanitize_header_for_dk(\$header);
+
   my $message = Mail::DomainKeys::Message->load(HeadString => $header,
 						 BodyReference => $body);
 
@@ -205,6 +207,73 @@ sub _dk_lookup_trapped {
 sub _dkmsg_hdr {
   my ($self, $message) = @_;
   return $message->header->value();
+}
+
+sub sanitize_header_for_dk {
+  my ($self, $ref) = @_;
+
+  # remove folding, in a HTML-escape data-preserving style, so we can
+  # strip headers easily
+  $$ref =~ s/!/!ex;/gs;
+  $$ref =~ s/\n([ \t])/!nl;$1/gs;
+  my @hdrs = split(/^/m, $$ref);
+
+  while (scalar @hdrs > 0) {
+    my $last = pop @hdrs;
+    next if ($last =~ /^\r?$/);
+
+    # List all the known appended headers that may break a DK signature. Things
+    # to note:
+    # 
+    # 1. only *appended* headers should be listed; prepended additions are fine.
+    # 2. some virus-scanner headers may be better left out, since there are ISPs
+    # who scan for viruses before the message leaves their SMTP relay; this is
+    # not quite decided.
+    #
+    # TODO: there's probably loads more, and this should be user-configurable
+
+    if ($last =~ /^ (?:
+            # SpamAssassin additions, remove these so that mass-check works
+            X-Spam-\S+
+
+            # other spam filters
+            |X-MailScanner(?:-SpamCheck)?
+            |X-Pyzor |X-DCC-\S{2,25}-Metrics
+            |X-Bogosity
+
+            # post-delivery MUA additions
+            |X-Evolution
+            |X-MH-Thread-Markup
+
+            # IMAP or POP additions
+            |X-Keywords
+            |(?:X-)?Status |X-Flags |Replied |Forwarded
+            |Lines |Content-Length
+            |X-UIDL? |X-IMAPbase
+
+            # MTA delivery control headers
+            |X-MDaemon-Deliver-To
+
+            # other MUAs: VM and Gnus
+            |X-VM-(?:Bookmark|(?:POP|IMAP)-Retrieved|Labels|Last-Modified
+            |Summary-Format|VHeader|v\d-Data|Message-Order)
+            |X-Gnus-Mail-Source
+            |Xref
+          ):/ix)
+    {
+      $last =~ /^([^:]+):/; dbg("dk: ignoring header '$1'");
+      next;
+    }
+
+    push (@hdrs, $last); last;
+  }
+
+  $$ref = join("", @hdrs);
+
+  # and return the remaining headers to pristine condition
+  # $$ref =~ s/^\n//gs; $$ref =~ s/\n$//gs;
+  $$ref =~ s/!nl;/\n/gs;
+  $$ref =~ s/!ex;/!/gs;
 }
 
 1;
