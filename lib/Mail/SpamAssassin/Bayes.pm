@@ -43,6 +43,7 @@ use vars qw{ @ISA @DBNAMES
   $MIN_SPAM_CORPUS_SIZE_FOR_BAYES
   $MIN_HAM_CORPUS_SIZE_FOR_BAYES
   %HEADER_NAME_COMPRESSION
+  $NSPAM_MAGIC_TOKEN $NHAM_MAGIC_TOKEN 
 };
 
 @ISA = qw();
@@ -149,6 +150,7 @@ use constant ROBINSON_S_CONSTANT => 0.30;
 use constant N_SIGNIFICANT_TOKENS => 150;
 
 # Should we ignore tokens with probs very close to the middle ground (.5)?
+# tokens need to be outside the [ .5-MPS, .5+MPS ] range to be used.
 use constant ROBINSON_MIN_PROB_STRENGTH => 0.27;
 
 # How long a token should we hold onto?  (note: German speakers typically
@@ -181,6 +183,9 @@ use constant PROB_BOUND_UPPER => 0.999;
 # are 's' for learnt-as-spam, 'h' for learnt-as-ham.
 
 @DBNAMES = qw(toks probs seen);
+
+$NSPAM_MAGIC_TOKEN = '**NSPAM';
+$NHAM_MAGIC_TOKEN = '**NHAM';
 
 ###########################################################################
 
@@ -354,12 +359,12 @@ sub tokenize {
   $self->{tokens} = [ ];
 
   for (@{$body}) {
-    $wc += $self->tokenize_line ($_, '', 1, 1);
+    $wc += $self->tokenize_line ($_, '', 1);
   }
 
   my %hdrs = $self->tokenize_headers ($msg);
   foreach my $prefix (keys %hdrs) {
-    $wc += $self->tokenize_line ($hdrs{$prefix}, "H$prefix:", 1, 0);
+    $wc += $self->tokenize_line ($hdrs{$prefix}, "H$prefix:", 0);
   }
 
   my @toks = @{$self->{tokens}}; delete $self->{tokens};
@@ -370,8 +375,7 @@ sub tokenize_line {
   my $self = $_[0];
   local ($_) = $_[1];
   my $tokprefix = $_[2];
-  my $casesensitive = $_[3];
-  my $killtitlecase = $_[4];
+  my $isbody = $_[3];
 
   # include quotes, .'s and -'s for URIs, and [$,]'s for Nigerian-scam strings,
   # and ISO-8859-15 alphas.  DO split on @'s, so username and domains in
@@ -384,7 +388,7 @@ sub tokenize_line {
   }
 
   if (TRY_IGNORE_TITLE_CASE_AT_START_OF_SENTENCE) {
-    if ($killtitlecase) {
+    if ($isbody) {
       # lower-case Title Case at start of a full-stop-delimited line (as would
       # be seen in a Western language).
       s/(?:^|\.\s+)([A-Z])([^A-Z]+)(?:\s|$)/ ' '. (lc $1) . $2 . ' ' /ge;
@@ -401,14 +405,12 @@ sub tokenize_line {
     next if length($token) > MAX_TOKEN_LENGTH;
     $wc++;
 
-    if ($casesensitive) {
-      if (TRY_IGNORE_TITLE_CASE_EVERYWHERE) {
-	if ($killtitlecase) { # lowercase Title Case words anyway
-	  $token =~ s/^([A-Z])([^A-Z]+)$/ (lc $1) . $2 /ge;
-	}
+    if (TRY_IGNORE_TITLE_CASE_EVERYWHERE) {
+      if ($isbody) { # lowercase Title Case words anyway
+	$token =~ s/^([A-Z])([^A-Z]+)$/ (lc $1) . $2 /ge;
       }
-      push (@{$self->{tokens}}, $tokprefix.$token);
     }
+    push (@{$self->{tokens}}, $tokprefix.$token);
 
     # now do some token abstraction; in other words, make them act like
     # patterns instead of text copies.
@@ -453,9 +455,9 @@ sub tokenize_headers {
   # and now delete lines for headers we don't want (incl all Receiveds)
   $hdrs =~ s/^From \S+[^\n]+$//gim;
 
-  my @newhdrs = ();
-
   if (TRY_NOTE_HEADER_PRESENCE_ABSENCE) {
+    my @newhdrs = ();
+
     foreach my $hdr (@FLAG_PRESENCE_HDRS) {
       if ($hdrs =~ /^${hdr}: /m) {
 	push (@newhdrs, "\n", $hdr, ": PRESENT");
@@ -463,10 +465,13 @@ sub tokenize_headers {
 	push (@newhdrs, "\n", $hdr, ": ABSENT");
       }
     }
-  }
 
-  $hdrs =~ s/^${IGNORED_HDRS}: [^\n]*$//gim;
-  $hdrs .= join ('', @newhdrs);
+    $hdrs =~ s/^${IGNORED_HDRS}: [^\n]*$//gim;
+    $hdrs .= join ('', @newhdrs);
+
+  } else {
+    $hdrs =~ s/^${IGNORED_HDRS}: [^\n]*$//gim;
+  }
 
   # and re-add the last 2 received lines: usually a good source of
   # spamware tokens and HELO names.
@@ -562,12 +567,12 @@ sub learn_trapped {
   }
 
   if ($isspam) {
-    $self->{db_probs}->{'**NSPAM'}++;
+    $self->{db_probs}->{$NSPAM_MAGIC_TOKEN}++;
   } else {
-    $self->{db_probs}->{'**NHAM'}++;
+    $self->{db_probs}->{$NHAM_MAGIC_TOKEN}++;
   }
-  my $ns = $self->{db_probs}->{'**NSPAM'};
-  my $nn = $self->{db_probs}->{'**NHAM'};
+  my $ns = $self->{db_probs}->{$NSPAM_MAGIC_TOKEN};
+  my $nn = $self->{db_probs}->{$NHAM_MAGIC_TOKEN};
   $ns ||= 0;
   $nn ||= 0;
 
@@ -645,18 +650,18 @@ sub forget_trapped {
     }
   }
 
-  my $ns = $self->{db_probs}->{'**NSPAM'};
-  my $nn = $self->{db_probs}->{'**NHAM'};
+  my $ns = $self->{db_probs}->{$NSPAM_MAGIC_TOKEN};
+  my $nn = $self->{db_probs}->{$NHAM_MAGIC_TOKEN};
   $ns ||= 0;
   $nn ||= 0;
 
   # protect against going negative
   if ($isspam) {
     $ns--; if ($ns < 0) { $ns = 0; }
-    $self->{db_probs}->{'**NSPAM'} = $ns;
+    $self->{db_probs}->{$NSPAM_MAGIC_TOKEN} = $ns;
   } else {
     $nn--; if ($nn < 0) { $nn = 0; }
-    $self->{db_probs}->{'**NHAM'} = $nn;
+    $self->{db_probs}->{$NHAM_MAGIC_TOKEN} = $nn;
   }
 
   my ($wc, @tokens) = $self->tokenize ($msg, $body);
@@ -666,9 +671,9 @@ sub forget_trapped {
     my ($ts, $th) = tok_unpack ($self->{db_toks}->{$_});
 
     if ($isspam) {
-      $ts = (!defined $ts ? 0 : ($ts <= 1 ? 0 : $ts-1));
+      $ts = ($ts <= 1 ? 0 : $ts-1);
     } else {
-      $th = (!defined $th ? 0 : ($th <= 1 ? 0 : $th-1));
+      $th = ($th <= 1 ? 0 : $th-1);
     }
 
     if ($ts == 0 && $th == 0) {
@@ -776,8 +781,8 @@ sub recompute_all_probs_trapped {
 
   my $start = time;
 
-  my $ns = $self->{db_probs}->{'**NSPAM'};
-  my $nn = $self->{db_probs}->{'**NHAM'};
+  my $ns = $self->{db_probs}->{$NSPAM_MAGIC_TOKEN};
+  my $nn = $self->{db_probs}->{$NHAM_MAGIC_TOKEN};
   $ns ||= 0;
   $nn ||= 0;
   if ($nn == 0 || $ns == 0) {
@@ -814,8 +819,6 @@ sub compute_prob_for_token {
 
   # precompute the probability that that token is spammish
   my ($s, $n) = tok_unpack ($self->{db_toks}->{$token});
-  $s ||= 0;
-  $n ||= 0;
 
   if (!USE_ROBINSON_FX_EQUATION_FOR_LOW_FREQS) {
     return if ($s + $n < 10);      # ignore low-freq tokens
@@ -826,7 +829,14 @@ sub compute_prob_for_token {
 
   my $ratios = ($s / $ns);
   my $ration = ($n / $nn);
-  my $prob = ($ratios) / ($ration + $ratios);
+  my $prob;
+
+  if ($ratios == 0 && $ration == 0) {
+    warn "oops? ratios == ration == 0";
+    $prob = 0.5;
+  } else {
+    $prob = ($ratios) / ($ration + $ratios);
+  }
 
   if (USE_ROBINSON_FX_EQUATION_FOR_LOW_FREQS) {
     # use Robinson's f(x) equation for low-n tokens, instead of just
@@ -856,8 +866,8 @@ sub scan {
 
   if (!$self->tie_db_readonly()) { goto skip; }
 
-  my $ns = $self->{db_probs}->{'**NSPAM'};
-  my $nn = $self->{db_probs}->{'**NHAM'};
+  my $ns = $self->{db_probs}->{$NSPAM_MAGIC_TOKEN};
+  my $nn = $self->{db_probs}->{$NHAM_MAGIC_TOKEN};
   $ns ||= 0;
   $nn ||= 0;
 
@@ -952,10 +962,56 @@ sub sa_die { Mail::SpamAssassin::sa_die (@_); }
 
 ###########################################################################
 
-# token packing format in db_toks: "token" => pack ("LL", $nspam, $nham).
-# note: no $self, so not OO: static instead, for speed
-sub tok_unpack { return unpack ("LL", $_[0] || 0); }
-sub tok_pack { return pack ("LL", $_[0] || 0, $_[1] || 0); }
+# token marshalling format for db_toks.
+
+# Since we may have many entries with few hits, especially thousands of hapaxes
+# (1-occurrence entries), use a flexible entry format, instead of simply "2
+# packed ints", to keep the memory and disk space usage down.  In my
+# 18k-message test corpus, only 8.9% have >= 8 hits in either counter, so we
+# can use a 1-byte representation for the other 91% of low-hitting entries
+# and save masses of space.
+
+# This looks like: XXSSSHHH (XX = format bits, SSS = 3 spam-count bits, HHH = 3
+# ham-count bits).  If XX in the first byte is 11, it's packed as this 1-byte
+# representation; otherwise, if XX in the first byte is 00, it's packed as
+# "CLL", ie. 1 byte and 2 32-bit "longs" in perl pack format.
+
+# Savings: roughly halves size of toks db, at the cost of a ~10% slowdown.
+
+use constant FORMAT_FLAG	=> 0xc0;	# 11000000
+  use constant ONE_BYTE_FORMAT	=> 0xc0;	# 11000000
+  use constant TWO_LONGS_FORMAT	=> 0x00;	# 00000000
+
+use constant ONE_BYTE_SSS_BITS	=> 0x38;	# 00111000
+use constant ONE_BYTE_HHH_BITS	=> 0x07;	# 00000111
+
+sub tok_unpack {
+  my ($packed, $ts, $th) = unpack("CLL", $_[0] || 0);
+
+  if (($packed & FORMAT_FLAG) == ONE_BYTE_FORMAT) {
+    return (($packed & ONE_BYTE_SSS_BITS) >> 3, $packed & ONE_BYTE_HHH_BITS);
+  }
+  elsif (($packed & FORMAT_FLAG) == TWO_LONGS_FORMAT) {
+    # use $ts and $th we just unpacked
+    return ($ts || 0, $th || 0);
+  }
+  # other formats would go here...
+  else {
+    warn "unknown packing format for Bayes db, please re-learn: $packed";
+    return (0, 0);
+  }
+}
+
+sub tok_pack {
+  my ($ts, $th) = @_;
+  $ts ||= 0;
+  $th ||= 0;
+  if ($ts < 8 && $th < 8) {
+    return pack ("C", ONE_BYTE_FORMAT | ($ts << 3) | $th);
+  } else {
+    return pack ("CLL", TWO_LONGS_FORMAT, $ts, $th);
+  }
+}
 
 ###########################################################################
 

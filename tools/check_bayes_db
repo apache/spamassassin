@@ -6,6 +6,14 @@ use Fcntl;
 BEGIN { @AnyDBM_File::ISA = qw(DB_File GDBM_File NDBM_File SDBM_File); }
 use AnyDBM_File;
 
+# for the DB format...
+use constant FORMAT_FLAG        => 0xc0;        # 11000000
+use constant ONE_BYTE_FORMAT    => 0xc0;        # 11000000
+use constant TWO_LONGS_FORMAT   => 0x00;        # 00000000
+
+use constant ONE_BYTE_SSS       => 0x38;        # 00111000
+use constant ONE_BYTE_HHH       => 0x07;        # 00000111
+
 use vars qw{
     %h $k $v @DBNAMES
     $opt_dbpath $opt_min_hits
@@ -57,5 +65,16 @@ foreach my $dbname (@DBNAMES) {
   untie %{$h{$db_var}};
 }
 
-sub tok_unpack { return unpack ("LL", $_[0] || 0); }
+sub tok_unpack {
+  my ($packed, $ts, $th) = unpack("CLL", $_[0] || 0);
+
+  if (($packed & FORMAT_FLAG) == ONE_BYTE_FORMAT) {
+    $ts = ($packed & ONE_BYTE_SSS) >> 3;
+    $th = ($packed & ONE_BYTE_HHH);
+  }
+  # else use $ts and $th we just unpacked.
+
+  return ($ts, $th);
+}
+
 
