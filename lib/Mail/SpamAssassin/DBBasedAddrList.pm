@@ -115,12 +115,12 @@ sub new_checker {
 
 sub finish {
     my $self = shift;
-    dbg("Untie-ing and destroying lockfile.\n");
+    dbg("Untie-ing and destroying lockfile.");
     untie %{$self->{accum}};
     if ($self->{is_locked}) {
-       dbg ("DB locked, breaking lock.\n");
+       dbg ("DB locked, breaking lock.");
        unlink($self->{lock_file}) ||
-          dbg ("Couldn't unlink " . $self->{lock_file} . " : $!\n");
+          dbg ("Couldn't unlink " . $self->{lock_file} . ": $!\n");
     }
 }
 
