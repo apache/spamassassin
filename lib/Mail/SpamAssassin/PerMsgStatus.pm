@@ -839,7 +839,7 @@ sub get_decoded_stripped_body_text_array {
      $boundary = $1;
    }
 
-  my $text = "Subject: " . $self->get('subject', '') . "\n\n";
+  my $text = $self->get('subject', '') . "\n\n";
   my $lastwasmime = 0;
   foreach $_ (@{$bodytext}) {
     /^SPAM: / and next;         # SpamAssassin markup
