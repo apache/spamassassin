@@ -584,12 +584,40 @@ sub parse_content_type {
   # Get the type out ...
   $ct =~ s/;.*$//;                    # strip everything after first semi-colon
   $ct =~ s@^([^/]+(?:/[^/]*)?).*$@$1@;	# only something/something ...
-  $ct =~ tr!\000-\040\177-\377\042\050\051\054\056\072-\077\100\133-\135!!d;    # strip inappropriate chars
+  $ct =~ tr/\000-\040\177-\377\042\050\051\054\056\072-\077\100\133-\135//d;    # strip inappropriate chars
 
   return wantarray ? ($ct,$boundary) : $ct;
 }
 
 ###########################################################################
+
+sub URLEncode {
+    my($url)=@_;
+    my(@characters)=split(/(\%[0-9a-fA-F]{2})/,$url);
+
+    foreach(@characters) {
+	if ( /\%[0-9a-fA-F]{2}/ ) {		# Escaped character set ...
+	    # IF it is in the range of 0x00-0x20 or 0x7f-0xff
+	    #    or it is one of  "<", ">", """, "#", "%",
+	    #                     ";", "/", "?", ":", "@", "=" or "&"
+	    # THEN preserve its encoding
+	    unless ( /(20|7f|[0189a-fA-F][0-9a-fA-F])/i
+		    || /2[2356fF]|3[a-fA-F]|40/i )
+	    {
+		s/\%([2-7][0-9a-fA-F])/sprintf "%c",hex($1)/e;
+	    }
+	}
+	else {					# Other stuff
+	    # 0x00-0x20, 0x7f-0xff, <, >, and " ... "
+	    s/([\000-\040\177-\377\074\076\042])
+	     /sprintf "%%%02x",unpack("C",$1)/egx;
+	}
+    }
+    return join("",@characters);
+}
+
+###########################################################################
+
 sub dbg { Mail::SpamAssassin::dbg (@_); }
 
 1;

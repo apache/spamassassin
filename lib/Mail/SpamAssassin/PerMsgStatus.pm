@@ -1442,6 +1442,8 @@ sub _uniq {
 sub get_uri_list {
   my ($self) = @_;
 
+  $self->{found_bad_uri_encoding} = 0;
+
   my $textary = $self->get_decoded_body_text_array();
   my ($rulename, $pat, @uris);
   local ($_);
@@ -1491,6 +1493,15 @@ sub get_uri_list {
 
       #warn("Got URI: $uri\n");
       push @uris, $uri;
+    }
+  }
+
+  # Make sure we catch bad encoding tricks ...
+  foreach my $uri ( @uris ) {
+    my $nuri = Mail::SpamAssassin::Util::URLEncode($uri);
+    if ( $nuri ne $uri ) {
+      push(@uris, $nuri);
+      $self->{found_bad_uri_encoding} = 1;
     }
   }
 
