@@ -1208,11 +1208,9 @@ sub preload_modules_with_tmp_homedir {
   # fail sometimes, it seems.
   eval { rmtree $tmphome; };
 
-  # if the dir still exists, use system().  We've already called 
-  # Mail::SpamAssassin::Util::untaint_file_path(), which cleans metachars,
-  # so this is safe (if a little absurd).
+  # if the dir still exists, throw a warning.
   if (-d $tmphome) {
-    system ("rm -rf '".$tmphome."'");
+    warn "rmtree couldn't remove $tmphome!: $!\n";
   }
 }
 
