@@ -1270,3 +1270,7 @@ describe REFINANCE_YOUR_HOME    "Refinance your home"
 body MARKETING_PARTNERS         /marketing partner|partner site/i
 describe MARKETING_PARTNERS     Claims you registered with some kind of partner
 
+# note the tense used, hopefully it won't hit FPs this way
+body PRIORITY_MAIL              /\b[Aa]ll\b.{0,20}\b[Oo]rders\b.{1,20}\bPriority Mail\b/
+describe PRIORITY_MAIL          Orders shipped by priority mail
+
