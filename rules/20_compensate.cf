@@ -165,7 +165,7 @@ body     SIGNATURE_DELIM        /^-- $/
 describe SIGNATURE_DELIM        Standard signature delimiter present
 tflags SIGNATURE_DELIM		nice
 
-body EGP_HTML_BANNER            /^<!-- \|\*\*\|begin egp html banner/
+body EGP_HTML_BANNER            /^<!-- \S+begin egp html banner/
 describe EGP_HTML_BANNER        non-spam EGP banner found
 tflags EGP_HTML_BANNER		nice
 
