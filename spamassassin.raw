@@ -308,12 +308,10 @@ instead.
 
 =item B<-a>
 
-Use auto-whitelists.  These will automatically create a list of
-senders whose messages are to be considered non-spam by monitoring the total
-number of received messages which weren't tagged as spam from that sender.
-Once a threshold is exceeded, further messages from that sender will be given a
-non-spam bonus (in case you correspond with people who occasionally swear in
-their emails).
+Use auto-whitelists.  Auto-whitelists track the long-term average score for each sender
+and then shift the score of new messages toward that long-term average.  This can increase
+or decrease the score for messages, depending on the long-term behavior of the
+particular correspondent.  See the README file for more details.
 
 =item B<-e>
 
