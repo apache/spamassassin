@@ -56,8 +56,8 @@ describe TO_INVESTORS		To: non-existent 'Investors' address
 header SUBJ_ALL_CAPS		eval:subject_is_all_caps()
 describe SUBJ_ALL_CAPS		Subject is all capitals
 
-header SUBJ_MISSING            eval:subject_missing()
-describe SUBJ_MISSING          Subject: is empty or missing
+header SUBJ_MISSING		Subject !~ /\S/
+describe SUBJ_MISSING		Subject: is empty or missing
 
 # (allow this test to pass if there's no Message-Id header)
 header MSGID_HAS_NO_AT		Message-Id !~ /\@/ [if-unset: NO@MSGID]
