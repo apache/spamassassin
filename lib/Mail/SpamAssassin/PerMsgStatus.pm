@@ -2306,7 +2306,7 @@ sub get_envelope_from {
   return undef;
 
 ok:
-  chomp $envf;	# remove newline
+  $envf =~ s/\s*$//gs;	# remove whitespace, newlines
   return $envf;
 }
 
