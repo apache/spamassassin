@@ -20,7 +20,7 @@ result.  Read the docs for "report_safe" for details.
 
 Please note that the use of the following commandline parameters for
 spamassassin and spamd have been deprecated!  They will still work in
-the 2.5x series (a warning will be displayed), but they will be removed
+the 2.6x series (a warning will be displayed), but they will be removed
 in the next major release.  If you currently use these flags, please
 remove them.  The flags are:	--add-from, --pipe, -F, -P
 
@@ -260,17 +260,11 @@ Commercial Tests
 ----------------
 
 There are several tests in the spamassassin configuration file which are
-turned off by default, namely the mail-abuse.org and bl.spamcop.net tests.
-The mail-abuse.org tests are RCVD_IN_MAPS_RBL, RCVD_IN_MAPS_DUL,
-RCVD_IN_MAPS_RSS, RCVD_IN_MAPS_NML, and RCVD_IN_MAPS_OPS; the
-bl.spamcop.net test is called RCVD_IN_BL_SPAMCOP_NET.
+turned off by default, namely the mail-abuse.org tests.  The
+mail-abuse.org tests are RCVD_IN_MAPS_RBL, RCVD_IN_MAPS_DUL,
+RCVD_IN_MAPS_RSS, RCVD_IN_MAPS_NML, and RCVD_IN_MAPS_OPS.
 
 These are commercial services, so you need to pay money to use them.
-
-Having said that, the bl.spamcop.net service gets my recommendation as one
-of the more useful blacklisting DNS services I've found.  More information
-on it can be found at http://spamcop.net/bl.shtml .  The maintainers ask
-for a voluntary contribution if you use it for non personal use.
 
 The mail-abuse.org tests are free, with caveats.  You must subscribe,
 asking for free access for personal use -- if you're using SpamAssassin as
@@ -281,7 +275,6 @@ http://www.mail-abuse.org/feestructure.html .
 To turn on the tests, simply assign them a non-zero score, e.g. by adding
 these lines to your ~/.spamassassin/user_prefs file:
 
-    score RCVD_IN_BL_SPAMCOP_NET 3
     score RCVD_IN_MAPS_RBL 3
     score RCVD_IN_MAPS_DUL 1
     score RCVD_IN_MAPS_RSS 2

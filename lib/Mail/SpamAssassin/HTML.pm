@@ -1,10 +1,10 @@
-# $Id: HTML.pm,v 1.95 2003/06/14 20:42:18 quinlan Exp $
+# $Id: HTML.pm,v 1.96 2003/09/12 00:04:27 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
 
 package Mail::SpamAssassin::PerMsgStatus;
-use HTML::Parser 3.00 ();
+use HTML::Parser 3.24 ();
 
 use strict;
 use bytes;
