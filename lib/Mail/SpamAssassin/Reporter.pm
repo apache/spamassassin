@@ -414,12 +414,11 @@ sub spamcop_report {
   my $user = $self->{main}->{'username'} || 'unknown';
   my $host = Mail::SpamAssassin::Util::fq_hostname() || 'unknown';
   my $from = $self->{conf}->{spamcop_from_address} || "$user\@$host";
-  my $name = (Mail::SpamAssassin::Util::portable_getpwuid($>))[6] || "Unknown";
 
   # message data
   my %head = (
 	      'To' => $self->{conf}->{spamcop_to_address},
-	      'From' => "\"$name\" <$from>",
+	      'From' => $from,
 	      'Subject' => 'report spam',
 	      'Date' => Mail::SpamAssassin::Util::time_to_rfc822_date(),
 	      'Message-Id' =>
