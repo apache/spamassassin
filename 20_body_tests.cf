@@ -1523,13 +1523,15 @@ describe THIS_AINT_JUNK         Claims "This is not junk email"
 body WEALTH                     /\bachieve .{0,15}wealth\b/i
 describe WEALTH                 Achieve Wealth
 
-#   0.004    0.006    0.003    0.70    1.00  MONSTERHUT
 rawbody MONSTERHUT              /monsterhut.com/
 describe MONSTERHUT             Mentions monsterhut.com
 
-#   0.002    0.004    0.001    0.81    1.00  MURKOWSKI_CRUFT
 rawbody MURKOWSKI_CRUFT         /www\.senate\.gov\/~?murkowski/
 describe MURKOWSKI_CRUFT        Old Murkowski disclaimer
 
 body EARN_MONEY			/\b(?:earn|make|making|made|received?|discounted)\s+(?:up\s+to|as\s+much\s+as|over|at\s+least|a\s+full)?\s*\$\s*[0-9,]{2}/i
 describe EARN_MONEY		Message talks about earning money
+
+body OBSCURED_EMAIL             /^\w+\^\S+\(\w{2,3}\b/m
+describe OBSCURED_EMAIL         Message seems to contain obscured email address (rot13)
+

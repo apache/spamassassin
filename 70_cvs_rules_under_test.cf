@@ -42,13 +42,6 @@ describe T_QUOTE_TWICE_1	Contains twice quoted reply
 tflags T_QUOTE_TWICE_1		nice
 score T_QUOTE_TWICE_1		-1.0
 
-header __ORIGINAL_MESSAGE_AGENT	X-Mailer =~ /\b(?:Microsoft Outlook|Internet Mail Service|Mozilla|AOL)\b/
-rawbody __ORIGINAL_MESSAGE_LINE	/^-{5,8} ?Original Message ?-{5,8}$/
-meta T_ORIGINAL_MESSAGE		(__ORIGINAL_MESSAGE_AGENT && __ORIGINAL_MESSAGE_LINE)
-describe T_ORIGINAL_MESSAGE	Looks like a reply to a message
-tflags T_ORIGINAL_MESSAGE	nice
-score T_ORIGINAL_MESSAGE	-1.0
-
 # this rule may need to factor in ok_languages or ok_locales
 body T_BODY_UNPRINTABLE		/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]{3,}/
 describe T_BODY_UNPRINTABLE	Body includes 3 consecutive unprintable characters
@@ -105,6 +98,9 @@ meta T_MIME_HEADER_CTYPE_ONLY	(!__CD && !__CTE && __CT && !__MIME_VERSION && !__
 # bug 1106: forged MUAs
 # only needed a \b around the shortest X-Mailer regular expressions
 
+# Dec  9 2002 jm: bloody Lyris eats message-ids, hurts the Eudora test
+header __GW_THRU_LYRIS		List-Unsubscribe =~ /<mailto:leave-\S+\@\S+>$/
+
 # AOL
 header __AOL_MUA		X-Mailer =~ /\bAOL\b/
 header __AOL_MSGID		MESSAGEID =~ /^<[0-9a-f]{1,3}\.[0-9a-f]{6,8}\.[0-9a-f]{8}\@aol.com>$/m
@@ -128,7 +124,7 @@ score T_FORGED_MUA_IMS		1.0
 
 # Outlook
 # Note: this uses __IMS_MSGID from above
-header __OUTLOOK_MUA		X-Mailer =~ /\bOutlook\b(?! IMO)/
+header __OUTLOOK_MUA		X-Mailer =~ /\bOutlook\b(?! IMO| Express Mac)/
 header __OUTLOOK_MSGID_1	MESSAGEID =~ /^<[0-9a-f]{12}\$[0-9a-f]{8}\$[0-9a-f]{8}\@\S+>$/m
 header __OUTLOOK_MSGID_2	MESSAGEID =~ /^<(?:OE[0-9A-Za-z]{25}|DAV[0-9A-Za-z]{24})\@hotmail\.com>$/m
 meta T_FORGED_MUA_OUTLOOK	(__OUTLOOK_MUA && !(__OUTLOOK_MSGID_1 || __OUTLOOK_MSGID_2 || __IMS_MSGID))
@@ -137,24 +133,18 @@ score T_FORGED_MUA_OUTLOOK	1.0
 
 # Outlook IMO (Internet Mail Only)
 header __OIMO_MUA		X-Mailer =~ /Outlook IMO/
-header __OIMO_MSGID		MESSAGEID =~ /^<[A-P]{26}AA\.[\w.-]+\@\S+>$/m
-meta T_FORGED_MUA_OIMO		(__OIMO_MUA && !__OIMO_MSGID)
+header __OIMO_MSGID		MESSAGEID =~ /^<[A-P]{26}A[AB]\.[-_\w.]+\@\S+>$/m
+meta T_FORGED_MUA_OIMO		(__OIMO_MUA && !__OIMO_MSGID && !__GW_THRU_LYRIS)
 describe T_FORGED_MUA_OIMO	Forged mail pretending to be from Outlook IMO
 score T_FORGED_MUA_OIMO		1.0
 
 # QUALCOMM Eudora
 header __EUDORA_MUA		X-Mailer =~ /\b(?:QUALCOMM|Eudora)\b/
+header __MAC_EUDORA_MUA		X-Mailer =~ /Eudora for Macintosh/
 header __EUDORA_MSGID		MESSAGEID =~ /^<(?:\d\d?\.){4,5}\d{14}\.[a-f0-9]{8}\@\S+>$/m
-meta T_FORGED_MUA_EUDORA	(__EUDORA_MUA && !__EUDORA_MSGID)
+meta T_FORGED_MUA_EUDORA	(__EUDORA_MUA && !__EUDORA_MSGID && !__GW_THRU_LYRIS && !__MAC_EUDORA_MUA)
 describe T_FORGED_MUA_EUDORA	Forged mail pretending to be from Eudora
 score T_FORGED_MUA_EUDORA	1.0
-
-# The Bat!
-header __THEBAT_MUA		X-Mailer =~ /The Bat!/
-header __THEBAT_MSGID		MESSAGEID =~ /^<\d+\.\d+\@\S+>$/m
-meta T_FORGED_MUA_THEBAT	(__THEBAT_MUA && !__THEBAT_MSGID)
-describe T_FORGED_MUA_THEBAT	Forged mail pretending to be from The Bat!
-score T_FORGED_MUA_THEBAT	1.0
 
 ########################################################################
 
@@ -175,19 +165,6 @@ body T_BANG_OPRAH		/\boprah!/i
 body T_BANG_QUOTE		/\b(?-i:Q)uotes?\!/i
 
 ###########################################################################
-
-body T_OBSCURED_EMAIL		/^\w+\^\S+\(\w{2,3}\b/m
-describe T_OBSCURED_EMAIL	Message seems to contain obscured email address (rot13)
-
-# mailman list reminder mails are getting tagged in 2.41, adding a rule to check for these
-header __FROM_MAILMAN_OWNER	From:addr =~ /^mailman-owner@/
-header __SUBJECT_MAILMAN_REMIND	Subject =~ /\bmailing list memberships reminder\b/
-meta T_MAILMAN_REMINDER		(__FROM_MAILMAN_OWNER && __SUBJECT_MAILMAN_REMIND)
-describe T_MAILMAN_REMINDER	Mail headers indicate a mailman membership reminder
-score T_MAILMAN_REMINDER		-3
-tflags T_MAILMAN_REMINDER nice
-
-########################################################
 
 # quinlan: I added HTML.current results for these tests on 2002-12-08
 # included in HTML.current are results from: daf, easmith, quinlan,
@@ -550,63 +527,9 @@ header T_RATWARE_HASH_2_V2   X-Mailer =~ /^[A-Za-z0-9\._]{14,}$/
 header T_RATWARE_FLOAT       X-Mailer =~ /^\d\.\d\d/
 header T_RATWARE_CHARSET_V2  X-Mailer =~ /^normal \W \W\s*charset.*=\"/
 
-header T_USER_AGENT_FORTE    X-Mailer =~ /^Forte Agent \d\.\d+\/\d+\.\d+$/
-score  T_USER_AGENT_FORTE    -0.5
-tflags T_USER_AGENT_FORTE    nice
-
-header T_USER_AGENT_MSN      X-Mailer =~ /^MSN Explorer \d\.\d\d\.\d{4}\.\d{4}$/
-score  T_USER_AGENT_MSN      -0.5
-tflags T_USER_AGENT_MSN      nice
-
-# forged, needs some correlation meta checks with other headers.
-header __USER_AGENT_MSN      X-Mailer =~ /^MSN Explorer /
-header __HAS_XOAT	     X-Originalarrivaltime =~ /FILETIME/
-header __HAS_XOIP	     X-Originating-Ip =~ /^\[/
-meta T_USER_AGENT_MSN_2    (__USER_AGENT_MSN && __HAS_XOAT && __HAS_XOIP)
-score  T_USER_AGENT_MSN_2    -0.5
-tflags T_USER_AGENT_MSN_2    nice
-# and let's see if we can catch a forgery!
-meta T_FORGED_USER_AGENT_MSN  (__USER_AGENT_MSN && (!__HAS_XOAT || !__HAS_XOIP))
-
-#   0.018   0.0171   0.0189    0.475   0.14   -0.50  T_USER_AGENT_PERL1
-header T_USER_AGENT_PERL1    X-Mailer =~ /^Perl\d Mail::Internet v\d\.\d+$/
-score  T_USER_AGENT_PERL1    -0.5
-tflags T_USER_AGENT_PERL1    nice
-
-#  0.000   0.0000   0.0000    0.500   0.12   -0.50  T_USER_AGENT_PERL2
-header T_USER_AGENT_PERL2    X-Mailer =~ /^Perl Mail::Sender \d\.\d+\.\d+/
-score  T_USER_AGENT_PERL2    -0.5
-tflags T_USER_AGENT_PERL2    nice
-
-#   0.002   0.0057   0.0000    1.000   0.00   -0.50  T_USER_AGENT_PERL3
-header T_USER_AGENT_PERL3    X-Mailer =~ /^Perl Powered Socket Mailer$/
-score  T_USER_AGENT_PERL3    -0.5
-tflags T_USER_AGENT_PERL3    nice
-
-header T_USER_AGENT_PHP1     X-Mailer =~ m!^PHP(?:/\d+\.\d+\.\d+)?$!
-score  T_USER_AGENT_PHP1     -0.5
-tflags T_USER_AGENT_PHP1     nice
-
-header T_USER_AGENT_PHP2     X-Mailer =~ /^phpmailer \[version \d\.\d+\]$/
-score  T_USER_AGENT_PHP2     -0.5
-tflags T_USER_AGENT_PHP2     nice
-
-header T_USER_AGENT_T_ONLINE X-Mailer =~ /^T-Online eMail \d+\.\d+$/
-score  T_USER_AGENT_T_ONLINE -0.5
-tflags T_USER_AGENT_T_ONLINE nice
-
-header T_USER_AGENT_UBB      X-Mailer =~ /^UBB\.?[Tt]hreads$/
-score  T_USER_AGENT_UBB      -0.5
-tflags T_USER_AGENT_UBB      nice
-
 header T_USER_AGENT_XIMIAN   X-Mailer =~ /^Ximian Evolution \d+\.\d+\.\d+(?:\.\d+)?\s$/
 score  T_USER_AGENT_XIMIAN   -0.5
 tflags T_USER_AGENT_XIMIAN   nice
-
-# OS/2 specific mailer
-header T_USER_AGENT_PMMAIL   X-Mailer =~ m!^PMMail \d\.\d+(?:\w|\.\d+)? [Ff]or OS/2(?: Warp \d\.\d+)?$!
-score  T_USER_AGENT_PMMAIL   -0.5
-tflags T_USER_AGENT_PMMAIL   nice
 
 # Bug 1133
 # Dec  6 2002 jm: retry with support for more header formats
@@ -659,6 +582,7 @@ describe T_SENDER_NO_REVERSE    No reverse lookup for sender's IP
 # (aol, hotmail etc.) but whose rDNS lists them at some dialup ISP or another
 # ;)
 # Dec  6 2002 jm: updated to avoid quite a few FPs
+# Dec  9 2002 jm: Dan, you have 2 or 3 hams hitting this. could you check?
 header T_RCVD_FAKE_HELO_DOTCOM_2	eval:check_for_fake_dotcom_helo()
 describe T_RCVD_FAKE_HELO_DOTCOM_2	Faked HELO-as-dotcom found
 
@@ -703,4 +627,20 @@ describe T_HTML_ALL_CAPS	Content type is "TEXT/HTML" in all caps
 # are just text/html
 body __CTYPE_HTML_ONLY	eval:check_for_mime_html_text_only()
 meta T_CTYPE_JUST_HTML	( !__RCVD_BY_HOTMAIL && __CTYPE_HTML_ONLY )
+
+# Good correlation between mutt msgids and nonspam.  Also provides
+# a good way to hammer those Mutt-forging spammers looking to
+# get the bonus points we added for it in 2.4x
+header __MUTT12_MSGID	Message-Id =~ /20[01]\d[01]\d[0123]\d[012]\d[0-5]\d\d\d\.[A-Z]{1,2}\d{2,5}\@/
+header __MUTT12_UA	User-Agent =~ /^Mutt\/1\.[234]\.\d+i/
+header __MUTT12_XM	X-Mailer =~ /^Mutt\/1\.[234]\.\d+i/
+
+meta T_FORGED_MUTT_NO_MSGID	((__MUTT12_UA || __MUTT12_XM) && !__MUTT12_MSGID)
+meta T_MUTT_WITH_MSGID		((__MUTT12_UA || __MUTT12_XM) && __MUTT12_MSGID)
+tflags T_MUTT_WITH_MSGID	nice
+
+# carefully crafted to avoid matching: mx1, x400, p11, s05, hd2, c4
+# nonspam seems to have low numbers, spam (which is faked) has high ones
+header T_AA9_HOSTNAME_IN_FROM	 From:addr =~ /\@[a-ln-z]{1,2}[5-9]+\.\S+\./i
+describe T_AA9_HOSTNAME_IN_FROM  'From' has fake 'letter-letter-number' hostname
 
