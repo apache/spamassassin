@@ -363,13 +363,14 @@ body T_DOMAIN_RATIO_31	eval:check_domain_ratio('0.031')
 body T_DOMAIN_RATIO_32	eval:check_domain_ratio('0.032')
 
 # Bug 3374
-body             T_DRUG_DOLLAR_DOSE    m{\$?\s*(?:\d|\.)+\s*\$?\s*(?:\\|/|per)\s*d.?o.?s.?e}i
-describe         T_DRUG_DOLLAR_DOSE    Talks about price per dose.
-lang nl describe T_DRUG_DOLLAR_DOSE    Heeft het over een prijs per dosis.
+body T_DRUG_DOLLAR_DOSE    m{\$?\s*(?:\d|\.)+\s*\$?\s*(?:\\|/|per)\s*d.?o.?s.?e}i
+describe T_DRUG_DOLLAR_DOSE		Message talks about price per dose
+lang nl describe T_DRUG_DOLLAR_DOSE	Heeft het over een prijs per dosis
+
 # Safer alternative for 3374
-body T__DRUG_DOLLAR_DOSE_A m{\$\s*(?:\d|\.)+\s*(?:\\|/|per)\s*d.?o.?s.?e}i
-body T__DRUG_DOLLAR_DOSE_B m{(?:\d|\.)+\s*\$\s*(?:\\|/|per)\s*d.?o.?s.?e}i
-meta T_DRUG_DOLLAR_DOSE_C     T__DRUG_DOLLAR_DOSE_A || T__DRUG_DOLLAR_DOSE_B
+body __DRUG_DOLLAR_DOSE_A	m{\$\s*(?:\d|\.)+\s*(?:\\|/|per)\s*d.?o.?s.?e}i
+body __DRUG_DOLLAR_DOSE_B	m{(?:\d|\.)+\s*\$\s*(?:\\|/|per)\s*d.?o.?s.?e}i
+meta T_DRUG_DOLLAR_DOSE_C	__DRUG_DOLLAR_DOSE_A || __DRUG_DOLLAR_DOSE_B
 
 # Bug 3349, rule written by yackley
 header T_FAKE_MS_XMIME X-MimeOLE =~ /mircosoft/i
