@@ -118,6 +118,7 @@ sub new {
   $self->{ok_locales} = '';
   $self->{ok_languages} = '';
   $self->{allow_user_rules} = 0;
+  $self->{user_rules_to_compile} = 0;
 
   $self->{dcc_body_max} = 999999;
   $self->{dcc_fuz1_max} = 999999;
@@ -770,6 +771,8 @@ The default is to not add the header.
     #
     if ($scoresonly && !$self->{allow_user_rules}) { goto failed_line; }
 
+    if ($scoresonly) { dbg("Checking privileged commands in user config"); }
+
 =back
 
 =head1 SETTINGS
@@ -785,18 +788,23 @@ then, they may only add rules from below).
 
 =item allow_user_rules { 0 | 1 }		(default: 0)
 
-This setting allows users to create rules (and only rules) in their C<user_prefs> files for
-use with C<spamd>. It defaults to off, because this could be a
-severe security hole. It may be possible for users to gain root level access
-if C<spamd> is run as root. It is NOT a good idea, unless you have some
-other way of ensuring that users' tests are safe. Don't use this unless you
-are certain you know what you are doing.
+This setting allows users to create rules (and only rules) in their
+C<user_prefs> files for use with C<spamd>. It defaults to off, because
+this could be a severe security hole. It may be possible for users to
+gain root level access if C<spamd> is run as root. It is NOT a good
+idea, unless you have some other way of ensuring that users' tests are
+safe. Don't use this unless you are certain you know what you are
+doing. Furthermore, this option causes spamassassin to recompile all
+the tests each time it processes a message for a user with a rule in
+his/her C<user_prefs> file, which could have a significant effect on
+server load. It is not recommended.
 
 =cut
 
 
     if (/^allow[-_]user[-_]rules\s+(\d+)$/) {
-      $self->{allow_user_rules} = $1+0; next;
+      $self->{allow_user_rules} = $1+0; 
+      dbg("Allowing user rules!"); next;
     }
 
 
@@ -823,10 +831,14 @@ are optional arguments to the function call.
 
 =cut
     if (/^header\s+(\S+)\s+eval:(.*)$/) {
-      $self->add_test ($1, $2, $type_head_evals); next;
+      $self->add_test ($1, $2, $type_head_evals);
+      $self->{user_rules_to_compile} = 1 if $scoresonly;
+      next;
     }
     if (/^header\s+(\S+)\s+(.*)$/) {
-      $self->add_test ($1, $2, $type_head_tests); next;
+      $self->add_test ($1, $2, $type_head_tests);
+      $self->{user_rules_to_compile} = 1 if $scoresonly;
+      next;
     }
 
 =item body SYMBOLIC_TEST_NAME /pattern/modifiers
@@ -844,10 +856,14 @@ Define a body eval test.  See above.
 
 =cut
     if (/^body\s+(\S+)\s+eval:(.*)$/) {
-      $self->add_test ($1, $2, $type_body_evals); next;
+      $self->add_test ($1, $2, $type_body_evals);
+      $self->{user_rules_to_compile} = 1 if $scoresonly;
+      next;
     }
     if (/^body\s+(\S+)\s+(.*)$/) {
-      $self->add_test ($1, $2, $type_body_tests); next;
+      $self->add_test ($1, $2, $type_body_tests);
+      $self->{user_rules_to_compile} = 1 if $scoresonly;
+      next;
     }
 
 =item uri SYMBOLIC_TEST_NAME /pattern/modifiers
@@ -863,10 +879,14 @@ points of the URI, and will also be faster.
 =cut
 # we don't do URI evals yet - maybe later
 #    if (/^uri\s+(\S+)\s+eval:(.*)$/) {
-#      $self->add_test ($1, $2, $type_uri_evals); next;
+#      $self->add_test ($1, $2, $type_uri_evals);
+#      $self->{user_rules_to_compile} = 1 if $scoresonly;
+#      next;
 #    }
     if (/^uri\s+(\S+)\s+(.*)$/) {
-      $self->add_test ($1, $2, $type_uri_tests); next;
+      $self->add_test ($1, $2, $type_uri_tests);
+      $self->{user_rules_to_compile} = 1 if $scoresonly;
+      next;
     }
 
 =item rawbody SYMBOLIC_TEST_NAME /pattern/modifiers
@@ -883,10 +903,14 @@ Define a raw-body eval test.  See above.
 
 =cut
     if (/^rawbody\s+(\S+)\s+eval:(.*)$/) {
-      $self->add_test ($1, $2, $type_rawbody_evals); next;
+      $self->add_test ($1, $2, $type_rawbody_evals);
+      $self->{user_rules_to_compile} = 1 if $scoresonly;
+      next;
     }
     if (/^rawbody\s+(\S+)\s+(.*)$/) {
-      $self->add_test ($1, $2, $type_rawbody_tests); next;
+      $self->add_test ($1, $2, $type_rawbody_tests);
+      $self->{user_rules_to_compile} = 1 if $scoresonly;
+      next;
     }
 
 =item full SYMBOLIC_TEST_NAME /pattern/modifiers
@@ -903,14 +927,18 @@ Define a full-body eval test.  See above.
 
 =cut
     if (/^full\s+(\S+)\s+eval:(.*)$/) {
-      $self->add_test ($1, $2, $type_full_evals); next;
+      $self->add_test ($1, $2, $type_full_evals);
+      $self->{user_rules_to_compile} = 1 if $scoresonly;
+      next;
     }
     if (/^full\s+(\S+)\s+(.*)$/) {
-      $self->add_test ($1, $2, $type_full_tests); next;
+      $self->add_test ($1, $2, $type_full_tests);
+      $self->{user_rules_to_compile} = 1 if $scoresonly;
+      next;
     }
 
 ###########################################################################
-    # SECURITY: allow_user_prefs is only in affect until here.
+    # SECURITY: allow_user_rules is only in affect until here.
     #
     if ($scoresonly) { goto failed_line; }
 

@@ -1068,8 +1068,9 @@ sub do_body_tests {
   dbg ("running body-text per-line regexp tests; score so far=".$self->{hits});
 
   $self->clear_test_state();
-  if ( defined &Mail::SpamAssassin::PerMsgStatus::_body_tests ) {
-    # ok, we've compiled this before.
+  if ( defined &Mail::SpamAssassin::PerMsgStatus::_body_tests
+       && !$self->{conf}->{user_rules_to_compile} ) {
+    # ok, we've compiled this before. Or have we?
     Mail::SpamAssassin::PerMsgStatus::_body_tests($self, @$textary);
     return;
   }

@@ -69,7 +69,7 @@ use vars	qw{
 @ISA = qw();
 
 $VERSION = "2.21";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.82 2002/06/01 14:31:55 quinlan Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.83 2002/06/02 06:40:03 hughescr Exp $';
 
 sub Version { $VERSION; }
 
@@ -426,6 +426,10 @@ sub read_scoreonly_config {
   close IN;
 
   $self->{conf}->parse_scores_only ($text);
+  if ($self->{conf}->{allow_user_rules}) {
+      dbg("finishing parsing!");
+      $self->{conf}->finish_parsing();
+  }
 }
 
 ###########################################################################
