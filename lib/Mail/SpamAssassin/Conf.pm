@@ -36,12 +36,11 @@ Mail::SpamAssassin::Conf - SpamAssassin configuration file
 
 =head1 DESCRIPTION
 
-SpamAssassin is configured using some traditional UNIX-style configuration
-files, loaded from the /usr/share/spamassassin and /etc/mail/spamassassin
+SpamAssassin is configured using traditional UNIX-style configuration files,
+loaded from the C</usr/share/spamassassin> and C</etc/mail/spamassassin>
 directories.
 
 The C<#> character starts a comment, which continues until end of line.
-
 Whitespace in the files is not significant, but please note that starting a
 line with whitespace is deprecated, as we reserve its use for multi-line rule
 definitions, at some point in the future.
@@ -51,119 +50,7 @@ settings are not supported yet.
 
 Paths can use C<~> to refer to the user's home directory.
 
-Where appropriate, default values are listed in parentheses.
-
-=head1 TAGS
-
-The following C<tags> can be used as placeholders in certain options
-specified below. They will be replaced by the corresponding value when
-they are used.
-
-Some tags can take an argument (in parentheses). The argument is
-optional, and the default is shown below.
-
- _YESNOCAPS_       "YES"/"NO" for is/isn't spam
- _YESNO_           "Yes"/"No" for is/isn't spam
- _SCORE_           message score
- _REQD_            message threshold
- _VERSION_         version (eg. 3.0.0 or 3.1.0-r26142-foo1)
- _SUBVERSION_      sub-version/code revision date (eg. 2004-01-10)
- _HOSTNAME_        hostname of the machine the mail was processed on
- _REMOTEHOSTNAME_  hostname of the machine the mail was sent from, only
-                   available with spamd
- _REMOTEHOSTADDR_  ip address of the machine the mail was sent from, only
-                   available with spamd
- _BAYES_           bayes score
- _TOKENSUMMARY_    number of new, neutral, spammy, and hammy tokens found
- _BAYESTC_         number of new tokens found
- _BAYESTCLEARNED_  number of seen tokens found
- _BAYESTCSPAMMY_   number of spammy tokens found
- _BAYESTCHAMMY_    number of hammy tokens found
- _HAMMYTOKENS(N)_  the N most significant hammy tokens (default, 5)
- _SPAMMYTOKENS(N)_ the N most significant spammy tokens (default, 5)
- _AWL_             AWL modifier
- _DATE_            rfc-2822 date of scan
- _STARS(*)_        one * (use any character) for each score point (note: this
-                   is limited to 50 'stars' to stay on the right side of the RFCs)
- _RELAYSTRUSTED_   relays used and deemed to be trusted
- _RELAYSUNTRUSTED_ relays used that can not be trusted
- _AUTOLEARN_       autolearn status ("ham", "no", "spam", "disabled",
-                   "failed", "unavailable")
- _TESTS(,)_        tests hit separated by , (or other separator)
- _TESTSSCORES(,)_  as above, except with scores appended (eg. AWL=-3.0,...)
- _DCCB_            DCC's "Brand"
- _DCCR_            DCC's results
- _PYZOR_           Pyzor results
- _RBL_             full results for positive RBL queries in DNS URI format
- _LANGUAGES_       possible languages of mail
- _PREVIEW_         content preview
- _REPORT_          terse report of tests hit (for header reports)
- _SUMMARY_         summary of tests hit for standard report (for body reports)
- _CONTACTADDRESS_  contents of the 'report_contact' setting
-
-The C<HAMMYTOKENS> and C<SPAMMYTOKENS> tags have an optional second argument
-which specifies a format: C<_SPAMMYTOKENS(N,FMT)_>, C<_HAMMYTOKENS(N,FMT)_>
-The following formats are available:
-
-=over 4
-
-=item short
-
-Only the tokens themselves are listed.
-I<For example, preference file entry:>
-
-C<add_header all Spammy _SPAMMYTOKENS(2,short)_>
-
-I<Results in message header:>
-
-C<X-Spam-Spammy: remove.php, UD:jpg>
-
-Indicating that the top two spammy tokens found are C<remove.php>
-and C<UD:jpg>.  (The token itself follows the last colon, the
-text before the colon indicates something about the token.
-C<UD> means the token looks like it might be part of a domain name.)
-
-=item compact
-
-The token probability, an abbreviated declassification distance (see
-example), and the token are listed.
-I<For example, preference file entry:>
-
-C<add_header all Spammy _SPAMMYTOKENS(2,compact)_>
-
-I<Results in message header:>
-
-C<0.989-6--remove.php, 0.988-+--UD:jpg>
-
-Indicating that the probabilities of the top two tokens are 0.989 and
-0.988, respectively.  The first token has a declassification distance
-of 6, meaning that if the token had appeared in at least 6 more ham
-messages it would not be considered spammy.  The C<+> for the second
-token indicates a declassification distance greater than 9.
-
-=item long
-
-Probability, declassification distance, number of times seen in a ham
-message, number of times seen in a spam message, age and the token are
-listed.
-
-I<For example, preference file entry:>
-
-C<add_header all Spammy _SPAMMYTOKENS(2,long)_>
-
-I<Results in message header:>
-
-C<X-Spam-Spammy: 0.989-6--0h-4s--4d--remove.php, 0.988-33--2h-25s--1d--UD:jpg>
-
-In addition to the information provided by the compact option,
-the long option shows that the first token appeared in zero
-ham messages and four spam messages, and that it was last
-seen four days ago.  The second token appeared in two ham messages,
-25 spam messages and was last seen one day ago.
-(Unlike the C<compact> option, the long option shows declassification
-distances that are greater than 9.)
-
-=back
+Where appropriate below, default values are listed in parentheses.
 
 =head1 USER PREFERENCES
 
@@ -242,82 +129,105 @@ sub set_default_commands {
   # ( { ... }, { ... }, { ...} ) otherwise POD parsing dies.
   my @cmds = ();
 
-=head2 PREPROCESSING OPTIONS
+=head2 SCORING OPTIONS
 
 =over 4
 
-=item include filename
+=item required_score n.nn (default: 5)
 
-Include configuration lines from C<filename>.   Relative paths are considered
-relative to the current configuration file or user preferences file.
-
-=item ifplugin PluginModuleName
-
-Used to support conditional interpretation, based on whether a plugin module
-has been loaded successfully or not.  Lines between this and a corresponding
-C<endif> line, will be ignored unless the named plugin module has been loaded
-using C<loadplugin>.
-
-Note that if the end of a configuration file is reached while still inside a
-C<ifplugin> scope, a warning will be issued, but parsing will restart on
-the next file.
-
-For example:
-
-	loadplugin MyPlugin plugintest.pm
-
-	ifplugin MyPlugin
-	  header MY_PLUGIN_FOO	eval:check_for_foo()
-	  score  MY_PLUGIN_FOO	0.1
-	endif
-
-=back
-
-=head2 VERSION OPTIONS
-
-=over 4
-
-=item require_version n.nn
-
-Indicates that the entire file, from this line on, requires a certain version
-of SpamAssassin to run.  If an older or newer version of SpamAssassin tries to
-read configuration from this file, it will output a warning instead, and
-ignore it.
+Set the score required before a mail is considered spam.  C<n.nn> can
+be an integer or a real number.  5.0 is the default setting, and is
+quite aggressive; it would be suitable for a single-user setup, but if
+you're an ISP installing SpamAssassin, you should probably set the
+default to be more conservative, like 8.0 or 10.0.  It is not
+recommended to automatically delete or discard messages marked as
+spam, as your users B<will> complain, but if you choose to do so, only
+delete messages with an exceptionally high score such as 15.0 or
+higher. This option was previously known as C<required_hits> and that
+name is still accepted, but is deprecated.
 
 =cut
 
   push (@cmds, {
-    setting => 'require_version',
-    code => sub {
-    }
+    setting => 'required_score',
+    aliases => ['required_hits'],       # backwards compat
+    default => 5,
+    type => $CONF_TYPE_NUMERIC
   });
 
-=item version_tag string
+=item score SYMBOLIC_TEST_NAME n.nn [ n.nn n.nn n.nn ]
 
-This tag is appended to the SA version in the X-Spam-Status header. You should
-include it when modify your ruleset, especially if you plan to distribute it.
-A good choice for I<string> is your last name or your initials followed by a
-number which you increase with each change.
+Assign scores (the number of points for a hit) to a given test. Scores can
+be positive or negative real numbers or integers. C<SYMBOLIC_TEST_NAME> is
+the symbolic name used by SpamAssassin for that test; for example,
+'FROM_ENDS_IN_NUMS'.
 
-The version_tag will be lowercased, and any non-alphanumeric or period
-character will be replaced by an underscore.
+If only one valid score is listed, then that score is always used for a
+test.
 
-e.g.
+If four valid scores are listed, then the score that is used depends on how
+SpamAssassin is being used. The first score is used when both Bayes and
+network tests are disabled. The second score is used when Bayes is disabled,
+but network tests are enabled. The third score is used when Bayes is enabled
+and network tests are disabled. The fourth score is used when Bayes is
+enabled and network tests are enabled.
 
-  version_tag myrules1    # version=2.41-myrules1
+Setting a rule's score to 0 will disable that rule from running.
+
+If the first score value is surrounded by parenthesis '()', then that
+value is considered to be relative to the already set score.  ie: '(3)'
+means increase the score for this rule by 3 points in all score sets.
+'(3) (0) (3) (0)' means increase the score for this rule by 3 in score
+sets 0 and 2 only.
+
+If no score is given for a test by the end of the configuration, the
+default score is 1.0, or 0.01 for tests whose names begin with 'T_'
+(this is used to indicate a rule in testing).
+
+Note that test names which begin with '__' are reserved for meta-match
+sub-rules, and are not scored or listed in the 'tests hit' reports.
 
 =cut
 
   push (@cmds, {
-    setting => 'version_tag',
+    setting => 'score',
+    is_frequent => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      my $tag = lc($value);
-      $tag =~ tr/a-z0-9./_/c;
-      foreach (@Mail::SpamAssassin::EXTRA_VERSION) {
-        if($_ eq $tag) { $tag = undef; last; }
+      my($rule, @scores) = split(/\s+/, $value);
+
+      my $relative = (@scores > 0 && $scores[0] =~ /^\(\d+(\.\d+)?\)$/) ? 1 : 0;
+      if ($relative && !exists $self->{scoreset}->[0]->{$rule})
+      {
+        my $msg = "Relative score without previous setting in SpamAssassin ".
+                    "configuration, skipping: $_";
+
+        if ($self->{lint_rules}) {
+          warn $msg."\n";
+        } else {
+          dbg ($msg);
+        }
+        $self->{errors}++;
+        return;
       }
-      push(@Mail::SpamAssassin::EXTRA_VERSION, $tag) if($tag);
+
+      if (@scores == 4) {
+        for my $index (0..3) {
+          my $score = $relative ?
+            $self->{scoreset}->[$index]->{$rule} + $scores[$index] :
+            $scores[$index];
+
+          $self->{scoreset}->[$index]->{$rule} = $score + 0.0;
+        }
+      }
+      elsif (@scores > 0) {
+        my $score = $relative ?
+          $self->{scoreset}->[0]->{$rule} + $scores[0] : $scores[0];
+
+        for my $index (0..3) {
+          $self->{scoreset}->[$index]->{$rule} = $score + 0.0;
+        }
+      }
     }
   });
 
@@ -594,161 +504,9 @@ be blacklisted.  Same format as C<blacklist_from>.
     type => $CONF_TYPE_ADDRLIST
   });
 
-=item envelope_sender_header Name-Of-Header
-
-SpamAssassin will attempt to discover the address used in the 'MAIL FROM:'
-phase of the SMTP transaction that delivered this message, if this data has
-been made available by the SMTP server.  This is used in the C<EnvelopeFrom>
-pseudo-header, and for various rules such as SPF checking.
-
-By default, various MTAs will use different headers, such as the following:
-
-    X-Envelope-From
-    Envelope-Sender
-    X-Sender
-    Return-Path
-
-SpamAssassin will attempt to use these, if some heuristics (such as the header
-placement in the message, or the absence of fetchmail signatures) appear to
-indicate that they are safe to use.  However, it may choose the wrong headers
-in some mailserver configurations.  (More discussion of this can be found
-in bug 2142 in the SpamAssassin BugZilla.)
-
-To avoid this heuristic failure, the C<envelope_sender_header> setting may be
-helpful.  Name the header that your MTA adds to messages containing the address
-used at the MAIL FROM step of the SMTP transaction.
-
-If the header in question contains C<E<lt>> or C<E<gt>> characters at the start
-and end of the email address in the right-hand side, as in the SMTP
-transaction, these will be stripped.
-
-If the header is not found in a message, or if it's value does not contain an
-C<@> sign, SpamAssassin will fall back to its default heuristics.
-
-(Note for MTA developers: we would prefer if the use of a single header be
-avoided in future, since that precludes 'downstream' spam scanning.
-C<http://wiki.apache.org/spamassassin/EnvelopeSenderInReceived> details a
-better proposal using the Received headers.)
-
-example:
-
-    envelope_sender_header X-SA-Exim-Mail-From
-
-=cut
-
-  push (@cmds, {
-    setting => 'envelope_sender_header',
-    default => undef,
-    type => $CONF_TYPE_STRING
-  });
-
 =back
 
-=head2 SCORING OPTIONS
-
-=over 4
-
-=item required_score n.nn (default: 5)
-
-Set the score required before a mail is considered spam.  C<n.nn> can
-be an integer or a real number.  5.0 is the default setting, and is
-quite aggressive; it would be suitable for a single-user setup, but if
-you're an ISP installing SpamAssassin, you should probably set the
-default to be more conservative, like 8.0 or 10.0.  It is not
-recommended to automatically delete or discard messages marked as
-spam, as your users B<will> complain, but if you choose to do so, only
-delete messages with an exceptionally high score such as 15.0 or
-higher. This option was previously known as C<required_hits> and that
-name is still accepted, but is deprecated.
-
-=cut
-
-  push (@cmds, {
-    setting => 'required_score',
-    aliases => ['required_hits'],       # backwards compat
-    default => 5,
-    type => $CONF_TYPE_NUMERIC
-  });
-
-=item score SYMBOLIC_TEST_NAME n.nn [ n.nn n.nn n.nn ]
-
-Assign scores (the number of points for a hit) to a given test. Scores can
-be positive or negative real numbers or integers. C<SYMBOLIC_TEST_NAME> is
-the symbolic name used by SpamAssassin for that test; for example,
-'FROM_ENDS_IN_NUMS'.
-
-If only one valid score is listed, then that score is always used for a
-test.
-
-If four valid scores are listed, then the score that is used depends on how
-SpamAssassin is being used. The first score is used when both Bayes and
-network tests are disabled. The second score is used when Bayes is disabled,
-but network tests are enabled. The third score is used when Bayes is enabled
-and network tests are disabled. The fourth score is used when Bayes is
-enabled and network tests are enabled.
-
-Setting a rule's score to 0 will disable that rule from running.
-
-If the first score value is surrounded by parenthesis '()', then that
-value is considered to be relative to the already set score.  ie: '(3)'
-means increase the score for this rule by 3 points in all score sets.
-'(3) (0) (3) (0)' means increase the score for this rule by 3 in score
-sets 0 and 2 only.
-
-If no score is given for a test by the end of the configuration, the
-default score is 1.0, or 0.01 for tests whose names begin with 'T_'
-(this is used to indicate a rule in testing).
-
-Note that test names which begin with '__' are reserved for meta-match
-sub-rules, and are not scored or listed in the 'tests hit' reports.
-
-=cut
-
-  push (@cmds, {
-    setting => 'score',
-    is_frequent => 1,
-    code => sub {
-      my ($self, $key, $value, $line) = @_;
-      my($rule, @scores) = split(/\s+/, $value);
-
-      my $relative = (@scores > 0 && $scores[0] =~ /^\(\d+(\.\d+)?\)$/) ? 1 : 0;
-      if ($relative && !exists $self->{scoreset}->[0]->{$rule})
-      {
-        my $msg = "Relative score without previous setting in SpamAssassin ".
-                    "configuration, skipping: $_";
-
-        if ($self->{lint_rules}) {
-          warn $msg."\n";
-        } else {
-          dbg ($msg);
-        }
-        $self->{errors}++;
-        return;
-      }
-
-      if (@scores == 4) {
-        for my $index (0..3) {
-          my $score = $relative ?
-            $self->{scoreset}->[$index]->{$rule} + $scores[$index] :
-            $scores[$index];
-
-          $self->{scoreset}->[$index]->{$rule} = $score + 0.0;
-        }
-      }
-      elsif (@scores > 0) {
-        my $score = $relative ?
-          $self->{scoreset}->[0]->{$rule} + $scores[0] : $scores[0];
-
-        for my $index (0..3) {
-          $self->{scoreset}->[$index]->{$rule} = $score + 0.0;
-        }
-      }
-    }
-  });
-
-=back
-
-=head2 MESSAGE TAGGING OPTIONS
+=head2 BASIC MESSAGE TAGGING OPTIONS
 
 =over 4
 
@@ -786,24 +544,6 @@ STRING. (They will be converted to square brackets.)
     }
   });
 
-=item fold_headers { 0 | 1 }        (default: 1)
-
-By default,  headers added by SpamAssassin will be whitespace folded.
-In other words, they will be broken up into multiple lines instead of
-one very long one and each other line will have a tabulator prepended
-to mark it as a continuation of the preceding one.
-
-The automatic wrapping can be disabled here  (which can generate very
-long lines).
-
-=cut
-
-  push (@cmds, {
-    setting => 'fold_headers',
-    default => 1,
-    type => $CONF_TYPE_BOOL
-  });
-
 =item add_header { spam | ham | all } header_name string
 
 Customized headers can be added to the specified type of messages (spam,
@@ -811,27 +551,27 @@ ham, or "all" to add to either).  All headers begin with C<X-Spam->
 (so a C<header_name> Foo will generate a header called X-Spam-Foo).
 header_name is restricted to the character set [A-Za-z0-9_-].
 
-C<string> can contain tags as explained above in the TAGS section.  You
-can also use C<\n> and C<\t> in the header to add newlines and tabulators
-as desired.  A backslash has to be written as \\, any other escaped chars
-will be silently removed.
+C<string> can contain tags as explained below in the B<TEMPLATE TAGS> section.
+You can also use C<\n> and C<\t> in the header to add newlines and tabulators
+as desired.  A backslash has to be written as \\, any other escaped chars will
+be silently removed.
 
 All headers will be folded if fold_headers is set to C<1>. Note: Manually
 adding newlines via C<\n> disables any further automatic wrapping (ie:
 long header lines are possible). The lines will still be properly folded
 (marked as continuing) though.
 
-You can customize existing headers with add_header (only the specified
+You can customize existing headers with B<add_header> (only the specified
 subset of messages will be changed).
 
 See also C<clear_headers> for removing headers.
 
 Here are some examples (these are the defaults):
 
-add_header spam Flag _YESNOCAPS_
-add_header all Status _YESNO_, score=_SCORE__ required=_REQD_ tests=_TESTS_ autolearn=_AUTOLEARN_ version=_VERSION_
-add_header all Level _STARS(*)_
-add_header all Checker-Version SpamAssassin _VERSION_ (_SUBVERSION_) on _HOSTNAME_
+  add_header spam Flag _YESNOCAPS_
+  add_header all Status _YESNO_, score=_SCORE__ required=_REQD_ tests=_TESTS_ autolearn=_AUTOLEARN_ version=_VERSION_
+  add_header all Level _STARS(*)_
+  add_header all Checker-Version SpamAssassin _VERSION_ (_SUBVERSION_) on _HOSTNAME_
 
 =cut
 
@@ -905,7 +645,7 @@ determine that SpamAssassin is running.
 =item clear_headers
 
 Clear the list of headers to be added to messages.  You may use this
-before any add_header options to prevent the default headers from being
+before any B<add_header> options to prevent the default headers from being
 added to the message.
 
 Note that B<X-Spam-Checker-Version> is not removable because the version
@@ -925,24 +665,6 @@ determine that SpamAssassin is running.
       for my $name (keys %{ $self->{headers_spam} }) {
         delete $self->{headers_spam}->{$name} if $name ne "Checker-Version";
       }
-    }
-  });
-
-=item report_safe_copy_headers header_name ...
-
-If using report_safe, a few of the headers from the original message
-are copied into the wrapper header (From, To, Cc, Subject, Date, etc.)
-If you want to have other headers copied as well, you can add them
-using this option.  You can specify multiple headers on the same line,
-separated by spaces, or you can just use multiple lines.
-
-=cut
-
-  push (@cmds, {
-    setting => 'report_safe_copy_headers',
-    code => sub {
-      my ($self, $key, $value, $line) = @_;
-      push(@{$self->{report_safe_copy_headers}}, split(/\s+/, $value));
     }
   });
 
@@ -967,6 +689,9 @@ addition, a header named B<X-Spam-Report> will be added to spam.  You
 can use the B<remove_header> option to remove that header after setting
 B<report_safe> to 0.
 
+See B<report_safe_copy_headers> if you want to copy headers from
+the original mail into tagged messages.
+
 =cut
 
   push (@cmds, {
@@ -979,161 +704,6 @@ B<report_safe> to 0.
         $self->{headers_spam}->{"Report"} = "_REPORT_";
       }
     }
-  });
-
-=item report_charset CHARSET		(default: unset)
-
-Set the MIME Content-Type charset used for the text/plain report which
-is attached to spam mail messages.
-
-=cut
-
-  push (@cmds, {
-    setting => 'report_charset',
-    default => '',
-    type => $CONF_TYPE_STRING
-  });
-
-=item report ...some text for a report...
-
-Set the report template which is attached to spam mail messages.  See the
-C<10_misc.cf> configuration file in C</usr/share/spamassassin> for an
-example.
-
-If you change this, try to keep it under 78 columns. Each C<report>
-line appends to the existing template, so use C<clear_report_template>
-to restart.
-
-Tags can be included as explained above.
-
-=cut
-
-  push (@cmds, {
-    command => 'report',
-    setting => 'report_template',
-    type => $CONF_TYPE_TEMPLATE
-  });
-
-=item clear_report_template
-
-Clear the report template.
-
-=cut
-
-  push (@cmds, {
-    command => 'clear_report_template',
-    setting => 'report_template',
-    default => '',
-    code => \&Mail::SpamAssassin::Conf::Parser::set_template_clear
-  });
-
-=item report_contact ...text of contact address...
-
-Set what _CONTACTADDRESS_ is replaced with in the above report text.
-By default, this is 'the administrator of that system', since the hostname
-of the system the scanner is running on is also included.
-
-=cut
-
-  push (@cmds, {
-    setting => 'report_contact',
-    default => 'the administrator of that system',
-    type => $CONF_TYPE_STRING
-  });
-
-=item report_hostname ...hostname to use...
-
-Set what _HOSTNAME_ is replaced with in the above report text.
-By default, this is determined dynamically as whatever the host running
-SpamAssassin calls itself.
-
-=cut
-
-  push (@cmds, {
-    setting => 'report_hostname',
-    default => '',
-    type => $CONF_TYPE_STRING
-  });
-
-=item unsafe_report ...some text for a report...
-
-Set the report template which is attached to spam mail messages which contain a
-non-text/plain part.  See the C<10_misc.cf> configuration file in
-C</usr/share/spamassassin> for an example.
-
-Each C<unsafe-report> line appends to the existing template, so use
-C<clear_unsafe_report_template> to restart.
-
-Tags can be used in this template (see above for details).
-
-=cut
-
-  push (@cmds, {
-    command => 'unsafe_report',
-    setting => 'unsafe_report_template',
-    default => '',
-    type => $CONF_TYPE_TEMPLATE
-  });
-
-=item clear_unsafe_report_template
-
-Clear the unsafe_report template.
-
-=cut
-
-  push (@cmds, {
-    command => 'clear_unsafe_report_template',
-    setting => 'unsafe_report_template',
-    code => \&Mail::SpamAssassin::Conf::Parser::set_template_clear
-  });
-
-=item spamtrap ...some text for spamtrap reply mail...
-
-A template for spam-trap responses.  If the first few lines begin with
-C<Xxxxxx: yyy> where Xxxxxx is a header and yyy is some text, they'll be used
-as headers.  See the C<10_misc.cf> configuration file in
-C</usr/share/spamassassin> for an example.
-
-Unfortunately tags can not be used with this option.
-
-=cut
-
-  push (@cmds, {
-    command => 'spamtrap',
-    setting => 'spamtrap_template',
-    default => '',
-    type => $CONF_TYPE_TEMPLATE
-  });
-
-=item clear_spamtrap_template
-
-Clear the spamtrap template.
-
-=cut
-
-  push (@cmds, {
-    command => 'clear_spamtrap_template',
-    setting => 'spamtrap_template',
-    code => \&Mail::SpamAssassin::Conf::Parser::set_template_clear
-  });
-
-=item describe SYMBOLIC_TEST_NAME description ...
-
-Used to describe a test.  This text is shown to users in the detailed report.
-
-Note that test names which begin with '__' are reserved for meta-match
-sub-rules, and are not scored or listed in the 'tests hit' reports.
-
-Also note that by convention, rule descriptions should be limited in
-length to no more than 50 characters.
-
-=cut
-
-  push (@cmds, {
-    command => 'describe',
-    setting => 'descriptions',
-    is_frequent => 1,
-    type => $CONF_TYPE_HASH_KEY_VALUE
   });
 
 =back
@@ -1376,7 +946,8 @@ Select the locales to allow from the list below:
 
 =item use_dcc ( 0 | 1 )		(default: 1)
 
-Whether to use DCC, if it is available.
+Whether to use DCC, if it is available.  DCC (Distributed Checksum
+Clearinghouse) is a system similar to Razor.
 
 =cut
 
@@ -1388,8 +959,8 @@ Whether to use DCC, if it is available.
 
 =item dcc_timeout n              (default: 10)
 
-How many seconds you wait for dcc to complete before you go on without
-the results
+How many seconds you wait for DCC to complete, before scanning continues
+without the DCC results.
 
 =cut
 
@@ -1405,15 +976,14 @@ the results
 
 =item dcc_fuz2_max NUMBER
 
-DCC (Distributed Checksum Clearinghouse) is a system similar to Razor.
 This option sets how often a message's body/fuz1/fuz2 checksum must have been
 reported to the DCC server before SpamAssassin will consider the DCC check as
 matched.
 
 As nearly all DCC clients are auto-reporting these checksums you should set
-this to a relatively high value, e.g. 999999 (this is DCC's MANY count).
+this to a relatively high value, e.g. C<999999> (this is DCC's MANY count).
 
-The default is 999999 for all these options.
+The default is C<999999> for all these options.
 
 =cut
 
@@ -1448,8 +1018,8 @@ Whether to use Pyzor, if it is available.
 
 =item pyzor_timeout n              (default: 10)
 
-How many seconds you wait for Pyzor to complete before you go on without
-the results.
+How many seconds you wait for Pyzor to complete, before scanning continues
+without the Pyzor results.
 
 =cut
 
@@ -1473,6 +1043,23 @@ The default is 5.
     setting => 'pyzor_max',
     default => 5,
     type => $CONF_TYPE_NUMERIC
+  });
+
+=item pyzor_options [option ...]
+
+Additional options for the pyzor(1) command line.   Note that for security,
+only characters in the ranges A-Z, a-z, 0-9, -, _ and / are permitted.
+
+=cut
+
+  push (@cmds, {
+    setting => 'pyzor_options',
+    default => '',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value !~ /^([-A-Za-z0-9_\/ ]+)$/) { return $INVALID_VALUE; }
+      $self->{pyzor_options} = $1;
+    }
   });
 
 =item trusted_networks ip.add.re.ss[/mask] ...   (default: none)
@@ -1621,34 +1208,6 @@ the results
     type => $CONF_TYPE_NUMERIC
   });
 
-=item use_bayes ( 0 | 1 )		(default: 1)
-
-Whether to use the naive-Bayesian-style classifier built into
-SpamAssassin.  This is a master on/off switch for all Bayes-related
-operations.
-
-=cut
-
-  push (@cmds, {
-    setting => 'use_bayes',
-    default => 1,
-    type => $CONF_TYPE_BOOL
-  });
-
-=item use_bayes_rules ( 0 | 1 )		(default: 1)
-
-Whether to use rules using the naive-Bayesian-style classifier built
-into SpamAssassin.  This allows you to disable the rules while leaving
-auto and manual learning enabled.
-
-=cut
-
-  push (@cmds, {
-    setting => 'use_bayes_rules',
-    default => 1,
-    type => $CONF_TYPE_BOOL
-  });
-
 =item skip_rbl_checks { 0 | 1 }   (default: 0)
 
 By default, SpamAssassin will run RBL checks.  If your ISP already does this
@@ -1715,48 +1274,6 @@ How many seconds to wait before retrying an MX check.
     type => $CONF_TYPE_NUMERIC
   });
 
-=item bayes_ignore_from add@ress.com
-
-Bayesian classification and autolearning will not be performed on mail
-from the listed addresses.  Program C<sa-learn> will also ignore the
-listed addresses if it is invoked using the C<--use-ignores> option.
-One or more addresses can be listed, see C<whitelist_from>.
-
-Spam messages from certain senders may contain many words that
-frequently occur in ham.  For example, one might read messages from a
-preferred bookstore but also get unwanted spam messages from other
-bookstores.  If the unwanted messages are learned as spam then any
-messages discussing books, including the preferred bookstore and
-antiquarian messages would be in danger of being marked as spam.  The
-addresses of the annoying bookstores would be listed.  (Assuming they
-were halfway legitimate and didn't send you mail through myriad
-affiliates.)
-
-Those who have pieces of spam in legitimate messages or otherwise
-receive ham messages containing potentially spammy words might fear
-that some spam messages might be in danger of being marked as ham.
-The addresses of the spam mailing lists, correspondents, etc.  would
-be listed.
-
-=cut
-
-  push (@cmds, {
-    setting => 'bayes_ignore_from',
-    type => $CONF_TYPE_ADDRLIST
-  });
-
-=item bayes_ignore_to add@ress.com
-
-Bayesian classification and autolearning will not be performed on mail
-to the listed addresses.  See C<bayes_ignore_from> for details.
-
-=cut
-
-  push (@cmds, {
-    setting => 'bayes_ignore_to',
-    type => $CONF_TYPE_ADDRLIST
-  });
-
 =item dns_available { yes | test[: name1 name2...] | no }   (default: test)
 
 By default, SpamAssassin will query some default hosts on the internet to
@@ -1795,6 +1312,34 @@ that the minimum limit on fds be raised to at least 256 for safety.
 =head2 LEARNING OPTIONS
 
 =over 4
+
+=item use_bayes ( 0 | 1 )		(default: 1)
+
+Whether to use the naive-Bayesian-style classifier built into
+SpamAssassin.  This is a master on/off switch for all Bayes-related
+operations.
+
+=cut
+
+  push (@cmds, {
+    setting => 'use_bayes',
+    default => 1,
+    type => $CONF_TYPE_BOOL
+  });
+
+=item use_bayes_rules ( 0 | 1 )		(default: 1)
+
+Whether to use rules using the naive-Bayesian-style classifier built
+into SpamAssassin.  This allows you to disable the rules while leaving
+auto and manual learning enabled.
+
+=cut
+
+  push (@cmds, {
+    setting => 'use_bayes_rules',
+    default => 1,
+    type => $CONF_TYPE_BOOL
+  });
 
 =item auto_whitelist_factor n	(default: 0.5, range [0..1])
 
@@ -1915,6 +1460,48 @@ setting.  Example:
     }
   });
 
+=item bayes_ignore_from add@ress.com
+
+Bayesian classification and autolearning will not be performed on mail
+from the listed addresses.  Program C<sa-learn> will also ignore the
+listed addresses if it is invoked using the C<--use-ignores> option.
+One or more addresses can be listed, see C<whitelist_from>.
+
+Spam messages from certain senders may contain many words that
+frequently occur in ham.  For example, one might read messages from a
+preferred bookstore but also get unwanted spam messages from other
+bookstores.  If the unwanted messages are learned as spam then any
+messages discussing books, including the preferred bookstore and
+antiquarian messages would be in danger of being marked as spam.  The
+addresses of the annoying bookstores would be listed.  (Assuming they
+were halfway legitimate and didn't send you mail through myriad
+affiliates.)
+
+Those who have pieces of spam in legitimate messages or otherwise
+receive ham messages containing potentially spammy words might fear
+that some spam messages might be in danger of being marked as ham.
+The addresses of the spam mailing lists, correspondents, etc.  would
+be listed.
+
+=cut
+
+  push (@cmds, {
+    setting => 'bayes_ignore_from',
+    type => $CONF_TYPE_ADDRLIST
+  });
+
+=item bayes_ignore_to add@ress.com
+
+Bayesian classification and autolearning will not be performed on mail
+to the listed addresses.  See C<bayes_ignore_from> for details.
+
+=cut
+
+  push (@cmds, {
+    setting => 'bayes_ignore_to',
+    type => $CONF_TYPE_ADDRLIST
+  });
+
 =item bayes_min_ham_num			(Default: 200)
 
 =item bayes_min_spam_num		(Default: 200)
@@ -1966,24 +1553,100 @@ group bayes databases.
     type => $CONF_TYPE_STRING
   });
 
-##############
+=item bayes_use_hapaxes		(default: 1)
 
-=item pyzor_options [option ...]
-
-Additional options for the pyzor(1) command line.   Note that for security,
-only characters in the ranges A-Z, a-z, 0-9, -, _ and / are permitted.
+Should the Bayesian classifier use hapaxes (words/tokens that occur only
+once) when classifying?  This produces significantly better hit-rates, but
+increases database size by about a factor of 8 to 10.
 
 =cut
 
   push (@cmds, {
-    setting => 'pyzor_options',
-    default => '',
-    code => sub {
-      my ($self, $key, $value, $line) = @_;
-      if ($value !~ /^([-A-Za-z0-9_\/ ]+)$/) { return $INVALID_VALUE; }
-      $self->{pyzor_options} = $1;
-    }
+    setting => 'bayes_use_hapaxes',
+    default => 1,
+    type => $CONF_TYPE_BOOL
   });
+
+=item bayes_use_chi2_combining		(default: 1)
+
+Should the Bayesian classifier use chi-squared combining, instead of
+Robinson/Graham-style naive Bayesian combining?  Chi-squared produces
+more 'extreme' output results, but may be more resistant to changes
+in corpus size etc.
+
+=cut
+
+  push (@cmds, {
+    setting => 'bayes_use_chi2_combining',
+    default => 1,
+    type => $CONF_TYPE_BOOL
+  });
+
+=item bayes_journal_max_size		(default: 102400)
+
+SpamAssassin will opportunistically sync the journal and the database.
+It will do so once a day, but will sync more often if the journal file
+size goes above this setting, in bytes.  If set to 0, opportunistic
+syncing will not occur.
+
+=cut
+
+  push (@cmds, {
+    setting => 'bayes_journal_max_size',
+    default => 102400,
+    type => $CONF_TYPE_NUMERIC
+  });
+
+=item bayes_expiry_max_db_size		(default: 150000)
+
+What should be the maximum size of the Bayes tokens database?  When expiry
+occurs, the Bayes system will keep either 75% of the maximum value, or
+100,000 tokens, whichever has a larger value.  150,000 tokens is roughly
+equivalent to a 8Mb database file.
+
+=cut
+
+  push (@cmds, {
+    setting => 'bayes_expiry_max_db_size',
+    default => 150000,
+    type => $CONF_TYPE_NUMERIC
+  });
+
+=item bayes_auto_expire       		(default: 1)
+
+If enabled, the Bayes system will try to automatically expire old tokens
+from the database.  Auto-expiry occurs when the number of tokens in the
+database surpasses the bayes_expiry_max_db_size value.
+
+=cut
+
+  push (@cmds, {
+    setting => 'bayes_auto_expire',
+    default => 1,
+    type => $CONF_TYPE_BOOL
+  });
+
+=item bayes_learn_to_journal  	(default: 0)
+
+If this option is set, whenever SpamAssassin does Bayes learning, it
+will put the information into the journal instead of directly into the
+database.  This lowers contention for locking the database to execute
+an update, but will also cause more access to the journal and cause a
+delay before the updates are actually committed to the Bayes database.
+
+=cut
+
+  push (@cmds, {
+    setting => 'bayes_learn_to_journal',
+    default => 0,
+    type => $CONF_TYPE_BOOL
+  });
+
+=back
+
+=head2 MISCELLANEOUS OPTIONS
+
+=over 4
 
 =item lock_method type
 
@@ -2027,9 +1690,248 @@ The supported locking systems for C<type> are as follows:
     }
   });
 
+=item fold_headers { 0 | 1 }        (default: 1)
+
+By default,  headers added by SpamAssassin will be whitespace folded.
+In other words, they will be broken up into multiple lines instead of
+one very long one and each other line will have a tabulator prepended
+to mark it as a continuation of the preceding one.
+
+The automatic wrapping can be disabled here.  Note that this can generate very
+long lines.
+
+=cut
+
+  push (@cmds, {
+    setting => 'fold_headers',
+    default => 1,
+    type => $CONF_TYPE_BOOL
+  });
+
+=item report_safe_copy_headers header_name ...
+
+If using C<report_safe>, a few of the headers from the original message
+are copied into the wrapper header (From, To, Cc, Subject, Date, etc.)
+If you want to have other headers copied as well, you can add them
+using this option.  You can specify multiple headers on the same line,
+separated by spaces, or you can just use multiple lines.
+
+=cut
+
+  push (@cmds, {
+    setting => 'report_safe_copy_headers',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      push(@{$self->{report_safe_copy_headers}}, split(/\s+/, $value));
+    }
+  });
+
+=item envelope_sender_header Name-Of-Header
+
+SpamAssassin will attempt to discover the address used in the 'MAIL FROM:'
+phase of the SMTP transaction that delivered this message, if this data has
+been made available by the SMTP server.  This is used in the C<EnvelopeFrom>
+pseudo-header, and for various rules such as SPF checking.
+
+By default, various MTAs will use different headers, such as the following:
+
+    X-Envelope-From
+    Envelope-Sender
+    X-Sender
+    Return-Path
+
+SpamAssassin will attempt to use these, if some heuristics (such as the header
+placement in the message, or the absence of fetchmail signatures) appear to
+indicate that they are safe to use.  However, it may choose the wrong headers
+in some mailserver configurations.  (More discussion of this can be found
+in bug 2142 in the SpamAssassin BugZilla.)
+
+To avoid this heuristic failure, the C<envelope_sender_header> setting may be
+helpful.  Name the header that your MTA adds to messages containing the address
+used at the MAIL FROM step of the SMTP transaction.
+
+If the header in question contains C<E<lt>> or C<E<gt>> characters at the start
+and end of the email address in the right-hand side, as in the SMTP
+transaction, these will be stripped.
+
+If the header is not found in a message, or if it's value does not contain an
+C<@> sign, SpamAssassin will fall back to its default heuristics.
+
+(Note for MTA developers: we would prefer if the use of a single header be
+avoided in future, since that precludes 'downstream' spam scanning.
+C<http://wiki.apache.org/spamassassin/EnvelopeSenderInReceived> details a
+better proposal using the Received headers.)
+
+example:
+
+    envelope_sender_header X-SA-Exim-Mail-From
+
+=cut
+
+  push (@cmds, {
+    setting => 'envelope_sender_header',
+    default => undef,
+    type => $CONF_TYPE_STRING
+  });
+
+=item describe SYMBOLIC_TEST_NAME description ...
+
+Used to describe a test.  This text is shown to users in the detailed report.
+
+Note that test names which begin with '__' are reserved for meta-match
+sub-rules, and are not scored or listed in the 'tests hit' reports.
+
+Also note that by convention, rule descriptions should be limited in
+length to no more than 50 characters.
+
+=cut
+
+  push (@cmds, {
+    command => 'describe',
+    setting => 'descriptions',
+    is_frequent => 1,
+    type => $CONF_TYPE_HASH_KEY_VALUE
+  });
+
+=item report_charset CHARSET		(default: unset)
+
+Set the MIME Content-Type charset used for the text/plain report which
+is attached to spam mail messages.
+
+=cut
+
+  push (@cmds, {
+    setting => 'report_charset',
+    default => '',
+    type => $CONF_TYPE_STRING
+  });
+
+=item report ...some text for a report...
+
+Set the report template which is attached to spam mail messages.  See the
+C<10_misc.cf> configuration file in C</usr/share/spamassassin> for an
+example.
+
+If you change this, try to keep it under 78 columns. Each C<report>
+line appends to the existing template, so use C<clear_report_template>
+to restart.
+
+Tags can be included as explained above.
+
+=cut
+
+  push (@cmds, {
+    command => 'report',
+    setting => 'report_template',
+    type => $CONF_TYPE_TEMPLATE
+  });
+
+=item clear_report_template
+
+Clear the report template.
+
+=cut
+
+  push (@cmds, {
+    command => 'clear_report_template',
+    setting => 'report_template',
+    default => '',
+    code => \&Mail::SpamAssassin::Conf::Parser::set_template_clear
+  });
+
+=item report_contact ...text of contact address...
+
+Set what _CONTACTADDRESS_ is replaced with in the above report text.
+By default, this is 'the administrator of that system', since the hostname
+of the system the scanner is running on is also included.
+
+=cut
+
+  push (@cmds, {
+    setting => 'report_contact',
+    default => 'the administrator of that system',
+    type => $CONF_TYPE_STRING
+  });
+
+=item report_hostname ...hostname to use...
+
+Set what _HOSTNAME_ is replaced with in the above report text.
+By default, this is determined dynamically as whatever the host running
+SpamAssassin calls itself.
+
+=cut
+
+  push (@cmds, {
+    setting => 'report_hostname',
+    default => '',
+    type => $CONF_TYPE_STRING
+  });
+
+=item unsafe_report ...some text for a report...
+
+Set the report template which is attached to spam mail messages which contain a
+non-text/plain part.  See the C<10_misc.cf> configuration file in
+C</usr/share/spamassassin> for an example.
+
+Each C<unsafe-report> line appends to the existing template, so use
+C<clear_unsafe_report_template> to restart.
+
+Tags can be used in this template (see above for details).
+
+=cut
+
+  push (@cmds, {
+    command => 'unsafe_report',
+    setting => 'unsafe_report_template',
+    default => '',
+    type => $CONF_TYPE_TEMPLATE
+  });
+
+=item clear_unsafe_report_template
+
+Clear the unsafe_report template.
+
+=cut
+
+  push (@cmds, {
+    command => 'clear_unsafe_report_template',
+    setting => 'unsafe_report_template',
+    code => \&Mail::SpamAssassin::Conf::Parser::set_template_clear
+  });
+
+=item spamtrap ...some text for spamtrap reply mail...
+
+A template for spam-trap responses.  If the first few lines begin with
+C<Xxxxxx: yyy> where Xxxxxx is a header and yyy is some text, they'll be used
+as headers.  See the C<10_misc.cf> configuration file in
+C</usr/share/spamassassin> for an example.
+
+Unfortunately tags can not be used with this option.
+
+=cut
+
+  push (@cmds, {
+    command => 'spamtrap',
+    setting => 'spamtrap_template',
+    default => '',
+    type => $CONF_TYPE_TEMPLATE
+  });
+
+=item clear_spamtrap_template
+
+Clear the spamtrap template.
+
+=cut
+
+  push (@cmds, {
+    command => 'clear_spamtrap_template',
+    setting => 'spamtrap_template',
+    code => \&Mail::SpamAssassin::Conf::Parser::set_template_clear
+  });
+
 =back
 
-=head1 PRIVILEGED SETTINGS
+=head1 RULE DEFINITIONS AND PRIVILEGED SETTINGS
 
 These settings differ from the ones above, in that they are considered
 'privileged'.  Only users running C<spamassassin> from their procmailrc's or
@@ -2092,7 +1994,7 @@ transaction that delivered this message, if this data has been made available
 by the SMTP server.
 
 =item C<MESSAGEID> is a symbol meaning all Message-Id's found in the message;
-some mailing list software moves the I<real> Message-Id to 'Resent-Message-Id'
+some mailing list software moves the real 'Message-Id' to 'Resent-Message-Id'
 or 'X-Message-Id', then uses its own one in the 'Message-Id' header.  The value
 returned for this symbol is the text from all 3 headers, separated by newlines.
 
@@ -2455,9 +2357,9 @@ tests, are run in priority order. The default test priority is 0 (zero).
 =head1 ADMINISTRATOR SETTINGS
 
 These settings differ from the ones above, in that they are considered 'more
-privileged' -- even more than the ones in the SETTINGS section.  No matter what
-C<allow_user_rules> is set to, these can never be set from a user's
-C<user_prefs> file.
+privileged' -- even more than the ones in the B<PRIVILEGED SETTINGS> section.
+No matter what C<allow_user_rules> is set to, these can never be set from a
+user's C<user_prefs> file.
 
 =over 4
 
@@ -2683,100 +2585,11 @@ not have any execute bits set (the umask is set to 111).
     type => $CONF_TYPE_NUMERIC
   });
 
-=item bayes_use_hapaxes		(default: 1)
+=item bayes_store_module Name::Of::BayesStore::Module
 
-Should the Bayesian classifier use hapaxes (words/tokens that occur only
-once) when classifying?  This produces significantly better hit-rates, but
-increases database size by about a factor of 8 to 10.
-
-=cut
-
-  push (@cmds, {
-    setting => 'bayes_use_hapaxes',
-    default => 1,
-    type => $CONF_TYPE_BOOL
-  });
-
-=item bayes_use_chi2_combining		(default: 1)
-
-Should the Bayesian classifier use chi-squared combining, instead of
-Robinson/Graham-style naive Bayesian combining?  Chi-squared produces
-more 'extreme' output results, but may be more resistant to changes
-in corpus size etc.
-
-=cut
-
-  push (@cmds, {
-    setting => 'bayes_use_chi2_combining',
-    default => 1,
-    type => $CONF_TYPE_BOOL
-  });
-
-=item bayes_journal_max_size		(default: 102400)
-
-SpamAssassin will opportunistically sync the journal and the database.
-It will do so once a day, but will sync more often if the journal file
-size goes above this setting, in bytes.  If set to 0, opportunistic
-syncing will not occur.
-
-=cut
-
-  push (@cmds, {
-    setting => 'bayes_journal_max_size',
-    default => 102400,
-    type => $CONF_TYPE_NUMERIC
-  });
-
-=item bayes_expiry_max_db_size		(default: 150000)
-
-What should be the maximum size of the Bayes tokens database?  When expiry
-occurs, the Bayes system will keep either 75% of the maximum value, or
-100,000 tokens, whichever has a larger value.  150,000 tokens is roughly
-equivalent to a 8Mb database file.
-
-=cut
-
-  push (@cmds, {
-    setting => 'bayes_expiry_max_db_size',
-    default => 150000,
-    type => $CONF_TYPE_NUMERIC
-  });
-
-=item bayes_auto_expire       		(default: 1)
-
-If enabled, the Bayes system will try to automatically expire old tokens
-from the database.  Auto-expiry occurs when the number of tokens in the
-database surpasses the bayes_expiry_max_db_size value.
-
-=cut
-
-  push (@cmds, {
-    setting => 'bayes_auto_expire',
-    default => 1,
-    type => $CONF_TYPE_BOOL
-  });
-
-=item bayes_learn_to_journal  	(default: 0)
-
-If this option is set, whenever SpamAssassin does Bayes learning, it
-will put the information into the journal instead of directly into the
-database.  This lowers contention for locking the database to execute
-an update, but will also cause more access to the journal and cause a
-delay before the updates are actually committed to the Bayes database.
-
-=cut
-
-  push (@cmds, {
-    setting => 'bayes_learn_to_journal',
-    default => 0,
-    type => $CONF_TYPE_BOOL
-  });
-
-=item bayes_store_module
-
-If this option is set, the module given will be used as an alternate to the default
-bayes storage mechanism.  It must conform to the published storage specification
-(see Mail::SpamAssassin::BayesStore).
+If this option is set, the module given will be used as an alternate to the
+default bayes storage mechanism.  It must conform to the published storage
+specification (see Mail::SpamAssassin::BayesStore).
 
 =cut
 
@@ -2925,17 +2738,21 @@ The query must be one one continuous line in order to parse correctly.
 Here are several example queries, please note that these are broken up
 for easy reading, in your config it should be one continuous line.
 
+=over 4
+
 =item Current default query:
 
-SELECT preference, value FROM _TABLE_ WHERE username = _USERNAME_ OR username = '@GLOBAL' ORDER BY username ASC
+C<SELECT preference, value FROM _TABLE_ WHERE username = _USERNAME_ OR username = '@GLOBAL' ORDER BY username ASC>
 
 =item Use global and then domain level defaults:
 
-SELECT preference, value FROM _TABLE_ WHERE username = _USERNAME_ OR username = '@GLOBAL' OR username = '@~'||_DOMAIN_ ORDER BY username ASC
+C<SELECT preference, value FROM _TABLE_ WHERE username = _USERNAME_ OR username = '@GLOBAL' OR username = '@~'||_DOMAIN_ ORDER BY username ASC>
 
 =item Maybe global prefs should override user prefs:
 
-SELECT preference, value FROM _TABLE_ WHERE username = _USERNAME_ OR username = '@GLOBAL' ORDER BY username DESC
+C<SELECT preference, value FROM _TABLE_ WHERE username = _USERNAME_ OR username = '@GLOBAL' ORDER BY username DESC>
+
+=back
 
 =cut
 
@@ -3049,6 +2866,200 @@ See C<Mail::SpamAssassin::Plugin> for more details on writing plugins.
       }
     }
   });
+
+=back
+
+=head1 PREPROCESSING OPTIONS
+
+=over 4
+
+=item include filename
+
+Include configuration lines from C<filename>.   Relative paths are considered
+relative to the current configuration file or user preferences file.
+
+=item ifplugin PluginModuleName
+
+Used to support conditional interpretation, based on whether a plugin module
+has been loaded successfully or not.  Lines between this and a corresponding
+C<endif> line, will be ignored unless the named plugin module has been loaded
+using C<loadplugin>.
+
+Note that if the end of a configuration file is reached while still inside a
+C<ifplugin> scope, a warning will be issued, but parsing will restart on
+the next file.
+
+For example:
+
+	loadplugin MyPlugin plugintest.pm
+
+	ifplugin MyPlugin
+	  header MY_PLUGIN_FOO	eval:check_for_foo()
+	  score  MY_PLUGIN_FOO	0.1
+	endif
+
+=item require_version n.nn
+
+Indicates that the entire file, from this line on, requires a certain version
+of SpamAssassin to run.  If an older or newer version of SpamAssassin tries to
+read configuration from this file, it will output a warning instead, and
+ignore it.
+
+=cut
+
+  push (@cmds, {
+    setting => 'require_version',
+    code => sub {
+    }
+  });
+
+=item version_tag string
+
+This tag is appended to the SA version in the X-Spam-Status header. You should
+include it when modify your ruleset, especially if you plan to distribute it.
+A good choice for I<string> is your last name or your initials followed by a
+number which you increase with each change.
+
+The version_tag will be lowercased, and any non-alphanumeric or period
+character will be replaced by an underscore.
+
+e.g.
+
+  version_tag myrules1    # version=2.41-myrules1
+
+=cut
+
+  push (@cmds, {
+    setting => 'version_tag',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      my $tag = lc($value);
+      $tag =~ tr/a-z0-9./_/c;
+      foreach (@Mail::SpamAssassin::EXTRA_VERSION) {
+        if($_ eq $tag) { $tag = undef; last; }
+      }
+      push(@Mail::SpamAssassin::EXTRA_VERSION, $tag) if($tag);
+    }
+  });
+
+=back
+
+=head1 TEMPLATE TAGS
+
+The following C<tags> can be used as placeholders in certain options.
+They will be replaced by the corresponding value when they are used.
+
+Some tags can take an argument (in parentheses). The argument is
+optional, and the default is shown below.
+
+ _YESNOCAPS_       "YES"/"NO" for is/isn't spam
+ _YESNO_           "Yes"/"No" for is/isn't spam
+ _SCORE_           message score
+ _REQD_            message threshold
+ _VERSION_         version (eg. 3.0.0 or 3.1.0-r26142-foo1)
+ _SUBVERSION_      sub-version/code revision date (eg. 2004-01-10)
+ _HOSTNAME_        hostname of the machine the mail was processed on
+ _REMOTEHOSTNAME_  hostname of the machine the mail was sent from, only
+                   available with spamd
+ _REMOTEHOSTADDR_  ip address of the machine the mail was sent from, only
+                   available with spamd
+ _BAYES_           bayes score
+ _TOKENSUMMARY_    number of new, neutral, spammy, and hammy tokens found
+ _BAYESTC_         number of new tokens found
+ _BAYESTCLEARNED_  number of seen tokens found
+ _BAYESTCSPAMMY_   number of spammy tokens found
+ _BAYESTCHAMMY_    number of hammy tokens found
+ _HAMMYTOKENS(N)_  the N most significant hammy tokens (default, 5)
+ _SPAMMYTOKENS(N)_ the N most significant spammy tokens (default, 5)
+ _AWL_             AWL modifier
+ _DATE_            rfc-2822 date of scan
+ _STARS(*)_        one * (use any character) for each score point (note: this
+                   is limited to 50 'stars' to stay on the right side of the RFCs)
+ _RELAYSTRUSTED_   relays used and deemed to be trusted
+ _RELAYSUNTRUSTED_ relays used that can not be trusted
+ _AUTOLEARN_       autolearn status ("ham", "no", "spam", "disabled",
+                   "failed", "unavailable")
+ _TESTS(,)_        tests hit separated by , (or other separator)
+ _TESTSSCORES(,)_  as above, except with scores appended (eg. AWL=-3.0,...)
+ _DCCB_            DCC's "Brand"
+ _DCCR_            DCC's results
+ _PYZOR_           Pyzor results
+ _RBL_             full results for positive RBL queries in DNS URI format
+ _LANGUAGES_       possible languages of mail
+ _PREVIEW_         content preview
+ _REPORT_          terse report of tests hit (for header reports)
+ _SUMMARY_         summary of tests hit for standard report (for body reports)
+ _CONTACTADDRESS_  contents of the 'report_contact' setting
+
+The C<HAMMYTOKENS> and C<SPAMMYTOKENS> tags have an optional second argument
+which specifies a format.  See the B<HAMMYTOKENS/SPAMMYTOKENS TAG FORMAT>
+section, below, for details.
+
+=head2 HAMMYTOKENS/SPAMMYTOKENS TAG FORMAT
+
+The C<HAMMYTOKENS> and C<SPAMMYTOKENS> tags have an optional second argument
+which specifies a format: C<_SPAMMYTOKENS(N,FMT)_>, C<_HAMMYTOKENS(N,FMT)_>
+The following formats are available:
+
+=over 4
+
+=item short
+
+Only the tokens themselves are listed.
+I<For example, preference file entry:>
+
+C<add_header all Spammy _SPAMMYTOKENS(2,short)_>
+
+I<Results in message header:>
+
+C<X-Spam-Spammy: remove.php, UD:jpg>
+
+Indicating that the top two spammy tokens found are C<remove.php>
+and C<UD:jpg>.  (The token itself follows the last colon, the
+text before the colon indicates something about the token.
+C<UD> means the token looks like it might be part of a domain name.)
+
+=item compact
+
+The token probability, an abbreviated declassification distance (see
+example), and the token are listed.
+I<For example, preference file entry:>
+
+C<add_header all Spammy _SPAMMYTOKENS(2,compact)_>
+
+I<Results in message header:>
+
+C<0.989-6--remove.php, 0.988-+--UD:jpg>
+
+Indicating that the probabilities of the top two tokens are 0.989 and
+0.988, respectively.  The first token has a declassification distance
+of 6, meaning that if the token had appeared in at least 6 more ham
+messages it would not be considered spammy.  The C<+> for the second
+token indicates a declassification distance greater than 9.
+
+=item long
+
+Probability, declassification distance, number of times seen in a ham
+message, number of times seen in a spam message, age and the token are
+listed.
+
+I<For example, preference file entry:>
+
+C<add_header all Spammy _SPAMMYTOKENS(2,long)_>
+
+I<Results in message header:>
+
+C<X-Spam-Spammy: 0.989-6--0h-4s--4d--remove.php, 0.988-33--2h-25s--1d--UD:jpg>
+
+In addition to the information provided by the compact option,
+the long option shows that the first token appeared in zero
+ham messages and four spam messages, and that it was last
+seen four days ago.  The second token appeared in two ham messages,
+25 spam messages and was last seen one day ago.
+(Unlike the C<compact> option, the long option shows declassification
+distances that are greater than 9.)
+
+=cut
 
   $DEFAULT_COMMANDS = \@cmds;
 }
