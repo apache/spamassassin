@@ -19,17 +19,29 @@ SPAMASSASSIN RELEASE PROCEDURE
   come from
 
 - edit lib/Mail/SpamAssassin.pm and comment the $IS_DEVEL_BUILD
-  line.
+  line.   Ensure the correct version number is present in $VERSION
+  and $EXTRA_VERSION.
 
-- create the Changes file
+- Ensure the new version number takes hold:
 
-	TZ=UTC svn log --non-interactive --stop-on-copy
+    make clean ; perl Makefile.PL < /dev/null ; make
+    ./spamassassin -L -t < sample-nonspam.txt | grep X-Spam-
 
-  This will output all of the changes since the .0 release in the current
-  branch.
+- create the Changes file.  There are two options here:
 
-  NOTE: THIS WILL NOT WORK FOR NEW MAJOR/MINOR VERSION RELEASES (not
-  copied) -- ONLY FOR BRANCH RELEASES  (update the docs for this later)
+  - For releases on a maintainance branch (e.g. 3.0.1, .2, etc.):
+
+    TZ=UTC svn log --non-interactive --stop-on-copy > Changes
+
+    This will output all of the changes since the .0 release in the current
+    branch.
+
+  - For releases on the trunk (e.g. a .0 release):
+
+    TZ=UTC svn log -r HEAD:5810 --non-interactive --stop-on-copy > Changes
+
+    r5810 was the start of the 3.0.0 work; replace with the correct rev
+    number for the point you want to start at.
 
 - run "make disttest" to ensure all tests pass once the distribution
   is fully packaged.
@@ -50,9 +62,10 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - SVN tag the release files.  This is done using "svn copy", ie:
 
+  repo=https://svn.apache.org/repos/asf/incubator/spamassassin
   svn copy -m "creating tag for release 2.62" \
-	https://svn.apache.org/repos/asf/incubator/spamassassin/branches/b2_6_0 \
-	https://svn.apache.org/repos/asf/incubator/spamassassin/tags/spamassassin_release_2_6_2
+	$repo/branches/b2_6_0 \
+	$repo/tags/spamassassin_release_2_6_2
 
   This will do a completely server-side tagging (which is the same as
   a branch really) of whatever the latest branch revision to be the new
@@ -116,6 +129,6 @@ SPAMASSASSIN RELEASE PROCEDURE
 - Approve the posting to SpamAssassin-Announce (the list admins
   will get a mail indicating how to do this.)
 
-lastmod: Jan 17 2004 tvd
+lastmod: Jun 19 2004 jm
 
 // vim:tw=74:
