@@ -1265,6 +1265,8 @@ sub get {
     $self->{hdr_cache}->{$request} = $_;
   }
 
+  # If the requested header wasn't found, we should return either
+  # a default value as specified by the caller, or the blank string ''.
   if (!defined) {
     $defval ||= '';
     $_ = $defval;
