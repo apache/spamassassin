@@ -95,7 +95,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.143 2002/12/18 15:15:50 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.144 2002/12/18 21:35:46 jmason Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -863,7 +863,7 @@ sub lint_rules {
   dbg ("ignore: using a test message to lint rules");
   my @testmsg = ("From: ignore\@compiling.spamassassin.taint.org\n", 
     "Subject: \n",
-    "Message-Id:  <".time."\@lint_rules>\n", "\n",
+    "Message-Id:  <".CORE::time()."\@lint_rules>\n", "\n",
     "I need to make this message body somewhat long so TextCat preloads\n"x20);
 
   $self->{lint_rules} = $self->{conf}->{lint_rules} = 1;
@@ -1219,7 +1219,7 @@ sub find_all_addrs_in_line {
 # and end obviously)
 sub timelog {
   my ($msg, $deltaslot, $wheredelta) = @_;
-  my $now=time;
+  my $now=CORE::time();
   my $tl=$Mail::SpamAssassin::TIMELOG;
   my $dbg=$Mail::SpamAssassin::DEBUG;
 
