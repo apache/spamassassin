@@ -176,17 +176,17 @@ FIXVARS		= -Mvars \
 
 # . ($mm_version < 5.45 ? q#
 pm_to_blib: $(TO_INST_PM)
-	@$(PERL) "-I$(INST_ARCHLIB)" "-I$(INST_LIB)" \
-        "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" -Ibuild \
+	@ $(PERL) "-I$(INST_ARCHLIB)" "-I$(INST_LIB)" \
+	"-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" -Ibuild \
 	-MExtUtils::Install -Mpreprocessor \
 	-e "ExtUtils::Install::Post545::pm_to_blib({qw{$(PM_TO_BLIB)}}, '$(INST_LIB)/auto', '$(PM_FILTER)')"# : '') . q#
 
 spamassassin: spamassassin.raw
-	$(PERL) build/preprocessor $(FIXVARS) -Msharpbang <$? >$@
+	$(PERL) build/preprocessor $(FIXVARS) -Msharpbang -i$? -o$@
 	$(CHMOD) $(PERM_RWX) $@
 
 spamd/spamd: spamd/spamd.raw
-	$(PERL) build/preprocessor $(FIXVARS) -Msharpbang <$? >$@
+	$(PERL) build/preprocessor $(FIXVARS) -Msharpbang -i$? -o$@
 	$(CHMOD) $(PERM_RWX) $@
 
 spamd/libspamc.so: binaries.mk
@@ -199,10 +199,8 @@ binaries.mk: configure
 	./configure
 
 inst_cfs: $(DEF_RULES_DIR) $(LOCAL_RULES_DIR) $(LOCAL_RULES_DIR)/local.cf
-	$(RM_F) $(DEF_RULES_DIR)/*; \
-	for file in $(RULES) ; do \
-	  $(PERL) build/preprocessor $(FIXVARS) <rules/$$file >$(DEF_RULES_DIR)/$$file; \
-	done
+	$(RM_F) $(DEF_RULES_DIR)/*
+	$(PERL) build/preprocessor $(FIXVARS) -Irules -O$(DEF_RULES_DIR) $(RULES)
 	$(CHMOD) $(PERM_RW) $(DEF_RULES_DIR)/*
 
 $(DEF_RULES_DIR):
@@ -212,24 +210,18 @@ $(LOCAL_RULES_DIR):
 	$(MKPATH) $@
 
 $(LOCAL_RULES_DIR)/local.cf: rules/local.cf
-	test -f $@ || \
-	  $(CP) rules/local.cf $@
+        $(PERL) -e 'use File::Copy; (-f "$@") or copy ("$?", "$@");'
 
-text_html_doc: doc/.made
-	@true
+text_html_doc: made-doc-stamp
+	$(NOOP)
 
 doc:
 	$(MKPATH) $@
 
-doc/.made: doc#. ($gotpods ? q# $(MAN1PODS) $(MAN3PODS) $(EXTRAPODS)
-	for f in $(MAN1PODS) $(MAN3PODS) $(EXTRAPODS) ; do \
-	      echo Converting POD in $$f; \
-	      pod2html $$f > doc/`echo $$f | $(PERL) -pe \
-	        's,^(lib|spamd)/|\.(pod|pm)$$,,g; tr,/,_,;'`.html ; \
-	      pod2text $$f > doc/`echo $$f | $(PERL) -pe \
-	        's,^(lib|spamd)/|\.(pod|pm)$$,,g; tr,/,_,;'`.txt ; \
-	done# : '') . q#
-	touch doc/.made
+made-doc-stamp: doc#. ($gotpods ? q# $(MAN1PODS) $(MAN3PODS) $(EXTRAPODS)
+	$(PERL) build/convert_pods_to_doc $(MAN1PODS) $(MAN3PODS) $(EXTRAPODS)
+	# : '') . q#
+	$(TOUCH) made-doc-stamp
 	$(RM_F) pod2htm*
 
 #;
