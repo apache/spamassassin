@@ -438,13 +438,21 @@ sub razor2_lookup {
 	  # so go through each part, taking the highest cf we find
 	  # of any part that isn't contested (ct).  This helps avoid false
 	  # positives.
+	  my $part = 0;
 	  foreach my $cf ( @{$objects->[0]->{p}} ) {
 	    if ( exists $cf->{resp} ) {
-	      my $tmpcf = $cf->{resp}->[0]->{cf}; # Part confidence
-	      my $tmpct = $cf->{resp}->[0]->{ct}; # Part contested?
-	      dbg("Found Razor2 part: ct? ".(defined $tmpct?$tmpct:"0").", cf=".(defined $tmpcf?$tmpcf:"0"));
-	      $self->{razor2_cf_score} = $tmpcf if ( !defined $tmpct && defined $tmpcf && $tmpcf > $self->{razor2_cf_score} );
+	      for (my $response=0;$response<@{$cf->{resp}};$response++) {
+	        my $tmp = $cf->{resp}->[$response];
+	      	my $tmpcf = $tmp->{cf}; # Part confidence
+	      	my $tmpct = $tmp->{ct}; # Part contested?
+		$tmpcf = 0 unless ( defined $tmpcf );
+		$tmpct = 0 unless ( defined $tmpct );
+		my $engine = $cf->{sent}->[$response]->{e};
+	        dbg("Found Razor2 response: part=$part, engine=$engine, ct=$tmpct, cf=$tmpcf");
+	        $self->{razor2_cf_score} = $tmpcf if ( !$tmpct && $tmpcf > $self->{razor2_cf_score} );
+	      }
 	    }
+	    $part++;
 	  }
         }
       }
