@@ -307,15 +307,22 @@ int main(int argc, char **argv){
     ret=message_filter(&trans, username, flags, &m);
     if(ret!=EX_OK) goto FAIL;
     get_output_fd(&out_fd);
-    if(message_write(out_fd, &m)<0) goto FAIL;
+
+    if(message_write(out_fd, &m)<0) {
+      goto FAIL;
+    }
 
     if((flags&SPAMC_CHECK_ONLY) && m.is_spam!=EX_TOOBIG) return m.is_spam;
-
     return ret;
 
 FAIL:
     get_output_fd(&out_fd);
-    if(flags&SPAMC_CHECK_ONLY || flags&SPAMC_REPORT || flags&SPAMC_REPORT_IFSPAM){
+
+    if((flags&SPAMC_CHECK_ONLY) && m.is_spam!=EX_TOOBIG) {
+	/* probably, the write to stdout failed; we can still report exit code */
+	return m.is_spam;
+
+    } else if(flags&SPAMC_CHECK_ONLY || flags&SPAMC_REPORT || flags&SPAMC_REPORT_IFSPAM) {
         full_write(out_fd, "0/0\n", 4);
         return EX_NOTSPAM;
     } else {
