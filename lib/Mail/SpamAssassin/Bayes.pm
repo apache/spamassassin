@@ -437,13 +437,14 @@ sub tokenize_line {
 
       # stop-list for numeric tokens.  These are squarely in the gray
       # area, and it just slows us down to record them.
-      if ($token !~ /(?:
-		  \QN:H*r:NN.NN.NNN\E |
-		  \QN:H*r:N.N.N\E |
-		  \QN:H*r:NNN.NNN.NNN\E |
-		  \QN:H*r:NNNN\E |
-		  \QN:H*r:NNN.NN.NN\E |
-		  \QN:NNNN\E
+      if ($token !~ /^(?:
+		  H\*r:ip\* |
+		  \QH*r:NN.NN.NNN\E |
+		  \QH*r:N.N.N\E |
+		  \QH*r:NNN.NNN.NNN\E |
+		  \QH*r:NNNN\E |
+		  \QH*r:NNN.NN.NN\E |
+		  \QNNNN\E
 		)/x)
       {
 	push (@{$self->{tokens}}, 'N:'.$tokprefix.$token);
@@ -600,11 +601,15 @@ sub pre_chew_received {
   # IPs: break down to nearest /24, to reduce hapaxes -- EXCEPT for
   # IPs in the 10 and 192.168 ranges, they gets lots of significant tokens
   # (on both sides)
+  # also make a dup with the full IP, as fodder for
+  # bayes_dump_to_trusted_networks: "H*r:ip*aaa.bbb.ccc.ddd"
   $val =~ s{(\b|[^\d])(\d{1,3}\.)(\d{1,3}\.)(\d{1,3})(\.\d{1,3})(\b|[^\d])}{
            if ($2 eq '10' || ($2 eq '192' && $3 eq '168')) {
-             $1.$2.$3.$4.$5.$6;
+             $1.$2.$3.$4.$5.$6.
+		" ip*".$2.$3.$4.$5." ";
            } else {
-             $1.$2.$3.$4.$6;
+             $1.$2.$3.$4.$6.
+		" ip*".$2.$3.$4.$5." ";
            }
          }gex;
 
