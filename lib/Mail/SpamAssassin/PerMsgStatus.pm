@@ -321,7 +321,7 @@ sub learn {
   dbg ("auto-learn? yes, ".($isspam?"spam ($hits > $max)":"ham ($hits < $min)"));
   eval {
     my $learnstatus = $self->{main}->learn ($self->{msg},
-			  scalar($self->get("Message-Id")), $isspam, 0);
+			  $self->get("Message-Id"), $isspam, 0);
     $learnstatus->finish();
     if ( $learnstatus->did_learn() ) {
       $self->{auto_learn_status} = $isspam;
