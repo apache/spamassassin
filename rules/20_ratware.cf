@@ -93,6 +93,8 @@ header RATWARE_LC_OUTLOOK	X-Mailer =~ /^outlook$/
 describe RATWARE_LC_OUTLOOK	Bulk email software fingerprint ("outlook") found in headers
 header RATWARE_OE_PI		X-Mailer =~ /Out[Ll]ook Express 3\.14159/
 describe RATWARE_OE_PI		X-Mailer contains "OutLook Express 3.14159"
+header RATWARE_OE_MALFORMED	X-Mailer =~ /Outlook Express \d\.\d+\.\d+\.\d{3}(?:\d \w+)?$/
+describe RATWARE_OE_MALFORMED	X-Mailer contains malformed Outlook Express version
 
 
 # commented all of these until they get some hits ;)
