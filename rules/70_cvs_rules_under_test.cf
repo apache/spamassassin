@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.521 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.522 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -53,21 +53,6 @@ meta T_HTML_WITHOUT_HTML_1	(__MIME_HTML && !__TAG_EXISTS_HTML)
 meta T_HTML_WITHOUT_HTML_2	(__MIME_HTML && !(__TAG_EXISTS_HTML && HTML_MESSAGE))
 meta T_HTML_WITHOUT_HTML_3	(__MIME_HTML && !(__TAG_EXISTS_HTML || HTML_MESSAGE))
 describe T_HTML_WITHOUT_HTML	Claims to be HTML, but there is no HTML text
-
-# 2003-05-15
-# possible replacements for current HTML_IMAGE_WEB_BUGS test
-body T_HTML_IMAGE_WEB_BUGS_0	eval:html_test('t_image_web_bugs_0')
-body T_HTML_IMAGE_WEB_BUGS_1	eval:html_test('t_image_web_bugs_1')
-body T_HTML_IMAGE_WEB_BUGS_2	eval:html_test('t_image_web_bugs_2')
-body T_HTML_IMAGE_WEB_BUGS_3	eval:html_test('t_image_web_bugs_3')
-body T_HTML_IMAGE_WEB_BUGS_4	eval:html_test('t_image_web_bugs_4')
-
-# possible replacements for current HTML_WEB_BUGS test
-body T_HTML_WEB_BUGS_0		eval:html_test('t_web_bugs_0')
-body T_HTML_WEB_BUGS_1		eval:html_test('t_web_bugs_1')
-body T_HTML_WEB_BUGS_2		eval:html_test('t_web_bugs_2')
-body T_HTML_WEB_BUGS_3		eval:html_test('t_web_bugs_3')
-body T_HTML_WEB_BUGS_4		eval:html_test('t_web_bugs_4')
 
 # 2003-02-25: quinlan
 # Whee... more HTML tests!
