@@ -365,10 +365,11 @@ sub upgrade_db {
     my $magic_re = $self->get_magic_re($self->{db_version});
 
     # deal with the data tokens
-    foreach my $tok (keys %{$self->{db_toks}}) {
+    my ($tok, $packed);
+    while (($tok, $packed) = each %{$self->{db_toks}}) {
       next if ($tok =~ /$magic_re/); # skip magic tokens
 
-      my ($ts, $th, $atime) = $self->tok_get ($tok);
+      my ($ts, $th, $atime) = $self->tok_unpack ($packed);
       $new_toks{$tok} = $self->tok_pack ($ts, $th, $newatime);
     }
 
@@ -560,10 +561,11 @@ sub expire_old_tokens_trapped {
     my $max_expire_mult = 512; # $max_expire_mult * $start = max expire time (256 days), power of 2.
 
     # do the first pass, figure out atime delta
-    foreach my $tok (keys %{$self->{db_toks}}) {
+    my ($tok, $packed);
+    while (($tok, $packed) = each %{$self->{db_toks}}) {
       next if ($tok =~ /$magic_re/); # skip magic tokens
 
-      my ($ts, $th, $atime) = $self->tok_get ($tok);
+      my ($ts, $th, $atime) = $self->tok_unpack ($packed);
 
       # Go through from $start * 1 to $start * 512, mark how many tokens we would expire
       my $token_age = $magic[10] - $atime;
@@ -633,10 +635,11 @@ sub expire_old_tokens_trapped {
   $too_old = $magic[10] - $newdelta; # tooold = newest - delta
 
   # Go ahead and do the move to new db/expire run now ...
-  foreach my $tok (keys %{$self->{db_toks}}) {
+  my ($tok, $packed);
+  while (($tok, $packed) = each %{$self->{db_toks}}) {
     next if ($tok =~ /$magic_re/); # skip magic tokens
 
-    my ($ts, $th, $atime) = $self->tok_get ($tok);
+    my ($ts, $th, $atime) = $self->tok_unpack ($packed);
 
     if ($atime < $too_old) {
       $deleted++;
