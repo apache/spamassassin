@@ -341,7 +341,7 @@ sub razor_lookup {
         }
       }
       else {
-          warn "Problem while trying to load Razor: $!";
+          warn "Problem while trying to load Razor: $! $Razor::Client::errstr";
       }
       
       alarm 0;
