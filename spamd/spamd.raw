@@ -793,23 +793,6 @@ sub spawn {
 
       elsif (/(PROCESS|CHECK|SYMBOLS|REPORT|REPORT_IFSPAM) SPAMC\/(.*)/) {
         check( $1, $2, $start );
-
-        # if we changed UID, change back!
-        if ( $> != $< and $> != ( $< - 2**32 ) ) {
-          $) = "$( $(";    # change eGID
-          $> = $<;         # change eUID
-          if ( $> != $< and $> != ( $< - 2**32 ) ) {
-            logmsg("fatal: return setuid failed");
-            die;           # make it fatal to avoid security breaches
-          }
-
-          # if we changed user, we would have also loaded up new configs
-          # (potentially), so let's restore back the saved version we
-          # had before.
-          #
-          $spamtest->copy_config(\%conf_backup, undef) ||
-	    die "error returned from copy_config, no Storable module?\n";
-        }
       }
 
       # Looks like a client is just seeing if we're alive.
@@ -826,6 +809,24 @@ sub spawn {
 
       # Close out our connection to the client ...
       $client->close;
+
+      # if we changed UID during processing, change back!
+      if ( $> != $< and $> != ( $< - 2**32 ) ) {
+        $) = "$( $(";    # change eGID
+        $> = $<;         # change eUID
+        if ( $> != $< and $> != ( $< - 2**32 ) ) {
+          logmsg("fatal: return setuid failed");
+          die;           # make it fatal to avoid security breaches
+        }
+
+        # if we changed user, we would have also loaded up new configs
+        # (potentially), so let's restore back the saved version we
+        # had before.
+        #
+        $spamtest->copy_config(\%conf_backup, undef) ||
+          die "error returned from copy_config, no Storable module?\n";
+      }
+
     }
 
     # If the child lives to get here, it will die ...  Muhaha.
