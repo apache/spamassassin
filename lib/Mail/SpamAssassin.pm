@@ -94,7 +94,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.192 2003/06/12 22:38:57 felicity Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.193 2003/06/13 22:34:46 felicity Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -1219,7 +1219,7 @@ sub init {
   $self->{conf}->set_score_set ($set);
 
   if ($self->{conf}->{bayes_auto_learn}) {
-    $self->init_learner({ });
+    $self->init_learner({ 'learn_to_journal' => $self->{conf}->{bayes_auto_learn_journal} });
   }
 
   if ($self->{only_these_rules}) {

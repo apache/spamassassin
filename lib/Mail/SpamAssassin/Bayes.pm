@@ -1056,9 +1056,12 @@ sub opportunistic_calls {
   if ($self->{store}->expiry_due()) {
     $self->{store}->set_running_expire_tok();
     $self->sync(1,1);
+    # don't need to unlock since the expire will have done that. ;)
   }
   elsif ( $self->{store}->journal_sync_due() ) {
+    $self->{store}->set_running_expire_tok();
     $self->sync(1,0);
+    $self->{store}->remove_running_expire_tok();
   }
 }
 
