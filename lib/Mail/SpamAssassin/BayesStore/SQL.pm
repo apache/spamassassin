@@ -259,9 +259,9 @@ sub token_expiration {
   }
 
   # Do the expire
-  my $sql = "DELETE from bayes_token WHERE username = ? and atime < ?";
+  $sql = "DELETE from bayes_token WHERE username = ? and atime < ?";
 
-  my $rows = $self->{_dbh}->do($sql, undef, $self->{_username}, $too_old);
+  $rows = $self->{_dbh}->do($sql, undef, $self->{_username}, $too_old);
 
   unless (defined($rows)) {
     dbg("bayes: actual_expire: SQL Error: ".$self->{_dbh}->errstr());
