@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 # autoconf wrapper (for Unix)/alternative (for Windows)
+#
+# Copyright (c) 2004 Malte S. Stretz <spamassassin-contrib (at) msquadrat.de>
 
 
 use strict;
@@ -61,7 +63,7 @@ else
     MAKEFILE       => 'binaries.mk',
     SRCDIR         => $args{srcdir},
 
-    LIBS           => 'ws32.lib',
+    LIBS           => 'ws2_32.lib',
     SSLLIBS        => 'ssleay32.lib libeay32.lib',
 
     SPAMC_FILES    => 'spamc.c getopt.c',

@@ -160,7 +160,7 @@ my %makefile = (
     'EXE_FILES'	=> [
         'spamassassin', 'sa-learn',
         'spamd/spamc$(EXE_EXT)',
-        'spamd/spamd',
+        'spamd/spamd', # must be the last one
     ],
 
     'MAN1PODS' => {
@@ -296,7 +296,8 @@ unless($Config{installman1dir}) {
 # Windows platforms need some adjustments
 if (RUNNING_ON_WINDOWS) {
   # Don't build spamd
-  delete $makefile{EXE_FILES}['spamd/spamd'];
+  pop    @{$makefile{EXE_FILES}};
+  delete $makefile{MAN1PODS}{'spamd/spamd'};
   # And require Net::DNS v0.44
   #$makefile{PREREQ_PM}{Net::DNS} = 0.44;
 }

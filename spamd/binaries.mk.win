@@ -17,7 +17,7 @@ all: spamc.exe
 
 $(SRCDIR)/spamc.exe:
 	cd $(SRCDIR)
-	make -f $(MAKEFILE) spamc.exe
+	$(MAKE) -f $(MAKEFILE) spamc.exe
 
 
 spamc.exe: $(SPAMC_FILES) $(LIBSPAMC_FILES)
