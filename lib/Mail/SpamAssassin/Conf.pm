@@ -170,6 +170,7 @@ sub new {
   $self->{bayes_use_hapaxes} = 1;
   $self->{bayes_use_chi2_combining} = 1;
   $self->{bayes_expiry_max_db_size} = 150000;
+  $self->{bayes_journal_max_size} = 102400;
   $self->{bayes_ignore_headers} = [ ];
   $self->{bayes_min_ham_num} = 200;
   $self->{bayes_min_spam_num} = 200;
@@ -1935,7 +1936,7 @@ value, or 100,000 tokens, whichever has a larger value.
       $self->{bayes_expiry_max_db_size} = $1; next;
     }
 
-=item bayes_journal_max_size		(default: 150000)
+=item bayes_journal_max_size		(default: 102400)
 
 SpamAssassin will opportunistically sync the journal and the database.
 It will do so at least once a day, but can also sync if the file size
