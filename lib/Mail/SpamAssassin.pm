@@ -1084,7 +1084,7 @@ sub compile_now {
   my %backup = ();
   if (defined $deal_with_userstate && $deal_with_userstate) {
     while(my($k,$v) = each %{$self->{conf}}) {
-      $backup{$k} = $v if (!ref($v) && $v =~/__userstate__/);
+      $backup{$k} = $v if (defined $v && !ref($v) && $v =~/__userstate__/);
     }
   }
 
