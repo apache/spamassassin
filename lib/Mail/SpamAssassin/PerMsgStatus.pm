@@ -237,9 +237,12 @@ so that future similar mails will be caught.
 sub learn {
   my ($self) = @_;
 
-  if (!$self->{conf}->{bayes_auto_learn}) { return; }
-  if (!$self->{conf}->{use_bayes}) { return; }
-  if ($self->{disable_auto_learning}) { return; }
+  if (!$self->{conf}->{bayes_auto_learn} ||
+      !$self->{conf}->{use_bayes} ||
+      $self->{disable_auto_learning}) {
+      $self->{auto_learn_status} = "disabled";
+      return;
+  }
 
   # Figure out min/max for autolearning.
   # Default to specified auto_learn_threshold settings
