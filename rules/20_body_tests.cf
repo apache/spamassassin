@@ -417,7 +417,7 @@ body THE_FOLLOWING_FORM		/the following form\b/
 describe THE_FOLLOWING_FORM	Asks you to fill out a form
 
 # suggested by Nick Rothwell
-body HUNZA_DIET_BREAD		/HUNZA DIET BREAD/
+body HUNZA_DIET_BREAD		/HUNZA.{1,80}BREAD/i
 describe HUNZA_DIET_BREAD	Offers a tasty-sounding dietary product
 
 rawbody A_HREF_TO_UNSUB		/href[3D=\s\"\']*\S+unsubscribe/i
