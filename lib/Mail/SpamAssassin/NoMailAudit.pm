@@ -137,7 +137,7 @@ sub _add_header_to_entry {
   $order ||= @{$self->{header_order}};
 
   # ensure we have line endings
-  $line .= "\n" unless $line =~ /\n$/;
+  if ($line !~ /\n$/s) { $line .= "\n"; }
 
   # Store this header
   $entry->{$entry->{count}} = $line;
@@ -392,7 +392,7 @@ sub accept {
 
     if (!defined $gotlock) {
       # dot-locking not supported here (probably due to file permissions
-      # on the mailspool dir).  just use flock().
+      # on the /var/spool/mail dir).  just use flock().
       $nodotlocking = 1;
     }
 
