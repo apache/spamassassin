@@ -539,3 +539,6 @@ describe PARTIAL_RFC_2369	not compliant with RFC 2369 or otherwise fishy
 header SUBJ_FREE_CAP		Subject =~ /\bFREE\b/
 describe SUBJ_FREE_CAP		Subject contains the word 'FREE'
 
+header VAR_REF_IN_RECEIVED      Received =~ /from \$\S+ (/
+describe VAR_REF_IN_RECEIVED    Received contains a $variable reference
+
