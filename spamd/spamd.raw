@@ -2146,8 +2146,8 @@ Run as the named user.  If this option is not set, the default behaviour
 is to setuid() to the user running C<spamc>, if C<spamd> is running
 as root.
 
-Note: "--username=root" disables the setuid() functionality and leaves
-spamd running as root.
+Note: "--username=root" is not a valid option.  If specified, C<spamd> will
+exit with a fatal error on startup.
 
 Note: If this option is set to a non-root user, and spamd is to run on
 a privileged port (any < 1024, default 783 or via -p), the parent will
