@@ -91,6 +91,9 @@ describe HTML_EMBEDS		HTML with embedded plugin object
 body HTML_EVENT_UNSAFE		eval:html_test('html_event_unsafe')
 describe HTML_EVENT_UNSAFE	HTML contains unsafe auto-executing code
 
+body HTML_EXTRA_CLOSE		eval:html_range('closed_extra_ratio', '0.09', 'inf')
+describe HTML_EXTRA_CLOSE	HTML contains far too many close tags
+
 body HTML_FONT_SIZE_TINY	eval:html_eval('min_size', '< 1')
 describe HTML_FONT_SIZE_TINY	HTML font size is tiny
 
