@@ -13,690 +13,1038 @@
 # resulted in minimum false positives or negatives.  The default evolution
 # parameters are very strongly weighted against false positives.
 
-# SUMMARY:               140 /   3537
-#
-# Correctly non-spam: 210220  99.93%  (81.74% overall)
-# Correctly spam:      43288  92.45%  (16.83% overall)
-# False positives:       140  0.07%  (0.05% overall,   3280 adjusted)
-# False negatives:      3537  7.55%  (1.38% overall,   9092 adjusted)
-# Average score for spam:  14.3    nonspam: -2.2
-# Average for false-pos:   7.0  false-neg: 2.6
-# TOTAL:              257185  100.00%
-#
+# Scoreset 0
+# SUMMARY for threshold 5.0:
+# Correctly non-spam: 129117  74.66%  (99.72% of non-spam corpus)
+# Correctly spam:      41226  23.84%  (94.86% of spam corpus)
+# False positives:       360  0.21%  (0.28% of nonspam,   6849 (1208.4) weighted)
+# False negatives:      2235  1.29%  (5.14% of spam,   6408 weighted)
+# Average score for spam:  16.6    nonspam: -3.6
+# Average for true-pos:    17.4   true-neg: -3.6
+# Average for false-pos:   5.7  false-neg: 2.9
+# TOTAL:              172938  100.00%
 
 # Start of GA-evolved scores
 
-score INVALID_DATE_TZ_ABSURD         3.947
-score MIME_ODD_CASE                  3.808
-score SUBJ_FULL_OF_8BITS             3.840
-score KOREAN_UCE_SUBJECT             2.908
-score USER_AGENT_KMAIL               -1.879
-score USER_AGENT_VM                  -0.5
-score MSGID_SPAMSIGN_1               2.624
-score MSGID_SPAMSIGN_ZEROES          3.8
-score MSGID_SPAMSIGN_6LETTER         3.8
-score MSGID_GOOD_EXCHANGE            -3.0
-score SIGNATURE_SHORT_SPARSE         -3.474
-score BILL_1618                      1.801
-score X_PRECEDENCE_REF               3.448
-score COMPETE                        3.081
-score EXCUSE_4                       3.375
-score REVERSE_AGING                  3.349
-score EXCUSE_FUTURE                  1.086
-score SENT_IN_COMPLIANCE             1.504
-score FINANCIAL                      0.703
-score DATE_YEAR_ZERO_FIRST           2.268
-score X_ENC_PRESENT                  1.722
-score FREE_GRANT                     1.574
-score WRINKLES                       0.889
-score FORGED_EUDORAMAIL_RCVD         2.754
-score SUBJ_HAS_SPACES                2.995
-score FAKED_UNDISC_RECIPS            1.684
-score FREE_CONSULTATION              3.247
-score FROM_HAS_MIXED_NUMS2           0.718
-score NOT_MLM                        3.052
-score COPY_ACCURATELY                1.985
-score HIDDEN_ASSETS                  2.611
-score JODY                           2.373
-score IN_REP_TO                      -0.794
-score BTAMAIL_HEADER                 1.029
-score FAKED_IP_IN_RCVD               1.082
-score WE_HONOR_ALL                   3.288
-score USERNAME_IN_SUBJECT            2.444
-score SECTION_301                    1.025
-score NONEXISTENT_CHARSET            2.513
-score DIG_UP_INFO                    1.467
-score PRODUCED_AND_SENT_OUT          1.785
-score HEADER_8BITS                   2.492
-score X_X_PRESENT                    1.095
-score RATWARE_JPFREE                 2.331
-score HTML_COMMENT_EGP               -2.883
-score USER_AGENT_MUTT                -1.631
-score TAKE_ACTION_NOW                2.360
-score REFINANCE_YOUR_HOME            1.759
-score X_LIST_UNSUBSCRIBE             1.225
-score EARNINGS                       2.519
-score NASTY_GIRLS                    3.107
-score STOCK_ALERT                    2.744
-score PGP_SIGNATURE_2                -1.462
-score WE_HATE_SPAM                   2.865
-score CONSOLIDATE_DEBT               0.970
-score CLICK_TO_REMOVE_2              0.722
-score INCOME                         3.019
-score USER_AGENT_PINE                -0.654
-score FREE_INVESTMENT                3.135
-score HTML_COMMENT_8BITS             0.603
-score SIGNATURE_LONG_DENSE           -1.618
-score CBYI                           1.993
-score EMAIL_ATTRIBUTION              -1.4
-score VIAGRA_ONLINE                  1.772
-score EASY_TERMS                     0.655
-score FREE_PASSWORD                  0.724
-score CLICK_HERE_CAPS_LINK           0.634
-score DISCLAIMER_LEGALESE            -2.654
-score WANTS_CREDIT_CARD              2.885
-score ADDRESSES_ON_CD                1.871
-score MARKUP_RAND                    2.264
-score REFINANCE                      0.603
-score NOT_INTENDED                   0.894
-score RATWARE_STORM                  2.960
-score X_STORMPOST_TO                 2.963
-score PORN_6                         1.033
-score PREST_NON_ACCREDITED           1.060
-score VJESTIKA                       1.871
-score SUBJ_GUARANTEED                0.610
-score MAILTO_WITH_SUBJ_REMOVE        0.614
-score RATWARE_OE_MALFORMED           3.026
-score HR_3113                        0.649
-score GENTLE_FEROCITY                1.091
-score ADVERT_CODE                    0.609
-score UCE_MAIL_ACT                   2.370
-score FORWARD_LOOKING                2.929
-score PATCH_UNIFIED_DIFF             -2.441
-score CELEBRITY_PORN                 3.017
-score NEW_DOMAIN_EXTENSIONS          1.556
-score NO_INVENTORY                   2.124
-score ONLINE_PHARMACY                2.442
-score FORGED_GW05_RCVD               2.678
-score CREDIT_BUREAU                  2.654
-score CREDIT_CARD                    0.601
-score CUM_SHOT                       1.365
-score COMPLAIN_TO                    2.971
-score RATWARE_OE_PI                  2.175
-score WHILE_YOU_SLEEP                1.267
-score HTML_FORM_ACTION_MAILTO        1.054
-score PORN_MEMBERSHIP                1.564
-score FREE_QUOTE                     0.636
-score SAVE_ON_INSURANCE              1.464
-score LOTS_OF_CC_LINES               1.551
-score DATE_IN_FUTURE_48_96           2.123
-score HGH                            0.613
-score SERIOUS_ONLY                   2.632
-score RATWARE_VC_IPA                 2.996
-score HOTMAIL_FOOTER3                -2.267
-score MUST_BE_18                     0.620
-score VIAGRA_COMBO                   1.769
-score RATWARE_HASH_2                 1.300
-score BEEN_TURNED_DOWN               0.620
-score HTTP_CTRL_CHARS_HOST           1.782
-score HTTP_EXCESSIVE_ESCAPES         1.0
-score KIFF                           1.617
-score READ_TO_END                    2.937
-score NO_CREDIT_CHECK                0.625
-score COMPARE_RATES                  2.006
-score LOW_PAYMENT                    1.257
-score THE_BEST_RATE                  0.565
-score BE_BOSS                        0.500
-score MICRO_CAP_WARNING              2.859
-score MORTGAGE_RATES                 0.516
-score SPAM_FORM_RETURN               2.422
-score GUARANTEED_100_PERCENT         0.502
-score TO_RECIP_MARKER                2.788
-score FROM_EGROUPS                   -0.559
-score EXCUSE_2                       1.466
-score REFERENCES                     -0.537
-score AMAZING_STUFF                  1.829
-score PENNIES_A_DAY                  1.491
-score FREE_INSTALL                   2.462
-score WHY_PAY_MORE                   1.036
-score MONEY_BACK                     1.599
-score FREE_PORN                      0.504
-score RATWARE_EVAMAIL                2.185
-score AS_SEEN_ON                     1.769
-score SUBJ_REMOVE                    0.669
-score PRINT_FORM_SIGNATURE           0.506
-score S_1618                         2.672
-score FORGED_AOL_RCVD                2.840
-score MEGA_SITE                      1.839
-score BUGZILLA_BUG                   -2.356
-score HR_4176                        1.926
-score FREE_MEMBERSHIP                1.848
-score FROM_STARTS_WITH_NUMS          0.510
-score MICROSOFT                      2.843
-score CABLE_CONVERTER                1.047
-score USER_AGENT                     -0.511
-score TRACKER_ID                     1.371
-score TO_NO_USER                     1.879
-score HTML_COMMENT_SAVED_URL         0.856
-score SUBJ_HAS_UNIQ_ID               0.823
-score GENUINE_EBAY_RCVD              -2.681
-score VIAGRA                         1.319
-score RATWARE_MMAILER                2.809
-score CENTS_ON_DOLLAR                1.559
-score EXCUSE_13                      0.508
-score WWW_CLIK4YOU_COM               2.178
-score X_PMFLAGS_PRESENT              0.811
-score USER_AGENT_MACOE               -2.742
-score MAIL_IN_ORDER_FORM             0.531
-score DATE_IN_FUTURE_12_24           0.515
-score SECRET_RECORD                  1.203
-score GROUPS_YAHOO_1                 -0.512
-score MIME_BOUND_OPTIN               0.874
-score BARELY_LEGAL                   1.593
-score QUOTED_EMAIL_TEXT              -0.2
-score SUBJ_2_CREDIT                  2.192
-score RATWARE_SCREWUP_2              0.504
-score UNCLAIMED_MONEY                2.295
-score CHILD_SUPPORT                  2.397
-score AMATEUR_PORN                   2.527
-score LOW_INTEREST                   0.503
-score REPLY_REMOVE_SUBJECT           0.528
-score RATWARE_SCREWUP_1              2.570
-score USER_AGENT_IMP                 -1.930
-score IMPOTENCE                      1.649
-score HAIR_LOSS                      1.545
-score INITIAL_INVEST                 1.347
-score CALL_NOW                       2.789
-score SAVE_THOUSANDS                 1.035
-score MLM                            0.636
-score HTTP_ESCAPED_HOST              0.587
-score CREDITORS_CALLING              1.875
-score RATWARE_JIXING                 2.606
-score HARDCORE_PORN                  1.543
-score EXCUSE_8                       1.477
-score FREE_LEADS                     0.934
-score CASH_BONUS                     1.752
-score APPLY_ONLINE                   0.517
-score HERBAL_VIAGRA                  1.028
-score DATE_IN_FUTURE_24_48           2.506
-score MDAEMON_2_7_4                  1.137
-score SPAM_FORM                      2.264
-score BUGGY_CGI                      2.796
-score DO_IT_TODAY                    0.501
-score ALL_NATURAL                    0.516
-score VAR_REF_IN_RECEIVED            2.097
-score AUTO_EMAIL_REMOVAL             1.650
-score USER_AGENT_MOZILLA_UA          -0.502
-score REMOVE_SUBJ                    0.785
-score LOSE_POUNDS                    0.502
-score MARKETING_PARTNERS             1.678
-score ADVERT_CODE2                   1.553
-score PORN_PASSWORD                  0.687
-score MISSING_MIMEOLE                0.504
-score BEST_PORN                      0.517
-score NUMERIC_HTTP_ADDR              2.181
-score AOL_USERS_LINK                 0.508
-score PGP_SIGNATURE                  -0.509
-score PURE_PROFIT                    1.001
-score RATWARE_IMKTG                  1.174
-score LESBIAN                        2.478
-score VACATION_SCAM                  0.527
-score UNSECURED_CREDIT               0.516
-score IN_ACCORDANCE_WITH_LAWS        1.981
-score NORMAL_HTTP_TO_IP              1.271
-score PENIS_ENLARGE                  0.897
-score ONE_TIME_MAILING               1.487
-score REMOVE_PAGE                    0.738
-score REMOVE_IN_QUOTES               0.403
-score US_DOLLARS                     1.955
-score GUARANTEE                      1.149
-score SERIOUS_CASH                   2.521
-score X_LIBRARY                      2.175
-score FROM_NO_USER                   0.683
-score BUY_DIRECT                     0.427
-score WE_PROMISE_YOU                 1.888
-score FIND_ANYTHING                  1.074
-score RICH                           2.130
-score HTTP_USERNAME_USED             1.430
-score HOTMAIL_FOOTER2                -2.553
-score EJACULATION                    1.798
-score UNIVERSITY_DIPLOMAS            1.412
-score FRONTPAGE                      0.430
-score PRIORITY_NO_NAME               0.985
-score COMPLETELY_FREE                0.404
-score RESISTANCE_IS_FUTILE           0.732
-score REPLY_TO_EMPTY                 1.053
-score EXCUSE_15                      0.661
-score FROM_AND_TO_SAME_3             1.619
-score THIS_AINT_SPAM                 0.405
-score MEET_SINGLES                   2.501
-score APPROVED_BY                    -1.017
-score DEAR_FRIEND                    0.437
-score X_MAIL_ID_PRESENT              0.415
-score X_SERV_HOST_PRESENT            0.425
-score X_MAILER_GIBBERISH             1.315
-score REMOVAL_INSTRUCTIONS           0.410
-score GUARANTEED_STUFF               0.456
-score SUBJ_DOLLARS                   1.118
-score TRACE_BY_SSN                   0.837
-score UNLIMITED                      0.865
-score HTML_90_100                    1.801
-score USER_AGENT_APPLEMAIL           -1.457
-score OBFUSCATING_COMMENT            1.660
-score EXCUSE_3                       0.476
-score HTML_FONT_COLOR_GREEN          0.407
-score DIET                           0.402
-score ITS_LEGAL                      0.680
-score CLICK_BELOW_CAPS               0.409
-score BAD_CREDIT                     0.430
-score HOTMAIL_FOOTER4                -1.214
-score THE_FOLLOWING_FORM             0.401
-score HOTMAIL_FOOTER1                -2.430
-score LIVE_PORN                      1.984
-score EXCUSE_12                      0.408
-score US_DOLLARS_3                   0.411
-score NO_OBLIGATION                  0.412
-score EXTRA_CASH                     0.404
-score HTML_TABLE_THICK_BORDER        0.401
-score STOCK_PICK                     0.739
-score FOR_INSTANT_ACCESS             0.434
-score OPPORTUNITY                    0.698
-score ACCEPT_CREDIT_CARDS            0.902
-score MIME_MISSING_BOUNDARY          0.413
-score MONEY_MAKING                   0.418
-score Q_FOR_SELLER                   -1.671
-score PAY_SITE                       2.551
-score DEBIAN_BTS_BUG                 -2.494
-score MSN_FOOTER1                    -2.197
-score FORGED_JUNO_RCVD               2.456
-score SUBJ_FREE_CAP                  0.416
-score ADULT_SITE                     1.447
-score INSTANT_ACCESS                 0.416
-score BASE64_ENC_TEXT                1.447
-score HTML_FONT_COLOR_YELLOW         0.411
-score FREE_CELL_PHONE                0.402
-score RCVD_FAKE_HELO_DOTCOM          2.095
-score USER_4U2                       0.457
-score HTML_FONT_COLOR_MAGENTA        0.430
-score MIME_BOUND_DIGITS_4            0.712
-score NO_DISAPPOINTMENT              0.402
-score DOMAIN_4U2                     0.403
-score BANKRUPTCY                     0.887
-score CRON_ENV                       -1.165
-score HTML_FONT_COLOR_CYAN           0.402
-score FULL_REFUND                    0.410
-score BULK_EMAIL                     2.009
-score LIMITED_TIME_ONLY              0.401
-score DATE_MISSING                   0.910
-score URGENT_BIZ                     1.764
-score FREE_ACCESS                    0.702
-score SUPPLIES_LIMITED               0.428
-score DATE_IN_FUTURE_06_12           1.159
-score FREE_PREVIEW                   1.714
-score HTML_FONT_COLOR_UNKNOWN        0.433
-score HIDE_WIN_STATUS                0.421
-score ONCE_IN_LIFETIME               2.460
-score GET_IT_NOW                     0.410
-score CTYPE_JUST_HTML                0.453
-score SEX_FEST                       1.219
-score OPPORTUNITY_2                  0.409
-score MAILTO_WITH_SUBJ               0.409
-score BILLION_DOLLARS                0.405
-score EXCUSE_7                       0.418
-score EARN_PER_WEEK                  1.745
-score SAVINGS                        0.413
-score STRONG_BUY                     0.405
-score PATCH_CONTEXT_DIFF             -2.128
-score OPT_IN                         1.463
-score LOW_PRICE                      0.301
-score AMAZING                        0.311
-score SUB_FREE_OFFER                 0.301
-score HTML_FONT_COLOR_NAME           0.320
-score ONE_TIME                       0.307
-score TARGETED                       1.043
-score LONG_DISTANCE                  1.787
-score X_ESMTP                        0.323
-score RATWARE_GROUPMAIL              1.514
-score ACT_NOW                        0.311
-score NO_COST                        1.087
-score HTML_FONT_INVISIBLE            0.307
-score HTML_WITH_BGCOLOR              0.312
-score HTML_FONT_COLOR_RED            0.319
-score HOME_EMPLOYMENT                0.715
-score RAPE                           1.473
-score HTML_WIN_BLUR                  0.821
-score HTML_WIN_OPEN                  1.164
-score MISSING_OUTLOOK_NAME           1.065
-score GET_PAID                       0.831
-score MSGID_HAS_NO_AT                0.330
-score HIDDEN_CHARGES                 0.302
-score SIGNATURE_LONG_SPARSE          -0.318
-score FROM_HAS_MIXED_NUMS            0.334
-score PENIS_ENLARGE2                 1.702
-score SAVE_UP_TO                     0.333
-score EXTRA_MPART_TYPE               0.443
-score HTML_JAVASCRIPT_VERY_UNSAFE    0.303
-score FREE_SAMPLE                    1.339
-score INVALID_DATE                   1.593
-score WINNER                         0.312
-score WORK_AT_HOME                   0.333
-score HTML_FONT_COLOR_GRAY           0.302
-score SAVE_MONEY                     0.304
-score PROFITS                        0.308
-score NO_CATCH                       1.740
-score UNSUB_SCRIPT                   0.430
-score USER_AGENT_ENTOURAGE           -0.307
-score CLICK_HERE_LINK                0.317
-score YOUR_INCOME                    1.641
-score EXCUSE_10                      0.331
-score HTML_70_90                     0.982
-score JAVASCRIPT_UNSAFE              0.323
-score MIME_BOUND_MA                  1.230
-score SIGNATURE_SHORT_DENSE          -0.320
-score NO_STRINGS                     0.325
-score SEE_FOR_YOURSELF               0.460
-score NO_EXPERIENCE                  0.680
-score HTML_50_70                     0.306
-score HTML_FONT_BIG                  0.315
-score EMAIL_MARKETING                0.315
-score FRIEND_AT_PUBLIC               1.141
-score HTML_FONT_COLOR_UNSAFE         0.302
-score ALL_CAP_PORN                   1.203
-score USER_AGENT_TONLINE             -2.081
-score WHILE_SUPPLIES                 0.301
-score DOMAIN_BODY                    0.333
-score WHY_WAIT                       0.303
-score NO_FEE                         0.303
-score PORN_4                         1.471
-score HTML_FONT_FACE_ODD             0.318
-score SATISFACTION                   0.359
-score NO_PURCHASE                    0.305
-score X_MSMAIL_PRIORITY_HIGH         0.394
-score SUB_HELLO                      1.561
-score MIME_LONG_LINE_QP              0.301
-score DIRECT_EMAIL                   1.005
-score FOR_FREE                       0.310
-score X_MAILING_LIST                 -0.305
-score FREE_WEBSITE                   0.327
-score LINES_OF_YELLING_3             0.334
-score MIME_EXCESSIVE_QP              0.935
-score VERY_SUSP_RECIPS               0.326
-score MANY_EXCLAMATIONS              0.349
-score SEDUCTION                      1.427
-score SUSPICIOUS_RECIPS              0.854
-score CLICK_BELOW                    0.304
-score PRIZE                          0.301
-score OFFSHORE_SCAM                  0.677
-score UPPERCASE_75_100               1.322
-score HOT_NASTY                      0.373
-score BE_AMAZED                      0.958
-score X_LOOP                         -0.239
-score DEAR_SOMETHING                 1.721
-score YOU_WON                        0.212
-score INCREASE_SOMETHING             1.454
-score MASS_EMAIL                     0.583
-score FORGED_RCVD_TRAIL              2.027
-score CASHCASHCASH                   1.801
-score EXCUSE_14                      0.206
-score MAILTO_TO_REMOVE               0.218
-score LARGE_COLLECTION               0.214
-score ONLY_COST                      0.212
-score FOR_JUST_SOME_AMT              0.209
-score HTML_EMBEDS                    0.501
-score UPPERCASE_25_50                1.234
-score NO_INVESTMENT                  1.903
-score X_PRIORITY_HIGH                0.551
-score LINES_OF_YELLING_2             0.204
-score MAILER_DAEMON                  -1.478
-score MIME_BOUND_HEX_24              1.039
-score DRASTIC_REDUCED                1.944
-score MARKET_SOLUTION                2.173
-score SUBJ_ALL_CAPS                  0.450
-score CONGRATULATIONS                0.209
-score DATE_IN_PAST_96_XX             1.633
-score ORDER_NOW                      0.219
-score HOTMAIL_FOOTER5                -2.089
-score HTML_FONT_FACE_BAD             0.202
-score HTML_JAVASCRIPT                0.204
-score MAILMAN_REMINDER		     -3.0
-score ORIGINAL_MESSAGE               -1.0
-score FROM_ENDS_IN_NUMS              0.879
-score MAILTO_LINK                    0.213
-score HAS_ORGANIZATION               -0.213
-score TO_HAS_SPACES                  1.498
-score FAILURE_NOTICE_2               -2.082
-score NO_QS_ASKED                    0.202
-score TO_EMPTY                       0.230
-score OFFER                          0.204
-score DATE_IN_PAST_12_24             0.214
-score HTML_FONT_COLOR_BLUE           0.207
-score DATE_IN_PAST_06_12             0.429
-score UNDISC_RECIPS                  1.511
-score SEARCH_ENGINE_PROMO            2.095
-score DATE_IN_FUTURE_96_XX           1.538
-score MIME_HTML_NO_CHARSET           0.755
-score UPPERCASE_50_75                0.238
-score LINK_TO_NO_SCHEME              1.386
-score WINNING_CAP                    0.207
-score HTML_FONT_COLOR_NOHASH         0.201
-score PLING_PLING                    1.564
-score WINNER_CAP                     0.205
-score MISSING_HEADERS                1.037
-score MARKETING                      1.548
-score SAVE_BUCKS                     0.204
-score PROMOTION                      0.223
-score FORGED_YAHOO_RCVD              1.463
-score HTTP_WITH_EMAIL_IN_URL         0.272
-score HTML_RELAYING_FRAME            0.228
-score LINES_OF_YELLING               0.201
-score SALE                           0.207
-score FORGED_HOTMAIL_RCVD            1.417
-score ASKS_BILLING_ADDRESS           0.400
-score LARGE_HEX                      0.621
-score HTML_WEB_BUGS                  0.204
-score DOMAIN_SUBJECT                 0.378
-score DATE_IN_PAST_03_06             0.234
-score TONER                          0.655
-score RATWARE_EGROUPS                1.025
-score HTML_FONT_FACE_CAPS            0.203
-score RESENT_TO                      -0.239
-score FANTASTIC                      0.219
-score X_ACCEPT_LANG                  -0.204
-score FREE_DVD                       0.201
-score GREAT_OFFER                    0.262
-score YAHOO_MSGID_ADDED              -0.210
-score CALL_FREE                      0.232
-score X_AUTH_WARNING                 -0.218
-score TO_ADDRESS_EQ_REAL             0.222
-score MONTH_TRIAL                    0.227
-score MAILTO_TO_SPAM_ADDR            0.582
-score DATE_IN_FUTURE_03_06           1.373
-score SMTPD_IN_RCVD                  1.019
-score DATE_IN_PAST_24_48             0.991
-score TO_MALFORMED                   0.568
-score FWD_MSG                        -0.421
-score SUBJECT_IS_LIST                -0.167
-score MSG_ID_ADDED_BY_MTA_2          0.106
-score NO_REAL_NAME                   1.272
-score NO_FORMS                       0.101
-score EXCUSE_1                       0.111
-score EXCUSE_6                       0.870
-score FROM_AND_TO_SAME_5             1.405
-score WEIRD_PORT                     1.219
-score DONT_DELETE                    0.827
-score ASCII_FORM_ENTRY               0.107
-score MSG_ID_ADDED_BY_MTA_3          0.857
-score MEMBER_2                       0.384
-score FAILURE_NOTICE_1               -0.113
-score US_DOLLARS_2                   0.123
-score GAPPY_SUBJECT                  1.282
-score MSGID_CHARS_SPAM               0.111
-score UNSUB_PAGE                     0.108
-score DISCLAIMER                     0.443
-score JAVASCRIPT_URI                 0.102
-score FREE_TRIAL                     0.103
-score COMMUNIGATE                    1.654
-score JOIN_MILLIONS                  0.179
-score PLING_QUERY                    0.245
-score EXCUSE_16                      0.101
-score MIME_BOUND_DIGITS_7            0.117
-score USER_AGENT_MOZILLA_XM          -0.116
-score FROM_AND_TO_SAME_1             0.565
-score DEAR_SOMEBODY                  0.127
-score KNOWN_MAILING_LIST             -0.157
-score HTML_COMMENT_UNIQUE_ID         0.103
-score RISK_FREE                      0.021
-score MAJORDOMO                      -0.011
-score FORGOTTEN_PASSWORD             -1.094
-score SHOPPING_SPREE                 0.006
-score RATWARE_XMAILER                1.700
-score EU_EMAIL_OPTOUT                1.800
-score URI_IS_POUND                   2.000
-score LUXURY_CAR                     3.200
-score NO_GIMMICK                     3.200
-score AZOOGLE                        3.200
-score EXCUSE_18                      1.300
-score RATWARE_CHARSET                1.000
-score LYING_EYES                     2.000
-score MANY_FROMS                     2.200
-score POST_IN_RCVD                   1.000
-score CLICK_TO_REMOVE_3              0.300
-score PHONE_CANCER                   3.100
-score DISCONTINUE                    1.000
-score PORN_GALLERIES                 1.000
-score RATWARE_LC_OUTLOOK             1.000
-score SAFEGUARD_NOTICE               3.300
-score MAILMAN_CONFIRM                -1.000
-score RATWARE_DIFFOND                2.200
-score MURKOWSKI_CRUFT                0.100
-score RATWARE_CARETOP                2.200
-score PRIORITY_MAIL                  1.000
-score BUY_JUDGEMENTS                 4.000
-score X_FIX_PRESENT                  1.000
-score MARKUP_SSPL                    3.800
-score MORE_TRAFFIC                   1.000
-score MIME_BOUND_HASHES              2.300
-score NO_SELLING                     1.000
-score ONLINE_BIZ_OPS                 2.400
-score NO_MIDDLEMAN                   1.000
-score WEALTH                         1.000
-score CHANGE_TERMS                   1.000
-score MONSTERHUT                     1.000
-score NATURAL_VIAGRA                 2.700
-score RATWARE_GR                     3.800
-score RATWARE_POWERC                 2.100
-score NEW_CUSTOMER                   -3.100
-score TO_INVESTORS                   1.000
-score SPAM_FORM_ACTION               1.000
-score MSN_GROUPS                     -1.300
-score WWW_AUTOREMOVE_COM             1.000
-score INCREDIBLE                     1.000
-score STOP_SNORING                   2.500
-score SPAM_FORM_INPUT                1.600
-score PSYCHIC                        1.000
-score NO_MEDICAL                     1.000
-score INTL_EXEC_GUILD                2.700
-score CONFIDENTIAL_ORDER             1.000
-score SUBJECT_IS_IN_REVIEW           -2.500
-score EXCUSE_11                      4.300
-score GET_STARTED_NOW                1.000
-score MIME_BOUND_MAIL_BOUND          2.200
-score NO_AGE                         0.800
-score ALTA_BUSCADORES_ES             1.000
-score CLICK_ES                       1.000
-score CONTRA_REEMBOLSO_ES            1.000
-score DEJAR_DE_FUMAR_ES              1.000
-score EXCLAMACION_ES                 1.000
-score EXCUSE_ES_01                   1.000
-score EXCUSE_ES_02                   1.000
-score EXCUSE_ES_03                   1.000
-score EXCUSE_ES_05                   1.000
-score EXCUSE_ES_06                   1.000
-score EXCUSE_ES_07                   1.000
-score GANADORES_ES_01                1.000
-score GANADORES_ES_02                1.000
-score GRATIS_ES                      1.400
-score GRATIS_T_ES                    1.000
-score INFORMACION_RESERVA_ES         1.000
-score INTERESADO_ES                  1.000
-score LEY_ORGANICA_ES                2.000
-score MAS_INFORMACION_ES             1.000
-score NORMATIVA_SPAM_ES              2.000
-score OFERTA_ES                      1.000
-score PL_ADRESOW_PUBLICZ             2.000
-score PL_ADRES_EMAIL                 2.000
-score PL_ADRES_EMAIL_3               2.000
-score PL_ADRES_Z_BAZY                2.000
-score PL_ARTYKUL_USTAWY              2.500
-score PL_BEZPLATNIE                  1.000
-score PL_CENY_TTO                    1.000
-score PL_DANE_OSOBOWE                2.000
-score PL_DASHOFER                    1.000
-score PL_DOPISKIEM_NIE               2.500
-score PL_GDZIEKUPIC                  1.000
-score PL_JESLI_NIE_CHCESZ            2.000
-score PL_JESZCZE_DZIS                1.000
-score PL_JEZELI_NIE                  2.500
-score PL_JEZELI_NIE_INTERESUA        2.000
-score PL_KLIKNIJ_W_LINK              2.000
-score PL_MAILING                     1.000
-score PL_MAIL_Z_TEMATEM              1.500
-score PL_NABYCIA_UNAS                2.000
-score PL_NADANO_JEDNORAZOWO          2.000
-score PL_NADANO_NA_PODSTAWIE         2.000
-score PL_NAJNIZ_CENY                 1.000
-score PL_NASZ_FIRMA                  1.000
-score PL_NASZ_OFERT                  1.000
-score PL_NISKIE_CENY                 1.000
-score QUOTE_TWICE_1                  -1.0
-score PL_OFERTA_CENOWA               1.000
-score PL_PROSBA_O_ZWROTNY            2.000
-score PL_PUBL_DOSTEPNY               1.500
-score PL_PUSTY_MAIL                  2.000
-score PL_PUSTY_MAIL_2                2.000
-score PL_SERDECZ_ZAPRASZAMY          1.000
-score PL_SPEC_OFERTA                 1.000
-score PL_SZANOWNI_PANSTWO            1.500
-score PL_TEMAT_OFERTA                1.500
-score PL_TEMAT_USUN                  2.000
-score PL_UPOWAZNIENIE_VAT            1.500
-score PL_USUNAC_MAIL                 2.500
-score PL_USUN_Z_BAZY                 2.000
-score PL_WSPOLRPACA                  1.000
-score PL_WWW_ADRESY_ORG              1.000
-score PL_ZAJETY_CZAS                 2.500
-score PL_ZALICZENIE_POCZT            1.000
-score PL_ZAMOWIENIE                  1.000
-score PL_ZAMOW_TERAZ                 2.500
-score PL_ZAPRASZAMY                  1.000
-score PL_ZAPROSICI_PANSTWO           1.500
-score PORNO_GRATIS_ES                1.000
-score PRESENTAMOS_ES                 1.000
-score PROMOCION_ES                   1.000
-score REENVIA_ES                     1.000
-score REGALO_ES                      1.000
-score REMOVE_ES_01                   1.000
-score REMOVE_ES_02                   1.000
-score REMOVE_ES_03                   1.000
-score REMOVE_ES_04                   1.000
-score REMOVE_ES_05                   1.000
-score REMOVE_ES_06                   1.000
-score REMOVE_ES_07                   1.000
-score SUBSCRIBE_ES_01                1.000
-score TARJETA_VERDE_ES               1.000
-score REPLY_WITH_QUOTES              -1.0
-score USER_AGENT_GNUS_UA             -1.0
-score USER_AGENT_GNUS_XM             -1.0
-score MIME_BOUND_DASH_DIGIT          1.0
-score MIME_BOUND_MANY_HEX            1.0
-score MIME_BOUND_TEP                 1.0
-score MIME_BOUND_RKFINDY             1.0
-score FORGED_MX_HOTMAIL              2.0
-score RCVD_BY_QVES_COM               3.0
-score RATWARE_EMWAC                  1.0
-score SOME_BREAKTHROUGH              0.5
-score SELECTED_YOU                   0.5
-score MIME_BOUND_NEXTPART            1.0
+score ACCEPT_CREDIT_CARDS -0.382
+score ACT_NOW_CAPS 1.294
+score ADDRESSES_ON_CD 2.730
+score ADDR_FREE 1.851
+score ADDR_NUMS_AT_BIGSITE -0.105
+score ADULT_SITE 1.290
+score ADVERT_CODE 0.574
+score ADVERT_CODE2 2.276
+score ALL_CAP_PORN 1.022
+score ALL_NATURAL 2.461
+score AMATEUR_PORN 1.018
+score AMAZING_STUFF 0.780
+score ANTISPAM_BILL -1.288
+score AOL_USERS_LINK 0.743
+score APPLY_FREE 1.491
+score APPLY_ONLINE 0.577
+score APPROVED_BY -1.333
+score ASCII_FORM_ENTRY -0.042
+score ASKS_BILLING_ADDRESS 0.783
+score AS_SEEN_ON 1.718
+score AZOOGLE 5.821
+score BAD_CREDIT 1.046
+score BANG_BOSS 0.321
+score BANG_EXERCISE 2.760
+score BANG_GUARANTEE 0.948
+score BANG_MONEY 1.014
+score BANG_MORE 0.762
+score BANG_OPRAH 1.945
+score BANG_QUOTE 0.898
+score BANKRUPTCY 0.537
+score BARELY_LEGAL -1.106
+score BARGAIN_URL 2.061
+score BASE64_ENC_TEXT 1.335
+score BEEN_TURNED_DOWN 1.850
+score BEST_PORN -0.548
+score BE_AMAZED -0.493
+score BE_BOSS 4.624
+score BILLION_DOLLARS 2.064
+score BILL_1618 1.389
+score BODY_8BITS 3.184
+score BTAMAIL_HEADER 2.623
+score BTAMAIL_URL 1.725
+score BUGGY_CGI 4.989
+score BUGZILLA_BUG -4.147
+score BULK_EMAIL 2.390
+score BUY_DIRECT -0.168
+score CABLE_CONVERTER 1.294
+score CALL_FREE -0.292
+score CALL_NOW 3.453
+score CANNOT_BE_SPAM 0.859
+score CASHCASHCASH 0.752
+score CASH_BONUS 1.401
+score CBYI -0.609
+score CELEBRITY_PORN -0.478
+score CELL_PHONE_BOOST 1.652
+score CENTS_ON_DOLLAR 4.073
+score CHINA_HEADER 5.529
+score CHINA_URL 1.873
+score CLICK_BELOW 0.333
+score CLICK_BELOW_CAPS 0.603
+score CLICK_TO_REMOVE_1 -0.104
+score CLICK_TO_REMOVE_2 -0.943
+score COMMUNIGATE 2.200
+score COMPARE_RATES 3.080
+score COMPETE 2.010
+score COMPLAIN_TO 0.693
+score COMPLETELY_FREE 0.613
+score CONFIRMED_FORGED 2.250
+score CONGRATULATIONS -0.898
+score CONSOLIDATE_DEBT 1.744
+score COPY_ACCURATELY 5.544
+score CREDIT_CARD -0.264
+score CRON_ENV -1.193
+score CUM_SHOT 2.691
+score DAILY_PL 0.618
+score DAILY_PXE 3.069
+score DATE_IN_FUTURE_03_06 1.876
+score DATE_IN_FUTURE_06_12 2.675
+score DATE_IN_FUTURE_12_24 0.938
+score DATE_IN_FUTURE_24_48 0.053
+score DATE_IN_FUTURE_48_96 2.408
+score DATE_IN_FUTURE_96_XX 2.838
+score DATE_IN_PAST_03_06 0.759
+score DATE_IN_PAST_06_12 0.997
+score DATE_IN_PAST_12_24 0.389
+score DATE_IN_PAST_24_48 0.140
+score DATE_IN_PAST_48_96 0.641
+score DATE_IN_PAST_96_XX 1.007
+score DATE_MISSING 1.596
+score DATE_YEAR_ZERO_FIRST 3.583
+score DEAR_FRIEND 0.902
+score DEAR_SOMETHING 2.701
+score DEBIAN_BTS_BUG -1.972
+score DIET -0.603
+score DIG_UP_INFO 1.371
+score DIRECT_EMAIL -0.628
+score DISCLAIMER_LEGALESE -1.281
+score DISGUISE_PORN 1.693
+score DOMAINS_CHEAP -0.037
+score DOMAIN_4U2 1.488
+score DOMAIN_BODY 0.360
+score DOMAIN_SUBJECT 0.847
+score DONT_DELETE -0.405
+score DO_IT_TODAY 0.064
+score DRASTIC_REDUCED 0.028
+score EARNINGS 3.746
+score EARN_MONEY 0.748
+score EARN_PER_WEEK 3.368
+score EASY_TERMS 1.490
+score EMAIL_ATTRIBUTION -2.564
+score EMAIL_MARKETING -0.564
+score EXCUSE_1 0.078
+score EXCUSE_10 0.029
+score EXCUSE_11 1.787
+score EXCUSE_12 0.624
+score EXCUSE_13 -0.480
+score EXCUSE_14 -0.060
+score EXCUSE_15 0.276
+score EXCUSE_16 -0.324
+score EXCUSE_19 -0.210
+score EXCUSE_20 2.516
+score EXCUSE_21 1.444
+score EXCUSE_22 1.307
+score EXCUSE_23 1.408
+score EXCUSE_24 3.014
+score EXCUSE_3 0.697
+score EXCUSE_4 3.622
+score EXCUSE_6 1.855
+score EXCUSE_7 -0.754
+score EXCUSE_REMOVE 2.228
+score EXTRA_CASH 1.781
+score EXTRA_MPART_TYPE 0.777
+score E_MAILPROMO_URL 1.005
+score FAILURE_NOTICE_1 0.022
+score FAILURE_NOTICE_2 -1.858
+score FAKED_IP_IN_RCVD 1.490
+score FAKED_UNDISC_RECIPS 4.381
+score FALLING_INTEREST 2.954
+score FANTASTIC -0.609
+score FINANCIAL 6.280
+score FIND_ANYTHING 0.910
+score FORGED_AOL_RCVD 3.627
+score FORGED_EUDORAMAIL_RCVD 3.461
+score FORGED_GW05_RCVD 1.524
+score FORGED_HOTMAIL_RCVD 3.135
+score FORGED_JUNO_RCVD 2.443
+score FORGED_MUA_AOL 3.814
+score FORGED_MUA_EUDORA 3.674
+score FORGED_MUA_IMS 4.199
+score FORGED_MUA_MOZILLA 3.273
+score FORGED_MUA_MUTT 1.602
+score FORGED_MUA_OIMO 4.879
+score FORGED_MUA_OUTLOOK 4.005
+score FORGED_MUA_THEBAT 4.711
+score FORGED_MX_HOTMAIL 2.914
+score FORGED_RCVD_TRAIL 1.375
+score FORGED_TELESP_RCVD 2.295
+score FORGED_YAHOO_RCVD 2.602
+score FORGOTTEN_PASSWORD -1.287
+score FORWARD_LOOKING 3.123
+score FOR_FREE 0.982
+score FOR_INSTANT_ACCESS -0.579
+score FOR_JUST_SOME_AMT 0.205
+score FREE_ACCESS 0.645
+score FREE_CELL_PHONE 1.331
+score FREE_CONSULTATION 3.413
+score FREE_DVD -1.394
+score FREE_GRANT 0.878
+score FREE_INSTALL 4.721
+score FREE_INVESTMENT 0.471
+score FREE_LEADS 4.264
+score FREE_MEMBERSHIP 2.723
+score FREE_PASSWORD 0.666
+score FREE_PORN 1.672
+score FREE_PREVIEW 3.282
+score FREE_QUOTE 0.690
+score FREE_QUOTE_INSTANT 3.698
+score FREE_SAMPLE 0.011
+score FREE_TRIAL 0.425
+score FREE_WEBSITE 0.772
+score FRIEND_AT_PUBLIC 2.666
+score FRIEND_PUBLIC 1.778
+score FROM_ALL_NUMS -0.190
+score FROM_AND_TO_SAME 3.081
+score FROM_EGROUPS -0.637
+score FROM_ENDS_IN_NUMS 0.859
+score FROM_HAS_MIXED_NUMS 0.032
+score FROM_HAS_MIXED_NUMS2 -0.282
+score FROM_HAS_UNDERLINE_NUMS -0.394
+score FROM_NO_LOWER 1.494
+score FROM_NO_USER 0.019
+score FROM_NUM_AT_WEBMAIL 0.752
+score FROM_OFFERS 4.360
+score FROM_STARTS_WITH_NUMS -0.952
+score FROM_WEBMAIL_ENDS_IN_NUMS6 1.025
+score FRONTPAGE 0.657
+score FULL_REFUND 0.315
+score FURTHER_TRANSMISSIONS -0.754
+score FWD_MSG -1.095
+score GAPPY_SUBJECT 1.720
+score GENTLE_FEROCITY 1.824
+score GENUINE_EBAY_RCVD -1.097
+score GET_IT_NOW 0.601
+score GET_PAID 2.357
+score GET_STARTED_NOW 0.896
+score GREAT_OFFER -0.019
+score GROUPS_YAHOO_1 -0.589
+score GUARANTEE 1.207
+score GUARANTEED_100_PERCENT 0.270
+score GUARANTEED_STUFF 0.454
+score HAIR_LOSS 1.823
+score HARDCORE_PORN 3.798
+score HAS_ORGANIZATION 0.588
+score HEADER_8BITS 2.915
+score HERBAL_VIAGRA 1.158
+score HGH -0.936
+score HIDDEN_ASSETS 0.671
+score HIDDEN_CHARGES 0.268
+score HIDE_WIN_STATUS 1.065
+score HOME_EMPLOYMENT 2.097
+score HOTMAIL_FOOTER1 -1.356
+score HOTMAIL_FOOTER2 -1.869
+score HOTMAIL_FOOTER4 -1.327
+score HOTMAIL_FOOTER5 -0.423
+score HOT_NASTY 0.455
+score HR_3113 -0.325
+score HR_4176 2.908
+score HTML_00_10 1.363
+score HTML_10_20 1.432
+score HTML_20_30 1.740
+score HTML_30_40 1.112
+score HTML_40_50 1.782
+score HTML_50_60 1.438
+score HTML_60_70 1.065
+score HTML_70_80 1.432
+score HTML_80_90 1.284
+score HTML_90_100 1.017
+score HTML_ALL_CAPS 3.526
+score HTML_COMMENT_8BITS 3.992
+score HTML_COMMENT_EGP 0.164
+score HTML_COMMENT_EMAIL -0.894
+score HTML_COMMENT_SAVED_URL 1.316
+score HTML_COMMENT_SKY 2.503
+score HTML_EMBEDS 0.710
+score HTML_EVENT -0.263
+score HTML_EVENT_UNSAFE 0.419
+score HTML_FONT_BIG 0.312
+score HTML_FONT_BIG_B 0.192
+score HTML_FONT_COLOR_BLUE 0.123
+score HTML_FONT_COLOR_CYAN 0.099
+score HTML_FONT_COLOR_GRAY 0.051
+score HTML_FONT_COLOR_GREEN 1.062
+score HTML_FONT_COLOR_MAGENTA 0.110
+score HTML_FONT_COLOR_NAME 0.479
+score HTML_FONT_COLOR_NOHASH -1.157
+score HTML_FONT_COLOR_RED 0.201
+score HTML_FONT_COLOR_UNKNOWN 0.425
+score HTML_FONT_COLOR_UNSAFE -0.186
+score HTML_FONT_COLOR_YELLOW -0.680
+score HTML_FONT_FACE_BAD 0.354
+score HTML_FONT_FACE_CAPS 0.240
+score HTML_FONT_FACE_ODD 0.180
+score HTML_FONT_INVISIBLE 0.213
+score HTML_FORM_ACTION_MAILTO 0.582
+score HTML_IMAGE_AREA_04 -0.523
+score HTML_IMAGE_AREA_05 0.297
+score HTML_IMAGE_AREA_06 -0.782
+score HTML_IMAGE_AREA_07 1.104
+score HTML_IMAGE_AREA_10 2.667
+score HTML_IMAGE_ONLY_02 2.808
+score HTML_IMAGE_ONLY_04 2.315
+score HTML_IMAGE_ONLY_06 1.644
+score HTML_IMAGE_ONLY_08 1.181
+score HTML_IMAGE_ONLY_10 0.799
+score HTML_IMAGE_ONLY_12 0.246
+score HTML_IMAGE_RATIO_02 0.343
+score HTML_IMAGE_RATIO_04 0.337
+score HTML_IMAGE_RATIO_06 0.408
+score HTML_IMAGE_RATIO_08 0.601
+score HTML_IMAGE_RATIO_10 0.217
+score HTML_IMAGE_RATIO_12 0.508
+score HTML_IMAGE_RATIO_14 0.322
+score HTML_JAVASCRIPT -0.395
+score HTML_LINK_CLICK_CAPS -0.016
+score HTML_LINK_CLICK_HERE 0.161
+score HTML_RELAYING_FRAME 0.944
+score HTML_SHOUTING3 0.305
+score HTML_SHOUTING4 0.381
+score HTML_SHOUTING5 1.229
+score HTML_SHOUTING6 2.509
+score HTML_SHOUTING7 1.754
+score HTML_SHOUTING8 3.936
+score HTML_SHOUTING9 0.362
+score HTML_TABLE_THICK_BORDER 0.592
+score HTML_TAG_BALANCE_A -0.336
+score HTML_TAG_BALANCE_BODY 0.646
+score HTML_TAG_BALANCE_FONT -0.040
+score HTML_TAG_BALANCE_HEAD -0.632
+score HTML_TAG_BALANCE_HTML -0.082
+score HTML_TAG_BALANCE_TABLE -0.389
+score HTML_TAG_EXISTS_BASE -0.035
+score HTML_TAG_EXISTS_PARAM -1.498
+score HTML_TAG_EXISTS_TBODY 0.224
+score HTML_TITLE_EMPTY -0.048
+score HTML_TITLE_UNTITLED 0.524
+score HTML_WEB_BUGS -0.178
+score HTML_WIN_BLUR -0.383
+score HTML_WIN_FOCUS 0.323
+score HTML_WIN_OPEN 0.144
+score HTML_WITH_BGCOLOR 0.063
+score HTTP_CTRL_CHARS_HOST 0.094
+score HTTP_ESCAPED_HOST -0.384
+score HTTP_EXCESSIVE_ESCAPES -0.245
+score HTTP_USERNAME_USED 0.724
+score HTTP_WITH_EMAIL_IN_URL 1.230
+score IDENT_NOBODY 2.056
+score IMPOTENCE 3.473
+score INCOME 3.553
+score INCREASE_SEX 1.695
+score INCREASE_SOMETHING -0.175
+score INITIAL_INVEST 6.051
+score INSTANT_ACCESS -0.469
+score INTL_DRIVERS_LICENSE 2.140
+score INVALID_DATE 1.425
+score INVALID_DATE_TZ_ABSURD 1.121
+score INVALID_MSGID -0.134
+score INVALUABLE_MARKETING 5.727
+score IN_REP_TO -0.870
+score ITS_LEGAL 1.568
+score JAVASCRIPT_URI 0.689
+score JODY 5.526
+score JOIN_MILLIONS 2.240
+score KIFF 2.764
+score KNOWN_MAILING_LIST -0.190
+score KOREAN_UCE_SUBJECT 4.375
+score LARGE_COLLECTION -0.072
+score LARGE_HEX 1.235
+score LESBIAN 3.923
+score LIMITED_TIME_ONLY 0.581
+score LINES_OF_YELLING 0.088
+score LINES_OF_YELLING_2 -0.086
+score LINES_OF_YELLING_3 -0.378
+score LINK_TO_NO_SCHEME -0.701
+score LIVE_PORN 1.861
+score LONG_DISTANCE 1.572
+score LOSE_POUNDS 4.799
+score LOTS_OF_CC_LINES 3.355
+score LOTS_OF_STUFF -0.319
+score LOW_INTEREST 3.300
+score LOW_PAYMENT 2.498
+score LOW_PRICE 0.541
+score LUXURY_CAR -0.716
+score LYING_EYES 0.471
+score MAILER_DAEMON -1.186
+score MAILMAN_REMINDER -1.450
+score MAILTO_LINK -0.368
+score MAILTO_TO_REMOVE 0.692
+score MAILTO_TO_SPAM_ADDR 0.641
+score MAILTO_WITH_SUBJ 0.148
+score MAILTO_WITH_SUBJ_REMOVE -0.483
+score MAIL_IN_ORDER_FORM -0.380
+score MAJORDOMO -3.271
+score MANY_EXCLAMATIONS 0.978
+score MARKETING -0.218
+score MARKETING_PARTNERS 2.376
+score MARKET_SOLUTION 2.167
+score MARKUP_RAND 2.640
+score MASS_EMAIL -1.210
+score MDAEMON_2_7_4 4.117
+score MEET_SINGLES 3.069
+score MEGA_SITE 4.193
+score MILLION_EMAIL 1.382
+score MILLION_USD -0.630
+score MIME_BOUND_DASH_DIGIT 0.576
+score MIME_BOUND_DIGITS_4 0.626
+score MIME_BOUND_DIGITS_7 5.231
+score MIME_BOUND_HASHES 2.103
+score MIME_BOUND_HEX_24 2.530
+score MIME_BOUND_MA 0.833
+score MIME_BOUND_MANY_HEX 6.236
+score MIME_BOUND_NEXTPART 0.695
+score MIME_BOUND_OPTIN 1.376
+score MIME_BOUND_RKFINDY 1.674
+score MIME_BOUND_TEP 2.467
+score MIME_DEFICIENT_QP 0.859
+score MIME_EXCESSIVE_QP -0.040
+score MIME_HEADER_CTYPE_ONLY 1.190
+score MIME_HTML_NO_CHARSET 1.132
+score MIME_HTML_ONLY 0.169
+score MIME_LONG_LINE_QP 0.079
+score MIME_MISSING_BOUNDARY -1.024
+score MIME_ODD_CASE 2.645
+score MISSING_HEADERS 1.608
+score MISSING_MIMEOLE -0.272
+score MISSING_OUTLOOK_NAME 0.582
+score MLM 3.142
+score MONEY_BACK 2.196
+score MONEY_MAKING 1.444
+score MORTGAGE_BEST 1.366
+score MORTGAGE_NETWORK 4.929
+score MORTGAGE_PITCH 0.914
+score MORTGAGE_RATES 0.025
+score MORTGAGE_WAITING 1.250
+score MSGID_3_DOLLARS 1.100
+score MSGID_4NUMS_DOLLAR 2.681
+score MSGID_CHARS_SPAM 0.363
+score MSGID_GOOD_EXCHANGE 0.084
+score MSGID_HAS_NO_AT 0.300
+score MSGID_NO_HOST 5.150
+score MSGID_OE_SPAM_4ZERO 2.082
+score MSGID_OUTLOOK_TIME 1.641
+score MSGID_SPAMSIGN_1 3.784
+score MSGID_SPAMSIGN_6LETTER 4.374
+score MSGID_SPAMSIGN_ZEROES 3.637
+score MSG_ID_ADDED_BY_MTA_2 1.107
+score MSG_ID_ADDED_BY_MTA_3 1.538
+score MSN_FOOTER1 0.349
+score MULTI_FORGED 0.861
+score MUST_BE_18 1.570
+score NASTY_GIRLS 3.868
+score NEVER_ANOTHER 2.145
+score NEW_DOMAIN_EXTENSIONS 1.500
+score NIGERIAN_BODY 3.236
+score NIGERIAN_SUBJECT1 2.089
+score NIGERIAN_SUBJECT2 2.697
+score NIGERIAN_SUBJECT8 -0.569
+score NONEXISTENT_CHARSET 2.630
+score NORMAL_HTTP_TO_IP 1.560
+score NOT_ADVISOR 2.950
+score NOT_INTENDED 3.558
+score NOT_MLM 3.191
+score NO_AGE 3.808
+score NO_CATCH 5.646
+score NO_COST 1.399
+score NO_CREDIT_CHECK 1.441
+score NO_DISAPPOINTMENT -0.267
+score NO_EXPERIENCE 1.097
+score NO_FEE 1.167
+score NO_INVENTORY 3.848
+score NO_INVESTMENT 1.006
+score NO_MEDICAL 1.394
+score NO_OBLIGATION 0.549
+score NO_PURCHASE 0.162
+score NO_QS_ASKED 0.174
+score NO_REAL_NAME 1.105
+score NO_STRINGS 2.575
+score NUMERIC_HTTP_ADDR 0.923
+score OBFUSCATING_COMMENT 3.030
+score OBSCURED_EMAIL 3.784
+score OFFER -0.019
+score OFFERS_ETC 0.986
+score OFFSHORE_SCAM 1.729
+score ONCE_IN_LIFETIME -0.875
+score ONE_TIME -0.081
+score ONE_TIME_MAILING 1.663
+score ONLINE_BIZ_OPS 3.300
+score ONLINE_PHARMACY 3.061
+score ONLY_COST 0.594
+score OPPORTUNITY 1.698
+score OPPORTUNITY_2 0.801
+score OPT_HEADER 2.043
+score OPT_IN 0.411
+score OPT_IN_CAPS 1.348
+score OPT_OUT 1.657
+score OPT_OUT_CAPS 1.339
+score ORDER_NOW -0.932
+score ORDER_REPORT 5.792
+score ORIGINAL_MESSAGE -3.824
+score OUR_AFFILIATE_PARTNERS 1.827
+score OUR_OVERWHELMING_GROWTH 0.808
+score OUR_PRIVACY_POLICY 1.156
+score OUR_STRICT_ANTI 3.649
+score PATCH_CONTEXT_DIFF -3.574
+score PATCH_UNIFIED_DIFF -5.613
+score PAY_SITE 3.995
+score PENIS_ENLARGE 2.240
+score PENIS_ENLARGE2 1.885
+score PENNIES_A_DAY 2.886
+score PGP_SIGNATURE -2.582
+score PGP_SIGNATURE_2 -4.625
+score PHONE_CANCER -0.925
+score PLING_PLING 1.918
+score PLING_QUERY 1.139
+score PORN_15 2.586
+score PORN_16 4.134
+score PORN_4 1.748
+score PORN_6 2.699
+score PORN_MEMBERSHIP 5.159
+score PORN_PASSWORD 2.090
+score PREST_NON_ACCREDITED 2.455
+score PRINT_FORM_SIGNATURE 2.090
+score PRIORITY_NO_NAME 0.897
+score PRIZE -0.329
+score PROMOTION 2.389
+score PURE_PROFIT 5.880
+score QUOTED_EMAIL_TEXT -0.805
+score QUOTE_TWICE_1 0.220
+score Q_FOR_SELLER -2.936
+score RAPE 1.867
+score RATWARE_DIRECT_EMAIL 1.754
+score RATWARE_EGROUPS 0.552
+score RATWARE_EMWAC 4.245
+score RATWARE_EVAMAIL 2.909
+score RATWARE_FLOAT 1.190
+score RATWARE_GROUPMAIL 3.824
+score RATWARE_HASH_2 1.217
+score RATWARE_HASH_2_V2 1.135
+score RATWARE_IMKTG 1.911
+score RATWARE_JIXING 3.047
+score RATWARE_JPFREE 0.409
+score RATWARE_MMAILER 3.658
+score RATWARE_OE_MALFORMED 3.383
+score RATWARE_OE_PI 3.579
+score RATWARE_POWERC 1.905
+score RATWARE_SCREWUP_1 3.264
+score RATWARE_SCREWUP_2 -1.256
+score RATWARE_STORM 2.559
+score RATWARE_VC_IPA 3.235
+score RATWARE_XMAILER 3.767
+score RCVD_BY_QVES_COM 5.461
+score RCVD_FAKE_HELO_DOTCOM 1.607
+score RCVD_FAKE_HELO_DOTCOM_2 2.241
+score READ_TO_END 2.232
+score RECEIVED_IDENT_SQUID 0.746
+score RECEIVE_EMAIL 1.550
+score RECEIVE_OFFER 0.147
+score REFERENCES -0.763
+score REFINANCE_NOW 2.432
+score REFINANCE_YOUR_HOME 0.106
+score REMOVAL_INSTRUCTIONS 0.807
+score REMOVE_FROM_LIST 0.087
+score REMOVE_IN_QUOTES -0.153
+score REMOVE_PAGE 0.614
+score REMOVE_POSTAL 3.654
+score REMOVE_RESPECT 1.597
+score REMOVE_SUBJ 1.863
+score REPLY_REMOVE_SUBJECT -0.357
+score REPLY_TO_EMPTY 1.532
+score REPLY_TO_HAS_UNDERLINE_NUMS 1.627
+score REPLY_WITH_QUOTES 0.587
+score RESENT_TO -1.101
+score RESISTANCE_IS_FUTILE 0.059
+score REVERSE_AGING 3.602
+score RICH 1.518
+score RISK_FREE 1.422
+score ROUND_THE_WORLD_LOCAL 0.686
+score SAFEGUARD_NOTICE 1.334
+score SATISFACTION 0.892
+score SAVE_BUCKS -1.118
+score SAVE_MONEY -0.181
+score SAVE_ON_INSURANCE 0.393
+score SAVE_THOUSANDS 0.617
+score SAVE_UP_TO -0.177
+score SAVINGS 0.624
+score SEARCH_ENGINE_PROMO 1.354
+score SECTION_301 -1.147
+score SEDUCTION 0.973
+score SEE_FOR_YOURSELF 0.043
+score SELECTED_YOU 0.094
+score SEMIFORGED_HOTMAIL_RCVD 1.951
+score SENT_IN_COMPLIANCE 2.397
+score SERIOUS_CASH 1.143
+score SERIOUS_ONLY 2.580
+score SEX_FEST 0.495
+score SHOPPING_SPREE -0.616
+score SIGNATURE_LONG_DENSE -3.799
+score SIGNATURE_LONG_SPARSE -4.221
+score SIGNATURE_SHORT_DENSE 1.018
+score SIGNATURE_SHORT_SPARSE 1.811
+score SMTPD_IN_RCVD -0.654
+score SOME_BREAKTHROUGH 0.187
+score SORTED_RECIPS 3.641
+score START_NOW_CAPS 4.344
+score STOCK_ALERT 3.064
+score STOCK_PICK 0.698
+score STOP_SNORING 2.770
+score STRONG_BUY 1.284
+score SUBJECT_APPROVED 3.232
+score SUBJ_2_CREDIT 1.475
+score SUBJ_ALL_CAPS 0.959
+score SUBJ_AS_SEEN 4.155
+score SUBJ_BUY 0.552
+score SUBJ_DOLLARS 1.946
+score SUBJ_DOUBLE_YOUR 0.937
+score SUBJ_FOR_ONLY -0.532
+score SUBJ_FREE_CAP 0.121
+score SUBJ_FREE_INSTANT 2.497
+score SUBJ_FULL_OF_8BITS 3.930
+score SUBJ_GUARANTEED 2.678
+score SUBJ_HAS_SPACES 2.059
+score SUBJ_HAS_TIME_ID 0.483
+score SUBJ_HAS_UNIQ_ID 1.234
+score SUBJ_LIFE_INSURANCE 2.187
+score SUBJ_NOW_ONLY 3.509
+score SUBJ_REMOVE 1.381
+score SUBJ_RIPPED 4.042
+score SUBJ_VIAGRA 3.770
+score SUBJ_YOUR_DEBT 3.497
+score SUBJ_YOUR_FAMILY 4.481
+score SUBJ_YOUR_OWN 0.981
+score SUB_FREE_OFFER 0.778
+score SUB_HELLO 2.897
+score SUPPLIES_LIMITED -0.037
+score SUSPICIOUS_RECIPS 1.216
+score S_1618 4.146
+score TAKE_ACTION_NOW 3.780
+score TARGETED 3.731
+score THE_BEST_RATE 0.998
+score THE_FOLLOWING_FORM 0.005
+score THIS_AINT_SPAM 2.997
+score THIS_IS_AN_AD 2.066
+score TONER 2.040
+score TO_ADDRESS_EQ_REAL 0.760
+score TO_EMPTY 1.382
+score TO_HAS_SPACES 0.268
+score TO_MALFORMED 0.717
+score TO_NO_USER 2.846
+score TO_RECIP_MARKER 1.016
+score TO_TXT 4.063
+score TRACKER_ID 2.046
+score UCE_MAIL_ACT 2.337
+score UNCLAIMED_MONEY 1.699
+score UNDER_BILL_1618 4.328
+score UNDISC_RECIPS 2.170
+score UNIVERSITY_DIPLOMAS 2.582
+score UNSECURED_CREDIT 0.576
+score UNSUB_PAGE 0.155
+score UNSUB_SCRIPT 0.577
+score UPPERCASE_25_50 1.078
+score UPPERCASE_50_75 1.036
+score UPPERCASE_75_100 0.422
+score UP_TO_OR_MORES 5.513
+score URGENT_BIZ 3.312
+score URI_IS_POUND 2.015
+score USERNAME_IN_SUBJECT 4.195
+score USERPASS 1.676
+score USER_4U2 1.995
+score USER_AGENT 0.741
+score USER_AGENT_APPLEMAIL -1.919
+score USER_AGENT_ENTOURAGE -1.131
+score USER_AGENT_FORTE -3.139
+score USER_AGENT_GNUS_UA -0.768
+score USER_AGENT_GNUS_XM -3.798
+score USER_AGENT_IMP -0.221
+score USER_AGENT_KMAIL -4.705
+score USER_AGENT_MACOE -2.495
+score USER_AGENT_MOZILLA_UA -2.580
+score USER_AGENT_MOZILLA_XM 0.925
+score USER_AGENT_MSN -1.023
+score USER_AGENT_MUTT -3.078
+score USER_AGENT_PINE -0.646
+score USER_AGENT_TONLINE -2.547
+score USER_AGENT_VM -1.859
+score USER_AGENT_XIMIAN -1.187
+score USE_IDENTITY 1.796
+score US_DOLLARS 1.484
+score US_DOLLARS_2 0.249
+score US_DOLLARS_3 0.867
+score VACATION_SCAM 0.326
+score VERB_UP_TO_OR_MORES -1.132
+score VERY_SUSP_RECIPS 2.498
+score VIAGRA 0.390
+score VIAGRA_COMBO 3.109
+score VIAGRA_ONLINE 0.773
+score VJESTIKA 2.409
+score WANTS_CREDIT_CARD 3.894
+score WEIRD_PORT -0.993
+score WEIRD_QUOTING 0.245
+score WE_HATE_SPAM 4.114
+score WE_HATE_SPAM2 1.951
+score WE_HONOR_ALL -0.869
+score WE_PROMISE_YOU 2.850
+score WHILE_SUPPLIES -0.295
+score WHILE_YOU_SLEEP 3.307
+score WHY_PAY_MORE 0.807
+score WHY_WAIT 0.673
+score WITH_LC_SMTP 2.026
+score WORK_AT_HOME 0.508
+score WRINKLES 2.531
+score X_ACCEPT_LANG -0.292
+score X_AUTH_WARNING -0.891
+score X_ENC_PRESENT 3.545
+score X_ESMTP -0.032
+score X_GCMULTI 3.140
+score X_LIBRARY 0.315
+score X_LIST_UNSUBSCRIBE 3.514
+score X_LOOP 0.921
+score X_MAILING_LIST 0.803
+score X_MAIL_ID_PRESENT -0.596
+score X_MIME_KEY 0.845
+score X_MSMAIL_PRIORITY_HIGH 0.137
+score X_PMFLAGS_PRESENT 2.866
+score X_PRECEDENCE_REF 2.406
+score X_PRIORITY_HIGH 1.435
+score X_SERV_HOST_PRESENT 0.152
+score X_STORMPOST_TO 3.112
+score X_VMP_TEXT 3.185
+score X_X_PRESENT 2.474
+score YAHOO_MSGID_ADDED 1.421
+score YOUR_INCOME 1.549
+score YOU_CAN_SEARCH 1.228
+score YOU_WON -0.234
+score ALTA_BUSCADORES_ES 1.000
+score AUTO_EMAIL_REMOVAL 1.650
+score BUY_JUDGEMENTS 4.000
+score CHANGE_TERMS 1.000
+score CHILD_SUPPORT 2.397
+score CLICK_ES 1.000
+score COLECTOR_DE_MAILS_ES 1.000
+score CONFIDENTIAL_ORDER 1.000
+score CONTRA_REEMBOLSO_ES 1.000
+score CREDITORS_CALLING 1.875
+score CREDIT_BUREAU 2.654
+score DEJAR_DE_FUMAR_ES 1.000
+score DISCONTINUE 1.000
+score EJACULATION 1.798
+score ENHANCE_WEBSITE 1.000
+score EU_EMAIL_OPTOUT 1.800
+score EXCLAMACION_ES 1.000
+score EXCUSE_18 1.300
+score EXCUSE_2 1.466
+score EXCUSE_8 1.477
+score EXCUSE_ES_01 1.000
+score EXCUSE_ES_02 1.000
+score EXCUSE_ES_03 1.000
+score EXCUSE_ES_05 1.000
+score EXCUSE_ES_06 1.000
+score EXCUSE_ES_07 1.000
+score EXPERTS_SHOW_HOW 1.000
+score FORGED_MUA_MSN 1.000
+score GANADORES_ES_01 1.000
+score GANADORES_ES_02 1.000
+score GRATIS_ES 1.400
+score GRATIS_T_ES 1.000
+score HELPED_FINANCE 1.925
+score HOTMAIL_FOOTER3 -2.267
+score HTML_IMAGE_AREA_08 1.000
+score HTML_IMAGE_AREA_09 1.000
+score INCREDIBLE 1.000
+score INFORMACION_RESERVA_ES 1.000
+score INTERESADO_ES 1.000
+score INTL_EXEC_GUILD 2.700
+score IN_ACCORDANCE_WITH_LAWS 1.981
+score LEY_CHILE_ES_01 1.000
+score LEY_CHILE_ES_02 1.000
+score LEY_ORGANICA_ES 2.000
+score MAILMAN_CONFIRM -2.765
+score MAILTO_TO_B2BMAIL 1.000
+score MANY_FROMS 2.200
+score MARKUP_SSPL 3.800
+score MAS_INFORMACION_ES 1.000
+score MICROSOFT 2.843
+score MICRO_CAP_WARNING 3.359
+score MIME_BOUND_MAIL_BOUND 2.200
+score MONSTERHUT 1.000
+score MORE_TRAFFIC 1.000
+score MSN_GROUPS -1.300
+score MURKOWSKI_CRUFT 0.100
+score NATURAL_VIAGRA 2.700
+score NEW_CUSTOMER -3.100
+score NIGERIAN_SUBJECT3 1.000
+score NIGERIAN_SUBJECT4 1.000
+score NIGERIAN_SUBJECT5 1.000
+score NIGERIAN_SUBJECT6 1.000
+score NIGERIAN_SUBJECT7 1.000
+score NORMATIVA_SPAM_ES 2.000
+score NO_FORMS 0.101
+score NO_GIMMICK 3.200
+score NO_MAS_MAIL_1_ES 1.000
+score NO_MAS_MAIL_2_ES 1.000
+score NO_MIDDLEMAN 1.000
+score NO_SELLING 1.000
+score OFERTA_ES 1.000
+score OUR_COMPENSATION 1.000
+score OUR_PUBLICATIONS 1.000
+score PEDIDO_ES 1.000
+score PL_ADRESOW_PUBLICZ 2.000
+score PL_ADRES_EMAIL 2.000
+score PL_ADRES_EMAIL_3 2.000
+score PL_ADRES_Z_BAZY 2.000
+score PL_ARTYKUL_USTAWY 2.500
+score PL_ATRAKCYJNA_PROPOZYCJA 1.000
+score PL_ATRAKCYJNE_CENY 1.000
+score PL_BEZPLATNIE 1.000
+score PL_CENA_WYNOSI 1.000
+score PL_CENY_TTO 1.000
+score PL_CHCIELIBYSMY 1.000
+score PL_CZAS_OBOWIAZYWANIA 2.500
+score PL_DANE_OSOBOWE 2.000
+score PL_DASHOFER 1.000
+score PL_DOBRE_CENY 1.000
+score PL_DODATKOWO 0.600
+score PL_DOPISKIEM_NIE 2.500
+score PL_DO_ODWIEDZENIA 1.000
+score PL_GDZIEKUPIC 1.000
+score PL_JESLI_NIE_CHCESZ 2.000
+score PL_JESLI_WIADOMOSC 1.000
+score PL_JESZCZE_DZIS 1.000
+score PL_JEZELI_NIE 2.500
+score PL_JEZELI_NIE_INTERES 2.000
+score PL_KLIKNIJ_TUTAJ 1.000
+score PL_KLIKNIJ_W_LINK 2.000
+score PL_MAILING 1.000
+score PL_MAIL_Z_TEMATEM 1.500
+score PL_MAMY_PRZYJEMNOSC 1.000
+score PL_NABYCIA_UNAS 2.000
+score PL_NADANO_JEDNORAZOWO 2.000
+score PL_NADANO_NA_PODSTAWIE 2.000
+score PL_NAJNIZ_CENY 1.000
+score PL_NAJSZERSZA_OFERTA 1.000
+score PL_NAJTANSZE 1.000
+score PL_NASZEJ_STRONIE 1.000
+score PL_NASZ_FIRMA 1.000
+score PL_NASZ_OFERT 1.000
+score PL_NIEZAINTERESOWANYCH 2.500
+score PL_NIE_ZWLEKAJ 1.000
+score PL_NISKIE_CENY 1.000
+score PL_NOWYCH_OFERTA 1.000
+score PL_ODZYSK_DLUGOW 1.000
+score PL_OFERTA 0.400
+score PL_OFERTA_CENOWA 1.000
+score PL_OFERTA_PROMOCYJNA 1.000
+score PL_OFERUJEMY_PANSTWU 1.000
+score PL_OTRZYMASZ_BEZPLATN 1.600
+score PL_POSIADAMY_W_OFERCIE 1.000
+score PL_PROMOCJA 1.000
+score PL_PROSBA_O_ZWROTNY 2.000
+score PL_PROSIMY_O_SKLADANIE 1.000
+score PL_PRZES_OFERTE 1.000
+score PL_PUBL_DOSTEPNY 1.500
+score PL_PUSTY_MAIL 2.000
+score PL_PUSTY_MAIL_2 2.000
+score PL_REKLAMA 2.000
+score PL_SERDECZ_ZAPRASZAMY 1.000
+score PL_SPEC_OFERTA 1.000
+score PL_SWOICH_ZNAJOMYCH 0.400
+score PL_SZANOWNI_PANSTWO 1.500
+score PL_SZCZEGOLOWE_INFO 1.000
+score PL_TEMAT_OFERTA 1.500
+score PL_TEMAT_USUN 2.000
+score PL_UPOWAZNIENIE_VAT 1.500
+score PL_USUNAC_MAIL 2.500
+score PL_USUN_Z_BAZY 2.000
+score PL_WITAJ_INTERNAUTO 0.400
+score PL_WSPOLPRACA 1.000
+score PL_WWW_ADRESY_ORG 1.000
+score PL_WYPRZEDAZ 1.000
+score PL_WYSTARCZY_WEJSC 2.000
+score PL_ZACHECAMY 1.000
+score PL_ZAJETY_CZAS 2.500
+score PL_ZALICZENIE_POCZT 1.000
+score PL_ZAMOWIENIE 1.000
+score PL_ZAMOW_TERAZ 2.500
+score PL_ZAPOZNAJ_OFERTA 1.000
+score PL_ZAPRASZAMY 1.000
+score PL_ZAPRASZAMY_UDZIAL 1.000
+score PL_ZAPROSICI_PANSTWO 1.500
+score PL_ZGLOSZENIE_POWINNO 1.000
+score PORNO_GRATIS_ES 1.000
+score PORN_GALLERIES 1.000
+score POST_IN_RCVD 1.000
+score PRESENTAMOS_ES 1.000
+score PRIORITY_MAIL 1.000
+score PRODUCED_AND_SENT_OUT 4.185
+score PROMOCION_ES 1.000
+score PSYCHIC 1.000
+score RATWARE_BANG_HASH 1.000
+score RATWARE_CARETOP 2.200
+score RATWARE_CHARSET 1.000
+score RATWARE_CHARSET_V2 1.000
+score RATWARE_DIFFOND 2.200
+score RATWARE_GR 3.800
+score RATWARE_LC_OUTLOOK 1.000
+score RECEIVED_IDENT_CACHEFLOW 1.000
+score REENVIA_ES 1.000
+score REGALO_ES 1.000
+score REMOVE_ES_01 1.000
+score REMOVE_ES_02 1.000
+score REMOVE_ES_03 1.000
+score REMOVE_ES_04 1.000
+score REMOVE_ES_05 1.000
+score REMOVE_ES_06 1.000
+score REMOVE_ES_07 1.000
+score REMOVE_ES_08 1.000
+score SECRET_RECORD 1.203
+score SMIME_SIGNATURE -1.000
+score SPAM_FORM 2.264
+score SPAM_FORM_ACTION 1.000
+score SPAM_FORM_INPUT 1.600
+score SPAM_FORM_RETURN 2.422
+score SUBJECT_IS_IN_REVIEW -2.500
+score SUBSCRIBE_ES_01 1.000
+score TARJETA_VERDE_ES 1.000
+score TO_INVESTORS 1.000
+score TRACE_BY_SSN 0.837
+score VAR_REF_IN_RECEIVED 2.097
+score WEALTH 1.000
+score WORRY_FREE 1.000
+score WWW_AUTOREMOVE_COM 1.000
+score WWW_CLIK4YOU_COM 2.178
+score X_FIX_PRESENT 1.000
+score X_MAILER_GIBBERISH 1.315
+
+# End of GA-evolved scores.
+
+# Scores for tests that are scored manually or with isolated GA runs.  Most
+# are net tests, userconf tests, tests occuring with very low frequency, or
+# tests with many false positives.
+#
+# The scores from isolated GA runs have two digits after the decimal point.
+
+# GTUBE - Generic Test for Unsolicited Bulk Email
+score GTUBE 1000.000
+
+# HTML control test
+score HTML_MESSAGE 0.014
+
+# miscellaneous network tests
+
+score BAD_HELO_WARNING 0.000 2.29 0 2.29
+score NO_MX_FOR_FROM 0.000 3.09 0 3.09
+score ROUND_THE_WORLD 0.000 2.80 0 2.80
+
+# message digest tests
+
+score RAZOR2_CHECK 0.000 3.91 0 3.91
+score RAZOR2_CF_RANGE_01_10 0.000 0 0 0.01
+score RAZOR2_CF_RANGE_11_20 0.000 0 0 0.01
+score RAZOR2_CF_RANGE_21_30 0.000 0 0 0.01
+score RAZOR2_CF_RANGE_31_40 0.000 0 0 0.01
+score RAZOR2_CF_RANGE_41_50 0.000 0 0 0.01
+score RAZOR2_CF_RANGE_51_60 0.000 0 0 0.01
+score RAZOR2_CF_RANGE_61_70 0.000 0 0 0.01
+score RAZOR2_CF_RANGE_71_80 0.000 0 0 0.01
+score RAZOR2_CF_RANGE_81_90 0.000 0 0 0.01
+score RAZOR2_CF_RANGE_91_100 0.000 0 0 0.01
+score DCC_CHECK 0.000 2.66 0 2.66
+score PYZOR_CHECK 0.000 2.50 0 2.50
+
+# Razor v1 is no longer used by default
+score RAZOR_CHECK                    0
+
+# DNS blacklists
+
+score RCVD_IN_RELAYS_ORDB_ORG 0.000 0.61 0 0.61
+score RCVD_IN_OSIRUSOFT_COM 0.000 0.38 0 0.38
+score X_OSIRU_DUL 0.000 0.62 0 0.62
+score X_OSIRU_DUL_FH 0.000 0.36 0 0.36
+score X_OSIRU_OPEN_RELAY 0.000 2.72 0 2.72
+score X_OSIRU_SPAMWARE_SITE 0.000 0.30 0 0.30
+score X_OSIRU_SPAM_SRC 0.000 2.73 0 2.73
+score RCVD_IN_RFCI 0.000 2.28 0 2.28
+score RCVD_IN_ORBS 0.000 2.25 0 2.25
+score RCVD_IN_DSBL 0.000 3.25 0 3.25
+score RCVD_IN_MULTIHOP_DSBL 0.000 0.81 0 0.81
+score RCVD_IN_SBL 0.000 3.18 0 3.18
+score RCVD_IN_UNCONFIRMED_DSBL 0.000 0.77 0 0.77
+score RCVD_IN_VISI 0.000 2.62 0 2.62
+score RCVD_IN_BONDEDSENDER 0.000 -10.0 0 -10.0
+
+# provisional scores, just added.  need GA run once we get the data
+score RCVD_IN_OPM 0.000 1.00 0 1.00
+score RCVD_IN_NJABL 0.000 0.01 0 0.01
+score X_NJABL_OPEN_PROXY 0.000 2.00 0 2.00
+score X_NJABL_DIALUP 0.000 0.50 0 0.50
+# note: RCVD_IN_NJABL has low score, as the X_NJABL rules 0 decipher 0 decipher
+# its results
+
+# ok_languages and ok_locales
+
+score CHARSET_FARAWAY 3.200
+score CHARSET_FARAWAY_HEADERS 2.060
+score HTML_CHARSET_FARAWAY 0.500
+score MIME_CHARSET_FARAWAY 2.450
+score UNDESIRED_LANGUAGE_BODY 3.970
+
+# highly generic tests for viruses that are scored just high enough to run
+
+score MICROSOFT_EXECUTABLE 0.100
+score MIME_SUSPECT_NAME 0.100
+
+# Habeas scores
+
+score HABEAS_SWE -1.312
+score HABEAS_HIL 0.000 4.0 0 4.0
+score HABEAS_VIOLATOR 0.000 8.0 0 8.0
+
+# unscored by default -- commercial services.  If you pay for these,
+# give them a score so they will be checked.
+#
+# 0.5 to 1.0 is probably good for the DUL scores
+# 1.5 to 2.0 is probably good for the rest
+
+score RCVD_IN_BL_SPAMCOP_NET 0.000
+score RCVD_IN_DUL 0.000
+score RCVD_IN_DUL_FH 0.000
+score RCVD_IN_RBL 0.000
+score RCVD_IN_RSS 0.000
+
+###########################################################################
+# Compensation for common false positives.
+
+score EVITE -10.000
+
+# GA never changes the whitelist/blacklist scores
+
+score USER_IN_BLACKLIST 100.000
+score USER_IN_WHITELIST -100.000
+
+# Not really false positives but the user wants spam!
+
+score USER_IN_WHITELIST_TO -6.000
+score USER_IN_MORE_SPAM_TO -20.000
+score USER_IN_ALL_SPAM_TO -100.000
+
+###########################################################################
+
+# Bayes Scores
+
 score BAYES_00        		     0 0 -4.0 -4.0
 score BAYES_01        		     0 0 -2.0 -2.0
 score BAYES_10       		     0 0 -0.5 -0.5
@@ -711,118 +1059,4 @@ score BAYES_70         		     0 0 0.1 0.1
 score BAYES_80         		     0 0 0.5 0.5
 score BAYES_90         		     0 0 2.0 2.0
 score BAYES_99          	     0 0 4.0 4.0
-
-# End of GA-evolved scores.
-
-# Scores for tests that are scored manually or with isolated GA runs.  Most
-# are net tests, userconf tests, tests occuring with very low frequency, or
-# tests with many false positives.
-#
-# The scores from isolated GA runs have two digits after the decimal point.
-
-# GTUBE - Generic Test for Unsolicited Bulk Email
-score GTUBE			     1000
-
-# HTML control test
-score HTML_MESSAGE                   0.01
-
-# miscellaneous network tests
-
-score BAD_HELO_WARNING               0 2.29 0 2.29
-score NO_MX_FOR_FROM                 0 3.09 0 3.09
-score ROUND_THE_WORLD                0 2.80 0 2.80
-
-# message digest tests
-
-score RAZOR2_CHECK                   0 3.91 0 3.91
-score RAZOR2_CF_RANGE_01_10          0 0 0 0.01
-score RAZOR2_CF_RANGE_11_20          0 0 0 0.01
-score RAZOR2_CF_RANGE_21_30          0 0 0 0.01
-score RAZOR2_CF_RANGE_31_40          0 0 0 0.01
-score RAZOR2_CF_RANGE_41_50          0 0 0 0.01
-score RAZOR2_CF_RANGE_51_60          0 0 0 0.01
-score RAZOR2_CF_RANGE_61_70          0 0 0 0.01
-score RAZOR2_CF_RANGE_71_80          0 0 0 0.01
-score RAZOR2_CF_RANGE_81_90          0 0 0 0.01
-score RAZOR2_CF_RANGE_91_100         0 0 0 0.01
-score DCC_CHECK                      0 2.66 0 2.66
-score PYZOR_CHECK                    0 2.50 0 2.50
-
-# Razor v1 is no longer used by default
-score RAZOR_CHECK                    0
-
-# DNS blacklists
-
-score RCVD_IN_RELAYS_ORDB_ORG        0 0.61 0 0.61
-score RCVD_IN_OSIRUSOFT_COM          0 0.38 0 0.38
-score X_OSIRU_DUL                    0 0.62 0 0.62
-score X_OSIRU_DUL_FH                 0 0.36 0 0.36
-score X_OSIRU_OPEN_RELAY             0 2.72 0 2.72
-score X_OSIRU_SPAMWARE_SITE          0 0.30 0 0.30
-score X_OSIRU_SPAM_SRC               0 2.73 0 2.73
-score RCVD_IN_RFCI                   0 2.28 0 2.28
-score RCVD_IN_ORBS                   0 2.25 0 2.25
-score RCVD_IN_DSBL                   0 3.25 0 3.25
-score RCVD_IN_MULTIHOP_DSBL          0 0.81 0 0.81
-score RCVD_IN_SBL                    0 3.18 0 3.18
-score RCVD_IN_UNCONFIRMED_DSBL       0 0.77 0 0.77
-score RCVD_IN_VISI                   0 2.62 0 2.62
-score RCVD_IN_BONDEDSENDER           0 -10.0 0 -10.0
-
-# provisional scores, just added.  need GA run once we get the data
-score RCVD_IN_OPM                    0 1.00 0 1.00
-score RCVD_IN_NJABL                  0 0.01 0 0.01
-score X_NJABL_OPEN_PROXY             0 2.00 0 2.00
-score X_NJABL_DIALUP                 0 0.50 0 0.50
-# note: RCVD_IN_NJABL has low score, as the X_NJABL rules 0 decipher 0 decipher
-# its results
-
-# ok_languages and ok_locales
-
-score CHARSET_FARAWAY                3.20
-score CHARSET_FARAWAY_HEADERS        2.06
-score HTML_CHARSET_FARAWAY           0.5
-score MIME_CHARSET_FARAWAY           2.45
-score UNDESIRED_LANGUAGE_BODY        3.97
-
-# highly generic tests for viruses that are scored just high enough to run
-
-score MICROSOFT_EXECUTABLE           0.1
-score MIME_SUSPECT_NAME              0.1
-
-# Habeas scores
-
-score HABEAS_SWE                     -4.0
-score HABEAS_HIL                     0 4.0 0 4.0
-score HABEAS_VIOLATOR                0 8.0 0 8.0
-
-# unscored by default -- commercial services.  If you pay for these,
-# give them a score so they will be checked.
-#
-# 0.5 to 1.0 is probably good for the DUL scores
-# 1.5 to 2.0 is probably good for the rest
-
-score RCVD_IN_BL_SPAMCOP_NET         0.0
-score RCVD_IN_DUL                    0.0
-score RCVD_IN_DUL_FH                 0.0
-score RCVD_IN_RBL                    0.0
-score RCVD_IN_RSS                    0.0
-
-###########################################################################
-# Compensation for common false positives.
-
-score EVITE                          -10
-
-# GA never changes the whitelist/blacklist scores
-
-score USER_IN_BLACKLIST              100
-score USER_IN_WHITELIST              -100
-
-# Not really false positives but the user wants spam!
-
-score USER_IN_WHITELIST_TO           -6
-score USER_IN_MORE_SPAM_TO           -20
-score USER_IN_ALL_SPAM_TO            -100
-
-###########################################################################
 
