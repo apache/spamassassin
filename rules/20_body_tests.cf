@@ -64,28 +64,60 @@ describe REMOVE_IN_QUOTES	List removal information
 body DISCONTINUE		/\"discontinue\".{1,15}no further notices/i
 describe DISCONTINUE		List removal information
 
-rawbody JAVASCRIPT			/<SCRIPT/i
-describe JAVASCRIPT			JavaScript code
-rawbody REALLY_UNSAFE_JAVASCRIPT	/<(?:body|frame) [^>]*on(?:Load|UnLoad|BeforeUnload)[\s=3d\"\']*\S+[\"\']?/is
-describe REALLY_UNSAFE_JAVASCRIPT	Auto-executing JavaScript code
-rawbody SLIGHTLY_UNSAFE_JAVASCRIPT	/\bon(?:Blur|Change|Focus|Error|Key(?:Press|Down|Up)|Mouse(?:Down|Up|Over|Move|Out)|Resize|Move|Scroll|Stop|Click)[\s=3d\"\']*\S+[\"\']?/i
-describe SLIGHTLY_UNSAFE_JAVASCRIPT	JavaScript code which can easily be executed
+###########################################################################
+# HTML parser tests
 
-rawbody HTML_WITH_BGCOLOR	/<body [^>]*bgcolor[=3d\"\'\#]+[0-9a-e][0-9a-f]{5,5}/is
+body HTML_50_70			eval:html_percentage('50','70')
+describe HTML_50_70		Message is 50-70% HTML tags
+
+body HTML_70_90			eval:html_percentage('70','90')
+describe HTML_70_90		Message is 70-90% HTML tags
+
+body HTML_90_100		eval:html_percentage('90','100')
+describe HTML_90_100		Message is 90-100% HTML tags
+
+body TABLE_THICK_BORDER		eval:html_table_thick_border()
+describe TABLE_THICK_BORDER	HTML table has thick border
+
+body JAVASCRIPT			eval:html_javascript()
+describe JAVASCRIPT		JavaScript code
+
+body JAVASCRIPT_VERY_UNSAFE	eval:html_javascript_very_unsafe()
+describe JAVASCRIPT_VERY_UNSAFE	Auto-executing JavaScript code
+
+body HTML_WITH_BGCOLOR		eval:html_bgcolor()
 describe HTML_WITH_BGCOLOR	HTML mail with non-white background
 
-body HTML_TABLE_BORDER_THICK		eval:check_html_table_border_thick()
-describe HTML_TABLE_BORDER_THICK	HTML table has thick border
+body BIG_FONT			eval:html_big_font()
+describe BIG_FONT		FONT Size +2 and up or 3 and up
+test BIG_FONT ok		<font size="5"> foo </font>
+test BIG_FONT ok		<font size="+2"> foo </font>
+test BIG_FONT ok		<font size="3"> foo </font>
+test BIG_FONT fail		<font size="2"> foo </font>
+test BIG_FONT fail		<font size="+1"> foo </font>
+test BIG_FONT fail		<font size="-1"> foo </font>
+test BIG_FONT fail		<font size="1"> foo </font>
 
-rawbody  BIG_FONT               /<\s*FONT\s[^>]*size\s*=(?:3D(?:\d{2,}|\+[2-9]|[3-9])|\s*["'](?:\d{2,}|\+[2-9]|[3-9]))/is
-describe BIG_FONT               FONT Size +2 and up or 3 and up
-test BIG_FONT ok   <font size="5"> foo </font>
-test BIG_FONT ok   <font size="+2"> foo </font>
-test BIG_FONT ok   <font size="3"> foo </font>
-test BIG_FONT fail <font size="2"> foo </font>
-test BIG_FONT fail <font size="+1"> foo </font>
-test BIG_FONT fail <font size="-1"> foo </font>
-test BIG_FONT fail <font size="1"> foo </font>
+body WEB_BUGS			eval:html_web_bugs()
+describe WEB_BUGS		Image tag with an ID code to identify you
+
+# many spammers seem to do this nowadays (and probably track
+# their customers with it).  (contrib: WW)
+body RELAYING_FRAME		eval:html_relaying_frame()
+describe RELAYING_FRAME		Frame wanted to load outside URL
+
+body HTML_EMBEDS		eval:html_embeds()
+describe HTML_EMBEDS		HTML with embedded plugin object
+
+###########################################################################
+# rawbody HTML tests
+
+rawbody JAVASCRIPT_UNSAFE	/\bon(?:Blur|Change|Focus|Error|Key(?:Press|Down|Up)|Mouse(?:Down|Up|Over|Move|Out)|Resize|Move|Scroll|Stop|Click)[\s=3d\"\']*\S+[\"\']?/i
+describe JAVASCRIPT_UNSAFE	Easily-executed JavaScript code
+
+#   0.001    0.000    0.002    0.00    1.00  JAVASCRIPT_OBFUSCATING (low matches)
+#rawbody JAVASCRIPT_OBFUSCATING   /charCodeAt|fromCharCode/i
+#describe JAVASCRIPT_OBFUSCATING   An attempt to hide spam inside obfuscating Javascript code
 
 rawbody SPAM_FORM		/CHANGE EMAIL ADDRESS IN ACTION OF FORM/
 describe SPAM_FORM		Form for changing email address
@@ -93,6 +125,19 @@ rawbody SPAM_FORM_RETURN	/return validate_form/
 describe SPAM_FORM_RETURN	Form for checking email address
 rawbody SPAM_FORM_INPUT		/<input name=.{0,5}submit.{0,99} Submit By E-Mail /i
 describe SPAM_FORM_INPUT	Form for verifying email address
+
+rawbody NUMERIC_COMMENT         /<!--\d{3,}-->/
+describe NUMERIC_COMMENT        Contains a comment with nothing but a number in it
+test NUMERIC_COMMENT     ok     Some text <!--34555--> followed by more
+test NUMERIC_COMMENT     fail   Something <!-- A comment --> and more
+
+rawbody  OBFUSCATING_COMMENT    /[^\s>]<!--.{0,12}?-->[^\s<]/
+describe OBFUSCATING_COMMENT    HTML comments which obfuscate text
+test OBFUSCATING_COMMENT ok     This is a te<!--foo-->st
+test OBFUSCATING_COMMENT fail   Not a <!-- problem --> here
+test OBFUSCATING_COMMENT fail   This <tag><!-- neither --></tag> I hope
+
+###########################################################################
 
 body BUGGY_CGI			/Below is the result of your feedback form/
 describe BUGGY_CGI		Broken CGI script message
@@ -355,15 +400,6 @@ describe LINES_OF_YELLING_2     2 WHOLE LINES OF YELLING DETECTED
 body     LINES_OF_YELLING_3     eval:check_for_num_yelling_lines("3")
 describe LINES_OF_YELLING_3     3 WHOLE LINES OF YELLING DETECTED
 
-body HTML_50_70                 eval:check_html_percentage('50','70')
-describe HTML_50_70             Message is 50-70% HTML tags
-
-body HTML_70_90                 eval:check_html_percentage('70','90')
-describe HTML_70_90             Message is 70-90% HTML tags
-
-body HTML_90_100                eval:check_html_percentage('90','100')
-describe HTML_90_100            Message is 90-100% HTML tags
-
 ###########################################################################
 # these tests doesn't actually use rawbody since rawbody isn't raw enough;
 # they must be written very carefully to avoid modifying the original content
@@ -507,17 +543,6 @@ rawbody FORM_W_MAILTO_ACTION	/action=[3D=\s"']*mailto:/is
 describe FORM_W_MAILTO_ACTION	Includes a form which will send an email
 body AOL_USERS_LINK		/AOL\s+Users\s+Click/is
 describe AOL_USERS_LINK		Includes a link for AOL users to click
-
-rawbody WEB_BUGS		/<\s*img\s[^>]*src[^>]+\?/i
-describe WEB_BUGS		Image tag with an ID code to identify you
-
-# many spammers seem to do this nowadays (and probably track
-# their customers with it).  (contrib: WW)
-rawbody RELAYING_FRAME		/<i?frame\s/i
-describe RELAYING_FRAME		Frame wanted to load outside URL
-
-rawbody HTML_EMBEDS		/<(?:object|embed)\s/i
-describe HTML_EMBEDS		HTML with embedded plugin object
 
 # Cyber FirePower! rants about 'Internet terrorists' aka spam fighters
 # (contrib: WW) (jm: tweaked to match again)
@@ -716,21 +741,6 @@ describe SEE_FOR_YOURSELF       See for yourself
 
 body ORDER_NOW                  /\border (?:now|soon|fast|quickly|while)\b/i
 describe ORDER_NOW              Encourages you to waste no time in ordering
-
-#   0.001    0.000    0.002    0.00    1.00  OBFUSCATING_JAVASCRIPT (low matches)
-#rawbody OBFUSCATING_JAVASCRIPT   /charCodeAt|fromCharCode/i
-#describe OBFUSCATING_JAVASCRIPT   An attempt to hide spam inside obfuscating Javascript code
-
-rawbody NUMERIC_COMMENT         /<!--\d{3,}-->/
-describe NUMERIC_COMMENT        Contains a comment with nothing but a number in it
-test NUMERIC_COMMENT     ok     Some text <!--34555--> followed by more
-test NUMERIC_COMMENT     fail   Something <!-- A comment --> and more
-
-rawbody  OBFUSCATING_COMMENT    /[^\s>]<!--.{0,12}?-->[^\s<]/
-describe OBFUSCATING_COMMENT    HTML comments which obfuscate text
-test OBFUSCATING_COMMENT ok     This is a te<!--foo-->st
-test OBFUSCATING_COMMENT fail   Not a <!-- problem --> here
-test OBFUSCATING_COMMENT fail   This <tag><!-- neither --></tag> I hope
 
 ## Contrib: Marc Perkel
 
