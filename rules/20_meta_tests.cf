@@ -88,15 +88,21 @@ body __NIGERIAN_BODY_39 /\bYOUR FULL NAMES?,?(?:and|&)? FULL CONTACT ADDRESS\b/i
 body __NIGERIAN_BODY_40	/\bsend .{1,30}\byour telefax Numbers?\b/i
 
 
-meta NIGERIAN_SUBJECT	(__NIGERIAN_SUBJECT.+ +) > 0
-describe NIGERIAN_SUBJECT	Subject is indicitive of a Nigerian spam
-header __NIGERIAN_SUBJECT1	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*(?:(?:very )?URGENT|ATTENTION)\s*$/i
-header __NIGERIAN_SUBJECT2	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*(?:very )?urgent\s+(?:(?:and|&)\s+)?(?:confidential|assistance|business|attention|reply|response|help)\b/i
-header __NIGERIAN_SUBJECT3	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*your assistance\b/i
-header __NIGERIAN_SUBJECT4	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*i need your urgent\b/i
-header __NIGERIAN_SUBJECT5	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*treat as urgent\b/i
-header __NIGERIAN_SUBJECT6	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*(?:family )?assis?tance\s*$/i
-header __NIGERIAN_SUBJECT7	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*[!*_-]+\s*(?:business|urgent)/i
-header __NIGERIAN_SUBJECT8	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*(?:appeal|request) for urgent assistance\b/i
+header NIGERIAN_SUBJECT1	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*(?:(?:very )?URGENT|ATTENTION)\s*$/i
+describe NIGERIAN_SUBJECT1	Subject is indicitive of a Nigerian spam
+header NIGERIAN_SUBJECT2	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*(?:very )?urgent\s+(?:(?:and|&)\s+)?(?:confidential|assistance|business|attention|reply|response|help)\b/i
+describe NIGERIAN_SUBJECT2	Subject is indicitive of a Nigerian spam
+header NIGERIAN_SUBJECT3	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*your assistance\b/i
+describe NIGERIAN_SUBJECT3	Subject is indicitive of a Nigerian spam
+header NIGERIAN_SUBJECT4	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*i need your urgent\b/i
+describe NIGERIAN_SUBJECT4	Subject is indicitive of a Nigerian spam
+header NIGERIAN_SUBJECT5	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*treat as urgent\b/i
+describe NIGERIAN_SUBJECT5	Subject is indicitive of a Nigerian spam
+header NIGERIAN_SUBJECT6	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*(?:family )?assis?tance\s*$/i
+describe NIGERIAN_SUBJECT6	Subject is indicitive of a Nigerian spam
+header NIGERIAN_SUBJECT7	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*[!*_-]+\s*(?:business|urgent)/i
+describe NIGERIAN_SUBJECT7	Subject is indicitive of a Nigerian spam
+header NIGERIAN_SUBJECT8	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*(?:appeal|request) for urgent assistance$/i
+describe NIGERIAN_SUBJECT8	Subject is indicitive of a Nigerian spam
 
 ##############################################################################
