@@ -355,7 +355,11 @@ sub tokenize {
 
   # Go ahead and uniq the array, skip null tokens (can happen sometimes)
   # generate an SHA1 hash and take the lower 40 bits as our token
-  my %tokens = map { substr(sha1($_), -5) => { 'raw_token' => $_ } } grep(length, @tokens);
+  my %tokens;
+  foreach my $token (@tokens) {
+    next unless length($token); # skip 0 length tokens
+    $tokens{substr(sha1($token), -5)} = { 'raw_token' => $token };
+  }
 
   # return the keys == tokens ...
   return \%tokens;
