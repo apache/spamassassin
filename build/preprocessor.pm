@@ -7,11 +7,11 @@ package ExtUtils::Install::Post545;
 use strict;
 
 use vars qw(
-  $VERSION @ISA
+  @ISA
   $Is_VMS
 );
 
-$VERSION = 1.30;
+# taken from ExtUtils::Install version 1.30
 use ExtUtils::Install;
 @ISA = qw(ExtUtils::Install);
 

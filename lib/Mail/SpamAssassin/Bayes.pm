@@ -211,6 +211,7 @@ sub new {
 
 sub finish {
   my $self = shift;
+  if (!$self->{conf}->{use_bayes}) { return; }
   $self->{store}->untie_db();
 }
 
