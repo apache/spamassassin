@@ -314,23 +314,24 @@ sub read_db_configs {
 
 ###########################################################################
 
+# The calling functions expect a uniq'ed array of tokens ...
 sub tokenize {
   my ($self, $msg, $body) = @_;
 
-  my $wc = 0;
-  $self->{tokens} = [ ];
+  # Tokenize the body and put everything together
+  my @tokens = map { $self->tokenize_line ($_, '', 1) } @{$body};
 
-  for (@{$body}) {
-    $wc += $self->tokenize_line ($_, '', 1);
-  }
-
+  # Tokenize the headers
   my %hdrs = $self->tokenize_headers ($msg);
-  foreach my $prefix (keys %hdrs) {
-    $wc += $self->tokenize_line ($hdrs{$prefix}, "H$prefix:", 0);
+  while( my($prefix, $value) = each %hdrs ) {
+    push(@tokens, $self->tokenize_line ($value, "H$prefix:", 0));
   }
 
-  my @toks = @{$self->{tokens}}; delete $self->{tokens};
-  ($wc, @toks);
+  # Go ahead and uniq the array
+  my %tokens = map { $_ => 1 } @tokens;
+
+  # return the keys == tokens ...
+  keys %tokens;
 }
 
 sub tokenize_line {
@@ -338,6 +339,8 @@ sub tokenize_line {
   my $tokprefix = $_[2];
   my $isbody = $_[3];
   local ($_) = $_[1];
+
+  my @rettokens = ();
 
   my $in_headers = ($tokprefix ne '');
 
@@ -359,8 +362,6 @@ sub tokenize_line {
       s/(?:^|\.\s+)([A-Z])([^A-Z]+)(?:\s|$)/ ' '. (lc $1) . $2 . ' ' /ge;
     }
   }
-
-  my $wc = 0;
 
   foreach my $token (split) {
     $token =~ s/^[-'"\.,]+//;        # trim non-alphanum chars at start or end
@@ -390,14 +391,12 @@ sub tokenize_line {
     # are we in the body?  If so, apply some body-specific breakouts
     if (!$in_headers) {
       if (CHEW_BODY_MAILADDRS && $token =~ /\S\@\S/i) {
-	my @toks = $self->tokenize_mail_addrs ($token);
-	push (@{$self->{tokens}}, @toks);
-	$wc += scalar @toks;
+	push (@rettokens, $self->tokenize_mail_addrs ($token));
       }
       elsif (CHEW_BODY_URIS && $token =~ /\S\.[a-z]/i) {
-	push (@{$self->{tokens}}, "UD:".$token); $wc++; # the full token
+	push (@rettokens, "UD:".$token); # the full token
 	my $bit = $token; while ($bit =~ s/^[^\.]+\.(.+)$/$1/gs) {
-	  push (@{$self->{tokens}}, "UD:".$1); $wc++;	# UD = URL domain
+	  push (@rettokens, "UD:".$1); # UD = URL domain
 	}
       }
     }
@@ -412,7 +411,7 @@ sub tokenize_line {
 	# but I'm doing tuples to keep the dbs small(er)."  Sounds like a plan
 	# to me! (jm)
 	while ($token =~ s/^(..?)//) {
-	  push (@{$self->{tokens}}, "8:$1"); $wc++;
+	  push (@rettokens, "8:$1");
 	}
 	next;
       }
@@ -428,8 +427,7 @@ sub tokenize_line {
       }
     }
 
-    $wc++;
-    push (@{$self->{tokens}}, $tokprefix.$token);
+    push (@rettokens, $tokprefix.$token);
 
     # now do some token abstraction; in other words, make them act like
     # patterns instead of text copies.
@@ -445,12 +443,12 @@ sub tokenize_line {
 		  H\*r:ip\* | \QNNNN\E
 		)/x)
       {
-	push (@{$self->{tokens}}, 'N:'.$tokprefix.$token);
+	push (@rettokens, 'N:'.$tokprefix.$token);
       }
     }
   }
 
-  return $wc;
+  return @rettokens;
 }
 
 sub tokenize_headers {
@@ -751,9 +749,6 @@ sub learn_trapped {
     $self->{store}->nspam_nham_change (0, 1);
   }
 
-  my ($wc, @tokens) = $self->tokenize ($msg, $body);
-  my %seen = ();
-
   my $msgatime = $self->receive_date(scalar $msg->get_all_headers(0,1));
 
   # If the message atime comes back as being more than 1 day in the
@@ -762,9 +757,7 @@ sub learn_trapped {
   #
   $msgatime = time if ( $msgatime - time > 86400 );
 
-  for (@tokens) {
-    if ($seen{$_}) { next; } else { $seen{$_} = 1; }
-
+  for (@{$self->tokenize ($msg, $body)}) {
     if ($isspam) {
       $self->{store}->tok_count_change (1, 0, $_, $msgatime);
     } else {
@@ -868,11 +861,7 @@ sub forget_trapped {
     $self->{store}->nspam_nham_change (0, -1);
   }
 
-  my ($wc, @tokens) = $self->tokenize ($msg, $body);
-  my %seen = ();
-  for (@tokens) {
-    if ($seen{$_}) { next; } else { $seen{$_} = 1; }
-
+  for (@{$self->tokenize ($msg, $body)}) {
     if ($isspam) {
       $self->{store}->tok_count_change (-1, 0, $_);
     } else {
@@ -1061,37 +1050,25 @@ sub scan {
 
   dbg ("bayes corpus size: nspam = $ns, nham = $nn");
 
+  # Add URIs to the body ...
   push (@{$body}, $self->add_uris_for_permsgstatus ($permsgstatus));
-  my ($wc, @tokens) = $self->tokenize ($msg, $body);
 
-  if ($wc <= 0) {
-    dbg ("cannot use bayes on this message; no tokens found");
-    goto skip;
-  }
-
-  my %seen = ();
-
-  my $msgatime = $self->receive_date(scalar $msg->get_all_headers(0,1));
-
+  # Figure out the message receive time (used as atime below)
   # If the message atime comes back as being in the future, something's
   # messed up and we should revert to current time as a safety measure.
   #
+  my $msgatime = $self->receive_date(scalar $msg->get_all_headers(0,1));
   $msgatime = time if ( $msgatime > time );
 
+  # Figure out our probabilities for the message tokens
   my %pw = map {
-    if ($seen{$_}) {
-      ();		# exit map()
-    } else {
-      $seen{$_} = 1;
-      # warn "JMD bayes token found: '$_'\n";
       my $pw = $self->compute_prob_for_token ($_, $ns, $nn);
       if (!defined $pw) {
 	();		# exit map()
       } else {
 	($_ => $pw);
       }
-    }
-  } @tokens;
+  } $self->tokenize ($msg, $body);
 
   # If none of the tokens were found in the DB, we're going to skip
   # this message...
