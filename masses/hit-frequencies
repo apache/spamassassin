@@ -6,11 +6,12 @@ getopts("fm:M:X:l:L:pxhc:");
 
 use vars qw {
   $opt_f $opt_m $opt_M $opt_X $opt_p $opt_x $opt_h $opt_l $opt_L $opt_c
+  $opt_a
 };
 
 sub usage {
   die "hit-frequencies [-c rules dir] [-f] [-m RE] [-M RE] [-X RE] [-l LC]
-                [-p] [-x] [spam log] [ham log]
+                [-a] [-p] [-x] [spam log] [ham log]
 
     -c p   use p as the rules directory
     -f     falses. count only false-negative or false-positive matches
@@ -19,6 +20,7 @@ sub usage {
     -X RE  don't consider log entries matching regular expression
     -l LC  also print language specific rules for lang code LC (or 'all')
     -L LC  only print language specific rules for lang code LC (or 'all')
+    -a     display all tests
     -p     percentages. implies -x
     -x     extended output, with S/O ratio and scores
 
@@ -160,8 +162,11 @@ foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
   my $fa = $fs+$fn;
 
   next if ($opt_m && $test !~ m/$opt_m/);	# match certain tests
-  next if ($rules{$test}->{tflags} =~ /net/);   # not net tests
-  next if ($rules{$test}->{tflags} =~ /userconf/); # or userconf
+
+  if (!$opt_a) {
+    next if ($rules{$test}->{tflags} =~ /net/);   # not net tests
+    next if ($rules{$test}->{tflags} =~ /userconf/); # or userconf
+  }
 
   # adjust based on corpora sizes (and cvt to % while we're at it)
   my $fsadj = $num_spam == 0 ? 0 : ($fs / ($num_spam)) * 100.0;

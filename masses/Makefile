@@ -43,7 +43,7 @@ tmp/tests.h: tmp/.created tmp/ranges.data logs-to-c
 tmp/ranges.data: tmp/.created freqs score-ranges-from-freqs
 	./score-ranges-from-freqs < freqs
 
-freqs: spam.log nonspam.log
+freqs: spam.log ham.log
 	./hit-frequencies -x -p > freqs
 
 tmp/.created:
