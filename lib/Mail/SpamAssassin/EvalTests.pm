@@ -3238,7 +3238,8 @@ sub check_for_illegal_ip {
 ###########################################################################
 
 sub check_msg_parse_flags {
-  my($self, $type) = @_;
+  my($self, $type, $type2) = @_;
+  $type = $type2 if ref($type);
   return defined $self->{msg}->{$type};
 }
 
