@@ -393,8 +393,8 @@ score SOCIAL_SEC_NUMBER              1.0
 score SPAM_FORM                      0.218
 score SPAM_FORM_RETURN               3.205
 score SPAM_PHRASE_00_01              -0.2
-score SPAM_PHRASE_01_02              -0.2
-score SPAM_PHRASE_02_03              -0.1
+score SPAM_PHRASE_01_02              -0.1
+score SPAM_PHRASE_02_03              -0.05
 score SPAM_PHRASE_03_05              0.1
 score SPAM_PHRASE_05_08              0.1
 score SPAM_PHRASE_08_13              0.5
@@ -529,13 +529,13 @@ score YR_MEMBERSHIP_EXCH             4.2
 score X_ACCEPT_LANG                  -1.0
 score    OBFUSCATING_COMMENT    2.0
 
-score SUBJECT_HAS_DATE          -4.0
+score SUBJECT_HAS_DATE          -1.0
 score FROM_NEWS_LIST            -0.5
 score FROM_US_PHONE             -5.0
-score SUBJECT_IS_NEWS           -4.0
-score SUBJECT_FREQ              -2.5
-score SUBJECT_MONTH             -3.5
-score SUBJECT_MONTH_2           -3.5
+score SUBJECT_IS_NEWS           -0.1
+score SUBJECT_FREQ              -1.0
+score SUBJECT_MONTH             -0.5
+score SUBJECT_MONTH_2           -0.5
 score FROM_EGROUPS      -3
 score   FWD_MSG                 -1.0
 score   FWD_MSG_2               -1.0
