@@ -181,8 +181,13 @@ sub _get_header_list {
 
 sub get_pristine_header {
   my ($self, $hdr) = @_;
-  my($ret) = $self->{headers_pristine} =~ /^(?:$hdr:[ ]+(.*\n(?:\s+\S.*\n)*))/mi;
-  return ( $ret || $self->get_header($hdr) );
+  my(@ret) = $self->{headers_pristine} =~ /^(?:$hdr:[ ]+(.*\n(?:\s+\S.*\n)*))/mig;
+  if (@ret) {
+    return wantarray ? @ret : $ret[0];
+  }
+  else {
+    return $self->get_header($hdr);
+  }
 }
 
 sub get_header {

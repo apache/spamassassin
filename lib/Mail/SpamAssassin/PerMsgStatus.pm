@@ -70,7 +70,6 @@ sub new {
     'subtest_names_hit' => [ ],
     'tests_already_hit' => { },
     'hdr_cache'         => { },
-    'headers_to_add'	=> { },
     'rule_errors'       => 0,
     'disable_auto_learning' => 0,
     'auto_learn_status' => undef,
@@ -573,13 +572,7 @@ sub rewrite_as_spam {
   my $original = $self->{msg}->get_pristine();
 
   # This is the new message.
-  # jm: add a SpamAssassin Received header to note markup time etc.
-  # emulates the fetchmail style.
-  my $newmsg = "Received: from localhost [127.0.0.1] by " .
-	    Mail::SpamAssassin::Util::fq_hostname() . "\n" .
-	"\twith SpamAssassin (" . Mail::SpamAssassin::Version() . " " .
-	    $Mail::SpamAssassin::SUB_VERSION . ");\n" .
-	"\t" . Mail::SpamAssassin::Util::time_to_rfc822_date() . "\n";
+  my $newmsg = '';
 
   # remove first line if it is "From "
   if ($original =~ s/^(From (.*?)\n)//s) {
@@ -628,13 +621,32 @@ sub rewrite_as_spam {
   }
 
   if (defined $self->{conf}->{report_safe_copy_headers}) {
+    my %already_added = map { $_ => 1 } qw/from to cc subject date message-id/;
+
     foreach my $hdr ( @{$self->{conf}->{report_safe_copy_headers}} ) {
-      next if ( exists $self->{headers_to_add}->{$hdr} );
-      my $hdrtext = $self->{msg}->get_pristine_header($hdr);
-      next unless $hdrtext;
-      $self->{headers_to_add}->{$hdr} = $hdrtext;
+      next if ( exists $already_added{lc $hdr} );
+      my @hdrtext = $self->{msg}->get_pristine_header($hdr);
+      $already_added{lc $hdr}++;
+      foreach ( @hdrtext ) {
+	if ( lc $hdr eq "received" ) { # add Received at the top ...
+          $newmsg = "$hdr: $_$newmsg";
+	}
+	else { # if not Received, add at the bottom ...
+          $newmsg .= "$hdr: $_";
+	}
+      }
     }
   }
+
+  # jm: add a SpamAssassin Received header to note markup time etc.
+  # emulates the fetchmail style.
+  # tvd: do this after report_safe_copy_headers so Received will be done correctly
+  $newmsg = "Received: from localhost [127.0.0.1] by " .
+	    Mail::SpamAssassin::Util::fq_hostname() . "\n" .
+	"\twith SpamAssassin (" . Mail::SpamAssassin::Version() . " " .
+	    $Mail::SpamAssassin::SUB_VERSION . ");\n" .
+	"\t" . Mail::SpamAssassin::Util::time_to_rfc822_date() . "\n" .
+	    $newmsg;
 
   # MIME boundary
   my $boundary = "----------=_" . sprintf("%08X.%08X",time,int(rand(2 ** 32)));
