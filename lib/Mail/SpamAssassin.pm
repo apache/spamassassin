@@ -91,7 +91,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.121 2002/09/10 14:31:26 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.122 2002/09/16 00:18:50 duncf Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -465,7 +465,7 @@ sub remove_spamassassin_markup {
 
   while ( $tag =~ /(_HITS_|_REQD_)/g ) {
        my $typeoftag = $1;
-       $hdrs =~ s/^Subject: (\D*)\d\d\.\d\d/Subject: $1$typeoftag/m;
+       $hdrs =~ s/^Subject: (\D*)\d\d\.\d\d/Subject: $typeoftag/m;
   } # Wow. Very Hackish.
 
   1 while $hdrs =~ s/^Subject: \Q${tag}\E /Subject: /gm;
