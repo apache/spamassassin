@@ -297,6 +297,12 @@ sub check_for_forged_received_trail {
     if ($received[$i] =~ s/\bfrom[\t ]+(\w+([\w.-]+\.)+\w+)//i) {
       $from[$i] = lc($1);
       $from[$i] =~ s/.*\.(\S+\.\S+)$/$1/;
+
+      # valid: bouncing around inside 1 machine, via the localhost interface.
+      # freshmeat newsletter does this.
+      if ($from[$i] eq 'localhost.localdomain') {
+        $from[$i] = undef;
+      }
     }
 
     if ($i > 0 && defined($by[$i]) && defined($from[$i - 1]) &&
