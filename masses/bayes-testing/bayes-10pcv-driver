@@ -31,21 +31,21 @@ SADIR=/home/jm/ftp/spamassassin
 
 testdir=`pwd`
 
-learnprob=
+learnargs=
 if [ "$#" -gt 0 ] ; then
-  learnprob="--learnprob $1 --showdots"
+  learnargs="$*"
 fi
 
 cd $SADIR/masses
 PATH=$PATH:$SADIR:$SADIR/masses
 
-tmpdir=/tmp/bayestest.$$
 results=$testdir/results
+tmpdir=$results/config
 
-rm -rf $tmpdir
+rm -rf $results $tmpdir
 
 # now, just copy in the Bayes ruleset
-mkdir -p $tmpdir/rules $results
+mkdir -p $results $tmpdir/rules
 cp ../rules/23_bayes.cf $tmpdir/rules
 cp ../rules/50*.cf $tmpdir/rules
 
@@ -56,11 +56,20 @@ mkdir $tmpdir/dbs
 # learn the lot, then forget the ones we're testing on each time.
 # faster than learning from scratch for each fold
 
-echo "Learning from all ham buckets..."
-sa-learn-nonspam $learnprob --config-file=$tmpdir/rules $testdir/cor/ham/*
+# note: we use randseed=1 so that every run will always pick the
+# same messages if --learnprob is used.
 
-echo "Learning from all spam buckets..."
-sa-learn-spam $learnprob --config-file=$tmpdir/rules $testdir/cor/spam/*
+(
+echo -n "Learning from all ham buckets..." ; date
+time sa-learn-nonspam --randseed=1 $learnargs \
+	--config-file=$tmpdir/rules $testdir/cor/ham/*
+
+echo -n "Learning from all spam buckets..." ; date
+time sa-learn-spam --randseed=1 $learnargs \
+	--config-file=$tmpdir/rules $testdir/cor/spam/*
+
+echo -n "Done learning. " ; date
+) 2>&1 | tee $results/learn.log
 
 backup_dbs () {
   echo "Backing up full learned DBs..."
@@ -77,8 +86,11 @@ echo "Dumping bayes DB..."
 
 backup_dbs
 
+(
+
+echo -n "Starting test..." ; date
 for bucket in 1 2 3 4 5 6 7 8 9 10 ; do
-  echo "Bucket $bucket..."
+  echo -n "Bucket $bucket..." ; date
 
   if [ $bucket != 1 ] ; then restore_dbs ; fi
 
@@ -86,18 +98,18 @@ for bucket in 1 2 3 4 5 6 7 8 9 10 ; do
   mkdir $rdir
 
   echo "Forgetting contents of test ham bucket..."
-  sa-forget --showdots $testdir/cor/ham/bucket.$bucket
+  time sa-forget --showdots $testdir/cor/ham/bucket.$bucket
 
   echo "Forgetting contents of test spam bucket..."
-  sa-forget --showdots $testdir/cor/spam/bucket.$bucket
+  time sa-forget --showdots $testdir/cor/spam/bucket.$bucket
 
   echo "Running mass-check on ham bucket..."
-  ./mass-check -c=$tmpdir/rules --showdots \
+  time ./mass-check -c=$tmpdir/rules --showdots \
 	--bayes $testdir/cor/ham/bucket.$bucket \
 	> $rdir/nonspam.log
 
   echo "Running mass-check on spam bucket..."
-  ./mass-check -c=$tmpdir/rules --showdots \
+  time ./mass-check -c=$tmpdir/rules --showdots \
 	--bayes $testdir/cor/spam/bucket.$bucket \
 	> $rdir/spam.log
 
@@ -111,14 +123,18 @@ for bucket in 1 2 3 4 5 6 7 8 9 10 ; do
 	> $rdir/thresholds
 
 done
-rm -rf $tmpdir
+echo -n "Done test..." ; date
+
+) 2>&1 | tee $results/test.log
 
 cat $results/bucket*/spam.log > $results/spam_all.log
 cat $results/bucket*/nonspam.log > $results/nonspam_all.log
 
-./bayes-testing/draw-bayes-histogram $results/spam_all.log $results/nonspam_all.log \
+./bayes-testing/draw-bayes-histogram \
+	$results/spam_all.log $results/nonspam_all.log \
 	> $results/hist_all
-./bayes-testing/bayes-thresholds $results/spam_all.log $results/nonspam_all.log \
+./bayes-testing/bayes-thresholds \
+	$results/spam_all.log $results/nonspam_all.log \
 	> $results/thresholds_all
 
 echo "Done."
