@@ -10,6 +10,7 @@ use Mail::SpamAssassin::Dns;
 use Mail::SpamAssassin::Locales;
 use Mail::SpamAssassin::PhraseFreqs;
 use Mail::SpamAssassin::TextCat;
+use Mail::SpamAssassin::MailingList;
 use Time::Local;
 use strict;
 
