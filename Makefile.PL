@@ -60,6 +60,7 @@ my @ATT_KEYS = (
   'PERL_TAINT',       # "   "  "    "  "    taint mode for the scripts (DON'T)
 
 
+  'BUILD_SPAMC'  ,    # Set to 'no' to skip build of spamc.
   'ENABLE_SSL',       # Set to 'yes' to build spamc with SSL support.
   'CONTACT_ADDRESS',  # To not ask for the contact address, use this.
   'RUN_NET_TESTS',    # To not ask whether net tests should be run, use this.
@@ -95,6 +96,7 @@ sub yesno {
 
 
 my %opt = (
+  'build_spamc'        => undef,
   'enable_ssl'      => undef,
   'contact_address' => undef,
   'run_net_tests'   => undef,
@@ -159,7 +161,7 @@ my %makefile = (
 
     'EXE_FILES'	=> [
         'spamassassin', 'sa-learn',
-        'spamc/spamc$(EXE_EXT)',
+        'spamc/spamc$(EXE_EXT)', # must next to last one
         'spamd/spamd',	# must be the last one
     ],
 
@@ -306,6 +308,18 @@ if (RUNNING_ON_WINDOWS) {
   # Don't build spamd
   pop    @{$makefile{EXE_FILES}};
   delete $makefile{MAN1PODS}{'spamd/spamd'};
+  # building spamc is optional under Win32 because not everyone has compiler
+  if (!defined $opt{'build_spamc'}) {
+    $opt{'build_spamc'} = bool(prompt(
+      "Build spamc.exe (environment must be set up for C compiler)? (y/n)",
+      'y'));
+  } else {
+    $opt{'build_spamc'} = bool($opt{'build_spamc'});
+  }
+  if (!$opt{'build_spamc'}) {
+    pop    @{$makefile{EXE_FILES}};
+    delete $makefile{MAN1PODS}{'spamc/spamc.pod'};
+  }
   # And require Net::DNS v0.44
   #$makefile{PREREQ_PM}{Net::DNS} = 0.44;
 }
