@@ -227,6 +227,7 @@ sub razor_lookup {
 
 sub is_dcc_available {
   my ($self) = @_;
+  my (@resp);
 
   if ($self->{main}->{local_tests_only}) {
     dbg ("local tests only, ignoring DCC");
@@ -234,13 +235,15 @@ sub is_dcc_available {
   }
 
   if (!open(DCCHDL, "dccproc -V 2>&1 |")) {
+    @resp = <DCCHDL>;
     close DCCHDL;
     dbg ("DCC is not available");
     return 0;
   } 
   else {
+    @resp = <DCCHDL>;
     close DCCHDL;
-    dbg ("DCC is available");
+    dbg ("DCC is available: ".join(" ", @resp));
     return 1;
   }
 }
@@ -330,7 +333,7 @@ sub dcc_lookup {
   }
 
   if ($count{body} >= $self->{conf}->{dcc_body_max} || $count{fuz1} >= $self->{conf}->{dcc_fuz1_max} || $count{fuz2} >= $self->{conf}->{dcc_fuz2_max}) {
-    dbg ("DCC: Listed! BODY: $count{body} >= $self->{conf}->{dcc_body_max} FUZ1: $count{fuz1} >= $self->{conf}->{dcc_fuz1_max} FUZ2: $count{fuz2} >= $self->{conf}->{dcc_fuz2_max}");
+    dbg ("DCC: Listed! BODY: $count{body} of $self->{conf}->{dcc_body_max} FUZ1: $count{fuz1} of $self->{conf}->{dcc_fuz1_max} FUZ2: $count{fuz2} of $self->{conf}->{dcc_fuz2_max}");
     return 1;
   }
   

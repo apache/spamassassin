@@ -147,6 +147,7 @@ sub razor_report {
 
 sub is_dcc_available {
   my ($self) = @_;
+  my (@resp);
 
   if ($self->{main}->{local_tests_only}) {
     dbg ("local tests only, ignoring DCC");
@@ -154,20 +155,23 @@ sub is_dcc_available {
   }
 
   if (!open(DCCHDL, "dccproc -V 2>&1 |")) {
+    @resp = <DCCHDL>;
     close DCCHDL;
     dbg ("DCC is not available");
     return 0;
   } 
   else {
+    @resp = <DCCHDL>;
     close DCCHDL;
-    dbg ("DCC is available");
+    dbg ("DCC is available: ".join(" ", @resp));
     return 1;
   }
 }
 
+use Symbol qw(gensym);
+
 sub dcc_report {
   my ($self, $fulltext) = @_;
-  my $timeout = 10;
 
   eval {
     use IPC::Open2;
@@ -177,6 +181,9 @@ sub dcc_report {
     local $SIG{PIPE} = sub { die "brokenpipe\n" };
 
     alarm 10;
+
+    $dccin  = gensym();
+    $dccout = gensym();
 
     $pid = open2($dccout, $dccin, 'dccproc -t many '.$self->{main}->{conf}->{dcc_options}.' >/dev/null 2>&1');
 
