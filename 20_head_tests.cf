@@ -298,3 +298,6 @@ describe USER_IN_ALL_SPAM_TO    User is listed in 'all_spam_to'
 header ORDER_STATUS             Subject =~ / order\b/i
 describe ORDER_STATUS           Subject looks like order info
 
+header IN_REP_TO		In-Reply-To =~ /\S/
+describe IN_REP_TO		'In-Reply-To' line found
+
