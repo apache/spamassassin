@@ -79,12 +79,52 @@ body T_HTML_JAVASCRIPT		eval:html_test('t_javascript')
 # possible replacement/supplement for FROM_BTAMAIL
 header T_BTAMAIL_HEADER		ALL =~ /btamail\.net\.cn/i
 
-# bug 1106
-header __OUTLOOK_EXCEPT_IMO	X-Mailer =~ /Microsoft Outlook(?! IMO)/
+########################################################################
+# bug 1106: forged MUAs
+
+# AOL
+header __AOL_MUA		X-Mailer =~ /\bAOL\b/
+header __AOL_MSGID		Message-Id =~ /^<[0-9a-f]{1,3}\.[0-9a-f]{7,8}\.[0-9a-f]{8}\@aol.com>$/
+meta T_FORGED_MUA_AOL		(__AOL_MUA && !__AOL_MSGID)
+describe T_FORGED_MUA_AOL	Forged mail pretending to be from AOL
+score T_FORGED_MUA_AOL		1.0
+
+# Internet Mail Service
+header __IMS_MUA		X-Mailer =~ /Internet Mail Service/
+header __IMS_MSGID		Message-Id =~ /^<[A-F\d]{38,40}\@\S+>$/
+meta T_FORGED_MUA_IMS		(__IMS_MUA && !__IMS_MSGID)
+describe T_FORGED_MUA_IMS	Forged mail pretending to be from IMS
+score T_FORGED_MUA_IMS		1.0
+
+# Mozilla
+header __MOZILLA_MUA		X-Mailer =~ /\bMozilla\b/
+header __MOZILLA_MSGID		Message-Id =~ /^<[A-F\d]{8}\.[A-F\d]{6,8}\@\S+>$/
+meta T_FORGED_MUA_MOZILLA	(__MOZILLA_MUA && !__MOZILLA_MSGID)
+describe T_FORGED_MUA_MOZILLA	Forged mail pretending to be from Mozilla
+score T_FORGED_MUA_MOZILLA	1.0
+
+# Outlook
+header __OUTLOOK_MUA		X-Mailer =~ /Outlook(?! IMO)/
 header __OUTLOOK_MSGID		Message-Id =~ /^<[0-9a-f]{12,12}\$[0-9a-f]{8,8}\$[0-9a-f]{8,8}\@.{1,50}>$/
-meta T_FORGED_OUTLOOK_MAILER	(__OUTLOOK_EXCEPT_IMO && !__OUTLOOK_MSGID)
-describe T_FORGED_OUTLOOK_MAILER	Forged mail pretending to be from Outlook/OE
-score T_FORGED_OUTLOOK_MAILER	1.0
+meta T_FORGED_MUA_OUTLOOK	(__OUTLOOK_MUA && !__OUTLOOK_MSGID)
+describe T_FORGED_MUA_OUTLOOK	Forged mail pretending to be from Outlook
+score T_FORGED_MUA_OUTLOOK	1.0
+
+# Outlook IMO (Internet Mail Only)
+header __OIMO_MUA		X-Mailer =~ /Outlook IMO/
+header __OIMO_MSGID		Message-Id =~ /^<[A-P]{28}\.[a-z.]+\@\S+>$/
+meta T_FORGED_MUA_OIMO		(__OIMO_MUA && !__OIMO_MSGID)
+describe T_FORGED_MUA_OIMO	Forged mail pretending to be from Outlook IMO
+score T_FORGED_MUA_OIMO		1.0
+
+# QUALCOMM Eudora
+header __EUDORA_MUA		X-Mailer =~ /\b(?:QUALCOMM|Eudora)\b/
+header __EUDORA_MSGID		Message-Id =~ /^<(?:\d\d?\.){4,5}\d{14}\.[a-f0-9]{8}\@\S+>$/
+meta T_FORGED_MUA_EUDORA	(__EUDORA_MUA && !__EUDORA_MSGID)
+describe T_FORGED_MUA_EUDORA	Forged mail pretending to be from Eudora
+score T_FORGED_MUA_EUDORA	1.0
+
+########################################################################
 
 # possible replacements for SUBJ_HAS_SPACES
 # original version from a postfix filter (Craig Sanders)
