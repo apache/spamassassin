@@ -1,9 +1,18 @@
 #!/usr/bin/perl
 
+eval 'exec /usr/bin/perl  -S $0 ${1+"$@"}'
+    if 0; # not running under some shell
+
 # Some configurable stuff here.  This may get offloaded to a file in the
 # future.
 
-$smarthost="localhost:10026";
+# $smarthost="localhost:10026";
+
+# Some stuff from MSDW's smtpprox for preforking stuff
+
+my $children = 4;
+my $minperchild = 5;
+my $maxperchild = 10;
 
 # This file is based largely on example code bundled with MacGyver's
 # Net::SMTP::Server kit, but with some additional stuff to use
@@ -23,46 +32,119 @@ use Carp;
 use Net::SMTP::Server;
 use Net::SMTP::Server::Client;
 use Mail::SpamAssassin::SMTP::SmartHost;
+use Mail::SpamAssassin::MyMailAudit;
 use Mail::SpamAssassin;
 use Net::DNS;
+use Getopt::Long;
 
 my $spamtest = Mail::SpamAssassin->new();
 $spamtest->compile_now();       # ensure all modules etc. are preloaded
 $/ = "\n";                      # argh, Razor resets this!  Bad Razor!
 
-# Set up the server.  Right now, this is in accordance to Postfix's
-# filtering documentation.
+# This is the preforking and option-parsiong section taken from the MSDW
+# smtpproxy code by Bennett Todd.  Any comments from that code are not my
+# own comments (marked with "[MSDW]") unless otherwise noted.
+#
+# Depending on your platform, you may need his patch which uses
+# IPC/semaphores to get information which may be required to allow two
+# simultaneous instances to accept() a connection, which can be obtained at
+# http://bent.latency.net/smtpprox/smtpprox-semaphore-patch.  It is best to
+# apply the patch to the original script, then port it to this one.
+#
+# --irj
+
+my $syntax = "syntax: $0 [--children=$children] [--minperchild=$minperchild] ".
+             "[--maxperchild=$maxperchild] ".
+             "listen.addr:port talk.addr:port spamaddr\@example.com\n";
+
+GetOptions("children=n" => \$children,
+           "minperchild=n" => \$minperchild,
+           "maxperchild=n" => \$maxperchild) or die $syntax;
+
+die $syntax unless @ARGV == 3;
+my ($srcaddr, $srcport) = split /:/, $ARGV[0];
+my ($dstaddr, $dstport) = split /:/, $ARGV[1];
+my $spamaddr = $ARGV[2];
+
+print "Trying to start using source $srcaddr port $srcport, " .
+      "destination $dstaddr port $dstport, " . 
+      "reporting e-mail address $spamaddr.\n";
+
+die $syntax unless defined($srcport) and defined($dstport)
+  and defined($spamaddr);
+
+$smarthost=$dstaddr . ":" . $dstport;
+
+# Set up the server using the IP address and port specified on the command
+# line by the user.
 #
 # Since a vast majority of the SMTP code is based on MacGyver's sample code,
 # I'll spare everyone those details here as that info is in his code. 
 # Instead,  I'll be concentrating on the message-handling portion. --irj
 
-$server = new Net::SMTP::Server('localhost', 10025) ||
-  croak("Unable to handle client connection: $!\n");
+$server = new Net::SMTP::Server($srcaddr, $srcport) ||
+  croak("Unable to create server: $!\n");
 
-print "server started on port 10025";
+print "Server started on address $srcaddr port $srcport " .
+      "with destination address $dstaddr port $dstport";
+
+# [MSDW]
+# This should allow a kill on the parent to also blow away the
+# children, I hope
+
+my %children;
+use vars qw($please_die);
+$please_die = 0;
+$SIG{TERM} = sub { $please_die = 1; };
+
+# [MSDW]
+# This sets up the parent process
+
+PARENT: while (1) {
+    while (scalar(keys %children) >= $children) {
+        my $child = wait;
+        delete $children{$child} if exists $children{$child};
+        if ($please_die) { kill 15, keys %children; exit 0; }
+    }
+    my $pid = fork;
+    die "$0: fork failed: $!\n" unless defined $pid;
+    last PARENT if $pid == 0;
+    $children{$pid} = 1;
+    select(undef, undef, undef, 0.1);
+    if ($please_die) { kill 15, keys %children; exit 0; }
+}
+
+# [MSDW]
+# This block is a child service daemon. It inherited the bound
+# socket created by SMTP::Server->new, it will service a random
+# number of connection requests in [minperchild..maxperchild] then
+# exit
+
+my $lives = $minperchild + (rand($maxperchild - $minperchild));
+my %opts;
 
 while($conn = $server->accept()) {
     my $client = new Net::SMTP::Server::Client($conn) ||
       croak("Unable to handle client connection: $!\n");
 
+    # [MSDW]
     # Process the client.  This command will block until
     # the connecting client completes the SMTP transaction.
     $client->process || next;
 
-    # Mail::Audit wants an array of lines, while the server returns a huge
-    # string.  Since I am unsure whether it needs to have the CR/LF pair for
-    # each line for use with Razor, after splitting it, using the CR/LF
-    # pairs as delimiters, I walk over the message again to re-add them.
-    # Once the array is populated and tweaked, it is then handed to a new
-    # Mail::Audit object.
+    # Mail::SpamAssassin::MyMailAudit wants an array of lines, while the
+    # server returns a huge string.  Since I am unsure whether it needs to
+    # have the CR/LF pair for each line for use with Razor, after splitting
+    # it, using the CR/LF pairs as delimiters, I walk over the message again
+    # to re-add them.  Once the array is populated and tweaked, it is then
+    # handed to a new Mail::SpamAssassin::MyMailAudit object.
     # --irj
 
     $message = $client->{MSG};
     @msg = split ("\r\n", $message);
     $arraycont = @msg; for(0..$arraycont) { $msg[$_] .= "\r\n"; }
     %args = (data => \@msg);
-    $mail = Mail::Audit->new(%args);
+    $mail = Mail::SpamAssassin::MyMailAudit->new(%args);
 
     # At some point, I may also put some other code so I can go grab
     # preferences, e.g. via MySQL, e.g. scoring parameters, or even whether to
@@ -82,7 +164,7 @@ while($conn = $server->accept()) {
     if ($status->is_spam ()) {
         $status->rewrite_mail ();
         $message = join ("",$mail->header(),@{$mail->body()});
-        @recipients = ("====CHANGEME====");
+        @recipients = ("$spamaddr");
         $recips = \@recipients;
     } else {
         $recips = $client->{TO};
@@ -105,6 +187,12 @@ while($conn = $server->accept()) {
                                                  $recips,
                                                  $message,
                                                  "$smarthost");
+
+    # Zap this instance if this child's processing limit has been reached.
+    # --irj
+    
+    delete $server->{"s"};
+    exit 0 if $lives-- <= 0;
 }
 
 
@@ -130,7 +218,9 @@ F<spamproxyd> currently has no options.
 
 =head1 DESCRIPTION
 
-This is a prototype for an SMTP filter based on B<Mail::SpamAssassin>
+IMPORTANT!  PLEASE read CHANGES.spamproxy before continuing!
+
+This is a prototype for an SMTP filter based on Mail::SpamAssassin
 (http://spamassassin.org, http://spamassassin.sourceforge.net).
 
 This was originally written with Postfix's filering in mind, based on the
@@ -144,24 +234,20 @@ being transferred.  However, it's currently good enough for a small-scale
 environment, like the IRC network for which I serve as postmaster, along
 with several other people I service on a small machine.
 
-This script requires B<Mail::SpamAssassin> (see above) and B<Net::SMTP::Server>
+This script requires Mail::Assassin (see above) and Net::SMTP::Server
 (http://www.macgyver.org/software/perl/, plus it is also in CPAN).  You also
 need a modified version of one of the modules in order to connect to a
 specific SMTP server, which I include in the package.
 
-Right now, this script has a few shortcomings:
+Right now, this script has a couple of shortcomings:
 
-1.  It only handles one SMTP transaction at a time.  I am considering
-    integrating preforking code in to allow for more concurrency, like the
-    code found in MSDW's smtpprox package.
-
-2.  Configurability, configurability!  This is especially true if this will
+1.  Configurability, configurability!  This is especially true if this will
     filter for multiple people whose needs may be quite different, including
     per-user weighting of the "suspicious stuff", white-lists, etc, and of
     course, whether to tag spam then deliver (if wanted), even whether to
-    filter or not.
+    filter at all.
 
-3.  What do YOU want? Who knows?  With Perl, your imagination's the limit. 
+2.  What do YOU want? Who knows?  With Perl, your imagination's the limit. 
 
 So far, I've managed to zap quite a bit of spam that'd normally go right
 through the server.  With Vipul's Razor, this can go up quite a bit.  If
@@ -179,9 +265,12 @@ Ian R. Justman E<lt>ianj@esper.netE<gt>
 
 =head1 CREDITS
 
-Justin Mason for B<Mail::SpamAssassin>
+Justin Mason and Craig Hughes for B<Mail::SpamAssassin>
 
 Habeeb J. "MacGyver" Dihu for his B<Net::SMTP::Server> code
+
+Bennett Todd for the perforking code and option-parsing code from his
+    pacakge, smtpproxy
 
 Special thanks go out to the crew at my usual IRC hangout, notably Barry
 Hughes, Matti Koskimies, plus a number of others whom I may have not given
