@@ -67,6 +67,7 @@ optional, and the default is shown below.
  _PREVIEW_         content preview
  _SUMMARYT_        summary of tests hit for terse report
  _SUMMARYL_        summary of tests hit for standard report
+ _CONTACTADDRESS_  contents of the 'report_contact' setting
 
 =head1 USER PREFERENCES
 
@@ -165,6 +166,7 @@ sub new {
   $self->{rewrite_subject} = 0;
   $self->{subject_tag} = '*****SPAM*****';
   $self->{report_safe} = 1;
+  $self->{report_contact} = 'the administrator of that system';
   $self->{use_terse_report} = 0;
   $self->{skip_rbl_checks} = 0;
   $self->{dns_available} = "test";
@@ -1103,8 +1105,19 @@ Clear the report template.
 =cut
 
     if (/^clear_report_template$/) {
-
       $self->{report_template} = ''; next;
+    }
+
+=item report_contact ...text of contact address...
+
+Set what _CONTACTADDRESS_ is replaced with in the above report text.
+By default, this is 'the administrator of that system', since the hostname
+of the system the scanner is running on is also included.
+
+=cut
+
+    if (/^report_contact\s+(.*?)\s*$/) {
+      $self->{report_contact} = $1; next;
     }
 
 =item unsafe_report ...some text for a report...

@@ -191,9 +191,9 @@ my $argv = join (' ', @ARGV);
     my $url = prompt (
       "What email address, or URL, should be used in the suspected-spam report\n".
       "text, for users who want more information on your filter installation?\n".
-      "(ISPs, in particular, should change this to a local Postmaster address\n".
-      "or URL.)",
-      "http://spamassassin.org/tag/");
+      "(ISPs, in particular, should change this to a local Postmaster\n".
+      "address or URL.)\n".
+      "Default text:", "the administrator of that system");
     $do = $url;
   }
 

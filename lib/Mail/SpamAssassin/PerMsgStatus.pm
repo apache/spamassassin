@@ -783,6 +783,8 @@ sub _replace_tags {
 
 	  HOSTNAME => sub { hostname() },
 
+	  CONTACTADDRESS => sub { my $self = shift; $self->{conf}->{report_contact}; },
+
 	  BAYES => sub {
 	    my $self = shift;
 	    $self->{bayes_score} ? sprintf("%3.4f", $self->{bayes_score}) : "0.5"
