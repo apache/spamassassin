@@ -201,9 +201,6 @@ endif	# Mail::SpamAssassin::Plugin::URIDNSBL
 header   T_LEADINGPREP       From =~ /^(?:A|About|All|An|And|Any|As|At|Be|Best|Bulk|Cash|Earn|Easy|Fast|Find|For|Free|From|Get|Hi|Home|In|Instant|Is|It|Its|Limited|Lose|Love|Make|Need|New|No|Save|Sex|She|Special|Stock|Stop|Take|Test|There|This|To|Try|Want|We|What|Where|Why|You|Your)[_ ]/i
 describe T_LEADINGPREP       From begins with preposition or similar word
 
-header   T_BLANKNAME    From =~ /"" \</i
-describe T_BLANKNAME    Sender has blanked out name
-
 header    T_WORTHCASH        Subject =~ /\b(?:Worth|Win|take|extra|earn|dollars|Short|need|claim|free|get|opinions?|surveys?)\b.{0,15}(?:fast)?(?:C[a\@]sh|M[0o]ney)\b/i
 describe  T_WORTHCASH        Subject mentions something is worth cash
 
@@ -246,23 +243,52 @@ describe  T_PENIS          masked spam word(s) in subject
 header    T_SPAMWORDS4      Subject =~ /(?!\bpenis\b)\bp[\W_]?[e3\*\xC8-\xCB\xE8-\xEB][\W_]?[n\xD1\xF1][\W_]?[il1:\|\*\xCC-\xCF\xEC-\xEF][\W_]?[s5\$\xA7]\b/i
 describe  T_SPAMWORDS4      masked spam word(s) in subject
 
-header    T_RNDSPM5   Subject =~ / [fghjklnqrtz]{3} /i
-describe  T_RNDSPM5   Subject contains random-text spamsign
-
-header    T_RNDSPM6   Subject =~ /\b[eiou][bfghjklnpqrtwz]{3}\b/i
-describe  T_RNDSPM6   Subject contains random-text spamsign
-
-header    T_RNDSPM7   Subject =~ /\b[bcdfghjklnpqrvwz]{5}\b/i
-describe  T_RNDSPM7   Subject contains random-text spamsign
-
-header    T_RNDSPM9      Subject =~ /\b[bcdfghjklmnpqrstvwxz]{7}\b/i
-describe  T_RNDSPM9      Subject contains random-text spamsign
-
-header    T_LONGSUBJ       Subject =~ /.{170,}/
-describe  T_LONGSUBJ       Subject is excessively long -- more than 169 chars
-
 header   T_TELESPRLY            Received =~ /dsl\.telesp\.net\.br/
 describe T_TELESPRLY            Spam passed through known spam relay domain
+
+##########################################################################
+# finish up rules from bug 2843 (above)
+
+# long headers
+header T_SUBJECT_LONG_170	Subject =~ /.{170,}/
+header T_SUBJECT_LONG_180	Subject =~ /.{180,}/
+header T_SUBJECT_LONG_190	Subject =~ /.{190,}/
+header T_SUBJECT_LONG_200	Subject =~ /.{200,}/
+header T_SUBJECT_LONG_210	Subject =~ /.{210,}/
+
+# random Subject text
+header T_RNDSPM7	Subject =~ /\b[bcdfghjklnpqrvwz]{5}\b/i
+describe T_RNDSPM7	Subject contains random-text spamsign
+header T_RNDSPM9	Subject =~ /\b[bcdfghjklmnpqrstvwxz]{7}\b/i
+describe T_RNDSPM9	Subject contains random-text spamsign
+# respin
+header T_SUBJECT_NOVOWEL_6	From =~ /[bcdfghjklmnpqrstvwxz]{6}/i
+header T_SUBJECT_NOVOWEL_7	From =~ /[bcdfghjklmnpqrstvwxz]{7}/i
+header T_SUBJECT_NOVOWEL_8	From =~ /[bcdfghjklmnpqrstvwxz]{8}/i
+header T_SUBJECT_NOVOWEL_9	From =~ /[bcdfghjklmnpqrstvwxz]{9}/i
+# with y?
+header T_SUBJECT_NOVOWEL_6Y	From =~ /[bcdfghjklmnpqrstvwxyz]{6}/i
+header T_SUBJECT_NOVOWEL_7Y	From =~ /[bcdfghjklmnpqrstvwxyz]{7}/i
+header T_SUBJECT_NOVOWEL_8Y	From =~ /[bcdfghjklmnpqrstvwxyz]{8}/i
+header T_SUBJECT_NOVOWEL_9Y	From =~ /[bcdfghjklmnpqrstvwxyz]{9}/i
+
+header T_FROM_BLANK_NAME_1	From =~ /"" </i
+describe T_FROM_BLANK_NAME_1	From: header has empty name
+header T_FROM_BLANK_NAME_2	From =~ /"" <\S+>/i
+describe T_FROM_BLANK_NAME_2	From: header has empty name
+header T_FROM_BLANK_NAME_3	From =~ /(?:\s|^)"" <\S+>/i
+describe T_FROM_BLANK_NAME_3	From: header has empty name
+
+##########################################################################
+
+# retry these with no y
+header T_FROM_DOMAIN_NOVOWEL	From =~ /\@\S*[bcdfghjklmnpqrstvwxz]{7}/i
+header T_FROM_LOCAL_NOVOWEL	From =~ /[bcdfghjklmnpqrstvwxz]{7}\S*\@/i
+uri T_URI_NOVOWEL		m%^https?://[^/?]*[bcdfghjklmnpqrstvwxz]{7}%i
+# and one shorter?
+header T_FROM_DOMAIN_NOVOWEL_6	From =~ /\@\S*[bcdfghjklmnpqrstvwxz]{6}/i
+header T_FROM_LOCAL_NOVOWEL_6	From =~ /[bcdfghjklmnpqrstvwxz]{6}\S*\@/i
+uri T_URI_NOVOWEL_6		m%^https?://[^/?]*[bcdfghjklmnpqrstvwxz]{6}%i
 
 ##########################################################################
 
