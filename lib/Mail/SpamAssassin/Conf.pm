@@ -1006,152 +1006,21 @@ length to no more than 50 characters.
 
 =item ok_languages xx [ yy zz ... ]		(default: all)
 
-Which languages are considered OK to receive mail in.  SpamAssassin will try to
-detect the language used in the message text.
+This option is used to specify which languages are considered OK for
+incoming mail.  SpamAssassin will try to detect the language used in the
+message text.
 
-Note that the language cannot always be recognized reliably.  In that case, no
-points will be assigned.
+Note that the language cannot always be recognized with sufficient
+confidence.  In that case, no points will be assigned.
 
 The rule C<UNDESIRED_LANGUAGE_BODY> is triggered based on how this is set.
 
-The following languages are recognized.  In your configuration, you must use
-the language specifier located in the first column, not the English name for
-the language.  You may also specify C<all> if your language is not listed, or
-if you want to allow any language.  The default setting is C<all>.
-
-=over 4
-
-=item af	afrikaans
-
-=item am	amharic
-
-=item ar	arabic
-
-=item be	byelorussian
-
-=item bg	bulgarian
-
-=item bs	bosnian
-
-=item ca	catalan
-
-=item cs	czech
-
-=item cy	welsh
-
-=item da	danish
-
-=item de	german
-
-=item el	greek
-
-=item en	english
-
-=item eo	esperanto
-
-=item es	spanish
-
-=item et	estonian
-
-=item eu	basque
-
-=item fa	persian
-
-=item fi	finnish
-
-=item fr	french
-
-=item fy	frisian
-
-=item ga	irish gaelic
-
-=item gd	scottish gaelic
-
-=item he	hebrew
-
-=item hi	hindi
-
-=item hr	croatian
-
-=item hu	hungarian
-
-=item hy	armenian
-
-=item id	indonesian
-
-=item is	icelandic
-
-=item it	italian
-
-=item ja	japanese
-
-=item ka	georgian
-
-=item ko	korean
-
-=item la	latin
-
-=item lt	lithuanian
-
-=item lv	latvian
-
-=item mr	marathi
-
-=item ms	malay
-
-=item ne	nepali
-
-=item nl	dutch
-
-=item no	norwegian
-
-=item pl	polish
-
-=item pt	portuguese
-
-=item qu	quechua
-
-=item rm	rhaeto-romance
-
-=item ro	romanian
-
-=item ru	russian
-
-=item sa	sanskrit
-
-=item sco	scots
-
-=item sk	slovak
-
-=item sl	slovenian
-
-=item sq	albanian
-
-=item sr	serbian
-
-=item sv	swedish
-
-=item sw	swahili
-
-=item ta	tamil
-
-=item th	thai
-
-=item tl	tagalog
-
-=item tr	turkish
-
-=item uk	ukrainian
-
-=item vi	vietnamese
-
-=item yi	yiddish
-
-=item zh	chinese
-
-=back
-
-examples:
+In your configuration, you must use the two or three letter language
+specifier in lowercase, not the English name for the language.  You may
+also specify C<all> if a desired language is not listed, or if you want to
+allow any language.  The default setting is C<all>.
+
+Examples:
 
   ok_languages all         (allow all languages)
   ok_languages en          (only allow English)
@@ -1159,17 +1028,158 @@ examples:
 
 Note: if there are multiple ok_languages lines, only the last one is used.
 
+Select the languages to allow from the list below:
+
+=over 4
+
+=item af	- Afrikaans
+
+=item am	- Amharic
+
+=item ar	- Arabic
+
+=item be	- Byelorussian
+
+=item bg	- Bulgarian
+
+=item bs	- Bosnian
+
+=item ca	- Catalan
+
+=item cs	- Czech
+
+=item cy	- Welsh
+
+=item da	- Danish
+
+=item de	- German
+
+=item el	- Greek
+
+=item en	- English
+
+=item eo	- Esperanto
+
+=item es	- Spanish
+
+=item et	- Estonian
+
+=item eu	- Basque
+
+=item fa	- Persian
+
+=item fi	- Finnish
+
+=item fr	- French
+
+=item fy	- Frisian
+
+=item ga	- Irish Gaelic
+
+=item gd	- Scottish Gaelic
+
+=item he	- Hebrew
+
+=item hi	- Hindi
+
+=item hr	- Croatian
+
+=item hu	- Hungarian
+
+=item hy	- Armenian
+
+=item id	- Indonesian
+
+=item is	- Icelandic
+
+=item it	- Italian
+
+=item ja	- Japanese
+
+=item ka	- Georgian
+
+=item ko	- Korean
+
+=item la	- Latin
+
+=item lt	- Lithuanian
+
+=item lv	- Latvian
+
+=item mr	- Marathi
+
+=item ms	- Malay
+
+=item ne	- Nepali
+
+=item nl	- Dutch
+
+=item no	- Norwegian
+
+=item pl	- Polish
+
+=item pt	- Portuguese
+
+=item qu	- Quechua
+
+=item rm	- Rhaeto-Romance
+
+=item ro	- Romanian
+
+=item ru	- Russian
+
+=item sa	- Sanskrit
+
+=item sco	- Scots
+
+=item sk	- Slovak
+
+=item sl	- Slovenian
+
+=item sq	- Albanian
+
+=item sr	- Serbian
+
+=item sv	- Swedish
+
+=item sw	- Swahili
+
+=item ta	- Tamil
+
+=item th	- Thai
+
+=item tl	- Tagalog
+
+=item tr	- Turkish
+
+=item uk	- Ukrainian
+
+=item vi	- Vietnamese
+
+=item yi	- Yiddish
+
+=item zh	- Chinese
+
+=back
+
 =cut
 
     if (/^ok_languages\s+(.+)$/) {
       $self->{ok_languages} = $1; next;
     }
 
+=back
+
+Z<>
+
+=over 4
+
 =item ok_locales xx [ yy zz ... ]		(default: all)
 
-Which locales (country codes) are considered OK to receive mail from.  Mail
-using B<character sets> used by languages in these countries, will not be
-marked as possibly being spam in a foreign language.
+This option is used to specify which locales (country codes) are
+considered OK for incoming mail.  Mail using B<character sets> used by
+languages in these countries will not be marked as possibly being spam in
+a foreign language.
 
 If you receive lots of spam in foreign languages, and never get any non-spam in
 these languages, this may help.  Note that all ISO-8859-* character sets, and
@@ -1180,43 +1190,31 @@ Set this to C<all> to allow all character sets.  This is the default.
 The rules C<CHARSET_FARAWAY>, C<CHARSET_FARAWAY_BODY>, and
 C<CHARSET_FARAWAY_HEADERS> are triggered based on how this is set.
 
-Select the locales to allow from the list below:
-
-=over 4
-
-=item en
-
-Western character sets in general
-
-=item ja
-
-Japanese
-
-=item ko
-
-Korea
-
-=item ru
-
-Cyrillic charsets
-
-=item th
-
-Thai
-
-=item zh
-
-Chinese (both simplified and traditional)
-
-=back
-
-examples:
+Examples:
 
   ok_locales all         (allow all locales)
   ok_locales en          (only allow English)
   ok_locales en ja zh    (allow English, Japanese, and Chinese)
 
 Note: if there are multiple ok_locales lines, only the last one is used.
+
+Select the locales to allow from the list below:
+
+=over 4
+
+=item en	- Western character sets in general
+
+=item ja	- Japanese character sets
+
+=item ko	- Korean character sets
+
+=item ru	- Cyrillic character sets
+
+=item th	- Thai character sets
+
+=item zh	- Chinese (both simplified and traditional) character sets
+
+=back
 
 =cut
 
@@ -1374,25 +1372,29 @@ This operates additively, so a C<trusted_networks> line after another one
 will result in all those networks becoming trusted.  To clear out the
 existing entries, use C<clear_trusted_networks>.
 
-If you're running with DNS checks enabled, SpamAssassin includes code to infer
-your trusted networks on the fly, so this may not be necessary.  This inference
-works as follows:
+If you're running with DNS checks enabled, SpamAssassin includes code to
+infer your trusted networks on the fly, so this may not be necessary.
+(Thanks to Scott Banister and Andrew Flury for the inspiration for this
+algorithm.)  This inference works as follows:
 
 =over 4
 
-=item if the 'from' IP address is on the same /16 network as the top Received
+=item *
+
+if the 'from' IP address is on the same /16 network as the top Received
 line's 'by' host, it's trusted
 
-=item if the address of the 'from' host is in a reserved network range,
+=item *
+
+if the address of the 'from' host is in a reserved network range,
 then it's trusted
 
-=item if any addresses of the 'by' host is in a reserved network range,
+=item *
+
+if any addresses of the 'by' host is in a reserved network range,
 then it's trusted
 
 =back
-
-(Thanks to Scott Banister and Andrew Flury for the inspiration for this
-algorithm.)
 
 =cut
 
