@@ -220,6 +220,10 @@ with at least 1000 messages of spam, and 1000 non-spam messages, if
 possible.  More is better, but anything over about 5000 messages does not
 improve accuracy significantly in our tests.
 
+Be careful that you train from the same source -- for example, if you train
+on old spam, but new non-spam mail, then the classifier will think that
+a mail with an old date stamp is likely to be spam.
+
 It's also worth noting that training with a very very small quantity of
 non-spam, will produce atrocious results.  You should aim to train with at
 least the same amount (or more if possible!) of non-spam data than spam.
@@ -267,6 +271,12 @@ possible.
 This will be turned on by setting the SpamAssassin configuration parameter
 C<auto_learn> to 1; note, however, that it is not supported in the current
 version of SpamAssassin.
+
+=item 4. Mistake-based training
+
+This means training on a small number of mails, then only training on
+messages that SpamAssassin classifies incorrectly.  This works, but it
+takes longer to get it right than a full training session would.
 
 =back
 

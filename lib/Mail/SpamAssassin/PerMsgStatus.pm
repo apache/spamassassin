@@ -657,24 +657,28 @@ sub rewrite_headers {
   my ($self) = @_;
 
   # add headers?  always for spam, only if requested for nonspam
-  if ( $self->{is_spam} || $self->{main}->{conf}->{always_add_headers} == 1 ) {
+  if ( $self->{is_spam} || $self->{main}->{conf}->{always_add_headers} == 1) {
+    $self->{msg}->put_header ("X-Spam-Checker-Version",
+			      "SpamAssassin " . Mail::SpamAssassin::Version() .
+			      " ($Mail::SpamAssassin::SUB_VERSION)");
+
     $self->{msg}->put_header ("X-Spam-Status", $self->_build_status_line());
     if($self->{main}->{conf}->{spam_level_stars} == 1) {
       $self->{msg}->put_header("X-Spam-Level", $self->{main}->{conf}->{spam_level_char} x int($self->{hits}));
     }
   }
 
-  # add spam headers if spam
-  if ($self->{is_spam}) {
-    $self->{msg}->put_header ("X-Spam-Flag", 'YES');
-    $self->{msg}->put_header ("X-Spam-Checker-Version",
-			      "SpamAssassin " . Mail::SpamAssassin::Version() .
-			      " ($Mail::SpamAssassin::SUB_VERSION)");
-
+  # add version & report headers if spam, or if always_report is on
+  if ($self->{is_spam} || $self->{main}->{conf}->{always_add_report}) {
     my $report = $self->{report};
     $report =~ s/^\s*\n//gm;	# Empty lines not allowed in header.
     $report =~ s/^\s*/  /gm;	# Ensure each line begins with whitespace.
     $self->{msg}->put_header ("X-Spam-Report", $report);
+  }
+
+  # add spam headers if spam
+  if ($self->{is_spam}) {
+    $self->{msg}->put_header ("X-Spam-Flag", 'YES');
 
     if ($self->{conf}->{rewrite_subject}) {
       my $subject = $self->{msg}->get_header("Subject") || '';
