@@ -338,6 +338,15 @@ describe ASKS_BILLING_ADDRESS   Asks for a billing address
 body CYBER_FIRE_POWER           /\b(?:by|for) Cyber FirePower\!/
 describe CYBER_FIRE_POWER       mentions Cyber FirePower!, a spam-tool
 
+body UPPERCASE_25_50		eval:check_for_uppercase('25', '50')
+describe UPPERCASE_25_50	message body is 25-50% uppercase
+
+body UPPERCASE_50_75		eval:check_for_uppercase('50', '75')
+describe UPPERCASE_50_75	message body is 50-75% uppercase
+
+body UPPERCASE_75_100		eval:check_for_uppercase('75', '100')
+describe UPPERCASE_75_100	message body is 75-100% uppercase
+
 # converted to use eval method by Matthew Cline
 body LINES_OF_YELLING		eval:check_for_yelling()
 describe LINES_OF_YELLING        A WHOLE LINE OF YELLING DETECTED
@@ -347,6 +356,10 @@ describe LINES_OF_YELLING_2     2 WHOLE LINES OF YELLING DETECTED
 
 body     LINES_OF_YELLING_3     eval:check_for_num_yelling_lines("3")
 describe LINES_OF_YELLING_3     3 WHOLE LINES OF YELLING DETECTED
+
+# this test doesn't actually use rawbody since rawbody isn't raw enough
+rawbody  MIME_EXCESSIVE_QP	eval:check_for_mime_excessive_qp()
+describe MIME_EXCESSIVE_QP	Excessive quoted-printable encoding in body
 
 # this test doesn't actually use rawbody since rawbody isn't raw enough
 rawbody  MIME_MISSING_BOUNDARY	eval:check_for_mime_missing_boundary()
