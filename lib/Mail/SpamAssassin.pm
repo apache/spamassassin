@@ -89,7 +89,7 @@ $IS_DEVEL_BUILD = 1;            # change for release versions
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.216 2003/09/30 04:52:55 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.217 2003/10/04 03:08:09 quinlan Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -1214,7 +1214,9 @@ sub init {
 
   $self->init_learner({ 'learn_to_journal' => $self->{conf}->{bayes_learn_to_journal} });
 
-  if ($self->{conf}->{auto_whitelist_factory}) {
+  if ($self->{conf}->{use_auto_whitelist} &&
+      $self->{conf}->{auto_whitelist_factory})
+  {
     my $factory;
     my $type = $self->{conf}->{auto_whitelist_factory};
     if ($type =~ /^([_A-Za-z0-9:]+)$/) {
