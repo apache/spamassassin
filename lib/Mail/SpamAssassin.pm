@@ -69,7 +69,7 @@ use vars	qw{
 @ISA = qw();
 
 $VERSION = "2.20";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.72 2002/03/08 20:06:49 hughescr Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.73 2002/03/17 11:51:31 hughescr Exp $';
 
 sub Version { $VERSION; }
 
@@ -643,6 +643,7 @@ sub create_default_prefs {
 
 sub expand_name ($) {
   my ($self, $name) = @_;
+  return $ENV{HOME} if $ENV{HOME} =~ /\//;
   return (getpwnam($name))[7] if ($name ne '');
   return (getpwuid($>))[7];
 }
