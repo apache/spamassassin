@@ -187,6 +187,26 @@ body T_MIME_EXCESSIVE_QP_V2_014	eval:check_for_mime_excessive_qp_v2('0.014')
 body T_MIME_EXCESSIVE_QP_V2_015	eval:check_for_mime_excessive_qp_v2('0.015')
 
 ########################################################################
+
+header __CD			exists:Content-Disposition
+header __CT			exists:Content-Type
+header __CTE			exists:Content-Transfer-Encoding
+header __MIME_VERSION		exists:MIME-Version
+
+meta T_MIME_NO_VERSION_CD	(__CD && !__MIME_VERSION)
+meta T_MIME_NO_VERSION_CTE	(__CTE && !__MIME_VERSION)
+meta T_MIME_NO_VERSION_CTYPE	(__CT && !__MIME_VERSION)
+
+meta T_MIME_NO_VERSION_ALL	(__CD && __CTE && __CT && !__MIME_VERSION)
+meta T_MIME_NO_VERSION_ANY	((__CD || __CTE || __CT) && !__MIME_VERSION)
+meta T_MIME_NO_VERSION_CD_AND_CTE	(__CD && __CTE && !__MIME_VERSION)
+meta T_MIME_NO_VERSION_CD_OR_CTE	((__CD || __CTE) && !__MIME_VERSION)
+meta T_MIME_NO_VERSION_LONER	(__CD + __CTE + __CT + __MIME_VERSION == 1)
+meta T_MIME_NO_VERSION_TWO	((__CD + __CTE + __CT > 1) && !__MIME_VERSION)
+
+meta T_MIME_NO_VERSION_ODD	((__CD + __CTE + __CT == 1) && !__MIME_VERSION)
+
+########################################################################
 # bug 1106: forged MUAs
 # only needed a \b around the shortest X-Mailer regular expressions
 
