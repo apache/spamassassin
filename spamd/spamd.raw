@@ -48,25 +48,26 @@ Options:
 
   -a              Use auto-whitelists.
   -c              Create user preferences files if they do not already exist
-  -d		  Daemonize, detach from parent process
+  -d              Daemonize, detach from parent process
   -h              Print this usage message and exit
   -i ipaddr       Listen on the specified IP address (default: 127.0.0.1,
                   use 0.0.0.0 to listen on all available addresses)
+  -m num          allow maximum num children
   -p port         Listen on the specific port (default: 783)
   -q              Enable SQL config (only useful with -x)
-  -v              Enable vpopmail config  (only useful with -u set to vpopmail user)
+  -r pidfile      Write the process id to pidfile
   -s facility     Specify the syslog facility (default: mail)
   -u username     Run as named user, instead of running setuid to spamc user
+  -v              Enable vpopmail config  (only useful with -u set to vpopmail user)
   -x              Disable user config files
   -A host,...     Set list of authorized ip addresses which can connect to this
                   server (default: 127.0.0.1)
   -D              Print debugging messages
+  -F 0|1          remove/add 'From ' line at start of output (default: 1)
   -L              Use local tests only (no DNS or other network lookups)
-  -S              Stop tests after the spam threshold is reached
   -P              Die upon user errors (does not exist or user = root) instead of
                   running as 'nobody' with defaults.
-  -F 0|1          remove/add 'From ' line at start of output (default: 1)
-  -m num          allow maximum num children
+  -S              Stop tests after the spam threshold is reached
 
 EOUSAGE
     exit $resphash{EX_USAGE};
@@ -75,9 +76,10 @@ EOUSAGE
 use vars qw{
     $opt_d $opt_h $opt_L $opt_p $opt_A $opt_x $opt_s $opt_D $opt_u
     $opt_P $opt_c $opt_a $opt_i $opt_q $opt_F $opt_S $opt_m $opt_v
+    $opt_r
 };
 
-getopts('acdhi:p:qvs:u:xA:DLSPF:m:') or usage();
+getopts('acdhi:m:p:qr:s:u:vxA:DLSPF:') or usage();
 
 $opt_h and usage();
 
@@ -153,6 +155,8 @@ setsockopt(Server,SOL_SOCKET,SO_REUSEADDR,pack("l",1))  || die "setsockopt: $!";
 bind(Server, sockaddr_in($port, $addr))                 || die "bind: $!";
 listen(Server,SOMAXCONN)                                || die "listen: $!";
 
+$opt_d and daemonize();
+
 # support non-root use (after we bind to the port)
 my $setuid_to_user = 0;
 if ($opt_u) {
@@ -172,8 +176,6 @@ if ($opt_u) {
 
 $spamtest->compile_now();	# ensure all modules etc. are loaded
 $/ = "\n";			# argh, Razor resets this!  Bad Razor!
-
-$opt_d and daemonize();
 
 my $current_user;
 my $paddr;
@@ -620,6 +622,7 @@ sub kill_handler
     my ($sig) = @_;
     logmsg "server killed by SIG$sig, shutting down";
     close Server;
+    defined($opt_r) and unlink($opt_r);
     exit 0;
 }
 
@@ -639,6 +642,11 @@ sub daemonize
     exit if $pid;
     setsid or die "Can't start new session: $!";
     open STDERR,'>&STDOUT' or die "Can't duplicate stdout: $!";
+    if(defined($opt_r)) {
+       open PIDF,">$opt_r" or warn "Can't open PID file: $!";
+       print PIDF $$."\n";
+       close PIDF;
+    }
 }
 
 =head1 NAME
@@ -689,6 +697,10 @@ Turn on SQL lookups even when per-user config files have been disabled
 with B<-x>. this is useful for spamd hosts which don't have user's
 home directories but do want to load user preferences from an SQL
 database.
+
+=item B<-r> I<pidfile>
+
+Write the process ID of the spamd parent to the file specified by I<pidfile>.  The file will be unlinked when the parent exits.
 
 =item B<-v>
 
