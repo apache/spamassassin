@@ -231,14 +231,12 @@ sub new {
   $self->{user_scores_dsn} = '';
   $self->{user_scores_sql_username} = '';
   $self->{user_scores_sql_password} = '';
-  $self->{user_scores_sql_table} = 'userpref'; # Morgan - default to userpref for backwords compatibility
-# Michael 'Moose' Dinn, <dinn@twistedpair.ca>
-# For integration with Horde's preference storage
-# 20020831
-  $self->{user_scores_sql_field_username} = 'username';
-  $self->{user_scores_sql_field_preference} = 'preference';
-  $self->{user_scores_sql_field_value} = 'value';
-  $self->{user_scores_sql_field_scope} = 'spamassassin'; # probably shouldn't change this
+
+  # REIMPLEMENT: to allow integration with Horde's pref storage, we may want to
+  # reimplement this patch.  required: 5 config settings:
+  # "user_scores_sql_field_username", "...preference", "...value" and
+  # "...scope", and finally, 'user_scores_sql_table'.  Defaults are "username",
+  # "preference", "value", "spamassassin" and "userpref".
 
   # for backwards compatibility, we need to set the default headers
   # remove this except for X-Spam-Checker-Version in 2.70
@@ -2529,62 +2527,10 @@ The password for the database username, for the above DSN.
       $self->{user_scores_sql_password} = $1; next;
     }
 
-=item user_scores_sql_table tablename
-
-The table user preferences are stored in, for the above DSN.
-
-=cut
-
-    if(/^user_scores_sql_table\s+(\S+)$/) {
-      $self->{user_scores_sql_table} = $1; next;
-    }
-
-# Michael 'Moose' Dinn <dinn@twistedpair.ca>
-# For integration with horde preferences system
-# 20020831
-
-=item user_scores_sql_field_username field_username
-
-The field that the username whose preferences you're looking up is stored in.
-Default: C<username>.
-
-=cut
-
-    if(/^user_scores_sql_field_username\s+(\S+)$/) {
-      $self->{user_scores_sql_field_username} = $1; next;
-    }
-
-=item user_scores_sql_field_preference field_preference
-
-The name of the preference that you're looking for.  Default: C<preference>.
-
-=cut
-
-    if(/^user_scores_sql_field_preference\s+(\S+)$/) {
-      $self->{user_scores_sql_field_preference} = $1; next;
-    }
-
-=item user_scores_sql_field_value field_value
-
-The name of the value you're looking for.  Default: C<value>.
-
-=cut
-
-    if(/^user_scores_sql_field_value\s+(\S+)$/) {
-      $self->{user_scores_sql_field_value} = $1; next;
-    }
-
-=item user_scores_sql_field_scope field_scope
-
-The 'scope' field. In Horde this makes the preference a single-module
-preference or a global preference. There's no real need to change it in other
-systems.  Default: C<spamassassin>.
-
-=cut
-
-    if(/^user_scores_sql_field_scope\s+(\S+)$/) {
-      $self->{user_scores_sql_field_scope} = $1; next;
-    }
+    # REIMPLEMENT: to allow integration with Horde's pref stuff.  allow setting
+    # user_scores_sql_field_{username,preference,value,scope} and
+    # user_scores_sql_table here.  All just take \S+ and set the string of the
+    # same name on $self.
 
 ###########################################################################
 

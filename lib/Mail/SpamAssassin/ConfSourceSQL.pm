@@ -95,10 +95,11 @@ sub load_with_dbi {
    my $dbuser = $main->{conf}->{user_scores_sql_username};
    my $dbpass = $main->{conf}->{user_scores_sql_password};
 
-   my $f_preference = $main->{conf}->{user_scores_sql_field_preference};
-   my $f_value = $main->{conf}->{user_scores_sql_field_value};
-   my $f_username = $main->{conf}->{user_scores_sql_field_username};
-   my $f_table = $main->{conf}->{user_scores_sql_table};
+   # REIMPLEMENT: use settings from $main->{conf} here
+   my $f_preference = 'preference';
+   my $f_value = 'value';
+   my $f_username = 'username';
+   my $f_table = 'userpref';
 
    my $dbh = DBI->connect($dsn, $dbuser, $dbpass, {'PrintError' => 0});
 
