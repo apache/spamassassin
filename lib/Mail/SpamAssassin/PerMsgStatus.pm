@@ -40,6 +40,8 @@ use Mail::SpamAssassin::EvalTests;
 use Mail::SpamAssassin::AutoWhitelist;
 use Mail::SpamAssassin::HTML;
 
+use constant HAS_MIME_BASE64 => eval { require MIME::Base64; };
+
 use vars qw{
   @ISA $base64alphabet
 };
@@ -2031,23 +2033,18 @@ sub b64decodesub
 sub generic_base64_decode {
     my ($self, $to_decode) = @_;
     
-    my $retval;
-    eval {
-        require MIME::Base64;
-
+    if (HAS_MIME_BASE64) {
+	my $retval;
         # base64 decoding can produce cruddy warnings we don't care
         # about.  suppress them here.
         my $prevwarn = $SIG{__WARN__}; local $SIG{__WARN__} = sub { };
 
         $retval = MIME::Base64::decode_base64($to_decode);
-
         $SIG{__WARN__} = $prevwarn;
-    };
-    if ($@) {
-        return $self->slow_base64_decode($to_decode);
+        return $retval;
     }
     else {
-        return $retval;
+        return $self->slow_base64_decode($to_decode);
     }
 }
 
