@@ -3,12 +3,13 @@ package Mail::SpamAssassin::BayesStore;
 
 use strict;
 eval "use bytes";
-use Fcntl ':DEFAULT',':flock';
+use Fcntl;
 
 BEGIN { @AnyDBM_File::ISA = qw(DB_File GDBM_File NDBM_File SDBM_File); }
 use AnyDBM_File;
 
 use Mail::SpamAssassin;
+use Mail::SpamAssassin::Util;
 use Sys::Hostname;
 use File::Spec;
 use File::Path;
@@ -67,8 +68,6 @@ sub new {
   my ($bayes) = @_;
   my $self = {
     'bayes'             => $bayes,
-    'hostname'          => hostname,
-
     'already_tied'	=> 0,
     'is_locked'		=> 0,
     'string_to_journal' => '',
@@ -181,58 +180,14 @@ sub tie_db_writable {
 
   my $path = $main->sed_path ($main->{conf}->{bayes_path});
 
-  # untaint
-  $path =~ /^([-_\/\\\:A-Za-z0-9 \.]+)$/; $path = $1;
-
-  #NFS Safe Lockng (I hope!)
-  #Attempt to lock the dbfile, using NFS safe locking 
-  #Locking code adapted from code by Alexis Rosen <alexis@panix.com>
-  #Kelsey Cummings <kgc@sonic.net>
-  my $lock_file = $self->{lock_file} = $path.'.lock';
-  my $lock_tmp = $lock_file . '.' . $self->{hostname} . '.'. $$;
-  my $max_lock_age = 300; #seconds 
-  my $lock_tries = 30;
-
-  # untaint the name of the lockfile
-  $lock_tmp =~ /^([-_\/\\\:A-Za-z0-9 \.]+)$/; $lock_tmp = $1;
-
-  open(LTMP, ">".$lock_tmp)
-		or die "Cannot create tmp lockfile $lock_tmp for $lock_file: $!\n";
-  dbg ("bayes: created $lock_tmp");
-  my $old_fh = select(LTMP);
-  $|=1;
-  select($old_fh);
-
-  for (my $i = 0; $i < $lock_tries; $i++) {
-    dbg("bayes: $$ trying to get lock on $path pass $i");
-    print LTMP $self->{hostname}.".$$\n";
-    if ( link ($lock_tmp,$lock_file) ) {
-      dbg ("bayes: link to $lock_file ok");
-      $self->{is_locked} = 1;
-      last;
-
-    } else {
-      #link _may_ return false even if the link _is_ created
-      if ( (stat($lock_tmp))[3] > 1 ) {
-	dbg ("bayes: link to $lock_file: stat ok");
-	$self->{is_locked} = 1;
-	last;
-      }
-
-      #check to see how old the lockfile is
-      my $lock_age = (stat($lock_file))[10];
-      my $now = (stat($lock_tmp))[10];
-      if (!defined($lock_age) || $lock_age < $now - $max_lock_age) {
-	#we got a stale lock, break it
-	dbg("bayes: breaking stale lockfile: age=$lock_age now=$now");
-	unlink "$lock_file";
-      }
-      sleep(1);
-    }
+  my $lock_file = Mail::SpamAssassin::Util::safe_lock ($path);
+  if (defined $lock_file) {
+    $self->{lock_file} = $lock_file;
+    $self->{is_locked} = 1;
+  } else {
+    warn "Cannot open bayes_path $path R/W: $!\n";
+    return 0;
   }
-  close(LTMP);
-  unlink($lock_tmp);
-  dbg ("bayes: unlinked $lock_tmp");
 
   foreach my $dbname (@DBNAMES) {
     my $name = $path.'_'.$dbname;
@@ -641,9 +596,6 @@ sub get_journal_filename {
 
   my $main = $self->{bayes}->{main};
   my $fname = $main->sed_path ($main->{conf}->{bayes_path}."_journal");
-
-  # untaint
-  $fname =~ /^([-_\/\\\:A-Za-z0-9 \.]+)$/; $fname = $1;
 
   $self->{journal_live_path} = $fname;
   return $self->{journal_live_path};
