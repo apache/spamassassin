@@ -342,54 +342,49 @@ sub check_for_forged_received_helo {
   return ($self->{mismatch_helo} > 0);
 }
 
-# note: reverted to last working version
 sub _check_for_forged_received {
   my ($self) = @_;
 
   $self->{mismatch_helo} = 0;
   $self->{mismatch_from} = 0;
 
-  my @received = grep(/\S/, split(/\n/, $self->get ('Received')));
-  my @by;
-  my @from;
-  my @helo;
-  my @fromip;
-
-  for (my $i = 0; $i < $#received; $i++) {
-    if ($received[$i] =~ s/\bby[\t ]+(\w+(?:[\w.-]+\.)+\w+)//i) {
-      $by[$i] = lc($1);
-      $by[$i] =~ s/.*\.(\S+\.\S+)$/$1/;
-    }
-    if ($received[$i] =~ s/\bfrom[\t ]+(\w+(?:[\w.-]+\.)+\w+)//i) {
-      $from[$i] = lc($1);
-      $from[$i] =~ s/.*\.(\S+\.\S+)$/$1/;
-    }
-    if ($received[$i] =~ s/\bhelo[=\t ]+(\w+(?:[\w.-]+\.)+\w+)//i) {
-      $helo[$i] = lc($1);
-      $helo[$i] =~ s/.*\.(\S+\.\S+)$/$1/;
-    }
-    if ($received[$i] =~ s/^ \((?:\S+ |)\[(${IPV4_ADDRESS})\]\)//i) {
-      $fromip[$i] = $1;
-    }
+  my @fromip = map { $_->{ip} } @{$self->{relays_untrusted}};
+  # just pick up domains for these
+  my @by = map {
+               hostname_to_domain ($_->{lc_by});
+             } @{$self->{relays_untrusted}};
+  my @from = map {
+               hostname_to_domain ($_->{lc_rdns});
+             } @{$self->{relays_untrusted}};
+  my @helo = map {
+               hostname_to_domain ($_->{lc_helo});
+             } @{$self->{relays_untrusted}};
+ 
+  for (my $i = 1; $i < $self->{num_relays_untrusted}; $i++) {
+    next if (!defined $by[$i] || $by[$i] !~ /^\w+(?:[\w.-]+\.)+\w+$/);
 
     if (defined ($from[$i]) && defined($fromip[$i])) {
       if ($from[$i] =~ /^localhost(?:\.localdomain|)$/) {
         if ($fromip[$i] eq '127.0.0.1') {
           # valid: bouncing around inside 1 machine, via the localhost
-          # interface (freshmeat newsletter does this).
+          # interface (freshmeat newsletter does this).  TODO: this
+	  # may be obsolete, I think we do this in Received.pm anyway
           $from[$i] = undef;
         }
       }
     }
 
-    if ($i > 0 && defined($by[$i]) && defined($helo[$i - 1]) &&
-	($by[$i] ne $helo[$i - 1]))
+    my $prevhelo = $helo[$i-1];
+    my $prevfrom = $from[$i-1];
+
+    if (defined($prevhelo) && $prevhelo =~ /^\w+(?:[\w.-]+\.)+\w+$/
+		&& $by[$i] ne $prevhelo)
     {
       $self->{mismatch_helo}++;
     }
 
-    if ($i > 0 && defined($by[$i]) && defined($from[$i - 1]) &&
-	($by[$i] ne $from[$i - 1]))
+    if (defined($prevfrom) && $prevfrom =~ /^\w+(?:[\w.-]+\.)+\w+$/
+		&& $by[$i] ne $prevfrom)
     {
       $self->{mismatch_from}++;
     }
@@ -399,6 +394,9 @@ sub _check_for_forged_received {
 sub hostname_to_domain {
   # TODO: deal with the .co.uk case
   my ($hname) = @_;
+
+  if ($hname !~ /[a-zA-Z]/) { return $hname; }	# IP address
+
   if ($hname =~ /([^\.]+\.[^\.]+)$/) {
     $1;
   } else {
