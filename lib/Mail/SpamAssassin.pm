@@ -78,7 +78,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 $VERSION = "2.31";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.95 2002/06/14 23:41:25 hughescr Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.96 2002/06/16 05:24:44 duncf Exp $';
 
 sub Version { $VERSION; }
 
@@ -113,6 +113,7 @@ $HOME_URL = "http://spamassassin.org/";
 @default_prefs_path = (
         '__prefix__/etc/mail/spamassassin/user_prefs.template',
         '__prefix__/share/spamassassin/user_prefs.template',
+	'/etc/spamassassin/user_prefs.template',
         '/etc/mail/spamassassin/user_prefs.template',
         '/usr/local/share/spamassassin/user_prefs.template',
         '/usr/share/spamassassin/user_prefs.template',
