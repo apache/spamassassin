@@ -15,35 +15,41 @@
 
 /* Craig's log(score) evaluator, not as aggressive against FPs I think.
  */
-#define USE_LOG_SCORE_EVALUATION
+//#define USE_LOG_SCORE_EVALUATION
+
+/* Use score ranges derived from hit-frequencies S/O ratio,
+ * and numbers of mails hit.  If not defined, score ranges are 
+ * from -3.0 to 0.0 (for nice tests) or 0.0 to 3.0 (for normal tests),
+ * regardless of hit success rate or frequency.
+ */
+#define USE_SCORE_RANGES
 
 
-double       evaluate(PGAContext *, int, int);
-int          myMutation(PGAContext *, int, int, double);
-void         CreateString     (PGAContext *, int, int, int);
-void         Crossover        (PGAContext *, int, int, int, int, int, int);
-void         CopyString       (PGAContext *, int, int, int, int);
-int          DuplicateString  (PGAContext *, int, int, int, int);
-MPI_Datatype BuildDT          (PGAContext *, int, int);
-
+double evaluate(PGAContext *, int, int);
+int    myMutation(PGAContext *, int, int, double);
+int    GetIntegerParameter(char *query);
 void dump(FILE *);
 void WriteString(PGAContext *ctx, FILE *fp, int p, int pop);
 void showSummary(PGAContext *ctx);
 
-float threshold = 5.0;
-float nybias = 5.0;
+double threshold = 5.0;
+double nybias = 10.0;
+const int exhaustive_eval = 1;
 
 const double mutation_rate = 0.01;
 const double mutation_noise = 0.5;
-
-const float SCORE_CAP = 3.0;
+const double regression_coefficient = 0.75;
+#ifndef USE_SCORE_RANGES
+const double SCORE_CAP = 4.0;
+const double NEG_SCORE_CAP = -9.0;
+#endif
 
 const double crossover_rate = 0.65;
 
 int pop_size = 50;
 int replace_num = 20;
 
-const int maxiter = 50000;
+const int maxiter = 30000;
 
 int justCount = 0;
 
@@ -80,26 +86,45 @@ void init_data()
 
     loadtests();
     loadscores();
-    nybias = nybias*((float)num_spam)/((float)num_nonspam);
+    nybias = nybias*((double)num_spam)/((double)num_nonspam);
 
 #ifdef USE_MPI
   }
 
   MPI_Bcast(num_tests_hit, num_tests, MPI_CHAR, 0, MPI_COMM_WORLD);
-  MPI_Bcast(&nybias, 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
+  MPI_Bcast(&nybias, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast(is_spam, num_tests, MPI_CHAR, 0, MPI_COMM_WORLD);
   MPI_Bcast(tests_hit, num_tests*max_hits_per_msg, MPI_SHORT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&num_scores, 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(is_mutatable, num_scores, MPI_CHAR, 0, MPI_COMM_WORLD);
-  MPI_Bcast(range_lo, num_scores, MPI_FLOAT, 0, MPI_COMM_WORLD);
-  MPI_Bcast(range_hi, num_scores, MPI_FLOAT, 0, MPI_COMM_WORLD);
-  MPI_Bcast(bestscores, num_scores, MPI_FLOAT, 0, MPI_COMM_WORLD);
-  MPI_Bcast(scores, num_scores, MPI_FLOAT, 0, MPI_COMM_WORLD);
+  MPI_Bcast(range_lo, num_scores, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  MPI_Bcast(range_hi, num_scores, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  MPI_Bcast(bestscores, num_scores, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  MPI_Bcast(scores, num_scores, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 #endif
 }
 
+#define LOOKUP_MAX 1999
+double lookup[LOOKUP_MAX];
+
+// this is about 35% faster than calling PGAGetRealAllele() directly inside
+// score_msg(), in my tests.
+void
+load_scores_into_lookup(PGAContext *ctx, int p, int pop)
+{
+  int i;
+  if (num_scores >= LOOKUP_MAX) {
+    fprintf (stderr, "oops! increase LOOKUP_MAX in load_scores_into_lookup\n");
+    exit (1);
+  }
+  for (i = 0; i < num_scores; i++) {
+    lookup[i] = PGAGetRealAllele(ctx, p, pop, i); 
+  }
+} 
+
 int main(int argc, char **argv) {
     PGAContext *ctx;
+    int i,p;
     int arg;
 
 #ifdef USE_MPI
@@ -113,7 +138,7 @@ int main(int argc, char **argv) {
           break;
 
          case 't':
-           threshold = (float) atof(optarg);
+           threshold = (double) atof(optarg);
            break;
 
         case 's':
@@ -140,13 +165,8 @@ int main(int argc, char **argv) {
 
      PGASetUserFunction(ctx, PGA_USERFUNCTION_PRINTSTRING, (void *)WriteString);
      PGASetUserFunction(ctx, PGA_USERFUNCTION_ENDOFGEN, (void *)showSummary);
-     PGASetUserFunction(ctx, PGA_USERFUNCTION_CREATESTRING, (void *)CreateString);
-     PGASetUserFunction(ctx, PGA_USERFUNCTION_CROSSOVER,     (void *)Crossover);
-     PGASetUserFunction(ctx, PGA_USERFUNCTION_PRINTSTRING,   (void *)WriteString);
-     PGASetUserFunction(ctx, PGA_USERFUNCTION_COPYSTRING,    (void *)CopyString);
-     PGASetUserFunction(ctx, PGA_USERFUNCTION_DUPLICATE,     (void *)DuplicateString);
-     PGASetUserFunction(ctx, PGA_USERFUNCTION_BUILDDATATYPE, (void *)BuildDT);
-     PGASetUserFunction(ctx, PGA_USERFUNCTION_MUTATION, (void *)myMutation);
+
+     PGASetRealInitRange(ctx, range_lo, range_hi);
 
      /* use a tiny population: we just want to get into the evaluate function */
      if (justCount) {
@@ -160,13 +180,25 @@ int main(int argc, char **argv) {
 
      //PGASetMutationOrCrossoverFlag(ctx, PGA_TRUE);
 
+#ifndef USE_SCORE_RANGES
+
      PGASetMutationBoundedFlag(ctx, PGA_FALSE);
+     PGASetUserFunction(ctx, PGA_USERFUNCTION_MUTATION, (void *)myMutation);
+
+#else
+
+     PGASetMutationBoundedFlag(ctx, PGA_FALSE);
+     PGASetMutationType(ctx, PGA_MUTATION_RANGE);
+     PGASetRealInitRange (ctx, range_lo, range_hi);
+
+#endif
 
      //PGASetCrossoverType(ctx, PGA_CROSSOVER_ONEPT);
      PGASetCrossoverProb(ctx, crossover_rate);
 
      if (justCount) {           // don't allow any mutation or crossover
        PGASetMutationType(ctx, PGA_MUTATION_CONSTANT);
+       PGASetRealInitRange (ctx, bestscores, bestscores);
        PGASetCrossoverProb(ctx, 0.0);
      }
 
@@ -179,6 +211,26 @@ int main(int argc, char **argv) {
 
      PGASetUp(ctx);
 
+     // Now initialize the scores
+     for(i=0; i<num_scores; i++)
+     {
+       for(p=0; p<pop_size; p++)
+       {
+         // just counting?  score[i] = defaultscore[i] in that case
+         if (justCount) {
+           PGASetRealAllele(ctx, p, PGA_NEWPOP, i, bestscores[i]);
+           continue;
+         }
+
+#ifndef USE_SCORE_RANGES
+	 if (is_mutatable[i]) {
+            if(bestscores[i] > SCORE_CAP) bestscores[i] = SCORE_CAP;
+	    else if(bestscores[i] < NEG_SCORE_CAP) bestscores[i] = NEG_SCORE_CAP;
+	 }
+#endif
+	 PGASetRealAllele(ctx, p, PGA_NEWPOP, i, bestscores[i]);
+       }
+     }
      PGARun(ctx, evaluate);
 
      PGADestroy(ctx);
@@ -191,176 +243,19 @@ int main(int argc, char **argv) {
 }
 
 int ga_yy,ga_yn,ga_ny,ga_nn;
-float ynscore,nyscore,yyscore,nnscore;
+double ynscore,nyscore,yyscore,nnscore;
 
-#ifdef __ALTIVEC__
-/** This algorithm is going to do vector evaluation of fitness -- basically
-  * we're going to parallelize the message scoring, so we determine the total scores for
-  * multiple messages at the same time, using altivec operations.  In theory, this
-  * should yield a nice speedup.  Also, altivec only does float ops, not double,
-  * so that'll probably speed things up as well.  Hopefully the double<->float conversions
-  * won't eat up the speed difference.  Unfortunately, PGA only has double evolution function
-  * and not float.  Perhaps we can play with the binary genome stuff later -- would probably
-  * give even more of a speedup, and besides, it's more of a "real" GA that way...
-  */
-  
-#define max(x,y) (x>y?x:y)
-
-double evaluate(PGAContext *ctx, int p, int pop)
+double score_msg(PGAContext *ctx, int p, int pop, int i)
 {
-   float *myscores;
-   float ynweight,nyweight;
-   vector float x,y;
-   float xfer[4];
-   int h,i,j,k,num_hit;
-   vector float zero = (vector float)(0);
-   yyscore = ynscore = nyscore = nnscore = 0.0;
-   ga_yy = ga_yn = ga_ny = ga_nn = 0;
-
-   myscores = (float *)PGAGetIndividual(ctx, p, pop)->chrom;
-   // Process messages 4 at a time
-   for(i=0; i<num_tests/4-1; i++)
-   {
-      k = i*4;
-      y = zero;
-      num_hit = 0;
-      for(j=0;j<4;j++)
-      {
-         if(num_tests_hit[k+j] > num_hit)
-            num_hit = num_tests_hit[k+j];
-      }
-      for(j=0; j<num_hit; j++)
-      {
-         // Get the score for each of the 4 messages
-         for(h=0; h<4; h++)
-         {
-            if(num_tests_hit[k+h] >= j)
-               xfer[h] = myscores[tests_hit[k+h][j]];
-            else
-               xfer[h] = 0.0f;
-         }
-         x = vec_ldl(0,xfer);
-         // Do the addition
-         y = vec_add(x,y);
-      }
-      // Now y holds the total scores for these 4 messages
-      vec_st(y,0,xfer);
-      for(j=0; j<4; j++)
-      {
-         if(is_spam[k+j])
-         {
-            if(xfer[j] >= threshold)
-            {
-               // Good positive
-               ga_yy++;
-               yyscore += xfer[j];
-            }
-            else
-            {
-               // False negative
-               ga_yn++;
-               ynscore += xfer[j];
-            }
-         }
-         else
-         {
-            if(xfer[j] >= threshold)
-            {
-               // False positive
-               ga_ny++;
-               nyscore += xfer[j];
-            }
-            else
-            {
-               // Good negative
-               ga_nn++;
-               nnscore += xfer[j];
-            }
-         }
-      }
-   }
-   if(justCount)
-   {
-      dump(stdout);
-      exit(0);
-   }
-
-#ifndef USE_LOG_SCORE_EVALUTION
-
-   // just count ho far they were from the threshold, in each case
-   ynweight = ((float)ga_yn * threshold) - ynscore;
-   nyweight = nyscore - ((float)ga_ny * threshold);
-   
-   return ynweight + nyweight*nybias;
-
-#else
-
-   if(nyscore>3) nyweight = log(nyscore); else nyweight = 0;
-   if(ynscore>3) ynweight = log(ynscore); else ynweight = 0;
-
-   return (double)ga_yn + nybias*((double)ga_ny + nyweight) + -ynweight;
-#endif USE_LOG_SCORE_EVALUATION
-}
-
-#else
-
-float score_msg(float *myscores, int i);
-
-double evaluate(PGAContext *ctx, int p, int pop)
-{
-  float *myscores;
-  float ynweight,nyweight;
-  int i;
-  yyscore = ynscore = nyscore = nnscore = 0.0;
-  ga_yy=ga_yn=ga_ny=ga_nn=0;
-
-  myscores = (float *)PGAGetIndividual(ctx, p, pop)->chrom;
-  // For every message
-  for (i=num_tests-1; i>=0; i--)
-  {
-    score_msg(myscores,i);
-  }
-
-  if (justCount) {
-    dump(stdout);
-    exit (0);
-  }
-
-#ifndef USE_LOG_SCORE_EVALUATION
-
-  // just count how far they were from the threshold, in each case
-  ynweight = (ga_yn * threshold) - ynscore;
-  nyweight = nyscore - (ga_ny * threshold);
-  
-  return  ynweight +            /* all FNs' points from threshold */
-	  nyweight*nybias;      /* all FPs' points from threshold */
-
-#else
-  // Craig's: use log(score).
-  //
-  // off for now, let's see how the more aggressive FP-reducing algo
-  // above works
-  //
-  if(nyscore>3) nyweight = log(nyscore); else nyweight = 0;
-  if(ynscore>3) ynweight = log(ynscore); else ynweight = 0;
-
-  return  /*min false-neg*/(double)ga_yn +
-	  /*weighted min false-pos*/((double)ga_ny)*nybias +
-	  /*min score(false-pos)*/nyweight*nybias +
-	  /*max score(false-neg)*/-ynweight;
-#endif //USE_LOG_SCORE_EVALUATION
-}
-
-float score_msg(float *myscores, int i)
-{
-  float msg_score = 0.0;
+  double msg_score = 0.0;
   int j;
 
   // For every test the message hit on
   for(j=num_tests_hit[i]-1; j>=0; j--)
   {
     // Up the message score by the allele for this test in the genome
-    msg_score += myscores[tests_hit[i][j]];
+    //msg_score += PGAGetRealAllele(ctx, p, pop, tests_hit[i][j]);
+    msg_score += lookup[tests_hit[i][j]];
   }
 
   // Ok, now we know the score for this message.  Let's see how this genome did...
@@ -398,30 +293,86 @@ float score_msg(float *myscores, int i)
 
   return msg_score;
 }
-#endif //__ALTIVEC__
+
+double evaluate(PGAContext *ctx, int p, int pop)
+{
+  double tot_score = 0.0;
+  double ynweight,nyweight;
+  int i;
+  yyscore = ynscore = nyscore = nnscore = 0.0;
+  ga_yy=ga_yn=ga_ny=ga_nn=0;
+
+  load_scores_into_lookup(ctx, p, pop);
+
+  // For every message
+  for (i=num_tests-1; i>=0; i--)
+  {
+    tot_score += score_msg(ctx,p,pop,i);
+  }
+
+  if (justCount) {
+    dump(stdout);
+    exit (0);
+  }
+
+#ifndef USE_LOG_SCORE_EVALUATION
+
+  // just count how far they were from the threshold, in each case
+  ynweight = (ga_yn * threshold) - ynscore;
+  nyweight = nyscore - (ga_ny * threshold);
+  
+  return  ynweight +            /* all FNs' points from threshold */
+	  nyweight*nybias;      /* all FPs' points from threshold */
+
+#else
+  // Craig's: use log(score).
+  //
+  // off for now, let's see how the more aggressive FP-reducing algo
+  // above works
+  //
+  if(nyscore>3) nyweight = log(nyscore); else nyweight = 0;
+  if(ynscore>3) ynweight = log(ynscore); else ynweight = 0;
+
+  return  /*min false-neg*/(double)ga_yn +
+	  /*weighted min false-pos*/((double)ga_ny)*nybias +
+	  /*min score(false-pos)*/nyweight*nybias +
+	  /*max score(false-neg)*/-ynweight;
+#endif
+}
 
 /*
- * Mutate by adding a little gaussian noise (while staying in bounds)
+ * This mutation function tosses a weighted coin for each allele.  If the allele is to be mutated,
+ * then the way it's mutated is to regress it toward the mean of the population for that allele,
+ * then add a little gaussian noise.
+ *
+ * Aug 21 2002 jm: we now use ranges and allow PGA to take care of it, if USE_SCORE_RANGES
+ * is defined.
  */
+#ifndef USE_SCORE_RANGES
 int myMutation(PGAContext *ctx, int p, int pop, double mr) {
     int         count=0;
-    int i;
-    float *myscores;
-    
-    myscores = (float *)PGAGetIndividual(ctx, p, pop)->chrom;
+    int i,j;
 
     for (i=0; i<num_scores; i++)
     {
       if(is_mutatable[i] && PGARandomFlip(ctx, mr))
       {
-         if(myscores[i] > SCORE_CAP) myscores[i] = SCORE_CAP;
-         else if(myscores[i] < (-SCORE_CAP*2.0)) myscores[i] = -SCORE_CAP*2.0;
-         myscores[i] += PGARandomGaussian(ctx, myscores[i], mutation_noise);
-         count++;
+	double gene_sum=0.0;
+	// Find the mean
+	for(j=0; j<pop_size; j++) { if(p!=j) gene_sum += PGAGetRealAllele(ctx, j, pop, i); }
+	gene_sum /= (double)(pop_size-1);
+	// Regress towards it...
+	gene_sum = (1.0-regression_coefficient)*gene_sum+regression_coefficient*PGAGetRealAllele(ctx, p, pop, i);
+	// Set this gene in this allele to be the average, plus some gaussian noise
+	if(gene_sum > SCORE_CAP) gene_sum = SCORE_CAP; else if(gene_sum < NEG_SCORE_CAP) gene_sum = NEG_SCORE_CAP;
+	PGASetRealAllele(ctx, p, pop, i, PGARandomGaussian(ctx, gene_sum, mutation_noise));
+	count++;
       }
     }
     return count;
 }
+#endif
+
 
 void dump(FILE *fp)
 {
@@ -453,7 +404,6 @@ void dump(FILE *fp)
 void WriteString(PGAContext *ctx, FILE *fp, int p, int pop)
 {
   int i;
-  float *myscores;
 
 #ifdef USE_MPI
   int rank;
@@ -464,10 +414,9 @@ void WriteString(PGAContext *ctx, FILE *fp, int p, int pop)
 #endif
     evaluate(ctx,p,pop);
     dump(fp);
-    myscores = (float *)PGAGetIndividual(ctx, p, pop)->chrom;
     for(i=0; i<num_scores; i++)
     {
-      fprintf(fp,"score %-30s %2.3f\n",score_names[i],myscores[i]);
+      fprintf(fp,"score %-30s %2.3f\n",score_names[i],PGAGetRealAllele(ctx, p, pop, i));
     }
     fprintf ( fp,"\n" );
 #ifdef USE_MPI
@@ -502,126 +451,4 @@ void showSummary(PGAContext *ctx)
 #ifdef USE_MPI
   }
 #endif
-}
-
-/*****************************************************************************
- * CreateString allocates and initializes a chromosome.  If InitFlag is      *
- * set to true, then it will randomly initialize the chromosome; otherwise,  *
- * it sets each double to 0.0 and each int to 0.                             *
- *****************************************************************************/
-void CreateString(PGAContext *ctx, int p, int pop, int InitFlag) {
-    int i;
-    float *myscore;
-    PGAIndividual *new;
-
-    new = PGAGetIndividual(ctx, p, pop);
-    if (!(new->chrom = malloc(sizeof(float)*num_scores))) {
-        fprintf(stderr, "No room for new->chrom");
-        exit(1);
-    }
-    myscore = (float *)new->chrom;
-    if (InitFlag) {
-        for(i=0; i<num_scores; i++)
-        {
-           myscore[i] = bestscores[i];
-        }
-    } else {
-        for(i=0; i<num_scores; i++)
-        {
-           myscore[i] = 0.0;
-        }
-    }
-}
-
-
-/*****************************************************************************
- * Crossover implements uniform crossover on the chromosome.                 *
- *****************************************************************************/
-void Crossover(PGAContext *ctx, int p1, int p2, int pop1, int t1, int t2,
-               int pop2) {
-    int i;
-    float *parent1, *parent2, *child1, *child2;
-    double pu;
-
-    parent1 = (float *)PGAGetIndividual(ctx, p1, pop1)->chrom;
-    parent2 = (float *)PGAGetIndividual(ctx, p2, pop1)->chrom;
-    child1  = (float *)PGAGetIndividual(ctx, t1, pop2)->chrom;
-    child2  = (float *)PGAGetIndividual(ctx, t2, pop2)->chrom;
-
-    pu = PGAGetUniformCrossoverProb(ctx);
-
-    for (i = 0; i < num_scores; i++)
-    {
-		if (PGARandomFlip(ctx, pu)) {
-			child1[i] = parent1[i];
-			child2[i] = parent2[i];
-		} else {
-			child1[i] = parent2[i];
-			child2[i] = parent1[i];
-		}
-    }
-}
-
-
-/*****************************************************************************
- * CopyString makes a copy of the chromosome at (p1, pop1) and puts it at    *
- * (p2, pop2).                                                               *
- *****************************************************************************/
-void CopyString(PGAContext *ctx, int p1, int pop1, int p2, int pop2) {
-    void *d, *s;
-
-     s = PGAGetIndividual(ctx, p1, pop1)->chrom;
-     d = PGAGetIndividual(ctx, p2, pop2)->chrom;
-     memcpy(d, s, sizeof(float)*num_scores);
-}
-
-
-/*****************************************************************************
- * DuplicateString compares two chromosomes and returns 1 if they are the    *
- * same and 0 if they are different.                                         *
- *****************************************************************************/
-int DuplicateString(PGAContext *ctx, int p1, int pop1, int p2, int pop2) {
-    void *a, *b;
-
-     a = PGAGetIndividual(ctx, p1, pop1)->chrom;
-     b = PGAGetIndividual(ctx, p2, pop2)->chrom;
-     return (!memcmp(a, b, sizeof(float)*num_scores));
-}
-
-
-/*****************************************************************************
- * BuildDatattype builds an MPI datatype for sending strings to other        *
- * processors.  Consult your favorite MPI manual for more information.       *
- *****************************************************************************/
-MPI_Datatype BuildDT(PGAContext *ctx, int p, int pop) {
-  int             counts[3];
-  MPI_Aint        displs[3];
-  MPI_Datatype    types[3];
-  MPI_Datatype    DT_PGAIndividual;
-  PGAIndividual  *P;
-
-  P = PGAGetIndividual(ctx, p, pop);
-
-  /*  Build the MPI datatype.  Every user defined function needs these.
-   *  The first two calls are stuff that is internal to PGAPack, but 
-   *  the user still must include it.  See pgapack.h for details one the
-   *  fields (under PGAIndividual)
-   */
-  MPI_Address(&P->evalfunc, &displs[0]);
-  counts[0] = 2;
-  types[0]  = MPI_DOUBLE;
-
-  /*  Next, we have an integer, evaluptodate.  */  
-  MPI_Address(&P->evaluptodate, &displs[1]);
-  counts[1] = 1;
-  types[1]  = MPI_INT;
-
-  /*  Finally, we have the actual user-defined string.  */
-  MPI_Address(P->chrom, &displs[2]);
-  counts[2] = num_scores;
-  types[2]  = MPI_FLOAT;
-
-  MPI_Type_struct(3, counts, displs, types, &DT_PGAIndividual);
-  MPI_Type_commit(&DT_PGAIndividual);
-  return(DT_PGAIndividual);
 }

@@ -168,7 +168,8 @@ sub check {
 
   # Round the hits to 3 decimal places to avoid rounding issues
   # We assume required_hits to be properly rounded already.
-  $self->{hits} = sprintf "%0.3f", $self->{hits};
+  # add 0 to force it back to numeric representation instead of string.
+  $self->{hits} = (sprintf "%0.3f", $self->{hits}) + 0;
   
   dbg ("is spam? score=".$self->{hits}.
                         " required=".$self->{conf}->{required_hits}.
