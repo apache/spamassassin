@@ -1595,7 +1595,7 @@ sub get_cf_files_in_dir {
   my @cfs = grep { /\.cf$/i && -f "$dir/$_" } readdir(SA_CF_DIR);
   closedir SA_CF_DIR;
 
-  return map { "$dir/$_" } sort { $a cmp $b } @cfs;	# sort numerically
+  return map { "$dir/$_" } sort { $a cmp $b } @cfs;
 }
 
 ###########################################################################
