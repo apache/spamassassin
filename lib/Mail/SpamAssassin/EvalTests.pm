@@ -1039,6 +1039,16 @@ sub check_from_in_blacklist {
   }
 }
 
+sub check_to_in_blacklist {
+  my ($self) = @_;
+  local ($_);
+  foreach $_ ($self->all_to_addrs()) {
+    if ($self->_check_whitelist ($self->{conf}->{blacklist_to}, $_)) {
+      return 1;
+    }
+  }
+}
+
 ###########################################################################
 # added by DJ
 

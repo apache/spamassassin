@@ -180,6 +180,7 @@ sub new {
   $self->{whitelist_from} = { };
   $self->{blacklist_from} = { };
 
+  $self->{blacklist_to} = { };
   $self->{whitelist_to} = { };
   $self->{more_spam_to} = { };
   $self->{all_spam_to} = { };
@@ -488,6 +489,18 @@ See above.
     }
     if (/^all_spam_to\s+(.+)$/) {
       $self->add_to_addrlist ('all_spam_to', split (' ', $1)); next;
+    }
+
+=item blacklist_to add@ress.com
+
+If the given address appears as a recipient in the message headers
+(Resent-To, To, Cc, obvious envelope receipient, etc,) the mail will
+be blacklisted.  Same format as C<blacklist_from>.
+
+=cut
+
+    if (/^blacklist_to\s+(.+)$/) {
+      $self->add_to_addrlist ('blacklist_to', split (' ', $1)); next;
     }
 
 =item required_hits n.nn   (default: 5)
