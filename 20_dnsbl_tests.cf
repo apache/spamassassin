@@ -58,10 +58,26 @@ tflags RCVD_IN_NJABL		net
 header RCVD_IN_NJABL_RELAY	rbleval:check_rbl_sub('njabl', '127.0.0.2')
 describe RCVD_IN_NJABL_RELAY	NJABL: sender is confirmed open relay
 tflags RCVD_IN_NJABL_RELAY	net
- 	
+
 header RCVD_IN_NJABL_DIALUP	rbleval:check_rbl('njabl-notfirsthop', 'dnsbl.njabl.org.', '127.0.0.3')
 describe RCVD_IN_NJABL_DIALUP	NJABL: sender is dialup that did non-local SMTP
 tflags RCVD_IN_NJABL_DIALUP	net
+
+header RCVD_IN_NJABL_SPAM	rbleval:check_rbl_sub('njabl', '127.0.0.4')
+describe RCVD_IN_NJABL_SPAM	NJABL: sender is confirmed spam source
+tflags RCVD_IN_NJABL_SPAM	net
+
+header RCVD_IN_NJABL_MULTI	rbleval:check_rbl_sub('njabl', '127.0.0.5')
+describe RCVD_IN_NJABL_MULTI	NJABL: sent through multi-stage open relay
+tflags RCVD_IN_NJABL_MULTI	net 
+
+header RCVD_IN_NJABL_CGI	rbleval:check_rbl_sub('njabl', '127.0.0.8')
+describe RCVD_IN_NJABL_CGI	NJABL: sender is an open formmail
+tflags RCVD_IN_NJABL_CGI	net
+
+header RCVD_IN_NJABL_PROXY	rbleval:check_rbl_sub('njabl', '127.0.0.9')
+describe RCVD_IN_NJABL_PROXY	NJABL: sender is an open proxy
+tflags RCVD_IN_NJABL_PROXY	net
 
 # ---------------------------------------------------------------------------
 
@@ -69,7 +85,7 @@ tflags RCVD_IN_NJABL_DIALUP	net
 # transfers: both axfr and ixfr available
 # url: http://www.dnsbl.sorbs.net/
 # pay-to-use: no
-# delist: $50 fee for T_RCVD_IN_SORBS_SPAM, others have free retest on request
+# delist: $50 fee for RCVD_IN_SORBS_SPAM, others have free retest on request
 header RCVD_IN_SORBS		rbleval:check_rbl('sorbs', 'dnsbl.sorbs.net.')
 describe RCVD_IN_SORBS		SORBS: sender is listed in SORBS
 tflags RCVD_IN_SORBS		net
