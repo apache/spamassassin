@@ -102,11 +102,11 @@ void init_data()
 int main(int argc, char **argv) {
     PGAContext *ctx;
     int i,p;
+    int arg;
 
 #ifdef USE_MPI
     MPI_Init(&argc, &argv);
 #endif
-    int arg;
 
     while ((arg = getopt (argc, argv, "b:r:s:t:C")) != -1) {
       switch (arg) {
