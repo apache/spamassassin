@@ -871,16 +871,17 @@ sub _check_whitelist {
 
 sub all_from_addrs {
   my ($self) = @_;
+  my @addrs;
 
   # Resent- headers take priority, if present. see bug 672
   # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=672
   my $resent = $self->get ('Resent-From');
   if (defined $resent && $resent =~ /\S/) {
-    return $self->{main}->find_all_addrs_in_line (
+    @addrs = $self->{main}->find_all_addrs_in_line (
   	 $self->get ('Resent-From'));
 
   } else {
-    return $self->{main}->find_all_addrs_in_line
+    @addrs = $self->{main}->find_all_addrs_in_line
   	($self->get ('From') .                  # std
   	 $self->get ('Envelope-Sender') .       # qmail: new-inject(1)
   	 $self->get ('Resent-Sender') .         # procmailrc manpage
@@ -889,30 +890,56 @@ sub all_from_addrs {
   	 $self->get ('Resent-From'));
     # http://www.cs.tut.fi/~jkorpela/headers.html is useful here
   }
+
+  dbg ("all '*From' addrs: ".join (" ", @addrs));
+  return @addrs;
 }
 
 sub all_to_addrs {
   my ($self) = @_;
+  my @addrs;
 
   # Resent- headers take priority, if present. see bug 672
   # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=672
   my $resent = $self->get ('Resent-To') . $self->get ('Resent-Cc');
   if (defined $resent && $resent =~ /\S/) {
-    return $self->{main}->find_all_addrs_in_line (
+    @addrs = $self->{main}->find_all_addrs_in_line (
   	 $self->get ('Resent-To') .             # std, rfc822
   	 $self->get ('Resent-Cc'));             # std, rfc822
 
   } else {
-    return $self->{main}->find_all_addrs_in_line (
+    # OK, a fetchmail trick: try to find the recipient address from
+    # the most recent 3 Received lines.  This is required for sendmail,
+    # since it does not add a helpful header like exim, qmail
+    # or Postfix do.
+    #
+    my $rcvd = $self->get ('Received');
+    $rcvd =~ s/\n[ \t]+/ /gs;
+    $rcvd =~ s/\n+/\n/gs;
+
+    my @rcvdlines = split (/\n/, $rcvd, 4); pop @rcvdlines; # forget last one
+    my @rcvdaddrs = ();
+    foreach my $line (@rcvdlines) {
+      if ($line =~ / for (\S+\@\S+);/) { push (@rcvdaddrs, $1); }
+    }
+
+    @addrs = $self->{main}->find_all_addrs_in_line (
+	 join (" ", @rcvdaddrs)."\n" .
          $self->get ('To') .                    # std
   	 $self->get ('Apparently-To') .         # sendmail, from envelope
-  	 $self->get ('Delivered-To') .          # Postfix, I think
+  	 $self->get ('Delivered-To') .          # Postfix, poss qmail
   	 $self->get ('Envelope-Recipients') .   # qmail: new-inject(1)
   	 $self->get ('Apparently-Resent-To') .  # procmailrc manpage
   	 $self->get ('X-Envelope-To') .         # procmailrc manpage
+  	 $self->get ('Envelope-To') .           # exim
          $self->get ('Cc'));                    # std
-    # http://www.cs.tut.fi/~jkorpela/headers.html is useful here
   }
+
+  dbg ("all '*To' addrs: ".join (" ", @addrs));
+  return @addrs;
+
+# http://www.cs.tut.fi/~jkorpela/headers.html is useful here, also
+# http://www.exim.org/pipermail/exim-users/Week-of-Mon-20001009/021672.html
 }
 
 ###########################################################################
