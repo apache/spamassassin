@@ -49,20 +49,10 @@ describe HTTP_CTRL_CHARS_HOST	Uses control sequences inside a URL hostname
 uri HTTP_EXCESSIVE_ESCAPES	/^https?:\/\/\S*%(?:3\d|[46][1-9a-f]|[57][\da])/i
 describe HTTP_EXCESSIVE_ESCAPES	Completely unnecessary %-escapes inside a URL
 
-# some frequently-advertised URLs
-uri WWW_CLIK4YOU_COM		/clik4you\.com/i
-describe WWW_CLIK4YOU_COM	Frequent Spam content
-
 # bug 1801
 uri IP_LINK_PLUS	/^https?\:\/\/(?:\S*\@)?\d+\.\d+\.\d+\.\d+.{0,20}(?:cgi|click|ads|id\=)/i
 describe IP_LINK_PLUS	Dotted-decimal IP address followed by CGI
 
-uri UNSUB_SCRIPT		/^https?:\/\/.*?cgi.*?(?:unsubscribe|remove)/i
-describe UNSUB_SCRIPT		URL of CGI script has unsubscribe or remove
-
-uri UNSUB_PAGE			/^https?:\/\/.*?(?!cgi).*?unsubscribe/i
-describe UNSUB_PAGE		URL of page called "unsubscribe"
- 	
 uri REMOVE_PAGE			/^https?:\/\/[^\/]+\/.*?remove/
 describe REMOVE_PAGE		URL of page called "remove"
  	
@@ -94,26 +84,8 @@ describe URI_IS_POUND		Filename is just a '\#'; probably a JS trick
 uri BTAMAIL_URL			/btamail\.net\.cn/i
 describe BTAMAIL_URL		Frequent Spam content
  	
-uri CHINA_URL			/(?:freehost|yada)china\.com/i
-describe CHINA_URL		Frequent Spam content
-
-uri MAILTO_TO_B2BMAIL		/^mailto:[^\s\@]{1,20}\@b2b-?mail\./is
-describe MAILTO_TO_B2BMAIL	Includes a link to a likely spammer email
-
-uri DAILY_PL			/\/logic\/[a-z]{2}\.pl/
-describe DAILY_PL		Spam URL pattern, DailyPromotions redirect
-
-uri DAILY_PXE			/http:\/\/(?:pxe|fx)\./i
-describe DAILY_PXE		Spam URL pattern, DailyPromotions server link
-
-uri E_MAILPROMO_URL		/\be-mailpromo\.net/
-describe E_MAILPROMO_URL	Includes a link to a likely spammer domain
-
 uri BARGAIN_URL			/bargain([sz]|-\S+)?\.(?:com|biz)/
 describe BARGAIN_URL		Includes a link to a likely spammer domain
-
-uri URI_PXLG			m{http://(?:www\.)?pxlg\.com}i
-describe URI_PXLG		Frequent Spam Content
 
 # this is actually effective.  What are they doing over there?
 uri BZ_TLD			/^(?:https?:\/\/|mailto:)[^\/]+\.bz(?:\/|$)/i
@@ -142,12 +114,6 @@ describe MORTGAGE_LINKS		Message has link to mortgage URI
 
 uri URI_OFFERS			m/offer([sz]|-\S+)?\.(?:com|bi?z)/i
 describe URI_OFFERS		Message has link to company offers
-
-uri URI_BANNEDCD		m@^(?:https?://|mailto:)[^\/]*bannedcd@i
-describe URI_BANNEDCD		Message has URI for bannedcd
-
-uri URI_FREEHT			m@^(?:https?://|mailto:)[^\/]*freeht@i
-describe URI_FREEHT		Message has URI for freeht
 
 uri URI_4YOU			m@^(?:https?://|mailto:)[^\/]*4you@i
 describe URI_4YOU		Message has URI 4you

@@ -281,12 +281,6 @@ describe FRIEND_AT_PUBLIC	sent to you@you.com or similar
 header FRIEND_PUBLIC		ALL =~ /^(?:to|cc|from):.*friend\@public\.com/im
 describe FRIEND_PUBLIC		sent from or to friend@public.com
 
-header DOMAINS_CHEAP		Subject =~ /(?:new extensions|domain names) now only \$\s*\d+/i
-describe DOMAINS_CHEAP		Subject: domain names are cheap
-
-header DOMAIN_SUBJECT		Subject =~ /(?:\s(?:\.|dot\s+)(?:info|biz|name)|domain)\b.*\b(?:extension|info|regist(?:ry|ration|er)|submission)/i
-describe DOMAIN_SUBJECT		Subject: domain registration spam subject
-
 header NO_DNS_FOR_FROM		eval:check_for_from_dns()
 describe NO_DNS_FOR_FROM	Domain in From header has no MX or A DNS records
 tflags NO_DNS_FOR_FROM          net
@@ -319,9 +313,6 @@ describe RCVD_DOUBLE_IP_SPAM	Bulk email fingerprint (double IP) found
 # other matches
 meta RCVD_DOUBLE_IP_LOOSE	(__DOUBLE_IP_LOOSE && !RCVD_DOUBLE_IP_SPAM)
 describe RCVD_DOUBLE_IP_LOOSE   Received: by and from look like IP addresses
-
-header SMTPD_IN_RCVD		Received =~ /\(SMTPD32-\d+\..+\)/
-describe SMTPD_IN_RCVD		Received via SMTPD32 server (SMTPD32-n.n)
 
 header LOTS_OF_CC_LINES		eval:check_lots_of_cc_lines()
 describe LOTS_OF_CC_LINES	Lots and lots of Cc: headers
@@ -454,11 +445,6 @@ header X_PMFLAGS_PRESENT	exists:X-PMFLAGS
 header X_PRECEDENCE_REF		exists:X-Precedence-Ref
 header X_SERV_HOST_PRESENT	exists:X-ServerHost
 header X_STORMPOST_TO		exists:X-Stormpost-To
-header X_X_PRESENT		exists:X-x
-header X_FIX_PRESENT            exists:X-Fix
-header COMPLAIN_TO		exists:Complain-To
-header X_VMP_TEXT               exists:X-VMP-Text
-header MICROSOFT		exists:microsoft
 describe X_ENC_PRESENT		Message has X-Encoding header
 describe X_ESMTP		Message has x-esmtp header
 describe X_LIBRARY		Message has X-Library header
@@ -467,11 +453,6 @@ describe X_PMFLAGS_PRESENT	Message has X-PMFLAGS header
 describe X_PRECEDENCE_REF	Message has X-Precedence-Ref header
 describe X_SERV_HOST_PRESENT	Message has X-ServerHost header
 describe X_STORMPOST_TO		Message has X-Stormpost-To header
-describe X_X_PRESENT		Message has X-x header
-describe X_FIX_PRESENT		Message has X-Fix header
-describe COMPLAIN_TO		Message has Complain-To header
-describe X_VMP_TEXT		Message has X-VMP-Text header
-describe MICROSOFT		Message has microsoft header
 
 header   MIME_ODD_CASE		ALL =~ /\nMiME-Version: /s
 describe MIME_ODD_CASE		MiME-Version header (oddly capitalized)
@@ -591,24 +572,11 @@ describe MIME_BOUND_RKFINDY     Spam tool pattern in MIME boundary (rfkindy)
 header DATE_MISSING             Date =~ /^UNSET$/ [if-unset: UNSET]
 describe DATE_MISSING           Missing Date: header
 
-# freqs:  0.001    0.003    0.000    1.00    2.66  POST_IN_RCVD
-header POST_IN_RCVD             Received =~ / Post\.(?:sk|cz)/  
-describe POST_IN_RCVD           Received contains fake 'Post.cz' hostname
-
 header TO_INVESTORS             To =~ /\bInvestors\@/
 describe TO_INVESTORS           To: non-existent 'Investors' address
 
 header TO_MALFORMED             To !~ /(?:(?:\"[^\"]+\"|\S+)\@\S+\.\S+|^\s*.+:\s*;|^\s*\"[^\"]+\":\s*;|^\s*\([^\)]*\)\s*$|<\S+(?:\!\S+){1,}>|^\s*$)/ [if-unset: unset@unset.unset]
 describe TO_MALFORMED           To: has a malformed address
-
-# jm: somehow these guys keep slipping through, and they're very persistent.
-# they use both azoogle.com and azogle.com, but this header is always
-# in this format.
-header AZOOGLE			X-Info =~ /service to abuse\@azoogle\.com$/
-describe AZOOGLE		From azoogle.com, azogle.com, etc.
-
-header SUBJECT_APPROVED		Subject =~ /approv(?:ed|al).?[.!*]/i
-describe SUBJECT_APPROVED	Subject talks about being approved
 
 header SUBJ_HAS_TIME_ID         Subject =~ /\sTime[: ]+\d+:\d+:\d+ [AP]M\s*$/i
 describe SUBJ_HAS_TIME_ID       Subject has a Time ID
@@ -691,11 +659,6 @@ describe RATWARE_EMPTY_HELO	Received headers forged (empty HELO)
 header TO_FILENAME		To =~ /<[CDEF]:/
 describe TO_FILENAME		"To" header contains a filename
 
-# quinlan: 2003-03-10, updated 2003-03-22
-# reply to a numbered address
-header ID_REPLY_TO_REPLY	Reply-To:addr =~ /reply.*\d{4}.*\@/i
-describe ID_REPLY_TO_REPLY	Reply-To address with reply and numbers
-
 # unsubscribe from a numbered address
 header __ID_REPLY_TO		Reply-To:addr =~ /\d{3}.*\d{3}.*\@/
 header __ID_RETURN_PATH		Return-path:addr =~ /\d{3}.*\d{3}.*\@/
@@ -739,9 +702,6 @@ describe FORGED_RCVD_NET_HELO	Host HELO'd using the wrong IP network
 
 header NO_RDNS_DOTCOM_HELO	eval:check_for_no_rdns_dotcom_helo()
 describe NO_RDNS_DOTCOM_HELO	Host HELO'd as a big ISP, but had no rDNS
-
-header X_ORIG_HOST		X-Originating-Host =~ /^\[/
-describe X_ORIG_HOST		Message has X-Originating-Host header
 
 header X_ORIG_IP_NOT_IPV4	X-Originating-IP !~ /\[?(?:\d{1,3}\.){3}\d{1,3}\]?/ [if-unset: 0.0.0.0] 
 describe X_ORIG_IP_NOT_IPV4	X-Originating-IP doesn't look like IPv4 address

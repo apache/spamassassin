@@ -7,7 +7,7 @@ use Test; BEGIN { plan tests => 6 };
 # ---------------------------------------------------------------------------
 
 %patterns = (
-q{ EXCUSE_13 } => 'EXCUSE_13',
+q{ MILLION_EMAIL } => 'MILLION_EMAIL',
 q{ GUARANTEE } => 'GUARANTEE',
 q{ ALL_NATURAL } => 'ALL_NATURAL',
 q{ OUR_AFFILIATE_PARTNERS } => 'OUR_AFFILIATE_PARTNERS',

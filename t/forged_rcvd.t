@@ -9,7 +9,7 @@ use Test; BEGIN { plan tests => 2 };
 %patterns = (
 
 q{ INVALID_DATE }, 'invdate',
-q{ VACATION_SCAM }, 'bodyspotted',
+q{ EXCUSE_4 }, 'bodyspotted',
 
 );
 

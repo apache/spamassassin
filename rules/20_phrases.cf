@@ -30,12 +30,6 @@ require_version @@VERSION@@
 
 ###########################################################################
 
-body REMOVE_SUBJ		/remove.{1,15}subject/i
-describe REMOVE_SUBJ		List removal information
-body SUBJ_REMOVE		/\w.{0,40}subject.{1,15}remove/i
-describe SUBJ_REMOVE		List removal information
-body REPLY_REMOVE_SUBJECT	/reply.{1,15}remove.{1,15}subject/i
-describe REPLY_REMOVE_SUBJECT	List removal information
 body REMOVE_FROM_LIST		/to be removed from (?:the|my|our) (?:mailing|e.?mail|opt[ -]?in)? ?list/i
 describe REMOVE_FROM_LIST	To be removed from list
 
@@ -69,8 +63,8 @@ describe BILL_SECTION		Claims compliance with spam regulations
 body FURTHER_TRANSMISSIONS	/further transmissions to you by the sender/i
 describe FURTHER_TRANSMISSIONS	Claims compliance with spam regulations
 
-body GUARANTEE			/\bGUARANTEE\b/
-describe GUARANTEE		Contains word 'guarantee' in all-caps
+body ALL_CAPS_GUAR		/\bGUARANTEE\b/
+describe ALL_CAPS_GUAR		Contains word 'guarantee' in all-caps
 body NO_QS_ASKED		/\bNO QUESTIONS ASKED\b/i
 describe NO_QS_ASKED		Doesn't ask any questions
 body FULL_REFUND		/full refund|refunds? your money in full/i
@@ -85,34 +79,18 @@ body NO_COST                    /\bno (?:cost|charge)\b/i
 describe NO_COST                No such thing as a free lunch (3)
 body GUARANTEED_100_PERCENT	/100% GUARANTEED/i
 describe GUARANTEED_100_PERCENT	One hundred percent guaranteed
-body MONEY_MAKING		/\bmoney mak(?:ing|er)/i
-describe MONEY_MAKING		Discusses money making
-body BULK_EMAIL			/bulk e-*mail/i
-describe BULK_EMAIL		Talks about bulk email
 body DEAR_FRIEND		/^\s*Dear Friend\b/i
 describe DEAR_FRIEND		Dear Friend? That's not very dear!
 body DEAR_SOMETHING		/\bDear (?:IT\W|Internet|candidate|sirs?|madam|investor|travell?er|car shopper|web)\b/i
 describe DEAR_SOMETHING		Contains 'Dear (something)'
-body CALL_NOW			/\bCALL NOW/i
-describe CALL_NOW		Urges you to call now
-body CALL_FREE			/\b(?:call|dial|toll free|order).{1,15}8(?:00|88|77|66|55|44|33|22)[\)\s-]*[\dA-Z]+[\s-]?[\dA-Z]+/i
-describe CALL_FREE		Contains a tollfree number
-body ONLINE_BIZ_OPS		/online business opportunities/i
-describe ONLINE_BIZ_OPS		Wants you to do business online
 body BILLION_DOLLARS		/[BM]ILLION DOLLAR/
 describe BILLION_DOLLARS	Talks about lots of money
-body OPT_IN			/\bopt-in\b/
-describe OPT_IN			Talks about opting in (lowercase version)
-body OPT_IN_CAPS		/(?-i:O)pt.?(?-i:I)n/i
-describe OPT_IN_CAPS		Talks about opting in (capitalized version)
 body OPT_OUT			/\bopt-out\b/
 describe OPT_OUT		Talks about opting out (lowercase version)
 body OPT_OUT_CAPS		/(?-i:O)pt.?(?-i:O)ut/i
 describe OPT_OUT_CAPS		Talks about opting out (capitalized version)
 body DIRECT_EMAIL		/direct e-*mail\b/i
 describe DIRECT_EMAIL		Talks about direct email
-body EMAIL_MARKETING		/e-*mail marketing/i
-describe EMAIL_MARKETING	Talks about email marketing
 
 body NEVER_ANOTHER		/never receive another mailing/i
 describe NEVER_ANOTHER		"another mailing" will "never" be "received"
@@ -123,9 +101,6 @@ describe ONE_TIME_MAILING	one time mailing doesn't mean it isn't spam
 
 body MILLION_EMAIL		/million (?:\w+ )?(?:e-?mail )?addresses/i
 describe MILLION_EMAIL		Get a million email addresses
-
-body ADDRESSES_ON_CD		/addresses on cd/i
-describe ADDRESSES_ON_CD	Addresses on CD are only useful for spam
 
 body EXCUSE_1			/\b(?:You (?:were sent|have received|are receiving)|You're receiving).{0,15}(?:message|e-?mail)s? because/i
 describe EXCUSE_1		Gives a lame excuse about why spam was sent
@@ -149,14 +124,8 @@ body EXCUSE_11			/you.{0,15}(?:name|mail).{0,15}(?:was|were|our).{0,15}list/i
 describe EXCUSE_11		Claims you were on a list
 body EXCUSE_12			/this (?:e?-?mail|message) (?:(?:has )?reached|was sent to) you in error/i
 describe EXCUSE_12		Nobody's perfect
-body EXCUSE_13			/mail was sent to you because\b/i
-describe EXCUSE_13		Gives an excuse for why message was sent
-body EXCUSE_14			/you (?:do not|no longer) wish to receive/i
-describe EXCUSE_14		Tells you how to stop further spam
 body EXCUSE_15			/this\s*(?:e?-?mail|message)? (?:is|was) (?:not|never) (?:spam|(?:sent )?unsolicited)/i
 describe EXCUSE_15		Claims to be legitimate email
-body EXCUSE_16			/received this.{1,10}in error/i
-describe EXCUSE_16		I wonder how many emails they sent in error
 
 body EXCUSE_19			/because (?:you're|you (?:are )?)(?:registered|.{0,20}\bopt.{0,3}in)/i
 describe EXCUSE_19		Claims you opted-in or registered
@@ -183,11 +152,6 @@ describe STRONG_BUY		Tells you about a strong buy
 body WE_HONOR_ALL		/\b(?:honou?r|respect)(?: all)? remov(?:e|al) requests?\b/i
 describe WE_HONOR_ALL		Claims to honor removal requests
 
-# Jul  2 2002 jm: note that CommuniGate is *not* spam software, it's totally legit.
-# but beginning spammers often download a trial version and spam with it.
-
-body OPPORTUNITY		/OPPORTUNITY/
-describe OPPORTUNITY		Gives information about an opportunity
 body STOCK_PICK			/STOCK PICK/i
 describe STOCK_PICK		Offers a picked stock
 body STOCK_ALERT		/stock alert/i
@@ -208,18 +172,11 @@ body MAIL_IN_ORDER_FORM		/\b(?:Mail-in|secure|ez|credit.card|fax this) Order For
 describe MAIL_IN_ORDER_FORM	Contains mail-in order form
 
 # (contrib: skod)
-body INSTANT_ACCESS             /\binstant access\b/i
-describe INSTANT_ACCESS         offers "instant access"
-
-# (contrib: skod)
 body UNIVERSITY_DIPLOMAS	/\b(?:college|university)\s+diplomas/i
 describe UNIVERSITY_DIPLOMAS	University Diplomas
 
 body PREST_NON_ACCREDITED	/prestigi?ous\b.{0,20}\bnon-accredited\b.{0,20}\buniversities/i
 describe PREST_NON_ACCREDITED	'Prestigious Non-Accredited Universities'
-
-body REMOVAL_INSTRUCTIONS	/\b(?:REMOVAL|UNSUBSCRIBE) INSTRUCTIONS/i
-describe REMOVAL_INSTRUCTIONS	Gives instructions for removal from list
 
 body CANNOT_BE_SPAM		/cannot be considered spam/i
 describe CANNOT_BE_SPAM		Claims "cannot be considered spam"
@@ -244,9 +201,6 @@ describe IMPOTENCE              Impotence cure
 
 body WORK_AT_HOME		/\b(?:WORK|(?:MAKE|EARN).{1,10}(?:MONEY|\$+|BUCKS|CASH)).{1,10}(?:AT|FROM) (?:YOUR )?HOME/i
 describe WORK_AT_HOME		Information on how to work at home (1)
-
-body HOME_EMPLOYMENT		/HOME.{0,10}(?: EMPLOYMENT|WORKER|BUSINESS)/i
-describe HOME_EMPLOYMENT	Information on how to work at home (2)
 
 body     NO_EXPERIENCE          /\bNo EXPERIENCE/i
 describe NO_EXPERIENCE          No experience needed!
@@ -274,11 +228,6 @@ describe ORDER_REPORT           Order a report from someone
 rawbody MAILTO_SUBJ_REMOVE		/mailto:.{0,64}\@.{0,64}\?subject=(?:\"|3D)*(?:remove?|delete|please.?(?:delete|remove|unsubscribe)|abuse|off\b|stop|take.?me.?off)/i
 describe MAILTO_SUBJ_REMOVE	mailto URI includes removal text
 
-# include the \n\n so we don't match mailto's in the headers!  Some list software
-# uses these to handle auto-subscribe/unsubscribe features
-rawbody MAILTO_LINK		/=[3D=\s"']*mailto:/is
-describe MAILTO_LINK		Includes a URL link to send an email
-
 body AOL_USERS_LINK		/AOL\s+Users\s+Click/is
 describe AOL_USERS_LINK		Includes a link for AOL users to click
 
@@ -304,15 +253,8 @@ describe JODY			Contains "My wife, Jody" testimonial
 body YOUR_INCOME		/\byour income\b/i
 describe YOUR_INCOME		Doing something with my income
 
-body BE_AMAZED			/\bbe amazed\b/i
-describe BE_AMAZED		Apparently, you'll be amazed
-
 body RESISTANCE_IS_FUTILE	/Replying to this email will not unsubscribe you./i
 describe RESISTANCE_IS_FUTILE	Resistance to this spam is futile
-
-# contrib: thelton /at/ donet.com
-body GREAT_OFFER                /\b(?:offer expires|see full offer for details|great offer)/i
-describe GREAT_OFFER            Trying to offer you something
 
 body SUBJ_2_CREDIT              /subject to credit approval/i
 describe SUBJ_2_CREDIT          Contains 'subject to credit approval'
@@ -322,13 +264,6 @@ describe URGENT_BIZ		Contains urgent matter
 
 body EARN_PER_WEEK              /\b(?:earn|make).{1,20}\d\d\d+.{1,30}(?:per week|per month|weekly|monthly)/i
 describe EARN_PER_WEEK          Contains 'earn $something per week'
-
-# contrib: Wayne A Tucker
-body PENNIES_A_DAY              /for (?:just|only) pennies a day/i
-describe PENNIES_A_DAY          Contains 'for only pennies a day'
-
-body FOR_JUST_SOME_AMT          /for (?:just|only) \$?\d+\.?\d*[^\.]*!/i
-describe FOR_JUST_SOME_AMT      Contains 'for only' some amount of cash
 
 # suggestion following Jason Haar
 body     READ_TO_END            /read this (?:e-?mail )?to the end/i
@@ -375,9 +310,6 @@ describe ORDER_NOW		Encourages you to waste no time in ordering
 body OFFSHORE_SCAM		/\boffshore\b.{0,20}(?:credit card|companies|account|financ|websites?)/i
 describe OFFSHORE_SCAM		Off Shore Scams
 
-body VACATION_SCAM		/\b(?=[dfms])(?:free|mini-?|dream|special).{0,10}vacation|vacation (?=[fgop])(?:offer|promotion|package|for two|getaway)/i
-describe VACATION_SCAM		Vacation Offers
-
 body WHY_PAY_MORE		/\bwhy pay more\b/i
 describe WHY_PAY_MORE		Why Pay More?
 
@@ -393,18 +325,9 @@ describe CELL_PHONE_FREE 	Talks about free mobile phones
 body CELL_PHONE_IMPROVE		/\b(?:(?:boost|antenna|reception).{0,16}(?:cell|mobile|phone|cord.?less)|(?:cell|mobile|phone|cord.?less).{0,16}(?:boost|antenna|reception))/i
 describe CELL_PHONE_IMPROVE	Talks about cell-phone signal improvement
 
-body FREE_LEADS			/\bfree leads\b/i
-describe FREE_LEADS		Free Leads
-
-body RECEIVE_EMAIL		/receive third party email/i
-describe RECEIVE_EMAIL		Receive third party email
-
 # similar to OFFER, but fewer FPs
 body RECEIVE_OFFER		/receive special offer/i
 describe RECEIVE_OFFER		Receive a special offer
-
-body OFFER			/\b(?:free|special|trial) offer/i
-describe OFFER			Free Offer
 
 body FREE_QUOTE_INSTANT		/free.{0,12}(?:(?:instant|express|online|no.?obligation).{0,4})+.{0,32}\bquote/i
 describe FREE_QUOTE_INSTANT	Free express or no-obligation quote
@@ -417,9 +340,6 @@ describe FREE_TRIAL		Free Trial
 
 body FREE_MEMBERSHIP	        /\bfree membership/i
 describe FREE_MEMBERSHIP	Free Membership
-
-body FREE_WEBSITE	        /\bfree website/i
-describe FREE_WEBSITE		Free Website
 
 body CREDIT_CARD	        /\bcredit card.{1,10}(?:offer|debt|decision)/i
 describe CREDIT_CARD		Credit Card Offers
@@ -442,9 +362,6 @@ describe NONSECURED_CREDIT	Non-secured Credit/Debt
 body LOW_INTEREST	        /\blow.{0,20} interest rates?\b/i
 describe LOW_INTEREST		Lower Interest Rates
 
-body COMPARE_RATES              /\bcompare .{0,9}rates?\b/i
-describe COMPARE_RATES          Compare Rates
-
 body SAVE_UP_TO                 /\b(?-i:S)ave up to\b/i
 describe SAVE_UP_TO             Save Up To
 
@@ -462,9 +379,6 @@ describe REFINANCE_YOUR_HOME	Home refinancing
 
 body REFINANCE_NOW              /time to refinance|refinanc\w{1,3}\b.{0,16}\bnow\b/i
 describe REFINANCE_NOW          Home refinancing
-
-body OPPORTUNITY_2		/\b(?:opportunity (?:pass|of a lifetime|is knocking|for you)|(?:investment|unique) opportunity)\b/i
-describe OPPORTUNITY_2		Opportunity - What a deal!
 
 body NO_PURCHASE	        /\bno purchase\b/i
 describe NO_PURCHASE		No Purchase Necessary
@@ -493,9 +407,6 @@ describe NO_INVENTORY		No Inventory
 body BUY_DIRECT		        /\bbuy direct\b/i
 describe BUY_DIRECT		Buy Direct
 
-body DRASTIC_REDUCED	        /\bdrastic.{0,4} reduc/i
-describe DRASTIC_REDUCED	Drastically Reduced
- 	
 body DO_IT_TODAY		/\b(?:join|register|order|apply) .{0,10}(?-i:T)oday\b/i
 describe DO_IT_TODAY		Do it Today
 
@@ -517,9 +428,6 @@ describe SEDUCTION		Score with babes!
 body INVALUABLE_MARKETING	/invaluable marketing information/i
 describe INVALUABLE_MARKETING	Invaluable marketing information
 
-body MARKET_SOLUTION	        /\bmarket.{0,9} solution/i
-describe MARKET_SOLUTION	Marketing Solutions
-
 body SAVE_MONEY		        /\bsave .{0,9}(?:money|thousands|millions|up to)\b/i
 describe SAVE_MONEY		Save big money
 
@@ -535,20 +443,8 @@ describe EARNINGS		Potential Earnings
 body THE_BEST_RATE	        /\bthe best rate/i
 describe THE_BEST_RATE		The best Rates
 
-body WE_PROMISE_YOU	        /\bwe promise .{0,9}you/i
-describe WE_PROMISE_YOU		Promise you ...!
-
 body AMAZING_STUFF	        /\bamazing (?:product|rates)/i
 describe AMAZING_STUFF		Amazing Stuff
-
-body CASH_BONUS		        /\bcash bonus\b/i
-describe CASH_BONUS		Cash Bonus
-
-body FANTASTIC		        /\bfantastic {0,9}(?:price|deal|saving)/i
-describe FANTASTIC		Fantastic Deal
-
-body CENTS_ON_DOLLAR	        /\bcents on the dollar\b/i
-describe CENTS_ON_DOLLAR	Cents on the Dollar
 
 # seems like we vastly reduce FPs on this one with a small change or two
 body DIET_1		/\b(?:(?:without|no) (?:exercis(?:e|ing)|dieting)|weight.?loss|(?:extra|lose|lost|losing).{0,10}(?:pounds|weight|inches|lbs)|burn.{1,10}fat)\b/i
@@ -593,9 +489,6 @@ describe RICH			If only it were that easy
 body YOU_WON                    /\byou(?:\'ve| have)? won[^\'\w]/i
 describe YOU_WON                Who really wins?
 
-body SPECIAL_PRO		        /\bspecial promotion\b/i
-describe SPECIAL_PRO		Contains 'Special Promotion'
-
 body FREE_PASSWORD              /\bfree .{0,9}passwords?\b/i
 describe FREE_PASSWORD          Offers Free (often stolen) Passwords
 
@@ -604,12 +497,6 @@ describe HIDDEN_CHARGES		Talks about Hidden Charges
 
 body GET_STARTED_NOW	        /\bget started (?-i:N)ow\b/i
 describe GET_STARTED_NOW	Get Started Now
-
-body ONLY_COST		        /\bonly .{0,9}\$/i
-describe ONLY_COST		Only $$$
-
-body SAVE_BUCKS		        /\bsave \$/i
-describe SAVE_BUCKS		Save $$$
 
 body FINANCIAL		        /\bfinancial(?:ly)? free/i
 describe FINANCIAL 		Financial Freedom
@@ -667,9 +554,6 @@ describe ML_MARKETING		Multi Level Marketing mentioned
 body NOT_ML_MARKETING		/\bnot (?:MLM|multi.level.marketing)\b/i
 describe NOT_ML_MARKETING	Apparently, NOT Multi Level Marketing
 
-body SERIOUS_CASH	        /\bserious cash\b/i
-describe SERIOUS_CASH		Serious cash
-
 body ITS_LEGAL                  /\b(?:perfectly|absolutely|100%|totally) legal\b/i
 describe ITS_LEGAL              Claims to be Legal
 
@@ -717,14 +601,9 @@ describe FREE_ACCESS            Contains 'free access' with capitals
 body FREE_SAMPLE                /(?-i:F)ree sample/i
 describe FREE_SAMPLE            Contains 'free sample' with capitals
 
-body GET_IT_NOW			/get it (?-i:N)ow/i
-describe GET_IT_NOW		Contains 'Get it now' with capitals
-
 body LOW_PRICE                  /\blow.{0,4} (?-i:P)rice/i
 describe LOW_PRICE              Lowest Price
 
-body TRACE_BY_SSN               /Trace anyone by social security number/i
-describe TRACE_BY_SSN           Talks about tracing by SSN
 body ONCE_IN_LIFETIME           /once in a lifetime opportunity/i
 describe ONCE_IN_LIFETIME       Once in a lifetime, apparently
 rawbody SAFEGUARD_NOTICE        /This safeguard is not inserted when using the registered version/s
@@ -737,17 +616,11 @@ describe UNCLAIMED_MONEY        People just leave money laying around
 body CHANGE_TERMS               /\bstrictly based on the following terms and conditions\b/i
 describe CHANGE_TERMS           Terms and conditions
 
-body     DONT_DELETE            /\b(?:don'?t delete this|do not delete)/i
-describe DONT_DELETE            Don't delete me!  Nooooo!!!!
-
 body NO_SELLING                 /absolutely NO selling/i
 describe NO_SELLING             Claims not to be selling anything
 
 body WEALTH                     /\bachieve .{0,15}wealth\b/i
 describe WEALTH                 Achieve Wealth
-
-rawbody MURKOWSKI_CRUFT         /www\.senate\.gov\/~?murkowski/
-describe MURKOWSKI_CRUFT        Old Murkowski disclaimer
 
 body EARN_MONEY			/\b(?:earn|make|making|made|received?|discounted)\s+(?:up\s+to|as\s+much\s+as|over|at\s+least|a\s+full)?\s*\$\s*[0-9,]{2}/i
 describe EARN_MONEY		Message talks about earning money
@@ -758,14 +631,11 @@ describe OBSCURED_EMAIL         Message seems to contain rot13ed address
 body OUR_AFFILIATE_PARTNERS     /our affiliate partners/i
 describe OUR_AFFILIATE_PARTNERS Mentions their affiliate partners
 
-body OUR_COMPENSATION           /our (?:full )?compensation/i
-describe OUR_COMPENSATION	Mentions their full compensation
-
 body OUR_STRICT_ANTI		/our strict anti/i
 describe OUR_STRICT_ANTI	Mentions their strict antipathy on something
 
-body SPECIAL_OFFERS		/\b(?:(?=[cefmpruw])(?:wish|want|unsub|reward|receive|recurring|remove|permission|partner|further|future|e.?mail|continue|click).{0,64}){2}.{0,8}(?=[cdos])(?:special|offer|coupon|discount)s?\b/i
-describe SPECIAL_OFFERS		Stop the offers, coupons, discounts etc!
+body STOP_OFFERING		/\b(?:(?=[cefmpruw])(?:wish|want|unsub|reward|receive|recurring|remove|permission|partner|further|future|e.?mail|continue|click).{0,64}){2}.{0,8}(?=[cdos])(?:special|offer|coupon|discount)s?\b/i
+describe STOP_OFFERING		Stop the offers, coupons, discounts etc!
 
 body BANG_BOSS        		/\bboss!/i
 describe BANG_BOSS        	Talks about your boss with an exclamation!
@@ -787,8 +657,6 @@ body ACT_NOW_CAPS               /A(?i:ct) N(?i:ow)/
 describe ACT_NOW_CAPS		Talks about 'acting now' with capitals
 body START_NOW_CAPS             /S(?i:tart now)/
 describe START_NOW_CAPS 	Talks about 'starting now' with capitals
-body WORRY_FREE                 /worry free/i
-describe WORRY_FREE             No Worries, Mate
 body MORE_SEX               /increased?.{0,9}(?:sex|stamina)/i
 describe MORE_SEX 		Talks about a bigger drive for sex
 

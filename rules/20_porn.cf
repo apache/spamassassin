@@ -76,9 +76,6 @@ describe PORN_CELEBRITY		Possible porn - Celebrity Porn
 body SOMETHING_FOR_ADULTS       /\badult.{0,9}(?:entertainment|sites?|industry|only|business|membership)/i
 describe SOMETHING_FOR_ADULTS   Possible porn - Adult Web Sites
 
-body MUST_BE_18                 /\bmust be (?:at least|over) 18\b/i
-describe MUST_BE_18             Possible porn - Must be 18
-
 body LESBIAN                    /\b(?:xxx|horny|hot|young) lesbian|lesbian (?:sites?|action|bitch)/i
 describe LESBIAN                Possible porn - Lesbian Site
 
