@@ -1549,9 +1549,11 @@ are optional arguments to the function call.
 =cut
     if (/^header\s+(\S+)\s+rbleval:(.*)$/) {
       $self->add_test ($1, $2, TYPE_RBL_EVALS); next;
+      $self->{user_rules_to_compile} = 1 if $scoresonly;
     }
     if (/^header\s+(\S+)\s+rblreseval:(.*)$/) {
       $self->add_test ($1, $2, TYPE_RBL_RES_EVALS); next;
+      $self->{user_rules_to_compile} = 1 if $scoresonly;
     }
     if (/^header\s+(\S+)\s+eval:(.*)$/) {
       my ($name,$rule) = ($1, $2);
@@ -1567,6 +1569,7 @@ are optional arguments to the function call.
     if (/^header\s+(\S+)\s+exists:(.*)$/) {
       $self->add_test ($1, "$2 =~ /./", TYPE_HEAD_TESTS);
       $self->{descriptions}->{$1} = "Found a $2 header";
+      $self->{user_rules_to_compile} = 1 if $scoresonly;
       next;
     }
     if (/^header\s+(\S+)\s+(.*)$/) {
