@@ -37,7 +37,10 @@ use vars	qw{ %charsets_for_locale };
 sub is_charset_ok_for_locales {
   my ($cs, @locales) = @_;
 
-  $cs = uc $cs; $cs =~ s/[^A-Z0-9]//g; study $cs;
+  $cs = uc $cs; $cs =~ s/[^A-Z0-9]//g;
+  $cs =~ s/^3D//gs;		# broken by quoted-printable?
+  study $cs;
+  #warn "JMD $cs";
 
   # always OK (the net speaks mostly roman charsets)
   return 1 if ($cs eq 'USASCII');

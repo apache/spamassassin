@@ -805,8 +805,12 @@ describe USER_IN_ALL_SPAM_TO	User is listed in 'all_spam_to'
 
 # the idea is that most legit newsletters will claim their copyright; spammers
 # do not seem to for some reason.  (Kevin Dangoor)
+<<<<<<< spamassassin.cf
+full COPYRIGHT_CLAIMED		/copyright.{0,100}all rights reserved/is
+=======
 body COPYRIGHT_CLAIMED		/copyright.*all rights reserved./i
 describe COPYRIGHT_CLAIMED	Contains a claim of copyright
+>>>>>>> 1.108
 
 ###########################################################################
 # not quite spam, but dangerous/irritating nonetheless, and easy to catch.
@@ -946,7 +950,7 @@ score MAIL_IN_ORDER_FORM             4.0
 score MANY_FROMS                     2.4
 score MASS_EMAIL                     1.8
 score MDAEMON_2_7_4                  1.3
-score MISSING_HEADERS                2.3
+score MISSING_HEADERS                1.3
 score MONEY_MAKING                   2.2
 score MONSTERHUT                     2.0
 score MSGID_HAS_NO_AT                0.1
@@ -998,7 +1002,7 @@ score SOCIAL_SEC_NUMBER              2.4
 score SPAM_FORM                      2.0
 score SPAM_FORM_INPUT                3.9
 score SPAM_FORM_RETURN               2.0
-score STOCK_ALERT                    4.0
+score STOCK_ALERT                    3.0
 score STOCK_PICK                     2.2
 score STRONG_BUY                     3.7
 score SUBJ_ALL_CAPS                  1.0
