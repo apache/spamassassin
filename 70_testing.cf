@@ -567,5 +567,8 @@ uri T_URI_AFFILIATE		/aff\w+id=/i
 body T_DEEP_DISC_MEDS		/\bdeep discount med(?:s|ications)\b/i
 
 # Al Iverson reports: "forged, now no longer in use"
-header T_REGSOFT	/hd\.regsoft\.net/i
+header T_REGSOFT        Received =~ /hd\.regsoft\.net/i
+
+# same ratware; forges dates as 'with SMTP; Jan, 17 2004 22:05:48 -0300'
+header T_DATE_COMMA     Received =~ /\bwith \S+\; [A-Z][a-z][a-z],\s+\d\d\s+\d\d\d\d\s/
 
