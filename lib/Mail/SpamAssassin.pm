@@ -1379,32 +1379,30 @@ sub read_cf {
 
   if (-d $path) {
     foreach my $file ($self->get_cf_files_in_dir ($path)) {
-      if (open (IN, "<".$file)) {
-        $txt .= "file start $file\n";     # let Conf know
-        $txt .= join ('', <IN>);
-        # add an extra \n in case file did not end in one.
-        $txt .= "\nfile end $file\n";     
-        close IN;
-        dbg("config: read file $file");
-      }
-      else {
-        warn "config: cannot open \"$file\": $!\n";
-	next;
-      }
+      $txt .= read_cf_file($file);
     }
 
   } elsif (-f $path && -s _ && -r _) {
-    if (open (IN, "<".$path)) {
-      $txt .= "file start $path\n";
-      $txt = join ('', <IN>);
-      # add an extra \n in case file did not end in one.
-      $txt .= "\nfile end $path\n";
-      close IN;
-      dbg("config: read file $path");
-    }
-    else {
-      warn "config: cannot open \"$path\": $!\n";
-    }
+    $txt .= read_cf_file($path);
+  }
+
+  return $txt;
+}
+
+sub read_cf_file {
+  my($path) = @_;
+  my $txt = '';
+
+  if (open (IN, "<".$path)) {
+    $txt .= "file start $path\n";
+    $txt = join ('', <IN>);
+    # add an extra \n in case file did not end in one.
+    $txt .= "\nfile end $path\n";
+    close IN;
+    dbg("config: read file $path");
+  }
+  else {
+    warn "config: cannot open \"$path\": $!\n";
   }
 
   return $txt;
