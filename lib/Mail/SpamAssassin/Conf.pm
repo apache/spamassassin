@@ -144,6 +144,7 @@ sub new {
   $self->{user_rules_to_compile} = 0;
   $self->{fold_headers} = 1;
 
+  $self->{dcc_path} = undef; # Browse PATH
   $self->{dcc_body_max} = 999999;
   $self->{dcc_fuz1_max} = 999999;
   $self->{dcc_fuz2_max} = 999999;
@@ -151,6 +152,7 @@ sub new {
   $self->{dcc_timeout} = 10;
   $self->{dcc_options} = '-R';
 
+  $self->{pyzor_path} = undef; # Browse PATH
   $self->{pyzor_max} = 5;
   $self->{pyzor_add_header} = 0;
   $self->{pyzor_timeout} = 10;
@@ -219,9 +221,9 @@ sub _parse {
 
     # handle i18n
     if (s/^lang\s+(\S+)\s+//) { next if ($lang !~ /^$1/i); }
-
+    
     # Versioning assertions
-    if (/^file\s+start\s+(.+)\s*$/) { $currentfile = $1; next; }
+    if (/^file\s+start\s+(.+)$/) { $currentfile = $1; next; }
     if (/^file\s+end/) {
       $currentfile = '(no file)';
       $skipfile = 0;
@@ -304,7 +306,7 @@ e.g.
 
 =cut
 
-    if (/^whitelist[-_]from\s+(.+)\s*$/) {
+    if (/^whitelist[-_]from\s+(.+)$/) {
       $self->add_to_addrlist ('whitelist_from', split (' ', $1)); next;
     }
 
@@ -321,7 +323,7 @@ e.g.
 
 =cut
 
-    if (/^whitelist[-_]from[-_]rcvd\s+(\S+)\s+(\S+)\s*$/) {
+    if (/^whitelist[-_]from[-_]rcvd\s+(\S+)\s+(\S+)$/) {
       $self->add_to_addrlist_rcvd ('whitelist_from_rcvd', $1, $2);
       next;
     }
@@ -339,7 +341,7 @@ e.g.
 
 =cut
 
-    if (/^unwhitelist[-_]from\s+(.+)\s*$/) {
+    if (/^unwhitelist[-_]from\s+(.+)$/) {
       $self->remove_from_addrlist ('whitelist_from', split (' ', $1)); next;
     }
 
@@ -350,7 +352,7 @@ non-spam, but which the user doesn't want.  Same format as C<whitelist_from>.
 
 =cut
 
-    if (/^blacklist[-_]from\s+(.+)\s*$/) {
+    if (/^blacklist[-_]from\s+(.+)$/) {
       $self->add_to_addrlist ('blacklist_from', split (' ', $1)); next;
     }
 
@@ -367,7 +369,7 @@ e.g.
 
 =cut
 
-    if (/^unblacklist[-_]from\s+(.+)\s*$/) {
+    if (/^unblacklist[-_]from\s+(.+)$/) {
       $self->remove_from_addrlist ('blacklist_from', split (' ', $1)); next;
     }
 
@@ -392,13 +394,13 @@ See above.
 
 =cut
 
-    if (/^whitelist[-_]to\s+(.+)\s*$/) {
+    if (/^whitelist[-_]to\s+(.+)$/) {
       $self->add_to_addrlist ('whitelist_to', split (' ', $1)); next;
     }
-    if (/^more[-_]spam[-_]to\s+(.+)\s*$/) {
+    if (/^more[-_]spam[-_]to\s+(.+)$/) {
       $self->add_to_addrlist ('more_spam_to', split (' ', $1)); next;
     }
-    if (/^all[-_]spam[-_]to\s+(.+)\s*$/) {
+    if (/^all[-_]spam[-_]to\s+(.+)$/) {
       $self->add_to_addrlist ('all_spam_to', split (' ', $1)); next;
     }
 
@@ -507,7 +509,7 @@ score for this message. _REQD_ will be replaced with the threshold.
 
 =cut
 
-    if (/^subject[-_]tag\s+(.+?)\s*$/) {
+    if (/^subject[-_]tag\s+(.+)$/) {
       $self->{subject_tag} = $1; next;
     }
 
@@ -819,7 +821,7 @@ If C<factor> = 0.3, then we'll move about 1/3 of the way from the score toward t
 C<factor> = 1 means just use the long-term mean; C<factor> = 0 mean just use the calculated score.
 
 =cut
-    if (/^auto[-_]whitelist[-_]factor\s*(.*)\s*$/) {
+    if (/^auto[-_]whitelist[-_]factor\s+(.*)$/) {
       $self->{auto_whitelist_factor} = $1; next;
     }
 
@@ -953,6 +955,17 @@ Clear the spamtrap template.
       $self->{spamtrap_template} = ''; next;
     }
 
+=item dcc_path STRING
+
+This option tells SpamAssassin specifically where to find the pyzor client
+instead of relying on SpamAssassin to find it in the current PATH.
+
+=cut
+
+    if (/^dcc[-_]path\s+(.+)$/) {
+      $self->{dcc_path} = $1; next;
+    }
+
 =item dcc_body_max NUMBER
 
 =item dcc_fuz1_max NUMBER
@@ -971,15 +984,15 @@ The default is 999999 for all these options.
 
 =cut
 
-    if (/^dcc_body_max\s+(\d+)/) {
+    if (/^dcc[-_]body[-_]max\s+(\d+)/) {
       $self->{dcc_body_max} = $1+0; next;
     }
 
-    if (/^dcc_fuz1_max\s+(\d+)/) {
+    if (/^dcc[-_]fuz1[-_]max\s+(\d+)/) {
       $self->{dcc_fuz1_max} = $1+0; next;
     }
 
-    if (/^dcc_fuz2_max\s+(\d+)/) {
+    if (/^dcc[-_]fuz2[-_]max\s+(\d+)/) {
       $self->{dcc_fuz2_max} = $1+0; next;
     }
 
@@ -993,7 +1006,7 @@ The default is to not add the header.
 
 =cut
 
-    if (/^dcc_add_header\s+(\d+)$/) {
+    if (/^dcc[-_]add[-_]header\s+(\d+)$/) {
       $self->{dcc_add_header} = $1+0; next;
     }
 
@@ -1004,10 +1017,20 @@ the results
 
 =cut
 
-    if (/^dcc[-_]timeout\s*(\d+)\s*$/) {
+    if (/^dcc[-_]timeout\s+(\d+)$/) {
       $self->{dcc_timeout} = $1+0; next;
     }
 
+=item pyzor_path STRING
+
+This option tells SpamAssassin specifically where to find the pyzor client
+instead of relying on SpamAssassin to find it in the current PATH.
+
+=cut
+
+    if (/^pyzor[-_]path\s+(.+)$/) {
+      $self->{pyzor_path} = $1; next;
+    }
 
 =item pyzor_max NUMBER
 
@@ -1044,7 +1067,7 @@ the results
 
 =cut
 
-    if (/^pyzor[-_]timeout\s*(\d+)\s*$/) {
+    if (/^pyzor[-_]timeout\s+(\d+)$/) {
       $self->{pyzor_timeout} = $1+0; next;
     }
 
@@ -1056,7 +1079,7 @@ the results
 
 =cut
 
-    if (/^razor[-_]timeout\s*(\d+)\s*$/) {
+    if (/^razor[-_]timeout\s+(\d+)$/) {
       $self->{razor_timeout} = $1; next;
     }
 
@@ -1186,7 +1209,7 @@ score Z_FUDGE_DUL_OSIRU_FH	1.5
 
 =cut
 
-    if (/^dialup_codes\s+(.*)$/) {
+    if (/^dialup[-_]codes\s+(.*)$/) {
 	$self->{dialup_codes} = eval $1;
 	next;
     }
@@ -1411,7 +1434,7 @@ Currently this is the same value Razor itself uses: C<~/razor.conf>.
 
 =cut
 
-    if (/^razor[-_]config\s*(.*)\s*$/) {
+    if (/^razor[-_]config\s+(.*)$/) {
       $self->{razor_config} = $1; next;
     }
 
@@ -1424,7 +1447,7 @@ The default is C<-R>
 
 =cut
 
-    if (/^dcc_options\s+[A-Z -]+/) {
+    if (/^dcc[-_]options\s+[A-Z -]+/) {
       $self->{dcc_options} = $1; next;
     }
 
@@ -1436,7 +1459,7 @@ SpamAssassin use, you may want to share this across all users.
 
 =cut
 
-    if (/^auto[-_]whitelist[-_]path\s*(.*)\s*$/) {
+    if (/^auto[-_]whitelist[-_]path\s+(.*)$/) {
       $self->{auto_whitelist_path} = $1; next;
     }
 
@@ -1452,7 +1475,7 @@ needed, make the log directory chmod'ed 1777, and adjust later.
 
 =cut
 
-    if (/^timelog[-_]path\s*(.*)\s*$/) {
+    if (/^timelog[-_]path\s+(.*)$/) {
       $Mail::SpamAssassin::TIMELOG->{logpath}=$1; next;
     }
 
@@ -1463,7 +1486,7 @@ Make sure this has the relevant execute-bits set (--x), otherwise
 things will go wrong.
 
 =cut
-    if (/^auto[-_]whitelist[-_]file[-_]mode\s*(.*)\s*$/) {
+    if (/^auto[-_]whitelist[-_]file[-_]mode\s+(.*)$/) {
       $self->{auto_whitelist_file_mode} = $1; next;
     }
 
