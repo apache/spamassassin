@@ -81,7 +81,7 @@ sub extract {
 
   # and identify the language (if we're going to do that), before we
   # run any Bayes tests, so they can use that as a token
-  $self->check_language($main->{conf});
+  $self->check_language($main);
 
   $main->call_plugins ("extract_metadata", { msg => $msg });
 }
@@ -95,9 +95,9 @@ sub finish {
 # ---------------------------------------------------------------------------
 
 sub check_language {
-  my ($self, $conf) = @_;
+  my ($self, $main) = @_;
 
-  my @languages = split (' ', $conf->{ok_languages});
+  my @languages = split (' ', $main->{conf}->{ok_languages});
   if (grep { $_ eq "all" } @languages) {
     # user doesn't care what lang it's in, so return.
     # TODO: might want to have them as bayes tokens all the same, though.
@@ -121,7 +121,7 @@ sub check_language {
     return;
   }
 
-  my @matches = Mail::SpamAssassin::TextCat::classify($self, $body);
+  my @matches = Mail::SpamAssassin::TextCat::classify($self, $body, $main->{languages_filename});
   $self->{textcat_matches} = \@matches;
   my $matches_str = join(' ', @matches);
 

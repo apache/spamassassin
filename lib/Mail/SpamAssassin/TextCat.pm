@@ -49,7 +49,7 @@ $opt_u = 1.05;
 #         values are 1.05 or 1.1.
 
 sub classify {
-  my ($self, $input) = @_;
+  my ($self, $input, $languages_filename) = @_;
   my %results;
   my $maxp = $opt_t;
 
@@ -63,11 +63,11 @@ sub classify {
     my $rang = 1;
     dbg("Loading languages file...");
 
-    if (!defined $self->{main}->{languages_filename}) {
+    if (!defined $languages_filename) {
       return;
     }
 
-    open(LM, $self->{main}->{languages_filename})
+    open(LM, $languages_filename)
 	|| die "cannot open languages: $!\n";
     local $/ = undef;
     @lm = split(/\n/, <LM>);
