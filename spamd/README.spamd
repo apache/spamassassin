@@ -76,7 +76,7 @@ use auto-whitelisting, which requires it maintain a database of email addresses
 on-disk, you should use a non-"root" but non-"nobody" user: "mailnull" or
 "mail" are good choices, or even create a "spamd" user.
 
-When run as root, spamd will change uid's to the user inoking spamc in 
+When run as root, spamd will change uid's to the user invoking spamc in 
 order to read and write to their configurations. This functionality
 is not possible if spamd does not run as root and is a disadvantage if
 you rely on this. If you use mysql for per-user configuration there
