@@ -11,9 +11,10 @@
 # --mid         report Message-ID from each message
 # --debug       report debugging information
 # --progress    show progress updates during check
+# --rewrite=OUT save rewritten message to OUT (default is /tmp/out)
 # --showdots    print a dot for each scanned message
-# --these_rules Only test rules matching the given regexp
-# --restart=num Restart all of the children mass-checks after num messages are processed
+# --rules=RE    Only test rules matching the given regexp RE
+# --restart=N   restart all of the children after processing N messages
 #
 # log options
 # -o            write all logs to stdout
@@ -47,7 +48,8 @@
 use vars qw($opt_c $opt_f $opt_j $opt_n $opt_o $opt_all $opt_bayes
 	    $opt_debug $opt_format $opt_hamlog $opt_head $opt_loghits
 	    $opt_mid $opt_mh $opt_ms $opt_net $opt_nosort $opt_progress
-	    $opt_showdots $opt_spamlog $opt_tail $opt_these_rules $opt_restart);
+	    $opt_showdots $opt_spamlog $opt_tail $opt_rules $opt_restart
+	    $opt_rewrite);
 
 use FindBin;
 use lib "$FindBin::Bin/../lib";
@@ -67,8 +69,8 @@ $opt_spamlog = "spam.log";
 
 GetOptions("c=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug",
 	   "hamlog=s", "head=i", "loghits", "mh", "mid", "ms", "net",
-	   "progress", "showdots", "spamlog=s", "tail=i", "these_rules=s",
-	   "restart=i",
+	   "progress", "rewrite", "showdots", "spamlog=s", "tail=i",
+	   "rules=s", "restart=i",
 	   "dir" => sub { $opt_format = "dir"; },
 	   "file" => sub { $opt_format = "file"; },
 	   "mbox" => sub { $opt_format = "mbox"; },
@@ -95,7 +97,7 @@ $spamtest = new Mail::SpamAssassin ({
   'save_pattern_hits'  			=> $opt_loghits,
   'dont_copy_prefs'   			=> 1,
   'local_tests_only'   			=> $opt_net ? 0 : 1,
-  'only_these_rules'   			=> $opt_these_rules,
+  'only_these_rules'   			=> $opt_rules,
   'ignore_safety_expire_timeout'	=> 1,
   PREFIX				=> '',
   DEF_RULES_DIR        			=> $opt_c,
@@ -238,10 +240,12 @@ sub wanted {
   my $tests = join(",", sort(grep(length,$status->get_names_of_tests_hit(),$status->get_names_of_subtests_hit())));
   my $extra = join(",", @extra);
 
-#  $status->rewrite_mail();
-#  open(REWRITE, "> /tmp/out");
-#  print REWRITE $status->get_full_message_as_text();
-#  close(REWRITE);
+  if ($opt_rewrite) {
+    $status->rewrite_mail();
+    open(REWRITE, "> /tmp/out");
+    print REWRITE $status->get_full_message_as_text();
+    close(REWRITE);
+  }
 
   $id =~ s/\s/_/g;
 
