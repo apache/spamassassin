@@ -93,6 +93,12 @@ sub check_for_from_mx {
     my @mx = Net::DNS::mx ($self->{res}, $from);
     dbg ("DNS MX records found: ".scalar (@mx));
     if (scalar @mx > 0) { return 0; }
+
+    # A records only for mail servers is perfectly OK.
+    my @a = $self->{res}->search ($from);
+    dbg ("DNS A records found: ".scalar (@a));
+    if (scalar @a > 0) { return 0; }
+
     if ($i < $self->{conf}->{check_mx_attempts}) {sleep $self->{conf}->{check_mx_delay}; };
   }
 
