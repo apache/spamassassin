@@ -905,3 +905,8 @@ body __AFRICAN_COUNTRY_51	/\bLagos\b/i
 body __AFRICAN_COUNTRY_52	/\bcape town\b/i
 
 ##############################################################################
+
+# possible replacement for SEARCH_ENGINE_PROMO - tvd
+# bug 1191, the change doesn't do anything to my results, but does stop
+# the match of the first bug message
+body T_SEARCH_ENGINE_PROMO        /\b(?:(?:submitt?|list)(?:ed|ing|s)?|place(?:d|ment))\b.{1,15}\b(?:in|to)[\s_-]+.{0,15}\b(?:search(?:ing)?\s*(?:engine|site)|director(?:y|ies))s?\b/is
