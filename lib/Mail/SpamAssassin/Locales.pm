@@ -62,7 +62,7 @@ sub is_charset_ok_for_locales {
     $locale =~ s/^([a-z][a-z]).*$/$1/;	# zh_TW... => zh
 
     my $ok_for_loc = $charsets_for_locale{$locale};
-    return 0 if (!defined $ok_for_loc);
+    next if (!defined $ok_for_loc);
 
     if ($ok_for_loc =~ /(?:^| )\Q${cs}\E(?:$| )/) {
       return 1;
