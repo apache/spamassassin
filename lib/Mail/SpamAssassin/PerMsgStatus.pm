@@ -273,7 +273,7 @@ reflect the filter status.  The keys in this string are as follows:
 =item X-Spam-Report: header for spam mails
 
 The SpamAssassin report is added to the mail header if
-the C<report_header = 1> configuration option is given.
+the C<report_header 1> configuration option is given.
 
 =over 4
 
