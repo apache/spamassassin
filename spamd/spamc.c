@@ -290,6 +290,13 @@ int main (int argc, char **argv) {
     username = userbuf;
   }
 
+  if ((flags & SPAMC_RANDOMIZE_HOSTS) != 0) {
+    /* we don't need strong randomness; this is just so we pick
+     * a random host for loadbalancing.
+     */
+    srand(getpid() ^ time(NULL));
+  }
+
   /*--------------------------------------------------------------------
    * SET UP TRANSPORT
    *
