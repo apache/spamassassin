@@ -211,17 +211,8 @@ if ( defined $opt{'version'} ) {
 }
 
 # set debug areas, if any specified (only useful for command-line tools)
-my @debug;
 if (defined $opt{'debug'}) {
-  if ($opt{'debug'}) {
-    @debug = split(/,/, $opt{'debug'});
-    if (grep { !/^\S+$/ } @debug) {
-      print_usage_and_exit("bad areas in --debug option!");
-    }
-  }
-  else {
-    @debug = ("all");
-  }
+  $opt{'debug'} ||= 'all';
 }
 
 # create the tester factory
@@ -231,7 +222,7 @@ my $spamtest = new Mail::SpamAssassin(
     site_rules_filename => $opt{'siteconfigpath'},
     userprefs_filename  => $opt{'prefspath'},
     local_tests_only    => $opt{'local'},
-    debug               => \@debug,
+    debug               => $opt{'debug'},
     dont_copy_prefs     => ( $opt{'create-prefs'} ? 0 : 1 ),
     PREFIX              => $PREFIX,
     DEF_RULES_DIR       => $DEF_RULES_DIR,
