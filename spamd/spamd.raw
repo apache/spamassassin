@@ -962,7 +962,7 @@ sub spawn {
         $orders = $scaling->wait_for_orders(); # and sleep...
 
         if ($orders != PFORDER_ACCEPT) {
-          logmsg ("unknown order: $orders");
+          logmsg("unknown order: $orders");
         }
       }
 
@@ -1548,7 +1548,7 @@ sub handle_user {
     return 0;
   }
 
-  # not sure if this is required, the doco says it isn't
+  # not sure if this is required, the documentation says it isn't
   $uid =~ /^(\d+)$/ and $uid = $1;    # de-taint
   $gid =~ /^(\d+)$/ and $gid = $1;    # de-taint
 
