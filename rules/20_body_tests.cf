@@ -442,11 +442,8 @@ body CLICK_TO_REMOVE_3		/http:.{0,50}action=remove/is
 describe CLICK_TO_REMOVE_3	Click-to-remove with PHP/ASP action found
 
 # (contrib: WW, mod by David Hull)
-body TO_BE_REMOVED_REPLY        /\bto\b.{0,20}\bremove.{0,20}\breply\b/is
+body TO_BE_REMOVED_REPLY        /\bto\b.{0,20}\b(?:remove|unsubscribe|opt[ -]?out).{0,20}\b(?:reply|send)\b/is
 describe TO_BE_REMOVED_REPLY    Says: "to be removed, reply via email" or similar
-
-body TO_UNSUB_REPLY		/\bto\b.{0,20}\bunsubscribe.{0,20}\breply\b/is
-describe TO_UNSUB_REPLY		Says: "to unsubscribe, reply via email" or similar
 
 body REMOVAL_INSTRUCTIONS	/\b(?:REMOVAL|UNSUBSCRIBE) INSTRUCTIONS/i
 describe REMOVAL_INSTRUCTIONS	Gives instructions for removal from list
