@@ -23,6 +23,8 @@ use vars qw{
 	$WORD_OBFUSCATION_CHARS 
 };
 
+use constant HAS_EMAIL_ISFREE => eval { require Email::IsFree; };
+
 # sad but true. sort it out, sysadmins!
 $CCTLDS_WITH_LOTS_OF_OPEN_RELAYS = qr{(?:kr|cn|cl|ar|hk|il|th|tw|sg|za|tr|ma|ua|in|pe|br)};
 $ROUND_THE_WORLD_RELAYERS = qr{(?:net|com|ca)};
@@ -1779,37 +1781,6 @@ sub message_is_habeas_swe {
 # BODY TESTS:
 ###########################################################################
 
-sub nonspace_length {
-  my ($self, $body, $min, $max) = @_;
-
-  if (exists $self->{nonspace}) {
-    return ($self->{nonspace} > $min && $self->{nonspace} <= $max);
-  }
-
-  $body = join('', @{$body});
-  $body =~ s/\bURI:\S+//g;
-  $body =~ tr/ \t\n\r\f//cd;
-  $self->{nonspace} = length($body);
-
-  return ($self->{nonspace} > $min && $self->{nonspace} <= $max);
-}
-
-# TESTING XXX this needs to be cleaned up, maybe moved to HTML.pm
-sub image_area_ratio {
-  my ($self, $body, $min, $max) = @_;
-
-  return 0 unless exists $self->{html}{total_image_area} && $self->{html}{total_image_area};
-
-  if (!exists $self->{nonspace}) {
-    nonspace_length($self, $body, 0, 0);
-  }
-
-  $self->{image_area_ratio} = $self->{nonspace} / $self->{html}{total_image_area};
-
-  return ($self->{image_area_ratio} > $min &&
-	  $self->{image_area_ratio} <= $max);
-}
-
 sub check_for_uppercase {
   my ($self, $body, $min, $max) = @_;
 
@@ -2492,16 +2463,12 @@ sub check_razor2_range {
   return 0;
 }
 
-
+# I don't know if we should simply copy Email::IsFree or source it.
+# It was first released on 2002-09-18 and hasn't been updated since then.
 sub check_email_isfree {
-
-# I don't know if we should simply copy Email::IsFree or source it
-# It's hopefully going to get updated often.
-
   my ($self, $body) = @_;
 
-  eval { require Email::IsFree; };
-  return 0 if $@; # Email::IsFree not available
+  return 0 unless HAS_EMAIL_ISFREE;
 
   foreach (@{$body}) {
     my @domains = /\@[.A-Za-z_-]+/g;
@@ -2513,7 +2480,6 @@ sub check_email_isfree {
   }
 
   return 0;
-
 }
 
 
