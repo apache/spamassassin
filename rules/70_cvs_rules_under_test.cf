@@ -79,6 +79,12 @@ body T_HTML_JAVASCRIPT		eval:html_test('t_javascript')
 # possible replacement/supplement for FROM_BTAMAIL
 header T_BTAMAIL_HEADER		ALL =~ /btamail\.net\.cn/i
 
+# plain old body rule
+# group with SENT_IN_COMPLIANCE
+body T_FURTHER_TRANSMISSIONS	/further transmissions to you by the sender/i
+describe T_FURTHER_TRANSMISSIONS	Claims compliance with spam regulations
+score T_FURTHER_TRANSMISSIONS	1.0
+
 ########################################################################
 # bug 1106: forged MUAs
 
@@ -105,7 +111,7 @@ score T_FORGED_MUA_MOZILLA	1.0
 
 # Outlook
 header __OUTLOOK_MUA		X-Mailer =~ /Outlook(?! IMO)/
-header __OUTLOOK_MSGID		Message-Id =~ /^<[0-9a-f]{12,12}\$[0-9a-f]{8,8}\$[0-9a-f]{8,8}\@.{1,50}>$/
+header __OUTLOOK_MSGID		Message-Id =~ /^<[0-9a-f]{12}\$[0-9a-f]{8}\$[0-9a-f]{8}\@\S+>$/
 meta T_FORGED_MUA_OUTLOOK	(__OUTLOOK_MUA && !__OUTLOOK_MSGID)
 describe T_FORGED_MUA_OUTLOOK	Forged mail pretending to be from Outlook
 score T_FORGED_MUA_OUTLOOK	1.0
@@ -123,6 +129,13 @@ header __EUDORA_MSGID		Message-Id =~ /^<(?:\d\d?\.){4,5}\d{14}\.[a-f0-9]{8}\@\S+
 meta T_FORGED_MUA_EUDORA	(__EUDORA_MUA && !__EUDORA_MSGID)
 describe T_FORGED_MUA_EUDORA	Forged mail pretending to be from Eudora
 score T_FORGED_MUA_EUDORA	1.0
+
+# The Bat!
+header __THEBAT_MUA		X-Mailer =~ /The Bat!/
+header __THEBAT_MSGID		Message-Id =~ /^<\d+\.\d+\@\S+>$/
+meta T_FORGED_MUA_THEBAT	(__THEBAT_MUA && !__THEBAT_MSGID)
+describe T_FORGED_MUA_THEBAT	Forged mail pretending to be from The Bat!
+score T_FORGED_MUA_THEBAT	1.0
 
 ########################################################################
 
