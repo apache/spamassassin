@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.548 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.549 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -116,12 +116,10 @@ header T_RCVD_IN_DNSRBLSPAM	rbleval:check_rbl('dnsrblspam', 'spam.dnsrbl.net.')
 header T_RCVD_IN_INTERSIL	rbleval:check_rbl('intersil', 'blackholes.intersil.net.')
 header T_RCVD_IN_SPAMSOURCES_FABEL	rbleval:check_rbl('fabel', 'spamsources.fabel.dk.')
 header T_RCVD_IN_VOX_SCHPIDER_COM	rbleval:check_rbl('schpider', 'vox.schpider.com.')
-header T_RCVD_IN_WSFF		rbleval:check_rbl('wsff', 'will-spam-for-food.eu.org.')
 tflags T_RCVD_IN_DNSRBLSPAM net
 tflags T_RCVD_IN_INTERSIL net
 tflags T_RCVD_IN_SPAMSOURCES_FABEL net
 tflags T_RCVD_IN_VOX_SCHPIDER_COM net
-tflags T_RCVD_IN_WSFF net
 
 # easynet.nl (formerly wirehub.net)
 header T_RCVD_IN_EASYNET_DYNABLOCK	rbleval:check_rbl('dynablock-notfirsthop', 'dynablock.easynet.nl.')
