@@ -413,6 +413,30 @@ sub parse_received_line {
       }
     }
 
+    # catch MS-ish headers here
+    if (/ SMTPSVC/) {
+      # MS servers using this fmt do not lookup the rDNS.
+      # Received: from inet-vrs-05.redmond.corp.microsoft.com ([157.54.6.157])
+      # by INET-IMC-05.redmond.corp.microsoft.com with Microsoft
+      # SMTPSVC(5.0.2195.6624); Thu, 6 Mar 2003 12:02:35 -0800
+      # Received: from 0 ([61.31.135.91]) by bass.bass.com.eg with Microsoft
+      # SMTPSVC(5.0.2195.6713); Tue, 21 Sep 2004 08:59:06 +0300
+      # Received: from 0 ([61.31.138.57] RDNS failed) by nccdi.com with 
+      # Microsoft SMTPSVC(6.0.3790.0); Thu, 23 Sep 2004 08:51:06 -0700
+      # Received: from tthompson ([217.35.105.172] unverified) by
+      # mail.neosinteractive.com with Microsoft SMTPSVC(5.0.2195.5329);
+      # Tue, 11 Mar 2003 13:23:01 +0000
+      if (/^from (\S+) \(\[(${IP_ADDRESS})\][^\)]{0,40}\) by (\S+) with Microsoft SMTPSVC/) {
+        $helo = $1; $ip = $2; $by = $3; goto enough;
+      }
+
+      # Received: from mail pickup service by mail1.insuranceiq.com with
+      # Microsoft SMTPSVC; Thu, 13 Feb 2003 19:05:39 -0500
+      if (/^from mail pickup service by (\S+) with Microsoft SMTPSVC;/) {
+        return;
+      }
+    }
+
     if (/Exim/) {
       # one of the HUGE number of Exim formats :(
       # This must be scriptable.
@@ -770,20 +794,6 @@ sub parse_received_line {
       $ip = $1; $by = $2; goto enough;
     }
 
-    # Received: from inet-vrs-05.redmond.corp.microsoft.com ([157.54.6.157]) by
-    # INET-IMC-05.redmond.corp.microsoft.com with Microsoft SMTPSVC(5.0.2195.6624);
-    # Thu, 6 Mar 2003 12:02:35 -0800
-    if (/^from (\S+) \(\[(${IP_ADDRESS})\]\) by (\S+) with /) {
-      $helo = $1; $ip = $2; $by = $3; goto enough;
-    }
-
-    # Received: from tthompson ([217.35.105.172] unverified) by
-    # mail.neosinteractive.com with Microsoft SMTPSVC(5.0.2195.5329);
-    # Tue, 11 Mar 2003 13:23:01 +0000
-    if (/^from (\S+) \(\[(${IP_ADDRESS})\] unverified\) by (\S+) with Microsoft SMTPSVC/) {
-      $helo = $1; $ip = $2; $by = $3; goto enough;
-    }
-
     # Received: from 157.54.8.23 by inet-vrs-05.redmond.corp.microsoft.com
     # (InterScan E-Mail VirusWall NT); Thu, 06 Mar 2003 12:02:35 -0800
     if (/^from (${IP_ADDRESS}) by (\S+) \(InterScan/) {
@@ -925,12 +935,6 @@ sub parse_received_line {
 
   # from qmail-scanner-general-admin@lists.sourceforge.net by alpha by uid 7791 with qmail-scanner-1.14 (spamassassin: 2.41. Clear:SA:0(-4.1/5.0):. Processed in 0.209512 secs)
   if (/^from \S+\@\S+ by \S+ by uid \S+ /) { return; }
-
-  # Received: from mail pickup service by mail1.insuranceiq.com with
-  # Microsoft SMTPSVC; Thu, 13 Feb 2003 19:05:39 -0500
-  if (/^from mail pickup service by (\S+) with Microsoft SMTPSVC;/) {
-    return;
-  }
 
   # Received: by x.x.org (bulk_mailer v1.13); Wed, 26 Mar 2003 20:44:41 -0600
   if (/^by (\S+) \(bulk_mailer /) { return; }
