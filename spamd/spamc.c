@@ -95,11 +95,13 @@ int process_message(in_addr_t host, int port)
   int mysock;
   struct sockaddr_in addr;
   int value=1;
+  int origerr;
 
   if(-1 == (mysock = socket(PF_INET,SOCK_STREAM,0)))
   {
+    origerr = errno;	/* take a copy before syslog() */
     syslog (LOG_ERR, "socket() to spamd failed: %m");
-    switch(errno)
+    switch(origerr)
     {
     case EPROTONOSUPPORT:
     case EINVAL:
@@ -135,8 +137,9 @@ int process_message(in_addr_t host, int port)
 
   if(-1 == connect(mysock,(const struct sockaddr *)&addr,sizeof(addr)))
   {
+    origerr = errno;	/* take a copy before syslog() */
     syslog (LOG_ERR, "connect() to spamd failed: %m");
-    switch(errno)
+    switch(origerr)
     {
     case EBADF:
     case EFAULT:
@@ -168,6 +171,7 @@ void read_args(int argc, char **argv, in_addr_t *host, int *port)
 {
   int opt;
   struct hostent *hent;
+  int origherr;
 	
   while(-1 != (opt = getopt(argc,argv,"d:p:h")))
   {
@@ -181,9 +185,10 @@ void read_args(int argc, char **argv, in_addr_t *host, int *port)
 	}
 	else
 	{
+	  origherr = h_errno;	/* take a copy before syslog() */
 	  syslog (LOG_ERR, "gethostbyname(%s) failed: h_errno=%d: %m",
-	      		optarg, h_errno);
-	  switch(h_errno)
+	      		optarg, origherr);
+	  switch(origherr)
 	  {
 	  case HOST_NOT_FOUND:
 	  case NO_ADDRESS:
