@@ -73,17 +73,25 @@ sub mass_check_mh_tar_file {
 sub mass_check_mh_folder {
   my $folder = shift;
   my @files = <$folder/[0-9]*>;
-  foreach my $mail (@files) {
+  foreach my $mail (@files)
+  {
+    # jm: commented size checks here; I can't see how they could be working,
+    # as "250_000" is not an int.  New size check implemented below
+
     if ($mail =~ /\.gz$/) {
-      next if `gunzip -c $mail|wc -c` > 250_000; #skip messages bigger than 250k
+      # next if `gunzip -c $mail|wc -c` > 250_000; #skip messages bigger than 250k
       open (STDIN, "gunzip -cd $mail |") or warn "gunzip $mail failed: $@";
     } elsif ($mail =~ /\.bz2$/) {
-      next if `bzip2 -dc $mail|wc -c` > 250_000; #skip messages bigger than 250k
+      # next if `bzip2 -dc $mail|wc -c` > 250_000; #skip messages bigger than 250k
       open (STDIN, "bzip2 -cd $mail |") or warn "bunzip2 $mail failed: $@";
     } else {
-      next if `wc -c $mail` > 250_000; #skip messages bigger than 250k
+      # next if `wc -c $mail` > 250_000; #skip messages bigger than 250k
       open (STDIN, "<$mail") or warn "open $mail failed: $@";
     }
+
+    # skip too-big mails
+    if (-s STDIN > 250*1024) { close STDIN; next; }
+
     my $ma = Mail::Audit->new();
     docheck ($mail, $ma);
   }
@@ -119,6 +127,8 @@ sub mass_check_mailbox {
       /^From \S+ +... ... / and last;
       push (@msg, $_);
     }
+
+    if (scalar @msg > 1000) { next; }	# too big
 
     # switch to a fork-based model to save RAM
     if ($FORK && fork()) { wait; next; }
