@@ -1932,6 +1932,21 @@ sub check_razor {
 
   return 0 unless ($self->is_razor_available());
   return 0 if ($self->{already_checked_razor});
+sub check_pyzor {
+  my ($self, $fulltext) = @_;
+
+  return 0 unless ($self->is_pyzor_available());
+  return 0 if ($self->{already_checked_pyzor});
+
+  $self->{already_checked_pyzor} = 1;
+
+  # note: we don't use $fulltext. instead we get the raw message,
+  # unfiltered, for pyzor to check.  ($fulltext removes MIME
+  # parts etc.)
+  my $full = $self->get_full_message_as_text();
+  return $self->pyzor_lookup (\$full);
+}
+
 
   $self->{already_checked_razor} = 1;
 

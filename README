@@ -198,19 +198,48 @@ skipped.
     something like "dcc.rhyolite.com,-     anon".
 
 
+  - Pyzor    http://pyzor.sourceforge.net/
+
+    Used to check message signatures against the Pyzor collaborative
+    filtering network.  Pyzor was initially "a Python implementation of
+    Razor", but now also uses its own (free) server architecture and is
+    "based upon a new, lighter, more language-independent protocol."
+
+    Pyzor requires at least Python 2.2.1 which can be found at
+    http://www.python.org/ .
+ 
+    To install Pyzor, download the latest revision from
+    https://sourceforge.net/project/showfiles.php?group_id=50000 and
+    perform the following steps:
+
+        # bunzip2 pyzor-*.tar.bz2
+        # cd pyzor-*
+        # python setup.py build
+        # python setup.py install
+
+    Note that your system might install the modules and scripts with
+    non-world-readable permissions.  Correct this with a command such as:
+
+	# chmod -R a+rX /usr/share/doc/pyzor \
+		/usr/lib/python2.2/site-packages/pyzor \
+		/usr/bin/pyzor /usr/bin/pyzord
+
+   Read the INSTALL document if you want to setup your own Pyzor server and
+   signature store.  Otherwise, you can just use the public servers.
+
+
   - Mail::Audit, Mail::Internet, Net::SMTP	(from CPAN)
 
-    If you want to use SpamAssassin for local delivery to a qmail or
-    MailDir spool, and you do *not* want to use procmail for some reason,
-    you will need to install the Mail::Audit module, and any modules it
-    requires (there's lots of them, unfortunately).   This is no longer
-    recommended.
+    If you want to use SpamAssassin with Mail::Audit, you will (obviously)
+    require the Mail::Audit module, and any modules it requires (there's
+    lots of them, unfortunately).
     
-    Additionally, Mail::Internet is required if you wish to use the "-r/-w"
-    options of the spamassassin program.
+    Additionally, Mail::Internet is required if you wish to use the
+    "-r/-w" options of the spamassassin program (reporting and replying,
+    for spam-trap mail accounts).
 
-    If you use procmail, KMail, or you plan to use 'spamd', you will *not*
-    need these.
+    If you use procmail, KMail, 'spamassassin -P', or you plan to use
+    'spamd', you will *not* need these.
 
     Here's how to install them using CPAN.pm:
 

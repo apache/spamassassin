@@ -54,6 +54,16 @@ sub report {
       dbg ("SpamAssassin: spam reported to DCC.");
     }
   }
+  if (!$self->{main}->{local_tests_only}
+  	&& !$self->{options}->{dont_report_to_pyzor}
+    && !$self->{main}->{stop_at_threshold}
+	&& $self->is_pyzor_available())
+  {
+    if ($self->pyzor_report($text)) {
+      dbg ("SpamAssassin: spam reported to Pyzor.");
+    }
+  }
+
 }
 
 ###########################################################################
@@ -276,6 +286,70 @@ sub dcc_report {
       return 0;
     } else {
       warn ("DCC report skipped: $! $@");
+      return 0;
+    }
+  }
+  return 1;
+}
+
+sub is_pyzor_available {
+  my ($self) = @_;
+  my (@resp);
+
+  if ($self->{main}->{local_tests_only}) {
+    dbg ("local tests only, ignoring Pyzor");
+    return 0;
+  }
+
+  if (!open(PyzorHDL, "pyzor ping 2>&1 |")) {
+    dbg ("Pyzor is not available");
+    return 0;
+  } 
+  else {
+    @resp = <PyzorHDL>;
+    close PyzorHDL;
+    dbg ("Pyzor is available: ".join(" ", @resp));
+    return 1;
+  }
+}
+
+use Symbol qw(gensym);
+
+sub pyzor_report {
+  my ($self, $fulltext) = @_;
+
+  eval {
+    use IPC::Open2;
+    my ($pyzorin, $pyzorout, $pid);
+
+    local $SIG{ALRM} = sub { die "alarm\n" };
+    local $SIG{PIPE} = sub { die "brokenpipe\n" };
+
+    alarm 10;
+
+    $pyzorin  = gensym();
+    $pyzorout = gensym();
+
+    $pid = open2($pyzorout, $pyzorin, 'pyzor report >/dev/null 2>&1');
+
+    print $pyzorin $fulltext;
+
+    close ($pyzorin);
+
+    waitpid ($pid, 0);
+
+    alarm(0);
+  };
+
+  if ($@) {
+    if ($@ =~ /alarm/) {
+      dbg ("Pyzor report timed out after 10 secs.");
+      return 0;
+    } elsif ($@ =~ /brokenpipe/) {
+      dbg ("Pyzor report failed - Broken pipe.");
+      return 0;
+    } else {
+      warn ("Pyzor report skipped: $! $@");
       return 0;
     }
   }
