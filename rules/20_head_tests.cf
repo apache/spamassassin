@@ -472,6 +472,9 @@ describe GAPPY_SUBJECT          'Subject' contains G.a.p.p.y-T.e.x.t
 header BUGZILLA_BUG		eval:message_from_bugzilla()
 describe BUGZILLA_BUG		Looks like a Bugzilla bug
 
+header DEBIAN_BTS_BUG		eval:message_from_debian_bts()
+describe DEBIAN_BTS_BUG		Looks like a Debian BTS bug
+
 # give a negative score to Majordomo results.
 header   MAJORDOMO              Subject =~ /Majordomo (?:request )?results/
 describe MAJORDOMO              From Majordomo
