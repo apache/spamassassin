@@ -78,7 +78,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 $VERSION = "2.21";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.91 2002/06/11 03:24:10 hughescr Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.92 2002/06/11 03:50:03 hughescr Exp $';
 
 sub Version { $VERSION; }
 
@@ -230,7 +230,7 @@ sub check {
   timelog("Init completed");
   my $mail = $self->encapsulate_mail_object ($mail_obj);
   my $msg = Mail::SpamAssassin::PerMsgStatus->new($self, $mail);
-  chomp($TIMELOG->{mesgid} = ($mail_obj->get("Message-Id") || 'nomsgid');
+  chomp($TIMELOG->{mesgid} = ($mail_obj->get("Message-Id") || 'nomsgid'));
   $TIMELOG->{mesgid} =~ s#<(.*)>#$1#;
   timelog("Created message object, checking message", "msgcheck", 1);
   $msg->check();
