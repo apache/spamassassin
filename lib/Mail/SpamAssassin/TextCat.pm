@@ -54,6 +54,7 @@ sub classify {
   # load model and count for each language.
   my $language = 0;
   open(LM, $self->{main}->{languages_filename}) || die "cannot open languages: $!\n";
+  dbg("Loading languages file...");
   while (<LM>) {
     chomp;
     if (/^0 (.+)/) {
@@ -92,9 +93,11 @@ sub classify {
     @answers=(@answers, shift(@results));
   }
   if (@answers > $opt_a) {
+    dbg("Can't determine language uniquely enough");
     return ();
   }
   else {
+    dbg("Language possibly: ".join(",",@answers));
     return @answers;
   }
 }
@@ -134,5 +137,7 @@ sub create_lm {
 
   return @sorted;
 }
+
+sub dbg { Mail::SpamAssassin::dbg (@_); }
 
 1;
