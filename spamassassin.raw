@@ -550,9 +550,10 @@ By default, configuration data is loaded from the first existing directory in:
 F<@@DEF_RULES_DIR@@>;
 F<@@PREFIX@@/share/spamassassin>;
 F</usr/local/share/spamassassin>;
-F</usr/share/spamassassin>.
+F</usr/share/spamassassin> .
 
-The configuration data in the first existing directory in:
+Site-specific configuration data is used to override any values which had
+already been set.  This is loaded from the first existing directory in:
 F<@@LOCAL_RULES_DIR@@>;
 F<@@PREFIX@@/etc/mail/spamassassin>;
 F<@@PREFIX@@/etc/spamassassin>;
@@ -560,16 +561,18 @@ F</usr/local/etc/spamassassin>;
 F</usr/pkg/etc/spamassassin>;
 F</usr/etc/spamassassin>;
 F</etc/mail/spamassassin>;
-F</etc/spamassassin>
-are used to override any values which had already been set
+F</etc/spamassassin> .
 
-Spamassassin will read *.cf in these directories, in alphanumeric order within each directory
-(similar to SysV-style startup scripts).  In other words, it will read F<10_misc.cf> before F<50_scores.cf> and F<20_body_tests.cf> before F<20_head_test.cf>.  Options in later files will override earlier files.
+Spamassassin will read *.cf in these directories, in alphanumeric order within
+each directory (similar to SysV-style startup scripts).  In other words, it
+will read F<10_misc.cf> before F<50_scores.cf> and F<20_body_tests.cf> before
+F<20_head_test.cf>.  Options in later files will override earlier files.
 
 The user preferences (such as scores to attach to each rule), are loaded from
 the file specified in the B<-p> argument.  If this is not specified,
-F<~/.spamassassin/user_prefs> is used if it exists.  C<spamassassin> will create this
-file if it does not exist, using F<user_prefs.template> as a template.  This file will be looked for in: 
+F<~/.spamassassin/user_prefs> is used if it exists.  C<spamassassin> will
+create this file if it does not exist, using F<user_prefs.template> as a
+template.  This file will be looked for in: 
 F<@@LOCAL_RULES_DIR@@>;
 F<@@PREFIX@@/etc/mail/spamassassin>;
 F<@@PREFIX@@/share/spamassassin>;
