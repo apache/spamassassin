@@ -706,7 +706,7 @@ sub _set_macro_PERL_TAINT {
 }
 
 
-# Override the libscan routine so it skips CVS stuff and some common
+# Override the libscan routine so it skips SVN/CVS stuff and some common
 # patch/backup extensions.
 sub MY::libscan {
   my $self = shift;
@@ -714,9 +714,8 @@ sub MY::libscan {
   init_MY_globals($self);
 
   return q{} if $path =~ m{
-                  windows_install|
                   (^|/)(CVS|\.svn)(/|$)|
-                  [/.](orig|old|rej|diff|patch|bak|backup|my)$
+                  [/.](orig|old|rej|r\d+|diff|patch|bak|backup|mine|my)$
                 }ix;
 
   clean_MY_globals($self);
