@@ -473,8 +473,6 @@ sub is_dcc_available {
   return 1;
 }
 
-use Symbol qw(gensym);
-
 sub dcc_lookup {
   my ($self, $fulltext) = @_;
   my $response = undef;
@@ -495,29 +493,25 @@ sub dcc_lookup {
   timelog("DCC -> Starting test ($timeout secs max)", "dcc", 1);
 
   eval {
-    my ($dccin, $dccout, $pid);
-
     local $SIG{ALRM} = sub { die "alarm\n" };
     local $SIG{PIPE} = sub { die "brokenpipe\n" };
 
     alarm($timeout);
 
-    $dccin = gensym();
-    $dccout = gensym();
+    # use a temp file here -- open2() is unreliable, buffering-wise,
+    # under spamd. :(
+    my $tmpf = $self->create_fulltext_tmpfile($fulltext);
 
-    $pid = open2($dccout, $dccin, join(' ', $self->{conf}->{dcc_path}, '-H', $self->{conf}->{dcc_options}, '2>&1'));
+    my $pid = open(DCC, join(' ',
+                        $self->{conf}->{dcc_path}, '-H', 
+                        $self->{conf}->{dcc_options}, '< \''.$tmpf.'\' 2>&1 |'));
+    $response = <DCC>;
+    close DCC;
 
-    print $dccin $$fulltext;
-    
-    close ($dccin);
-
-    $response = <$dccout>;
-        
     dbg("DCC: got response: $response");
 
-    waitpid ($pid, 0);
-
     alarm(0);
+    waitpid ($pid, 0);
   };
 
   if ($@) {
@@ -537,7 +531,7 @@ sub dcc_lookup {
     }
   }
 
-  if ($response !~ /^X-DCC/) {
+  if (!defined $response || $response !~ /^X-DCC/) {
     dbg ("DCC -> check failed - no X-DCC returned (did you create a map file?): $response");
     timelog("dcc check failed", "dcc", 2);
     return 0;
@@ -603,8 +597,6 @@ sub is_pyzor_available {
   return 1;
 }
 
-use Symbol qw(gensym);
-
 sub pyzor_lookup {
   my ($self, $fulltext) = @_;
   my $response = undef;
@@ -623,29 +615,23 @@ sub pyzor_lookup {
   timelog("Pyzor -> Starting test ($timeout secs max)", "pyzor", 1);
 
   eval {
-    my ($pyzorin, $pyzorout, $pid);
-
     local $SIG{ALRM} = sub { die "alarm\n" };
     local $SIG{PIPE} = sub { die "brokenpipe\n" };
 
     alarm($timeout);
 
-    $pyzorin = gensym();
-    $pyzorout = gensym();
+    # use a temp file here -- open2() is unreliable, buffering-wise,
+    # under spamd. :(
+    my $tmpf = $self->create_fulltext_tmpfile($fulltext);
 
-    $pid = open2($pyzorout, $pyzorin, join(' ', $self->{conf}->{pyzor_path}, 'check', '2>&1'));
-
-    print $pyzorin $$fulltext;
-    
-    close ($pyzorin);
-
-    $response = <$pyzorout>;
-        
+    my $pid = open(PYZOR, join(' ',
+                    $self->{conf}->{pyzor_path}, 'check < \''.$tmpf.'\' 2>&1 |'));
+    $response = <PYZOR>;
+    close PYZOR;
     dbg("Pyzor: got response: $response");
 
-    waitpid ($pid, 0);
-
     alarm(0);
+    waitpid ($pid, 0);
   };
 
   if ($@) {

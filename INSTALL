@@ -117,6 +117,7 @@ These modules are required for spamassassin to run.
     If you use Debian, you can get HTML::Parser from the libhtml-parser-perl
     package.
 
+
 Optional Additional Modules
 ---------------------------
 
@@ -344,6 +345,16 @@ handle local mail delivery:
 
 
 Other installation notes:
+
+  - SpamAssassin now uses a temporary file in /tmp (or $TMPDIR, if that's
+    set in the environment) for Pyzor and DCC checks.  Make sure that this
+    directory is not either (a) writable by other users, or (b) shared over
+    NFS, for security.
+
+
+  - The auto-whitelist is enabled using the -a flag to spamassassin or
+    spamd.
+
 
   - If you get spammed, it is helpful to everyone else if you re-run
     spamassassin with the "-r" option to report the message in question as

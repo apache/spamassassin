@@ -61,7 +61,6 @@ WriteMakefile(
                         'HTML::Parser' => 0,
                         'Text::Wrap' => 0,
                         'Time::Local' => 0,
-                        'Symbol' => 0,
                   },
 
     'dist' => {
