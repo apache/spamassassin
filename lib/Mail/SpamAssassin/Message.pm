@@ -215,7 +215,7 @@ sub new {
 	# except colon (072).
 	# FOR THIS NEXT PART: list off the valid REs for what can be next:
 	#	Header, header continuation, blank line
-        if (!@message || $message[0] !~ /^(?:[\041-\071\073-\176]+:|[ \t]|\r?$)/) {
+        if (!@message || $message[0] !~ /^(?:[\041-\071\073-\176]+:|[ \t]|\r?$)/ || $message[0] =~ /^--/) {
 	  # No body or no separator before mime boundary is invalid
           $self->{'missing_head_body_separator'} = 1;
 	  
