@@ -91,7 +91,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.125 2002/09/17 23:25:33 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.126 2002/09/24 17:10:02 jmason Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -291,8 +291,8 @@ Otherwise identical to C<$f->check()> above.
 =cut
 
 sub check_message_text {
-  my ($self, $mailtext) = @_;
-  my @lines = split (/^/m, $mailtext);
+  my $self = shift;
+  my @lines = split (/^/m, $_[0]);
   my $mail_obj = Mail::SpamAssassin::NoMailAudit->new ('data' => \@lines);
   return $self->check ($mail_obj);
 }
