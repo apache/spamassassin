@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.81 2003/05/02 21:41:23 quinlan Exp $
+# $Id: HTML.pm,v 1.82 2003/05/06 07:23:16 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -465,54 +465,8 @@ sub html_tests {
       $height = $1;
       $height *= 6 if (defined $2 && $2 eq "%");
     }
-    if ($width > 0 && $height > 0) {
-      my $area = $width * $height;
-      $self->{html}{image_area} += $area;
-      if ($area <= 2) {
-	$self->{html}{t_image_web_bugs_6} = 1;
-	$self->{html}{t_image_web_bugs_6b} = 1;
-      }
-      if ($area <= 4) {
-	$self->{html}{t_image_web_bugs_7} = 1;
-	$self->{html}{t_image_web_bugs_7b} = 1;
-      }
-      if ($area <= 6) {
-	$self->{html}{t_image_web_bugs_8} = 1;
-	$self->{html}{t_image_web_bugs_8b} = 1;
-      }
-      if ($area <= 8) {
-	$self->{html}{t_image_web_bugs_9} = 1;
-	$self->{html}{t_image_web_bugs_9b} = 1;
-      }
-      if ($area <= 10) {
-	$self->{html}{t_image_web_bugs_10} = 1;
-	$self->{html}{t_image_web_bugs_10b} = 1;
-      }
-      if ($area <= 12) {
-	$self->{html}{t_image_web_bugs_11} = 1;
-	$self->{html}{t_image_web_bugs_11b} = 1;
-      }
-    }
     if ($width <= 1 && $height <= 1) {
-      $self->{html}{t_image_web_bugs_1} = 1;
-    }
-    if ($width + $height < 4) {
-      $self->{html}{t_image_web_bugs_2} = 1;
-    }
-    if ($width <= 2 && $height <= 2) {
-      $self->{html}{t_image_web_bugs_3} = 1;
-      $self->{html}{t_image_web_bugs_6b} = 1;
-      $self->{html}{t_image_web_bugs_7b} = 1;
-      $self->{html}{t_image_web_bugs_8b} = 1;
-      $self->{html}{t_image_web_bugs_9b} = 1;
-      $self->{html}{t_image_web_bugs_10b} = 1;
-      $self->{html}{t_image_web_bugs_11b} = 1;
-    }
-    if ($width <= 3 && $height <= 3) {
-      $self->{html}{t_image_web_bugs_4} = 1;
-    }
-    if ($width <= 4 && $height <= 4) {
-      $self->{html}{t_image_web_bugs_5} = 1;
+      $self->{html}{image_web_bugs} = 1;
     }
   }
   if ($tag eq "form" && exists $attr->{action}) {
