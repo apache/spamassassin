@@ -803,9 +803,11 @@ sub check_for_cached_probs_invalidated {
   return 0;
 }
 
-sub is_available {
+# Check to make sure we can tie() the DB, and we have enough entries to do a scan
+sub is_scan_available {
   my $self = shift;
 
+  return 0 unless $self->{main}->{conf}->{use_bayes};
   return 0 unless $self->{store}->tie_db_readonly();
 
   my ($ns, $nn) = $self->{store}->nspam_nham_get();
@@ -828,22 +830,14 @@ sub is_available {
 sub scan {
   my ($self, $msg, $body) = @_;
 
-  if (!$self->{main}->{conf}->{use_bayes}) { goto skip; }
-  if (!$self->{store}->tie_db_readonly()) { goto skip; }
+  if ( !$self->is_scan_available() ) {
+    goto skip;
+  }
 
   my ($ns, $nn) = $self->{store}->nspam_nham_get();
 
   if ($self->{log_raw_counts}) {
     $self->{raw_counts} = " ns=$ns nn=$nn ";
-  }
-
-  if ($ns < $MIN_SPAM_CORPUS_SIZE_FOR_BAYES) {
-    dbg ("spam corpus too small ($ns < $MIN_SPAM_CORPUS_SIZE_FOR_BAYES), skipping");
-    goto skip;
-  }
-  if ($nn < $MIN_HAM_CORPUS_SIZE_FOR_BAYES) {
-    dbg ("ham corpus too small ($nn < $MIN_HAM_CORPUS_SIZE_FOR_BAYES), skipping");
-    goto skip;
   }
 
   dbg ("bayes corpus size: nspam = $ns, nham = $nn");
