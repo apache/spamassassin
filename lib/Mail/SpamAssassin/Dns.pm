@@ -432,6 +432,23 @@ sub razor2_lookup {
 	  # if we got here, we're done doing remote stuff, abort the alert
 	  alarm 0;
 
+          # figure out if we have a log file we need to close...
+          if (ref($rc->{logref}) && exists $rc->{logref}->{fd}) {
+            # the fd can be stdout or stderr, so we need to find out if it is
+	    # so we don't close them by accident.  Note: we can't just
+	    # undef the fd here (like the IO::Handle manpage says we can)
+	    # because it won't actually close, unfortunately. :(
+            my $untie = 1;
+            foreach my $log ( *STDOUT{IO}, *STDERR{IO} ) {
+              if ($log == $rc->{logref}->{fd}) {
+                $untie = 0;
+                last;
+              }
+            }
+            close $rc->{logref}->{fd} if ($untie);
+          }
+
+
 	  dbg("Using results from Razor v".$Razor2::Client::Version::VERSION);
 
 	  # so $objects->[0] is the first (only) message, and ->{spam} is a general yes/no
