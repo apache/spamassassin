@@ -21,6 +21,15 @@ use Test;
 use Mail::SpamAssassin;
 use vars qw(%patterns %anti_patterns);
 
+# use a pre-set rand() seed.   Otherwise we WILL get non-deterministic
+# failures from people running "make test" -- which will be a PITA!
+# if you want to use your own seed, set the RULE_NAMES_SEED env var.
+# if you want randomness, use "RULE_NAMES_SEED=-1".
+my $seed = 2323;
+if ($ENV{'RULE_NAMES_SEED'}) { $seed = $ENV{'RULE_NAMES_SEED'}; }
+if ($seed < 0) { $seed = time^$$; }
+srand ($seed);
+
 # initialize SpamAssassin
 my $sa = Mail::SpamAssassin->new({
     rules_filename => "$prefix/t/log/test_rules_copy",
