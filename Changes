@@ -1,3 +1,63 @@
+2003-03-25 01:11  jmason
+
+	* INSTALL: last-minute doco change: recommend using DB_File
+
+2003-03-24 22:39  msquadrat
+
+	* lib/Mail/SpamAssassin.pm: ready for release
+
+2003-03-24 22:21  msquadrat
+
+	* spamassassin.raw: bug 1260: corrected description of
+	--nocreate-prefs option
+
+2003-03-24 22:17  msquadrat
+
+	* spamd/netbsd-rc-script.sh: bug 1656: updated init script for
+	NetBSD
+
+2003-03-24 21:28  msquadrat
+
+	* configure.in: bug 1542: configure didn't detect SSL_CTX_free on
+	NetBSD
+
+2003-03-24 21:11  msquadrat
+
+	* spamd/spamd.raw: bug 1601: option --syslog-socket wasn't
+	implemented
+
+2003-03-24 01:10  felicity
+
+	* lib/Mail/SpamAssassin/: Bayes.pm, BayesStore.pm: bug 1664: the
+	only entries in the bayes journal are token access time updates
+	(from scans).  we can exploit the fact that most of the tokens
+	appear multiple times by caching in memory the updates per token,
+	then just writing to db the end result times for all tokens.  
+	also, scan() tries to opportunistically do a journal sync and
+	expire which causes lots of contention if there is a lot of
+	messages for a single db (this is usually seen with site-wide dbs).
+	 so we flag when we are doing the sync and expire and let all other
+	pids not be so opportunistic.  this should greatly lower
+	contention.  we also let the db tie r/w happen before we try to
+	read from the journal, and also exploit the fact we can open the
+	journal before renaming it so the most common error occurs first,
+	and then a journal read failure means we don't need to rename the
+	temp file back.
+
+2003-03-24 00:52  felicity
+
+	* lib/Mail/SpamAssassin/Bayes.pm: bug 1672: a typo in a backported
+	patch for 2.51 caused bayes to sometimes not unlock the db.
+
+2003-03-20 20:31  jmason
+
+	* lib/Mail/SpamAssassin.pm: 2.51 devel cycle started
+
+2003-03-20 20:27  jmason
+
+	* Changes, build/update_devel, lib/Mail/SpamAssassin.pm: 2.51
+	RELEASED
+
 2003-03-20 20:07  jmason
 
 	* Changes, lib/Mail/SpamAssassin.pm: 2.5.1 RELEASED
