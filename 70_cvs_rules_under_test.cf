@@ -126,7 +126,6 @@ describe T_HTTP_EXCESSIVE_ENTITIES Completely unnecessary %-escapes inside a URL
 #header T_HEADER_COUNT_BAD_BCC		eval:check_header_count_range('Bcc','2','999')
 # There doesn't seem to be a RFC restriction, but these should only show up
 # once in ham
-header T_HEADER_COUNT_BAD_CTYPE		eval:check_header_count_range('Content-Type','2','999')
 #header T_HEADER_COUNT_BAD_CTE		eval:check_header_count_range('Content-Transfer-Encoding','2','999')
 
 body T_BLANK_LINE_RATIO_04_70_80	eval:check_blank_line_ratio('70','80','4')
