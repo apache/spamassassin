@@ -100,6 +100,12 @@ sub check_for_from_to_same {
   }
 }
 
+sub check_for_matching_env_and_hdr_from {
+  my ($self) =@_;
+  # two blank headers match so don't bother checking
+  return (lc $self->get('EnvelopeFrom:addr') eq lc $self->get('From:addr'));
+}
+
 sub sorted_recipients {
   my ($self) = @_;
 
