@@ -55,6 +55,7 @@ struct message {
     char *pre; int pre_len;   /* Pre-message data (e.g. SMTP commands) */
     char *msg; int msg_len;   /* The message */
     char *post; int post_len; /* Post-message data (e.g. SMTP commands) */
+    int content_length;
 
     /* Filled in by filter_message */
     int is_spam;              /* EX_ISSPAM if the message is spam, EX_NOTSPAM

@@ -532,17 +532,26 @@ sub check {
 	$was_it_spam = 'clean message';
     }
 
+    my $spamhdr = "Spam: $response_spam_status ; $msg_score / $msg_threshold";
+
     if ($method eq 'PROCESS') {
         $status->rewrite_mail; #if $status->is_spam;
 
         # Build the message to send back and measure it
         my $msg_resp = join '',$mail->header,"\n",@{$mail->body};
         my $msg_resp_length = length($msg_resp);
-        if($version >= 1.2) # Spamc protocol 1.2 means it accepts content-length
+        if($version >= 1.3) # Spamc protocol 1.2 means it takes multi hdrs
 	{
 	    print $client "SPAMD/1.1 $resphash{$resp} $resp\r\n",
-	   		 "Content-length: $msg_resp_length\r\n\r\n",
-	    $msg_resp;
+	   		"Content-length: $msg_resp_length\r\n",
+			$spamhdr."\r\n",
+			"\r\n", $msg_resp;
+        }
+        elsif($version >= 1.2) # Spamc protocol 1.2 means it accepts content-length
+	{
+	    print $client "SPAMD/1.1 $resphash{$resp} $resp\r\n",
+	   		"Content-length: $msg_resp_length\r\n",
+			"\r\n", $msg_resp;
         }
         else # Earlier than 1.2 didn't accept content-length
         {
@@ -554,20 +563,30 @@ sub check {
       print $client "SPAMD/1.1 $resphash{$resp} $resp\r\n"; 
 
       if($method eq "CHECK") {
-	    print $client "Spam: $response_spam_status ; $msg_score / $msg_threshold\r\n\r\n";
+	    print $client "$spamhdr\r\n\r\n";
       }
       else {
         my $msg_resp = '';
 
-        if($method eq "REPORT" or ($method eq "REPORT_IFSPAM" and $status->is_spam)) {
+        if($method eq "REPORT" or
+		  ($method eq "REPORT_IFSPAM" and $status->is_spam))
+	{
 	    $msg_resp = "$msg_score/$msg_threshold\r\n" . 
-            $status->{test_logs};
+				$status->{test_logs};
         }
         elsif($method eq "SYMBOLS") {
           $msg_resp = $status->get_names_of_tests_hit;
         }
 
-        printf $client "Content-length: %d\r\n\r\n%s", length($msg_resp), $msg_resp;
+        if($version >= 1.3) # Spamc protocol 1.2 means it takes multi hdrs
+	{
+	    printf $client "Content-length: %d\r\n%s\r\n\r\n%s",
+			length($msg_resp), $spamhdr, $msg_resp;
+        }
+	else {
+	    printf $client "Content-length: %d\r\n\r\n%s",
+			length($msg_resp), $msg_resp;
+	}
       }
     }
 

@@ -248,6 +248,7 @@ sub start_spamd {
 
 sub stop_spamd {
   return 0 if defined($spamd_never_started);
+  return 0 if defined($spamd_already_killed);
 
   $spamd_pid ||= 0;
   if ( $spamd_pid <= 1) {
@@ -266,6 +267,7 @@ sub stop_spamd {
 
     $spamd_pid = 0;
     undef $spamd_never_started;
+    $spamd_already_killed = 1;
     return $killed;
   }
 }

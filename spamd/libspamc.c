@@ -91,7 +91,7 @@ static const int EXPANSION_ALLOWANCE = 16384;
  */
 
 /* Set the protocol version that this spamc speaks */
-static const char *PROTOCOL_VERSION="SPAMC/1.2";
+static const char *PROTOCOL_VERSION="SPAMC/1.3";
 
 int libspamc_timeout = 0;
 
@@ -335,6 +335,7 @@ static void clear_message(struct message *m){
     m->is_spam=EX_TOOBIG;
     m->score=0.0; m->threshold=0.0;
     m->out=NULL; m->out_len=0;
+    m->content_length=-1;
 }
 
 static int message_read_raw(int fd, struct message *m){
@@ -495,13 +496,84 @@ void message_dump(int in_fd, int out_fd, struct message *m){
     }
 }
 
+static int
+_spamc_read_full_line (struct message *m, int flags, int sock,
+		char *buf, int *lenp, int bufsiz)
+{
+    int failureval;
+    int bytesread = 0;
+    int len;
+
+    /* Now, read from spamd */
+    for(len=0; len<bufsiz-1; len++) {
+	if(flags&SPAMC_USE_SSL) {
+#ifdef SPAMC_SSL
+	  bytesread=timeout_read(SSL_read, ssl, buf+len, 1);
+#endif
+	} else {
+	  bytesread=timeout_read(read, sock, buf+len, 1);
+	}
+
+        if(buf[len]=='\n') {
+            buf[len]='\0';
+	    if (len > 0 && buf[len-1] == '\r') {
+		len--;
+		buf[len]='\0';
+	    }
+	    *lenp = len;
+	    return EX_OK;
+	}
+
+        if(bytesread<=0){
+	    failureval = EX_IOERR; goto failure;
+        }
+    }
+
+    syslog(LOG_ERR, "spamd responded with line of %d bytes, dying", len);
+    failureval = EX_TOOBIG;
+
+failure:
+    return failureval;
+}
+
+static int
+_handle_spamd_header (struct message *m, int flags, char *buf, int len)
+{
+    char is_spam[6];
+
+    /* Feb 12 2003 jm: actually, I think sccanf is working fine here ;)
+     * let's stick with it for this parser.
+     */
+    if (sscanf(buf, "Spam: %5s ; %f / %f", is_spam, &m->score, &m->threshold) == 3)
+    {
+	/* Format is "Spam: x; y / x" */
+	m->is_spam=strcasecmp("true", is_spam)? EX_NOTSPAM : EX_ISSPAM;
+
+	if(flags&SPAMC_CHECK_ONLY) {
+	    m->out_len=snprintf (m->out, m->max_len+EXPANSION_ALLOWANCE,
+			"%.1f/%.1f\n", m->score, m->threshold);
+	}
+	return EX_OK;
+
+    } else if(sscanf(buf, "Content-length: %d", &m->content_length) == 1) {
+	if (m->content_length < 0) {
+	    syslog(LOG_ERR, "spamd responded with bad Content-length '%s'", buf);
+	    return EX_PROTOCOL;
+	}
+	return EX_OK;
+    }
+
+    syslog(LOG_ERR, "spamd responded with bad header '%s'", buf);
+    return EX_PROTOCOL;
+}
+
 static int _message_filter(const struct sockaddr *addr,
                 const struct hostent *hent, int hent_port, char *username,
                 int flags, struct message *m)
 {
-    char buf[8192], is_spam[6];
+    char buf[8192];
     int bufsiz = (sizeof(buf) / sizeof(*buf)) - 4; /* bit of breathing room */
-    int len, expected_len, i, header_read=0;
+    int len, i;
     int sock;
     float version;
     int response;
@@ -577,127 +649,72 @@ static int _message_filter(const struct sockaddr *addr,
       shutdown(sock, SHUT_WR);
     }
 
-    /* Now, read from spamd */
-    for(len=0; len<bufsiz; len++) {
-	if(flags&SPAMC_USE_SSL) {
-#ifdef SPAMC_SSL
-	  i=timeout_read(SSL_read, ssl, buf+len, 1);
-#endif
-	} else {
-	  i=timeout_read(read, sock, buf+len, 1);
-	}
+    /* ok, now read and parse it.  SPAMD/1.2 line first... */
+    failureval = _spamc_read_full_line (m, flags, sock, buf, &len, bufsiz);
+    if (failureval != EX_OK) { goto failure; }
 
-        if(i<0){
-	    failureval = EX_IOERR; goto failure;
-        }
-        if(i==0){
-            /* Read to end of message! Must be a version <1.0 server */
-            if(len<100){
-                /* Nope, communication error */
-		failureval = EX_IOERR; goto failure;
-            }
-            break;
-        }
-        if(buf[len]=='\n'){
-            buf[len]='\0';
-            if(sscanf(buf, "SPAMD/%f %d %*s", &version, &response)!=2){
-                syslog(LOG_ERR, "spamd responded with bad string '%s'", buf);
-		failureval = EX_PROTOCOL; goto failure;
-            }
-            header_read=-1;
-            break;
-        }
-    }
-    if(!header_read){
-        /* No header, so it must be a version <1.0 server */
-        memcpy(m->out, buf, len);
-        m->out_len=len;
-    } else {
-        /* Handle different versioned headers */
-        if(version-1.0>0.01){
-            for(len=0; len<bufsiz; len++){
-#ifdef SPAMC_SSL
-	      if(flags&SPAMC_USE_SSL){
-		i=timeout_read(SSL_read, ssl, buf+len, 1);
-	      } else{
-#endif
-		i=timeout_read(read, sock, buf+len, 1);
-#ifdef SPAMC_SSL
-	      }
-#endif
-                if(i<=0){
-		    failureval = (i<0)?EX_IOERR:EX_PROTOCOL; goto failure;
-                }
-                if(buf[len]=='\n'){
-                    buf[len]='\0';
-                    if(flags&SPAMC_CHECK_ONLY){
-                        /* Check only or report mode, better be "Spam: x; y / x" */
-                        i=sscanf(buf, "Spam: %5s ; %f / %f", is_spam, &m->score, &m->threshold);
-                        
-                        if(i!=3){
-                            free(m->out); m->out=m->msg; m->out_len=m->msg_len;
-                            return EX_PROTOCOL;
-                        }
-                        m->out_len=snprintf(m->out, m->max_len+EXPANSION_ALLOWANCE, "%.1f/%.1f\n", m->score, m->threshold);
-                        m->is_spam=strcasecmp("true", is_spam)?EX_NOTSPAM:EX_ISSPAM;
-
-                        close(sock);
-                        return EX_OK;
-                    } else {
-                        /* Not check-only, better be Content-length */
-                        if(sscanf(buf, "Content-length: %d", &expected_len)!=1){
-			    failureval = EX_PROTOCOL;
-			    goto failure;
-                        }
-                    }
-
-                    /* Should be end of headers now */
-		    if(flags&SPAMC_USE_SSL){
-#ifdef SPAMC_SSL
-		      i=timeout_read(SSL_read,ssl, buf, 2);
-#endif
-		    } else{
-		      i=full_read (sock, (unsigned char *) buf, 2, 2);
-		    }
-
-                    if(i!=2 || buf[0]!='\r' || buf[1]!='\n'){
-                        /* Nope, bail. */
-			failureval = EX_PROTOCOL; goto failure;
-                    }
-
-                    break;
-                }
-            }
-        }
-    }
-
-    if(flags&SPAMC_CHECK_ONLY){
-        /* We should have gotten headers back... Damnit. */
+    if(sscanf(buf, "SPAMD/%f %d %*s", &version, &response)!=2) {
+	syslog(LOG_ERR, "spamd responded with bad string '%s'", buf);
 	failureval = EX_PROTOCOL; goto failure;
     }
 
-    if(flags&SPAMC_USE_SSL){
+    m->score = 0;
+    m->threshold = 0;
+    m->is_spam = EX_TOOBIG;
+    while (1) {
+	failureval = _spamc_read_full_line (m, flags, sock, buf, &len, bufsiz);
+	if (failureval != EX_OK) { goto failure; }
+
+	if (len == 0 && buf[0] == '\0') {
+	    break;	/* end of headers */
+	}
+
+	if (_handle_spamd_header(m, flags, buf, len) < 0) {
+	    failureval = EX_PROTOCOL; goto failure;
+	}
+    }
+
+    len = 0;		/* overwrite those headers */
+
+    if (flags&SPAMC_CHECK_ONLY) {
+	close(sock);
+	if (m->is_spam) {
+	    /* We should have gotten headers back... Damnit. */
+	    failureval = EX_PROTOCOL; goto failure;
+	}
+
+    } else {
+	if (m->content_length < 0) {
+	    /* should have got a length too. */
+	    failureval = EX_PROTOCOL; goto failure;
+	}
+
+	if (flags&SPAMC_USE_SSL) {
 #ifdef SPAMC_SSL
-      len=timeout_read(SSL_read,ssl, m->out+m->out_len,
-		 m->max_len+EXPANSION_ALLOWANCE+1-m->out_len);
+	  len=timeout_read(SSL_read,ssl, m->out+m->out_len,
+		     m->max_len+EXPANSION_ALLOWANCE+1-m->out_len);
 #endif
-    } else{
-      len=full_read(sock, (unsigned char *) m->out+m->out_len,
-		 m->max_len+EXPANSION_ALLOWANCE+1-m->out_len,
-		 m->max_len+EXPANSION_ALLOWANCE+1-m->out_len);
-    }
+	} else{
+	  len=full_read(sock, (unsigned char *) m->out+m->out_len,
+		     m->max_len+EXPANSION_ALLOWANCE+1-m->out_len,
+		     m->max_len+EXPANSION_ALLOWANCE+1-m->out_len);
+	}
 
-    if(len+m->out_len>m->max_len+EXPANSION_ALLOWANCE){
-	failureval = EX_TOOBIG; goto failure;
-    }
-    m->out_len+=len;
 
-    shutdown(sock, SHUT_RD);
-    close(sock);
+	if(len+m->out_len>m->max_len+EXPANSION_ALLOWANCE){
+	    failureval = EX_TOOBIG; goto failure;
+	}
+	m->out_len+=len;
+
+
+	shutdown(sock, SHUT_RD);
+	close(sock);
+    }
     libspamc_timeout = 0;
 
-    if(m->out_len!=expected_len){
-        syslog(LOG_ERR, "failed sanity check, %d bytes claimed, %d bytes seen", expected_len, m->out_len);
+    if(m->out_len!=m->content_length) {
+        syslog(LOG_ERR, "failed sanity check, %d bytes claimed, %d bytes seen",
+				m->content_length, m->out_len);
 	failureval = EX_PROTOCOL; goto failure;
     }
 
@@ -708,12 +725,12 @@ failure:
     close(sock);
     libspamc_timeout = 0;
 
-#ifdef SPAMC_SSL
     if(flags&SPAMC_USE_SSL){
+#ifdef SPAMC_SSL
       SSL_free(ssl);
       SSL_CTX_free(ctx);
-    }
 #endif
+    }
     return failureval;
 }
 
