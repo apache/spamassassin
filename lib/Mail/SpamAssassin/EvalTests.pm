@@ -741,7 +741,7 @@ sub check_for_sender_no_reverse {
   my $sender_rcvd = $received[$#received];
 
   # Ignore if the from host is domainless (has no dot)
-  return 0 unless ($sender_rcvd =~
+  return 0 unless (defined $sender_rcvd && $sender_rcvd =~
                    /^from (\S+\.\S+) \(\[([\d.]+)\]\)/);
 
   my $from = $1;
