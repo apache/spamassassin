@@ -75,8 +75,12 @@ describe JAVASCRIPT_URI	Javascript protocol in a URI
 
 # allow port 80, that's the HTTP port after all, so not wierd ;)
 # Dilbert does this for some reason.
-uri      WEIRD_PORT     m{https?:\/\/[^/:\s]+:(?:[^8][^0]|\d|\d\d\d+)(?:\D|$)}
-describe WEIRD_PORT     Uses non-standard port number for HTTP
+# we don't want to hit http://www.cnn.com:USArticle1840@www.liquidshirts.com/
+# though, which actually doesn't have a weird port in it.
+uri      WEIRD_PORT     m{https?://[^/\s]+?:(?:[^8][^0]|\d|\d\d\d+)(?:/|\s|$)}
+
+# looks for a username and (optional) password in an url
+uri      USERPASS     m{https?://[^/\s]+?(?::.+?)?\@}
 
 uri WWW_AUTOREMOVE_COM      /autoremove\.com/i   
 describe WWW_AUTOREMOVE_COM     Frequent SPAM content
@@ -123,3 +127,5 @@ describe DAILY_PL		Spam URL pattern, DailyPromotions redirect link
 uri DAILY_PXE			/http:\/\/(?:pxe|fx)\./i
 describe DAILY_PXE		Spam URL pattern, DailyPromotions server link
 
+uri E_MAILPROMO_URL		/\be-mailpromo\.net/
+uri E_MAILPROMO_MAILTO		/mailto:\S+[.@]e-mailpromo\.net/

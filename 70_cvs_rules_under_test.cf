@@ -73,35 +73,6 @@ score T_FORGED_MUA_MOZILLA3     1.0
 
 ########################################################################
 
-# Dec 18 2002 jm:
-# pretty good, will promote it tomorrow once Allen's had a look at
-# excluding his FPs
-# 12/23 - tvd - not bad for everyone except me where it's really a ham sign. :|
-#  mail from twig (webmail) seem to be most of the fps, let's try a third ?
-# daf          0.000   0.0000   0.0000    0.500   0.11    1.00  T_IDENT_NOBODY
-# easmith      0.024   0.0363   0.0210    0.634   0.23    1.00  T_IDENT_NOBODY
-# jm           0.136   0.4598   0.0000    1.000   0.96    1.00  T_IDENT_NOBODY
-# quinlan      0.270   0.6923   0.0000    1.000   0.93    1.00  T_IDENT_NOBODY
-# rODbegbie    0.000   0.0000   0.0000    0.500   0.12    1.00  T_IDENT_NOBODY
-# theo         0.091   0.0071   0.1442    0.047   0.00    1.00  T_IDENT_NOBODY
-# easmith      0.008   0.0363   0.0000    1.000   0.92    0.01  T_IDENT_NOBODY2
-# quinlan      0.270   0.6923   0.0000    1.000   0.93    0.01  T_IDENT_NOBODY2
-# rODbegbie    0.000   0.0000   0.0000    0.500   0.12    0.01  T_IDENT_NOBODY2
-# theo         0.088   0.0071   0.1397    0.048   0.00    0.01  T_IDENT_NOBODY2
-header __IDENT_NOBODY		Received =~ /ident[:=]nobody\b/i
-header __REGSITE_COM		Received =~ /\.registeredsite\.com\s/
-meta T_IDENT_NOBODY		(__IDENT_NOBODY && !__REGSITE_COM)
-describe T_IDENT_NOBODY		Message was sent by nobody
-score T_IDENT_NOBODY		1.0
-# Allen's version
-header __X_BEENTHERE		exists:X-BeenThere
-meta T_IDENT_NOBODY2		(__IDENT_NOBODY && !__REGSITE_COM && !((FORGOTTEN_PASSWORD + SUBJECT_IS_LIST + __X_BEENTHERE + KNOWN_MAILING_LIST) > 1))
-# Theo's version
-header __IDENT_NOBODY_LOCALHOST Received =~ /\bident[:=]nobody\@localhost\b/i
-meta T_IDENT_NOBODY3		(__IDENT_NOBODY && !__IDENT_NOBODY_LOCALHOST && !__REGSITE_COM && !((FORGOTTEN_PASSWORD + SUBJECT_IS_LIST + __X_BEENTHERE + KNOWN_MAILING_LIST) > 1))
-
-##############################################################################
-
 # Nov 12 2002 jm: not keen on this.  many ISPs do not provide rDNS these
 # days as policy. stupid policy, but there we are. and SpamAssassin policy
 # is not to punish users with stupid ISPs...
@@ -148,15 +119,9 @@ header __FROM_HAS_UNDERLINE_NUMS	From =~ /_\S?(?:[a-z]+\w*?\d+|\d+\w*?[a-z]+)\w*
 meta T_FROM_HAS_UNDERLINE_NUMS		(!T_REPLY_TO_HAS_UNDERLINE_NUMS && __FROM_HAS_UNDERLINE_NUMS)
 describe T_FROM_HAS_UNDERLINE_NUMS	From: contains an underline and numbers/letters
 
-# Specific whitelisting for GradFinder.  They use the sender's own
-# From addr, so whitelist_from_rcvd won't cut it
-# bug 1241
-# 12/23 - 0 hits for anyone - tvd
-header __GRADF_MSGID	Message-ID =~ /\@gradfinder.com>$/
-header __GRADF_RCVD	Received =~ /from \S+ \(\S+.friendfinder.com \[216\.34\./
-meta T_VIA_GRADFINDER	(__GRADF_RCVD && __GRADF_MSGID)
-tflags T_VIA_GRADFINDER	nice
-
+# tvd - 12/25 - part of me says to promote this with strong ham sign, but
+# another part says that since it's only 1 person who really gets any hits,
+# we shouldn't promote and just let them have local rules.  Thoughts?
 # bug 1171
 # Listproc - Allen (example: nonspam:<199811090515.AAA28259@chem.harvard.edu>)
 # 12/22 - hits a lot for allen (4.3%), a tiny amount for theo (0.05%), and that's it. - tvd
@@ -164,52 +129,17 @@ header T_LISTPROC1		X-Listprocessor-version =~ /^\s*(?:\d\.)+\w*\s+--\s+List[Pp]
 score T_LISTPROC1		-0.01
 tflags T_LISTPROC1		nice
 
-# 12/22 - hits some for allen (0.42%), a tiny amount for theo (0.01%), and that's it. - tvd
-header __FROM_LISTPROC		From =~ /\blistproc\@/i
-header __REPLY_LISTPROC		Reply-To =~ /\blistproc\@/i
-header __SENDER_LISTPROC	Sender =~ /\blistproc\@/i
-meta T_LISTPROC2		T_LISTPROC1 && __FROM_LISTPROC && (__REPLY_LISTPROC || __SENDER_LISTPROC)
-score T_LISTPROC2		-0.01
-tflags T_LISTPROC2		nice
-
 # bug 1010
-# 12/22 - 2.59% hits for quinlan, 0 for others - tvd
-uri T_SUPER_BARGAINS_URL	/\bsuper-bargains\.com/
-# 12/22 - 0 hits for anyone - tvd
-uri T_FANTASTIC_BARGAIN_URL	/\bfantastic-bargain\.com/
-# 12/22 - 4.83% for Allen, 0 for others - tvd
-uri T_KAVKAZCENTER_URL		/\bkavkazcenter\.com/
-# 12/22 - 0 hits for anyone - tvd
-uri T_FINESTOFFERS_URL		/\bfinestoffers\.com/
-# 12/22 - 0 hits for anyone - tvd
-uri T_AEOPUBLISHING_URL		/\baeopublishing\.com/
-# 12/22 - 0.47% for quinlan, 0 for others - tvd
-uri T_SKY08_URL			/\bsky08\.com/
-# 12/22 - 2.07% for allen, 0.11% for rod, 0.06% for theo - tvd
-uri T_E_MAILPROMO_URL		/\be-mailpromo\.net/
-# 12/22 - 0.06% for quinlan, 0 for others - tvd
-uri T_MARINEDIGITAL_URL		/\bmarinedigital\.com/
-# 12/22 - 0 hits for anyone - tvd
-uri T_ITSREMARKABLE_URL		/\bitsremarkable\.com/
+# tvd - 12/25 - part of me says to promote these with strong spam signs, but
+# another part says that since it's only 1 person who gets any hits,
+# we shouldn't promote and just let them have local rules.  Thoughts?
 #
 # 12/22 - 2.59% for quinlan, 0 for others - tvd
 uri T_SUPER_BARGAINS_MAILTO	/mailto:\S+[.@]super-bargains\.com/
-# 12/22 - 0 hits for anyone - tvd
-uri T_FANTASTIC_BARGAIN_MAILTO	/mailto:\S+[.@]fantastic-bargain\.com/
+uri T_SUPER_BARGAINS_URL	/\bsuper-bargains\.com/
 # 12/23 - 4.83% for allen, 0 for others - tvd
 uri T_KAVKAZCENTER_MAILTO	/mailto:\S+[.@]kavkazcenter\.com/
-# 12/22 - 0 hits for anyone - tvd
-uri T_FINESTOFFERS_MAILTO	/mailto:\S+[.@]finestoffers\.com/
-# 12/22 - 0 hits for anyone - tvd
-uri T_AEOPUBLISHING_MAILTO	/mailto:\S+[.@]aeopublishing\.com/
-# 12/22 - 0.47% for quinlan, 0 for others - tvd
-uri T_SKY08_MAILTO		/mailto:\S+[.@]sky08\.com/
-# 12/22 - 2.07% for allen, 0.10% for rod, 0.05% for theo - tvd
-uri T_E_MAILPROMO_MAILTO	/mailto:\S+[.@]e-mailpromo\.net/
-# 12/22 - 0.06% for quinlan, 0 for others - tvd
-uri T_MARINEDIGITAL_MAILTO	/mailto:\S+[.@]marinedigital\.com/
-# 12/22 - 0 hits for anyone - tvd
-uri T_ITSREMARKABLE_MAILTO	/mailto:\S+[.@]itsremarkable\.com/
+uri T_KAVKAZCENTER_URL		/\bkavkazcenter\.com/
 
 ########################################################################
 
@@ -336,11 +266,12 @@ header T_SORTED_RECIPIENTS_16		eval:sorted_recipients('16')
 
 ########################################################################
 
-# a few random rules
-header T_RATWARE_MASS_SENDER		X-Mailer =~ /Advanced Mass Sender/i
-header T_RATWARE_DIRECT_EMAIL		X-Mailer =~ /Direct Email/i
-header T_RATWARE_MAILWORKZ		X-Mailer =~ /\bMailWorkZ\b/i
+# 12/25 - tvd - this FPs on Car Talk newsletters, the hit rate is pretty
+# low all around (likely to just remove), but let's try a meta exception anyway.
 header T_X_BULKMAIL			exists:X-Bulkmail
+header __X_BULKMAIL			exists:X-Bulkmail
+header __FROM_CARTALK			From =~ /\@cartalk\.com$/
+meta T_X_BULKMAIL_2			( __X_BULKMAIL && !__FROM_CARTALK )
 
 # possible additions to NIGERIA rules
 body T_SCAM_419_1		/MOHAMMED(?:\.|=2e)?\s?ABACHA/i
@@ -348,32 +279,9 @@ body T_SCAM_419_2		/(?:government|bank) of nigeria/i
 body T_SCAM_419_3		/nigerian? (?:national|government)/i
 
 # Dec 24 2002 jm: random check
+# 12/25 - tvd - great for quinlan (2.69%), hits under .05% for everyone else, no fps
 uri T_BARGAIN_URL		/bargains?\.(?:com|biz)/
-uri T_PROMO_URL			/promo(?:|tion)s?\.(?:com|biz)/
+# 12/25 - tvd - fps a bit for rod, my fp is homestead.com redirect to:
+#http://professional.homestead.com/splash.ffhtml?ref=3564&target=www.homestead.com/splash.html%3F3564%26target%3Dwww.hspromos.com/webring.html
+uri T_PROMO_URL			/promo(?:tion)?s?\.(?:com|biz)/
 
-# bug 765, 12/23 -tvd
-body	ENTER_TO_LOSE		/\benter to win\b/i
-describe ENTER_TO_LOSE		Has 'enter to win' but you lose privacy.
-
-# bug 881, 12/23 -tvd
-# possible replacements for MARKETING_PARTNERS
-body T_MARKETING_PARTNERS  /(?:marketing|network) partner|partner site/i
-describe T_MARKETING_PARTNERS     Claims you registered with some kind of partner
-body T_MARKETING_PARTNERS_2  /(?:marketing|network) partner|partner (?:web)?site/i
-describe T_MARKETING_PARTNERS_2    Claims you registered with some kind of partner
-
-# to try fixing the overlap between the two rules (bug 786)
-# DEAR_SOMEBODY has a bad S/O, I'm tempted to remove it, but want to
-# see if this helps any first.
-# 12/23-tvd
-body __DEAR_SOMEBODY              /Dear [A-Z][a-z]+/
-meta T_DEAR_SOMEBODY              __DEAR_SOMEBODY && !DEAR_SOMETHING
-
-# WEIRD_PORT hits http://www.cnn.com:USArticle1840@www.liquidshirts.com/
-# which actually doesn't have a weird port in it.
-uri      T_WEIRD_PORT     m{https?://[^/\s]+?:(?:[^8][^0]|\d|\d\d\d+)(?:/|\s|$)}
-
-# T_USERPASS looks for a username and (optional) password in an url
-# per bug 1273
-# 12/23-tvd
-uri      T_USERPASS     m{https?://[^/\s]+?(?::.+?)?\@}
