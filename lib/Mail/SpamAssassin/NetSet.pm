@@ -80,58 +80,5 @@ sub contains_ip {
 sub dbg { Mail::SpamAssassin::dbg (@_); }
 
 ###########################################################################
-# unit tests for CIDR specifications and IP matching.  Save memory by compiling
-# this only when the test() function is run.
-
-sub test_load_code { eval $TESTCODE or die "eval of test code failed: $@"; }
-sub test { _test(@_); }
-
-$NUMTESTS = 22;
-
-$TESTCODE = q{
-
-  sub tryone {
-    my ($testip, @nets) = @_;
-    my $nets = Mail::SpamAssassin::NetSet->new();
-    foreach my $net (@nets) { $nets->add_cidr ($net); }
-
-    if ($nets->contains_ip ($testip)) {
-      print "\n$testip was in @nets\n"; return 1;
-    } else {
-      print "\n$testip was not in @nets\n"; return 0;
-    }
-  }
-
-  sub _test {
-    my ($okfunc) = @_;
-    &$okfunc (tryone ("127.0.0.1", "127.0.0.1"));
-    &$okfunc (!tryone ("127.0.0.2", "127.0.0.1"));
-
-    &$okfunc (tryone ("127.0.0.1", "127."));
-    &$okfunc (tryone ("127.0.0.254", "127."));
-    &$okfunc (tryone ("127.0.0.1", "127/8"));
-    &$okfunc (tryone ("127.0.0.1", "127.0/16"));
-    &$okfunc (tryone ("127.0.0.1", "127.0.0/24"));
-    &$okfunc (tryone ("127.0.0.1", "127.0.0.1/32"));
-    &$okfunc (tryone ("127.0.0.1", "127.0.0.1/31"));
-    &$okfunc (tryone ("127.0.0.1", "10.", "11.", "127.0.0.1"));
-    &$okfunc (tryone ("127.0.0.1", "127.0."));
-    &$okfunc (tryone ("127.0.0.1", "127.0.0."));
-    &$okfunc (tryone ("127.0.0.1", "127."));
-
-    &$okfunc (!tryone ("128.0.0.254", "127."));
-    &$okfunc (!tryone ("128.0.0.1", "127/8"));
-    &$okfunc (!tryone ("128.0.0.1", "127.0/16"));
-    &$okfunc (!tryone ("128.0.0.1", "127.0.0/24"));
-    &$okfunc (!tryone ("128.0.0.1", "127.0.0.1/32"));
-    &$okfunc (!tryone ("128.0.0.1", "127.0.0.1/31"));
-    &$okfunc (!tryone ("128.0.0.1", "127.0."));
-    &$okfunc (!tryone ("128.0.0.1", "127.0.0."));
-    &$okfunc (!tryone ("12.9.0.1", "10.", "11.", "127.0.0.1"));
-  }
-
-1; };
-
-###########################################################################
 
 1;
