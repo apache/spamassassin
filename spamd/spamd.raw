@@ -153,6 +153,13 @@ if ($opt{'username'}) {
     if (!defined $uuid || $uuid == 0) {
 	die "fatal: cannot run as nonexistent user or root with -u option\n";
     }
+
+    # make sure we can unlink it later
+    if (defined $opt{'pidfile'}) {
+      chown $uuid, -1, $opt{'pidfile'}
+                or die "fatal: could not chown '$opt{'pidfile'}' to uid $uuid\n";
+    }
+
     $> = $uuid;		# effective uid
     $< = $uuid;		# real uid. we now cannot setuid anymore
     if ($> != $uuid and $> != ($uuid-2**32)) {
@@ -741,6 +748,7 @@ sub daemonize
     exit if $pid;
     setsid or die "Can't start new session: $!";
     open STDERR,'>&STDOUT' or die "Can't duplicate stdout: $!";
+
     if(defined($opt{'pidfile'})) {
        open PIDF,">$opt{'pidfile'}" or warn "Can't open PID file: $!";
        print PIDF $$."\n";
