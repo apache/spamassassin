@@ -146,7 +146,7 @@ inst_cfs: $(LOCAL_RULES_DIR) $(DEF_RULES_DIR) $(DEF_RULES_DIR)/user_prefs.templa
 	for file in $(RULES) ; do \
 	  $(CP) rules/$$file $(DEF_RULES_DIR)/$$file; \
 	done; \
-	chmod 644 $(DEF_RULES_DIR)/*
+	$(CHMOD) $(PERM_RW) $(DEF_RULES_DIR)/*
 
 $(DEF_RULES_DIR)/user_prefs.template: rules/user_prefs.template
 	$(CP) rules/user_prefs.template $(DEF_RULES_DIR)/user_prefs.template
