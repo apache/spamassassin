@@ -290,6 +290,112 @@ sub _check_mta_message_id {
   }
 }
 
+sub mta_added_message_id {
+  my ($self, $test) = @_;
+
+  if (!exists $self->{"mta_added_message_id_$test"}) {
+    $self->_mta_added_message_id();
+  }
+  return $self->{"mta_added_message_id_$test"};
+}
+
+sub backup_mx_host {
+  my ($self, $host, $test) = @_;
+
+  # check that DNS is available, if not do not perform this check
+  return 0 unless $self->is_dns_available();
+
+  $self->load_resolver();
+
+  if ($self->{conf}->{check_mx_attempts} < 1) {
+    return 0;
+  }
+
+  # try check_mx_attempts times to protect against temporary outages.
+  # sleep between checks to give the DNS a chance to recover.
+  for my $i (1..$self->{conf}->{check_mx_attempts}) {
+    my @mx = Net::DNS::mx($self->{res}, $host);
+    return 0 unless (scalar @mx);
+    my $primary;
+    my $preference;
+    foreach my $mx (@mx) {
+      if (!defined($primary) || ($mx->preference =~ /^\d+$/ &&
+				 $mx->preference < $primary))
+      {
+	$primary = $mx->preference;
+      }
+      if (lc($mx->exchange) eq lc($test)) {
+	$preference = $mx->preference;
+      }
+    }
+    if (defined($primary) && defined($preference) && $preference > $primary) {
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+sub _mta_added_message_id {
+  my ($self) = @_;
+
+  my @received = grep(/\S/, split(/\n/, $self->get('Received')));
+  my $id = $self->get('MESSAGEID');
+  my $local = 1;
+
+  # general method to detect local messages
+  my $from = $self->get('From:addr');
+  $from =~ s/.*\@//;
+  $from = ($from =~ m/(\S+\.\S+)\s*$/) ? lc($1) : '';
+
+  # add any variant names here
+  $self->{mta_added_message_id_short} = 0;
+  $self->{mta_added_message_id_later} = 0;
+  $self->{mta_added_message_id_backup} = 0;
+
+  # Postfix adds the Message-ID on the second local hop.  Note: this is not
+  # an exemption, this is a special case to classify these hits correctly.
+  if ($#received > 0 &&
+      $received[$#received] =~ /\(Postfix.*?\)/i &&
+      $received[$#received - 1] =~ /\(Postfix.*?\)/i)
+  {
+    $local = 2;
+  }
+
+  # Note: these tests intentionally do not exempt localhost!
+  for (my $i = 0; $i <= $#received; $i++) {
+    if ($received[$i] =~ /\sid ([^\s;]{3,})/) {
+      my $received_id = $1;
+
+      if (index($id, $received_id) != -1) {
+	# if: only 1 or 2 hops
+	if ($local > $#received && !($from && $id =~ /\@.*\Q$from\E>/)) {
+	  $self->{mta_added_message_id_short} = 1;
+	}
+	# else: hops after first 1 or 2 hops
+	elsif ($i + $local <= $#received) {
+	  $self->{mta_added_message_id_later} = 1;
+	}
+	# else: first 1 or 2 hops and through a backup MX
+	else {
+	  my $host;
+	  my $test;
+	  if ($received[$i] =~ /\bfor\s\W*([^\s>;]+)/) {
+	    $host = lc($1);
+	    $host =~ s/.*\@//;
+	  }
+	  if ($host && $received[$i] =~ /\bby\s\W*([^\s>;]+)/) {
+	    $test = lc($1);
+	  }
+	  if ($host && $test && $self->backup_mx_host($host, $test)) {
+	    $self->{mta_added_message_id_backup} = 1;
+	  }
+	}
+      }
+    }
+  }
+}
+
 ###########################################################################
 
 # FORGED_RCVD_TRAIL
