@@ -345,13 +345,13 @@ body CREDIT_CARD	        /\bcredit card.{1,10}(?:offer|debt|decision)/i
 describe CREDIT_CARD		Credit Card Offers
 
 body NO_CREDIT_CHECK	        /\bno credit check\b/i
-describe NO_CREDIT_CHECK	No Credit Check
+describe NO_CREDIT_CHECK	Without a credit check
 
 body BANKRUPTCY		        /\b(?:avoid|past) bankruptcy\b/i
-describe BANKRUPTCY		Avoid Bankruptcy
+describe BANKRUPTCY		Avoiding bankruptcy
 
 body ACCEPT_CREDIT_CARDS	/\b(?:accept\b|are accepting).{1,15}credit cards?\b/i
-describe ACCEPT_CREDIT_CARDS	Accept Credit Cards
+describe ACCEPT_CREDIT_CARDS	Accepting credit cards
 
 body BAD_CREDIT		        /\b(?:bad|poor|no\b|eliminate|repair|(?:re)?establish|damag).{0,10} (?:credit|debt)\b/i
 describe BAD_CREDIT		Eliminate Bad Credit

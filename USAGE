@@ -102,9 +102,9 @@ If you want to use SpamAssassin site-wide:
 The Auto-Whitelist
 ------------------
 
-The auto-whitelist is enabled using the -a flag to spamassassin or spamd.  
-See http://wiki.spamassassin.org/w/AutoWhitelist for details on how it
-works, if you're curious.
+The auto-whitelist is enabled using the -a flag to spamassassin or spamd.
+(See http://wiki.apache.org/spamassassin/AutoWhitelist for details on how
+it works, if you're curious.)
 
 
 Other Installation Notes
@@ -206,30 +206,10 @@ Other Installation Notes
     ''SPAM TRAPPING'' section of the spamassassin manual page for details.
 
     If you don't want to go to the bother of setting up a system yourself
-    to do this, feel free to set up a simple alias to forward any mails to
-    <someaddress@spamtraps.taint.org> -- replace "someaddress" with
-    something to identify you, such as your email addr or website with
-    non-alphanumeric chars replaced by underscores, or similar.  (Please
-    also send me a mail at jm - spamtraps at jmason dot org if you do
-    this, so that I know who to contact if it starts going haywire, or the
-    quality drops.)
-    
-    Mails sent to an address at the spamtraps domain are fed into the
-    SpamAssassin.org spam-trapping system, where they will then be
-    virus-scanned, de-duplicated, and fed into various scanning and
-    spam-blocking systems, including some blocklists.
+    to do this, take a look here [1] for a simple forwarding-based
+    alternative.
 
-    Some notes: I monitor the quality of feeds coming into this, and if it
-    turns out to contain occasional bits of non-spam mail, I'll start
-    bouncing your feed with a 550 -- as a spam feed that isn't reliably
-    spam-only is *not* suitable for a spamtrap.
-    
-    Also, messages relayed to the spamtrap must be either (a) direct
-    relaying as performed by a sendmail alias, or (b) message/rfc822
-    attachments with no Content-Transfer-Encoding.  Again, if they're not,
-    I'll 550 them.  And finally, if I can't figure out who's in control of
-    the feed, you guessed it, 550.  So try to keep the quality control
-    up! ;)
+      [1]: http://wiki.apache.org/spamassassin/SpamTrapping
 
 
   - Scores and other user preferences can now be loaded from an SQL
