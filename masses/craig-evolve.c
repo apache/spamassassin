@@ -13,11 +13,15 @@
 #include "tmp/tests.h"
 
 
-/* Craig's log(score) evaluator, not as aggressive against FPs I think */
+/* Craig's log(score) evaluator, not as aggressive against FPs I think.
+ */
 #define USE_LOG_SCORE_EVALUATION
 
 /* Use score ranges derived from hit-frequencies S/O ratio,
- * and numbers of mails hit */
+ * and numbers of mails hit.  If not defined, score ranges are 
+ * from -3.0 to 0.0 (for nice tests) or 0.0 to 3.0 (for normal tests),
+ * regardless of hit success rate or frequency.
+ */
 //#define USE_SCORE_RANGES
 
 
@@ -145,8 +149,9 @@ int main(int argc, char **argv) {
 
      PGASetRealInitRange(ctx, range_lo, range_hi);
 
+     /* use a tiny population: we just want to get into the evaluate function */
      if (justCount) {
-       pop_size = 10;
+       pop_size = 2;
        replace_num = 1;
      }
 
@@ -172,6 +177,12 @@ int main(int argc, char **argv) {
      //PGASetCrossoverType(ctx, PGA_CROSSOVER_ONEPT);
      PGASetCrossoverProb(ctx, crossover_rate);
 
+     if (justCount) {           // don't allow any mutation or crossover
+       PGASetMutationType(ctx, PGA_MUTATION_CONSTANT);
+       PGASetRealInitRange (ctx, bestscores, bestscores);
+       PGASetCrossoverProb(ctx, 0.0);
+     }
+
      PGASetPrintFrequencyValue(ctx,300);
      PGASetPrintOptions(ctx, PGA_REPORT_AVERAGE);
 
@@ -186,9 +197,14 @@ int main(int argc, char **argv) {
      {
        for(p=0; p<pop_size; p++)
        {
+         // just counting?  score[i] = defaultscore[i] in that case
+         if (justCount) {
+           PGASetRealAllele(ctx, p, PGA_NEWPOP, i, bestscores[i]);
+           continue;
+         }
+
 #ifndef USE_SCORE_RANGES
-	 if (!justCount && is_mutatable[i])
-	 {
+	 if (is_mutatable[i]) {
             if(bestscores[i] > SCORE_CAP) bestscores[i] = SCORE_CAP;
 	    else if(bestscores[i] < -SCORE_CAP) bestscores[i] = -SCORE_CAP;
 	 }
@@ -272,17 +288,16 @@ double evaluate(PGAContext *ctx, int p, int pop)
     tot_score += score_msg(ctx,p,pop,i);
   }
 
+  if (justCount) {
+    dump(stdout);
+    exit (0);
+  }
+
 #ifndef USE_LOG_SCORE_EVALUATION
 
   // just count how far they were from the threshold, in each case
   ynweight = (ga_yn * threshold) - ynscore;
   nyweight = nyscore - (ga_ny * threshold);
-  //printf ("JMD %f %d  %f %d\n", nyscore, ga_ny, ynscore, ga_yn);
-
-  if (justCount) {
-    dump(stdout);
-    exit (0);
-  }
   
   return  ynweight +            /* all FNs' points from threshold */
 	  nyweight*nybias;      /* all FPs' points from threshold */
