@@ -118,6 +118,11 @@ sub sarun {
   1;
 }
 
+sub scrun {
+  $spamd_never_started = 1;
+  spamcrun (@_);
+}
+
 sub spamcrun {
   my $args = shift;
   my $read_sub = shift;
@@ -242,6 +247,9 @@ sub start_spamd {
 }
 
 sub stop_spamd {
+  return 0 if defined($spamd_never_started);
+
+  $spamd_pid ||= 0;
   if ( $spamd_pid <= 1) {
     print ("Invalid spamd pid: $spamd_pid. Spamd not started/crashed?\n");
     return 0;

@@ -12,6 +12,6 @@ q{ hello world }, 'spamc',
 
 );
 
-ok (spamcrun ("-p 0 < data/etc/hello.txt", \&patterns_run_cb));
+ok (scrun ("-p 0 < data/etc/hello.txt", \&patterns_run_cb));
 ok_all_patterns();
 
