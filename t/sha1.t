@@ -27,20 +27,36 @@ plan tests => 15;
 sub try {
   my ($data, $want) = @_;
 
-  my $perl_sha1 = Mail::SpamAssassin::SHA1::SHA1($data);
+# test our pure perl code
+  my $perl_sha1 = unpack("H*", Mail::SpamAssassin::SHA1::SHA1($data));
 
+# test the fast version if we have it
   my $digest_sha1;
   if (HAS_DIGEST_SHA1) {
     $digest_sha1 = Digest::SHA1::sha1_hex($data);
   }
 
+# test as it is going to be used by SpamAssassin, including hex conversion
+  my $sa_sha1 = Mail::SpamAssassin::SHA1::sha1($data);
+
+# and just to be really careful explicitly test sha1bin too
+  my $sa_sha1bin = unpack("H*", Mail::SpamAssassin::SHA1::sha1bin($data));
+
   my $failure = 0;
   if ($want ne $perl_sha1) {
-    print "Mail::SpamAssassin::SHA1 mismatch\n";
+    print "Mail::SpamAssassin::SHA1:SHA1 mismatch\n";
     $failure++;
   }
   if (HAS_DIGEST_SHA1 && $want ne $digest_sha1) {
     print "Digest::SHA1 mismatch\n";
+    $failure++;
+  }
+  if ($want ne $sa_sha1) {
+    print "Mail::SpamAssassin::SHA1::sha1 mismatch\n";
+    $failure++;
+  }
+  if ($want ne $sa_sha1bin) {
+    print "Mail::SpamAssassin::SHA1::sha1bin mismatch\n";
     $failure++;
   }
   return ! $failure;

@@ -55,16 +55,21 @@ use vars qw(
 require Exporter;
 
 @ISA = qw(Exporter);
-@EXPORT = qw(sha1);
+@EXPORT = qw(sha1 sha1bin);
 
 use constant HAS_DIGEST_SHA1 => eval { require Digest::SHA1; };
 
 sub sha1 {
   my ($data) = @_;
+  return unpack("H40", sha1bin($data));
+}
+
+sub sha1bin {
+  my ($data) = @_;
 
   if (HAS_DIGEST_SHA1) {
     # this is about 40x faster than the below perl version
-    return Digest::SHA1::sha1_hex($data);
+    return Digest::SHA1::sha1($data);
   }
   else {
     return SHA1($data);
@@ -130,7 +135,13 @@ do {
 
 } while $r>56;
 
-sprintf "%.8x%.8x%.8x%.8x%.8x", $aa & 0xffffffff, $bb & 0xffffffff, $cc & 0xffffffff, $dd & 0xffffffff, $ee & 0xffffffff;
+my $bits = '';
+vec($bits, 0, 32) = $aa;
+vec($bits, 1, 32) = $bb;
+vec($bits, 2, 32) = $cc;
+vec($bits, 3, 32) = $dd;
+vec($bits, 4, 32) = $ee;
+return $bits;
 }
 
 1;
