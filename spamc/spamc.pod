@@ -117,11 +117,11 @@ See B<-r> for details of the output format used.
 =item B<-s> I<max_size>
 
 Set the maximum message size which will be sent to spamd -- any bigger than
-this threshold and the message will be returned unprocessed (default: 250k).
+this threshold and the message will be returned unprocessed (default: 250 KB).
 If spamc gets handed a message bigger than this, it won't be passed to spamd.
 
-The size is specified in bytes, and if you send it a negative number, things 
-are quite likely to break very hard.
+The size is specified in bytes, as a positive integer greater than 0.
+For example, B<-s 250000>.
 
 =item B<-S>
 
