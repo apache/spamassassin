@@ -885,8 +885,10 @@ sub get_decoded_stripped_body_text_array {
   $self->{html}{max_shouting}     = 0;
 
   # do HTML conversions if necessary
-  if ($text =~ m/<\s*[a-z:!][a-z:\d_-]*(?:\s.*?)?\s*>/is) {
+  if ($text =~ m/<(?:$re_strict|$re_loose|!--|!doctype)(?:\s|>)/ois) {
     my $raw = length($text);
+    my $before = substr($text, 0, $-[0]);
+    $text = substr($text, $-[0]);
 
     $self->{html_text} = [];
     $self->{html_last_tag} = 0;
@@ -902,7 +904,7 @@ sub get_decoded_stripped_body_text_array {
 
     $hp->parse($text);
     $hp->eof;
-    $text = join('', @{$self->{html_text}});
+    $text = join('', $before, @{$self->{html_text}});
     $self->{html}{ratio} = ($raw - length($text)) / $raw if $raw;
     delete $self->{html_last_tag};
   }
@@ -1391,7 +1393,7 @@ sub do_body_uri_tests {
   }
 
   dbg("uri tests: Done uriRE");
-  
+
   $self->clear_test_state();
   if ( defined &Mail::SpamAssassin::PerMsgStatus::_body_uri_tests
        && !$self->{conf}->{user_rules_to_compile} ) {
