@@ -1074,6 +1074,8 @@ sub check_from_in_whitelist {
       return 1;
     }
   }
+
+  return 0;
 }
 
 ###########################################################################
@@ -2810,19 +2812,11 @@ sub check_access_database {
   $path = $self->{main}->sed_path ($path);
   dbg("Tie-ing to DB file R/O in $path");
   if ( tie %access,"AnyDBM_File",$path, O_RDONLY ) {
-    my @addrs = $self->{main}->find_all_addrs_in_line
-               ($self->get ('From') .                  # std
-                $self->get ('Envelope-Sender') .       # qmail: new-inject(1)
-                $self->get ('Resent-Sender') .         # procmailrc manpage
-                $self->get ('X-Envelope-From') .       # procmailrc manpage
-                $self->get ('Return-Path') .           # Postfix, sendmail; rfc821
-                $self->get ('Resent-From'));
-
     my $rcvd = $self->get ('Received');
     my @lookfor = ();
 
     # Look for "From:" versions as well!
-    foreach my $from ( @addrs ) {
+    foreach my $from ( $self->all_from_addrs() ) {
       # $user."\@"
       # rotate through $domain and check
       my($user,$domain) = split(/\@/, $from,2);

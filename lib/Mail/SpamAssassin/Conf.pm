@@ -2145,7 +2145,8 @@ sub add_to_addrlist {
   my ($self, $singlelist, @addrs) = @_;
 
   foreach my $addr (@addrs) {
-    my $re = lc $addr;
+    $addr = lc $addr;
+    my $re = $addr;
     $re =~ s/[\000\\\(]/_/gs;			# paranoia
     $re =~ s/([^\*\?_a-zA-Z0-9])/\\$1/g;	# escape any possible metachars
     $re =~ tr/?/./;				# "?" -> "."
@@ -2157,7 +2158,8 @@ sub add_to_addrlist {
 sub add_to_addrlist_rcvd {
   my ($self, $listname, $addr, $domain) = @_;
   
-  my $re = lc $addr;
+  $addr = lc $addr;
+  my $re = $addr;
   $re =~ s/[\000\\\(]/_/gs;			# paranoia
   $re =~ s/([^\*\?_a-zA-Z0-9])/\\$1/g;		# escape any possible metachars
   $re =~ tr/?/./;				# "?" -> "."
