@@ -216,7 +216,9 @@ Systems administrators can edit the
 "/usr/lib/perl5/site_perl/5.005/spamfilter.cf" file to add new rules for all
 users on the system, or they can edit
 "/usr/lib/perl5/site_perl/5.005/spamfilter.prefs" to set default preferences
-for the users.
+for the users.  Note that the "/usr/lib/perl5/site_perl/5.005" path changes,
+depending on your OS and the version of perl you have installed
+(unfortunately).
 
 There is no difference in interpretation between the rules file and the
 preferences file, so users can add new rules for their own use in the
