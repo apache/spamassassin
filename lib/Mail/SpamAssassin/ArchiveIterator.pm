@@ -273,15 +273,20 @@ sub index_unpack {
 sub scan_directory {
   my ($self, $class, $folder) = @_;
 
+  my @files;
+
   opendir(DIR, $folder) || die "Can't open '$folder' dir: $!";
-
-  # ignore ,234 (deleted or refiled messages) and MH metadata files
-  # probably more to go here (TODO)
-  my @files = grep { -f } map { "$folder/$_" } grep {
-	/^\S+$/ && !/^(,|\.xmhcache|\.mh|cyrus\.(?:index|header|cache))/
-      } readdir(DIR);
-
+  if (-f "$folder/cyrus.header") {
+    # cyrus metadata: http://unix.lsa.umich.edu/docs/imap/imap-lsa-srv_3.html
+    @files = grep { /^\S+$/ && !/^cyrus\.(?:index|header|cache|seen)/ }
+			readdir(DIR);
+  } else {
+    # ignore ,234 (deleted or refiled messages) and MH metadata dotfiles
+    @files = grep { /^[^,.]\S*$/ } readdir(DIR);
+  }
   closedir(DIR);
+
+  @files = grep { -f } map { "$folder/$_" } @files;
 
   foreach my $mail (@files) {
     if ($self->{opt_n}) {
