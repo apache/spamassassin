@@ -435,9 +435,6 @@ sub read_ranges {
 }
 
 sub evaluate {
-   my $fprate = ($ga_ny / $num_tests) * 100.0;
-   my $fnrate = ($ga_yn / $num_tests) * 100.0;
-
    printf ("\n# SUMMARY for threshold %3.1f:\n", $threshold);
    printf "# Correctly non-spam: %6d  %4.2f%%\n",
        $ga_nn, ($ga_nn /  $num_ham) * 100.0;
@@ -467,7 +464,7 @@ sub evaluate {
 
   my $sr = ($nspamspam / $nspam) * 100.0;
   my $sp = ($nspamspam / ($nspamspam + $nlegitspam)) * 100.0;
-  printf "# TCR: %3.6f  SpamRecall: %3.3f%%  SpamPrec: %3.3f%%  FP: %3.2f%%  FN: %3.2f%%\n", $tcr, $sr, $sp, $fprate, $fnrate;
+  printf "# TCR: %3.6f  SpamRecall: %3.3f%%  SpamPrec: %3.3f%%", $tcr, $sr, $sp;
 }
 
 __DATA__
