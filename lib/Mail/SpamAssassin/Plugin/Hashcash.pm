@@ -222,6 +222,14 @@ sub _run_hashcash_for_one_string {
   my $bitstring = unpack ("B*", sha1($hc));
   $bitstring =~ /^(0+)/ and $value = length $1;
 
+  # hashcash v1 tokens: if the "claimed value" of the token is less than
+  # what the token actually contains (ie. token was accidentally generated
+  # with 24 bits instead of the claimed 20), then cut it down to just the
+  # claimed value.  that way it's a bit tidier and more deterministic.
+  if ($bits && $value > $bits) {
+    $value = $bits;
+  }
+
   dbg ("hashcash token value: $value");
 
   if ($self->was_hashcash_token_double_spent ($scanner, $hc)) {
