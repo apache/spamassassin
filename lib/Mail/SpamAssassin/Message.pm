@@ -211,7 +211,7 @@ sub new {
 	# should use, so just keep updating as they come in.
         if ($header =~ /^Content-Type:/i) {
 	  my ($type, $temp_boundary) =
-	    Mail::SpamAssassin::Util::parse_content_type($header);
+	    Mail::SpamAssassin::Util::parse_content_type(substr($header, 13));
 	  $boundary = $temp_boundary if (defined $temp_boundary);
 	}
 
