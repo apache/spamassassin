@@ -64,6 +64,9 @@ GetOptions(
 	'stop-at-threshold!' => \$opt{'stop-at-threshold'}, 'S' => \$opt{'stop-at-threshold'}
 ) or pod2usage(-exitval => $resphash{'EXUSAGE'}, -verbose => 0);
 
+$opt{'user-config'} = 1 unless defined $opt{'user-config'};
+$opt{'add-from'} = 1 unless defined $opt{'add-from'};
+
 $opt{'help'} and pod2usage(-exitval => $resphash{EX_USAGE}, -verbose => 0, -message => 'For more details, use "man spamd"');
 
 # These can be changed on command line with -A flag
