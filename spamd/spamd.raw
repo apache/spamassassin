@@ -216,6 +216,7 @@ for ( $waitedpid = 0;
 
     spawn sub {
 	$|=1; # always immediately flush output
+
 	# First request line off stream
         local $_ = <STDIN>;
 
@@ -303,6 +304,7 @@ for ( $waitedpid = 0;
 	    }
 	    my $was_it_spam;
 	    if($status->is_spam) { $was_it_spam = 'identified spam'; } else { $was_it_spam = 'clean message'; }
+	    $current_user ||= '(unknown)';
 	    logmsg "$was_it_spam for $current_user:$> in ".
 			 sprintf("%3d", time - $start) ." seconds.\n";
 
