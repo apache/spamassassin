@@ -170,7 +170,7 @@ my $mail = Mail::SpamAssassin::NoMailAudit->new ( add_From_line => $opt_F );
     $mail->ignore();		# will exit
   }
 
-$opt_a and eval
+($opt_a or $opt_R or $opt_W) and eval
 {
   # create a factory for the persistent address list.
   # choose one of these implementations!
