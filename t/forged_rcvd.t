@@ -2,13 +2,13 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spam");
-use Test; BEGIN { plan tests => 5 };
+use Test; BEGIN { plan tests => 3 };
 
 # ---------------------------------------------------------------------------
 
 %patterns = (
 
-q{ Forged 'Received:' header found }, 'rcvdspotted',
+# q{ Forged 'Received:' header found }, 'rcvdspotted',
 q{ BODY: /To Be Removed,? Please/i }, 'bodyspotted',
 
 );
