@@ -151,11 +151,20 @@ describe RCVD_IN_RSS		Received via RSS-listed relay, see http://www.mail-abuse.o
 header RCVD_IN_DUL		eval:check_rbl('dialups.mail-abuse.org.')
 describe RCVD_IN_DUL		Received from a dialup IP, see http://www.mail-abuse.org/dul/
 
+header RCVD_IN_RELAYS_ORDB_ORG	eval:check_rbl('relays.ordb.org.')
+describe RCVD_IN_RELAYS_ORDB_ORG Received via a relay in relays.ordb.org
+
 header RCVD_IN_OSIRUSOFT_COM	eval:check_rbl('relays.osirusoft.com.')
 describe RCVD_IN_OSIRUSOFT_COM	Received from an IP in Osirusoft zone, see http://relays.osirusoft.com/
 
-header RCVD_IN_RELAYS_ORDB_ORG	eval:check_rbl('relays.ordb.org.')
-describe RCVD_IN_RELAYS_ORDB_ORG Received via a relay in relays.ordb.org
+header OSIRU_SPAM_SOURCE	eval:check_rbl_results_for('127.0.0.3')
+describe OSIRU_SPAM_SOURCE	Osirusoft says sender is a Dialup Spam Source
+
+header OSIRU_CONFIRMED_SPAM_SOURCE	eval:check_rbl_results_for('127.0.0.4')
+describe OSIRU_CONFIRMED_SPAM_SOURCE	Osirusoft says sender is a Confirmed Spam Source
+
+header OSIRU_SPAMWARE_SITE	eval:check_rbl_results_for('127.0.0.6')
+describe OSIRU_SPAMWARE_SITE	Osirusoft says sender is a Spamware vendor or site
 
 header FORGED_RCVD_FOUND	ALL =~ /\n(?:Date|Subject|From):.*\nReceived: .*\n\n/s
 describe FORGED_RCVD_FOUND	Possibly-forged 'Received:' header found

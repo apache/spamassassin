@@ -30,7 +30,16 @@ sub do_rbl_lookup {
   my $q = $self->{res}->search ($dom); if ($q) {
     foreach my $rr ($q->answer) {
       if ($rr->type eq "A") {
-	$self->test_log ("RBL check: found relay ".$dom);
+	my $addr = $rr->address();
+
+	if ($addr ne '127.0.0.2') {
+	  $self->test_log ("RBL check: found relay ".$dom.", type: ".$addr);
+	} else {
+	  # 127.0.0.2 is the traditional boolean indicator, don't log it
+	  $self->test_log ("RBL check: found relay ".$dom);
+	}
+
+	$self->{rbl_IN_As_found} .= $addr.' ';
 	return ($found+1);
       }
     }
