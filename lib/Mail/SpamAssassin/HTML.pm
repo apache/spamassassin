@@ -91,7 +91,6 @@ sub html_render {
   $self->{html}{max_shouting} = 0;
   $self->{html}{total_comment_ratio} = 0;
   $self->{html}{title_index} = -1;
-  $self->{html}{alt_longest} = 0;
 
   $self->{html_text} = [];
   $self->{html_last_tag} = 0;
@@ -203,11 +202,6 @@ sub html_format {
   }
   elsif ($tag =~ /^(?:p|hr|blockquote|pre)$/) {
     push @{$self->{html_text}}, "\n\n";
-  }
-  elsif ($tag eq "img" && exists $attr->{alt} && $attr->{alt} ne "") {
-    if (length($attr->{alt}) > $self->{html}{alt_longest}) {
-      $self->{html}{alt_longest} = length($attr->{alt});
-    }
   }
 }
 
