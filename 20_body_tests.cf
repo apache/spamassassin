@@ -211,6 +211,55 @@ describe HTML_FONT_FACE_CAPS	HTML font face has excess capital characters
 body HTML_FORM_ACTION_MAILTO	eval:html_test('form_action_mailto')
 describe HTML_FORM_ACTION_MAILTO	HTML includes a form which sends mail
 
+# HTML_IMAGE_AREA - lots of image area (absolute)
+# note that: 640x480 = 307200 and 800x600 = 480000
+body HTML_IMAGE_AREA_04		eval:html_range('image_area','400000','500000')
+body HTML_IMAGE_AREA_05		eval:html_range('image_area','500000','600000')
+body HTML_IMAGE_AREA_06		eval:html_range('image_area','600000','700000')
+body HTML_IMAGE_AREA_07		eval:html_range('image_area','700000','800000')
+body HTML_IMAGE_AREA_08		eval:html_range('image_area','800000','900000')
+body HTML_IMAGE_AREA_09		eval:html_range('image_area','900000','1000000')
+body HTML_IMAGE_AREA_10		eval:html_range('image_area','1000000')
+describe HTML_IMAGE_AREA_04	HTML has 4-5 kilopixels of images
+describe HTML_IMAGE_AREA_05	HTML has 5-6 kilopixels of images
+describe HTML_IMAGE_AREA_06	HTML has 6-7 kilopixels of images
+describe HTML_IMAGE_AREA_07	HTML has 7-8 kilopixels of images
+describe HTML_IMAGE_AREA_08	HTML has 8-9 kilopixels of images
+describe HTML_IMAGE_AREA_09	HTML has 9-10 kilopixels of images
+describe HTML_IMAGE_AREA_10	HTML has over 1 megapixel of images
+
+# HTML_IMAGE_ONLY - not much text with images (absolute)
+body HTML_IMAGE_ONLY_02		eval:html_image_only('0000','0200')
+body HTML_IMAGE_ONLY_04		eval:html_image_only('0200','0400')
+body HTML_IMAGE_ONLY_06		eval:html_image_only('0400','0600')
+body HTML_IMAGE_ONLY_08		eval:html_image_only('0600','0800')
+body HTML_IMAGE_ONLY_10		eval:html_image_only('0800','1000')
+body HTML_IMAGE_ONLY_12		eval:html_image_only('1000','1200')
+body HTML_IMAGE_ONLY_14		eval:html_image_only('1200','1400')
+describe HTML_IMAGE_ONLY_02	HTML has images with 0-200 bytes of words
+describe HTML_IMAGE_ONLY_04	HTML has images with 200-400 bytes of words
+describe HTML_IMAGE_ONLY_06	HTML has images with 400-600 bytes of words
+describe HTML_IMAGE_ONLY_08	HTML has images with 600-800 bytes of words
+describe HTML_IMAGE_ONLY_10	HTML has images with 800-1000 bytes of words
+describe HTML_IMAGE_ONLY_12	HTML has images with 1000-1200 bytes of words
+describe HTML_IMAGE_ONLY_14	HTML has images with 1200-1400 bytes of words
+
+# HTML_IMAGE_RATIO - more image area than text (ratio)
+body HTML_IMAGE_RATIO_02	eval:html_image_ratio('0.000','0.002')
+body HTML_IMAGE_RATIO_04	eval:html_image_ratio('0.002','0.004')
+body HTML_IMAGE_RATIO_06	eval:html_image_ratio('0.004','0.006')
+body HTML_IMAGE_RATIO_08	eval:html_image_ratio('0.006','0.008')
+body HTML_IMAGE_RATIO_10	eval:html_image_ratio('0.008','0.010')
+body HTML_IMAGE_RATIO_12	eval:html_image_ratio('0.010','0.012')
+body HTML_IMAGE_RATIO_14	eval:html_image_ratio('0.012','0.014')
+describe HTML_IMAGE_RATIO_02	HTML has a low ratio of text to image area
+describe HTML_IMAGE_RATIO_04	HTML has a low ratio of text to image area
+describe HTML_IMAGE_RATIO_06	HTML has a low ratio of text to image area
+describe HTML_IMAGE_RATIO_08	HTML has a low ratio of text to image area
+describe HTML_IMAGE_RATIO_10	HTML has a low ratio of text to image area
+describe HTML_IMAGE_RATIO_12	HTML has a low ratio of text to image area
+describe HTML_IMAGE_RATIO_14	HTML has a low ratio of text to image area
+
 body HTML_JAVASCRIPT		eval:html_test('javascript')
 describe HTML_JAVASCRIPT	JavaScript code
 
