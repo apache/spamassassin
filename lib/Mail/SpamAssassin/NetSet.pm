@@ -42,9 +42,9 @@ sub add_cidr {
 
     } elsif ($ip =~ /\.$/) {
       # just use string matching; much simpler than doing smart stuff with arrays ;)
-      if ($ip =~ /^(\d+)\./) { $ip = "$1.0.0.0"; $bits = 8; }
-      elsif ($ip =~ /^(\d+)\.(\d+)\./) { $ip = "$1.$2.0.0"; $bits = 16; }
-      elsif ($ip =~ /^(\d+)\.(\d+)\.(\d+)\./) { $ip = "$1.$2.$3.0"; $bits = 24; }
+      if ($ip =~ /^(\d+)\.(\d+)\.(\d+)\.$/) { $ip = "$1.$2.$3.0"; $bits = 24; }
+      elsif ($ip =~ /^(\d+)\.(\d+)\.$/) { $ip = "$1.$2.0.0"; $bits = 16; }
+      elsif ($ip =~ /^(\d+)\.$/) { $ip = "$1.0.0.0"; $bits = 8; }
       else {
 	warn $err; next;
       }
