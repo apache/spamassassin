@@ -128,6 +128,21 @@ sub check_address {
 
 ###########################################################################
 
+=item awl->count();
+
+This method will return the count of messages used in determining the
+whitelist correction.
+
+=cut
+
+sub count {
+  my $self = shift;
+  return $self->{entry}->{count};
+}
+
+
+###########################################################################
+
 =item awl->add_score($score);
 
 This method will add half the score to the current entry.  Half the
@@ -161,6 +176,7 @@ sub add_known_good_address {
 
   return $self->modify_address($addr, -100);
 }
+
 
 ###########################################################################
 

@@ -910,6 +910,10 @@ sub check_from_in_auto_whitelist {
         $delta = ($meanscore - $awlpoints) * $self->{main}->{conf}->{auto_whitelist_factor};
 	$self->{tag_data}->{AWL} = sprintf("%2.1f",$delta);
 	# Save this for _AWL_ tag
+
+	$self->{tag_data}->{AWLMEAN} = sprintf("%2.1f", $meanscore);
+	$self->{tag_data}->{AWLCOUNT} = sprintf("%2.1f", $whitelist->count());
+	$self->{tag_data}->{AWLPRESCORE} = sprintf("%2.1f", $self->{score});
       }
 
       # Update the AWL *before* adding the new score, otherwise
