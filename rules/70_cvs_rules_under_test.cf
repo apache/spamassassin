@@ -377,18 +377,6 @@ body T_HTML_MIN_IMG_RATIO6      eval:html_range('min_img_ratio','0.75','0.999')
 meta T_HTML_NUM_IMGS01B         (T_HTML_NUM_IMGS01 && !FROM_EGROUPS)
 meta T_HTML_NUM_IMGS02B         (T_HTML_NUM_IMGS02 && !FROM_EGROUPS)
 
-# quinlan: better, but still questionable
-#
-#OVERALL%   SPAM% NONSPAM%     S/O    RANK   SCORE  NAME
-#  24928    19300     5628    0.774   0.00    0.00  (all messages)
-#100.000  77.4230  22.5770    0.774   0.00    0.00  (all messages as %)
-# [above version]
-#  7.562   7.6062   7.4094    0.507   0.13    0.01  T_HTML_CONSEC_IMGS01
-# [B version]
-#  6.912   7.6062   4.5309    0.627   0.24    0.01  T_HTML_CONSEC_IMGS01B
-#
-meta T_HTML_CONSEC_IMGS01B      (T_HTML_CONSEC_IMGS01 && !FROM_EGROUPS)
-
 # quinlan: not much better than above version
 #
 #OVERALL%   SPAM% NONSPAM%     S/O    RANK   SCORE  NAME
@@ -569,18 +557,6 @@ meta T_IMAGE_ONLY3_256	(!FROM_EGROUPS && (__IMG_TAG || (__IMG_URI&&HTML_MESSAGE)
 # quinlan: yet another image test, whee.
 
 # smaller is worse
-body T_IMAGE_COUNT_RATIO_05	eval:image_count_ratio('00','05')
-body T_IMAGE_COUNT_RATIO_10	eval:image_count_ratio('05','10')
-body T_IMAGE_COUNT_RATIO_15	eval:image_count_ratio('10','15')
-body T_IMAGE_COUNT_RATIO_20	eval:image_count_ratio('15','20')
-body T_IMAGE_COUNT_RATIO_25	eval:image_count_ratio('20','25')
-body T_IMAGE_COUNT_RATIO_30	eval:image_count_ratio('25','30')
-body T_IMAGE_COUNT_RATIO_35	eval:image_count_ratio('30','35')
-body T_IMAGE_COUNT_RATIO_40	eval:image_count_ratio('35','40')
-body T_IMAGE_COUNT_RATIO_45	eval:image_count_ratio('40','45')
-body T_IMAGE_COUNT_RATIO_50	eval:image_count_ratio('45','50')
-
-# smaller is worse
 body T_IMAGE_AREA_RATIO_05	eval:image_area_ratio('0.0000','0.0005')
 body T_IMAGE_AREA_RATIO_10	eval:image_area_ratio('0.0005','0.0010')
 body T_IMAGE_AREA_RATIO_15	eval:image_area_ratio('0.0010','0.0015')
@@ -632,26 +608,6 @@ body T_LOW_PRICE                  /\blow.{0,4} Price/i
 
 body     T_LOTS_OF_STUFF         /\b(?:\d{1,3}[,\.])+\d{3}.{0,20}\b(?:pics|pictures|images|photos|movies)/i
 describe T_LOTS_OF_STUFF         Thousands or millions of pics/movies/etc
-
-body     T_LOTS_OF_SPACE         /\bover\s+(?:\d{1,3}[,\.])*\d{3,}\s*(?:MB|GB)/i
-describe T_LOTS_OF_SPACE         Over XYZ MB/GB of junk
-
-# possible replacement for our current CTYPE_JUST_HTML
-# looks for messages with either text/html ctype or all mime parts that
-# are just text/html
-body __CTYPE_HTML_ONLY1	eval:check_for_mime_html_text_only()
-meta T_CTYPE_JUST_HTML1	(!__RCVD_BY_HOTMAIL && __CTYPE_HTML_ONLY1)
-
-body __CTYPE_HTML_ONLY2	eval:check_for_mime_html_without_plain()
-meta T_CTYPE_JUST_HTML2	(!__RCVD_BY_HOTMAIL && __CTYPE_HTML_ONLY2)
-
-body __CTYPE_HTML_ONLY3	eval:check_for_mime_html_images_only()
-meta T_CTYPE_JUST_HTML3	(!__RCVD_BY_HOTMAIL && __CTYPE_HTML_ONLY3)
-
-# quinlan: all of my false positives are Mozilla 4.7x
-meta T_CTYPE_JUST_HTML1B	(!(__MOZILLA_MUA && __MOZILLA_MSGID) && !__RCVD_BY_HOTMAIL && __CTYPE_HTML_ONLY1)
-meta T_CTYPE_JUST_HTML2B	(!(__MOZILLA_MUA && __MOZILLA_MSGID) && !__RCVD_BY_HOTMAIL && __CTYPE_HTML_ONLY2)
-meta T_CTYPE_JUST_HTML3B	(!(__MOZILLA_MUA && __MOZILLA_MSGID) && !__RCVD_BY_HOTMAIL && __CTYPE_HTML_ONLY3)
 
 # Good correlation between mutt msgids and nonspam.  Also provides
 # a good way to hammer those Mutt-forging spammers looking to
