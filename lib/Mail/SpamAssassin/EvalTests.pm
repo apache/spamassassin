@@ -1466,37 +1466,79 @@ sub check_for_num_yelling_lines {
 }
 
 sub check_for_mime_excessive_qp {
-  my ($self, $body) = @_;
+  my ($self) = @_;
 
-  # Note: We don't use $body because it removes MIME parts.  Instead, we
-  # get the raw unfiltered body AND WE MUST NOT CHANGE ANY LINE.
-  $body = join('', @{$self->{msg}->get_body()});
+  # Note: We don't use rawbody because it removes MIME parts.  Instead,
+  # we get the raw unfiltered body.  We must not change any lines.
+  my $body = join('', @{$self->{msg}->get_body()});
 
   my $length = length($body);
-  my $qp = $body =~ s/\=([0-9A-Fa-f]{2})/$1/g;
+  my $qp = $body =~ s/\=([0-9A-Fa-f]{2,2})/$1/g;
 
   # this seems like a decent cutoff
   return ($length != 0 && ($qp > ($length / 20)));
 }
 
-# This test should be a nearly zero cost operation done during MIME
-# decoding, but this works just fine for now.
 sub check_for_mime_missing_boundary {
-  my ($self, $body) = @_;
-  my $ctype = 0;
-  my $name;
+  my ($self) = @_;
+
+  if (!exists $self->{mime_missing_boundary}) {
+    $self->_check_attachments;
+  }
+  return $self->{mime_missing_boundary};
+}
+
+sub check_for_mime_long_line_qp {
+  my ($self) = @_;
+
+  if (!exists $self->{mime_long_line_qp}) {
+    $self->_check_attachments;
+  }
+  return $self->{mime_long_line_qp};
+}
+
+sub check_for_mime_suspect_name {
+  my ($self) = @_;
+
+  if (!exists $self->{mime_suspect_name}) {
+    $self->_check_attachments;
+  }
+  return $self->{mime_suspect_name};
+}
+
+sub check_for_microsoft_executable {
+  my ($self) = @_;
+
+  if (!exists $self->{microsoft_executable}) {
+    $self->_check_attachments;
+  }
+  return $self->{microsoft_executable};
+}
+
+# This should really be done during decoding of MIME and uuencoded files.
+sub _check_attachments {
+  my ($self) = @_;
+
   my @boundary;
   my %count;
+  my $ctype;
+  my $name;
+  my $previous = 'undef';
+
+  $self->{microsoft_executable} = 0;
+  $self->{mime_long_line_qp} = 0;
+  $self->{mime_missing_boundary} = 0;
+  $self->{mime_suspect_name} = 0;
 
   # boundaries in header
-  my $header_ctype = $self->{msg}->get_header('Content-Type');
-  $header_ctype = '' unless defined $header_ctype;
-  if ($header_ctype =~ /\bboundary\s*=\s*["']?(.*?)["']?(?:;|$)/i) {
+  $ctype = $self->get('Content-Type');
+  if ($ctype =~ /\bboundary\s*=\s*["']?(.*?)["']?(?:;|$)/i) {
     push (@boundary, "\Q$1\E");
   }
+  $ctype = 0;
 
-  # Note: We don't use $body because it removes MIME parts.  Instead, we
-  # get the raw unfiltered body AND WE MUST NOT CHANGE ANY LINE.
+  # Note: We don't use rawbody because it removes MIME parts.  Instead,
+  # we get the raw unfiltered body.  We must not change any lines.
   foreach my $line (@{$self->{msg}->get_body()}) {
     if ($line =~ /^--/) {
       foreach my $boundary (@boundary) {
@@ -1508,8 +1550,13 @@ sub check_for_mime_missing_boundary {
 	}
       }
     }
-    if ($line =~ /^Content-[Tt]ype: (\S+?\/\S+?)(?:\;|\s|$)/) {
-      $ctype = 1;
+    elsif ($line =~ /^Content-[Tt]ype: (\S+?\/\S+?)(?:\;|\s|$)/) {
+      $ctype = lc($1);
+      $ctype =~ s@/(x-|vnd\.)@/@;
+    }
+    if ($self->{found_encoding_quoted_printable} &&
+	length($line) > 77 && $line =~ /\=[0-9A-Fa-f]{2}/) {
+      $self->{mime_long_line_qp} = 1;
     }
     if ($ctype) {
       if ($line =~ /^$/) {
@@ -1518,12 +1565,42 @@ sub check_for_mime_missing_boundary {
       elsif ($line =~ /\bboundary\s*=\s*["']?(.*?)["']?(?:;|$)/i) {
         push (@boundary, "\Q$1\E");
       }
+      if ($ctype ne "application/octet-stream" &&
+	  $line =~ /name=(".*"|\S+)(?:\;|\s|$)/i) {
+	my $name = $1;
+	$name =~ s/.*\.//;	# look at just the extension
+	$name =~ s/"//g;	# remove quotes
+	$name = lc($name);
+	if (  ($name =~ /^html?$/ && $ctype ne "text/html")
+	   || ($name =~ /^jpe?g$/ && $ctype ne "image/jpeg")
+	   || ($name eq "pdf" && $ctype ne "application/pdf")
+	   || ($name eq "gif" && $ctype ne "image/gif")
+	   || ($name eq "txt" && $ctype ne "text/plain")
+	   || ($name eq "vcf" && $ctype ne "text/vcard")
+	   || ($name =~ /^(?:bat|com|exe|pif|scr|swf|vbs)$/ && $ctype !~ m@^application/@)
+	   || ($name eq "doc" && $ctype !~ m@^application/.*word$@)
+	   || ($name eq "ppt" && $ctype !~ m@^application/.*(?:powerpoint|ppt)$@)
+	   || ($name eq "xls" && $ctype !~ m@^application/.*excel$@)
+	   )
+	{
+	  $self->{mime_suspect_name} = 1;
+	}
+      }
     }
+    if ($previous =~ /^$/) {
+      $self->{microsoft_executable} = 1 if $line =~ /^TVqQAAMAAAAEAAAA/;
+    }
+    elsif ($previous =~ /^begin [0-7]{3} .*/) {
+      $self->{microsoft_executable} = 1 if $line =~ /^M35J0``,````\$````/;
+    }
+    $previous = $line;
   }
   foreach my $boundary (keys %count) {
-    return 1 if $count{$boundary} != 0;
+    if ($count{$boundary} != 0) {
+      $self->{mime_missing_boundary} = 1;
+      last;
+    }
   }
-  return 0;
 }
 
 sub check_language {

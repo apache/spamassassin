@@ -357,13 +357,24 @@ describe LINES_OF_YELLING_2     2 WHOLE LINES OF YELLING DETECTED
 body     LINES_OF_YELLING_3     eval:check_for_num_yelling_lines("3")
 describe LINES_OF_YELLING_3     3 WHOLE LINES OF YELLING DETECTED
 
-# this test doesn't actually use rawbody since rawbody isn't raw enough
+###########################################################################
+# these tests doesn't actually use rawbody since rawbody isn't raw enough;
+# they must be written very carefully to avoid modifying the original content
+
 rawbody  MIME_EXCESSIVE_QP	eval:check_for_mime_excessive_qp()
 describe MIME_EXCESSIVE_QP	Excessive quoted-printable encoding in body
 
-# this test doesn't actually use rawbody since rawbody isn't raw enough
+rawbody  MIME_LONG_LINE_QP	eval:check_for_mime_long_line_qp()
+describe MIME_LONG_LINE_QP	Quoted-printable line longer than 76 characters
+
 rawbody  MIME_MISSING_BOUNDARY	eval:check_for_mime_missing_boundary()
 describe MIME_MISSING_BOUNDARY	MIME section missing boundary
+
+rawbody  MICROSOFT_EXECUTABLE	eval:check_for_microsoft_executable()
+describe MICROSOFT_EXECUTABLE	Message includes Microsoft executable program
+
+rawbody  MIME_SUSPECT_NAME	eval:check_for_mime_suspect_name()
+describe MIME_SUSPECT_NAME	MIME filename does not match content
 
 ###########################################################################
 # some full-text matches; note the [3D=\s"']* bits of the patterns, which
