@@ -895,7 +895,7 @@ sub spawn {
   $backchannel->setup_backchannel_parent_pre_fork();
 
   # block signal for fork
-  my $sigset = POSIX::SigSet->new( POSIX::SIGINT() );
+  my $sigset = POSIX::SigSet->new( POSIX::SIGINT(), POSIX::SIGCHLD() );
   sigprocmask( POSIX::SIG_BLOCK(), $sigset )
     or die "Can't block SIGINT for fork: $!\n";
 
@@ -905,14 +905,14 @@ sub spawn {
   if ($pid) {
     ## PARENT
 
-    sigprocmask( POSIX::SIG_UNBLOCK(), $sigset )
-      or die "Can't unblock SIGINT for fork: $!\n";
     $children{$pid} = 1;
     logmsg("server successfully spawned child process, pid $pid");
     $backchannel->setup_backchannel_parent_post_fork($pid);
     if ($scaling) {
       $scaling->add_child($pid);
     }
+    sigprocmask( POSIX::SIG_UNBLOCK(), $sigset )
+      or die "Can't unblock SIGINT for fork: $!\n";
     return;
   }
   else {
