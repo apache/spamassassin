@@ -349,12 +349,22 @@ sub check_for_forged_received_ip_helo {
   return ($self->{mismatch_ip_helo} > 0);
 }
 
+# FORGED_RCVD_IP_HELO
+sub check_for_forged_received_ip_helo_big {
+  my ($self) = @_;
+  $self->_check_for_forged_received unless exists $self->{mismatch_ip_helo_big};
+  return ($self->{mismatch_ip_helo_big} > 0);
+}
+
 sub _check_for_forged_received {
   my ($self) = @_;
 
   $self->{mismatch_helo} = 0;
   $self->{mismatch_ip_helo} = 0;
+  $self->{mismatch_ip_helo_big} = 0;
   $self->{mismatch_from} = 0;
+
+  my $ip_in_rsvd = \$Mail::SpamAssassin::Dns::IP_IN_RESERVED_RANGE;
 
   my @fromip = map { $_->{ip} } @{$self->{relays_untrusted}};
   # just pick up domains for these
@@ -401,13 +411,27 @@ sub _check_for_forged_received {
     }
 
     my $fip = $fromip[$i];
-    if (defined($hlo) && defined($fip)
-		&& $hlo =~ /^\d+\.\d+\.\d+\.\d+$/
-		&& $fip =~ /^\d+\.\d+\.\d+\.\d+$/
-		&& $fip ne $hlo)
-    {
-      dbg ("forged-HELO: mismatch on IP-addr HELO: '$hlo' != '$fip'");
-      $self->{mismatch_ip_helo}++;
+
+    if (defined($hlo) && defined($fip)) {
+      if ($hlo =~ /^\d+\.\d+\.\d+\.\d+$/
+		  && $fip =~ /^\d+\.\d+\.\d+\.\d+$/
+		  && $fip ne $hlo)
+      {
+	dbg ("forged-HELO: mismatch on IP-addr HELO: '$hlo' != '$fip'");
+	$self->{mismatch_ip_helo}++;
+
+	$hlo =~ /^(\d+\.\d+)\.\d+\.\d+$/; my $hclassb = $1;
+	$fip =~ /^(\d+\.\d+)\.\d+\.\d+$/; my $fclassb = $1;
+
+	# allow private IP addrs here, could be a legit screwup
+	if ($hclassb && $fclassb && 
+		$hclassb ne $fclassb &&
+		$hlo !~ /${ip_in_rsvd}/o)
+	{
+	  dbg ("forged-HELO: massive mismatch on IP-addr HELO: '$hlo' != '$fip'");
+	  $self->{mismatch_ip_helo_big}++;
+	}
+      }
     }
 
     my $prev = $from[$i-1];
@@ -756,6 +780,7 @@ sub _check_received_helos {
     my $from_host = $rcvd->{rdns};
     my $helo_host = $rcvd->{helo};
     my $by_host = $rcvd->{by};
+    my $no_rdns = $rcvd->{no_reverse_dns};
 
     next unless defined($helo_host);
 
@@ -770,12 +795,19 @@ sub _check_received_helos {
     # so HELO="outgoing.aol.com" and from="mx34853495.mx.aol.com" works OK.
     #
     $self->{faked_dotcom_helo} = 0;
+    $self->{no_rdns_dotcom_helo} = 0;
     if ($helo_host =~ /(?:\.|^)(lycos\.com|lycos\.co\.uk|hotmail\.com
 		|localhost\.com|excite\.com|caramail\.com
 		|cs\.com|aol\.com|msn\.com|yahoo\.com|drizzle\.com)$/ix)
     {
       my $dom = $1;
-      if ($from_host !~ /^${IP_ADDRESS}$/ && $from_host !~ /(?:\.|^)${dom}$/i) {
+
+      # ok, let's catch the case where there's *no* reverse DNS there either
+      if ($no_rdns) {
+	dbg ("Received: no rDNS for dotcom HELO: from=$from_host HELO=$helo_host");
+	$self->{no_rdns_dotcom_helo} = 1;
+      }
+      elsif ($from_host !~ /(?:\.|^)${dom}$/i) {
 	dbg ("Received: faked dotcom HELO: from=$from_host HELO=$helo_host");
 	$self->{faked_dotcom_helo} = 1;
       }
@@ -787,6 +819,12 @@ sub check_for_fake_dotcom_helo {
   my ($self) = @_;
   if (!exists $self->{faked_dotcom_helo}) { $self->_check_received_helos(@_); }
   return $self->{faked_dotcom_helo};
+}
+
+sub check_for_no_rdns_dotcom_helo {
+  my ($self) = @_;
+  if (!exists $self->{no_rdns_dotcom_helo}) { $self->_check_received_helos(@_); }
+  return $self->{no_rdns_dotcom_helo};
 }
 
 ###########################################################################

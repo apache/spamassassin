@@ -1,4 +1,4 @@
-# $Id: Received.pm,v 1.22 2003/06/10 05:06:35 jmason Exp $
+# $Id: Received.pm,v 1.23 2003/06/10 05:29:17 jmason Exp $
 
 # ---------------------------------------------------------------------------
 
@@ -245,6 +245,7 @@ sub parse_received_line {
   my $rdns = '';
   my $by = '';
   my $ident = '';
+  my $mta_looked_up_dns = 0;
 
   # Received: (qmail 27981 invoked by uid 225); 14 Mar 2003 07:24:34 -0000
   # Received: (qmail 84907 invoked from network); 13 Feb 2003 20:59:28 -0000
@@ -307,6 +308,7 @@ sub parse_received_line {
     # mail.ssccbelen.edu.pe with SMTP (Microsoft Exchange Internet Mail Service
     # Version 5.5.1960.3) id G69TW478; Thu, 13 Mar 2003 14:01:10 -0500
     if (/^from (\S+) \((\S+) \[(${IP_ADDRESS})\]\) by (\S+) with \S+ \(/) {
+      $mta_looked_up_dns = 1;
       $rdns= $2; $ip = $3; $helo = $1; $by = $4; goto enough;
     }
 
@@ -326,6 +328,7 @@ sub parse_received_line {
 
     # from attbi.com (h000502e08144.ne.client2.attbi.com[24.128.27.103]) by rwcrmhc53.attbi.com (rwcrmhc53) with SMTP id <20030222193438053008f7tee>; Sat, 22 Feb 2003 19:34:39 +0000
     if (/^from (\S+) \((\S+\.\S+)\[(${IP_ADDRESS})\]\) by (\S+) /) {
+      $mta_looked_up_dns = 1;
       $helo = $1; $rdns = $2; $ip = $3; $by = $4;
       goto enough;
     }
@@ -336,6 +339,7 @@ sub parse_received_line {
     # Received: from ran-out.mx.develooper.com (IDENT:qmailr@one.develooper.com [64.81.84.115]) by dogma.slashnull.org (8.11.6/8.11.6) with SMTP id h381Vvf19860 for <jm-cpan@jmason.org>; Tue, 8 Apr 2003 02:31:57 +0100
     # from rev.net (natpool62.rev.net [63.148.93.62] (may be forged)) (authenticated) by mail.rev.net (8.11.4/8.11.4) with ESMTP id h0KKa7d32306 for <spamassassin-talk@lists.sourceforge.net>
     if (/^from (\S+) \((\S+) \[(${IP_ADDRESS})\].*\) by (\S+) \(/) {
+      $mta_looked_up_dns = 1;
       $helo = $1; $rdns = $2; $ip = $3; $by = $4;
       $rdns =~ s/^IDENT:([^\@]+)\@// and $ident = $1; # remove IDENT lookups
       $rdns =~ s/^([^\@]+)\@// and $ident = $1;	# remove IDENT lookups
@@ -347,6 +351,7 @@ sub parse_received_line {
     # for <jm@localhost>; Thu, 13 Mar 2003 15:23:15 -0500 (EST)
     if (/ \(Postfix\) with/) {
       if ( /^from (\S+) \((\S+) \[(${IP_ADDRESS})\]\) by (\S+) / ) {
+	$mta_looked_up_dns = 1;
 	$helo = $1; $rdns = $2; $ip = $3; $by = $4;
 	if ($rdns eq 'unknown') { $rdns = ''; }
 	goto enough;
@@ -391,6 +396,7 @@ sub parse_received_line {
 
     # Received: from acecomms [202.83.84.95] by mailscan.acenet.net.au [202.83.84.27] with SMTP (MDaemon.PRO.v5.0.6.R) for <spamassassin-talk@lists.sourceforge.net>; Fri, 21 Feb 2003 09:32:27 +1000
     if (/^from (\S+) \[(${IP_ADDRESS})\] by (\S+) \[(\S+)\] with /) {
+      $mta_looked_up_dns = 1;
       $helo = $1; $ip = $2;
       $by = $4; # use the IP addr for "by", more useful?
       goto enough;
@@ -400,6 +406,7 @@ sub parse_received_line {
     # (8.11.6/8.11.6) with ESMTP id h2FH0Zx11330 for <webmaster@efi.ie>;
     # Sat, 15 Mar 2003 17:00:41 GMT
     if (/^from (\S+) \(\[(${IP_ADDRESS})\]\) by (\S+) \(/) { # sendmail
+      $mta_looked_up_dns = 1;
       $helo = $1; $ip = $2; $by = $3; goto enough;
     }
 
@@ -407,9 +414,11 @@ sub parse_received_line {
     # Received: from Agni (localhost [::ffff:127.0.0.1]) (TLS: TLSv1/SSLv3, 168bits,DES-CBC3-SHA) by agni.forevermore.net with esmtp; Mon, 28 Oct 2002 14:48:52 -0800
     # Received: from gandalf ([4.37.75.131]) (authenticated bits=0) by herald.cc.purdue.edu (8.12.5/8.12.5/herald) with ESMTP id g9JLefrm028228 for <spamassassin-talk@lists.sourceforge.net>; Sat, 19 Oct 2002 16:40:41 -0500 (EST)
     if (/^from (\S+) \((\S+) \[(${IP_ADDRESS})\]\).*? by (\S+) /) { # sendmail
+      $mta_looked_up_dns = 1;
       $helo = $1; $rdns = $2; $ip = $3; $by = $4; goto enough;
     }
     if (/^from (\S+) \(\[(${IP_ADDRESS})\]\).*? by (\S+) /) {
+      $mta_looked_up_dns = 1;
       $helo = $1; $ip = $2; $by = $3; goto enough;
     }
 
@@ -418,6 +427,7 @@ sub parse_received_line {
     # with ESMTP id g9MFWcvb068860 for <jm@jmason.org>;
     # Tue, 22 Oct 2002 16:32:39 +0100 (IST)
     if (/^from (\S+) \((\S+) \[(${IP_ADDRESS})\]\)(?: \(authenticated bits=\d+\)|) by (\S+) \(/) { # sendmail
+      $mta_looked_up_dns = 1;
       $helo = $1; $rdns = $2; $ip = $3; $by = $4; goto enough;
     }
 
@@ -432,6 +442,7 @@ sub parse_received_line {
     # (61.197.108.141) by one.develooper.com (qpsmtpd/0.21-dev) with SMTP;
     # Thu, 13 Mar 2003 23:24:32 -0800
     if (/^from (\S+) \(HELO (\S+)\) \((${IP_ADDRESS})\) by (\S+) \(qpsmtpd/) {
+      $mta_looked_up_dns = 1;
       $rdns = $1; $helo = $2; $ip = $3; $by = $4; goto enough;
     }
 
@@ -452,6 +463,7 @@ sub parse_received_line {
     # Received: from snake.corp.yahoo.com(216.145.52.229) by x.x.org via smap (V1.3)
     # id xma093673; Wed, 26 Mar 03 20:43:24 -0600
     if (/^from (\S+)\((${IP_ADDRESS})\) by (\S+) via smap /) {
+      $mta_looked_up_dns = 1;
       $rdns = $1; $ip = $2; $by = $3; goto enough;
     }
 
@@ -459,6 +471,7 @@ sub parse_received_line {
     # (213.94.135.44) by relay06.indigo.ie (qp 33102) with SMTP;
     # 2 Mar 2003 21:54:54 -0000
     if (/^from (\S+) \(HELO (\S+)\) \((${IP_ADDRESS})\) by (\S+) \(qp \d+\) with SMTP; /) {
+      $mta_looked_up_dns = 1;
       $rdns = $1; $helo = $2; $ip = $3; $by = $4; goto enough;
     }
 
@@ -504,6 +517,7 @@ sub parse_received_line {
     # Received: from spike (spike.ig.co.uk [193.32.60.32]) by mail.ig.co.uk with
     # SMTP id h27CrCD03362 for <asrg@ietf.org>; Fri, 7 Mar 2003 12:53:12 GMT
     if (/^from (\S+) \((\S+) \[(${IP_ADDRESS})\]\) by (\S+) with /) {
+      $mta_looked_up_dns = 1;
       $helo = $1; $rdns = $2; $ip = $3; $by = $4; goto enough;
     }
 
@@ -511,6 +525,7 @@ sub parse_received_line {
     # (baldusi@200.69.254.217 with plain) by smtp.mail.vip.sc5.yahoo.com with
     # SMTP; 11 Mar 2003 21:03:28 -0000
     if (/^from (\S+) \(HELO (\S+)\) \((\S+) with \S+\) by (\S+) with /) {
+      $mta_looked_up_dns = 1;
       $rdns = $1; $helo = $2; $ip = $3; $by = $4;
       $ip =~ s/([^\@]+)\@//g and $ident = $1;	# remove IDENT lookups
       goto enough;
@@ -519,9 +534,7 @@ sub parse_received_line {
     # Received: from raptor.research.att.com (bala@localhost) by
     # raptor.research.att.com (SGI-8.9.3/8.8.7) with ESMTP id KAA14788 
     # for <asrg@example.com>; Fri, 7 Mar 2003 10:37:56 -0500 (EST)
-    if (/^from (\S+) \((\S+\@\S+)\) by (\S+) \(/) {
-      return;
-    }
+    if (/^from (\S+) \((\S+\@\S+)\) by (\S+) \(/) { return; }
 
     # Received: from mmail by argon.connect.org.uk with local (connectmail/exim) id 18tOsg-0008FX-00; Thu, 13 Mar 2003 09:20:06 +0000
     if (/^from (\S+) by (\S+) with local/) { return; }
@@ -541,8 +554,7 @@ sub parse_received_line {
 
     # Received: from scv3.apple.com (scv3.apple.com) by mailgate2.apple.com (Content Technologies SMTPRS 4.2.1) with ESMTP id <T61095998e1118164e13f8@mailgate2.apple.com>; Mon, 17 Mar 2003 17:04:54 -0800
     if (/^from (\S+) \((\S+)\) by (\S+) \(/) {
-      $helo = $1; $rdns = $2; $by = $3;
-	goto enough;
+      $helo = $1; $rdns = $2; $by = $3; goto enough;
     }
 
     # Received: from centipaid.com ([216.177.8.126]) by centipaid.com ; Tue,
@@ -571,6 +583,7 @@ sub parse_received_line {
     # by rwcrmhc53.attbi.com (rwcrmhc53) with SMTP id <2003031302165605300suph7e>;
     # Thu, 13 Mar 2003 02:16:56 +0000
     if (/^from (\S+) \((\S+)\[(${IP_ADDRESS})\]\) by (\S+) /) {
+      $mta_looked_up_dns = 1;
       $helo = $1; $rdns = $2; $ip = $3; $by = $4; goto enough;
     }
 
@@ -774,13 +787,24 @@ enough:
   };
 
   # perform rDNS check if MTA has not done it for us.
+  #
   # TODO: do this for untrusted headers anyway; if it mismatches it
   # could be a spamsign.  Probably better done later after we've
   # moved the "trusted" ones out of the way.  In fact, this op
   # here may be movable too; no need to lookup trusted IPs all the time.
+  #
   if ($rdns eq '') {
     if (!$self->is_dns_available()) {
-      $relay->{rdns_not_in_headers} = 1;
+      if ($mta_looked_up_dns) {
+	# we know the MTA always does lookups, so this means the host
+	# really has no rDNS (rather than that the MTA didn't bother
+	# looking it up for us).
+	$relay->{no_reverse_dns} = 1;
+	$rdns = $ip;		# default no-rDNS to be the IP
+      } else {
+	$relay->{rdns_not_in_headers} = 1;
+      }
+
     } else {
       $rdns = $self->lookup_ptr ($ip);
 
