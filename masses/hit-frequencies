@@ -61,14 +61,17 @@ if ($opt_p) {
   	$hdr_all, $hdr_spam, $hdr_nonspam;
 }
 
+my %done = ();
 foreach my $test (sort { 
 		  (defined ($freq_spam{$b}) ? $freq_spam{$b} : 0) <=>
 		  (defined ($freq_spam{$a}) ? $freq_spam{$a} : 0)
-		} keys %freq)
+		} (keys %freq_spam, keys %freq_nonspam))
 {
-  my $fa = $freq{$test};
+  next if $done{$test}; $done{$test} = 1;
+
   my $fs = $freq_spam{$test}; $fs ||= 0;
   my $fn = $freq_nonspam{$test}; $fn ||= 0;
+  my $fa = $fs+$fn;
 
   if (!defined $score{$test}) { $score{$test} ||= 1.0; }
   if (!defined $tflags{$test}) { $tflags{$test} = ''; }
@@ -77,6 +80,8 @@ foreach my $test (sort {
   # adjust based on corpora sizes (and cvt to % while we're at it)
   my $fsadj = ($fs / ($num_spam)) * 100.0;
   my $fnadj = ($fn / ($num_nonspam)) * 100.0;
+
+  if ($opt_f && $fsadj == 0 && $fnadj == 0) { next; }
 
   if ($opt_p) {
     $fa = ($fa / ($num_spam + $num_nonspam)) * 100.0;
@@ -134,7 +139,6 @@ sub readlogs {
       my @tests = split (/,/, $_);
       foreach my $t (@tests) {
 	next if ($t eq '');
-	$freq{$t}++;
 	if ($isspam) {
           if ($opt_f) {
             if (!$caught) { $freq_spam{$t}++; }
@@ -164,7 +168,6 @@ sub readscores {
     s/#.*$//g; s/^\s+//; s/\s+$//;
 
     if (/^(header|rawbody|body|full|uri)\s+(\S+)\s+/) {
-      $freq{$2} ||= 0;
       $freq_spam{$2} ||= 0;
       $freq_nonspam{$2} ||= 0;
       $tflags{$2} ||= '';
