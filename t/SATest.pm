@@ -73,8 +73,15 @@ sub sa_t_init {
   ";
 
   (-f "t/test_dir") && chdir("t");        # run from ..
-  rmtree ("log");
+
+  # do not remove prior test results!
+  # rmtree ("log");
+
   mkdir ("log", 0755);
+
+  rmtree ("log/user_state");
+  rmtree ("log/outputdir.tmp");
+  rmtree ("log/test_rules_copy");
   mkdir ("log/test_rules_copy", 0755);
   for $file (<../rules/*.cf>) {
     $base = basename $file;
@@ -82,6 +89,7 @@ sub sa_t_init {
       or warn "cannot copy $file to log/test_rules_copy/$base";
   }
 
+  rmtree ("log/localrules.tmp");
   mkdir ("log/localrules.tmp", 0755);
   copy ("../rules/init.pre", "log/localrules.tmp/init.pre")
     or die "init.pre copy failed";

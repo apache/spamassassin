@@ -115,6 +115,9 @@ my $ORIG_CWD = Mail::SpamAssassin::Util::untaint_var( Cwd::cwd() );
 Getopt::Long::Configure("bundling");
 GetOptions(
   'socketpath=s'             => \$opt{'socketpath'},
+  'socketowner=s'            => \$opt{'socketowner'},
+  'socketgroup=s'            => \$opt{'socketgroup'},
+  'socketmode=s'             => \$opt{'socketmode'},
   'create-prefs!'            => \$opt{'create-prefs'},
   'c'                        => \$opt{'create-prefs'},
   'daemonize!'               => \$opt{'daemonize'},
@@ -207,6 +210,21 @@ if (
     -verbose => 0,
     -message =>
 "ERROR: --socketpath mutually exclusive with --allowed-ip/--ssl/--port params"
+  );
+}
+
+if (
+  !$opt{'socketpath'}
+  and ( $opt{'socketowner'}
+    or $opt{'socketgroup'}
+    or $opt{'socketmode'})
+  )
+{
+  pod2usage(
+    -exitval => $resphash{'EX_USAGE'},
+    -verbose => 0,
+    -message =>
+"ERROR: --socketowner/group/mode requires --socketpath param"
   );
 }
 
@@ -535,7 +553,36 @@ if ( $opt{'socketpath'} ) {
     )
     || die "Could not create UNIX socket on $path: $! $@\n";
 
-  chmod 0666, $path;    # make sure everybody can talk to it
+  my $mode = $opt{socketmode};
+  if ($mode) {
+    $mode = oct $mode;
+  } else {
+    $mode = 0666;        # default
+  }
+
+  my $owner = $opt{socketowner};
+  my $group = $opt{socketgroup};
+  if ($owner || $group) {
+    my $uid = -1;
+    my $gid = -1;
+    if ($owner) {
+      my ($login,$pass,$puid,$pgid) = getpwnam($owner)
+                            or die "$owner not in passwd database\n";
+      $uid = $puid;
+    }
+    if ($group) {
+      my ($name,$pass,$ggid,$members) = getpwnam($group)
+                            or die "$group not in group database\n";
+      $gid = $ggid;
+    }
+    if (!chown $uid, $gid, $path) {
+      die "Could not chown $path to $uid/$gid: $! $@";
+    }
+  }
+
+  if (!chmod $mode, $path) {    # make sure everybody can talk to it
+    die "Could not chmod $path to $mode: $! $@";
+  }
 }
 elsif ( $opt{'ssl'} ) {
   $server = new IO::Socket::SSL(
@@ -585,7 +632,7 @@ if ( $opt{'username'} ) {
   }
 
   # ditto with the socket file
-  if ( defined $opt{'socketpath'} ) {
+  if ( defined $opt{'socketpath'} && !$opt{'socketowner'}) {
     chown $uuid, -1, $opt{'socketpath'}
       || die "fatal: could not chown '$opt{'socketpath'}' to uid $uuid\n";
   }
@@ -1745,6 +1792,9 @@ Options:
  --server-key keyfile               Specify an SSL keyfile
  --server-cert certfile             Specify an SSL certificate
  --socketpath=path                  Listen on given UNIX domain socket
+ --socketowner=name                 Set UNIX domain socket file's owner
+ --socketgroup=name                 Set UNIX domain socket file's group
+ --socketmode=mode                  Set UNIX domain socket file's mode
 
 =head1 DESCRIPTION
 
@@ -2041,6 +2091,24 @@ Specify the SSL certificate file to use for SSL connections.
 =item B<--socketpath> I<pathname>
 
 Listen on UNIX domain path I<pathname> instead of a TCP socket.
+
+=item B<--socketowner> I<name>
+
+Set UNIX domain socket to be owned by the user named I<name>.  Note
+that this requires that spamd be started as C<root>, and if C<-u>
+is used, that user should have write permissions to unlink the file
+later, for when the C<spamd> server is killed.
+
+=item B<--socketgroup> I<name>
+
+Set UNIX domain socket to be owned by the group named I<name>.  See
+C<--socketowner> for notes on ownership and permissions.
+
+=item B<--socketmode> I<mode>
+
+Set UNIX domain socket to use the octal mode I<mode>.  Note that if C<-u> is
+used, that user should have write permissions to unlink the file later, for
+when the C<spamd> server is killed.
 
 =back
 

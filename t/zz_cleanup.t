@@ -6,5 +6,9 @@ use Test; BEGIN { plan tests => 1 };
 
 use File::Path;
 
-rmtree ("log");
+# jm: off! we want to keep the logs around in case something failed,
+# so we can see what it was. esp. important in case of intermittent
+# failures.
+# rmtree ("log");
+
 ok (1);
