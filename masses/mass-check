@@ -79,8 +79,8 @@ use vars qw($opt_c $opt_p $opt_f $opt_j $opt_n $opt_o $opt_all $opt_bayes
 	    $opt_debug $opt_format $opt_hamlog $opt_head $opt_loghits
 	    $opt_mid $opt_net $opt_nosort $opt_progress $opt_showdots
 	    $opt_spamlog $opt_tail $opt_rules $opt_restart $opt_loguris
-            $opt_logmem
-	    $opt_after $opt_before $opt_rewrite $opt_deencap);
+            $opt_logmem $opt_after $opt_before $opt_rewrite $opt_deencap
+	    $total_messages $statusevery);
 
 use FindBin;
 use lib "$FindBin::Bin/../lib";
@@ -201,11 +201,16 @@ my $iter = new Mail::SpamAssassin::ArchiveIterator({
 });
 
 if ($opt_progress) {
-  my $now = strftime("%Y-%m-%d %X", localtime(time));
-  printf STDERR "status: pre-scanning and sorting. now: %s\n", $now;
+  status('starting scan stage');
 }
+
 $iter->set_functions(\&wanted, \&result);
 $iter->run(@targets);
+
+if ($opt_progress) {
+  status('completed run stage');
+}
+
 print STDERR "\n" if ($opt_showdots);
 exit;
 
@@ -225,6 +230,20 @@ sub target  {
 ###########################################################################
 
 sub init_results {
+  if ($opt_progress) {
+    # make it a local variable for now
+    $total_messages = $Mail::SpamAssassin::ArchiveIterator::MESSAGES;
+
+    # round up since 100% will be caught at end already
+    $statusevery = int($total_messages / $updates + 1);
+
+    # if $messages < $updates, just give a status line per msg.
+    $statusevery ||= 1;
+
+    status("completed scan stage, $total_messages messages");
+    status('starting run stage');
+  }
+
   if ($opt_o) {
     autoflush STDOUT 1;
     print STDOUT $log_header;
@@ -436,17 +455,18 @@ sub progress {
   my ($time) = @_;
   $time ||= 0;
 
-  my $messages = $Mail::SpamAssassin::ArchiveIterator::MESSAGES;
-  my $statusevery = int($messages / $updates);
-  $statusevery ||= 1; # if $messages < $updates, just give a status line per msg.
-
   # Are we at the end or otherwise at a point we should print status?  Then do it.
-  if ($messages == $total_count || $total_count % $statusevery == 0) {
+  if ($total_messages == $total_count || $total_count % $statusevery == 0) {
     my $time = strftime("%Y-%m-%d", localtime($time));
-    my $now = strftime("%Y-%m-%d %X", localtime(time));
-    printf STDERR "status: %3.0f%% ham: %-6d spam: %-6d date: %s now: %s\n",
-	($total_count / $messages) * 100, $ham_count, $spam_count, $time, $now;
+    status(sprintf("%3d%% ham: %-6d spam: %-6d date: %s",
+	int(($total_count / $total_messages) * 100), $ham_count, $spam_count, $time));
   }
+}
+
+sub status {
+  my($str) = @_;
+  my $now = strftime("%Y-%m-%d %X", localtime(time));
+  printf STDERR "status: %-48s now: %s\n", $str, $now;
 }
 
 ###########################################################################
