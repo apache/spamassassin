@@ -421,7 +421,7 @@ tflags USER_IN_WHITELIST        userconf
 #describe DATE_MISSING		Missing Date: header
 
 # Steve Linford via Charlie Watts: good test!
-header __RCVD_BY_HOTMAIL        Received =~ / by hotmail.com /
+header __RCVD_BY_HOTMAIL        Received =~ / by hotmail\.com /
 header __CTYPE_IS_HTML          Content-Type =~ /^text\/html\b/
 meta CTYPE_JUST_HTML		(!__RCVD_BY_HOTMAIL && __CTYPE_IS_HTML)
 describe CTYPE_JUST_HTML	HTML-only mail, with no text version
@@ -610,7 +610,7 @@ describe DATE_MISSING           Missing Date: header
 header POST_IN_RCVD             Received =~ / Post\.(?:sk|cz)/  
 describe POST_IN_RCVD           Received contains fake 'Post.cz' hostname
 
-header FROM_TOPICA              From =~ /\@(?:\w\.)*email-publisher.com/i
+header FROM_TOPICA              From =~ /\@(?:\w\.)*email-publisher\.com/i
 describe FROM_TOPICA            From an address @email-publisher.com
 
 header FORGED_EBAY_RCVD         eval:check_for_from_domain_in_received_headers('ebay.com', 'false')
