@@ -638,12 +638,22 @@ sub check_for_bad_helo2 {
   my @received = grep(/\S/, split(/\n/, $self->get ('Received')));
 
   for (my $i = 0; $i < @received; $i++) {
-    # Ignore where HELO is localhost
-    next if $received[$i] =~ /\Q[127.0.0.1]\E/;
+    # Ignore where HELO is in reserved IP space; regexp matches
+    # "[W.X.Y.Z]" immediatly followed by a ")", which should only
+    # sho up at the end of the HELO part of a Received header
+    if ($received[$i] =~ /\[([\d.]+)\]\)/) {
+      my $ip = $1;
 
-    # $by_host regexp is "([\w.-]+\.[\w.-]+)" so that at least
+      next if $ip =~  /${IP_IN_RESERVED_RANGE}/o;;
+    }
+
+    # $helo_host regexp is "([\w.-]+\.[\w.-]+)" so that at least
     # one "." must be present, thus avoiding domainless hostnames
-    # and "(HELO hostname)" situations
+    # and "(HELO hostname)" situations.
+    #
+    # $from_host and $by_host regexps are "([\w.-]+)" to exclude
+    # things like "[1.2.3.4]"; we don't deal with numeric-only
+    # addresses
     next unless $received[$i] =~
       /from ([\w.-]+) \(([\w.-]+\.[\w.-]+).* by ([\w.-]+)/;
 
@@ -652,12 +662,22 @@ sub check_for_bad_helo2 {
     my $by_host   = $3;
 
     next unless ($from_host eq $by_host);
-
     next if ($from_host eq "localhost");
 
-    if ($from_host ne $helo_host) {
+    # If helo host is all numeric, from host probably won't be, so
+    # don't bother
+    next unless ($helo_host =~ /[a-z]/i);
+
+    $from_host =~ /([^.]+\.[^.]+$)/;
+    my $from_domain = $1;
+
+    $helo_host =~ /([^.]+\.[^.]+$)/;
+    my $helo_domain = $1;
+
+
+    if ($from_domain ne $helo_domain) {
       dbg("Received: from and by hosts '$from_host' same, but " .
-          "by host '$by_host' differs\n");
+          "helo host '$helo_host' differs\n");
       return 1;
     }
   } # for (my $i = 0; $i < @received; $i++)
