@@ -14,7 +14,7 @@ my $threshold = 5;
 if ($opt_threshold) { $threshold = $opt_threshold; }
 
 $opt_spam ||= 'spam.log';
-$opt_nonspam ||= 'nonspam.log';
+$opt_nonspam ||= 'ham.log';
 $opt_scoreset = 0 if ( !defined $opt_scoreset );
 
 my $nybias = 10;
