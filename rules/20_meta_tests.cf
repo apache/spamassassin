@@ -80,6 +80,10 @@ body __NIGERIAN_BODY_32 /\blocate(?: .{1,20})? extended relative/i
 body __NIGERIAN_BODY_33 /\bhonest cooperation\b/i
 body __NIGERIAN_BODY_34 /\b(?:wife|son|brother|daughter) of the late\b/i
 body __NIGERIAN_BODY_35 /\bintuitive confidence/i
+body __NIGERIAN_BODY_36 /\battached to ticket number\b/i
+body __NIGERIAN_BODY_37 /\ball funds will be returned\b/i
+body __NIGERIAN_BODY_38 /\b(?:International\b.{1,15}\bLottery|lottery\b.{1,15}\binternational)\b/i
+body __NIGERIAN_BODY_39 /\bYOUR FULL NAMES?,?(?:and|&)? FULL CONTACT ADDRESS\b/i
 
 
 meta NIGERIAN_SUBJECT	(__NIGERIAN_SUBJECT.+ +) > 0
