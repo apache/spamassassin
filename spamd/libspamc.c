@@ -850,20 +850,71 @@ failure:
     return failureval;
 }
 
+/*
+ * May  7 2003 jm: using %f is bad where LC_NUMERIC is "," in the locale.
+ * work around using our own locale-independent float-parser code.
+ */
+static float
+_locale_safe_string_to_float (char *buf, int siz)
+{
+  char *cp, *dot;
+  int divider;
+  float ret, postdot;
+
+  buf[siz-1] = '\0';	/* ensure termination */
+
+  /* ok, let's illustrate using "100.033" as an example... */
+  
+  ret = (float) (strtol (buf, &dot, 10));
+  if (dot == NULL) { return 0.0; }
+  if (dot != NULL && *dot != '.') { return ret; }
+
+  /* ex: ret == 100.0 */
+
+  cp = (dot + 1);
+  postdot = (float) (strtol (cp, NULL, 10));
+  if (postdot == 0.0) { return ret; }
+
+  /* ex: postdot == 33.0, cp="033" */
+
+  /* now count the number of decimal places and figure out what power of 10 to use */
+  divider = 1;
+  while (*cp != '\0') {
+    divider *= 10; cp++;
+  }
+
+  /* ex:
+   * cp="033", divider=1
+   * cp="33", divider=10
+   * cp="3", divider=100
+   * cp="", divider=1000
+   */
+
+  ret += (postdot / ((float) divider));
+  /* ex: ret == 100.033, tada! ... hopefully */
+
+  return ret;
+}
+
 static int
 _handle_spamd_header (struct message *m, int flags, char *buf, int len)
 {
     char is_spam[6];
+    char s_str[20], t_str[20];
 
     UNUSED_VARIABLE(len);
 
     /* Feb 12 2003 jm: actually, I think sccanf is working fine here ;)
      * let's stick with it for this parser.
+     * May  7 2003 jm: using %f is bad where LC_NUMERIC is "," in the locale.
+     * work around using our own locale-independent float-parser code.
      */
-    if (sscanf(buf, "Spam: %5s ; %f / %f", is_spam, &m->score, &m->threshold) == 3)
+    if (sscanf(buf, "Spam: %5s ; %20s / %20s", is_spam, s_str, t_str) == 3)
     {
+	m->score = _locale_safe_string_to_float (s_str, 20);
+	m->threshold = _locale_safe_string_to_float (t_str, 20);
+
 	/* Format is "Spam: x; y / x" */
-       /* Feb 14 2004 ym: apparently, it is really easy to screw up with sscanf() parsing */
 	m->is_spam=strcasecmp("true", is_spam) == 0 ? EX_ISSPAM: EX_NOTSPAM;
 
 	if(flags&SPAMC_CHECK_ONLY) {
@@ -891,6 +942,7 @@ int message_filter(struct transport *tp, const char *username,
     int bufsiz = (sizeof(buf) / sizeof(*buf)) - 4; /* bit of breathing room */
     int len, i;
     int sock, rc;
+    char versbuf[20];
     float version;
     int response;
     int failureval;
@@ -979,8 +1031,14 @@ int message_filter(struct transport *tp, const char *username,
     failureval = _spamc_read_full_line (m, flags, ssl, sock, buf, &len, bufsiz);
     if (failureval != EX_OK) { goto failure; }
 
-    if(sscanf(buf, "SPAMD/%f %d %*s", &version, &response)!=2) {
+    if(sscanf(buf, "SPAMD/%s %d %*s", versbuf, &response)!=2) {
 	syslog(LOG_ERR, "spamd responded with bad string '%s'", buf);
+	failureval = EX_PROTOCOL; goto failure;
+    }
+
+    version = _locale_safe_string_to_float (versbuf, 20);
+    if (version < 1.0) {
+	syslog(LOG_ERR, "spamd responded with bad version string '%s'", versbuf);
 	failureval = EX_PROTOCOL; goto failure;
     }
 
