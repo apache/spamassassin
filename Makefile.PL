@@ -159,12 +159,16 @@ my %makefile = (
     'NAME'         => 'Mail::SpamAssassin',
     'VERSION_FROM' => 'lib/Mail/SpamAssassin.pm', # finds $VERSION
 
-    'EXE_FILES'	=> [
-        'sa-filter', 'sa-learn',
-        'spamassassin',
-        'spamc/spamc$(EXE_EXT)', # must next to last one
-        'spamd/spamd',	# must be the last one
-    ],
+    # This is not the standard EU::MM array, we use a hash instead (which 
+    # will be converted later on).  Use the source file name as the key and
+    # the executable as the value.
+    'EXE_FILES' => {
+      'sa-filter.raw'    => 'sa-filter',
+      'sa-learn.raw'     => 'sa-learn',
+      'spamassassin.pod' => 'spamassassin',
+      'spamc/spamc.c'    => 'spamc/spamc$(EXE_EXT)',
+      'spamd/spamd.raw'  => 'spamd/spamd',
+    },
 
     'MAN1PODS' => {
         'spamassassin.pod' => '$(INST_MAN1DIR)/spamassassin.$(MAN1EXT)',
@@ -232,8 +236,8 @@ my %makefile = (
 
     },
 
-    'AUTHOR'   => 'SpamAssassin Project <spamassassin-dev@incubator.apache.org>',
-    'ABSTRACT' => 'identify spam mail using text analysis',
+    'AUTHOR'   => 'The Apache SpamAssassin Project <dev@spamassassin.apache.org>',
+    'ABSTRACT' => 'SpamAssassin is an extensible email filter which is used to identify spam.',
 
     # We have only this Makefile.PL and this option keeps MakeMaker from
     # asking all questions twice after a 'make dist*'.
@@ -324,7 +328,7 @@ unless($Config{installman1dir}) {
 # Windows platforms need some adjustments
 if (RUNNING_ON_WINDOWS) {
   # Don't build spamd
-  pop    @{$makefile{EXE_FILES}};
+  delete $makefile{EXE_FILES}{'spamd/spamd.raw'};
   delete $makefile{MAN1PODS}{'spamd/spamd'};
   # building spamc is optional under Win32 because not everyone has compiler
   if (!defined $opt{'build_spamc'}) {
@@ -335,7 +339,7 @@ if (RUNNING_ON_WINDOWS) {
     $opt{'build_spamc'} = bool($opt{'build_spamc'});
   }
   if (!$opt{'build_spamc'}) {
-    pop    @{$makefile{EXE_FILES}};
+    delete $makefile{EXE_FILES}{'spamc/spamc.c'};
     delete $makefile{MAN1PODS}{'spamc/spamc.pod'};
   }
 }
@@ -441,7 +445,8 @@ if (Mail::SpamAssassin::Util::DependencyInfo::long_diagnostics() != 0) {
 
 #######################################################################
 
-# Now dump the Makefile
+# Now finish the meta hash and dump the Makefile
+$makefile{EXE_FILES} = [ values %{$makefile{EXE_FILES}} ];
 WriteMakefile(%makefile);
 print "Makefile written by ExtUtils::MakeMaker ${mm_version}\n";
 
