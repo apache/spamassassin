@@ -1384,7 +1384,7 @@ server load. It is not recommended.
 
     if (/^allow[-_]user[-_]rules\s+(\d+)$/) {
       $self->{allow_user_rules} = $1+0; 
-      dbg("Allowing user rules!"); next;
+      dbg( ($self->{allow_user_rules} ? "Allowing":"Not allowing") . " user rules!"); next;
     }
 
 # If you think, this is complex, you should have seen the four previous
