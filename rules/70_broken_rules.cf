@@ -452,22 +452,23 @@ describe NO_SPENDING            No Spending Limits
 #
 #
 #   1.297    1.989    0.878    0.69   -0.30  OUTLOOK_FW_MSG
-header OUTLOOK_FW_MSG           Subject =~ /\[?F[Ww]:\s/
+header __OUTLOOK_FW_MSG         Subject =~ /\[?F[Ww]:\s/
+meta OUTLOOK_FW_MSG             (__OUTLOOK_FW_MSG && __HAS_OUTLOOK_IN_MAILER)
+
 describe OUTLOOK_FW_MSG         Forwarded email (Outlook style)
 tflags OUTLOOK_FW_MSG		nice
 score   OUTLOOK_FW_MSG          -0.3
-test OUTLOOK_FW_MSG ok Subject: FW: White Stripes Tour!
-test OUTLOOK_FW_MSG ok Subject: Fw: Thank you yourself
-test OUTLOOK_FW_MSG fail Subject: Fwd: Dracula
-test OUTLOOK_FW_MSG fail Subject: fw:                                       . qBQyzOWqKYggZT0oDJzp41nd
-test OUTLOOK_FW_MSG fail Subject: FW:>Re: Spruce up your life!DGKJWI
-#
-#
-#   1.297    1.989    0.878    0.69   -0.30  OUTLOOK_FW_MSG
+
+test __OUTLOOK_FW_MSG ok Subject: FW: White Stripes Tour!
+test __OUTLOOK_FW_MSG ok Subject: Fw: Thank you yourself
+test __OUTLOOK_FW_MSG fail Subject: Fwd: Dracula
+test __OUTLOOK_FW_MSG fail Subject: fw:                                       . qBQyzOWqKYggZT0oDJzp41nd
+test __OUTLOOK_FW_MSG fail Subject: FW:>Re: Spruce up your life!DGKJWI
 #
 #
 #   0.008    0.003    0.011    0.23    0.50  OUTLOOK_UNDISC_RECIPS
-header OUTLOOK_UNDISC_RECIPS	To =~ /<Undisclosed-Recipient:;>/
+header __OUTLOOK_UNDISC_RECIPS	To =~ /<Undisclosed-Recipient:;>/
+meta OUTLOOK_UNDISC_RECIPS      (__OUTLOOK_UNDISC_RECIPS && __HAS_OUTLOOK_IN_MAILER)
 describe OUTLOOK_UNDISC_RECIPS	MS-Outlook-style To "<Undisclosed-Recipient:;>"
 score OUTLOOK_UNDISC_RECIPS          0.5
 #
