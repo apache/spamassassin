@@ -34,7 +34,7 @@ SpamAssasin; it is not guaranteed to work with other versions of SpamAssassin.
 
   replace_tag	A	[a@]
   replace_tag	G	[gk]
-  replace_tag	I	[il\|\!1y\?\xcc\xcd\xce\xcf\xec\xed\xee\xef]
+  replace_tag	I	[il|!1y\?\xcc\xcd\xce\xcf\xec\xed\xee\xef]
   replace_tag	R	[r3]
   replace_tag	V	(?:[vu]|\\\/)
   replace_tag	SP	[\s~_-]
