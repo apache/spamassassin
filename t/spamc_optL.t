@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use lib '.'; use lib 't';
-use SATest; sa_t_init("spamc_L");
+use SATest; sa_t_init("spamc_optL");
 use Test; plan tests => ($SKIP_SPAMC_TESTS ? 0 : 16);
 
 exit if $SKIP_SPAMC_TESTS;
