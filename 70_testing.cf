@@ -354,3 +354,13 @@ body T_HOST_DOM_RATIO_90_20	eval:check_host_domain_ratio('90','20')
 
 body T_MALE_ENHANCE	/male enhancement/i
 body T_IMPR_STAM	/\bimprov.{1,32}stamina/i
+
+body T_INT_PROFIT	eval:check_obfu_word('profit')
+body T_INT_MORTGAGE	eval:check_obfu_word('mortgage')
+body T_INT_ROLEX	eval:check_obfu_word('rolex')
+body T_INT_VIAGRA	eval:check_obfu_word('viagra')
+body T_INT_CIALIS	eval:check_obfu_word('cialis')
+body T_INT_CELEBREX	eval:check_obfu_word('celebrex')
+body T_INT_SEX		eval:check_obfu_word('sex')
+body T_INT_VICODIN	eval:check_obfu_word('vicodin')
+body T_INT_LEVITRA	eval:check_obfu_word('levitra')
