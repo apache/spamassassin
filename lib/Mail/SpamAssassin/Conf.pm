@@ -1222,8 +1222,10 @@ score Z_FUDGE_DUL_OSIRU_FH	1.5
 
 Define a test.  C<SYMBOLIC_TEST_NAME> is a symbolic test name, such as
 'FROM_ENDS_IN_NUMS'.  C<header> is the name of a mail header, such as
-'Subject', 'To', etc. 'ALL' can be used to mean the text of all the message's
-headers.
+'Subject', 'To', etc.
+
+'ALL' can be used to mean the text of all the message's headers.  'ToCc' can be
+used to mean the contents of both the 'To' and 'Cc' headers.
 
 C<op> is either C<=~> (contains regular expression) or C<!~> (does not contain
 regular expression), and C<pattern> is a valid Perl regular expression, with
