@@ -70,10 +70,7 @@ body T_OFFERS_ETC		/(?:(?:wish|want|unsub|reward|receive|recurring|remove|permis
 # separated into two rules since one seems to have a lot of
 # sourceforge list advertisement false positives
 # %%% FREE_CELL_PHONE
-body T_FREE_CELL_PHONE_1A	/\bfree\b.{0,24}(?:cell(?:ular)?|mobile).{0,4}phones?/i
-body T_FREE_CELL_PHONE_2A	/(?:cell(?:ular)?|mobile).{0,4}phones?.{0,24}\bfree\b/i
-body T_FREE_CELL_PHONE_1B	/\b(?-i:F)ree\b.{0,24}(?:cell(?:ular)?|mobile).{0,4}phones?/i
-body T_FREE_CELL_PHONE_2B	/(?:cell(?:ular)?|mobile).{0,4}phones?.{0,24}\b(?-i:F)ree\b/i
+body T_FREE_CELL_PHONE		/\b(?-i:F)ree\b.{0,24}(?:cell(?:ular)?|mobile).{0,4}phones?/i
 
 # dear user
 body T_DEAR_USER		/dear(?: \w+)? user/i
@@ -535,6 +532,14 @@ tflags T_USER_AGENT_XIMIAN   nice
 
 # Bug 1133
 # Dec  6 2002 jm: retry with support for more header formats
+# Dec  9 2002 quinlan: seems not so good
+#
+#  0.108   0.0460   0.1366    0.252   0.02    0.01  T_BAD_HELO2
+#  0.050   0.2241   0.0196    0.920   0.68    0.01  T_BAD_HELO2:daf
+#  0.008   0.0000   0.0141    0.000   0.00    0.01  T_BAD_HELO2:jm
+#  0.436   0.0407   0.6890    0.056   0.00    0.01  T_BAD_HELO2:quinlan
+#  0.020   0.0400   0.0115    0.777   0.45    0.01  T_BAD_HELO2:rODbegbie
+#
 header T_BAD_HELO2           eval:check_for_bad_helo2()
 
 ##############################################################################
@@ -560,6 +565,15 @@ meta T_IMAGE_ONLY_160	((__IMG_TAG ||(__IMG_URI&&HTML_MESSAGE))&& __TEXT_160)
 meta T_IMAGE_ONLY_192	((__IMG_TAG ||(__IMG_URI&&HTML_MESSAGE))&& __TEXT_192)
 meta T_IMAGE_ONLY_224	((__IMG_TAG ||(__IMG_URI&&HTML_MESSAGE))&& __TEXT_224)
 meta T_IMAGE_ONLY_256	((__IMG_TAG ||(__IMG_URI&&HTML_MESSAGE))&& __TEXT_256)
+
+meta T_IMAGE_ONLY2_32	(!EGP_HTML_BANNER && (__IMG_TAG || (__IMG_URI&&HTML_MESSAGE)) && __TEXT_32)
+meta T_IMAGE_ONLY2_64	(!EGP_HTML_BANNER && (__IMG_TAG || (__IMG_URI&&HTML_MESSAGE)) && __TEXT_64)
+meta T_IMAGE_ONLY2_96	(!EGP_HTML_BANNER && (__IMG_TAG || (__IMG_URI&&HTML_MESSAGE)) && __TEXT_96)
+meta T_IMAGE_ONLY2_128	(!EGP_HTML_BANNER && (__IMG_TAG || (__IMG_URI&&HTML_MESSAGE)) && __TEXT_128)
+meta T_IMAGE_ONLY2_160	(!EGP_HTML_BANNER && (__IMG_TAG || (__IMG_URI&&HTML_MESSAGE)) && __TEXT_160)
+meta T_IMAGE_ONLY2_192	(!EGP_HTML_BANNER && (__IMG_TAG || (__IMG_URI&&HTML_MESSAGE)) && __TEXT_192)
+meta T_IMAGE_ONLY2_224	(!EGP_HTML_BANNER && (__IMG_TAG || (__IMG_URI&&HTML_MESSAGE)) && __TEXT_224)
+meta T_IMAGE_ONLY2_256	(!EGP_HTML_BANNER && (__IMG_TAG || (__IMG_URI&&HTML_MESSAGE)) && __TEXT_256)
 
 ##############################################################################
 
