@@ -24,6 +24,54 @@ Mail::SpamAssassin::Plugin::Hashcash - perform hashcash verification tests
 # limitations under the License.
 # </@LICENSE>
 
+=over 4
+
+=item use_hashcash { 1 | 0 }   (default: 1)
+
+Whether to use hashcash, if it is available.
+
+=cut
+
+=item hashcash_accept add@ress.com ...
+
+Used to specify addresses that we accept HashCash tokens for.  You should set
+it to match all the addresses that you may receive mail at.
+
+Like whitelist and blacklist entries, the addresses are file-glob-style
+patterns, so C<friend@somewhere.com>, C<*@isp.com>, or C<*.domain.net> will all
+work.  Specifically, C<*> and C<?> are allowed, but all other metacharacters
+are not.  Regular expressions are not used for security reasons.
+
+The sequence C<%u> is replaced with the current user's username, which
+is useful for ISPs or multi-user domains.
+
+Multiple addresses per line, separated by spaces, is OK.  Multiple
+C<hashcash_accept> lines is also OK.
+
+=cut
+
+=item hashcash_doublespend_path /path/to/file   (default: ~/.spamassassin/hashcash_seen)
+
+Path for HashCash double-spend database.  HashCash tokens are only usable once,
+so their use is tracked in this database to avoid providing a loophole.
+
+By default, each user has their own, in their C<~/.spamassassin> directory with
+mode 0700/0600.  Note that once a token is 'spent' it is written to this file,
+and double-spending of a hashcash token makes it invalid, so this is not
+suitable for sharing between multiple users.
+
+=cut
+
+=item hashcash_doublespend_file_mode            (default: 0700)
+
+The file mode bits used for the HashCash double-spend database file.
+
+Make sure you specify this using the 'x' mode bits set, as it may also be used
+to create directories.  However, if a file is created, the resulting file will
+not have any execute bits set (the umask is set to 111).
+
+=cut
+
 package Mail::SpamAssassin::Plugin::Hashcash;
 
 use Mail::SpamAssassin::Plugin;
@@ -50,139 +98,46 @@ sub new {
   my $self = $class->SUPER::new($mailsaobject);
   bless ($self, $class);
 
-  my $conf = $mailsaobject->{conf};
-  $conf->{use_hashcash} = 1;
-  $conf->{hashcash_accept} = { };
-  $conf->{hashcash_doublespend_path} = '__userstate__/hashcash_seen';
-  $conf->{hashcash_doublespend_file_mode} = "0700";
-
   $self->register_eval_rule ("check_hashcash_value");
   $self->register_eval_rule ("check_hashcash_double_spend");
+
+  $self->set_config($mailsaobject->{conf});
 
   return $self;
 }
 
 ###########################################################################
 
-sub parse_config {
-  my ($self, $opts) = @_;
-  my $conf = $opts->{conf};
-  my $key = $opts->{key};
-  my $value = $opts->{value};
-  my $line = $opts->{line};
+sub set_config {
+  my($self, $conf) = @_;
+  my @cmds = ();
 
-=over 4
+  push(@cmds, {
+    setting => 'use_hashcash',
+    default => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+  });
 
-=item use_hashcash { 1 | 0 }   (default: 1)
+  push(@cmds, {
+    setting => 'hashcash_doublespend_path',
+    default => '__userstate__/hashcash_seen',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
+  });
 
-Whether to use hashcash, if it is available.
+  push(@cmds, {
+    setting => 'hashcash_doublespend_file_mode',
+    default => "0700",
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+  });
 
-=cut
+  push(@cmds, {
+    setting => 'hashcash_accept',
+    default => {},
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST,
+  });
 
-  if ( $key eq 'use_hashcash' ) {
-    $self->handle_parser_error($opts,
-      Mail::SpamAssassin::Conf::Parser::set_numeric_value($conf, $key, $value, $line)
-    );
-    $self->inhibit_further_callbacks();
-    return 1;
-  }
-
-=item hashcash_accept add@ress.com ...
-
-Used to specify addresses that we accept HashCash tokens for.  You should set
-it to match all the addresses that you may receive mail at.
-
-Like whitelist and blacklist entries, the addresses are file-glob-style
-patterns, so C<friend@somewhere.com>, C<*@isp.com>, or C<*.domain.net> will all
-work.  Specifically, C<*> and C<?> are allowed, but all other metacharacters
-are not.  Regular expressions are not used for security reasons.
-
-The sequence C<%u> is replaced with the current user's username, which
-is useful for ISPs or multi-user domains.
-
-Multiple addresses per line, separated by spaces, is OK.  Multiple
-C<hashcash_accept> lines is also OK.
-
-=cut
-
-  if ( $key eq 'hashcash_accept' ) {
-    $conf->add_to_addrlist ('hashcash_accept', split (/\s+/, $value));
-    $self->inhibit_further_callbacks();
-    return 1;
-  }
-
-=item hashcash_doublespend_path /path/to/file   (default: ~/.spamassassin/hashcash_seen)
-
-Path for HashCash double-spend database.  HashCash tokens are only usable once,
-so their use is tracked in this database to avoid providing a loophole.
-
-By default, each user has their own, in their C<~/.spamassassin> directory with
-mode 0700/0600.  Note that once a token is 'spent' it is written to this file,
-and double-spending of a hashcash token makes it invalid, so this is not
-suitable for sharing between multiple users.
-
-=cut
-
-  if ( $key eq 'hashcash_doublespend_path' ) {
-    $self->handle_parser_error($opts,
-      Mail::SpamAssassin::Conf::Parser::set_string_value($conf, $key, $value, $line)
-    );
-    $self->inhibit_further_callbacks();
-    return 1;
-  }
-
-=item hashcash_doublespend_file_mode            (default: 0700)
-
-The file mode bits used for the HashCash double-spend database file.
-
-Make sure you specify this using the 'x' mode bits set, as it may also be used
-to create directories.  However, if a file is created, the resulting file will
-not have any execute bits set (the umask is set to 111).
-
-=cut
-
-  if ( $key eq 'hashcash_doublespend_file_mode' ) {
-    $self->handle_parser_error($opts,
-      Mail::SpamAssassin::Conf::Parser::set_numeric_value($conf, $key, $value, $line)
-    );
-    $self->inhibit_further_callbacks();
-    return 1;
-  }
-
-  return 0;
+  $conf->{parser}->register_commands(\@cmds);
 }
-
-sub handle_parser_error {
-  my($self, $opts, $ret_value) = @_;
-
-  my $conf = $opts->{conf};
-  my $key = $opts->{key};
-  my $value = $opts->{value};
-  my $line = $opts->{line};
-
-  my $msg = '';
-
-  if ($ret_value && $ret_value eq $Mail::SpamAssassin::Conf::INVALID_VALUE) {
-    $msg = "config: SpamAssassin failed to parse line, ".
-           "\"$value\" is not valid for \"$key\", ".
-           "skipping: $line";
-  }
-  elsif ($ret_value && $ret_value eq $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE) {
-    $msg = "config: SpamAssassin failed to parse line, ".
-           "no value provided for \"$key\", ".
-           "skipping: $line";
-  }
-
-  return unless $msg;
-
-  if ($conf->{lint_rules}) {
-    warn $msg."\n";
-  } else {
-    dbg($msg);
-  } 
-  $conf->{errors}++;
-  return;
-} 
 
 ###########################################################################
 
