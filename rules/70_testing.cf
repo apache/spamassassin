@@ -375,3 +375,13 @@ body T_MPART_ALT_DIFF10_20  eval:multipart_alternative_difference_count('10','20
 
 # bug 3186
 uri T_BIZ_TLD		/^(?:https?:\/\/|mailto:)[^\/]+\.biz(?![-a-z0-9])/i
+
+# catch mails with redirector looking pieces associated with it.
+body T_REDIRS_2		eval:redirect_num('2')
+body T_REDIRS_3		eval:redirect_num('3')
+body T_REDIRS_4		eval:redirect_num('4')
+body T_REDIRS_5		eval:redirect_num('5')
+body T_REDIRS_8		eval:redirect_num('8')
+body T_REDIRS_10	eval:redirect_num('10')
+body T_REDIRS_15	eval:redirect_num('15')
+body T_REDIRS_20	eval:redirect_num('20')
