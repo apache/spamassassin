@@ -239,9 +239,9 @@ sub pyzor_report {
 
   if ($err) {
     alarm $oldalarm;
-    if ($err =~ /^__alarm__$/) {
+    if ($err eq '__alarm__') {
       dbg("reporter: pyzor report timed out after $timeout seconds");
-    } elsif ($err /^__brokenpipe__$/) {
+    } elsif ($err eq '__brokenpipe__') {
       dbg("reporter: pyzor report failed: broken pipe");
     } else {
       warn("reporter: pyzor report failed: $err\n");
