@@ -49,7 +49,7 @@ sha1sum:
 
 The release files also have a .asc accompanying them.  The file serves
 as an external GPG signature for the given release file.  The signing
-key is available via the wwwkeys.pgp.net keyserver, as well as
+key is available via the wwwkeys.pgp.net key server, as well as
 http://www.spamassassin.org/released/GPG-SIGNING-KEY
 
 The key information is:
@@ -96,7 +96,7 @@ Important installation notes
 
   The "sa-learn --rebuild" command has been deprecated; please use
   "sa-learn --sync" instead.  The --rebuild option will remain temporarily
-  for backwards compatability.
+  for backwards compatibility.
 
 - "spamd" now has a default max-children setting of 5; no more than 5
   child scanner processes will be run in parallel.  Previously, there was
@@ -110,7 +110,7 @@ Important installation notes
   file. This is strongly recommended if you're not using NFS, as it is
   much faster than the NFS-safe locker.
 
-- Please note that the use of the following commandline parameters for
+- Please note that the use of the following command line parameters for
   spamassassin and spamd have been deprecated and are now removed.  If you
   currently use these flags, please remove them:
 
@@ -143,7 +143,7 @@ New rules:
   - SPF testing, if the Mail::SPF::Query module is installed.
 
   - added new rules and code to combat Bayes poisoning text and random
-    hashbusters; Habeas rules now verify against the Habeas user
+    hash-busters; Habeas rules now verify against the Habeas user
     list, to combat forged marks used in spam.
 
   - URIDNSBL rules.  These do DNSBL lookups on URLs, allowing URLs found
