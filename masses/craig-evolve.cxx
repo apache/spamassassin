@@ -6,16 +6,12 @@
  *  cleaner.
  */
 
-#ifdef __cplusplus
 extern "C" {
-#endif
-
 #include <pgapack.h>
-
-#ifdef __cplusplus
 }
-#endif
 
+#include <iostream>
+#include <unistd.h>
 #include "tmp/scores.h"
 #include "tmp/tests.h"
 
@@ -37,10 +33,24 @@ const double SCORE_CAP = 3.0;
 
 const double crossover_rate = 0.65;
 
-const int pop_size = 50;
-const int replace_num = 20;
+int pop_size = 50;
+int replace_num = 20;
 
 const int maxiter = 50000;
+
+int justCount = 0;
+
+void usage()
+{
+  cerr << "usage: evolve [-s size] [args]\n"
+    << "\n"
+    << "  -s size = population size (50 recommended)\n"
+    << "  -b nybias = bias towards false negatives (10.0 default)\n"
+    << "\n"
+    << "  -C = just count hits and exit, no evolution\n"
+    <<endl;
+  exit (30);
+}
 
 void init_data()
 {
@@ -74,7 +84,28 @@ void init_data()
 }
 
 int main(int argc, char **argv) {
-     PGAContext *ctx;
+    PGAContext *ctx;
+    int arg;
+
+    while ((arg = getopt (argc, argv, "b:s:C")) != -1) {
+      switch (arg) {
+        case 'b':
+          nybias = atof(optarg);
+          break;
+
+        case 's':
+          pop_size = atoi(optarg);
+          break;
+
+        case 'C':
+          justCount = 1;
+          break;
+
+        case '?':
+          usage();
+          break;
+      }
+    }
 
 #ifdef USE_MPI
      MPI_Init(&argc, &argv);
@@ -87,6 +118,11 @@ int main(int argc, char **argv) {
      PGASetUserFunction(ctx, PGA_USERFUNCTION_ENDOFGEN, (void *)showSummary);
 
      PGASetRealInitRange(ctx, range_lo, range_hi);
+
+     if (justCount) {
+       pop_size = 10;
+       replace_num = 1;
+     }
 
      PGASetPopSize(ctx, pop_size);
 
@@ -114,7 +150,7 @@ int main(int argc, char **argv) {
      {
        for(int p=0; p<pop_size; p++)
        {
-	 if(is_mutatable[i])
+	 if (!justCount && is_mutatable[i])
 	 {
             if(bestscores[i] > SCORE_CAP) bestscores[i] = SCORE_CAP;
 	    else if(bestscores[i] < -SCORE_CAP) bestscores[i] = -SCORE_CAP;
@@ -122,7 +158,6 @@ int main(int argc, char **argv) {
 	 PGASetRealAllele(ctx, p, PGA_NEWPOP, i, bestscores[i]);
        }
      }
-
      PGARun(ctx, evaluate);
 
      PGADestroy(ctx);
@@ -196,14 +231,34 @@ double evaluate(PGAContext *ctx, int p, int pop)
     tot_score += score_msg(ctx,p,pop,i);
   }
 
-  double logyn,logny;
-  if(nyscore>3) logny = log(nyscore); else logny = 0;
-  if(ynscore>3) logyn = log(ynscore); else logyn = 0;
+  double ynweight,nyweight;
+
+  // just count how far they were from the threshold, in each case
+  ynweight = ynscore - (ga_yn * threshold);
+  nyweight = nyscore - (ga_ny * threshold);
+
+  if (justCount) {
+    dump(stdout);
+    exit (0);
+  }
   
+  return  ynweight +            /* all FNs' points from threshold */
+	  nyweight*nybias;      /* all FPs' points from threshold */
+
+#if 0
+  // Craig's: use log(score).
+  //
+  // off for now, let's see how the more aggressive FP-reducing algo
+  // above works
+  //
+  if(nyscore>3) nyweight = log(nyscore); else nyweight = 0;
+  if(ynscore>3) ynweight = log(ynscore); else ynweight = 0;
+
   return  /*min false-neg*/(double)ga_yn +
 	  /*weighted min false-pos*/((double)ga_ny)*nybias +
-	  /*min score(false-pos)*/logny*nybias +
-	  /*max score(false-neg)*/-logyn;
+	  /*min score(false-pos)*/nyweight*nybias +
+	  /*max score(false-neg)*/-ynweight;
+#endif
 }
 
 /*
