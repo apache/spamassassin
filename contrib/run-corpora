@@ -61,7 +61,7 @@ while ! wget -q -nd -m http://rsync.spamassassin.org/$VERS-versions.txt ; do
   fi
 done
 
-CREV=`$SVNVERS`
+CREV=`$SVNVERS .`
 NREV=`tail -1 nightly-versions.txt | awk '{print $2}'`
 
 if [ $CREV -ge $NREV ]; then
