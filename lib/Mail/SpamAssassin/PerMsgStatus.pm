@@ -540,13 +540,13 @@ sub get_raw_body_text_array {
   for ($line = 0; defined($_ = $bodyref->[$line]); $line++)
   {
     # we run into a perl bug if the lines are astronomically long (probably due
-    # to lots of regexp backtracking); so cut short any individual line over 2048
+    # to lots of regexp backtracking); so cut short any individual line over 4096
     # bytes in length.  This can wreck HTML totally -- but IMHO the only reason a
-    # luser would use 2048-byte lines is to crash filters, anyway.
+    # luser would use 4096-byte lines is to crash filters, anyway.
 
-    while (length ($_) > 1024) {
-      push (@{$self->{body_text_array}}, substr($_, 0, 1024));
-      substr($_, 0, 1024) = '';
+    while (length ($_) > 4096) {
+      push (@{$self->{body_text_array}}, substr($_, 0, 4096));
+      substr($_, 0, 4096) = '';
     }
 
     push (@{$self->{body_text_array}}, $_);
