@@ -1,5 +1,5 @@
 # SpamAssassin rules file: tests.
-# $Id: 20_body_tests.cf,v 1.237.2.4 2002/08/28 11:38:07 jmason Exp $
+# $Id: 20_body_tests.cf,v 1.237.2.5 2002/08/28 14:02:10 jmason Exp $
 # 
 # note: body tests are run with long lines, so be sure to limit the
 # size of searches; use ".{0,30}" instead of ".*" to avoid huge
@@ -562,9 +562,11 @@ describe INTERNET_TERROR_RANT   Cyber FirePower! rant about losing dropboxes
 
 body CHARSET_FARAWAY		eval:check_for_faraway_charset()
 describe CHARSET_FARAWAY	Character set indicates a foreign language
+tflags CHARSET_FARAWAY          userconf
 
 full CHARSET_FARAWAY_BODY	eval:check_for_faraway_charset_in_body()
 describe CHARSET_FARAWAY_BODY	Character set indicates foreign language body
+tflags CHARSET_FARAWAY_BODY     userconf
 
 body UNDESIRED_LANGUAGE_BODY		eval:check_language()
 describe UNDESIRED_LANGUAGE_BODY	Written in an undesired language

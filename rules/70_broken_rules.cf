@@ -61,18 +61,17 @@ score BIG_BUCKS			     1.0
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  BUGGY_CGI_ES
-body BUGGY_CGI_ES		/Aqui esta el resultado de su formulario/i
-describe BUGGY_CGI_ES		Broken Spanish CGI script message
-lang fr describe BUGGY_CGI_ES   Réponse a un formulaire jamais rempli (en espagnol)
-score BUGGY_CGI_ES                   1.0
+#body BUGGY_CGI_ES		/Aqui esta el resultado de su formulario/i
+#describe BUGGY_CGI_ES		Broken Spanish CGI script message
+#lang fr describe BUGGY_CGI_ES   Réponse a un formulaire jamais rempli (en espagnol)
+#score BUGGY_CGI_ES                   1.0
 #
 #
-#   0.000    0.000    0.000    0.00    1.00  BUGGY_CGI_PT_2
 #   0.000    0.000    0.000    0.00    4.00  BUGGY_CGI_PT
-body BUGGY_CGI_PT		/Abaixo o resultado do preenchimento do Formulario/
-describe BUGGY_CGI_PT		Broken Portuguese CGI script message
-lang fr describe BUGGY_CGI_PT   Réponse a un formulaire jamais rempli (en portugais)
-score BUGGY_CGI_PT                   4.0
+#body BUGGY_CGI_PT		/Abaixo o resultado do preenchimento do Formulario/
+#describe BUGGY_CGI_PT		Broken Portuguese CGI script message
+#lang fr describe BUGGY_CGI_PT   Réponse a un formulaire jamais rempli (en portugais)
+#score BUGGY_CGI_PT                   4.0
 #
 #
 #
@@ -103,12 +102,12 @@ describe CLICK_TO_REMOVE_3	Click-to-remove with PHP/ASP action found
 #
 #
 #   0.000    0.000    0.000    0.00    2.67  CORRUPT_MSGID
-header CORRUPT_MSGID		Message-Id =~ /\@Received: /
-describe CORRUPT_MSGID		'Message-Id' contains bits of Received header
-lang de describe CORRUPT_MSGID            'Message-Id' enthaelt Teile des Received Headers
-lang es describe CORRUPT_MSGID		'Message-Id' contiene pedazos de la cabecera Received
-lang fr describe CORRUPT_MSGID   L'entête Message-Id: contient des morceaux de l'entête Received:
-score CORRUPT_MSGID                  2.665
+#header CORRUPT_MSGID		Message-Id =~ /\@Received: /
+#describe CORRUPT_MSGID		'Message-Id' contains bits of Received header
+#lang de describe CORRUPT_MSGID            'Message-Id' enthaelt Teile des Received Headers
+#lang es describe CORRUPT_MSGID		'Message-Id' contiene pedazos de la cabecera Received
+#lang fr describe CORRUPT_MSGID   L'entête Message-Id: contient des morceaux de l'entête Received:
+#score CORRUPT_MSGID                  2.665
 #
 #
 #   0.035    0.048    0.027    0.64    1.56  DONT_DELETE
@@ -699,10 +698,10 @@ test SPAM_REDIRECTOR ok http://wwp.icq.com/?http://anothersite.com/
 #
 #
 #   0.000    0.000    0.000    0.00    4.00  STAINLESS_STEEL
-uri STAINLESS_STEEL             /www.BuyStainlessOnline.com/i
-describe STAINLESS_STEEL        Stainless Steel Network Spam
-lang fr describe STAINLESS_STEEL        Contient une référence à www.BuyStainlessOnline.com, fréquement trouvée dans du spam
-score STAINLESS_STEEL                4.0
+#uri STAINLESS_STEEL             /www.BuyStainlessOnline.com/i
+#describe STAINLESS_STEEL        Stainless Steel Network Spam
+#lang fr describe STAINLESS_STEEL        Contient une référence à www.BuyStainlessOnline.com, fréquement trouvée dans du spam
+#score STAINLESS_STEEL                4.0
 #
 #
 #   0.307    0.301    0.311    0.49   -1.00  SUBJECT_HAS_DATE
@@ -863,8 +862,8 @@ describe WEB4PORNO_URL          Frequent SPAM content
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  WWW_DIRECTFORCEMARKETING_COM
-uri WWW_DIRECTFORCEMARKETING_COM    /directforcemarketing\.com/i   
-describe WWW_DIRECTFORCEMARKETING_COM   Frequent SPAM content   
+#uri WWW_DIRECTFORCEMARKETING_COM    /directforcemarketing\.com/i   
+#describe WWW_DIRECTFORCEMARKETING_COM   Frequent SPAM content   
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  WWW_NETSITESFORFREE_NET
