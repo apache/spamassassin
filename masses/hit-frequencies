@@ -24,7 +24,7 @@ my %freq_spam = ();
 my %freq_nonspam = ();
 my $num_spam = 0;
 my $num_nonspam = 0;
-my %sort_rating = ();
+my %ranking = ();
 
 readlogs();
 readscores();
@@ -82,10 +82,18 @@ foreach my $test (keys %freq_spam, keys %freq_nonspam) {
   }
 
   $soratio{$test} = soratio ($fsadj, $fnadj);
-  $sort_rating{$test} = (($soratio{$test} * 100) ** 8) * $fa;
+
+  my $soratio = $soratio{$test};
+  my $matched = $fs;
+  if ($tflags{$test} =~ /nice/) {
+    $soratio = 1.0 - $soratio;
+    $matched = $fn;
+  }
+
+  $ranking{$test} = (($soratio * 100) ** 8) * $matched;
 }
 
-foreach $test (sort { $sort_rating{$b} <=> $sort_rating{$a} } @tests) {
+foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
   my $fs = $freq_spam{$test}; $fs ||= 0;
   my $fn = $freq_nonspam{$test}; $fn ||= 0;
   my $fa = $fs+$fn;
