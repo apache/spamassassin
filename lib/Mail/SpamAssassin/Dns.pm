@@ -363,7 +363,6 @@ sub razor2_lookup {
 
   $self->enter_helper_run_mode();
 
-  {
     eval {
       local ($^W) = 0;    # argh, warnings in Razor
 
@@ -424,7 +423,6 @@ sub razor2_lookup {
         warn("razor2 check skipped: $! $@");
         }
       }
-  }
 
   $self->leave_helper_run_mode();
 
@@ -826,8 +824,16 @@ sub enter_helper_run_mode {
   dbg ("entering helper-app run mode");
   $self->{old_slash} = $/;              # Razor pollutes this
   $self->{old_env_home} = $ENV{'HOME'}; # can be 'undef', e.g. spamd has no HOME
-  if (exists $self->{main}->{home_dir_for_helpers}) {
+
+  if (defined $self->{main}->{home_dir_for_helpers}
+             && $self->{main}->{home_dir_for_helpers})
+  {
     $ENV{'HOME'} = $self->{main}->{home_dir_for_helpers};
+  }
+  else {
+    # use spamd -u user's home dir
+    my $hd = (getpwuid($>))[7];
+    $ENV{'HOME'} = $hd if defined $hd;
   }
 }
 
