@@ -345,3 +345,7 @@ describe T_MSN_REDIR	Has MSN Redirect URI
 header T_RE_UC_3WORDS	Subject =~ /^[rR][eE]: [A-Z]{3,12},(?:\s[A-Z][a-z]+){3}$/
 describe T_RE_UC_3WORDS	Has Subject in form "Re: UPPERCASE, word word word"
 
+# Spammers are now attempting to use tiny font sizes to hide hashbusters
+body T_HTML_FONT_TINY		eval:html_test('tiny_font')
+describe T_HTML_FONT_TINY	HTML has a tiny font
+
