@@ -137,6 +137,15 @@ use constant CHEW_BODY_MAILADDRS => 1;
 use constant HDRS_TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
 use constant BODY_TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
 
+# maximum byte length of a header key
+use constant MAX_HEADER_KEY_LENGTH => 256;
+
+# maximum byte length of a header value including continued lines
+use constant MAX_HEADER_VALUE_LENGTH => 8192;
+
+# maximum byte length of entire header
+use constant MAX_HEADER_LENGTH => 65536;
+
 # We store header-mined tokens in the db with a "HHeaderName:val" format.
 # some headers may contain lots of gibberish tokens, so allow a little basic
 # compression by mapping the header name at least here.  these are the headers
@@ -432,7 +441,28 @@ sub tokenize_line {
 sub tokenize_headers {
   my ($self, $msg) = @_;
 
-  my $hdrs = $msg->get_all_headers();
+  my @hdrs = ();
+  my $length = 0;
+
+  my $hdr;
+  foreach $hdr ($msg->get_all_headers()) {
+    last if ($length + length($hdr) > MAX_HEADER_LENGTH);
+
+    my($key, $value) = split(/:/, $hdr, 2);
+
+    # limit the length of the pairs we store
+    if (length($key) > MAX_HEADER_KEY_LENGTH) {
+      $key = substr($key, 0, MAX_HEADER_KEY_LENGTH);
+    }
+    if (length($value) > MAX_HEADER_VALUE_LENGTH) {
+      $value = substr($value, 0, MAX_HEADER_VALUE_LENGTH);
+    }
+    push(@hdrs, "$key:$value");
+    $length += length "$key:$value";
+  }
+
+  my $hdrs = join('', @hdrs);
+  undef @hdrs;
 
   # jm: do not learn additional metadata (X-Languages, X-Relays-Untrusted)
   # until we can generate that while running sa-learn. TODO

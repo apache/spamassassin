@@ -48,6 +48,16 @@ use constant HAS_MIME_BASE64 =>		eval { require MIME::Base64; };
 
 use constant MAX_BODY_LINE_LENGTH =>	2048;
 
+# maximum byte length of a header key
+use constant MAX_HEADER_KEY_LENGTH => 256;
+
+# maximum byte length of a header value including continued lines
+use constant MAX_HEADER_VALUE_LENGTH => 8192;
+
+# maximum byte length of entire header
+use constant MAX_HEADER_LENGTH => 65536;
+
+
 use vars qw{
   @ISA $base64alphabet
 };
@@ -1314,7 +1324,26 @@ sub get {
     my $getraw = ($hdrname eq 'ALL' || $hdrname =~ s/:raw$//);
 
     if ($hdrname eq 'ALL') {
-      $_ = $self->{msg}->get_all_headers();
+      my @hdrs = ();
+      my $length = 0;
+
+      my $hdr;
+      foreach $hdr ($self->{msg}->get_all_headers()) {
+	last if ($length + length($hdr) > MAX_HEADER_LENGTH);
+
+	my($key, $value) = split(/:/, $hdr, 2);
+        # limit the length of the pairs we store
+        if (length($key) > MAX_HEADER_KEY_LENGTH) {
+          $key = substr($key, 0, MAX_HEADER_KEY_LENGTH);
+        }
+        if (length($value) > MAX_HEADER_VALUE_LENGTH) {
+          $value = substr($value, 0, MAX_HEADER_VALUE_LENGTH);
+        }
+	push(@hdrs, "$key:$value");
+	$length += length "$key:$value";
+      }
+
+      $_ = join('', @hdrs);
     }
     # ToCc: the combined recipients list
     elsif ($hdrname eq 'ToCc') {
@@ -1324,7 +1353,14 @@ sub get {
 	$_ .= ", " if /\S/;
       }
       $_ .= join ("\n", $self->{msg}->get_header ('Cc'));
-      undef $_ if $_ eq '';
+      if ($_ eq '') {
+        undef $_;
+      }
+      else {
+        if (length($_) > MAX_HEADER_VALUE_LENGTH) {
+          $_ = substr($_, 0, MAX_HEADER_VALUE_LENGTH);
+        }
+      }
     }
     # MESSAGEID: handle lists which move the real message-id to another
     # header for resending.
@@ -1334,12 +1370,18 @@ sub get {
 		$self->{msg}->get_header ('Resent-Message-Id'),
 		$self->{msg}->get_header ('X-Original-Message-ID'), # bug 2122
 		$self->{msg}->get_header ('Message-Id'));
+      if (length($_) > MAX_HEADER_VALUE_LENGTH) {
+        $_ = substr($_, 0, MAX_HEADER_VALUE_LENGTH);
+      }
     }
     # a conventional header
     else {
       my @hdrs = $self->{msg}->get_header ($hdrname);
       if ($#hdrs >= 0) {
 	$_ = join ("\n", @hdrs);
+        if (length($_) > MAX_HEADER_VALUE_LENGTH) {
+          $_ = substr($_, 0, MAX_HEADER_VALUE_LENGTH);
+        }
       }
       else {
 	$_ = undef;
