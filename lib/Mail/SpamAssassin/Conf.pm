@@ -24,8 +24,11 @@ SpamAssassin is configured using some traditional UNIX-style configuration
 files, loaded from the /usr/share/spamassassin and /etc/mail/spamassassin
 directories.
 
-The C<#> character starts a comment, which continues until end of line,
-and whitespace in the files is not significant.
+The C<#> character starts a comment, which continues until end of line.
+
+Whitespace in the files is not significant, but please note that starting a
+line with whitespace is deprecated, as we reserve its use for multi-line rule
+definitions, at some point in the future.
 
 Paths can use C<~> to refer to the user's home directory.
 
@@ -257,7 +260,7 @@ number which you increase with each change.
 
 eg.
 
-  version_tag perkel2    # version=2.40-perkel2
+  version_tag myrules1    # version=2.41-myrules1
 
 =cut
 
