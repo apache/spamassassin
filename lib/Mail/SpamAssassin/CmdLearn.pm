@@ -175,6 +175,11 @@ sub cmdline_run {
     return (!$ret);
   }
 
+  if ( !$spamtest->{conf}->{use_bayes} ) {
+    warn "ERROR: configuration specifies 'use_bayes 0', sa-learn disabled\n";
+    return 1;
+  }
+
   $spamtest->init_learner({
       force_expire	=> $opt{'force-expire'},
       learn_to_journal	=> $opt{'norebuild'},
