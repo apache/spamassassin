@@ -2041,7 +2041,7 @@ sub subject_is_all_caps {
    # If so, punt on this test to avoid FPs.  We just list the known charsets
    # this test will FP on, here.
    my $subjraw = $self->get('Subject:raw');
-   if ($subjraw =~ /^=\?${CHARSETS_LIKELY_TO_FP_AS_CAPS}\?/i) {
+   if ($subjraw =~ /=\?${CHARSETS_LIKELY_TO_FP_AS_CAPS}\?/i) {
      return 0;
    }
 
