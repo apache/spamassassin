@@ -50,6 +50,7 @@ sub safe_lock {
       close(LOCKFILE);
       return 1;
     }
+    dbg ("lock: $$ sysopen failed: $!");
     my @stat = stat($lock_file);
     # check age of lockfile ctime
     my $age = ($#stat < 11 ? undef : $stat[10]);

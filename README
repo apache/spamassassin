@@ -24,10 +24,21 @@ the 2.6x series (a warning will be displayed), but they will be removed
 in the next major release.  If you currently use these flags, please
 remove them.  The flags are: --add-from, --pipe, -F, -P
 
-Finally, SpamAssassin now runs in "taint mode" by default for improved
+SpamAssassin now runs in "taint mode" by default for improved
 security.  If you have Razor2 turned on and are using Vipul's Razor 2.22
-or higher (until at least 2.36), you will need to apply a small patch.
+or higher (through at least 2.36), you will need to apply a small patch.
 The instructions are located in the Razor2.patch file.
+
+The 2.6x series has a new Bayes backend and database format (since 2.5x).
+Your old database(s) will automatically be upgraded the first time
+SpamAssassin tries to write to the DB, and any journal, if it exists,
+will be wiped out without being synced.  Please see the INSTALL document
+for more details.
+
+Finally, the "check_bayes_db" script has been deprecated and will no
+longer function properly with 2.6x series databases.  The functionality
+from that script was added to sa-learn via the "--dump" parameter.
+Please see the sa-learn man/pod documentation for more info.
 
 
 Welcome to SpamAssassin!

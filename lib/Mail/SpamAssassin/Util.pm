@@ -82,6 +82,7 @@ use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
 
     # Go through and clean the PATH out
     my @path = ();
+    my @stat;
     foreach my $dir (File::Spec->path()) {
       next unless $dir;
 
@@ -92,12 +93,17 @@ use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
 	dbg("PATH included '$dir', which is not absolute, dropping.");
 	next;
       }
-      elsif (!stat($dir)) {
+      elsif (!(@stat=stat($dir))) {
 	dbg("PATH included '$dir', which doesn't exist, dropping.");
 	next;
       }
       elsif (!-d _) {
 	dbg("PATH included '$dir', which isn't a directory, dropping.");
+	next;
+      }
+      elsif (($stat[2]&2) == 1) {
+        # We could be more paranoid and check all of the parent directories as well
+	dbg("PATH included '$dir', which is world writable, dropping.");
 	next;
       }
 

@@ -79,6 +79,8 @@ sub check_address {
 
   $self->{entry} = undef;
 
+  # note: $origip could be undef here, if no public IP was found in the
+  # message headers.
   my $fulladdr = $self->pack_addr ($addr, $origip);
   $self->{entry} = $self->{checker}->get_addr_entry ($fulladdr);
 
@@ -86,7 +88,7 @@ sub check_address {
     # no entry found
     if (defined $origip) {
       # try upgrading a default entry (probably from "add-addr-to-foo")
-      my $noipaddr = $self->pack_addr ($addr, undef);
+      my $noipaddr = $self->pack_addr ($addr, 'cmd');
       my $noipent = $self->{checker}->get_addr_entry ($noipaddr);
 
       if (defined $noipent->{count} && $noipent->{count} > 0) {
@@ -171,7 +173,7 @@ sub modify_address {
     return undef;		# no factory defined; we can't check
   }
 
-  my $fulladdr = $self->pack_addr ($addr, undef);
+  my $fulladdr = $self->pack_addr ($addr, 'cmd');
   my $entry = $self->{checker}->get_addr_entry ($fulladdr);
 
   # remove any old entries (will remove per-ip entries as well)
@@ -200,6 +202,16 @@ sub finish {
 
 ###########################################################################
 
+# Entries in the db can have:
+#
+#   "from@addr|ip=nnn.nnn"	= from <from@addr>, IP addr nnn.nnn.*.*
+#   "from@addr|ip=none"		= from <from@addr>, via private networks
+#   "from@addr|ip=cmd"		= from <from@addr>, "commandline"
+#
+# the "commandline" variant is used for command-line manipulation of the
+# AWL; it'll be upgraded into an "ip=nnn.nnn" entry first time it is
+# used.
+
 sub pack_addr {
   my ($self, $addr, $origip) = @_;
 
@@ -210,11 +222,13 @@ sub pack_addr {
     # could not find an IP address to use, could be localhost mail or from
     # the user running "add-addr-to-*".
     $origip = 'none';
+  } elsif ($origip eq 'cmd') {
+    # pass that through
   } else {
     $origip =~ s/\.\d{1,3}\.\d{1,3}$//gs;
   }
 
-  $origip =~ s/[^0-9\.noe]/_/gs;	# paranoia
+  $origip =~ s/[^0-9\.noecmd]/_/gs;	# paranoia
   $addr."|ip=".$origip;
 }
 

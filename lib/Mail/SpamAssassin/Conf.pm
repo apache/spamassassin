@@ -56,7 +56,8 @@ optional, and the default is shown below.
  _BAYES_           bayes score
  _AWL_             AWL modifier
  _DATE_            rfc-2822 date of scan
- _STARS(*)_        one * (use any character) for each score point (50 at most)
+ _STARS(*)_        one * (use any character) for each score point (note: this
+                   is limited to 50 'stars' to stay on the right side of the RFCs)
  _RELAYSTRUSTED_   relays used and deemed to be trusted
  _RELAYSUNTRUSTED_ relays used that can not be trusted
  _AUTOLEARN_       autolearn status ("ham", "no", "spam")
@@ -700,8 +701,9 @@ long lines).
 =item add_header { spam | ham | all } header_name string
 
 Customized headers can be added to the specified type of messages (spam,
-ham, or "all" to add to either).  All headers begin with C<X-Spam-> (so
-a C<header_name> Foo will generate a header called X-Spam-Foo).
+ham, or "all" to add to either).  All headers begin with C<X-Spam->
+(so a C<header_name> Foo will generate a header called X-Spam-Foo).
+header_name is restricted to the character set [A-Za-z0-9_-].
 
 C<string> can contain tags as explained above in the TAGS section.  You
 can also use C<\n> and C<\t> in the header to add newlines and tabulators
@@ -1691,14 +1693,17 @@ By default, a header field called "X-Spam-Level" will be added to the message,
 with its value set to a number of asterisks equal to the score of the message.
 In other words, for a message scoring 7.2 points:
 
-X-Spam-Level: *******
+ X-Spam-Level: *******
 
 This can be useful for MUA rule creation.
+
+Note that a maximum of 50 'stars' will be added, to keep under RFC-822's
+message header line length limit.
 
 This option is deprecated in version 2.60 and later.  It will be removed
 in a future version.  Please use the add_header option instead:
 
-add_header all Level _STARS(*)_
+ add_header all Level _STARS(*)_
 
 =cut
 
@@ -1719,12 +1724,12 @@ option.
 
 In other words, for a message scoring 7.2 points with this option set to .
 
-X-Spam-Level: .......
+ X-Spam-Level: .......
 
 This option is deprecated in version 2.60 and later.  It will be removed
 in a future version.  Please use the add_header option instead:
 
-add_header all Level _STARS(.)_
+ add_header all Level _STARS(.)_
 
 =cut
 
@@ -2373,9 +2378,9 @@ in corpus size etc.
 =item bayes_journal_max_size		(default: 102400)
 
 SpamAssassin will opportunistically sync the journal and the database.
-It will do so at least once a day, but can also sync if the file size
-goes above this setting, in bytes.  If set to 0, the journal sync will
-only occur once a day.
+It will do so once a day, but will sync more often if the journal file
+size goes above this setting, in bytes.  If set to 0, opportunistic
+syncing will not occur.
 
 =cut
 

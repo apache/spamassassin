@@ -141,12 +141,12 @@ sub remove_entry {
   delete $self->{accum}->{$addr};
   delete $self->{accum}->{$addr.'|totscore'};
 
-  if ($addr =~ /^(.*)\|ip=none$/) {
+  if ($addr =~ /^(.*)\|ip=cmd$/) {
     # it doesn't have an IP attached.
     # try to delete any per-IP entries for this addr as well.
     # could be slow...
     my $mailaddr = $1;
-    my @keys = grep { /^\Q${mailaddr}\E\|ip=\d+\.\d+$/ }
+    my @keys = grep { /^\Q${mailaddr}\E\|ip=(?:\d+\.\d+|none)$/ }
 					keys %{$self->{accum}};
     foreach my $key (@keys) {
       delete $self->{accum}->{$key};
