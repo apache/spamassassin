@@ -78,6 +78,8 @@ sub do_file {
 
 sub do_stdin {
   while (<STDIN>) {
+    $_ = pack("C0A*", $_);	# turn off UTF8-ness
+
     # Conditional compiling
     if ($modules{'conditional'}) {
       # Comment out lines carrying the REMOVEFORINST tag

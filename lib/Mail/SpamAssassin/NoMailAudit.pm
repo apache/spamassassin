@@ -70,6 +70,8 @@ sub parse_headers {
   my ($prevhdr, $hdr, $val, $entry);
 
   while (defined ($_ = shift @{$self->{textarray}})) {
+    $_ = pack("C0A*", $_);      # turn off UTF8-ness
+
     # warn "parse_headers $_";
     if (/^\r*$/) { last; }
 

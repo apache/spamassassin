@@ -1758,6 +1758,7 @@ sub message_is_habeas_swe {
   my $all = $self->get('ALL');
   if ($all =~ /\n(X-Habeas-SWE-1:.{0,512}X-Habeas-SWE-9:[^\n]{0,64}\n)/si) {
     my $text = $1;
+    $text = pack ("C0A*", $text);	# remove UTF-8-ness
     $text =~ tr/A-Z/a-z/;
     $text =~ tr/ / /s;
     $text =~ s/\/?>/\/>/;
@@ -1824,6 +1825,8 @@ sub check_for_uppercase {
 
   # remove shift-JIS charset codes
   $body =~ s/\x1b\$B.*\x1b\(B//gs;
+
+  $body = pack ("C0A*", $body);	# remove UTF-8-ness
 
   # report only on mails above a minimum size; otherwise one
   # or two acronyms can throw it off
