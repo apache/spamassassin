@@ -16,7 +16,7 @@
 
 =head1 NAME
 
-Mail::SpamAssassin::ConfSourceSQL - load SpamAssassin scores from SQL database
+Mail::SpamAssassin::Conf::SQL - load SpamAssassin scores from SQL database
 
 =head1 SYNOPSIS
 
@@ -38,7 +38,7 @@ interfaces.
 
 =cut
 
-package Mail::SpamAssassin::ConfSourceSQL;
+package Mail::SpamAssassin::Conf::SQL;
 
 use strict;
 use bytes;
@@ -140,7 +140,7 @@ sub load_with_dbi {
         "$f_username = ".$dbh->quote($username).
         " or $f_username = '\@GLOBAL' order by $f_username asc";
      }
-     dbg("ConfSourceSQL: executing SQL: $sql");
+     dbg("Conf::SQL: executing SQL: $sql");
       my $sth = $dbh->prepare($sql);
       if($sth) {
          my $rv  = $sth->execute();

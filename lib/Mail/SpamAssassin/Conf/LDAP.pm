@@ -1,6 +1,6 @@
 =head1 NAME
 
-Mail::SpamAssassin::ConfSourceLDAP - load SpamAssassin scores from LDAP database
+Mail::SpamAssassin::Conf::LDAP - load SpamAssassin scores from LDAP database
 
 =head1 SYNOPSIS
 
@@ -22,7 +22,7 @@ interfaces.
 
 =cut
 
-package Mail::SpamAssassin::ConfSourceLDAP;
+package Mail::SpamAssassin::Conf::LDAP;
 
 use strict;
 use bytes;

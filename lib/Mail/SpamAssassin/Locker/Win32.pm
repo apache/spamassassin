@@ -93,6 +93,8 @@ sub safe_unlock {
 sub refresh_lock {
   my($self, $path) = @_;
 
+  return unless $path;
+
   # this could arguably read the lock and make sure the same process
   # owns it, but this shouldn't, in theory, be an issue.
   utime time, time, "$path.lock";

@@ -66,8 +66,8 @@ require 5.006_001;
 
 use Mail::SpamAssassin::Constants;
 use Mail::SpamAssassin::Conf;
-use Mail::SpamAssassin::ConfSourceSQL;
-use Mail::SpamAssassin::ConfSourceLDAP;
+use Mail::SpamAssassin::Conf::SQL;
+use Mail::SpamAssassin::Conf::LDAP;
 use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::Message;
 use Mail::SpamAssassin::Bayes;
@@ -961,7 +961,7 @@ the Mail::SpamAssassin object.
 sub load_scoreonly_sql {
   my ($self, $username) = @_;
 
-  my $src = Mail::SpamAssassin::ConfSourceSQL->new ($self);
+  my $src = Mail::SpamAssassin::Conf::SQL->new ($self);
   $self->{username} = $username;
   unless ($src->load($username)) {
     return 0;
@@ -988,7 +988,7 @@ sub load_scoreonly_ldap {
   my ($self, $username) = @_;
 
   dbg("load_scoreonly_ldap($username)");
-  my $src = Mail::SpamAssassin::ConfSourceLDAP->new ($self);
+  my $src = Mail::SpamAssassin::Conf::LDAP->new ($self);
   $self->{username} = $username;
   $src->load($username);
 }
@@ -1053,9 +1053,9 @@ sub compile_now {
   my $dsn = $self->{conf}->{user_scores_dsn};
   if ($dsn ne '') {
     if ($dsn =~ /^ldap:/i) {
-      Mail::SpamAssassin::ConfSourceLDAP::load_modules();
+      Mail::SpamAssassin::Conf::LDAP::load_modules();
     } else {
-      Mail::SpamAssassin::ConfSourceSQL::load_modules();
+      Mail::SpamAssassin::Conf::SQL::load_modules();
     }
   }
 
