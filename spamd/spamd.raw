@@ -988,17 +988,40 @@ sub spawn {
         }
       }
 
-      if ($copy_config_p) {
-        while(my($k,$v) = each %msa_backup) {
-          $spamtest->{$k} = $v;
-        }
+      if ($copy_config_p)
+      {
+        # use a timeout!  There are bugs in Storable on certain platforms
+        # that can cause spamd to hang -- see bug 3828 comment 154.
+        my $oldalarm = 0;
+        eval {
+          local $SIG{ALRM} = sub { die "__alarm__\n" };
+          $oldalarm = alarm 10;
 
-        # if we changed user, we would have also loaded up new configs
-        # (potentially), so let's restore back the saved version we
-        # had before.
-        #
-        $spamtest->copy_config(\%conf_backup, undef) ||
-          die "error returned from copy_config, no Storable module?\n";
+          while(my($k,$v) = each %msa_backup) {
+            $spamtest->{$k} = $v;
+          }
+
+          # if we changed user, we would have also loaded up new configs
+          # (potentially), so let's restore back the saved version we
+          # had before.
+          $spamtest->copy_config(\%conf_backup, undef) ||
+            die "error returned from copy_config, no Storable module?\n";
+          alarm $oldalarm;
+        };
+
+        alarm $oldalarm;
+        my $err = $@;
+
+        if ($err) {
+          if ($err =~ /__alarm__/) {
+            logmsg("copy_config timeout, respawning child process after ".
+                            ($i+1)." messages");
+            exit;         # so that the master spamd can respawn
+
+          } else {
+            die $err;     # propagate failures
+          }
+        }
       }
       undef $current_user;
 
