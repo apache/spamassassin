@@ -151,6 +151,20 @@ is a reference to a hash containing these options:
 The line of configuration text to parse.   This has leading and trailing
 whitespace, and comments, removed.
 
+=item key
+
+The configuration key; ie. the first "word" on the line.
+
+=item value
+
+The configuration value; everything after the first "word" and
+any whitespace after that.
+
+=item conf
+
+The C<Mail::SpamAssassin::Conf> object on which the configuration
+data should be stored.
+
 =item user_config
 
 A boolean: C<1> if reading a user's configuration, C<0> if reading the

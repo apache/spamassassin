@@ -253,11 +253,6 @@ sub new {
   $self->{bayes_sql_password} = '';
   $self->{bayes_sql_override_username} = '';
 
-  $self->{use_hashcash} = 1;
-  $self->{hashcash_accept} = { };
-  $self->{hashcash_doublespend_path} = '__userstate__/hashcash_seen';
-  $self->{hashcash_doublespend_file_mode} = "0700";
-
   $self->{whitelist_from} = { };
   $self->{blacklist_from} = { };
 
@@ -1729,68 +1724,6 @@ that the minimum limit on fds be raised to at least 256 for safety.
     # RE is easier for now ...
     if (/^dns_available\s+(yes|no|test|test:\s+.+)$/) {
       $self->{dns_available} = ($1 or "test"); next;
-    }
-
-=item use_hashcash { 1 | 0 }   (default: 1)
-
-Whether to use hashcash, if it is available.
-
-=cut
-
-    if ( $key eq 'use_hashcash' ) {
-      $self->{use_hashcash} = $value+0; next;
-    }
-
-=item hashcash_accept add@ress.com ...
-
-Used to specify addresses that we accept HashCash tokens for.  You should set
-it to match all the addresses that you may receive mail at.
-
-Like whitelist and blacklist entries, the addresses are file-glob-style
-patterns, so C<friend@somewhere.com>, C<*@isp.com>, or C<*.domain.net> will all
-work.  Specifically, C<*> and C<?> are allowed, but all other metacharacters
-are not.  Regular expressions are not used for security reasons.
-
-The sequence C<%u> is replaced with the current user's username, which
-is useful for ISPs or multi-user domains.
-
-Multiple addresses per line, separated by spaces, is OK.  Multiple
-C<hashcash_accept> lines is also OK.
-
-=cut
-
-    if ( $key eq 'hashcash_accept' ) {
-      $self->add_to_addrlist ('hashcash_accept', split (/\s+/, $value)); next;
-    }
-
-=item hashcash_doublespend_path /path/to/file	(default: ~/.spamassassin/hashcash_seen)
-
-Path for HashCash double-spend database.  HashCash tokens are only usable once,
-so their use is tracked in this database to avoid providing a loophole.
-
-By default, each user has their own, in their C<~/.spamassassin> directory with
-mode 0700/0600.  Note that once a token is 'spent' it is written to this file,
-and double-spending of a hashcash token makes it invalid, so this is not
-suitable for sharing between multiple users.
-
-=cut
-
-    if ( $key eq 'hashcash_doublespend_path' ) {
-      $self->{hashcash_doublespend_path} = $value; next;
-    }
-
-=item hashcash_doublespend_file_mode		(default: 0700)
-
-The file mode bits used for the HashCash double-spend database file.
-
-Make sure you specify this using the 'x' mode bits set, as it may also be used
-to create directories.  However, if a file is created, the resulting file will
-not have any execute bits set (the umask is set to 111).
-
-=cut
-
-    if ( $key eq 'hashcash_doublespend_file_mode' ) {
-      $self->{hashcash_doublespend_file_mode} = $value+0; next;
     }
 
 =back

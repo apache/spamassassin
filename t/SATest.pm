@@ -83,6 +83,8 @@ sub sa_t_init {
   }
 
   mkdir ("log/localrules.tmp", 0755);
+  copy ("../rules/init.pre", "log/localrules.tmp/init.pre")
+    or die "init.pre copy failed";
 
   copy ("../rules/user_prefs.template", "log/test_rules_copy/99_test_default.cf")
     or die "user prefs copy failed";
