@@ -176,12 +176,6 @@ rawbody PGP_SIGNATURE           /-----BEGIN PGP SIGNATURE-----/
 describe PGP_SIGNATURE          Contains a PGP-signed message
 tflags PGP_SIGNATURE		nice
 
-# the idea is that most legit newsletters will claim their copyright; spammers
-# do not seem to for some reason.  (Kevin Dangoor)
-body COPYRIGHT_CLAIMED          /copyright.{0,100}all rights reserved/is
-describe COPYRIGHT_CLAIMED      Contains a claim of copyright
-tflags COPYRIGHT_CLAIMED	nice
-
 body BALANCE_FOR_LONG           eval:check_for_very_long_text()
 describe BALANCE_FOR_LONG       Message text is over 500 lines long
 tflags BALANCE_FOR_LONG		nice
