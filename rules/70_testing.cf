@@ -118,67 +118,6 @@ tflags T_RCVD_IN_IADB_LVL100	net nice
 
 ########################################################################
 
-# IADB2 support ...
-header __RCVD_IN_IADB2	eval:check_rbl('iadb2-firsttrusted', 'iadb2.isipp.com.')
-tflags __RCVD_IN_IADB2	net nice
-
-# 0-9
-header T_RCVD_IN_IADB2_00	eval:check_rbl_sub('iadb2-firsttrusted', '^127\.0\.0\.\d$')
-describe T_RCVD_IN_IADB2_00	Sender is listed in ISIPP IADB2
-tflags T_RCVD_IN_IADB2_00	net nice
-
-# 10-19
-header T_RCVD_IN_IADB2_10	eval:check_rbl_sub('iadb2-firsttrusted', '^127\.0\.0\.1\d$')
-describe T_RCVD_IN_IADB2_10	Sender is listed in ISIPP IADB2
-tflags T_RCVD_IN_IADB2_10	net nice
-
-# 20-29
-header T_RCVD_IN_IADB2_20	eval:check_rbl_sub('iadb2-firsttrusted', '^127\.0\.0\.2\d$')
-describe T_RCVD_IN_IADB2_20	Sender is listed in ISIPP IADB2
-tflags T_RCVD_IN_IADB2_20	net nice
-
-# 30-39
-header T_RCVD_IN_IADB2_30	eval:check_rbl_sub('iadb2-firsttrusted', '^127\.0\.0\.3\d$')
-describe T_RCVD_IN_IADB2_30	Sender is listed in ISIPP IADB2
-tflags T_RCVD_IN_IADB2_30	net nice
-
-# 40-49
-header T_RCVD_IN_IADB2_40	eval:check_rbl_sub('iadb2-firsttrusted', '^127\.0\.0\.4\d$')
-describe T_RCVD_IN_IADB2_40	Sender is listed in ISIPP IADB2
-tflags T_RCVD_IN_IADB2_40	net nice
-
-# 50-59
-header T_RCVD_IN_IADB2_50	eval:check_rbl_sub('iadb2-firsttrusted', '^127\.0\.0\.5\d$')
-describe T_RCVD_IN_IADB2_50	Sender is listed in ISIPP IADB2
-tflags T_RCVD_IN_IADB2_50	net nice
-
-# 60-69
-header T_RCVD_IN_IADB2_60	eval:check_rbl_sub('iadb2-firsttrusted', '^127\.0\.0\.6\d$')
-describe T_RCVD_IN_IADB2_60	Sender is listed in ISIPP IADB2
-tflags T_RCVD_IN_IADB2_60	net nice
-
-# 70-79
-header T_RCVD_IN_IADB2_70	eval:check_rbl_sub('iadb2-firsttrusted', '^127\.0\.0\.7\d$')
-describe T_RCVD_IN_IADB2_70	Sender is listed in ISIPP IADB2
-tflags T_RCVD_IN_IADB2_70	net nice
-
-# 80-89
-header T_RCVD_IN_IADB2_80	eval:check_rbl_sub('iadb2-firsttrusted', '^127\.0\.0\.8\d$')
-describe T_RCVD_IN_IADB2_80	Sender is listed in ISIPP IADB2
-tflags T_RCVD_IN_IADB2_80	net nice
-
-# 90-99
-header T_RCVD_IN_IADB2_90	eval:check_rbl_sub('iadb2-firsttrusted', '^127\.0\.0\.9\d$')
-describe T_RCVD_IN_IADB2_90	Sender is listed in ISIPP IADB2
-tflags T_RCVD_IN_IADB2_90	net nice
-
-# 100 and higher
-header T_RCVD_IN_IADB2_100	eval:check_rbl_sub('iadb2-firsttrusted', '^127\.0\.0\.\d{3}$')
-describe T_RCVD_IN_IADB2_100	Sender is listed in ISIPP IADB2
-tflags T_RCVD_IN_IADB2_100	net nice
-
-########################################################################
-
 # header T_FORGED_IN_WHITELIST      eval:check_forged_in_whitelist()
 # describe T_FORGED_IN_WHITELIST    Forged From: is in user's white-list
 # tflags T_FORGED_IN_WHITELIST      userconf
