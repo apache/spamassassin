@@ -95,7 +95,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.157 2003/01/02 02:52:40 duncf Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.158 2003/01/08 19:44:00 jmason Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -374,6 +374,7 @@ sub init_learner {
   dbg ("Initialising learner");
   if ($opts->{use_whitelist}) { $self->{learn_with_whitelist} = 1; }
   if ($opts->{force_expire}) { $self->{learn_force_expire} = 1; }
+  if ($opts->{caller_will_untie}) { $self->{learn_caller_will_untie} = 1; }
   1;
 }
 

@@ -528,6 +528,10 @@ sub learn {
 
     $self->{store}->tie_db_writable();
     $ret = $self->learn_trapped ($isspam, $msg, $body);
+
+    if (!$self->{main}->{learn_caller_will_untie}) {
+      $self->{store}->untie_db();
+    }
   };
 
   if ($@) {		# if we died, untie the dbs.
@@ -595,6 +599,10 @@ sub forget {
 
     $self->{store}->tie_db_writable();
     $ret = $self->forget_trapped ($msg, $body);
+
+    if (!$self->{main}->{learn_caller_will_untie}) {
+      $self->{store}->untie_db();
+    }
   };
 
   if ($@) {		# if we died, untie the dbs.
