@@ -303,3 +303,6 @@ meta T_RATWARE_DM15_4	T_DM15_MID2 && T_DM15_BOUND
 # simple enough to test
 meta T_RATWARE_SOMETHING	__MSGID_DOLLARS_OK && !__HAS_X_MAILER
 meta T_RATWARE_WHATEVER		__OUTLOOK_DOLLARS_MSGID && !__HAS_X_MAILER
+
+body T_HTML_CLOSED_TWICE	eval:html_eval('closed_html', '> 1')
+body T_BODY_CLOSED_TWICE	eval:html_eval('closed_body', '> 1')

@@ -134,6 +134,8 @@ sub html_end {
   $self->put_results(length => $self->{length});
   $self->put_results(min_size => $self->{min_size});
   $self->put_results(max_size => $self->{max_size});
+  $self->put_results(closed_html => $self->{closed_html});
+  $self->put_results(closed_body => $self->{closed_body});
   if (exists $self->{tags}) {
     $self->put_results(closed_extra_ratio =>
 		       ($self->{closed_extra} / $self->{tags}));
@@ -312,8 +314,8 @@ sub html_tag {
     }
     # end tags
     else {
-      $self->{closed_html} = 1 if $tag eq "html";
-      $self->{closed_body} = 1 if $tag eq "body";
+      $self->{closed_html}++ if $tag eq "html";
+      $self->{closed_body}++ if $tag eq "body";
     }
   }
 }
