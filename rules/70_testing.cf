@@ -355,3 +355,83 @@ body T_INVEST_ADVICE_2		/\binvestment advisor/i
 body T_INVEST_ADVICE_3		/\binvestment advi[cs]/i
 body T_INVEST_ADVICE_4		/\binvestment expert/i
 body T_INVEST_ADVICE_5		/\binvestment (?:advi[cs]|expert)/i
+
+# X-Mailer rules
+header T_X_MAILER_SPAM_1	X-Mailer !~ m{[A-Z0-9.]} [if-unset: Foo 1.0]
+header T_X_MAILER_SPAM_2	X-Mailer !~ m{[A-Z0-9./]} [if-unset: Foo 1.0]
+header T_X_MAILER_SPAM_3	X-Mailer !~ m{[A-Z0-9.-]} [if-unset: Foo 1.0]
+header T_X_MAILER_SPAM_4	X-Mailer !~ m{[A-Z0-9./-]} [if-unset: Foo 1.0]
+
+# some testing work on case-sensitive names
+header T_HEADER_01	ALL =~ /\nAlternate-Recipient:/
+header T_HEADER_02	ALL =~ /\nAntivirus:/
+header T_HEADER_03	ALL =~ /\nApproved:/
+header T_HEADER_04	ALL =~ /\nDelivery-Notification:/
+header T_HEADER_05	ALL =~ /\nDisclose-Recipients:/
+header T_HEADER_06	ALL =~ /\nError-path:/
+header T_HEADER_07	ALL =~ /\nLanguage:/
+header T_HEADER_08	ALL =~ /\nLocation:/
+header T_HEADER_09	ALL =~ /\nMime-Subversion:/
+header T_HEADER_10	ALL =~ /\nNewsletter-ID:/
+header T_HEADER_11	ALL =~ /\nPID:/
+header T_HEADER_12	ALL =~ /\nPrevent-NonDelivery-Report:/
+header T_HEADER_13	ALL =~ /\nRot:/
+header T_HEADER_14	ALL =~ /\nUID:/
+header T_HEADER_15	ALL =~ /\nX-BounceTrace:/
+header T_HEADER_16	ALL =~ /\nX-CS-IP:/
+header T_HEADER_17	ALL =~ /\nX-Camp...:/
+header T_HEADER_18	ALL =~ /\nX-ClientHost:/
+header T_HEADER_19	ALL =~ /\nX-Comment:/
+header T_HEADER_20	ALL =~ /\nX-Company-Address:/
+header T_HEADER_21	ALL =~ /\nX-Company-City:/
+header T_HEADER_22	ALL =~ /\nX-Company-Country:/
+header T_HEADER_23	ALL =~ /\nX-Company-State:/
+header T_HEADER_24	ALL =~ /\nX-Company-Zip:/
+header T_HEADER_25	ALL =~ /\nX-Contact:/
+header T_HEADER_26	ALL =~ /\nX-E(?:[Mm]ail)?:/
+header T_HEADER_27	ALL =~ /\nX-ENVID:/
+header T_HEADER_28	ALL =~ /\nX-EXP32-SerialNo:/
+header T_HEADER_29	ALL =~ /\nX-Encoding:/
+header T_HEADER_30	ALL =~ /\nX-Encoding-Version:/
+header T_HEADER_31	ALL =~ /\nX-Find:/
+header T_HEADER_32	ALL =~ /\nX-INFO_.Z:/
+header T_HEADER_33	ALL =~ /\nX-IP:/
+header T_HEADER_34	ALL =~ /\nX-JLH:/
+header T_HEADER_35	ALL =~ /\nX-L-C:/
+header T_HEADER_36	ALL =~ /\nX-LIDCode:/
+header T_HEADER_37	ALL =~ /\nX-MID:/
+header T_HEADER_38	ALL =~ /\nX-Mailid:/
+header T_HEADER_39	ALL =~ /\nX-MailingID:/
+header T_HEADER_40	ALL =~ /\nX-Message-flag:/
+header T_HEADER_41	ALL =~ /\nX-MessageOrder:/
+header T_HEADER_42	ALL =~ /\nX-Misc_ID:/
+header T_HEADER_43	ALL =~ /\nX-Originating-Company:/
+header T_HEADER_44	ALL =~ /\nX-PMG-.+:/
+header T_HEADER_45	ALL =~ /\nX-POPFile-Link:/
+header T_HEADER_46	ALL =~ /\nX-RMD-Text:/
+header T_HEADER_47	ALL =~ /\nX-Rec:/
+header T_HEADER_48	ALL =~ /\nX-SG4:/
+header T_HEADER_49	ALL =~ /\nX-SP-Track-ID:/
+header T_HEADER_50	ALL =~ /\nX-Spam:/
+header T_HEADER_51	ALL =~ /\nX-T2-Posting-ID:/
+header T_HEADER_52	ALL =~ /\nX-TID:/
+header T_HEADER_53	ALL =~ /\nX-Text-Classification:/
+header T_HEADER_54	ALL =~ /\nX-Tnz-Problem-Type:/
+header T_HEADER_55	ALL =~ /\nX-Trans:/
+header T_HEADER_56	ALL =~ /\nX-Vig:/
+header T_HEADER_57	ALL =~ /\nX-WCMailID:/
+header T_HEADER_58	ALL =~ /\nX-Webmail-Time:/
+header T_HEADER_59	ALL =~ /\nX-[Ii][DdMm]?:/
+header T_HEADER_60	ALL =~ /\nX-[Ii][Dd]?:/
+header T_HEADER_61	ALL =~ /\nX-[Ii][Mm]?:/
+header T_HEADER_62	ALL =~ /\nX-bounce-to:/
+header T_HEADER_63	ALL =~ /\nX-cross:/
+header T_HEADER_64	ALL =~ /\nX-mlcipher:/
+header T_HEADER_65	ALL =~ /\nX-mlmsgid:/
+header T_HEADER_66	ALL =~ /\nX-mpm:/
+header T_HEADER_67	ALL =~ /\nX-ms:/
+header T_HEADER_68	ALL =~ /\nX-ntc:/
+header T_HEADER_69	ALL =~ /\nX-rco:/
+header T_HEADER_70	ALL =~ /\nX-srk:/
+header T_HEADER_71	ALL =~ /\nX-tri:/
+header T_HEADER_72	ALL =~ /\nX-yd:/
