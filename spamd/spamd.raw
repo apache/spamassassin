@@ -728,10 +728,7 @@ if ($setuid_to_user && $clients_per_child > 1) {
 # make sure this happens before setting up the pidfile to avoid a race
 # condition.  see bugzilla ticket 3443.
 my $got_sighup;
-$SIG{HUP} = \&restart_handler;
-$SIG{CHLD} = \&child_handler;
-$SIG{INT}  = \&kill_handler;
-$SIG{TERM} = \&kill_handler;
+setup_parent_sig_handlers();
 
 # log server started, but processes watching the log to wait for connect
 # should wait until they see the pid, after signal handlers are in place
@@ -818,9 +815,7 @@ sub spawn {
     ## CHILD
 
     # Reset signal handling to default settings.
-    foreach (keys %SIG) {
-      $SIG{$_} = 'DEFAULT';
-    }
+    setup_child_sig_handlers();
 
     # unblock signals
     sigprocmask( POSIX::SIG_UNBLOCK(), $sigset )
@@ -1584,12 +1579,25 @@ sub create_default_cf_if_needed {
   }
 }
 
+# sig handlers: parent process
+sub setup_parent_sig_handlers {
+  $SIG{HUP}  = \&restart_handler;
+  $SIG{CHLD} = \&child_handler;
+  $SIG{INT}  = \&kill_handler;
+  $SIG{TERM} = \&kill_handler;
+}
+
+# sig handlers: child processes
+sub setup_child_sig_handlers {
+  # note: all the signals changed in setup_parent_sig_handlers() must
+  # be reset to appropriate values here!
+  $SIG{HUP} = $SIG{CHLD} = $SIG{INT} = $SIG{TERM} = 'DEFAULT';
+}
+
 sub logmsg {
   my $msg = join ( " ", @_ );
   $msg =~ s/[\r\n]+$//;       # remove any trailing newlines
   $msg =~ s/[\x00-\x1f]/_/g;  # replace all other control chars with underscores
-
-  warn "logmsg: $msg\n" if $opt{'debug'};
 
   # log to file:
   #   bug 1360 <http://bugzilla.spamassassin.org/show_bug.cgi?id=1360>
