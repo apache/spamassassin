@@ -4,6 +4,21 @@ use lib "../lib";
 use Mail::Internet;
 use Mail::SpamAssassin;
 
+$cffile = '../spamassassin.cf';
+if (-f "spamassassin.cf") { $cffile = "spamassassin.cf"; }
+
+if (defined $ARGV[0] && $ARGV[0] eq '-c') {
+  shift; $cffile = $ARGV[0]; shift;
+}
+
+if (defined $ARGV[0] && $ARGV[0] eq '-ms') {
+  shift; find_missed('spam.log');
+}
+
+if (defined $ARGV[0] && $ARGV[0] eq '-mn') {
+  shift; find_missed('nonspam.log');
+}
+
 my $FORK = 0;
 if (defined $ARGV[0] && $ARGV[0] eq '-f') { $FORK = 1; }
 
@@ -13,11 +28,8 @@ sub sortbynum {
   ($anum <=> $bnum);
 }
 
-$rulesfile = "../spamassassin.cf";
-if (-f "spamassassin.cf") { $rulesfile = "spamassassin.cf"; }
-
 $spamtest = new Mail::SpamAssassin ({
-  'rules_filename'      => $rulesfile,
+  'rules_filename'      => $cffile,
   'userprefs_filename'  => "../spamassassin.prefs",
   'local_tests_only'    => 1
 });
@@ -147,3 +159,67 @@ sub docheck {
 		    ($yorn ? 'Y' : '.'),
 		    $hits, $id, $tests;
 }
+
+
+sub find_missed {
+  my $file = shift;
+
+  my $threshold = 5;
+
+  my $shouldbespam = 1;
+  if ($file =~ /nonspam/) { $shouldbespam = 0; }
+
+  my $scores = readscores();
+
+  open (IN, "<$file");
+  while (<IN>) {
+    /^.\s+\d+\s+(\S+)\s*/ or next;
+    my $id = $1;
+    my $score = 0.0;
+
+    $_ = $'; s/,,+/,/g; s/^\s+//; s/\s+$//;
+    foreach my $tst (split (/,/, $_)) {
+      next if ($tst eq '');
+      if (!defined $scores->{$tst}) {
+	warn "unknown test in $file, ignored: $tst\n";
+	next;
+      }
+      $score += $scores->{$tst};
+    }
+
+    if ($shouldbespam && $score < $threshold) {
+      found_missed ($score, $id, $_);
+    } elsif (!$shouldbespam && $score > $threshold) {
+      found_missed ($score, $id, $_);
+    }
+  } 
+  close IN;
+}
+
+sub readscores {
+  my $scores = { };
+
+  print "Reading scores from \"$cffile\"...\n";
+  open (IN, "<$cffile") or warn "cannot read $cffile\n";
+  while (<IN>) {
+    s/#.*$//g; s/^\s+//; s/\s+$//;
+
+    if (/^(header|body|full)\s+(\S+)\s+/) {
+      $scores->{$2} ||= 1;
+    } elsif (/^score\s+(\S+)\s+(.+)$/) {
+      $scores->{$1} = $2;
+    }
+  }
+  close IN;
+
+  $scores;
+}
+
+sub found_missed {
+  my $score = shift;
+  my $id = shift;
+  my $tests = shift;
+
+  print "JMD $score $id $tests\n";
+}
+

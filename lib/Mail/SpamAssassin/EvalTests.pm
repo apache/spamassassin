@@ -159,17 +159,11 @@ sub check_subject_for_lotsa_8bit_chars {
 
 ###########################################################################
 
-sub check_for_missing_headers {
+sub check_for_missing_to_header {
   my ($self) = @_;
-
-  my $hdr = $self->get ('From');
-  return 1 if ($hdr eq '');
 
   $hdr = $self->get ('To');
   $hdr ||= $self->get ('Apparently-To');
-  return 1 if ($hdr eq '');
-
-  $hdr = $self->get ('Date');
   return 1 if ($hdr eq '');
 
   return 0;
