@@ -225,7 +225,6 @@ my $mail = Mail::SpamAssassin::NoMailAudit->new ( add_From_line => $opt_F );
 # holds details of the message's spam/not-spam status.
   my $status = $spamtest->check ($mail);
   $status->rewrite_mail ();
-  $status->handle_auto_report ();
 
   if ($opt_t) {
     # add the spam report to the end of the body as well, if testing.
