@@ -473,8 +473,8 @@ describe COPY_ACCURATELY        Common pyramid scheme phrase (1)
 body SEE_FOR_YOURSELF		/See (?:for|it|it for) yourself\b/i
 describe SEE_FOR_YOURSELF	See for yourself
 
-body ORDER_NOW                  /\border (?:now|soon|fast|quickly|while)\b/i
-describe ORDER_NOW              Encourages you to waste no time in ordering
+body ORDER_NOW			/\border (?:now|soon|fast|quickly|while|today)\b/i
+describe ORDER_NOW		Encourages you to waste no time in ordering
 
 ## Contrib: Marc Perkel
 body OFFSHORE_SCAM		/\boffshore\b.{0,20}(?:credit card|companies|account|financ|websites?)/i
