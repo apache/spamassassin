@@ -295,3 +295,28 @@ uri T_REDIR_AOL_CLICKTHRU     /www\.aol\.com\/ams\/clickThruRedirect\.adp/i
 header T_FAKE_HELO_MAIL_COM_DOM  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=(?:\S+\.|)(?:(?:mail|email|iname|cheerful|consultant|europe|mindless|myself|post|techie|usa|writeme|2die4|artlover|bikerider|catlover|cliffhanger|cutey|doglover|gardener|hot-shot|inorbit|loveable|mad\.scientist|playful|poetic|popstar|saintly|seductive|soon|whoever|winning|witty|yours|africamail|arcticmail|asia|australiamail|europe|japan|samerica|usa|berlin|dublin|london|madrid|moscowmail|munich|nycmail|paris|rome|sanfranmail|singapore|tokyo|accountant|adexec|allergist|alumnidirector|archaeologist|chemist|clerk|columnist|comic|consultant|counsellor|deliveryman|diplomats|doctor|dr|engineer|execs|financier|geologist|graphic-designer|insurer|journalist|lawyer|legislator|lobbyist|minister|optician|pediatrician|presidency|priest|publicist|realtyagent|registerednurses|repairman|representative|rescueteam|scientist|sociologist|teacher|techietechnologist|umpire)\.com|(?:programmer|earthling|hairdresser)\.net|musician\.org) /i
 header T_FAKE_HELO_MAIL_COM_DOM2  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=(?:(?:mail|email|iname|cheerful|consultant|europe|mindless|myself|post|techie|usa|writeme|2die4|artlover|bikerider|catlover|cliffhanger|cutey|doglover|gardener|hot-shot|inorbit|loveable|mad\.scientist|playful|poetic|popstar|saintly|seductive|soon|whoever|winning|witty|yours|africamail|arcticmail|asia|australiamail|europe|japan|samerica|usa|berlin|dublin|london|madrid|moscowmail|munich|nycmail|paris|rome|sanfranmail|singapore|tokyo|accountant|adexec|allergist|alumnidirector|archaeologist|chemist|clerk|columnist|comic|consultant|counsellor|deliveryman|diplomats|doctor|dr|engineer|execs|financier|geologist|graphic-designer|insurer|journalist|lawyer|legislator|lobbyist|minister|optician|pediatrician|presidency|priest|publicist|realtyagent|registerednurses|repairman|representative|rescueteam|scientist|sociologist|teacher|techietechnologist|umpire)\.com|(?:programmer|earthling|hairdresser)\.net|musician\.org) /i
 
+# cream of the rules removed from old releases, may need some work
+body T_GREAT_OFFER_A		/offer expires/i
+body T_GREAT_OFFER_B		/see full offer for details/i
+body T_GREAT_OFFER_C		/great offer/i
+body T_SAVE_BUCKS		/\bsave \$/i
+
+# this should be separated into a few more sensible rules
+body T_OFFERS_ETC		/\b(?:(?=[cefmpruw])(?:wish|want|unsub|reward|receive|recurring|remove|permission|partner|further|future|e.?mail|continue|click).{0,64}){2}.{0,8}(?=[cdos])(?:special|offer|coupon|discount)s?\b/i
+
+uri T_UNSUB_PAGE_1		/^https?:\/\/.*?(?!cgi).*?unsubscribe/i
+uri T_UNSUB_PAGE_2		/^https?:\/\/.*?(?!cgi).*?unsub/i
+uri T_UNSUB_PAGE_3		/^https?:\/\/.*?(?!cgi).*?unsub(?:scribe)?\b/i
+
+header T_MSGID_CHARS_COMMA	MESSAGEID =~ /\,/
+header T_MSGID_CHARS_QUOTE	MESSAGEID =~ /\"/
+header T_MSGID_CHARS_SEMI	MESSAGEID =~ /\;/
+header T_MSGID_CHARS_CARAT	MESSAGEID =~ /\^/
+header T_MSGID_CHARS_POUND	MESSAGEID =~ /\#/
+header T_MSGID_CHARS_SLASH	MESSAGEID =~ /\//
+header T_MSGID_CHARS_BRACE1	MESSAGEID =~ /\{/
+header T_MSGID_CHARS_BRACE2	MESSAGEID =~ /\}/
+header T_MSGID_CHARS_COLON	MESSAGEID =~ /\:/
+header T_MSGID_CHARS_BANG	MESSAGEID =~ /\!/
+header T_MSGID_CLOSE_TWICE_1	MESSAGEID =~ />.*>/
+header T_MSGID_CLOSE_TWICE_2	MESSAGEID =~ />>/
