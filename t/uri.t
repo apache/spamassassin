@@ -21,7 +21,35 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::HTML;
 use Mail::SpamAssassin::Util;
 
-plan tests => 44;
+plan tests => 55;
+
+##############################################
+
+sub try_domains {
+  my($try, $expect) = @_;
+  my $result = Mail::SpamAssassin::Util::uri_to_domain($try);
+
+  # undef is valid in some situations, so deal with it...
+  if (!defined $expect) {
+    return !defined $result;
+  }
+
+  return $expect eq $result;
+}
+
+ok(try_domains('javascript:{some crap}', undef));
+ok(try_domains('mailto:nobody@example.com', 'example.com'));
+ok(try_domains('http://66.92.69.221/', '66.92.69.221'));
+ok(try_domains('http://www.spamassassin.org:8080/lists.html', 'spamassassin.org'));
+ok(try_domains('http://www.spamassassin.org/lists.html#some_tag', 'spamassassin.org'));
+ok(try_domains('http://username@www.spamassassin.org/lists.html', 'spamassassin.org'));
+ok(try_domains('http://username:password@www.spamassassin.org/lists.html', 'spamassassin.org'));
+ok(try_domains('http:/%77%77%77.spamassassin.org/lists.html', undef));
+ok(try_domains('http:/www.spamassassin.org/lists.html', 'spamassassin.org'));
+ok(try_domains('http:www.spamassassin.org/lists.html', 'spamassassin.org'));
+ok(try_domains('http://kung.pao.com.cn', 'pao.com.cn'));
+
+##############################################
 
 sub array_cmp {
   my($a, $b) = @_;
@@ -43,13 +71,14 @@ sub try_canon {
   return array_cmp(\@input, \@expect);
 }
 
-# All of these ought to compress down into a single URL
+# We should get the raw versions and a single "correct" version
 ok(try_canon([
    'http:www.spamassassin.org',
    'http:/www.spamassassin.org',
-   'http://www.spamassassin.org'
    ], [
    'http://www.spamassassin.org',
+   'http:www.spamassassin.org',
+   'http:/www.spamassassin.org',
    ]));
 
 # Try a simple redirector.  Should return the redirector and the URI
@@ -58,6 +87,7 @@ ok(try_canon(['http://rd.yahoo.com/?http:/www.spamassassin.org'],
    [
    'http://rd.yahoo.com/?http:/www.spamassassin.org',
    'http://www.spamassassin.org',
+   'http:/www.spamassassin.org',
    ]));
 
 ##############################################

@@ -423,9 +423,6 @@ sub html_uri {
 	# form of "http://foo.com/index.html"
 	$uri =~ s@^([a-z]+:/{0,2}[^/]+/.*?)[^/\.]+\.[^/\.]{2,4}$@$1@i;
 
-	# Make sure the URI has the proper seperator
-	$uri =~ s@^([a-z]+:)/{0,2}@$1//@;
-
 	# Make sure it ends in a slash
 	$uri .= "/" unless $uri =~ m@/$@;
 	$self->{html}{base_href} = $uri;

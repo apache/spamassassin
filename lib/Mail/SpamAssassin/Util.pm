@@ -787,11 +787,11 @@ sub uri_list_canonify {
     # sometimes we catch URLs on multiple lines
     $uri =~ s/\n//g;
 
-    # http:/www.foo.biz -> http://www.foo.biz
-    $uri =~ s#^(https?:)/{0,2}#$1//#i;
-
     # Make a copy so we don't trash the original
     my $nuri = $uri;
+
+    # http:www.foo.biz -> http://www.foo.biz
+    $nuri =~ s#^(https?:)/{0,2}#$1//#i;
 
     # http://www.foo.biz?id=3 -> http://www.foo.biz/?id=3
     $nuri =~ s/^(https?:\/\/[^\/\?]+)\?/$1\/?/;
