@@ -1824,8 +1824,8 @@ The SpamAssassin(tm) Project E<lt>http://spamassassin.apache.org/E<gt>
 
 =head1 COPYRIGHT
 
-SpamAssassin is distributed under the Apache Software License, as described
-in the file C<LICENSE> included with the distribution.
+SpamAssassin is distributed under the Apache License, Version 2.0, as
+described in the file C<LICENSE> included with the distribution.
 
 =head1 AVAILABILITY
 
