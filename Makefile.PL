@@ -30,6 +30,20 @@ sub MY::libscan {
   $path;
 }
 
+unlink('t/do_razor', 't/do_razor2');
+
+if (eval { require Razor::Client }) {
+    if (prompt('Run Razor v1 tests (these may fail due to network problems)? (y/n)', "n") =~ /^y(es)?$/i) {
+        open(FILE, ">t/do_razor"); close(FILE);
+    }
+}
+
+if (eval { require Razor2::Client::Agent }) {
+    if (prompt('Run Razor v2 tests (these may fail due to network problems)? (y/n)', "n") =~ /^y(es)?$/i) {
+        open(FILE, ">t/do_razor2"); close(FILE);
+    }
+}
+
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
 WriteMakefile(
