@@ -143,7 +143,7 @@ sub tie_db_readonly {
   foreach my $dbname (@DBNAMES) {
     my $name = $path.'_'.$dbname;
     my $db_var = 'db_'.$dbname;
-    dbg("bayes: tie-ing to DB file R/O $name");
+    dbg("bayes: $$ tie-ing to DB file R/O $name");
     # untie %{$self->{$db_var}} if (tied %{$self->{$db_var}});
     tie %{$self->{$db_var}},"AnyDBM_File",$name, O_RDONLY,
 		 (oct ($main->{conf}->{bayes_file_mode}) & 0666)
@@ -198,7 +198,7 @@ sub tie_db_writable {
   foreach my $dbname (@DBNAMES) {
     my $name = $path.'_'.$dbname;
     my $db_var = 'db_'.$dbname;
-    dbg("bayes: tie-ing to DB file R/W $name");
+    dbg("bayes: $$ tie-ing to DB file R/W $name");
     # not convinced this is needed, or is efficient!
     # untie %{$self->{$db_var}} if (tied %{$self->{$db_var}});
     tie %{$self->{$db_var}},"AnyDBM_File",$name, O_RDWR|O_CREAT,
@@ -228,13 +228,13 @@ failed_to_tie:
 
 sub untie_db {
   my $self = shift;
-  dbg("bayes: untie-ing");
+  dbg("bayes: $$ untie-ing");
 
   foreach my $dbname (@DBNAMES) {
     my $db_var = 'db_'.$dbname;
 
     if (exists $self->{$db_var}) {
-      dbg ("bayes: untie-ing $db_var");
+      dbg ("bayes: $$ untie-ing $db_var");
       untie %{$self->{$db_var}};
       delete $self->{$db_var};
     }

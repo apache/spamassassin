@@ -333,6 +333,10 @@ sub learn {
       $self->{auto_learn_status} = $isspam;
     }
     $self->{main}->finish_learner();	# for now
+
+    if (exists $self->{main}->{bayes_scanner}) {
+      $self->{main}->{bayes_scanner}->sanity_check_is_untied();
+    }
   };
 
   if ($@) {
