@@ -422,12 +422,19 @@ sub razor2_lookup {
           $rc->disconnect() or die $rc->errprefix("checkit");
 	  # so $objects->[0] is the first (only) message, and ->{spam} is a general yes/no
           $self->{razor2_result} = $response = $objects->[0]->{spam};
+	  # good for debugging, but leave this off!
+	  #use Data::Dumper;
+	  #print Dumper($objects),"\n";
+	  #
 	  # ->{p} is for each part of the message
 	  # so go through each part, taking the highest cf we find
-	  if ( $response ) {
-	    foreach my $cf ( @{$objects->[0]->{p}} ) {
-	      my $tmpcf = $cf->{resp}->[0]->{cf};
-	      $self->{razor2_cf_score} = $tmpcf if ( defined $tmpcf && $tmpcf > $self->{razor2_cf_score} );
+	  # of any part that isn't contested (ct).  This helps avoid false
+	  # positives.
+	  foreach my $cf ( @{$objects->[0]->{p}} ) {
+	    if ( exists $cf->{resp} ) {
+	      my $tmpcf = $cf->{resp}->[0]->{cf}; # Part confidence
+	      my $tmpct = $cf->{resp}->[0]->{ct}; # Part contested?
+	      $self->{razor2_cf_score} = $tmpcf if ( !defined $tmpct && defined $tmpcf && $tmpcf > $self->{razor2_cf_score} );
 	    }
 	  }
         }
