@@ -1072,7 +1072,8 @@ sub dump_bayes_db {
   return 0 unless $self->{conf}->{use_bayes};
   return 0 unless $self->{store}->tie_db_readonly();
 
-  my($sb,$ns,$nh,$nt,$le,$oa) = $self->{store}->get_magic_tokens();
+  my($sb,$ns,$nh,$nt,$le,$oa,$bv) = $self->{store}->get_magic_tokens();
+  $sb = $self->{store}->scan_count_get(); # we want current scan count, not scan base count
 
   if ( $magic ) {
     printf ("%3.3f %8d %8d %8d  %s\n", 0.0, 0, $ns, 0, 'non-token data: nspam');
@@ -1081,11 +1082,14 @@ sub dump_bayes_db {
     printf ("%3.3f %8d %8d %8d  %s\n", 0.0, 0, $oa, 0, 'non-token data: oldest age');
     printf ("%3.3f %8d %8d %8d  %s\n", 0.0, 0, $sb, 0, 'non-token data: current scan-count');
     printf ("%3.3f %8d %8d %8d  %s\n", 0.0, 0, $le, 0, 'non-token data: last expiry scan-count');
+    printf ("%3.3f %8d %8d %8d  %s\n", 0.0, 0, $bv, 0, 'non-token data: bayes db version');
   }
 
   if ( $toks ) {
+    my $magic_re = $self->{store}->get_magic_re($bv);
+
     foreach my $tok (keys %{$self->{store}->{db_toks}}) {
-      next if ($tok =~ /^\*\*[A-Z]+$/); # skip magic tokens
+      next if ($tok =~ /$magic_re/); # skip magic tokens
 
       my $prob = $self->compute_prob_for_token($tok, $ns, $nh);
       $prob ||= 0.5;
@@ -1099,6 +1103,5 @@ sub dump_bayes_db {
     $self->{store}->untie_db();
   }
 }
-
 
 1;

@@ -61,18 +61,19 @@ use vars qw{
 @DB_EXTENSIONS = ('', '.db', '.dir', '.pag', '.dbm', '.cdb');
 
 # These are the magic tokens we use to track stuff in the DB.
-# The format MUST be '**' followed by a capital letter ([A-Z]).
-$NSPAM_MAGIC_TOKEN = '**NSPAM';
-$NHAM_MAGIC_TOKEN = '**NHAM';
-$OLDEST_TOKEN_AGE_MAGIC_TOKEN = '**OLDESTAGE';
-$LAST_EXPIRE_MAGIC_TOKEN = '**LASTEXPIRE';
-$NTOKENS_MAGIC_TOKEN = '**NTOKENS';
-$SCANCOUNT_BASE_MAGIC_TOKEN = '**SCANBASE';
-$RUNNING_EXPIRE_MAGIC_TOKEN = '**RUNNINGEXPIRE';
-$DB_VERSION_MAGIC_TOKEN = '**DBVERSION';
+# The format is '^M^A^G^I^C' followed by any string you want.
+# None of the control chars will be in a real token.
+$NSPAM_MAGIC_TOKEN		= "\015\001\007\011\003NSPAM";
+$NHAM_MAGIC_TOKEN		= "\015\001\007\011\003NHAM";
+$OLDEST_TOKEN_AGE_MAGIC_TOKEN	= "\015\001\007\011\003OLDESTAGE";
+$LAST_EXPIRE_MAGIC_TOKEN	= "\015\001\007\011\003LASTEXPIRE";
+$NTOKENS_MAGIC_TOKEN		= "\015\001\007\011\003NTOKENS";
+$SCANCOUNT_BASE_MAGIC_TOKEN	= "\015\001\007\011\003SCANBASE";
+$RUNNING_EXPIRE_MAGIC_TOKEN	= "\015\001\007\011\003RUNNINGEXPIRE";
+$DB_VERSION_MAGIC_TOKEN		= "\015\001\007\011\003DBVERSION";
 
 use constant MAX_SIZE_FOR_SCAN_COUNT_FILE => 5000;
-use constant DB_VERSION => 2;
+use constant DB_VERSION => 1;	# what version of DB do we use?
 
 ###########################################################################
 
@@ -85,6 +86,7 @@ sub new {
     'already_tied'	=> 0,
     'is_locked'		=> 0,
     'string_to_journal' => '',
+    'db_version'	=> undef,
   };
   bless ($self, $class);
 
@@ -154,7 +156,15 @@ sub tie_db_readonly {
 		 (oct ($main->{conf}->{bayes_file_mode}) & 0666)
        or goto failed_to_tie;
   }
+
+  # If the DB version is one we don't understand, abort!
+  if ( $self->check_db_version() ) {
+    $self->untie_db();
+    return 0;
+  }
+
   $self->{scan_count_little_file} = $path.'_msgcount';
+  $self->{db_version} = ($self->get_magic_tokens())[6];
   return 1;
 
 failed_to_tie:
@@ -169,6 +179,8 @@ sub tie_db_writable {
   my ($self) = @_;
   my $main = $self->{bayes}->{main};
 
+  return 0; # THEO - KLUGE, REMOVE THIS AFTER FIGURING OUT ATIME ISSUE!
+
   # return if we've already tied to the db's, using the same mode
   # (locked/unlocked) as before.
   return 1 if ($self->{already_tied} && $self->{is_locked} == 1);
@@ -182,6 +194,9 @@ sub tie_db_writable {
   }
 
   my $path = $main->sed_path ($main->{conf}->{bayes_path});
+
+  my $found=0;
+  for my $ext (@DB_EXTENSIONS) { if (-f $path.'_toks'.$ext) { $found=1; last; } }
 
   my $parentdir = dirname ($path);
   if (!-d $parentdir) {
@@ -210,18 +225,26 @@ sub tie_db_writable {
     my $name = $path.'_'.$dbname;
     my $db_var = 'db_'.$dbname;
     dbg("bayes: $$ tie-ing to DB file R/W $name");
-    # not convinced this is needed, or is efficient!
-    # untie %{$self->{$db_var}} if (tied %{$self->{$db_var}});
     tie %{$self->{$db_var}},"AnyDBM_File",$name, O_RDWR|O_CREAT,
 		 (oct ($main->{conf}->{bayes_file_mode}) & 0666)
        or goto failed_to_tie;
   }
   umask $umask;
-  $self->{scan_count_little_file} = $path.'_msgcount';
 
-  # figure out if we need to do a DB version update and do it if necessary
-  # if upgrade_db has a problem, fail immediately
-  goto failed_to_tie if ( $self->upgrade_db() );
+  # figure out if we can read the current DB and if we need to do a
+  # DB version update and do it if necessary if either has a problem,
+  # fail immediately
+  #
+  if ( $found && $self->upgrade_db() ) {
+    $self->untie_db();
+    return 0;
+  }
+  elsif ( !$found ) { # new DB, we need to put in the DB version ...
+    $self->{db_toks}->{$DB_VERSION_MAGIC_TOKEN} = DB_VERSION; # we're now using the latest DB version
+  }
+
+  $self->{scan_count_little_file} = $path.'_msgcount';
+  $self->{db_version} = ($self->get_magic_tokens())[6];
 
   # ensure we count 1 mailbox learnt as an event worth marking,
   # expiry-wise
@@ -240,23 +263,105 @@ failed_to_tie:
   return 0;
 }
 
+# Do we understand how to deal with this DB version?
+sub check_db_version {
+  my ($self) = @_;
+  my $db_ver = ($self->get_magic_tokens())[6];
+
+  if ( $db_ver > DB_VERSION ) { # current DB is newer, ignore the DB!
+    warn "bayes: Found DB Version $db_ver, but can only handle up to version ".DB_VERSION."\n";
+    return 1;
+  }
+
+  return 0;
+}
+
 # Check to see if we need to upgrade the DB, and do so if necessary
 sub upgrade_db {
   my ($self) = @_;
 
-  my $db_ver = $self->{db_toks}->{$DB_VERSION_MAGIC_TOKEN};
-  if ( !defined $db_ver || $db_ver =~ /\D/ ) { $db_ver = 1; }
+  my $db_ver = ($self->get_magic_tokens())[6];
+  return 0 if ( $db_ver == DB_VERSION );
+  return 1 if ( $self->check_db_version() );
 
   # If the current DB version is lower than the new version, upgrade!
   if ( $db_ver < DB_VERSION ) {
     # Do conversions in order so we can go 1 -> 3, make sure to update $db_ver
 
+    # since DB_File will not shrink a database (!!), we need to *create*
+    # a new one instead.
+    my $main = $self->{bayes}->{main};
+    my $path = $main->sed_path ($main->{conf}->{bayes_path});
+    my $name = $path.'_toks';
+
+    if ( $db_ver == 0 ) {
+      dbg ("bayes: upgrading database format from v0 to v1");
+
+      # Magic tokens for version 0, defined as '**[A-Z]+'
+      my $DB0_NSPAM_MAGIC_TOKEN = '**NSPAM';
+      my $DB0_NHAM_MAGIC_TOKEN = '**NHAM';
+      my $DB0_OLDEST_TOKEN_AGE_MAGIC_TOKEN = '**OLDESTAGE';
+      my $DB0_LAST_EXPIRE_MAGIC_TOKEN = '**LASTEXPIRE';
+      my $DB0_NTOKENS_MAGIC_TOKEN = '**NTOKENS';
+      my $DB0_SCANCOUNT_BASE_MAGIC_TOKEN = '**SCANBASE';
+
+      # remember when we started ...
+      my $started = time;
+
+      # use O_EXCL to avoid races (bonus paranoia, since we should be locked
+      # anyway)
+      my %new_toks;
+      my $umask = umask 0;
+      tie %new_toks, "AnyDBM_File", "${name}.new", O_RDWR|O_CREAT|O_EXCL,
+	           (oct ($main->{conf}->{bayes_file_mode}) & 0666) or return 1;
+      umask $umask;
+
+      # add the magic tokens to the new db.
+      my $sb = $new_toks{$SCANCOUNT_BASE_MAGIC_TOKEN} = $self->{db_toks}->{$DB0_SCANCOUNT_BASE_MAGIC_TOKEN};
+      my $le = $new_toks{$LAST_EXPIRE_MAGIC_TOKEN} = $self->{db_toks}->{$DB0_LAST_EXPIRE_MAGIC_TOKEN};
+      $new_toks{$OLDEST_TOKEN_AGE_MAGIC_TOKEN} = $self->{db_toks}->{$DB0_OLDEST_TOKEN_AGE_MAGIC_TOKEN};
+      $new_toks{$NSPAM_MAGIC_TOKEN} = $self->{db_toks}->{$DB0_NSPAM_MAGIC_TOKEN};
+      $new_toks{$NHAM_MAGIC_TOKEN} = $self->{db_toks}->{$DB0_NHAM_MAGIC_TOKEN};
+      $new_toks{$NTOKENS_MAGIC_TOKEN} = $self->{db_toks}->{$DB0_NTOKENS_MAGIC_TOKEN};
+      $new_toks{$DB_VERSION_MAGIC_TOKEN} = 1; # we're now a DB version 1 file
+
+      # deal with the data tokens
+      foreach my $tok (keys %{$self->{db_toks}}) {
+        next if ($tok =~ /^\*\*[A-Z]+$/); # skip magic tokens
+
+        my ($ts, $th, $atime) = $self->tok_get ($tok);
+	if ( $sb > 65535 ) {	# bug in DB version 0, atime was unsigned 16bit
+	  $atime = $le;		# so make all token atimes the last expire time
+	}
+        $new_toks{$tok} = $self->tok_pack ($ts, $th, $atime);
+      }
+
+
+      # now untie so we can do renames
+      untie %{$self->{db_toks}};
+      untie %new_toks;
+
+      # now rename in the new one.  Try several extensions
+      for my $ext (@DB_EXTENSIONS) {
+        my $newf = $name.'.new'.$ext;
+        my $oldf = $name.$ext;
+        next unless (-f $newf);
+        if (!rename ($newf, $oldf)) {
+          warn "rename $newf to $oldf failed: $!\n";
+	  return 1;
+        }
+      }
+
+      # re-tie to the new db in read-write mode ...
+      tie %{$self->{db_toks}},"AnyDBM_File", $name, O_RDWR|O_CREAT,
+		 (oct ($main->{conf}->{bayes_file_mode}) & 0666) or return 1;
+
+      dbg ("bayes: upgraded database format from v0 to v1 in ".(time - $started)." seconds");
+      $db_ver = 1;
+    }
+
     # if ( $db_ver == 1 ) { ... $db_ver = 2; }
-    # if ( $db_ver == 2 ) { ... $db_ver = 3; }
-  }
-  elsif ( $db_ver > DB_VERSION ) { # current DB is newer, ignore the DB!
-    dbg("bayes: Found DB Version $db_ver, but can only handle up to version ".DB_VERSION);
-    return 1;
+    # ... and so on.
   }
 
   return 0;
@@ -285,6 +390,7 @@ sub untie_db {
   }
 
   $self->{already_tied} = 0;
+  $self->{db_version} = undef;
 }
 
 ###########################################################################
@@ -333,9 +439,9 @@ sub expire_old_tokens_trapped {
   my $num_lowfreq = 0;
   my $num_hapaxes = 0;
   my $started = time();
-  my $last = $self->{db_toks}->{$LAST_EXPIRE_MAGIC_TOKEN};
-  if (!$last || $last =~ /\D/) { $last = 0; }
-  my $current = $self->scan_count_get();
+  my @magic = $self->get_magic_tokens();
+  my $last = $magic[4];
+  my $current = $self->scan_count_get(); # wants current scan count, not scan count base
 
   # since DB_File will not shrink a database (!!), we need to *create*
   # a new one instead.
@@ -357,7 +463,7 @@ sub expire_old_tokens_trapped {
   if ($showdots) { print STDERR "\n"; }
 
   foreach my $tok (keys %{$self->{db_toks}}) {
-    next if ($tok =~ /^\*\*[A-Z]+$/); # skip magic tokens
+    next if ($tok =~ /^\015\001\007\011\003/); # skip magic tokens
 
     my ($ts, $th, $atime) = $self->tok_get ($tok);
 
@@ -373,7 +479,7 @@ sub expire_old_tokens_trapped {
       $deleted++;
 
     } else {
-      $new_toks{$tok} = tok_pack ($ts, $th, $atime); $kept++;
+      $new_toks{$tok} = $self->tok_pack ($ts, $th, $atime); $kept++;
       if (!defined($oldest) || $atime < $oldest) { $oldest = $atime; }
       if ($ts + $th == 1) {
 	$num_hapaxes++;
@@ -408,7 +514,7 @@ sub expire_old_tokens_trapped {
         next unless (defined $tok && defined $ts && defined $th);
         $oatime = $atime;
 
-        $new_toks{$tok} = tok_pack ($ts, $th, $atime);
+        $new_toks{$tok} = $self->tok_pack ($ts, $th, $atime);
         if (defined($atime) && (!defined($oldest) || $atime < $oldest)) {
           $oldest = $atime;
         }
@@ -473,11 +579,8 @@ sub expiry_due {
 
   # is the database too small for expiry?  (Do *not* use "scalar keys",
   # as this will iterate through the entire db counting them!)
-  my $ntoks = $self->{db_toks}->{$NTOKENS_MAGIC_TOKEN};
-
-  # grr, wierd warning about non-numeric data. work around it
-  if (!$ntoks || $ntoks =~ /\D/) 
-		{ $ntoks = $self->{expiry_min_db_size} + 1; }
+  my @magic = get_magic_tokens();
+  my $ntoks = $magic[3];
 
   dbg("Bayes DB expiry: Tokens in DB: $ntoks, Expiry min size: ".$self->{expiry_min_db_size},'bayes','-1');
 
@@ -485,10 +588,8 @@ sub expiry_due {
     return 0;
   }
 
-  my $last = $self->{db_toks}->{$LAST_EXPIRE_MAGIC_TOKEN};
-  if (!$last || $last =~ /\D/) { $last = 0; }
-  my $oldest = $self->{db_toks}->{$OLDEST_TOKEN_AGE_MAGIC_TOKEN};
-  if (!$oldest || $oldest =~ /\D/) { $oldest = 0; }
+  my $last = $magic[4];
+  my $oldest = $magic[5];
 
   my $limit = $self->{expiry_count};
   my $now = $self->scan_count_get();
@@ -525,38 +626,72 @@ sub seen_delete {
 
 sub tok_get {
   my ($self, $tok) = @_;
-  my ($ts, $th, $atime) = tok_unpack ($self->{db_toks}->{$tok});
-  ($ts, $th, $atime);
+  $self->tok_unpack ($self->{db_toks}->{$tok});
 }
  
 sub nspam_nham_get {
   my ($self) = @_;
-  my $ns = $self->{db_toks}->{$NSPAM_MAGIC_TOKEN};
-  if (!$ns || $ns =~ /\D/) { $ns = 0; }
-  my $nn = $self->{db_toks}->{$NHAM_MAGIC_TOKEN};
-  if (!$nn || $nn =~ /\D/) { $nn = 0; }
-  ($ns, $nn);
+  my @magic = $self->get_magic_tokens();
+  ($magic[1], $magic[2]);
 }
 
+# return the magic tokens in a specific order:
+# 0: scan count base
+# 1: number of spam
+# 2: number of ham
+# 3: number of tokens in db
+# 4: last expire atime
+# 5: oldest token in db atime
+# 6: db version value
+#
 sub get_magic_tokens {
   my ($self) = @_;
+  my @values;
 
-  my(@values) = (
-    $self->{db_toks}->{$NTOKENS_MAGIC_TOKEN},
-    $self->{db_toks}->{$LAST_EXPIRE_MAGIC_TOKEN},
-    $self->{db_toks}->{$OLDEST_TOKEN_AGE_MAGIC_TOKEN},
-  );
+  my $db_ver = $self->{db_toks}->{$DB_VERSION_MAGIC_TOKEN};
+  if ( !$db_ver || $db_ver =~ /\D/ ) { $db_ver = 0; }
+
+  if ( $db_ver == 0 ) {
+    my $DB0_NSPAM_MAGIC_TOKEN = '**NSPAM';
+    my $DB0_NHAM_MAGIC_TOKEN = '**NHAM';
+    my $DB0_OLDEST_TOKEN_AGE_MAGIC_TOKEN = '**OLDESTAGE';
+    my $DB0_LAST_EXPIRE_MAGIC_TOKEN = '**LASTEXPIRE';
+    my $DB0_NTOKENS_MAGIC_TOKEN = '**NTOKENS';
+    my $DB0_SCANCOUNT_BASE_MAGIC_TOKEN = '**SCANBASE';
+
+    @values = (
+      $self->{db_toks}->{$DB0_SCANCOUNT_BASE_MAGIC_TOKEN},
+      $self->{db_toks}->{$DB0_NSPAM_MAGIC_TOKEN},
+      $self->{db_toks}->{$DB0_NHAM_MAGIC_TOKEN},
+      $self->{db_toks}->{$DB0_NTOKENS_MAGIC_TOKEN},
+      $self->{db_toks}->{$DB0_LAST_EXPIRE_MAGIC_TOKEN},
+      $self->{db_toks}->{$DB0_OLDEST_TOKEN_AGE_MAGIC_TOKEN},
+      0,
+    );
+  }
+  elsif ( $db_ver == 1 ) {
+    @values = (
+      $self->{db_toks}->{$SCANCOUNT_BASE_MAGIC_TOKEN},
+      $self->{db_toks}->{$NSPAM_MAGIC_TOKEN},
+      $self->{db_toks}->{$NHAM_MAGIC_TOKEN},
+      $self->{db_toks}->{$NTOKENS_MAGIC_TOKEN},
+      $self->{db_toks}->{$LAST_EXPIRE_MAGIC_TOKEN},
+      $self->{db_toks}->{$OLDEST_TOKEN_AGE_MAGIC_TOKEN},
+      1,
+    );
+  }
+
   foreach ( @values ) {
     if ( !$_ || $_ =~ /\D/ ) { $_ = 0; }
   }
 
-  return (
-    $self->scan_count_get(),
-    $self->nspam_nham_get(),
-    @values
-  );
+  return @values;
 }
 
+
+## Don't bother using get_magic_tokens here.  This token should only
+## ever exist when we're running expire, so we don't want to convert it if
+## it's there and we're not expiring ...
 sub get_running_expire_tok {
   my ($self) = @_;
   my $running = $self->{db_toks}->{$RUNNING_EXPIRE_MAGIC_TOKEN};
@@ -662,6 +797,17 @@ sub add_touches_to_journal {
   umask $umask; # reset umask
 
   $self->{string_to_journal} = '';
+}
+
+sub get_magic_re {
+  my ($self, $db_ver) = @_;
+
+  if ( $db_ver == 1 ) {
+    return qr/^\015\001\007\011\003/;
+  }
+
+  # When in doubt, assume v0
+  return qr/^\*\*[A-Z]+$/;
 }
 
 ###########################################################################
@@ -809,7 +955,7 @@ sub tok_put {
   $ts ||= 0;
   $th ||= 0;
 
-  if ( $tok =~ /^\*\*[A-Z]+$/ ) { # magic token?  Ignore it!
+  if ( $tok =~ /^\015\001\007\011\003/ ) { # magic token?  Ignore it!
     return;
   }
 
@@ -829,16 +975,13 @@ sub tok_put {
       $self->{db_toks}->{$NTOKENS_MAGIC_TOKEN}++;
     }
 
-    $self->{db_toks}->{$tok} = tok_pack ($ts, $th, $atime);
+    $self->{db_toks}->{$tok} = $self->tok_pack ($ts, $th, $atime);
   }
 }
 
 sub tok_sync_nspam_nham {
   my ($self, $ds, $dh) = @_;
-  my $ns = $self->{db_toks}->{$NSPAM_MAGIC_TOKEN};
-  my $nh = $self->{db_toks}->{$NHAM_MAGIC_TOKEN};
-  $ns ||= 0;
-  $nh ||= 0;
+  my ($ns, $nh) = ($self->get_magic_tokens())[1,2];
   if ($ds) { $ns += $ds; } if ($ns < 0) { $ns = 0; }
   if ($dh) { $nh += $dh; } if ($nh < 0) { $nh = 0; }
   $self->{db_toks}->{$NSPAM_MAGIC_TOKEN} = $ns;
@@ -866,9 +1009,7 @@ sub get_journal_filename {
 sub scan_count_get {
   my ($self) = @_;
 
-  my $count = $self->{db_toks}->{$SCANCOUNT_BASE_MAGIC_TOKEN};
-  # avoid a wierd warning: non-numeric data in there
-  if (!$count || $count =~ /\D/) { $count = 0; }
+  my ($count) = $self->get_magic_tokens();
   my $path = $self->{scan_count_little_file};
   $count += (defined $path && -e $path ? -s _ : 0);
   $count;
@@ -929,8 +1070,7 @@ sub scan_count_increment_big_counter {
     local $SIG{'__DIE__'};      # do not run user die() traps in here
 
     if ($self->tie_db_writable()) {
-      my $count = $self->{db_toks}->{$SCANCOUNT_BASE_MAGIC_TOKEN};
-      if (!$count || $count =~ /\D/) { $count = 0; }
+      my($count) = $self->get_magic_tokens();
       $count += MAX_SIZE_FOR_SCAN_COUNT_FILE;
       $self->{db_toks}->{$SCANCOUNT_BASE_MAGIC_TOKEN} = $count;
     }
@@ -972,14 +1112,23 @@ sub scan_count_increment_big_counter {
 # Savings: roughly halves size of toks db, at the cost of a ~10% slowdown.
 
 use constant FORMAT_FLAG	=> 0xc0;	# 11000000
-  use constant ONE_BYTE_FORMAT	=> 0xc0;	# 11000000
-  use constant TWO_LONGS_FORMAT	=> 0x00;	# 00000000
+use constant ONE_BYTE_FORMAT	=> 0xc0;	# 11000000
+use constant TWO_LONGS_FORMAT	=> 0x00;	# 00000000
 
 use constant ONE_BYTE_SSS_BITS	=> 0x38;	# 00111000
 use constant ONE_BYTE_HHH_BITS	=> 0x07;	# 00000111
 
 sub tok_unpack {
-  my ($packed, $atime) = unpack("CS", $_[0] || 0);
+  my ($self, $value) = @_;
+  $value ||= 0;
+
+  my ($packed, $atime);
+  if ( $self->{db_version} == 0 ) {
+    ($packed, $atime) = unpack("CS", $value);
+  }
+  elsif ( $self->{db_version} == 1 ) {
+    ($packed, $atime) = unpack("CV", $value);
+  }
 
   if (($packed & FORMAT_FLAG) == ONE_BYTE_FORMAT) {
     return (($packed & ONE_BYTE_SSS_BITS) >> 3,
@@ -987,7 +1136,13 @@ sub tok_unpack {
 		$atime || 0);
   }
   elsif (($packed & FORMAT_FLAG) == TWO_LONGS_FORMAT) {
-    my ($packed, $ts, $th, $atime) = unpack("CLLS", $_[0] || 0);
+    my ($packed, $ts, $th, $atime);
+    if ( $self->{db_version} == 0 ) {
+      ($packed, $ts, $th, $atime) = unpack("CLLS", $value);
+    }
+    elsif ( $self->{db_version} == 1 ) {
+      ($packed, $ts, $th, $atime) = unpack("CVVV", $value);
+    }
     return ($ts || 0, $th || 0, $atime || 0);
   }
   # other formats would go here...
@@ -998,12 +1153,12 @@ sub tok_unpack {
 }
 
 sub tok_pack {
-  my ($ts, $th, $atime) = @_;
+  my ($self, $ts, $th, $atime) = @_;
   $ts ||= 0; $th ||= 0; $atime ||= 0;
   if ($ts < 8 && $th < 8) {
-    return pack ("CS", ONE_BYTE_FORMAT | ($ts << 3) | $th, $atime);
+    return pack ("CV", ONE_BYTE_FORMAT | ($ts << 3) | $th, $atime);
   } else {
-    return pack ("CLLS", TWO_LONGS_FORMAT, $ts, $th, $atime);
+    return pack ("CVVV", TWO_LONGS_FORMAT, $ts, $th, $atime);
   }
 }
 
