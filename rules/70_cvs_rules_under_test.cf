@@ -838,3 +838,56 @@ score T_X_NJABL_DIALUP     0.5
 body __FORMMAIL_MSG	/^Below is the result of your feedback form\./
 meta T_FORMMAIL		( __FORMMAIL_MSG && ! NMS_CGI_NOT_BUGGY )
 describe T_FORMMAIL	An old-looking formmail.pl message
+
+# Matt Cline: New ratware and user-agent tests
+header T_RATWARE_BIXON       X-Mailer =~ /Bixon ThunderMail/
+header T_RATWARE_BULK_MAILER X-Mailer =~ /BulkMailer/
+header T_RATWARE_BANG_HASH   X-Mailer =~ /!.*\#.*\*/
+header T_RATWARE_HASH_2_V2   X-Mailer =~ /^[A-Za-z0-9\._]{14,}$/
+header T_RATWARE_FLOAT       X-Mailer =~ /^\d\.\d\d/
+header T_RATWARE_CHARSET_V2  X-Mailer =~ /^normal \W \W\s*charset.*=\"/
+
+header T_USER_AGENT_FORTE    X-Mailer =~ /^Forte Agent \d\.\d+\/\d+\.\d+$/
+score  T_USER_AGENT_FORTE    -0.5
+tflags T_USER_AGENT_FORTE    nice
+
+header T_USER_AGENT_MSN      X-Mailer =~ /^MSN Explorer \d\.\d\d\.\d{4}\.\d{4}$/
+score  T_USER_AGENT_MSN      -0.5
+tflags T_USER_AGENT_MSN      nice
+
+header T_USER_AGENT_PERL1    X-Mailer =~ /^Perl\d Mail::Internet v\d\.\d+$/
+score  T_USER_AGENT_PERL1    -0.5
+tflags T_USER_AGENT_PERL1    nice
+
+header T_USER_AGENT_PERL2    X-Mailer =~ /^Perl Mail::Sender \d\.\d+\.\d+/
+score  T_USER_AGENT_PERL2    -0.5
+tflags T_USER_AGENT_PERL2    nice
+
+header T_USER_AGENT_PERL3    X-Mailer =~ /^Perl Powered Socket Mailer$/
+score  T_USER_AGENT_PERL3    -0.5
+tflags T_USER_AGENT_PERL3    nice
+
+header T_USER_AGENT_PHP1     X-Mailer =~ m!^PHP(?:/\d+\.\d+\.\d+)?$!
+score  T_USER_AGENT_PHP1     -0.5
+tflags T_USER_AGENT_PHP1     nice
+
+header T_USER_AGENT_PHP2     X-Mailer =~ /^phpmailer \[version \d\.\d+\]$/
+score  T_USER_AGENT_PHP2     -0.5
+tflags T_USER_AGENT_PHP2     nice
+
+header T_USER_AGENT_T_ONLINE X-Mailer =~ /^T-Online eMail \d+\.\d+$/
+score  T_USER_AGENT_T_ONLINE -0.5
+tflags T_USER_AGENT_T_ONLINE nice
+
+header T_USER_AGENT_UBB      X-Mailer =~ /^UBB\.?[Tt]hreads$/
+score  T_USER_AGENT_UBB      -0.5
+tflags T_USER_AGENT_UBB      nice
+
+header T_USER_AGENT_XIMIAN   X-Mailer =~ /^Ximian Evolution \d+\.\d+\.\d+(?:\.\d+)?\s$/
+score  T_USER_AGENT_XIMIAN   -0.5
+tflags T_USER_AGENT_XIMIAN   nice
+
+# OS/2 specific mailer
+header T_USER_AGENT_PMMAIL   X-Mailer =~ m!^PMMail \d\.\d+(?:\w|\.\d+)? [Ff]or OS/2(?: Warp \d\.\d+)?$!
+score  T_USER_AGENT_PMMAIL   -0.5
+tflags T_USER_AGENT_PMMAIL   nice
