@@ -245,7 +245,7 @@ sub razor2_access {
 
 		    # These should always be set, but just in case ...
                     $tmpcf = 0 unless defined $tmpcf;
-                    $tmpct = 0 unless defined $tmpcf;
+                    $tmpct = 0 unless defined $tmpct;
                     $engine = 0 unless defined $engine;
 
 		    push(@results,
