@@ -1257,31 +1257,6 @@ Empty the list of internal networks.
     }
   });
 
-=item use_razor2 ( 0 | 1 )		(default: 1)
-
-Whether to use Razor version 2, if it is available.
-
-=cut
-
-  push (@cmds, {
-    setting => 'use_razor2',
-    default => 1,
-    type => $CONF_TYPE_BOOL
-  });
-
-=item razor_timeout n		(default: 10)
-
-How many seconds you wait for razor to complete before you go on without
-the results
-
-=cut
-
-  push (@cmds, {
-    setting => 'razor_timeout',
-    default => 10,
-    type => $CONF_TYPE_NUMERIC
-  });
-
 =item skip_rbl_checks { 0 | 1 }   (default: 0)
 
 By default, SpamAssassin will run RBL checks.  If your ISP already does this
@@ -2451,19 +2426,6 @@ general running of SpamAssassin.
       if ($value !~ /^(\S+)\s+(ok|fail)\s+(.*)$/) { return $INVALID_VALUE; }
       $self->{parser}->add_regression_test($1, $2, $3);
     }
-  });
-
-=item razor_config filename
-
-Define the filename used to store Razor's configuration settings.
-Currently this is left to Razor to decide.
-
-=cut
-
-  push (@cmds, {
-    setting => 'razor_config',
-    is_admin => 1,
-    type => $CONF_TYPE_STRING
   });
 
 =item pyzor_path STRING

@@ -2579,19 +2579,6 @@ sub _check_attachments {
 # FULL-MESSAGE TESTS:
 ###########################################################################
 
-sub check_razor2 {
-  my ($self) = @_;
-
-  return 0 unless ($self->is_razor2_available());
-  return $self->{razor2_result} if (defined $self->{razor2_result});
-
-  # note: we don't use $fulltext. instead we get the raw message,
-  # unfiltered, for razor2 to check.  ($fulltext removes MIME
-  # parts etc.)
-  my $full = $self->{msg}->get_pristine();
-  return $self->razor2_lookup (\$full);
-}
-
 sub check_pyzor {
   my ($self, $full) = @_;
 
@@ -2736,30 +2723,6 @@ sub check_outlook_message_id {
   $diff = $timetoken - $expected;
 
   return (abs($diff) >= $fudge);
-}
-
-# Check the cf value of a given message and return if it's within the
-# given range
-sub check_razor2_range {
-  my ($self,$fulltext,$min,$max) = @_;
-
-  # If the Razor2 general test is disabled, don't continue.
-  return 0 unless $self->{conf}{scores}{'RAZOR2_CHECK'};
-
-  # If Razor2 hasn't been checked yet, go ahead and run it.
-  if (!defined $self->{razor2_result}) {
-    # note: we don't use $fulltext. instead we get the raw message,
-    # unfiltered, for razor2 to check.  ($fulltext removes MIME
-    # parts etc.)
-    my $full = $self->{msg}->get_pristine();
-    $self->razor2_lookup (\$full);
-  }
-
-  if ($self->{razor2_cf_score} >= $min && $self->{razor2_cf_score} <= $max) {
-    $self->test_log(sprintf ("cf: %3d", $self->{razor2_cf_score}));
-    return 1;
-  }
-  return 0;
 }
 
 sub check_messageid_not_usable {

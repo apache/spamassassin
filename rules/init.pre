@@ -28,6 +28,10 @@ loadplugin Mail::SpamAssassin::Plugin::Hashcash
 #
 loadplugin Mail::SpamAssassin::Plugin::SPF
 
+# Razor2 - perform Razor2 message checks
+#
+loadplugin Mail::SpamAssassin::Plugin::Razor2
+
 # MSExec - do simple checks to see if the message includes a Microsoft
 # executable file
 #
