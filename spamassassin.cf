@@ -350,7 +350,7 @@ describe USER_IN_WHITELIST	From: address is in the user's white-list
 ###########################################################################
 # not quite spam, but dangerous/irritating nonetheless. Sircam worms etc.
 
-full SIRCAM_SIGNATURE		/Content-Disposition: attachment;\s+filename=..+\.\S\S\S\.(bat|com|lnk|pif)./s
+full SIRCAM_SIGNATURE		/Content-Disposition: attachment;\s+filename=.[^\n]+\.\S\S\S\.(bat|com|lnk|pif)./s
 describe SIRCAM_SIGNATURE	SECURITY: message contains the Sircam worm
 
 ###########################################################################
