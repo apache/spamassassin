@@ -1,0 +1,62 @@
+#!/usr/bin/perl
+# Copyright 2003 by Malte S. Stretz <spamassassin-contrib at msquadrat dot de>
+#                   and all the other SA OSS folks
+#
+# This file is licensed for use with the OSS SpamAssassin distribution
+# under the same terms as the whole SpamAssassin bundle (PAL/GPL, the 
+# text of which is included as the file named "License"). 
+
+
+use strict;
+use bytes;
+
+use vars qw {
+  $opt_f $opt_h
+};
+
+use Getopt::Std;
+getopts("f:h");
+
+sub usage {
+  die "extract-message-from-mbox [-f=file] offset
+
+  Extracts the message starting at offset from file (or stdin). Very useful in
+  combination with mass-check logs and mboxes.
+";
+}
+
+my $offset = $ARGV[0];
+usage() if($opt_h || !$offset);
+
+
+if($opt_f) {
+  do_file($opt_f, $offset);
+} else {
+  do_stdin($offset);
+}
+
+sub do_file {
+  my ($in, $offset) = @_;
+  open (STDIN, "<$in") or die "Cannot open '$in': $!";
+  do_stdin($offset);
+  close STDIN;
+}
+
+sub do_stdin {
+  my ($offset) = @_;
+  my $found = 0;
+
+  while(<STDIN>) {
+
+    unless($found) {
+      $offset -= length;
+      $found = 1 if($offset <= 0);
+    }
+    else {
+      print;
+      last if($found == 3);
+      $found++ if(/^From /);
+    }
+  }
+}
+
