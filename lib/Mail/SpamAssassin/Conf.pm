@@ -201,6 +201,8 @@ sub new {
   $self->{rawbody_evals} = { };
   $self->{meta_tests} = { };
 
+  $self->{eval_plugins} = { };
+
   # testing stuff
   $self->{regression_tests} = { };
 
@@ -1986,7 +1988,16 @@ in a future version.  Please use the C<trusted_networks> option instead
       $self->{num_check_received} = $1+0; next;
     }
 
+###########################################################################
 
+    if ($self->{main}->call_plugins ("parse_config", {
+		line => $_,
+		user_config => $scoresonly
+	    }))
+    {
+      # a plugin dealt with it successfully.
+      next;
+    }
 
 ###########################################################################
     # SECURITY: no eval'd code should be loaded before this line.
@@ -2643,6 +2654,20 @@ The password for the database username, for the above DSN.
     # user_scores_sql_table here.  All just take \S+ and set the string of the
     # same name on $self.
 
+=item loadplugin PluginModuleName /path/to/module.pm
+
+Load a SpamAssassin plugin module.  The C<PluginModuleName> is the perl module
+name, used to create the plugin object itself; C</path/to/module.pm> is the
+file to load, containing the module's perl code.
+
+See C<Mail::SpamAssassin::Plugin> for more details on writing plugins.
+
+=cut
+
+    if (/^loadplugin\s+(\S+)\s+(\S+)$/) {
+      $self->load_plugin ($1, $2); next;
+    }
+
 ###########################################################################
 
 failed_line:
@@ -2866,6 +2891,18 @@ sub maybe_body_only {
   }
 
   return 0;
+}
+
+###########################################################################
+
+sub load_plugin {
+  my ($self, $package, $path) = @_;
+  $self->{main}->{plugins}->load_plugin ($package, $path);
+}
+
+sub register_eval_rule {
+  my ($self, $pluginobj, $nameofsub) = @_;
+  $self->{eval_plugins}->{$nameofsub} = $pluginobj;
 }
 
 ###########################################################################

@@ -2174,6 +2174,17 @@ sub run_eval_tests {
     my ($function, @args) = @{$test};
     unshift(@args, @extraevalargs);
 
+    # check to make sure the function is defined
+    if (!$self->can ($function)) {
+      my $pluginobj = $self->{conf}->{eval_plugins}->{$function};
+      if ($pluginobj) {
+	# we have a plugin for this.  eval its function
+	$self->register_plugin_eval_glue ($pluginobj, $function);
+      } else {
+	dbg ("no method found for eval test $function");
+      }
+    }
+
     eval {
       $result = $self->$function(@args);
     };
@@ -2191,6 +2202,31 @@ sub run_eval_tests {
     } else {
         #dbg("Ran run_eval_test rule $rulename but did not get hit", "rulesrun", 32) if $debugenabled;
     }
+  }
+}
+
+sub register_plugin_eval_glue {
+  my ($self, $pluginobj, $function) = @_;
+
+  dbg ("registering glue method for $function ($pluginobj)");
+  my $evalstr = <<"ENDOFEVAL";
+{
+    package Mail::SpamAssassin::PerMsgStatus;
+
+	sub $function {
+	  my (\$self) = shift;
+	  my \$plugin = \$self->{conf}->{eval_plugins}->{$function};
+	  return \$plugin->$function (\$self, \@_);
+	}
+
+	1;
+}
+ENDOFEVAL
+  eval $evalstr;
+
+  if ($@) {
+    warn "Failed to run header SpamAssassin tests, skipping some: $@\n";
+    $self->{rule_errors}++;
   }
 }
 

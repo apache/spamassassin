@@ -113,6 +113,7 @@ use Mail::SpamAssassin::ConfSourceSQL;
 use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::MsgParser;
 use Mail::SpamAssassin::Bayes;
+use Mail::SpamAssassin::PluginHandler;
 
 use File::Basename;
 use File::Path;
@@ -310,6 +311,7 @@ sub new {
   $DEBUG->{rulesrun}=64;
 
   $self->{conf} ||= new Mail::SpamAssassin::Conf ($self);
+  $self->{plugins} = Mail::SpamAssassin::PluginHandler->new ($self);
 
   $self->{save_pattern_hits} ||= 0;
 
@@ -1038,11 +1040,13 @@ sub read_scoreonly_config {
   my $text = join ('',<IN>);
   close IN;
 
+  $self->{conf}->{main} = $self;
   $self->{conf}->parse_scores_only ($text);
   if ($self->{conf}->{allow_user_rules}) {
       dbg("finishing parsing!");
       $self->{conf}->finish_parsing();
   }
+  delete $self->{conf}->{main};	# to allow future GC'ing
 }
 
 ###########################################################################
@@ -1232,8 +1236,10 @@ sub init {
     warn "No configuration text or files found! Please check your setup.\n";
   }
 
+  $self->{conf}->{main} = $self;
   $self->{conf}->parse_rules ($self->{config_text});
   $self->{conf}->finish_parsing ();
+  delete $self->{conf}->{main};	# to allow future GC'ing
 
   delete $self->{config_text};
 
@@ -1453,6 +1459,14 @@ sub get_cf_files_in_dir {
   closedir SA_CF_DIR;
 
   return map { "$dir/$_" } sort { $a cmp $b } @cfs;	# sort numerically
+}
+
+###########################################################################
+
+sub call_plugins {
+  my $self = shift;
+  my $subname = shift;
+  return $self->{plugins}->callback ($subname, @_);
 }
 
 ###########################################################################
