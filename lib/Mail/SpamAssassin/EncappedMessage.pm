@@ -24,11 +24,6 @@ sub replace_header {
   $self->{mail_object}->replace_header ($hdr, $text);
 }
 
-sub delete_header {
-  my ($self, $hdr) = @_;
-  $self->{mail_object}->delete_header ($hdr);
-}
-
 sub get_pristine_header {
   my ($self, $hdr) = @_;
   return $self->get_header ($hdr);

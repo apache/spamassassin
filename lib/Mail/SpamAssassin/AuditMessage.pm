@@ -33,6 +33,11 @@ sub put_header {
   $self->{mail_object}->put_header ($hdr, $text);
 }
 
+sub delete_header {
+  my ($self, $hdr) = @_;
+  $self->{mail_object}->{obj}->head->delete ($hdr);
+}
+
 sub get_all_headers {
   my ($self) = @_;
   $self->{mail_object}->header();
