@@ -2,6 +2,10 @@
 
 Mail::SpamAssassin::Plugin::SPF - perform SPF verification tests
 
+This plugin checks a message against Sender Policy Framework (SPF)
+records published by the domain owners in DNS to fight email address
+forgery and make it easier to identify spams.
+
 =head1 SYNOPSIS
 
   loadplugin     Mail::SpamAssassin::Plugin::SPF
