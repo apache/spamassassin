@@ -364,26 +364,32 @@ body T_INT_CELEBREX	eval:check_obfu_word('celebrex')
 body T_INT_CIALIS	eval:check_obfu_word('cialis')
 body T_INT_CREDIT	eval:check_obfu_word('credit')
 body T_INT_ERECT	eval:check_obfu_word('erection')
+body T_INT_FREE		eval:check_obfu_word('free')
+body T_INT_HUNDREDS	eval:check_obfu_word('hundreds')
 body T_INT_LEVITRA	eval:check_obfu_word('levitra')
 body T_INT_MILF		eval:check_obfu_word('milf')
 body T_INT_MILLION	eval:check_obfu_word('million')
+body T_INT_MONEY	eval:check_obfu_word('money')
 body T_INT_MORTGAGE	eval:check_obfu_word('mortgage')
 body T_INT_OBLIGATION	eval:check_obfu_word('obligation')
 body T_INT_OFFERS	eval:check_obfu_word('offers')
 body T_INT_PENIS	eval:check_obfu_word('penis')
 body T_INT_PHARMACY	eval:check_obfu_word('pharmacy')
 body T_INT_PHENT	eval:check_obfu_word('phentermine')
-body T_INT_PILLS	eval:check_obfu_word('pills')
 body T_INT_PRESCRIPT	eval:check_obfu_word('prescription')
 body T_INT_PROFIT	eval:check_obfu_word('profit')
 body T_INT_REFINANCE	eval:check_obfu_word('refinance')
 body T_INT_ROLEX	eval:check_obfu_word('rolex')
 body T_INT_SOFTWARE	eval:check_obfu_word('software')
+body T_INT_THOUSANDS	eval:check_obfu_word('thousands')
 body T_INT_VALIUM	eval:check_obfu_word('valium')
 body T_INT_VIAGRA	eval:check_obfu_word('viagra')
 body T_INT_VICODIN	eval:check_obfu_word('vicodin')
 body T_INT_VIOXX	eval:check_obfu_word('vioxx')
 body T_INT_XANAX	eval:check_obfu_word('xanax')
+
+# TVD: my FPs for this are all things like "pill's benefits"
+body T_INT_PILLS	eval:check_obfu_word('pill(?!<\')s')
 
 # TVD: my FPs for this are from last names in sentences.
 # ala "... see Dave Price's results for ..."
@@ -394,5 +400,31 @@ body T_AFFORD		/\baffordable .{0,10}prices\b/i
 header __RATWARE_NAME_ID	eval:check_ratware_name_id()
 meta T_RATWARE_NAME_ID	__RATWARE_0_TZ_DATE && __RATWARE_NAME_ID
 
+# these don't hit a lot, but it's a definite obfuscation technique
 uri T_HTTP_BAD_HOST_CHAR	m@^https?://[^/]*[\000-\040\200-\377]@i
 uri T_HTTP_BAD_HOST_CTRL	m@^https?://[^/]*[\000-\037]@i
+
+#  0.129   0.1461   0.0000    1.000   0.50    0.01  T_DOLLARS_US
+body T_DOLLARS_US /\d+,\d+US/i
+#  0.157   0.1780   0.0000    1.000   1.00    0.01  T_DOLLARS_US_2
+body T_DOLLARS_US_2 /\s\d[\d.,]+US/
+
+# These don't overlap at all, but happen to catch the same number
+#  0.099   0.1118   0.0000    1.000   0.20    0.01  T_REPLICA_ROLEX
+#  0.099   0.1118   0.0000    1.000   0.20    0.01  T_CHAR_ROLEX
+body T_REPLICA_ROLEX /\breplica.{1,20}rolex/i
+body T_CHAR_ROLEX /[^\s\w]rolex/i
+
+#  0.091   0.1027   0.0000    1.000   0.10    0.01  T_RATWARE_HASH_3
+header T_RATWARE_HASH_3 Message-ID =~ /^<\d{8}[a-zA-Z0-9]{14}@/
+
+#  7.011   7.9353   0.0000    1.000   1.00    0.01  T_RATWARE_MS_HASH_1
+#  4.390   4.9684   0.0000    1.000   0.80    0.01  T_RATWARE_MS_HASH_2
+header __MSGID_MS_HASH Message-ID =~ /^<[a-f0-9]{12}\$[a-f0-9]{8}\$[a-f0-9]{8}@/
+header __MSGID_MS_HASH_HOST Message-ID =~ /^<[a-f0-9]{12}\$[a-f0-9]{8}\$[a-f0-9]{8}@[^>.]+>/
+header __MIMEOLE_MS X-MIMEOLE =~ /^Produced By Microsoft MimeOLE/
+meta T_RATWARE_MS_HASH_1 __MSGID_MS_HASH && !__MIMEOLE_MS
+meta T_RATWARE_MS_HASH_2 __MSGID_MS_HASH_HOST && !__MIMEOLE_MS
+
+#  0.058   0.0662   0.0000    1.000   0.40    0.01  T_AUTO_MARKET
+body T_AUTO_MARKET /\bAutomated Marketing\b/i
