@@ -530,3 +530,19 @@ describe COPYRIGHT_CLAIMED	Contains a claim of copyright
 body HTTP_NUMBER_WORD		/http\:\/\/(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty)\./i
 describe HTTP_NUMBER_WORD	URL contains spamhaus signature: numbered servers
 
+# some very frequent spam subjects, based on statistical analysis
+body KIFF			/temple kiff/i
+describe KIFF			Contains "Temple Kiff"
+
+body CBYI			/CBYI/
+describe CBYI			Contains "CBYI"
+
+body JODY			/(?:My wife, Jody|Mi esposa, Jody)/
+describe JODY			Contains "My wife, Jody" testimonial
+
+body GENTLE_FEROCITY		/Gentle Ferocity/i
+describe GENTLE_FEROCITY	Contains "Gentle Ferocity"
+
+body VJESTIKA			/Vjestika Aphrodisia/i
+describe VJESTIKA		Contains "Vjestika Aphrodisia"
+
