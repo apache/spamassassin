@@ -359,9 +359,13 @@ meta T_SUBJECT_EXCESS_MIME_Q	__SUBJECT_MIME_ENCODED_Q && !__SUBJECT_NEEDS_MIME
 meta T_SUBJECT_EXCESS_MIME_B	__SUBJECT_MIME_ENCODED_B && !__SUBJECT_NEEDS_MIME
 
 # quick idea
+header __FROM_MIME_ENCODED	From:raw =~ /=\?\S+\?[BQ]\?/i
 header __FROM_NEEDS_MIME	From =~ /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]/
-meta T_FROM_EXCESS_MIME	__FROM_MIME_ENCODED && !__FROM_NEEDS_MIME
+meta T_FROM_EXCESS_MIME		__FROM_MIME_ENCODED && !__FROM_NEEDS_MIME
 header __FROM_MIME_ENCODED_Q	From:raw =~ /=\?\S+\?Q\?/i
 header __FROM_MIME_ENCODED_B	From:raw =~ /=\?\S+\?B\?/i
 meta T_FROM_EXCESS_MIME_Q	__FROM_MIME_ENCODED_Q && !__FROM_NEEDS_MIME
 meta T_FROM_EXCESS_MIME_B	__FROM_MIME_ENCODED_B && !__FROM_NEEDS_MIME
+
+# hmmmm...
+header T_SUBJECT_MIME_ENCODED_TWICE	Subject:raw =~ /=\?\S+\?[BQ]\?.*=\?\S+\?[BQ]\?/i
