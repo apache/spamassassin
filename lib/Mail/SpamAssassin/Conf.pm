@@ -2378,9 +2378,9 @@ in corpus size etc.
 =item bayes_journal_max_size		(default: 102400)
 
 SpamAssassin will opportunistically sync the journal and the database.
-It will do so at least once a day, but can also sync if the file size
-goes above this setting, in bytes.  If set to 0, the journal sync will
-only occur once a day.
+It will do so once a day, but will sync more often if the journal file
+size goes above this setting, in bytes.  If set to 0, opportunistic
+syncing will not occur.
 
 =cut
 
