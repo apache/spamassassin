@@ -816,10 +816,12 @@ sub get_decoded_stripped_body_text_array {
     # <A>, <AREA>, <BASE> and <LINK> use "href=URI".
     # <IMG>, <FRAME>, <IFRAME>, <EMBED> and <SCRIPT> use "src=URI"
     # <FORM> uses "action=URI"
+    # <TABLE> and <TD> use "background=URI"
     $text =~ s/<base\s[^>]*\bhref$URI_in_tag>/BASEURI:$1 /ogis;
     $text =~ s/<(?:a|area|link)\s[^>]*\bhref$URI_in_tag>/URI:$1 /ogis;
     $text =~ s/<(?:img|i?frame|embed|script)\s[^>]*\bsrc$URI_in_tag>/URI:$1 /ogis;
     $text =~ s/<form\s[^>]*\baction$URI_in_tag>/URI:$1 /ogis;
+    $text =~ s/<(?:table|td)\s[^>]*\bbackground$URI_in_tag>/URI:$1 /ogis;
   
     # Get rid of all remaing HTML and XML tags
     $text =~ s/<[?!\s]*[:a-z0-9]+\b[^>]*>//gis;
