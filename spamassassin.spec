@@ -18,7 +18,7 @@ Group:          Applications/Mail
 %define version 2.70
 %define real_version 2.70
 
-# Release number can be specified with rpmbuild --define 'rel SOMETHING' ...
+# Release number can be specified with rpmbuild --define 'release SOMETHING' ...
 # If no such --define is used, the release number is 1.
 #
 # Source archive's extension can be specified with --define 'srcext .foo'
