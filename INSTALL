@@ -94,12 +94,12 @@ still be some issues.  In addition, there is a speed hit, which it would
 be nice to avoid.
 
 Setting the LANG environment variable before any invocation of
-SpamAssassin sometimes seems to help fix it:
+SpamAssassin sometimes seems to help fix it, like so:
 
   export LANG=en_US
 
 Notably, the LANG setting must not include "utf8".   However, some folks
-have reported that this makes no difference.
+have reported that this makes no difference. ;)
 
 
 Installing SpamAssassin for Personal Use (Not System-Wide)
