@@ -137,3 +137,7 @@ describe URI_AFFILIATE		Contains a URI with an affiliate ID code
 
 uri URI_LONG_HOSTNAME		/^https?:\/\/[a-z0-9]{25,29}\./i
 describe URI_LONG_HOSTNAME	Contains a URI with a long hostname
+
+# really a URI rule
+header URI_REDIRECTOR		eval:check_for_http_redirector()
+describe URI_REDIRECTOR		Message has HTTP redirector URI
