@@ -326,3 +326,42 @@ meta T_ORANGES_AND_SPAM_4	!T_ORANGES_AND_SPAM_POST && T_ORANGES_AND_SPAM_TELE
 header T_X_MESSAGE_FLAG_1	ALL =~ /^X-Message-flag:/m
 header T_X_MESSAGE_FLAG_2	ALL =~ /^X-Message-flag:/mi
 header T_X_MESSAGE_FLAG_3	exists:X-Message-flag
+
+# bug 2954: remember to remove test code from EvalTests.pm
+header T_ADDRESS_IN_SUBJECT_USER	eval:check_for_to_in_subject('user')
+header T_ADDRESS_IN_SUBJECT_USER2	eval:check_for_to_in_subject_bug_2954('user')
+header T_ADDRESS_IN_SUBJECT_ADDRESS2	eval:check_for_to_in_subject_bug_2954('address')
+
+# revise tuning
+header T_HEAD_ILLEGAL_CHARS_001_2	eval:check_illegal_chars('ALL','0.001','2')
+header T_HEAD_ILLEGAL_CHARS_002_2	eval:check_illegal_chars('ALL','0.002','2')
+header T_HEAD_ILLEGAL_CHARS_003_2	eval:check_illegal_chars('ALL','0.003','2')
+header T_HEAD_ILLEGAL_CHARS_004_2	eval:check_illegal_chars('ALL','0.004','2')
+header T_HEAD_ILLEGAL_CHARS_005_2	eval:check_illegal_chars('ALL','0.005','2')
+header T_HEAD_ILLEGAL_CHARS_006_2	eval:check_illegal_chars('ALL','0.006','2')
+header T_HEAD_ILLEGAL_CHARS_007_2	eval:check_illegal_chars('ALL','0.007','2')
+header T_HEAD_ILLEGAL_CHARS_008_2	eval:check_illegal_chars('ALL','0.008','2')
+header T_HEAD_ILLEGAL_CHARS_009_2	eval:check_illegal_chars('ALL','0.009','2')
+header T_HEAD_ILLEGAL_CHARS_010_2	eval:check_illegal_chars('ALL','0.010','2')
+header T_HEAD_ILLEGAL_CHARS_011_2	eval:check_illegal_chars('ALL','0.011','2')
+header T_HEAD_ILLEGAL_CHARS_012_2	eval:check_illegal_chars('ALL','0.012','2')
+header T_HEAD_ILLEGAL_CHARS_013_2	eval:check_illegal_chars('ALL','0.013','2')
+header T_HEAD_ILLEGAL_CHARS_014_2	eval:check_illegal_chars('ALL','0.014','2')
+header T_HEAD_ILLEGAL_CHARS_015_2	eval:check_illegal_chars('ALL','0.015','2')
+
+# quick idea
+header __SUBJECT_MIME_ENCODED	Subject:raw =~ /=\?\S+\?[BQ]\?/i
+header __SUBJECT_NEEDS_MIME	Subject =~ /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]/
+meta T_SUBJECT_EXCESS_MIME	__SUBJECT_MIME_ENCODED && !__SUBJECT_NEEDS_MIME
+header __SUBJECT_MIME_ENCODED_Q	Subject:raw =~ /=\?\S+\?Q\?/i
+header __SUBJECT_MIME_ENCODED_B	Subject:raw =~ /=\?\S+\?B\?/i
+meta T_SUBJECT_EXCESS_MIME_Q	__SUBJECT_MIME_ENCODED_Q && !__SUBJECT_NEEDS_MIME
+meta T_SUBJECT_EXCESS_MIME_B	__SUBJECT_MIME_ENCODED_B && !__SUBJECT_NEEDS_MIME
+
+# quick idea
+header __FROM_NEEDS_MIME	From =~ /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]/
+meta T_FROM_EXCESS_MIME	__FROM_MIME_ENCODED && !__FROM_NEEDS_MIME
+header __FROM_MIME_ENCODED_Q	From:raw =~ /=\?\S+\?Q\?/i
+header __FROM_MIME_ENCODED_B	From:raw =~ /=\?\S+\?B\?/i
+meta T_FROM_EXCESS_MIME_Q	__FROM_MIME_ENCODED_Q && !__FROM_NEEDS_MIME
+meta T_FROM_EXCESS_MIME_B	__FROM_MIME_ENCODED_B && !__FROM_NEEDS_MIME
