@@ -2,25 +2,29 @@
 
 use FindBin;
 use Getopt::Std;
-getopts("fm:M:l:L:pxhc:");
+getopts("fm:M:X:l:L:pxhc:");
 
 use vars qw {
-  $opt_f $opt_m $opt_M $opt_p $opt_x $opt_h $opt_l $opt_L $opt_c
+  $opt_f $opt_m $opt_M $opt_X $opt_p $opt_x $opt_h $opt_l $opt_L $opt_c
 };
 
 sub usage {
-  die "hit-frequencies [-c rules dir] [-f] [-m RE] [-M RE] [-l LC] [-p] [-x] [spam log] [nonspam log]
+  die "hit-frequencies [-c rules dir] [-f] [-m RE] [-M RE] [-X RE] [-l LC]
+                [-p] [-x] [spam log] [nonspam log]
 
     -c p   use p as the rules directory
     -f     falses. count only false-negative or false-positive matches
     -m RE  print rules matching regular expression
     -M RE  only consider log entries matching regular expression
+    -X RE  don't consider log entries matching regular expression
     -l LC  also print language specific rules for lang code LC (or 'all')
     -L LC  only print language specific rules for lang code LC (or 'all')
     -p     percentages. implies -x
     -x     extended output, with S/O ratio and scores
 
     options -l and -L are mutually exclusive.
+
+    options -M and -X are *not* mutually exclusive.
 
     if either the spam or and nonspam logs are unspecified, the defaults
     are \"spam.log\" and \"nonspam.log\" in the cwd.
@@ -200,6 +204,7 @@ sub readlogs {
     while (<IN>) {
       next if (/^#/);
       next unless (!$opt_M || /$opt_M/o);
+      next if ($opt_X && /$opt_X/o);
 
       /^(.)\s+(-?\d+)\s+(\S+)\s*(\S*)/ or next;
       my $caught = ($1 eq 'Y');
