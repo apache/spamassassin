@@ -236,6 +236,9 @@ describe CORRUPT_MSGID		'Message-Id' contains bits of Received header
 header MSG_ID_ADDED_BY_MTA	Message-Id =~ / \(added by /
 describe MSG_ID_ADDED_BY_MTA	'Message-Id' was added by a relay
 
+header MSG_ID_ADDED_BY_MTA_2	ALL =~ /Message-Id: .*\nReceived: /s
+describe MSG_ID_ADDED_BY_MTA_2	'Message-Id' was added by a relay (2)
+
 header MANY_FROMS		From =~ /^[^\"\<\(]+, [^\"\<\(]+$/
 describe MANY_FROMS		'From' contains more than one address
 
