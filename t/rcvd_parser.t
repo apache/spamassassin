@@ -574,7 +574,7 @@ foreach my $hdrs (sort keys %data) {
 
   #warn "JMD $result";
   $result =~ s/\n[ \t]+/ /gs;
-  $result =~ /\nX-Spam-Relays: ([^\n]*)\n/s;
+  $result =~ /(?:\n|^)X-Spam-Relays: ([^\n]*)\n/s;
   my $relays = $1;
   
   $relays =~ s/\s+/ /gs;

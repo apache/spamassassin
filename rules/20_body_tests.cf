@@ -119,14 +119,6 @@ body CHARSET_FARAWAY		eval:check_for_faraway_charset()
 describe CHARSET_FARAWAY	Character set indicates a foreign language
 tflags CHARSET_FARAWAY		userconf
 
-body UNWANTED_LANGUAGE_BODY	eval:check_language()
-describe UNWANTED_LANGUAGE_BODY	Message written in an undesired language
-tflags UNWANTED_LANGUAGE_BODY	userconf
-
-body BODY_8BITS			eval:check_for_body_8bits()
-describe BODY_8BITS		Body includes 8 consecutive 8-bit characters
-tflags BODY_8BITS		userconf
-
 # duncf
 body EMAIL_ROT13     /\b[a-z(\]-]+\^[a-z-]+\([a-z]{2,3}\b/
 describe EMAIL_ROT13 Body contains a ROT13-encoded email address

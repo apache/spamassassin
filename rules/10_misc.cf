@@ -106,8 +106,10 @@ ok_locales              all
 
 # Mail using languages used in these country codes will not be marked
 # as being possibly spam in a foreign language.  This is an expensive
-# test, so it is set to "all" so the test will not be used by default.
+# classification, so it is is disabled in init.pre by default.
+ifplugin Mail::SpamAssassin::Plugin::TextCat
 ok_languages            all
+endif # Mail::SpamAssassin::Plugin::TextCat
 
 # Mail which scores outside this range will be fed back into SpamAssassin's
 # learning system automatically, to train the Bayesian scanner.
