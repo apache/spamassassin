@@ -247,7 +247,7 @@ body PORN_2			/\bwild\b.{0,15}\bhard[ -]?core\b/i
 describe PORN_2			Uses words and phrases which indicate porn (2)
 
 # updated by: skod & Craig & jm
-body PORN_3			/(?:(?:\blolita|\bcum|\borg[iy]|\bwild|fuck|\bteen|\baction\b|spunk|\bpussy\b|\bpussies\b|suck\b|sucking\b|\bhot\b|\bhottest\b|\bvoyeur|\ble[sz]b(?:ian|o)|\banal\b|\binterracial|\basian\b|\bamateur|\bsex+\b|\bslut|explicit|(?:[^x]|\b)xxx(?:[^x]|\b)|\blive\b|celebrity|\blick|\bsuck|\bdorm\b|webcam|\bass\b|\bschoolgirl\b|\bstrip|\bhorny\b|\bhorniest\b|\berotic|\boral\b|\bpenis\b|\bhardcore\b|\bblow[ -]*job|\bnast(?:y|iest)\b|\bporn).{0,15}){3,}/i
+body PORN_3			/(?:lolita|cum|org[iy]|wild|fuck|teen|action|spunk|puss|suck|hot|voyeur|le[sz]b|anal|interracial|asian|amateur|sex|slut|explicit|xxx|live|celebrity|lick|suck|dorm|webcam|ass|schoolgirl|strip|horn|erotic|oral|penis|hardcore|blow|nast|porn)/i and /(?:(?:\blolita|\bcum|\borg[iy]|\bwild|fuck|\bteen|\baction\b|spunk|\bpussy\b|\bpussies\b|suck\b|sucking\b|\bhot\b|\bhottest\b|\bvoyeur|\ble[sz]b(?:ian|o)|\banal\b|\binterracial|\basian\b|\bamateur|\bsex+\b|\bslut|explicit|(?:[^x]|\b)xxx(?:[^x]|\b)|\blive\b|celebrity|\blick|\bsuck|\bdorm\b|webcam|\bass\b|\bschoolgirl\b|\bstrip|\bhorny\b|\bhorniest\b|\berotic|\boral\b|\bpenis\b|\bhardcore\b|\bblow[ -]*job|\bnast(?:y|iest)\b|\bporn).{0,15}){3,}/i
 describe PORN_3			Uses words and phrases which indicate porn (3)
 
 # (contrib: skod)
@@ -277,7 +277,7 @@ describe PORN_11                Uses words and phrases which indicate porn (11)
 # compensate for only matching two terms, so as to not generate too many
 # false positives, there can only be up to seven characters between terms,
 # rather than the 15 for PORN_3; it also uses a shorter list of terms.
-body     PORN_12                /(?:(?:\blolita|(?:[^x]|\b)xxx(?:[^x]|\b)|\bsex|\bslut|\bwhore|\bhottest\b|hard-?core|\bhorny\b|\bhorniest\b|\bvirgin|\bnaughty\b|\bnaughtiest\b|\bweb.?cam|\ble[sz]b(?:ian|o)|\bskank|\btits\b|\btitties\b|\bpussy\b|\bpussies\b|\badult\b|\bfuck).{0,7}){2,}/i
+body     PORN_12                /(?:lolita|xxx|sex|slut|whore|hottest|hard-?core|horn|virgin|naught|web.?cam|le[sz]|skank|tit|puss|adult|fuck)/i and /(?:(?:\blolita|(?:[^x]|\b)xxx(?:[^x]|\b)|\bsex|\bslut|\bwhore|\bhottest\b|hard-?core|\bhorny\b|\bhorniest\b|\bvirgin|\bnaughty\b|\bnaughtiest\b|\bweb.?cam|\ble[sz]b(?:ian|o)|\bskank|\btits\b|\btitties\b|\bpussy\b|\bpussies\b|\badult\b|\bfuck).{0,7}){2,}/i
 describe PORN_12                Uses words and phrases which indicate porn (12)
 
 body     PORN_13                /must be (?:at least|over) 18/i
@@ -494,20 +494,28 @@ describe CHARSET_FARAWAY_BODY	Character set indicates foreign language body
 body NIGERIAN_SCAM		/BASED ON INFORMATION GATHERED ABOUT YOU, WE BELIEVE\s*YOU WOULD BE IN A POSITION TO HELP US IN TRANSFER/i
 describe NIGERIAN_SCAM		Nigerian scam, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
 
-# (contrib: skod)
-body NIGERIAN_SCAM_2		/(?:Government of Nigeria|NIGERIAN? NATIONAL|Nigerian? Government|Federal Republic of Nigeria)/i
+body NIGERIAN_SCAM_2 /\b(?:Government|Federal Republic)\b of Nigeria|Nigerian? \b(?:NATIONAL|Government|embassy|chamber of commerce)\b/i
 describe NIGERIAN_SCAM_2	Mutated Nigerian scams, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
 
 body NIGERIAN_SCAM_3            /(?:Bank of Nigeria|Nigerian? National Petroleum)/i
 describe NIGERIAN_SCAM_3        Nigerian Bank or Petroleum scam, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
 
-body NIGERIAN_SCAM_4            /\b(wife|widow|son|husband)\b.{0,60}Sann?i Abacha/
+body NIGERIAN_SCAM_4 /\b(wife|widow|son|husband)\b.{0,60}\b(?:Abacha|Kabila|Sekou?|Stojiljkovic)\b/i
 describe NIGERIAN_SCAM_4        Nigerian widow needs your help, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
 
-body NIGERIAN_SCAM_5            /Sann?i Abacha.{0,60}\b(wife|widow|son|husband)\b/
+body NIGERIAN_SCAM_5 /\b(?:Abacha|Kabila|Sekou?|Stojiljkovic)\b.{0,60}\b(wife|widow|son|husband)\b/i
 describe NIGERIAN_SCAM_5        Nigerian widow needs your help, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
 
-body US_DOLLARS			/Million\b.{0,40}\b(?:United States Dollars|USD|U\. ?S\. Dollars)/i
+body NIGERIAN_SCAM_6 /\b(?:late|former|new|Nigerian|military)\b.{0,20}\bhead of state/i
+describe NIGERIAN_SCAM_6        Mutated Nigerian scams (6)
+
+body NIGERIAN_SCAM_7 /\b(?:late|former)\b.{0,40}\b(?:Abacha|Kabila|Sekou?|Stojiljkovic)\b|\b(?:Abacha|Kabila|Sekou?|Stojiljkovic)\b.{0,40}\b(?:late|former)\b/i
+describe NIGERIAN_SCAM_7        Mutated Nigerian scams (7)
+
+body NIGERIAN_SCAM_8 /\b(?:Tribunal|War Crimes|Hague)\b.{0,60}\b(?:Vlajko|Stojiljkovic)\b|\b(?:Vlajko|Stojiljkovic)\b.{0,60}\b(?:Tribunal|War Crimes|Hague)\b/i 
+describe NIGERIAN_SCAM_8        Mutated Nigerian scams (8)
+
+body US_DOLLARS			/Million\b.{0,40}\b(?:United States? Dollars|USD|U\.? ?S\.? Dollar)/i
 describe US_DOLLARS		Nigerian scam key phrase
 
 body US_DOLLARS_2               /(?:\$|usd)\d{2,3}(?:\.\d)?m\b/i
