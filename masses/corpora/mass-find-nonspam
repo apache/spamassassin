@@ -101,17 +101,27 @@ my $killfile_froms = qr{(?:
 use lib "lib";
 use lib "../lib";
 use lib "../../lib";
-use Mail::ArchiveIterator;
+use Mail::SpamAssassin::ArchiveIterator;
 use Mail::SpamAssassin::NoMailAudit;
 
 # flush buffer immediately so if mass-check fails or stops we don't get a corrupt line
 $|++;
 
-my $iter = new Mail::ArchiveIterator ({
+my $format = "dir";		# for now. TODO
+
+my $iter = new Mail::SpamAssassin::ArchiveIterator ({
+        'opt_j' => 1,
+        'opt_n' => 1,
+        'opt_all' => 1,
   });
 
-$iter->set_function (\&wanted);
-$iter->run (@ARGV);
+my @targets = ();
+foreach (@ARGV) {
+  push (@targets, "ham:$format:$_");
+}
+
+$iter->set_functions (\&wanted, sub { });
+$iter->run (@targets);
 
 #foreach my $from (sort {$count{$b} <=> $count{$a}} keys %count) {
 #print "$count{$from}   $from $lastsubject{$from}  $lastid{$from}\n";
@@ -126,7 +136,7 @@ sub get_or_empty {
 }
 
 sub wanted {
-  my ($id, $dataref) = @_;
+  my ($id, $time, $dataref) = @_;
 
   my $ma = Mail::SpamAssassin::NoMailAudit->new ('data' => $dataref);
   my $from = $ma->get_header ("From");
