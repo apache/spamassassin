@@ -246,7 +246,7 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
 	# It might be a CHECK message, meaning that we should just check
 	# if it's spam or not, then return the appropriate response.
 
-	elsif (/(CHECK|SYMBOLS|REPORT) SPAMC\/(.*)/)
+	elsif (/(CHECK|SYMBOLS|REPORT|REPORT_IFSPAM) SPAMC\/(.*)/)
 	{
 	    my $method = $1;
 	    my $version = $2;
@@ -339,18 +339,29 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
 	    my $msg_score = sprintf("%.1f",$status->get_hits);
 	    my $msg_threshold = sprintf("%.1f",$status->get_required_hits);
 	    my $was_it_spam;
-	    if ($status->is_spam)
-	    {
-		print "SPAMD/1.1 $resphash{$resp} $resp\r\nSpam: True ; $msg_score / $msg_threshold\r\n\r\n";
+            my $response_header = "SPAMD/1.1 $resphash{$resp} $resp\r\n"; 
+            my $response_spam_status = "";
+	    if ($status->is_spam) {
+                $response_spam_status = $method eq "REPORT_IFSPAM" ? "Yes" : "True";
 		$was_it_spam = 'identified spam';
 	    }
 	    else
 	    {
-		print "SPAMD/1.1 $resphash{$resp} $resp\r\nSpam: False ; $msg_score / $msg_threshold\r\n\r\n";
+                $response_spam_status = $method eq "REPORT_IFSPAM" ? "No" : "False";
 		$was_it_spam = 'clean message';
 	    }
+            if ($method eq "REPORT_IFSPAM") {
+                $response_header .= "X-Spam-Status: $response_spam_status, hits=$msg_score required=$msg_threshold tests="
+                    . $status->get_names_of_tests_hit 
+                    . " version=$Mail::SpamAssassin::VERSION";
+            }
+            else
+            {
+                $response_header .= "Spam: False ; $msg_score / $msg_threshold";
+	    }
+            print $response_header, "\r\n\r\n";
 	    print $status->get_names_of_tests_hit,"\r\n" if ($method eq "SYMBOLS");
-	    print $status->get_report,"\r\n" if ($method eq "REPORT");
+	    print $status->get_report,"\r\n" if ($method eq "REPORT" or $method eq "REPORT_IFSPAM" and $status->is_spam);
 	    $current_user ||= '(unknown)';
 	    logmsg "$was_it_spam ($msg_score/$msg_threshold) for $current_user:$> in ".
 		sprintf("%3d", time - $start) ." seconds, $actual_length bytes.\n";
