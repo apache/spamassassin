@@ -72,8 +72,6 @@ sub new {
   $class = ref($class) || $class;
   my $self = { }; bless ($self, $class);
 
-  my $main = shift;     # do not add to class, avoid circular ref
-
   $self->{tests} = { };
   $self->{descriptions} = { };
   $self->{test_types} = { };
@@ -141,6 +139,7 @@ sub new {
   $self->{dcc_fuz2_max} = 999999;
   $self->{dcc_add_header} = 0;
   $self->{dcc_timeout} = 10;
+  $self->{dcc_options} = '-R';
 
   $self->{pyzor_max} = 5;
   $self->{pyzor_add_header} = 0;
@@ -1279,8 +1278,6 @@ The default is '-R'
 
     if (/^dcc_options\s+[A-Z -]+/) {
       $self->{dcc_options} = $1; next;
-    } else {
-      $self->{dcc_options} = '-R';
     }
 
 =item auto_whitelist_path /path/to/file	(default: ~/.spamassassin/auto-whitelist)
