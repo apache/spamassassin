@@ -204,7 +204,7 @@ If you're using procmail:
       }
 
       :0:  
-      * ^Subject:.*\*\*\*\*SPAM\*\*\*\*
+      * ^Subject: \*\*\*\*\*SPAM\*\*\*\*\*
       caughtspam
 
     That'll process all mail through SA, and refile spam messages to
