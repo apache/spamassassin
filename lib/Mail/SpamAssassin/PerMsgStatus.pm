@@ -1414,7 +1414,7 @@ sub _uniq {
 sub get_uri_list {
   my ($self) = @_;
 
-  $self->{found_bad_uri_encoding} = 0;
+  #$self->{found_bad_uri_encoding} = 0;
 
   my $textary = $self->get_decoded_body_text_array();
   my ($rulename, $pat, @uris);
@@ -1470,10 +1470,17 @@ sub get_uri_list {
 
   # Make sure we catch bad encoding tricks ...
   foreach my $uri ( @uris ) {
-    my $nuri = Mail::SpamAssassin::Util::URLEncode($uri);
+    next if ( $uri =~ /^mailto:/i );
+
+    my($nuri, $unencoded, $encoded) = Mail::SpamAssassin::Util::URLEncode($uri);
     if ( $nuri ne $uri ) {
       push(@uris, $nuri);
-      $self->{found_bad_uri_encoding} = 1;
+
+      # allow some unencodings to be ok ...
+      # This is essentially HTTP_EXCESSIVE_ESCAPES ...
+      #if ( $unencoded =~ /[a-zA-Z0-9\/]/ ) {
+      #  $self->{found_bad_uri_encoding} = 1;
+      #}
     }
   }
 

@@ -594,6 +594,8 @@ sub parse_content_type {
 sub URLEncode {
     my($url)=@_;
     my(@characters)=split(/(\%[0-9a-fA-F]{2})/,$url);
+    my(@unencoded) = ();
+    my(@encoded) = ();
 
     foreach(@characters) {
 	if ( /\%[0-9a-fA-F]{2}/ ) {		# Escaped character set ...
@@ -605,15 +607,21 @@ sub URLEncode {
 		    || /2[2356fF]|3[a-fA-F]|40/i )
 	    {
 		s/\%([2-7][0-9a-fA-F])/sprintf "%c",hex($1)/e;
+		push(@unencoded, $_);
 	    }
 	}
 	else {					# Other stuff
 	    # 0x00-0x20, 0x7f-0xff, <, >, and " ... "
 	    s/([\000-\040\177-\377\074\076\042])
-	     /sprintf "%%%02x",unpack("C",$1)/egx;
+	     /push(@encoded,$1) && sprintf "%%%02x",unpack("C",$1)/egx;
 	}
     }
-    return join("",@characters);
+    if (wantarray) {
+      return(join("",@characters), join("",@unencoded), join("",@encoded));
+    }
+    else {
+      return join("",@characters);
+    }
 }
 
 ###########################################################################
