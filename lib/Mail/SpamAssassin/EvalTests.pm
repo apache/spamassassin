@@ -634,6 +634,8 @@ sub check_for_faraway_charset {
     # number of 8-bit chars in the body text first.
 
     my $body = $self->get_decoded_stripped_body_text_array();
+    $body = join ("\n", @$body);
+
     if ($self->are_more_high_bits_set ($body)) {
       return 1;
     }
