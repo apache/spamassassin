@@ -2212,9 +2212,9 @@ points of the URI, and will also be faster.
 
 Define a raw-body pattern test.  C<pattern> is a Perl regular expression.
 
-The 'raw body' of a message is the text, including all textual parts.
-The text will be decoded from base64 or quoted-printable encoding, but
-HTML tags and line breaks will still be present.
+The 'raw body' of a message is the raw data inside all textual parts.
+The text will be decoded from base64 or quoted-printable encoding,
+but HTML tags and line breaks will still be present.
 
 =item rawbody SYMBOLIC_TEST_NAME eval:name_of_eval_method([args])
 
@@ -2236,9 +2236,9 @@ Define a raw-body eval test.  See above.
 
 Define a full-body pattern test.  C<pattern> is a Perl regular expression.
 
-The 'full body' of a message is the un-decoded text, including all parts
-(including images or other attachments).  SpamAssassin no longer tests
-full tests against decoded text; use C<rawbody> for that.
+The 'full body' of a message is the fully pristine message body, including
+all parts (including images or other attachments), MIME boundaries,
+etc.
 
 =item full SYMBOLIC_TEST_NAME eval:name_of_eval_method([args])
 
