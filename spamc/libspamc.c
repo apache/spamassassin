@@ -133,7 +133,7 @@ int libspamc_timeout = 0;
  *
  *	This should ONLY be called when there is an error.
  */
-static int translate_connect_errno(int err)
+static int _translate_connect_errno(int err)
 {
     switch (err) {
     case EBADF:
@@ -169,7 +169,7 @@ static int translate_connect_errno(int err)
  *
  *	Upon failure we return one of the other EX_??? error codes.
  */
-static int opensocket(int flags, int type, int *psock)
+static int _opensocket(int flags, int type, int *psock)
 {
     const char *typename;
     int proto = 0;
@@ -283,7 +283,7 @@ static int opensocket(int flags, int type, int *psock)
  *	file descriptor in *sockptr. Return is EX_OK if we did it,
  *	and some other error code otherwise.
  */
-static int try_to_connect_unix(struct transport *tp, int *sockptr)
+static int _try_to_connect_unix(struct transport *tp, int *sockptr)
 {
 #ifndef _WIN32
     int mysock, status, origerr;
@@ -297,7 +297,7 @@ static int try_to_connect_unix(struct transport *tp, int *sockptr)
 	/*----------------------------------------------------------------
 	 * If the socket itself can't be created, this is a fatal error.
 	 */
-    if ((ret = opensocket(tp->flags, PF_UNIX, &mysock)) != EX_OK)
+    if ((ret = _opensocket(tp->flags, PF_UNIX, &mysock)) != EX_OK)
 	return ret;
 
     /* set up the UNIX domain socket */
@@ -329,7 +329,7 @@ static int try_to_connect_unix(struct transport *tp, int *sockptr)
 	   addrbuf.sun_path, strerror(origerr));
     closesocket(mysock);
 
-    return translate_connect_errno(origerr);
+    return _translate_connect_errno(origerr);
 #else
     return EX_OSERR;
 #endif
@@ -343,7 +343,7 @@ static int try_to_connect_unix(struct transport *tp, int *sockptr)
  *	list of IP addresses has already been randomized (if requested)
  *	and limited to just one if fallback has been enabled.
  */
-static int try_to_connect_tcp(const struct transport *tp, int *sockptr)
+static int _try_to_connect_tcp(const struct transport *tp, int *sockptr)
 {
     int numloops;
     int origerr = 0;
@@ -371,7 +371,7 @@ static int try_to_connect_tcp(const struct transport *tp, int *sockptr)
 		 * one attempt to connect() on each one. If this fails,
 		 * we're done.
 		 */
-	if ((ret = opensocket(tp->flags, PF_INET, &mysock)) != EX_OK)
+	if ((ret = _opensocket(tp->flags, PF_INET, &mysock)) != EX_OK)
 	    return ret;
 
 	memset(&addrbuf, 0, sizeof(addrbuf));
@@ -421,7 +421,7 @@ static int try_to_connect_tcp(const struct transport *tp, int *sockptr)
     libspamc_log(tp->flags, LOG_ERR, "connection attempt to spamd aborted after %d retries",
 	    MAX_CONNECT_RETRIES);
 
-    return translate_connect_errno(origerr);
+    return _translate_connect_errno(origerr);
 }
 
 /* Aug 14, 2002 bj: Reworked things. Now we have message_read, message_write,
@@ -429,7 +429,7 @@ static int try_to_connect_tcp(const struct transport *tp, int *sockptr)
  * of helper functions.
  */
 
-static void clear_message(struct message *m)
+static void _clear_message(struct message *m)
 {
     m->type = MESSAGE_NONE;
     m->raw = NULL;
@@ -448,9 +448,9 @@ static void clear_message(struct message *m)
     m->content_length = -1;
 }
 
-static int message_read_raw(int fd, struct message *m)
+static int _message_read_raw(int fd, struct message *m)
 {
-    clear_message(m);
+    _clear_message(m);
     if ((m->raw = malloc(m->max_len + 1)) == NULL)
 	return EX_OSERR;
     m->raw_len = full_read(fd, 1, m->raw, m->max_len + 1, m->max_len + 1);
@@ -471,12 +471,12 @@ static int message_read_raw(int fd, struct message *m)
     return EX_OK;
 }
 
-static int message_read_bsmtp(int fd, struct message *m)
+static int _message_read_bsmtp(int fd, struct message *m)
 {
     off_t i, j;
     char prev;
 
-    clear_message(m);
+    _clear_message(m);
     if ((m->raw = malloc(m->max_len + 1)) == NULL)
 	return EX_OSERR;
 
@@ -556,10 +556,10 @@ int message_read(int fd, int flags, struct message *m)
 
     switch (flags & SPAMC_MODE_MASK) {
     case SPAMC_RAW_MODE:
-	return message_read_raw(fd, m);
+	return _message_read_raw(fd, m);
 
     case SPAMC_BSMTP_MODE:
-	return message_read_bsmtp(fd, m);
+	return _message_read_bsmtp(fd, m);
 
     default:
 	libspamc_log(flags, LOG_ERR, "message_read: Unknown mode %d",
@@ -890,9 +890,9 @@ int message_filter(struct transport *tp, const char *username,
     libspamc_timeout = m->timeout;
 
     if (tp->socketpath)
-	rc = try_to_connect_unix(tp, &sock);
+	rc = _try_to_connect_unix(tp, &sock);
     else
-	rc = try_to_connect_tcp(tp, &sock);
+	rc = _try_to_connect_tcp(tp, &sock);
 
     if (rc != EX_OK) {
 	free(m->out);
@@ -1092,7 +1092,7 @@ void message_cleanup(struct message *m)
 	free(m->raw);
     if (m->priv != NULL)
 	free(m->priv);
-    clear_message(m);
+    _clear_message(m);
 }
 
 /* Aug 14, 2002 bj: Obsolete! */
@@ -1138,7 +1138,7 @@ void transport_init(struct transport *tp)
  *	do anything unless 
  */
 
-static void randomize_hosts(struct transport *tp)
+static void _randomize_hosts(struct transport *tp)
 {
     int rnum;
 
@@ -1269,7 +1269,7 @@ int transport_setup(struct transport *tp, int flags)
 		 * meaningful only if we have more than one host.
 		 */
 	if ((flags & SPAMC_RANDOMIZE_HOSTS) && tp->nhosts > 1) {
-	    randomize_hosts(tp);
+	    _randomize_hosts(tp);
 	}
 
 		/*--------------------------------------------------------
