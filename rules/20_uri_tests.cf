@@ -92,7 +92,7 @@ uri BZ_TLD			/^(?:https?:\/\/|mailto:)[^\/]+\.bz(?:\/|$)/i
 describe BZ_TLD			Contains a URL in the BZ top-level domain    
 
 # this is somewhat loose, but results are good
-uri BIZ_TLD_2			/\.biz(?:\/|$)/i
+uri BIZ_TLD  			/\.biz(?:\/|$)/i
 describe BIZ_TLD		Contains a URL in the BIZ top-level domain    
 
 uri INFO_TLD			/^(?:https?:\/\/|mailto:)[^\/]+\.info(?:\/|$)/i
