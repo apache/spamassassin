@@ -640,7 +640,7 @@ sub rewrite_as_spam {
   # jm: add a SpamAssassin Received header to note markup time etc.
   # emulates the fetchmail style.
   # tvd: do this after report_safe_copy_headers so Received will be done correctly
-  $newmsg = "Received: from localhost [127.0.0.1] by " .
+  $newmsg = "Received: from localhost by " .
 	    Mail::SpamAssassin::Util::fq_hostname() . "\n" .
 	"\twith SpamAssassin (" . Mail::SpamAssassin::Version() . " " .
 	    $Mail::SpamAssassin::SUB_VERSION . ");\n" .
