@@ -243,6 +243,9 @@ sub new {
   $DEBUG->{enabled} = 0;
   if (defined $self->{debug} && $self->{debug} > 0) { $DEBUG->{enabled} = 1; }
 
+  # Make the first thing output by debug the version...
+  dbg("SpamAssassin version ".Version());
+
   # if the libs are installed in an alternate location, and the caller
   # didn't set PREFIX, we should have an estimated guess ready ...
   $self->{PREFIX} ||= '@@PREFIX@@';  # substituted at 'make' time
