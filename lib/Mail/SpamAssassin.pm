@@ -169,22 +169,34 @@ sub check {
 
 ###########################################################################
 
-=item $f->report_as_spam ($mail)
+=item $f->report_as_spam ($mail, $options)
 
 Report a mail, encapsulated in a C<Mail::Audit> object, as human-verified spam.
 This will submit the mail message to live, collaborative, spam-blocker
 databases, allowing other users to block this message.
 
+Options is an optional reference to a hash of options.  Currently these
+can be:
+
+=over 4
+
+=item dont_report_to_razor
+
+Inhibits reporting of the spam to Razor; useful if you know it's already
+been listed there.
+
+=back
+
 =cut
 
 sub report_as_spam {
-  my ($self, $mail_obj) = @_;
+  my ($self, $mail_obj, $options) = @_;
   local ($_);
 
   $self->init();
   my $mail = $self->encapsulate_mail_object ($mail_obj);
-  my $msg = Mail::SpamAssassin::Reporter->new($self, $mail);
-  $msg->report();
+  my $msg = Mail::SpamAssassin::Reporter->new($self, $mail, $options);
+  $msg->report ();
 }
 
 ###########################################################################
