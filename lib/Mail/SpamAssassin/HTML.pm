@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.10 2002/09/10 14:31:27 jmason Exp $
+# $Id: HTML.pm,v 1.11 2002/09/23 10:13:00 zelgadis Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -223,6 +223,16 @@ sub html_tests {
 
 sub html_text {
   my ($self, $text) = @_;
+
+  if (exists $self->{html_inside}{title} &&
+      $self->{html_inside}{title} > 0) {
+      $self->{html}{has_title} = 1;
+      $self->{html}{empty_title}    = 1 if ($text =~ /^\s*$/s);
+      $self->{html}{untitled_title} = 1 if ($text =~ /Untitled/i);
+      #if ($text =~ /^\s*$/s) {
+      #    print STDERR "<$text>\n";
+      #}
+  }
 
   return if (exists $self->{html_inside}{script} && $self->{html_inside}{script} > 0);
   return if (exists $self->{html_inside}{style} && $self->{html_inside}{style} > 0);
