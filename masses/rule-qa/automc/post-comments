@@ -92,10 +92,12 @@ sub do_bug {
   foreach my $key (sort keys %freqs_file) {
     my $file = $freqs_file{$key};
 
+    $comment .= "\n";
+
     # keep the comment in two buffers; one for the top part (freqs),
     # one for the lower (metadata and links)
-    my $cmt2 = "freqs using data from \"$file\" as of ".
-                                    (scalar localtime time)."\n";
+    my $cmt2 = "above freqs using data from \"$file\" as of ".
+                                    (scalar localtime time).":\n";
 
     foreach my $rule (@rulenames) {
       my $renamedata = $outputs->{rule_renames}{$rule};
@@ -121,14 +123,14 @@ sub do_bug {
       $cmt2 .= "full freqs: $conf{RULEQA_URL}?rule=$rule&date=$date\n";
     }
 
-    $comment .= $cmt2;
+    $comment .= "\n".$cmt2;
+    $comment .= $freqs_hdr{$key};
   }
 
   if ($messages) {
     $comment .= "\n".$messages."\n";
   }
 
-  $comment .= $cmt2;
   $comment .= $boilerplate_footer;
 
   if (!$SEND_DATA) {
