@@ -66,12 +66,6 @@ header   KNOWN_MAILING_LIST     eval:detect_mailing_list()
 describe KNOWN_MAILING_LIST     Email came from some known mailing list software
 tflags KNOWN_MAILING_LIST	nice
 
-# this gives even better points; lists from these systems are typically moderated,
-# or use their own spam filtering as well.
-header   KNOWN_MOD_MAILING_LIST eval:detect_moderated_mailing_list()
-describe KNOWN_MOD_MAILING_LIST Email came from some known moderated list software
-tflags KNOWN_MOD_MAILING_LIST	nice
-
 # cf http://bugzilla.spamassassin.org/show_bug.cgi?id=587
 rawbody LISTBUILDER             eval:detect_ml_listbuilder()
 describe LISTBUILDER            Sent through Microsoft's ListBuilder service
