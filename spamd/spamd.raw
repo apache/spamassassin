@@ -762,6 +762,10 @@ program.
 See the README file in the C<spamd> directory of the SpamAssassin distribution
 for more details.
 
+Note: Although spamd will check per-user config files for every message, any
+changes to the system-wide config files will require restarting spamd for
+the changes to take effect.
+
 =head1 SEE ALSO
 
 spamc(1)
