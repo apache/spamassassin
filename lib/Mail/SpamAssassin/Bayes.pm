@@ -155,25 +155,20 @@ use constant USE_ROBINSON_FX_EQUATION_FOR_LOW_FREQS => 1;
 
 # Value for 'x' in the f(w) equation.
 # "Let x = the number used when n [hits] is 0."
-use constant ROBINSON_X_CONSTANT => 0.538;
+use constant CHI_ROBINSON_X_CONSTANT  => 0.538;
+use constant GARY_ROBINSON_X_CONSTANT => 0.600;
 
 # Value for 's' in the f(w) equation.  "We can see s as the "strength" (hence
 # the use of "s") of an original assumed expectation ... relative to how
 # strongly we want to consider our actual collected data."  Low 's' means
 # trust collected data more strongly.
-use constant ROBINSON_S_CONSTANT => 0.373;
+use constant CHI_ROBINSON_S_CONSTANT  => 0.373;
+use constant GARY_ROBINSON_S_CONSTANT => 0.160;
 
 # Should we ignore tokens with probs very close to the middle ground (.5)?
 # tokens need to be outside the [ .5-MPS, .5+MPS ] range to be used.
-use constant ROBINSON_MIN_PROB_STRENGTH => 0.346;
-
-# note: these seem to work well for Gary-combining.
-#use constant ROBINSON_X_CONSTANT => 0.6;
-#use constant ROBINSON_S_CONSTANT => 0.16;
-#use constant ROBINSON_MIN_PROB_STRENGTH => 0.43;
-
-# Precompute S * X
-use constant ROBINSON_S_TIMES_X => ROBINSON_S_CONSTANT * ROBINSON_X_CONSTANT;
+use constant CHI_ROBINSON_MIN_PROB_STRENGTH  => 0.346;
+use constant GARY_ROBINSON_MIN_PROB_STRENGTH => 0.430;
 
 # How many of the most significant tokens should we use for the p(w)
 # calculation?
@@ -217,6 +212,38 @@ sub new {
 sub finish {
   my $self = shift;
   $self->{store}->untie_db();
+}
+
+###########################################################################
+
+# read configuration items to control bayes behaviour.  Called by
+# BayesStore::read_db_configs().
+sub read_db_configs {
+  my ($self) = @_;
+  my $conf = $self->{main}->{conf};
+
+  # use of hapaxes.  Set on bayes object, since it controls prob
+  # computation.
+  $self->{bayes}->{use_hapaxes} = $conf->{bayes_use_hapaxes};
+
+  # Use chi-squared combining instead of Gary-combining (Robinson/Graham-style
+  # naive-Bayesian)?
+  $self->{bayes}->{use_chi_sq_combining} = $conf->{bayes_use_chi2_combining};
+
+  # Use the appropriate set of constants; the different systems have different
+  # optimum settings for these.  (TODO: should these be exposed through Conf?)
+  if ($self->{bayes}->{use_chi_sq_combining}) {
+    $self->{robinson_x_constant} = CHI_ROBINSON_X_CONSTANT;
+    $self->{robinson_s_constant} = CHI_ROBINSON_S_CONSTANT;
+    $self->{robinson_min_prob_strength} = CHI_ROBINSON_MIN_PROB_STRENGTH;
+  } else {
+    $self->{robinson_x_constant} = GARY_ROBINSON_X_CONSTANT;
+    $self->{robinson_s_constant} = GARY_ROBINSON_S_CONSTANT;
+    $self->{robinson_min_prob_strength} = GARY_ROBINSON_MIN_PROB_STRENGTH;
+  }
+
+  $self->{robinson_s_times_x} =
+      ($self->{robinson_x_constant} * $self->{robinson_s_constant});
 }
 
 ###########################################################################
@@ -700,9 +727,9 @@ sub compute_prob_for_token {
     # use Robinson's f(x) equation for low-n tokens, instead of just
     # ignoring them
     my $robn = $s+$n;
-    $prob = (ROBINSON_S_TIMES_X + ($robn * $prob))
+    $prob = ($self->{robinson_s_times_x} + ($robn * $prob))
                              /
-		  (ROBINSON_S_CONSTANT + $robn);
+		  ($self->{robinson_s_constant} + $robn);
   }
 
   if ($self->{log_raw_counts}) {
@@ -816,7 +843,7 @@ sub scan {
   {
     if ($count-- < 0) { last; }
     my $pw = $pw{$_};
-    next if (abs($pw - 0.5) < ROBINSON_MIN_PROB_STRENGTH);
+    next if (abs($pw - 0.5) < $self->{robinson_min_prob_strength});
 
     # enforce (max PROB_BOUND_LOWER (min PROB_BOUND_UPPER (score))) as per
     # Graham; it allows a majority of spam clues to override 1 or 2

@@ -81,3 +81,12 @@ describe RATWARE_V3161		Bulk email software fingerprint (V3161) found in headers
 header RATWARE_EMWAC		Received =~ /EMWAC SMTPRS/
 describe RATWARE_EMWAC		Bulk email software fingerprint ("EMWAC SMTPRS") found in headers
 
+# The Bat! forgeries
+header __THEBAT_MUA             X-Mailer =~ /The Bat!/
+header __THEBAT_MSGID           MESSAGEID =~ /^<\d+\.\d+\@\S+>$/m
+meta FORGED_MUA_THEBAT          (__THEBAT_MUA && !__THEBAT_MSGID)
+describe FORGED_MUA_THEBAT      Forged mail pretending to be from The Bat!
+
+# forgeries of MSN Explorer.  See "20_anti_ratware.cf" for the meta subrules
+meta FORGED_USER_AGENT_MSN   (__USER_AGENT_MSN && (!__HAS_XOAT || !__HAS_XOIP))
+
