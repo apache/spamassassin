@@ -541,8 +541,11 @@ describe T_RCVD_IN_MONKEYS_UPL Received via a relay in proxies.relays.monkeys.co
 tflags T_RCVD_IN_MONKEYS_UPL net
 
 # new "-notfirsthop" logic
-header T_RCVD_IN_PDL	rbleval:check_rbl('pdl-notfirsthop', 'dialups.visi.com.')
-tflags T_RCVD_IN_PDL	net
+header T_RCVD_IN_PDL		rbleval:check_rbl('pdl-notfirsthop', 'dialups.visi.com.')
+tflags T_RCVD_IN_PDL		net
+
+header T_RCVD_IN_DYNABLOCK	rbleval:check_rbl('dynablock-notfirsthop', 'dynablock.wirehub.net.')
+tflags T_RCVD_IN_DYNABLOCK	net
 
 
 # OK, a whole batch of faked-HELO detection rules.  These work by checking
@@ -551,7 +554,7 @@ tflags T_RCVD_IN_PDL	net
 header T_FAKE_HELO_YAHOO	eval:check_for_rdns_helo_mismatch("yahoo\.com","yahoo\.com")
 header T_FAKE_HELO_HOTMAIL	eval:check_for_rdns_helo_mismatch("hotmail(?:\.msn|)\.com","hotmail\.com")
 header T_FAKE_HELO_AOL		eval:check_for_rdns_helo_mismatch("aol\.com","aol\.com")
-header T_FAKE_HELO_MSN		eval:check_for_rdns_helo_mismatch("hotmail(?:\.msn|)\.com","msn\.com")
+header T_FAKE_HELO_MSN		eval:check_for_rdns_helo_mismatch("msn\.com","msn\.com")
 header T_FAKE_HELO_EXCITE	eval:check_for_rdns_helo_mismatch("excite\S*","excite\.com")
 header T_FAKE_HELO_LYCOS	eval:check_for_rdns_helo_mismatch("lycos\S*","lycos\.com")
 header T_FAKE_HELO_MAIL_COM	eval:check_for_rdns_helo_mismatch("mail\.com","mail\.com")
