@@ -3,7 +3,7 @@
 # 55 8 * * * /home/jm/ftp/spamassassin/build/tag_nightly_mc > /dev/null 2>&1
 
 cd /home/jm/ftp/spamassassin
-export CVS_RSH=SSH
+export CVS_RSH=ssh
 
 cvs -z3 update -dP
 cvs tag -F CURRENT_CORPORA_SUBMIT_VERSION
