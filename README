@@ -59,9 +59,9 @@ ASF.
 Upgrading SpamAssassin
 ----------------------
 
-If you are upgrading from a previous major version of SpamAssassin,
-please be sure to read the notes in UPGRADE to find out what has
-changed in a non-backwards compatible way.
+IMPORTANT: If you are upgrading from a previous major version of
+SpamAssassin, please be sure to read the notes in UPGRADE to find out what
+has changed in a non-backwards compatible way.
 
 
 Installing SpamAssassin
@@ -291,9 +291,7 @@ details.
 
 The default address-list implementation,
 Mail::SpamAssassin::DBBasedAddrList, uses Berkeley DB files to store the
-addresses.  There may be synchronization issues with this implementation
-in an NFS environment.  Reasonable attempts have been made to ensure
-proper locking of the DB file, but it may yet be somewhat flakey.
+addresses.
 
 
 
