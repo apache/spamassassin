@@ -1,3 +1,19 @@
+# Traduction française d'Olivier Nicole <on@cs.ait.ac.th>
+# Asian Institute of Technology, Bangkok, Thailande
+lang fr clear-report-template
+lang fr report ---------------- Début des résultats de SpamAssassin -----------------
+lang fr report Ce mèl est sans doute du spam. Le message original a été modifié afin
+lang fr report de vous permettre, plus tard, d'identifier ou de bloquer de tels mèls
+lang fr report  non désirés. Pour plus d'information http://spamassassin.org/tag/ 
+lang fr report 
+lang fr report Analyze détaillée du contenu:   (_HITS_ points, _REQD_ points requis)
+lang fr report _SUMMARY_
+lang fr report ---------------- Fin des résultats de SpamAssassin -------------------
+lang fr clear-terse-report-template
+lang fr terse-report ---- Début des résultats de SpamAssassin
+lang fr terse-report _HITS_ points, _REQD_ points requis ;
+lang fr terse-report _SUMMARY_
+lang fr terse-report ---- Fin des résultats de SpamAssassin
 lang fr describe 25FREEMEGS_URL     Expression fréquement trouvée dans du spam
 lang fr describe ADDRESSES_ON_CD    Les adresse sur cédérom ne servent qu'aux spameurs
 lang fr describe ADVERT_CODE        Le Subject: contient l'identificateur 'ADV'
@@ -48,6 +64,7 @@ lang fr describe CYBER_FIRE_POWER       Fait référence a l'outil de spam Cyber F
 lang fr describe DATE_IN_FUTURE  La date est postérieur a maintenant ou elle n'est pas décodable
 lang fr describe DATE_MISSING   La date est manquante
 lang fr describe DEAR_FRIEND    Contient la formule 'Dear somebody'
+lang fr describe DIFFERENT_REPLY_TO     l'entête Reply-To: est tres différent des entêtes From: et To:
 lang fr describe DIFF_C_PATCH   Contient quelque chose qui ressemble au contenu de la commande 'diff -c'
 lang fr describe DIRECT_EMAIL   Contient la formule 'direct emai
 lang fr describe EARN_PER_WEEK          Propose de gangner quelquechose chaque semaine
@@ -125,6 +142,8 @@ lang fr describe INCREASE_TRAFFIC       Propose d'augmenter le trafic
 lang fr describe INTERNET_TERROR_RANT   Message de Cyber FirePower!
 lang fr describe INTL_EXEC_GUILD        Source de SPAM bien connue
 lang fr describe INVALID_DATE   L'entête Date: est incorrect (il contient AM/PM)
+lang fr describe INVALID_DATE_NO_TZ     L'entête Date: est incorrect (il ne contient pas de zone de temps)
+lang fr describe INVALID_DATE_ODD_MONTH L'entête Date: est incorrect (il contient un mois incorrect)
 lang fr describe INVALID_DATE_TZ_ABSURD L'entête Date: est incorrect (la zone de temps n'existe pas)
 lang fr describe INVALID_MSGID  L'entête Message-ID: ne suit pas la norme RFC-2822
 lang fr describe IN_ACCORDANCE_WITH_LAWS Préten être en conformité avec une loi sur le SPAM
@@ -164,8 +183,8 @@ lang fr describe MSG_ID_ADDED_BY_MTA_2  L'entête Message-Id: a été ajouté par un
 lang fr describe MURKOWSKI_CRUFT        Contient le message d'avertissement à propos de l'arrêté anti-SPAM de Murkowski
 lang fr describe MYCASINOBUILDER        Mentionne mycasinobuilder.com
 lang fr describe NEW_DOMAIN_EXTENSIONS  Mentionne les nouveaux noms de domaine
-lang fr describe NIGERIAN_SCAM  Mentionne les magouilles nigériennes, voir http://www.snopes2.com/inboxer/scams/nigeria.htm
-lang fr describe NIGERIAN_SCAM_2        Mentionnes les magouilles nigériennes
+lang fr describe NIGERIAN_SCAM  Mentionne les combines nigériennes, voir http://www.snopes2.com/inboxer/scams/nigeria.htm
+lang fr describe NIGERIAN_SCAM_2        Mentionnes les combines nigériennes
 lang fr describe NONEXISTENT_CHARSET    Mèl rédigé dans une jeu de caratères inexistant
 lang fr describe NORMAL_HTTP_TO_IP      Utilise une adresse IP, en notation avec des points, dans une URL
 lang fr describe NO_MX_FOR_FROM  L'adresse de l'entête From: n'a pas d'enregistrement MX correspondant
@@ -209,6 +228,7 @@ lang fr describe RCVD_IN_5_10   Ce mèl a été reçu par l'intermédiaire d'un relai
 lang fr describe RCVD_IN_BL_SPAMCOP_NET Ce mèl a été reçu par l'intermédiaire d'un relai qui figure dans la liste bl.spamcom.net
 lang fr describe RCVD_IN_DUL    Ce mèl a été reçu par l'intermédiaire d'un relai qui figure dans la liste dialup, voir http://www.mail-abuse.org/
 lang fr describe RCVD_IN_ORBS   Ce mèl a été reçu par l'intermédiaire d'un relai qui figure dans la liste orbs.dorkslayers.com
+# lang fr describe RCVD_IN_ORBZ 
 lang fr describe RCVD_IN_OSIRUSOFT_COM  Ce mèl a été reçu par l'intermédiaire d'un relai qui figure dans la liste relays.osirusoft.com
 lang fr describe RCVD_IN_RBL    Ce mèl a été reçu par l'intermédiaire d'un relai qui figure dans la liste RBL, voir http://www.mail-abuse.org/
 lang fr describe RCVD_IN_RELAYS_ORDB_ORG Ce mèl a été reçu par l'intermédiaire d'un relai qui figure dans la liste rrelays.ordb.com
@@ -280,7 +300,7 @@ lang fr describe USER_IN_BLACKLIST      L'expéditeur est sur la liste noire du d
 lang fr describe USER_IN_MORE_SPAM_TO   Le destinataire est dans la liste more_spam_to
 lang fr describe USER_IN_WHITELIST      L'expéditeur est sur la liste blanche du destinataire
 lang fr describe USER_IN_WHITELIST_TO   le destinataire est dans la liste blanche des destinataires
-lang fr describe US_DOLLARS     Phrase clé des magouilles nigériennes
+lang fr describe US_DOLLARS     Combine nigérienne, phrase clé
 lang fr describe VERY_SUSP_CC_RECIPS    L'entête Cc: contient plus de dix fois le même nom de destinataire
 lang fr describe VERY_SUSP_RECIPS       L'entête To: contient plus de dix fois le même nom de destinataire
 lang fr describe VIAGRA Mentionne le viagra
@@ -300,8 +320,8 @@ lang fr describe WWW_TRAFFICWOW_NET             Expression fréquement trouvée da
 lang fr describe X_EM_VER_PRESENT       Contient un entête X-Em-Version:
 lang fr describe X_MAILER_GIBBERISH     L'entête X-Mailer: contient des informations incompréhensibles
 lang fr describe X_MSMAIL_PRIORITY_HIGH L'entête X-Msmail-Priority: défini une priorité élevée
-lang fr describe X_OSIRU_SPAMWARE_SITE  L'expéditeur est un SPAMeur selon DNSBL
-lang fr describe X_OSIRU_SPAM_SRC       L'expéditeur est décidément un SPAMeur selon DNSBL
+lang fr describe X_OSIRU_SPAMWARE_SITE  L'expéditeur est un spameur selon DNSBL
+lang fr describe X_OSIRU_SPAM_SRC       L'expéditeur est décidément un spameur selon DNSBL
 lang fr describe X_PMFLAGS_PRESENT      Contient l'entête X-PMFLAGS: en majuscules
 lang fr describe X_PRIORITY_HIGH        L'entête X-Priority: défini une priorité élevée
 lang fr describe X_UIDL_SPAMSIGN        L'entête X-UIDL: contient des caractères inappropriés
@@ -310,3 +330,105 @@ lang fr describe YELLOWSUN      Expression fréquement trouvée dans du spam
 lang fr describe YOUR_INCOME    Mentionne vos revenus
 lang fr describe YOU_HAVE_BEEN_SELECTED Mentionne votre sélection comme finaliste
 lang fr describe YR_MEMBERSHIP_EXCH     L'entête Subject: contient 'your membership exchange'
+lang fr describe DCC_CHECK          Ce mèl est dans la liste de DCC : http://www.rhyolite.com/anti-spam/dcc/dcc-tree/dcc.html
+lang fr describe SPAM_PHRASES_040	Le score des phrases de spam est suérieur à 40
+lang fr describe BIG_FONT               Utilise une taille de caractères supérieure ou égale a +2 ou 3
+lang fr describe BUGGY_CGI_PT_2		Réponse à un formulaire jamais rempli (en portugais)
+lang fr describe NO_COST                Propose un produit ou un service à un coût nul
+lang fr describe CALL_FREE		Contient un numéro de téléphone gratuit
+lang fr describe PORN_9                 Utilise des mots ou des phrases à caractère pornographique (9)
+lang fr describe PORN_10                Utilise des mots ou des phrases à caractère pornographique (10)
+lang fr describe PORN_11                Utilise des mots ou des phrases à caractère pornographique (11)
+lang fr describe PORN_12                Utilise des mots ou des phrases à caractère pornographique (12)
+lang fr describe PORN_13                Utilise des mots ou des phrases à caractère pornographique (13)
+lang fr describe PORN_14                Utilise des mots ou des phrases à caractère pornographique (14)
+lang fr describe INVESTOR_SPEC_SHEET	Fait référence à "Investor Spec Sheet"
+lang fr describe LINES_OF_YELLING        Contient une ligne entière en MAJUSCULES
+lang fr describe LINES_OF_YELLING_2     Contient 2 lignes entières en MAJUSCULE
+lang fr describe LINES_OF_YELLING_3     Contient  lignes entières en MAJUSCULES
+lang fr describe DOMAIN_BODY		Fait référence à l'enregistrement de nouveaux noms de domaine Internet
+lang fr describe THIS_AINT_JUNK         Contient la formule "This is not junk email"
+lang fr describe PENIS_ENLARGE2		Contient des information sur l'accroissementd e la taille du pénis
+lang fr describe EJACULATION            Contient des information pour augmenter l'éjaculation
+lang fr describe IMPOTENCE              Contient des informations pour combattre l'impuissance
+lang fr describe NO_EXPERIENCE          Contient une offre qui ne recquière pas d'expérience
+lang fr describe FREE_MONEY             Contient une offre pour gagner beaucoup d'argent facilement
+lang fr describe HTML_EMBEDS		Contient une marque HTML faisant appel à une objet encastré
+lang fr describe NIGERIAN_SCAM_4        Combine nigérienne, voir http://www.snopes2.com/inboxer/scams/nigeria.htm
+lang fr describe NIGERIAN_SCAM_5        Combine nigérienne, voir http://www.snopes2.com/inboxer/scams/nigeria.htm
+lang fr describe NIGERIAN_SCAM_6        Combine nigérienne, version modifiée (6)
+lang fr describe NIGERIAN_SCAM_7        Combine nigérienne, version modifiée (7)
+lang fr describe NIGERIAN_SCAM_8        Combine nigérienne, version modifiée (8)
+lang fr describe US_DOLLARS_2           Combine nigérienne, version modifiée, phrase clé ($NNN.N m/USDNNN.N m)
+lang fr describe US_DOLLARS_3           Combine nigérienne, version modifiée, phrase clé ($NN,NNN,NNN.NN)
+lang fr describe FRONTPAGE		Mèl créé avec l'éditeur Frontpage
+lang fr describe DEAR_SOMEBODY          Contient la formule 'Dear Somebody'
+lang fr describe MIME_NULL_BLOCK	Bloc vide pour un message au format MIME
+lang fr describe SAFEGUARD_NOTICE	Contient la signature d'un outil de spam sans licence
+lang fr describe EVITE			Contient une référence à evite.citysearch.com
+lang fr describe SIGNATURE_DELIM        Contient le délimiteur standard pour les signatures
+lang fr describe READ_TO_END            Contient une formule incitant é lire le message jusqu'à la fin
+lang fr describe DONT_DELETE            Contient une formule incitant é ne pas détruire ce message
+lang fr describe REAL_THING             Contient la formule 'the real thing'
+lang fr describe ALL_NATURAL            Offre un produit 100% naturel
+lang fr describe MONEY_BACK             Assure le remboursement
+lang fr describe NO_CATCH               Assure qu'il n'y a pas de vice caché
+lang fr describe NO_OBLIGATION          Assure qu'il n'y a pas d'engagement nécessaire
+lang fr describe NO_DISSAPOINTMENT      Assure que vous ne serez pas déçu
+lang fr describe SERIOUS_ONLY           Offre réservée aux requêtes sérieuses
+lang fr describe RISK_FREE              Offre une produit sans aucune risque
+lang fr describe AS_SEEN_ON             Offre un produit vu à la télévision
+lang fr describe NOT_INTENDED           Offre réservée à ceux qui n'habitent pas un certain lieu
+lang fr describe COPY_ACCURATELY        Contient une formule souvent présente dans les chaînes pyramidales de lettres
+lang fr describe SEE_FOR_YOURSELF       Offre de juger par vous même
+lang fr describe FROM_STARTS_WITH_NUMS	L'entête From: commence par des chiffres
+lang fr describe FROM_NAME_NO_SPACES	Le nom de l'entête From: ne contient aucune espace
+lang fr describe TO_LOCALPART_EQ_REAL   Le nom de l'entête From: et l'adresse du destinataire sont équivalents
+lang fr describe SUBJ_MISSING           L'entête Subject: manque ou est vide
+lang fr describe MSGID_CHARS_SPAM	L'entête Message-Id: contient des caractères qui indiquent un spam
+lang fr describe MSGID_CHARS_WEIRD	L'entête Message-Id: contient des caractères souvent présents dans du spam
+lang fr describe DOMAIN_SUBJECT		L'entête Subject: fait référence aux nouveaux noms de domaine Internet
+lang fr describe ALL_CAPS_HEADER	Certains entêtes sont en majucules
+lang fr describe RCVD_IN_VISI		Ce mèl a été reçu par l'intermédiaire d'un relai qui figure dans la liste relays.visi.com
+lang fr describe FORGED_JUNO_RCVD	Contient un entête Received: falsifié comme venant de juno.com
+lang fr describe MSG_ID_ADDED_BY_MTA_3	Contient un entête Message-Id: rajouté par un relai
+lang fr describe FROM_TOPICA		L'entête From: vient de @email-publisher.com
+lang fr describe BUGZILLA_BUG		L'entête Subject ressemble à un bug publié dans Bugzilla
+lang fr describe MAJORDOMO              L'entête Subject: semble venir du gestionaire de listes Majordomo
+lang fr describe PLEASE_READ            L'entête Subject vous incite à lire ce mèl
+lang fr describe X_AUTH_WARNING         L'entête X-Authentication-Warning: est présent
+lang fr describe DATE_WARNING           L'entête Date-warning: est présent
+lang fr describe X_MAIL_ID_PRESENT     L'entête X-MailingID: est présent
+lang fr describe X_SERV_HOST_PRESENT   L'entête X-ServerHost: est présent
+lang fr describe X_NOT_PRESENT         Il n'y a aucune entête X-...:
+lang fr describe X_X_PRESENT           Il y a un entête X-x:
+lang fr describe X_ENC_PRESENT         Il y a un entête X-Encoding:
+lang fr describe X_FIX_PRESENT         Il y a un entête X-Fix:
+lang fr describe MIME_ODD_CASE         Il y a un entête MiME-Version: (avec une 'i' minuscule)
+lang fr describe FREEMEGS_URL         Contient une référence à 25freemegs.com, fréquement trouvée dans du spam
+lang fr describe STAINLESS_STEEL        Contient une référence à www.BuyStainlessOnline.com, fréquement trouvée dans du spam
+lang fr describe JAVASCRIPT_URI	Contient un appel à Javascript dans un URI
+lang fr describe URI_IS_POUND	Le nom de fichier d'un URI contient uniquement \#, sans doute un truc de Javascript
+lang fr describe WEIRD_PORT             Contient un numéro de port Internet non standard pour HTTP
+lang fr describe REMOVE_ES_01         Offre de vous enlever de la liste de distribution (en espagnol)
+lang fr describe REMOVE_ES_02           Offre de vous enlever de la liste de distribution (en espagnol)
+lang fr describe REMOVE_ES_03           Offre de vous enlever de la liste de distribution (en espagnol)
+lang fr describe REMOVE_ES_04           Offre de vous enlever de la liste de distribution (en espagnol)
+lang fr describe EXCUSE_ES_01         Prétend ne pas être du spam (en espagnol)
+lang fr describe EXCUSE_ES_02         Prend la liberté de vous envoyer du spam (en espagnol)
+lang fr describe EXCUSE_ES_03         Ce mèl vous à été envoyé à la demande de quelqu'un (en espagnol)
+lang fr describe EXCUSE_ES_04         Ce mèl vous à été envoyé à la demande de quelqu'un (en espagnol)
+lang fr describe DOUBLE_CAPSWORD	Contient un mot en majuscules répété sur une ligne
+lang fr describe DATE_IN_PAST_03_06	L'entête Date: est 3 à 6 heures avant la date de l'entête Received:
+lang fr describe DATE_IN_PAST_06_12	L'entête Date: est 6 à 12 heures avant la date de l'entête Received:
+lang fr describe DATE_IN_PAST_12_24	L'entête Date: est 12 à 24 heures avant la date de l'entête Received:
+lang fr describe DATE_IN_PAST_24_48	L'entête Date: est 24 à 48 heures avant la date de l'entête Received:
+lang fr describe DATE_IN_PAST_48_96	L'entête Date: est 48 à 96 heures avant la date de l'entête Received:
+lang fr describe DATE_IN_PAST_96_XX	L'entête Date: est plus de 96 heures avant la date de l'entête Received:
+lang fr describe DATE_IN_FUTURE_03_06	L'entête Date: est 3 à 6 heures après la date de l'entête Received:
+lang fr describe DATE_IN_FUTURE_06_12	L'entête Date: est 6 à 12 heures après la date de l'entête Received:
+lang fr describe DATE_IN_FUTURE_12_24	L'entête Date: est 12 à 24 heures après la date de l'entête Received:
+lang fr describe DATE_IN_FUTURE_24_48	L'entête Date: est 24 à 48 heures après la date de l'entête Received:
+lang fr describe DATE_IN_FUTURE_48_96	L'entête Date: est 48 à 96 heures après la date de l'entête Received:
+lang fr describe DATE_IN_FUTURE_96_XX	L'entête Date: est plus de 96 heures après la date de l'entête Received:
+lang fr describe KOREAN_UCE_SUBJECT	L'entête Subject: contient des caractères coréens
