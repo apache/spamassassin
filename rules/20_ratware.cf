@@ -286,3 +286,6 @@ describe RATWARE_RCVD_PF	Bulk email fingerprint (Received PF) found
 
 header RATWARE_RCVD_AT		Received =~ / by \S+\@\S+ with Microsoft SMTPSVC/
 describe RATWARE_RCVD_AT	Bulk email fingerprint (Received @) found
+
+meta RATWARE_OUTLOOK_NONAME	__MSGID_DOLLARS_OK && !__HAS_X_MAILER
+describe RATWARE_OUTLOOK_NONAME	Bulk email fingerprint (Outlook no name) found

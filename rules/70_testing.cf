@@ -266,15 +266,6 @@ tflags T_NO_RELAYS      nice
 header __NO_RCVD        exists:Received
 meta T_NO_RCVD        (!__NO_RCVD)
 
-# I have a feeling these are well-caught already, better tests may exist
-# shouldn't these trigger MSGID_OUTLOOK_INVALID?
-header __DM15_MID	Message-ID =~ /<[0-9a-f]{4}01c4[0-9a-f]{4}\$[0-9a-f]{8}\$[0-9a-f]{8}@\S+>/
-meta T_RATWARE_DM15	__DM15_MID && !__HAS_X_MAILER
-
-# simple enough to test
-meta T_RATWARE_SOMETHING	__MSGID_DOLLARS_OK && !__HAS_X_MAILER
-meta T_RATWARE_WHATEVER		__OUTLOOK_DOLLARS_MSGID && !__HAS_X_MAILER
-
 # possible IDN spoofing attack: http://www.shmoo.com/idn/homograph.txt
 # not expecting any hits on this (yet)
 uri T_HIGH_CODEPAGE_URI         /^https?:\/\/[^\/]*\&\#(?:\d{4,}|[3456789]\d\d);/i
