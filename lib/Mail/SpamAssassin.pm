@@ -94,7 +94,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.181 2003/03/27 01:54:10 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.182 2003/03/27 17:48:10 felicity Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -258,6 +258,9 @@ sub new {
   $self->{conf} ||= new Mail::SpamAssassin::Conf ($self);
 
   $self->{save_pattern_hits} ||= 0;
+
+  # Make sure that we clean $PATH if we're tainted
+  Mail::SpamAssassin::Util::clean_path_in_taint_mode();
 
   # this could probably be made a little faster; for now I'm going
   # for slow but safe, by keeping in quotes
