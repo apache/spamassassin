@@ -95,7 +95,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.144 2002/12/18 21:35:46 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.145 2002/12/20 16:54:42 jmason Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -1197,11 +1197,14 @@ sub find_all_addrs_in_mail {
 sub find_all_addrs_in_line {
   my ($self, $line) = @_;
 
+  my $ID_PATTERN   = '[-a-z0-9_\+\:\/\.]+';
+  my $HOST_PATTERN = '[-a-z0-9_\+\:\/]+';
+
   my @addrs = ();
   my %seen = ();
-  while ($line =~ s/([-a-z0-9_\+\:\.\/]+
-	      \@[-a-z0-9_\+\:\.\/]+
-	      \.[-a-z0-9_\+\:\.\/]+)//ix)
+  while ($line =~ s/(?:mailto:)?\s*
+	      ($ID_PATTERN \@
+	      $HOST_PATTERN(?:\.$HOST_PATTERN)+)//oix) 
   {
     my $addr = $1;
     $addr =~ s/^mailto://;
