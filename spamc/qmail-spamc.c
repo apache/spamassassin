@@ -15,15 +15,16 @@
  * </@LICENSE>
  */
 
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <unistd.h>
+
 
 #define MAXOPTS 16
 
 #define TRY(exp) do {                                                         \
           if ((exp) == -1) {                                                  \
-            printf("%s:%d: '%s' failed: ",                                    \
+            fprintf(stderr, "%s:%d: '%s' failed: ",                           \
               __FILE__,                                                       \
               __LINE__,                                                       \
               #exp                                                            \
@@ -32,45 +33,55 @@
           }                                                                   \
         } while(0)
 
+
 int main(int argc, char **argv)
 {
-    int pfds[2];
-    pid_t childpid;
-    char *socket = getenv("SPAMDSOCK");   /* Unix Domain Socket path  */
-    char *host = getenv("SPAMDHOST");     /* remote spamd host name   */
-    char *port = getenv("SPAMDPORT");     /* remote spamd host port   */
-    char *ssl = getenv("SPAMDSSL");       /* use ssl for spamc/spamd  */
-    char *limit = getenv("SPAMDLIMIT");   /* message size limit       */
-    char *user = getenv("SPAMDUSER");     /* spamc user configuration */
     char *options[MAXOPTS];
-    int opt = 0;
+    char *val = NULL;
+    int   opt = 0;
+
+    pid_t childpid;
+    int pfds[2];
+
+
+#ifdef HAVE_QMAIL_RELAYCLIENT
+    /*
+     * use standard qmail-queue if this is a RELAYCLIENT,
+     * see <http://bugzilla.spamassassin.org/show_bug.cgi?id=2927>
+     */
+    if (getenv("RELAYCLIENT")) {
+       TRY(execlp("qmail-queue", "qmail-queue", NULL));
+    }
+#endif
+
 
     /* create the array of options */
-    options[opt++] = "spamc";             /* set zeroth argument */
-    if (socket) {
+    options[opt++] = "spamc";            /* set zeroth argument */
+    if ((val = getenv("SPAMDSOCK")) != NULL) {   /* Unix Domain Socket path */
         options[opt++] = "-U";
-        options[opt++] = socket;
+        options[opt++] = val;
     }
-    if (host) {
+    if ((val = getenv("SPAMDHOST")) != NULL) {   /* remote spamd host name */
         options[opt++] = "-d";
-        options[opt++] = host;
+        options[opt++] = val;
     }
-    if (port) {
+    if ((val = getenv("SPAMDPORT")) != NULL) {   /* remote spamd port number */
         options[opt++] = "-p";
-        options[opt++] = port;
+        options[opt++] = val;
     }
-    if (ssl) {
+    if ((val = getenv("SPAMDSSL")) != NULL) {    /* use ssl for spamc/spamd */
         options[opt++] = "-S";
     }
-    if (limit) {
+    if ((val = getenv("SPAMDLIMIT")) != NULL) {  /* message size limit */
         options[opt++] = "-s";
-        options[opt++] = limit;
+        options[opt++] = val;
     }
-    if (user) {
+    if ((val = getenv("SPAMDUSER")) != NULL) {   /* spamc user configuration */
         options[opt++] = "-u";
-        options[opt++] = user;
+        options[opt++] = val;
     }
-    options[opt] = NULL;
+    options[opt] = NULL;                 /* terminate argument list */
+
 
     TRY(pipe(pfds));
     TRY(childpid = fork());
@@ -90,3 +101,4 @@ int main(int argc, char **argv)
     /* never reached */
     return 81;
 }
+
