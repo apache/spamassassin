@@ -39,6 +39,11 @@ describe UPPERCASE_75_100       message body is 75-100% uppercase
 meta PLING_PLING                (!__ISO_2022_JP_DELIM && __PLING_PLING)
 describe PLING_PLING            Subject has lots of exclamation marks
 
+# Steve Linford via Charlie Watts: good test!
+header __RCVD_BY_HOTMAIL	Received =~ / by hotmail\.com /
+body __MIME_HTML_ONLY		eval:check_for_mime_html_only()
+meta MIME_HTML_ONLY		(!__RCVD_BY_HOTMAIL && __MIME_HTML_ONLY)
+
 ##############################################################################
 
 meta NIGERIAN_BODY	(( __NIGERIAN_BODY_.+ + ) > 1)

@@ -446,12 +446,6 @@ header USER_IN_WHITELIST	eval:check_from_in_whitelist()
 describe USER_IN_WHITELIST	From: address is in the user's white-list
 tflags USER_IN_WHITELIST        userconf
 
-# Steve Linford via Charlie Watts: good test!
-header __RCVD_BY_HOTMAIL        Received =~ / by hotmail\.com /
-header __CTYPE_IS_HTML          Content-Type =~ /^text\/html\b/
-meta CTYPE_JUST_HTML		(!__RCVD_BY_HOTMAIL && __CTYPE_IS_HTML)
-describe CTYPE_JUST_HTML	HTML-only mail, with no text version
-
 # noticed this implied in passing in Dan's CVS messages. ;)  no nonspam hits
 # but only a small number of spam ones, for me.
 header HTML_ALL_CAPS   		Content-Type =~ /TEXT\/HTML/
