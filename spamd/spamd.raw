@@ -241,8 +241,8 @@ sub handle_user {
     my $cf_file = $pw[7]."/.spamassassin.cf";
 
     create_default_cf_if_needed ($cf_file, $username);
-    # $spamtest->set_username ($username);		# wtf?
     $spamtest->read_scoreonly_config ($cf_file);
+    $spamtest->load_scoreonly_sql ($username);
 }
 
 sub create_default_cf_if_needed {
