@@ -348,7 +348,7 @@ sub rendered {
       $self->{'rendered_type'} = 'text/html';
       my $html = Mail::SpamAssassin::HTML->new(); # object
       my @lines = @{$html->html_render($text)};
-      $self->{rendered} = join('', @{$html->html_render($text)});
+      $self->{rendered} = join('', @lines);
       $self->{html_results} = $html->get_results(); # needed in eval tests
 
       # some tests done after rendering
