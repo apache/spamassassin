@@ -80,7 +80,6 @@ sub new {
   }
 
   $self->{conf} = $self->{main}->{conf};
-  $self->{stop_at_threshold} = $self->{main}->{stop_at_threshold};
 
   # used with "mass-check --loghits"
   if ($self->{main}->{save_pattern_hits}) {
@@ -170,12 +169,8 @@ sub check {
     $self->do_rbl_res_eval_tests();
     timelog("Finished all RBL tests", "rblblock", 2);
 
-    # Do meta rules second-to-last, but don't do them if the "-S" option
-    # is used, because then not all rules will have been run, so some
-    # of the rules that meta-rules depend on will be falsely false
-    if (!$self->{stop_at_threshold}) {
-        $self->do_meta_tests();
-    }
+    # Do meta rules second-to-last
+    $self->do_meta_tests();
 
     # TODO: call learn() here, before adding Bayes points
 
@@ -1239,21 +1234,8 @@ sub do_head_tests {
   my $evalstr2 = '';
 
   my @tests = keys %{$self->{conf}{head_tests}};
-  my @negative_tests;
-  my @positive_tests;
-  # add negative tests;
-  foreach my $test (@tests) {
-    if ($self->{conf}{scores}{$test} < 0) {
-      push @negative_tests, $test;
-    }
-    else {
-      push @positive_tests, $test;
-    }
-  }
-  @negative_tests = sort { $self->{conf}{scores}{$a} <=> $self->{conf}{scores}{$b} } @negative_tests;
-  @positive_tests = sort { $self->{conf}{scores}{$b} <=> $self->{conf}{scores}{$a} } @positive_tests;
 
-  foreach $rulename (@negative_tests, @positive_tests) {
+  foreach $rulename (@tests) {
     $rule = $self->{conf}->{head_tests}->{$rulename};
     my $def = '';
     my ($hdrname, $testtype, $pat) =
@@ -1270,11 +1252,6 @@ sub do_head_tests {
     $hdrname =~ s/#/[HASH]/g;		# avoid probs with eval below
     $def =~ s/#/[HASH]/g;
 
-    if ( $self->{stop_at_threshold} && $self->{conf}{scores}{$rulename} > 0 ) {
-    	$evalstr .= 'return if $self->is_spam();
-	';
-    }
-    
     $evalstr .= '
       if ($self->{conf}->{scores}->{q#'.$rulename.'#}) {
          '.$rulename.'_head_test($self, $_); # no need for OO calling here (its faster this way)
@@ -1340,28 +1317,10 @@ sub do_body_tests {
   my $evalstr = '';
   my $evalstr2 = '';
   my @tests = keys %{$self->{conf}{body_tests}};
-  my @negative_tests;
-  my @positive_tests;
-  # add negative tests;
-  foreach my $test (@tests) {
-    if ($self->{conf}{scores}{$test} < 0) {
-      push @negative_tests, $test;
-    }
-    else {
-      push @positive_tests, $test;
-    }
-  }
-  @negative_tests = sort { $self->{conf}{scores}{$a} <=> $self->{conf}{scores}{$b} } @negative_tests;
-  @positive_tests = sort { $self->{conf}{scores}{$b} <=> $self->{conf}{scores}{$a} } @positive_tests;
 
-  foreach $rulename (@negative_tests, @positive_tests) {
+  foreach $rulename (@tests) {
     $pat = $self->{conf}->{body_tests}->{$rulename};
 
-    if ( $self->{stop_at_threshold} && $self->{conf}{scores}{$rulename} > 0 ) {
-    	$evalstr .= 'return if $self->is_spam();
-	';
-    }
-    
     $evalstr .= '
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
         # call procedurally as it is faster.
@@ -1553,27 +1512,9 @@ sub do_body_uri_tests {
   my $evalstr = '';
   my $evalstr2 = '';
   my @tests = keys %{$self->{conf}{uri_tests}};
-  my @negative_tests;
-  my @positive_tests;
-  # add negative tests;
-  foreach my $test (@tests) {
-    if ($self->{conf}{scores}{$test} < 0) {
-      push @negative_tests, $test;
-    }
-    else {
-      push @positive_tests, $test;
-    }
-  }
-  @negative_tests = sort { $self->{conf}{scores}{$a} <=> $self->{conf}{scores}{$b} } @negative_tests;
-  @positive_tests = sort { $self->{conf}{scores}{$b} <=> $self->{conf}{scores}{$a} } @positive_tests;
 
-  foreach $rulename (@negative_tests, @positive_tests) {
+  foreach $rulename (@tests) {
     $pat = $self->{conf}->{uri_tests}->{$rulename};
-
-    if ( $self->{stop_at_threshold} && $self->{conf}{scores}{$rulename} > 0 ) {
-    	$evalstr .= 'return if $self->is_spam();
-	';
-    }
 
     $evalstr .= '
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
@@ -1640,28 +1581,10 @@ sub do_rawbody_tests {
   my $evalstr = '';
   my $evalstr2 = '';
   my @tests = keys %{$self->{conf}{rawbody_tests}};
-  my @negative_tests;
-  my @positive_tests;
-  # add negative tests;
-  foreach my $test (@tests) {
-    if ($self->{conf}{scores}{$test} < 0) {
-      push @negative_tests, $test;
-    }
-    else {
-      push @positive_tests, $test;
-    }
-  }
-  @negative_tests = sort { $self->{conf}{scores}{$a} <=> $self->{conf}{scores}{$b} } @negative_tests;
-  @positive_tests = sort { $self->{conf}{scores}{$b} <=> $self->{conf}{scores}{$a} } @positive_tests;
 
-  foreach $rulename (@negative_tests, @positive_tests) {
+  foreach $rulename (@tests) {
     $pat = $self->{conf}->{rawbody_tests}->{$rulename};
 
-    if ( $self->{stop_at_threshold} && $self->{conf}{scores}{$rulename} > 0 ) {
-    	$evalstr .= 'return if $self->is_spam();
-	';
-    }
-    
     $evalstr .= '
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
          '.$rulename.'_rawbody_test($self, @_); # call procedurally for speed
@@ -1726,28 +1649,10 @@ sub do_full_tests {
   # build up the eval string...
   my $evalstr = '';
   my @tests = keys %{$self->{conf}{full_tests}};
-  my @negative_tests;
-  my @positive_tests;
-  # add negative tests;
-  foreach my $test (@tests) {
-    if ($self->{conf}{scores}{$test} < 0) {
-      push @negative_tests, $test;
-    }
-    else {
-      push @positive_tests, $test;
-    }
-  }
-  @negative_tests = sort { $self->{conf}{scores}{$a} <=> $self->{conf}{scores}{$b} } @negative_tests;
-  @positive_tests = sort { $self->{conf}{scores}{$b} <=> $self->{conf}{scores}{$a} } @positive_tests;
 
-  foreach $rulename (@negative_tests, @positive_tests) {
+  foreach $rulename (@tests) {
     $pat = $self->{conf}->{full_tests}->{$rulename};
 
-    if ( $self->{stop_at_threshold} && $self->{conf}{scores}{$rulename} > 0 ) {
-    	$evalstr .= 'return if $self->is_spam();
-	';
-    }
-    
     $evalstr .= '
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
 	if ($$fullmsgref =~ '.$pat.') {
@@ -2010,25 +1915,12 @@ sub run_eval_tests {
   local ($_);
   
   my @tests = keys %{$evalhash};
-  my @negative_tests;
-  my @positive_tests;
-  # add negative tests;
-  foreach my $test (@tests) {
-    if ($self->{conf}{scores}{$test} < 0) {
-      push @negative_tests, $test;
-    }
-    else {
-      push @positive_tests, $test;
-    }
-  }
-  @negative_tests = sort { $self->{conf}{scores}{$a} <=> $self->{conf}{scores}{$b} } @negative_tests;
-  @positive_tests = sort { $self->{conf}{scores}{$b} <=> $self->{conf}{scores}{$a} } @positive_tests;
+
   my $debugenabled = $Mail::SpamAssassin::DEBUG->{enabled};
 
-  foreach my $rulename (@negative_tests, @positive_tests) {
+  foreach my $rulename (@tests) {
     next unless ($self->{conf}->{scores}->{$rulename});
     my $score = $self->{conf}{scores}{$rulename};
-    return if ($score > 0) && $self->{stop_at_threshold} && $self->is_spam();
     my $evalsub = $evalhash->{$rulename};
 
     my $result;
@@ -2078,7 +1970,6 @@ sub run_rbl_eval_tests {
   foreach my $rulename (sort (@tests)) {
     next unless ($self->{conf}->{scores}->{$rulename});
     my $score = $self->{conf}{scores}{$rulename};
-    return if ($score > 0) && $self->{stop_at_threshold} && $self->is_spam();
     my $evalsub = $evalhash->{$rulename};
 
     my $result;

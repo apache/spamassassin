@@ -39,9 +39,8 @@ sub report {
   my $text = $self->{main}->remove_spamassassin_markup ($self->{msg});
 
   if (!$self->{main}->{local_tests_only}
-  	&& !$self->{options}->{dont_report_to_razor}
-    && !$self->{main}->{stop_at_threshold}
-	&& $self->is_razor_available())
+      && !$self->{options}->{dont_report_to_razor}
+      && $self->is_razor_available())
   {
     if ($self->razor_report($text)) {
       dbg ("SpamAssassin: spam reported to Razor.");
@@ -49,9 +48,8 @@ sub report {
     }
   }
   if (!$self->{main}->{local_tests_only}
-  	&& !$self->{options}->{dont_report_to_dcc}
-    && !$self->{main}->{stop_at_threshold}
-	&& $self->is_dcc_available())
+      && !$self->{options}->{dont_report_to_dcc}
+      && $self->is_dcc_available())
   {
     if ($self->dcc_report($text)) {
       dbg ("SpamAssassin: spam reported to DCC.");
@@ -59,9 +57,8 @@ sub report {
     }
   }
   if (!$self->{main}->{local_tests_only}
-  	&& !$self->{options}->{dont_report_to_pyzor}
-    && !$self->{main}->{stop_at_threshold}
-	&& $self->is_pyzor_available())
+      && !$self->{options}->{dont_report_to_pyzor}
+      && $self->is_pyzor_available())
   {
     if ($self->pyzor_report($text)) {
       dbg ("SpamAssassin: spam reported to Pyzor.");
