@@ -1,4 +1,6 @@
 #!/usr/bin/perl -w
+#
+# used to clean out spamtraps.
 
 my $killfile_message_ids = qr{(?:
     <\d\d\d\d\S+\@dev\.lifetimetv\.com>
@@ -13,6 +15,7 @@ my $killfile_receiveds = qr{(?:
     |for <spamistehsuk\@spamtraps\.taint\.org>          # unreliable
     |for <postmaster_neto.net\@spamtraps\.taint\.org>   # unreliable
     |for <fortress\S*\@shangri-la\.dropbear\.id\.au>
+    |by mailstrom\.vmadmin\.com \(\S+\) with SMTP id 
 )}x;
 
 my $killfile_froms = qr{(?:
@@ -29,6 +32,7 @@ my $killfile_froms = qr{(?:
     |<Cooking\.com\.\S+\@mail\.cooking\.com>
     |<cio\@UPDATE\.CIO\.COM>
     |<DirectTV\S+\@vmadmin.com>
+    |<\S+\@icelandair.is>
 )}x;
 
 ###########################################################################
