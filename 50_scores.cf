@@ -33,6 +33,7 @@ score AS_SEEN_ON                     2.235
 score AUTO_EMAIL_REMOVAL             1.750
 score BAD_HELO_WARNING               2.540
 score BASE64_ENC_TEXT                2.062
+score BCC                            0.500
 score BE_AMAZED                      4.202
 score BIG_FONT                       2.056
 score BILLION_DOLLARS                3.060
@@ -51,6 +52,7 @@ score CHECK_OR_MONEY_ORDER           4.465
 score CLICK_BELOW                    1.531
 score CLICK_HERE_LINK                0.847
 score CLICK_TO_REMOVE_2              0.394
+score COMMENT                        0.500
 score COMMUNIGATE                    2.596
 score COPYRIGHT_CLAIMED              -1.255
 score COPY_ACCURATELY                3.410
@@ -105,6 +107,7 @@ score FORGED_GW05_RCVD               4.851
 score FORGED_HOTMAIL_RCVD            0.500
 score FORGED_JUNO_RCVD               4.430
 score FORGED_RCVD_FOUND              0.008
+score FORGED_RCVD_TRAIL              1.000
 score FORGED_YAHOO_RCVD              1.454
 score FORM_W_MAILTO_ACTION           3.239
 score FOR_FREE                       1.127
@@ -115,6 +118,8 @@ score FREE_MONEY                     0.244
 score FREE_PRIORITY_MAIL             0.718
 score FREQ_SPAM_PHRASE               2.417
 score FRIEND_AT_PUBLIC               0.999
+score FROM_ADDRESS_EQ_REAL           1.000
+score FROM_AND_TO_SAME               -2.071
 score FROM_BTAMAIL                   3.516
 score FROM_ENDS_IN_NUMS              0.382
 score FROM_HAS_MIXED_NUMS            2.578
@@ -164,6 +169,7 @@ score LINES_OF_YELLING               -0.036
 score LINES_OF_YELLING_2             0.068
 score LINES_OF_YELLING_3             0.478
 score LOTS_OF_CC_LINES               3.033
+score MAILING_LIST                   1.000
 score MAILTO_LINK                    0.782
 score MAILTO_TO_REMOVE               -1.669
 score MAILTO_TO_SPAM_ADDR            0.523
@@ -185,6 +191,7 @@ score MONEY_MAKING                   2.500
 score MONSTERHUT                     1.295
 score MORTGAGE_RATES                 4.354
 score MSGID_CHARS_SPAM               2.058
+score MSGID_CHARS_WEIRD              0.100
 score MSGID_HAS_NO_AT                2.150
 score MSGID_SPAMSIGN_1               3.458
 score MSG_ID_ADDED_BY_MTA            3.967
@@ -255,6 +262,7 @@ score REMOVE_PAGE                    2.198
 score REMOVE_SUBJ                    3.435
 score REPLY_REMOVE_SUBJECT           0.731
 score REPLY_TO_EMPTY                 2.595
+score RESENT_TO                      -1.000
 score RESISTANCE_IS_FUTILE           3.515
 score RISK_FREE                      1.928
 score SAFEGUARD_NOTICE               1.967
@@ -292,6 +300,7 @@ score TAKE_ACTION_NOW                2.675
 score THE_FOLLOWING_FORM             1.988
 score THIS_AINT_SPAM                 0.854
 score TONER                          1.403
+score TO_ADDRESS_EQ_REAL             1.000
 score TO_BE_REMOVED_REPLY            3.985
 score TO_EMPTY                       1.446
 score TO_LOCALPART_EQ_REAL           0.483
@@ -311,6 +320,7 @@ score UPPERCASE_50_75                2.972
 score UPPERCASE_75_100               2.990
 score URGENT_BIZ                     2.734
 score URI_IS_POUND                   2.026
+score USER_AGENT                     -1.000
 score US_DOLLARS                     4.475
 score US_DOLLARS_2                   0.182
 score US_DOLLARS_3                   2.295
@@ -334,17 +344,22 @@ score X_EM_REGISTRATION              1.191
 score X_EM_VER_PRESENT               1.331
 score X_ENC_PRESENT                  4.140
 score X_ESMTP                        -1.662
+score X_LIBRARY                      1.000
 score X_LIST_HOST                    2.079
 score X_LIST_UNSUBSCRIBE             3.195
+score X_LOOP                         -1.000
 score X_MAILER_GIBBERISH             3.062
+score X_MAILING_LIST                 -1.000
 score X_MAIL_ID_PRESENT              2.192
 score X_MESSAGE_ID                   0.648
+score X_MSMAIL_ODD_CASE              3.000
 score X_MSMAIL_PRIORITY_HIGH         -0.886
 score X_PMFLAGS_PRESENT              3.093
 score X_PRECEDENCE_REF               4.555
 score X_PRIORITY_HIGH                0.896
 score X_SERV_HOST_PRESENT            3.759
-score X_SMTPEXP_VERSION              3.243
+score X_SMTPEXP_REGISTRATION         1.622
+score X_SMTPEXP_VERSION              1.622
 score X_STORMPOST_TO                 2.272
 score X_X_PRESENT                    1.508
 score YELLOWSUN                      2.810
