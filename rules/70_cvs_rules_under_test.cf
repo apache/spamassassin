@@ -102,3 +102,7 @@ describe T_NASD_FINANCIAL       Message indicates a financial institute
 tflags   T_NASD_FINANCIAL           nice
 score T_NASD_FINANCIAL -1.0
 
+# http://www.hughes-family.org/bugzilla/show_bug.cgi?id=679
+body T_MEMBER                 /\bmember (?:number|reward|value|benefit|rate|report|card|information)s?\b/i
+describe T_MEMBER             Member Stuff
+
