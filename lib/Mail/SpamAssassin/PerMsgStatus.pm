@@ -1568,7 +1568,7 @@ sub get_uri_list {
   $self->{uri_list} = \@uris;
 
   dbg("uri tests: Done uriRE");
-  return @{$self->{uri_list}};
+  return @uris;
 }
 
 sub do_body_uri_tests {
