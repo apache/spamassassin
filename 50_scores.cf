@@ -617,7 +617,7 @@ score X_ACCEPT_LANG                  -2.0
 score    OBFUSCATING_COMMENT    2.0
 
 score SUBJECT_HAS_DATE          -4.0
-score FROM_NEWS_LIST            -2.0
+score FROM_NEWS_LIST            -0.5
 score FROM_US_PHONE             -5.0
 score SUBJECT_IS_NEWS           -4.0
 score SUBJECT_FREQ              -2.5
@@ -652,7 +652,6 @@ score FAILURE_NOTICE_1          -1.0
 score FAILURE_NOTICE_2          -1.0
 score MAILER_DAEMON             -1.0
 score FORGOTTEN_PASSWORD        -2.0
-score PRIVACY_STATEMENT         -1.0
 score REG_THANKS                -1.0
 score ACCOUNT_CLICK             -1.0
 score TRACK_NUMBER              -1.0
@@ -663,17 +662,17 @@ score LISTBUILDER               -5
 score USER_AGENT_PINE           -1.0
 score USER_AGENT_MUTT           -1.0
 score USER_AGENT_GNUS_UA        -1.0
-score USER_AGENT_GNUS_XM        -1.0
+score USER_AGENT_GNUS_XM        -0.1
 score USER_AGENT_MOZILLA_UA     -1.0
 score USER_AGENT_MOZILLA_XM     -1.0
-score USER_AGENT_OE             -0.5
+score USER_AGENT_OE             -0.1
 score USER_AGENT_MACOE          -1.0
 score USER_AGENT_OUTLOOK        -0.5
 score USER_AGENT_ENTOURAGE      -1.0
 score USER_AGENT_THEBAT         -0.5
 score USER_AGENT_KMAIL          -1.0
 score USER_AGENT_IMP            -1.0
-score USER_AGENT_AOL            -0.5
+score USER_AGENT_AOL            -0.1
 score USER_AGENT_TONLINE        -1.0
 score USER_AGENT_APPLEMAIL      -1.0
 

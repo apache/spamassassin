@@ -59,12 +59,6 @@ describe T_FREE_HOSTING           Contains 'free hosting' with capitals
 body T_FREE_WEBSITE               /(?-i:F)ree web/i  
 describe T_FREE_WEBSITE           Contains 'free website' with capitals
 
-# bug 646: compensate rule
-body T_TRADEMARK            /\bregistered\s+trademark/i
-describe T_TRADEMARK     Message specifies a registered trademark
-tflags T_TRADEMARK          nice
-score T_TRADEMARK           -1.0
-
 header T_SUBJ_GUARANTEED          Subject =~ /^guaranteed|(?-i:GUARANTEE)/i
 describe T_SUBJ_GUARANTEED        Subject GUARANTEED
 
@@ -98,10 +92,10 @@ body T_SALE                       /sales?  (?:price|system|department|technology
 describe T_SALE                   Stuff on Sale
 
 # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=649
-body T_NASD_FINANCIAL           /\b(?:member\s+(?-i:NASD\/SIPC)|not\s+insured\s+.{0,10}(?-i:FDIC)|(?-i:FDIC)\s+insured)/i
-describe T_NASD_FINANCIAL       Message indicates a financial institute
-tflags   T_NASD_FINANCIAL           nice
-score T_NASD_FINANCIAL -1.0
+#body T_NASD_FINANCIAL           /\b(?:member\s+(?-i:NASD\/SIPC)|not\s+insured\s+.{0,10}(?-i:FDIC)|(?-i:FDIC)\s+insured)/i
+#describe T_NASD_FINANCIAL       Message indicates a financial institute
+#tflags   T_NASD_FINANCIAL           nice
+#score T_NASD_FINANCIAL -1.0
 
 # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=679
 body T_MEMBER                 /\bmember (?:number|reward|value|benefit|rate|report|card|information)s?\b/i

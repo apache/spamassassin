@@ -464,8 +464,9 @@ describe PENIS_ENLARGE		Information on getting a larger penis or breasts
 body PENIS_ENLARGE2		/\b(?:penis|male organ|P[ -]?P\b|pee[ -]?pee|dick|sc?hlong|wh?anger|breast).{0,50}\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b|\binches\b)/i
 describe PENIS_ENLARGE2		Information on getting a larger penis or breasts (2)
 
-body     EJACULATION            /\b(?:increase|improve|greater).{0,10}ejaculation/i
-describe EJACULATION            Increase your ejaculation!
+#   0.001    0.000    0.002    0.00    3.60  EJACULATION (low matches)
+#body     EJACULATION            /\b(?:increase|improve|greater).{0,10}ejaculation/i
+#describe EJACULATION            Increase your ejaculation!
 
 body     IMPOTENCE              /\b(?:impotence (?:problem|cure|solution)|Premature Ejaculation|erectile dysfunction)/i
 describe IMPOTENCE              Impotence cure
@@ -711,8 +712,9 @@ describe SEE_FOR_YOURSELF       See for yourself
 body ORDER_NOW                  /\border (?:now|soon|fast|quickly|while)\b/i
 describe ORDER_NOW              Encourages you to waste no time in ordering
 
-rawbody OBFUSCATING_JAVASCRIPT   /charCodeAt|fromCharCode/i
-describe OBFUSCATING_JAVASCRIPT   An attempt to hide spam inside obfuscating Javascript code
+#   0.001    0.000    0.002    0.00    1.00  OBFUSCATING_JAVASCRIPT (low matches)
+#rawbody OBFUSCATING_JAVASCRIPT   /charCodeAt|fromCharCode/i
+#describe OBFUSCATING_JAVASCRIPT   An attempt to hide spam inside obfuscating Javascript code
 
 rawbody NUMERIC_COMMENT         /<!--\d{3,}-->/
 describe NUMERIC_COMMENT        Contains a comment with nothing but a number in it
