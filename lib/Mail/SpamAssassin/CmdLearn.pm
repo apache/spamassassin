@@ -210,7 +210,7 @@ sub cmdline_run {
     if ($@) { die $@ unless ($@ =~ /HITLIMIT/); }
 
     print STDERR "\n" if ($opt{showdots});
-    print "Learned from $learnedcount messages ($messagecount messages examined).\n";
+    print "Learned from $learnedcount message(s) ($messagecount message(s) examined).\n";
   };
 
   if ($@) {
