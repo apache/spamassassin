@@ -265,9 +265,12 @@ sub replace_header {
 sub delete_header {
   my ($self, $hdr) = @_;
 
+#use Data::Dumper;
+#print Dumper($self->{header_order});
+
   # Delete all versions of the header, case insensitively
   foreach my $dhdr ( $self->_get_header_list($hdr,1) ) {
-    @{$self->{header_order}} = grep($_ ne $dhdr, @{$self->{header_order}});
+    @{$self->{header_order}} = grep( index($_,"$dhdr:") != 0, @{$self->{header_order}} );
     delete $self->{headers}->{$dhdr};
   }
 }
