@@ -56,7 +56,7 @@ case "$1" in
 	status spamd
 	;;
   *)
-	echo "Usage: $0 {start|stop|restart|status}"
+	echo "Usage: $0 {start|stop|restart|status|condrestart}"
 	exit 1
 esac
 
