@@ -2612,7 +2612,7 @@ sub check_bayes {
   if (($min == 0 || $self->{bayes_score} > $min) &&
       ($max eq "undef" || $self->{bayes_score} <= $max))
   {
-      if ($self->{bayes_score}) {
+      if (exists ($self->{bayes_score})) {
           if ($self->{conf}->{detailed_bayes_score}) {
               $self->test_log(sprintf ("score: %3.4f, hits: %s",
                                        $self->{bayes_score},

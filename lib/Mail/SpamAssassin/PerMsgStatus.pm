@@ -790,7 +790,8 @@ sub _get_tag {
 	    CONTACTADDRESS => sub { $self->{conf}->{report_contact}; },
 
 	    BAYES => sub {
-	      $self->{bayes_score} ? sprintf("%3.4f", $self->{bayes_score}) : "0.5"
+	      exists($self->{bayes_score}) ?
+			sprintf("%3.4f", $self->{bayes_score}) : "0.5"
 	    },
 
 	    DATE => sub {
