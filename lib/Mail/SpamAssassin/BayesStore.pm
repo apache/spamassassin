@@ -229,6 +229,9 @@ sub tie_db_writable {
   }
   umask $umask;
 
+  # set our cache to what version DB we're using
+  $self->{db_version} = ($self->get_magic_tokens())[6];
+
   # figure out if we can read the current DB and if we need to do a
   # DB version update and do it if necessary if either has a problem,
   # fail immediately
@@ -242,7 +245,6 @@ sub tie_db_writable {
   }
 
   $self->{scan_count_little_file} = $path.'_msgcount';
-  $self->{db_version} = ($self->get_magic_tokens())[6];
 
   # ensure we count 1 mailbox learnt as an event worth marking,
   # expiry-wise
@@ -355,10 +357,13 @@ sub upgrade_db {
 		 (oct ($main->{conf}->{bayes_file_mode}) & 0666) or return 1;
 
       dbg ("bayes: upgraded database format from v0 to v1 in ".(time - $started)." seconds");
-      $db_ver = 1;
+      $self->{db_version} = $db_ver = 1; # need this for other functions which check
     }
 
-    # if ( $db_ver == 1 ) { ... $db_ver = 2; }
+    # if ( $db_ver == 1 ) {
+    #   ...
+    #   $self->{db_version} = $db_ver = 2; # need this for other functions which check
+    # }
     # ... and so on.
   }
 
