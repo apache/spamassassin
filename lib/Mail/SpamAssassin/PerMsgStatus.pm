@@ -44,12 +44,10 @@ use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Received;
 use Mail::SpamAssassin::Util;
 
-use constant HAS_MIME_BASE64 =>		eval { require MIME::Base64; };
-
 use constant MAX_BODY_LINE_LENGTH =>	2048;
 
 use vars qw{
-  @ISA $base64alphabet
+  @ISA
 };
 
 @ISA = qw();
@@ -1129,8 +1127,8 @@ sub split_into_array_of_short_lines {
 
 sub split_b64_decode {
   my ($self) = shift;
-  return $self->split_into_array_of_short_lines
-		  ($self->generic_base64_decode ($_[0]));
+  return $self->split_into_array_of_short_lines(
+    Mail::SpamAssassin::Util::base64_decode($_[0]));
 }
 
 ###########################################################################
@@ -1343,7 +1341,7 @@ sub mime_decode_header {
   # =?UTF-8?B?bmcgY29jb29uIC0gcmVzZW50IA==?=   (yuck)
 
   if ($enc =~ s{\s*=\?([^\?]+)\?[Bb]\?([^\?]+)\?=}{
-    		$self->generic_base64_decode ($2);
+		Mail::SpamAssassin::Util::base64_decode($2);
 	      }eg)
   {
     my $rawenc = $enc;
@@ -2278,78 +2276,6 @@ sub _test_log_line {
   } else {
     $self->{test_log_msgs}->{LONG} .= sprintf ("%27s [%s]\n", "", $msg);
   }
-}
-
-###########################################################################
-# Rather than add a requirement for MIME::Base64, use a slower but
-# built-in base64 decode mechanism.
-#
-# original credit for this code:
-# b64decode -- decode a raw BASE64 message
-# A P Barrett <barrett@ee.und.ac.za>, October 1993
-# Minor mods by jm@jmason.org for spamassassin and "use strict"
-
-sub slow_base64_decode {
-  my $self = shift;
-  local $_ = shift;
-
-  $base64alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.
-		    'abcdefghijklmnopqrstuvwxyz'.
-		    '0123456789+/'; # and '='
-
-  my $leftover = '';
-
-  # ignore illegal characters
-  s/[^$base64alphabet]//go;
-  # insert the leftover stuff from last time
-  $_ = $leftover . $_;
-  # if there are not a multiple of 4 bytes, keep the leftovers for later
-  m/^((?:....)*)(.*)/ ; $_ = $1 ; $leftover = $2 ;
-  # turn each group of 4 values into 3 bytes
-  s/(....)/&b64decodesub($1)/eg;
-  # special processing at EOF for last few bytes
-  if (eof) {
-      $_ .= &b64decodesub($leftover); $leftover = '';
-  }
-  # output it
-  return $_;
-}
-
-# b64decodesub -- takes some characters in the base64 alphabet and
-# returns the raw bytes that they represent.
-sub b64decodesub
-{
-  local ($_) = $_[0];
-	   
-  # translate each char to a value in the range 0 to 63
-  eval qq{ tr!$base64alphabet!\0-\77!; };
-  # keep 6 bits out of every 8, and pack them together
-  $_ = unpack('B*', $_); # look at the bits
-  s/(..)(......)/$2/g;   # keep 6 bits of every 8
-  s/((........)*)(.*)/$1/; # throw away spare bits (not multiple of 8)
-  $_ = pack('B*', $_);   # turn the bits back into bytes
-  $_; # return
-}
-
-# contributed by Matt: a wrapper for slow_base64_decode() which uses
-# MIME::Base64 if it's installed.
-sub generic_base64_decode {
-    my ($self, $to_decode) = @_;
-
-    $to_decode =~ s/\r//;
-    if (HAS_MIME_BASE64) {
-	my $retval;
-        # base64 decoding can produce cruddy warnings we don't care
-        # about.  suppress them here.
-        my $prevwarn = $SIG{__WARN__}; local $SIG{__WARN__} = sub { };
-
-        $retval = MIME::Base64::decode_base64($to_decode);
-        $SIG{__WARN__} = $prevwarn;
-        return $retval;
-    }
-    else {
-        return $self->slow_base64_decode($to_decode);
-    }
 }
 
 ###########################################################################

@@ -23,7 +23,7 @@ use vars qw (
 require Exporter;
 
 @ISA = qw(Exporter);
-@EXPORT = qw(local_tz);
+@EXPORT = qw(local_tz base64_decode);
 
 use Mail::SpamAssassin;
 
@@ -379,7 +379,7 @@ sub base64_decode {
       m|^(?:[A-Za-z0-9+/=]{2,}={0,2})$|s)
   {
     # only use MIME::Base64 when the XS and Perl are both correct and quiet
-    s/(=+)(?!$)/'A' x length($1)/ge;
+    s/(=+)(?!=*$)/'A' x length($1)/ge;
     return MIME::Base64::decode_base64($_);
   }
   tr|A-Za-z0-9+/=||cd;			# remove non-base64 characters
