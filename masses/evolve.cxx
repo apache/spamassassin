@@ -55,7 +55,7 @@ void writescores (FILE *fout) {
   int i;
 
   for (i = 0; i < num_scores; i++) {
-    fprintf (fout, "score %s %2.1f\n",
+    fprintf (fout, "score %-30s %2.1f\n",
 		score_names[i], scores[i]);
   }
 }

@@ -5,7 +5,7 @@ all: evolve
 evolve: tmp/tests.h evolve.o
 	g++ -Wall -O -fexceptions -Lgalib245/ga evolve.o -o evolve -lga -lm
 
-tmp/tests.h: spam.log
+tmp/tests.h: spam.log nonspam.log
 	./logs-to-c
 
 %.o: %.cxx

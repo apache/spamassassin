@@ -109,7 +109,7 @@ describe MSGID_HAS_NO_AT	Message-Id has no @ sign
 header INVALID_DATE		Date =~ / AM| PM/i
 describe INVALID_DATE		Invalid Date: header (has AM/PM)
 
-header INVALID_DATE_NO_TZ	Date =~ /^..., .. ... .... ..:..:..$/
+header INVALID_DATE_NO_TZ	Date =~ /^..., \d+ ... .... ..:..:..$/
 describe INVALID_DATE_NO_TZ	Invalid Date: header (no timezone)
 
 header SUBJ_HAS_Q_MARK		Subject =~ /\?.{2,}$/
@@ -148,6 +148,12 @@ describe BAD_HELO_WARNING	Fake name used in SMTP HELO command
 header SUBJ_FULL_OF_8BITS	eval:check_subject_for_lotsa_8bit_chars()
 describe SUBJ_FULL_OF_8BITS	Subject is full of 8-bit characters
 
+header MDAEMON_2_7_4		Received =~ /with SMTP .MDaemon.v2.7.SP4.R./
+describe MDAEMON_2_7_4		Received via buggy SMTP server (MDaemon 2.7.4SP4R)
+
+header POST_IN_RCVD		Received =~ / Post\.(?:sk|cz)/
+describe POST_IN_RCVD		Received contains fake 'Post.cz' hostname
+
 header RCVD_IN_RELAYS_ORDB_ORG	eval:check_rbl('relays.ordb.org.')
 describe RCVD_IN_RELAYS_ORDB_ORG Received via a relay in relays.ordb.org
 
@@ -183,6 +189,12 @@ describe YR_MEMBERSHIP_EXCH	Subject contains 'Your Membership Exchange'
 header FROM_FORGED_HOTMAIL	From =~ /^[^"]+\S+\@hotmail\.com/i
 describe FROM_FORGED_HOTMAIL	Forged From: line claiming to be from hotmail.com
 
+header LOTS_OF_CC_LINES		eval:check_lots_of_cc_lines()
+describe LOTS_OF_CC_LINES	Lots and lots of Cc: headers
+
+header FROM_NAME_EQ_FROM_ADDR	eval:check_from_name_eq_from_address()
+describe FROM_NAME_EQ_FROM_ADDR	'From:' address also used as sender's real name
+
 header FORGED_HOTMAIL_RCVD	eval:check_for_forged_hotmail_received_headers()
 describe FORGED_HOTMAIL_RCVD	Forged hotmail.com 'Received:' header found
 
@@ -197,6 +209,15 @@ describe X_MSMAIL_PRIORITY_HIGH	Sent with 'X-Msmail-Priority' set to high
 
 header MAY_BE_FORGED            Received =~ /\(may be forged\)/i
 describe MAY_BE_FORGED          'Received:' has 'may be forged' warning
+
+header SHORT_RECEIVED_LINE	Received =~ /\S{80,}/s
+describe SHORT_RECEIVED_LINE	'Received:' contains huge hostname
+
+header CORRUPT_MSGID		Message-Id =~ /\@Received: /
+describe CORRUPT_MSGID		'Message-Id' contains bits of Received header
+
+header MANY_FROMS		From =~ /^[^"<]+, [^"<]+$/
+describe MANY_FROMS		'From' contains more than one address
 
 ###########################################################################
 
@@ -217,7 +238,10 @@ body HTML_WITH_BGCOLOR		/<body .*bgcolor=\S+/i
 body SPAM_FORM			/CHANGE EMAIL ADDRESS IN ACTION OF FORM/
 body SPAM_FORM_RETURN		/return validate_form/
 body SPAM_FORM_INPUT		/<input name=.*submit type=.*submit value=.*" *Submit By E-Mail *">/i
-body DOLLAR_DOLLAR_DOLLAR	/\$\$\$/
+
+body BUGGY_CGI			/Below is the result of your feedback form/
+body BUGGY_CGI_DE		/Neue Mail aus dem Fitzshop Briefkasten./
+body BUGGY_CGI_DE_2		/Diese Mail wurde &uuml;bertragen von/
 
 # these are now full tests instead of body tests, to catch QP-encoded
 # split lines
@@ -229,18 +253,23 @@ full SECTION_301		/SECTION.{0,10}301/
 
 body POPLAUNCH			/StealthLaunch PopLaunch.\s/
 
-body NUMERIC_HTTP_ADDR		/http\:\/\/\d+\//i
+body NUMERIC_HTTP_ADDR		/http\:\/\/\d+\//is
+body NORMAL_HTTP_TO_IP		/http\:\/\/\d+\.\d+\.\d+\.\d+\//is
+body LONG_NUMERIC_HTTP_ADDR	/http\:\/\/000\d+/is
+
 body SUPERLONG_LINE		/.{199,}/
 body ASCII_FORM_ENTRY		/[A-Za-z][A-Za-z]+.*\s+_{30,}/
 
 body AMAZING			/AMAZING/
 body GUARANTEE			/GUARANTEE/
 body PROFITS			/PROFITS/
+body NO_QS_ASKED		/NO QUESTIONS ASKED/
+body FULL_REFUND		/FULL REFUND/
 body FOR_FREE			/for FREE/
 body MONEY_MAKING		/money making/i
 body BULK_EMAIL			/bulk e-*mail/i
 body DEAR_FRIEND		/Dear Friend/
-body CASHCASHCASH		/\${5,}/
+body CASHCASHCASH		/\${3,}/
 body CALL_NOW			/CALL NOW/
 body CALL_888			/(?:call|dial).*888-[\dA-Z]+-?[\dA-Z]+/i
 body CALL_1_800			/(?:call|dial).*1-800-[\dA-Z]+-?[\dA-Z]+/i
@@ -250,6 +279,8 @@ body BILLION_DOLLARS		/[BM]ILLION DOLLAR/
 body OPT_IN			/opt-in/i
 body DIRECT_EMAIL		/direct e-*mail/i
 body MASS_EMAIL			/mass e-*mail/i
+body EMAIL_MARKETING		/e-*mail marketing/i
+body PRODUCED_AND_SENT_OUT	/This a.?d is produced and sent out by/
 
 body INTL_EXEC_GUILD		/International Executive Guild/
 body ANOTHER_NET_AD		/Another Internet Ad campaign produced/
@@ -257,14 +288,15 @@ body LASER_PRINTER		/LASER PRINTER SUPPLIES/
 body DIGITAL_FX1		/Digital FX1/
 body OFFICE_OF_MD		/The Office of *The Managing Director/
 body BRAND_NEW_PAGER		/BRAND NEW Pager FREE/
+body SHOES_GUY			/Lingui Office of Guilin Textiles Import/
 
 body EXCUSE_1			/You were sent this message because/i
 body EXCUSE_2			/If you did not opt.in/i
-body EXCUSE_3			/to be removed (?:from|send|reply)/i
+body EXCUSE_3			/to be (?:removed|deleted) (?:from|send|reply|mail|email)/i
 body EXCUSE_4			/To Be Removed,? Please/i
 body EXCUSE_5			/that your email address is removed/i
 body EXCUSE_6			/to remove yourself/i
-body EXCUSE_7			/you would like to be removed/i
+body EXCUSE_7			/you (?:wish|want|would like) to be removed/i
 body EXCUSE_8			/requests to be taken off our mailing list/
 body EXCUSE_9		/If you do.*n.*t want to receive emails on this subject/i
 body EXCUSE_10			/if you (?:wish|care) not to (?:be contacted again|receive any\s*more solicitations)/i
@@ -283,11 +315,13 @@ body LIMITED_TIME_ONLY		/LIMITED TIME ONLY/i
 body WE_HONOR_ALL		/we honou?r(?: all|) remove requests/i
 body FILTERED_BY_WORLDREMOVE	/filtered by WorldRemove/
 
+body COMMUNIGATE		/transferred with a trial version of Communigate/
+
 body PORN_1			/\bbarely\b.*\blegal\b/i
 body PORN_2			/\bwild\b.*\bhardcore\b/i
 body PORN_3			/(?:(?:\bcum|\bteen|\baction\b|\bhot\b|\bhottest\b).*){2,}/i
 
-body TRACKER_ID			/^\s*\W{4,} \w{10,} \W{4,}\s*$/
+body TRACKER_ID			/^\W{4,6} (?:[a-z]{10,}|[A-Z]{10,}) \W{4,6}\s*$/
 
 body OPPORTUNITY		/OPPORTUNITY/
 body PURE_PROFIT		/PURE PROFIT/
@@ -313,8 +347,12 @@ describe CYBER_FIRE_POWER       mentions Cyber FirePower!, a spam-tool
 # match some gibberish produced by quoted-printable encoding of HTML, often
 # in the middle of a HTML "attribute=value" pair.
 
+full JUST_MAILED_PAGE		/\n\n.{0,160}<!-- saved from url=/s
+
 full CLICK_HERE_LINK		/click here.{0,100}<\/a>/is
 full CLICK_BELOW		/click below/is
+
+full PENIS_ENLARGE		/(?:(?:\bpenis\b|\benlarge).{0,50}){2,}/is
 
 full A_HREF_TO_IP		/href[3D=\s\"\']*http:\/\/\d+\.\d+\.\d+\.\d+\:?\d*\//is
 describe A_HREF_TO_IP		Link to an IP-address instead of a named host
@@ -329,6 +367,8 @@ full MAILTO_WITH_SUBJ_REMOVE	/mailto:\S+\?subject=[3D=\s"']*remove/is
 full MAILTO_WITH_SUBJ		/\n\n.*mailto:\S+\?subject=/is
 full FORM_W_MAILTO_ACTION	/action=[3D=\s"']*mailto:/is
 full AOL_USERS_LINK		/AOL\s+Users\s+Click\s+Here/is
+
+body MAILTO_TO_SPAM_ADDR	/mailto:[a-z]+\d{2,}\@/is
 
 full WEB_BUGS			/<\s*img\s[^>]*src[^>]+\?/i
 describe WEB_BUGS		Image tag with an ID code to identify you
@@ -362,185 +402,183 @@ full SIRCAM_SIGNATURE		/Content-Disposition: attachment;\s+filename=.[^\n]+\.\S\
 describe SIRCAM_SIGNATURE	SECURITY: message contains the Sircam worm
 
 ###########################################################################
-# Default scores: for header tests.  Note that if a test is named above,
-# but a score is not assigned here, the default score will be set to 1.
+# Default scores.   Note that if a test is named above, but a score is not
+# assigned here, the default score will be set to 1.
 
-# From: does not include a real name. (This gets *huge* hits.)
-#
-score NO_REAL_NAME		1
+# These scores were generating using the mass-checking scripts, and a genetic
+# algorithm to determine the optimum scores which resulted in minimum false
+# positives or negatives.
 
-# From: ends in numbers. Can also hit AOL/Yahoo/MSN etc., so this
-# is weighted quite low.
-#
-score FROM_ENDS_IN_NUMS		1
+score ADVERT_CODE 3.5
+score AMAZING 2.8
+score ANOTHER_NET_AD 0.3
+score AOL_USERS_LINK 0.3
+score ASCII_FORM_ENTRY 2.1
+score ASKS_BILLING_ADDRESS 0.0
+score A_HREF_TO_IP 0.9
+score A_HREF_TO_REMOVE 1.0
+score BASE64_ENC_TEXT 4.4
+score BILLION_DOLLARS 2.2
+score BILL_1618 0.5
+score BRAND_NEW_PAGER 2.5
+score BUGGY_CGI 4.7
+score BUGGY_CGI_DE 2.6
+score BUGGY_CGI_DE_2 0.8
+score BULK_EMAIL 0.8
+score CALL_1_800 1.0
+score CALL_888 3.2
+score CALL_NOW 2.6
+score CASHCASHCASH 1.0
+score CLICK_BELOW 4.7
+score CLICK_HERE_LINK 2.5
+score CORRUPT_MSGID 3.0
+score CYBER_FIRE_POWER 4.0
+score DEAR_FRIEND 0.7
+score DIGITAL_FX1 1.4
+score DIRECT_EMAIL 0.0
+score EMAIL_MARKETING 2.5
+score EXCUSE_1 4.7
+score EXCUSE_10 4.8
+score EXCUSE_11 2.5
+score EXCUSE_12 0.5
+score EXCUSE_13 3.6
+score EXCUSE_14 3.3
+score EXCUSE_15 2.8
+score EXCUSE_2 4.2
+score EXCUSE_3 2.5
+score EXCUSE_4 4.8
+score EXCUSE_5 2.7
+score EXCUSE_6 0.2
+score EXCUSE_7 1.7
+score EXCUSE_8 1.0
+score FILTERED_BY_WORLDREMOVE 2.4
+score FORGED_HOTMAIL_RCVD 3.6
+score FORM_W_MAILTO_ACTION 2.4
+score FOR_FREE 1.2
+score FREE_CONSULTATION 3.3
+score FREE_PRIORITY_MAIL 4.3
+score FRIEND_AT_PUBLIC 4.2
+score FROM_AND_TO_SAME 0.8
+score FROM_ENDS_IN_NUMS 1.1
+score FROM_FORGED_HOTMAIL 2.2
+score FROM_NAME_EQ_FROM_ADDR 4.2
+score FULL_REFUND 1.1
+score GREEN_EXCUSE_1 1.6
+score GREEN_EXCUSE_2 0.1
+score GUARANTEE 1.8
+score HTML_WITH_BGCOLOR 0.9
+score INCREASE_SALES 2.9
+score INTERNET_TERROR_RANT 0.0
+score INTL_EXEC_GUILD 1.2
+score INVALID_DATE 3.3
+score INVALID_DATE_NO_TZ 4.2
+score JAVASCRIPT 2.5
+score JUST_MAILED_PAGE 1.8
+score KNOWN_BAD_DIALUPS 1.4
+score LASER_PRINTER 1.4
+score LIMITED_TIME_ONLY 3.2
+score LONG_NUMERIC_HTTP_ADDR 1.7
+score LOTS_OF_CC_LINES 4.9
+score MAILTO_LINK 0.2
+score MAILTO_TO_SPAM_ADDR 1.5
+score MAILTO_WITH_SUBJ 1.8
+score MAILTO_WITH_SUBJ_REMOVE 2.0
+score MANY_FROMS 4.7
+score MASS_EMAIL 0.0
+score MAY_BE_FORGED 0.6
+score MDAEMON_2_7_4 2.4
+score MONEY_MAKING 3.2
+score MSGID_HAS_NO_AT 0.0
+score NORMAL_HTTP_TO_IP 3.0
+score NO_QS_ASKED 4.3
+score NO_REAL_NAME 2.6
+score NUMERIC_HTTP_ADDR 3.2
+score ONLINE_BIZ_OPS 3.1
+score OPPORTUNITY 4.3
+score OPT_IN 0.6
+score OSIRU_SPAMWARE_SITE 5.0
+score PARA_A_2_C_OF_1618 1.6
+score PENIS_ENLARGE 0.8
+score PLING 1.2
+score PLING_PLING 0.7
+score POPLAUNCH 1.5
+score PORN_1 1.4
+score PORN_2 3.8
+score PORN_3 0.0
+score POST_IN_RCVD 2.7
+score PRODUCED_AND_SENT_OUT 2.1
+score PROFITS 0.7
+score PURE_PROFIT 2.6
+score REALLY_UNSAFE_JAVASCRIPT 0.7
+score REMOVAL_INSTRUCTIONS 4.3
+score REMOVE_IN_QUOTES 0.2
+score REMOVE_SUBJ 1.7
+score REPLY_REMOVE_SUBJECT 0.4
+score REPLY_TO_EMPTY 1.9
+score SECTION_301 2.5
+score SENT_IN_COMPLIANCE 0.0
+score SHORT_RECEIVED_LINE 0.2
+score SIRCAM_SIGNATURE 10.0
+score SLIGHTLY_UNSAFE_JAVASCRIPT 0.1
+score SPAM_FORM 0.4
+score SPAM_FORM_INPUT 2.5
+score SPAM_FORM_RETURN 0.6
+score SUBJ_ALL_CAPS 1.2
+score SUBJ_ENDS_IN_Q_MARK 0.1
+score SUBJ_FULL_OF_8BITS 4.8
+score SUBJ_HAS_Q_MARK 1.4
+score SUBJ_HAS_UNIQ_ID 1.2
+score SUBJ_REMOVE 0.0
+score SUPERLONG_LINE 0.0
+score S_1618 3.5
+score TO_EMPTY 4.6
+score TRACKER_ID 2.0
+score UNDISC_RECIPS 2.3
+score WANTS_CREDIT_CARD 0.0
+score WEB_BUGS 0.2
+score WE_HONOR_ALL 3.3
+score X_EM_VER_PRESENT 4.2
+score X_MAILER_GIBBERISH 3.7
+score X_MSMAIL_PRIORITY_HIGH 0.3
+score X_PRIORITY_HIGH 2.5
+score YR_MEMBERSHIP_EXCH 4.7
 
-# "What an incredible offer!" yeah right.
-#
-score PLING			1
 
-# "What an incredible offer!!" I still don't believe you.
-#
-score PLING_PLING		1
+# some non-GA-generated scores: either network tests or occuring with
+# very low frequency.
 
-# Another very-high-hit-rate rule; subject ends in a unique ID.
-#
-score SUBJ_HAS_UNIQ_ID		3
+score NO_MX_FOR_FROM		1.0
+score BAD_HELO_WARNING		4.0
+score FORGED_RCVD_FOUND		1.0
+score RCVD_IN_RELAYS_ORDB_ORG	2.0
+score RCVD_IN_OSIRUSOFT_COM	2.0
+score OSIRU_CONFIRMED_SPAM_SOURCE 3.0
+score OSIRU_SPAMWARE_SITE	5.0
+score RAZOR_CHECK		4.0
+score COMMUNIGATE		2.0
+score OFFICE_OF_MD		3.0
+score SHOES_GUY			5.0
+score EXCUSE_9			2.0
+score FILL_OUT_HERE		2.0
+score RELAYING_FRAME		5.0
 
-# To "Undisclosed.Recipients" or similar.
-#
-score UNDISC_RECIPS		2
+# unscored by default -- commercial services.  If you pay for these,
+# give them a score so they will be checked.
 
-# Subject is all capitals.
-#
-score SUBJ_ALL_CAPS		1
-
-# Message-Id has no @ sign
-#
-score MSGID_HAS_NO_AT		0.5
-
-# Invalid Date: header
-score INVALID_DATE		3
-
-# Invalid Date:, no timezone
-score INVALID_DATE_NO_TZ	2
-
-# Subject: ends in a question mark
-score SUBJ_HAS_Q_MARK		1
-
-# Subject: contains advertising tag, "ADV:" etc (unlikely, but still...)
-score ADVERT_CODE		3
-
-# sent to you@you.com or similar
-score FRIEND_AT_PUBLIC		2
-
-# To: or Reply-To: is empty
-score TO_EMPTY			3
-score REPLY_TO_EMPTY		3
-
-# No MX records for the domain in the From: address. Set this low,
-# as it's also used as a common anti-spam tactic.
-score NO_MX_FOR_FROM		1
-
-# Received via a set of known-spam-harbouring dialups.
-score KNOWN_BAD_DIALUPS		2
-
-# From: and To: the same address
-score FROM_AND_TO_SAME		3
-
-# Headers contain a warning from the MTA which received the first
-# mail, indicating a fake name was used in the SMTP HELO command.
-# Usually quite a good sign of spam.
-score BAD_HELO_WARNING		4
-
-# Subject: contains many 8-bit chars.  If you normally expect
-# to receive mails in non-ISO-Latin-1 charsets, set this to 0!
-score SUBJ_FULL_OF_8BITS	5
-
-# Received via a relay listed in relays.orbs.org
-score RCVD_IN_RELAYS_ORBS_ORG	1
-
-# confirmed codes from Osirusoft
-score OSIRU_CONFIRMED_SPAM_SOURCE	3
-score OSIRU_SPAMWARE_SITE	5
-
-# found an X-Em-Version: header, used by spamware vendor to track their
-# "customers" (spam spyware)
-score X_EM_VER_PRESENT		5
-
-# may-be-forged Received: header found in the headers.
-score FORGED_RCVD_FOUND		1
-
-# From: address claims to be sent from hotmail.com, but does not use
-# their formatting
-score FROM_FORGED_HOTMAIL	1
-
-# spam-tool gibberish in the X-Mailer line
-score X_MAILER_GIBBERISH	4
-
-# Received via a relay listed in the RBL (see maps.vix.com/rbl)
-score RCVD_IN_RBL		0
-
-# Received via a relay listed in http://www.mail-abuse.org/rss/
-score RCVD_IN_RSS		0
-
-# Received via a dialup IP address listed in http://www.mail-abuse.org/dul/
-score RCVD_IN_DUL		0
-
-# Received via an IP listed in SpamCop blacklist
-score RCVD_IN_BL_SPAMCOP_NET	0
-
-###########################################################################
-
-score RAZOR_CHECK		4
-
-###########################################################################
-# Default scores for body tests.  Most of these are not listed, using the
-# default value of 1.
-
-score REMOVE_SUBJ		4
-score SUBJ_REMOVE		4
-score MAILTO_WITH_SUBJ_REMOVE	4
-score MAILTO_WITH_SUBJ		3
-score JAVASCRIPT		2
-score REALLY_UNSAFE_JAVASCRIPT	8
-score SLIGHTLY_UNSAFE_JAVASCRIPT 1
-score CLICK_HERE_LINK		3
-score SPAM_FORM			3
-score SPAM_FORM_RETURN		3
-score SPAM_FORM_INPUT		3
-score SENT_IN_COMPLIANCE	5	
-score PARA_A_2_C_OF_1618	4
-score BILL_1618			4
-score S_1618			4
-score SECTION_301		3
-score NUMERIC_HTTP_ADDR		3
-score TRACKER_ID		3
-score POPLAUNCH			4
-
-score ONLINE_BIZ_OPS		2
-score INTL_EXEC_GUILD		3
-score ANOTHER_NET_AD		3
-score LASER_PRINTER		3
-score DIGITAL_FX1		3
-score OFFICE_OF_MD		3
-score BRAND_NEW_PAGER		3
-
-score EXCUSE_1			2
-score EXCUSE_2			2
-score EXCUSE_7			2
-score EXCUSE_8			2
-score EXCUSE_9			2
-score GREEN_EXCUSE_1		3
-score GREEN_EXCUSE_2		3
-
-score FILTERED_BY_WORLDREMOVE	3
-
-score WEB_BUGS			5
-
-score FILL_OUT_HERE		2
-score CYBER_FIRE_POWER		4
-score INTERNET_TERROR_RANT	8
-score RELAYING_FRAME		5
-score BASE64_ENC_TEXT		4
-
-# some re-scored tests: statistical analysis of my mail spool indicates
-# these scores work well without causing false positives.
-score CALL_888			3
-score CALL_1_800		3
-score CLICK_BELOW		3
-score OPT_IN			2
-score REMOVAL_INSTRUCTIONS	3
-score FORGED_HOTMAIL_RCVD	3
+score RCVD_IN_RBL		0.0
+score RCVD_IN_RSS		0.0
+score RCVD_IN_DUL		0.0
+score RCVD_IN_BL_SPAMCOP_NET	0.0
 
 ###########################################################################
 # Compensation for common false positives.
 
-score BALANCE_FOR_LONG		-2
-score USER_IN_WHITELIST		-5
+score BALANCE_FOR_LONG		-2.0
+score USER_IN_WHITELIST		-5.0
 
 ###########################################################################
 # Some not-quite-spam scores; block common virii with these.  (it's feature
 # creep, but it's easy to implement ;)
 
-score SIRCAM_SIGNATURE		10
+score SIRCAM_SIGNATURE		10.0
 

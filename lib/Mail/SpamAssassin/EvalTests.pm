@@ -73,9 +73,8 @@ sub check_for_bad_dialup_ips {
 
 sub check_for_from_to_equivalence {
   my ($self) = @_;
-  my $from = $self->get ('From');
-  my $to = $self->get ('To');
-
+  my $from = $self->get ('From:addr');
+  my $to = $self->get ('To:addr');
   ($from eq $to);
 }
 
@@ -146,6 +145,29 @@ sub check_from_in_whitelist {
 
 ###########################################################################
 
+sub check_lots_of_cc_lines {
+  my ($self) = @_;
+  local ($_);
+  $_ = $self->get ('Cc');
+  my @count = /\n/gs;
+  if ($#count > 20) { return 1; }
+  return 0;
+}
+
+###########################################################################
+
+sub check_from_name_eq_from_address {
+  my ($self) = @_;
+  local ($_);
+  $_ = $self->get ('From');
+
+  /\"(\S+)\" <(\S+)>/ or return 0;
+  if ($1 eq $2) { return 1; }
+  return 0;
+}
+
+###########################################################################
+
 sub check_rbl {
   my ($self, $rbl_domain) = @_;
   local ($_);
@@ -206,7 +228,7 @@ sub check_for_unique_subject_id {
   $_ = $self->get ('Subject');
 
   my $id = undef;
-  if (/[-_\s]{7,}([-a-z0-9]{4,})$/
+  if (/[-_\.\s]{7,}([-a-z0-9]{4,})$/
 	|| /\s+[-:\#\(\[]+([-a-zA-Z0-9]{4,})[\]\)]+$/
 	|| /\s+[-:\#]([-a-zA-Z0-9]{4,})$/)
   {
