@@ -183,7 +183,7 @@ def process_message(spamd_host, spamd_port, lmtp_host, sender, recipient):
             checked_data = data # fallback
         lmtp = LMTP(lmtp_host)
         code, msg = lmtp.lhlo()
-        if code != 250: sys.exit(1)
+        if code != 250: sys.exit(75)
 
         #lmtp.set_debuglevel(1)
         errors = lmtp.sendmail(sender, recipient, checked_data)
@@ -193,7 +193,7 @@ def process_message(spamd_host, spamd_port, lmtp_host, sender, recipient):
         # too much data.  Just pass it through unchanged
         lmtp = LMTP(lmtp_host)
         code, msg = lmtp.lhlo()
-        if code != 250: sys.exit(1)
+        if code != 250: sys.exit(75)
         #lmtp.set_debuglevel(1)
 
         code, msg = lmtp.mail(sender)
