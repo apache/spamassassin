@@ -1,4 +1,23 @@
-# $Id: Received.pm,v 1.6 2003/04/05 23:30:53 jmason Exp $
+# $Id: Received.pm,v 1.7 2003/04/08 00:17:12 jmason Exp $
+
+# ---------------------------------------------------------------------------
+
+# So, what's the difference between a trusted and untrusted Received header?
+# Basically, relays we *know* are trustworthy are 'trusted', all others after
+# the last one of those are 'untrusted'.
+#
+# We determine trust by detecting if they are inside the network ranges
+# specified in 'trusted_networks'.  Dan has promised to write some code which
+# uses a persistent db to determine (statistically) other trusted relays,
+# without user configuration.
+#
+# There's another type of Received header: the semi-trusted one.  This is the
+# header added by *our* MX, at the boundary of trust; we can trust the IP
+# address (and possibly rDNS) in this header, but that's about it; HELO name is
+# untrustworthy.  The contents of this header are added to the marked-up
+# message for scanning by Bayes or by rules.
+
+# ---------------------------------------------------------------------------
 
 package Mail::SpamAssassin::Received;
 1;
@@ -73,7 +92,8 @@ sub parse_received_headers {
 
     # TODO: add inference code using a persistent db
 
-    dbg ("received-header: relay ".$relay->{ip}." trusted? ".$in_trusted);
+    dbg ("received-header: relay ".$relay->{ip}." trusted? ".
+			($in_trusted ? "yes" : "no"));
 
     if ($in_trusted) {
       push (@{$self->{relays_trusted}}, $relay);
@@ -88,6 +108,15 @@ sub parse_received_headers {
   chop ($self->{relays_trusted_str});	# remove trailing ws
   chop ($self->{relays_untrusted_str});	# remove trailing ws
 
+  # now pick out the first untrusted relay for use as the semi-trusted
+  # relay string.
+  if (scalar @{$self->{relays_untrusted}} > 0) {
+    $self->{relays_semitrusted_str} =
+			$self->{relays_untrusted}->[0]->{as_string};
+  } else {
+    $self->{relays_semitrusted_str} = '';
+  }
+
   # OK, we've now split the relay list into trusted and untrusted.
 
   # add the stringified representation to the message object, so Bayes
@@ -96,11 +125,14 @@ sub parse_received_headers {
   if ($self->{msg}->can ("delete_header")) {
     $self->{msg}->delete_header ("X-SA-Relays-Trusted");
     $self->{msg}->delete_header ("X-SA-Relays-Untrusted");
+    $self->{msg}->delete_header ("X-SA-Relays-Semitrusted");
     if ($self->{msg}->can ("put_header")) {
       $self->{msg}->put_header ("X-SA-Relays-Trusted",
 				  $self->{relays_trusted_str});
       $self->{msg}->put_header ("X-SA-Relays-Untrusted",
 				  $self->{relays_untrusted_str});
+      $self->{msg}->put_header ("X-SA-Relays-Semitrusted",
+				  $self->{relays_semitrusted_str});
     }
   }
 

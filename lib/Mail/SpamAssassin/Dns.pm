@@ -47,6 +47,7 @@ use vars qw{
 #     <http://duxcw.com/faq/network/autoip.htm>
 #
 # Last update
+#   2003-04-07 Justin Mason - removed some now-assigned nets
 #   2002-08-24 Malte S. Stretz - added 172.16/12, 169.254/16
 #   2002-08-23 Justin Mason - added 192.168/16
 #   2002-08-12 Matt Kettler - mail to SpamAssassin-devel
@@ -61,17 +62,16 @@ $IP_IN_RESERVED_RANGE = qr{^(?:
 
   [01257]|                         # 000-002/8, 005/8, 007/8: Reserved
   2[37]|                           # 023/8, 027/8:            Reserved
-  3[179]|                          # 031/8, 037/8, 039/8:     Reserved
+  3[1679]|                         # 031/8, 036/8, 037/8, 039/8: Reserved
   4[12]|                           # 041/8, 042/8:            Reserved
   5[89]|                           # 058/8, 059/8:            Reserved
-  60|                              # 060/8:                   Reserved
   7[0-9]|                          # 070-079/8:               Reserved
-  8[2-9]|                          # 082
+  8[3-9]|                          # 082
   9[0-9]|                          #  -
   1[01][0-9]|                      #  -
   12[0-6]|                         # 126/8:                   Reserved
   197|                             # 197/8:                   Reserved
-  22[23]|                          # 222/8, 223/8:            Reserved
+  223|                             # 223/8:                   Reserved
   24[0-9]|                         # 240-
   25[0-5]|                         # 255/8:                   Reserved
 )\.}x;

@@ -540,3 +540,8 @@ header T_RCVD_IN_MONKEYS_UPL	rbleval:check_rbl_txt('relay', 'proxies.relays.monk
 describe T_RCVD_IN_MONKEYS_UPL Received via a relay in proxies.relays.monkeys.com.
 tflags T_RCVD_IN_MONKEYS_UPL net
 
+# new "-notfirsthop" logic
+header T_RCVD_IN_PDL	rbleval:check_rbl('pdl-notfirsthop', 'dialups.visi.com.')
+tflags T_RCVD_IN_PDL	net
+
+

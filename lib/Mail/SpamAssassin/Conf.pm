@@ -111,7 +111,7 @@ sub new {
   $self->{terse_report_template} = '';
   $self->{spamtrap_template} = '';
 
-  $self->{num_check_received} = 2;
+  $self->{num_check_received} = 9;
 
   $self->{use_razor2} = 1;
   $self->{razor_config} = undef;
@@ -1204,17 +1204,19 @@ Specify options to the pyzor command. Please note that only
       $self->{pyzor_options} = $1; next;
     }
 
-=item num_check_received { integer }   (default: 2)
+=item num_check_received { integer }   (default: 9)
 
 How many received lines from and including the original mail relay
 do we check in RBLs (at least 1 or 2 is recommended).
 
 Note that for checking against dialup lists, you can call C<check_rbl()> with a
-special set name of "set-firsthop" and this rule will only be matched against
-the first hop if there is more than one hop, so that you can set a negative
-score to not penalize people who properly relayed through their ISP.
+special set name of B<set-notfirsthop> and this rule will only be matched
+against the relays except for the very first one; this allows SpamAssassin to
+catch dialup-sent spam, without penalizing people who properly relay through
+their ISP.
 
-See also C<trusted_networks>, to specify which the relays you trust.
+See also C<trusted_networks>, to specify which the relays you trust.  This
+is a much better way to control DNSBL-checking behaviour.
 
 =cut
 
@@ -1524,7 +1526,6 @@ If you add or modify a test, please be sure to run a sanity check afterwards
 by running C<spamassassin --lint>.  This will avoid confusing error
 messages, or other tests being skipped as a side-effect.
 
-
 =item header SYMBOLIC_TEST_NAME exists:name_of_header
 
 Define a header existence test.  C<name_of_header> is the name of a
@@ -1536,6 +1537,54 @@ the above header tests.
 Define a header eval test.  C<name_of_eval_method> is the name of 
 a method on the C<Mail::SpamAssassin::EvalTests> object.  C<arguments>
 are optional arguments to the function call.
+
+=item header SYMBOLIC_TEST_NAME rbleval:check_rbl('set', 'zone')
+
+Check a DNSBL (DNS blacklist), also known as RBLs (realtime blacklists).  This
+will retrieve Received headers from the mail, parse the IP addresses, select
+which ones are 'untrusted' based on the C<trusted_networks> logic, and query
+that blacklist.  There's a few things to note:
+
+=over 4
+
+=item Duplicated or reserved IPs
+
+These are stripped, and the DNSBLs will not be queried for them.  Reserved IPs
+are those listed in <http://www.iana.org/assignments/ipv4-address-space>,
+<http://duxcw.com/faq/network/privip.htm>, or
+<http://duxcw.com/faq/network/autoip.htm>.
+
+=item The first argument, 'set'
+
+This is used as a 'zone ID'.  If you want to look up a multi-meaning zone like
+relays.osirusoft.com, you can then query the results from that zone using it;
+but all check_rbl_results_for() calls must use that zone ID.
+
+Also, if an IP gets a hit in one lookup in a zone using that ID, any further
+hits in other rules using that zone ID will *not* be added to the score.
+
+=item Selecting all IPs except for the originating one
+
+This is accomplished by naming the set 'foo-notfirsthop'.  Useful for querying
+against DNS lists which list dialup IP addresses; the first hop may be a
+dialup, but as long as there is at least one more hop, via their outgoing
+SMTP server, that's legitimate, and so should not gain points.  If there
+is only one hop, that will be queried anyway, as it should be relaying
+via its outgoing SMTP server instead of sending directly to your MX.
+
+=item Selecting just the most recent untrusted Received header
+
+When checking a 'nice' DNSBL (a DNS whitelist?), you cannot trust
+Received headers further back than the very first 'untrusted' one.
+This is accomplished by naming the set 'foo-lastuntrusted'.
+
+=back
+
+=item header SYMBOLIC_TEST_NAME rbleval:check_rbl_txt('set', 'zone')
+
+Same as check_rbl(), except querying using IN TXT instead of IN A records.
+If the zone supports it, it will result in a line of text describing
+why the IP is listed, typically a hyperlink to a database entry.
 
 =cut
     if (/^header\s+(\S+)\s+rbleval:(.*)$/) {
