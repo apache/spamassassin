@@ -417,30 +417,30 @@ sub parse_received_line {
       # Received: from sc8-sf-list1-b.sourceforge.net ([10.3.1.13] helo=sc8-sf-list1.sourceforge.net) by sc8-sf-list2.sourceforge.net with esmtp (Exim 3.31-VA-mm2 #1 (Debian)) id 18t301-0007Bh-00; Wed, 12 Mar 2003 01:58:13 -0800
       # Received: from dsl092-072-213.bos1.dsl.speakeasy.net ([66.92.72.213] helo=blazing.arsecandle.org) by sc8-sf-list1.sourceforge.net with esmtp (Cipher TLSv1:DES-CBC3-SHA:168) (Exim 3.31-VA-mm2 #1 (Debian)) id 18lyuU-0007TI-00 for <SpamAssassin-talk@lists.sourceforge.net>; Thu, 20 Feb 2003 14:11:18 -0800
       # Received: from eclectic.kluge.net ([66.92.69.221] ident=[W9VcNxE2vKxgWHD05PJbLzIHSxcmZQ/O]) by sc8-sf-list1.sourceforge.net with esmtp (Cipher TLSv1:DES-CBC3-SHA:168) (Exim 3.31-VA-mm2 #1 (Debian)) id 18m0hT-00031I-00 for <spamassassin-talk@lists.sourceforge.net>; Thu, 20 Feb 2003 16:06:00 -0800
-      if (/^from (\S+) \(\[(${IP_ADDRESS})\] helo=(\S+) ident=(\S+)\) by (\S+) /) {
-	$rdns=$1; $ip = $2; $helo = $3; $ident = $4; $by = $5; goto enough;
+      if (/^from (\S+) \(\[(${IP_ADDRESS})\](:\d+)? helo=(\S+) ident=(\S+)\) by (\S+) /) {
+	$rdns=$1; $ip = $2; $helo = $4; $ident = $5; $by = $6; goto enough;
       }
       # (and without ident)
-      if (/^from (\S+) \(\[(${IP_ADDRESS})\] helo=(\S+)\) by (\S+) /) {
-	$rdns=$1; $ip = $2; $helo = $3; $by = $4; goto enough;
+      if (/^from (\S+) \(\[(${IP_ADDRESS})\](:\d+)? helo=(\S+)\) by (\S+) /) {
+	$rdns=$1; $ip = $2; $helo = $4; $by = $5; goto enough;
       }
 
       # Received: from mail.ssccbelen.edu.pe ([216.244.149.154]) by yzordderrex
       # with esmtp (Exim 3.35 #1 (Debian)) id 18tqiz-000702-00 for
       # <jm@example.com>; Fri, 14 Mar 2003 15:03:57 +0000
-      if (/^from (\S+) \(\[(${IP_ADDRESS})\]\) by (\S+) /) {
+      if (/^from (\S+) \(\[(${IP_ADDRESS})\](:\d+)?\) by (\S+) /) {
 	# speculation: Exim uses this format when rdns==helo. TODO: verify fully
-	$rdns= $1; $ip = $2; $helo = $1; $by = $3; goto enough;
+	$rdns= $1; $ip = $2; $helo = $1; $by = $4; goto enough;
       }
-      if (/^from (\S+) \(\[(${IP_ADDRESS})\] ident=(\S+)\) by (\S+) /) {
-	$rdns= $1; $ip = $2; $helo = $1; $ident = $3; $by = $4; goto enough;
+      if (/^from (\S+) \(\[(${IP_ADDRESS})\](:\d+)? ident=(\S+)\) by (\S+) /) {
+	$rdns= $1; $ip = $2; $helo = $1; $ident = $4; $by = $5; goto enough;
       }
 
       # Received: from boggle.ihug.co.nz [203.109.252.209] by grunt6.ihug.co.nz
       # with esmtp (Exim 3.35 #1 (Debian)) id 18SWRe-0006X6-00; Sun, 29 Dec 
       # 2002 18:57:06 +1300
-      if (/^from (\S+) \[(${IP_ADDRESS})\] by (\S+) /) {
-	$rdns= $1; $ip = $2; $helo = $1; $by = $3; goto enough;
+      if (/^from (\S+) \[(${IP_ADDRESS})\](:\d+)? by (\S+) /) {
+	$rdns= $1; $ip = $2; $helo = $1; $by = $4; goto enough;
       }
 
       # else it's probably forged. fall through
