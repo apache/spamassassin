@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.483 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.484 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -80,7 +80,6 @@ rawbody T_MIME_BASE64			eval:check_for_mime('t_mime_base64_count')
 rawbody T_MIME_QP			eval:check_for_mime('t_mime_qp_count')
 
 # 2003-03-06: quinlan
-rawbody T_MIME_BASE64_BLANKS		eval:check_for_mime('t_mime_base64_blanks')
 rawbody T_MIME_BASE64_ILLEGAL		eval:check_for_mime('t_mime_base64_illegal')
 rawbody T_MIME_BASE64_WITHOUT_NAME	eval:check_for_mime('t_mime_base64_without_name')
 rawbody T_MIME_QP_INLINE_NO_CHARSET	eval:check_for_mime('t_mime_qp_inline_no_charset')
@@ -229,7 +228,7 @@ header T_RCVD_IN_OPM_HTTP_POST		rbleval:check_rbl_sub('opm', '16')
 tflags T_RCVD_IN_OPM_HTTP_POST net
 
 # fiveten - many blacklists, but only the bulk one performs well
-# transfers: not specified, unknown
+# transfers: yes, most of the slave servers allow zone transfers
 # url: http://blackholes.five-ten-sg.com/
 # pay-to-use: no
 # delist: email address contact provided

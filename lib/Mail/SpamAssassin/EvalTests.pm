@@ -2255,6 +2255,7 @@ sub _check_attachments {
 
   # results
   $self->{microsoft_executable} = 0;
+  $self->{mime_base64_blanks} = 0;
   $self->{mime_base64_encoded_text} = 0;
   $self->{mime_base64_latin} = 0;
   $self->{mime_body_html_count} = 0;
@@ -2267,7 +2268,6 @@ sub _check_attachments {
   $self->{mime_qp_inline_no_charset} = 0;
   $self->{mime_qp_ratio} = 0;
   $self->{mime_suspect_name} = 0;
-  $self->{t_mime_base64_blanks} = 0;
   $self->{t_mime_base64_count} = 0;
   $self->{t_mime_base64_illegal} = 0;
   $self->{t_mime_base64_without_name} = 0;
@@ -2315,7 +2315,7 @@ sub _check_attachments {
 	$self->{microsoft_executable} = 1;
       }
       if ($cte =~ /base64/ && $previous =~ /^\s*$/ && /^\s*$/) {
-	$self->{t_mime_base64_blanks} = 1;
+	$self->{mime_base64_blanks} = 1;
       }
       if ($cte =~ /base64/ && (m@[^A-Za-z0-9+/=\n]@ || m/=[^=\s]/)) {
 	$self->{t_mime_base64_illegal} = 1;
