@@ -171,12 +171,23 @@ describe SPAM_FORM		Form for changing email address
 rawbody SPAM_FORM_RETURN	/return validate_form/
 describe SPAM_FORM_RETURN	Form for checking email address
 rawbody SPAM_FORM_ACTION	/action="\&\#\d+;\&\#\d+;\&\#\d+;\&\#\d+;/i
-describe SPAM_FORM_ACTION       Obfuscated action attribute in HTML form
+describe SPAM_FORM_ACTION	Obfuscated action attribute in HTML form
 rawbody SPAM_FORM_INPUT		/<input name=.{0,5}submit.{0,99} Submit By E-Mail /i
 describe SPAM_FORM_INPUT	Form for verifying email address
 
-rawbody  OBFUSCATING_COMMENT    /[^\s>]<!--.{0,12}?-->[^\s<]/
-describe OBFUSCATING_COMMENT    HTML comments which obfuscate text
+rawbody  OBFUSCATING_COMMENT	/[^\s>]<!--.{0,12}?-->[^\s<]/
+describe OBFUSCATING_COMMENT	HTML comments which obfuscate text
+
+rawbody HIDE_WIN_STATUS		/<[^>]+onMouseOver=[^>]+window\.status=/i
+describe HIDE_WIN_STATUS	Javascript to hide URLs in browser
+
+rawbody LINK_TO_NO_SCHEME	/\s+href=['"]?www\./i
+describe LINK_TO_NO_SCHEME	Contains link without http:// prefix
+
+rawbody HTML_WIN_OPEN		/(?:<script>.{0,200}|<[^>]+)window\.open\s*\(/i
+describe HTML_WIN_OPEN		Javascript to open a new window
+rawbody HTML_WIN_BLUR		/(?:<script>.{0,200}|<[^>]+)\.blur\s*\(\s*\)/i
+describe HTML_WIN_BLUR		Javascript to move windows around
 
 ###########################################################################
 
@@ -1426,14 +1437,3 @@ describe MEMBER_2       Being a Member
 
 body GET_IT_NOW         /get it (?-i:N)ow/i
 describe GET_IT_NOW     Contains 'Get it now' with capitals
-
-rawbody HIDE_WIN_STATUS    /<[^>]+onMouseOver=[^>]+window\.status=/i
-describe HIDE_WIN_STATUS   Javascript to hide URLs in browser
-
-rawbody LINK_TO_NO_SCHEME /\s+href=['"]?www\./i
-describe LINK_TO_NO_SCHEME Contains link without http:// prefix
-
-rawbody HTML_WIN_OPEN      /(?:<script>.{0,200}|<[^>]+)window\.open\s*\(/i
-describe HTML_WIN_OPEN     Javascript to open a new window
-rawbody HTML_WIN_BLUR      /(?:<script>.{0,200}|<[^>]+)\.blur\s*\(\s*\)/i
-describe HTML_WIN_BLUR     Javascript to move windows around
