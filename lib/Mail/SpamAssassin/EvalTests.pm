@@ -24,6 +24,7 @@ use vars qw{
   $CCTLDS_WITH_LOTS_OF_OPEN_RELAYS
   $ROUND_THE_WORLD_RELAYERS
   $WORD_OBFUSCATION_CHARS 
+  $CHARSETS_LIKELY_TO_FP_AS_CAPS
 };
 
 # sad but true. sort it out, sysadmins!
@@ -48,6 +49,11 @@ $ROUND_THE_WORLD_RELAYERS = qr{(?:net|com|ca)};
 
 $IP_ADDRESS = qr/(?:\b|[^\d])\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?:\b|[^\d])/;
 $WORD_OBFUSCATION_CHARS = '*_.,/|-+=';
+
+# Charsets which use capital letters heavily in their encoded representation.
+$CHARSETS_LIKELY_TO_FP_AS_CAPS = qr{[-_a-z0-9]*(?:
+	  koi|jp|jis|euc|gb|big5|isoir|cp1251
+	)[-_a-z0-9]*}ix;
 
 ###########################################################################
 # HEAD TESTS:
@@ -1888,6 +1894,15 @@ sub subject_is_all_caps {
    return 0 if $subject !~ /\s/;	# don't match one word subjects
    return 0 if (length $subject < 10);  # don't match short subjects
    $subject =~ s/[^a-zA-Z]//g;		# only look at letters
+
+   # now, check to see if the subject is encoded using a non-ASCII charset.
+   # If so, punt on this test to avoid FPs.  We just list the known charsets
+   # this test will FP on, here.
+   my $subjraw = $self->get('Subject:raw');
+   if ($subjraw =~ /^=\?${CHARSETS_LIKELY_TO_FP_AS_CAPS}\?/i) {
+     return 0;
+   }
+
    return length($subject) && ($subject eq uc($subject));
 }
 
