@@ -86,17 +86,18 @@ elsif ($opt_mh) {
 }
 
 $spamtest = new Mail::SpamAssassin ({
-  'debug'               => $opt_debug,
-  'rules_filename'      => $opt_c,
-  'userprefs_filename'  => "$FindBin::Bin/spamassassin/user_prefs",
-  'userstate_dir'       => "$FindBin::Bin/spamassassin",
-  'save_pattern_hits'   => $opt_loghits,
-  'dont_copy_prefs'     => 1,
-  'local_tests_only'    => $opt_net ? 0 : 1,
-  'only_these_rules'    => $opt_these_rules,
-  PREFIX		=> '',
-  DEF_RULES_DIR         => $opt_c,
-  LOCAL_RULES_DIR       => '',
+  'debug'              			=> $opt_debug,
+  'rules_filename'     			=> $opt_c,
+  'userprefs_filename' 			=> "$FindBin::Bin/spamassassin/user_prefs",
+  'userstate_dir'     			=> "$FindBin::Bin/spamassassin",
+  'save_pattern_hits'  			=> $opt_loghits,
+  'dont_copy_prefs'   			=> 1,
+  'local_tests_only'   			=> $opt_net ? 0 : 1,
+  'only_these_rules'   			=> $opt_these_rules,
+  'ignore_safety_expire_timeout'	=> 1,
+  PREFIX				=> '',
+  DEF_RULES_DIR        			=> $opt_c,
+  LOCAL_RULES_DIR      			=> '',
 });
 
 $spamtest->compile_now(1);

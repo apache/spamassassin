@@ -719,13 +719,16 @@ sub expiry_due {
   # If force expire was called, do the expire no matter what.
   return 1 if ($self->{bayes}->{main}->{learn_force_expire});
 
+  # If something has explicitly said to ignore the safety 12hr waiting period since the last expire
+  # (mass-check), don't bother checking when the last expire ran ...
+  return 0 if (!$self->{bayes}->{main}->{ignore_safety_expire_timeout} && time() - $magic[4] < 43200);
+
   dbg("Bayes DB expiry: Tokens in DB: $ntoks, Expiry max size: ".$self->{expiry_max_db_size}.", Oldest atime: ".$magic[5].", Newest atime: ".$magic[10].", Last expire: ".$magic[4].", Current time: ".time(),'bayes','-1');
 
   if ($ntoks <= 100000 ||			# keep at least 100k tokens
       $self->{expiry_max_db_size} == 0 ||	# config says don't expire
       $self->{expiry_max_db_size} > $ntoks ||	# not enough tokens to cause an expire
       $magic[10]-$magic[5] < 43200 ||		# delta between oldest and newest < 12h
-      time() - $magic[4] < 43200 ||		# last expire occured < 12h ago
       $self->{db_version} < DB_VERSION		# ignore old db formats
       ) {
     return 0;
