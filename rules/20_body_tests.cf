@@ -350,6 +350,10 @@ describe LINES_OF_YELLING_2     2 WHOLE LINES OF YELLING DETECTED
 body     LINES_OF_YELLING_3     eval:check_for_num_yelling_lines("3")
 describe LINES_OF_YELLING_3     3 WHOLE LINES OF YELLING DETECTED
 
+# this test doesn't actually use rawbody since rawbody isn't raw enough
+rawbody  MIME_MISSING_BOUNDARY	eval:check_for_mime_missing_boundary()
+describe MIME_MISSING_BOUNDARY	MIME section missing boundary
+
 ###########################################################################
 # some full-text matches; note the [3D=\s"']* bits of the patterns, which
 # match some gibberish produced by quoted-printable encoding of HTML, often
@@ -507,10 +511,13 @@ describe INTERNET_TERROR_RANT   Cyber FirePower! rant about losing dropboxes
 full BASE64_ENC_TEXT		eval:check_for_base64_enc_text()
 describe BASE64_ENC_TEXT	Message text disguised using base-64 encoding
 
+body CHARSET_FARAWAY		eval:check_for_faraway_charset()
+describe CHARSET_FARAWAY	Character set indicates a foreign language
+
 full CHARSET_FARAWAY_BODY	eval:check_for_faraway_charset_in_body()
 describe CHARSET_FARAWAY_BODY	Character set indicates foreign language body
 
-full UNDESIRED_LANGUAGE_BODY		eval:check_language()
+body UNDESIRED_LANGUAGE_BODY		eval:check_language()
 describe UNDESIRED_LANGUAGE_BODY	Written in an undesired language
 
 body NIGERIAN_SCAM		/BASED ON INFORMATION GATHERED ABOUT YOU, WE BELIEVE\s*YOU WOULD BE IN A POSITION TO HELP US IN TRANSFER/i
