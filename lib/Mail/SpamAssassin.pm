@@ -1117,7 +1117,11 @@ sub compile_now {
   my $status = Mail::SpamAssassin::PerMsgStatus->new($self, $mail,
                         { disable_auto_learning => 1 } );
   $status->word_is_in_dictionary("aba"); # load triplets.txt into memory
+  # We want to turn off the bayes rules for this test msg
+  my $use_bayes_rules_value = $self->{conf}->{use_bayes_rules};
+  $self->{conf}->{use_bayes_rules} = 0;
   $status->check();
+  $self->{conf}->{use_bayes_rules} = $use_bayes_rules_value;
   $status->finish();
   $mail->finish();
 
