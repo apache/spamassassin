@@ -136,6 +136,8 @@ my $rank_lo = 9999999;
 # variables for wanted/unwanted RANK
 my %wanted;
 my %unwanted;
+my %wranks;
+my %uranks;
 
 foreach my $test (keys %freq_spam, keys %freq_ham) {
   next unless (exists $rules{$test});           # only valid tests
@@ -214,6 +216,9 @@ foreach my $test (keys %freq_spam, keys %freq_ham) {
     # basic wanted/unwanted ranking
     $wanted{$test} = $isnice ? $fn : $fs;
     $unwanted{$test} = $isnice ? $fs : $fn;
+    # count number of ranks of each type
+    $wranks{$wanted{$test}} = 1;
+    $uranks{$unwanted{$test}} = 1;
   }
 }
 
@@ -222,22 +227,22 @@ if (! $opt_i) {
   my @wanted = sort { $wanted{$a} <=> $wanted{$b} } keys %wanted;
   my @unwanted = sort { $unwanted{$b} <=> $unwanted{$a} } keys %wanted;
 
-  my $position;
-  my $last;
-
-  $position = 0;
-  $last = undef;
+  # first half of ranking is the wanted rank
+  my $position = 0;
+  my $last = undef;
   for my $test (@wanted) {
     $position++ if defined $last && $last != $wanted{$test};
     $ranking{$test} += $position;
     $last = $wanted{$test}
   }
 
+  # second half of ranking is the unwanted rank
+  my $normalize = (scalar keys %wranks) / (scalar keys %uranks);
   $position = 0;
   $last = undef;
   for my $test (@unwanted) {
     $position++ if defined $last && $last != $unwanted{$test};
-    $ranking{$test} += $position;
+    $ranking{$test} += ($position * $normalize);
     $last = $unwanted{$test};
     $rank_hi = $ranking{$test} if ($ranking{$test} > $rank_hi);
     $rank_lo = $ranking{$test} if ($ranking{$test} < $rank_lo);
