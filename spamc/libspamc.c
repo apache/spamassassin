@@ -25,7 +25,7 @@
 #include <string.h>
 #ifdef _WIN32
 /* simple macro that works for single strings without %m */
-#define syslog(x, y) fprintf(stderr, #y "\n")
+#define vsnprintf _vsnprintf
 #define strcasecmp stricmp
 #define sleep Sleep
 #else
@@ -54,6 +54,9 @@
 #endif
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
+#endif
+#ifndef LOG_ERR
+#define LOG_ERR 3
 #endif
 
 #define MAX_CONNECT_RETRIES 3
@@ -166,7 +169,7 @@ static int translate_connect_errno(int err)
  *
  *	Upon failure we return one of the other EX_??? error codes.
  */
-static int opensocket(int type, int *psock)
+static int opensocket(int flags, int type, int *psock)
 {
     const char *typename;
     int proto = 0;
@@ -187,11 +190,7 @@ static int opensocket(int type, int *psock)
     }
 
 #ifdef DO_CONNECT_DEBUG_SYSLOGS
-#ifndef _WIN32
-    syslog(DEBUG_LEVEL, "dbg: create socket(%s)", typename);
-#else
-    fprintf(stderr, "dbg: create socket(%s)\n", typename);
-#endif
+    libspamc_log(flags, DEBUG_LEVEL, "dbg: create socket(%s)", typename);
 #endif
 
     if ((*psock = socket(type, SOCK_STREAM, proto))
@@ -210,7 +209,7 @@ static int opensocket(int type, int *psock)
 		 */
 #ifndef _WIN32
 	origerr = errno;	/* take a copy before syslog() */
-	syslog(LOG_ERR, "socket(%s) to spamd failed: %m", typename);
+	libspamc_log(flags, LOG_ERR, "socket(%s) to spamd failed: %m", typename);
 #else
 	origerr = WSAGetLastError();
 	printf("socket(%s) to spamd failed: %d\n", typename, origerr);
@@ -258,7 +257,7 @@ static int opensocket(int type, int *psock)
 	    case ENOPROTOOPT:
 	    case EFAULT:
 #ifndef _WIN32
-		syslog(LOG_ERR,
+		libspamc_log(flags, LOG_ERR,
 		       "setsockopt(TCP_NODELAY) failed: %m", origerr);
 #else
 		fprintf(stderr,
@@ -299,7 +298,7 @@ static int try_to_connect_unix(struct transport *tp, int *sockptr)
 	/*----------------------------------------------------------------
 	 * If the socket itself can't be created, this is a fatal error.
 	 */
-    if ((ret = opensocket(PF_UNIX, &mysock)) != EX_OK)
+    if ((ret = opensocket(tp->flags, PF_UNIX, &mysock)) != EX_OK)
 	return ret;
 
     /* set up the UNIX domain socket */
@@ -309,7 +308,7 @@ static int try_to_connect_unix(struct transport *tp, int *sockptr)
     addrbuf.sun_path[sizeof addrbuf.sun_path - 1] = '\0';
 
 #ifdef DO_CONNECT_DEBUG_SYSLOGS
-    syslog(DEBUG_LEVEL, "dbg: connect(AF_UNIX) to spamd at %s",
+    libspamc_log(tp->flags, DEBUG_LEVEL, "dbg: connect(AF_UNIX) to spamd at %s",
 	   addrbuf.sun_path);
 #endif
 
@@ -319,7 +318,7 @@ static int try_to_connect_unix(struct transport *tp, int *sockptr)
 
     if (status >= 0) {
 #ifdef DO_CONNECT_DEBUG_SYSLOGS
-	syslog(DEBUG_LEVEL, "dbg: connect(AF_UNIX) ok");
+	libspamc_log(tp->flags, DEBUG_LEVEL, "dbg: connect(AF_UNIX) ok");
 #endif
 
 	*sockptr = mysock;
@@ -327,7 +326,7 @@ static int try_to_connect_unix(struct transport *tp, int *sockptr)
 	return EX_OK;
     }
 
-    syslog(LOG_ERR, "connect(AF_UNIX) to spamd %s failed: %m",
+    libspamc_log(tp->flags, LOG_ERR, "connect(AF_UNIX) to spamd %s failed: %m",
 	   addrbuf.sun_path);
     closesocket(mysock);
 
@@ -357,11 +356,7 @@ static int try_to_connect_tcp(const struct transport *tp, int *sockptr)
 
 #ifdef DO_CONNECT_DEBUG_SYSLOGS
     for (numloops = 0; numloops < tp->nhosts; numloops++) {
-#ifndef _WIN32
-	syslog(LOG_ERR, "dbg: %d/%d: %s",
-#else
-	fprintf(stderr, "dbg: %d/%d: %s\n",
-#endif
+	libspamc_log(tp->flags, LOG_ERR, "dbg: %d/%d: %s",
 		numloops + 1, tp->nhosts, inet_ntoa(tp->hosts[numloops]));
     }
 #endif
@@ -377,7 +372,7 @@ static int try_to_connect_tcp(const struct transport *tp, int *sockptr)
 		 * one attempt to connect() on each one. If this fails,
 		 * we're done.
 		 */
-	if ((ret = opensocket(PF_INET, &mysock)) != EX_OK)
+	if ((ret = opensocket(tp->flags, PF_INET, &mysock)) != EX_OK)
 	    return ret;
 
 	memset(&addrbuf, 0, sizeof(addrbuf));
@@ -389,13 +384,8 @@ static int try_to_connect_tcp(const struct transport *tp, int *sockptr)
 	ipaddr = inet_ntoa(addrbuf.sin_addr);
 
 #ifdef DO_CONNECT_DEBUG_SYSLOGS
-#ifndef _WIN32
-	syslog(DEBUG_LEVEL,
+	libspamc_log(tp->flags, DEBUG_LEVEL,
 	       "dbg: connect(AF_INET) to spamd at %s (try #%d of %d)",
-#else
-	fprintf(stderr,
-		"dbg: connect(AF_INET) to spamd at %s (try #%d of %d\)\n",
-#endif
 		ipaddr, numloops + 1, MAX_CONNECT_RETRIES);
 #endif
 
@@ -405,7 +395,7 @@ static int try_to_connect_tcp(const struct transport *tp, int *sockptr)
 	if (status != 0) {
 #ifndef _WIN32
 	    origerr = errno;
-	    syslog(LOG_ERR,
+	    libspamc_log(tp->flags, LOG_ERR,
 		   "connect(AF_INET) to spamd at %s failed, retrying (#%d of %d): %m",
 		   ipaddr, numloops + 1, MAX_CONNECT_RETRIES);
 #else
@@ -420,13 +410,8 @@ static int try_to_connect_tcp(const struct transport *tp, int *sockptr)
 	}
 	else {
 #ifdef DO_CONNECT_DEBUG_SYSLOGS
-#ifndef _WIN32
-	    syslog(DEBUG_LEVEL,
+	    libspamc_log(tp->flags, DEBUG_LEVEL,
 		   "dbg: connect(AF_INET) to spamd at %s done", ipaddr);
-#else
-	    fprintf(stderr,
-		    "dbg: connect(AF_INET) to spamd at %s done\n", ipaddr);
-#endif
 #endif
 	    *sockptr = mysock;
 
@@ -434,11 +419,7 @@ static int try_to_connect_tcp(const struct transport *tp, int *sockptr)
 	}
     }
 
-#ifndef _WIN32
-    syslog(LOG_ERR, "connection attempt to spamd aborted after %d retries",
-#else
-    fprintf(stderr, "connection attempt to spamd aborted after %d retries\n",
-#endif
+    libspamc_log(tp->flags, LOG_ERR, "connection attempt to spamd aborted after %d retries",
 	    MAX_CONNECT_RETRIES);
 
     return translate_connect_errno(origerr);
@@ -569,7 +550,7 @@ int message_read(int fd, int flags, struct message *m)
     /* create the "private" part of the struct message */
     m->priv = malloc(sizeof(struct libspamc_private_message));
     if (m->priv == NULL) {
-	syslog(LOG_ERR, "message_read: malloc failed");
+	libspamc_log(flags, LOG_ERR, "message_read: malloc failed");
 	return EX_OSERR;
     }
     m->priv->flags = flags;
@@ -582,11 +563,7 @@ int message_read(int fd, int flags, struct message *m)
 	return message_read_bsmtp(fd, m);
 
     default:
-#ifndef _WIN32
-	syslog(LOG_ERR, "message_read: Unknown mode %d",
-#else
-	fprintf(stderr, "message_read: Unknown mode %d\n",
-#endif
+	libspamc_log(flags, LOG_ERR, "message_read: Unknown mode %d",
 		flags & SPAMC_MODE_MASK);
 	return EX_USAGE;
     }
@@ -605,12 +582,8 @@ long message_write(int fd, struct message *m)
 
 	}
 	else {
-#ifndef _WIN32
-	    syslog(LOG_ERR, "oops! SPAMC_CHECK_ONLY is_spam: %d", m->is_spam);
-#else
-	    fprintf(stderr, "oops! SPAMC_CHECK_ONLY is_spam: %d\n",
-		    m->is_spam);
-#endif
+	    libspamc_log(m->priv->flags, LOG_ERR, "oops! SPAMC_CHECK_ONLY is_spam: %d",
+                        m->is_spam);
 	    return -1;
 	}
     }
@@ -618,7 +591,7 @@ long message_write(int fd, struct message *m)
     /* else we're not in CHECK_ONLY mode */
     switch (m->type) {
     case MESSAGE_NONE:
-	syslog(LOG_ERR, "Cannot write this message, it's MESSAGE_NONE!");
+	libspamc_log(m->priv->flags, LOG_ERR, "Cannot write this message, it's MESSAGE_NONE!");
 	return -1;
 
     case MESSAGE_ERROR:
@@ -650,11 +623,7 @@ long message_write(int fd, struct message *m)
 	return total + full_write(fd, 1, m->post, m->post_len);
 
     default:
-#ifndef _WIN32
-	syslog(LOG_ERR, "Unknown message type %d", m->type);
-#else
-	fprintf(stderr, "Unknown message type %d\n", m->type);
-#endif
+	libspamc_log(m->priv->flags, LOG_ERR, "Unknown message type %d", m->type);
 	return -1;
     }
 }
@@ -669,13 +638,8 @@ void message_dump(int in_fd, int out_fd, struct message *m)
     }
     while ((bytes = full_read(in_fd, 1, buf, 8192, 8192)) > 0) {
 	if (bytes != full_write(out_fd, 1, buf, bytes)) {
-#ifndef _WIN32
-	    syslog(LOG_ERR, "oops! message_dump of %d returned different",
+	    libspamc_log(m->priv->flags, LOG_ERR, "oops! message_dump of %d returned different",
 		   bytes);
-#else
-	    fprintf(stderr, "oops! message_dump of %d returned different\n",
-		    bytes);
-#endif
 	}
     }
 }
@@ -715,11 +679,7 @@ _spamc_read_full_line(struct message *m, int flags, SSL * ssl, int sock,
 	}
     }
 
-#ifndef _WIN32
-    syslog(LOG_ERR, "spamd responded with line of %d bytes, dying", len);
-#else
-    fprintf(stderr, "spamd responded with line of %d bytes, dying\n", len);
-#endif
+    libspamc_log(flags, LOG_ERR, "spamd responded with line of %d bytes, dying", len);
     failureval = EX_TOOBIG;
 
   failure:
@@ -834,23 +794,14 @@ _handle_spamd_header(struct message *m, int flags, char *buf, int len)
     }
     else if (sscanf(buf, "Content-length: %d", &m->content_length) == 1) {
 	if (m->content_length < 0) {
-#ifndef _WIN32
-	    syslog(LOG_ERR, "spamd responded with bad Content-length '%s'",
+	    libspamc_log(flags, LOG_ERR, "spamd responded with bad Content-length '%s'",
 		   buf);
-#else
-	    fprintf(stderr, "spamd responded with bad Content-length '%s'\n",
-		    buf);
-#endif
 	    return EX_PROTOCOL;
 	}
 	return EX_OK;
     }
 
-#ifndef _WIN32
-    syslog(LOG_ERR, "spamd responded with bad header '%s'", buf);
-#else
-    fprintf(stderr, "spamd responded with bad header '%s'\n", buf);
-#endif
+    libspamc_log(flags, LOG_ERR, "spamd responded with bad header '%s'", buf);
     return EX_PROTOCOL;
 }
 
@@ -880,7 +831,7 @@ int message_filter(struct transport *tp, const char *username,
 	UNUSED_VARIABLE(ssl);
 	UNUSED_VARIABLE(meth);
 	UNUSED_VARIABLE(ctx);
-	syslog(LOG_ERR, "spamc not built with SSL support");
+	libspamc_log(flags, LOG_ERR, "spamc not built with SSL support");
 	return EX_SOFTWARE;
 #endif
     }
@@ -980,11 +931,7 @@ int message_filter(struct transport *tp, const char *username,
     }
 
     if (sscanf(buf, "SPAMD/%18s %d %*s", versbuf, &response) != 2) {
-#ifndef _WIN32
-	syslog(LOG_ERR, "spamd responded with bad string '%s'", buf);
-#else
-	fprintf(stderr, "spamd responded with bad string '%s'\n", buf);
-#endif
+	libspamc_log(flags, LOG_ERR, "spamd responded with bad string '%s'", buf);
 	failureval = EX_PROTOCOL;
 	goto failure;
     }
@@ -992,13 +939,8 @@ int message_filter(struct transport *tp, const char *username,
     versbuf[19] = '\0';
     version = _locale_safe_string_to_float(versbuf, 20);
     if (version < 1.0) {
-#ifndef _WIN32
-	syslog(LOG_ERR, "spamd responded with bad version string '%s'",
+	libspamc_log(flags, LOG_ERR, "spamd responded with bad version string '%s'",
 	       versbuf);
-#else
-	fprintf(stderr, "spamd responded with bad version string '%s'\n",
-		versbuf);
-#endif
 	failureval = EX_PROTOCOL;
 	goto failure;
     }
@@ -1078,15 +1020,9 @@ int message_filter(struct transport *tp, const char *username,
     libspamc_timeout = 0;
 
     if (m->out_len != m->content_length) {
-#ifndef _WIN32
-	syslog(LOG_ERR,
+	libspamc_log(flags, LOG_ERR,
 	       "failed sanity check, %d bytes claimed, %d bytes seen",
 	       m->content_length, m->out_len);
-#else
-	fprintf(stderr,
-		"failed sanity check, %d bytes claimed, %d bytes seen\n",
-		m->content_length, m->out_len);
-#endif
 	failureval = EX_PROTOCOL;
 	goto failure;
     }
@@ -1190,6 +1126,7 @@ void transport_init(struct transport *tp)
 
     tp->type = TRANSPORT_LOCALHOST;
     tp->port = 783;
+    tp->flags = 0;
 }
 
 /*
@@ -1244,6 +1181,8 @@ int transport_setup(struct transport *tp, int flags)
     struct hostent *hp = 0;
     char **addrp;
 
+    tp->flags = flags;
+
 #ifdef _WIN32
     // Start Winsock up
     WSADATA wsaData;
@@ -1272,11 +1211,7 @@ int transport_setup(struct transport *tp, int flags)
 	if (NULL == (hp = gethostbyname(tp->hostname))) {
 	    int origherr = h_errno;	/* take a copy before syslog() */
 
-#ifndef _WIN32
-	    syslog(LOG_ERR, "gethostbyname(%s) failed: h_errno=%d",
-#else
-	    fprintf(stderr, "gethostbyname(%s) failed: h_errno=%d\n",
-#endif
+	    libspamc_log(flags, LOG_ERR, "gethostbyname(%s) failed: h_errno=%d",
 		    tp->hostname, origherr);
 	    switch (origherr) {
 	    case HOST_NOT_FOUND:
@@ -1316,13 +1251,8 @@ int transport_setup(struct transport *tp, int flags)
 
 	for (addrp = hp->h_addr_list; *addrp; addrp++) {
 	    if (tp->nhosts >= TRANSPORT_MAX_HOSTS - 1) {
-#ifndef _WIN32
-		syslog(LOG_ERR, "hit limit of %d hosts, ignoring remainder",
+		libspamc_log(flags, LOG_ERR, "hit limit of %d hosts, ignoring remainder",
 		       TRANSPORT_MAX_HOSTS - 1);
-#else
-		fprintf(stderr, "hit limit of %d hosts, ignoring remainder\n",
-			TRANSPORT_MAX_HOSTS - 1);
-#endif
 		break;
 	    }
 
@@ -1356,6 +1286,39 @@ int transport_setup(struct transport *tp, int flags)
     return EX_OK;
 }
 
+/* --------------------------------------------------------------------------- */
+
+#define LOG_BUFSIZ      1023
+
+void
+libspamc_log (int flags, int level, char *msg, ...)
+{
+    va_list ap;
+    char buf[LOG_BUFSIZ+1];
+    int len = 0;
+
+    va_start(ap, msg);
+
+    if ((flags & SPAMC_LOG_TO_STDERR) != 0) {
+        // create a log-line buffer
+        len = snprintf(buf, LOG_BUFSIZ, "spamc: ");
+        len += vsnprintf(buf+len, LOG_BUFSIZ-len, msg, ap);
+
+        // avoid buffer overflow
+        if (len > (LOG_BUFSIZ-2)) { len = (LOG_BUFSIZ-3); }
+
+        len += snprintf(buf+len, LOG_BUFSIZ-len, "\n");
+        buf[LOG_BUFSIZ] = '\0';     /* ensure termination */
+        (void) write (2, buf, len);
+
+    } else {
+        vsnprintf(buf, LOG_BUFSIZ, msg, ap);
+        buf[LOG_BUFSIZ] = '\0';     /* ensure termination */
+        syslog (level, "%s", buf);
+    }
+
+    va_end(ap);
+}
 
 /* --------------------------------------------------------------------------- */
 

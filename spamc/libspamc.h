@@ -18,6 +18,7 @@
 #define LIBSPAMC_H 1
 
 #include <stdio.h>
+#include <stdarg.h>
 #include <sys/types.h>
 #ifdef _WIN32
 #include <winsock.h>
@@ -72,6 +73,9 @@
 
 /* 2003/04/16 SJF: randomize hostname order (quasi load balancing) */
 #define SPAMC_RANDOMIZE_HOSTS (1<<23)
+
+/* log to stderr */
+#define SPAMC_LOG_TO_STDERR  (1<<22)
 
 /* Aug 14, 2002 bj: A struct for storing a message-in-progress */
 typedef enum
@@ -156,6 +160,7 @@ struct transport
 
     struct in_addr hosts[TRANSPORT_MAX_HOSTS];
     int nhosts;
+    int flags;
 };
 
 extern void transport_init(struct transport *tp);
@@ -202,5 +207,7 @@ void message_cleanup(struct message *m);
 int process_message(struct transport *tp, char *username,
 		    int max_size, int in_fd, int out_fd,
 		    const int check_only, const int safe_fallback);
+
+void libspamc_log(int flags, int level, char *msg, ...);
 
 #endif

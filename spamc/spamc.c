@@ -27,7 +27,6 @@
 #include <io.h>
 #include <fcntl.h>
 #include <process.h>
-#define syslog(x, y) fprintf(stderr, #y "\n")
 #else
 #include <syslog.h>
 #include <unistd.h>
@@ -37,6 +36,9 @@
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
+#endif
+#ifndef LOG_ERR
+#define LOG_ERR 3
 #endif
 
 #ifdef HAVE_SYSEXITS_H
@@ -102,17 +104,19 @@ void print_usage(void)
     usg("Options:\n");
     usg("  -B                  Assume input is a single BSMTP-formatted message.\n");
     usg("  -c                  Just print the summary line and set an exit code.\n");
+    usg("  -y                  Just print the names of the tests hit.\n");
+    usg("  -r                  Print full report for messages identified as spam.\n");
+    usg("  -R                  Print full report for all messages.\n");
     usg("  -E                  Filter as normal, and set an exit code.\n");
-    usg("  -d host             Specify host to connect to.\n"
-           "                      [default: localhost]\n");
     usg("  -e command [args]   Pipe the output to the given command instead of stdout.\n"
            "                      This must be the last option.\n");
     usg("  -h                  Print this help message and exit.\n");
+
+    usg("  -d host             Specify host to connect to.\n"
+           "                      [default: localhost]\n");
     usg("  -H                  Randomize IP addresses for the looked-up hostname.\n");
     usg("  -p port             Specify port for connection to spamd.\n"
            "                      [default: 783]\n");
-    usg("  -r                  Print full report for messages identified as spam.\n");
-    usg("  -R                  Print full report for all messages.\n");
     usg("  -s size             Specify maximum message size, in bytes.\n"
            "                      [default: 250k]\n");
 #ifdef SPAMC_SSL
@@ -124,8 +128,9 @@ void print_usage(void)
 #ifndef _WIN32
     usg("  -U path             Connect to spamd via UNIX domain sockets.\n");
 #endif
+
     usg("  -x                  Don't fallback safely.\n");
-    usg("  -y                  Just print the names of the tests hit.\n");
+    usg("  -l                  Log errors and warnings to stderr.\n");
     usg("\n");
 }
 
@@ -135,9 +140,9 @@ read_args(int argc, char **argv,
           struct transport *ptrn)
 {
 #ifndef _WIN32
-    const char *opts = "-BcrRd:e:fhyp:t:s:u:xSHU:E";
+    const char *opts = "-BcrRd:e:fhyp:t:s:u:xSHU:El";
 #else
-    const char *opts = "-BcrRd:fhyp:t:s:u:xSHE";
+    const char *opts = "-BcrRd:fhyp:t:s:u:xSHEl";
 #endif
     int opt;
 
@@ -179,6 +184,11 @@ read_args(int argc, char **argv,
             case 'f':
             {
                 flags |= SPAMC_SAFE_FALLBACK;
+                break;
+            }
+            case 'l':
+            {
+                flags |= SPAMC_LOG_TO_STDERR;
                 break;
             }
             case 'H':
@@ -249,7 +259,7 @@ read_args(int argc, char **argv,
             
             case '?':
             {
-                syslog(LOG_ERR, "invalid usage");
+                libspamc_log (flags, LOG_ERR, "invalid usage");
                 /* NOTE: falls through to usage case below... */
             }
             case 'h':
@@ -277,12 +287,12 @@ void get_output_fd(int *fd)
     }
 #ifndef _WIN32
     if (pipe(fds)) {
-	syslog(LOG_ERR, "pipe creation failed: %m");
+        libspamc_log(flags, LOG_ERR, "pipe creation failed: %m");
 	exit(EX_OSERR);
     }
     pid = fork();
     if (pid < 0) {
-	syslog(LOG_ERR, "fork failed: %m");
+	libspamc_log(flags, LOG_ERR, "fork failed: %m");
 	exit(EX_OSERR);
     }
     else if (pid == 0) {
@@ -298,12 +308,12 @@ void get_output_fd(int *fd)
     /* parent process (see above) */
     close(fds[1]);
     if (dup2(fds[0], STDIN_FILENO)) {
-	syslog(LOG_ERR, "redirection of stdin failed: %m");
+	libspamc_log(flags, LOG_ERR, "redirection of stdin failed: %m");
 	exit(EX_OSERR);
     }
     close(fds[0]);		/* no point in leaving extra fds lying around */
     execv(exec_argv[0], exec_argv);
-    syslog(LOG_ERR, "exec failed: %m");
+    libspamc_log(flags, LOG_ERR, "exec failed: %m");
 #else
     fprintf(stderr, "exec failed: %d\n", errno);
 #endif

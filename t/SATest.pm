@@ -217,12 +217,17 @@ sub salearnrun {
 
 sub scrun {
   $spamd_never_started = 1;
-  spamcrun (@_);
+  spamcrun (@_, 0);
+}
+sub scrunwithstderr {
+  $spamd_never_started = 1;
+  spamcrun (@_, 1);
 }
 
 sub spamcrun {
   my $args = shift;
   my $read_sub = shift;
+  my $capture_stderr = shift;
 
   if (defined $ENV{'SC_ARGS'}) {
     $args = $ENV{'SC_ARGS'} . " ". $args;
@@ -240,7 +245,11 @@ sub spamcrun {
   $spamcargs =~ s!/!\\!g if ($^O =~ /^MS(DOS|Win)/i);
 
   print ("\t$spamcargs\n");
-  system ("$spamcargs > log/$testname.out");
+  if ($capture_stderr) {
+    system ("$spamcargs > log/$testname.out 2>&1");
+  } else {
+    system ("$spamcargs > log/$testname.out");
+  }
 
   $sa_exitcode = ($?>>8);
   if ($sa_exitcode != 0) { stop_spamd(); return undef; }
