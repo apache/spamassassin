@@ -2883,6 +2883,22 @@ The table user auto-whitelists are stored in, for the above DSN.
     type => $CONF_TYPE_STRING
   });
 
+=item user_awl_sql_override_username
+
+Used by the SQLBasedAddrList storage implementation.
+
+If this option is set the SQLBasedAddrList module will override the set
+username with the value given.  This can be useful for implementing global
+or group based auto-whitelist databases.
+
+=cut
+
+  push (@cmds, {
+    setting => 'user_awl_sql_override_username',
+    default => '',
+    type => $CONF_TYPE_STRING
+  });
+
 =item user_scores_ldap_username
 
 This is the Bind DN used to connect to the LDAP server.
