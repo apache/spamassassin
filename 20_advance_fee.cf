@@ -39,11 +39,9 @@ body __FRAUD_10	/\b(?:financial|confiden(?:tial|ce)|safe|mutual|secret|success|r
 body __FRAUD_11	/\b(?:of|the) late president\b/i
 body __FRAUD_12	/\b(?:wife|son|brother|daughter) of the late\b/i
 body __FRAUD_13	/\bU\.?S\.?(?:D\.?)?\s*(?:\$\s*)?(?:\d+,\d+,\d+|\d+\.\d+\.\d+|\d+(?:\.\d+)?\s*milli?on)/i
-body __FRAUD_14	/\bWRITING THIS LETTER TO SOLICIT\b/i
 body __FRAUD_15	/\ball funds will be returned\b/i
 body __FRAUD_16	/\bass?ylum\b/i
 body __FRAUD_17	/\battached to ticket number\b/i
-body __FRAUD_18	/\bcode of conduct\b/i
 body __FRAUD_19	/\bdisburs/i
 body __FRAUD_20	/\bforeign account\b/i
 body __FRAUD_21	/\bgive\s+you .{0,15}(?:fund|money|total|sum|contact|percent)\b/i
@@ -57,7 +55,6 @@ body __FRAUD_28	/\bsum of ?(?:million|US|\$)|\b(?:deposit|left|huge|discovered|a
 body __FRAUD_29	/\btop secret\b/i
 body __FRAUD_30	/\btransaction\b.{1,30}\b(?:magnitude|diplomatic|strict|absolute|secret|confiden(?:tial|ce)|guarantee)/i
 body __FRAUD_31	/\burgent and(?: very)? (?:profitable|confidential) business propos(?:al|ition)/i
-body __FRAUD_32	/\byour(?: private)? (?:tele)?phone (?:and|&) fax Numbers?\b/i
 body __FRAUD_33	/\d+%.{0,15}\)? (?:of (?:the total|this|the) (?:amount|sum|money)|for you|for my investment|for (?:us|me)|.{0,15}\bfor your expenses)\b/i
 body __FRAUD_34	/as a minister/i
 body __FRAUD_35	/as the beneficiary/i
