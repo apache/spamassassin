@@ -46,6 +46,9 @@ describe RATWARE_RCVD_LC_ESMTP	Bulk email fingerprint ('esmtp' Received) found
 header RATWARE_MOZ_MALFORMED	User-Agent =~ /Mozilla\/5\.0\d\d/
 describe RATWARE_MOZ_MALFORMED	Bulk email fingerprint (Mozilla malformed) found
 
+header RATWARE_MPOP_WEBMAIL	X-Mailer =~ /mPOP Web-Mail/i
+describe RATWARE_MPOP_WEBMAIL	Bulk email fingerprint (mPOP Web-Mail)
+
 ###########################################################################
 # Now, detect forgeries of real MUAs
 #

@@ -264,41 +264,6 @@ meta T_ORANGES_AND_SPAM_4	!T_ORANGES_AND_SPAM_POST && T_ORANGES_AND_SPAM_TELE
 header T_FROM_MIME_ENCODED_TWICE	From:raw =~ /=\?\S+\?[BQ]\?.*=\?\S+\?[BQ]\?/i
 
 ########################################################################
-# ratware signs
-# bug 1744
-
-body T_RATWARE_MAILER_05 	/http:\/\/www\.adminsystem\.net \(Trial Version Only\)/
-describe T_RATWARE_MAILER_05 	Ratware mailer.
-
-# X-Mailer: mPOP Web-Mail 2.19
-header T_RATWARE_MAILER_06	X-Mailer =~ /mPOP Web-Mail/i
-describe T_RATWARE_MAILER_06	Ratware mailer 6
-
-# <RNDLT[32]>
-rawbody T_RATWARE_OOPS_01	/(?:<(?:\/|!|!--)?(?:RND(?:LT|MX|DG|LINE)\[?[0-9]?[0-9]?\]?|RANDOM_TEST))>/i
-describe T_RATWARE_OOPS_01	Spammer doesn't know how to use ratware properly (<>)
-
-# %RANDOM_WORD%
-rawbody T_RATWARE_OOPS_02	/\%\s?(?:RANDOM_@?(?:WORD|TEXT|NUMBERS?|CHARS?|=|NLS[0-9]|DATE_TIME)|PRIORITY_NUMBER|RND_?(?:\:.{1,10}|IMA|SYB|TEXT|URL|WORD|([UL]C_)?CHAR)|MESSAGE_BODY|BOUNDARY|STRING_CONST|CUSTOM[0-9]_)/i
-describe T_RATWARE_OOPS_02	Spammer doesn't know how to use ratware properly (%)
-
-# http://www..
-rawbody T_RATWARE_OOPS_09	/http:\/\/www\.\./i
-describe T_RATWARE_OOPS_09	Spammer doesn't know how to use ratware properly (..)
-
-# http://http://www
-rawbody T_RATWARE_OOPS_11	/http:\/\/.{0,10}http\:\/\/www/i
-describe T_RATWARE_OOPS_11	Spammer doesn't know how to use ratware properly (http^2)
-
-# They took out the meta tags for frontpage, but forgot this one shows
-# up from fp also.
-rawbody __T_RATWARE_ERROR_03 	/\<\!\-\- saved from url\=\(0022\)http:\/\/internet\.e-mail \-\-\>/
-describe __T_RATWARE_ERROR_03 	Frontpage was used to create the email.
-
-meta T_RATWARE_ERROR_04 	!FRONTPAGE && __T_RATWARE_ERROR_03
-describe T_RATWARE_ERROR_04 	Made with Frontpage, but forgot to remove all entries.
-
-########################################################################
 
 # bug 2903
 # the output of this exercise should replace the following rules:
@@ -490,3 +455,58 @@ uri T_URI_3896_33	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{8,}\.info\/\?\S{25,}/i
 uri T_URI_3896_34	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{8,}\.biz\/\?\S{25,}/i
 uri T_URI_3896_35	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{8,}\.info\/\S{25,}/i
 uri T_URI_3896_36	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{8,}\.biz\/\S{25,}/i
+
+########################################################################
+
+# test these separated out... maybe split up HTML_COMMENT_SAVED_URL_EMAIL
+
+body T_HTML_SAVED_URL_EMAIL	eval:html_text_match('comment', '<!-- saved from url=\(\d{4}\)http:\/\/internet\.e-mail')
+describe T_HTML_SAVED_URL_EMAIL	HTML message is a saved web page
+
+body T_HTML_SAVED_URL_FILEC	eval:html_text_match('comment', '<!-- saved from url=\(\d{4}\)file:\/\/C:')
+describe T_HTML_SAVED_URL_FILEC	HTML message is a saved web page
+
+body T_HTML_SAVED_URL_OTHER	eval:html_text_match('comment', '<!-- saved from url=\(\d{4}\)(?!file:\/\/C:|http:\/\/internet\.e-mail)')
+describe T_HTML_SAVED_URL_OTHER	HTML message is a saved web page
+
+########################################################################
+
+# let's play dissect the rule... good stuff, but overlaps our own
+# PERCENT_RANDOM
+rawbody T_RATWARE_OOPS_02	/\%\s?(?:RANDOM_@?(?:WORD|TEXT|NUMBERS?|CHARS?|=|NLS[0-9]|DATE_TIME)|PRIORITY_NUMBER|RND_?(?:\:.{1,10}|IMA|SYB|TEXT|URL|WORD|([UL]C_)?CHAR)|MESSAGE_BODY|BOUNDARY|STRING_CONST|CUSTOM[0-9]_)/i
+
+# try more letters
+header __PC_RND_HEADER_T	ALL =~ /%RA?ND(?:OM)?(?:_|\b|[A-Z]{2})/i
+rawbody __PC_RND_RAWBODY_T	/%RA?ND(?:OM)?(?:_|\b|[A-Z]{2})/i
+meta T_PERCENT_RANDOM		(__PC_RND_HEADER_T || __PC_RND_RAWBODY_T)
+
+header __PC_RND_HEADER_T2	ALL =~ /%RA?ND(?:OM)?(?:_|\b|[A-Z]{3})/i
+rawbody __PC_RND_RAWBODY_T2	/%RA?ND(?:OM)?(?:_|\b|[A-Z]{3})/i
+meta T_PERCENT_RANDOM_2		(__PC_RND_HEADER_T2 || __PC_RND_RAWBODY_T2)
+
+# add \s? to that
+header __PC_RND_HEADER_T3	ALL =~ /%\s?RA?ND(?:OM)?(?:_|\b|[A-Z]{2})/i
+rawbody __PC_RND_RAWBODY_T3	/%\s?RA?ND(?:OM)?(?:_|\b|[A-Z]{2})/i
+meta T_PERCENT_RANDOM_3		(__PC_RND_HEADER_T3 || __PC_RND_RAWBODY_T3)
+
+header __PC_RND_HEADER_T4	ALL =~ /%\s?RA?ND(?:OM)?(?:_|\b|[A-Z]{3})/i
+rawbody __PC_RND_RAWBODY_T4	/%\s?RA?ND(?:OM)?(?:_|\b|[A-Z]{3})/i
+meta T_PERCENT_RANDOM_4		(__PC_RND_HEADER_T4 || __PC_RND_RAWBODY_T4)
+
+# try @ in there
+header __PC_RND_HEADER_T5	ALL =~ /%\s?RA?ND(?:OM)?(?:_|\b|[A-Z]{2})/i
+rawbody __PC_RND_RAWBODY_T5	/%\s?RA?ND(?:OM)?(?:_|\b|[A-Z@]{2})/i
+meta T_PERCENT_RANDOM_5		(__PC_RND_HEADER_T5 || __PC_RND_RAWBODY_T5)
+
+header __PC_RND_HEADER_T6	ALL =~ /%RA?ND(?:OM)?(?:_|\b|[A-Z]{3})/i
+rawbody __PC_RND_RAWBODY_T6	/%RA?ND(?:OM)?(?:_|\b|[A-Z@]{3})/i
+meta T_PERCENT_RANDOM_6		(__PC_RND_HEADER_T6 || __PC_RND_RAWBODY_T6)
+
+# try @0-9 in there
+header __PC_RND_HEADER_T7	ALL =~ /%\s?RA?ND(?:OM)?(?:_|\b|[A-Z]{2})/i
+rawbody __PC_RND_RAWBODY_T7	/%\s?RA?ND(?:OM)?(?:_|\b|[A-Z0-9@]{2})/i
+meta T_PERCENT_RANDOM_7		(__PC_RND_HEADER_T7 || __PC_RND_RAWBODY_T7)
+
+header __PC_RND_HEADER_T8	ALL =~ /%RA?ND(?:OM)?(?:_|\b|[A-Z]{3})/i
+rawbody __PC_RND_RAWBODY_T8	/%RA?ND(?:OM)?(?:_|\b|[A-Z0-9@]{3})/i
+meta T_PERCENT_RANDOM_8		(__PC_RND_HEADER_T8 || __PC_RND_RAWBODY_T8)
