@@ -1747,15 +1747,49 @@ sub do_meta_tests {
 
     my @tests = keys %{$self->{conf}{meta_tests}};
 
+    my @all_tests = ();
+
+    foreach my $test_type ('body_tests', 'uri_tests', 'uri_evals',
+    'head_tests', 'head_evals', 'body_evals', 'full_tests',
+    'full_evals', 'rawbody_tests', 'rawbody_evals') {
+      push(@all_tests, keys %{$self->{conf}{$test_type}});
+    }
+
     foreach $rulename (@tests) {
         $rule = $self->{conf}->{meta_tests}->{$rulename};
 
-        my @tokens = $rule =~ m/(\w+|[^\w\s]+)/g;
+        my @tokens = $rule =~ m/([\w\.\[][\w\.\*\?\+\[\^\]]+|[\(\)]|\|\||\&\&|>=?|<=?|==|!=|!|[\+\-\*\/]|\d+)/g;
 
         my ($token, $setupline, $expr);
 
         $setupline = "";
         $expr = "";
+
+        # Exapnd regexp + operator pairs
+        for (my $i = 0; $i < @tokens; $i++) {
+          $token = $tokens[$i];
+          next unless (($token =~ /^\w.*[\.\*\?\+\[\^\]]/) ||
+                      ($token =~ /^[\.\[]/));
+
+          # This is a regular expression to match rule names
+          my @rules = grep(/^$token$/, @all_tests);
+
+          my $operator = splice(@tokens, $i + 1, 1);
+
+          # If no rules match, then this regexp + operator will evaluate
+          # to false (0)
+          if (@rules == 0) {
+            $tokens[$i] = "0";
+            next;
+          }
+
+          my @expansion = split(/\s+/, join(" $operator ", @rules));
+
+          splice(@tokens, $i, 1, '(', @expansion, ')');
+
+          $i += scalar(@expansion) + 1;
+        } # for (my $i = 0; $i < @tokens; $i++)
+
         foreach $token (@tokens) {
             # Numbers can't be rule names
             if ($token =~ /^(?:\W+|\d+)$/) {
