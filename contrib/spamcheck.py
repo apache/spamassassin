@@ -36,6 +36,10 @@ import sys, string
 import re, getopt
 import smtplib, socket
 
+# EX_TEMPFAIL is 75 on every Unix I've checked, but...
+# check /usr/include/sysexits.h if you have odd problems.
+TEMPFAIL = 75
+
 # this class hacks smtplib's SMTP class into a shape where it will
 # successfully pass a message off to Cyrus's LMTP daemon.
 # Also adds support for connecting to a unix domain socket.
@@ -186,9 +190,13 @@ def process_message(spamd_host, spamd_port, lmtp_host, sender, recipient):
         if code != 250: sys.exit(75)
 
         #lmtp.set_debuglevel(1)
-        errors = lmtp.sendmail(sender, recipient, checked_data)
-        if errors:
-            sys.exit(1)
+        try:
+            lmtp.sendmail(sender, recipient, checked_data)
+        except smtplib.SMTPDataError, errors:
+            if errors.smtp_code/100 == 4:
+                sys.exit(TEMPFAIL)
+            else:
+                sys.exit(1)
     else:
         # too much data.  Just pass it through unchanged
         lmtp = LMTP(lmtp_host)
@@ -215,7 +223,10 @@ def process_message(spamd_host, spamd_port, lmtp_host, sender, recipient):
         lmtp.send('\r\n.\r\n')
  
         code, msg = lmtp.getreply()
-        if code != 250: sys.exit(1)
+        if code/100 == 4:
+            sys.exit(TEMPFAIL)
+        elif code != 250:
+            sys.exit(1)
 
 def main(argv):
     spamd_host = 'localhost'
