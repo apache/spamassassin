@@ -12,6 +12,6 @@ q{ Subject: There yours for FREE! }, 'subj',
 
 );
 
-ok (sdrun ("", "-s 512 < data/spam/001", \&patterns_run_cb));
+ok (sdrun ("-L", "-s 512 < data/spam/001", \&patterns_run_cb));
 ok_all_patterns();
 

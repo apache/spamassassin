@@ -13,5 +13,5 @@ q{ BODY: Claims you can be removed from the list }, 'bodyspotted',
 
 );
 
-ok (sarun ("-t < data/spam/002", \&patterns_run_cb));
+ok (sarun ("-L -t < data/spam/002", \&patterns_run_cb));
 ok_all_patterns();
