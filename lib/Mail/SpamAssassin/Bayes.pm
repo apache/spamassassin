@@ -163,18 +163,17 @@ use constant ROBINSON_X_CONSTANT => 0.538;
 # trust collected data more strongly.
 use constant ROBINSON_S_CONSTANT => 0.373;
 
-# Precompute S * X
-use constant ROBINSON_S_TIMES_X => ROBINSON_S_CONSTANT * ROBINSON_X_CONSTANT;
-
 # Should we ignore tokens with probs very close to the middle ground (.5)?
 # tokens need to be outside the [ .5-MPS, .5+MPS ] range to be used.
 use constant ROBINSON_MIN_PROB_STRENGTH => 0.346;
-#use constant ROBINSON_MIN_PROB_STRENGTH => 0.0;
 
 # note: these seem to work well for Gary-combining.
 #use constant ROBINSON_X_CONSTANT => 0.6;
-#use constant ROBINSON_S_CONSTANT => 0.16;
-#use constant ROBINSON_MIN_PROB_STRENGTH => 0.43;
+#use constant ROBINSON_S_CONSTANT => 0.14;
+#use constant ROBINSON_MIN_PROB_STRENGTH => 0.352;
+
+# Precompute S * X
+use constant ROBINSON_S_TIMES_X => ROBINSON_S_CONSTANT * ROBINSON_X_CONSTANT;
 
 # How many of the most significant tokens should we use for the p(w)
 # calculation?

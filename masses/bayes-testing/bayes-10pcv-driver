@@ -52,7 +52,7 @@ cp ../rules/50*.cf $tmpdir/rules
 # tell SpamAssassin to use this path for DBs
 # TODO: for tests of these settings, read from a test-specific file
 echo "bayes_path $tmpdir/dbs/bayes
-bayes_use_chi2_combining 1
+bayes_use_chi2_combining 0
 bayes_expiry_use_scan_count 0
 bayes_expiry_scan_count 500
 " > $tmpdir/rules/30bayes_path.cf

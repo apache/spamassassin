@@ -527,9 +527,21 @@ describe T_LOTS_OF_STUFF         Thousands or millions of pics/movies/etc
 body     T_LOTS_OF_SPACE         /\bover\s+(?:\d{1,3}[,\.])*\d{3,}\s*(?:MB|GB)/i
 describe T_LOTS_OF_SPACE         Over XYZ MB/GB of junk
 
+# not sure about this - it could be a markup dropping from Eudora...
+# let's see what happens in the nightly run anyway.
+rawbody  T_X_HTML_TAG_FOUND	/<x-html>/
+describe T_X_HTML_TAG_FOUND	Found a non-standard tag ('x-html')
+
+# Dec  8 2002 jm: noticed this implied in passing in Dan's
+# CVS messages. ;)  no nonspam hits but only a small number of spam ones,
+# for me.
+header T_HTML_ALL_CAPS		Content-Type =~ /TEXT\/HTML/
+describe T_HTML_ALL_CAPS	Content type is "TEXT/HTML" in all caps
+
 full __CTYPE_HTML_ONLY	eval:check_for_text_html_only()
 meta T_CTYPE_JUST_HTML	( !__RCVD_BY_HOTMAIL && __CTYPE_HTML_ONLY )
 
 # version written using _check_attachments
 body __CTYPE_HTML_ONLY2	eval:check_for_mime_html_text_only()
 meta T_CTYPE_JUST_HTML2	( !__RCVD_BY_HOTMAIL && __CTYPE_HTML_ONLY2 )
+
