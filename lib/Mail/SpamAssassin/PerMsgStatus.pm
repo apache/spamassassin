@@ -496,7 +496,7 @@ Content-Transfer-Encoding: 7bit
 $report
 --$boundary
 Content-Type: message/rfc822
-Content-Description: original message
+Content-Description: spamassassin original message
 Content-Disposition: $disposition
 Content-Transfer-Encoding: 8bit
 
