@@ -755,12 +755,14 @@ sub _build_status_line {
     $line .= "\ttests=none\n";
   }
 
+  $line .= "\t";
   if ( defined $self->{auto_learn_status} ) {
-    $line .= "\tautolearn=";
+    $line .= "autolearn=";
     $line .= $self->{auto_learn_status} ? "spam" : "ham";
+    $line .= " ";
   }
 
-  $line .= "\tversion=" . Mail::SpamAssassin::Version();
+  $line .= "version=" . Mail::SpamAssassin::Version();
 
   # If the configuration says no folded headers, unfold what we have.
   if ( ! $self->{conf}->{fold_headers} ) {
