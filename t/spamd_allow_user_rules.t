@@ -2,7 +2,9 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_allow_user_rules");
-use Test; BEGIN { plan tests => 5 };
+use Test; BEGIN { plan tests => (!$SKIP_SPAMD_TESTS? 5 : 0) };
+
+exit if $SKIP_SPAMD_TESTS;
 
 # ---------------------------------------------------------------------------
 
@@ -20,8 +22,8 @@ tstlocalrules ("
 	allow_user_rules 1
 ");
 
-system ("rm -rf log/virtualconfig/testuser");
-system ("mkdir -p log/virtualconfig/testuser");
+rmtree ("log/virtualconfig/testuser", 0, 1);
+mkpath ("log/virtualconfig/testuser", 0, 0755);
 open (OUT, ">log/virtualconfig/testuser/user_prefs");
 print OUT "
 	header MYFOO Content-Transfer-Encoding =~ /quoted-printable/

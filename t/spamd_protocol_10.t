@@ -2,7 +2,9 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_protocol_10");
-use Test; BEGIN { plan tests => 10 };
+use Test; BEGIN { plan tests => (!$SKIP_SPAMD_TESTS? 10 : 0) };
+
+exit if $SKIP_SPAMD_TESTS;
 
 use File::Path;
 use IO::Socket;

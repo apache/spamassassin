@@ -2,7 +2,9 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_maxchildren");
-use Test; BEGIN { plan tests => 22 };
+use Test; BEGIN { plan tests => (!$SKIP_SPAMD_TESTS? 22 : 0) };
+
+exit if $SKIP_SPAMD_TESTS;
 
 # ---------------------------------------------------------------------------
 

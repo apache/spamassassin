@@ -2,7 +2,9 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_stop");
-use Test; BEGIN { plan tests => 2 };
+use Test; BEGIN { plan tests => (!$SKIP_SPAMD_TESTS? 2 : 0) };
+
+exit if $SKIP_SPAMD_TESTS;
 
 # ---------------------------------------------------------------------------
 

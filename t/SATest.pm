@@ -1,6 +1,5 @@
 # common functionality for tests.
 # imported into main for ease of use.
-
 package main;
 
 use Cwd;
@@ -8,6 +7,16 @@ use Config;
 use File::Path;
 use File::Copy;
 use File::Basename;
+
+
+BEGIN {
+  # No spamd test in Windows unless env override says user figured out a way
+  # If you want to know why these are vars and no constants, read this thread:
+  #   <http://www.mail-archive.com/dev%40perl.apache.org/msg05466.html>
+  #  -- mss, 2004-01-13
+  our $RUNNING_ON_WINDOWS = ($^O =~ /^(mswin|dos|os2)/oi);
+  our $SKIP_SPAMD_TESTS   = ($RUNNING_ON_WINDOWS && !$ENV{'SPAMD_SCRIPT'}); 
+}
 
 # Set up for testing. Exports (as global vars):
 # out: $home: $HOME env variable
@@ -230,6 +239,10 @@ sub sdrun {
 sub start_spamd {
   my $sdargs = shift;
 
+  if ($SKIP_SPAMD_TESTS) {
+    warn "spamd tests cannot be run on this platform\n";
+    return;
+  }
   return if (defined($spamd_pid) && $spamd_pid > 0);
 
   rmtree ("log/outputdir.tmp"); # some tests use this
@@ -251,7 +264,7 @@ sub start_spamd {
   {
     $spamdargs = "$spamd -D $sdargs";
   }
-  $spamdargs =~ s!/!\\!g if ($^O =~ /^MS(DOS|Win)/i);
+  $spamdargs =~ tr,/,\\, if $RUNNING_ON_WINDOWS;
 
   if ($set_test_prefs) {
     warn "oops! SATest.pm: a test prefs file was created, but spamd isn't reading it\n";

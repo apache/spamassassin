@@ -2,7 +2,9 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_port");
-use Test; BEGIN { plan tests => 4 };
+use Test; BEGIN { plan tests => (!$SKIP_SPAMD_TESTS? 4 : 0) };
+
+exit if $SKIP_SPAMD_TESTS;
 
 # ---------------------------------------------------------------------------
 
