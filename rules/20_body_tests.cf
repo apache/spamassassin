@@ -643,3 +643,6 @@ describe PENNIES_A_DAY          Contains 'for only pennies a day'
 body FOR_JUST_SOME_AMT          /for (?:just|only) \$?\d+\.?\d*[^\.]*!/i
 describe FOR_JUST_SOME_AMT      Contains 'for only' some amount of cash
 
+# suggestion following Jason Haar
+body MIME_NULL_BLOCK		/This message is in MIME format/
+describe MIME_NULL_BLOCK	Correct for MIME 'null block'
