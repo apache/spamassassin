@@ -1,20 +1,20 @@
 #!/usr/bin/perl -w
 
-# Locate locally installed SA libraries.
 use File::Spec;
-BEGIN {
-  # Keep FindBin from croak()ing on STDERR and confusing MTAs.
-  {
-    local *STDERR;
-    open(STDERR, '>' . File::Spec->devnull()) || die $!;
-    require FindBin;
-  }
 
+BEGIN {
+  # Locate locally installed SA libraries *without* using FindBin, which generates
+  # warnings and causes more trouble than its worth.  We don't need to be too
+  # smart about this BTW.
+  my $bin = $0;
+  if ($bin =~ /[\/\\]/) {
+    $bin =~ s,[\/\\][^\/\\]+$,,gs;      # /home/jm/foo -> /home/jm
+  } else {
+    $bin = ".";                         # foo -> .
+  }
   # These are common paths where the SA libs might be found.
   foreach (qw(lib ../lib ../lib/site_perl ../lib/spamassassin ../share/spamassassin/lib)) {
-    # Note: FindBin returns '/' if it had problems recursing through the paths.
-    # But disallowing '/' might break chrooted systems.
-    my $dir = File::Spec->catdir($FindBin::Bin, split('/', $_));
+    my $dir = File::Spec->catdir($bin, split('/', $_));
     if(-f File::Spec->catfile($dir, "Mail", "SpamAssassin.pm")) {
       unshift(@INC, $dir);
       last;
