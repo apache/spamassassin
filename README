@@ -11,38 +11,39 @@ officially support perl versions earlier than perl 5.6.0.  If you are
 using an earlier release, you will need to upgrade when SpamAssassin 2.70
 is eventually released.
 
-Users of SpamAssassin versions earlier than 2.50 should note that the
-default tagging behavior has changed.  If an incoming message is tagged as
-spam, instead of modifying the original message, SpamAssassin will create a
-new report message and attach the original message as a message/rfc822 MIME
-part (ensuring the original message is completely preserved and easier to
-recover).  If you do not want to modify the body of incoming spam, use the
-"report_safe" option.
-
-The "report_header" and "defang_mime" options are also deprecated as a
-result.  Read the docs for "report_safe" for details.
+Users of SpamAssassin versions earlier than 2.50 should note that
+the default tagging behavior has changed.  If an incoming message is
+tagged as spam, instead of modifying the original message, SpamAssassin
+will create a new report message and attach the original message as a
+message/rfc822 MIME part (ensuring the original message is completely
+preserved and easier to recover).  If you do not want to modify the body
+of incoming spam, use the "report_safe" option.  The "report_header"
+and "defang_mime" options have been removed as a result.
 
 Please note that the use of the following commandline parameters for
-spamassassin and spamd have been deprecated!  They will still work in
-the 2.6x series (a warning will be displayed), but they will be removed
-in the next major release.  If you currently use these flags, please
-remove them.  The flags are: --add-from, --pipe, -F, -P
+spamassassin and spamd were deprecated in the 2.6x series and are
+now removed!  If you currently use these flags, please remove them.
+The flags are: --add-from, --pipe, -F, -P, --stop-at-threshold, -S.
 
-SpamAssassin now runs in "taint mode" by default for improved
-security.  If you want to enable usage of Razor v2, you will need to be
-using v2.40 of razor-agents or higher which fixes taint issues in previous
-versions.
+The following flags are deprecated and will be removed in the next major
+release: --whitelist-factory, -M, --auto-whitelist, -a, --warning-from,
+-w, --log-to-mbox, -l.
 
-The 2.6x series has a new Bayes backend and database format (since 2.5x).
-Your old database(s) will automatically be upgraded the first time
-SpamAssassin tries to write to the DB, and any journal, if it exists,
-will be wiped out without being synced.  Please see the INSTALL document
-for more details.
+SpamAssassin runs in "taint mode" by default for improved security.
+Certain third-party modules, such as Razor v2, may be incompatible with
+taint mode.  For Razor v2, you will need to be using v2.40 of razor-agents
+or higher which allows taint mode by default.  Earlier versions which are
+patched to allow taint mode may be used as well.
 
-Finally, the "check_bayes_db" script has been deprecated and will no
-longer function properly with 2.6x series databases.  The functionality
-from that script was added to sa-learn via the "--dump" parameter.
-Please see the sa-learn man/pod documentation for more info.
+If you are upgrading from a 2.5x series version of SpamAssassin, please
+note that there is a new Bayes backend and database format.  Your old
+database(s) will automatically be upgraded the first time SpamAssassin
+tries to write to the DB, and any journal, if it exists, will be wiped out
+without being synced.  Please see the INSTALL document for more details.
+
+Finally, 2.6x deprecated the use of the "check_bayes_db" script, and it
+is now no longer available.  Please see the sa-learn man/pod documentation
+for more info.
 
 
 Welcome to SpamAssassin!
