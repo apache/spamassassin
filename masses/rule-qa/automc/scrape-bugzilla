@@ -1,8 +1,14 @@
 #!/usr/bin/perl -w
 
-our $ALLOWED_NEEDSMCERS = qr/
+our $ALLOWED_NEEDSMCERS = qr/^
         jm\@jmason\.org
-    /ix;
+        |quinlan\@pathname\.com
+        |felicity\@kluge\.net
+        |parkerm\@pobox\.com
+        |duncf\@debian\.org
+        |spamassassin-contrib\@msquadrat\.de
+        |sidney\@sidney\.com
+    $/ix;
 
 use URI::Escape;
 use XML::Simple;
