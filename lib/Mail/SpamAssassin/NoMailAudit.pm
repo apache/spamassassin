@@ -167,10 +167,14 @@ sub _get_header_list {
   return @entries;
 }
 
-sub get_header {
-  my ($self, $hdr, $unfold) = @_;
+sub get_pristine_header {
+  my ($self, $hdr) = @_;
+  $self->{headers_pristine} =~ /^$hdr:\s+(.*\n(?:\s+.*\n)*)/mi;
+  return ( $1 || $self->get_header($hdr) );
+}
 
-  $unfold = 1 unless defined $unfold;
+sub get_header {
+  my ($self, $hdr) = @_;
 
   # And now pick up all the entries into a list
   my @entries = $self->_get_header_list($hdr);
@@ -181,10 +185,8 @@ sub get_header {
       foreach my $entry (@entries) {
 	  if($entry->{count} > 0) {
 	    my $ret = $entry->{0};
-	    if ( $unfold ) {
-              $ret =~ s/^\s+//;
-              $ret =~ s/\n\s+/ /g;
-	    }
+            $ret =~ s/^\s+//;
+            $ret =~ s/\n\s+/ /g;
 	    return $ret;
 	  }
       }
@@ -200,10 +202,8 @@ sub get_header {
       {
 	  foreach my $i (0 .. ($entry->{count}-1)) {
 		my $ret = $entry->{$i};
-		if ( $unfold ) {
-                  $ret =~ s/^\s+//;
-                  $ret =~ s/\n\s+/ /g;
-		}
+                $ret =~ s/^\s+//;
+                $ret =~ s/\n\s+/ /g;
 	  	push (@ret, $ret);
           }
       }

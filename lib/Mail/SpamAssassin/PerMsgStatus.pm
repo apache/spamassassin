@@ -539,12 +539,14 @@ sub rewrite_as_spam {
   # the SpamAssassin report
   my $report = $self->{report};
 
-  # get original headers
-  my $from = $self->{msg}->get_header("From", 0);
-  my $to = $self->{msg}->get_header("To", 0);
-  my $cc = $self->{msg}->get_header("Cc", 0);
-  my $subject = $self->{msg}->get_header("Subject", 0);
-  my $msgid = $self->{msg}->get_header('Message-Id', 0);
+  # get original headers, "pristine" if we can do it
+  my $from = $self->{msg}->get_pristine_header("From");
+  my $to = $self->{msg}->get_pristine_header("To");
+  my $cc = $self->{msg}->get_pristine_header("Cc");
+  my $subject = $self->{msg}->get_pristine_header("Subject");
+  my $msgid = $self->{msg}->get_pristine_header('Message-Id');
+  my $date = $self->{msg}->get_pristine_header("Date");
+
   if ($self->{conf}->{rewrite_subject}) {
     $subject ||= '';
     my $tag = $self->{conf}->{subject_tag};
@@ -553,7 +555,6 @@ sub rewrite_as_spam {
     $subject =~ s/^(?:\Q${tag}\E |)/${tag} /g;
     $subject =~ s/\n*$/\n/s;
   }
-  my $date = $self->{msg}->get_header("Date");
 
   # add report headers to message
   $newmsg .= "From: $from" if $from;
