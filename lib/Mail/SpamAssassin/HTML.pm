@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.40 2002/11/27 23:42:08 jmason Exp $
+# $Id: HTML.pm,v 1.41 2002/12/08 03:18:57 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -169,25 +169,15 @@ sub html_tests {
   if ($tag eq "script") {
     $self->{html}{javascript} = 1;
   }
-  ### START TEST CODE
   if ($tag =~ /^(?:a|body|div|input|form|td|layer|area|img)$/i) {
     for (keys %$attr) {
       if (/\b$events\b/io)
       {
-	$self->{html}{t_html_event} = 1;
+	$self->{html}{html_event} = 1;
       }
       if (/\bon(?:blur|contextmenu|focus|load|resize|submit|unload)\b/i)
       {
-	$self->{html}{t_html_event_unsafe} = 1;
-      }
-    }
-  }
-  ### END TEST CODE
-  if ($tag =~ /^(?:a|body|div|input|form|td|layer|area|img)$/) {
-    for (keys %$attr) {
-      if (/\bon(?:blur|contextmenu|focus|load|resize|submit|unload)\b/i)
-      {
-	$self->{html}{javascript_very_unsafe} = 1;
+	$self->{html}{html_event_unsafe} = 1;
         if ($attr->{$_} =~ /\.open\s*\(/) { $self->{html}{window_open} = 1; }
         if ($attr->{$_} =~ /\.blur\s*\(/) { $self->{html}{window_blur} = 1; }
         if ($attr->{$_} =~ /\.focus\s*\(/) { $self->{html}{window_focus} = 1; }
@@ -299,26 +289,6 @@ sub html_tests {
   if ($tag eq "form" && exists $attr->{action}) {
     $self->{html}{form_action_mailto} = 1 if $attr->{action} =~ /mailto:/i
   }
-  # TESTING: input form tests
-  if ($tag eq "input") {
-    if (exists $attr->{type} && $attr->{type} =~ /hidden/i)
-    {
-      if ((exists $attr->{name} &&
-	   $attr->{name} =~ /(?:mail|recipient|from)/i) ||
-	  (exists $attr->{value} &&
-	   $attr->{value} =~ /(?:\S+\@\S+|remove|subscrib|unsub)/i))
-      {
-	$self->{html}{t_form_hidden_email1} = 1;
-      }
-      if ((exists $attr->{name} &&
-	   $attr->{name} =~ /(?:mail|recipient|from)/i) &&
-	  (exists $attr->{value} &&
-	   $attr->{value} =~ /\S+\@\S+/))
-      {
-	$self->{html}{t_form_hidden_email2} = 2;
-      }
-    }
-  }
   if ($tag =~ /^i?frame$/) {
     $self->{html}{relaying_frame} = 1;
   }
@@ -350,16 +320,14 @@ sub html_text {
 
   if (exists $self->{html_inside}{script} && $self->{html_inside}{script} > 0)
   {
-    ### TEST CODE
     if ($text =~ /\b($events)\b/io)
     {
-      $self->{html}{t_html_event} = 1;
+      $self->{html}{html_event} = 1;
     }
-    if ($text =~ /\bon(?:blur|contextmenu|focus|load|resize|submit|unload)\b/)
+    if ($text =~ /\bon(?:blur|contextmenu|focus|load|resize|submit|unload)\b/i)
     {
-      $self->{html}{t_html_event_unsafe} = 1;
+      $self->{html}{html_event_unsafe} = 1;
     }
-    ### END TEST CODE
     if ($text =~ /\.open\s*\(/) { $self->{html}{window_open} = 1; }
     if ($text =~ /\.blur\s*\(/) { $self->{html}{window_blur} = 1; }
     if ($text =~ /\.focus\s*\(/) { $self->{html}{window_focus} = 1; }
@@ -399,16 +367,14 @@ sub html_comment {
 
   if (exists $self->{html_inside}{script} && $self->{html_inside}{script} > 0)
   {
-    ### TEST CODE
     if ($text =~ /\b($events)\b/io)
     {
-      $self->{html}{t_html_event} = 1;
+      $self->{html}{html_event} = 1;
     }
-    if ($text =~ /\bon(?:blur|contextmenu|focus|load|resize|submit|unload)\b/)
+    if ($text =~ /\bon(?:blur|contextmenu|focus|load|resize|submit|unload)\b/i)
     {
-      $self->{html}{t_html_event_unsafe} = 1;
+      $self->{html}{html_event_unsafe} = 1;
     }
-    ### END TEST CODE
     if ($text =~ /\.open\s*\(/) { $self->{html}{window_open} = 1; }
     if ($text =~ /\.blur\s*\(/) { $self->{html}{window_blur} = 1; }
     if ($text =~ /\.focus\s*\(/) { $self->{html}{window_focus} = 1; }
