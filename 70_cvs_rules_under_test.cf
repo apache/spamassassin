@@ -591,7 +591,7 @@ body     T_HTML_LINK_UNSUB      eval:html_eval('anchor_text', '=~/unsubscribe/i'
 #
 # T_TOO_MANY_UA uses "regexp and operator": all of the tests matching
 # regexp /USER_AGENT.*/ will be strung together with "+" between them.
-#meta T_TOO_MANY_UA	( (USER_AGENT.+ +) > 1) 
+#meta T_TOO_MANY_UA	( (USER_AGENT.+ +) > 1)
 #meta T_UA_AND_XM	( USER_AGENT && __HAS_X_MAILER )
 #
 # quinlan: these might work better, but I have no hits (they should be
@@ -725,6 +725,53 @@ header __USER_AGENT               exists:User-Agent
 meta T_USER_AGENT		( __USER_AGENT && ((USER_AGENT.+ +) < 1) )
 tflags T_USER_AGENT               nice
 
+##############################################################################
+# bug 1163: image only test from mgm
+
+body T_HTML_TAG_EXISTS_IMG	eval:html_tag_exists('img')
+uri T_IMAGE_URI			/\.(?:gif|jpe?g|png)$/i
+
+body T_HAS_TEXT_A100		/.{100}/i
+body T_HAS_TEXT_A120		/.{120}/i
+body T_HAS_TEXT_A140		/.{140}/i
+body T_HAS_TEXT_B100		/(?:\S\s*){100}/i
+body T_HAS_TEXT_B120		/(?:\S\s*){120}/i
+body T_HAS_TEXT_B140		/(?:\S\s*){140}/i
+
+# test a few variations -- which one will survive?
+#
+# T_IMAGE_ONLY_01 is very close to the original rule as submitted
+
+meta T_IMAGE_ONLY_00	(T_HTML_TAG_EXISTS_IMG && !T_HAS_TEXT_A100)
+meta T_IMAGE_ONLY_01	(T_HTML_TAG_EXISTS_IMG && !T_HAS_TEXT_A120)
+meta T_IMAGE_ONLY_02	(T_HTML_TAG_EXISTS_IMG && !T_HAS_TEXT_A140)
+meta T_IMAGE_ONLY_03	(T_HTML_TAG_EXISTS_IMG && !T_HAS_TEXT_B100)
+meta T_IMAGE_ONLY_04	(T_HTML_TAG_EXISTS_IMG && !T_HAS_TEXT_B120)
+meta T_IMAGE_ONLY_05	(T_HTML_TAG_EXISTS_IMG && !T_HAS_TEXT_B140)
+#
+meta T_IMAGE_ONLY_06	((T_IMAGE_URI && T_HTML_MESSAGE) && !T_HAS_TEXT_A100)
+meta T_IMAGE_ONLY_07	((T_IMAGE_URI && T_HTML_MESSAGE) && !T_HAS_TEXT_A120)
+meta T_IMAGE_ONLY_08	((T_IMAGE_URI && T_HTML_MESSAGE) && !T_HAS_TEXT_A140)
+meta T_IMAGE_ONLY_09	((T_IMAGE_URI && T_HTML_MESSAGE) && !T_HAS_TEXT_B100)
+meta T_IMAGE_ONLY_10	((T_IMAGE_URI && T_HTML_MESSAGE) && !T_HAS_TEXT_B120)
+meta T_IMAGE_ONLY_11	((T_IMAGE_URI && T_HTML_MESSAGE) && !T_HAS_TEXT_B140)
+#
+meta T_IMAGE_ONLY_12	((T_HTML_TAG_EXISTS_IMG || (T_IMAGE_URI && T_HTML_MESSAGE)) && !T_HAS_TEXT_A100)
+meta T_IMAGE_ONLY_13	((T_HTML_TAG_EXISTS_IMG || (T_IMAGE_URI && T_HTML_MESSAGE)) && !T_HAS_TEXT_A120)
+meta T_IMAGE_ONLY_14	((T_HTML_TAG_EXISTS_IMG || (T_IMAGE_URI && T_HTML_MESSAGE)) && !T_HAS_TEXT_A140)
+meta T_IMAGE_ONLY_15	((T_HTML_TAG_EXISTS_IMG || (T_IMAGE_URI && T_HTML_MESSAGE)) && !T_HAS_TEXT_B100)
+meta T_IMAGE_ONLY_16	((T_HTML_TAG_EXISTS_IMG || (T_IMAGE_URI && T_HTML_MESSAGE)) && !T_HAS_TEXT_B120)
+meta T_IMAGE_ONLY_17	((T_HTML_TAG_EXISTS_IMG || (T_IMAGE_URI && T_HTML_MESSAGE)) && !T_HAS_TEXT_B140)
+#
+meta T_IMAGE_ONLY_18	(T_HTML_TAG_EXISTS_IMG && T_IMAGE_URI && T_HTML_MESSAGE && !T_HAS_TEXT_A100)
+meta T_IMAGE_ONLY_19	(T_HTML_TAG_EXISTS_IMG && T_IMAGE_URI && T_HTML_MESSAGE && !T_HAS_TEXT_A120)
+meta T_IMAGE_ONLY_20	(T_HTML_TAG_EXISTS_IMG && T_IMAGE_URI && T_HTML_MESSAGE && !T_HAS_TEXT_A140)
+meta T_IMAGE_ONLY_21	(T_HTML_TAG_EXISTS_IMG && T_IMAGE_URI && T_HTML_MESSAGE && !T_HAS_TEXT_B100)
+meta T_IMAGE_ONLY_22	(T_HTML_TAG_EXISTS_IMG && T_IMAGE_URI && T_HTML_MESSAGE && !T_HAS_TEXT_B120)
+meta T_IMAGE_ONLY_23	(T_HTML_TAG_EXISTS_IMG && T_IMAGE_URI && T_HTML_MESSAGE && !T_HAS_TEXT_B140)
+
+##############################################################################
+
 # This looks for those "-approved-!" type subjects.  works well for me. - tvd
 # updated to find 'approval!' as well.
 #  0.511   1.3455   0.0000    1.00    1.00    0.01  T_SUBJECT_APPROVED2
@@ -734,3 +781,4 @@ header T_SUBJECT_APPROVED      Subject =~ /approv(?:ed|al).?[.!*]/i
 # 0.211   0.5428   0.0072    0.99    1.00    0.01  T_EXCUSE_11
 # 0.004   0.0000   0.0072    0.00    0.00    1.00  EXCUSE_11
 body T_EXCUSE_11 /you.{0,15}(?:name|mail).{0,15}(?:was|were|our).{0,15}list/i
+
