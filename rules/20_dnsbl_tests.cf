@@ -160,6 +160,11 @@ header RCVD_IN_RFCI		rbleval:check_rbl_txt('rfci', 'ipwhois.rfc-ignorant.org.')
 describe RCVD_IN_RFCI		Received via a relay in ipwhois.rfc-ignorant.org
 tflags RCVD_IN_RFCI             net
 
+# DSN is a domain-based blacklist
+header DNS_FROM_RFCI_DSN	rbleval:check_rbl_from_host('rfci-dsn', 'dsn.rfc-ignorant.org.')
+describe DNS_FROM_RFCI_DSN	From: sender is listed in dsn.rfc-ignorant.org
+tflags DNS_FROM_RFCI_DSN	net
+
 header HABEAS_VIOLATOR		rbleval:check_rbl_swe('hil', 'hil.habeas.com.')
 describe HABEAS_VIOLATOR	Has Habeas warrant mark and on Infringer List
 tflags HABEAS_VIOLATOR		net
