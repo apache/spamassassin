@@ -2,7 +2,7 @@
 
 outdir=/home/jm/spamassassin.taint.org/qa/freqs
 
-cd /home/jm/ftp/spamassassin/masses
+cd /home/jm/ftp/240/spamassassin/masses
 
 (
 echo "STARTING AT"; date
@@ -24,8 +24,8 @@ cp $tmp/dprof.{spam,nonspam} $nowdir
 
 # add sonic data
 son=spamassassin.sonic.net
-rsync -vrze ssh $son:ftp/spamassassin/masses/spam.sonic spam.sonic
-rsync -vrze ssh $son:ftp/spamassassin/masses/nonspam.sonic nonspam.sonic
+rsync -vrze ssh $son:ftp/240/spamassassin/masses/spam.sonic spam.sonic
+rsync -vrze ssh $son:ftp/240/spamassassin/masses/nonspam.sonic nonspam.sonic
 
 cat spam.sonic spam.local > spam.log
 cat nonspam.sonic nonspam.local > nonspam.log
