@@ -1,4 +1,4 @@
-=head1 NAME
+=head1 NON-PUBLIC CLASS NAME
 
 Mail::SpamAssassin::ExposedMessage - interface to Mail::Audit message text,
 for Mail::Audit versions up to 1.9.

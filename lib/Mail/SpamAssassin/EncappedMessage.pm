@@ -1,4 +1,4 @@
-=head1 NAME
+=head1 NON-PUBLIC CLASS NAME
 
 Mail::SpamAssassin::EncappedMessage - interface to Mail::Audit message text,
 for versions of Mail::Audit with methods to encapsulate the message text
