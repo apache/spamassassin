@@ -8,8 +8,6 @@ exit if $SKIP_SPAMD_TESTS;
 
 use File::Path;
 use IO::Socket;
-use Mail::SpamAssassin::PerMsgStatus;
-use Mail::SpamAssassin::Conf;
 
 # ---------------------------------------------------------------------------
 
