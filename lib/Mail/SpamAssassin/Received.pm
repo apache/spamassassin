@@ -1,4 +1,4 @@
-# $Id: Received.pm,v 1.10 2003/04/08 19:03:59 jmason Exp $
+# $Id: Received.pm,v 1.11 2003/04/10 21:43:14 jmason Exp $
 
 # ---------------------------------------------------------------------------
 
@@ -220,6 +220,18 @@ sub parse_received_line {
       $rdns = $1; $ip = $2; $by = $4;
       my $sub = ' '.$3.' ';
       if ($sub =~ / helo=(\S+) /) { $helo = $1; }
+      goto enough;
+    }
+
+    # from 12-211-5-69.client.attbi.com (<unknown.domain>[12.211.5.69]) by rwcrmhc53.attbi.com (rwcrmhc53) with SMTP id <2002112823351305300akl1ue>; Thu, 28 Nov 2002 23:35:13 +0000
+    if (/^from (\S+) \(<unknown\S*>\[(${IP_ADDRESS})\]\) by (\S+) /) {
+      $helo = $1; $ip = $2; $by = $3;
+      goto enough;
+    }
+
+    # from attbi.com (h000502e08144.ne.client2.attbi.com[24.128.27.103]) by rwcrmhc53.attbi.com (rwcrmhc53) with SMTP id <20030222193438053008f7tee>; Sat, 22 Feb 2003 19:34:39 +0000
+    if (/^from (\S+) \((\S+\.\S+)\[(${IP_ADDRESS})\]\) by (\S+) /) {
+      $helo = $1; $rdns = $2; $ip = $3; $by = $4;
       goto enough;
     }
 

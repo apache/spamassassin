@@ -2810,8 +2810,24 @@ sub check_for_mizspeeling_ratware {
   return 1;
 }
 
+sub sent_by_applemail {
+  my ($self) = @_;
+
+  return 0 unless ($self->get ("MIME-Version") =~ /Apple Message framework/);
+  return 0 unless ($self->get ("X-Mailer") =~ /^Apple Mail \(\d+\.\d+\)/);
+  return 0 unless ($self->get ("Message-Id") =~
+				/^<[A-F0-9]+(?:-[A-F0-9]+){4}\@\S+.\S+>$/);
+  return 1;
+}
+
 sub check_for_rdns_helo_mismatch {	# T_FAKE_HELO_*
   my ($self, $rdns, $helo) = @_;
+
+  # oh for ghod's sake.  Apple's Mail.app HELO's as the right-hand
+  # side of the From address.  So "HELO jmason.org" in my case.
+  # This is (obviously) considered forgery, since it's exactly
+  # what ratware does too.
+  return 0 if $self->sent_by_applemail();
 
   my $firstuntrusted = 1;
   foreach my $relay (@{$self->{relays_untrusted}}) {
