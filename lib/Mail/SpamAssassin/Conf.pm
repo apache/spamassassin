@@ -1605,7 +1605,13 @@ sub add_test {
   if ($name eq '.') { $name = ($self->{_unnamed_counter}++); }
   $self->{tests}->{$name} = $text;
   $self->{test_types}->{$name} = $type;
-  $self->{scores}->{$name} ||= 1.0;
+
+  # T_ rules (in a testing probationary period) get low, low scores
+  if ($name =~ /^T_/) {
+    $self->{scores}->{$name} ||= 0.01;
+  } else {
+    $self->{scores}->{$name} ||= 1.0;
+  }
 }
 
 sub add_regression_test {
