@@ -12,7 +12,8 @@ use Getopt::Long;
 use Pod::Usage;
 
 use vars qw(
-  $spamtest %opt $isspam $forget $messagecount $messagelimit
+  $spamtest %opt $isspam $forget
+  $messagecount $learnedcount $messagelimit
   $rebuildonly $learnprob @targets $bayes_override_path
 );
 
@@ -201,6 +202,7 @@ sub cmdline_run {
 
     $iter->set_functions(\&wanted, sub { });
     $messagecount = 0;
+    $learnedcount = 0;
 
     eval {
       $iter->run (@targets);
@@ -208,7 +210,7 @@ sub cmdline_run {
     if ($@) { die $@ unless ($@ =~ /HITLIMIT/); }
 
     print STDERR "\n" if ($opt{showdots});
-    print "Learned from $messagecount messages.\n";
+    print "Learned from $learnedcount messages ($messagecount messages examined).\n";
   };
 
   if ($@) {
@@ -247,9 +249,10 @@ sub wanted {
     }
   }
 
-  if (defined($messagelimit) && $messagecount > $messagelimit)
+  if (defined($messagelimit) && $learnedcount > $messagelimit)
 					{ die 'HITLIMIT'; }
 
+  $messagecount++;
   my $ma = Mail::SpamAssassin::NoMailAudit->new ('data' => $dataref);
 
   if ($ma->get ("X-Spam-Status")) {
@@ -263,7 +266,7 @@ sub wanted {
   my $status = $spamtest->learn ($ma, $id, $isspam, $forget);
 
   if ($status->did_learn()) {
-    $messagecount++;
+    $learnedcount++;
   }
 
   $status->finish();
