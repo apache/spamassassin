@@ -55,8 +55,8 @@ foreach my $symbol ($sa->{conf}->regression_tests()) {
 
 	my $mail;
 
-        if ($test_type == Mail::SpamAssassin::Conf::TYPE_HEAD_TESTS ||
-            $test_type == Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS)
+        if ($test_type == $Mail::SpamAssassin::Conf::TYPE_HEAD_TESTS ||
+            $test_type == $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS)
         {
   	    my $test_string;
 	    # Look through all of the priorities until we find our test
