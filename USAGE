@@ -113,25 +113,21 @@ The Auto-Whitelist
 ------------------
 
 The auto-whitelist is enabled using the -a flag to spamassassin or spamd.  
-
-The algorithm works using a database of entries. Each entry has a key formed by
-the From: address of the mail, and the IP address it originated at, and
-contains a TOTAL score and a COUNT number. The MEAN score is TOTAL/COUNT. The
-current algorithm works as follows:
-
-   1. Compute the SCORE of the message without AWL (auto-whitelist)
-   2. Compute AWL DELTA as (MEAN-SCORE)*auto_whitelist_factor
-   3. Increment TOTAL by SCORE
-   4. Increment COUNT by one
-   5. Set the final score of the message to SCORE+DELTA
-
-auto_whitelist_factor can be tweaked in the configuration, and you
-may find this useful when starting off.  The contents of the database
-can be examined using the program 'tools/check_whitelist'.
+See http://wiki.spamassassin.org/w/AutoWhitelist for details on how it
+works, if you're curious.
 
 
 Other Installation Notes
 ------------------------
+
+  
+  - Hashcash is a useful system; it requires that senders exercise a
+    CPU-intensive task before they can send mail to you, so we give that
+    some bonus points.  However, it requires that you list what addresses
+    you expect to receive mail from, by adding 'hashcash_accept' lines to
+    your ~/.spamassassin/user_prefs or /etc/mail/spamassassin/local.cf
+    files.  See the Mail::SpamAssassin::Conf manual page for details on
+    how to specify these.
 
 
   - SpamAssassin now uses a temporary file in /tmp (or $TMPDIR, if that's
@@ -182,6 +178,9 @@ Other Installation Notes
 
       report_safe_copy_headers X-MDRcpt-To X-MDRemoteIP X-MDaemon-Deliver-To
 
+    Otherwise, MDaemon's internal delivery will fail when SpamAssassin
+    rewrites a message as spam.
+
 
   - The distribution includes 'spamd', a daemonized version of the
     perl script, and 'spamc', a low-overhead C client for this,
@@ -229,7 +228,8 @@ Other Installation Notes
     
     Mails sent to an address at the spamtraps domain are fed into the
     SpamAssassin.org spam-trapping system, where they will then be
-    virus-scanned, de-duplicated, and fed into Razor, DCC, Pyzor and OPM.
+    virus-scanned, de-duplicated, and fed into various scanning and
+    spam-blocking systems, including some blocklists.
 
     Some notes: I monitor the quality of feeds coming into this, and if it
     turns out to contain occasional bits of non-spam mail, I'll start
@@ -241,7 +241,7 @@ Other Installation Notes
     attachments with no Content-Transfer-Encoding.  Again, if they're not,
     I'll 550 them.  And finally, if I can't figure out who's in control of
     the feed, you guessed it, 550.  So try to keep the quality control
-    up!
+    up! ;)
 
 
   - Scores and other user preferences can now be loaded from an SQL
@@ -249,8 +249,8 @@ Other Installation Notes
 
 
   - Edward Fang <edfang /at/ visi.net> has contributed the
-    'communigate.sh' script for CommunigatePro (available from
-    http://SpamAssassin.org/released/contrib/ ).
+    'communigate.sh' script for CommunigatePro, available from
+    http://SpamAssassin.org/released/contrib/ .
 
 
   - James Henstridge <james /at/ daa.com.au> has contributed an LMTP proxy
@@ -260,7 +260,7 @@ Other Installation Notes
 
 
   - Lots more ways to integrate SpamAssassin can be read at
-    http://news.SpamAssassin.org/ .
+    http://news.SpamAssassin.org/ and http://wiki.SpamAssassin.org/ .
 
 
 (end of USAGE)

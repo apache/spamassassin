@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.645 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.646 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -251,4 +251,30 @@ body T_RANDO_MIZE		/\$RAN[DOMI]*\s+[DOMI]*ZE/
 
 # yet another open Yahoo! redirector
 uri T_YAHOO_REDIR		/^http:\/\/srd\.yahoo\.com\//i
+
+header T_HASHCASH_20		eval:check_hashcash_value('20', '21')
+header T_HASHCASH_21		eval:check_hashcash_value('21', '22')
+header T_HASHCASH_22		eval:check_hashcash_value('22', '23')
+header T_HASHCASH_23		eval:check_hashcash_value('23', '24')
+header T_HASHCASH_24		eval:check_hashcash_value('24', '25')
+header T_HASHCASH_25		eval:check_hashcash_value('25', '26')
+header T_HASHCASH_26		eval:check_hashcash_value('26', '9999')
+tflags T_HASHCASH_20		nice
+tflags T_HASHCASH_21		nice
+tflags T_HASHCASH_22		nice
+tflags T_HASHCASH_23		nice
+tflags T_HASHCASH_24		nice
+tflags T_HASHCASH_25		nice
+tflags T_HASHCASH_26		nice
+score T_HASHCASH_20		-0.5
+score T_HASHCASH_21		-0.7
+score T_HASHCASH_22		-1.0
+score T_HASHCASH_23		-2.0
+score T_HASHCASH_24		-3.0
+score T_HASHCASH_25		-4.0
+score T_HASHCASH_26		-5.0
+
+header T_HASHCASH_2SPEND	eval:check_hashcash_double_spend()
+describe T_HASHCASH_2SPEND	HashCash token already spent in another mail
+score T_HASHCASH_2SPEND		0.1
 
