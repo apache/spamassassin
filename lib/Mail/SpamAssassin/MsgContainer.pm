@@ -303,17 +303,10 @@ sub rendered {
 	$self->{html_results}{t_bad_tag_unique_ratio} = ($self->{html_results}{tags_seen} - $self->{html_results}{elements_seen}) / $self->{html_results}{tags_seen};
 	$self->{html_results}{t_bad_tag_unique_count} = ($self->{html_results}{tags_seen} - $self->{html_results}{elements_seen});
       }
-      if (exists $self->{html_results}{tags}) {
-	$self->{html_results}{t_obfu_nspc_ratio} = $self->{html_results}{t_obfu_nspc} / $self->{html_results}{tags} if defined $self->{html_results}{t_obfu_nspc};
-	$self->{html_results}{t_obfu_word_ratio} = $self->{html_results}{t_obfu_word} / $self->{html_results}{tags} if defined $self->{html_results}{t_obfu_word};
-	$self->{html_results}{t_obfu_nfmt_ratio} = $self->{html_results}{t_obfu_nfmt} / $self->{html_results}{tags} if defined $self->{html_results}{t_obfu_nfmt};
-	$self->{html_results}{t_obfu_wfmt_ratio} = $self->{html_results}{t_obfu_wfmt} / $self->{html_results}{tags} if defined $self->{html_results}{t_obfu_wfmt};
-      }
-      if (exists $self->{html_results}{t_obfu_word} && exists $self->{html_results}{t_nonobfu_word}) {
-	$self->{html_results}{t_obfu_word2_ratio} = $self->{html_results}{t_obfu_word} / ($self->{html_results}{t_obfu_word} + $self->{html_results}{t_nonobfu_word});
-      }
-      if (exists $self->{html_results}{t_obfu_nspc} && exists $self->{html_results}{t_nonobfu_nspc}) {
-	$self->{html_results}{t_obfu_nspc2_ratio} = $self->{html_results}{t_obfu_nspc} / ($self->{html_results}{t_obfu_nspc} + $self->{html_results}{t_nonobfu_nspc});
+      if (exists $self->{html_results}{tags} &&
+	  exists $self->{html_results}{obfuscation})
+      {
+	$self->{html_results}{obfuscation_ratio} = $self->{html_results}{obfuscation} / $self->{html_results}{tags};
       }
     }
     else {

@@ -693,20 +693,11 @@ sub html_text {
   $text =~ s/^\n//s if $self->{html_last_tag} eq "br";
 
   if (defined $self->{html_text}[-1]) {
-    my $before = $self->{html_text}[-1];
-    if ($before =~ /\S$/s && $text =~ /^\S/s) {
-      $self->{html}{t_obfu_nspc}++;
-      $self->{html}{t_obfu_nfmt}++ if $self->{html_last_tag} !~ /^(?:strong|b|em|font|a|u|span|sup|i)/;
-    }
-    else {
-      $self->{html}{t_nonobfu_nspc}++;
-    }
-    if ($before =~ /\w$/s && $text =~ /^\w/s) {
-      $self->{html}{t_obfu_word}++;
-      $self->{html}{t_obfu_wfmt}++ if $self->{html_last_tag} !~ /^(?:strong|b|em|font|a|u|span|sup|i)/;
-    }
-    else {
-      $self->{html}{t_nonobfu_word}++;
+    # ideas discarded since they would be easy to evade:
+    # 1. using \w instead of \S
+    # 2. exempting certain tags
+    if ($self->{html_text}[-1] =~ /\S$/s && $text =~ /^\S/s) {
+      $self->{html}{obfuscation}++;
     }
   }
 
