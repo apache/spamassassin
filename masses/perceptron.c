@@ -95,11 +95,12 @@ void init_wheel () {
 		 * most important to classify correctly.  They are thus replicated in the
 		 * training set proportionally to their difficulty. */
 		if ( ! is_spam[i] ) {
-			slot_size += (int)(num_tests_hit[i] * ham_preference);
+			slot_size += (int)(num_tests_hit[i] * ham_preference * tests_count[i]);
+		} else {
+			slot_size = tests_count[i];
 		}
 
 		/* The database is compressed with all instances mapped in the same place. */
-		slot_size *= tests_count[i];
 		wheel_size += slot_size;
 
 		if ( ! is_spam[i] ) {
