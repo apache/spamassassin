@@ -1059,6 +1059,45 @@ sub compute_prob_for_token {
   return $prob;
 }
 
+###########################################################################
+# If a token is neither hammy nor spammy, return 0.
+# For a spammy token, return the minimum number of additional ham messages
+# it would have had to appear in to no longer be spammy.  Hammy tokens
+# are handled similarly.  That's what the function does (at the time
+# of this writing, 31 July 2003, 16:02:55 CDT).  It would be slightly
+# more useful if it returned the number of /additional/ ham messages
+# a spammy token would have to appear in to no longer be spammy but I
+# fear that might require the solution to a cubic equation, and I
+# just don't have the time for that now.
+
+sub compute_declassification_distance {
+  my ($self, $Ns, $Nn, $ns, $nn, $prob) = @_;
+
+  return 0 if $ns == 0 && $nn == 0;
+
+  if (!USE_ROBINSON_FX_EQUATION_FOR_LOW_FREQS) {return 0 if ($ns + $nn < 10);}
+  if (!$self->{use_hapaxes}) {return 0 if ($ns + $nn < 2);}
+
+  return 0 if $Ns == 0 || $Nn == 0;
+  return 0 if abs( $prob - 0.5 ) < $self->{robinson_min_prob_strength};
+
+  my ($Na,$na,$Nb,$nb) = $prob > 0.5 ? ($Nn,$nn,$Ns,$ns) : ($Ns,$ns,$Nn,$nn);
+  my $p = 0.5 - $self->{robinson_min_prob_strength};
+
+  return int( 1.0 - 1e-6 + $nb * $Na * $p / ($Nb * ( 1 - $p )) ) - $na
+    unless USE_ROBINSON_FX_EQUATION_FOR_LOW_FREQS;
+
+  my $s = $self->{robinson_s_constant};
+  my $sx = $self->{robinson_s_times_x};
+  my $a = $Nb * ( 1 - $p );
+  my $b = $Nb * ( $sx + $nb * ( 1 - $p ) - $p * $s ) - $p * $Na * $nb;
+  my $c = $Na * $nb * ( $sx - $p * ( $s + $nb ) );
+
+  return int( 1.0 - 1e-6 + ( -$b + sqrt( $b * $b - 4 * $a * $c ) ) / ( 2 * $a ) )
+    - $na;
+}
+
+
 # Check to make sure we can tie() the DB, and we have enough entries to do a scan
 sub is_scan_available {
   my $self = shift;
@@ -1105,15 +1144,18 @@ sub scan {
 
   my $msgdata = $self->get_msgdata_from_permsgstatus ($permsgstatus);
 
+  my $pw;
+  my @tokens = $self->tokenize ($msg, $msgdata);
+
   # Figure out our probabilities for the message tokens
   my %pw = map {
-      my $pw = $self->compute_prob_for_token ($_, $ns, $nn);
+      $pw = $self->compute_prob_for_token ($_, $ns, $nn);
       if (!defined $pw) {
 	();		# exit map()
       } else {
 	($_ => $pw);
       }
-  } $self->tokenize ($msg, $msgdata);
+  } @tokens;
 
   # If none of the tokens were found in the DB, we're going to skip
   # this message...
@@ -1121,6 +1163,9 @@ sub scan {
     dbg ("cannot use bayes on this message; none of the tokens were found in the database");
     goto skip;
   }
+
+  my $tcount_total = @tokens;
+  my $tcount_learned = keys %pw;
 
   # Figure out the message receive time (used as atime below)
   # If the message atime comes back as being in the future, something's
@@ -1134,6 +1179,10 @@ sub scan {
   my $count = N_SIGNIFICANT_TOKENS;
   my @sorted = ();
 
+  my ($tcount_spammy,$tcount_hammy) = (0,0);
+  my $tinfo_spammy = $permsgstatus->{bayes_token_info_spammy} = [];
+  my $tinfo_hammy = $permsgstatus->{bayes_token_info_hammy} = [];
+
   for (sort {
               abs($pw{$b} - 0.5) <=> abs($pw{$a} - 0.5)
             } keys %pw)
@@ -1141,6 +1190,15 @@ sub scan {
     if ($count-- < 0) { last; }
     my $pw = $pw{$_};
     next if (abs($pw - 0.5) < $self->{robinson_min_prob_strength});
+
+    # What's more expensive, scanning headers for HAMMYTOKENS and
+    # SPAMMYTOKENS tags that aren't there or collecting data that
+    # won't be used?  Just collecting the data is certainly simpler.
+    #
+    my ($s, $n, $a) = $self->{store}->tok_get ($_);
+    push @$tinfo_spammy, [$_,$pw,$s,$n,$a] if $pw >= 0.5 && ++$tcount_spammy;
+    push @$tinfo_hammy,  [$_,$pw,$s,$n,$a] if $pw <  0.5 && ++$tcount_hammy;
+
     push (@sorted, $pw);
 
     # update the atime on this token, it proved useful
@@ -1167,6 +1225,9 @@ sub scan {
 
   dbg ("bayes: score = $score");
 
+  $permsgstatus->{bayes_nspam} = $ns;
+  $permsgstatus->{bayes_nham} = $nn;
+
   if ($self->{log_raw_counts}) {
     print "#Bayes-Raw-Counts: $self->{raw_counts}\n";
   }
@@ -1179,6 +1240,11 @@ skip:
   $self->{store}->cleanup();
   $self->opportunistic_calls();
   $self->{store}->untie_db();
+
+  $permsgstatus->{tag_data}{BAYESTCHAMMY} = $tcount_hammy;
+  $permsgstatus->{tag_data}{BAYESTCSPAMMY} = $tcount_spammy;
+  $permsgstatus->{tag_data}{BAYESTCLEARNED} = $tcount_learned;
+  $permsgstatus->{tag_data}{BAYESTC} = $tcount_total;
 
   return $score;
 }

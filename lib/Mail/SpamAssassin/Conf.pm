@@ -70,6 +70,13 @@ optional, and the default is shown below.
  _SUBVERSION_      sub-version/code revision date (eg. 2004-01-10)
  _HOSTNAME_        hostname
  _BAYES_           bayes score
+ _TOKENSUMMARY_    number of new, neutral, spammy, and hammy tokens found
+ _BAYESTC_         number of new tokens found
+ _BAYESTCLEARNED_  number of seen tokens found
+ _BAYESTCSPAMMY_   number of spammy tokens found
+ _BAYESTCHAMMY_    number of hammy tokens found
+ _HAMMYTOKENS(N)_  the N most significant hammy tokens (default, 5)
+ _SPAMMYTOKENS(N)_ the N most significant spammy tokens (default, 5)
  _AWL_             AWL modifier
  _DATE_            rfc-2822 date of scan
  _STARS(*)_        one * (use any character) for each score point (note: this
@@ -89,6 +96,70 @@ optional, and the default is shown below.
  _REPORT_          terse report of tests hit (for header reports)
  _SUMMARY_         summary of tests hit for standard report (for body reports)
  _CONTACTADDRESS_  contents of the 'report_contact' setting
+
+The C<HAMMYTOKENS> and C<SPAMMYTOKENS> tags have an optional second argument
+which specifies a format: C<_SPAMMYTOKENS(N,FMT)_>, C<_HAMMYTOKENS(N,FMT)_>
+The following formats are available:
+
+=over 4
+
+=item short
+
+Only the tokens themselves are listed.
+I<For example, preference file entry:>
+
+C<add_header all Spammy _SPAMMYTOKENS(2,short)_>
+
+I<Results in message header:>
+
+C<X-Spam-Spammy: remove.php, UD:jpg>
+
+Indicating that the top two spammy tokens found are C<remove.php>
+and C<UD:jpg>.  (The token itself follows the last colon, the
+text before the colon indicates something about the token.
+C<UD> means the token looks like it might be part of a domain name.)
+
+=item compact
+
+The token probability, an abbreviated declassification distance (see
+example), and the token are listed.
+I<For example, preference file entry:>
+
+C<add_header all Spammy _SPAMMYTOKENS(2,compact)_>
+
+I<Results in message header:>
+
+C<0.989-6--remove.php, 0.988-+--UD:jpg>
+
+Indicating that the probabilities of the top two tokens are 0.989 and
+0.988, respectively.  The first token has a declassification distance
+of 6, meaning that if the token had appeared in at least 6 more ham
+messages it would not be considered spammy.  The C<+> for the second
+token indicates a declassification distance greater than 9.
+
+=item long
+
+Probability, declassification distance, number of times seen in a ham
+message, number of times seen in a spam message, age and the token are
+listed.
+
+I<For example, preference file entry:>
+
+C<add_header all Spammy _SPAMMYTOKENS(2,long)_>
+
+I<Results in message header:>
+
+C<X-Spam-Spammy: 0.989-6--0h-4s--4d--remove.php, 0.988-33--2h-25s--1d--UD:jpg>
+
+In addition to the information provided by the compact option,
+the long option shows that the first token appeared in zero
+ham messages and four spam messages, and that it was last
+seen four days ago.  The second token appeared in two ham messages,
+25 spam messages and was last seen one day ago.
+(Unlike the C<compact> option, the long option shows declassification
+distances that are greater than 9.)
+
+=back
 
 =head1 USER PREFERENCES
 

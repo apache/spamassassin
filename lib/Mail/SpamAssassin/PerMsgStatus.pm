@@ -869,6 +869,54 @@ sub _replace_tags {
   return $text;
 }
 
+sub bayes_report_make_list {
+  my $self = shift;
+  my $info = shift;
+  my $param = shift || "5";
+  my ($limit,$fmt_arg,$more) = split /,/, $param;
+
+  return "Tokens not available." unless defined $info;
+
+  my %formats =
+    ( short => '$t',
+      Short => 'Token: \"$t\"',
+      compact => '$p-$D--$t',
+      Compact => 'Probability $p -declassification distance $D (\"+\" means > 9) --token: \"$t\"',
+      medium => '$p-$D-$N--$t',
+      long => '$p-$d--${h}h-${s}s--${a}d--$t',
+      Long => 'Probability $p -declassification distance $D --in ${h} ham messages -and ${s} spam messages --$a} days old--token:\"$t\"'
+                );
+
+  my $allow_user_defined = 0;
+  my $raw_fmt =   !$fmt_arg ? '$p-$D--$t'
+                : $allow_user_defined && $fmt_arg =~ m/^\"([^"]+)\"/ ? $1
+                : $formats{$fmt_arg};
+
+  return "Invalid format, must be one of: ".join(",",keys %formats)
+    unless defined $raw_fmt;
+
+  my $fmt = '"'.$raw_fmt.'"';
+  my $amt = $limit < @$info ? $limit : @$info;
+  return "" unless $amt;
+
+  my $Bayes = $self->{main}{bayes_scanner};
+  my $ns = $self->{bayes_nspam};
+  my $nh = $self->{bayes_nham};
+  my $digit = sub { $_[0] > 9 ? "+" : $_[0] };
+  my $now = time;
+
+  join ', ', map {
+    my($t,$prob,$s,$h,$u) = @$_;
+    my $a = int(($now - $u)/(3600 * 24));
+    my $d = $Bayes->compute_declassification_distance($ns,$nh,$s,$h,$prob);
+    my $p = sprintf "%.3f", $prob;
+    my $n = $s + $h;
+    my ($c,$o) = $prob < 0.5 ? ($h,$s) : ($s,$h);
+    my ($D,$S,$H,$C,$O,$N) = map &$digit($_), ($d,$s,$h,$c,$o,$n);
+    eval $fmt;
+  } @{$info}[0..$amt-1];
+}
+
 sub _get_tag_value_for_yesno {
   my $self   = shift;
   
@@ -922,6 +970,33 @@ sub _get_tag {
             BAYES => sub {
               defined($self->{bayes_score}) ?
                         sprintf("%3.4f", $self->{bayes_score}) : "0.5"
+            },
+
+            HAMMYTOKENS => sub {
+              $self->bayes_report_make_list
+                ( $self->{bayes_token_info_hammy}, shift );
+            },
+
+            SPAMMYTOKENS => sub {
+              $self->bayes_report_make_list
+                ( $self->{bayes_token_info_spammy}, shift );
+            },
+
+            TOKENSUMMARY => sub {
+              if( defined $self->{tag_data}{BAYESTC} )
+                {
+                  my $tcount_neutral = $self->{tag_data}{BAYESTCLEARNED}
+                    - $self->{tag_data}{BAYESTCSPAMMY}
+                    - $self->{tag_data}{BAYESTCHAMMY};
+                  my $tcount_new = $self->{tag_data}{BAYESTC}
+                    - $self->{tag_data}{BAYESTCLEARNED};
+                  "Tokens: new, $tcount_new; "
+                    ."hammy, $self->{tag_data}{BAYESTCHAMMY}; "
+                    ."neutral, $tcount_neutral; "
+                    ."spammy, $self->{tag_data}{BAYESTCSPAMMY}."
+                } else {
+                  "Bayes not run.";
+                }
             },
 
             DATE => \&Mail::SpamAssassin::Util::time_to_rfc822_date,
