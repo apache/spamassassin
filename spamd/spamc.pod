@@ -7,7 +7,7 @@ spamc - client for spamd
 
 =over
 
-=item spamc [-d host] [-p port] [-h] [-f]
+=item spamc [-d host] [-p port] [-u username] [-h] [-f]
 
 =back
 
@@ -37,6 +37,10 @@ Print this help message and terminate without action
 =item B<-p> I<port>
 
 Connect to spamd server listening on given port
+
+=item B<-u> I<username>
+
+Have spamd read the config file for the given username to be added to the default configuration
 
 =back
 

@@ -21,6 +21,8 @@ my $spamtest = Mail::SpamAssassin->new({
   #	local_tests_only=>1
   dont_copy_prefs => 1
 });
+$spamtest->init();
+
 
 my %resphash = (
     EX_OK => 0,
@@ -88,8 +90,29 @@ for ( $waitedpid = 0;
 	# First request line off stream
         $_ = <STDIN>;
 	chomp;
-        if(/PROCESS SPAMC\/1\.0/)
+        if(/PROCESS SPAMC\/(.*)/)
 	{
+	    my $version = $1;
+	    if($version > 1.0)
+	    {
+		while(1)
+		{
+		    $_ = <STDIN>;
+		    if(/^\r\n/) { last; }
+		    if(/^User: (.*)\r\n/)
+		    {
+			my $username = $1;
+			my @pw = getpwnam($username);
+			my $dir = $pw[7];
+			if(-f "$dir/.spamassassin.cf")
+			{
+			    open (PREFS,"<$dir/.spamassassin.cf");
+			    $spamtest->{conf}->parse_rules(join('',<PREFS>));
+			    close(PREFS);
+			}
+		    }
+		}
+	    }
 	    my $resp = "EX_OK";
 	    # Now read in message
 	    my $mail = Mail::Audit->new();

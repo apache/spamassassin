@@ -31,10 +31,11 @@ int SAFE_FALLBACK=0;
 
 void print_usage(void)
 {
-  printf("Usage: spamc [-d host] [-p port] [-f] [-h]\n");
+  printf("Usage: spamc [-d host] [-p port] [-f] [-u user] [-h]\n");
   printf("-d host: specify host to connect to  [default: localhost]\n");
   printf("-p port: specify port for connection [default: 22874]\n");
   printf("-f: fallback safely - in case of comms error, dump original message unchanges instead of setting exitcode\n");
+  printf("-u user: specify username for spamd to use in loading per-user config options\n");
   printf("-h: print this help message\n");
 }
 
@@ -54,12 +55,19 @@ int dump_message(int in,int out)
   return (0==bytes)?EX_OK:EX_IOERR;
 }
 
-int send_message(int in,int out)
+int send_message(int in,int out,char *username)
 {
   size_t bytes;
   char buf[8192];
 
-  bytes = snprintf(buf,8192,"PROCESS SPAMC/1.0\r\n");
+  if(NULL != username)
+  {
+    bytes = snprintf(buf,8192,"PROCESS SPAMC/1.1\r\nUser: %s\r\n\r\n",username);
+  }
+  else
+  {
+    bytes = snprintf(buf,8192,"PROCESS SPAMC/1.1\r\n\r\n");
+  }
 
   do
   {
@@ -200,7 +208,7 @@ try_to_connect (const struct sockaddr *addr, int *sockptr)
   return EX_OK;
 }
 
-int process_message(const char *hostname, int port)
+int process_message(const char *hostname, int port, char *username)
 {
   int exstatus;
   int mysock;
@@ -240,7 +248,7 @@ int process_message(const char *hostname, int port)
   exstatus = try_to_connect ((const struct sockaddr *) &addr, &mysock);
   if (0 == exstatus)
   {
-    exstatus = send_message(STDIN_FILENO,mysock);
+    exstatus = send_message(STDIN_FILENO,mysock,username);
     if (0 == exstatus)
     {
       exstatus = read_message(mysock,STDOUT_FILENO);
@@ -254,11 +262,11 @@ int process_message(const char *hostname, int port)
   return exstatus;	/* return the last failure code */
 }
 
-void read_args(int argc, char **argv, char **hostname, int *port)
+void read_args(int argc, char **argv, char **hostname, int *port, char **username)
 {
   int opt;
 
-  while(-1 != (opt = getopt(argc,argv,"d:p:hf")))
+  while(-1 != (opt = getopt(argc,argv,"d:p:u:hf")))
   {
     switch(opt)
     {
@@ -270,6 +278,11 @@ void read_args(int argc, char **argv, char **hostname, int *port)
     case 'p':
       {
 	*port = atoi(optarg);
+	break;
+      }
+    case 'u':
+      {
+	*username = optarg;
 	break;
       }
     case 'f':
@@ -294,11 +307,12 @@ int main(int argc,char **argv)
 {
   int port = 22874;
   char *hostname = "127.0.0.1";
+  char *username = NULL;
 
   srand(time(NULL));
   openlog ("spamc", LOG_CONS|LOG_PID, LOG_MAIL);
 
-  read_args(argc,argv,&hostname,&port);
-    
-  return process_message(hostname,port);
+  read_args(argc,argv,&hostname,&port,&username);
+
+  return process_message(hostname,port,username);
 }
