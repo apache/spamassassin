@@ -3,7 +3,6 @@
 # 50 * * * * /home/jm/ftp/spamassassin/build/gen_freqs_from_nightly_mc
 
 outdir=/home/jm/spamassassin.taint.org/qa/freqs
-
 cd /home/jm/ftp/spamassassin/masses
 
 (
@@ -18,40 +17,68 @@ export RSYNC_PASSWORD
 mkdir all-results >/dev/null 2>&1
 rsync -vrz $RSYNC_USERNAME@belphegore.hughes-family.org::corpus/. all-results
 
-# now grep out the ones built today, and put copies into "uptodate"
+
+# now grep out the ones built today, and put copies into "fresh".
+# copy both today and y'day into "mixed"
 today=`date +"%b %e"`   # "Oct 17"
 yday=`date +"%b %e" --date='yesterday'`   # "Oct 16"
 
-rm -rf uptodate; mkdir uptodate >/dev/null 2>&1
-rm -rf timestamps; mkdir timestamps >/dev/null 2>&1
+rm -rf fresh; mkdir fresh >/dev/null 2>&1
+rm -rf mixed; mkdir mixed >/dev/null 2>&1
+rm -rf freshstamps; mkdir freshstamps >/dev/null 2>&1
+rm -rf mixedstamps; mkdir mixedstamps >/dev/null 2>&1
 for f in all-results/*.log ; do
-  if grep "mass-check results from" $f | egrep "$today|$yday" > dates ; then
-    cp $f uptodate
-    sort dates | tail -1 > timestamps/`basename $f`
+  if grep "mass-check results from" $f | egrep "$today" > dates ; then
+    cp $f fresh
+    cp $f mixed
+    sort dates | tail -1 > tmp/x
+    cat tmp/x > freshstamps/`basename $f`
+    cat tmp/x > mixedstamps/`basename $f`
+  elif grep "mass-check results from" $f | egrep "$yday" > dates ; then
+    cp $f mixed
+    sort dates | tail -1 > mixedstamps/`basename $f`
   fi
 done
 
-cat uptodate/nonspam-*.log > nonspam.log
-cat uptodate/spam-*.log > spam.log
-make clean ; make freqs
 
+
+cat fresh/nonspam-*.log > nonspam.log
+cat fresh/spam-*.log > spam.log
+make clean ; make freqs
 echo "
 Last update: `date`
-Nonspam results used: `echo uptodate/nonspam*`
-Spam results used: `echo uptodate/spam*`
+Nonspam results used: `echo fresh/nonspam*`
+Spam results used: `echo fresh/spam*`
 
 `cat freqs`
 
 Timestamps from mass-check output used:
 
-`egrep . timestamps/*`
-" > $outdir/DETAILS
+`egrep . freshstamps/*`
+" > $outdir/DETAILS.today
+cp freqs $outdir/freqs.today
 
-cp freqs $outdir
 
-echo $outdir
-ls -l $outdir
 
+cat mixed/nonspam-*.log > nonspam.log
+cat mixed/spam-*.log > spam.log
+make clean ; make freqs
+echo "
+Last update: `date`
+Nonspam results used: `echo mixed/nonspam*`
+Spam results used: `echo mixed/spam*`
+
+`cat freqs`
+
+Timestamps from mass-check output used:
+
+`egrep . mixedstamps/*`
+" > $outdir/DETAILS.mixed
+cp freqs $outdir/freqs.mixed
+
+
+
+echo $outdir; ls -l $outdir
 echo "FINISHED AT"; date
 
 ) > nightly.log 2>&1
