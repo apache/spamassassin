@@ -162,6 +162,27 @@ skipped.
     Razor has a large number of dependencies on CPAN modules.  Feel free
     to skip installing it, if this makes you nervous; SpamAssassin will
     still work well without it.
+    
+
+  - DCC    http://www.rhyolite.com/anti-spam/dcc/
+
+    DCC (Distributed Checksum Clearinghouse) is a system similar to Razor.
+    It supports fuzzy checksums and therefore detects some more spams than
+    Razor does at the moment.
+
+    To install it, download
+    http://www.rhyolite.com/anti-spam/dcc/source/dcc-dccproc.tar.Z and
+    perform the following steps:
+
+    # tar xfvz dcc-dccproc.tar.Z
+    # cd dcc-dccproc-X.X.X
+    # ./configure && make && make install
+    # cdcc 'new map'
+    # cdcc 'add dcc.rhyolite.com'
+    # cdcc 'info'
+
+    The last command will give some output. One line of it should contain
+    something like "dcc.rhyolite.com,-     anon".
 
 
   - Mail::Audit, Mail::Internet, Net::SMTP	(from CPAN)
