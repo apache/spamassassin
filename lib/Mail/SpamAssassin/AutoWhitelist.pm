@@ -22,7 +22,7 @@ sub new {
     'main'		=> $main,
   };
 
-  $self->{threshold} = $main->{conf}->{auto_whitelist_threshold};
+  $self->{factor} = $main->{conf}->{auto_whitelist_factor};
 
   if (!defined $self->{main}->{pers_addr_list_factory}) {
     $self->{checker} = undef;
@@ -37,62 +37,66 @@ sub new {
 
 ###########################################################################
 
+=item $meanscore = awl->check_address($addr);
+
+This method will return the mean score of all messages associated with the
+given address, or undef if the address hasn't been seen before
+
+=cut
+
 sub check_address {
   my ($self, $addr) = @_;
 
   if (!defined $self->{checker}) {
-    return 0;		# no factory defined; we can't check
+    return undef;		# no factory defined; we can't check
   }
 
   $addr = lc $addr;
   $addr =~ s/[\000\;\'\"\!]/_/gs;	# paranoia
   $self->{entry} = $self->{checker}->get_addr_entry ($addr);
 
-  if ($self->{entry}->{count} >= $self->{threshold}) {
-    $self->{already_in_whitelist} = 1;
-    return 1;
-  } else {
-    return 0;
-  }
+  if($self->{entry}->{count} == 0) { return undef; }
+
+  return $self->{entry}->{totscore}/$self->{entry}->{count};
 }
 
 ###########################################################################
 
-sub increment_pass_accumulator {
-  my ($self) = @_;
+=item awl->add_score($score);
+
+This method will add the score to the current entry
+
+=cut
+
+sub add_score {
+  my ($self,$score) = @_;
 
   if (!defined $self->{checker}) {
-    return 0;		# no factory defined; we can't check
+    return undef;		# no factory defined; we can't check
   }
 
-  if (!$self->{already_in_whitelist}) {
-    $self->{checker}->increment_accumulator_for_entry ($self->{entry});
-
-  } elsif ($self->{entry}->{count} == $self->{threshold}) {
-    $self->{checker}->add_permanent_entry ($self->{entry});
-  }
+  $self->{checker}->add_score($self->{entry},$score);
 }
 
 ###########################################################################
+
+=item awl->add_known_good_address($addr);
+
+This method will add a score of -100 to the given address -- effectively
+"bootstrapping" the address as being one that should be whitelisted.
+
+=cut
 
 sub add_known_good_address {
   my ($self, $addr) = @_;
 
   if (!defined $self->{checker}) {
-    return 0;		# no factory defined; we can't check
+    return undef;		# no factory defined; we can't check
   }
 
-  # this could be short-circuited, but for now I can't see a need.
-  # other backend implementors can have a go, if they do.
-
-  $addr = lc $addr;
-  $addr =~ s/[\000\;\'\"\!]/_/gs;	# paranoia
   my $entry = $self->{checker}->get_addr_entry ($addr);
 
-  if ($entry->{count} < $self->{threshold}) {
-    $self->{checker}->add_permanent_entry ($entry);
-    return 1;
-  }
+  $self->{checker}->add_score($entry,-100);
 
   return 0;
 }
@@ -103,14 +107,9 @@ sub remove_address {
   my ($self, $addr) = @_;
 
   if (!defined $self->{checker}) {
-    return 0;		# no factory defined; we can't check
+    return undef;		# no factory defined; we can't check
   }
 
-  # this could be short-circuited, but for now I can't see a need.
-  # other backend implementors can have a go, if they do.
-
-  $addr = lc $addr;
-  $addr =~ s/[\000\;\'\"\!]/_/gs;	# paranoia
   my $entry = $self->{checker}->get_addr_entry ($addr);
 
   if ($entry->{count} > 0) {
@@ -126,10 +125,12 @@ sub remove_address {
 sub finish {
   my $self = shift;
 
-  if (!defined $self->{checker}) { return; }
+  if (!defined $self->{checker}) { return undef; }
   $self->{checker}->finish();
 }
 
 ###########################################################################
+
+sub dbg { Mail::SpamAssassin::dbg (@_); }
 
 1;

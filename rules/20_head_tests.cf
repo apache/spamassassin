@@ -103,9 +103,6 @@ describe X_PMFLAGS_PRESENT	Found an X-PMFLAGS: (all caps) header
 header X_UIDL_SPAMSIGN		X-UIDL =~ /[^\s\x21-\x7E]/
 describe X_UIDL_SPAMSIGN	X-UIDL: header contains invalid chars
 
-header A_FROM_IN_AUTO_WLIST	eval:check_for_auto_whitelist()
-describe A_FROM_IN_AUTO_WLIST	have seen non-spam mail from same From: address
-
 header NO_MX_FOR_FROM		eval:check_for_from_mx()
 describe NO_MX_FOR_FROM		No MX records for the From: domain
 

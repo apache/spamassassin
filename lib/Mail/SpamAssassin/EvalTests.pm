@@ -9,7 +9,6 @@ use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Dns;
 use Mail::SpamAssassin::Locales;
 use Mail::SpamAssassin::PhraseFreqs;
-use Mail::SpamAssassin::AutoWhitelist;
 use Time::Local;
 use strict;
 
@@ -574,24 +573,6 @@ sub check_for_spam_reply_to {
   if ($ratio1 > 2.0 && $ratio2 > 2.0 && $ratio3 > 2.0) { return 1; }
 
   return 0;
-}
-
-###########################################################################
-
-sub check_for_auto_whitelist {
-  my ($self) = @_;
-
-  my $addr = lc $self->get ('From:addr');
-  if ($addr !~ /\S/) { return 0; }
-
-  my $list = Mail::SpamAssassin::AutoWhitelist->new ($self->{main});
-  $self->{auto_whitelist} = $list;
-
-  if ($list->check_address ($addr)) {
-    return 1;
-  }
-
-  0;
 }
 
 ###########################################################################

@@ -440,21 +440,22 @@ these lines to your ~/.spamassassin.cf file:
 Automatic Whitelist System
 --------------------------
 
-SpamAssassin includes automatic whitelisting; if a mail sender sends 3
-mails which are not matched as spam, their address will be added to an
-automatic whitelist database.  This will mean that further mail from that
-address will never be tagged as spam, no matter how "spammish" it may
-appear.
+SpamAssassin includes automatic whitelisting; The current iteration is
+considerably more complex than the original version.  The way it works is
+by tracking for each sender address the average score of messages so far
+seen from there.  Then, it combines this long-term average score for the
+sender with the score for the particular message being evaluated, after
+all other rules have been applied.
 
-For command-line spamassassin users, this happens automatically.  'spamd'
-needs the '-a' command-line flag to do this.
+This functionality is off by default, and is enabled with the "-a" flag to
+either spamassassin or spamd.
 
 A system-wide auto-whitelist can be used, by setting the
 auto_whitelist_path and auto_whitelist_file_mode configuration commands
 appropriately, e.g.
 
     auto_whitelist_path        /var/spool/spamassassin/auto-whitelist
-    auto_whitelist_file_mode   0777
+    auto_whitelist_file_mode   0666
 
 The spamassassin -W and -R command line flags provide an API to add and
 remove entries 'manually', if you so desire.  They operate based on an
@@ -464,11 +465,9 @@ details.
 
 The default address-list implementation,
 Mail::SpamAssassin::DBBasedAddrList, uses Berkeley DB files to store the
-addresses.  If you are paranoid about concurrency issues, in a
-high-traffic setup, and/or using NFS, it may be safer to use the
-directory-based implementation -- Mail::SpamAssassin::DirBasedAddrList --
-which uses known-safe UNIX filesystem operations to implement this without
-the possibility of dangerous race conditions.
+addresses.  There may be synchronization issues with this implementation
+in an NFS environment.  Reasonable attempts have been made to ensure
+proper locking of the DB file, but it may yet be somewhat flakey.
 
 
 
