@@ -420,11 +420,11 @@ header T_MSGID_MULTIPLE_AT	MESSAGEID =~ /<[^>]*\@[^>]*\@/
 
 # okay formats
 # 12,8,8
-header __MSGID_DOLLARS_OK1	MESSAGEID =~ /^<[0-9a-f]{12}\$[0-9a-f]{8}\$[0-9a-f]{8}\@\S+>$/m
+header __MSGID_DOLLARS_OK0	MESSAGEID =~ /^<[0-9a-f]{12}\$[0-9a-f]{8}\$[0-9a-f]{8}\@\S+>$/m
 # 2 of 3: 12,8,8
-header __MSGID_DOLLARS_OK2	MESSAGEID =~ /^<[0-9a-f]{12}\$[0-9a-f]{8}\$[0-9a-f]+\@\S+>$/m
-header __MSGID_DOLLARS_OK3	MESSAGEID =~ /^<[0-9a-f]{12}\$[0-9a-f]+\$[0-9a-f]{8}\@\S+>$/m
-header __MSGID_DOLLARS_OK4	MESSAGEID =~ /^<[0-9a-f]+\$[0-9a-f]{12}\$[0-9a-f]{8}\@\S+>$/m
+header __MSGID_DOLLARS_OK1	MESSAGEID =~ /^<[0-9a-f]{12}\$[0-9a-f]{8}\$[0-9a-f]+\@\S+>$/m
+header __MSGID_DOLLARS_OK2	MESSAGEID =~ /^<[0-9a-f]{12}\$[0-9a-f]+\$[0-9a-f]{8}\@\S+>$/m
+header __MSGID_DOLLARS_OK3	MESSAGEID =~ /^<[0-9a-f]+\$[0-9a-f]{8}\$[0-9a-f]{8}\@\S+>$/m
 # 10-14,6-10,6-10
 header __MSGID_DOLLARS_OK4	MESSAGEID =~ /^<[0-9a-f]{10,14}\$[0-9a-f]{6,10}\$[0-9a-f]{6,10}\@\S+>$/m
 # 2 of 3: 10-14,6-10,6-10
@@ -445,7 +445,7 @@ header __MSGID_DOLLARS_BAD0	MESSAGEID =~ /^<\w{12}\$\w{8}\$\w{8}\@\S+>$/m
 # 2 of 3: 12,8,8
 header __MSGID_DOLLARS_BAD1	MESSAGEID =~ /^<\w{12}\$\w{8}\$\w+\@\S+>$/m
 header __MSGID_DOLLARS_BAD2	MESSAGEID =~ /^<\w{12}\$\w+\$\w{8}\@\S+>$/m
-header __MSGID_DOLLARS_BAD3	MESSAGEID =~ /^<\w+\$\w{12}\$\w{8}\@\S+>$/m
+header __MSGID_DOLLARS_BAD3	MESSAGEID =~ /^<\w+\$\w{8}\$\w{8}\@\S+>$/m
 # 10-14,6-10,6-10
 header __MSGID_DOLLARS_BAD4	MESSAGEID =~ /^<\w{10,14}\$\w{6,10}\$\w{6,10}\@\S+>$/m
 # 2 of 3: 10-14,6-10,6-10
@@ -461,7 +461,7 @@ header __MSGID_DOLLARS_BADC	MESSAGEID =~ /^<\w{6,}\$\w{4,}\$\w{4,}\@\S+>$/m
 header __MSGID_DOLLARS_BADD	MESSAGEID =~ /^<\w{8,}\$\w{6,}\$\w{6,}\@\S+>$/m
 
 # meta rules
-meta T_MSGID_DOLLARS_RND0	__MSGID_DOLLARS_BAD1 && !__MSGID_DOLLARS_OK1
+meta T_MSGID_DOLLARS_RND0	__MSGID_DOLLARS_BAD0 && !__MSGID_DOLLARS_OK0
 # 2 of 3: 12,8,8
 meta T_MSGID_DOLLARS_RND1	__MSGID_DOLLARS_BAD1 && !__MSGID_DOLLARS_OK1
 meta T_MSGID_DOLLARS_RND2	__MSGID_DOLLARS_BAD2 && !__MSGID_DOLLARS_OK2
