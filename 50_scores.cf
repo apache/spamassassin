@@ -478,8 +478,6 @@ score RATWARE_RCVD_LC_ESMTP 1.745 1.474 2.122 2.083
 score RATWARE_RCVD_PF 2.880 3.384 3.608 3.867
 score RATWARE_STORM_URI 1.920 1.518 2.405 2.295
 score RATWARE_ZERO_TZ 3.200 2.372 3.875 4.100
-score RAZOR2_CF_RANGE_51_100 0 1.485 0 0.056
-score RAZOR2_CHECK 0 0.150 0 1.511
 score RCVD_AM_PM 1.558 0.091 1.802 1.927
 score RCVD_BONUS_SPC_DATE 1.371 0.904 1.575 1.872
 score RCVD_BY_IP 0 0.024 0.051 0.067
@@ -699,6 +697,12 @@ score URIBL_SBL 0 0.629 0 0.996
 score URIBL_SC_SURBL 0 3.897 0 4.263
 score URIBL_WS_SURBL 0 0.539 0 1.462
 endif # Mail::SpamAssassin::Plugin::URIDNSBL
+
+# Razor2
+ifplugin Mail::SpamAssassin::Plugin::Razor2
+score RAZOR2_CF_RANGE_51_100 0 1.485 0 0.056
+score RAZOR2_CHECK 0 0.150 0 1.511
+endif # Mail::SpamAssassin::Plugin::Razor2
 
 # MAPS
 # MAPS is a commercial service.  If you pay for them, assign a score
