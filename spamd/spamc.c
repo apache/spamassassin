@@ -41,18 +41,18 @@
 
 int SAFE_FALLBACK=0;
 
-const int ESC_PASSTHROUGHRAW = 666;
+const int ESC_PASSTHROUGHRAW = EX__MAX+666;
 
 /* set EXPANSION_ALLOWANCE to something more than might be
    added to a message in X-headers and the report template */
-#define EXPANSION_ALLOWANCE 16384
+const int EXPANSION_ALLOWANCE = 16384;
 
 /* set NUM_CHECK_BYTES to number of bytes that have to match at beginning and end
    of the data streams before and after processing by spamd */
-#define NUM_CHECK_BYTES 32
+const int NUM_CHECK_BYTES = 32;
 
-char *msg_buf;
-int amount_read;
+/* Set the protocol version that this spamc speaks */
+const char *PROTOCOL_VERSION="SPAMC/1.2";
 
 void print_usage(void)
 {
@@ -80,31 +80,42 @@ int dump_message(int in,int out)
   return (0==bytes)?EX_OK:EX_IOERR;
 }
 
+/* This guy has to be global so that if comms fails, we can passthru the message raw */
+char *msg_buf = NULL;
+/* Keep track of how much is stored in this buffer in case of failure later */
+int amount_read = 0;
+
 int send_message(int in,int out,char *username, int max_size)
 {
-  size_t bytes;
+  char *header_buf = NULL;
+  size_t bytes,bytes2;
   int ret = EX_OK;
 
-  if(NULL != username)
-  {
-    bytes = snprintf(msg_buf,1024,"PROCESS SPAMC/1.1\r\nUser: %s\r\n\r\n",username);
-  }
-  else
-  {
-    bytes = snprintf(msg_buf,1024,"PROCESS SPAMC/1.1\r\n\r\n");
-  }
-
-  write(out,msg_buf,bytes);
 
   /* Ok, now we'll read the message into the buffer up to the limit */
   /* Hmm, wonder if this'll just work ;) */
   if((bytes = read(in,msg_buf,max_size+1024)) > max_size)
   {
-     /* Message is too big, so return so we can dump the message back out */
-     ret = ESC_PASSTHROUGHRAW;
+    /* Message is too big, so return so we can dump the message back out */
+    free(msg_buf);
+    ret = ESC_PASSTHROUGHRAW;
   } else
   {
-    /* entire message is now in the buffer so one write is all we need */
+    /* First send header */
+    if(NULL == (header_buf = malloc(1024))) return EX_OSERR;
+    if(NULL != username)
+    {
+      bytes2 = snprintf(header_buf,1024,"PROCESS %s\r\nUser: %s\r\nContent-length: %d\r\n\r\n",PROTOCOL_VERSION,username,bytes);
+    }
+    else
+    {
+      bytes2 = snprintf(header_buf,1024,"PROCESS %s\r\nContent-length: %d\r\n\r\n",PROTOCOL_VERSION,bytes);
+    }
+
+    write(out,header_buf,bytes2);
+
+    free(header_buf);
+
     write(out,msg_buf,bytes);
   }
 
@@ -116,90 +127,114 @@ int send_message(int in,int out,char *username, int max_size)
 int read_message(int in, int out, int max_size)
 {
   size_t bytes;
-  int flag=0;
+  int header_read=0;
   char buf[8192];
   float version;
   int response=EX_OK;
   char* out_buf;
   size_t out_index=0;
+  int expected_length=0;
 
   out_buf = malloc(max_size+EXPANSION_ALLOWANCE);
 
-
-  /* ch: Just call me Mr. Livingontheedge ;) fixed your bytes+1 kludge below too */
   for(bytes=0;bytes<8192;bytes++)
   {
     if(read(in,&buf[bytes],1) == 0) /* read header one byte at a time */
     {
       /* Read to end of message!  Must be because this is version <1.0 server */
-   memcpy(&out_buf[out_index], buf, bytes);
-   out_index += bytes;
-      break; /* if we break here, the while loop below will never be entered and we'll return properly */
+      /* No need to copy buf to out_buf here, because since header_read is unset that'll happen below */
+      break;
     }
+
     if('\n' == buf[bytes])
     {
       buf[bytes] = '\0';	/* terminate the string */
       if(2 != sscanf(buf,"SPAMD/%f %d %*s",&version,&response))
       {
 	syslog (LOG_ERR, "spamd responded with bad string '%s'", buf);
-	return EX_PROTOCOL;
+	response = EX_PROTOCOL; break;
       }
-      flag = -1; /* Set flag to show we found a header */
+      header_read = -1; /* Set flag to show we found a header */
       break;
     }
   }
-	
-  if(!flag)
+
+  if(!header_read && EX_OK == response)
   {
-    /* We never received a header, so it's a long message with version <1.0 server */
- memcpy(&out_buf[out_index], buf, bytes);
- out_index += bytes;
+    /* We never received a header, so it's a message with version <1.0 server */
+    memcpy(&out_buf[out_index], buf, bytes);
+    out_index += bytes;
     /* Now we'll fall into the while loop if there's more message left. */
+  }
+  else if(header_read && EX_OK == response)
+  {
+    /* Now if the header was 1.1, we need to pick up the content-length field */
+    if(version - 1.0 > 0.01) /* Do this for any version higher than 1.0 [and beware of float rounding errors]*/
+    {
+      for(bytes=0;bytes<8192;bytes++)
+      {
+	if(read(in,&buf[bytes],1) == 0) /* keep reading one byte at a time */
+	{
+	  /* Read to end of message, but shouldn't have! */
+	  response = EX_PROTOCOL; break;
+	}
+	if('\n' == buf[bytes])
+	{
+	  /* Ok, found a header line, it better be content-length */
+	  if(1 != sscanf(buf,"Content-length: %d",&expected_length))
+	  {
+	    /* Something's wrong, so bail */
+	    response = EX_PROTOCOL; break;
+	  }
+
+	  /* Ok, got here means we just read the content-length.  Now suck up the header/body separator.. */
+	  if(read(in,buf,2) != 2 || !('\r' == buf[0] && '\n' == buf[1]))
+	  {
+	    /* Oops, bail */
+	    response = EX_PROTOCOL; break;
+	  }
+
+	  /* header done being sucked, let's get out of this inner-for */
+	  break;
+	} /* if EOL */
+      } /* for loop to read subsequent header lines */
+    }
   }
 
   if(EX_OK == response)
   {
     while((bytes=read(in,buf,8192)) > 0)
     {
-   memcpy(&out_buf[out_index], buf, bytes);
-   out_index += bytes;
-   if (out_index >= max_size+EXPANSION_ALLOWANCE)
-   {
-    syslog (LOG_ERR, "spamd expanded message by more than %d bytes",
-                  EXPANSION_ALLOWANCE);
-    response = ESC_PASSTHROUGHRAW;
-    break;
+      if (out_index+bytes >= max_size+EXPANSION_ALLOWANCE)
+      {
+	syslog (LOG_ERR, "spamd expanded message to more than %d bytes",
+		max_size+EXPANSION_ALLOWANCE);
+	response = ESC_PASSTHROUGHRAW;
+	break;
+      }
+      memcpy(&out_buf[out_index], buf, bytes);
+      out_index += bytes;
     }
-  }
   }
 
   shutdown(in,SHUT_RD);
 
   if (EX_OK == response)
   {
-   /* Sanity check of results from spamd, which should */
-   /* preserve first and last n bytes of data */
-   /* Ideally don't compare more at the end than is is the original body, */
-   /* otherwise we'll be comparing header and/or spam report aded by spamd */
-   /* This code avoids searching for the start of the message body */
-   /* As a result messages shorter than the compare length are always */
-   /* passed through and not detected as spam */
-   if ((amount_read > 2*NUM_CHECK_BYTES) &&
-    (out_index > 2*NUM_CHECK_BYTES) &&
-    (memcmp(msg_buf, out_buf, NUM_CHECK_BYTES) == 0) &&
-    (memcmp(&msg_buf[amount_read - NUM_CHECK_BYTES],
-      &out_buf[out_index - NUM_CHECK_BYTES],
-      NUM_CHECK_BYTES) == 0))
-      {
-    write(out, out_buf, out_index);
-   } else
-   {
-    syslog (LOG_ERR, "failed sanity check, %d bytes in, %d bytes out",
-      amount_read, out_index);
-    response = ESC_PASSTHROUGHRAW;
-   }
-
+    /* Check the content length for sanity */
+    if(expected_length && expected_length != out_index)
+    {
+      syslog (LOG_ERR, "failed sanity check, %d bytes claimed, %d bytes seen",
+	      expected_length, out_index);
+      response = ESC_PASSTHROUGHRAW;
+    }
+    else
+    {
+      write(out, out_buf, out_index);
+    }
   }
+
+  free(out_buf);
 
   return response;
 }
@@ -306,7 +341,7 @@ int process_message(const char *hostname, int port, char *username, int max_size
     if (NULL == (hent = gethostbyname(hostname))) {
       origherr = h_errno;	/* take a copy before syslog() */
       syslog (LOG_ERR, "gethostbyname(%s) failed: h_errno=%d",
-		    hostname, origherr);
+	      hostname, origherr);
       switch(origherr)
       {
       case HOST_NOT_FOUND:
@@ -322,15 +357,17 @@ int process_message(const char *hostname, int port, char *username, int max_size
   }
 
   exstatus = try_to_connect ((const struct sockaddr *) &addr, &mysock);
-  if (0 == exstatus)
+  if (EX_OK == exstatus)
   {
-    msg_buf = malloc(max_size+1024);
+    if(NULL == (msg_buf = malloc(max_size+1024))) return EX_OSERR;
+
     exstatus = send_message(STDIN_FILENO,mysock,username,max_size);
-    if (0 == exstatus)
+    if (EX_OK == exstatus)
     {
       exstatus = read_message(mysock,STDOUT_FILENO,max_size);
     }
-    if(ESC_PASSTHROUGHRAW == exstatus)
+
+    if(ESC_PASSTHROUGHRAW == exstatus || (SAFE_FALLBACK && EX_OK != exstatus))
     {
       /* Message was too big or corrupted, so dump the buffer then bail */
       write(STDOUT_FILENO,msg_buf,amount_read);
@@ -339,8 +376,12 @@ int process_message(const char *hostname, int port, char *username, int max_size
     }
     free(msg_buf);
   }
-  else if(SAFE_FALLBACK) // If connection failed but SAFE_FALLBACK set then dump original message
+  else if(SAFE_FALLBACK) /* If connection failed but SAFE_FALLBACK set then dump original message */
   {
+    if(amount_read > 0)
+    {
+      write(STDOUT_FILENO,msg_buf,amount_read);
+    }
     return dump_message(STDIN_FILENO,STDOUT_FILENO);
   }
 
@@ -381,9 +422,9 @@ void read_args(int argc, char **argv, char **hostname, int *port, int *max_size)
 	break;
       }
     case '?': {
-	syslog (LOG_ERR, "invalid usage");
-	/* NOTE: falls through to usage case below... */
-      }
+      syslog (LOG_ERR, "invalid usage");
+      /* NOTE: falls through to usage case below... */
+    }
     case 'h':
       {
 	print_usage();

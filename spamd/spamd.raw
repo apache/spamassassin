@@ -212,6 +212,7 @@ for ( $waitedpid = 0;
         if(/PROCESS SPAMC\/(.*)/)
 	{
 	    my $version = $1;
+	    my $expected_length;
 	    if($version > 1.0)
 	    {
 		while(1)
@@ -225,6 +226,9 @@ for ( $waitedpid = 0;
                     if((/^User: (.*)\r\n/) && (! $opt_x)) {
 		        handle_user ($1);
                     }
+		    if((/^Content-length: ([0-9]*)\r\n/i)) {
+			$expected_length = $1;
+		    }
                 }	
 	    }
 
@@ -244,13 +248,31 @@ for ( $waitedpid = 0;
 	    # Now read in message
 	    my $mail = Mail::SpamAssassin::MyMailAudit->new();
 
+	    # Check length if we're supposed to
+	    if($expected_length)
+	    {
+		my $actual_length = length join '',$mail->header,"\n",@{$mail->body};
+		if($actual_length != $expected_length) { protocol_error ("(Content-length mismatch: $expected_length vs. $actual_length)"); return 1; }
+	    }
+
 	    # Now use copy-on-writed (hopefully) SA object
 	    my $status = $spamtest->check($mail);
 	    $status->rewrite_mail; #if $status->is_spam;
 
-	    print "SPAMD/1.0 $resphash{$resp} $resp\r\n",
-	    		$mail->header, "\n",
-			(join '',@{$mail->body});
+	    # Build the message to send back and measure it
+	    my $msg_resp = join '',$mail->header,"\n",@{$mail->body};
+	    my $msg_resp_length = length($msg_resp);
+	    if($version >= 1.2) # Spamc protocol 1.2 means it accepts content-length
+	    {
+		print "SPAMD/1.1 $resphash{$resp} $resp\r\n",
+		      "Content-length: $msg_resp_length\r\n\r\n",
+		      $msg_resp;
+	    }
+	    else # Earlier than 1.2 didn't accept content-length
+	    {
+		print "SPAMD/1.0 $resphash{$resp} $resp\r\n",
+		      $msg_resp;
+	    }
 
 	    logmsg "processed successfully for $current_user:$> in ".
 			 sprintf("%3d", time - $start) ." seconds.\n";
