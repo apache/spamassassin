@@ -55,7 +55,6 @@ lib/Mail/SpamAssassin/PerMsgStatus.pm
 lib/Mail/SpamAssassin/PersistentAddrList.pm
 lib/Mail/SpamAssassin/PhraseFreqs.pm
 lib/Mail/SpamAssassin/Received.pm
-lib/Mail/SpamAssassin/Replier.pm
 lib/Mail/SpamAssassin/Reporter.pm
 lib/Mail/SpamAssassin/SHA1.pm
 lib/Mail/SpamAssassin/TextCat.pm
@@ -123,14 +122,10 @@ rules/20_ratware.cf
 rules/20_uri_tests.cf
 rules/20_fake_helo_tests.cf
 rules/23_bayes.cf
-rules/25_body_tests_es.cf
 rules/25_body_tests_pl.cf
-rules/25_head_tests_es.cf
 rules/25_head_tests_pl.cf
 rules/30_text_de.cf
-rules/30_text_es.cf
 rules/30_text_fr.cf
-rules/30_text_pl.cf
 rules/50_scores.cf
 rules/60_whitelist.cf
 rules/STATISTICS-set1.txt
