@@ -8,6 +8,10 @@ require 5.005;
 # You can also override the automatic ./configure step by just
 # running that yourself first.
 #
+# The Razor prompts ("run Razor 1 tests?" and "run Razor 2 tests?"
+# can be overridden by setting RUN_RAZOR1_TESTS or RUN_RAZOR2_TESTS to
+# "y" or "n".
+#
 ###########################################################################
 
 use strict;
@@ -17,7 +21,8 @@ use ExtUtils::MakeMaker;
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'SYSCONFDIR'} = 1;
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'DEF_RULES_DIR'} = 1;
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'LOCAL_RULES_DIR'} = 1;
-
+$ExtUtils::MakeMaker::Recognized_Att_Keys{'RUN_RAZOR1_TESTS'} = 1;
+$ExtUtils::MakeMaker::Recognized_Att_Keys{'RUN_RAZOR2_TESTS'} = 1;
 
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
@@ -33,12 +38,16 @@ my %makefile = (
     'NAME'	=> 'Mail::SpamAssassin',
     'VERSION_FROM' => 'lib/Mail/SpamAssassin.pm', # finds $VERSION
 
-    'EXE_FILES'	=> [ 'spamassassin', 'spamd/spamc$(EXE_EXT)', 'spamd/spamd' ],
+    'EXE_FILES'	=> [ 'spamassassin', 'spamd/spamc$(EXE_EXT)', 'spamd/spamd',
+                'sa-learn-spam', 'sa-learn-nonspam', 'sa-forget' ],
 
     'MAN1PODS' => { 
         'spamassassin'    => '$(INST_MAN1DIR)/spamassassin.$(MAN1EXT)',
         'spamd/spamc.pod' => '$(INST_MAN1DIR)/spamc.$(MAN1EXT)',
         'spamd/spamd'     => '$(INST_MAN1DIR)/spamd.$(MAN1EXT)',
+        'sa-learn-spam'   => '$(INST_MAN1DIR)/sa-learn-spam.$(MAN1EXT)',
+        'sa-learn-nonspam' => '$(INST_MAN1DIR)/sa-learn-nonspam.$(MAN1EXT)',
+        'sa-forget'       => '$(INST_MAN1DIR)/sa-forget.$(MAN1EXT)',
     },
 
     'PL_FILES' => { },
@@ -69,7 +78,8 @@ my %makefile = (
 	      },
 
     'clean' => { FILES =>
-	'pod2htm* spamassassin spamd/spamc$(EXE_EXT) spamd/libspamc.so spamd/spamd doc '.
+	'pod2htm* spamassassin sa-learn-spam sa-learn-nonspam sa-forget '.
+        'spamd/spamc$(EXE_EXT) spamd/libspamc.so spamd/spamd doc '.
 	'binaries.mk config.h config.status config.cache config.log'
     },
 
@@ -95,18 +105,32 @@ unless($Config{installman1dir}) {
 WriteMakefile(%makefile);
 
 
+#######################################################################
+
 unlink('t/do_razor', 't/do_razor2');
-if (eval { require Razor::Client }) {
-  if (prompt('Run Razor v1 tests (these may fail due to network problems)? (y/n)', "n") =~ /^y(es)?$/i) {
-    open(FILE, ">t/do_razor"); close(FILE);
-  }
-}
-if (eval { require Razor2::Client::Agent }) {
-  if (prompt('Run Razor v2 tests (these may fail due to network problems)? (y/n)', "n") =~ /^y(es)?$/i) {
-    open(FILE, ">t/do_razor2"); close(FILE);
-  }
+my $runrazor1tests = 0;
+my $runrazor2tests = 0;
+
+# what a PITA.  we can't get at MakeMaker's parsed args. do it ourselves,
+# again....
+$_ = join (' ', @ARGV);
+if (/\bRUN_RAZOR1_TESTS=y/) { $runrazor1tests = 1; }
+elsif (/\bRUN_RAZOR1_TESTS=n/) { $runrazor1tests = 0; }
+elsif (eval { require Razor::Client }) {
+  if (prompt('Run Razor v1 tests (these may fail due to network problems)? (y/n)', "n") =~ /^y(es)?$/i)
+                                { $runrazor1tests = 1; }
 }
 
+$_ = join (' ', @ARGV); # again; never know what prompt() might do
+if (/\bRUN_RAZOR2_TESTS=y/) { $runrazor2tests = 1; }
+elsif (/\bRUN_RAZOR2_TESTS=n/) { $runrazor2tests = 0; }
+elsif (eval { require Razor2::Client::Agent }) {
+  if (prompt('Run Razor v2 tests (these may fail due to network problems)? (y/n)', "n") =~ /^y(es)?$/i)
+                                { $runrazor2tests = 1; }
+}
+
+if ($runrazor1tests) { open(FILE, ">t/do_razor"); close(FILE); }
+if ($runrazor2tests) { open(FILE, ">t/do_razor2"); close(FILE); }
 
 #######################################################################
 
@@ -161,6 +185,18 @@ pm_to_blib: $(TO_INST_PM)
 	-e "ExtUtils::Install::Post545::pm_to_blib({qw{$(PM_TO_BLIB)}}, '$(INST_LIB)/auto', '$(PM_FILTER)')"# : '') . q#
 
 spamassassin: spamassassin.raw
+	$(PERL) build/preprocessor $(FIXVARS) -Msharpbang <$? >$@
+	$(CHMOD) $(PERM_RWX) $@
+
+sa-learn-spam: sa-learn-spam.raw
+	$(PERL) build/preprocessor $(FIXVARS) -Msharpbang <$? >$@
+	$(CHMOD) $(PERM_RWX) $@
+
+sa-learn-nonspam: sa-learn-nonspam.raw
+	$(PERL) build/preprocessor $(FIXVARS) -Msharpbang <$? >$@
+	$(CHMOD) $(PERM_RWX) $@
+
+sa-forget: sa-forget.raw
 	$(PERL) build/preprocessor $(FIXVARS) -Msharpbang <$? >$@
 	$(CHMOD) $(PERM_RWX) $@
 
