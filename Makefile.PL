@@ -160,7 +160,7 @@ my %makefile = (
     'VERSION_FROM' => 'lib/Mail/SpamAssassin.pm', # finds $VERSION
 
     'EXE_FILES'	=> [
-        'sa-filter', 'sa-learn', 'spamassassin',
+        'sa-filter', 'sa-learn',
         'spamc/spamc$(EXE_EXT)', # must next to last one
         'spamd/spamd',	# must be the last one
     ],
@@ -168,7 +168,7 @@ my %makefile = (
     'MAN1PODS' => {
         'sa-filter'       => '$(INST_MAN1DIR)/sa-filter.$(MAN1EXT)',
         'sa-learn'        => '$(INST_MAN1DIR)/sa-learn.$(MAN1EXT)',
-        'spamassassin'    => '$(INST_MAN1DIR)/spamassassin.$(MAN1EXT)',
+        'spamassassin.pod' => '$(INST_MAN1DIR)/spamassassin.$(MAN1EXT)',
         'spamc/spamc.pod' => '$(INST_MAN1DIR)/spamc.$(MAN1EXT)',
         'spamd/spamd'     => '$(INST_MAN1DIR)/spamd.$(MAN1EXT)',
     },
@@ -207,7 +207,7 @@ my %makefile = (
     },
 
     'clean' => { FILES => join(' ' =>
-        'sa-filter', 'sa-learn', 'spamassassin',
+        'sa-filter', 'sa-learn',
 
         'spamd/spamd',
 
@@ -878,7 +878,7 @@ sub MY::install {
 
   foreach (@code) {
     # Add our install targets as a dependency to all top-level install targets
-    s/^(install(?:_[a-z]+)?\s*::?\s*.*)$/$1 conf__install data__install/;
+    s/^(install(?:_[a-z]+)?\s*::?\s*.*)$/$1 bin__install conf__install data__install/;
 
     # Now do the DESTDIR hack, if necessary.
     next if !$mm_needs_destdir;
@@ -1077,7 +1077,6 @@ FIXVARS		= -Mvars \
 		  -DPREFIX="$(I_PREFIX)" \
 		  -DDEF_RULES_DIR="$(I_DATADIR)" \
 		  -DLOCAL_RULES_DIR="$(I_CONFDIR)" \
-		  -DINSTALLBIN="$(INSTALLBIN)" \
 		  -DINSTALLSITELIB="$(I_LIBDIR)" \
 		  -DCONTACT_ADDRESS="$(CONTACT_ADDRESS)"
 
@@ -1091,9 +1090,6 @@ sa-filter: sa-filter.raw
 	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@
 
 sa-learn: sa-learn.raw
-	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@
-
-spamassassin: spamassassin.raw
 	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@
 
 spamd/spamd: spamd/spamd.raw
@@ -1145,6 +1141,8 @@ qmail/qmail-spamc$(EXE_EXT): spamc/qmail-spamc$(EXE_EXT)
 	$(MAKE_SPAMC_OLD)
 	$(CHMOD) $(PERM_RWX) $@
 
+bin__install:
+	$(PERL) -MFile::Copy -e 'chdir q{$(INSTALLSITEBIN)}; $$symlink_exists = eval { symlink("",""); 1 }; if ($$symlink_exists) { symlink(q{sa-filter}, q{spamassassin}); } else { copy(q{sa-filter}, q{spamassassin}); }'
 
 conf__install:
 	-$(MKPATH) $(B_CONFDIR)
