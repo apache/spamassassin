@@ -883,7 +883,8 @@ score SPF_HELO_SOFTFAIL 0 1.002 0 3.140
 endif # Mail::SpamAssassin::Plugin::SPF
 
 # MAPS
-# MAPS is a commercial service.  If you pay for them, asign
+# MAPS is a commercial service.  If you pay for them, assign a score
+# so they will be checked.
 score RCVD_IN_MAPS_RBL 0
 score RCVD_IN_MAPS_DUL 0
 score RCVD_IN_MAPS_RSS 0
