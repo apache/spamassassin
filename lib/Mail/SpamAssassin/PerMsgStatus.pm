@@ -639,12 +639,11 @@ sub rewrite_headers {
     $self->{msg}->put_header ("X-Spam-Checker-Version",
 			      "SpamAssassin " . Mail::SpamAssassin::Version() .
 			      " ($Mail::SpamAssassin::SUB_VERSION)");
-    if ($self->{conf}->{report_header}) {
-      my $report = $self->{report};
-      $report =~ s/^\s*\n//gm;	# Empty lines not allowed in header.
-      $report =~ s/^\s*/  /gm;	# Ensure each line begins with whitespace.
-      $self->{msg}->put_header ("X-Spam-Report", $report);
-    }
+
+    my $report = $self->{report};
+    $report =~ s/^\s*\n//gm;	# Empty lines not allowed in header.
+    $report =~ s/^\s*/  /gm;	# Ensure each line begins with whitespace.
+    $self->{msg}->put_header ("X-Spam-Report", $report);
 
     if ($self->{conf}->{rewrite_subject}) {
       my $subject = $self->{msg}->get_header("Subject") || '';
