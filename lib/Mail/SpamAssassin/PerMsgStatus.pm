@@ -1,4 +1,4 @@
-=head1 NAME
+=head0 NAME
 
 Mail::SpamAssassin::PerMsgStatus - per-message status (spam or not-spam)
 
@@ -308,7 +308,7 @@ sub get {
   if ($hdrname eq 'Message-Id' && (!defined($_) || $_ eq '')) {
     $_ = join ("\n", $self->{msg}->get_header ('Message-ID'));	# news-ish
   }
-  $_ ||= '';
+  $_ ||= 'undef';
 
   if ($getaddr) {
     s/^.*?<.+>\s*$/$1/g			# Foo Blah <jm@foo>

@@ -13,6 +13,7 @@
 #   header SYMBOLIC_TEST_NAME	header op pattern
 #	(The operations allowed (so far) are: =~  and: !~)
 #       (header can be 'ALL', which returns the text of all headers)
+#       (note that non-appearing headers are returned as the string 'undef')
 #
 #   header SYMBOLIC_TEST_NAME	eval:name_of_eval_method([args])
 #
@@ -92,7 +93,7 @@ describe FRIEND_AT_PUBLIC	sent to you@you.com or similar
 header TO_EMPTY			To =~ /^(?:\@|\s*$)/
 describe TO_EMPTY		To: is empty
 
-header REPLY_TO_EMPTY		Reply-To =~ /^\@*$/
+header REPLY_TO_EMPTY		Reply-To =~ /^(?:\@|\s*$)/
 describe REPLY_TO_EMPTY		Reply-To: is empty
 
 header X_EM_VER_PRESENT		X-Em-Version =~ /\S/
