@@ -10,6 +10,12 @@
 #
 ###########################################################################
 
+# improvement on NO_REAL_NAME
+header __NO_NAME		From =~ /^\s*<?\S+\@\S+\>?\s*$/
+header __EMPTY_NAME		From =~ /^\s*\"\"\s*<?\S+\@\S+\>?\s*$/
+meta T_NO_REAL_NAME		(__NO_NAME || __EMPTY_NAME)
+describe T_NO_REAL_NAME		From: does not include a real name
+
 # should be fixed now
 header T_INVALID_MSGID		Message-Id !~ /^<(?:[a-zA-Z0-9.,!\#\$%&'*\+\/=?\^_{}|~-]+|\".+\")\@(?:[a-zA-Z0-9_.-]+|\[\d{1,3}(?:\.\d{1,3}){3}\])>(?:\s*\(.*\))?\s*$/ [if-unset: <NO@MSGID>]
 describe T_INVALID_MSGID	Message-Id is not valid, according to RFC 2822
@@ -79,6 +85,59 @@ header __OUTLOOK_MSGID		Message-Id =~ /^<[0-9a-f]{12,12}\$[0-9a-f]{8,8}\$[0-9a-f
 meta T_FORGED_OUTLOOK_MAILER	(__OUTLOOK_EXCEPT_IMO && !__OUTLOOK_MSGID)
 describe T_FORGED_OUTLOOK_MAILER	Forged mail pretending to be from Outlook/OE
 score T_FORGED_OUTLOOK_MAILER	1.0
+
+# possible replacements for SUBJ_HAS_SPACES
+# original version from a postfix filter (Craig Sanders)
+# adds some hits, but loses some too
+header T_SUBJ_ENDS_IN_SPACES	Subject =~ /\s{6,}([^0 \t]\S{3,})?$/
+# distilled new rules (merge of T_SUBJ_ENDS_IN_SPACES and SUBJ_HAS_SPACES)
+header T_SUBJ_HAS_SPACES1	Subject =~ /(?:\s{6,}|\t)/
+header T_SUBJ_HAS_SPACES2	Subject =~ /(?:\s{6,}|\t{2,})/
+
+# bug 1108, From: header
+header __FROM_NO_LOWER		From !~ /[a-z]/
+header __FROM_EXISTS		exists:From
+meta T_NO_LOWER_FROM_1		(__FROM_NO_LOWER)
+meta T_NO_LOWER_FROM_2		(__FROM_NO_LOWER && __FROM_EXISTS)
+
+# bug 1108, To: and Cc: headers
+header __TO_NLA			To !~ /[a-z]/
+header __TO_NLU			To !~ /[a-z][^\s,]*\@/
+header __TO_NLH			To !~ /\@[^\s,]*[a-z]/
+header __CC_NLA			Cc !~ /[a-z]/
+header __CC_NLU			Cc !~ /[a-z][^\s,]*\@/
+header __CC_NLH			Cc !~ /\@[^\s,]*[a-z]/
+header __TOCC_NLA		ToCc !~ /[a-z]/
+header __TOCC_NLU		ToCc !~ /[a-z][^\s,]*\@/
+header __TOCC_NLH		ToCc !~ /\@[^\s,]*[a-z]/
+header __CC_E			exists:Cc
+header __TO_E			exists:To
+header __TOCC_E			exists:ToCc
+#
+meta T_NO_LOWER_TO_ALL		(__TO_NLA)
+meta T_NO_LOWER_TO_USER		(__TO_NLU)
+meta T_NO_LOWER_TO_HOST		(__TO_NLH)
+meta T_NO_LOWER_TO_EITHER	(__TO_NLU || __TO_NLH)
+#
+meta T_NO_LOWER_TOCC_ALL	(__TOCC_NLA)
+meta T_NO_LOWER_TOCC_USER	(__TOCC_NLU)
+meta T_NO_LOWER_TOCC_HOST	(__TOCC_NLH)
+meta T_NO_LOWER_TOCC_EITHER	(__TOCC_NLU || __TOCC_NLH)
+#
+meta T_NO_LOWER_TO_ALL_E	(__TO_NLA && __TO_E)
+meta T_NO_LOWER_TO_USER_E	(__TO_NLU && __TO_E)
+meta T_NO_LOWER_TO_HOST_E	(__TO_NLH && __TO_E)
+meta T_NO_LOWER_TO_EITHER_E	((__TO_NLU || __TO_NLH) && __TO_E)
+#
+meta T_NO_LOWER_TOCC_ALL_E	(__TOCC_NLA && __TOCC_E)
+meta T_NO_LOWER_TOCC_USER_E	(__TOCC_NLU && __TOCC_E)
+meta T_NO_LOWER_TOCC_HOST_E	(__TOCC_NLH && __TOCC_E)
+meta T_NO_LOWER_TOCC_EITHER_E	((__TOCC_NLU || __TOCC_NLH) && __TOCC_E)
+#
+meta T_NO_LOWER_TO_CC_ALL_E	(__CC_NLA && __CC_E) || (__TO_NLA && __TO_E)
+meta T_NO_LOWER_TO_CC_USER_E	(__CC_NLU && __CC_E) || (__TO_NLU && __TO_E)
+meta T_NO_LOWER_TO_CC_HOST_E	(__CC_NLH && __CC_E) || (__TO_NLH && __TO_E)
+meta T_NO_LOWER_TO_CC_EITHER_E	(((__CC_NLU || __CC_NLH) && __CC_E) || ((__TO_NLU || __TO_NLH) && __TO_E))
 
 ###########################################################################
 
