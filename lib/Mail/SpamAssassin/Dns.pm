@@ -110,36 +110,36 @@ BEGIN {
 ###########################################################################
 
 sub do_rbl_lookup {
-  my ($self, $set, $usetxt, $dom, $ip, $found) = @_;
+  my ($self, $set, $type, $dom, $ip, $found) = @_;
 
   return $found if $found;
 
   # add these as tmp items on $self, to save passing around as args
   $self->{rbl_set} = $set;
   $self->{rbl_dom} = $dom;
-  $self->{rbl_usetxt} = $usetxt;
+  $self->{rbl_type} = $type;
   $self->{rbl_ip} = $ip;
 
-  if (defined $self->{dnscache}->{rbl}->{$dom}->{result}) {
+  if (defined $self->{dnscache}->{$type}->{$dom}->{result}) {
     dbg("rbl: found $dom in our DNS cache. Yeah!", "rbl", -1);
     return $self->handle_dnsbl_results();
-
-  } elsif (!defined $self->{dnscache}->{rbl}->{$dom}->{bgsock}) {
+  }
+  elsif (!defined $self->{dnscache}->{$type}->{$dom}->{bgsock}) {
     $self->launch_dnsbl_query();
-
-  } elsif ($self->{rbl_pass} ==
-	    $Mail::SpamAssassin::PerMsgStatus::RBL_PASS_LAUNCH_QUERIES)
+  }
+  elsif ($self->{rbl_pass} ==
+	 $Mail::SpamAssassin::PerMsgStatus::RBL_PASS_LAUNCH_QUERIES)
   {
     dbg("rbl: second query for $dom ignored, we have one pending", "rbl", -1);
-
-  } elsif ($self->{rbl_pass} ==
-	    $Mail::SpamAssassin::PerMsgStatus::RBL_PASS_HARVEST_RESULTS)
+  }
+  elsif ($self->{rbl_pass} ==
+	 $Mail::SpamAssassin::PerMsgStatus::RBL_PASS_HARVEST_RESULTS)
   {
     if ($self->wait_for_dnsbl_results()) {
       return $self->handle_dnsbl_results();
     }
-
-  } else {
+  }
+  else {
     warn "oops! unknown RBL pass $self->{rbl_pass}";
   }
 
@@ -152,11 +152,12 @@ sub launch_dnsbl_query {
   my ($self) = @_;
 
   my $dom = $self->{rbl_dom};
-  dbg("rbl: launching DNS query for $dom in the background", "rbl", -1);
+  my $type = $self->{rbl_type};
+  dbg("rbl: launching DNS $type query for $dom in background", "rbl", -1);
 
-  $self->{dnscache}->{rbl}->{$dom}->{bgsock} =
-	      $self->{res}->bgsend($dom, ($self->{rbl_usetxt} ? 'TXT' : 'A'));
-  $self->{dnscache}->{rbl}->{$dom}->{launchtime} = time;
+  $self->{dnscache}->{$type}->{$dom}->{bgsock} =
+      $self->{res}->bgsend($dom, $type);
+  $self->{dnscache}->{$type}->{$dom}->{launchtime} = time;
 }
 
 ###########################################################################
@@ -165,16 +166,17 @@ sub wait_for_dnsbl_results {
   my ($self) = @_;
 
   my $dom = $self->{rbl_dom};
+  my $type = $self->{rbl_type};
   dbg("rbl: waiting for result on $dom", "rbl", -1);
   timelog("rbl: Waiting for result on $dom", "rbl", 1);
 
   my $bgsock;
-  $bgsock=\$self->{dnscache}->{rbl}->{$dom}->{bgsock};
+  $bgsock=\$self->{dnscache}->{$type}->{$dom}->{bgsock};
 
   my $maxwait=$self->{conf}->{rbl_timeout};
   
   while (!$self->{res}->bgisready($$bgsock)) {
-    last if (time - $self->{dnscache}->{rbl}->{$dom}->{launchtime} > $maxwait);
+    last if (time - $self->{dnscache}->{$type}->{$dom}->{launchtime} > $maxwait);
     sleep 1;
   }
 
@@ -183,8 +185,8 @@ sub wait_for_dnsbl_results {
     dbg("rbl: query for $dom timed out after $maxwait seconds", "rbl", -1);
     undef($$bgsock);
     return 0;
-
-  } else {
+  }
+  else {
     dbg("rbl: query returned for $dom", "rbl", -1);
     my $packet = $self->{res}->bgread($$bgsock);
     undef($$bgsock);
@@ -193,25 +195,23 @@ sub wait_for_dnsbl_results {
     my @txt = ();
 
     foreach my $ansitem ($packet->answer) {
-      dbg("rbl: query for $dom yielded: ".$ansitem->rdatastr, "rbl", -2);
+      dbg("rbl: $type query for $dom yielded: ".$ansitem->rdatastr, "rbl", -2);
 
-      if ($ansitem->type eq "A") {
+      if ($ansitem->type eq 'A') {
 	push(@addr, $ansitem->rdatastr);
-
-      } elsif ($ansitem->type eq "TXT") {
+      }
+      elsif ($ansitem->type eq 'TXT') {
 	my $txt = $ansitem->rdatastr;
 	$txt =~ s/^\"//; $txt =~ s/\"$//;
 	push(@txt, $txt);
-	push(@addr, '127.0.0.2');
       }
     }
-
-    # IN A and IN TXT results.  Note that an IN TXT will never *not* be
-    # accompanied by an IN A; we generate 127.0.0.2 IN A results artificially
-    # if we receive an IN TXT result.
-
-    $self->{dnscache}->{rbl}->{$dom}->{result} = \@addr;
-    $self->{dnscache}->{rbl}->{$dom}->{result_txt} = \@txt;
+    if ($type eq 'A') {
+      $self->{dnscache}->{$type}->{$dom}->{result} = \@addr;
+    }
+    elsif ($type eq 'TXT') {
+      $self->{dnscache}->{$type}->{$dom}->{result} = \@txt;
+    }
   }
   return 1;
 }
@@ -222,45 +222,23 @@ sub handle_dnsbl_results {
   my ($self) = @_;
 
   my $dom = $self->{rbl_dom};
-  my @addr = @{$self->{dnscache}->{rbl}->{$dom}->{result}};
-  my @txt = @{$self->{dnscache}->{rbl}->{$dom}->{result_txt}};
+  my $type = $self->{rbl_type};
+  my @result = @{$self->{dnscache}->{$type}->{$dom}->{result}};
 
-  if (scalar @addr <= 0) {
-    timelog("rbl: no match on $dom", "rbl", 2);
+  if (scalar @result <= 0) {
+    timelog("rbl: no $type match for $dom", "rbl", 2);
     return 0;
   }
 
   my $set = $self->{rbl_set};
   my $ip = $self->{rbl_ip};
-  foreach my $addr (@addr) {
-    my $txt = pop (@txt);
-
-    # 127.0.0.2 is the traditional boolean indicator, don't log it
-    # 127.0.0.3 now also means "is a dialup IP" (only if set is dialup
-    # -- Marc)
-    if (defined $txt) {
-      $self->test_log ("RBL check: found ".$dom.":");
-      $self->test_log ("\"".$txt."\"");
-    }
-    elsif ($addr ne '127.0.0.2' and 
-	   !($addr eq '127.0.0.3' and $set =~ /^dialup/))
-    {
-      $self->test_log ("RBL check: found ".$dom.", type: ".$addr);
-      $txt ||= '';
-    }
-    else {
-      $self->test_log ("RBL check: found ".$dom);
-      $txt ||= '';
-    }
-
-    dbg("rbl: check found $dom, type: $addr", "rbl", -2);
-
-    $self->{$set}->{rbl_IN_As_found} .= $addr.' ';
-    $self->{$set}->{rbl_IN_TXTs_found} .= $txt.' ';
-    $self->{$set}->{rbl_matches_found} .= $ip.' ';
+  foreach my $result (@result) {
+    $self->test_log ("RBL $type check: found ".$dom.", type: ".$result);
+    dbg("rbl: $type check found $dom, type: $result", "rbl", -2);
+    $self->{$set}->{'rbl_IN_'.$type.'s_found'} .= $result.' ';
   }
 
-  timelog("rbl: match on $dom", "rbl", 2);
+  timelog("rbl: $type match on $dom", "rbl", 2);
   return 1;
 }
 
@@ -271,9 +249,10 @@ sub rbl_finish {
 
   delete $self->{rbl_set};
   delete $self->{rbl_dom};
-  delete $self->{rbl_usetxt};
+  delete $self->{rbl_type};
   delete $self->{rbl_ip};
-  delete $self->{dnscache}->{rbl};		# TODO: make it persistent?
+  delete $self->{dnscache}->{A};
+  delete $self->{dnscache}->{TXT};
   delete $self->{dnscache};
 }
 

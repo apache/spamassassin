@@ -1079,7 +1079,7 @@ sub check_lots_of_cc_lines {
 ###########################################################################
 
 sub check_rbl_backend {
-  my ($self, $set, $rbl_domain, $use_txt_query) = @_;
+  my ($self, $set, $rbl_domain, $type) = @_;
   local ($_);
 
   # First check that DNS is available, if not do not perform this check
@@ -1147,10 +1147,8 @@ sub check_rbl_backend {
   if (!defined $self->{$set}->{rbl_IN_As_found}) {
     $self->{$set}->{rbl_IN_As_found} = ' ';
     $self->{$set}->{rbl_IN_TXTs_found} = ' ';
-    $self->{$set}->{rbl_matches_found} = ' ';
   }
 
-  # my $already_matched_in_other_zones = ' '.$self->{$set}->{rbl_matches_found}.' ';
   my $found = 0;
 
   # First check that DNS is available. If not, do not perform this check.
@@ -1174,9 +1172,11 @@ sub check_rbl_backend {
       # }
 
       next unless ($ip =~ /(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/);
-     ($b1, $b2, $b3, $b4) = ($1, $2, $3, $4);
+      ($b1, $b2, $b3, $b4) = ($1, $2, $3, $4);
 
-      $found = $self->do_rbl_lookup ($set, $use_txt_query, "$b4.$b3.$b2.$b1.".$rbl_domain, $ip, $found);
+      $found = $self->do_rbl_lookup ($set, $type,
+				     "$b4.$b3.$b2.$b1.".$rbl_domain, $ip,
+				     $found);
       dbg("Got $found on $ip (item $i)", "rbl", -3);
     }
   };
@@ -1187,12 +1187,12 @@ sub check_rbl_backend {
 
 sub check_rbl {
   my ($self, $set, $rbl_domain) = @_;
-  $self->check_rbl_backend ($set, $rbl_domain, 0);
+  $self->check_rbl_backend ($set, $rbl_domain, 'A');
 }
 
 sub check_rbl_txt {
   my ($self, $set, $rbl_domain) = @_;
-  $self->check_rbl_backend ($set, $rbl_domain, 1);
+  $self->check_rbl_backend ($set, $rbl_domain, 'TXT');
 }
 
 ###########################################################################
@@ -1227,29 +1227,6 @@ sub check_rbl_results_for {
 
   return 0;
 }
-
-###########################################################################
-
-sub check_two_rbl_results {
-  my ($self, $set1, $addr1, $set2, $addr2) = @_;
-
-  return 0 if $self->{conf}->{skip_rbl_checks};
-  return 0 unless $self->is_dns_available();
-  return 0 unless defined ($self->{$set1});
-  return 0 unless defined ($self->{$set2});
-  return 0 unless defined ($self->{$set1}->{rbl_IN_As_found});
-  return 0 unless defined ($self->{$set2}->{rbl_IN_As_found});
-
-  # note: IN_As cannot be !undef without IN_TXTs existing too
-  my $inas1 = ' '.$self->{$set1}->{rbl_IN_As_found}.' '.
-		  $self->{$set1}->{rbl_IN_TXTs_found}.' ';
-  my $inas2 = ' '.$self->{$set2}->{rbl_IN_As_found}.' '.
-		  $self->{$set2}->{rbl_IN_TXTs_found}.' ';
-  if ($inas1 =~ / ${addr1} / and $inas2 =~ / ${addr2} /) { return 1; }
-
-  return 0;
-}
-
 
 ###########################################################################
 
