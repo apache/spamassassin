@@ -559,6 +559,10 @@ header MIME_BOUND_MA		Content-Type =~ /boundary=\"----=_[a-zA-Z0-9]{8}_[a-zA-Z0-
 describe MIME_BOUND_MA		Spam tool pattern in MIME boundary
 header MIME_BOUND_MANY_HEX	Content-Type =~ /boundary="[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}"/
 describe MIME_BOUND_MANY_HEX	Spam tool pattern in MIME boundary
+header __NEXTPART_ALL		Content-Type =~ /NextPart/
+header __NEXTPART_NORMAL	Content-Type =~ /="(?:----_?=_)?NextPart_[\dA-F]{3}(_[\dA-F]{3,8})?_[\dA-F]{8}\.[\dA-F]{8}"/
+meta MIME_BOUND_NEXTPART	(__NEXTPART_ALL && !__NEXTPART_NORMAL)
+describe MIME_BOUND_NEXTPART	Spam tool pattern in MIME boundary
 header MIME_BOUND_OPTIN		Content-Type =~ /boundary=\"[A-F\d]{8}-[A-F\d]{4}-[A-F\d]{4}-[A-F\d]{4}-[A-F\d]{12}OPTIN\"/
 describe MIME_BOUND_OPTIN	Spam tool pattern in MIME boundary
 header MIME_BOUND_MAIL_BOUND	Content-Type =~ /boundary=\"____MAIL_BOUNDARY____\"/
