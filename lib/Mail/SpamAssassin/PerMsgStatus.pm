@@ -866,9 +866,10 @@ sub get_decoded_stripped_body_text_array {
 
   # do HTML conversions if necessary
   if ($text =~ m/<\s*[a-z:!][a-z:\d_-]*(?:\s.*?)?\s*>/is) {
+    my $raw = length($text);
+
     $self->{html_text} = [];
     $self->{html_last_tag} = 0;
-    my $raw = length($text);
     my $hp = HTML::Parser->new(
 		api_version => 3,
 		handlers => [
@@ -883,6 +884,8 @@ sub get_decoded_stripped_body_text_array {
     $hp->eof;
     $text = join('', @{$self->{html_text}});
     $self->{html}{ratio} = ($raw - length($text)) / $raw if $raw;
+    delete $self->{html_inside};
+    delete $self->{html_last_tag};
   }
 
   # whitespace handling (warning: small changes have large effects!)

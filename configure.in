@@ -26,9 +26,11 @@ dnl ----------------------------------------------------------------------
 
 AC_CACHE_CHECK([for SHUT_RD],
        shutrd, [
-                 AC_EGREP_HEADER(SHUT_RD, sys/socket.h,
+                AC_TRY_COMPILE([#include <sys/types.h>
+#include <sys/socket.h>],
+                        [printf ("%d", SHUT_RD); return 0;],
                                         [shutrd=yes],
-                                        [shutrd=no])
+                                        [shutrd=no]),
        ])
 if test $shutrd = yes ; then
   AC_DEFINE(HAVE_SHUT_RD)
@@ -73,7 +75,8 @@ dnl ----------------------------------------------------------------------
 
 AC_CACHE_CHECK([for in_addr_t],
         inaddrt, [
-                AC_TRY_COMPILE([#include <netinet/in.h>],
+                AC_TRY_COMPILE([#include <sys/types.h>
+#include <netinet/in.h>],
                         [in_addr_t foo; return 0;],
                                         [inaddrt=yes],
                                         [inaddrt=no]),
@@ -86,7 +89,8 @@ dnl ----------------------------------------------------------------------
 
 AC_CACHE_CHECK([for INADDR_NONE],
         haveinaddrnone, [
-                AC_TRY_COMPILE([#include <netinet/in.h>],
+                AC_TRY_COMPILE([#include <sys/types.h>
+#include <netinet/in.h>],
                         [in_addr_t foo = INADDR_NONE; return 0;],
                                         [haveinaddrnone=yes],
                                         [haveinaddrnone=no]),
@@ -99,7 +103,10 @@ dnl ----------------------------------------------------------------------
 
 AC_CACHE_CHECK([for EX__MAX],
         haveexmax, [
-                AC_TRY_COMPILE([#include <errno.h>],
+                AC_TRY_COMPILE([#ifdef HAVE_SYSEXITS_H
+#include <sysexits.h>
+#endif
+#include <errno.h>],
                         [int foo = EX__MAX; return 0;],
                                         [haveexmax=yes],
                                         [haveexmax=no]),
