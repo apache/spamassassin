@@ -47,8 +47,6 @@ describe CLICK_TO_REMOVE_1	Click to be removed
 
 body SENT_IN_COMPLIANCE		/(?:e.?mail|message) .{0,10}sen[dt] (?:to you )?in (?:\w{1,10} )?compliance (?:of|with)/i
 describe SENT_IN_COMPLIANCE	Claims compliance with spam regulations
-body PARA_A_2_C_OF_1618		/Paragraph *.a.{0,10}2.{0,10}C\. of S\. 1618/i
-describe PARA_A_2_C_OF_1618	Claims compliance with Senate Bill 1618
 body BILL_1618			/Bill.{0,10}1618.{0,10}TITLE.{0,10}(?:III|\#3)/i
 describe BILL_1618		Claims compliance with Senate Bill 1618
 body S_1618			/S\..{0,10}1618.{0,10}-.{0,10}SECTION.{0,10}301/i
@@ -61,9 +59,6 @@ body HR_4176			/H\.?R\.? *4176.{0,10}SECTION.{0,10}101/i
 describe HR_4176		Claims compliance with House Bill 4176
 body FURTHER_TRANSMISSIONS      /further transmissions to you by the sender/i
 describe FURTHER_TRANSMISSIONS  Claims compliance with spam regulations
-
-body CHECK_OR_MONEY_ORDER	/check or money order/i
-describe CHECK_OR_MONEY_ORDER	Talk about a check or money order
 
 body GUARANTEE			/\bGUARANTEE\b/
 describe GUARANTEE		Contains word 'guarantee' in all-caps
@@ -85,8 +80,6 @@ body MONEY_MAKING		/\bmoney mak(?:ing|er)/i
 describe MONEY_MAKING		Discusses money making
 body BULK_EMAIL			/bulk e-*mail/i
 describe BULK_EMAIL		Talks about bulk email
-body DEAR_EMAIL			/\bDear [A-Za-z0-9_-]+\@/
-describe DEAR_EMAIL		Dear you@you.com?
 body DEAR_FRIEND		/^\s*Dear Friend\b/i
 describe DEAR_FRIEND		How dear can you be if you don't know my name?
 body DEAR_SOMETHING		/\bDear (?:IT\W|Internet|candidate|sirs?|madam|investor|travell?er|car shopper|web)\b/i
@@ -125,10 +118,6 @@ describe NEVER_ANOTHER		"another mailing" will "never" be "received"
 body ONE_TIME_MAILING		/this\b.{0,20}\b(?:one|1).time\b.{0,20}\b(?:(?:e-?)?mail|offer)/i
 describe ONE_TIME_MAILING	"one time mailing" doesn't mean it isn't spam
 
-# this one gets a few false positives
-body SOCIAL_SEC_NUMBER		/social security (?:number|record)/i
-describe SOCIAL_SEC_NUMBER	Talks about social security numbers
-
 body MILLION_EMAIL		/million (?:\w+ )?(?:e-?mail )?addresses/i
 describe MILLION_EMAIL		Get a million email addresses
 
@@ -143,8 +132,6 @@ body EXCUSE_3			/to (?:be removed|be deleted|no longer receive th(?:is|ese) mess
 describe EXCUSE_3		Claims you can be removed from the list
 body EXCUSE_4			/To Be Removed,? Please/i
 describe EXCUSE_4		Claims you can be removed from the list
-body EXCUSE_5			/that your email address is removed/i
-describe EXCUSE_5		Claims you can be removed from the list
 
 # strange pattern because otherwise it matches the std. majordomo line
 # pls note the comment above. DO NOT just put "to" in the first group!
@@ -226,8 +213,6 @@ body STOCK_ALERT		/stock alert/i
 describe STOCK_ALERT		Offers a alert about a stock
 body MICRO_CAP_WARNING		/Investing in micro-cap securities is highly speculative/i
 describe MICRO_CAP_WARNING	SEC-mandated penny-stock warning -- thanks SEC
-body INVESTOR_SPEC_SHEET	/Investor Spec Sheet/i
-describe INVESTOR_SPEC_SHEET	Standard investment opportunity spam
 body NOT_ADVISOR		/not a registered investment advisor/i
 describe NOT_ADVISOR		Not registered investment advisor
 
@@ -342,10 +327,6 @@ describe FALLING_INTEREST	Interest rates
 body ORDER_REPORT               /order report .\s?\d from/i
 describe ORDER_REPORT           Order a report from someone
 
-# detect "mort$age", but not "mortgage"
-body MORTGAGE_OBFU	        /mor[tga\$]*\$[ga\$]*e/i
-describe MORTGAGE_OBFU 	        Attempt at obfuscating the word "mortgage"
-
 body TAKE_ACTION_NOW		/take action now!/i
 describe TAKE_ACTION_NOW	Tells you to 'take action now!'
 
@@ -366,22 +347,16 @@ describe AOL_USERS_LINK		Includes a link for AOL users to click
 
 # Cyber FirePower! rants about 'Internet terrorists' aka spam fighters
 # (contrib: WW) (jm: tweaked to match again)
-body INTERNET_TERROR_RANT       /At the time of this mailing.{9,50}legitimate return email address.{100,299}internet terrorists/i
-describe INTERNET_TERROR_RANT   Cyber FirePower! rant about losing dropboxes
 
 body US_DOLLARS			/\b(?:\d{1,3})?Million\b.{0,40}\b(?:(?:United States?|Canadian) Dollar?s?|US(?:D|\$)|U\.? ?S\.? Dollar)/i
 describe US_DOLLARS		Nigerian scam key phrase (million dollars)
 
-# jm: use {2,3} to avoid matching iso-2022-jp charset items. split into US_DOLLARS_4
 # to still match all test cases
 body US_DOLLARS_2               /\s(?:\$|US\$|usd?).?\d{2,3}(?:\.\d)?.?(?:m|millions?)\b/i
 describe US_DOLLARS_2           Nigerian scam key phrase ($NNN.N m/USDNNN.N m/US$NN.N m)
 
 body US_DOLLARS_3               /(?:\$|usd).?\d{1,3}[,.]\d{3}[,.]\d{3}(?:[,.]\d\d)?/i
 describe US_DOLLARS_3           Nigerian scam key phrase ($NN,NNN,NNN.NN)
-
-body US_DOLLARS_4               /\s(?:\$|US\$|usd?).?\d{1,3}\.\d+.?(?:m|millions?)\b/i
-describe US_DOLLARS_4           Nigerian scam key phrase ($NNN.N m/USDNNN.N m/US$NN.N m)
 
 body MILLION_USD              	/Million\b.{0,40}\b(?:United States? Dollars?|USD)/i
 describe MILLION_USD 		Nigerian scam key phrase (millions of dollars)
@@ -494,9 +469,6 @@ describe WHY_PAY_MORE		Why Pay More?
 body CONGRATULATIONS		/\bcongratulations! you/i
 describe CONGRATULATIONS	Congratulations - you've been scammed?
 
-body SIGN_UP			/\b(?:free sign up|sign up today)\b/i
-describe SIGN_UP		Sign up Free Today
-
 # do not add "new" since there's non-spam about "new cell phone numbers"
 # separated into two rules since one seems to have a lot of
 # sourceforge list advertisement false positives
@@ -516,9 +488,6 @@ describe RECEIVE_OFFER		Receive a special offer
 body OFFER			/\b(?:free|special|trial) offer/i
 describe OFFER			Free Offer
 
-body OFFER_EXPIRE	        /\boffer expires\b/i
-describe OFFER_EXPIRE		Offer Expires
-
 body FREE_QUOTE		        /\bfree quote/i
 describe FREE_QUOTE		Free Quote
 
@@ -530,9 +499,6 @@ describe FREE_DVD		Free DVD
 
 body FREE_INVESTMENT	        /\bfree investment/i
 describe FREE_INVESTMENT	Free Investment
-
-body INVESTMENT		        /\binvestment decision/i
-describe INVESTMENT		Investment Decision
 
 body FREE_TRIAL		        /\bfree trial\b/i
 describe FREE_TRIAL		Free Trial
@@ -696,15 +662,6 @@ describe FANTASTIC		Fantastic Deal
 body CENTS_ON_DOLLAR	        /\bcents on the dollar\b/i
 describe CENTS_ON_DOLLAR	Cents on the Dollar
 
-body COUPON		        /\boff coupon/i
-describe COUPON			Offers Coupon
-
-body CANT_LIVE_WITHOUT	        /\bcan.{0,4} live without\b/i
-describe CANT_LIVE_WITHOUT	Can't live without?
-
-body NAME_BRAND		        /\b(?:famous name|major) brand/i
-describe NAME_BRAND		Name Brand
-
 # seems like we vastly reduce FPs on this one with a small change or two
 body DIET			/\b(?:(?:without|no) (?:exercis(?:e|ing)|dieting)|weight.?loss|(?:extra|lose|lost|losing).{0,10}(?:pounds|weight|inches|lbs)|burn.{1,10}fat)\b/i
 describe DIET			Lose Weight Spam
@@ -775,14 +732,8 @@ describe SATISFACTION		Satisfaction Guaranteed
 body PRIZE		        /\bclaim.{0,9} prize/i
 describe PRIZE			Talks about prizes
 
-body GETAWAY		        /\bweekend getaway/i
-describe GETAWAY		Weekend Getaway
-
 body HGH			/\b(?:human growth hormone|(?-i:HGH)|H.G.H)\b/i
 describe HGH			Human Growth Hormone
-
-body GIVING_AWAY	        /\bgiving away\b/i
-describe GIVING_AWAY		They're just giving it away!
 
 body EASY_TERMS		        /\beasy terms\b/i
 describe EASY_TERMS		Easy Terms
@@ -801,12 +752,6 @@ describe ONE_TIME		One Time Rip Off
 
 body COMPETE		        /\bcompete for your business\b/i
 describe COMPETE		Compete for your business
-
-body CANCEL		        /\bcancel at any time\b/i
-describe CANCEL			Cancel at any time!
-
-body NO_COMBINE		        /\bwith any other offer/i
-describe NO_COMBINE		Can not be combined with any other offer
 
 body NEW_CUSTOMER	        /\bnew customers only\b/i
 describe NEW_CUSTOMER		New Customers Only
@@ -902,9 +847,6 @@ describe GET_IT_NOW		Contains 'Get it now' with capitals
 body LOW_PRICE                  /\blow.{0,4} (?-i:P)rice/i
 describe LOW_PRICE              Lowest Price
 
-body MEMBER			/\bmember (?:number|reward|value|benefit|rate|report|card|information)s?\b/i
-describe MEMBER			Member Stuff
-
 body     EJACULATION            /\b(?:increase|improve|greater).{0,10}ejaculation/i
 describe EJACULATION            Increase your ejaculation!
 
@@ -912,8 +854,6 @@ body TRACE_BY_SSN               /Trace anyone by social security number/i
 describe TRACE_BY_SSN           Talks about tracing by SSN
 body AUTO_EMAIL_REMOVAL         /Auto Email Removal/
 describe AUTO_EMAIL_REMOVAL     Claims auto-email removal
-body CYBER_FIRE_POWER           /\b(?:by|for) Cyber FirePower\!/
-describe CYBER_FIRE_POWER       mentions Cyber FirePower!, a spam-tool
 body ONCE_IN_LIFETIME           /once in a lifetime opportunity/i
 describe ONCE_IN_LIFETIME       Once in a lifetime, apparently
 rawbody SAFEGUARD_NOTICE        /This safeguard is not inserted when using the registered version/s
@@ -933,18 +873,11 @@ describe INTL_EXEC_GUILD        Well known spam senders
 body IN_ACCORDANCE_WITH_LAWS    /has been sent in accordance with/
 describe IN_ACCORDANCE_WITH_LAWS Claims to be in accordance with some Spam law
 
-
-body ANOTHER_NET_AD             /Another Internet Ad campaign produced/
-describe ANOTHER_NET_AD         Tells you it's an ad
-
 body CHANGE_TERMS               /\bstrictly based on the following terms and conditions\b/i
 describe CHANGE_TERMS           Terms and conditions
 
 body     DONT_DELETE            /\b(?:don'?t delete this|do not delete)/i
 describe DONT_DELETE            Don't delete me!  Nooooo!!!!
-
-body EU_200_32_CE               /Directive 200.32.CE/i
-describe EU_200_32_CE           Claims compliance with European spam regulations
 
 body EU_EMAIL_OPTOUT            	/EU (?:e-?mail opt.?out|e.?commerce) directive/i
 describe EU_EMAIL_OPTOUT        	Claims compliance with European spam regulations
@@ -952,38 +885,14 @@ describe EU_EMAIL_OPTOUT        	Claims compliance with European spam regulation
 body EXCUSE_8                   /requests to be taken off our mailing list/i
 describe EXCUSE_8               Claims you can be removed from the list
 
-body FILTERED_BY_WORLDREMOVE		/filtered by WorldRemove/
-describe FILTERED_BY_WORLDREMOVE	Claims to listen to some removal request list
-
-body FREE_HOSTING               /\bfree hosting\b/i
-describe FREE_HOSTING           Free Hosting
-
-body GREEN_EXCUSE_1             /using email instead can significantly reduce this/i
-describe GREEN_EXCUSE_1         Claims spam helps the environment
-
-body GREEN_EXCUSE_2             /the trees, save the planet, use email!/i
-describe GREEN_EXCUSE_2         Claims spam helps the environment
-
 body INCREDIBLE                 /\bincredible secrets\b/i
 describe INCREDIBLE             Things incredible
 
 body NO_SELLING                 /absolutely NO selling/i
 describe NO_SELLING             Claims not to be selling anything
 
-body POPLAUNCH                  /StealthLaunch PopLaunch\b/
-describe POPLAUNCH              spam software: PopLaunch
-
 body PSYCHIC                    /\b(?:caring|gifted|experienced) psychic/i
 describe PSYCHIC                Psychics Scam
-
-body SIGNIFICANT                /\bsignificant savings\b/i
-describe SIGNIFICANT            Significant Savings
-
-body SLASH_PRICE                /\bslash.{0,2} price/i
-describe SLASH_PRICE            Slashed Price
-
-body THIS_AINT_JUNK             /This.{0,30}is not (?:a )?junk(?: email)?/is
-describe THIS_AINT_JUNK         Claims "This is not junk email"
 
 body WEALTH                     /\bachieve .{0,15}wealth\b/i
 describe WEALTH                 Achieve Wealth
@@ -1009,9 +918,6 @@ describe OUR_COMPENSATION	Mentions their full compensation
 body OUR_OVERWHELMING_GROWTH		/our overwhelming growth/i
 describe OUR_OVERWHELMING_GROWTH	Mentions their overwhelming growth
 
-body OUR_POLICY_ON_SELLING	/our policy on selling/i
-describe OUR_POLICY_ON_SELLING	Mentions their policy on selling
-
 body OUR_STRICT_ANTI		/our strict anti/i
 describe OUR_STRICT_ANTI	Mentions their strict antipathy on something
 
@@ -1029,10 +935,6 @@ describe OFFERS_ETC		Stop with the offers, coupons, discounts etc!
 
 body BANG_BOSS        		/\bboss!/i
 describe BANG_BOSS        	Talks about your boss with an exclamation!
-body BANG_CARTOONS    		/\bcartoons!/i
-describe BANG_CARTOONS    	Talks about cartoons with an exclamation!
-body BANG_CYBERANALYSTS		/\bcyberanalysts!/i
-describe BANG_CYBERANALYSTS	Talks about cyberanalysts with an exclamation!
 body BANG_EXERCISE    		/\bexercis(?:e|er|es)!/i
 describe BANG_EXERCISE    	Talks about exercise with an exclamation!
 body BANG_MONEY      		/\bmoney!/i
