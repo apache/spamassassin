@@ -111,6 +111,8 @@ else
 my $dontcopy = 1;
 if ($opt_c) { $dontcopy = 0; }
 
+undef $ENV{'HOME'};		# we do not want to use this we running as spamd
+
 my $spamtest = Mail::SpamAssassin->new({
   dont_copy_prefs => $dontcopy,
   local_tests_only => $opt_L,

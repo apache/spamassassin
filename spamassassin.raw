@@ -92,7 +92,7 @@ eval {
   require Mail::SpamAssassin;
   require Mail::SpamAssassin::MyMailAudit;
 
-  getopts ('tc:p:hVDrPw:l:dLWM:') or usage();
+  getopts ('tc:p:ehVDrPw:l:dLWM:') or usage();
 
   if (defined $opt_h) { usage(); }
   if (defined $opt_V) {

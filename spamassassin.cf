@@ -99,7 +99,7 @@ header NO_REAL_NAME		From =~ /^\s*\<?\S+\@\S+\>?\s*$/
 describe NO_REAL_NAME		From: does not include a real name
 
 header FROM_ENDS_IN_NUMS	From =~ /\d\d\@/
-describe FROM_ENDS_IN_NUMS	From: ends in more than 1 number
+describe FROM_ENDS_IN_NUMS	From: ends in numbers
 
 header FROM_HAS_MIXED_NUMS	From =~ /\d+[a-z]+\d+\S*@/i
 describe FROM_HAS_MIXED_NUMS	From: contains numbers mixed in with letters
@@ -328,10 +328,10 @@ describe SUSPICIOUS_RECIPS      To: contains same domain at least 10 times
 header SUSPICIOUS_CC_RECIPS	Cc =~ /(@[-a-z0-9_.]+).*(?:\1.*){9,}/is
 describe SUSPICIOUS_CC_RECIPS	Cc: contains same domain at least 10 times
 
-header VERY_SUSP_RECIPS         To =~ /([a-z][a-z])[^@]*(@[-a-z0-9_.]+).*(?:\1[^@]*\2.*){9,}/is
+header VERY_SUSP_RECIPS         To =~ /\b([a-z][a-z])[^@\s,]*(@[-a-z0-9_.]+).*(?:\1[^@]*\2.*){9,}/is
 describe VERY_SUSP_RECIPS       To: contains very similar addresses 10 times
 
-header VERY_SUSP_CC_RECIPS	Cc =~ /([a-z][a-z])[^@]*(@[-a-z0-9_.]+).*(?:\1[^@]*\2.*){9,}/is
+header VERY_SUSP_CC_RECIPS	Cc =~ /\b([a-z][a-z])[^@\s,]*(@[-a-z0-9_.]+).*(?:\1[^@]*\2.*){9,}/is
 describe VERY_SUSP_CC_RECIPS	Cc: contains very similar addresses 10 times
 
 header Q_FOR_SELLER		Subject =~ /Question for seller/
@@ -703,8 +703,11 @@ full CLICK_TO_REMOVE_2          /href.{0,50}mailto:.{0,50}click.{0,50}remove/is
 describe CLICK_TO_REMOVE_2      Click-to-remove with mailto: found beforehand
 
 # (contrib: WW, mod by David Hull)
-full TO_BE_REMOVED_REPLY        /\bto\b.{0,60}\b(?:remove|unsubscribe).{0,60}\breply\b/is
+full TO_BE_REMOVED_REPLY        /\bto\b.{0,60}\bremove.{0,60}\breply\b/is
 describe TO_BE_REMOVED_REPLY    Says: "to be removed, reply via email" or similar
+
+full TO_UNSUB_REPLY		/\bto\b.{0,60}\bunsubscribe.{0,60}\breply\b/is
+describe TO_UNSUB_REPLY		Says: "to unsubscribe, reply via email" or similar
 
 full REMOVAL_INSTRUCTIONS	/REMOVAL INSTRUCTIONS/i
 describe REMOVAL_INSTRUCTIONS	Gives instructions for removal from list
@@ -749,13 +752,22 @@ describe THE_FOLLOWING_FORM	Asks you to fill out a form
 body HUNZA_DIET_BREAD		/HUNZA DIET BREAD/
 describe HUNZA_DIET_BREAD	Offers a tasty-sounding dietary product
 
-full A_HREF_TO_REMOVE		/href[3D=\s\"\']*\S+(?:unsubscribe|remove)/i
+full A_HREF_TO_UNSUB		/href[3D=\s\"\']*\S+unsubscribe/i
+describe A_HREF_TO_UNSUB	Link to a URL containing "unsubscribe"
+
+body UNSUB_SCRIPT		/https?:\/\/.*cgi.*\/unsubscribe\./
+describe UNSUB_SCRIPT		URL of CGI script called "unsubscribe"
+
+body UNSUB_PAGE			/https?:\/\/[^\/]+\/unsubscribe/
+describe UNSUB_PAGE		URL of page called "unsubscribe"
+
+full A_HREF_TO_REMOVE		/href[3D=\s\"\']*\S+remove/i
 describe A_HREF_TO_REMOVE	Link to a URL containing "remove"
 
-body REMOVE_SCRIPT		/https?:\/\/.*cgi.*\/(?:unsubscribe|remove)\./
+body REMOVE_SCRIPT		/https?:\/\/.*cgi.*\/remove\./
 describe REMOVE_SCRIPT		URL of CGI script called "remove"
 
-body REMOVE_PAGE		/https?:\/\/[^\/]+\/(?:unsubscribe|remove)/
+body REMOVE_PAGE		/https?:\/\/[^\/]+\/remove/
 describe REMOVE_PAGE		URL of page called "remove"
 
 # include the \n\n so we don't match mailto's in the headers!  Some list software
@@ -797,7 +809,7 @@ full NIGERIAN_SCAM		/BASED ON INFORMATION GATHERED ABOUT YOU, WE BELIEVE\s*YOU W
 describe NIGERIAN_SCAM		Nigerian scam, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
 
 # (contrib: skod)
-body NIGERIAN_SCAM_2		/(?:Government of Nigeria|NIGERIA NATIONAL)/
+body NIGERIAN_SCAM_2		/(?:Government of Nigeria|NIGERIAN? NATIONAL|Nigerian? Government)/
 describe NIGERIAN_SCAM_2	Mutated Nigerian scams
 
 body UNNEEDED_HTML_ENCODING	/font=3E/i
@@ -872,6 +884,7 @@ score ASKS_BILLING_ADDRESS           0.1
 score AUTO_EMAIL_REMOVAL             3.6
 score A_HREF_TO_IP                   1.3
 score A_HREF_TO_REMOVE               2.0
+score A_HREF_TO_UNSUB                2.0
 score BAD_HELO_WARNING               1.1
 score BASE64_ENC_TEXT                2.0
 score BILLION_DOLLARS                1.5
@@ -1020,6 +1033,8 @@ score REMOVAL_INSTRUCTIONS           3.2
 score REMOVE_IN_QUOTES               2.5
 score REMOVE_PAGE                    2.0
 score REMOVE_SCRIPT                  3.3
+score UNSUB_PAGE                     2.0
+score UNSUB_SCRIPT                   3.3
 score REMOVE_SUBJ                    2.0
 score REPLY_REMOVE_SUBJECT           2.0
 score REPLY_TO_EMPTY                 3.0
@@ -1049,6 +1064,7 @@ score TAKE_ACTION_NOW                2.0
 score THE_FOLLOWING_FORM             4.0
 score THIS_AINT_SPAM                 2.3
 score TO_BE_REMOVED_REPLY            2.0
+score TO_UNSUB_REPLY            2.0
 score TO_EMPTY                       0.1
 score TO_MALFORMED                   2.6
 score TO_NO_USER                     1.4
