@@ -1522,28 +1522,38 @@ sub get_uri_list {
   }
 
   # make sure we catch bad encoding tricks
+  my @nuris = ();
   for my $uri (@uris) {
     next if $uri =~ /^mailto:/i;
 
+    # sometimes we catch URLs on multiple lines
+    $uri =~ s/\n//g;
+
+    # Make a copy so we don't trash the original
+    my $nuri = $uri;
+
     # http://www.foo.biz?id=3 -> http://www.foo.biz/?id=3
-    $uri =~ s/^(https?:\/\/[^\/\?]+)\?/$1\/?/;
+    $nuri =~ s/^(https?:\/\/[^\/\?]+)\?/$1\/?/;
 
     # deal with encoding of chars, this is just the set of printable
     # chars minus ' ' (that is, dec 33-126, hex 21-7e)
-    $uri =~ s/\&\#0*(3[3-9]|[4-9]\d|1[01]\d|12[0-6]);/sprintf "%c",$1/e;
-    $uri =~ s/\&\#x0*(2[1-9]|[3-6][a-f0-9]|7[0-9a-e]);/sprintf "%c",hex($1)/ei;
+    $nuri =~ s/\&\#0*(3[3-9]|[4-9]\d|1[01]\d|12[0-6]);/sprintf "%c",$1/ge;
+    $nuri =~ s/\&\#x0*(2[1-9]|[3-6][a-f0-9]|7[0-9a-e]);/sprintf "%c",hex($1)/gei;
 
-    my ($nuri, $unencoded, $encoded) =
-      Mail::SpamAssassin::Util::url_encode($uri);
+    ($nuri) = Mail::SpamAssassin::Util::url_encode($nuri);
     if ($nuri ne $uri) {
-      push(@uris, $nuri);
+      push(@nuris, $nuri);
     }
+
+    # deal with redirectors, push the redirect uri onto the uri array
+    # so this loop deals with that one independently
+    $nuri =~ m{^https?://.+?(https?://.+)$} && push(@uris, $1);
   }
 
   # remove duplicates
-  my %uris;
-  $uris{$_} = 1 for @uris;
+  my %uris = map { $_ => 1 } @uris, @nuris;
   @uris = keys %uris;
+  @nuris = undef;
 
   # get domain list
   my %domains;
