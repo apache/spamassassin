@@ -1407,6 +1407,22 @@ my $domain      = qq<(?:$domain_ref|$domain_lit)>;
 # Finally, the address-spec regex (more or less)
 my $Addr_spec_re   = qr<$local_part\s*\@\s*$domain>o;
 
+# Discard all but one of identical successive entries in an array.
+# The input must be sorted if you want the returned array to be
+# without identical entries.
+sub _uniq {
+  my $previous;
+  my @uniq;
+  if (@_) {
+    push(@uniq, ($previous = shift(@_)));
+  }
+  foreach my $current (@_) {
+    next if ($current eq $previous);
+    push(@uniq, ($previous = $current));
+  }
+  return @uniq;
+}
+
 sub get_uri_list {
   my ($self) = @_;
 
@@ -1461,6 +1477,9 @@ sub get_uri_list {
       push @uris, $uri;
     }
   }
+
+  # remove duplicates
+  @uris = _uniq(sort(@uris));
 
   $self->{uri_list} = \@uris;
   dbg("uri tests: Done uriRE");
