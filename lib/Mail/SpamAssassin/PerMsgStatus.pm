@@ -908,7 +908,7 @@ sub _get_tag {
             CONTACTADDRESS => sub { $self->{conf}->{report_contact}; },
 
             BAYES => sub {
-              exists($self->{bayes_score}) ?
+              defined($self->{bayes_score}) ?
                         sprintf("%3.4f", $self->{bayes_score}) : "0.5"
             },
 
