@@ -89,6 +89,7 @@ sub locate {
 	    last if $line !~ /^#/;
 	    $time++ if $line =~ /\b(?!08)\d\d:\d\d:\d\d\b/;
 	    $tag++ if $line =~ /CURRENT_CORPORA_SUBMIT_VERSION/;
+	    $tag++ if $line =~ /CURRENT_CORPORA_WEEKLY_VERSION/ && /-net-/;
 	    $revision{$_} = $1 if $line =~ m/CVS revision:\s*(\S+)/;
 	}
 	close(FILE);
@@ -135,16 +136,14 @@ sub sort_all {
 }
 
 sub current {
-    for my $class ("DETAILS", "HTML", "NET", "ALL") {
-	for my $age ("new", "1day", "2day", "7day", "10day") {
+    for my $class ("DETAILS", "HTML", "NET") {
+	for my $age ("new", "all", "1day", "2day", "7day") {
 	    my @ham = grep { /^(?:nonspam|ham)/ } @files;
 	    my @spam = grep { /^spam/ } @files;
 
 	    chdir $opt{corpus};
 
-	    next if ($class eq "NET" && $age ne "10day");
-	    next if ($class ne "NET" && $age eq "10day");
-	    next if ($class eq "ALL" && $age ne "new");
+	    next if ($class eq "NET" && $age !~ /^(?:new|all)$/);
 
 	    # net vs. local
 	    my @ham_net = grep { /-net-/ } @ham;
@@ -164,7 +163,13 @@ sub current {
 	    }
 	    
 	    # age
-	    if ($age eq "new") {
+	    if ($class eq "NET") {
+		@ham = grep { -M "$_" < 10 } @ham;
+		@spam = grep { -M "$_" < 10 } @spam;
+		@ham = grep { $revision{$_} eq $revision } @ham;
+		@spam = grep { $revision{$_} eq $revision } @spam;
+	    }
+	    elsif ($age =~ /^(?:new|all)$/) {
 		@ham = grep { -M "$_" < -M $opt{tagtime} } @ham;
 		@spam = grep { -M "$_" < -M $opt{tagtime} } @spam;
 		@ham = grep { $revision{$_} eq $revision } @ham;
@@ -186,7 +191,11 @@ sub current {
 		print OUT "# $_=$revision{$_}\n" if $revision{$_} ne $revision;
 	    }
 
-	    if ($class eq "ALL") {
+	    my $flags = "";
+	    $flags = "-t net -s 1" if $class eq "NET";
+	    $flags = "-M HTML_MESSAGE" if $class eq "HTML";
+
+	    if ($age eq "all") {
 		my %spam;
 		my %ham;
 		my @output;
@@ -199,19 +208,20 @@ sub current {
 		}
 		unlink "$opt{tmp}/ham.log.$$";
 		unlink "$opt{tmp}/spam.log.$$";
+		next unless (scalar keys %spam && scalar keys %ham);
 		for my $user (sort keys %spam) {
 		    next unless defined $ham{$user};
 		    chdir "$opt{tree}/masses";
 		    system("cat $opt{corpus}/$ham{$user} >> $opt{tmp}/ham.log.$$");
 		    system("cat $opt{corpus}/$spam{$user} >> $opt{tmp}/spam.log.$$");
-		    open(IN, "./hit-frequencies -p -x $opt{corpus}/$spam{$user} $opt{corpus}/$ham{$user} |");
+		    open(IN, "./hit-frequencies -xpa $flags $opt{corpus}/$spam{$user} $opt{corpus}/$ham{$user} |");
 		    while(<IN>) {
 			chomp;
 			push @output, "$_:$user\n";
 		    }
 		    close(IN);
 		}
-		open(IN, "./hit-frequencies -p -x $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
+		open(IN, "./hit-frequencies -xpa $flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
 		while(<IN>) {
 		    push @output, $_;
 		}
@@ -220,24 +230,13 @@ sub current {
 		    print OUT $_;
 		}
 	    }
-	    else {
+	    elsif (@ham && @spam) {
 		# get logs
 		system("cat " . join(" ", @ham) . " > $opt{tmp}/ham.log.$$");
 		system("cat " . join(" ", @spam) . " > $opt{tmp}/spam.log.$$");
 	
 		chdir "$opt{tree}/masses";
-		# open hit-frequencies
-		if ($class eq "NET") {
-		    open(IN, "./hit-frequencies -s 1 -p -x -t net $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
-		}
-		elsif ($class eq "HTML") {
-		    open(IN, "./hit-frequencies -p -x -M HTML_MESSAGE $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
-		}
-		else {
-		    open(IN, "./hit-frequencies -p -x $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
-		}
-
-		# do hit-frequencies
+		open(IN, "./hit-frequencies -xpa $flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
 		while(<IN>) {
 		    print(OUT);
 		}
