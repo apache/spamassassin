@@ -4,11 +4,12 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("spf");
 use Test;
 
+use constant TEST_ENABLED => (-e 't/do_net');
 use constant HAS_SPFQUERY => eval { require Mail::SPF::Query; };
 
 BEGIN {
   
-  plan tests => (HAS_SPFQUERY ? 2 : 0);
+  plan tests => ((TEST_ENABLED && HAS_SPFQUERY) ? 2 : 0);
 
 };
 
