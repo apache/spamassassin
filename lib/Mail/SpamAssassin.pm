@@ -154,7 +154,7 @@ $SUB_VERSION = (split(/\s+/,'$LastChangedDate$ updated by SVN'))[1];
 # This variable should not be modified directly.
 @EXTRA_VERSION = qw();
 if (defined $IS_DEVEL_BUILD && $IS_DEVEL_BUILD) {
-  @EXTRA_VERSION = ( 'r' . qw{$LastChangedRevision$ updated by SVN}[1] );
+  push(@EXTRA_VERSION, ( 'r' . qw{$LastChangedRevision$ updated by SVN}[1] ));
 }
 
 sub Version { join('-', $VERSION, @EXTRA_VERSION) }
