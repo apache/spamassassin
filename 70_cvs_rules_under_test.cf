@@ -57,3 +57,9 @@ describe T_FREE_HOSTING           Contains 'free hosting' with capitals
 body T_FREE_WEBSITE               /(?-i:F)ree web/i  
 describe T_FREE_WEBSITE           Contains 'free website' with capitals
 
+# bug 646: compensate rule
+body T_TRADEMARK            /\bregistered\s+trademark/i
+description T_TRADEMARK     Message specifies a registered trademark
+tflags T_TRADEMARK          nice
+score T_TRADEMARK           -1.0
+
