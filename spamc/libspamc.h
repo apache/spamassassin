@@ -29,7 +29,9 @@
 #endif
 
 #ifdef _WIN32
-#define EX_OK        0
+/* FIXME: This stuff has to go somewhere else */
+
+#define EX_OK           0
 #define EX_USAGE        64
 #define EX_DATAERR      65
 #define EX_NOINPUT      66
@@ -48,6 +50,16 @@
 
 #define STDIN_FILENO 0
 #define STDOUT_FILENO 1
+
+/* FIXME: This doesn't belong here either */
+#define LOG_EMERG       0       /* system is unusable */
+#define LOG_ALERT       1       /* action must be taken immediately */
+#define LOG_CRIT        2       /* critical conditions */
+#define LOG_ERR         3       /* error conditions */
+#define LOG_WARNING     4       /* warning conditions */
+#define LOG_NOTICE      5       /* normal but significant condition */
+#define LOG_INFO        6       /* informational */
+#define LOG_DEBUG       7       /* debug-level messages */
 
 #endif
 

@@ -55,9 +55,6 @@
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
-#ifndef LOG_ERR
-#define LOG_ERR 3
-#endif
 
 #define MAX_CONNECT_RETRIES 3
 #define CONNECT_RETRY_SLEEP 1

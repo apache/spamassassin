@@ -38,9 +38,6 @@
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
 #endif
-#ifndef LOG_ERR
-#define LOG_ERR 3
-#endif
 
 #ifdef HAVE_SYSEXITS_H
 #include <sysexits.h>
