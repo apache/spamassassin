@@ -806,8 +806,7 @@ sub check_subject_for_lotsa_8bit_chars {
 sub are_more_high_bits_set {
   my ($self, $str) = @_;
 
-  my @highbits = ($str =~ /[\200-\377]/g);
-  my $numhis = $#highbits+1;
+  my $numhis = () = ($str =~ /[\200-\377]/g);
   my $numlos = length($str) - $numhis;
 
   ($numlos <= $numhis && $numhis > 3);
