@@ -632,7 +632,7 @@ telling_truth:
 # When this occurs for real, the from name and HELO name will be the
 # same, unless the "helo" name is localhost, or the from and by hostsnames
 # themselves are localhost
-sub check_for_bad_helo2 {
+sub _check_received_helos {
   my ($self) = @_;
 
   my @received = grep(/\S/, split(/\n/, $self->get ('Received')));
@@ -657,9 +657,39 @@ sub check_for_bad_helo2 {
     next unless $received[$i] =~
       /from ([\w.-]+) \(([\w.-]+\.[\w.-]+).* by ([\w.-]+)/;
 
-    my $from_host = $1;
-    my $helo_host = $2;
+    # I'm pretty sure from and HELO were the wrong way around here.  e.g.  in
+    # "from lycos.co.uk (newwww-37.st1.spray.net [212.78.202.47]) by
+    # outmail-3.st1.spray.net", the HELO is 'lycos.co.uk', NOT
+    # 'newwww-37.st1.spray.net' -- the latter is from reverse DNS, and is
+    # therefore trustworthy, whereas HELO is not.  (Nov 12 2002 jm) So
+    # accordingly, I've changed the order of $from_host and $helo_host below.
+
+    my $from_host = $2;
+    my $helo_host = $1;
     my $by_host   = $3;
+
+    # Check for a faked dotcom HELO, e.g.
+    # Received: from mx02.hotmail.com (www.sucasita.com.mx [148.223.251.99])...
+    # this can be a stronger spamsign than the normal case, since the
+    # big dotcoms don't screw up their rDNS normally ;), so less FPs.
+    # Since spammers like sending out their mails from the dotcoms (esp.
+    # hotmail and AOL) this will catch those forgeries.
+    #
+    # allow stuff before the dot-com for both from-name and HELO-name,
+    # so HELO="outgoing.aol.com" and from="mx34853495.mx.aol.com" works OK.
+    #
+    $self->{faked_dotcom_helo} = 0;
+    if ($helo_host =~ /(?:\.|^)(lycos\.com|lycos\.co\.uk|hotmail\.com
+		|cs\.com|aol\.com|msn\.com|yahoo\.com|drizzle\.com)$/ix)
+    {
+      my $dom = $1;
+      if ($from_host !~ /(?:\.|^)${dom}$/i) {
+	dbg ("Received: faked dotcom HELO: from=$from_host HELO=$helo_host");
+	$self->{faked_dotcom_helo} = 1;
+      }
+    }
+
+    # OK, carry on to check for the faked-HELO-as-relay case
 
     next unless ($from_host eq $by_host);
     next if ($from_host eq "localhost");
@@ -679,12 +709,25 @@ sub check_for_bad_helo2 {
     if ($from_domain ne $helo_domain) {
       dbg("Received: from and by hosts '$from_host' same, but " .
           "helo host '$helo_host' differs\n");
-      return 1;
+      $self->{found_bad_helo_2} = 1;
+      return;
     }
   } # for (my $i = 0; $i < @received; $i++)
 
-  return 0;
-} # check_for_bad_helo2()
+  $self->{found_bad_helo_2} = 0;
+} # _check_received_helos()
+
+sub check_for_bad_helo2 {
+  my ($self) = @_;
+  if (!exists $self->{found_bad_helo_2}) { $self->_check_received_helos(@_); }
+  return $self->{found_bad_helo_2};
+}
+
+sub check_for_fake_dotcom_helo {
+  my ($self) = @_;
+  if (!exists $self->{faked_dotcom_helo}) { $self->_check_received_helos(@_); }
+  return $self->{faked_dotcom_helo};
+}
 
 ###########################################################################
 
