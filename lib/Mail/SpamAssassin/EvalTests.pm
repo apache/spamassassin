@@ -373,22 +373,37 @@ sub _check_for_forged_received {
         }
       }
     }
+    dbg ("forged-HELO: from=$from[$i] helo=$helo[$i] by=$by[$i]");
 
-    my $prevhelo = $helo[$i-1];
-    my $prevfrom = $from[$i-1];
+    # note: this code won't catch IP-address HELOs, but we already have
+    # a separate rule for that anyway.
 
-    if (defined($prevhelo) && $prevhelo =~ /^\w+(?:[\w.-]+\.)+\w+$/
-		&& $by[$i] ne $prevhelo)
+    my $by = $by[$i];
+    next unless ($by !~ /^\w+(?:[\w.-]+\.)+\w+$/);
+
+    my $prev = $helo[$i-1];
+    if (defined($prev)
+		&& $prev =~ /^\w+(?:[\w.-]+\.)+\w+$/
+		&& $by ne $prev && !helo_forgery_whitelisted($by, $prev))
     {
+      dbg ("forged-HELO: mismatch on HELO: '$prev' != '$by[$i]'");
       $self->{mismatch_helo}++;
     }
 
-    if (defined($prevfrom) && $prevfrom =~ /^\w+(?:[\w.-]+\.)+\w+$/
-		&& $by[$i] ne $prevfrom)
+    $prev = $from[$i-1];
+    if (defined($prev) && $prev =~ /^\w+(?:[\w.-]+\.)+\w+$/
+		&& $by ne $prev && !helo_forgery_whitelisted($by, $prev))
     {
+      dbg ("forged-HELO: mismatch on from: '$prev' != '$by[$i]'");
       $self->{mismatch_from}++;
     }
   }
+}
+
+sub helo_forgery_whitelisted {
+  my ($helo, $rdns) = @_;
+  if ($helo eq 'msn.com' && $rdns eq 'hotmail.com') { return 1; }
+  0;
 }
 
 sub hostname_to_domain {
