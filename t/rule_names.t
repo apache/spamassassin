@@ -41,11 +41,6 @@ while (my ($test, $type) = each %{ $sa->{conf}->{test_types} }) {
 # run tests
 my $mail = 'log/rule_names.eml';
 write_mail();
-plan tests => (scalar @tests),
-  onfail => sub {
-    warn "\n\n   Note: rule_name failures may be only cosmetic" .
-    "\n        but must be fixed before release\n\n";
-  };
 %patterns = ();
 my $i = 1;
 for my $test (@tests) {
@@ -59,6 +54,14 @@ for my $test (@tests) {
   next if $test eq "UNIQUE_WORDS";
   $anti_patterns{"$test,"} = "P_" . $i++;
 }
+
+# settings
+plan tests => (scalar(keys %anti_patterns) + scalar(keys %patterns)),
+onfail => sub {
+    warn "\n\n   Note: rule_name failures may be only cosmetic" .
+    "\n        but must be fixed before release\n\n";
+};
+
 tstprefs ("
 	# set super low threshold, so always marked as spam
 	required_hits -10000.0
