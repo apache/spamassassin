@@ -349,6 +349,11 @@ score RCVD_IN_RFCI		     0.5
 score RCVD_IN_ORBS                   1.0
 #score RCVD_IN_ORBZ                   1.0
 
+# the ok_language configuration option will need to be set correctly
+# across each corpus for this score to be GA evolved
+
+score UNDESIRED_LANGUAGE_BODY        2.0
+
 # unscored by default -- commercial services.  If you pay for these,
 # give them a score so they will be checked.
 
