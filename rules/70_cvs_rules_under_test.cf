@@ -250,6 +250,10 @@ uri T_E_MAILPROMO_MAILTO	/mailto:\S+[.@]e-mailpromo\.net/
 uri T_MARINEDIGITAL_MAILTO	/mailto:\S+[.@]marinedigital\.com/
 uri T_ITSREMARKABLE_MAILTO	/mailto:\S+[.@]itsremarkable\.com/
 
+# quinlan: I think this is more correct
+rawbody  T_MIME_LONG_LINE_QP	eval:check_for_mime_long_line_qp2()
+describe T_MIME_LONG_LINE_QP	Quoted-printable line longer than 76 characters
+
 header T_WITH_LC_SMTP		Received =~ /\swith\ssmtp;\s/
 describe T_WITH_LC_SMTP		Received line contains spam-sign (lowercase smtp)
 
