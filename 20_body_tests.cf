@@ -741,11 +741,15 @@ describe COPY_ACCURATELY        Common pyramid scheme phrase (1)
 body     SEE_FOR_YOURSELF       /See (?:for|it) yourself/i
 describe SEE_FOR_YOURSELF       See for yourself
 
-body DOUBLE_CAPSWORD		/\b([A-Z]{3,})\b.{0,50}\b\1\b/
+# Jul  3 2002 jm: made into a rawbody test so it actually tests line-by-line. Otherwise
+# words in all caps (eg. a headline) repeated anywhere in the *next few* lines (eg.
+# story leader) were getting a hit.  Also made min wordsize 4 letters for a bit more
+# sanity.
+rawbody DOUBLE_CAPSWORD		/\b([A-Z]{4,})\b.{0,50}\b\1\b/
 describe DOUBLE_CAPSWORD	A word in all caps repeated on the line
 
-body ORDER_NOW              /order (?:now|soon|fast|quickly|while)/i
-describe ORDER_NOW          Encourages you to waste no time in ordering
+body ORDER_NOW                  /order (?:now|soon|fast|quickly|while)/i
+describe ORDER_NOW              Encourages you to waste no time in ordering
 
 rawbody OBFUSCATING_JAVASCRIPT   /charCodeAt|fromCharCode/i
 describe OBFUSCATING_JAVASCRIPT   An attempt to hide spam inside obfuscating Javascript code
