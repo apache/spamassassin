@@ -82,8 +82,8 @@ use vars qw{
 	@site_rules_path
 };
 
-$VERSION = "2.44";              # update after release
-$IS_DEVEL_BUILD = 0;            # change for release versions
+$VERSION = "2.45";              # update after release
+$IS_DEVEL_BUILD = 1;            # change for release versions
 
 # Create the hash so that it really points to something, otherwise we can't
 # get a reference to it -- Marc
@@ -91,7 +91,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.115.2.24 2003/01/30 16:15:18 msquadrat Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.115.2.25 2003/01/31 15:35:22 jmason Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
