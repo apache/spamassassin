@@ -1,14 +1,10 @@
 require 5.005;
 
-my $DEF_RULES_DIR	= '$(DESTDIR)$(PREFIX)/share/spamassassin';
-
 # RPM builders, or people building in their home dirs:
-# set SYSCONFDIR in the environment to override from /etc .
+# set PREFIX (default = /usr)
+# set SYSCONFDIR (default = /etc)
 #
-my $LOCAL_RULES_DIR	= '$(DESTDIR)/etc/mail/spamassassin';
-if (defined $ENV{'SYSCONFDIR'}) {
-   $LOCAL_RULES_DIR	= '$(SYSCONFDIR)/mail/spamassassin';
-}
+# e.g. "perl Makefile.PL PREFIX=/home/jm/sausr SYSCONFDIR=/home/jm/saetc"
 
 # this is a good place to put -g, -R/usr/local/lib etc.
 my $MYCFLAGS		= '';
@@ -98,9 +94,15 @@ sub MY::install {
 }
 
 sub MY::postamble {
-    # import some C-linkage stuff from %Config.  We can't seem to
-    # do this with MakeMaker without it trying to build the perl
-    # modules as .so's :(
+  # import some C-linkage stuff from %Config.  We can't seem to
+  # do this with MakeMaker without it trying to build the perl
+  # modules as .so's :(
+
+  package MY;
+  my $self = shift;
+
+  my $sysconfdir = $self->{SYSCONFDIR};
+  $sysconfdir ||= '$(DESTDIR)/etc';
 
 qq#
 
@@ -114,23 +116,28 @@ CFLIBS		= $Config{libs}
 CFLDFLAGS	= $Config{ldflags}
 CFLDDLFLAGS	= $Config{lddlflags}
 
-DEF_RULES_DIR	= $DEF_RULES_DIR
-LOCAL_RULES_DIR	= $LOCAL_RULES_DIR
+SYSCONFDIR      = $sysconfdir
 
 #. q#
+
+DEF_RULES_DIR	= $(DESTDIR)$(PREFIX)/share/spamassassin
+LOCAL_RULES_DIR	= $(DESTDIR)$(SYSCONFDIR)/mail/spamassassin
+
+FIXPATHFLAGS    = -DDEF_RULES_DIR="$(DEF_RULES_DIR)" \
+                  -DLOCAL_RULES_DIR="$(LOCAL_RULES_DIR)"
 
 pm_to_blib: spamassassin doc/.made
 
 spamassassin: spamassassin.raw
-	$(PERL) fixpath.pl spamassassin.raw $@
+	$(PERL) fixpath.pl $(FIXPATHFLAGS) spamassassin.raw $@
 	$(CHMOD) $(PERM_RWX) $@
 
 spamd/spamd: spamd/spamd.raw
-	$(PERL) fixpath.pl spamd/spamd.raw $@
+	$(PERL) fixpath.pl $(FIXPATHFLAGS) spamd/spamd.raw $@
 	$(CHMOD) $(PERM_RWX) $@
 
 spamproxy/spamproxyd: spamproxy/spamproxyd.raw
-	$(PERL) fixpath.pl spamproxy/spamproxyd.raw $@
+	$(PERL) fixpath.pl $(FIXPATHFLAGS) spamproxy/spamproxyd.raw $@
 	$(CHMOD) $(PERM_RWX) $@
 
 spamd/libspamc.so: spamd/libspamc.c
@@ -150,17 +157,17 @@ $(DEF_RULES_DIR)/user_prefs.template: rules/user_prefs.template
 	$(CP) rules/user_prefs.template $(DEF_RULES_DIR)/user_prefs.template
 
 $(LOCAL_RULES_DIR)/local.cf: rules/local.cf
-        if [ "$(PREFIX)" = "/usr" -a ! -f $(LOCAL_RULES_DIR)/local.cf ] ; then \
-          $(CP) rules/local.cf $(LOCAL_RULES_DIR)/local.cf ; \
-        else true ; fi
+	if [ ! -f $(LOCAL_RULES_DIR)/local.cf ] ; then \
+	  $(CP) rules/local.cf $(LOCAL_RULES_DIR)/local.cf ; \
+	else true ; fi
 
 $(DEF_RULES_DIR):
 	mkdir -p $(DEF_RULES_DIR)
 
 $(LOCAL_RULES_DIR):
-        if [ "$(PREFIX)" = "/usr" -a ! -d $(LOCAL_RULES_DIR) ] ; then \
-          mkdir -p $(LOCAL_RULES_DIR) ; \
-        else true ; fi
+	if [ ! -d $(LOCAL_RULES_DIR) ] ; then \
+	  mkdir -p $(LOCAL_RULES_DIR) ; \
+	else true ; fi
 
 doc:
 	mkdir -p doc
@@ -171,9 +178,9 @@ text_html_doc: doc/.made
 doc/.made: doc $(MAN1PODS) $(MAN3PODS)
 	for f in $(MAN1PODS) $(MAN3PODS) $(EXTRAPODS) ; do \
 	      pod2html $$f > doc/`echo $$f | perl -pe \
-	  	's/(lib|spamd)\///; s/\//_/g; s/\.(pod|pm)//;'`.html ; \
+		's/(lib|spamd)\///; s/\//_/g; s/\.(pod|pm)//;'`.html ; \
 	      pod2text $$f > doc/`echo $$f | perl -pe \
-	  	's/(lib|spamd)\///; s/\//_/g; s/\.(pod|pm)//;'`.txt ; \
+		's/(lib|spamd)\///; s/\//_/g; s/\.(pod|pm)//;'`.txt ; \
 	done
 	touch doc/.made
 	-rm -f pod2htm*
