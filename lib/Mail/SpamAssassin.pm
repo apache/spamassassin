@@ -594,6 +594,9 @@ sub signal_user_changed {
   $self->{bayes_scanner}->finish();
   $self->{bayes_scanner} = new Mail::SpamAssassin::Bayes ($self);
 
+  # this user may have a different learn_to_journal setting, so reset appropriately
+  $self->{'learn_to_journal'} = $self->{conf}->{bayes_learn_to_journal};
+
   $set |= 1 unless $self->{local_tests_only};
   $set |= 2 if $self->{bayes_scanner}->is_scan_available();
 

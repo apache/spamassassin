@@ -727,7 +727,7 @@ unless ($clients_per_child > 1) {
 }
 
 if ($copy_config_p) {
-  foreach( 'username', 'user_dir', 'userstate_dir' ) {
+  foreach( 'username', 'user_dir', 'userstate_dir', 'learn_to_journal' ) {
     $msa_backup{$_} = $spamtest->{$_} if (exists $spamtest->{$_});
   }
 
