@@ -686,6 +686,22 @@ header RCVD_IN_IADB_SPF		eval:check_rbl_sub('iadb', '127.0.0.3')
 describe RCVD_IN_IADB_SPF	Sender is in IADB as a publisher of SPF records
 tflags RCVD_IN_IADB_SPF		net nice
 
+# IADB trusted
+header __RCVD_IN_IADB_TR	eval:check_rbl('iadbtr-firsttrusted', 'iadb.isipp.com.')
+tflags __RCVD_IN_IADB_TR	net nice
+
+header RCVD_IN_IADB_LISTED_TR	eval:check_rbl_sub('iadbtr', '127.0.0.1')
+describe RCVD_IN_IADB_LISTED_TR	Sender is in ISIPP IADB of trusted senders
+tflags RCVD_IN_IADB_LISTED_TR	net nice
+
+header RCVD_IN_IADB_VOUCHED_TR	eval:check_rbl_sub('iadbtr', '127.0.0.2')
+describe RCVD_IN_IADB_VOUCHED_TR	Sender is a vouched sender in IADB
+tflags RCVD_IN_IADB_VOUCHED_TR	net nice
+
+header RCVD_IN_IADB_SPF_TR		eval:check_rbl_sub('iadbtr', '127.0.0.3')
+describe RCVD_IN_IADB_SPF_TR	Sender is in IADB as a publisher of SPF records
+tflags RCVD_IN_IADB_SPF_TR		net nice
+
 # Bug 3153
 body __MIME_TEXT_ONLY           eval:check_for_mime_text_only()
 
