@@ -16,10 +16,10 @@ BEGIN {
     unshift(@INC, '../blib/lib');
   }
 
-  plan tests => (HAS_DB_FILE ? 44 : 0);
+  plan tests => ((HAS_DB_FILE && !$RUNNING_ON_WINDOWS) ? 44 : 0);
 };
 
-exit unless HAS_DB_FILE;
+exit unless (HAS_DB_FILE && !$RUNNING_ON_WINDOWS);
 
 tstlocalrules ("
         bayes_learn_to_journal 0
