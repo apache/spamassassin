@@ -96,7 +96,7 @@ sub finish_parsing_end {
 
 	  # if the tag exists, replace it with the corresponding phrase
 	  if ($tag_name) {
-	    my $replacement = $opts->{conf}->{replace_tags}->{$tag_name};
+	    my $replacement = $opts->{conf}->{replace_tag}->{$tag_name};
 	    if ($replacement) {
 	      $re =~ s|$start$tag_name$end|$replacement|g;
 	    }
@@ -131,13 +131,7 @@ put them inside the rule itself for greater flexibility.
 
   push(@cmds, {
     setting => 'replace_tag',
-    code => sub {
-      my ($self, $key, $value, $line) = @_;
-      if ($value =~ m|^(\S+)\s+(.*?)\s*$|) {
-	dbg("replacetags: replace_tag $1 -> $2");
-	$conf->{replace_tags}->{$1} = $2;
-      }
-    }
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
   });
 
 =item replace_rules list_of_tests
