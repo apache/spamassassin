@@ -623,6 +623,11 @@ sub check {
 		protocol_error("(header not in 'Name: value' format)");
                 return 1;
             }
+	    if ($value eq '')
+	    {
+		Mail::SpamAssassin::dbg('ignored empty '$header' header');
+		next;
+	    }
 
             # We'll run handle user unless we've been told not
             # to process per-user config files.  Otherwise
