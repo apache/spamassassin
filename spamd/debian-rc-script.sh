@@ -8,8 +8,8 @@
 
 # Please do not name this script /etc/init.d/spamd.  It may cause problems.
 
-PATH=/sbin:/bin:/usr/sbin:/usr/bin
-DAEMON=/usr/bin/spamd
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin
+DAEMON=spamd
 PNAME=spamd
 NAME=spamd
 DESC="SpamAssasin Mail Filter Daemon"
