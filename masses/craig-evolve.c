@@ -12,6 +12,15 @@
 #include "tmp/scores.h"
 #include "tmp/tests.h"
 
+
+/* Craig's log(score) evaluator, not as aggressive against FPs I think */
+//#define USE_LOG_SCORE_EVALUATION
+
+/* Use score ranges derived from hit-frequencies S/O ratio,
+ * and numbers of mails hit */
+#define USE_SCORE_RANGES
+
+
 double evaluate(PGAContext *, int, int);
 int    myMutation(PGAContext *, int, int, double);
 int    GetIntegerParameter(char *query);
@@ -19,14 +28,14 @@ void dump(FILE *);
 void WriteString(PGAContext *ctx, FILE *fp, int p, int pop);
 void showSummary(PGAContext *ctx);
 
-const double threshold = 5.0;
+double threshold = 5.0;
 double nybias = 5.0;
 const int exhaustive_eval = 1;
 
 const double mutation_rate = 0.01;
 const double mutation_noise = 0.5;
 const double regression_coefficient = 0.75;
-const double SCORE_CAP = 3.0;
+//const double SCORE_CAP = 3.0;
 
 const double crossover_rate = 0.65;
 
@@ -70,7 +79,7 @@ void init_data()
   if (rank == 0) {
     loadtests();
     loadscores();
-    nybias = nybias*((double)num_spam)/((double)num_nonspam);
+    //nybias = nybias*((double)num_spam)/((double)num_nonspam);
     printf("nybias normalized to %f\n",nybias);
   }
 
@@ -98,11 +107,15 @@ int main(int argc, char **argv) {
 //#ifndef USE_MPI
     int arg;
 
-    while ((arg = getopt (argc, argv, "b:r:s:C")) != -1) {
+    while ((arg = getopt (argc, argv, "b:r:s:t:C")) != -1) {
       switch (arg) {
         case 'b':
           nybias = atof(optarg);
           break;
+
+         case 't':
+           threshold = (double) atof(optarg);
+           break;
 
         case 's':
           pop_size = atoi(optarg);
@@ -143,13 +156,19 @@ int main(int argc, char **argv) {
 
      //PGASetMutationOrCrossoverFlag(ctx, PGA_TRUE);
 
-     // jm: try out using ranges instead of our own mutator
+#ifndef USE_SCORE_RANGES
+
      PGASetMutationBoundedFlag(ctx, PGA_FALSE);
      PGASetUserFunction(ctx, PGA_USERFUNCTION_MUTATION, (void *)myMutation);
 
-     //PGASetMutationBoundedFlag(ctx, PGA_FALSE);
-     //PGASetMutationType(ctx, PGA_MUTATION_RANGE);
-     //PGASetRealInitRange (ctx, range_lo, range_hi);
+#else
+
+     // jm: try out using ranges instead of our own mutator
+     PGASetMutationBoundedFlag(ctx, PGA_FALSE);
+     PGASetMutationType(ctx, PGA_MUTATION_RANGE);
+     PGASetRealInitRange (ctx, range_lo, range_hi);
+
+#endif
 
      //PGASetCrossoverType(ctx, PGA_CROSSOVER_ONEPT);
      PGASetCrossoverProb(ctx, crossover_rate);
@@ -168,11 +187,13 @@ int main(int argc, char **argv) {
      {
        for(p=0; p<pop_size; p++)
        {
+#ifndef USE_SCORE_RANGES
 	 if (!justCount && is_mutatable[i])
 	 {
             if(bestscores[i] > SCORE_CAP) bestscores[i] = SCORE_CAP;
 	    else if(bestscores[i] < -SCORE_CAP) bestscores[i] = -SCORE_CAP;
 	 }
+#endif
 	 PGASetRealAllele(ctx, p, PGA_NEWPOP, i, bestscores[i]);
        }
      }
@@ -252,7 +273,7 @@ double evaluate(PGAContext *ctx, int p, int pop)
     tot_score += score_msg(ctx,p,pop,i);
   }
 
-#if 1
+#ifndef USE_LOG_SCORE_EVALUATION
 
   // just count how far they were from the threshold, in each case
   ynweight = (ga_yn * threshold) - ynscore;
@@ -288,8 +309,10 @@ double evaluate(PGAContext *ctx, int p, int pop)
  * then the way it's mutated is to regress it toward the mean of the population for that allele,
  * then add a little gaussian noise.
  *
- * Aug 21 2002 jm: we now use ranges and allow PGA to take care of it.
+ * Aug 21 2002 jm: we now use ranges and allow PGA to take care of it, if USE_SCORE_RANGES
+ * is defined.
  */
+#ifndef USE_SCORE_RANGES
 int myMutation(PGAContext *ctx, int p, int pop, double mr) {
     int         count=0;
     int i,j;
@@ -312,18 +335,31 @@ int myMutation(PGAContext *ctx, int p, int pop, double mr) {
     }
     return count;
 }
+#endif
 
 
 void dump(FILE *fp)
 {
-    fprintf (fp,"\n# SUMMARY:            %6d / %6d\n#\n", ga_ny, ga_yn);
-    fprintf (fp,"# Correctly non-spam: %6d  %3.2f%%  (%3.2f%% overall)\n", ga_nn, (ga_nn / (float) num_nonspam) * 100.0, (ga_nn / (float) num_tests) * 100.0);
-    fprintf (fp,"# Correctly spam:     %6d  %3.2f%%  (%3.2f%% overall)\n", ga_yy, (ga_yy / (float) num_spam) * 100.0, (ga_yy / (float) num_tests) * 100.0);
-    fprintf (fp,"# False positives:    %6d  %3.2f%%  (%3.2f%% overall, %6.0f adjusted)\n", ga_ny, (ga_ny / (float) num_nonspam) * 100.0, (ga_ny / (float) num_tests) * 100.0, nyscore*nybias);
-    fprintf (fp,"# False negatives:    %6d  %3.2f%%  (%3.2f%% overall, %6.0f adjusted)\n", ga_yn, (ga_yn / (float) num_spam) * 100.0, (ga_yn / (float) num_tests) * 100.0, ynscore);
-    fprintf (fp,"# Average score for spam:  %3.1f    nonspam: %3.1f\n",(ynscore+yyscore)/((double)(ga_yn+ga_yy)),(nyscore+nnscore)/((double)(ga_nn+ga_ny)));
-    fprintf (fp,"# Average for false-pos:   %3.1f  false-neg: %3.1f\n",(nyscore/(double)ga_ny),(ynscore/(double)ga_yn));
-    fprintf (fp,"# TOTAL:              %6d  %3.2f%%\n#\n", num_tests, 100.0);
+   fprintf (fp,"\n# SUMMARY for threshold %3.1f:\n", threshold);
+   fprintf (fp,"# Correctly non-spam: %6d  %4.2f%%  (%4.2f%% of non-spam corpus)\n", ga_nn,
+       (ga_nn / (float) num_tests) * 100.0,
+       (ga_nn / (float) num_nonspam) * 100.0);
+   fprintf (fp,"# Correctly spam:     %6d  %4.2f%%  (%4.2f%% of spam corpus)\n", ga_yy,
+       (ga_yy / (float) num_tests) * 100.0,
+       (ga_yy / (float) num_spam) * 100.0);
+   fprintf (fp,"# False positives:    %6d  %4.2f%%  (%4.2f%% of nonspam, %6.0f weighted)\n", ga_ny,
+       (ga_ny / (float) num_tests) * 100.0,
+       (ga_ny / (float) num_nonspam) * 100.0,
+       nyscore*nybias);
+   fprintf (fp,"# False negatives:    %6d  %4.2f%%  (%4.2f%% of spam, %6.0f weighted)\n", ga_yn,
+       (ga_yn / (float) num_tests) * 100.0,
+       (ga_yn / (float) num_spam) * 100.0,
+       ynscore);
+
+   fprintf (fp,"# Average score for spam:  %3.1f    nonspam: %3.1f\n",(ynscore+yyscore)/((double)(ga_yn+ga_yy)),(nyscore+nnscore)/((double)(ga_nn+ga_ny)));
+   fprintf (fp,"# Average for false-pos:   %3.1f  false-neg: %3.1f\n",(nyscore/(double)ga_ny),(ynscore/(double)ga_yn));
+
+   fprintf (fp,"# TOTAL:              %6d  %3.2f%%\n\n", num_tests, 100.0);
 }
 
 /*****************************************************************************
