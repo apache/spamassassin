@@ -359,8 +359,8 @@ full EU_EMAIL_OPTOUT		/EU Email Opt.?out Directive/i
 body POPLAUNCH			/StealthLaunch PopLaunch.\s/
 body CHECK_OR_MONEY_ORDER	/check or money order/i
 
-body NUMERIC_HTTP_ADDR		/http\:\/\/\d+\//is
-body NORMAL_HTTP_TO_IP		/http\:\/\/\d+\.\d+\.\d+\.\d+\//is
+body NUMERIC_HTTP_ADDR		/http\:\/\/\d+(?:\/|\s|$)/is
+body NORMAL_HTTP_TO_IP		/http\:\/\/\d+\.\d+\.\d+\.\d+/is
 body LONG_NUMERIC_HTTP_ADDR	/http\:\/\/000\d+/is
 body HTTP_USERNAME_USED		/http\:\/\/[^\s\/]+\@/is
 
@@ -491,6 +491,7 @@ body 25FREEMEGS_URL		/http:\/\/.*25freemegs\.com/i
 body WEB4PORNO_URL		/http:\/\/.*web4porno\.com/i
 body CLICKSFORMONEY_NET		/http:\/\/.*clicksformoney\.net/i
 body WWW_REMOVEYOU_COM		/http:\/\/.*removeyou\.com/i
+body WWW_AUTOREMOVE_COM		/http:\/\/.*autoremove\.com/i
 body WWW_DIRECTFORCEMARKETING_COM /http:\/\/.*directforcemarketing\.com/i
 body WWW_NETSITESFORFREE_NET	/http:\/\/.*netsitesforfree\.net/i
 
