@@ -11,6 +11,7 @@ my $killfile_message_ids = qr{(?:
     |<LISTMANAGERSQL-\S+\@mailcontrol\.bellevuedata\.com>
     |<LISTMANAGER-\S+\@lister\.masie\.com>
     |<CA-.*\@cert\.org>
+    |<SEAEMS\S+\@\S+\.drugstore\.com>
 )}x;
 
 my $killfile_receiveds = qr{(?:
