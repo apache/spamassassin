@@ -621,25 +621,6 @@ shorter reports, set this to C<1>.
       $self->{use_terse_report} = $1+0; next;
     }
 
-=item dns_available { yes | test[: name1 name2...] | no }   (default: test)
-
-By default, SpamAssassin will query some default hosts on the internet to
-attempt to check if DNS is working on not. The problem is that it can introduce
-some delay if your network connection is down, and in some cases it can wrongly
-guess that DNS is unavailable because the test connections failed.
-SpamAssassin includes a default set of 13 servers, among which 3 are picked
-randomly.
-
-You can however specify your own list by specifying
-
-dns_available test: server1.tld server2.tld server3.tld
-
-=cut
-
-    if (/^dns[-_]available\s+(yes|no|test|test:\s+.+)$/) {
-      $self->{dns_available} = ($1 or "test"); next;
-    }
-
 =item skip_rbl_checks { 0 | 1 }   (default: 0)
 
 By default, SpamAssassin will run RBL checks.  If your ISP already does this
@@ -649,27 +630,6 @@ for you, set this to 1.
 
     if (/^skip[-_]rbl[-_]checks\s+(\d+)$/) {
       $self->{skip_rbl_checks} = $1+0; next;
-    }
-
-=item check_mx_attempts n	(default: 2)
-
-By default, SpamAssassin checks the From: address for a valid MX this many
-times, waiting 5 seconds each time.
-
-=cut
-
-    if (/^check[-_]mx[-_]attempts\s+(\S+)$/) {
-      $self->{check_mx_attempts} = $1+0; next;
-    }
-
-=item check_mx_delay n		(default 5)
-
-How many seconds to wait before retrying an MX check.
-
-=cut
-
-    if (/^check[-_]mx[-_]delay\s+(\S+)$/) {
-      $self->{check_mx_delay} = $1+0; next;
     }
 
 =item ok_languages xx [ yy zz ... ]		(default: all)
@@ -824,19 +784,6 @@ points will be assigned.
       $self->{ok_languages} = $1; next;
     }
 
-=item rbl_timeout n		(default 30)
-
-All RBL queries are started at the beginning and we try to read the results
-at the end. In case some of them are hanging or not returning, you can specify
-here how long you're willing to wait for them before deciding that they timed
-out
-
-=cut
-
-    if (/^rbl[-_]timeout\s+(\d+)$/) {
-      $self->{rbl_timeout} = $1+0; next;
-    }
-
 =item ok_locales xx [ yy zz ... ]		(default: all)
 
 Which locales (country codes) are considered OK to receive mail from.  Mail
@@ -877,63 +824,6 @@ Chinese (both simplified and traditional)
 
     if (/^ok[-_]locales\s+(.+)$/) {
       $self->{ok_locales} = $1; next;
-    }
-
-=item auto_whitelist_factor n	(default: 0.5, range [0..1])
-
-How much towards the long-term mean for the sender to regress a message.
-Basically, the algorithm is to track the long-term mean score of messages for
-the sender (C<mean>), and then once we have otherwise fully calculated the
-score for this message (C<score>), we calculate the final score for the
-message as:
-
-C<finalscore> = C<score> +  (C<mean> - C<score>) * C<factor>
-
-So if C<factor> = 0.5, then we'll move to half way between the calculated
-score and the mean.  If C<factor> = 0.3, then we'll move about 1/3 of the way
-from the score toward the mean.  C<factor> = 1 means just use the long-term
-mean; C<factor> = 0 mean just use the calculated score.
-
-=cut
-    if (/^auto[-_]whitelist[-_]factor\s+(.*)$/) {
-      $self->{auto_whitelist_factor} = $1; next;
-    }
-
-=item auto_learn ( 0 | 1 )	(default: 1)
-
-Whether SpamAssassin should automatically feed high-scoring mails (or
-low-scoring mails, for non-spam) into its learning systems.  The only learning
-system supported currently is a naive-Bayesian-style classifier.
-
-Note that tests with tflags set to 'learn' (the Bayesian rules) or 'userconf'
-(user whitelisting rules) are ignored for the purposes of auto-training.
-
-=cut
-
-    if (/^auto[-_]learn\s+(.*)$/) {
-      $self->{auto_learn} = $1+0; next;
-    }
-
-=item auto_learn_threshold_nonspam n.nn	(default -2.0)
-
-The score threshold below which a mail has to score, to be fed into
-SpamAssassin's learning systems automatically as a non-spam message.
-
-=cut
-
-    if (/^auto[-_]learn[-_]threshold[-_]nonspam\s+(.*)$/) {
-      $self->{auto_learn_threshold_nonspam} = $1+0; next;
-    }
-
-=item auto_learn_threshold_spam n.nn	(default 15.0)
-
-The score threshold above which a mail has to score, to be fed into
-SpamAssassin's learning systems automatically as a spam message.
-
-=cut
-
-    if (/^auto[-_]learn[-_]threshold[-_]spam\s+(.*)$/) {
-      $self->{auto_learn_threshold_spam} = $1+0; next;
     }
 
 =item describe SYMBOLIC_TEST_NAME description ...
@@ -1102,19 +992,6 @@ Clear the spamtrap template.
       $self->{spamtrap_template} = ''; next;
     }
 
-=item dcc_path STRING
-
-This option tells SpamAssassin specifically where to find the C<dccproc>
-client instead of relying on SpamAssassin to find it in the current PATH.
-Note that if I<taint mode> is enabled in the Perl interpreter, you should
-use this, as the current PATH will have been cleared.
-
-=cut
-
-    if (/^dcc[-_]path\s+(.+)$/) {
-      $self->{dcc_path} = $1; next;
-    }
-
 =item dcc_body_max NUMBER
 
 =item dcc_fuz1_max NUMBER
@@ -1159,30 +1036,6 @@ The default is to not add the header.
       $self->{dcc_add_header} = $1+0; next;
     }
 
-=item dcc_timeout n              (default: 10)
-
-How many seconds you wait for dcc to complete before you go on without 
-the results
-
-=cut
-
-    if (/^dcc[-_]timeout\s+(\d+)$/) {
-      $self->{dcc_timeout} = $1+0; next;
-    }
-
-=item pyzor_path STRING
-
-This option tells SpamAssassin specifically where to find the C<pyzor> client
-instead of relying on SpamAssassin to find it in the current PATH.
-Note that if I<taint mode> is enabled in the Perl interpreter, you should
-use this, as the current PATH will have been cleared.
-
-=cut
-
-    if (/^pyzor[-_]path\s+(.+)$/) {
-      $self->{pyzor_path} = $1; next;
-    }
-
 =item pyzor_max NUMBER
 
 Pyzor is a system similar to Razor.  This option sets how often a message's
@@ -1209,29 +1062,6 @@ The default is to not add the header.
 
     if (/^pyzor[-_]add[-_]header\s+(\d+)$/) {
       $self->{pyzor_add_header} = $1+0; next;
-    }
-
-=item pyzor_timeout n              (default: 10)
-
-How many seconds you wait for pyzor to complete before you go on without 
-the results
-
-=cut
-
-    if (/^pyzor[-_]timeout\s+(\d+)$/) {
-      $self->{pyzor_timeout} = $1+0; next;
-    }
-
-
-=item razor_timeout n		(default 10)
-
-How many seconds you wait for razor to complete before you go on without 
-the results
-
-=cut
-
-    if (/^razor[-_]timeout\s+(\d+)$/) {
-      $self->{razor_timeout} = $1; next;
     }
 
 
@@ -1291,6 +1121,75 @@ server load. It is not recommended.
       $self->{allow_user_rules} = $1+0; 
       dbg("Allowing user rules!"); next;
     }
+
+=item dcc_timeout n              (default: 10)
+
+How many seconds you wait for dcc to complete before you go on without 
+the results
+
+=cut
+
+    if (/^dcc[-_]timeout\s+(\d+)$/) {
+      $self->{dcc_timeout} = $1+0; next;
+    }
+
+=item pyzor_timeout n              (default: 10)
+
+How many seconds you wait for pyzor to complete before you go on without 
+the results
+
+=cut
+
+    if (/^pyzor[-_]timeout\s+(\d+)$/) {
+      $self->{pyzor_timeout} = $1+0; next;
+    }
+
+
+=item razor_timeout n		(default 10)
+
+How many seconds you wait for razor to complete before you go on without 
+the results
+
+=cut
+
+    if (/^razor[-_]timeout\s+(\d+)$/) {
+      $self->{razor_timeout} = $1; next;
+    }
+
+=item rbl_timeout n		(default 30)
+
+All RBL queries are started at the beginning and we try to read the results
+at the end. In case some of them are hanging or not returning, you can specify
+here how long you're willing to wait for them before deciding that they timed
+out
+
+=cut
+
+    if (/^rbl[-_]timeout\s+(\d+)$/) {
+      $self->{rbl_timeout} = $1+0; next;
+    }
+
+=item check_mx_attempts n	(default: 2)
+
+By default, SpamAssassin checks the From: address for a valid MX this many
+times, waiting 5 seconds each time.
+
+=cut
+
+    if (/^check[-_]mx[-_]attempts\s+(\S+)$/) {
+      $self->{check_mx_attempts} = $1+0; next;
+    }
+
+=item check_mx_delay n		(default 5)
+
+How many seconds to wait before retrying an MX check.
+
+=cut
+
+    if (/^check[-_]mx[-_]delay\s+(\S+)$/) {
+      $self->{check_mx_delay} = $1+0; next;
+    }
+
 
 
 
@@ -1611,6 +1510,83 @@ C<user_prefs> file.
 =over 4
 
 
+=item dns_available { yes | test[: name1 name2...] | no }   (default: test)
+
+By default, SpamAssassin will query some default hosts on the internet to
+attempt to check if DNS is working on not. The problem is that it can introduce
+some delay if your network connection is down, and in some cases it can wrongly
+guess that DNS is unavailable because the test connections failed.
+SpamAssassin includes a default set of 13 servers, among which 3 are picked
+randomly.
+
+You can however specify your own list by specifying
+
+dns_available test: server1.tld server2.tld server3.tld
+
+=cut
+
+    if (/^dns[-_]available\s+(yes|no|test|test:\s+.+)$/) {
+      $self->{dns_available} = ($1 or "test"); next;
+    }
+
+=item auto_whitelist_factor n	(default: 0.5, range [0..1])
+
+How much towards the long-term mean for the sender to regress a message.
+Basically, the algorithm is to track the long-term mean score of messages for
+the sender (C<mean>), and then once we have otherwise fully calculated the
+score for this message (C<score>), we calculate the final score for the
+message as:
+
+C<finalscore> = C<score> +  (C<mean> - C<score>) * C<factor>
+
+So if C<factor> = 0.5, then we'll move to half way between the calculated
+score and the mean.  If C<factor> = 0.3, then we'll move about 1/3 of the way
+from the score toward the mean.  C<factor> = 1 means just use the long-term
+mean; C<factor> = 0 mean just use the calculated score.
+
+=cut
+    if (/^auto[-_]whitelist[-_]factor\s+(.*)$/) {
+      $self->{auto_whitelist_factor} = $1; next;
+    }
+
+=item auto_learn ( 0 | 1 )	(default: 1)
+
+Whether SpamAssassin should automatically feed high-scoring mails (or
+low-scoring mails, for non-spam) into its learning systems.  The only learning
+system supported currently is a naive-Bayesian-style classifier.
+
+Note that tests with tflags set to 'learn' (the Bayesian rules) or 'userconf'
+(user whitelisting rules) are ignored for the purposes of auto-training.
+
+=cut
+
+    if (/^auto[-_]learn\s+(.*)$/) {
+      $self->{auto_learn} = $1+0; next;
+    }
+
+=item auto_learn_threshold_nonspam n.nn	(default -2.0)
+
+The score threshold below which a mail has to score, to be fed into
+SpamAssassin's learning systems automatically as a non-spam message.
+
+=cut
+
+    if (/^auto[-_]learn[-_]threshold[-_]nonspam\s+(.*)$/) {
+      $self->{auto_learn_threshold_nonspam} = $1+0; next;
+    }
+
+=item auto_learn_threshold_spam n.nn	(default 15.0)
+
+The score threshold above which a mail has to score, to be fed into
+SpamAssassin's learning systems automatically as a spam message.
+
+=cut
+
+    if (/^auto[-_]learn[-_]threshold[-_]spam\s+(.*)$/) {
+      $self->{auto_learn_threshold_spam} = $1+0; next;
+    }
+
+
 =item test SYMBOLIC_TEST_NAME (ok|fail) Some string to test against
 
 Define a regression testing string. You can have more than one regression test string
@@ -1634,6 +1610,32 @@ Currently this is left to Razor to decide.
 
     if (/^razor[-_]config\s+(.*)$/) {
       $self->{razor_config} = $1; next;
+    }
+
+=item pyzor_path STRING
+
+This option tells SpamAssassin specifically where to find the C<pyzor> client
+instead of relying on SpamAssassin to find it in the current PATH.
+Note that if I<taint mode> is enabled in the Perl interpreter, you should
+use this, as the current PATH will have been cleared.
+
+=cut
+
+    if (/^pyzor[-_]path\s+(.+)$/) {
+      $self->{pyzor_path} = $1; next;
+    }
+
+=item dcc_path STRING
+
+This option tells SpamAssassin specifically where to find the C<dccproc>
+client instead of relying on SpamAssassin to find it in the current PATH.
+Note that if I<taint mode> is enabled in the Perl interpreter, you should
+use this, as the current PATH will have been cleared.
+
+=cut
+
+    if (/^dcc[-_]path\s+(.+)$/) {
+      $self->{dcc_path} = $1; next;
     }
 
 =item dcc_options options
@@ -2017,6 +2019,7 @@ sub remove_from_addrlist_rcvd {
 sub maybe_header_only {
   my($self,$rulename) = @_;
   my $type = $self->{test_types}->{$rulename};
+  return 0 if (!defined ($type));
 
   if (($type == TYPE_HEAD_TESTS) || ($type == TYPE_HEAD_EVALS)) {
     return 1;
@@ -2036,6 +2039,7 @@ sub maybe_header_only {
 sub maybe_body_only {
   my($self,$rulename) = @_;
   my $type = $self->{test_types}->{$rulename};
+  return 0 if (!defined ($type));
 
   if (($type == TYPE_BODY_TESTS) || ($type == TYPE_BODY_EVALS)
 	|| ($type == TYPE_URI_TESTS) || ($type == TYPE_URI_EVALS))
