@@ -89,6 +89,13 @@ my $iter = new Mail::ArchiveIterator ({
         'opt_tail' => $opt_tail,
         'opt_all' => $opt_all
   });
+
+my $who = `id -un 2>/dev/null`; chop $who;
+my $where = `uname -n 2>/dev/null`; chop $where;
+my $when = `date`; chop $when;
+
+print "# mass-check results from $who\@$where, on $when\n";
+print "# M:SA version ".$spamtest->Version()."\n";
 $iter->set_function (\&wanted);
 $iter->run (@ARGV);
 exit;
