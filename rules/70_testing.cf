@@ -275,10 +275,6 @@ describe T_INDYLIB       Uses spam-only version of Indy library
 
 ##########################################################################
 
-# bug 2554
-body T_HOT_NASTY /\b(?=[dehklnswxy])(?:horny|nasty|hot|wild|young|horniest|nastiest|hottest|wildest|youngest|naughty|dirtiest|slutty|kinky|lusty|extreme|xxx+)\b.{0,9}\b(?=[acfghilmpsvx])(?:virgins?\b|asian|cheerleader|sex|selection|fuck|fucking|anal\b|lesb(?:ian|o)|incest|chicks?|pics|movies|video|gay\b|porn|h[a\@]rdcore|schoolgirls|amateur|slut|adult|cum\b|xxx|sites?|hotties|shit)/i
-body T_BEST_PORN /\b(?:best|biggest|largest|most|free|ultimate)\b.{0,9}\b(?:virgins?\b|anal\b|lesbians?|incest|porno?|h[a\@]rdcore|sluts?|xxx+)/i
-
 body	T_EMPTY_URI_SRC		eval:html_test('blank_uri')
 body	T_EMPTY_URI_SRC_IMG	eval:html_text_match('blank_uri', '^img$')
 body	T_EMPTY_URI_SRC_IFRAME	eval:html_text_match('blank_uri', '^iframe$')
