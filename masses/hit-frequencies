@@ -273,8 +273,11 @@ foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
   my $fn = $freq_ham{$test}; $fn ||= 0;
   my $fa = $fs+$fn;
 
-  next if ($opt_m && $test !~ m/$opt_m/);	# match certain tests
-  next if ($opt_t && $rules{$test}->{tflags} !~ /$opt_t/); # match tflags
+  # match certain tests
+  next if ($opt_m && $test !~ m/$opt_m/);
+  # match tflags
+  next if ($opt_t && (!$rules{$test}->{tflags} ||
+		      $rules{$test}->{tflags} !~ /$opt_t/));
 
   if (!$opt_a && !$opt_t && $rules{$test}->{tflags}) {
     # not net tests
