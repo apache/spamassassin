@@ -59,6 +59,7 @@ Options:
                   server (default: 127.0.0.1)
   -D              Print debugging messages
   -L              Use local tests only (no DNS or other network lookups)
+  -S              Stop tests after the spam threshold is reached
   -P              Die upon user errors (does not exist or user = root) instead of
                   running as 'nobody' with defaults.
   -F 0|1          remove/add 'From ' line at start of output (default: 1)
@@ -70,10 +71,10 @@ EOUSAGE
 
 use vars qw{
     $opt_d $opt_h $opt_L $opt_p $opt_A $opt_x $opt_s $opt_D $opt_u
-    $opt_P $opt_c $opt_a $opt_i $opt_q $opt_F
+    $opt_P $opt_c $opt_a $opt_i $opt_q $opt_F $opt_S
 };
 
-getopts('acdhi:p:qs:u:xA:DLPF:') or usage();
+getopts('acdhi:p:qs:u:xA:DLSPF:') or usage();
 
 $opt_h and usage();
 
@@ -109,6 +110,7 @@ if (defined $ENV{'HOME'}) {
 my $spamtest = Mail::SpamAssassin->new({
     dont_copy_prefs => $dontcopy,
     local_tests_only => $opt_L,
+    stop_at_threshold => $opt_S,
     debug => $opt_D,
     paranoid => ($opt_P || 0),
 });
@@ -648,6 +650,11 @@ Print debugging messages
 
 Perform only local tests on all mail.  In other words, skip DNS and other
 network tests.  Works the same as the C<-L> flag to C<spamassassin(1)>.
+
+=item B<-S>
+
+Stop spam checking as soon as the spam threshold is reached, to increase
+performance. This option also turns off Razor reporting.
 
 =item B<-P>
 
