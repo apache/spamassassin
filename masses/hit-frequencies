@@ -67,27 +67,18 @@ my @tests = ();
 foreach my $test (keys %freq_spam, keys %freq_nonspam) {
   next if $done{$test}; $done{$test} = 1;
   push (@tests, $test);
+
+  if (!defined $tflags{$test}) { $tflags{$test} = ''; }
   my $fs = $freq_spam{$test}; $fs ||= 0;
   my $fn = $freq_nonspam{$test}; $fn ||= 0;
-  my $fa = $fs+$fn;
-  if (!defined $score{$test}) { $score{$test} ||= 1.0; }
-  if (!defined $tflags{$test}) { $tflags{$test} = ''; }
   my $fsadj = $num_spam == 0 ? 0 : ($fs / ($num_spam)) * 100.0;
   my $fnadj = $num_nonspam == 0 ? 0 : ($fn / ($num_nonspam)) * 100.0;
 
-  {
-    $fa = ($fa / ($num_spam + $num_nonspam)) * 100.0;
-    $fs = $fsadj;
-    $fn = $fnadj;
-  }
-
-  $soratio{$test} = soratio ($fsadj, $fnadj);
-
-  my $soratio = $soratio{$test};
-  my $matched = $fs;
+  my $soratio = $soratio{$test} = soratio ($fsadj, $fnadj);
+  my $matched = $fsadj;
   if ($tflags{$test} =~ /nice/) {
     $soratio = 1.0 - $soratio;
-    $matched = $fn;
+    $matched = $fnadj;
   }
 
   $ranking{$test} = (($soratio * 100) ** 8) * $matched;
