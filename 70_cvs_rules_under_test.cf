@@ -629,10 +629,18 @@ body T_RAZOR2_RANGE_91_100	eval:check_razor2_range('91','100')
 # bug 1207:
 header T_DOUBLE_SQUOTES_1 Subject =~ /''\w+''/
 describe T_DOUBLE_SQUOTES_1 Evading word tests with two single quotes
+test T_DOUBLE_SQUOTES_1 ok  ''this'' is ''spam''
+test T_DOUBLE_SQUOTES_1 fail 'this is quoted'
+
 header T_DOUBLE_SQUOTES_2 Subject =~ /''/
 describe T_DOUBLE_SQUOTES_2 Evading word tests with two single quotes
+test T_DOUBLE_SQUOTES_2	ok ''
+test T_DOUBLE_SQUOTES_2 fail 'hi'
+
 header T_DOUBLE_SQUOTES_3 Subject =~ /''.{0,15}''/
 describe T_DOUBLE_SQUOTES_3 Evading word tests with two single quotes
+test T_DOUBLE_SQUOTES_3 ok ''buy now''
+test T_DOUBLE_SQUOTES_3 fail 'asdfasdfasdf'
 
 #bug 1010
 body T_CHECK_EMAIL_ISFREE	eval:check_email_isfree()
@@ -642,3 +650,10 @@ describe T_CHECK_EMAIL_ISFREE Body contains an e-mail address listed by Email::I
 body T_DISGUISE_PORN         /\b(c[*0]cks?|d[1*]cks?|h[0*]rny|b[1*]tch(?:es)|f[*0]ckk?ed|p[*]ssy|p[*]ssies)\b/i
 describe T_DISGUISE_PORN     Attempts to disguise porn words
 
+#bug 495: potential replacements for ACT_NOW
+body T_ACT_NOW_1	/A(?i:ct) N(?i:ow)/
+body T_ACT_NOW_2	/D[Oo].{0.5} H(?i:esitate)/
+body T_ACT_NOW_3	/S(?i:tart now)/
+body T_ACT_NOW_4	/act now/i
+body T_ACT_NOW_5	/do.{0.6}\bhesitate/i
+body T_ACT_NOW_6	/start now/i
