@@ -54,7 +54,7 @@ sub detect_ml_ezmlm {
 }
 
 # MailMan (the gnu mailing list manager)
-#  Precedence: bulk
+#  Precedence: bulk [or list for v2]
 #  List-Help: <mailto:
 #  List-Post: <mailto:
 #  List-Subscribe: .*<mailto:.*=subscribe>
@@ -66,23 +66,24 @@ sub detect_ml_ezmlm {
 # However, for for mailing list membership reminders, most of
 # those headers are gone, so we identify on the following:
 #
-#  Subject: ...... mailing list memberships reminder
+#  Subject: ...... mailing list memberships reminder  (v1)
+#  or X-List-Administrivia: yes  (only in version 2)
 #  X-Mailman-Version: \d
-#  Precedence: bulk
+#  Precedence: bulk [or list for v2]
 #  X-No-Archive: yes
-#  X-Ack: no
 #  Errors-To: 
 #  X-BeenThere: 
 sub detect_ml_mailman {
     my ($self) = @_;
     return 0 unless $self->get('x-mailman-version') =~ /^\d/;
-    return 0 unless $self->get('precedence') eq "bulk\n";
+    return 0 unless $self->get('precedence') =~ /^(?:bulk|list)$/;
 
-    if ($self->get('subject') =~ /mailing list memberships reminder$/) {
+    if ($self->get('x-list-administrivia') =~ /yes/ ||
+        $self->get('subject') =~ /mailing list memberships reminder$/)
+    {
         return 0 unless $self->get('errors-to');
         return 0 unless $self->get('x-beenthere');
         return 0 unless $self->get('x-no-archive') =~ /yes/;
-        return 0 unless $self->get('x-ack') =~ /no/;
         return 1;
     }
 
@@ -91,7 +92,6 @@ sub detect_ml_mailman {
     return 0 unless $self->get('list-post') =~ /^<mailto:/;
     return 0 unless $self->get('list-subscribe') =~ /<mailto:.*=subscribe>/;
     return 0 unless $self->get('list-unsubscribe') =~ /<mailto:.*=unsubscribe>/;
-    return 0 unless $self->get('list-archive'); # maybe comment this out.
     return 1; # assume this is a valid mailman list
 }
 
