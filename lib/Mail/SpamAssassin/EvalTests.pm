@@ -15,8 +15,8 @@ use strict;
 
 use vars qw{
 	$KNOWN_BAD_DIALUP_RANGES
-
 	$CCTLDS_WITH_LOTS_OF_OPEN_RELAYS
+	$ROUND_THE_WORLD_RELAYERS
 };
 
 # persistent spam sources. These are not in the RBL though :(
@@ -26,6 +26,7 @@ $KNOWN_BAD_DIALUP_RANGES = q(
 
 # sad but true. sort it out, sysadmins!
 $CCTLDS_WITH_LOTS_OF_OPEN_RELAYS = qr{(?:kr|cn|cl|ar|hk|us|il|th|tw|sg|za|tr|ma|ua|in)};
+$ROUND_THE_WORLD_RELAYERS = qr{(?:net|com|ca)};
 
 # Here's how that RE was determined... relay rape by country (as of my
 # spam collection on Dec 12 2001):
@@ -561,7 +562,7 @@ sub check_for_round_the_world_received {
   if ($rcvd =~ /
   	\nfrom\s(\S+\.${CCTLDS_WITH_LOTS_OF_OPEN_RELAYS})\s\(.{0,200}
   	\nfrom\s(\S+)\s.{0,30}\[(\d+\.\d+\.\d+\.\d+)\]
-  /six) { $relay = $1; $relayer = $2; $relayerip = $3; goto gotone; }
+  /osix) { $relay = $1; $relayer = $2; $relayerip = $3; goto gotone; }
 
   return 0;
 
@@ -571,7 +572,7 @@ gotone:
   dbg ("round-the-world: mail relayed through $relay by ".	
   	"$relayerip (HELO $relayer, rev DNS says $revdns");
 
-  if ($revdns =~ /\.(?:net|com|us|uk|ca)$/) {
+  if ($revdns =~ /\.${$ROUND_THE_WORLD_RELAYERS}$/oi) {
     dbg ("round-the-world: yep, I think so");
     return 1;
   }
