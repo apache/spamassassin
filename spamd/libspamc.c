@@ -142,6 +142,7 @@ try_to_connect (const struct sockaddr *argaddr, const struct hostent *hent,
     case ENOPROTOOPT:
     case EFAULT:
       syslog (LOG_ERR, "setsockopt() to spamd failed: %m");
+      close (mysock);
       return EX_SOFTWARE;
 
     default:
@@ -180,6 +181,7 @@ try_to_connect (const struct sockaddr *argaddr, const struct hostent *hent,
   }
  
   /* failed, even with a few retries */
+  close (mysock);
   syslog (LOG_ERR, "connection attempt to spamd aborted after %d retries",
        MAX_CONNECT_RETRIES);
  
