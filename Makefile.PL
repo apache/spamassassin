@@ -160,14 +160,15 @@ my %makefile = (
     'VERSION_FROM' => 'lib/Mail/SpamAssassin.pm', # finds $VERSION
 
     'EXE_FILES'	=> [
-        'spamassassin', 'sa-learn',
+        'sa-filter', 'sa-learn',
         'spamc/spamc$(EXE_EXT)', # must next to last one
         'spamd/spamd',	# must be the last one
     ],
 
     'MAN1PODS' => {
-        'spamassassin'    => '$(INST_MAN1DIR)/spamassassin.$(MAN1EXT)',
+        'sa-filter'       => '$(INST_MAN1DIR)/sa-filter.$(MAN1EXT)',
         'sa-learn'        => '$(INST_MAN1DIR)/sa-learn.$(MAN1EXT)',
+        'spamassassin'    => '$(INST_MAN1DIR)/spamassassin.$(MAN1EXT)',
         'spamc/spamc.pod' => '$(INST_MAN1DIR)/spamc.$(MAN1EXT)',
         'spamd/spamd'     => '$(INST_MAN1DIR)/spamd.$(MAN1EXT)',
     },
@@ -206,7 +207,7 @@ my %makefile = (
     },
 
     'clean' => { FILES => join(' ' =>
-        'spamassassin', 'sa-learn',
+        'sa-filter', 'sa-learn', 'spamassassin',
 
         'spamd/spamd',
 
@@ -1085,12 +1086,14 @@ FIXBANG		= -Msharpbang \
 		  -DPERL_TAINT="$(PERL_TAINT)"
 
 
-spamassassin: spamassassin.raw
+sa-filter: sa-filter.raw
 	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@
 
 sa-learn: sa-learn.raw
 	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@
 
+spamassassin: spamassassin.raw
+	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@
 
 spamd/spamd: spamd/spamd.raw
 	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@
