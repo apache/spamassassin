@@ -1055,7 +1055,7 @@ sub scan_mbx {
     $path =~ s,^~/,${home}/,;
 
     # protect/escape spaces: ./Mail/My Letters => ./Mail/My\ Letters
-    $path =~ s/([^\\])(\s)/$1\\$2/g;
+    $path =~ s/(?<!\\)(\s)/\\$1/g;
 
     # return csh-style globs: ./corpus/*.mbox => er, you know what it does ;)
     return glob($path);
