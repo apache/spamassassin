@@ -89,7 +89,7 @@ $IS_DEVEL_BUILD = 1;            # change for release versions
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.218 2003/11/09 01:48:20 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.219 2003/12/03 02:22:07 jmason Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -587,10 +587,7 @@ Otherwise identical to C<$f->check()> above.
 sub check_message_text {
   my $self = shift;
 
-  # REIMPLEMENT: this should split on "start of line" using multiline
-  # matching, instead of simply splitting on newline chars.
-  my @lines = split (/\n/s, $_[0]);
-
+  my @lines = split (/^/m, $mailtext);
   my $mail_obj = Mail::SpamAssassin::NoMailAudit->new ('data' => \@lines);
   return $self->check ($mail_obj);
 }
