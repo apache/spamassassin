@@ -32,17 +32,25 @@ SpamAssassin documentation. So far the only Windows version of perl
 this has been tested with is ActivePerl.
 
 Building spamc for Windows has been tested with Microsoft Visual C++
-6.0 and with Microsoft Visual C++ Toolkit 2003 with the February 2003
-Platform SDK. It will probably just work with any recent version of
-VC++. Some installation files would have to be changed to use with any
-other C compiler.
+6.0 and with Microsoft Visual C++ Toolkit 2003. It will probably just
+work with any recent version of VC++. Some installation files would
+have to be changed to use with any other C compiler.
 
-Note that Microsoft Visual C++ Toolkit 2003 and the Platform SDK are
-available for download for free from
-http://msdn.microsoft.com/visualc/vctoolkit2003/ and
-http://www.microsoft.com/msdownload/platformsdk/sdkupdate/
-The latter requires Internet Explorer and accepting installation of an
-ActiveX control to access.
+Microsoft Visual C++ Toolkit 2003 can be downloaded for free. It
+requires two other free downloads to be able to build spamc. To use it:
+
+ Download and install Microsoft Visual C++ Toolkit 2003 from
+  http://msdn.microsoft.com/visualc/vctoolkit2003/
+
+ Download and install the Platform SDK from
+  http://www.microsoft.com/msdownload/platformsdk/sdkupdate/
+  That download requires Internet Explorer and accepting installation
+  of an ActiveX control to access.
+
+ Download the self-extracting archive file
+ http://download.microsoft.com/download/vc15/Patch/1.52/W95/EN-US/Nmake15.exe
+ Run it to create the files nmake.exe and nmake.err, which should both
+ be placed in a directory that is in the Path, such as \perl\bin.
 
 To run the spamc executable once it is built you do not need to have
 VC++ or perl installed.
