@@ -116,12 +116,12 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - then, commit the new version number to the new branch:
 
-        svn commit -m "X.YN devel cycle started"
+        svn commit -m "X.Y.N devel cycle started"
 
-	(where X.YN is the new version number)
+	(where X.Y.N is the new version number)
 
 - edit SpamAssassin site through WebMake, change released_version item
-  at top of file to be X.YZ, then run "webmake" or hit "Build Fully"
+  at top of file to be X.Y.Z, then run "webmake" or hit "Build Fully"
   in the Web interface
 
 - run this to update the mirrors:
