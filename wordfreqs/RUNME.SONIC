@@ -6,18 +6,32 @@ NOTE: this is a sample.  You need to customise it to
 fit your corpus of spam and nonspam mails.
 
 "
-cd /home/jm/ftp/spamassassin/wordfreqs
+set -x
+date
+
+touch scanning.sonic
+trap 'rm -f scanning.sonic' 0 2 3 15
 
 set -x
 date
 
-rm -f spam.sonic nonspam.sonic
+mkdir -p logs/old 2>/dev/null
+mv spam.sonic nonspam.sonic logs/old
+:> spam.sonic
+:> nonspam.sonic
 
-./mass-phrase-freq /home/jm/corpus/kelsey.spamtrap.gz > spam.sonic
-./mass-phrase-freq /home/jm/corpus/spam.2000-2001.gz >> spam.sonic
-./mass-phrase-freq /home/jm/corpus/spamtrap.200108-200201.gz >> spam.sonic
+for mb in /home/jm/lib/spamtrap/nonspam.mbox.*.gz /home/jm/corpus/nonspam/*
+do
+  ./mass-phrase-freq $mb >> nonspam.sonic
+done
 
-> nonspam.sonic
+for mb in /home/jm/lib/spamtrap/spam.mbox.*.gz /home/jm/corpus/spam/*
+do
+  ./mass-phrase-freq $mb >> spam.sonic
+done
+
+rm -f scanning.sonic
+date
 
 echo "
 
