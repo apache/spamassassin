@@ -168,6 +168,9 @@ use constant ROBINSON_X_CONSTANT => 0.538;
 # trust collected data more strongly.
 use constant ROBINSON_S_CONSTANT => 0.373;
 
+# Precompute S * X
+use constant ROBINSON_S_TIMES_X => ROBINSON_S_CONSTANT * ROBINSON_X_CONSTANT;
+
 # Should we ignore tokens with probs very close to the middle ground (.5)?
 # tokens need to be outside the [ .5-MPS, .5+MPS ] range to be used.
 use constant ROBINSON_MIN_PROB_STRENGTH => 0.346;
@@ -244,7 +247,6 @@ sub new {
   };
   bless ($self, $class);
 
-  $self->precompute_robinson_constants();
   $self;
 }
 
@@ -882,7 +884,8 @@ sub compute_prob_for_token {
     # use Robinson's f(x) equation for low-n tokens, instead of just
     # ignoring them
     my $robn = $s+$n;
-    $prob = ($self->{robinson_s_dot_x} + ($robn * $prob)) /
+    $prob = (ROBINSON_S_TIMES_X + ($robn * $prob))
+                             /
 		  (ROBINSON_S_CONSTANT + $robn);
   }
 
@@ -896,19 +899,6 @@ sub compute_prob_for_token {
   #}
 
   return $prob;
-}
-
-sub precompute_robinson_constants {
-  my $self = shift;
-
-  # precompute this here for speed.
-
-  # TODO: should we compute ROBINSON_X? to quote: "x can be computed by trial
-  # and error, with a starting estimate of .5. However, another approach would
-  # be to calculate p(w) for all words that have, say, 10 or more data points,
-  # and then use the average."
-
-  $self->{robinson_s_dot_x} = (ROBINSON_X_CONSTANT * ROBINSON_S_CONSTANT);
 }
 
 ###########################################################################
