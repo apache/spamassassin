@@ -88,7 +88,6 @@ GetOptions(
 	'debug!', => \$opt{'debug'}, 'D' => \$opt{'debug'},
 	'local!' => \$opt{'local'}, 'L' => \$opt{'local'},
 	'paranoid!' => \$opt{'paranoid'}, 'P' => \$opt{'paranoid'},
-	'stop-at-threshold!' => \$opt{'stop-at-threshold'}, 'S' => \$opt{'stop-at-threshold'},
 	'helper-home-dir|H:s' => \$opt{'home_dir_for_helpers'},
 	'auth-ident' => \$opt{'auth-ident'},
 	'ident-timeout=f' => \$opt{'ident-timeout'},
@@ -161,7 +160,6 @@ my $spamtest = Mail::SpamAssassin->new({
     dont_copy_prefs => $dontcopy,
     rules_filename => ($opt{'configpath'} || 0),
     local_tests_only => ($opt{'local'} || 0),
-    stop_at_threshold => ($opt{'stop-at-threshold'} || 0),
     debug => ($opt{'debug'} || 0),
     paranoid => ($opt{'paranoid'} || 0),
     home_dir_for_helpers => (defined $opt{'home_dir_for_helpers'} ? $opt{'home_dir_for_helpers'} : $orighome),
@@ -995,11 +993,6 @@ sub cleanupchildren {
 }
 
 __DATA__
-
-#-S, --stop-at-threshold            Stop tests after the threshold is reached
-#=item B<-S>, B<--stop-at-threshold>
-#Stop spam checking as soon as the spam threshold is reached, to increase
-#performance. This option also turns off Razor reporting.
 
 =head1 NAME
 
