@@ -266,10 +266,10 @@ tflags EVITE			nice
 
 # Till now no spammer told me where he's working at :o)
 #   -- Malte
-# freqs:  2.273    0.383    3.416    0.10    1.00  T_NOSPAM_INC
-header T_NOSPAM_INC             exists:Organization
-describe T_NOSPAM_INC           Where are you working at?
-tflags T_NOSPAM_INC             nice
+# freqs:  2.273    0.383    3.416    0.10    1.00  NOSPAM_INC
+header NOSPAM_INC             exists:Organization
+describe NOSPAM_INC           Where are you working at?
+tflags NOSPAM_INC             nice
 
 header ORDER_STATUS             Subject =~ / order\b/i
 describe ORDER_STATUS           Subject looks like order info
