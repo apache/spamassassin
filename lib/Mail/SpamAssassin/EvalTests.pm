@@ -34,19 +34,19 @@ $IS_DNS_AVAILABLE = undef;
 
 sub check_for_from_mx {
   my ($self) = @_;
-  local ($_);
 
-  $_ = $self->get ('From');
-  return 0 unless (/\@(\S+)/);
-  $_ = $1;
+  my $from = $self->get ('From:addr');
+  return 0 unless ($from =~ /\@(\S+)/);
+  $from = $1;
 
   # First check that DNS is available, if not do not perform this check
   return 0 unless $self->is_dns_available();
+  $self->load_resolver();
 
   # Try 5 times to protect against temporary outages.  sleep between checks
   # to give the DNS a chance to recover.
   for my $i (1..5) {
-    my @mx = Net::DNS::mx ($self->{res}, $_);
+    my @mx = Net::DNS::mx ($self->{res}, $from);
     if (scalar @mx >= 0) { return 0; }
     sleep 5;
   }
@@ -195,7 +195,7 @@ sub check_rbl {
 
   # First check that DNS is available, if not do not perform this check.
   # Stop after the first positive.
-  eval q{
+  eval {
     foreach my $ip (@ips) {
       next if ($ip =~ /${IP_IN_RESERVED_RANGE}/o);
       next if ($already_matched_in_other_zones =~ / ${ip} /);

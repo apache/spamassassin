@@ -23,6 +23,36 @@ $IS_DNS_AVAILABLE = undef;
 
 ###########################################################################
 
+BEGIN {
+  # some trickery. Load these modules right here, if possible; that way, if
+  # the module exists, we'll get it loaded now.  Very useful to avoid attempted
+  # loads later (which will happen).  If we do a fork(), we could wind up
+  # attempting to load these modules in *every* subprocess.
+  #
+  # We turn off strict and warnings, because Net::DNS and Razor both contain
+  # crud that -w complains about (perl 5.6.0).  Not that this seems to work,
+  # mind ;)
+
+  no strict;
+  no warnings 'all';
+  local ($^W) = 0;
+
+  eval {
+    require Net::DNS;
+    require Net::DNS::Resolver;
+  };
+  eval {
+    require Razor::Client;
+    require Razor::Signature;
+    require Razor::String;
+  };
+  eval {
+    require MIME::Base64;
+  };
+};
+
+###########################################################################
+
 sub do_rbl_lookup {
   my ($self, $dom, $ip, $found) = @_;
   return $found if $found;
@@ -96,19 +126,26 @@ sub init_rbl_check_reserved_ips {
 
 sub is_razor_available {
   my ($self) = @_;
-  my $razor_avail = 0;
+
+  if ($self->{main}->{local_tests_only}) {
+    dbg ("local tests only, ignoring Razor");
+    return 0;
+  }
 
   eval {
     require Razor::Client;
     require Razor::Signature; 
     require Razor::String;
-    $razor_avail = 1;
-    1;
   };
-
-  dbg ("is Razor available? $razor_avail");
-
-  return $razor_avail;
+  
+  if ($@) {
+    dbg ("Razor is not available");
+    return 0;
+  }
+  else {
+    dbg ("Razor is available");
+    return 1;
+  }
 }
 
 sub razor_lookup {
@@ -128,12 +165,14 @@ sub razor_lookup {
     # 'debug'	=> 1
   );
 
-  if (!eval {
+  eval {
     require Razor::Client;
     require Razor::Signature; 
+    local ($^W) = 0;		# argh, warnings in Razor
     $response = Razor::Client->new($config, %options)->check (\@msg);
-  1;})
-  {
+  };
+
+  if ($@) {
     warn ("$! $@") unless ($@ eq "timeout\n");
     warn "razor check timed out after $timeout secs.\n";
   }
@@ -152,12 +191,13 @@ sub load_resolver {
 
   eval {
     require Net::DNS;
-    $self->{res} = new Net::DNS::Resolver;
+    $self->{res} = Net::DNS::Resolver->new;
     if (defined $self->{res}) {
       $self->{no_resolver} = 0;
     }
     1;
   };   #  or warn "eval failed: $@ $!\n";
+
   dbg ("is Net::DNS::Resolver unavailable? $self->{no_resolver}");
 
   return (!$self->{no_resolver});
@@ -173,12 +213,13 @@ sub lookup_mx {
 
   eval {
     if (Net::DNS::mx ($self->{res}, $dom)) { $ret = 1; }
-  1; } or sa_die (71, "MX lookup died: $@ $!\n");
-
-  # 71 == EX_OSERR.  MX lookups are not supposed to crash and burn!
+  };
+  if ($@) {
+    # 71 == EX_OSERR.  MX lookups are not supposed to crash and burn!
+    sa_die (71, "MX lookup died: $@ $!\n");
+  }
 
   dbg ("MX for '$dom' exists? $ret");
-
   return $ret;
 }
 

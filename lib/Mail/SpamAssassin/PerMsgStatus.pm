@@ -506,7 +506,7 @@ sub get_decoded_body_text_array {
       }
     }
 
-    $_ = $self->slow_base64_decode ($_);
+    $_ = $self->generic_base64_decode ($_);
     # print "decoded: $_\n";
     my @ary = split (/^/, $_);
     return \@ary;
@@ -622,35 +622,60 @@ sub do_head_tests {
   my ($self) = @_;
   local ($_);
 
+  # note: we do this only once for all head pattern tests.  Only
+  # eval tests need to use stuff in here.
+  $self->clear_test_state();
+ 
   dbg ("running header regexp tests; score so far=".$self->{hits});
+
+  # speedup code provided by Matt Sergeant
+  if (defined &Mail::SpamAssassin::PerMsgStatus::_head_tests) {
+      Mail::SpamAssassin::PerMsgStatus::_head_tests($self);
+      return;
+  }
 
   my ($rulename, $rule);
   my $evalstr = '';
 
-  # note: we do this only once for all head pattern tests.  Only
-  # eval tests need to use stuff in here.
-  $self->clear_test_state();
-
   while (($rulename, $rule) = each %{$self->{conf}->{head_tests}}) {
-    next if ($self->{conf}->{scores}->{$rulename} == 0.0);
+    next unless ($self->{conf}->{scores}->{$rulename});
 
     my $def = '';
     my ($hdrname, $testtype, $pat) = 
     		$rule =~ /^\s*(\S+)\s*(\=|\!)\~\s*(\S.*?\S)\s*$/;
 
     if ($pat =~ s/\s+\[if-unset:\s+(.+)\]\s*$//) { $def = $1; }
-    $_ = $self->get ($hdrname, $def);
-    s/#/[HASH]/gs;		# avoid probs with eval below
+    $hdrname =~ s/#/[HASH]/g;		# avoid probs with eval below
+    $def =~ s/#/[HASH]/g;
 
     $evalstr .= '
-      if (q#'.$_.'# '.$testtype.'~ '.$pat.') {
+      if ($self->get(q#'.$hdrname.'#, q#'.$def.'#) '.$testtype.'~ '.$pat.') {
 	$self->got_hit (q{'.$rulename.'}, q{});
       }
     ';
   }
 
-  if (!eval $evalstr.'1;') {
+  $evalstr = <<"EOT";
+{
+    package Mail::SpamAssassin::PerMsgStatus;
+
+    sub _head_tests {
+        my (\$self) = \@_;
+
+        $evalstr;
+    }
+
+    1;
+}
+EOT
+
+  eval $evalstr;
+  
+  if ($@) {
     warn "Failed to run header SpamAssassin tests, skipping some: $@\n";
+  }
+  else {
+    Mail::SpamAssassin::PerMsgStatus::_head_tests($self);
   }
 }
 
@@ -658,26 +683,50 @@ sub do_body_tests {
   my ($self, $textary) = @_;
   my ($rulename, $pat);
   local ($_);
-  $self->clear_test_state();
 
   dbg ("running body-text per-line regexp tests; score so far=".$self->{hits});
+
+  $self->clear_test_state();
+  if ( defined &Mail::SpamAssassin::PerMsgStatus::_body_tests ) {
+    # ok, we've compiled this before.
+    Mail::SpamAssassin::PerMsgStatus::_body_tests($self, @$textary);
+    return;
+  }
 
   # build up the eval string...
   my $evalstr = '';
   while (($rulename, $pat) = each %{$self->{conf}->{body_tests}}) {
-    next if ($self->{conf}->{scores}->{$rulename} == 0.0);
+    next unless ($self->{conf}->{scores}->{$rulename});
     $evalstr .= '
       if ('.$pat.') { $self->got_body_pattern_hit (q{'.$rulename.'}); }
     ';
   }
 
   # generate the loop that goes through each line...
-  $evalstr = 'foreach $_ (@{$textary}) { study; '.$evalstr.'; }';
+  $evalstr = <<"EOT";
+{
+  package Mail::SpamAssassin::PerMsgStatus;
+
+  sub _body_tests {
+    my \$self = shift;
+    foreach (\@_) {
+        $evalstr
+	;
+    }
+  }
+
+  1;
+}
+EOT
 
   # and run it.
-  if (!eval $evalstr.'1;') {
-    warn "Failed to run body SpamAssassin tests, skipping:\n".
-	      "\t($@)\n";
+  eval $evalstr;
+  if ($@) {
+      warn("Failed to compile body SpamAssassin tests, skipping:\n".
+	      "\t($@)\n");
+  }
+  else {
+    Mail::SpamAssassin::PerMsgStatus::_body_tests($self, @$textary);
   }
 }
 
@@ -685,24 +734,46 @@ sub do_full_tests {
   my ($self, $fullmsgref) = @_;
   my ($rulename, $pat);
   local ($_);
+  
+  dbg ("running full-text regexp tests; score so far=".$self->{hits});
+
   $self->clear_test_state();
 
-  dbg ("running full-text regexp tests; score so far=".$self->{hits});
+  if (defined &Mail::SpamAssassin::PerMsgStatus::_full_tests) {
+      Mail::SpamAssassin::PerMsgStatus::_full_tests($self, $fullmsgref);
+      return;
+  }
 
   # build up the eval string...
   my $evalstr = '';
   while (($rulename, $pat) = each %{$self->{conf}->{full_tests}}) {
-    next if ($self->{conf}->{scores}->{$rulename} == 0);
+    next unless ($self->{conf}->{scores}->{$rulename});
     $evalstr .= '
       if ($$fullmsgref =~ '.$pat.') { $self->got_hit (q{'.$rulename.'}, q{}); }
     ';
   }
 
-  # and run it.
-  study $$fullmsgref;
-  if (!eval $evalstr.'; 1;') {
-    warn "Failed to run full SpamAssassin tests, skipping:\n".
+  # and compile it.
+  $evalstr = <<"EOT";
+  {
+    package Mail::SpamAssassin::PerMsgStatus;
+
+    sub _full_tests {
+	my (\$self, \$fullmsgref) = \@_;
+	study \$\$fullmsgref;
+	$evalstr
+    }
+
+    1;
+  }
+EOT
+  eval $evalstr;
+
+  if ($@) {
+    warn "Failed to compile full SpamAssassin tests, skipping:\n".
 	      "\t($@)\n";
+  } else {
+    Mail::SpamAssassin::PerMsgStatus::_full_tests($self, $fullmsgref);
   }
 }
 
@@ -725,26 +796,35 @@ sub do_full_eval_tests {
 
 ###########################################################################
 
+sub mk_param {
+    my $param = shift;
+    if ($param =~ /^['"](.*)['"]$/) {
+        return $1;
+    }
+    return $param;
+}
+
 sub run_eval_tests {
   my ($self, $evalhash, $prepend2desc, @extraevalargs) = @_;
   my ($rulename, $pat, $evalsub, @args);
   local ($_);
 
   while (($rulename, $evalsub) = each %{$evalhash}) {
-    next if ($self->{conf}->{scores}->{$rulename} == 0);
+    next unless ($self->{conf}->{scores}->{$rulename});
 
     my $result;
     $self->clear_test_state();
 
     @args = ();
-    if (scalar @extraevalargs >= 0) { push (@args, '@extraevalargs'); }
+    if (scalar @extraevalargs >= 0) { push (@args, @extraevalargs); }
 
     $evalsub =~ s/\s*\((.*?)\)\s*$//;
-    if (defined $1 && $1 ne '') { push (@args, $1); }
+    if (defined $1 && $1 ne '') { push (@args, mk_param($1)); }
 
-    my $evalstr = '$result = $self->'.$evalsub.'('.join (', ', @args).');';
-    dbg ("running: $evalstr");
-    if (!eval $evalstr.'1;') {
+    eval {
+        $result = $self->$evalsub(@args);
+    };
+    if ($@) {
       warn "Failed to run $rulename SpamAssassin test, skipping:\n".
       		"\t($@)\n";
       next;
@@ -787,6 +867,22 @@ sub handle_hit {
 
   $self->{test_names_hit} .= $rule.",";
 
+sub generic_base64_decode {
+    my ($self, $to_decode) = @_;
+    
+    my $retval;
+    eval {
+        require MIME::Base64;
+        $retval = MIME::Base64::decode_base64($to_decode);
+    };
+    if ($@) {
+        return $self->slow_base64_decode($to_decode);
+    }
+    else {
+        return $retval;
+    }
+}
+
   $self->{test_logs} .= sprintf ("%-18s %s%s\n%s",
 		"Hit! (".$score." point".($score == 1 ? "":"s").")",
 		$area, $desc, $self->{test_log_msgs});
@@ -817,8 +913,8 @@ sub test_log {
 # Minor mods by jm@jmason.org for spamassassin and "use strict"
 
 sub slow_base64_decode {
-  my ($self) = shift;
-  local ($_) = shift;
+  my $self = shift;
+  local $_ = shift;
 
   $base64alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.
 		    'abcdefghijklmnopqrstuvwxyz'.
