@@ -879,7 +879,7 @@ sub MY::install {
 
   foreach (@code) {
     # Add our install targets as a dependency to all top-level install targets
-    s/^(install(?:_[a-z]+)?\s*::?\s*.*)$/$1 bin__install conf__install data__install/;
+    s/^(install(?:_[a-z]+)?\s*::?\s*.*)$/$1 conf__install data__install/;
 
     # Now do the DESTDIR hack, if necessary.
     next if !$mm_needs_destdir;
@@ -1151,6 +1151,7 @@ qmail/qmail-spamc$(EXE_EXT): spamc/qmail-spamc$(EXE_EXT)
 	$(MAKE_SPAMC_OLD)
 	$(CHMOD) $(PERM_RWX) $@
 
+# needs to be added to MY::install if used
 #bin__install: $(INST_SCRIPT)/sa-filter
 #        # $(RM_F) $(B_SCRIPTDIR)/spamassassin
 #        # $(SYMLINK) $(INST_SCRIPT)/sa-filter $(B_SCRIPTDIR)/spamassassin
