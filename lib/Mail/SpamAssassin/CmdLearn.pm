@@ -90,6 +90,7 @@ sub cmdline_run {
 
   $spamtest->init_learner({
       force_expire	=> $opt{'force-expire'},
+      wait_for_lock	=> 1,
       caller_will_untie	=> 1
   });
 

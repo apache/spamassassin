@@ -94,7 +94,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.174.2.11 2003/03/27 17:48:38 felicity Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.174.2.12 2003/03/28 01:01:20 jmason Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -389,10 +389,18 @@ method.
 
 =over 4
 
-=item use_whitelist
+=item caller_will_untie
 
-Whether or not to add addresses to the automatic whitelist while learning.
-(optional, default 0)
+Whether or not the code calling this method will take care of untie'ing
+from the Bayes databases (by calling C<finish_learner()>) (optional, default 0).
+
+=item force_expire
+
+Should an expiration run be forced to occur immediately? (optional, default 0).
+
+=item wait_for_lock
+
+Whether or not to wait a long time for locks to complete (optional, default 0).
 
 =back
 
@@ -402,9 +410,9 @@ sub init_learner {
   my $self = shift;
   my $opts = shift;
   dbg ("Initialising learner");
-  if ($opts->{use_whitelist}) { $self->{learn_with_whitelist} = 1; }
   if ($opts->{force_expire}) { $self->{learn_force_expire} = 1; }
   if ($opts->{caller_will_untie}) { $self->{learn_caller_will_untie} = 1; }
+  if ($opts->{wait_for_lock}) { $self->{learn_wait_for_lock} = 1; }
   1;
 }
 
