@@ -16,10 +16,10 @@
 
 Summary:        a spam filter for email which can be invoked from mail delivery agents
 Summary(pl):    Filtr antyspamowy, przeznaczony dla programów dostarczaj±cych pocztê (MDA)
-
 Group:          Applications/Mail
-%define version 2.62
-%define real_version 2.62
+
+%define real_version 2.63
+%define version %{real_version}
 
 # Release number can be specified with rpmbuild --define 'release SOMETHING' ...
 # If no such --define is used, the release number is 1.
