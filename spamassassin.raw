@@ -484,8 +484,9 @@ in this case.  Pay attention to the score instead.
 If you run this with B<-d>, the message will first have SpamAssassin
 markup removed before being tested.
 
-If you run tests with the B<-a> option, the scores will be added to the AWL.
-This may not be what you want to do.  If it is not, then don't use B<-a -t>.
+If you run tests with the auto-whitelist enabled, the score result will be
+added to the AWL.  This may not be what you want to do.  If it is not,
+then disable the auto-whitelist.
 
 =item B<-r>, B<--report>
 
@@ -533,16 +534,15 @@ typos and rules that do not compile correctly.  Exits immediately with
 
 Add all email addresses, in the headers and body of the mail message read
 from STDIN, to the automatic whitelist.  Note that you must be running
-C<spamassassin> or C<spamd> with the B<-a> switch for this to work.
-See the B<-a> documentation for more information.
+C<spamassassin> or C<spamd> with the auto-whitelist enabled for this
+to work.
 
 =item B<--add-to-blacklist>
 
 Add all email addresses, in the headers and body of the mail message read
 from STDIN, to the automatic whitelist with a high score (ensuring they
 will be ''blacklisted'').  Note that you must be running C<spamassassin>
-or C<spamd> with the B<-a> switch.  See the B<-a> documentation for
-more information.
+or C<spamd> with the auto-whitelist enabled.
 
 =item B<-R>, B<--remove-from-whitelist>
 
@@ -551,27 +551,26 @@ from STDIN, from the automatic whitelist. STDIN must contain a full email
 message, so to remove a single address you should use
 B<--remove-addr-from-whitelist> instead.
 
-Note that you must be running C<spamassassin> or C<spamd> with the B<-a>
-switch.  See the B<-a> documentation for more information.
+Note that you must be running C<spamassassin> or C<spamd> with the
+auto-whitelist enabled.
 
 =item B<--add-addr-to-whitelist>
 
-Add the named email address to the automatic whitelist.  Note that
-you must be running C<spamassassin> or C<spamd> with the B<-a> switch.
-See the B<-a> documentation for more information.
+Add the named email address to the automatic whitelist.  Note that you
+must be running C<spamassassin> or C<spamd> with the auto-whitelist
+enabled.
 
 =item B<--add-addr-to-blacklist>
 
 Add the named email address to the automatic whitelist with a high score
 (ensuring they will be ''blacklisted'').  Note that you must be running
-C<spamassassin> or C<spamd> with the B<-a> switch.  See the B<-a>
-documentation for more information.
+C<spamassassin> or C<spamd> with the auto-whitelist enabled.
 
 =item B<--remove-addr-from-whitelist>
 
 Remove the named email address from the automatic whitelist.  Note that
-you must be running C<spamassassin> or C<spamd> with the B<-a> switch.
-See the B<-a> documentation for more information.
+you must be running C<spamassassin> or C<spamd> with the auto-whitelist
+enabled.
 
 =item B<-L>, B<--local>
 
