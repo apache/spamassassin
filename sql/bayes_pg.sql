@@ -23,7 +23,7 @@ CREATE TABLE bayes_seen (
 
 CREATE TABLE bayes_token (
   id integer NOT NULL default '0',
-  token char(200) NOT NULL default '',
+  token char(5) NOT NULL default '',
   spam_count integer NOT NULL default '0',
   ham_count integer NOT NULL default '0',
   atime integer NOT NULL default '0',
