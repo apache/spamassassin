@@ -89,7 +89,7 @@ sub check_for_forged_hotmail_received_headers {
   # spammers do not ;)
 
   if ($rcvd =~ /from hotmail.com/
-  	&& $rcvd !~ /from hotmail.com \(\S+\.\S+\.hotmail\.com /)
+  	&& $rcvd !~ /from \S*hotmail.com \(\S+\.hotmail\.com /)
   {
     return 1;
   } else {
