@@ -1,4 +1,4 @@
-# $Id: regression_tests.cf,v 1.21 2002/09/05 09:26:38 zelgadis Exp $
+# $Id: regression_tests.cf,v 1.22 2002/09/09 04:16:55 zelgadis Exp $
 #
 test BIG_FONT      fail    <font size=3D2>
 test BIG_FONT      ok      <font size=3D+2>
@@ -261,3 +261,8 @@ test EMAIL_ATTRIBUTION ok --- In FruityGroup@y..., hopefuldreamer13@a... wrote:
 test EMAIL_ATTRIBUTION fail foo@bar.com writed:
 test EMAIL_ATTRIBUTION fail wrote:
 
+test BAD_CREDIT ok   no credit checks
+test BAD_CREDIT ok   reestablish credit
+test BAD_CREDIT ok   establish good credit
+test BAD_CREDIT ok   repair your credit
+test BAD_CREDIT fail NOTICE: Your credit card company may place the words "San Antonio"
