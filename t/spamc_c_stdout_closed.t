@@ -11,12 +11,19 @@ use Test; BEGIN { plan tests => 2 };
 
 start_spamd("-L");
 
+my @warnings;
 sub myrun {
   open (OLDOUT, ">&STDOUT");
   close STDOUT;
+
+  # redirect warnings to (the real) STDOUT
+  local($SIG{'__WARN__'}) = sub { print OLDOUT @_ };
+
   my $ret = spamcrun (@_);
+
   open (STDOUT, ">&OLDOUT");
-  $ret;
+
+  return $ret;
 }
 
 ok (!myrun ("-c < data/spam/001", \&patterns_run_cb));
