@@ -282,7 +282,7 @@ sub read_db_configs {
 
   # Use the appropriate set of constants; the different systems have different
   # optimum settings for these.  (TODO: should these be exposed through Conf?)
-  if ($self->{bayes}->{use_chi_sq_combining}) {
+  if ($self->{use_chi_sq_combining}) {
     $self->{robinson_x_constant} = CHI_ROBINSON_X_CONSTANT;
     $self->{robinson_s_constant} = CHI_ROBINSON_S_CONSTANT;
     $self->{robinson_min_prob_strength} = CHI_ROBINSON_MIN_PROB_STRENGTH;
