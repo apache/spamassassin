@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.7 2002/08/29 12:29:37 jmason Exp $
+# $Id: HTML.pm,v 1.8 2002/08/29 19:29:22 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -11,9 +11,9 @@ use HTML::Parser 3.00 ();
 
 sub html_tag {
   my ($self, $tag, $attr, $num) = @_;
-  
+
   $self->{html_inside}{$tag} += $num;
-  
+
   if ($num == 1) {
     $self->html_format($tag, $attr, $num);
     $self->html_uri($tag, $attr, $num);
@@ -251,11 +251,20 @@ sub html_percentage {
   return ($html_percent > $min && $html_percent <= $max);
 }
 
+sub html_tag_balance {
+  my ($self, undef, $tag, $expr) = @_;
+  return exists $self->{html_inside}{$tag} && eval "$self->{html_inside}{$tag} $expr";
+}
+
+sub html_tag_exists {
+  my ($self, undef, $tag) = @_;
+  return exists $self->{html_inside}{$tag};
+}
+
 sub html_test {
   my ($self, undef, $test) = @_;
   return $self->{html}{$test};
 }
-
 
 1;
 __END__
