@@ -10,7 +10,6 @@ use Mail::SpamAssassin::Dns;
 use Mail::SpamAssassin::Locales;
 use Mail::SpamAssassin::MailingList;
 use Mail::SpamAssassin::PerMsgStatus;
-use Mail::SpamAssassin::PhraseFreqs;
 use Mail::SpamAssassin::SHA1 qw(sha1);
 use Mail::SpamAssassin::TextCat;
 use Time::Local;
@@ -1095,12 +1094,9 @@ sub word_is_in_dictionary {
   return 1 if ($word_len < 3);
 
   if (!$triplets_loaded) {
-    my $filename;
-    foreach my $tr_path ( $self->{main}->{DEF_RULES_DIR}, $self->{main}->{LOCAL_RULES_DIR} ) {
-        next unless -f "$tr_path/triplets.txt";
-        $filename = "$tr_path/triplets.txt";
-        last;
-    }
+    my @default_triplets_path = map { s,$,/triplets.txt,; $_; }
+                                @Mail::SpamAssassin::default_rules_path;
+    my $filename = $self->{main}->first_existing_path (@default_triplets_path);
 
     unless ( defined $filename ) {
       dbg("failed to locate the triplets.txt file");
@@ -1149,13 +1145,10 @@ sub nonsense_from_percent {
     }
 
     if (!$names_triplets_loaded) {
-        my $filename = "/name-triplets.txt";
-
-        foreach my $tr_path ( $self->{main}->{DEF_RULES_DIR}, $self->{main}->{LOCAL_RULES_DIR} ) {
-            next unless -f "$tr_path$filename";
-            $filename = "$tr_path$filename";
-            last;
-        }
+        my @default_triplets_path = map { s,$,/name-triplets.txt,; $_; }
+                                    @Mail::SpamAssassin::default_rules_path;
+        my $filename = $self->{main}->first_existing_path (@default_triplets_path
+);
 
         if (!open (TRIPLETS, "<$filename")) {
             dbg ("failed to open '$filename', cannot check dictionary");
@@ -1415,10 +1408,12 @@ sub get_my_locales {
 
 ###########################################################################
 
-sub check_for_round_the_world_received {
+sub _check_for_round_the_world_received {
   my ($self) = @_;
   my ($relayer, $relayerip, $relay);
 
+  $self->{round_the_world_revdns} = 0;
+  $self->{round_the_world_helo} = 0;
   my $rcvd = $self->get ('Received');
 
   # trad sendmail/postfix fmt:
@@ -1440,16 +1435,39 @@ gotone:
   if (!defined $revdns) { $revdns = '(unknown)'; }
 
   dbg ("round-the-world: mail relayed through $relay by ".	
-  	"$relayerip (HELO $relayer, rev DNS says $revdns");
+  	"$relayerip (HELO $relayer, rev DNS says $revdns)");
 
-  if ($revdns =~ /\.${ROUND_THE_WORLD_RELAYERS}$/oi ||
-      $relayer =~ /\.${ROUND_THE_WORLD_RELAYERS}$/oi)
-  {
-    dbg ("round-the-world: yep, I think so");
-    return 1;
+  if ($revdns =~ /\.${ROUND_THE_WORLD_RELAYERS}$/oi) {
+    dbg ("round-the-world: yep, I think so (from rev dns)");
+    $self->{round_the_world_revdns} = 1;
+    return;
+  }
+
+  if ($relayer =~ /\.${ROUND_THE_WORLD_RELAYERS}$/oi) {
+    dbg ("round-the-world: yep, I think so (from HELO)");
+    $self->{round_the_world_helo} = 1;
+    return;
   }
 
   dbg ("round-the-world: probably not");
+  return;
+}
+
+sub check_for_round_the_world_received_helo {
+  my ($self) = @_;
+  if (!defined $self->{round_the_world_helo}) {
+    $self->_check_for_round_the_world_received();
+  }
+  if ($self->{round_the_world_helo}) { return 1; }
+  return 0;
+}
+
+sub check_for_round_the_world_received_revdns {
+  my ($self) = @_;
+  if (!defined $self->{round_the_world_revdns}) {
+    $self->_check_for_round_the_world_received();
+  }
+  if ($self->{round_the_world_revdns}) { return 1; }
   return 0;
 }
 
@@ -2229,7 +2247,8 @@ sub check_dcc {
 ###########################################################################
 
 sub check_for_spam_phrases {
-  return Mail::SpamAssassin::PhraseFreqs::check_phrase_freqs (@_);
+  return 0;
+  #return Mail::SpamAssassin::PhraseFreqs::check_phrase_freqs (@_);
 }
 
 ###########################################################################
@@ -2285,6 +2304,35 @@ sub check_for_to_in_subject {
   return 1 if ( $check == 6 && $subject =~ /\b\Q$to\E\b/i );    # "user"    case insensitive
 
   return 0;
+}
+
+###########################################################################
+
+sub check_bayes {
+  my ($self, $fulltext, $min, $max) = @_;
+
+  if (!exists ($self->{bayes_score})) {
+    $self->{bayes_score} = $self->{main}->{bayes_scanner}->scan ($fulltext);
+    # printf "JMD bayes_score: %3.5f\n", $self->{bayes_score};
+  }
+
+  if (($min == 0 || $self->{bayes_score} > $min) &&
+      ($max eq "undef" || $self->{bayes_score} <= $max))
+  {
+      if ($self->{bayes_score}) {
+          if ($self->{conf}->{detailed_bayes_score}) {
+              $self->test_log(sprintf ("score: %3.4f, hits: %s",
+                                       $self->{bayes_score},
+                                       $self->{bayes_hits}));
+          }
+          else {
+              $self->test_log(sprintf ("score: %3.4f", $self->{bayes_score}));
+          }
+      }
+      return 1;
+  }
+  return 0;
+
 }
 
 1;

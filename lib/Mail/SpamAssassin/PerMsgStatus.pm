@@ -53,7 +53,7 @@ use vars qw{
 sub new {
   my $class = shift;
   $class = ref($class) || $class;
-  my ($main, $msg) = @_;
+  my ($main, $msg, $opts) = @_;
 
   my $self = {
     'main'              => $main,
@@ -64,7 +64,12 @@ sub new {
     'tests_already_hit' => { },
     'hdr_cache'         => { },
     'rule_errors'       => 0,
+    'disable_auto_learning' => 0,
   };
+
+  if (defined $opts && $opts->{disable_auto_learning}) {
+    $self->{disable_auto_learning} = 1;
+  }
 
   $self->{conf} = $self->{main}->{conf};
   $self->{stop_at_threshold} = $self->{main}->{stop_at_threshold};
@@ -201,6 +206,27 @@ sub check {
   $self->{hdr_cache} = { };
 
   $self->{report} = "\n".$_."\n";
+}
+
+###########################################################################
+
+=item $status->learn()
+
+After a mail message has been checked, this method can be called.  If the score
+is outside a certain range around the threshold, ie. if the message is judged
+more-or-less definitely spam or definitely non-spam, it will be fed into
+SpamAssassin's learning systems (currently the naive Bayesian classifier),
+so that future similar mails will be caught.
+
+=cut
+
+sub learn {
+  my ($self) = @_;
+
+  if (!$self->{conf}->{auto_learn}) { return; }
+  if ($self->{disable_auto_learning}) { return; }
+
+  return;	# not impled yet
 }
 
 ###########################################################################
@@ -1709,7 +1735,9 @@ sub do_awl_tests {
       # later ones.  See
       # http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=159704
       #
-      $whitelist->add_score($self->{hits});
+      if (!$self->{disable_auto_learning}) {
+        $whitelist->add_score($self->{hits});
+      }
 
       if($delta != 0) {
           $self->_handle_hit("AWL",$delta,"AWL: ","Auto-whitelist adjustment");

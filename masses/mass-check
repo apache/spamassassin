@@ -13,6 +13,7 @@
 # --loghits     log the text hit for patterns (useful for debugging)
 # --showdots    print a dot for each scanned message
 # --nokillfile  don't use the "QUICK HACK"
+# --bayes       report score from Bayesian classifier
 #
 # options for maildir and mh-style folders
 # --head=N      only check first N messages
@@ -39,7 +40,8 @@ my $killfile_receiveds = qr{(?:
 ###########################################################################
 
 use vars qw($opt_c $opt_f $opt_fork $opt_all $opt_head $opt_mh $opt_ms $opt_mn
-	    $opt_single $opt_sort $opt_tail $opt_showdots $opt_nokillfile);
+	    $opt_single $opt_sort $opt_tail $opt_showdots $opt_nokillfile
+            $opt_bayes);
 
 use FindBin;
 use lib "$FindBin::Bin/lib";
@@ -52,8 +54,8 @@ use Getopt::Long;
 # flush buffer immediately so if mass-check fails or stops we don't get a corrupt line
 $|++;
 
-GetOptions("c=s", "f=s", "fork", "all", "head=i", "mh", "ms", "mn", "single", "sort",
-	   "tail=i", "loghits", "showdots", "nokillfile");
+GetOptions("c=s", "f=s", "fork", "all", "head=i", "mh", "ms", "mn", "single",
+        "sort", "tail=i", "loghits", "showdots", "nokillfile", "bayes");
 
 #use Devel::Peek;
 
@@ -150,13 +152,19 @@ sub wanted {
   my $hits = $status->get_hits();
   my $tests = $status->get_names_of_tests_hit();
 
+  my $bscore;
+  if ($opt_bayes) {
+    $bscore = $status->{bayes_score};
+  }
+
   $tests = join(',', sort(split(/,/, $tests)));
 
   $id =~ s/\s/_/g;
 
-  printf "%s %2d %s %s\n",
+  printf "%s %2d %s %s%s\n",
 		    ($yorn ? 'Y' : '.'),
-		    $hits, $id, $tests;
+		    $hits, $id, $tests,
+                    ($opt_bayes ? " bayes=".$bscore : "");
 
   if ($tests =~ /MICROSOFT_EXECUTABLE|MIME_SUSPECT_NAME/) {
     logkilled($ma,$id, "possible virus");
@@ -221,7 +229,7 @@ sub find_missed {
     my $id = $1;
     my $score = 0.0;
 
-    $_ = $'; s/,,+/,/g; s/^\s+//; s/\s+$//;
+    $_ = $'; s/bayes=\S+//; s/,,+/,/g; s/^\s+//; s/\s+$//;
     foreach my $tst (split (/,/, $_)) {
       next if ($tst eq '');
       if (!defined $scores->{$tst}) {

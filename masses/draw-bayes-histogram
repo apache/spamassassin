@@ -1,0 +1,75 @@
+#!/usr/bin/perl -w
+#
+# Given a spam.log and nonspam.log from a "mass-check --bayes" run,
+# draw a histogram of the score ranges.
+
+my $spam = $ARGV[0] || "spam.log";
+my $nonspam = $ARGV[1] || (-f "good.log" ? "good.log" : "nonspam.log");
+
+my $buckets = 25;
+my $range_lo = 0.0;
+my $range_hi = 1.0;
+
+%bux_sp = ();
+%bux_ns = ();
+
+my $step = ($range_hi - $range_lo) / $buckets;
+my $i;
+for ($i = $range_lo; $i <= $range_hi; $i += $step) {
+  push (@buckets, $i);
+  $bux_ns{$i} = $bux_sp{$i} = 0;
+}
+
+foreach my $file ($spam, $nonspam) {
+  open (IN, "<$file") || die "Could not open file '$file': $!";
+
+  my $isspam = 0; ($file eq $spam) and $isspam = 1;
+
+  while (<IN>) {
+    /^(\.|Y)\s.+bayes=(\S+)$/ or next;
+    my $score = $2+0;
+
+    my $bucket_id;
+    foreach my $bucket (@buckets) {
+      if ($score >= $bucket && $score < $bucket+$step) {
+        $bucket_id = $bucket; last;
+      }
+    }
+
+    if ($isspam) {
+      $bux_sp{$bucket_id}++;
+    } else {
+      $bux_ns{$bucket_id}++;
+    }
+  }
+}
+
+my $max_sp = 0;
+my $max_ns = 0;
+my $tot_sp = 0;
+my $tot_ns = 0;
+foreach my $bucket (@buckets) {
+  $tot_sp += $bux_sp{$bucket};
+  if ($bux_sp{$bucket} > $max_sp) 
+                        { $max_sp = $bux_sp{$bucket}; }
+  $tot_ns += $bux_ns{$bucket};
+  if ($bux_ns{$bucket} > $max_ns) 
+                        { $max_ns = $bux_ns{$bucket}; }
+}
+
+my $chars_in_line = 65;
+my $scale_sp = ($max_sp / $chars_in_line);
+my $scale_ns = ($max_ns / $chars_in_line);
+foreach my $bucket (@buckets) {
+  my $numdots = $bux_ns{$bucket} / $scale_ns;
+  my $line_ns = ('.' x $numdots);
+
+  $numdots = $bux_sp{$bucket} / $scale_sp;
+  my $line_sp = ('#' x $numdots);
+
+  printf STDOUT "%3.3f (%3d%%) %s\n", $bucket,
+		(($bux_ns{$bucket} / $tot_ns) * 100.0), $line_ns;
+  printf STDOUT "      (%3d%%) %s\n",
+		(($bux_sp{$bucket} / $tot_sp) * 100.0), $line_sp;
+}
+
