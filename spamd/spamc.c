@@ -14,6 +14,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include <syslog.h>
 
 void print_usage(void)
 {
@@ -47,7 +48,9 @@ int read_message(int in, int out)
   char buf[8192];
   float version; int response=EX_OK;
 
-  for(bytes=0;bytes<8192;bytes++)
+  // jm: changed to 8190 for paranoia, since we use "bytes+1" below.
+  //
+  for(bytes=0;bytes<8190;bytes++)
   {
     if(read(in,&buf[bytes],1) == 0) // read header one byte at a time
     {
@@ -57,8 +60,10 @@ int read_message(int in, int out)
     }
     if('\n' == buf[bytes])
     {
+      buf[bytes+1] = '\0';	// terminate the string
       if(2 != sscanf(buf,"SPAMD/%f %d %*s",&version,&response))
       {
+	syslog (LOG_ERR, "spamd responded with bad string '%s'", buf);
 	exit(EX_PROTOCOL);
       }
       flag = -1; // Set flag to show we found a header
@@ -94,6 +99,7 @@ int process_message(in_addr_t host, int port)
 
   if(-1 == (mysock = socket(PF_INET,SOCK_STREAM,0)))
   {
+    syslog (LOG_ERR, "socket() to spamd failed: %m");
     switch(errno)
     {
     case EPROTONOSUPPORT:
@@ -117,7 +123,10 @@ int process_message(in_addr_t host, int port)
     case ENOTSOCK:
     case ENOPROTOOPT:
     case EFAULT:
+      syslog (LOG_ERR, "setsockopt() to spamd failed: %m");
       return EX_SOFTWARE;
+    default:
+      // ignored
     }
   }
 
@@ -127,6 +136,7 @@ int process_message(in_addr_t host, int port)
 
   if(-1 == connect(mysock,(const struct sockaddr *)&addr,sizeof(addr)))
   {
+    syslog (LOG_ERR, "connect() to spamd failed: %m");
     switch(errno)
     {
     case EBADF:
@@ -172,6 +182,8 @@ void read_args(int argc, char **argv, in_addr_t *host, int *port)
 	}
 	else
 	{
+	  syslog (LOG_ERR, "gethostbyname(%s) failed: h_errno=%d: %m",
+	      		optarg, h_errno);
 	  switch(h_errno)
 	  {
 	  case HOST_NOT_FOUND:
@@ -189,7 +201,10 @@ void read_args(int argc, char **argv, in_addr_t *host, int *port)
 	*port = atoi(optarg);
 	break;
       }
-    case '?':
+    case '?': {
+	syslog (LOG_ERR, "invalid usage");
+	/* NOTE: falls through to usage case below... */
+      }
     case 'h':
       {
 	print_usage();
@@ -205,6 +220,7 @@ int main(int argc,char **argv)
   in_addr_t host = (in_addr_t)0;
 
   srand(time(NULL));
+  openlog ("spamc", LOG_CONS|LOG_PID, LOG_MAIL);
 
   read_args(argc,argv,&host,&port);
     
