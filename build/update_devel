@@ -11,11 +11,18 @@ DEVDIR=$WEBDIR/devel
 RELDIR=$WEBDIR/released
 mkdir -p $DEVDIR $RELDIR
 
+DISTNAME=Mail-SpamAssassin
+
+rm -rf $DISTNAME-*               # otherwise make will fail
+
 make distclean
 perl Makefile.PL < /dev/null || exit $?
 
 make version.env || exit $?
 . version.env
+
+DISTDNAME=$DISTNAME-$DIST_VERSION
+DISTVNAME=$DISTNAME-$FULL_VERSION
 
 # $VERSION will be x.y.z for released not marked $IS_DEVEL_BUILD, else
 # x-y-latest while $DIST_VERSION is always the x.y.z variant.
@@ -28,10 +35,6 @@ make || exit $?
 
 make text_html_doc
 make distcheck
-
-DISTNAME=Mail-SpamAssassin
-DISTDNAME=$DISTNAME-$DIST_VERSION
-DISTVNAME=$DISTNAME-$VERSION
 
 echo $VERSION > $WEBDIR/latest_version
 
