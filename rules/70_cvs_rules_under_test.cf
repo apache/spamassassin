@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.614 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.615 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -43,14 +43,4 @@ tflags T_RCVD_IN_BONDEDSENDER net
 # older corpus mail)
 uri T_YAHOO_REDIRECTOR		/^https?:\/\/rd\.yahoo\.com/i
 describe T_YAHOO_REDIRECTOR	Uses commonly-spammed redirector URL
-
-# This is not necessarily intended for the 2.60 release; if it's not
-# 1.0 S/O, just leave it in here for 2.61cvs.
-#
-header T_FAKE_HELO_DELPHI	eval:check_for_rdns_helo_mismatch("delphi\.com", "delphi\.com")
-describe T_FAKE_HELO_DELPHI	Host HELO did not match rDNS: delphi.com
-
-# delphi.com is frequently forged.  but it's no longer an ISP ;)
-header T_HAS_NUM_AT_DELPHI	ALL =~ /\d\S+\@delphi\.com\b/
-describe T_HAS_NUM_AT_DELPHI	Contains a Delphi address with a number
 
