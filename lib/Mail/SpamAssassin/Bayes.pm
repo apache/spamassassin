@@ -108,21 +108,14 @@ use constant TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
 # which appear with the most frequency in my db.  note: this doesn't have to
 # be 2-way (ie. LHSes that map to the same RHS are not a problem), but mixing
 # tokens from multiple different headers may impact accuracy, so might as well
-# avoid this if possible.  These are the top ones from my corpus, BTW (jm).
+# avoid this if possible.
 %HEADER_NAME_COMPRESSION = (
-  'Message-Id'		=> '*m',
-  'Message-ID'		=> '*M',
-  'Received'		=> '*r',
-  'User-Agent'		=> '*u',
-  'References'		=> '*f',
-  'In-Reply-To'		=> '*i',
-  'From'		=> '*F',
-  'Reply-To'		=> '*R',
-  'Return-Path'		=> '*p',
-  'X-Mailer'		=> '*x',
-  'X-Authentication-Warning' => '*a',
-  'Organization'	=> '*o',
-  'Content-Type'	=> '*c',
+  'Message-Id' => '*m',
+  'Message-ID' => '*M',
+  'Received' => '*r',
+  'User-Agent' => '*u',
+  'References' => '*f',
+  'In-Reply-To' => '*i',
 );
 
 # How big should the corpora be before we allow scoring using Bayesian tests?
@@ -136,8 +129,19 @@ $MIN_HAM_CORPUS_SIZE_FOR_BAYES = 200;
 # into the <0.5 range for nonspam and >0.5 for spam.
 use constant USE_ROBINSON_FX_EQUATION_FOR_LOW_FREQS => 1;
 
-# This (apparently) works well as a value for 's' in the f(w) equation.
-use constant ROBINSON_S_CONSTANT => 0.30;
+# Value for 'x' in the f(w) equation.
+# "Let x = the number used when n [hits] is 0."
+use constant ROBINSON_X_CONSTANT => 0.43;
+
+# Value for 's' in the f(w) equation.  "We can see s as the "strength" (hence
+# the use of "s") of an original assumed expectation ... relative to how
+# strongly we want to consider our actual collected data."  Low 's' means
+# trust collected data more strongly.
+use constant ROBINSON_S_CONSTANT => 0.53;
+
+# note: these seem to work well for Gary-combining.
+#use constant ROBINSON_X_CONSTANT => 0.6;
+#use constant ROBINSON_S_CONSTANT => 0.1;
 
 # How many of the most significant tokens should we use for the p(w)
 # calculation?
@@ -156,6 +160,10 @@ use constant MAX_TOKEN_LENGTH => 15;
 # tokens.
 use constant PROB_BOUND_LOWER => 0.001;
 use constant PROB_BOUND_UPPER => 0.999;
+
+# Use chi-squared combining instead of Gary-combining (Robinson/Graham-style
+# naive-Bayesian)?
+use constant USE_CHI_SQ_COMBINING => 1;
 
 # we have 5 databases for efficiency.  To quote Matt:
 # > need five db files though to make it real fast:
@@ -196,6 +204,7 @@ sub new {
     'hostname'          => hostname,
     'already_tied'      => 0,
     'is_locked'         => 0,
+    'log_raw_counts'	=> 0,
   };
   bless ($self, $class);
 
@@ -819,6 +828,10 @@ sub compute_prob_for_token {
 		  (ROBINSON_S_CONSTANT + $robn);
   }
 
+  if ($self->{log_raw_counts}) {
+    $self->{raw_counts} .= " s=$s,n=$n ";
+  }
+
   #$self->{db_probs}->{"$s:$n"} = pack ('f', $prob);
   return $prob;
 }
@@ -826,9 +839,14 @@ sub compute_prob_for_token {
 sub precompute_robinson_constants {
   my $self = shift;
 
-  my $robinson_x = 0.5;		#TODO - use computed one?
-  # precompute this here for speed
-  $self->{robinson_s_dot_x} = ($robinson_x * ROBINSON_S_CONSTANT);
+  # precompute this here for speed.
+
+  # TODO: should we compute ROBINSON_X? to quote: "x can be computed by trial
+  # and error, with a starting estimate of .5. However, another approach would
+  # be to calculate p(w) for all words that have, say, 10 or more data points,
+  # and then use the average."
+
+  $self->{robinson_s_dot_x} = (ROBINSON_X_CONSTANT * ROBINSON_S_CONSTANT);
 }
 
 ###########################################################################
@@ -843,6 +861,10 @@ sub scan {
   my $nn = $self->{db_toks}->{$NHAM_MAGIC_TOKEN};
   $ns ||= 0;
   $nn ||= 0;
+
+  if ($self->{log_raw_counts}) {
+    $self->{raw_counts} = " ns=$ns nn=$nn ";
+  }
 
   if ($ns < $MIN_SPAM_CORPUS_SIZE_FOR_BAYES) {
     dbg ("corpus too small ($ns < $MIN_SPAM_CORPUS_SIZE_FOR_BAYES), skipping");
@@ -860,26 +882,15 @@ sub scan {
   my $pw;
 
   my %pw = map {
-    if ($seen{$_}) { (); }	# exit map()
-    
-    else {
+    if ($seen{$_}) {
+      ();		# exit map()
+    } else {
       $seen{$_} = 1;
-
       $pw = $self->compute_prob_for_token ($_, $ns, $nn);
-      if (!defined $pw) { (); }	# exit map()
-      
-      else {
-	# enforce (max PROB_BOUND_LOWER (min PROB_BOUND_UPPER (score))) as per
-	# Graham; it allows a majority of spam clues to override 1 or 2
-	# very-strong nonspam clues.
-	#
-	if ($pw < PROB_BOUND_LOWER) {
-	  ($_ => PROB_BOUND_LOWER);
-	} elsif ($pw > PROB_BOUND_UPPER) {
-	  ($_ => PROB_BOUND_UPPER);
-	} else {
-	  ($_ => $pw);
-	}
+      if (!defined $pw) {
+	();		# exit map()
+      } else {
+	($_ => $pw);
       }
     }
   } @tokens;
@@ -892,8 +903,8 @@ sub scan {
   # now take the $count most significant tokens and calculate probs using
   # Robinson's formula.
   my $count = N_SIGNIFICANT_TOKENS;
-  my $P = 1;
-  my $Q = 1;
+  my @sorted = ();
+
   for (sort {
               abs($pw{$b} - 0.5) <=> abs($pw{$a} - 0.5)
             } keys %pw)
@@ -901,25 +912,44 @@ sub scan {
     if ($count-- < 0) { last; }
     my $pw = $pw{$_};
     next if (abs($pw - 0.5) < ROBINSON_MIN_PROB_STRENGTH);
-    $P *= (1-$pw);
-    $Q *= $pw;
+
+    # enforce (max PROB_BOUND_LOWER (min PROB_BOUND_UPPER (score))) as per
+    # Graham; it allows a majority of spam clues to override 1 or 2
+    # very-strong nonspam clues.  Moved here from above to save some CPU.
+    #
+    if ($pw < PROB_BOUND_LOWER) {
+      $pw = PROB_BOUND_LOWER;
+    } elsif ($pw > PROB_BOUND_UPPER) {
+      $pw = PROB_BOUND_UPPER;
+    }
+
+    push (@sorted, $pw);
 
     dbg ("bayes token '$_' => $pw");
   }
 
-  $P = 1 - ($P ** (1 / $wc));
-  $Q = 1 - ($Q ** (1 / $wc));
-
-  if ($P + $Q == 0) {
+  if ($#sorted < 0) {
     dbg ("cannot use bayes on this message; db not initialised yet");
     goto skip;
   }
 
-  my $S = (1 + ($P - $Q) / ($P + $Q)) / 2.0;
-  dbg ("bayes: score = $S");
+  my $score;
+
+  if (USE_CHI_SQ_COMBINING) {
+    $score = chi_squared_probs_combine (@sorted);
+  } else {
+    $score = robinson_naive_bayes_probs_combine (@sorted);
+  }
+
+  dbg ("bayes: score = $score");
+
+  if ($self->{log_raw_counts}) {
+    print "#Bayes-Raw-Counts: $self->{raw_counts}\n";
+  }
+
   $self->untie_db();
 
-  return $S;
+  return $score;
 
 skip:
   dbg ("bayes: not scoring message, returning 0.5");
@@ -982,6 +1012,87 @@ sub tok_pack {
   } else {
     return pack ("CLL", TWO_LONGS_FORMAT, $ts, $th);
   }
+}
+
+###########################################################################
+
+sub robinson_naive_bayes_probs_combine {
+  my (@sorted) = @_;
+
+  my $wc = scalar @sorted;
+  my $P = 1;
+  my $Q = 1;
+
+  foreach my $pw (@sorted) {
+    $P *= (1-$pw);
+    $Q *= $pw;
+  }
+  $P = 1 - ($P ** (1 / $wc));
+  $Q = 1 - ($Q ** (1 / $wc));
+  return (1 + ($P - $Q) / ($P + $Q)) / 2.0;
+}
+
+###########################################################################
+
+# Chi-squared function
+sub chi2q {
+  my ($x2, $v) = @_;
+
+  die "v must be even in chi2q(x2, v)" if $v & 1;
+  my $m = $x2 / 2.0;
+  my ($sum, $term);
+  $sum = $term = exp(0 - $m);
+  for my $i (1 .. ($v >> 2)) {
+    $term *= $m / $i;
+    $sum += $term;
+  }
+  return $sum < 1.0 ? $sum : 1.0;
+}
+
+# Chi-Squared method. Produces mostly boolean $result,
+# but with a grey area.
+sub chi_squared_probs_combine  {
+  my (@sorted) = @_;
+  # @sorted contains an array of the probabilities
+
+  my ($H, $S);
+  my ($Hexp, $Sexp);
+  $H = $S = 1.0;
+  $Hexp = $Sexp = 0;
+
+  my $num_clues = @sorted;
+  use POSIX qw(frexp);
+
+  foreach my $prob (@sorted) {
+    $S *= 1.0 - $prob;
+    $H *= $prob;
+    if ($S < 1e-200) {
+      my $e;
+      ($S, $e) = frexp($S);
+      $Sexp += $e;
+    }
+    if ($H < 1e-200) {
+      my $e;
+      ($H, $e) = frexp($H);
+      $Hexp += $e;
+    }
+  }
+
+  use constant LN2 => log(2);
+
+  $S = log($S) + $Sexp + LN2;
+  $H = log($H) + $Hexp + LN2;
+
+  my $result;
+  if ($num_clues) {
+    $S = 1.0 - chi2q(-2.0 * $S, 2 * $num_clues);
+    $H = 1.0 - chi2q(-2.0 * $H, 2 * $num_clues);
+    $result = (($S - $H) + 1.0) / 2.0;
+  } else {
+    $result = 0.5;
+  }
+
+  return $result;
 }
 
 ###########################################################################
