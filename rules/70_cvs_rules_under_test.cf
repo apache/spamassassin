@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.647 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.648 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -283,9 +283,15 @@ score T_HASHCASH_2SPEND		0.1
 # -0800, on the spf-discuss at v2.listbox.com mailing list.  Let's see
 # what this results in!
 #
-header FAKE_FROM_ALTAVISTA	From:addr =~ /\@altavista\.com$/i
-header FAKE_TO_ALTAVISTA	To:addr =~ /\@altavista\.com$/i
-header FAKE_REPTO_ALTAVISTA	Reply-To:addr =~ /\@altavista\.com$/i
-header FAKE_ERRSTO_ALTAVISTA	Errors-To:addr =~ /\@altavista\.com$/i
-header FAKE_ENVFROM_ALTAVISTA	EnvelopeFrom =~ /\@altavista\.com$/i
+header T_FAKE_FROM_ALTAVISTA	From:addr =~ /\@altavista\.com$/i
+header T_FAKE_TO_ALTAVISTA	To:addr =~ /\@altavista\.com$/i
+header T_FAKE_REPTO_ALTAVISTA	Reply-To:addr =~ /\@altavista\.com$/i
+header T_FAKE_ERRSTO_ALTAVISTA	Errors-To:addr =~ /\@altavista\.com$/i
+header T_FAKE_ENVFROM_ALTAVISTA	EnvelopeFrom =~ /\@altavista\.com$/i
+
+header T_FAKE_OUTBLAZE_RCVD	Received =~ /\.mr\.outblaze\.com/
+header T_FAKE_OUTBLAZE_MID	Message-Id =~ /\.mr\.outblaze\.com/
+
+header T_ALL_TRUSTED		eval:check_all_trusted()
+describe T_ALL_TRUSTED		Did not pass through any untrusted hosts
 
