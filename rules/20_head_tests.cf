@@ -445,7 +445,7 @@ describe SUSPICIOUS_RECIPS	Similar addresses in recipient list
 header SORTED_RECIPS		eval:sorted_recipients()
 describe SORTED_RECIPS		Recipient list is sorted by address
 
-header GAPPY_SUBJECT		Subject =~ /\b(?:[a-z]([-_. =~\/:,*!\@\#\$\%\^&+;\"\'<>\\])\1{0,2}){4,}/i
+header GAPPY_SUBJECT		Subject =~ /\b(?:[a-z]([-_. =~\/:,*!\@\#\$\%\^&+;\"\'<>\\])\1{0,2}){4}/i
 describe GAPPY_SUBJECT		Subject: contains G.a.p.p.y-T.e.x.t
 
 ### header existence tests (description is added automatically)
@@ -500,7 +500,7 @@ describe SUBJ_DOLLARS           Subject starts with dollar amount
 header SUBJ_FOR_ONLY 		Subject =~ /For Only/i
 describe SUBJ_FOR_ONLY 		Subject contains "For Only"
 
-header SUBJ_FREE_CAP		Subject =~ /FRE{2,}|F.R.E.E\b/
+header SUBJ_FREE_CAP		Subject =~ /FREE|F.R.E.E\b/
 describe SUBJ_FREE_CAP		Subject contains "FREE" in CAPS
 
 header SUB_FREE_OFFER           Subject =~ /^fre{2,}\b/i

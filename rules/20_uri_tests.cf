@@ -24,7 +24,7 @@
 
 require_version @@VERSION@@
 
-uri NUMERIC_HTTP_ADDR		/^https?\:\/\/\d{7,}/is
+uri NUMERIC_HTTP_ADDR		/^https?\:\/\/\d{7}/is
 describe NUMERIC_HTTP_ADDR	Uses a numeric IP address in URL
 
 uri NORMAL_HTTP_TO_IP		m{^https?://\d+\.\d+\.\d+\.\d+}i
@@ -89,7 +89,7 @@ describe INFO_TLD		Contains an URL in the INFO top-level domain
 #uri      HTTP_ENTITIES_HOST	m{https?://[^\s\">/]*\&\#[\da-f]+}i
 #describe HTTP_ENTITIES_HOST	URI obscured with character entities
 
-uri YAHOO_RD_REDIR		m{^https?\://rd\.yahoo\.com/(?:[0-9]{4,}|partner\b|dir\b)}i
+uri YAHOO_RD_REDIR		m{^https?\://rd\.yahoo\.com/(?:[0-9]{4}|partner\b|dir\b)}i
 describe YAHOO_RD_REDIR		Has Yahoo Redirect URI
 
 uri YAHOO_DRS_REDIR		m{^https?://drs\.yahoo\.com/}i
@@ -119,7 +119,7 @@ header URI_REDIRECTOR		eval:check_for_http_redirector()
 describe URI_REDIRECTOR		Message has HTTP redirector URI
 
 # a.com.b.c
-uri SPOOF_COM2OTH	m{^https?://(?:\w+\.)+?com\.(?:\w+\.){2,}}i
+uri SPOOF_COM2OTH	m{^https?://(?:\w+\.)+?com\.(?:\w+\.){2}}i
 describe SPOOF_COM2OTH	URI contains ".com" in middle
 
 # a.com.b.com
@@ -156,7 +156,7 @@ describe URI_NO_WWW_INFO_CGI	CGI in .info TLD other than third-level "www"
 uri URI_NO_WWW_BIZ_CGI	/^(?:https?:\/\/)?[^\/]+(?<!\/www)\.[^.]{7,}\.biz\/(?=\S{15,})\S*\?/i
 describe URI_NO_WWW_BIZ_CGI	CGI in .biz TLD other than third-level "www"
 
-uri URI_NO_WWW_ANY_CGI	/^(?:https?:\/\/)?[^\/]+(?<!\/www)\.[^.]{3,}\.[^.]{3,}\.(?!biz|info)[a-z]{2,4}\/\?\S{14,}/i
+uri URI_NO_WWW_ANY_CGI	/^(?:https?:\/\/)?[^\/]+(?<!\/www)\.[^.]{3,}\.[^.]{3,}\.(?!biz|info)[a-z]{2,4}\/\?\S{14}/i
 describe URI_NO_WWW_ANY_CGI	CGI with long hostname other fourth-level "www"
 
 uri URI_SCHEME_MIXED_CASE	/^(?![a-z]{3,6}:|[A-Z]{3,6})[A-Za-z]{3,6}:\//
