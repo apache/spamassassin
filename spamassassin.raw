@@ -507,14 +507,13 @@ filtering databases, such as Vipul's Razor ( http://razor.sourceforge.net/ ).
 The default tagging operations that take place are detailed in L</TAGGING>.
 
 By default, message(s) are read in from STDIN (< I<mailmessage>), or
-from specified files and maildir-formatted directories (I<path> ...)
-STDIN and files are assumed to be in I<file> format, with a single
-message per file.  Directories are assumed to be in I<maildir> format
-where each file in each directory contains only one message
-(directories are not recursed and filenames containing whitespace or
-beginning with "." or "," are skipped).  The options I<--mbox> and
-I<--mbx> can override the assumed format, see the appropriate OPTION
-information below.
+from specified files and directories (I<path> ...)  STDIN and files
+are assumed to be in I<file> format, with a single message per file.
+Directories are assumed to be in a format where each file in the directory
+contains only one message (directories are not recursed and filenames
+containing whitespace or beginning with "." or "," are skipped).
+The options I<--mbox> and I<--mbx> can override the assumed format,
+see the appropriate OPTION information below.
 
 =head1 OPTIONS
 

@@ -64,10 +64,10 @@ Mail::SpamAssassin::ArchiveIterator - find and process messages one at a time
 
 =head1 DESCRIPTION
 
-The Mail::SpamAssassin::ArchiveIterator module will go through a set of mbox
-files, maildir directories, and mbx directories and generate a list of
-messages.  It will then call the wanted and results functions appropriately
-per message.
+The Mail::SpamAssassin::ArchiveIterator module will go through a set
+of mbox files, mbx files, and directories (with a single message per
+file) and generate a list of messages.  It will then call the wanted
+and results functions appropriately per message.
 
 =head1 METHODS
 
@@ -219,8 +219,8 @@ it will be truncated.  If blank, 'h' is default.
 
 =item format
 
-Specifies the format of the raw_location.  C<dir> is a maildir formatted
-directory (one message per file), C<file> a file with a single message,
+Specifies the format of the raw_location.  C<dir> is a directory whose
+files are individual messages, C<file> a file with a single message,
 C<mbox> an mbox formatted file, or C<mbx> for an mbx formatted directory.
 
 C<detect> can also be used; assumes C<file> for STDIN and anything that is not
