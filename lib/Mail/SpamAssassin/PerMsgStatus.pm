@@ -572,7 +572,7 @@ sub get_raw_body_text_array {
   # just assemble the body array from the text bits.
   my $multipart_boundary;
   my $end_boundary;
-  if ($ctype =~ /boundary="(.*)"/) {
+  if ($ctype =~ /boundary\s*=\s*"(.*)"/) {
     $multipart_boundary = "--$1\n";
     $end_boundary = "--$1--\n";
   }
@@ -612,6 +612,7 @@ sub get_raw_body_text_array {
     }
 
     if ($multipart_boundary eq $_) {
+      my $starting_line = $line;
       for ($line++; defined($_ = $bodyref->[$line]); $line++) {
 	push (@{$self->{body_text_array}}, $_);
 
@@ -626,6 +627,8 @@ sub get_raw_body_text_array {
 	  }
 	}
       }
+
+      $line = $starting_line;
 
       last unless defined $_;
 
@@ -659,14 +662,32 @@ sub get_decoded_body_text_array {
   if ($self->{found_encoding_base64}) {
     $_ = '';
     my $foundb64 = 0;
+    my $lastlinelength = 0;
+    my $b64lines = 0;
     foreach my $line (@{$textary}) {
-      if (length($line) != 77) {	# 76 + newline
-	if ($foundb64) {
-	  $_ .= $line;		# last line of block is usually short
-	  last;
-	}
-      } else {
-	$_ .= $line; $foundb64 = 1;
+      if ($line =~ /[ \t]/) {  # base64 can't have whitespace on the line
+        $_ = "";
+        $foundb64 = 0;
+        next;
+      }
+
+      if (length($line) != $lastlinelength && !$foundb64) { # This line is a different length from the last one
+        $_ = $line;                                         # Could be the first line of a base 64 part
+        $lastlinelength = length($line);
+        next;
+      }
+
+      if ($lastlinelength == length ($line)) {              # Same length as the last line.  Starting to look like a base64 encoding
+        if ($b64lines++ == 5) {                             # Five lines the same length, with no spaces in them
+          $foundb64 = 1;                                    # Sounds like base64 to me!
+        }
+        $_ .= $line;
+        next;
+      }
+
+      if ($foundb64) {                                      # Last line is shorter, so we are done.
+        $_ .= $line;
+        last;
       }
     }
 
