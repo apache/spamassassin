@@ -321,7 +321,7 @@ if ( $targets[0] =~ /:mbo?x:-$/ ) {
 # Go run the messages!
 eval { $iter->run(@targets); };
 
-$progress->final() if ($opt{progress});
+$progress->final() if ($opt{progress} && $progress);
 
 # If we needed to make a tempfile, go delete it now.
 if ( defined $tempfile ) {
@@ -367,7 +367,7 @@ sub result {
   # don't open results files until we get here to avoid overwriting files
   &init_results if !$init_results;
 
-  $progress->update($count) if $opt{progress};
+  $progress->update($count) if ($opt{progress} && $progress);
 }
 
 ###########################################################################
