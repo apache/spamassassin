@@ -198,9 +198,12 @@ for (my $v = 1; $v <= 2; $v++) {
       $do = eval { require Razor2::Client::Agent };
     }
 
-    if ($do) {
+    if (defined $do) {
       prompt("Run Razor v${v} tests (these may fail due to network problems)? (y/n)", 'n') =~ /^(.)/;
       $do = $1;
+    }
+    else {
+      $do = '';
     }
   }
   
