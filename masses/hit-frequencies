@@ -23,7 +23,7 @@ getopts("fm:M:X:l:L:pxhc:at:s:io");
 
 use vars qw {
   $opt_f $opt_m $opt_M $opt_X $opt_p $opt_x $opt_h $opt_l $opt_L $opt_c
-  $opt_a $opt_t $opt_s $opt_i $sorting $opt_o
+  $opt_a $opt_t $opt_s $opt_i $sorting $opt_o 
 };
 
 sub usage {
@@ -89,7 +89,7 @@ foreach my $key (keys %rules) {
 
   if ( ($opt_L && !$rules{$key}->{lang}) ||
        ($rules{$key}->{lang} &&
-         (!$ok_lang || $rules{$key}->{lang} !~ /^$ok_lang/i)
+         (!$ok_lang || $rules{$key}->{lang} !~ /^$ok_lang/io)
      ) ) {
     delete $rules{$key} ; next;
   }
@@ -349,7 +349,7 @@ exit;
 
 sub readlogs {
   my $spam = $ARGV[0] || "spam.log";
-  my $ham = $ARGV[1] || (-f "good.log" ? "good.log" : "ham.log");
+  my $ham = $ARGV[1] || "ham.log";
 
   foreach my $file ($spam, $ham) {
     open (IN, "<$file") || die "Could not open file '$file': $!";
@@ -481,10 +481,9 @@ sub _hmap_to_overlap_ratio {
   # now, count the set bits in both bitstrings. thank you unpack()!
   my $both_count = unpack("%32b*", $both_bits);
   my $diff_count = unpack("%32b*", $diff_bits);
-  # warn "JMD $r1 $r2 $both_count $diff_count";
 
   if ($both_count == 0) {
-    warn "oops! no hits on either but didn't get caught in RE above";
+    warn "oops! no hits on either but didn't get caught in RE";
     return 0;
   }
 
@@ -511,20 +510,3 @@ sub soratio {
   }
 }
 
-sub tcr {
-  my ($nspam, $nlegit, $nspamspam, $nlegitspam) = @_;
-  my $nspamlegit = $nspam - $nspamspam;
-  my $nlegitlegit = $nlegit - $nlegitspam;
-
-  my $lambda = 50;
-
-  my $werr = ($lambda * $nlegitspam + $nspamlegit)
-                  / ($lambda * $nlegit + $nspam);
-
-  my $werr_base = $nspam
-                  / ($lambda * $nlegit + $nspam);
-
-  $werr ||= 0.000001;     # avoid / by 0
-  my $tcr = $werr_base / $werr;
-  return $tcr;
-}
