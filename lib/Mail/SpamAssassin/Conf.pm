@@ -1820,40 +1820,6 @@ in a future version.  Please use the C<trusted_networks> option instead
       $self->{num_check_received} = $1+0; next;
     }
 
-=item use_terse_report { 0 | 1 }   (default: 1)
-
-This option is deprecated and does nothing.  It will be removed in a
-future version.
-
-=cut
-
-    if (/^use_terse_report\s+(\d+)$/) {
-      next;
-    }
-
-
-=item terse_report ...some text for a report...
-
-This option is deprecated and does nothing.  It will be removed in a
-future version.
-
-=cut
-
-    if (/^terse_report\b\s*(.*?)$/) {
-      next;
-    }
-
-=item clear_terse_report_template
-
-This option is deprecated and does nothing.  It will be removed in a
-future version.
-
-=cut
-
-    if (/^clear_terse_report_template$/) {
-      next;
-    }
-
 
 
 ###########################################################################
