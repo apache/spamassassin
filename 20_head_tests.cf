@@ -530,8 +530,11 @@ describe VAR_REF_IN_RECEIVED    Received contains a $variable reference
 header RCVD_FAKE_HELO_DOTCOM    Received =~ /^from (?:msn|yahoo|yourwebsite|lycos|excite|cs|aol|localhost|koreanmail|allexecs|mydomain|juno|eudoramail|compuserve|desertmail|excite|caramail)\.com \(/m
 describe RCVD_FAKE_HELO_DOTCOM  Received contains a faked HELO hostname
 
-header USERNAME_IN_SUBJECT	eval:check_for_to_in_subject()
-describe USERNAME_IN_SUBJECT	To: username at front of subject
+header USERNAME_IN_SUBJECT	eval:check_for_to_in_subject('user')
+describe USERNAME_IN_SUBJECT	To: username listed at front of Subject
+
+header ADDRESS_IN_SUBJECT	eval:check_for_to_in_subject('address')
+describe ADDRESS_IN_SUBJECT	To: address listed at front of Subject
 
 header LOSE_POUNDS              Subject =~ /\bLose .*(?:pounds|lbs|weight)/i
 describe LOSE_POUNDS            Subject talks about losing pounds
@@ -732,6 +735,9 @@ describe NO_RDNS_DOTCOM_HELO	Host HELO'd as a big ISP, but had no rDNS
 
 header X_ORIG_HOST		X-Originating-Host =~ /^\[/
 describe X_ORIG_HOST		Message has X-Originating-Host header
+
+header X_ORIG_IP_NOT_IPV4	X-Originating-IP !~ /\[?(?:\d{1,3}\.){3}\d{1,3}\]?/ [if-unset: 0.0.0.0] 
+describe X_ORIG_IP_NOT_IPV4	X-Originating-IP doesn't look like IPv4 address
 
 # Hotmail's DAV interface uses this and it's heavily exploited right now.  As
 # far as I can tell, it requires an msn.com or hotmail.com X-Originating-Email:

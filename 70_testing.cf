@@ -27,34 +27,23 @@
 ###########################################################################
 
 # http://bugzilla.spamassassin.org/show_bug.cgi?id=2088
+# low hit rate
+#   0.091   0.1174   0.0000    1.000   0.93    0.01  T_RATWARE_MIME_844412
 header T_RATWARE_MIME_844412	Content-Type =~ /boundary="[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"/
 
 # http://bugzilla.spamassassin.org/show_bug.cgi?id=2087
+# low hit rate
+#   0.069   0.0895   0.0000    1.000   0.93    0.01  T_RATWARE_OE_DM
 header T_RATWARE_OE_DM	X-Mailer =~ /^Microsoft Outlook Express [\d\.]+ DM$/
 
-# a referral ID
-uri T_REF_ID			/[\?\&]RefID/
-
-# http://bugzilla.spamassassin.org/show_bug.cgi?id=2089
-header T_DATE_EXTRA_SPACE	Date =~ /^..., .\d ... \d\d\d\d \d\d:\d\d:\d\d  [\+\-]\d\d\d\d$/
-
-# another one for bug 2089, may be more useful:
-full __END_HASHBUSTER_1		/\n\[[a-z0-9]+\]\n\s*\Z/
-meta T_RATWARE_2089		(NO_REAL_NAME && __END_HASHBUSTER_1)
-
-# this is really badly faked.  Also the spammer who uses "25250101"
-# for the build is a total hippie.
-header T_RATWARE_GECKO_BUILD	User-Agent =~ /Gecko\/(?!200\d\d\d\d\d)\d/
-
-# another good way to catch mozilla fakery
-header __UA_GECKO		User-Agent =~ /Gecko\//
-header __EXISTS_ACCEPT_LANG	exists:X-Accept-Language
-meta T_RATWARE_GECKO_NO_LANG	(__UA_GECKO && !__EXISTS_ACCEPT_LANG)
-
 # reminder: develop these after 2.60
+# low hit rate
+#  0.093   0.1201   0.0000    1.000   0.93    0.01  T_SPRINTF_5X
 full T_SPRINTF_5X	/[^-][A-F1-9][A-F0-9]{5,7}-[A-F1-9][A-F0-9]{5,7}-[A-F1-9][A-F0-9]{5,7}-[A-F1-9][A-F0-9]{5,7}-[A-F1-9][A-F0-9]{5,7}[^-]/
 
 # (time_t/4444)
+# low hit rate
+#  0.115   0.1174   0.1061    0.525   0.13    0.01  T_TIME_OVER_4444
 header T_TIME_OVER_4444	ALL =~ /\D23[67][0-9][0-9][0-9]\D/
 
 # replacements for PORN_4; split out sub-patterns as some are more FP-prone
@@ -70,25 +59,17 @@ uri T_PORN_URL_SUCK	/^https?:\/\/[\w\.-]*suck[\w-]*\./
 uri T_PORN_URL_TEEN	/^https?:\/\/[\w\.-]*(?<!thir|four|eigh|nine)(?<!fif|six)(?<!seven)teen(?!th)[\w-]*\./
 uri T_PORN_URL_MISC	/^https?:\/\/[\w\.-]*(pussy|nympho|porn|hard-?core|taboo|whore|voyeur|lesbian|gurlpages|naughty|lolita|schoolgirl|kooloffer|erotic)[\w-]*\./
 
-header T_DATE_DOUBLE_DASH	Date =~ /:\d\d --\d\d\d\d$/
-
-header __RCVD_IN_SORBS_RHSBL	eval:check_rbl_from_host('sorbsrhs', 'rhsbl.sorbs.net.')
-tflags __RCVD_IN_SORBS_RHSBL	net
-
-header T_RCVD_IN_SORBS_BADCONF	eval:check_rbl_sub('sorbsrhs', '127.0.0.11')
-describe T_RCVD_IN_SORBS_BADCONF	SORBS: sender uses invalid DNS A or MX records
-tflags T_RCVD_IN_SORBS_BADCONF	net
-
-header T_RCVD_IN_SORBS_NOMAIL	eval:check_rbl_sub('sorbsrhs', '127.0.0.12')
-describe T_RCVD_IN_SORBS_NOMAIL	SORBS: sender is not expected to send mail
-tflags T_RCVD_IN_SORBS_NOMAIL	net
-
 # test XBL with -notfirsthop
 # Note: can't use check_rbl_sub, but can rely on DNSBL caching to avoid
 # duplicate queries of sbl-xbl.
 header T_RCVD_IN_XBL_NFH	eval:check_rbl_txt('sblxbl-notfirsthop', 'sbl-xbl.spamhaus.org.', '(?i)/xbl')
 describe T_RCVD_IN_XBL_NFH	Received via a relay in Spamhaus XBL
 tflags T_RCVD_IN_XBL_NFH	net
+
+# ugh, is that right?
+header T_RCVD_IN_XBL_NFH_2	eval:check_rbl_txt('xbl-notfirsthop', 'xbl.spamhaus.org.')
+describe T_RCVD_IN_XBL_NFH_2	Received via a relay in Spamhaus XBL
+tflags T_RCVD_IN_XBL_NFH_2	net
 
 # SPF support.  "pass" is nice, "fail" is bad, "softfail" is bad, but
 # not as bad as "fail".
@@ -111,31 +92,6 @@ score T_SPF_HELO_FAIL	0.2
 header T_SPF_HELO_SOFTFAIL	eval:check_for_spf_helo_softfail()
 tflags T_SPF_HELO_SOFTFAIL	net
 score T_SPF_HELO_SOFTFAIL	0.1
-
-# Not good, esp. considering how *slow* it runs..
-# 17.640   4.1041  29.0741    0.124   0.69   -0.10  T_ALL_RELAYS_NEAR_MXES
-# However, combined with SBL it might work out useful...
-#header T_ALL_RELAYS_NEAR_MXES	eval:check_for_all_relays_near_mxes()
-#tflags T_ALL_RELAYS_NEAR_MXES	net nice
-#score T_ALL_RELAYS_NEAR_MXES	-0.1
-#describe T_ALL_RELAYS_NEAR_MXES	All relays are near to their MXes
-
-# try out new versions of username in subject ...
-# "user@domain.com" in the subject, case insensitive
-header T_USERNAME_IN_SUBJECT1     eval:check_for_to_in_subject('1')
-describe T_USERNAME_IN_SUBJECT1   Full To: address listed in Subject:
-header T_USERNAME_IN_SUBJECT2     eval:check_for_to_in_subject('2')
-describe T_USERNAME_IN_SUBJECT2   To: username listed in Subject: (ucfirst)
-header T_USERNAME_IN_SUBJECT3     eval:check_for_to_in_subject('3')
-describe T_USERNAME_IN_SUBJECT3   Full To: address listed at front of Subject:
-
-# This is hitting nothing.  Maybe it's gone again...
-header T_RCVD_IN_PDL	 	rbleval:check_rbl_txt('pdl-notfirsthop', 'dialups.visi.com.')
-describe T_RCVD_IN_PDL		Received via a relay in PDL, http://www.pan-am.ca/pdl/
-tflags T_RCVD_IN_PDL		net
-
-rawbody T_RNDMX			/<rndmx\b/
-describe T_RNDMX		Contains 'rndmx' hashbuster code
 
 ########################################################################
 # This ratware always uses a +0000 TZ in the Date header, and has a multiplicity
@@ -291,17 +247,6 @@ header T_FAKE_OUTBLAZE_MID_2	MESSAGEID =~ /\.mr\.outblaze\.com/
 header T_ALL_TRUSTED		eval:check_all_trusted()
 describe T_ALL_TRUSTED		Did not pass through any untrusted hosts
 tflags T_ALL_TRUSTED		nice
-
-# both aspects of same spammer tool
-header T_NETIP_RCVD		Received =~ /netIP with HTTP\;/
-header T_NETIP_BOUND		Content-Type =~ /boundary="--ALT--[A-Z]{4}\d/
-
-# several variants of same rule idea
-header T_XORIGIP_NOT_IPV4_1		X-Originating-IP !~ /\[?(?:\d{1,3}\.){3}\d{1,3}\]?/ [if-unset: 0.0.0.0] 
-header T_XORIGIP_NOT_IPV4_2		X-Originating-IP !~ /^\[?(?:\d{1,3}\.){3}\d{1,3}\]?$/ [if-unset: 0.0.0.0] 
-header T_XORIGIP_NOT_IPV4_3		X-Originating-IP !~ /^\s*\[?(?:\d{1,3}\.){3}\d{1,3}\]?\s*$/ [if-unset: 0.0.0.0] 
-header T_XORIGIP_NOT_IPV4_4		X-Originating-IP !~ /^[^\d.]*\[?(?:\d{1,3}\.){3}\d{1,3}\]?[^\d.]*$/ [if-unset: 0.0.0.0] 
-describe T_XORIGIP_NOT_IPV4	X-Originating-IP doesn't look like IPv4 address
 
 # some tests to catch long lines of random dictionary words
 # this could be slow, being a rawbody rule, but if it works well maybe
