@@ -1,7 +1,5 @@
 #!/usr/bin/perl
 
-# $Id: rule_tests.t,v 1.6 2002/07/22 12:19:57 jmason Exp $
-
 my $prefix = '.';
 if (-e 'test_dir') {            # running from test directory, not ..
   use lib '../lib';

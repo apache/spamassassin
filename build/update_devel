@@ -20,7 +20,11 @@ echo $vers > $WEBDIR/latest_version
 
 rm -rf $WEBDIR/dist $WEBDIR/doc
 mkdir $WEBDIR/dist
-tar cf - --exclude=CVS --exclude='.#*' . | ( cd $WEBDIR/dist ; tar xf - )
+
+tar cf - --exclude=CVS --exclude='.#*'  \
+         --exclude="logs" --exclude='*.tar.gz' --exclude='*.zip' \
+         . | ( cd $WEBDIR/dist ; tar xf - )
+
 tar cf - --exclude=CVS --exclude='.#*' doc | ( cd $WEBDIR ; tar xf - )
 
 rm -f Mail-SpamAssassin-$vers.tar.gz Mail-SpamAssassin-$vers.zip

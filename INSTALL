@@ -357,12 +357,6 @@ Other Installation Notes
     spamd.
 
 
-  - You can create your own system-wide rules files in
-    /etc/mail/spamassassin; their filenames should end in ".cf".  Multiple
-    files will be read, and SpamAssassin will not overwrite these files
-    when installing a new version.
-
-
   - spamc can now be built as a shared library for use with milters or
     to link into other existing programs; simply run "make libspamc.so"
     to build this.

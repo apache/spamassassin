@@ -13,15 +13,15 @@ use lib '@@INSTALLSITELIB@@'; # substituted at install time
 use lib '../lib';	# added by jm for use inside the distro
 use strict;
 use Socket;
-use Carp;
 use Config;
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::NoMailAudit;
-use Sys::Syslog qw(:DEFAULT setlogsock);
-use POSIX qw(setsid);
 use Getopt::Long;
 use Pod::Usage;
-use POSIX ":sys_wait_h";
+use Sys::Syslog qw(:DEFAULT setlogsock);
+use POSIX qw(:sys_wait_h);
+use POSIX qw(setsid);
+use Errno;
 
 my %resphash = (
 		EX_OK          => 0,  # no problems
@@ -205,17 +205,21 @@ delete $ENV{'HOME'};
 
 my $current_user;
 my $paddr;
+my $error_before_reaper;
 
-sub REAPER { # Adapted from the perlipc manpage
-	cleanupchildren;
-	$SIG{CHLD} = \&REAPER;
-}
-if ($opt{'max-children'}) {
+sub REAPER {
+    $error_before_reaper = $!;  # take a copy before cleanupchildren()
+    cleanupchildren;            # may reset errno
     $SIG{CHLD} = \&REAPER;
-} else {
-    $SIG{CHLD} = 'IGNORE';
 }
 
+# don't use this: use the same signal-handling regardless of options,
+# to cut down on the matrix of possible input and errors.
+#
+# if ($opt{'max-children'}) {$SIG{CHLD} = \&REAPER;}
+# else {$SIG{CHLD} = 'IGNORE';}
+
+$SIG{CHLD} = \&REAPER;
 $SIG{INT} = \&kill_handler;
 $SIG{TERM} = \&kill_handler;
 
@@ -227,9 +231,21 @@ if ($opt{'debug'}) {
 }
 logmsg "server started on port $port (running version ".Mail::SpamAssassin::Version().")";
 
-while (1) {
-for ( ; ($paddr = accept(Client,Server)) ; close Client)
+for ( ; 1; close Client)
 {
+    $error_before_reaper = 0;
+    $paddr = accept(Client,Server);
+
+    if (!$paddr) {
+      # this can happen when interrupted by SIGCHLD on Solaris,
+      # perl 5.8.0, and some other platforms with -m.
+      if ($! == &Errno::EINTR || $error_before_reaper == &Errno::EINTR) {
+        warn "accept interrupted: $! $error_before_reaper";
+        next;
+      } else {
+        die "accept failed: $! $error_before_reaper";
+      }
+    }
 
     my $start = time;
 
@@ -560,14 +576,9 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
 	}
     };
 
-    # Clean up any defunct processes.  (Not perfect, as usually leaves at
-    # least one around until next connection, but avoids handling SIGCHLD.)
-    # Needed on SunOS, where SIGCHLD=IGNORE doesn't make it automatic.
-	# Not sure if this is still needed with SIGCHLD=\&REAPER which
-    # essentially does this!
-
+    # Clean up any defunct processes.  (Not sure if we still need this
+    # with our SIGCHLD handler, but best to keep it around anyway.)
     cleanupchildren;
-}
 }
 
 sub protocol_error {
@@ -582,7 +593,7 @@ sub spawn {
     my $coderef = shift;
 
     unless (@_ == 0 && $coderef && ref($coderef) eq 'CODE') {
-	confess "usage: spawn CODEREF";
+	warn "usage: spawn CODEREF";
     }
 
     my $pid;
@@ -595,7 +606,7 @@ sub spawn {
                         "): waiting for some to exit";
       cleanupchildren;
     }
-	
+
     $extrapid--;
 
     if (!defined($pid = fork)) {
@@ -783,6 +794,7 @@ sub kill_handler
 sub cleanupchildren {
     while ( my $kid = waitpid(-1, &WNOHANG) > 0 ) {
         $extrapid++;
+        Mail::SpamAssassin::dbg("cleaned up kid $kid, pool=$extrapid");
     }
 }
 
