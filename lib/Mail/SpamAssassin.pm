@@ -1410,11 +1410,12 @@ sub get_and_create_userstate_dir {
   my $fname;
 
   # If vpopmail is enabled then set fname to virtual homedir
-  #
-  if (defined $self->{user_dir}) {
-    $fname = File::Spec->catdir ($self->{user_dir}, ".spamassassin");
-  } elsif (defined $self->{userstate_dir}) {
+  # precedence: userstate_dir, derive from user_dir, system default
+  if (defined $self->{userstate_dir}) {
     $fname = $self->{userstate_dir};
+  }
+  elsif (defined $self->{user_dir}) {
+    $fname = File::Spec->catdir ($self->{user_dir}, ".spamassassin");
   }
 
   $fname ||= $self->first_existing_path (@default_userstate_dir);
