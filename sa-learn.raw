@@ -455,9 +455,12 @@ sub wanted {
     $learnedcount++;
   }
 
+  # Do cleanup ...
   $status->finish();
-  undef $ma;                  # clean 'em up
   undef $status;
+
+  $ma->finish();
+  undef $ma;
 
   print STDERR '.' if ( $opt{showdots} );
 }
