@@ -14,6 +14,7 @@ my $revision = "unknown";
 my %revision;
 my @files;
 my $skip = '';
+my $time_start = time;
 
 &configure;
 &version;
@@ -121,7 +122,7 @@ sub locate {
 sub rename {
     use File::Copy qw(move);
 
-    my $hour = (gmtime(time))[2];
+    my $hour = (gmtime($time_start))[2];
     if ($hour == 9) {
 	chdir $opt{html};
 	opendir(HTML, $opt{html});
@@ -151,8 +152,8 @@ sub sort_all {
 sub time_filter {
     my ($after, $before) = @_;
     if (/time=(\d+)/) {
-	return ((time - $1 >= MONTH * $after) &&
-		(time - $1 < MONTH * $before));
+	return (($time_start - $1 >= MONTH * $after) &&
+		($time_start - $1 < MONTH * $before));
     }
     return 0;
 }
