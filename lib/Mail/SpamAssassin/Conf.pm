@@ -1650,10 +1650,12 @@ why the IP is listed, typically a hyperlink to a database entry.
 
 Define a body pattern test.  C<pattern> is a Perl regular expression.
 
-The 'body' in this case is the textual parts of the message body; any non-text
-MIME parts are stripped, and the message decoded from Quoted-Printable or
-Base-64-encoded format if necessary.  All HTML tags and line breaks will be
-removed before matching.
+The 'body' in this case is the textual parts of the message body;
+any non-text MIME parts are stripped, and the message decoded from
+Quoted-Printable or Base-64-encoded format if necessary.  The message
+Subject header is considered part of the body and becomes the first
+paragraph when running the rules.  All HTML tags and line breaks will
+be removed before matching.
 
 =item body SYMBOLIC_TEST_NAME eval:name_of_eval_method([args])
 
