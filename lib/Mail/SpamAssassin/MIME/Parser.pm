@@ -1,4 +1,4 @@
-# $Id: Parser.pm,v 1.9 2003/09/29 04:03:35 felicity Exp $
+# $Id: Parser.pm,v 1.10 2003/09/29 04:37:05 felicity Exp $
 
 package Mail::SpamAssassin::MIME::Parser;
 use strict;
@@ -308,7 +308,7 @@ sub _decode_header {
   }
   elsif ( $cte eq 'Q' ) {
     # quoted printable
-    return MIME::QuotedPrint::decode_qp($data);
+    return Mail::SpamAssassin::Util::qp_decode($data);
   }
   else {
     die "Unknown encoding type '$cte' in RFC2047 header";
@@ -352,7 +352,7 @@ sub decode {
   if ( lc( $msg->header('content-transfer-encoding') ) eq 'quoted-printable' ) {
     dbg("decoding QP file\n");
     my @output =
-      map { s/\r\n/\n/; $_; } split ( /^/m, MIME::QuotedPrint::decode_qp( join ( "", @{$body} ) ) );
+      map { s/\r\n/\n/; $_; } split ( /^/m, Mail::SpamAssassin::Util::qp_decode( join ( "", @{$body} ) ) );
 
     my $type = $msg->header('content-type');
     my ($filename) =
