@@ -942,7 +942,7 @@ score HTML_MESSAGE 0.014
 
 # miscellaneous network tests
 
-score BAD_HELO_WARNING 0.000 2.29 0 2.29
+score BAD_HELO_WARNING 0
 score NO_MX_FOR_FROM 0.000 3.09 0 3.09
 score ROUND_THE_WORLD 0.000 2.80 0 2.80
 
@@ -968,26 +968,26 @@ score RAZOR_CHECK                    0
 # DNS blacklists
 
 score RCVD_IN_RELAYS_ORDB_ORG 0.000 0.61 0 0.61
-score RCVD_IN_OSIRUSOFT_COM 0.000 0.38 0 0.38
-score X_OSIRU_DUL 0.000 0.62 0 0.62
-score X_OSIRU_DUL_FH 0.000 0.36 0 0.36
-score X_OSIRU_OPEN_RELAY 0.000 2.72 0 2.72
+score RCVD_IN_OSIRUSOFT_COM 0 0.01 0 0.01
+score X_OSIRU_DUL 0
+score X_OSIRU_DUL_FH 0
+score X_OSIRU_OPEN_RELAY 0
 score X_OSIRU_SPAMWARE_SITE 0.000 0.30 0 0.30
-score X_OSIRU_SPAM_SRC 0.000 2.73 0 2.73
-score RCVD_IN_RFCI 0.000 2.28 0 2.28
+score X_OSIRU_SPAM_SRC 0
+score RCVD_IN_RFCI 0
 score RCVD_IN_ORBS 0.000 2.25 0 2.25
 score RCVD_IN_DSBL 0.000 3.25 0 3.25
-score RCVD_IN_MULTIHOP_DSBL 0.000 0.81 0 0.81
+score RCVD_IN_MULTIHOP_DSBL 0
 score RCVD_IN_SBL 0.000 3.18 0 3.18
-score RCVD_IN_UNCONFIRMED_DSBL 0.000 0.77 0 0.77
-score RCVD_IN_VISI 0.000 2.62 0 2.62
+score RCVD_IN_UNCONFIRMED_DSBL 0
+score RCVD_IN_VISI 0
 score RCVD_IN_BONDEDSENDER 0.000 -10.0 0 -10.0
 
 # provisional scores, just added.  need GA run once we get the data
 score RCVD_IN_OPM 0.000 1.00 0 1.00
 score RCVD_IN_NJABL 0.000 0.01 0 0.01
 score X_NJABL_OPEN_PROXY 0.000 2.00 0 2.00
-score X_NJABL_DIALUP 0.000 0.50 0 0.50
+score X_NJABL_DIALUP 0
 # note: RCVD_IN_NJABL has low score, as the X_NJABL rules 0 decipher 0 decipher
 # its results
 
