@@ -224,7 +224,7 @@ static void clear_message(struct message *m){
 static int message_read_raw(int fd, struct message *m){
     clear_message(m);
     if((m->raw=malloc(m->max_len+1))==NULL) return EX_OSERR;
-    m->raw_len=full_read(fd, m->raw, m->max_len+1, m->max_len+1);
+    m->raw_len=full_read(fd, (unsigned char *) m->raw, m->max_len+1, m->max_len+1);
     if(m->raw_len<=0){
         free(m->raw); m->raw=NULL; m->raw_len=0;
         return EX_IOERR;
@@ -247,7 +247,7 @@ static int message_read_bsmtp(int fd, struct message *m){
     if((m->raw=malloc(m->max_len+1))==NULL) return EX_OSERR;
 
     /* Find the DATA line */
-    m->raw_len=full_read(fd, m->raw, m->max_len+1, m->max_len+1);
+    m->raw_len=full_read(fd, (unsigned char *) m->raw, m->max_len+1, m->max_len+1);
     if(m->raw_len<=0){
         free(m->raw); m->raw=NULL; m->raw_len=0;
         return EX_IOERR;
@@ -320,7 +320,7 @@ long message_write(int fd, struct message *m){
     char buffer[1024];
 
     if(m->is_spam==EX_ISSPAM || m->is_spam==EX_NOTSPAM){
-        return full_write(fd, m->out, m->out_len);
+        return full_write(fd, (unsigned char *) m->out, m->out_len);
     }
 
     switch(m->type){
@@ -329,15 +329,17 @@ long message_write(int fd, struct message *m){
         return -1;
 
       case MESSAGE_ERROR:
-        return full_write(fd, m->raw, m->raw_len);
+        return full_write(fd, (unsigned char *) m->raw, m->raw_len);
 
       case MESSAGE_RAW:
-        return full_write(fd, m->out, m->out_len);
+        return full_write(fd, (unsigned char *) m->out, m->out_len);
 
       case MESSAGE_BSMTP:
-        total=full_write(fd, m->pre, m->pre_len);
+        total=full_write(fd, (unsigned char *) m->pre, m->pre_len);
         for(i=0; i<m->out_len; ){
-            for(j=0; i<m->out_len && j<sizeof(buffer)/sizeof(*buffer)-1; ){
+            for(j=0; i < (off_t) m->out_len &&
+                                j < (off_t) (sizeof(buffer)/sizeof(*buffer)-1);)
+            {
                 if(i+1<m->out_len && m->out[i]=='\n' && m->out[i+1]=='.'){
                     buffer[j++]=m->out[i++];
                     buffer[j++]=m->out[i++];
@@ -346,9 +348,9 @@ long message_write(int fd, struct message *m){
                     buffer[j++]=m->out[i++];
                 }
             }
-            total+=full_write(fd, buffer, j);
+            total+=full_write(fd, (unsigned char *) buffer, j);
         }
-        return total+full_write(fd, m->post, m->post_len);
+        return total+full_write(fd, (unsigned char *) m->post, m->post_len);
 
       default:
         syslog(LOG_ERR, "Unknown message type %d\n", m->type);
@@ -363,8 +365,10 @@ void message_dump(int in_fd, int out_fd, struct message *m){
     if(m!=NULL && m->type!=MESSAGE_NONE) {
         message_write(out_fd, m);
     }
-    while((bytes=full_read(in_fd, buf, 8192, 8192))>0){
-        if(bytes!=full_write(out_fd, buf, bytes));
+    while((bytes=full_read(in_fd, (unsigned char *) buf, 8192, 8192))>0){
+        if (bytes!=full_write(out_fd, (unsigned char *) buf, bytes)) {
+            syslog(LOG_ERR, "oops! message_dump of %d returned different", bytes);
+        }
     }
 }
 
@@ -406,8 +410,8 @@ static int _message_filter(const struct sockaddr *addr,
     }
 
     /* Send to spamd */
-    full_write(sock, buf, len);
-    full_write(sock, m->msg, m->msg_len);
+    full_write(sock, (unsigned char *) buf, len);
+    full_write(sock, (unsigned char *) m->msg, m->msg_len);
     shutdown(sock, SHUT_WR);
 
     /* Now, read from spamd */
@@ -483,7 +487,7 @@ static int _message_filter(const struct sockaddr *addr,
                     }
 
                     /* Should be end of headers now */
-                    if(full_read(sock, buf, 2, 2)!=2 || buf[0]!='\r' || buf[1]!='\n'){
+                    if(full_read(sock, (unsigned char *) buf, 2, 2)!=2 || buf[0]!='\r' || buf[1]!='\n'){
                         /* Nope, bail. */
                         free(buf);
                         free(m->out); m->out=m->msg; m->out_len=m->msg_len;
@@ -505,7 +509,7 @@ static int _message_filter(const struct sockaddr *addr,
         return EX_PROTOCOL;
     }
 
-    len=full_read(sock, m->out+m->out_len, m->max_len+EXPANSION_ALLOWANCE+1-m->out_len, m->max_len+EXPANSION_ALLOWANCE+1-m->out_len);
+    len=full_read(sock, (unsigned char *) m->out+m->out_len, m->max_len+EXPANSION_ALLOWANCE+1-m->out_len, m->max_len+EXPANSION_ALLOWANCE+1-m->out_len);
     if(len+m->out_len>m->max_len+EXPANSION_ALLOWANCE){
         free(m->out); m->out=m->msg; m->out_len=m->msg_len;
         close(sock);
@@ -580,7 +584,7 @@ int message_process(const char *hostname, int port, char *username, int max_size
 
 FAIL:
    if(flags&SPAMC_CHECK_ONLY){
-       full_write(out_fd, "0/0\n", 4);
+       full_write(out_fd, (unsigned char *) "0/0\n", 4);
        message_cleanup(&m);
        return EX_NOTSPAM;
    } else {
