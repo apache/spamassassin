@@ -12,6 +12,7 @@ use Mail::SpamAssassin::MailingList;
 use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::PhraseFreqs;
 use Mail::SpamAssassin::TextCat;
+use Digest::SHA1 qw(sha1_hex);
 use Time::Local;
 use strict;
 
@@ -1520,11 +1521,11 @@ sub message_is_habeas_swe {
   my ($self) = @_;
 
   my $all = $self->get('ALL');
-  if ($all =~ /\n(X-Habeas-SWE-1:.*X-Habeas-SWE-9:[^\n]*)\n/s) {
+  if ($all =~ /\n(X-Habeas-SWE-1:.{0,512}X-Habeas-SWE-9:[^\n]{0,64}\n)/s) {
     my $text = $1;
     $text =~ tr/A-Z/a-z/;
-    $text =~ tr/ \///d;
-    return (unpack("%32C*", $text) == 41501);
+    $text =~ tr/\/ //d;
+    return sha1_hex($text) eq "9224b061a99d3db7fde37cbda4b6b5d0feb50a84";
   }
   return 0;
 }
