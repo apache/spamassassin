@@ -173,7 +173,7 @@ foreach my $test (keys %freq) {
     # come up with a ranking
     my $rank;
 
-    # New new system: from "Learning to Filter Unsolicited Commercial E-Mail",
+    # IG system: from "Learning to Filter Unsolicited Commercial E-Mail",
     # Ion Androutsopoulos et al: determine the information gain IG(X, C) of the
     # Boolean attributes (ie. the rules). Measures "the average reduction in
     # the entropy of C (classification) given the value of X (the rule)". Makes
@@ -221,7 +221,17 @@ foreach my $test (keys %freq) {
     $rank_lo = $rank if ($rank < $rank_lo);
   }
   else {
-    # basic wanted/unwanted ranking
+    # RANK: basic wanted/unwanted ranking
+    #
+    # The rank of each test based on two ranks: (1) the number of wanted
+    # hits and (2) the number of unwanted hits.  Each test is ranked
+    # positionally for both its wanted and unwanted hits (ties are
+    # allowed) and the two ranks are normalized to have the same range.
+    # Those two ranks are added together, producing a single RANK number
+    # that is then normalized to [0, 1].  The result is equivalent to:
+    #
+    # RANK(rule) = (percentile(wanted) + percentile(unwanted))/2
+    #
     $wanted{$test} = $isnice ? $fn : $fs;
     $unwanted{$test} = $isnice ? $fs : $fn;
     # count number of ranks of each type
