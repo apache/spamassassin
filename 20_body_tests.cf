@@ -7,9 +7,13 @@
 
 require_version 2.40
 
-full RAZOR_CHECK	eval:check_razor()
-describe RAZOR_CHECK	Listed in Razor, see http://razor.sourceforge.net/
+full RAZOR_CHECK	eval:check_razor1()
+describe RAZOR_CHECK	Listed in Razor1, see http://razor.sourceforge.net/
 tflags RAZOR_CHECK	net
+
+full RAZOR2_CHECK	eval:check_razor2()
+describe RAZOR2_CHECK	Listed in Razor2, see http://razor.sourceforge.net/
+tflags RAZOR2_CHECK	net
 
 full DCC_CHECK		eval:check_dcc()
 describe DCC_CHECK	Listed in DCC, see http://www.rhyolite.com/anti-spam/dcc/dcc-tree/dcc.html
