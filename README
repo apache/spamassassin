@@ -108,10 +108,11 @@ skipped.
 
   - Mail::Audit, Mail::Internet, Net::SMTP	(from CPAN)
 
-    If you intend to let SpamAssassin handle local mail delivery to your
-    mail spool file, or if you want to use a Mail::Audit mail-delivery
-    script, you will require the Mail::Audit module, and any modules it
-    requires (there's lots of them, unfortunately.)
+    If you want to use SpamAssassin for local delivery to a qmail or
+    MailDir spool, and you do *not* want to use procmail for some reason,
+    you will need to install the Mail::Audit module, and any modules it
+    requires (there's lots of them, unfortunately).   This is no longer
+    recommended.
 
     If you use procmail, KMail, or you plan to use 'spamd', you will *not*
     need these.
@@ -219,19 +220,11 @@ If you want to use SpamAssassin site-wide:
 
 
 If you don't use any mail filter just yet, and want to let SpamAssassin
-handle local mail delivery using Mail::Audit:
+handle local mail delivery:
 
   - **BEFORE YOU DO THIS** consider using procmail instead (see above),
     it's recommended for this situation, and less bugs have been reported
     with it.
-
-  - If you're still sure you want to go ahead, install the Mail::Audit
-    module.
-
-      perl -MCPAN -e shell
-      o conf prerequisites_policy ask
-      install Mail::Audit
-      quit
 
   - Make a backup of your .forward (if it exists).
 

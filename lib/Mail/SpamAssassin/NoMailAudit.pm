@@ -16,6 +16,7 @@
 package Mail::SpamAssassin::NoMailAudit;
 
 use Mail::SpamAssassin::Message;
+use Fcntl ':flock';
 
 @Mail::SpamAssassin::NoMailAudit::ISA = (
   	'Mail::SpamAssassin::Message'
@@ -285,8 +286,30 @@ sub print {
 
 sub accept {
   my $self = shift;
-  $self->_proxy_to_mail_audit ('accept', @_);
+  my $file = shift;
+
+  # some bits of code from Mail::Audit here:
+  $file ||= $ENV{'MAIL'} || "/var/spool/mail/".getpwuid($>);
+
+  if (exists $self->{accept}) {
+    return $self->{accept}->();
+  }
+
+  # we don't support maildir or qmail here yet. use the real Mail::Audit
+  # for those.
+
+  if (!open (MBOX, ">>$file")) {
+    die "Couldn't open $file: $!";
+  }
+  flock(MBOX, LOCK_EX) or warn "failed to lock $file: $!";
+  print MBOX $self->as_string();
+  flock(MBOX, LOCK_UN) or warn "failed to unlock $file: $!";
+  close MBOX;
+
+  if (!$self->{noexit}) { exit 0; }
 }
+
+# ---------------------------------------------------------------------------
 
 sub reject {
   my $self = shift;
