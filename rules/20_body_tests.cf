@@ -240,8 +240,10 @@ describe WE_HONOR_ALL		Claims to honor removal requests
 body FILTERED_BY_WORLDREMOVE	/filtered by WorldRemove/
 describe FILTERED_BY_WORLDREMOVE Claims to listen to some removal request list
 
+# Jul  2 2002 jm: note that CommuniGate is *not* spam software, it's totally legit.
+# but beginning spammers often download a trial version and spam with it.
 body COMMUNIGATE		/transferred with a trial version of CommuniGate/
-describe COMMUNIGATE		Communigate is SPAM software
+describe COMMUNIGATE		Sent using a trial version of CommuniGate
 
 # contrib: skod
 body AUTO_EMAIL_REMOVAL		/Auto Email Removal/
