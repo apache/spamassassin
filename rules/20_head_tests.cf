@@ -1,5 +1,5 @@
 # SpamAssassin rules file: tests.
-# $Id: 20_head_tests.cf,v 1.162.2.7 2002/08/26 22:55:18 jmason Exp $
+# $Id: 20_head_tests.cf,v 1.162.2.8 2002/08/27 10:48:01 jmason Exp $
 ###########################################################################
 
 require_version 2.40
@@ -617,8 +617,6 @@ describe DATE_MISSING           Missing Date: header
 header POST_IN_RCVD             Received =~ / Post\.(?:sk|cz)/  
 describe POST_IN_RCVD           Received contains fake 'Post.cz' hostname
 
-header FROM_UGETMORE            From =~ /\@ugetmore4less.net/i
-describe FROM_UGETMORE          From an address @ugetmore4less.net
 header FROM_TOPICA              From =~ /\@(?:\w\.)*email-publisher.com/i
 describe FROM_TOPICA            From an address @email-publisher.com
 
