@@ -339,3 +339,8 @@ describe ENTITY_DEC_ALPHANUM	HTML contains needlessly encoded characters
 # a good possible rule that may resurface
 #rawbody ENTITY_DEC_OTHER	/\&\#0*(?:3[3679]|4[014567]|5[89]|6[134]|95)\;/
 #describe ENTITY_DEC_OTHER	HTML contains needlessly encoded punctuation
+
+# thanks to Bob Menschel for this one; bug 4116
+rawbody   HTML_EHTML2         m'</html></html>'i
+describe  HTML_EHTML2         HTML has doubled end HTML tag
+
