@@ -308,7 +308,7 @@ sub word_is_in_dictionary {
   my ($self, $word) = @_;
   local ($_);
 
-  # $word =~ tr/A-Z/a-z/;
+  # $word =~ tr/A-Z/a-z/;	# already done by this stage
   $word =~ s/^\s+//;
   $word =~ s/\s+$//;
   return 0 if ($word =~ /[^a-z]/);

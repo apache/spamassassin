@@ -365,7 +365,7 @@ body LONG_NUMERIC_HTTP_ADDR	/http\:\/\/000\d+/is
 body HTTP_USERNAME_USED		/http\:\/\/[^\s\/]+\@/is
 
 body SUPERLONG_LINE		/^[^<]{199,}$/m
-body ASCII_FORM_ENTRY		/[A-Za-z][A-Za-z]+.*\s+_{30,}/
+body ASCII_FORM_ENTRY		/[^<][A-Za-z][A-Za-z]+.*?\s+_{30,}/
 
 body AMAZING			/AMAZING/
 body GUARANTEE			/GUARANTEE/
@@ -794,7 +794,7 @@ score INVALID_MSGID                  2.0
 score IN_ACCORDANCE_WITH_LAWS        2.4
 score JAVASCRIPT                     1.5
 score JUST_MAILED_PAGE               2.0
-score KNOWN_BAD_DIALUPS              1.1
+score KNOWN_BAD_DIALUPS              0.3
 score LASER_PRINTER                  3.0
 score LIMITED_TIME_ONLY              2.4
 score LINE_OF_YELLING                1.1
@@ -970,6 +970,8 @@ score BADTRANS_WORM                 10.0
 # a shortcut around SpamAssassin.
 
 whitelist_from	billing@networksolutions.com
+whitelist_from  *@fatbrain.com
+whitelist_from  *@email.fatbrain.com
 whitelist_from  *@amazon.com
 whitelist_from  *@amazon.co.uk
 whitelist_from  *@ebay.com
