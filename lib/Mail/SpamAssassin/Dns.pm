@@ -202,12 +202,17 @@ sub process_dnsbl_set {
       $rdatastr =~ s/^"?\d+-//;
       $rdatastr =~ s/"$//;
       my %sb = ($rdatastr =~ m/(?:^|\|)(\d+)=([^|]+)/g);
+      my $undef = 0;
       while ($subtest =~ m/\bS(\d+)\b/g) {
+	if (!defined $sb{$1}) {
+	  $undef = 1;
+	  last;
+	}
 	$subtest =~ s/\bS(\d+)\b/\$sb{$1}/;
       }
       #print STDERR "$subtest\n";
       #print STDERR "$rdatastr\n";
-      $self->got_hit($rule, "SenderBase: ") if eval "$subtest";
+      $self->got_hit($rule, "SenderBase: ") if !$undef && eval "$subtest";
     }
     # bitmask
     elsif ($subtest =~ /^\d+$/) {
