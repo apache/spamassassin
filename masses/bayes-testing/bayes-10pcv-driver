@@ -1,0 +1,116 @@
+#!/bin/sh
+#
+# bayes-10pcv-driver - run 10-fold cross-validation test on SpamAssassin Bayes
+#
+# Since Bayesish probability analysis requires training on a corpus, the
+# traditional SpamAssassin 10-pass cross-validation suite can't be used.  Also,
+# Bayes requires its own ten-pass testing, separately, to judge the effects of
+# tweaks.  So that's what this is.
+#
+# Before running, you need to create a test corpus, as "cor/spam" and
+# "cor/ham".  Here's how to do this:
+
+#   SADIR/tools/split_corpora -l 2000 -p cor/spam/bucket spf1 spf2 spf3 ...
+#   SADIR/tools/split_corpora -l 2000 -p cor/ham/bucket ham1 ham2 ham3 ...
+#
+# SADIR = top-level directory of SpamAssassin distro
+# TEST  = the directory where the corpus and results are to be written
+# spfN   = mail folders full of spam
+# hamN   = mail folders full of ham
+
+# It will produce a directory of results called "results".  The most important
+# are "hist_all": a histogram of scores and frequencies, and "thresholds_all":
+# the output of analysis of all scores and frequencies from the
+# bayes-thresholds script.
+
+# CHANGE ME: the path to the version of SpamAssassin you are testing.
+SADIR=/home/jm/ftp/spamassassin
+
+###########################################################################
+
+testdir=`pwd`
+
+cd $SADIR/masses
+PATH=$PATH:$SADIR:$SADIR/masses
+
+tmpdir=/tmp/bayestest.$$
+results=$testdir/results
+
+rm -rf $tmpdir
+
+# now, just copy in the Bayes ruleset
+mkdir -p $tmpdir/rules $results
+cp ../rules/23_bayes.cf $tmpdir/rules
+cp ../rules/50*.cf $tmpdir/rules
+
+# tell SpamAssassin to use this path for DBs
+echo "bayes_path $tmpdir/dbs/bayes" > $tmpdir/rules/99bayes_path.cf
+mkdir $tmpdir/dbs
+
+# learn the lot, then forget the ones we're testing on each time.
+# faster than learning from scratch for each fold
+
+echo "Learning from all ham buckets..."
+sa-learn-nonspam --config-file=$tmpdir/rules $testdir/cor/ham/*
+
+echo "Learning from all spam buckets..."
+sa-learn-spam --config-file=$tmpdir/rules $testdir/cor/spam/*
+
+backup_dbs () {
+  echo "Backing up full learned dbs..."
+  ( cd $tmpdir; tar cvf learned-all.tar dbs )
+}
+restore_dbs () {
+  echo "Restoring full learned dbs..."
+  ( cd $tmpdir; tar xf learned-all.tar )
+}
+
+backup_dbs
+
+for bucket in 1 2 3 4 5 6 7 8 9 10 ; do
+  echo "Bucket $bucket..."
+
+  if [ $bucket != 1 ] ; then restore_dbs ; fi
+
+  rdir=$results/bucket$bucket
+  mkdir $rdir
+
+  echo "Forgetting contents of test ham bucket..."
+  sa-forget --showdots $testdir/cor/ham/bucket.$bucket
+
+  echo "Forgetting contents of test spam bucket..."
+  sa-forget --showdots $testdir/cor/spam/bucket.$bucket
+
+  echo "Running mass-check on ham bucket..."
+  ./mass-check -c=$tmpdir/rules --showdots \
+	--bayes $testdir/cor/ham/bucket.$bucket \
+	> $rdir/nonspam.log
+
+  echo "Running mass-check on spam bucket..."
+  ./mass-check -c=$tmpdir/rules --showdots \
+	--bayes $testdir/cor/spam/bucket.$bucket \
+	> $rdir/spam.log
+
+  echo "Dumping bayes DB..."
+  ( cd .. ; ./tools/check_bayes_db --dbpath=$tmpdir/dbs/bayes ) \
+	> $rdir/bayes_db.dump
+
+  echo "Reporting..."
+  ./bayes-testing/draw-bayes-histogram \
+	$rdir/spam.log $rdir/nonspam.log \
+	> $rdir/hist
+
+done
+rm -rf $tmpdir
+
+cat $results/bucket*/spam.log > $results/spam_all.log
+cat $results/bucket*/nonspam.log > $results/nonspam_all.log
+
+./bayes-testing/draw-bayes-histogram $results/spam_all.log $results/nonspam_all.log \
+	> $results/hist_all
+./bayes-testing/bayes-thresholds $results/spam_all.log $results/nonspam_all.log \
+	> $results/thresholds_all
+
+echo "Done."
+ls -l $results
+
