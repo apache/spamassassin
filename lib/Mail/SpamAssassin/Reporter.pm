@@ -41,8 +41,9 @@ sub report {
   my $text = $self->{main}->remove_spamassassin_markup ($self->{msg});
 
   if ($self->is_razor_available()) {
-    $self->razor_report('razor.vipul.net:2702', $text)
-    	and print "SpamAssassin: spam reported to Razor.\n";
+    if ($self->razor_report('razor.vipul.net:2702', $text)) {
+      dbg ("SpamAssassin: spam reported to Razor.");
+    }
   }
 }
 

@@ -232,19 +232,37 @@ sub remove_spamassassin_markup {
   1 while $hdrs =~ s/^Subject: \*+SPAM\*+ /Subject: /gm;
 
   # ok, next, the report.
-  my $body = join ('', @{$mail->get_body()});
+  # This is a little tricky since we can have either 0, 1 or 2 reports;
+  # 0 for the non-spam case, 1 for normal filtering, and 2 for -t (where
+  # an extra report is appended at the end of the mail).
 
-  while ($body =~ /^SPAM: /m)
+  my @newbody = ();
+  my $inreport = 0;
+  foreach $_ (@{$mail->get_body()})
   {
-    # strip off all the SPAM: lines
-    1 while $body =~ s/\n*SPAM: [^\n]*?\n//gs;
+    if (/^SPAM: / && $inreport == 0) {
+      # we've just entered a report.  If there's a blank line before the
+      # report, get rid of it...
+      if ($#newbody > 0 && $newbody[$#newbody-1] =~ /^$/) {
+	pop (@newbody);
+      }
+      # and skip on to the next line...
+      $inreport = 1; next;
+    }
 
-    # and finally, strip off an extra blank line at the start of the
-    # mail; the template is always added with an NL before and after it
-    $body =~ s/^\n//gs;
+    if ($inreport && /^$/) {
+      # blank line at end of report; skip it.  Also note that we're
+      # now out of the report.
+      $inreport = 0; next;
+    }
+
+    # finally, if we're not in the report, add it to the body array
+    if (!$inreport) {
+      push (@newbody, $_);
+    }
   }
 
-  return $hdrs."\n".$body;
+  return $hdrs."\n".join ('', @newbody);
 }
 
 ###########################################################################
