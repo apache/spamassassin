@@ -538,12 +538,17 @@ describe MONSTERHUT		mentions monsterhut.com
 body EMAIL_HARVEST		/email harvest/
 
 # (contrib: WW)
-full CLICK_TO_REMOVE_MAILTO     /\bclick to remove.{0,50}mailto:/is
+full CLICK_TO_REMOVE_MAILTO     /\bclick to.{0,30}remove.{0,50}mailto:/is
 describe CLICK_TO_REMOVE_MAILTO Click-to-remove with mailto: found
+
+full CLICK_TO_REMOVE_2          /href.{0,50}mailto:.{0,50}click.{0,50}remove/is
+describe CLICK_TO_REMOVE_2      Click-to-remove with mailto: found beforehand
 
 # (contrib: WW, mod by David Hull)
 full TO_BE_REMOVED_REPLY        /\bto\b.{0,60}\b(?:remove|unsubscribe).{0,60}\breply\b/is
 describe TO_BE_REMOVED_REPLY    Says: "to be removed, reply via email" or similar
+
+full REMOVAL_INSTRUCTIONS	/REMOVAL INSTRUCTIONS/i
 
 # (contrib: WW)
 full THIS_AINT_SPAM             /This.{0,60}is not SPAM/is
@@ -696,6 +701,7 @@ score CLICKSFORMONEY_NET             3.4
 score CLICK_BELOW                    4.0
 score CLICK_HERE_LINK                3.3
 score CLICK_TO_REMOVE_MAILTO         2.1
+score CLICK_TO_REMOVE_2  	     2.1
 score COMMUNIGATE                    3.6
 score CORRUPT_MSGID                  2.7
 score CYBER_FIRE_POWER               2.0
@@ -858,6 +864,7 @@ score VERY_SUSP_CC_RECIPS            3.0
 score VERY_SUSP_RECIPS               3.0
 score X_MAILER_GIBBERISH             3.2
 score X_MSMAIL_PRIORITY_HIGH         1.4
+score REMOVAL_INSTRUCTIONS	     2.0
 score X_PRIORITY_HIGH                1.4
 score YR_MEMBERSHIP_EXCH             4.0
 
