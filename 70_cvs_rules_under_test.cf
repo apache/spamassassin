@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.642 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.643 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -32,7 +32,7 @@ header T_DATE_EXTRA_SPACE	Date =~ /^..., .\d ... \d\d\d\d \d\d:\d\d:\d\d  [\+\-]
 
 # another one for bug 2089, may be more useful:
 full __END_HASHBUSTER_1		/\n\[[a-z0-9]+\]\n\s*\Z/
-meta T_RATWARE_2089		(NO_REAL_NAME && TO_ADDRESS_EQ_REAL && __END_HASHBUSTER_1)
+meta T_RATWARE_2089		(NO_REAL_NAME && __END_HASHBUSTER_1)
 
 # this is really badly faked.  Also the spammer who uses "25250101"
 # for the build is a total hippie.
