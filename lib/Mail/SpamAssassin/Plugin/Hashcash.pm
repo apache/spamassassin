@@ -26,7 +26,7 @@ Mail::SpamAssassin::Plugin::Hashcash - perform hashcash verification tests
 package Mail::SpamAssassin::Plugin::Hashcash;
 
 use Mail::SpamAssassin::Plugin;
-use Mail::SpamAssassin::SHA1 qw(sha1_hex);
+use Mail::SpamAssassin::SHA1 qw(sha1);
 use Fcntl;
 use File::Path;
 use File::Basename;
