@@ -94,7 +94,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.168 2003/02/09 01:17:35 felicity Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.169 2003/02/13 13:21:52 jmason Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -371,8 +371,10 @@ sub learn {
   if ($forget) {
     $msg->forget();
   } elsif ($isspam) {
+    dbg("Learning Spam");
     $msg->learn_spam();
   } else {
+    dbg("Learning Ham");
     $msg->learn_ham();
   }
 
@@ -560,6 +562,46 @@ sub report_as_spam {
 
 ###########################################################################
 
+=item $f->revoke_as_spam ($mail, $options)
+
+Revoke a mail, encapsulated in a C<Mail::Audit> object, as human-verified ham.
+This will revoke the mail message from live, collaborative, spam-blocker
+databases, allowing other users to block this message.
+
+It will also submit the mail to SpamAssassin's Bayesian learner as nonspam.
+
+Options is an optional reference to a hash of options.  Currently these
+can be:
+
+=over 4
+
+=item dont_report_to_razor
+
+Inhibits revoking of the spam to Razor.
+
+
+=back
+
+=cut
+
+sub revoke_as_spam {
+  my ($self, $mail, $options) = @_;
+  local ($_);
+
+  $self->init(1);
+
+  $mail = $self->encapsulate_mail_object ($mail);
+
+  # learn as nonspam
+  $self->learn ($mail, $mail->get_header("Message-Id"), 0, 0);
+
+  require Mail::SpamAssassin::Reporter;
+  $mail = Mail::SpamAssassin::Reporter->new($self, $mail, $options);
+  $mail->revoke ();
+}
+
+###########################################################################
+
 =item $f->add_address_to_whitelist ($addr)
 
 Given a string containing an email address, add it to the automatic
@@ -720,6 +762,7 @@ sub remove_spamassassin_markup {
   my ($self, $mail_obj) = @_;
   local ($_);
 
+  dbg("Removing Markup");
   $self->init(1);
   my $ct = $mail_obj->get_header("Content-Type") || '';
   if ( $ct
