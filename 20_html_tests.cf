@@ -72,7 +72,13 @@ describe HTML_SHOUTING7		HTML has very strong "shouting" markup
 describe HTML_SHOUTING8		HTML has very strong "shouting" markup
 describe HTML_SHOUTING9		HTML has very strong "shouting" markup
 
-body HTML_TABLE_THICK_BORD		eval:html_test('thick_border')
+body HTML_TEXT_AFTER_HTML	eval:html_test('text_after_html')
+describe HTML_TEXT_AFTER_HTML	HTML contains text after HTML close tag
+
+body HTML_TEXT_AFTER_BODY	eval:html_test('text_after_body')
+describe HTML_TEXT_AFTER_BODY	HTML contains text after BODY close tag
+
+body HTML_TABLE_THICK_BORD	eval:html_test('thick_border')
 describe HTML_TABLE_THICK_BORD	HTML table has thick border
 
 # HTML comment tests
