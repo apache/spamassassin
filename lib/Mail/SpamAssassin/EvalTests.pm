@@ -1835,4 +1835,24 @@ sub check_for_fake_aol_relay_in_rcvd {
 
 sub check_for_missing_headers { return 0; } # obsolete test
 
+sub check_for_to_in_subject {
+  my ($self,$check) = @_;
+  $check ||= 1;
+
+  my $to = $self->get ('To:addr');
+  return 0 unless $to; # no To:?
+  $to =~ s/\@.*$//; # just the username please
+
+  my $subject = $self->get('Subject');
+
+  return 1 if ( $check == 1 && $subject =~ /^\s*\Q$to\E,/ );    # "user,"   case sensitive
+  return 1 if ( $check == 2 && $subject =~ /^\s*\Q$to\E,/i );   # "user,"   case insensitive
+  return 1 if ( $check == 3 && $subject =~ /^\s*\Q$to\E,\S/ );  # "user,\S" case sensitive
+  return 1 if ( $check == 4 && $subject =~ /^\s*\Q$to\E,\S/i ); # "user,\S" case insensitive
+  return 1 if ( $check == 5 && $subject =~ /\b\Q$to\E\b/ );     # "user"    case sensitive
+  return 1 if ( $check == 6 && $subject =~ /\b\Q$to\E\b/i );    # "user"    case insensitive
+
+  return 0;
+}
+
 1;
