@@ -630,8 +630,8 @@ sub rewrite_as_spam {
       $self->{main}->{conf}->{spam_level_char} x $length . "\n";
   }
   $newmsg .= "X-Spam-Checker-Version: SpamAssassin " .
-    Mail::SpamAssassin::Version() . " " .
-    $Mail::SpamAssassin::SUB_VERSION . "\n";
+    Mail::SpamAssassin::Version() . " (" .
+    $Mail::SpamAssassin::SUB_VERSION . ")\n";
 
   # now add any test-specific markup headers (X-Pyzor etc.)
   foreach my $hdr (keys %{$self->{headers_to_add}}) {
