@@ -88,8 +88,11 @@ score RCVD_IN_RBL		10
 # Received via a relay listed in relays.orbs.org
 score RCVD_IN_RELAYS_ORBS_ORG	1
 
-# Received via a relay listed in relays.mail-abuse.org
-score RCVD_IN_MAIL_ABUSE_ORG	1
+# Received via a relay listed in http://www.mail-abuse.org/rss/
+score RCVD_IN_RSS		1
+
+# Received via a dialup IP address listed in http://www.mail-abuse.org/dul/
+score RCVD_IN_DUL		1
 
 ###########################################################################
 # Scores for body tests.  Most of these are not listed, using the default
