@@ -69,7 +69,7 @@ use vars	qw{
 @ISA = qw();
 
 $VERSION = "2.1";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.62 2002/01/25 04:44:55 jmason Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.63 2002/02/05 03:40:00 hughescr Exp $';
 
 sub Version { $VERSION; }
 
@@ -402,7 +402,7 @@ sub read_scoreonly_config {
   my ($self, $filename) = @_;
 
   if (!open(IN,"<$filename")) {
-    warn "read_scoreonly_config: cannot open \"$filename\"\n";
+    warn "read_scoreonly_config: cannot open \"$filename\": $!\n";
     return;
   }
   my $text = join ('',<IN>);
@@ -533,7 +533,7 @@ sub init {
 
       if (defined $fname) {
         if (!-f $fname && !$self->create_default_prefs($fname)) {
-          warn "Failed to create default prefs file $fname\n";
+          warn "Failed to create default prefs file $fname: $!\n";
         }
       }
 
@@ -588,7 +588,7 @@ sub create_dotsa_dir_if_needed {
     dbg ("using \"$fname\" for user state dir");
 
     if (!-d $fname) {
-      mkpath ($fname, 0, 0700) or warn "mkdir $fname failed\n";
+      mkpath ($fname, 0, 0700) or warn "mkdir $fname failed: $!\n";
     }
   }
 }
@@ -610,8 +610,8 @@ sub create_default_prefs {
     my $defprefs = $self->first_existing_path
 			(@Mail::SpamAssassin::default_prefs_path);
     
-    open (IN, "<$defprefs") or warn "cannot open $defprefs";
-    open (OUT, ">$fname") or warn "cannot write to $fname";
+    open (IN, "<$defprefs") or warn "cannot open $defprefs: $!";
+    open (OUT, ">$fname") or warn "cannot write to $fname: $!";
     while (<IN>) {
       /^\#\* / and next;
       print OUT;
@@ -624,14 +624,14 @@ sub create_default_prefs {
 	# chown it
 	my ($uid,$gid) = (getpwnam($user))[2,3];
 	unless (chown $uid, $gid, $fname) {
-	   warn "Couldn't chown $fname to $uid:$gid for $user\n";
+	   warn "Couldn't chown $fname to $uid:$gid for $user: $!\n";
 	}
       }
      warn "Created user preferences file: $fname\n";
      return(1);
 
    } else {
-     warn "Failed to create user preferences file\n".
+     warn "Failed to create user preferences file: $!\n".
 			 "\"$fname\" from default \"$defprefs\".\n";
    }
  }
