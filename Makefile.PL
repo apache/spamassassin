@@ -262,36 +262,54 @@ sub MY::postamble {
 
   my $self = shift;
 
-  my $instprefix = $self->{INST_PREFIX} || $self->{PREFIX};
+  my $prefix             = $self->{PREFIX}
+                        || '';
+  my $instprefix         = $self->{INST_PREFIX}
+                        || $prefix;
 
-  my $sysconfdir  = $self->{SYSCONFDIR} || '/etc';
-  my $instsysconfdir = $self->{INST_SYSCONFDIR} || $sysconfdir;
+  my $is_sys_build       = ($prefix     =~ m{^(/usr/?)?$});
+  my $is_sys_inst        = ($instprefix =~ m{^(/usr/?)?$});
 
-  if ($instprefix && $instprefix ne '/usr') {
-    $sysconfdir = $self->{PREFIX}.'/etc';
-    $instsysconfdir = $self->{INST_PREFIX}.'/etc';
-  }
+  my $sysconfdir         = $self->{SYSCONFDIR}
+                        || '';
+  my $instsysconfdir     = $self->{INST_SYSCONFDIR}
+                        || $sysconfdir
+                        || ($is_sys_inst  ? '' : '$(INST_PREFIX)') . '/etc';
+     $sysconfdir       ||= ($is_sys_build ? '' : '$(PREFIX)')      . '/etc';
 
-  my $pkgdefrulesdir = $self->{PKG_DEF_RULES_DIR} || $self->{DEF_RULES_DIR}
-    || '$(PREFIX)/share/spamassassin';
-  my $defrulesdir = $self->{DEF_RULES_DIR}
-    || '$(INST_PREFIX)/share/spamassassin';
-  my $pkglocalrulesdir = $self->{PKG_LOCAL_RULES_DIR}
-    || $self->{LOCAL_RULES_DIR} || '$(SYSCONFDIR)/mail/spamassassin';
-  my $localrulesdir = $self->{LOCAL_RULES_DIR} || '$(INST_SYSCONFDIR)/mail/spamassassin';
-  my $instsitelib = $self->{INST_SITELIB} || '$(INSTALLSITELIB)';
+  my $pkgdefrulesdir     = $self->{PKG_DEF_RULES_DIR}
+                        || $self->{DEF_RULES_DIR}
+                        || '$(PREFIX)/share/spamassassin';
+  my $defrulesdir        = $self->{DEF_RULES_DIR}
+                        || '$(INST_PREFIX)/share/spamassassin';
+  my $pkglocalrulesdir   = $self->{PKG_LOCAL_RULES_DIR}
+                        || $self->{LOCAL_RULES_DIR}
+                        || '$(SYSCONFDIR)/mail/spamassassin';
+  my $localrulesdir      = $self->{LOCAL_RULES_DIR}
+                        || '$(INST_SYSCONFDIR)/mail/spamassassin';
+  my $instsitelib        = $self->{INST_SITELIB}
+                        || '$(INSTALLSITELIB)';
 
-  my $enablessl = $self->{ENABLE_SSL} || 'no';
- 
-  my $perl_bin     = $self->{PERL_BIN}     || 'this';
-  my $perl_warn    = $self->{PERL_WARN}    || 'auto';
-  my $perl_taint   = $self->{PERL_TAINT}   || 'auto';
-  my $perl_version = $self->{PERL_VERSION} || 'this';
+  my $enablessl          = $self->{ENABLE_SSL}
+                        || 'no';
+
+  my $perl_bin           = $self->{PERL_BIN}
+                        || 'this';
+  my $perl_warn          = $self->{PERL_WARN}
+                        || 'auto';
+  my $perl_taint         = $self->{PERL_TAINT}
+                        || 'auto';
+  my $perl_version       = $self->{PERL_VERSION}
+                        || 'this';
 
 
-  my $gotpods = keys(%{$self->{MAN1PODS}}) || keys(%{$self->{MAN3PODS}}) || keys(%{$self->{EXTRAPODS}}) || 0;
+  my $gotpods            = keys(%{$self->{MAN1PODS}})
+                        || keys(%{$self->{MAN3PODS}})
+                        || keys(%{$self->{EXTRAPODS}})
+                        || 0;
 
-qq#
+qq(
+#PREFIX			= $prefix	# just for reference
 INST_PREFIX     	= $instprefix
 SYSCONFDIR      	= $sysconfdir
 INST_SYSCONFDIR 	= $instsysconfdir
@@ -308,7 +326,7 @@ PERL_WARN		= $perl_warn
 PERL_TAINT		= $perl_taint
 PERL_VERSION 		= $perl_version
 
-# . q#
+) . q#
 
 FIXVARS		= -Mvars \
 		  -DVERSION="$(VERSION)" \
