@@ -68,8 +68,8 @@ use vars	qw{
 
 @ISA = qw();
 
-$VERSION = "2.0";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.58 2002/01/23 07:49:27 jmason Exp $';
+$VERSION = "2.1";
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.59 2002/01/23 08:01:53 jmason Exp $';
 
 sub Version { $VERSION; }
 
