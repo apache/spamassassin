@@ -90,7 +90,7 @@ CFLDFLAGS	= $Config{ldflags}
 
 }. q{
 
-pm_to_blib: spamassassin
+pm_to_blib: spamassassin text_html_doc
 
 spamassassin: spamassassin.raw
 	$(PERL) fixpath.pl spamassassin.raw $@
