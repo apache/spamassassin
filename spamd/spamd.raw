@@ -174,7 +174,7 @@ if ($opt_u) {
     $setuid_to_user = 1;
 }
 
-$spamtest->compile_now();	# ensure all modules etc. are loaded
+$spamtest->compile_now(0);	# ensure all modules etc. are loaded
 $/ = "\n";			# argh, Razor resets this!  Bad Razor!
 
 my $current_user;

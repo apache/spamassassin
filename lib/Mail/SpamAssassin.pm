@@ -69,7 +69,7 @@ use vars	qw{
 @ISA = qw();
 
 $VERSION = "2.21";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.80 2002/05/14 05:59:52 hughescr Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.81 2002/05/31 02:09:01 quinlan Exp $';
 
 sub Version { $VERSION; }
 
@@ -465,7 +465,7 @@ sub set_persistent_address_list_factory {
 
 ###########################################################################
 
-=item $f->compile_now ()
+=item $f->compile_now ($use_user_prefs)
 
 Compile all patterns, load all configuration files, and load all
 possibly-required Perl modules.
@@ -477,14 +477,14 @@ this is suboptimal, as each process/thread will have to perform these actions.
 Call this function in the master thread or process to perform the actions
 straightaway, so that the sub-processes will not have to.
 
-Note that this will initialise the SpamAssassin configuration without reading
-the per-user configuration file; it assumes that you will call
-C<read_scoreonly_config> at a later point.
+If C<$use_user_prefs> is 0, this will initialise the SpamAssassin
+configuration without reading the per-user configuration file and it will
+assume that you will call C<read_scoreonly_config> at a later point.
 
 =cut
 
 sub compile_now {
-  my ($self) = @_;
+  my ($self, $use_user_prefs) = @_;
 
   # note: this may incur network access. Good.  We want to make sure
   # as much as possible is preloaded!
@@ -492,7 +492,7 @@ sub compile_now {
   			"\n", "x\n");
 
   dbg ("ignore: test message to precompile patterns and load modules");
-  $self->init(0);
+  $self->init($use_user_prefs);
   my $mail = Mail::SpamAssassin::NoMailAudit->new(data => \@testmsg);
   $self->check($mail)->finish();
 

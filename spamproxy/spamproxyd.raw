@@ -44,7 +44,7 @@ use Getopt::Long;
 use strict;
 
 my $spamtest = Mail::SpamAssassin->new();
-$spamtest->compile_now();       # ensure all modules etc. are preloaded
+$spamtest->compile_now(0);      # ensure all modules etc. are preloaded
 $/ = "\n";                      # argh, Razor resets this!  Bad Razor!
 
 # This is the preforking and option-parsiong section taken from the MSDW
