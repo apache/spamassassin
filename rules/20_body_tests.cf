@@ -221,9 +221,6 @@ describe HTML_WIN_OPEN		Javascript to open a new window
 rawbody HTML_WIN_BLUR		eval:html_test('window_blur')
 describe HTML_WIN_BLUR		Javascript to move windows around
 
-rawbody HTML_TAG_MIXED_CASE	eval:check_for_mixed_case_html()
-describe HTML_TAG_MIXED_CASE	HTML tags are inconsistently capitalized
-
 ###########################################################################
 
 body BUGGY_CGI			/Below is the result of your feedback form/
@@ -417,6 +414,12 @@ describe INVESTOR_SPEC_SHEET	Standard investment opportunity spam
 
 body FREE_CONSULTATION		/FREE CONSULTATION/i
 describe FREE_CONSULTATION	Offers a free consultation
+
+body SOME_BREAKTHROUGH		/(?:science|medical|major|scientific|fundamental|technology|revolutionary)\s+breakthrough/i
+describe SOME_BREAKTHROUGH	Describes some sort of breakthrough
+
+body SELECTED_YOU		/(?:you (?:have been|were) selected|we (?:have )?selected you)/i
+describe SELECTED_YOU		Says you have been selected
 
 # (contrib: Matt Sergeant)
 body LARGE_HEX  		/[0-9a-fA-F]{70,}/
