@@ -649,7 +649,23 @@ sub message_array {
   my ($self, $targets, $fh) = @_;
 
   foreach my $target (@${targets}) {
+    if (!defined $target) {
+      warn "Invalid (undef) value in target list";
+      next;
+    }
+
     my ($class, $format, $rawloc) = split(/:/, $target, 3);
+
+    # "class"
+    if (!defined $format) {
+      warn "Invalid (undef) format in target list, $target";
+      next;
+    }
+    # "class:format"
+    if (!defined $rawloc) {
+      warn "Invalid (undef) raw location in target list, $target";
+      next;
+    }
 
     # use ham by default, things like "spamassassin" can't specify the type
     $class = substr($class, 0, 1) || 'h';
