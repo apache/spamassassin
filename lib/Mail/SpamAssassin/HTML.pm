@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.22 2002/10/05 09:24:21 zelgadis Exp $
+# $Id: HTML.pm,v 1.23 2002/10/05 10:49:42 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -13,6 +13,7 @@ sub html_tag {
   my ($self, $tag, $attr, $num) = @_;
 
   $self->{html_inside}{$tag} += $num;
+  $self->{html}{tags}++;
 
   if ($num == 1) {
     $self->html_format($tag, $attr, $num);
@@ -279,8 +280,8 @@ sub html_text {
   my ($self, $text) = @_;
 
   if ($text =~ /\S/) {
-      # Measuring consecutive image tags with no intervening text
-      $self->{html}{consec_imgs} = 0;
+    # measuring consecutive image tags with no intervening text
+    $self->{html}{consec_imgs} = 0;
   }
 
   if (exists $self->{html_inside}{script} && $self->{html_inside}{script} > 0)
@@ -291,7 +292,7 @@ sub html_text {
   }
 
   if (exists $self->{html_inside}{style} && $self->{html_inside}{style} > 0) {
-    if ($attr->{style} =~ /font(?:-size)?:\s*([\d\.]+)(p[tx])/i) {
+    if ($text =~ /font(?:-size)?:\s*([\d\.]+)(p[tx])/i) {
       my $size = $1;
       my $type = $2;
 
@@ -322,7 +323,7 @@ sub html_comment {
   $self->{html}{comment_unique_id} = 1 if $text =~ /<!--\s*(?:[\d.]+|[a-f\d]{5,}|\S{10,})\s*-->/i;
 
   if (exists $self->{html_inside}{style} && $self->{html_inside}{style} > 0) { 
-    if ($attr->{style} =~ /font(?:-size)?:\s*([\d\.]+)(p[tx])/i) {
+    if ($text =~ /font(?:-size)?:\s*([\d\.]+)(p[tx])/i) {
       my $size = $1;
       my $type = $2;
 
@@ -366,60 +367,16 @@ sub html_eval {
   return exists $self->{html}{$test} && eval "qq{\Q$self->{html}{$test}\E} $expr";
 }
 
-sub html_image_area {
-    my ($self, undef, $min, $max) = @_;
+sub html_range {
+  my ($self, undef, $test, $min, $max) = @_;
 
-    $max ||= "inf";
+  $max ||= "inf";
 
-    my $image_area = $self->{html}{total_image_area};
-    return ($image_area > $min && $image_area <= $max);
-} # html_image_area()
+  return 0 unless exists $self->{html}{$test};
 
-
-sub html_num_imgs {
-    my ($self, undef, $min, $max) = @_;
-
-    $max ||= "inf";
-
-    my $num_imgs = $self->{html}{num_imgs};
-    return ($num_imgs > $min && $num_imgs <= $max);
-} # html_num_imgs()
-
-sub html_max_consec_imgs {
-    my ($self, undef, $min, $max) = @_;
-
-    $max ||= "inf";
-
-    my $consec = $self->{html}{max_consec_imgs};
-    return ($consec > $min && $consec <= $max);
-} # html_max_consec_imgs()
-
-sub html_min_img_ratio {
-    my ($self, undef, $min, $max) = @_;
-
-    $max ||= "inf";
-
-    my $ratio = $self->{html}{min_img_ratio};
-    return ($ratio > $min && $ratio <= $max);
-} # html_min_img_ratio()
-
-sub html_max_img_ratio {
-    my ($self, undef, $min, $max) = @_;
-
-    $max ||= "inf";
-
-    my $ratio = $self->{html}{max_img_ratio};
-    return ($ratio > $min && $ratio <= $max);
-} # html_max_img_ratio()
-
-sub html_max_shouting {
-    my ($self, undef, $min, $max) = @_;
-
-    $max ||= "inf";
-
-    my $shouting = $self->{html}{max_shouting};
-    return ($shouting > $min && $shouting <= $max);
-} # html_max_shouting()
+  $test = $self->{html}{$test};
+  return ($test > $min && $test <= $max);
+}
 
 1;
 __END__
