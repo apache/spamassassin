@@ -2,7 +2,6 @@
 
 uri NUMERIC_HTTP_ADDR   /^https?\:\/\/\d{7,}/is
 describe NUMERIC_HTTP_ADDR  Uses a numeric IP address in URL
-test NUMERIC_HTTP_ADDR ok http://123456789/foo/bar
 
 uri NORMAL_HTTP_TO_IP   /^https?\:\/\/\d+\.\d+\.\d+\.\d+/is
 describe NORMAL_HTTP_TO_IP  Uses a dotted-decimal IP address in URL
@@ -92,5 +91,3 @@ describe WEIRD_PORT             Uses non-standard port number for HTTP
 
 uri             SPAM_REDIRECTOR /https?\:.*(?:rd\.yahoo\.com|wwp\.icq\.com)/is
 describe        SPAM_REDIRECTOR Uses open redirection service
-test			SPAM_REDIRECTOR ok http://rd.yahoo.com/?http://somesite.com/
-test			SPAM_REDIRECTOR ok http://wwp.icq.com/?http://anothersite.com/

@@ -14,6 +14,7 @@ use ExtUtils::MakeMaker;
 # do this in perl, it's more portable
 my $rulesfiles = join (' ', map { s/rules.//; $_ } (<rules/*.cf>));
 $rulesfiles =~ s/local\.cf//;
+$rulesfiles =~ s/regression_tests\.cf//; # Don't include regression tests
 
 $rulesfiles .= " triplets.txt languages";
 
