@@ -551,9 +551,12 @@ sub check_from_name_eq_from_address {
 ###########################################################################
 
 sub check_rbl {
-  my ($self, $set, $rbl_domain) = @_;
+  my ($self, $set, $rbl_domain, $needresult) = @_;
   local ($_);
-  dbg ("checking RBL $rbl_domain, set $set");
+  # How many IPs max you check in the received lines;
+  my $checklast=$self->{conf}->{num_check_received} - 1;
+  
+  dbg ("checking RBL $rbl_domain, set $set", "rbl", -1);
 
   my $rcv = $self->get ('Received');
   my @ips = ($rcv =~ /[\[\(](\d+\.\d+\.\d+\.\d+)[\]\)]/g);
@@ -564,9 +567,11 @@ sub check_rbl {
   return 0 unless $self->is_dns_available();
   $self->load_resolver();
 
+  dbg("Got the following IPs: ".join(", ", @ips), "rbl", -3);
   if ($#ips > 1) {
-    @ips = @ips[$#ips-1 .. $#ips];        # only check the originating 2
+    @ips = @ips[$#ips-$checklast .. $#ips]; # only check the originating IPs
   }
+  dbg("But only inspecting the following IPs: ".join(", ", @ips), "rbl", -3);
 
   if (!defined $self->{$set}->{rbl_IN_As_found}) {
     $self->{$set}->{rbl_IN_As_found} = ' ';
@@ -577,17 +582,54 @@ sub check_rbl {
   my $already_matched_in_other_zones = ' '.$self->{$set}->{rbl_matches_found}.' ';
   my $found = 0;
 
-  # First check that DNS is available, if not do not perform this check.
+  # First check that DNS is available. If not, do not perform this check.
   # Stop after the first positive.
   eval {
+    my $i=0;
+    my ($b1,$b2,$b3,$b4);
+    my $dialupreturn;
     foreach my $ip (@ips) {
+      $i++;
       next if ($ip =~ /${IP_IN_RESERVED_RANGE}/o);
-      next if ($already_matched_in_other_zones =~ / ${ip} /);
+      # Some of the matches in other zones, like a DUL match on a first hop 
+      # may be negated by another rule, so preventing a match in two zones
+      # is better done with a Z_FUDGE_foo rule that users check_both_rbl_results
+      # and sets a negative score to compensate 
+      # It's also useful to be able to flag mail that went through an IP that
+      # is on two different blacklists  -- Marc
+      #next if ($already_matched_in_other_zones =~ / ${ip} /);
+      if ($already_matched_in_other_zones =~ / ${ip} /) {
+	dbg("Skipping $ip, already matched in other zones for $set", "rbl", -1);
+	next;
+      }
       next unless ($ip =~ /(\d+)\.(\d+)\.(\d+)\.(\d+)/);
-      $found = $self->do_rbl_lookup ($set, "$4.$3.$2.$1.".$rbl_domain, $ip, $found);
+     ($b1, $b2, $b3, $b4) = ($1, $2, $3, $4);
+      
+      # By default, we accept any return on an RBL
+      undef $dialupreturn;
+      
+      # foo-firsthop are special rule names that only match on the
+      # first Received line (used to give a negative score to counter the
+      # normal dialup rule and not penalize people who relayed through their
+      # ISP) -- Marc
+      # By default this rule won't get run unless it's the first hop IP
+      if ($set =~ /-firsthop$/) {
+	if ($#ips>0 and $i == $#ips + 1) {
+	  dbg("Set dialupreturn on $ip for first hop", "rbl", -2);
+	  $dialupreturn=$self->{conf}->{dialup_codes};
+	  die "$self->{conf}->{dialup_codes} undef" if (!defined $dialupreturn);
+	} else {
+	  dbg("Not running firsthop rule against middle hop or direct dialup IP connection (ip $ip)", "rbl", -2);
+	  next;
+	}
+      }
+      
+      $found = $self->do_rbl_lookup ($set, "$b4.$b3.$b2.$b1.".$rbl_domain, $ip, $found, $dialupreturn, $needresult);
+      dbg("Got $found on $ip (item $i)", "rbl", -3);
     }
   };
 
+  dbg("Check_rbl returning $found", "rbl", -3);
   $found;
 }
 
@@ -596,7 +638,7 @@ sub check_rbl {
 sub check_rbl_results_for {
   my ($self, $set, $addr) = @_;
 
-  dbg ("checking RBL results in set $set for $addr");
+  dbg ("checking RBL results in set $set for $addr", "rbl", -1);
   return 0 if $self->{conf}->{skip_rbl_checks};
   return 0 unless $self->is_dns_available();
   return 0 unless defined ($self->{$set});
@@ -607,6 +649,26 @@ sub check_rbl_results_for {
 
   return 0;
 }
+
+###########################################################################
+
+sub check_two_rbl_results {
+  my ($self, $set1, $addr1, $set2, $addr2) = @_;
+
+  return 0 if $self->{conf}->{skip_rbl_checks};
+  return 0 unless $self->is_dns_available();
+  return 0 unless defined ($self->{$set1});
+  return 0 unless defined ($self->{$set2});
+  return 0 unless defined ($self->{$set1}->{rbl_IN_As_found});
+  return 0 unless defined ($self->{$set2}->{rbl_IN_As_found});
+
+  my $inas1 = ' '.$self->{$set1}->{rbl_IN_As_found}.' ';
+  my $inas2 = ' '.$self->{$set2}->{rbl_IN_As_found}.' ';
+  if ($inas1 =~ / ${addr1} / and $inas2 =~ / ${addr2} /) { return 1; }
+
+  return 0;
+}
+
 
 ###########################################################################
 
@@ -1013,7 +1075,7 @@ sub _check_date_diff {
   my @rcvddatestrs = ($rcvd =~ /\s.?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+/g);
   my @rcvddates = ();
   foreach $rcvd (@rcvddatestrs) {
-    dbg ("trying Received header date for real time: $rcvd");
+    dbg ("trying Received header date for real time: $rcvd", "datediff", -2);
     $rcvd = $self->_parse_rfc822_date ($rcvd);
     if (defined($rcvd)) {
       push (@rcvddates, $rcvd);
@@ -1021,7 +1083,7 @@ sub _check_date_diff {
   }
 
   if ($#rcvddates <= 0) {
-    dbg ("no dates found in Received headers, not raising flag");
+    dbg ("no dates found in Received headers, not raising flag", "datediff", -1);
     return;
   }
 
@@ -1029,7 +1091,7 @@ sub _check_date_diff {
 
   foreach $rcvd (@rcvddates) {
     my $diff = $time - $rcvd;
-    dbg ("time_t from date=$time, rcvd=$rcvd, diff=$diff");
+    dbg ("time_t from date=$time, rcvd=$rcvd, diff=$diff", "datediff", -2);
     push(@diffs, $diff);
   }
 

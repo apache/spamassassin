@@ -54,31 +54,98 @@ BEGIN {
 ###########################################################################
 
 sub do_rbl_lookup {
-  my ($self, $set, $dom, $ip, $found) = @_;
+  my ($self, $set, $dom, $ip, $found, $dialupreturn, $needresult) = @_;
+  my $socket;
+  my @addr=();
+  my $maxwait=$self->{conf}->{rbl_timeout};
   return $found if $found;
 
-  my $q = $self->{res}->search ($dom);
+  my $gotdialup=0;
+  my $domainonly;
+  ($domainonly = $dom) =~ s/^\d+\.\d+\.\d+\.\d+.//;
+  $domainonly =~ s/\.?$/./;
 
-  if ($q) {
-    foreach my $rr ($q->answer) {
-      if ($rr->type eq "A") {
-	my $addr = $rr->address();
-	dbg ("record found for $dom = $addr");
+  if (defined $self->{dnscache}->{rbl}->{$dom}->{result}) {
+    dbg("Found $dom in our DNS cache. Yeah!", "rbl", -1);
+    @addr = @{$self->{dnscache}->{rbl}->{$dom}->{result}};
+  } elsif (not defined $self->{dnscache}->{rbl}->{$dom}->{socket}) {
+    dbg("Launching DNS query for $dom in the background", "rbl", -1);
+    $self->{dnscache}->{rbl}->{$dom}->{socket}=$self->{res}->bgsend($dom);
+    $self->{dnscache}->{rbl}->{$dom}->{time}=time;
+    return 0;
+  } elsif (not $needresult) {
+    dbg("Second batch query for $dom, ignoring since we have one pending", "rbl", -1);
+    return 0;
+  } else {
+    timelog("RBL -> Waiting for result on $dom", "rbl", 1);
+    $socket=$self->{dnscache}->{rbl}->{$dom}->{socket};
+    
+    while (not $self->{res}->bgisready($socket)) {
+      last if (time - $self->{dnscache}->{rbl}->{$dom}->{time} > $maxwait);
+      sleep 1;
+    }
 
-	if ($addr ne '127.0.0.2' && $addr ne '127.0.0.3') {
-	  $self->test_log ("RBL check: found ".$dom.", type: ".$addr);
-	} else {
-	  # 127.0.0.2 is the traditional boolean indicator, don't log it
-	  # 127.0.0.3 now also means "is a dialup IP"
-	  $self->test_log ("RBL check: found ".$dom);
+    if (not $self->{res}->bgisready($socket)) {
+      timelog("RBL -> Timeout on $dom", "rbl", 2);
+      dbg("Query for $dom timed out after $maxwait seconds", "rbl", -1);
+      return 0;
+    } else {
+      my $packet = $self->{res}->bgread($socket);
+      undef($socket);
+      foreach $_ ($packet->answer) {
+	dbg("Query for $dom yielded: ".$_->rdatastr, "rbl", -2);
+	if ($_->type eq "A") {
+	  push(@addr, $_->rdatastr);
 	}
-
-	$self->{$set}->{rbl_IN_As_found} .= $addr.' ';
-	$self->{$set}->{rbl_matches_found} .= $ip.' ';
-	return ($found+1);
       }
+      $self->{dnscache}->{rbl}->{$dom}->{result} = \@addr;
     }
   }
+
+  if (@addr) {
+    foreach my $addr (@addr) {
+
+      # 127.0.0.2 is the traditional boolean indicator, don't log it
+      # 127.0.0.3 now also means "is a dialup IP" (only if set is dialup
+      # -- Marc)
+      if ($addr ne '127.0.0.2' and 
+	      not ($addr eq '127.0.0.3' and $set =~ /^dialup/)) {
+	$self->test_log ("RBL check: found ".$dom.", type: ".$addr);
+      } else {
+	$self->test_log ("RBL check: found ".$dom);
+      }
+      dbg("RBL check: found $dom, type: $addr", "rbl", -2);
+
+      $self->{$set}->{rbl_IN_As_found} .= $addr.' ';
+      $self->{$set}->{rbl_matches_found} .= $ip.' ';
+
+      # If $dialupreturn is a reference to a hash, we were told to ignore
+      # dialup IPs, let's see if we have a match
+      if ($dialupreturn) {
+	my $toign;
+	dbg("Checking dialup_codes for $addr as a DUL code for $domainonly", "rbl", -2);
+
+	foreach $toign (keys %{$dialupreturn}) {
+	  dbg("Comparing against $toign/".$dialupreturn->{$toign}, "rbl", -3);
+	  $toign =~ s/\.?$/./;
+	  if ($domainonly eq $toign and $addr eq $dialupreturn->{$toign}) {
+	    dbg("Got $addr in $toign for $ip, good, we'll take it", "rbl", "-3");
+	    $gotdialup=1;  
+	    last;
+	  }
+	}
+
+	if (not $gotdialup) {
+	  dbg("Ignoring return $addr for $ip, not known as dialup for $domainonly in dialup_code variable", "rbl", -2);
+	  next;
+	}
+      }
+
+      timelog("RBL -> match on $dom", "rbl", 2);
+      return 1;
+    }
+  }
+  timelog("RBL -> No match on $dom", "rbl", 2);
   return 0;
 }
 
@@ -130,7 +197,7 @@ sub is_razor_available {
   my ($self) = @_;
 
   if ($self->{main}->{local_tests_only}) {
-    dbg ("local tests only, ignoring Razor");
+    dbg ("local tests only, ignoring Razor", "razor", -1);
     return 0;
   }
 
@@ -139,30 +206,32 @@ sub is_razor_available {
   };
   
   if ($@) {
-    dbg ("Razor is not available");
+    dbg ("Razor is not available", "razor", -1);
     return 0;
   }
   else {
-    dbg ("Razor is available");
+    dbg ("Razor is available", "razor", -1);
     return 1;
   }
 }
 
 sub razor_lookup {
   my ($self, $fulltext) = @_;
+  my $timeout=$self->{conf}->{razor_timeout};
 
   if ($self->{main}->{local_tests_only}) {
-    dbg ("local tests only, ignoring Razor");
+    dbg ("local tests only, ignoring Razor", "razor", -1);
     return 0;
   }
 
+  timelog("Razor -> Starting razor test ($timeout secs max)", "razor", 1);
+  
   my @msg = split (/^/m, $$fulltext);
 
-  my $timeout = 10;		# seconds
   my $response = undef;
   my $config = $self->{conf}->{razor_config};
   my %options = (
-    'debug'	=> $Mail::SpamAssassin::DEBUG
+    'debug'	=> ($Mail::SpamAssassin::DEBUG->{enabled} and $Mail::SpamAssassin::DEBUG->{razor} < -2)
   );
 
   # razor also debugs to stdout. argh. fix it to stderr...
@@ -179,7 +248,7 @@ sub razor_lookup {
     local ($^W) = 0;		# argh, warnings in Razor
 
     local $SIG{ALRM} = sub { die "alarm\n" };
-    alarm 10;
+    alarm $timeout;
 
     my $rc = Razor::Client->new ($config, %options);
 
@@ -207,7 +276,8 @@ sub razor_lookup {
   if ($@) {
     $response = undef;
     if ($@ =~ /alarm/) {
-      dbg ("razor check timed out after $timeout secs.");
+      dbg ("razor check timed out after $timeout secs.", "razor", -1);
+      timelog("Razor -> interrupted after $timeout secs", "razor", 2);
     } else {
       warn ("razor check skipped: $! $@");
     }
@@ -221,7 +291,11 @@ sub razor_lookup {
     close OLDOUT;
   }
 
-  if ((defined $response) && ($response+0)) { return 1; }
+  if ((defined $response) && ($response+0)) { 
+      timelog("Razor -> Finished razor test: confirmed spam", "razor", 2);
+      return 1; 
+  }
+  timelog("Razor -> Finished razor test: not known spam", "razor", 2);
   return 0;
 }
 
@@ -254,6 +328,7 @@ sub dcc_lookup {
   my %count;
   my $left;
   my $right;
+  my $timeout=$self->{conf}->{dcc_timeout};
 
   $count{body} = 0;
   $count{fuz1} = 0;
@@ -264,13 +339,15 @@ sub dcc_lookup {
     return 0;
   }
 
+  timelog("DCC -> Starting test ($timeout secs max)", "dcc", 1);
+
   eval {
     my ($dccin, $dccout, $pid);
 
     local $SIG{ALRM} = sub { die "alarm\n" };
     local $SIG{PIPE} = sub { die "brokenpipe\n" };
 
-    alarm(10);
+    alarm($timeout);
 
     $dccin = gensym();
     $dccout = gensym();
@@ -294,18 +371,22 @@ sub dcc_lookup {
     $response = undef;
     if ($@ =~ /alarm/) {
       dbg ("DCC check timed out after 10 secs.");
+      timelog("DCC -> interrupted after $timeout secs", "dcc", 2);
       return 0;
     } elsif ($@ =~ /brokenpipe/) {
-      dbg ("DCC check failed - Broken pipe.");
+      dbg ("DCC -> check failed - Broken pipe.");
+      timelog("dcc check failed, broken pipe", "dcc", 2);
       return 0;
     } else {
-      warn ("DCC check skipped: $! $@");
+      warn ("DCC -> check skipped: $! $@");
+      timelog("dcc check skipped", "dcc", 2);
       return 0;
     }
   }
 
   if ($response !~ /^X-DCC/) {
-    dbg ("DCC check failed - no X-DCC returned (did you create a map file?): $response");
+    dbg ("DCC -> check failed - no X-DCC returned (did you create a map file?): $response");
+    timelog("dcc check failed", "dcc", 2);
     return 0;
   }
  
@@ -332,9 +413,11 @@ sub dcc_lookup {
 
   if ($count{body} >= $self->{conf}->{dcc_body_max} || $count{fuz1} >= $self->{conf}->{dcc_fuz1_max} || $count{fuz2} >= $self->{conf}->{dcc_fuz2_max}) {
     dbg ("DCC: Listed! BODY: $count{body} of $self->{conf}->{dcc_body_max} FUZ1: $count{fuz1} of $self->{conf}->{dcc_fuz1_max} FUZ2: $count{fuz2} of $self->{conf}->{dcc_fuz2_max}");
+    timelog("DCC -> got hit", "dcc", 2);
     return 1;
   }
   
+  timelog("DCC -> no match", "dcc", 2);
   return 0;
 }
 

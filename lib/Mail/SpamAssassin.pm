@@ -59,23 +59,30 @@ use File::Copy;
 use Cwd;
 use Config;
 
+# Let's not make this required -- Marc
+#eval { require Time::HiRes };
+#Time::HiRes->import( qw(time) ) unless $@;
+# Unfortunately, the above doesn't work, please FIXME
+use Time::HiRes qw ( time );
+
 use vars	qw{
-  	@ISA $VERSION $SUB_VERSION $HOME_URL $DEBUG
+  	@ISA $VERSION $SUB_VERSION $HOME_URL $DEBUG $TIMELOG
 	@default_rules_path @default_prefs_path
 	@default_userprefs_path @default_userstate_dir
 	@site_rules_path @old_site_rules_path
 };
 
+# Create the hash so that it really points to something, otherwise we can't
+# get a reference to it -- Marc
+$TIMELOG->{dummy}=0;
 @ISA = qw();
 
 $VERSION = "2.21";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.86 2002/06/08 04:50:53 hughescr Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.87 2002/06/10 07:16:34 hughescr Exp $';
 
 sub Version { $VERSION; }
 
 $HOME_URL = "http://spamassassin.org/";
-
-$DEBUG = 0;
 
 #__installsitelib__/spamassassin.cf
 #__installvendorlib__/spamassassin.cf
@@ -172,7 +179,26 @@ sub new {
   if (!defined $self) { $self = { }; }
   bless ($self, $class);
 
-  if (defined $self->{debug}) { $DEBUG = $self->{debug}+0; }
+  $DEBUG->{enabled} = 0;
+  if (defined $self->{debug} and $self->{debug}) { $DEBUG->{enabled} = 1 }
+
+  # This should be moved elsewhere, I know, but SA really needs debug sets 
+  # I'm putting the intialization here for now, move it if you want
+
+  # For each part of the code, you can set debug levels. If the level is
+  # progressive, use negative numbers (the more negative, the move debug info
+  # is put out), and if you want to use bit fields, use positive numbers
+  # All code path debug codes should be listed here with a value of 0 if you
+  # want them disabled -- Marc
+
+  $DEBUG->{datediff}=-1;
+  $DEBUG->{razor}=-3;
+  $DEBUG->{rbl}=0;
+  $DEBUG->{timelog}=0;
+  # Bitfield:
+  # header regex: 1 | body-text: 2 | uri tests: 4 | raw-body-text: 8
+  # full-text regexp: 16 | run_eval_tests: 32 | run_rbl_eval_tests: 64
+  $DEBUG->{rulesrun}=64;
 
   $self->{conf} ||= new Mail::SpamAssassin::Conf ($self);
   $self;
@@ -199,10 +225,17 @@ sub check {
   my ($self, $mail_obj) = @_;
   local ($_);
 
+  timelog("Starting SpamAssassin Check", "SAfull", 1);
   $self->init(1);
+  timelog("Init completed");
   my $mail = $self->encapsulate_mail_object ($mail_obj);
   my $msg = Mail::SpamAssassin::PerMsgStatus->new($self, $mail);
+  chomp($TIMELOG->{mesgid} = $mail_obj->get("Message-Id"));
+  $TIMELOG->{mesgid} =~ s#<(.*)>#$1#;
+  timelog("Created message object, checking message", "msgcheck", 1);
   $msg->check();
+  timelog("Done checking message", "msgcheck", 2);
+  timelog("Done running SpamAssassin", "SAfull", 2);
   $msg;
 }
 
@@ -829,8 +862,82 @@ sub find_all_addrs_in_line {
   return @addrs;
 }
 
+# First argument is the message you want to log for that time
+# wheredelta is 1 for starting a split on the stopwatch, and 2 for showing the
+# instant delta (used to show how long a specific routine took to run)
+# deltaslot says which stopwatch you are working with (needs to match for begin
+# and end obviously)
+sub timelog {
+  my ($msg, $deltaslot, $wheredelta) = @_;
+  my $now=time;
+  my $tl=$Mail::SpamAssassin::TIMELOG;
+  my $dbg=$Mail::SpamAssassin::DEBUG;
+
+  if (defined($deltaslot) and ($deltaslot eq "SAfull") and defined($wheredelta) and ($wheredelta eq 1)) {
+    $tl->{'start'}=$now;
+  } 
+
+  if (defined $wheredelta) {
+    $tl->{stopwatch}->{$deltaslot}=$now if ($wheredelta eq 1);
+    if ($wheredelta eq 2) {
+      if (not defined $tl->{stopwatch}->{$deltaslot}) {
+	warn("Error: got end of time log for $deltaslot but never got the start\n");
+      } else {
+	$msg.=sprintf(" (Delta: %.3fs)", 
+	  $now - $tl->{stopwatch}->{$deltaslot} );
+      }
+    }
+  }
+
+  $msg=sprintf("%.3f: $msg\n", $now - $tl->{start});
+
+  if (not ($tl->{logpath} and $tl->{mesgid})) {
+    push (@{$tl->{keeplogs}}, $msg);
+    print $msg if ($dbg->{timelog});
+    dbg("Log not yet opened, continuing", "timelog", -2);
+    return;
+  } 
+  if (not $tl->{flushedlogs} and $tl->{logpath} and $tl->{mesgid}) {
+    my $file="$tl->{logpath}/".sprintf("%.4f",time)."_$tl->{mesgid}";
+
+    $tl->{flushedlogs}=1;
+    dbg("Flushing logs to $file", "timelog", -2);
+    open (LOG, ">>$file") or warn("Can't open file: $!");
+
+    while (defined ($_ = shift(@{$tl->{keeplogs}})))
+    {
+      print LOG $_;
+    }
+    dbg("Done flushing logs", "timelog", -2);
+  }
+  print LOG $msg;
+  print $msg if ($dbg->{timelog});
+}
+
+
+# Only the first argument is needed, and it can be a reference to a list if
+# you want
 sub dbg {
-  if ($Mail::SpamAssassin::DEBUG > 0) { warn "debug: ".join('',@_)."\n"; }
+  my ($msg, $codepath, $level) = @_;
+  my $dbg=$Mail::SpamAssassin::DEBUG;
+
+  $msg=join('',@{$msg}) if (ref $msg);
+
+  if (defined $codepath) {
+    if (not defined $dbg->{$codepath}) {
+      warn("dbg called with codepath $codepath, but it's not defined, skipping (message was \"$msg\"\n");
+      return 0;
+    } elsif (not defined $level) {
+      warn("dbg called with codepath $codepath, but no level threshold (message was \"$msg\"\n");
+    }
+  }
+  return if (not $dbg->{enabled});
+  # Negative levels are just level numbers, the more negative, the more debug
+  return if (defined $level and $level<0 and not $dbg->{$codepath} <= $level);
+  # Positive levels are bit fields
+  return if (defined $level and $level>0 and not $dbg->{$codepath} & $level);
+
+  warn "debug: $msg\n";
 }
 
 # sa_die -- used to die with a useful exit code.

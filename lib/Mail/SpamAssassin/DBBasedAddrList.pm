@@ -93,14 +93,14 @@ sub new_checker {
 
       if ($self->{is_locked})
       {
-	 dbg("Tie-ing to DB file R/W in ",$path);
+	 dbg("Tie-ing to DB file R/W in $path");
 	 tie %{$self->{accum}},"AnyDBM_File",$path, O_RDWR|O_CREAT,   #open rw w/lock
 		       (oct ($main->{conf}->{auto_whitelist_file_mode}) & 0666)
 	     or die "Cannot open auto_whitelist_path $path: $!\n";
       } 
       else 
       {
-	 dbg("Tie-ing to DB file R/O in ",$path);
+	 dbg("Tie-ing to DB file R/O in $path");
 	 tie %{$self->{accum}},"AnyDBM_File",$path, O_RDONLY,         #open ro w/o lock
 		       (oct ($main->{conf}->{auto_whitelist_file_mode}) & 0666)
 	     or die "Cannot open auto_whitelist_path $path: $!\n";

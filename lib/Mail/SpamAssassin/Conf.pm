@@ -45,8 +45,9 @@ use strict;
 use vars	qw{
   	@ISA $type_body_tests $type_head_tests $type_head_evals
 	$type_body_evals $type_full_tests $type_full_evals
-	$type_rawbody_tests $type_rawbody_evals
-    $type_uri_tests $type_uri_evals
+	$type_rawbody_tests $type_rawbody_evals 
+	$type_uri_tests $type_uri_evals
+	$type_rbl_evals $type_rbl_res_evals
 };
 
 @ISA = qw();
@@ -61,6 +62,8 @@ $type_rawbody_tests = 107;
 $type_rawbody_evals = 108;
 $type_uri_tests  = 109;
 $type_uri_evals  = 110;
+$type_rbl_evals  = 120;
+$type_rbl_res_evals  = 121;
 
 ###########################################################################
 
@@ -98,7 +101,19 @@ sub new {
   $self->{terse_report_template} = '';
   $self->{spamtrap_template} = '';
 
+  # What different RBLs consider a dialup IP -- Marc
+  $self->{dialup_codes} = { 
+			    "dialups.mail-abuse.org." => "127.0.0.3",
+			   # For DUL + other codes, we ignore that it's on DUL
+			    "rbl-plus.mail-abuse.org." => "127.0.0.2",
+			    "relays.osirusoft.com." => "127.0.0.3",
+			  };
+
+  $self->{num_check_received} = 2;
+
   $self->{razor_config} = $main->sed_path ("~/razor.conf");
+  $self->{razor_timeout} = 10;
+  $self->{rbl_timeout} = 30;
 
   # this will be sedded by whitelist implementations, so ~ is OK
   $self->{auto_whitelist_path} = "~/.spamassassin/auto-whitelist";
@@ -124,6 +139,7 @@ sub new {
   $self->{dcc_fuz1_max} = 999999;
   $self->{dcc_fuz2_max} = 999999;
   $self->{dcc_add_header} = 0;
+  $self->{dcc_timeout} = 10;
 
   $self->{whitelist_from} = { };
   $self->{blacklist_from} = { };
@@ -553,6 +569,19 @@ points will be assigned.
       $self->{ok_languages} = $1; next;
     }
 
+=item rbl_timeout n		(default 30)
+
+All RBL queries are started at the beginning and we try to read the results
+at the end. In case some of them are hanging or not returning, you can specify
+here how long you're willing to wait for them before deciding that they timed
+out
+
+=cut
+
+    if (/^rbl[-_]timeout\s+(\d+)$/) {
+      $self->{rbl_timeout} = $1+0; next;
+    }
+
 =item ok_locales xx [ yy zz ... ]		(default: en)
 
 Which locales (country codes) are considered OK to receive mail from.  Mail
@@ -765,11 +794,112 @@ The default is to not add the header.
       $self->{dcc_add_header} = $1+0; next;
     }
 
+=item dcc_timeout n              (default: 10)
+
+How many seconds you wait for dcc to complete before you go on without 
+the results
+
+=cut
+
+    if (/^dcc[-_]timeout\s*(\d+)\s*$/) {
+      $self->{dcc_timeout} = $1+0; next;
+    }
+
+
+=item num_check_received { integer }   (default: 2)
+
+How many received lines from and including the original mail relay
+do we check in RBLs (you'd want at least 1 or 2).
+Note that for checking against dialup lists, you can call check_rbl
+with a special set name of "set-firsthop" and this rule will only
+be matched against the first hop if there is more than one hop, so 
+that you can set a negative score to not penalize people who properly
+relayed through their ISP.
+See dialup_codes for more details and an example
+
+=cut
+
+    if (/^num[-_]check[-_]received\s+(\d+)$/) {
+      $self->{num_check_received} = $1+0; next;
+    }
 
 ###########################################################################
     # SECURITY: no eval'd code should be loaded before this line.
     #
     if ($scoresonly && !$self->{allow_user_rules}) { goto failed_line; }
+
+
+# If you think, this is complex, you should have seen the four previous
+# implementations that I scratched :-)
+# Once you understand this, you'll see it's actually quite flexible -- Marc
+
+=item dialup_codes { "domain1" => "127.0.x.y", "domain2" => "127.0.a.b" }
+
+Default:
+{ "dialups.mail-abuse.org." => "127.0.0.3", 
+# For DUL + other codes, we ignore that it's on DUL
+  "rbl-plus.mail-abuse.org." => "127.0.0.2",
+  "relays.osirusoft.com." => "127.0.0.3" };
+
+WARNING!!! When passing a reference to a hash, you need to put the whole hash in
+one line for the parser to read it correctly (you can check with spamassassin -D
+< mesg)
+
+Set this to what your RBLs return for dialup IPs
+It is used by dialup-firsthop and relay-firsthop rules so that you can match
+DUL codes and compensate DUL checks with a negative score if the IP is a dialup
+IP the mail originated from and it was properly relayed by a hop before reaching
+you (hopefully not your secondary MX :-D)
+The trailing "-firsthop" is magic, it's what triggers the RBL to only be run
+on the originating hop
+The idea is to not penalize (or penalize less) people who properly relayed
+through their ISP's mail server
+
+Here's an example showing the use of Osirusoft and MAPS DUL, as well as the use
+of check_two_rbl_results to compensate for a match in both RBLs
+
+header RCVD_IN_DUL		rbleval:check_rbl('dialup', 'dialups.mail-abuse.org.')
+describe RCVD_IN_DUL		Received from dialup, see http://www.mail-abuse.org/dul/
+score RCVD_IN_DUL		4
+
+header X_RCVD_IN_DUL_FH		rbleval:check_rbl('dialup-firsthop', 'dialups.mail-abuse.org.')
+describe X_RCVD_IN_DUL_FH	Received from first hop dialup, see http://www.mail-abuse.org/dul/
+score X_RCVD_IN_DUL_FH		-3
+
+header RCVD_IN_OSIRUSOFT_COM    rbleval:check_rbl('osirusoft', 'relays.osirusoft.com.')
+describe RCVD_IN_OSIRUSOFT_COM  Received via an IP flagged in relays.osirusoft.com
+
+header X_OSIRU_SPAM_SRC         rbleval:check_rbl_results_for('osirusoft', '127.0.0.4')
+describe X_OSIRU_SPAM_SRC       DNSBL: sender is Confirmed Spam Source, penalizing further
+score X_OSIRU_SPAM_SRC          3.0
+
+header X_OSIRU_SPAMWARE_SITE    rbleval:check_rbl_results_for('osirusoft', '127.0.0.6')
+describe X_OSIRU_SPAMWARE_SITE  DNSBL: sender is a Spamware site or vendor, penalizing further
+score X_OSIRU_SPAMWARE_SITE     5.0
+
+header X_OSIRU_DUL_FH		rbleval:check_rbl('osirusoft-dul-firsthop', 'relays.osirusoft.com.')
+describe X_OSIRU_DUL_FH		Received from first hop dialup listed in relays.osirusoft.com
+score X_OSIRU_DUL_FH		-1.5
+
+header Z_FUDGE_DUL_MAPS_OSIRU	rblreseval:check_two_rbl_results('osirusoft', "127.0.0.3", 'dialup', "127.0.0.3")
+describe Z_FUDGE_DUL_MAPS_OSIRU	Do not double penalize for MAPS DUL and Osirusoft DUL
+score Z_FUDGE_DUL_MAPS_OSIRU	-2
+
+header Z_FUDGE_RELAY_OSIRU	rblreseval:check_two_rbl_results('osirusoft', "127.0.0.2", 'relay', "127.0.0.2")
+describe Z_FUDGE_RELAY_OSIRU	Do not double penalize for being an open relay on Osirusoft and another DNSBL
+score Z_FUDGE_RELAY_OSIRU	-2
+
+header Z_FUDGE_DUL_OSIRU_FH	rblreseval:check_two_rbl_results('osirusoft-dul-firsthop', "127.0.0.3", 'dialup-firsthop', "127.0.0.3")
+describe Z_FUDGE_DUL_OSIRU_FH	Do not double compensate for MAPS DUL and Osirusoft DUL first hop dialup
+score Z_FUDGE_DUL_OSIRU_FH	1.5
+
+=cut
+
+    if (/^dialup_codes\s+(.*)$/) {
+	$self->{dialup_codes} = eval $1;
+	next;
+    }
+
 
     if ($scoresonly) { dbg("Checking privileged commands in user config"); }
 
@@ -836,8 +966,20 @@ a method on the C<Mail::SpamAssassin::EvalTests> object.  C<arguments>
 are optional arguments to the function call.
 
 =cut
+    if (/^header\s+(\S+)\s+rbleval:(.*)$/) {
+      $self->add_test ($1, $2, $type_rbl_evals); next;
+    }
+    if (/^header\s+(\S+)\s+rblreseval:(.*)$/) {
+      $self->add_test ($1, $2, $type_rbl_res_evals); next;
+    }
     if (/^header\s+(\S+)\s+eval:(.*)$/) {
-      $self->add_test ($1, $2, $type_head_evals);
+      my ($name,$rule) = ($1, $2);
+      # Backward compatibility with old rule names -- Marc
+      if ($name =~ /^RCVD_IN/) {
+        $self->add_test ($name, $rule, $type_rbl_evals); next;
+      } else {
+       $self->add_test ($name, $rule, $type_head_evals); next;
+      }
       $self->{user_rules_to_compile} = 1 if $scoresonly;
       next;
     }
@@ -979,6 +1121,17 @@ Currently this is the same value Razor itself uses: C<~/razor.conf>.
       $self->{razor_config} = $1; next;
     }
 
+=item razor_timeout n		(default 10)
+
+How many seconds you wait for razor to complete before you go on without 
+the results
+
+=cut
+
+    if (/^razor[-_]timeout\s*(\d+)\s*$/) {
+      $self->{razor_timeout} = $1; next;
+    }
+
 =item dcc_options options
 
 Specify additional options to the dccproc(8) command. Please note that only
@@ -1004,6 +1157,22 @@ SpamAssassin use, you may want to share this across all users.
 
     if (/^auto[-_]whitelist[-_]path\s*(.*)\s*$/) {
       $self->{auto_whitelist_path} = $1; next;
+    }
+
+=item timelog_path /path/to/dir		(default: NULL)
+
+If you set this value, razor will try to create logfiles for each message I
+processes and dump information on how fast it ran, and in which parts of the
+code the time was spent.
+The files will be named: unixdate_mesgid (i.e 1023257504_chuvn31gdu@4ax.com)
+
+Make sure  SA can write  the log file, if  you're not sure  what permissions
+needed, make the log directory chmod'ed 1777, and adjust later.
+
+=cut
+
+    if (/^timelog[-_]path\s*(.*)\s*$/) {
+      $Mail::SpamAssassin::TIMELOG->{logpath}=$1; next;
     }
 
 =item auto_whitelist_file_mode		(default: 0700)
@@ -1112,6 +1281,8 @@ sub finish_parsing {
     my $text = $self->{tests}->{$name};
 
     if ($type == $type_body_tests) { $self->{body_tests}->{$name} = $text; }
+    elsif ($type == $type_rbl_evals) { $self->{rbl_evals}->{$name} = $text; }
+    elsif ($type == $type_rbl_res_evals) { $self->{rbl_res_evals}->{$name} = $text; }
     elsif ($type == $type_head_tests) { $self->{head_tests}->{$name} = $text; }
     elsif ($type == $type_head_evals) { $self->{head_evals}->{$name} = $text; }
     elsif ($type == $type_body_evals) { $self->{body_evals}->{$name} = $text; }
