@@ -87,17 +87,13 @@ my %makefile = (
     'VERSION_FROM' => 'lib/Mail/SpamAssassin.pm', # finds $VERSION
 
     'EXE_FILES'	=> [
-			'spamassassin', 'sa-learn-spam',
-			'sa-learn-nonspam', 'sa-forget',
-			'sa-learn-rebuild', @SPAMD_EXE_FILES
+			'spamassassin', 'sa-learn',
+			@SPAMD_EXE_FILES
 		],
 
     'MAN1PODS' => { 
 	'spamassassin'    => '$(INST_MAN1DIR)/spamassassin.$(MAN1EXT)',
-	'sa-learn-spam'    => '$(INST_MAN1DIR)/sa-learn-spam.$(MAN1EXT)',
-	'sa-learn-nonspam'    => '$(INST_MAN1DIR)/sa-learn-nonspam.$(MAN1EXT)',
-	'sa-learn-rebuild'    => '$(INST_MAN1DIR)/sa-learn-rebuild.$(MAN1EXT)',
-	'sa-forget'    => '$(INST_MAN1DIR)/sa-forget.$(MAN1EXT)',
+	'sa-learn'        => '$(INST_MAN1DIR)/sa-learn.$(MAN1EXT)',
 	'spamd/spamc.pod' => '$(INST_MAN1DIR)/spamc.$(MAN1EXT)',
 	'spamd/spamd'     => '$(INST_MAN1DIR)/spamd.$(MAN1EXT)',
     },
@@ -130,11 +126,11 @@ my %makefile = (
 	      },
 
     'clean' => { FILES =>
-	'pod2htm* spamassassin sa-forget sa-learn-spam sa-learn-nonspam '.
+	'pod2htm* spamassassin sa-learn '.
 	'spamd/spamc$(EXE_EXT) spamd/libspamc.so spamd/spamd doc '.
 	'spamd/sslspamc$(EXE_EXT) spamd/libsslspamc.so '.
 	'binaries.mk config.h config.status config.cache config.log '.
-	'qmail/qmail-spamc sa-learn-rebuild '
+	'qmail/qmail-spamc '
     },
 
     'AUTHOR' => 'Justin Mason <jm@jmason.org>',
@@ -274,19 +270,7 @@ spamassassin: spamassassin.raw
 	$(PERL) build/preprocessor $(FIXBYTES) $(FIXVARS) $(FIXBANG) -i$? -o$@
 	$(CHMOD) $(PERM_RWX) $@
 
-sa-learn-spam: sa-learn-spam.raw
-	$(PERL) build/preprocessor $(FIXBYTES) $(FIXVARS) $(FIXBANG) -i$? -o$@
-	$(CHMOD) $(PERM_RWX) $@
-
-sa-learn-nonspam: sa-learn-nonspam.raw
-	$(PERL) build/preprocessor $(FIXBYTES) $(FIXVARS) $(FIXBANG) -i$? -o$@
-	$(CHMOD) $(PERM_RWX) $@
-
-sa-learn-rebuild: sa-learn-rebuild.raw
-	$(PERL) build/preprocessor $(FIXBYTES) $(FIXVARS) $(FIXBANG) -i$? -o$@
-	$(CHMOD) $(PERM_RWX) $@
-
-sa-forget: sa-forget.raw
+sa-learn: sa-learn.raw
 	$(PERL) build/preprocessor $(FIXBYTES) $(FIXVARS) $(FIXBANG) -i$? -o$@
 	$(CHMOD) $(PERM_RWX) $@
 

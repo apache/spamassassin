@@ -143,7 +143,7 @@ default locations that SpamAssassin will look at the end.
 	the "bayes_path" and "bayes_file_mode" configuration settings
 	can be used to do this.
 
-	See "perldoc sa-learn-nonspam" for more documentation on how
+	See "perldoc sa-learn" for more documentation on how
 	to train this.
 
 File Locations:
@@ -208,12 +208,11 @@ Learning
 Since SpamAssassin now includes a Bayesian learning filter (in version
 2.50 on), it is worthwhile training SpamAssassin with your collection of
 non-spam and spam, if possible.  This will make it more accurate for your
-incoming mail.  Do this using the "sa-learn-spam" and "sa-learn-nonspam"
-commands, like so:
+incoming mail.  Do this using the "sa-learn" tools, like so:
 
-	sa-learn-spam ~/Mail/saved-spam-folder
-	sa-learn-nonspam ~/Mail/inbox
-	sa-learn-nonspam ~/Mail/other-nonspam-folder
+	sa-learn --spam ~/Mail/saved-spam-folder
+	sa-learn --nonspam ~/Mail/inbox
+	sa-learn --nonspam ~/Mail/other-nonspam-folder
 
 Use as many mailboxes as you like.  Note that SpamAssassin will remember
 what mails it's learnt from, so you can re-run this as often as you like.
