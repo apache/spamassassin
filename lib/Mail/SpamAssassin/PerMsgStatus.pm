@@ -921,13 +921,9 @@ sub get_decoded_stripped_body_text_array {
   $self->{html} = {};
   $self->{html_inside} = {};
   $self->{html}{ratio} = 0;
-  $self->{html}{total_image_area} = 0;
-  $self->{html}{num_imgs}         = 0;
-  $self->{html}{min_img_ratio}    = "inf";
-  $self->{html}{max_img_ratio}    = -1;
-
-  $self->{html}{shouting}         = 0;
-  $self->{html}{max_shouting}     = 0;
+  $self->{html}{image_area} = 0;
+  $self->{html}{shouting} = 0;
+  $self->{html}{max_shouting} = 0;
 
   # do HTML conversions if necessary
   if ($text =~ m/<(?:$re_strict|$re_loose|!--|!doctype)(?:\s|>)/ois) {
@@ -955,11 +951,17 @@ sub get_decoded_stripped_body_text_array {
 	join('', $before, @{$self->{html_text}}));
 
     if ($raw > 0) {
-      my $non_uri_len = 0;
-      for ($before, grep(!/^URI:/, @{$self->{html_text}})) {
-        $non_uri_len += length($_);
+      my $space = ($before =~ tr/ \t\n\r\x0b\xa0/ \t\n\r\x0b\xa0/);
+      $self->{html}{non_uri_len} = length($before);
+      for my $line (@{$self->{html_text}}) {
+	$space += ($line =~ tr/ \t\n\r\x0b\xa0/ \t\n\r\x0b\xa0/);
+	$self->{html}{non_uri_len} += length($line);
+        for my $uri ($line =~ m/\b(URI:\S+)/g) {
+	  $self->{html}{non_uri_len} -= length($uri);
+	}
       }
-      $self->{html}{ratio} = ($raw - $non_uri_len) / $raw;
+      $self->{html}{non_space_len} = $self->{html}{non_uri_len} - $space;
+      $self->{html}{ratio} = ($raw - $self->{html}{non_uri_len}) / $raw;
     } # if ($raw > 0)
     delete $self->{html_last_tag};
   }
@@ -970,16 +972,6 @@ sub get_decoded_stripped_body_text_array {
   $text =~ tr/\f/\n/;			# form feeds => newline
 
   my @textary = split (/^/, $text);
-
-# 2002-12-10 quinlan: this is not needed because URIs already appear
-# in the body and it also slows things down since it will cause
-# get_uri_list() to be called twice on each message instead of once.
-# In addition, it adds the URLs without intermediate whitespace.
-#
-#  # add any URIs we discovered while parsing...
-#  if (!defined $Mail::SpamAssassin::Bayes::TST_INHIBIT_URIS_IN_BODY_TEXT) {
-#  push (@textary, $self->get_uri_list());
-#  }
 
   return \@textary;
 }
