@@ -2503,4 +2503,35 @@ sub check_outlook_timestamp_token {
   return 1;
 }
 
+# Check Content-Type: in message header and all mime parts for text/html.
+# return true if it's a html-only message
+sub check_for_text_html_only {
+  my ($self, $fulltext) = @_;
+
+  my $content_type = $self->get('Content-Type');
+  $content_type = '' unless defined $content_type;
+  return 1 if ( $content_type =~ m@text/html@ ); # true if message is all text/html
+
+  $content_type =~ /\bboundary\s*=\s*["']?(.*?)["']?(?:;|$)/i
+    or return 0; # No message sections to check
+  my $boundary = "\Q$1\E";
+
+  # Grab the whole mime body part
+  my($mimebody) = ($$fulltext =~ /^(--$boundary\n.*
+                                  ^--$boundary--\n)/smx);
+
+  # Check each mime part -- return true if there are only text/html parts
+  if (defined $mimebody) {
+    foreach my $section ( split(/^--${boundary}\n/m, $mimebody) ) {
+      my($header) = split(/\n\s*\n/, $section, 2);
+      next unless defined $header;
+      return 0 unless ( $header =~ m@^Content-Type:.*text/html@i );
+    }
+
+    return 1;
+  }
+
+  return 0;
+}
+
 1;
