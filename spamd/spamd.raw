@@ -133,8 +133,6 @@ $opt_a and eval
     $spamtest->set_persistent_address_list_factory ($addrlistfactory);
 };
 
-$spamtest->compile_now();	# ensure all modules etc. are loaded
-$/ = "\n";			# argh, Razor resets this!  Bad Razor!
 
 sub spawn;  # forward declaration
 sub logmsg; # forward declaration
@@ -157,8 +155,11 @@ socket(Server, PF_INET, SOCK_STREAM, $proto)            || die "socket: $!";
 setsockopt(Server,SOL_SOCKET,SO_REUSEADDR,pack("l",1))  || die "setsockopt: $!";
 bind(Server, sockaddr_in($port, $addr))                 || die "bind: $!";
 listen(Server,SOMAXCONN)                                || die "listen: $!";
-
-$opt_d and daemonize();
+if ($opt_D) {
+    warn "server started on port $port\n";
+    warn "server pid: $$\n";
+}
+logmsg "server started on port $port";
 
 # support non-root use (after we bind to the port)
 my $setuid_to_user = 0;
@@ -177,11 +178,10 @@ if ($opt_u) {
     $setuid_to_user = 1;
 }
 
-if ($opt_D) {
-    warn "server started on port $port\n";
-    warn "server pid: $$\n";
-}
-logmsg "server started on port $port";
+$spamtest->compile_now();	# ensure all modules etc. are loaded
+$/ = "\n";			# argh, Razor resets this!  Bad Razor!
+
+$opt_d and daemonize();
 
 my $waitedpid = 0;
 my $current_user;
