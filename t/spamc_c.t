@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamc_c");
-use Test; BEGIN { plan tests => 7 };
+use Test; BEGIN { plan tests => 2 };
 
 # ---------------------------------------------------------------------------
 
