@@ -181,7 +181,7 @@ sub razor2_lookup {
       if ($rc) {
         my %opt = (
 		   debug      => ($Mail::SpamAssassin::DEBUG &&
-				  $Mail::SpamAssassin::facilities->{razor}), 
+				  $Mail::SpamAssassin::facilities{razor2}), 
 		   foreground => 1,
 		   config     => $self->{main}->{conf}->{razor_config}
         );
