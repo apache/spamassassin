@@ -38,16 +38,16 @@ header RCVD_IN_OSIRU_RELAY	rbleval:check_rbl_sub('osirusoft', '127.0.0.2')
 describe RCVD_IN_OSIRU_RELAY	OSIRU: sender is Confirmed Open Relay
 tflags RCVD_IN_OSIRU_RELAY	net
 
-header RCVD_IN_OSIRU_DUL	rbleval:check_rbl('osirusoft-notfirsthop', 'relays.osirusoft.com.', '127.0.0.3')
-describe RCVD_IN_OSIRU_DUL	OSIRU: sender ip address in in a dialup block
-tflags RCVD_IN_OSIRU_DUL	net
+header RCVD_IN_OSIRU_DIALUP	rbleval:check_rbl('osirusoft-notfirsthop', 'relays.osirusoft.com.', '127.0.0.3')
+describe RCVD_IN_OSIRU_DIALUP	OSIRU: sender is dial-up IP address
+tflags RCVD_IN_OSIRU_DIALUP	net
 
 header RCVD_IN_OSIRU_SPAM_SRC	rbleval:check_rbl_sub('osirusoft', '127.0.0.4')
 describe RCVD_IN_OSIRU_SPAM_SRC	OSIRU: sender is Confirmed Spam Source
 tflags RCVD_IN_OSIRU_SPAM_SRC	net
 
 header RCVD_IN_OSIRU_SPAMWARE	rbleval:check_rbl_sub('osirusoft', '127.0.0.6')
-describe RCVD_IN_OSIRU_SPAMWARE	OSIRU: sender is a Spamware site or vendor
+describe RCVD_IN_OSIRU_SPAMWARE	OSIRU: sender is Spamware site or vendor
 tflags RCVD_IN_OSIRU_SPAMWARE	net
 
 header RCVD_IN_OSIRU_PROXY	rbleval:check_rbl_sub('osirusoft', '127.0.0.9')
@@ -208,7 +208,7 @@ tflags RCVD_IN_BONDEDSENDER	net nice
 # DynaBlocker: block SMTP connections from dynamic dial-up IP ranges.
 # URL: http://basic.wirehub.nl/dynablocker.html
 header RCVD_IN_DYNABLOCK	rbleval:check_rbl_txt('dynablock-notfirsthop', 'dynablock.easynet.nl.')
-describe RCVD_IN_DYNABLOCK	Sent from dynamic IP address to remote relay
+describe RCVD_IN_DYNABLOCK	Sent directly from dynamic IP address
 tflags RCVD_IN_DYNABLOCK	net
 
 # ---------------------------------------------------------------------------
