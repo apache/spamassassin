@@ -2437,15 +2437,30 @@ sub _handle_hit {
     }
 
     # save both summaries
+    # TODO: this is slower than necessary, if we only need one
     $self->{tag_data}->{REPORT} .= sprintf ("* %s %s %s%s\n%s",
-                                       $score, $rule, $area, $desc,
-                                       ($self->{test_log_msgs}->{TERSE} ?
-                                        "*      " . $self->{test_log_msgs}->{TERSE} : '')
-                                   );
+              $score, $rule, $area,
+              $self->_wrap_desc($desc,
+                  4+length($rule)+length($score)+length($area), "*      "),
+              ($self->{test_log_msgs}->{TERSE} ?
+              "*      " . $self->{test_log_msgs}->{TERSE} : ''));
+
     $self->{tag_data}->{SUMMARY} .= sprintf ("%s %-22s %s%s\n%s",
-                                       $score, $rule, $area, $desc,
-                                       ($self->{test_log_msgs}->{LONG} || ''));
+              $score, $rule, $area,
+              $self->_wrap_desc($desc,
+                  3+length($rule)+length($score)+length($area), " " x 28),
+              ($self->{test_log_msgs}->{LONG} || ''));
+
     $self->{test_log_msgs} = ();        # clear test logs
+}
+
+sub _wrap_desc {
+  my ($self, $desc, $firstlinelength, $prefix) = @_;
+
+  my $firstline = " " x $firstlinelength;
+  my $wrapped = Mail::SpamAssassin::Util::wrap($desc, $prefix, $firstline, 75, 0);
+  $wrapped =~ s/^ +//;
+  $wrapped;
 }
 
 sub handle_hit {

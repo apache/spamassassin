@@ -491,10 +491,6 @@ sub lint_check {
   {
     # Check for description and score issues in lint fashion
     while ( ($k,$v) = each %{$conf->{descriptions}} ) {
-      if (length($v) > 50) {
-        warn "config: warning: description for $k is over 50 chars\n";
-        $conf->{errors}++;
-      }
       if (!exists $conf->{tests}->{$k}) {
         warn "config: warning: description exists for non-existent rule $k\n";
         $conf->{errors}++;
@@ -522,8 +518,8 @@ sub set_default_scores {
 
   while ( ($k,$v) = each %{$conf->{tests}} ) {
     if ($conf->{lint_rules}) {
-      if (length($k) > 22 && $k !~ /^__/ && $k !~ /^T_/) {
-        warn "config: warning: rule '$k' is over 22 chars\n";
+      if (length($k) > 50 && $k !~ /^__/ && $k !~ /^T_/) {
+        warn "config: warning: rule name '$k' is over 50 chars\n";
         $conf->{errors}++;
       }
     }
