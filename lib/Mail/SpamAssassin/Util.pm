@@ -892,7 +892,7 @@ sub uri_list_canonify {
       }
     }
 
-    ($nuri) = Mail::SpamAssassin::Util::url_encode($nuri);
+    $nuri = Mail::SpamAssassin::Util::url_encode($nuri);
     if ($nuri ne $uri) {
       push(@nuris, $nuri);
     }
