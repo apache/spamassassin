@@ -80,6 +80,8 @@ sub sa_t_init {
 
   (-f "t/test_dir") && chdir("t");        # run from ..
 
+  read_config();
+
   $NO_SPAMC_EXE = ($RUNNING_ON_WINDOWS &&
                    !$ENV{'SPAMC_SCRIPT'} &&
                    !(-e "../spamc/spamc.exe"));
@@ -598,6 +600,43 @@ sub skip_all_patterns {
 sub clear_pattern_counters {
   %found = ();
   %found_anti = ();
+}
+
+sub read_config {
+  return if defined($already_read_config);
+  $already_read_config = 1;
+
+  # allow reading config from top-level dir, outside the test suite;
+  # this is so read_config() will work even when called from
+  # a "use constant" line at compile time.
+  my $prefix = '';
+  if (-f 't/test_dir') { $prefix = "t/"; }
+
+  if (!open (CF, "<${prefix}config")) {
+    if (!open (CF, "<${prefix}config.dist")) {   # fall back to defaults
+      die "cannot open test suite configuration file 'config.dist'";
+    }
+  }
+
+  while (<CF>) {
+    s/#.*$//; s/^\s+//; s/\s+$//; next if /^$/;
+    /^([^=]+)=(.*)$/ or next;
+    $conf{$1} = $2;
+  }
+  close CF;
+}
+
+sub conf {
+  read_config();
+  return $conf{$_[0]};
+}
+
+sub conf_bool {
+  my $val = conf($_[0]);
+  return 0 unless defined($val);
+  return 1 if ($val =~ /^y/i);              # y, YES, yes, etc.
+  return ($val+0) if ($val =~ /^\d/);       # 1
+  return 0;                                 # n or 0
 }
 
 1;

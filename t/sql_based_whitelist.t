@@ -18,11 +18,17 @@ exit unless TEST_ENABLED;
 
 sa_t_init("sql_based_whitelist");
 
-open(CONFIG,"<sql_based_whitelist.cf");
-while (my $line = <CONFIG>) {
-  $dbconfig .= $line;
+my $dbconfig = '';
+foreach my $setting (qw(
+                  user_awl_dsn
+                  user_awl_sql_username
+                  user_awl_sql_password
+                  user_awl_sql_table
+                ))
+{
+  my $val = conf($setting);
+  $dbconfig .= "$setting $val\n" if $val;
 }
-close(CONFIG);
 
 my $testuser = 'tstusr.'.$$.'.'.time();
 

@@ -11,6 +11,7 @@ use Test;
 
 # require pkill and pgrep be installed to run this test
 BEGIN {
+  $RUN_THIS_TEST = conf_bool('run_spamd_prefork_stress_test');
   (-x "/usr/bin/pkill") or $RUN_THIS_TEST = 0;
   (-x "/usr/bin/pgrep") or $RUN_THIS_TEST = 0;
   plan tests => ($SKIP_SPAMD_TESTS || !$RUN_THIS_TEST ? 0 : 14) 

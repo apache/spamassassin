@@ -26,28 +26,21 @@ BEGIN {
 
 exit unless TEST_ENABLED;
 
-my $dbconfig;
-my $dbdsn;
-my $dbusername;
-my $dbpassword;
+my $dbdsn = conf('bayes_sql_dsn');
+my $dbusername = conf('bayes_sql_username');
+my $dbpassword = conf('bayes_sql_password');
 
-open(CONFIG,"<bayessql.cf");
-while (my $line = <CONFIG>) {
-  $dbconfig .= $line;
-  if ($line =~ /^bayes_sql_dsn (.*)/) {
-    $dbdsn = $1;
-    chomp($dbdsn);
-  }
-  elsif ($line =~ /^bayes_sql_username (.*)/) {
-    $dbusername = $1;
-    chomp($dbusername);
-  }
-  elsif ($line =~ /^bayes_sql_password (.*)/) {
-    $dbpassword = $1;
-    chomp($dbpassword);
-  }
+my $dbconfig = '';
+foreach my $setting (qw(
+                  bayes_store_module
+                  bayes_sql_dsn
+                  bayes_sql_username
+                  bayes_sql_password
+                ))
+{
+  $val = conf($setting);
+  $dbconfig .= "$setting $val\n" if $val;
 }
-close(CONFIG);
 
 my $testuser = 'tstusr.'.$$.'.'.time();
 

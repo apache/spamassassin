@@ -4,7 +4,7 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("spf");
 use Test;
 
-use constant TEST_ENABLED => (-e 't/do_net');
+use constant TEST_ENABLED => conf_bool('run_net_tests');
 use constant HAS_SPFQUERY => eval { require Mail::SPF::Query; };
 # Do not run this test on non-Linux unices as root, due to a bug
 # in Sys::Hostname::Long (which Mail::Query::SPF uses.)

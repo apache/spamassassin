@@ -3,7 +3,7 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("razor2");
 
-use constant TEST_ENABLED => (-e 't/do_net');
+use constant TEST_ENABLED => conf_bool('run_net_tests');
 use constant HAS_RAZOR2 => eval { require Razor2::Client::Agent; };
 
 use Test;
