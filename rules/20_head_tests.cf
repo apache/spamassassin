@@ -27,6 +27,12 @@ require_version @@VERSION@@
 header HEAD_LONG		eval:check_for_long_header()
 describe HEAD_LONG		Message headers are very long
 
+# partial messages; currently-theoretical attack
+# unsurprisingly this hits 0/0 right now.  But should we promote it anyway
+# to protect against the possibility?
+header FRAGMENTED_MESSAGE	Content-Type =~ /\bmessage\/partial/i
+describe FRAGMENTED_MESSAGE	Partial message
+
 header MISSING_HB_SEP		eval:check_for_missing_hb_separator()
 describe MISSING_HB_SEP		Missing blank line between message header and body
 
