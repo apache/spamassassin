@@ -70,26 +70,6 @@ terse-report ---- End of SpamAssassin results
 #user_scores_sql_password	spamfilter
 
 ###########################################################################
-# Default whitelists.  These should be addresses which send mail that
-# is often tagged (incorrectly) as spam; it also helps that they be
-# addresses of big companies with lots of lawyers, so if spammers
-# impersonate them, they'll get into big trouble, so it doesn't provide
-# a shortcut around SpamAssassin.
-#
-# Whitelist and blacklist addresses are now file-glob-style patterns, so
-# "friend@somewhere.com", "*@isp.com", or "*.domain.net" will all work.
-
-whitelist_from	billing@networksolutions.com
-whitelist_from  *fatbrain.com
-whitelist_from  *amazon.com
-whitelist_from  *amazon.co.uk
-whitelist_from  *ebay.com
-whitelist_from	*ora.com		# O'Reilly
-whitelist_from  *@walmart.com
-whitelist_from  *@bn.com
-whitelist_from  *@yahoo-inc.com
-
-###########################################################################
 # Automatic-whitelist directory, for the default directory-based whitelist
 # backend.  By default, each user has their own, in their ~/.spamassassin
 # directory with mode 0700, but for system-wide SpamAssassin use, you may
