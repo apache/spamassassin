@@ -24,10 +24,13 @@
 
 my $killfile_message_ids = qr{(?:
     <\d\d\d\d\S+\@dev\.lifetimetv\.com>
+    |<\d+\.\S+\@fmail..\.real-net\.net>
 )}x;
 
 my $killfile_receiveds = qr{(?:
     from\s\S+\s\S+\sby\s(?:anclsmtp\d\d|myfamlsmtp\d\d)\.myfamily\.com
+    |for :include:\S+/MapQuest/
+    |from bounce.winxpnews.com
 )}x;
 
 ###########################################################################

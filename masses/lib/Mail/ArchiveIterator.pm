@@ -214,6 +214,7 @@ sub mass_check_mailbox {
     # switch to a fork-based model to save RAM
     if ($self->{opt_fork} && fork()) { wait; next; }
 
+    $msgid ||= "(undef)";
     $msgid = "$folder:$msgid";	# so we can find it again
     $msgid =~ s/\s/_/gs;	# make safe
 
