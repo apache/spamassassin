@@ -92,6 +92,10 @@ sub check_for_from_to_equivalence {
 
 sub check_for_forged_hotmail_received_headers {
   my ($self) = @_;
+
+  my $to = $self->get ('To:addr');
+  if ($to !~ /hotmail.com/) { return 0; }
+
   my $rcvd = $self->get ('Received');
 
   # Hotmail formats its received headers like this:
@@ -112,6 +116,10 @@ sub check_for_forged_hotmail_received_headers {
 
 sub check_for_forged_yahoo_received_headers {
   my ($self) = @_;
+
+  my $to = $self->get ('To:addr');
+  if ($to !~ /yahoo.com/) { return 0; }
+
   my $rcvd = $self->get ('Received');
 
   # Hotmail formats its received headers like this:
@@ -366,6 +374,7 @@ sub word_is_in_dictionary {
   return 0 if ($word =~ /[^a-z]/);
 
   # handle a few common "blah blah blah (comment)" styles
+  return 1 if ($word =~ /^(?:ot|off.?topic)$/);	# off-topic
   return 1 if ($word =~ /ing$/);	# amusing
   return 1 if ($word =~ /nny$/);	# funny
 
