@@ -1,7 +1,6 @@
 #!/usr/bin/perl -w
 
 use Getopt::Std;
-use Config;
 
 use FindBin;
 
@@ -48,28 +47,10 @@ BEGIN {
 use lib 'lib';
 use lib '../lib';		# for testing in ./t
 
-@default_rules_path = qw(
-	./spamassassin.cf
-	../spamassassin.cf
-	/etc/spamassassin.cf
-	__installsitelib__/spamassassin.cf
-);
-
-@default_prefs_path = qw(
-	/etc/spamassassin.prefs
-	__installsitelib__/spamassassin.prefs
-);
-
-@default_userprefs_path = qw(
-	./spamassassin.prefs
-	../spamassassin.prefs
-	~/.spamassassin.cf
-);
-
 sub usage {
   my $ver = Mail::SpamAssassin::Version();
-  my $rules = join ("\n\t\t\t\t", @default_rules_path);
-  my $prefs = join ("\n\t\t\t\t", @default_userprefs_path);
+  my $rules = join ("\n\t\t\t\t", @Mail::SpamAssassin::default_rules_path);
+  my $prefs = join ("\n\t\t\t\t", @Mail::SpamAssassin::default_userprefs_path);
   die <<EOUSAGE;
 
 Usage: spamassassin [option ...] < mailmessage
@@ -134,29 +115,8 @@ my $mail = Mail::Audit->new();
 # You can then use the rewrite() method (passing in the Mail::Audit object) to
 # rewrite the spam.
 #
-# (This implementation does other stuff though, such as -t support, and setting
-# up the user's rules files if they don't exist; ignore that stuff.)
-
-if (!defined $opt_c) {
-  $opt_c = first_existing_path (@default_rules_path);
-}
-
-if (!defined $opt_p) {
-  $opt_p = first_existing_path (@default_userprefs_path);
-
-  if (!-f $opt_p) {
-    # copy in the default one for later editing
-
-    my $defprefs = first_existing_path (@default_prefs_path);
-    use File::Copy;
-    if (copy ($defprefs, $opt_p)) {
-      warn "Created user preferences file: $opt_p\n";
-    } else {
-      warn "Failed to create user preferences file\n".
-      		"\"$opt_p\" from default \"$defprefs\".\n";
-    }
-  }
-}
+# (This implementation does other stuff though, such as -t support; ignore that
+# stuff.)
 
 # finally, now that we've found the configuration, start testing the message...
 my $spamtest = new Mail::SpamAssassin ({
@@ -213,29 +173,12 @@ my $where = $ENV{'MAIL'} || $ENV{'DEFAULT'} || undef;
 $mail->accept($where);
 exit;
 
-# ---------------------------------------------------------------------------
 
-sub expand_name ($) {
-  my $name = shift;
-  return (getpwnam($name))[7] if ($name ne '');
-  return $ENV{HOME} if defined $ENV{HOME};
-  return (getpwuid($>))[7];
-}
 
-sub sed_path {
-  my $path = shift;
-  $path =~ s/__installsitelib__/$Config{installsitelib}/gs;
-  $path =~ s/^\~([^\/]*)/&expand_name($1)/es;
-  $path;
-}
-
-sub first_existing_path {
-  my $path;
-  foreach my $p (@_) { 
-    $path = sed_path ($p);
-    if (-e $path) { return $path; }
-  }
-  $path;
+# this is never called, it's just used to shut up the warnings
+sub NEVERCALLED {
+  @Mail::SpamAssassin::default_rules_path =
+  			@Mail::SpamAssassin::default_userprefs_path;
 }
 
 # ---------------------------------------------------------------------------

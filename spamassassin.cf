@@ -312,4 +312,157 @@ describe USER_IN_WHITELIST	From: address is in the user's white-list
 full SIRCAM_SIGNATURE		/Content-Disposition: attachment;\s+filename=..+\.\S\S\S\.(bat|com|lnk|pif)./s
 describe SIRCAM_SIGNATURE	SECURITY: message contains the Sircam worm
 
+###########################################################################
+# Default scores: for header tests.  Note that if a test is named above,
+# but a score is not assigned here, the default score will be set to 1.
+
+# From: does not include a real name. (This gets *huge* hits.)
+#
+score NO_REAL_NAME		1
+
+# From: ends in numbers. Can also hit AOL/Yahoo/MSN etc., so this
+# is weighted quite low.
+#
+score FROM_ENDS_IN_NUMS		1
+
+# "What an incredible offer!!" yeah right.
+#
+score PLING_PLING		1
+
+# Another very-high-hit-rate rule; subject ends in a unique ID.
+#
+score SUBJ_HAS_UNIQ_ID		3
+
+# To "Undisclosed.Recipients" or similar.
+#
+score UNDISC_RECIPS		2
+
+# Subject is all capitals.
+#
+score SUBJ_ALL_CAPS		1
+
+# Message-Id has no @ sign
+#
+score MSGID_HAS_NO_AT		1
+
+# Invalid Date: header
+score INVALID_DATE		2
+
+# Subject: ends in a question mark
+score SUBJ_HAS_Q_MARK		1
+
+# Subject: contains advertising tag, "ADV:" etc (unlikely, but still...)
+score ADVERT_CODE		3
+
+# sent to you@you.com or similar
+score FRIEND_AT_PUBLIC		2
+
+# To: or Reply-To: is empty
+score TO_EMPTY			3
+score REPLY_TO_EMPTY		3
+
+# No MX records for the domain in the From: address. Set this low,
+# as it's also used as a common anti-spam tactic.
+score NO_MX_FOR_FROM		1
+
+# Received via a set of known-spam-harbouring dialups.
+score KNOWN_BAD_DIALUPS		2
+
+# From: and To: the same address
+score FROM_AND_TO_SAME		1
+
+# Headers contain a warning from the MTA which received the first
+# mail, indicating a fake name was used in the SMTP HELO command.
+# Usually quite a good sign of spam.
+score BAD_HELO_WARNING		4
+
+# Subject: contains many 8-bit chars.  If you normally expect
+# to receive mails in non-ISO-Latin-1 charsets, set this to 0!
+score SUBJ_FULL_OF_8BITS	5
+
+# Received via a relay listed in the RBL (see maps.vix.com/rbl)
+score RCVD_IN_RBL		10
+
+# Received via a relay listed in relays.orbs.org
+score RCVD_IN_RELAYS_ORBS_ORG	1
+
+# Received via a relay listed in http://www.mail-abuse.org/rss/
+score RCVD_IN_RSS		1
+
+# Received via a dialup IP address listed in http://www.mail-abuse.org/dul/
+score RCVD_IN_DUL		1
+
+# found an X-Em-Version: header, used by spamware vendor to track their
+# "customers" (spam spyware)
+score X_EM_VER_PRESENT		5
+
+# may-be-forged Received: header found in the headers.
+score FORGED_RCVD_FOUND		1
+
+# From: address claims to be sent from hotmail.com, but does not use
+# their formatting
+score FROM_FORGED_HOTMAIL	2
+
+# spam-tool gibberish in the X-Mailer line
+score X_MAILER_GIBBERISH	4
+
+###########################################################################
+
+score RAZOR_CHECK		4
+
+###########################################################################
+# Default scores for body tests.  Most of these are not listed, using the
+# default value of 1.
+
+score REMOVE_SUBJ		4
+score SUBJ_REMOVE		4
+score MAILTO_WITH_SUBJ_REMOVE	4
+score MAILTO_WITH_SUBJ		3
+score JAVASCRIPT		2
+score REALLY_UNSAFE_JAVASCRIPT	8
+score SLIGHTLY_UNSAFE_JAVASCRIPT 1
+score CLICK_HERE_LINK		3
+score SPAM_FORM			3
+score SPAM_FORM_RETURN		3
+score SPAM_FORM_INPUT		3
+score SENT_IN_COMPLIANCE	5	
+score PARA_A_2_C_OF_1618	4
+score BILL_1618			4
+score S_1618			4
+score SECTION_301		3
+score NUMERIC_HTTP_ADDR		3
+score TRACKER_ID		3
+score POPLAUNCH			4
+
+score ONLINE_BIZ_OPS		2
+score INTL_EXEC_GUILD		3
+score ANOTHER_NET_AD		3
+score LASER_PRINTER		3
+score DIGITAL_FX1		3
+score OFFICE_OF_MD		3
+score BRAND_NEW_PAGER		3
+
+score EXCUSE_1			2
+score EXCUSE_2			2
+score EXCUSE_7			2
+score EXCUSE_8			2
+score EXCUSE_9			2
+score GREEN_EXCUSE_1		3
+score GREEN_EXCUSE_2		3
+
+score FILTERED_BY_WORLDREMOVE	3
+
+score WEB_BUGS			5
+
+###########################################################################
+# Compensation for common false positives.
+
+score BALANCE_FOR_LONG		-2
+score USER_IN_WHITELIST		-5
+
+###########################################################################
+# Some not-quite-spam scores; block common virii with these.  (it's feature
+# creep, but it's easy to implement ;)
+
+score SIRCAM_SIGNATURE		10
 
