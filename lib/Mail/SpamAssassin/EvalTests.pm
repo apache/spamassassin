@@ -1174,18 +1174,6 @@ sub check_obfuscated_words {
 }
 
 sub check_unique_words {
-  my ($self, $body, $total, $ratio) = @_;
-
-  if (!defined $self->{unique_words_repeat}) {
-    $self->_check_unique_words($body);
-  }
-  my $unique = $self->{unique_words_unique};
-  my $repeat = $self->{unique_words_repeat};
-  return ((($unique + $repeat) > $total) &&
-	  ($unique / ($unique + $repeat) > $ratio));
-}
-
-sub many_unique_words {
   my ($self, $body, $m, $b) = @_;
 
   if (!defined $self->{unique_words_repeat}) {
