@@ -9,9 +9,9 @@
 # Public License as published by the Free Software Foundation; either
 # version 2 of the License, or (at your option) any later version.
 
-use vars qw($opt_a $opt_c $opt_d $opt_h $opt_p $opt_r);
+use vars qw($opt_a $opt_b $opt_c $opt_d $opt_h $opt_p $opt_r);
 use Getopt::Std;
-getopts("acdhpr");
+getopts("abcdhpr");
 
 my $prog = $0;
 $prog =~ s@.*/@@;
@@ -25,6 +25,7 @@ usage: $prog [options] [first input] [second input]
        $prog [options] [first input] [second input] [scores file]
 
  -a    show all elements (only used for -d)
+ -b    show both count and percentage
  -c    remove comments from inputs
  -d    print delta of frequencies (second - first)
  -h    print this help
@@ -90,11 +91,12 @@ foreach my $elem (@all) {
 	$out{$elem} = $two - $one;
     }
     else {
+	$count{$elem} = $two + $one if $opt_b;
 	$out{$elem} = $one / ($one + $two) * 100.0;
     }
 }
 
-foreach my $elem (sort { $out{$b} <=> $out{$a} || $a cmp $b } keys %out) {
+foreach my $elem (sort { $out{$b} <=> $out{$a} || ((defined %count) && ($count{$b} <=> $count{$a})) || $a cmp $b } keys %out) {
     my $name = $elem;
     if (%score) {
 	if (exists($score{$elem})) {
@@ -111,7 +113,12 @@ foreach my $elem (sort { $out{$b} <=> $out{$a} || $a cmp $b } keys %out) {
 	print "$out{$elem}\t$name\n" if ($out{$elem} || $opt_a);
     }
     else {
-	printf "%.2f\t%s\n", $out{$elem}, $name;
+	if ($opt_b) {
+	    printf "%.2f\t%d\t%s\n", $out{$elem}, $count{$elem}, $name;
+	}
+	else {
+	    printf "%.2f\t%s\n", $out{$elem}, $name;
+	}
     }
 }
 
@@ -165,7 +172,7 @@ sub read_argv {
 	    $freq{$key} = $line - $freq{$key} + 1;
 	}
 	if ($opt_r) {
-	    $freq{$key} = $freq{$key} / $line;
+	    $freq{$key} /= $line;
 	}
     }
     $line[$input] = $line;
