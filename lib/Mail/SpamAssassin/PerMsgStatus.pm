@@ -50,7 +50,7 @@ use constant HAS_MIME_BASE64 =>		eval { require MIME::Base64; };
 use constant MAX_BODY_LINE_LENGTH =>	2048;
 
 use vars qw{
-  @ISA $base64alphabet %tags
+  @ISA $base64alphabet
 };
 
 @ISA = qw();
@@ -764,85 +764,75 @@ sub _replace_tags {
   return $text;
 }
 
-# references to sub (this is kinda ugly.. but elegant?)
-# tags can also refer to data in the $self->{tag_data} hash
-
-%tags = ( YESNOCAPS => sub { my $self = shift; $self->{is_spam} ? "YES" : "NO"; },
-
-	  YESNO => sub { my $self = shift; $self->{is_spam} ? "Yes" : "No"; },
-
-	  HITS => sub { my $self = shift; sprintf ("%2.1f", $self->{hits}); },
-
-	  REQD => sub { my $self = shift; sprintf ("%2.1f", $self->{conf}->{required_hits}); },
-
-	  VERSION => sub { return Mail::SpamAssassin::Version()},
-
-	  SUBVERSION => sub { $Mail::SpamAssassin::SUB_VERSION },
-
-	  HOSTNAME => sub { hostname() },
-
-	  CONTACTADDRESS => sub { my $self = shift; $self->{conf}->{report_contact}; },
-
-	  BAYES => sub {
-	    my $self = shift;
-	    $self->{bayes_score} ? sprintf("%3.4f", $self->{bayes_score}) : "0.5"
-	  },
-
-	  DATE => sub {
-	    my $self = shift;
-	    strftime("%a, %d %b %Y %H:%M:%S ", localtime)
-	      . Mail::SpamAssassin::Util::local_tz();
-	  },
-
-	  STARS => sub {
-	    my $self = shift;
-	    my $arg = (shift || "*");
-	    my $length = int($self->{hits});
-	    $length = 100 if $length > 100;
-	    return $arg x $length;
-	  },
-
-	  AUTOLEARN => sub {
-	    my $self = shift;
-	    return "no" if !defined $self->{auto_learn_status};
-	    return "spam" if $self->{auto_learn_status};
-	    return "ham";
-	  },
-
-	  TESTS => sub {
-	    my $self = shift;
-	    my $arg = (shift || ',');
-	    return (join($arg, sort(@{$self->{test_names_hit}})) || "none");
-	  },
-
-	  TESTSSCORES => sub {
-	    my $self = shift;
-	    my $arg = (shift || ",");
-	    my $line = '';
-	    foreach my $test (sort @{$self->{test_names_hit}}) {
-	      if (!$line) {
-		$line .= $test . "=" . $self->{conf}->{scores}->{$test};
-	      } else {
-		$line .= $arg . $test . "=" . $self->{conf}->{scores}->{$test};
-	      }
-	    }
-	    return $line;
-	  },
-
-	  PREVIEW => sub { my $self = shift; $self->get_content_preview() },
-
-	);
-
 sub _get_tag {
   my $self = shift;
   my $tag = shift;
+  my %tags;
+
+  # tag data also comes from $self->{tag_data}->{TAG}
+
+  %tags = ( YESNOCAPS => sub { $self->{is_spam} ? "YES" : "NO"; },
+
+	    YESNO => sub { $self->{is_spam} ? "Yes" : "No"; },
+
+	    HITS => sub { sprintf ("%2.1f", $self->{hits}); },
+
+	    REQD => sub { sprintf ("%2.1f", $self->{conf}->{required_hits}); },
+
+	    VERSION => sub { return Mail::SpamAssassin::Version()},
+
+	    SUBVERSION => sub { $Mail::SpamAssassin::SUB_VERSION },
+
+	    HOSTNAME => sub { hostname() },
+
+	    CONTACTADDRESS => sub { $self->{conf}->{report_contact}; },
+
+	    BAYES => sub {
+	      $self->{bayes_score} ? sprintf("%3.4f", $self->{bayes_score}) : "0.5"
+	    },
+
+	    DATE => sub {
+	      strftime("%a, %d %b %Y %H:%M:%S ", localtime)
+		. Mail::SpamAssassin::Util::local_tz();
+	    },
+
+	    STARS => sub {
+	      my $arg = (shift || "*");
+	      my $length = int($self->{hits});
+	      $length = 100 if $length > 100;
+	      return $arg x $length;
+	    },
+
+	    AUTOLEARN => sub {
+	      return "no" if !defined $self->{auto_learn_status};
+	      return "spam" if $self->{auto_learn_status};
+	      return "ham";
+	    },
+
+	    TESTS => sub {
+	      my $arg = (shift || ',');
+	      return (join($arg, sort(@{$self->{test_names_hit}})) || "none");
+	    },
+
+	    TESTSSCORES => sub {
+	      my $arg = (shift || ",");
+	      my $line = '';
+	      foreach my $test (sort @{$self->{test_names_hit}}) {
+		if (!$line) {
+		  $line .= $test . "=" . $self->{conf}->{scores}->{$test};
+		} else {
+		  $line .= $arg . $test . "=" . $self->{conf}->{scores}->{$test};
+		}
+	      }
+	      return $line;
+	    },
+
+	    PREVIEW => sub { $self->get_content_preview() },
+
+	  );
 
   if (exists $tags{$tag}) {
-    if (@_) {
-      return $tags{$tag}($self, @_);
-    } else {
-      return $tags{$tag}($self);
-    }
+      return $tags{$tag}(@_);
   } elsif ($self->{tag_data}->{$tag}) {
     return $self->{tag_data}->{$tag};
   } else {
