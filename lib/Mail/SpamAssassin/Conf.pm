@@ -811,7 +811,7 @@ If C<factor> = 0.3, then we'll move about 1/3 of the way from the score toward t
 C<factor> = 1 means just use the long-term mean; C<factor> = 0 mean just use the calculated score.
 
 =cut
-    if (/^auto[-_]whitelist[-_]factor\s*(.*)$/) {
+    if (/^auto[-_]whitelist[-_]factor\s+(.*)$/) {
       $self->{auto_whitelist_factor} = $1; next;
     }
 
@@ -886,7 +886,7 @@ SpamAssassin:
 
 =cut
 
-    if (/^report\b\s*(.*)$/) {
+    if (/^report(?:\s+(.*))?$/) {
       $self->{report_template} .= $1."\n"; next;
     }
 
@@ -908,7 +908,7 @@ C</usr/share/spamassassin> for an example.
 
 =cut
 
-    if (/^terse[-_]report\b\s*(.*)$/) {
+    if (/^terse[-_]report(?:\s+(.*))?$/) {
       $self->{terse_report_template} .= $1."\n"; next;
     }
 
@@ -931,7 +931,7 @@ C</usr/share/spamassassin> for an example.
 
 =cut
 
-    if (/^spamtrap\s*(.*?)$/) {
+    if (/^spamtrap(?:\s+(.*))?$/) {
       $self->{spamtrap_template} .= $1."\n"; next;
     }
 
@@ -963,15 +963,15 @@ The default is 999999 for all these options.
 
 =cut
 
-    if (/^dcc_body_max\s+(\d+)/) {
+    if (/^dcc[-_]body[-_]max\s+(\d+)/) {
       $self->{dcc_body_max} = $1+0; next;
     }
 
-    if (/^dcc_fuz1_max\s+(\d+)/) {
+    if (/^dcc[-_]fuz1[-_]max\s+(\d+)/) {
       $self->{dcc_fuz1_max} = $1+0; next;
     }
 
-    if (/^dcc_fuz2_max\s+(\d+)/) {
+    if (/^dcc[-_]fuz2[-_]max\s+(\d+)/) {
       $self->{dcc_fuz2_max} = $1+0; next;
     }
 
@@ -985,7 +985,7 @@ The default is to not add the header.
 
 =cut
 
-    if (/^dcc_add_header\s+(\d+)$/) {
+    if (/^dcc[-_]add[-_]header\s+(\d+)$/) {
       $self->{dcc_add_header} = $1+0; next;
     }
 
@@ -996,7 +996,7 @@ the results
 
 =cut
 
-    if (/^dcc[-_]timeout\s*(\d+)$/) {
+    if (/^dcc[-_]timeout\s+(\d+)$/) {
       $self->{dcc_timeout} = $1+0; next;
     }
 
@@ -1036,7 +1036,7 @@ the results
 
 =cut
 
-    if (/^pyzor[-_]timeout\s*(\d+)$/) {
+    if (/^pyzor[-_]timeout\s+(\d+)$/) {
       $self->{pyzor_timeout} = $1+0; next;
     }
 
@@ -1048,7 +1048,7 @@ the results
 
 =cut
 
-    if (/^razor[-_]timeout\s*(\d+)$/) {
+    if (/^razor[-_]timeout\s+(\d+)$/) {
       $self->{razor_timeout} = $1; next;
     }
 
@@ -1178,7 +1178,7 @@ score Z_FUDGE_DUL_OSIRU_FH	1.5
 
 =cut
 
-    if (/^dialup_codes\s+(.*)$/) {
+    if (/^dialup[-_]codes\s+(.*)$/) {
 	$self->{dialup_codes} = eval $1;
 	next;
     }
@@ -1403,7 +1403,7 @@ Currently this is the same value Razor itself uses: C<~/razor.conf>.
 
 =cut
 
-    if (/^razor[-_]config\s*(.*)$/) {
+    if (/^razor[-_]config\s+(.*)$/) {
       $self->{razor_config} = $1; next;
     }
 
