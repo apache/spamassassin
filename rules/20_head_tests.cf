@@ -132,6 +132,15 @@ describe MSGID_OUTLOOK_INVALID	Message-Id is fake (in Outlook Express format)
 meta MSGID_DOLLARS		(__OUTLOOK_DOLLARS_MSGID && !__HAS_OUTLOOK_IN_MAILER && !__UNUSABLE_MSGID)
 describe MSGID_DOLLARS		Message-Id has pattern used in spam
 
+# bit of a ratware rule, but catches a bit more than just the one ratware
+header __MSGID_RANDY		Message-ID =~ /<[a-z\d][a-z\d\$-]{10,29}[a-z\d]\@[a-z\d][a-z\d.]{3,12}[a-z\d]>/
+# heuristic to eliminate most good Message-ID formats
+header __MSGID_OK_HEX		Message-ID =~ /\b[a-f\d]{8}\b/
+header __MSGID_OK_DIGITS	Message-ID =~ /\d{10}/
+header __MSGID_OK_HOST		Message-ID =~ /\@(?:\D{2,}|(?:\d{1,3}\.){3}\d{1,3})>/
+meta MSGID_RANDY	(__MSGID_RANDY && !(__MSGID_OK_HEX || __MSGID_OK_HOST || __MSGID_OK_HOST))
+describe MSGID_RANDY		Message-Id has pattern used in spam
+
 ###########################################################################
 
 header MSGID_FROM_MTA_SHORT	eval:mta_added_message_id('short')
