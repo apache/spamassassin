@@ -40,7 +40,7 @@ use Mail::SpamAssassin::EvalTests;
 use Mail::SpamAssassin::AutoWhitelist;
 
 use vars	qw{
-  	@ISA $base64alphabet
+  	@ISA $base64alphabet 
 };
 
 @ISA = qw();
@@ -85,8 +85,20 @@ sub check {
   $self->remove_unwanted_headers();
 
   {
-    $self->do_head_tests();
+    # If you run timelog from within specified rules, prefix the message with
+    # "Rulename -> " so that it's easy to pick out details from the overview
+    # -- Marc
+    timelog("Launching RBL queries in the background", "rblbg", 1);
+    # Here, we launch all the DNS RBL queries and let them run while we
+    # inspect the message -- Marc
+    $self->do_rbl_eval_tests(0);
+    timelog("Finished launching RBL queries in the background", "rblbg", 22);
 
+    timelog("Starting head tests", "headtest", 1);
+    $self->do_head_tests();
+    timelog("Finished head tests", "headtest", 2);
+
+    timelog("Starting body tests", "bodytest", 1);
     # do body tests with decoded portions
     {
       my $decoded = $self->get_decoded_stripped_body_text_array();
@@ -96,7 +108,9 @@ sub check {
       $self->do_body_uri_tests($decoded);
       undef $decoded;
     }
+    timelog("Finished body tests", "bodytest", 2);
 
+    timelog("Starting raw body tests", "rawbodytest", 1);
     # do rawbody tests with raw text portions
     {
       my $bodytext = $self->get_decoded_body_text_array();
@@ -104,7 +118,9 @@ sub check {
       $self->do_rawbody_eval_tests($bodytext);
       undef $bodytext;
     }
+    timelog("Finished raw body tests", "rawbodytest", 2);
 
+    timelog("Starting full message tests", "fullmsgtest", 1);
     # and do full tests: first with entire, full, undecoded message
     # still skip application/image attachments though
     {
@@ -114,8 +130,18 @@ sub check {
       $self->do_full_eval_tests(\$fulltext);
       undef $fulltext;
     }
+    timelog("Finished full message tests", "fullmsgtest", 2);
 
+    timelog("Starting head eval tests", "headevaltest", 1);
     $self->do_head_eval_tests();
+    timelog("Finished head eval tests", "headevaltest", 2);
+
+    timelog('Starting RBL tests (will wait up to $self->{conf}->{dns_timeout} secs before giving up)', "rblblock", 1);
+    # This time we want to harvest the DNS results -- Marc
+    $self->do_rbl_eval_tests(1);
+    # And now we can compute rules that depend on those results
+    $self->do_rbl_res_eval_tests();
+    timelog("Finished all RBL tests", "rblblock", 2);
 
     # Do AWL tests last, since these need the score to have already been calculated
     $self->do_awl_tests();
@@ -1033,7 +1059,6 @@ sub do_head_tests {
     $hdrname =~ s/#/[HASH]/g;		# avoid probs with eval below
     $def =~ s/#/[HASH]/g;
 
-    # dbg ("header regexp test '.$rulename.'");
     $evalstr .= '
       return if ('.$score.' > 0) && $self->{stop_at_threshold} && $self->is_spam();
       if ($self->{conf}->{scores}->{q#'.$rulename.'#}) {
@@ -1046,7 +1071,10 @@ sub do_head_tests {
         $_ = shift;
         if ($self->get(q#'.$hdrname.'#, q#'.$def.'#) '.$testtype.'~ '.$pat.') {
            $self->got_hit (q#'.$rulename.'#, q{});
-        }
+	   dbg("Ran header regex rule '.$rulename.' ======> got hit", "rulesrun", 1);
+        } else {
+	   dbg("Ran header regex rule '.$rulename.' but did not get hit", "rulesrun", 1);
+	}
     }
     ';
   }
@@ -1123,7 +1151,12 @@ sub do_body_tests {
     sub '.$rulename.'_body_test {
            my $self = shift;
            $_ = shift;
-           if ('.$pat.') { $self->got_body_pattern_hit (q{'.$rulename.'}); }
+           if ('.$pat.') { 
+	       $self->got_body_pattern_hit (q{'.$rulename.'}); 
+	       dbg("Ran body-text regex rule '.$rulename.' ======> got hit", "rulesrun", 2);
+	   } else {
+	       dbg("Ran body-text regex rule '.$rulename.' but did not get hit", "rulesrun", 2);
+	   }
     }
     ';
   }
@@ -1315,7 +1348,12 @@ sub do_body_uri_tests {
     sub '.$rulename.'_uri_test {
        my $self = shift;
        $_ = shift;
-       if ('.$pat.') { $self->got_uri_pattern_hit (q{'.$rulename.'}); }
+       if ('.$pat.') { 
+           $self->got_uri_pattern_hit (q{'.$rulename.'});
+	   dbg("Ran uri test rule '.$rulename.' ======> got hit", "rulesrun", 4);
+       } else {
+	   dbg("Ran uri test rule '.$rulename.' but did not get hit", "rulesrun", 4);
+       }
     }
     ';
   }
@@ -1395,7 +1433,12 @@ sub do_rawbody_tests {
     sub '.$rulename.'_rawbody_test {
        my $self = shift;
        $_ = shift;
-       if ('.$pat.') { $self->got_body_pattern_hit (q{'.$rulename.'}); }
+       if ('.$pat.') { 
+           $self->got_body_pattern_hit (q{'.$rulename.'});
+	   dbg("Ran body_pattern_hit rule '.$rulename.' ======> got hit", "rulesrun", 8);
+       } else {
+	   dbg("Ran body_pattern_hit rule '.$rulename.' but did not get hit", "rulesrun", 8);
+       }
     }
     ';
   }
@@ -1460,7 +1503,7 @@ sub do_full_tests {
   }
   @negative_tests = sort { $self->{conf}{scores}{$a} <=> $self->{conf}{scores}{$b} } @negative_tests;
   @positive_tests = sort { $self->{conf}{scores}{$b} <=> $self->{conf}{scores}{$a} } @positive_tests;
-  
+
   foreach $rulename (@negative_tests, @positive_tests) {
     $pat = $self->{conf}->{full_tests}->{$rulename};
     my $score = $self->{conf}{scores}{$rulename};
@@ -1469,6 +1512,9 @@ sub do_full_tests {
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
 	if ($$fullmsgref =~ '.$pat.') {
 	  $self->got_body_pattern_hit (q{'.$rulename.'});
+	  dbg("Ran full-text regex rule '.$rulename.' =====> got hit", "rulesrun", 16);
+	} else {
+	  dbg("Ran full-text regex rule '.$rulename.' but did not get hit", "rulesrun", 16);
 	}
       }
     ';
@@ -1499,6 +1545,17 @@ EOT
 }
 
 ###########################################################################
+
+sub do_rbl_eval_tests {
+  my ($self, $needresult) = @_;
+  $self->run_rbl_eval_tests ($self->{conf}->{rbl_evals}, $needresult);
+}
+
+sub do_rbl_res_eval_tests {
+  my ($self) = @_;
+  # run_rbl_eval_tests doesn't process check returns unless you set needresult
+  $self->run_rbl_eval_tests ($self->{conf}->{rbl_res_evals}, 1);
+}
 
 sub do_head_eval_tests {
   my ($self) = @_;
@@ -1603,6 +1660,13 @@ sub run_eval_tests {
     eval {
         $result = $self->$evalsub(@args);
     };
+
+    if ($result) {
+	dbg("Ran run_eval_test rule $rulename ======> got hit", "rulesrun", 32);
+    } else {
+	dbg("Ran run_eval_test rule $rulename but did not get hit", "rulesrun", 32);
+    }
+
     if ($@) {
       warn "Failed to run $rulename SpamAssassin test, skipping:\n".
       		"\t($@)\n";
@@ -1610,6 +1674,52 @@ sub run_eval_tests {
     }
 
     if ($result) { $self->got_hit ($rulename, $prepend2desc); }
+  }
+}
+
+###########################################################################
+
+sub run_rbl_eval_tests {
+  my ($self, $evalhash, $needresult) = @_;
+  my ($rulename, $pat, @args);
+  local ($_);
+  
+  my @tests = keys %{$evalhash};
+
+  foreach my $rulename (sort (@tests)) {
+    next unless ($self->{conf}->{scores}->{$rulename});
+    my $score = $self->{conf}{scores}{$rulename};
+    return if ($score > 0) && $self->{stop_at_threshold} && $self->is_spam();
+    my $evalsub = $evalhash->{$rulename};
+
+    my $result;
+    $self->clear_test_state();
+
+    @args = ();
+    $evalsub =~ s/\s*\((.*?)\)\s*$//;
+    if (defined $1 && $1 ne '') { push (@args, mk_param($1)); }
+
+    eval {
+        $result = $self->$evalsub(@args, $needresult);
+    };
+
+    # A run with $job eq 0 is just to start DNS queries
+    if ($needresult eq 1)
+    {
+	if ($result) {
+	    dbg("Ran run_rbl_eval_test rule $rulename ======> got hit", "rulesrun", 64);
+	} else {
+	    dbg("Ran run_rbl_eval_test rule $rulename but did not get hit", "rulesrun", 64);
+	}
+
+	if ($@) {
+	  warn "Failed to run $rulename RBL SpamAssassin test, skipping:\n".
+		    "\t($@)\n";
+	  next;
+	}
+
+	if ($result) { $self->got_hit ($rulename, "RBL: "); }
+    }
   }
 }
 
@@ -1792,6 +1902,7 @@ sub work_out_local_domain {
 }
 
 sub dbg { Mail::SpamAssassin::dbg (@_); }
+sub timelog { Mail::SpamAssassin::timelog (@_); }
 sub sa_die { Mail::SpamAssassin::sa_die (@_); }
 
 ###########################################################################
