@@ -81,6 +81,28 @@ my %resphash = (
   EX_CONFIG      => 78,    # configuration error
 );
 
+
+sub print_version {
+  print "SpamAssassin Server version " . Mail::SpamAssassin::Version() . "\n"
+      . "  running on Perl version " . join(".", map { $_ * 1 } ($] =~ /(\d)\.(\d{3})(\d{3})/ )) . "\n";
+}
+
+sub print_usage_and_exit {
+  my ( $message, $respnam ) = (@_);
+  $respnam ||= 'EX_USAGE';
+
+  if ($respnam eq 'EX_OK' ) {
+    print_version();
+    print("\n");
+  }
+  pod2usage(
+    -verbose => 0,
+    -message => $message,
+    -exitval => $resphash{$respnam},
+  );
+}
+
+
 # defaults
 my %opt = (
   'user-config'   => 1,
@@ -122,7 +144,6 @@ GetOptions(
   'c'                        => \$opt{'create-prefs'},
   'daemonize!'               => \$opt{'daemonize'},
   'd'                        => \$opt{'daemonize'},
-  'help|h'                   => \$opt{'help'},
   'listen-ip|ip-address|i=s' => \$opt{'listen-ip'},
   'max-children|m=i'         => \$opt{'max-children'},
   'max-conn-per-child=i'     => \$opt{'max-conn-per-child'},
@@ -145,8 +166,6 @@ GetOptions(
   'user-config'              => \$opt{'user-config'},
   'nouser-config|x'          => sub { $opt{'user-config'} = 0 },
   'allowed-ips|A=s'          => \@{ $opt{'allowed-ip'} },
-  'debug!'                   => \$opt{'debug'},
-  'D'                        => \$opt{'debug'},
   'local!'                   => \$opt{'local'},
   'L'                        => \$opt{'local'},
   'paranoid!'                => \$opt{'paranoid'},
@@ -157,23 +176,19 @@ GetOptions(
   'ssl'                      => \$opt{'ssl'},
   'server-key=s'             => \$opt{'server-key'},
   'server-cert=s'            => \$opt{'server-cert'},
-
-  # will be stripped in future release
-  'add-from!' => sub { warn "The --add-from option has been removed\n" },
-  'F=i'       => sub { warn "The -F option has been removed\n" },
-  'S'         => sub { warn "The -S option has been removed\n" },
-  'stop-at-threshold!' =>
-    sub { warn "The --stop-at-threshold option has been removed\n" },
-  'auto-whitelist|whitelist|a' =>
-    sub { warn "The -a option has been removed\n" },
-  )
-  or pod2usage( -exitval => $resphash{'EX_USAGE'}, -verbose => 0 );
-
-$opt{'help'} and pod2usage(
-  -exitval => $resphash{'EX_USAGE'},
-  -verbose => 0,
-  -message => 'For more details, use "man spamd"'
-);
+  'debug!'                   => \$opt{'debug'},
+  'D'                        => \$opt{'debug'},
+  'version|V'                => \$opt{'version'},
+  'help|h'                   => \$opt{'help'},
+) or print_usage_and_exit();
+	
+if ($opt{'help'}) {
+  print_usage_and_exit(qq{For more details, use "man spamd".\n}, 'EX_OK');
+}
+if ($opt{'version'}) {
+  print_version();
+  exit($resphash{'EX_OK'});
+}
 
 # bug 2228: make the values of (almost) all parameters which accept file paths
 # absolute, so they are still valid after daemonize()
@@ -205,12 +220,7 @@ if (
     or defined $opt{'port'} )
   )
 {
-  pod2usage(
-    -exitval => $resphash{'EX_USAGE'},
-    -verbose => 0,
-    -message =>
-"ERROR: --socketpath mutually exclusive with --allowed-ip/--ssl/--port params"
-  );
+  print_usage_and_exit("ERROR: --socketpath mutually exclusive with --allowed-ip/--ssl/--port params");
 }
 
 if (
@@ -220,12 +230,7 @@ if (
     or $opt{'socketmode'})
   )
 {
-  pod2usage(
-    -exitval => $resphash{'EX_USAGE'},
-    -verbose => 0,
-    -message =>
-"ERROR: --socketowner/group/mode requires --socketpath param"
-  );
+  print_usage_and_exit("ERROR: --socketowner/group/mode requires --socketpath param");
 }
 
 # These can be changed on command line with -A flag

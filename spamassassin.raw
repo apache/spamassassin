@@ -77,6 +77,49 @@ use Pod::Usage;
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::ArchiveIterator;
 
+
+my %resphash = (
+  EX_OK          => 0,     # no problems
+  EX_USAGE       => 64,    # command line usage error
+  EX_DATAERR     => 65,    # data format error
+  EX_NOINPUT     => 66,    # cannot open input
+  EX_NOUSER      => 67,    # addressee unknown
+  EX_NOHOST      => 68,    # host name unknown
+  EX_UNAVAILABLE => 69,    # service unavailable
+  EX_SOFTWARE    => 70,    # internal software error
+  EX_OSERR       => 71,    # system error (e.g., can't fork)
+  EX_OSFILE      => 72,    # critical OS file missing
+  EX_CANTCREAT   => 73,    # can't create (user) output file
+  EX_IOERR       => 74,    # input/output error
+  EX_TEMPFAIL    => 75,    # temp failure; user is invited to retry
+  EX_PROTOCOL    => 76,    # remote error in protocol
+  EX_NOPERM      => 77,    # permission denied
+  EX_CONFIG      => 78,    # configuration error
+);
+
+
+sub print_version {
+  print "SpamAssassin version " . Mail::SpamAssassin::Version() . "\n"
+      . "  running on Perl version " . join(".", map { $_ * 1 } ($] =~ /(\d)\.(\d{3})(\d{3})/ )) . "\n";
+}
+
+sub print_usage_and_exit {
+  my ( $message, $respnam ) = @_;
+  $respnam ||= 'EX_USAGE';
+
+  if ($respnam eq 'EX_OK' ) {
+    print_version();
+    print("\n");
+  }
+  pod2usage(
+    -verbose => 0,
+    -message => $message,
+    -exitval => $resphash{$respnam},
+  );
+}
+
+
+
 sub usage {
   my ( $verbose, $message ) = @_;
   my $ver = Mail::SpamAssassin::Version();
@@ -126,22 +169,16 @@ GetOptions(
   'help|h|?'                                => \$opt{'help'},
   'mbox'                                    => sub { $opt{'format'} = 'mbox'; },
   'mbx'                                     => sub { $opt{'format'} = 'mbx'; },
+) or print_usage_and_exit();
 
-  # NOTE: ignored for backwards compatibility. will be stripped
-  # in a future release.
-  'whitelist-factory|M=s' => sub { warn "The -M option has been removed.\n" },
-  'auto-whitelist|a'      => sub { warn "The -a option has been removed.\n" },
-  'warning-from|w=s'      => sub { warn "The -w option has been removed.\n" },
-  'log-to-mbox|l=s'       => sub { warn "The -l option has been removed.\n" },
-  )
-  or usage( 0, "Unknown option!" );
 if ( defined $opt{'help'} ) {
-  usage( 0, "For more information read the spamassassin man page" );
+  print_usage_and_exit("For more information read the spamassassin man page.\n", 'EX_OK');
 }
 if ( defined $opt{'version'} ) {
-  print "SpamAssassin version " . Mail::SpamAssassin::Version() . "\n";
-  exit 0;
+  print_version();
+  exit($resphash{'EX_OK'});
 }
+
 
 # create the tester factory
 my $spamtest = new Mail::SpamAssassin(
@@ -166,7 +203,7 @@ if ( defined $opt{'debug-level'} && $opt{'debug-level'} ne '' ) {
     $Mail::SpamAssassin::DEBUG->{$1} = $2 + 0;
   }
   if ( $levels !~ /^\s*$/ ) {
-    usage( 0, "bad areas in --debug option ($levels)!" );
+    print_usage_and_exit("bad areas in --debug option ($levels)!");
   }
 }
 
