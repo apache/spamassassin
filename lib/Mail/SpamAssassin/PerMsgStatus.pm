@@ -1215,7 +1215,9 @@ sub get_decoded_stripped_body_text_array {
     }
 
     # remove empty close tags: </>, </ >, </ foo>
-    $text =~ s/<\/(?:\s.*?)?>//gs;
+    if ($HTML::Parser::VERSION < 3.29) { 
+      $text =~ s/<\/(?:\s.*?)?>//gs;
+    }
 
     $self->{html_text} = [];
     $self->{html_last_tag} = 0;
