@@ -480,3 +480,5 @@ describe T_RATWARE_EMPTY_HELO	Received headers forged (empty HELO)
 header T_RATWARE_RCVD_BONUS_SPC	Received =~ /\) by  [a-zA-Z0-9]/
 describe T_RATWARE_RCVD_BONUS_SPC Received headers forged (extra spaces)
 
+meta T_MIME_HTML_NO_HTML_TAG	MIME_HTML_ONLY && !__TAG_EXISTS_HTML
+meta T_MIME_HTML_NO_BODY_TAG	MIME_HTML_ONLY && !__TAG_EXISTS_BODY
