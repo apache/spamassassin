@@ -338,12 +338,6 @@
 #tflags   FAILURE_NOTICE_2       nice
 #score FAILURE_NOTICE_2 0 -1.559 0 0
 
-# spamassassin@davidgreenaway.com (David Greenaway)
-#body     FORGOTTEN_PASSWORD     /[fF]org[oe]t.{0,25}[pP]assword/
-#describe FORGOTTEN_PASSWORD     Contains a password retrieval system
-#tflags   FORGOTTEN_PASSWORD     nice
-#score FORGOTTEN_PASSWORD -0.620 -0.981 -0.217 -0.563
-
 #header FROM_EGROUPS             X-eGroups-Return =~ /^sentto-.*\@returns\.groups\.yahoo\.com$/
 #describe FROM_EGROUPS           Appears to be from yahoo groups
 #tflags FROM_EGROUPS		nice
