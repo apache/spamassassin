@@ -221,10 +221,10 @@ $SIG{TERM} = \&kill_handler;
 # now allow waiting processes to connect, if they're watching the log.
 # The test suite does this!
 if ($opt{'debug'}) {
-    warn "server started on port $port\n";
+    warn "server started on port $port (running version ".Mail::SpamAssassin::Version().")\n";
     warn "server pid: $$\n";
 }
-logmsg "server started on port $port";
+logmsg "server started on port $port (running version ".Mail::SpamAssassin::Version().")";
 
 for ( ; ($paddr = accept(Client,Server)) ; close Client)
 {
@@ -343,11 +343,30 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
 	    my $resp = "EX_OK";
 
 	    # Now read in message
-	    my @msglines = (<STDIN>);
-	    my $actual_length;
-	    for (@msglines) {
-		$actual_length += length;
-	    }
+            my @msglines;
+            my $actual_length;
+            my $in_header = 1;
+            my $msgid;
+            for (<STDIN>) {
+                if ($in_header) {
+                    if (/^$/) {
+                        $in_header = 0;
+                        $msgid = '(unknown)' unless($msgid);
+                    }
+                    elsif (/^Message-Id:\s+(.*)$/i) {
+                        $msgid = $1;
+                        while($msgid =~ s/\([^\(\)]*\)//) {};    # remove comments and
+                        $msgid =~ s/^\s+|\s+$//g;                # leading and trailing spaces
+                        $msgid =~ s/\s.*$/(...)/;                # keep only the first token
+                    }
+                }
+                push(@msglines, $_);
+                $actual_length += length;
+            }
+
+            logmsg "checking message $msgid for $current_user:$>" .
+              ($expected_length ? ", expecting $expected_length bytes" : "") . ".\n";
+
 	    my $mail = Mail::SpamAssassin::NoMailAudit->new (
                                 data => \@msglines
                          );
@@ -468,11 +487,30 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
 	    my $resp = "EX_OK";
 
 	    # Now read in message
-	    my @msglines = (<STDIN>);
-	    my $actual_length;
-	    for (@msglines) {
-		$actual_length += length;
-	    }
+            my @msglines;
+            my $actual_length;
+            my $in_header = 1;
+            my $msgid;
+            for (<STDIN>) {
+                if ($in_header) {
+                    if (/^$/) {
+                        $in_header = 0;
+                        $msgid = '(unknown)' unless($msgid);
+                    }
+                    elsif (/^Message-Id:\s+(.*)$/i) {
+                        $msgid = $1;
+                        while($msgid =~ s/\([^\(\)]*\)//) {};    # remove comments and
+                        $msgid =~ s/^\s+|\s+$//g;                # leading and trailing spaces
+                        $msgid =~ s/\s.*$/(...)/;                # keep only the first token
+                    }
+                }
+                push(@msglines, $_);
+                $actual_length += length;
+            }
+
+            logmsg "processing message $msgid for $current_user:$>" .
+              ($expected_length ? ", expecting $expected_length bytes" : "") . ".\n";
+
 	    my $mail = Mail::SpamAssassin::NoMailAudit->new (
                                 data => \@msglines
                          );
