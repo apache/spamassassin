@@ -13,6 +13,7 @@
 #include <sysexits.h>
 #include <errno.h>
 #include <time.h>
+#include <signal.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 /* RedHat 5.2 doesn't define Shutdown 2nd Parameter Constants */
@@ -492,6 +493,7 @@ int main(int argc,char **argv)
   struct passwd *curr_user;
 
   openlog ("spamc", LOG_CONS|LOG_PID, LOG_MAIL);
+  signal (SIGPIPE, SIG_IGN);
 
   read_args(argc,argv,&hostname,&port,&max_size,&username);
 
