@@ -757,3 +757,10 @@ body T_SA_MARKED_UP     /Spam detection software, running on the system /
 header T_BAD_TIMEZONE_EST	ALL =~ /[+-]\d\d[30]0(?<!-0500|-0300|\+1000|\+1100) \(?EST\)?\b/
 header T_BAD_TIMEZONE_CST_A	ALL =~ /[+-]\d\d[30]0(?<!-0600|-0400|\+0800|\+0930) \(?CST\)?\b/
 header T_BAD_TIMEZONE_CST_B	ALL =~ /[+-]\d\d[30]0(?<!-0600|-0400|\+0800|\+0930|\+1030) \(?CST\)?\b/
+header T_BAD_TIMEZONE_GMT_A	ALL =~ /[+-]\d\d[30]0(?<!\+0000) \(?GMT\)?\b/
+header T_BAD_TIMEZONE_GMT_B	ALL =~ /[+-]\d\d[30]0(?<![+-]0000) \(?GMT\)?\b/
+header T_BAD_TIMEZONE_UTC_A	ALL =~ /[+-]\d\d[30]0(?<!\+0000) \(?UTC\)?\b/
+header T_BAD_TIMEZONE_UTC_B	ALL =~ /[+-]\d\d[30]0(?<![+-]0000) \(?UTC\)?\b/
+header T_BAD_TIMEZONE_CDT_A	ALL =~ /[+-]\d\d[30]0(?<!-0500) \(?CDT\)?\b/
+header T_BAD_TIMEZONE_CDT_B	ALL =~ /[+-]\d\d[30]0(?<!-0500|\+1030) \(?CDT\)?\b/
+header T_BAD_TIMEZONE_MST	ALL =~ /[+-]\d\d[30]0(?<!-0700) \(?MST\)?\b/
