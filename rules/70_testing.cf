@@ -560,3 +560,6 @@ describe T_HTML_TAG_BALANCE_DIV_1	HTML has unbalanced "font" tags
 
 body T_HTML_TAG_BALANCE_DIV_2	eval:html_tag_balance('div', '> 0')
 describe T_HTML_TAG_BALANCE_DIV_2	HTML is missing "div" tags
+
+# bug 1985
+body T_URGENT_BIZ /urgent.{0,16}(?:assistance|business|buy|confidential|notice|proposal|reply|request|response)/i
