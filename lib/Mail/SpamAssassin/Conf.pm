@@ -56,6 +56,11 @@ sub new {
 
   $self->{whitelist_from} = [ ];
 
+  # this will hold the database connection params
+  $self->{user_scores_dsn} = '';
+  $self->{user_scores_sql_username} = '';
+  $self->{user_scores_sql_passowrd} = '';
+
   $self->{_unnamed_counter} = 'aaaaa';
 
   $self;
@@ -110,11 +115,11 @@ sub _parse {
       $self->{scores}->{$1} = $2+0.0; next;
     }
 
-    if (/^report\s+(.*)$/) {
+    if (/^report\s*(.*?)$/) {
       $report_template .= $1."\n"; next;
     }
 
-    if (/^spamtrap\s*(.*)$/) {
+    if (/^spamtrap\s*(.*?)$/) {
       $spamtrap_template .= $1."\n"; next;
     }
 
@@ -163,6 +168,16 @@ sub _parse {
 
     if (/^razor-config\s*(.*)\s*$/) {
       $self->{razor_config} = $1; next;
+    }
+
+    if (/^user_scores_dsn\s+(\S+)$/) {
+      $self->{user_scores_dsn} = $1; next;
+    }
+    if(/^user_scores_sql_username\s+(\S+)$/) {
+      $self->{user_scores_sql_username} = $1; next;
+    }
+    if(/^user_scores_sql_password\s+(\S+)$/) {
+      $self->{user_scores_sql_password} = $1; next;
     }
 
 failed_line:

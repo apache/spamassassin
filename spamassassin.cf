@@ -762,3 +762,17 @@ score COPYRIGHT_CLAIMED		    -2.0
 
 score SIRCAM_SIGNATURE		    10.0
 
+###########################################################################
+# Database configuration options.
+#
+# user_scores_dsn MUST be in the form:
+# DBI:databasetype:databasename:hostname:port
+# ex. DBI:mysql:spamassassin:localhost
+#
+# user_scores_sql_username is the authorized username to connect to DSN
+# user_scores_sql_password is the password for the database username
+
+#user_scores_dsn		DBI:mysql:spamassassin:localhost
+#user_scores_sql_username	spam
+#user_scores_sql_password	spamfilter
+

@@ -46,6 +46,7 @@ filtering databases, such as Vipul's Razor ( http://razor.sourceforge.net/ ).
 package Mail::SpamAssassin;
 
 use Mail::SpamAssassin::Conf;
+use Mail::SpamAssassin::ConfSourceSQL;
 use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::Reporter;
 use Mail::SpamAssassin::Replier;
@@ -324,6 +325,23 @@ sub read_scoreonly_config {
 
 ###########################################################################
 
+=item $f->load_scoreonly_sql ($username)
+
+Read configuration paramaters from SQL database and parse scores from it.  This
+will only take effect if the perl C<DBI> module is installed, and the
+configuration parameters C<user_scores_dsn>, C<user_scores_sql_username>, and
+C<user_scores_sql_password> are set correctly.
+
+=cut
+
+sub load_scoreonly_sql {
+  my ($self, $username) = @_;
+
+  my $src = Mail::SpamAssassin::ConfSourceSQL->new ($self);
+  $src->load($username);
+}
+###########################################################################
+
 =item $f->compile_now ()
 
 Compile all patterns, load all configuration files, and load all
@@ -354,6 +372,12 @@ sub compile_now {
   $self->init(0);
   my $mail = Mail::SpamAssassin::MyMailAudit->new(data => \@testmsg);
   $self->check($mail)->finish();
+
+  # load SQL modules now as well
+  my $dsn = $self->{conf}->{user_scores_dsn};
+  if ($dsn ne '') {
+    Mail::SpamAssassin::ConfSourceSQL::load_modules();
+  }
 
   1;
 }

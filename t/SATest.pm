@@ -123,6 +123,7 @@ sub start_spamd {
   while ($spamd_pid <= 0) {
     if (open (IN, "<log/$testname.spamd")) {
       while (<IN>) {
+	/Address already in use/ and $retries = 0;
 	/server pid: (\d+)/ and $spamd_pid = $1;
       }
       close IN;
