@@ -37,12 +37,13 @@ describe USER_AGENT_TONLINE	X-Mailer header indicates a non-spam MUA (T-Offline)
 header USER_AGENT_APPLEMAIL	X-Mailer   =~ /^Apple Mail \(\d\.\d+\)$/
 describe USER_AGENT_APPLEMAIL	X-Mailer header indicates a non-spam MUA (Apple Mail)
 
-
 header USER_AGENT_GNUS_UA	User-Agent =~ /^Gnus\/\d\.\d+ /
 describe USER_AGENT_GNUS_UA	User-Agent header indicates a non-spam MUA (Gnus)
 header USER_AGENT_GNUS_XM	X-Mailer   =~ /^Gnus v\d(?:\.\d+){1,2}\/X?Emacs \d+\.\d+/
 describe USER_AGENT_GNUS_XM	X-Mailer header indicates a non-spam MUA (Gnus)
 
+header USER_AGENT_VM		X-Mailer =~ /^\s*VM\s+\d+\.\d+\s+under\s+.{0,30}?[Ee]macs\b/
+describe USER_AGENT_VM		X-Mailer header indicates a non-spam MUA (VM)
 
 tflags USER_AGENT_PINE       nice
 tflags USER_AGENT_MUTT       nice
@@ -56,3 +57,4 @@ tflags USER_AGENT_TONLINE    nice
 tflags USER_AGENT_APPLEMAIL  nice
 tflags USER_AGENT_GNUS_UA    nice
 tflags USER_AGENT_GNUS_XM    nice
+tflags USER_AGENT_VM         nice
