@@ -113,9 +113,9 @@ if ($opt_p) {
         soratio ($num_spam,$num_ham), 0, 0;
 
 } elsif ($opt_x) {
-  printf "%7s  %7s  %7s  %6s  %6s  %s\n",
-  	"OVERALL", "SPAM", "HAM", "S/O", "SCORE", "NAME";
-  printf "%7d  %7d  %7d  %7.3f %6.2f  %6.2f  (all messages)\n",
+  printf "%7s %7s  %7s  %6s  %6s %6s  %s\n",
+  	"OVERALL%", "SPAM%", "HAM%", "S/O", "RANK", "SCORE", "NAME";
+  printf "%7d  %7d  %7d  %7.3f %6.2f %6.2f  (all messages)\n",
   	$hdr_all, $hdr_spam, $hdr_ham,
         soratio ($num_spam,$num_ham), 0, 0;
 
