@@ -712,6 +712,31 @@ Used to describe a test.  This text is shown to users in the detailed report.
       $self->{descriptions}->{$1} = $2; next;
     }
 
+=item tflags SYMBOLIC_TEST_NAME [ { net | nice } ... ]
+
+Used to set flags on a test.  These flags are used in the score-determination back
+end system for details of the test's behaviour.  The following flags can be set:
+
+=over 4
+
+=item  net
+
+The test is a network test, and will not be run in the mass checking system
+or if B<-L> is used, therefore its score should not be modified.
+
+=item  nice
+
+The test is intended to compensate for common false positives, and should be
+assigned a negative score.
+
+=back
+
+=cut
+
+    if (/^tflags\s+(.*)$/) {
+      next;     # ignored in SpamAssassin modules
+    }
+
 =item report ...some text for a report...
 
 Set the report template which is attached to spam mail messages.  See the
