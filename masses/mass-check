@@ -96,7 +96,7 @@ my $when = `date`; chop $when;
 
 print "# mass-check results from $who\@$where, on $when\n";
 print "# M:SA version ".$spamtest->Version()."\n";
-print "# CVS tag: $Name:  $\n";
+print '# CVS tag: $Name:  $',"\n";
 $iter->set_function (\&wanted);
 $iter->run (@ARGV);
 exit;
