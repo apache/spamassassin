@@ -1067,6 +1067,48 @@ only characters in the ranges A-Z, a-z, 0-9, -, _ and / are permitted.
     }
   });
 
+=item spamcop_from_address add@ress.com   (default: none)
+
+This address is used during manual reports to SpamCop as the From:
+address.  You can use your normal email address.  If this is not set, a
+guess will be used as the From: address in SpamCop reports.
+
+=cut
+
+  push (@cmds, {
+    setting => 'spamcop_from_address',
+    default => '',
+    type => $CONF_TYPE_STRING,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value =~ /([^<\s]+\@[^>\s]+)/) {
+        $self->{spamcop_from_address} = $1;
+      }
+    },
+  });
+
+=item spamcop_to_address add@ress.com   (default: generic reporting address)
+
+Your customized SpamCop report submission address.  You need to obtain
+this address by registering at C<http://www.spamcop.net/>.  If this is
+not set, SpamCop reports will go to a generic reporting address for
+SpamAssassin users and your reports will probably have less weight in
+the SpamCop system.
+
+=cut
+
+  push (@cmds, {
+    setting => 'spamcop_to_address',
+    default => 'spamassassin-submit@spam.spamcop.net',
+    type => $CONF_TYPE_STRING,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value =~ /([^<\s]+\@[^>\s]+)/) {
+        $self->{spamcop_to_address} = $1;
+      }
+    },
+  });
+
 =item trusted_networks ip.add.re.ss[/mask] ...   (default: none)
 
 What networks or hosts are 'trusted' in your setup.   B<Trusted> in this case

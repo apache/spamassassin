@@ -515,39 +515,42 @@ then disable the auto-whitelist.
 
 =item B<-r>, B<--report>
 
-Report this message as verified spam.  This will submit the mail message
-read from STDIN to various spam-blocker databases.  Currently, these are
-Vipul's Razor ( http://razor.sourceforge.net/ ), the Distributed Checksum
-Clearinghouse ( http://www.rhyolite.com/anti-spam/dcc/ ), and Pyzor (
-http://pyzor.sourceforge.net/ ).
+Report this message as manually-verified spam.  This will submit the mail
+message read from STDIN to various spam-blocker databases.  Currently,
+these are the Distributed Checksum Clearinghouse
+C<http://www.rhyolite.com/anti-spam/dcc/>, Pyzor
+C<http://pyzor.sourceforge.net/>, Vipul's Razor
+C<http://razor.sourceforge.net/>, and SpamCop C<http://www.spamcop.net/>.
 
-If the message contains SpamAssassin markup, this will be stripped out
-automatically before submission.  The support modules for DCC, Razor
-and/or Pyzor must be installed for spam to be reported to each service.
+If the message contains SpamAssassin markup, the markup will be stripped
+out automatically before submission.  The support modules for DCC, Pyzor,
+and Razor must be installed for spam to be reported to each service.
+SpamCop reports will have greater effect if you register and set the
+C<spamcop_submission_address> option.
 
 The message will also be submitted to SpamAssassin's learning systems;
-currently this is the internal Bayesian statistical-filtering system (the BAYES
-rules).   (Note that if you I<only> want to perform statistical learning, and
-do not want to report mail to a third-party server, you should use the
-C<sa-learn> command directly instead.)
+currently this is the internal Bayesian statistical-filtering system (the
+BAYES rules).  (Note that if you I<only> want to perform statistical
+learning, and do not want to report mail to third-parties, you should use
+the C<sa-learn> command directly instead.)
 
 =item B<-k>, B<--revoke>
 
 Revoke this message.  This will revoke the mail message read from STDIN from
 various spam-blocker databases.  Currently, these are Vipul's Razor.
 
-Revocation support for the Distributed Checksum Clearinghouse, and Pyzor
-is not currently available.
+Revocation support for the Distributed Checksum Clearinghouse, Pyzor, and
+SpamCop is not currently available.
 
-If the message contains SpamAssassin markup, this will be stripped out
-automatically before submission.  The support modules for Razor must be
-installed for spam to be revoked from the service.
+If the message contains SpamAssassin markup, the markup will be stripped
+out automatically before submission.  The support modules for Razor must
+be installed for spam to be revoked from the service.
 
 The message will also be submitted as 'ham' (non-spam) to SpamAssassin's
-learning systems; currently this is the internal Bayesian statistical-filtering
-system (the BAYES rules).   (Note that if you I<only> want to perform
-statistical learning, and do not want to report mail to a third-party server,
-you should use the C<sa-learn> command directly instead.)
+learning systems; currently this is the internal Bayesian
+statistical-filtering system (the BAYES rules).  (Note that if you I<only>
+want to perform statistical learning, and do not want to report mail to
+third-parties, you should use the C<sa-learn> command directly instead.)
 
 =item B<--lint>
 

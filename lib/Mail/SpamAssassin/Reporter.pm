@@ -22,6 +22,8 @@ use strict;
 use bytes;
 use Carp;
 use POSIX ":sys_wait_h";
+use constant HAS_NET_DNS => eval { require Net::DNS; };
+use constant HAS_NET_SMTP => eval { require Net::SMTP; };
 
 use vars qw{
   @ISA $VERSION
@@ -58,16 +60,6 @@ sub report {
 
   my $text = $self->{main}->remove_spamassassin_markup ($self->{msg});
 
-  if (!$self->{options}->{dont_report_to_razor} && $self->is_razor_available()) {
-    if ($self->razor_report($text)) {
-      $available = 1;
-      dbg ("SpamAssassin: spam reported to Razor.");
-      $return = 0;
-    }
-    else {
-      dbg ("SpamAssassin: could not report spam to Razor.");
-    }
-  }
   if (!$self->{options}->{dont_report_to_dcc} && $self->is_dcc_available()) {
     if ($self->dcc_report($text)) {
       $available = 1;
@@ -86,6 +78,26 @@ sub report {
     }
     else {
       dbg ("SpamAssassin: could not report spam to Pyzor.");
+    }
+  }
+  if (!$self->{options}->{dont_report_to_razor} && $self->is_razor_available()) {
+    if ($self->razor_report($text)) {
+      $available = 1;
+      dbg ("SpamAssassin: spam reported to Razor.");
+      $return = 0;
+    }
+    else {
+      dbg ("SpamAssassin: could not report spam to Razor.");
+    }
+  }
+  if (!$self->{options}->{dont_report_to_spamcop} && $self->is_spamcop_available()) {
+    if ($self->spamcop_report($text)) {
+      $available = 1;
+      dbg ("SpamAssassin: spam reported to SpamCop.");
+      $return = 0;
+    }
+    else {
+      dbg ("SpamAssassin: could not report spam to SpamCop.");
     }
   }
 
@@ -364,6 +376,122 @@ sub pyzor_report {
 
   return 1;
 }
+
+sub smtp_dbg {
+  my ($command, $smtp) = @_;
+
+  dbg("SpamCop -> sent $command");
+  my $code = $smtp->code();
+  my $message = $smtp->message();
+  my $debug;
+  $debug .= $code if $code;
+  $debug .= ($code ? " " : "") . $message if $message;
+  chomp $debug;
+  dbg("SpamCop -> received $debug");
+  return 1;
+}
+
+sub spamcop_report {
+  my ($self, $original) = @_;
+
+  # check date
+  my $header = $original;
+  $header =~ s/\r?\n\r?\n.*//s;
+  my $date = Mail::SpamAssassin::Util::receive_date($header);
+  if ($date && $date < time - 3*86400) {
+    warn ("SpamCop -> message older than 3 days, not reporting\n");
+    return 0;
+  }
+
+  # message variables
+  my $boundary = "----------=_" . sprintf("%08X.%08X",time,int(rand(2**32)));
+  while ($original =~ /^\Q${boundary}\E$/m) {
+    $boundary .= "/".sprintf("%08X",int(rand(2**32)));
+  }
+  my $description = "spam report via " . Mail::SpamAssassin::Version();
+  my $trusted = $self->{msg}->{metadata}->{relays_trusted_str};
+  my $untrusted = $self->{msg}->{metadata}->{relays_untrusted_str};
+  my $user = $self->{main}->{'username'} || 'unknown';
+  my $host = Mail::SpamAssassin::Util::fq_hostname() || 'unknown';
+  my $from = $self->{conf}->{spamcop_from_address} || "$user\@$host";
+  my $name = (Mail::SpamAssassin::Util::portable_getpwuid($>))[6] || "Unknown";
+
+  # message data
+  my %head = (
+	      'To' => $self->{conf}->{spamcop_to_address},
+	      'From' => "\"$name\" <$from>",
+	      'Subject' => 'report spam',
+	      'Date' => Mail::SpamAssassin::Util::time_to_rfc822_date(),
+	      'Message-Id' =>
+		sprintf("<%08X.%08X@%s>",time,int(rand(2**32)),$host),
+	      'MIME-Version' => '1.0',
+	      'Content-Type' => "multipart/mixed; boundary=\"$boundary\"",
+	      );
+
+  # truncate message
+  if (length($original) > 64*1024) {
+    substr($original,(64*1024)) = "\n[truncated by SpamAssassin]\n";
+  }
+
+  my $body = <<"EOM";
+This is a multi-part message in MIME format.
+
+--$boundary
+Content-Type: message/rfc822; x-spam-type=report
+Content-Description: $description
+Content-Disposition: attachment
+Content-Transfer-Encoding: 8bit
+X-Spam-Relays-Trusted: $trusted
+X-Spam-Relays-Untrusted: $untrusted
+
+$original
+--$boundary--
+
+EOM
+
+  # compose message
+  my $message;
+  while (my ($k, $v) = each %head) {
+    $message .= "$k: $v\n";
+  }
+  $message .= "\n" . $body;
+
+  # send message
+  my $failure;
+  my $mx = $head{To};
+  my $hello = Mail::SpamAssassin::Util::fq_hostname() || $from;
+  $mx =~ s/.*\@//;
+  $hello =~ s/.*\@//;
+  for my $rr (Net::DNS::mx($mx)) {
+    my $exchange = Mail::SpamAssassin::Util::untaint_hostname($rr->exchange);
+    next unless $exchange;
+    my $smtp;
+    if ($smtp = Net::SMTP->new($exchange,
+			       Hello => $hello,
+			       Port => 25, # change to 587 before 3.0.0-final
+			       Timeout => 10))
+    {
+      if ($smtp->mail($from) && smtp_dbg("FROM $from", $smtp) &&
+	  $smtp->recipient($head{To}) && smtp_dbg("TO $head{To}", $smtp) &&
+	  $smtp->data($message) && smtp_dbg("DATA", $smtp) &&
+	  $smtp->quit() && smtp_dbg("QUIT", $smtp))
+      {
+	# tell user we succeeded after first attempt if we previously failed
+	warn("SpamCop -> report to $exchange succeeded\n") if defined $failure;
+	return 1;
+      }
+      my $code = $smtp->code();
+      my $text = $smtp->message();
+      $failure = "$code $text" if ($code && $text);
+    }
+    $failure ||= "Net::SMTP error";
+    chomp $failure;
+    warn("SpamCop -> report to $exchange failed: $failure\n");
+  }
+
+  return 0;
+}
+
 ###########################################################################
 
 sub dbg { Mail::SpamAssassin::dbg (@_); }
@@ -371,10 +499,20 @@ sub create_fulltext_tmpfile { Mail::SpamAssassin::PerMsgStatus::create_fulltext_
 sub delete_fulltext_tmpfile { Mail::SpamAssassin::PerMsgStatus::delete_fulltext_tmpfile(@_) }
 
 # Use the Dns versions ...  At least something only needs 1 copy of code ...
-sub is_pyzor_available { Mail::SpamAssassin::PerMsgStatus::is_pyzor_available(@_); }
-sub is_dcc_available { Mail::SpamAssassin::PerMsgStatus::is_dcc_available(@_); }
+sub is_dcc_available {
+  Mail::SpamAssassin::PerMsgStatus::is_dcc_available(@_);
+}
+sub is_pyzor_available {
+  Mail::SpamAssassin::PerMsgStatus::is_pyzor_available(@_);
+}
 sub is_razor_available {
   Mail::SpamAssassin::PerMsgStatus::is_razor2_available(@_);
+}
+sub is_spamcop_available {
+  my ($self) = @_;
+  return (HAS_NET_DNS &&
+	  HAS_NET_SMTP &&
+	  $self->{conf}{scores}{'RCVD_IN_BL_SPAMCOP_NET'});
 }
 
 sub enter_helper_run_mode { Mail::SpamAssassin::PerMsgStatus::enter_helper_run_mode(@_); }

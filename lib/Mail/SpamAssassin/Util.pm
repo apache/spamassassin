@@ -194,6 +194,25 @@ sub untaint_file_path {
   }
 }
 
+sub untaint_hostname {
+  my ($host) = @_;
+
+  return unless defined($host);
+  return '' if ($host eq '');
+
+  # from RFC 1035, but allowing domains starting with numbers
+  my $label = q/[A-Za-z\d](?:[A-Za-z\d-]{0,61}[A-Za-z\d])?/;
+  my $domain = qq<$label(?:\.$label)*>;
+
+  if (length($host) <= 255 && $host =~ /^($domain)$/) {
+    return $1;
+  }
+  else {
+    warn "security: cannot untaint hostname: \"$host\"\n";
+    return $host;
+  }
+}
+
 # This sub takes a scalar or a reference to an array, hash, scalar or another
 # reference and recursively untaints all its values (and keys if it's a
 # reference to a hash). It should be used with caution as blindly untainting
@@ -438,6 +457,20 @@ sub qp_decode {
 
   s/\=\r?\n//gs;
   s/\=([0-9a-fA-F]{2})/chr(hex($1))/ge;
+  return $_;
+}
+
+sub base64_encode {
+  local $_ = shift;
+
+  if (HAS_MIME_BASE64) {
+    return MIME::Base64::encode_base64($_);
+  }
+
+  $_ = pack("u57", $_);
+  s/^.//mg;
+  tr| -_`|A-Za-z0-9+/A|;
+  s/(A+)$/'=' x length $1/e;
   return $_;
 }
 
