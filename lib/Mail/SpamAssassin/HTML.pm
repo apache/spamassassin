@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.47 2002/12/11 07:24:55 quinlan Exp $
+# $Id: HTML.pm,v 1.48 2002/12/11 09:31:55 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -247,9 +247,7 @@ sub html_tests {
       my $type = $2;
 
       $self->{html}{big_font_B} = 1 if (lc($type) eq "pt" && $size > 12);
-      $self->{html}{font_px}    = 1 if (lc($type) eq "px");
     }
-    $self->{html}{line_height} = 1 if ($attr->{style} =~ /line-height/i);
   }
 
   if (($tag eq "img" &&
@@ -350,10 +348,7 @@ sub html_text {
       my $type = $2;
 
       $self->{html}{big_font_B} = 1 if (lc($type) eq "pt" && $size > 12);
-      $self->{html}{font_px}    = 1 if (lc($type) eq "px");
     }
-    $self->{html}{line_height} = 1 if ($text =~ /line-height/i);
-
     return;
   }
 
@@ -397,9 +392,7 @@ sub html_comment {
       my $type = $2;
 
       $self->{html}{big_font_B} = 1 if (lc($type) eq "pt" && $size > 12);
-      $self->{html}{font_px}    = 1 if (lc($type) eq "px");
     }
-    $self->{html}{line_height} = 1 if ($text =~ /line-height/i);
   }
 }
 
