@@ -1274,19 +1274,29 @@ sub opportunistic_calls {
   my($self) = @_;
 
   # If we're not already tied, abort.
-  return unless ($self->{store}->db_readable());
+  if (!$self->{store}->db_readable()) {
+    dbg("bayes: opportunistic call attempt failed, DB not readable");
+    return;
+  }
 
   # Is an expire or sync running?
   my $running_expire = $self->{store}->get_running_expire_tok();
-  if ( defined $running_expire && $running_expire+$OPPORTUNISTIC_LOCK_VALID > time() ) { return; }
+  if ( defined $running_expire && $running_expire+$OPPORTUNISTIC_LOCK_VALID > time() ) {
+    dbg("bayes: opportunistic call attempt skipped, found fresh running expire magic token");
+    return;
+  }
 
   # handle expiry and syncing
   if ($self->{store}->expiry_due()) {
+    dbg("bayes: opportunistic call found expiry due");
+
     # sync will bring the DB R/W as necessary, and the expire will remove
     # the running_expire token, may untie as well.
     $self->sync(1,1);
   }
   elsif ( $self->{store}->sync_due() ) {
+    dbg("bayes: opportunistic call found journal sync due");
+
     # sync will bring the DB R/W as necessary, may untie as well
     $self->sync(1,0);
 
