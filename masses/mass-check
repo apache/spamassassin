@@ -190,7 +190,7 @@ sub wanted {
       $mid = $id;             # ... so build one from the id
       $mid =~ s,^.*/,,;       # remove the path
       $mid .= "." . time;     # add time
-      $mid = "<$mid\@$host.masses.spamassasin.org>";
+      $mid = "<$mid\@$host.masses.spamassassin.org>";
     }
     $mid =~ s/^\s+|\s+$//sg;  # trim leading and trailing whitespaces
     $mid =~ s/[\s:,\\]/_/sg;  # replace dangerous characters
