@@ -175,12 +175,6 @@ header NO_MX_FOR_FROM		eval:check_for_from_mx()
 describe NO_MX_FOR_FROM		No MX records for the From: domain
 tflags NO_MX_FOR_FROM           net
 
-header FORGED_AOL_RCVD	        eval:check_for_fake_aol_relay_in_rcvd()
-describe FORGED_AOL_RCVD	Received forged, contains fake AOL relays
-
-header FORGED_TELESP_RCVD	Received =~ /\.(?!br).. \(\d+-\d+-\d+-\d+\.dsl\.telesp\.net\.br /
-describe FORGED_TELESP_RCVD	Contains forged hostname for a DSL IP in Brazil
-
 header FROM_AND_TO_SAME_1	eval:check_for_from_to_same('exact_both')
 describe FROM_AND_TO_SAME_1	From and To the same (1)
 
@@ -356,15 +350,17 @@ header X_NJABL_DIALUP    rbleval:check_rbl_results_for('njabl', '127.0.0.3')
 describe X_NJABL_DIALUP  NJABL: sender is on dialup/dynamic IP
 tflags X_NJABL_DIALUP    net
 
+header LOTS_OF_CC_LINES		eval:check_lots_of_cc_lines()
+describe LOTS_OF_CC_LINES	Lots and lots of Cc: headers
+
 header FORGED_RCVD_TRAIL	eval:check_for_forged_received_trail()
 describe FORGED_RCVD_TRAIL	trail of Received: headers seems to be forged
 
-# obsolete; hotmail have changed their header format.
-#header FROM_FORGED_HOTMAIL	From =~ /^[^"]+\S+\@hotmail\.com/i
-#describe FROM_FORGED_HOTMAIL	From: claims to be hotmail but not in their format
+header FORGED_AOL_RCVD	        eval:check_for_fake_aol_relay_in_rcvd()
+describe FORGED_AOL_RCVD	Received forged, contains fake AOL relays
 
-header LOTS_OF_CC_LINES		eval:check_lots_of_cc_lines()
-describe LOTS_OF_CC_LINES	Lots and lots of Cc: headers
+header FORGED_TELESP_RCVD	Received =~ /\.(?!br).. \(\d+-\d+-\d+-\d+\.dsl\.telesp\.net\.br /
+describe FORGED_TELESP_RCVD	Contains forged hostname for a DSL IP in Brazil
 
 header FORGED_HOTMAIL_RCVD	eval:check_for_forged_hotmail_received_headers()
 describe FORGED_HOTMAIL_RCVD	Forged hotmail.com 'Received:' header found
@@ -381,13 +377,18 @@ describe FORGED_JUNO_RCVD	'From' juno.com does not match 'Received' headers
 header FORGED_GW05_RCVD		eval:check_for_forged_gw05_received_headers()
 describe FORGED_GW05_RCVD	Forged 'by gw05' 'Received:' header found
 
-# Sep 23 2002 jm: another spamhaus rule
-header RCVD_BY_QVES_COM		Received =~ /by email.qves.com with Microsoft/
-describe RCVD_BY_QVES_COM	Sent by a known spamhaus (qves)
-
 # real hotmail outgoings use 'mc1-s3.law16...' or 'f206..' etc.
 header FORGED_MX_HOTMAIL	Received =~ /^from mx\d+\.hotmail\.com /m
 describe FORGED_MX_HOTMAIL	Forged hotmail.com Received 'from mx' header
+
+# forgery meta-rules: more reliable than their inputs
+meta CONFIRMED_FORGED         (FORGED_RCVD_TRAIL && (FORGED_AOL_RCVD || FORGED_HOTMAIL_RCVD || FORGED_EUDORAMAIL_RCVD || FORGED_YAHOO_RCVD || FORGED_JUNO_RCVD || FORGED_GW05_RCVD || FORGED_MX_HOTMAIL))
+
+meta MULTI_FORGED             ((FORGED_AOL_RCVD + FORGED_HOTMAIL_RCVD + FORGED_EUDORAMAIL_RCVD + FORGED_YAHOO_RCVD + FORGED_JUNO_RCVD + FORGED_GW05_RCVD) > 1)
+
+# Sep 23 2002 jm: another spamhaus rule
+header RCVD_BY_QVES_COM		Received =~ /by email.qves.com with Microsoft/
+describe RCVD_BY_QVES_COM	Sent by a known spamhaus (qves)
 
 header NONEXISTENT_CHARSET	Content-Type =~ /charset=.?DEFAULT/
 describe NONEXISTENT_CHARSET	Character set doesn't exist
@@ -509,6 +510,8 @@ header X_STORMPOST_TO		exists:X-Stormpost-To
 header X_X_PRESENT		exists:X-x
 header X_FIX_PRESENT            exists:X-Fix
 header COMPLAIN_TO		exists:Complain-To
+header X_VMP_TEXT               exists:X-VMP-Text
+header X_GCMULTI                exists:X-GCMulti
 
 header   MIME_ODD_CASE		ALL =~ /\nMiME-Version: /s
 describe MIME_ODD_CASE		MiME-Version header (oddly capitalized)
@@ -678,8 +681,21 @@ describe AZOOGLE		From azoogle.com, azogle.com, etc.
 header SUBJECT_APPROVED		Subject =~ /approv(?:ed|al).?[.!*]/i
 describe SUBJECT_APPROVED	Subject talks about being approved
 
+header SUBJ_HAS_TIME_ID         Subject =~ /\sTime[: ]+\d+:\d+:\d+ [AP]M\s*$/i
+describe SUBJ_HAS_TIME_ID       Subject has a Time ID
+
 header __OPT_HEADER_SUBJ	ALL =~ /^(?:Resent-)?Subject:.*opt.?(in|out|oem|ed|ion-in|[\d@])(?:\b|\d|\@)/im
 header __OPT_HEADER_ALL		ALL =~ /opt.?(?:in|out|oem|ed|ion-in|[\d@])(?:\b|\d|\@)/i
 meta OPT_HEADER			(__OPT_HEADER_ALL && !__OPT_HEADER_SUBJ)
 describe OPT_HEADER		Headers include an "opt"ed phrase
+
+# Most/all of these require that From addresses do not start with numbers.
+header FROM_NUM_AT_WEBMAIL    From:addr =~ /^\d\S+\@(?:msn\.com|flashmail\.com|mailexcite\.com|prodigy\.net|yahoo\.\S+|hotmail\.com|eudoramail\.com|aol\.com|excite\.com|email\.com|earthlink\.net|geocities\.com|hknetmail\.com|angelfire\.com)/i
+describe FROM_NUM_AT_WEBMAIL  From address is webmail, but starts with a number
+
+# thanks to Jason Staples for this suggestion. Sendmail and other MTAs
+# will often query the ident server on a relay; Squid proxies should not be
+# sending mail.
+header RECEIVED_IDENT_SQUID      Received =~ /ident[:=]squid\b/i
+describe RECEIVED_IDENT_SQUID    Message was sent by a Squid HTTP proxy
 

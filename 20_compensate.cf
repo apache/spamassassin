@@ -195,14 +195,9 @@ body EMAIL_ATTRIBUTION         /^(?:\"|--- )?\w.{4,80} (?:wrote|writes):\s*(?:$|
 describe EMAIL_ATTRIBUTION	Contains what looks like an email attribution
 tflags EMAIL_ATTRIBUTION	nice
 
-
-
 rawbody QUOTED_EMAIL_TEXT	/^>+ +.{60,72}$/
 describe QUOTED_EMAIL_TEXT	Contains what looks like a quoted email text
 tflags QUOTED_EMAIL_TEXT	nice
-
-# matt@nightrealms.com (Matthew Cline)
-
 
 
 # spamassassin@davidgreenaway.com (David Greenaway)
@@ -259,3 +254,7 @@ test FWD_MSG ok Subject: Fwd: Dracula
 test FWD_MSG ok Subject: [landho] Fwd: tell rod
 test FWD_MSG fail Subject: Fwd:Pure Opt-In for half the price
 test FWD_MSG fail Subject: Re: RE: FWD: search results        .       .       .
+
+#  3.351   0.0060   4.5117    0.001   0.97   -1.00  T_MSGID_GOOD_EXCHANGE
+header MSGID_GOOD_EXCHANGE    Message-Id =~ /^<[A-Z]{28}\.\S+\@\S+>$/
+
