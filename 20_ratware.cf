@@ -149,7 +149,6 @@ describe FORGED_MUA_THEBAT	Forged mail pretending to be from The Bat! (mid)
 describe FORGED_MUA_THEBAT_CS	Forged mail pretending to be from The Bat! (charset)
 describe FORGED_MUA_THEBAT_BOUND Forged mail pretending to be from The Bat! (boundary)
 
-
 meta FORGED_OUTLOOK_HTML	(__OUTLOOK_MUA && __MIME_HTML_ONLY)
 describe FORGED_OUTLOOK_HTML	Outlook can't send HTML message only
 
@@ -178,14 +177,17 @@ body __MIME_HTML                eval:check_for_mime_html()
 header __CTYPE_HTML             Content-Type =~ /text\/html/i
 header __ANY_AOL_MUA            X-Mailer =~ /^AOL\b/
 header __ANY_IMS_MUA            X-Mailer =~ /^Internet Mail Service\b/
+header __ANY_OUTLOOK_MUA	X-Mailer =~ /^Microsoft Outlook\b/
 body __TAG_EXISTS_BODY          eval:html_tag_exists('body')
 body __TAG_EXISTS_HEAD          eval:html_tag_exists('head')
 body __TAG_EXISTS_HTML          eval:html_tag_exists('html')
 body __TAG_EXISTS_META          eval:html_tag_exists('meta')
 
-meta HTML_FAKED_AOL		(__ANY_AOL_MUA && __MIME_HTML && !__TAG_EXISTS_HTML)
-describe HTML_FAKED_AOL		AOL can't send HTML in this format
+meta FORGED_AOL_TAGS		(__ANY_AOL_MUA && __MIME_HTML && !__TAG_EXISTS_HTML)
+describe FORGED_AOL_TAGS	AOL can't send HTML in this format
 
-meta HTML_FAKED_IMS		(__ANY_IMS_MUA && __MIME_HTML && !(__TAG_EXISTS_BODY && __TAG_EXISTS_HEAD && __TAG_EXISTS_HTML && __TAG_EXISTS_META))
-describe HTML_FAKED_IMS		IMS can't send HTML in this format
+meta FORGED_IMS_TAGS		(__ANY_IMS_MUA && __MIME_HTML && !(__TAG_EXISTS_HTML && __TAG_EXISTS_HEAD && __TAG_EXISTS_META && __TAG_EXISTS_BODY))
+describe FORGED_IMS_TAGS	IMS can't send HTML in this format
 
+meta FORGED_OUTLOOK_TAGS	(__ANY_OUTLOOK_MUA && __MIME_HTML && !(__TAG_EXISTS_HTML && __TAG_EXISTS_HEAD && __TAG_EXISTS_META && __TAG_EXISTS_BODY))
+describe FORGED_OUTLOOK_TAGS	Outlook can't send HTML in this format

@@ -70,11 +70,15 @@ meta T_MIME_HTML_NO_DOCTYPE	(__MIME_HTML && !__HTML_TAG_EXISTS_DOCTYPE)
 # that rule
 # Apr 22 2003 jm: removed __TAG_EXISTS_DIV from OUTLOOK, as 'MS Exchange
 # Server version 6.0.4630.0' does not insert that, causing FPs
-header __ANY_OUTLOOK_MUA	X-Mailer =~ /^Microsoft Outlook\b/
-header __ANY_QUALCOMM_MUA	X-Mailer =~ /^QUALCOMM\b/
-meta T_HTML_FAKED_OUTLOOK	(__ANY_OUTLOOK_MUA && __MIME_HTML && !(__TAG_EXISTS_BODY && __TAG_EXISTS_HEAD && __TAG_EXISTS_HTML && __TAG_EXISTS_META))
 # my FPs for this should hopefully be fixed now
-meta T_HTML_FAKED_QUALCOMM	(__ANY_QUALCOMM_MUA && __MIME_HTML && !__TAG_EXISTS_HTML)
+# ... place with brother rule in 20_ratware.cf
+header __ANY_QUALCOMM_MUA	X-Mailer =~ /^QUALCOMM\b/
+meta T_FORGED_QUALCOMM_TAGS	(__ANY_QUALCOMM_MUA && __MIME_HTML && !__TAG_EXISTS_HTML)
+
+# bug 1380
+# 2003-05-09 quinlan: fixed rule
+header __THEBAT_MUA		X-Mailer =~ /The Bat!/
+meta T_FORGED_THEBAT_HTML	(__THEBAT_MUA && __MIME_HTML_ONLY)
 
 # MIME Content-Transfer-Encoding control rules
 rawbody T_MIME_BASE64			eval:check_for_mime('t_mime_base64_count')
@@ -85,9 +89,6 @@ rawbody T_MIME_BASE64_BLANKS		eval:check_for_mime('t_mime_base64_blanks')
 rawbody T_MIME_BASE64_ILLEGAL		eval:check_for_mime('t_mime_base64_illegal')
 rawbody T_MIME_BASE64_WITHOUT_NAME	eval:check_for_mime('t_mime_base64_without_name')
 rawbody T_MIME_QP_INLINE_NO_CHARSET	eval:check_for_mime('t_mime_qp_inline_no_charset')
-
-# bug 1380
-meta T_FAKED_THEBAT		(__THEBAT_MUA && __MIME_HTML_ONLY)
 
 # quinlan: 2003-03-15
 # these all appear in the same low-scoring spammer for me, but they
