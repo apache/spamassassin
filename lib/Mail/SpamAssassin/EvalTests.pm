@@ -325,17 +325,17 @@ sub check_for_forged_hotmail_received_headers {
 sub check_for_msn_groups_headers {
   my ($self) = @_;
 
-  return 0 unless ($self->get('To') =~ /<(\S+)\@groups\.msn\.com>/);
+  return 0 unless ($self->get('To') =~ /<(\S+)\@groups\.msn\.com>/i);
   my $listname = $1;
 
   # from Theo Van Dinter, see
   # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=591
-  return 0 unless $self->get('message-id') =~ /^<$listname-\S+\@groups\.msn\.com>/;
-  return 0 unless $self->get('x-loop') =~ /^notifications\@groups\.msn\.com/;
-  return 0 unless $self->get('return-path') =~ /<$listname-bounce\@groups\.msn\.com>/;
+  return 0 unless $self->get('Message-Id') =~ /^<$listname-\S+\@groups\.msn\.com>/;
+  return 0 unless $self->get('X-Loop') =~ /^notifications\@groups\.msn\.com/;
+  return 0 unless $self->get('Return-Path') =~ /<$listname-bounce\@groups\.msn\.com>/;
 
   $_ = $self->get ('Received');
-  return 0 if ! /^\s+from mail pickup service by groups\.msn\.com\b/;
+  return 0 if !/from mail pickup service by groups\.msn\.com\b/;
   return 1;
 
 # MSN Groups
