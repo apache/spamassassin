@@ -3,6 +3,9 @@
 cp spam.log.orig spam.log
 cp nonspam.log.orig nonspam.log
 
+sed -e 's/const double nybias = .*/const double nybias = 1.0;/' craig-evolve.cxx > c.cxx
+mv -f c.cxx craig-evolve.cxx
+
 make craig-evolve
 mpirun -np 2 craig-evolve
 
@@ -13,6 +16,9 @@ cp craig-evolve.scores craig-evolve.scores.all
 cp trueneg.log nonspam.log
 cp falseneg.log spam.log
 
+sed -e 's/const double nybias = .*/const double nybias = 20.0;/' craig-evolve.cxx > c.cxx
+mv -f c.cxx craig-evolve.cxx
+
 make craig-evolve
 mpirun -np 2 craig-evolve
 
@@ -21,6 +27,9 @@ cp craig-evolve.scores.all craig-evolve.scores
 
 cp truepos.log spam.log
 cp falsepos.log nonspam.log
+
+sed -e 's/const double nybias = .*/const double nybias = 20.0;/' craig-evolve.cxx > c.cxx
+mv -f c.cxx craig-evolve.cxx
 
 make craig-evolve
 mpirun -np 2 craig-evolve
