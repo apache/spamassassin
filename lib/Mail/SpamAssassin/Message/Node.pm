@@ -282,8 +282,15 @@ sub decode {
     elsif ( $encoding eq 'base64' ) {
       dbg("decoding: base64");
 
-      # Generate the decoded output
-      $self->{'decoded'} = [ Mail::SpamAssassin::Util::base64_decode(join("", @{$self->{'raw'}})) ];
+      # if it's not defined or is 0, do the whole thing, otherwise only decode
+      # a portion
+      if ($bytes) {
+        return Mail::SpamAssassin::Util::base64_decode(join("", @{$self->{'raw'}}), $bytes);
+      }
+      else {
+        # Generate the decoded output
+        $self->{'decoded'} = [ Mail::SpamAssassin::Util::base64_decode(join("", @{$self->{'raw'}})) ];
+      }
 
       # If it's a type text or message, split it into an array of lines
       if ( $self->{'type'} =~ m@^(?:text|message)\b/@i ) {
