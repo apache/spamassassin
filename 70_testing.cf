@@ -157,17 +157,8 @@ rawbody T_ENTITY_OTHER2_R	/\&\#(?:33|39|40|46|47)\;/
 body T_ENTITY_OTHER2_B		/\&\#(?:33|39|40|46|47)\;/
 meta T_ENTITY_OTHER2_M		(T_ENTITY_OTHER2_R || T_ENTITY_OTHER2_B)
 
-########################################################################
-# HTML title rules
-
-# this won't work well until we parse HTML documents separately
-body T_HTML_TITLE_EXTRA		eval:html_test('title_extra')
-
-# possible replacement rules
-body T_HTML_TITLE_UNTITLED_2	eval:html_title('=~ /new page \d+/i')
-body T_HTML_TITLE_UNTITLED_3	eval:html_title('=~ /untitled|new page \d+/i')
-
-# according to the postmaster at qualcomm, no mail is sent from eudora.com, but it's heavily joe-jobbed ...
+# according to the postmaster at qualcomm, no mail is sent from
+eudora.com, but it's heavily joe-jobbed ...
 header T_FROM_EUDORA            From:addr =~ /\@eudora\.com/i
 
 # similar concept for Delphi.com.  Was an ISP, now a car company!
@@ -178,27 +169,7 @@ header T_FROM_DELPHI_BASIC	From:addr =~ /\@delphi\.com/i
 
 body T_RANDO_MIZE		/\$RAN[DOMI]*\s+[DOMI]*ZE/
 
-# more open Yahoo! redirectors
-uri T_YAHOO_SRD_REDIR_1		m{^http://srd\.yahoo\.com/}i
-uri T_YAHOO_SRD_REDIR_2		m{^http://srd\.yahoo\.com/.*(?:[^:/?\#]+)://}i
-uri T_YAHOO_SRD_REDIR_3		m{^http://(\S+\.)*srd\.yahoo\.com/}i
-uri T_YAHOO_SRD_REDIR_4		m{^http://(\S+\.)*srd\.yahoo\.com/.*(?:[^:/?\#]+)://}i
-uri T_YAHOO_SRD_REDIR_5		m{^http://.*\bsrd\.yahoo\.com/}i
-uri T_YAHOO_SRD_REDIR_6		m{^http://.*\bsrd\.yahoo\.com/.*(?:[^:/?\#]+)://}i
-uri T_YAHOO_DRS_REDIR_1		m{^http://drs\.yahoo\.com/}i
-uri T_YAHOO_DRS_REDIR_2		m{^http://drs\.yahoo\.com/.*(?:[^:/?\#]+)://}i
-uri T_YAHOO_DRS_REDIR_3		m{^http://(\S+\.)*drs\.yahoo\.com/}i
-uri T_YAHOO_DRS_REDIR_4		m{^http://(\S+\.)*drs\.yahoo\.com/.*(?:[^:/?\#]+)://}i
-uri T_YAHOO_DRS_REDIR_5		m{^http://.*\bdrs\.yahoo\.com/}i
-uri T_YAHOO_DRS_REDIR_6		m{^http://.*\bdrs\.yahoo\.com/.*(?:[^:/?\#]+)://}i
-uri T_YAHOO_RD_REDIR_1		m{^http://rd\.yahoo\.com/}i
-uri T_YAHOO_RD_REDIR_2		m{^http://rd\.yahoo\.com/.*(?:[^:/?\#]+)://}i
-uri T_YAHOO_RD_REDIR_3		m{^http://(\S+\.)*rd\.yahoo\.com/}i
-uri T_YAHOO_RD_REDIR_4		m{^http://(\S+\.)*rd\.yahoo\.com/.*(?:[^:/?\#]+)://}i
-uri T_YAHOO_RD_REDIR_5		m{^http://.*\brd\.yahoo\.com/}i
-uri T_YAHOO_RD_REDIR_6		m{^http://.*\brd\.yahoo\.com/.*(?:[^:/?\#]+)://}i
-
-# good Yahoo! forgery rule, but is it going to be stable?
+# great Yahoo! forgery rule, but is it going to be stable?
 header __YAHOO_MSGID		Message-ID =~ /\@yahoo\.com>/i
 header __YAHOO_BEGINNING	Message-ID =~ /<\S+(?:\.\S+|\.\S+\.\S+\.\S+)\@/
 meta T_FORGED_YAHOO_MSGID	(__YAHOO_MSGID && !__YAHOO_BEGINNING)
@@ -495,21 +466,11 @@ header T_SUBJ_VICODIN		Subject =~ /v.{0,2}i.{0,2}c.{0,6}d.{0,2}i.{0,2}n/i
 header T_SUBJ_SOMA		Subject =~ /s.{0,2}o.{0,2}m.{0,2}a/i
 header T_SUBJ_PHENTER		Subject =~ /p.{0,2}h.{0,6}t.{0,2}e.{0,2}r.{0,2}m/i
 
-# No legit mailer claims that their mailserver has no name.
-# However, one build of the T_MSGID_EVIL_SPAM_1 ratware does.
-header T_RCVD_BY_IP	Received =~ /from \S+ \[\S+\] by [0-9\.]+ with ESMTP id/
-
-# this ratware forges dates in 2002!  Also a T_MSGID_EVIL_SPAM_1
-# variant
-header T_RCVD_ESMTP_IN_TIMEWARP	Received =~ /with ESMTP id <\d+-\d+>; \S\S\S, *\d+ \S\S\S 2002 \d\d:\d\d:\d\d [-+]/
-
 # partial messages; currently-theoretical attack
 header T_FRAGMENTED_MESSAGE	Content-Type =~ /message\/partial/i
 
 # affiliateid, aff_id, aff_sub_id etc.
 uri T_URI_AFFILIATE		/aff\w+id=/i
-
-body T_DEEP_DISC_MEDS		/\bdeep discount med(?:s|ications)\b/i
 
 # Al Iverson reports: "forged, now no longer in use"
 header T_REGSOFT        Received =~ /hd\.regsoft\.net/i
