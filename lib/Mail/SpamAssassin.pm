@@ -78,6 +78,7 @@ $DEBUG = 0;
         ./spamassassin.cf
         ../spamassassin.cf
         __installsitelib__/spamassassin.cf
+	__installvendorlib__/spamassassin.cf
 );
 
 @site_rules_path = qw(
@@ -90,6 +91,7 @@ $DEBUG = 0;
         ./spamassassin.prefs 
         ../spamassassin.prefs
         __installsitelib__/spamassassin.prefs
+	__installvendorlib__/spamassassin.prefs
 );
 
 @default_userprefs_path = qw(
@@ -504,6 +506,7 @@ sub sed_path {
   my $self = shift;
   my $path = shift;
   $path =~ s/__installsitelib__/$Config{installsitelib}/gs;
+  $path =~ s/__installvendorlib__/$Config{installvendorlib}/gs;
   $path =~ s/^\~([^\/]*)/$self->expand_name($1)/es;
   $path;
 }
