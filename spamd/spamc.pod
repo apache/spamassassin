@@ -7,7 +7,7 @@ spamc - client for spamd
 
 =over
 
-=item spamc [-c] [-d host] [-f] [-h] [-S] [-p port] [-s max_size] [-t tout] [-u username] [-e command [args]]
+=item spamc [options] < message
 
 =back
 
@@ -110,6 +110,13 @@ This argument has been semi-obsoleted.  To have spamd use per-user-config
 files, run spamc as the user whose config files spamd should load.  If you're
 running spamc as some other user, though, (eg. root, mail, nobody, cyrus, etc.)
 then you can still use this flag.
+
+=item B<-x>
+
+Don't use the 'safe fallback' error-recovery method, which passes through the
+unaltered message if an error occurs.  Instead, exit with a B<temporary
+failure> error code (exit code 75), and let the MTA queue up the mails for a
+retry later.
 
 =back
 
