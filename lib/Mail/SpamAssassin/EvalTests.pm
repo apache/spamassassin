@@ -2692,6 +2692,9 @@ sub check_messageid_not_usable {
   $_ = $self->get ("Received");
   return 1 if /\/CWT\/DCE\)/;
 
+  # Apr  2 2003 jm: iPlanet rewrites lots of stuff, including Message-IDs
+  return 1 if /iPlanet Messaging Server/;
+
   # too old; older versions of clients used different formats
   return 1 if ($self->received_within_months('6','undef'));
 
