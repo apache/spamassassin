@@ -355,8 +355,8 @@ sub tokenize {
     push(@tokens, $self->tokenize_line ($value, "H$prefix:", 0));
   }
 
-  # Go ahead and uniq the array
-  my %tokens = map { $_ => 1 } @tokens;
+  # Go ahead and uniq the array, skip null tokens (can happen sometimes)
+  my %tokens = map { $_ => 1 } grep(length, @tokens);
 
   # return the keys == tokens ...
   keys %tokens;
