@@ -592,3 +592,7 @@ describe FROM_NONSENDING_DOMAIN	Message is from domain that never sends email
 
 header SUBJ_2_NUM_PARENS        Subject =~ /^\(\d+\).*\(\d+\)\s*$/
 describe SUBJ_2_NUM_PARENS      Subject contains common spam sign (2 numbers)
+
+# thanks to David Ritz for passing this on; ready for post-3.0.0
+header UNCLOSED_BRACKET		ALL =~ /\[\d+\r?\n/s
+describe UNCLOSED_BRACKET	Headers contain an unclosed bracket
