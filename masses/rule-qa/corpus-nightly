@@ -63,5 +63,5 @@ uptime
 date > test.end
 
 # submit results
-rsync -CPcvuzb --timeout=60 ham.log $username@rsync.kluge.net::corpus/ham-$net$username.log
-rsync -CPcvuzb --timeout=60 spam.log $username@rsync.kluge.net::corpus/spam-$net$username.log
+rsync -CPcvuzb --timeout=60 ham.log $username@rsync.spamassassin.org::corpus/ham-$net$username.log
+rsync -CPcvuzb --timeout=60 spam.log $username@rsync.spamassassin.org::corpus/spam-$net$username.log

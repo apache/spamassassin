@@ -70,7 +70,7 @@ sub init {
 
 sub update {
     chdir $opt{corpus};
-    system "rsync -CPcvuzbt --timeout=60 $opt{username}" . '@rsync.kluge.net::corpus/* .';
+    system "rsync -CPcvuzbt --timeout=60 $opt{username}" . '@rsync.spamassassin.org::corpus/* .';
 }
 
 sub locate {
