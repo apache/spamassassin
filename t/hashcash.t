@@ -2,7 +2,13 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("hashcash");
-use Test; BEGIN { plan tests => 2 };
+
+# we need DB_File to support the double-spend db.
+use constant HAS_DB_FILE => eval { require DB_File; };
+
+use Test; BEGIN { plan tests => HAS_DB_FILE ? 2 : 0 };
+
+exit unless HAS_DB_FILE;
 
 # ---------------------------------------------------------------------------
 
