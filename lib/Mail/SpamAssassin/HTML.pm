@@ -588,6 +588,21 @@ sub html_tests {
       $self->examine_text_style($1, $2);
     }
   }
+  if ($tag eq "img" && exists $self->{inside}{a} && $self->{inside}{a} > 0) {
+    $self->{anchor}->[$self->{anchor_index}] .= "<img>\n";
+    if (exists $self->{anchor_last}) {
+      if ($self->{anchor_last} =~ /\.(?:pl|cgi|php|asp|jsp|cfm)\b/i) {
+	$self->put_results(t_anchor_image_bug_1 => 1);
+      }
+      if ($self->{anchor_last} =~ /\?/) {
+	$self->put_results(t_anchor_image_bug_2 => 1);
+      }
+      if ($self->{anchor_last} =~ /\=/) {
+	$self->put_results(t_anchor_image_bug_3 => 1);
+      }
+    }
+  }
+
   if ($tag eq "img" && exists $attr->{width} && exists $attr->{height}) {
     my $width = 0;
     my $height = 0;
@@ -625,6 +640,7 @@ sub html_tests {
 
   # special text delimiters - <a> and <title>
   if ($tag eq "a") {
+    $self->{anchor_last} = (exists $attr->{href} ? $attr->{href} : "");
     $self->{anchor_index}++;
     $self->{anchor}->[$self->{anchor_index}] = "";
   }
