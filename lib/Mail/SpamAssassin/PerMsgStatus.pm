@@ -1563,7 +1563,6 @@ sub get_uri_list {
   # remove duplicates
   my %uris = map { $_ => 1 } @uris, @nuris;
   @uris = keys %uris;
-  @nuris = undef;
 
   # get domain list
   my %domains;
