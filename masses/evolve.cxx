@@ -102,22 +102,26 @@ void counthitsfromscores (void) {
     }
 
     // divide by 50 so we get e.g.
-    // 1.01 for a positive spam 
+    // 1.02 for a positive spam which is 1 pt over the threshold
     if (is_spam[file]) {
       if (hits > threshold) {
 	yy++;
-	yyscore += ((threshold - hits) / 50.0) + 1.0;
+	// maximise diff between hits and threshold
+	yyscore += ((hits - threshold) / 50.0) + 1.0;
       } else {
 	yn++;
+	// penalise diff between hits and threshold. bigger is worse
 	ynscore += ((threshold - hits) / 50.0) + 1.0;
       }
     } else {
       if (hits > threshold) {
 	ny++;
+	// penalise diff between hits and threshold. bigger is worse
 	nyscore += ((hits - threshold) / 50.0) + 1.0;
       } else {
 	nn++;
-	nnscore += ((hits - threshold) / 50.0) + 1.0;
+	// maximise diff between hits and threshold
+	nnscore += ((threshold - hits) / 50.0) + 1.0;
       }
     }
   }
