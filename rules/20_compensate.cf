@@ -1,5 +1,5 @@
 # SpamAssassin rules file: compensation for common false positives.
-# $Id: 20_compensate.cf,v 1.49.2.8 2002/09/04 15:33:01 jmason Exp $
+# $Id: 20_compensate.cf,v 1.49.2.9 2002/09/04 21:58:51 quinlan Exp $
 ###########################################################################
 # Header compensation tests
 
@@ -42,10 +42,12 @@ header   MAJORDOMO              Subject =~ /Majordomo (?:request )?results/
 describe MAJORDOMO              From Majordomo
 tflags MAJORDOMO		nice
 
+header REFERENCES		References =~ /^(<(?:[a-zA-Z0-9.!\#\$%&'*\+\/=?\^_{}|~-]+|\".+\")\@(?:[a-zA-Z0-9.-]+|\[\d{1,3}(?:\.\d{1,3}){3}\])>\s*)+$/
+describe REFERENCES		Has a valid-looking References header
+
 # these headers have very low correlation with spam
 header CRON_ENV                 exists:X-Cron-Env
 header IN_REP_TO                exists:In-Reply-To
-header REFERENCES               exists:References
 header USER_AGENT               exists:User-Agent
 header X_AUTH_WARNING           exists:X-Authentication-Warning
 header X_MAILING_LIST           exists:X-Mailing-List
@@ -54,7 +56,6 @@ header X_ACCEPT_LANG            exists:X-Accept-Language
 header RESENT_TO                exists:Resent-To
 tflags CRON_ENV                 nice
 tflags IN_REP_TO                nice
-tflags REFERENCES               nice
 tflags USER_AGENT               nice
 tflags X_AUTH_WARNING           nice
 tflags X_MAILING_LIST           nice
