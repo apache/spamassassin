@@ -35,6 +35,9 @@ SPAMASSASSIN RELEASE PROCEDURE
   on HEAD appearing in branches, if those revisions are in files created
   after the branch was created.   (I hate cvs -- jm)
 
+- run "make disttest" to ensure all tests pass once the distribution
+  is fully packaged.
+
 - run "./build/update_stable" to build the tar.gz files.
 
 - by default, they're written to ~/spamassassin.taint.org/released/ .
@@ -110,6 +113,6 @@ SPAMASSASSIN RELEASE PROCEDURE
 - Approve the posting to SpamAssassin-Announce (the list admins
   will get a mail indicating how to do this.)
 
-lastmod: May 10 2003 jm
+lastmod: Jun 25 2003 jm
 
 // vim:tw=74:
