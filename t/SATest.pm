@@ -292,6 +292,43 @@ sub spamcrun {
   ($sa_exitcode == 0);
 }
 
+# like spamcrun but without the exitcode == 0 checking, since learn doesn't exit with a 0
+sub spamclearnrun {
+  my $args = shift;
+  my $read_sub = shift;
+  my $capture_stderr = shift;
+
+  if (defined $ENV{'SC_ARGS'}) {
+    $args = $ENV{'SC_ARGS'} . " ". $args;
+  }
+
+  my $spamcargs;
+  if($args !~ /\b(?:-p\s*[0-9]+|-U)\b/)
+  {
+    $spamcargs = "$spamc -d $spamdhost -p $spamdport $args";
+  }
+  else
+  {
+    $spamcargs = "$spamc $args";
+  }
+  $spamcargs =~ s!/!\\!g if ($^O =~ /^MS(DOS|Win)/i);
+
+  print ("\t$spamcargs\n");
+  if ($capture_stderr) {
+    system ("$spamcargs > log/$testname.out 2>&1");
+  } else {
+    system ("$spamcargs > log/$testname.out");
+  }
+
+  $sa_exitcode = ($?>>8);
+ 
+  %found = ();
+  %found_anti = ();
+  &checkfile ("$testname.out", $read_sub) if (defined $read_sub);
+
+  return $sa_exitcode;
+}
+
 sub spamcrun_background {
   my $args = shift;
   my $read_sub = shift;

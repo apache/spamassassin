@@ -769,6 +769,7 @@ _handle_spamd_header(struct message *m, int flags, char *buf, int len)
 {
     char is_spam[6];
     char s_str[21], t_str[21];
+    char is_learned[4];
 
     UNUSED_VARIABLE(len);
 
@@ -815,12 +816,26 @@ _handle_spamd_header(struct message *m, int flags, char *buf, int len)
 	}
 	return EX_OK;
     }
+    else if (sscanf(buf, "Learned: %3s", is_learned) == 1) {
+        if(strcmp(is_learned, "yes") == 0 || strcmp(is_learned, "Yes") == 0) {
+	  m->is_learned = 1;
+	}
+	else if(strcmp(is_learned, "no") == 0 || strcmp(is_learned, "No") == 0) {
+	  m->is_learned = 0;
+	}
+	else {
+	  libspamc_log(flags, LOG_ERR, "spamd responded with bad Learned-state '%s'",
+		       buf);
+	  return EX_PROTOCOL;
+	}
+	return EX_OK;
+    }
 
     libspamc_log(flags, LOG_ERR, "spamd responded with bad header '%s'", buf);
     return EX_PROTOCOL;
 }
 
-int message_filter(struct transport *tp, const char *username,
+int message_filter(struct transport *tp, const char *username, int learntype,
 		   int flags, struct message *m)
 {
     char buf[8192];
@@ -829,6 +844,7 @@ int message_filter(struct transport *tp, const char *username,
     int sock = -1;
     int rc;
     char versbuf[20];
+    char strlearntype[1];
     float version;
     int response;
     int failureval;
@@ -859,9 +875,8 @@ int message_filter(struct transport *tp, const char *username,
     m->out = m->outbuf;
     m->out_len = 0;
 
-
     /* Build spamd protocol header */
-    if (flags & SPAMC_CHECK_ONLY)
+    if(flags & SPAMC_CHECK_ONLY)
 	strcpy(buf, "CHECK ");
     else if (flags & SPAMC_REPORT_IFSPAM)
 	strcpy(buf, "REPORT_IFSPAM ");
@@ -869,6 +884,8 @@ int message_filter(struct transport *tp, const char *username,
 	strcpy(buf, "REPORT ");
     else if (flags & SPAMC_SYMBOLS)
 	strcpy(buf, "SYMBOLS ");
+    else if (flags & SPAMC_LEARN )
+        strcpy(buf, "LEARN ");
     else
 	strcpy(buf, "PROCESS ");
 
@@ -881,6 +898,21 @@ int message_filter(struct transport *tp, const char *username,
     strcat(buf, PROTOCOL_VERSION);
     strcat(buf, "\r\n");
     len = strlen(buf);
+
+
+    if (flags & SPAMC_LEARN) {
+        if ((learntype > 2) | (learntype < 0 )) {
+	  free(m->out);
+  	  m->out = m->msg;
+  	  m->out_len = m->msg_len;
+	  return EX_OSERR;
+	}
+	sprintf(strlearntype,"%d",learntype);
+	strcpy(buf + len, "Learn-type: ");
+	strcat(buf + len, strlearntype);
+	strcat(buf + len, "\r\n");
+	len += strlen(buf + len);
+    }
 
     if (username != NULL) {
 	if (strlen(username) + 8 >= (bufsiz - len)) {
@@ -956,6 +988,7 @@ int message_filter(struct transport *tp, const char *username,
     m->score = 0;
     m->threshold = 0;
     m->is_spam = EX_TOOBIG;
+    m->is_learned = 0;
     while (1) {
 	failureval =
 	    _spamc_read_full_line(m, flags, ssl, sock, buf, &len, bufsiz);
@@ -983,6 +1016,12 @@ int message_filter(struct transport *tp, const char *username,
 	    failureval = EX_PROTOCOL;
 	    goto failure;
 	}
+	return EX_OK;
+    }
+    else if (flags & SPAMC_LEARN) {
+        shutdown(sock, SHUT_RD);
+	closesocket(sock);
+	sock = -1;
 	return EX_OK;
     }
     else {
@@ -1054,7 +1093,7 @@ int message_filter(struct transport *tp, const char *username,
 }
 
 
-int message_process(struct transport *trans, char *username, int max_size,
+int message_process(struct transport *trans, char *username, int learntype, int max_size,
 		    int in_fd, int out_fd, const int flags)
 {
     int ret;
@@ -1066,7 +1105,7 @@ int message_process(struct transport *trans, char *username, int max_size,
     ret = message_read(in_fd, flags, &m);
     if (ret != EX_OK)
         goto FAIL;
-    ret = message_filter(trans, username, flags, &m);
+    ret = message_filter(trans, username, learntype, flags, &m);
     if (ret != EX_OK)
         goto FAIL;
     if (message_write(out_fd, &m) < 0)
@@ -1091,6 +1130,7 @@ int message_process(struct transport *trans, char *username, int max_size,
     }
 }
 
+
 void message_cleanup(struct message *m)
 {
     if (m->outbuf)
@@ -1103,9 +1143,9 @@ void message_cleanup(struct message *m)
 }
 
 /* Aug 14, 2002 bj: Obsolete! */
-int process_message(struct transport *tp, char *username, int max_size,
-                    int in_fd, int out_fd, const int my_check_only,
-                    const int my_safe_fallback)
+int process_message(struct transport *tp, char *username, int learntype,
+		    int max_size, int in_fd, int out_fd,
+		    const int my_check_only, const int my_safe_fallback)
 {
     int flags;
 
@@ -1115,7 +1155,7 @@ int process_message(struct transport *tp, char *username, int max_size,
     if (my_safe_fallback)
         flags |= SPAMC_SAFE_FALLBACK;
 
-    return message_process(tp, username, max_size, in_fd, out_fd, flags);
+    return message_process(tp, username, learntype, max_size, in_fd, out_fd, flags);
 }
 
 /*
