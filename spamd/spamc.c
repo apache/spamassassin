@@ -258,7 +258,7 @@ void read_args(int argc, char **argv, char **hostname, int *port)
 int main(int argc,char **argv)
 {
   int port = 22874;
-  char *hostname = "localhost";
+  char *hostname = "127.0.0.1";
 
   srand(time(NULL));
   openlog ("spamc", LOG_CONS|LOG_PID, LOG_MAIL);
