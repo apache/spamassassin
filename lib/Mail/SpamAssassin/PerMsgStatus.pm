@@ -343,6 +343,13 @@ sub rewrite_as_spam {
     $_ ||= '';
 
     my $tag = $self->{conf}->{subject_tag};
+
+    my $hit = sprintf ("%05.2f", $self->{hits});
+    $tag =~ s/_HITS_/$hit/;
+
+    my $reqd = sprintf ("%05.2f", $self->{conf}->{required_hits});
+    $tag =~ s/_REQD_/$reqd/;
+    
     s/^(?:\Q${tag}\E |)/${tag} /g;
 
     if (defined $SUBJ) {        # keep the uppercase subject header
