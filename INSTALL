@@ -336,12 +336,20 @@ skipped.
 	install Net::DNS
 	quit
 
+
   - Mail::SPF::Query     (from CPAN)
 
     Used to check DNS Sender Policy Framework (SPF) records to fight email
     address forgery and make it easier to identify spams.
 
     Net::DNS version 0.34 or higher is required to use Mail::SPF::Query.
+
+
+  - IP::Country::Fast    (from CPAN)
+
+    Used by the RelayCountry plugin (not enabled by default) to determine
+    the domain country codes of each relay in the path of an email.
+
 
   - Razor           http://razor.sourceforge.net/
 
@@ -474,8 +482,8 @@ skipped.
 
   - Time::HiRes    (from CPAN)
 
-    If this module is installed, the processing times are logged more
-    precisely by spamd.
+    If this module is installed, the processing times are logged/reported
+    more precisely.
 
 
   - DBI *and* DBD driver/modules for your database  (from CPAN)

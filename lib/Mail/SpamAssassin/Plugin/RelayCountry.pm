@@ -6,6 +6,10 @@ RelayCountry - add message metadata indicating the country code of each relay
 
   loadplugin     Mail::SpamAssassin::Plugin::RelayCountry
 
+=head1 REQUIREMENT
+
+This plugin requires the IP::Country::Fast module from CPAN.
+
 =cut
 
 package Mail::SpamAssassin::Plugin::RelayCountry;
