@@ -1198,11 +1198,11 @@ sub _check_unique_words {
     # copy to avoid changing @$body
     my $line = $_;
     # from tokenize_line in Bayes.pm
-    tr/-A-Za-z0-9,\@\*\!_'"\$.\241-\377 / /cs;
-    s/(\w)(\.{3,6})(\w)/$1 $2 $3/gs;
-    s/(\w)(\-{2,6})(\w)/$1 $2 $3/gs;
-    s/(?:^|\.\s+)([A-Z])([^A-Z]+)(?:\s|$)/ ' '. (lc $1) . $2 . ' ' /ge;
-    for my $token (split) {
+    $line =~ tr/-A-Za-z0-9,\@\*\!_'"\$.\241-\377 / /cs;
+    $line =~ s/(\w)(\.{3,6})(\w)/$1 $2 $3/gs;
+    $line =~ s/(\w)(\-{2,6})(\w)/$1 $2 $3/gs;
+    $line =~ s/(?:^|\.\s+)([A-Z])([^A-Z]+)(?:\s|$)/ ' '.(lc $1).$2.' '/ge;
+    for my $token (split(' ', $line)) {
       $count{$token}++;
     }
   }
