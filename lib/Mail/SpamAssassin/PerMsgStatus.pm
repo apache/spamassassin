@@ -773,7 +773,7 @@ sub get_decoded_stripped_body_text_array {
   # There might be things in comments we'd want to look at, like
   # SCRIPT and STYLE content, but that can be taken care of with
   # rawbody tests.
-  $text =~ s/<!--([^\-]|-(?!->))*-->//g;
+  $text =~ s/<!--.*?--\s*>//gs;
 
   # Try to put paragraph breaks where'd they'd be in HTML.  There's
   # an optional "/" before the ends of some tags in case it's XML style.
