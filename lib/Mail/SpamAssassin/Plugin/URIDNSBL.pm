@@ -606,33 +606,33 @@ sub complete_dnsbl_lookup {
       # this zone is a simple rule, not a set of subrules
       # skip any A record that isn't on 127/8
       if ($rr->type eq 'A' && $rr->rdatastr !~ /^127\./) {
-        warn "URIDNSBL: Net::DNS bogosity in rule, ignored: ".$rr->string;
-        next;
+	warn("uridnsbl: bogus rr for domain=$dom, rule=$rulename, rr=" . $rr->string);
+	next;
       }
-      $self->got_dnsbl_hit ($scanstate, $ent, $rdatastr, $dom, $rulename);
+      $self->got_dnsbl_hit($scanstate, $ent, $rdatastr, $dom, $rulename);
     }
     else {
       # skip any A record that isn't on 127/8 if we're not looking for
       # any bits in the first octet, this is a workaround for bug 3997
       if ($rr->type eq 'A' && $rr->rdatastr !~ /^127\./ &&
-	       !($uridnsbl_subs_bits & 0xff000000))
+	  !($uridnsbl_subs_bits & 0xff000000))
       {
-        warn "URIDNSBL: Net::DNS bogosity in subrule, ignored: ".$rr->string;
-        next;
+	warn("uridnsbl: bogus rr: domain=$dom, zone=$ent->{zone}, rr=" . $rr->string);
+	next;
       }
       foreach my $subtest (keys (%{$uridnsbl_subs}))
       {
         my $subrulename = $uridnsbl_subs->{$subtest}->{rulename};
 
         if ($subtest eq $rdatastr) {
-          $self->got_dnsbl_hit ($scanstate, $ent, $rdatastr, $dom, $subrulename);
+          $self->got_dnsbl_hit($scanstate, $ent, $rdatastr, $dom, $subrulename);
         }
         # bitmask
         elsif ($subtest =~ /^\d+$/) {
           if ($rdatastr =~ m/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/ &&
               Mail::SpamAssassin::Util::my_inet_aton($rdatastr) & $subtest)
           {
-            $self->got_dnsbl_hit ($scanstate, $ent, $rdatastr, $dom, $subrulename);
+            $self->got_dnsbl_hit($scanstate, $ent, $rdatastr, $dom, $subrulename);
           }
         }
         # regular expression
