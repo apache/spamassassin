@@ -143,7 +143,7 @@ test FORGED_YAHOO_RCVD fail by mf1.lng.yahoo.com (8.11.1/8.11.1) id g3SDfPH19426
 test NUMERIC_HTTP_ADDR ok http://123456789/foo/bar
 test PGP_SIGNATURE_2 ok Content-Type: multipart/signed; micalg=pgp-sha1;protocol="application/pgp-signature"; boundary="n8g4imXOkfNTN/H1"
 test PGP_SIGNATURE_2 fail Content-Type: text/plain; charset=us-ascii
-test SEARCH_ENGINE_PROMO ok	evaluated for FREE for its keyword placement in the top twenty major search engines
+#test SEARCH_ENGINE_PROMO ok	evaluated for FREE for its keyword placement in the top twenty major search engines
 #
 test US_DOLLARS fail $-$NFbMF$K!"A49q$+$iLd$$9g$o$;$,;&E~$7$F$$$^$9!#
 test US_DOLLARS ok Twenty Million Five Hundred Thousand United States Dollars
