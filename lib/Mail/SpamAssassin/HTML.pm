@@ -76,12 +76,12 @@ sub new {
   my $self = {};
   bless($self, $class);
 
-  $self->html_init();
+  $self->html_start();
 
   return $self;
 }
 
-sub html_init {
+sub html_start {
   my ($self) = @_;
 
   $self->{basefont} = 3;
@@ -92,6 +92,12 @@ sub html_init {
 		 bgcolor => "#ffffff",
 		 size => $self->{basefont});
   push @{ $self->{text_style} }, \%default;
+}
+
+sub html_end {
+  my ($self) = @_;
+
+  $self->display_text();
 }
 
 sub get_results {
@@ -120,6 +126,9 @@ sub html_render {
   $self->{html_text} = [];
   $self->{html_visible_text} = [];
   $self->{html_invisible_text} = [];
+  $self->{last_text} = "";
+  $self->{last_visible_text} = "";
+  $self->{last_invisible_text} = "";
   $self->{html_last_tag} = 0;
   $self->{html}{closed_html} = 0;
   $self->{html}{closed_body} = 0;
@@ -157,8 +166,9 @@ sub html_render {
   my $hp = HTML::Parser->new(
 		api_version => 3,
 		handlers => [
-		  start_document => [sub { $self->html_init(@_) }],
+		  start_document => [sub { $self->html_start(@_) }],
 		  start => [sub { $self->html_tag(@_) }, "tagname,attr,'+1'"],
+		  end_document => [sub { $self->html_end(@_) }],
 		  end => [sub { $self->html_tag(@_) }, "tagname,attr,'-1'"],
 		  text => [sub { $self->html_text(@_) }, "dtext"],
 		  comment => [sub { $self->html_comment(@_) }, "text"],
@@ -218,13 +228,12 @@ sub html_tag {
       $self->html_format($tag, $attr, $num);
       $self->html_uri($tag, $attr, $num);
       $self->html_tests($tag, $attr, $num);
-      $self->{html_last_tag} = $tag;
     }
+    # end tags
     elsif ($num == -1) {
       $self->{html}{closed_html} = 1 if $tag eq "html";
       $self->{html}{closed_body} = 1 if $tag eq "body";
     }
-
     # shouting
     if ($tag =~ /^(?:b|i|u|strong|em|big|center|h\d)$/) {
       $self->{html}{shouting} += $num;
@@ -232,6 +241,8 @@ sub html_tag {
 	$self->{html}{max_shouting} = $self->{html}{shouting};
       }
     }
+
+    $self->{html_last_tag} = (($num < 0) ? "/" : "") . $tag;
   }
 }
 
@@ -240,16 +251,20 @@ sub html_format {
 
   # ordered by frequency of tag groups
   if ($tag eq "br" || $tag eq "div") {
+    $self->display_text();
     push @{$self->{html_visible_text}}, "\n";
     push @{$self->{html_invisible_text}}, "\n";
     push @{$self->{html_text}}, "\n";
   }
-  elsif ($tag eq "li" || $tag eq "td" || $tag eq "dd") {
+  # should probably add th and dt here
+  elsif ($tag =~ /^(?:li|td|dd)$/) {
+    $self->display_text();
     push @{$self->{html_visible_text}}, " ";
     push @{$self->{html_invisible_text}}, " ";
     push @{$self->{html_text}}, " ";
   }
   elsif ($tag =~ /^(?:p|hr|blockquote|pre)$/) {
+    $self->display_text();
     push @{$self->{html_visible_text}}, "\n\n";
     push @{$self->{html_invisible_text}}, "\n\n";
     push @{$self->{html_text}}, "\n\n";
@@ -649,6 +664,7 @@ sub close_tag {
 sub css_style {
   my ($self, $tag, $attr, $num) = @_;
 
+  # TODO: something here
 }
 
 # body, font, table, tr, th, td, big, small
@@ -892,6 +908,19 @@ sub examine_text_style {
   $self->{html}{big_font} = 1 if ($type eq "px" && $size > 18);
 }
 
+sub display_text {
+  my ($self) = @_;
+
+  for my $type ('text', 'visible_text', 'invisible_text') {
+    my $text = $self->{"last_$type"};
+    $text =~ s/[ \t\n\r\f\x0b\xa0]+/ /g;
+    $text =~ s/^ //;
+    $text =~ s/ $//;
+    push @{$self->{"html_$type"}}, $text;
+    $self->{"last_$type"} = "";
+  }
+}
+
 sub html_text {
   my ($self, $text) = @_;
 
@@ -928,20 +957,18 @@ sub html_text {
     $self->{html}{text_after_html} = 1 if $self->{html}{closed_html};
   }
 
-  $text =~ s/^\n//s if $self->{html_last_tag} eq "br";
-
-  if (defined $self->{html_text}[-1]) {
-    my $last = $self->{html_text}[-1];
-
+  if ($self->{last_text}) {
     # ideas discarded since they would be easy to evade:
     # 1. using \w or [A-Za-z] instead of \S or non-punctuation
     # 2. exempting certain tags
     if ($text =~ /^[^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]/s &&
-	$last =~ /[^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]\z/s)
+	$self->{last_text} =~ /[^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]\z/s)
     {
       $self->{html}{obfuscation}++;
     }
-    if ($last =~ /\b([^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]{1,7})\z/s) {
+    if ($self->{last_text} =~
+	/\b([^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]{1,7})\z/s)
+    {
       my $start = length($1);
       if ($text =~ /^([^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]{1,7})\b/s) {
 	my $backhair = $start . "_" . length($1);
@@ -952,12 +979,12 @@ sub html_text {
   }
 
   if ($visible_for_bayes) {
-    push @{$self->{html_visible_text}}, $text;
+    $self->{last_visible_text} .= $text;
   }
   else {
-    push @{$self->{html_invisible_text}}, $text;
+    $self->{last_invisible_text} .= $text;
   }
-  push @{$self->{html_text}}, $text;
+  $self->{last_text} .= $text;
 }
 
 # note: $text includes <!-- and -->
