@@ -180,6 +180,14 @@ sub add_body_part {
   push @{ $self->{'body_parts'} }, $part;
 }
 
+=item is_root()
+
+=cut
+
+sub is_root {
+  return ! exists $_[0]->{'raw'};
+}
+
 =item raw()
 
 Return a reference to the the raw array.

@@ -2356,7 +2356,9 @@ sub check_mime_multipart_ratio {
 sub _check_mime_header {
   my ($self, $ctype, $cte, $cd, $charset, $name) = @_;
 
-  if ($ctype =~ m@^text/html@i) {
+  $charset ||= '';
+
+  if ($ctype eq 'text/html') {
     $self->{mime_body_html_count}++;
   }
   elsif ($ctype =~ m@^(?:text|message)@i) {
@@ -2393,7 +2395,7 @@ sub _check_mime_header {
     $self->{mime_qp_inline_no_charset} = 1;
   }
 
-  if ($ctype =~ /^text\/html/ &&
+  if ($ctype eq 'text/html' &&
       !(defined($charset) && $charset) &&
       !($cd && $cd =~ /^(?:attachment|inline)/))
   {
@@ -2448,11 +2450,8 @@ sub _check_mime_header {
 sub _check_attachments {
   my ($self) = @_;
 
-  my $previous = 'undef';	# the previous line
-
   # MIME status
   my $where = -1;		# -1 = start, 0 = nowhere, 1 = header, 2 = body
-  my @boundary;			# list of MIME boundaries
   my %state;			# state of each MIME part
   my $qp_bytes = 0;		# total bytes in QP regions
   my $qp_count = 0;		# QP-encoded bytes in QP regions
@@ -2460,18 +2459,9 @@ sub _check_attachments {
   my @part_type;		# MIME part types
 
   # MIME header information
-  my $ctype = 0;		# Content-Type
-  my $cte = 0;			# Content-Transfer-Encoding
-  my $cd = 0;			# Content-Disposition
-  my $charset = 0;		# charset
-  my $name = 0;			# name or filename
   my $part = -1;		# MIME part index
 
   # regular expressions
-  my $re_boundary = qr/\bboundary\s*=\s*["']?(.*?)["']?(?:;|$)/i;
-  my $re_charset = qr/\bcharset\s*=\s*["']?(.*?)["']?(?:;|$)/i;
-  my $re_name = qr/name\s*=\s*["']?(.*?)["']?(?:;|$)/i;
-  my $re_ctype = qr/^Content-Type:\s*(.+?)(?:;|\s|$)/i;
   my $re_cte = qr/^Content-Transfer-Encoding:\s*(.+)/i;
   my $re_cd = qr/^Content-Disposition:\s*(.+)/i;
 
@@ -2500,115 +2490,89 @@ sub _check_attachments {
   $self->{mime_qp_ratio} = 0;
   $self->{mime_suspect_name} = 0;
 
-  # message headers
-  $ctype = $self->get('Content-Type');
-  $cte = $self->get('Content-Transfer-Encoding');
-  $cd = $self->get('Content-Disposition');
-  chomp($cte = defined($cte) ? lc($cte) : "");
-  if ($ctype =~ /$re_boundary/m && $1 ne '') {
-    push (@boundary, "\Q$1\E");
-  }
-  if ($ctype =~ /^multipart\/alternative/i) {
-    $self->{mime_multipart_alternative} = 1;
-  }
+  # Get all parts ...
+  foreach my $p ( $self->{msg}->find_parts(qr/./) ) {
+    # message headers
+    my($ctype, $boundary, $charset, $name) = Mail::SpamAssassin::Util::parse_content_type($p->get_header("content-type"));
 
-  # check MIME headers in message header
-  if ($ctype =~ /$re_charset/) { $charset = lc($1); }
-  if ($ctype =~ /$re_name/) { $name = lc($1); }
-  if ($ctype =~ /$re_ctype/) { $ctype = lc($1); }
-  if ($cte =~ /$re_cte/) { $cte = lc($1); }
-  if ($cd =~ /$re_cd/) { $cd = lc($1); }
-  $self->_check_mime_header($ctype, $cte, $cd, $charset, $name);
-
-  # Note: We don't use rawbody because it removes MIME parts.  Instead,
-  # we get the raw unfiltered body.  We must not change any lines and
-  # we might see some SpamAssassin mark-up.
-  foreach my $line (@{$self->{msg}->get_body()}) {
-    $_ = $line;		# copy to preserve originals
-    s/\r$//;		# trim CRs, we don't want them
-
-    if (/^--/) {
-      foreach my $boundary (@boundary) {
-	if (/^--$boundary$/) {
-	  $state{$boundary} = 1;
-	  $ctype = $cte = $cd = $charset = $name = 0;
-	  $where = 1;
-	}
-	if (/^--$boundary--$/) {
-	  $state{$boundary}--;
-	  $where = 0;
-	}
-      }
+    if ($ctype eq 'multipart/alternative') {
+      $self->{mime_multipart_alternative} = 1;
     }
-    if ($where == 2) {
-      if ($previous =~ /^$/ && /^TV[pq]QAA[MI]AAAAEAA[8A]A/) {
-	$self->{microsoft_executable} = 1;
+
+    my $cte = $self->get('Content-Transfer-Encoding');
+    if ($cte =~ /$re_cte/) { $cte = lc($1); }
+    chomp($cte = defined($cte) ? $cte : "");
+
+    my $cd = $self->get('Content-Disposition');
+    if ($cd =~ /$re_cd/) { $cd = lc($1); }
+    chomp($cd = defined($cd) ? $cd : "");
+
+    $self->_check_mime_header($ctype, $cte, $cd, $charset, $name);
+
+    # If we're in the root node of the MIME tree, let's skip the rest of the tests ...
+    if ( $p->is_root() ) {
+      next;
+    }
+
+    $part++;
+    $part_type[$part] = $ctype;
+    $part_bytes[$part] = 0 if $cd !~ /attachment/;
+
+    my $previous = '';
+    foreach ( @{$p->raw()} ) {
+      if ( $cte =~ /base64/i ) {
+        if ($previous =~ /^$/ && /^TV[pq]QAA[MI]AAAAEAA[8A]A/) {
+	  $self->{microsoft_executable} = 1;
+        }
+        if ($previous =~ /^\s*$/ && /^\s*$/) {
+	  $self->{mime_base64_blanks} = 1;
+        }
+        if (m@[^A-Za-z0-9+/=\n]@ || /=[^=\s]/) {
+	  $self->{mime_base64_illegal} = 1;
+        }
       }
-      if ($cte =~ /base64/ && $previous =~ /^\s*$/ && /^\s*$/) {
-	$self->{mime_base64_blanks} = 1;
-      }
-      if ($cte =~ /base64/ && (m@[^A-Za-z0-9+/=\n]@ || m/=[^=\s]/)) {
-	$self->{mime_base64_illegal} = 1;
-      }
-      if ($self->{mime_html_no_charset} &&
-	  $ctype =~ /^text\/html/ &&
-	  /charset=/i)
-      {
+
+      if ($self->{mime_html_no_charset} && $ctype eq 'text/html' && defined $charset) {
 	$self->{mime_html_no_charset} = 0;
       }
-      if ($self->{mime_multipart_alternative} &&
-	  $ctype =~ /^text\/(?:plain|html)/i &&
-	  $cd !~ /attachment/)
-      {
+      if ($self->{mime_multipart_alternative} && $cd !~ /attachment/ &&
+          ( $ctype eq 'text/plain' || $ctype eq 'text/html' ) ) {
 	$part_bytes[$part] += length;
       }
-    }
-    if ($where == 1) {
-      if (/^$/) {
-	$where = 2;
-	$part++;
-	$part_bytes[$part] = 0 if $cd !~ /attachment/;
-	$part_type[$part] = $ctype;
-	$self->_check_mime_header($ctype, $cte, $cd, $charset, $name);
+
+      if ($previous =~ /^begin [0-7]{3} ./ && /^M35J0``,````\$````/) {
+        $self->{microsoft_executable} = 1;
       }
-      if (/$re_boundary/) { push(@boundary, "\Q$1\E"); }
-      if (/$re_charset/) { $charset = lc($1); }
-      if (/$re_name/) { $name = lc($1); }
-      if (/$re_ctype/) { $ctype = lc($1); }
-      elsif (/$re_cte/) { $cte = lc($1); }
-      elsif (/$re_cd/) { $cd = lc($1); }
-    }
-    if ($previous =~ /^begin [0-7]{3} ./ && /^M35J0``,````\$````/) {
-      $self->{microsoft_executable} = 1;
-    }
-    if ($where != 1 && $cte eq "quoted-printable" && ! /^SPAM: /) {
-      if (length > 77) {
-	$self->{mime_qp_long_line} = 1;
-      }
-      $qp_bytes += length;
-      # check for illegal substrings (RFC 2045), hexadecimal values 7F-FF and
-      # control characters other than TAB, or CR and LF as parts of CRLF pairs
-      if (!$self->{mime_qp_illegal} && /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]/)
-      {
-	$self->{mime_qp_illegal} = 1;
-      }
-      # count excessive QP bytes
-      if (index($_, '=') != -1) {
-	# whoever wrote this next line is an evil hacker -- jm
-	my $qp = () = m/=(?:09|3[0-9ABCEF]|[2456][0-9A-F]|7[0-9A-E])/g;
-	if ($qp) {
-	  $qp_count += $qp;
-	  # tabs and spaces at end of encoded line are okay.  Also, multiple
-	  # whitespace at the end of a line are OK, like ">=20=20=20=20=20=20".
-	  my ($trailing) = m/((?:=09|=20)+)\s*$/g;
-	  if ($trailing) {
-	    $qp_count -= (length($trailing) / 3);
+      if ($where != 1 && $cte eq "quoted-printable" && ! /^SPAM: /) {
+        if (length > 77) {
+	  $self->{mime_qp_long_line} = 1;
+        }
+        $qp_bytes += length;
+        # check for illegal substrings (RFC 2045), hexadecimal values 7F-FF and
+        # control characters other than TAB, or CR and LF as parts of CRLF pairs
+        if (!$self->{mime_qp_illegal} && /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]/)
+        {
+	  $self->{mime_qp_illegal} = 1;
+        }
+        # count excessive QP bytes
+        if (index($_, '=') != -1) {
+	  # whoever wrote this next line is an evil hacker -- jm
+	  my $qp = () = m/=(?:09|3[0-9ABCEF]|[2456][0-9A-F]|7[0-9A-E])/g;
+	  if ($qp) {
+	    $qp_count += $qp;
+	    # tabs and spaces at end of encoded line are okay.  Also, multiple
+	    # whitespace at the end of a line are OK, like ">=20=20=20=20=20=20".
+	    my ($trailing) = m/((?:=09|=20)+)\s*$/g;
+	    if ($trailing) {
+	      $qp_count -= (length($trailing) / 3);
+	    }
 	  }
-	}
+        }
       }
+      $previous = $_;
     }
-    $previous = $_;
   }
+
   if ($qp_bytes) {
     $self->{mime_qp_ratio} = $qp_count / $qp_bytes;
   }
@@ -2617,10 +2581,10 @@ sub _check_attachments {
     my $html;
     for (my $i = 0; $i <= $part; $i++) {
       next if !defined $part_bytes[$i];
-      if (!defined($html) && $part_type[$i] =~ /^text\/html/i) {
+      if (!defined($html) && $part_type[$i] eq 'text/html') {
 	$html = $part_bytes[$i];
       }
-      if (!defined($text) && $part_type[$i] =~ /^text\/plain/i) {
+      if (!defined($text) && $part_type[$i] eq 'text/plain') {
 	$text = $part_bytes[$i];
       }
     }
