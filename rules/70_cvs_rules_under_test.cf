@@ -377,3 +377,28 @@ tflags T_RCVD_IN_BOGUSMX	net
 # bug 2071
 body            T_GEVALIACOFFEE           /\bGevalia (?:Coffee|Kaffe)\b/i
 describe        T_GEVALIACOFFEE           Selling Gevalia Coffee
+
+# bug 2970: Bob Menschel's "longwords" rules
+body     T_RM_BPT_LONGWORDS_68A /\b(?:[a-z]{6,}\s+){8}/
+describe T_RM_BPT_LONGWORDS_68A Long string of long words
+body     T_RM_BPT_LONGWORDS_69A /\b(?:[a-z]{6,}\s+){9}/
+describe T_RM_BPT_LONGWORDS_69A Long string of long words
+body     T_RM_BPT_LONGWORDS_78A /\b(?:[a-z]{7,}\s+){8}/
+describe T_RM_BPT_LONGWORDS_78A Long string of long words
+body     T_RM_BPT_LONGWORDS_59A /\b(?:[a-z]{5,}\s+){9}/
+describe T_RM_BPT_LONGWORDS_59A Long string of long words
+body     T_RM_BPT_LONGWORDS_79A /\b(?:[a-z]{7,}\s+){9}/
+describe T_RM_BPT_LONGWORDS_79A Long string of long words
+body     T_RM_BPT_LONGWORDS_96A /\b(?:[a-z]{9,}\s+){6}/
+describe T_RM_BPT_LONGWORDS_96A Long string of long words
+body     T_RM_BPT_LONGWORDS_88A /\b(?:[a-z]{8,}\s+){8}/
+describe T_RM_BPT_LONGWORDS_88A Long string of long words
+body     T_RM_BPT_LONGWORDS_89A /\b(?:[a-z]{8,}\s+){9}/
+describe T_RM_BPT_LONGWORDS_89A Long string of long words
+body     T_RM_BPT_LONGWORDS_97 /\b(?:\w{9,}\s+){7}/
+describe T_RM_BPT_LONGWORDS_97 Long string of long words
+body     T_RM_BPT_LONGWORDS_98 /\b(?:\w{9,}\s+){8}/
+describe T_RM_BPT_LONGWORDS_98 Long string of long words
+body     T_RM_BPT_LONGWORDS_99 /\b(?:\w{9,}\s+){9}/
+describe T_RM_BPT_LONGWORDS_99 Long string of long words
+
