@@ -31,14 +31,6 @@
 # will be pretty safe.  (lower rule as a baseline to see if we miss much)
 header T_FROM_DELPHI		From:addr =~ /\d[^\@]+\d[^\@]+\@delphi\.com/i
 
-# more portable replacement for RCVD_NUMERIC_HELO that doesn't rely on
-# Received headers using "helo=" prefix.  exclude squirrelmail, which
-# records a perfectly-ok rcvd header for the HTTP step in this fmt
-header __RCVD_NUMERIC_HELO	eval:check_for_numeric_helo()
-header __SQUIRREL_AUTH          Received =~ /SquirrelMail authenticated user/
-meta T_RCVD_NUMERIC_HELO        (__RCVD_NUMERIC_HELO && !__SQUIRREL_AUTH)
-describe T_RCVD_NUMERIC_HELO	Received: contains an IP address used for HELO
-
 header T_RCVD_IN_BOGUSMX	rbleval:check_rbl_from_host('rfci-bmx', 'bogusmx.rfc-ignorant.org.')
 describe T_RCVD_IN_BOGUSMX	Received via a relay in BogusMX (rfc-ignorant.org)
 tflags T_RCVD_IN_BOGUSMX	net
@@ -434,61 +426,6 @@ header T_S3_78_S25_180	eval:check_rbl_sub('senderbase', 'S3 > 7.8 && (time - S25
 
 # high daily volume for organization
 # high monthly volume for IP address
-header T_S2_70_S41_40	eval:check_rbl_sub('senderbase', 'S2 > 7.0 && S41 > 4.0')
-header T_S2_70_S41_42	eval:check_rbl_sub('senderbase', 'S2 > 7.0 && S41 > 4.2')
-header T_S2_70_S41_44	eval:check_rbl_sub('senderbase', 'S2 > 7.0 && S41 > 4.4')
-header T_S2_70_S41_46	eval:check_rbl_sub('senderbase', 'S2 > 7.0 && S41 > 4.6')
-header T_S2_70_S41_48	eval:check_rbl_sub('senderbase', 'S2 > 7.0 && S41 > 4.8')
-header T_S2_70_S41_50	eval:check_rbl_sub('senderbase', 'S2 > 7.0 && S41 > 5.0')
-header T_S2_70_S41_52	eval:check_rbl_sub('senderbase', 'S2 > 7.0 && S41 > 5.2')
-header T_S2_70_S41_54	eval:check_rbl_sub('senderbase', 'S2 > 7.0 && S41 > 5.4')
-header T_S2_70_S41_56	eval:check_rbl_sub('senderbase', 'S2 > 7.0 && S41 > 5.6')
-header T_S2_70_S41_58	eval:check_rbl_sub('senderbase', 'S2 > 7.0 && S41 > 5.8')
-header T_S2_70_S41_60	eval:check_rbl_sub('senderbase', 'S2 > 7.0 && S41 > 6.0')
-header T_S2_72_S41_40	eval:check_rbl_sub('senderbase', 'S2 > 7.2 && S41 > 4.0')
-header T_S2_72_S41_42	eval:check_rbl_sub('senderbase', 'S2 > 7.2 && S41 > 4.2')
-header T_S2_72_S41_44	eval:check_rbl_sub('senderbase', 'S2 > 7.2 && S41 > 4.4')
-header T_S2_72_S41_46	eval:check_rbl_sub('senderbase', 'S2 > 7.2 && S41 > 4.6')
-header T_S2_72_S41_48	eval:check_rbl_sub('senderbase', 'S2 > 7.2 && S41 > 4.8')
-header T_S2_72_S41_50	eval:check_rbl_sub('senderbase', 'S2 > 7.2 && S41 > 5.0')
-header T_S2_72_S41_52	eval:check_rbl_sub('senderbase', 'S2 > 7.2 && S41 > 5.2')
-header T_S2_72_S41_54	eval:check_rbl_sub('senderbase', 'S2 > 7.2 && S41 > 5.4')
-header T_S2_72_S41_56	eval:check_rbl_sub('senderbase', 'S2 > 7.2 && S41 > 5.6')
-header T_S2_72_S41_58	eval:check_rbl_sub('senderbase', 'S2 > 7.2 && S41 > 5.8')
-header T_S2_72_S41_60	eval:check_rbl_sub('senderbase', 'S2 > 7.2 && S41 > 6.0')
-header T_S2_74_S41_40	eval:check_rbl_sub('senderbase', 'S2 > 7.4 && S41 > 4.0')
-header T_S2_74_S41_42	eval:check_rbl_sub('senderbase', 'S2 > 7.4 && S41 > 4.2')
-header T_S2_74_S41_44	eval:check_rbl_sub('senderbase', 'S2 > 7.4 && S41 > 4.4')
-header T_S2_74_S41_46	eval:check_rbl_sub('senderbase', 'S2 > 7.4 && S41 > 4.6')
-header T_S2_74_S41_48	eval:check_rbl_sub('senderbase', 'S2 > 7.4 && S41 > 4.8')
-header T_S2_74_S41_50	eval:check_rbl_sub('senderbase', 'S2 > 7.4 && S41 > 5.0')
-header T_S2_74_S41_52	eval:check_rbl_sub('senderbase', 'S2 > 7.4 && S41 > 5.2')
-header T_S2_74_S41_54	eval:check_rbl_sub('senderbase', 'S2 > 7.4 && S41 > 5.4')
-header T_S2_74_S41_56	eval:check_rbl_sub('senderbase', 'S2 > 7.4 && S41 > 5.6')
-header T_S2_74_S41_58	eval:check_rbl_sub('senderbase', 'S2 > 7.4 && S41 > 5.8')
-header T_S2_74_S41_60	eval:check_rbl_sub('senderbase', 'S2 > 7.4 && S41 > 6.0')
-header T_S2_76_S41_40	eval:check_rbl_sub('senderbase', 'S2 > 7.6 && S41 > 4.0')
-header T_S2_76_S41_42	eval:check_rbl_sub('senderbase', 'S2 > 7.6 && S41 > 4.2')
-header T_S2_76_S41_44	eval:check_rbl_sub('senderbase', 'S2 > 7.6 && S41 > 4.4')
-header T_S2_76_S41_46	eval:check_rbl_sub('senderbase', 'S2 > 7.6 && S41 > 4.6')
-header T_S2_76_S41_48	eval:check_rbl_sub('senderbase', 'S2 > 7.6 && S41 > 4.8')
-header T_S2_76_S41_50	eval:check_rbl_sub('senderbase', 'S2 > 7.6 && S41 > 5.0')
-header T_S2_76_S41_52	eval:check_rbl_sub('senderbase', 'S2 > 7.6 && S41 > 5.2')
-header T_S2_76_S41_54	eval:check_rbl_sub('senderbase', 'S2 > 7.6 && S41 > 5.4')
-header T_S2_76_S41_56	eval:check_rbl_sub('senderbase', 'S2 > 7.6 && S41 > 5.6')
-header T_S2_76_S41_58	eval:check_rbl_sub('senderbase', 'S2 > 7.6 && S41 > 5.8')
-header T_S2_76_S41_60	eval:check_rbl_sub('senderbase', 'S2 > 7.6 && S41 > 6.0')
-header T_S2_78_S41_40	eval:check_rbl_sub('senderbase', 'S2 > 7.8 && S41 > 4.0')
-header T_S2_78_S41_42	eval:check_rbl_sub('senderbase', 'S2 > 7.8 && S41 > 4.2')
-header T_S2_78_S41_44	eval:check_rbl_sub('senderbase', 'S2 > 7.8 && S41 > 4.4')
-header T_S2_78_S41_46	eval:check_rbl_sub('senderbase', 'S2 > 7.8 && S41 > 4.6')
-header T_S2_78_S41_48	eval:check_rbl_sub('senderbase', 'S2 > 7.8 && S41 > 4.8')
-header T_S2_78_S41_50	eval:check_rbl_sub('senderbase', 'S2 > 7.8 && S41 > 5.0')
-header T_S2_78_S41_52	eval:check_rbl_sub('senderbase', 'S2 > 7.8 && S41 > 5.2')
-header T_S2_78_S41_54	eval:check_rbl_sub('senderbase', 'S2 > 7.8 && S41 > 5.4')
-header T_S2_78_S41_56	eval:check_rbl_sub('senderbase', 'S2 > 7.8 && S41 > 5.6')
-header T_S2_78_S41_58	eval:check_rbl_sub('senderbase', 'S2 > 7.8 && S41 > 5.8')
-header T_S2_78_S41_60	eval:check_rbl_sub('senderbase', 'S2 > 7.8 && S41 > 6.0')
 header T_S2_80_S41_40	eval:check_rbl_sub('senderbase', 'S2 > 8.0 && S41 > 4.0')
 header T_S2_80_S41_42	eval:check_rbl_sub('senderbase', 'S2 > 8.0 && S41 > 4.2')
 header T_S2_80_S41_44	eval:check_rbl_sub('senderbase', 'S2 > 8.0 && S41 > 4.4')
@@ -536,61 +473,6 @@ header T_S2_86_S41_60	eval:check_rbl_sub('senderbase', 'S2 > 8.6 && S41 > 6.0')
 
 # high monthly volume for organization
 # high monthly volume for IP address
-header T_S3_70_S41_40	eval:check_rbl_sub('senderbase', 'S3 > 7.0 && S41 > 4.0')
-header T_S3_70_S41_42	eval:check_rbl_sub('senderbase', 'S3 > 7.0 && S41 > 4.2')
-header T_S3_70_S41_44	eval:check_rbl_sub('senderbase', 'S3 > 7.0 && S41 > 4.4')
-header T_S3_70_S41_46	eval:check_rbl_sub('senderbase', 'S3 > 7.0 && S41 > 4.6')
-header T_S3_70_S41_48	eval:check_rbl_sub('senderbase', 'S3 > 7.0 && S41 > 4.8')
-header T_S3_70_S41_50	eval:check_rbl_sub('senderbase', 'S3 > 7.0 && S41 > 5.0')
-header T_S3_70_S41_52	eval:check_rbl_sub('senderbase', 'S3 > 7.0 && S41 > 5.2')
-header T_S3_70_S41_54	eval:check_rbl_sub('senderbase', 'S3 > 7.0 && S41 > 5.4')
-header T_S3_70_S41_56	eval:check_rbl_sub('senderbase', 'S3 > 7.0 && S41 > 5.6')
-header T_S3_70_S41_58	eval:check_rbl_sub('senderbase', 'S3 > 7.0 && S41 > 5.8')
-header T_S3_70_S41_60	eval:check_rbl_sub('senderbase', 'S3 > 7.0 && S41 > 6.0')
-header T_S3_72_S41_40	eval:check_rbl_sub('senderbase', 'S3 > 7.2 && S41 > 4.0')
-header T_S3_72_S41_42	eval:check_rbl_sub('senderbase', 'S3 > 7.2 && S41 > 4.2')
-header T_S3_72_S41_44	eval:check_rbl_sub('senderbase', 'S3 > 7.2 && S41 > 4.4')
-header T_S3_72_S41_46	eval:check_rbl_sub('senderbase', 'S3 > 7.2 && S41 > 4.6')
-header T_S3_72_S41_48	eval:check_rbl_sub('senderbase', 'S3 > 7.2 && S41 > 4.8')
-header T_S3_72_S41_50	eval:check_rbl_sub('senderbase', 'S3 > 7.2 && S41 > 5.0')
-header T_S3_72_S41_52	eval:check_rbl_sub('senderbase', 'S3 > 7.2 && S41 > 5.2')
-header T_S3_72_S41_54	eval:check_rbl_sub('senderbase', 'S3 > 7.2 && S41 > 5.4')
-header T_S3_72_S41_56	eval:check_rbl_sub('senderbase', 'S3 > 7.2 && S41 > 5.6')
-header T_S3_72_S41_58	eval:check_rbl_sub('senderbase', 'S3 > 7.2 && S41 > 5.8')
-header T_S3_72_S41_60	eval:check_rbl_sub('senderbase', 'S3 > 7.2 && S41 > 6.0')
-header T_S3_74_S41_40	eval:check_rbl_sub('senderbase', 'S3 > 7.4 && S41 > 4.0')
-header T_S3_74_S41_42	eval:check_rbl_sub('senderbase', 'S3 > 7.4 && S41 > 4.2')
-header T_S3_74_S41_44	eval:check_rbl_sub('senderbase', 'S3 > 7.4 && S41 > 4.4')
-header T_S3_74_S41_46	eval:check_rbl_sub('senderbase', 'S3 > 7.4 && S41 > 4.6')
-header T_S3_74_S41_48	eval:check_rbl_sub('senderbase', 'S3 > 7.4 && S41 > 4.8')
-header T_S3_74_S41_50	eval:check_rbl_sub('senderbase', 'S3 > 7.4 && S41 > 5.0')
-header T_S3_74_S41_52	eval:check_rbl_sub('senderbase', 'S3 > 7.4 && S41 > 5.2')
-header T_S3_74_S41_54	eval:check_rbl_sub('senderbase', 'S3 > 7.4 && S41 > 5.4')
-header T_S3_74_S41_56	eval:check_rbl_sub('senderbase', 'S3 > 7.4 && S41 > 5.6')
-header T_S3_74_S41_58	eval:check_rbl_sub('senderbase', 'S3 > 7.4 && S41 > 5.8')
-header T_S3_74_S41_60	eval:check_rbl_sub('senderbase', 'S3 > 7.4 && S41 > 6.0')
-header T_S3_76_S41_40	eval:check_rbl_sub('senderbase', 'S3 > 7.6 && S41 > 4.0')
-header T_S3_76_S41_42	eval:check_rbl_sub('senderbase', 'S3 > 7.6 && S41 > 4.2')
-header T_S3_76_S41_44	eval:check_rbl_sub('senderbase', 'S3 > 7.6 && S41 > 4.4')
-header T_S3_76_S41_46	eval:check_rbl_sub('senderbase', 'S3 > 7.6 && S41 > 4.6')
-header T_S3_76_S41_48	eval:check_rbl_sub('senderbase', 'S3 > 7.6 && S41 > 4.8')
-header T_S3_76_S41_50	eval:check_rbl_sub('senderbase', 'S3 > 7.6 && S41 > 5.0')
-header T_S3_76_S41_52	eval:check_rbl_sub('senderbase', 'S3 > 7.6 && S41 > 5.2')
-header T_S3_76_S41_54	eval:check_rbl_sub('senderbase', 'S3 > 7.6 && S41 > 5.4')
-header T_S3_76_S41_56	eval:check_rbl_sub('senderbase', 'S3 > 7.6 && S41 > 5.6')
-header T_S3_76_S41_58	eval:check_rbl_sub('senderbase', 'S3 > 7.6 && S41 > 5.8')
-header T_S3_76_S41_60	eval:check_rbl_sub('senderbase', 'S3 > 7.6 && S41 > 6.0')
-header T_S3_78_S41_40	eval:check_rbl_sub('senderbase', 'S3 > 7.8 && S41 > 4.0')
-header T_S3_78_S41_42	eval:check_rbl_sub('senderbase', 'S3 > 7.8 && S41 > 4.2')
-header T_S3_78_S41_44	eval:check_rbl_sub('senderbase', 'S3 > 7.8 && S41 > 4.4')
-header T_S3_78_S41_46	eval:check_rbl_sub('senderbase', 'S3 > 7.8 && S41 > 4.6')
-header T_S3_78_S41_48	eval:check_rbl_sub('senderbase', 'S3 > 7.8 && S41 > 4.8')
-header T_S3_78_S41_50	eval:check_rbl_sub('senderbase', 'S3 > 7.8 && S41 > 5.0')
-header T_S3_78_S41_52	eval:check_rbl_sub('senderbase', 'S3 > 7.8 && S41 > 5.2')
-header T_S3_78_S41_54	eval:check_rbl_sub('senderbase', 'S3 > 7.8 && S41 > 5.4')
-header T_S3_78_S41_56	eval:check_rbl_sub('senderbase', 'S3 > 7.8 && S41 > 5.6')
-header T_S3_78_S41_58	eval:check_rbl_sub('senderbase', 'S3 > 7.8 && S41 > 5.8')
-header T_S3_78_S41_60	eval:check_rbl_sub('senderbase', 'S3 > 7.8 && S41 > 6.0')
 header T_S3_80_S41_40	eval:check_rbl_sub('senderbase', 'S3 > 8.0 && S41 > 4.0')
 header T_S3_80_S41_42	eval:check_rbl_sub('senderbase', 'S3 > 8.0 && S41 > 4.2')
 header T_S3_80_S41_44	eval:check_rbl_sub('senderbase', 'S3 > 8.0 && S41 > 4.4')
@@ -716,61 +598,6 @@ tflags T_S3_78_S25_90 net
 tflags T_S3_78_S25_120 net
 tflags T_S3_78_S25_150 net
 tflags T_S3_78_S25_180 net
-tflags T_S2_70_S41_40 net
-tflags T_S2_70_S41_42 net
-tflags T_S2_70_S41_44 net
-tflags T_S2_70_S41_46 net
-tflags T_S2_70_S41_48 net
-tflags T_S2_70_S41_50 net
-tflags T_S2_70_S41_52 net
-tflags T_S2_70_S41_54 net
-tflags T_S2_70_S41_56 net
-tflags T_S2_70_S41_58 net
-tflags T_S2_70_S41_60 net
-tflags T_S2_72_S41_40 net
-tflags T_S2_72_S41_42 net
-tflags T_S2_72_S41_44 net
-tflags T_S2_72_S41_46 net
-tflags T_S2_72_S41_48 net
-tflags T_S2_72_S41_50 net
-tflags T_S2_72_S41_52 net
-tflags T_S2_72_S41_54 net
-tflags T_S2_72_S41_56 net
-tflags T_S2_72_S41_58 net
-tflags T_S2_72_S41_60 net
-tflags T_S2_74_S41_40 net
-tflags T_S2_74_S41_42 net
-tflags T_S2_74_S41_44 net
-tflags T_S2_74_S41_46 net
-tflags T_S2_74_S41_48 net
-tflags T_S2_74_S41_50 net
-tflags T_S2_74_S41_52 net
-tflags T_S2_74_S41_54 net
-tflags T_S2_74_S41_56 net
-tflags T_S2_74_S41_58 net
-tflags T_S2_74_S41_60 net
-tflags T_S2_76_S41_40 net
-tflags T_S2_76_S41_42 net
-tflags T_S2_76_S41_44 net
-tflags T_S2_76_S41_46 net
-tflags T_S2_76_S41_48 net
-tflags T_S2_76_S41_50 net
-tflags T_S2_76_S41_52 net
-tflags T_S2_76_S41_54 net
-tflags T_S2_76_S41_56 net
-tflags T_S2_76_S41_58 net
-tflags T_S2_76_S41_60 net
-tflags T_S2_78_S41_40 net
-tflags T_S2_78_S41_42 net
-tflags T_S2_78_S41_44 net
-tflags T_S2_78_S41_46 net
-tflags T_S2_78_S41_48 net
-tflags T_S2_78_S41_50 net
-tflags T_S2_78_S41_52 net
-tflags T_S2_78_S41_54 net
-tflags T_S2_78_S41_56 net
-tflags T_S2_78_S41_58 net
-tflags T_S2_78_S41_60 net
 tflags T_S2_80_S41_40 net
 tflags T_S2_80_S41_42 net
 tflags T_S2_80_S41_44 net
@@ -815,61 +642,6 @@ tflags T_S2_86_S41_54 net
 tflags T_S2_86_S41_56 net
 tflags T_S2_86_S41_58 net
 tflags T_S2_86_S41_60 net
-tflags T_S3_70_S41_40 net
-tflags T_S3_70_S41_42 net
-tflags T_S3_70_S41_44 net
-tflags T_S3_70_S41_46 net
-tflags T_S3_70_S41_48 net
-tflags T_S3_70_S41_50 net
-tflags T_S3_70_S41_52 net
-tflags T_S3_70_S41_54 net
-tflags T_S3_70_S41_56 net
-tflags T_S3_70_S41_58 net
-tflags T_S3_70_S41_60 net
-tflags T_S3_72_S41_40 net
-tflags T_S3_72_S41_42 net
-tflags T_S3_72_S41_44 net
-tflags T_S3_72_S41_46 net
-tflags T_S3_72_S41_48 net
-tflags T_S3_72_S41_50 net
-tflags T_S3_72_S41_52 net
-tflags T_S3_72_S41_54 net
-tflags T_S3_72_S41_56 net
-tflags T_S3_72_S41_58 net
-tflags T_S3_72_S41_60 net
-tflags T_S3_74_S41_40 net
-tflags T_S3_74_S41_42 net
-tflags T_S3_74_S41_44 net
-tflags T_S3_74_S41_46 net
-tflags T_S3_74_S41_48 net
-tflags T_S3_74_S41_50 net
-tflags T_S3_74_S41_52 net
-tflags T_S3_74_S41_54 net
-tflags T_S3_74_S41_56 net
-tflags T_S3_74_S41_58 net
-tflags T_S3_74_S41_60 net
-tflags T_S3_76_S41_40 net
-tflags T_S3_76_S41_42 net
-tflags T_S3_76_S41_44 net
-tflags T_S3_76_S41_46 net
-tflags T_S3_76_S41_48 net
-tflags T_S3_76_S41_50 net
-tflags T_S3_76_S41_52 net
-tflags T_S3_76_S41_54 net
-tflags T_S3_76_S41_56 net
-tflags T_S3_76_S41_58 net
-tflags T_S3_76_S41_60 net
-tflags T_S3_78_S41_40 net
-tflags T_S3_78_S41_42 net
-tflags T_S3_78_S41_44 net
-tflags T_S3_78_S41_46 net
-tflags T_S3_78_S41_48 net
-tflags T_S3_78_S41_50 net
-tflags T_S3_78_S41_52 net
-tflags T_S3_78_S41_54 net
-tflags T_S3_78_S41_56 net
-tflags T_S3_78_S41_58 net
-tflags T_S3_78_S41_60 net
 tflags T_S3_80_S41_40 net
 tflags T_S3_80_S41_42 net
 tflags T_S3_80_S41_44 net
@@ -914,9 +686,3 @@ tflags T_S3_86_S41_54 net
 tflags T_S3_86_S41_56 net
 tflags T_S3_86_S41_58 net
 tflags T_S3_86_S41_60 net
-
-body T_HTML_TEXT_AFTER_HTML	eval:html_test('text_after_html')
-body T_HTML_TEXT_AFTER_BODY	eval:html_test('text_after_body')
-
-# might be better than X_MESSAGE_INFO
-header T_X_MESSAGE_INFO		exists:X-Message-Info
