@@ -919,26 +919,7 @@ sub check_from_in_default_whitelist {
 sub check_from_in_auto_whitelist {
     my ($self) = @_;
 
-    return unless $self->{main}->{conf}->{use_auto_whitelist};
-
-    if (!defined $self->{main}->{pers_addr_list_factory}) {
-      my $factory;
-      return unless $self->{main}->{conf}->{auto_whitelist_factory};
-      my $type = $self->{main}->{conf}->{auto_whitelist_factory};
-      if ($type =~ /^([_A-Za-z0-9:]+)$/) {
-	$type = $1;
-      }
-      else {
-	warn "illegal auto_whitelist_factory setting\n";
-	return;
-      }
-      eval '
-        require '.$type.';
-        $factory = '.$type.'->new();
-      ';
-      if ($@) { warn $@; undef $factory; }
-      $self->{main}->set_persistent_address_list_factory($factory);
-    }
+    return unless defined $self->{main}->{pers_addr_list_factory};
 
     local $_ = lc $self->get('From:addr');
     return 0 unless /\S/;
@@ -2496,7 +2477,7 @@ sub _check_attachments {
       }
     }
     if ($where == 2) {
-      if ($previous =~ /^$/ && /^TVqQAAMAAAAEAAAA/) {
+      if ($previous =~ /^$/ && /^TV[pq]QAAMAAAAEAA[8A]A/) {
 	$self->{microsoft_executable} = 1;
       }
       if ($cte =~ /base64/ && $previous =~ /^\s*$/ && /^\s*$/) {
