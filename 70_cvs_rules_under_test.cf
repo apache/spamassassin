@@ -63,13 +63,10 @@ body T_HTML_TAG_EXISTS_FORM     eval:html_tag_exists('form')
 body T_HTML_FORM_HIDDEN_EMAIL1	eval:html_test('t_form_hidden_email1')
 body T_HTML_FORM_HIDDEN_EMAIL2	eval:html_test('t_form_hidden_email2')
 
-# HTML image tricks
-body T_HTML_IMG_ALT_ONLY1	eval:html_test('img_alt_only1')
-body T_HTML_IMG_ALT_ONLY2	eval:html_test('img_alt_only2')
-body T_HTML_IMG_SRC_NO_IMAGE	eval:html_test('img_src_no_image')
-# possible improvements for WEB_BUGS (code into HTML.pm if it works)
-body T_HTML_WEB_BUGS1		eval:html_test('t_web_bugs1')
-body T_HTML_WEB_BUGS2		eval:html_test('t_web_bugs2')
+# HTML web bugs replacements
+body T_HTML_WEB_BUGS_BACKGROUND	eval:html_test('web_bugs_background')
+body T_HTML_WEB_BUGS_SRC	eval:html_test('web_bugs_src')
+
 # possible improvements for HTML_JAVASCRIPT
 body T_HTML_JAVASCRIPT		eval:html_test('t_javascript')
 
