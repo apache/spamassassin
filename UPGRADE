@@ -94,9 +94,21 @@ Note for Users Upgrading to SpamAssassin 3.0.0
   razor-agents or higher which allows taint mode by default.  Earlier
   versions which are patched to allow taint mode may be used as well.
 
-- Finally, 2.6x deprecated the use of the "check_bayes_db" script, and it
+- 2.6x deprecated the use of the "check_bayes_db" script, and it
   has been removed in 3.0.0.  Please see the sa-learn man/pod
   documentation for more info.
+
+- Finally, this document is likely not complete.  Other configuration
+  options/arguments may have changed from older versions, etc.  It would
+  be good to double-check any custom configuration options to make sure
+  they're still valid.  This could be as simple as running "spamassassin
+  --lint", or more complex, as required by the environment.
+
+  An example: "require_version <version>" hasn't changed itself, but the
+  internal version representation is now "x.yyyzzz" instead of "x.yz"
+  which could cause issues if "require_version 3.00" is expected to work
+  (it won't, it needs to be "require_version 3.000000").
+
 
 Note for Users Upgrading from SpamAssassin 2.5x
 -----------------------------------------------
@@ -133,6 +145,7 @@ Note for Users Upgrading from SpamAssassin 2.5x
 
   Obviously the steps will be different depending on your environment, but
   you get the idea. :)
+
 
 Note For Users Upgrading From SpamAssassin 2.3x or 2.4x
 -------------------------------------------------------
