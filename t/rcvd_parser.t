@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rcvd_parser");
-use Test; BEGIN { plan tests => 22 };
+use Test; BEGIN { plan tests => 23 };
 
 
 use strict;
@@ -84,6 +84,21 @@ Received: from adsl-207-213-27-129.dsl.lsan03.pacbell.net (HELO merlin.net.au) (
 } => q{
 
 [ ip=207.213.27.129 rdns=adsl-207-213-27-129.dsl.lsan03.pacbell.net helo=merlin.net.au by=totor.example.net ident=Owner50 envfrom= ]
+
+},
+q{
+
+
+Received: from imo-m01.mx.aol.com ([64.12.136.4] verified)
+  by xxx.com (CommuniGate Pro SMTP 4.1.8)
+  with ESMTP id 875522 for yyy@xxx.com; Tue, 03 Feb 2004 08:37:38 -0800
+Received: from Dwsf@aol.com
+  by imo-m01.mx.aol.com (mail_out_v36_r4.12.) id m.b9.3bfe3305 (4116)
+  for <Slowhand101967@aol.com>; Tue, 3 Feb 2004 11:14:06 -0500 (EST)
+
+} => q{
+
+[ ip=64.12.136.4 rdns= helo=imo-m01.mx.aol.com by=xxx.com ident= envfrom= ]
 
 },
 q{
