@@ -11,10 +11,10 @@ use strict;
 
 use vars qw{
 	$KNOWN_BAD_DIALUP_RANGES $IP_IN_RESERVED_RANGE
-	$EXISTING_DOMAIN
+	$EXISTING_DOMAIN $IS_DNS_AVAILABLE
 };
 
-# persistent spam sources
+# persistent spam sources. These are not in the RBL though :(
 $KNOWN_BAD_DIALUP_RANGES = q(
     .da.uu.net .prod.itd.earthlink.net .pub-ip.psi.net .prserv.net
 );
@@ -22,6 +22,8 @@ $KNOWN_BAD_DIALUP_RANGES = q(
 $EXISTING_DOMAIN = 'microsoft.com.';
 
 $IP_IN_RESERVED_RANGE = undef;
+
+$IS_DNS_AVAILABLE = undef;
 
 ###########################################################################
 # HEAD TESTS:
@@ -35,11 +37,8 @@ sub check_for_from_mx {
   return 0 unless (/\@(\S+)/);
   $_ = $1;
 
-  # return OK if Net:DNS is not available
-  return 0 unless $self->load_resolver();
-
   # First check that DNS is available, if not do not perform this check
-  return 0 unless $self->lookup_mx ($EXISTING_DOMAIN);
+  return 0 unless $self->is_dns_available();
 
   # Try 5 times to protect against temporary outages
   for my $i (1..5) {
@@ -109,11 +108,8 @@ sub check_rbl {
   my @ips = ($rcv =~ /\[(\d+\.\d+\.\d+\.\d+)\]/g);
   return 0 unless ($#ips >= 0);
 
-  # return OK if Net:DNS is not available
-  return 0 unless $self->load_resolver();
-
   # First check that DNS is available, if not do not perform this check
-  return 0 unless $self->lookup_mx ($EXISTING_DOMAIN);
+  return 0 unless $self->is_dns_available();
 
   if ($#ips > 1) {
     @ips = @ips[$#ips-1 .. $#ips];        # only check the originating 2
@@ -142,7 +138,7 @@ sub do_rbl_lookup {
   my $q = $self->{res}->search ($dom); if ($q) {
     foreach my $rr ($q->answer) {
       if ($rr->type eq "A") {
-	$self->test_log ("RBL check: found relay ".$_[0]);
+	$self->test_log ("RBL check: found relay ".$dom);
 	return ($found+1);
       }
     }
@@ -159,7 +155,7 @@ sub do_rbl_lookup {
 # from them; however we do not, so we should ignore them.
 #
 sub init_rbl_check_reserved_ips {
-  return unless defined ($IP_IN_RESERVED_RANGE);
+  return if defined ($IP_IN_RESERVED_RANGE);
 
   $IP_IN_RESERVED_RANGE = '^(?:';
   foreach my $top8bits (qw(
@@ -218,6 +214,7 @@ sub load_resolver {
     }
     1;
   ' or warn "eval failed: $@ $!\n";
+  dbg ("is Net::DNS::Resolver unavailable? $self->{no_resolver}");
 
   return (!$self->{no_resolver});
 }
@@ -226,13 +223,36 @@ sub lookup_mx {
   my ($self, $dom) = @_;
 
   return 0 unless $self->load_resolver();
+  my $ret = 0;
 
+  dbg ("looking up MX for '$dom'");
   eval '
-    if (mx ($self->{res}, $dom)) { return 1; }
+    if (mx ($self->{res}, $dom)) { $ret = 1; }
     1;
-  ' or die "MX lookup failed: $@ $!\n";
+  ' or die "MX lookup died: $@ $!\n";
+  dbg ("MX for '$dom' exists? $ret");
 
-  return 0;
+  return $ret;
+}
+
+sub is_dns_available {
+  my ($self) = @_;
+
+  return $IS_DNS_AVAILABLE if (defined $IS_DNS_AVAILABLE);
+
+  $IS_DNS_AVAILABLE = 0;
+  goto done unless $self->load_resolver();
+  goto done unless $self->lookup_mx ($EXISTING_DOMAIN);
+
+  $IS_DNS_AVAILABLE = 1;
+
+done:
+  dbg ("is DNS available? $IS_DNS_AVAILABLE");
+  return $IS_DNS_AVAILABLE;
+}
+
+sub dbg {
+  if ($Mail::SpamAssassin::DEBUG > 0) { warn "debug: ".join('',@_)."\n"; }
 }
 
 1;

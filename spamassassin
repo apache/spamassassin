@@ -4,6 +4,7 @@ use Getopt::Std;
 use Config;
 
 use FindBin;
+use lib 'lib';
 BEGIN {
   # This code will track down the directories where WebMake
   # keeps its modules, portably, so it'll work on Macs, UNIX and Win32,
@@ -68,6 +69,8 @@ Options:
   -p prefs         user preferences file
                    (default: $default_userprefs )
 
+  -D		   log diagnostic messages
+
 Version: $ver      Home: http://spamassassin.taint.org/
 
 EOUSAGE
@@ -78,10 +81,10 @@ require Mail::SpamAssassin;
 require Mail::Audit;
 
 use vars qw{
-  $opt_t $opt_c $opt_p $opt_h $opt_V
+  $opt_t $opt_c $opt_p $opt_h $opt_V $opt_D
 };
 
-getopts ('tc:p:hV') or usage();
+getopts ('tc:p:hVD') or usage();
 
 if (defined $opt_h) { usage(); }
 if (defined $opt_V) {
@@ -125,7 +128,8 @@ if (!defined $opt_p) {
 
 my $spamtest = new Mail::SpamAssassin ({
   'rules_filename'	=> $opt_c,
-  'userprefs_filename'	=> $opt_p
+  'userprefs_filename'	=> $opt_p,
+  'debug'		=> $opt_D
 });
 
 my $status = $spamtest->check ($mail);
