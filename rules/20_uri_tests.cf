@@ -132,4 +132,13 @@ describe SPOOF_NET2COM 	URI contains ".net" or ".org", then ".com"
 
 # CDNs (Akamai (edgesuite), Speedera, and NYUD, so far) do this, so skip them
 uri SPOOF_OURI		m{^https?://(?:[a-z0-9_-]+?\.){2,}(?:com|net|org|biz|info|edu|www)(?!\.(?:\w+\.)?(?:edgesuite|nyud|speedera)\.net)(?:\.[a-z0-9_%-]+?){2,}(?:(?::|%3a)\d+)?}i
-describe SPOOF_OURI	URL has items in odd places
+describe SPOOF_OURI	URI has items in odd places
+
+uri URI_DIGITS		m%^https?://[^/?]*\b\d{6,}\b%i
+describe URI_DIGITS	URI hostname has long digit sequence
+
+uri URI_HEX		m%^https?://[^/?]*\b[0-9a-f]{6,}\b%i
+describe URI_HEX	URI hostname has long hexadecimal sequence
+
+uri URI_NOVOWEL		m%^https?://[^/?]*[bcdfghjklmnpqrstvwxyz]{7}%i
+describe URI_NOVOWEL	URI hostname has long non-vowel sequence
