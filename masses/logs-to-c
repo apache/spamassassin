@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
-my $cffile = shift @ARGV;
-$cffile ||= "../spamassassin.cf";
+#my $cffile = shift @ARGV;
+#$cffile ||= "../spamassassin.cf";
 
 
 my @unmutated_tests = qw(
@@ -106,7 +106,8 @@ sub readlogs {
 
 sub readscores {
   $scores = { };
-
+  my @files = <../rules/[0-9]*.cf>;
+  foreach $cffile (@files) {
   print "Reading scores from \"$cffile\"...\n";
   open (IN, "<$cffile") or warn "cannot read $cffile\n";
   while (<IN>) {
@@ -119,6 +120,7 @@ sub readscores {
     }
   }
   close IN;
+  }
 }
 
 sub writescores_c {

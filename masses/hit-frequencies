@@ -60,7 +60,10 @@ sub readlogs {
 
 
 sub readscores {
-  open (IN, "<../spamassassin.cf");
+	my @files = <../rules/[0-9]*.cf>;
+	my $file;
+	foreach $file (@files) {
+  open (IN, "<$file");
   while (<IN>) {
     s/#.*$//g; s/^\s+//; s/\s+$//;
 
@@ -75,5 +78,6 @@ sub readscores {
     }
   }
   close IN;
+  }
 }
 
