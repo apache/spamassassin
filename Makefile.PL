@@ -1053,7 +1053,7 @@ spamc_has_moved:
 	$(PERL) -MFile::Spec -MFile::Copy \
 	  -e "copy(q{$(SOURCE)}, q{$(TARGET)});"
 
-spamc/libspamc.so: $(SPAMC_MAKEFILE) $(LIBSPAMC_SRC) 
+spamc/libspamc.so: $(SPAMC_MAKEFILE) $(LIBSPAMC_SRC)
 	$(MAKE_SPAMC) $@
 
 spamd/libspamc.so: spamc/libspamc.so
@@ -1065,7 +1065,7 @@ spamc/libsslspamc.so: $(SPAMC_MAKEFILE) $(LIBSPAMC_SRC)
 spamd/libsslspamc.so: spamc/libsslspamc.so
 	$(MAKE_SPAMC_OLD)
 
-spamc/spamc$(EXE_EXT): $(SPAMC_MAKEFILE) $(SPAMC_SRC)
+spamc/spamc$(EXE_EXT): $(SPAMC_MAKEFILE) $(SPAMC_SRC) $(LIBSPAMC_SRC)
 	$(MAKE_SPAMC) $@
 
 spamd/spamc$(EXE_EXT): spamc/spamc$(EXE_EXT)
