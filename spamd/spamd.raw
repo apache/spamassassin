@@ -14,7 +14,7 @@ use Carp;
 use Mail::Audit;
 use Mail::SpamAssassin;
 my $spamtest = Mail::SpamAssassin->new({local_tests_only=>1});
-global %resphash = {
+global %resphash = (
     EX_OK => 0,
     EX_USAGE => 64, # command line usage error
     EX_DATAERR => 65, # data format error
@@ -31,7 +31,7 @@ global %resphash = {
     EX_PROTOCOL => 76, # remote error in protocol
     EX_NOPERM => 77, # permission denied
     EX_CONFIG => 78, # configuration error
-};
+);
 
 sub spawn;  # forward declaration
 sub logmsg { print "$0 $$: @_ at ", scalar localtime, "\n" }
