@@ -65,9 +65,14 @@ foreach my $symbol ($sa->{conf}->regression_tests()) {
             $mail->set_body($string);
         }
 
+	# Make sure that this test will run
         $conf->{scores}->{$symbol} = 1;
         $msg->check();
-        ok( $msg->get_hits(), ($ok_or_fail eq 'ok' ? 1 : 0),
+
+	my %rules_hit = map { $_ => 1 } split(/,/,$msg->get_names_of_tests_hit()),
+		split(/,/,$msg->get_names_of_subtests_hit());
+
+        ok( (exists $rules_hit{$symbol} ? 1 : 0), ($ok_or_fail eq 'ok' ? 1 : 0),
                 "Test for '$symbol' (type: $test_type) against '$string'" );
     }
 }
