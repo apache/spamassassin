@@ -570,9 +570,10 @@ sub scan_mailbox {
   }
 
   foreach my $file (@files) {
-    if ($folder =~ /\.(?:gz|bz2)$/) {
+    if ($file =~ /\.(?:gz|bz2)$/) {
       die "compressed mbox folders are not supported at this time\n";
     }
+
     mail_open($file) or return;
     
     my $start = 0;		# start of a message
