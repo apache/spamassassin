@@ -1028,3 +1028,11 @@ score BAYES_99 0.001 0.001 4.300 2.791
 
 #header T_RCVD_IN_DUINV	rbleval:check_rbl('duinv', 'duinv.aupads.org.')
 #tflags T_RCVD_IN_DUINV net
+
+# Warning, several big ISP's mail relays (not open to outside people)
+# are listed on multihop. Do not set a high score on this.  Note too
+# that those IPs often are listed in unconfirmed.dsbl.org at the same
+# time.
+#header RCVD_IN_MULTIHOP_DSBL   rbleval:check_rbl_txt('multihop', 'multihop.dsbl.org.')
+#describe RCVD_IN_MULTIHOP_DSBL Received via a relay in multihop.dsbl.org
+#tflags RCVD_IN_MULTIHOP_DSBL   net
