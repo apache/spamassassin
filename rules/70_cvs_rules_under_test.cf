@@ -152,12 +152,6 @@ meta T_FAKED_AOL		(__AOL_MUA && __MIME_HTML_ONLY)
 meta T_FAKED_THEBAT		(__THEBAT_MUA && __MIME_HTML_ONLY)
 meta T_FAKED_IMS		(__IMS_MUA && __MIME_HTML_ONLY)
 
-# quinlan: 2003-03-02, last updated 2003-03-26
-body T_REMOVE_REMOVAL_1WORD	/remov\S{0,64}remov/i
-body T_REMOVE_REMOVAL_2WORD	/remov\S{0,16}\s+\S{0,16}remov/i
-body __REMOVE_REMOVAL_NEAR	/remov(?:e|al).{0,16}remov(?:e|al)/i
-meta T_REMOVE_REMOVAL_NEAR	(__REMOVE_REMOVAL_NEAR && !T_REMOVE_REMOVAL_1WORD && !T_REMOVE_REMOVAL_2WORD)
-
 # 2003-03-04: quinlan (my final attempt at this idea)
 # bug 821: test for "good" RFC2369 headers (was: reverse SUSPECT_LIST_HEADERS)
 #
