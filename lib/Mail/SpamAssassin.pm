@@ -77,7 +77,7 @@ use vars qw{
 	@ISA $VERSION $SUB_VERSION @EXTRA_VERSION $HOME_URL $DEBUG $TIMELOG
 	@default_rules_path @default_prefs_path
 	@default_userprefs_path @default_userstate_dir
-	@site_rules_path @old_site_rules_path
+	@site_rules_path
 };
 
 # Create the hash so that it really points to something, otherwise we can't
@@ -87,7 +87,7 @@ $TIMELOG->{dummy}=0;
 
 $VERSION = "2.40";
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.113 2002/08/19 21:16:39 msquadrat Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.114 2002/08/20 17:57:33 jmason Exp $'))[2 .. 5, 8]));
 # If you hacked up your SA, add a token to identify it here. Eg.: I use "mss<number>",
 # <number> increasing with every hack. Deersoft might want to use "pro" :o)
 # "cvs" is added automatically if this file is tagged as 'Exp'erimental.
@@ -101,6 +101,7 @@ $HOME_URL = "http://spamassassin.org/";
 #__installsitelib__/spamassassin.cf
 #__installvendorlib__/spamassassin.cf
 @default_rules_path = (
+        '__default_rules_dir__',
         '__prefix__/share/spamassassin',
         '/usr/local/share/spamassassin',
   	'/usr/share/spamassassin',
@@ -110,6 +111,7 @@ $HOME_URL = "http://spamassassin.org/";
 
 # first 3 are BSDish, latter 2 Linuxish
 @site_rules_path = (
+        '__local_rules_dir__',
         '__prefix__/etc/mail/spamassassin',
         '__prefix__/etc/spamassassin',
         '/usr/local/etc/spamassassin',
@@ -119,12 +121,8 @@ $HOME_URL = "http://spamassassin.org/";
   	'/etc/spamassassin',
 );
 
-@old_site_rules_path = (
-  	'/etc/mail/spamassassin.cf',
-  	'/etc/spamassassin.cf',
-);
-    
 @default_prefs_path = (
+        '__local_rules_dir__/user_prefs.template',
         '__prefix__/etc/mail/spamassassin/user_prefs.template',
         '__prefix__/share/spamassassin/user_prefs.template',
 	'/etc/spamassassin/user_prefs.template',
@@ -806,6 +804,8 @@ sub expand_name ($) {
 sub sed_path {
   my ($self, $path) = @_;
   return undef if (!defined $path);
+  $path =~ s/__local_rules_dir__/$self->{LOCAL_RULES_DIR} || ''/ges;
+  $path =~ s/__default_rules_dir__/$self->{DEFAULT_RULES_DIR} || ''/ges;
   $path =~ s/__prefix__/$Config{prefix}/gs;
   $path =~ s/__sitelib__/$Config{sitelib}/gs;
   $path =~ s/__vendorlib__/$Config{vendorlib}/gs;
