@@ -257,7 +257,10 @@ if ($opt{'username'}) {
     die "fatal: cannot run as nonexistent user or root with -u option\n";
   }
 
-    # make sure we can unlink it later
+  $uuid =~ /^(\d+)$/ and $uuid = $1;	# de-taint
+  $ugid =~ /^(\d+)$/ and $ugid = $1;	# de-taint
+
+  # make sure we can unlink it later
   if (defined $opt{'pidfile'}) {
     chown $uuid, -1, $opt{'pidfile'}
       || die "fatal: could not chown '$opt{'pidfile'}' to uid $uuid\n";
@@ -513,6 +516,9 @@ sub check {
         logmsg "Still running as root: user not specified with -u, ".
 	     "not found, or set to root.  Fall back to nobody.";
         my ($uid,$gid) = (getpwnam('nobody'))[2,3];
+        $uid =~ /^(\d+)$/ and $uid = $1;	# de-taint
+        $gid =~ /^(\d+)$/ and $gid = $1;	# de-taint
+
 	$) = "$gid $gid"; # eGID
         $> = $uid; # eUID
         if ( !defined($uid) || ($> != $uid and $> != ($uid-2**32))) {
@@ -742,6 +748,10 @@ sub handle_user
 	return 0;
     }
 
+    # not sure if this is required, the doco says it isn't
+    $uid =~ /^(\d+)$/ and $uid = $1;	# de-taint
+    $gid =~ /^(\d+)$/ and $gid = $1;	# de-taint
+
     if ($setuid_to_user) {
 	$) = "$gid $gid"; # change eGID
 	$> = $uid; # change eUID
@@ -868,6 +878,9 @@ sub handle_user_setuid_with_sql
        logmsg "handle_user() -> unable to find user [$username]!\n";
        return 0;
     }
+
+    $uid =~ /^(\d+)$/ and $uid = $1;	# de-taint
+    $gid =~ /^(\d+)$/ and $gid = $1;	# de-taint
 
     if ($setuid_to_user) {
        $) = "$gid $gid"; # change eGID
