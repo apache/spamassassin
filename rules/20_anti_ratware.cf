@@ -69,4 +69,10 @@ tflags USER_AGENT_VM         nice
 tflags USER_AGENT_MSN        nice
 tflags USER_AGENT_FORTE      nice
 
+header __XIMIAN_MUA	     X-Mailer =~ /^(?:Ximian Evolution|Evolution\/\d+\.)/
+# interestingly the last word (\S+) always seems to be 'camel' ;)
+header __XIMIAN_MSGID	     MESSAGEID =~ /^<\d{10}\.\d+\.\d+\.\S+\@/
+meta USER_AGENT_XIMIAN     (__XIMIAN_MSGID && __XIMIAN_MUA && !__UNUSABLE_MSGID)
+score  USER_AGENT_XIMIAN   -0.5
+tflags USER_AGENT_XIMIAN   nice
 
