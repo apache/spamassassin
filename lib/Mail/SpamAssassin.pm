@@ -69,7 +69,7 @@ use vars	qw{
 @ISA = qw();
 
 $VERSION = "2.21";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.79 2002/04/26 00:15:10 hughescr Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.80 2002/05/14 05:59:52 hughescr Exp $';
 
 sub Version { $VERSION; }
 
@@ -666,7 +666,8 @@ sub create_default_prefs {
 			 "\"$fname\" from default \"$defprefs\".\n";
    }
  }
-
+ elsif ($self->{dont_copy_prefs}) { return 1; }
+ 
  return(0);
 }
 
