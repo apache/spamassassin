@@ -59,7 +59,8 @@ sub sa_t_init {
   $spamdhost = $ENV{'SPAMD_HOST'};
   $spamdhost ||= "localhost";
   $spamdport = $ENV{'SPAMD_PORT'};
-  $spamdport ||= 48373;		# whatever
+  $spamdport ||= gen_random_spamd_port();
+
   $spamd_cf_args = "-C log/test_rules_copy";
   $spamd_localrules_args = " --siteconfigpath log/localrules.tmp";
   $scr_localrules_args =   " --siteconfigpath log/localrules.tmp";
@@ -126,6 +127,12 @@ sub sa_t_init {
 
   $ENV{'TEST_DIR'} = $cwd;
   $testname = $tname;
+}
+
+# a random port number between 48373 and 58372; used to allow
+# multiple test suite runs on the same machine simultaneously
+sub gen_random_spamd_port {
+  srand; return (48373 + int rand 10000);
 }
 
 sub sa_t_finish {
