@@ -213,7 +213,7 @@ sub load_resolver {
       $self->{no_resolver} = 0;
     }
     1;
-  ' or warn "eval failed: $@ $!\n";
+  ';   #  or warn "eval failed: $@ $!\n";
   dbg ("is Net::DNS::Resolver unavailable? $self->{no_resolver}");
 
   return (!$self->{no_resolver});
