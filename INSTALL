@@ -250,8 +250,8 @@ version is too low for them to be used.
   - Net::DNS (from CPAN)
 
     Used for all DNS-based tests (SBL, XBL, SpamCop, DSBL, etc.),
-    perform MX checks, and is also used when manually reporting spam to
-    SpamCop.  Recommended.
+    perform MX checks, used when manually reporting spam to SpamCop,
+    and used by sa-update to gather version information.  Recommended.
 
     If this is installed and you are using network tests of any variety
     (which is the default), then you need to make sure the Net::DNS
@@ -320,6 +320,21 @@ version is too low for them to be used.
     user configuration data, Bayes storage, or other storage, you will need
     to have these installed; both the basic DBI module and the driver for
     your database.
+
+
+  - LWP (from CPAN)
+
+    Used by sa-update to retrieve update archives.
+
+
+  - IO::Zlib (from CPAN)
+
+    Used by sa-update to uncompress update archives.
+
+
+  - Archive::Tar (from CPAN)
+
+    Used by sa-update to expand update archives.
 
 
 Optional Programs
