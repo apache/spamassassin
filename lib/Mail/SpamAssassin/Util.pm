@@ -396,12 +396,12 @@ sub parse_rfc822_date {
   # Time::Local (v1.10 at least) throws warnings when the dates cause
   # a 32-bit overflow.  So force a min/max for year.
   if ($yyyy > 2037) {
-    dbg("util: forcing year to 2037: $date");
-    $yyyy=2037;
+    dbg("util: date before supported range, forcing year to 2037: $date");
+    $yyyy = 2037;
   }
   elsif ($yyyy < 1970) {
-    dbg("util: forcing year to 1970: $date");
-    $yyyy=1970;
+    dbg("util: date after supported range, forcing year to 1970: $date");
+    $yyyy = 1971;
   }
 
   my $time;
