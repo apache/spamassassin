@@ -349,20 +349,12 @@ sub check_for_forged_received_ip_helo {
   return ($self->{mismatch_ip_helo} > 0);
 }
 
-# FORGED_RCVD_IP_HELO
-sub check_for_forged_received_ip_helo_big {
-  my ($self) = @_;
-  $self->_check_for_forged_received unless exists $self->{mismatch_ip_helo_big};
-  return ($self->{mismatch_ip_helo_big} > 0);
-}
-
 sub _check_for_forged_received {
   my ($self) = @_;
 
   $self->{mismatch_from} = 0;
   $self->{mismatch_helo} = 0;
   $self->{mismatch_ip_helo} = 0;
-  $self->{mismatch_ip_helo_big} = 0;
 
   my @fromip = map { $_->{ip} } @{$self->{relays_untrusted}};
   # just pick up domains for these
@@ -415,9 +407,6 @@ sub _check_for_forged_received {
 		  && $fip =~ /^\d+\.\d+\.\d+\.\d+$/
 		  && $fip ne $hlo)
       {
-	dbg ("forged-HELO: mismatch on IP-addr HELO: '$hlo' != '$fip'");
-	$self->{mismatch_ip_helo}++;
-
 	$hlo =~ /^(\d+\.\d+)\.\d+\.\d+$/; my $hclassb = $1;
 	$fip =~ /^(\d+\.\d+)\.\d+\.\d+$/; my $fclassb = $1;
 
@@ -427,7 +416,7 @@ sub _check_for_forged_received {
 		!($hlo =~ /${IP_IN_RESERVED_RANGE}/o))
 	{
 	  dbg ("forged-HELO: massive mismatch on IP-addr HELO: '$hlo' != '$fip'");
-	  $self->{mismatch_ip_helo_big}++;
+	  $self->{mismatch_ip_helo}++;
 	}
       }
     }
@@ -792,7 +781,6 @@ sub _check_received_helos {
     # allow stuff before the dot-com for both from-name and HELO-name,
     # so HELO="outgoing.aol.com" and from="mx34853495.mx.aol.com" works OK.
     #
-    $self->{faked_dotcom_helo} = 0;
     $self->{no_rdns_dotcom_helo} = 0;
     if ($helo_host =~ /(?:\.|^)(lycos\.com|lycos\.co\.uk|hotmail\.com
 		|localhost\.com|excite\.com|caramail\.com
@@ -805,19 +793,9 @@ sub _check_received_helos {
 	dbg ("Received: no rDNS for dotcom HELO: from=$from_host HELO=$helo_host");
 	$self->{no_rdns_dotcom_helo} = 1;
       }
-      elsif ($from_host !~ /(?:\.|^)${dom}$/i) {
-	dbg ("Received: faked dotcom HELO: from=$from_host HELO=$helo_host");
-	$self->{faked_dotcom_helo} = 1;
-      }
     }
   }
 } # _check_received_helos()
-
-sub check_for_fake_dotcom_helo {
-  my ($self) = @_;
-  if (!exists $self->{faked_dotcom_helo}) { $self->_check_received_helos(@_); }
-  return $self->{faked_dotcom_helo};
-}
 
 sub check_for_no_rdns_dotcom_helo {
   my ($self) = @_;
