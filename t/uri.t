@@ -98,9 +98,11 @@ sub try_canon {
   my @expect = sort { $a cmp $b } @{$expect};
 
   # output what we want/get for debugging
-  #warn ">> expect: @expect\n>> got: @input\n";
-
-  return array_cmp(\@input, \@expect);
+  my $res = array_cmp(\@input, \@expect);
+  if (!$res) {
+    warn ">> expect: [ @expect ]\n>> got: [ @input ]\n";
+  }
+  return $res;
 }
 
 # We should get the raw versions and a single "correct" version
