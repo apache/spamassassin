@@ -1631,7 +1631,8 @@ Options:
  -h, --help                         Print usage message.
  -i ipaddr, --listen-ip=ipaddr,...  Listen on the IP ipaddr (default: 127.0.0.1)
  -p port, --port                    Listen on specified port (default: 783)
- -m num, --max-children             Allow maximum num children (default: 5)
+ -m num, --max-children=num         Allow maximum num children (default: 5)
+ --max-conn-per-child=num	    Maximum connections accepted by child before exiting
  -q, --sql-config                   Enable SQL config (only useful with -x)
  -Q, --setuid-with-sql              Enable SQL config (only useful with -x,
                                     enables use of -H)
