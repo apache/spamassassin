@@ -475,7 +475,9 @@ sub parse_received_line {
     # Received: from 217.137.58.28 ([217.137.58.28])
     # by webmail.ukonline.net (IMP) with HTTP
     # for <anarchyintheuk@localhost>; Sun, 11 Apr 2004 00:31:07 +0100
-    if (/^from (${IP_ADDRESS}) \(\[${IP_ADDRESS}\]\) by (\S+).*\bwith HTTP/) {
+    if (/\bwith HTTP\b/ &&        # more efficient split up this way
+        /^from (${IP_ADDRESS}) \(\[${IP_ADDRESS}\]\) by (\S+)/)
+    {
       # some smarty-pants decided to fake a numeric HELO for HTTP
       # no rDNS for this format?
       $ip = $1; $by = $2; goto enough;
@@ -490,10 +492,8 @@ sub parse_received_line {
     }
 
     # from mail2.detr.gsi.gov.uk ([51.64.35.18] helo=ahvfw.dtlr.gsi.gov.uk) by mail4.gsi.gov.uk with smtp id 190K1R-0000me-00 for spamassassin-talk-admin@lists.sourceforge.net; Tue, 01 Apr 2003 12:33:46 +0100
-    if (/^from (\S+) \(\[(${IP_ADDRESS})\](.*)\) by (\S+) with /) {
-      $rdns = $1; $ip = $2; $by = $4;
-      my $sub = ' '.$3.' ';
-      if ($sub =~ / helo=(\S+) /) { $helo = $1; }
+    if (/^from (\S+) \(\[(${IP_ADDRESS})\] helo=(\S+)\) by (\S+) with /) {
+      $rdns = $1; $ip = $2; $helo = $3; $by = $4;
       goto enough;
     }
 

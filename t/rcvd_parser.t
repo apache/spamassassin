@@ -120,7 +120,7 @@ Received: from m165.4superdeals.biz (softdnserr [::ffff:64.235.238.165]) by
 
 } => q{
 
-  [ ip=218.11.152.141 rdns=cs.helsinki.fi helo= by=mail.cs.helsinki.fi ident= envfrom= id= ] [ ip=64.235.238.165 rdns= helo=m165.4superdeals.biz by=mail.cs.helsinki.fi ident= envfrom= id= ]
+  [ ip=218.11.152.141 rdns= helo=cs.helsinki.fi by=mail.cs.helsinki.fi ident= envfrom= id= ] [ ip=64.235.238.165 rdns= helo=m165.4superdeals.biz by=mail.cs.helsinki.fi ident= envfrom= id= ]
 
 },
 q{
@@ -222,7 +222,7 @@ Received: from a1200 ([24.83.2.7])
 
 } => q{
 
-[ ip=66.199.2.3 rdns=bigass1.example.com helo= by=slim1.example.com ident= envfrom= id= ] [ ip=24.83.2.4 rdns=a1200 helo= by=bigass1.example.com ident= envfrom= id= ] [ ip=66.199.2.5 rdns=ns1.example.com helo=bigass1.example.com by=fiat.example.edu ident= envfrom= id=i06MBJ6U020255 ] [ ip=24.83.2.6 rdns=a1200 helo= by=bigass1.example.com ident= envfrom= id= ] [ ip=24.83.2.7 rdns=a1200 helo= by=bigass1.example.com ident= envfrom= id= ]
+[ ip=66.199.2.3 rdns= helo=bigass1.example.com by=slim1.example.com ident= envfrom= id= ] [ ip=24.83.2.4 rdns= helo=a1200 by=bigass1.example.com ident= envfrom= id= ] [ ip=66.199.2.5 rdns=ns1.example.com helo=bigass1.example.com by=fiat.example.edu ident= envfrom= id=i06MBJ6U020255 ] [ ip=24.83.2.6 rdns= helo=a1200 by=bigass1.example.com ident= envfrom= id= ] [ ip=24.83.2.7 rdns= helo=a1200 by=bigass1.example.com ident= envfrom= id= ]
 
 },
 q{
