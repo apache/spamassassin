@@ -1276,7 +1276,9 @@ sub check {
       if ( $version >= 1.3 )    # Spamc protocol > 1.2 means multi hdrs are OK
       {
         my $msg_resp_length = length($msg_resp);
-        syswrite( $client, "Content-length: $msg_resp_length\r\n" . $spamhdr . "\r\n\r\n" . $msg_resp );
+        syswrite( $client,
+                  "Content-length: $msg_resp_length\r\n" . 
+                  $spamhdr . "\r\n\r\n" . $msg_resp );
       }
       else {
         syswrite( $client, $spamhdr . "\r\n\r\n" . $msg_resp );
@@ -1428,7 +1430,8 @@ sub protocol_error {
 sub service_unavailable_error {
   my ($err) = @_;
   my $resp = "EX_UNAVAILABLE";
-  syswrite( $client, "SPAMD/1.0 $resphash{$resp} Service Unavailable: $err\r\n" );
+  syswrite( $client,
+            "SPAMD/1.0 $resphash{$resp} Service Unavailable: $err\r\n" );
   logmsg("service unavailable: $err");
 }
 
