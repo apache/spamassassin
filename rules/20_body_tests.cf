@@ -341,6 +341,15 @@ describe LINES_OF_YELLING_2     2 WHOLE LINES OF YELLING DETECTED
 body     LINES_OF_YELLING_3     eval:check_for_num_yelling_lines("3")
 describe LINES_OF_YELLING_3     3 WHOLE LINES OF YELLING DETECTED
 
+body HTML_50_70                 eval:check_html_percentage('50','70')
+describe HTML_50_70             Message is 50-70% HTML tags
+
+body HTML_70_90                 eval:check_html_percentage('70','90')
+describe HTML_70_90             Message is 70-90% HTML tags
+
+body HTML_90_100                eval:check_html_percentage('90','100')
+describe HTML_90_100            Message is 90-100% HTML tags
+
 ###########################################################################
 # these tests doesn't actually use rawbody since rawbody isn't raw enough;
 # they must be written very carefully to avoid modifying the original content
