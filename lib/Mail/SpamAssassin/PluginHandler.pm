@@ -89,7 +89,12 @@ sub callback {
 
     dbg ("plugin: calling $subname on $plugin");
     my $methodref = $plugin->can ($subname);
-    $ret = &$methodref ($plugin, @_);
+
+    if (defined $methodref) {
+      eval {
+	$ret = &$methodref ($plugin, @_);
+      };
+    }
 
     if ($plugin->{_inhibit_further_callbacks}) {
       dbg ("plugin: $plugin inhibited further callbacks");
