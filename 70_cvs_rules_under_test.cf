@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.535 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.536 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -266,12 +266,6 @@ tflags T_RCVD_IN_DUL_AUPADS net
 # dsn.rfc-ignorant.org
 header T_DNS_FROM_RFCI_DSN	rbleval:check_rbl_from_host('rfci-dsn', 'dsn.rfc-ignorant.org.')
 tflags T_DNS_FROM_RFCI_DSN net
-
-# DO NOT USE - DELETE BEFORE RELEASE: this is a test rule to verify that
-# we are testing at least one IP address per spam
-header T_RCVD_IN_ALL	rbleval:check_rbl('xxx', 'blocked.secnap.net.')
-tflags T_RCVD_IN_ALL net
-score T_RCVD_IN_ALL 0.001
 
 # bug 1733: SenderBase
 # sa.senderbase.org for SpamAssassin queries
