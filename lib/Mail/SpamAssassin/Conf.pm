@@ -134,6 +134,7 @@ sub new {
   $self->{auto_whitelist_path} = "__userstate__/auto-whitelist";
   $self->{auto_whitelist_file_mode} = '0700';
   $self->{auto_whitelist_factor} = 0.5;
+  $self->{auto_whitelist_lock_timeout} = 30;
 
   $self->{auto_learn} = 1;
   $self->{auto_learn_threshold_nonspam} = -2.0;
@@ -183,6 +184,9 @@ sub new {
   $self->{bayes_ignore_headers} = [ ];
   $self->{bayes_min_ham_num} = 200;
   $self->{bayes_min_spam_num} = 200;
+
+  $self->{bayes_manual_lock_timeout} = 300;
+  $self->{bayes_opportunistic_lock_timeout} = 10;
 
   $self->{whitelist_from} = { };
   $self->{blacklist_from} = { };
@@ -1335,6 +1339,18 @@ mean; C<factor> = 0 mean just use the calculated score.
       $self->{auto_whitelist_factor} = $1; next;
     }
 
+=item auto_whitelist_lock_timeout	(Default: 30)
+
+SpamAssassin needs to lock the auto-whitelist database, in order to modify the
+values therein.  The operation will fail if it cannot get a lock within a given
+timeout.
+
+=cut
+
+    if (/^auto_whitelist_lock_timeout\s+(.*)$/) {
+      $self->{auto_whitelist_lock_timeout} = $1+0; next;
+    }
+
 =item auto_learn ( 0 | 1 )	(default: 1)
 
 Whether SpamAssassin should automatically feed high-scoring mails (or
@@ -1414,6 +1430,33 @@ spam, but you can tune these up or down with these two settings.
       $self->{bayes_min_spam_num} = $1+0; next;
     }
 
+=item bayes_manual_lock_timeout		(Default: 300)
+
+SpamAssassin needs to lock the Bayes tokens database, in order to learn from
+new mails, or to expire old data from the database.  The lock will fail if it
+cannot get a lock within a given timeout.  This value is the lock timeout for
+manual operations, run from the command-line via C<sa-learn>.
+
+=cut
+
+    if (/^bayes_manual_lock_timeout\s+(.*)$/) {
+      $self->{bayes_manual_lock_timeout} = $1+0; next;
+    }
+
+=item bayes_opportunistic_lock_timeout		(Default: 10)
+
+SpamAssassin needs to lock the Bayes tokens database, in order to learn from
+new mails, or to expire old data from the database.  The lock will fail if it
+cannot get a lock within a given timeout.  This value is the lock timeout for
+opportunistic operations, run from the scanner as it scans incoming mail,
+namely auto-learning, and opportunistic expiry (if C<sa-learn --rebuild> is not
+run from the command-line or from cron regularly).
+
+=cut
+
+    if (/^bayes_opportunistic_lock_timeout\s+(.*)$/) {
+      $self->{bayes_opportunistic_lock_timeout} = $1+0; next;
+    }
 
 
 ###########################################################################
