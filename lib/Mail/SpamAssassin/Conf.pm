@@ -709,6 +709,11 @@ or "all" to remove from either).  All headers begin with C<X-Spam->
 
 See also C<clear_headers> for removing all the headers at once.
 
+Note that B<X-Spam-Checker-Version> is not removable because the version
+information is needed by mail administrators and developers to debug
+problems.  Without at least one header, it might not even be possible to
+determine that SpamAssassin is running.
+
 =cut
 
     if (/^remove_header\s+(ham|spam|all)\s+([A-Za-z0-9_-]+)\s*$/) {
