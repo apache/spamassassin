@@ -367,6 +367,8 @@ header T_SUBJ_VIAGRA		Subject =~ /v.{0,2}i.{0,2}a.{0,2}g.{0,2}r.{0,2}a/i
 header T_SUBJ_VICODIN		Subject =~ /v.{0,2}i.{0,2}c.{0,6}d.{0,2}i.{0,2}n/i
 header T_SUBJ_SOMA		Subject =~ /s.{0,2}o.{0,2}m.{0,2}a/i
 header T_SUBJ_PHENTER		Subject =~ /p.{0,2}h.{0,6}t.{0,2}e.{0,2}r.{0,2}m/i
+header T_SUBJ_CIALIS		Subject =~ /\bc.{0,2}i.{0,2}a.{0,2}l.{0,2}i.{0,2}s/i
+header T_SUBJ_LEVITRA		Subject =~ /l.{0,2}e.{0,2}v.{0,2}i.{0,2}t.{0,2}r.{0,2}a/i
 
 # partial messages; currently-theoretical attack
 header T_FRAGMENTED_MESSAGE	Content-Type =~ /message\/partial/i
@@ -548,3 +550,8 @@ describe T_FAKED_IP_IN_RCVD	Received: contains a name with a faked IP-address
 header T_RCVD_BY_IP	Received =~ /\bby\s+\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/
 describe T_RCVD_BY_IP	Received by mail server with no name
 header T_RCVD_BY_IP_2	Received =~ /\bby\s+\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b/
+
+# replaces VIAGRA
+# Cialis needs a leading \b
+body T_DRUG_ED_CAPS	/(?:\bCIALIS|LEVITRA|VIAGRA)/i
+describe T_DRUG_ED_CAPS	Mentions an E.D. drug
