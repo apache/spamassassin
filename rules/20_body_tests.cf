@@ -469,10 +469,10 @@ describe HR_3113                Mentions Spam law "H.R. 3113"
 body UCE_MAIL_ACT               /Unsolicited Commercial Electronic Mail Act/
 describe UCE_MAIL_ACT           Mentions Spam Law "UCE-Mail Act"
 
-body PENIS_ENLARGE		/\b(?:add\b|enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b).{0,50}\b(?:penis|P[ -]?P\b|pee[ -]?pee|dick|sc?hlong|wh?anger|breast)/i
+body PENIS_ENLARGE		/\b(?:add\b|enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b).{0,50}\b(?:penis|male organ|P[ -]?P\b|pee[ -]?pee|dick|sc?hlong|wh?anger|breast)/i
 describe PENIS_ENLARGE		Information on getting a larger penis or breasts
 
-body PENIS_ENLARGE2		/\b(?:penis|P[ -]?P\b|pee[ -]?pee|dick|sc?hlong|wh?anger|breast).{0,50}\b(?:add\b|enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b)/i
+body PENIS_ENLARGE2		/\b(?:penis|male organ|P[ -]?P\b|pee[ -]?pee|dick|sc?hlong|wh?anger|breast).{0,50}\b(?:add\b|enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b)/i
 describe PENIS_ENLARGE2		Information on getting a larger penis or breasts (2)
 
 body     EJACULATION            /\b(?:increase|improve).{0,10}ejaculation/i
