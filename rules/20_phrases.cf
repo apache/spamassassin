@@ -959,15 +959,12 @@ describe CHANGE_TERMS           Terms and conditions
 
 body     DONT_DELETE            /\b(?:don'?t delete this|do not delete)/i
 describe DONT_DELETE            Don't delete me!  Nooooo!!!!
-lang fr describe DONT_DELETE    Contient une formule incitant é ne pas détruire ce message
 
-lang fr describe EU_200_32_CE   Revendique la conformité avec l'arrêt européen 200.32.CE
 body EU_200_32_CE               /Directive 200.32.CE/i
-describe EU_200_32_CE           Claims compliance with spam regulations
+describe EU_200_32_CE           Claims compliance with European spam regulations
 
-lang fr describe EU_EMAIL_OPTOUT        Revendique la conformité avec l'arrêt européen sur le spam
 body EU_EMAIL_OPTOUT            	/EU (?:e-?mail opt.?out|e.?commerce) directive/i
-describe EU_EMAIL_OPTOUT        	Claims compliance with spam regulations
+describe EU_EMAIL_OPTOUT        	Claims compliance with European spam regulations
 
 body EXCUSE_8                   /requests to be taken off our mailing list/i
 describe EXCUSE_8               Claims you can be removed from the list
@@ -978,11 +975,9 @@ describe FILTERED_BY_WORLDREMOVE	Claims to listen to some removal request list
 body FREE_HOSTING               /\bfree hosting\b/i
 describe FREE_HOSTING           Free Hosting
 
-lang fr describe GREEN_EXCUSE_1 Prétend que le spam est bon pour l'environement
 body GREEN_EXCUSE_1             /using email instead can significantly reduce this/i
 describe GREEN_EXCUSE_1         Claims spam helps the environment
 
-lang fr describe GREEN_EXCUSE_2 Prétend que le spam est bon pour l'environement
 body GREEN_EXCUSE_2             /the trees, save the planet, use email!/i
 describe GREEN_EXCUSE_2         Claims spam helps the environment
 
