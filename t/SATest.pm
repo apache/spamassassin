@@ -143,7 +143,7 @@ sub spamcrun_background {
   $spamcargs =~ s!/!\\!g if ($^O =~ /^MS(DOS|Win)/i);
 
   print ("\t$spamcargs &\n");
-  system ("$spamcargs > log/$testname.out &") and return 0;
+  system ("$spamcargs > log/$testname.bg &") and return 0;
 
   1;
 }
@@ -214,8 +214,15 @@ sub start_spamd {
 }
 
 sub stop_spamd {
-  print ("Killed ",kill (15, $spamd_pid)," spamd instances\n");
-  $spamd_pid = 0;
+  if ( $spamd_pid <= 1) {
+    print ("Invalid spamd pid: $spamd_pid. Spamd not started/crashed?\n");
+    return 0;
+  } else {
+    my $killed = kill (15, $spamd_pid);
+    print ("Killed $killed spamd instances\n");
+    $spamd_pid = 0;
+    return $killed;
+  }
 }
 
 # ---------------------------------------------------------------------------
