@@ -1,10 +1,12 @@
-# $Id: HTML.pm,v 1.23 2002/10/05 10:49:42 quinlan Exp $
+# $Id: HTML.pm,v 1.24 2002/10/05 22:07:33 zelgadis Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
 
 package Mail::SpamAssassin::PerMsgStatus;
 use HTML::Parser 3.00 ();
+
+use strict;
 
 # HTML decoding TODOs
 # - add URIs to list for faster URI testing
