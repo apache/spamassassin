@@ -639,9 +639,7 @@ sub check {
                     return 1;
                 }
 
-		# REIMPLEMENT:
-		# set current user to the value in $1.  is this silly?
-
+		my $current_user = $1;
                 auth_ident($current_user) if $opt{'auth-ident'};
 
                 if (!$opt{'user-config'})
