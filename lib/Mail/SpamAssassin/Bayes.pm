@@ -977,12 +977,12 @@ sub compute_prob_for_token {
     return if ($s + $n < 2);
   }
 
-  my $prob;
-
   return 0.5 if ( $ns == 0 || $nn == 0 );
 
   my $ratios = ($s / $ns);
   my $ration = ($n / $nn);
+
+  my $prob;
 
   if ($ratios == 0 && $ration == 0) {
     warn "oops? ratios == ration == 0";
@@ -1053,13 +1053,6 @@ sub scan {
   # Add URIs to the body ...
   push (@{$body}, $self->add_uris_for_permsgstatus ($permsgstatus));
 
-  # Figure out the message receive time (used as atime below)
-  # If the message atime comes back as being in the future, something's
-  # messed up and we should revert to current time as a safety measure.
-  #
-  my $msgatime = $self->receive_date(scalar $msg->get_all_headers(0,1));
-  $msgatime = time if ( $msgatime > time );
-
   # Figure out our probabilities for the message tokens
   my %pw = map {
       my $pw = $self->compute_prob_for_token ($_, $ns, $nn);
@@ -1076,6 +1069,13 @@ sub scan {
     dbg ("cannot use bayes on this message; none of the tokens were found in the database");
     goto skip;
   }
+
+  # Figure out the message receive time (used as atime below)
+  # If the message atime comes back as being in the future, something's
+  # messed up and we should revert to current time as a safety measure.
+  #
+  my $msgatime = $self->receive_date(scalar $msg->get_all_headers(0,1));
+  $msgatime = time if ( $msgatime > time );
 
   # now take the $count most significant tokens and calculate probs using
   # Robinson's formula.
