@@ -522,6 +522,8 @@ but network tests are enabled. The third score is used when Bayes is enabled
 and network tests are disabled. The fourth score is used when Bayes is
 enabled and network tests are enabled.
 
+Setting a rule's score to 0 will disable that rule from running.
+
 Note that test names which begin with '__' are reserved for meta-match
 sub-rules, and are not scored or listed in the 'tests hit' reports.
 
