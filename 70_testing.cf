@@ -373,16 +373,6 @@ uri T_LONG_HOSTNAME_25		/^https?:\/\/[a-z0-9]{25,29}\./i
 uri T_LONG_HOSTNAME_30		/^https?:\/\/[a-z0-9]{30,40}\./i
 uri T_LONG_HOSTNAME_40		/^https?:\/\/[a-z0-9]{40,}\./i
 
-# bug 2876: catch faked Reply messages
-# looks like it doesn't work!  
-# 6.971   7.2516   6.2943    0.535   0.16    0.01  T_REPLY_WITHOUT_HDRS
-# kill it?
-header __HAS_THREAD_TOPIC	exists:Thread-Topic
-header __HAS_IRT		exists:In-Reply-To
-header __HAS_REFS		exists:References
-header __HAS_SUBJ_RE		Subject =~ /^re: /i
-meta T_REPLY_WITHOUT_HDRS	(__HAS_SUBJ_RE && !(__HAS_THREAD_TOPIC || __HAS_IRT || __HAS_REFS))
-
 body T_DOMAIN_RATIO_001		eval:domain_ratio('0.001')
 body T_DOMAIN_RATIO_002		eval:domain_ratio('0.002')
 body T_DOMAIN_RATIO_003		eval:domain_ratio('0.003')
@@ -544,7 +534,10 @@ body T_BACKHAIR2_7_6		eval:html_test('backhair2_7_6')
 body T_BACKHAIR2_7_7		eval:html_test('backhair2_7_7')
 
 # spams that are assembled from a Javascript array
-rawbody T_JS_FROMCHARCODE	/String\.fromCharCode/
+# look for the XOR op
+rawbody __JS_FROMCHARCODE	/String\.fromCharCode\s*(\s*\S+\s*\[\s*\S+\s*\]\s*\^/
+rawbody __JS_DOCWRITE   	/document\.write/
+meta T_JS_FROMCHARCODE          (__JS_FROMCHARCODE && __JS_DOCWRITE)
 
 # IADB
 header __RCVD_IN_IADB		eval:check_rbl('iadb', 'iadb.isipp.com.')
