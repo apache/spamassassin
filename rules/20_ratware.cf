@@ -82,6 +82,8 @@ describe RATWARE_RCVD_BONUS_SPC	Bulk email fingerprint (bonus space) found
 
 ###########################################################################
 # Now, detect forgeries of real MUAs
+#
+# NOTE: these rules should specify version numbers!
 
 # Dec 17 2002 jm: this means "message ID is either too old or has been
 # rewritten by a gateway".  Made into an eval test since meta tests cannot
@@ -100,23 +102,31 @@ header __AOL_MUA		X-Mailer =~ /\bAOL\b/
 # Internet Mail Service
 header __IMS_MUA		X-Mailer =~ /Internet Mail Service/
 header __IMS_MSGID		MESSAGEID =~ /^<[A-F\d]{36,40}\@\S+>$/m
-meta FORGED_MUA_IMS		(__IMS_MUA && !__UNUSABLE_MSGID && !__IMS_MSGID)
+meta FORGED_MUA_IMS		(__IMS_MUA && !__IMS_MSGID && !__UNUSABLE_MSGID)
 describe FORGED_MUA_IMS		Forged mail pretending to be from IMS
 
-# Outlook
-# Note: this uses __IMS_MSGID from above
-header __OUTLOOK_MUA		X-Mailer =~ /\bOutlook\b(?! IMO| Express (?:for )?Mac|, Build 11\.0\.)/
-header __OUTLOOK_MSGID_1	MESSAGEID =~ /^<[0-9a-f]{12}\$[0-9a-f]{8}\$[0-9a-f]{8}\@\S+>$/m
-# See bug 1488 for details
-header __OUTLOOK_MSGID_2	MESSAGEID =~ /^<[A-Za-z0-9-]{7}[A-Za-z0-9]{20}\@hotmail\.com>$/m
-header __OUTLOOK_MSGID_3	MESSAGEID =~ /^<\!\~\!/m
-meta FORGED_MUA_OUTLOOK		(__OUTLOOK_MUA && !__UNUSABLE_MSGID && !(__OUTLOOK_MSGID_1 || __OUTLOOK_MSGID_2 || __OUTLOOK_MSGID_3 || __IMS_MSGID))
+# Outlook mailers often use this Message-ID
+header __OUTLOOK_DOLLARS_MSGID	MESSAGEID =~ /^<[0-9a-f]{12}\$[0-9a-f]{8}\$[0-9a-f]{8}\@\S+>$/m
+
+# Outlook Express 4, 5, and 6
+header __OE_MUA			X-Mailer =~ /\bOutlook Express [456]\./
+header __OE_MSGID_1		MESSAGEID =~ /^<[A-Za-z0-9-]{7}[A-Za-z0-9]{20}\@hotmail\.com>$/m
+header __OE_MSGID_2		MESSAGEID =~ /^<(?:[0-9a-f]{8}|[0-9a-f]{12})\$[0-9a-f]{8}\$[0-9a-f]{8}\@\S+>$/m
+meta __FORGED_OE		(__OE_MUA && !__OE_MSGID_1 && !__OE_MSGID_2 && !__UNUSABLE_MSGID)
+
+# Outlook versions that usually use "dollar signs"
+header __OUTLOOK_DOLLARS_MUA	X-Mailer =~ /^Microsoft Outlook(?: 8| CWS, Build 9|, Build 10)\./
+header __OUTLOOK_DOLLARS_OTHER	MESSAGEID =~ /^<\!\~\!/m
+meta __FORGED_OUTLOOK_DOLLARS	(__OUTLOOK_DOLLARS_MUA && !__OUTLOOK_DOLLARS_MSGID && !__OUTLOOK_DOLLARS_OTHER && !__IMS_MSGID && !__UNUSABLE_MSGID)
+
+# use new meta rules to implement FORGED_MUA_OUTLOOK rule from 2.60
+meta FORGED_MUA_OUTLOOK		(__FORGED_OE || __FORGED_OUTLOOK_DOLLARS)
 describe FORGED_MUA_OUTLOOK	Forged mail pretending to be from MS Outlook
 
 # Outlook IMO (Internet Mail Only)
 header __OIMO_MUA		X-Mailer =~ /Outlook IMO/
 header __OIMO_MSGID		MESSAGEID =~ /^<[A-P]{26}A[AB]\.[-_\w.]+\@\S+>$/m
-meta FORGED_MUA_OIMO		(__OIMO_MUA && !__OIMO_MSGID && !__UNUSABLE_MSGID)
+meta FORGED_MUA_OIMO		(__OIMO_MUA && !__OIMO_MSGID && !__OUTLOOK_DOLLARS_MSGID && !__UNUSABLE_MSGID)
 describe FORGED_MUA_OIMO	Forged mail pretending to be from MS Outlook IMO
 
 # QUALCOMM Eudora
