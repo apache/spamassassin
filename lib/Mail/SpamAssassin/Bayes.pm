@@ -840,10 +840,12 @@ sub is_scan_available {
 
   if ($ns < $self->{conf}->{bayes_min_spam_num}) {
     dbg("bayes: Not available for scanning, only $ns spam(s) in Bayes DB < ".$self->{conf}->{bayes_min_spam_num});
+    $self->{store}->untie_db();
     return 0;
   }
   if ($nn < $self->{conf}->{bayes_min_ham_num}) {
     dbg("bayes: Not available for scanning, only $nn ham(s) in Bayes DB < ".$self->{conf}->{bayes_min_ham_num});
+    $self->{store}->untie_db();
     return 0;
   }
 
