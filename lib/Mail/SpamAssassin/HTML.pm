@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.3.2.1 2002/08/21 15:38:44 jmason Exp $
+# $Id: HTML.pm,v 1.3.2.2 2002/08/22 10:41:26 matt_sergeant Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -51,7 +51,23 @@ sub html_uri {
     push @{$self->{html_text}}, "URI:$uri " if $uri = $attr->{action};
   }
   elsif ($tag eq "base") {
-    push @{$self->{html_text}}, "BASEURI:$uri " if $uri = $attr->{href};
+    if ($uri = $attr->{href}) {
+      # use <BASE HREF="URI"> to turn relative links into absolute links
+
+      # even if it is a base URI, handle like a normal URI as well
+      push @{$self->{html_text}}, "URI:$uri ";
+
+      # a base URI will be ignored by browsers unless it is an absolute
+      # URI of a standard protocol
+      if ($uri =~ m@^(?:ftp|https?)://@i) {
+	# remove trailing filename, if any; base URIs can have the
+	# form of "http://foo.com/index.html"
+	$uri =~ s@^([a-z]+://[^/]+/.*?)[^/\.]+\.[^/\.]{2,4}$@$1@i;
+	# Make sure it ends in a slash
+	$uri .= "/" unless $uri =~ m@/$@;
+	$self->{html}{base_href} = $uri;
+      }
+    }
   }
 }
 
