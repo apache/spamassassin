@@ -10,7 +10,11 @@ if (defined $ARGV[0] && $ARGV[0] eq '-t') {
 my $stoplist = { };
 while (<DATA>) {
   chomp; s/#.*$//; next unless (/\S/);
-  $stoplist->{$_} = 1;
+  /(.*) (.*)/;
+  my $word1 = $1;
+  my $word2 = $2;
+  if(!defined($stoplist->{$word1})) { $stoplist->{$word1} = { }; }
+  $stoplist->{$1}->{$2} = 1;
 }
 
 my $freqs = { };
@@ -34,7 +38,7 @@ sub wanted {
   $text = '';
 
   while ($_ = shift @lines) {
-    /^$/ and last;
+    /^\s*$/ and last;
   }
 
   while ($_ = shift @lines) {
@@ -87,7 +91,7 @@ sub wanted {
 
   } else {
     my $lastword;
-    while ($text =~ /([a-z]{3,20})\b/ig) {
+    while ($text =~ /\b([a-z]{3,20})\b/ig) {
       if (defined $lastword) { add_word_pair ($lastword, $1); }
       $lastword = $1;
     }
@@ -97,10 +101,12 @@ sub wanted {
 
 sub add_word_pair {
   my ($word1, $word2) = @_;
+  $word1 = lc $word1; $word2 = lc $word2;
 
-  my $w = lc $word1." ".$word2;
-  next if defined ($stoplist->{$w});
-  $freqs->{$w}++;
+  next if (defined ($stoplist->{$word1}) and defined($stoplist->{$word1}->{$word2}));
+  if(!defined($freqs->{$word1})) { $freqs->{$word1} = { }; }
+  if(!defined($freqs->{$word1}->{$word2})) { $freqs->{$word1}->{$word2} = 1; }
+  else { $freqs->{$word1}->{$word2}++; }
 }
 
 sub test_word_pair {
@@ -114,19 +120,13 @@ sub test_word_pair {
 }
 
 sub summarise {
-  my $num = 1;
-  foreach my $w (sort {
-    		$freqs->{$b} <=> $freqs->{$a}
-	      } keys %{$freqs})
+  foreach my $w1 (keys %{$freqs})
   {
-    next if ($freqs->{$w} < 2);
-
-    # readable, max 20 listings
-    # printf ("%3d %-10d %s\n", $num, $freqs->{$w}, $w);
-    # $num++; last if ($num == 20);
-
-    # not-so-readable. dump all
-    printf ("%d %s\n", $freqs->{$w}, $w);
+     foreach my $w2 (keys %{$freqs->{$w1}})
+     {
+        next if ($freqs->{$w1}->{$w2} < 2);
+        printf ("%d $w1 $w2\n", $freqs->{$w1}->{$w2});
+     }
   }
 }
 
