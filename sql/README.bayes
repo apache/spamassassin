@@ -20,6 +20,16 @@ This directive is used by the Bayes module to determine which storage
 module should be used.  If not set it will default to:
 Mail::SpamAssassin::BayesStore::DBM
 
+PostgreSQL users will want to use the PostgreSQL specific storage
+module:
+bayes_store_module               Mail::SpamAssassin::BayesStore::PgSQL
+This module provides a slightly different interface to makes better
+use of the resources that PostgreSQL offers.  In addition, please make
+sure that you follow the instructions below for loading the proper
+procedural language and installing the tables and stored procedure.
+
+Additional configuration directives provided by BayesSQL:
+
 bayes_sql_dsn			   DBI:driver:database:hostname[:port]
 bayes_sql_username		   dbusername
 bayes_sql_password		   dbpassword
@@ -100,6 +110,14 @@ mysql -h <hostname> -u <adminusername> -p databasename < bayes_mysql.sql
 Enter password: <adminpassword>
 
 To install the tables for PostgreSQL, use:
+
+You need to install the plpgsql procedural language (assuming it
+hasn't already been installed in template1). You can do this by
+running the following command:
+
+createlang plpgsql <databasename>
+
+and then:
 
 psql -U <username> -f bayes_pg.sql <databasename>
 

@@ -407,12 +407,14 @@ if (HAS_DBI) {
 }
 
 if ($opt{'run_bayes_sql_tests'}) {
+  my $bayes_store_module = prompt("Bayes Store Module (bayes_store_module): ", "Mail::SpamAssassin::BayesStore::SQL");
   my $bayes_sql_dsn = prompt("Bayes SQL DSN (bayes_sql_dsn): ", "dbi:mysql:spamassassin:localhost");
   my $bayes_sql_username = prompt("Bayes SQL DB username (bayes_sql_username): ", "");
   my $bayes_sql_password = prompt("Bayes SQL DB password (bayes_sql_password): ", "");
   print "\n";
   
   open(FILE, ">t/bayessql.cf");
+  print FILE "bayes_store_module $bayes_store_module\n";
   print FILE "bayes_sql_dsn $bayes_sql_dsn\n";
   # These two can be blank and the conf parser doesn't really like
   # blank variables, so do not print them if blank
