@@ -126,7 +126,7 @@ describe RCVD_IN_SBL		Received via a relay in Spamhaus SBL
 tflags RCVD_IN_SBL		net
 
 # XBL is the Exploits Block List: http://www.spamhaus.org/xbl/
-header RCVD_IN_XBL		eval:check_rbl('sblxbl-firsttrusted', 'sbl-xbl.spamhaus.org.', '127.0.0.[456]')
+header RCVD_IN_XBL		eval:check_rbl('sblxbl-notfirsthop', 'sbl-xbl.spamhaus.org.', '127.0.0.[456]')
 describe RCVD_IN_XBL		Received via a relay in Spamhaus XBL
 tflags RCVD_IN_XBL		net
 
@@ -154,7 +154,7 @@ tflags DNS_FROM_RFC_WHOIS_A	net
 
 # this is 127.0.0.6 if querying fullip.rfc-ignorant.org, but since there
 # is only one right now, we might as well get the TXT record version
-header RCVD_IN_RFC_IPWHOIS	eval:check_rbl_txt('ipwhois-firsttrusted', 'ipwhois.rfc-ignorant.org.')
+header RCVD_IN_RFC_IPWHOIS	eval:check_rbl_txt('ipwhois-notfirsthop', 'ipwhois.rfc-ignorant.org.')
 describe RCVD_IN_RFC_IPWHOIS	Sent via a relay in ipwhois.rfc-ignorant.org
 tflags RCVD_IN_RFC_IPWHOIS	net
 
@@ -177,7 +177,7 @@ tflags DNS_FROM_RFC_BOGUSMX	net
 # transfers: yes - rsync and http, see http://dsbl.org/usage
 # pay-to-use: no
 # delist: automated/distributed
-header RCVD_IN_DSBL		eval:check_rbl_txt('dsbl-firsttrusted', 'list.dsbl.org.')
+header RCVD_IN_DSBL		eval:check_rbl_txt('dsbl-notfirsthop', 'list.dsbl.org.')
 describe RCVD_IN_DSBL		Received via a relay in list.dsbl.org
 tflags RCVD_IN_DSBL		net
 
