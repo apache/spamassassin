@@ -14,6 +14,8 @@ use Carp;
 use Mail::Audit;
 use Mail::SpamAssassin;
 use Sys::Syslog qw(:DEFAULT setlogsock);
+use POSIX qw(setsid);
+
 my $spamtest = Mail::SpamAssassin->new({local_tests_only=>1});
 my %resphash = (
     EX_OK => 0,
@@ -42,6 +44,12 @@ my $port = shift || 22874;
 my $proto = getprotobyname('tcp');
 
 ($port) = $port =~ /^(\d+)$/ or die "invalid port";
+
+# Be a well-behaved daemon
+chdir '/'               or die "Can't chdir to /: $!";
+open STDIN, '/dev/null' or die "Can't read /dev/null: $!";
+open STDOUT, '>/dev/null' or die "Can't write to /dev/null: $!";
+open STDERR, '>/dev/null' or die "Can't write to /dev/null: $!";
 
 socket(Server, PF_INET, SOCK_STREAM, $proto)        || die "socket: $!";
 setsockopt(Server,SOL_SOCKET,SO_REUSEADDR,pack("l", 1)) || die "setsockopt: $!";
