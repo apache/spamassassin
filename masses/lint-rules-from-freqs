@@ -173,6 +173,27 @@ sub readrules {
         $score{$2} ||= 1.0;
         $tflags{$2} ||= '';
         $descfile{$2} ||= $file;       # a rule with no score or desc is OK
+
+        if (/^body\s+\S+\s+eval:/) {
+          # ignored
+        } elsif (/^body\s+\S+\s+(.*)$/) {
+          my $re = $1;
+
+          if ($re =~ /[^\\]\([^\?]/) { 
+            print "warning: non-(?:...) capture in regexp in $file: $_\n";
+          }
+          if ($re =~ /([^\\])[\*\+]/) { 
+            if ($1 eq '.') {
+              print "warning: .* in regexp in $file: $_\n";
+            }
+          }
+          if ($re =~ /[^\\]\{(\d*),?(\d*?)\}/) {
+            if ($1 > 120 || $2 > 120) {
+              print "warning: long .{n} in regexp in $file: $_\n";
+            }
+          }
+        }
+
       } elsif (/^describe\s+(\S+)\s+/) {
         $rulesfound{$1} = 1;
         $descfile{concat_rule_lang ($1, $lang)} ||= $file;

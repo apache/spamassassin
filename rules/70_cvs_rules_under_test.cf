@@ -46,12 +46,12 @@ describe T_UNSUBSCRIBE_POSTCARD	Send a postcard to unsubscribe
 score T_UNSUBSCRIBE_POSTCARD	2.0
 
 # bug 1022: MGM_POSTCARD #2 original
-body T_UNSUBSCRIBE_POSTAL	/(?:Send(ing)? a (?:postal mail|postcard) to (?:Unsubscribe|Customer ?Service|remove)|unsubscribe by (?:postal mail|postcard))/i
+body T_UNSUBSCRIBE_POSTAL	/(?:Send(?:ing|) a (?:postal mail|postcard) to (?:Unsubscribe|Customer ?Service|remove)|unsubscribe by (?:postal mail|postcard))/i
 describe T_UNSUBSCRIBE_POSTAL	Send real mail to unsubscribe
 score T_UNSUBSCRIBE_POSTAL	2.0
 
 # bug 1022: MGM_POSTCARD #2 small change
-body T_UNSUBSCRIBE_POSTAL2	/(?:Send(ing)? a (?:postal mail|postcard) to (?:Unsubscribe|Customer ?Service|remov(?:e|al))|unsubscribe by (?:postal mail|postcard))/i
+body T_UNSUBSCRIBE_POSTAL2	/(?:Send(?:ing|) a (?:postal mail|postcard) to (?:Unsubscribe|Customer ?Service|remov(?:e|al))|unsubscribe by (?:postal mail|postcard))/i
 describe T_UNSUBSCRIBE_POSTAL2	Send real mail to unsubscribe
 score T_UNSUBSCRIBE_POSTAL2	2.0
 
@@ -157,7 +157,7 @@ body T_Q_REMOVE1		/(?:respect|honou?r) all removal requests/i
 body T_Q_REMOVE3		/click here to be (?:permanently )?(?:removed|deleted)/i
 body T_Q_REMOVE4		/If you no longer wish to receive/i
 body T_Q_REMOVE5		/to be removed from (?:the|my|our) (?:mailing|e.?mail|opt[ -]?in)? list/i
-body T_Q_REMOVE6		/to be removed from.*(?:mailings|offers)/i
+body T_Q_REMOVE6		/to be removed from.{0,99}(?:mailings|offers)/i
 
 body T_Q_WEGOTYOU1		/because (?:you're|you (?:are )?)(?:registered|.{0,20}\bopt.{0,3}in)/i
 body T_Q_WEGOTYOU2		/you(?:'ve|'re| have| are)? receiv(?:ed|ing) this (?:e.?mail|advertisement) (?:by either|because)/i
