@@ -413,10 +413,13 @@ meta T_PRIORITY_NO_NAME_BOTH_REF	((__HAS_X_PRIORITY && __HAS_MSMAIL_PRI) && !__H
 meta T_PRIORITY_NO_NAME_ONE_REF		((__HAS_X_PRIORITY + __HAS_MSMAIL_PRI == 1) && !__HAS_X_MAILER && !__IS_EXCH && !__USER_AGENT && !__HAS_REFERENCES)
 
 # bug 2513
-header T_FROM_UNNEEDED_QUOTE	From =~ /"[\w.-]+"\s+\</
-header T_REPTO_UNNEEDED_QUOTE	Reply-To =~ /"[\w.-]+"\s+\</
-header T_FROM_UNNEEDED_QUOTE2	From =~ /"[\w.-]+"\s*\</
-header T_REPTO_UNNEEDED_QUOTE2	Reply-To =~ /"\[w.-]+"\s*\</
+header T_REPLY_TO_OVERQUOTE	Reply-To =~ /"[\w.-]+"\s+\</
+describe T_REPLY_TO_OVERQUOTE	Reply-To: contains unnecessarily quoted name
+header T_REPLY_TO_OVERQUOTE_1	Reply-To =~ /"[\w.-]+ ?[\w.-]*"\s+\</
+header T_REPLY_TO_OVERQUOTE_2	Reply-To =~ /"[\w.-]+( [\w.-]+)?"\s+\</
+header T_REPLY_TO_OVERQUOTE_3	Reply-To =~ /"[\w.-]+"\s*\</
+header T_REPLY_TO_OVERQUOTE_4	Reply-To =~ /"[\w.-]+ ?[\w.-]*"\s*\</
+header T_REPLY_TO_OVERQUOTE_5	Reply-To =~ /"[\w.-]+( [\w.-]+)?"\s*\</
 
 # bug 3896
 uri T_URI_3896_1	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{6,}\.info\/\?\S{20,}/i
