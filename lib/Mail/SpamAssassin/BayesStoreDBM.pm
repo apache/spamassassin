@@ -356,7 +356,7 @@ sub _upgrade_db {
     $new_toks{$LAST_ATIME_DELTA_MAGIC_TOKEN} = 0;
     $new_toks{$LAST_EXPIRE_REDUCE_MAGIC_TOKEN} = 0;
 
-    my $magic_re = $self->get_magic_re($self->{db_version});
+    my $magic_re = $self->get_magic_re();
 
     # deal with the data tokens
     my ($tok, $packed);
@@ -453,7 +453,7 @@ sub calculate_expire_delta {
 
   my %delta = (); # use a hash since an array is going to be very sparse
 
-  my $magic_re = $self->get_magic_re($self->DB_VERSION);
+  my $magic_re = $self->get_magic_re();
 
   # do the first pass, figure out atime delta
   my ($tok, $packed);
@@ -519,7 +519,7 @@ sub token_expiration {
   # Figure out how old is too old...
   my $too_old = $vars[10] - $newdelta; # tooold = newest - delta
 
-  my $magic_re = $self->get_magic_re($self->DB_VERSION);
+  my $magic_re = $self->get_magic_re();
 
   # Go ahead and do the move to new db/expire run now ...
   my ($tok, $packed);
@@ -759,7 +759,7 @@ sub get_storage_variables {
 sub dump_db_toks {
   my ($self, $template, $regex, @vars) = @_;
 
-  my $magic_re = $self->get_magic_re($self->{db_version});
+  my $magic_re = $self->get_magic_re();
 
   while( my($tok, $tokvalue) = each %{$self->{db_toks}}) {
     next if ($tok =~ /$magic_re/); # skip magic tokens
@@ -907,11 +907,9 @@ sub cleanup {
 
 # Return a qr'd RE to match a token with the correct format's magic token
 sub get_magic_re {
-  my ($self, $db_ver) = @_;
+  my ($self) = @_;
 
-  $db_ver = $self->DB_VERSION if (!$db_ver); # XXX - not sure how good of a thing this is
-
-  if ( $db_ver >= 1 ) {
+  if ( !defined $self->{db_version} || $self->{db_version} >= 1 ) {
     return qr/^\015\001\007\011\003/;
   }
 
@@ -1094,7 +1092,9 @@ sub tok_put {
   $ts ||= 0;
   $th ||= 0;
 
-  # get_magic_re could be used here, but it'll be overkill for this function
+  # get_magic_re could be used here, but:
+  # 1) it'll be overkill for this function
+  # 2) we're in write mode, so there's only ever 1 RE here.
   if ( $tok =~ /^\015\001\007\011\003/ ) { # magic token?  Ignore it!
     return;
   }
