@@ -121,6 +121,17 @@ header T_MSG_ID_ADDED_BY_MTA_SHORT	eval:mta_added_message_id('short')
 header T_MSG_ID_ADDED_BY_MTA_LATER	eval:mta_added_message_id('later')
 header T_MSG_ID_ADDED_BY_MTA_BACKUP	eval:mta_added_message_id('backup')
 tflags T_MSG_ID_ADDED_BY_MTA_BACKUP	net
+# 2003-03-25
+# replace MSG_ID_ADDED_BY_MTA_2 since it matches some missed by above tests
+header __MSG_ID_BEFORE_RECEIVED	ALL =~ /\nMessage-(?:ID|Id|id):.*\nReceived:/s
+header __MSG_ID_YAHOODOO_1	Message-Id =~ /\@[a-z0-9.-]+\.(?:yahoo|wanadoo)(?:\.[a-z]{2,3}){1,2}>/
+header __MSG_ID_YAHOODOO_2	MESSAGEID =~ /\@[a-z0-9.-]+\.(?:yahoo|wanadoo)(?:\.[a-z]{2,3}){1,2}>/
+meta T_MSG_ID_ADDED_BY_MTA_HEADER_1	(__MSG_ID_BEFORE_RECEIVED)
+meta T_MSG_ID_ADDED_BY_MTA_HEADER_2	(__MSG_ID_BEFORE_RECEIVED && !__MSG_ID_YAHOODOO_1)
+meta T_MSG_ID_ADDED_BY_MTA_HEADER_3	(__MSG_ID_BEFORE_RECEIVED && !__MSG_ID_YAHOODOO_2)
+meta T_MSG_ID_ADDED_BY_MTA_HEADER_4	(__MSG_ID_BEFORE_RECEIVED && !T_MSG_ID_ADDED_BY_MTA_SHORT && !T_MSG_ID_ADDED_BY_MTA_LATER && !T_MSG_ID_ADDED_BY_MTA_BACKUP)
+meta T_MSG_ID_ADDED_BY_MTA_HEADER_5	(__MSG_ID_BEFORE_RECEIVED && !T_MSG_ID_ADDED_BY_MTA_SHORT && !T_MSG_ID_ADDED_BY_MTA_LATER && !T_MSG_ID_ADDED_BY_MTA_BACKUP && !__MSG_ID_YAHOODOO_1)
+meta T_MSG_ID_ADDED_BY_MTA_HEADER_6	(__MSG_ID_BEFORE_RECEIVED && !T_MSG_ID_ADDED_BY_MTA_SHORT && !T_MSG_ID_ADDED_BY_MTA_LATER && !T_MSG_ID_ADDED_BY_MTA_BACKUP && !__MSG_ID_YAHOODOO_2)
 
 # 2003-03-02: quinlan
 header T_NO_DNS_FOR_RECIPS_ONE		eval:check_for_recips_dns('1','2')
@@ -141,127 +152,11 @@ meta T_FAKED_AOL		(__AOL_MUA && __MIME_HTML_ONLY)
 meta T_FAKED_THEBAT		(__THEBAT_MUA && __MIME_HTML_ONLY)
 meta T_FAKED_IMS		(__IMS_MUA && __MIME_HTML_ONLY)
 
-# quinlan: 2003-03-02, last updated 2003-03-25
-# I'm sorry there are so many, this test seems effective enough to merit
-# massive tweaking and exploration.  :-)
-# double REMOVE tests
-body T_REMOVE_REMOVAL_12	/remov(?:e|al).{0,12}remov(?:e|al)/i
-body T_REMOVE_REMOVAL_16	/remov(?:e|al).{0,16}remov(?:e|al)/i
-body T_REMOVE_REMOVAL_20	/remov(?:e|al).{0,20}remov(?:e|al)/i
-body T_REMOVE_REMOVAL_24	/remov(?:e|al).{0,24}remov(?:e|al)/i
-body T_REMOVE_REMOVAL_28	/remov(?:e|al).{0,28}remov(?:e|al)/i
-body T_REMOVE_REMOVAL_32	/remov(?:e|al).{0,32}remov(?:e|al)/i
-# bleh
-rawbody T_REMOVE_REMOVAL_12_R	/remov(?:e|al).{0,12}remov(?:e|al)/i
-rawbody T_REMOVE_REMOVAL_16_R	/remov(?:e|al).{0,16}remov(?:e|al)/i
-rawbody T_REMOVE_REMOVAL_20_R	/remov(?:e|al).{0,20}remov(?:e|al)/i
-rawbody T_REMOVE_REMOVAL_24_R	/remov(?:e|al).{0,24}remov(?:e|al)/i
-rawbody T_REMOVE_REMOVAL_28_R	/remov(?:e|al).{0,28}remov(?:e|al)/i
-rawbody T_REMOVE_REMOVAL_32_R	/remov(?:e|al).{0,32}remov(?:e|al)/i
-# one space
-body T_REMOVE_REMOVAL_12_S	/remov(?:e|al)\S{0,6}\s*\S{0,6}remov(?:e|al)/i
-body T_REMOVE_REMOVAL_16_S	/remov(?:e|al)\S{0,8}\s*\S{0,8}remov(?:e|al)/i
-body T_REMOVE_REMOVAL_20_S	/remov(?:e|al)\S{0,10}\s*\S{0,10}remov(?:e|al)/i
-body T_REMOVE_REMOVAL_24_S	/remov(?:e|al)\S{0,12}\s*\S{0,12}remov(?:e|al)/i
-body T_REMOVE_REMOVAL_28_S	/remov(?:e|al)\S{0,14}\s*\S{0,14}remov(?:e|al)/i
-body T_REMOVE_REMOVAL_32_S	/remov(?:e|al)\S{0,16}\s*\S{0,16}remov(?:e|al)/i
-body T_REMOVE_REMOVAL_36_S	/remov(?:e|al)\S{0,18}\s*\S{0,18}remov(?:e|al)/i
-body T_REMOVE_REMOVAL_40_S	/remov(?:e|al)\S{0,20}\s*\S{0,20}remov(?:e|al)/i
-body T_REMOVE_REMOVAL_44_S	/remov(?:e|al)\S{0,22}\s*\S{0,22}remov(?:e|al)/i
-body T_REMOVE_REMOVAL_48_S	/remov(?:e|al)\S{0,24}\s*\S{0,24}remov(?:e|al)/i
-body T_REMOVE_REMOVAL_52_S	/remov(?:e|al)\S{0,26}\s*\S{0,26}remov(?:e|al)/i
-body T_REMOVE_REMOVAL_56_S	/remov(?:e|al)\S{0,28}\s*\S{0,28}remov(?:e|al)/i
-body T_REMOVE_REMOVAL_60_S	/remov(?:e|al)\S{0,30}\s*\S{0,30}remov(?:e|al)/i
-body T_REMOVE_REMOVAL_64_S	/remov(?:e|al)\S{0,32}\s*\S{0,32}remov(?:e|al)/i
-# one space
-rawbody T_REMOVE_REMOVAL_12_RS	/remov(?:e|al)\S{0,6}\s*\S{0,6}remov(?:e|al)/i
-rawbody T_REMOVE_REMOVAL_16_RS	/remov(?:e|al)\S{0,8}\s*\S{0,8}remov(?:e|al)/i
-rawbody T_REMOVE_REMOVAL_20_RS	/remov(?:e|al)\S{0,10}\s*\S{0,10}remov(?:e|al)/i
-rawbody T_REMOVE_REMOVAL_24_RS	/remov(?:e|al)\S{0,12}\s*\S{0,12}remov(?:e|al)/i
-rawbody T_REMOVE_REMOVAL_28_RS	/remov(?:e|al)\S{0,14}\s*\S{0,14}remov(?:e|al)/i
-rawbody T_REMOVE_REMOVAL_32_RS	/remov(?:e|al)\S{0,16}\s*\S{0,16}remov(?:e|al)/i
-rawbody T_REMOVE_REMOVAL_36_RS	/remov(?:e|al)\S{0,18}\s*\S{0,18}remov(?:e|al)/i
-rawbody T_REMOVE_REMOVAL_40_RS	/remov(?:e|al)\S{0,20}\s*\S{0,20}remov(?:e|al)/i
-rawbody T_REMOVE_REMOVAL_44_RS	/remov(?:e|al)\S{0,22}\s*\S{0,22}remov(?:e|al)/i
-rawbody T_REMOVE_REMOVAL_48_RS	/remov(?:e|al)\S{0,24}\s*\S{0,24}remov(?:e|al)/i
-rawbody T_REMOVE_REMOVAL_52_RS	/remov(?:e|al)\S{0,26}\s*\S{0,26}remov(?:e|al)/i
-rawbody T_REMOVE_REMOVAL_56_RS	/remov(?:e|al)\S{0,28}\s*\S{0,28}remov(?:e|al)/i
-rawbody T_REMOVE_REMOVAL_60_RS	/remov(?:e|al)\S{0,30}\s*\S{0,30}remov(?:e|al)/i
-rawbody T_REMOVE_REMOVAL_64_RS	/remov(?:e|al)\S{0,32}\s*\S{0,32}remov(?:e|al)/i
-# no space
-body T_REMOVE_REMOVAL_12_NS	/remov(?:e|al)\S{0,12}remov(?:e|al)/i
-body T_REMOVE_REMOVAL_16_NS	/remov(?:e|al)\S{0,16}remov(?:e|al)/i
-body T_REMOVE_REMOVAL_20_NS	/remov(?:e|al)\S{0,20}remov(?:e|al)/i
-body T_REMOVE_REMOVAL_24_NS	/remov(?:e|al)\S{0,24}remov(?:e|al)/i
-body T_REMOVE_REMOVAL_28_NS	/remov(?:e|al)\S{0,28}remov(?:e|al)/i
-body T_REMOVE_REMOVAL_32_NS	/remov(?:e|al)\S{0,32}remov(?:e|al)/i
-body T_REMOVE_REMOVAL_36_NS	/remov(?:e|al)\S{0,36}remov(?:e|al)/i
-body T_REMOVE_REMOVAL_40_NS	/remov(?:e|al)\S{0,40}remov(?:e|al)/i
-body T_REMOVE_REMOVAL_44_NS	/remov(?:e|al)\S{0,44}remov(?:e|al)/i
-body T_REMOVE_REMOVAL_48_NS	/remov(?:e|al)\S{0,48}remov(?:e|al)/i
-body T_REMOVE_REMOVAL_52_NS	/remov(?:e|al)\S{0,52}remov(?:e|al)/i
-body T_REMOVE_REMOVAL_56_NS	/remov(?:e|al)\S{0,56}remov(?:e|al)/i
-body T_REMOVE_REMOVAL_60_NS	/remov(?:e|al)\S{0,60}remov(?:e|al)/i
-body T_REMOVE_REMOVAL_64_NS	/remov(?:e|al)\S{0,64}remov(?:e|al)/i
-# remov versions
-body T_REMOV_REMOV_12		/remov.{0,12}remov/i
-body T_REMOV_REMOV_16		/remov.{0,16}remov/i
-body T_REMOV_REMOV_20		/remov.{0,20}remov/i
-body T_REMOV_REMOV_24		/remov.{0,24}remov/i
-body T_REMOV_REMOV_28		/remov.{0,28}remov/i
-body T_REMOV_REMOV_32		/remov.{0,32}remov/i
-# bleh
-rawbody T_REMOV_REMOV_12_R	/remov.{0,12}remov/i
-rawbody T_REMOV_REMOV_16_R	/remov.{0,16}remov/i
-rawbody T_REMOV_REMOV_20_R	/remov.{0,20}remov/i
-rawbody T_REMOV_REMOV_24_R	/remov.{0,24}remov/i
-rawbody T_REMOV_REMOV_28_R	/remov.{0,28}remov/i
-rawbody T_REMOV_REMOV_32_R	/remov.{0,32}remov/i
-# one space
-body T_REMOV_REMOV_12_S		/remov\S{0,6}\s*\S{0,6}remov/i
-body T_REMOV_REMOV_16_S		/remov\S{0,8}\s*\S{0,8}remov/i
-body T_REMOV_REMOV_20_S		/remov\S{0,10}\s*\S{0,10}remov/i
-body T_REMOV_REMOV_24_S		/remov\S{0,12}\s*\S{0,12}remov/i
-body T_REMOV_REMOV_28_S		/remov\S{0,14}\s*\S{0,14}remov/i
-body T_REMOV_REMOV_32_S		/remov\S{0,16}\s*\S{0,16}remov/i
-body T_REMOV_REMOV_36_S		/remov\S{0,18}\s*\S{0,18}remov/i
-body T_REMOV_REMOV_40_S		/remov\S{0,20}\s*\S{0,20}remov/i
-body T_REMOV_REMOV_44_S		/remov\S{0,22}\s*\S{0,22}remov/i
-body T_REMOV_REMOV_48_S		/remov\S{0,24}\s*\S{0,24}remov/i
-body T_REMOV_REMOV_52_S		/remov\S{0,26}\s*\S{0,26}remov/i
-body T_REMOV_REMOV_56_S		/remov\S{0,28}\s*\S{0,28}remov/i
-body T_REMOV_REMOV_60_S		/remov\S{0,30}\s*\S{0,30}remov/i
-body T_REMOV_REMOV_64_S		/remov\S{0,32}\s*\S{0,32}remov/i
-# one space
-rawbody T_REMOV_REMOV_12_RS	/remov\S{0,6}\s*\S{0,6}remov/i
-rawbody T_REMOV_REMOV_16_RS	/remov\S{0,8}\s*\S{0,8}remov/i
-rawbody T_REMOV_REMOV_20_RS	/remov\S{0,10}\s*\S{0,10}remov/i
-rawbody T_REMOV_REMOV_24_RS	/remov\S{0,12}\s*\S{0,12}remov/i
-rawbody T_REMOV_REMOV_28_RS	/remov\S{0,14}\s*\S{0,14}remov/i
-rawbody T_REMOV_REMOV_32_RS	/remov\S{0,16}\s*\S{0,16}remov/i
-rawbody T_REMOV_REMOV_36_RS	/remov\S{0,18}\s*\S{0,18}remov/i
-rawbody T_REMOV_REMOV_40_RS	/remov\S{0,20}\s*\S{0,20}remov/i
-rawbody T_REMOV_REMOV_44_RS	/remov\S{0,22}\s*\S{0,22}remov/i
-rawbody T_REMOV_REMOV_48_RS	/remov\S{0,24}\s*\S{0,24}remov/i
-rawbody T_REMOV_REMOV_52_RS	/remov\S{0,26}\s*\S{0,26}remov/i
-rawbody T_REMOV_REMOV_56_RS	/remov\S{0,28}\s*\S{0,28}remov/i
-rawbody T_REMOV_REMOV_60_RS	/remov\S{0,30}\s*\S{0,30}remov/i
-rawbody T_REMOV_REMOV_64_RS	/remov\S{0,32}\s*\S{0,32}remov/i
-# no space
-body T_REMOV_REMOV_12_NS	/remov\S{0,12}remov/i
-body T_REMOV_REMOV_16_NS	/remov\S{0,16}remov/i
-body T_REMOV_REMOV_20_NS	/remov\S{0,20}remov/i
-body T_REMOV_REMOV_24_NS	/remov\S{0,24}remov/i
-body T_REMOV_REMOV_28_NS	/remov\S{0,28}remov/i
-body T_REMOV_REMOV_32_NS	/remov\S{0,32}remov/i
-body T_REMOV_REMOV_36_NS	/remov\S{0,36}remov/i
-body T_REMOV_REMOV_40_NS	/remov\S{0,40}remov/i
-body T_REMOV_REMOV_44_NS	/remov\S{0,44}remov/i
-body T_REMOV_REMOV_48_NS	/remov\S{0,48}remov/i
-body T_REMOV_REMOV_52_NS	/remov\S{0,52}remov/i
-body T_REMOV_REMOV_56_NS	/remov\S{0,56}remov/i
-body T_REMOV_REMOV_60_NS	/remov\S{0,60}remov/i
-body T_REMOV_REMOV_64_NS	/remov\S{0,64}remov/i
+# quinlan: 2003-03-02, last updated 2003-03-26
+body T_REMOVE_REMOVAL_1WORD	/remov\S{0,64}remov/i
+body T_REMOVE_REMOVAL_2WORD	/remov\S{0,16}\s+\S{0,16}remov/i
+body __REMOVE_REMOVAL_NEAR	/remov(?:e|al).{0,16}remov(?:e|al)/i
+meta T_REMOVE_REMOVAL_NEAR	(__REMOVE_REMOVAL_NEAR && !T_REMOVE_REMOVAL_1WORD && !T_REMOVE_REMOVAL_2WORD)
 
 # 2003-03-04: quinlan (my final attempt at this idea)
 # bug 821: test for "good" RFC2369 headers (was: reverse SUSPECT_LIST_HEADERS)
