@@ -113,6 +113,59 @@ sub check_for_bad_dialup_ips {
 
 ###########################################################################
 
+sub check_for_from_to_same {
+  my ($self, $type) = @_;
+
+  if (! exists $self->{from_to_same}) {
+    $self->_check_from_to_same();
+  }
+  return ($self->{from_to_same} eq $type);
+}
+
+sub _check_from_to_same {
+  my ($self) = @_;
+  my $addr_from = $self->get ('From:addr');
+  my $addr_to = $self->get ('To:addr');
+  my $hdr_from = $self->get ('From');
+  my $hdr_to = $self->get ('To');
+
+  # BUG: From:addr and To:addr sometimes contain whitespace
+  $addr_from =~ s/\s+//g;
+  $addr_to =~ s/\s+//g;
+
+  if (!length($addr_from) || !length($addr_to) ||
+      !length($hdr_from) || !length($hdr_to) ||
+      ($addr_from ne $addr_to))
+  {
+    $self->{from_to_same} = "none";
+    return;
+  }
+
+  if ($hdr_from eq $hdr_to) {
+    $self->{from_to_same} = "exact";
+  }
+  else {
+    $self->{from_to_same} = "rough";
+  }
+
+  my $from_space = ($hdr_from =~ /^\s*\S+\s*$/);
+  my $to_space = ($hdr_to =~ /^\s*\S+\s*$/);
+  if ($from_space && $to_space) {
+    $self->{from_to_same} .= "_both";
+  }
+  elsif ($from_space) {
+    $self->{from_to_same} .= "_from";
+  }
+  elsif ($to_space) {
+    $self->{from_to_same} .= "_to";
+  }
+  else {
+    $self->{from_to_same} .= "_none";
+  }
+}
+
+###########################################################################
+
 # The MTA probably added the Message-ID if either of the following is true:
 #
 # (1) The Message-ID: comes before a Received: header.
@@ -1243,6 +1296,15 @@ sub message_from_bugzilla {
 
 ###########################################################################
 
+sub missing_mimeole {
+  my ($self) = @_;
+
+  my $mimeole = $self->get ('X-MimeOLE');
+  my $priority = $self->get ('X-MSMail-Priority');
+
+  return ($priority && !$mimeole);
+}
+
 sub missing_outlook_name {
   my ($self) = @_;
 
@@ -1251,6 +1313,28 @@ sub missing_outlook_name {
   my $priority = $self->get ('X-MSMail-Priority');
 
   return ($mimeole || $priority) && $mailer && $mailer !~ /Microsoft Outlook/;
+}
+
+sub priority_no_name {
+  my ($self) = @_;
+
+  my $priority = $self->get ('X-Priority') || $self->get ('X-MSMail-Priority');
+  my $mailer = $self->get ('X-Mailer');
+
+  return ($priority && !$mailer);
+}
+
+sub partial_rfc_2369 {
+  my ($self) = @_;
+
+  my $score = 0;
+  $score++ if $self->get('List-Archive');
+  $score++ if $self->get('List-Help');
+  $score++ if $self->get('List-Owner');
+  $score++ if $self->get('List-Post');
+  $score++ if $self->get('List-Subscribe');
+  $score++ if $self->get('List-Unsubscribe');
+  return ($score == 1 || $score == 2);
 }
 
 ###########################################################################
