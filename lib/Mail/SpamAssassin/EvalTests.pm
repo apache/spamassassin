@@ -1947,7 +1947,7 @@ sub _check_attachments {
   # Note: We don't use rawbody because it removes MIME parts.  Instead,
   # we get the raw unfiltered body.  We must not change any lines.
   for (@{$self->{msg}->get_body()}) {
-    if (/^--/o) {
+    if (/^--/) {
       foreach my $boundary (@boundary) {
 	if (/^--$boundary$/) {
 	  $state{$boundary} = 1;
