@@ -157,7 +157,7 @@ sub tie_db_writable {
   dbg("bayes: found bayes db version ".$self->{db_version});
 
   if ( $db_ver != $self->DB_VERSION ) {
-    dbg("bayes: Database version $db_ver is different than we understand (".$self->DB_VERSION."), aborting!");
+    warn("bayes: Database version $db_ver is different than we understand (".$self->DB_VERSION."), aborting!");
     $self->untie_db();
     return 0;
   }
@@ -1407,7 +1407,7 @@ sub restore_database {
   }
 
   unless ($db_version == 2 || $db_version == 3) {
-    dbg("bayes: Database Version $db_version is unsupported, must be version 2 or 3.");
+    warn("bayes: Database Version $db_version is unsupported, must be version 2 or 3.");
     return 0;
   }
 
