@@ -13,7 +13,7 @@ if (-f 'CVS/Entries') {
 }
 
 while (<>) {
-  s,^\#!/usr/bin/perl(?:| -w),\#!${perl}${minusw},g;
+  s,^\#!/usr/bin/perl[-Tw\s]*,\#!${perl}${minusw},g;
   s,^.*REMOVEFORINST.*$,,g;
   print OUT;
 }
