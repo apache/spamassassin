@@ -360,6 +360,12 @@ sub rendered {
       $self->{rendered} = join('', @lines);
       $self->{html_results} = $html->get_results(); # needed in eval tests
 
+      # the visible text parts of the message; all invisible or low-contrast
+      # text removed.  TODO: wonder if we should just replace 
+      # $self->{rendered} with this?
+      $self->{visible_rendered} = join('',
+                                @{$html->{html_visible_text}});
+
       # some tests done after rendering
       my $r = $self->{html_results}; # temporary reference for brevity
       my $space = 0;
@@ -412,6 +418,18 @@ sub rendered {
   }
 
   return ($self->{'rendered_type'}, $self->{'rendered'});
+}
+
+=item visible_rendered()
+
+Render and return the visible text in this part.
+
+=cut
+
+sub visible_rendered {
+  my ($self) = @_;
+  $self->rendered();  # ignore return, we want just this:
+  return $self->{visible_rendered};
 }
 
 =item content_summary()
@@ -597,6 +615,7 @@ sub finish {
   undef $self->{'raw'};
   undef $self->{'decoded'};
   undef $self->{'rendered'};
+  undef $self->{'visible_rendered'};
   undef $self->{'type'};
   undef $self->{'rendered_type'};
 

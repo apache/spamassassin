@@ -950,7 +950,7 @@ sub get_body_from_msg {
   my $permsgstatus =
         Mail::SpamAssassin::PerMsgStatus->new($self->{main}, $msg);
 
-  my $body = $msg->get_rendered_body_text_array();
+  my $body = $msg->get_visible_rendered_body_text_array();
   # TODO! also add URI extraction to {metadata}
   push (@{$body}, $self->add_uris_for_permsgstatus($permsgstatus));
   $permsgstatus->finish();

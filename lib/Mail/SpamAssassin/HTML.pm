@@ -118,6 +118,7 @@ sub html_render {
   $self->{html}{min_size} = 3;	# start at default size
 
   $self->{html_text} = [];
+  $self->{html_visible_text} = [];
   $self->{html_last_tag} = 0;
 
   # NOTE: We *only* need to fix the rendering when we verify that it
@@ -230,12 +231,15 @@ sub html_format {
 
   # ordered by frequency of tag groups
   if ($tag eq "br" || $tag eq "div") {
+    push @{$self->{html_visible_text}}, "\n";
     push @{$self->{html_text}}, "\n";
   }
   elsif ($tag eq "li" || $tag eq "td" || $tag eq "dd") {
+    push @{$self->{html_visible_text}}, " ";
     push @{$self->{html_text}}, " ";
   }
   elsif ($tag =~ /^(?:p|hr|blockquote|pre)$/) {
+    push @{$self->{html_visible_text}}, "\n\n";
     push @{$self->{html_text}}, "\n\n";
   }
 }
@@ -795,11 +799,12 @@ sub html_font_invisible {
 
   my $fg = $self->{text_style}[-1]->{fgcolor};
   my $bg = $self->{text_style}[-1]->{bgcolor};
+  my $visible_for_bayes = 1;
 
   # invisibility
   if (substr($fg,-6) eq substr($bg,-6)) {
     $self->{html}{font_invisible} = 1;
-    return 0;
+    $visible_for_bayes = 0;
   }
   # near-invisibility
   elsif ($fg =~ /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/) {
@@ -822,13 +827,15 @@ sub html_font_invisible {
       # 1.25% of HTML spam right now), but please test any changes first
       if ($distance < 12) {
 	$self->{html}{"font_near_invisible"} = 1;
+        $visible_for_bayes = 0;
       }
       for (my $contrast = 14; $contrast <= 64; $contrast += 2) {
 	$self->{html}{"text_contrast_$contrast"} = 1 if $distance < $contrast;
       }
     }
   }
-  return 1;
+
+  return $visible_for_bayes;
 }
 
 sub html_tests {
@@ -976,7 +983,10 @@ sub html_text {
     $self->{html}{title}->[$self->{html}{title_index}] .= $text;
   }
 
-  $self->html_font_invisible($text) if $text =~ /[^ \t\n\r\f\x0b\xa0]/;
+  my $visible_for_bayes = 1;
+  if ($text =~ /[^ \t\n\r\f\x0b\xa0]/) {
+    $visible_for_bayes = $self->html_font_invisible($text);
+  }
 
   $text =~ s/^\n//s if $self->{html_last_tag} eq "br";
 
@@ -1006,8 +1016,9 @@ sub html_text {
     # m{ [^ \Q \s()<>[]$,";/# \E ] \z }sx
     # m{ [^\Q  \s () <> [] $,";/#  \E] \z }sx too
     if ($self->{html_text}[-1] =~ m{[^\s\(\)\<\>\[\]\$\,\"\;\/\#]\z}s &&
-	$text =~ m{^[^\s\(\)\<\>\[\]\$\,\"\;\/\#]}s)
+	$text =~ m{^[^\s\(\)\<\>\[\]\$\,\"\;\/\#]}s) 
     {
+      #"    -- shut up vim
       $self->{html}{t_obfuscation4}++;
     }
     if ($self->{html_text}[-1] =~ /[^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]\z/s &&
@@ -1031,6 +1042,9 @@ sub html_text {
     }
   }
 
+  if ($visible_for_bayes) {
+    push @{$self->{html_visible_text}}, $text;
+  }
   push @{$self->{html_text}}, $text;
 }
 

@@ -522,7 +522,6 @@ sub get_rendered_body_text_array {
   my ($self) = @_;
 
   if (exists $self->{text_rendered}) { return $self->{text_rendered}; }
-  local ($_);
 
   $self->{text_rendered} = [];
 
@@ -561,6 +560,52 @@ sub get_rendered_body_text_array {
   $self->{text_rendered} = \@textary;
 
   return $self->{text_rendered};
+}
+
+# ---------------------------------------------------------------------------
+
+# TODO: possibly this should just replace get_rendered_body_text_array().
+# (although watch out, this one doesn't copy {html} to metadata)
+sub get_visible_rendered_body_text_array {
+  my ($self) = @_;
+
+  if (exists $self->{text_visible_rendered}) {
+    return $self->{text_visible_rendered};
+  }
+
+  $self->{text_visible_rendered} = [];
+
+  # Find all parts which are leaves
+  my @parts = $self->find_parts(qr/^(?:text|message)\b/i,1);
+  return $self->{text_visible_rendered} unless @parts;
+
+  # Go through each part
+  my $text = $self->get_header ('subject') || '';
+  for(my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
+    my $p = $parts[$pt];
+
+    # put a blank line between parts ...
+    $text .= "\n" if ( $text );
+
+    my($type, $rnd) = $p->visible_rendered(); # decode this part
+    if ( defined $rnd ) {
+      # Only text/* types are rendered ...
+      $text .= $rnd;
+    }
+    else {
+      $text .= $p->decode();
+    }
+  }
+
+  # whitespace handling (warning: small changes have large effects!)
+  $text =~ s/\n+\s*\n+/\f/gs;                # double newlines => form feed
+  $text =~ tr/ \t\n\r\x0b\xa0/ /s;        # whitespace => space
+  $text =~ tr/\f/\n/;                        # form feeds => newline
+
+  my @textary = split_into_array_of_short_lines ($text);
+  $self->{text_visible_rendered} = \@textary;
+
+  return $self->{text_visible_rendered};
 }
 
 # ---------------------------------------------------------------------------
