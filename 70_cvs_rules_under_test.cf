@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.528 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.529 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -47,12 +47,6 @@ header __INVALID_DATE		Date !~ /^\s*(?:(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), )?[0-3 ]
 header __XM_FOXMAIL		X-Mailer =~ /FoxMail/
 meta T_INVALID_DATE_2		(__INVALID_DATE && !__XM_BAD_DATE_MUAS)
 describe T_INVALID_DATE_2	Invalid Date: header (not RFC 2822)
-
-# Wierd.  Can only assume this is caused by PEBKAC on the sending side...
-meta T_HTML_WITHOUT_HTML_1	(__MIME_HTML && !__TAG_EXISTS_HTML)
-meta T_HTML_WITHOUT_HTML_2	(__MIME_HTML && !(__TAG_EXISTS_HTML && HTML_MESSAGE))
-meta T_HTML_WITHOUT_HTML_3	(__MIME_HTML && !(__TAG_EXISTS_HTML || HTML_MESSAGE))
-describe T_HTML_WITHOUT_HTML	Claims to be HTML, but there is no HTML text
 
 # 2003-02-25: quinlan
 # Whee... more HTML tests!
