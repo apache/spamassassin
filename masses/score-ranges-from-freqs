@@ -22,6 +22,8 @@ my $shrinking_window_size_range =   2.00; # *ratio, added to above
 my $use_sliding_window = 0;
 
 my $argcffile = shift @ARGV;
+my $scoreset = shift @ARGV;
+$scoreset = 0 if ( !defined $scoreset );
 
 if (defined ($argcffile) && $argcffile eq '-test') {
   # use this to debug the ranking -> score-range mapping:
@@ -47,7 +49,7 @@ my %ranking = ();
 my %soratio = ();
 
 if (!defined $argcffile) { $argcffile = "../rules"; }
-system ("./parse-rules-for-masses -d \"$argcffile\"") and die;
+system ("./parse-rules-for-masses -d \"$argcffile\" -s $scoreset") and die;
 require "./tmp/rules.pl";
 
 while (<>) {
@@ -114,8 +116,8 @@ foreach my $test (sort { $ranking{$b} <=> $ranking{$a} } keys %freq) {
 
   if (!$mutatable) {
     printf OUT ("%3.3f %3.3f 0 $test\n",
-                         (split(/\s+/,$rules{$test}->{score}))[0],
-                         (split(/\s+/,$rules{$test}->{score}))[0]);
+                         $rules{$test}->{score},
+                         $rules{$test}->{score});
     next;
   }
 

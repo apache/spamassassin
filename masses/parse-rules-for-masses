@@ -5,10 +5,11 @@ sub usage {
 parse-rules-for-masses: parse the SpamAssassin rules files for mass-checks,
         evolving, and frequency analysis
 
-usage: ./parse-rules-for-masses [-d rulesdir] [-o outputfile]
+usage: ./parse-rules-for-masses [-d rulesdir] [-o outputfile] [-s scoreset]
 
 rulesdir defaults to ../rules
 outputfile defaults to ./tmp/rules.pl
+scoreset default to 0
 
 ";
 }
@@ -16,10 +17,11 @@ outputfile defaults to ./tmp/rules.pl
 use Getopt::Long;
 use Data::Dumper;
 
-use vars qw(@rulesdirs $outputfile);
+use vars qw(@rulesdirs $outputfile $scoreset);
 GetOptions (
                 "d=s" => \@rulesdirs,
                 "o=s" => \$outputfile,
+		"s=i" => \$scoreset,
                 "help|h|?" => sub { usage(); } );
 
 if ($#rulesdirs < 0) {
@@ -30,6 +32,8 @@ if (!defined $outputfile) {
   $outputfile = "./tmp/rules.pl";
   mkdir ("tmp", 0755);
 }
+
+$scoreset = 0 if ( !defined $scoreset );
 
 my $rules = { };
 readrules(@rulesdirs);
@@ -80,8 +84,12 @@ sub readrules {
           $rules->{$1}->{tflags} = $2;
 
         } elsif (/^score\s+(\S+)\s+(.+)$/) {
-          $rules->{$1} ||= { };
-          $rules->{$1}->{score} = $2;
+	  my($name,$score) = ($1,$2);
+          $rules->{$name} ||= { };
+	  if ( $score =~ /\s/ ) { # there are multiple scores
+	    ($score) = (split(/\s+/,$score))[$scoreset];
+	  }
+          $rules->{$name}->{score} = $score;
         }
       }
       close IN;

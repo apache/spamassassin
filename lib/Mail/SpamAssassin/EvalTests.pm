@@ -2031,16 +2031,16 @@ sub _check_signature {
   }
 }
 
-sub check_carriage_returns {
-  my ($self, $rawbody) = @_;
-
-  $rawbody = join ("\n", @$rawbody);
-
-  my $cr = ($rawbody =~ tr/\r/x/);
-  my $nl = ($rawbody =~ tr/\n/x/);
-
-  return ($nl > 0 && ($cr / $nl) > 0.5);
-}
+#sub check_carriage_returns {
+#  my ($self, $rawbody) = @_;
+#
+#  $rawbody = join ("\n", @$rawbody);
+#
+#  my $cr = ($rawbody =~ tr/\r/x/);
+#  my $nl = ($rawbody =~ tr/\n/x/);
+#
+#  return ($nl > 0 && ($cr / $nl) > 0.5);
+#}
 
 ###########################################################################
 # MIME/uuencode attachment tests
