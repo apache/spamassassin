@@ -3,63 +3,71 @@
 # This is purely used to generate a page on the website; it's not intended
 # to be distributed or installed.
 
-my $tmpl = q{
-  <tr __BGCOLOR__><td><strong>
+use HTML::Entities;
 
-  __TYPE__
+my $tmpl = q{<tr __BGCOLOR__><td><strong>__TYPE__</strong></td>
+<td><font size=-1>__LANG__</font></td>
+<td><font size=-1>__DESCRIPTION__</font></td>
+<td><font size=-1>__NAME__</font></td><td>__SCORE__</td></tr>};
 
-  </strong></td><td>
-  <font size=-1>
-
-  __DESCRIPTION__
-
-  </font>
-  </td><td>
-  <font size=-1>
-
-  __NAME__
-
-  </font>
-  </td><td>
-
-  __SCORE__
-
-  </td></tr>
-};
-
+my %test = ();
+my %type = ();
+my %lang = ();
+my %desc = ();
 while (<>) {
-  s/#.*$//g; s/^\s+//; s/\s+$//;
+  s/(?<!\\)#.*$//; # remove comments
+  s/^\s+//; s/\s+$//;
 
-  if (/^(header|body|full|describe)\s+(\S+)\s+(.+)$/) {
+  my $lang ='';
+  if (s/^lang\s+(\S+)\s+//) { $lang = $1; }
+
+  if (/^(header|body|rawbody|uri|full)\s+(\S+)\s+(.+)$/) {
     if (!defined $test{$2}) {
       push (@testnames, $2);
       $type{$2} = $1;
+      $lang{$2} = $lang;
     }
     $test{$2} = $3;
-  }
-  if (/^score\s+(\S+)\s+(.+)$/) {
+
+  } elsif (/^describe\s+(\S+)\s+(.+)$/) {
+
+    # no locale; overrides any other desc
+    if ($lang eq '') {
+      $desc{$1} = $2;
+    }
+
+    # uses the test's "native" locale
+    if (defined ($lang) && defined($lang{$1}) && $lang{$1} eq $lang) {
+      if (!defined $desc{$1}) { $desc{$1} = $2; }
+    }
+
+  } elsif (/^score\s+(\S+)\s+(.+)$/) {
     $score{$1} = $2;
   }
 }
 
 my $n = 0;
 foreach my $t (@testnames) {
+  next if ($t =~ /^__/);
+  next if ($t =~ /^T_/);
+
   $n++;
   $_ = $tmpl;
-  $test = $test{$t};
+  my $desc = $desc{$t};
+  if (!defined $desc) { $desc = $test{$t}; }
 
-  $test =~ s,&,&amp;,gs;	# protect HTML
-  $test =~ s,<,&lt;,gs;
-  $test =~ s,>,&gt;,gs;
-  $test =~ s,\|,| ,gs;		# allow line breaks on pipes
+  $desc =~ s,\|,| ,gs;		# allow line breaks on pipes
+  $desc =~ s,\$,(dollar) ,gs;
+  $desc = HTML::Entities::encode ($desc);
 
   my $bgcolor = '';
   if ($n % 2 == 0) { $bgcolor = ' bgcolor=#ccffcc'; }
 
   s/__BGCOLOR__/$bgcolor/gs;
   s/__NAME__/$t/gs;
-  s/__DESCRIPTION__/$test/gs;
+  s/__DESCRIPTION__/$desc/gs;
   s/__TYPE__/$type{$t}/gs;
+  s/__LANG__/$lang{$t}/gs;
   s/__SCORE__/$score{$t} or 1/ges;
   print;
 }

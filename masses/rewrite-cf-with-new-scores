@@ -1,77 +1,130 @@
 #!/usr/bin/perl -w
+#
+# <@LICENSE>
+# Copyright 2004 Apache Software Foundation
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
 
-my $oldscores = $ARGV[0];
-my $newscores = $ARGV[1];
+my $NUM_SCORESETS = 4;
 
-if (!defined $newscores) {
-  die "usage: rewrite-cf-with-new-scores oldscores.cf newscores.cf\n";
+my ($scoreset,$oldscores,$newscores) = @ARGV;
+
+$scoreset = int($scoreset) if defined $scoreset;
+if (!defined $newscores || $scoreset < 0 || $scoreset >= $NUM_SCORESETS ) {
+  die "usage: rewrite-cf-with-new-scores scoreset oldscores.cf newscores.cf\n";
 }
 
-# read the skipped scores and their previous values
-%skipped_scores = ();
-my ($name, $base, $muta);
-open (IN, "<tmp/scores.data");
-while (<IN>) {
-  chomp;
-  /^n(.*)$/ and $name = $1;
-  /^b(.*)$/ and $base = $1;
-  /^m(.*)$/ and $muta = $1;
-
-  if (/^\./ && defined($name)) {
-    if ($muta == 0) { $skipped_scores{$name} = $base; }
-  }
+system ("./parse-rules-for-masses -s $scoreset") and die;
+if (-e "tmp/rules.pl") {
+  # Note, the spaces need to stay in front of the require to work around a RPM 4.1 problem
+  require "./tmp/rules.pl";
 }
-if ($muta == 0) { $skipped_scores{$name} = $base; }
-close IN;
+else {
+  die "parse-rules-for-masses had no error but no tmp/rules.pl!?!";
+}
 
-# now read the evolved scores
-my $gascores = '';
+# now read the generated scores
+my @gascoreorder = ();
+my %gascorelines = ();
 open (STDIN, "<$newscores") or die "cannot open $newscores";
 while (<STDIN>) {
-  /^score\s+(\S+)\s/ or next;
-  next if (defined $skipped_scores{$1});
-  next if ($1 eq '(null)');	# er, oops ;)
-  $gascores .= $_;
+  /^score\s+(\S+)\s+(-?\d+(?:\.\d+)?)/ or next;
+  my $name = $1;  my $score = $2;
+  next unless (exists ($rules{$name}) && $rules{$name}->{issubrule} == 0);
+  next if ($name =~ /^__/);
+  next if ($name eq '(null)');	# er, oops ;)
+
+  $gascorelines{$name} = $score;
+  push (@gascoreorder, $name);
 }
 
 open (IN, "<$oldscores") or die "cannot open $oldscores";
 my $out = '';
 my $pre = '';
 
-# read until '# Start of GA-evolved scores', removing scores from our
+# read until '# Start of generated scores', removing scores from our
 # new list if we come across them.
 while (<IN>) {
   if (/^\s*score\s+(\S+)\s/) {
-    delete $skipped_scores{$1};
-    $gascores =~ s/^score\s+$1\s.*?\n//gm;
+    delete $gascorelines{$1};
+    next unless (exists ($rules{$name}) && $rules{$name}->{issubrule} == 0);
   }
   $pre .= $_;
-  /^# Start of GA-evolved scores/ and last;
+  /^# Start of generated scores/ and last;
 }
 
-# now skip until '# End of GA-evolved scores'
+# now skip until '# End of generated scores'
 while (<IN>) {
-  /^# End of GA-evolved scores/ and last;
+  if (/^\s*score\s+\S+/) {
+    my($score,$name,@scores) = split;
+    @{$oldscores{$name}} = @scores;
+  }
+
+  /^# End of generated scores/ and last;
 }
 if (defined $_) {
   $out .= $_;
 }
 
-# and read until EOF, again removing score sfrom our list as we find 'em.
+# and read until EOF, again removing scores from our list as we find 'em.
 while (<IN>) {
-  if (/^\s*score\s+(\S+)\s/) {
-    delete $skipped_scores{$1};
-    $gascores =~ s/^score\s+$1\s.*?\n//gm;
+  if (/^\s*score\s+\S+/) {
+    my($score,$name,@scores) = split;
+
+    next unless (exists ($rules{$name}) && $rules{$name}->{issubrule} == 0);
+    if (defined $gascorelines{$name}) {
+      # Set appropriate scoreset value
+      $scores[$scoreset] = $gascorelines{$name};
+
+      # Create new score line
+      $_ = join(" ","score",$name,generate_scores(@scores))."\n";
+    }
+    delete $gascorelines{$name};
   }
   $out .= $_;
 }
 close IN;
 
-# finally, make a string of the scores that were not in either list
-my $missing = '';
-foreach my $key (sort keys %skipped_scores) {
-  $missing .= sprintf ("score %-30s %3.1f\n", $key, $skipped_scores{$key});
-}
-if ($missing ne '') { $missing = "# Missed scores:\n\n".$missing; }
+# and output the lot
+print $pre, "\n";
+foreach my $name (@gascoreorder) {
+  $_ = $gascorelines{$name};
+  next unless (defined ($_));
 
-print $pre, "\n", $gascores, "\n", $out, "\n", $missing;
+  # Use the old scores if they existed
+  my @scores = ();
+  @scores = @{$oldscores{$name}} if ( exists $oldscores{$name} );
+
+  # Set appropriate scoreset value
+  $scores[$scoreset] = $_;
+
+  # Create new score line
+  print join(" ","score",$name,generate_scores(@scores)),"\n";
+}
+print "\n", $out;
+
+sub generate_scores {
+  my (@scores) = @_;
+
+  # Set defaults if not already set
+  $scores[0] ||= 0;
+  my $flag = 1;
+  for(my $i=1;$i<$NUM_SCORESETS;$i++) {
+    $scores[$i] = $scores[0] unless defined $scores[$i];
+    $flag = 0 if ( $scores[$i] != $scores[$i-1] );
+  };
+  splice @scores, 1 if $flag;
+
+  return @scores;
+}

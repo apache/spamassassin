@@ -1,198 +1,286 @@
 #!/usr/bin/perl -w
+#
+# <@LICENSE>
+# Copyright 2004 Apache Software Foundation
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
 
-my $argcffile = shift @ARGV;
+use Getopt::Long;
+use vars qw($opt_cffile $opt_count $opt_lambda $opt_threshold
+		$opt_spam $opt_ham);
 
-my @unmutated_tests = qw(
-BALANCE_FOR_LONG
-COPYRIGHT_CLAIMED
-SIRCAM_SIGNATURE
-USER_IN_WHITELIST
-NO_MX_FOR_FROM
+GetOptions("cffile=s", "count", "lambda=f", "threshold=f", "spam=s", "ham=s", "scoreset=i");
+my $argcffile = $opt_cffile;
 
-BADTRANS_WORM
-USER_IN_ALL_SPAM_TO
-USER_IN_MORE_SPAM_TO
-USER_IN_WHITELIST_TO
-Q_FOR_SELLER
-A_FROM_IN_AUTO_WLIST
-USER_IN_WHITELIST
-COPYRIGHT_CLAIMED
-
-INVALID_DATE_NO_TZ
-UNDISC_RECIPS
-MAY_BE_FORGED
-HTML_WITH_BGCOLOR
-FORGED_RCVD_FOUND
-NO_REAL_NAME
-PLING
-PLING_PLING
-USER_IN_BLACKLIST
-SUBJ_ENDS_IN_Q_MARK
-SUBJ_HAS_Q_MARK
-RAZOR_CHECK
-RCVD_IN_RELAYS_ORDB_ORG
-RCVD_IN_OSIRUSOFT_COM
-X_OSIRU_SPAM_SRC
-X_OSIRU_SPAMWARE_SITE
-NO_MX_FOR_FROM
-
-PORN_5
-
-  );
+my $justcount = 0;
+if ($opt_count) { $justcount = 1; }
 
 my $threshold = 5;
-my $iterlimit = 0;
+if (defined $opt_threshold) { $threshold = $opt_threshold; }
+
+$opt_spam ||= 'spam.log';
+$opt_ham ||= 'ham.log';
+$opt_scoreset = 0 if ( !defined $opt_scoreset );
+
+my $nybias = 10;
+
+# lambda value for TCR equation, representing the cost of of an FP vs. the
+# cost of a FN.  Some example values are: 1 = tagged only, 9 = mailed back
+# to sender asking for token, 999 = blocking or deleting a message.
+#
+# We roughly aim for a value representing "moved to infrequently-read folder".
+
+my $lambda = 50;
+if ($opt_lambda) { $lambda = $opt_lambda; }
 
 my %is_spam = ();
 my %tests_hit = ();
+my %mutable_tests = ();
 
-my $scores;
+use vars qw(%rules %allrules);
+
 readscores();
-my $origscores = $scores;
 
 print "Reading per-message hit stat logs and scores...\n";
-my $total;
-my $totspam;
-my $totnonspam;
+my ($num_tests, $num_spam, $num_ham);
+my ($ga_yy, $ga_ny, $ga_yn, $ga_nn, $yyscore, $ynscore, $nyscore, $nnscore);
+
 readlogs();
 read_ranges();
 
-print "Writing logs and current scores as C code...\n";
-
-writescores_c();
-writetests_c();
+if ($justcount) {
+  $nybias = $nybias*($num_spam / $num_ham);
+  evaluate();
+} else {
+  print "Writing logs and current scores as C code...\n";
+  writescores_c();
+}
 exit 0;
 
 
 sub readlogs {
-  my $count = $totspam = $totnonspam = 0;
+  my $count = 0;
+  $num_spam = $num_ham = 0;
 
-  foreach my $file ("spam.log", "nonspam.log") {
+  if ($justcount) {
+    $ga_yy = $ga_ny = $ga_yn = $ga_nn = 0;
+    $yyscore = $ynscore = $nyscore = $nnscore = 0.0;
+  }
+
+  foreach my $file ($opt_spam, $opt_ham) {
     open (IN, "<$file");
 
     while (<IN>) {
-      /^.\s+(\d+)\s+\S+\s*/ or next;
+      next unless /^[^#]/;
+      if($_ !~ /^.\s+([-\d]+)\s+(\S+)\s*/) { warn "bad line: $_"; next; }
       my $hits = $1;
+      #my $id = $2;
+      $_ = $'; s/(?:bayes|time)=\S+//; s/,,+/,/g; s/^\s+//; s/\s+$//;
 
-      $_ = $'; s/,,+/,/g; s/^\s+//; s/\s+$//;
+      my $score = 0;
       my @tests = ();
       foreach my $tst (split (/,/, $_)) {
-	next if ($tst eq '');
-	if (!defined $scores->{$tst}) {
-	  warn "unknown test in $file, ignored: $tst\n";
+	next unless $tst;
+	if (!defined $scores{$tst}) {
+          #warn "unknown test in $file, ignored: $tst\n";
 	  next;
 	}
-	push (@tests, $tst);
+
+	# Make sure to skip any subrules!
+	next if ( $allrules{$tst}->{issubrule} );
+
+        if ($justcount) {
+          $score += $scores{$tst};
+        } else {
+          push (@tests, $tst);
+        }
       }
 
-      $tests_hit{$count} = \@tests;
+      if (!$justcount) { 
+        $tests_hit{$count} = \@tests;
+      }
 
-      if ($file eq "spam.log") {
-	$totspam++;
-	$is_spam{$count} = 1;
+      if ($file eq $opt_spam) {
+	$num_spam++;
+        if ($justcount) {
+          if ($score >= $threshold) {
+            $ga_yy++; $yyscore += $score;
+          } else {
+            $ga_yn++; $ynscore += $score;
+          }
+        } else {
+          $is_spam{$count} = 1;
+        }
       } else {
-	$totnonspam++;
-	$is_spam{$count} = 0;
+	$num_ham++;
+        if ($justcount) {
+          if ($score >= $threshold) {
+	    #print STDERR "FP: $id\n";
+            $ga_ny++; $nyscore += $score;
+          } else {
+            $ga_nn++; $nnscore += $score;
+          }
+        } else {
+          $is_spam{$count} = 0;
+        }
       }
       $count++;
-    } 
+    }
     close IN;
   }
-  $total = $count;
+  $num_tests = $count;
 }
 
 
 sub readscores {
-  $scores = { };
-
-  my @files;
   if (!defined $argcffile) { $argcffile = "../rules"; }
-
-  if (-d $argcffile ) {
-    @files = <$argcffile/[0-9]*.cf>;
-  } else {
-    @files = ($argcffile);
-  }
-
-  foreach $cffile (@files) {
-  print "Reading scores from \"$cffile\"...\n";
-  open (IN, "<$cffile") or warn "cannot read $cffile\n";
-  while (<IN>) {
-    s/#.*$//g; s/^\s+//; s/\s+$//;
-
-    if (/^(header|body|rawbody|full)\s+(\S+)\s+/) {
-      $scores->{$2} ||= 1;
-    } elsif (/^score\s+(\S+)\s+(.+)$/) {
-      $scores->{$1} = $2;
-    }
-  }
-  close IN;
-  }
+  print "Reading scores from \"$argcffile\"...\n";
+  system ("./parse-rules-for-masses -d \"$argcffile\" -s $opt_scoreset") and die;
+  require "./tmp/rules.pl";
+  %allrules = %rules;           # ensure it stays global
 }
 
 sub writescores_c {
-  my $size = (scalar keys %{$scores}); # adding 100 here makes the GA take a lot longer since the genome's 100 genes longer! plus messes up scores output - crh
+  my $output = '';
+  my $size = 0;
+  my $mutable = 0;
+  my $i;
 
-  open (DAT, ">tmp/scores.data");
-  print DAT "N$size\n";
+    # jm: now, score-ranges-from-freqs has tflags to work from, so
+    # it will always list all mutable tests.
 
-  my $count = 0;
-  foreach my $name (sort keys %{$scores}) {
-    if (!defined $is_mutatable{$name}) { $is_mutatable{$name} = 1; } else { $range_lo{$name} = $range_hi{$name} = $scores->{$name}; }
-
-    $range_lo{$name} ||= 0.1;
-    $range_hi{$name} ||= 1.5;
-
-    print DAT ".".$count."\n";
-    print DAT "n".$name."\n";
-    print DAT "b".$scores->{$name}."\n";
-    print DAT "m".$is_mutatable{$name}."\n";
-    print DAT "l".$range_lo{$name}."\n";
-    print DAT "h".$range_hi{$name}."\n";
-
-    $score_c_index{$name} = $count;
-    $count++;
+  @index_to_rule = sort {($ignored_rule{$a} <=> $ignored_rule{$b}) ||
+			  ($mutable_tests{$b} <=> $mutable_tests{$a}) ||
+			   ($a cmp $b)} (keys %scores);
+  my $max_hits_per_msg = 0;
+  for ($file = 0; $file < $num_tests; $file++) {
+    my(@hits) =
+     grep {(! $ignored_rule{$_}) && $mutable_tests{$_}} (@{$tests_hit{$file}});
+    if ((scalar(@hits)+1) > $max_hits_per_msg) {
+      $max_hits_per_msg = scalar(@hits)+1;
+    }
   }
 
+  for ($i = 0; $i <= $#index_to_rule; $i++) {
+    my $name = $index_to_rule[$i];
+    $rule_to_index{$name} = $i;
+
+    if ($ignored_rule{$name}) { next; }
+
+    if ($mutable_tests{$name} == 0) {
+      $range_lo{$name} = $range_hi{$name} = $scores{$name};
+    } else {
+      $mutable++;
+      if ($range_lo{$name} > $range_hi{$name}) {
+	($range_lo{$name},$range_hi{$name}) =
+	 ($range_hi{$name},$range_lo{$name});
+      }
+      #$range_lo{$name} ||= 0.1;
+      #$range_hi{$name} ||= 1.5;
+    }
+
+    $output .= ".".$i."\n".
+                "n".$name."\n".
+                "b".$scores{$name}."\n".
+                "m".$mutable_tests{$name}."\n".
+                "l".$range_lo{$name}."\n".
+                "h".$range_hi{$name}."\n";
+    $size++;
+  }
+
+
+  open (DAT, ">tmp/scores.data");
+  print DAT "N$size\n", "M$mutable\n", # informational only
+   $output;
   close DAT;
 
   open (OUT, ">tmp/scores.h");
   print OUT "
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
-int num_scores;
-unsigned char is_mutatable[$size]; 	/* er, is_mutable I think ;) */
+int num_scores = $size;
+int num_mutable = $mutable;
+unsigned char is_mutable[$size];
 double range_lo[$size];
 double range_hi[$size];
 double bestscores[$size];
-double scores[$size];
 char *score_names[$size];
+double tmp_scores[$size][2];
+unsigned char ny_hit[$mutable];
+unsigned char yn_hit[$mutable];
+
+double lookup[$mutable];
 
 /* readscores() is defined in tests.h */
 
 ";
   close OUT;
+
+  writetests_c($max_hits_per_msg); # make sure $rule_to_index is around
 }
 
 sub writetests_c {
+  my $max_hits_per_msg = $_[0];
+
+  my(%uniq_files) = ();
+  my(%count_keys) = ();
+  my(%file_key) = ();
+
   my $file;
 
-  # figure out max hits per message
-  my $max_hits_per_msg = 0;
-  for ($file = 0; $file < $total; $file++) {
-    my $hits = scalar @{$tests_hit{$file}} + 1;
-    if ($hits > $max_hits_per_msg) { $max_hits_per_msg = $hits; }
+  for ($file = 0; $file < $num_tests; $file++)
+  {
+    my $uniq_key = $is_spam{$file} . " ";
+
+    my(@good_tests) =
+     grep {length($_) && (! $ignored_rule{$_}) &&
+	    (defined($rule_to_index{$_}))} (@{ $tests_hit{$file} });
+
+    @good_tests = sort {$a <=> $b} (map {$rule_to_index{$_}} (@good_tests));
+
+    $uniq_key .= join(" ",@good_tests);
+
+    if (exists($count_keys{$uniq_key})) {
+      $count_keys{$uniq_key}++;
+    } else {
+      $count_keys{$uniq_key} = 1;
+      $file_key{$file} = $uniq_key;
+      $uniq_files{$file} = scalar(keys(%count_keys)) - 1;
+    }
   }
+
+  my $num_nondup = scalar(keys(%uniq_files));
 
   open (TOP, ">tmp/tests.h");
   print TOP "
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
-int num_tests = $total;
-int num_spam = $totspam;
-int num_nonspam = $totnonspam;
+int num_tests = $num_tests;
+int num_nondup = $num_nondup;
+int num_spam = $num_spam;
+int num_ham = $num_ham;
 int max_hits_per_msg = $max_hits_per_msg;
-unsigned char num_tests_hit[$total];
-unsigned char is_spam[$total];
-unsigned short tests_hit[$total][$max_hits_per_msg];
+unsigned char num_tests_hit[$num_nondup];
+unsigned char is_spam[$num_nondup];
+unsigned short tests_hit[$num_nondup][$max_hits_per_msg];
+double scores[$num_nondup];
+double tmp_total[$num_nondup];
+int tests_count[$num_nondup];
 
 ";
   $_ = join ('', <DATA>);
@@ -201,28 +289,41 @@ unsigned short tests_hit[$total][$max_hits_per_msg];
 
   open (DAT, ">tmp/tests.data");
 
-  for ($file = 0; $file < $total; $file++)
-  {
-    print DAT ".".$file."\n";
+  foreach $file (sort {$a <=> $b} (keys %uniq_files)) {
+    print DAT ".".$uniq_files{$file}."\n";
 
     my $out = '';
     $out .= "s".$is_spam{$file}."\n";
 
+    my $base_score = 0;
     my $num_tests_hit = 0;
     foreach my $test (@{$tests_hit{$file}}) {
       if ($test eq '') { next; }
 
-      if (!defined $score_c_index{$test}) {
-	warn "test with no C index: $test\n";
+      if ($ignored_rule{$test}) {
+        warn "ignored rule $test got a hit in $file!\n";
+        next;
       }
 
+      if (!defined $rule_to_index{$test}) {
+	warn "test with no C index: $test\n";
+	next;
+      }
+
+      if ($mutable_tests{$test}) {
       $num_tests_hit++;
-      $out .= "t".$score_c_index{$test}."\n";
+      $out .= "t".$rule_to_index{$test}."\n";
 
       if ($num_tests_hit >= $max_hits_per_msg) {
 	die "Need to increase \$max_hits_per_msg";
       }
+      } else {
+	$base_score += $scores{$test};
+      }
     }
+
+    $out .= "b" . $base_score . "\n"; # score to add in for non-mutable tests
+    $out .= "c" . $count_keys{$file_key{$file}} . "\n";
 
     print DAT "n".$num_tests_hit."\n".$out;
   }
@@ -230,25 +331,140 @@ unsigned short tests_hit[$total][$max_hits_per_msg];
 }
 
 sub read_ranges {
-  %is_mutatable = ();
-  foreach my $t (@unmutated_tests) { $is_mutatable{$t} = 0; }
-
   if (!-f 'tmp/ranges.data') {
     system ("make tmp/ranges.data");
   }
 
-  # read ranges, and mutatableness, from ranges.data.
+  # read ranges, and mutableness, from ranges.data.
   open (IN, "<tmp/ranges.data")
   	or die "need to run score-ranges-from-freqs first!";
 
+  my $count = 0;
   while (<IN>) {
     /^(\S+) (\S+) (\d+) (\S+)$/ or next;
     my $t = $4;
     $range_lo{$t} = $1+0;
     $range_hi{$t} = $2+0;
-    my $mut = $3+0; if (!$mut) { $is_mutatable{$t} = 0; }
+    my $mut = $3+0;
+
+    if ($allrules{$t}->{issubrule}) {
+      $ignored_rule{$t} = 1;
+      $mutable_tests{$t} = 0;
+      next;
+    }
+    if (($range_lo{$t} == $range_hi{$t}) && (! $range_lo{$t})) {
+      #warn "ignored rule: score and range == 0: $t\n";
+      $ignored_rule{$t} = 1;
+      $mutable_tests{$t} = 0;
+      next;
+    }
+
+    $ignored_rule{$t} = 0;
+    $index_to_rule[$count] = $t;
+    $count++;
+
+    if (!$mut) {
+      $mutable_tests{$t} = 0;
+    } elsif ($range_lo{$t} == $range_hi{$t}) {
+      $mutable_tests{$t} = 0;
+    } elsif ($allrules{$t}->{tflags} =~ m/\buserconf\b/i) {
+      $mutable_tests{$t} = 0;
+    } else {
+      $mutable_tests{$t} = 1;
+    }
+    unless ($mutable_tests{$t} || $scores{$t}) {
+      $ignored_rule{$t} = 1;
+    }
   }
   close IN;
+
+  # catch up on the ones missed; seems to be userconf or 0-hitters mostly.
+  foreach my $t (sort keys %allrules) {
+    next if (exists($range_lo{$t}));
+    if ($allrules{$t}->{issubrule}) {
+      $ignored_rule{$t} = 1;
+      $mutable_tests{$t} = 0;
+      next;
+    }
+    $ignored_rule{$t} = 0;
+    unless (exists($mutable_tests{$t}) &&
+	    ($allrules{$t}->{tflags} !~ m/\buserconf\b/i)) {
+      $mutable_tests{$t} = 0;
+    }
+    unless ($mutable_tests{$t} || $scores{$t}) {
+      $ignored_rule{$t} = 1;
+    }
+    $index_to_rule[$count] = $t;
+    $count++;
+  }
+  foreach my $t (keys %range_lo) {
+    next if ($ignored_rule{$t});
+    if ($mutable_tests{$t}) {
+      if (($scores{$t} == 1) && ($allrules{$t}->{tflags} =~ m/\bnice\b/i)) {
+	$scores{$t} = -1;
+      } elsif (($scores{$t} == 0.01) && ($t =~ m/^T_/) &&
+	       ($allrules{$t}->{tflags} =~ m/\bnice\b/i)) {
+	$scores{$t} = -0.01;
+      }
+      if ($scores{$t} >= $range_hi{$t}) {
+	$scores{$t} = $range_hi{$t} - 0.001;
+      } elsif ($scores{$t} <= $range_lo{$t}) {
+	$scores{$t} = $range_lo{$t} + 0.001;
+      }
+    } else {
+      if ($allrules{$t}->{tflags} =~ m/\buserconf\b/i) {
+	next;
+      } elsif ($range_lo{$t} == $range_hi{$t}) {
+	$scores{$t} = $range_lo{$t};
+	next;
+      }
+      if (($scores{$t} == 1) && ($allrules{$t}->{tflags} =~ m/\bnice\b/i)) {
+	$scores{$t} = -1;
+      } elsif (($scores{$t} == 0.01) && ($t =~ m/^T_/) &&
+	       ($allrules{$t}->{tflags} =~ m/\bnice\b/i)) {
+	$scores{$t} = -0.01;
+      }
+      if ($scores{$t} > $range_hi{$t}) {
+	$scores{$t} = $range_hi{$t};
+      } elsif ($scores{$t} < $range_lo{$t}) {
+	$scores{$t} = $range_lo{$t};
+      }
+    }
+  }
+}
+
+sub evaluate {
+   printf ("\n# SUMMARY for threshold %3.1f:\n", $threshold);
+   printf "# Correctly non-spam: %6d  %4.2f%%\n",
+       $ga_nn, ($ga_nn /  $num_ham) * 100.0;
+   printf "# Correctly spam:     %6d  %4.2f%%\n",
+       $ga_yy, ($ga_yy /  $num_spam) * 100.0;
+   printf "# False positives:    %6d  %4.2f%%\n",
+       $ga_ny, ($ga_ny /  $num_ham) * 100.0;
+   printf "# False negatives:    %6d  %4.2f%%\n",
+       $ga_yn, ($ga_yn /  $num_spam) * 100.0;
+
+  # convert to the TCR metrics used in the published lit
+  my $nspamspam = $ga_yy;
+  my $nspamlegit = $ga_yn;
+  my $nlegitspam = $ga_ny;
+  my $nlegitlegit = $ga_yn;
+  my $nlegit = $num_ham;
+  my $nspam = $num_spam;
+
+  my $werr = ($lambda * $nlegitspam + $nspamlegit)
+                  / ($lambda * $nlegit + $nspam);
+
+  my $werr_base = $nspam
+                  / ($lambda * $nlegit + $nspam);
+
+  $werr ||= 0.000001;     # avoid / by 0
+  my $tcr = $werr_base / $werr;
+
+  my $sr = ($nspamspam / $nspam) * 100.0;
+  my $sp = ($nspamspam / ($nspamspam + $nlegitspam)) * 100.0;
+  printf "# TCR(l=%s): %3.6f  SpamRecall: %3.3f%%  SpamPrec: %3.3f%%\n",
+    $lambda, $tcr, $sr, $sp;
 }
 
 __DATA__
@@ -262,9 +478,11 @@ void loadtests (void) {
   while (fgets (buf, 255, fin) != NULL) {
     char cmd;
     long arg;
+    float argd;
 
     cmd = (char) *buf;
     arg = strtol (buf+1, NULL, 10);
+    argd = (float)strtod (buf+1, NULL);
 
     if (cmd == '.') {
       file = arg;
@@ -276,13 +494,21 @@ void loadtests (void) {
     } else if (cmd == 's') {
       is_spam[file] = arg;
 
+    } else if (cmd == 'b') {
+      scores[file] = argd;
+
     } else if (cmd == 't') {
       tests_hit[file][tnum] = arg; tnum++;
+
+    } else if (cmd == 'c') {
+      tests_count[file] = arg;
+
     }
   }
   fclose(fin);
 
-  printf ("Read test results for %d messages.\n", file+1);
+  printf ("Read test results for %d messages (%d total).\n", file+1,
+	  num_tests);
 }
 
 void loadscores (void) {
@@ -293,12 +519,12 @@ void loadscores (void) {
   while (fgets (buf, 255, fin) != NULL) {
     char cmd;
     long arg;
-    float argf;
+    float argd;
     char *str, *white;
 
     cmd = (char) *buf;
     arg = strtol (buf+1, NULL, 10);
-    argf = strtod (buf+1, NULL);
+    argd = (float)strtod (buf+1, NULL);
     str = buf+1;
 
     while ((white = strchr (str, '\n')) != NULL) {
@@ -308,27 +534,23 @@ void loadscores (void) {
     if (cmd == '.') {
       snum = arg;
 
-    } else if (cmd == 'N') {
-      num_scores = arg;
-
     } else if (cmd == 'b') {
-      bestscores[snum] = argf;
+      bestscores[snum] = argd;
 
     } else if (cmd == 'l') {
-      range_lo[snum] = argf;
+      range_lo[snum] = argd;
 
     } else if (cmd == 'h') {
-      range_hi[snum] = argf;
+      range_hi[snum] = argd;
 
     } else if (cmd == 'n') {
       score_names[snum] = strdup (str);	/* leaky leak ;) */
 
     } else if (cmd == 'm') {
-      is_mutatable[snum] = arg;
+      is_mutable[snum] = arg;
     }
   }
   fclose(fin);
 
   printf ("Read scores for %d tests.\n", num_scores);
 }
-

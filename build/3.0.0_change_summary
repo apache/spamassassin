@@ -1,0 +1,230 @@
+*** THIS IS A PRE-RELEASE ONLY, NOT THE FINAL 3.0.0 RELEASE ***
+
+SpamAssassin 3.0.0 is released!  SpamAssassin 3.0.0 is a major update and
+includes a number of new email and anti-spam technologies.
+
+SpamAssassin is a mail filter which uses advanced statistical and
+heuristic tests to identify spam (also known as unsolicited bulk email).
+
+Highlights of the release
+-------------------------
+
+ - SpamAssassin is now part of the Apache Software Foundation, bringing an
+   improved and clearer software license, the 2.0 version of the Apache
+   License.
+
+ - We added a new architecture which allows third-parties to easily add
+   plugin modules.
+
+ - There is now SQL database support for both the Bayes and auto-whitelist
+   subsystems, allowing more large sites to easily deploy SpamAssassin.
+
+ - A more accurate simulation of email client handling of MIME and HTML
+   improves our accuracy.  In addition, there is better detection and
+   handling of spammer techniques used to trick email clients and filters.
+
+ - Web sites contained in the message body are checked against network
+   databases of domains that advertise with spam.
+
+ - SpamAssassin now includes support for SPF (the Sender Policy Framework,
+   http://spf.pobox.com/) and Hashcash (http://www.hashcash.org/).
+
+Downloading
+-----------
+
+Pick it up from:
+
+  http://SpamAssassin.org/released/Mail-SpamAssassin-3.0.0-pre1.tar.gz
+  http://SpamAssassin.org/released/Mail-SpamAssassin-3.0.0-pre1.tar.bz2
+  http://SpamAssassin.org/released/Mail-SpamAssassin-3.0.0-pre1.zip
+
+md5sum:
+
+  bb42ada117c965bfa5b63046173cc4e0  Mail-SpamAssassin-3.000000-pre1.tar.gz
+  53ebc4b0527d8f99d9fc3b52781a8100  Mail-SpamAssassin-3.000000-pre1.tar.bz2
+  5f23d79ceaaa60ba4017cb067414dd01  Mail-SpamAssassin-3.000000-pre1.zip
+
+sha1sum:
+
+  9b1e02af2ecc79fc8149f399fad4090bfb981767  Mail-SpamAssassin-3.000000-pre1.tar.gz
+  fb7fafb039dabba4d644d604c7a9dc056bd8b1b0  Mail-SpamAssassin-3.000000-pre1.tar.bz2
+  1f152f1834e8611dc47350594e920d65fef1143d  Mail-SpamAssassin-3.000000-pre1.zip
+
+The release files also have a .asc accompanying them.  The file serves
+as an external GPG signature for the given release file.  The signing
+key is available via the wwwkeys.pgp.net key server, as well as
+http://www.spamassassin.org/released/GPG-SIGNING-KEY
+
+The key information is:
+
+pub  1024D/265FA05B 2003-06-09 SpamAssassin Signing Key <release@spamassassin.org>
+     Key fingerprint =3D 26C9 00A4 6DD4 0CD5 AD24  F6D7 DEE0 1987 265F A05B
+
+Important installation notes
+----------------------------
+
+- The SpamAssassin 2.6x release series was the last set of releases to
+  officially support perl versions earlier than perl 5.6.1.  If you are
+  using an earlier version of perl, you will need to upgrade before you
+  can use the 3.0.0 version of SpamAssassin.
+
+- SpamAssassin 3.0.0 has a significantly different API (Application
+  Program Interface) from the 2.x series of code.  This means that if you
+  use SpamAssassin through a third-party utility (milter, etc,) you need
+  to make sure you have an updated version which supports 3.0.0.
+
+- The --auto-whitelist and -a options for "spamd" and "spamassassin" to
+  turn on the auto-whitelist have been removed and replaced by the
+  "use_auto_whitelist" configuration option which is also now turned on by
+  default.
+
+- The "rewrite_subject" configuration setting was deprecated and is now
+  removed. Instead, using "rewrite_header Subject [your desired setting]".
+  e.g.
+
+    rewrite_subject ****SPAM(_SCORE_)****
+
+  becomes
+
+    rewrite_header Subject ****SPAM(_SCORE_)****
+
+- The Bayesian storage modules have been completely re-written and now
+  include Berkeley DB (DBM) storage as well as SQL based storage (see
+  sql/README.bayes for more information).  In addition, a new format has
+  been introduced for the bayes database that stores tokens in fixed
+  length hashes.  All DBM databases should be automatically converted to
+  this new format the first time they are opened for write.  You can
+  manually perform the upgrade by running "sa-learn --sync" from the
+  command line.
+
+  The "sa-learn --rebuild" command has been deprecated; please use
+  "sa-learn --sync" instead.  The --rebuild option will remain temporarily
+  for backwards compatibility.
+
+- "spamd" now has a default max-children setting of 5; no more than 5
+  child scanner processes will be run in parallel.  Previously, there was
+  no default limit unless you specified the "-m" switch when starting
+  spamd.
+
+- If you are using a UNIX machine with all database files on local disks,
+  and no sharing of those databases across NFS filesystems, you can use a
+  more efficient, but non-NFS-safe, locking mechanism.   Do this by adding
+  the line "lock_method flock" to the /etc/mail/spamassassin/local.cf
+  file. This is strongly recommended if you're not using NFS, as it is
+  much faster than the NFS-safe locker.
+
+- Please note that the use of the following command line parameters for
+  spamassassin and spamd have been deprecated and are now removed.  If you
+  currently use these flags, please remove them:
+
+    in the 2.6x series: --add-from, --pipe, -F, -P, --stop-at-threshold, -S
+    in the 3.0.x series: --auto-whitelist, -a
+
+- The following flags are deprecated and will be removed in a future major
+  release: --whitelist-factory, -M, --warning-from, -w, --log-to-mbox, -l.
+
+- SpamAssassin runs in "taint mode" by default for improved security.
+  Certain third-party modules, such as Razor v2, may be incompatible with
+  taint mode. For Razor v2, you will need to be using v2.40 of
+  razor-agents or higher which allows taint mode by default.  Earlier
+  versions which are patched to allow taint mode may be used as well.
+
+- Finally, 2.6x deprecated the use of the "check_bayes_db" script, and it
+  is now no longer available.  Please see the sa-learn man/pod
+  documentation for more info.
+
+Summary of major changes since 2.6x
+-----------------------------------
+
+Licensing:
+
+  - Relicensed using Apache License v2.0, instead of dual GPL/PAL licensing,
+    since we are now an Apache Incubator project.
+
+New rules:
+
+  - SPF testing, if the Mail::SPF::Query module is installed.
+
+  - added new rules and code to combat Bayes poisoning text and random
+    hash-busters; Habeas rules now verify against the Habeas user
+    list, to combat forged marks used in spam.
+
+  - URIDNSBL rules.  These do DNSBL lookups on URLs, allowing URLs found
+    in the message body to be used in spam determination.  Added the SURBL
+    blocklist (http://www.surbl.org/).
+
+  - Spamhaus XBL and a variety of new DNSBL rules
+
+  - Hashcash support.
+
+  - added Bob Menschel's 'longwords' rules
+
+  - added 'backhair' rule, technique based on Jennifer Wheeler's ruleset
+
+  - added Matt Kettler's 'antidrug' ruleset
+
+  - added anti-fraud rules from Matt Yackley
+
+  - added some hostname-based blocklist tests based on the envelope
+    sender address.
+
+  - a *lot* of other new rules, too many to detail here
+
+Spamd:
+
+  - spamd now uses a 'preforking' model instead of 'fork per message'.
+
+  - new log format, detailing message-id, resent-message-id, the tests hit,
+    autolearn status, and several other things in a mass-check compatible
+    format, to provide more information for spamd log-summarizer scripts.
+
+Infrastructure:
+
+  - Plugins.  Third-party modules can now be written and loaded dynamically
+    from inside SpamAssassin, to provide support for entirely new rule types
+    or eval tests.
+
+  - SQL support for Bayes and AWL storage, thanks to Michael Parker.
+    See sql/README.bayes and sql/README.awl for additional information.
+
+  - ground-up rewrite of the MIME parser.  Now deals correctly with complex
+    MIME structures, including entire message/rfc822 message attachments.
+
+  - rules can now test the "MAIL FROM:" address used in the SMTP transaction,
+    if it was logged to the message headers, using the "EnvelopeFrom"
+    pseudoheader.  This allows rules such as SPF to be applied.
+
+  - Added optional faster but NFS-unsafe Bayes locking mechanism, using
+    "lock_method flock"
+
+  - support for parsing mbx mailboxes, as used by UW IMAP. Thanks to John
+    Newman for this patch.
+
+  - refactored configuration parser to split parser code from configuration
+    settings.
+
+  - Bayes databases can now be backed up and restored using --backup and
+    --restore.
+
+  - Config files can now include other files using the "include" command.
+
+  - replaced GA-based evolver with fast Perceptron score generation tool by
+    Henry Stern; scores can now be generated much more quickly.
+
+  - The "spamassassin" script can now check collections of mail en masse.  This
+    lets us do things like 'spamassassin -d --mbox file1' and have the
+    functionality go over the entire mbox file. same for checks, adding to
+    white/black-lists, etc.
+
+  - Windows support improved.
+
+Translations: 
+
+  - Dutch translation, thanks to Jesse Houwing
+
+  - Polish translations from Jerzy Szczudlowski and radek at alter dot pl
+
+  - French translations, Michel Bouissou
+
+  - German translations, Klaus Heinz
+

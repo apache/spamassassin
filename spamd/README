@@ -8,14 +8,6 @@ automated mail checking.  This document is a brief synopsis of how spamc/spamd
 work, and how to use them effectively.
 
 
-Changes since 1.x
------------------
-
-Spamd now listens on port 783, instead of 22874.  If you're keeping spamc and
-spamd in sync (which you should be!), and running spamd as root (the default),
-you won't even notice this.
-
-
 Spamd
 -----
 
@@ -38,7 +30,7 @@ Spamc
 -----
 
 Spamc is the client half of the pair.  It should be used in place of
-'spamassassin -P' in scripts to process mail.  It will read the mail from
+'spamassassin' in scripts to process mail.  It will read the mail from
 stdin, and spool it to its connection to spamd, then read the result back and
 print it to stdout.  Spamc has extremely low overhead in loading, so it should
 be much faster to load than the whole spamassassin program (and a perl VM).
@@ -48,7 +40,7 @@ Installation
 
 Simply copy the two executables to where you want them.  Then, configure your
 system to run spamd in the background, and where your mailer invokes
-'spamassassin -P' instead invoke 'spamc'.  It's that easy!
+'spamassassin' instead invoke 'spamc'.  It's that easy!
 
 There's a Red Hat/Mandrake-style startup script called 'spamassassin'
 in this directory, suitable for installation in /etc/rc.d/init.d .
@@ -61,7 +53,8 @@ which passes through it , you may want to keep security in mind. Depending
 on the nature of your set-up. If you are installing it on a site-wide
 basis at least some caution is advisable. 
 
-System-level security:
+System-level security
+---------------------
 
 Spamd has the facility to run as a non-root user, this has potential security
 payoffs. If a fault is found in spamd or spamassassin code, any third party
@@ -69,19 +62,49 @@ linked-libraries or imported perl modules there is the potential for abuse of
 both the running uid of spamd, and the uid of the username supplied by spamc
 (and this could be any user).
 
-If you do not need to let your users define their own rules, maintain their own
-whitelists, or have non-world-readable home and ~/.spamassassin directories,
-then just set spamd up to run with the "-u username" option.  Since spamd can
-use auto-whitelisting, which requires it maintain a database of email addresses
-on-disk, you should use a non-"root" but non-"nobody" user: "mailnull" or
-"mail" are good choices, or even create a "spamd" user.
+When run as root, spamd will change uid's to the user invoking spamc in order
+to read and write to their configurations. This functionality is not possible
+if spamd does not run as root and is a disadvantage if you rely on this. If you
+use mysql or LDAP for per-user configuration there is no reason in the world
+to run as root, and this remains fully functional.
 
-When run as root, spamd will change uid's to the user inoking spamc in 
-order to read and write to their configurations. This functionality
-is not possible if spamd does not run as root and is a disadvantage if
-you rely on this. If you use mysql for per-user configuration there
-is no reason in the world to run as root, and this remains fully
-functional.
+If you do not need to let your users define their own rules, maintain
+their own whitelists, or have non-world-readable home and ~/.spamassassin
+directories, then just set spamd up to run with the "-u username" option.
+Since spamd can use auto-whitelisting, which requires it maintain a
+database of email addresses on-disk, you should use a non-"root" but
+non-"nobody" user: "mailnull" or "mail" are good choices, or even create a
+"spamd" user.
+
+If you plan to use Razor or Pyzor, please note that they both rely on
+their external configuration files in ~/.razor and ~/.pyzor being
+readable, and Razor will try to write to a log file in
+~/.razor/razor-agent.log that must be writable (Razor will complain about
+'unblessed references' in this case).  You may find the -H switch to spamd
+to be useful; it allows you to set a 'helper home directory' that will be
+used as $HOME when external helpers like Razor, Pyzor and DCC are run.
+
+The Bayesian Classifier
+-----------------------
+
+If you plan to use Bayesian classification (the BAYES rules) with spamd,
+you will need to either
+
+  1. modify /etc/mail/spamassassin/local.cf to use a shared database of
+  tokens, by setting the 'bayes_path' setting to a path all users can read
+  and write to.  You will also need to set the 'bayes_file_mode' setting
+  to 0666 so that created files are shared, too.
+
+  2. Alternatively, let the users train their individual Bayes database.
+
+We have implemented an auto-learning algorithm (option
+'bayes_auto_learn', on by default) which can use high-scoring
+and low-scoring (options 'bayes_auto_learn_threshold_spam' and
+'bayes_auto_learn_threshold_nonspam') mails to improve classification
+efficiency.
+
+Security And User-Spoofing Clients
+----------------------------------
 
 Since spamd makes no effort to authenticate the username supplied by
 spamc, it is easily possible for malicious users invoking modified 
@@ -94,10 +117,10 @@ spamc clients to make spamd:
 If users do not have the opportunity to invoke spamc themselves, and
 the network is secure, running spamd as root is the preferred option,
 Be clear that the issues above dont affect you. Note: if you use mysql
-for per-user configuration on systems, you will remain vulnerable to
-(1.) and (2.). 
+or LDAP for per-user configuration on systems, you will remain vulnerable
+to (1.) and (2.).
 
-configuration:              Mysql           .spamassassin.cf
+configuration:              Mysql           .spamassassin/user_prefs
                              / \                  / \
                             /   \                /   \               
 can users connect?      yes      no           yes     no
@@ -110,32 +133,40 @@ can users connect?      yes      no           yes     no
                                           |
                                   some deprecation
 
-Network security:
+If you use spamd across a network and spamc connects from other hosts, you
+should ensure (as with all services) the security of your network segments.
+Mail is sent as plaintext, and is prone to packet sniffing and spoofing
+techniques if you are on an insecure network. If you cannot avoid this consider
+using an encrypted transport layer, such as a VPN, ssh tunnel or similar, or
+using an SSL-enabled spamc (see 'SSL Support' below).
 
-If you use spamd across a network and spamc connects from other hosts,
-you should ensure (as with all services) the security of your network
-segments. Mail is sent as plaintext, and is prone to packet sniffing and
-spoofing techniques if you are on an insecure network. If you cannot avoid
-this consider using an encrypted transport layer, such as a VPN, ssh
-tunnel or similar. 
 
 Performance
 -----------
 
-So how much faster is this than just using spamassassin -P?  Well, on my 400MHz
-K6-2 mail server, spamassassin -P process a 11689 byte message in about 3.36
+So how much faster is this than just using 'spamassassin'?  Well, on my 400MHz
+K6-2 mail server, spamassassin process a 11689 byte message in about 3.36
 seconds, spamc/spamd processes the same message in about 0.86 seconds, or about
 4 times faster.  With bigger messages, the difference is less pronounced; a
-115855 byte message takes about 5 seconds with spamassassin -P, and 2.5 seconds
+115855 byte message takes about 5 seconds with spamassassin, and 2.5 seconds
 with spamc/spamd, or about 2 times faster.  However, if many messages are being
 processed in parallel, the spamc/spamd combination will likely be much more
-efficient, since spamassassin -P has much higher overhead starting up, and will
+efficient, since spamassassin has much higher overhead starting up, and will
 consume more non-shared memory than will spamc/spamd.  For example, on the
 115855 byte message, spamc consumes *no* heap memory (and very little on the
-stack), where spamassassin -P uses over 15MB of heap space and a peak of 3.5M.
-In processing the 115855 byte message 10 times in parrallel, spamd uses just
-22M of heap, with a peak of only 2.5M spamassassin -P would have used 150M
+stack), where spamassassin uses over 15MB of heap space and a peak of 3.5M.
+In processing the 115855 byte message 10 times in parallel, spamd uses just
+22M of heap, with a peak of only 2.5M spamassassin would have used 150M
 total, and a peak of up to 35M to do this same job.
+
+Regarding how much resources to allocate for spamd, Francesco Potorti reports
+'On a Sun Ultra60 with 512MB memory, I found that 20 is a reasonable number
+(for --max-children), and maybe it could be increased. In fact, the memory
+footprint of a single Perl interpreter for spamd is about 20MB, but the total
+memory occupied by several concurrent spamd processes is not much higher. In
+peak activity periods, with load average around 15, more than 13 spamd
+processes running or sleeping, and many other amavis and sendmail processes
+active, the total memory used was around 350MB, plus about 200MB on swap.'
 
 Bugs
 ----
@@ -144,7 +175,7 @@ There are no known bugs with this setup.  Several reasonable sized sites are
 now running it on their production mail systems.  However, you should still
 test it completely in *your environment* before trusting all your mail to it.
 If you discover compilation, runtime, or load-performance bugs, please notify
-the SpamAssassing-Talk mailing list (SpamAssassin-Talk@lists.sourceforge.net
+the SpamAssassin-Talk mailing list (SpamAssassin-Talk@lists.sourceforge.net)
 
 Network Protocol
 ----------------
@@ -166,7 +197,7 @@ conversation looks like:
 After each side is done writing, it shuts down its side of the connection.
 
 The first line from spamc is the command for spamd to execute (PROCESS a
-message is the command in protocol<=1.2) followed by the protocol version
+message is the command in protocol<=1.2) followed by the protocol version.
 
 The first line of the response from spamd is the protocol version (note this is
 SPAMD here, where it was SPAMC on the other side) followed by a response code
@@ -180,7 +211,15 @@ The following commands are defined as of protocol 1.2:
 
 CHECK         --  Just check if the passed message is spam or not and reply as described below
 
+SYMBOLS       --  Check if message is spam or not, and return score plus list of symbols hit
+
+REPORT        --  Check if message is spam or not, and return score plus report
+
+REPORT_IFSPAM --  Check if message is spam or not, and return score plus report if the message is spam
+
 SKIP          --  Ignore this message -- client opened connection then changed its mind
+
+PING          --  Return a confirmation that spamd is alive.
 
 PROCESS       --  Process this message as described above and return modified message
 
@@ -198,3 +237,59 @@ or
 
 SPAMD/1.1 0 EX_OK
 Spam: False ; 2 / 5
+
+
+
+
+SYMBOLS command returns the same as CHECK, followed by a line listing all the
+rule names, separated by commas.  Note that some versions of the protocol
+terminate this line with "\r\n", and some do not, due to an oversight; so
+clients should be flexible on whether or not a CR-LF pair follows
+the symbol text, and how many CR-LFs there are.
+
+REPORT command returns the same as CHECK, followed immediately by the report
+generated by spamd:
+
+SPAMD/1.1 0 EX_OK
+Spam: False ; 2 / 5
+
+This mail is probably spam.  The original message has been attached
+along with this report, so you can recognize or block similar unwanted
+mail in future.  See http://spamassassin.org/tag/ for more details.
+[....]
+
+
+Note that the superfluous-score/threshold-line bug that appeared in
+SpamAssassin 2.5x is fixed.
+
+Clients should be flexible on whether or not a CR-LF pair follows
+the report text, and how many CR-LFs there are.
+
+REPORT_IFSPAM returns the same as REPORT if the message is spam, or nothing at
+all if the message is non-spam.
+
+The PING command does not actually trigger any spam checking, and (as with
+SKIP) no additional input is expected. It returns a simple confirmation
+response, like this:
+
+SPAMD/1.2 0 PONG
+
+This facility may be useful for monitoring programs which wish to check that 
+the daemon is alive and providing at least a basic response within a reasonable
+time frame.
+
+
+Shared Library
+--------------
+
+spamc can now be used as libspamc.so; simply run "make spamd/libspamc.so" at
+the top level.  Thanks to Liam Widdowson <liam@inodes.org> for this patch.
+
+SSL Support
+-----------
+
+If you have the OpenSSL headers and libraries installed, you can build an
+SSL-enabled version of spamc or the spamc shared library by running "make
+spamd/sslspamc" or "make spamd/libsslspamc.so".  Thanks to Nate
+<nate@cs.wisc.edu> for this patch.
+

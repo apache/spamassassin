@@ -1,0 +1,66 @@
+#!/bin/sh
+
+# run-masses, Theo Van Dinter <felicity@kluge.net> (c) 2002
+# $Id: run-masses,v 1.1 2003/06/10 17:11:12 felicity Exp $
+
+#
+# This script will run a mass-check against all mbox files in a given
+# set of directories.  The expected directory structure is:
+#
+# spamassassin				SA version to use
+# corpus				location of all corpus files
+#  run-masses				this script
+#  spam					directory of spam
+#  ham					directory of ham
+#
+# By default, the script looks for "spamassassin-head" which on my
+# machine is the latest version from CVS.  You can easily change this
+# by passing parameters to this script as such:
+#
+# run-masses ../spamassassin-garun --progress
+#
+# The first parameter is the directory to use for mass-check, and all
+# other parameters are passed to mass-check itself.
+#
+# At the end, you will have a ham.log, spam.log, and results.log in the
+# corpus directory.
+#
+# BTW: cpucount is a small script to figure out the number
+# of CPUs on the current machine.  It is available from
+# http://www.kluge.net/~felicity/random/
+#
+
+# Setup the path as necessary
+PATH=/bin:/usr/bin:/usr/local/bin:${HOME}/bin:.
+if [ -d /sw/bin ]; then
+	PATH=${PATH}:/sw/bin
+fi
+export PATH
+
+# Use the specified directory for tests
+if [ -z "$1" ]; then
+	DIR=../spamassassin-head
+else
+	DIR="$1"
+	shift
+fi
+
+# How many processes should we run at once?
+PROCS=`cpucount`
+
+# Where are our files located?
+MASS=$DIR/masses
+RULES=$DIR/rules
+
+# do the mass-check
+# class:format:path
+# class = ham | spam
+# format = file (file w/ single message) | mbox (file w/ multiple messsages) | dir (of 'file's)
+$MASS/mass-check --all -c $RULES -j $PROCS "$@" `mbox-to-check`
+
+echo "Generating hit frequency results"
+$MASS/hit-frequencies -c $RULES -x -p -a > results.log
+
+# remove the parse-rules-for-masses tmp directory
+echo "Removing temporary files"
+rm -rf ./tmp

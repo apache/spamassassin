@@ -2,27 +2,21 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spam");
-use Test; BEGIN { plan tests => 25 };
+use Test; BEGIN { plan tests => 7 };
 
 # ---------------------------------------------------------------------------
 
 %patterns = (
 
-q{ Subject: *****SPAM***** There yours for FREE!}, 'subj',
-q{ X-Spam-Status: Yes, hits=}, 'status',
+q{ Subject: There yours for FREE!}, 'subj',
+q{ X-Spam-Status: Yes, score=}, 'status',
 q{ X-Spam-Flag: YES}, 'flag',
-q{ Valid-looking To "undisclosed-recipients"}, 'undisc',
-q{ Missing Date: header}, 'date',
-q{ Subject has an exclamation mark}, 'apling',
-q{ From: ends in numbers}, 'endsinnums',
-q{ From: does not include a real name}, 'noreal',
-q{ BODY: List removal information }, 'removesubject',
-q{ BODY: Claims you can be removed from the list}, 'toberemoved',
-q{ Says: "to be removed, reply via email" }, 'removesubj',
-q{ BODY: Nobody's perfect }, 'remove',
+q{ X-Spam-Level: **********}, 'stars',
+q{ FROM_ENDS_IN_NUMS }, 'endsinnums',
+q{ NO_REAL_NAME }, 'noreal',
 
 
 );
 
-ok (sarun ("-t < data/spam/001", \&patterns_run_cb));
+ok (sarun ("-L -t < data/spam/001", \&patterns_run_cb));
 ok_all_patterns();

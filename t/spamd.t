@@ -2,24 +2,24 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd");
-use Test; BEGIN { plan tests => 17 };
+use Test; BEGIN { plan tests => ($SKIP_SPAMD_TESTS ? 0 : 7) };
+
+exit if $SKIP_SPAMD_TESTS;
 
 # ---------------------------------------------------------------------------
 
 %patterns = (
 
-q{ Subject: *****SPAM***** There yours for FREE!}, 'subj',
-q{ X-Spam-Status: Yes, hits=}, 'status',
+q{ Subject: There yours for FREE!}, 'subj',
+q{ X-Spam-Status: Yes, score=}, 'status',
 q{ X-Spam-Flag: YES}, 'flag',
-q{ Valid-looking To "undisclosed-recipients"}, 'undisc',
-q{ Missing Date: header}, 'date',
-q{ Subject has an exclamation mark}, 'apling',
-q{ From: ends in numbers}, 'endsinnums',
-q{ From: does not include a real name}, 'noreal',
+q{ X-Spam-Level: **********}, 'stars',
+q{ FROM_ENDS_IN_NUMS}, 'endsinnums',
+q{ NO_REAL_NAME}, 'noreal',
 
 
 );
 
-ok (sdrun ("", "< data/spam/001", \&patterns_run_cb));
+ok (sdrun ("-L", "< data/spam/001", \&patterns_run_cb));
 ok_all_patterns();
 

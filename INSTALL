@@ -1,0 +1,420 @@
+Upgrading SpamAssassin?
+-----------------------
+
+Please be sure to read the UPGRADE file for important changes that
+have been made since previous versions.
+
+
+Installing or Upgrading SpamAssassin
+------------------------------------
+
+The easiest way to do this is using CPAN.pm, like so:
+
+	perl -MCPAN -e shell                    [as root]
+	o conf prerequisites_policy ask
+	install Mail::SpamAssassin
+	quit
+
+On Debian, you can apt-get it from unstable, thanks to Duncan Findlay.
+
+Alternatively download the tarfile, zipfile or Fedora Core RPM from
+http://spamassassin.org/ , and install that, like so:
+
+	[unzip/untar the archive]
+	cd Mail-SpamAssassin-*
+	perl Makefile.PL
+	[option: add -DSPAMC_SSL to $CFLAGS to build an SSL-enabled spamc]
+	make
+	make install                            [as root]
+
+To install as non-root into a directory named "sausr" under your home
+directory, do something like this:
+
+	[unzip/untar the archive]
+	cd Mail-SpamAssassin-*
+	perl Makefile.PL PREFIX=~/sausr SYSCONFDIR=~/saetc
+	[option: add -DSPAMC_SSL to $CFLAGS to build an SSL-enabled spamc]
+	make
+	make install
+
+If you are running AFS, you may also need to specify INSTALLSITELIB and
+SITELIBEXP.
+
+This will install the SpamAssassin modules and rules below the ~/sausr
+and ~/saetc directories off your home directory. Please see the file
+PACKAGING, sections "Changing paths in the Makefile" and "Setting further
+options on the command line" for more informations on available command
+line variables.
+
+Note that you can upgrade SpamAssassin using these instructions, as long
+as you take care to read the caveats at the top of this file.   Upgrading
+will not delete your learnt Bayes data or local rule modifications.
+
+If you're using SunOS 4.1.x, see
+http://wiki.spamassassin.org/w/BuildingOnSunOS4 for build tips.
+
+
+Note for Perl 5.8 Users (incl Red Hat 8)
+----------------------------------------
+
+Perl 5.8 now uses Unicode internally by default, which causes trouble for
+SpamAssassin (and almost all other reasonably complex pieces of perl
+code!).
+
+We've worked around this in most places, as far as we know, but there may
+still be some issues.  In addition, there is a speed hit, which it would
+be nice to avoid.
+
+Setting the LANG environment variable before any invocation of
+SpamAssassin sometimes seems to help fix it, like so:
+
+  export LANG=en_US
+
+Notably, the LANG setting must not include "utf8".   However, some folks
+have reported that this makes no difference. ;)
+
+
+Installing SpamAssassin for Personal Use (Not System-Wide)
+----------------------------------------------------------
+
+These steps assume the following, so substitute as necessary:
+  - Your UNIX login is "user"
+  - Your home directory is /home/user
+  - The location of the procmail executable is /usr/bin/procmail
+
+1. Uncompress and extract the SpamAssassin archive, using "unzip" or "tar
+xvfz", in a temporary directory.
+
+2. change directory into it:
+
+	cd Mail-SpamAssassin-*
+
+3. Make SpamAssassin as normal, but using your home directory as the
+target:
+
+	perl Makefile.PL PREFIX=~/sausr SYSCONFDIR=~/saetc
+	make
+	make install
+
+Please see the file PACKAGING, sections "Changing paths in the Makefile"
+and "Setting further options on the command line" for more informations
+on available command line variables.
+
+4. If you already use procmail, skip to step 6.  If not, ensure procmail
+is installed using "which procmail" or install it from www.procmail.org.
+
+5. Create a .forward file in your home directory containing the below
+lines:
+
+"|IFS=' ' && exec /usr/bin/procmail -f- || exit 75 #user"
+
+6. Edit or create a .procmailrc file in your home directory containing the
+below lines.  If you already have a .procmailrc file, add the lines to the
+top of your .procmailrc file:
+
+:0fw: spamassassin.lock
+| /home/user/sausr/bin/spamassassin
+
+The above line filters all incoming mail through SpamAssassin and tags
+probable spam with a unique header.  If you would prefer to have spam
+blocked and saved to a file called "caughtspam" in your home directory,
+instead of passed through and tagged, append this directly below the above
+lines:
+
+:0:
+* ^X-Spam-Status: Yes
+caughtspam
+
+7. Now, you should be ready to send some test emails and ensure everything
+works as expected.  First, send yourself a test email that doesn't contain
+anything suspicious.  You should receive it normally, but there will be a
+header containing "X-Spam-Status: No".  If you are only tagging your spam,
+send yourself a copy of the GTUBE test string to check to be sure it is
+marked as spam.  GTUBE is located in the sample-spam.txt message
+distributed with SpamAssassin and also at:
+
+  http://www.spamassassin.org/gtube/
+
+If your test emails don't get through to you, immediately rename your
+.forward file until you figure out cause of the the problem, so you don't
+lose incoming email.
+
+Note: one possible cause for this is the use of smrsh on the MTA system;
+see http://wiki.spamassassin.org/w/ProcmailVsSmrsh for details.
+
+
+CPAN
+----
+
+Most of the modules listed below are available via the Comprehensive
+Perl Archive Network (CPAN, http://www.cpan.org/).  While each module
+is different, most can be installed via a few simple commands such as:
+
+	$ perl -MCPAN -e shell
+	cpan> o conf prerequisites_policy ask
+	cpan> install Module::Name
+	cpan> quit
+
+If there are problems or questions regarding the installation any of
+the modules, please see the module's documentation for more information.
+We can't provide documentation or installation support for third party
+modules.
+
+Also, more information about the CPAN module is available via "perldoc
+CPAN".
+
+Most Linux distributions also offer the CPAN modules in their own
+native formats (RPMs, as apt-gettable packages, etc.), so you should
+be able to find these through those mechanisms, too, if you prefer.
+
+
+Required Modules
+----------------
+
+These modules are required for SpamAssassin to build and run:
+
+  - ExtUtils::MakeMaker >= 5.45 (included in Perl 5.6.1 and later)
+
+    The ExtUtils::MakeMaker module is required in version 5.45 or later.
+    Without the proper version the build will fail to create the Makefile.
+    This is included in Perl versions 5.6.1 and later.
+
+    Version 6.16 or later is recommended (which is included in Perl 5.8.1
+    and 5.6.2).
+
+
+These additional modules are required for SpamassAssin to run:
+
+  - HTML::Parser >= 3.24 (from CPAN)
+
+    Version 3.29 or later is recommended.
+
+    HTML is used for an ever-increasing amount of email so this dependency
+    is unavoidable.  Run "perldoc -q html" for additional information.
+
+    If you use Debian, you can get HTML::Parser from the libhtml-parser-perl
+    package.
+
+  - Sys::Syslog          (from CPAN)
+
+    This is a required module if you use spamd.  spamd logs information
+    about scanned messages to syslog using this module.
+
+    Note: perl versions 5.6.0 and later should have Sys::Syslog already
+    installed.  You can easily test this by running:
+	perl -MSys::Syslog -e 1
+    If it generates an error, you need to install the module.  If the
+    command just returns, you should be ok.
+
+  - Storable             (from CPAN)
+
+    This is a required module if you use spamd, and allow user
+    configurations to be used (ie: you don't use -x, -u, -q/--sql-config,
+    -Q/--setuid-with-sql, --ldap-config, or --setuid-with-ldap).
+
+
+Optional Additional Modules
+---------------------------
+
+In addition, the following modules will be used for some checks, if
+available.  If they are not available, SpamAssassin will still work, just
+not as effectively -- some of the spam-detection tests will have to be
+skipped.
+
+
+  - DB_File         (from CPAN, included in many distributions)
+
+    Used to store data on-disk, for the Bayes-style logic and
+    auto-whitelist.  *Much* more efficient than the other standard Perl
+    database packages.  Strongly recommended.
+
+    There seems to be a bug in libdb 4.1.25, which is distributed by
+    default on some versions of Linux.  See
+    http://wiki.apache.org/spamassassin/DbFileSleepBug for details.
+
+
+  - Digest::SHA1    (from CPAN)
+
+    The Digest::SHA1 module will speed up some cryptographic hash tests,
+    but is not required (although it may be required by another module).
+
+    If you make use of the bayes rules this module is strongly
+    recommended.
+
+    If you use Debian, you can get Digest::SHA1 from the libdigest-sha1-perl
+    package.
+
+
+  - Net::DNS        (from CPAN)
+
+    Used to check the RBL, RSS, DUL etc. and perform MX checks.
+    Recommended.
+
+
+  - Mail::SPF::Query     (from CPAN)
+
+    Used to check DNS Sender Policy Framework (SPF) records to fight email
+    address forgery and make it easier to identify spams.
+
+    Net::DNS version 0.34 or higher is required to use Mail::SPF::Query.
+
+
+  - IP::Country::Fast    (from CPAN)
+
+    Used by the RelayCountry plugin (not enabled by default) to determine
+    the domain country codes of each relay in the path of an email.
+
+
+  - Razor           http://razor.sourceforge.net/
+
+    Used to check message signatures against Vipul's Razor collaborative
+    filtering network.  Razor is not available from CPAN -- you have to
+    download it from the URL above.
+
+    Razor has a large number of dependencies on CPAN modules.  Feel free
+    to skip installing it, if this makes you nervous; SpamAssassin will
+    still work well without it.
+
+    Note that Razor support does not seem to work on Windows systems.
+    Win32 users should disable the Razor tests using "score RAZOR2_CHECK 0".
+
+    You (and any users who use Razor) will need to register an account
+    to do so, like this:
+
+	razor-client          [creates symbolic links]
+	razor-admin -create   [creates the razor home]
+	razor-admin -register [registers an account]
+
+    To use Razor with SpamAssassin, you will need to be using v2.40 or
+    higher.
+
+
+  - DCC             http://www.rhyolite.com/anti-spam/dcc/
+
+    DCC (Distributed Checksum Clearinghouse) is a system similar to Razor.
+    It supports fuzzy checksums and therefore detects some more spams than
+    Razor does at the moment.
+
+    To install it, perform the following steps:
+
+	wget http://www.dcc-servers.net/dcc/source/dcc-dccproc.tar.Z
+	tar xfvz dcc-dccproc.tar.Z
+	cd dcc-dccproc-*
+	./configure && make && make install
+
+    You might want to replace the configure call with something like this to
+    get an FHS compliant install:
+
+	./configure \
+	    --bindir=$(PREFIX)/bin \
+            --libexecdir=$(PREFIX)/lib/dcc \
+            --mandir=$(PREFIX)/man \
+            --homedir=/var/lib/dcc
+
+    Finally call cdcc:
+
+	cdcc info
+
+    The last command will give some output. The output should contain lines
+    like this:
+
+	dcc1.dcc-servers.net,-         RTT+0 ms    anon
+	dcc2.dcc-servers.net,-         RTT+0 ms    anon
+	...
+
+    There should be *at least one*, preferably more than half a dozen, of
+    the public DCC servers listed.  If this is not the case, a likely
+    cause is an interfering firewall (see below).
+
+    Note that MIMEDefang users may need to set the 'dcc_path'
+    configuration setting, since MIMEDefang does not set a PATH by
+    default. See also 'perldoc Mail::SpamAssassin::Conf'.
+
+    Also note that DCC requires that you open your firewall for DCC reply
+    packets on UDP port 6277.   DCC uses UDP packets when replying, which
+    are blocked by most firewalls by default. As a result, it requires
+    that you open your firewall for DCC reply packets on UDP port 6277.
+    Here's sample firewall rules required:
+
+      allow udp local gt 1023 to remote 6277
+      allow udp remote 6277 to local gt 1023
+
+    If you're running a large site, processing upwards of tens of
+    thousands of messages a day, the DCC maintainers have requested that
+    you consider setting up your own DCC server as described in dccd(8),
+    and arrange to peer with the rest of the public servers, to reduce
+    their load.
+
+
+  - Pyzor           http://pyzor.sourceforge.net/
+
+    Used to check message signatures against the Pyzor collaborative
+    filtering network.  Pyzor was initially "a Python implementation of
+    Razor", but now also uses its own (free) server architecture and is
+    "based upon a new, lighter, more language-independent protocol."
+
+    Pyzor requires at least Python 2.2.1 which can be found at
+    http://www.python.org/ .
+ 
+    To install Pyzor, download the latest revision from
+    https://sourceforge.net/project/showfiles.php?group_id=50000 and
+    perform the following steps:
+
+	tar xvfj pyzor-*.tar.bz2
+	cd pyzor-*
+	python setup.py build
+	python setup.py install
+
+    Note that your system might install the modules and scripts with
+    non-world-readable permissions.  Correct this with a command such as:
+
+	chmod -R a+rX /usr/share/doc/pyzor \
+		/usr/lib/python2.2/site-packages/pyzor \
+		/usr/bin/pyzor /usr/bin/pyzord
+
+    Read the INSTALL document if you want to setup your own Pyzor server and
+    signature store.  Otherwise, you can just use the public servers.
+
+    Note that MIMEDefang users may need to set the 'pyzor_path'
+    configuration setting, since MIMEDefang does not set a PATH by
+    default.
+
+  - Net::Ident      (from CPAN)
+
+    If you plan to use the --auth-ident option to spamd, you will need
+    to install this module.
+
+
+  - IO::Socket::SSL (from CPAN)
+
+    If you wish to use SSL encryption to communicate between spamc and
+    spamd (the --ssl option to spamd), you need to install this
+    module. (You will need the OpenSSL libraries and use the
+    ENABLE_SSL="yes" argument to Makefile.PL to build and run an SSL
+    compatibile spamc.)
+
+
+  - Time::HiRes    (from CPAN)
+
+    If this module is installed, the processing times are logged/reported
+    more precisely.
+
+
+  - DBI *and* DBD driver/modules for your database  (from CPAN)
+
+    If you intend to use SpamAssassin with an SQL database backend for
+    user configuration data, Bayes storage, or AWL storage, you will need
+    to have these installed; both the basic DBI module and the driver for
+    your database.
+
+
+What Next?
+----------
+
+Take a look at the USAGE document for more information on how to
+use SpamAssassin.
+
+
+(end of INSTALL)
+
+// vim:tw=74:

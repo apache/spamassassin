@@ -2,52 +2,64 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("strip2");
-use Test; BEGIN { plan tests => 12 };
-
-# this should be taken care of now by local overriding of Mail::Audit
-# warn "
-# 	If tests 8, 10, and 12 fail, it's because you did not apply
-# 	the patch to Mail::Audit in 'MailAudit.patch'.
-# \n";
+use Test; BEGIN { plan tests => 4 };
 
 # ---------------------------------------------------------------------------
 
-%patterns = (
- 	'www.supersitescentral.com' => 'msg-text'
-);
-
 use File::Copy;
-
-sub diff {
-  my ($f1, $f2) = @_;
-  system ("diff $f1 $f2");
-  return ($? >> 8);
-}
+use File::Compare qw(compare_text);
 
 my $INPUT = 'data/spam/002';
+my $MUNGED = 'log/strip2.munged';
 
-# create the -t output
-ok (sarun ("-L -t < $INPUT", \&patterns_run_cb));
-ok_all_patterns();
-clear_pattern_counters();
-copy ("log/strip2.1", "log/strip2_with-t.out");
+tstprefs ("
+        $default_cf_lines
+        report_safe 1
+	");
 
-# create the -p output
-ok (sarun ("-L -P < $INPUT", \&patterns_run_cb));
-ok_all_patterns();
-clear_pattern_counters();
-copy ("log/strip2.4", "log/strip2_with-P.out");
+# create report_safe 1 and -t output
+sarun ("-L -t < $INPUT");
+if (move("log/$testname.${Test::ntest}", $MUNGED)) {
+  sarun ("-d < $MUNGED");
+  ok(!compare_text($INPUT,"log/$testname.${Test::ntest}"));
+}
+else {
+  warn "move failed: $!\n";
+  ok(0);
+}
 
-# create fake output, as if it was not spam
-copy ("data/spam/002", "log/strip2_without_markup.out");
+tstprefs ("
+        $default_cf_lines
+        report_safe 2
+	");
 
-# now run -d for each of them and fail if it does not match up exactly
-ok (sarun ("-d < log/strip2_with-t.out", \&patterns_run_cb));
-ok (diff ($INPUT, "log/strip2.7") == 0);
+# create report_safe 2 output
+sarun ("-L < $INPUT");
+if (move("log/$testname.${Test::ntest}", $MUNGED)) {
+  sarun ("-d < $MUNGED");
+  ok(!compare_text($INPUT,"log/$testname.${Test::ntest}"));
+}
+else {
+  warn "move failed: $!\n";
+  ok(0);
+}
 
-ok (sarun ("-d < log/strip2_with-P.out", \&patterns_run_cb));
-ok (diff ($INPUT, "log/strip2.9") == 0);
+tstprefs ("
+        $default_cf_lines
+        report_safe 0
+	");
 
-ok (sarun ("-d < log/strip2_without_markup.out", \&patterns_run_cb));
-ok (diff ($INPUT, "log/strip2.11") == 0);
+# create report_safe 0 output
+sarun ("-L < $INPUT");
+if (move("log/$testname.${Test::ntest}", $MUNGED)) {
+  sarun ("-d < $MUNGED");
+  ok(!compare_text($INPUT,"log/$testname.${Test::ntest}"));
+}
+else {
+  warn "move failed: $!\n";
+  ok(0);
+}
 
+# Work directly on regular message, as though it was not spam
+sarun ("-d < $INPUT");
+ok(!compare_text($INPUT,"log/$testname.${Test::ntest}"));

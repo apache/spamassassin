@@ -1,0 +1,20 @@
+The following guideline is used for specifying the language model
+filename.
+
+  <language>[_<territory>][.<codeset>].<format>
+
+<language> is lowercase and taken from ISO 639-1.  If ISO 639-1 does
+not define a two-letter language code, a three-letter code defined by
+ISO 639-2 is used.
+
+The <territory> field is optional, uppercase, and taken from ISO
+3166-1.  If ISO 3166-1 does not define a two-letter country code, use
+two or three lowercase letters and if possible, use the top-level
+domain for the country.
+
+The <codeset> field is only optional if there is only one codeset
+present for a language.  It should be specified using a lowercase
+representation of the preferred MIME name for that codeset.
+
+The <format> is "lm" to specify the original language model format and
+"ln" to specify the new language model format.

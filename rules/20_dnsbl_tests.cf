@@ -1,0 +1,269 @@
+# SpamAssassin rules file: DNS blacklist tests
+#
+# Please don't modify this file as your changes will be overwritten with
+# the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
+# See 'perldoc Mail::SpamAssassin::Conf' for details.
+#
+# <@LICENSE>
+# Copyright 2004 Apache Software Foundation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+#
+###########################################################################
+
+require_version @@VERSION@@
+
+# See the Mail::SpamAssassin::Conf manual page for details of how to use
+# check_rbl().
+
+# ---------------------------------------------------------------------------
+# Multizone / Multi meaning BLs first.
+#
+# Note that currently TXT queries cannot be used for these, since the
+# DNSBLs do not return the A type (127.0.0.x) as part of the TXT reply.
+# Well, at least NJABL doesn't, it seems, as of Apr 7 2003.
+
+# ---------------------------------------------------------------------------
+# NJABL
+# URL: http://www.dnsbl.njabl.org/
+
+header __RCVD_IN_NJABL		eval:check_rbl('njabl', 'combined.njabl.org.')
+describe __RCVD_IN_NJABL	Received via a relay in combined.njabl.org
+tflags __RCVD_IN_NJABL		net
+
+header RCVD_IN_NJABL_RELAY	eval:check_rbl_sub('njabl', '127.0.0.2')
+describe RCVD_IN_NJABL_RELAY	NJABL: sender is confirmed open relay
+tflags RCVD_IN_NJABL_RELAY	net
+
+header RCVD_IN_NJABL_DUL	eval:check_rbl('njabl-notfirsthop', 'combined.njabl.org.', '127.0.0.3')
+describe RCVD_IN_NJABL_DUL	NJABL: dialup sender did non-local SMTP
+tflags RCVD_IN_NJABL_DUL	net
+
+header RCVD_IN_NJABL_SPAM	eval:check_rbl_sub('njabl', '127.0.0.4')
+describe RCVD_IN_NJABL_SPAM	NJABL: sender is confirmed spam source
+tflags RCVD_IN_NJABL_SPAM	net
+
+header RCVD_IN_NJABL_MULTI	eval:check_rbl_sub('njabl', '127.0.0.5')
+describe RCVD_IN_NJABL_MULTI	NJABL: sent through multi-stage open relay
+tflags RCVD_IN_NJABL_MULTI	net
+
+header RCVD_IN_NJABL_CGI	eval:check_rbl_sub('njabl', '127.0.0.8')
+describe RCVD_IN_NJABL_CGI	NJABL: sender is an open formmail
+tflags RCVD_IN_NJABL_CGI	net
+
+header RCVD_IN_NJABL_PROXY	eval:check_rbl_sub('njabl', '127.0.0.9')
+describe RCVD_IN_NJABL_PROXY	NJABL: sender is an open proxy
+tflags RCVD_IN_NJABL_PROXY	net
+
+# ---------------------------------------------------------------------------
+# SORBS
+# transfers: both axfr and ixfr available
+# URL: http://www.dnsbl.sorbs.net/
+# pay-to-use: no
+# delist: $50 fee for RCVD_IN_SORBS_SPAM, others have free retest on request
+
+header __RCVD_IN_SORBS		eval:check_rbl('sorbs', 'dnsbl.sorbs.net.')
+describe __RCVD_IN_SORBS	SORBS: sender is listed in SORBS
+tflags __RCVD_IN_SORBS		net
+
+header RCVD_IN_SORBS_HTTP	eval:check_rbl_sub('sorbs', '127.0.0.2')
+describe RCVD_IN_SORBS_HTTP	SORBS: sender is open HTTP proxy server
+tflags RCVD_IN_SORBS_HTTP	net
+
+header RCVD_IN_SORBS_MISC	eval:check_rbl_sub('sorbs', '127.0.0.3')
+describe RCVD_IN_SORBS_MISC	SORBS: sender is open proxy server
+tflags RCVD_IN_SORBS_MISC	net
+
+header RCVD_IN_SORBS_SMTP	eval:check_rbl_sub('sorbs', '127.0.0.4')
+describe RCVD_IN_SORBS_SMTP	SORBS: sender is open SMTP relay
+tflags RCVD_IN_SORBS_SMTP	net
+
+header RCVD_IN_SORBS_SOCKS	eval:check_rbl_sub('sorbs', '127.0.0.5')
+describe RCVD_IN_SORBS_SOCKS	SORBS: sender is open SOCKS proxy server
+tflags RCVD_IN_SORBS_SOCKS	net
+
+#header RCVD_IN_SORBS_SPAM	eval:check_rbl_sub('sorbs', '127.0.0.6')
+#describe RCVD_IN_SORBS_SPAM	SORBS: sender is a spam source
+#tflags RCVD_IN_SORBS_SPAM	net
+
+header RCVD_IN_SORBS_WEB	eval:check_rbl_sub('sorbs', '127.0.0.7')
+describe RCVD_IN_SORBS_WEB	SORBS: sender is a abuseable web server
+tflags RCVD_IN_SORBS_WEB	net
+
+header RCVD_IN_SORBS_BLOCK	eval:check_rbl_sub('sorbs', '127.0.0.8')
+describe RCVD_IN_SORBS_BLOCK	SORBS: sender demands to never be tested
+tflags RCVD_IN_SORBS_BLOCK	net
+
+header RCVD_IN_SORBS_ZOMBIE	eval:check_rbl_sub('sorbs', '127.0.0.9')
+describe RCVD_IN_SORBS_ZOMBIE	SORBS: sender is on a hijacked network
+tflags RCVD_IN_SORBS_ZOMBIE	net
+
+header RCVD_IN_SORBS_DUL	eval:check_rbl('sorbs-notfirsthop', 'dnsbl.sorbs.net.', '127.0.0.10')
+describe RCVD_IN_SORBS_DUL	SORBS: sent directly from dynamic IP address
+tflags RCVD_IN_SORBS_DUL	net
+
+# ---------------------------------------------------------------------------
+# Spamhaus XBL+SBL
+
+header __RCVD_IN_SBL_XBL	eval:check_rbl('sblxbl', 'sbl-xbl.spamhaus.org.')
+describe __RCVD_IN_SBL_XBL	Received via a relay in Spamhaus SBL+XBL
+tflags __RCVD_IN_SBL_XBL	net
+
+# SBL is the Spamhaus Block List: http://www.spamhaus.org/sbl/
+header RCVD_IN_SBL		eval:check_rbl_sub('sblxbl', '127.0.0.2')
+describe RCVD_IN_SBL		Received via a relay in Spamhaus SBL
+tflags RCVD_IN_SBL		net
+
+# XBL is the Exploits Block List: http://www.spamhaus.org/xbl/
+header RCVD_IN_XBL		eval:check_rbl('sblxbl-notfirsthop', 'sbl-xbl.spamhaus.org.', '127.0.0.[456]')
+describe RCVD_IN_XBL		Received via a relay in Spamhaus XBL
+tflags RCVD_IN_XBL		net
+
+# ---------------------------------------------------------------------------
+# RFC-Ignorant blacklists (both name and IP based)
+
+header __RFC_IGNORANT_ENVFROM	eval:check_rbl_envfrom('rfci_envfrom', 'fulldom.rfc-ignorant.org.')
+tflags __RFC_IGNORANT_ENVFROM	net
+
+header DNS_FROM_RFC_DSN		eval:check_rbl_sub('rfci_envfrom', '127.0.0.2')
+describe DNS_FROM_RFC_DSN	Envelope sender in dsn.rfc-ignorant.org
+tflags DNS_FROM_RFC_DSN		net
+
+header DNS_FROM_RFC_POST	eval:check_rbl_sub('rfci_envfrom', '127.0.0.3')
+describe DNS_FROM_RFC_POST	Envelope sender in postmaster.rfc-ignorant.org
+tflags DNS_FROM_RFC_POST	net
+
+header DNS_FROM_RFC_ABUSE	eval:check_rbl_sub('rfci_envfrom', '127.0.0.4')
+describe DNS_FROM_RFC_ABUSE	Envelope sender in abuse.rfc-ignorant.org
+tflags DNS_FROM_RFC_ABUSE	net
+
+header DNS_FROM_RFC_WHOIS	eval:check_rbl_sub('rfci_envfrom', '127.0.0.5')
+describe DNS_FROM_RFC_WHOIS	Envelope sender in whois.rfc-ignorant.org
+tflags DNS_FROM_RFC_WHOIS	net
+
+# this is 127.0.0.6 if querying fullip.rfc-ignorant.org, but since there
+# is only one right now, we might as well get the TXT record version
+header RCVD_IN_RFC_IPWHOIS	eval:check_rbl_txt('ipwhois-notfirsthop', 'ipwhois.rfc-ignorant.org.')
+describe RCVD_IN_RFC_IPWHOIS	Sent via a relay in ipwhois.rfc-ignorant.org
+tflags RCVD_IN_RFC_IPWHOIS	net
+
+# 127.0.0.7 is the response for an entire TLD in whois.rfc-ignorant.org,
+# but it has too many false positives.
+
+header DNS_FROM_RFC_BOGUSMX	eval:check_rbl_sub('rfci_envfrom', '127.0.0.8')
+describe DNS_FROM_RFC_BOGUSMX	Envelope sender in bogusmx.rfc-ignorant.org
+tflags DNS_FROM_RFC_BOGUSMX	net
+
+# ---------------------------------------------------------------------------
+# Now, single zone BLs follow:
+
+# DSBL catches open relays, badly-installed CGI scripts and open SOCKS and
+# HTTP proxies.  list.dsbl.org lists servers tested by "trusted" users,
+# multihop.dsbl.org lists servers which open SMTP servers relay through,
+# unconfirmed.dsbl.org lists servers tested by "untrusted" users.
+# See http://dsbl.org/ for full details.
+# transfers: yes - rsync and http, see http://dsbl.org/usage
+# pay-to-use: no
+# delist: automated/distributed
+header RCVD_IN_DSBL		eval:check_rbl_txt('dsbl-notfirsthop', 'list.dsbl.org.')
+describe RCVD_IN_DSBL		Received via a relay in list.dsbl.org
+tflags RCVD_IN_DSBL		net
+
+########################################################################
+
+# another domain-based blacklist
+header DNS_FROM_AHBL_RHSBL	eval:check_rbl_from_host('ahbl', 'rhsbl.ahbl.org.')
+describe DNS_FROM_AHBL_RHSBL	From: sender listed in dnsbl.ahbl.org
+tflags DNS_FROM_AHBL_RHSBL	net
+
+# sa-hil.habeas.com for SpamAssassin queries
+# hil.habeas.com for other queries
+header HABEAS_INFRINGER		eval:check_rbl_swe('hil', 'sa-hil.habeas.com.')
+describe HABEAS_INFRINGER	Has Habeas warrant mark and on Infringer List
+tflags HABEAS_INFRINGER		net
+
+# sa-hul.habeas.com for SpamAssassin queries
+# hul.habeas.com for other queries
+header HABEAS_USER		eval:check_rbl_swe('hul', 'sa-hul.habeas.com.')
+describe HABEAS_USER		Has Habeas warrant mark and on User List
+tflags HABEAS_USER		net nice
+
+header RCVD_IN_BSP_TRUSTED	eval:check_rbl_txt('bsp-firsttrusted', 'sa-trusted.bondedsender.org.')
+describe RCVD_IN_BSP_TRUSTED	Sender is in Bonded Sender Program (trusted relay)
+tflags RCVD_IN_BSP_TRUSTED	net nice
+
+header RCVD_IN_BSP_OTHER	eval:check_rbl_txt('bsp-untrusted', 'sa-other.bondedsender.org.')
+describe RCVD_IN_BSP_OTHER	Sender is in Bonded Sender Program (other relay)
+tflags RCVD_IN_BSP_OTHER	net nice
+
+# SenderBase provides information about senders
+# http://www.senderbase.org/dnsresponses.html
+# sa.senderbase.org for SpamAssassin queries
+# query.senderbase.org for other queries
+header __SENDERBASE eval:check_rbl_txt('sb', 'sa.senderbase.org.')
+tflags __SENDERBASE net
+
+# S23 = domain daily magnitude
+# S25 = date of first message from this domain
+header SB_NEW_BULK		eval:check_rbl_sub('sb', 'sb:S23 > 6.2 && (time - S25 < 120*86400)')
+describe SB_NEW_BULK		Sender domain is new and very high volume
+tflags SB_NEW_BULK		net
+
+# S5 = category
+# S40 = IP daily magnitude
+# S41 = IP monthly magnitude
+# note: accounting for rounding, "> 0.3" means at least a 59% volume spike
+header SB_NSP_VOLUME_SPIKE	eval:check_rbl_sub('sb', 'sb:S5 =~ /NSP/ && S41 > 3.8 && S40 - S41 > 0.3')
+describe SB_NSP_VOLUME_SPIKE	Sender IP hosted at NSP has a volume spike
+tflags SB_NSP_VOLUME_SPIKE	net
+
+# ---------------------------------------------------------------------------
+# NOTE: donation tests, see README file for details
+
+header RCVD_IN_BL_SPAMCOP_NET	eval:check_rbl_txt('spamcop', 'bl.spamcop.net.')
+describe RCVD_IN_BL_SPAMCOP_NET	Received via a relay in bl.spamcop.net
+tflags RCVD_IN_BL_SPAMCOP_NET	net
+
+header RCVD_IN_RSL		eval:check_rbl_txt('rsl', 'relays.visi.com.')
+describe RCVD_IN_RSL		Received via a relay in RSL
+tflags RCVD_IN_RSL		net
+
+# ---------------------------------------------------------------------------
+# NOTE: commercial tests, see README file for details
+
+header RCVD_IN_MAPS_RBL		eval:check_rbl('rbl', 'blackholes.mail-abuse.org.')
+describe RCVD_IN_MAPS_RBL	Relay in RBL, http://www.mail-abuse.org/rbl/
+tflags RCVD_IN_MAPS_RBL		net
+
+header RCVD_IN_MAPS_DUL		eval:check_rbl('dialup-notfirsthop', 'dialups.mail-abuse.org.')
+describe RCVD_IN_MAPS_DUL	Relay in DUL, http://www.mail-abuse.org/dul/
+tflags RCVD_IN_MAPS_DUL		net
+
+header RCVD_IN_MAPS_RSS		eval:check_rbl('rss', 'relays.mail-abuse.org.')
+describe RCVD_IN_MAPS_RSS	Relay in RSS, http://www.mail-abuse.org/rss/
+tflags RCVD_IN_MAPS_RSS		net
+
+header RCVD_IN_MAPS_NML		eval:check_rbl('nml', 'nonconfirm.mail-abuse.org.')
+describe RCVD_IN_MAPS_NML	Relay in NML, http://www.mail-abuse.org/nml/
+tflags RCVD_IN_MAPS_NML		net
+
+# if you're subscribed to RBL+, then comment out the above rules (just the
+# "header" lines, not the "describe" or "tflags" lines) and uncomment the
+# below lines
+#header RCVD_IN_MAPS_RBL	eval:check_rbl('rblplus', 'rbl-plus.mail-abuse.org.', '1')
+#header RCVD_IN_MAPS_DUL	eval:check_rbl('rblplus-notfirsthop', 'rbl-plus.mail-abuse.org.', '2')
+#header RCVD_IN_MAPS_RSS	eval:check_rbl_sub('rblplus', '4')
+#header RCVD_IN_MAPS_OPS	eval:check_rbl_sub('rblplus', '8')
+#describe RCVD_IN_MAPS_OPS	Relay in OPS, http://www.mail-abuse.org/ops/
+#tflags RCVD_IN_MAPS_OPS	net

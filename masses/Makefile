@@ -1,33 +1,41 @@
+CC=		gcc
+CFLAGS=		-g -O2 -Wall 
+LDFLAGS=	-lm
 
-OPT = -g -O2
-GALIB =	./galib245
-PGALIB = pgapack
+# What rule scoreset are we using?
+include config
 
-all:
-	echo "Either do  make evolve  or  make craig-evolve"
+#### Should be no need to modify below this line
 
-evolve: tmp/tests.h evolve.o
-	g++ -Wall $(OPT) -fexceptions -L$(GALIB)/ga evolve.o -o evolve -lga -lm
-	# cp evolve evolve.unstripped
-	strip evolve
+all: badrules perceptron
 
-craig-evolve: tmp/tests.h craig-evolve.cxx
-	mpiCC -Wall $(OPT) -Dlinux -DWL=2 -DOPTIMIZE -L$(PGALIB)/lib/linux -I$(PGALIB)/include -lpgaO -lm craig-evolve.cxx -o craig-evolve
-	strip craig-evolve
+perceptron: perceptron.o
+	$(CC) -o perceptron perceptron.o $(LDFLAGS)
 
-tmp/tests.h: spam.log nonspam.log tmp/ranges.data logs-to-c
-	./logs-to-c
+perceptron.o: tmp/rules.pl tmp/tests.h tmp/scores.h
+	$(CC) $(CFLAGS) -c -o perceptron.o perceptron.c
 
-tmp/ranges.data: freqs score-ranges-from-freqs
-	./score-ranges-from-freqs < freqs
+tmp/rules.pl: tmp/.created parse-rules-for-masses
+	perl parse-rules-for-masses -d ../rules -s $(SCORESET)
 
-freqs: spam.log nonspam.log
-	-rm -rf tmp
-	mkdir tmp
-	./hit-frequencies > freqs
+tmp/tests.h: tmp/.created tmp/ranges.data logs-to-c
+	perl logs-to-c --scoreset=$(SCORESET)
 
-%.o: %.cxx
-	g++ -Wall $(OPT) -fexceptions -I$(GALIB) -c $< -o $@
+tmp/scores.h: tmp/tests.h
+
+tmp/ranges.data: tmp/.created freqs score-ranges-from-freqs
+	perl score-ranges-from-freqs ../rules $(SCORESET) < freqs
+
+freqs: spam.log ham.log
+	perl hit-frequencies -x -p -s $(SCORESET) > freqs
+
+badrules: freqs
+	perl lint-rules-from-freqs < freqs > badrules
+
+tmp/.created:
+	-mkdir tmp
+	touch tmp/.created
 
 clean:
-	rm -rf *.o evolve tmp
+	rm -rf *.o perceptron tmp freqs
+

@@ -1,15 +1,30 @@
+# <@LICENSE>
+# Copyright 2004 Apache Software Foundation
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
 
 package Mail::SpamAssassin::DBBasedAddrList;
 
 use strict;
+use bytes;
+use Fcntl;
 
 use Mail::SpamAssassin::PersistentAddrList;
-use AnyDBM_File;
-use Fcntl ':DEFAULT',':flock';
-use Sys::Hostname;
+use Mail::SpamAssassin::Util;
 
-use vars	qw{
-  	@ISA
+use vars qw{
+  @ISA
 };
 
 @ISA = qw(Mail::SpamAssassin::PersistentAddrList);
@@ -35,93 +50,69 @@ sub new_checker {
     'main'		=> $main,
     'accum'             => { },
     'is_locked'		=> 0,
-    'lock_file'		=> '',
-    'hostname'		=> hostname,
+    'locked_file'	=> ''
   };
 
-  if(defined($main->{conf}->{auto_whitelist_path})) # if undef then don't worry -- empty hash!
-  {
-      my $path = $main->sed_path ($main->{conf}->{auto_whitelist_path});
+  my $path;
 
-      #NFS Safe Lockng (I hope!)
-      #Attempt to lock the dbfile, using NFS safe locking 
-      #Locking code adapted from code by Alexis Rosen <alexis@panix.com>
-      #Kelsey Cummings <kgc@sonic.net>
-      my $lock_file = $self->{lock_file} = $path.'.lock';
-      my $lock_tmp = $lock_file . '.' . $self->{hostname} . '.'. $$;
-      my $max_lock_age = 300; #seconds 
-      my $lock_tries = 30;
-
-      open(LTMP, ">$lock_tmp") || die "Cannot create tmp lockfile $lock_file : $!\n";
-      my $old_fh = select(LTMP);
-      $|=1;
-      select($old_fh);
-
-      for (my $i = 0; $i < $lock_tries; $i++) #try $lock_tries (seconds) times to get lock
-      {
-         dbg("$$ Trying to get lock on $path pass $i");
-	 print LTMP $self->{hostname}.".$$\n"; #updates tmp lockfile to current time
-	 if ( link ($lock_tmp,$lock_file) )
-	 {
-	    
-	    $self->{is_locked} = 1;
-	    last;
-	 } 
-	 else
-	 {
-	    #link _may_ return false even if the link _is_ created
-
-	    if ( (stat($lock_tmp))[3] > 1 ) {
-	       $self->{is_locked} = 1;
-	       last;
-	    }
-	       
-	    #check to see how old the lockfile is
-	    my $lock_age = (stat($lock_file))[10];
-	    my $now = (stat($lock_tmp))[10];
-	    if ($lock_age < $now - $max_lock_age) {
-	       #we got a stale lock, break it
-	       dbg("$$ Breaking Stale Lockfile!");
-	       unlink "$lock_file";
-	    }
-	    sleep(1);
-	 }
-      }
-
-      close(LTMP);
-      unlink($lock_tmp);
-
-      if ($self->{is_locked})
-      {
-	 dbg("Tie-ing to DB file R/W in ",$path);
-	 tie %{$self->{accum}},"AnyDBM_File",$path, O_RDWR|O_CREAT,   #open rw w/lock
-		       (oct ($main->{conf}->{auto_whitelist_file_mode}) & 0666)
-	     or die "Cannot open auto_whitelist_path $path: $!\n";
-      } 
-      else 
-      {
-	 dbg("Tie-ing to DB file R/O in ",$path);
-	 tie %{$self->{accum}},"AnyDBM_File",$path, O_RDONLY,         #open ro w/o lock
-		       (oct ($main->{conf}->{auto_whitelist_file_mode}) & 0666)
-	     or die "Cannot open auto_whitelist_path $path: $!\n";
-      } 
+  my @order = split (' ', $main->{conf}->{auto_whitelist_db_modules});
+  my $dbm_module = Mail::SpamAssassin::Util::first_available_module (@order);
+  if (!$dbm_module) {
+    die "Cannot find a usable DB package from auto_whitelist_db_modules: ".
+	$main->{conf}->{auto_whitelist_db_modules}."\n";
   }
 
+  my $umask = umask 0;
+  if(defined($main->{conf}->{auto_whitelist_path})) # if undef then don't worry -- empty hash!
+  {
+    $path = $main->sed_path ($main->{conf}->{auto_whitelist_path});
+
+    if ($main->{locker}->safe_lock
+			($path, 30))
+    {
+      $self->{locked_file} = $path;
+      $self->{is_locked} = 1;
+      dbg("Tie-ing to DB file R/W in $path");
+      tie %{$self->{accum}},$dbm_module,$path,
+		  O_RDWR|O_CREAT,   #open rw w/lock
+		  (oct ($main->{conf}->{auto_whitelist_file_mode}) & 0666)
+	 or goto failed_to_tie;
+
+    } else {
+      $self->{is_locked} = 0;
+      dbg("Tie-ing to DB file R/O in $path");
+      tie %{$self->{accum}},$dbm_module,$path,
+		  O_RDONLY,         #open ro w/o lock
+		  (oct ($main->{conf}->{auto_whitelist_file_mode}) & 0666)
+	 or goto failed_to_tie;
+    }
+  }
+  umask $umask;
+
   bless ($self, $class);
-  $self;
+  return $self;
+
+failed_to_tie:
+  umask $umask;
+  if ($self->{is_locked}) {
+    $self->{main}->{locker}->safe_unlock ($self->{locked_file});
+    $self->{is_locked} = 0;
+  }
+  die "Cannot open auto_whitelist_path $path: $!\n";
 }
 
 ###########################################################################
 
 sub finish {
-    my $self = shift;
-    dbg("DB addr list: untie-ing and destroying lockfile.");
-    untie %{$self->{accum}};
-    if ($self->{is_locked}) {
-       dbg ("DB addr list: file locked, breaking lock.");
-       unlink($self->{lock_file}) ||
-          dbg ("Couldn't unlink " . $self->{lock_file} . ": $!\n");
-    }
+  my $self = shift;
+  dbg("DB addr list: untie-ing and unlocking.");
+  untie %{$self->{accum}};
+  if ($self->{is_locked}) {
+    dbg ("DB addr list: file locked, breaking lock.");
+    $self->{main}->{locker}->safe_unlock ($self->{locked_file});
+    $self->{is_locked} = 0;
+  }
+  # TODO: untrap signals to unlock the db file here
 }
 
 ###########################################################################
@@ -134,30 +125,51 @@ sub get_addr_entry {
   };
 
   $entry->{count} = $self->{accum}->{$addr} || 0;
+  $entry->{totscore} = $self->{accum}->{$addr.'|totscore'} || 0;
 
-  dbg ("auto-whitelist (db-based): $addr scores ".$entry->{count});
+  dbg ("auto-whitelist (db-based): $addr scores ".$entry->{count}.'/'.$entry->{totscore});
   return $entry;
 }
 
 ###########################################################################
 
-sub increment_accumulator_for_entry {
-  my ($self, $entry) = @_;
+sub add_score {
+    my($self, $entry, $score) = @_;
 
-  $self->{accum}->{$entry->{addr}} = $entry->{count}+1;
+    $entry->{count} ||= 0;
+    $entry->{addr}  ||= '';
+
+    $entry->{count}++;
+    $entry->{totscore} += $score;
+
+    dbg("add_score: New count: ".$entry->{count}.", new totscore: ".$entry->{totscore});
+
+    $self->{accum}->{$entry->{addr}} = $entry->{count};
+    $self->{accum}->{$entry->{addr}.'|totscore'} = $entry->{totscore};
+    return $entry;
 }
 
 ###########################################################################
 
-sub add_permanent_entry {
-  my ($self, $entry) = @_;
-
-  $self->{accum}->{$entry->{addr}} = 999;
-}
-
 sub remove_entry {
   my ($self, $entry) = @_;
-  delete $self->{accum}->{$entry->{addr}};
+
+  my $addr = $entry->{addr};
+  delete $self->{accum}->{$addr};
+  delete $self->{accum}->{$addr.'|totscore'};
+
+  if ($addr =~ /^(.*)\|ip=none$/) {
+    # it doesn't have an IP attached.
+    # try to delete any per-IP entries for this addr as well.
+    # could be slow...
+    my $mailaddr = $1;
+    my @keys = grep { /^\Q${mailaddr}\E\|ip=\d+\.\d+$/ }
+					keys %{$self->{accum}};
+    foreach my $key (@keys) {
+      delete $self->{accum}->{$key};
+      delete $self->{accum}->{$key.'|totscore'};
+    }
+  }
 }
 
 ###########################################################################
