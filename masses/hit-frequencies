@@ -225,7 +225,7 @@ foreach my $test (keys %freq_spam, keys %freq_ham) {
 # finish basic wanted/unwanted ranking
 if (! $opt_i) {
   my @wanted = sort { $wanted{$a} <=> $wanted{$b} } keys %wanted;
-  my @unwanted = sort { $unwanted{$b} <=> $unwanted{$a} } keys %wanted;
+  my @unwanted = sort { $unwanted{$b} <=> $unwanted{$a} } keys %unwanted;
 
   # first half of ranking is the wanted rank
   my $position = 0;
