@@ -684,34 +684,48 @@ sub learn {
 # this function is trapped by the wrapper above
 sub learn_trapped {
   my ($self, $isspam, $msg, $body, $msgid) = @_;
+  my @msgid = ( $msgid );
 
-  $msgid ||= $self->get_msgid ($msg);
-  my $seen = $self->{store}->seen_get ($msgid);
-  if (defined ($seen)) {
-    if (($seen eq 's' && $isspam) || ($seen eq 'h' && !$isspam)) {
-      dbg ("$msgid: already learnt correctly, not learning twice");
-      return 0;
-    } elsif ($seen !~ /^[hs]$/) {
-      warn ("db_seen corrupt: value='$seen' for $msgid. ignored");
-    } else {
-      dbg ("$msgid: already learnt as opposite, forgetting first");
+  if (!defined $msgid) {
+    @msgid = $self->get_msgid($msg);
+  }
 
-      # kluge so that forget() won't untie the db on us ...
-      my $orig = $self->{main}->{learn_caller_will_untie};
-      $self->{main}->{learn_caller_will_untie} = 1;
+  foreach $msgid ( @msgid ) {
+    my $seen = $self->{store}->seen_get ($msgid);
 
-      my $fatal = !defined $self->forget ($msg);
+    if (defined ($seen)) {
+      if (($seen eq 's' && $isspam) || ($seen eq 'h' && !$isspam)) {
+        dbg ("$msgid: already learnt correctly, not learning twice");
+        return 0;
+      } elsif ($seen !~ /^[hs]$/) {
+        warn ("db_seen corrupt: value='$seen' for $msgid. ignored");
+      } else {
+        dbg ("$msgid: already learnt as opposite, forgetting first");
 
-      # reset the value post-forget() ...
-      $self->{main}->{learn_caller_will_untie} = $orig;
+        # kluge so that forget() won't untie the db on us ...
+        my $orig = $self->{main}->{learn_caller_will_untie};
+        $self->{main}->{learn_caller_will_untie} = 1;
 
-      # forget() gave us a fatal error, so propagate that up
-      if ($fatal) {
-        dbg("forget() returned a fatal error, so learn() will too");
-	return;
+        my $fatal = !defined $self->forget ($msg);
+
+        # reset the value post-forget() ...
+        $self->{main}->{learn_caller_will_untie} = $orig;
+    
+        # forget() gave us a fatal error, so propagate that up
+        if ($fatal) {
+          dbg("forget() returned a fatal error, so learn() will too");
+	  return;
+        }
       }
+
+      # we're only going to have seen this once, so stop if it's been
+      # seen already
+      last;
     }
   }
+
+  # Now that we're sure we haven't seen this message before ...
+  $msgid = $msgid[0];
 
   if ($isspam) {
     $self->{store}->nspam_nham_change (1, 0);
@@ -790,27 +804,44 @@ sub forget {
 # this function is trapped by the wrapper above
 sub forget_trapped {
   my ($self, $msg, $body, $msgid) = @_;
-
-  $msgid ||= $self->get_msgid ($msg);
-  my $seen = $self->{store}->seen_get ($msgid);
+  my @msgid = ( $msgid );
   my $isspam;
-  if (defined ($seen)) {
-    if ($seen eq 's') {
-      $isspam = 1;
-    } elsif ($seen eq 'h') {
-      $isspam = 0;
-    } else {
-      dbg ("forget: message $msgid seen entry is neither ham nor spam, ignored");
-      return 0;
-    }
-  } else {
-    dbg ("forget: message $msgid not learnt, ignored");
-    return 0;
+
+  if (!defined $msgid) {
+    @msgid = $self->get_msgid($msg);
   }
 
-  if ($isspam) {
+  while( $msgid = shift @msgid ) {
+    my $seen = $self->{store}->seen_get ($msgid);
+
+    if (defined ($seen)) {
+      if ($seen eq 's') {
+        $isspam = 1;
+      } elsif ($seen eq 'h') {
+        $isspam = 0;
+      } else {
+        dbg ("forget: msgid $msgid seen entry is neither ham nor spam, ignored");
+        return 0;
+      }
+
+      # messages should only be learned once, so stop if we find a msgid
+      # which was seen before
+      last;
+    }
+    else {
+      dbg ("forget: msgid $msgid not learnt, ignored");
+    }
+  }
+
+  # This message wasn't learnt before, so return
+  if (!defined $isspam) {
+    dbg("forget: no msgid from this message has been learnt, skipping message");
+    return 0;
+  }
+  elsif ($isspam) {
     $self->{store}->nspam_nham_change (-1, 0);
-  } else {
+  }
+  else {
     $self->{store}->nspam_nham_change (0, -1);
   }
 
@@ -836,32 +867,36 @@ sub forget_trapped {
 sub get_msgid {
   my ($self, $msg) = @_;
 
+  my @msgid = ();
+
   my $msgid = $msg->get_header("Message-Id");
-  if (!defined $msgid || $msgid eq '' || $msgid =~ /^\s*<\s*>.*$/) { # generate a best effort unique id
-    # Use sha1(Date:, last received: and top N bytes of body)
-    # where N is MIN(1024 bytes, 1/2 of body length)
-    #
-    my $date = $msg->get_header("Date");
-    $date = "None" if (!defined $date || $date eq ''); # No Date?
-
-    my @rcvd = $msg->get_header("Received");
-    my $rcvd = $rcvd[$#rcvd];
-    $rcvd = "None" if (!defined $rcvd || $rcvd eq ''); # No Received?
-
-    my $body = $msg->get_pristine_body();
-    if (length($body) > 64) { # Small Body?
-      my $keep = ( length $body > 2048 ? 1024 : int(length($body) / 2) );
-      substr($body, $keep) = '';
-    }
-
-    $msgid = sha1($date."\000".$rcvd."\000".$body).'@sa_generated';
+  if (defined $msgid && $msgid ne '' && $msgid !~ /^\s*<\s*(?:\@sa_generated)?>.*$/) {
+    # remove \r and < and > prefix/suffixes
+    chomp $msgid;
+    $msgid =~ s/^<//; $msgid =~ s/>.*$//g;
+    push(@msgid, $msgid);
   }
 
-  # remove \r and < and > prefix/suffixes
-  chomp $msgid;
-  $msgid =~ s/^<//; $msgid =~ s/>.*$//g;
+  # Use sha1(Date:, last received: and top N bytes of body)
+  # where N is MIN(1024 bytes, 1/2 of body length)
+  #
+  my $date = $msg->get_header("Date");
+  $date = "None" if (!defined $date || $date eq ''); # No Date?
 
-  $msgid;
+  my @rcvd = $msg->get_header("Received");
+  my $rcvd = $rcvd[$#rcvd];
+  $rcvd = "None" if (!defined $rcvd || $rcvd eq ''); # No Received?
+
+  # Make a copy since pristine_body is a reference ...
+  my $body = join('', $msg->get_pristine_body());
+  if (length($body) > 64) { # Small Body?
+    my $keep = ( length $body > 2048 ? 1024 : int(length($body) / 2) );
+    substr($body, $keep) = '';
+  }
+
+  unshift(@msgid, sha1($date."\000".$rcvd."\000".$body).'@sa_generated');
+
+  return wantarray ? @msgid : $msgid[0];
 }
 
 sub add_uris_for_permsgstatus {
@@ -886,7 +921,7 @@ sub get_body_from_msg {
 
   if (!defined $body) {
     # why?!
-    warn "failed to get body for ".$self->get_msgid($self->{msg})."\n";
+    warn "failed to get body for ".scalar($self->get_msgid($self->{msg}))."\n";
     return [ ];
   }
 

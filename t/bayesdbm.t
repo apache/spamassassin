@@ -16,7 +16,7 @@ BEGIN {
     unshift(@INC, '../blib/lib');
   }
 
-  plan tests => (HAS_DB_FILE ? 43 : 0);
+  plan tests => (HAS_DB_FILE ? 44 : 0);
 };
 
 exit unless HAS_DB_FILE;
@@ -68,9 +68,11 @@ ok($wc > 0);
 
 ok(scalar(@toks) > 0);
 
-my $msgid = $sa->{bayes_scanner}->get_msgid($mail);
+my($msgid,$msgid_hdr) = $sa->{bayes_scanner}->get_msgid($mail);
 
-ok($msgid eq '9PS291LhupY');
+# $msgid is the generated hash messageid, $msgid_hdr is the Message-Id header ...
+ok($msgid eq '502e12b89b9c74074744ffc18a95d80cff2effcd@sa_generated');
+ok($msgid_hdr eq '9PS291LhupY');
 
 ok($sa->{bayes_scanner}->{store}->tie_db_writable());
 
