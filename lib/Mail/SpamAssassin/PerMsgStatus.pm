@@ -100,6 +100,12 @@ sub new {
     $self->{pattern_hits} = { };
   }
 
+  delete $self->{should_log_rule_hits};
+  my $dbgcache = Mail::SpamAssassin::dbg_check('rules');
+  if ($dbgcache || $self->{save_pattern_hits}) {
+    $self->{should_log_rule_hits} = 1;
+  }
+
   bless ($self, $class);
   $self;
 }
@@ -1462,22 +1468,19 @@ sub get {
 
 sub ran_rule_debug_code {
   my ($self, $rulename, $ruletype, $bit) = @_;
-  my $dbgcache = Mail::SpamAssassin::dbg_check('rules');
 
-  return '' if (!$dbgcache && !$self->{save_pattern_hits});
+  return '' unless exists($self->{should_log_rule_hits});
 
-  my $log_hits_code = '';
+  # note: keep this in 'single quotes' to avoid the $ & performance hit,
+  # unless specifically requested by the caller.   Also split the
+  # two chars, just to be paranoid and ensure that a buggy perl interp
+  # doesn't impose that hit anyway (just in case)
+  my $log_hits_code = ': match=\'$' . '&\'';
+
   my $save_hits_code = '';
-
-  if ($dbgcache) {
-    # note: keep this in 'single quotes' to avoid the $ & performance hit,
-    # unless specifically requested by the caller.
-    $log_hits_code = ': match=\'$&\'';
-  }
-
   if ($self->{save_pattern_hits}) {
     $save_hits_code = '
-        $self->{pattern_hits}->{q{'.$rulename.'}} = $&;
+        $self->{pattern_hits}->{q{'.$rulename.'}} = $' . '&;
     ';
   }
 
