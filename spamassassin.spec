@@ -4,7 +4,7 @@
 # the perl-Mail-SpamAssassin rpm for the modules only.
 
 # the version in the tar name
-%define real_version 3.0.0
+%define real_version 3.1.0
 # the display version number
 %define version %{real_version}
 
