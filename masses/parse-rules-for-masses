@@ -107,6 +107,11 @@ sub readrules {
           $rules->{$name}->{lang} = $lang;
           $rules->{$name}->{issubrule} = ($name =~ /^__/) ? '1' : '0';
           $rules->{$name}->{tflags} = '';
+          $rules->{$name}->{eval} = ($val =~ /\beval:(\w+)/) ? $1 : '0';
+          if ($type eq "meta") {
+            my @depends = grep { !/^\d+$/ } ($val =~ m/(\w+)/g);
+            push(@{ $rules->{$name}->{depends} }, @depends);
+          }
           $rules->{$name}->{code} = $val;
 
         } elsif (/^describe\s+(\S+)\s+(.+)$/) {
