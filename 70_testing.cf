@@ -869,3 +869,12 @@ meta T_ADVANCE_FEE_4 (__FRAUD_KJV + __FRAUD_IRJ + __FRAUD_NEB + __FRAUD_XJR + __
 # bug 3661
 body T_HTML_INVIS_SPAN	eval:html_test('span_invisible')
 body T_HTML_INVIS_TEXT	eval:html_test('invisible_text')
+
+# bug 3070
+# this might have high overlap with other rules, double-check
+# before promoting
+rawbody T_TINY_FONT_1	/\<.*font\-size\:[ \"]*1[^0-9]+.*\>/i
+describe T_TINY_FONT_1	body contains 1-point font
+
+rawbody T_TINY_FONT_0	/\<.*font\-size\:[ \"]*0[^0-9]+.*\>/i
+describe T_TINY_FONT_0	body contains 0-point font
