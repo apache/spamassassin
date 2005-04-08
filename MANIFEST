@@ -109,6 +109,7 @@ masses/fp-fn-statistics
 masses/fp-fn-to-tcr
 masses/freqdiff
 masses/generate-corpus
+masses/generate-translation
 masses/graphs/gen-score-freqs-gnuplot-table
 masses/graphs/gnuplot-score-graph
 masses/hit-frequencies
@@ -162,6 +163,7 @@ rules/20_uri_tests.cf
 rules/23_bayes.cf
 rules/25_antivirus.cf
 rules/25_body_tests_es.cf
+rules/25_body_tests_pl.cf
 rules/25_dcc.cf
 rules/25_domainkeys.cf
 rules/25_hashcash.cf
@@ -191,10 +193,10 @@ rules/triplets.txt
 rules/user_prefs.template
 sa-learn.raw
 sa-update.raw
-spamassassin-run.pod
-spamassassin.raw
 sample-nonspam.txt
 sample-spam.txt
+spamassassin-run.pod
+spamassassin.raw
 spamassassin.spec
 spamc/Makefile.in
 spamc/Makefile.win
@@ -240,7 +242,6 @@ sql/userpref_pg.sql
 t/README
 t/SATest.pl
 t/SATest.pm
-t/config.dist
 t/basic_lint.t
 t/bayesdbm.t
 t/bayesdbm_flock.t
@@ -249,6 +250,7 @@ t/bayessql.t
 t/blacklist_autolearn.t
 t/body_mod.t
 t/cidrs.t
+t/config.dist
 t/data/etc/hello.txt
 t/data/etc/testhost.cert
 t/data/etc/testhost.key
@@ -377,9 +379,9 @@ t/spamd_maxchildren.t
 t/spamd_maxsize.t
 t/spamd_parallel.t
 t/spamd_port.t
-t/spamd_protocol_10.t
 t/spamd_prefork_stress.t
 t/spamd_prefork_stress_2.t
+t/spamd_protocol_10.t
 t/spamd_report.t
 t/spamd_report_ifspam.t
 t/spamd_ssl.t
