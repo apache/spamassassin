@@ -878,3 +878,10 @@ describe T_TINY_FONT_1	body contains 1-point font
 
 rawbody T_TINY_FONT_0	/\<.*font\-size\:[ \"]*0[^0-9]+.*\>/i
 describe T_TINY_FONT_0	body contains 0-point font
+
+# bug 3250 - split MARKETING_PARTNERS into two to see if
+# the S/O ratios differ and we can fix (after rescore) that way
+body T_MARKETING_PARTNERS	/\b(?:marketing|network) partner/i
+describe T_MARKETING_PARTNERS	Claims you registered with a partner
+body T_PARTNER_SITE		/\bpartner (?:web)?site/
+describe T_PARTNER_SITE		Directs you to a partner web site
