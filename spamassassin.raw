@@ -599,6 +599,10 @@ The following two sections detail the default tagging and markup that
 takes place for messages when running C<spamassassin> or C<spamc> with
 C<spamd> in the default configuration.
 
+Note: before header modification and addition, all headers beginning
+with C<X-Spam-> are removed to prevent spammer mischief and also to
+avoid potential problems caused by prior invocations of SpamAssassin.
+
 =head2 TAGGING FOR SPAM MAILS
 
 By default, all messages with a calculated score of 5.0 or higher are
