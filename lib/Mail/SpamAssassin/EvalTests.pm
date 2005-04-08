@@ -2789,10 +2789,10 @@ sub helo_ip_mismatch {
   for my $relay (@{$self->{relays_untrusted}}) {
     # is HELO usable?
     next unless ($relay->{helo} =~ m/^$IP_ADDRESS$/ &&
-		 $relay->{helo} !~ /^$IP_PRIVATE/);
+		 $relay->{helo} !~ /$IP_PRIVATE/);
     # compare HELO with IP
     return 1 if ($relay->{ip} =~ m/^$IP_ADDRESS$/ &&
-		 $relay->{ip} !~ m/^$IP_PRIVATE/ &&
+		 $relay->{ip} !~ m/$IP_PRIVATE/ &&
 		 $relay->{helo} ne $relay->{ip} &&
 		 # different IP is okay if in same /24
 		 $relay->{helo} =~ /^(\d+\.\d+\.\d+\.)/ &&
@@ -3114,7 +3114,7 @@ sub check_for_numeric_helo {
   if ($rcvd) {
     my $IP_ADDRESS = IPV4_ADDRESS;
     my $IP_PRIVATE = IP_PRIVATE;
-    if ($rcvd =~ /helo=($IP_ADDRESS)\b/i && $1 !~ /^$IP_PRIVATE/) {
+    if ($rcvd =~ /helo=($IP_ADDRESS)\b/i && $1 !~ /$IP_PRIVATE/) {
       return 1;
     }
   }
@@ -3174,7 +3174,7 @@ sub check_numeric_http {
   my $IP_PRIVATE = IP_PRIVATE;
   for my $uri ($self->get_uri_list()) {
     if ($uri =~ m{^https?://[^/?]*\b($IP_ADDRESS)\b}i &&
-	$1 !~ /^$IP_PRIVATE/)
+	$1 !~ /$IP_PRIVATE/)
     {
       return 1;
     }
