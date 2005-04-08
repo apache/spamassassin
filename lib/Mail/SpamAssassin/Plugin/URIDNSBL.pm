@@ -152,6 +152,8 @@ sub new {
     $self->{res}->dnsrch(0);
     $self->{res}->retrans(3);
     $self->{res}->retry(1);
+    $self->{res}->persistent_tcp(0);  # bug 3997
+    $self->{res}->persistent_udp(0);  # bug 3997
   }
 
   $self->register_eval_rule ("check_uridnsbl");
