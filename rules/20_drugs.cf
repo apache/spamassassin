@@ -275,7 +275,7 @@ describe DRUGS_SLEEP_EREC 	Refers to both an erectile and a sleep aid drug
 # note: some 3 item combos are "normal" ie: a patient might legitimately
 # be prescribed depression, anxiety and sleep aid drugs all at once.
 # however, I know of no "normal" 4-item combinations.
-meta DRUGS_MANYKINDS	(DRUGS_ERECTILE + DRUGS_DIET + DRUGS_PAIN + DRUGS_SLEEP + DRUGS_MUSCLE + DRUGS_ANXIETY + DRUGS_DEPRESSION >3)
+meta DRUGS_MANYKINDS	(DRUGS_ERECTILE + DRUGS_DIET + DRUGS_PAIN + DRUGS_SLEEP + DRUGS_MUSCLE + DRUGS_ANXIETY > 3)
 describe DRUGS_MANYKINDS 	Refers to at least four kinds of drugs
 
 ########################################################################
