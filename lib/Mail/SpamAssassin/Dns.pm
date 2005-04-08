@@ -404,8 +404,8 @@ sub load_resolver {
       $self->{res}->defnames(0);	# don't append stuff to end of query
       $self->{res}->tcp_timeout(3);	# timeout of 3 seconds only
       $self->{res}->udp_timeout(3);	# timeout of 3 seconds only
-      $self->{res}->persistent_tcp(1);
-      $self->{res}->persistent_udp(1);
+      $self->{res}->persistent_tcp(0);	# bug 3997
+      $self->{res}->persistent_udp(0);	# bug 3997
     }
     1;
   };   #  or warn "dns: eval failed: $@ $!\n";
