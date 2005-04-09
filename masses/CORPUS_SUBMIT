@@ -1,12 +1,13 @@
  1. If you don't already have a submission account, send a request to
-    submit@spamassassin.org and ask for a GA mass-check submission account.
-    You will receive your username and password via email, it will only be
-    good for GA mass-check submissions.  If you're interested in the nightly
-    submissions, please see the CORPUS_SUBMIT_NIGHTLY document.
+    pmc@spamassassin.apache.org and ask for a score generation mass-check
+    submission account.  You will receive your username and password
+    via email, it will only be good for the score generation mass-check
+    submissions.  If you're interested in the nightly submissions,
+    please see the CORPUS_SUBMIT_NIGHTLY document.
 
- 2. Get the latest version of SA following the instructions in the GA
-    mass-check announcement email.
- 3. Now cd to the "masses" directory in the checked-out CVS code tree.
+ 2. Get the latest version of SA following the instructions in the score
+    generation mass-check announcement email.
+ 3. Now cd to the "masses" directory in the checked-out SVN code tree.
  4. Read README to gain understanding of what mass-check does.
  5. Run mass-check against your ham mail archive.
  6. sort -rn +1 ham.log | head -20
