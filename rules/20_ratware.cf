@@ -172,7 +172,8 @@ describe REPTO_QUOTE_YAHOO	Yahoo! doesn't do quoting like this
 # MIME_HTML_ONLY.
 # perhaps limit CTYPE to "text/plain", "multipart/alternative" with
 # "text/plain" and "text/enhanced", or "multipart/mixed"?
-header __X_MAILER_APPLEMAIL	X-Mailer =~ /^Apple Mail \(\d\.\d+\)$/
+# bug 4223: expand for new Apple Mail version format
+header __X_MAILER_APPLEMAIL	X-Mailer =~ /^Apple Mail \(\d\.\d+(?:\.\d+)?\)$/
 header __MSGID_APPLEMAIL        Message-Id =~ /^<[0-9A-F]{8}-(?:[0-9A-F]{4}-){3}[0-9A-F]{12}\@\S+>$/
 header __MIME_VERSION_APPLEMAIL	Mime-Version =~ /^1\.0 \(Apple Message framework v\d+\)$/
 meta __USER_AGENT_APPLEMAIL	!__CTYPE_HTML && __X_MAILER_APPLEMAIL && (__MSGID_APPLEMAIL || __MIME_VERSION_APPLEMAIL)
