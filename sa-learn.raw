@@ -624,7 +624,17 @@ C<type> above is optional, but is the same as the standard for
 ArchiveIterator: mbox, mbx, dir, file, or detect (the default if not
 specified).
 
-=item B<--use-ignore>
+=item B<--mbox>
+
+sa-learn will read in the file(s) containing the emails to be learned, 
+and will process them in mbox format (one or more emails per file). 
+
+=item B<--mbx>
+
+sa-learn will read in the file(s) containing the emails to be learned, 
+and will process them in mbx format (one or more emails per file). 
+
+=item B<--use-ignores>
 
 Don't learn the message if a from address matches configuration file
 item C<bayes_ignore_from> or a to address matches C<bayes_ignore_to>.
