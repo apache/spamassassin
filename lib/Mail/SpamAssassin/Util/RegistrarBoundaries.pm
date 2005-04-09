@@ -48,6 +48,7 @@ foreach (qw/
   aero biz com coop info museum name net org pro gov edu mil int
   arpa
   eu
+  jobs travel
   /) { 
   $VALID_TLDS{$_} = 1;
 }
