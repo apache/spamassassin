@@ -1208,21 +1208,6 @@ increases database size by about a factor of 8 to 10.
     type => $CONF_TYPE_BOOL
   });
 
-=item bayes_use_chi2_combining		(default: 1)
-
-Should the Bayesian classifier use chi-squared combining, instead of
-Robinson/Graham-style naive Bayesian combining?  Chi-squared produces
-more 'extreme' output results, but may be more resistant to changes
-in corpus size etc.
-
-=cut
-
-  push (@cmds, {
-    setting => 'bayes_use_chi2_combining',
-    default => 1,
-    type => $CONF_TYPE_BOOL
-  });
-
 =item bayes_journal_max_size		(default: 102400)
 
 SpamAssassin will opportunistically sync the journal and the database.

@@ -56,6 +56,11 @@ use bytes;
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::PerMsgStatus;
+
+# pick ONLY ONE of these combining implementations.
+use Mail::SpamAssassin::Bayes::CombineChi;
+# use Mail::SpamAssassin::Bayes::CombineNaiveBayes;
+
 use Digest::SHA1 qw(sha1 sha1_hex);
 
 use vars qw{
@@ -206,23 +211,6 @@ $OPPORTUNISTIC_LOCK_VALID = 300;
 # into the <0.5 range for nonspam and >0.5 for spam.
 use constant USE_ROBINSON_FX_EQUATION_FOR_LOW_FREQS => 1;
 
-# Value for 'x' in the f(w) equation.
-# "Let x = the number used when n [hits] is 0."
-use constant CHI_ROBINSON_X_CONSTANT  => 0.538;
-use constant GARY_ROBINSON_X_CONSTANT => 0.600;
-
-# Value for 's' in the f(w) equation.  "We can see s as the "strength" (hence
-# the use of "s") of an original assumed expectation ... relative to how
-# strongly we want to consider our actual collected data."  Low 's' means
-# trust collected data more strongly.
-use constant CHI_ROBINSON_S_CONSTANT  => 0.100;
-use constant GARY_ROBINSON_S_CONSTANT => 0.160;
-
-# Should we ignore tokens with probs very close to the middle ground (.5)?
-# tokens need to be outside the [ .5-MPS, .5+MPS ] range to be used.
-use constant CHI_ROBINSON_MIN_PROB_STRENGTH  => 0.346;
-use constant GARY_ROBINSON_MIN_PROB_STRENGTH => 0.430;
-
 # How many of the most significant tokens should we use for the p(w)
 # calculation?
 use constant N_SIGNIFICANT_TOKENS => 150;
@@ -270,8 +258,6 @@ sub new {
   $self;
 }
 
-###########################################################################
-
 sub finish {
   my $self = shift;
   #if (!$self->{conf}->{use_bayes}) { return; }
@@ -281,6 +267,8 @@ sub finish {
 
   $self->{store}->untie_db();
 }
+
+sub sa_die { Mail::SpamAssassin::sa_die(@_); }
 
 ###########################################################################
 
@@ -306,25 +294,6 @@ sub read_db_configs {
   # use of hapaxes.  Set on bayes object, since it controls prob
   # computation.
   $self->{use_hapaxes} = $self->{conf}->{bayes_use_hapaxes};
-
-  # Use chi-squared combining instead of Gary-combining (Robinson/Graham-style
-  # naive-Bayesian)?
-  $self->{use_chi_sq_combining} = $self->{conf}->{bayes_use_chi2_combining};
-
-  # Use the appropriate set of constants; the different systems have different
-  # optimum settings for these.  (TODO: should these be exposed through Conf?)
-  if ($self->{use_chi_sq_combining}) {
-    $self->{robinson_x_constant} = CHI_ROBINSON_X_CONSTANT;
-    $self->{robinson_s_constant} = CHI_ROBINSON_S_CONSTANT;
-    $self->{robinson_min_prob_strength} = CHI_ROBINSON_MIN_PROB_STRENGTH;
-  } else {
-    $self->{robinson_x_constant} = GARY_ROBINSON_X_CONSTANT;
-    $self->{robinson_s_constant} = GARY_ROBINSON_S_CONSTANT;
-    $self->{robinson_min_prob_strength} = GARY_ROBINSON_MIN_PROB_STRENGTH;
-  }
-
-  $self->{robinson_s_times_x} =
-      ($self->{robinson_x_constant} * $self->{robinson_s_constant});
 }
 
 ###########################################################################
@@ -1089,9 +1058,9 @@ sub compute_prob_for_token {
     # use Robinson's f(x) equation for low-n tokens, instead of just
     # ignoring them
     my $robn = $s+$n;
-    $prob = ($self->{robinson_s_times_x} + ($robn * $prob))
+    $prob = ($Mail::SpamAssassin::Bayes::Combine::FW_S_DOT_X + ($robn * $prob))
                              /
-		  ($self->{robinson_s_constant} + $robn);
+            ($Mail::SpamAssassin::Bayes::Combine::FW_S_CONSTANT + $robn);
   }
 
   if ($self->{log_raw_counts}) {
@@ -1121,16 +1090,17 @@ sub compute_declassification_distance {
   if (!$self->{use_hapaxes}) {return 0 if ($ns + $nn < 2);}
 
   return 0 if $Ns == 0 || $Nn == 0;
-  return 0 if abs( $prob - 0.5 ) < $self->{robinson_min_prob_strength};
+  return 0 if abs( $prob - 0.5 ) <
+                $Mail::SpamAssassin::Bayes::Combine::MIN_PROB_STRENGTH;
 
   my ($Na,$na,$Nb,$nb) = $prob > 0.5 ? ($Nn,$nn,$Ns,$ns) : ($Ns,$ns,$Nn,$nn);
-  my $p = 0.5 - $self->{robinson_min_prob_strength};
+  my $p = 0.5 - $Mail::SpamAssassin::Bayes::Combine::MIN_PROB_STRENGTH;
 
   return int( 1.0 - 1e-6 + $nb * $Na * $p / ($Nb * ( 1 - $p )) ) - $na
     unless USE_ROBINSON_FX_EQUATION_FOR_LOW_FREQS;
 
-  my $s = $self->{robinson_s_constant};
-  my $sx = $self->{robinson_s_times_x};
+  my $s = $Mail::SpamAssassin::Bayes::Combine::FW_S_CONSTANT;
+  my $sx = $Mail::SpamAssassin::Bayes::Combine::FW_S_DOT_X;
   my $a = $Nb * ( 1 - $p );
   my $b = $Nb * ( $sx + $nb * ( 1 - $p ) - $p * $s ) - $p * $Na * $nb;
   my $c = $Na * $nb * ( $sx - $p * ( $s + $nb ) );
@@ -1261,7 +1231,8 @@ sub scan {
   {
     if ($count-- < 0) { last; }
     my $pw = $pw{$_}->{prob};
-    next if (abs($pw - 0.5) < $self->{robinson_min_prob_strength});
+    next if (abs($pw - 0.5) < 
+                $Mail::SpamAssassin::Bayes::Combine::MIN_PROB_STRENGTH);
 
     # What's more expensive, scanning headers for HAMMYTOKENS and
     # SPAMMYTOKENS tags that aren't there or collecting data that
@@ -1289,11 +1260,7 @@ sub scan {
     goto skip;
   }
 
-  if ($self->{use_chi_sq_combining}) {
-    $score = chi_squared_probs_combine ($ns, $nn, @sorted);
-  } else {
-    $score = robinson_naive_bayes_probs_combine (@sorted);
-  }
+  $score = Mail::SpamAssassin::Bayes::Combine::combine($ns, $nn, \@sorted);
 
   # Couldn't come up with a probability?
   goto skip unless defined $score;
@@ -1391,92 +1358,6 @@ sub opportunistic_calls {
   }
 
   return;
-}
-
-###########################################################################
-
-sub sa_die { Mail::SpamAssassin::sa_die(@_); }
-
-###########################################################################
-
-sub robinson_naive_bayes_probs_combine {
-  my (@sorted) = @_;
-
-  my $wc = scalar @sorted;
-  return unless $wc;
-
-  my $P = 1;
-  my $Q = 1;
-
-  foreach my $pw (@sorted) {
-    $P *= (1-$pw);
-    $Q *= $pw;
-  }
-  $P = 1 - ($P ** (1 / $wc));
-  $Q = 1 - ($Q ** (1 / $wc));
-  return (1 + ($P - $Q) / ($P + $Q)) / 2.0;
-}
-
-###########################################################################
-
-# Chi-squared function
-sub chi2q {
-  my ($x2, $v) = @_;
-
-  die "bayes: v must be even in chi2q(x2, v)" if $v & 1;
-  my $m = $x2 / 2.0;
-  my ($sum, $term);
-  $sum = $term = exp(0 - $m);
-  for my $i (1 .. (($v/2)-1)) {
-    $term *= $m / $i;
-    $sum += $term;
-  }
-  return $sum < 1.0 ? $sum : 1.0;
-}
-
-# Chi-Squared method. Produces mostly boolean $result,
-# but with a grey area.
-sub chi_squared_probs_combine  {
-  my ($ns, $nn, @sorted) = @_;
-  # @sorted contains an array of the probabilities
-  my $wc = scalar @sorted;
-  return unless $wc;
-
-  my ($H, $S);
-  my ($Hexp, $Sexp);
-  $Hexp = $Sexp = 0;
-
-  # see bug 3118
-  my $totmsgs = ($ns + $nn);
-  if ($totmsgs == 0) { return; }
-  $S = ($ns / $totmsgs);
-  $H = ($nn / $totmsgs);
-
-  use POSIX qw(frexp);
-
-  foreach my $prob (@sorted) {
-    $S *= 1.0 - $prob;
-    $H *= $prob;
-    if ($S < 1e-200) {
-      my $e;
-      ($S, $e) = frexp($S);
-      $Sexp += $e;
-    }
-    if ($H < 1e-200) {
-      my $e;
-      ($H, $e) = frexp($H);
-      $Hexp += $e;
-    }
-  }
-
-  use constant LN2 => log(2);
-
-  $S = log($S) + $Sexp * LN2;
-  $H = log($H) + $Hexp * LN2;
-
-  $S = 1.0 - chi2q(-2.0 * $S, 2 * $wc);
-  $H = 1.0 - chi2q(-2.0 * $H, 2 * $wc);
-  return (($S - $H) + 1.0) / 2.0;
 }
 
 ###########################################################################
