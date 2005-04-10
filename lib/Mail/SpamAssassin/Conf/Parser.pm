@@ -122,6 +122,7 @@ package Mail::SpamAssassin::Conf::Parser;
 
 # Make the main dbg() accessible in our package w/o an extra function
 *dbg=\&Mail::SpamAssassin::dbg;
+*info=\&Mail::SpamAssassin::info;
 
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Constants qw(:sa);
@@ -358,11 +359,11 @@ sub parse {
     if ($cmd) {
       if ($self->{scoresonly}) {              # reading user config from spamd
         if ($cmd->{is_priv} && !$conf->{allow_user_rules}) {
-          dbg("config: not parsing, 'allow_user_rules' is 0: $line");
+          info("config: not parsing, 'allow_user_rules' is 0: $line");
           goto failed_line;
         }
         if ($cmd->{is_admin}) {
-          dbg("config: not parsing, administrator setting: $line");
+          info("config: not parsing, administrator setting: $line");
           goto failed_line;
         }
       }
@@ -415,7 +416,7 @@ failed_line:
     if ($conf->{lint_rules}) {
       warn $msg."\n";
     } else {
-      dbg($msg);
+      info($msg);
     }
     $conf->{errors}++;
   }
