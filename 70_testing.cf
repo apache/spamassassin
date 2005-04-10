@@ -886,6 +886,3 @@ describe T_MARKETING_PARTNERS	Claims you registered with a partner
 body T_PARTNER_SITE		/\bpartner (?:web)?site/
 describe T_PARTNER_SITE		Directs you to a partner web site
 
-# slow current rule, try changing from body to URI
-uri T_DOMAIN_4U2		/[\@\.]\S{0,20}(?:[^0-9][42](?:yo)?u|for-*you)(?:[.-]\S{1,20})?\.(?:net|com|org|info)\b/
-describe T_DOMAIN_4U2		Domain name containing a "4u" variant
