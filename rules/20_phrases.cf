@@ -295,10 +295,6 @@ describe MARKETING_PARTNERS	Claims you registered with a partner
 body FREE_PREVIEW		/\bfree preview\b/i
 describe FREE_PREVIEW		Free Preview
 
-# http://www.hughes-family.org/bugzilla/show_bug.cgi?id=678
-body DOMAIN_4U2                 /[\@\.]\S{0,20}(?:[^0-9][42](?:yo)?u|for-*you)(?:[.-]\S{1,20})?\.(?:net|com|org|info)\b/
-describe DOMAIN_4U2             Domain name containing a "4u" variant
-
 body FREE_ACCESS                /(?-i:F)ree access/i
 describe FREE_ACCESS            Contains 'free access' with capitals
 
