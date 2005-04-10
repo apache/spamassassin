@@ -66,19 +66,6 @@ body T_NORMAL_HTTP_TO_IP	eval:check_numeric_http()
 
 ########################################################################
 
-# bug 3999
-# 0.767   0.9738   0.0204    0.980   0.77    0.01  T_PRIORITY_NO_NAME_BOTH_REF
-# 0.791   0.9887   0.0796    0.926   0.67    0.01  T_PRIORITY_NO_NAME_BOTH
-# 1.533   1.9166   0.1490    0.928   0.66    0.01  T_PRIORITY_NO_NAME_ONE_REF
-# 1.548   1.9174   0.2128    0.900   0.63    0.01  T_PRIORITY_NO_NAME_ONE
-header __HAS_REFERENCES		exists:References
-meta T_PRIORITY_NO_NAME_BOTH		((__HAS_X_PRIORITY && __HAS_MSMAIL_PRI) && !__HAS_X_MAILER && !__IS_EXCH && !__USER_AGENT)
-meta T_PRIORITY_NO_NAME_ONE		((__HAS_X_PRIORITY + __HAS_MSMAIL_PRI == 1) && !__HAS_X_MAILER && !__IS_EXCH && !__USER_AGENT)
-meta T_PRIORITY_NO_NAME_BOTH_REF	((__HAS_X_PRIORITY && __HAS_MSMAIL_PRI) && !__HAS_X_MAILER && !__IS_EXCH && !__USER_AGENT && !__HAS_REFERENCES)
-meta T_PRIORITY_NO_NAME_ONE_REF		((__HAS_X_PRIORITY + __HAS_MSMAIL_PRI == 1) && !__HAS_X_MAILER && !__IS_EXCH && !__USER_AGENT && !__HAS_REFERENCES)
-
-########################################################################
-
 # remove evals if these aren't promoted
 header T_UNPARSEABLE_RELAY  eval:check_relays_unparseable()
 
