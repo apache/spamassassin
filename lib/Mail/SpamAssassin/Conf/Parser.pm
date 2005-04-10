@@ -742,6 +742,10 @@ sub add_test {
   {
     return unless $self->is_regexp_valid($name, $text);
   }
+  elsif ($type == $Mail::SpamAssassin::Conf::TYPE_META_TESTS)
+  {
+    return unless $self->is_meta_valid($name, $text);
+  }
 
   $conf->{tests}->{$name} = $text;
   $conf->{test_types}->{$name} = $type;
@@ -768,12 +772,50 @@ sub add_regression_test {
   }
 }
 
+sub is_meta_valid {
+  my ($self, $name, $rule) = @_;
+
+  my $meta = '';
+
+  # Lex the rule into tokens using a rather simple RE method ...
+  my $lexer = ARITH_EXPRESSION_LEXER;
+  my @tokens = ($rule =~ m/$lexer/g);
+  if (length($name) == 1) {
+    print "$name $_\n " for @tokens;
+  }
+  # Go through each token in the meta rule
+  foreach my $token (@tokens) {
+    # Numbers can't be rule names
+    if ($token =~ /^(?:\W+|\d+)$/) {
+      $meta .= "$token ";
+    }
+    # Zero will probably cause more errors
+    else {
+      $meta .= "0 ";
+    }
+  }
+
+  my $evalstr = 'my $x = ' . $meta . '; 1;';
+  if (eval $evalstr) {
+    return 1;
+  }
+  if ($@) {
+    my $err = $@;
+    $err =~ s/\s+(?:at|near)\b.*//s;
+    $err =~ s/Illegal division by zero/division by zero possible/i;
+    warn "config: invalid expression for rule $name: \"$rule\": $err\n";
+    $self->{conf}->{errors}++;
+    return 0;
+  }
+}
+
 sub is_regexp_valid {
   my ($self, $name, $re) = @_;
+
   if (eval { ("" =~ m{$re}); 1; }) {
     return 1;
-
-  } else {
+  }
+  else {
     my $err = $@;
     $err =~ s/ at .*? line \d+\.\n?//;
     warn "config: invalid regexp for rule $name: $re: $err\n";
