@@ -116,7 +116,7 @@ sub print_usage_and_exit {
     -verbose => 0,
     -message => $message,
     -exitval => $resphash{$respnam},
-    -input => "Mail/spamassassin-run.pod",
+    -input => "spamassassin-run.pod",
     -pathlist => \@INC,
   );
 }
@@ -128,7 +128,7 @@ sub usage {
   my $ver = Mail::SpamAssassin::Version();
 
   print "SpamAssassin version $ver\n";
-  pod2usage( -verbose => $verbose, -message => $message, -exitval => 64, -input => "Mail/spamassassin-run.pod", -pathlist => \@INC );
+  pod2usage( -verbose => $verbose, -message => $message, -exitval => 64, -input => "spamassassin-run.pod", -pathlist => \@INC );
 
 }
 
