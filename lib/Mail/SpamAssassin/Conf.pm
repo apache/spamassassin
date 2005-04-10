@@ -74,6 +74,7 @@ use File::Spec;
 
 # Make the main dbg() accessible in our package w/o an extra function
 *dbg=\&Mail::SpamAssassin::dbg;
+*info=\&Mail::SpamAssassin::info;
 
 use strict;
 use warnings;
@@ -229,7 +230,7 @@ it from running.
         if ($self->{lint_rules}) {
           warn $msg."\n";
         } else {
-          dbg($msg);
+          info($msg);
         }
         $self->{errors}++;
         return;
@@ -256,7 +257,7 @@ it from running.
         if ($self->{lint_rules}) {
           warn $msg."\n";
         } else {
-          dbg($msg);
+          info($msg);
         }
         $self->{errors}++;
         return;
@@ -588,7 +589,7 @@ header.
       }
 
       # if we get here, note the issue, then we'll fail through for an error.
-      dbg("config: rewrite_header: ignoring $hdr, not From, Subject, or To");
+      info("config: rewrite_header: ignoring $hdr, not From, Subject, or To");
     }
   });
 
