@@ -56,9 +56,11 @@ sub new {
   my $conf = $mailsaobject->{conf};
 
   $self->register_eval_rule ("check_for_spf_pass");
+  $self->register_eval_rule ("check_for_spf_neutral");
   $self->register_eval_rule ("check_for_spf_fail");
   $self->register_eval_rule ("check_for_spf_softfail");
   $self->register_eval_rule ("check_for_spf_helo_pass");
+  $self->register_eval_rule ("check_for_spf_helo_neutral");
   $self->register_eval_rule ("check_for_spf_helo_fail");
   $self->register_eval_rule ("check_for_spf_helo_softfail");
   $self->register_eval_rule ("check_for_spf_whitelist_from");
@@ -124,6 +126,15 @@ sub check_for_spf_pass {
   $scanner->{spf_pass};
 }
 
+sub check_for_spf_neutral {
+  my ($self, $scanner) = @_;
+  $self->_check_spf ($scanner, 0) unless $scanner->{spf_checked};
+  if ($scanner->{spf_failure_comment}) {
+    $scanner->test_log ($scanner->{spf_failure_comment});
+  }
+  $scanner->{spf_neutral};
+}
+
 sub check_for_spf_fail {
   my ($self, $scanner) = @_;
   $self->_check_spf ($scanner, 0) unless $scanner->{spf_checked};
@@ -146,6 +157,15 @@ sub check_for_spf_helo_pass {
   my ($self, $scanner) = @_;
   $self->_check_spf ($scanner, 1) unless $scanner->{spf_helo_checked};
   $scanner->{spf_helo_pass};
+}
+
+sub check_for_spf_helo_neutral {
+  my ($self, $scanner) = @_;
+  $self->_check_spf ($scanner, 1) unless $scanner->{spf_helo_checked};
+  if ($scanner->{spf_helo_failure_comment}) {
+    $scanner->test_log ($scanner->{spf_helo_failure_comment});
+  }
+  $scanner->{spf_helo_neutral};
 }
 
 sub check_for_spf_helo_fail {
@@ -192,6 +212,7 @@ sub _check_spf {
     # SPF HELO-checking variant.  This isn't really SPF at all ;)
     $scanner->{spf_helo_checked} = 1;
     $scanner->{spf_helo_pass} = 0;
+    $scanner->{spf_helo_neutral} = 0;
     $scanner->{spf_helo_fail} = 0;
     $scanner->{spf_helo_softfail} = 0;
     $scanner->{spf_helo_failure_comment} = undef;
@@ -199,6 +220,7 @@ sub _check_spf {
     # "real" SPF; checking the envelope-from (where we can)
     $scanner->{spf_checked} = 1;
     $scanner->{spf_pass} = 0;
+    $scanner->{spf_neutral} = 0;
     $scanner->{spf_fail} = 0;
     $scanner->{spf_softfail} = 0;
     $scanner->{spf_failure_comment} = undef;
@@ -297,18 +319,20 @@ sub _check_spf {
 
   if ($ishelo) {
     if ($result eq 'pass') { $scanner->{spf_helo_pass} = 1; }
+    elsif ($result eq 'neutral') { $scanner->{spf_helo_neutral} = 1; }
     elsif ($result eq 'fail') { $scanner->{spf_helo_fail} = 1; }
     elsif ($result eq 'softfail') { $scanner->{spf_helo_softfail} = 1; }
 
-    if ($result eq 'fail' || $result eq 'softfail') {
+    if ($result eq 'neutral' || $result eq 'fail' || $result eq 'softfail') {
       $scanner->{spf_helo_failure_comment} = "SPF failed: $comment";
     }
   } else {
     if ($result eq 'pass') { $scanner->{spf_pass} = 1; }
+    elsif ($result eq 'neutral') { $scanner->{spf_neutral} = 1; }
     elsif ($result eq 'fail') { $scanner->{spf_fail} = 1; }
     elsif ($result eq 'softfail') { $scanner->{spf_softfail} = 1; }
 
-    if ($result eq 'fail' || $result eq 'softfail') {
+    if ($result eq 'neutral' || $result eq 'fail' || $result eq 'softfail') {
       $scanner->{spf_failure_comment} = "SPF failed: $comment";
     }
   }
