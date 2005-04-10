@@ -26,11 +26,15 @@
 
 ifplugin Mail::SpamAssassin::Plugin::SPF
 
-# SPF support.  "pass" is nice, "fail" is bad, "softfail" is bad, but
-# not as bad as "fail". ;)   These are more trustworthy results than
-# the SPF_HELO rules.
+# SPF support:
+#   "pass" is nice
+#   "neutral" is somewhat bad
+#   "fail" is bad
+#   "softfail" is bad, but not as bad as "fail"
+# These are more trustworthy results than the SPF_HELO rules.
 
-header SPF_PASS		        eval:check_for_spf_pass()
+header SPF_PASS			eval:check_for_spf_pass()
+header SPF_NEUTRAL		eval:check_for_spf_neutral()
 header SPF_FAIL			eval:check_for_spf_fail()
 header SPF_SOFTFAIL		eval:check_for_spf_softfail()
 
@@ -39,20 +43,25 @@ header SPF_SOFTFAIL		eval:check_for_spf_softfail()
 # However, a *failure* is still a very good spamsign.
 
 header SPF_HELO_PASS		eval:check_for_spf_helo_pass()
+header SPF_HELO_NEUTRAL		eval:check_for_spf_helo_neutral()
 header SPF_HELO_FAIL		eval:check_for_spf_helo_fail()
 header SPF_HELO_SOFTFAIL	eval:check_for_spf_helo_softfail()
 
 describe SPF_PASS		SPF: sender matches SPF record
+describe SPF_NEUTRAL		SPF: sender does not match SPF record (neutral)
 describe SPF_FAIL		SPF: sender does not match SPF record (fail)
 describe SPF_SOFTFAIL		SPF: sender does not match SPF record (softfail)
-describe SPF_HELO_PASS	        SPF: HELO matches SPF record
+describe SPF_HELO_PASS		SPF: HELO matches SPF record
+describe SPF_HELO_NEUTRAL	SPF: HELO does not match SPF record (neutral)
 describe SPF_HELO_FAIL		SPF: HELO does not match SPF record (fail)
 describe SPF_HELO_SOFTFAIL	SPF: HELO does not match SPF record (softfail)
 
-tflags SPF_PASS		        net nice userconf
+tflags SPF_PASS			net nice userconf
+tflags SPF_NEUTRAL		net
 tflags SPF_FAIL			net
 tflags SPF_SOFTFAIL		net
 tflags SPF_HELO_PASS		net nice userconf
+tflags SPF_HELO_NEUTRAL		net
 tflags SPF_HELO_FAIL		net
 tflags SPF_HELO_SOFTFAIL	net
 
