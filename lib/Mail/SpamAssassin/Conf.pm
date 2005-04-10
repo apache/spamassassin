@@ -53,7 +53,9 @@ definitions, at some point in the future.
 Currently, each rule or configuration setting must fit on one-line; multi-line
 settings are not supported yet.
 
-Paths can use C<~> to refer to the user's home directory.
+File and directory paths can use C<~> to refer to the user's home
+directory, but no other shell-style path extensions such as globing or
+C<~user/> are supported.
 
 Where appropriate below, default values are listed in parentheses.
 
