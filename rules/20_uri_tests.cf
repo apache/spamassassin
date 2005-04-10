@@ -161,3 +161,7 @@ describe URI_NO_WWW_ANY_CGI	CGI with long hostname other fourth-level "www"
 
 uri URI_SCHEME_MIXED_CASE	/^(?![a-z]{3,6}:|[A-Z]{3,6})[A-Za-z]{3,6}:\//
 describe URI_SCHEME_MIXED_CASE	URI scheme has mixed uppercase and lowercase
+
+# bug 678
+uri DOMAIN_4U2			/[\@\.]\S{0,20}(?:[^0-9][42](?:yo)?u|for-*you)(?:[.-]\S{1,20})?\.(?:net|com|org|info)\b/
+describe DOMAIN_4U2		Domain name containing a "4u" variant
