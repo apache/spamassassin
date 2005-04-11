@@ -106,7 +106,7 @@ else {
 
 sub read_defs {
   my ($in) = @_;
-  open (DEFS, "<$in") or die "Connot open $in: $!";
+  open (DEFS, "<$in") or die "Cannot open $in: $!";
   foreach (<DEFS>) {
     $_ =~ s/^\s+|\s+$//g;
     next if /^#/;
@@ -177,6 +177,18 @@ sub do_it {
     $perl_version = sprintf("%i.%03i%03i", $v[0] || 0, $v[1] || 0, $v[2] || 0);
   }
 
+  # Grab active plugin list
+  my @plugin_pod = ();
+  if (open(INIT, "rules/init.pre")) {
+    while (<INIT>) {
+      if (/^loadplugin\s+(.*?)\s*$/) {
+	push(@plugin_pod, "    $1\n");
+      }
+    }
+    close(INIT);
+  }
+  $defines{PLUGIN_POD} = join('', sort @plugin_pod);
+
   my $l = 1;
   while (<FOOIN>) {
     $_ = pack("C0A*", $_);	# turn off UTF8-ness
@@ -207,4 +219,3 @@ sub do_it {
     $l++;
   }
 }
-
