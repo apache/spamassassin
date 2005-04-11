@@ -866,3 +866,4 @@ describe T_TINY_FONT_1	body contains 1-point font
 rawbody T_TINY_FONT_0	/\<.*font\-size\:[ \"]*0[^0-9]+.*\>/i
 describe T_TINY_FONT_0	body contains 0-point font
 
+body T_HTTPS_URI_MISMATCH       eval:check_https_uri_mismatch()
