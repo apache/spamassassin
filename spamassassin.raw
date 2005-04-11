@@ -488,24 +488,35 @@ system.
 
 =head1 SYNOPSIS
 
-For ease of access, the SpamAssassin manual has been split up into several
-sections:
-
-    spamassassin              SpamAssassin overview (this section)
-    Mail::SpamAssassin::Conf  SpamAssassin configuration files
-    spamassassin-run          "spamassassin" front-end filtering script
-    sa-learn                  train SpamAssassin's Bayesian classifier
-    spamc                     client for spamd (faster than spamassassin)
-    spamd                     spamassassin server (needed by spamc)
-
-(If you're intending to read these straight through for the first time,
-the suggested order will tend to reduce the number of forward references.)
+For ease of access, the SpamAssassin manual has been split up into
+several sections.  If you're intending to read these straight through
+for the first time, the suggested order will tend to reduce the number
+of forward references.
 
 Extensive additional documentation for SpamAssassin is available,
 primarily on the SpamAssassin web site and wiki.
 
 You should be able to view SpamAssassin's documentation with your man(1)
 program or perldoc(1).
+
+=head2 OVERVIEW
+
+    spamassassin              SpamAssassin overview (this section)
+
+=head2 CONFIGURATION
+
+    Mail::SpamAssassin::Conf  SpamAssassin configuration files
+
+=head2 USAGE
+
+    spamassassin-run          "spamassassin" front-end filtering script
+    sa-learn                  train SpamAssassin's Bayesian classifier
+    spamc                     client for spamd (faster than spamassassin)
+    spamd                     spamassassin server (needed by spamc)
+
+=head2 DEFAULT PLUGINS
+
+@@PLUGIN_POD@@
 
 =head1 WEB SITES
 
