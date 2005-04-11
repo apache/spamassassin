@@ -34,14 +34,7 @@ add these lines to a .cf file:
 
 =head1 DESCRIPTION
 
-The AWL plugin has been deprecated and superceded by the new History
-plugin, but is available if you want to continue using the old AWL
-method with your current AWL database.  Once you have activated the
-History plugin and are using it to adjust scores, you should disable
-this plugin (it will work, but accuracy will be compromised).
-
-This plugin module provides backward-compatible support for the
-auto-whitelist used in SpamAssassin 3.0 and earlier versions.  It keeps
+This plugin module provides support for the auto-whitelist.  It keeps
 track of the average SpamAssassin score for senders.  Senders are
 tracked using a combination of their From: address and their IP address.
 It then uses that average score to reduce the variability in scoring
