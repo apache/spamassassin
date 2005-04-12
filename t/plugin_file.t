@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("plugin_file");
-use Test; BEGIN { plan tests => 6 };
+use Test; BEGIN { plan tests => 7 };
 
 # ---------------------------------------------------------------------------
 
@@ -12,6 +12,7 @@ q{ GTUBE }, 'gtube',
 q{ MY_TEST_PLUGIN }, 'plugin_called',
 q{ registered myTestPlugin }, 'registered',
 q{ myTestPlugin eval test called }, 'test_called',
+q{ myTestPlugin finishing }, 'plugin_finished',
 
 );
 

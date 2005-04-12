@@ -414,6 +414,11 @@ Signals that a C<Mail::SpamAssassin::PerMsgStatus> object is being
 destroyed, and any per-scan context held on that object by this
 plugin should be destroyed as well.
 
+Normally, any member variables on the C<PerMsgStatus> object will be cleaned up
+automatically -- but if your plugin has made a circular reference on that
+object, this is the place to break them so that garbage collection can operate
+correctly.
+
 =over 4
 
 =item permsgstatus

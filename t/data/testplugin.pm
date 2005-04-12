@@ -40,4 +40,10 @@ sub check_test_plugin {
   return 1;
 }
 
+sub per_msg_finish {
+  my ($self, $permsgstatus) = @_;
+  print "myTestPlugin finishing: $self\n";
+  return 1;
+}
+
 1;
