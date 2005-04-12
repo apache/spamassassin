@@ -17,7 +17,10 @@
 # </@LICENSE>
 
 sub usage {
-  die <<ENDOFUSAGE;
+  my $status = shift;
+
+  my $out = $status ? STDERR : STDOUT;
+  print $out <<EOF;
 usage: mass-check [options] target ...
  
   -c=file       set configuration/rules directory
@@ -74,7 +77,8 @@ usage: mass-check [options] target ...
   <format>      is "dir", "file", "mbx", or "mbox"
   <location>    is a file or directory name.  globbing of ~ and * is supported
 
-ENDOFUSAGE
+EOF
+  exit($status);
 }
 
 ###########################################################################
@@ -109,10 +113,10 @@ $opt_hamlog = "ham.log";
 $opt_spamlog = "spam.log";
 $opt_learn = 0;
 
+# rules.pl is for the --reuse option, score set doesn't matter
 if (! -f "$FindBin::Bin/tmp/rules.pl") {
   system("cd $FindBin::Bin; perl parse-rules-for-masses -d $opt_c");
 }
-# note: for reuse, score set doesn't matter
 require "rules.pl";
 
 GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug:s",
@@ -124,19 +128,19 @@ GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug:s",
 	   "file" => sub { $opt_format = "file"; },
 	   "mbox" => sub { $opt_format = "mbox"; },
 	   "mbx" => sub { $opt_format = "mbx"; },
-	   '<>' => \&target) or usage();
+	   "help" => sub { usage(0); },
+	   '<>' => \&target) or usage(1);
 
+# test messages for the mass-check
+my @targets;
 if ($opt_f) {
   open(F, $opt_f) || die $!;
   push(@targets, map { chomp; $_ } <F>);
   close(F);
 }
+usage(1) if !@targets;
 
-if (scalar @targets == 0) { usage(); }
-
-if (defined $opt_debug) {
-  $opt_debug ||= 'all';
-}
+$opt_debug ||= 'all' if defined $opt_debug;
 
 my $user_prefs = "$opt_p/user_prefs";
 # generated user_prefs
@@ -155,7 +159,6 @@ if ($opt_reuse) {
   }
   close(PREFS);
 }
-
 
 $spamtest = new Mail::SpamAssassin ({
   'debug'              			=> $opt_debug,
@@ -176,9 +179,14 @@ $spamtest = new Mail::SpamAssassin ({
 $spamtest->compile_now(1);
 $spamtest->read_scoreonly_config("$FindBin::Bin/mass-check.cf");
 
-my $who   = `id -un 2>/dev/null`;   chomp $who;
-my $where = `uname -n 2>/dev/null`; chomp $where;
-my $when  = `date -u`;              chomp $when;
+my $who = `id -un 2>/dev/null`;
+my $where = `uname -n 2>/dev/null`;
+my $when = `date -u`;
+my $host = $ENV{'HOSTNAME'} || $ENV{'HOST'} || `hostname` || 'localhost';
+chomp $who;
+chomp $where;
+chomp $when;
+chomp $host;
 my $revision = "unknown";
 if (open(TESTING, "$opt_c/70_testing.cf")) {
   chomp($revision = <TESTING>);
@@ -189,8 +197,6 @@ my $log_header = "# mass-check results from $who\@$where, on $when\n" .
 		 "# M:SA version ".$spamtest->Version()."\n" .
 		 "# SVN revision: $revision\n" .
 		 "# Perl version: $] on $Config{archname}\n";
-my $host = $ENV{'HOSTNAME'} || $ENV{'HOST'} || `hostname` || 'localhost';
-chomp $host;
 
 my $updates = 10;
 my $total_count = 0;
@@ -251,7 +257,8 @@ if (defined $opt_rewrite) {
   close(REWRITE);
 }
 
-exit;
+# exit status: did we check at least one message correctly?
+exit(!($ham_count || $spam_count));
 
 ###########################################################################
 
