@@ -59,7 +59,7 @@ sub parse_received_headers {
   # argh.  this is only used to perform DNS lookups.
   # TODO! we need to get Dns.pm code into a class that is NOT
   # part of Mail::SpamAssassin::PerMsgStatus to avoid this crap!
-  $self->{dns_pms} = Mail::SpamAssassin::PerMsgStatus->new($main, $msg);
+  $self->{dns_pms} = $main->{parser_dns_pms};
   $self->{is_dns_available} = $self->{dns_pms}->is_dns_available();
 
   $self->{relays_trusted} = [ ];
@@ -270,7 +270,6 @@ sub parse_received_headers {
                     @{$self->{relays_untrusted}});
 
   # drop the temp PerMsgStatus object
-  $self->{dns_pms}->finish();
   delete $self->{dns_pms};
 
   # OK, we've now split the relay list into trusted and untrusted.
