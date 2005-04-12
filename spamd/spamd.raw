@@ -2327,11 +2327,11 @@ Note: Although C<spamd> will check per-user config files for every message, any
 changes to the system-wide config files will require either restarting spamd
 or forcing it to reload itself via B<SIGHUP> for the changes to take effect.
 
-Note: If C<spamd> receives a B<SIGHUP>, it internally reloads itself, which means
-that it will change its pid and might not restart at all if its environment
-changed  (ie. if it can't change back into its own directory).  If you plan
-to use B<SIGHUP>, you should always start C<spamd> with the B<-r> switch to know its
-current pid.
+Note: If C<spamd> receives a B<SIGHUP>, it internally reloads itself, which
+means that it will change its pid and might not restart at all if its
+environment changed  (ie. if it can't change back into its own directory).  If
+you plan to use B<SIGHUP>, you should always start C<spamd> with the B<-r>
+switch to know its current pid.
 
 =head1 OPTIONS
 
@@ -2486,6 +2486,11 @@ not needed but still recommended.)
 Note that logging to a file does not use locking, so you cannot intermix
 logging from spamd and other processes into the same file.  If you want
 to mix logging like this, use syslog instead.
+
+If you use syslog logging, it is essential to send a SIGHUP to the spamd daemon
+when you restart the syslogd daemon.  (This is due to a shortcoming in Perl's
+syslog handling, where the disappearance of the connection to the syslogd is
+considered a fatal error.)
 
 =item B<--syslog-socket>=I<type>
 
