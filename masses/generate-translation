@@ -25,13 +25,14 @@ use Getopt::Std;
 use Lingua::Translate;
 
 # %rules and %scores from tmp/rules.pl
-use vars qw { $opt_h $opt_c $opt_e %rules %scores };
+use vars qw { $opt_h $opt_c $opt_e $opt_r %rules %scores };
 
 sub usage {
-  die "generate-translation language > 30_text_xx.cf
+  die "generate-translation language output_file
 
     -e STR   use STR as destination character set encoding (might not work)
     -c DIR   use DIR as rules directory
+    -r STR   use STR as destination character set encoding (using recode)
     -h       print this help
 
   language should be a two letter language code from this list:
@@ -54,12 +55,14 @@ sub usage {
 ";
 }
 
-getopts("hc:e:");
-usage() if ($opt_h || @ARGV < 1);
+getopts("hc:e:r:");
+usage() if ($opt_h || @ARGV < 2);
 
 my $dest = shift @ARGV;
+my $output = shift @ARGV;
 my $cffile = $opt_c || "$FindBin::Bin/../rules";
 my $enc = $opt_e || "utf8";
+my $recode = $opt_r || "UTF-8";
 
 my $okay = '';
 my $none = '';
@@ -83,10 +86,14 @@ sub generate_translation {
 				    dest_enc => $enc)
       or die "No translation server available for en -> $dest";
 
+  my $count = 0;
   for my $name (sort keys %rules) {
     my $lang_name = $name;
     my $lang_describe = '';
-    if (defined $rules{$name}->{describe}) {
+    if ($rules{$name}->{lang}) {
+      print "skipping $name with lang $rules{$name}->{lang}\n";
+    }
+    elsif (defined $rules{$name}->{describe}) {
       # translate name if it appears in the description
       my $describe = $rules{$name}->{describe};
       if ($describe =~ /$name/) {
@@ -111,25 +118,32 @@ sub generate_translation {
       };
       # didn't work
       if ($@) {
-	$none .= "lang $dest $name\t" . $describe . "\n";
-	print STDERR "none: $name $describe\n";
+	$none .= "lang $dest describe $name\t" . $describe . "\n";
+	print STDERR "none: $name\t$describe\n";
       }
       # worked
       else {
 	$lang_describe =~ s/$lang_name/$name/;
 	print "$lang_name $name\n" if $lang_name ne $name;
-	$okay .= "lang $dest $name\t" . $lang_describe . "\n";
+	$okay .= "# describe $name\t" . $describe . "\n";
+	$okay .= "lang $dest describe $name\t" . $lang_describe . "\n\n";
 	print STDERR "okay: $name $lang_describe\n";
       }
     }
+    $count++;
+    #last if $count > 10;
   }
 }
 
 sub print_translation {
   my $charset = $enc;
+  if ($opt_r) {
+    $charset = $recode;
+  }
   $charset =~ s/utf-?8/utf-8/i;
 
-  print <<'EOF';
+  open(OUTPUT, "> $output");
+  print OUTPUT <<'EOF';
 #
 # Please don't modify this file as your changes will be overwritten with
 # the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
@@ -154,20 +168,22 @@ sub print_translation {
 ###########################################################################
 
 # character set used in the following texts
-lang $dest report_charset $enc
+EOF
+  print OUTPUT <<EOF;
+lang $dest report_charset $charset
 
 # make me pretty
 EOF
   open(MISC, "$FindBin::Bin/../rules/10_misc.cf");
   while (<MISC>) {
     if (/^(?:clear_report_template|report|clear_unsafe_report_template|unsafe_report)\b/) {
-      print "lang $dest $_";
+      print OUTPUT "lang $dest $_";
     }
   }
 
-  print "\n# good translations\n\n";
-  print "$okay\n";
-
-  print "\n# unfinished translations\n\n";
-  print "$none\n";
+  print OUTPUT "\n# good translations\n\n";
+  print OUTPUT "$okay\n";
+  print OUTPUT "\n# unfinished translations\n\n";
+  print OUTPUT "$none\n";
+  system("/usr/bin/recode $enc..$recode $output") if $opt_r;
 }
