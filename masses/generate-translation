@@ -25,15 +25,16 @@ use Getopt::Std;
 use Lingua::Translate;
 
 # %rules and %scores from tmp/rules.pl
-use vars qw { $opt_h $opt_c $opt_e $opt_r %rules %scores };
+use vars qw { $opt_c $opt_e $opt_h $opt_n $opt_r %rules %scores };
 
 sub usage {
   die "generate-translation language output_file
 
-    -e STR   use STR as destination character set encoding (might not work)
-    -c DIR   use DIR as rules directory
-    -r STR   use STR as destination character set encoding (using recode)
     -h       print this help
+    -e STR   use STR as destination character set (using Lingua::Translate)
+    -r STR   use STR as destination character set (using recode)
+    -n N     translate first N rules (used for testing)
+    -c DIR   use DIR as rules directory
 
   language should be a two letter language code from this list:
 
@@ -50,24 +51,29 @@ sub usage {
      ru: Russian
      es: Spanish
 
-  translation is displayed on standard output
   progress is displayed on standard error
 ";
 }
 
-getopts("hc:e:r:");
+getopts("hc:e:n:r:");
 usage() if ($opt_h || @ARGV < 2);
 
+# options
 my $dest = shift @ARGV;
 my $output = shift @ARGV;
 my $cffile = $opt_c || "$FindBin::Bin/../rules";
 my $enc = $opt_e || "utf8";
 my $recode = $opt_r || "UTF-8";
 
-my $okay = '';
-my $none = '';
+# rule => configuration hashes
+my %english;
+my %old;
+my %translation;
+
+# translation cache
 my %lang_cache;
 
+# do the work
 read_rules($cffile);
 generate_translation();
 print_translation();
@@ -75,25 +81,38 @@ print_translation();
 sub read_rules {
   my ($cffile) = @_;
 
-  # read rules data
-  system("$FindBin::Bin/parse-rules-for-masses -d \"$cffile\"") and die;
-  require "./tmp/rules.pl";
+  system("$FindBin::Bin/parse-rules-for-masses -d \"$cffile\"")
+      and die "unable to parse rules\n";
+  require "$FindBin::Bin/tmp/rules.pl"
+      or die "unable to read tmp/rules.pl\n";
 }
 
 sub generate_translation {
   my $fish = Lingua::Translate->new(src => "en",
 				    dest => $dest,
 				    dest_enc => $enc)
-      or die "No translation server available for en -> $dest";
+      or die "no translation server available for en -> $dest\n";
 
+  # see if we had an old translation
+  if (-f "$FindBin::Bin/../rules/30_text_$dest.cf") {
+    open(OLD, "$FindBin::Bin/../rules/30_text_$dest.cf");
+    while(<OLD>) {
+      if (/^lang\s+$dest\s+describe\s+(\S+)\s+(.*?)\s*$/) {
+	$old{$1} = "lang $dest describe $1 $2\n";
+      }
+    }
+    close(OLD);
+  }
+
+  # try to generate new translation
   my $count = 0;
   for my $name (sort keys %rules) {
     my $lang_name = $name;
     my $lang_describe = '';
     if ($rules{$name}->{lang}) {
-      print "skipping $name with lang $rules{$name}->{lang}\n";
+      next;
     }
-    elsif (defined $rules{$name}->{describe}) {
+    if (defined $rules{$name}->{describe}) {
       # translate name if it appears in the description
       my $describe = $rules{$name}->{describe};
       if ($describe =~ /$name/) {
@@ -104,7 +123,8 @@ sub generate_translation {
 	  $lang_name = '[A-Z]+[A-Z0-9_]+[A-Z0-9]';
 	}
       }
-
+      # English version
+      $english{$name} = "describe $name\t$describe\n";
       # translate description
       eval {
 	if (defined $lang_cache{$describe}) {
@@ -113,26 +133,25 @@ sub generate_translation {
 	else {
 	  # dies or croaks on error
 	  $lang_describe = $fish->translate($describe);
+	  $lang_describe =~ s/\s+/ /sg;
+	  $lang_describe =~ s/ $//g;
 	  $lang_cache{$describe} = $lang_describe;
 	}
       };
       # didn't work
       if ($@) {
-	$none .= "lang $dest describe $name\t" . $describe . "\n";
-	print STDERR "none: $name\t$describe\n";
+	print STDERR "x";
       }
-      # worked
       else {
 	$lang_describe =~ s/$lang_name/$name/;
-	print "$lang_name $name\n" if $lang_name ne $name;
-	$okay .= "# describe $name\t" . $describe . "\n";
-	$okay .= "lang $dest describe $name\t" . $lang_describe . "\n\n";
-	print STDERR "okay: $name $lang_describe\n";
+	$translation{$name} = "lang $dest describe $name\t$lang_describe\n";
+	print STDERR ".";
       }
+      $count++;
+      last if ($opt_n && $count == $opt_n);
     }
-    $count++;
-    #last if $count > 10;
   }
+  print STDERR "\n" if $count > 0;
 }
 
 sub print_translation {
@@ -181,9 +200,14 @@ EOF
     }
   }
 
-  print OUTPUT "\n# good translations\n\n";
-  print OUTPUT "$okay\n";
-  print OUTPUT "\n# unfinished translations\n\n";
-  print OUTPUT "$none\n";
+  print OUTPUT "\n\n";
+
+  for (sort keys %english) {
+    print OUTPUT "# $english{$_}";
+    print OUTPUT "# $translation{$_}" if $translation{$_};
+    print OUTPUT "# $old{$_}" if $old{$_};
+    print OUTPUT "\n";
+  }
+
   system("/usr/bin/recode $enc..$recode $output") if $opt_r;
 }
