@@ -1295,7 +1295,7 @@ sub init {
     if ($self->{_initted} != $$) {
       $self->{_initted} = $$;
       srand;
-      Mail::SpamAssassin::Util::init_dns_counter_from_pid();
+      Mail::SpamAssassin::Util::init_dns_id_counter_from_pid();
     }
     return;
   }
