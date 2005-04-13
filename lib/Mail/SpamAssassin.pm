@@ -1291,10 +1291,11 @@ sub init {
 
   # Allow init() to be called multiple times, but only run once.
   if (defined $self->{_initted}) {
-    # If the PID changes, reseed the PRNG
+    # If the PID changes, reseed the PRNG and the DNS ID counter
     if ($self->{_initted} != $$) {
       $self->{_initted} = $$;
       srand;
+      Mail::SpamAssassin::Util::init_dns_counter_from_pid();
     }
     return;
   }

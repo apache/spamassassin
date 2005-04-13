@@ -108,7 +108,7 @@ sub do_rbl_lookup {
     dbg("dns: launching DNS $type query for $host in background");
     $self->{rbl_launch} = time;
     $self->{dnspending}->{$type}->{$host}->[BGSOCK] =
-	$self->{res}->bgsend($host, $type);
+        $self->res_bgsend($host, $type);
   }
 
   # always add set
@@ -137,9 +137,15 @@ sub do_dns_lookup {
     dbg("dns: launching DNS $type query for $host in background");
     $self->{rbl_launch} = time;
     $self->{dnspending}->{$type}->{$host}->[BGSOCK] =
-	$self->{res}->bgsend($host, $type);
+        $self->res_bgsend($host, $type);
   }
   push @{$self->{dnspending}->{$type}->{$host}->[RULES]}, $rule;
+}
+
+sub res_bgsend {
+  my ($self, $host, $type) = @_;
+  return $self->{res}->bgsend(
+            Mail::SpamAssassin::Util::new_dns_packet($host, $type));
 }
 
 ###########################################################################
