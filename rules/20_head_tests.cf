@@ -489,7 +489,7 @@ header __IS_EXCH		X-MimeOLE =~ /Produced By Microsoft Exchange V/
 header __HAS_X_PRIORITY 	exists:X-Priority
 header __USER_AGENT             exists:User-Agent
 header __X_NEWSREADER		exists:X-Newsreader
-meta PRIORITY_NO_NAME		((__HAS_X_PRIORITY && __HAS_MSMAIL_PRI) && !__HAS_X_MAILER && !__IS_EXCH && !__USER_AGENT && !X_NEWSREADER)
+meta PRIORITY_NO_NAME		((__HAS_X_PRIORITY && __HAS_MSMAIL_PRI) && !__HAS_X_MAILER && !__IS_EXCH && !__USER_AGENT && !__X_NEWSREADER)
 describe PRIORITY_NO_NAME	Message has priority, but no user agent name
 
 header SUBJ_AS_SEEN		Subject =~ /\bAs Seen/i
