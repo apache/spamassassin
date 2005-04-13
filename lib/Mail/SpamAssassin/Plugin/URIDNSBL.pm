@@ -519,7 +519,7 @@ sub lookup_domain_ns {
   return if $scanstate->{pending_lookups}->{$key};
 
   # dig $dom ns
-  my $ent = $self->start_lookup ($scanstate, 'NS', $self->{res}->bgsend ($dom, 'NS'));
+  my $ent = $self->start_lookup ($scanstate, 'NS', $self->res_bgsend($dom, 'NS'));
   $ent->{obj} = $obj;
   $scanstate->{pending_lookups}->{$key} = $ent;
 }
@@ -565,7 +565,7 @@ sub lookup_a_record {
   return if $scanstate->{pending_lookups}->{$key};
 
   # dig $hname a
-  my $ent = $self->start_lookup ($scanstate, 'A', $self->{res}->bgsend ($hname, 'A'));
+  my $ent = $self->start_lookup ($scanstate, 'A', $self->res_bgsend($hname, 'A'));
   $ent->{obj} = $obj;
   $scanstate->{pending_lookups}->{$key} = $ent;
 }
@@ -612,7 +612,7 @@ sub lookup_single_dnsbl {
 
   # dig $ip txt
   my $ent = $self->start_lookup ($scanstate, 'DNSBL',
-				$self->{res}->bgsend ($item, $qtype));
+        $self->res_bgsend($item, $qtype));
   $ent->{obj} = $obj;
   $ent->{rulename} = $rulename;
   $ent->{zone} = $dnsbl;
@@ -827,6 +827,12 @@ sub close_ent_socket {
 }
 
 # ---------------------------------------------------------------------------
+
+sub res_bgsend {
+  my ($self, $name, $type) = @_;
+  return $self->{res}->bgsend (
+    Mail::SpamAssassin::Util::new_dns_packet($name, $type));
+}
 
 sub log_dns_result {
   #my $self = shift;
