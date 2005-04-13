@@ -1108,7 +1108,11 @@ sub accept_a_conn {
   alarm 0;
 
   if ($@) {
-    service_timeout("($timeout_tcp second socket timeout reading input from client)");
+    if ($@ =~ /tcp timeout/) {
+      service_timeout("($timeout_tcp second socket timeout reading input from client)");
+    } else {
+      warn $@;
+    }
     $client->close;
     return 0;
   }
@@ -1148,7 +1152,11 @@ sub accept_a_conn {
     alarm 0;
 
     if ($@) {
-      service_timeout("($timeout_child second timeout while trying to $method)");
+      if ($@ =~ /child processing timeout/) {
+        service_timeout("($timeout_child second timeout while trying to $method)");
+      } else {
+        warn $@;
+      }
       $client->close();
       return 0;
     }
@@ -1167,7 +1175,11 @@ sub accept_a_conn {
     alarm 0;
 
     if ($@) {
-      service_timeout("($timeout_child second timeout while trying to $method)");
+      if ($@ =~ /child processing timeout/) {
+        service_timeout("($timeout_child second timeout while trying to $method)");
+      } else {
+        warn $@;
+      }
       $client->close();
       return 0;
     }
