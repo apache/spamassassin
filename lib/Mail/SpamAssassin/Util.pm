@@ -58,7 +58,7 @@ use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
 our $DNS_ID_COUNTER;
 
 sub init_dns_id_counter_from_pid {
-  $DNS_ID_COUNTER = (($$ >> 10) | (($$ << 6) & 0xffff));
+  $DNS_ID_COUNTER = (($$ >> 10) ^ (($$ << 6) & 0xffff));
 }
 
 BEGIN {
