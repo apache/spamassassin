@@ -521,14 +521,14 @@ sub lookup_domain_ns {
   # dig $dom ns
   my $ent = $self->start_lookup ($scanstate, 'NS', $self->res_bgsend($dom, 'NS'));
   $ent->{obj} = $obj;
+  $ent->{dns_id} = $self->{last_id};
   $scanstate->{pending_lookups}->{$key} = $ent;
 }
 
 sub complete_ns_lookup {
   my ($self, $scanstate, $ent, $dom) = @_;
 
-  my $packet = $self->{res}->bgread($ent->{sock});
-  $self->close_ent_socket ($ent);
+  my $packet = $ent->{response_packet};
   my @answer = $packet->answer;
 
   my $IPV4_ADDRESS = IPV4_ADDRESS;
@@ -567,14 +567,14 @@ sub lookup_a_record {
   # dig $hname a
   my $ent = $self->start_lookup ($scanstate, 'A', $self->res_bgsend($hname, 'A'));
   $ent->{obj} = $obj;
+  $ent->{dns_id} = $self->{last_id};
   $scanstate->{pending_lookups}->{$key} = $ent;
 }
 
 sub complete_a_lookup {
   my ($self, $scanstate, $ent, $hname) = @_;
 
-  my $packet = $self->{res}->bgread($ent->{sock});
-  $self->close_ent_socket ($ent);
+  my $packet = $ent->{response_packet};
   my @answer = $packet->answer;
 
   foreach my $rr (@answer) {
@@ -614,6 +614,7 @@ sub lookup_single_dnsbl {
   my $ent = $self->start_lookup ($scanstate, 'DNSBL',
         $self->res_bgsend($item, $qtype));
   $ent->{obj} = $obj;
+  $ent->{dns_id} = $self->{last_id};
   $ent->{rulename} = $rulename;
   $ent->{zone} = $dnsbl;
   $scanstate->{pending_lookups}->{$key} = $ent;
@@ -628,9 +629,9 @@ sub complete_dnsbl_lookup {
   my $rulename = $ent->{rulename};
   my $rulecf = $conf->{uridnsbls}->{$rulename};
 
-  my $packet = $self->{res}->bgread($ent->{sock});
-  $self->close_ent_socket ($ent);
+  my $packet = $ent->{response_packet};
   my @answer = $packet->answer;
+
   my $uridnsbl_subs = $conf->{uridnsbl_subs}->{$ent->{zone}};
   my $uridnsbl_subs_bits = 0;
   $uridnsbl_subs_bits |= $_ for keys %{$uridnsbl_subs};
@@ -733,7 +734,10 @@ sub complete_lookups {
     my $type = $ent->{type};
     $key =~ /:(\S+)$/; my $val = $1;
 
-    if (!$self->{res}->bgisready ($ent->{sock})) {
+    my $packet;
+    if (!$self->{res}->bgisready ($ent->{sock})
+            || !$self->validate_response_packet($ent))
+    {
       $typecount{$type}++;
       #$stillwaiting = 1;
       next;
@@ -799,6 +803,27 @@ sub complete_lookups {
   return (!$stillwaiting);
 }
 
+sub validate_response_packet {
+  my ($self, $ent) = @_;
+
+  my $packet = $self->{res}->bgread($ent->{sock});
+  return unless (defined $packet &&
+                 defined $packet->header &&
+                 defined $packet->question &&
+                 defined $packet->answer);
+
+  my $respid = $packet->header->id;
+  if ($respid != $ent->{dns_id}) {    # bug 3997
+    warn "dns: received out-of-order response packet: id=$respid want=".
+            $ent->{dns_id}.": ".$packet->string;
+    return;     # keep waiting
+  }
+
+  $ent->{response_packet} = $packet;
+  $self->close_ent_socket ($ent);
+  return 1;
+}
+
 # ---------------------------------------------------------------------------
 
 sub abort_remaining_lookups  {
@@ -829,9 +854,10 @@ sub close_ent_socket {
 # ---------------------------------------------------------------------------
 
 sub res_bgsend {
-  my ($self, $name, $type) = @_;
-  return $self->{res}->bgsend (
-    Mail::SpamAssassin::Util::new_dns_packet($name, $type));
+  my ($self, $host, $type) = @_;
+  my $pkt = Mail::SpamAssassin::Util::new_dns_packet($host, $type);
+  $self->{last_id} = $pkt->header()->id();
+  return $self->{res}->bgsend($pkt);
 }
 
 sub log_dns_result {

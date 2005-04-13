@@ -98,6 +98,7 @@ BEGIN {
 use constant BGSOCK => 0;
 use constant RULES => 1;
 use constant SETS => 2;
+use constant ID => 3;
 
 # TODO: $server is currently unused
 sub do_rbl_lookup {
@@ -109,6 +110,8 @@ sub do_rbl_lookup {
     $self->{rbl_launch} = time;
     $self->{dnspending}->{$type}->{$host}->[BGSOCK] =
         $self->res_bgsend($host, $type);
+    $self->{dnspending}->{$type}->{$host}->[ID] =
+        $self->{last_id};
   }
 
   # always add set
@@ -138,14 +141,17 @@ sub do_dns_lookup {
     $self->{rbl_launch} = time;
     $self->{dnspending}->{$type}->{$host}->[BGSOCK] =
         $self->res_bgsend($host, $type);
+    $self->{dnspending}->{$type}->{$host}->[ID] =
+        $self->{last_id};
   }
   push @{$self->{dnspending}->{$type}->{$host}->[RULES]}, $rule;
 }
 
 sub res_bgsend {
   my ($self, $host, $type) = @_;
-  return $self->{res}->bgsend(
-            Mail::SpamAssassin::Util::new_dns_packet($host, $type));
+  my $pkt = Mail::SpamAssassin::Util::new_dns_packet($host, $type);
+  $self->{last_id} = $pkt->header()->id();
+  return $self->{res}->bgsend($pkt);
 }
 
 ###########################################################################
@@ -184,15 +190,22 @@ sub dnsbl_uri {
   }
 }
 
+# returns 1 on successful packet processing
 sub process_dnsbl_result {
   my ($self, $query) = @_;
 
   my $packet = $self->{res}->bgread($query->[BGSOCK]);
-  undef $query->[BGSOCK];
   return unless (defined $packet &&
 		 defined $packet->header &&
 		 defined $packet->question &&
 		 defined $packet->answer);
+
+  my $respid = $packet->header->id;
+  if ($respid != $query->[ID]) {    # bug 3997
+    warn "dns: received out-of-order response packet: id=$respid want=".
+            $query->[ID].": ".$packet->string;
+    return;     # keep waiting
+  }
 
   my $question = ($packet->question)[0];
   return if !defined $question;
@@ -226,6 +239,7 @@ sub process_dnsbl_result {
       }
     }
   }
+  return 1;
 }
 
 sub process_dnsbl_set {
@@ -306,12 +320,14 @@ sub harvest_dnsbl_queries {
     while (@waiting) {
       @left = ();
       for my $query (@waiting) {
-        if ($self->{res}->bgisready($query->[BGSOCK])) {
-          $self->process_dnsbl_result($query);
+        if ($self->{res}->bgisready($query->[BGSOCK]) &&
+                    $self->process_dnsbl_result($query))
+        {
+          # ok, the response was useful; close the socket
+          undef $query->[BGSOCK];
+          next;
         }
-        else {
-          push(@left, $query);
-        }
+        push(@left, $query);
       }
 
       $self->{main}->call_plugins ("check_tick", { permsgstatus => $self });
