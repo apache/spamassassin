@@ -3274,19 +3274,6 @@ sub check_https_ip_mismatch {
   return 0;
 }
 
-sub check_https_uri_mismatch {
-  my ($self) = @_;
-
-  while (my($k,$v) = each %{$self->{html}->{uri_detail}}) {
-    next if ($k !~ m%^http:%i);
-    foreach (@{$v->{anchor_text}}) {
-      return 1 if (m%\bhttps:%i);
-    }
-  }
-
-  return 0;
-}
-
 sub check_ratware_envelope_from {
   my ($self) = @_;
 
