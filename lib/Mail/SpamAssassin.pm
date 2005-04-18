@@ -75,6 +75,7 @@ use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::Message;
 use Mail::SpamAssassin::Bayes;
 use Mail::SpamAssassin::PluginHandler;
+use Mail::SpamAssassin::DnsResolver;
 
 use File::Basename;
 use File::Path;
@@ -276,6 +277,8 @@ sub new {
   # Mail::SpamAssassin::PerMsgStatus to avoid this crap!
   my $tmpmsg = $self->parse([ ], 1);
   $self->{parser_dns_pms} = Mail::SpamAssassin::PerMsgStatus->new($self, $tmpmsg);
+
+  $self->{resolver} = Mail::SpamAssassin::DnsResolver->new($self);
 
   $self;
 }
@@ -1278,6 +1281,8 @@ sub finish {
     delete $self->{bayes_scanner};
   }
 
+  $self->{resolver}->finish();
+
   foreach(keys %{$self}) {
     delete $self->{$_};
   }
@@ -1295,7 +1300,7 @@ sub init {
     if ($self->{_initted} != $$) {
       $self->{_initted} = $$;
       srand;
-      Mail::SpamAssassin::Util::init_dns_id_counter_from_pid();
+      $self->{resolver}->reinit_post_fork();
     }
     return;
   }

@@ -135,26 +135,9 @@ sub new {
   my $self = $class->SUPER::new($samain);
   bless ($self, $class);
 
-  # TODO: use infrastructure from Mail::SpamAssassin::Dns!
-  eval {
-    require Net::DNS;
-    require Net::DNS::Resolver; 
+  # this can be effectively global, at least in each process, safely
 
-    $self->{res} = Net::DNS::Resolver->new();
-  };
-
-  if ($@) {
-    dbg("uridnsbl: failed to load Net::DNS::Resolver: $@");
-  }
-
-  if ($self->{res}) {
-    $self->{res}->defnames(0);
-    $self->{res}->dnsrch(0);
-    $self->{res}->retrans(3);
-    $self->{res}->retry(1);
-    $self->{res}->persistent_tcp(0);  # bug 3997
-    $self->{res}->persistent_udp(0);  # bug 3997
-  }
+  $self->{finished} = { };
 
   $self->register_eval_rule ("check_uridnsbl");
   $self->set_config($samain->{conf});
@@ -175,7 +158,7 @@ sub parsed_metadata {
   my ($self, $opts) = @_;
   my $scanner = $opts->{permsgstatus};
 
-  if (!($self->{res} && $scanner->is_dns_available())) {
+  if (!$scanner->is_dns_available()) {
     $self->{dns_not_available} = 1;
     return;
   }
@@ -404,12 +387,7 @@ sub check_tick {
   my ($self, $opts) = @_;
 
   return if ($self->{dns_not_available});
-
-  # do a microscopic sleep to give other processes/the DNS server
-  # time to get at the CPU
-  select (undef, undef, undef, 0.01);
-
-  $self->complete_lookups($opts->{permsgstatus}->{uribl_scanstate});
+  $self->complete_lookups($opts->{permsgstatus}->{uribl_scanstate}, 0.3);
   return 1;
 }
 
@@ -422,12 +400,16 @@ sub check_post_dnsbl {
   my $scanstate = $scan->{uribl_scanstate};
 
   # try to complete a few more
-  if (!$self->complete_lookups($scanstate)) {
+  if (!$self->complete_lookups($scanstate, 0.1)) {
     my $secs_to_wait = $scan->{conf}->{uridnsbl_timeout};
+    if ($secs_to_wait < 0) { $secs_to_wait = 0; }
+    my $now = time;
+    my $deadline = $now + $secs_to_wait;
     dbg("uridnsbl: waiting $secs_to_wait seconds for URIDNSBL lookups to complete");
-    while ($secs_to_wait-- >= 0) {
-      last if ($self->complete_lookups($scanstate));
-      sleep 1;
+
+    while ($now < $deadline) {
+      last if ($self->complete_lookups($scanstate, $deadline - $now));
+      $now = time;
     }
     dbg("uridnsbl: done waiting for URIDNSBL lookups to complete");
   }
@@ -521,7 +503,6 @@ sub lookup_domain_ns {
   # dig $dom ns
   my $ent = $self->start_lookup ($scanstate, 'NS', $self->res_bgsend($dom, 'NS'));
   $ent->{obj} = $obj;
-  $ent->{dns_id} = $self->{last_id};
   $scanstate->{pending_lookups}->{$key} = $ent;
 }
 
@@ -567,17 +548,13 @@ sub lookup_a_record {
   # dig $hname a
   my $ent = $self->start_lookup ($scanstate, 'A', $self->res_bgsend($hname, 'A'));
   $ent->{obj} = $obj;
-  $ent->{dns_id} = $self->{last_id};
   $scanstate->{pending_lookups}->{$key} = $ent;
 }
 
 sub complete_a_lookup {
   my ($self, $scanstate, $ent, $hname) = @_;
 
-  my $packet = $ent->{response_packet};
-  my @answer = $packet->answer;
-
-  foreach my $rr (@answer) {
+  foreach my $rr ($ent->{response_packet}->answer) {
     my $str = $rr->string;
     $self->log_dns_result ("A for NS $hname: $str");
 
@@ -614,7 +591,6 @@ sub lookup_single_dnsbl {
   my $ent = $self->start_lookup ($scanstate, 'DNSBL',
         $self->res_bgsend($item, $qtype));
   $ent->{obj} = $obj;
-  $ent->{dns_id} = $self->{last_id};
   $ent->{rulename} = $rulename;
   $ent->{zone} = $dnsbl;
   $scanstate->{pending_lookups}->{$key} = $ent;
@@ -701,10 +677,10 @@ sub got_dnsbl_hit {
 # ---------------------------------------------------------------------------
 
 sub start_lookup {
-  my ($self, $scanstate, $type, $sock) = @_;
+  my ($self, $scanstate, $type, $id) = @_;
   my $ent = {
     type => $type,
-    sock => $sock
+    id => $id
   };
   $scanstate->{queries_started}++;
   $ent;
@@ -716,7 +692,7 @@ sub start_lookup {
 # are, the next lookup in the sequence will be kicked off.
 
 sub complete_lookups {
-  my ($self, $scanstate) = @_;
+  my ($self, $scanstate, $timeout) = @_;
   my %typecount = ();
   my $stillwaiting = 0;
 
@@ -728,20 +704,21 @@ sub complete_lookups {
   $scanstate->{queries_started} = 0;
   $scanstate->{queries_completed} = 0;
 
+  my $nfound = $self->{main}->{resolver}->poll_responses($timeout);
+  dbg ("uridnsbl: select found $nfound socks ready");
+
   foreach my $key (keys %{$pending}) {
     my $ent = $pending->{$key};
-
     my $type = $ent->{type};
-    $key =~ /:(\S+)$/; my $val = $1;
 
-    my $packet;
-    if (!$self->{res}->bgisready ($ent->{sock})
-            || !$self->validate_response_packet($ent))
-    {
+    if (!exists ($self->{finished}->{$ent->{id}})) {
       $typecount{$type}++;
       #$stillwaiting = 1;
       next;
     }
+
+    $ent->{response_packet} = delete $self->{finished}->{$ent->{id}};
+    $key =~ /:(\S+)$/; my $val = $1;
 
     if (LOG_COMPLETION_TIMES) {
       my $secs = (time - $ent->{start});
@@ -803,27 +780,6 @@ sub complete_lookups {
   return (!$stillwaiting);
 }
 
-sub validate_response_packet {
-  my ($self, $ent) = @_;
-
-  my $packet = $self->{res}->bgread($ent->{sock});
-  return unless (defined $packet &&
-                 defined $packet->header &&
-                 defined $packet->question &&
-                 defined $packet->answer);
-
-  my $respid = $packet->header->id;
-  if ($respid != $ent->{dns_id}) {    # bug 3997
-    warn "dns: received out-of-order response packet: id=$respid want=".
-            $ent->{dns_id}.": ".$packet->string;
-    return;     # keep waiting
-  }
-
-  $ent->{response_packet} = $packet;
-  $self->close_ent_socket ($ent);
-  return 1;
-}
-
 # ---------------------------------------------------------------------------
 
 sub abort_remaining_lookups  {
@@ -838,16 +794,7 @@ sub abort_remaining_lookups  {
       $foundone = 1;
     }
 
-    $self->close_ent_socket ($pending->{$key});
     delete $pending->{$key};
-  }
-}
-
-sub close_ent_socket {
-  my ($ent) = @_;
-  if ($ent->{sock}) {
-    $ent->{sock}->close();
-    delete $ent->{sock};
   }
 }
 
@@ -855,9 +802,11 @@ sub close_ent_socket {
 
 sub res_bgsend {
   my ($self, $host, $type) = @_;
-  my $pkt = Mail::SpamAssassin::Util::new_dns_packet($host, $type);
-  $self->{last_id} = $pkt->header()->id();
-  return $self->{res}->bgsend($pkt);
+
+  return $self->{main}->{resolver}->bgsend($host, $type, undef, sub {
+        my $pkt = shift;
+        $self->{finished}->{$pkt->header->id} = $pkt;
+      });
 }
 
 sub log_dns_result {
