@@ -95,23 +95,19 @@ BEGIN {
 ###########################################################################
 
 # DNS query array constants
-use constant BGSOCK => 0;
+use constant ID => 0;
 use constant RULES => 1;
 use constant SETS => 2;
-use constant ID => 3;
 
 # TODO: $server is currently unused
 sub do_rbl_lookup {
   my ($self, $rule, $set, $type, $server, $host, $subtest) = @_;
 
   # only make a specific query once
-  if (!defined $self->{dnspending}->{$type}->{$host}->[BGSOCK]) {
+  if (!defined $self->{dnspending}->{$type}->{$host}->[ID]) {
     dbg("dns: launching DNS $type query for $host in background");
     $self->{rbl_launch} = time;
-    $self->{dnspending}->{$type}->{$host}->[BGSOCK] =
-        $self->res_bgsend($host, $type);
-    $self->{dnspending}->{$type}->{$host}->[ID] =
-        $self->{last_id};
+    $self->{dnspending}->{$type}->{$host}->[ID] = $self->res_bgsend($host, $type);
   }
 
   # always add set
@@ -136,22 +132,21 @@ sub do_dns_lookup {
   my ($self, $rule, $type, $host) = @_;
 
   # only make a specific query once
-  if (!defined $self->{dnspending}->{$type}->{$host}->[BGSOCK]) {
+  if (!defined $self->{dnspending}->{$type}->{$host}->[ID]) {
     dbg("dns: launching DNS $type query for $host in background");
     $self->{rbl_launch} = time;
-    $self->{dnspending}->{$type}->{$host}->[BGSOCK] =
-        $self->res_bgsend($host, $type);
-    $self->{dnspending}->{$type}->{$host}->[ID] =
-        $self->{last_id};
+    $self->{dnspending}->{$type}->{$host}->[ID] = $self->res_bgsend($host, $type);
   }
   push @{$self->{dnspending}->{$type}->{$host}->[RULES]}, $rule;
 }
 
 sub res_bgsend {
   my ($self, $host, $type) = @_;
-  my $pkt = Mail::SpamAssassin::Util::new_dns_packet($host, $type);
-  $self->{last_id} = $pkt->header()->id();
-  return $self->{res}->bgsend($pkt);
+
+  return $self->{resolver}->bgsend($host, $type, undef, sub {
+          my $pkt = shift;
+          $self->{dnsfinished}->{$pkt->header->id} = $pkt;
+        });
 }
 
 ###########################################################################
@@ -192,20 +187,7 @@ sub dnsbl_uri {
 
 # returns 1 on successful packet processing
 sub process_dnsbl_result {
-  my ($self, $query) = @_;
-
-  my $packet = $self->{res}->bgread($query->[BGSOCK]);
-  return unless (defined $packet &&
-		 defined $packet->header &&
-		 defined $packet->question &&
-		 defined $packet->answer);
-
-  my $respid = $packet->header->id;
-  if ($respid != $query->[ID]) {    # bug 3997
-    warn "dns: received out-of-order response packet: id=$respid want=".
-            $query->[ID].": ".$packet->string;
-    return;     # keep waiting
-  }
+  my ($self, $query, $packet) = @_;
 
   my $question = ($packet->question)[0];
   return if !defined $question;
@@ -303,44 +285,53 @@ sub harvest_dnsbl_queries {
 
   return if !defined $self->{rbl_launch};
 
-  my $timeout = $self->{conf}->{rbl_timeout} + $self->{rbl_launch};
+  my $deadline = $self->{conf}->{rbl_timeout} + $self->{rbl_launch};
   my @waiting = (values %{ $self->{dnspending}->{A} },
 		 values %{ $self->{dnspending}->{MX} },
 		 values %{ $self->{dnspending}->{TXT} });
   my @left;
   my $total;
 
-  @waiting = grep { defined $_->[BGSOCK] } @waiting;
+  @waiting = grep { defined $_->[ID] } @waiting;
   $total = scalar @waiting;
+
+  my $now = time;
 
   # trap this loop in an eval { } block, as Net::DNS could throw
   # die()s our way; in particular, process_dnsbl_results() has
   # thrown die()s before (bug 3794).
   eval {
     while (@waiting) {
-      @left = ();
-      for my $query (@waiting) {
-        if ($self->{res}->bgisready($query->[BGSOCK]) &&
-                    $self->process_dnsbl_result($query))
-        {
-          # ok, the response was useful; close the socket
-          undef $query->[BGSOCK];
-          next;
+      my $nfound = $self->{resolver}->poll_responses(1);
+
+      if ($nfound > 0) {
+        @left = ();
+        for my $query (@waiting) {
+          if (exists $self->{dnsfinished}->{$query->[ID]})
+          {
+            my $pkt = delete $self->{dnsfinished}->{$query->[ID]};
+            $self->process_dnsbl_result($query, $pkt);
+          }
+          else {
+            push(@left, $query);
+          }
         }
-        push(@left, $query);
+      } else {
+        @left = @waiting;
       }
 
       $self->{main}->call_plugins ("check_tick", { permsgstatus => $self });
 
       last unless @left;
-      last if time >= $timeout;
+      $now = time;
+      last if $now >= $deadline;
+
       @waiting = @left;
       # dynamic timeout
       my $dynamic = (int($self->{conf}->{rbl_timeout}
                         * (1 - (($total - @left) / $total) ** 2) + 0.5)
                     + $self->{rbl_launch});
-      $timeout = $dynamic if ($dynamic < $timeout);
-      sleep 1;
+      $deadline = $dynamic if ($dynamic < $deadline);
     }
     dbg("dns: success for " . ($total - @left) . " of $total queries");
   };
@@ -361,7 +352,7 @@ sub harvest_dnsbl_queries {
     }
     my $delay = time - $self->{rbl_launch};
     dbg("dns: timeout for $string after $delay seconds");
-    undef $query->[BGSOCK];
+    undef $query->[ID];
   }
   # register hits
   while (my ($rule, $logs) = each %{ $self->{dnsresult} }) {
@@ -387,18 +378,9 @@ sub harvest_dnsbl_queries {
 sub rbl_finish {
   my ($self) = @_;
 
-  foreach my $type (keys %{$self->{dnspending}}) {
-    foreach my $host (keys %{$self->{dnspending}->{$type}}) {
-      if (defined $self->{dnspending}->{$type}->{$host}->[BGSOCK]) {
-	eval {
-	  # ensure the sockets are closed
-	  delete $self->{dnspending}->{$type}->{$host}->[BGSOCK];
-	};
-      }
-    }
-  }
   delete $self->{rbl_launch};
   delete $self->{dnspending};
+  delete $self->{dnsfinished};
 
   # TODO: do not remove these since they can be retained!
   delete $self->{dnscache};
@@ -411,34 +393,8 @@ sub rbl_finish {
 
 sub load_resolver {
   my ($self) = @_;
-
-  if (defined $self->{res}) { return 1; }
-  $self->{no_resolver} = 1;
-
-  eval {
-    require Net::DNS;
-    $self->{res} = Net::DNS::Resolver->new;
-    if (defined $self->{res}) {
-      $self->{no_resolver} = 0;
-      $self->{res}->retry(1);		# If it fails, it fails
-      $self->{res}->retrans(0);		# If it fails, it fails
-      $self->{res}->dnsrch(0);		# ignore domain search-list
-      $self->{res}->defnames(0);	# don't append stuff to end of query
-      $self->{res}->tcp_timeout(3);	# timeout of 3 seconds only
-      $self->{res}->udp_timeout(3);	# timeout of 3 seconds only
-      $self->{res}->persistent_tcp(0);	# bug 3997
-      $self->{res}->persistent_udp(0);	# bug 3997
-    }
-    1;
-  };   #  or warn "dns: eval failed: $@ $!\n";
-
-  dbg("dns: is Net::DNS::Resolver available? " .
-       ($self->{no_resolver} ? "no" : "yes"));
-  if (!$self->{no_resolver} && defined $Net::DNS::VERSION) {
-    dbg("dns: Net::DNS version: ".$Net::DNS::VERSION);
-  }
-
-  return (!$self->{no_resolver});
+  $self->{resolver} = $self->{main}->{resolver};
+  return $self->{resolver}->load_resolver();
 }
 
 sub lookup_ns {
@@ -455,7 +411,7 @@ sub lookup_ns {
 
   } else {
     eval {
-      my $query = $self->{res}->search($dom, 'NS');
+      my $query = $self->{resolver}->search($dom, 'NS');
       my @nses = ();
       if ($query) {
 	foreach my $rr ($query->answer) {
@@ -487,10 +443,14 @@ sub lookup_mx {
 
   } else {
     eval {
-      my @recs = Net::DNS::mx ($self->{res}, $dom);
-
-      # just keep the IPs, drop the preferences.
-      my @ips = map { $_->exchange } @recs;
+      my $query = $self->{resolver}->search($dom, 'MX');
+      my @ips = ();
+      if ($query) {
+	foreach my $rr ($query->answer) {
+          # just keep the IPs, drop the preferences.
+	  if ($rr->type eq "MX") { push (@ips, $rr->exchange); }
+	}
+      }
 
       $mxrecords = $self->{dnscache}->{MX}->{$dom} = [ @ips ];
     };
@@ -541,7 +501,7 @@ sub lookup_ptr {
 
   } else {
     eval {
-      my $query = $self->{res}->search($dom);
+      my $query = $self->{resolver}->search($dom);
       if ($query) {
 	foreach my $rr ($query->answer) {
 	  if ($rr->type eq "PTR") {
@@ -584,7 +544,7 @@ sub lookup_a {
 
   } else {
     eval {
-      my $query = $self->{res}->search($name);
+      my $query = $self->{resolver}->search($name);
       if ($query) {
 	foreach my $rr ($query->answer) {
 	  if ($rr->type eq "A") {
