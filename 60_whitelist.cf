@@ -40,19 +40,6 @@ header USER_IN_DEF_WHITELIST	eval:check_from_in_default_whitelist()
 describe USER_IN_DEF_WHITELIST	From: address is in the default white-list
 tflags USER_IN_DEF_WHITELIST	userconf nice noautolearn
 
-header USER_IN_SPF_WHITELIST	eval:check_for_spf_whitelist_from()
-describe USER_IN_SPF_WHITELIST	From: address is in the user's SPF whitelist
-tflags USER_IN_SPF_WHITELIST	userconf nice noautolearn net
-
-header USER_IN_DEF_SPF_WL	eval:check_for_def_spf_whitelist_from()
-describe USER_IN_DEF_SPF_WL	From: address is in the default SPF white-list
-tflags USER_IN_DEF_SPF_WL	userconf nice noautolearn net
-
-header __ENV_AND_HDR_FROM_MATCH	eval:check_for_matching_env_and_hdr_from()
-meta ENV_AND_HDR_SPF_MATCH	(USER_IN_DEF_SPF_WL && __ENV_AND_HDR_FROM_MATCH)
-describe ENV_AND_HDR_SPF_MATCH	Env and Hdr From used in default SPF WL Match
-tflags ENV_AND_HDR_SPF_MATCH	userconf nice noautolearn net
-
 header USER_IN_BLACKLIST_TO     eval:check_to_in_blacklist()
 describe USER_IN_BLACKLIST_TO   User is listed in 'blacklist_to'
 tflags USER_IN_BLACKLIST_TO     userconf noautolearn
@@ -80,49 +67,6 @@ tflags USER_IN_ALL_SPAM_TO      userconf nice noautolearn
 #
 # Please do not add unmoderated public mailing lists here.  They are
 # too easily abused by spammers.
-
-# we need the SPF plugin to do SPF validated whitelists, so:
-ifplugin Mail::SpamAssassin::Plugin::SPF
-
-def_whitelist_from_spf   *@nytimes.com
-def_whitelist_from_spf   *@amazon.com
-def_whitelist_from_spf   *@*.amazon.com
-def_whitelist_from_spf   *@amazon.co.uk
-def_whitelist_from_spf   *@*.amazon.co.uk
-def_whitelist_from_spf   *@ora.com
-def_whitelist_from_spf   *@*.ora.com
-def_whitelist_from_spf   *@bn.com
-def_whitelist_from_spf   *@mypoints.com
-def_whitelist_from_spf   *@*.mypoints.com
-def_whitelist_from_spf   *@paypal.com
-def_whitelist_from_spf   *@ebay.com
-def_whitelist_from_spf   *@foolsubs.com
-def_whitelist_from_spf   *@match.com
-
-# bugtraq: can contain malicious Javascript etc.
-def_whitelist_from_spf   *@securityfocus.com
-
-def_whitelist_from_spf   *@mediaunspun.imakenews.net
-
-# sender of Cringley newsletter
-def_whitelist_from_spf   *@bdcimail.com
-
-# Silicon.com newslettters - we see thousands of these
-def_whitelist_from_spf   *@silicon.com
-
-# C|Net news.com newsletters
-def_whitelist_from_spf   *@newsletter.online.com
-
-# bug 1348
-def_whitelist_from_spf   *@enews.buy.com
-def_whitelist_from_spf   *@palm.m0.net
-def_whitelist_from_spf   *@handspring.4at1.com
-
-endif # Mail::SpamAssassin::Plugin::SPF
-
-
-# the remaining default whitelists use the received headers and do not require
-# the SPF plugin
 
 def_whitelist_from_rcvd  billing@networksolutions.com           networksolutions.com
 def_whitelist_from_rcvd  outbound-response@networksolutions.com networksolutions.com
