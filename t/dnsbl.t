@@ -9,10 +9,12 @@ use constant HAS_NET_DNS => eval { require Net::DNS; };
 # in Sys::Hostname::Long (which Net::DNS uses.)
 # See <http://bugzilla.spamassassin.org/show_bug.cgi?id=3806>
 use constant IS_LINUX   => $^O eq 'linux';
+use constant IS_WINDOWS => ($^O =~ /^(mswin|dos|os2)/oi);
 use constant AM_ROOT    => $< == 0;
 
 use constant DO_RUN     => TEST_ENABLED && HAS_NET_DNS &&
-                                        !(AM_ROOT && !IS_LINUX);
+                                        !(AM_ROOT &&
+                                          !(IS_LINUX || IS_WINDOWS));
 
 use Test;
 
