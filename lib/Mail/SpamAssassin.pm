@@ -21,12 +21,13 @@ Mail::SpamAssassin - Spam detector and markup engine
 =head1 SYNOPSIS
 
   my $spamtest = Mail::SpamAssassin->new();
-  my $mail = $spamtest->parse( $message );
-  my $status = $spamtest->check( $mail );
+  my $mail = $spamtest->parse($message);
+  my $status = $spamtest->check($mail);
 
   if ($status->is_spam()) {
     $mail = $status->rewrite_mail();
-  } else {
+  }
+  else {
     ...
   }
   ...
@@ -34,25 +35,20 @@ Mail::SpamAssassin - Spam detector and markup engine
   $status->finish();
   $mail->finish();
 
-
 =head1 DESCRIPTION
 
 Mail::SpamAssassin is a module to identify spam using several methods
 including text analysis, internet-based realtime blacklists, statistical
 analysis, and internet-based hashing algorithms.
 
-Using its rule base, it uses a wide range of heuristic tests on mail headers
-and body text to identify "spam", also known as unsolicited bulk email.
-
-Once identified, the mail can then be tagged as spam for later filtering
-using the user's own mail user-agent application or at the mail transfer
-agent.
+Using its rule base, it uses a wide range of heuristic tests on mail
+headers and body text to identify "spam", also known as unsolicited bulk
+email.  Once identified as spam, the mail can then be tagged as spam for
+later filtering using the user's own mail user agent application or at
+the mail transfer agent.
 
 If you wish to use a command-line filter tool, try the C<spamassassin>
 or the C<spamd>/C<spamc> tools provided.
-
-SpamAssassin also includes support for reporting spam messages to collaborative
-filtering databases, such as Vipul's Razor ( http://razor.sourceforge.net/ ).
 
 =head1 METHODS
 
@@ -107,14 +103,18 @@ $IS_DEVEL_BUILD = 1;        # change for release versions
 # SUB_VERSION is now just <yyyy>-<mm>-<dd>
 $SUB_VERSION = (split(/\s+/,'$LastChangedDate$ updated by SVN'))[1];
 
-# If you hacked up your SA, you should add a version_tag to you .cf files.
+# If you hacked up your SA, you should add a version_tag to your .cf files.
 # This variable should not be modified directly.
 @EXTRA_VERSION = qw();
 if (defined $IS_DEVEL_BUILD && $IS_DEVEL_BUILD) {
-  push(@EXTRA_VERSION, ( 'r' . qw{$LastChangedRevision$ updated by SVN}[1] ));
+  push(@EXTRA_VERSION,
+       ('r' . qw{$LastChangedRevision$ updated by SVN}[1]));
 }
 
-sub Version { $VERSION=~/^(\d+)\.(\d\d\d)(\d\d\d)$/; join('-', sprintf("%d.%d.%d",$1,$2,$3), @EXTRA_VERSION) }
+sub Version {
+  $VERSION =~ /^(\d+)\.(\d\d\d)(\d\d\d)$/;
+  return join('-', sprintf("%d.%d.%d", $1, $2, $3), @EXTRA_VERSION);
+}
 
 $HOME_URL = "http://spamassassin.apache.org/";
 
@@ -169,6 +169,20 @@ Constructs a new C<Mail::SpamAssassin> object.  You may pass the
 following attribute-value pairs to the constructor.
 
 =over 4
+
+=item debug
+
+This is the debug options used to determine logging level.  It exists to
+allow sections of debug messages (called "facilities") to be enabled or
+disabled.  If this is a string, it is treated as a comma-delimited list
+of the debug facilities.  If it's a hash reference, then the keys are
+treated as the list of debug facilities and if it's a array reference,
+then the elements are treated as the list of debug facilities.
+
+There are also two special cases: (1) if the special case of "info" is
+passed as a debug facility, then all informational messages are enabled;
+(2) if the special case of "all" is passed as a debug facility, then all
+debugging facilities are enabled.
 
 =item rules_filename
 
