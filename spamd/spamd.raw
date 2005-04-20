@@ -336,23 +336,21 @@ my $log_facility = $opt{'syslog'} || 'mail';
 # gets mapped to --syslog=stderr and such --syslog-socket=file. An internal
 # socket of 'none' means as much as --syslog=null. Sounds complicated? It is.
 # But it works.
-my $log_socket = lc( $opt{'syslog-socket'} ) || 'unix';
+my $log_socket = lc($opt{'syslog-socket'}) || 'unix';
 
 # This is the default log file; it can be changed on the command line
 # via a --syslog flag containing non-word characters.
 my $log_file = "spamd.log";
 
 # A specific log file was given (--syslog=/path/to/file).
-if ( $log_facility =~ /[^a-z0-9]/ ) {
-  $log_file   = $log_facility;
+if ($log_facility =~ /[^a-z0-9]/) {
+  $log_file = $log_facility;
   $log_socket = 'file';
 }
-
 # The generic log file was requested (--syslog=file).
-elsif ( lc($log_facility) eq 'file' ) {
+elsif (lc($log_facility) eq 'file') {
   $log_socket = 'file';
 }
-
 # The casing is kept only if the facility specified a file.
 else {
   $log_facility = lc($log_facility);
@@ -360,19 +358,18 @@ else {
 
 # Either above or at the command line the socket was set
 # to 'file' (--syslog-socket=file).
-if ( $log_socket eq 'file' ) {
+if ($log_socket eq 'file') {
   $log_facility = 'file';
 }
-
 # The socket 'none' (--syslog-socket=none) historically
 # represents logging to STDERR.
-elsif ( $log_socket eq 'none' ) {
+elsif ($log_socket eq 'none') {
   $log_facility = 'stderr';
 }
 
 # Either above or at the command line the facility was set
 # to 'stderr' (--syslog=stderr).
-if ( $log_facility eq 'stderr' ) {
+if ($log_facility eq 'stderr') {
   $log_socket = 'file';
 }
 
@@ -383,7 +380,7 @@ my $syslog_failure_threshold = 10;
 
 # Logging via syslog is requested. Falling back to INET and then STDERR
 # if opening a UNIX socket fails.
-if ( $log_socket ne 'file' and $log_facility ne 'null' ) {
+if ($log_socket ne 'file' && $log_facility ne 'null') {
   dbg("logger: trying to connect to syslog/${log_socket}...\n");
   eval {
     defined( setlogsock($log_socket) ) || die $!;
