@@ -28,14 +28,12 @@ This module implementes a SQL based bayesian storage module.
 
 package Mail::SpamAssassin::BayesStore::SQL;
 
-# Make the main dbg() accessible in our package w/o an extra function
-*dbg=\&Mail::SpamAssassin::dbg;
-
 use strict;
 use warnings;
 use bytes;
 
 use Mail::SpamAssassin::BayesStore;
+use Mail::SpamAssassin::Logger;
 use Digest::SHA1 qw(sha1);
 
 use vars qw( @ISA );

@@ -98,6 +98,7 @@ use lib "$FindBin::Bin/tmp";
 eval "use bytes";
 use Mail::SpamAssassin::ArchiveIterator;
 use Mail::SpamAssassin;
+use Mail::SpamAssassin::Logger;
 use File::Copy;
 use Getopt::Long;
 use POSIX qw(strftime);
@@ -141,6 +142,11 @@ if ($opt_f) {
 usage(1) if !@targets;
 
 $opt_debug ||= 'all' if defined $opt_debug;
+
+Mail::SpamAssassin::Logger::add(method => 'syslog',
+				ident => 'mass-check',
+				socket => 'unix',
+				facility => 'mail');
 
 my $user_prefs = "$opt_p/user_prefs";
 # generated user_prefs

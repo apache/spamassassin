@@ -72,11 +72,8 @@ use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::NetSet;
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::Conf::Parser;
+use Mail::SpamAssassin::Logger;
 use File::Spec;
-
-# Make the main dbg() accessible in our package w/o an extra function
-*dbg=\&Mail::SpamAssassin::dbg;
-*info=\&Mail::SpamAssassin::info;
 
 use strict;
 use warnings;

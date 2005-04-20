@@ -48,12 +48,9 @@ SpamAssasin; it is not guaranteed to work with other versions of SpamAssassin.
 
 package Mail::SpamAssassin::Plugin::ReplaceTags;
 
-# Make the main dbg() accessible in our package w/o an extra function
-*dbg=\&Mail::SpamAssassin::Plugin::dbg;
-*info=\&Mail::SpamAssassin::Plugin::info;
-
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Plugin;
+use Mail::SpamAssassin::Logger;
 
 use strict;
 use warnings;
@@ -90,7 +87,7 @@ sub finish_parsing_end {
 	# skip if not listed by replace_rules
 	next unless $opts->{conf}->{rules_to_replace}{$rule};
 
-	if (Mail::SpamAssassin::dbg_check('+replacetags')) {
+	if (would_log('dbg', 'replacetags') > 1) {
 	  dbg("replacetags: replacing $rule: $re");
 	}
 
@@ -136,7 +133,7 @@ sub finish_parsing_end {
 	# do the actual replacement
 	$opts->{conf}->{$type}->{$priority}->{$rule} = $re;
 
-	if (Mail::SpamAssassin::dbg_check('+replacetags')) {
+	if (would_log('dbg', 'replacetags') > 1) {
 	  dbg("replacetags: replaced $rule: $re");
 	}
       }

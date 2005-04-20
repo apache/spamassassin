@@ -45,9 +45,6 @@ the learning process.
 
 package Mail::SpamAssassin::PerMsgLearner;
 
-# Make the main dbg() accessible in our package w/o an extra function
-*dbg=\&Mail::SpamAssassin::dbg;
-
 use strict;
 use warnings;
 use bytes;
@@ -55,6 +52,7 @@ use bytes;
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::Bayes;
+use Mail::SpamAssassin::Logger;
 
 use vars qw{
   @ISA

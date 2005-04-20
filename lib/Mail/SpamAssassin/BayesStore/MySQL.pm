@@ -35,14 +35,12 @@ the instructions in sql/README.bayes.
 
 package Mail::SpamAssassin::BayesStore::MySQL;
 
-# Make the main dbg() accessible in our package w/o an extra function
-*dbg=\&Mail::SpamAssassin::dbg;
-
 use strict;
 use warnings;
 use bytes;
 
 use Mail::SpamAssassin::BayesStore::SQL;
+use Mail::SpamAssassin::Logger;
 
 use vars qw( @ISA );
 

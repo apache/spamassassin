@@ -36,10 +36,8 @@ This plugin requires the IP::Country module from CPAN.
 
 package Mail::SpamAssassin::Plugin::RelayCountry;
 
-# Make the main dbg() accessible in our package w/o an extra function
-*dbg=\&Mail::SpamAssassin::Plugin::dbg;
-
 use Mail::SpamAssassin::Plugin;
+use Mail::SpamAssassin::Logger;
 use strict;
 use warnings;
 use bytes;

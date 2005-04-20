@@ -63,6 +63,7 @@ use bytes;
 
 require 5.006_001;
 
+use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Constants;
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Conf::SQL;
@@ -86,10 +87,8 @@ BEGIN {
   Time::HiRes->import( qw(time) ) unless $@;
 }
 
-
 use vars qw{
   @ISA $VERSION $SUB_VERSION @EXTRA_VERSION $IS_DEVEL_BUILD $HOME_URL
-  $DEBUG $INFO %facilities
   @default_rules_path @default_prefs_path
   @default_userprefs_path @default_userstate_dir
   @site_rules_path
@@ -259,10 +258,10 @@ sub new {
   bless ($self, $class);
 
   # enable or disable debugging
-  Mail::SpamAssassin::_init_debugger($self->{debug});
+  Mail::SpamAssassin::Logger::add_facilities($self->{debug});
 
   # first debugging information possibly printed should be the version
-  info("generic: SpamAssassin version ".Version());
+  info("generic: SpamAssassin version " . Version());
 
   # if the libs are installed in an alternate location, and the caller
   # didn't set PREFIX, we should have an estimated guess ready ...
@@ -296,44 +295,6 @@ sub new {
 
   $self;
 }
-
-# Do not use this routine in any 3rd-party scripts, it's not part of the
-# official public API!  spamd needs it though.
-#
-# Enables or disables debugging based on the facilities given.  This will
-# affect ALL SpamAssassin objects!
-sub _init_debugger {
-  # define debugging facilities first
-  $Mail::SpamAssassin::INFO = 0;
-  $Mail::SpamAssassin::DEBUG = 0;
-
-  my $facilities = $_[0];
-  my @facilities = ();
-  if (ref ($facilities) eq '') {
-    return if not defined $facilities or $facilities eq '0';
-    @facilities = split(/,/, $facilities);
-  }
-  elsif (ref ($facilities) eq 'ARRAY') {
-    @facilities = @{ $facilities };
-  }
-  elsif (ref ($facilities) eq 'HASH') {
-    @facilities = grep { $facilities{$_} } keys %{ $facilities };
-  }
-  else {
-    return;
-  }
-  @facilities = grep(/^\S+$/, @facilities);
-  
-  if (@facilities) {
-    $Mail::SpamAssassin::facilities{$_} = 1 for @facilities;
-    # turn on informational notices
-    $Mail::SpamAssassin::INFO = 1;
-    # turn on debugging if facilities other than "info" are enabled
-    $Mail::SpamAssassin::DEBUG = keys %Mail::SpamAssassin::facilities > 1
-                              || !$Mail::SpamAssassin::facilities{info};
-  }
-}
-
 
 sub create_locker {
   my ($self) = @_;
@@ -1674,81 +1635,6 @@ sub find_all_addrs_in_line {
 }
 
 ###########################################################################
-
-sub _dbg_info_helper {
-  my ($facility, $prefix, $message) = ("generic", @_);
-
-  if ($message =~ /^(\S+?):\s*(.*)/s) {
-    $facility = $1;
-    $message = $2;
-  }
-
-  if ($facilities{all} || $facilities{$prefix} || $facilities{$facility}) {
-    $message =~ s/\n+$//s;
-    $message =~ s/^/${prefix}: ${facility}: /mg;
-    warn "$message\n";
-  }
-}
-
-# usage: dbg("facility: message")
-# This is used for all low priority debugging messages.
-sub dbg {
-  return unless $Mail::SpamAssassin::DEBUG;
-  _dbg_info_helper("debug", @_);
-}
-
-# returns whether or not debugging is enabled in general or (if specified) for
-# a certain facility
-sub dbg_check {
-  my $facility = shift;
-  my $useall = 1;
-
-  if (defined $facility) {
-    if ($facility =~ /^(\+)(.+)$/) {
-      $facility = $2;
-      $useall = 0;
-    }
-    return($Mail::SpamAssassin::DEBUG && (
-      ($useall && $Mail::SpamAssassin::facilities{all}) ||
-      $Mail::SpamAssassin::facilities{$facility}
-      ));
-  }
-
-  return($Mail::SpamAssassin::DEBUG && $Mail::SpamAssassin::facilities{all});
-}
-
-# usage: info("facility: message")
-# This is used for informational messages indicating a normal, but
-# significant, condition.  This should be very infrequently called.
-sub info {
-  return unless $Mail::SpamAssassin::INFO;
-  _dbg_info_helper("info", @_);
-}
-
-# returns whether or not info output is enabled in general or (if specified) for
-# a certain facility
-sub info_check {
-  my $facility = shift;
-  my $useall = 1;
-
-  if (defined $facility) {
-    if ($facility =~ /^(\+)(.+)$/) {
-      $facility = $2;
-      $useall = 0;
-    }
-    return($Mail::SpamAssassin::INFO && (
-      ($useall &&
-       ($Mail::SpamAssassin::facilities{all} ||
-        $Mail::SpamAssassin::facilities{info})) ||
-      $Mail::SpamAssassin::facilities{$facility}
-      ));
-  }
-
-  return($Mail::SpamAssassin::INFO && (
-    $Mail::SpamAssassin::facilities{all} ||
-    $Mail::SpamAssassin::facilities{info}
-  ));
-}
 
 # sa_die -- used to die with a useful exit code.
 

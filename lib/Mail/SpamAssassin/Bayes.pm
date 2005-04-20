@@ -47,15 +47,13 @@ The results are incorporated into SpamAssassin as the BAYES_* rules.
 
 package Mail::SpamAssassin::Bayes;
 
-# Make the main dbg() accessible in our package w/o an extra function
-*dbg=\&Mail::SpamAssassin::dbg;
-
 use strict;
 use warnings;
 use bytes;
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::PerMsgStatus;
+use Mail::SpamAssassin::Logger;
 
 # pick ONLY ONE of these combining implementations.
 use Mail::SpamAssassin::Bayes::CombineChi;

@@ -43,11 +43,8 @@ confidence.  In that case, C<UNWANTED_LANGUAGE_BODY> will not trigger.
 
 package Mail::SpamAssassin::Plugin::TextCat;
 
-# Make the main dbg() accessible in our package w/o an extra function
-*dbg=\&Mail::SpamAssassin::Plugin::dbg;
-*info=\&Mail::SpamAssassin::Plugin::info;
-
 use Mail::SpamAssassin::Plugin;
+use Mail::SpamAssassin::Logger;
 use strict;
 use warnings;
 use bytes;

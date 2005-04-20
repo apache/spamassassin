@@ -80,10 +80,8 @@ not have any execute bits set (the umask is set to 111).
 
 package Mail::SpamAssassin::Plugin::Hashcash;
 
-# Make the main dbg() accessible in our package w/o an extra function
-*dbg=\&Mail::SpamAssassin::Plugin::dbg;
-
 use Mail::SpamAssassin::Plugin;
+use Mail::SpamAssassin::Logger;
 use Digest::SHA1 qw(sha1);
 use Fcntl;
 use File::Path;

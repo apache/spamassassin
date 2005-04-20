@@ -46,9 +46,6 @@ class.  This object encapsulates all the per-message state.
 
 package Mail::SpamAssassin::PerMsgStatus;
 
-# Make the main dbg() accessible in our package w/o an extra function
-*dbg=\&Mail::SpamAssassin::dbg;
-
 use strict;
 use warnings;
 use bytes;
@@ -58,6 +55,7 @@ use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::EvalTests;
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Util;
+use Mail::SpamAssassin::Logger;
 
 use vars qw{
   @ISA
@@ -98,7 +96,7 @@ sub new {
   }
 
   delete $self->{should_log_rule_hits};
-  my $dbgcache = Mail::SpamAssassin::dbg_check('rules');
+  my $dbgcache = would_log('dbg', 'rules');
   if ($dbgcache || $self->{save_pattern_hits}) {
     $self->{should_log_rule_hits} = 1;
   }
@@ -1942,7 +1940,7 @@ sub get_parsed_uri_list {
     $self->{parsed_uri_list} = \@uris;
 
     # list out the URLs for debugging ...
-    if (Mail::SpamAssassin::dbg_check('uri')) {
+    if (would_log('dbg', 'uri')) {
       foreach my $nuri (@uris) {
         dbg("uri: parsed uri found: $nuri");
       }
@@ -2366,7 +2364,7 @@ sub run_eval_tests {
   my ($self, $evalhash, $prepend2desc, @extraevalargs) = @_;
   local ($_);
   
-  my $debugenabled = Mail::SpamAssassin::dbg_check();
+  my $debugenabled = would_log('dbg');
 
   my $scoreset = $self->{conf}->get_score_set();
   while (my ($rulename, $test) = each %{$evalhash}) {
