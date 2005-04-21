@@ -20,7 +20,7 @@ use SATest; sa_t_init("debug");
 use Test;
 use Mail::SpamAssassin;
 
-plan tests => 2;
+plan tests => 3;
 
 # list of known debug facilities
 my %facility = map {; $_ => 1 }
@@ -31,20 +31,11 @@ my %facility = map {; $_ => 1 }
       uridnsbl util ),
 ;
 
-# initialize SpamAssassin
-my $sa = Mail::SpamAssassin->new({
-    rules_filename => "$prefix/t/log/test_rules_copy",
-    site_rules_filename => "$prefix/t/log/test_default.cf",
-    userprefs_filename  => "$prefix/masses/spamassassin/user_prefs",
-    local_tests_only    => 1,
-    debug             => 1,
-    dont_copy_prefs   => 1,
-});
-$sa->init(0); # parse rules
-
 my $fh = IO::File->new_tmpfile();
 open(STDERR, ">&=".fileno($fh)) || die "Cannot reopen STDERR";
-sarun("-t -D < data/spam/dnsbl.eml");
+
+ok(sarun("-t -D < data/spam/dnsbl.eml"));
+
 seek($fh, 0, 0);
 my $error = do {
     local $/;
