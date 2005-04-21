@@ -194,7 +194,7 @@ sub syslog_incr_failure_counter {
 
   $self->{consecutive_failures}++;
   if ($self->{consecutive_failures}++ > $self->{failure_threshold}) {
-    warn("syslog() failed " . $self->{consecutive_failures} .
+    warn("logger: syslog() failed " . $self->{consecutive_failures} .
 	 " times in a row, disabled\n");
     $self->{disabled} = 1;
     return 1;

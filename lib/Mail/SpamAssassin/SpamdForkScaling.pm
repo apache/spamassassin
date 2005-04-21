@@ -226,7 +226,7 @@ sub read_one_line_from_child_socket {
     return PFSTATE_BUSY;
   }
   else {
-    die "unknown message from child: '$line'";
+    die "prefork: unknown message from child: '$line'";
     return PFSTATE_ERROR;
   }
 }
@@ -327,14 +327,14 @@ sub wait_for_orders {
   while (1) {
     my $line = $sock->getline();
     if (!defined($line)) {
-      die "empty order from parent";
+      die "prefork: empty order from parent";
     }
     chomp $line;
     if (index ($line, "A") == 0) {  # string starts with "A" = accept
       return PFORDER_ACCEPT;
     }
     else {
-      die "unknown order from parent: '$line'";
+      die "prefork: unknown order from parent: '$line'";
     }
   }
 }
@@ -421,7 +421,7 @@ sub need_to_del_server {
 
   if (!defined $pid) {
     # this should be impossible. assert it
-    die "oops! no idle kids in need_to_del_server?";
+    die "prefork: oops! no idle kids in need_to_del_server?";
   }
 
   # warning: race condition if these two lines are the other way around.

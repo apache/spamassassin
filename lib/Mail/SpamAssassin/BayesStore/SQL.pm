@@ -1532,13 +1532,13 @@ sub restore_database {
     }
 
     if ($token_error_count >= 20) {
-      warn "Encountered too many errors (20) while parsing token line, reverting to empty database and exiting.\n";
+      warn "bayes: encountered too many errors (20) while parsing token line, reverting to empty database and exiting\n";
       $self->clear_database();
       return 0;
     }
 
     if ($seen_error_count >= 20) {
-      warn "Encountered too many errors (20) while parsing seen lines, reverting to empty database and exiting.\n";
+      warn "bayes: encountered too many errors (20) while parsing seen lines, reverting to empty database and exiting\n";
       $self->clear_database();
       return 0;
     }

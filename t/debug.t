@@ -26,9 +26,9 @@ plan tests => 3;
 my %facility = map {; $_ => 1 }
   qw( accessdb auto-whitelist bayes check config daemon dcc dns eval
       generic facility hashcash ident ignore info ldap learn locker log
-      logger markup message metadata plugin prefork pyzor razor2
-      received-header replacetags reporter rules spamd spf textcat uri
-      uridnsbl util ),
+      logger markup message metadata mimeheader plugin prefork progress
+      pyzor razor2 received-header replacetags reporter rules spamd spf
+      textcat uri uridnsbl util ),
 ;
 
 my $fh = IO::File->new_tmpfile();

@@ -208,8 +208,8 @@ sub long_diagnostics {
 
   print $summary;
   if ($EXIT_STATUS || $WARNINGS) {
-    print "\nWarning: some functionality may not be available.\n".
-            "Please read the above report before continuing!\n\n";
+    print "\nwarning: some functionality may not be available,\n".
+            "please read the above report before continuing!\n\n";
   }
   return $EXIT_STATUS;
 }

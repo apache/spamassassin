@@ -133,7 +133,7 @@ sub set_config {
 
       eval $evalcode;
       if ($@) {
-        warn "plugin error: $@";
+        warn "mimeheader: plugin error: $@";
         return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
 

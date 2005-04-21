@@ -51,6 +51,7 @@ use constant WARNING => 1;
 use constant INFO => 2;
 use constant DBG => 3;
 
+# global shared object
 our %LOG_SA;
 
 # defaults
@@ -91,6 +92,13 @@ sub add_facilities {
 
 sub log_message {
   my ($level, @message) = @_;
+
+  # too many die and warn messages out there, don't log the
+  # ones that we don't own
+  if ($level eq "error" or $level eq "warn") {
+    return unless $message[0] =~ /^\S+:/;
+  }
+
   my $message = join(" ", @message);
   $message =~ s/[\r\n]+$//;		# remove any trailing newlines
   $message =~ s/[\x00-\x1f]/_/g;	# replace control characters with "_"

@@ -87,7 +87,7 @@ sub new {
   $class = ref($class) || $class;
 
   if (!exists($args->{total}) || $args->{total} < 1) {
-    warn "Must provide a total value > 1";
+    warn "progress: must provide a total value > 1";
     return undef;
   }
 
