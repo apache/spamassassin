@@ -202,7 +202,7 @@ sub syslog_incr_failure_counter {
   return 0;
 }
 
-sub close {
+sub close_log {
   my ($self) = @_;
 
   closelog();

@@ -190,14 +190,14 @@ sub would_log {
   return 0;
 }
 
-sub close {
+sub close_log {
   while (my ($name, $object) = each %{ $LOG_SA{method} }) {
-    $object->close();
+    $object->close_log();
   }
 }
 
 END {
-  close();
+  close_log();
 }
 
 1;
