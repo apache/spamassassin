@@ -81,6 +81,7 @@ use Pod::Usage;
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::ArchiveIterator;
 use Mail::SpamAssassin::Util::Progress;
+use Mail::SpamAssassin::Logger;
 
 my %resphash = (
   EX_OK          => 0,     # no problems
