@@ -110,12 +110,10 @@ not going to be listed in URIBLs.
 
 package Mail::SpamAssassin::Plugin::URIDNSBL;
 
-# Make the main dbg() accessible in our package w/o an extra function
-*dbg=\&Mail::SpamAssassin::Plugin::dbg;
-
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Constants qw(:ip);
 use Mail::SpamAssassin::Util;
+use Mail::SpamAssassin::Logger;
 use strict;
 use warnings;
 use bytes;

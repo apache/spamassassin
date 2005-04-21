@@ -57,14 +57,12 @@ for more information on TEMPLATE TAGS.
 
 package Mail::SpamAssassin::Plugin::AWL;
 
-# Make the main dbg() accessible in our package w/o an extra function
-*dbg=\&Mail::SpamAssassin::Plugin::dbg;
-
 use strict;
 use warnings;
 use bytes;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::AutoWhitelist;
+use Mail::SpamAssassin::Logger;
 
 use vars qw(@ISA);
 @ISA = qw(Mail::SpamAssassin::Plugin);

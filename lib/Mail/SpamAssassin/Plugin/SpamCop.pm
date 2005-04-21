@@ -42,11 +42,8 @@ See http://www.spamcop.net/ for more information about SpamCop.
 
 package Mail::SpamAssassin::Plugin::SpamCop;
 
-# Make the main dbg() accessible in our package w/o an extra function
-*dbg=\&Mail::SpamAssassin::Plugin::dbg;
-*info=\&Mail::SpamAssassin::Plugin::info;
-
 use Mail::SpamAssassin::Plugin;
+use Mail::SpamAssassin::Logger;
 use IO::Socket;
 use strict;
 use warnings;

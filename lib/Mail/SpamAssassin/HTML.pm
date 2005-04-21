@@ -24,16 +24,16 @@ use warnings;
 use bytes;
 
 package Mail::SpamAssassin::HTML;
+
 use HTML::Parser 3.24 ();
+use Mail::SpamAssassin::Logger;
+
 use vars qw($re_loose $re_strict $re_other @ISA @EXPORT @EXPORT_OK);
 
 require Exporter;
 @ISA = qw(HTML::Parser Exporter);
 @EXPORT = qw(get_results name_to_rgb);
 @EXPORT_OK = qw();
-
-# Make the main dbg() accessible in our package w/o an extra function
-*dbg=\&Mail::SpamAssassin::dbg;
 
 # elements defined by the HTML 4.01 and XHTML 1.0 DTDs (do not change them!)
 # does not include XML
@@ -140,7 +140,7 @@ sub html_end {
       my @tmp = Mail::SpamAssassin::Util::uri_list_canonify($uri);
       $info->{cleaned} = \@tmp;
       # list out the URLs for debugging ...
-      if (Mail::SpamAssassin::dbg_check('uri')) {
+      if (would_log('dbg', 'uri')) {
         dbg("uri: html uri found, $uri");
         foreach my $nuri (@tmp) {
           dbg("uri: cleaned html uri, $nuri");

@@ -29,12 +29,10 @@ the storage module must implement these methods.
 
 package Mail::SpamAssassin::BayesStore;
 
-# Make the main dbg() accessible in our package w/o an extra function
-*dbg=\&Mail::SpamAssassin::dbg;
-
 use strict;
 use warnings;
 use bytes;
+use Mail::SpamAssassin::Logger;
 
 =head1 METHODS
 
@@ -322,7 +320,7 @@ sub expire_old_tokens_trapped {
     return 0 unless (%delta);
 
     # This will skip the for loop if debugging isn't enabled ...
-    if (Mail::SpamAssassin::dbg_check('bayes')) {
+    if (would_log('dbg', 'bayes')) {
       dbg("bayes: atime\ttoken reduction");
       dbg("bayes: ========\t===============");
       for(my $i = 1; $i<=$max_expire_mult; $i <<= 1) {

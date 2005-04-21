@@ -71,9 +71,6 @@ see C<Mail::SpamAssassin::Conf> for more information.
 
 package Mail::SpamAssassin::SQLBasedAddrList;
 
-# Make the main dbg() accessible in our package w/o an extra function
-*dbg=\&Mail::SpamAssassin::dbg;
-
 use strict;
 use warnings;
 use bytes;
@@ -82,6 +79,7 @@ use bytes;
 BEGIN { require DBI;  import DBI; }
 
 use Mail::SpamAssassin::PersistentAddrList;
+use Mail::SpamAssassin::Logger;
 
 use vars qw(@ISA);
 

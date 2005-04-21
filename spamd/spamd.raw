@@ -41,10 +41,10 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::NetSet;
 use Mail::SpamAssassin::SubProcBackChannel;
 use Mail::SpamAssassin::SpamdForkScaling qw(:pfstates);
+use Mail::SpamAssassin::Logger qw(:DEFAULT log_message);
 
 use Getopt::Long;
 use Pod::Usage;
-use Sys::Syslog qw(:DEFAULT setlogsock);
 use POSIX qw(:sys_wait_h);
 use POSIX qw(setsid sigprocmask);
 use Errno;
@@ -63,6 +63,13 @@ if ($Mail::SpamAssassin::VERSION ne '@@VERSION@@' && '@@VERSION@@' ne "\@\@VERSI
 BEGIN {
   eval { require Time::HiRes };
   Time::HiRes->import(qw(time)) unless $@;
+  # redirect __WARN__ and __DIE__
+  $SIG{__WARN__} = sub {
+    log_message("warn", $_[0]);
+  };
+  $SIG{__DIE__} = sub {
+    log_message("error", $_[0]) if $_[0] !~ /\bin eval\b/;
+  };
 }
 
 my %resphash = (
@@ -84,9 +91,6 @@ my %resphash = (
   EX_CONFIG      => 78,    # configuration error
   EX_TIMEOUT     => 79,    # read timeout
 );
-
-*dbg = \&Mail::SpamAssassin::dbg;
-
 
 sub print_version {
   printf("%s version %s\n", "SpamAssassin Server", Mail::SpamAssassin::Version());
@@ -233,8 +237,8 @@ if ($opt{'version'}) {
 if (defined $opt{'debug'}) {
   $opt{'debug'} ||= 'all';
 }
-Mail::SpamAssassin::_init_debugger($opt{'debug'});
-
+# turn on debugging facilities as soon as possible
+Mail::SpamAssassin::Logger::add_facilities($opt{'debug'});
 
 # bug 2228: make the values of (almost) all parameters which accept file paths
 # absolute, so they are still valid after daemonize()
@@ -373,121 +377,23 @@ if ($log_facility eq 'stderr') {
   $log_socket = 'file';
 }
 
-my $already_done_syslog_failure_warning;
-my $syslog_disabled;
-my $syslog_consecutive_failures = 0;
-my $syslog_failure_threshold = 10;
-
-# Logging via syslog is requested. Falling back to INET and then STDERR
-# if opening a UNIX socket fails.
+# Logging via syslog is requested.
 if ($log_socket ne 'file' && $log_facility ne 'null') {
-  dbg("logger: trying to connect to syslog/${log_socket}...\n");
-  eval {
-    defined( setlogsock($log_socket) ) || die $!;
-
-    # The next call is required to actually open the socket.
-    openlog_for_spamd();
-    syslog( 'debug', "%s", "spamd starting" );
-  };
-  my $err = $@;
-  chomp($err);
-
-  # Solaris sometimes doesn't support UNIX-domain syslog sockets apparently;
-  # same is true for perl 5.6.0 build on an early version of Red Hat 7!
-  # In that case we try it with INET.
-  if ( $err and $log_socket ne 'inet' ) {
-    dbg("logger: connection to syslog/${log_socket} failed: $err\n"
-              . "trying to connect to syslog/inet...");
-    eval {
-      defined( setlogsock('inet') ) || die $!;
-      openlog_for_spamd();
-      syslog( 'debug', "%s", "spamd starting, 2nd try" );
-      syslog( 'debug', "%s", "failed to setlogsock(${log_socket}): $err" );
-      syslog( 'debug', "%s",
-        "falling back to inet (you might want to use --syslog-socket=inet)" );
-    };
-    $log_socket = 'inet' unless $@;
-  }
-
-  # fall back to stderr if all else fails
-  if ($@) {
-    dbg("logger: failed to setlogsock(${log_socket}): $err\n"
-              . "reporting logs to stderr");
-    $log_facility = 'stderr';
-  }
-  else {
-    dbg("logger: successfully connected to syslog/${log_socket}");
+  if (Mail::SpamAssassin::Logger::add(method => 'syslog',
+				      socket => $log_socket,
+				      facility => $log_facility))
+  {
+    Mail::SpamAssassin::Logger::remove('stderr');
   }
 }
-
-# The user wants to log to some file -- open it on STDLOG. Falling back to STDERR
-# if opening the file fails.
-elsif ( $log_facility eq 'file' ) {
-  unless ( open( STDLOG, ">>$log_file" ) ) {
-    warn "failed to open logfile ${log_file}: $!\n"
-      . "reporting logs to stderr\n";
-    $log_facility = 'stderr';
+# Otherwise, the user wants to log to some file.
+elsif ($log_facility eq 'file') {
+  if (Mail::SpamAssassin::Logger::add(method => 'file',
+				      filename => $log_file))
+  {
+    Mail::SpamAssassin::Logger::remove('stderr');
   }
 }
-
-# Either one of the above failed ot logging to STDERR is explicitly requested --
-# make STDLOG a dup so we don't have to handle so many special cases later on.
-if ( $log_facility eq 'stderr' ) {
-  open( STDLOG, ">&STDERR" ) || die "Can't duplicate stderr: $!\n";
-  $log_socket = 'file';
-}
-
-dbg("logger: enabled with:\n"
-  . "\tfacility: ${log_facility}\n"
-  . "\tsocket:   ${log_socket}\n"
-  . "\toutput:   "
-  . (
-  $log_facility eq 'file' ? ${log_file}
-  : $log_facility eq 'stderr' ? 'stderr'
-  : $log_facility eq 'null'   ? 'debug'
-  : 'syslog'
-  )
-);
-
-# Don't duplicate log messages in debug mode.
-if ( $log_facility eq 'stderr' and $Mail::SpamAssassin::DEBUG ) {
-  dbg("logger: facility stderr disabled: already debugging to stderr.");
-  $log_facility = 'null';
-}
-
-# Either above or at the command line all logging was disabled (--syslog=null).
-if ( $log_facility eq 'null' ) {
-  $log_socket = 'none';
-}
-
-# Close the logfile on exit.
-END {
-  close(STDLOG) if (defined $log_socket && $log_socket eq 'file');
-}
-
-# The code above was quite complicated. Make sure everything fits together.
-# These combinations are allowed:
-#   * socket = file
-#      ^ ^-> facility = stderr
-#      '---> facility = file
-#   * socket = none
-#      ^-> facility = null
-#   * socket = (unix|inet|...)
-#      --> facility = (mail|daemon|...)
-die "fatal: internal error while setting up logging: values don't match:\n"
-  . "\targuments:\n"
-  . "\t\t--syslog=$opt{'syslog'} --syslog-socket=$opt{'syslog-socket'}\n"
-  . "\tvalues:\n"
-  . "\t\tfacility: ${log_facility}\n"
-  . "\t\tsocket:   ${log_socket}\n"
-  . "\t\tfile:     ${log_file}\n"
-  . "\tplease report to http://bugzilla.spamassassin.org -- thank you\n"
-  if ( $log_socket eq 'file'
-  and ( $log_facility ne 'stderr' and $log_facility ne 'file' ) )
-  or ( ( $log_facility eq 'stderr' or $log_facility eq 'file' )
-  and $log_socket ne 'file' )
-  or ( $log_socket   eq 'none' and $log_facility ne 'null' )
-  or ( $log_facility eq 'null' and $log_socket   ne 'none' );
 
 ### End initialization of logging ##########################
 
@@ -668,7 +574,7 @@ if ( $opt{'socketpath'} ) {
       die "spamd already running on $path, exiting\n";
     }
     else {
-      dbg("daemon: removing stale socket file $path");
+      dbg("spamd: removing stale socket file $path");
       unlink $path;
     }
   }
@@ -678,7 +584,7 @@ if ( $opt{'socketpath'} ) {
     Type   => SOCK_STREAM,
     Listen => SOMAXCONN,
   );
-  dbg("daemon: creating UNIX socket:\n" . join("\n", map { "\t$_: " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket));
+  dbg("spamd: creating UNIX socket:\n" . join("\n", map { "\t$_: " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket));
   $server = new IO::Socket::UNIX(%socket)
          || die "Could not create UNIX socket on $path: $! ($@)\n";
 
@@ -730,7 +636,7 @@ elsif ( $opt{'ssl'} ) {
     SSL_key_file    => $opt{'server-key'},
     SSL_cert_file   => $opt{'server-cert'}
   );
-  dbg("daemon: creating SSL socket:\n" . join("\n", map { "\t$_:  " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket));
+  dbg("spamd: creating SSL socket:\n" . join("\n", map { "\t$_:  " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket));
   $server = new IO::Socket::SSL(%socket)
          || die "Could not create SSL socket on $addr:$port: $! ($@)\n";
 }
@@ -743,7 +649,7 @@ else {
     ReuseAddr => 1,
     Listen    => SOMAXCONN
   );
-  dbg("daemon: creating INET socket:\n" . join("\n", map { "\t$_: " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket));
+  dbg("spamd: creating INET socket:\n" . join("\n", map { "\t$_: " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket));
   $server = new IO::Socket::INET(%socket)
          || die "Could not create INET socket on $addr:$port: $! ($@)\n";
 }
@@ -823,10 +729,8 @@ $backchannel->set_selector(\$select_mask);
 # log server started, but processes watching the log to wait for connect
 # should wait until they see the pid, after signal handlers are in place
 # FIXME: two calls are one too much
-dbg("info: server started on $listeninfo (running version "
-    . Mail::SpamAssassin::Version() . ")" );
-logmsg("server started on $listeninfo (running version "
-    . Mail::SpamAssassin::Version() . ")" );
+info("spamd: server started on $listeninfo (running version "
+     . Mail::SpamAssassin::Version() . ")" );
 
 my $remote_port;
 
@@ -873,7 +777,7 @@ while (1) {
     # leave Client fds active, and do not kill children; they can still
     # service clients until they exit.  But restart the listener anyway.
     # And close the logfile, so the new instance can reopen it.
-    close(STDLOG) if $log_facility eq 'file';
+    Mail::SpamAssasin::Logger::close();
     chdir($ORIG_CWD)
       || die "spamd restart failed: chdir failed: ${ORIG_CWD}: $!\n";
     exec( $ORIG_ARG0, @ORIG_ARGV );
@@ -907,7 +811,7 @@ sub spawn {
     ## PARENT
 
     $children{$pid} = 1;
-    logmsg("server successfully spawned child process, pid $pid");
+    info("spamd: server successfully spawned child process, pid $pid");
     $backchannel->setup_backchannel_parent_post_fork($pid);
     if ($scaling) {
       $scaling->add_child($pid);
@@ -965,7 +869,7 @@ sub spawn {
         $orders = $scaling->wait_for_orders(); # and sleep...
 
         if ($orders != PFORDER_ACCEPT) {
-          logmsg("unknown order: $orders");
+          info("spamd: unknown order: $orders");
         }
       }
 
@@ -974,7 +878,7 @@ sub spawn {
       my $evalret = eval { accept_a_conn(); };
 
       if (!defined ($evalret)) {
-        logmsg("error: $@ $!, continuing");
+        warn("spamd: error: $@ $!, continuing");
         if ($client) { $client->close(); }  # avoid fd leaks
       }
       elsif ($evalret == -1) {
@@ -987,7 +891,7 @@ sub spawn {
         $) = "$( $(";    # change eGID
         $> = $<;         # change eUID
         if ( $> != $< and $> != ( $< - 2**32 ) ) {
-          logmsg("fatal: return setuid failed");
+          warn("spamd: fatal: return setuid failed");
           die;           # make it fatal to avoid security breaches
         }
       }
@@ -1018,7 +922,7 @@ sub spawn {
 
         if ($err) {
           if ($err =~ /__alarm__/) {
-            logmsg("copy_config timeout, respawning child process after ".
+            warn("spamd: copy_config timeout, respawning child process after ".
                             ($i+1)." messages");
             exit;         # so that the master spamd can respawn
 
@@ -1048,11 +952,11 @@ sub accept_a_conn {
       return 0;
     }
     elsif ( $! == 0 && $opt{'ssl'} ) {
-      logmsg( "SSL failure: " . &IO::Socket::SSL::errstr() );
+      warn("spamd: SSL failure: " . &IO::Socket::SSL::errstr());
       return 0;
     }
     else {
-      logmsg("accept failed: $!");
+      warn("spamd: accept failed: $!");
       return -1;
     }
   }
@@ -1068,11 +972,11 @@ sub accept_a_conn {
 
   my $remote_hostname;
   my $remote_hostaddr;
-  if ( $opt{'socketpath'} ) {
+  if ($opt{'socketpath'}) {
     $remote_hostname = 'localhost';
     $remote_hostaddr = '127.0.0.1';
     $remote_port = $opt{'socketpath'};
-    logmsg( "got connection over " . $opt{'socketpath'} );
+    info("spamd: got connection over " . $opt{'socketpath'});
   }
   else {
     my ( $port, $ip ) = sockaddr_in( $client->peername );
@@ -1083,11 +987,11 @@ sub accept_a_conn {
     $remote_port = $port;
 
     my $msg = "connection from ${remote_hostname} [${remote_hostaddr}] at port ${port}";
-    if ( ip_is_allowed($remote_hostaddr) ) {
-      logmsg($msg);
+    if (ip_is_allowed($remote_hostaddr)) {
+      info("spamd: $msg");
     }
     else {
-      logmsg("unauthorized " . $msg);
+      warn("spamd: unauthorized $msg");
       $client->close;
       return 0;
     }
@@ -1127,9 +1031,7 @@ sub accept_a_conn {
   # in that case.
 
   if (/SKIP SPAMC\/(.*)/) {
-    logmsg( "skipped large message in "
-        . sprintf( "%3d", time - $start )
-        . " seconds." );
+    info(sprintf("spamd: skipped large message in %3d seconds", time - $start));
   }
 
   # It might be a CHECK message, meaning that we should just check
@@ -1200,24 +1102,20 @@ sub accept_a_conn {
 }
 
 sub handle_setuid_to_user {
-
-  if ( $spamtest->{paranoid} ) {
-    logmsg("PARANOID: still running as root, closing connection.");
-    die;
+  if ($spamtest->{paranoid}) {
+    die("spamd: in paranoid mode, still running as root: closing connection");
   }
-  logmsg( "Still running as root: user not specified with -u, "
-	  . "not found, or set to root.  Fall back to nobody." );
-  my ( $uid, $gid ) = ( getpwnam('nobody') )[ 2, 3 ];
+  warn("spamd: still running as root: user not specified with -u, "
+       . "not found, or set to root, falling back to nobody" );
+  my ($uid, $gid) = (getpwnam('nobody'))[2,3];
   $uid =~ /^(\d+)$/ and $uid = $1;    # de-taint
   $gid =~ /^(\d+)$/ and $gid = $1;    # de-taint
   
   $) = "$gid $gid";                   # eGID
   $> = $uid;                          # eUID
-  if ( !defined($uid) || ( $> != $uid and $> != ( $uid - 2**32 ) ) ) {
-    logmsg("fatal: setuid to nobody failed");
-    die;
+  if (!defined($uid) || ($> != $uid and $> != ($uid - 2**32))) {
+    die("spamd: fatal error: setuid to nobody failed");
   }
-
 }
 
 sub parse_body {
@@ -1299,14 +1197,13 @@ sub check {
 
   $msgid        ||= "(unknown)";
   $current_user ||= "(unknown)";
-  logmsg( ( $method eq 'PROCESS' ? "processing" : "checking" )
-      . " message $msgid"
-      . ( $rmsgid ? " aka $rmsgid" : "" )
-      . " for ${current_user}:$>"
-      . "." );
+  info("spamd: " . ($method eq 'PROCESS' ? "processing" : "checking")
+       . " message $msgid"
+       . ( $rmsgid ? " aka $rmsgid" : "" )
+       . " for ${current_user}:$>");
 
   # Check length if we're supposed to.
-  if ( defined $expected_length && $actual_length != $expected_length ) {
+  if (defined $expected_length && $actual_length != $expected_length) {
     protocol_error(
       "(Content-Length mismatch: Expected $expected_length bytes, got $actual_length bytes)"
     );
@@ -1400,8 +1297,8 @@ sub check {
 
   my $scantime = sprintf( "%.1f", time - $start_time );
 
-  logmsg( "$was_it_spam ($msg_score/$msg_threshold) for $current_user:$> in"
-      . " $scantime seconds, $actual_length bytes." );
+  info("spamd: $was_it_spam ($msg_score/$msg_threshold) for $current_user:$> in"
+       . " $scantime seconds, $actual_length bytes." );
 
   # add a summary "result:" line, based on mass-check format
   my @extra;
@@ -1426,8 +1323,8 @@ sub check {
   my $score = $status->get_score();
   my $tests = join(",", sort(grep(length,$status->get_names_of_tests_hit())));
 
-  logmsg( sprintf("result: %s %2d - %s %s", $yorn, $score,
-                        $tests, join(",", @extra) ));
+  info(sprintf("spamd: result: %s %2d - %s %s", $yorn, $score,
+	       $tests, join(",", @extra)));
 
   $status->finish();    # added by jm to allow GC'ing
   $mail->finish();
@@ -1498,11 +1395,10 @@ sub learn {
     $forget = 1;
   }
 
-  logmsg($learn_type_desc
+  info("spamd: $learn_type_desc"
       . " message $msgid"
       . ( $rmsgid ? " aka $rmsgid" : "" )
-      . " for ${current_user}:$>"
-      . ".");
+      . " for ${current_user}:$>");
 
   # Check length if we're supposed to.
   if (defined $expected_length && $actual_length != $expected_length) {
@@ -1526,8 +1422,8 @@ sub learn {
 
   my $scantime = sprintf( "%.1f", time - $start_time );
 
-  logmsg("$learn_type_desc_past message for $current_user:$> in"
-      . " $scantime seconds, $actual_length bytes.");
+  info("spamd: $learn_type_desc_past message for $current_user:$> in"
+       . " $scantime seconds, $actual_length bytes");
   $status->finish();    # added by jm to allow GC'ing
   $mail->finish();
   return 1;
@@ -1658,23 +1554,23 @@ sub got_learn_type_header {
 sub protocol_error {
   my ($err) = @_;
   my $resp = "EX_PROTOCOL";
-  syswrite( $client, "SPAMD/1.0 $resphash{$resp} Bad header line: $err\r\n" );
-  logmsg("bad protocol: header error: $err");
+  syswrite($client, "SPAMD/1.0 $resphash{$resp} Bad header line: $err\r\n");
+  info("spamd: bad protocol: header error: $err");
 }
 
 sub service_unavailable_error {
   my ($err) = @_;
   my $resp = "EX_UNAVAILABLE";
-  syswrite( $client,
-            "SPAMD/1.0 $resphash{$resp} Service Unavailable: $err\r\n" );
-  logmsg("service unavailable: $err");
+  syswrite($client,
+	   "SPAMD/1.0 $resphash{$resp} Service Unavailable: $err\r\n");
+  info("spamd: service unavailable: $err");
 }
 
 sub service_timeout {
   my ($err) = @_;
   my $resp = "EX_TIMEOUT";
   print $client "SPAMD/1.0 $resphash{$resp} Timeout: $err\r\n";
-  logmsg("timeout: $err");
+  info("spamd: timeout: $err");
 }
 
 ###########################################################################
@@ -1685,7 +1581,7 @@ sub auth_ident {
   my $dn = $ident_username || 'NONE';    # display name
   dbg("ident: ident_username = $dn, spamc_username = $username\n");
   if ( !defined($ident_username) || $username ne $ident_username ) {
-    logmsg( "fatal: ident username ($dn) does not match "
+    info("spamd: fatal: ident username ($dn) does not match "
         . "spamc username ($username)" );
     return 0;
   }
@@ -1706,15 +1602,14 @@ sub handle_user {
   else {
     $userid = $username;
   }
-  my ( $name, $pwd, $uid, $gid, $quota, $comment, $gcos, $dir, $etc ) =
-    getpwnam($userid);
+  my ($name, $pwd, $uid, $gid, $quota, $comment, $gcos, $dir, $etc) =
+      getpwnam($userid);
 
-  if ( !$spamtest->{'paranoid'} && !defined($uid) ) {
-
-    #if we are given a username, but can't look it up,
-    #Maybe NIS is down? lets break out here to allow
-    #them to get 'defaults' when we are not running paranoid.
-    logmsg("handle_user: unable to find user '$userid'!");
+  if (!$spamtest->{'paranoid'} && !defined($uid)) {
+    # if we are given a username, but can't look it up, maybe name
+    # services are down?  let's break out here to allow them to get
+    # 'defaults' when we are not running paranoid
+    info("spamd: handle_user unable to find user: $userid\n");
     return 0;
   }
 
@@ -1726,11 +1621,11 @@ sub handle_user {
     $) = "$gid $gid";                 # change eGID
     $> = $uid;                        # change eUID
     if ( !defined($uid) || ( $> != $uid and $> != ( $uid - 2**32 ) ) ) {
-      logmsg("fatal: setuid to $username failed");
-      die;                            # make it fatal to avoid security breaches
+      # make it fatal to avoid security breaches
+      die("spamd: fatal error: setuid to $username failed");
     }
     else {
-      logmsg("info: setuid to $username succeeded");
+      info("spamd: setuid to $username succeeded");
     }
   }
 
@@ -1799,7 +1694,7 @@ sub handle_virtual_config_dir {
     $prefsfile = $dir . '/user_prefs';
 
     # Log that the default configuration is being used for a user.
-    logmsg("Using default config for $username: $prefsfile");
+    info("spamd: using default config for $username: $prefsfile");
   }
 
   if ( -f $prefsfile ) {
@@ -1850,15 +1745,14 @@ sub handle_user_ldap {
 
 sub handle_user_setuid_with_sql {
   my $username = shift;
-  my ( $name, $pwd, $uid, $gid, $quota, $comment, $gcos, $dir, $etc ) =
-    getpwnam($username);
+  my ($name, $pwd, $uid, $gid, $quota, $comment, $gcos, $dir, $etc) =
+      getpwnam($username);
 
-  if ( !$spamtest->{'paranoid'} && !defined($uid) ) {
-
-    #if we are given a username, but can't look it up,
-    #Maybe NIS is down? lets break out here to allow
-    #them to get 'defaults' when we are not running paranoid.
-    logmsg("handle_user() -> unable to find user [$username]!\n");
+  if (!$spamtest->{'paranoid'} && !defined($uid)) {
+    # if we are given a username, but can't look it up, maybe name
+    # services are down?  let's break out here to allow them to get
+    # 'defaults' when we are not running paranoid
+    info("spamd: handle_user unable to find user: $username\n");
     return 0;
   }
 
@@ -1868,26 +1762,26 @@ sub handle_user_setuid_with_sql {
   if ($setuid_to_user) {
     $) = "$gid $gid";                 # change eGID
     $> = $uid;                        # change eUID
-    if ( !defined($uid) || ( $> != $uid and $> != ( $uid - 2**32 ) ) ) {
-      logmsg("fatal: setuid to $username failed");
-      die;                            # make it fatal to avoid security breaches
+    if (!defined($uid) || ($> != $uid and $> != ($uid - 2**32))) {
+      # make it fatal to avoid security breaches
+      die("spamd: fatal error: setuid to $username failed");
     }
     else {
-      logmsg("info: setuid to $username succeeded, reading scores from SQL.");
+      info("spamd: setuid to $username succeeded, reading scores from SQL");
     }
   }
 
-  my $spam_conf_dir = $dir . '/.spamassassin';    #needed for Bayes, etc.
-  if ( !-d $spam_conf_dir ) {
-    if ( mkdir $spam_conf_dir, 0700 ) {
-      logmsg("info: created $spam_conf_dir for $username.");
+  my $spam_conf_dir = $dir . '/.spamassassin'; # needed for Bayes, etc.
+  if (! -d $spam_conf_dir) {
+    if (mkdir $spam_conf_dir, 0700) {
+      info("spamd: created $spam_conf_dir for $username");
     }
     else {
-      logmsg("info: failed to create $spam_conf_dir for $username.");
+      info("spamd: failed to create $spam_conf_dir for $username");
     }
   }
 
-  unless ( $spamtest->load_scoreonly_sql($username) ) {
+  unless ($spamtest->load_scoreonly_sql($username)) {
     return 0;
   }
 
@@ -1897,37 +1791,36 @@ sub handle_user_setuid_with_sql {
 
 sub handle_user_setuid_with_ldap {
   my $username = shift;
-  my ( $name, $pwd, $uid, $gid, $quota, $comment, $gcos, $dir, $etc ) =
-    getpwnam($username);
+  my ($name, $pwd, $uid, $gid, $quota, $comment, $gcos, $dir, $etc) =
+      getpwnam($username);
 
-  if ( !$spamtest->{'paranoid'} && !defined($uid) ) {
-
-    #if we are given a username, but can't look it up,
-    #Maybe NIS is down? lets break out here to allow
-    #them to get 'defaults' when we are not running paranoid.
-    logmsg("handle_user() -> unable to find user [$username]!\n");
+  if (!$spamtest->{'paranoid'} && !defined($uid)) {
+    # if we are given a username, but can't look it up, maybe name
+    # services are down?  let's break out here to allow them to get
+    # 'defaults' when we are not running paranoid
+    info("spamd: handle_user unable to find user: $username\n");
     return 0;
   }
 
   if ($setuid_to_user) {
     $) = "$gid $gid";    # change eGID
     $> = $uid;           # change eUID
-    if ( !defined($uid) || ( $> != $uid and $> != ( $uid - 2**32 ) ) ) {
-      logmsg("fatal: setuid to $username failed");
-      die;               # make it fatal to avoid security breaches
+    if (!defined($uid) || ($> != $uid and $> != ($uid - 2**32))) {
+      # make it fatal to avoid security breaches
+      die("spamd: fatal error: setuid to $username failed");
     }
     else {
-      logmsg("info: setuid to $username succeeded, reading scores from LDAP.");
+      info("spamd: setuid to $username succeeded, reading scores from LDAP");
     }
   }
 
-  my $spam_conf_dir = $dir . '/.spamassassin';    #needed for Bayes, etc.
-  if ( !-d $spam_conf_dir ) {
-    if ( mkdir $spam_conf_dir, 0700 ) {
-      logmsg("info: created $spam_conf_dir for $username.");
+  my $spam_conf_dir = $dir . '/.spamassassin'; # needed for Bayes, etc.
+  if (! -d $spam_conf_dir) {
+    if (mkdir $spam_conf_dir, 0700) {
+      info("spamd: created $spam_conf_dir for $username");
     }
     else {
-      logmsg("info: failed to create $spam_conf_dir for $username.");
+      info("spamd: failed to create $spam_conf_dir for $username");
     }
   }
 
@@ -1942,14 +1835,14 @@ sub create_default_cf_if_needed {
 
   # Parse user scores, creating default .cf if needed:
   if ( !-r $cf_file && !$spamtest->{'dont_copy_prefs'} ) {
-    logmsg("Creating default_prefs [$cf_file]");
+    info("spamd: creating default_prefs: $cf_file");
 
     # If vpopmail config enabled then pass virtual homedir onto
     # create_default_prefs via $userdir
     $spamtest->create_default_prefs( $cf_file, $username, $userdir );
 
-    if ( !-r $cf_file ) {
-      logmsg("Couldn't create readable default_prefs for [$cf_file]");
+    if (! -r $cf_file) {
+      info("spamd: failed to create readable default_prefs: $cf_file");
     }
   }
 }
@@ -1971,140 +1864,9 @@ sub setup_child_sig_handlers {
   $SIG{PIPE} = 'IGNORE';
 }
 
-sub logmsg {
-  my $msg = join ( " ", @_ );
-  $msg =~ s/[\r\n]+$//;       # remove any trailing newlines
-  $msg =~ s/[\x00-\x1f]/_/g;  # replace all other control chars with underscores
-
-  dbg("log: $msg\n");
-
-  # log to file:
-  #   bug 1360 <http://bugzilla.spamassassin.org/show_bug.cgi?id=1360>
-  #   enable logging to a file via --syslog=file or --syslog=/path/to/file
-  # log to STDERR:
-  #   bug 605  <http://bugzilla.spamassassin.org/show_bug.cgi?id=605>
-  #   more efficient for daemontools if --syslog=stderr is used
-  if ( $log_socket eq 'file' ) {
-    logmsg_file ($msg);
-  }
-
-  # log to syslog (if logging isn't disabled completely via 'null')
-  elsif ( $log_socket ne 'none' ) {
-    logmsg_syslog ($msg);
-  }
-}
-
-sub logmsg_file {
-  my $msg = shift;
-  my @date = reverse( ( gmtime(time) )[ 0 .. 5 ] );
-  $date[0] += 1900;
-  $date[1] += 1;
-  syswrite(
-    STDLOG,
-    sprintf(
-      "%04d-%02d-%02d %02d:%02d:%02d [%s] %s: %s\n",
-      @date, $$, 'i', $msg
-    )
-  );
-}
-
-sub logmsg_syslog {
-  my $msg = shift;
-
-  return if $syslog_disabled;
-
-  # install a new handler for SIGPIPE -- this signal has been
-  # found to occur with syslog-ng after syslog-ng restarts.
-  local $SIG{'PIPE'} = sub {
-    $main::SIGPIPE_RECEIVED++;
-    # force a log-close.   trap possible die() calls
-    eval { closelog(); };
-  };
-
-  # important: do not call syslog() from the SIGCHLD handler
-  # child_handler().   otherwise we can get into a loop if syslog()
-  # forks a process -- as it does in syslog-ng apparently! (bug 3625)
-  $main::INHIBIT_LOGGING_IN_SIGCHLD_HANDLER = 1;    #{
-  eval { syslog( 'info', "%s", $msg ); };
-  $main::INHIBIT_LOGGING_IN_SIGCHLD_HANDLER = 0;    #}
-
-  if ($@) {
-    if (check_syslog_sigpipe($msg)) {
-      # dealt with
-    }
-    else {
-      warn "syslog() failed: $@"; # includes a \n
-
-      # only write this warning once.  it gets annoying fast
-      if (!$already_done_syslog_failure_warning) {
-        warn "try using --syslog-socket={unix,inet} or --syslog=file\n";
-        $already_done_syslog_failure_warning = 1;
-      }
-    }
-    syslog_incr_failure_counter();
-  }
-  else {
-    $syslog_consecutive_failures = 0;
-    check_syslog_sigpipe($msg);     # check for SIGPIPE anyway (bug 3625)
-  }
-
-  $SIG{PIPE} = 'IGNORE';            # this may have been reset (bug 4026)
-}
-
-sub check_syslog_sigpipe {
-  my ($msg) = @_;
-
-  if (!$main::SIGPIPE_RECEIVED) {
-    return 0;     # didn't have a SIGPIPE
-  }
-
-  eval {
-    # SIGPIPE received when writing to syslog -- close and reopen
-    # the log handle, then try again.
-    closelog();
-    openlog_for_spamd();
-    syslog( 'debug', "%s", "syslog reopened" );
-    syslog( 'info', "%s", $msg );
-
-    # now report what happend
-    $msg = "SIGPIPE received, reopening log socket";
-    dbg("log: $msg");
-    syslog( 'warning', "%s", $msg );
-
-    # if we've received multiple sigpipes, logging is probably
-    # still broken.
-    if ( $main::SIGPIPE_RECEIVED > 1 ) {
-      warn "logging failure: multiple SIGPIPEs received\n";
-      $syslog_disabled = 1;
-    }
-
-    $main::SIGPIPE_RECEIVED = 0;
-    return 1;
-  };
-
-  if ($@) {     # something died?  that's not good.
-    syslog_incr_failure_counter();
-  }
-}
-
-# NOTE: wrap calls to this in eval{ }!!
-sub openlog_for_spamd {
-  openlog( 'spamd', 'cons,pid,ndelay', $log_facility );
-}
-
-sub syslog_incr_failure_counter {
-  if (++$syslog_consecutive_failures > $syslog_failure_threshold) {
-    warn "syslog() failed ".$syslog_consecutive_failures
-              ." times in a row, disabled\n";
-    $syslog_disabled = 1;
-    return 1;
-  }
-  return 0;
-}
-
 sub kill_handler {
   my ($sig) = @_;
-  logmsg("server killed by SIG$sig, shutting down");
+  info("spamd: server killed by SIG$sig, shutting down");
   $server->close;
 
   if (defined($opt{'pidfile'})) {
@@ -2145,9 +1907,9 @@ sub child_handler {
       if ($sock) { $sock->close(); }
     }
 
-    unless ($main::INHIBIT_LOGGING_IN_SIGCHLD_HANDLER) {
-      logmsg("handled cleanup of child pid $pid ".
-                (defined $sig) ? "due to SIG$sig" : "");
+    unless ($$Mail::SpamAssassin::Logger::LOG_SA{INHIBIT_LOGGING_IN_SIGCHLD_HANDLER}) {
+      info("spamd: handled cleanup of child pid $pid " .
+	   (defined $sig) ? "due to SIG$sig" : "");
     }
   }
 
@@ -2156,13 +1918,13 @@ sub child_handler {
 
 sub restart_handler {
   my ($sig) = @_;
-  logmsg("server hit by SIG$sig, restarting");
+  info("spamd: server hit by SIG$sig, restarting");
 
   $SIG{CHLD} = 'DEFAULT';    # we're going to kill our children
   foreach (keys %children) {
     kill 'INT' => $_;
     my $pid = waitpid($_, 0);
-    logmsg("child $pid killed successfully");
+    info("spamd: child $pid killed successfully");
   }
   %children = ();
 
@@ -2175,25 +1937,25 @@ sub restart_handler {
       unlink($opt{'socketpath'}) || warn "Can't unlink $opt{'socketpath'}: $!\n";
     }
 
-    dbg("info: Server socket closed");
+    info("spamd: server socket closed");
   }
   $got_sighup = 1;
 }
 
 sub daemonize {
-
   # Pretty command line in ps
-  $0 = join (' ', $ORIG_ARG0, @ORIG_ARGV) unless $Mail::SpamAssassin::DEBUG;
+  $0 = join (' ', $ORIG_ARG0, @ORIG_ARGV) unless would_log("dbg");
 
-  # Be a nice daemon and chdir() to the root so we don't block any unmount attempts
+  # be a nice daemon and chdir to the root so we don't block any
+  # unmount attempts
   chdir '/' or die "Can't chdir to /: $!\n";
-
-  # Redirect all warnings to logmsg()
-  $SIG{__WARN__} = sub { logmsg( $_[0] ); };
 
   # Redirect in and out to the bit bucket
   open STDIN,  "</dev/null" or die "Can't read from /dev/null: $!\n";
   open STDOUT, ">/dev/null" or die "Can't write to /dev/null: $!\n";
+
+  # Remove the stderr logger
+  Mail::SpamAssassin::Logger::remove('stderr');
 
   # Here we go...
   defined( my $pid = fork ) or die "Can't fork: $!\n";
@@ -2203,7 +1965,7 @@ sub daemonize {
   # Now we can redirect the errors, too.
   open STDERR, '>&STDOUT' or die "Can't duplicate stdout: $!\n";
 
-  dbg("daemon: successfully daemonized");
+  dbg("spamd: successfully daemonized");
 }
 
 sub set_allowed_ip {
@@ -2234,7 +1996,7 @@ sub preload_modules_with_tmp_homedir {
 
   my $tmpsadir = File::Spec->catdir( $tmphome, ".spamassassin" );
 
-  dbg("daemon: Preloading modules with HOME=$tmphome");
+  dbg("spamd: Preloading modules with HOME=$tmphome");
 
   mkdir( $tmphome,  0700 ) or die "fatal: Can't create $tmphome: $!";
   mkdir( $tmpsadir, 0700 ) or die "fatal: Can't create $tmpsadir: $!";
