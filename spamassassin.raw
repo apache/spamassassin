@@ -139,7 +139,7 @@ sub usage {
 # Check to make sure the script version and the module version matches.
 # If not, die here!  Also, deal with unchanged VERSION macro.
 if ($Mail::SpamAssassin::VERSION ne '@@VERSION@@' && '@@VERSION@@' ne "\@\@VERSION\@\@") {
-  die 'ERROR! spamassassin script is v@@VERSION@@, but using modules v'.$Mail::SpamAssassin::VERSION."!\n";
+  die 'spamassassin: spamassassin script is v@@VERSION@@, but using modules v'.$Mail::SpamAssassin::VERSION."\n";
 }
 
 # by default:
@@ -264,7 +264,7 @@ if ($opt{'remove-addr-from-whitelist'} ||
     $spamtest->add_address_to_blacklist( $opt{'add-addr-to-blacklist'} );
   }
   else {
-    die "oops! unhandled whitelist operation";
+    die "spamassassin: oops! unhandled whitelist operation";
   }
 
   exit(0);
@@ -389,7 +389,7 @@ sub wanted {
       $spamtest->add_all_addresses_to_blacklist($mail);
     }
     else {
-      warn "oops! unhandled whitelist operation";
+      warn "spamassassin: oops! unhandled whitelist operation";
     }
 
     $mail->finish();
@@ -436,8 +436,8 @@ sub wanted {
     }
 
     if ($failed) {
-      warn "Warning, unable to $failed message\n";
-      warn "For more information, re-run with -D option to see debug output.\n";
+      warn "spamassassin: warning, unable to $failed message\n";
+      warn "spamassassin: for more information, re-run with -D option to see debug output\n";
     }
 
     $new_mail->finish();

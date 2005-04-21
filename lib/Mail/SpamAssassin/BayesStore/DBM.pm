@@ -1450,14 +1450,14 @@ sub upgrade_old_dbm_files_trapped {
       untie %in;
     ';
     if ($@) {
-      print "$dbm: $dbm module not installed, nothing copied.\n";
+      print "$dbm: $dbm module not installed, nothing copied\n";
       dbg("bayes: error was: $@");
     }
     elsif ($count == 0) {
-      print "$dbm: no database of that kind found, nothing copied.\n";
+      print "$dbm: no database of that kind found, nothing copied\n";
     }
     else {
-      print "$dbm: copied $count entries.\n";
+      print "$dbm: copied $count entries\n";
       return 1;
     }
   }

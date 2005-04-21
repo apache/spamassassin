@@ -408,7 +408,7 @@ sub run {
 	{
 	  $needs_restart = 0;
 
-	  #warn "debug: Needs restart, $MESSAGES total, $total_count done.\n";
+	  #warn "debug: needs restart, $MESSAGES total, $total_count done\n";
 	  $self->reap_children($self->{opt_j}, \@child, \@pid);
 	  @child=();
 	  @pid=();

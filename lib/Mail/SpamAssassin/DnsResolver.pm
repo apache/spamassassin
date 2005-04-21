@@ -214,7 +214,7 @@ sub new_dns_packet {
   if ($@) {
     # this can happen if Net::DNS isn't available -- but in this
     # case this function should never be called!
-    warn "cannot create Net::DNS::Packet, but new_dns_packet() was called: $@ $!";
+    warn "dns: cannot create Net::DNS::Packet, but new_dns_packet() was called: $@ $!";
   }
   return $packet;
 }
@@ -250,7 +250,7 @@ sub bgsend {
   my $data = $pkt->data;
   my $dest = $self->{dest};
   if (!$self->{sock}->send ($pkt->data, 0, $self->{dest})) {
-    warn "sendto() failed: $@";
+    warn "dns: sendto() failed: $@";
     return;
   }
 
@@ -369,7 +369,7 @@ sub fhs_to_vec {
   my $rin = '';
   foreach my $sock (@fhlist) {
     my $fno = fileno($sock);
-    warn "oops! fileno now undef for $sock" unless defined($fno);
+    warn "dns: oops! fileno now undef for $sock" unless defined($fno);
     vec ($rin, $fno, 1) = 1;
   }
   return $rin;

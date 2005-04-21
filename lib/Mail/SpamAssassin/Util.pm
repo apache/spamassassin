@@ -1186,14 +1186,14 @@ sub helper_app_pipe_open_unix {
   if ($f != 0) {
     POSIX::close(0);
   }
-  open STDIN, "<$stdinfile" or die "cannot open $stdinfile: $!";
+  open STDIN, "<$stdinfile" or die "util: cannot open $stdinfile: $!";
 
   # this should be impossible; if we just closed fd 0, UNIX
   # fd behaviour dictates that the next fd opened (the new STDIN)
   # will be the lowest unused fd number, which should be 0.
   # so die with a useful error if this somehow isn't the case.
   if (fileno(STDIN) != 0) {
-    die "setuid: oops: fileno(STDIN) [".fileno(STDIN)."] != 0";
+    die "util: setuid: oops: fileno(STDIN) [".fileno(STDIN)."] != 0";
   }
 
   # ensure STDOUT is open.  since we just created a pipe to ensure this, it has
@@ -1214,11 +1214,11 @@ sub helper_app_pipe_open_unix {
     if ($f != 2) {
       POSIX::close(2);
     }
-    open STDERR, ">&STDOUT" or die "dup STDOUT failed: $!";
+    open STDERR, ">&STDOUT" or die "util: dup STDOUT failed: $!";
 
     # STDERR must be fd 2 to be useful to subprocesses! (bug 3649)
     if (fileno(STDERR) != 2) {
-      die "setuid: oops: fileno(STDERR) [".fileno(STDERR)."] != 2";
+      die "util: setuid: oops: fileno(STDERR) [".fileno(STDERR)."] != 2";
     }
   }
 
@@ -1286,7 +1286,7 @@ sub new_dns_packet {
   if ($@) {
     # this can happen if Net::DNS isn't available -- but in this 
     # case this function should never be called!
-    warn "cannot create Net::DNS::Packet, but new_dns_packet() was called: $@ $!";
+    warn "util: cannot create Net::DNS::Packet, but new_dns_packet() was called: $@ $!";
   }
   return $packet;
 }
