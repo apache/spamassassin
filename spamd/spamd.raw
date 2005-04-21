@@ -777,7 +777,7 @@ while (1) {
     # leave Client fds active, and do not kill children; they can still
     # service clients until they exit.  But restart the listener anyway.
     # And close the logfile, so the new instance can reopen it.
-    Mail::SpamAssassin::Logger::close();
+    Mail::SpamAssassin::Logger::close_log();
     chdir($ORIG_CWD)
       || die "spamd restart failed: chdir failed: ${ORIG_CWD}: $!\n";
     exec( $ORIG_ARG0, @ORIG_ARGV );

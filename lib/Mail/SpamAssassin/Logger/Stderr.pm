@@ -51,7 +51,7 @@ sub log_message {
   print STDERR "$level: $msg\n";
 }
 
-sub close {
+sub close_log {
   my ($self) = @_;
 }
 

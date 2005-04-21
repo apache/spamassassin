@@ -78,7 +78,7 @@ sub log_message {
 			   @date, $$, $level, $msg));
 }
 
-sub close {
+sub close_log {
   my ($self) = @_;
 
   close(STDLOG) if defined $self->{filename};
