@@ -1648,17 +1648,20 @@ sub sa_die {
 
 # private function to find out if the Storable function is available...
 sub _is_storable_available {
-  my($self) = @_;
+  my ($self) = @_;
+
+  # Storable spews some warnings
+  local $SIG{__DIE__};
 
   if (exists $self->{storable_available}) {
   }
   elsif (!eval { require Storable; }) {
     $self->{storable_available} = 0;
-    dbg("info: no Storable module found");
+    dbg("generic: no Storable module found");
   }
   else {
     $self->{storable_available} = 1;
-    dbg("info: Storable module v".$Storable::VERSION." found");
+    dbg("generic: Storable module v".$Storable::VERSION." found");
   }
 
   return $self->{storable_available};
