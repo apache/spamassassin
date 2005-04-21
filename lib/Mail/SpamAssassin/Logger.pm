@@ -171,9 +171,6 @@ sub remove {
   my ($method) = @_;
 
   my $name = lc($method);
-  for (keys %{ $LOG_SA{method} }) {
-    print STDERR "a: $_\n";
-  }
   if (exists $LOG_SA{method}->{$name}) {
     delete $LOG_SA{method}->{$name};
     return 1;
