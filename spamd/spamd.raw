@@ -298,9 +298,7 @@ if ( not defined $opt{'socketpath'} ) {
 # ident-based spamc user authentication
 if ( $opt{'auth-ident'} ) {
   eval { require Net::Ident };
-  die
-"fatal: ident-based authentication requested, but Net::Ident is unavailable\n"
-    if ($@);
+  die "fatal: ident-based authentication requested, but Net::Ident is unavailable\n" if ($@);
 
   $opt{'ident-timeout'} = undef if $opt{'ident-timeout'} <= 0.0;
   import Net::Ident qw(ident_lookup);
@@ -779,7 +777,7 @@ while (1) {
     # leave Client fds active, and do not kill children; they can still
     # service clients until they exit.  But restart the listener anyway.
     # And close the logfile, so the new instance can reopen it.
-    Mail::SpamAssasin::Logger::close();
+    Mail::SpamAssassin::Logger::close();
     chdir($ORIG_CWD)
       || die "spamd restart failed: chdir failed: ${ORIG_CWD}: $!\n";
     exec( $ORIG_ARG0, @ORIG_ARGV );
