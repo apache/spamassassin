@@ -50,10 +50,8 @@ likely that the message check and auto-learn scores will be different.
 
 package Mail::SpamAssassin::Plugin::AutoLearnThreshold;
 
-# Make the main dbg() accessible in our package w/o an extra function
-*dbg=\&Mail::SpamAssassin::Plugin::dbg;
-
 use Mail::SpamAssassin::Plugin;
+use Mail::SpamAssassin::Logger;
 use strict;
 use warnings;
 use bytes;

@@ -49,9 +49,6 @@ It is held in two forms:
 
 package Mail::SpamAssassin::Message::Metadata;
 
-# Make the main dbg() accessible in our package w/o an extra function
-*dbg=\&Mail::SpamAssassin::dbg;
-
 use strict;
 use warnings;
 use bytes;
@@ -59,6 +56,7 @@ use bytes;
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::Message::Metadata::Received;
+use Mail::SpamAssassin::Logger;
 
 =item new()
 

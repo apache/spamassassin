@@ -18,13 +18,12 @@
 
 package Mail::SpamAssassin::SpamdForkScaling;
 
-*dbg=\&Mail::SpamAssassin::dbg;
-
 use strict;
 use warnings;
 use bytes;
 
 use Mail::SpamAssassin::Util;
+use Mail::SpamAssassin::Logger;
 
 use vars qw {
   @PFSTATE_VARS %EXPORT_TAGS @EXPORT_OK

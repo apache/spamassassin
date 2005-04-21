@@ -40,8 +40,7 @@ interfaces.
 
 package Mail::SpamAssassin::Conf::SQL;
 
-# Make the main dbg() accessible in our package w/o an extra function
-*dbg=\&Mail::SpamAssassin::dbg;
+use Mail::SpamAssassin::Logger;
 
 use strict;
 use warnings;

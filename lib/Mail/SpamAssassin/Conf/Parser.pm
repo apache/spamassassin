@@ -120,12 +120,9 @@ up first for speed.
 
 package Mail::SpamAssassin::Conf::Parser;
 
-# Make the main dbg() accessible in our package w/o an extra function
-*dbg=\&Mail::SpamAssassin::dbg;
-*info=\&Mail::SpamAssassin::info;
-
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Constants qw(:sa);
+use Mail::SpamAssassin::Logger;
 
 use strict;
 use warnings;

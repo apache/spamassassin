@@ -28,7 +28,10 @@ my $LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';    # substituted at 'make' time
 use lib '@@INSTALLSITELIB@@';                   # substituted at 'make' time
 
 BEGIN {
-
+  # redirect __WARN__ and __DIE__
+  $SIG{__WARN__} = sub {
+    log_message("warn", $_[0]);
+  };
   # Locate locally installed SA libraries *without* using FindBin, which
   # generates warnings and causes more trouble than its worth.  We don't
   # need to be too smart about this BTW.
@@ -341,13 +344,6 @@ if ($@) { die $@; }
 
 # Ok, exit!
 exit( $exitvalue || 0 );
-
-###########################################################################
-
-# this is never called, it's just used to shut up the warnings
-sub NEVERCALLED {
-  $Mail::SpamAssassin::DEBUG = 0;
-}
 
 ###########################################################################
 

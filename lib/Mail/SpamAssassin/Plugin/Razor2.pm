@@ -42,11 +42,8 @@ See http://razor.sourceforge.net/ for more information about Razor.
 
 package Mail::SpamAssassin::Plugin::Razor2;
 
-# Make the main dbg() accessible in our package w/o an extra function
-*dbg=\&Mail::SpamAssassin::Plugin::dbg;
-*info=\&Mail::SpamAssassin::Plugin::info;
-
 use Mail::SpamAssassin::Plugin;
+use Mail::SpamAssassin::Logger;
 use strict;
 use warnings;
 use bytes;
@@ -138,7 +135,7 @@ sub razor2_access {
   my $debug = $type eq 'check' ? 'razor2' : 'reporter';
 
   # razor also debugs to stdout. argh. fix it to stderr...
-  if (Mail::SpamAssassin::dbg_check($debug)) {
+  if (would_log('dbg', $debug)) {
     open(OLDOUT, ">&STDOUT");
     open(STDOUT, ">&STDERR");
   }
@@ -157,7 +154,7 @@ sub razor2_access {
 
     if ($rc) {
       $rc->{opt} = {
-	debug => Mail::SpamAssassin::dbg_check('+razor2'),
+	debug => (would_log('dbg', $debug) > 1),
 	foreground => 1,
 	config => $self->{main}->{conf}->{razor_config}
       };
@@ -327,7 +324,7 @@ sub razor2_access {
   Mail::SpamAssassin::PerMsgStatus::leave_helper_run_mode($self);
 
   # razor also debugs to stdout. argh. fix it to stderr...
-  if (Mail::SpamAssassin::dbg_check($debug)) {
+  if (would_log('dbg', $debug)) {
     open(STDOUT, ">&OLDOUT");
     close OLDOUT;
   }

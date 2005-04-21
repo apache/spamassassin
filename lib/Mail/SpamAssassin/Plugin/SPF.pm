@@ -32,10 +32,8 @@ forgery and make it easier to identify spams.
 
 package Mail::SpamAssassin::Plugin::SPF;
 
-# Make the main dbg() accessible in our package w/o an extra function
-*dbg=\&Mail::SpamAssassin::Plugin::dbg;
-
 use Mail::SpamAssassin::Plugin;
+use Mail::SpamAssassin::Logger;
 use strict;
 use warnings;
 use bytes;
@@ -281,7 +279,7 @@ sub _check_spf {
     $query = Mail::SPF::Query->new (ip => $ip,
 				    sender => $scanner->{sender},
 				    helo => $helo,
-				    debug => Mail::SpamAssassin::dbg_check('+rbl'),
+				    debug => 0,
 				    trusted => 0);
   };
 

@@ -94,11 +94,8 @@ that SpamAssassin will call back to:
 
 package Mail::SpamAssassin::Plugin;
 
-# Make the main dbg() accessible in our package w/o an extra function
-*dbg=\&Mail::SpamAssassin::dbg;
-*info=\&Mail::SpamAssassin::info;
-
 use Mail::SpamAssassin;
+use Mail::SpamAssassin::Logger;
 
 use strict;
 use warnings;

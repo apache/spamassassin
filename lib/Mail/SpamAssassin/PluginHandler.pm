@@ -22,12 +22,10 @@ Mail::SpamAssassin::PluginHandler - SpamAssassin plugin handler
 
 package Mail::SpamAssassin::PluginHandler;
 
-# Make the main dbg() accessible in our package w/o an extra function
-*dbg=\&Mail::SpamAssassin::dbg;
-
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Util;
+use Mail::SpamAssassin::Logger;
 
 use strict;
 use warnings;

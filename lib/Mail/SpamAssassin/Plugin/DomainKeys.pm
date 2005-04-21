@@ -33,15 +33,13 @@ This is the DomainKeys plugin and it needs lots more documentation.
 package Mail::SpamAssassin::Plugin::DomainKeys;
 
 use Mail::SpamAssassin::Plugin;
+use Mail::SpamAssassin::Logger;
 use strict;
 use warnings;
 use bytes;
 
 # Have to do this so that RPM doesn't find these as required perl modules
 BEGIN { require Mail::DomainKeys::Message; require Mail::DomainKeys::Policy; }
-
-# Make the main dbg() accessible in our package w/o an extra function
-*dbg=\&Mail::SpamAssassin::Plugin::dbg;
 
 use vars qw(@ISA);
 @ISA = qw(Mail::SpamAssassin::Plugin);

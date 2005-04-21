@@ -41,11 +41,9 @@ C</etc/mail/spamassassin/plugintest.cf>.
 
 package Mail::SpamAssassin::Plugin::NetCache;
 
-# Make the main dbg() accessible in our package w/o an extra function
-*dbg=\&Mail::SpamAssassin::Plugin::dbg;
-
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Util;
+use Mail::SpamAssassin::Logger;
 use strict;
 use warnings;
 use bytes;

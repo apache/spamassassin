@@ -43,9 +43,6 @@ the various MIME message parts and message metadata.
 
 package Mail::SpamAssassin::Message;
 
-# Make the main dbg() accessible in our package w/o an extra function
-*dbg=\&Mail::SpamAssassin::dbg;
-
 use strict;
 use warnings;
 use bytes;
@@ -54,6 +51,7 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::Message::Node;
 use Mail::SpamAssassin::Message::Metadata;
 use Mail::SpamAssassin::Constants qw(:sa);
+use Mail::SpamAssassin::Logger;
 
 use vars qw(@ISA);
 
