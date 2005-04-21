@@ -379,19 +379,21 @@ if ($log_facility eq 'stderr') {
 
 # Logging via syslog is requested.
 if ($log_socket ne 'file' && $log_facility ne 'null') {
-  if (Mail::SpamAssassin::Logger::add(method => 'syslog',
-				      socket => $log_socket,
-				      facility => $log_facility))
+  if (!Mail::SpamAssassin::Logger::add(method => 'syslog',
+				       socket => $log_socket,
+				       facility => $log_facility))
   {
-    Mail::SpamAssassin::Logger::remove('stderr');
+    # syslog method failed 
+    $log_facility = 'stderr';
   }
 }
 # Otherwise, the user wants to log to some file.
 elsif ($log_facility eq 'file') {
-  if (Mail::SpamAssassin::Logger::add(method => 'file',
-				      filename => $log_file))
+  if (!Mail::SpamAssassin::Logger::add(method => 'file',
+				       filename => $log_file))
   {
-    Mail::SpamAssassin::Logger::remove('stderr');
+    # file method failed
+    $log_facility = 'stderr';
   }
 }
 
@@ -752,7 +754,7 @@ if (defined $opt{'pidfile'}) {
 
 # now allow waiting processes to connect, if they're watching the log.
 # The test suite does this!
-dbg("info: server pid: $$\n");
+info("spamd: server pid: $$\n");
 
 if ($scaling) {
   $scaling->set_server_fh($server);
