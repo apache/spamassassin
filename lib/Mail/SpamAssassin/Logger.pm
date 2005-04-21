@@ -61,12 +61,6 @@ $LOG_SA{facility} = {};		# no dbg facilities turned on
 use Mail::SpamAssassin::Logger::Stderr;
 $LOG_SA{method}->{stderr} = Mail::SpamAssassin::Logger::Stderr->new();
 
-END {
-  while (my ($name, $object) = each %{ $LOG_SA{method} }) {
-    $object->close();
-  }
-}
-
 sub add_facilities {
   my ($facilities) = @_;
 
@@ -194,6 +188,16 @@ sub would_log {
   }
   warn "logger: would_log called with unknown level: $level\n";
   return 0;
+}
+
+sub close {
+  while (my ($name, $object) = each %{ $LOG_SA{method} }) {
+    $object->close();
+  }
+}
+
+END {
+  close();
 }
 
 1;
