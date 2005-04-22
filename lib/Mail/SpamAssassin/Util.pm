@@ -941,7 +941,7 @@ sub uri_list_canonify {
     # www.foo.biz -> http://www.foo.biz
     # unschemed URI?  assume a default of "http://" as most 
     # HTML-displaying MUAs would
-    if ($nuri !~ /^[-_a-z0-9]+:/) {
+    if ($nuri !~ /^[-_a-z0-9]+:/i) {
       $nuri =~ s/^/http:\/\//g;
     }
 
