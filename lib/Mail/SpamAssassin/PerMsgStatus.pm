@@ -1765,7 +1765,7 @@ my $mark       = q(-_.!~*'());                                    #'; emacs
 my $unreserved = "A-Za-z0-9\Q$mark\E\x00-\x08\x0b\x0c\x0e-\x1f";
 my $uricSet = quotemeta($reserved) . $unreserved . "%";
 
-my $schemeRE = qr/(?:https?|ftp|mailto|javascript|file)/;
+my $schemeRE = qr/(?:https?|ftp|mailto|javascript|file)/i;
 
 my $uricCheat = $uricSet;
 $uricCheat =~ tr/://d;
