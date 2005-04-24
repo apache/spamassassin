@@ -831,7 +831,7 @@ _handle_spamd_header(struct message *m, int flags, char *buf, int len,
 	}
 	return EX_OK;
     }
-    else if (!strcmp(buf, "X-") == 0) {
+    else if (strcmp(buf, "X-") == 0) {
 	/* skip X-headers that may be locally defined */
 	return EX_OK;
     }
