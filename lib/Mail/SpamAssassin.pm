@@ -261,7 +261,7 @@ sub new {
   Mail::SpamAssassin::Logger::add_facilities($self->{debug});
 
   # first debugging information possibly printed should be the version
-  info("generic: SpamAssassin version " . Version());
+  dbg("generic: SpamAssassin version " . Version());
 
   # if the libs are installed in an alternate location, and the caller
   # didn't set PREFIX, we should have an estimated guess ready ...
