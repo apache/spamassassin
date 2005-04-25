@@ -788,7 +788,7 @@ sub uri_to_domain {
   $uri =~ s#^[a-z]+:/{0,2}##gsi;	# drop the protocol
   $uri =~ s,^[^/]*\@,,gs;		# username/passwd
   $uri =~ s,[/\?\&].*$,,gs;		# path/cgi params
-  $uri =~ s,:\d+$,,gs;			# port
+  $uri =~ s,:\d*$,,gs;			# port, bug 4191: sometimes the # is missing
 
   return if $uri =~ /\%/;         # skip undecoded URIs.
   # we'll see the decoded version as well

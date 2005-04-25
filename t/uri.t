@@ -80,6 +80,7 @@ ok(try_domains('http:/%77%77%77.spamassassin.org/lists.html', undef));
 ok(try_domains('http:/www.spamassassin.org/lists.html', 'spamassassin.org'));
 ok(try_domains('http:www.spamassassin.org/lists.html', 'spamassassin.org'));
 ok(try_domains('http://kung.pao.com.cn', 'pao.com.cn'));
+ok(try_domains('http://blah.blah.com:/', 'blah.com'));
 
 ##############################################
 
