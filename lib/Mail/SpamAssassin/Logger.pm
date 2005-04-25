@@ -122,13 +122,16 @@ sub info {
   _log("info", @_);
 }
 
+# remember to avoid deep recursion, my friend
 sub _log {
   my ($level, $message) = @_;
 
   my $facility = "generic";
-  if ($message =~ /^(\S+?):\s*(.*)/s) {
+  my $whitespace = " ";
+  if ($message =~ /^(\S+?):(\s*)(.*)/s) {
     $facility = $1;
-    $message = $2;
+    $whitespace = $2 if $2;
+    $message = $3;
   }
 
   # only debug specific facilities
@@ -139,7 +142,7 @@ sub _log {
   }
 
   $message =~ s/\n+$//s;
-  $message =~ s/^/${facility}: /mg;
+  $message =~ s/^/${facility}:${whitespace}/mg;
 
   # no reason to go through warn()
   log_message($level, $message);
