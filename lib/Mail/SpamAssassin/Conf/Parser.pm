@@ -311,6 +311,9 @@ sub parse {
       next;
     }
 
+    # preprocessing? skip all other commands
+    next if $skip_parsing;
+
     if ($key eq 'require_version') {
       # if it wasn't replaced during install, assume current version ...
       next if ($value eq "\@\@VERSION\@\@");
@@ -336,9 +339,6 @@ sub parse {
       }
       next;
     }
-
-    # preprocessing? skip all other commands
-    next if $skip_parsing;
 
     my $cmd = $lut_frequent->{$key}; # check the frequent command set
     if (!$cmd) {
