@@ -184,7 +184,9 @@ To use this, change calls to C<Net::DNS::Resolver::bgsend> from:
 
 to:
 
-    $res->bgsend(Mail::SpamAssassin::Util::new_dns_packet($hostname, $type));
+    $res->bgsend(Mail::SpamAssassin::DnsResolver::new_dns_packet($hostname, $type, $class));
+
+This documentation should be more specific about usage of $type and $class.
 
 =cut
 
@@ -206,7 +208,7 @@ sub new_dns_packet {
     $packet->header()->id($DNS_ID_COUNTER);
 
     # a bit noisy, so commented by default...
-    # dbg("dns: new DNS packet h=$host t=$type id=$DNS_ID_COUNTER");
+    # dbg("dns: new DNS packet time=".time()." host=$host type=$type id=$DNS_ID_COUNTER");
   };
 
   if ($@) {
