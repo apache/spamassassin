@@ -831,13 +831,9 @@ _handle_spamd_header(struct message *m, int flags, char *buf, int len,
 	}
 	return EX_OK;
     }
-    else if (strcmp(buf, "X-") == 0) {
-	/* skip X-headers that may be locally defined */
-	return EX_OK;
-    }
 
-    libspamc_log(flags, LOG_ERR, "spamd responded with bad header '%s'", buf);
-    return EX_PROTOCOL;
+    /* skip any other headers that may be locally defined */
+    return EX_OK;
 }
 
 int message_filter(struct transport *tp, const char *username,
