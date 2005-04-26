@@ -176,7 +176,7 @@ sub new {
 	# Go onto the next header line, unless the next line is a
 	# multipart mime boundary, where we know we're going to stop
 	# below, so drop through for final header processing.
-        next unless (defined $boundary && $message[0] =~ /^--\Q$boundary\E(?:--|\s*$)/);
+        next unless (defined $boundary && @message && $message[0] =~ /^--\Q$boundary\E(?:--|\s*$)/);
       }
       else {
 	# There was no previous header and this is just "out there"?
@@ -222,7 +222,7 @@ sub new {
 
     # Alternately, if a multipart mime boundary is found in the header area,
     # aka it's malformed, exit out as well and treat it as part of the body.
-    last if (defined $boundary && $message[0] =~ /^--\Q$boundary\E(?:--|\s*$)/);
+    last if (defined $boundary && @message && $message[0] =~ /^--\Q$boundary\E(?:--|\s*$)/);
   }
 
   # Store the pristine body for later -- store as a copy since @message
