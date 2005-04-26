@@ -285,6 +285,7 @@ sub parsed_metadata {
 sub usable_uri_domain {
   my($self, $skip_domains, $uri) = @_;
 
+  return if ($uri =~ /^mailto:/i);
   my $dom = Mail::SpamAssassin::Util::uri_to_domain($uri);
   if ($dom) {
     if (exists $skip_domains->{$dom}) {
