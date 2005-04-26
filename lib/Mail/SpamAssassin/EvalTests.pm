@@ -1351,10 +1351,20 @@ sub check_rbl_results_for {
   check_rbl_sub(@_);
 }
 
-# check a RBL if a message is Habeas SWE
+# Check a RBL if a message is Habeas SWE.
+#	Test is skipped if the SWE 2.0 "Reputation Tag" is matched in the
+#	Envelope From address.  Otherwise transitional senders would get a
+#	double bonus.  <csg@habeas.com>
+#
 sub check_rbl_swe {
   my ($self, $rule, $set, $rbl_server, $subtest) = @_;
 
+  if (!defined $self->{envelope_accreditor_tag}) {
+    $self->message_envelope_accreditor_tag();
+  }
+  if ($self->{envelope_accreditor_tag}) {
+    return 0;
+  }
   if (!defined $self->{habeas_swe}) {
     $self->message_is_habeas_swe();
   }
@@ -1363,6 +1373,22 @@ sub check_rbl_swe {
   }
   return 0;
 }
+
+# check an RBL if "--accreditor" tag is in Envelope From.
+#	<csg@habeas.com>
+#
+sub check_rbl_accreditor {
+  my ($self, $rule, $set, $rbl_server, $subtest, $accreditor) = @_;
+
+  if (!defined $self->{envelope_accreditor_tag}) {
+    $self->message_envelope_accreditor_tag();
+  }
+  if ($self->{envelope_accreditor_tag} eq $accreditor) {
+    $self->check_rbl_backend($rule, $set, $rbl_server, 'A', $subtest);
+  }
+  return 0;
+}
+
 
 # this only checks the address host name and not the domain name because
 # using the domain name had much worse results for dsn.rfc-ignorant.org
@@ -2116,6 +2142,16 @@ sub message_is_habeas_swe {
   }
 
   return $self->{habeas_swe};
+}
+
+sub message_envelope_accreditor_tag {
+  my ($self) = @_;
+
+  if ($self->get('EnvelopeFrom:addr') =~ /[@.]a--([a-z0-9]{3,})\./i) {
+    ($self->{envelope_accreditor_tag} = $1) =~ tr/A-Z/a-z/;
+    return;
+  }
+  $self->{envelope_accreditor_tag} = "";
 }
 
 ###########################################################################
