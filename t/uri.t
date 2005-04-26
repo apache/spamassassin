@@ -63,6 +63,9 @@ sub try_domains {
   if (!defined $expect) {
     return !defined $result;
   }
+  elsif (!defined $result) {
+    return 0;
+  }
 
   if ($expect eq $result) {
     return 1;
