@@ -875,9 +875,6 @@ sub secure_tmpfile {
 sub uri_to_domain {
   my ($uri) = @_;
 
-  return if ($uri =~ /^mailto:/i);	# not mailto's, please (TODO?
-					# this was commented out -- re-enabled for bug 4201
-
   # Javascript is not going to help us, so return.
   return if ($uri =~ /^javascript:/i);
 
