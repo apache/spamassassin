@@ -71,6 +71,10 @@ or
 	SPAMD/1.1 0 EX_OK
 	Spam: False ; 2 / 5
 
+There may be additional headers following the "Spam:" header, which
+are as yet undefined.  Clients should ignore these, and keep looking for
+headers which they do support, or the "\r\n\r\n" end-of-headers marker.
+
 
 SYMBOLS command returns the same as CHECK, followed by a line listing all the
 rule names, separated by commas.  Note that some versions of the protocol
