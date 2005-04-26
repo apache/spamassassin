@@ -1279,18 +1279,18 @@ sub check_rbl_results_for {
   check_rbl_sub(@_);
 }
 
-# Check a RBL if a message is Habeas SWE.
-#	Test is skipped if the SWE 2.0 "Reputation Tag" is matched in the
-#	Envelope From address.  Otherwise transitional senders would get a
-#	double bonus.  <csg@habeas.com>
+# Check an RBL if a message is Habeas SWE (a.k.a. the Habeas Haiku).
+#	Test is skipped if the message contains an Accreditor assertion;
+#	otherwise transitional senders using both the SWE header and the
+#	accreditor assertion would get a double bonus.  <csg@habeas.com>
 #
 sub check_rbl_swe {
   my ($self, $rule, $set, $rbl_server, $subtest) = @_;
 
-  if (!defined $self->{envelope_accreditor_tag}) {
-    $self->message_envelope_accreditor_tag();
+  if (!defined $self->{accreditor_tag}) {
+    $self->message_accreditor_tag();
   }
-  if ($self->{envelope_accreditor_tag}) {
+  if (%{$self->{accreditor_tag}}) {
     return 0;
   }
   if (!defined $self->{habeas_swe}) {
@@ -1302,16 +1302,17 @@ sub check_rbl_swe {
   return 0;
 }
 
-# check an RBL if "--accreditor" tag is in Envelope From.
-#	<csg@habeas.com>
+# check an RBL if the message contains an "accreditor assertion," that is,
+#	the message contains the name of a service that will vouch for their
+#	practices.  <csg@habeas.com>
 #
 sub check_rbl_accreditor {
   my ($self, $rule, $set, $rbl_server, $subtest, $accreditor) = @_;
 
-  if (!defined $self->{envelope_accreditor_tag}) {
-    $self->message_envelope_accreditor_tag();
+  if (!defined $self->{accreditor_tag}) {
+    $self->message_accreditor_tag();
   }
-  if ($self->{envelope_accreditor_tag} eq $accreditor) {
+  if ($self->{accreditor_tag}->{$accreditor}) {
     $self->check_rbl_backend($rule, $set, $rbl_server, 'A', $subtest);
   }
   return 0;
@@ -2064,14 +2065,40 @@ sub message_is_habeas_swe {
   return $self->{habeas_swe};
 }
 
-sub message_envelope_accreditor_tag {
+# Check for an Accreditor Assertion within the message, that is, the name of
+#	a third-party who will vouch for the sender's practices. The accreditor
+#	can be asserted in the EnvelopeFrom like this:
+#
+#	    listowner@a--accreditor.mail.example.com
+#
+#	or in an 'Accreditor" Header field, like this:
+#
+#	    Accreditor: accreditor1, parm=value; accreditor2, parm-value
+#
+#	This implementation supports multiple accreditors, but ignores any
+#	parameters in the header field.
+#
+sub message_accreditor_tag {
   my ($self) = @_;
+  my %acctags;
 
   if ($self->get('EnvelopeFrom:addr') =~ /[@.]a--([a-z0-9]{3,})\./i) {
-    ($self->{envelope_accreditor_tag} = $1) =~ tr/A-Z/a-z/;
-    return;
+    (my $tag = $1) =~ tr/A-Z/a-z/;
+    $acctags{$tag} = -1;
   }
-  $self->{envelope_accreditor_tag} = "";
+  my $accreditor_field = $self->get('Accreditor');
+  if (defined($accreditor_field)) {
+    my @accreditors = split(/,/, $accreditor_field);
+    foreach my $accreditor (@accreditors) {
+      my @terms = split(' ', $accreditor);
+      if ($#terms >= 0) {
+	  my $tag = $terms[0];
+	  $tag =~ tr/A-Z/a-z/;
+	  $acctags{$tag} = -1;
+      }
+    }
+  }
+  $self->{accreditor_tag} = \%acctags;
 }
 
 ###########################################################################
