@@ -52,18 +52,6 @@ use Text::Wrap ();
 use constant HAS_MIME_BASE64 => eval { require MIME::Base64; };
 use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
 
-# a counter value to use for DNS ID numbers in new_dns_packet().
-# range: 0x0000 - 0xffff
-our $DNS_ID_COUNTER;
-
-sub init_dns_id_counter_from_pid {
-  $DNS_ID_COUNTER = (($$ >> 10) ^ (($$ << 6) & 0xffff));
-}
-
-BEGIN {
-  init_dns_id_counter_from_pid();    # always init at startup
-}
-
 ###########################################################################
 
 # find an executable in the current $PATH (or whatever for that platform)
@@ -1244,48 +1232,6 @@ sub trap_sigalrm_fully {
     # may be using "safe" signals with %SIG; use POSIX to avoid it
     POSIX::sigaction POSIX::SIGALRM(), new POSIX::SigAction $handler;
   }
-}
-
-###########################################################################
-
-=item $packet = new_dns_packet ($host, $type, $class)
-
-A wrapper for C<Net::DNS::Packet::new()> which ensures that the
-packet's ID field uses a new, unique value for this process.
-This is to avoid SpamAssassin bug 3997.
-
-To use this, change calls to C<Net::DNS::Resolver::bgsend> from:
-
-    $res->bgsend($hostname, $type);
-
-to:
-
-    $res->bgsend(Mail::SpamAssassin::Util::new_dns_packet($hostname, $type));
-
-=cut
-
-sub new_dns_packet {
-  my ($host, $type, $class) = @_;
-
-  # increment our counter, and ensure it stays in range
-  $DNS_ID_COUNTER = (($DNS_ID_COUNTER+1) & 0xffff);
-
-  my $packet;
-  eval {
-    $packet = Net::DNS::Packet->new($host, $type, $class);
-    # set the ID on the packet to avoid bug 3997
-    $packet->header()->id($DNS_ID_COUNTER);
-
-    # a bit noisy, so commented by default...
-    # dbg("util: new DNS packet h=$host t=$type id=$DNS_ID_COUNTER");
-  };
-
-  if ($@) {
-    # this can happen if Net::DNS isn't available -- but in this 
-    # case this function should never be called!
-    warn "util: cannot create Net::DNS::Packet, but new_dns_packet() was called: $@ $!";
-  }
-  return $packet;
 }
 
 ###########################################################################
