@@ -51,6 +51,13 @@ use constant WARNING => 1;
 use constant INFO => 2;
 use constant DBG => 3;
 
+my %log_level = (
+		 0 => 'ERROR',
+		 1 => 'WARNING',
+		 2 => 'INFO',
+		 3 => 'DBG',
+		 );
+
 # global shared object
 our %LOG_SA;
 
@@ -87,6 +94,9 @@ sub add_facilities {
     else {
       $LOG_SA{level} = INFO if $LOG_SA{level} < INFO;
     }
+    # debug statement last so we might see it
+    dbg("logger: adding facilities: " . join(", ", @facilities));
+    dbg("logger: logging level is " . $log_level{$LOG_SA{level}});
   }
 }
 
@@ -178,9 +188,10 @@ sub remove {
   my $name = lc($method);
   if (exists $LOG_SA{method}->{$name}) {
     delete $LOG_SA{method}->{$name};
+    info("logger: removing $name method");
     return 1;
   }
-  # should warn here
+  warn("logger: unable to remove $name method, not present to be removed");
   return 1;
 }
 
