@@ -1,2 +1,12 @@
 # SpamAssassin rules file: bugzilla-scraped needs-mc rules
 
+## MC: bug 4021 cmt 0: start
+header T_MC_L_SUBJ_JAPAN_UCE_2_b4021_c0 Subject =~/\e\$B.*(?:L\$>5Bz|EE;R%a!<%k)(?:8x|9-)9p/
+body T_MC_L_BODY_JAPAN_UCE_b4021_c0 /\e\$B.*(?:L\$>5Bz|EE;R%a!<%k)(?:8x|9-)9p/
+## MC: bug 4021 cmt 0: end
+
+## MC: bug 4021 cmt 2: start
+header T_MC_L_SUBJ_JAPAN_UCE_2_b4021_c2 Subject =~ /\e\$B.*(?:L\$>5Bz|EE;R%a!<%k)(?:8x|9-)9p/
+body T_MC_L_BODY_JAPAN_UCE_b4021_c2 /\e\$B.*(?:L\$>5Bz|EE;R%a!<%k)(?:8x|9-)9p/
+## MC: bug 4021 cmt 2: end
+
