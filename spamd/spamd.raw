@@ -1557,7 +1557,7 @@ sub protocol_error {
   my ($err) = @_;
   my $resp = "EX_PROTOCOL";
   syswrite($client, "SPAMD/1.0 $resphash{$resp} Bad header line: $err\r\n");
-  info("spamd: bad protocol: header error: $err");
+  warn("spamd: bad protocol: header error: $err");
 }
 
 sub service_unavailable_error {
@@ -1565,14 +1565,14 @@ sub service_unavailable_error {
   my $resp = "EX_UNAVAILABLE";
   syswrite($client,
 	   "SPAMD/1.0 $resphash{$resp} Service Unavailable: $err\r\n");
-  info("spamd: service unavailable: $err");
+  warn("spamd: service unavailable: $err");
 }
 
 sub service_timeout {
   my ($err) = @_;
   my $resp = "EX_TIMEOUT";
   print $client "SPAMD/1.0 $resphash{$resp} Timeout: $err\r\n";
-  info("spamd: timeout: $err");
+  warn("spamd: timeout: $err");
 }
 
 ###########################################################################
