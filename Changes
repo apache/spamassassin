@@ -1,4 +1,130 @@
 ------------------------------------------------------------------------
+r165046 | parker | 2005-04-27 20:46:09 +0000 (Wed, 27 Apr 2005) | 1 line
+
+Bug 4201: Do no lookup email addresses for URIBL tests
+------------------------------------------------------------------------
+r165033 | quinlan | 2005-04-27 19:50:16 +0000 (Wed, 27 Apr 2005) | 2 lines
+
+replace bayes scores for network+bayes score set
+
+------------------------------------------------------------------------
+r164938 | dos | 2005-04-27 02:10:38 +0000 (Wed, 27 Apr 2005) | 1 line
+
+bug 4282: detect Critical Path's authentication token
+------------------------------------------------------------------------
+r164898 | felicity | 2005-04-26 22:06:29 +0000 (Tue, 26 Apr 2005) | 1 line
+
+revert out patch from bug 3998, miscounted votes so can't apply yet.
+------------------------------------------------------------------------
+r164885 | felicity | 2005-04-26 21:18:16 +0000 (Tue, 26 Apr 2005) | 1 line
+
+bug 3998: add support for Habeas Accreditor (v2)
+------------------------------------------------------------------------
+r164848 | parker | 2005-04-26 18:05:39 +0000 (Tue, 26 Apr 2005) | 1 line
+
+Bug 4053: XMail v1.21 received header change
+------------------------------------------------------------------------
+r164821 | parker | 2005-04-26 16:44:54 +0000 (Tue, 26 Apr 2005) | 1 line
+
+Bug 3944: get_envelope_from not handling received header
+------------------------------------------------------------------------
+r164813 | parker | 2005-04-26 16:41:52 +0000 (Tue, 26 Apr 2005) | 1 line
+
+Bug 4232: Make sure @message has parts before trying to match against them
+------------------------------------------------------------------------
+r164751 | dos | 2005-04-26 06:37:27 +0000 (Tue, 26 Apr 2005) | 1 line
+
+fix missing auth token value in rcvd_parser.t
+------------------------------------------------------------------------
+r164521 | dos | 2005-04-25 02:24:47 +0000 (Mon, 25 Apr 2005) | 1 line
+
+bug 4184: support qmail's 'with ESMTPA;' auth token
+------------------------------------------------------------------------
+r164518 | parker | 2005-04-25 02:17:18 +0000 (Mon, 25 Apr 2005) | 1 line
+
+Bump number of tests
+------------------------------------------------------------------------
+r164517 | felicity | 2005-04-25 02:11:54 +0000 (Mon, 25 Apr 2005) | 1 line
+
+bug 4092: plugin API for set_tag wasn't documented, get_tag was missing.
+------------------------------------------------------------------------
+r164516 | felicity | 2005-04-25 02:08:27 +0000 (Mon, 25 Apr 2005) | 1 line
+
+bug 4191: urls with invalidly listed port isn't handled
+------------------------------------------------------------------------
+r164515 | felicity | 2005-04-25 02:05:38 +0000 (Mon, 25 Apr 2005) | 1 line
+
+bug 4192: require_version wasn't allowed inside if config blocks.
+------------------------------------------------------------------------
+r164513 | felicity | 2005-04-25 02:01:29 +0000 (Mon, 25 Apr 2005) | 1 line
+
+bug 4121: user defined rule's scores become ignored after spamd processes a message.  problem is in how the {scores} reference is handled (or not) by copy_config().
+------------------------------------------------------------------------
+r164275 | parker | 2005-04-22 19:28:59 +0000 (Fri, 22 Apr 2005) | 1 line
+
+Remove obsolete -w option from usage
+------------------------------------------------------------------------
+r159767 | mss | 2005-04-02 11:06:54 +0000 (Sat, 02 Apr 2005) | 2 lines
+
+bug 3952:  Doc fix for --username=root (results in a fatal error).
+
+------------------------------------------------------------------------
+r159257 | felicity | 2005-03-28 16:55:31 +0000 (Mon, 28 Mar 2005) | 1 line
+
+bug 4034: fix conf errors for invalid rule configuration lines
+------------------------------------------------------------------------
+r157178 | parker | 2005-03-11 23:56:24 +0000 (Fri, 11 Mar 2005) | 1 line
+
+Bug4075: Additional fix to avoid double delete while using each on a hash
+------------------------------------------------------------------------
+r157049 | dos | 2005-03-11 05:25:05 +0000 (Fri, 11 Mar 2005) | 1 line
+
+bug 4064: implements spamcop_max_report_size
+------------------------------------------------------------------------
+r155330 | felicity | 2005-02-25 14:29:38 +0000 (Fri, 25 Feb 2005) | 1 line
+
+change mime-type properties from text/english to text/plain
+------------------------------------------------------------------------
+r126183 | parker | 2005-01-23 03:11:08 +0000 (Sun, 23 Jan 2005) | 1 line
+
+Bug 4075: use each instead of grep/keys to avoid reading large chunks of the autowhitelist into memory
+------------------------------------------------------------------------
+r125738 | jm | 2005-01-20 08:33:56 +0000 (Thu, 20 Jan 2005) | 1 line
+
+introduce some randomness to avoid deadlock
+------------------------------------------------------------------------
+r125736 | jm | 2005-01-20 08:32:05 +0000 (Thu, 20 Jan 2005) | 1 line
+
+backend: need synch script in b3.0 as well
+------------------------------------------------------------------------
+r125023 | jm | 2005-01-13 02:54:12 +0000 (Thu, 13 Jan 2005) | 1 line
+
+bug 4048: avoid spurious warning from auth_ident if ident_lookup() returns failure, trivial fix from Daryl C. W. O'Shea
+------------------------------------------------------------------------
+r123288 | felicity | 2004-12-24 10:34:20 +0000 (Fri, 24 Dec 2004) | 1 line
+
+bug 4050: if perl version ends in .0, spamd and spamassassin --version wouldn't output anything because of perl's rounding the trailing 000 off.
+------------------------------------------------------------------------
+r123015 | sidney | 2004-12-21 22:36:48 +0000 (Tue, 21 Dec 2004) | 1 line
+
+Bug 4044: SPF test moved to use DNS we control and to test for fail as well as pass
+------------------------------------------------------------------------
+r122693 | jm | 2004-12-18 01:22:39 +0000 (Sat, 18 Dec 2004) | 1 line
+
+bug 3826: version_tag should be an administrator setting.  trivial fix
+------------------------------------------------------------------------
+r122583 | parker | 2004-12-16 21:18:40 +0000 (Thu, 16 Dec 2004) | 1 line
+
+Update version number for spec file
+------------------------------------------------------------------------
+r122144 | parker | 2004-12-16 04:21:22 +0000 (Thu, 16 Dec 2004) | 1 line
+
+Begin 3.0.3 development
+------------------------------------------------------------------------
+r121166 | parker | 2004-12-16 04:13:35 +0000 (Thu, 16 Dec 2004) | 1 line
+
+3.0.2 Released
+------------------------------------------------------------------------
 r112261 | quinlan | 2004-12-16 00:27:25 +0000 (Thu, 16 Dec 2004) | 2 lines
 
 update version
