@@ -621,7 +621,8 @@ sub complete_dnsbl_lookup {
       # this zone is a simple rule, not a set of subrules
       # skip any A record that isn't on 127/8
       if ($rr->type eq 'A' && $rr->rdatastr !~ /^127\./) {
-	warn("uridnsbl: bogus rr for domain=$dom, rule=$rulename, rr=" . $rr->string);
+	warn("uridnsbl: bogus rr for domain=$dom, rule=$rulename, id=" .
+            $packet->header->id." rr=".$rr->string);
 	next;
       }
       $self->got_dnsbl_hit($scanstate, $ent, $rdatastr, $dom, $rulename);
@@ -632,7 +633,8 @@ sub complete_dnsbl_lookup {
       if ($rr->type eq 'A' && $rr->rdatastr !~ /^127\./ &&
 	  !($uridnsbl_subs_bits & 0xff000000))
       {
-	warn("uridnsbl: bogus rr: domain=$dom, zone=$ent->{zone}, rr=" . $rr->string);
+	warn("uridnsbl: bogus rr: domain=$dom, zone=$ent->{zone}, id=" .
+            $packet->header->id." rr=".$rr->string);
 	next;
       }
       foreach my $subtest (keys (%{$uridnsbl_subs}))
