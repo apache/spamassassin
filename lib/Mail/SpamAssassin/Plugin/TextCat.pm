@@ -52,6 +52,31 @@ use bytes;
 use vars qw(@ISA);
 @ISA = qw(Mail::SpamAssassin::Plugin);
 
+# language models
+my @nm;
+
+# TextCat settings
+my $opt_a = 10;
+my $opt_f = 0;
+my $opt_t = 400;
+my $opt_u = 1.05;
+
+# $opt_a  If the number of languages to be returned by &classify is larger
+#         than the value of $opt_a then an empty list is returned signifying
+#         that the language is unknown.
+#
+# $opt_f  Before sorting is performed, the ngrams which occur $opt_f times
+#         or less are removed.  This can be used to speed up the program for
+#         longer inputs.  For shorter inputs, this should be set to 0.
+#
+# $opt_t  This option indicates the maximum number of ngrams that should be
+#         compared with each of the language models (note that each of those
+#         models is used completely).
+#
+# $opt_u  &classify returns a list of the best-scoring language together with
+#         all languages which are less than $opt_u times worse.  Typical
+#         values are 1.05 or 1.1.
+
 sub new {
   my $class = shift;
   my $mailsaobject = shift;
@@ -59,6 +84,12 @@ sub new {
   $class = ref($class) || $class;
   my $self = $class->SUPER::new($mailsaobject);
   bless ($self, $class);
+
+  # load language models once
+  if (! @nm) {
+    # load_models will die() if it fails
+    load_models($mailsaobject->{languages_filename});
+  }
 
   $self->register_eval_rule("check_language");
   $self->register_eval_rule("check_body_8bits");
@@ -279,70 +310,51 @@ Rhaeto-Romance, Sanskrit, Scots, Slovenian, and Yiddish.
   $conf->{parser}->register_commands(\@cmds);
 }
 
-my @nm;
+sub load_models {
+  my ($languages_filename) = @_;
 
-# TextCat settings
-my $opt_a = 10;
-my $opt_f = 0;
-my $opt_t = 400;
-my $opt_u = 1.05;
+  my @lm;
+  my $ngram = {};
+  my $rang = 1;
+  dbg("textcat: loading languages file...");
 
-# $opt_a  If the number of languages to be returned by &classify is larger
-#         than the value of $opt_a then an empty list is returned signifying
-#         that the language is unknown.
-#
-# $opt_f  Before sorting is performed, the ngrams which occur $opt_f times
-#         or less are removed.  This can be used to speed up the program for
-#         longer inputs.  For shorter inputs, this should be set to 0.
-#
-# $opt_t  This option indicates the maximum number of ngrams that should be
-#         compared with each of the language models (note that each of those
-#         models is used completely).
-#
-# $opt_u  &classify returns a list of the best-scoring language together with
-#         all languages which are less than $opt_u times worse.  Typical
-#         values are 1.05 or 1.1.
+  if (!defined $languages_filename) {
+    die "textcat: languages filename not defined";
+  }
+
+  open(LM, $languages_filename)
+      || die "textcat: cannot open languages: $!\n";
+  local $/ = undef;
+  @lm = split(/\n/, <LM>);
+  close(LM);
+  # create language ngram maps once
+  for (@lm) {
+    # look for end delimiter
+    if (/^0 (.+)/) {
+      $ngram->{"language"} = $1;
+      push(@nm, $ngram);
+      # reset for next language
+      $ngram = {};
+      $rang = 1;
+    }
+    else {
+      $ngram->{$_} = $rang++;
+    }
+  }
+  if (! @nm) {
+    die "textcat: no language models loaded";
+  }
+  dbg("textcat: loaded " . scalar(@nm) . " language models");
+}
 
 sub classify {
-  my ($inputptr, $languages_filename, %skip) = @_;
+  my ($inputptr, %skip) = @_;
   my %results;
   my $maxp = $opt_t;
 
   # create ngrams for input
   # limit to 10000 characters, enough for accuracy and still fast enough
   my @unknown = create_lm($inputptr);
-
-  # load language models once
-  if (! @nm) {
-    my @lm;
-    my $ngram = {};
-    my $rang = 1;
-    dbg("textcat: loading languages file...");
-
-    if (!defined $languages_filename) {
-      return;
-    }
-
-    open(LM, $languages_filename)
-	|| die "textcat: cannot open languages: $!\n";
-    local $/ = undef;
-    @lm = split(/\n/, <LM>);
-    close(LM);
-    # create language ngram maps once
-    for (@lm) {
-      # look for end delimiter
-      if (/^0 (.+)/) {
-	$ngram->{"language"} = $1;
-	push(@nm, $ngram);
-	# reset for next language
-	$ngram = {};
-	$rang = 1;
-      }
-      else {
-	$ngram->{$_} = $rang++;
-      }
-    }
-  }
 
   # test each language
   foreach my $ngram (@nm) {
@@ -442,7 +454,7 @@ sub extract_metadata {
     $skip{$_} = 1 for split(' ', $opts->{conf}->{inactive_languages});
     delete $skip{$_} for split(' ', $opts->{conf}->{ok_languages});
     dbg("textcat: classifying, skipping: " . join(" ", keys %skip));
-    @matches = classify(\$body, $self->{main}->{languages_filename}, %skip);
+    @matches = classify(\$body, %skip);
   }
   else {
     dbg("textcat: message too short for language analysis");
