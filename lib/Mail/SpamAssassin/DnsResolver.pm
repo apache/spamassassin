@@ -53,10 +53,10 @@ our @ISA = qw();
 # we can reset it to a new range when we fork -- paranoia to avoid
 # accidentally reusing old results that way.
 # range: 0x0000 - 0xffff
-our $DNS_ID_COUNTER;
+my $DNS_ID_COUNTER;
 
 sub init_dns_id_counter_from_pid {
-  $DNS_ID_COUNTER = (($$ >> 10) ^ (($$ << 6) & 0xffff));
+  $DNS_ID_COUNTER = int(rand(0xffff));
 }
 
 BEGIN {
@@ -208,7 +208,7 @@ sub new_dns_packet {
     $packet->header()->id($DNS_ID_COUNTER);
 
     # a bit noisy, so commented by default...
-    # dbg("dns: new DNS packet time=".time()." host=$host type=$type id=$DNS_ID_COUNTER");
+    #dbg("dns: new DNS packet pid=$$ time=".time()." host=$host type=$type id=$DNS_ID_COUNTER");
   };
 
   if ($@) {
