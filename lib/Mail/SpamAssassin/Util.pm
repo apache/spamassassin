@@ -825,7 +825,11 @@ sub secure_tmpfile {
   my $tmpdir = Mail::SpamAssassin::Util::untaint_file_path(
                  File::Spec->tmpdir()
                );
+
   if (!$tmpdir) {
+    # note: would prefer to keep this fatal, as not being
+    # able to find a writable tmpdir is a big deal for the calling
+    # code too.  Should be quite a psychotic case, also.
     die "util: cannot find a temporary directory, set TMP or TMPDIR in environment";
   }
 
@@ -1112,6 +1116,7 @@ sub setuid_to_euid {
 
     # Check that we have now accomplished the setuid
     if ($< != $touid) {
+      # keep this fatal: it's a serious security problem if it fails
       die "util: setuid $< to $touid failed!";
     }
   }
@@ -1142,6 +1147,7 @@ sub helper_app_pipe_open_unix {
   # do a fork-open, so we can setuid() back
   my $pid = open ($fh, '-|');
   if (!defined $pid) {
+    # acceptable to die() here, calling code catches it
     die "util: cannot fork: $!";
   }
 
@@ -1171,6 +1177,7 @@ sub helper_app_pipe_open_unix {
   if ($f != 0) {
     POSIX::close(0);
   }
+  # acceptable to die() here, calling code catches it
   open STDIN, "<$stdinfile" or die "util: cannot open $stdinfile: $!";
 
   # this should be impossible; if we just closed fd 0, UNIX
@@ -1208,7 +1215,8 @@ sub helper_app_pipe_open_unix {
   }
 
   exec @cmdline;
-  die "util: exec failed: $!";
+  die "util: exec failed: $!";  
+  # must be a die() otherwise -w will complain
 }
 
 ###########################################################################
