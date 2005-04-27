@@ -186,6 +186,7 @@ sub parsed_metadata {
   # the URI was found so we can ignore hammy decoys.
   my %domlist = ( );
   foreach my $uri ($scanner->get_uri_list()) {
+    next if ($uri =~ /^mailto:/i);
     my $dom = Mail::SpamAssassin::Util::uri_to_domain($uri);
     if ($dom) {
       if (exists $scanner->{main}->{conf}->{uridnsbl_skip_domains}->{$dom}) {
