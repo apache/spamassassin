@@ -889,12 +889,14 @@ sub spawn {
       }
 
       # if we changed UID during processing, change back!
-      if ( $> != $< and $> != ( $< - 2**32 ) ) {
+      if ($setuid_to_user && ($> != $<) && ($> != ($< - 2**32))) {
         $) = "$( $(";    # change eGID
         $> = $<;         # change eUID
-        if ( $> != $< and $> != ( $< - 2**32 ) ) {
-           # make it fatal to avoid security breaches
-	   die("spamd: return setuid failed");
+
+        # check again; ensure the change happened
+        if ($> != $< && ($> != ( $< - 2**32))) {
+          # make it fatal to avoid security breaches
+          die("spamd: return setuid failed");
         }
       }
 
