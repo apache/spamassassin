@@ -48,21 +48,6 @@ use IO::Socket::INET;
 
 our @ISA = qw();
 
-# a counter value to use for DNS ID numbers in new_dns_packet().
-# note: we maintain our own rather than use Net::DNS' one, so that
-# we can reset it to a new range when we fork -- paranoia to avoid
-# accidentally reusing old results that way.
-# range: 0x0000 - 0xffff
-my $DNS_ID_COUNTER;
-
-sub init_dns_id_counter_from_pid {
-  $DNS_ID_COUNTER = int(rand(0xffff));
-}
-
-BEGIN {
-  init_dns_id_counter_from_pid();    # always init at startup
-}
-
 ###########################################################################
 
 sub new {
@@ -102,6 +87,8 @@ sub load_resolver {
     $self->{res} = Net::DNS::Resolver->new;
     if (defined $self->{res}) {
       $self->{no_resolver} = 0;
+      $self->{retry} = 1;               # retries for non-nackgrounded search
+      $self->{retrans} = 3;   # initial timeout for "non-backgrounded" search run in background
       $self->{res}->retry(1);           # If it fails, it fails
       $self->{res}->retrans(0);         # If it fails, it fails
       $self->{res}->dnsrch(0);          # ignore domain search-list
@@ -146,10 +133,10 @@ sub connect_sock {
 
   return if $self->{no_resolver};
 
+  $self->{sock}->close() if $self->{sock};
   $self->{sock} = IO::Socket::INET->new (
     Proto => 'udp',
     Type => SOCK_DGRAM,
-    ReuseAddr => 1,
   );
 
   $self->{dest} = sockaddr_in($self->{res}->{port},
@@ -195,20 +182,12 @@ sub new_dns_packet {
 
   return if $self->{no_resolver};
 
-  # increment our counter, and ensure it stays in range
-  $DNS_ID_COUNTER = (($DNS_ID_COUNTER+1) & 0xffff);
-
-  # avoid 0x0000 so we can return it as a success value from some methods
-  $DNS_ID_COUNTER = 1 if (!$DNS_ID_COUNTER);
-
   my $packet;
   eval {
     $packet = Net::DNS::Packet->new($host, $type, $class);
-    # set the ID on the packet to avoid bug 3997
-    $packet->header()->id($DNS_ID_COUNTER);
 
     # a bit noisy, so commented by default...
-    #dbg("dns: new DNS packet pid=$$ time=".time()." host=$host type=$type id=$DNS_ID_COUNTER");
+    #dbg("dns: new DNS packet pid=$$ time=".time()." host=$host type=$type id=".$packet->id);
   };
 
   if ($@) {
@@ -249,6 +228,7 @@ sub bgsend {
   my $id = $pkt->header->id;
   my $data = $pkt->data;
   my $dest = $self->{dest};
+  $self->connect_sock() if !$self->{sock};
   if (!$self->{sock}->send ($pkt->data, 0, $self->{dest})) {
     warn "dns: sendto() failed: $@";
     return;
@@ -270,6 +250,7 @@ the number of such packets delivered to their callbacks.
 sub poll_responses {
   my ($self, $timeout) = @_;
   return if $self->{no_resolver};
+  return if !$self->{sock};
 
   my $rin = $self->{sock_as_vec};
   my $rout;
@@ -330,17 +311,45 @@ sub search {
   my ($self, $name, $type, $class) = @_;
   return if $self->{no_resolver};
 
-  # note nifty use of a closure here.  I love closures ;)
+  my $retrans = $self->{retrans};
+  my $retries = $self->{retry};
+  my $timeout = $retrans;
   my $answerpkt;
-  $self->bgsend($name, $type, $class, sub {
+  for (my $i = 0;
+       (($i < $retries) && !defined($answerpkt));
+       ++$i, $retrans *= 2, $timeout = $retrans) {
+
+    $timeout = 1 if ($timeout < 1);
+    # note nifty use of a closure here.  I love closures ;)
+    $self->bgsend($name, $type, $class, sub {
       $answerpkt = shift;
     });
 
-  while (!defined($answerpkt)) {
-    $self->poll_responses(-1);     # -1 = as long as it takes
-  }
+    my $now = time;
+    my $deadline = $now + $timeout;
 
+    while (($now < $deadline) && (!defined($answerpkt))) {
+      $self->poll_responses(1);
+      $now = time;
+    }
+  }
   return $answerpkt;
+}
+
+###########################################################################
+
+=item $res->finish_socket()
+
+Reset socket when done with it.
+
+=cut
+
+sub finish_socket {
+  my ($self) = @_;
+  if ($self->{sock}) {
+    $self->{sock}->close();
+    delete $self->{sock};
+  }
 }
 
 ###########################################################################
@@ -353,8 +362,8 @@ Clean up for destruction.
 
 sub finish {
   my ($self) = @_;
+  $self->finish_socket();
   if (!$self->{no_resolver}) {
-    $self->{sock}->close();
     delete $self->{res};
   }
   delete $self->{main};
@@ -378,8 +387,6 @@ sub fhs_to_vec {
 # call Mail::SA::init() instead
 sub reinit_post_fork {
   my ($self) = @_;
-  # use a new range of IDs
-  init_dns_id_counter_from_pid();
   # and a new socket, so we don't have 5 spamds sharing the same
   # socket
   $self->connect_sock();
