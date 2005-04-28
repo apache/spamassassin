@@ -183,6 +183,7 @@ sub check {
 	# finish the DNS results
 	$self->rbl_finish();
 	$self->{main}->call_plugins ("check_post_dnsbl", { permsgstatus => $self });
+       $self->{resolver}->finish_socket() if $self->{resolver};
       }
 
       # since meta tests must have a priority of META_TEST_MIN_PRIORITY or
@@ -220,6 +221,7 @@ sub check {
       # finish the DNS results
       $self->rbl_finish();
       $self->{main}->call_plugins ("check_post_dnsbl", { permsgstatus => $self });
+      $self->{resolver}->finish_socket() if $self->{resolver};
     }
 
     # finished running rules

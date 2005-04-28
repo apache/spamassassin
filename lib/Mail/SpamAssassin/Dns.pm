@@ -618,26 +618,40 @@ sub is_dns_available {
   # TODO: retry every now and again if we get this far, but the
   # next test fails?  could be because the ethernet cable has
   # simply fallen out ;)
-  for(my $retry = 3; $retry > 0 and $#domains>-1; $retry--) {
-    my $domain = splice(@domains, rand(@domains), 1);
-    dbg("dns: trying ($retry) $domain...");
-    my $result = $self->lookup_ns($domain);
-    if(defined $result) {
-      if (scalar @$result > 0) {
-        dbg("dns: NS lookup of $domain succeeded => DNS available (set dns_available to override)");
-        $IS_DNS_AVAILABLE = 1;
-        last;
+
+  # Net::DNS::Resolver scans a list of nameservers when it does a foreground query
+  # but only uses the first in a background query like we use.
+  # Try the different nameservers here in case the first one is not woorking
+  
+  my @nameservers = $self->{resolver}->get_resolver->nameservers();
+  dbg("dns: testing resolver nameservers: ".join(", ", @nameservers));
+  my $ns;
+  while( $ns  = shift(@nameservers)) {
+    for(my $retry = 3; $retry > 0 and $#domains>-1; $retry--) {
+      my $domain = splice(@domains, rand(@domains), 1);
+      dbg("dns: trying ($retry) $domain...");
+      my $result = $self->lookup_ns($domain);
+      if(defined $result) {
+        if (scalar @$result > 0) {
+          dbg("dns: NS lookup of $domain using $ns succeeded => DNS available (set dns_available to override)");
+          $IS_DNS_AVAILABLE = 1;
+          last;
+        }
+        else {
+          dbg("dns: NS lookup of $domain using $ns failed, no results found");
+          next;
+        }
       }
       else {
-        dbg("dns: NS lookup of $domain failed, no results found");
-	next;
+        dbg("dns: NS lookup of $domain using $ns failed horribly, may not be a valid nameserver");
+        $IS_DNS_AVAILABLE = 0; # should already be 0, but let's be sure.
+        last; 
       }
     }
-    else {
-      dbg("dns: NS lookup of $domain failed horribly, your resolv.conf may not be pointing at a valid server");
-      $IS_DNS_AVAILABLE = 0; # should already be 0, but let's be sure.
-      last; 
-    }
+    last if $IS_DNS_AVAILABLE;
+    dbg("dns: NS lookups failed, removing nameserver $ns from list");
+    $self->{resolver}->get_resolver->nameservers(@nameservers);
+    $self->{resolver}->connect_sock(); # reconnect socket to new nameserver
   }
 
   dbg("dns: all NS queries failed => DNS unavailable (set dns_available to override)") if ($IS_DNS_AVAILABLE == 0);
