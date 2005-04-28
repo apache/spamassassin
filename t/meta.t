@@ -22,7 +22,12 @@ use Mail::SpamAssassin;
 
 use vars qw( %rules %scores );
 
-plan tests => 2;
+# "parse-rules-for-masses" requires Data::Dumper
+use constant HAS_DATADUMPER => eval { require Data::Dumper; };
+use constant DO_RUN     => HAS_DATADUMPER;
+
+plan tests => (DO_RUN ? 2 : 0);
+exit unless DO_RUN;
 
 # meta failures
 my $meta_dependency_disabled = 0;
