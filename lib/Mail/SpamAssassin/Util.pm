@@ -46,6 +46,7 @@ use Sys::Hostname (); # don't import hostname() into this namespace!
 use Fcntl;
 use POSIX (); # don't import anything unless we ask explicitly!
 use Text::Wrap ();
+use Errno qw(EEXIST);
 
 ###########################################################################
 
@@ -819,6 +820,15 @@ sub first_available_module {
 
 ###########################################################################
 
+=item my ($filehandle, $filepath) = secure_tmpfile();
+
+Generates a filename for a temporary file, opens it exclusively and
+securely, and returns a filehandle to the open file (opened O_RDWR).
+
+If it cannot open a file after 20 tries, it returns C<undef>.
+
+=cut
+
 # thanks to http://www2.picante.com:81/~gtaylor/autobuse/ for this
 # code.
 sub secure_tmpfile {
@@ -830,11 +840,14 @@ sub secure_tmpfile {
     # note: would prefer to keep this fatal, as not being
     # able to find a writable tmpdir is a big deal for the calling
     # code too.  Should be quite a psychotic case, also.
-    die "util: cannot find a temporary directory, set TMP or TMPDIR in environment";
+    warn "util: cannot find a temporary directory, set TMP or TMPDIR in environment";
+    return;
   }
 
   my ($reportfile,$tmpfile);
   my $umask = umask 077;
+  my $retries = 20;
+
   do {
     # we do not rely on the obscurity of this name for security...
     # we use a average-quality PRG since this is all we need
@@ -854,10 +867,33 @@ sub secure_tmpfile {
                       "tmp",
                     )
                   );
+
     # ...rather, we require O_EXCL|O_CREAT to guarantee us proper
     # ownership of our file; read the open(2) man page.
-  } while (! sysopen ($tmpfile, $reportfile, O_RDWR|O_CREAT|O_EXCL, 0600));
+    if (sysopen ($tmpfile, $reportfile, O_RDWR|O_CREAT|O_EXCL, 0600))
+    {
+      last;
+    }
+
+    if ($!{EEXIST}) {
+      # this is acceptable; tmpfile already exists. try another
+      next;
+    }
+    
+    # this is not, however.  could be "out of quota" or "too many
+    # open files" (bug 4017).
+    warn "util: secure_tmpfile failed to create file '$tmpfile': $!\n";
+
+    # ensure the FH is not semi-open in some way
+    if ($tmpfile) { close $tmpfile; }     
+
+  } while ($retries-- > 0);
   umask $umask;
+
+  if (!$tmpfile) {
+    warn "util: secure_tmpfile failed to create file, giving up";
+    return;     # undef
+  }
 
   return ($reportfile, $tmpfile);
 }
