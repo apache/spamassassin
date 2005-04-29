@@ -346,6 +346,8 @@ sub pyzor_report {
 
     my $opts = $options->{report}->{conf}->{pyzor_options} || '';
 
+    dbg("pyzor: opening pipe: " . join(' ', $path, $opts, "report", "< $tmpf"));
+
     my $pid = Mail::SpamAssassin::Util::helper_app_pipe_open(*PYZOR,
 	$tmpf, 1, $path, split(' ', $opts), "report");
     $pid or die "$!\n";
