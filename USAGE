@@ -212,8 +212,14 @@ Other Installation Notes
       [1]: http://wiki.apache.org/spamassassin/SpamTrapping
 
 
-  - Scores and other user preferences can now be loaded from an SQL
-    database; see the 'sql' subdirectory for more details.
+  - Scores and other user preferences can now be loaded from, and Bayes
+    and auto-whitelist data can be stored in, an SQL database; see the
+    'sql' subdirectory for more details.
+
+    If you are setting up a large 'spamd' system-wide installation, with
+    Bayes and/or auto-whitelists, we strongly recommend using SQL as
+    storage.  It has proven more reliable than the default DB_File storage
+    backend at several large sites.
 
 
   - If you are running SpamAssassin under a disk quota, or are setting up
