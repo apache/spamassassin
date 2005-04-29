@@ -19,7 +19,7 @@ use constant DO_RUN     => TEST_ENABLED && HAS_SPFQUERY &&
 
 BEGIN {
   
-  plan tests => (DO_RUN ? 4 : 0);
+  plan tests => (DO_RUN ? 8 : 0);
 
 };
 
@@ -36,9 +36,24 @@ sarun ("-t < data/nice/spf1", \&patterns_run_cb);
 ok_all_patterns();
 
 %patterns = (
-    q{ SPF_HELO_FAIL }, 'helo_fail',
-    q{ SPF_FAIL }, 'fail',
+    q{ SPF_NEUTRAL }, 'neutral',
+    q{ SPF_HELO_NEUTRAL }, 'helo_neutral',
 );
 
 sarun ("-t < data/spam/spf1", \&patterns_run_cb);
+ok_all_patterns();
+
+%patterns = (
+    q{ SPF_SOFTFAIL }, 'softfail',
+    q{ SPF_HELO_SOFTFAIL }, 'helo_softfail',
+);
+
+sarun ("-t < data/spam/spf2", \&patterns_run_cb);
+ok_all_patterns();
+%patterns = (
+    q{ SPF_FAIL }, 'fail',
+    q{ SPF_HELO_FAIL }, 'helo_fail',
+);
+
+sarun ("-t < data/spam/spf3", \&patterns_run_cb);
 ok_all_patterns();
