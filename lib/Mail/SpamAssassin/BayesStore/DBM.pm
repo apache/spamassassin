@@ -1470,21 +1470,33 @@ sub clear_database {
 
   return 0 unless ($self->tie_db_writable());
 
+  dbg("bayes: $$ untie-ing in preparation for removal.");
+
+  foreach my $dbname (@DBNAMES) {
+    my $db_var = 'db_'.$dbname;
+
+    if (exists $self->{$db_var}) {
+      dbg("bayes: $$ untie-ing $db_var");
+      untie %{$self->{$db_var}};
+      delete $self->{$db_var};
+    }
+  }
+
   my $path = $self->{bayes}->{main}->sed_path($self->{bayes}->{main}->{conf}->{bayes_path});
 
   foreach my $dbname (@DBNAMES, 'journal') {
     foreach my $ext ($self->DB_EXTENSIONS) {
       my $name = $path.'_'.$dbname.$ext;
-      unlink $name;
-      dbg("bayes: clear_database: removing $dbname");
+      my $ret = unlink $name;
+      dbg("bayes: clear_database: " . ($ret ? 'removed' : 'tried to remove') . " $name");
     }
   }
 
   # the journal file needs to be done separately since it has no extension
   foreach my $dbname ('journal') {
     my $name = $path.'_'.$dbname;
-    unlink $name;
-    dbg("bayes: clear_database: removing $dbname");
+    my $ret = unlink $name;
+    dbg("bayes: clear_database: " . ($ret ? 'removed' : 'tried to remove') . " $name");
   }
 
   $self->untie_db();
