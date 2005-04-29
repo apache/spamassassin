@@ -48,7 +48,7 @@ sub new {
 sub log_message {
   my ($self, $level, $msg) = @_;
 
-  print STDERR "$level: $msg\n";
+  print STDERR "[$$] $level: $msg\n";
 }
 
 sub close_log {
