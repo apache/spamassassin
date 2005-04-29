@@ -272,6 +272,8 @@ sub parse {
                   $self->{currentfile}.": if ".$cond->{conditional}."\n";
           }
           else {
+            # die seems a bit excessive here, but this shouldn't be possible
+            # so I suppose it's okay.
             die "config: unknown 'if' type: ".$cond->{type}."\n";
           }
 
@@ -366,7 +368,9 @@ sub parse {
       }
 
       if (!$cmd->{code}) {
-        $self->setup_default_code_cb ($cmd);
+        if (! $self->setup_default_code_cb($cmd)) {
+          goto failed_line;
+        }
       }
 
       my $ret = &{$cmd->{code}} ($conf, $cmd->{setting}, $value, $line);
@@ -560,8 +564,10 @@ sub setup_default_code_cb {
     $cmd->{code} = \&set_template_append;
   }
   else {
-    die "config: unknown conf type $type!";
+    warn "config: unknown conf type $type!";
+    return 0;
   }
+  return 1;
 }
 
 sub set_numeric_value {
