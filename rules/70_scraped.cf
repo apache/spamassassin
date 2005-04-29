@@ -1,20 +1,40 @@
 # SpamAssassin rules file: bugzilla-scraped needs-mc rules
 
-## MC: bug 3860 cmt 0: start
-header T_MC_SARE_SUB_BUY_CHEAP_b3860_c0 subject =~ /\bbuy cheap\b/i
-score T_MC_SARE_SUB_BUY_CHEAP_b3860_c0 2.222
-## MC: bug 3860 cmt 0: end
+## MC: bug 4236 cmt 4: start
+header __RCVD_APNIC_b4236_c4 Received =~ /(\[|\()(58|59|60|61|202|203|210|211|218|219|220|221|222)\.\d+\.\d+\.\d+.+by MAIL.SERVER.FOR.MY.DOMAIN/
+header __RCVD_RIPE_b4236_c4 Received =~ /(\[|\()(62|80|81|82|83|84||85|86|87|88|193|194|195|212|213|217)\.\d+\.\d+\.\d+.+by MAIL.SERVER.FOR.MY.DOMAIN/
+header __RCVD_LACNIC_b4236_c4 Received =~ /(\[|\()20(0|1)\.\d+\.\d+\.\d+.+by MAIL.SERVER.FOR.MY.DOMAIN/
+meta __RCVD_FOREIGN_b4236_c4 (__RCVD_APNIC_b4236_c4 || __RCVD_RIPE_b4236_c4 || __RCVD_LACNIC_b4236_c4)
+header __FROM_AOL_b4236_c4 From =~ /\@aol\.com/i
+meta T_MC_SPAMMY_FOREIGN_AOL_b4236_c4 (__RCVD_FOREIGN_b4236_c4 && __FROM_AOL_b4236_c4)
+score T_MC_SPAMMY_FOREIGN_AOL_b4236_c4 8
+header __FROM_RIPE_b4236_c4 From:addr =~ /\.(at|ba|ch|cz|de|dk|eg|es|fi|fr|gr|hr|hu|ie|il|is|it|lt|lu|lv|ma|nl|no|pl|pt|ro|ru|se|sk|ua|uk|za)$/i
+meta T_MC_SPAMMY_FOREIGN_RIPE_b4236_c4 (__FROM_RIPE_b4236_c4 && (__RCVD_APNIC_b4236_c4 || __RCVD_LACNIC_b4236_c4))
+score T_MC_SPAMMY_FOREIGN_RIPE_b4236_c4 10
+header __FROM_APNIC_b4236_c4 From:addr =~ /\.(au|cn|in|jp|kr|nz|ph|pk|sg|th)$/i
+meta T_MC_SPAMMY_FOREIGN_APNIC_b4236_c4 (__FROM_APNIC_b4236_c4 && (__RCVD_RIPE_b4236_c4 || __RCVD_LACNIC_b4236_c4))
+score T_MC_SPAMMY_FOREIGN_APNIC_b4236_c4 8
+header __FROM_LACNIC_b4236_c4 From:addr =~ /\.(ar|br|cl|co|mx|pe|ve)$/i
+meta T_MC_SPAMMY_FOREIGN_LACNIC_b4236_c4 (__FROM_LACNIC_b4236_c4 && (__RCVD_RIPE_b4236_c4 || __RCVD_APNIC_b4236_c4))
+score T_MC_SPAMMY_FOREIGN_LACNIC_b4236_c4 6
+## MC: bug 4236 cmt 4: end
 
-## MC: bug 3861 cmt 0: start
-header T_MC_SARE_BOUNDARY_NP2_b3861_c0 Content-Type =~ /boundary=".*_NextPart_.*_NextPart_/
-score T_MC_SARE_BOUNDARY_NP2_b3861_c0 4.000
-## MC: bug 3861 cmt 0: end
-
-## MC: bug 3863 cmt 2: start
-header T_MC_SUBJECT_DIET_b3863_c2 Subject =~ /\bLose .*(?:pounds|lbs|weight)/i
-header T_MC_SARE_SUB_LOSE_PCT_b3863_c2 Subject =~/lose.{1,20}(?:\d+\%.{1,25}weight|weight.{1,40}\d+\%)/i
-header T_MC_N1_SUBJECT_DIET_b3863_c2 Subject =~/lose.{1,20}(?:\d+\%.{1,25}(?:pounds|lbs|weight)|(?:pounds|lbs|weight).{1,40}\d+\%)/i
-header T_MC_N2_SUBJECT_DIET_b3863_c2 Subject =~/lose.{1,20}(?:\d+.{1,25}(?:pounds|lbs|weight)|(?:pounds|lbs|weight).{1,40}\d+)/i
-header T_MC_N3_SUBJECT_DIET_b3863_c2 Subject =~/lose.{1,20}(?:\%.{1,25}(?:pounds|lbs|weight)|(?:pounds|lbs|weight).{1,40}\%)/i
-## MC: bug 3863 cmt 2: end
+## MC: bug 4236 cmt 5: start
+header __RCVD_APNIC_b4236_c5 Received =~/(\[|\()(58|59|60|61|202|203|210|211|218|219|220|221|222)\.\d+\.\d+\.\d+.+byMAIL.SERVER.FOR.MY.DOMAIN/
+header __RCVD_RIPE_b4236_c5 Received =~/(\[|\()(62|80|81|82|83|84||85|86|87|88|193|194|195|212|213|217)\.\d+\.\d+\.\d+.+byMAIL.SERVER.FOR.MY.DOMAIN/
+header __RCVD_LACNIC_b4236_c5 Received =~ /(\[|\()20(0|1)\.\d+\.\d+\.\d+.+byMAIL.SERVER.FOR.MY.DOMAIN/
+meta __RCVD_FOREIGN_b4236_c5 (__RCVD_APNIC_b4236_c5 || __RCVD_RIPE_b4236_c5 || __RCVD_LACNIC_b4236_c5)
+header __FROM_AOL_b4236_c5 From =~ /\@aol\.com/i
+meta T_MC_SPAMMY_FOREIGN_AOL_b4236_c5 (__RCVD_FOREIGN_b4236_c5 && __FROM_AOL_b4236_c5)
+score T_MC_SPAMMY_FOREIGN_AOL_b4236_c5 8
+header __FROM_RIPE_b4236_c5 From:addr =~/\.(at|ba|ch|cz|de|dk|eg|es|fi|fr|gr|hr|hu|ie|il|is|it|lt|lu|lv|ma|nl|no|pl|pt|ro|ru|se|sk|ua|uk|za)$/i
+meta T_MC_SPAMMY_FOREIGN_RIPE_b4236_c5 (__FROM_RIPE_b4236_c5 && (__RCVD_APNIC_b4236_c5 || __RCVD_LACNIC_b4236_c5))
+score T_MC_SPAMMY_FOREIGN_RIPE_b4236_c5 10
+header __FROM_APNIC_b4236_c5 From:addr =~ /\.(au|cn|in|jp|kr|nz|ph|pk|sg|th)$/i
+meta T_MC_SPAMMY_FOREIGN_APNIC_b4236_c5 (__FROM_APNIC_b4236_c5 && (__RCVD_RIPE_b4236_c5 || __RCVD_LACNIC_b4236_c5))
+score T_MC_SPAMMY_FOREIGN_APNIC_b4236_c5 8
+header __FROM_LACNIC_b4236_c5 From:addr =~ /\.(ar|br|cl|co|mx|pe|ve)$/i
+meta T_MC_SPAMMY_FOREIGN_LACNIC_b4236_c5 (__FROM_LACNIC_b4236_c5 && (__RCVD_RIPE_b4236_c5 || __RCVD_APNIC_b4236_c5))
+score T_MC_SPAMMY_FOREIGN_LACNIC_b4236_c5 6
+## MC: bug 4236 cmt 5: end
 
