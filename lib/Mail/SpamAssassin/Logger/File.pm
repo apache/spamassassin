@@ -71,11 +71,8 @@ sub init {
 sub log_message {
   my ($self, $level, $msg) = @_;
 
-  my @date = reverse((gmtime(time))[0..5]);
-  $date[0] += 1900;
-  $date[1] += 1;
-  syswrite(STDLOG, sprintf("%04d-%02d-%02d %02d:%02d:%02d [%s] %s: %s\n",
-			   @date, $$, $level, $msg));
+  syswrite(STDLOG, sprintf("%s [%s] %s: %s\n",
+			   scalar localtime, $$, $level, $msg));
 }
 
 sub close_log {
