@@ -1,5 +1,3 @@
-# $Id: HTML.pm,v 1.101 2003/10/15 08:08:05 quinlan Exp $
-
 # <@LICENSE>
 # Copyright 2004 Apache Software Foundation
 # 
