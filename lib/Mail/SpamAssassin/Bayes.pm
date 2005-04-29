@@ -551,7 +551,9 @@ sub tokenize_headers {
     } else {
       $parsed{$hdr} = $val;
     }
-    dbg("bayes: header tokens for $hdr = \"$parsed{$hdr}\"");
+    if (would_log('dbg', 'bayes') > 1) {
+      dbg("bayes: header tokens for $hdr = \"$parsed{$hdr}\"");
+    }
   }
 
   return %parsed;
@@ -1248,7 +1250,9 @@ sub scan {
     # update the atime on this token, it proved useful
     push(@touch_tokens, $_);
 
-    dbg("bayes: token '$raw_token' => $pw");
+    if (would_log('dbg', 'bayes') > 1) {
+      dbg("bayes: token '$raw_token' => $pw");
+    }
   }
 
   if (!@sorted || (REQUIRE_SIGNIFICANT_TOKENS_TO_SCORE > 0 && 
