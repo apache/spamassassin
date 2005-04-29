@@ -485,6 +485,7 @@ sub __decode_header {
     return Mail::SpamAssassin::Util::qp_decode($data);
   }
   else {
+    # not possible since the input has already been limited to 'B' and 'Q'
     die "message: unknown encoding type '$cte' in RFC2047 header";
   }
 }
