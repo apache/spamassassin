@@ -216,6 +216,13 @@ Other Installation Notes
     database; see the 'sql' subdirectory for more details.
 
 
+  - If you are running SpamAssassin under a disk quota, or are setting up
+    'spamd' with users with disk quotas, be warned that the DB_File
+    database module used by SpamAssassin for Bayes and AWL storage seems
+    to be unreliable in the face of quotas (bug 3796). In this situation,
+    we recommend using SQL storage for those databases, instead of DB_File.
+
+
   - Lots more ways to integrate SpamAssassin can be read at
     http://wiki.SpamAssassin.org/ .
 
