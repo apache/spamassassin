@@ -1,5 +1,3 @@
-# $Id: Received.pm,v 1.40 2003/12/17 07:08:44 jmason Exp $
-
 # <@LICENSE>
 # Copyright 2004 Apache Software Foundation
 # 

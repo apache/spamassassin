@@ -1,5 +1,3 @@
-# $Id: MIME.pm,v 1.8 2003/10/02 22:59:00 quinlan Exp $
-
 # <@LICENSE>
 # Copyright 2004 Apache Software Foundation
 # 
