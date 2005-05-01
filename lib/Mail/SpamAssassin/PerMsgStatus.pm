@@ -2319,8 +2319,8 @@ sub do_meta_tests {
   my %metas = map { $_ => 1 } @metas; # keep a small cache for fast lookups
   foreach $rulename (@metas) {
     $self->{rule_errors}++; # flag to --lint that there was an error ...
-    dbg("rules: excluding meta test $rulename; unsolved meta dependencies: " .
-        join(", ", grep($metas{$_}, @{ $rule_deps{$rulename} })));
+    warn("rules: excluding meta test $rulename; unsolved meta dependencies: " .
+	 join(", ", grep($metas{$_}, @{ $rule_deps{$rulename} })));
   }
 
   if (defined &{'_meta_tests_'.$clean_priority}) {
