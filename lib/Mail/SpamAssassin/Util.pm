@@ -829,70 +829,53 @@ If it cannot open a file after 20 tries, it returns C<undef>.
 
 =cut
 
-# thanks to http://www2.picante.com:81/~gtaylor/autobuse/ for this
-# code.
+# thanks to http://www2.picante.com:81/~gtaylor/autobuse/ for this code
 sub secure_tmpfile {
-  my $tmpdir = Mail::SpamAssassin::Util::untaint_file_path(
-                 File::Spec->tmpdir()
-               );
+  my $tmpdir = Mail::SpamAssassin::Util::untaint_file_path(File::Spec->tmpdir());
 
   if (!$tmpdir) {
-    # note: would prefer to keep this fatal, as not being
-    # able to find a writable tmpdir is a big deal for the calling
-    # code too.  Should be quite a psychotic case, also.
+    # Note: we would prefer to keep this fatal, as not being able to
+    # find a writable tmpdir is a big deal for the calling code too.
+    # That would be quite a psychotic case, also.
     warn "util: cannot find a temporary directory, set TMP or TMPDIR in environment";
     return;
   }
 
-  my ($reportfile,$tmpfile);
+  my ($reportfile, $tmpfile);
   my $umask = umask 077;
-  my $retries = 20;
 
-  do {
-    # we do not rely on the obscurity of this name for security...
+  for (my $retries = 20; $retries > 0; $retries--) {
+    # we do not rely on the obscurity of this name for security,
     # we use a average-quality PRG since this is all we need
-    my $suffix = join ('',
-                       (0..9, 'A'..'Z','a'..'z')[rand 62,
-                                                 rand 62,
-                                                 rand 62,
-                                                 rand 62,
-                                                 rand 62,
-                                                 rand 62]);
-    $reportfile = File::Spec->catfile(
-                    $tmpdir,
-                    join ('.',
-                      "spamassassin",
-                      $$,
-                      $suffix,
-                      "tmp",
-                    )
-                  );
+    my $suffix = join('', (0..9,'A'..'Z','a'..'z')[rand 62, rand 62, rand 62,
+						   rand 62, rand 62, rand 62]);
+    $reportfile = File::Spec->catfile($tmpdir,".spamassassin${$}${suffix}tmp");
 
-    # ...rather, we require O_EXCL|O_CREAT to guarantee us proper
-    # ownership of our file; read the open(2) man page.
-    if (sysopen ($tmpfile, $reportfile, O_RDWR|O_CREAT|O_EXCL, 0600))
-    {
+    # instead, we require O_EXCL|O_CREAT to guarantee us proper
+    # ownership of our file, read the open(2) man page
+    if (sysopen($tmpfile, $reportfile, O_RDWR|O_CREAT|O_EXCL, 0600)) {
       last;
     }
 
     if ($!{EEXIST}) {
-      # this is acceptable; tmpfile already exists. try another
+      # it is acceptable if $tmpfile already exists, try another
       next;
     }
     
-    # this is not, however.  could be "out of quota" or "too many
-    # open files" (bug 4017).
+    # error, maybe "out of quota" or "too many open files" (bug 4017)
     warn "util: secure_tmpfile failed to create file '$tmpfile': $!\n";
 
-    # ensure the FH is not semi-open in some way
-    if ($tmpfile) { close $tmpfile; }     
+    # ensure the file handle is not semi-open in some way
+    if ($tmpfile) {
+      close $tmpfile;
+    }
+  }
 
-  } while ($retries-- > 0);
   umask $umask;
 
   if (!$tmpfile) {
     warn "util: secure_tmpfile failed to create file, giving up";
-    return;     # undef
+    return;	# undef
   }
 
   return ($reportfile, $tmpfile);
