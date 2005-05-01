@@ -159,7 +159,7 @@ if ( $opt{'force-expire'} ) {
 }
 
 if ($opt{'showdots'} && $opt{'progress'}) {
-  print "--showdots and --progress may not be used together, please select just one.\n";
+  print "--showdots and --progress may not be used together, please select just one\n";
   exit 0;
 }
 
@@ -402,7 +402,7 @@ eval {
 
   print STDERR "\n" if ($opt{showdots});
   $progress->final() if ($opt{progress} && $progress);
-  print "Learned from $learnedcount message(s) ($messagecount message(s) examined).\n";
+  print "acted on $learnedcount message(s) ($messagecount message(s) examined)\n";
 
   # If we needed to make a tempfile, go delete it.
   if ( defined $tempfile ) {
