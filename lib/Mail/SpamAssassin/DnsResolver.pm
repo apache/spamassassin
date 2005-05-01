@@ -33,7 +33,6 @@ that module.
 =cut
 
 # TODO: caching in this layer instead of in callers.
-# TODO: timeout form of the search() method.
 
 package Mail::SpamAssassin::DnsResolver;
 
@@ -302,10 +301,6 @@ sub poll_responses {
 Emulates C<Net::DNS::Resolver::search()>.
 
 =cut
-
-# TODO: for now this just emulates Net::DNS::Resolver::search(), but it would
-# be really trivial to do timeout code without invoking alarm() now -- just use
-# poll_responses(1) to poll until time() hits $start_time+$timeout_secs!
 
 sub search {
   my ($self, $name, $type, $class) = @_;
