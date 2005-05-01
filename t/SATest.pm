@@ -4,10 +4,10 @@ package main;
 
 use Cwd;
 use Config;
-use File::Path;
-use File::Copy;
 use File::Basename;
-
+use File::Copy;
+use File::Path;
+use File::Spec;
 
 BEGIN {
   # No spamd test in Windows unless env override says user figured out a way
@@ -147,6 +147,19 @@ sub probably_unused_spamd_port {
     $delta = int(rand(32768));
   }
   return $port;
+}
+
+sub locate_command {
+  my ($command) = @_;
+
+  my @path = File::Spec->path();
+  push(@path, '/usr/bin') if ! grep { m@/usr/bin/?$@ } @path;
+  for my $path (@path) {
+    $location = "$path/$command";
+    $location =~ s@//@/@g;
+    return $location if -x $location;
+  }
+  return 0;
 }
 
 sub sa_t_finish {

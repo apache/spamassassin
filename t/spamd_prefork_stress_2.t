@@ -9,11 +9,15 @@ use Test;
 
 our $RUN_THIS_TEST;
 
+my $pgrep;
+my $pkill;
+
 # require pkill and pgrep be installed to run this test
 BEGIN {
   $RUN_THIS_TEST = conf_bool('run_spamd_prefork_stress_test');
-  (-x "/usr/bin/pkill") or $RUN_THIS_TEST = 0;
-  (-x "/usr/bin/pgrep") or $RUN_THIS_TEST = 0;
+  $pkill = locate_command("pkill");
+  $pgrep = locate_command("pgrep");
+  $RUN_THIS_TEST = 0 if !$pkill || !$pgrep;
   plan tests => ($SKIP_SPAMD_TESTS || !$RUN_THIS_TEST ? 0 : 14) 
 };
 
@@ -23,7 +27,7 @@ print "NOTE: this test requires /usr/bin/pkill, /usr/bin/pgrep, and\n".
     "'run_spamd_prefork_stress_test' set to 'y'.\n";
 exit unless $RUN_THIS_TEST;
 
-system("pgrep", "spamd child");
+system($pgrep, "spamd child");
 if ($? >> 8 == 0) {
   die "not running test: existing 'spamd child' processes would be killed.\n";
 }
@@ -49,7 +53,7 @@ ok_all_patterns();
 my $i = 0;
 for ($i = 0; $i < 1999; $i++) {
   print "killing [$i]\n";
-  system ("pkill", "-f", "spamd child");
+  system ($pkill, "-f", "spamd child");
 }
 
 clear_pattern_counters();
