@@ -1176,7 +1176,7 @@ sub helper_app_pipe_open_unix {
 
   # else, child process.  go setuid...
   setuid_to_euid();
-  dbg("util: setuid: helper proc $$: ruid=$< euid=$>");
+  dbg("util: setuid: ruid=$< euid=$>");
 
   # now set up the fds.  due to some wierdness, we may have to ensure that we
   # *really* close the correct fd number, since some other code may have

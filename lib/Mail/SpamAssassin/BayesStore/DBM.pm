@@ -165,7 +165,7 @@ sub tie_db_readonly {
   foreach my $dbname (@DBNAMES) {
     my $name = $path.'_'.$dbname;
     my $db_var = 'db_'.$dbname;
-    dbg("bayes: $$ tie-ing to DB file R/O $name");
+    dbg("bayes: tie-ing to DB file R/O $name");
     # untie %{$self->{$db_var}} if (tied %{$self->{$db_var}});
     tie %{$self->{$db_var}},$self->DBM_MODULE,$name, O_RDONLY,
 		 (oct($main->{conf}->{bayes_file_mode}) & 0666)
@@ -190,7 +190,7 @@ failed_to_tie:
   foreach my $dbname (@DBNAMES) {
     my $db_var = 'db_'.$dbname;
     next unless exists $self->{$db_var};
-    dbg("bayes: $$ untie-ing DB file $dbname");
+    dbg("bayes: untie-ing DB file $dbname");
     untie %{$self->{$db_var}};
   }
 
@@ -261,7 +261,7 @@ sub tie_db_writable {
   foreach my $dbname (@DBNAMES) {
     my $name = $path.'_'.$dbname;
     my $db_var = 'db_'.$dbname;
-    dbg("bayes: $$ tie-ing to DB file R/W $name");
+    dbg("bayes: tie-ing to DB file R/W $name");
     tie %{$self->{$db_var}},$self->DBM_MODULE,$name, O_RDWR|O_CREAT,
 		 (oct($main->{conf}->{bayes_file_mode}) & 0666)
        or goto failed_to_tie;
@@ -296,7 +296,7 @@ failed_to_tie:
   foreach my $dbname (@DBNAMES) {
     my $db_var = 'db_'.$dbname;
     next unless exists $self->{$db_var};
-    dbg("bayes: $$ untie-ing DB file $dbname");
+    dbg("bayes: untie-ing DB file $dbname");
     untie %{$self->{$db_var}};
   }       
 
@@ -566,13 +566,13 @@ sub untie_db {
 
   return if (!$self->{already_tied});
 
-  dbg("bayes: $$ untie-ing");
+  dbg("bayes: untie-ing");
 
   foreach my $dbname (@DBNAMES) {
     my $db_var = 'db_'.$dbname;
 
     if (exists $self->{$db_var}) {
-      dbg("bayes: $$ untie-ing $db_var");
+      dbg("bayes: untie-ing $db_var");
       untie %{$self->{$db_var}};
       delete $self->{$db_var};
     }
@@ -1470,13 +1470,13 @@ sub clear_database {
 
   return 0 unless ($self->tie_db_writable());
 
-  dbg("bayes: $$ untie-ing in preparation for removal.");
+  dbg("bayes: untie-ing in preparation for removal.");
 
   foreach my $dbname (@DBNAMES) {
     my $db_var = 'db_'.$dbname;
 
     if (exists $self->{$db_var}) {
-      dbg("bayes: $$ untie-ing $db_var");
+      dbg("bayes: untie-ing $db_var");
       untie %{$self->{$db_var}};
       delete $self->{$db_var};
     }
