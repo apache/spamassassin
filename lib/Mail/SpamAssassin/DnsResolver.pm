@@ -186,7 +186,7 @@ sub new_dns_packet {
     $packet = Net::DNS::Packet->new($host, $type, $class);
 
     # a bit noisy, so commented by default...
-    #dbg("dns: new DNS packet pid=$$ time=".time()." host=$host type=$type id=".$packet->id);
+    #dbg("dns: new DNS packet time=".time()." host=$host type=$type id=".$packet->id);
   };
 
   if ($@) {
