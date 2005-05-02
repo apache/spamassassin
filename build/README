@@ -149,6 +149,11 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 	(where X.Y.N is the new version number)
 
+  this is the point of no-return, once this commit has been made, the
+  version number is considered "burned".  Even if the release is not
+  made at this point, the number is locked for this particular code.
+  The same number cannot be used for a future different release.
+
 - (for any rc, prerelease, or full release) Place the tarballs in a
   private location and request a vote on dev@spamassassin.apache.org to
   make the release, three +1 votes are required to make the release
