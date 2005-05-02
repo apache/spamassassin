@@ -177,7 +177,7 @@ bayes_min_ham_num 10
 
 # we get to bastardize the existing pattern matching code here.  It lets us provide
 # our own checking callback and keep using the existing ok_all_patterns call
-%patterns = ( 1 => 'Learned from message' );
+%patterns = ( 1 => 'Acted on message' );
 
 ok(salearnrun("--spam data/spam", \&check_examined));
 ok_all_patterns();
@@ -267,8 +267,8 @@ sub check_examined {
     $_ = join ('', <IN>);
   }
 
-  if ($_ =~ /Learned from \d+ message\(s\) \(\d+ message\(s\) examined\)/) {
-    $found{'Learned from message'}++;
+  if ($_ =~ /acted on \d+ message\(s\) \(\d+ message\(s\) examined\)/) {
+    $found{'Acted on message'}++;
   }
 }
 
