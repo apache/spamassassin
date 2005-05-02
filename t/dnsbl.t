@@ -66,7 +66,7 @@ EOF
  q{ <dns:98.3.137.144.dnsbltest.spamassassin.org> [127.0.0.2] } => 'P_1',
  q{ <dns:134.88.73.210.dnsbltest.spamassassin.org> [127.0.0.4] } => 'P_2',
  q{ <dns:18.13.119.61.dnsbltest.spamassassin.org> [127.0.0.12] } => 'P_3',
- q{ <dns:14.35.17.212.dnsbltest.spamassassin.org> [127.0.0.1, 127.0.0.1] } => 'P_4',
+ q{ <dns:14.35.17.212.dnsbltest.spamassassin.org> [127.0.0.1] } => 'P_4',
  q{ <dns:226.149.120.193.dnsbltest.spamassassin.org> [127.0.0.1] } => 'P_5',
  q{ <dns:example.com.dnsbltest.spamassassin.org> [127.0.0.2] } => 'P_6',
  q{ <dns:134.88.73.210.sb.dnsbltest.spamassassin.org?type=TXT> } => 'P_7',
@@ -104,7 +104,7 @@ header DNSBL_TEST_TOP	eval:check_rbl('test', 'dnsbltest.spamassassin.org.')
 describe DNSBL_TEST_TOP	DNSBL A record match
 tflags DNSBL_TEST_TOP	net
 
-header DNSBL_TEST_WHITELIST	eval:check_rbl('white-firsttrusted', 'dnsbltest.spamassassin.org', '127.0.0.1')
+header DNSBL_TEST_WHITELIST	eval:check_rbl('white-firsttrusted', 'dnsbltest.spamassassin.org.', '127.0.0.1')
 describe DNSBL_TEST_WHITELIST	DNSBL whitelist match
 tflags DNSBL_TEST_WHITELIST	net nice
 

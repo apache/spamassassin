@@ -1158,7 +1158,13 @@ sub check_rbl_backend {
   return 0 if $self->{conf}->{skip_rbl_checks};
   return 0 unless $self->is_dns_available();
   $self->load_resolver();
-  
+
+  if (($rbl_server !~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) &&
+      (index($rbl_server, '.') >= 0) &&
+      ($rbl_server !~ /\.$/)) {
+    $rbl_server .= ".";
+  }
+
   dbg("dns: checking RBL $rbl_server, set $set");
 
   # ok, make a list of all the IPs in the untrusted set
@@ -1346,6 +1352,14 @@ sub _check_rbl_addresses {
   return unless scalar keys %hosts;
 
   $self->load_resolver();
+
+  if (($rbl_server !~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) &&
+      (index($rbl_server, '.') >= 0) &&
+      ($rbl_server !~ /\.$/)) {
+    $rbl_server .= ".";
+  }
+  dbg("dns: _check_rbl_addresses RBL $rbl_server, set $set");
+
   for my $host (keys %hosts) {
     $self->do_rbl_lookup($rule, $set, 'A', $rbl_server, "$host.$rbl_server");
   }
