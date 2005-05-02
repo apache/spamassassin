@@ -149,6 +149,12 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 	(where X.Y.N is the new version number)
 
+- (for any rc, prerelease, or full release) Place the tarballs in a
+  private location and request a vote on dev@spamassassin.apache.org to
+  make the release, three +1 votes are required to make the release
+  official.  The release manager (that's you) may vote as well.  Once
+  there are three or more +1 votes, you may proceed.
+
 - (for rc and prerelease builds) copy the tarballs to the website.
 
         cp -p ~/site/released/Mail-SpamAssassin-[VERSION].* \
