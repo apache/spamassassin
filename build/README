@@ -156,11 +156,20 @@ SPAMASSASSIN RELEASE PROCEDURE
   the release official.  The release manager (that's you) may vote as
   well.  Once there are three or more +1 votes, you may proceed.
 
-- publish the tarballs
+- !WARNING! After the next step, the version number will be considered
+  "burned". The number is locked for this particular code.  The same
+  number cannot be used for a future different release.  So make sure
+  you're happy before you go on!
 
-  After this step, the version number will be considered "burned".  The
-  number is locked for this particular code.  The same number cannot be
-  used for a future different release.
+  If you need to redo something, re-comment the $IS_DEVEL_BUILD line,
+  revert the $VERSION bump, and go back to 'Ensure the new version number
+  takes hold'.  You can retag with the normal 'svn copy' command used in
+  'SVN tag the release files', even if that tag already existed; but be
+  sure to check in another commit message to note what happened, e.g.:
+
+    svn commit -m "oops, had to redo: THIS IS THE REAL X.Y.Z RELEASE"
+
+- publish the tarballs.
 
   (for rc and prerelease builds) copy the tarballs to the website.
 
