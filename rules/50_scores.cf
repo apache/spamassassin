@@ -567,6 +567,11 @@ score MISSING_HB_SEP 2.5
 # HTML control test
 score HTML_MESSAGE 0.001
 
+# Informational rules about Received header parsing
+score NO_RELAYS -0.001
+score NO_RECEIVED -0.001
+score UNPARSEABLE_RELAY 0.001
+
 # ok_locales
 score CHARSET_FARAWAY 3.200
 score CHARSET_FARAWAY_HEADER 3.200
