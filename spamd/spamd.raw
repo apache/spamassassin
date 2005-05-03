@@ -842,6 +842,17 @@ sub spawn {
       # Change UID
       $> = $uuid;            # effective uid
       $< = $uuid;            # real uid. we now cannot setuid anymore
+
+      # bug 3900: BSD perl bug. see comment in setuid_to_euid() in
+      # Mail::SA::Util on the same issue.
+      if ( $< != $uuid ) {
+        dbg("initial attempt to change real uid failed, trying BSD workaround");
+
+        $> = $<;              # revert euid to ruid
+        $< = $uuid;           # change ruid to target
+        $> = $uuid;           # change euid back to target
+      }
+
       if ( $> != $uuid and $> != ( $uuid - 2**32 ) ) {
         die "spamd: setuid to uid $uuid failed\n";
       }
