@@ -105,7 +105,6 @@ lang de describe DNS_FROM_RFC_DSN Absender in dsn-Liste von www.rfc-ignorant.org
 lang de describe DNS_FROM_RFC_POST Absender in postmaster-Liste von www.rfc-ignorant.org
 lang de describe DNS_FROM_RFC_ABUSE Absender in abuse-Liste von www.rfc-ignorant.org
 lang de describe DNS_FROM_RFC_WHOIS Absender in whois-Liste von www.rfc-ignorant.org
-lang de describe RCVD_IN_RFC_IPWHOIS Transportiert via Rechner in ipwhois-Liste von www.rfc-ignorant.org
 lang de describe DNS_FROM_RFC_BOGUSMX Absender in bogusmx-Liste von www.rfc-ignorant.org
 lang de describe RCVD_IN_DSBL Transportiert via Rechner in Liste von list.dsbl.org
 lang de describe DNS_FROM_AHBL_RHSBL Absenderadresse in Liste von dnsbl.ahbl.org
@@ -113,8 +112,6 @@ lang de describe HABEAS_INFRINGER Verletzung das Warenzeichens der Firma Habeas
 lang de describe HABEAS_USER Offizieller Nutzer des Warenzeichens der Firma Habeas 
 lang de describe RCVD_IN_BSP_TRUSTED Senderechner in Liste von http://www.bondedsender.org/
 lang de describe RCVD_IN_BSP_OTHER Senderechner in Liste von http://www.bondedsender.org/
-lang de describe SB_NEW_BULK Domain des Senderechners ist neu und verschickt viele E-mails
-lang de describe SB_NSP_VOLUME_SPIKE Senderechner eines Providers mit kurzfristig hohem E-Mail-Aufkommen
 lang de describe RCVD_IN_BL_SPAMCOP_NET Transportiert via Rechner in Liste von www.spamcop.net
 lang de describe RCVD_IN_MAPS_RBL Transportiert via Rechner in Liste von http://www.mail-abuse.org/rbl/
 lang de describe RCVD_IN_MAPS_DUL Transportiert via Rechner in Liste von http://www.mail-abuse.org/dul/
@@ -184,7 +181,6 @@ lang de describe NO_REAL_NAME Kein vollständiger Name in Absendeadresse
 lang de describe FROM_ENDS_IN_NUMS Absenderadresse endet mit Ziffern im Benutzernamen
 lang de describe FROM_STARTS_WITH_NUMS Absenderadresse beginnt mit Ziffern im Benutzernamen
 lang de describe FROM_HAS_MIXED_NUMS Absendeadresse enthält Mischung aus Ziffern/Buchstaben
-lang de describe FROM_HAS_MIXED_NUMS3 Absenderadresse enthält Ziffern gemischt mit Buchstaben
 lang de describe ADDR_NUMS_AT_BIGSITE Adresse enthält viele Ziffern im Benutzernamen (bekannte Provider)
 lang de describe FROM_ALL_NUMS Adresse enthält nur Ziffern im Benutzernamen
 lang de describe FROM_OFFERS Absenderadresse enthält "@...offers"
@@ -294,8 +290,6 @@ lang de describe MIME_BOUND_MANY_HEX Bestimmtes Muster von Spam-Software in MIME
 lang de describe MIME_BOUND_NEXTPART Bestimmtes Muster von Spam-Software in MIME-Begrenzung
 lang de describe MIME_BOUND_RKFINDY Bestimmtes Muster von Spam-Software in MIME-Begrenzung (rfkindy)
 lang de describe TO_MALFORMED Format der Zieladresse inkorrekt
-lang de describe FROM_NUM_AT_WEBMAIL Absenderadresse webbasierter Maildienste, beginnt aber mit Ziffer
-lang de describe FROM_WEBMAIL_END_NUMS6 Absenderadresse webbasierter Maildienste, endet mit vielen Ziffern
 lang de describe ADDR_FREE Absenderzeile enthält "Free"
 lang de describe TO_TXT Gesendet an eine Textdatei
 lang de describe CHINA_HEADER Kopfzeilen enthalten Hinweis auf "china.com"
@@ -304,8 +298,6 @@ lang de describe WITH_LC_SMTP Kopfzeilen mit "smtp" in Kleinschreibung
 lang de describe FROM_NO_LOWER Absenderzeile enthält keine Kleinbuchstaben
 lang de describe SUBJ_BUY Betreff dreht sich ums Kaufen ("buy...")
 lang de describe FROM_HAS_ULINE_NUMS Benutzername des Absenders enthält Unterstrich und Ziffern/Buchstaben
-lang de describe NIGERIAN_SUBJECT1 Betreff deutet auf nigerianischen Spam hin
-lang de describe NIGERIAN_SUBJECT2 Betreff deutet auf nigerianischen Spam hin
 lang de describe ACCESSDB Nachricht wäre von access.db erkannt worden
 lang de describe RCVD_AM_PM Gefälschte "Received"-Kopfzeilen (AM/PM Zeitangabe)
 lang de describe HEADER_COUNT_CTYPE Kopfzeile "Content-Type" mehrfach vorhanden
@@ -335,7 +327,6 @@ lang de describe HTML_TEXT_AFTER_HTML Text nach Endmarkierung "/html"
 lang de describe HTML_TEXT_AFTER_BODY Text nach Endmarkierung "/body"
 lang de describe HTML_COMMENT_SHORT HTML-Kommentar ist sehr kurz
 lang de describe HTML_COMMENT_SAVED_URL Nachricht ist eine gespeicherte Webseite
-lang de describe HTML_CONVERTED HTML-Konvertierungsprogramm typisch für Spam
 lang de describe HTML_EMBEDS HTML-Nachricht mit eingebettetem WWW-Plugin
 lang de describe HTML_EVENT_UNSAFE HTML mit unsicheren, automatisch ausgeführten Programmanweisungen
 lang de describe HTML_FONT_SIZE_TINY HTML-Schriftgröße ist winzig
@@ -417,10 +408,6 @@ lang de describe UPPERCASE_25_50 Nachrichtentext besteht zu 25-50% aus Großbuchs
 lang de describe UPPERCASE_50_75 Nachrichtentext besteht zu 50-75% aus Großbuchstaben
 lang de describe UPPERCASE_75_100 Nachrichtentext besteht zu 75-100% aus Großbuchstaben
 lang de describe PLING_PLING Ungewöhnlich viele Ausrufezeichen im Betreff
-lang de describe NIGERIAN_BODY1 Nachrichtentext sieht nach nigerianischem Spam aus
-lang de describe NIGERIAN_BODY2 Nachrichtentext sieht nach nigerianischem Spam aus
-lang de describe NIGERIAN_BODY3 Nachrichtentext sieht nach nigerianischem Spam aus
-lang de describe NIGERIAN_BODY4 Nachrichtentext sieht nach nigerianischem Spam aus
 lang de describe INVALID_MSGID "Message-ID"-Zeile ist ungültig gemäß RFC-2822
 lang de describe FORGED_MUA_MOZILLA Gefälschte E-Mail gibt vor vom Mailprogramm Mozilla zu kommen
 lang de describe REMOVE_POSTAL Senden Sie Brief/Postkarte um aus der Liste entfernt zu werden...
@@ -518,7 +505,6 @@ lang de describe BANG_OPRAH Erwähnt Oprah (Winfrey), mit Ausrufezeichen
 lang de describe ACT_NOW_CAPS Reagieren Sie jetzt (in Großbuchstaben)
 lang de describe MORE_SEX Werden Sie sexuell aktiver
 lang de describe BANG_GUAR Eine Garantie mit Ausrufezeichen
-lang de describe NIGERIAN_BODY_GOVT_3 Nachrichtentext deutet auf nigerianischen Spam hin
 lang de describe SEE_FOR_YOURSELF Sehen Sie selbst
 lang de describe FREE_PORN Eventuell Pornowerbung: Kostenlose Pornos
 lang de describe CUM_SHOT Eventuell Pornowerbung: "cum shot"
