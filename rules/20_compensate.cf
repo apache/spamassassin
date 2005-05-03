@@ -27,6 +27,15 @@ require_version @@VERSION@@
 
 # The message was never sent via an untrustworthy host.
 header ALL_TRUSTED      eval:check_all_trusted()
-describe ALL_TRUSTED    Did not pass through any untrusted hosts
+describe ALL_TRUSTED    Passed through trusted hosts only via SMTP
 tflags ALL_TRUSTED      nice
+
+header NO_RELAYS        eval:check_no_relays()
+tflags NO_RELAYS        nice userconf
+describe NO_RELAYS      Informational: message was not relayed via SMTP
+
+header __HAS_RCVD       exists:Received
+meta NO_RECEIVED        (!__HAS_RCVD)
+tflags NO_RECEIVED      nice userconf
+describe NO_RECEIVED    Informational: message has no Received headers
 

@@ -64,19 +64,6 @@ describe T_TELESPRLY            Spam passed through known spam relay domain
 # 1.972   2.4562   0.2249    0.916   0.64    0.01  T_NORMAL_HTTP_TO_IP
 body T_NORMAL_HTTP_TO_IP	eval:check_numeric_http()
 
-########################################################################
-
-# remove evals if these aren't promoted
-header T_UNPARSEABLE_RELAY  eval:check_relays_unparseable()
-
-header T_NO_RELAYS      eval:check_no_relays()
-tflags T_NO_RELAYS      nice
-
-header __NO_RCVD        exists:Received
-meta T_NO_RCVD        (!__NO_RCVD)
-
-########################################################################
-
 # this doesn't hit a lot, but it's a definite obfuscation technique
 uri T_HTTP_BAD_HOST_CHAR	m@^https?://[^/]*[\000-\037\200-\377]@i
 

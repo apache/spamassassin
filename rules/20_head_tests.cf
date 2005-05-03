@@ -35,6 +35,12 @@ describe FRAGMENTED_MESSAGE	Partial message
 header MISSING_HB_SEP		eval:check_msg_parse_flags('missing_head_body_separator')
 describe MISSING_HB_SEP		Missing blank line between message header and body
 
+header UNPARSEABLE_RELAY        eval:check_relays_unparseable()
+tflags UNPARSEABLE_RELAY        userconf
+describe UNPARSEABLE_RELAY      Informational: message has unparseable relay lines
+
+###########################################################################
+
 header NO_REAL_NAME		From =~ /^["\s]*\<?\S+\@\S+\>?\s*$/
 describe NO_REAL_NAME		From: does not include a real name
 
