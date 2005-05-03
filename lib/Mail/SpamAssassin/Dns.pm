@@ -623,7 +623,7 @@ sub is_dns_available {
   # but only uses the first in a background query like we use.
   # Try the different nameservers here in case the first one is not woorking
   
-  my @nameservers = $self->{resolver}->get_resolver->nameservers();
+  my @nameservers = $self->{resolver}->nameservers();
   dbg("dns: testing resolver nameservers: ".join(", ", @nameservers));
   my $ns;
   while( $ns  = shift(@nameservers)) {
@@ -650,7 +650,7 @@ sub is_dns_available {
     }
     last if $IS_DNS_AVAILABLE;
     dbg("dns: NS lookups failed, removing nameserver $ns from list");
-    $self->{resolver}->get_resolver->nameservers(@nameservers);
+    $self->{resolver}->nameservers(@nameservers);
     $self->{resolver}->connect_sock(); # reconnect socket to new nameserver
   }
 

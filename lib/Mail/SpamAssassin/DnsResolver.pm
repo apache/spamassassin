@@ -120,6 +120,18 @@ sub get_resolver {
   return $self->{res};
 }
 
+=item $res->nameservers()
+
+Wrapper for Net::DNS::Reslolver->nameservers to get or set list of nameservers
+
+=cut
+
+sub nameservers {
+  my $self = shift;
+  my $res = $self->{res};
+  return $res->nameservers(@_) if $res;
+}
+
 =item $res->connect_sock()
 
 Re-connect to the first nameserver listed in C</etc/resolv.conf> or similar
