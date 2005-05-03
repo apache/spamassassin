@@ -102,7 +102,6 @@ lang fr describe BIZ_TLD		Contient une URL dans un domaine en .biz
 lang fr describe BLANK_LINES_70_80	Le corps du message a 70 à 80% de lignes vides
 lang fr describe BLANK_LINES_80_90	Le corps du message a 80 à 90% de lignes vides
 lang fr describe BLANK_LINES_90_100	Le corps du message a 90 à 100% de lignes vides
-lang fr describe BODY_8BITS		Contient plusieurs caractères 8-bits consécutifs
 lang fr describe CHARSET_FARAWAY	Message utilisant un jeu de caractères exotique
 lang fr describe CHARSET_FARAWAY_HEADER	En-tête utilisant un jeu de caractères exotique
 lang fr describe CHINA_HEADER           Implique le domaine "china.com"
@@ -127,7 +126,6 @@ lang fr describe DATE_IN_FUTURE_48_96	Date: est 48 à 96 heures après la date de 
 lang fr describe DATE_IN_FUTURE_96_XX	Date: est plus de 96 heures après la date de l'en-tête Received:
 lang fr describe MISSING_DATE		En-tête "Date:" absent
 lang fr describe DATE_SPAMWARE_Y2K	L'en-tête date utilise un format Y2K inhabituel
-lang fr describe DCC_CHECK		Message listé par DCC: http://www.rhyolite.com/anti-spam/dcc/
 lang fr describe DEAR_FRIEND		Contient la formule "Dear friend"
 lang fr describe DEAR_SOMETHING		Le message contient "Dear... (quelqu'un)"
 lang fr describe DIET_1			Spam proposant une perte de poids
@@ -299,7 +297,6 @@ lang fr describe MIME_HTML_ONLY_MULTI	Message multipart uniquement en MIME text/
 lang fr describe MIME_MISSING_BOUNDARY  Limites de sections MIME manquantes
 lang fr describe __MIME_QP		Contient en attachement en quoted-printable
 lang fr describe MIME_QP_LONG_LINE	Ligne quoted-printable de plus de 76 caractères
-lang fr describe MIME_SUSPECT_NAME    	Le nom du fichier joint MIME semble suspect (virus ?)
 lang fr describe MISSING_HEADERS	Le message ne comporte pas l'en-tête To:
 lang fr describe MISSING_MIMEOLE	Possède un en-tête X-MSMail-Priority, mais pas de X-MimeOLE
 lang fr describe ML_MARKETING		Le message parle de marketing multi-niveaux
@@ -347,7 +344,6 @@ lang fr describe PORN_15 		Pornographie possible: Différents types de "feline"
 lang fr describe PORN_16 		Pornographie probable - "nasty, dirty, little" etc.
 lang fr describe PREST_NON_ACCREDITED	Fait référence a une "prestigieuse université" non reconnue
 lang fr describe PRIORITY_NO_NAME	Possède un indicateur de priorité, mais pas d'en-tête X-Mailer
-lang fr describe PYZOR_CHECK		Message listé par Pyzor, voir http://pyzor.sf.net/
 lang fr describe RATWARE_EGROUPS	Trace de logiciel de mailing en masse (eGroups) dans les en-têtes
 lang fr describe RATWARE_HASH_DASH	Contient un "hashbuster" au format Send-Safe
 lang fr describe RATWARE_HASH_2		Trace de logiciel de spam (hash 2) dans les en-têtes
@@ -433,7 +429,6 @@ lang fr describe TO_TXT			Envoyé vers un fichiers texte
 lang fr describe TRACKER_ID		Contient un numéro permettant de vous identifier
 lang fr describe UNCLAIMED_MONEY        Argent non réclamé: Chacun sait que c'est courant ;-)
 lang fr describe UNDISC_RECIPS		Le champ To: contient une adresse "Undisclosed-Recipients:" valide
-lang fr describe UNWANTED_LANGUAGE_BODY	Message dans une langue non désirée (config locale)
 lang fr describe UPPERCASE_25_50	Message composé de 25 à 50% de majuscules
 lang fr describe UPPERCASE_50_75	Message composé de 50 à 75% de majuscules
 lang fr describe UPPERCASE_75_100	Message composé de 75 à 100% de majuscules
@@ -464,3 +459,20 @@ lang fr describe X_LIBRARY		Le message comporte un en-tête X-Library
 lang fr describe X_MSMAIL_PRIORITY_HIGH L'en-tête X-Msmail-Priority: défini une priorité élevée
 lang fr describe X_PRIORITY_HIGH        L'en-tête X-Priority: défini une priorité élevée
 lang fr describe YOU_CAN_SEARCH		Vous propose des renseignements sur n'importe qui
+
+ifplugin Mail::SpamAssassin::Plugin::AntiVirus
+lang fr describe MIME_SUSPECT_NAME    	Le nom du fichier joint MIME semble suspect (virus ?)
+endif
+
+ifplugin Mail::SpamAssassin::Plugin::DCC
+lang fr describe DCC_CHECK		Message listé par DCC: http://www.rhyolite.com/anti-spam/dcc/
+endif
+
+ifplugin Mail::SpamAssassin::Plugin::Pyzor
+lang fr describe PYZOR_CHECK		Message listé par Pyzor, voir http://pyzor.sf.net/
+endif
+
+ifplugin Mail::SpamAssassin::Plugin::TextCat
+lang fr describe BODY_8BITS		Contient plusieurs caractères 8-bits consécutifs
+lang fr describe UNWANTED_LANGUAGE_BODY	Message dans une langue non désirée (config locale)
+endif

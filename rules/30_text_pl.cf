@@ -89,7 +89,6 @@ lang pl describe BIZ_TLD		Zawiera URL w domenie Top-Level typu .biz
 lang pl describe BLANK_LINES_70_80	Tre¶æ zawiera 70-80% pustych linii
 lang pl describe BLANK_LINES_80_90	Tre¶æ zawiera 80-90% pustych linii
 lang pl describe BLANK_LINES_90_100	Tre¶æ zawiera 90-100% pustych linii
-lang pl describe BODY_8BITS		Tre¶æ zawiera 8 kolejnych 8mio bitowych znaków
 lang pl describe CHARSET_FARAWAY_HEADER	Obcojêzyczny zestaw znaków w nag³ówkach
 lang pl describe CHARSET_FARAWAY	List zawiera typ znaków oznaczaj±cy jêzyk obcy
 lang pl describe CHINA_HEADER		'china.com' w nag³ówkach
@@ -114,7 +113,6 @@ lang pl describe DATE_IN_PAST_48_96	Data: jest od 48 do 96 godzin przed dat± z R
 lang pl describe DATE_IN_PAST_96_XX	Data: jest od 96 lub wiêcej godzin przed dat± z Received:
 lang pl describe MISSING_DATE		Brakuje nag³ówka Data:
 lang pl describe DATE_SPAMWARE_Y2K	Nag³ówek Data: u¿ywa podejrzanego formatowania Y2k
-lang pl describe DCC_CHECK		Na li¶cie DCC (http://rhyolite.com/anti-spam/dcc/)
 lang pl describe DEAR_FRIEND		'Drogi Przyjacielu' (ang.)
 lang pl describe DEAR_SOMETHING		Zawiera 'Drogi Kto¶tam' (ang.)
 lang pl describe DISGUISE_PORN		Próba zaciemnienia s³ów identyfikuj±cych pornografiê
@@ -280,7 +278,6 @@ lang pl describe MIME_HTML_ONLY		Wiadomo¶æ posiada tylko czê¶ci tekstowe/html MI
 lang pl describe MIME_MISSING_BOUNDARY	sekcja MIME nie posiada wyznaczonej granicy
 lang pl describe MIME_QP_LONG_LINE	Linia QP d³u¿sza ni¿ 76 znaków
 lang pl describe __MIME_QP		Zawiera za³±cznik kodowany w Quoted-Printable
-lang pl describe MIME_SUSPECT_NAME	Nazwa pliku MIME nie zgadza siê z zawarto¶ci±
 lang pl describe MISSING_HEADERS	Brakuje jednego z nag³ówków: Od, Dd lub Data
 lang pl describe MISSING_MIMEOLE	Wiadomo¶æ zawiera X-MSMail-Priority, lecz bez X-MimeOLE
 lang pl describe MONEY_BACK		Gwarancja zwrotu pieniêdzy
@@ -326,7 +323,6 @@ lang pl describe PORN_15		Prawdopodobnie porno - ró¿ne rodzaje kociaków
 lang pl describe PORN_16		Prawdopodobnie porno - spro¶ne, brudne, ma³e itp.
 lang pl describe PREST_NON_ACCREDITED	'Presti¿owe nieakredytowane uniwersytety'
 lang pl describe PRIORITY_NO_NAME	Wiadomo¶æ ma ustawiony priorytet, lecz brakuje nag³ówka X-Mailer
-lang pl describe PYZOR_CHECK		Na li¶cie Pyzor (http://pyzor.sf.net/)
 lang pl describe RATWARE_EGROUPS	Znaleziono oznaczenie  przesy³ki masowej (eGroups)
 lang pl describe RATWARE_HASH_2		Znaleziono oznaczenie  przesy³ki masowej (hash 2)
 lang pl describe RATWARE_HASH_2_V2	Znaleziono oznaczenie  przesy³ki masowej (hash 2 v2)
@@ -411,7 +407,6 @@ lang pl describe TO_TXT			Wys³ane do pliku tekstowego
 lang pl describe TRACKER_ID		Zawiera numer identyfikacyjny
 lang pl describe UNCLAIMED_MONEY	(ludzie po prostu rozrzucaj± pieni±dze dooko³a)
 lang pl describe UNDISC_RECIPS		Do zawiera poprawne "undisclosed-recipients"
-lang pl describe UNWANTED_LANGUAGE_BODY	Wiadomo¶æ napisana w niepo¿±danym jêzyku
 lang pl describe UPPERCASE_25_50	Tre¶æ jest w 25-50% wielkimi literami
 lang pl describe UPPERCASE_50_75	Tre¶æ jest w 50-75% wielkimi literami
 lang pl describe UPPERCASE_75_100	Tre¶æ jest w 75-100% wielkimi literami
@@ -440,3 +435,20 @@ lang pl describe X_LIBRARY		Wiadomo¶æ zawiera nag³ówek X-Library
 lang pl describe X_MSMAIL_PRIORITY_HIGH	Wys³ane ze zbyt du¿ym priorytetem 'X-Msmail-Priority'
 lang pl describe X_PRIORITY_HIGH	Wys³ane ze zbyt du¿ym priorytetem 'X-Priority'
 lang pl describe YOU_CAN_SEARCH		Mo¿esz szukaæ kogokolwiek
+
+ifplugin Mail::SpamAssassin::Plugin::AntiVirus
+lang pl describe MIME_SUSPECT_NAME	Nazwa pliku MIME nie zgadza siê z zawarto¶ci±
+endif
+
+ifplugin Mail::SpamAssassin::Plugin::DCC
+lang pl describe DCC_CHECK		Na li¶cie DCC (http://rhyolite.com/anti-spam/dcc/)
+endif
+
+ifplugin Mail::SpamAssassin::Plugin::Pyzor
+lang pl describe PYZOR_CHECK		Na li¶cie Pyzor (http://pyzor.sf.net/)
+endif
+
+ifplugin Mail::SpamAssassin::Plugin::TextCat
+lang pl describe BODY_8BITS		Tre¶æ zawiera 8 kolejnych 8mio bitowych znaków
+lang pl describe UNWANTED_LANGUAGE_BODY	Wiadomo¶æ napisana w niepo¿±danym jêzyku
+endif
