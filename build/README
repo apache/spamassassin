@@ -127,11 +127,6 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 	svn commit -m "X.Y.Z RELEASED"
 
-  this is the point of no-return, once this commit has been made, the
-  version number is considered "burned".  Even if the release is not
-  made at this point, the number is locked for this particular code.
-  The same number cannot be used for a future different release.
-
 - Now, start the new development codebase.  For minor updates of a 2.x
   tree (e.g. 2.x1, 2.x2), you don't need to branch; for major updates
   (2.x0) you should use a new development branch, off the trunk.
@@ -161,12 +156,18 @@ SPAMASSASSIN RELEASE PROCEDURE
   the release official.  The release manager (that's you) may vote as
   well.  Once there are three or more +1 votes, you may proceed.
 
-- (for rc and prerelease builds) copy the tarballs to the website.
+- publish the tarballs
+
+  After this step, the version number will be considered "burned".  The
+  number is locked for this particular code.  The same number cannot be
+  used for a future different release.
+
+  (for rc and prerelease builds) copy the tarballs to the website.
 
         cp -p ~/site/released/Mail-SpamAssassin-[VERSION].* \
             /www/spamassassin.apache.org/released/
 
-- (for full release builds) copy the tarballs to www.apache.org/dist:
+  (for full release builds) copy the tarballs to www.apache.org/dist:
 
         version=X.Y.Z
         cp -p ~/site/released/Mail-SpamAssassin-$version.* \
@@ -180,7 +181,7 @@ SPAMASSASSIN RELEASE PROCEDURE
   [note: the ASF archives documentation claims that symlinks are
   supported. This is not the case for some mirrors, so use "cp" instead.]
 
-- (for full release builds) remove release tarballs from now-obsolete
+  (for full release builds) remove release tarballs from now-obsolete
   versions from dist:
 
         cd /www/www.apache.org/dist/spamassassin
