@@ -24,7 +24,8 @@ use vars qw( %rules %scores );
 
 # "parse-rules-for-masses" requires Data::Dumper
 use constant HAS_DATADUMPER => eval { require Data::Dumper; };
-use constant DO_RUN     => HAS_DATADUMPER;
+use constant IS_WINDOWS => ($^O =~ /^(mswin|dos|os2)/oi);
+use constant DO_RUN     => HAS_DATADUMPER && !IS_WINDOWS;
 
 plan tests => (DO_RUN ? 2 : 0);
 exit unless DO_RUN;
