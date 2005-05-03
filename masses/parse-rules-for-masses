@@ -23,23 +23,24 @@ sub usage {
 parse-rules-for-masses: parse the SpamAssassin rules files for mass-checks,
         evolving, and frequency analysis
 
-usage: ./parse-rules-for-masses [-d rulesdir] [-o outputfile] [-s scoreset]
+usage: ./parse-rules-for-masses [-d rulesdir] [-o outputfile] [-s scoreset] [-x]
 
 rulesdir defaults to ../rules
 outputfile defaults to ./tmp/rules.pl
 scoreset default to 0
-
+-x do not include test rules files (ie 70_*)
 ";
 }
 
 use Getopt::Long;
 use Data::Dumper;
 
-use vars qw(@rulesdirs $outputfile $scoreset);
+use vars qw(@rulesdirs $outputfile $scoreset $skip_test_rules);
 GetOptions (
                 "d=s" => \@rulesdirs,
                 "o=s" => \$outputfile,
 		"s=i" => \$scoreset,
+	        "x" => \$skip_test_rules,
                 "help|h|?" => sub { usage(); } );
 
 if ($#rulesdirs < 0) {
@@ -74,6 +75,9 @@ sub readrules {
     my %rulesfound = ();
     my %langs = ();
     foreach $file (sort @files) {
+      if ($skip_test_rules) {
+	next if ($file =~ /7\d_/);
+      }
       open (IN, "<$file");
       while (<IN>)
       {
