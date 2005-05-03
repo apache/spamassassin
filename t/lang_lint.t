@@ -1,6 +1,5 @@
 #!/usr/bin/perl
 
-
 use lib '.'; use lib 't';
 use vars qw(@locales);
 use SATest; sa_t_init("lang_lint");
