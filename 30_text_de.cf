@@ -58,8 +58,6 @@ lang de unsafe_report mit einem Texteditor zu öffnen.
 #                     ........................................................................
 
 lang de describe GTUBE Test zur Prüfung von Anti-Spam-Software
-lang de describe DCC_CHECK Gelistet im DCC-System (http://rhyolite.com/anti-spam/dcc/)
-lang de describe PYZOR_CHECK Gelistet im Pyzor-System (http://pyzor.sf.net/)
 lang de describe DIGEST_MULTIPLE Mehrere Internettests (Razor, DCC, Pyzor, etc.) treffen zu
 lang de describe TRACKER_ID Beinhaltet eine Identitätsnummer zur Nutzerbeobachtung
 lang de describe WEIRD_QUOTING Seltsame Häufung von Anführungszeichen im Nachrichtentext
@@ -73,12 +71,9 @@ lang de describe MIME_HTML_MOSTLY Mehrteilige MIME-Nachricht überwiegend in HTML
 lang de describe MIME_HTML_ONLY MIME-Nachricht besteht nur aus HTML
 lang de describe MIME_HTML_ONLY_MULTI Mehrteilige MIME-Nachricht besteht nur aus HTML
 lang de describe MIME_QP_LONG_LINE "quoted-printable"-kodierte Zeile länger als 76 Zeichen
-lang de describe MIME_SUSPECT_NAME MIME-Dateiname entspricht nicht dem MIME-Typ
 lang de describe MIME_CHARSET_FARAWAY MIME-Zeichensatz deutet auf fremde Sprache hin
 lang de describe MPART_ALT_DIFF Nachrichtentext im Text- und HTML-Format unterscheiden sich
 lang de describe CHARSET_FARAWAY Zeichensatz deutet auf fremde Sprache hin
-lang de describe UNWANTED_LANGUAGE_BODY Nachrichtentext in unerwünschter Sprache
-lang de describe BODY_8BITS Nachrichtentext enthält Folge von 8 oder mehr 8-Bit-Zeichen
 lang de describe EMAIL_ROT13 Eventuell ROT13-kodierte E-Mail-Adresse im Text
 lang de describe BLANK_LINES_70_80 Nachrichtentext besteht zu 70-80% aus Leerzeilen
 lang de describe BLANK_LINES_80_90 Nachrichtentext besteht zu 80-90% aus Leerzeilen
@@ -634,3 +629,21 @@ lang de describe USER_IN_BLACKLIST_TO Empfängeradresse steht in Ihrer persönlich
 lang de describe USER_IN_WHITELIST_TO Empfängeradresse steht in Ihrer persönlichen weißen Liste
 lang de describe USER_IN_MORE_SPAM_TO Empfängeradresse soll fast alle (Spam-) Nachrichten erhalten
 lang de describe USER_IN_ALL_SPAM_TO Empfängeradresse soll alle (Spam-) Nachrichten erhalten
+
+
+ifplugin Mail::SpamAssassin::Plugin::AntiVirus
+lang de describe MIME_SUSPECT_NAME MIME-Dateiname entspricht nicht dem MIME-Typ
+endif
+
+ifplugin Mail::SpamAssassin::Plugin::DCC
+lang de describe DCC_CHECK Gelistet im DCC-System (http://rhyolite.com/anti-spam/dcc/)
+endif
+
+ifplugin Mail::SpamAssassin::Plugin::Pyzor
+lang de describe PYZOR_CHECK Gelistet im Pyzor-System (http://pyzor.sf.net/)
+endif
+
+ifplugin Mail::SpamAssassin::Plugin::TextCat
+lang de describe BODY_8BITS Nachrichtentext enthält Folge von 8 oder mehr 8-Bit-Zeichen
+lang de describe UNWANTED_LANGUAGE_BODY Nachrichtentext in unerwünschter Sprache
+endif

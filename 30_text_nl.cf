@@ -25,8 +25,6 @@ lang nl unsafe_report en het te bekijken in een tekstbewerkingsprogramma.
 #                    ........................................................................
 
 lang nl describe GTUBE                           Standaard test voor ongewenste bulk mail
-lang nl describe DCC_CHECK                       Gevonden in DCC (http://rhyolite.com/anti-spam/dcc/)
-lang nl describe PYZOR_CHECK                     Gevonden in Pyzor (http://pyzor.sf.net/)
 lang nl describe TRACKER_ID                      Maakt gebruik van een nummer om het bericht te kunnen volgen
 lang nl describe WEIRD_QUOTING                   Vreemde herhaalde dubbel aanhalingsteken
 lang nl describe __MIME_BASE64                   Bevat een base64 bijlage
@@ -39,12 +37,9 @@ lang nl describe MIME_HTML_MOSTLY                Multipart bericht bestaat voorn
 lang nl describe MIME_HTML_ONLY                  Bericht bestaat enkel uit text/html MIME delen
 lang nl describe MIME_HTML_ONLY_MULTI            Bericht heeft enkel text/html MIME delen
 lang nl describe MIME_QP_LONG_LINE               Quoted-printable regel langer dan 76 karakters
-lang nl describe MIME_SUSPECT_NAME               MIME bestandsnaam komt niet overeen met inhoud
 lang nl describe MIME_CHARSET_FARAWAY            MIME karakterset wijst op vreemde taal
 lang nl describe MPART_ALT_DIFF                  HTML en tekst delen zijn verschillend
 lang nl describe CHARSET_FARAWAY                 Karakterset wijst op vreemde taal
-lang nl describe UNWANTED_LANGUAGE_BODY          Bericht is opgesteld in een ongewenste taal
-lang nl describe BODY_8BITS                      Bericht bevat 8 aaneengesloten 8-bit karakters
 lang nl describe EMAIL_ROT13                     Body bevat een ROT13-versleuteld emailadres
 lang nl describe BLANK_LINES_70_80               Bericht bestaat voor 70-80% uit witregels
 lang nl describe BLANK_LINES_80_90               Bericht bestaat voor 80-90% uit witregels
@@ -613,3 +608,20 @@ lang nl describe URIBL_SBLXBL                    Bevat een URL die vermeld staat
 lang nl describe URIBL_DSBL                      Bevat een URL die vermeld staat in de DSBL blocklist
 lang nl describe URIBL_SORBS                     Bevat een URL die vermeld staat in de SORBS blocklist
 lang nl describe DRUG_DOSAGE			Heeft het over een prijs per dosis
+
+ifplugin Mail::SpamAssassin::Plugin::AntiVirus
+lang nl describe MIME_SUSPECT_NAME               MIME bestandsnaam komt niet overeen met inhoud
+endif
+
+ifplugin Mail::SpamAssassin::Plugin::DCC
+lang nl describe DCC_CHECK                       Gevonden in DCC (http://rhyolite.com/anti-spam/dcc/)
+endif
+
+ifplugin Mail::SpamAssassin::Plugin::Pyzor
+lang nl describe PYZOR_CHECK                     Gevonden in Pyzor (http://pyzor.sf.net/)
+endif
+
+ifplugin Mail::SpamAssassin::Plugin::TextCat
+lang nl describe BODY_8BITS                      Bericht bevat 8 aaneengesloten 8-bit karakters
+lang nl describe UNWANTED_LANGUAGE_BODY          Bericht is opgesteld in een ongewenste taal
+endif
