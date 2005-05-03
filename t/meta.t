@@ -38,7 +38,7 @@ for (my $scoreset = 0; $scoreset < 4; $scoreset++) {
   unlink $output || die;
   %rules = ();
   %scores = ();
-  if (system("$prefix/masses/parse-rules-for-masses -o $output -d \"$prefix/rules\" -s $scoreset")) {
+  if (system("$prefix/masses/parse-rules-for-masses -o $output -d \"$prefix/rules\" -s $scoreset -x")) {
     warn "parse-rules-for-masses failed!";
   }
   eval {
