@@ -2456,14 +2456,16 @@ sub _check_attachments {
   if ($self->{mime_multipart_alternative}) {
     my $text;
     my $html;
-    for (my $i = 0; $i <= $part; $i++) {
+    # bug 4207: we want the size of the last parts
+    for (my $i = $part; $i >= 0; $i--) {
       next if !defined $part_bytes[$i];
       if (!defined($html) && $part_type[$i] eq 'text/html') {
 	$html = $part_bytes[$i];
       }
-      if (!defined($text) && $part_type[$i] eq 'text/plain') {
+      elsif (!defined($text) && $part_type[$i] eq 'text/plain') {
 	$text = $part_bytes[$i];
       }
+      last if (defined($html) && defined($text));
     }
     if (defined($text) && defined($html) && $html > 0) {
       $self->{mime_multipart_ratio} = ($text / $html);
