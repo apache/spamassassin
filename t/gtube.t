@@ -15,10 +15,10 @@ q{ GTUBE }, 'gtube',
 tstprefs ("
         $default_cf_lines
 
-        ifplugin Mail::Spamassassin::Plugin::AWL
-        use_auto_whitelist 1
-        auto_whitelist_path ./log/awl
-        auto_whitelist_file_mode 0755
+        ifplugin Mail::SpamAssassin::Plugin::AWL
+         use_auto_whitelist 1
+         auto_whitelist_path ./log/awl
+         auto_whitelist_file_mode 0755
         endif
 ");
 
