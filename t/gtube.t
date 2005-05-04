@@ -14,9 +14,12 @@ q{ GTUBE }, 'gtube',
 
 tstprefs ("
         $default_cf_lines
-	use_auto_whitelist 1
+
+        ifplugin Mail::Spamassassin:AWL
+        use_auto_whitelist 1
         auto_whitelist_path ./log/awl
         auto_whitelist_file_mode 0755
+        endif
 ");
 
 ok (sarun ("-L -t < data/spam/gtube.eml", \&patterns_run_cb));
