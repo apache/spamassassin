@@ -950,10 +950,14 @@ sub uri_list_canonify {
     }
 
     # www.foo.biz -> http://www.foo.biz
-    # unschemed URI?  assume a default of "http://" as most 
-    # HTML-displaying MUAs would
+    # unschemed URIs: assume default of "http://" as most MUAs do
     if ($nuri !~ /^[-_a-z0-9]+:/i) {
-      $nuri =~ s/^/http:\/\//g;
+      if ($nuri =~ /^ftp\./) {
+	$nuri =~ s/^/ftp:\/\//g;
+      }
+      else {
+	$nuri =~ s/^/http:\/\//g;
+      }
     }
 
     # http://www.foo.biz?id=3 -> http://www.foo.biz/?id=3
