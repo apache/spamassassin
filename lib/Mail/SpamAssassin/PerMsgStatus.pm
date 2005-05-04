@@ -1777,19 +1777,25 @@ $uricCheat =~ tr/://d;
 my $tldsRE = qr/
     (?=[a-wyz])
     (?:a(?:e(?:ro)?|r(?:pa)?|[cdfgilmnoqstuwzx])
-      |b(?:iz?|[abdefghjmnorstvwyz]) |c(?:o(?:m|op)?|[acdfghiklmnrsu])
-      |g(?:[efghilmnpqrstuwy]|ov) |h[kmnrtu] |i(?:n(?:fo|t)?|[delmoqrst])
+      |b(?:iz?|[abdefghjmnorstvwyz])|c(?:o(?:m|op)?|[acdfghiklmnrsu])
+      |g(?:[efghilmnpqrstuwy]|ov)|h[kmnrtu]|i(?:n(?:fo|t)?|[delmoqrst])
       |j[emop]|k[eghimnprwyz]|l[abcikrstuvy]
       |m(?:u(?:seum)?|[acdghkmnopqrstvwxyz]|i?l)|n(?:a(?:me)?|et?|[cfgilopruz])
       |o(?:m|rg)|p(?:ro?|[aefghklmnstwy])|r[eouw]|s[abcdeghijklmnortvyzu]
       |t[cdfghjklmnoprtvwz]|u[agkmsyz]|v[aceginu]|w[fs]|y[etu]|z[amw]|ed?u|qa
     )/ix;
 
-my $schemelessRE = qr/(?<![.=])(?:
-        www\.
-        |ftp\.
-        |(?<!\@)[-_a-z0-9\.]{3,999}\.${tldsRE}(?![-_a-z0-9\.])
-    )/ix;
+# from RFC 1035, but allowing domains starting with numbers:
+#   $label = q/[A-Za-z\d](?:[A-Za-z\d-]{0,61}[A-Za-z\d])?/;
+#   $domain = qq<$label(?:\.$label)*>;
+#   length($host) <= 255 && $host =~ /^($domain)$/
+# massively simplified from grammar, only matches known TLDs, a single
+# dot at end of TLD works, skip ones that will match as email addresses
+my $schemelessRE = qr/(?<!.\@)\b[a-z\d]
+                      [a-z\d.-]{0,251}
+                      \.${tldsRE}\.?\b
+                      (?![a-z\d.-])
+                      /ix;
 
 my $uriRe = qr/\b(?:$schemeRE:[$uricCheat]|$schemelessRE)[$uricSet#]*/o;
 
@@ -1881,7 +1887,7 @@ sub get_uri_list {
 }
 
 sub get_parsed_uri_list {
-  my($self) = @_;
+  my ($self) = @_;
 
   # use cached answer if available
   unless (defined $self->{parsed_uri_list}) {
@@ -1904,6 +1910,9 @@ sub get_parsed_uri_list {
       while (/($uriRe)/igo) {
         my $uri = $1;
 
+        # skip mismatches from URI regular expression
+        next if $uri =~ /^[a-z\d.-]*\.\./i;	# skip ".."
+
         $uri =~ s/^<(.*)>$/$1/;
         $uri =~ s/[\]\)>#]$//;
 
@@ -1923,13 +1932,17 @@ sub get_parsed_uri_list {
           }
         }
 
-        # warn("uri: got URI: $uri\n");
+        #warn("uri: got URI: $uri\n");
         push @uris, $uri;
       }
       while (/($Addr_spec_re)/go) {
         my $uri = $1;
 
-        $uri = "mailto:$uri";
+        # skip mismatches from email address regular expression
+        next unless $uri =~ /\.${tldsRE}\W*$/;	# skip non-TLDs
+
+        $uri =~ s/\s*\@\s*/@/;	# remove spaces around the '@'
+        $uri = "mailto:$uri";	# prepend mailto:
 
         #warn("uri: got URI: $uri\n");
         push @uris, $uri;
