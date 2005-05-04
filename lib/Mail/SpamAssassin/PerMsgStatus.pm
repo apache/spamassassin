@@ -1789,9 +1789,14 @@ my $tldsRE = qr/
 #   $label = q/[A-Za-z\d](?:[A-Za-z\d-]{0,61}[A-Za-z\d])?/;
 #   $domain = qq<$label(?:\.$label)*>;
 #   length($host) <= 255 && $host =~ /^($domain)$/
-# massively simplified from grammar, only matches known TLDs, a single
-# dot at end of TLD works, skip ones that will match as email addresses
-my $schemelessRE = qr/(?<!.\@)\b[a-z\d]
+# changes:
+#   massively simplified from grammar, only matches known TLDs, a single
+#   dot at end of TLD works
+# negative look-behinds:
+#   (?<![a-z\d][.-]) = don't let there be more hostname behind, but
+#                      don't miss ".....www.bar.com" or "-----www.foo.com"
+#   (?<!.\@) = this will be caught by the email address regular expression
+my $schemelessRE = qr/(?<![a-z\d][.-])(?<!.\@)\b[a-z\d]
                       [a-z\d.-]{0,251}
                       \.${tldsRE}\.?\b
                       (?![a-z\d.-])
