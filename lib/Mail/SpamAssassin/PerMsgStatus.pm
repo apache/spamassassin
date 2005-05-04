@@ -1796,10 +1796,10 @@ my $tldsRE = qr/
 #   (?<![a-z\d][.-]) = don't let there be more hostname behind, but
 #                      don't miss ".....www.bar.com" or "-----www.foo.com"
 #   (?<!.\@) = this will be caught by the email address regular expression
-my $schemelessRE = qr/(?<![a-z\d][.-])(?<!.\@)\b[a-z\d]
-                      [a-z\d.-]{0,251}
+my $schemelessRE = qr/(?<![a-z\d][._-])(?<!.\@)\b[a-z\d]
+                      [a-z\d._-]{0,251}
                       \.${tldsRE}\.?\b
-                      (?![a-z\d.-])
+                      (?![a-z\d._-])
                       /ix;
 
 my $uriRe = qr/\b(?:$schemeRE:[$uricCheat]|$schemelessRE)[$uricSet#]*/o;
