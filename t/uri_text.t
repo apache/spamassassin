@@ -57,13 +57,13 @@ my $error = do {
 # run patterns and anti-patterns
 my $failures = 0;
 for my $pattern (keys %patterns) {
-  if ($error !~ /\Q${pattern}\E/) {
+  if ($error !~ /${pattern}/) {
     print "did not find $pattern\n";
     $failures++;
   }
 }
 for my $anti_pattern (keys %anti_patterns) {
-  if ($error =~ /\Q${anti_pattern}\E/) {
+  if ($error =~ /${anti_pattern}/) {
     print "did find $anti_pattern\n";
     $failures++;
   }
@@ -85,6 +85,8 @@ Content-Transfer-Encoding: 7bit
 
 EOF
     while (<DATA>) {
+      chomp;
+      next if /^#/;
       if (/^(.*?)\t+(.*?)\s*$/) {
 	my $string = $1;
 	my @patterns = split(' ', $2);
@@ -145,3 +147,5 @@ foo @ cae8kaip.com	mailto:foo@cae8kaip.com
 xyz..geifoza0.com	!geifoza0
 
 joe@koja3fui.koja3fui	!koja3fui
+
+<xuq@dsj.x.thriyi.com>	mailto:xuq@dsj.x.thriyi.com	!http\S*thriyi
