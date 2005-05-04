@@ -921,7 +921,7 @@ sub uri_to_domain {
 }
 
 sub uri_list_canonify {
-  my(@uris) = @_;
+  my (@uris) = @_;
 
   # make sure we catch bad encoding tricks
   my @nuris = ();
