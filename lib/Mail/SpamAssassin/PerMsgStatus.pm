@@ -1935,11 +1935,11 @@ sub get_parsed_uri_list {
         #warn("uri: got URI: $uri\n");
         push @uris, $uri;
       }
-      while (/($Addr_spec_re)/go) {
+      while (/($Addr_spec_re)/igo) {
         my $uri = $1;
 
         # skip mismatches from email address regular expression
-        next unless $uri =~ /\.${tldsRE}\W*$/;	# skip non-TLDs
+        next unless $uri =~ /\.${tldsRE}\W*$/io;	# skip non-TLDs
 
         $uri =~ s/\s*\@\s*/@/;	# remove spaces around the '@'
         $uri = "mailto:$uri";	# prepend mailto:
