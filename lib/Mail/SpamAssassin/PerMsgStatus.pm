@@ -1776,9 +1776,9 @@ $uricCheat =~ tr/://d;
 # Regexp::Optimize optimized regexp ;)  accurate as of 20050318
 my $tldsRE = qr/
     (?=[a-wyz])
-    (?:a(?:e(?:ro)?|r(?:pa)?|[cdfgilmnoqstuwzx])
-      |b(?:iz?|[abdefghjmnorstvwyz])|c(?:o(?:m|op)?|[acdfghiklmnrsu])
-      |g(?:[efghilmnpqrstuwy]|ov)|h[kmnrtu]|i(?:n(?:fo|t)?|[delmoqrst])
+    (?:a(?:e(?:ro)?|r(?:pa)?|[cdfgilmnoqstuwzx])|b(?:iz?|[abdefghjmnorstvwyz])
+      |c(?:o(?:m|op)?|[acdfghiklmnrsu])|d[ejkmoz]|e[ceghrst]|f[ijkmor]
+      |g(?:[abdefghilmnpqrstuwy]|ov)|h[kmnrtu]|i(?:n(?:fo|t)?|[delmoqrst])
       |j[emop]|k[eghimnprwyz]|l[abcikrstuvy]
       |m(?:u(?:seum)?|[acdghkmnopqrstvwxyz]|i?l)|n(?:a(?:me)?|et?|[cfgilopruz])
       |o(?:m|rg)|p(?:ro?|[aefghklmnstwy])|r[eouw]|s[abcdeghijklmnortvyzu]
