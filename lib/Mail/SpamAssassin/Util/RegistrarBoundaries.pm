@@ -195,7 +195,7 @@ Examples:
 =cut
 
 sub split_domain {
-  my $domain = lc $_[0];
+  my $domain = lc shift;
   my $hostname = '';
 
   if ($domain) {
@@ -207,15 +207,15 @@ sub split_domain {
     $domain =~ s/\.+$//;
 
     # Split scalar domain into components
-    my @domparts = split (/\./, $domain);
-    my @hostname=();
+    my @domparts = split(/\./, $domain);
+    my @hostname = ();
 
     while (@domparts > 1) { # go until we find the TLD
       if (@domparts == 4) {
-	if ($domparts[3] eq 'us' && (
-          ($domparts[0] eq 'pvt' && $domparts[1] eq 'k12') ||
-	  $domparts[0] =~ /^c[io]$/
-	)) {
+	if ($domparts[3] eq 'us' &&
+	    (($domparts[0] eq 'pvt' && $domparts[1] eq 'k12') ||
+	     ($domparts[0] =~ /^c[io]$/)))
+	{
           # http://www.neustar.us/policies/docs/rfc_1480.txt
           # "Fire-Dept.CI.Los-Angeles.CA.US"
           # "<school-name>.PVT.K12.<state>.US"
@@ -228,7 +228,7 @@ sub split_domain {
 	# esc.edu.ar
 	# [^\.]+\.${US_STATES}\.us
 	if ($domparts[2] eq 'uk' || $domparts[2] eq 'ar') {
-	  my $temp = join(".", @domparts);
+	  my $temp = join('.', @domparts);
 	  last if ($temp eq 'demon.co.uk' || $temp eq 'esc.edu.ar');
 	}
 	elsif ($domparts[2] eq 'us') {
