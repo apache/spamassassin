@@ -84,11 +84,11 @@ sub set_child_state {
 
   if ($state == PFSTATE_STARTING || exists $self->{kids}->{$pid}) {
     $self->{kids}->{$pid} = $state;
-    dbg ("prefork: child $pid: entering state $state");
+    dbg("prefork: child $pid: entering state $state");
     $self->compute_lowest_child_pid();
 
   } else {
-    dbg ("prefork: child $pid: ignored new state $state, already exited");
+    dbg("prefork: child $pid: ignored new state $state, already exited");
   }
 }
 
@@ -127,9 +127,7 @@ sub main_server_poll {
 
   # use alarm to back up select()'s built-in alarm, to debug theo's bug
   eval {
-    Mail::SpamAssassin::Util::trap_sigalrm_fully(sub {
-                          die "tcp timeout";
-                        });
+    Mail::SpamAssassin::Util::trap_sigalrm_fully(sub { die "tcp timeout"; });
     alarm ($tout*2) if ($tout);
     ($nfound, $timeleft) = select($rout=$rin, undef, $eout=$rin, $tout);
   };
@@ -206,7 +204,7 @@ sub read_one_message_from_child_socket {
   my $line;
   my $nbytes = $sock->sysread($line, 6);
   if (!defined $nbytes || $nbytes == 0) {
-    dbg ("prefork: child closed connection");
+    dbg("prefork: child closed connection");
 
     # stop it being select'd
     my $fno = $sock->fileno;
@@ -218,8 +216,8 @@ sub read_one_message_from_child_socket {
     return PFSTATE_ERROR;
   }
   if ($nbytes < 6) {
-    warn ("prefork: child gave short message: len=$nbytes bytes=".
-                    join(" ", unpack "C*", $line));
+    warn("prefork: child gave short message: len=$nbytes bytes=".
+	 join(" ", unpack "C*", $line));
   }
 
   chomp $line;
@@ -267,14 +265,14 @@ sub order_idle_child_to_accept {
       return $self->order_idle_child_to_accept();
     }
 
-    dbg ("prefork: ordered $kid to accept");
+    dbg("prefork: ordered $kid to accept");
 
     # now wait for it to say it's done that
     return $self->wait_for_child_to_accept($sock);
 
   }
   else {
-    dbg ("prefork: no spare children to accept, waiting for one to complete");
+    dbg("prefork: no spare children to accept, waiting for one to complete");
     return undef;
   }
 }
@@ -345,8 +343,8 @@ sub wait_for_orders {
       die "prefork: empty order from parent";
     }
     if ($nbytes < 6) {
-      warn ("prefork: parent gave short message: len=$nbytes bytes=".
-                      join(" ", unpack "C*", $line));
+      warn("prefork: parent gave short message: len=$nbytes bytes=".
+	   join(" ", unpack "C*", $line));
     }
 
     chomp $line;
@@ -397,7 +395,7 @@ sub adapt_num_children {
       $statestr .= '?';
     }
   }
-  warn ("prefork: child states: ".$statestr."\n");
+  info("prefork: child states: ".$statestr."\n");
 
   # just kill off/add one at a time, to avoid swamping stuff and
   # reacting too quickly; Apache emulation
@@ -405,7 +403,7 @@ sub adapt_num_children {
     if ($num_servers < $self->{max_children}) {
       $self->need_to_add_server($num_idle);
     } else {
-      warn "prefork: server reached --max-clients setting, consider raising it\n";
+      info("prefork: server reached --max-clients setting, consider raising it\n");
     }
   }
   elsif ($num_idle > $self->{max_idle} && $num_servers > $self->{min_children}) {
@@ -417,7 +415,7 @@ sub need_to_add_server {
   my ($self, $num_idle) = @_;
   my $cur = ${$self->{cur_children_ref}};
   $cur++;
-  dbg ("prefork: adjust: increasing, not enough idle children ($num_idle < $self->{min_idle})");
+  dbg("prefork: adjust: increasing, not enough idle children ($num_idle < $self->{min_idle})");
   main::spawn();
   # servers will be started once main_server_poll() returns
 }
@@ -449,7 +447,7 @@ sub need_to_del_server {
   $self->set_child_state ($pid, PFSTATE_KILLED);
   kill 'INT' => $pid;
 
-  dbg ("prefork: adjust: decreasing, too many idle children ($num_idle > $self->{max_idle}), killed $pid");
+  dbg("prefork: adjust: decreasing, too many idle children ($num_idle > $self->{max_idle}), killed $pid");
 }
 
 1;
