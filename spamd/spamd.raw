@@ -845,8 +845,8 @@ sub spawn {
 
       # bug 3900: BSD perl bug. see comment in setuid_to_euid() in
       # Mail::SA::Util on the same issue.
-      if ( $< != $uuid ) {
-        dbg("initial attempt to change real uid failed, trying BSD workaround");
+      if ($< != $uuid) {
+        dbg("spamd: initial attempt to change real uid failed, trying BSD workaround");
 
         $> = $<;              # revert euid to ruid
         $< = $uuid;           # change ruid to target
