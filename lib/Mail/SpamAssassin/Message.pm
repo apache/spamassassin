@@ -106,6 +106,11 @@ sub new {
   my $message = $opts->{'message'} || \*STDIN;
   my $parsenow = $opts->{'parsenow'} || 0;
 
+  # Specifies whether or not to parse message/rfc822 parts into its own tree.
+  # If the # > 0, it'll subparse, otherwise it won't.  By default, do one
+  # level deep.
+  my $subparse = defined $opts->{'subparse'} ? $opts->{'subparse'} : 1;
+
   # protect it from abuse ...
   local $_;
 
@@ -740,12 +745,12 @@ sub _parse_normal {
 
   # If this part is a message/* part, and the parent isn't also a
   # message/* part (ie: the main part) go ahead and parse into a tree.
-  if ($part_msg->{'type'} =~ /^message\b/i) {
+  if ($part_msg->{'type'} =~ /^message\b/i && $msg->{subparse}) {
     # Get the part ready...
     my $message = $part_msg->decode();
 
     if ($message) {
-      my $msg_obj = Mail::SpamAssassin::Message->new({message=>$message, parsenow=>1});
+      my $msg_obj = Mail::SpamAssassin::Message->new({message=>$message, parsenow=>1, subparse=>$msg->{subparse}-1});
 
       # main message is a message/* part ...
       if ($msg == $part_msg) {
