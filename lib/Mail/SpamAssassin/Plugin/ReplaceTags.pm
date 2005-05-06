@@ -91,44 +91,57 @@ sub finish_parsing_end {
 	  dbg("replacetags: replacing $rule: $re");
 	}
 
+	my $pre_name;
+	my $post_name;
+	my $inter_name;
+
+	# get modifier tags
 	if ($re =~ s/${start}pre (.+?)${end}//) {
-	  my $pre_name = $1;
-	  if ($pre_name) {
-	    my $pre = $opts->{conf}->{replace_pre}->{$pre_name};
-	    if ($pre) {
-	      $re =~ s|($start.+?$end)|$pre$1|g;
-	    }
-	  }
-	}
-	if ($re =~ s/${start}inter (.+?)${end}//) {
-	  my $inter_name = $1;
-	  if ($inter_name) {
-	    my $inter = $opts->{conf}->{replace_inter}->{$inter_name};
-	    if ($inter) {
-	      $re =~ s|($start.+?$end)($start.+?$end)|$1$inter$2|g;
-	    }
-	  }
+	  $pre_name = $1;
 	}
 	if ($re =~ s/${start}post (.+?)${end}//) {
-	  my $post_name = $1;
-	  if ($post_name) {
-	    my $post = $opts->{conf}->{replace_post}->{$post_name};
-	    if ($post) {
-	      $re =~ s|($start.+?$end)|$1$post|g;
-	    }
+	  $post_name = $1;
+	}
+	if ($re =~ s/${start}inter (.+?)${end}//) {
+	  $inter_name = $1;
+	}
+
+	# this will produce an array of tags to be replaced
+	# for two adjacent tags, an element of "" will be between the two
+	my @re = split(/(<.+?>)/, $re);
+
+	if ($pre_name) {
+	  my $pre = $opts->{conf}->{replace_pre}->{$pre_name};
+	  if ($pre) {
+	    @re = map { s|($start.+?$end)|$pre$1|; $_; } @re;
+	  }
+        }
+	if ($post_name) {
+	  my $post = $opts->{conf}->{replace_post}->{$post_name};
+	  if ($post) {
+	    @re = map { s|($start.+?$end)|$1$post|g; $_; } @re;
 	  }
 	}
-	while ($re =~ m|$start(.+?)$end|g) {
-	  my $tag_name = $1;
-
-	  # if the tag exists, replace it with the corresponding phrase
-	  if ($tag_name) {
-	    my $replacement = $opts->{conf}->{replace_tag}->{$tag_name};
-	    if ($replacement) {
-	      $re =~ s|$start$tag_name$end|$replacement|g;
+	if ($inter_name) {
+	  my $inter = $opts->{conf}->{replace_inter}->{$inter_name};
+	  if ($inter) {
+	    @re = map { s|^$|$inter|; $_; } @re;
+	  }
+	}
+	for (my $i = 0; $i < @re; $i++) {
+	  if ($re[$i] =~ m|$start(.+?)$end|g) {
+	    my $tag_name = $1;
+	    # if the tag exists, replace it with the corresponding phrase
+	    if ($tag_name) {
+	      my $replacement = $opts->{conf}->{replace_tag}->{$tag_name};
+	      if ($replacement) {
+		$re[$i] =~ s|$start$tag_name$end|$replacement|g;
+	      }
 	    }
 	  }
         }
+
+        $re = join('', @re);
 
 	# do the actual replacement
 	$opts->{conf}->{$type}->{$priority}->{$rule} = $re;
