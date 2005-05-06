@@ -78,6 +78,9 @@ tree is not going to be used.  This is handy, for instance, when running
 C<spamassassin -d>, which only needs the pristine header and body which
 is always handled when the object is created.
 
+C<subparse> specifies how many levels of message/* attachment should be parsed
+into a subtree.  Defaults to 1.
+
 =cut
 
 # month mappings (ripped from Util.pm)
@@ -109,7 +112,7 @@ sub new {
   # Specifies whether or not to parse message/rfc822 parts into its own tree.
   # If the # > 0, it'll subparse, otherwise it won't.  By default, do one
   # level deep.
-  my $subparse = defined $opts->{'subparse'} ? $opts->{'subparse'} : 1;
+  $self->{subparse} = defined $opts->{'subparse'} ? $opts->{'subparse'} : 1;
 
   # protect it from abuse ...
   local $_;
@@ -616,7 +619,8 @@ sub _parse_multipart {
     # Else, there's no boundary, so leave the whole part...
   }
 
-  my $part_msg = Mail::SpamAssassin::Message::Node->new();    # prepare a new tree node
+  # prepare a new tree node
+  my $part_msg = Mail::SpamAssassin::Message::Node->new({ subparse=>$msg->{subparse} });
   my $in_body = 0;
   my $header;
   my $part_array;
@@ -663,7 +667,7 @@ sub _parse_multipart {
 
       # make sure we start with a new clean node
       $in_body  = 0;
-      $part_msg = Mail::SpamAssassin::Message::Node->new();
+      $part_msg = Mail::SpamAssassin::Message::Node->new({ subparse=>$msg->{subparse} });
       undef $part_array;
       undef $header;
 
@@ -750,7 +754,11 @@ sub _parse_normal {
     my $message = $part_msg->decode();
 
     if ($message) {
-      my $msg_obj = Mail::SpamAssassin::Message->new({message=>$message, parsenow=>1, subparse=>$msg->{subparse}-1});
+      my $msg_obj = Mail::SpamAssassin::Message->new({
+      	message		=>	$message,
+	parsenow	=>	1,
+	subparse	=>	$msg->{subparse}-1,
+	});
 
       # main message is a message/* part ...
       if ($msg == $part_msg) {
@@ -767,6 +775,10 @@ sub _parse_normal {
 
       return;
     }
+  }
+  else {
+    # leaves don't need the subparse value, so get rid of it
+    delete $part_msg->{subparse};
   }
 
   # Add the new part as a child to the parent
