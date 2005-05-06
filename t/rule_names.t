@@ -48,7 +48,7 @@ for my $test (@tests) {
   # look for test with spaces on either side, should match report
   # lines in spam report, only exempt rules that are really unavoidable
   # and are clearly not hitting due to rules being named poorly
-  next if $test eq "UPPERCASE_75_100";
+  next if $test =~ /^UPPERCASE_\d/;
   next if $test eq "UNIQUE_WORDS";
   # exempt the auto-generated nightly mass-check rules
   next if $test =~ /^T_MC_/;
