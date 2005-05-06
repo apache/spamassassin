@@ -81,6 +81,10 @@ sub revoke {
 
   $self->{main}->call_plugins("plugin_revoke", { revoke => $self, text => \$text, msg => $self->{msg} });
 
+  if ($self->{revoke_available} == 0) {
+    warn "reporter: no revoke methods available, so couldn't revoke\n";
+  }
+
   return $self->{revoke_return};
 }
 
