@@ -166,9 +166,16 @@ body T_OBFU_CELEBREX_W2_P2	/<inter W2><post P2>(?!celebrex)<C><E><L><E><B><R><E>
 body T_OBFU_CELEBREX_W2_P3	/<inter W2><post P3>(?!celebrex)<C><E><L><E><B><R><E><X>/i
 body T_OBFU_CELEBREX_W3_P2	/<inter W3><post P2>(?!celebrex)<C><E><L><E><B><R><E><X>/i
 body T_OBFU_CELEBREX_W3_P3	/<inter W3><post P3>(?!celebrex)<C><E><L><E><B><R><E><X>/i
+
 body T_OBFU_CPILL	/(?!ciali[sz])<C><I><A><L><I><S>/i
 body T_OBFU_CPILL_W1_P2	/<inter W1><post P2>(?!ciali[sz])<C><I><A><L><I><S>/i
 body T_OBFU_CPILL_W1_P3	/<inter W1><post P3>(?!ciali[sz])<C><I><A><L><I><S>/i
+
+replace_tag	S2	[s\xa6\xa7]
+body T_OBFU_CPILL_2	/(?!cialis)<C><I><A><L><I>(?:<S2>|z\b)/i
+body T_OBFU_CPILL_W1_P2_2	/<inter W1><post P2>(?!cialis)<C><I><A><L><I>(?:<S2>|z\b)/i
+body T_OBFU_CPILL_W1_P3_2	/<inter W1><post P3>(?!cialis)<C><I><A><L><I>(?:<S2>|z\b)/i
+
 body T_OBFU_CLICK	/(?!click)<C><L><I><C><K>/i
 body T_OBFU_CLICK_W1_P2	/<inter W1><post P2>(?!click)<C><L><I><C><K>/i
 body T_OBFU_CLICK_W1_P3	/<inter W1><post P3>(?!click)<C><L><I><C><K>/i
