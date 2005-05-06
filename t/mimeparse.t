@@ -55,7 +55,7 @@ my %files = (
 	],
 
 	"$prefix/t/data/nice/mime8" => [
-	  join("\n",'multipart/mixed','application/postscript','binary','message/rfc822,multipart/mixed,text/plain,multipart/parallel,image/gif,audio/basic,application/atomicmail,message/rfc822,audio/x-sun'),
+	  join("\n",'multipart/mixed','application/postscript','binary','message/rfc822,multipart/mixed,text/plain,multipart/parallel,image/gif,audio/basic,application/atomicmail,message/rfc822'),
 	  '07fdde1c24f216b05813f6a1ae0c7c1c0f84c42b',
 	  '03e5acb518e8aca0b3a7b18f2d94b5efe73495b2'
 	],
@@ -79,11 +79,8 @@ my %files = (
 	],
 
 	"$prefix/t/data/nice/mime9" => [
-	  join("\n",'multipart/mixed','text/plain','message/rfc822,message/rfc822,multipart/mixed,multipart/alternative,text/plain,text/html,image/jpeg'),
+	  join("\n",'multipart/mixed','text/plain','message/rfc822,message/rfc822'),
 	  '5cdcabdb89c5fbb3a5e0c0473599668927045d9c',
-	  'f80584aff917e03d54663422918b58e4689cf993',
-	  '0228600472b0820b3b326d9d7842eef3af811cb2',
-	  '0b9fb462ad496d926ef65db0da8da451d7815ab6',
 	],
 );
 

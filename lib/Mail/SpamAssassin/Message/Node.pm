@@ -60,6 +60,12 @@ sub new {
     header_order	=> []
   };
 
+  # deal with any parameters
+  my($opts) = @_;
+  if (defined $opts->{'subparse'}) {
+    $self->{subparse} = $opts->{'subparse'};
+  }
+
   bless($self,$class);
   $self;
 }
