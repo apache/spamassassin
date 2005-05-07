@@ -17,6 +17,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use strict;
 use Test;
+use SATest;
 use Mail::SpamAssassin;
 use vars qw($num_tests);
 
@@ -24,14 +25,7 @@ $num_tests = 1;
 
 $Mail::SpamAssassin::Conf::COLLECT_REGRESSION_TESTS = 1;
 
-my $sa = Mail::SpamAssassin->new({
-    rules_filename => "$prefix/t/log/test_rules_copy",
-    site_rules_filename => "$prefix/t/log/test_default.cf",
-    userprefs_filename  => "$prefix/masses/spamassassin/user_prefs",
-    local_tests_only    => 1,
-    debug             => 0,
-    dont_copy_prefs   => 1,
-});
+my $sa = create_saobj({'dont_copy_prefs' => 1});
 
 $sa->init(0); # parse rules
 
