@@ -101,6 +101,11 @@ Send message to spamd for learning.  The C<learn type> can be either spam,
 ham or forget.  The exitcode for spamc will be set to 5 if the message
 was learned, or 6 if it was already learned.
 
+=item B<-C> I<report type>
+
+Report or revoke a message to one of the configured collaborative filtering
+databases.  The C<report type> can be either report or revoke.
+
 =item B<-p> I<port>
 
 In TCP/IP mode, connect to spamd server listening on given port 

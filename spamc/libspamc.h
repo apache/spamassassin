@@ -100,6 +100,9 @@
 /* Nov 24, 2004 NP: added learning support */
 #define SPAMC_LEARN	     (1<<21)
 
+/* May 5, 2005 NP: added list reporting support */
+#define SPAMC_COLLABREPORT   (1<<20)
+
 /* Aug 14, 2002 bj: A struct for storing a message-in-progress */
 typedef enum
 {
@@ -218,6 +221,14 @@ int message_filter(struct transport *tp, const char *username,
  */
 int message_learn(struct transport *tp, const char *username, int flags,
 		  struct message *m, int learntype, int *islearned);
+
+/* Process the message through the spamd collandreport, making as many
+ * connection attempts as are implied by the transport structure. To make
+ * this do failover, more than one host is defined, but if there is only
+ * one there, no failover is done.
+ */
+int message_collabreport(struct transport *tp, const char *username, int flags,
+			 struct message *m, int reporttype, int *isreported);
 
 /* Dump the message. If there is any data in the message (typically, m->type
  * will be MESSAGE_ERROR) it will be message_writed. Then, fd_in will be piped

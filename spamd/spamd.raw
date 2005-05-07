@@ -1049,6 +1049,30 @@ sub accept_a_conn {
     info(sprintf("spamd: skipped large message in %3d seconds", time - $start));
   }
 
+  # COLLABREPORT must come before REPORT, since the regex is overgenerous
+  elsif (/(COLLABREPORT) SPAMC\/(.*)/) {
+    my $method = $1;
+    my $version = $2;
+    eval {
+      Mail::SpamAssassin::Util::trap_sigalrm_fully(sub {
+						     die "child processing timeout";
+						   });
+      alarm $timeout_child if ($timeout_child);
+      report($method, $version, $start, $remote_hostname, $remote_hostaddr);
+    };
+    alarm 0;
+
+    if ($@) {
+      if ($@ =~ /child processing timeout/) {
+        service_timeout("($timeout_child second timeout while trying to $method)");
+      } else {
+	warn "spamd: $@";
+      }
+      $client->close();
+      return 0;
+    }
+  }
+
   # It might be a CHECK message, meaning that we should just check
   # if it's spam or not, then return the appropriate response.
   # If we get the PROCESS command, the client is going to send a
@@ -1444,6 +1468,102 @@ sub learn {
   return 1;
 }
 
+sub report {
+  my ($method, $version, $start_time, $remote_hostname, $remote_hostaddr) = @_;
+  local ($_);
+  my $expected_length;
+  my $report_type;
+
+  my $hdrs = {};
+
+  return 0 unless (parse_headers($hdrs, $client));
+
+  $expected_length = $hdrs->{expected_length};
+  $report_type = $hdrs->{collabreport_type};
+
+  &handle_setuid_to_user if ($setuid_to_user && $> == 0);
+
+  if ($opt{'sql-config'} && !defined($current_user)) {
+    unless (handle_user_sql('nobody')) {
+      service_unavailable_error("Error fetching user preferences via SQL");
+      return 0;
+    }
+  }
+
+  if ($opt{'ldap-config'} && !defined($current_user)) {
+    handle_user_ldap('nobody');
+  }
+
+  my $resp = "EX_OK";
+
+  # generate mail object from input
+  my ($mail, $actual_length) = parse_body($client, $expected_length);
+
+  # Check length if we're supposed to.
+  if (defined $expected_length && $actual_length != $expected_length) {
+    protocol_error("(Content-Length mismatch: Expected $expected_length bytes, got $actual_length bytes)");
+    $mail->finish();
+    return 0;
+  }
+
+  if ( $mail->get_header("X-Spam-Checker-Version") ) {
+    my $new_mail = $spamtest->parse($spamtest->remove_spamassassin_markup($mail), 1);
+    $mail->finish();
+    $mail = $new_mail;
+  }
+
+  # attempt to fetch the message ids
+  my ($msgid, $rmsgid) = parse_msgids($mail);
+
+  $msgid        ||= "(unknown)";
+  $current_user ||= "(unknown)";
+
+  my $report_type_desc;
+  my $report_type_desc_past;
+
+  if ($report_type == 0) {
+    $report_type_desc = "reporting spam";
+    $report_type_desc_past = "reported spam";
+  }
+  elsif ($report_type == 1) {
+    $report_type_desc = "revoking ham";
+    $report_type_desc_past = "revoked ham";
+  }
+
+  info("spamd: $report_type_desc"
+      . " message $msgid"
+      . ( $rmsgid ? " aka $rmsgid" : "" )
+      . " for ${current_user}:$>");
+
+  my $hdr;
+  my $status = 1;
+
+  if ($report_type) {
+    $status = $spamtest->revoke_as_spam($mail);
+  }
+  else {
+    $status = $spamtest->report_as_spam($mail);
+  }
+
+  if ($status) {
+    $hdr .= "Reported: Yes";
+  }
+  else {
+    $hdr .= "Reported: No";
+  }
+
+  print $client "SPAMD/1.1 $resphash{$resp} $resp\r\n",
+    $hdr . "\r\n\r\n";
+
+  my $scantime = sprintf( "%.1f", time - $start_time );
+
+  info("spamd: $report_type_desc_past message for $current_user:$> in"
+       . " $scantime seconds, $actual_length bytes");
+
+  $mail->finish();
+  return 1;
+}
+
 ###########################################################################
 
 # generalised header parser.  
@@ -1474,6 +1594,9 @@ sub parse_headers {
     }
     elsif ($header eq 'Learn-type') {
       return 0 unless &got_learn_type_header($hdrs, $header, $value);
+    }
+    elsif ($header eq 'CollabReport-type') {
+      return 0 unless &got_collabreport_type_header($hdrs, $header, $value);
     }
   }
 
@@ -1563,6 +1686,21 @@ sub got_learn_type_header {
     return 0;
   }
   $hdrs->{learn_type} = $type;
+  return 1;
+}
+
+sub got_collabreport_type_header {
+  my ($hdrs, $header, $value) = @_;
+  if ($value !~ /^(\d*)$/) {
+    protocol_error("(CollabReport-type contains non-numeric bytes)");
+    return 0;
+  }
+  my $type = $1;
+  if ($type != 0 && $type != 1) {
+    protocol_error("(CollabReport-type contains invalid type)");
+    return 0;
+  }
+  $hdrs->{collabreport_type} = $type;
   return 1;
 }
 
