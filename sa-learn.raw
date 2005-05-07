@@ -480,7 +480,7 @@ sub wanted {
   }
 
   $messagecount++;
-  my $ma = Mail::SpamAssassin->parse($dataref);
+  my $ma = $spamtest->parse($dataref);
 
   if ( $ma->get_header("X-Spam-Checker-Version") ) {
     my $new_ma = $spamtest->parse($spamtest->remove_spamassassin_markup($ma), 1);

@@ -32,7 +32,7 @@ my $spamtest = Mail::SpamAssassin->new({
 for($_=shift @ARGV; defined($_); $_=shift @ARGV)
 {
 	open (FILE, "<$_");
-	my $mail = Mail::SpamAssassin->parse (\*FILE);
+	my $mail = $spamtest->parse (\*FILE);
 	close(FILE);
 
 	my $status = $spamtest->check($mail);
