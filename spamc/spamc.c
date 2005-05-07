@@ -143,6 +143,10 @@ print_usage(void)
 
     usg("  -L learntype        Learn message as spam, ham or forget to\n"
 	"                      forget or unlearn the message.\n");
+
+    usg("  -C reporttype       Report message to collaborative filtering\n"
+	"                      databases.  Report type should be report for\n"
+	"                      spam or revoke for ham.\n");
 	
     usg("  -B                  Assume input is a single BSMTP-formatted\n"
         "                      message.\n");
@@ -176,13 +180,13 @@ print_usage(void)
  */
 int
 read_args(int argc, char **argv,
-          int *max_size, char **username, int *learntype,
+          int *max_size, char **username, int *extratype,
           struct transport *ptrn)
 {
 #ifndef _WIN32
-    const char *opts = "-BcrRd:e:fyp:t:s:u:L:xSHU:ElhV";
+    const char *opts = "-BcrRd:e:fyp:t:s:u:L:C:xSHU:ElhV";
 #else
-    const char *opts = "-BcrRd:fyp:t:s:u:L:xSHElhV";
+    const char *opts = "-BcrRd:fyp:t:s:u:L:C:xSHElhV";
 #endif
     int opt;
     int ret = EX_OK;
@@ -287,16 +291,31 @@ read_args(int argc, char **argv,
 	    {
 	        flags |= SPAMC_LEARN;
 		if (strcmp(optarg,"spam") == 0) {
-		    *learntype = 0;
+		    *extratype = 0;
 		}
 	        else if (strcmp(optarg,"ham") == 0) {
-		    *learntype = 1;
+		    *extratype = 1;
 		}
 		else if (strcmp(optarg,"forget") == 0) {
-		    *learntype = 2;
+		    *extratype = 2;
 		}
 		else {
 		    libspamc_log(flags, LOG_ERR, "Please specifiy a legal learn type");
+		    ret = EX_USAGE;
+		}
+		break;
+	    }
+        case 'C':
+	    {
+	        flags |= SPAMC_COLLABREPORT;
+		if (strcmp(optarg,"report") == 0) {
+		    *extratype = 0;
+		}
+	    else if (strcmp(optarg,"revoke") == 0) {
+		    *extratype = 1;
+		}
+		else {
+		    libspamc_log(flags, LOG_ERR, "Please specifiy a legal report type");
 		    ret = EX_USAGE;
 		}
 		break;
@@ -358,6 +377,10 @@ read_args(int argc, char **argv,
 	}
 	if (flags & SPAMC_SYMBOLS) {
 	    libspamc_log(flags, LOG_ERR, "Learning excludes symbols");
+	    ret = EX_USAGE;
+	}
+	if (flags & SPAMC_COLLABREPORT) {
+	    libspamc_log(flags, LOG_ERR, "Learning excludes reporting to collaborative filtering databases");
 	    ret = EX_USAGE;
 	}
     }
@@ -500,8 +523,9 @@ main(int argc, char *argv[])
     int out_fd = -1;
     int result;
     int ret;
-    int learntype = 0;
+    int extratype = 0;
     int islearned = 0;
+    int isreported = 0;
 
     transport_init(&trans);
 
@@ -518,7 +542,7 @@ main(int argc, char *argv[])
    /* Now parse the command line arguments. First, set the defaults. */
    max_size = 250 * 1024;
    username = NULL;
-   if ((ret = read_args(argc, argv, &max_size, &username, &learntype, &trans)) != EX_OK) {
+   if ((ret = read_args(argc, argv, &max_size, &username, &extratype, &trans)) != EX_OK) {
        if (ret == EX_TEMPFAIL )
            ret = EX_OK;
        goto finish;
@@ -562,7 +586,10 @@ main(int argc, char *argv[])
 	if (ret == EX_OK) {
 
  	    if (flags & SPAMC_LEARN) {
-	      ret = message_learn(&trans, username, flags, &m, learntype, &islearned);
+	      ret = message_learn(&trans, username, flags, &m, extratype, &islearned);
+	    }
+ 	    else if (flags & SPAMC_COLLABREPORT) {
+	      ret = message_collabreport(&trans, username, flags, &m, extratype, &isreported);
 	    }
 	    else {
 	      ret = message_filter(&trans, username, flags, &m);
@@ -580,6 +607,16 @@ main(int argc, char *argv[])
 		    }
 		    else {
 		        printf("Message was already un/learned\n");
+		    }
+		    message_cleanup(&m);
+		    goto finish;
+		}
+		else if (flags & SPAMC_COLLABREPORT) {
+		    if (isreported == 1) {
+  		        printf("Message successfully reported/revoked\n");
+		    }
+		    else {
+		        printf("Unable to report/revoke message\n");
 		    }
 		    message_cleanup(&m);
 		    goto finish;

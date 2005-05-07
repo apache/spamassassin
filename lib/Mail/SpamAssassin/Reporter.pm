@@ -54,7 +54,7 @@ sub new {
 
 sub report {
   my ($self) = @_;
-  $self->{report_return} = 1;
+  $self->{report_return} = 0;
   $self->{report_available} = 0;
 
   my $text = $self->{main}->remove_spamassassin_markup($self->{msg});

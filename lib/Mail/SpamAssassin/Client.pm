@@ -118,7 +118,7 @@ sub process {
 
   my $command = $is_check_p ? 'CHECK' : 'PROCESS';
 
-  $self->clear_errors();
+  $self->_clear_errors();
 
   my $remote = $self->_create_connection();
 
@@ -211,7 +211,7 @@ the error was.
 sub learn {
   my ($self, $msg, $learntype) = @_;
 
-  $self->clear_errors();
+  $self->_clear_errors();
 
   my $remote = $self->_create_connection();
 
@@ -257,6 +257,37 @@ sub learn {
 
   return $learned_p;
 }
+
+=head2 report
+
+public instance (Boolean) report (String $msg)
+
+Description:
+This method provides the report interface to spamd.
+
+=cut
+
+sub report {
+  my ($self, $msg) = @_;
+
+  return $self->_report_or_revoke($msg, 0);
+}
+
+=head2 revoke
+
+public instance (Boolean) revoke (String $msg)
+
+Description:
+This method provides the revoke interface to spamd.
+
+=cut
+
+sub revoke {
+  my ($self, $msg) = @_;
+
+  return $self->_report_or_revoke($msg, 1);
+}
+
 
 =head2 ping
 
@@ -346,11 +377,88 @@ sub _parse_response_line {
   return split(/\s+/, $line);
 }
 
-sub clear_errors {
+=head2 _clear_errors
+
+private instance () _clear_errors ()
+
+Description:
+This method clears out any current errors.
+
+=cut
+
+sub _clear_errors {
   my ($self) = @_;
 
   $self->{resp_code} = undef;
   $self->{resp_msg} = undef;
 }
+
+
+=head2 _report_or_revoke
+
+public instance (Boolean) report_or_revoke (String $msg, Integer $reporttype)
+
+Description:
+This method implements the report or revoke call.  C<$learntype> should
+be an integer, 0 for report or 1 for revoke.  The return value is a
+boolean indicating if the message was learned or not.
+
+An undef return value indicates that there was an error and you
+should check the resp_code/resp_error values to determine what
+the error was.
+
+=cut
+
+sub _report_or_revoke {
+  my ($self, $msg, $reporttype) = @_;
+
+  $self->_clear_errors();
+
+  my $remote = $self->_create_connection();
+
+  return undef unless ($remote);
+
+  my $msgsize = length($msg.$EOL);
+
+  print $remote "COLLABREPORT $PROTOVERSION$EOL";
+  print $remote "Content-length: $msgsize$EOL";
+  print $remote "User: $self->{username}$EOL" if ($self->{username});
+  print $remote "CollabReport-type: $reporttype$EOL";
+  print $remote "$EOL";
+  print $remote $msg;
+  print $remote "$EOL";
+
+  my $line = <$remote>;
+
+  my ($version, $resp_code, $resp_msg) = $self->_parse_response_line($line);
+
+  $self->{resp_code} = $resp_code;
+  $self->{resp_msg} = $resp_msg;
+
+  return undef unless ($resp_code == 0);
+
+  my $reported_p = 0;
+  my $found_blank_line_p = 0;
+
+  while (!$found_blank_line_p) {
+    $line = <$remote>;
+
+    if ($line =~ /Reported: yes/i) {
+      $reported_p = 1;
+    }
+    elsif ($line =~ /Reported: no/i) {
+      $reported_p = 0;
+    }
+    elsif ($line =~ /$EOL/) {
+      $found_blank_line_p = 1;
+    }
+  }
+
+  close $remote;
+
+  return $reported_p;
+}
+
+
 1;
 

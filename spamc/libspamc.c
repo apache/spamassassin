@@ -766,11 +766,12 @@ static float _locale_safe_string_to_float(char *buf, int siz)
 
 static int
 _handle_spamd_header(struct message *m, int flags, char *buf, int len,
-		     int *islearned)
+		     int *actionok)
 {
     char is_spam[6];
     char s_str[21], t_str[21];
     char is_learned[4];
+    char is_reported[4];
 
     UNUSED_VARIABLE(len);
 
@@ -819,13 +820,27 @@ _handle_spamd_header(struct message *m, int flags, char *buf, int len,
     }
     else if (sscanf(buf, "Learned: %3s", is_learned) == 1) {
         if(strcmp(is_learned, "yes") == 0 || strcmp(is_learned, "Yes") == 0) {
-	  *islearned = 1;
+	  *actionok = 1;
 	}
 	else if(strcmp(is_learned, "no") == 0 || strcmp(is_learned, "No") == 0) {
-	  *islearned = 0;
+	  *actionok = 0;
 	}
 	else {
-	  libspamc_log(flags, LOG_ERR, "spamd responded with bad Learned-state '%s'",
+	  libspamc_log(flags, LOG_ERR, "spamd responded with bad Learned state '%s'",
+		       buf);
+	  return EX_PROTOCOL;
+	}
+	return EX_OK;
+	}
+	else if (sscanf(buf, "Reported: %3s", is_reported) == 1) {
+        if(strcmp(is_reported, "yes") == 0 || strcmp(is_reported, "Yes") == 0) {
+	  *actionok = 1;
+	}
+	else if(strcmp(is_reported, "no") == 0 || strcmp(is_reported, "No") == 0) {
+	  *actionok = 0;
+	}
+	else {
+	  libspamc_log(flags, LOG_ERR, "spamd responded with bad Reported state '%s'",
 		       buf);
 	  return EX_PROTOCOL;
 	}
@@ -1269,24 +1284,15 @@ int message_learn(struct transport *tp, const char *username, int flags,
     shutdown(sock, SHUT_RD);
     closesocket(sock);
     sock = -1;
-    return EX_OK;
 
     libspamc_timeout = 0;
-
-    if (m->out_len != m->content_length) {
-	libspamc_log(flags, LOG_ERR,
-	       "failed sanity check, %d bytes claimed, %d bytes seen",
-	       m->content_length, m->out_len);
-	failureval = EX_PROTOCOL;
-	goto failure;
-    }
 
     return EX_OK;
 
   failure:
-	_use_msg_for_out(m);
+    _use_msg_for_out(m);
     if (sock != -1) {
-	closesocket(sock);
+        closesocket(sock);
     }
     libspamc_timeout = 0;
 
@@ -1298,6 +1304,193 @@ int message_learn(struct transport *tp, const char *username, int flags,
     }
     return failureval;
 }
+
+
+int message_collabreport(struct transport *tp, const char *username, int flags,
+			 struct message *m, int reporttype, int *isreported)
+{
+    char buf[8192];
+    size_t bufsiz = (sizeof(buf) / sizeof(*buf)) - 4; /* bit of breathing room */
+    size_t len;
+    int sock = -1;
+    int rc;
+    char versbuf[20];
+    char strreporttype[1];
+    float version;
+    int response;
+    int failureval;
+    SSL_CTX *ctx = NULL;
+    SSL *ssl = NULL;
+    SSL_METHOD *meth;
+
+    if (flags & SPAMC_USE_SSL) {
+#ifdef SPAMC_SSL
+        SSLeay_add_ssl_algorithms();
+	meth = SSLv2_client_method();
+	SSL_load_error_strings();
+	ctx = SSL_CTX_new(meth);
+#else
+	UNUSED_VARIABLE(ssl);
+	UNUSED_VARIABLE(meth);
+	UNUSED_VARIABLE(ctx);
+	libspamc_log(flags, LOG_ERR, "spamc not built with SSL support");
+	return EX_SOFTWARE;
+#endif
+    }
+
+    m->is_spam = EX_TOOBIG;
+    if ((m->outbuf = malloc(m->max_len + EXPANSION_ALLOWANCE + 1)) == NULL) {
+	failureval = EX_OSERR;
+	goto failure;
+    }
+    m->out = m->outbuf;
+    m->out_len = 0;
+
+    /* Build spamd protocol header */
+    strcpy(buf, "COLLABREPORT ");
+
+    len = strlen(buf);
+    if (len + strlen(PROTOCOL_VERSION) + 2 >= bufsiz) {
+	_use_msg_for_out(m);
+	return EX_OSERR;
+    }
+
+    strcat(buf, PROTOCOL_VERSION);
+    strcat(buf, "\r\n");
+    len = strlen(buf);
+
+    if ((reporttype > 2) | (reporttype < 0 )) {
+        free(m->out);
+        m->out = m->msg;
+        m->out_len = m->msg_len;
+        return EX_OSERR;
+    }
+    sprintf(strreporttype,"%d",reporttype);
+    strcpy(buf + len, "CollabReport-type: ");
+    strcat(buf + len, strreporttype);
+    strcat(buf + len, "\r\n");
+    len += strlen(buf + len);
+
+    if (username != NULL) {
+	if (strlen(username) + 8 >= (bufsiz - len)) {
+	    _use_msg_for_out(m);
+	    return EX_OSERR;
+	}
+	strcpy(buf + len, "User: ");
+	strcat(buf + len, username);
+	strcat(buf + len, "\r\n");
+	len += strlen(buf + len);
+    }
+    if ((m->msg_len > 9999999) || ((len + 27) >= (bufsiz - len))) {
+	_use_msg_for_out(m);
+	return EX_OSERR;
+    }
+    len += sprintf(buf + len, "Content-length: %d\r\n\r\n", m->msg_len);
+
+    libspamc_timeout = m->timeout;
+
+    if (tp->socketpath)
+	rc = _try_to_connect_unix(tp, &sock);
+    else
+	rc = _try_to_connect_tcp(tp, &sock);
+
+    if (rc != EX_OK) {
+	_use_msg_for_out(m);
+	return rc;      /* use the error code try_to_connect_*() gave us. */
+    }
+
+    if (flags & SPAMC_USE_SSL) {
+#ifdef SPAMC_SSL
+	ssl = SSL_new(ctx);
+	SSL_set_fd(ssl, sock);
+	SSL_connect(ssl);
+#endif
+    }
+
+    /* Send to spamd */
+    if (flags & SPAMC_USE_SSL) {
+#ifdef SPAMC_SSL
+	SSL_write(ssl, buf, len);
+	SSL_write(ssl, m->msg, m->msg_len);
+#endif
+    }
+    else {
+	full_write(sock, 0, buf, len);
+	full_write(sock, 0, m->msg, m->msg_len);
+	shutdown(sock, SHUT_WR);
+    }
+
+    /* ok, now read and parse it.  SPAMD/1.2 line first... */
+    failureval =
+	_spamc_read_full_line(m, flags, ssl, sock, buf, &len, bufsiz);
+    if (failureval != EX_OK) {
+	goto failure;
+    }
+
+    if (sscanf(buf, "SPAMD/%18s %d %*s", versbuf, &response) != 2) {
+	libspamc_log(flags, LOG_ERR, "spamd responded with bad string '%s'", buf);
+	failureval = EX_PROTOCOL;
+	goto failure;
+    }
+
+    versbuf[19] = '\0';
+    version = _locale_safe_string_to_float(versbuf, 20);
+    if (version < 1.0) {
+	libspamc_log(flags, LOG_ERR, "spamd responded with bad version string '%s'",
+		     versbuf);
+	failureval = EX_PROTOCOL;
+	goto failure;
+    }
+
+    m->score = 0;
+    m->threshold = 0;
+    m->is_spam = EX_TOOBIG;
+    *isreported = 0;
+    while (1) {
+	failureval =
+	    _spamc_read_full_line(m, flags, ssl, sock, buf, &len, bufsiz);
+	if (failureval != EX_OK) {
+	    goto failure;
+	}
+
+	if (len == 0 && buf[0] == '\0') {
+	    break;		/* end of headers */
+	}
+
+	if (_handle_spamd_header(m, flags, buf, len, isreported) < 0) {
+	    failureval = EX_PROTOCOL;
+	    goto failure;
+	}
+    }
+
+    len = 0;			/* overwrite those headers */
+
+    shutdown(sock, SHUT_RD);
+    closesocket(sock);
+    sock = -1;
+
+    libspamc_timeout = 0;
+
+    return EX_OK;
+
+  failure:
+    _use_msg_for_out(m);
+    if (sock != -1) {
+        closesocket(sock);
+    }
+
+    libspamc_timeout = 0;
+
+    if (flags & SPAMC_USE_SSL) {
+#ifdef SPAMC_SSL
+	SSL_free(ssl);
+	SSL_CTX_free(ctx);
+#endif
+    }
+    return failureval;
+}
+
+
 
 void message_cleanup(struct message *m)
 {
