@@ -28,14 +28,8 @@ use vars qw(%patterns %anti_patterns);
 plan tests => 2;
 
 # initialize SpamAssassin
-my $sa = Mail::SpamAssassin->new({
-    rules_filename => "$prefix/t/log/test_rules_copy",
-    site_rules_filename => "$prefix/t/log/test_default.cf",
-    userprefs_filename  => "$prefix/masses/spamassassin/user_prefs",
-    local_tests_only    => 1,
-    debug             => 0,
-    dont_copy_prefs   => 1,
-});
+my $sa = create_saobj({'dont_copy_prefs' => 1});
+
 $sa->init(0); # parse rules
 
 # load tests and write mail

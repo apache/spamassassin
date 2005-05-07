@@ -17,6 +17,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use strict;
 use Test;
+use SATest;
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::HTML;
 use Mail::SpamAssassin::Util;
@@ -26,13 +27,8 @@ plan tests => 77;
 ##############################################
 
 # initialize SpamAssassin
-my $sa = Mail::SpamAssassin->new({
-    rules_filename => "$prefix/t/log/test_rules_copy",
-    site_rules_filename => "$prefix/t/log/test_default.cf",
-    local_tests_only    => 1,
-    debug             => 0,
-    dont_copy_prefs   => 1,
-});
+my $sa = create_saobj({'dont_copy_prefs' => 1});
+
 $sa->init(0); # parse rules
 
 open (IN, "<data/spam/009");
