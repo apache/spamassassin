@@ -1302,17 +1302,10 @@ sub init {
     $sysrules ||= $self->first_existing_path (@default_rules_path);
 
     if ($siterules) {
-      $fname = File::Spec->catfile ($siterules, "init.pre");
-
-      if (-f $fname) {
-        $self->{config_text} .= $self->read_cf ($fname, 'site rules init.pre');
-
-      } else {
-        $fname = File::Spec->catfile ($sysrules, "init.pre");
-        if (-f $fname) {
-          $self->{config_text} .= $self->read_cf ($fname, 'sys rules init.pre');
-        }
-      }
+      $self->{config_text} .= $self->read_pre($siterules, 'site rules pre files');
+    }
+    if ($sysrules) {
+      $self->{config_text} .= $self->read_pre($sysrules, 'sys rules pre files');
     }
 
     $fname = $sysrules;
@@ -1386,6 +1379,27 @@ sub read_cf {
   if (-d $path) {
     foreach my $file ($self->get_cf_files_in_dir ($path)) {
       $txt .= read_cf_file($file);
+    }
+
+  } elsif (-f $path && -s _ && -r _) {
+    $txt .= read_cf_file($path);
+  }
+
+  return $txt;
+}
+
+
+sub read_pre {
+  my ($self, $path, $desc) = @_;
+
+  return '' unless defined ($path);
+
+  dbg("config: using \"$path\" for $desc");
+  my $txt = '';
+
+  if (-d $path) {
+    foreach my $file ($self->get_pre_files_in_dir($path)) {
+      $txt .= read_cf_file($file); # ok to use read_cf_file at this point
     }
 
   } elsif (-f $path && -s _ && -r _) {
@@ -1563,6 +1577,16 @@ sub get_cf_files_in_dir {
   opendir(SA_CF_DIR, $dir) or warn "config: cannot opendir $dir: $!\n";
   my @cfs = grep { /\.cf$/i && -f "$dir/$_" } readdir(SA_CF_DIR);
   closedir SA_CF_DIR;
+
+  return map { "$dir/$_" } sort { $a cmp $b } @cfs;
+}
+
+sub get_pre_files_in_dir {
+  my ($self, $dir) = @_;
+
+  opendir(SA_PRE_DIR, $dir) or warn "config: cannot opendir $dir: $!\n";
+  my @cfs = grep { /\.pre$/i && -f "$dir/$_" } readdir(SA_PRE_DIR);
+  closedir SA_PRE_DIR;
 
   return map { "$dir/$_" } sort { $a cmp $b } @cfs;
 }
