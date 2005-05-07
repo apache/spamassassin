@@ -36,6 +36,10 @@ if (! $razor_not_available) {
   }
 }
 
+tstpre ("
+loadplugin Mail::SpamAssassin::Plugin::Razor2
+");
+
 sarun ("-t < data/spam/001", \&patterns_run_cb);
 skip_all_patterns($razor_not_available);
 

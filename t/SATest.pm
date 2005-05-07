@@ -195,6 +195,16 @@ sub tstprefs {
   $scr_pref_args = "-p log/tst.cf";
 }
 
+# creates a .pre file in the localrules dir to be parsed alongside init.pre
+# make it zz_* just to make sure it is parse last
+
+sub tstpre {
+  my $lines = shift;
+
+  open (OUT, ">log/localrules.tmp/zz_tst.pre") or die;
+  print OUT $lines; close OUT;
+}
+
 # Run spamassassin. Calls back with the output.
 # in $args: arguments to run with
 # in $read_sub: callback for the output (should read from <IN>).
