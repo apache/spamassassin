@@ -56,6 +56,10 @@ PING          --  Return a confirmation that spamd is alive.
 PROCESS       --  Process this message as described above and return modified
                   message
 
+LEARN         --  Learn message as spam, ham or forget.
+
+COLLABREPORT  --  Send message to any configured collaborative reporting
+		  databses
 
 CHECK command returns just a header (terminated by "\r\n\r\n") with the first
 line as for PROCESS (ie a response code and message), and then a header called
@@ -104,6 +108,9 @@ the report text, and how many CR-LFs there are.
 REPORT_IFSPAM returns the same as REPORT if the message is spam, or nothing at
 all if the message is non-spam.
 
+LEARN returns just a header, Learned:, with a Yes or a No value.
+
+COLLABREPORT returns just a header, Reported:, with a Yes or a No value
 
 The PING command does not actually trigger any spam checking, and (as with
 SKIP) no additional input is expected. It returns a simple confirmation
