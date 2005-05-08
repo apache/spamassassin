@@ -65,6 +65,9 @@ header    T_FUZZY_CHEAP_PRE	Subject =~ /(?!\bcheap(er)?)\b[c\xC7\xE7\xA2\xA9][\W
 header    T_FUZZY_PENIS_PRE	Subject =~ /(?!\bpenis\b)\bp[\W_]?[e3\*\xC8-\xCB\xE8-\xEB][\W_]?[n\xD1\xF1][\W_]?[il1:\|\*\xCC-\xCF\xEC-\xEF][\W_]?[s5\$\xA7]\b/i
 header    T_FUZZY_VPILL_PRE	Subject =~ /[vu][\W_]?[il1:\|\*\xCC-\xCF\xEC-\xEF][\W_]?[a4\*\@\xC0-\xC5\xAA\xE0-\xE5][\W_]?[g6][\W_]?[r\xAE][\W_]?[a4\*\@\xC0-\xC5\xAA\xE0-\xE5]/i
 
+# these rules should probably not be promoted if they overlap a lot with
+# an existing fuzzy body rule since body rules also test the Subject:
+
 header    T_FUZZY_FOREVER	Subject =~ /<F><O><R><E><V><E><R>/i
 header    T_FUZZY_FOREVER_SP	Subject =~ /<inter SP>\b<SP>?<F><O><R><E><V><E><R><SP>?\b/i
 header    T_FUZZY_FOREVER_W1	Subject =~ /<inter W1>\b<SP>?<F><O><R><E><V><E><R><SP>?\b/i
