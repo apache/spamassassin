@@ -168,11 +168,19 @@ body T_OBFU_CELEBREX_W3_P2	/<inter W3><post P2>(?!celebrex)<C><E><L><E><B><R><E>
 body T_OBFU_CELEBREX_W3_P3	/<inter W3><post P3>(?!celebrex)<C><E><L><E><B><R><E><X>/i
 
 body T_OBFU_CPILL	/(?!ciali[sz])<C><I><A><L><I><S>/i
+body T_OBFU_CPILL_SP	/<inter SP>(?!ciali[sz])<C><I><A><L><I><S>/i
+body T_OBFU_CPILL_W1	/<inter W1>(?!ciali[sz])<C><I><A><L><I><S>/i
+body T_OBFU_CPILL_SP_P2	/<inter SP><post P2>(?!ciali[sz])<C><I><A><L><I><S>/i
+body T_OBFU_CPILL_SP_P3	/<inter SP><post P3>(?!ciali[sz])<C><I><A><L><I><S>/i
 body T_OBFU_CPILL_W1_P2	/<inter W1><post P2>(?!ciali[sz])<C><I><A><L><I><S>/i
 body T_OBFU_CPILL_W1_P3	/<inter W1><post P3>(?!ciali[sz])<C><I><A><L><I><S>/i
 
 replace_tag	S2	[s\xa6\xa7]
 body T_OBFU_CPILL_2	/(?!cialis)<C><I><A><L><I>(?:<S2>|z\b)/i
+body T_OBFU_CPILL_SP_2	/<inter SP>(?!cialis)<C><I><A><L><I>(?:<S2>|z\b)/i
+body T_OBFU_CPILL_W1_2	/<inter W1>(?!cialis)<C><I><A><L><I>(?:<S2>|z\b)/i
+body T_OBFU_CPILL_SP_P2_2	/<inter SP><post P2>(?!cialis)<C><I><A><L><I>(?:<S2>|z\b)/i
+body T_OBFU_CPILL_SP_P3_2	/<inter SP><post P3>(?!cialis)<C><I><A><L><I>(?:<S2>|z\b)/i
 body T_OBFU_CPILL_W1_P2_2	/<inter W1><post P2>(?!cialis)<C><I><A><L><I>(?:<S2>|z\b)/i
 body T_OBFU_CPILL_W1_P3_2	/<inter W1><post P3>(?!cialis)<C><I><A><L><I>(?:<S2>|z\b)/i
 
@@ -355,6 +363,21 @@ body T_OBFU_PRICES_W2_P2	/<inter W2><post P2>(?!prices)<P><R><I><C><E><S>/i
 body T_OBFU_PRICES_W2_P3	/<inter W2><post P3>(?!prices)<P><R><I><C><E><S>/i
 body T_OBFU_PRICES_W3_P2	/<inter W3><post P2>(?!prices)<P><R><I><C><E><S>/i
 body T_OBFU_PRICES_W3_P3	/<inter W3><post P3>(?!prices)<P><R><I><C><E><S>/i
+# left S off of negative look-ahead on purpose
+body T_OBFU_PRICES_2	/(?!price)<P><R><I><C><E><S>/i
+body T_OBFU_PRICES_W1_P2_2	/<inter W1><post P2>(?!price)<P><R><I><C><E><S>/i
+body T_OBFU_PRICES_W1_P3_2	/<inter W1><post P3>(?!price)<P><R><I><C><E><S>/i
+body T_OBFU_PRICES_W2_P2_2	/<inter W2><post P2>(?!price)<P><R><I><C><E><S>/i
+body T_OBFU_PRICES_W2_P3_2	/<inter W2><post P3>(?!price)<P><R><I><C><E><S>/i
+body T_OBFU_PRICES_W3_P2_2	/<inter W3><post P2>(?!price)<P><R><I><C><E><S>/i
+body T_OBFU_PRICES_W3_P3_2	/<inter W3><post P3>(?!price)<P><R><I><C><E><S>/i
+body T_OBFU_PRICES_3	/(?!price)<P><R><I><C><E><S>/i
+body T_OBFU_PRICES_W1_P2_3	/<inter W1><post P2>(?!price[s ])<P><R><I><C><E><S>/i
+body T_OBFU_PRICES_W1_P3_3	/<inter W1><post P3>(?!price[s ])<P><R><I><C><E><S>/i
+body T_OBFU_PRICES_W2_P2_3	/<inter W2><post P2>(?!price[s ])<P><R><I><C><E><S>/i
+body T_OBFU_PRICES_W2_P3_3	/<inter W2><post P3>(?!price[s ])<P><R><I><C><E><S>/i
+body T_OBFU_PRICES_W3_P2_3	/<inter W3><post P2>(?!price[s ])<P><R><I><C><E><S>/i
+body T_OBFU_PRICES_W3_P3_3	/<inter W3><post P3>(?!price[s ])<P><R><I><C><E><S>/i
 body T_OBFU_PROFIT	/(?!profit)<P><R><O><F><I><T>/i
 body T_OBFU_PROFIT_W1_P2	/<inter W1><post P2>(?!profit)<P><R><O><F><I><T>/i
 body T_OBFU_PROFIT_W1_P3	/<inter W1><post P3>(?!profit)<P><R><O><F><I><T>/i
@@ -381,20 +404,22 @@ body T_OBFU_ROLEX_W2_P3	/<inter W2><post P3>(?!rolex)<R><O><L><E><X>/i
 body T_OBFU_ROLEX_W3_P2	/<inter W3><post P2>(?!rolex)<R><O><L><E><X>/i
 body T_OBFU_ROLEX_W3_P3	/<inter W3><post P3>(?!rolex)<R><O><L><E><X>/i
 body T_OBFU_SOFTWARE	/(?!software)<S><O><F><T><W><A><R><E>/i
-body T_OBFU_SOFTWARE_W1_P2	/<inter W1><post P2>(?!software)<S><O><F><T><W><A><R><E>/i
-body T_OBFU_SOFTWARE_W1_P3	/<inter W1><post P3>(?!software)<S><O><F><T><W><A><R><E>/i
-body T_OBFU_SOFTWARE_W2_P2	/<inter W2><post P2>(?!software)<S><O><F><T><W><A><R><E>/i
-body T_OBFU_SOFTWARE_W2_P3	/<inter W2><post P3>(?!software)<S><O><F><T><W><A><R><E>/i
-body T_OBFU_SOFTWARE_W3_P2	/<inter W3><post P2>(?!software)<S><O><F><T><W><A><R><E>/i
-body T_OBFU_SOFTWARE_W3_P3	/<inter W3><post P3>(?!software)<S><O><F><T><W><A><R><E>/i
+# inter versions hit 'soft ware'
+body T_OBFU_SOFTWARE_W1_P2	/<inter W1><post P2>(?!soft[w ])<S><O><F><T><W><A><R><E>/i
+body T_OBFU_SOFTWARE_W1_P3	/<inter W1><post P3>(?!soft[w ])<S><O><F><T><W><A><R><E>/i
+body T_OBFU_SOFTWARE_W2_P2	/<inter W2><post P2>(?!soft[w ])<S><O><F><T><W><A><R><E>/i
+body T_OBFU_SOFTWARE_W2_P3	/<inter W2><post P3>(?!soft[w ])<S><O><F><T><W><A><R><E>/i
+body T_OBFU_SOFTWARE_W3_P2	/<inter W3><post P2>(?!soft[w ])<S><O><F><T><W><A><R><E>/i
+body T_OBFU_SOFTWARE_W3_P3	/<inter W3><post P3>(?!soft[w ])<S><O><F><T><W><A><R><E>/i
 body T_OBFU_SUBMIT	/(?!submit)<S><U><B><M><I><T>/i
 body T_OBFU_THOUSANDS	/(?!thousands)<T><H><O><U><S><A><N><D><S>/i
-body T_OBFU_THOUSANDS_W1_P2	/<inter W1><post P2>(?!thousands)<T><H><O><U><S><A><N><D><S>/i
-body T_OBFU_THOUSANDS_W1_P3	/<inter W1><post P3>(?!thousands)<T><H><O><U><S><A><N><D><S>/i
-body T_OBFU_THOUSANDS_W2_P2	/<inter W2><post P2>(?!thousands)<T><H><O><U><S><A><N><D><S>/i
-body T_OBFU_THOUSANDS_W2_P3	/<inter W2><post P3>(?!thousands)<T><H><O><U><S><A><N><D><S>/i
-body T_OBFU_THOUSANDS_W3_P2	/<inter W3><post P2>(?!thousands)<T><H><O><U><S><A><N><D><S>/i
-body T_OBFU_THOUSANDS_W3_P3	/<inter W3><post P3>(?!thousands)<T><H><O><U><S><A><N><D><S>/i
+# S is left off of lookahead on plurals on purpose
+body T_OBFU_THOUSANDS_W1_P2	/<inter W1><post P2>(?!thousand)<T><H><O><U><S><A><N><D><S>/i
+body T_OBFU_THOUSANDS_W1_P3	/<inter W1><post P3>(?!thousand)<T><H><O><U><S><A><N><D><S>/i
+body T_OBFU_THOUSANDS_W2_P2	/<inter W2><post P2>(?!thousand)<T><H><O><U><S><A><N><D><S>/i
+body T_OBFU_THOUSANDS_W2_P3	/<inter W2><post P3>(?!thousand)<T><H><O><U><S><A><N><D><S>/i
+body T_OBFU_THOUSANDS_W3_P2	/<inter W3><post P2>(?!thousand)<T><H><O><U><S><A><N><D><S>/i
+body T_OBFU_THOUSANDS_W3_P3	/<inter W3><post P3>(?!thousand)<T><H><O><U><S><A><N><D><S>/i
 body T_OBFU_TRAMADOL	/(?!tramadol)<T><R><A><M><A><D><O><L>/i
 body T_OBFU_TRAMADOL_W1_P2	/<inter W1><post P2>(?!tramadol)<T><R><A><M><A><D><O><L>/i
 body T_OBFU_TRAMADOL_W1_P3	/<inter W1><post P3>(?!tramadol)<T><R><A><M><A><D><O><L>/i
@@ -450,6 +475,16 @@ body T_OBFU_MILF_W2_P3	/<inter W2><post P3>(?!milf)<M><I><L><F>/i
 body T_OBFU_MILF_W3_P2	/<inter W3><post P2>(?!milf)<M><I><L><F>/i
 body T_OBFU_MILF_W3_P3	/<inter W3><post P3>(?!milf)<M><I><L><F>/i
 
+body T_OBFU_MILF_2	/\b(?!milf)<M><I><L><F>/i
+body T_OBFU_MILF_SP_2	/<inter SP>(?!milf)\b<M><I><L><F>/i
+body T_OBFU_MILF_SP_P2_2	/<inter SP><post P2>\b(?!milf)<M><I><L><F>/i
+body T_OBFU_MILF_W1_P2_2	/<inter W1><post P2>\b(?!milf)<M><I><L><F>/i
+body T_OBFU_MILF_W1_P3_2	/<inter W1><post P3>\b(?!milf)<M><I><L><F>/i
+body T_OBFU_MILF_W2_P2_2	/<inter W2><post P2>\b(?!milf)<M><I><L><F>/i
+body T_OBFU_MILF_W2_P3_2	/<inter W2><post P3>\b(?!milf)<M><I><L><F>/i
+body T_OBFU_MILF_W3_P2_2	/<inter W3><post P2>\b(?!milf)<M><I><L><F>/i
+body T_OBFU_MILF_W3_P3_2	/<inter W3><post P3>\b(?!milf)<M><I><L><F>/i
+
 body T_OBFU_PENIS	/(?!penis)<P><E><N><I><S>/i
 body T_OBFU_PENIS_SP	/<inter SP>(?!penis)<P><E><N><I><S>/i
 body T_OBFU_PENIS_SP_P2	/<inter SP><post P2>(?!penis)<P><E><N><I><S>/i
@@ -469,6 +504,28 @@ body T_OBFU_PILLS_W2_P2	/<inter W2><post P2>(?!pills)<P><I><L><L><S>/i
 body T_OBFU_PILLS_W2_P3	/<inter W2><post P3>(?!pills)<P><I><L><L><S>/i
 body T_OBFU_PILLS_W3_P2	/<inter W3><post P2>(?!pills)<P><I><L><L><S>/i
 body T_OBFU_PILLS_W3_P3	/<inter W3><post P3>(?!pills)<P><I><L><L><S>/i
+
+# left S off of negative look-ahead on purpose
+body T_OBFU_PILLS_2	/(?!pill)<P><I><L><L><S>/i
+body T_OBFU_PILLS_SP_2	/<inter SP>(?!pill)<P><I><L><L><S>/i
+body T_OBFU_PILLS_SP_P2_2	/<inter SP><post P2>(?!pill)<P><I><L><L><S>/i
+body T_OBFU_PILLS_W1_P2_2	/<inter W1><post P2>(?!pill)<P><I><L><L><S>/i
+body T_OBFU_PILLS_W1_P3_2	/<inter W1><post P3>(?!pill)<P><I><L><L><S>/i
+body T_OBFU_PILLS_W2_P2_2	/<inter W2><post P2>(?!pill)<P><I><L><L><S>/i
+body T_OBFU_PILLS_W2_P3_2	/<inter W2><post P3>(?!pill)<P><I><L><L><S>/i
+body T_OBFU_PILLS_W3_P2_2	/<inter W3><post P2>(?!pill)<P><I><L><L><S>/i
+body T_OBFU_PILLS_W3_P3_2	/<inter W3><post P3>(?!pill)<P><I><L><L><S>/i
+
+# left S off of negative look-ahead on purpose
+body T_OBFU_PILLS_3	/(?!pill[s ])<P><I><L><L><S>/i
+body T_OBFU_PILLS_SP_3	/<inter SP>(?!pill[s ])<P><I><L><L><S>/i
+body T_OBFU_PILLS_SP_P2_3	/<inter SP><post P2>(?!pill[s ])<P><I><L><L><S>/i
+body T_OBFU_PILLS_W1_P2_3	/<inter W1><post P2>(?!pill[s ])<P><I><L><L><S>/i
+body T_OBFU_PILLS_W1_P3_3	/<inter W1><post P3>(?!pill[s ])<P><I><L><L><S>/i
+body T_OBFU_PILLS_W2_P2_3	/<inter W2><post P2>(?!pill[s ])<P><I><L><L><S>/i
+body T_OBFU_PILLS_W2_P3_3	/<inter W2><post P3>(?!pill[s ])<P><I><L><L><S>/i
+body T_OBFU_PILLS_W3_P2_3	/<inter W3><post P2>(?!pill[s ])<P><I><L><L><S>/i
+body T_OBFU_PILLS_W3_P3_3	/<inter W3><post P3>(?!pill[s ])<P><I><L><L><S>/i
 
 replace_rules T_OBFU_AFFORDABLE
 replace_rules T_OBFU_AFFORDABLE_W1_P2
@@ -506,9 +563,17 @@ replace_rules T_OBFU_CELEBREX_W2_P3
 replace_rules T_OBFU_CELEBREX_W3_P2
 replace_rules T_OBFU_CELEBREX_W3_P3
 replace_rules T_OBFU_CPILL
+replace_rules T_OBFU_CPILL_SP
+replace_rules T_OBFU_CPILL_W1
+replace_rules T_OBFU_CPILL_SP_P2
+replace_rules T_OBFU_CPILL_SP_P3
 replace_rules T_OBFU_CPILL_W1_P2
 replace_rules T_OBFU_CPILL_W1_P3
 replace_rules T_OBFU_CPILL_2
+replace_rules T_OBFU_CPILL_SP_2
+replace_rules T_OBFU_CPILL_W1_2
+replace_rules T_OBFU_CPILL_SP_P2_2
+replace_rules T_OBFU_CPILL_SP_P3_2
 replace_rules T_OBFU_CPILL_W1_P2_2
 replace_rules T_OBFU_CPILL_W1_P3_2
 replace_rules T_OBFU_CLICK
@@ -690,6 +755,20 @@ replace_rules T_OBFU_PRICES_W2_P2
 replace_rules T_OBFU_PRICES_W2_P3
 replace_rules T_OBFU_PRICES_W3_P2
 replace_rules T_OBFU_PRICES_W3_P3
+replace_rules T_OBFU_PRICES_2
+replace_rules T_OBFU_PRICES_W1_P2_2
+replace_rules T_OBFU_PRICES_W1_P3_2
+replace_rules T_OBFU_PRICES_W2_P2_2
+replace_rules T_OBFU_PRICES_W2_P3_2
+replace_rules T_OBFU_PRICES_W3_P2_2
+replace_rules T_OBFU_PRICES_W3_P3_2
+replace_rules T_OBFU_PRICES_3
+replace_rules T_OBFU_PRICES_W1_P2_3
+replace_rules T_OBFU_PRICES_W1_P3_3
+replace_rules T_OBFU_PRICES_W2_P2_3
+replace_rules T_OBFU_PRICES_W2_P3_3
+replace_rules T_OBFU_PRICES_W3_P2_3
+replace_rules T_OBFU_PRICES_W3_P3_3
 replace_rules T_OBFU_PROFIT
 replace_rules T_OBFU_PROFIT_W1_P2
 replace_rules T_OBFU_PROFIT_W1_P3
@@ -783,6 +862,15 @@ replace_rules T_OBFU_MILF_W2_P2
 replace_rules T_OBFU_MILF_W2_P3
 replace_rules T_OBFU_MILF_W3_P2
 replace_rules T_OBFU_MILF_W3_P3
+replace_rules T_OBFU_MILF_2
+replace_rules T_OBFU_MILF_SP_2
+replace_rules T_OBFU_MILF_SP_P2_2
+replace_rules T_OBFU_MILF_W1_P2_2
+replace_rules T_OBFU_MILF_W1_P3_2
+replace_rules T_OBFU_MILF_W2_P2_2
+replace_rules T_OBFU_MILF_W2_P3_2
+replace_rules T_OBFU_MILF_W3_P2_2
+replace_rules T_OBFU_MILF_W3_P3_2
 replace_rules T_OBFU_PENIS
 replace_rules T_OBFU_PENIS_SP
 replace_rules T_OBFU_PENIS_SP_P2
@@ -801,6 +889,24 @@ replace_rules T_OBFU_PILLS_W2_P2
 replace_rules T_OBFU_PILLS_W2_P3
 replace_rules T_OBFU_PILLS_W3_P2
 replace_rules T_OBFU_PILLS_W3_P3
+replace_rules T_OBFU_PILLS_2
+replace_rules T_OBFU_PILLS_SP_2
+replace_rules T_OBFU_PILLS_SP_P2_2
+replace_rules T_OBFU_PILLS_W1_P2_2
+replace_rules T_OBFU_PILLS_W1_P3_2
+replace_rules T_OBFU_PILLS_W2_P2_2
+replace_rules T_OBFU_PILLS_W2_P3_2
+replace_rules T_OBFU_PILLS_W3_P2_2
+replace_rules T_OBFU_PILLS_W3_P3_2
+replace_rules T_OBFU_PILLS_3
+replace_rules T_OBFU_PILLS_SP_3
+replace_rules T_OBFU_PILLS_SP_P2_3
+replace_rules T_OBFU_PILLS_W1_P2_3
+replace_rules T_OBFU_PILLS_W1_P3_3
+replace_rules T_OBFU_PILLS_W2_P2_3
+replace_rules T_OBFU_PILLS_W2_P3_3
+replace_rules T_OBFU_PILLS_W3_P2_3
+replace_rules T_OBFU_PILLS_W3_P3_3
 
 endif   #ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 
