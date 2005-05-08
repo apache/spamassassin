@@ -76,48 +76,6 @@ describe T_OBSOLETE_WS_FOLDING	Header uses obsolete whitespace folding method
 
 ########################################################################
 
-#### PHRASE OBFUSCATION RULES ####
-
-# these need to have "decently long" words.  things like "sex" FP too easily
-# in normal use, ala: "jackson's ex-wife" vs "Best S E X you"
-body T_INT_AFFORDABLE	eval:check_obfu_word('affordable')
-body T_INT_ANXIETY	eval:check_obfu_word('anxiety')
-body T_INT_BILLION	eval:check_obfu_word('billion')
-body T_INT_CELEBREX	eval:check_obfu_word('celebrex')
-body T_INT_CPILL	eval:check_obfu_word('cialis')
-body T_INT_CREDIT	eval:check_obfu_word('credit')
-body T_INT_ERECT	eval:check_obfu_word('erection')
-body T_INT_FREE		eval:check_obfu_word('free')
-body T_INT_HUNDREDS	eval:check_obfu_word('hundreds')
-body T_INT_LPILL	eval:check_obfu_word('levitra')
-body T_INT_MILF		eval:check_obfu_word('milf')
-body T_INT_MILLION	eval:check_obfu_word('million')
-body T_INT_MONEY	eval:check_obfu_word('money')
-body T_INT_MORTGAGE	eval:check_obfu_word('mortgage')
-body T_INT_OBLIGATION	eval:check_obfu_word('obligation')
-body T_INT_OFFERS	eval:check_obfu_word('offers')
-body T_INT_PENIS	eval:check_obfu_word('penis')
-body T_INT_PHARMACY	eval:check_obfu_word('pharmacy')
-body T_INT_PHENT	eval:check_obfu_word('phentermine')
-body T_INT_PRESCRIPT	eval:check_obfu_word('prescription')
-body T_INT_PROFIT	eval:check_obfu_word('profit')
-body T_INT_REFINANCE	eval:check_obfu_word('refinance')
-body T_INT_ROLEX	eval:check_obfu_word('rolex')
-body T_INT_SOFTWARE	eval:check_obfu_word('software')
-body T_INT_THOUSANDS	eval:check_obfu_word('thousands')
-body T_INT_VALIUM	eval:check_obfu_word('valium')
-body T_INT_VPILL	eval:check_obfu_word('viagra')
-body T_INT_VICODIN	eval:check_obfu_word('vicodin')
-body T_INT_VIOXX	eval:check_obfu_word('vioxx')
-body T_INT_XPILL	eval:check_obfu_word('xanax')
-
-# TVD: my FPs for this are all things like "pill's benefits"
-body T_INT_PILLS	eval:check_obfu_word('pills')
-
-# TVD: my FPs for this are from last names in sentences.
-# ala "... see Dave Price's results for ..."
-body T_INT_PRICES	eval:check_obfu_word('prices')
-
 # use ReplaceTags
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 
