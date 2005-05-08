@@ -101,7 +101,7 @@ my $killfile_froms = qr{(?:
 use lib "lib";
 use lib "../lib";
 use lib "../../lib";
-use Mail::SpamAssassin;
+use Mail::SpamAssassin::Message;
 use Mail::SpamAssassin::ArchiveIterator;
 
 # flush buffer immediately so if mass-check fails or stops we don't get a corrupt line
@@ -114,8 +114,6 @@ use vars qw( $opt_single
 use Getopt::Long;
 GetOptions("single");
 
-my $spamtest = new Mail::SpamAssassin;
-
 my $iter = new Mail::SpamAssassin::ArchiveIterator ({
         'opt_j' => 1,
         'opt_n' => 1,
@@ -125,7 +123,6 @@ my $iter = new Mail::SpamAssassin::ArchiveIterator ({
 if ($opt_single) {
   my @data = <STDIN>;
   wanted ("stdin", 0, \@data);
-  $spamtest->finish;
   exit 1;
 
 } else {
@@ -140,7 +137,6 @@ if ($opt_single) {
 #foreach my $from (sort {$count{$b} <=> $count{$a}} keys %count) {
 #print "$count{$from}   $from $lastsubject{$from}  $lastid{$from}\n";
 #}
-$spamtest->finish();
 exit;
 
 ###########################################################################
@@ -152,8 +148,7 @@ sub get_or_empty {
 
 sub wanted {
   my (undef, $id, $time, $dataref) = @_;
-
-  my $ma = $spamtest->parse ($dataref);
+  my $ma = Mail::SpamAssassin::Message->new({message=>$dataref});
   my $from = $ma->get_header ("From");
   unless (defined $from) {
     $ma->finish();
