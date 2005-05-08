@@ -939,4 +939,5 @@ describe T_TINY_FONT_1	body contains 1-point font
 rawbody T_TINY_FONT_0	/\<.*font\-size\:[ \"]*0[^0-9]+.*\>/i
 describe T_TINY_FONT_0	body contains 0-point font
 
-uri T_HEX_ENCODED_HTTP	/\b(?!http)(?:\\x68|h)(?:\\x74|t){2}(?:\\x70|p)/i
+uri T_HEX_ENCODED_HTTP_1	/(?!http)(?:\\x68|h)(?:\\x74|t){2}(?:\\x70|p)/i
+rawbody T_HEX_ENCODED_HTTP_2	/(?!http)(?:\\x68|h)(?:\\x74|t){2}(?:\\x70|p)/i
