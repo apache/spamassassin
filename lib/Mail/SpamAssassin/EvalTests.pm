@@ -3137,69 +3137,6 @@ sub check_numeric_http {
 
 ###########################################################################
 
-{
-  my %obfu_cache = ();
-  my %repllist = (
-        'a' => '[a@]',
-        'e' => '[e3]',
-        'o' => '[o0]',
-        'i' => '[il1|!]',
-        'l' => '[l1|!]',
-        'u' => '[uv]',
-        'v' => '(?:v|\\\/)',
-	'x' => '(?:x|><)',
-  );
-
-  sub check_obfu_word {
-    my($self, $body, $word) = @_;
-
-    # force lowercase since we're case insensitive anyway
-    $word = lc $word;
-
-    my $new;
-    unless ($obfu_cache{$word}) {
-      $new = '';
-      my @list = split(//, $word);
-      while ($_ = shift @list) {
-        if (exists $repllist{$_}) {
-          $_ = $repllist{$_};
-        }
-
-        # turn "foo" into "f\W*o\W*o" to match interuptus
-        if (@list) {
-          $new .= $_.'{1,3}\W{0,3}';
-        }
-        else {
-          # mad skillz yo
-          if ($_ eq 's') {
-            # we should figure out how to handle "pill's benefits"
-            $_ = '[sz]';
-          }
-
-          $new .= $_;
-        }
-      }
-
-      # cache both the word and the new RE
-      $obfu_cache{$word} = qr/\b(?!$word)$new\b/i;
-    }
-
-    # this word will be cached now, use that version
-    $new = $obfu_cache{$word};
-
-    foreach (@{$body}) {
-      if (/$new/) {
-	#warn ">> $new\n$_\n\n";
-        return 1;
-      }
-    }
-
-    return 0;
-  }
-}
-
-###########################################################################
-
 sub check_ratware_name_id {
   my ($self) = @_;
 
