@@ -69,6 +69,25 @@ $LOG_SA{facility} = {};		# no dbg facilities turned on
 use Mail::SpamAssassin::Logger::Stderr;
 $LOG_SA{method}->{stderr} = Mail::SpamAssassin::Logger::Stderr->new();
 
+=head1 METHODS
+
+=over
+
+=item add_facilities(facilities)
+
+Enable debug logging for specific facilities.  Each facility is the area
+of code to debug.  Facilities can be specified as a hash reference (the
+key names are used), an array reference, an array, or a comma-separated
+scalar string.
+
+If "all" is listed, then all debug facilities are enabled.  Higher
+priority informational messages that are suitable for logging in normal
+circumstances are available with an area of "info".  Some very verbose
+messages require the facility to be specifically enabled (see
+C<would_log> below).
+
+=cut
+
 sub add_facilities {
   my ($facilities) = @_;
 
@@ -100,6 +119,16 @@ sub add_facilities {
   }
 }
 
+=item log_message($level, $message)
+
+=item log_message($level, @message)
+
+Log a message at a specific level.  Levels are specified as strings:
+"warn", "error", "info", and "dbg".  The first element of the message
+must be prefixed with a facility name followed directly by a colon.
+
+=cut
+
 sub log_message {
   my ($level, @message) = @_;
 
@@ -117,16 +146,25 @@ sub log_message {
   }
 }
 
-# usage: dbg("facility: message")
-# This is used for all low priority debugging messages.
+=item dbg("facility: message")
+
+This is used for all low priority debugging messages.
+
+=cut
+
 sub dbg {
   return unless $LOG_SA{level} >= DBG;
   _log("dbg", @_);
 }
 
-# usage: info("facility: message")
-# This is used for informational messages indicating a normal, but
-# significant, condition.  This should be infrequently called.
+=item info("facility: message")
+
+This is used for informational messages indicating a normal, but
+significant, condition.  This should be infrequently called.  These
+messages are typically logged when SpamAssassin is run as a daemon.
+
+=cut
+
 sub info {
   return unless $LOG_SA{level} >= INFO;
   _log("info", @_);
@@ -158,6 +196,21 @@ sub _log {
   log_message($level, $message);
 }
 
+=item add(method => 'syslog', socket => $socket, facility => $facility)
+
+C<socket> is the type the syslog ("unix" or "inet").  C<facility> is the
+syslog facility (typically "mail").
+
+=item add(method => 'file', filename => $file)
+
+C<filename> is the name of the log file.
+
+=item add(method => 'stderr')
+
+No options are needed for stderr logging, just don't close stderr first.
+
+=cut
+
 sub add {
   my %params = @_;
 
@@ -182,6 +235,13 @@ sub add {
   return 1;
 }
 
+=item remove(method)
+
+Remove a logging method.  Only the method name needs to be passed as a
+scalar.
+
+=cut
+
 sub remove {
   my ($method) = @_;
 
@@ -194,6 +254,17 @@ sub remove {
   warn("logger: unable to remove $name method, not present to be removed");
   return 1;
 }
+
+=item would_log($level, $facility)
+
+Returns 0 if a message at the given level and with the given facility
+would be logged.  Returns 1 if a message at a given level and facility
+would be logged normally.  Returns 2 if the facility was specifically
+enabled.
+
+The facility argument is optional.
+
+=cut
 
 sub would_log {
   my ($level, $facility) = @_;
@@ -211,6 +282,12 @@ sub would_log {
   warn "logger: would_log called with unknown level: $level\n";
   return 0;
 }
+
+=item close_log()
+
+Close all logs.
+
+=cut
 
 sub close_log {
   while (my ($name, $object) = each %{ $LOG_SA{method} }) {
