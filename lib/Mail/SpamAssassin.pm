@@ -1670,27 +1670,6 @@ sub sa_die {
 
 ###########################################################################
 
-# private function to find out if the Storable function is available...
-sub _is_storable_available {
-  my ($self) = @_;
-
-  # Storable spews some warnings
-  local $SIG{__DIE__};
-
-  if (exists $self->{storable_available}) {
-  }
-  elsif (!eval { require Storable; }) {
-    $self->{storable_available} = 0;
-    dbg("generic: no Storable module found");
-  }
-  else {
-    $self->{storable_available} = 1;
-    dbg("generic: Storable module v".$Storable::VERSION." found");
-  }
-
-  return $self->{storable_available};
-}
-
 =item $f->copy_config ( [ $source ], [ $dest ] )
 
 Used for daemons to keep a persistent Mail::SpamAssassin object's
@@ -1712,90 +1691,36 @@ so that the object will use its current configuration.  i.e.:
   $spamtest->copy_config(\%conf_backup, undef) ||
     die "config: error returned from copy_config!\n";
 
+Note that the contents of the associative arrays should be considered
+opaque by calling code.
+
 =cut
 
 sub copy_config {
-  my($self, $source, $dest) = @_;
+  my ($self, $source, $dest) = @_;
 
   # At least one of either source or dest needs to be a hash reference ...
   unless ((defined $source && ref($source) eq 'HASH') ||
-          (defined $dest && ref($dest) eq 'HASH')) {
+          (defined $dest && ref($dest) eq 'HASH'))
+  {
     return 0;
   }
 
-  # We need the Storable module for this, so if it's not available,
-  # return an error.
-  return 0 if (!$self->_is_storable_available()); 
-
-  # Set the other one to be the conf object
-  $source ||= $self->{conf};
-  $dest ||= $self->{conf};
-
-  # if the destination sed_path_cache exists, destroy it and only copy
-  # back what should be there...
-  delete $dest->{sed_path_cache};
-
-  # Copy the source array to the dest array
-  while(my($k,$v) = each %{$source}) {
-    # we know the main value doesn't need to get copied.
-    # also ignore anything plugin related, since users can't change that,
-    # and there are usually code references.
-    next if ($k eq 'main' || $k =~ /plugin/ || $k eq 'registered_commands');
-
-
-    my $i = ref($v);
-
-    # Not a reference?  Just copy the value over.
-    if (!$i) {
-      $dest->{$k} = $v;
-    }
-    elsif ($k =~ /^(internal|trusted)_networks$/) {
-      # these are objects, but have a single hash array of interest
-      # it may not exist though, so deal with it appropriately.
-
-      # if it exists and is defined, copy it to the destination
-      if ($v->{nets}) {
-        # just copy the nets reference over ...
-        $dest->{$k}->{nets} = Storable::dclone($v->{nets});
-      }
-      else {
-	# this gets a little tricky...
-	#
-	# If $dest->{$k} doesn't exist, we're copying from the
-	# config to a backup.  So make a note that we want to delete
-	# any configured nets by setting to undef.
-	#
-	# If $dest->{$k} does exist, we're copying back to the config
-	# from the backup, so delete {nets}.
-
-        if (exists $dest->{$k}) {
-	  delete $dest->{$k}->{nets};
-	}
-	else {
-          $dest->{$k}->{nets} = undef;
-        }
-      }
-    }
-    elsif ($k eq 'scores') {
-      # this is dealt with below, but we need to ignore it for now
-    }
-    elsif ($i eq 'SCALAR' || $i eq 'ARRAY' || $i eq 'HASH') {
-      # IMPORTANT: DO THIS AFTER EVERYTHING ELSE!
-      # If we don't do this at the end, any "special" object handling
-      # will be screwed.  See bugzilla ticket 3317 for more info.
-
-      # Make a recursive copy of the reference.
-      $dest->{$k} = Storable::dclone($v);
-    }
-#    else {
-#      # throw a warning for debugging -- should never happen in normal usage
-#      warn ">> $k, $i\n";
-#    }
+  # let the Conf object itself do all the heavy lifting.  It's better
+  # than having this class know all about that class' internals...
+  if (defined $source) {
+    dbg ("config: copying current conf from backup");
+    $self->{conf} = $source->{obj}->clone();
   }
-
-  # deal with $conf->{scores}, it needs to be a reference into the scoreset
-  # hash array dealy
-  $dest->{scores} = $dest->{scoreset}->[$dest->{scoreset_current}];
+  else {
+    dbg ("config: copying current conf to backup");
+    if ($dest->{obj}) {
+      # delete any existing copies first, to ensure that
+      # circular references are cleaned up
+      $dest->{obj}->finish();
+    }
+    $dest->{obj} = $self->{conf}->clone();
+  }
 
   return 1;
 }

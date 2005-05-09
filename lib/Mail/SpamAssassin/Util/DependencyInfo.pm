@@ -41,16 +41,6 @@ my @MODULES = (
   HTML is used for an ever-increasing amount of email so this dependency
   is unavoidable.  Run "perldoc -q html" for additional information.',
 },
-{
-  'module' => 'Storable',
-  'version' => '0.00',      # 0.00 required, 2.12 is optional (below)
-  'desc' => 'This is a required module if you use spamd and allow user
-  configurations to be used (ie: you don\'t use -x, -u, -q/--sql-config,
-  -Q/--setuid-with-sql, --ldap-config, or --setuid-with-ldap).  Third
-  party utilities may also require this module for the same
-  functionality.  Storable is used to shift configuration when a spamd
-  process switches between users.',
-},
 );
 
 my @OPTIONAL_MODULES = (
