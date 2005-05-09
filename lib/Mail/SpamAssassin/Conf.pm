@@ -1589,7 +1589,7 @@ Note: The target URI portion must be surrounded in parentheses and
 
 Example: http://chkpt.zdnet.com/chkpt/whatever/spammer.domain/yo/dude
 
-  redirector_pattern	/^(?:http://)?chkpt\.zdnet\.com/chkpt/\w+/(.*)$/
+  redirector_pattern	/^https?://(?:opt\.)?chkpt\.zdnet\.com/chkpt/\w+/(.*)$/
 
 =cut
 
