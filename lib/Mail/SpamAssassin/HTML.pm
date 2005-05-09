@@ -134,18 +134,6 @@ sub html_end {
 
   # add the canonified version of each uri to the detail list
   if (defined $self->{uri}) {
-    while(my($uri, $info) = each %{ $self->{uri} }) {
-      my @tmp = Mail::SpamAssassin::Util::uri_list_canonify($uri);
-      $info->{cleaned} = \@tmp;
-      # list out the URLs for debugging ...
-      if (would_log('dbg', 'uri')) {
-        dbg("uri: html uri found, $uri");
-        foreach my $nuri (@tmp) {
-          dbg("uri: cleaned html uri, $nuri");
-        }
-      }
-    }
-
     @uri = keys %{$self->{uri}};
   }
 

@@ -1579,6 +1579,40 @@ existing system rule from a C<user_prefs> file with C<spamd>.
     }
   });
 
+=item redirector_pattern	/pattern/
+
+A regex pattern that matches both the redirector site portion, and
+the target site portion of a URI.
+
+Note: The target URI portion must be surrounded in parentheses and
+      no other part of the pattern may create a backreference.
+
+Example: http://chkpt.zdnet.com/chkpt/whatever/spammer.domain/yo/dude
+
+  redirector_pattern	/^(?:http://)?chkpt\.zdnet\.com/chkpt/\w+/(.*)$/
+
+=cut
+
+  push (@cmds, {
+    setting => 'redirector_pattern',
+    is_priv => 1,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+
+      # strip off the leading and trailing slashes
+      # we only ask for them to be like normal rules
+      $value =~ s/^\/(.*)\/$/$1/;
+
+      if (Mail::SpamAssassin::Conf::Parser->is_regexp_valid("redirector_pattern", $value)) {
+	# since the regexp will never change we might as well qr it
+	$value = qr/$value/i;
+
+	push @{$self->{main}->{conf}->{redirector_patterns}}, $value;
+	dbg("config: adding redirector regex: " . $value);
+      }
+    }
+  });
+
 =item header SYMBOLIC_TEST_NAME header op /pattern/modifiers	[if-unset: STRING]
 
 Define a test.  C<SYMBOLIC_TEST_NAME> is a symbolic test name, such as

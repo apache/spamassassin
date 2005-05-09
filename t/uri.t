@@ -22,7 +22,7 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::HTML;
 use Mail::SpamAssassin::Util;
 
-plan tests => 77;
+plan tests => 78;
 
 ##############################################
 
@@ -106,7 +106,10 @@ sub array_cmp {
 
 sub try_canon {
   my($input, $expect) = @_;
-  my @input = sort { $a cmp $b } Mail::SpamAssassin::Util::uri_list_canonify(@{$input});
+  my $redirs = ['/^(?:http://)?chkpt\.zdnet\.com/chkpt/\w+/(.*)$/',
+                '/^(?:http://)?www\.nate\.com/r/\w+/(.*)$/',
+               ];
+  my @input = sort { $a cmp $b } Mail::SpamAssassin::Util::uri_list_canonify($redirs, @{$input});
   my @expect = sort { $a cmp $b } @{$expect};
 
   # output what we want/get for debugging
@@ -155,6 +158,13 @@ ok(try_canon([
    ], [
    'http%3A//ebg&vosxfov.com%2Emunged-%72xspecials%2Enet/b/Tr3f0amG',
    'http://ebg&vosxfov.com.munged-rxspecials.net/b/Tr3f0amG'
+   ]));
+
+ok(try_canon([
+   'http://www.nate.com/r/DM03/n%65verp4%79re%74%61%69%6c%2eco%6d/%62%61m/?m%61%6e=%6Di%634%39'
+   ], [
+   'http://www.nate.com/r/DM03/n%65verp4%79re%74%61%69%6c%2eco%6d/%62%61m/?m%61%6e=%6Di%634%39',
+   'http://www.nate.com/r/DM03/neverp4yretail.com/bam/?man=mic49',
    ]));
 
 ##############################################

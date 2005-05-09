@@ -1864,12 +1864,29 @@ sub get_uri_list {
   # get_parsed_uri_list() which calls get_decoded_stripped_body_text_array(),
   # which does the metadata stuff ...  DO THIS BEFORE LOOKING FOR METADATA!!!
   my @uris = $self->get_parsed_uri_list();
+  my $redirector_patterns = $self->{conf}->{redirector_patterns};
+  @uris = Mail::SpamAssassin::Util::uri_list_canonify($redirector_patterns, @uris);
 
   # get URIs from HTML parsing
   # use the metadata version as $self->{html} is probably not set yet
   if (defined $self->{msg}->{metadata}->{html}->{uri_detail}) {
     while(my($uri, $info) = each %{ $self->{msg}->{metadata}->{html}->{uri_detail} }) {
-      push(@uris, @{$info->{cleaned}});
+      my @tmp = Mail::SpamAssassin::Util::uri_list_canonify($redirector_patterns, $uri);
+      $info->{cleaned} = \@tmp;
+      push(@uris, @tmp);
+      if (would_log('dbg', 'uri')) {
+        dbg("uri: html uri found, $uri");
+        foreach my $nuri (@tmp) {
+          dbg("uri: cleaned html uri, $nuri");
+        }
+      }
+    }
+  }
+
+  # list out the URLs for debugging ...
+  if (would_log('dbg', 'uri')) {
+    foreach my $nuri (@uris) {
+      dbg("uri: parsed uri found: $nuri");
     }
   }
 
@@ -1953,20 +1970,10 @@ sub get_parsed_uri_list {
         push @uris, $uri;
       }
     }
-
-    @uris = Mail::SpamAssassin::Util::uri_list_canonify(@uris);
-
     # setup the cache and return
     $self->{parsed_uri_list} = \@uris;
 
-    # list out the URLs for debugging ...
-    if (would_log('dbg', 'uri')) {
-      foreach my $nuri (@uris) {
-        dbg("uri: parsed uri found: $nuri");
-      }
-    }
   }
-
   return @{$self->{parsed_uri_list}};
 }
 
