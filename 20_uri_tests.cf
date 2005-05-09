@@ -24,6 +24,10 @@
 
 require_version @@VERSION@@
 
+# Redirector URI patterns
+redirector_pattern     /^(?:http://)?chkpt\.zdnet\.com/chkpt/\w+/(.*)$/
+redirector_pattern     /^(?:http://)?www\.nate\.com/r/\w+/(.*)$/
+
 uri NUMERIC_HTTP_ADDR		/^https?\:\/\/\d{7}/is
 describe NUMERIC_HTTP_ADDR	Uses a numeric IP address in URL
 
