@@ -196,7 +196,7 @@ sub parsed_metadata {
   # IMPORTANT: to get the html parsed into metadata, we need to call
   # get_parsed_uri_list() which calls get_decoded_stripped_body_text_array(),
   # which does the metadata stuff ...  DO THIS BEFORE SETTING $html !!!
-  my @parsed = $scanner->get_parsed_uri_list();
+  my @parsed = $scanner->get_uri_list();
 
   # Generate the full list of html-parsed domains.
   my $html = $scanner->{msg}->{metadata}->{html}->{uri_detail} || { };

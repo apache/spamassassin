@@ -921,7 +921,7 @@ sub uri_to_domain {
 }
 
 sub uri_list_canonify {
-  my (@uris) = @_;
+  my($redirector_patterns, @uris) = @_;
 
   # make sure we catch bad encoding tricks
   my @nuris = ();
@@ -993,6 +993,20 @@ sub uri_list_canonify {
       # bug 3308: redirectors like yahoo only need one '/' ... <grrr>
       if ($rest =~ m{(https?:/{0,2}.+)$}i) {
         push(@uris, $1);
+      }
+
+      # resort to redirector pattern matching if the generic https? check
+      # doesn't result in a match -- bug 4176
+      else {
+	foreach (@{$redirector_patterns}) {
+	  if ("$proto$host$rest" =~ $_) {
+	    next unless defined $1;
+	    dbg("uri: parsed uri pattern: $_");
+	    dbg("uri: parsed uri found: $1 in redirector: $proto$host$rest");
+	    push (@uris, $1);
+	    last;
+	  }
+	}
       }
 
       ########################
