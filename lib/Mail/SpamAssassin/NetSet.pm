@@ -102,6 +102,15 @@ sub contains_ip {
   0;
 }
 
+sub clone {
+  my ($self) = @_;
+  my $dup = Mail::SpamAssassin::NetSet->new();
+  if (defined $self->{nets}) {
+    @{$dup->{nets}} = @{$self->{nets}};
+  }
+  return $dup;
+}
+
 ###########################################################################
 
 1;

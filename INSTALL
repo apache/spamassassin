@@ -209,25 +209,6 @@ installed:
     Debian: apt-get install libhtml-parser-perl
     Gentoo: emerge dev-perl/HTML-Parser
 
-  - Storable (from CPAN)
-
-    This is a required module if you use spamd and allow children to
-    handle more than one client connection before quitting. Third party
-    utilities may also require this module for the same functionality.
-    Storable is used to shift configuration when a spamd process switches
-    between users.
-
-    If you plan to run SpamAssassin on a multiprocessor machine, or one
-    with a hyperthreaded CPU like a Pentium 4, it is strongly recommended
-    that you ensure version 2.12 (or newer) is installed.  This fixes a
-    bug that causes hangs under heavy load with that hardware
-    configuration.  (The fix might also be in version 2.10 already,
-    see <http://bugzilla.spamassassin.org/show_bug.cgi?id=4010> for more
-    information.)
-
-    Debian: apt-get install libstorable-perl
-    Gentoo: emerge dev-perl/Storable
-
 Optional Modules
 ----------------
 
