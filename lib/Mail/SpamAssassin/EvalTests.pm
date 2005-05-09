@@ -341,7 +341,7 @@ sub _check_for_forged_hotmail_received_headers {
   $rcvd =~ s/\s+/ /gs;		# just spaces, simplify the regexp
 
   return if ($rcvd =~
-        /from mail pickup service by hotmail\.com with Microsoft SMTPSVC;/);
+        /from mail pickup service by (?:\w+\.groups\.msn|hotmail)\.com with Microsoft SMTPSVC;/);
 
   my $ip = $self->get('X-Originating-Ip');
   my $IP_ADDRESS = IP_ADDRESS;
