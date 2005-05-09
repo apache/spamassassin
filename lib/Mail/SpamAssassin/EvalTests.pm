@@ -3120,23 +3120,6 @@ sub check_unresolved_template {
 
 ###########################################################################
 
-sub check_numeric_http {
-  my ($self) = @_;
-
-  my $IP_ADDRESS = IPV4_ADDRESS;
-  my $IP_PRIVATE = IP_PRIVATE;
-  for my $uri ($self->get_uri_list()) {
-    if ($uri =~ m{^https?://[^/?]*\b($IP_ADDRESS)\b}i &&
-	$1 !~ /$IP_PRIVATE/)
-    {
-      return 1;
-    }
-  }
-  return 0;
-}
-
-###########################################################################
-
 sub check_ratware_name_id {
   my ($self) = @_;
 

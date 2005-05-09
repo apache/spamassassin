@@ -62,7 +62,7 @@ my %attributes = map {; $_ => 1 }
 
 # elements that change text style
 my %elements_text_style = map {; $_ => 1 }
-  qw( body font table tr th td big small basefont marquee span img ),
+  qw( body font table tr th td big small basefont marquee span ),
 ;
 
 # elements that insert whitespace
@@ -91,7 +91,6 @@ $ok_attributes{td}{$_} = 1 for qw( bgcolor );
 $ok_attributes{th}{$_} = 1 for qw( bgcolor );
 $ok_attributes{tr}{$_} = 1 for qw( bgcolor );
 $ok_attributes{span}{$_} = 1 for qw( style );
-$ok_attributes{img}{$_} = 1 for qw( style );
 
 sub new {
   my ($class) = @_;
@@ -534,10 +533,6 @@ sub text_style {
 	      $new{$whcolor} = name_to_rgb($value);
 	    }
 	  }
-	  elsif (/\s*display:\s*none\b/i) {
-	    $new{display} = 'none';
-            $self->put_results(span_invisible => 1);
-          }
 	}
       }
       else {
@@ -553,21 +548,6 @@ sub text_style {
 	  $new{$name} = $attr->{$name};
 	}
       }
-      # all styles, not part of the if/elsif series
-      # START test code
-      if ($name eq "style") {
-	my $style = $new{style} = $attr->{style};
-	my @parts = split(/;/, $style);
-	foreach (@parts) {
-	  if (/\s*display:\s*none\b/i) {
-	    $self->put_results(display_none => 1);
-	    if ($tag eq "img") {
-	      $self->put_results(img_display_none => 1);
-	    }
-	  }
-	}
-      }
-      # END test code
       if ($new{size} > $self->{max_size}) {
 	$self->{max_size} = $new{size};
       }
@@ -845,7 +825,6 @@ sub html_text {
 
   if ($invisible_for_bayes) {
     $self->display_text($text, invisible => 1);
-    $self->put_results(invisible_text => 1);
   }
   else {
     $self->display_text($text);
