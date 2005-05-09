@@ -175,9 +175,11 @@ sub new {
 
     # NB: Really need to figure out special folding rules here!
     if ( $current =~ /^[ \t]/ ) {
-      unless ($current =~ /\S/) {
-        $self->{'obsolete_folding_whitespace'} = 1;
-      }
+      # This wasn't useful in terms of a rule, but we may want to treat it
+      # specially at some point.  Perhaps ignore it?
+      #unless ($current =~ /\S/) {
+      #  $self->{'obsolete_folding_whitespace'} = 1;
+      #}
 
       # append continuations if there's a header in process
       if ($header) {
