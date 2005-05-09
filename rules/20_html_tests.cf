@@ -344,3 +344,6 @@ describe ENTITY_DEC_ALPHANUM	HTML contains needlessly encoded characters
 rawbody   HTML_EHTML2         m'</html></html>'i
 describe  HTML_EHTML2         HTML has doubled end HTML tag
 
+# bug 3070
+rawbody HTML_TINY_FONT	/\<.*font\-size\:[ \"]*[01][^0-9]+.*\>/i
+describe HTML_TINY_FONT	body contains 1 or 0-point font

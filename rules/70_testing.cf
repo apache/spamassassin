@@ -36,18 +36,8 @@
 
 ##########################################################################
 
-# 1.972   2.4562   0.2249    0.916   0.64    0.01  T_NORMAL_HTTP_TO_IP
-body T_NORMAL_HTTP_TO_IP	eval:check_numeric_http()
-
 # this doesn't hit a lot, but it's a definite obfuscation technique
 uri T_HTTP_BAD_HOST_CHAR	m@^https?://[^/]*[\000-\037\200-\377]@i
-
-# possible IDN spoofing attack: http://www.shmoo.com/idn/homograph.txt
-# not expecting any hits on this (yet)
-uri T_HIGH_CODEPAGE_URI         /^https?:\/\/[^\/]*\&\#(?:\d{4,}|[3456789]\d\d);/i
-
-header T_OBSOLETE_WS_FOLDING	eval:check_msg_parse_flags('obsolete_folding_whitespace')
-describe T_OBSOLETE_WS_FOLDING	Header uses obsolete whitespace folding method
 
 ########################################################################
 
@@ -299,26 +289,6 @@ header T_HELO_DYNAMIC_NTL  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+\d+-\d+-c
 header T_HELO_DYNAMIC_HOME_NL  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z]{2}\d+-\S\.\S+\d\.[a-z]{2}\.home\.nl[^]]+ auth= /i
 
 ########################################################################
-
-# bug 3661
-body T_HTML_INVIS_SPAN	eval:html_test('span_invisible')
-body T_HTML_INVIS_TEXT	eval:html_test('invisible_text')
-
-# another
-body T_HTML_DISPLAY_NONE	eval:html_test('display_none')
-describe T_HTML_DISPLAY_NONE	CSS style contains "display:none"
-
-body T_HTML_IMG_DISPLAY_NONE	eval:html_test('img_display_none')
-describe T_HTML_IMG_DISPLAY_NONE	image CSS style contains "display:none"
-
-# bug 3070
-# this might have high overlap with other rules, double-check
-# before promoting
-rawbody T_TINY_FONT_1	/\<.*font\-size\:[ \"]*1[^0-9]+.*\>/i
-describe T_TINY_FONT_1	body contains 1-point font
-
-rawbody T_TINY_FONT_0	/\<.*font\-size\:[ \"]*0[^0-9]+.*\>/i
-describe T_TINY_FONT_0	body contains 0-point font
 
 uri T_HEX_ENCODED_HTTP_1	/(?!http)(?:\\x68|h)(?:\\x74|t){2}(?:\\x70|p)/i
 rawbody T_HEX_ENCODED_HTTP_2	/(?!http)(?:\\x68|h)(?:\\x74|t){2}(?:\\x70|p)/i

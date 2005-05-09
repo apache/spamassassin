@@ -165,3 +165,7 @@ describe URI_SCHEME_MIXED_CASE	URI scheme has mixed uppercase and lowercase
 # bug 678
 uri DOMAIN_4U2			/[\@\.]\S{0,20}(?:[^0-9][42](?:yo)?u|for-*you)(?:[.-]\S{1,20})?\.(?:net|com|org|info)\b/
 describe DOMAIN_4U2		Domain name containing a "4u" variant
+
+# possible IDN spoofing attack: http://www.shmoo.com/idn/homograph.txt
+# not expecting any hits on this (yet)
+uri HIGH_CODEPAGE_URI	/^https?:\/\/[^\/]*\&\#(?:\d{4,}|[3456789]\d\d);/i
