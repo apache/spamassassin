@@ -4,18 +4,13 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_allow_user_rules");
 use Test;
 
-use constant HAS_STORABLE => eval { require Storable; };
-
 BEGIN { 
 
-  plan tests => ($SKIP_SPAMD_TESTS || !HAS_STORABLE ? 0 : 5)
+  plan tests => ($SKIP_SPAMD_TESTS ? 0 : 5)
 
 };
 
 exit if $SKIP_SPAMD_TESTS;
-
-exit if !HAS_STORABLE;
-
 
 # ---------------------------------------------------------------------------
 

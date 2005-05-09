@@ -72,22 +72,6 @@ my @OPTIONAL_MODULES = (
   - version 0.46 or higher on Windows systems',
 },
 {
-  'module' => 'Storable',
-  'version' => '2.12',
-  'desc' => 'This is a required module if you use spamd and allow user
-  configurations to be used (ie: you don\'t use -x, -u, -q/--sql-config,
-  -Q/--setuid-with-sql, --ldap-config, or --setuid-with-ldap).  Third
-  party utilities may also require this module for the same
-  functionality.  Storable is used to shift configuration when a spamd
-  process switches between users. 
-
-  If you plan to run SpamAssassin on a multiprocessor Linux machine, or one
-  with a hyperthreaded CPU like a Pentium 4, it is strongly recommended that
-  you ensure version 2.12 (or newer) is installed.  This fixes a bug that
-  causes hangs under heavy load with that hardware configuration.',
-
-},
-{
   module => 'Net::SMTP',
   alt_name => 'libnet',
   version => '0.00',
