@@ -186,20 +186,18 @@ sub parsed_metadata {
   $self->setup ($scanstate);
 
   # get all domains in message
-  # TODO! we need a method that provides more metadata about where
-  # the URI was found so we can ignore hammy decoys.
 
   # list of arrays to use in order
   my @uri_ordered = ();
 
   # use the parsed uris from the rendered message text
-  # IMPORTANT: to get the html parsed into metadata, we need to call
-  # get_parsed_uri_list() which calls get_decoded_stripped_body_text_array(),
-  # which does the metadata stuff ...  DO THIS BEFORE SETTING $html !!!
-  my @parsed = $scanner->get_uri_list();
+  my @parsed = $scanner->get_parsed_uri_list();
+
+  # We need the Metadata extracted to get the canonified HTML parsed URIs
+  $scanner->extract_message_metadata();
 
   # Generate the full list of html-parsed domains.
-  my $html = $scanner->{msg}->{metadata}->{html}->{uri_detail} || { };
+  my $html = $scanner->{html}->{uri_detail} || { };
 
   # go from uri => info to uri_ordered
   # 0: a
