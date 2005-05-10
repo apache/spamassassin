@@ -193,9 +193,6 @@ sub parsed_metadata {
   # use the parsed uris from the rendered message text
   my @parsed = $scanner->get_parsed_uri_list();
 
-  # We need the Metadata extracted to get the canonified HTML parsed URIs
-  $scanner->extract_message_metadata();
-
   # Generate the full list of html-parsed domains.
   my $html = $scanner->{html}->{uri_detail} || { };
 

@@ -1312,9 +1312,11 @@ sub extract_message_metadata {
   $self->{tag_data}->{RELAYSUNTRUSTED} = $self->{relays_untrusted_str};
   $self->{tag_data}->{LANGUAGES} = $self->{msg}->get_metadata("X-Languages");
 
-  # NOTE: this has to come after get_decoded_stripped_body_text_array() as it's
-  # the one that sets {metadata}->{html} ...  it should  be called before
-  # extract_message_metadata() ...
+  # NOTE: we may have to call get_decoded_stripped_body_text_array so
+  # that {metadata}->{html} gets set...
+  if (!$self->{msg}->{metadata}->{html}) {
+    $self->get_decoded_stripped_body_text_array();
+  }
   $self->{html} = $self->{msg}->{metadata}->{html};
 
   # canonify the HTML parsed URIs
