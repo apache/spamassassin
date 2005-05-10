@@ -85,11 +85,6 @@ use Config;
 BEGIN {
   eval { require Time::HiRes };
   Time::HiRes->import( qw(time) ) unless $@;
-
-  # and shut up the Net::Ident warnings: "Net::Ident::_export_hooks() called
-  # too early to check prototype at /usr/share/perl5/Net/Ident.pm line 29."
-  #commented out line: causes all kinds of warnings and errors
-  #eval { sub Net::Ident::_export_hooks; };
 }
 
 use vars qw{
