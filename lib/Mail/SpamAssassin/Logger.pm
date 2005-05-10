@@ -140,9 +140,14 @@ sub log_message {
 
   my $message = join(" ", @message);
   $message =~ s/[\r\n]+$//;		# remove any trailing newlines
-  $message =~ s/[\x00-\x1f]/_/g;	# replace control characters with "_"
-  while (my ($name, $object) = each %{ $LOG_SA{method} }) {
-    $object->log_message($level, $message);
+
+  # split on newlines and call log_message multiple times; saves
+  # the subclasses having to understand multi-line logs
+  foreach my $line (split(/\n/s, $message)) {
+    $line =~ s/[\x00-\x1f]/_/gm; # replace control characters with "_"
+    while (my ($name, $object) = each %{ $LOG_SA{method} }) {
+      $object->log_message($level, $line);
+    }
   }
 }
 
