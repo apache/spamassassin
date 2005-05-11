@@ -185,16 +185,14 @@ sub parsed_metadata {
 
   $self->setup ($scanstate);
 
+
   # get all domains in message
 
   # list of arrays to use in order
   my @uri_ordered = ();
 
-  # use the parsed uris from the rendered message text
-  my @parsed = $scanner->get_parsed_uri_list();
-
   # Generate the full list of html-parsed domains.
-  my $html = $scanner->{html}->{uri_detail} || { };
+  my $uris = $scanner->get_uri_detail_list();
 
   # go from uri => info to uri_ordered
   # 0: a
@@ -203,11 +201,7 @@ sub parsed_metadata {
   # 3: !a_empty
   # 4: parsed
   # 5: a_empty
-  if (@parsed) {
-    $uri_ordered[4] = \@parsed;
-  }
-
-  while (my($uri, $info) = each %{$html}) {
+  while (my($uri, $info) = each %{$uris}) {
     my $entry = 3;
 
     if ($info->{types}->{a}) {
@@ -226,6 +220,9 @@ sub parsed_metadata {
     }
     elsif ($info->{types}->{img}) {
       $entry = 2;
+    }
+    elsif (@{$info->{types}} == 1 && $info->{types}->{parsed}) {
+      $entry = 4;
     }
 
     push(@{$uri_ordered[$entry]}, @{$info->{cleaned}});
