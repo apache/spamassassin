@@ -21,7 +21,6 @@ use strict;
 use SATest; sa_t_init("uri_text");
 use Test;
 use Mail::SpamAssassin;
-use IO::File;
 use vars qw(%patterns %anti_patterns);
 
 # settings
@@ -33,32 +32,28 @@ my $sa = create_saobj({'dont_copy_prefs' => 1});
 $sa->init(0); # parse rules
 
 # load tests and write mail
-my $mail = 'log/uri_text.eml';
 %patterns = ();
 %anti_patterns = ();
-write_mail();
+my $message = write_mail();
 
-# test message
-my $fh = IO::File->new_tmpfile();
-open(STDERR, ">&=".fileno($fh)) || die "Cannot reopen STDERR";
-ok(sarun("-t --debug=uri < log/uri_text.eml"));
-seek($fh, 0, 0);
-my $error = do {
-    local $/;
-    <$fh>;
-};
-$error =~ s/^.*dbg: uri: parsed uri found: //mg;
+my $mail = $sa->parse($message);
+my $msg = Mail::SpamAssassin::PerMsgStatus->new($sa, $mail);
+
+my $uris = join("\n", $msg->get_uri_list(), "");
 
 # run patterns and anti-patterns
 my $failures = 0;
 for my $pattern (keys %patterns) {
-  if ($error !~ /${pattern}/m) {
+  if ($uris !~ /${pattern}/m) {
     print "did not find $pattern\n";
     $failures++;
   }
 }
+ok(!$failures);
+$failures = 0;
+
 for my $anti_pattern (keys %anti_patterns) {
-  if ($error =~ /${anti_pattern}/m) {
+  if ($uris =~ /${anti_pattern}/m) {
     print "did find $anti_pattern\n";
     $failures++;
   }
@@ -67,8 +62,7 @@ ok(!$failures);
 
 # function to write test email
 sub write_mail {
-  if (open(MAIL, ">$mail")) {
-    print MAIL <<'EOF';
+  my $message = <<'EOF';
 Message-ID: <clean.1010101@example.com>
 Date: Mon, 07 Oct 2002 09:00:00 +0000
 From: Sender <sender@example.com>
@@ -79,30 +73,28 @@ Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 
 EOF
-    while (<DATA>) {
-      chomp;
-      next if /^#/;
-      if (/^(.*?)\t+(.*?)\s*$/) {
-	my $string = $1;
-	my @patterns = split(' ', $2);
-	if ($string && @patterns) {
-	  print MAIL "$string\n";
-	  for my $pattern (@patterns) {
-	    if ($pattern =~ /^\!(.*)/) {
-	      $anti_patterns{$1} = 1;
-	    }
-	    else {
-	      $patterns{$pattern} = 1;
-	    }
-	  }
-	}
+
+  while (<DATA>) {
+    chomp;
+    next if /^#/;
+    if (/^(.*?)\t+(.*?)\s*$/) {
+      my $string = $1;
+      my @patterns = split(' ', $2);
+      if ($string && @patterns) {
+        $message .= "$string\n";
+        for my $pattern (@patterns) {
+          if ($pattern =~ /^\!(.*)/) {
+            $anti_patterns{$1} = 1;
+          }
+          else {
+            $patterns{$pattern} = 1;
+          }
+        }
       }
     }
-    close(MAIL);
   }
-  else {
-    die "can't open output file: $!";
-  }
+
+  return $message;
 }
 
 # <line>    : <string><tabs><matches>
