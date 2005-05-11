@@ -145,20 +145,18 @@ sub check {
     $self->{conf}->set_score_set ($set|2);
   }
 
-  # Do this here so that {metadata}->{html} gets set, which we then reference
-  # in extract_message_metadata()
-  my $decoded = $self->get_decoded_stripped_body_text_array();
-
-  $self->extract_message_metadata();
-
   {
     # Here, we launch all the DNS RBL queries and let them run while we
     # inspect the message
     $self->run_rbl_eval_tests ($self->{conf}->{rbl_evals});
     my $needs_dnsbl_harvest_p = 1; # harvest needs to be run
 
+    my $decoded = $self->get_decoded_stripped_body_text_array();
     my $bodytext = $self->get_decoded_body_text_array();
     my $fulltext = $self->{msg}->get_pristine();
+
+    $self->extract_message_metadata();
+
     my @uris = $self->get_uri_list();
 
     foreach my $priority (sort { $a <=> $b } keys %{$self->{conf}->{priorities}}) {
@@ -1293,10 +1291,6 @@ sub get_current_eval_rule_name {
 sub extract_message_metadata {
   my ($self) = @_;
   
-  # Use $self->{html} as a flag indicating whether or not we've already
-  # extracted the metadata.
-  return if ($self->{html});
-
   $self->{msg}->extract_message_metadata($self->{main});
 
   foreach my $item (qw(
@@ -1312,27 +1306,11 @@ sub extract_message_metadata {
   $self->{tag_data}->{RELAYSUNTRUSTED} = $self->{relays_untrusted_str};
   $self->{tag_data}->{LANGUAGES} = $self->{msg}->get_metadata("X-Languages");
 
-  # NOTE: we may have to call get_decoded_stripped_body_text_array so
-  # that {metadata}->{html} gets set...
-  if (!$self->{msg}->{metadata}->{html}) {
+  # This should happen before we get called, but just in case.
+  if (!defined $self->{msg}->{metadata}->{html}) {
     $self->get_decoded_stripped_body_text_array();
   }
   $self->{html} = $self->{msg}->{metadata}->{html};
-
-  # canonify the HTML parsed URIs
-  my $redirector_patterns = $self->{conf}->{redirector_patterns};
-  if (defined $self->{html}->{uri_detail}) {
-    while(my($uri, $info) = each %{ $self->{html}->{uri_detail} }) {
-      my @tmp = Mail::SpamAssassin::Util::uri_list_canonify($redirector_patterns, $uri);
-      $info->{cleaned} = \@tmp;
-      if (would_log('dbg', 'uri')) {
-        dbg("uri: html uri found, $uri");
-        foreach my $nuri (@tmp) {
-          dbg("uri: cleaned html uri, $nuri");
-        }
-      }
-    }
-  }
 
   # allow plugins to add more metadata, read the stuff that's there, etc.
   $self->{main}->call_plugins ("parsed_metadata", { permsgstatus => $self });
@@ -1916,29 +1894,46 @@ sub get_uri_detail_list {
     return $self->{uri_detail_list};
   }
 
-  # IMPORTANT: to get the html parsed into metadata, we need to
-  # call extract_message_metadata().  It will call
-  # get_decoded_stripped_body_text_array(), if necessary which does
-  # the metadata->html stuff ...
-
-  # We need the Metadata extracted to get the canonified HTML parsed URIs
-  $self->extract_message_metadata();
+  # do this so we're sure metadata->html is setup
+  my @parsed = $self->_get_parsed_uri_list();
 
   # get URIs from HTML parsing
-  my $detail = $self->{html}->{uri_detail} || { };
+  # use the metadata version since $self->{html} may not be setup
+  my $detail = $self->{msg}->{metadata}->{html}->{uri_detail} || { };
 
-  foreach my $uri ( $self->_get_parsed_uri_list() ) {
-    my @uris = Mail::SpamAssassin::Util::uri_list_canonify($self->{conf}->{redirector_patterns}, $uri);
+  # don't keep dereferencing ...
+  my $redirector_patterns = $self->{conf}->{redirector_patterns};
 
-    # list out the URLs for debugging ...
+  # canonify the HTML parsed URIs
+  while(my($uri, $info) = each %{ $detail }) {
+    my @tmp = Mail::SpamAssassin::Util::uri_list_canonify($redirector_patterns, $uri);
+    $info->{cleaned} = \@tmp;
+
     if (would_log('dbg', 'uri')) {
-      foreach my $nuri (@uris) {
-        dbg("uri: parsed uri found: $nuri");
+      dbg("uri: html uri found, $uri");
+      foreach my $nuri (@tmp) {
+        dbg("uri: cleaned html uri, $nuri");
       }
     }
+  }
 
+  # canonify the text parsed URIs
+  foreach my $uri ( @parsed ) {
     $detail->{$uri}->{types}->{parsed} = 1;
-    push(@{$detail->{$uri}->{cleaned}}, @uris);
+
+    my @uris = ();
+    
+    if (!exists $detail->{$uri}->{cleaned}) {
+      @uris = Mail::SpamAssassin::Util::uri_list_canonify($redirector_patterns, $uri);
+      $detail->{$uri}->{cleaned} = \@uris;
+    }
+
+    if (would_log('dbg', 'uri')) {
+      dbg("uri: parsed uri found, $uri");
+      foreach my $nuri (@uris) {
+        dbg("uri: parsed html uri, $nuri");
+      }
+    }
   }
 
   # setup the cache
