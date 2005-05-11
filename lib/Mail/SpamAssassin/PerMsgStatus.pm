@@ -1886,6 +1886,31 @@ sub get_uri_list {
   return @uris;
 }
 
+=item $status->get_uri_detail_list ()
+
+Returns a hash reference of all unique URIs found in the message and
+various data about where the URIs were found in the message.  It takes a
+combination of the URIs found in the rendered (decoded and HTML stripped)
+body and the URIs found when parsing the HTML in the message.  Will also
+set $status->{uri_detail_list} (the hash reference as returned by this
+function).
+
+The hash format looks something like this:
+
+  raw_uri => {
+    types => { a => 1, img => 1, parsed => 1 },
+    cleaned => ( canonified_uri )
+  }
+
+C<raw_uri> is whatever the URI was in the message itself
+(http://spamassassin.apache%2Eorg/).  C<types> is a hash of the HTML
+tags (lowercase) which referenced the raw_uri.  I<parsed> is a faked
+type which specifies that the raw_uri was seen in the rendered text.
+C<cleaned> is an array of the raw and canonified version of the raw_uri
+(http://spamassassin.apache%2Eorg/, http://spamassassin.apache.org/).
+
+=cut
+
 sub get_uri_detail_list {
   my ($self) = @_;
 
