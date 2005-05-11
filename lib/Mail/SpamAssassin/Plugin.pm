@@ -547,41 +547,50 @@ this message.
 
 =item $plugin->plugin_report ( { options ... } )
 
-Called if the message is to be reported as spam.
+Called if the message is to be reported as spam.  If the reporting system is
+available, the variable C<$options-<gt>{report}-><gt>report_available}> should
+be set to C<1>; if the reporting system successfully reported the message, the
+variable C<$options-<gt>{report}-><gt>report_return}> should be set to C<1>.
 
 =over 4
 
 =item report
 
-Reference to the Reporter object
+Reference to the Reporter object (C<$options-<gt>{report}> in the
+paragraph above.)
 
 =item text
 
-Reference to a markup removed copy of the message in scalar format
+Reference to a markup removed copy of the message in scalar string format.
 
 =item msg
 
-Reference to the original message object
+Reference to the original message object.
 
 =back
 
 =item $plugin->plugin_revoke ( { options ... } )
 
-Called if the message is to be reported as ham (revokes a spam report).
+Called if the message is to be reported as ham (revokes a spam report). If the
+reporting system is available, the variable
+C<$options-<gt>{revoke}-><gt>revoke_available}> should be set to C<1>; if the
+reporting system successfully revoked the message, the variable
+C<$options-<gt>{revoke}-><gt>revoke_return}> should be set to C<1>.
 
 =over 4
 
 =item revoke
 
-Reference to the Reporter object
+Reference to the Reporter object (C<$options-<gt>{revoke}> in the
+paragraph above.)
 
 =item text
 
-Reference to a markup removed copy of the message in scalar format
+Reference to a markup removed copy of the message in scalar string format.
 
 =item msg
 
-Reference to the original message object
+Reference to the original message object.
 
 =back
 
