@@ -738,13 +738,18 @@ sub add_test {
   }
 
   # all of these rule types are regexps
-  if ($type == $Mail::SpamAssassin::Conf::TYPE_HEAD_TESTS
-        || $type == $Mail::SpamAssassin::Conf::TYPE_BODY_TESTS
-        || $type == $Mail::SpamAssassin::Conf::TYPE_FULL_TESTS
-        || $type == $Mail::SpamAssassin::Conf::TYPE_RAWBODY_TESTS
-        || $type == $Mail::SpamAssassin::Conf::TYPE_URI_TESTS)
+  if ($type == $Mail::SpamAssassin::Conf::TYPE_BODY_TESTS ||
+      $type == $Mail::SpamAssassin::Conf::TYPE_FULL_TESTS ||
+      $type == $Mail::SpamAssassin::Conf::TYPE_RAWBODY_TESTS ||
+      $type == $Mail::SpamAssassin::Conf::TYPE_URI_TESTS)
   {
     return unless $self->is_regexp_valid($name, $text);
+  }
+  if ($type == $Mail::SpamAssassin::Conf::TYPE_HEAD_TESTS)
+  {
+    my ($pat) = ($text =~ /^\s*\S+\s*(?:\=|\!)\~\s*(\S.*?\S)\s*$/);
+    $pat =~ s/\s+\[if-unset:\s+(.+)\]\s*$//;
+    return unless $self->is_regexp_valid($name, $pat);
   }
   elsif ($type == $Mail::SpamAssassin::Conf::TYPE_META_TESTS)
   {
@@ -816,10 +821,8 @@ sub is_meta_valid {
 sub is_regexp_valid {
   my ($self, $name, $re) = @_;
 
-  # get rid of the / delimiters in $re so we can verify it
-  $re =~ s/^\/(.*)\/$/$1/;
-
-  if (eval { ("" =~ m{$re}); 1; }) {
+  my $evalstr = '("" =~ ' . $re . '); 1;';
+  if (eval $evalstr) {
     return 1;
   }
   else {
