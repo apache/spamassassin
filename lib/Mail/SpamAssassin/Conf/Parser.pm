@@ -816,13 +816,16 @@ sub is_meta_valid {
 sub is_regexp_valid {
   my ($self, $name, $re) = @_;
 
+  # get rid of the / delimiters in $re so we can verify it
+  $re =~ s/^\/(.*)\/$/$1/;
+
   if (eval { ("" =~ m{$re}); 1; }) {
     return 1;
   }
   else {
     my $err = $@;
     $err =~ s/ at .*? line \d+\.\n?//;
-    warn "config: invalid regexp for rule $name: $re: $err\n";
+    warn "config: invalid regexp for rule $name: /$re/: $err\n";
     $self->{conf}->{errors}++;
     return 0;
   }
