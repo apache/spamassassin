@@ -1599,7 +1599,7 @@ Example: http://chkpt.zdnet.com/chkpt/whatever/spammer.domain/yo/dude
     code => sub {
       my ($self, $key, $value, $line) = @_;
 
-      if (Mail::SpamAssassin::Conf::Parser->is_regexp_valid("redirector_pattern", $value)) {
+      if ( $self->{parser}->is_regexp_valid("redirector_pattern", $value)) {
 	# strip off delimiters and modifiers  TODO: include modifiers in qr
 	$value =~ s/^m?(.)(.*)(?:\1|>|}|\)|\]).*?$/$2/;
 
