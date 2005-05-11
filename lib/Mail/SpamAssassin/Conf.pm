@@ -1589,7 +1589,7 @@ Note: The target URI portion must be surrounded in parentheses and
 
 Example: http://chkpt.zdnet.com/chkpt/whatever/spammer.domain/yo/dude
 
-  redirector_pattern	/^https?://(?:opt\.)?chkpt\.zdnet\.com/chkpt/\w+/(.*)$/
+  redirector_pattern	/^https?:\/\/(?:opt\.)?chkpt\.zdnet\.com\/chkpt\/\w+\/(.*)$/
 
 =cut
 
@@ -1599,11 +1599,10 @@ Example: http://chkpt.zdnet.com/chkpt/whatever/spammer.domain/yo/dude
     code => sub {
       my ($self, $key, $value, $line) = @_;
 
-      # strip off the leading and trailing slashes
-      # we only ask for them to be like normal rules
-      $value =~ s/^\/(.*)\/$/$1/;
-
       if (Mail::SpamAssassin::Conf::Parser->is_regexp_valid("redirector_pattern", $value)) {
+	# strip off delimiters and modifiers  TODO: include modifiers in qr
+	$value =~ s/^m?(.)(.*)(?:\1|>|}|\)|\]).*?$/$2/;
+
 	# since the regexp will never change we might as well qr it
 	$value = qr/$value/i;
 
