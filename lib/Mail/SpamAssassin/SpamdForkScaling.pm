@@ -340,6 +340,10 @@ sub wait_for_orders {
     my $line;
     my $nbytes = $sock->sysread($line, 6);
     if (!defined $nbytes || $nbytes == 0) {
+      if ($sock->eof()) {
+        dbg("prefork: parent closed, exiting");
+        exit;
+      }
       die "prefork: empty order from parent";
     }
     if ($nbytes < 6) {
