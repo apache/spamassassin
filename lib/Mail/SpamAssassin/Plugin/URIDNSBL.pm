@@ -221,7 +221,7 @@ sub parsed_metadata {
     elsif ($info->{types}->{img}) {
       $entry = 2;
     }
-    elsif ($info->{types}->{parsed} && (@{$info->{types}} == 1)) {
+    elsif ($info->{types}->{parsed} && (keys %{$info->{types}} == 1)) {
       $entry = 4;
     }
 
