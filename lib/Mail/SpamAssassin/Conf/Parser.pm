@@ -743,13 +743,13 @@ sub add_test {
       $type == $Mail::SpamAssassin::Conf::TYPE_RAWBODY_TESTS ||
       $type == $Mail::SpamAssassin::Conf::TYPE_URI_TESTS)
   {
-    return unless $self->is_regexp_valid($name, $text);
+    return unless $self->is_delimited_regexp_valid($name, $text);
   }
   if ($type == $Mail::SpamAssassin::Conf::TYPE_HEAD_TESTS)
   {
     my ($pat) = ($text =~ /^\s*\S+\s*(?:\=|\!)\~\s*(\S.*?\S)\s*$/);
     $pat =~ s/\s+\[if-unset:\s+(.+)\]\s*$//;
-    return unless $self->is_regexp_valid($name, $pat);
+    return unless $self->is_delimited_regexp_valid($name, $pat);
   }
   elsif ($type == $Mail::SpamAssassin::Conf::TYPE_META_TESTS)
   {
@@ -816,6 +816,17 @@ sub is_meta_valid {
     $self->{conf}->{errors}++;
     return 0;
   }
+}
+
+sub is_delimited_regexp_valid {
+  my ($self, $name, $re) = @_;
+
+  unless ($re =~ /^\s*m?(\W).*(?:\1|>|}|\)|\])[a-z]*\s*$/) {
+    warn "config: invalid regexp for rule $name: $re: missing or invalid delimiters\n";
+    $self->{conf}->{errors}++;
+    return 0;
+  }
+  return $self->is_regexp_valid($name, $re);
 }
 
 sub is_regexp_valid {
