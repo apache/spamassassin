@@ -24,7 +24,7 @@ use Mail::SpamAssassin;
 use vars qw(%patterns %anti_patterns);
 
 # settings
-plan tests => 22;
+plan tests => 24;
 
 # initialize SpamAssassin
 my $sa = create_saobj({'dont_copy_prefs' => 1});
@@ -58,4 +58,7 @@ ok !tryone 'foo(bar';
 ok !tryone 'foo(?{1})bar';
 ok !tryone '/foo(?{1})bar/';
 ok !tryone 'm!foo(?{1})bar!';
+
+ok !tryone '/test//';
+ok tryone '.*';
 
