@@ -865,7 +865,7 @@ sub is_regexp_valid {
   }
 
   my $err = $@;
-  $err =~ s/ at .*? line \d+\.\n?//;
+  $err =~ s/ at .*? line \d.*$//;
   warn "config: invalid regexp for rule $name: $origre: $err\n";
   $self->{conf}->{errors}++;
   return 0;
