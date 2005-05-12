@@ -290,7 +290,7 @@ sub spamcrun {
   }
 
   my $spamcargs;
-  if($args !~ /\b(?:-p\s*[0-9]+|-U)\b/)
+  if($args !~ /\b(?:-p\s*[0-9]+|-F|-U)\b/)
   {
     $spamcargs = "$spamc -d $spamdhost -p $spamdport $args";
   }

@@ -210,6 +210,7 @@ my %makefile = (
         'spamd/spamd',
 
         'spamc/spamc$(EXE_EXT)',
+        'spamc/spamc.h',
         'spamc/qmail-spamc$(EXE_EXT)',
         'spamc/*.o*', 'spamc/replace/*.o*',
         'spamc/*.so',
