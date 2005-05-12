@@ -825,6 +825,7 @@ sub is_regexp_valid {
   # the start and end, and modifiers at the end if present,
   # so we can validate those too.
   my $origre = $re;
+  my $safere = $re;
   my $mods = '';
   if ($re =~ s/^m{//) {
     $re =~ s/}([a-z]*)$//; $mods = $1;
@@ -841,6 +842,9 @@ sub is_regexp_valid {
   elsif ($re =~ s/^\/(.*)\/([a-z]*)$/$1/) {
     $mods = $2;
   }
+  else {
+    $safere = "m#".$re."#";
+  }
 
   # now prepend the modifiers, in order to check if they're valid
   if ($mods) {
@@ -852,15 +856,19 @@ sub is_regexp_valid {
   # security of the regexp.  simply using ("" =~ $re) will NOT do that, and
   # will therefore open a hole!
   if (eval { ("" =~ m#${re}#); 1; }) {
-    return 1;
+
+    # now double-check -- try with the user-supplied delimiters as well
+    my $evalstr = '("" =~ '.$safere.'); 1;';
+    if (eval $evalstr) {
+      return 1;
+    }
   }
-  else {
-    my $err = $@;
-    $err =~ s/ at .*? line \d+\.\n?//;
-    warn "config: invalid regexp for rule $name: $origre: $err\n";
-    $self->{conf}->{errors}++;
-    return 0;
-  }
+
+  my $err = $@;
+  $err =~ s/ at .*? line \d+\.\n?//;
+  warn "config: invalid regexp for rule $name: $origre: $err\n";
+  $self->{conf}->{errors}++;
+  return 0;
 }
 
 ###########################################################################
