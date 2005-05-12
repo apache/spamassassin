@@ -503,3 +503,22 @@ meta T_MC_OBFU_BAYES_b3714_c8 ((BAYES_99 || BAYES_95 || BAYES_90) + (T_MC_OBFU_2
 score T_MC_OBFU_BAYES_b3714_c8 5.000
 ## MC: bug 3714 cmt 8: end
 
+## MC: bug 4236 cmt 8: start
+header __RCVD_APNIC_b4236_c8 Received =~/(\[|\()(58|59|60|61|202|203|210|211|218|219|220|221|222)\.\d+\.\d+\.\d+.+ by /
+header __RCVD_RIPE_b4236_c8 Received =~/(\[|\()(62|80|81|82|83|84||85|86|87|88|193|194|195|212|213|217)\.\d+\.\d+\.\d+.+by /
+header __RCVD_LACNIC_b4236_c8 Received =~ /(\[|\()20(0|1)\.\d+\.\d+\.\d+.+ by /
+meta __RCVD_FOREIGN_b4236_c8 (__RCVD_APNIC_b4236_c8 || __RCVD_RIPE_b4236_c8 || __RCVD_LACNIC_b4236_c8)
+header __FROM_AOL_b4236_c8 From =~ /\@aol\.com/i
+meta T_MC_SPAMMY_FOREIGN_AOL_b4236_c8 (__RCVD_FOREIGN_b4236_c8 && __FROM_AOL_b4236_c8)
+score T_MC_SPAMMY_FOREIGN_AOL_b4236_c8 8
+header __FROM_RIPE_b4236_c8 From:addr =~/\.(at|ba|ch|cz|de|dk|eg|es|fi|fr|gr|hr|hu|ie|il|is|it|lt|lu|lv|ma|nl|no|pl|pt|ro|ru|se|sk|ua|uk|za)>?$/i
+meta T_MC_SPAMMY_FOREIGN_RIPE_b4236_c8 (__FROM_RIPE_b4236_c8 && (__RCVD_APNIC_b4236_c8 || __RCVD_LACNIC_b4236_c8))
+score T_MC_SPAMMY_FOREIGN_RIPE_b4236_c8 10
+header __FROM_APNIC_b4236_c8 From:addr =~ /\.(au|cn|in|jp|kr|nz|ph|pk|sg|th)>?$/i
+meta T_MC_SPAMMY_FOREIGN_APNIC_b4236_c8 (__FROM_APNIC_b4236_c8 && (__RCVD_RIPE_b4236_c8 || __RCVD_LACNIC_b4236_c8))
+score T_MC_SPAMMY_FOREIGN_APNIC_b4236_c8 8
+header __FROM_LACNIC_b4236_c8 From:addr =~ /\.(ar|br|cl|co|mx|pe|ve)>?$/i
+meta T_MC_SPAMMY_FOREIGN_LACNIC_b4236_c8 (__FROM_LACNIC_b4236_c8 && (__RCVD_RIPE_b4236_c8 || __RCVD_APNIC_b4236_c8))
+score T_MC_SPAMMY_FOREIGN_LACNIC_b4236_c8 6
+## MC: bug 4236 cmt 8: end
+
