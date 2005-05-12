@@ -41,15 +41,9 @@ distribution for more details.
 
 =head1 OPTIONS
 
-All options detailed below can be passed as command line arguments, or
-be contained in a configuration file. The layout of the configuration
-file is :
-
-B<[option]> B<(value)>
-
-B<(value)> is required for any options that require an argument.
-Whitespace and new lines delimit the options. Blank lines, and lines
-beginning with a '#' are ignored.
+All options detailed below can be passed as command line arguments, or be
+contained in a configuration file, as described in the B<CONFIGURATION FILE>
+section below.
 
 =over
 
@@ -215,6 +209,17 @@ C</etc/mail/spamassassin/spamc.conf> will be attempted. If it begins with
 C</opt>, C</etc/opt/mail/spamassassin/spamc.conf> will be attempted. If those
 don't exist, C</etc/spamc.conf> will be appended to the prefix and tried. If
 none of those exist, no configuration file will be read by default.
+
+Example:
+
+    # spamc global configuration file 
+    
+    # connect to "server.example.com", port 783
+    -d server.example.com
+    -p 783
+
+    # max message size for scanning = 350k
+    -s 350000
 
 =head1 EXIT CODES
 
