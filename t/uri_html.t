@@ -218,7 +218,7 @@ ftp://name@faikaj4t.dom/%2Fetc/motd	ftp://name@faikaj4t.dom//etc/motd
 #keyword:sportscar		!sportscar
 
 # test redirector pattern
-http://www.nate.com/r/DM03/n%65verp4%79re%74%61%69%6c%2eco%6d/%62%61m/?m%61%6e=%6Di%634%39	http://neverp4yretail.com/bam/[?]man=mic49
+http://www.NATE.com/r/DM03/n%65verp4%79re%74%61%69%6c%2eco%6d/%62%61m/?m%61%6e=%6Di%634%39	http://neverp4yretail.com/bam/[?]man=mic49
 
 # test ignoring text portion of multipart with an html part
 http://www.nowhereinthetestdata.com		!http://www.dontputhisinthetestdata.com
