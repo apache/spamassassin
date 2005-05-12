@@ -1599,7 +1599,7 @@ Example: http://chkpt.zdnet.com/chkpt/whatever/spammer.domain/yo/dude
     code => sub {
       my ($self, $key, $value, $line) = @_;
 
-      if ($self->{parser}->is_regexp_valid("redirector_pattern", $value)) {
+      if ($self->{parser}->is_delimited_regexp_valid("redirector_pattern", $value)) {
 	# convert to qr// while including modifiers
 	$value =~ /^m?(\W)(.*)(?:\1|>|}|\)|\])(.*?)$/;
 	my $pattern = $2;
