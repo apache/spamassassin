@@ -1579,7 +1579,7 @@ existing system rule from a C<user_prefs> file with C<spamd>.
     }
   });
 
-=item redirector_pattern	/pattern/
+=item redirector_pattern	/pattern/modifiers
 
 A regex pattern that matches both the redirector site portion, and
 the target site portion of a URI.
@@ -1589,7 +1589,7 @@ Note: The target URI portion must be surrounded in parentheses and
 
 Example: http://chkpt.zdnet.com/chkpt/whatever/spammer.domain/yo/dude
 
-  redirector_pattern	/^https?:\/\/(?:opt\.)?chkpt\.zdnet\.com\/chkpt\/\w+\/(.*)$/
+  redirector_pattern	/^https?:\/\/(?:opt\.)?chkpt\.zdnet\.com\/chkpt\/\w+\/(.*)$/i
 
 =cut
 
@@ -1599,14 +1599,14 @@ Example: http://chkpt.zdnet.com/chkpt/whatever/spammer.domain/yo/dude
     code => sub {
       my ($self, $key, $value, $line) = @_;
 
-      if ( $self->{parser}->is_regexp_valid("redirector_pattern", $value)) {
-	# strip off delimiters and modifiers  TODO: include modifiers in qr
-	$value =~ s/^m?(.)(.*)(?:\1|>|}|\)|\]).*?$/$2/;
+      if ($self->{parser}->is_regexp_valid("redirector_pattern", $value)) {
+	# convert to qr// while including modifiers
+	$value =~ /^m?(\W)(.*)(?:\1|>|}|\)|\])(.*?)$/;
+	my $pattern = $2;
+	$pattern = "(?".$3.")".$pattern if $3;
+	$pattern = qr/$pattern/;
 
-	# since the regexp will never change we might as well qr it
-	$value = qr/$value/i;
-
-	push @{$self->{main}->{conf}->{redirector_patterns}}, $value;
+	push @{$self->{main}->{conf}->{redirector_patterns}}, $pattern;
 	dbg("config: adding redirector regex: " . $value);
       }
     }
