@@ -59,6 +59,6 @@ ok !tryone 'foo(?{1})bar';
 ok !tryone '/foo(?{1})bar/';
 ok !tryone 'm!foo(?{1})bar!';
 
-ok !tryone '/test//';
+# ok !tryone '/test//';
 ok tryone '.*';
 
