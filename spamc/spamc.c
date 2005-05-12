@@ -19,10 +19,13 @@
 #include "version.h"
 #include "libspamc.h"
 #include "utils.h"
+#include "spamc.h"
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <ctype.h>
 
 #ifdef _WIN32
 #include <io.h>
@@ -134,6 +137,7 @@ print_usage(void)
 #ifndef _WIN32
     usg("  -U path             Connect to spamd via UNIX domain sockets.\n");
 #endif
+    usg("  -F path             Use this configuration file.\n");
     usg("  -t timeout          Timeout in seconds for communications to\n"
         "                      spamd. [default: 600]\n");
     usg("  -s size             Specify maximum message size, in bytes.\n"
@@ -184,9 +188,9 @@ read_args(int argc, char **argv,
           struct transport *ptrn)
 {
 #ifndef _WIN32
-    const char *opts = "-BcrRd:e:fyp:t:s:u:L:C:xSHU:ElhV";
+    const char *opts = "-BcrRd:e:fyp:t:s:u:L:C:xSHU:ElhVF:";
 #else
-    const char *opts = "-BcrRd:fyp:t:s:u:L:C:xSHElhV";
+    const char *opts = "-BcrRd:fyp:t:s:u:L:C:xSHElhVF:";
 #endif
     int opt;
     int ret = EX_OK;
@@ -387,6 +391,132 @@ read_args(int argc, char **argv,
     return ret;
 }
 
+/* find_config()
+ *
+ * looks for the config file in default locations as well as
+ * ${prefix}/etc
+ *
+ * return config path if found, NULL if not, or if there's an error
+ */
+char *find_config(char *prefix) {
+   struct stat buf;
+   char *config_path = NULL;
+
+   if((strncasecmp(prefix, "/usr", 4)) == 0) {
+      if((config_path = (char *)malloc(32)) != NULL) {
+         strcat(config_path, "/etc/mail/spamassassin/spamc.conf");
+      } else {
+         libspamc_log(flags, LOG_ERR, 
+           "Out of memory while searching for config file");
+         return NULL;
+      }
+
+      if((stat(config_path, &buf) < 0) || (!(S_ISREG(buf.st_mode)))) {
+         config_path = NULL;
+      } else {
+         return(config_path);
+      }
+   } else if((strncasecmp(prefix, "/opt", 4)) == 0) {
+      if((config_path = (char *)malloc(38)) != NULL) {
+         strcat(config_path, "/etc/opt/mail/spamassassin/spamc.conf");
+      } else {
+         libspamc_log(flags, LOG_ERR,
+           "Out of memory while searching for config file");
+         return NULL;
+      }
+
+      if((stat(config_path, &buf) < 0) || (!(S_ISREG(buf.st_mode)))) {
+         config_path = NULL;
+      } else {
+         return(config_path);
+      }
+   }
+
+   if(config_path == NULL) {
+      if((config_path = (char *)malloc(strlen(prefix)+16)) != NULL) {
+         strcat(config_path, prefix);
+         strcat(config_path, "/etc/spamc.conf");
+      } else {
+         libspamc_log(flags, LOG_ERR,
+           "Out of memory while searching for config file");
+         return NULL;
+      }
+
+      if((stat(config_path, &buf) < 0) || (!(S_ISREG(buf.st_mode)))) {
+         config_path = NULL;
+      } else {
+         return(config_path);
+      }
+   }
+   return NULL; // if we get to here, it hasn't been found
+}
+
+/* combine_args() :: parses spamc.conf for options, and combines those
+ * with options passed via command line
+ *
+ * lines beginning with # or blank lines are ignored
+ *
+ * returns EX_OK on success, EX_CONFIG on failure
+ */
+int combine_args(char *prefix, char *config_file, 
+      int argc, char **argv, int *combo_argc, char **combo_argv) {
+   FILE *config;
+   char option[100];
+   int i, count = 0;
+   char *tok = NULL;
+
+   if(config_file == NULL) {
+      // look for the file 
+      if((config_file = find_config(prefix)) == NULL)
+         return EX_CONFIG;
+   }
+
+   if((config = fopen(config_file, "r")) == NULL) {
+      libspamc_log(flags, LOG_ERR,
+        "Cannot open %s : %s", config_file, strerror(errno));
+      return EX_CONFIG;
+   }
+
+   while(!(feof(config)) && (fgets(option, 100, config))) {
+
+      count++; // increment the line counter
+
+      if(option[0] == '#' || option[0] == '\n')
+         continue;
+
+      tok = option;
+      while((tok = strtok(tok, " "))) {
+         for(i=strlen(tok); i>0; i--) {
+            if(tok[i] == '\n')
+               tok[i] = '\0';
+         }
+         if((combo_argv[*combo_argc] = 
+                  (char *)malloc(strlen(tok)+1)) == NULL) {
+            libspamc_log(flags, LOG_ERR,
+              "Error allocating memory for option \"%s\" in %s line %d", 
+              tok, config_file, count);
+            continue;
+         }
+         strcpy(combo_argv[*combo_argc], tok);
+         tok = NULL;
+         *combo_argc+=1;
+      }
+   }
+   for(i=0; i<argc; i++) {
+      if((combo_argv[*combo_argc] =
+               (char *)malloc(strlen(argv[i]+1))) == NULL) {
+         libspamc_log(flags, LOG_ERR,
+           "Error allocating memory for command line option \"%s\"",
+           argv[i]);
+         continue;
+      } else {
+         strcpy(combo_argv[*combo_argc], argv[i]);
+         *combo_argc+=1;
+      }
+   }
+   return EX_OK;
+}
+
 void
 get_output_fd(int *fd)
 {
@@ -527,6 +657,15 @@ main(int argc, char *argv[])
     int islearned = 0;
     int isreported = 0;
 
+    /* these are to hold CLI and config options combined, to be passed
+     * to read_args() */
+    char *combo_argv[24];
+    int combo_argc;
+
+    int i;
+    char *config_file = CONFIG_FILE;
+    char *prefix = PREFIX;
+
     transport_init(&trans);
 
 #ifdef LIBSPAMC_UNIT_TESTS
@@ -539,13 +678,40 @@ main(int argc, char *argv[])
     signal(SIGPIPE, SIG_IGN);
 #endif
 
-   /* Now parse the command line arguments. First, set the defaults. */
+   /* set some defaults */
    max_size = 250 * 1024;
    username = NULL;
-   if ((ret = read_args(argc, argv, &max_size, &username, &extratype, &trans)) != EX_OK) {
-       if (ret == EX_TEMPFAIL )
-           ret = EX_OK;
-       goto finish;
+   if(strncasecmp(config_file, "${prefix}", 9) == 0)
+      config_file = NULL;
+
+   combo_argc = 1;
+   if((combo_argv[0] = (char *)malloc(strlen(argv[0]))) != NULL)
+      strcpy(combo_argv[0], argv[0]);
+
+   for(i=0; i<argc; i++) {
+      if(strncmp(argv[i], "-F", 2) == 0) {
+         config_file = argv[i+1];
+         break;
+      }
+   }
+
+   if((combine_args(prefix, config_file, argc, argv, 
+               &combo_argc, combo_argv)) != EX_OK) {
+      /* parse only command line arguments (default behaviour) */
+      if((ret = read_args(argc, argv, &max_size, &username, 
+                  &extratype, &trans)) != EX_OK) {
+         if(ret == EX_TEMPFAIL)
+            ret = EX_OK;
+         goto finish;
+      }
+   } else {
+   /* Parse the combined arguments of command line and config file */
+      if ((ret = read_args(combo_argc, combo_argv, &max_size, &username, 
+                  &extratype, &trans)) != EX_OK) {
+          if (ret == EX_TEMPFAIL)
+              ret = EX_OK;
+          goto finish;
+      }
    }
 
    ret = get_current_user(&username);

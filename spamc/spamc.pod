@@ -41,6 +41,18 @@ distribution for more details.
 
 =head1 OPTIONS
 
+All options detailed below can be passed as command line arguments, or
+be contained in a configuration file. The layout of the configuration
+file is :
+
+B<[option]> B<(value)>
+
+B<(value)> is required for any options that require an argument.
+Whitespace and new lines delimit the options. Blank lines, and lines
+beginning with a '#' are ignored.
+
+See F<spamc/spamc.conf> for a sample configuration file.
+
 =over
 
 =item B<-B>
@@ -178,6 +190,104 @@ let the MTA queue up the mails for a retry later.  See also L<"EXIT CODES">.
 
 Just output the names of the tests hit to stdout, on one line, separated
 by commas.
+
+=back
+
+=head1 CONFIGURATION PARAMETERS
+
+=over
+
+=item B<Host>
+
+Set the hostname for the spamd daemon that spamc should connect to. This 
+option, and the F<Socket> option are mutually exclusive, and only the first 
+listed in the configuration file will be used.
+
+Default : C<localhost>.
+
+Valid options : server DNS name (server.tld) or IP address.
+
+=item B<Port>
+
+Set the port that the spamd daemon is running on. 
+
+Default : C<783>.
+
+Valid options : an integer less than or equal to 65535
+
+=item B<Socket>
+
+Set the path to the unix domain socket to use to connect to spamd. This
+option and the F<Host> option are mutually exclusive, and only the first
+listed in the configuration file will be used. 
+
+Default : don't use unix domain sockets.
+
+Valid options : /path/to/socket
+
+=item B<User>
+
+Set the user that spamc should run as. 
+
+Default : user running spamc.
+
+Valid options : any user on the system
+
+=item B<Max-Size>
+
+Set the maximum message size (in bytes). 
+
+Default : C<256000> bytes.
+
+Valid options : an integer size for the message in bytes
+
+=item B<UseSSL>
+
+Turn on or off whether to use SSL when connecting to spamd. 
+
+Default : C<off>.
+
+Valid options : C<yes> / C<on> or C<no> / C<off>
+
+=item B<Timeout>
+
+Set the timeout (in seconds) for connecting to spamd. 
+
+Default : C<600>.
+
+Valid options : an integer
+
+=item B<BSMTP>
+
+Assume input is a single BSMTP formatted message. 
+
+Default : C<off>.
+
+Valid options : C<yes> / C<on> or C<no> / C<off>
+
+=item B<Fallback>
+
+Turn on or off safe fallback.
+
+Default : C<on>
+
+Valid options : C<yes> / C<on> or C<no> / C<off>
+
+=item B<Randomize>
+
+Turn on or off whether to randomize IP addresses for looked-up hostname.
+
+Default : C<off>
+
+Valid options : C<yes> / C<on> or C<no> / C<off>
+
+=item B<LogSTDERR>
+
+Log errors and warnings to stderr.
+
+Default : C<off>
+
+Valid options : C<yes> / C<on> or C<no> / C<off>
 
 =back
 
