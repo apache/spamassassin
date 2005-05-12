@@ -51,8 +51,6 @@ B<(value)> is required for any options that require an argument.
 Whitespace and new lines delimit the options. Blank lines, and lines
 beginning with a '#' are ignored.
 
-See F<spamc/spamc.conf> for a sample configuration file.
-
 =over
 
 =item B<-B>
@@ -205,8 +203,9 @@ file.
 
 The format of the file is similar to the SpamAssassin rules files; blank lines
 and lines beginning with C<#> are ignored.  Any space-separated words are
-considered additions to the command line, and are prepended.  Existing command
-line switches will override any settings in the configuration file.
+considered additions to the command line, and are prepended. Newlines are
+treated as equivalent to spaces. Existing command line switches will override
+any settings in the configuration file.
 
 If the B<-F> switch is specified, that file will be used.  Otherwise,
 C<spamc> will attempt to load defaults as follows.
