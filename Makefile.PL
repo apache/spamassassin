@@ -215,7 +215,7 @@ my %makefile = (
         'spamc/*.o*', 'spamc/replace/*.o*',
         'spamc/*.so',
         'spamc/Makefile',
-        'spamc/config.h', 'spamc/version.h',
+        'spamc/config.h', 'spamc/version.h', 'spamc/spamc.h',
         'spamc/config.status', 'spamc/config.cache', 'spamc/config.log', 'spamc/autom4te.cache',
         'spamd/*spamc*', 'qmail',
 
