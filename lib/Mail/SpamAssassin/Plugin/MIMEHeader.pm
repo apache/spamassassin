@@ -102,12 +102,10 @@ sub set_config {
       my $negated = ($3 eq '!~') ? 1 : 0;
       my $pattern = $4;
 
-      if (!$pattern || !$self->{parser}->is_regexp_valid($rulename, $pattern))
-      {
-        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
-      }
+      return unless $self->{parser}->is_delimited_regexp_valid($rulename, $pattern);
 
       $pattern = $pluginobj->make_qr($pattern);
+      return $Mail::SpamAssassin::Conf::INVALID_VALUE unless $pattern;
 
       $self->{mimeheader_tests}->{$rulename} = {
         hdr => $hdrname,
