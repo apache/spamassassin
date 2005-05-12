@@ -821,9 +821,28 @@ sub is_meta_valid {
 sub is_regexp_valid {
   my ($self, $name, $re) = @_;
 
-  my $evalstr = '("" =~ ' . $re . '); 1;';
-  if (eval $evalstr) {
-    return 1;
+  $re =~ /^m?(\W)(.*)(?:\1|>|}|\)|\])(.*?)$/;
+  my $pattern = $2;
+  $pattern = "(?".$3.")".$pattern if $3;
+
+  # the first eval tells us if the regexp is safe
+  # the second eval tells us if the delimiters are ok
+  if (!defined ($pattern)) {
+    warn "config: invalid regexp for rule $name: $re: missing or invalid delimiters\n";
+    $self->{conf}->{errors}++;
+    return 0;
+  }
+  elsif (eval { ("" =~ m{$pattern}); 1; }) {
+    my $evalstr = '("" =~ ' . $re . '); 1;';
+    if (eval $evalstr) {
+      return 1;
+    } else {
+      my $err = $@;
+      $err =~ s/ at .*? line \d+,//;
+      warn "config: invalid regexp for rule $name: $re: $err\n";
+      $self->{conf}->{errors}++;
+      return 0;
+    }
   }
   else {
     my $err = $@;
