@@ -821,33 +821,43 @@ sub is_meta_valid {
 sub is_regexp_valid {
   my ($self, $name, $re) = @_;
 
-  $re =~ /^m?(\W)(.*)(?:\1|>|}|\)|\])(.*?)$/;
-  my $pattern = $2;
-  $pattern = "(?".$3.")".$pattern if $3;
-
-  # the first eval tells us if the regexp is safe
-  # the second eval tells us if the delimiters are ok
-  if (!defined ($pattern)) {
-    warn "config: invalid regexp for rule $name: $re: missing or invalid delimiters\n";
-    $self->{conf}->{errors}++;
-    return 0;
+  # OK, try to remove any normal perl-style regexp delimiters at
+  # the start and end, and modifiers at the end if present,
+  # so we can validate those too.
+  my $origre = $re;
+  my $mods = '';
+  if ($re =~ s/^m{//) {
+    $re =~ s/}([a-z]*)$//; $mods = $1;
   }
-  elsif (eval { ("" =~ m{$pattern}); 1; }) {
-    my $evalstr = '("" =~ ' . $re . '); 1;';
-    if (eval $evalstr) {
-      return 1;
-    } else {
-      my $err = $@;
-      $err =~ s/ at .*? line \d+,//;
-      warn "config: invalid regexp for rule $name: $re: $err\n";
-      $self->{conf}->{errors}++;
-      return 0;
-    }
+  elsif ($re =~ s/^m\(//) {
+    $re =~ s/\)([a-z]*)$//; $mods = $1;
+  }
+  elsif ($re =~ s/^m<//) {
+    $re =~ s/>([a-z]*)$//; $mods = $1;
+  }
+  elsif ($re =~ s/^m(\W)//) {
+    $re =~ s/$1([a-z]*)$//; $mods = $1;
+  }
+  elsif ($re =~ s/^\/(.*)\/([a-z]*)$/$1/) {
+    $mods = $2;
+  }
+
+  # now prepend the modifiers, in order to check if they're valid
+  if ($mods) {
+    $re = "(?".$mods.")".$re;
+  }
+
+  # note: this MUST use m/...${re}.../ in some form or another, ie.
+  # interpolation of the $re variable into a code regexp, in order to test the
+  # security of the regexp.  simply using ("" =~ $re) will NOT do that, and
+  # will therefore open a hole!
+  if (eval { ("" =~ m#${re}#); 1; }) {
+    return 1;
   }
   else {
     my $err = $@;
     $err =~ s/ at .*? line \d+\.\n?//;
-    warn "config: invalid regexp for rule $name: $re: $err\n";
+    warn "config: invalid regexp for rule $name: $origre: $err\n";
     $self->{conf}->{errors}++;
     return 0;
   }
