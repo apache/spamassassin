@@ -458,8 +458,10 @@ char *find_config(char *prefix) {
  *
  * returns EX_OK on success, EX_CONFIG on failure
  */
-int combine_args(char *prefix, char *config_file, 
-      int argc, char **argv, int *combo_argc, char **combo_argv) {
+int
+combine_args(char *prefix, char *config_file, 
+      int argc, char **argv, int *combo_argc, char **combo_argv)
+{
    FILE *config;
    char option[100];
    int i, count = 0;
@@ -696,10 +698,12 @@ main(int argc, char *argv[])
    }
 
    if((combine_args(prefix, config_file, argc, argv, 
-               &combo_argc, combo_argv)) != EX_OK) {
+               &combo_argc, combo_argv)) != EX_OK)
+   {
       /* parse only command line arguments (default behaviour) */
       if((ret = read_args(argc, argv, &max_size, &username, 
-                  &extratype, &trans)) != EX_OK) {
+                  &extratype, &trans)) != EX_OK)
+      {
          if(ret == EX_TEMPFAIL)
             ret = EX_OK;
          goto finish;
@@ -707,7 +711,8 @@ main(int argc, char *argv[])
    } else {
    /* Parse the combined arguments of command line and config file */
       if ((ret = read_args(combo_argc, combo_argv, &max_size, &username, 
-                  &extratype, &trans)) != EX_OK) {
+                  &extratype, &trans)) != EX_OK)
+      {
           if (ret == EX_TEMPFAIL)
               ret = EX_OK;
           goto finish;
