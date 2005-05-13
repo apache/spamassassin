@@ -1,6 +1,10 @@
 # A general class for utility functions.  Please use this for
 # functions that stand alone, without requiring a $self object,
 # Portability functions especially.
+#
+# NOTE: The functions in this module are all considered private.  Their API
+# may change at any point, and it's expected that they'll only be used by
+# other Mail::SpamAssassin modules.
 
 # <@LICENSE>
 # Copyright 2004 Apache Software Foundation
@@ -936,6 +940,9 @@ sub uri_list_canonify {
     $uri =~ s/^\s+//;
     $uri =~ s/\s+$//;
 
+    # CRs just confuse things down below, so trash them now
+    $uri =~ s/\r//g;
+
     # Make a copy so we don't trash the original in the array
     my $nuri = $uri;
 
@@ -953,10 +960,10 @@ sub uri_list_canonify {
     # unschemed URIs: assume default of "http://" as most MUAs do
     if ($nuri !~ /^[-_a-z0-9]+:/i) {
       if ($nuri =~ /^ftp\./) {
-	$nuri =~ s/^/ftp:\/\//g;
+	$nuri =~ s@^@ftp://@g;
       }
       else {
-	$nuri =~ s/^/http:\/\//g;
+	$nuri =~ s@^@http://@g;
       }
     }
 
