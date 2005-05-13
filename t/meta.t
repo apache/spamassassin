@@ -23,7 +23,7 @@ use Mail::SpamAssassin;
 use vars qw( %rules %scores );
 
 # "parse-rules-for-masses" requires Data::Dumper
-use constant HAS_DATADUMPER => eval ' use Data::Dumper; ';
+use constant HAS_DATADUMPER => eval 'use Data::Dumper; 1;';
 use constant IS_WINDOWS => ($^O =~ /^(mswin|dos|os2)/oi);
 use constant DO_RUN     => HAS_DATADUMPER && !IS_WINDOWS;
 
