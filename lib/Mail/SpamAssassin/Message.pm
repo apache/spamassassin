@@ -734,8 +734,9 @@ sub _parse_normal {
 
   dbg("message: parsing normal part");
 
-  $part_msg->{'type'} =
-    Mail::SpamAssassin::Util::parse_content_type($part_msg->header('content-type'));
+  # 0: content-type, 1: boundary, 2: charset, 3: filename
+  my @ct = Mail::SpamAssassin::Util::parse_content_type($part_msg->header('content-type'));
+  $part_msg->{'type'} = $ct[0];
 
   # multipart sections are required to have a boundary set ...  If this
   # one doesn't, assume it's malformed and revert to text/plain
@@ -743,7 +744,7 @@ sub _parse_normal {
 
   # attempt to figure out a name for this attachment if there is one ...
   my $disp = $part_msg->header('content-disposition') || '';
-  my($filename) = $disp =~ /name="?([^\";]+)"?/i || $part_msg->{'type'} =~ /name="?([^\";]+)"?/i;
+  my($filename) = $disp =~ /name="?([^\";]+)"?/i || $ct[3];
 
   $part_msg->{'raw'} = $body;
   $part_msg->{'boundary'} = $boundary;
