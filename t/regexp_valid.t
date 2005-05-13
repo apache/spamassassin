@@ -1,12 +1,10 @@
 #!/usr/bin/perl -w
-
 # test regexp validation
 
 BEGIN {
   if (-e 't/test_dir') { # if we are running "t/rule_names.t", kluge around ...
     chdir 't';
   }
-
   if (-e 'test_dir') {            # running from test directory, not ..
     unshift(@INC, '../blib/lib');
   }
@@ -20,13 +18,12 @@ if (-e 'test_dir') {            # running from test directory, not ..
 use strict;
 use SATest; sa_t_init("regexp_valid");
 use Test;
-use Mail::SpamAssassin;
-use vars qw(%patterns %anti_patterns);
 
 # settings
-plan tests => 26;
+plan tests => 25;
 
 # initialize SpamAssassin
+use Mail::SpamAssassin;
 my $sa = create_saobj({'dont_copy_prefs' => 1});
 $sa->init(0); # parse rules
 
@@ -62,6 +59,5 @@ ok !tryone 'm!foo(?{1})bar!';
 ok !tryone '/test//';
 ok tryone '.*';
 
-ok tryone 'm*<a[^<]{0,60} onMouseMove=(?:3D)?"window.status=(?:3D)?\'https?://*';
 ok tryone 'm*<a[^<]{0,60} onMouseMove=(?:3D)?"window.status=(?:3D)?\'https?://*';
 
