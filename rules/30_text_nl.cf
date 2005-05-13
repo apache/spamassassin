@@ -442,3 +442,7 @@ ifplugin Mail::SpamAssassin::Plugin::TextCat
 lang nl describe BODY_8BITS                      Bericht bevat 8 aaneengesloten 8-bit karakters
 lang nl describe UNWANTED_LANGUAGE_BODY          Bericht is opgesteld in een ongewenste taal
 endif
+
+ifplugin Mail::SpamAssassin::Plugin::AccessDB
+lang nl describe ACCESSDB                        Bericht zou gevangen zijn door accessdb
+endif

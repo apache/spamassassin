@@ -631,3 +631,7 @@ ifplugin Mail::SpamAssassin::Plugin::TextCat
 lang de describe BODY_8BITS Nachrichtentext enthält Folge von 8 oder mehr 8-Bit-Zeichen
 lang de describe UNWANTED_LANGUAGE_BODY Nachrichtentext in unerwünschter Sprache
 endif
+
+ifplugin Mail::SpamAssassin::Plugin::AccessDB
+lang de describe ACCESSDB Nachricht wäre von access.db erkannt worden
+endif

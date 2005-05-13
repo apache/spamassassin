@@ -430,3 +430,7 @@ ifplugin Mail::SpamAssassin::Plugin::TextCat
 lang pl describe BODY_8BITS		Tre¶æ zawiera 8 kolejnych 8mio bitowych znaków
 lang pl describe UNWANTED_LANGUAGE_BODY	Wiadomo¶æ napisana w niepo¿±danym jêzyku
 endif
+
+ifplugin Mail::SpamAssassin::Plugin::AccessDB
+lang pl describe ACCESSDB		Wiadomo¶æ zosta³aby przechwycona przez accessdb
+endif
