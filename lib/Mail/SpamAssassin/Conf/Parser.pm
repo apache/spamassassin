@@ -848,7 +848,7 @@ sub is_regexp_valid {
     $re =~ s/>([a-z]*)$//; $mods = $1;
   }
   elsif ($re =~ s/^m(\W)//) {
-    $re =~ s/$1([a-z]*)$//; $mods = $1;
+    $re =~ s/\Q$1\E([a-z]*)$//; $mods = $1;
   }
   elsif ($re =~ s/^\/(.*)\/([a-z]*)$/$1/) {
     $mods = $2;
