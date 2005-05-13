@@ -77,7 +77,7 @@ sub new {
 }
 
 sub check_access_database {
-  my ($self, $path) = @_;
+  my ($self, $pms, $path) = @_;
 
   if (!HAS_DB_FILE) {
     return 0;
@@ -93,7 +93,7 @@ sub check_access_database {
     my @lookfor = ();
 
     # Look for "From:" versions as well!
-    foreach my $from ($self->all_from_addrs()) {
+    foreach my $from ($pms->all_from_addrs()) {
       # $user."\@"
       # rotate through $domain and check
       my ($user,$domain) = split(/\@/, $from,2);
@@ -111,8 +111,8 @@ sub check_access_database {
     }
 
     # we can only match this if we have at least 1 untrusted header
-    if ($self->{num_relays_untrusted} > 0) {
-      my $lastunt = $self->{relays_untrusted}->[0];
+    if ($pms->{num_relays_untrusted} > 0) {
+      my $lastunt = $pms->{relays_untrusted}->[0];
 
       # If there was a reverse lookup, use it in a lookup
       if (! $lastunt->{no_reverse_dns}) {
