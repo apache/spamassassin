@@ -522,3 +522,17 @@ meta T_MC_SPAMMY_FOREIGN_LACNIC_b4236_c8 (__FROM_LACNIC_b4236_c8 && (__RCVD_RIPE
 score T_MC_SPAMMY_FOREIGN_LACNIC_b4236_c8 6
 ## MC: bug 4236 cmt 8: end
 
+## MC: bug 4236 cmt 11: start
+meta T_MC_FAKE_WORLD_TRAVELER_b4236_c11 (SPAMMY_FOREIGN_LACNIC + SPAMMY_FOREIGN_RIPE + SPAMMY_FOREIGN_AOL + SPAMMY_FOREIGN_APNIC > 1)
+## MC: bug 4236 cmt 11: end
+
+## MC: bug 4323 cmt 1: start
+body T_MC_FB_PIPE_ILLION_b4323_c1 /(?!illion)i[l|][l|][i|][o0]n/i
+score T_MC_FB_PIPE_ILLION_b4323_c1 2.4
+## MC: bug 4323 cmt 1: end
+
+## MC: bug 4323 cmt 2: start
+body T_MC_FB_PIPE_ILLION_b4323_c2 /(?!illion)i[l|][l|][i|][o0]n/i
+score T_MC_FB_PIPE_ILLION_b4323_c2 2.4
+## MC: bug 4323 cmt 2: end
+
