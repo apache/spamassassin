@@ -454,3 +454,7 @@ ifplugin Mail::SpamAssassin::Plugin::TextCat
 lang fr describe BODY_8BITS		Contient plusieurs caractères 8-bits consécutifs
 lang fr describe UNWANTED_LANGUAGE_BODY	Message dans une langue non désirée (config locale)
 endif
+
+ifplugin Mail::SpamAssassin::Plugin::AccessDB
+lang fr describe ACCESSDB		Ce message aurait été bloqué par accessdb
+endif
