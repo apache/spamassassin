@@ -128,17 +128,6 @@ $CONF_TYPE_TEMPLATE         = 6;
 $MISSING_REQUIRED_VALUE     = -998;
 $INVALID_VALUE              = -999;
 
-# keys that should not be copied in ->clone()
-my @NON_COPIED_KEYS = qw(
-  main eval_plugins plugins_loaded registered_commands sed_path_cache parser
-  scoreset scores
-);
-
-# keys that should can be copied using a ->clone() method, in ->clone()
-my @CLONABLE_KEYS = qw(
-  internal_networks trusted_networks 
-);
-
 # set to "1" by the test suite code, to record regression tests
 # $Mail::SpamAssassin::Conf::COLLECT_REGRESSION_TESTS = 1;
 
@@ -3027,40 +3016,50 @@ sub register_eval_rule {
 ###########################################################################
 
 sub clone {
-  my ($self) = @_;
-  my $dest = Mail::SpamAssassin::Conf->new($self->{main});
+  my ($self, $source, $dest) = @_;
+
+  unless (defined $source) {
+    $source = $self;
+  }
+  unless (defined $dest) {
+    $dest = $self;
+  }
+
+  # keys that should not be copied in ->clone()
+  my @NON_COPIED_KEYS = qw(
+    main eval_plugins plugins_loaded registered_commands sed_path_cache parser
+    scoreset scores
+  );
+
+  # keys that should can be copied using a ->clone() method, in ->clone()
+  my @CLONABLE_KEYS = qw(
+    internal_networks trusted_networks 
+  );
+
   my %done = ();
 
   # special cases.  first, skip anything that cannot be changed
   # by users, and the stuff we take care of here
-  foreach my $var (@NON_COPIED_KEYS, @CLONABLE_KEYS) {
+  foreach my $key (@CLONABLE_KEYS) {
+    $dest->{$key} = $source->{$key}->clone();
+    $done{$key} = undef;
+  }
+
+  foreach my $var (@NON_COPIED_KEYS) {
     $done{$var} = undef;
   }
 
-  foreach my $key (@CLONABLE_KEYS) {
-    $dest->{$key} = $self->{$key}->clone();
-  }
-
-  # scoresets
-  for my $i (0 .. 3) {
-    %{$dest->{scoreset}->[$i]} = %{$self->{scoreset}->[$i]};
-  }
-
-  # deal with $conf->{scores}, it needs to be a reference into the scoreset
-  # hash array dealy
-  $dest->{scores} = $dest->{scoreset}->[$dest->{scoreset_current}];
-
-  # ensure we don't copy the path cache from the master
-  delete $dest->{sed_path_cache};
-
   # and now, copy over all the rest -- the less complex cases.
-  while(my($k,$v) = each %{$self}) {
+  while(my($k,$v) = each %{$source}) {
     next if exists $done{$k};   # we handled it above
     my $i = ref($v);
 
     # Not a reference, or a scalar?  Just copy the value over.
-    if (!$i || $i eq 'SCALAR') {
+    if ($i eq '') {
       $dest->{$k} = $v;
+    }
+    elsif ($i eq 'SCALAR') {
+      $dest->{$k} = $$v;
     }
     elsif ($i eq 'ARRAY') {
       @{$dest->{$k}} = @{$v};
@@ -3073,7 +3072,22 @@ sub clone {
       warn "config: dup unknown type $k, $i\n";
     }
   }
-  return $dest;
+
+  # scoresets
+  delete $dest->{scoreset};
+  for my $i (0 .. 3) {
+    %{$dest->{scoreset}->[$i]} = %{$source->{scoreset}->[$i]};
+  }
+
+  # deal with $conf->{scores}, it needs to be a reference into the scoreset
+  # hash array dealy.  Do it at the end since scoreset_current isn't set
+  # otherwise.
+  $dest->{scores} = $dest->{scoreset}->[$dest->{scoreset_current}];
+
+  # ensure we don't copy the path cache from the master
+  delete $dest->{sed_path_cache};
+
+  return 1;
 }
 
 ###########################################################################

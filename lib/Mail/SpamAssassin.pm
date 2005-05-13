@@ -1710,19 +1710,11 @@ sub copy_config {
   # than having this class know all about that class' internals...
   if (defined $source) {
     dbg ("config: copying current conf from backup");
-    $self->{conf} = $source->{obj}->clone();
   }
   else {
     dbg ("config: copying current conf to backup");
-    if ($dest->{obj}) {
-      # delete any existing copies first, to ensure that
-      # circular references are cleaned up
-      $dest->{obj}->finish();
-    }
-    $dest->{obj} = $self->{conf}->clone();
   }
-
-  return 1;
+  return $self->{conf}->clone($source, $dest);
 }
 
 
