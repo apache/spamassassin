@@ -53,12 +53,15 @@ package Mail::SpamAssassin::Plugin::AccessDB;
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
+use Fcntl;
 use strict;
 use warnings;
 use bytes;
 
 use vars qw(@ISA);
 @ISA = qw(Mail::SpamAssassin::Plugin);
+
+use constant HAS_DB_FILE => eval { require DB_File; };
 
 sub new {
   my $class = shift;
