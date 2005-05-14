@@ -1985,7 +1985,7 @@ sub get_uri_detail_list {
     if (would_log('dbg', 'uri')) {
       dbg("uri: parsed uri found, $uri");
       foreach my $nuri (@uris) {
-        dbg("uri: parsed html uri, $nuri");
+        dbg("uri: cleaned parsed uri, $nuri");
       }
       if ($info->{domains}) {
         foreach my $domain (keys %{$info->{domains}}) {
