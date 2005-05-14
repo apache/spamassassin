@@ -364,7 +364,7 @@ sub check_examined {
     $_ = join ('', <IN>);
   }
 
-  if ($_ =~ /acted on \d+ message\(s\) \(\d+ message\(s\) examined\)/) {
+  if ($_ =~ /(?:Forgot|Learned) tokens from \d+ message\(s\) \(\d+ message\(s\) examined\)/) {
     $found{'Acted on message'}++;
   }
 }
