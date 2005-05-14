@@ -1899,15 +1899,22 @@ The hash format looks something like this:
 
   raw_uri => {
     types => { a => 1, img => 1, parsed => 1 },
-    cleaned => ( canonified_uri )
+    cleaned => [ canonified_uri ],
+    anchor_text => [ "click here", "no click here" ],
   }
 
 C<raw_uri> is whatever the URI was in the message itself
-(http://spamassassin.apache%2Eorg/).  C<types> is a hash of the HTML
-tags (lowercase) which referenced the raw_uri.  I<parsed> is a faked
-type which specifies that the raw_uri was seen in the rendered text.
+(http://spamassassin.apache%2Eorg/).
+
+C<types> is a hash of the HTML tags (lowercase) which referenced
+the raw_uri.  I<parsed> is a faked type which specifies that the
+raw_uri was seen in the rendered text.
+
 C<cleaned> is an array of the raw and canonified version of the raw_uri
 (http://spamassassin.apache%2Eorg/, http://spamassassin.apache.org/).
+
+C<anchor_text> is an array of the anchor text (text between <a> and
+</a>), if any, which linked to the URI.
 
 =cut
 
