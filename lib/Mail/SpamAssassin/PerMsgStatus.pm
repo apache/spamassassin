@@ -1841,8 +1841,7 @@ my $Addr_spec_re   = qr<$local_part\s*\@\s*$domain>o;
 Returns an array of all unique URIs found in the message.  It takes
 a combination of the URIs found in the rendered (decoded and HTML
 stripped) body and the URIs found when parsing the HTML in the message.
-Will also set $status->{uri_domain_count} (count of unique domains)
-and $status->{uri_list} (the array as returned by this function).
+Will also set $status->{uri_list} (the array as returned by this function).
 
 The returned array will include the "raw" URI as well as
 "slightly cooked" versions.  For example, the single URI
@@ -1860,27 +1859,22 @@ sub get_uri_list {
   }
 
   my @uris = ();
+  $self->{redirect_num} = 0;
 
   # get URIs from HTML parsing
   while(my($uri, $info) = each %{ $self->get_uri_detail_list() }) {
     if ($info->{cleaned}) {
-      push(@uris, @{$info->{cleaned}});
+      foreach (@{$info->{cleaned}}) {
+        push(@uris, $_);
+
+        # count redirection attempts and log it
+        if (my @http = m{\b(https?:/{0,2})}gi) {
+          $self->{redirect_num} = $#http if ($#http > $self->{redirect_num});
+        }
+      }
     }
   }
 
-  # get domain list
-  $self->{redirect_num} = 0;
-  my %domains;
-  for (@uris) {
-    # count redirection attempts and log it
-    if (my @http = m{\b(https?:/{0,2})}gi) {
-      $self->{redirect_num} = $#http if ($#http > $self->{redirect_num});
-    }
-    my $domain = Mail::SpamAssassin::Util::uri_to_domain($_);
-    $domains{$domain} = 1 if $domain;
-  }
-
-  $self->{uri_domain_count} = keys %domains;
   $self->{uri_list} = \@uris;
 
   return @uris;
@@ -1893,7 +1887,8 @@ various data about where the URIs were found in the message.  It takes a
 combination of the URIs found in the rendered (decoded and HTML stripped)
 body and the URIs found when parsing the HTML in the message.  Will also
 set $status->{uri_detail_list} (the hash reference as returned by this
-function).
+function).  This function will also set $status->{uri_domain_count} (count of
+unique domains).
 
 The hash format looks something like this:
 
@@ -1901,6 +1896,7 @@ The hash format looks something like this:
     types => { a => 1, img => 1, parsed => 1 },
     cleaned => [ canonified_uri ],
     anchor_text => [ "click here", "no click here" ],
+    domains => { domain1 => 1, domain2 => 1 },
   }
 
 C<raw_uri> is whatever the URI was in the message itself
@@ -1916,6 +1912,8 @@ C<cleaned> is an array of the raw and canonified version of the raw_uri
 C<anchor_text> is an array of the anchor text (text between <a> and
 </a>), if any, which linked to the URI.
 
+C<domains> is a hash of the domains found in the canonified URIs.
+
 =cut
 
 sub get_uri_detail_list {
@@ -1925,6 +1923,8 @@ sub get_uri_detail_list {
   if (defined $self->{uri_detail_list}) {
     return $self->{uri_detail_list};
   }
+
+  $self->{uri_domain_count} = 0;
 
   # do this so we're sure metadata->html is setup
   my @parsed = $self->_get_parsed_uri_list();
@@ -1941,10 +1941,23 @@ sub get_uri_detail_list {
     my @tmp = Mail::SpamAssassin::Util::uri_list_canonify($redirector_patterns, $uri);
     $info->{cleaned} = \@tmp;
 
+    foreach (@tmp) {
+      my $domain = Mail::SpamAssassin::Util::uri_to_domain($_);
+      if ($domain && !$info->{domains}->{$domain}) {
+        $info->{domains}->{$domain} = 1;
+        $self->{uri_domain_count}++;
+      }
+    }
+
     if (would_log('dbg', 'uri')) {
       dbg("uri: html uri found, $uri");
       foreach my $nuri (@tmp) {
         dbg("uri: cleaned html uri, $nuri");
+      }
+      if ($info->{domains}) {
+        foreach my $domain (keys %{$info->{domains}}) {
+          dbg("uri: html domain, $domain");
+        }
       }
     }
   }
@@ -1952,18 +1965,32 @@ sub get_uri_detail_list {
   # canonify the text parsed URIs
   foreach my $uri ( @parsed ) {
     $detail->{$uri}->{types}->{parsed} = 1;
+    my $info = $detail->{$uri};
 
     my @uris = ();
     
-    if (!exists $detail->{$uri}->{cleaned}) {
+    if (!exists $info->{cleaned}) {
       @uris = Mail::SpamAssassin::Util::uri_list_canonify($redirector_patterns, $uri);
-      $detail->{$uri}->{cleaned} = \@uris;
+      $info->{cleaned} = \@uris;
+
+      foreach (@uris) {
+        my $domain = Mail::SpamAssassin::Util::uri_to_domain($_);
+        if ($domain && !$info->{domains}->{$domain}) {
+          $info->{domains}->{$domain} = 1;
+          $self->{uri_domain_count}++;
+        }
+      }
     }
 
     if (would_log('dbg', 'uri')) {
       dbg("uri: parsed uri found, $uri");
       foreach my $nuri (@uris) {
         dbg("uri: parsed html uri, $nuri");
+      }
+      if ($info->{domains}) {
+        foreach my $domain (keys %{$info->{domains}}) {
+          dbg("uri: parsed domain, $domain");
+        }
       }
     }
   }

@@ -188,6 +188,9 @@ sub parsed_metadata {
 
   # get all domains in message
 
+  # don't keep dereferencing this
+  my $skip_domains = $scanner->{main}->{conf}->{uridnsbl_skip_domains};
+
   # list of arrays to use in order
   my @uri_ordered = ();
 
@@ -202,6 +205,12 @@ sub parsed_metadata {
   # 4: parsed
   # 5: a_empty
   while (my($uri, $info) = each %{$uris}) {
+    # we want to skip mailto: uris
+    next if ($uri =~ /^mailto:/);
+
+    # no domains were found via this uri, so skip
+    next unless ($info->{domains});
+
     my $entry = 3;
 
     if ($info->{types}->{a}) {
@@ -225,42 +234,39 @@ sub parsed_metadata {
       $entry = 4;
     }
 
-    push(@{$uri_ordered[$entry]}, @{$info->{cleaned}});
+    # take the usable domains and add to the ordered list
+    foreach ( keys %{ $info->{domains} } ) {
+      if (exists $skip_domains->{$_}) {
+        dbg("uridnsbl: domain $_ in skip list");
+        next;
+      }
+      $uri_ordered[$entry]->{$_} = 1;
+    }
   }
 
-  # at this point, @uri_ordered is an ordered array of uri arrays
+  # at this point, @uri_ordered is an ordered array of uri hashes
 
   my %domlist = ();
   while (keys %domlist < $scanner->{main}->{conf}->{uridnsbl_max_domains} && @uri_ordered) {
     my $array = shift @uri_ordered;
     next unless $array;
 
-    my %domains = ();
-
-    # run through and find the domains in this grouping
-    foreach (@{$array}) {
-      my $domain = $self->usable_uri_domain($scanner->{main}->{conf}->{uridnsbl_skip_domains}, $_);
-      next unless $domain;
-      next if $domlist{$domain};
-      $domains{$domain} = 1;
-    }
-
-    # at this point %domains has the list of new domains found in this
-    # grouping
+    # run through and find the new domains in this grouping
+    my @domains = grep(!$domlist{$_}, keys %{$array});
+    next unless @domains;
 
     # the new domains are all useful, just add them in
-    if (keys(%domlist) + keys(%domains) <= $scanner->{main}->{conf}->{uridnsbl_max_domains}) {
-      foreach (keys %domains) {
+    if (keys(%domlist) + @domains <= $scanner->{main}->{conf}->{uridnsbl_max_domains}) {
+      foreach (@domains) {
         $domlist{$_} = 1;
       }
     }
     else {
       # trim down to a limited number - pick randomly
       my $i;
-      my @longlist = keys %domains;
-      while (@longlist && keys %domlist < $scanner->{main}->{conf}->{uridnsbl_max_domains}) {
-        my $r = int rand (scalar @longlist);
-        $domlist{splice (@longlist, $r, 1)} = 1;
+      while (@domains && keys %domlist < $scanner->{main}->{conf}->{uridnsbl_max_domains}) {
+        my $r = int rand (scalar @domains);
+        $domlist{splice (@domains, $r, 1)} = 1;
       }
     }
   }
@@ -272,23 +278,6 @@ sub parsed_metadata {
   }
 
   return 1;
-}
-
-sub usable_uri_domain {
-  my($self, $skip_domains, $uri) = @_;
-
-  return if ($uri =~ /^mailto:/i);
-  my $dom = Mail::SpamAssassin::Util::uri_to_domain($uri);
-  if ($dom) {
-    if (exists $skip_domains->{$dom}) {
-      dbg("uridnsbl: domain $dom in skip list");
-    }
-    else {
-      return $dom;
-    }
-  }
-
-  return;
 }
 
 sub set_config {
