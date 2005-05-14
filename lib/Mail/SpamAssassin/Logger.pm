@@ -179,19 +179,19 @@ sub info {
 sub _log {
   my ($level, $message) = @_;
 
-  # only debug specific facilities
-  # log all info, warn, and error messages
-  if ($level eq "dbg") {
-    return unless ($LOG_SA{facility}->{all} ||
-		   $LOG_SA{facility}->{$facility});
-  }
-
   my $facility = "generic";
   my $whitespace = " ";
   if ($message =~ /^(\S+?):(\s*)(.*)/s) {
     $facility = $1;
     $whitespace = $2 if $2;
     $message = $3;
+  }
+
+  # only debug specific facilities
+  # log all info, warn, and error messages
+  if ($level eq "dbg") {
+    return unless ($LOG_SA{facility}->{all} ||
+		   $LOG_SA{facility}->{$facility});
   }
 
   $message =~ s/\n+$//s;
