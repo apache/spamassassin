@@ -373,7 +373,7 @@ sub check_razor2 {
 
   return $permsgstatus->{razor2_result} if (defined $permsgstatus->{razor2_result});
   $permsgstatus->{razor2_result} = 0;
-  $permsgstatus->{razor2_cf_score} = 0;
+  $permsgstatus->{razor2_cf_score} = { '4' => 0, '8' => 0 };
 
   return unless $self->{razor2_available};
   return unless $self->{main}->{conf}->{use_razor2};
@@ -404,14 +404,18 @@ sub check_razor2 {
 	' confidence=' . $result->{confidence});
 
       next if $result->{contested};
-      if ($result->{confidence} > $permsgstatus->{razor2_cf_score}) {
-        $permsgstatus->{razor2_cf_score} = $result->{confidence};
+
+      my $cf = $permsgstatus->{razor2_cf_score}->{$result->{engine}} || 0;
+      if ($result->{confidence} > $cf) {
+        $permsgstatus->{razor2_cf_score}->{$result->{engine}} = $result->{confidence};
       }
     }
   }
 
-  dbg("razor2: results: spam? " . $permsgstatus->{razor2_result} .
-    "  highest cf score: " . $permsgstatus->{razor2_cf_score} . "\n");
+  dbg("razor2: results: spam? " . $permsgstatus->{razor2_result});
+  while(my ($engine, $cf) = each %{$permsgstatus->{razor2_cf_score}}) {
+    dbg("razor2: results: engine $engine, highest cf score: $cf");
+  }
 
   return $permsgstatus->{razor2_result};
 }
@@ -419,7 +423,7 @@ sub check_razor2 {
 # Check the cf value of a given message and return if it's within the
 # given range
 sub check_razor2_range {
-  my ($self, $permsgstatus, $body, $min, $max) = @_;
+  my ($self, $permsgstatus, $body, $engine, $min, $max) = @_;
 
   # If Razor2 isn't available, or the general test is disabled, don't
   # continue.
@@ -432,8 +436,23 @@ sub check_razor2_range {
     $self->check_razor2($permsgstatus, $body);
   }
 
-  if ($permsgstatus->{razor2_cf_score} >= $min && $permsgstatus->{razor2_cf_score} <= $max) {
-    $permsgstatus->test_log(sprintf("cf: %3d", $permsgstatus->{razor2_cf_score}));
+  my $cf = 0;
+  if ($engine) {
+    $cf = $permsgstatus->{razor2_cf_score}->{$engine};
+    return unless defined $cf;
+  }
+  else {
+    # If no specific engine was given to the rule, find the highest cf
+    # determined and use that
+    while(my ($engine, $ecf) = each %{$permsgstatus->{razor2_cf_score}}) {
+      if ($ecf > $cf) {
+        $cf = $ecf;
+      }
+    }
+  }
+
+  if ($cf >= $min && $cf <= $max) {
+    $permsgstatus->test_log(sprintf("cf: %3d", $cf));
     return 1;
   }
 
