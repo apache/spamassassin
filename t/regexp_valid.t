@@ -28,36 +28,66 @@ my $sa = create_saobj({'dont_copy_prefs' => 1});
 $sa->init(0); # parse rules
 
 
+# make a _copy_ of the STDERR file descriptor
+# (so we can restore it after redirecting it)
+open(OLDERR, ">&STDERR");
+
+# create a file descriptior for logging STDERR
+# (we do not want warnings for regexps we know are invalid)
+open(LOGERR, ">".IO::File->new_tmpfile());
+
+# quiet "used only once" warnings
+1 if *OLDERR;
+1 if *LOGERR;
+
+
 sub tryone {
   my $re = shift;
   return $sa->{conf}->{parser}->is_regexp_valid('test', $re);
 }
 
-ok tryone qr/foo bar/;
-ok tryone qr/foo bar/i;
-ok tryone qr/foo bar/is;
-ok tryone qr/foo bar/im;
-ok tryone qr!foo bar!im;
-ok tryone 'qr/foo bar/';
-ok tryone 'qr/foo bar/im';
-ok tryone 'qr!foo bar!';
-ok tryone 'qr!foo bar!im';
-ok tryone '/^foo bar$/';
-ok tryone '/foo bar/';
-ok tryone '/foo bar/im';
-ok tryone 'm!foo bar!is';
-ok tryone 'm{foo bar}is';
-ok tryone 'm(foo bar)is';
-ok tryone 'm<foo bar>is';
-ok tryone 'foo bar';
-ok tryone 'foo/bar';
-ok !tryone 'foo(bar';
-ok !tryone 'foo(?{1})bar';
-ok !tryone '/foo(?{1})bar/';
-ok !tryone 'm!foo(?{1})bar!';
+# test valid regexps with this sub
+sub goodone {
+  my $re = shift;
+  open(STDERR, ">&=OLDERR") || die "Cannot reopen STDERR";
+  return tryone $re;
+}
 
-ok !tryone '/test//';
-ok tryone '.*';
+# test invalid regexps with this sub
+sub badone {
+  my $re = shift;
+  open(STDERR, ">&=LOGERR") || die "Cannot reopen STDERR (for logging)";
+  return !tryone $re;
+}
 
-ok tryone 'm*<a[^<]{0,60} onMouseMove=(?:3D)?"window.status=(?:3D)?\'https?://*';
+
+ok goodone qr/foo bar/;
+ok goodone qr/foo bar/i;
+ok goodone qr/foo bar/is;
+ok goodone qr/foo bar/im;
+ok goodone qr!foo bar!im;
+
+ok goodone 'qr/foo bar/';
+ok goodone 'qr/foo bar/im';
+ok goodone 'qr!foo bar!';
+ok goodone 'qr!foo bar!im';
+ok goodone '/^foo bar$/';
+
+ok goodone '/foo bar/';
+ok goodone '/foo bar/im';
+ok goodone 'm!foo bar!is';
+ok goodone 'm{foo bar}is';
+ok goodone 'm(foo bar)is';
+
+ok goodone 'm<foo bar>is';
+ok goodone 'foo bar';
+ok goodone 'foo/bar';
+ok badone 'foo(bar';
+ok badone 'foo(?{1})bar';
+
+ok badone '/foo(?{1})bar/';
+ok badone 'm!foo(?{1})bar!';
+ok badone '/test//';
+ok goodone '.*';
+ok goodone 'm*<a[^<]{0,60} onMouseMove=(?:3D)?"window.status=(?:3D)?\'https?://*';
 
