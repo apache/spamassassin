@@ -180,11 +180,9 @@ sub _log {
   my ($level, $message) = @_;
 
   my $facility = "generic";
-  my $whitespace = " ";
   if ($message =~ /^(\S+?): (.*)/s) {
     $facility = $1;
-    $whitespace = $2 if $2;
-    $message = $3;
+    $message = $2;
   }
 
   # only debug specific facilities
@@ -195,7 +193,7 @@ sub _log {
   }
 
   $message =~ s/\n+$//s;
-  $message =~ s/^/${facility}:${whitespace}/mg;
+  $message =~ s/^/${facility}: /mg;
 
   # no reason to go through warn()
   log_message($level, $message);
