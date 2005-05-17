@@ -2,7 +2,11 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("whitelist_addrs");
-use Test; BEGIN { plan tests => 5 };
+
+use constant HAS_DB_FILE => eval { require DB_File; };
+
+use Test; BEGIN { plan tests => (HAS_DB_FILE ? 5 : 0); };
+exit unless HAS_DB_FILE;
 
 # ---------------------------------------------------------------------------
 

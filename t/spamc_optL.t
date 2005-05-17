@@ -2,11 +2,17 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamc_optL");
-use Test; plan tests => ($SKIP_SPAMC_TESTS ? 0 : 16);
+use constant HAS_SDBM_FILE => eval { require SDBM_File; };
 
-exit if $SKIP_SPAMC_TESTS;
+use Test; plan tests => (!HAS_SDBM_FILE || $SKIP_SPAMC_TESTS ? 0 : 16);
+
+exit if (!HAS_SDBM_FILE || $SKIP_SPAMC_TESTS);
 
 # ---------------------------------------------------------------------------
+
+tstlocalrules ("
+        bayes_store_module Mail::SpamAssassin::BayesStore::SDBM
+");
 
 start_spamd("-L");
 
