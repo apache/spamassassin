@@ -341,7 +341,10 @@ sub _check_for_forged_hotmail_received_headers {
   $rcvd =~ s/\s+/ /gs;		# just spaces, simplify the regexp
 
   return if ($rcvd =~
-        /from mail pickup service by (?:\w+\.groups\.msn|hotmail)\.com with Microsoft SMTPSVC;/);
+	/from mail pickup service by hotmail\.com with Microsoft SMTPSVC;/);
+
+  # Microsoft passes Hotmail mail directly to MSN Group servers.
+  return if $self->check_for_msn_groups_headers();
 
   my $ip = $self->get('X-Originating-Ip');
   my $IP_ADDRESS = IP_ADDRESS;
@@ -395,12 +398,17 @@ sub check_for_msn_groups_headers {
 
   # from Theo Van Dinter, see
   # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=591
-  return 0 unless $self->get('Message-Id') =~ /^<$listname-\S+\@groups\.msn\.com>/;
-  return 0 unless $self->get('X-Loop') =~ /^notifications\@groups\.msn\.com/;
-  return 0 unless $self->get('EnvelopeFrom') =~ /<$listname-bounce\@groups\.msn\.com>/;
+  # Updated by DOS, based on messages from Bob Menschel, bug 4301
 
-  $_ = $self->get('Received');
-  return 0 if !/from mail pickup service by groups\.msn\.com\b/;
+  return 0 unless $self->get('Received') =~ /from mail pickup service by ((?:p\d\d\.)groups\.msn\.com)\b/;
+  my $server = $1;
+
+  if ($listname =~ /^notifications$/) {
+    return 0 unless $self->get('Message-Id') =~ /^<\S+\@$server>/;
+  } else {
+    return 0 unless $self->get('Message-Id') =~ /^<$listname-\S+\@groups\.msn\.com>/;
+    return 0 unless $self->get('EnvelopeFrom') =~ /$listname-bounce\@groups\.msn\.com/;
+  }
   return 1;
 
 # MSN Groups
@@ -414,6 +422,35 @@ sub check_for_msn_groups_headers {
 # X-loop: notifications@groups.msn.com
 # Reply-to: "List Full Name" <ListName@groups.msn.com>
 # To: "List Full Name" <ListName@groups.msn.com>
+
+# Return-path: <ListName-bounce@groups.msn.com>
+# Received: from p04.groups.msn.com ([65.54.195.216]) etc...
+# Received: from mail pickup service by p04.groups.msn.com with Microsoft SMTPSVC;
+#          Thu, 5 May 2005 20:30:37 -0700
+# X-Originating-Ip: 207.68.170.30
+# From: =?iso-8859-1?B?IqSj4/D9pEbzeN9s9vLw6qQiIA==?=<zzzzzzzz@hotmail.com>
+# To: "Managers of List Name" <notifications@groups.msn.com>
+# Subject: =?iso-8859-1?Q?APPROVAL_NEEDED:_=A4=A3=E3=F0=FD=A4F=F3x=DFl?=
+#         =?iso-8859-1?Q?=F6=F2=F0=EA=A4_applied_to_join_List_Name=2C?=
+#         =?iso-8859-1?Q?_an_MSN_Group?=
+# Date: Thu, 5 May 2005 20:30:37 -0700
+# MIME-Version: 1.0
+# Content-Type: multipart/alternative;
+#         boundary="----=_NextPart_000_333944_01C551B1.4BBA02B0"
+# X-MimeOLE: Produced By Microsoft MimeOLE V5.50.4927.1200
+# Message-ID: <TK2DCPUBA042cv0aGlt00020aa3@p04.groups.msn.com>
+
+# Return-path: <ListName-bounce@groups.msn.com>
+# Received: from [65.54.208.83] (helo=p05.groups.msn.com) etc...
+# Received: from mail pickup service by p05.groups.msn.com with Microsoft SMTPSVC;
+#          Fri, 6 May 2005 14:59:25 -0700
+# X-Originating-Ip: 207.68.170.30
+# Message-Id: <ListName-101@groups.msn.com>
+# Reply-To: "List Name" <ListName@groups.msn.com>
+# From: "whoever" <zzzzzzzzzz@hotmail.com>
+# To: "List Name" <ListName@groups.msn.com>
+# Subject: whatever
+# Date: Fri, 6 May 2005 14:59:25 -0700
 
 }
 
