@@ -26,7 +26,7 @@ This is a Bayesian-like form of probability-analysis classification, using an
 algorithm based on the one detailed in Paul Graham's I<A Plan For Spam> paper
 at:
 
-  http://www.paulgraham.com/
+  http://www.paulgraham.com/spam.html
 
 It also incorporates some other aspects taken from Graham Robinson's webpage
 on the subject at:
