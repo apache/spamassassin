@@ -10,6 +10,7 @@ To try this out, write these lines to /etc/mail/spamassassin/plugintest.cf:
 package myTestPlugin;
 
 use Mail::SpamAssassin::Plugin;
+use Mail::SpamAssassin::Logger;
 use strict;
 use bytes;
 
@@ -36,7 +37,20 @@ sub new {
 sub check_test_plugin {
   my ($self, $permsgstatus) = @_;
   print "myTestPlugin eval test called: $self\n";
-  # ... hard work goes here...
+
+  my $file = $ENV{'SPAMD_PLUGIN_COUNTER_FILE'};
+  if ($file) {
+    open (IN, "<$file") or warn;
+    my $count = <IN>; $count += 0;
+    close IN;
+
+    dbg("test: called myTestPlugin, round $count");
+
+    open (OUT, ">$file") or warn;
+    print OUT ++$count;
+    close OUT or warn;
+  }
+
   return 1;
 }
 

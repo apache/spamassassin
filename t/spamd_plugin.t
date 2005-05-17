@@ -3,7 +3,7 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_plugin");
 
-use constant numtests => 7;
+use constant numtests => 6;
 use Test; BEGIN { plan tests => ((!$SKIP_SPAMD_TESTS && !$RUNNING_ON_WINDOWS) ?
                         numtests : 0) };
 
@@ -12,31 +12,40 @@ exit unless (!$SKIP_SPAMD_TESTS && !$RUNNING_ON_WINDOWS);
 # ---------------------------------------------------------------------------
 
 tstlocalrules ('
-    hashcash_accept test@example.com test1@example.com test2@example.com
-    hashcash_doublespend_path log/user_state/hashcash_seen
+        loadplugin myTestPlugin data/testplugin.pm
+        header MY_TEST_PLUGIN eval:check_test_plugin()
 ');
+
+# create a shared counter file for this test
+use Cwd;
+$ENV{'SPAMD_PLUGIN_COUNTER_FILE'} = getcwd."/log/spamd_plugin.tmp";
+open(COUNTER,">log/spamd_plugin.tmp");
+print COUNTER "0";
+close COUNTER;
 
 start_spamd("-D -L --socketpath=log/spamd.sock");
 
 %patterns = (
-q{ X-Spam-Status: Yes, score=}, 'status',
-q{ X-Spam-Flag: YES}, 'flag',
+  q{ test: called myTestPlugin, round 1 }, 'called1'
 );
 ok (spamcrun ("-U log/spamd.sock < data/spam/001", \&patterns_run_cb));
+
+checkfile("spamd_plugin-spamd.err", \&patterns_run_cb);
 ok_all_patterns();
 
 %patterns = (
-q{ HASHCASH_24 }, 'hashcash24',
+  q{ called myTestPlugin, round 2 }, 'called2'
 );
 ok (spamcrun ("-U log/spamd.sock < data/nice/001", \&patterns_run_cb));
+checkfile("spamd_plugin-spamd.err", \&patterns_run_cb);
 ok_all_patterns();
 
 %patterns = (
-q{ HASHCASH_20 }, 'hashcash20',
+  q{ called myTestPlugin, round 3 }, 'called3'
 );
 ok (spamcrun ("-U log/spamd.sock < data/nice/001", \&patterns_run_cb));
+checkfile("spamd_plugin-spamd.err", \&patterns_run_cb);
 ok_all_patterns();
 
 stop_spamd();
-
 
