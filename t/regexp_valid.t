@@ -30,11 +30,11 @@ $sa->init(0); # parse rules
 
 # make a _copy_ of the STDERR file descriptor
 # (so we can restore it after redirecting it)
-open(OLDERR, ">&STDERR");
+open(OLDERR, ">&STDERR") || die "Cannot copy STDERR file handle";
 
 # create a file descriptior for logging STDERR
 # (we do not want warnings for regexps we know are invalid)
-open(LOGERR, ">".IO::File->new_tmpfile());
+open(LOGERR, ">".IO::File->new_tmpfile()) || die "Cannot create LOGERR temp file";
 
 # quiet "used only once" warnings
 1 if *OLDERR;
