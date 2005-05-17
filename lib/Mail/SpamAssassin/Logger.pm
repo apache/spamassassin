@@ -181,7 +181,7 @@ sub _log {
 
   my $facility = "generic";
   my $whitespace = " ";
-  if ($message =~ /^(\S+?):(\s*)(.*)/s) {
+  if ($message =~ /^(\S+?): (.*)/s) {
     $facility = $1;
     $whitespace = $2 if $2;
     $message = $3;
