@@ -28,6 +28,9 @@ fi
 [ -f /usr/bin/spamd -o -f /usr/local/bin/spamd ] || exit 0
 PATH=$PATH:/usr/bin:/usr/local/bin
 
+# By default it's all good
+RETVAL=0
+
 # See how we were called.
 case "$1" in
   start)
@@ -59,7 +62,8 @@ case "$1" in
 	;;
   *)
 	echo "Usage: $0 {start|stop|restart|status|condrestart}"
-	exit 1
+	RETVAL=1
+	;;
 esac
 
-exit 0
+exit $RETVAL
