@@ -219,10 +219,27 @@ sub learn {
 
   my $msgsize = length($msg.$EOL);
 
-  print $remote "LEARN $PROTOVERSION$EOL";
+  print $remote "TELL $PROTOVERSION$EOL";
   print $remote "Content-length: $msgsize$EOL";
   print $remote "User: $self->{username}$EOL" if ($self->{username});
-  print $remote "Learn-type: $learntype$EOL";
+
+  if ($learntype == 0) {
+    print $remote "Message-class: spam$EOL";
+    print $remote "Set: local$EOL";
+  }
+  elsif ($learntype == 1) {
+    print $remote "Message-class: ham$EOL";
+    print $remote "Set: local$EOL";
+  }
+  elsif ($learntype == 2) {
+    print $remote "Remove: local$EOL";
+  }
+  else { # bad learntype
+    $self->{resp_code} = 00;
+    $self->{resp_msg} = 'do not know';
+    return undef;
+  }
+
   print $remote "$EOL";
   print $remote $msg;
   print $remote "$EOL";
@@ -236,17 +253,19 @@ sub learn {
 
   return undef unless ($resp_code == 0);
 
-  my $learned_p = 0;
   my $found_blank_line_p = 0;
+
+  my $did_set;
+  my $did_remove;
 
   while (!$found_blank_line_p) {
     $line = <$remote>;
 
-    if ($line =~ /Learned: yes/i) {
-      $learned_p = 1;
+    if ($line =~ /DidSet: (.*)/i) {
+      $did_set = $1;
     }
-    elsif ($line =~ /Learned: no/i) {
-      $learned_p = 0;
+    elsif ($line =~ /DidRemove: (.*)/i) {
+      $did_remove = $1;
     }
     elsif ($line =~ /$EOL/) {
       $found_blank_line_p = 1;
@@ -255,7 +274,12 @@ sub learn {
 
   close $remote;
 
-  return $learned_p;
+  if ($learntype == 0 || $learntype == 1) {
+    return $did_set =~ /local/;
+  }
+  else { #safe since we've already checked the $learntype values
+    return $did_remove =~ /local/;
+  }
 }
 
 =head2 report
@@ -270,7 +294,49 @@ This method provides the report interface to spamd.
 sub report {
   my ($self, $msg) = @_;
 
-  return $self->_report_or_revoke($msg, 0);
+  $self->_clear_errors();
+
+  my $remote = $self->_create_connection();
+
+  return undef unless ($remote);
+
+  my $msgsize = length($msg.$EOL);
+
+  print $remote "TELL $PROTOVERSION$EOL";
+  print $remote "Content-length: $msgsize$EOL";
+  print $remote "User: $self->{username}$EOL" if ($self->{username});
+  print $remote "Message-class: spam$EOL";
+  print $remote "Set: local,remote$EOL";
+  print $remote "$EOL";
+  print $remote $msg;
+  print $remote "$EOL";
+
+  my $line = <$remote>;
+
+  my ($version, $resp_code, $resp_msg) = $self->_parse_response_line($line);
+
+  $self->{resp_code} = $resp_code;
+  $self->{resp_msg} = $resp_msg;
+
+  return undef unless ($resp_code == 0);
+
+  my $reported_p = 0;
+  my $found_blank_line_p = 0;
+
+  while (!$reported_p && !$found_blank_line_p) {
+    $line = <$remote>;
+
+    if ($line =~ /DidSet:\s+.*remote/i) {
+      $reported_p = 1;
+    }
+    elsif ($line =~ /^$EOL$/) {
+      $found_blank_line_p = 1;
+    }
+  }
+
+  close $remote;
+
+  return $reported_p;
 }
 
 =head2 revoke
@@ -285,7 +351,50 @@ This method provides the revoke interface to spamd.
 sub revoke {
   my ($self, $msg) = @_;
 
-  return $self->_report_or_revoke($msg, 1);
+  $self->_clear_errors();
+
+  my $remote = $self->_create_connection();
+
+  return undef unless ($remote);
+
+  my $msgsize = length($msg.$EOL);
+
+  print $remote "TELL $PROTOVERSION$EOL";
+  print $remote "Content-length: $msgsize$EOL";
+  print $remote "User: $self->{username}$EOL" if ($self->{username});
+  print $remote "Message-class: ham$EOL";
+  print $remote "Set: local$EOL";
+  print $remote "Remove: remote$EOL";
+  print $remote "$EOL";
+  print $remote $msg;
+  print $remote "$EOL";
+
+  my $line = <$remote>;
+
+  my ($version, $resp_code, $resp_msg) = $self->_parse_response_line($line);
+
+  $self->{resp_code} = $resp_code;
+  $self->{resp_msg} = $resp_msg;
+
+  return undef unless ($resp_code == 0);
+
+  my $revoked_p = 0;
+  my $found_blank_line_p = 0;
+
+  while (!$revoked_p && !$found_blank_line_p) {
+    $line = <$remote>;
+
+    if ($line =~ /DidRemove:\s+remote/i) {
+      $revoked_p = 1;
+    }
+    elsif ($line =~ /^$EOL$/) {
+      $found_blank_line_p = 1;
+    }
+  }
+
+  close $remote;
+
+  return $revoked_p;
 }
 
 
@@ -392,73 +501,6 @@ sub _clear_errors {
   $self->{resp_code} = undef;
   $self->{resp_msg} = undef;
 }
-
-
-=head2 _report_or_revoke
-
-public instance (Boolean) report_or_revoke (String $msg, Integer $reporttype)
-
-Description:
-This method implements the report or revoke call.  C<$learntype> should
-be an integer, 0 for report or 1 for revoke.  The return value is a
-boolean indicating if the message was learned or not.
-
-An undef return value indicates that there was an error and you
-should check the resp_code/resp_error values to determine what
-the error was.
-
-=cut
-
-sub _report_or_revoke {
-  my ($self, $msg, $reporttype) = @_;
-
-  $self->_clear_errors();
-
-  my $remote = $self->_create_connection();
-
-  return undef unless ($remote);
-
-  my $msgsize = length($msg.$EOL);
-
-  print $remote "COLLABREPORT $PROTOVERSION$EOL";
-  print $remote "Content-length: $msgsize$EOL";
-  print $remote "User: $self->{username}$EOL" if ($self->{username});
-  print $remote "CollabReport-type: $reporttype$EOL";
-  print $remote "$EOL";
-  print $remote $msg;
-  print $remote "$EOL";
-
-  my $line = <$remote>;
-
-  my ($version, $resp_code, $resp_msg) = $self->_parse_response_line($line);
-
-  $self->{resp_code} = $resp_code;
-  $self->{resp_msg} = $resp_msg;
-
-  return undef unless ($resp_code == 0);
-
-  my $reported_p = 0;
-  my $found_blank_line_p = 0;
-
-  while (!$found_blank_line_p) {
-    $line = <$remote>;
-
-    if ($line =~ /Reported: yes/i) {
-      $reported_p = 1;
-    }
-    elsif ($line =~ /Reported: no/i) {
-      $reported_p = 0;
-    }
-    elsif ($line =~ /$EOL/) {
-      $found_blank_line_p = 1;
-    }
-  }
-
-  close $remote;
-
-  return $reported_p;
-}
-
 
 1;
 

@@ -56,10 +56,10 @@ PING          --  Return a confirmation that spamd is alive.
 PROCESS       --  Process this message as described above and return modified
                   message
 
-LEARN         --  Learn message as spam, ham or forget.
+TELL          --  Tell what type of we are to process and what should be done
+                  with that message.  This includes setting or removing a local
+                  or a remote database (learning, reporting, forgetting, revoking).
 
-COLLABREPORT  --  Send message to any configured collaborative reporting
-		  databses
 
 CHECK command returns just a header (terminated by "\r\n\r\n") with the first
 line as for PROCESS (ie a response code and message), and then a header called
@@ -108,10 +108,6 @@ the report text, and how many CR-LFs there are.
 REPORT_IFSPAM returns the same as REPORT if the message is spam, or nothing at
 all if the message is non-spam.
 
-LEARN returns just a header, Learned:, with a Yes or a No value.
-
-COLLABREPORT returns just a header, Reported:, with a Yes or a No value
-
 The PING command does not actually trigger any spam checking, and (as with
 SKIP) no additional input is expected. It returns a simple confirmation
 response, like this:
@@ -121,3 +117,28 @@ response, like this:
 This facility may be useful for monitoring programs which wish to check that
 the daemon is alive and providing at least a basic response within a reasonable
 time frame.
+
+TELL accepts three new headers, Message-class, Set and Remove and will return
+two possible headers, DidSet and DidRemove which indicate which action was
+taken.  It is up to the caller to determine if the proper action happened.  Here
+are some examples:
+
+To learn a message as spam:
+TELL SPAMC/1.3
+Message-class: spam
+Set: local
+
+To forget a learned message:
+TELL SPAMC/1.3
+Remove: local
+
+To report a spam message:
+TELL SPAMC/1.3
+Message-class: spam
+Set: local, remove
+
+To revoke a ham message:
+TELL SPAMC/1.3
+Message-class: spam
+Set: local
+Remove: remote
