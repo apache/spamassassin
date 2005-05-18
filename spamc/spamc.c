@@ -311,7 +311,7 @@ read_args(int argc, char **argv,
 	    }
         case 'C':
 	    {
-	        flags |= SPAMC_COLLABREPORT;
+	        flags |= SPAMC_REPORT_MSG;
 		if (strcmp(optarg,"report") == 0) {
 		    *extratype = 0;
 		}
@@ -383,7 +383,7 @@ read_args(int argc, char **argv,
 	    libspamc_log(flags, LOG_ERR, "Learning excludes symbols");
 	    ret = EX_USAGE;
 	}
-	if (flags & SPAMC_COLLABREPORT) {
+	if (flags & SPAMC_REPORT_MSG) {
 	    libspamc_log(flags, LOG_ERR, "Learning excludes reporting to collaborative filtering databases");
 	    ret = EX_USAGE;
 	}
@@ -757,10 +757,70 @@ main(int argc, char *argv[])
 	if (ret == EX_OK) {
 
  	    if (flags & SPAMC_LEARN) {
-	      ret = message_learn(&trans, username, flags, &m, extratype, &islearned);
+	      int msg_class = 0;
+	      uint tellflags = 0;
+	      uint didtellflags = 0;
+
+	      if ((extratype == 0) || (extratype == 1)) {
+		if (extratype == 0) {
+		  msg_class = SPAMC_MESSAGE_CLASS_SPAM;
+		}
+		else {
+		  msg_class = SPAMC_MESSAGE_CLASS_HAM;
+		}
+		tellflags |= SPAMC_SET_LOCAL;
+	      }
+	      else {
+		tellflags |= SPAMC_REMOVE_LOCAL;
+	      }
+
+	      ret = message_tell(&trans, username, flags, &m, msg_class,
+				 tellflags, &didtellflags);
+
+	      if (ret == EX_OK) {
+		if ((extratype == 0) || (extratype == 1)) {
+		  if (didtellflags & SPAMC_SET_LOCAL) {
+		    islearned = 1;
+		  }
+		}
+		else {
+		  if (didtellflags & SPAMC_REMOVE_LOCAL) {
+		    islearned = 1;
+		  }
+		}
+	      }
 	    }
- 	    else if (flags & SPAMC_COLLABREPORT) {
-	      ret = message_collabreport(&trans, username, flags, &m, extratype, &isreported);
+ 	    else if (flags & SPAMC_REPORT_MSG) {
+	      int msg_class = 0;
+	      uint tellflags = 0;
+	      uint didtellflags = 0;
+
+	      if (extratype == 0) {
+		msg_class = SPAMC_MESSAGE_CLASS_SPAM;
+		tellflags |= SPAMC_SET_REMOTE;
+		tellflags |= SPAMC_SET_LOCAL;
+	      }
+	      else {
+		msg_class = SPAMC_MESSAGE_CLASS_HAM;
+		tellflags |= SPAMC_SET_LOCAL;
+		tellflags |= SPAMC_REMOVE_REMOTE;
+	      }
+
+	      ret = message_tell(&trans, username, flags, &m, msg_class,
+				 tellflags, &didtellflags);
+
+	      if (ret == EX_OK) {
+		if (extratype == 0) {
+		  if (didtellflags & SPAMC_SET_REMOTE) {
+		    isreported = 1;
+		  }
+		}
+		else {
+		  if (didtellflags & SPAMC_REMOVE_REMOTE) {
+		    isreported = 1;
+		  }
+		}
+	      }
 	    }
 	    else {
 	      ret = message_filter(&trans, username, flags, &m);
@@ -782,7 +842,7 @@ main(int argc, char *argv[])
 		    message_cleanup(&m);
 		    goto finish;
 		}
-		else if (flags & SPAMC_COLLABREPORT) {
+		else if (flags & SPAMC_REPORT_MSG) {
 		    if (isreported == 1) {
   		        printf("Message successfully reported/revoked\n");
 		    }

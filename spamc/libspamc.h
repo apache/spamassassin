@@ -80,28 +80,38 @@
 #define SPAMC_RAW_MODE       0
 #define SPAMC_BSMTP_MODE     1
 
-#define SPAMC_USE_SSL	     (1<<27)
-#define SPAMC_SAFE_FALLBACK  (1<<28)
-#define SPAMC_CHECK_ONLY     (1<<29)
+#define SPAMC_USE_SSL	      (1<<27)
+#define SPAMC_SAFE_FALLBACK   (1<<28)
+#define SPAMC_CHECK_ONLY      (1<<29)
 
 /* Jan 30, 2003 ym: added reporting options */
-#define SPAMC_REPORT         (1<<26)
-#define SPAMC_REPORT_IFSPAM  (1<<25)
+#define SPAMC_REPORT          (1<<26)
+#define SPAMC_REPORT_IFSPAM   (1<<25)
 
 /* Feb  1 2003 jm: might as well fix bug 191 as well */
-#define SPAMC_SYMBOLS        (1<<24)
+#define SPAMC_SYMBOLS         (1<<24)
 
 /* 2003/04/16 SJF: randomize hostname order (quasi load balancing) */
 #define SPAMC_RANDOMIZE_HOSTS (1<<23)
 
 /* log to stderr */
-#define SPAMC_LOG_TO_STDERR  (1<<22)
+#define SPAMC_LOG_TO_STDERR   (1<<22)
 
 /* Nov 24, 2004 NP: added learning support */
-#define SPAMC_LEARN	     (1<<21)
+#define SPAMC_LEARN	      (1<<21)
 
 /* May 5, 2005 NP: added list reporting support */
-#define SPAMC_COLLABREPORT   (1<<20)
+#define SPAMC_REPORT_MSG      (1<<20)
+
+
+#define SPAMC_MESSAGE_CLASS_SPAM 1
+#define SPAMC_MESSAGE_CLASS_HAM  2
+
+#define SPAMC_SET_LOCAL          1
+#define SPAMC_SET_REMOTE         2
+
+#define SPAMC_REMOVE_LOCAL       4
+#define SPAMC_REMOVE_REMOTE      8
 
 /* Aug 14, 2002 bj: A struct for storing a message-in-progress */
 typedef enum
@@ -214,21 +224,14 @@ long message_write(int out_fd, struct message *m);
 int message_filter(struct transport *tp, const char *username,
 		   int flags, struct message *m);
 
-/* Process the message through the spamd learn, making as many connection
- * attempts as are implied by the transport structure. To make this do
- * failover, more than one host is defined, but if there is only one there,
- * no failover is done.
- */
-int message_learn(struct transport *tp, const char *username, int flags,
-		  struct message *m, int learntype, int *islearned);
-
-/* Process the message through the spamd collandreport, making as many
+/* Process the message through the spamd tell command, making as many
  * connection attempts as are implied by the transport structure. To make
  * this do failover, more than one host is defined, but if there is only
  * one there, no failover is done.
  */
-int message_collabreport(struct transport *tp, const char *username, int flags,
-			 struct message *m, int reporttype, int *isreported);
+int message_tell(struct transport *tp, const char *username, int flags,
+		 struct message *m, int msg_class,
+		 uint tellflags, uint *didtellflags);
 
 /* Dump the message. If there is any data in the message (typically, m->type
  * will be MESSAGE_ERROR) it will be message_writed. Then, fd_in will be piped
