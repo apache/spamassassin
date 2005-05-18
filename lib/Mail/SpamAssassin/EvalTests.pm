@@ -646,14 +646,10 @@ sub gated_through_received_hdr_remover {
 
     # ensure we have other indicative headers too
     if ($dlto =~ /^mailing list \S+\@\S+/ &&
-      	$rcvd =~ /qmail \d+ invoked by .{3,20}\); \d+ ... \d+/)
+        $rcvd =~ /qmail \d+ invoked (?:from network|by .{3,20})\); \d+ ... \d+/)
     {
       return 1;
     }
-    # jm: this line *was* included:
-    #   $rcvd =~ /qmail \d+ invoked from network\); \d+ ... \d+/ &&
-    # but I've found FPs where it did not appear in the mail; it's
-    # not required.
   }
 
   if ($self->get("Received") !~ /\S/) {
