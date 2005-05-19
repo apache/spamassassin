@@ -35,7 +35,7 @@ open(OLDERR, ">&STDERR") || die "Cannot copy STDERR file handle";
 # create a file descriptior for logging STDERR
 # (we do not want warnings for regexps we know are invalid)
 my $fh = IO::File->new_tmpfile();
-open(LOGERR, ">".fileno($fh)) || die "Cannot create LOGERR temp file";
+open(LOGERR, ">&".fileno($fh)) || die "Cannot create LOGERR temp file";
 
 # quiet "used only once" warnings
 1 if *OLDERR;
