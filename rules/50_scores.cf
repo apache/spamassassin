@@ -693,6 +693,7 @@ endif # Mail::SpamAssassin::Plugin::SPF
 # URIDNSBL
 ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
 score URIBL_AB_SURBL 0 2.007 0 0.417
+score URIBL_JP_SURBL 0 1.539 0 2.462
 score URIBL_OB_SURBL 0 1.996 0 3.213
 score URIBL_PH_SURBL 0 0.839 0 2.000
 score URIBL_SBL 0 0.629 0 0.996
