@@ -474,8 +474,6 @@ combine_args(char *prefix, char *config_file,
    }
 
    if((config = fopen(config_file, "r")) == NULL) {
-      libspamc_log(flags, LOG_ERR,
-        "Cannot open %s : %s", config_file, strerror(errno));
       return EX_CONFIG;
    }
 
