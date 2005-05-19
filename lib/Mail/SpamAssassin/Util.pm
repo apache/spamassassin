@@ -663,6 +663,9 @@ sub parse_content_type {
   $ct =~ tr/\000-\040\177-\377\042\050\051\054\056\072-\077\100\133-\135//d;    # strip inappropriate chars
   $ct = lc $ct;
 
+  # bug 4298: If at this point we don't have a content-type, assume text/plain
+  $ct ||= "text/plain";
+
   # Now that the header has been parsed, return the requested information.
   # In scalar context, just the MIME type, in array context the
   # four important data parts (type, boundary, charset, and filename).
