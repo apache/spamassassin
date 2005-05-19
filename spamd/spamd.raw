@@ -447,8 +447,8 @@ if (defined $opt{'timeout-tcp'}) {
   $timeout_tcp = undef if ($timeout_tcp < 1);
 }
 
-if (defined $opt{'timeout_child'}) {
-  $timeout_child = $opt{'timeout_child'};
+if (defined $opt{'timeout-child'}) {
+  $timeout_child = $opt{'timeout-child'};
   $timeout_child = undef if ($timeout_child < 1);
 }
 
