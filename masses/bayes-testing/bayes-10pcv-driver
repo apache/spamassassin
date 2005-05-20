@@ -28,9 +28,6 @@
 # this, since bayes will not be activated without 200 messages in the db,
 # and each fold is run using 10% of the corpus -- and 2000/10 = 200.
 
-# CHANGE ME: the path to the version of SpamAssassin you are testing.
-SADIR=/home/jm/ftp/spamassassin
-
 ###########################################################################
 
 testdir=`pwd`
@@ -58,12 +55,11 @@ cp ../rules/50*.cf $tmpdir/rules
 echo "
 
 bayes_path                $tmpdir/dbs/bayes
-bayes_use_chi2_combining  1
 bayes_auto_learn          0
+bayes_min_ham_num         10
+bayes_min_spam_num        10
 
 " > $tmpdir/rules/30bayes_path.cf
-# bayes_expiry_use_scan_count 0
-# bayes_expiry_scan_count 500
 mkdir $tmpdir/dbs
 
 INTERLEAVE_TESTS=0
@@ -89,14 +85,14 @@ if [ $LEARN_ALL_THEN_FORGET_TEST_SET = 1 ] ; then
 
   (
   echo -n "Learning from all ham buckets..." ; date
-  time sa-learn --ham --randseed=1 --no-rebuild $learnargs \
+  time sa-learn --ham --randseed=1 --no-sync $learnargs \
 	  --showdots --mbox --config-file=$tmpdir/rules $testdir/cor/ham/*
 
   echo -n "Learning from all spam buckets..." ; date
-  time sa-learn --spam --randseed=1 --no-rebuild $learnargs \
+  time sa-learn --spam --randseed=1 --no-sync $learnargs \
 	  --showdots --mbox --config-file=$tmpdir/rules $testdir/cor/spam/*
 
-  time sa-learn --rebuild $learnargs --config-file=$tmpdir/rules
+  time sa-learn --sync $learnargs --config-file=$tmpdir/rules
 
   echo -n "Done learning. " ; date
   ) 2>&1 | tee $results/learn.log
@@ -151,21 +147,21 @@ for bucket in 1 2 3 4 5 6 7 8 9 10 ; do
 
   else
     echo "Learning contents of learn ham bucket..."
-    time sa-learn --ham --randseed=1 --no-rebuild $learnargs \
+    time sa-learn --ham --randseed=1 --no-sync $learnargs \
 	    --showdots --mbox --config-file=$tmpdir/rules $rdir/hbucketlearn
 
     echo "Learning contents of learn spam bucket..."
-    time sa-learn --spam --randseed=1 --no-rebuild $learnargs \
+    time sa-learn --spam --randseed=1 --no-sync $learnargs \
 	    --showdots --mbox --config-file=$tmpdir/rules $rdir/sbucketlearn
 
-    time sa-learn --rebuild $learnargs --config-file=$tmpdir/rules
+    time sa-learn --sync $learnargs --config-file=$tmpdir/rules
 
     echo "Dumping bayes DB..."
     ( cd .. ; sa-learn --dump --dbpath=$tmpdir/dbs/bayes ) \
 	  > $rdir/bayes_db.dump
   fi
 
-  time sa-learn --rebuild --config-file=$tmpdir/rules
+  time sa-learn --sync --config-file=$tmpdir/rules
 
   if [ $INTERLEAVE_TESTS = 1 ] ; then
     # now split the ham and spam test bucket into 10 sub-buckets,

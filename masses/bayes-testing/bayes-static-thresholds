@@ -9,8 +9,8 @@
 my $spam = $ARGV[0] || "spam.log";
 my $nonspam = $ARGV[1] || (-f "good.log" ? "good.log" : "nonspam.log");
 
-my $hamcutoff = 0.30;
-my $spamcutoff = 0.70;
+my $hamcutoff = 0.20;
+my $spamcutoff = 0.80;
 
 my $nbuckets = 50;
 my $range_lo = 0.00;
@@ -46,7 +46,7 @@ foreach my $file ($spam, $nonspam) {
   my $isspam = 0; ($file eq $spam) and $isspam = 1;
 
   while (<IN>) {
-    /^(\.|Y)\s.+bayes=(\S+)$/ or next;
+    /^(\.|Y)\s.+bayes=([^\s,]+)/ or next;
     my $score = $2+0;
     if ($score == 1) { $score = 0.9999999999999; }
 
