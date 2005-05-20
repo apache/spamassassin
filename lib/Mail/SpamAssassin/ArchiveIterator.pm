@@ -26,6 +26,7 @@ use IO::Select;
 use IO::Socket;
 use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::Constants qw(:sa);
+use Mail::SpamAssassin::Logger;
 
 use constant BIG_BYTES => 256*1024;	# 256k is a big email
 use constant BIG_LINES => BIG_BYTES/65;	# 65 bytes/line is a good approximation
@@ -451,6 +452,7 @@ sub run_file {
   mail_open($where) or return;
   # skip too-big mails
   if (! $self->{opt_all} && -s INPUT > BIG_BYTES) {
+    info("archive-iterator: skipping large message\n");
     close INPUT;
     return;
   }
@@ -491,6 +493,7 @@ sub run_mailbox {
 
     # skip too-big mails
     if (! $self->{opt_all} && @msg > BIG_LINES) {
+      info("archive-iterator: skipping large message\n");
       close INPUT;
       return;
     }
@@ -525,6 +528,7 @@ sub run_mbx {
 	
     # skip mails that are too big
     if (! $self->{opt_all} && @msg > BIG_LINES) {
+      info("archive-iterator: skipping large message\n");
       close INPUT;
       return;
     }
