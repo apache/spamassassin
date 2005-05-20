@@ -49,6 +49,7 @@ can be found:
 
 Then split the test corpus into folds:
 
+  mkdir -p cor/ham cor/spam
   $SADIR/tools/split_corpora -n 10 -p cor/ham/bucket ch
   $SADIR/tools/split_corpora -n 10 -p cor/spam/bucket cs
 
