@@ -145,11 +145,20 @@ sub connect_sock {
   return if $self->{no_resolver};
 
   $self->{sock}->close() if $self->{sock};
-  $self->{sock} = IO::Socket::INET->new (
-    Proto => 'udp',
-    Type => SOCK_DGRAM,
-  );
+  my $sock;
+  # find next available unprivileged port (1024 - 65535)
+  # starting at a random value to spread out use of ports
+  my $port_offset = int(rand(64511));  # 65535 - 1024
+  for (my $i = 0; (!$sock && ($i<64511)); $i++) {
+    my $lport = 1024 + (($port_offset + $i) % 64511);
+    $sock = IO::Socket::INET->new (
+                                   Proto => 'udp',
+                                   LocalPort => $lport,
+                                   Type => SOCK_DGRAM,
+                                   );
+  }
 
+  $self->{sock} = $sock;
   $self->{dest} = sockaddr_in($self->{res}->{port},
             inet_aton($self->{res}->{nameservers}[0]));
 
@@ -172,9 +181,7 @@ sub get_sock {
 
 =item $packet = new_dns_packet ($host, $type, $class)
 
-A wrapper for C<Net::DNS::Packet::new()> which ensures that the
-packet's ID field uses a new, unique value for this process.
-This is to avoid SpamAssassin bug 3997.
+A wrapper for C<Net::DNS::Packet::new()> which traps a die thrown by it
 
 To use this, change calls to C<Net::DNS::Resolver::bgsend> from:
 
@@ -183,8 +190,6 @@ To use this, change calls to C<Net::DNS::Resolver::bgsend> from:
 to:
 
     $res->bgsend(Mail::SpamAssassin::DnsResolver::new_dns_packet($hostname, $type, $class));
-
-This documentation should be more specific about usage of $type and $class.
 
 =cut
 
@@ -209,6 +214,20 @@ sub new_dns_packet {
   return $packet;
 }
 
+# Internal function used only in this file
+## compute an unique ID for a packet to match the query to the reply
+## It must use only data that is returned unchanged by the nameserver.
+## Argument is a Net::DNS::Packet that has a non-empty question section
+## return is an object that can be used as a hash key
+sub _packet_id {
+  my ($self, $packet) = @_;
+  my $header = $packet->header;
+  my $id = $header->id;
+  my @questions = $packet->question;
+  my $ques = $questions[0];
+  return $id . $ques->qname . $ques->qtype . $ques->qclass;
+}
+
 ###########################################################################
 
 =item $id = $res->bgsend($host, $type, $class, $cb)
@@ -220,14 +239,18 @@ sub reference C<$cb> will be called.
 Note that C<$type> and C<$class> may be C<undef>, in which case they
 will default to C<A> and C<IN>, respectively.
 
-The callback sub will be called with one argument -- the packet that was
-delivered.  It is expected that a closure callback be used, like so:
+The callback sub will be called with two arguments -- the packet that was
+delivered and an id string that fingerprints the query packet and the expected reply.
+It is expected that a closure callback be used, like so:
 
-  my $pkt = $self->{resolver}->bgsend($host, $type, undef, sub {
+  my $id = $self->{resolver}->bgsend($host, $type, undef, sub {
         my $reply = shift;
-        $self->got_a_reply ($reply);
+        my $reply_id = shift;
+        $self->got_a_reply ($reply, $reply_id);
       });
 
+The callback can ignore the reply as an invalid packet sent to the listening port
+if the reply id does not match the return value from bgsend.
 =cut
 
 sub bgsend {
@@ -236,7 +259,6 @@ sub bgsend {
 
   my $pkt = $self->new_dns_packet($host, $type, $class);
 
-  my $id = $pkt->header->id;
   my $data = $pkt->data;
   my $dest = $self->{dest};
   $self->connect_sock() if !$self->{sock};
@@ -244,7 +266,7 @@ sub bgsend {
     warn "dns: sendto() failed: $@";
     return;
   }
-
+  my $id = $self->_packet_id($pkt);
   $self->{id_to_callback}->{$id} = $cb;
   return $id;
 }
@@ -284,19 +306,16 @@ sub poll_responses {
       defined $packet->question &&
       defined $packet->answer)
   {
-    my $header = $packet->header;
-    my $id = $header->id;
-
-    # dbg("dns: reply id=$id");
+    my $id = $self->_packet_id($packet);
 
     my $cb = delete $self->{id_to_callback}->{$id};
     if (!$cb) {
-      dbg("dns: no callback for id number: $id, ignored; packet: ".
+      dbg("dns: no callback for id: $id, ignored; packet: ".
                                 $packet->string);
       return 0;
     }
 
-    $cb->($packet);
+    $cb->($packet, $id);
     return 1;
   }
   else {
