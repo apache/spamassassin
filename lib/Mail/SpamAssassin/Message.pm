@@ -752,7 +752,7 @@ sub _parse_normal {
 
   # If this part is a message/* part, and the parent isn't also a
   # message/* part (ie: the main part) go ahead and parse into a tree.
-  if ($part_msg->{'type'} =~ /^message\b/i && $msg->{subparse}) {
+  if ($part_msg->{'type'} =~ /^message\b/i && ($msg->{subparse} > 0)) {
     # Get the part ready...
     my $message = $part_msg->decode();
 
