@@ -74,7 +74,7 @@ sub new_checker {
     {
       $self->{locked_file} = $path;
       $self->{is_locked} = 1;
-      dbg("auto-whitelist: tie-ing to DB file R/W in $path");
+      dbg("auto-whitelist: tie-ing to DB file of type $dbm_module R/W in $path");
       tie %{$self->{accum}},$dbm_module,$path,
 		  O_RDWR|O_CREAT,   #open rw w/lock
 		  (oct ($main->{conf}->{auto_whitelist_file_mode}) & 0666)
@@ -82,7 +82,7 @@ sub new_checker {
 
     } else {
       $self->{is_locked} = 0;
-      dbg("auto-whitelist: tie-ing to DB file R/O in $path");
+      dbg("auto-whitelist: tie-ing to DB file of type $dbm_module R/O in $path");
       tie %{$self->{accum}},$dbm_module,$path,
 		  O_RDONLY,         #open ro w/o lock
 		  (oct ($main->{conf}->{auto_whitelist_file_mode}) & 0666)
