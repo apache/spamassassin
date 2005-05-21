@@ -295,44 +295,31 @@ sub harvest_dnsbl_queries {
 
   @waiting = grep { defined $_->[ID] } @waiting;
   $total = scalar @waiting;
-
   my $now = time;
-
   # trap this loop in an eval { } block, as Net::DNS could throw
   # die()s our way; in particular, process_dnsbl_results() has
   # thrown die()s before (bug 3794).
   eval {
-    while (@waiting) {
-      my $nfound = $self->{resolver}->poll_responses(1);
-
-      if ($nfound > 0) {
-        @left = ();
-        for my $query (@waiting) {
-          if (exists $self->{dnsfinished}->{$query->[ID]})
-          {
-            my $pkt = delete $self->{dnsfinished}->{$query->[ID]};
-            $self->process_dnsbl_result($query, $pkt);
-          }
-          else {
-            push(@left, $query);
-          }
+    while (@waiting && ($now < $deadline)) {
+      @left = ();
+      for my $query (@waiting) {
+        if (exists $self->{dnsfinished}->{$query->[ID]}) {
+          my $pkt = delete $self->{dnsfinished}->{$query->[ID]};
+          $self->process_dnsbl_result($query, $pkt);
+        } else {
+          push(@left, $query);
         }
-      } else {
-        @left = @waiting;
       }
-
       $self->{main}->call_plugins ("check_tick", { permsgstatus => $self });
-
       last unless @left;
-      $now = time;
-      last if $now >= $deadline;
-
       @waiting = @left;
       # dynamic timeout
       my $dynamic = (int($self->{conf}->{rbl_timeout}
                         * (1 - (($total - @left) / $total) ** 2) + 0.5)
                     + $self->{rbl_launch});
       $deadline = $dynamic if ($dynamic < $deadline);
+      until((($now = time) >= $deadline) || ($self->{resolver}->poll_responses(1) > 0)) {
+      }
     }
     dbg("dns: success for " . ($total - @left) . " of $total queries");
   };
