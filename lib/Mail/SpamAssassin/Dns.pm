@@ -145,7 +145,8 @@ sub res_bgsend {
 
   return $self->{resolver}->bgsend($host, $type, undef, sub {
           my $pkt = shift;
-          $self->{dnsfinished}->{$pkt->header->id} = $pkt;
+          my $id = shift;
+          $self->{dnsfinished}->{$id} = $pkt;
         });
 }
 

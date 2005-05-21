@@ -787,7 +787,8 @@ sub res_bgsend {
 
   return $self->{main}->{resolver}->bgsend($host, $type, undef, sub {
         my $pkt = shift;
-        $self->{finished}->{$pkt->header->id} = $pkt;
+        my $id = shift;
+        $self->{finished}->{$id} = $pkt;
       });
 }
 
