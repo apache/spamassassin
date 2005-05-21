@@ -801,8 +801,8 @@ sub url_encode {
 
 =item $module = first_available_module (@module_list)
 
-Return the first module that can be successfully loaded with C<require>
-from the list.  Returns C<undef> if none are available.
+Return the name of the first module that can be successfully loaded with
+C<require> from the list.  Returns C<undef> if none are available.
 
 This is used instead of C<AnyDBM_File> as follows:
 
