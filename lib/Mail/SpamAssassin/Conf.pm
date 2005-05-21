@@ -748,7 +748,7 @@ the original mail into tagged messages.
     default => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      if ($value !~ /^\s*(|0|1|2)\s*$/) {
+      if ($value !~ /^(0|1|2)$/) {
         return $INVALID_VALUE;
       }
 
