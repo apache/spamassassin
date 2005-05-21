@@ -748,6 +748,10 @@ the original mail into tagged messages.
     default => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
+      if ($value !~ /^\s*(|0|1|2)\s*$/) {
+        return $INVALID_VALUE;
+      }
+
       $self->{report_safe} = $value+0;
       if (! $self->{report_safe}) {
         $self->{headers_spam}->{"Report"} = "_REPORT_";
