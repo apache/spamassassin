@@ -254,12 +254,28 @@ sub order_idle_child_to_accept {
   if (defined $kid)
   {
     my $sock = $self->{backchannel}->get_socket_for_child($kid);
+    if (!$sock)
+    {
+      # this should not happen, but if it does, trap it here
+      # before we attempt to call a method on an undef object
+      warn "prefork: oops! no socket for child $kid, killing";
+      delete $self->{kids}->{$kid};
+      kill 'INT' => $kid;
+
+      # retry with another child
+      return $self->order_idle_child_to_accept();
+    }
+
     if (!$sock->syswrite ("A....\n"))
     {
       # failure to write to the child; bad news.  call it dead
       warn "prefork: killing rogue child $kid, failed to write: $!\n";
       $self->set_child_state ($kid, PFSTATE_KILLED);
       kill 'INT' => $kid;
+
+      # close the socket and remove the child from our list
+      delete $self->{kids}->{$kid};
+      $sock->close();
 
       # retry with another child
       return $self->order_idle_child_to_accept();
