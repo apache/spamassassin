@@ -572,6 +572,11 @@ header.
 
       # We only deal with From, Subject, and To ...
       if ($hdr =~ /^(?:From|Subject|To)$/) {
+        unless (defined $string && $string =~ /\S/) {
+          delete $self->{rewrite_header}->{$hdr};
+          return;
+        }
+
 	if ($hdr ne 'Subject') {
           $string =~ tr/()/[]/;
 	}
