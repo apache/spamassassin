@@ -1101,6 +1101,9 @@ setting.  Example:
     setting => 'bayes_ignore_header',
     code => sub {
       my ($self, $key, $value, $line) = @_;
+      if ($value eq '') {
+        return $MISSING_REQUIRED_VALUE;
+      }
       push (@{$self->{bayes_ignore_headers}}, split(/\s+/, $value));
     }
   });
@@ -1356,6 +1359,9 @@ separated by spaces, or you can just use multiple lines.
     setting => 'report_safe_copy_headers',
     code => sub {
       my ($self, $key, $value, $line) = @_;
+      if ($value eq '') {
+        return $MISSING_REQUIRED_VALUE;
+      }
       push(@{$self->{report_safe_copy_headers}}, split(/\s+/, $value));
     }
   });
@@ -1570,6 +1576,13 @@ existing system rule from a C<user_prefs> file with C<spamd>.
     default => 0,
     code => sub {
       my ($self, $key, $value, $line) = @_;
+      if ($value eq '') {
+        return $MISSING_REQUIRED_VALUE;
+      }
+      elsif ($value !~ /^[01]$/) {
+        return $INVALID_VALUE;
+      }
+
       $self->{allow_user_rules} = $value+0;
       dbg("config: " . ($self->{allow_user_rules} ? "allowing":"not allowing") . " user rules!");
     }
@@ -1594,17 +1607,21 @@ Example: http://chkpt.zdnet.com/chkpt/whatever/spammer.domain/yo/dude
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-
-      if ($self->{parser}->is_delimited_regexp_valid("redirector_pattern", $value)) {
-	# convert to qr// while including modifiers
-	$value =~ /^m?(\W)(.*)(?:\1|>|}|\)|\])(.*?)$/;
-	my $pattern = $2;
-	$pattern = "(?".$3.")".$pattern if $3;
-	$pattern = qr/$pattern/;
-
-	push @{$self->{main}->{conf}->{redirector_patterns}}, $pattern;
-	dbg("config: adding redirector regex: " . $value);
+      if ($value eq '') {
+	return $MISSING_REQUIRED_VALUE;
       }
+      elsif (!$self->{parser}->is_delimited_regexp_valid("redirector_pattern", $value)) {
+	return $INVALID_VALUE;
+      }
+
+      # convert to qr// while including modifiers
+      $value =~ /^m?(\W)(.*)(?:\1|>|}|\)|\])(.*?)$/;
+      my $pattern = $2;
+      $pattern = "(?".$3.")".$pattern if $3;
+      $pattern = qr/$pattern/;
+
+      push @{$self->{main}->{conf}->{redirector_patterns}}, $pattern;
+      dbg("config: adding redirector regex: " . $value);
     }
   });
 
@@ -2101,6 +2118,9 @@ e.g.
     is_admin => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
+      if ($value eq '') {
+        return $MISSING_REQUIRED_VALUE;
+      }
       my $tag = lc($value);
       $tag =~ tr/a-z0-9./_/c;
       foreach (@Mail::SpamAssassin::EXTRA_VERSION) {
@@ -2426,10 +2446,15 @@ See C<Mail::SpamAssassin::Plugin> for more details on writing plugins.
     is_admin => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
+      if ($value eq '') {
+        return $MISSING_REQUIRED_VALUE;
+      }
       if ($value =~ /^(\S+)\s+(\S+)$/) {
         $self->load_plugin ($1, $2);
-      } else {
+      } elsif ($value =~ /^(?:\S+)$/) {
         $self->load_plugin ($value);
+      } else {
+	return $INVALID_VALUE;
       }
     }
   });
