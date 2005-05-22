@@ -655,7 +655,7 @@ describe FROM_DOMAIN_NOVOWEL	From: domain has series of non-vowel letters
 header FROM_LOCAL_NOVOWEL	From =~ /[bcdfghjklmnpqrstvwxz]{7}\S*\@/i
 describe FROM_LOCAL_NOVOWEL	From: localpart has series of non-vowel letters
 
-header SUBJECT_NOVOWEL		Subject =~ /[bcdfghjklmnpqrstvwxz]{7}/i
+header SUBJECT_NOVOWEL		Subject =~ /[bcdfghjklmnpqrstvwxz]{8}/i
 describe SUBJECT_NOVOWEL	Subject: has long non-vowel letter sequence
 
 header FROM_LOCAL_HEX		From =~ /[0-9a-f]{11}\S*\@/i
