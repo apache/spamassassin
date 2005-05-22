@@ -24,8 +24,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/stat.h>
-#include <ctype.h>
 
 #ifdef _WIN32
 #include <io.h>
@@ -391,66 +389,6 @@ read_args(int argc, char **argv,
     return ret;
 }
 
-/* find_config()
- *
- * looks for the config file in default locations as well as
- * ${prefix}/etc
- *
- * return config path if found, NULL if not, or if there's an error
- */
-char *find_config(char *prefix) {
-   struct stat buf;
-   char *config_path = NULL;
-
-   if((strncasecmp(prefix, "/usr", 4)) == 0) {
-      if((config_path = (char *)malloc(32)) != NULL) {
-         strcat(config_path, "/etc/mail/spamassassin/spamc.conf");
-      } else {
-         libspamc_log(flags, LOG_ERR, 
-           "Out of memory while searching for config file");
-         return NULL;
-      }
-
-      if((stat(config_path, &buf) < 0) || (!(S_ISREG(buf.st_mode)))) {
-         config_path = NULL;
-      } else {
-         return(config_path);
-      }
-   } else if((strncasecmp(prefix, "/opt", 4)) == 0) {
-      if((config_path = (char *)malloc(38)) != NULL) {
-         strcat(config_path, "/etc/opt/mail/spamassassin/spamc.conf");
-      } else {
-         libspamc_log(flags, LOG_ERR,
-           "Out of memory while searching for config file");
-         return NULL;
-      }
-
-      if((stat(config_path, &buf) < 0) || (!(S_ISREG(buf.st_mode)))) {
-         config_path = NULL;
-      } else {
-         return(config_path);
-      }
-   }
-
-   if(config_path == NULL) {
-      if((config_path = (char *)malloc(strlen(prefix)+16)) != NULL) {
-         strcat(config_path, prefix);
-         strcat(config_path, "/etc/spamc.conf");
-      } else {
-         libspamc_log(flags, LOG_ERR,
-           "Out of memory while searching for config file");
-         return NULL;
-      }
-
-      if((stat(config_path, &buf) < 0) || (!(S_ISREG(buf.st_mode)))) {
-         config_path = NULL;
-      } else {
-         return(config_path);
-      }
-   }
-   return NULL; // if we get to here, it hasn't been found
-}
-
 /* combine_args() :: parses spamc.conf for options, and combines those
  * with options passed via command line
  *
@@ -459,62 +397,65 @@ char *find_config(char *prefix) {
  * returns EX_OK on success, EX_CONFIG on failure
  */
 int
-combine_args(char *prefix, char *config_file, 
-      int argc, char **argv, int *combo_argc, char **combo_argv)
+combine_args(char *config_file, int argc, char **argv,
+	     int *combo_argc, char **combo_argv)
 {
-   FILE *config;
-   char option[100];
-   int i, count = 0;
-   char *tok = NULL;
+    FILE *config;
+    char option[100];
+    int i, count = 0;
+    char *tok = NULL;
+    int is_user_defined_p = 1;
 
-   if(config_file == NULL) {
-      // look for the file 
-      if((config_file = find_config(prefix)) == NULL)
-         return EX_CONFIG;
-   }
+    if (config_file == NULL) {
+      config_file = CONFIG_FILE;
+      is_user_defined_p = 0;
+    }
 
-   if((config = fopen(config_file, "r")) == NULL) {
-      return EX_CONFIG;
-   }
+    if((config = fopen(config_file, "r")) == NULL) {
+        if (is_user_defined_p == 1) { /* if the config file was user defined we should issue an error */
+	    fprintf(stderr,"Failed to open config file: %s\n", config_file);
+	}
+	return EX_CONFIG;
+    }
 
-   while(!(feof(config)) && (fgets(option, 100, config))) {
+    while(!(feof(config)) && (fgets(option, 100, config))) {
 
-      count++; // increment the line counter
+        count++; // increment the line counter
 
-      if(option[0] == '#' || option[0] == '\n')
-         continue;
+	if(option[0] == '#' || option[0] == '\n')
+	    continue;
 
-      tok = option;
-      while((tok = strtok(tok, " "))) {
-         for(i=strlen(tok); i>0; i--) {
-            if(tok[i] == '\n')
-               tok[i] = '\0';
-         }
-         if((combo_argv[*combo_argc] = 
-                  (char *)malloc(strlen(tok)+1)) == NULL) {
-            libspamc_log(flags, LOG_ERR,
-              "Error allocating memory for option \"%s\" in %s line %d", 
-              tok, config_file, count);
-            continue;
-         }
-         strcpy(combo_argv[*combo_argc], tok);
-         tok = NULL;
-         *combo_argc+=1;
-      }
-   }
-   for(i=0; i<argc; i++) {
-      if((combo_argv[*combo_argc] =
-               (char *)malloc(strlen(argv[i]+1))) == NULL) {
-         libspamc_log(flags, LOG_ERR,
-           "Error allocating memory for command line option \"%s\"",
-           argv[i]);
-         continue;
-      } else {
-         strcpy(combo_argv[*combo_argc], argv[i]);
-         *combo_argc+=1;
-      }
-   }
-   return EX_OK;
+	tok = option;
+	while((tok = strtok(tok, " "))) {
+	    for(i=strlen(tok); i>0; i--) {
+	        if(tok[i] == '\n')
+		    tok[i] = '\0';
+	    }
+	    if((combo_argv[*combo_argc] = 
+		(char *)malloc(strlen(tok)+1)) == NULL) {
+	        libspamc_log(flags, LOG_ERR,
+			     "Error allocating memory for option \"%s\" in %s line %d", 
+			     tok, config_file, count);
+		continue;
+	    }
+	    strcpy(combo_argv[*combo_argc], tok);
+	    tok = NULL;
+	    *combo_argc+=1;
+	}
+    }
+    for(i=0; i<argc; i++) {
+        if((combo_argv[*combo_argc] =
+	    (char *)malloc(strlen(argv[i]+1))) == NULL) {
+	    libspamc_log(flags, LOG_ERR,
+			 "Error allocating memory for command line option \"%s\"",
+			 argv[i]);
+	    continue;
+	} else {
+	    strcpy(combo_argv[*combo_argc], argv[i]);
+	    *combo_argc+=1;
+	}
+    }
+    return EX_OK;
 }
 
 void
@@ -663,8 +604,7 @@ main(int argc, char *argv[])
     int combo_argc;
 
     int i;
-    char *config_file = CONFIG_FILE;
-    char *prefix = PREFIX;
+    char *config_file = NULL;
 
     transport_init(&trans);
 
@@ -681,8 +621,6 @@ main(int argc, char *argv[])
    /* set some defaults */
    max_size = 250 * 1024;
    username = NULL;
-   if(strncasecmp(config_file, "${prefix}", 9) == 0)
-      config_file = NULL;
 
    combo_argc = 1;
    if((combo_argv[0] = (char *)malloc(strlen(argv[0]))) != NULL)
@@ -695,26 +633,22 @@ main(int argc, char *argv[])
       }
    }
 
-   if((combine_args(prefix, config_file, argc, argv, 
-               &combo_argc, combo_argv)) != EX_OK)
-   {
-      /* parse only command line arguments (default behaviour) */
-      if((ret = read_args(argc, argv, &max_size, &username, 
-                  &extratype, &trans)) != EX_OK)
-      {
-         if(ret == EX_TEMPFAIL)
-            ret = EX_OK;
-         goto finish;
-      }
+   if((combine_args(config_file, argc, argv, &combo_argc, combo_argv)) == EX_OK) {
+     /* Parse the combined arguments of command line and config file */
+     if ((ret = read_args(combo_argc, combo_argv, &max_size, &username, 
+			  &extratype, &trans)) != EX_OK) {
+       if (ret == EX_TEMPFAIL)
+	 ret = EX_OK;
+       goto finish;
+     }
    } else {
-   /* Parse the combined arguments of command line and config file */
-      if ((ret = read_args(combo_argc, combo_argv, &max_size, &username, 
-                  &extratype, &trans)) != EX_OK)
-      {
-          if (ret == EX_TEMPFAIL)
-              ret = EX_OK;
-          goto finish;
-      }
+     /* parse only command line arguments (default behaviour) */
+     if((ret = read_args(argc, argv, &max_size, &username, 
+			 &extratype, &trans)) != EX_OK) {
+       if(ret == EX_TEMPFAIL)
+	 ret = EX_OK;
+       goto finish;
+     }
    }
 
    ret = get_current_user(&username);
