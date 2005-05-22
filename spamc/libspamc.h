@@ -231,7 +231,7 @@ int message_filter(struct transport *tp, const char *username,
  */
 int message_tell(struct transport *tp, const char *username, int flags,
 		 struct message *m, int msg_class,
-		 uint tellflags, uint *didtellflags);
+		 unsigned int tellflags, unsigned int *didtellflags);
 
 /* Dump the message. If there is any data in the message (typically, m->type
  * will be MESSAGE_ERROR) it will be message_writed. Then, fd_in will be piped
