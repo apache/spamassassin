@@ -146,6 +146,12 @@ sub check {
   }
 
   {
+    # bug 4353:
+    # Do this before the RBL tests are kicked off.  The metadata parsing
+    # will figure out the (un)trusted relays and such, which are used in the
+    # rbl calls.
+    $self->extract_message_metadata();
+
     # Here, we launch all the DNS RBL queries and let them run while we
     # inspect the message
     $self->run_rbl_eval_tests ($self->{conf}->{rbl_evals});
@@ -154,8 +160,6 @@ sub check {
     my $decoded = $self->get_decoded_stripped_body_text_array();
     my $bodytext = $self->get_decoded_body_text_array();
     my $fulltext = $self->{msg}->get_pristine();
-
-    $self->extract_message_metadata();
 
     my @uris = $self->get_uri_list();
 
