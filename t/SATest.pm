@@ -292,12 +292,16 @@ sub spamcrun {
   my $spamcargs;
   if($args !~ /\b(?:-p\s*[0-9]+|-F|-U)\b/)
   {
-    $spamcargs = "$spamc -d $spamdhost -p $spamdport $args";
+    $args = "-d $spamdhost -p $spamdport $args";
   }
-  else
-  {
+
+  if ($args !~ /-F/) {
+    $spamcargs = "$spamc -F data/spamc_blank.cf $args";
+  }
+  else {
     $spamcargs = "$spamc $args";
   }
+
   $spamcargs =~ s!/!\\!g if ($^O =~ /^MS(DOS|Win)/i);
 
   print ("\t$spamcargs\n");
