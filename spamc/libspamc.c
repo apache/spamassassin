@@ -1111,7 +1111,7 @@ int message_process(struct transport *trans, char *username, int max_size,
 
 int message_tell(struct transport *tp, const char *username, int flags,
 		 struct message *m, int msg_class,
-		 uint tellflags, uint *didtellflags)
+		 unsigned int tellflags, unsigned int *didtellflags)
 {
     char buf[8192];
     size_t bufsiz = (sizeof(buf) / sizeof(*buf)) - 4; /* bit of breathing room */

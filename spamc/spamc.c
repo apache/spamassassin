@@ -690,8 +690,8 @@ main(int argc, char *argv[])
 
  	    if (flags & SPAMC_LEARN) {
 	      int msg_class = 0;
-	      uint tellflags = 0;
-	      uint didtellflags = 0;
+	      unsigned int tellflags = 0;
+	      unsigned int didtellflags = 0;
 
 	      if ((extratype == 0) || (extratype == 1)) {
 		if (extratype == 0) {
@@ -724,8 +724,8 @@ main(int argc, char *argv[])
 	    }
  	    else if (flags & SPAMC_REPORT_MSG) {
 	      int msg_class = 0;
-	      uint tellflags = 0;
-	      uint didtellflags = 0;
+	      unsigned int tellflags = 0;
+	      unsigned int didtellflags = 0;
 
 	      if (extratype == 0) {
 		msg_class = SPAMC_MESSAGE_CLASS_SPAM;
