@@ -766,7 +766,7 @@ static float _locale_safe_string_to_float(char *buf, int siz)
 
 static int
 _handle_spamd_header(struct message *m, int flags, char *buf, int len,
-		     int *didtellflags)
+		     unsigned int *didtellflags)
 {
     char is_spam[6];
     char s_str[21], t_str[21];
@@ -850,7 +850,7 @@ int message_filter(struct transport *tp, const char *username,
     float version;
     int response;
     int failureval;
-    int throwaway;
+    unsigned int throwaway;
     SSL_CTX *ctx = NULL;
     SSL *ssl = NULL;
     SSL_METHOD *meth;
