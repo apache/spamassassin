@@ -1,5 +1,14 @@
-Note for Users Upgrading to SpamAssassin 3.0.0
+Note for Users Upgrading to SpamAssassin 3.1.0
 -----------------------------------------------
+
+- The AWL support for NDBM_File databases has been dropped, due to a bug in
+  that package which renders it useless (bug 4353).  It appears that SDBM_File,
+  the package which will be used instead, is fully compatible with NDBM
+  however, so this should be unnoticeable.
+
+
+Note for Users Upgrading from SpamAssassin 3.0.x
+------------------------------------------------
 
 - The SpamAssassin 2.6x release series was the last set of releases to
   officially support perl versions earlier than perl 5.6.1.  If you are
