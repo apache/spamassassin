@@ -217,14 +217,17 @@ will be used.  The format is:
 
 ie. a space-separated list of perl module names.  The default is:
 
-  DB_File GDBM_File NDBM_File SDBM_File
+  DB_File GDBM_File SDBM_File
+
+NDBM_File is no longer supported, since it appears to have bugs that
+preclude its use for the AWL (see SpamAssassin bug 4353).
 
 =cut
 
   push (@cmds, {
 		setting => 'auto_whitelist_db_modules',
 		is_admin => 1,
-		default => 'DB_File GDBM_File NDBM_File SDBM_File',
+		default => 'DB_File GDBM_File SDBM_File',
 		type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
 	       });
 
