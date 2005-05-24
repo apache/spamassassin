@@ -1,13 +1,5 @@
 # SpamAssassin rules file: bugzilla-scraped needs-mc rules
 
-## MC: bug 4342 cmt 6: start
-meta T_MC_MSGID_FROM_MTA_HEADER_b4342_c6 (__MSGID_BEFORE_RECEIVED_b4342_c6 && !__MSGID_BEFORE_OKAY_b4342_c6)
-header __MSGID_BEFORE_RECEIVED_b4342_c6 ALL =~ /\nMessage-Id:.*\nReceived:/si
-header __MSGID_BEFORE_OKAY_b4342_c6 Message-Id =~/\@[a-z0-9.-]+\.(?:yahoo|wanadoo)(?:\.[a-z]{2,3}){1,2}>/
-header __FROM_HOTMAIL_COM_b4342_c6 From =~ /\@hotmail\.com\b/i
-meta T_MC_MSGID_MTA_NOT_HOTMAIL_b4342_c6 ( T_MC_MSGID_FROM_MTA_HEADER_b4342_c6 && !__FROM_HOTMAIL_COM_b4342_c6 )
-## MC: bug 4342 cmt 6: end
-
 ## MC: bug 3714 cmt 8: start
 body __FIDEW1_b3714_c8 /project/i
 body __FIDEW2_b3714_c8 /foresee/i
