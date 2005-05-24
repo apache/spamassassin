@@ -115,6 +115,8 @@ else
   # Now do the real work...
   print "copy config.h.win config.h\n";
   copy(q{config.h.win}, q{config.h}) || die "Can't copy `config.h.win' to `config.h': $!";
+  print "copy spamc.h.win spamc.h\n";
+  copy(q{spamc.h.win}, q{spamc.h}) || die "Can't copy `spamc.h.win' to `spamc.h': $!";
 
   # We'll use our preprocessor for variable replacement in the Makefile.
   # Note that variables are enclosed by *two* @s while autoconf uses only
@@ -145,4 +147,3 @@ else
     print "cd " . updir() . "\n" for splitdir($srcdir);
   }
 } #* RUNNING_ON_NATIVE_WINDOWS *#
-
