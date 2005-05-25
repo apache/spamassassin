@@ -309,6 +309,12 @@ sub set_config {
           is_rhsbl => 0
         };
       }
+      elsif ($value =~ /^$/) {
+        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
+      else {
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
     }
   });
 
@@ -324,6 +330,12 @@ sub set_config {
 	  zone => $zone, type => $type,
           is_rhsbl => 1
         };
+      }
+      elsif ($value =~ /^$/) {
+        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
+      else {
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
     }
   });
@@ -346,6 +358,12 @@ sub set_config {
           rulename => $rulename
         };
       }
+      elsif ($value =~ /^$/) {
+        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
+      else {
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
     }
   });
 
@@ -354,6 +372,9 @@ sub set_config {
     default => {},
     code => sub {
       my ($self, $key, $value, $line) = @_;
+      if ($value =~ /^$/) {
+        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
       foreach my $domain (split(/\s+/, $value)) {
         $self->{uridnsbl_skip_domains}->{lc $domain} = 1;
       }

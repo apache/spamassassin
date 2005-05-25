@@ -101,6 +101,12 @@ guess will be used as the From: address in SpamCop reports.
       if ($value =~ /([^<\s]+\@[^>\s]+)/) {
 	$self->{spamcop_from_address} = $1;
       }
+      elsif ($value =~ /^$/) {
+	return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
+      else {
+	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
     },
   });
 
@@ -122,6 +128,12 @@ the SpamCop system.
       my ($self, $key, $value, $line) = @_;
       if ($value =~ /([^<\s]+\@[^>\s]+)/) {
 	$self->{spamcop_to_address} = $1;
+      }
+      elsif ($value =~ /^$/) {
+	return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
+      else {
+	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
     },
   });
