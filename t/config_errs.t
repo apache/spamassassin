@@ -4,7 +4,9 @@
 # and (b) the 'plan' line means all tests are effectively ignored from
 # 'make test'.
 
-use Test; plan tests => 0;
+use Test;
+
+plan tests => 0;
 exit 0;     
 
 # ---------------------------------------------------------------------------
@@ -13,6 +15,11 @@ exit 0;
 my $WHITELIST = qr/^
     require_version
     |\S+_template
+    |clear_trusted_networks
+    |clear_internal_networks
+    |clear_headers
+    |descriptions
+    |test
 $/ox;
 
 # ---------------------------------------------------------------------------
@@ -36,7 +43,6 @@ use strict;
 use SATest; sa_t_init("config_errs");
 use Test;
 use Mail::SpamAssassin;
-use vars qw(%patterns %anti_patterns);
 
 # initialize SpamAssassin
 my $sa = create_saobj({'dont_copy_prefs' => 1});
@@ -51,12 +57,10 @@ foreach my $cmd (@{$sa->{conf}{registered_commands}}) {
   next if ($name =~ $WHITELIST);
 
   $cf .= "$name\n";
-  push (@want, qr/
-        failed to parse line, (?:no value provided|\"\" is not valid)
-        for \"$name\", skipping: /x); # "
+  push (@want, qr/failed to parse line, (?:no value provided|\"\" is not valid) for \"$name\", skipping: / );  # "
 }
 
-plan tests => (scalar(keys %anti_patterns) + scalar(keys %patterns));
+plan tests => $#want+3;
 
 tstlocalrules ($cf);
 
