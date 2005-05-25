@@ -226,6 +226,12 @@ body, header, uri, full, rawbody tests are supported.
     setting => 'replace_rules',
     code => sub {
       my ($self, $key, $value, $line) = @_;
+      unless (defined $value && $value !~ /^$/) {
+	return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
+      unless ($value =~ /\S+/) {
+	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
       foreach my $rule (split(' ', $value)) {
 	$conf->{rules_to_replace}->{$rule} = 1;
       }

@@ -197,7 +197,7 @@ across all users, although that is not recommended.
 		default => '__userstate__/auto-whitelist',
 		code => sub {
 		  my ($self, $key, $value, $line) = @_;
-		  unless (defined $value) {
+		  unless (defined $value && $value !~ /^$/) {
 		    return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
 		  }
 		  if (-d $value) {

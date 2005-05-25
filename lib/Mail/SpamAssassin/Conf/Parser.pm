@@ -573,7 +573,10 @@ sub setup_default_code_cb {
 sub set_numeric_value {
   my ($conf, $key, $value, $line) = @_;
 
-  unless (defined $value && $value =~ /^-?\d+(?:\.\d+)?$/) {
+  unless (defined $value && $value !~ /^$/) {
+    return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+  }
+  unless ($value =~ /^-?\d+(?:\.\d+)?$/) {
     return $Mail::SpamAssassin::Conf::INVALID_VALUE;
   }
 
@@ -583,7 +586,10 @@ sub set_numeric_value {
 sub set_bool_value {
   my ($conf, $key, $value, $line) = @_;
 
-  unless (defined $value && ($value == 1 || $value == 0) ) {
+  unless (defined $value && $value !~ /^$/) {
+    return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+  }
+  unless ($value == 1 || $value == 0) {
     return $Mail::SpamAssassin::Conf::INVALID_VALUE;
   }
 
@@ -593,7 +599,7 @@ sub set_bool_value {
 sub set_string_value {
   my ($conf, $key, $value, $line) = @_;
 
-  unless (defined $value) {
+  unless (defined $value && $value !~ /^$/) {
     return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
   }
 
@@ -613,11 +619,19 @@ sub set_hash_key_value {
 
 sub set_addrlist_value {
   my ($conf, $key, $value, $line) = @_;
+
+  unless (defined $value && $value =~ /^(?:\S+\@\S+(?:\s+\S+\@\S+)*)$/) {
+    return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+  }
   $conf->{parser}->add_to_addrlist ($key, split (' ', $value));
 }
 
 sub remove_addrlist_value {
   my ($conf, $key, $value, $line) = @_;
+
+  unless (defined $value && $value =~ /^(?:\S+\@\S+(?:\s+\S+\@\S+)*)$/) {
+    return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+  }
   $conf->{parser}->remove_from_addrlist ($key, split (' ', $value));
 }
 

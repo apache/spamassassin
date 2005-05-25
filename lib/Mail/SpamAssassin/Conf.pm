@@ -232,7 +232,7 @@ it from running.
           info($msg);
         }
         $self->{errors}++;
-        return;
+        return $INVALID_VALUE;
       }
 
       # If we're only passed 1 score, copy it to the other scoresets
@@ -259,7 +259,7 @@ it from running.
           info($msg);
         }
         $self->{errors}++;
-        return;
+        return $MISSING_REQUIRED_VALUE;
       }
     }
   });
@@ -364,6 +364,12 @@ these are often targets for spammer spoofing.
     setting => 'whitelist_from_rcvd',
     code => sub {
       my ($self, $key, $value, $line) = @_;
+      unless (defined $value && $value !~ /^$/) {
+	return $MISSING_REQUIRED_VALUE;
+      }
+      unless ($value =~ /^\S+\@\S+\s+\S+$/) {
+	return $INVALID_VALUE;
+      }
       $self->{parser}->add_to_addrlist_rcvd ('whitelist_from_rcvd',
                                         split(/\s+/, $value));
     }
@@ -373,6 +379,12 @@ these are often targets for spammer spoofing.
     setting => 'def_whitelist_from_rcvd',
     code => sub {
       my ($self, $key, $value, $line) = @_;
+      unless (defined $value && $value !~ /^$/) {
+	return $MISSING_REQUIRED_VALUE;
+      }
+      unless ($value =~ /^\S+\@\S+\s+\S+$/) {
+	return $INVALID_VALUE;
+      }
       $self->{parser}->add_to_addrlist_rcvd ('def_whitelist_from_rcvd',
                                         split(/\s+/, $value));
     }
@@ -431,6 +443,12 @@ e.g.
     setting => 'unwhitelist_from_rcvd',
     code => sub {
       my ($self, $key, $value, $line) = @_;
+      unless (defined $value && $value !~ /^$/) {
+	return $MISSING_REQUIRED_VALUE;
+      }
+      unless ($value =~ /^(?:\S+\@\S+(?:\s+\S+\@\S+)*)$/) {
+	return $INVALID_VALUE;
+      }
       $self->{parser}->remove_from_addrlist_rcvd('whitelist_from_rcvd',
                                         split (/\s+/, $value));
       $self->{parser}->remove_from_addrlist_rcvd('def_whitelist_from_rcvd',
@@ -573,8 +591,11 @@ header.
       my($hdr, $string) = split(/\s+/, $value, 2);
       $hdr = ucfirst(lc($hdr));
 
+      if ($hdr =~ /^$/) {
+	return $MISSING_REQUIRED_VALUE;
+      }
       # We only deal with From, Subject, and To ...
-      if ($hdr =~ /^(?:From|Subject|To)$/) {
+      elsif ($hdr =~ /^(?:From|Subject|To)$/) {
 	unless (defined $string && $string =~ /\S/) {
 	  delete $self->{rewrite_header}->{$hdr};
 	  return;
@@ -586,9 +607,11 @@ header.
         $self->{rewrite_header}->{$hdr} = $string;
         return;
       }
-
-      # if we get here, note the issue, then we'll fail through for an error.
-      info("config: rewrite_header: ignoring $hdr, not From, Subject, or To");
+      else {
+	# if we get here, note the issue, then we'll fail through for an error.
+	info("config: rewrite_header: ignoring $hdr, not From, Subject, or To");
+	return $INVALID_VALUE;
+      }
     }
   });
 
@@ -882,6 +905,9 @@ then it's trusted
     setting => 'trusted_networks',
     code => sub {
       my ($self, $key, $value, $line) = @_;
+      unless (defined $value && $value !~ /^$/) {
+	return $MISSING_REQUIRED_VALUE;
+      }
       foreach my $net (split (/\s+/, $value)) {
         $self->{trusted_networks}->add_cidr ($net);
       }
@@ -926,6 +952,9 @@ SpamAssassin is running will be considered external.
     setting => 'internal_networks',
     code => sub {
       my ($self, $key, $value, $line) = @_;
+      unless (defined $value && $value !~ /^$/) {
+	return $MISSING_REQUIRED_VALUE;
+      }
       foreach my $net (split (/\s+/, $value)) {
         $self->{internal_networks}->add_cidr ($net);
       }
@@ -2172,7 +2201,7 @@ more effective with individual user databases.
     default => '__userstate__/bayes',
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      unless (defined $value) {
+      unless (defined $value && $value !~ /^$/) {
 	return $MISSING_REQUIRED_VALUE;
       }
       if (-d $value) {
