@@ -100,6 +100,17 @@ static int timeout = 600;
 
 
 void
+check_malloc (void *ptr)
+{
+    if(ptr == NULL) {
+        libspamc_log(flags, LOG_ERR,
+                      "Error allocating memory using malloc\n");
+        /* this is really quite serious.  we can't do anything. die */
+        exit(EX_OSERR);
+    }
+}
+
+void
 print_version(void)
 {
     printf("%s version %s\n", "SpamAssassin Client", VERSION_STRING);
@@ -431,29 +442,21 @@ combine_args(char *config_file, int argc, char **argv,
 	        if(tok[i] == '\n')
 		    tok[i] = '\0';
 	    }
-	    if((combo_argv[*combo_argc] = 
-		(char *)malloc(strlen(tok)+1)) == NULL) {
-	        libspamc_log(flags, LOG_ERR,
-			     "Error allocating memory for option \"%s\" in %s line %d", 
-			     tok, config_file, count);
-		continue;
-	    }
-	    strcpy(combo_argv[*combo_argc], tok);
+            combo_argv[*combo_argc] = strdup(tok);
+            check_malloc(combo_argv[*combo_argc]);
+            // TODO: leaked.  not a big deal since spamc exits quickly
 	    tok = NULL;
 	    *combo_argc+=1;
 	}
     }
+
+    fclose(config);
+
     for(i=0; i<argc; i++) {
-        if((combo_argv[*combo_argc] =
-	    (char *)malloc(strlen(argv[i]+1))) == NULL) {
-	    libspamc_log(flags, LOG_ERR,
-			 "Error allocating memory for command line option \"%s\"",
-			 argv[i]);
-	    continue;
-	} else {
-	    strcpy(combo_argv[*combo_argc], argv[i]);
-	    *combo_argc+=1;
-	}
+        combo_argv[*combo_argc] = strdup(argv[i]);
+        check_malloc(combo_argv[*combo_argc]);
+        // TODO: leaked.  not a big deal since spamc exits quickly
+        *combo_argc+=1;
     }
     return EX_OK;
 }
@@ -623,8 +626,9 @@ main(int argc, char *argv[])
    username = NULL;
 
    combo_argc = 1;
-   if((combo_argv[0] = (char *)malloc(strlen(argv[0]))) != NULL)
-      strcpy(combo_argv[0], argv[0]);
+   combo_argv[0] = strdup(argv[0]);
+   check_malloc(combo_argv[0]);
+   // TODO: leaked.  not a big deal since spamc exits quickly
 
    for(i=0; i<argc; i++) {
       if(strncmp(argv[i], "-F", 2) == 0) {
