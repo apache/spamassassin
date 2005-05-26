@@ -233,11 +233,13 @@ read_args(int argc, char **argv,
                  * store the remaining arguments.
                  */
                 exec_argv = malloc(sizeof(*exec_argv) * (argc - optind + 2));
-                if (exec_argv == NULL)
+                if (exec_argv == NULL) {
                     return EX_OSERR;
+                }
                 
-                for (i = 0, j = optind - 1; j < argc; i++, j++)
+                for (i = 0, j = optind - 1; j < argc; i++, j++) {
                     exec_argv[i] = argv[j];
+                }
                 exec_argv[i] = NULL;
                 
                 return EX_OK;
@@ -324,7 +326,7 @@ read_args(int argc, char **argv,
 		if (strcmp(optarg,"report") == 0) {
 		    *extratype = 0;
 		}
-	    else if (strcmp(optarg,"revoke") == 0) {
+                else if (strcmp(optarg,"revoke") == 0) {
 		    *extratype = 1;
 		}
 		else {
@@ -433,8 +435,9 @@ combine_args(char *config_file, int argc, char **argv,
 
         count++; // increment the line counter
 
-	if(option[0] == '#' || option[0] == '\n')
+	if(option[0] == '#' || option[0] == '\n') {
 	    continue;
+        }
 
 	tok = option;
 	while((tok = strtok(tok, " ")) != NULL) {
@@ -637,18 +640,22 @@ main(int argc, char *argv[])
        }
     }
  
-    if((combine_args(config_file, argc, argv, &combo_argc, combo_argv)) == EX_OK) {
+    if((combine_args(config_file, argc, argv, &combo_argc, combo_argv)) == EX_OK)
+    {
       /* Parse the combined arguments of command line and config file */
       if ((ret = read_args(combo_argc, combo_argv, &max_size, &username, 
- 			  &extratype, &trans)) != EX_OK) {
+ 			  &extratype, &trans)) != EX_OK)
+      {
         if (ret == EX_TEMPFAIL)
  	 ret = EX_OK;
         goto finish;
       }
-    } else {
+    }
+    else {
       /* parse only command line arguments (default behaviour) */
       if((ret = read_args(argc, argv, &max_size, &username, 
- 			 &extratype, &trans)) != EX_OK) {
+ 			 &extratype, &trans)) != EX_OK)
+      {
         if(ret == EX_TEMPFAIL)
  	 ret = EX_OK;
         goto finish;
