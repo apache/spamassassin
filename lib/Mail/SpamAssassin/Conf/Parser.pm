@@ -620,7 +620,7 @@ sub set_hash_key_value {
 sub set_addrlist_value {
   my ($conf, $key, $value, $line) = @_;
 
-  unless (defined $value && $value =~ /^(?:\S+\@\S+(?:\s+\S+\@\S+)*)$/) {
+  unless (defined $value && $value !~ /^$/) {
     return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
   }
   $conf->{parser}->add_to_addrlist ($key, split (' ', $value));
@@ -629,7 +629,7 @@ sub set_addrlist_value {
 sub remove_addrlist_value {
   my ($conf, $key, $value, $line) = @_;
 
-  unless (defined $value && $value =~ /^(?:\S+\@\S+(?:\s+\S+\@\S+)*)$/) {
+  unless (defined $value && $value !~ /^$/) {
     return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
   }
   $conf->{parser}->remove_from_addrlist ($key, split (' ', $value));
