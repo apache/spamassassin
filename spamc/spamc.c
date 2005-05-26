@@ -122,7 +122,7 @@ print_version(void)
 static void
 usg(char *str)
 {
-  printf("%s", str);
+    printf("%s", str);
 }
 
 void
@@ -621,45 +621,45 @@ main(int argc, char *argv[])
     signal(SIGPIPE, SIG_IGN);
 #endif
 
-   /* set some defaults */
-   max_size = 250 * 1024;
-   username = NULL;
-
-   combo_argc = 1;
-   combo_argv[0] = strdup(argv[0]);
-   check_malloc(combo_argv[0]);
-   // TODO: leaked.  not a big deal since spamc exits quickly
-
-   for(i=0; i<argc; i++) {
-      if(strncmp(argv[i], "-F", 2) == 0) {
-         config_file = argv[i+1];
-         break;
+    /* set some defaults */
+    max_size = 250 * 1024;
+    username = NULL;
+ 
+    combo_argc = 1;
+    combo_argv[0] = strdup(argv[0]);
+    check_malloc(combo_argv[0]);
+    // TODO: leaked.  not a big deal since spamc exits quickly
+ 
+    for(i=0; i<argc; i++) {
+       if(strncmp(argv[i], "-F", 2) == 0) {
+          config_file = argv[i+1];
+          break;
+       }
+    }
+ 
+    if((combine_args(config_file, argc, argv, &combo_argc, combo_argv)) == EX_OK) {
+      /* Parse the combined arguments of command line and config file */
+      if ((ret = read_args(combo_argc, combo_argv, &max_size, &username, 
+ 			  &extratype, &trans)) != EX_OK) {
+        if (ret == EX_TEMPFAIL)
+ 	 ret = EX_OK;
+        goto finish;
       }
-   }
-
-   if((combine_args(config_file, argc, argv, &combo_argc, combo_argv)) == EX_OK) {
-     /* Parse the combined arguments of command line and config file */
-     if ((ret = read_args(combo_argc, combo_argv, &max_size, &username, 
-			  &extratype, &trans)) != EX_OK) {
-       if (ret == EX_TEMPFAIL)
-	 ret = EX_OK;
-       goto finish;
-     }
-   } else {
-     /* parse only command line arguments (default behaviour) */
-     if((ret = read_args(argc, argv, &max_size, &username, 
-			 &extratype, &trans)) != EX_OK) {
-       if(ret == EX_TEMPFAIL)
-	 ret = EX_OK;
-       goto finish;
-     }
-   }
-
-   ret = get_current_user(&username);
-   if (ret != EX_OK)
-       goto finish;
-       
-   if ((flags & SPAMC_RANDOMIZE_HOSTS) != 0) {
+    } else {
+      /* parse only command line arguments (default behaviour) */
+      if((ret = read_args(argc, argv, &max_size, &username, 
+ 			 &extratype, &trans)) != EX_OK) {
+        if(ret == EX_TEMPFAIL)
+ 	 ret = EX_OK;
+        goto finish;
+      }
+    }
+ 
+    ret = get_current_user(&username);
+    if (ret != EX_OK)
+        goto finish;
+        
+    if ((flags & SPAMC_RANDOMIZE_HOSTS) != 0) {
 	/* we don't need strong randomness; this is just so we pick
 	 * a random host for loadbalancing.
 	 */
