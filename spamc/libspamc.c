@@ -733,7 +733,8 @@ static float _locale_safe_string_to_float(char *buf, int siz)
 
     cp = (dot + 1);
     postdot = (float) (strtol(cp, NULL, 10));
-    if (postdot == 0.0) {
+    /* note: don't compare floats == 0.0, it's unsafe.  use a range */
+    if (postdot >= -0.00001 && postdot <= 0.00001) {
 	return ret;
     }
 

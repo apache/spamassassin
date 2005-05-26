@@ -376,7 +376,7 @@ read_args(int argc, char **argv,
         }
     }
 
-    // learning action has to block some parameters //
+    /* learning action has to block some parameters */
     if (flags & SPAMC_LEARN) {
         if (flags & SPAMC_CHECK_ONLY) {
 	    libspamc_log(flags, LOG_ERR, "Learning excludes check only");
@@ -433,7 +433,7 @@ combine_args(char *config_file, int argc, char **argv,
 
     while(!(feof(config)) && (fgets(option, 100, config))) {
 
-        count++; // increment the line counter
+        count++; /* increment the line counter */
 
 	if(option[0] == '#' || option[0] == '\n') {
 	    continue;
@@ -447,7 +447,7 @@ combine_args(char *config_file, int argc, char **argv,
 	    }
             combo_argv[*combo_argc] = strdup(tok);
             check_malloc(combo_argv[*combo_argc]);
-            // TODO: leaked.  not a big deal since spamc exits quickly
+            /* TODO: leaked.  not a big deal since spamc exits quickly */
 	    tok = NULL;
 	    *combo_argc+=1;
 	}
@@ -459,7 +459,7 @@ combine_args(char *config_file, int argc, char **argv,
     for(i=1; i<argc; i++) {
         combo_argv[*combo_argc] = strdup(argv[i]);
         check_malloc(combo_argv[*combo_argc]);
-        // TODO: leaked.  not a big deal since spamc exits quickly
+        /* TODO: leaked.  not a big deal since spamc exits quickly */
         *combo_argc+=1;
     }
     return EX_OK;
@@ -632,7 +632,7 @@ main(int argc, char *argv[])
     combo_argc = 1;
     combo_argv[0] = strdup(argv[0]);
     check_malloc(combo_argv[0]);
-    // TODO: leaked.  not a big deal since spamc exits quickly
+    /* TODO: leaked.  not a big deal since spamc exits quickly */
  
     for(i=0; i<argc; i++) {
        if(strncmp(argv[i], "-F", 2) == 0) {
