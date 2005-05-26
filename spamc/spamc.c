@@ -455,7 +455,8 @@ combine_args(char *config_file, int argc, char **argv,
 
     fclose(config);
 
-    for(i=0; i<argc; i++) {
+    /* note: not starting at 0, that's the command name */
+    for(i=1; i<argc; i++) {
         combo_argv[*combo_argc] = strdup(argv[i]);
         check_malloc(combo_argv[*combo_argc]);
         // TODO: leaked.  not a big deal since spamc exits quickly
