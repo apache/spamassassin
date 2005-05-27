@@ -21,7 +21,7 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::HTML;
 use Mail::SpamAssassin::Util;
 
-plan tests => 63;
+plan tests => 64;
 
 ##############################################
 
@@ -81,6 +81,7 @@ ok(try_domains('http:/www.spamassassin.org/lists.html', 'spamassassin.org'));
 ok(try_domains('http:www.spamassassin.org/lists.html', 'spamassassin.org'));
 ok(try_domains('http://kung.pao.com.cn', 'pao.com.cn'));
 ok(try_domains('http://blah.blah.com:/', 'blah.com'));
+ok(try_domains('http://ebg&vosxfov.com.munged-rxspecials.net/b/Tr3f0amG','munged-rxspecials.net'));
 
 ##############################################
 
