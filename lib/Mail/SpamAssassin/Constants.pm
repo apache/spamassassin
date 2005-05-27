@@ -71,6 +71,7 @@ use constant DUMP_BACKUP => 8;
 #   CYMRU = <http://www.cymru.com/Documents/bogon-list.html>
 #
 # Last update
+#   2005-05-24 Daryl C. W. O'Shea - removed all but private ranges
 #   2004-07-23 Daniel Quinlan - added CYMRU source, sorted, many updates
 #   2004-05-22 Daniel Quinlan - removed 58/8 and 59/8
 #   2004-03-08 Justin Mason - reimplemented removed code
@@ -89,25 +90,6 @@ use constant IP_IN_RESERVED_RANGE => qr{^(?:
   172\.(?:1[6-9]|2[0-9]|3[01])|	   # 172.16-172.31/16: Private Use (3330)
   169\.254|			   # 169.254/16:       Private Use (APIPA)
   127|				   # 127/8:            Private Use (localhost)
-# reserved/multicast ranges
-  [01257]|			   # 000-002/8, 005/8, 007/8: IANA Reserved
-  2[37]|			   # 023/8, 027/8:     IANA Reserved
-  3[1679]|			   # 031/8, 036/8, 037/8, 039/8: IANA Reserved
-  4[129]|			   # 041/8, 042/8, 049/8: IANA Reserved
-  50|				   # 050/8:            IANA Reserved
-  7[1-9]|			   # 071-079/8:        IANA Reserved
-  89|				   # 089/8:            IANA Reserved
-  9[0-9]|			   # 090-099/8:        IANA Reserved
-  1[01][0-9]|			   # 100-119/8:        IANA Reserved
-  12[0-6]|			   # 126/8:            IANA Reserved
-  1(?:7[3-9]|8[0-79]|90)	   # 173-187/8, 189/8, 190/8: IANA Reserved
-  192\.0\.2|			   # 192.0.2/24:       Reserved (3330)
-  197|				   # 197/8:            IANA Reserved
-  198\.1[89]|			   # 198.18/15:        Reserved (3330)
-  22[3-9]|			   # 223-239/8:        IANA Rsvd, Mcast
-  23[0-9]|			   # 230-239/8:        IANA Multicast
-  24[0-9]|			   # 240-249/8:        IANA Reserved
-  25[0-5]			   # 255/8:            IANA Reserved
 )\.}ox;
 
 # ---------------------------------------------------------------------------
