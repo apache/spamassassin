@@ -88,20 +88,20 @@ describe RCVD_IN_SORBS_HTTP	SORBS: sender is open HTTP proxy server
 tflags RCVD_IN_SORBS_HTTP	net
 #reuse RCVD_IN_SORBS_HTTP
 
-header RCVD_IN_SORBS_MISC	eval:check_rbl_sub('sorbs', '127.0.0.3')
+header RCVD_IN_SORBS_SOCKS	eval:check_rbl_sub('sorbs', '127.0.0.3')
+describe RCVD_IN_SORBS_SOCKS	SORBS: sender is open SOCKS proxy server
+tflags RCVD_IN_SORBS_SOCKS	net
+#reuse RCVD_IN_SORBS_SOCKS
+
+header RCVD_IN_SORBS_MISC	eval:check_rbl_sub('sorbs', '127.0.0.4')
 describe RCVD_IN_SORBS_MISC	SORBS: sender is open proxy server
 tflags RCVD_IN_SORBS_MISC	net
 #reuse RCVD_IN_SORBS_MISC
 
-header RCVD_IN_SORBS_SMTP	eval:check_rbl_sub('sorbs', '127.0.0.4')
+header RCVD_IN_SORBS_SMTP	eval:check_rbl_sub('sorbs', '127.0.0.5')
 describe RCVD_IN_SORBS_SMTP	SORBS: sender is open SMTP relay
 tflags RCVD_IN_SORBS_SMTP	net
 #reuse RCVD_IN_SORBS_SMTP
-
-header RCVD_IN_SORBS_SOCKS	eval:check_rbl_sub('sorbs', '127.0.0.5')
-describe RCVD_IN_SORBS_SOCKS	SORBS: sender is open SOCKS proxy server
-tflags RCVD_IN_SORBS_SOCKS	net
-#reuse RCVD_IN_SORBS_SOCKS
 
 # delist: $50 fee
 #header RCVD_IN_SORBS_SPAM	eval:check_rbl_sub('sorbs', '127.0.0.6')
