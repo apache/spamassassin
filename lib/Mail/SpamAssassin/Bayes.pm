@@ -1010,10 +1010,16 @@ sub sync {
   my ($self, $sync, $expire, $opts) = @_;
   if (!$self->{conf}->{use_bayes}) { return 0; }
 
-  dbg("bayes: syncing bayes and expiring old tokens...");
-  $self->{store}->sync($opts) if ( $sync );
-  $self->{store}->expire_old_tokens($opts) if ( $expire );
-  dbg("bayes: syncing complete");
+  if ($sync) {
+    dbg("bayes: bayes journal sync starting");
+    $self->{store}->sync($opts);
+    dbg("bayes: bayes journal sync completed");
+  }
+  if ($expire) {
+    dbg("bayes: expiry starting");
+    $self->{store}->expire_old_tokens($opts);
+    dbg("bayes: expiry completed");
+  }
 
   return 0;
 }
