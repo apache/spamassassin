@@ -399,7 +399,7 @@ sub lookup_ns {
 
   } else {
     eval {
-      my $query = $self->{resolver}->search($dom, 'NS');
+      my $query = $self->{resolver}->send($dom, 'NS');
       my @nses = ();
       if ($query) {
 	foreach my $rr ($query->answer) {
@@ -431,7 +431,7 @@ sub lookup_mx {
 
   } else {
     eval {
-      my $query = $self->{resolver}->search($dom, 'MX');
+      my $query = $self->{resolver}->send($dom, 'MX');
       my @ips = ();
       if ($query) {
 	foreach my $rr ($query->answer) {
@@ -489,7 +489,7 @@ sub lookup_ptr {
 
   } else {
     eval {
-      my $query = $self->{resolver}->search($dom);
+      my $query = $self->{resolver}->send($dom);
       if ($query) {
 	foreach my $rr ($query->answer) {
 	  if ($rr->type eq "PTR") {
@@ -532,7 +532,7 @@ sub lookup_a {
 
   } else {
     eval {
-      my $query = $self->{resolver}->search($name);
+      my $query = $self->{resolver}->send($name);
       if ($query) {
 	foreach my $rr ($query->answer) {
 	  if ($rr->type eq "A") {
