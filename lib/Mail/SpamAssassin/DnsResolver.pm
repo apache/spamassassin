@@ -86,8 +86,8 @@ sub load_resolver {
     $self->{res} = Net::DNS::Resolver->new;
     if (defined $self->{res}) {
       $self->{no_resolver} = 0;
-      $self->{retry} = 1;               # retries for non-nackgrounded search
-      $self->{retrans} = 3;   # initial timeout for "non-backgrounded" search run in background
+      $self->{retry} = 1;               # retries for non-nackgrounded query
+      $self->{retrans} = 3;   # initial timeout for "non-backgrounded" query run in background
       $self->{res}->retry(1);           # If it fails, it fails
       $self->{res}->retrans(0);         # If it fails, it fails
       $self->{res}->dnsrch(0);          # ignore domain search-list
@@ -327,13 +327,13 @@ sub poll_responses {
 
 ###########################################################################
 
-=item $packet = $res->search($name, $type, $class)
+=item $packet = $res->send($name, $type, $class)
 
-Emulates C<Net::DNS::Resolver::search()>.
+Emulates C<Net::DNS::Resolver::send()>.
 
 =cut
 
-sub search {
+sub send {
   my ($self, $name, $type, $class) = @_;
   return if $self->{no_resolver};
 
