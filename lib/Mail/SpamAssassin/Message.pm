@@ -744,11 +744,15 @@ sub _parse_normal {
 
   # attempt to figure out a name for this attachment if there is one ...
   my $disp = $part_msg->header('content-disposition') || '';
-  my($filename) = $disp =~ /name="?([^\";]+)"?/i || $ct[3];
+  if ($disp =~ /name="?([^\";]+)"?/i) {
+    $part_msg->{'name'} = $1;
+  }
+  elsif ($ct[3]) {
+    $part_msg->{'name'} = $ct[3];
+  }
 
   $part_msg->{'raw'} = $body;
   $part_msg->{'boundary'} = $boundary;
-  $part_msg->{'name'} = $filename if $filename;
 
   # If this part is a message/* part, and the parent isn't also a
   # message/* part (ie: the main part) go ahead and parse into a tree.
