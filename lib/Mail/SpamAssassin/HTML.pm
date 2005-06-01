@@ -521,6 +521,10 @@ sub text_style {
 	      $new{$whcolor} = name_to_rgb($value);
 	    }
 	  }
+	  elsif (/\s*display:\s*none\b/i) {
+	    $new{display} = 'none';
+	    $self->put_results(span_invisible => 1);
+	  }
 	}
       }
       else {
