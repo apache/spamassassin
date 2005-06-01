@@ -47,6 +47,7 @@ sub new {
   };
 
   bless($self, $class);
+  $self->{msg}->extract_message_metadata($self->{main});
   $self;
 }
 
