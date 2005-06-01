@@ -225,6 +225,11 @@ if (defined $opt{'debug'}) {
   $opt{'debug'} ||= 'all';
 }
 
+if (Mail::SpamAssassin::Util::am_running_on_windows()) {
+  binmode(STDIN);       # bug 4363
+  binmode(STDOUT);
+}
+
 # create the tester factory
 my $spamtest = new Mail::SpamAssassin(
   {

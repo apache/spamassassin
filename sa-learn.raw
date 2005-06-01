@@ -212,6 +212,11 @@ $spamtest = new Mail::SpamAssassin(
 
 $spamtest->init(1);
 
+if (Mail::SpamAssassin::Util::am_running_on_windows()) {
+  binmode(STDIN);       # bug 4363
+  binmode(STDOUT);
+}
+
 # kluge to support old check_bayes_db operation
 if ( defined $bayes_override_path ) {
 
