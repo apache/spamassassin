@@ -72,6 +72,12 @@ sub setup_backchannel_parent_pre_fork {
   ($self->{latest_kid_fh}, $self->{parent}) =
             $io->socketpair(AF_UNIX,SOCK_STREAM,PF_UNSPEC)
             or die "backchannel: socketpair failed: $!";
+
+  # set those to use non-blocking I/O
+  $self->{parent}->blocking(0)
+            or die "backchannel: set non-blocking failed: $!";
+  $self->{latest_kid_fh}->blocking(0)
+            or die "backchannel: set non-blocking failed: $!";
 }
 
 sub setup_backchannel_parent_post_fork {

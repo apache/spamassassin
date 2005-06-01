@@ -21,6 +21,7 @@ package Mail::SpamAssassin::SpamdForkScaling;
 use strict;
 use warnings;
 use bytes;
+use Errno qw();
 
 use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::Logger;
@@ -48,6 +49,11 @@ use constant PFSTATE_BUSY        => 2;
 use constant PFSTATE_KILLED      => 3;
 
 use constant PFORDER_ACCEPT      => 10;
+
+
+# timeout for a sysread() on the command channel.  if we go this long
+# without a message from the spamd parent or child, it's an error.
+use constant TOUT_READ_MAX       => 300;
 
 ###########################################################################
 
@@ -202,7 +208,8 @@ sub read_one_message_from_child_socket {
 
   # "I  b1 b2 b3 b4 \n " or "B  b1 b2 b3 b4 \n "
   my $line;
-  my $nbytes = $sock->sysread($line, 6);
+  my $nbytes = $self->sysread_with_timeout($sock, \$line, 6, TOUT_READ_MAX);
+
   if (!defined $nbytes || $nbytes == 0) {
     dbg("prefork: child closed connection");
 
@@ -266,7 +273,7 @@ sub order_idle_child_to_accept {
       return $self->order_idle_child_to_accept();
     }
 
-    if (!$sock->syswrite ("A....\n"))
+    if (!$self->syswrite_with_retry($sock, "A....\n"))
     {
       # failure to write to the child; bad news.  call it dead
       warn "prefork: killing rogue child $kid, failed to write: $!\n";
@@ -314,7 +321,7 @@ sub child_now_ready_to_accept {
   my ($self, $kid) = @_;
   if ($self->{waiting_for_idle_child}) {
     my $sock = $self->{backchannel}->get_socket_for_child($kid);
-    $sock->syswrite ("A....\n")
+    $self->syswrite_with_retry($sock, "A....\n")
         or die "prefork: $kid claimed it was ready, but write failed: $!";
     $self->{waiting_for_idle_child} = 0;
   }
@@ -343,7 +350,7 @@ sub update_child_status_busy {
 sub report_backchannel_socket {
   my ($self, $str) = @_;
   my $sock = $self->{backchannel}->get_parent_socket();
-  syswrite ($sock, $str)
+  $self->syswrite_with_retry($sock, $str)
         or write "syswrite() to parent failed: $!";
 }
 
@@ -354,7 +361,7 @@ sub wait_for_orders {
   while (1) {
     # "A  .  .  .  .  \n "
     my $line;
-    my $nbytes = $sock->sysread($line, 6);
+    my $nbytes = $self->sysread_with_timeout($sock, \$line, 6, TOUT_READ_MAX);
     if (!defined $nbytes || $nbytes == 0) {
       if ($sock->eof()) {
         dbg("prefork: parent closed, exiting");
@@ -375,6 +382,118 @@ sub wait_for_orders {
       die "prefork: unknown order from parent: '$line'";
     }
   }
+}
+
+###########################################################################
+
+sub sysread_with_timeout {
+  my ($self, $sock, $lineref, $toread, $timeout) = @_;
+
+  $$lineref = '';   # clear the output buffer
+  my $readsofar = 0;
+  my $deadline; # we only set this if the first read fails
+  my $buf;
+
+retry_read:
+  my $nbytes = $sock->sysread($buf, $toread);
+
+  if (!defined $nbytes) {
+    unless ((exists &Errno::EAGAIN && $! == &Errno::EAGAIN)
+        || (exists &Errno::EWOULDBLOCK && $! == &Errno::EWOULDBLOCK))
+    {
+      # an error that wasn't non-blocking I/O-related.  that's serious
+      return undef;
+    }
+
+    # ok, we didn't get it first time.  we'll have to start using
+    # select() and timeouts (which is slower).  Don't warn just yet,
+    # as it's quite acceptable in our design to have to "block" on
+    # sysread()s here.
+
+    my $now = time();
+    my $tout = $timeout;
+    if (!defined $deadline) {
+      # set this.  it'll be close enough ;)
+      $deadline = $now + $timeout;
+    }
+    elsif ($now > $deadline) {
+      # timed out!  report failure
+      warn "prefork: sysread(".$sock->fileno.") failed after $timeout secs";
+      return undef;
+    }
+    else {
+      $tout = $deadline - $now;     # the remaining timeout
+    }
+
+    dbg("prefork: sysread(".$sock->fileno.") not ready, wait max $tout secs");
+    my $rin = '';
+    vec($rin, $sock->fileno, 1) = 1;
+    select($rin, undef, undef, $tout);
+    goto retry_read;
+
+  }
+  elsif ($nbytes == 0) {        # EOF
+    return $readsofar;          # may be a partial read, or 0 for EOF
+
+  }
+  elsif ($nbytes == $toread) {  # a complete read, nice.
+    $readsofar += $nbytes;
+    $$lineref .= $buf;
+    return $readsofar;
+
+  }
+  else {
+    # we want to know about this.  this is not supposed to happen!
+    warn "prefork: partial read of $nbytes, toread=".$toread.
+            "sofar=".$readsofar." fd=".$sock->fileno.", recovering";
+    $readsofar += $nbytes;
+    $$lineref .= $buf;
+    $toread -= $nbytes;
+    goto retry_read;
+  }
+
+  die "assert: should not get here";
+}
+
+sub syswrite_with_retry {
+  my ($self, $sock, $buf) = @_;
+
+  my $written = 0;
+
+retry_write:
+  my $nbytes = $sock->syswrite($buf);
+  if (!defined $nbytes) {
+    unless ((exists &Errno::EAGAIN && $! == &Errno::EAGAIN)
+        || (exists &Errno::EWOULDBLOCK && $! == &Errno::EWOULDBLOCK))
+    {
+      # an error that wasn't non-blocking I/O-related.  that's serious
+      return undef;
+    }
+
+    warn "prefork: syswrite(".$sock->fileno.") failed, retrying...";
+
+    # give it 5 seconds to recover.  we retry indefinitely.
+    my $rout = '';
+    vec($rout, $sock->fileno, 1) = 1;
+    select(undef, $rout, undef, 5);
+
+    goto retry_write;
+  }
+  else {
+    $written += $nbytes;
+    $buf = substr($buf, $nbytes);
+
+    if ($buf eq '') {
+      return $written;      # it's complete, we can return
+    }
+    else {
+      warn "prefork: partial write of $nbytes, towrite=".length($buf).
+            " sofar=".$written." fd=".$sock->fileno.", recovering";
+      goto retry_write;
+    }
+  }
+
+  die "assert: should not get here";
 }
 
 ###########################################################################
