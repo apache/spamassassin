@@ -1926,7 +1926,7 @@ Options:
                                     enables use of -H)
  --ldap-config                      Enable LDAP config (only useful with -x)
  --setuid-with-ldap                 Enable LDAP config (only useful with -x,
-                                    enables use of -a and -H)
+                                    enables use of -H)
  --virtual-config-dir=dir           Enable pattern based Virtual configs
                                     (needs -x)
  -r pidfile, --pidfile              Write the process id to pidfile
@@ -2038,7 +2038,7 @@ only it is using an LDAP server.
 Turn on SQL lookups even when per-user config files have been disabled
 with B<-x> and also setuid to the user.  This is useful for spamd hosts
 which want to load user preferences from an SQL database but also wish to
-support the use of B<-a> (AWL) and B<-H> (Helper home directories.)
+support the use of the auto-whitelist and B<-H> (Helper home directories.)
 
 =item B<--setuid-with-ldap>
 
