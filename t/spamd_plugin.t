@@ -12,7 +12,7 @@ exit unless (!$SKIP_SPAMD_TESTS && !$RUNNING_ON_WINDOWS);
 # ---------------------------------------------------------------------------
 
 tstlocalrules ('
-        loadplugin myTestPlugin data/testplugin.pm
+        loadplugin myTestPlugin ../../data/testplugin.pm
         header MY_TEST_PLUGIN eval:check_test_plugin()
 ');
 

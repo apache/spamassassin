@@ -10,7 +10,7 @@ exit if $SKIP_SPAMC_TESTS;
 # ---------------------------------------------------------------------------
 
 tstlocalrules ("
-	loadplugin reporterplugin data/reporterplugin.pm
+	loadplugin reporterplugin ../../data/reporterplugin.pm
 ");
 
 start_spamd("-L");
