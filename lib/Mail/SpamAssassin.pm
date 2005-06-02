@@ -257,6 +257,12 @@ sub new {
   if (!defined $self) { $self = { }; }
   bless ($self, $class);
 
+  # basic backwards compatibility; debug used to be a boolean.
+  # translate that into 'all', which is what it meant before 3.1.0.
+  if ($self->{debug} && $self->{debug} eq '1') {
+    $self->{debug} = 'all';
+  }
+
   # enable or disable debugging
   Mail::SpamAssassin::Logger::add_facilities($self->{debug});
 
