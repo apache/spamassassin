@@ -1414,8 +1414,8 @@ sub read_cf_file {
   my $txt = '';
 
   if (open (IN, "<".$path)) {
-    $txt .= "file start $path\n";
-    $txt = join ('', <IN>);
+    $txt = "file start $path\n";
+    $txt .= join ('', <IN>);
     # add an extra \n in case file did not end in one.
     $txt .= "\nfile end $path\n";
     close IN;
