@@ -132,11 +132,13 @@ must be prefixed with a facility name followed directly by a colon.
 sub log_message {
   my ($level, @message) = @_;
 
-  # too many die and warn messages out there, don't log the
-  # ones that we don't own
-  if ($level eq "error" or $level eq "warn") {
-    return unless $message[0] =~ /^\S+:/;
-  }
+  # too many die and warn messages out there, don't log the ones that we don't
+  # own.  jm: off: this makes no sense -- if a dependency module dies or warns,
+  # we want to know about it, unless we're *SURE* it's not something worth
+  # worrying about.
+  # if ($level eq "error" or $level eq "warn") {
+  # return unless $message[0] =~ /^\S+:/;
+  # }
 
   my $message = join(" ", @message);
   $message =~ s/[\r\n]+$//;		# remove any trailing newlines
