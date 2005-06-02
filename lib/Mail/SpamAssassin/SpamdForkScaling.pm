@@ -188,7 +188,7 @@ sub main_server_poll {
     if (!$self->order_idle_child_to_accept()) {
       # dbg("prefork: no idle kids, noting overloaded");
       # there are no idle kids!  we're overloaded, mark that
-      $self->{overloaded}++;
+      $self->{overloaded} = 1;
     }
     return;
   }
@@ -209,11 +209,15 @@ sub main_server_poll {
 
         dbg("prefork: overloaded, immediately telling kid to accept");
         if (!$self->order_idle_child_to_accept()) {
-          # this should not happen
-          warn "prefork: oops! still overloaded?";
+          # this can happen if something is buggy in the child, and
+          # it has to be killed, resulting in no idle kids left
+          warn "prefork: lost idle kids, so still overloaded";
+          $self->{overloaded} = 1;
         }
-        dbg("prefork: no longer overloaded");
-        $self->{overloaded} = 0;
+        else {
+          dbg("prefork: no longer overloaded");
+          $self->{overloaded} = 0;
+        }
       }
     }
   }
