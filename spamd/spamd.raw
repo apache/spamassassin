@@ -1701,7 +1701,19 @@ sub handle_user {
   # If vpopmail config enabled then set $dir to virtual homedir
   #
   if ( $opt{'vpopmail'} ) {
-    $dir = `$dir/bin/vuserinfo -d $username`;
+    my $vpopdir = $dir;
+    $dir = `$vpopdir/bin/vuserinfo -d $username`;
+    if ($? != 0) {
+      #
+      # If vuserinfo failed $username could be an alias
+      #
+      $dir = `$vpopdir/bin/valias $username`;
+      if ($? == 0 && $dir !~ /.+ -> &/) {
+        $dir =~ s,.+ -> (/.+)/Maildir/,$1,;
+      } else {
+        undef($dir);
+      }
+    }
     chomp($dir);
   }
   my $cf_file = $dir . "/.spamassassin/user_prefs";
