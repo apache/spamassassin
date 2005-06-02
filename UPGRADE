@@ -77,9 +77,12 @@ Note for Users Upgrading from SpamAssassin 3.0.x
     the data looks valid.
   - start running spamassassin/spamd again
 
-  If, instead of uprading your Bayes database, you want to wipe it and start
-  fresh, simply delete the Bayes database files ("bayes_*") while SA is not
-  running; SpamAssassin will recreate them in the current format when it runs.
+  If, instead of uprading your Bayes database, you want to wipe it and
+  start fresh, you can run "sa-learn --clear" to safely remove your
+  Bayes database files.  If the --clear command issues an error then
+  you can simply delete the Bayes database files ("bayes_*") while SA
+  is not running; SpamAssassin will recreate them in the current
+  format when it runs.
 
 - "spamd" now has a default max-children setting of 5; no more than 5
   child scanner processes will be run in parallel.  Previously, there was
