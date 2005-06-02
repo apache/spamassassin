@@ -28,11 +28,11 @@ use vars qw (
 
 # The list of currently-valid TLDs for the DNS system.
 #
-  # http://www.iana.org/cctld/cctld-whois.htm
-  # "su" Extra from http://www.iana.org/root-whois/
-  # http://www.iana.org/gtld/gtld.htm
-  # http://www.iana.org/arpa-dom/
-  # "eu" just in case, for the future
+# http://www.iana.org/cctld/cctld-whois.htm
+# "su" Extra from http://www.iana.org/root-whois/
+# http://www.iana.org/gtld/gtld.htm
+# http://www.iana.org/arpa-dom/
+# "eu" just in case, for the future
 foreach (qw/
   ac ad ae af ag ai al am an ao aq ar as at au aw az ax ba bb bd be bf bg bh bi 
   bj bm bn bo br bs bt bv bw by bz ca cc cd cf cg ch ci ck cl cm cn co cr cs cu 
@@ -49,14 +49,15 @@ foreach (qw/
   arpa
   eu
   jobs travel
+  xxx
   /) { 
   $VALID_TLDS{$_} = 1;
 }
 
-  # http://www.neustar.us/policies/docs/rfc_1480.txt
-  # data from http://spamcheck.freeapp.net/two-level-tlds , in turn from
-  # http://www.bestregistrar.com/help/ccTLD.htm
-  # http://www.hkdnr.net.hk/instructions/new_domain.html
+# http://www.neustar.us/policies/docs/rfc_1480.txt
+# data from http://spamcheck.freeapp.net/two-level-tlds , in turn from
+# http://www.bestregistrar.com/help/ccTLD.htm
+# http://www.hkdnr.net.hk/instructions/new_domain.html
 foreach(qw/
   fed.us dni.us 
   com.ac edu.ac gov.ac mil.ac net.ac org.ac 
