@@ -43,8 +43,8 @@ lib/Mail/SpamAssassin/Conf/Parser.pm
 lib/Mail/SpamAssassin/Conf/SQL.pm
 lib/Mail/SpamAssassin/Constants.pm
 lib/Mail/SpamAssassin/DBBasedAddrList.pm
-lib/Mail/SpamAssassin/DnsResolver.pm
 lib/Mail/SpamAssassin/Dns.pm
+lib/Mail/SpamAssassin/DnsResolver.pm
 lib/Mail/SpamAssassin/EvalTests.pm
 lib/Mail/SpamAssassin/HTML.pm
 lib/Mail/SpamAssassin/Locales.pm
@@ -66,8 +66,8 @@ lib/Mail/SpamAssassin/PerMsgLearner.pm
 lib/Mail/SpamAssassin/PerMsgStatus.pm
 lib/Mail/SpamAssassin/PersistentAddrList.pm
 lib/Mail/SpamAssassin/Plugin.pm
-lib/Mail/SpamAssassin/Plugin/AccessDB.pm
 lib/Mail/SpamAssassin/Plugin/AWL.pm
+lib/Mail/SpamAssassin/Plugin/AccessDB.pm
 lib/Mail/SpamAssassin/Plugin/AntiVirus.pm
 lib/Mail/SpamAssassin/Plugin/AutoLearnThreshold.pm
 lib/Mail/SpamAssassin/Plugin/DCC.pm
@@ -206,6 +206,7 @@ rules/local.cf
 rules/name-triplets.txt
 rules/triplets.txt
 rules/user_prefs.template
+rules/v310.pre
 sa-learn.raw
 sa-update.raw
 sample-nonspam.txt
@@ -224,13 +225,13 @@ spamc/configure.in
 spamc/configure.pl
 spamc/libspamc.c
 spamc/libspamc.h
-spamc/spamc.h.in
-spamc/spamc.h.win
 spamc/qmail-spamc.c
 spamc/replace/README.getopt
 spamc/replace/getopt.c
 spamc/replace/getopt.h
 spamc/spamc.c
+spamc/spamc.h.in
+spamc/spamc.h.win
 spamc/spamc.pod
 spamc/utils.c
 spamc/utils.h
@@ -267,8 +268,8 @@ t/bayessql.t
 t/blacklist_autolearn.t
 t/body_mod.t
 t/cidrs.t
-t/config_errs.t
 t/config.dist
+t/config_errs.t
 t/data/etc/hello.txt
 t/data/etc/testhost.cert
 t/data/etc/testhost.key
@@ -302,6 +303,7 @@ t/data/nice/mime8
 t/data/nice/mime9
 t/data/nice/not_gtube.eml
 t/data/nice/spf1
+t/data/reporterplugin.pm
 t/data/spam/001
 t/data/spam/002
 t/data/spam/003
@@ -328,7 +330,8 @@ t/data/spam/gtube.eml
 t/data/spam/spf1
 t/data/spam/spf2
 t/data/spam/spf3
-t/data/reporterplugin.pm
+t/data/spamc_blank.cf
+t/data/spamc_test.cf
 t/data/testplugin.pm
 t/data/validuserplugin.pm
 t/data/whitelists/action.eff.org
@@ -352,8 +355,6 @@ t/data/whitelists/ryanairmail.com
 t/data/whitelists/sf.net
 t/data/whitelists/winxpnews.com
 t/data/whitelists/yahoo-inc.com
-t/data/spamc_blank.cf
-t/data/spamc_test.cf
 t/db_awl_path.t
 t/db_based_whitelist.t
 t/db_based_whitelist_ips.t
