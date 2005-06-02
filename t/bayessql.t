@@ -87,7 +87,7 @@ sa_t_init("bayes");
 tstlocalrules ("
 $dbconfig
 bayes_sql_override_username iwillfail
-loadplugin validuserplugin data/validuserplugin.pm
+loadplugin validuserplugin ../../data/validuserplugin.pm
 bayes_sql_username_authorized 1
 ");
 
@@ -311,7 +311,8 @@ my $score = $sa->{bayes_scanner}->scan($msgstatus, $mail, $body);
 # Pretty much we can't count on the data returned with such little training
 # so just make sure that the score wasn't equal to .5 which is the default
 # return value.
-ok($score != .5);
+print "\treturned score: $score\n";
+ok($score =~ /\d/ && $score <= 1.0 && $score != .5);
 
 open(MAIL,"< ../sample-spam.txt");
 
@@ -339,7 +340,8 @@ $score = $sa->{bayes_scanner}->scan($msgstatus, $mail, $body);
 # Pretty much we can't count on the data returned with such little training
 # so just make sure that the score wasn't equal to .5 which is the default
 # return value.
-ok($score != .5);
+print "\treturned score: $score\n";
+ok($score =~ /\d/ && $score <= 1.0 && $score != .5);
 }
 
 # This bit breaks abstraction a bit, the userid is an implementation detail,
