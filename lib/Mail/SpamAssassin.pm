@@ -1002,7 +1002,12 @@ sub read_scoreonly_config {
     dbg("config: read_scoreonly_config: cannot open \"$filename\": $!");
     return;
   }
-  my $text = join ('',<IN>);
+
+  my $text = "file start $path\n"
+        . join ('', <IN>)
+        # add an extra \n in case file did not end in one.
+        . "\nfile end $path\n";
+
   close IN;
 
   $self->{conf}->{main} = $self;
