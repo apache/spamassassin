@@ -732,11 +732,6 @@ info("spamd: server started on $listeninfo (running version "
 
 my $remote_port;
 
-# Fork off our children.
-for ( 1 .. $childlimit ) {
-  spawn();
-}
-
 # Make the pidfile ...
 if (defined $opt{'pidfile'}) {
   if (open PIDF, ">$opt{'pidfile'}") {
@@ -751,6 +746,11 @@ if (defined $opt{'pidfile'}) {
 # now allow waiting processes to connect, if they're watching the log.
 # The test suite does this!
 info("spamd: server pid: $$\n");
+
+# Fork off our children.
+for ( 1 .. $childlimit ) {
+  spawn();
+}
 
 if ($scaling) {
   $scaling->set_server_fh($server);
@@ -1988,8 +1988,8 @@ sub child_handler {
     }
 
     unless ($$Mail::SpamAssassin::Logger::LOG_SA{INHIBIT_LOGGING_IN_SIGCHLD_HANDLER}) {
-      info("spamd: handled cleanup of child pid $pid " .
-	   (defined $sig) ? "due to SIG$sig" : "");
+      info("spamd: handled cleanup of child pid $pid ".
+                ((defined $sig) ? "due to SIG$sig" : ""));
     }
   }
 
