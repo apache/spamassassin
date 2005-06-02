@@ -1003,10 +1003,10 @@ sub read_scoreonly_config {
     return;
   }
 
-  my $text = "file start $path\n"
+  my $text = "file start $filename\n"
         . join ('', <IN>)
         # add an extra \n in case file did not end in one.
-        . "\nfile end $path\n";
+        . "\nfile end $filename\n";
 
   close IN;
 
