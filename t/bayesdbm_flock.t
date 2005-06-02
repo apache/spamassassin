@@ -225,7 +225,7 @@ my $score = $sa->{bayes_scanner}->scan($msgstatus, $mail, $body);
 # so just make sure that the score wasn't equal to .5 which is the default
 # return value.
 print "\treturned score: $score\n";
-ok($score != .5);
+ok($score =~ /\d/ && $score <= 1.0 && $score != .5);
 
 open(MAIL,"< ../sample-spam.txt");
 
@@ -248,7 +248,7 @@ $score = $sa->{bayes_scanner}->scan($msgstatus, $mail, $body);
 # so just make sure that the score wasn't equal to .5 which is the default
 # return value.
 print "\treturned score: $score\n";
-ok($score != .5);
+ok($score =~ /\d/ && $score <= 1.0 && $score != .5);
 
 }
 
