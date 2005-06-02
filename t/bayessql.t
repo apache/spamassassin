@@ -49,7 +49,7 @@ sa_t_init("bayes");
 tstlocalrules ("
 $dbconfig
 bayes_sql_override_username $testuser
-loadplugin validuserplugin data/validuserplugin.pm
+loadplugin validuserplugin ../../data/validuserplugin.pm
 bayes_sql_username_authorized 1
 ");
 

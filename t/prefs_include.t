@@ -17,7 +17,7 @@ $ENV{'LC_ALL'} = 'C';             # a cheat, but we need the patterns to work
 
 tstprefs ("
         $default_cf_lines
-        include log/prefs_include.inc
+        include prefs_include.inc
         ");
 
 open (OUT, ">log/prefs_include.inc") or die "open log/prefs_include.inc failed";
