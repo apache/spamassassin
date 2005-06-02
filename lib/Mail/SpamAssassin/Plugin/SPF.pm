@@ -207,7 +207,7 @@ sub _check_spf {
   return if $scanner->check_for_from_dns();
 
   if ($ishelo) {
-    # SPF HELO-checking variant.  This isn't really SPF at all ;)
+    # SPF HELO-checking variant
     $scanner->{spf_helo_checked} = 1;
     $scanner->{spf_helo_pass} = 0;
     $scanner->{spf_helo_neutral} = 0;
@@ -215,7 +215,7 @@ sub _check_spf {
     $scanner->{spf_helo_softfail} = 0;
     $scanner->{spf_helo_failure_comment} = undef;
   } else {
-    # "real" SPF; checking the envelope-from (where we can)
+    # SPF on envelope sender (where possible)
     $scanner->{spf_checked} = 1;
     $scanner->{spf_pass} = 0;
     $scanner->{spf_neutral} = 0;
@@ -236,13 +236,6 @@ sub _check_spf {
 
   if ($ishelo) {
     dbg("spf: checking HELO (helo=$helo, ip=$ip)");
-
-    if ($helo !~ /^\d+\.\d+\.\d+\.\d+$/) {
-      # get rid of hostname part of domain, understanding delegation
-      $helo = Mail::SpamAssassin::Util::RegistrarBoundaries::trim_domain ($helo);
-    }
-
-    dbg("spf: trimmed HELO down to '$helo'");
 
   } else {
     $self->_get_sender($scanner) unless $scanner->{sender_got};
