@@ -166,10 +166,25 @@ sub tie_db_readonly {
     my $name = $path.'_'.$dbname;
     my $db_var = 'db_'.$dbname;
     dbg("bayes: tie-ing to DB file R/O $name");
+
     # untie %{$self->{$db_var}} if (tied %{$self->{$db_var}});
-    tie %{$self->{$db_var}},$self->DBM_MODULE,$name, O_RDONLY,
-		 (oct($main->{conf}->{bayes_file_mode}) & 0666)
-       or goto failed_to_tie;
+    if (!tie %{$self->{$db_var}},$self->DBM_MODULE, $name, O_RDONLY,
+		 (oct($main->{conf}->{bayes_file_mode}) & 0666))
+    {
+      # bug 2975: it's acceptable for the db_seen to not be present,
+      # to allow it to be recycled.  if that's the case, just create
+      # a new, empty one. we don't need to lock it, since we won't
+      # be writing to it; let the R/W api deal with that case.
+
+      if ($dbname eq 'seen') {
+        tie %{$self->{$db_var}},$self->DBM_MODULE, $name, O_RDWR|O_CREAT,
+                    (oct($main->{conf}->{bayes_file_mode}) & 0666)
+          or goto failed_to_tie;
+      }
+      else {
+        goto failed_to_tie;
+      }
+    }
   }
 
   $self->{db_version} = ($self->get_storage_variables())[6];
