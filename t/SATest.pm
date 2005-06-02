@@ -490,6 +490,7 @@ sub create_saobj {
 		     userprefs_filename => 'log/test_default.cf',
 		     userstate_dir => 'log/user_state',
 		     local_tests_only => 1,
+                     # debug => 'all',
 		   );
 
   # override default args
