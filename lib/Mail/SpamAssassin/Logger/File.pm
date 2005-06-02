@@ -60,6 +60,12 @@ sub init {
 
   if (open(STDLOG, ">> $self->{filename}")) {
     dbg("logger: successfully opened file $self->{filename}");
+
+    # ensure it's unbuffered
+    my $oldfh = select STDLOG;
+    $| = 1;
+    select $oldfh;
+
     return 1;
   }
   else {
