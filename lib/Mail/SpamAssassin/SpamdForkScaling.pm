@@ -85,6 +85,23 @@ sub child_exited {
   delete $self->{kids}->{$pid};
 }
 
+sub child_error_kill {
+  my ($self, $pid, $sock) = @_;
+
+  warn "prefork: killing failed child $pid ".
+            ($sock ? "fd=".$sock->fileno : "");
+
+  # close the socket and remove the child from our list
+  $self->set_child_state ($pid, PFSTATE_KILLED);
+
+  kill 'INT' => $pid;
+  if ($sock) {
+    $sock->close;
+  }
+
+  warn "prefork: killed child $pid";
+}
+
 sub set_child_state {
   my ($self, $pid, $state) = @_;
 
@@ -94,7 +111,7 @@ sub set_child_state {
     $self->compute_lowest_child_pid();
 
   } else {
-    dbg("prefork: child $pid: ignored new state $state, already exited");
+    dbg("prefork: child $pid: ignored new state $state, starting or already exited");
   }
 }
 
@@ -109,6 +126,9 @@ sub compute_lowest_child_pid {
     if ($l > $p) { $l = $p };
   }
   $self->{lowest_idle_pid} = $l;
+
+  dbg("prefork: new lowest idle kid: ".
+            ($self->{lowest_idle_pid} ? $self->{lowest_idle_pid} : 'none'));
 }
 
 ###########################################################################
@@ -266,8 +286,7 @@ sub order_idle_child_to_accept {
       # this should not happen, but if it does, trap it here
       # before we attempt to call a method on an undef object
       warn "prefork: oops! no socket for child $kid, killing";
-      delete $self->{kids}->{$kid};
-      kill 'INT' => $kid;
+      $self->child_error_kill($kid, $sock);
 
       # retry with another child
       return $self->order_idle_child_to_accept();
@@ -276,13 +295,8 @@ sub order_idle_child_to_accept {
     if (!$self->syswrite_with_retry($sock, "A....\n"))
     {
       # failure to write to the child; bad news.  call it dead
-      warn "prefork: killing rogue child $kid, failed to write: $!\n";
-      $self->set_child_state ($kid, PFSTATE_KILLED);
-      kill 'INT' => $kid;
-
-      # close the socket and remove the child from our list
-      delete $self->{kids}->{$kid};
-      $sock->close();
+      warn "prefork: killing rogue child $kid, failed to write on fd ".$sock->fileno.": $!\n";
+      $self->child_error_kill($kid, $sock);
 
       # retry with another child
       return $self->order_idle_child_to_accept();
@@ -322,7 +336,8 @@ sub child_now_ready_to_accept {
   if ($self->{waiting_for_idle_child}) {
     my $sock = $self->{backchannel}->get_socket_for_child($kid);
     $self->syswrite_with_retry($sock, "A....\n")
-        or die "prefork: $kid claimed it was ready, but write failed: $!";
+        or die "prefork: $kid claimed it was ready, but write failed on fd ".
+                            $sock->fileno.": ".$!;
     $self->{waiting_for_idle_child} = 0;
   }
 }
