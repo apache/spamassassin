@@ -784,8 +784,8 @@ sub url_encode {
     }
     # other stuff
     else {
-      # 0x00-0x20, 0x7f-0xff, <, >, and " ... "
-      s/([\000-\040\177-\377\074\076\042])
+      # 0x00-0x20, 0x7f-0xff, ", %, <, >
+      s/([\000-\040\177-\377\042\045\074\076])
 	  /push(@encoded, $1) && sprintf "%%%02x", unpack("C",$1)/egx;
     }
   }
