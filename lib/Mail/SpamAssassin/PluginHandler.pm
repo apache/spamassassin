@@ -104,8 +104,6 @@ sub load_plugin {
   # Don't load the same plugin twice!
   foreach my $old_plugin (@{$self->{plugins}}) {
     if (ref($old_plugin) eq ref($plugin)) {
-      # why are there two warnings here?
-      warn "plugin: plugin " . ref($old_plugin) . " already registered\n";
       dbg("plugin: did not register $plugin, already registered");
       return;
     }
