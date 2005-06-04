@@ -162,10 +162,11 @@ $HOME_URL = "http://spamassassin.apache.org/";
 
 ###########################################################################
 
-=item $f = new Mail::SpamAssassin( [ { opt => val, ... } ] )
+=item $t = Mail::SpamAssassin->new( { opt => val, ... } )
 
-Constructs a new C<Mail::SpamAssassin> object.  You may pass the
-following attribute-value pairs to the constructor.
+Constructs a new C<Mail::SpamAssassin> object.  You may pass a hash
+reference to the constructor which may contain the following attribute-
+value pairs.
 
 =over 4
 
