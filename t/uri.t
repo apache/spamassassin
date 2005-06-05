@@ -22,7 +22,7 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::HTML;
 use Mail::SpamAssassin::Util;
 
-plan tests => 78;
+plan tests => 79;
 
 ##############################################
 
@@ -153,6 +153,11 @@ ok(try_canon(['http://images.google.ca/imgres?imgurl=gmib.free.fr/viagra.jpg&img
 
 ok(try_canon(["http://www.kl\nuge.n\net/"],
   ['http://www.kluge.net/']
+  ));
+
+ok(try_canon(['http:\\\\people.apache.org\\~felicity\\'],
+  ['http:\\\\people.apache.org\\~felicity\\',
+  'http://people.apache.org/~felicity/']
   ));
 
 ok(try_canon([
