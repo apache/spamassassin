@@ -51,8 +51,10 @@ $VALID_TLDS = qr{ (?:
   arpa|
 
   # just in case... futureproofing 
-  eu
+  eu|
   
+  # bug 4385: http://www.icann.org/tlds/stld-apps-19mar04/xxx.htm
+  xxx
   )
 }ix;
 
