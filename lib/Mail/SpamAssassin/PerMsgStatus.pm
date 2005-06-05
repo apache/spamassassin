@@ -1785,7 +1785,7 @@ my $tldsRE = qr/
       |j[emop]|k[eghimnprwyz]|l[abcikrstuvy]
       |m(?:u(?:seum)?|[acdghkmnopqrstvwxyz]|i?l)|n(?:a(?:me)?|et?|[cfgilopruz])
       |o(?:m|rg)|p(?:ro?|[aefghklmnstwy])|r[eouw]|s[abcdeghijklmnortvyzu]
-      |t[cdfghjklmnoprtvwz]|u[agkmsyz]|v[aceginu]|w[fs]|y[etu]|z[amw]|ed?u|qa
+      |t[cdfghjklmnoprtvwz]|u[agkmsyz]|v[aceginu]|w[fs]|xxx|y[etu]|z[amw]|ed?u|qa
     )/ix;
 
 # from RFC 1035, but allowing domains starting with numbers:
