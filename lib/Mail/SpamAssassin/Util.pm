@@ -946,6 +946,11 @@ sub uri_list_canonify {
     # Make a copy so we don't trash the original in the array
     my $nuri = $uri;
 
+    # bug 4390: certain MUAs treat back slashes as front slashes.
+    # since backslashes are supposed to be encoded in a URI, swap non-encoded
+    # ones with front slashes.
+    $nuri =~ tr@\\@/@;
+
     # http:www.foo.biz -> http://www.foo.biz
     $nuri =~ s#^(https?:)/{0,2}#$1//#i;
 
