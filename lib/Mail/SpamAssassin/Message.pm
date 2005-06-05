@@ -122,7 +122,6 @@ sub new {
 
   # Go through all the headers of the message
   my $header = '';
-  my $boundary;
   while ( my $last = shift @message ) {
     if ( $last =~ /^From\s/ ) {
 	# mbox formated mailbox
@@ -157,72 +156,63 @@ sub new {
     }
 
     # Store the non-modified headers in a scalar
-    $self->{'pristine_headers'} .= $last;
+    unless ($self->{'missing_head_body_separator'}) {
+      $self->{'pristine_headers'} .= $last;
+    }
 
     # NB: Really need to figure out special folding rules here!
     if ( $last =~ /^[ \t]+/ ) {                    # if its a continuation
       if ($header) {
         $header .= $last;                            # fold continuations
+      }
+    }
+    else {
+      # Ok, there's a header here, let's go ahead and add it in.
+      if ($header) {
+        # Yes, the /s is needed to match \n too.
+        my ($key, $value) = split (/:\s*(?=.)/s, $header, 2);
 
-	# If we're currently dealing with a content-type header, and there's a
-	# boundary defined, use it.  Since there could be multiple
-	# content-type headers in a message, the last one will be the one we
-	# should use, so just keep updating as they come in.
-        if ($header =~ /^content-type:\s*(\S.*)$/is) {
-	  my($type,$temp_boundary) = Mail::SpamAssassin::Util::parse_content_type($1);
-	  $boundary = $temp_boundary if ($type =~ /^multipart/ && defined $temp_boundary);
-	}
+        # If it's not a valid header (aka: not in the form "foo: bar"), skip it.
+        if (defined $value) {
+	  # limit the length of the pairs we store
+	  if (length($key) > MAX_HEADER_KEY_LENGTH) {
+	    $key = substr($key, 0, MAX_HEADER_KEY_LENGTH);
+	    $self->{'truncated_header'} = 1;
+	  }
+	  if (length($value) > MAX_HEADER_VALUE_LENGTH) {
+	    $value = substr($value, 0, MAX_HEADER_VALUE_LENGTH);
+	    $self->{'truncated_header'} = 1;
+	  }
+          $self->header($key, $value);
+        }
+      }
 
-	# Go onto the next header line, unless the next line is a
-	# multipart mime boundary, where we know we're going to stop
-	# below, so drop through for final header processing.
-        next unless (defined $boundary && @message && $message[0] =~ /^--\Q$boundary\E(?:--|\s*$)/);
+      # not a continuation...
+      $header = $last;
+    }
+
+    if ($header) {
+      if ($header =~ /^\r?$/) {
+        last;
       }
       else {
-	# There was no previous header and this is just "out there"?
-	# Ignore it!
-        next;
+        # Check for missing head/body separator
+	# RFC 2822, s2.2:
+	# A field name MUST be composed of printable US-ASCII characters
+	# (i.e., characters that have values between 33 (041) and 126 (176), inclusive),
+	# except colon (072).
+	# FOR THIS NEXT PART: list off the valid REs for what can be next:
+	#	Header, header continuation, blank line
+        if (!@message || $message[0] !~ /^(?:[\041-\071\073-\176]+:|[ \t]|\r?$)/ || $message[0] =~ /^--/) {
+	  # No body or no separator before mime boundary is invalid
+	  $self->{'missing_head_body_separator'} = 1;
+
+	  # we *have* to go back through again to make sure we catch the last
+	  # header, so fake a separator and loop again.
+	  unshift(@message, "\n");
+        }
       }
     }
-
-    # Ok, there's a header here, let's go ahead and add it in.
-    if ($header) {
-      # Yes, the /s is needed to match \n too.
-      my ($key, $value) = split (/:\s*(?=.)/s, $header, 2);
-
-      # If it's not a valid header (aka: not in the form "foo: bar"), skip it.
-      if (defined $value) {
-	# limit the length of the pairs we store
-	if (length($key) > MAX_HEADER_KEY_LENGTH) {
-	  $key = substr($key, 0, MAX_HEADER_KEY_LENGTH);
-	  $self->{'truncated_header'} = 1;
-	}
-	if (length($value) > MAX_HEADER_VALUE_LENGTH) {
-	  $value = substr($value, 0, MAX_HEADER_VALUE_LENGTH);
-	  $self->{'truncated_header'} = 1;
-	}
-        $self->header($key, $value);
-
-	# If we're currently dealing with a content-type header, and there's a
-	# boundary defined, use it.  Since there could be multiple
-	# content-type headers in a message, the last one will be the one we
-	# should use, so just keep updating as they come in.
-        if (lc $key eq 'content-type') {
-	  my($type,$temp_boundary) = Mail::SpamAssassin::Util::parse_content_type($value);
-	  $boundary = $temp_boundary if ($type =~ /^multipart/ && defined $temp_boundary);
-	}
-      }
-    }
-
-    # not a continuation...
-    $header = $last;
-
-    # Ok, we found the header/body blank line ...
-    last if ($last =~ /^\r?$/m);
-
-    # Alternately, if a multipart mime boundary is found in the header area,
-    # aka it's malformed, exit out as well and treat it as part of the body.
-    last if (defined $boundary && @message && $message[0] =~ /^--\Q$boundary\E(?:--|\s*$)/);
   }
 
   # Store the pristine body for later -- store as a copy since @message
