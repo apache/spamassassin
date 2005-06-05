@@ -151,7 +151,7 @@ ok(try_canon(['http://images.google.ca/imgres?imgurl=gmib.free.fr/viagra.jpg&img
    'http://www.google.com/url?q=http://www.google.com/url?q=http://www.expage.com/manger32',
    ]));
 
-ok(try_canon(["http://www.kl\nuge.n\net/"],
+ok(try_canon(["ht\rtp\r://www.kl\nuge.n\net/"],
   ['http://www.kluge.net/']
   ));
 
