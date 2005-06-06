@@ -72,6 +72,10 @@ loadplugin Mail::SpamAssassin::Plugin::AutoLearnThreshold
 #
 #loadplugin Mail::SpamAssassin::Plugin::AccessDB
 
+# WhitelistSubject - Whitelist/Blacklist certain subject regular expressions
+#
+loadplugin Mail::SpamAssassin::Plugin::WhiteListSubject
+
 ###########################################################################
 # experimental plugins
 
