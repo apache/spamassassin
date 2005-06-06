@@ -126,6 +126,11 @@ sub get_socket_for_child {
   return $self->{kids}->{$pid};
 }
 
+sub delete_socket_for_child {
+  my ($self, $pid) = @_;
+  delete $self->{kids}->{$pid};
+}
+
 ###########################################################################
 
 sub setup_backchannel_child_post_fork {
