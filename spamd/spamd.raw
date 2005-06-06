@@ -563,8 +563,8 @@ if ( $opt{'socketpath'} ) {
   # Yes, there is a window here: best we can do for now. There is almost
   # certainly a better way, but we don't know it. Yet.
 
-  if ( -e $path ) {
-    unless ( -S $path ) {
+  if (-e $path) {
+    unless (-S $path) {
       die "spamd: file $path exists but is no socket, exiting\n";
     }
   
@@ -580,6 +580,9 @@ if ( $opt{'socketpath'} ) {
       unlink $path;
     }
   }
+  if (not -d (File::Spec->splitpath($path))[1]) {
+    die "spamd: directory for $path does not exist, exiting\n";
+  }
 
   my %socket = (
     Local  => $path,
@@ -587,12 +590,23 @@ if ( $opt{'socketpath'} ) {
     Listen => SOMAXCONN,
   );
   dbg("spamd: creating UNIX socket:\n" . join("\n", map { " $_: " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket));
-  $server = new IO::Socket::UNIX(%socket)
-         || die "spamd: could not create UNIX socket on $path: $!\n";
-
-  # sanity check!
-  if (!-S $path) {
-    die "spamd: could not find newly-created UNIX socket on $path (" . $server->hostpath() . "): $!\n";
+  $server = IO::Socket::UNIX->new(%socket);
+  
+  # sanity check!  cf. bug 3490
+  if (not $server or not -S $path) {
+    unless ($server) {
+      dbg "spamd: socket path might have been truncated due to system limits\n";
+      die "spamd: could not create UNIX socket on $path: $!\n";
+    }
+    my $hostpath = $server->hostpath();
+    if ($hostpath ne $path) {
+      warn "spamd: socket path was truncated at position " . length($hostpath) . "\n";
+      warn "spamd: leaving stale socket at $hostpath\n" if -S $hostpath;
+      die "spamd: path length for UNIX socket on $path exceeds system limit, exiting\n";
+    }
+    else {
+      die "spamd: could not find newly-created UNIX socket on $path: $!\n";
+    }
   }
 
   my $mode = $opt{socketmode};
