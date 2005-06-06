@@ -98,8 +98,10 @@ sub sa_t_init {
 
   rmtree ("log/user_state");
   rmtree ("log/outputdir.tmp");
+
   rmtree ("log/test_rules_copy");
   mkdir ("log/test_rules_copy", 0755);
+
   for $file (<../rules/*.cf>) {
     $base = basename $file;
     copy ($file, "log/test_rules_copy/$base")
@@ -108,8 +110,12 @@ sub sa_t_init {
 
   rmtree ("log/localrules.tmp");
   mkdir ("log/localrules.tmp", 0755);
-  copy ("../rules/init.pre", "log/localrules.tmp/init.pre")
-    or die "init.pre copy failed";
+
+  for $file (<../rules/*.pre>) {
+    $base = basename $file;
+    copy ($file, "log/localrules.tmp/$base")
+      or warn "cannot copy $file to log/localrules.tmp/$base";
+  }
 
   copy ("../rules/user_prefs.template", "log/test_rules_copy/99_test_default.cf")
     or die "user prefs copy failed";
