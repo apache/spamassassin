@@ -1101,7 +1101,7 @@ low-scoring mails, for non-spam) into its learning systems.  The only
 learning system supported currently is a naive-Bayesian-style classifier.
 
 See the documentation for the
-C<Mail::SpamAssassin::Plugin::DefaultAutoLearnDiscriminator> plugin module
+C<Mail::SpamAssassin::Plugin::AutoLearnThreshold> plugin module
 for details on how Bayes auto-learning is implemented by default.
 
 =cut
