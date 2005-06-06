@@ -586,13 +586,13 @@ if ( $opt{'socketpath'} ) {
     Type   => SOCK_STREAM,
     Listen => SOMAXCONN,
   );
-  dbg("spamd: creating UNIX socket:\n" . join("\n", map { "\t$_: " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket));
+  dbg("spamd: creating UNIX socket:\n" . join("\n", map { " $_: " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket));
   $server = new IO::Socket::UNIX(%socket)
-         || die "spamd: could not create UNIX socket on $path: $! ($@)\n";
+         || die "spamd: could not create UNIX socket on $path: $!\n";
 
   # sanity check!
   if (!-S $path) {
-    die "spamd: could not find newly-created UNIX socket on $path: $! ($@)\n";
+    die "spamd: could not find newly-created UNIX socket on $path (" . $server->hostpath() . "): $!\n";
   }
 
   my $mode = $opt{socketmode};
@@ -618,12 +618,12 @@ if ( $opt{'socketpath'} ) {
       $gid = $ggid;
     }
     if (!chown $uid, $gid, $path) {
-      die "spamd: could not chown $path to $uid/$gid: $! ($@)";
+      die "spamd: could not chown $path to $uid/$gid: $!";
     }
   }
 
   if (!chmod $mode, $path) {    # make sure everybody can talk to it
-    die "spamd: could not chmod $path to $mode: $! ($@)";
+    die "spamd: could not chmod $path to $mode: $!";
   }
 }
 elsif ( $opt{'ssl'} ) {
@@ -638,9 +638,9 @@ elsif ( $opt{'ssl'} ) {
     SSL_key_file    => $opt{'server-key'},
     SSL_cert_file   => $opt{'server-cert'}
   );
-  dbg("spamd: creating SSL socket:\n" . join("\n", map { "\t$_:  " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket));
+  dbg("spamd: creating SSL socket:\n" . join("\n", map { " $_:  " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket));
   $server = new IO::Socket::SSL(%socket)
-         || die "spamd: could not create SSL socket on $addr:$port: $! ($@)\n";
+         || die "spamd: could not create SSL socket on $addr:$port: $!\n";
 }
 else {
   my %socket = (
@@ -651,9 +651,9 @@ else {
     ReuseAddr => 1,
     Listen    => SOMAXCONN
   );
-  dbg("spamd: creating INET socket:\n" . join("\n", map { "\t$_: " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket));
+  dbg("spamd: creating INET socket:\n" . join("\n", map { " $_: " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket));
   $server = new IO::Socket::INET(%socket)
-         || die "spamd: could not create INET socket on $addr:$port: $! ($@)\n";
+         || die "spamd: could not create INET socket on $addr:$port: $!\n";
 }
 
 if ( defined $opt{'pidfile'} ) {
