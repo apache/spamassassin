@@ -82,7 +82,12 @@ sub add_child {
 
 sub child_exited {
   my ($self, $pid) = @_;
+
   delete $self->{kids}->{$pid};
+
+  # ensure we recompute, so that we don't try to tell that child to
+  # accept a request, only to find that it's died in the meantime.
+  $self->compute_lowest_child_pid();
 }
 
 sub child_error_kill {
@@ -94,7 +99,10 @@ sub child_error_kill {
   # close the socket and remove the child from our list
   $self->set_child_state ($pid, PFSTATE_KILLED);
 
-  kill 'INT' => $pid;
+  kill 'INT' => $pid
+    or warn "prefork: kill of failed child $pid failed: $!\n";
+
+  $self->{backchannel}->delete_socket_for_child($pid);
   if ($sock) {
     $sock->close;
   }
@@ -105,13 +113,17 @@ sub child_error_kill {
 sub set_child_state {
   my ($self, $pid, $state) = @_;
 
-  if ($state == PFSTATE_STARTING || exists $self->{kids}->{$pid}) {
+  # I keep misreading this -- so: this says, if the child is starting, or is
+  # dying, or it has an entry in the {kids} hash, then allow the state to be
+  # set.  otherwise the update can be ignored.
+  if ($state == PFSTATE_STARTING || $state == PFSTATE_KILLED || exists $self->{kids}->{$pid})
+  {
     $self->{kids}->{$pid} = $state;
     dbg("prefork: child $pid: entering state $state");
     $self->compute_lowest_child_pid();
 
   } else {
-    dbg("prefork: child $pid: ignored new state $state, starting or already exited");
+    dbg("prefork: child $pid: ignored new state $state, already exited?");
   }
 }
 
