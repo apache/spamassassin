@@ -133,7 +133,7 @@ sub new_checker {
   my $dbh = DBI->connect($dsn, $dbuser, $dbpass, {'PrintError' => 0});
 
   if(!$dbh) {
-    dbg("auto-whitelist: sql-based unable to connect to database ($dsn)");
+    dbg("auto-whitelist: sql-based unable to connect to database ($dsn) : " . DBI::errstr);
     return undef;
   }
 
