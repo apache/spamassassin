@@ -1,4 +1,76 @@
 ------------------------------------------------------------------------
+r180169 | dos | 2005-06-05 23:11:06 +0000 (Sun, 05 Jun 2005) | 1 line
+
+bug 4328: still have issues getting filename from parsed part.  this commit makes it very explicit where the info should come from.
+------------------------------------------------------------------------
+r180158 | felicity | 2005-06-05 22:32:36 +0000 (Sun, 05 Jun 2005) | 1 line
+
+bug 4080: FORGED_YAHOO_RCVD now failing on new Yahoo internal host layout, fixed
+------------------------------------------------------------------------
+r180132 | felicity | 2005-06-05 19:12:18 +0000 (Sun, 05 Jun 2005) | 1 line
+
+bug 4385: .xxx is a new tld, so support it in RegistrarBoundaries
+------------------------------------------------------------------------
+r180131 | felicity | 2005-06-05 19:06:24 +0000 (Sun, 05 Jun 2005) | 1 line
+
+bug 4171: new way of determining header/body separation w/out needing to look for MIME boundary.
+------------------------------------------------------------------------
+r179430 | felicity | 2005-06-01 22:06:13 +0000 (Wed, 01 Jun 2005) | 1 line
+
+bug 4377: spamd POD referred to -a option which no longer exists
+------------------------------------------------------------------------
+r179261 | dos | 2005-05-31 18:41:38 +0000 (Tue, 31 May 2005) | 1 line
+
+bug 4367: SORBS lists are mixed up
+------------------------------------------------------------------------
+r178993 | felicity | 2005-05-29 22:05:57 +0000 (Sun, 29 May 2005) | 1 line
+
+increase the version number in spamassassin.spec
+------------------------------------------------------------------------
+r178801 | felicity | 2005-05-27 17:25:01 +0000 (Fri, 27 May 2005) | 1 line
+
+bug 4213: backport uri canonification/anti-obfu code from 3.1
+------------------------------------------------------------------------
+r178761 | dos | 2005-05-27 06:28:34 +0000 (Fri, 27 May 2005) | 1 line
+
+bug 4355: qmail received-header parser fails on empty ident
+------------------------------------------------------------------------
+r178758 | dos | 2005-05-27 06:03:44 +0000 (Fri, 27 May 2005) | 1 line
+
+bug 4338: remove all but private ranges from list of reserved IPs
+------------------------------------------------------------------------
+r171185 | dos | 2005-05-21 02:07:40 +0000 (Sat, 21 May 2005) | 1 line
+
+bug 3866: Empty rewrite_header doesn't remove rewrite_header setting
+------------------------------------------------------------------------
+r171048 | felicity | 2005-05-20 04:47:46 +0000 (Fri, 20 May 2005) | 1 line
+
+bug 4328: parsing out the filename from message parts wasn't working properly
+------------------------------------------------------------------------
+r171015 | felicity | 2005-05-19 23:37:09 +0000 (Thu, 19 May 2005) | 1 line
+
+bug 4085: avoid 'sec too big' issues with Time::Local v1.10 and later
+------------------------------------------------------------------------
+r171013 | felicity | 2005-05-19 23:36:06 +0000 (Thu, 19 May 2005) | 1 line
+
+bug 4339: add in the SURBL JP list
+------------------------------------------------------------------------
+r171012 | felicity | 2005-05-19 23:32:42 +0000 (Thu, 19 May 2005) | 1 line
+
+bug 4298: certain invalid content-type headers would end out with no content-type.  assume text/plain for anything we don't otherwise parse out.
+------------------------------------------------------------------------
+r170708 | felicity | 2005-05-18 05:09:26 +0000 (Wed, 18 May 2005) | 1 line
+
+bug 4287: the redhat spamd rc script always exited with a 0, exit with the appropriate value instead
+------------------------------------------------------------------------
+r165054 | parker | 2005-04-27 21:50:02 +0000 (Wed, 27 Apr 2005) | 1 line
+
+Begin 3.0.4 Development
+------------------------------------------------------------------------
+r165049 | parker | 2005-04-27 21:08:43 +0000 (Wed, 27 Apr 2005) | 1 line
+
+Preparing for 3.0.3 Release
+------------------------------------------------------------------------
 r165046 | parker | 2005-04-27 20:46:09 +0000 (Wed, 27 Apr 2005) | 1 line
 
 Bug 4201: Do no lookup email addresses for URIBL tests
