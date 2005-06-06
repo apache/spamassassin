@@ -3,10 +3,9 @@
 # See 'perldoc Mail::SpamAssassin::Conf' for details of what can be
 # tweaked.
 #
-# This file will be loaded before *all other* configuration files, including
-# the system configuration.  As such, it's a good place to set things that
-# will affect how those files are parsed, like which plugins are loaded
-# etc.
+# This file contains plugin activation commands for plugins included
+# in SpamAssassin 3.0.x releases.  It will not be installed if you
+# already have a file in place called "init.pre".
 #
 ###########################################################################
 
@@ -27,67 +26,4 @@ loadplugin Mail::SpamAssassin::Plugin::Hashcash
 # SPF - perform SPF verification.
 #
 loadplugin Mail::SpamAssassin::Plugin::SPF
-
-# DCC - perform DCC message checks.
-#
-# DCC is disabled here because it is not open source.  See the DCC
-# license for more details.
-#
-#loadplugin Mail::SpamAssassin::Plugin::DCC
-
-# Pyzor - perform Pyzor message checks.
-#
-loadplugin Mail::SpamAssassin::Plugin::Pyzor
-
-# Razor2 - perform Razor2 message checks.
-#
-# Razor2 is disabled here because it is not available for unlimited free
-# use.  It is currently free for personal use, subject to capacity
-# constraints.  See the Cloudmark SpamNet Service Policy for more details.
-#
-#loadplugin Mail::SpamAssassin::Plugin::Razor2
-
-# SpamCop - perform SpamCop message reporting
-#
-loadplugin Mail::SpamAssassin::Plugin::SpamCop
-
-# AntiVirus - some simple anti-virus checks, this is not a replacement
-# for an anti-virus filter like Clam AntiVirus
-#
-#loadplugin Mail::SpamAssassin::Plugin::AntiVirus
-
-# AWL - do auto-whitelist checks
-#
-loadplugin Mail::SpamAssassin::Plugin::AWL
-
-# AutoLearnThreshold - threshold-based discriminator for Bayes auto-learning
-#
-loadplugin Mail::SpamAssassin::Plugin::AutoLearnThreshold
-
-# TextCat - language guesser
-#
-#loadplugin Mail::SpamAssassin::Plugin::TextCat
-
-# AccessDB - lookup from-addresses in access database
-#
-#loadplugin Mail::SpamAssassin::Plugin::AccessDB
-
-# WhitelistSubject - Whitelist/Blacklist certain subject regular expressions
-#
-loadplugin Mail::SpamAssassin::Plugin::WhiteListSubject
-
-###########################################################################
-# experimental plugins
-
-# DomainKeys - perform DomainKeys verification
-#
-#loadplugin Mail::SpamAssassin::Plugin::DomainKeys
-
-# MIMEHeader - apply regexp rules against MIME headers in the message
-#
-loadplugin Mail::SpamAssassin::Plugin::MIMEHeader
-
-# ReplaceTags
-#
-loadplugin Mail::SpamAssassin::Plugin::ReplaceTags
 
