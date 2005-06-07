@@ -648,7 +648,6 @@ sub set_template_clear {
 
 ###########################################################################
 
-# note: error 70 == SA_SOFTWARE
 sub finish_parsing {
   my ($self) = @_;
   my $conf = $self->{conf};
@@ -687,12 +686,12 @@ sub finish_parsing {
         #}
         else {
           $conf->{errors}++;
-          sa_die(70, "unknown type $type for $name: $text");
+	  warn("unknown type $type for $name: $text");
         }
       }
       else {
         $conf->{errors}++;
-        sa_die(70, "syntax error for eval function $name: $text");
+        warn("syntax error for eval function $name: $text");
       }
     }
     # non-eval tests
@@ -726,7 +725,7 @@ sub finish_parsing {
       }
       else {
         $conf->{errors}++;
-        sa_die(70, "unknown type $type for $name: $text");
+        warn("unknown type $type for $name: $text");
       }
     }
   }
@@ -962,10 +961,6 @@ sub fix_path_relative_to_current_file {
   }
   return $path;
 }
-
-###########################################################################
-
-sub sa_die { Mail::SpamAssassin::sa_die(@_); }
 
 ###########################################################################
 
