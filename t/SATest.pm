@@ -676,7 +676,7 @@ sub conf_bool {
 sub mk_safe_tmpdir {
   return $safe_tmpdir if defined($safe_tmpdir);
 
-  my $dir = $ENV{TMPDIR} || '/tmp';
+  my $dir = File::Spec->tmpdir() || 'log';
 
   # be a little paranoid, since we're using a public tmp dir and
   # are exposed to race conditions
