@@ -28,6 +28,7 @@ sub new {
 
   # the important bit!
   $self->register_eval_rule ("check_test_plugin");
+  $self->register_eval_rule ("sleep_based_on_header");
 
   print "registered myTestPlugin: $self\n";
   return $self;
@@ -49,6 +50,19 @@ sub check_test_plugin {
     open (OUT, ">$file") or warn;
     print OUT ++$count;
     close OUT or warn;
+  }
+
+  return 1;
+}
+
+sub sleep_based_on_header {
+  my ($self, $permsgstatus) = @_;
+  my $secs = $permsgstatus->{msg}->get_header("Sleep-Time");
+  chop $secs;
+
+  if ($secs) {
+    warn "sleeping for $secs seconds...";
+    sleep ($secs+0);
   }
 
   return 1;
