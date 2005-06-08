@@ -17,8 +17,15 @@ q{ X-Spam-Flag: YES}, 'flag',
 
 );
 
-start_spamd("-D -L --socketpath=log/spamd.sock");
-ok (spamcrun ("-F data/spamc_test.cf < data/spam/001", \&patterns_run_cb));
+my $sockpath = mk_safe_tmpdir()."/spamd.sock";
+start_spamd("-D -L --socketpath=$sockpath");
+
+open (OUT, ">log/spamc_cf.cf");
+print OUT "-U $sockpath\n";
+close OUT;
+
+ok (spamcrun ("-F log/spamc_cf.cf < data/spam/001", \&patterns_run_cb));
 ok_all_patterns();
 stop_spamd();
+cleanup_safe_tmpdir();
 
