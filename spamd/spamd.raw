@@ -2548,6 +2548,12 @@ Specify the SSL certificate file to use for SSL connections.
 
 Listen on UNIX domain path I<pathname> instead of a TCP socket.
 
+Warning: the Perl support on BSD platforms for UNIX domain sockets seems to
+have a bug regarding paths of over 100 bytes or so (SpamAssassin bug 4380).  If
+you see a 'could not find newly-created UNIX socket' error message, and the
+path appears truncated, this may be the cause.  Try using a shorter path
+to the socket.
+
 =item B<--socketowner> I<name>
 
 Set UNIX domain socket to be owned by the user named I<name>.  Note
