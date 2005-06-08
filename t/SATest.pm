@@ -673,4 +673,40 @@ sub conf_bool {
   return 0;                                 # n or 0
 }
 
+sub mk_safe_tmpdir {
+  return $safe_tmpdir if defined($safe_tmpdir);
+
+  my $dir = $ENV{TMPDIR} || '/tmp';
+
+  # be a little paranoid, since we're using a public tmp dir and
+  # are exposed to race conditions
+  my $retries = 10;
+  my $tmp;
+  while (1) {
+    $tmp = "$dir/satest.$$.".rand(99999);
+    if (!-d $tmp && mkdir ($tmp, 0755)) {
+      if (-d $tmp && -o $tmp) {     # check we own it
+        lstat($tmp);
+        if (-d _ && -o _) {         # double-check, ignoring symlinks
+          last;                     # we got it safely
+        }
+      }
+    }
+
+    die "cannot get tmp dir, giving up" if ($retries-- < 0);
+
+    warn "failed to create tmp dir '$tmp' safely, retrying...";
+    sleep 1;
+  }
+
+  $safe_tmpdir = $tmp;
+  return $tmp;
+}
+
+sub cleanup_safe_tmpdir {
+  if ($safe_tmpdir) {
+    rmtree($safe_tmpdir) or warn "cannot rmtree $safe_tmpdir";
+  }
+}
+
 1;

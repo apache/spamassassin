@@ -23,12 +23,13 @@ open(COUNTER,">log/spamd_plugin.tmp");
 print COUNTER "0";
 close COUNTER;
 
-start_spamd("-D -L --socketpath=log/spamd.sock");
+my $sockpath = mk_safe_tmpdir()."/spamd.sock";
+start_spamd("-D -L --socketpath=$sockpath");
 
 %patterns = (
   q{ test: called myTestPlugin, round 1 }, 'called1'
 );
-ok (spamcrun ("-U log/spamd.sock < data/spam/001", \&patterns_run_cb));
+ok (spamcrun ("-U $sockpath < data/spam/001", \&patterns_run_cb));
 
 checkfile("spamd_plugin-spamd.err", \&patterns_run_cb);
 ok_all_patterns();
@@ -36,16 +37,17 @@ ok_all_patterns();
 %patterns = (
   q{ called myTestPlugin, round 2 }, 'called2'
 );
-ok (spamcrun ("-U log/spamd.sock < data/nice/001", \&patterns_run_cb));
+ok (spamcrun ("-U $sockpath < data/nice/001", \&patterns_run_cb));
 checkfile("spamd_plugin-spamd.err", \&patterns_run_cb);
 ok_all_patterns();
 
 %patterns = (
   q{ called myTestPlugin, round 3 }, 'called3'
 );
-ok (spamcrun ("-U log/spamd.sock < data/nice/001", \&patterns_run_cb));
+ok (spamcrun ("-U $sockpath < data/nice/001", \&patterns_run_cb));
 checkfile("spamd_plugin-spamd.err", \&patterns_run_cb);
 ok_all_patterns();
 
 stop_spamd();
+cleanup_safe_tmpdir();
 
