@@ -28,6 +28,8 @@ foreach $INPUT (@files) {
   tstprefs ("
         $default_cf_lines
         report_safe 0
+        body TEST_ALWAYS /./
+        score TEST_ALWAYS 100
 	");
 
   # create report_safe 0 output
@@ -44,6 +46,8 @@ foreach $INPUT (@files) {
   tstprefs ("
         $default_cf_lines
         report_safe 1
+        body TEST_ALWAYS /./
+        score TEST_ALWAYS 100
 	");
 
   # create report_safe 1 and -t output
@@ -65,6 +69,8 @@ $INPUT = $files[0];
 tstprefs ("
         $default_cf_lines
         report_safe 2
+        body TEST_ALWAYS /./
+        score TEST_ALWAYS 100
 	");
 
 # create report_safe 2 output
