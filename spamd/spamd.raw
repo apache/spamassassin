@@ -970,6 +970,10 @@ sub spawn {
 sub accept_a_conn {
   $client = $server->accept();
 
+  if ($scaling) {
+    $scaling->update_child_status_busy();
+  }
+
   # Bah!
   if ( !$client ) {
 
@@ -989,10 +993,6 @@ sub accept_a_conn {
   }
 
   $client->autoflush(1);
-
-  if ($scaling) {
-    $scaling->update_child_status_busy();
-  }
 
   # keep track of start time
   my $start = time;
