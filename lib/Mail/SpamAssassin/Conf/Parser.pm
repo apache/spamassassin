@@ -226,6 +226,8 @@ sub parse {
   # get fast-access handles on the command lookup tables
   my $lut_frequent = $self->{command_luts}->{frequent};
   my $lut_remaining = $self->{command_luts}->{remaining};
+  my %migrated_keys = map { $_ => 1 }
+            @Mail::SpamAssassin::Conf::MIGRATED_SETTINGS;
 
   $self->{currentfile} = '(no file)';
   my $skip_parsing = 0;
@@ -409,9 +411,17 @@ sub parse {
 
 failed_line:
     my $msg = $parse_error;
+    my $is_error = 1;
     if (!$msg) {
-      # the default warning, if a more specific one isn't output
-      $msg = "config: failed to parse line, skipping: $line";
+      # use a default warning, if a more specific one wasn't output
+      if ($migrated_keys{$key}) {
+        # this key was moved into a plugin; non-fatal for lint
+        $is_error = 0;
+        $msg = "config: failed to parse, now a plugin, skipping: $line";
+      } else {
+        # a real syntax error; this is fatal for --lint
+        $msg = "config: failed to parse line, skipping: $line";
+      }
     }
 
     if ($conf->{lint_rules}) {
@@ -419,7 +429,10 @@ failed_line:
     } else {
       info($msg);
     }
-    $conf->{errors}++;
+
+    if ($is_error) {
+      $conf->{errors}++;
+    }
   }
 
   $self->lint_check();

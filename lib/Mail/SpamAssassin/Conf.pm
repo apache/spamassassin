@@ -85,6 +85,7 @@ use vars qw{
   $CONF_TYPE_NUMERIC $CONF_TYPE_HASH_KEY_VALUE
   $CONF_TYPE_ADDRLIST $CONF_TYPE_TEMPLATE
   $INVALID_VALUE $MISSING_REQUIRED_VALUE
+  @MIGRATED_SETTINGS
 
 $TYPE_HEAD_TESTS $TYPE_HEAD_EVALS
 $TYPE_BODY_TESTS $TYPE_BODY_EVALS $TYPE_FULL_TESTS $TYPE_FULL_EVALS
@@ -2696,6 +2697,16 @@ distances that are greater than 9.)
 
   return \@cmds;
 }
+
+###########################################################################
+
+# settings that were once part of core, but are now in (possibly-optional)
+# bundled plugins. these will be warned about, but do not generate a fatal
+# error when "spamassassin --lint" is run like a normal syntax error would.
+
+@MIGRATED_SETTINGS = qw{
+  ok_languages
+};
 
 ###########################################################################
 
