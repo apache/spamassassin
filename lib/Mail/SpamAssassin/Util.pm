@@ -1267,8 +1267,12 @@ sub helper_app_pipe_open_unix {
   }
 
   exec @cmdline;
-  die "util: exec failed: $!";  
-  # must be a die() otherwise -w will complain
+  warn "util: exec failed: $!";
+
+  # bug 4370: we really have to exit here; break any eval traps
+  POSIX::_exit(1);  # avoid END and destructor processing 
+  kill('KILL',$$);  # still kicking? die! 
+  die;  # must be a die() otherwise -w will complain
 }
 
 ###########################################################################
