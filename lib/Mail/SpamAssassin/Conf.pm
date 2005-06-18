@@ -368,7 +368,7 @@ these are often targets for spammer spoofing.
       unless (defined $value && $value !~ /^$/) {
 	return $MISSING_REQUIRED_VALUE;
       }
-      unless ($value =~ /^\S+\@\S+\s+\S+$/) {
+      unless ($value =~ /^\S+\s+\S+$/) {
 	return $INVALID_VALUE;
       }
       $self->{parser}->add_to_addrlist_rcvd ('whitelist_from_rcvd',
@@ -383,7 +383,7 @@ these are often targets for spammer spoofing.
       unless (defined $value && $value !~ /^$/) {
 	return $MISSING_REQUIRED_VALUE;
       }
-      unless ($value =~ /^\S+\@\S+\s+\S+$/) {
+      unless ($value =~ /^\S+\s+\S+$/) {
 	return $INVALID_VALUE;
       }
       $self->{parser}->add_to_addrlist_rcvd ('def_whitelist_from_rcvd',
@@ -447,7 +447,7 @@ e.g.
       unless (defined $value && $value !~ /^$/) {
 	return $MISSING_REQUIRED_VALUE;
       }
-      unless ($value =~ /^(?:\S+\@\S+(?:\s+\S+\@\S+)*)$/) {
+      unless ($value =~ /^(?:\S+(?:\s+\S+)*)$/) {
 	return $INVALID_VALUE;
       }
       $self->{parser}->remove_from_addrlist_rcvd('whitelist_from_rcvd',
