@@ -2045,48 +2045,6 @@ sub subject_is_all_caps {
 
 ###########################################################################
 
-sub message_from_bugzilla {
-  my ($self) = @_;
-
-  my $all    = $self->get('ALL');
-  
-  # Let's look for a Bugzilla Subject...
-  if ($all   =~ /^Subject: [^\n]{0,10}\[Bug \d+\] /m && (
-        # ... in combination with either a Bugzilla message header...
-        $all =~ /^X-Bugzilla-[A-Z][a-z]+: /m ||
-        # ... or sender.
-        $all =~ /^From: bugzilla/mi
-     )) {
-    return 1;
-  }
-
-  return 0;
-}
-
-sub message_from_debian_bts {
-  my ($self)  = @_;
-
-  my  $all    = $self->get('ALL');
-
-  # This is the main case; A X-<Project>-PR-Message header exists and the
-  # Subject looks "buggy". Watch out: The DBTS is used not only by Debian
-  # but by other <Project>s, eg. KDE, too.
-  if ($all    =~ /^X-[A-Za-z0-9]+-PR-Message: [a-z-]+ \d+$/m &&
-      $all    =~ /^Subject: Bug#\d+: /m) {
-    return 1;
-  }
-  # Sometimes the DBTS sends out messages which don't include the X- header.
-  # In this case we look if the message is From a DBTS account and Subject
-  # and Message-Id look good.
-  elsif ($all =~ /^From: owner\@/mi &&
-         $all =~ /^Subject: Processed(?: \([^)]+\))?: /m &&
-         $all =~ /^Message-ID: <handler\./m) {
-    return 1;
-  }
-
-  return 0;
-}
-
 sub message_is_habeas_swe {
   my ($self) = @_;
 
