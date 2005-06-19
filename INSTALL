@@ -292,11 +292,13 @@ version is too low for them to be used.
     If this module is installed, the processing times are logged/reported
     more precisely.
 
+
   - Mail::DomainKeys (from CPAN)
 
     If this module is installed, and you enable the DomainKeys plugin,
     SpamAssassin will perform domain key lookups when domain key information
     is present in the message headers.
+
 
   - DBI *and* DBD driver/modules for your database (from CPAN)
 
@@ -304,11 +306,6 @@ version is too low for them to be used.
     user configuration data, Bayes storage, or other storage, you will need
     to have these installed; both the basic DBI module and the driver for
     your database.
-
-
-  - Mail::DomainKeys (from CPAN)
-
-    Used by the DomainKeys plugin.
 
 
   - LWP (from CPAN)
