@@ -72,10 +72,11 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   - For releases on the trunk (e.g. a .0 release):
 
-      TZ=UTC svn log -r HEAD:5810 --non-interactive > Changes
+      TZ=UTC svn log -r HEAD:46030 --non-interactive > Changes
 
-    r5810 was the start of the 3.0.0 (2.70 at the time) work; replace
-    with the correct rev number for the point you want to start at.
+    r46030 was the start of the 3.1.0 work (created 3.0 branch); replace
+    with the correct rev number for the point you want to start at
+    if different.
 
 - Check in the updated Changes file.
 
