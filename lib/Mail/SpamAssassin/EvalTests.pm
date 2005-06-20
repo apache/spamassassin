@@ -1318,46 +1318,6 @@ sub check_rbl_results_for {
   check_rbl_sub(@_);
 }
 
-# Check an RBL if a message is Habeas SWE (a.k.a. the Habeas Haiku).
-#	Test is skipped if the message contains an Accreditor assertion;
-#	otherwise transitional senders using both the SWE header and the
-#	accreditor assertion would get a double bonus.  <csg@habeas.com>
-#
-sub check_rbl_swe {
-  my ($self, $rule, $set, $rbl_server, $subtest) = @_;
-
-  if (!defined $self->{accreditor_tag}) {
-    $self->message_accreditor_tag();
-  }
-  if (%{$self->{accreditor_tag}}) {
-    return 0;
-  }
-  if (!defined $self->{habeas_swe}) {
-    $self->message_is_habeas_swe();
-  }
-  if (defined $self->{habeas_swe} && $self->{habeas_swe}) {
-    $self->check_rbl_backend($rule, $set, $rbl_server, 'A', $subtest);
-  }
-  return 0;
-}
-
-# check an RBL if the message contains an "accreditor assertion," that is,
-#	the message contains the name of a service that will vouch for their
-#	practices.  <csg@habeas.com>
-#
-sub check_rbl_accreditor {
-  my ($self, $rule, $set, $rbl_server, $subtest, $accreditor) = @_;
-
-  if (!defined $self->{accreditor_tag}) {
-    $self->message_accreditor_tag();
-  }
-  if ($self->{accreditor_tag}->{$accreditor}) {
-    $self->check_rbl_backend($rule, $set, $rbl_server, 'A', $subtest);
-  }
-  return 0;
-}
-
-
 # this only checks the address host name and not the domain name because
 # using the domain name had much worse results for dsn.rfc-ignorant.org
 sub check_rbl_from_host {
@@ -2045,29 +2005,20 @@ sub subject_is_all_caps {
 
 ###########################################################################
 
-sub message_is_habeas_swe {
-  my ($self) = @_;
+# check an RBL if the message contains an "accreditor assertion,"
+# that is, the message contains the name of a service that will vouch
+# for their practices.
+#
+sub check_rbl_accreditor {
+  my ($self, $rule, $set, $rbl_server, $subtest, $accreditor) = @_;
 
-  return $self->{habeas_swe} if defined $self->{habeas_swe};
-
-  $self->{habeas_swe} = 0;
-
-  my $text = '';
-  for (my $i = 1; $i <= 9; $i++) {
-    $text .= (lc($self->get("X-Habeas-SWE-$i")) || return 0);
+  if (!defined $self->{accreditor_tag}) {
+    $self->message_accreditor_tag();
   }
-  if ($text) {
-    $text =~ s/\s+/ /g;
-    $text =~ s/^\s|\s$//g;
-    $text =~ s@/?>@/>@;
-    my $sha1 = sha1_hex($text);
-
-    if ($sha1 eq '76c65d9eb65e572166a08b50fd197b29af09d43a') {
-      $self->{habeas_swe} = 1;
-    }
+  if ($self->{accreditor_tag}->{$accreditor}) {
+    $self->check_rbl_backend($rule, $set, $rbl_server, 'A', $subtest);
   }
-
-  return $self->{habeas_swe};
+  return 0;
 }
 
 # Check for an Accreditor Assertion within the message, that is, the name of
