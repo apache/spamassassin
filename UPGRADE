@@ -7,6 +7,13 @@ Note for Users Upgrading to SpamAssassin 3.1.0
   plugins please refer to their individual documentation:
   perldoc Mail::SpamAssassin::Plugin::* (ie AWL, DCC, etc)
 
+- There are now multiple files read to enable plugins in the
+  /etc/mail/spamassassin directory; previously only one, "init.pre" was
+  read.  Now both "init.pre", "v310.pre", and any other files ending
+  in ".pre" will be read.  As future releases are made, new plugins
+  will be added to new files named according to the release they're
+  added in.
+
 - Due to license restrictions the DCC and Razor2 plugins are disabled
   by default.  We encourage you to read the appropriate license
   yourself and decide if you are able to re-enable the plugins for
@@ -14,9 +21,9 @@ Note for Users Upgrading to SpamAssassin 3.1.0
 
 - The use_auto_whitelist config option has been moved to a user config
   option, this allows individual users to turn on or off whitelisting
-  regardless of what is set in the system config.  If you would like
-  to disable AWL (auto-whitelist) then you can comment out the plugin
-  in v310.pre.
+  regardless of what is set in the system config.  If you would like to
+  disable AWL (auto-whitelist) on a site-wide basis, then you can comment
+  out the plugin in "v310.pre".
 
 - The bayes_auto_learn_threshold_* config options for bayes have moved
   to a plugin.  In general the default should work just fine however
@@ -28,15 +35,14 @@ Note for Users Upgrading to SpamAssassin 3.1.0
   that SDBM_File, the package which will be used instead, is fully
   compatible with NDBM however, so this should be unnoticeable.
 
-- The prefork algorithm for spamd has been changed.  In this version
-  spamd will attempt to keep a small number of "hot" child processes
-  as busy as possible, and keep any others as idle as possible, using
-  something similar to the Apache httpd server scaling algorithm.
-  This is accomplished by the master process coordinating the
-  activities of the children.  You can use the --round-robin switch
-  for spamd to disable this scaling algorithm, and the behaviour seen
-  in the 3.0.x versions will be used instead, where all processes
-  receive an equal load and no scaling takes place.
+- The prefork algorithm for spamd has been changed.  In this version spamd
+  will attempt to keep a small number of "hot" child processes as busy as
+  possible, and keep any others as idle as possible, using something
+  similar to the Apache httpd server scaling algorithm. This reduces
+  memory usage and swapping. You can use the --round-robin switch for
+  spamd to disable this scaling algorithm, and the behaviour seen in the
+  3.0.x versions will be used instead, where all processes receive an
+  equal load and no scaling takes place.
 
 - See http://wiki.apache.org/spamassassin/UpgradeTo310 for a
   supplementary list of upgrade notes.  It will be updated with any
