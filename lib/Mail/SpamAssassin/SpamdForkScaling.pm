@@ -99,10 +99,18 @@ sub add_child {
   $self->set_child_state ($pid, PFSTATE_STARTING);
 }
 
+# this is called by the SIGCHLD handler in spamd.  The idea is that
+# main_ping_kids etc. can mark a child as probably dead ("K" state), but until
+# SIGCHLD is received, the process is still around (in some form), so it
+# shouldn't be removed from the list until it's confirmed dead.
+#
 sub child_exited {
   my ($self, $pid) = @_;
 
   delete $self->{kids}->{$pid};
+
+  # remove the child from the backchannel list, too
+  $self->{backchannel}->delete_socket_for_child($pid);
 
   # ensure we recompute, so that we don't try to tell that child to
   # accept a request, only to find that it's died in the meantime.
