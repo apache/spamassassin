@@ -68,6 +68,10 @@ C<message> is either undef (which will use STDIN), a scalar of the
 entire message, an array reference of the message with 1 line per array
 element, or a file glob which holds the entire contents of the message.
 
+Note: The message is expected to generally be in RFC 2822 format,
+optionally including a mbox or mbx message separation line as the
+first line.
+
 C<parse_now> specifies whether or not to create the MIME tree
 at object-creation time or later as necessary.
 

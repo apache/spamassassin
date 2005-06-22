@@ -345,12 +345,15 @@ message with 1 line per array element, or a file glob which holds the
 entire contents of the message; and $parse_now, which specifies whether
 or not to create the MIME tree at parse time or later as necessary.
 
-The I<$parse_now> option, by default, is set to false (0).
-This allows SpamAssassin to not have to generate the tree of
-Mail::SpamAssassin::Message::Node objects and their related data if the
-tree is not going to be used.  This is handy, for instance, when running
-C<spamassassin -d>, which only needs the pristine header and body which
-is always parsed and stored by this function.
+The I<$parse_now> option, by default, is set to false (0).  This
+allows SpamAssassin to not have to generate the tree of internal
+data nodes if the information is not going to be used.  This is
+handy, for instance, when running C<spamassassin -d>, which only
+needs the pristine header and body which is always parsed and stored
+by this function.
+
+For more information, please see the C<Mail::SpamAssassin::Message>
+and C<Mail::SpamAssassin::Message::Node> POD.
 
 =cut
 
