@@ -22,7 +22,7 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::HTML;
 use Mail::SpamAssassin::Util;
 
-plan tests => 79;
+plan tests => 80;
 
 ##############################################
 
@@ -92,6 +92,7 @@ ok(try_domains('spamassassin.txt', undef));
 ok(try_domains('longer.url.but.not.spamassassin.txt', undef));
 ok(try_domains('http://ebg&vosxfov.com.munged-rxspecials.net/b/Tr3f0amG','munged-rxspecials.net'));
 ok(try_domains('http://blah.blah.com:/', 'blah.com'));
+ok(try_domains('http://example.com.%20.host.example.info/', 'example.info'));
 
 ##############################################
 
