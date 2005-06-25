@@ -24,21 +24,60 @@ my $DEF_RULES_DIR   = '@@DEF_RULES_DIR@@';      # substituted at 'make' time
 my $LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';    # substituted at 'make' time
 use lib '@@INSTALLSITELIB@@';                   # substituted at 'make' time
 
-# These are the non-standard required modules
-use Net::DNS;
-use LWP::UserAgent;
-use HTTP::Date qw(time2str);
-use Archive::Tar;
-use IO::Zlib;
-
-# These should already be available
-use Mail::SpamAssassin;
-use Digest::SHA1 qw/sha1_hex/;
+# Standard perl modules
 use File::Spec;
 use Getopt::Long;
 use Pod::Usage;
 use strict;
 use warnings;
+
+BEGIN {
+  # Locate locally installed SA libraries *without* using FindBin, which generates
+  # warnings and causes more trouble than its worth.  We don't need to be too
+  # smart about this BTW.
+  my @bin = File::Spec->splitpath($0);
+  my $bin = ($bin[0] ? File::Spec->catpath(@bin[0..1]) : $bin[1])  # /home/jm/foo -> /home/jm
+            || File::Spec->curdir;                                 # foo          -> .
+
+  # check to make sure it wasn't just installed in the normal way.
+  # note that ./lib/Mail/SpamAssassin.pm takes precedence, for
+  # building SpamAssassin on a machine where an old version is installed.
+  if (-e $bin.'/lib/Mail/SpamAssassin.pm'
+        || !-e '@@INSTALLSITELIB@@/Mail/SpamAssassin.pm')
+  {
+    # Firstly, are we running "make test" in the "t" dir?  the test files
+    # *need* to use 'blib', so that 'use bytes' is removed for pre-5.6 perls
+    # beforehand by the preproc.  However, ./spamassassin does not, as the
+    # preproc will have stripped out the "use rule files from cwd" code from
+    # Mail::SpamAssassin.  So we want to use blib just for the t scripts.
+    if ( $bin eq '../' && -e '../blib/lib/Mail/SpamAssassin.pm' ) {
+      unshift(@INC, '../blib/lib');
+    }
+    else {
+      # These are common paths where the SA libs might be found.
+      foreach (qw(lib ../lib/site_perl
+                  ../lib/spamassassin ../share/spamassassin/lib))
+      {
+        my $dir = File::Spec->catdir($bin, split('/', $_));
+        if(-f File::Spec->catfile($dir, "Mail", "SpamAssassin.pm")) {
+          unshift(@INC, $dir); last;
+        }
+      }
+    }
+  }
+}
+
+# These are the non-standard required modules
+# Use the evals to avoid the annoying RPM requirement check
+eval { use Net::DNS; };
+eval { use LWP::UserAgent; };
+eval { use HTTP::Date qw(time2str); };
+eval { use Archive::Tar; };
+eval { use IO::Zlib; };
+
+# These should already be available
+use Mail::SpamAssassin;
+use Digest::SHA1 qw/sha1_hex/;
 
 # Make the main dbg() accessible in our package w/o an extra function
 *dbg=\&Mail::SpamAssassin::dbg;
@@ -127,12 +166,13 @@ my $SA = new Mail::SpamAssassin({
 });
 $site_rules_path ||= $SA->first_existing_path(@Mail::SpamAssassin::site_rules_path);
 
-dbg("sa-update version $VERSION");
-dbg("using update directory: $site_rules_path");
+dbg("generic: sa-update version $VERSION");
+dbg("generic: using update directory: $site_rules_path");
 
-# doesn't really display useful things for this script,
-# but we do want a module/version listing, etc.
-#$SA->debug_diagnostics();
+# doesn't really display useful things for this script, but we do want
+# a module/version listing, etc. sa-update may be used for older versions
+# of SA that don't include this function, so eval around it.
+eval { $SA->debug_diagnostics(); 1; };
 
 $SA->finish();
 
@@ -177,7 +217,7 @@ if (defined $opt{'channelfile'}) {
     die "Can't open ".$opt{'channelfile'}." for reading: $!\n";
   }
 
-  dbg("channel reading in channelfile ".$opt{'channelfile'});
+  dbg("channel: reading in channelfile ".$opt{'channelfile'});
   while(my $chan = <CHAN>) {
     $chan = lc $chan;
     dbg("channel: adding $chan");
