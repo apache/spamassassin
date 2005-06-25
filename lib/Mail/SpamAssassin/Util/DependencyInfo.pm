@@ -138,6 +138,29 @@ my @OPTIONAL_MODULES = (
   summary reports from spamd\'s syslog messages, requires this version
   of Getopt::Long or newer.',
 },
+{
+  module => 'LWP::UserAgent',
+  version => '0.00',
+  desc => 'The "sa-update" script requires this module to make HTTP requests.',
+},
+{
+  module => 'HTTP::Date',
+  version => '0.00',
+  desc => 'The "sa-update" script requires this module to make HTTP
+  If-Modified-Since GET requests.',
+},
+{
+  module => 'Archive::Tar',
+  version => '0.00',
+  desc => 'The "sa-update" script requires this module to access tar update
+  archive files.',
+},
+{
+  module => 'IO::Zlib',
+  version => '0.00',
+  desc => 'The "sa-update" script requires this module to access compressed
+  update archive files.',
+},
 );
 
 ###########################################################################
