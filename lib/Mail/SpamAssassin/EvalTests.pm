@@ -3089,6 +3089,16 @@ sub check_https_ip_mismatch {
   return 0;
 }
 
+sub check_iframe_src {
+  my ($self) = @_;
+
+  while (my($k,$v) = each %{$self->{html}->{uri_detail}}) {
+    return 1 if $v->{types}->{iframe};
+  }
+
+  return 0;
+}
+
 sub check_ratware_envelope_from {
   my ($self) = @_;
 
