@@ -359,7 +359,11 @@ sub push_uri {
   $uri =~ s/\s+$//;
 
   my $target = target_uri($self->{base_href} || "", $uri);
-  $self->{uri}->{$uri}->{types}->{$type} = 1;
+
+  # skip things like <iframe src="" ...>
+  if (length $uri) {
+    $self->{uri}->{$uri}->{types}->{$type} = 1;
+  }
 }
 
 sub html_uri {
