@@ -28,3 +28,9 @@
 
 body T_HTML_IFRAME_SRC	eval:check_iframe_src()
 describe T_HTML_IFRAME_SRC	Message has HTML IFRAME tag with SRC URI
+
+# These phrases seem to occur a lot in phishing...
+body T_PH_SEC		/\byour .{0,40}account .{0,40}security/i
+describe T_PH_SEC	Message has a phrase standard for phishing mails
+body T_PH_REC		/\byour .{0,40}account .{0,40}record/i
+describe T_PH_REC	Message has a phrase standard for phishing mails
