@@ -1156,7 +1156,7 @@ sub parse_body {
   my @msglines;
   my $actual_length = 0;
 
-  while ( $_ = $client->getline() ) {
+  while (defined($_ = $client->getline())) {
     $actual_length += length($_);
     push(@msglines, $_);    
     last if (defined $expected_length && $actual_length >= $expected_length);
