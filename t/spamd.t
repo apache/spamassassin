@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd");
-use Test; BEGIN { plan tests => ($SKIP_SPAMD_TESTS ? 0 : 9) };
+use Test; BEGIN { plan tests => ($SKIP_SPAMD_TESTS ? 0 : 12) };
 
 exit if $SKIP_SPAMD_TESTS;
 
@@ -25,3 +25,11 @@ q{ This must be the very last line}, 'lastline',
 ok (sdrun ("-L", "< data/spam/001", \&patterns_run_cb));
 ok_all_patterns();
 
+%patterns = (
+q{ X-Spam-Status: Yes, score=}, 'status',
+q{ X-Spam-Flag: YES}, 'flag',
+             );
+
+
+ok (sdrun ("-L", "< data/spam/018", \&patterns_run_cb));
+ok_all_patterns();
