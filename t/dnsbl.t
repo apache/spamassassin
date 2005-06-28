@@ -19,7 +19,7 @@ use constant DO_RUN     => TEST_ENABLED && HAS_NET_DNS &&
 use Test;
 
 BEGIN {
-  plan tests => (DO_RUN ? 22 : 0),
+  plan tests => (DO_RUN ? 23 : 0),
 };
 
 exit unless (DO_RUN);
@@ -88,6 +88,7 @@ EOF
  q{ DNSBL_TXT_MISS } => 'P_20',
  q{ DNSBL_SB_UNDEF } => 'P_21',
  q{ DNSBL_SB_MISS } => 'P_22',
+ q{ launching DNS A query for 14.35.17.212.untrusted.dnsbltest.spamassassin.org. } => 'untrusted',
 );
 
 tstprefs("
@@ -107,6 +108,10 @@ tflags DNSBL_TEST_TOP	net
 header DNSBL_TEST_WHITELIST	eval:check_rbl('white-firsttrusted', 'dnsbltest.spamassassin.org.', '127.0.0.1')
 describe DNSBL_TEST_WHITELIST	DNSBL whitelist match
 tflags DNSBL_TEST_WHITELIST	net nice
+
+header DNSBL_TEST_UNTRUSTED	eval:check_rbl('white-untrusted', 'untrusted.dnsbltest.spamassassin.org.', '127.0.0.1')
+describe DNSBL_TEST_UNTRUSTED	DNSBL untrusted match
+tflags DNSBL_TEST_UNTRUSTED	net nice
 
 header DNSBL_TEST_DYNAMIC	eval:check_rbl_sub('test', '2')
 describe DNSBL_TEST_DYNAMIC	DNSBL dynamic match
@@ -164,5 +169,5 @@ describe DNSBL_SB_MISS	DNSBL SenderBase miss
 tflags DNSBL_SB_MISS	net
 ");
 
-sarun ("-t < data/spam/dnsbl.eml", \&patterns_run_cb);
+sarun ("-D -t < data/spam/dnsbl.eml 2>&1", \&patterns_run_cb);
 ok_all_patterns();

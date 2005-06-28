@@ -223,6 +223,9 @@ sub sarun {
   my $args = shift;
   my $read_sub = shift;
 
+  my $post_redir = '';
+  $args =~ s/ 2\>\&1$// and $post_redir = ' 2>&1';
+
   rmtree ("log/outputdir.tmp"); # some tests use this
   mkdir ("log/outputdir.tmp", 0755);
 
@@ -238,7 +241,7 @@ sub sarun {
   my $scrargs = "$scr $args";
   $scrargs =~ s!/!\\!g if ($^O =~ /^MS(DOS|Win)/i);
   print ("\t$scrargs\n");
-  system ("$scrargs > log/$testname.${Test::ntest}");
+  system ("$scrargs > log/$testname.${Test::ntest} $post_redir");
   $sa_exitcode = ($?>>8);
   if ($sa_exitcode != 0) { return undef; }
   &checkfile ("$testname.${Test::ntest}", $read_sub) if (defined $read_sub);

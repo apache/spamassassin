@@ -1267,6 +1267,8 @@ sub check_rbl_backend {
       @ips = $self->ip_list_uniq_and_strip_private (@ips, @tips);
       if ($1 eq "first") {
         @ips = (defined $ips[0]) ? ($ips[0]) : ();
+      } else {
+        shift @ips;
       }
     }
     else
