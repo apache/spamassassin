@@ -1,8 +1,12 @@
 #!/usr/bin/perl -w
 
-# mboxget - get a message from a mailbox
+# mboxget - get a message from a mailbox or maildir, from mass-check output
 #
-# usage: mboxget [mass-check-mbox-id ...]
+# usage: mboxget [-noannotate] [mass-check-mbox-or-file-id ...]
+#
+# example:
+#
+#   grep SUBJECT_FREQ spam.log | ./mboxget | grep Subject:
 #
 # <@LICENSE>
 # Copyright 2004 Apache Software Foundation
@@ -25,38 +29,89 @@ use strict;
 my $prog = $0;
 $prog =~ s@.*/@@;
 
+sub mywarn;
+
+my $annotate = 1;
+while ($#ARGV >= 0) {
+  $_ = $ARGV[0]; shift;
+  if ($_ eq '-noannotate') { $annotate = 0; }
+  else { unshift @ARGV, $_; last; }
+}
+
 my @inputs;
 push @inputs, @ARGV;
 
 if (!@inputs) {
   while (<STDIN>) {
-    if (/^[Y.]\s+-?\d+\s+(\S+)\s+\S+/) {
+    s/^[^\s:]+://;  # filenames, from "grep foo *"
+
+    if (/^[Y\.]\s+-?\d+\s+(\S+)\s+\S+/) {
       # mass-check format
-      push @inputs, $1;
+      handle_input($1);
     }
     else {
       next if /^#/;
       chomp;
-      push @inputs, $_;
+      handle_input($_);
     }
   }
 }
+exit;
 
-foreach my $where (@inputs) {
+sub handle_input {
+  my $where = shift;
   my ($file, $offset) = ($where =~ m/(.*?)(?:\.(\d+))?$/);
-  open(INPUT, $file) || die("$prog: open $file failed: $!\n");
-  if ($offset) {
-    seek(INPUT, $offset, 0) || die("$prog: seek $offset failed: $!\n");
+
+  if ($file =~ /\.gz$/) {
+    open (INPUT, "gunzip -cd $file |") or mywarn "gunzip $file failed: $!";
+  } elsif ($file =~ /\.bz2$/) {
+    open (INPUT, "bzip2 -cd $file |") or mywarn "bunzip2 $file failed: $!";
+  } else {
+    open (INPUT, "<$file") or mywarn "open $file failed: $!";
   }
+
+  if ($offset) {
+    # TODO: steal open-file caching code from old revisions of
+    # mass-check-results-to-mbox
+    if (!seek(INPUT, $offset, 0)) {
+      mywarn "$prog: seek $offset failed: $!\n";
+      close INPUT;
+      return;
+    }
+  }
+
+  # read the message into @msg
   my $past = 0;
+  my @msg = ();
   while (<INPUT>) {
-    if ($past) {
+    if ($past && $offset) {
+      # only do this for mboxes
       last if substr($_,0,5) eq "From ";
     }
     else {
       $past = 1;
     }
-    print $_;
+    push (@msg, $_);
   }
   close INPUT;
+
+  # now chop off the leading headers that may have come from a previous
+  # run, or will interfere with insertion of the X-Mass-Check-Id hdr
+  my $fromline = "From nobody\@nowhere  Wed Jan  1 00:00:00 2000\n";
+  while (scalar @msg > 0 &&
+      $msg[0] =~ /^(?:From|X-Mass-Check-Id:) /)
+  {
+    if ($msg[0] =~ /^From /) { $fromline = $msg[0]; }
+    shift @msg;
+  }
+
+  # and output
+  $annotate and unshift (@msg, "X-Mass-Check-Id: $where\n");
+  print $fromline, @msg, "\n";
 }
+
+sub mywarn {
+  warn @_;
+  if ($annotate) { print "X-Mass-Check-Warning: ".join ('',@_)."\n"; }
+}
+
