@@ -1235,6 +1235,8 @@ sub check_rbl_backend {
 	" untrusted: ".join(", ", @ips).
 	" originating: ".join(", ", @originating));
 
+  my $trusted = $self->{conf}->{trusted_networks};
+
   if (scalar @ips + scalar @originating > 0) {
     # If name is foo-notfirsthop, check all addresses except for
     # the originating one.  Suitable for use with dialup lists, like the PDL.
@@ -1256,18 +1258,27 @@ sub check_rbl_backend {
     # And if name is foo-untrusted, check any untrusted IP address.
     elsif ($set =~ /-(first|un)trusted$/)
     {
-      push(@ips, @originating);
-      if ($1 eq "first") {
-	@ips = ($ips[0]);
+      my @tips = ();
+      foreach my $ip (@originating) {
+        if ($ip && !$trusted->contains_ip($ip)) {
+          push(@tips, $ip);
+        }
       }
-      else {
-	shift @ips;
+      @ips = reverse $self->ip_list_uniq_and_strip_private (@ips, @tips);
+      if ($1 eq "first") {
+        @ips = (defined $ips[0]) ? ($ips[0]) : ();
       }
     }
     else
     {
-      # add originating IPs as untrusted IPs
-      @ips = reverse $self->ip_list_uniq_and_strip_private(@ips, @originating);
+      my @tips = ();
+      foreach my $ip (@originating) {
+        if ($ip && !$trusted->contains_ip($ip)) {
+          push(@tips, $ip);
+        }
+      }
+      # add originating IPs as untrusted IPs (if they are untrusted)
+      @ips = reverse $self->ip_list_uniq_and_strip_private (@ips, @tips);
 
       # How many IPs max you check in the received lines
       my $checklast=$self->{conf}->{num_check_received};
