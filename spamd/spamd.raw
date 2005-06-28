@@ -52,6 +52,7 @@ use Errno;
 use Cwd ();
 use File::Spec 0.8;
 use File::Path;
+use Carp ();
 
 # Check to make sure the script version and the module version matches.
 # If not, die here!  Also, deal with unchanged VERSION macro.
@@ -734,6 +735,10 @@ if ($copy_config_p) {
 my $got_sighup;
 setup_parent_sig_handlers();
 
+# bonus: SIGUSR2 to dump a stack trace.  this is never reset
+my $current_msgid = "(none)";
+$SIG{USR2} = \&backtrace_handler;
+
 my $select_mask = '';
 vec($select_mask, $server->fileno, 1) = 1;
 $backchannel->set_selector(\$select_mask);
@@ -1224,6 +1229,7 @@ sub check {
 
   $msgid        ||= "(unknown)";
   $current_user ||= "(unknown)";
+  $current_msgid = $msgid;      # for the SIGUSR2 backtrace
   info("spamd: " . ($method eq 'PROCESS' ? "processing" : "checking")
        . " message $msgid"
        . ( $rmsgid ? " aka $rmsgid" : "" )
@@ -2034,6 +2040,11 @@ sub restart_handler {
     info("spamd: server socket closed");
   }
   $got_sighup = 1;
+}
+
+sub backtrace_handler {
+  Carp::cluck("spamd: caught SIGUSR2 - dumping backtrace. ".
+        "most recent message: $current_msgid\n");
 }
 
 sub daemonize {
