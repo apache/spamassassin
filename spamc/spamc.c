@@ -134,7 +134,7 @@ print_usage(void)
     usg("\n");
     usg("Options:\n");
 
-    usg("  -d host             Specify host to connect to.\n"
+    usg("  -d host[,host2]     Specify one or more hosts to connect to.\n"
         "                      [default: localhost]\n");
     usg("  -H                  Randomize IP addresses for the looked-up\n"
         "                      hostname.\n");
@@ -683,6 +683,7 @@ main(int argc, char *argv[])
      */
     m.type = MESSAGE_NONE;
     m.out = NULL;
+    m.outbuf = NULL;
     m.raw = NULL;
     m.priv = NULL;
     m.max_len = max_size;

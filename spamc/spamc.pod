@@ -62,12 +62,14 @@ score/threshold to stdout (as ints) or 0/0 if there was an error.
 Combining B<-c> and B<-E> is a no-op, since B<-c> implies the behaviour
 of B<-E>.
 
-=item B<-d> I<host>
+=item B<-d> I<host[,host2]>
 
-In TCP/IP mode, connect to spamd server on given host (default: localhost). 
+In TCP/IP mode, connect to spamd server on given host (default: localhost).
+Several hosts can be specified if separated by commas.
 
 If I<host> resolves to multiple addresses, then spamc will fail-over to the 
-other addresses, if the first one cannot be connected to.
+other addresses, if the first one cannot be connected to.  It will first try
+all addresses of one host before it tries the next one in the list.
 
 =item B<-e> I<command> I<[args]>
 
@@ -96,9 +98,9 @@ Print this help message and terminate without action.
 
 =item B<-H>
 
-For TCP/IP sockets, randomize the IP addresses returned from a DNS name
-lookup (when more than one IP is returned). This provides for a kind of
-hostname-base load balancing.
+For TCP/IP sockets, randomize the IP addresses returned for the hosts given
+by the B<-d> switch. This provides for a simple kind of load balancing.  It
+will try only three times though.
 
 =item B<-l>
 

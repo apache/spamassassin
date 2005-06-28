@@ -57,6 +57,7 @@
 #include <sys/time.h>
 #endif
 
+/* FIXME: Make this configurable */
 #define MAX_CONNECT_RETRIES 3
 #define CONNECT_RETRY_SLEEP 1
 
@@ -559,6 +560,8 @@ static int _message_read_bsmtp(int fd, struct message *m)
 
 int message_read(int fd, int flags, struct message *m)
 {
+    assert(m != NULL);
+
     libspamc_timeout = 0;
 
     /* create the "private" part of the struct message */
@@ -589,6 +592,8 @@ long message_write(int fd, struct message *m)
     off_t i, j;
     off_t jlimit;
     char buffer[1024];
+
+    assert(m != NULL);
 
     if (m->priv->flags & SPAMC_CHECK_ONLY) {
 	if (m->is_spam == EX_ISSPAM || m->is_spam == EX_NOTSPAM) {
@@ -856,6 +861,9 @@ int message_filter(struct transport *tp, const char *username,
     SSL *ssl = NULL;
     SSL_METHOD *meth;
 
+    assert(tp != NULL);
+    assert(m != NULL);
+
     if (flags & SPAMC_USE_SSL) {
 #ifdef SPAMC_SSL
 	SSLeay_add_ssl_algorithms();
@@ -1079,6 +1087,8 @@ int message_process(struct transport *trans, char *username, int max_size,
     int ret;
     struct message m;
 
+    assert(trans != NULL);
+
     m.type = MESSAGE_NONE;
 
     m.max_len = max_size;
@@ -1126,6 +1136,9 @@ int message_tell(struct transport *tp, const char *username, int flags,
     SSL_CTX *ctx = NULL;
     SSL *ssl = NULL;
     SSL_METHOD *meth;
+
+    assert(tp != NULL);
+    assert(m != NULL);
 
     if (flags & SPAMC_USE_SSL) {
 #ifdef SPAMC_SSL
@@ -1327,7 +1340,8 @@ int message_tell(struct transport *tp, const char *username, int flags,
 
 void message_cleanup(struct message *m)
 {
-    if (m->outbuf)
+    assert(m != NULL);
+    if (m->outbuf != NULL)
         free(m->outbuf);
     if (m->raw != NULL)
         free(m->raw);
@@ -1418,7 +1432,9 @@ static void _randomize_hosts(struct transport *tp)
 */
 int transport_setup(struct transport *tp, int flags)
 {
-    struct hostent *hp = 0;
+    struct hostent *hp;
+    char *hostlist, *hostname;
+    int errbits;
     char **addrp;
 
 #ifdef _WIN32
@@ -1432,9 +1448,8 @@ int transport_setup(struct transport *tp, int flags)
 
 #endif
 
+    assert(tp != NULL);
     tp->flags = flags;
-
-    assert(tp != 0);
 
     switch (tp->type) {
 #ifndef _WIN32
@@ -1448,82 +1463,124 @@ int transport_setup(struct transport *tp, int flags)
         return EX_OK;
 
     case TRANSPORT_TCP:
-        if (NULL == (hp = gethostbyname(tp->hostname))) {
-            int origherr = h_errno;	/* take a copy before syslog() */
+        if ((hostlist = strdup(tp->hostname)) == NULL)
+            return EX_OSERR;
 
-            libspamc_log(flags, LOG_ERR, "gethostbyname(%s) failed: h_errno=%d",
-                    tp->hostname, origherr);
-            switch (origherr) {
-            case HOST_NOT_FOUND:
-            case NO_ADDRESS:
-            case NO_RECOVERY:
-                return EX_NOHOST;
-            case TRY_AGAIN:
-                return EX_TEMPFAIL;
-            default:
-                return EX_OSERR;
-            }
-        }
-
-                /*--------------------------------------------------------
-                * If we have no hosts at all, or if they are some other
-                * kind of address family besides IPv4, then we really
-                * just have no hosts at all.
-                */
-        if (hp->h_addr_list[0] == 0) {
-            /* no hosts in this list */
-            return EX_NOHOST;
-        }
-
-        if (hp->h_length != sizeof tp->hosts[0]
-            || hp->h_addrtype != AF_INET) {
-            /* FAIL - bad size/protocol/family? */
-            return EX_NOHOST;
-        }
-
-                /*--------------------------------------------------------
-                * Copy all the IP addresses into our private structure.
-                * This gets them out of the resolver's static area and
-                * means we won't ever walk all over the list with other
-                * calls.
-                */
+        /* We want to return the least permanent error, in this bitmask we
+         * record the errors seen with:
+         *  0: no error
+         *  1: EX_TEMPFAIL
+         *  2: EX_NOHOST
+         * EX_OSERR will return immediately.
+         * Bits aren't reset so a check against nhosts is needed to determine
+         * if something went wrong.
+         */
+        errbits = 0;
         tp->nhosts = 0;
-
-        for (addrp = hp->h_addr_list; *addrp; addrp++) {
-            if (tp->nhosts >= TRANSPORT_MAX_HOSTS - 1) {
-                libspamc_log(flags, LOG_ERR, "hit limit of %d hosts, ignoring remainder",
-                      TRANSPORT_MAX_HOSTS - 1);
-                break;
+        /* Start with char offset in front of the string because we'll add 
+         * one in the loop
+         */
+        hostname = hostlist - 1;
+        do {
+            char *hostend;
+            
+            hostname += 1;
+            hostend = strchr(hostname, ',');
+            if (hostend != NULL) {
+                *hostend = '\0';
+            }
+            
+            if ((hp = gethostbyname(hostname)) == NULL) {
+                int origerr = h_errno; /* take a copy before syslog() */
+                libspamc_log(flags, LOG_DEBUG, "gethostbyname(%s) failed: h_errno=%d",
+                    hostname, origerr);
+                switch (origerr) {
+                case TRY_AGAIN:
+                    errbits |= 1;
+                    break;
+                case HOST_NOT_FOUND:
+                case NO_ADDRESS:
+                case NO_RECOVERY:
+                    errbits |= 2;
+                    break;
+                default:
+                    /* should not happen, all errors are checked above */
+                    free(hostlist);
+                    return EX_OSERR;
+                }
+                goto nexthost; /* try next host in list */
+            }
+            
+            /* If we have no hosts at all, or if they are some other
+             * kind of address family besides IPv4, then we really
+             * just have no hosts at all. TODO: IPv6
+             */
+            if (hp->h_addr_list[0] == NULL
+             || hp->h_length != sizeof tp->hosts[0]
+             || hp->h_addrtype != AF_INET) {
+                /* no hosts/bad size/wrong family */
+                errbits |= 1;
+                goto nexthost; /* try next host in list */
             }
 
-            memcpy(&tp->hosts[tp->nhosts], *addrp, sizeof tp->hosts[0]);
-
-            tp->nhosts++;
+            /* Copy all the IP addresses into our private structure.
+             * This gets them out of the resolver's static area and
+             * means we won't ever walk all over the list with other
+             * calls.
+             */
+            for (addrp = hp->h_addr_list; *addrp; addrp++) {
+                if (tp->nhosts == TRANSPORT_MAX_HOSTS) {
+                    libspamc_log(flags, LOG_NOTICE, "hit limit of %d hosts, ignoring remainder",
+                        TRANSPORT_MAX_HOSTS);
+                    break;
+                }
+                memcpy(&tp->hosts[tp->nhosts], *addrp, hp->h_length);
+                tp->nhosts++;
+            }
+            
+nexthost:
+            hostname = hostend;
+        } while (hostname != NULL);
+        free(hostlist);
+        
+        if (tp->nhosts == 0) {
+            if (errbits & 1) {
+                libspamc_log(flags, LOG_ERR, "could not resolve any hosts (%s): a temporary error occurred",
+                    tp->hostname); 
+                return EX_TEMPFAIL;
+            }
+            else {
+                libspamc_log(flags, LOG_ERR, "could not resolve any hosts (%s): no such host",
+                    tp->hostname); 
+                return EX_NOHOST;
+            }
         }
-
-                /*--------------------------------------------------------
-                * QUASI-LOAD-BALANCING
-                *
-                * If the user wants to do quasi load balancing, "rotate"
-                * the list by a random amount based on the current time.
-                * This may later be truncated to a single item. This is
-                * meaningful only if we have more than one host.
-                */
+        
+        /* QUASI-LOAD-BALANCING
+         *
+         * If the user wants to do quasi load balancing, "rotate"
+         * the list by a random amount based on the current time.
+         * This may later be truncated to a single item. This is
+         * meaningful only if we have more than one host.
+         */
         if ((flags & SPAMC_RANDOMIZE_HOSTS) && tp->nhosts > 1) {
             _randomize_hosts(tp);
         }
 
-                /*--------------------------------------------------------
-                * If the user wants no fallback, simply truncate the host
-                * list to just one - this pretends that this is the extent
-                * of our connection list - then it's not a special case.
-                */
+        /* If the user wants no fallback, simply truncate the host
+         * list to just one - this pretends that this is the extent
+         * of our connection list - then it's not a special case.
+         */
         if (!(flags & SPAMC_SAFE_FALLBACK) && tp->nhosts > 1) {
             /* truncating list */
             tp->nhosts = 1;
         }
+        
+        return EX_OK;
     }
-    return EX_OK;
+    
+    /* oops, unknown transport type */
+    return EX_OSERR;
 }
 
 /* --------------------------------------------------------------------------- */
