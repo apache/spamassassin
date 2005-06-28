@@ -1264,7 +1264,7 @@ sub check_rbl_backend {
           push(@tips, $ip);
         }
       }
-      @ips = reverse $self->ip_list_uniq_and_strip_private (@ips, @tips);
+      @ips = $self->ip_list_uniq_and_strip_private (@ips, @tips);
       if ($1 eq "first") {
         @ips = (defined $ips[0]) ? ($ips[0]) : ();
       }
