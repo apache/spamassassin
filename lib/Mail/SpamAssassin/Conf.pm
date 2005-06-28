@@ -1816,12 +1816,18 @@ test the first IP address that can be trusted, place '-firsttrusted' at the
 end of the set name.  That should test the IP address of the relay that
 connected to the most remote trusted relay.
 
-In addition, you can test all untrusted IP addresses by placing '-untrusted'
-at the end of the set name.
-
 Note that this requires that SpamAssassin know which relays are trusted.  For
 simple cases, SpamAssassin can make a good estimate.  For complex cases, you
 may get better results by setting C<trusted_networks> manually.
+
+In addition, you can test all untrusted IP addresses by placing '-untrusted'
+at the end of the set name.   Important note -- this does NOT include the 
+IP address from the most recent 'untrusted line', as used in '-firsttrusted'
+above.  That's because we're talking about the trustworthiness of the
+IP address data, not the source header line, here; and in the case of 
+the most recent header (the 'firsttrusted'), that data can be trusted.
+See the Wiki page at http://wiki.apache.org/spamassassin/TrustedRelays
+for more information on this.
 
 =back
 
