@@ -4,6 +4,10 @@
 #
 # usage: remove-ids-from-mclog idlist < log > log.new
 #
+# idlist can either be a file listing ID strings, one per line, or
+# a file containing grepped lines from a mass-check log, in which
+# case the IDs will be read from each line.
+#
 # <@LICENSE>
 # Copyright 2004 Apache Software Foundation
 # 
@@ -33,7 +37,14 @@ usage: remove-ids-from-mclog idlist < log > log.new
 
 my %ids = ();
 open (IN, "<$file") or usage();
-while (<IN>) { chop; $ids{$_}++; }
+while (<IN>) {
+  chop;
+  if (/^[Y\.]\s+-?\d+\s+(\S+)\s+\S+/) {
+    $ids{$1}++;     # mass-check lines
+  } else {
+    $ids{$_}++;     # just the IDs
+  }
+}
 close IN;
 
 my $rmed = 0;
