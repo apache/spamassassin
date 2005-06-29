@@ -878,7 +878,7 @@ sub remove_spamassassin_markup {
     my $cd = '';
     for ( my $i = 0 ; $i <= $#msg ; $i++ ) {
       # only look at mime part headers
-      next unless ( $msg[$i] =~ /^--$boundary$/ || $flag );
+      next unless ( $msg[$i] =~ /^--$boundary\r?$/ || $flag );
 
       if ( $msg[$i] =~ /^\s*$/ ) {    # end of mime header
 
