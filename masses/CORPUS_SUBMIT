@@ -9,16 +9,10 @@
     generation mass-check announcement email.
  3. Now cd to the "masses" directory in the checked-out SVN code tree.
  4. Read README to gain understanding of what mass-check does.
- 5. Run mass-check against your ham mail archive.
- 6. sort -rn +1 ham.log | head -20
- 7. Check each of those 20 messages by hand to make sure they're not spam that
-    slipped through, or a forward of a spam message.
- 8. Repeat #6 until the top 20 are "clean"
- 9. Repeat steps 4-7 for your spam archive until they are "clean"
-    (except you do sort -n +1 spam.log to look for low scoring spam)
-10. Run a mass-check for ham and spam together (one mass-check run)
-11. rename ham.log and spam.log to the appropriate filenames.  ** see note below **
-12. rsync -CPcvzb ham-yourname.log spam-yourname.log username@rsync.spamassassin.org::submit
+ 5. Run mass-check against your ham and spam mail archives.
+ 6. Clean the results: see <http://wiki.apache.org/spamassassin/CorpusCleaning>.
+ 7. rename ham.log and spam.log to the appropriate filenames.  ** see note below **
+ 8. rsync -CPcvzb ham-yourname.log spam-yourname.log username@rsync.spamassassin.org::submit
 
 Thanks for your help!
 
