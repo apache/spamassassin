@@ -5,11 +5,13 @@
 
 sub usage {
   die "usage: maildir-scan-headers [-h headers] [--headers headers]
-	[-i] [-raw] [-sort] fileordir1 fileordir2 ...  \n";
+        [-re regexp] [-i] [-raw] [-sort] fileordir1 fileordir2 ...  \n";
 
 }
 
+my $expect_attachment = 0;
 my $wanted = '';
+my $regexp = '';
 my $sort = 0;
 my $casei = 0;
 my $raw = 0;
@@ -18,6 +20,7 @@ my @files = ();
 use Getopt::Long qw(:config no_ignore_case);
 GetOptions(
 	"headers|h=s" => \$wanted,
+	"re=s" => \$regexp,
 	"casei|i" => \$casei,
 	"raw" => \$raw,
 	"sort" => \$sort,
@@ -26,7 +29,9 @@ GetOptions(
 );
 
 $wanted =~ s/[ ,\|;:]+/\|/gs;
-if ($casei) {
+if ($regexp) {
+  $wanted = qr{${regexp}};
+} elsif ($casei) {
   $wanted = qr{(?:$wanted)}i;
 } else {
   $wanted = qr{(?:$wanted)};
@@ -54,7 +59,7 @@ sub do_file {
   {
     if (/^$/) { last; }
 
-    if (!$raw && /X-Spam-Flag: YES/) {
+    if ($expect_attachment && !$raw && /X-Spam-Flag: YES/) {
       while (<IN>) {
 	/^Content-Description: original message before SpamAssassin/ and last;
       }
@@ -65,12 +70,15 @@ sub do_file {
 
     $hdrs .= $_;
   }
+
   close IN;
 
-  $hdrs =~ s/(\n[ \t]+)/\\n /gs;	# folding
+
+  $hdrs =~ s/\n([ \t])/\\n$1/gs;	# folding
+  $hdrs =~ s/\t/\\t/gs;                 # tabs
   $hdrs =~ s/\|/[pipe]/gs;		# pipe chars
 
-  my @ok = ($hdrs =~ /^(${wanted}:(?: .*)?)$/gom);
+  my @ok = ($hdrs =~ /^(${wanted}:.*)$/gom);
   if ($sort) { @ok = sort @ok; }
   $hdrs = join ("|", @ok);
 
