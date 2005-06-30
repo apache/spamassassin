@@ -471,9 +471,12 @@ non-spam, but which the user doesn't want.  Same format as C<whitelist_from>.
 
 =item unblacklist_from add@ress.com
 
-Used to override a default blacklist_from entry, so for example a distribution blacklist_from
-can be overridden in a local.cf file, or an individual user can override a blacklist_from entry
-in their own C<user_prefs> file.
+Used to override a default blacklist_from entry, so for example a
+distribution blacklist_from can be overridden in a local.cf file, or
+an individual user can override a blacklist_from entry in their own
+C<user_prefs> file. The specified email address has to match exactly
+the address previously used in a blacklist_from line.
+
 
 e.g.
 
