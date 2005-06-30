@@ -96,6 +96,13 @@ SPAMASSASSIN RELEASE PROCEDURE
 	$repo/trunk \
 	$repo/tags/spamassassin_release_3_0_0
 
+  For a trunk pre-release (x.y.0-preZ):
+
+    repo=https://svn.apache.org/repos/asf/spamassassin
+    svn copy -m "creating tag for release 3.1.0-pre2" \
+	$repo/trunk \
+	$repo/tags/spamassassin_release_3_1_0_pre_2
+
   This will do a completely server-side tagging (which is the same as
   a branch really) of whatever the latest branch revision to be the new
   base of the tag release.
@@ -173,7 +180,13 @@ SPAMASSASSIN RELEASE PROCEDURE
   (for rc and prerelease builds) copy the tarballs to the website.
 
         cp -p ~/site/released/Mail-SpamAssassin-[VERSION].* \
-            /www/spamassassin.apache.org/released/
+            /www/spamassassin.apache.org/devel/
+
+  BTW, note that http://spamassassin.apache.org/devel/ is served via a
+  mirror which takes several hours to catch up.  However that directory is
+  ALSO accessible directly, and immediately, as
+
+        http://people.apache.org/~jm/devel/
 
   (for full release builds) copy the tarballs to www.apache.org/dist:
 
@@ -199,9 +212,10 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   (Archive copies are automatically kept on archive.apache.org/dist/ .)
 
-- edit SpamAssassin site through WebMake, change released_version item
-  at top of file to be X.Y.Z, then run "webmake" or hit "Build Fully"
-  in the Web interface
+- rebuild the SpamAssassin website with webmake:
+
+        cd /www/spamassassin.apache.org
+        webmake -F
 
 - upload to CPAN at http://pause.cpan.org/
 
@@ -222,7 +236,5 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - Approve the posting to SpamAssassin-Announce (the list admins will get a
   mail indicating how to do this.)
-
-lastmod: Aug 12 2004 jm
 
 // vim:tw=74:
