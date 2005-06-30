@@ -62,7 +62,7 @@ my %log_level = (
 our %LOG_SA;
 
 # defaults
-$LOG_SA{level} = DBG;	        # log info, warnings and errors
+$LOG_SA{level} = WARNING;       # log info, warnings and errors
 $LOG_SA{facility} = {};		# no dbg facilities turned on
 
 # always log to stderr initially
