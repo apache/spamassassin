@@ -6,27 +6,71 @@ includes a number of new email and anti-spam technologies.
 SpamAssassin is a mail filter which uses advanced statistical and
 heuristic tests to identify spam (also known as unsolicited bulk email).
 
+
 Highlights of the release
 -------------------------
 
- - SpamAssassin is now part of the Apache Software Foundation and has an 
-   improved software license, the 2.0 version of the Apache License.
+- Apache preforking algorithm adopted; number of spamd child processes is now
+  scaled, according to demand.  This provides better VM behaviour when not
+  under peak load.
 
- - SpamAssassin now includes support for SPF (the Sender Policy Framework,
-   http://spf.pobox.com/).
+- added PostgreSQL, MySQL 4.1+, and local SDBM file Bayes storage modules. SQL
+  storage is now recommended for Bayes, instead of DB_File. NDBM_File support
+  has been dropped due to a major bug in that module.
 
- - Web site links contained in the message are checked against SURBL and
-   SBL.  SURBL and SBL track sites that advertise with spam, known spam
-   sources, and spam services.
+- detect legitimate SMTP AUTH submission, to avoid false positives on
+  Dynablock-style rules.
 
- - The new 3.0 architecture allows third-parties to easily add plugin modules.
+- new Advance Fee Fraud (419 scam) rules.
 
- - There is now SQL database support for both the Bayes and auto-whitelist
-   modules, allowing more large sites to easily deploy SpamAssassin.
+- removed use of the Storable module, due to several reported hangs on SMP
+  Linux machines.
 
- - A more accurate simulation of email client handling of MIME and HTML
-   improves our accuracy.  In addition, there is better detection and
-   handling of spammer techniques that try to trick anti-spam software.
+- new plugins: DomainKeys (off by default), MIMEHeader: a new plugin to perform
+  tests against header in internal MIME structure, ReplaceTags: plugin by Felix
+  Bauer to support fuzzy text matching, WhiteListSubject: plugin added to
+  support user whitelists by Subject header.
+
+- TextCat language guesser moved to a plugin.  This means "ok_languages"
+  is no longer part of the core engine.
+
+- AccessDB, Pyzor: moved to their own plugins to trim down the core engine.
+
+- Razor: disable Razor2 support by default per our policy, since the
+  service is not free for non-personal use.  It's trivial to reenable.
+
+- DCC: disable DCC for similar reasons, due to new license terms.
+
+- Net::DNS bug: high load caused answer packets to be mixed up and delivered as
+  answers to the wrong request, causing false positives.  worked around.
+
+- DNSBL lookups and other DNS operations are now more efficient, by using a
+  custom single-socket event-based model instead of Net::DNS.
+
+- add support for accreditation services, including Habeas v2.
+
+- better URI parsing -- many evasion tricks now caught.
+
+- mass-check now supports reusing realtime DNSBL hit results, and sample-based
+  Bayes autolearning emulation, to reduce complexity.
+
+- sa-learn, spamassassin and mass-check now have progress bars.
+
+- modify header ordering for DomainKeys compatibility, by placing markup
+  headers at the top of the message instead at the bottom of the list.
+
+- spamd/spamc now support remote Bayes training, and reporting spam.
+
+- spamc now supports reading its flags from a configuration file using the -F
+  switch, contributed by John Madden.
+
+- added SPF-based whitelisting.
+
+- Polish rules contributed by Radoslaw Stachowiak.
+
+- many rule changes and additions.
+
+
 
 Downloading
 -----------
