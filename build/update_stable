@@ -18,9 +18,6 @@ for ext in tar.bz2 tar.gz zip ; do
 done
 
 
-# cp WebMake-${vers}-1.noarch.rpm WebMake-${vers}-1.src.rpm $WEBDIR/released
-( cd $RELDIR && svn add *SpamAssassin* )
-
 set +x
 echo
 

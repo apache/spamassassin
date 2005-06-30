@@ -20,9 +20,8 @@ SPAMASSASSIN DEVELOPMENT SNAPSHOT PROCEDURE
 
 - run "./build/update_devel" to build the tar.gz files
 
-- by default, they're written to ~/spamassassin.taint.org/devel/ .  This
-  Works For Me (tm), as it's my local cvs checkout of the SpamAssassin
-  website.  Copy them to wherever you want, yourself.
+- by default, they're written to ~/site/devel/ . 
+  Copy them to wherever you want, yourself.
 
 
 SPAMASSASSIN RELEASE PROCEDURE
@@ -116,11 +115,10 @@ SPAMASSASSIN RELEASE PROCEDURE
 
     ./build/update_stable
 
-- by default, they're written to ~/spamassassin.taint.org/released/ .
-  This Works For Me (tm), as it's my local cvs checkout of the
-  SpamAssassin website.  Copy them to wherever you want, yourself.
-
 - take a copy of the MD5sum line output.
+
+- by default, they're written to ~/site/released/ .
+  Copy them to wherever you want, yourself.
 
 - test the tar.gz and zip files!  redo until they work!! ;)
 
