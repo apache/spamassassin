@@ -49,7 +49,7 @@ echo $VERSION > $WEBDIR/latest_version
 rm -f $DISTVNAME.*
 
 make distdir || exit $?
-tar -cWvf   $DISTVNAME.tar $DISTDNAME         || exit $?
+tar -cvf   $DISTVNAME.tar $DISTDNAME         || exit $?
 
 gzip  -f9vc $DISTVNAME.tar > $DISTVNAME.tar.gz  || exit $?
 bzip2 -f9vc $DISTVNAME.tar > $DISTVNAME.tar.bz2 || exit $?
