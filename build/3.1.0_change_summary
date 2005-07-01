@@ -85,6 +85,9 @@ Summary of major changes since 3.0.x
   scaled, according to demand.  This provides better VM behaviour when not
   under peak load.
 
+- Inclusion of sa-update script which will allow for updates of rules and
+  scores in between code releases.
+
 - added PostgreSQL, MySQL 4.1+, and local SDBM file Bayes storage modules. SQL
   storage is now recommended for Bayes, instead of DB_File. NDBM_File support
   has been dropped due to a major bug in that module.
@@ -97,6 +100,9 @@ Summary of major changes since 3.0.x
 - removed use of the Storable module, due to several reported hangs on SMP
   Linux machines.
 
+- Converted several rule/engine components into Plugins such as:
+  AccessDB, AWL, Pyzor, Razor2, DCC, Bayes AutoLearn Determination, etc.
+
 - new plugins: DomainKeys (off by default), MIMEHeader: a new plugin to perform
   tests against header in internal MIME structure, ReplaceTags: plugin by Felix
   Bauer to support fuzzy text matching, WhiteListSubject: plugin added to
@@ -104,8 +110,6 @@ Summary of major changes since 3.0.x
 
 - TextCat language guesser moved to a plugin.  This means "ok_languages"
   is no longer part of the core engine.
-
-- AccessDB, Pyzor: moved to their own plugins to trim down the core engine.
 
 - Razor: disable Razor2 support by default per our policy, since the
   service is not free for non-personal use.  It's trivial to reenable.
@@ -122,10 +126,13 @@ Summary of major changes since 3.0.x
 
 - better URI parsing -- many evasion tricks now caught.
 
+- URIBL lookups are prioritized based on the location in the message
+  the URI was found.
+
 - mass-check now supports reusing realtime DNSBL hit results, and sample-based
   Bayes autolearning emulation, to reduce complexity.
 
-- sa-learn, spamassassin and mass-check now have progress bars.
+- sa-learn, spamassassin and mass-check now have optional progress bars.
 
 - modify header ordering for DomainKeys compatibility, by placing markup
   headers at the top of the message instead at the bottom of the list.
