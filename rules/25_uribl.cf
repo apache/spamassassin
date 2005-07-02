@@ -37,36 +37,43 @@ uridnsbl	URIBL_SBL	sbl.spamhaus.org.	TXT
 body		URIBL_SBL	eval:check_uridnsbl('URIBL_SBL')
 describe	URIBL_SBL	Contains an URL listed in the SBL blocklist
 tflags		URIBL_SBL	net
+#reuse		URIBL_SBL
 
 urirhssub	URIBL_SC_SURBL	multi.surbl.org.	A   2
 body		URIBL_SC_SURBL	eval:check_uridnsbl('URIBL_SC_SURBL')
 describe	URIBL_SC_SURBL	Contains an URL listed in the SC SURBL blocklist
 tflags		URIBL_SC_SURBL	net
+#reuse		URIBL_SC_SURBL
 
 urirhssub	URIBL_WS_SURBL	multi.surbl.org.	A   4
 body		URIBL_WS_SURBL	eval:check_uridnsbl('URIBL_WS_SURBL')
 describe	URIBL_WS_SURBL	Contains an URL listed in the WS SURBL blocklist
 tflags		URIBL_WS_SURBL	net
+#reuse		URIBL_WS_SURBL
 
 urirhssub	URIBL_PH_SURBL	multi.surbl.org.	A   8
 body		URIBL_PH_SURBL	eval:check_uridnsbl('URIBL_PH_SURBL')
 describe	URIBL_PH_SURBL	Contains an URL listed in the PH SURBL blocklist
 tflags		URIBL_PH_SURBL	net
+#reuse		URIBL_PH_SURBL
 
 urirhssub	URIBL_OB_SURBL	multi.surbl.org.	A   16
 body		URIBL_OB_SURBL	eval:check_uridnsbl('URIBL_OB_SURBL')
 describe	URIBL_OB_SURBL	Contains an URL listed in the OB SURBL blocklist
 tflags		URIBL_OB_SURBL	net
+#reuse		URIBL_OB_SURBL
 
 urirhssub	URIBL_AB_SURBL	multi.surbl.org.	A   32
 body		URIBL_AB_SURBL	eval:check_uridnsbl('URIBL_AB_SURBL')
 describe	URIBL_AB_SURBL	Contains an URL listed in the AB SURBL blocklist
 tflags		URIBL_AB_SURBL	net
+#reuse		URIBL_AB_SURBL
 
 urirhssub	URIBL_JP_SURBL	multi.surbl.org.	A   64
 body		URIBL_JP_SURBL	eval:check_uridnsbl('URIBL_JP_SURBL')
 describe	URIBL_JP_SURBL	Contains an URL listed in the JP SURBL blocklist
 tflags		URIBL_JP_SURBL	net
+#reuse		URIBL_JP_SURBL
 
 # Don't bother looking for example domains as per RFC 2606.
 uridnsbl_skip_domain example.com example.net example.org
