@@ -34,3 +34,11 @@ body T_PH_SEC		/\byour .{0,40}account .{0,40}security/i
 describe T_PH_SEC	Message has a phrase standard for phishing mails
 body T_PH_REC		/\byour .{0,40}account .{0,40}record/i
 describe T_PH_REC	Message has a phrase standard for phishing mails
+
+# tvd- works well for me in testing, let's see how well it works for others
+#  0.331   0.3763   0.0000    1.000   0.50    0.01  T_EB_PHISH
+#  0.292   0.3326   0.0000    1.000   0.25    0.01  T_PP_PHISH
+header __FROM_PAYPAL	From:addr =~ /\@paypal\.com$/i
+header __FROM_EBAY	From:addr =~ /\@ebay\.com$/i
+meta T_PP_PHISH	__FROM_PAYPAL && NORMAL_HTTP_TO_IP
+meta T_EB_PHISH	__FROM_EBAY && NORMAL_HTTP_TO_IP
