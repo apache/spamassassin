@@ -225,7 +225,17 @@ sub _packet_id {
   my $id = $header->id;
   my @questions = $packet->question;
   my $ques = $questions[0];
-  return $id . $ques->qname . $ques->qtype . $ques->qclass;
+
+  if (defined $ques) {
+    return $id . $ques->qname . $ques->qtype . $ques->qclass;
+  } else {
+    # odd.  this should not happen, but clearly some DNS servers
+    # can return something that Net::DNS interprets as having no
+    # question section.  Better support it; just return the
+    # (safe) ID part, along with a text token indicating that
+    # the packet had no question part.
+    return $id . "NO_QUESTION_IN_PACKET";
+  }
 }
 
 ###########################################################################
