@@ -708,6 +708,7 @@ sub complete_lookups {
   $scanstate->{queries_completed} = 0;
 
   my $nfound = $self->{main}->{resolver}->poll_responses($timeout);
+  $nfound ||= 'no';
   dbg ("uridnsbl: select found $nfound socks ready");
 
   foreach my $key (keys %{$pending}) {
