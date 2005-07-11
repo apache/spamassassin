@@ -520,6 +520,7 @@ sub dccproc_lookup {
   }
 
   if (!defined($response) || $response !~ /^X-DCC/) {
+    $response ||= '';
     dbg("dcc: check failed: no X-DCC returned (did you create a map file?): $response");
     return 0;
   }
