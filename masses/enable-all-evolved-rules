@@ -29,13 +29,17 @@
 
 use strict;
 
-while (<>) {
-  print;
-  last if /<gen:mutable>/;
-}
+my $in_mut_sect = 0;
 
 while (<>) {
-  if (/^\s*score\s+(.+?)$/) {
+  if (/<gen:mutable>/) {
+    $in_mut_sect = 1;
+  }
+  elsif (/<\/gen:mutable>/) {
+    $in_mut_sect = 0;
+  }
+
+  if ($in_mut_sect && /^\s*score\s+(.+?)$/) {
     my @vals = split(' ', $1);
     my $new = '';
     foreach my $score (@vals) {
@@ -45,14 +49,11 @@ while (<>) {
         $new .= "$score ";
       }
     }
+    $new =~ s/ +$//;
     print "score $new\n";
   }
   else {
     print;
   }
-  last if /<\/gen:mutable>/;
 }
 
-while (<>) {
-  print;
-}
