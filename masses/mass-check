@@ -205,7 +205,7 @@ if ($opt_reuse) {
 
   # zeroed scores to mass_prefs
   my @zero = sort grep { defined $reuse{$_}->{skip} } keys %reuse;
-  open(PREFS, ">> $opt_p/mass_prefs");
+  open(PREFS, ">> $opt_p/mass_prefs") || die "Unable to open $opt_p/mass_prefs: $!\nNeeded for --reuse to work properly";
   for my $zero (@zero) {
     print PREFS "score $zero 0\n";
   }
