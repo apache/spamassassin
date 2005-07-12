@@ -24,7 +24,7 @@ use Mail::SpamAssassin;
 use vars qw(%patterns %anti_patterns);
 
 # settings
-plan tests => 2;
+plan tests => 101;
 
 # initialize SpamAssassin
 my $sa = create_saobj({'dont_copy_prefs' => 1});
@@ -44,21 +44,22 @@ my $uris = join("\n", $msg->get_uri_list(), "");
 # run patterns and anti-patterns
 my $failures = 0;
 for my $pattern (keys %patterns) {
-  if ($uris !~ /${pattern}/m) {
-    print "did not find $pattern\n";
+  if (!ok($uris =~ /${pattern}/m)) {
+    warn "failure: did not find /$pattern/\n";
     $failures++;
   }
 }
-ok(!$failures);
-$failures = 0;
 
 for my $anti_pattern (keys %anti_patterns) {
-  if ($uris =~ /${anti_pattern}/m) {
-    print "did find $anti_pattern\n";
+  if (!ok($uris !~ /${anti_pattern}/m)) {
+    warn "failure: did find /$anti_pattern/\n";
     $failures++;
   }
 }
-ok(!$failures);
+
+if ($failures) {
+  print "URIs found:\n$uris";
+}
 
 # function to write test email
 sub write_mail {
@@ -77,6 +78,7 @@ EOF
   while (<DATA>) {
     chomp;
     next if /^#/;
+    next if /^\s*$/;
     if (/^(.*?)\t+(.*?)\s*$/) {
       my $string = $1;
       my @patterns = split(' ', $2);
@@ -91,6 +93,9 @@ EOF
           }
         }
       }
+    }
+    else {
+      warn "unparseable line: $_";
     }
   }
 
@@ -251,3 +256,7 @@ baeb1fai@@example.com			!baeb1fai@@example.com
 #ldap://www.luzoop5k.com	ldap://www.luzoop5k.com
 #im://www.luzoop5k.com		im://www.luzoop5k.com
 #snmp://www.luzoop5k.com	snmp://www.luzoop5k.com
+
+<sentto-4934-foo=addr.com@verper.com>	!^http://.*addr.com@verper.com
+<sentto-4934-foo=addr.com@verper.com>	mailto:sentto-4934-foo=addr.com@verper.com
+

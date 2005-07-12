@@ -2040,18 +2040,23 @@ sub _get_parsed_uri_list {
           # open, without a protocol, and not inside of an HTML tag,
           # the we should add the proper protocol in front, rather
           # than using the base URI.
-          if ($uri =~ /^www\d*\./i) {
+          if ($uri =~ /^ftp\./i) {
+            push (@uris, $uri);
+            $uri = "ftp://$uri";
+          }
+          if ($uri =~ /\@/) {
+            push (@uris, $uri);
+            $uri = "mailto:$uri";
+          }
+          else # if ($uri =~ /^www\d*\./i)
+          {
             # some spammers are using unschemed URIs to escape filters
             push (@uris, $uri);
             $uri = "http://$uri";
           }
-          elsif ($uri =~ /^ftp\./i) {
-            push (@uris, $uri);
-            $uri = "ftp://$uri";
-          }
         }
 
-        #warn("uri: got URI: $uri\n");
+        # warn("uri: got URI: $uri\n");
         push @uris, $uri;
       }
       while (/($Addr_spec_re)/igo) {

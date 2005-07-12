@@ -931,8 +931,9 @@ sub uri_list_canonify {
   # make sure we catch bad encoding tricks
   my @nuris = ();
   for my $uri (@uris) {
-    # we're interested in http:// and so on, skip mailto:
-    next if $uri =~ /^mailto:/i;
+    # we're interested in http:// and so on, skip mailto: and
+    # email addresses with no protocol
+    next if $uri =~ /^mailto:/i || $uri =~ /^[^:]*\@/;
 
     # sometimes we catch URLs on multiple lines
     $uri =~ s/\n//g;
