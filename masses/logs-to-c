@@ -45,6 +45,7 @@ my $nybias = 10;
 my $lambda = 50;
 if ($opt_lambda) { $lambda = $opt_lambda; }
 
+my $msgline;
 my $is_spam = '';		# vec aligned with @tests_hit
 my @tests_hit = ();
 my %mutable_tests = ();
@@ -175,8 +176,8 @@ sub readlogs {
     my $caught;			# 1st parameter of log line
     my $rules;			# 4th parameter of log line
 
-    while (<IN>) {
-      ($caught, undef, undef, $rules) = split;
+    while (defined($msgline = <IN>)) {
+      ($caught, undef, undef, $rules) = split(' ', $msgline);
 
       # only take lines starting with Y or .
       next unless ($caught eq 'Y' || $caught eq '.') && $rules;
