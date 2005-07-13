@@ -64,11 +64,20 @@ for (my $scoreset = 0; $scoreset < 4; $scoreset++) {
 	    $meta_dependency_nonexistent = 1;
 	    next;
 	  }
+
 	  # if dependency is a predicate, it'll run
 	  next if $depend =~ /^__/;
+
 	  # if dependency has a non-zero score, it'll run
 	  next if (defined $rules{$depend}->{score} &&
 		   $rules{$depend}->{score} != 0);
+
+          # ignore "tflags net" and "tflags learn" rules -- it is OK
+          # for those to have zero scores in some scoresets, for obvious
+          # reasons.
+          next if (defined $rules{$depend}->{tflags} &&
+                  $rules{$depend}->{tflags} =~ /\b(?:net|learn)\b/);
+
 	  warn "$name depends on $depend with 0 score in set $scoreset\n";
 	  $meta_dependency_disabled = 1;
 	}
