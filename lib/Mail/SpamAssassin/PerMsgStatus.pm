@@ -1466,7 +1466,12 @@ sub _get {
   # a conventional header
   else {
     $result = join('', $self->{msg}->get_header($request, $getraw));
-    $result = undef if !$result;
+
+    # metadata
+    if (!$result) {
+      $result = $self->{msg}->get_metadata($request);
+      $result = undef if !$result;
+    }
   }
       
   # special queries
