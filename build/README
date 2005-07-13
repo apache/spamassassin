@@ -44,6 +44,10 @@ SPAMASSASSIN RELEASE PROCEDURE
   line.   Ensure the correct version number is present in $VERSION
   and $EXTRA_VERSION.
 
+  Prerelease versions are formatted like this -- "pre4" -- in
+  $EXTRA_VERSION, and $IS_DEVEL_BUILD is left as 1 instead of commented.
+  When referred to in full, it's "3.1.0-pre4".
+
   [NOTE: when editing files in these instructions, you may have to
   use another checkout somewhere else, check in the changes there,
   then 'svn update' in the release account -- since I think it
