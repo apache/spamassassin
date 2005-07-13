@@ -1,0 +1,37 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+my $command = shift @ARGV;
+my $perl = shift @ARGV;
+my $syncfile = shift @ARGV;
+
+if ($command eq 'start') {
+  if ($syncfile) {
+    # sleep until it disappears, or times out
+    while (-f $syncfile && mtime_age_secs($syncfile) < 60*60) {
+      print "$syncfile exists with age ".mtime_age_secs($syncfile).", sleeping\n";
+      sleep 60*3 + rand(60*5);
+    }
+
+    open (TOUCH, ">$syncfile"); close TOUCH;
+  }
+
+  system ("$perl Makefile.PL < /dev/null");
+  system ("make distclean");
+  system ("rm -rf Mail-SpamAssassin*");
+}
+elsif ($command eq 'stop') {
+  if ($syncfile) {
+    unlink ($syncfile);
+    print "$syncfile removed\n";
+  }
+}
+exit;
+
+sub mtime_age_secs {
+  my $f = shift;
+  my @s = stat($f);
+  return (time - $s[9]);
+}
+

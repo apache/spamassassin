@@ -1,0 +1,262 @@
+#!/usr/bin/perl -w
+#
+# <@LICENSE>
+# Copyright 2004 Apache Software Foundation
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+
+use strict;
+
+my $NUM_SCORESETS = 4;
+
+# scores are broken into three regions:
+# 1. "pre" (stuff before generated mutable scores)
+# 2. "gen" (generated mutable scores)
+# 3. "end" (stuff after generated mutable scores)
+
+# options
+my ($scoreset, $oldscores, $newscores) = @ARGV;
+$scoreset = int($scoreset) if defined $scoreset;
+if (!defined $newscores || $scoreset < 0 || $scoreset >= $NUM_SCORESETS ) {
+  die "usage: rewrite-cf-with-new-scores scoreset oldscores.cf newscores.cf\n";
+}
+
+# variables filled-out in read_rules()
+our %rules;			# rules data
+
+# variables filled-out in read_gascores()
+my %gascores = ();		# generated scores
+
+# variables filled-out in read_oldscores()
+my $pre = '';			# stuff before "gen" scores
+my $end = '';			# stuff after "gen" scores
+my %oldscores;			# old scores
+my %comment;			# "gen" rule comments
+my %fixed;			# scores that are fixed (non-gen)
+
+# read stuff in
+read_rules();
+read_gascores();
+read_oldscores();
+
+# write stuff out
+print $pre;
+print_gen();
+print $end;
+
+sub read_rules {
+  system ("./parse-rules-for-masses -s $scoreset") and die;
+  if (-e "tmp/rules.pl") {
+    # note: the spaces need to stay in front of the require to work around
+    # a RPM 4.1 problem
+    require "./tmp/rules.pl";
+  }
+  else {
+    die "parse-rules-for-masses had no error but no tmp/rules.pl";
+  }
+}
+
+sub read_gascores {
+  open (STDIN, "<$newscores") or die "cannot open $newscores";
+  while (<STDIN>) {
+    next unless /^score\s+(\S+)\s+(-?\d+(?:\.\d+)?)/;
+    my $name = $1;
+    my $score = $2;
+
+    # various things we should be concerned about
+    if (!exists $rules{$name}) {
+      warn "$name is not defined in tmp/rules.pl\n";
+      next;
+    }
+    if ($rules{$name}->{issubrule}) {
+      warn "$name is an indirect sub-rule in tmp/rules.pl\n";
+      next;
+    }
+    if ($rules{$name} =~ /^__/) {
+      warn "$name has an indirect sub-rule \"__\" prefix\n";
+      next;
+    }
+    if ($name eq '(null)') {
+      warn "$name is (null)\n";
+      next;
+    }
+
+    $gascores{$name} = $score;
+  }
+}
+
+sub read_oldscores {
+  open (IN, "<$oldscores") or die "cannot open $oldscores";
+
+  # state of things
+  my $where = "pre";		# region of original scores file that we're in
+
+  # read everything in
+  while (my $line = <IN>) {
+    if ($line =~ /<\/gen:mutable>/) {
+      $where = "end";
+    }
+
+    if ($where eq "pre") {
+      readline_fix($line);
+      $pre .= $line;
+    }
+    elsif ($where eq "gen") {
+      readline_gen($line);
+    }
+    elsif ($where eq "end") {
+      readline_fix($line);
+      $end .= $line;
+    }
+
+    if ($line =~ /<gen:mutable>/) {
+      $where = "gen";
+    }
+  }
+}
+
+# used for both "pre" and "end"
+sub readline_fix {
+  my ($line) = @_;
+
+  my $comment;
+  if ($line =~ s/\s*#\s*(.*)//) {
+    $comment = $1;
+  }
+  if ($line =~ /^\s*score\s+(\S+)\s/) {
+    my (undef, $name, @scores) = split(' ', $line);
+    $fixed{$name}++;
+    $comment{$name} = $comment if $comment;
+  }
+}
+
+sub readline_gen {
+  my ($line) = @_;
+
+  my $comment;
+  if ($line =~ s/\s*#\s*(.*)//) {
+    $comment = $1;
+    $comment =~ s/ n=$scoreset//;
+  }
+  if ($line =~ /^\s*score\s+(\S+)\s/) {
+    my (undef, $name, @scores) = split(' ', $line);
+    for (my $i = 1; $i < $NUM_SCORESETS; $i++) {
+      $scores[$i] = $scores[0] unless defined $scores[$i];
+    }
+    @{$oldscores{$name}} = @scores;
+    $comment{$name} = $comment if $comment;
+  }
+}
+
+sub print_gen {
+  print "\n";
+
+  # we just consider scores for this set that are in the input or were in the
+  # "gen" region from the old scores, tmp/rules.pl is not considered here
+  my %gen;				# rules to be printed in "gen" region
+  $gen{$_} = 1 for keys %gascores;	# scores for this set from GA
+  $gen{$_} = 1 for keys %oldscores;	# original scores in "gen" region
+
+  # remove fixed scores
+  for (keys %fixed) {
+    delete $gen{$_};
+  }
+
+  # sort all generated rules by name
+  for my $name (sort keys %gen) {
+    next if ($rules{$name}->{lang});	# "lang es" rules etc.
+    next if ($rules{$name}->{issubrule});	# indirect sub-rules
+    next if ($name eq 'AWL');		# dynamic score
+
+    my @scores = ();
+    my $comment = '';
+    $comment = $comment{$name} if defined $comment{$name};
+    
+    # use the old scores if they existed
+    @scores = @{$oldscores{$name}} if exists $oldscores{$name};
+    
+    # set appropriate scoreset value
+    if (defined $gascores{$name}) {
+      $scores[$scoreset] = $gascores{$name};
+      delete $oldscores{$name};
+    }
+    else {
+      # I think these are non-issues
+      if (defined $rules{$name}->{score} && !$rules{$name}->{issubrule}) {
+	#warn "$name has no GA score, but is in tmp/rules.pl\n";
+      }
+      if (defined $oldscores{$name}) {
+	$comment .= " n=$scoreset";
+	#warn "$name has no GA score, but had a score before\n";
+      }
+    }
+
+    # sort and unique comment tags
+    my %unique;
+    $unique{$_} = 1 for split(' ', $comment);
+    $comment = join(' ', sort keys %unique);
+
+    # create new score line
+    printf("score %s %s%s\n", $name,
+	   join(" ", generate_scores($name, @scores)),
+	   ($comment) ? ' # ' . $comment : '');
+  }
+
+  print "\n";
+}
+
+sub generate_scores {
+  my ($name, @scores) = @_;
+
+  my $isnet = 0;
+  my $islearn = 0;
+  if (defined $rules{$name}->{tflags}) {
+    $isnet = ($rules{$name}->{tflags} =~ /\bnet\b/);
+    $islearn = ($rules{$name}->{tflags} =~ /\blearn\b/);
+  }
+
+  # set defaults if not already set
+  if (!defined $scores[0]) {
+    warn "$name does not have a default score\n";
+    $scores[0] ||= 0;
+  }
+
+  # zero for current scoreset if there was no new score
+  $scores[$scoreset] = 0 if !$gascores{$name};
+
+  my $flag = 1;
+  for (my $i = 1; $i < $NUM_SCORESETS; $i++) {
+    $scores[$i] = $scores[0] unless defined $scores[$i];
+    $flag = 0 if ($scores[$i] != $scores[$i-1]);
+  };
+
+  # enforce rule/scoreset rules.
+  # net rules never have a non-zero score in sets 0 and 2
+  for (my $i = 0; $i < $NUM_SCORESETS; $i++) {
+    if ($isnet && ($i & 1) == 0) {
+      $scores[$i] = 0;
+      $flag = 0 if ($i > 0 && $scores[$i] != $scores[$i-1]);
+    }
+    if ($islearn && ($i & 2) == 0) {
+      $scores[$i] = 0;
+      $flag = 0 if ($i > 0 && $scores[$i] != $scores[$i-1]);
+    }
+  }
+
+  if ($flag) {
+    splice @scores, 1;
+  }
+
+  return @scores;
+}

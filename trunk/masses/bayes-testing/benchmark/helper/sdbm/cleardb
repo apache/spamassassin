@@ -1,0 +1,6 @@
+#!/bin/bash
+
+DBDIR=$1/dbdir
+
+echo "[Removing DB_File bayes Database - $DBDIR/bayes*]"
+rm $DBDIR/bayes*

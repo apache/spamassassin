@@ -1,0 +1,84 @@
+Return-Path: owner-ports-jp@jp.freebsd.org
+Return-Path: <owner-ports-jp@jp.freebsd.org>
+Received: from updraft.jp.freebsd.org (updraft.jp.FreeBSD.ORG [210.157.158.42])
+	by coconut.itojun.org (8.9.3+3.2W/3.7W) with ESMTP id WAA10857
+	for <itojun@itojun.org>; Sun, 20 Feb 2000 22:08:59 +0900 (JST)
+Received: from castle.jp.freebsd.org (castle.jp.freebsd.org [210.226.20.15])
+	by updraft.jp.freebsd.org (8.9.3+3.2W/8.7.3/smtpfeed 1.04) with ESMTP id WAA06847;
+	Sun, 20 Feb 2000 22:07:34 +0900 (JST)
+	(envelope-from owner-ports-jp@jp.freebsd.org)
+Received: (from daemon@localhost)
+	by castle.jp.freebsd.org (8.9.3+3.2W/8.7.3) id WAA22962;
+	Sun, 20 Feb 2000 22:07:32 +0900 (JST)
+	(envelope-from owner-ports-jp@jp.FreeBSD.org)
+Received: from prince.net.ebina.hitachi.co.jp (sagami134136.allnet.ne.jp [210.251.134.136])
+	by castle.jp.freebsd.org (8.9.3+3.2W/8.7.3) with ESMTP id WAA22957
+	for <ports-jp@jp.freebsd.org>; Sun, 20 Feb 2000 22:07:31 +0900 (JST)
+	(envelope-from sumikawa@ebina.hitachi.co.jp)
+From: sumikawa@ebina.hitachi.co.jp
+Received: from ebina.hitachi.co.jp (localhost [127.0.0.1])
+	by prince.net.ebina.hitachi.co.jp (8.9.3/3.7W) with SMTP id WAA10556
+	for <ports-jp@jp.freebsd.org>; Sun, 20 Feb 2000 22:07:30 +0900 (JST)
+Message-Id: <200002201307.WAA10556@prince.net.ebina.hitachi.co.jp>
+Date: Sun, 20 Feb 2000 22:07:29 +0900 (JST)
+To: ports-jp@jp.freebsd.org
+In-Reply-To: <20149.950850047@lychee.itojun.org>
+References: <200002180440.NAA74451@prince.net.ebina.hitachi.co.jp>
+	<20149.950850047@lychee.itojun.org>
+X-Mailer: xcite1.31> Mew version 1.95b10 on Emacs 20.4 / Mule 4.0 (HANANOEN)
+Mime-Version: 1.0
+Content-Type: Text/Plain; charset=iso-2022-jp
+Content-Transfer-Encoding: 7bit
+Reply-To: ports-jp@jp.freebsd.org
+Precedence: list
+X-Distribute: distribute version 2.1 (Alpha) patchlevel 24e+990727
+X-Sequence: ports-jp 8947
+Subject: [ports-jp 8947] Re: ipv6 & ruby 
+Errors-To: owner-ports-jp@jp.freebsd.org
+Sender: owner-ports-jp@jp.freebsd.org
+X-Originator: sumikawa@ebina.hitachi.co.jp
+X-Filter: mailagent [version 3.0 PL68] for itojun@itojun.org
+
+>ああ、心当たりがあります。たぶん、この前のsshと同じ問題です。
+>調べます。
+itojun> 	ruby repositoryには修正いれてあるとおもいます。 1.4.x branchも
+itojun> 	1.5 branchも。
+
+Webを見るかぎり入ってないように見えます。HEADも1.4.xも。
+<a href="http://cvs.netlab.co.jp/cgi-bin/cvsweb/ruby/ext/socket/extconf.rb" target="_top">http://cvs.netlab.co.jp/cgi-bin/cvsweb/ruby/ext/socket/extconf.rb</a>
+
+以下、patches/patch-aa に対するパッチです。
+
+Index: patches/patch-aa
+===================================================================
+RCS file: /home/ncvs/ports/lang/ruby/patches/patch-aa,v
+retrieving revision 1.1
+diff -u -r1.1 patch-aa
+--- patches/patch-aa	2000/01/12 19:16:44	1.1
++++ patches/patch-aa	2000/02/20 13:06:46
+@@ -1,5 +1,5 @@
+ --- ext/socket/extconf.rb.orig	Fri Oct 29 13:45:41 1999
+-+++ ext/socket/extconf.rb	Wed Jan 12 17:15:03 2000
+++++ ext/socket/extconf.rb	Sun Feb 20 22:04:32 2000
+ @@ -57,8 +57,6 @@
+  #endif
+  EOF
+@@ -9,3 +9,14 @@
+      $CFLAGS="-DINET6 "+$CFLAGS
+    elsif File.directory? "/usr/inet6"
+      $ipv6type = "linux"
++@@ -225,7 +223,9 @@
++     }
++   }
++ 
++-  if (inet6 != 2 || inet4 != 2)
+++  if (!(inet4 == 0 || inet4 == 2))
+++    goto bad;
+++  if (!(inet6 == 0 || inet6 == 2))
++     goto bad;
++ 
++   if (aitop)
+
+---
+角川宗近＠KAME Project
+

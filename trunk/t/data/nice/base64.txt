@@ -1,0 +1,168 @@
+Replied: Fri, 22 Dec 2000 13:22:17 +0000
+Replied: webmake-talk@lists.sourceforge.net
+Return-Path: jm@dogma.slashnull.org
+Delivery-Date: Thu, 21 Dec 2000 18:46:44 +0000
+Return-Path: <jm@dogma.slashnull.org>
+Delivered-To: jm@netnoteinc.com
+Received: from dogma.slashnull.org (dogma.slashnull.org [212.17.35.15])
+	by mail (Postfix) with ESMTP id 135A6114342
+	for <jm@netnoteinc.com>; Thu, 21 Dec 2000 18:46:34 +0000 (Eire)
+Received: (from jm@localhost)
+	by dogma.slashnull.org (8.9.3/8.9.3) id SAA16010
+	for jm@netnoteinc.com; Thu, 21 Dec 2000 18:46:02 GMT
+Received: from usw-sf-list1.sourceforge.net (usw-outbound.sourceforge.net [216.136.171.194])
+	by dogma.slashnull.org (8.9.3/8.9.3) with ESMTP id SAA16005
+	for <jm@jmason.org>; Thu, 21 Dec 2000 18:46:01 GMT
+Received: from localhost ([127.0.0.1] helo=usw-sf-list1.sourceforge.net)
+	by usw-sf-list1.sourceforge.net with esmtp (Exim 3.16 #1 (Debian))
+	id 149Aj4-0005fj-00; Thu, 21 Dec 2000 10:46:02 -0800
+Received: from admin.csn.ul.ie ([136.201.105.1])
+	by usw-sf-list1.sourceforge.net with esmtp (Exim 3.16 #1 (Debian))
+	id 149Aia-0005f4-00
+	for <webmake-talk@lists.sourceforge.net>; Thu, 21 Dec 2000 10:45:32 -0800
+Received: from skynet.csn.ul.ie (skynet.csn.ul.ie [136.201.105.2])
+	by admin.csn.ul.ie (Postfix) with ESMTP id 733A0205DE
+	for <webmake-talk@lists.sourceforge.net>; Thu, 21 Dec 2000 18:51:22 +0000 (GMT)
+Received: by skynet.csn.ul.ie (Postfix, from userid 1341)
+	id 86E3E4E5CA; Thu, 21 Dec 2000 13:37:16 +0000 (GMT)
+Received: from localhost (localhost [127.0.0.1])
+	by skynet.csn.ul.ie (Postfix) with ESMTP id 7FD614E5C3
+	for <webmake-talk@lists.sourceforge.net>; Thu, 21 Dec 2000 13:37:16 +0000 (GMT)
+From: Mark McLoughlin <mark@skynet.ie>
+X-Sender:  <mark@skynet.csn.ul.ie>
+To: <webmake-talk@lists.sourceforge.net>
+Subject: Re: [WM] Using print to output from <{perl }> blocks? 
+In-Reply-To: <20001219165455.74110114087@mail>
+Message-ID: <Pine.LNX.4.30.0012211329370.7395-200000@skynet.csn.ul.ie>
+MIME-Version: 1.0
+Content-Type: MULTIPART/MIXED; BOUNDARY="-913833367-1359000879-977405836=:7395"
+Sender: webmake-talk-admin@lists.sourceforge.net
+Errors-To: webmake-talk-admin@lists.sourceforge.net
+X-BeenThere: webmake-talk@lists.sourceforge.net
+X-Mailman-Version: 2.0
+Precedence: bulk
+Reply-To: webmake-talk@lists.sourceforge.net
+List-Help: <mailto:webmake-talk-request@lists.sourceforge.net?subject=help>
+List-Post: <mailto:webmake-talk@lists.sourceforge.net>
+List-Subscribe: <http://lists.sourceforge.net/mailman/listinfo/webmake-talk>,
+	<mailto:webmake-talk-request@lists.sourceforge.net?subject=subscribe>
+List-Id: Discussion of WebMake. <webmake-talk.lists.sourceforge.net>
+List-Unsubscribe: <http://lists.sourceforge.net/mailman/listinfo/webmake-talk>,
+	<mailto:webmake-talk-request@lists.sourceforge.net?subject=unsubscribe>
+List-Archive: <http://lists.sourceforge.net/archives//webmake-talk/>
+Date: Thu, 21 Dec 2000 13:37:16 +0000 (GMT)
+
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+  Send mail to mime@docserver.cac.washington.edu for more info.
+
+---913833367-1359000879-977405836=:7395
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+
+Hi,
+
+> What I'd prefer would be another block tag, like <{perl}> but indicating
+> that the "print" output from the block should be added to the document
+> instead of the return value.
+>
+> <{perlprint}>?  Urgh, sounds awful.  Please people, suggest a better name
+> for it!
+
+Attached is a better patch - only one pipe is opened and the <{perlprint}>
+block thing is there as well. Yeah, 'perlprint' ugly - but I couldn't
+think of anything better either ;)
+
+I don't have time at the mo', but I profiled the last patch and, surprisingly,
+it wasn't that much slower at all. If I get a chance I'll do it again with
+this patch and post the results.
+
+Good Luck,
+Mark
+
+---913833367-1359000879-977405836=:7395
+Content-Type: TEXT/PLAIN; charset=US-ASCII; name="UseStdoutForOutputAgainst_HTML-WebMake-0.8.update"
+Content-Transfer-Encoding: BASE64
+Content-ID: <Pine.LNX.4.30.0012211337160.7395@skynet.csn.ul.ie>
+Content-Description: UseStdoutForOutputAgainst_HTML-WebMake-0.8.update
+Content-Disposition: attachment; filename="UseStdoutForOutputAgainst_HTML-WebMake-0.8.update"
+
+ZGlmZiAtdXIgL2hvbWUvbWFyay93ZWJtYWtlL2xpYi9zaXRlX3BlcmwvNS42
+LjAvSFRNTC9XZWJNYWtlL01haW4ucG0gL2hvbWUvbWFyay93ZWJtYWtlL2Rl
+dmVsL2xpYi9zaXRlX3BlcmwvNS42LjAvSFRNTC9XZWJNYWtlL01haW4ucG0N
+Ci0tLSAvaG9tZS9tYXJrL3dlYm1ha2UvbGliL3NpdGVfcGVybC81LjYuMC9I
+VE1ML1dlYk1ha2UvTWFpbi5wbQlUaHUgRGVjIDIxIDExOjEwOjU2IDIwMDAN
+CisrKyAvaG9tZS9tYXJrL3dlYm1ha2UvZGV2ZWwvbGliL3NpdGVfcGVybC81
+LjYuMC9IVE1ML1dlYk1ha2UvTWFpbi5wbQlUaHUgRGVjIDIxIDEzOjA2OjE2
+IDIwMDANCkBAIC0xMDAwLDEwICsxMDAwLDExIEBADQogDQogIyBldmFsdWF0
+ZSBwZXJsIGNvZGUgZnJvbSB0aGUgV2ViTWFrZSBmaWxlLiBXZSBzdXBwb3J0
+IHBlcmxwcmVwcm9jIGFuZA0KICMgcGVybHBvc3RkZWNsIGFzIHRhZyBuYW1l
+cyBmb3IgYmFja3dhcmRzIGNvbXBhdC4NCisjIHBlcmxwcmludCB1c2VzIHN0
+ZG91dCBmcm9tIHRoZSBjb2RlIGJsb2NrLg0KIHN1YiBldmFsX2NvZGVfYXRf
+cGFyc2Ugew0KICAgbXkgKCRzZWxmLCAkc3RyKSA9IEBfOw0KLSAgJHN0ciA9
+fiBzL15ccypcPFx7KD86cGVybHByZXByb2N8cGVybHBvc3RkZWNsfHBlcmwp
+XHMrKC4rPylccypcfVw+Lw0KLQkgICAgJHNlbGYtPl9wX2ludGVycHJldCgk
+MSk7DQorICAkc3RyID1+IHMvXlxzKlw8XHsocGVybHByZXByb2N8cGVybHBv
+c3RkZWNsfHBlcmxwcmludHxwZXJsKVxzKyguKz8pXHMqXH1cPi8NCisJICAg
+ICRzZWxmLT5fcF9pbnRlcnByZXQoJDEsJDIpOw0KIAkgIC9naWVzOw0KICAg
+JHN0cjsNCiB9DQpAQCAtMTAyMiw3ICsxMDIzLDcgQEANCiAgICAgICAkc2Vs
+Zi0+YWRkX2ZpbGVsZXNzX2NvbnRlbnQgKCQxLCAkMiwgdW5kZWYsIDEpOyAi
+IjsNCiAgICAgL2dpZXM7DQogDQotICAgICQkc3RyID1+IHMvXDxce3Blcmxc
+cyooLis/KVxzKlx9XD4vICRzZWxmLT5fcF9pbnRlcnByZXQoJDEpOyAvZ2ll
+czsNCisgICAgJCRzdHIgPX4gcy9cPFx7KHBlcmxwcmludHxwZXJsKVxzKigu
+Kz8pXHMqXH1cPi8gJHNlbGYtPl9wX2ludGVycHJldCgkMSwgJDIpOyAvZ2ll
+czsNCiANCiAgICAgJHNlbGYtPmdldHVzZXJ0YWdzKCktPnN1YnN0X3RhZ3Mg
+KCRmcm9tLCAkc3RyKTsNCiAgIH0NCkBAIC0xMDQ2LDkgKzEwNDcsOSBAQA0K
+IA0KICMgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KIA0KLXN1YiBf
+cF9pbnRlcnByZXQgKCQkKSB7DQotICBteSAoJHNlbGYsICR0eHQpID0gQF87
+DQotICAkc2VsZi0+Z2V0cGVybGludGVycCgpLT5pbnRlcnByZXQgKCR0eHQp
+Ow0KK3N1YiBfcF9pbnRlcnByZXQgKCQkJCkgew0KKyAgbXkgKCRzZWxmLCAk
+dHlwZSwgJHR4dCkgPSBAXzsNCisgICRzZWxmLT5nZXRwZXJsaW50ZXJwKCkt
+PmludGVycHJldCAoJHR5cGUsICR0eHQpOw0KIH0NCiANCiAjIC0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0NCmRpZmYgLXVyIC9ob21lL21hcmsvd2Vi
+bWFrZS9saWIvc2l0ZV9wZXJsLzUuNi4wL0hUTUwvV2ViTWFrZS9QZXJsQ29k
+ZS5wbSAvaG9tZS9tYXJrL3dlYm1ha2UvZGV2ZWwvbGliL3NpdGVfcGVybC81
+LjYuMC9IVE1ML1dlYk1ha2UvUGVybENvZGUucG0NCi0tLSAvaG9tZS9tYXJr
+L3dlYm1ha2UvbGliL3NpdGVfcGVybC81LjYuMC9IVE1ML1dlYk1ha2UvUGVy
+bENvZGUucG0JV2VkIE5vdiAxNSAwMDowOTowMSAyMDAwDQorKysgL2hvbWUv
+bWFyay93ZWJtYWtlL2RldmVsL2xpYi9zaXRlX3BlcmwvNS42LjAvSFRNTC9X
+ZWJNYWtlL1BlcmxDb2RlLnBtCVRodSBEZWMgMjEgMTM6MjM6NTAgMjAwMA0K
+QEAgLTUsNiArNSw3IEBADQogcmVxdWlyZSBFeHBvcnRlcjsNCiB1c2UgQ2Fy
+cDsNCiB1c2Ugc3RyaWN0Ow0KK3VzZSBJTzo6SGFuZGxlOw0KIA0KIHVzZSBI
+VE1MOjpXZWJNYWtlOjpNYWluOw0KIHVzZSBIVE1MOjpXZWJNYWtlOjpQZXJs
+Q29kZUxpYnJhcnk7DQpAQCAtMjQsOCArMjUsMTYgQEANCiAgICRjbGFzcyA9
+IHJlZigkY2xhc3MpIHx8ICRjbGFzczsNCiAgIG15ICgkbWFpbikgPSBAXzsN
+CiANCisgICMgT3BlbiBhIHBpcGUsIHNldCBhdXRvZmx1c2ggb24gZm9yIHRo
+ZSB3cml0ZSANCisgICMgc2lkZSBhbmQgbWFrZSB0aGUgcmVhZCBzaWRlIG5v
+bi1ibG9ja2luZw0KKyAgcGlwZShSUCxXUCk7DQorICBXUC0+YXV0b2ZsdXNo
+KDEpOw0KKyAgUlAtPmJsb2NraW5nKDApOw0KKw0KICAgbXkgJHNlbGYgPSB7
+DQogICAgICdtYWluJwkJPT4gJG1haW4sDQorICAgICdyZWFkcGlwZScgICAg
+ICAgICAgPT4gKlJQLA0KKyAgICAnd3JpdGVwaXBlJyAgICAgICAgID0+ICpX
+UA0KICAgfTsNCiAgIGJsZXNzICgkc2VsZiwgJGNsYXNzKTsNCiAgICRzZWxm
+Ow0KQEAgLTM2LDcgKzQ1LDggQEANCiAjIC0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0NCiANCiBzdWIgaW50ZXJwcmV0IHsgDQotICBteSAoJHNlbGYs
+ICRzdHIpID0gQF87DQorICBteSAoJHNlbGYsICR0eXBlLCAkc3RyKSA9IEBf
+Ow0KKyAgbXkgKCRyZXQpOw0KICAgbG9jYWwgKCRfKSA9ICcnOw0KIA0KICAg
+aWYgKCRzZWxmLT57bWFpbn0tPntwYXJhbm9pZH0pIHsNCkBAIC00Nyw3ICs1
+NywyMCBAQA0KICAgIyBwZXJsIGNvZGUuDQogDQogICAkc2VsZi0+ZW50ZXJf
+cGVybF9jYWxsKCk7DQotICBteSAkcmV0ID0gZXZhbCAncGFja2FnZSBtYWlu
+OycuJHN0cjsNCisNCisgIGlmICggJHR5cGUgbmUgInBlcmxwcmludCIgKSB7
+DQorICAgICAkcmV0ID0gZXZhbCAncGFja2FnZSBtYWluOycuJHN0cjsNCisg
+IH0gDQorICBlbHNlIHsNCisgICAgIG15ICgkcmVhZHBpcGUsICR3cml0ZXBp
+cGUpID0gKCRzZWxmLT57cmVhZHBpcGV9LCAkc2VsZi0+e3dyaXRlcGlwZX0p
+Ow0KKyAgICAgbG9jYWwoKlNURE9VVCkgPSAqJHdyaXRlcGlwZTsNCisgICAg
+ICRyZXQgPSBldmFsICdwYWNrYWdlIG1haW47Jy4kc3RyOw0KKyAgICAgaWYg
+KGRlZmluZWQoJHJldCkpIHsNCisgICAgICAgICRyZXQgPSBqb2luKCAnJyAs
+IDwkcmVhZHBpcGU+ICk7DQorICAgICB9DQorICB9DQorDQorDQogICAkc2Vs
+Zi0+ZXhpdF9wZXJsX2NhbGwoKTsNCiANCiAgIGlmICghZGVmaW5lZCAkcmV0
+KSB7DQo=
+---913833367-1359000879-977405836=:7395--
+
+_______________________________________________
+webmake-talk mailing list
+webmake-talk@lists.sourceforge.net
+http://lists.sourceforge.net/mailman/listinfo/webmake-talk
+
+
