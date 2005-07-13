@@ -68,6 +68,14 @@ sub sleep_based_on_header {
   return 1;
 }
 
+sub extract_metadata {
+  my ($self, $opts) = @_;
+  my $msg = $opts->{msg};
+  print "myTestPlugin extract_metadata: $self\n";
+  $msg->put_metadata("Plugin-Meta-Test", "bar");
+  return 1;
+}
+
 sub per_msg_finish {
   my ($self, $permsgstatus) = @_;
   print "myTestPlugin finishing: $self\n";
