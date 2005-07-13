@@ -1,4 +1,77 @@
 ------------------------------------------------------------------------
+r216068 | jm | 2005-07-13 00:59:26 +0000 (Wed, 13 Jul 2005) | 1 line
+
+bug 4465: fix formatting in POD docs
+------------------------------------------------------------------------
+r216067 | jm | 2005-07-13 00:57:55 +0000 (Wed, 13 Jul 2005) | 1 line
+
+bug 4322: RelayCountry was failing to be useful for rules, since metadata could no longer be used from rules.  fixed
+------------------------------------------------------------------------
+r216066 | jm | 2005-07-13 00:56:20 +0000 (Wed, 13 Jul 2005) | 1 line
+
+bug 4478: unzero all scores for mass-check
+------------------------------------------------------------------------
+r215926 | parker | 2005-07-12 05:31:30 +0000 (Tue, 12 Jul 2005) | 1 line
+
+Bug 4461: Trivial bits from the rest of the patch, need to check status of open, otherwise bad things can happen.
+------------------------------------------------------------------------
+r215906 | jm | 2005-07-12 01:28:31 +0000 (Tue, 12 Jul 2005) | 1 line
+
+damn, there can be multiple mutable sections
+------------------------------------------------------------------------
+r215905 | jm | 2005-07-12 01:23:39 +0000 (Tue, 12 Jul 2005) | 1 line
+
+trivial, non-R-T-C change for masses -- helper script to enable zeroed rules
+------------------------------------------------------------------------
+r215904 | jm | 2005-07-12 01:07:08 +0000 (Tue, 12 Jul 2005) | 1 line
+
+bug 4461: mass-check --reuse cannot deal with previously-unscanned mail; fix this by maintaining two user_prefs Conf objects internally.  a little slower, but more accurate
+------------------------------------------------------------------------
+r215903 | jm | 2005-07-12 01:05:50 +0000 (Tue, 12 Jul 2005) | 1 line
+
+bug 4460: fix USERPASS false positives, by ensuring that email addresses are not picked up as HTTP links
+------------------------------------------------------------------------
+r215895 | dos | 2005-07-11 23:10:28 +0000 (Mon, 11 Jul 2005) | 1 line
+
+bug 4429: uninitialized values in dbg/warns
+------------------------------------------------------------------------
+r209917 | jm | 2005-07-09 01:30:33 +0000 (Sat, 09 Jul 2005) | 1 line
+
+bug 4456: avoid annoying 'can't call method qname on an undefined value' errors caused by DNS server returning unusual reply packets
+------------------------------------------------------------------------
+r209916 | jm | 2005-07-09 01:27:45 +0000 (Sat, 09 Jul 2005) | 1 line
+
+bug 4444: masses/Makefile was omitted from distro
+------------------------------------------------------------------------
+r209672 | dos | 2005-07-07 23:03:02 +0000 (Thu, 07 Jul 2005) | 1 line
+
+bug 4453: whitelist_from_rcvd hostname should be case insensitive
+------------------------------------------------------------------------
+r209520 | parker | 2005-07-06 21:45:29 +0000 (Wed, 06 Jul 2005) | 1 line
+
+Fixes issue where second spamd instance was not getting killed
+------------------------------------------------------------------------
+r209383 | jm | 2005-07-06 01:49:21 +0000 (Wed, 06 Jul 2005) | 1 line
+
+doco fix: add Nico Prenzel to the CREDITS file
+------------------------------------------------------------------------
+r209324 | felicity | 2005-07-05 21:00:27 +0000 (Tue, 05 Jul 2005) | 1 line
+
+new test phish rule for paypal and ebay
+------------------------------------------------------------------------
+r208873 | quinlan | 2005-07-02 21:33:16 +0000 (Sat, 02 Jul 2005) | 2 lines
+
+add Matthew Cline to list of inactive committers
+
+------------------------------------------------------------------------
+r208823 | jm | 2005-07-02 06:03:08 +0000 (Sat, 02 Jul 2005) | 1 line
+
+3.1.0-pre3 RELEASED
+------------------------------------------------------------------------
+r208817 | jm | 2005-07-02 03:12:27 +0000 (Sat, 02 Jul 2005) | 1 line
+
+preparing to release 3.1.0-pre3
+------------------------------------------------------------------------
 r208813 | jm | 2005-07-02 01:55:17 +0000 (Sat, 02 Jul 2005) | 1 line
 
 bug 4450: add reuse flags for SPF and URIBL rules
