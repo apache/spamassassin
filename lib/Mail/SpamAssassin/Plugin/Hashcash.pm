@@ -30,6 +30,8 @@ hashcash tokens added by mail programs as a bonus for messages.
 
 =cut
 
+=head1 USER SETTINGS
+
 =over 4
 
 =item use_hashcash { 1 | 0 }   (default: 1)
@@ -329,3 +331,7 @@ sub _check_hashcash_resource {
 ############################################################################
 
 1;
+
+=back
+
+=cut

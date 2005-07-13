@@ -18,28 +18,26 @@
 
 Mail::SpamAssassin::Message - decode, render, and hold an RFC-2822 message
 
-=head1 SYNOPSIS
-
 =head1 DESCRIPTION
 
-This module will encapsulate an email message and allow access to
-the various MIME message parts and message metadata.
+This module encapsulates an email message and allows access to the various MIME
+message parts and message metadata.
+
+The message structure, after initiating a parse() cycle, looks like this:
+ 
+  Message object, also top-level node in Message::Node tree
+     |
+     +---> Message::Node for other parts in MIME structure
+     |       |---> [ more Message::Node parts ... ]
+     |       [ others ... ]
+     |
+     +---> Message::Metadata object to hold metadata
 
 =head1 PUBLIC METHODS
 
 =over 4
 
 =cut
-
-# the message structure, after initiating a parse() cycle, is now:
-#
-# Message object, also top-level node in Message::Node tree
-#    |
-#    +---> Message::Node for other parts in MIME structure
-#    |       |---> [ more Message::Node parts ... ]
-#    |       [ others ... ]
-#    |
-#    +---> Message::Metadata object to hold metadata
 
 package Mail::SpamAssassin::Message;
 
@@ -1009,3 +1007,7 @@ sub split_into_array_of_short_lines {
 # ---------------------------------------------------------------------------
 
 1;
+
+=back
+
+=cut

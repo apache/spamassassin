@@ -18,8 +18,6 @@
 
 Mail::SpamAssassin::DnsResolver - DNS resolution engine
 
-=head1 SYNOPSIS
-
 =head1 DESCRIPTION
 
 This is a DNS resolution engine for SpamAssassin, implemented in order to
@@ -429,3 +427,7 @@ sub reinit_post_fork {
 }
 
 1;
+
+=back
+
+=cut

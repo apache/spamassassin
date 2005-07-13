@@ -71,7 +71,7 @@ $LOG_SA{method}->{stderr} = Mail::SpamAssassin::Logger::Stderr->new();
 
 =head1 METHODS
 
-=over
+=over 4
 
 =item add_facilities(facilities)
 
@@ -305,3 +305,7 @@ END {
 }
 
 1;
+
+=back
+
+=cut

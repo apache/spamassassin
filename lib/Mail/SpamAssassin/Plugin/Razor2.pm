@@ -36,6 +36,8 @@ Policy for more details.
 
 See http://razor.sourceforge.net/ for more information about Razor.
 
+=head1 USER SETTINGS
+
 =over 4
 
 =cut
@@ -460,3 +462,7 @@ sub check_razor2_range {
 }
 
 1;
+
+=back
+
+=cut

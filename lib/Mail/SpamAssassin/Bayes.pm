@@ -18,8 +18,6 @@
 
 Mail::SpamAssassin::Bayes - determine spammishness using a Bayesian classifier
 
-=head1 SYNOPSIS
-
 =head1 DESCRIPTION
 
 This is a Bayesian-like form of probability-analysis classification, using an
@@ -1411,3 +1409,7 @@ sub dump_bayes_db {
 }
 
 1;
+
+=back
+
+=cut

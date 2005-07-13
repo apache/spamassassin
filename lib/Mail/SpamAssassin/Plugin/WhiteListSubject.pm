@@ -16,7 +16,7 @@
 
 =head1 NAME
 
-Mail::SpamAssassin::Plugin::WhiteListSubject
+Mail::SpamAssassin::Plugin::WhiteListSubject - whitelist by Subject header
 
 =head1 SYNOPSIS
 

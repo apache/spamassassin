@@ -80,6 +80,8 @@ sub set_config {
 
 The following configuration settings are used to control auto-learning:
 
+=over 4
+
 =item bayes_auto_learn_threshold_nonspam n.nn   (default: 0.1)
 
 The score threshold below which a mail has to score, to be fed into
@@ -191,3 +193,7 @@ sub autolearn_discriminator {
 }
 
 1;
+
+=back
+
+=cut

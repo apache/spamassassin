@@ -36,8 +36,6 @@ entire spam message.
 
 See http://www.spamcop.net/ for more information about SpamCop.
 
-=over 4
-
 =cut
 
 package Mail::SpamAssassin::Plugin::SpamCop;
@@ -83,6 +81,8 @@ sub set_config {
   my @cmds = ();
 
 =head1 USER OPTIONS
+
+=over 4
 
 =item spamcop_from_address add@ress.com   (default: none)
 
@@ -137,8 +137,6 @@ the SpamCop system.
       }
     },
   });
-
-=over 4
 
 =item spamcop_max_report_size   (default: 50)
 
@@ -293,3 +291,7 @@ EOM
 }
 
 1;
+
+=back
+
+=cut
