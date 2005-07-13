@@ -18,6 +18,6 @@ tstlocalrules ("
         header META_FOUND	Plugin-Meta-Test =~ /bar/
 ");
 
-ok (sarun ("-D -L -t < data/spam/gtube.eml", \&patterns_run_cb));
+ok (sarun ("-L -t < data/spam/gtube.eml", \&patterns_run_cb));
 ok_all_patterns();
 
