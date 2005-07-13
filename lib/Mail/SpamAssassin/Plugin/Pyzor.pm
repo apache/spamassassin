@@ -29,8 +29,6 @@ using identifying digests of messages.
 
 See http://pyzor.sourceforge.net/ for more information about Pyzor.
 
-=over 4
-
 =cut
 
 package Mail::SpamAssassin::Plugin::Pyzor;
@@ -75,6 +73,8 @@ sub set_config {
 
 =head1 USER OPTIONS
 
+=over 4
+
 =item use_pyzor (0|1)		(default: 1)
 
 Whether to use Pyzor, if it is available.
@@ -117,7 +117,11 @@ set this to a relatively low value, e.g. C<5>.
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
   });
 
+=back
+
 =head1 ADMINISTRATOR OPTIONS
+
+=over 4
 
 =item pyzor_options options
 
@@ -381,3 +385,7 @@ sub pyzor_report {
 }
 
 1;
+
+=back
+
+=cut

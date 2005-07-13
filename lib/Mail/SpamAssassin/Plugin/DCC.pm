@@ -38,8 +38,6 @@ open source.  See the DCC license for more details.
 See http://www.rhyolite.com/anti-spam/dcc/ for more information about
 DCC.
 
-=over 4
-
 =cut
 
 package Mail::SpamAssassin::Plugin::DCC;
@@ -83,6 +81,8 @@ sub set_config {
   my @cmds = ();
 
 =head1 USER OPTIONS
+
+=over 4
 
 =item use_dcc (0|1)		(default: 1)
 
@@ -142,7 +142,11 @@ The default is C<999999> for all these options.
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
   });
 
+=back
+
 =head1 ADMINISTRATOR OPTIONS
+
+=over 4
 
 =item dcc_home STRING
 
@@ -634,3 +638,7 @@ sub dcc_report {
 }
 
 1;
+
+=back
+
+=cut

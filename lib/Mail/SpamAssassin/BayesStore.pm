@@ -18,8 +18,6 @@
 
 Mail::SpamAssassin::BayesStore - Bayesian Storage Module
 
-=head1 SYNOPSIS
-
 =head1 DESCRIPTION
 
 This is the public API for the Bayesian store methods.  Any implementation of
@@ -34,9 +32,14 @@ use warnings;
 use bytes;
 use Mail::SpamAssassin::Logger;
 
+# TODO: if we ever get tuits, it'd be good to make these POD
+# method docs more perlish... hardly a biggie.
+
 =head1 METHODS
 
-=head2 new
+=over 4
+
+=item new
 
 public class (Mail::SpamAssassin::BayesStore) new (Mail::SpamAssassin::Bayes $bayes)
 
@@ -63,7 +66,7 @@ sub new {
   $self;
 }
 
-=head2 DB_VERSION
+=item DB_VERSION
 
 public instance (Integer) DB_VERSION ()
 
@@ -78,7 +81,7 @@ sub DB_VERSION {
   return $self->{supported_db_version};
 }
 
-=head2 read_db_configs
+=item read_db_configs
 
 public instance () read_db_configs ()
 
@@ -112,7 +115,7 @@ sub read_db_configs {
   $self->{bayes}->read_db_configs();
 }
 
-=head2 tie_db_readonly
+=item tie_db_readonly
 
 public instance (Boolean) tie_db_readonly ()
 
@@ -126,7 +129,7 @@ sub tie_db_readonly {
   die "bayes: tie_db_readonly: not implemented\n";
 }
 
-=head2 tie_db_writable
+=item tie_db_writable
 
 public instance (Boolean) tie_db_writable ()
 
@@ -143,7 +146,7 @@ sub tie_db_writable {
   die "bayes: tie_db_writable: not implemented\n";
 }
 
-=head2 untie_db
+=item untie_db
 
 public instance () untie_db ()
 
@@ -157,7 +160,7 @@ sub untie_db {
   die "bayes: untie_db: not implemented\n";
 }
 
-=head2 calculate_expire_delta
+=item calculate_expire_delta
 
 public instance (%) calculate_expire_delta (Integer $newest_atime,
                                              Integer $start,
@@ -174,7 +177,7 @@ sub calculate_expire_delta {
   die "bayes: calculate_expire_delta: not implemented\n";
 }
 
-=head2 token_expiration
+=item token_expiration
 
 public instance (Integer, Integer,
                  Integer, Integer) token_expiration(\% $opts,
@@ -192,7 +195,7 @@ sub token_expiration {
   die "bayes: token_expiration: not implemented\n";
 }
 
-=head2 expire_old_tokens
+=item expire_old_tokens
 
 public instance (Boolean) expire_old_tokens (\% hashref)
 
@@ -224,7 +227,7 @@ sub expire_old_tokens {
   $ret;
 }
 
-=head2 expire_old_tokens_trapped
+=item expire_old_tokens_trapped
 
 public instance (Boolean) expire_old_tokens_trapped (\% $opts)
 
@@ -385,7 +388,7 @@ sub expire_old_tokens_trapped {
   return 1;
 }
 
-=head2 sync_due
+=item sync_due
 
 public instance (Boolean) sync_due ()
 
@@ -399,7 +402,7 @@ sub sync_due {
   die "bayes: sync_due: not implemented\n";
 }
 
-=head2 expiry_due
+=item expiry_due
 
 public instance (Boolean) expiry_due ()
 
@@ -450,7 +453,7 @@ sub expiry_due {
   return 1;
 }
 
-=head2 seen_get
+=item seen_get
 
 public instance (Char) seen_get (String $msgid)
 
@@ -466,7 +469,7 @@ sub seen_get {
   die "bayes: seen_get: not implemented\n";
 }
 
-=head2 seen_put
+=item seen_put
 
 public instance (Boolean) seen_put (String $msgid, Char $flag)
 
@@ -481,7 +484,7 @@ sub seen_put {
   die "bayes: seen_put: not implemented\n";
 }
 
-=head2 seen_delete
+=item seen_delete
 
 public instance (Boolean) seen_delete (String $msgid)
 
@@ -495,7 +498,7 @@ sub seen_delete {
   die "bayes: seen_delete: not implemented\n";
 }
 
-=head2 get_storage_variables
+=item get_storage_variables
 
 public instance (@) get_storage_variables ()
 
@@ -534,7 +537,7 @@ sub get_storage_variables {
   die "bayes: get_storage_variables: not implemented\n";
 }
 
-=head2 dump_db_toks
+=item dump_db_toks
 
 public instance () dump_db_toks (String $template, String $regex, @ @vars)
 
@@ -549,7 +552,7 @@ sub dump_db_toks {
   die "bayes: dump_db_toks: not implemented\n";
 }
 
-=head2 set_last_expire
+=item set_last_expire
 
 public instance (Boolean) _set_last_expire (Integer $time)
 
@@ -563,7 +566,7 @@ sub set_last_expire {
   die "bayes: set_last_expire: not implemented\n";
 }
 
-=head2 get_running_expire_tok
+=item get_running_expire_tok
 
 public instance (Time) get_running_expire_tok ()
 
@@ -578,7 +581,7 @@ sub get_running_expire_tok {
   die "bayes: get_running_expire_tok: not implemented\n";
 }
 
-=head2 set_running_expire_tok
+=item set_running_expire_tok
 
 public instance (Time) set_running_expire_tok ()
 
@@ -592,7 +595,7 @@ sub set_running_expire_tok {
   die "bayes: set_running_expire_tok: not implemented\n";
 }
 
-=head2 remove_running_expire_tok
+=item remove_running_expire_tok
 
 public instance (Boolean) remove_running_expire_tok ()
 
@@ -606,7 +609,7 @@ sub remove_running_expire_tok {
   die "bayes: remove_running_expire_tok: not implemented\n";
 }
 
-=head2 tok_get
+=item tok_get
 
 public instance (Integer, Integer, Time) tok_get (String $token)
 
@@ -621,7 +624,7 @@ sub tok_get {
   die "bayes: tok_get: not implemented\n";
 }
 
-=head2 tok_get_all
+=item tok_get_all
 
 public instance (\@) tok_get_all (@ @tokens)
 
@@ -636,7 +639,7 @@ sub tok_get_all {
   die "bayes: tok_get_all: not implemented\n";
 }
 
-=head2 tok_count_change
+=item tok_count_change
 
 public instance (Boolean) tok_count_change (Integer $spam_count,
                                             Integer $ham_count,
@@ -654,7 +657,7 @@ sub tok_count_change {
   die "bayes: tok_count_change: not implemented\n";
 }
 
-=head2 nspam_nham_get
+=item nspam_nham_get
 
 public instance (Integer, Integer) nspam_nham_get ()
 
@@ -669,7 +672,7 @@ sub nspam_nham_get {
   die "bayes: nspam_nham_get: not implemented\n";
 }
 
-=head2 nspam_nham_change
+=item nspam_nham_change
 
 public instance (Boolean) nspam_nham_change (Integer $num_spam,
                                              Integer $num_ham)
@@ -684,7 +687,7 @@ sub nspam_nham_change {
   die "bayes: nspam_nham_change: not implemented\n";
 }
 
-=head2 tok_touch
+=item tok_touch
 
 public instance (Boolean) tok_touch (String $token,
                                      Time $atime)
@@ -699,7 +702,7 @@ sub tok_touch {
   die "bayes: tok_touch: not implemanted\n";
 }
 
-=head2 tok_touch_all
+=item tok_touch_all
 
 public instance (Boolean) tok_touch_all (\@ $tokens,
                                          Time $atime)
@@ -715,7 +718,7 @@ sub tok_touch_all {
   die "bayes: tok_touch_all: not implemanted\n";
 }
 
-=head2 cleanup
+=item cleanup
 
 public instance (Boolean) cleanup ()
 
@@ -730,7 +733,7 @@ sub cleanup {
   die "bayes: cleanup: not implemented\n";
 }
 
-=head2 get_magic_re
+=item get_magic_re
 
 public instance get_magic_re (String)
 
@@ -744,7 +747,7 @@ sub get_magic_re {
   die "bayes: get_magic_re: not implemented\n";
 }
 
-=head2 sync
+=item sync
 
 public instance (Boolean) sync (\% $opts)
 
@@ -758,7 +761,7 @@ sub sync {
   die "bayes: sync: not implemented\n";
 }
 
-=head2 perform_upgrade
+=item perform_upgrade
 
 public instance (Boolean) perform_upgrade (\% $opts)
 
@@ -776,7 +779,7 @@ sub perform_upgrade {
   die "bayes: perform_upgrade: not implemented\n";
 }
 
-=head2 clear_database
+=item clear_database
 
 public instance (Boolean) clear_database ()
 
@@ -793,7 +796,7 @@ sub clear_database {
   die "bayes: clear_database: not implemented\n";
 }
 
-=head2 backup_database
+=item backup_database
 
 public instance (Boolean) backup_database ()
 
@@ -807,7 +810,7 @@ sub backup_database {
   die "bayes: backup_database: not implemented\n";
 }
 
-=head2 restore_database
+=item restore_database
 
 public instance (Boolean) restore_database (String $filename, Boolean $showdots)
 
@@ -824,7 +827,7 @@ sub restore_database {
   die "bayes: restore_database: not implemented\n";
 }
 
-=head2 db_readable
+=item db_readable
 
 public instance (Boolean) db_readable ()
 
@@ -839,7 +842,7 @@ sub db_readable {
   die "bayes: db_readable: not implemented\n";
 }
 
-=head2 db_writable
+=item db_writable
 
 public instance (Boolean) db_writable ()
 
@@ -858,3 +861,7 @@ sub db_writable {
 sub sa_die { Mail::SpamAssassin::sa_die(@_); }
 
 1;
+
+=back
+
+=cut

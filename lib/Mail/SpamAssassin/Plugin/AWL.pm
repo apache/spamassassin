@@ -162,12 +162,16 @@ or group based auto-whitelist databases.
 		type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
 	       });
 
+=back
+
 =head1 ADMINISTRATOR SETTINGS
 
 These settings differ from the ones above, in that they are considered 'more
 privileged' -- even more than the ones in the B<PRIVILEGED SETTINGS> section.
 No matter what C<allow_user_rules> is set to, these can never be set from a
 user's C<user_prefs> file.
+
+=over 4
 
 =item auto_whitelist_factory module (default: Mail::SpamAssassin::DBBasedAddrList)
 
@@ -296,8 +300,6 @@ The password for the database username, for the above DSN.
 Used by the SQLBasedAddrList storage implementation.
 
 The table user auto-whitelists are stored in, for the above DSN.
-
-=back
 
 =cut
 
@@ -512,5 +514,8 @@ sub remove_address {
   return $status;
 }
 
-
 1;
+
+=back
+
+=cut

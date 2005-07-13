@@ -75,6 +75,10 @@ sub set_config {
   my($self, $conf) = @_;
   my @cmds = ();
 
+=head1 USER SETTINGS
+
+=over 4
+
 =item whitelist_from_spf add@ress.com
 
 Use this to supplement the whitelist_from addresses with a check against the
@@ -451,3 +455,7 @@ sub _check_def_spf_whitelist {
 ###########################################################################
 
 1;
+
+=back
+
+=cut

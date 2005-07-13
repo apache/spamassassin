@@ -37,8 +37,6 @@ can be added to marked-up messages using "add_header".
 Note: the language cannot always be recognized with sufficient
 confidence.  In that case, C<UNWANTED_LANGUAGE_BODY> will not trigger.
 
-=over 4
-
 =cut
 
 package Mail::SpamAssassin::Plugin::TextCat;
@@ -104,6 +102,8 @@ sub set_config {
   my @cmds = ();
 
 =head1 USER OPTIONS
+
+=over 4
 
 =item ok_languages xx [ yy zz ... ]		(default: all)
 
@@ -296,8 +296,6 @@ The default setting is:
 That list is Bosnian, Welsh, Esperanto, Estonian, Basque, Frisian, Irish
 Gaelic, Scottish Gaelic, Icelandic, Latin, Lithuanian, Latvian,
 Rhaeto-Romance, Sanskrit, Scots, Slovenian, and Yiddish.
-
-=over 4
 
 =cut
 
@@ -531,3 +529,7 @@ sub check_body_8bits {
 }
 
 1;
+
+=back
+
+=cut

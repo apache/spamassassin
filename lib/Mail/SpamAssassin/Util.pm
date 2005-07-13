@@ -1,11 +1,3 @@
-# A general class for utility functions.  Please use this for
-# functions that stand alone, without requiring a $self object,
-# Portability functions especially.
-#
-# NOTE: The functions in this module are all considered private.  Their API
-# may change at any point, and it's expected that they'll only be used by
-# other Mail::SpamAssassin modules.
-
 # <@LICENSE>
 # Copyright 2004 Apache Software Foundation
 # 
@@ -21,6 +13,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # </@LICENSE>
+
+=head1 NAME
+
+Mail::SpamAssassin::Util - utility functions
+
+=head1 DESCRIPTION
+
+A general class for utility functions.  Please use this for functions that
+stand alone, without requiring a $self object, Portability functions
+especially.
+
+NOTE: The functions in this module are to be considered private.  Their API may
+change at any point, and it's expected that they'll only be used by other
+Mail::SpamAssassin modules. (TODO: we should probably revisit this if
+it's useful for plugin development.)
+
+=over 4
+
+=cut
 
 package Mail::SpamAssassin::Util;
 
@@ -1303,3 +1314,7 @@ sub trap_sigalrm_fully {
 ###########################################################################
 
 1;
+
+=back
+
+=cut

@@ -263,3 +263,7 @@ enclosed by the start and end strings are found and replaced.
 }
 
 1;
+
+=back
+
+=cut
