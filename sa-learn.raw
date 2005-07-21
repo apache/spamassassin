@@ -710,6 +710,11 @@ If specified this username will override the username taken from the runtime
 environment.  You can use this option to specify users in a virtual user
 configuration.
 
+NOTE: This option will not change to the given I<username>, it will only attempt
+to act on behalf of that user.  Because of this you will need to have proper
+permissions to be able to change files owned by I<username>.  In the case of SQL
+this generally is not a problem.
+
 =item B<-C> I<path>, B<--configpath>=I<path>, B<--config-file>=I<path>
 
 Use the specified path for locating the distributed configuration files.
