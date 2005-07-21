@@ -920,7 +920,7 @@ sub add_to_addrlist {
     $re =~ s/[\000\\\(]/_/gs;			# paranoia
     $re =~ s/([^\*\?_a-zA-Z0-9])/\\$1/g;	# escape any possible metachars
     $re =~ tr/?/./;				# "?" -> "."
-    $re =~ s/\*/\.\*/g;				# "*" -> "any string"
+    $re =~ s/\*+/\.\*/g;			# "*" -> "any string"
     $conf->{$singlelist}->{$addr} = "^${re}\$";
   }
 }
@@ -938,7 +938,7 @@ sub add_to_addrlist_rcvd {
     $re =~ s/[\000\\\(]/_/gs;			# paranoia
     $re =~ s/([^\*\?_a-zA-Z0-9])/\\$1/g;	# escape any possible metachars
     $re =~ tr/?/./;				# "?" -> "."
-    $re =~ s/\*/\.\*/g;				# "*" -> "any string"
+    $re =~ s/\*+/\.\*/g;			# "*" -> "any string"
     $conf->{$listname}->{$addr}{re} = "^${re}\$";
     $conf->{$listname}->{$addr}{domain} = [ $domain ];
   }
