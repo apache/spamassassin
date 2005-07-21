@@ -940,7 +940,10 @@ sub _check_whitelist_rcvd {
       if ($addr =~ $regexp) {
         foreach my $lastunt (@relays) {
           my $rdns = $lastunt->{lc_rdns};
-          if ($rdns =~ /(?:^|\.)\Q${domain}\E$/i) { return 1; }
+          if ($rdns =~ /(?:^|\.)\Q${domain}\E$/i) { 
+            dbg("rules: address $addr matches (def_)whitelist_from_rcvd $list->{$white_addr}{re} ${domain}");
+            return 1;
+          }
         }
         # found address match but no relay match. note as possible forgery
         $found_forged = -1;
@@ -968,6 +971,7 @@ sub _check_whitelist {
   study $addr;
   foreach my $regexp (values %{$list}) {
     if ($addr =~ qr/$regexp/i) {
+      dbg("rules: address $addr matches whitelist or blacklist regexp: $regexp");
       return 1;
     }
   }
