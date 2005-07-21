@@ -82,7 +82,7 @@ sub set_config {
 		 $re =~ s/[\000\\\(]/_/gs;                   # paranoia
 		 $re =~ s/([^\*\?_a-zA-Z0-9])/\\$1/g;        # escape any possible metachars
 		 $re =~ tr/?/./;                             # "?" -> "."
-                 $re =~ s/\*/\.\*/g;                         # "*" -> "any string"
+                 $re =~ s/\*+/\.\*/g;                        # "*" -> "any string"
 		 $conf->{$key}->{$value} = ${re};
 	       }});
 
@@ -96,7 +96,7 @@ sub set_config {
 		 $re =~ s/[\000\\\(]/_/gs;                   # paranoia
 		 $re =~ s/([^\*\?_a-zA-Z0-9])/\\$1/g;        # escape any possible metachars
 		 $re =~ tr/?/./;                             # "?" -> "."
-                 $re =~ s/\*/\.\*/g;                         # "*" -> "any string"
+                 $re =~ s/\*+/\.\*/g;                        # "*" -> "any string"
 		 $conf->{$key}->{$value} = ${re};
 	       }});
 
