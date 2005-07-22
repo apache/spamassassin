@@ -35,6 +35,7 @@ char * rules_file = "rules.dat";	/* The data file containing rule names. */
 /* Fitness function parameters */
 int maximum_relevant_hits = 4;	/* How many hits is the rule going to look for. */
 int target_num_rules = 50;	/* How many sub-rules would we like the meta rule to use? */
+double target_flex_rules = 5;	/* How flexible the GA should be.  Half-life of the fitness function. */
 
 /* The fitness function is based on:
  * min(num_hits, maximum_relevant_hits)^hits_exponent * count * ...
@@ -111,7 +112,7 @@ void load_patterns () {
  * sum_{all individuals}
  * 	min(num_hits, maximum_relevant_hits)^hits_exponent * count * ...
  * 	(if ham: -num_hits ^ penalty_exponent)
- * / exp(abs(target_num_rules - num_rules_present) / exp(1))
+ * / exp(abs(target_num_rules - num_rules_present) * log(2) / target_flex_rules)
  * */
 static boolean pattern_score(population *pop, entity *entity) {
 	int i, j, num_hits, num_rules_present;
@@ -152,7 +153,7 @@ static boolean pattern_score(population *pop, entity *entity) {
 	/* This divisor is bound to 1, to prevent overflow.  exp(0) is undefined
 	 * so we just skip this part (it's unnecessary).  */
 	if ( target_num_rules - num_rules_present ) {
-		entity->fitness /= max(exp(fabs(target_num_rules - num_rules_present) / exp(1)),1);
+		entity->fitness /= max(exp(fabs(target_num_rules - num_rules_present) * log(2) / target_flex_rules),1);
 	}
 
 	/* Negative fitnesses make roulette wheels go owwie. */
@@ -189,8 +190,8 @@ void print_entity (entity * entity) {
 		}
 	}
 
-	printf ("fitness: %f\n", entity->fitness);
-	printf ("rule count: %d\n", count);
+	fprintf (stderr, "fitness: %f\n", entity->fitness);
+	fprintf (stderr, "rule count: %d\n", count);
 
 	/* Zero the histogram, just in case the compiler han't done it for us. */
 	bzero (histogram, sizeof(histogram));
@@ -214,14 +215,14 @@ void print_entity (entity * entity) {
 	}
 
 	/* Print the histogram. */
-	printf ("\t %8s %8s %8s %8s %8s\n",
+	fprintf (stderr, "\t %8s %8s %8s %8s %8s\n",
 			"HAM",
 			"HAM%",
 			"SPAM",
 			"SPAM%",
 			"S/O");
 	for (i = 0; i <= maximum_relevant_hits; i++) {
-		printf (">=%d hits:%8d %8.4f %8d %8.4f %8.4f\n", i,
+		fprintf (stderr, ">=%d hits:%8d %8.4f %8d %8.4f %8.4f\n", i,
 				histogram[0][i],
 				100.0 * histogram[0][i] / histogram[0][0],
 				histogram[1][i],
@@ -239,6 +240,7 @@ void usage () {
 			"\nFitness function parameters:\n"
 			"  -m maximum_relevant_hits\n"
 			"  -t target_num_rules\n"
+			"  -l target_flex_rules\n"
 			"  -e hits_exponent\n"
 			"  -p penalty_exponent\n"
 			"\nGA parameters:\n"
@@ -256,7 +258,7 @@ int main (int argc, char ** argv) {
 	population *pop = 0;
 	char arg;
 
-	while ((arg = getopt (argc, argv, "h:r:m:t:e:p:s:g:x:u:?")) != -1) {
+	while ((arg = getopt (argc, argv, "h:r:m:t:l:e:p:s:g:x:u:?")) != -1) {
 		switch (arg) {
 			case 'h':
 				hits_file = optarg;
@@ -269,6 +271,9 @@ int main (int argc, char ** argv) {
 				break;
 			case 't':
 				target_num_rules = atoi(optarg);
+				break;
+			case 'l':
+				target_flex_rules = atoi(optarg);
 				break;
 			case 'e':
 				hits_exponent = atof(optarg);
