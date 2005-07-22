@@ -45,6 +45,11 @@ Fitness function parameters:
 	How many sub-rules should be used by the meta rule.
 	Default: 50
 
+  -l target_flex_rules
+	Solutions with target_num_rules +/- target_flex_rules are half as
+	fit as solutions with target_num_rules.
+	Default: 5
+
   -e hits_exponent
 	Parameter to the fitness function, how the importance of high numbers of
 	hits is.
