@@ -748,7 +748,7 @@ sub _parse_normal {
   if ($disp =~ /name="?([^\";]+)"?/i) {
     $part_msg->{'name'} = $1;
   }
-  elsif (defined $ct[3]) {
+  elsif ($ct[3]) {
     $part_msg->{'name'} = $ct[3];
   }
 
