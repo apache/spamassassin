@@ -42,3 +42,6 @@ header __FROM_PAYPAL	From:addr =~ /\@paypal\.com$/i
 header __FROM_EBAY	From:addr =~ /\@ebay\.com$/i
 meta T_PP_PHISH	__FROM_PAYPAL && NORMAL_HTTP_TO_IP
 meta T_EB_PHISH	__FROM_EBAY && NORMAL_HTTP_TO_IP
+
+body T_DIET_1             /\b(?:(?:without|no) (?:exercis(?:e(?! price)|ing)|dieting)|weight.?loss|(?:extra|lose|lost|losing).{0,10}(?:pounds|weight|inches|lbs)|burn.{1,10}fat)\b/i
+describe T_DIET_1		Lose Weight Spam
