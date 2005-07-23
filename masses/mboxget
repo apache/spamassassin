@@ -60,7 +60,13 @@ exit;
 
 sub handle_input {
   my $where = shift;
-  my ($file, $offset) = ($where =~ m/(.*?)(?:\.(\d+))?$/);
+  my ($file, $offset);
+
+  if (-f $where) {
+    ($file, $offset) = ($where);
+  } else {
+    ($file, $offset) = ($where =~ m/(.*?)(?:\.(\d+))?$/);
+  }
 
   if ($file =~ /\.gz$/) {
     open (INPUT, "gunzip -cd $file |") or mywarn "gunzip $file failed: $!";
