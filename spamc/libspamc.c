@@ -173,6 +173,10 @@ static int _opensocket(int flags, int type, int *psock)
     const char *typename;
     int proto = 0;
 
+#ifdef _WIN32
+    int socktout;
+#endif
+
     assert(psock != 0);
 
 	/*----------------------------------------------------------------
@@ -233,6 +237,30 @@ static int _opensocket(int flags, int type, int *psock)
 	}
     }
 
+#ifdef _WIN32
+    /* bug 4344: makes timeout functional on Win32 */
+    socktout = libspamc_timeout * 1000;
+    if (type == PF_INET
+        && setsockopt(*psock, SOL_SOCKET, SO_RCVTIMEO, (char *)&socktout, sizeof(socktout)) != 0)
+    {
+        int origerrno;
+
+        origerrno = WSAGetLastError();
+        switch (origerrno)
+        {
+        case EBADF:
+        case ENOTSOCK:
+        case ENOPROTOOPT:
+        case EFAULT:
+            libspamc_log(flags, LOG_ERR, "setsockopt(SO_RCVTIMEO) failed: %d", origerrno);
+            closesocket(*psock);
+            return EX_SOFTWARE;
+
+        default:
+            break;             /* ignored */
+        }
+    }
+#endif
 
 	/*----------------------------------------------------------------
 	 * Do a bit of setup on the TCP socket if required. Notes above
