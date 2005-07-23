@@ -31,29 +31,25 @@ $prog =~ s@.*/@@;
 
 sub mywarn;
 
-my $annotate = 1;
-while ($#ARGV >= 0) {
-  $_ = $ARGV[0]; shift;
-  if ($_ eq '-noannotate') { $annotate = 0; }
-  else { unshift @ARGV, $_; last; }
-}
+use Getopt::Long;
+use vars qw($opt_noannotate);
+GetOptions("noannotate");
 
-my @inputs;
-push @inputs, @ARGV;
+my $annotate = ($opt_noannotate ? 0 : 1);
 
-if (!@inputs) {
-  while (<STDIN>) {
-    s/^[^\s:]+://;  # filenames, from "grep foo *"
+my @inputs = @ARGV;
 
-    if (/^[Y\.]\s+-?\d+\s+(\S+)\s+\S+/) {
-      # mass-check format
-      handle_input($1);
-    }
-    else {
-      next if /^#/;
-      chomp;
-      handle_input($_);
-    }
+while (<>) {
+  s/^[^\s:]+://;  # filenames, from "grep foo *"
+
+  if (/^[Y\.]\s+-?\d+\s+(\S+)\s+\S+/) {
+    # mass-check format
+    handle_input($1);
+  }
+  else {
+    next if /^#/;
+    chomp;
+    handle_input($_);
   }
 }
 exit;
