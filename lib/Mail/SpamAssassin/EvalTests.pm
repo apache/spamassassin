@@ -3137,4 +3137,17 @@ sub check_ratware_envelope_from {
   return 0;
 }
 
+sub check_from_format {
+  my ($self) = @_;
+
+  my $name = $self->get('From:name') || return;
+  return if ($name !~ m/^[A-Z][a-z]+\.[A-Z][a-z]+\@/);
+
+  my $addr = $self->get('From:addr') || return;
+  return if ($addr !~ m/^[A-Z][a-z]+\.[A-Z][a-z]+\@/);
+
+  return if ($name eq $addr);
+  return 1;
+}
+
 1;
