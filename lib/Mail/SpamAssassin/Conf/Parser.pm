@@ -678,7 +678,7 @@ sub finish_parsing {
 	  # bug 4419: Parse quoted strings, unquoted alphanumerics/floats and
 	  # both unquoted IPv4 and IPv6 addresses.  s// is used so that we can
 	  # determine whether or not we successfully parsed ALL arguments.
-	  while ($args =~ s/^\s*(?:['"](.*?)['"]|([\d\.A-Za-z]+?))\s*(?:,\s*|$)//) {
+	  while ($args =~ s/^\s*(?:['"](.*?)['"]|([\d\.:A-Za-z]+?))\s*(?:,\s*|$)//) {
 	    if (defined $1) {
 	      push @args, $1;
 	    }
