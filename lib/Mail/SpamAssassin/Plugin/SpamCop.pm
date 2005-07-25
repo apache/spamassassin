@@ -226,8 +226,8 @@ sub spamcop_report {
 	      );
 
   # truncate message
-  if (length($original) > $self->{conf}->{spamcop_max_report_size} * 1024) {
-    substr($original, ($self->{conf}->{spamcop_max_report_size} * 1024)) =
+  if (length($original) > $self->{main}->{conf}->{spamcop_max_report_size} * 1024) {
+    substr($original, ($self->{main}->{conf}->{spamcop_max_report_size} * 1024)) =
       "\n[truncated by SpamAssassin]\n";
   }
 
