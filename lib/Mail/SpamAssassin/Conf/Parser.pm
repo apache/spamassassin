@@ -674,11 +674,25 @@ sub finish_parsing {
     if (($type & 1) == 1) {
       my @args;
       if (my ($function, $args) = ($text =~ m/(.*?)\s*\((.*?)\)\s*$/)) {
-        if ($args) {
-          @args = ($args =~ m/['"](.*?)['"]\s*(?:,\s*|$)/g);
-        }
+	if ($args) {
+	  # bug 4419: Parse quoted strings, unquoted alphanumerics/floats and
+	  # both unquoted IPv4 and IPv6 addresses.  s// is used so that we can
+	  # determine whether or not we successfully parsed ALL arguments.
+	  while ($args =~ s/^\s*(?:['"](.*?)['"]|([\d\.A-Za-z]+?))\s*(?:,\s*|$)//) {
+	    if (defined $1) {
+	      push @args, $1;
+	    }
+	    else {
+	      push @args, $2;
+	    }
+	  }
+	}
         unshift(@args, $function);
-        if ($type == $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS) {
+	if ($args) {
+	  $conf->{errors}++;
+	  warn("syntax error (unparsable argument: $args) for eval function: $name: $text");
+	}
+        elsif ($type == $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS) {
           $conf->{body_evals}->{$priority}->{$name} = \@args;
         }
         elsif ($type == $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS) {
