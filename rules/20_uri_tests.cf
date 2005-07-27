@@ -29,6 +29,7 @@ redirector_pattern	/^http:\/\/chkpt\.zdnet\.com\/chkpt\/\w+\/(.*)$/i
 redirector_pattern	/^http:\/\/www(?:\d+)?\.nate\.com\/r\/\w+\/(.*)$/i
 redirector_pattern	/^http:\/\/.+\.gov\/(?:.*\/)?externalLink\.jhtml\?.*url=(.*?)(?:&.*)?$/i
 redirector_pattern	/^http:\/\/redir\.internet\.com\/.+?\/.+?\/(.*)$/i
+redirector_pattern	/^http:\/\/(?:.*?\.)?adtech\.de\/.*(?:;|\|)link=(.*?)(?:;|$)/i
 
 uri NUMERIC_HTTP_ADDR		/^https?\:\/\/\d{7}/is
 describe NUMERIC_HTTP_ADDR	Uses a numeric IP address in URL
