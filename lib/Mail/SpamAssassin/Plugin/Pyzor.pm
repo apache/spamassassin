@@ -191,6 +191,7 @@ sub get_pyzor_interface {
   }
   elsif ($self->is_pyzor_available()) {
     $self->{pyzor_interface} = "pyzor";
+    $self->{pyzor_available} = 1;
   }
   else {
     dbg("pyzor: no pyzor found, disabling Pyzor");
@@ -201,7 +202,7 @@ sub get_pyzor_interface {
 sub check_pyzor {
   my ($self, $permsgstatus, $full) = @_;
 
-  $self->get_pyzor_interface() unless $self->{pyzor_interface};
+  $self->get_pyzor_interface();
   return 0 unless $self->{pyzor_available};
 
   return $self->pyzor_lookup($permsgstatus, $full);
