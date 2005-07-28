@@ -55,11 +55,12 @@ sub new {
 use constant LOCK_MAX_AGE => 600;	# seconds 
 
 sub safe_lock {
-  my ($self, $path, $max_retries) = @_;
+  my ($self, $path, $max_retries, $mode) = @_;
   my $is_locked = 0;
   my @stat;
 
   $max_retries ||= 30;
+  $mode ||= 0700;
 
   my $lock_file = "$path.lock";
   my $hname = Mail::SpamAssassin::Util::fq_hostname();
@@ -69,7 +70,7 @@ sub safe_lock {
   # keep this for unlocking
   $self->{lock_tmp} = $lock_tmp;
 
-  my $umask = umask 077;
+  my $umask = umask (oct($mode) ^ 0700);
   if (!open(LTMP, ">$lock_tmp")) {
       umask $umask; # just in case
       die "locker: safe_lock: cannot create tmp lockfile $lock_tmp for $lock_file: $!\n";

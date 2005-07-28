@@ -264,7 +264,8 @@ sub tie_db_writable {
   } else {
     $tout = 10;
   }
-  if ($main->{locker}->safe_lock($path, $tout)) {
+  if ($main->{locker}->safe_lock($path, $tout, $main->{conf}->{bayes_file_mode}))
+  {
     $self->{locked_file} = $path;
     $self->{is_locked} = 1;
   } else {

@@ -70,7 +70,7 @@ sub new_checker {
     $path = $main->sed_path ($main->{conf}->{auto_whitelist_path});
 
     if ($main->{locker}->safe_lock
-			($path, 30))
+			($path, 30, $main->{conf}->{auto_whitelist_file_mode}))
     {
       $self->{locked_file} = $path;
       $self->{is_locked} = 1;
