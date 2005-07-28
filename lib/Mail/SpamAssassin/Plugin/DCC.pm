@@ -285,9 +285,11 @@ sub get_dcc_interface {
 
   if ($self->is_dccifd_available()) {
     $self->{dcc_interface} = "dccifd";
+    $self->{dcc_disabled} = 0;
   }
   elsif ($self->is_dccproc_available()) {
     $self->{dcc_interface} = "dccproc";
+    $self->{dcc_disabled} = 0;
   }
   else {
     dbg("dcc: dccifd and dccproc are not available, disabling DCC");
@@ -305,7 +307,7 @@ sub check_dcc {
     return 1;
   }
 
-  $self->get_dcc_interface() unless $self->{dcc_interface};
+  $self->get_dcc_interface();
   return 0 if $self->{dcc_disabled};
 
   if ($$full eq '') {
