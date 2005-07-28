@@ -737,7 +737,15 @@ where no valid terminal is found this option will behave very much like the
 
 =item B<-D>, B<--debug-level>
 
-Produce diagnostic output.
+Produce debugging output. If no areas are listed, all debugging information is
+printed. Diagnostic output can also be enabled for each area individually;
+I<area> is the area of the code to instrument. For example, to produce
+diagnostic output on bayes, learn, and dns, use:
+
+        spamassassin -D bayes,learn,dns
+
+Higher priority informational messages that are suitable for logging in normal
+circumstances are available with an area of "info".
 
 =item B<--no-sync>
 
