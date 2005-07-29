@@ -1,10 +1,14 @@
-#!/bin/sh
+#!/usr/bin/bash
 
+. /etc/profile
 cd /home/automc/svn/spamassassin/masses/rule-qa/automc ; . config
+
+date=date ; [ -x /opt/sfw/bin/gdate ] && date=gdate
+egrep=egrep ; [ -x /usr/sfw/bin/gegrep ] && egrep=gegrep
 
 # ensure we're running on or after 0830 UTC, because cron can't; it's
 # in a different timezone, and we have daylight savings to contend with
-if TZ=UTC date | egrep -q '^... ... .. (03|04|05|06|07|09|10|11|12|13):'; then
+if TZ=UTC $date | $egrep -q '^... ... .. (03|04|05|06|07|09|10|11|12|13):'; then
   exit
 fi
 
@@ -17,12 +21,16 @@ rm -rf $MCTMP; mkdir -p $MCTMP
 
 ./scrape-bugzilla
 cp 70_scraped.cf $SADIR/rules
-(
-  cd $SADIR/rules
-  svn commit \
-	--username $SVN_USERNAME \
-	--file $MCTMP/commit.msg 70_scraped.cf
-)
+
+if false                # OFF: do not commit anything to svn (Jul 28 2005 jm)
+then
+  (
+    cd $SADIR/rules
+    svn commit \
+         --username $SVN_USERNAME \
+         --file $MCTMP/commit.msg 70_scraped.cf
+  )
+fi
 
 # update the "tagtime" file; of course, we're not tagging, but it helps for
 # the corpus scripts
