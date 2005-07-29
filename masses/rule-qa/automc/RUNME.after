@@ -1,5 +1,6 @@
-#!/bin/sh
+#!/usr/bin/bash
 
+. /etc/profile
 cd /home/automc/svn/spamassassin/masses/rule-qa/automc ; . config
 exec >> LOG.after 2>&1
 set -x
@@ -8,9 +9,11 @@ echo "RUNME.after starting"; date
 
 PATH=$PATH:/usr/local/bin
 
+date=date ; [ -x /opt/sfw/bin/gdate ] && date=gdate
+
 $SADIR/masses/rule-qa/corpus-hourly
 
-today=`date +"%Y%m%d"`
+today=`$date +"%Y%m%d"`
 mkdir -p $html/$today
 cp -p $html/*.* $html/$today
 date
