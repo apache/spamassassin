@@ -27,22 +27,21 @@
 
 ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
 
-urirhssub	URIBL_BLACK	multi.uribl.com.        A   2
-body		URIBL_BLACK	eval:check_uridnsbl('URIBL_BLACK')
-describe	URIBL_BLACK	Contains an URL listed in the URIBL blacklist
-tflags		URIBL_BLACK	net
-score		URIBL_BLACK	3.0
+# bug 4507: evaluate hitrates for uribl.com URIBLs
+#
+urirhssub	T_URIBL_BLACK	multi.uribl.com.        A   2
+body		T_URIBL_BLACK	eval:check_uridnsbl('T_URIBL_BLACK')
+describe	T_URIBL_BLACK	Contains an URL listed in the URIBL blacklist
+tflags		T_URIBL_BLACK	net
 
-urirhssub	URIBL_GREY	multi.uribl.com.        A   4
-body		URIBL_GREY	eval:check_uridnsbl('URIBL_GREY')
-describe	URIBL_GREY	Contains an URL listed in the URIBL greylist
-tflags		URIBL_GREY	net
-score		URIBL_GREY	1.0
+urirhssub	T_URIBL_GREY	multi.uribl.com.        A   4
+body		T_URIBL_GREY	eval:check_uridnsbl('T_URIBL_GREY')
+describe	T_URIBL_GREY	Contains an URL listed in the URIBL greylist
+tflags		T_URIBL_GREY	net
 
-urirhssub	URIBL_RED	multi.uribl.com.        A   8
-body		URIBL_RED	eval:check_uridnsbl('URIBL_RED')
-describe	URIBL_RED	Contains an URL listed in the URIBL redlist
-tflags		URIBL_RED	net
-score		URIBL_RED	1.0
+urirhssub	T_URIBL_RED	multi.uribl.com.        A   8
+body		T_URIBL_RED	eval:check_uridnsbl('T_URIBL_RED')
+describe	T_URIBL_RED	Contains an URL listed in the URIBL redlist
+tflags		T_URIBL_RED	net
 
 endif	# Mail::SpamAssassin::Plugin::URIDNSBL
