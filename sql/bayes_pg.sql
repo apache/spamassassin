@@ -46,7 +46,7 @@ CREATE TABLE bayes_vars (
   PRIMARY KEY  (id)
 ) WITHOUT OIDS;
 
-CREATE INDEX bayes_vars_idx1 ON bayes_vars (username);
+CREATE UNIQUE INDEX bayes_vars_idx1 ON bayes_vars (username);
 
 CREATE OR REPLACE FUNCTION put_token(integer, bytea, integer, integer, integer) RETURNS bool AS ' 
 DECLARE 
