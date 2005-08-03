@@ -71,12 +71,12 @@ else {
 }
 
 # show memory usage before we exit
-print "Running \"ps aux\"...\n";
-open(PS, "ps aux|");
-while(<PS>) {
-    print if $. == 1 || /\b$$\b/;
-}
-close(PS);
+# print "Running \"ps aux\"...\n";
+# open(PS, "ps aux|");
+# while(<PS>) {
+# print if $. == 1 || /\b$$\b/;
+# }
+# close(PS);
 
 exit 0;
 
