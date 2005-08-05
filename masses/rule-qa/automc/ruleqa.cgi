@@ -229,7 +229,7 @@ sub get_freqs_for_rule {
 
   my $comment = "
   
-    <h3>freqs from \"$key\" ($freqs_filenames{$key}, $strdate):</h3>
+    <h3 class=freqs_title>$freqs_filenames{$key}, $strdate (\"$key\"):</h3>
 
     <pre class=freqs>";
 
