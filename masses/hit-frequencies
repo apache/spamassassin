@@ -322,7 +322,8 @@ foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
   if ($opt_f && $fsadj == 0 && $fnadj == 0) { next; }
 
   if ($opt_p) {
-    $fa = ($fa / ($num_spam + $num_ham)) * 100.0;
+    my $denom = ($num_spam + $num_ham) || 0.000001; # avoid / by 0
+    $fa = ($fa / $denom) * 100.0;
     $fs = $fsadj;
     $fn = $fnadj;
   }
