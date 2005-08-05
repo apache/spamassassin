@@ -47,3 +47,14 @@ body T_DIET_1             /\b(?:(?:without|no) (?:exercis(?:e(?! price)|ing)|die
 describe T_DIET_1		Lose Weight Spam
 
 header T_FROM_FORMAT eval:check_from_format()
+
+urirhsbl  T_URIBL_SC2_SURBL  sc2.surbl.org.   A  
+body      T_URIBL_SC2_SURBL  eval:check_uridnsbl('T_URIBL_SC2_SURBL')  
+describe  T_URIBL_SC2_SURBL  Has URI in SC2 at http://www.surbl.org/lists.html  
+tflags    T_URIBL_SC2_SURBL  net  
+
+urirhsbl  T_URIBL_XS_SURBL   xs.surbl.org.    A  
+body      T_URIBL_XS_SURBL   eval:check_uridnsbl('T_URIBL_XS_SURBL')  
+describe  T_URIBL_XS_SURBL   Has URI in XS - Testing  
+tflags    T_URIBL_XS_SURBL   net  
+
