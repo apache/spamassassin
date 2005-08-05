@@ -42,8 +42,10 @@ sub new {
 ###########################################################################
 
 sub safe_lock {
-  my ($self, $path, $max_retries) = @_;
+  my ($self, $path, $max_retries, $mode) = @_;
   # max_retries is optional, should default to about 30
+  # mode is UNIX-style and optional, should default to 0700,
+  # callers must specify --x bits
   die "locker: safe_lock not implemented by Locker subclass";
 }
 

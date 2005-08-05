@@ -46,14 +46,15 @@ sub new {
 # Attempt to create a file lock, using NFS-UNsafe locking techniques.
 
 sub safe_lock {
-  my ($self, $path, $max_retries) = @_;
+  my ($self, $path, $max_retries, $mode) = @_;
   my $is_locked = 0;
   my @stat;
 
   $max_retries ||= 30;
+  $mode ||= 0700;
 
   my $lock_file = "$path.mutex";
-  my $umask = umask 077;
+  my $umask = umask (oct($mode) ^ 0700);
   my $fh = new IO::File();
 
   if (!$fh->open ("$lock_file", O_RDWR|O_CREAT)) {
