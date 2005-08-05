@@ -122,9 +122,11 @@ if ($opt_p) {
   	$hdr_all, $hdr_spam, $hdr_ham,
         soratio ($num_spam,$num_ham), 0, 0;
 
+  $hdr_all ||= 0.00001;     # avoid div by 0 in the next 2 statements
   $hdr_spam = ($num_spam / $hdr_all) * 100.0;
   $hdr_ham = ($num_ham / $hdr_all) * 100.0;
   $hdr_all = 100.0;             # this is obvious
+
   printf "%7.3f  %7.4f  %7.4f  %7.3f %6.2f  %6.2f  (all messages as %%)\n",
   	$hdr_all, $hdr_spam, $hdr_ham,
         soratio ($num_spam,$num_ham), 0, 0;
