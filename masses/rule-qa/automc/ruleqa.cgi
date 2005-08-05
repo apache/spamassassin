@@ -6,6 +6,7 @@ my $automcdir = "/home/automc/svn/spamassassin/masses/rule-qa/automc";
 use CGI;
 use strict;
 use bytes;
+use POSIX qw(strftime);
 
 open (CF, "<$automcdir/config");
 my %conf; while(<CF>) { /^(\S+)=(\S+)/ and $conf{$1} = $2; }
@@ -42,6 +43,7 @@ $s{overlap} = get_url_switch('s_overlap', 0);
 $s{new} = get_url_switch('s_new', 0);
 $s{age} = get_url_switch('s_age', 0);
 $s{all} = get_url_switch('s_all', 0);
+$s{zero} = get_url_switch('s_zero', 0);
 $s{overlap} = get_url_switch('s_overlap', 0);
 
 $s{headers} = get_url_switch('s_headers', 0);
@@ -75,8 +77,8 @@ print q{<html><head>
     pre.freqs {
       font-family: monospace;
       font-size: 14px;
-      margin-left: 1em;
       border: 1px dashed #ddb;
+      margin: 0em -0.5em 0em -0.5em;
       padding: 10px 20px 10px 20px;
     }
     div.updateform {
@@ -106,10 +108,12 @@ my $tmpl = q{
   <input type=checkbox name=s_new !s_new!> Show combined freqs<br/>
   <input type=checkbox name=s_age !s_age!> Show freqs by message age<br/>
   <input type=checkbox name=s_all !s_all!> Show freqs by contributor<br/>
+  <input type=checkbox name=s_zero !s_zero!> Show rules with no hits<br/>
   <br/>
   <input type=checkbox name=s_overlap !s_overlap!> Show overlaps between rules<br/>
   <br/>
-  Date to display: <input type=textfield name=date value="!date!"><br/>
+  Date to display (UTC timezone):
+  <input type=textfield name=date value="!date!"><br/>
   <br/>
   Show only these rules (space separated, or regexp with '/' prefix):<br/>
   <input type=textfield size=60 name=rule value="!rule!"><br/>
@@ -133,24 +137,36 @@ foreach my $opt (keys %s) {
 
 print $tmpl;
 
-# fill in current date if unspecified
-if (!$date) {
-  use POSIX qw(strftime);
-  $date = strftime("%Y%m%d", localtime);
-}
-
-my $datadir = $conf{html}."/".$date."/";
+my $datadir;
 my %freqs_head = ();
 my %freqs_data = ();
 my %freqs_ordr = ();
 
-$s{details} and showfreqset('DETAILS');
-$s{html} and showfreqset('HTML');
-$s{net} and showfreqset('NET');
+# fill in current date if unspecified
+if ($date) {
+  show_all_sets_for_date($date, $date);
+}
+else {
+  my $ONE_DAY = (24 * 60 * 60);
+  show_all_sets_for_date(strftime ("%Y%m%d", localtime), "latest");
+  show_all_sets_for_date(strftime ("%Y%m%d", localtime(time - $ONE_DAY)),
+                    "yesterday");
+}
 
-# special case: we only build this for one set, as it's quite slow
-# to generate
-$s{overlap} and showfreqsubset("OVERLAP.new");
+sub show_all_sets_for_date {
+  my ($path, $strdate) = @_;
+
+  $strdate = "logs from $path";
+  $datadir = $conf{html}."/".$path."/";
+
+  $s{details} and showfreqset('DETAILS', $strdate);
+  $s{html} and showfreqset('HTML', $strdate);
+  $s{net} and showfreqset('NET', $strdate);
+
+  # special case: we only build this for one set, as it's quite slow
+  # to generate
+  $s{overlap} and showfreqsubset("OVERLAP.new", $strdate);
+}
 
 print "
 
@@ -163,16 +179,16 @@ exit;
 ###########################################################################
 
 sub showfreqset {
-  my ($type) = @_;
-  $s{new} and showfreqsubset("$type.new");
-  $s{age} and showfreqsubset("$type.age");
-  $s{all} and showfreqsubset("$type.all");
+  my ($type, $strdate) = @_;
+  $s{new} and showfreqsubset("$type.new", $strdate);
+  $s{age} and showfreqsubset("$type.age", $strdate);
+  $s{all} and showfreqsubset("$type.all", $strdate);
 }
 
 sub showfreqsubset {
-  my ($filename) = @_;
+  my ($filename, $strdate) = @_;
   read_freqs_file($filename);
-  get_freqs_for_rule($filename, $rule);
+  get_freqs_for_rule($filename, $strdate, $rule);
 }
 
 sub read_freqs_file {
@@ -206,14 +222,14 @@ sub read_freqs_file {
 }
 
 sub get_freqs_for_rule {
-  my ($key, $ruleslist) = @_;
+  my ($key, $strdate, $ruleslist) = @_;
 
   my $desc = $freqs_filenames{$key};
   my $file = $datadir.$key;
 
   my $comment = "
   
-    <h3>freqs from \"$key\" ($freqs_filenames{$key}):</h3>
+    <h3>freqs from \"$key\" ($freqs_filenames{$key}, $strdate):</h3>
 
     <pre class=freqs>";
 
@@ -281,6 +297,12 @@ sub sub_freqs_head_line {
 
 sub sub_freqs_data_line {
   my ($str) = @_;
+
+  if (!$s{zero}) {
+    if ($str =~ /^\s*(\d\S+)\s/ && ($1+0) == 0) {
+      return '';
+    }
+  }
 
   # normal freqs lines, with optional subselector after rule name
   $str =~ s/(  )(\S+?)(:\S+)?$/
