@@ -246,9 +246,12 @@ sub gen_class {
         print STDERR "ham (NET $age): " . join(' ', @ham) . "\n";
         print STDERR "spam (NET $age): " . join(' ', @spam) . "\n";
     }
-    elsif ($age =~ /^(?:new|all|age)$/) {
-        @ham = grep { -M "$_" < -M $opt{tagtime} } @ham;
-        @spam = grep { -M "$_" < -M $opt{tagtime} } @spam;
+    elsif ($age =~ /^(?:new|all|age)$/)
+    {
+        my $tt = (-M $opt{tagtime});
+        @ham = grep { !defined($tt) || ((-M "$_") < $tt) } @ham;
+        @spam = grep { !defined($tt) || ((-M "$_") < $tt) } @spam;
+
         if (!$opt{ignore_revisions}) {
             @ham = grep { $revision{$_} eq $revision } @ham;
             @spam = grep { $revision{$_} eq $revision } @spam;
