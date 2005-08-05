@@ -227,9 +227,11 @@ sub get_freqs_for_rule {
   my $desc = $freqs_filenames{$key};
   my $file = $datadir.$key;
 
+  my $titleplink = "$key.$strdate"; $titleplink =~ s/[^A-Za-z0-9]+/_/gs;
   my $comment = "
   
     <h3 class=freqs_title>$freqs_filenames{$key}, $strdate (\"$key\"):</h3>
+    <a name='$titleplink'></a><a href='#$titleplink' class=title_permalink>#</a>
 
     <pre class=freqs>";
 
