@@ -47,10 +47,11 @@ sub new {
 use constant LOCK_MAX_AGE => 600;       # seconds 
 
 sub safe_lock {
-  my ($self, $path, $max_retries) = @_;
+  my ($self, $path, $max_retries, $mode) = @_;
   my @stat;
 
   $max_retries ||= 30;
+  # $mode is ignored on win32
 
   my $lock_file = "$path.lock";
 
