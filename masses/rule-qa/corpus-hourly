@@ -190,8 +190,8 @@ sub gen_class {
     if ($class eq "NET") {
         @ham = grep { /-net-/ } @ham;
         @spam = grep { /-net-/ } @spam;
-        print STDERR "ham: " . join(' ', @ham) . "\n";
-        print STDERR "spam: " . join(' ', @spam) . "\n";
+        print STDERR "ham (NET): " . join(' ', @ham) . "\n";
+        print STDERR "spam (NET): " . join(' ', @spam) . "\n";
     }
     else {
         # if both net and local exist, use newer
@@ -228,8 +228,8 @@ sub gen_class {
                 }
             }
         }
-        print STDERR "ham: " . join(' ', @ham) . "\n";
-        print STDERR "spam: " . join(' ', @spam) . "\n";
+        print STDERR "ham (non-NET): " . join(' ', @ham) . "\n";
+        print STDERR "spam (non-NET): " . join(' ', @spam) . "\n";
     }
     
     # age
@@ -243,8 +243,8 @@ sub gen_class {
         }
         @spam = grep { $revision{$_} eq $wanted } @spam;
         @ham = grep { $revision{$_} eq $wanted } @ham;
-        print STDERR "ham: " . join(' ', @ham) . "\n";
-        print STDERR "spam: " . join(' ', @spam) . "\n";
+        print STDERR "ham (NET $age): " . join(' ', @ham) . "\n";
+        print STDERR "spam (NET $age): " . join(' ', @spam) . "\n";
     }
     elsif ($age =~ /^(?:new|all|age)$/) {
         @ham = grep { -M "$_" < -M $opt{tagtime} } @ham;
@@ -253,15 +253,15 @@ sub gen_class {
             @ham = grep { $revision{$_} eq $revision } @ham;
             @spam = grep { $revision{$_} eq $revision } @spam;
         }
-        print STDERR "ham: " . join(' ', @ham) . "\n";
-        print STDERR "spam: " . join(' ', @spam) . "\n";
+        print STDERR "ham (non-NET $age): " . join(' ', @ham) . "\n";
+        print STDERR "spam (non-NET $age): " . join(' ', @spam) . "\n";
     }
     elsif ($age =~ /(\d+)day/) {
         my $mtime = $1;
         @ham = grep { -M "$_" < $mtime } @ham;
         @spam = grep { -M "$_" < $mtime } @spam;
-        print STDERR "ham: " . join(' ', @ham) . "\n";
-        print STDERR "spam: " . join(' ', @spam) . "\n";
+        print STDERR "ham (non-NET $age): " . join(' ', @ham) . "\n";
+        print STDERR "spam (non-NET $age): " . join(' ', @spam) . "\n";
     }
     
     open(OUT, "> $opt{html}/$class.$age");
@@ -292,7 +292,12 @@ sub gen_class {
         }
         unlink "$opt{tmp}/ham.log.$$";
         unlink "$opt{tmp}/spam.log.$$";
-        next unless (scalar keys %spam && scalar keys %ham);
+
+        if (!(scalar keys %spam && scalar keys %ham)) {
+            warn "no files found for $class.$age";
+            return;
+        }
+
         for my $user (sort keys %spam) {
             next unless defined $ham{$user};
             chdir "$opt{tree}/masses";
