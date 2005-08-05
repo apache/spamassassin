@@ -8,17 +8,23 @@ set -x
 echo "RUNME.after starting"; date
 
 PATH=$PATH:/usr/local/bin
-
 date=date ; [ -x /opt/sfw/bin/gdate ] && date=gdate
 
+# hit-frequencies now requires up-to-date rules to generate valid reports!
+# so we need to do an svn update
+( cd $SADIR ; svn update )
+
+# then generate the various forms of 'freqs' files...
 $SADIR/masses/rule-qa/corpus-hourly
 
+# copy those output files to a datestamped archive dir...
 today=`$date +"%Y%m%d"`
 mkdir -p $html/$today
 cp -p $html/*.* $html/$today
 date
 
-# only post the comments once, on the first time the results are read
+# only post the comments to bugs in bugzilla once, on the first
+# time the results are read
 if [ ! -f $MCTMP/comments-posted ] ; then
   ./post-comments
   touch $MCTMP/comments-posted
