@@ -657,6 +657,25 @@ sub tok_count_change {
   die "bayes: tok_count_change: not implemented\n";
 }
 
+=head2 multi_tok_count_change
+
+public instance (Boolean) multi_tok_count_change (Integer $spam_count,
+ 					          Integer $ham_count,
+				 	          \% $tokens,
+					          String $atime)
+
+Description:
+This method takes a C<$spam_count> and C<$ham_count> and adds it to all
+of the tokens in the C<$tokens> hash ref along with updating each tokens
+atime with C<$atime>.
+
+=cut
+
+sub multi_tok_count_change {
+  my ($self, $spam_count, $ham_count, $tokens, $atime) = @_;
+  die "bayes: multi_tok_count_change: not implemented\n";
+}
+
 =item nspam_nham_get
 
 public instance (Integer, Integer) nspam_nham_get ()
