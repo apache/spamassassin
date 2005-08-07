@@ -800,12 +800,10 @@ sub learn_trapped {
 
   my $tokens = $self->tokenize($msg, $msgdata);
 
-  for my $token (keys %{$tokens}) {
-    if ($isspam) {
-      $self->{store}->tok_count_change (1, 0, $token, $msgatime);
-    } else {
-      $self->{store}->tok_count_change (0, 1, $token, $msgatime);
-    }
+  if ($isspam) {
+    $self->{store}->multi_tok_count_change(1, 0, $tokens, $msgatime);
+  } else {
+    $self->{store}->multi_tok_count_change(0, 1, $tokens, $msgatime);
   }
 
   $self->{store}->seen_put ($msgid, ($isspam ? 's' : 'h'));
@@ -912,12 +910,10 @@ sub forget_trapped {
 
   my $tokens = $self->tokenize($msg, $msgdata);
 
-  for my $token (keys %{$tokens}) {
-    if ($isspam) {
-      $self->{store}->tok_count_change (-1, 0, $token);
-    } else {
-      $self->{store}->tok_count_change (0, -1, $token);
-    }
+  if ($isspam) {
+    $self->{store}->multi_tok_count_change (-1, 0, $tokens);
+  } else {
+    $self->{store}->multi_tok_count_change (0, -1, $tokens);
   }
 
   $self->{store}->seen_delete ($msgid);

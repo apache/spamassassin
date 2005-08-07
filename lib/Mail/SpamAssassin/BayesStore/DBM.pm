@@ -1029,6 +1029,23 @@ sub tok_count_change {
   }
 }
 
+sub multi_tok_count_change {
+  my ($self, $ds, $dh, $tokens, $atime) = @_;
+
+  $atime = 0 unless defined $atime;
+
+  foreach my $tok (keys %{$tokens}) {
+    if ($self->{bayes}->{main}->{learn_to_journal}) {
+      # we can't store the SHA1 binary value in the journal to convert it
+      # to a printable value that can be converted back later
+      my $encoded_tok = unpack("H*",$tok);
+      $self->defer_update ("c $ds $dh $atime $encoded_tok");
+    } else {
+      $self->tok_sync_counters ($ds, $dh, $atime, $tok);
+    }
+  }
+}
+
 sub nspam_nham_get {
   my ($self) = @_;
   my @vars = $self->get_storage_variables();

@@ -48,97 +48,65 @@ CREATE TABLE bayes_vars (
 
 CREATE UNIQUE INDEX bayes_vars_idx1 ON bayes_vars (username);
 
-CREATE OR REPLACE FUNCTION put_token(integer, bytea, integer, integer, integer) RETURNS bool AS ' 
-DECLARE 
-	inuserid ALIAS for $1; 
-        intoken ALIAS for $2; 
-        inspam_count ALIAS for $3; 
-        inham_count ALIAS for $4; 
-        inatime ALIAS for $5; 
-        got_token record;
-	updated_atime_p bool;
+CREATE OR REPLACE FUNCTION greatest_int (integer, integer)
+ RETURNS INTEGER
+ IMMUTABLE STRICT
+ AS 'SELECT CASE WHEN $1 < $2 THEN $2 ELSE $1 END;'
+ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION least_int (integer, integer)
+ RETURNS INTEGER
+ IMMUTABLE STRICT
+ AS 'SELECT CASE WHEN $1 < $2 THEN $1 ELSE $2 END;'
+ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION put_tokens(inuserid INTEGER,
+                                      intokenary BYTEA[],
+                                      inspam_count INTEGER,
+                                      inham_count INTEGER,
+                                      inatime INTEGER)
+RETURNS VOID AS ' 
+DECLARE
+  _token BYTEA;
+  new_tokens INTEGER := 0;
 BEGIN
-  updated_atime_p := FALSE;
-  SELECT INTO got_token spam_count, ham_count, atime 
-    FROM bayes_token 
-   WHERE id = inuserid 
-     AND token = intoken; 
-   IF NOT FOUND THEN 
-     -- we do not insert negative counts, just return true
-     IF (inspam_count < 0 OR inham_count < 0) THEN
-       RETURN TRUE;
-     END IF;
-     INSERT INTO bayes_token (id, token, spam_count, ham_count, atime) 
-     VALUES (inuserid, intoken, inspam_count, inham_count, inatime); 
-     IF NOT FOUND THEN 
-       RAISE EXCEPTION ''unable to insert into bayes_token''; 
-       return FALSE;
-     END IF;
-     UPDATE bayes_vars SET token_count = token_count + 1 
-      WHERE id = inuserid; 
-     IF NOT FOUND THEN 
-       RAISE EXCEPTION ''unable to update token_count in bayes_vars''; 
-       return FALSE;
-     END IF;
-     UPDATE bayes_vars SET newest_token_age = inatime 
-      WHERE id = inuserid AND newest_token_age < inatime; 
-     IF NOT FOUND THEN 
-       UPDATE bayes_vars
-          SET oldest_token_age = inatime
-        WHERE id = inuserid
-          AND oldest_token_age > inatime; 
-     END IF;
-     return TRUE; 
-  ELSE 
-    IF (inspam_count != 0) THEN
-      -- no need to update atime if it is < the existing value
-      IF (inatime < got_token.atime) THEN
-        UPDATE bayes_token 
-           SET spam_count = spam_count + inspam_count
-         WHERE id = inuserid
-           AND token = intoken
-           AND spam_count + inspam_count >= 0;
-      ELSE 
-        UPDATE bayes_token 
-           SET spam_count = spam_count + inspam_count,
-               atime = inatime
-         WHERE id = inuserid
-           AND token = intoken
-           AND spam_count + inspam_count >= 0;
+  for i in array_lower(intokenary, 1) .. array_upper(intokenary, 1)
+  LOOP
+    _token := intokenary[i];
+    UPDATE bayes_token
+       SET spam_count = greatest_int(spam_count + inspam_count, 0),
+           ham_count = greatest_int(ham_count + inham_count, 0),
+           atime = greatest_int(atime, inatime)
+     WHERE id = inuserid 
+       AND token = _token;
+    IF NOT FOUND THEN 
+      -- we do not insert negative counts, just return true
+      IF NOT (inspam_count < 0 OR inham_count < 0) THEN
+        INSERT INTO bayes_token (id, token, spam_count, ham_count, atime) 
+        VALUES (inuserid, _token, inspam_count, inham_count, inatime); 
         IF FOUND THEN
-          updated_atime_p := TRUE;
+          new_tokens := new_tokens + 1;
         END IF;
       END IF;
     END IF;
-    IF (inham_count != 0) THEN
-      -- no need to update atime is < the existing value or if it was already updated
-      IF inatime < got_token.atime OR updated_atime_p THEN
-        UPDATE bayes_token 
-           SET ham_count = ham_count + inham_count
-         WHERE id = inuserid
-           AND token = intoken
-           AND ham_count + inham_count >= 0;
-      ELSE 
-        UPDATE bayes_token 
-           SET ham_count = ham_count + inham_count,
-               atime = inatime
-         WHERE id = inuserid
-           AND token = intoken
-           AND ham_count + inham_count >= 0;
-        IF FOUND THEN
-          updated_atime_p := TRUE;
-        END IF;
-      END IF;
-    END IF;
-    IF updated_atime_p THEN
-      UPDATE bayes_vars
-         SET oldest_token_age = inatime
-       WHERE id = inuserid
-         AND oldest_token_age > inatime;
-    END IF;
-    return TRUE;
+  END LOOP;
+
+  IF new_tokens > 0 AND inatime > 0 THEN
+    UPDATE bayes_vars
+       SET token_count = token_count + new_tokens,
+           newest_token_age = greatest_int(newest_token_age, inatime),
+           oldest_token_age = least_int(oldest_token_age, inatime)
+     WHERE id = inuserid;
+  ELSEIF new_tokens > 0 AND NOT inatime > 0 THEN
+    UPDATE bayes_vars
+       SET token_count = token_count + new_tokens
+     WHERE id = inuserid;
+  ELSEIF NOT new_tokens > 0 AND inatime > 0 THEN
+    UPDATE bayes_vars
+       SET newest_token_age = greatest_int(newest_token_age, inatime),
+           oldest_token_age = least_int(oldest_token_age, inatime)
+     WHERE id = inuserid;
   END IF;
+  RETURN;
 END; 
 ' LANGUAGE 'plpgsql'; 
-
- 

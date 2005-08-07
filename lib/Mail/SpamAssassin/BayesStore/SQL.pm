@@ -137,7 +137,7 @@ sub tie_db_readonly {
     return 0;
   }
 
-  unless ($self->_initialize_db()) {
+  unless ($self->_initialize_db(0)) {
     dbg("bayes: unable to initialize database for ".$self->{_username}." user, aborting!");
     $self->untie_db();
     return 0;
@@ -186,6 +186,7 @@ sub tie_db_writable {
 
   unless ($self->_initialize_db(1)) {
     dbg("bayes: unable to initialize database for ".$self->{_username}." user, aborting!");
+
     $self->untie_db();
     return 0;
   }
@@ -937,7 +938,29 @@ sub tok_count_change {
 
   $atime = 0 unless defined $atime;
 
-  $self->_put_token ($token, $spam_count, $ham_count, $atime);
+  $self->_put_token($token, $spam_count, $ham_count, $atime);
+}
+
+=head2 multi_tok_count_change
+
+public instance (Boolean) multi_tok_count_change (Integer $spam_count,
+ 					          Integer $ham_count,
+				 	          \% $tokens,
+					          String $atime)
+
+Description:
+This method takes a C<$spam_count> and C<$ham_count> and adds it to all
+of the tokens in the C<$tokens> hash ref along with updating each tokens
+atime with C<$atime>.
+
+=cut
+
+sub multi_tok_count_change {
+  my ($self, $spam_count, $ham_count, $tokens, $atime) = @_;
+
+  $atime = 0 unless defined $atime;
+
+  $self->_put_tokens($tokens, $spam_count, $ham_count, $atime);
 }
 
 =head2 nspam_nham_get
