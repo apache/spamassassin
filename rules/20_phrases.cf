@@ -215,7 +215,7 @@ body AMAZING_STUFF	        /\bamazing (?:product|rates)/i
 describe AMAZING_STUFF		Amazing Stuff
 
 # seems like we vastly reduce FPs on this one with a small change or two
-body DIET_1		/\b(?:(?:without|no) (?:exercis(?:e|ing)|dieting)|weight.?loss|(?:extra|lose|lost|losing).{0,10}(?:pounds|weight|inches|lbs)|burn.{1,10}fat)\b/i
+body DIET_1             /\b(?:(?:without|no) (?:exercis(?:e(?! price)|ing)|dieting)|weight.?loss|(?:extra|lose|lost|losing).{0,10}(?:pounds|weight|inches|lbs)|burn.{1,10}fat)\b/i
 describe DIET_1		Lose Weight Spam
 
 body DIET_2		/\blo+se.{1,10}\d+.{1,3}(?:lb|pound|kg|kilo)/i
