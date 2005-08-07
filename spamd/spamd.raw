@@ -840,6 +840,8 @@ sub spawn {
   else {
     ## CHILD
 
+    $spamtest->call_plugins("spamd_child_init");
+
     # support non-root use
     if ( $opt{'username'} ) {
       my ( $uuid, $ugid ) = ( getpwnam( $opt{'username'} ) )[ 2, 3 ];
@@ -966,6 +968,8 @@ sub spawn {
       undef $current_user;
 
     }
+
+    $spamtest->call_plugins("spamd_child_finish");
 
     # If the child lives to get here, it will die ...  Muhaha.
     exit;

@@ -633,6 +633,16 @@ Address you wish to remove.
 
 =back
 
+=item $plugin->spamd_child_init ()
+
+Called when a new child starts up under spamd.
+
+=item $plugin->spamd_child_finish ()
+
+Called right before a child exits normally under spamd.
+
+NOTE: Under and abnormal exit (ie a timeout) the call is not made.
+
 =item $plugin->finish ()
 
 Called when the C<Mail::SpamAssassin> object is destroyed.
