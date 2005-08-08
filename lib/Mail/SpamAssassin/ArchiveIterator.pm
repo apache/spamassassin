@@ -154,7 +154,9 @@ time_t value.
 =item opt_want_date
 
 Set to 1 (default) if you want the received date to be filled in
-in the C<wanted_sub> callback below.
+in the C<wanted_sub> callback below.  Set this to 0 to avoid this;
+it's a good idea to set this to 0 if you can, as it imposes a performance
+hit.
 
 =item wanted_sub
 
@@ -191,7 +193,7 @@ sub new {
 
   $self->{opt_head} = 0 unless (defined $self->{opt_head});
   $self->{opt_tail} = 0 unless (defined $self->{opt_tail});
-  $self->{opt_want_date} = 0 unless (defined $self->{opt_want_date});
+  $self->{opt_want_date} = 1 unless (defined $self->{opt_want_date});
 
   # If any of these options are set, we need to figure out the message's
   # receive date at scan time.  opt_n == 0, opt_after, opt_before
