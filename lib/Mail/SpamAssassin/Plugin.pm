@@ -637,11 +637,12 @@ Address you wish to remove.
 
 Called when a new child starts up under spamd.
 
-=item $plugin->spamd_child_finish ()
+=item $plugin->spamd_child_cleanup ()
 
-Called right before a child exits normally under spamd.
+Called when child returns from handling a connection.
 
-NOTE: Under and abnormal exit (ie a timeout) the call is not made.
+If there was an accept failure, the child will die and this code will
+not be called.
 
 =item $plugin->finish ()
 
