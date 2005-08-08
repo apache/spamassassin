@@ -916,6 +916,8 @@ sub spawn {
         die("spamd: respawning server");
       }
 
+      $spamtest->call_plugins("spamd_child_cleanup");
+
       # if we changed UID during processing, change back!
       if ($setuid_to_user && ($> != $<) && ($> != ($< - 2**32))) {
         $) = "$( $(";    # change eGID
@@ -968,8 +970,6 @@ sub spawn {
       undef $current_user;
 
     }
-
-    $spamtest->call_plugins("spamd_child_finish");
 
     # If the child lives to get here, it will die ...  Muhaha.
     exit;
