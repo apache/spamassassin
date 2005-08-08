@@ -191,7 +191,7 @@ sub new {
 
   $self->{opt_head} = 0 unless (defined $self->{opt_head});
   $self->{opt_tail} = 0 unless (defined $self->{opt_tail});
-  $self->{opt_want_date} = 1 unless (defined $self->{opt_want_date});
+  $self->{opt_want_date} = 0 unless (defined $self->{opt_want_date});
 
   # If any of these options are set, we need to figure out the message's
   # receive date at scan time.  opt_n == 0, opt_after, opt_before
