@@ -46,7 +46,7 @@ echo "each test, where 0.0 = hits only non-spam and 1.0 = hits only spam,"
 echo "and the 'score' field should be ignored.)"
 echo
 # don't just use "freqs", it's often out of date w.r.t. scores
-perl hit-frequencies -x -p -s $SCORESET
+perl hit-frequencies -x -p -s $SCORESET spam-test.log ham-test.log
 
 version=`( cd .. ; ./build/get_version )`
 echo
