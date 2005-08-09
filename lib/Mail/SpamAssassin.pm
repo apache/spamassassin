@@ -1263,6 +1263,7 @@ sub finish {
   my ($self) = @_;
 
   $self->{parser_dns_pms}->finish();
+  Mail::SpamAssassin::PerMsgStatus::finish_tests($self->{conf});
   $self->{conf}->finish(); delete $self->{conf};
   $self->{plugins}->finish(); delete $self->{plugins};
 

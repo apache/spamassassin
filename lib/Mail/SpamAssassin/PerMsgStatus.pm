@@ -1276,6 +1276,36 @@ sub finish {
   }
 }
 
+sub finish_tests {
+  my ($conf) = @_;
+
+  foreach my $priority (keys %{$conf->{priorities}}) {
+    # clean up priority value so it can be used in a subroutine name
+    my $clean_priority;
+    ($clean_priority = $priority) =~ s/-/neg/;
+
+    if (defined &{'_head_tests_'.$clean_priority}) {
+      undef &{'_head_tests_'.$clean_priority};
+    }
+    if (defined &{'_body_tests_'.$clean_priority}) {
+      undef &{'_body_tests_'.$clean_priority};
+    }
+    if (defined &{'_body_uri_tests_'.$clean_priority}) {
+      undef &{'_body_uri_tests_'.$clean_priority};
+    }
+    if (defined &{'_rawbody_tests_'.$clean_priority}) {
+      undef &{'_rawbody_tests_'.$clean_priority};
+    }
+    if (defined &{'_full_tests_'.$clean_priority}) {
+      undef &{'_full_tests_'.$clean_priority};
+    }
+    if (defined &{'_meta_tests_'.$clean_priority}) {
+      undef &{'_meta_tests_'.$clean_priority};
+    }
+  }
+}
+
+
 =item $name = $status->get_current_eval_rule_name()
 
 Return the name of the currently-running eval rule.  C<undef> is
