@@ -1,11 +1,19 @@
 #!/bin/sh
 
 # set SCORESET
-. config
+# note: this script does not need to rely on the runGA setup
+[ -r config ] && . config
 
 if [ "x$1" != "x" ]; then
  SCORESET=$1
 fi
+
+# prime the pump -- there's a few generated files that we need.  This
+# avoids unsightly errors later on!
+(
+  make clean freqs
+  ./fp-fn-statistics > /dev/null 2>&1
+) > /dev/null 2>&1
 
 gen_fp_fn_report () {
   ./logs-to-c \
@@ -47,3 +55,4 @@ echo "(SpamAssassin Version string: $version)"
 echo
 
 ( cd ../rules ; ls -l *.cf )
+
