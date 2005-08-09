@@ -637,7 +637,7 @@ Address you wish to remove.
 
 Called when a new child starts up under spamd.
 
-=item $plugin->spamd_child_cleanup ()
+=item $plugin->spamd_child_post_connection_close ()
 
 Called when child returns from handling a connection.
 
