@@ -242,8 +242,30 @@ sub new {
   $self->{'pristine_body'} = join('', @message);
 
   # CRLF -> LF
-  for ( @message ) {
-    s/\r\n/\n/;
+  # also merge multiple blank lines into a single one
+  my $start;
+  # iterate over lines in reverse order
+  for (my $cnt=$#message; $cnt>=0; $cnt--) {
+    $message[$cnt] =~ s/\r\n/\n/;
+
+    # line is blank
+    if ($message[$cnt] !~ /\S/) {
+      if (!defined $start) {
+        $start=$cnt;
+      }
+      next unless $cnt == 0;
+    }
+
+    # line is not blank, or we've reached the beginning
+
+    # if we've got a series of blank lines, get rid of them
+    if (defined $start) {
+      my $num = $start-$cnt;
+      if ($num > 10) {
+        splice @message, $cnt+2, $num-1;
+      }
+      undef $start;
+    }
   }
 
   # If the message does need to get parsed, save off a copy of the body
