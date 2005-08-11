@@ -1206,6 +1206,18 @@ sub helper_app_pipe_open_windows {
   return open ($fh, $cmd.'|');
 }
 
+sub force_die {
+  my ($msg) = @_;
+
+  # note use of eval { } scope in logging -- paranoia to ensure that a broken
+  # $SIG{__WARN__} implementation will not interfere with the flow of control
+  # here, where we *have* to die.
+  eval { warn $msg; };
+
+  POSIX::_exit(1);  # avoid END and destructor processing 
+  kill('KILL',$$);  # still kicking? die! 
+}
+
 sub helper_app_pipe_open_unix {
   my ($fh, $stdinfile, $duperr2out, @cmdline) = @_;
 
@@ -1220,7 +1232,11 @@ sub helper_app_pipe_open_unix {
     return $pid;          # parent process; return the child pid
   }
 
-  # else, child process.  go setuid...
+  # else, child process.  
+  # from now on, we cannot die(), as a parent-process eval { } scope
+  # could intercept it! use force_die() instead  (bug 4370, cmt 2)
+
+  # go setuid...
   setuid_to_euid();
   dbg("util: setuid: ruid=$< euid=$>");
 
@@ -1242,15 +1258,15 @@ sub helper_app_pipe_open_unix {
   if ($f != 0) {
     POSIX::close(0);
   }
-  # acceptable to die() here, calling code catches it
-  open STDIN, "<$stdinfile" or die "util: cannot open $stdinfile: $!";
+
+  open (STDIN, "<$stdinfile") or force_die "util: cannot open $stdinfile: $!";
 
   # this should be impossible; if we just closed fd 0, UNIX
   # fd behaviour dictates that the next fd opened (the new STDIN)
   # will be the lowest unused fd number, which should be 0.
   # so die with a useful error if this somehow isn't the case.
   if (fileno(STDIN) != 0) {
-    die "util: setuid: oops: fileno(STDIN) [".fileno(STDIN)."] != 0";
+    force_die "util: setuid: oops: fileno(STDIN) [".fileno(STDIN)."] != 0";
   }
 
   # ensure STDOUT is open.  since we just created a pipe to ensure this, it has
@@ -1271,11 +1287,12 @@ sub helper_app_pipe_open_unix {
     if ($f != 2) {
       POSIX::close(2);
     }
-    open STDERR, ">&STDOUT" or die "util: dup STDOUT failed: $!";
+
+    open (STDERR, ">&STDOUT") or force_die "util: dup STDOUT failed: $!";
 
     # STDERR must be fd 2 to be useful to subprocesses! (bug 3649)
     if (fileno(STDERR) != 2) {
-      die "util: setuid: oops: fileno(STDERR) [".fileno(STDERR)."] != 2";
+      force_die "util: oops: fileno(STDERR) [".fileno(STDERR)."] != 2";
     }
   }
 

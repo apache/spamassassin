@@ -46,7 +46,7 @@ use Mail::SpamAssassin::Logger qw(:DEFAULT log_message);
 use Getopt::Long;
 use Pod::Usage;
 use POSIX qw(:sys_wait_h);
-use POSIX qw(setsid sigprocmask);
+use POSIX qw(setsid sigprocmask _exit);
 use Errno;
 
 use Cwd ();
@@ -1199,6 +1199,9 @@ sub check {
   local ($_);
   my $expected_length;
 
+  # used to ensure we don't accidentally fork (bug 4370)
+  my $starting_self_pid = $$;
+
   # Protocol version 1.0 and greater may have "User:" and
   # "Content-length:" headers.  But they're not required.
 
@@ -1365,6 +1368,13 @@ sub check {
 
   $status->finish();    # added by jm to allow GC'ing
   $mail->finish();
+
+  # ensure we didn't accidentally fork (bug 4370)
+  if ($starting_self_pid != $$) {
+    eval { warn("spamd: accidental fork: $$ != $starting_self_pid"); };
+    POSIX::_exit(1);        # avoid END and dtor processing
+  }
+
   return 1;
 }
 
