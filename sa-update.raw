@@ -177,7 +177,7 @@ eval { $SA->debug_diagnostics(); 1; };
 $SA->finish();
 
 # deal with gpg-related options
-if (defined $opt{'gpgkey'}) {
+if (@{$opt{'gpgkey'}}) {
   $GPG_ENABLED = 1;
   foreach my $key (@{$opt{'gpgkey'}}) {
     unless ($key =~ /^[a-fA-F0-9]{8}$/) {
