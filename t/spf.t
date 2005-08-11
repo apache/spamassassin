@@ -27,6 +27,18 @@ exit unless (DO_RUN);
 
 # ---------------------------------------------------------------------------
 
+# ensure all rules will fire
+tstlocalrules ("
+  score SPF_FAIL 0.001
+  score SPF_HELO_FAIL 0.001
+  score SPF_HELO_NEUTRAL 0.001
+  score SPF_HELO_SOFTFAIL 0.001
+  score SPF_NEUTRAL 0.001
+  score SPF_SOFTFAIL 0.001
+  score SPF_PASS -0.001
+  score SPF_HELO_PASS -0.001
+");
+
 %patterns = (
     q{ SPF_HELO_PASS }, 'helo_pass',
     q{ SPF_PASS }, 'pass',
