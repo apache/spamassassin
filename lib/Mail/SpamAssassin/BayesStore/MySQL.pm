@@ -881,6 +881,161 @@ sub _put_token {
   return 1;
 }
 
+=head2 _put_tokens
+
+private instance (Boolean) _put_tokens (\% $tokens,
+                                        integer $spam_count,
+                                        integer $ham_count,
+			 	        string $atime)
+
+Description:
+This method performs the work of either inserting or updating tokens in
+the database.
+
+=cut
+
+sub _put_tokens {
+  my ($self, $tokens, $spam_count, $ham_count, $atime) = @_;
+
+  return 0 unless (defined($self->{_dbh}));
+
+  $spam_count ||= 0;
+  $ham_count ||= 0;
+
+  if ($spam_count == 0 && $ham_count == 0) {
+    return 1;
+  }
+
+  # the case where spam_count of ham_count is < 0 is special, it assumes
+  # that there already exists a token (although there might actually not be
+  # be one) that will be updated.  So we just do the update, being careful
+  # to not allow the spam_count or ham_count to not drop below 0
+  # In addition, when lowering the spam_count or ham_count we will not be
+  # updating the atime value
+  if ($spam_count < 0 || $ham_count < 0) {
+    # we only need to cleanup when we subtract counts for a token and the
+    # counts may have both reached 0
+    $self->{needs_cleanup} = 1;
+
+    my $sql = "UPDATE bayes_token SET spam_count = GREATEST(spam_count + ?, 0),
+                                      ham_count = GREATEST(ham_count + ?, 0)
+                WHERE id = ?
+                  AND token = ?";
+
+    my $sth = $self->{_dbh}->prepare_cached($sql);
+
+    unless (defined($sth)) {
+      dbg("bayes: _put_tokens: SQL error: ".$self->{_dbh}->errstr());
+      $self->{_dbh}->rollback();
+      return 0;
+    }
+
+    my $error_p = 0;
+    foreach my $token (keys %{$tokens}) {
+      my $rc = $sth->execute($spam_count,
+			     $ham_count,
+			     $self->{_userid},
+			     $token);
+
+      unless ($rc) {
+	dbg("bayes: _put_tokens: SQL error: ".$self->{_dbh}->errstr());
+	$error_p = 1;
+      }
+    }
+
+    $sth->finish();
+
+    if ($error_p) {
+      $self->{_dbh}->rollback();
+      return 0;
+    }
+  }
+  else {
+    my $sql = "INSERT INTO bayes_token
+               (id, token, spam_count, ham_count, atime)
+               VALUES (?,?,?,?,?)
+               ON DUPLICATE KEY UPDATE spam_count = GREATEST(spam_count + ?, 0),
+                                       ham_count = GREATEST(ham_count + ?, 0),
+                                       atime = GREATEST(atime, ?)";
+
+    my $sth = $self->{_dbh}->prepare_cached($sql);
+
+    unless (defined($sth)) {
+      dbg("bayes: _put_tokens: SQL error: ".$self->{_dbh}->errstr());
+      $self->{_dbh}->rollback();
+      return 0;
+    }
+
+    my $error_p = 0;
+    my $new_tokens = 0;
+    my $need_atime_update_p = 0;
+    foreach my $token (keys %{$tokens}) {
+      my $rc = $sth->execute($self->{_userid},
+			     $token,
+			     $spam_count,
+			     $ham_count,
+			     $atime,
+			     $spam_count,
+			     $ham_count,
+			     $atime);
+
+      if (!$rc) {
+	dbg("bayes: _put_tokens: SQL error: ".$self->{_dbh}->errstr());
+	$error_p = 1;
+      }
+      else {
+	my $num_rows = $rc;
+
+	$need_atime_update_p = 1 if ($num_rows == 1 || $num_rows == 2);
+	$new_tokens++ if ($num_rows == 1);
+      }
+    }
+
+    $sth->finish();
+
+    if ($error_p) {
+      $self->{_dbh}->rollback();
+      return 0;
+    }
+
+    if ($need_atime_update_p) {
+      my $token_count_update = '';
+      
+      $token_count_update = "token_count = token_count + $new_tokens," if ($new_tokens);
+      $sql = "UPDATE bayes_vars SET
+                     $token_count_update
+                     newest_token_age = GREATEST(newest_token_age, ?),
+                     oldest_token_age = LEAST(oldest_token_age, ?)
+               WHERE id = ?";
+
+      $sth = $self->{_dbh}->prepare_cached($sql);
+
+      unless (defined($sth)) {
+	dbg("bayes: _put_tokens: SQL error: ".$self->{_dbh}->errstr());
+	$self->{_dbh}->rollback();
+	return 0;
+      }
+
+      my $rc = $sth->execute($atime, $atime, $self->{_userid});
+
+      unless ($rc) {
+	dbg("bayes: _put_tokens: SQL error: ".$self->{_dbh}->errstr());
+	$self->{_dbh}->rollback();
+	return 0;
+      }
+    }
+    else {
+      # $num_rows was not what we expected
+      dbg("bayes: _put_tokens: Updated an unexpected number of rows.");
+      $self->{_dbh}->rollback();
+      return 0;
+    }
+  }
+
+  $self->{_dbh}->commit();
+  return 1;
+}
+
 sub sa_die { Mail::SpamAssassin::sa_die(@_); }
 
 1;
