@@ -137,7 +137,7 @@ sub tie_db_readonly {
     return 0;
   }
 
-  unless ($self->_initialize_db()) {
+  unless ($self->_initialize_db(0)) {
     dbg("bayes: unable to initialize database for ".$self->{_username}." user, aborting!");
     $self->untie_db();
     return 0;
@@ -186,6 +186,7 @@ sub tie_db_writable {
 
   unless ($self->_initialize_db(1)) {
     dbg("bayes: unable to initialize database for ".$self->{_username}." user, aborting!");
+
     $self->untie_db();
     return 0;
   }
@@ -937,7 +938,29 @@ sub tok_count_change {
 
   $atime = 0 unless defined $atime;
 
-  $self->_put_token ($token, $spam_count, $ham_count, $atime);
+  $self->_put_token($token, $spam_count, $ham_count, $atime);
+}
+
+=head2 multi_tok_count_change
+
+public instance (Boolean) multi_tok_count_change (Integer $spam_count,
+ 					          Integer $ham_count,
+				 	          \% $tokens,
+					          String $atime)
+
+Description:
+This method takes a C<$spam_count> and C<$ham_count> and adds it to all
+of the tokens in the C<$tokens> hash ref along with updating each tokens
+atime with C<$atime>.
+
+=cut
+
+sub multi_tok_count_change {
+  my ($self, $spam_count, $ham_count, $tokens, $atime) = @_;
+
+  $atime = 0 unless defined $atime;
+
+  $self->_put_tokens($tokens, $spam_count, $ham_count, $atime);
 }
 
 =head2 nspam_nham_get
@@ -1805,13 +1828,13 @@ sub _put_token {
   $spam_count ||= 0;
   $ham_count ||= 0;
 
-  my ($existing_spam_count,
-      $existing_ham_count,
-      $existing_atime) = $self->tok_get($token);
-
   if ($spam_count == 0 && $ham_count == 0) {
     return 1;
   }
+
+  my ($existing_spam_count,
+      $existing_ham_count,
+      $existing_atime) = $self->tok_get($token);
 
   if (!$existing_atime) {
 
@@ -1975,6 +1998,202 @@ sub _put_token {
 	dbg("bayes: _put_token: SQL error: ".$self->{_dbh}->errstr());
 	return 0;
       }
+    }
+  }
+
+  return 1;
+}
+
+=head2 _put_tokens
+
+private instance (Boolean) _put_tokens (\% $tokens,
+                                        integer $spam_count,
+                                        integer $ham_count,
+	 			        string $atime)
+
+Description:
+This method performs the work of either inserting or updating tokens in
+the database.
+
+=cut
+
+sub _put_tokens {
+  my ($self, $tokens, $spam_count, $ham_count, $atime) = @_;
+
+  return 0 unless (defined($self->{_dbh}));
+
+  $spam_count ||= 0;
+  $ham_count ||= 0;
+
+  if ($spam_count == 0 && $ham_count == 0) {
+    return 1;
+  }
+
+  my $atime_updated_p = 0;
+  my $atime_inserted_p = 0;
+  my $new_tokens = 0;
+
+  my $insertsql = "INSERT INTO bayes_token
+                   (id, token, spam_count, ham_count, atime)
+                   VALUES (?,?,?,?,?)";
+
+  my $insertsth = $self->{_dbh}->prepare_cached($insertsql);
+
+  unless (defined($insertsth)) {
+    dbg("bayes: _put_token: SQL error: ".$self->{_dbh}->errstr());
+    return 0;
+  }
+
+  foreach my $token (keys %{$tokens}) {
+    my ($existing_spam_count,
+	$existing_ham_count,
+	$existing_atime) = $self->tok_get($token);
+
+    if (!$existing_atime) {
+
+      # You can't create a new entry for a token with a negative count, so
+      # just skip to the next one if we are unable to find an entry.
+      next if ($spam_count < 0 || $ham_count < 0);
+
+
+      my $rc = $insertsth->execute($self->{_userid},
+				   $token,
+				   $spam_count,
+				   $ham_count,
+				   $atime);
+    
+      unless ($rc) {
+	dbg("bayes: _put_token: SQL error: ".$self->{_dbh}->errstr());
+	next;
+      }
+
+      $insertsth->finish();
+
+      $atime_inserted_p = 1;
+      $new_tokens++;
+    }
+    else {
+
+      if ($spam_count < 0 || $ham_count < 0) {
+	# we only need to cleanup when we subtract counts for a token and the
+	# counts may have both reached 0
+	# XXX - future optimization, since we have the existing spam/ham counts
+	# we can make an educated guess on if the count would reach 0, for
+	# instance, if we are decreasing spam_count but spam_count is currently
+	# > 1000, then there is no possible why this update or any others that
+	# might currently be happening could reduce that value to 0, so there
+	# would be no need to set the needs_cleanup flag
+	$self->{needs_cleanup} = 1;
+      }
+
+      my $update_atime_p = 1;
+
+      # if the existing atime is already >= the one we are going to set, then
+      # don't bother
+      $update_atime_p = 0 if ($existing_atime >= $atime);
+      
+      # These SQL statements include as part of the WHERE clause something like
+      # "AND spam_count + ? >= 0" or "AND ham_count + ? >= 0".  This is to keep
+      # the count from going negative.
+      
+      if ($spam_count) {
+	my $sql;
+	my @args;
+	if ($update_atime_p) {
+	  $sql = "UPDATE bayes_token
+                     SET spam_count = spam_count + ?,
+                         atime = ?
+                   WHERE id = ?
+                     AND token = ?
+                     AND spam_count + ? >= 0";
+	  @args = ($spam_count, $atime, $self->{_userid}, $token, $spam_count);
+	  $atime_updated_p = 1;
+	}
+	else {
+	  $sql = "UPDATE bayes_token
+                     SET spam_count = spam_count + ?
+                   WHERE id = ?
+                     AND token = ?
+                     AND spam_count + ? >= 0";
+	  @args = ($spam_count, $self->{_userid}, $token, $spam_count);
+	}
+
+	my $rows = $self->{_dbh}->do($sql, undef, @args);
+
+	unless (defined($rows)) {
+	  dbg("bayes: _put_token: SQL error: ".$self->{_dbh}->errstr());
+	}
+      }
+
+      if ($ham_count) {
+	my $sql;
+	my @args;
+	# if $spam_count then we already updated the atime
+	if ($update_atime_p && !$spam_count) { 
+	  $sql = "UPDATE bayes_token
+                     SET ham_count = ham_count + ?,
+                         atime = ?
+                   WHERE id = ?
+                     AND token = ?
+                     AND ham_count + ? >= 0";
+	  @args = ($ham_count, $atime, $self->{_userid}, $token, $ham_count);
+	  $atime_updated_p = 1;
+	}
+	else {
+	  $sql = "UPDATE bayes_token
+                     SET ham_count = ham_count + ?
+                   WHERE id = ?
+                     AND token = ?
+                     AND ham_count + ? >= 0";
+	  @args = ($ham_count, $self->{_userid}, $token, $ham_count);
+	}
+	
+	my $rows = $self->{_dbh}->do($sql, undef, @args);
+
+	unless (defined($rows)) {
+	  dbg("bayes: _put_token: SQL error: ".$self->{_dbh}->errstr());
+	}
+      }
+    }
+  }
+
+  if ($new_tokens) {
+    my $sql = "UPDATE bayes_vars SET token_count = token_count + ?
+                WHERE id = ?";
+
+    my $rows = $self->{_dbh}->do($sql, undef, $new_tokens, $self->{_userid});
+
+    unless (defined($rows)) {
+      dbg("bayes: _put_token: SQL error: ".$self->{_dbh}->errstr());
+    }
+  }
+
+  if ($atime_updated_p || $atime_inserted_p) {
+    # we updated the atime, so we need to check and update bayes_vars
+    # we only need to worry about newest_token_age since we would have
+    # only updated the atime if it was > the previous value
+    my $sql = "UPDATE bayes_vars SET newest_token_age = ?
+                WHERE id = ? AND newest_token_age < ?";
+
+    my $rows = $self->{_dbh}->do($sql, undef, $atime, $self->{_userid}, $atime);
+
+    unless (defined($rows)) {
+      dbg("bayes: _put_token: SQL error: ".$self->{_dbh}->errstr());
+    }
+  }
+
+
+  # If we inserted then we might need to update oldest_token_age
+  # but if we already updated newest_token_age then there is no need
+
+  if ($atime_inserted_p) {
+    my $sql = "UPDATE bayes_vars SET oldest_token_age = ?
+                WHERE id = ? AND oldest_token_age > ?";
+
+    my $rows = $self->{_dbh}->do($sql, undef, $atime, $self->{_userid}, $atime);
+
+    unless (defined($rows)) {
+      dbg("bayes: _put_token: SQL error: ".$self->{_dbh}->errstr());
     }
   }
 
