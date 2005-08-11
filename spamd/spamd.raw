@@ -840,6 +840,8 @@ sub spawn {
   else {
     ## CHILD
 
+    $spamtest->call_plugins("spamd_child_init");
+
     # support non-root use
     if ( $opt{'username'} ) {
       my ( $uuid, $ugid ) = ( getpwnam( $opt{'username'} ) )[ 2, 3 ];
@@ -913,6 +915,8 @@ sub spawn {
         # serious error; used for accept() failure
         die("spamd: respawning server");
       }
+
+      $spamtest->call_plugins("spamd_child_post_connection_close");
 
       # if we changed UID during processing, change back!
       if ($setuid_to_user && ($> != $<) && ($> != ($< - 2**32))) {
