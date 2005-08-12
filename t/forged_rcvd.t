@@ -8,8 +8,8 @@ use Test; BEGIN { plan tests => 2 };
 
 %patterns = (
 
-q{ INVALID_DATE }, 'invdate',
-q{ EXCUSE_4 }, 'bodyspotted',
+q{ TEST_INVALID_DATE }, 'invdate',
+q{ TEST_EXCUSE_4 }, 'bodyspotted',
 
 );
 

@@ -8,8 +8,8 @@ use Test; BEGIN { plan tests => 9 };
 
 %patterns = (
 
-q{ INVALID_DATE }, 'invdate',
-q{ EXCUSE_4 }, 'bodyspotted',
+q{ TEST_INVALID_DATE }, 'invdate',
+q{ TEST_EXCUSE_4 }, 'bodyspotted',
 q{ LAST_RCVD_LINE }, 'LAST_RCVD_LINE',
 q{ MESSAGEID_MATCH }, 'MESSAGEID_MATCH',
 q{ ENV_FROM }, 'ENV_FROM',

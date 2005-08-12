@@ -86,9 +86,15 @@ Content-Type: text/plain; charset=us-ascii; format=flowed
 Content-Transfer-Encoding: 7bit
 
 EOF
-    print MAIL join("\n", @tests) . "\n\n";
+
     # we are looking for random failures, but we do a deterministic
-    # test to prevent too much frustration with "make test"
+    # test to prevent too much frustration with "make test".
+
+    # start off sorted
+    @tests = sort @tests;
+
+    print MAIL join("\n", @tests) . "\n\n";
+
     # 25 iterations gets most hits most of the time, but 10 is large enough
     for (1..10) {
       print MAIL join("\n", sha1_shuffle($_, @tests)) . "\n\n";
