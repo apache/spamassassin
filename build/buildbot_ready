@@ -42,4 +42,3 @@ sub mtime_age_secs {
   my @s = stat($f);
   return (time - $s[9]);
 }
-
