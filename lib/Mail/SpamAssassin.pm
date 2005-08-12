@@ -95,7 +95,7 @@ use vars qw{
 };
 
 $VERSION = "3.001000";      # update after release (same format as perl $])
-$IS_DEVEL_BUILD = 1;        # change for release versions
+$IS_DEVEL_BUILD = 0;        # change for release versions
 
 @ISA = qw();
 
@@ -104,7 +104,7 @@ $SUB_VERSION = (split(/\s+/,'$LastChangedDate$ updated by SVN'))[1];
 
 # If you hacked up your SA, you should add a version_tag to your .cf files.
 # This variable should not be modified directly.
-@EXTRA_VERSION = qw(pre4);
+@EXTRA_VERSION = qw(rc1);
 if (defined $IS_DEVEL_BUILD && $IS_DEVEL_BUILD) {
   push(@EXTRA_VERSION,
        ('r' . qw{$LastChangedRevision$ updated by SVN}[1]));
