@@ -13,8 +13,8 @@ exit if $SKIP_SPAMD_TESTS;
 q{ X-Spam-Status: Yes, score=}, 'status',
 q{ X-Spam-Flag: YES}, 'flag',
 q{ X-Spam-Level: **********}, 'stars',
-q{ FROM_ENDS_IN_NUMS}, 'endsinnums',
-q{ NO_REAL_NAME}, 'noreal',
+q{ TEST_ENDSNUMS}, 'endsinnums',
+q{ TEST_NOREALNAME}, 'noreal',
 
 
 );
