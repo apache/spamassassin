@@ -1,12 +1,13 @@
-*** THIS IS A PRE-RELEASE ONLY, NOT THE FINAL 3.1.0 RELEASE ***
+*** THIS IS A RELEASE CANDIDATE ONLY, NOT THE FINAL 3.1.0 RELEASE ***
 
-SpamAssassin 3.1.0-pre4 is released!  SpamAssassin 3.1.0 is a major update and
+SpamAssassin 3.1.0-rc1 is released!  SpamAssassin 3.1.0 is a major update and
 includes a number of new email and anti-spam technologies.
 
 SpamAssassin is a mail filter which uses advanced statistical and
 heuristic tests to identify spam (also known as unsolicited bulk email).
 
-This is a prerelease, and NOT the full release.
+This is a release candidate, and NOT the general availability release (yet.)
+We think it's pretty rock solid, however. ;)
 
 
 Highlights of the release
@@ -45,21 +46,21 @@ Downloading
 
 Pick it up from:
 
-  http://people.apache.org/~jm/devel/Mail-SpamAssassin-3.1.0-pre4.tar.gz
-  http://people.apache.org/~jm/devel/Mail-SpamAssassin-3.1.0-pre4.tar.bz2
-  http://people.apache.org/~jm/devel/Mail-SpamAssassin-3.1.0-pre4.zip
+  http://people.apache.org/~jm/devel/Mail-SpamAssassin-3.1.0-rc1.tar.gz
+  http://people.apache.org/~jm/devel/Mail-SpamAssassin-3.1.0-rc1.tar.bz2
+  http://people.apache.org/~jm/devel/Mail-SpamAssassin-3.1.0-rc1.zip
 
 md5sum:
 
-  e127527fbf7cccdfd59a0ecf5291e1e4  Mail-SpamAssassin-3.1.0-pre4.tar.bz2
-  fade2efe8ce40e029056c9e5b9ef2241  Mail-SpamAssassin-3.1.0-pre4.tar.gz
-  4deec9073b17eb01ab37af9b1a47d096  Mail-SpamAssassin-3.1.0-pre4.zip
+  c41126e515eacc5480d6d44498d5b99d  Mail-SpamAssassin-3.1.0-rc1.tar.bz2
+  196a22f1a9d27792d8388fbc6f1b522f  Mail-SpamAssassin-3.1.0-rc1.tar.gz
+  1763521a992ebd45c46ca1dcab586474  Mail-SpamAssassin-3.1.0-rc1.zip
 
 sha1sum:
 
-  d315eeac93bcc189d5d7ab4e75ad4a9c280c687e  Mail-SpamAssassin-3.1.0-pre4.tar.bz2
-  23e8384ca79b3559a67dc693b12b6f481a4cb36a  Mail-SpamAssassin-3.1.0-pre4.tar.gz
-  2636ac280ab6e967a54142b1a8e4823bf04fa577  Mail-SpamAssassin-3.1.0-pre4.zip
+  17145041222d607d1591eb5cffdff80fdd55cd6c  Mail-SpamAssassin-3.1.0-rc1.tar.bz2
+  904c9b67498ec456c674545c15d0c4f89950a9da  Mail-SpamAssassin-3.1.0-rc1.tar.gz
+  f6d5d50abc70a4cedde3bc50715848aba1c3a4e4  Mail-SpamAssassin-3.1.0-rc1.zip
 
 The release files also have a .asc accompanying them.  The file serves
 as an external GPG signature for the given release file.  The signing
@@ -108,8 +109,8 @@ Summary of major changes since 3.0.x
   Bauer to support fuzzy text matching, WhiteListSubject: plugin added to
   support user whitelists by Subject header.
 
-- TextCat language guesser moved to a plugin.  This means "ok_languages"
-  is no longer part of the core engine.
+- TextCat language guesser moved to a plugin.  (This means "ok_languages"
+  is no longer part of the core engine by default.)
 
 - Razor: disable Razor2 support by default per our policy, since the
   service is not free for non-personal use.  It's trivial to reenable.
