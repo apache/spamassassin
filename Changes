@@ -1,4 +1,206 @@
 ------------------------------------------------------------------------
+r231544 | jm | 2005-08-12 00:05:47 +0000 (Fri, 12 Aug 2005) | 1 line
+
+bug 4505: new scores for 3.1.0; STATISTICS files for same; fix test failures caused by changing scores, by making the test suite ruleset-independent; and rename a rule so that t/rule_names.t passes.
+------------------------------------------------------------------------
+r231411 | parker | 2005-08-11 07:00:37 +0000 (Thu, 11 Aug 2005) | 1 line
+
+Bug 4519: Add multi_tok_count_change to BayesStore API
+------------------------------------------------------------------------
+r231387 | jm | 2005-08-11 03:52:19 +0000 (Thu, 11 Aug 2005) | 1 line
+
+bug 4370: stop failed exec() from resulting in duplicate processes
+------------------------------------------------------------------------
+r231383 | parker | 2005-08-11 03:13:18 +0000 (Thu, 11 Aug 2005) | 1 line
+
+Bug 4520: Add plugin hooks for spamd child init and post connection close
+------------------------------------------------------------------------
+r231382 | jm | 2005-08-11 03:09:53 +0000 (Thu, 11 Aug 2005) | 1 line
+
+spf.t was failing due to SPF_HELO_FAIL having a 0 score; trivial fix
+------------------------------------------------------------------------
+r231362 | jm | 2005-08-11 00:25:28 +0000 (Thu, 11 Aug 2005) | 1 line
+
+bug 4523: sa-update was requiring the supposedly-optional GPG
+------------------------------------------------------------------------
+r231360 | jm | 2005-08-11 00:23:22 +0000 (Thu, 11 Aug 2005) | 1 line
+
+bug 4484: note that OBSCURED_EMAIL and SUBJ_ILLEGAL_CHARS are both likely to FP for non-english speakers
+------------------------------------------------------------------------
+r231168 | jm | 2005-08-10 04:38:18 +0000 (Wed, 10 Aug 2005) | 1 line
+
+attempt to support multiple <gen:mutable> blocks safely, since some of the later ones may be in ifplugin scopes
+------------------------------------------------------------------------
+r231150 | jm | 2005-08-10 02:11:28 +0000 (Wed, 10 Aug 2005) | 1 line
+
+forgot this: these shouldn't be active in a release branch
+------------------------------------------------------------------------
+r231140 | jm | 2005-08-09 23:23:55 +0000 (Tue, 09 Aug 2005) | 1 line
+
+ensure that hit-frequencies uses the right logs when building STATISTICS.txt files
+------------------------------------------------------------------------
+r230956 | jm | 2005-08-09 02:15:58 +0000 (Tue, 09 Aug 2005) | 1 line
+
+bug 4511: old rule configs were persisting across Mail::SpamAssassin::finish().  fixed, patch from John Gardiner Myers <jgmyers /at/ proofpoint.com>
+------------------------------------------------------------------------
+r230953 | jm | 2005-08-09 02:14:11 +0000 (Tue, 09 Aug 2005) | 1 line
+
+bug 3712: avoid high memory usage when the message contains many newline characters
+------------------------------------------------------------------------
+r230951 | jm | 2005-08-09 02:04:16 +0000 (Tue, 09 Aug 2005) | 1 line
+
+get this a bit more hospitable to running outside of runGA
+------------------------------------------------------------------------
+r230946 | jm | 2005-08-09 01:32:52 +0000 (Tue, 09 Aug 2005) | 1 line
+
+commented debugging code which was messing up statistics output for the release
+------------------------------------------------------------------------
+r230723 | jm | 2005-08-08 01:12:10 +0000 (Mon, 08 Aug 2005) | 1 line
+
+bug 4505 att 3051: render BAYES scores immutable, and set them to a sensible increasing scale
+------------------------------------------------------------------------
+r230642 | duncf | 2005-08-07 06:05:24 +0000 (Sun, 07 Aug 2005) | 2 lines
+
+Bug 4363 - Avoid FP for DIET_1 on "exercise price"
+
+------------------------------------------------------------------------
+r227525 | jm | 2005-08-05 00:12:03 +0000 (Fri, 05 Aug 2005) | 1 line
+
+bug 4161: mutex lock files for the flock lock method need to respect bayes_file_mode file permissions, too
+------------------------------------------------------------------------
+r227288 | jm | 2005-08-04 01:50:40 +0000 (Thu, 04 Aug 2005) | 1 line
+
+trivial: rename STATISTICS.txt to STATISTICS-set0.txt, so it matches the other stats files
+------------------------------------------------------------------------
+r227145 | parker | 2005-08-03 01:29:56 +0000 (Wed, 03 Aug 2005) | 1 line
+
+Bug 4510: Add missing UNIQUE index for bayes_vars
+------------------------------------------------------------------------
+r227105 | dos | 2005-08-02 22:59:22 +0000 (Tue, 02 Aug 2005) | 1 line
+
+bug 4502: Habeas rules have malformed calls to check_rbl() and check_rbl_sub()
+------------------------------------------------------------------------
+r227100 | dos | 2005-08-02 22:36:43 +0000 (Tue, 02 Aug 2005) | 1 line
+
+bug 4504: Add new adtech.de redirector pattern
+------------------------------------------------------------------------
+r226283 | jm | 2005-07-28 23:13:05 +0000 (Thu, 28 Jul 2005) | 1 line
+
+bug 4487: trivial fix; copy -D pod doco from spamassassin-run.pod
+------------------------------------------------------------------------
+r226278 | jm | 2005-07-28 22:56:43 +0000 (Thu, 28 Jul 2005) | 1 line
+
+bug 4448: use_dcc and use_pyzor fail to function via SQL prefs if disabled in local.cf
+------------------------------------------------------------------------
+r225838 | dos | 2005-07-28 18:16:38 +0000 (Thu, 28 Jul 2005) | 1 line
+
+bug 4396: spamcop plugin spamcop_max_report_size not defined
+------------------------------------------------------------------------
+r225173 | dos | 2005-07-25 20:29:55 +0000 (Mon, 25 Jul 2005) | 1 line
+
+bug 4419: oops... wrong patch was missing the colon for IPv6 addresses
+------------------------------------------------------------------------
+r225171 | dos | 2005-07-25 20:20:16 +0000 (Mon, 25 Jul 2005) | 1 line
+
+bug 4419: improve eval test argument parsing and implement --lint warnings for same
+------------------------------------------------------------------------
+r224585 | jm | 2005-07-23 23:29:55 +0000 (Sat, 23 Jul 2005) | 1 line
+
+bug 4344: enhance spamc under win32 to same timeout behaviour as under UNIX
+------------------------------------------------------------------------
+r224584 | jm | 2005-07-23 23:29:01 +0000 (Sat, 23 Jul 2005) | 1 line
+
+allow SPF_PASS to appear in hit-frequencies output
+------------------------------------------------------------------------
+r224560 | quinlan | 2005-07-23 22:16:55 +0000 (Sat, 23 Jul 2005) | 1 line
+
+creating branch for 3.1
+------------------------------------------------------------------------
+r224559 | quinlan | 2005-07-23 22:11:47 +0000 (Sat, 23 Jul 2005) | 2 lines
+
+oops, I meant to do that post-branch
+
+------------------------------------------------------------------------
+r224557 | quinlan | 2005-07-23 21:54:34 +0000 (Sat, 23 Jul 2005) | 2 lines
+
+add defined check
+
+------------------------------------------------------------------------
+r224490 | jm | 2005-07-23 18:03:27 +0000 (Sat, 23 Jul 2005) | 1 line
+
+minor tweak: mboxget should use proper args parsing with Getopt::Long
+------------------------------------------------------------------------
+r224486 | jm | 2005-07-23 17:51:09 +0000 (Sat, 23 Jul 2005) | 1 line
+
+mboxget was failing on maildir/mbox files that had filenames ending in '.\d+'
+------------------------------------------------------------------------
+r224400 | hstern | 2005-07-22 21:03:50 +0000 (Fri, 22 Jul 2005) | 4 lines
+
+ * evolve_metarule/README
+
+   Documentation change for target_flex_rules option.
+
+------------------------------------------------------------------------
+r224398 | hstern | 2005-07-22 21:01:29 +0000 (Fri, 22 Jul 2005) | 7 lines
+
+ * evolve_metarule.c
+
+   The fitness function was not very effective with large rule sets so I
+   changed it a bit.  Now you can give a range to say that solutions with
+   target +/- flex rules are half as good as those with target rules.  I added
+   an option, -l, to control this.
+
+------------------------------------------------------------------------
+r220192 | parker | 2005-07-21 21:58:26 +0000 (Thu, 21 Jul 2005) | 1 line
+
+Bug 4409: Added a note to the --username documentation
+------------------------------------------------------------------------
+r220191 | parker | 2005-07-21 21:46:46 +0000 (Thu, 21 Jul 2005) | 1 line
+
+Bug 4224: Sample OS X startup files for spamd
+------------------------------------------------------------------------
+r220000 | dos | 2005-07-21 05:56:06 +0000 (Thu, 21 Jul 2005) | 1 line
+
+bug 4414: remove redundant wildcards from white/blacklist regexps
+------------------------------------------------------------------------
+r219999 | dos | 2005-07-21 05:53:35 +0000 (Thu, 21 Jul 2005) | 1 line
+
+bug 4431: add debugging info for whitelist and blacklist hits
+------------------------------------------------------------------------
+r219017 | dos | 2005-07-14 09:34:45 +0000 (Thu, 14 Jul 2005) | 1 line
+
+bug 4443: add redir.internet.com redirector_pattern
+------------------------------------------------------------------------
+r216292 | quinlan | 2005-07-14 00:50:52 +0000 (Thu, 14 Jul 2005) | 2 lines
+
+fix a bunch of Content-Type: typos
+
+------------------------------------------------------------------------
+r216204 | felicity | 2005-07-13 18:24:35 +0000 (Wed, 13 Jul 2005) | 1 line
+
+our sample local.cf has required_hits which should now be required_score -- just a comment
+------------------------------------------------------------------------
+r216202 | jm | 2005-07-13 18:15:43 +0000 (Wed, 13 Jul 2005) | 1 line
+
+bug 4480: trivial t/ fix: avoid misfiring meta.t failure caused by 'tflags net' rules having zero scores in non-net scoresets
+------------------------------------------------------------------------
+r216200 | jm | 2005-07-13 18:11:55 +0000 (Wed, 13 Jul 2005) | 1 line
+
+trivial test fix: don't issue debug logs from metadata.t
+------------------------------------------------------------------------
+r216088 | quinlan | 2005-07-13 01:56:15 +0000 (Wed, 13 Jul 2005) | 2 lines
+
+fix --fplog and --fnlog options
+
+------------------------------------------------------------------------
+r216076 | jm | 2005-07-13 01:13:14 +0000 (Wed, 13 Jul 2005) | 1 line
+
+3.1.0-pre4 prerelease cut
+------------------------------------------------------------------------
+r216072 | jm | 2005-07-13 01:05:34 +0000 (Wed, 13 Jul 2005) | 1 line
+
+preparing to release 3.1.0pre4, try 2
+------------------------------------------------------------------------
 r216071 | jm | 2005-07-13 01:05:11 +0000 (Wed, 13 Jul 2005) | 1 line
 
 hmm.  I guess patch doesn't know how to do an 'svn add'.
