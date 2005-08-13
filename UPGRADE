@@ -44,6 +44,32 @@ Note for Users Upgrading to SpamAssassin 3.1.0
   3.0.x versions will be used instead, where all processes receive an
   equal load and no scaling takes place.
 
+- As of 3.1.0, in addition to the generic BayesSQL support (via
+  Mail::SpamAssassin::BayesStore::SQL) usable by multiple database
+  drivers there is now specific support for MySQL 4.1+ and
+  PostgreSQL.  This support is based on non-standard features present
+  in both database servers that allow for various performance boosts.
+
+  If you were using the previous BayesSQL support with MySQL, and
+  already have MySQL 4.1+ installed you can begin using the new module
+  immediately by replacing the bayes_store_module line in your
+  configuration with:  Mail::SpamAssassin::BayesStore::MySQL
+
+  We do however recommend that you switch your MySQL tables over to
+  InnoDB for better data integrity and multi user support.  You can
+  most often do this via a simple ALTER TABLE command, refer to the
+  MySQL documentation for more information.
+
+  If you were previously using PostgreSQL for your bayes database then
+  we STRONGLY recommend switching to the PostgreSQL specific backend:
+  Mail::SpamAssassin::BayesStore::PgSQL
+  To switch to this backend you should first run sa-learn --backup to
+  make a backup of your existing data and then drop and recreate the
+  database following the instructions in sql/README.bayes.  Then you
+  can restore the database with sa-learn --restore.  If you have
+  multiple users then you will have to run --backup and --restore for
+  each user to fully restore the database.
+
 - See http://wiki.apache.org/spamassassin/UpgradeTo310 for a
   supplementary list of upgrade notes.  It will be updated with any
   upgrade notes not captured in this document.
