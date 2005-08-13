@@ -27,9 +27,9 @@ requires that you are running at least version 4.1 of MySQL, if you are running
 a version of MySQL < 4.1 then several aspects of this module will fail and
 possibly corrupt your bayes database data.
 
-In addition, this module will support rollback on error, if you are using
-the InnoDB database table typ in MySQL.  For more information please review
-the instructions in sql/README.bayes.
+In addition, this module will support rollback on error, if you are
+using the InnoDB database table type in MySQL.  For more information
+please review the instructions in sql/README.bayes.
 
 =cut
 
