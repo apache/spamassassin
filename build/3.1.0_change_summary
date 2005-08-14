@@ -32,8 +32,9 @@ Highlights of the release
   Bauer to support fuzzy text matching, WhiteListSubject: plugin added to
   support user whitelists by Subject header.
 
-- Razor: disable Razor2 support by default per our policy, since the
-  service is not free for non-personal use.  It's trivial to reenable.
+- Razor: disable Razor2 support by default per our policy, since the service is
+  not free for non-personal use.  It's trivial to reenable (by editing
+  '/etc/mail/spamassassin/v310.pre').
 
 - DCC: disable DCC for similar reasons, due to new license terms.
 
