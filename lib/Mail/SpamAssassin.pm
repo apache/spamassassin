@@ -1124,6 +1124,11 @@ by a configuration option.  By default, this is disabled.
 sub compile_now {
   my ($self, $use_user_prefs, $deal_with_userstate) = @_;
 
+  # tell plugins we are here
+  $self->call_plugins("compile_now_start",
+		      { use_user_prefs => $use_user_prefs,
+			keep_userstate => $deal_with_userstate});
+
   # note: this may incur network access. Good.  We want to make sure
   # as much as possible is preloaded!
   my @testmsg = ("From: ignore\@compiling.spamassassin.taint.org\n", 
@@ -1180,7 +1185,11 @@ sub compile_now {
     }
   }
 
+  # make sure things are ready for scanning
   $self->{bayes_scanner}->sanity_check_is_untied();
+  $self->call_plugins("compile_now_finish",
+		      { use_user_prefs => $use_user_prefs,
+			keep_userstate => $deal_with_userstate});
 
   # Reset any non-default values to the post-init() version.
   while(my($k,$v) = each %backup) {
