@@ -931,7 +931,7 @@ sub _put_token {
     $self->{needs_cleanup} = 1;
   }
 
-  my $escaped_token = _quote_bytea($_);
+  my $escaped_token = _quote_bytea($token);
   my $sth = $self->{_dbh}->prepare("select put_tokens($self->{_userid},'{$escaped_token}',
                                                       $spam_count,$ham_count,$atime)");
 
