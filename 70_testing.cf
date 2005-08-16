@@ -55,3 +55,6 @@ body      T_URIBL_XS_SURBL   eval:check_uridnsbl('T_URIBL_XS_SURBL')
 describe  T_URIBL_XS_SURBL   Has URI in XS - Testing  
 tflags    T_URIBL_XS_SURBL   net  
 
+# From discussion on users@ list
+body T_URI_HTML_ONLY		eval:check_html_uri_only()
+describe T_URI_HTML_ONLY	URIs only found in HTML part of multipart/alternative message
