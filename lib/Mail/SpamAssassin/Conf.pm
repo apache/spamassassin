@@ -797,10 +797,10 @@ the original mail into tagged messages.
 
 =item ok_locales xx [ yy zz ... ]		(default: all)
 
-This option is used to specify which locales (country codes) are
-considered OK for incoming mail.  Mail using B<character sets> used by
-languages in these countries will not be marked as possibly being spam in
-a foreign language.
+This option is used to specify which locales are considered OK for
+incoming mail.  Mail using the B<character sets> that are allowed by
+this option will not be marked as possibly being spam in a foreign
+language.
 
 If you receive lots of spam in foreign languages, and never get any non-spam in
 these languages, this may help.  Note that all ISO-8859-* character sets, and
