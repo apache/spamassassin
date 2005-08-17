@@ -104,7 +104,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
     repo=https://svn.apache.org/repos/asf/spamassassin
     svn copy -m "creating tag for release 3.1.0-pre2" \
-	$repo/trunk \
+	$repo/branches/3.1 \
 	$repo/tags/spamassassin_release_3_1_0_pre_2
 
   This will do a completely server-side tagging (which is the same as
@@ -132,6 +132,10 @@ SPAMASSASSIN RELEASE PROCEDURE
   Copy them to wherever you want, yourself.
 
 - test the tar.gz and zip files!  redo until they work!! ;)
+
+- Propose a release, and post the URL and md5sums/sha1sums to the
+  dev list.  Once you've got 2 committer +1's, in addition to your own,
+  carry on:
 
 - SVN commit the release files, including 'Changes':
 
