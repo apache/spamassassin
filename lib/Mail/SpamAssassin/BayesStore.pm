@@ -378,7 +378,7 @@ sub expire_old_tokens_trapped {
     my $hapax_pc = ($num_hapaxes * 100) / $kept;
     my $lowfreq_pc = ($num_lowfreq * 100) / $kept;
     print "$msg\n$msg2\n";
-    printf "token frequency: 1-occurence tokens: %3.2f%%\n", $hapax_pc;
+    printf "token frequency: 1-occurrence tokens: %3.2f%%\n", $hapax_pc;
     printf "token frequency: less than 8 occurrences: %3.2f%%\n", $lowfreq_pc;
   }
   else {
