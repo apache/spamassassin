@@ -786,6 +786,55 @@ the Bayes files to use.
 
 =back
 
+=head1 MIGRATION
+
+There are now multiple backend storage modules available for storing
+user's bayesian data. As such you might want to migrate from one
+backend to another. Here is a simple procedure for migrating from one
+backend to another.
+
+Note that if you have individual user databases you will have to
+perform a similar procedure for each one of them.
+
+=over 4
+
+=item sa-learn --sync
+
+This will sync any outstanding journal entries
+
+=item sa-learn --backup > backup.txt
+
+This will save all your Bayes data to a plain text file.
+
+=item sa-learn --clear
+
+This is optional, but good to do to clear out the old database.
+
+=item Repeat!
+
+At this point, if you have multiple databases, you should perform the
+procedure above for each of them. (i.e. each user's database needs to
+be backed up before continuing.)
+
+=item Switch backends
+
+Once you have backed up all databases you can update your
+configuration for the new database backend. This will involve at least
+the bayes_store_module config option and may involve some additional
+config options depending on what is required by the module. (For
+example, you may need to configure an SQL database.)
+
+=item sa-learn --restore backup.txt
+
+Again, you need to do this for every database.
+
+=back
+
+If you are migrating to SQL you can make use of the -u <username>
+option in sa-learn to populate each user's database. Otherwise, you
+must run sa-learn as the user who database you are restoring.
+
+
 =head1 INTRODUCTION TO BAYESIAN FILTERING
 
 (Thanks to Michael Bell for this section!)
