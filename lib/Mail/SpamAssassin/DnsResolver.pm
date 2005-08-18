@@ -259,6 +259,7 @@ It is expected that a closure callback be used, like so:
 
 The callback can ignore the reply as an invalid packet sent to the listening port
 if the reply id does not match the return value from bgsend.
+
 =cut
 
 sub bgsend {
