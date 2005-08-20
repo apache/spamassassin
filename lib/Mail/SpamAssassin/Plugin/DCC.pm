@@ -457,6 +457,7 @@ sub dccproc_lookup {
   my $tmpf = $permsgstatus->create_fulltext_tmpfile($fulltext);
   my $oldalarm = 0;
 
+  my $pid;
   eval {
     # safe to use $SIG{ALRM} here instead of Util::trap_sigalrm_fully(),
     # since there are no killer regexp hang dangers here
@@ -472,12 +473,13 @@ sub dccproc_lookup {
 
     dbg("dcc: opening pipe: " . join(' ', $path, "-H", $opts, "< $tmpf"));
 
-    my $pid = Mail::SpamAssassin::Util::helper_app_pipe_open(*DCC,
+    $pid = Mail::SpamAssassin::Util::helper_app_pipe_open(*DCC,
 	$tmpf, 1, $path, "-H", split(' ', $opts));
     $pid or die "$!\n";
 
     my @null = <DCC>;
-    close DCC;
+    close DCC
+      or dbg(sprintf("dcc: [%s] finished: %s exit=0x%04x",$pid,$!,$?));
 
     if (!@null) {
       # no facility prefix on this
@@ -508,6 +510,14 @@ sub dccproc_lookup {
   # do NOT reinstate $oldalarm here; we may already have done that in
   # the success case.  leave it to the error handler below
   my $err = $@;
+  if (defined(fileno(*DCC))) {  # still open
+    if ($pid) {
+      if (kill('TERM',$pid)) { dbg("dcc: killed stale helper [$pid]") }
+      else { dbg("dcc: killing helper application [$pid] failed: $!") }
+    }
+    close DCC
+      or dbg(sprintf("dcc: [%s] terminated: %s exit=0x%04x",$pid,$!,$?));
+  }
   $permsgstatus->leave_helper_run_mode();
 
   if ($err) {
