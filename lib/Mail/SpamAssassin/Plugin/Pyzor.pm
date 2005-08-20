@@ -224,6 +224,7 @@ sub pyzor_lookup {
   my $tmpf = $permsgstatus->create_fulltext_tmpfile($fulltext);
   my $oldalarm = 0;
 
+  my $pid;
   eval {
     # safe to use $SIG{ALRM} here instead of Util::trap_sigalrm_fully(),
     # since there are no killer regexp hang dangers here
@@ -239,12 +240,13 @@ sub pyzor_lookup {
  
     dbg("pyzor: opening pipe: " . join(' ', $path, $opts, "check", "< $tmpf"));
 
-    my $pid = Mail::SpamAssassin::Util::helper_app_pipe_open(*PYZOR,
+    $pid = Mail::SpamAssassin::Util::helper_app_pipe_open(*PYZOR,
 	$tmpf, 1, $path, split(' ', $opts), "check");
     $pid or die "$!\n";
 
     @response = <PYZOR>;
-    close PYZOR;
+    close PYZOR
+      or dbg(sprintf("pyzor: [%s] finished: %s exit=0x%04x",$pid,$!,$?));
 
     if (!@response) {
       # this exact string is needed below
@@ -266,6 +268,14 @@ sub pyzor_lookup {
   # do NOT reinstate $oldalarm here; we may already have done that in
   # the success case.  leave it to the error handler below
   my $err = $@;
+  if (defined(fileno(*PYZOR))) {  # still open
+    if ($pid) {
+      if (kill('TERM',$pid)) { dbg("pyzor: killed stale helper [$pid]") }
+      else { dbg("pyzor: killing helper application [$pid] failed: $!") }
+    }
+    close PYZOR
+      or dbg(sprintf("pyzor: [%s] terminated: %s exit=0x%04x",$pid,$!,$?));
+  }
   $permsgstatus->leave_helper_run_mode();
 
   if ($err) {
