@@ -28,10 +28,6 @@ my $LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';    # substituted at 'make' time
 use lib '@@INSTALLSITELIB@@';                   # substituted at 'make' time
 
 BEGIN {
-  # redirect __WARN__ and __DIE__
-  $SIG{__WARN__} = sub {
-    log_message("warn", $_[0]);
-  };
   # Locate locally installed SA libraries *without* using FindBin, which
   # generates warnings and causes more trouble than its worth.  We don't
   # need to be too smart about this BTW.
@@ -82,6 +78,14 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::ArchiveIterator;
 use Mail::SpamAssassin::Util::Progress;
 use Mail::SpamAssassin::Logger qw(log_message);
+
+BEGIN {
+  # redirect __WARN__ and __DIE__, but NOT until after the
+  # Mail::SpamAssassin::Logger class has been parsed.
+  $SIG{__WARN__} = sub {
+    log_message("warn", $_[0]);
+  };
+};
 
 my %resphash = (
   EX_OK          => 0,     # no problems
