@@ -382,7 +382,8 @@ if ($log_facility eq 'stderr') {
 if ($log_socket ne 'file' && $log_facility ne 'null') {
   if (!Mail::SpamAssassin::Logger::add(method => 'syslog',
 				       socket => $log_socket,
-				       facility => $log_facility))
+				       facility => $log_facility,
+                                       ident => 'spamd'))
   {
     # syslog method failed 
     $log_facility = 'stderr';
