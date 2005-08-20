@@ -156,14 +156,20 @@ sub connect_sock {
   my $ip64 = IP_ADDRESS;
   my $ip4 = IPV4_ADDRESS;
   my $ns = $self->{res}->{nameservers}[0];
+  my $ipv6 = 0;
 
-  # note: if the use of "AF_INET6" as a bare word here causes trouble
-  # on your platform, just comment the line and replace with
-  # "my $family = AF_INET;" instead
-  my $family = (HAS_SOCKET_INET6 && $ns=~/^${ip64}$/o && $ns!~/^${ip4}$/o)
-                 ? AF_INET6 : AF_INET;
+  # now, attempt to set the family to AF_INET6 if we can.  Some
+  # platforms don't have it (bug 4412 comment 29)...
+  # also, only set $ipv6 to true if that succeeds.
+  my $family;
+  if (HAS_SOCKET_INET6 && $ns=~/^${ip64}$/o && $ns!~/^${ip4}$/o) {
+    eval '$family = AF_INET6; $ipv6 = 1;';
+  }
+  if (!defined $family) {
+    $family = AF_INET;       # that didn't work ;)
+  }
 
-  dbg("dns: name server: $ns, family: $family");
+  dbg("dns: name server: $ns, family: $family, ipv6: $ipv6");
 
   # find next available unprivileged port (1024 - 65535)
   # starting at a random value to spread out use of ports
@@ -192,7 +198,7 @@ sub connect_sock {
       dbg("dns: UDP port $lport already in use, trying another port");
     } else {
       # did we fail due to the attempted use of an IPv6 nameserver?
-      $self->_ipv6_ns_warning()  if !HAS_SOCKET_INET6 && $errno==EINVAL;
+      $self->_ipv6_ns_warning()  if (!$ipv6 && $errno==EINVAL);
       die "Error creating a DNS resolver socket: $errno";
     }
   }
