@@ -154,6 +154,7 @@ my $ORIG_CWD = Mail::SpamAssassin::Util::untaint_var( Cwd::cwd() );
 # Parse the command line
 Getopt::Long::Configure("bundling");
 GetOptions(
+  'allow-tell'               => \$opt{'tell'},
   'allowed-ips|A=s'          => \@{ $opt{'allowed-ip'} },
   'auth-ident'               => \$opt{'auth-ident'},
   'configpath|C=s'           => \$opt{'configpath'},
@@ -169,6 +170,7 @@ GetOptions(
   'listen-ip|ip-address|i:s' => \$opt{'listen-ip'},
   'local!'                   => \$opt{'local'},
   'L'                        => \$opt{'local'},
+  'l'                        => \$opt{'tell'},
   'round-robin!'             => \$opt{'round-robin'},
   'min-children=i'           => \$opt{'min-children'},
   'max-children|m=i'         => \$opt{'max-children'},
@@ -1390,6 +1392,11 @@ sub dotell {
 
   $expected_length = $hdrs->{expected_length};
 
+  if (!$opt{tell}) {
+    service_unavailable_error("TELL commands have not been enabled.");
+    return 0;
+  }
+
   if ($hdrs->{set_local} && $hdrs->{remove_local}) {
     protocol_error("Unable to set local and remove local in the same operation.");
     return 0;
@@ -2164,6 +2171,7 @@ spamd [options]
 
 Options:
 
+ -l, --allow-tell                   Allow learning/reporting
  -c, --create-prefs                 Create user preferences files
  -C path, --configpath=path         Path for default config files
  --siteconfigpath=path              Path for site configs
@@ -2239,6 +2247,21 @@ Also, boolean options (like B<--user-config>) can be negated by
 adding I<no> (B<--nouser-config>), however, this is usually unnecessary.
 
 =over 4
+
+=item B<-l>, B<--allow-tell>
+
+Allow learning and forgetting (to a local Bayes database), reporting
+and revoking (to a remote database) by spamd. The client issues a TELL
+command to tell what type of message is being processed and whether
+local (learn/forget) or remote (report/revoke) databases should be
+updated.
+
+Note that spamd always trusts the username passed in (unless
+B<--auth-ident> is used) so clients could maliciously learn messages
+for other users. (This is not ususally a concern with an SQL Bayes
+store as users will typically have read-write access directly to the
+database, and can also use C<sa-learn> with the B<-u> option to
+achieve the same result.)
 
 =item B<-c>, B<--create-prefs>
 
