@@ -482,7 +482,7 @@ with the response line.
 sub _parse_response_line {
   my ($self, $line) = @_;
 
-  return split(/\s+/, $line);
+  return split(/\s+/, $line, 3);
 }
 
 =head2 _clear_errors
