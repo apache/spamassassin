@@ -203,7 +203,7 @@ an integer, 0 for spam, 1 for ham and 2 for forget.  The return
 value is a boolean indicating if the message was learned or not.
 
 An undef return value indicates that there was an error and you
-should check the resp_code/resp_error values to determine what
+should check the resp_code/resp_msg values to determine what
 the error was.
 
 =cut
