@@ -13,7 +13,7 @@ tstlocalrules ("
 	loadplugin reporterplugin ../../data/reporterplugin.pm
 ");
 
-start_spamd("-L");
+start_spamd("-L --allow-tell");
 
 %patterns = ( 'Message successfully reported/revoked' => 'reported spam' );
 
