@@ -14,7 +14,7 @@ tstlocalrules ("
         bayes_store_module Mail::SpamAssassin::BayesStore::SDBM
 ");
 
-start_spamd("-L");
+start_spamd("-L --allow-tell");
 
 %patterns = ( 'Message successfully un/learned' => 'learned spam' );
 ok (spamcrun ("-L spam < data/spam/001", \&patterns_run_cb));
