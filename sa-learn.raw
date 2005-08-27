@@ -1052,10 +1052,10 @@ development releases, and 2 for all more recent databases.
 
 =item bayes_seen
 
-A map of message-ID to what that message was learnt as.  This is used so that
-SpamAssassin can avoid re-learning a message it has already seen, and so it can
-reverse the training if you later decide that message was previously learnt
-incorrectly.
+A map of Message-Id and some data from headers and body to what that
+message was learnt as. This is used so that SpamAssassin can avoid
+re-learning a message it has already seen, and so it can reverse the
+training if you later decide that message was learnt incorrectly.
 
 This is a database file, using C<DB_File>.
 
