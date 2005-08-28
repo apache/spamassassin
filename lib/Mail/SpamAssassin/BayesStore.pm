@@ -657,7 +657,7 @@ sub tok_count_change {
   die "bayes: tok_count_change: not implemented\n";
 }
 
-=head2 multi_tok_count_change
+=item multi_tok_count_change
 
 public instance (Boolean) multi_tok_count_change (Integer $spam_count,
  					          Integer $ham_count,
