@@ -1,13 +1,36 @@
 Welcome to SpamAssassin!
 ------------------------
 
+What SpamAssassin Is
+--------------------
+
 SpamAssassin is a mail filter which attempts to identify spam using
 a variety of mechanisms including text analysis, Bayesian filtering,
 DNS blocklists, and collaborative filtering databases.
 
-Using its rule base, it uses a wide range of heuristic tests on mail
-headers and body text to identify "spam", also known as unsolicited
-commercial email.
+SpamAssassin is a project of the Apache Software Foundation (ASF).
+
+
+What SpamAssassin Is Not
+------------------------
+
+SpamAssassin is not a program to delete spam, route spam and ham to
+separate mailboxes or folders, or send bounces when you receive spam.
+Those are mail routing functions, and SpamAssassin is not a mail
+router.  SpamAssassin is a mail filter or classifier.  It will examine
+each message presented to it, and assign a score indicating the
+liklyhood that the mail is spam.  An external program must then
+examine this score and do any routing the user wants done.  There are
+many programs that will easily perform these functions after examining
+the score assigned by SpamAssassin.
+
+
+How SpamAssassin Works
+----------------------
+
+SpamAssassin uses a wide range of heuristic tests on mail headers and
+body text to identify "spam", also known as unsolicited commercial
+email.
 
 Once identified, the mail can then be optionally tagged as spam for
 later filtering using the user's own mail user-agent application.
@@ -34,20 +57,22 @@ a lightweight client written in C, an MTA can process large volumes of
 mail through SpamAssassin without having to fork/exec a perl interpreter
 for each message.
 
-If you have questions about SpamAssassin, please check the Wiki[2] to
+
+Questions? Need Help?
+---------------------
+
+If you have questions about SpamAssassin, please check the Wiki[1] to
 see if someone has already posted an answer to your question. (The
 Wiki doubles as a FAQ.) Failing that, post a message to the
-spamassassin-users mailing list[3]. If you've found a bug (and you're
+spamassassin-users mailing list[2]. If you've found a bug (and you're
 sure it's a bug after checking the Wiki), please file a report in our
-Bugzilla[4].
+Bugzilla[3].
 
-	[2]: http://wiki.apache.org/spamassassin/
-	[3]: http://wiki.apache.org/spamassassin/MailingLists
-	[4]: http://bugzilla.spamassassin.org/
+	[1]: http://wiki.apache.org/spamassassin/
+	[2]: http://wiki.apache.org/spamassassin/MailingLists
+	[3]: http://bugzilla.spamassassin.org/
 
 Please also be sure to read the man pages.
-
-SpamAssassin is a project of the Apache Software Foundation (ASF).
 
 
 Upgrading SpamAssassin
@@ -227,6 +252,10 @@ Do this using the "sa-learn" tools, like so:
 	sa-learn --ham ~/Mail/inbox
 	sa-learn --ham ~/Mail/other-nonspam-folder
 
+
+If these are mail folders in mbox format, use the --mbox switch, for
+Maildirs use a trailing slash, like Maildir/cur/.
+
 Use as many mailboxes as you like.  Note that SpamAssassin will remember
 what mails it has learnt from, so you can re-run this as often as you like.
 
@@ -238,22 +267,13 @@ All text displayed to users is taken from the configuration files.  This
 means that you can translate messages, test descriptions, and templates
 into other languages.
 
-If you do so, I would *really* appreciate if you could
-send a copy back of the updated messages; mail them to
-<spamassassin-users@incubator.apache.org> .  Hopefully if it takes off,
-I can add them to the distribution as "official" translations and build
-in support for this.  You will, of course, get credited for this work ;)
+If you do so, we would *really* appreciate it if you could contribute
+these translations, so that they can be added to the
+distribution. Please file a bug in our Bugzilla[4], and attach your
+translations. You will, of course, be credited for this work!
 
+	[4]: http://bugzilla.spamassassin.org/
 
-Help With SpamAssassin
-----------------------
-
-There's a mailing list for support or discussion of SpamAssassin.  It
-lives at <spamassassin-users /at/ incubator.apache.org>.  See
-http://wiki.apache.org/spamassassin/MailingLists for the sign-up address
-and a link to the archive of past messages.
-
-Much more info is at http://wiki.apache.org/spamassassin/
 
 Disabled code
 -------------
