@@ -31,7 +31,8 @@ Steps to take for every installation:
     contain a SpamAssassin report anyway.  This is a side-effect of
     the "-t" (test) switch.  However, there should be less than 5
     points accumulated; when the "-t" switch is not in use, the report
-    text would not be added.
+    text would not be added. For more verbose (debugging) output, add
+    the "-D" switch.
 
     If the commands do not work, DO NOT PROCEED TO THE NEXT STEP, as you
     will lose mail!
@@ -151,7 +152,9 @@ Other Installation Notes
   - If you have an unusual network configuration, you should probably
     set 'trusted_networks'.  This allows SpamAssassin to determine where
     your internal network ends and the internet begins, and allows DNS
-    checks to be more accurate.
+    checks to be more accurate. If your mail host is NATed, you will
+    almost certainly need to set 'trusted_networks' to get correct
+    results.
 
 
   - A very handy new feature is SPF support, which allows you to check
@@ -168,15 +171,16 @@ Other Installation Notes
 
       report_safe_copy_headers X-MDRcpt-To X-MDRemoteIP X-MDaemon-Deliver-To
 
-    Otherwise, MDaemon's internal delivery will fail when SpamAssassin
+    Otherwise, MDaemon's internal delivery will fail when Spamssassin
     rewrites a message as spam.
 
 
-  - The distribution includes 'spamd', a daemonized version of the
-    perl script, and 'spamc', a low-overhead C client for this,
-    contributed by Craig R. Hughes.  This greatly reduces the overhead of
-    checking large volumes of mail with SpamAssassin.  Take a look in the
-    'spamd' directory for more details.
+  - The distribution includes 'spamd', a daemonized version of
+    SpamAssassin which runs persistently.  Using its counterpart,
+    'spamc', a lightweight client written in C, an MTA can process
+    large volumes of mail through SpamAssassin without having to
+    fork/exec a perl interpreter for each message. Take a look in the
+    'spamd' and 'spamc' directories for more details.
 
 
   - spamc can now be built as a shared library for use with milters or
