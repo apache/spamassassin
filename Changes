@@ -1,4 +1,104 @@
 ------------------------------------------------------------------------
+r263808 | duncf | 2005-08-28 03:31:47 +0000 (Sun, 28 Aug 2005) | 2 lines
+
+Bug 4494: Fix sa-learn's --local option
+
+------------------------------------------------------------------------
+r263805 | duncf | 2005-08-28 03:28:48 +0000 (Sun, 28 Aug 2005) | 2 lines
+
+Bug 4552: Uninitialized values in spamd when processing TELL commands.
+
+------------------------------------------------------------------------
+r261909 | duncf | 2005-08-28 01:04:50 +0000 (Sun, 28 Aug 2005) | 2 lines
+
+Bug 4535: Tweak MIME boundary regexp
+
+------------------------------------------------------------------------
+r261907 | duncf | 2005-08-28 01:00:14 +0000 (Sun, 28 Aug 2005) | 2 lines
+
+Bug 4412: Support IPv6 resolvers, if possible.
+
+------------------------------------------------------------------------
+r241821 | sidney | 2005-08-27 23:26:20 +0000 (Sat, 27 Aug 2005) | 1 line
+
+Documentation change to reflect change from bug 3055
+------------------------------------------------------------------------
+r239986 | jm | 2005-08-25 03:40:26 +0000 (Thu, 25 Aug 2005) | 1 line
+
+bug 4546: add --allow-tell/-l spamd option, so that spamd users cannot use the new learn functionality, without the sysadmin accepting the risks of spoofing first
+------------------------------------------------------------------------
+r234432 | duncf | 2005-08-22 04:33:25 +0000 (Mon, 22 Aug 2005) | 3 lines
+
+Trivial: Fix Mail::SpamAssassin::Client to save the enitre error
+message, not just the first word.
+
+------------------------------------------------------------------------
+r234426 | duncf | 2005-08-22 03:49:54 +0000 (Mon, 22 Aug 2005) | 2 lines
+
+Minor doc fix
+
+------------------------------------------------------------------------
+r233992 | jm | 2005-08-20 03:04:33 +0000 (Sat, 20 Aug 2005) | 1 line
+
+bug 4536: avoid breakage if a warn happens before Mail::SA::Logger is loaded
+------------------------------------------------------------------------
+r233990 | jm | 2005-08-20 03:03:32 +0000 (Sat, 20 Aug 2005) | 1 line
+
+bug 4518: fix situation where helper apps can be left running after SA times out on them, thanks to Mark Martinec
+------------------------------------------------------------------------
+r233988 | jm | 2005-08-20 02:57:38 +0000 (Sat, 20 Aug 2005) | 1 line
+
+bug 4533: syslog entries were being identified as 'spamassassin' instead of 'spamd'. fixed, thanks to Dawn Keenan
+------------------------------------------------------------------------
+r233575 | duncf | 2005-08-19 23:12:02 +0000 (Fri, 19 Aug 2005) | 2 lines
+
+Bug 4543: Document Bayes migration procedure.
+
+------------------------------------------------------------------------
+r233284 | duncf | 2005-08-18 04:07:08 +0000 (Thu, 18 Aug 2005) | 1 line
+
+Valid POD Please!
+------------------------------------------------------------------------
+r233123 | duncf | 2005-08-17 04:45:44 +0000 (Wed, 17 Aug 2005) | 2 lines
+
+Trivial: Typos: occured -> occurred, occurence -> occurrence
+
+------------------------------------------------------------------------
+r233114 | duncf | 2005-08-17 03:22:15 +0000 (Wed, 17 Aug 2005) | 4 lines
+
+Trivial: Doc fix about locales -- ok_locales does not take country
+codes as args (en, for example), so we should avoid refering to it as
+such.
+
+------------------------------------------------------------------------
+r232904 | parker | 2005-08-15 23:08:40 +0000 (Mon, 15 Aug 2005) | 1 line
+
+Bug 4351: Fix typo/cut-n-paste o
+------------------------------------------------------------------------
+r232654 | jm | 2005-08-14 21:54:34 +0000 (Sun, 14 Aug 2005) | 1 line
+
+adding note on razor-reenabling, per Dan Kohn's suggestion
+------------------------------------------------------------------------
+r232534 | parker | 2005-08-13 22:02:22 +0000 (Sat, 13 Aug 2005) | 1 line
+
+Fix typo
+------------------------------------------------------------------------
+r232513 | parker | 2005-08-13 17:52:19 +0000 (Sat, 13 Aug 2005) | 1 line
+
+Documentation updates
+------------------------------------------------------------------------
+r232404 | jm | 2005-08-12 23:42:50 +0000 (Fri, 12 Aug 2005) | 1 line
+
+update change summary
+------------------------------------------------------------------------
+r231548 | jm | 2005-08-12 00:50:17 +0000 (Fri, 12 Aug 2005) | 1 line
+
+update build/README, and planned 3.1.0-rc1 announcement message
+------------------------------------------------------------------------
+r231546 | jm | 2005-08-12 00:37:52 +0000 (Fri, 12 Aug 2005) | 1 line
+
+preparing to release 3.1.0-rc1
+------------------------------------------------------------------------
 r231544 | jm | 2005-08-12 00:05:47 +0000 (Fri, 12 Aug 2005) | 1 line
 
 bug 4505: new scores for 3.1.0; STATISTICS files for same; fix test failures caused by changing scores, by making the test suite ruleset-independent; and rename a rule so that t/rule_names.t passes.
