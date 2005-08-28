@@ -42,6 +42,9 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::Logger;
 
 use IO::Socket::INET;
+use Errno qw(EINVAL EADDRINUSE);
+
+use constant HAS_SOCKET_INET6 => eval { require IO::Socket::INET6 };
 
 our @ISA = qw();
 
@@ -144,21 +147,64 @@ sub connect_sock {
 
   $self->{sock}->close() if $self->{sock};
   my $sock;
+  my $errno;
+
+  # IO::Socket::INET6 may choose wrong LocalAddr if family is unspecified,
+  # causing EINVAL failure when automatically assigned local IP address
+  # and remote address do not belong to the same address family:
+  use Mail::SpamAssassin::Constants qw(:ip);
+  my $ip64 = IP_ADDRESS;
+  my $ip4 = IPV4_ADDRESS;
+  my $ns = $self->{res}->{nameservers}[0];
+  my $ipv6 = 0;
+
+  # now, attempt to set the family to AF_INET6 if we can.  Some
+  # platforms don't have it (bug 4412 comment 29)...
+  # also, only set $ipv6 to true if that succeeds.
+  my $family;
+  if (HAS_SOCKET_INET6 && $ns=~/^${ip64}$/o && $ns!~/^${ip4}$/o) {
+    eval '$family = AF_INET6; $ipv6 = 1;';
+  }
+  if (!defined $family) {
+    $family = AF_INET;       # that didn't work ;)
+  }
+
+  dbg("dns: name server: $ns, family: $family, ipv6: $ipv6");
+
   # find next available unprivileged port (1024 - 65535)
   # starting at a random value to spread out use of ports
   my $port_offset = int(rand(64511));  # 65535 - 1024
-  for (my $i = 0; (!$sock && ($i<64511)); $i++) {
+  for (my $i = 0; $i<64511; $i++) {
     my $lport = 1024 + (($port_offset + $i) % 64511);
-    $sock = IO::Socket::INET->new (
-                                   Proto => 'udp',
-                                   LocalPort => $lport,
-                                   Type => SOCK_DGRAM,
-                                   );
+
+    my %args = (
+        PeerAddr => $ns,
+        PeerPort => $self->{res}->{port},
+        Proto => 'udp',
+        LocalPort => $lport,
+        Type => SOCK_DGRAM,
+        Domain => $family,
+    );
+
+    if (HAS_SOCKET_INET6) {
+      $sock = IO::Socket::INET6->new(%args);
+    } else {
+      $sock = IO::Socket::INET->new(%args);
+    }
+    $errno = $!;
+    if (defined $sock) {  # ok, got it
+      last;
+    } elsif ($! == EADDRINUSE) {  # in use, let's try another source port
+      dbg("dns: UDP port $lport already in use, trying another port");
+    } else {
+      # did we fail due to the attempted use of an IPv6 nameserver?
+      $self->_ipv6_ns_warning()  if (!$ipv6 && $errno==EINVAL);
+      die "Error creating a DNS resolver socket: $errno";
+    }
   }
+  defined $sock or die "Can't create a DNS resolver socket: $errno";
 
   $self->{sock} = $sock;
-  $self->{dest} = sockaddr_in($self->{res}->{port},
-            inet_aton($self->{res}->{nameservers}[0]));
 
   $self->{sock_as_vec} = $self->fhs_to_vec($self->{sock});
 }
@@ -269,9 +315,8 @@ sub bgsend {
   my $pkt = $self->new_dns_packet($host, $type, $class);
 
   my $data = $pkt->data;
-  my $dest = $self->{dest};
   $self->connect_sock() if !$self->{sock};
-  if (!$self->{sock}->send ($pkt->data, 0, $self->{dest})) {
+  if (!$self->{sock}->send ($pkt->data, 0)) {
     warn "dns: sendto() failed: $@";
     return;
   }
@@ -425,6 +470,26 @@ sub reinit_post_fork {
   # and a new socket, so we don't have 5 spamds sharing the same
   # socket
   $self->connect_sock();
+}
+
+sub _ipv6_ns_warning {
+  my ($self) = @_;
+
+  # warn about the attempted use of an IPv6 nameserver without
+  # IO::Socket::INET6 installed (bug 4412)
+  my $firstns = $self->{res}->{nameservers}[0];
+
+  use Mail::SpamAssassin::Constants qw(:ip);
+  my $ip64 = IP_ADDRESS;
+  my $ip4 = IPV4_ADDRESS;
+
+  # was the nameserver in IPv6 format?
+  if ($firstns =~ /^${ip64}$/o && $firstns !~ /^${ip4}$/o) {
+    my $addr = inet_aton($firstns);
+    if (!defined $addr) {
+      die "IO::Socket::INET6 module is required to use IPv6 nameservers such as '$firstns': $@\n";
+    }
+  }
 }
 
 1;

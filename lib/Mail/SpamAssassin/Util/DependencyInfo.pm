@@ -109,6 +109,13 @@ my @OPTIONAL_MODULES = (
   to install this module.',
 },
 {
+  module => 'IO::Socket::INET6',
+  version => '0.00',
+  desc => 'This is required if the first nameserver listed in your IP
+  configuration or /etc/resolv.conf file is available only via
+  an IPv6 address.',
+},
+{
   module => 'IO::Socket::SSL',
   version => '0.00',
   desc => 'If you wish to use SSL encryption to communicate between spamc and
