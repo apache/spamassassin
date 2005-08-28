@@ -1475,18 +1475,21 @@ sub dotell {
     push(@did_remove, 'remote') if ($msgrpt->revoke());
   }
 
-  my $hdr;
-  my $info_set_str;
-  my $info_remove_str;
+  my $hdr = "";
+  my $info_str;
 
   if (scalar(@did_set)) {
     $hdr .= "DidSet: " . join(',', @did_set) . "\r\n";
-    $info_set_str = " Setting " . join(',', @did_set) . " ";
+    $info_str .= " Setting " . join(',', @did_set) . " ";
   }
 
   if (scalar(@did_remove)) {
     $hdr .= "DidRemove: " . join(',', @did_remove) . "\r\n";
-    $info_remove_str = " Removing " . join(',', @did_remove) . " ";
+    $info_str .= " Removing " . join(',', @did_remove) . " ";
+  }
+
+  if (!$info_str) {
+    $info_str = " Did nothing ";
   }
 
   print $client "SPAMD/1.1 $resphash{$resp} $resp\r\n",
@@ -1494,7 +1497,7 @@ sub dotell {
 
   my $scantime = sprintf( "%.1f", time - $start_time );
 
-  info("spamd:$info_set_str$info_remove_str for $current_user:$> in"
+  info("spamd: Tell:${info_str}for $current_user:$> in"
        . " $scantime seconds, $actual_length bytes");
 
   $mail->finish();
