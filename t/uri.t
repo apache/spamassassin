@@ -17,12 +17,13 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use strict;
 use Test;
-use SATest;
+use SATest; sa_t_init("uri");
+
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::HTML;
 use Mail::SpamAssassin::Util;
 
-plan tests => 80;
+plan tests => 82;
 
 ##############################################
 
@@ -107,9 +108,7 @@ sub array_cmp {
 
 sub try_canon {
   my($input, $expect) = @_;
-  my $redirs = ['/^(?:http://)?chkpt\.zdnet\.com/chkpt/\w+/(.*)$/',
-                '/^(?:http://)?www\.nate\.com/r/\w+/(.*)$/',
-               ];
+  my $redirs = $sa->{conf}->{redirector_patterns};
   my @input = sort { $a cmp $b } Mail::SpamAssassin::Util::uri_list_canonify($redirs, @{$input});
   my @expect = sort { $a cmp $b } @{$expect};
 
@@ -152,6 +151,21 @@ ok(try_canon(['http://images.google.ca/imgres?imgurl=gmib.free.fr/viagra.jpg&img
    'http://www.google.com/url?q=http://www.google.com/url?q=http://www.expage.com/manger32',
    ]));
 
+# redirector_pattern test
+ok(try_canon(['http://chkpt.zdnet.com/chkpt/baz/jmason.org'],
+   [
+   'http://chkpt.zdnet.com/chkpt/baz/jmason.org',
+   'http://jmason.org',
+   'jmason.org',
+   ]));
+
+ok(try_canon(['http://emf0.com/r.cfm?foo=bar&r=jmason.org'],
+   [
+   'http://emf0.com/r.cfm?foo=bar&r=jmason.org',
+   'http://jmason.org',
+   'jmason.org',
+   ]));
+
 ok(try_canon(["ht\rtp\r://www.kl\nuge.n\net/"],
   ['http://www.kluge.net/']
   ));
@@ -173,6 +187,8 @@ ok(try_canon([
    ], [
    'http://www.nate.com/r/DM03/n%65verp4%79re%74%61%69%6c%2eco%6d/%62%61m/?m%61%6e=%6Di%634%39',
    'http://www.nate.com/r/DM03/neverp4yretail.com/bam/?man=mic49',
+   'http://neverp4yretail.com/bam/?man=mic49',
+   'neverp4yretail.com/bam/?man=mic49',
    ]));
 
 ##############################################
