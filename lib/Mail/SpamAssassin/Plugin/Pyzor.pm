@@ -293,7 +293,7 @@ sub pyzor_lookup {
     return 0;
   }
 
-  # this regexp is intented to be a little bit forgiving
+  # this regexp is intended to be a little bit forgiving
   if ($response[0] =~ /^\S+\t.*?\t(\d+)\t(\d+)\s*$/) {
     $pyzor_whitelisted = $2+0;
     if ($pyzor_whitelisted == 0) {
