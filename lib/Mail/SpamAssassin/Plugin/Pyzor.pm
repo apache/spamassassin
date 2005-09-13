@@ -228,8 +228,8 @@ sub pyzor_lookup {
   eval {
     # safe to use $SIG{ALRM} here instead of Util::trap_sigalrm_fully(),
     # since there are no killer regexp hang dangers here
-    local $SIG{ALRM} = sub { die "__alarm__\n" };
-    local $SIG{PIPE} = sub { die "__brokenpipe__\n" };
+    local $SIG{ALRM} = sub { die "__alarm__ignore__\n" };
+    local $SIG{PIPE} = sub { die "__brokenpipe__ignore__\n" };
 
     $oldalarm = alarm $timeout;
 
@@ -262,12 +262,20 @@ sub pyzor_lookup {
 
     # note: this must be called BEFORE leave_helper_run_mode()
     # $self->cleanup_kids($pid);
-    alarm $oldalarm;
+
+    # attempt to call this inside the eval, as leaving this scope is
+    # a slow operation and timing *that* out is pointless
+    if (defined $oldalarm) { 
+      alarm $oldalarm; $oldalarm = undef;
+    }
   };
 
-  # do NOT reinstate $oldalarm here; we may already have done that in
-  # the success case.  leave it to the error handler below
+  # clear the alarm before doing lots of time-consuming hard work
   my $err = $@;
+  if (defined $oldalarm) { 
+    alarm $oldalarm; $oldalarm = undef;
+  }
+
   if (defined(fileno(*PYZOR))) {  # still open
     if ($pid) {
       if (kill('TERM',$pid)) { dbg("pyzor: killed stale helper [$pid]") }
@@ -279,11 +287,10 @@ sub pyzor_lookup {
   $permsgstatus->leave_helper_run_mode();
 
   if ($err) {
-    alarm $oldalarm;
     chomp $err;
-    if ($err eq "__alarm__") {
+    if ($err eq "__alarm__ignore__") {
       dbg("pyzor: check timed out after $timeout seconds");
-    } elsif ($err eq "__brokenpipe__") {
+    } elsif ($err eq "__brokenpipe__ignore__") {
       dbg("pyzor: check failed: broken pipe");
     } elsif ($err eq "no response") {
       dbg("pyzor: check failed: no response");
@@ -351,8 +358,8 @@ sub pyzor_report {
   my $oldalarm = 0;
 
   eval {
-    local $SIG{ALRM} = sub { die "__alarm__\n" };
-    local $SIG{PIPE} = sub { die "__brokenpipe__\n" };
+    local $SIG{ALRM} = sub { die "__alarm__ignore__\n" };
+    local $SIG{PIPE} = sub { die "__brokenpipe__ignore__\n" };
 
     $oldalarm = alarm $timeout;
 
@@ -370,21 +377,23 @@ sub pyzor_report {
     my @ignored = <PYZOR>;
     $options->{report}->close_pipe_fh(\*PYZOR);
 
-    alarm $oldalarm;
+    if (defined $oldalarm) { 
+      alarm $oldalarm; $oldalarm = undef;
+    }
     waitpid ($pid, 0);
   };
 
   my $err = $@;
-
-  # do not call alarm $oldalarm here, that *may* have already taken place
+  if (defined $oldalarm) { 
+    alarm $oldalarm; $oldalarm = undef;
+  }
   $options->{report}->leave_helper_run_mode();
 
   if ($err) {
-    alarm $oldalarm;
     chomp $err;
-    if ($err eq '__alarm__') {
+    if ($err eq '__alarm__ignore__') {
       dbg("reporter: pyzor report timed out after $timeout seconds");
-    } elsif ($err eq '__brokenpipe__') {
+    } elsif ($err eq '__brokenpipe__ignore__') {
       dbg("reporter: pyzor report failed: broken pipe");
     } else {
       warn("reporter: pyzor report failed: $err\n");

@@ -287,20 +287,25 @@ sub _check_spf {
 
   my ($result, $comment);
   my $timeout = 5;
-  my $oldalarm;
+  my $oldalarm = 0;
 
   eval {
-    local $SIG{ALRM} = sub { die "__alarm__\n" };
+    local $SIG{ALRM} = sub { die "__alarm__ignore__\n" };
     $oldalarm = alarm($timeout);
     ($result, $comment) = $query->result();
-    alarm $oldalarm;
+    if (defined $oldalarm) {
+      alarm $oldalarm; $oldalarm = undef;
+    }
   };
 
   my $err = $@;
+  if (defined $oldalarm) {
+    alarm $oldalarm; $oldalarm = undef;
+  }
 
   if ($err) {
-    alarm $oldalarm;
-    if ($err =~ /^__alarm__$/) {
+    chomp $err;
+    if ($err eq "__alarm__ignore__") {
       dbg("spf: lookup timed out after $timeout seconds");
     } else {
       warn("spf: lookup failed: $err\n");
