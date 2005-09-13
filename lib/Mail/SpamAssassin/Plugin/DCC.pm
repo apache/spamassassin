@@ -344,7 +344,7 @@ sub dccifd_lookup {
   eval {
     # safe to use $SIG{ALRM} here instead of Util::trap_sigalrm_fully(),
     # since there are no killer regexp hang dangers here
-    local $SIG{ALRM} = sub { die "__alarm__\n" };
+    local $SIG{ALRM} = sub { die "__alarm__ignore__\n" };
 
     $oldalarm = alarm $timeout;
 
@@ -383,19 +383,21 @@ sub dccifd_lookup {
 
     dbg("dcc: dccifd got response: $response");
 
-    alarm $oldalarm;
+    if (defined $oldalarm) {
+      alarm $oldalarm; $oldalarm = undef;
+    }
   };
 
-  # do NOT reinstate $oldalarm here; we may already have done that in
-  # the success case.  leave it to the error handler below
   my $err = $@;
+  if (defined $oldalarm) {
+    alarm $oldalarm; $oldalarm = undef;
+  }
   $permsgstatus->leave_helper_run_mode();
 
   if ($err) {
-    alarm $oldalarm;
     chomp $err;
     $response = undef;
-    if ($err =~ /__alarm__/) {
+    if ($err eq "__alarm__ignore__") {
       dbg("dcc: dccifd check timed out after $timeout secs.");
       return 0;
     } else {
@@ -461,8 +463,8 @@ sub dccproc_lookup {
   eval {
     # safe to use $SIG{ALRM} here instead of Util::trap_sigalrm_fully(),
     # since there are no killer regexp hang dangers here
-    local $SIG{ALRM} = sub { die "__alarm__\n" };
-    local $SIG{PIPE} = sub { die "__brokenpipe__\n" };
+    local $SIG{ALRM} = sub { die "__alarm__ignore__\n" };
+    local $SIG{PIPE} = sub { die "__brokenpipe__ignore__\n" };
 
     $oldalarm = alarm $timeout;
 
@@ -504,12 +506,16 @@ sub dccproc_lookup {
 
     # note: this must be called BEFORE leave_helper_run_mode()
     # $self->cleanup_kids($pid);
-    alarm $oldalarm;
+    if (defined $oldalarm) {
+      alarm $oldalarm; $oldalarm = undef;
+    }
   };
 
-  # do NOT reinstate $oldalarm here; we may already have done that in
-  # the success case.  leave it to the error handler below
   my $err = $@;
+  if (defined $oldalarm) {
+    alarm $oldalarm; $oldalarm = undef;
+  }
+
   if (defined(fileno(*DCC))) {  # still open
     if ($pid) {
       if (kill('TERM',$pid)) { dbg("dcc: killed stale helper [$pid]") }
@@ -521,11 +527,10 @@ sub dccproc_lookup {
   $permsgstatus->leave_helper_run_mode();
 
   if ($err) {
-    alarm $oldalarm;
     chomp $err;
-    if ($err =~ /^__alarm__$/) {
+    if ($err eq "__alarm__ignore__") {
       dbg("dcc: check timed out after $timeout seconds");
-    } elsif ($err =~ /^__brokenpipe__$/) {
+    } elsif ($err eq "__brokenpipe__ignore__") {
       dbg("dcc: check failed: broken pipe");
     } elsif ($err eq "no response") {
       dbg("dcc: check failed: no response");
@@ -607,8 +612,8 @@ sub dcc_report {
   my $oldalarm = 0;
 
   eval {
-    local $SIG{ALRM} = sub { die "__alarm__\n" };
-    local $SIG{PIPE} = sub { die "__brokenpipe__\n" };
+    local $SIG{ALRM} = sub { die "__alarm__ignore__\n" };
+    local $SIG{PIPE} = sub { die "__brokenpipe__ignore__\n" };
 
     $oldalarm = alarm $timeout;
 
@@ -625,20 +630,23 @@ sub dcc_report {
     $options->{report}->close_pipe_fh(\*DCC);
 
     waitpid ($pid, 0);
-    alarm $oldalarm;
+    if (defined $oldalarm) {
+      alarm $oldalarm; $oldalarm = undef;
+    }
   };
 
   my $err = $@;
+  if (defined $oldalarm) {
+    alarm $oldalarm; $oldalarm = undef;
+  }
 
-  # do not call alarm $oldalarm here, that *may* have already taken place
   $options->{report}->leave_helper_run_mode();
 
   if ($err) {
-    alarm $oldalarm;  # reinstate the one we missed
     chomp $err;
-    if ($err =~ /^__alarm__$/) {
+    if ($err eq "__alarm__ignore__") {
       dbg("reporter: DCC report timed out after $timeout seconds");
-    } elsif ($err =~ /^__brokenpipe__$/) {
+    } elsif ($err eq "__brokenpipe__ignore__") {
       dbg("reporter: DCC report failed: broken pipe");
     } else {
       warn("reporter: DCC report failed: $err\n");

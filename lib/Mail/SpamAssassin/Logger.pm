@@ -140,6 +140,9 @@ sub log_message {
   # return unless $message[0] =~ /^\S+:/;
   # }
 
+  # dos: don't log alarm timeouts or broken pipes of various plugins' network checks
+  return if ($level eq "error" && $message[0] =~ /__(?:alarm|brokenpipe)__ignore__/);
+
   my $message = join(" ", @message);
   $message =~ s/[\r\n]+$//;		# remove any trailing newlines
 
