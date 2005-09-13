@@ -148,7 +148,7 @@ sub razor2_access {
   eval {
     local ($^W) = 0;    # argh, warnings in Razor
 
-    local $SIG{ALRM} = sub { die "alarm\n" };
+    local $SIG{ALRM} = sub { die "__alarm__ignore__\n" };
     $oldalarm = alarm $timeout;
 
     # everything's in the module!
@@ -220,7 +220,9 @@ sub razor2_access {
 	}
 
 	# if we got here, we're done doing remote stuff, abort the alert
-	alarm 0;
+        if (defined $oldalarm) {
+          alarm $oldalarm; $oldalarm = undef;
+        }
 
 	# Razor 2.14 says that if we get here, we did ok.
 	$return = 1;
@@ -295,18 +297,19 @@ sub razor2_access {
       warn "$debug: undefined Razor2::Client::Agent\n";
     }
   
-    # note: this may be a double-reset.  not a big deal though; the
-    # result should only be the extension of a preexisting timeout
-    # by < 1 sec.
-    alarm $oldalarm;
+    if (defined $oldalarm) {
+      alarm $oldalarm; $oldalarm = undef;
+    }
   };
 
   my $err = $@;
+  if (defined $oldalarm) {
+    alarm $oldalarm; $oldalarm = undef;
+  }
 
   if ($err) {
-    alarm $oldalarm;    # just in case
     chomp $err;
-    if ($err =~ /alarm/) {
+    if ($err eq "__alarm__ignore__") {
       dbg("$debug: razor2 $type timed out after $timeout seconds");
     } elsif ($err =~ /(?:could not connect|network is unreachable)/) {
       # make this a dbg(); SpamAssassin will still continue,
