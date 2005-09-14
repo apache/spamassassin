@@ -24,7 +24,7 @@ use Mail::SpamAssassin;
 use vars qw(%patterns %anti_patterns);
 
 # settings
-plan tests => 101;
+plan tests => 104;
 
 # initialize SpamAssassin
 my $sa = create_saobj({'dont_copy_prefs' => 1});
@@ -83,6 +83,7 @@ EOF
       my $string = $1;
       my @patterns = split(' ', $2);
       if ($string && @patterns) {
+        $string =~ s/{ESC}/\x1b/gs;     # magic, to avoid ^[ chars in source
         $message .= "$string\n";
         for my $pattern (@patterns) {
           if ($pattern =~ /^\!(.*)/) {
@@ -259,4 +260,8 @@ baeb1fai@@example.com			!baeb1fai@@example.com
 
 <sentto-4934-foo=addr.com@verper.com>	!^http://.*addr.com@verper.com
 <sentto-4934-foo=addr.com@verper.com>	mailto:sentto-4934-foo=addr.com@verper.com
+
+http://foo23498.com/{ESC}(B	^http://foo23498.com/$
+{ESC}(Bhttp://foo23499.com/	^http://foo23499.com/$
+http://foo23500.com{ESC}(B/	^http://foo23500.com$
 
