@@ -220,6 +220,16 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   (Archive copies are automatically kept on archive.apache.org/dist/ .)
 
+- (for full release builds) update the main website "downloads" page:
+
+        cd /www/spamassassin.apache.org
+        vi main.wmk
+
+  See the comment at the top of the file; you'll need to change at
+  least one variable ("relversion") to the new version number, and
+  possibly more, depending on if this is the first release of a new
+  release line.
+
 - rebuild the SpamAssassin website with webmake:
 
         cd /www/spamassassin.apache.org
