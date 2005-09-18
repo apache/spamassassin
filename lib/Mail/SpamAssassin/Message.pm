@@ -64,7 +64,8 @@ as a parameter.  The used hash key/value pairs are as follows:
 
 C<message> is either undef (which will use STDIN), a scalar of the
 entire message, an array reference of the message with 1 line per array
-element, or a file glob which holds the entire contents of the message.
+element, and either a file glob or IO::File object which holds the entire
+contents of the message.
 
 Note: The message is expected to generally be in RFC 2822 format, optionally
 including an mbox message separator line (the "From " line) as the first line.
