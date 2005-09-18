@@ -123,10 +123,13 @@ sub new {
   if (ref $message eq 'ARRAY') {
      @message = @{$message};
   }
-  elsif (ref $message eq 'GLOB') {
+  elsif (ref $message eq 'GLOB' || ref $message eq 'IO::File') {
     if (defined fileno $message) {
       @message = <$message>;
     }
+  }
+  elsif (ref $message) {
+    dbg("message: Input is a reference of unknown type!");
   }
   else {
     @message = split ( /^/m, $message );
