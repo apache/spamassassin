@@ -623,7 +623,7 @@ sub adapt_num_children {
     if ($num_servers < $self->{max_children}) {
       $self->need_to_add_server($num_idle);
     } else {
-      info("prefork: server reached --max-clients setting, consider raising it\n");
+      info("prefork: server reached --max-children setting, consider raising it\n");
     }
   }
   elsif ($num_idle > $self->{max_idle} && $num_servers > $self->{min_children}) {
