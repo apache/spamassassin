@@ -927,7 +927,8 @@ sub _check_whitelist_rcvd {
   }
   # then try the trusted ones; the user could have whitelisted a trusted
   # relay, totally permitted
-  if ($self->{num_relays_trusted} > 0) {
+  # but do not do this if any untrusted relays, to avoid forgery -- bug 4425
+  if ($self->{num_relays_trusted} > 0 && !$self->{num_relays_untrusted} ) {
     push (@relays, @{$self->{relays_trusted}});
   }
 
