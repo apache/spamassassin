@@ -58,3 +58,14 @@ tflags    T_URIBL_XS_SURBL   net
 # From discussion on users@ list
 body T_URI_HTML_ONLY		eval:check_html_uri_only()
 describe T_URI_HTML_ONLY	URIs only found in HTML part of multipart/alternative message
+
+# tvd:
+#  1.575   1.8696   0.0000    1.000   1.00    0.01  T_SUBJ_ACC_NUM3
+#  1.532   1.8192   0.0000    1.000   0.67    0.01  T_SUBJ_ACC_NUM
+#  1.532   1.8192   0.0000    1.000   0.67    0.01  T_SUBJ_ACC_NUM2
+header	T_SUBJ_ACC_NUM		Subject =~ /\b(?i:invoice|account).{1,4}\d+[A-Z]+/
+header	T_SUBJ_ACC_NUM2		Subject =~ /\b(?i:invoice|account).{1,4}\d+[A-Z]+\s*$/
+header	T_SUBJ_ACC_NUM3		Subject =~ /\b[a-zA-Z]+ \W{1,4}\d+[A-Z]+\s*$/
+describe T_SUBJ_ACC_NUM		Subject has spammy looking monetary reference
+describe T_SUBJ_ACC_NUM2	Subject has spammy looking monetary reference
+describe T_SUBJ_ACC_NUM3	Subject has spammy looking monetary reference
