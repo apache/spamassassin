@@ -82,3 +82,7 @@ endif
 
 body T_BODY_RX /\brx\W{0,2}(?:drug|med)/i
 body T_DEAR_WINNER /\bdear.{1,20}winner/i
+
+meta T_SUBJECT_NEEDS_ENCODING    (!__SUBJECT_ENCODED_B64 && !__SUBJECT_ENCODED_QP) && __SUBJECT_NEEDS_MIME
+
+body T_SPACED_PHONE /(?:\d\s){2}\d\s?[.-]\s?(?:\d\s){2}\d\s?[.-]\s?(?:\d\s){3}\d/
