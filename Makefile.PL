@@ -1029,12 +1029,14 @@ spamassassin: spamassassin.raw
 sa-learn: sa-learn.raw
 	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@
 
-sa-update: sa-update.raw
-	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@
+sa-update: sa-update.raw build_rules
+	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -isa-update.raw -osa-update
 
 spamd/spamd: spamd/spamd.raw
 	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@
 
+build_rules: rulesrc rules
+	$(PERL) build/mkrules --src rulesrc --out rules 
 
 SPAMC_MAKEFILE  = spamc/Makefile
 MAKE_SPAMC      = $(MAKE) -f $(SPAMC_MAKEFILE)
