@@ -162,6 +162,10 @@ my %makefile = (
       'spamd/spamd.raw'  => 'spamd/spamd',
     },
 
+    # TODO: the rule compilation is hooked into the build step for "sa-update"
+    # as the make target "build_rules".
+    # This is kludgy, and it'd be nice to find a cleaner way to do this.
+
     'MAN1PODS' => {
         'spamassassin'     => '$(INST_MAN1DIR)/spamassassin.$(MAN1EXT)',
         'lib/spamassassin-run.pod' => '$(INST_MAN1DIR)/spamassassin-run.$(MAN1EXT)',
