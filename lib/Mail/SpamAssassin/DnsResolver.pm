@@ -365,7 +365,7 @@ sub poll_responses {
     my $cb = delete $self->{id_to_callback}->{$id};
     if (!$cb) {
       dbg("dns: no callback for id: $id, ignored; packet: ".
-                                $packet->string);
+                    ($packet ? $packet->string : "undef"));
       return 0;
     }
 
@@ -373,7 +373,8 @@ sub poll_responses {
     return 1;
   }
   else {
-    dbg("dns: no packet! err=$err packet=".$packet->string);
+    dbg("dns: no packet! err=$err packet=".
+                    ($packet ? $packet->string : "undef"));
   }
 
   return 0;
