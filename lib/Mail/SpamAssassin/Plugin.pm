@@ -395,6 +395,63 @@ The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
 
 =back
 
+=item $plugin->start_rules ( { options ... } )
+
+Called before testing a set of rules of a given type and priority.
+
+=over 4
+
+=item permsgstatus
+
+The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
+
+=item ruletype
+
+The type of the rules about to be performed.
+
+=back
+
+=item $plugin->hit_rule ( { options ... } )
+
+Called when a rule fires.
+
+=over 4
+
+=item permsgstatus
+
+The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
+
+=item ruletype
+
+The type of the rule that fired.
+
+=item rulename
+
+The name of the rule that fired.
+
+=back
+
+=item $plugin->ran_rule ( { options ... } )
+
+Called after a rule has been tested, whether or not it fired.  When the
+rule fires, the hit_rule callback is always called before this.
+
+=over 4
+
+=item permsgstatus
+
+The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
+
+=item ruletype
+
+The type of the rule that was tested.
+
+=item rulename
+
+The name of the rule that was tested.
+
+=back
+
 =item $plugin->check_end ( { options ... } )
 
 Signals that a message check operation has just finished, and the

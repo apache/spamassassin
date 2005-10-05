@@ -1618,6 +1618,15 @@ sub get_pre_files_in_dir {
 
 ###########################################################################
 
+sub have_plugin {
+  my ($self, $subname) = @_;
+
+  # We could potentially get called after a finish(), so just return.
+  return unless $self->{plugins};
+
+  return $self->{plugins}->have_callback ($subname);
+}
+
 sub call_plugins {
   my $self = shift;
 

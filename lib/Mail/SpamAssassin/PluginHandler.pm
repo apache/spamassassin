@@ -130,10 +130,8 @@ sub register_plugin {
 
 ###########################################################################
 
-sub callback {
-  my $self = shift;
-  my $subname = shift;
-  my ($ret, $overallret);
+sub have_callback {
+  my ($self, $subname) = @_;
 
   # have we set up the cache entry for this callback type?
   if (!exists $self->{cbs}->{$subname}) {
@@ -148,6 +146,19 @@ sub callback {
       }
     }
     $self->{cbs}->{$subname} = \@subs;
+  }
+
+  return scalar(@{$self->{cbs}->{$subname}});
+}
+
+sub callback {
+  my $self = shift;
+  my $subname = shift;
+  my ($ret, $overallret);
+
+  # have we set up the cache entry for this callback type?
+  if (!exists $self->{cbs}->{$subname}) {
+    return unless $self->have_callback($subname);
   }
 
   foreach my $cbpair (@{$self->{cbs}->{$subname}}) {

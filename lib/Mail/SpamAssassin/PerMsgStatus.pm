@@ -1565,16 +1565,35 @@ sub get {
 
 ###########################################################################
 
-sub ran_rule_debug_code {
+sub start_rules_plugin_code {
+  my ($self, $ruletype) = @_;
+
+  return '' unless $self->{main}->have_plugin("start_rules");
+
+  return '
+    $self->{main}->call_plugins ("start_rules", { permsgstatus => $self, ruletype => \''.$ruletype.'\' });
+  ';
+}
+
+sub hit_rule_plugin_code {
   my ($self, $rulename, $ruletype, $bit) = @_;
 
-  return '' unless exists($self->{should_log_rule_hits});
+  return '' unless exists($self->{should_log_rule_hits}) || $self->{main}->have_plugin("hit_rule");
 
   # note: keep this in 'single quotes' to avoid the $ & performance hit,
   # unless specifically requested by the caller.   Also split the
   # two chars, just to be paranoid and ensure that a buggy perl interp
   # doesn't impose that hit anyway (just in case)
   my $match = '($' . '&' . '|| "negative match")';
+
+  my $debug_code = '';
+  if (exists($self->{should_log_rule_hits})) {
+    $debug_code = '
+        dbg("rules: ran '.$ruletype.' rule '.$rulename.' ======> got hit: \"" . '.
+            $match.' . "\"");
+        
+    ';
+  }
 
   my $save_hits_code = '';
   if ($self->{save_pattern_hits}) {
@@ -1583,10 +1602,24 @@ sub ran_rule_debug_code {
     ';
   }
 
+  my $plugin_code = '';
+  if ($self->{main}->have_plugin("hit_rule")) {
+    $plugin_code = '
+        $self->{main}->call_plugins ("hit_rule", { permsgstatus => $self, rulename => \''.$rulename.'\', ruletype => \''.$ruletype.'\' });
+    ';
+  }
+
+  return $debug_code.$save_hits_code.$plugin_code.'
+  ';
+}
+
+sub ran_rule_plugin_code {
+  my ($self, $rulename, $ruletype) = @_;
+
+  return '' unless $self->{main}->have_plugin("ran_rule");
+
   return '
-    dbg("rules: ran '.$ruletype.' rule '.$rulename.' ======> got hit: \"" . '.
-        $match.' . "\"");
-    '.$save_hits_code.'
+    $self->{main}->call_plugins ("ran_rule", { permsgstatus => $self, rulename => \''.$rulename.'\', ruletype => \''.$ruletype.'\' });
   ';
 }
 
@@ -1625,7 +1658,7 @@ sub do_head_tests {
     return;
   }
 
-  my $evalstr = '';
+  my $evalstr = $self->start_rules_plugin_code("header");
   my $evalstr2 = '';
 
   while (my($rulename, $rule) = each %{$self->{conf}{head_tests}->{$priority}}) {
@@ -1647,6 +1680,7 @@ sub do_head_tests {
     $evalstr .= '
       if ($self->{conf}->{scores}->{q#'.$rulename.'#}) {
          '.$rulename.'_head_test($self, $_); # no need for OO calling here (its faster this way)
+         '.$self->ran_rule_plugin_code($rulename, "header").'
       }
     ';
 
@@ -1661,7 +1695,7 @@ sub do_head_tests {
         '.$self->hash_line_for_rule($rulename).'
         if ($self->get(q#'.$hdrname.'#, q#'.$def.'#) '.$testtype.'~ '.$pat.') {
           $self->got_hit (q#'.$rulename.'#, q{});
-          '. $self->ran_rule_debug_code($rulename, "header", 1) . '
+          '. $self->hit_rule_plugin_code($rulename, "header", 1) . '
         }
       }';
 
@@ -1726,7 +1760,7 @@ sub do_body_tests {
   }
 
   # build up the eval string...
-  my $evalstr = '';
+  my $evalstr = $self->start_rules_plugin_code("body");
   my $evalstr2 = '';
 
   while (my($rulename, $pat) = each %{$self->{conf}{body_tests}->{$priority}}) {
@@ -1734,6 +1768,7 @@ sub do_body_tests {
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
         # call procedurally as it is faster.
         '.$rulename.'_body_test($self,@_);
+        '.$self->ran_rule_plugin_code($rulename, "body").'
       }
     ';
 
@@ -1748,7 +1783,7 @@ sub do_body_tests {
              '.$self->hash_line_for_rule($rulename).'
              if ('.$pat.') { 
                 $self->got_pattern_hit(q{'.$rulename.'}, "BODY: "); 
-                '. $self->ran_rule_debug_code($rulename, "body", 2) . '
+                '. $self->hit_rule_plugin_code($rulename, "body", 2) . '
 		# Ok, we hit, stop now.
 		last;
              }
@@ -2138,13 +2173,15 @@ sub do_body_uri_tests {
   }
 
   # otherwise build up the eval string...
-  my $evalstr = '';
+  my $evalstr = $self->start_rules_plugin_code("uri");
   my $evalstr2 = '';
 
   while (my($rulename, $pat) = each %{$self->{conf}{uri_tests}->{$priority}}) {
     $evalstr .= '
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
         '.$rulename.'_uri_test($self, @_); # call procedurally for speed
+        '.$self->ran_rule_plugin_code($rulename, "uri").'
+
       }
     ';
 
@@ -2159,7 +2196,7 @@ sub do_body_uri_tests {
          '.$self->hash_line_for_rule($rulename).'
          if ('.$pat.') { 
             $self->got_pattern_hit(q{'.$rulename.'}, "URI: ");
-            '. $self->ran_rule_debug_code($rulename, "uri", 4) . '
+            '. $self->hit_rule_plugin_code($rulename, "uri", 4) . '
             # Ok, we hit, stop now.
             last;
          }
@@ -2227,13 +2264,14 @@ sub do_rawbody_tests {
   }
 
   # build up the eval string...
-  my $evalstr = '';
+  my $evalstr = $self->start_rules_plugin_code("rawbody");
   my $evalstr2 = '';
 
   while (my($rulename, $pat) = each %{$self->{conf}{rawbody_tests}->{$priority}}) {
     $evalstr .= '
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
          '.$rulename.'_rawbody_test($self, @_); # call procedurally for speed
+         '.$self->ran_rule_plugin_code($rulename, "rawbody").'
       }
     ';
 
@@ -2248,7 +2286,7 @@ sub do_rawbody_tests {
          '.$self->hash_line_for_rule($rulename).'
          if ('.$pat.') { 
             $self->got_pattern_hit(q{'.$rulename.'}, "RAW: ");
-            '. $self->ran_rule_debug_code($rulename, "rawbody", 8) . '
+            '. $self->hit_rule_plugin_code($rulename, "rawbody", 8) . '
             # Ok, we hit, stop now.
             last;
          }
@@ -2317,7 +2355,7 @@ sub do_full_tests {
   }
 
   # build up the eval string...
-  my $evalstr = '';
+  my $evalstr = $self->start_rules_plugin_code("full");
 
   while (my($rulename, $pat) = each %{$self->{conf}{full_tests}->{$priority}}) {
     $evalstr .= '
@@ -2325,8 +2363,9 @@ sub do_full_tests {
         '.$self->hash_line_for_rule($rulename).'
         if ($$fullmsgref =~ '.$pat.') {
           $self->got_pattern_hit(q{'.$rulename.'}, "FULL: ");
-          '. $self->ran_rule_debug_code($rulename, "full", 16) . '
+          '. $self->hit_rule_plugin_code($rulename, "full", 16) . '
         }
+        '.$self->ran_rule_plugin_code($rulename, "full").'
       }
     ';
   }
