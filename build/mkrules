@@ -25,6 +25,7 @@ sub usage {
   die "mkrules/run [--src srcdir] [--out outputdir]\n";
 }
 
+use strict;
 use File::Find;
 use File::Copy;
 
@@ -37,51 +38,279 @@ die "no out" unless ($opt_out);
 die "unreadable src" unless (-d $opt_src);
 die "unreadable out" unless (-d $opt_out);
 
+# source files that need compilation, and their targets
+my $needs_compile = { };
+
 File::Find::find ({
           wanted => \&wanted,
           no_chdir => 1
         }, $opt_src);
 
+# context for the rules compiler
+my $seen_rules = { };
+my $output_files = { };
+my $output_file_text = { };
+
+compile_sorted($needs_compile);
+write_output_files();
+
+exit;
+
 sub wanted {
-  return unless (-f $File::Find::name && /\d.*\.cf$/i);
+  return unless (-f $File::Find::name && /\d.*\.(?:cf|pm)$/i);
 
   my $dir = $File::Find::name;
   $dir =~ s/^${opt_src}[\/\\\:]//s;
   $dir =~ s/([^\/\\\:]+)$//;
-  my $file = $1;
+  my $filename = $1;
 
-  if ($dir =~ /sandbox/) {
-    apply_sandbox_rules($dir, $file);
+  my $f = "$opt_src/$dir$filename";
+  my $t = "$opt_out/$filename";
+  $needs_compile->{$f} = {
+          f => $f,
+          t => $t,
+          dir => $dir,
+          filename => $filename
+        };
+}
+
+# compile all the source files found by the wanted() sub, in sorted
+# order so that the order of precedence makes sense.
+
+sub compile_sorted {
+  my ($sources) = @_;
+
+  foreach my $f (sort keys %$sources) {
+    my $entry = $needs_compile->{$f};
+    my $t = $entry->{t};
+
+    # TODO: dependency checking optimization?
+    ## my $needs_rebuild = 0;
+    ## if (!-f $t || -M $t > -M $f) {
+    ## # the source file is newer, or dest is not there
+    ## $needs_rebuild = 1;     
+    ## }
+
+    my $needs_rebuild = 1;
+
+    if ($entry->{dir} =~ /sandbox/) {
+      # sandbox rules
+      rule_file_compile(0, $f, $t, $entry->{filename});
+    }
+    elsif ($entry->{dir} =~ /extra/) {
+      # 'extra' rulesets; not built by default (TODO)
+      next;
+    }
+    else {
+      # rules in "core" and "lang" are always copied
+      if ($needs_rebuild) {
+        rule_file_compile(1, $f, $t, $entry->{filename});
+      }
+    }
+  }
+}
+
+# implement the validation criteria from
+# http://wiki.apache.org/spamassassin/RulesProjPromotion .
+#
+# Rules are compiled from source dir to output dir. All rules in "core" are
+# always promoted (for backwards compatibility). In addition, rules in the
+# sandboxes will be promoted, if the rules source file contains a "publish
+# core" command prior to that rule.  This command is added (by hand!) to the
+# source file by committers, as the rules pass the validation criteria.
+#
+# The compiler will copy the rules to the output directory. By default, the
+# filename is preserved; so a rule in a file called "20_foo.cf" in the source
+# directory will be output to the file "20_foo.cf".
+#
+# ('pubfile' is another command to select the name of the output file in the
+# "rules" directory: pubfile NN_filename.cf , and override that behaviour.)
+#
+# Rules will be autorenamed, if there's a collision between a new rule name and
+# one that's already been output by the compiler in another source file. The
+# autorenaming is very simple -- portions of the current source path are
+# appended to the rule name, sanitised.
+#
+# TODO: linting during compilation, and ignore lint-failures? may have to
+# reimplement a small subset of lint behaviour to do this.
+
+sub rule_file_compile {
+  my ($copy_all, $f, $t, $filename) = @_;
+
+  open (IN, "<$f") or die "cannot read $f";
+
+  # a fast parser for the config file format; don't need the
+  # full deal here, and it must be fast, since it's run on every
+  # "make" invocation
+
+  my $rules = { };
+  my $rule_order = [ ];
+
+  # $COMMENTS is a "catch-all" "name", for lines that appear before the first
+  # line that refers to a rule by name.  Those lines are not published by
+  # themselves; they'll be published to all pubfiles found in the file.
+  #
+  # It's assumed they are comments, because they generally are, but could
+  # be all sorts of unparseable lines.
+
+  my $COMMENTS = '!comments!';
+  my $lastrule = $COMMENTS;
+
+  while (<IN>) {
+    my $orig = $_;
+
+    s/^#reuse/reuse/;   # dirty hack.  we need to fix this to just be
+    # a keyword which the engine ignores, this is absurd!  TODO
+
+    s/#.*$//g; s/^\s+//; s/\s+$//;
+
+    # send comments/blank lines to the current default output
+    if (/^$/) {
+      $rules->{$lastrule}->{text} .= $orig;
+      next;
+    }
+
+    # save "lang" declarations
+    my $lang = '';
+    if (s/^lang\s+(\S+)\s+//) {
+      $lang = $1;
+    }
+
+    if (/^
+        (header|rawbody|body|full|uri|meta|mimeheader|describe|
+         tflags|reuse|score)
+        \s+(\S+)\s+(.*)$
+      /x)
+    {
+      my $type = $1;
+      my $name = $2;
+      my $val = $3;
+
+      my $origname = $name;
+      $name = rule_name_avoid_collisions($name, $f);
+
+      if (!$rules->{$name}) { $rules->{$name} = rule_entry_create(); }
+      $rules->{$name}->{origname} = $origname;
+      $rules->{$name}->{text} .= $orig;
+
+      $lastrule = $name;
+      push (@$rule_order, $name);
+    }
+    elsif (/^
+        (pubfile|publish)
+        \s+(\S+)\s*(.*?)$
+      /x)
+    {
+      my $command = $1;
+      my $name = $2;
+      my $val = $3;
+
+      my $origname = $name;
+      $name = rule_name_avoid_collisions($name, $f);
+
+      if (!$rules->{$name}) { $rules->{$name} = rule_entry_create(); }
+      $rules->{$name}->{origname} = $origname;
+
+      if ($command eq 'publish') {
+        # the 'publish' command defaults to "1", unless it explicitly
+        # is set to "0".
+        if (!defined $val) { $val = '1'; }
+      }
+      $rules->{$name}->{$command} = $val;
+    }
+    else {
+      # warn "unknown line in rules file '$f', saving to default: $orig";
+      $rules->{$lastrule}->{text} .= $orig;
+    }
+  }
+  close IN;
+
+  # now append all the found text to the output file buffers
+  my %already_done = ();
+  foreach my $name (@$rule_order)
+  {
+    # only do each rule once, please ;)
+    next if exists $already_done{$name};
+    $already_done{$name} = undef;
+
+    my $pubfile = $rules->{$name}->{pubfile};
+    $pubfile ||= $filename;
+    $pubfile = $opt_out.'/'.$filename;
+    $output_files->{$pubfile} = 1;
+
+    if (!$copy_all && !$rules->{$name}->{publish}) {
+      # don't output non-published rules
+      next;     
+    }
+
+    my $text = $rules->{$name}->{text};
+    if (!$text) {
+      next;     # nothing to write!
+    }
+
+    if (!$output_file_text->{$pubfile}) {
+      $output_file_text->{$pubfile} = output_file_header($f);
+
+      # do we have any top-of-file comments?  if so, add it
+      my $cmts = $rules->{$COMMENTS}->{text}; $cmts ||= '';
+      $output_file_text->{$pubfile} .= $cmts;
+    }
+
+    $output_file_text->{$pubfile} .= $text;
+  }
+
+  print "$f: ".(scalar @$rule_order)." rules copied\n";
+
+  # ok; file complete.  now mark all those rules as "seen"; future
+  # refs to those rule names will trigger an autorename.
+  foreach my $name (@$rule_order) {
+    $seen_rules->{$name} = 1;
+  }
+}
+
+sub write_output_files {
+  foreach my $pubfile (sort keys %$output_files) {
+    if (-f $pubfile) {
+      unlink $pubfile or die "cannot remove output file '$pubfile'";
+    }
+
+    if ($output_file_text->{$pubfile}) {
+      open (OUT, ">".$pubfile) or die "cannot write to output file '$pubfile'";
+      print OUT $output_file_text->{$pubfile};
+      close OUT or die "cannot close output file '$pubfile'";
+      print "$pubfile: written\n";
+    }
+    else {
+      print "$pubfile: no rules promoted\n";
+    }
+  }
+}
+
+sub rule_entry_create {
+  return {
+    text => '',
+    publish => 0
+  };
+}
+
+sub rule_name_avoid_collisions {
+  my ($rule, $path) = @_;
+  if (!exists $seen_rules->{$rule}) {
+    return $rule;
   }
   else {
-    copy_rule_file_if_newer($dir, $file);
+    my $new = $path;
+    $new =~ s/[^A-Za-z0-9]+/_/gs;
+    $new =~ s/_+/_/gs;
+    $new =~ s/^_//;
+    $new =~ s/_$//;
+    return $rule.'_'.$new;
   }
 }
 
-
-sub copy_rule_file_if_newer {
-  my ($dir, $file) = @_;
-
-  my $f = "$opt_src/$dir/$file";
-  my $t = "$opt_out/$file";
-
-  if (!-r $t || -M $t > -M $f) {
-    print "cp $f $t\n";
-    copy($f, $t) or die "copy failed from $f to $t: $!\n";
-  }
-}
-
-sub apply_sandbox_rules {
-  my ($dir, $file) = @_;
-
-  # TODO! this section should implement the validation criteria from
-  # http://wiki.apache.org/spamassassin/RulesProjPromotion .
-  #
-  # right now, it just copies the file, raw.
-
-  my $f = "$opt_src/$dir/$file";
-  my $t = "$opt_out/$file";
-  print "grepcp?? $f $t\n";
-  copy($f, $t) or die "copy failed from $f to $t: $!\n";
+sub output_file_header {
+  my ($filename) = @_;
+  my $now = scalar localtime time;
+  return "# [compiled from '$filename' on $now]\n";
 }
 
