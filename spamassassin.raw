@@ -583,7 +583,7 @@ From those two directories, SpamAssassin will first read files ending in
 lexical order (most files begin with two numbers to make the sorting
 order obvious).
 
-In other words, it will read F<init.pre> first, then F<10_misc.cf> before
+In other words, it will read F<init.pre> first, then F<10_default_prefs.cf> before
 F<50_scores.cf> and F<20_body_tests.cf> before F<20_head_tests.cf>.
 Options in later files will override earlier files.
 

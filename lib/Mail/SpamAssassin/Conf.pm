@@ -1486,7 +1486,7 @@ is attached to spam mail messages.
 =item report ...some text for a report...
 
 Set the report template which is attached to spam mail messages.  See the
-C<10_misc.cf> configuration file in C</usr/share/spamassassin> for an
+C<10_default_prefs.cf> configuration file in C</usr/share/spamassassin> for an
 example.
 
 If you change this, try to keep it under 78 columns. Each C<report>
@@ -1547,7 +1547,7 @@ SpamAssassin calls itself.
 =item unsafe_report ...some text for a report...
 
 Set the report template which is attached to spam mail messages which contain a
-non-text/plain part.  See the C<10_misc.cf> configuration file in
+non-text/plain part.  See the C<10_default_prefs.cf> configuration file in
 C</usr/share/spamassassin> for an example.
 
 Each C<unsafe-report> line appends to the existing template, so use
