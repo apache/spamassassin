@@ -48,6 +48,7 @@ File::Find::find ({
 
 # context for the rules compiler
 my $seen_rules = { };
+my $said_renamed_warning = { };
 my $output_files = { };
 my $output_file_text = { };
 
@@ -95,7 +96,7 @@ sub compile_sorted {
 
     if ($entry->{dir} =~ /sandbox/) {
       # sandbox rules
-      rule_file_compile(0, $f, $t, $entry->{filename});
+      rule_file_compile(1, $f, $t, $entry->{filename});
     }
     elsif ($entry->{dir} =~ /extra/) {
       # 'extra' rulesets; not built by default (TODO)
@@ -104,7 +105,7 @@ sub compile_sorted {
     else {
       # rules in "core" and "lang" are always copied
       if ($needs_rebuild) {
-        rule_file_compile(1, $f, $t, $entry->{filename});
+        rule_file_compile(0, $f, $t, $entry->{filename});
       }
     }
   }
@@ -135,7 +136,7 @@ sub compile_sorted {
 # reimplement a small subset of lint behaviour to do this.
 
 sub rule_file_compile {
-  my ($copy_all, $f, $t, $filename) = @_;
+  my ($is_sandbox, $f, $t, $filename) = @_;
 
   open (IN, "<$f") or die "cannot read $f";
 
@@ -156,11 +157,16 @@ sub rule_file_compile {
   my $COMMENTS = '!comments!';
   my $lastrule = $COMMENTS;
 
+  # another "fake name" for lines that should always be published, to an
+  # output file with the same name as the input file.
+  my $ALWAYS_PUBLISH = '!always_publish!';
+  $rules->{$ALWAYS_PUBLISH} = { text => '', publish => 1 };
+
   while (<IN>) {
     my $orig = $_;
 
-    s/^#reuse/reuse/;   # dirty hack.  we need to fix this to just be
-    # a keyword which the engine ignores, this is absurd!  TODO
+    s/^#reuse/reuse/;   # TODO - dirty hack.  we need to fix this to just be
+    # a keyword which the engine ignores, this is absurd! 
 
     s/#.*$//g; s/^\s+//; s/\s+$//;
 
@@ -182,12 +188,15 @@ sub rule_file_compile {
         \s+(\S+)\s+(.*)$
       /x)
     {
+      # rule definitions
       my $type = $1;
       my $name = $2;
       my $val = $3;
 
       my $origname = $name;
-      $name = rule_name_avoid_collisions($name, $f);
+      if ($is_sandbox) {
+        $name = rule_name_avoid_collisions($name, $f);
+      }
 
       if (!$rules->{$name}) { $rules->{$name} = rule_entry_create(); }
       $rules->{$name}->{origname} = $origname;
@@ -201,33 +210,40 @@ sub rule_file_compile {
         \s+(\S+)\s*(.*?)$
       /x)
     {
+      # preprocessor directives
       my $command = $1;
       my $name = $2;
       my $val = $3;
 
       my $origname = $name;
-      $name = rule_name_avoid_collisions($name, $f);
+      if ($is_sandbox) {
+        $name = rule_name_avoid_collisions($name, $f);
+      }
 
       if (!$rules->{$name}) { $rules->{$name} = rule_entry_create(); }
       $rules->{$name}->{origname} = $origname;
 
       if ($command eq 'publish') {
         # the 'publish' command defaults to "1", unless it explicitly
-        # is set to "0".
+        # is set to "0".  iow: publish RULE_NAME (0 | 1)  [default: 1]
         if (!defined $val) { $val = '1'; }
       }
       $rules->{$name}->{$command} = $val;
     }
     else {
+      # this is a non-comment, non-rule, non-build-directive line.
+      # create a file with the same name as the input file, and
+      # publish to that.
+
       # warn "unknown line in rules file '$f', saving to default: $orig";
-      $rules->{$lastrule}->{text} .= $orig;
+      $rules->{$ALWAYS_PUBLISH}->{text} .= $orig;
     }
   }
   close IN;
 
   # now append all the found text to the output file buffers
   my %already_done = ();
-  foreach my $name (@$rule_order)
+  foreach my $name ($ALWAYS_PUBLISH, @$rule_order)
   {
     # only do each rule once, please ;)
     next if exists $already_done{$name};
@@ -238,7 +254,7 @@ sub rule_file_compile {
     $pubfile = $opt_out.'/'.$filename;
     $output_files->{$pubfile} = 1;
 
-    if (!$copy_all && !$rules->{$name}->{publish}) {
+    if ($is_sandbox && !$rules->{$name}->{publish}) {
       # don't output non-published rules
       next;     
     }
@@ -304,7 +320,14 @@ sub rule_name_avoid_collisions {
     $new =~ s/_+/_/gs;
     $new =~ s/^_//;
     $new =~ s/_$//;
-    return $rule.'_'.$new;
+    $new = $rule.'_'.$new;
+
+    if (!$said_renamed_warning->{$new}) {
+      $said_renamed_warning->{$new} = 1;
+      warn "$rule: renamed to $new due to collision with existing rule\n";
+    }
+
+    return $new;
   }
 }
 
