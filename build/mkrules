@@ -77,6 +77,7 @@ sub wanted {
   $dir =~ s/([^\/\\\:]+)$//;
   my $filename = $1;
 
+
   my $f = "$current_src/$dir$filename";
   my $t = "$opt_out/$filename";
   $needs_compile->{$f} = {
