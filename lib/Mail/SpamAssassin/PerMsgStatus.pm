@@ -48,7 +48,6 @@ package Mail::SpamAssassin::PerMsgStatus;
 
 use strict;
 use warnings;
-use bytes;
 use Carp;
 
 use Mail::SpamAssassin::Constants qw(:sa);
@@ -706,13 +705,21 @@ sub rewrite_report_safe {
   my $newmsg = '';
 
   # the report charset
-  my $report_charset = "";
+  my $report_charset = "; charset=iso-8859-1";
   if ($self->{conf}->{report_charset}) {
     $report_charset = "; charset=" . $self->{conf}->{report_charset};
   }
 
   # the SpamAssassin report
   my $report = $self->get_report();
+
+  # If there are any wide characters, need to MIME-encode in UTF-8
+  # TODO: If $report_charset is something other than iso-8859-1/us-ascii, then
+  # we could try converting to that charset if possible
+  unless ($] < 5.008 || utf8::downgrade($report, 1)) {
+      $report_charset = "; charset=utf-8";
+      utf8::encode($report);
+  }
 
   # get original headers, "pristine" if we can do it
   my $from = $self->{msg}->get_pristine_header("From");

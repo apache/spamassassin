@@ -458,6 +458,7 @@ sub wanted {
   print $status->rewrite_mail ();
 
   if ( $opt{'test-mode'} ) {
+    use bytes;
     print $status->get_report();
   }
 
