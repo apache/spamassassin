@@ -1039,8 +1039,8 @@ sa-update: sa-update.raw build_rules
 spamd/spamd: spamd/spamd.raw
 	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@
 
-build_rules: rulesrc rules
-	$(PERL) build/mkrules --src rulesrc --out rules 
+build_rules: rulesrc rulescode rules
+	$(PERL) build/mkrules --src rulesrc --src rulescode --out rules 
 
 SPAMC_MAKEFILE  = spamc/Makefile
 MAKE_SPAMC      = $(MAKE) -f $(SPAMC_MAKEFILE)
