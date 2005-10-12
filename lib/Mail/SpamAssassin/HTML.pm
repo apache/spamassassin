@@ -19,11 +19,10 @@
 
 use strict;
 use warnings;
-use bytes;
 
 package Mail::SpamAssassin::HTML;
 
-use HTML::Parser 3.24 ();
+use HTML::Parser 3.43 ();
 use Mail::SpamAssassin::Logger;
 
 use vars qw($re_loose $re_strict $re_other @ISA @EXPORT @EXPORT_OK);
@@ -248,37 +247,18 @@ sub parse {
   # NOTE: HTML::Parser can cope with: <?xml pis>, <? with space>, so we
   # don't need to fix them here.
 
-  # bug #1551: HTML declarations, like <!foo>, are being used by spammers
-  # for obfuscation, and they aren't stripped out by HTML::Parser prior to
-  # version 3.28.  We have to modify these out *before* the parser is
-  # invoked, because otherwise a spammer could do "&lt;! body of message
-  # &gt;", which would get turned into "<! body of message >" by the
-  # parser, and then the whole body message would be stripped.
-
-  # convert <!foo> to <!--foo-->
-  if ($HTML::Parser::VERSION < 3.28) {
-    $text =~ s/<!((?!--|doctype)[^>]*)>/<!--$1-->/gsi;
-  }
-
-  # remove empty close tags: </>, </ >, </ foo>
-  if ($HTML::Parser::VERSION < 3.29) {
-    $text =~ s/<\/(?:\s.*?)?>//gs;
-  }
-
   # HTML::Parser converts &nbsp; into a question mark ("?") for some
   # reason, so convert them to spaces.  Confirmed in 3.31, at least.
   $text =~ s/&nbsp;/ /g;
 
-  # ALWAYS pack it into byte-representation, even if we're using 'use bytes',
-  # since the HTML::Parser object may use Unicode internally. (bug 1417,
-  # maybe).  Also, ignore stupid warning that can't be suppressed: 'Parsing of
+  # Ignore stupid warning that can't be suppressed: 'Parsing of
   # undecoded UTF-8 will give garbage when decoding entities at ..' (bug 4046)
   {
     local $SIG{__WARN__} = sub {
       warn @_ unless (defined $_[0] && $_[0] =~ /^Parsing of undecoded UTF-/);
     };
 
-    $self->SUPER::parse(pack('C0A*', $text));
+    $self->SUPER::parse($text);
   }
 
   $self->SUPER::eof;
@@ -760,11 +740,6 @@ sub display_text {
 
 sub html_text {
   my ($self, $text) = @_;
-
-  # note: this comes back from HTML::Parser as UTF-8-tainted.  Enforce byte
-  # mode by repacking the string in byte mode, to avoid 'Malformed UTF-8
-  # character (unexpected non-continuation byte)' warnings
-  $text = pack("C0A*", $text);
 
   # text that is not part of body
   if (exists $self->{inside}{script} && $self->{inside}{script} > 0)

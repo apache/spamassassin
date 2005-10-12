@@ -35,10 +35,8 @@ my @MODULES = (
 },
 {
   'module' => 'HTML::Parser',
-  'version' => '3.24',
-  'desc' => 'Version 3.31 or later is recommended.
-
-  HTML is used for an ever-increasing amount of email so this dependency
+  'version' => '3.43',
+  'desc' => 'HTML is used for an ever-increasing amount of email so this dependency
   is unavoidable.  Run "perldoc -q html" for additional information.',
 },
 );

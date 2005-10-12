@@ -43,7 +43,6 @@ package Mail::SpamAssassin::Message;
 
 use strict;
 use warnings;
-use bytes;
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Message::Node;
