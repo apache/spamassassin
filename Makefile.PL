@@ -1042,6 +1042,9 @@ spamd/spamd: spamd/spamd.raw
 build_rules: rulesrc rulescode rules
 	$(PERL) build/mkrules --src rulesrc --src rulescode --out rules 
 
+rules:
+	$(PERL) -e 'mkdir "rules" or die'
+
 SPAMC_MAKEFILE  = spamc/Makefile
 MAKE_SPAMC      = $(MAKE) -f $(SPAMC_MAKEFILE)
 MAKE_SPAMC_OLD  = $(MAKE) SOURCE=$< TARGET=$@ spamc_has_moved
