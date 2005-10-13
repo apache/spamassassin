@@ -3,7 +3,7 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("html_obfu");
 
-use constant TEST_ENABLED => ($] > 5.007);
+use constant TEST_ENABLED => ($] > 5.008004);
 
 use Test; BEGIN { plan tests => (TEST_ENABLED ? 2 : 0) };
 
