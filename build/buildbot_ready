@@ -6,7 +6,12 @@ my $command = shift @ARGV;
 my $perl = shift @ARGV;
 my $syncfile = shift @ARGV;
 
-if ($command eq 'start') {
+if ($command eq 'quickstart') {
+  quickstart();
+
+}
+elsif ($command eq 'start') {
+  quickstart();
   if ($syncfile)
   {
     # sleep until it disappears, or times out.
@@ -42,3 +47,8 @@ sub mtime_age_secs {
   my @s = stat($f);
   return (time - $s[9]);
 }
+
+sub quickstart {
+  # TODO
+}
+
