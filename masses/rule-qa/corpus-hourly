@@ -1,9 +1,10 @@
-#!/usr/bin/perl -w
+#!/local/perl586/bin/perl -w
 
 # settings are located in $HOME/.corpus
 
 use strict;
 use File::Path;
+use Time::ParseDate;
 use POSIX qw(nice strftime);
 
 use constant WEEK => 60*60*24;
@@ -119,7 +120,6 @@ sub locate {
       if ($line =~ /, on (... ... .. )(..)(:..:.. ... ....)/) {
         my ($datepre, $hh, $datepost) = ($1,$2,$3);
         
-        use Time::ParseDate;
         my $timet = Time::ParseDate::parsedate($datepre.$hh.$datepost,
                     GMT => 1, PREFER_PAST => 1);
         $time{$file} = $timet;
