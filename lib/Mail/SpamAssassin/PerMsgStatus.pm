@@ -139,7 +139,7 @@ sub check {
   # to see if we should go from {0,1} to {2,3}.  We of course don't need
   # to do this switch if we're already using bayes ... ;)
   my $set = $self->{conf}->get_score_set();
-  if (($set & 2) == 0 && $self->{main}->{bayes_scanner}->is_scan_available()) {
+  if (($set & 2) == 0 && $self->{main}->{bayes_scanner} && $self->{main}->{bayes_scanner}->is_scan_available()) {
     dbg("check: scoreset $set but bayes is available, switching scoresets");
     $self->{conf}->set_score_set ($set|2);
   }
@@ -1040,6 +1040,7 @@ sub bayes_report_make_list {
   return "" unless $amt;
 
   my $Bayes = $self->{main}{bayes_scanner};
+  return "Bayes not available" unless defined $Bayes;
   my $ns = $self->{bayes_nspam};
   my $nh = $self->{bayes_nham};
   my $digit = sub { $_[0] > 9 ? "+" : $_[0] };

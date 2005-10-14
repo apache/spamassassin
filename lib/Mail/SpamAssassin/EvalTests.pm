@@ -2500,7 +2500,7 @@ sub check_for_to_in_subject {
 sub check_bayes {
   my ($self, $fulltext, $min, $max) = @_;
 
-  return 0 if (!$self->{conf}->{use_bayes_rules});
+  return 0 if (!$self->{conf}->{use_bayes} || !$self->{conf}->{use_bayes_rules});
 
   if (!exists ($self->{bayes_score})) {
     $self->{bayes_score} = $self->{main}->{bayes_scanner}->scan ($self, $self->{msg});
