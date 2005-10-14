@@ -225,12 +225,8 @@ chomp $who;
 chomp $where;
 chomp $when;
 chomp $host;
-my $revision = "unknown";
-if (open(TESTING, "$opt_c/70_testing.cf")) {
-  chomp($revision = <TESTING>);
-  $revision =~ s/.*\$Rev:\s*(\S+).*/$1/;
-  close(TESTING);
-}
+my $revision = get_current_svn_revision();
+
 my $log_header = "# mass-check results from $who\@$where, on $when\n" .
 		 "# M:SA version ".$spamtest->Version()."\n" .
 		 "# SVN revision: $revision\n" .
@@ -670,4 +666,30 @@ sub memory_track_finish {
     }
   }
   $str;
+}
+
+sub get_current_svn_revision {
+  my $revision;
+
+  if (-d ".svn") {
+    open (SVNINFO, "svn info 2>&1 |");
+    while (<SVNINFO>) {
+      # Revision: 320871
+      next unless /^Revision: (\d+)/;
+      $revision = $1;
+      last;
+    }
+    close SVNINFO;
+    return $revision if $revision;
+  }
+
+  # this probably will never work due to Rules Project changes TODO
+  if (open(TESTING, "$opt_c/70_testing.cf")) {
+    chomp($revision = <TESTING>);
+    $revision =~ s/.*\$Rev:\s*(\S+).*/$1/;
+    close(TESTING);
+    return $revision if $revision;
+  }
+
+  return $revision || "unknown";
 }
