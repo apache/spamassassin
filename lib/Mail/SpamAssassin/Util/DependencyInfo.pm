@@ -253,7 +253,7 @@ sub try_module {
   print "\n", ("*" x 75), "\n";
   if ($required) {
     $EXIT_STATUS++;
-    print "\aERROR: the required $pretty_name ${pretty_version}module $errtype";
+    warn "\aERROR: the required $pretty_name ${pretty_version}module $errtype";
     if ($not_installed) {
       $$summref .= "REQUIRED module missing: $pretty_name\n";
     } else {
