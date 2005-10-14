@@ -70,7 +70,6 @@ use Mail::SpamAssassin::Conf::SQL;
 use Mail::SpamAssassin::Conf::LDAP;
 use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::Message;
-use Mail::SpamAssassin::Bayes;
 use Mail::SpamAssassin::PluginHandler;
 use Mail::SpamAssassin::DnsResolver;
 
@@ -548,7 +547,7 @@ if set to 1.
 sub rebuild_learner_caches {
   my $self = shift;
   my $opts = shift;
-  $self->{bayes_scanner}->sync(1,1,$opts);
+  $self->{bayes_scanner}->sync(1,1,$opts) if $self->{bayes_scanner};
   1;
 }
 
@@ -560,7 +559,7 @@ Finish learning.
 
 sub finish_learner {
   my $self = shift;
-  $self->{bayes_scanner}->finish();
+  $self->{bayes_scanner}->finish() if $self->{bayes_scanner};
   1;
 }
 
@@ -572,7 +571,7 @@ Dump the contents of the Bayes DB
 
 sub dump_bayes_db {
   my($self,@opts) = @_;
-  $self->{bayes_scanner}->dump_bayes_db(@opts);
+  $self->{bayes_scanner}->dump_bayes_db(@opts) if $self->{bayes_scanner};
 }
 
 =item $f->signal_user_changed ( [ { opt => val, ... } ] )
@@ -626,14 +625,19 @@ sub signal_user_changed {
   }
 
   # reopen bayes dbs for this user
-  $self->{bayes_scanner}->finish();
-  $self->{bayes_scanner} = new Mail::SpamAssassin::Bayes ($self);
+  $self->{bayes_scanner}->finish() if $self->{bayes_scanner};
+  if ($self->{conf}->{use_bayes}) {
+      require Mail::SpamAssassin::Bayes;
+      $self->{bayes_scanner} = new Mail::SpamAssassin::Bayes ($self);
+  } else {
+      delete $self->{bayes_scanner} if $self->{bayes_scanner};
+  }
 
   # this user may have a different learn_to_journal setting, so reset appropriately
   $self->{'learn_to_journal'} = $self->{conf}->{bayes_learn_to_journal};
 
   $set |= 1 unless $self->{local_tests_only};
-  $set |= 2 if $self->{bayes_scanner}->is_scan_available();
+  $set |= 2 if $self->{bayes_scanner} && $self->{bayes_scanner}->is_scan_available();
 
   $self->{conf}->set_score_set ($set);
 
@@ -1186,7 +1190,7 @@ sub compile_now {
   }
 
   # make sure things are ready for scanning
-  $self->{bayes_scanner}->sanity_check_is_untied();
+  $self->{bayes_scanner}->sanity_check_is_untied() if $self->{bayes_scanner};
   $self->call_plugins("compile_now_finish",
 		      { use_user_prefs => $use_user_prefs,
 			keep_userstate => $deal_with_userstate});
@@ -1377,13 +1381,16 @@ sub init {
   delete $self->{config_text};
 
   # Initialize the Bayes subsystem
-  $self->{bayes_scanner} = new Mail::SpamAssassin::Bayes ($self);
+  if ($self->{conf}->{use_bayes}) {
+      require Mail::SpamAssassin::Bayes;
+      $self->{bayes_scanner} = new Mail::SpamAssassin::Bayes ($self);
+  }
   $self->{'learn_to_journal'} = $self->{conf}->{bayes_learn_to_journal};
 
   # Figure out/set our initial scoreset
   my $set = 0;
   $set |= 1 unless $self->{local_tests_only};
-  $set |= 2 if $self->{bayes_scanner}->is_scan_available();
+  $set |= 2 if $self->{bayes_scanner} && $self->{bayes_scanner}->is_scan_available();
   $self->{conf}->set_score_set ($set);
 
   if ($self->{only_these_rules}) {
