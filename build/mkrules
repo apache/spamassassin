@@ -33,6 +33,15 @@ use Getopt::Long;
 use vars qw(@opt_srcs $opt_out);
 GetOptions("src=s" => \@opt_srcs, "out=s");
 
+if (!@opt_srcs) {
+  foreach ( 'rulescode', 'rulesrc' ) {
+    if (-d $_) {
+      print "using default src $_\n";
+      push(@opt_srcs, $_);
+    }
+  }
+}
+
 die "no src" unless (@opt_srcs >= 1);
 die "no out" unless ($opt_out);
 die "unreadable out" unless (-d $opt_out);
