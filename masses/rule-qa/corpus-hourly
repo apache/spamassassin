@@ -3,368 +3,430 @@
 # settings are located in $HOME/.corpus
 
 use strict;
-use POSIX qw(nice);
-use constant MONTH => 60*60*24*30;
+use File::Path;
+use POSIX qw(nice strftime);
 
+use constant WEEK => 60*60*24;
 nice(15);
 
 my $configuration = "$ENV{HOME}/.corpus";
 my %opt;
-my $revision = "unknown";
-my %revision;
+# my $revision = "unknown";
+my %revision = ();
+my %logs_by_rev = ();
+my %is_net_revision = ();
+my %time = ();
 my @files;
 my $skip = '';
 my $time_start = time;
 
 &configure;
-&version;
+# &version;
 &init;
 &update;
 &locate;
-&rename;
+# &rename;
 &current;
 &clean_up;
 
-sub version {
-    my $line;
-    if (open(TESTING, "$opt{tree}/rules/70_testing.cf")) {
-	chomp($line = <TESTING>);
-	if ($line =~ m/^#.*Rev(?:ision)?:\s*(\S+).*/) {
-	    $revision = $1;
-	}
-	close(TESTING);
-    }
-}
+# sub version {
+# my $line;
+# if (open(TESTING, "$opt{tree}/rules/70_testing.cf")) {
+# chomp($line = <TESTING>);
+# if ($line =~ m/^#.*Rev(?:ision)?:\s*(\S+).*/) {
+# $revision = $1;
+# }
+# close(TESTING);
+# }
+# }
 
 sub configure {
-    # does rough equivalent of source
-    open(C, $configuration) || die "open failed: $configuration: $!\n";
-    while(<C>) {
+  # does rough equivalent of source
+  open(C, $configuration) || die "open failed: $configuration: $!\n";
+  while(<C>) {
 	chomp;
 	s/#.*//;
 	if (/^\s*(.*?)\s*=\s*(.*?)\s*$/) {
-	    $opt{$1} = $2;
+	  $opt{$1} = $2;
 	}
-    }
-    close(C);
+  }
+  close(C);
 }
 
 sub clean_up {
-    system "rm -f $opt{tmp}/*.$$";
+  system "rm -f $opt{tmp}/*.$$";
 }
 
 sub init {
-    $SIG{INT} = \&clean_up;
-    $SIG{TERM} = \&clean_up;
+  $SIG{INT} = \&clean_up;
+  $SIG{TERM} = \&clean_up;
 
-    $ENV{RSYNC_PASSWORD} = $opt{password};
-    $ENV{TIME} = '%e,%U,%S';
-    $ENV{TZ} = 'UTC';
+  $ENV{RSYNC_PASSWORD} = $opt{password};
+  $ENV{TIME} = '%e,%U,%S';
+  $ENV{TZ} = 'UTC';
 }
 
 sub update {
-    chdir $opt{corpus};
+  chdir $opt{corpus};
 
-    # allow non-running of rsync under some circumstances
-    if ($opt{rsync_command}) {
-      system $opt{rsync_command};
-    } else {
-      system "rsync -CPcvuzt --timeout=300 $opt{username}" . '@rsync.spamassassin.org::corpus/*.log .';
-    }
+  # allow non-running of rsync under some circumstances
+  if ($opt{rsync_command}) {
+    system $opt{rsync_command};
+  } else {
+    system "rsync -CPcvuzt --timeout=300 $opt{username}" . '@rsync.spamassassin.org::corpus/*.log .';
+  }
 
+  if (!$opt{always_update_html}) {
     if (-f "rsync.last") {
-	open(FIND, "find . -type f -newer rsync.last |");
-	my $files = "";
-	while(<FIND>) {
-	    $files .= $_;
-	}
-	close(FIND);
-	if (! $files) {
-	    print STDERR "no new corpus files\n";
-	    if (!$opt{always_update_html} && rand(24) > 1) {
-		exit 0;
-	    }
-	    else {
-		print STDERR "updating anyway\n";
-	    }
-	}
+      open(FIND, "find . -type f -newer rsync.last |");
+      my $files = "";
+      while(<FIND>) {
+        $files .= $_;
+      }
+      close(FIND);
+      if (! $files) {
+        print STDERR "no new corpus files\n";
+        if (rand(24) > 1) {
+          exit 0;
+        }
+        else {
+          print STDERR "updating anyway\n";
+        }
+      }
     }
-    open(RSYNC, "> rsync.last");
-    close(RSYNC);
-    system "chmod +r *.log";
+  }
+  open(RSYNC, "> rsync.last");
+  close(RSYNC);
+  system "chmod +r *.log";
 }
 
 sub locate {
-    chdir "$opt{tree}/masses";
-    opendir(CORPUS, $opt{corpus});
-    @files = sort readdir(CORPUS);
-    closedir(CORPUS);
+  chdir "$opt{tree}/masses";
+  opendir(CORPUS, $opt{corpus});
+  @files = sort readdir(CORPUS);
+  closedir(CORPUS);
 
-    @files = grep { /^(?:spam|ham)-(?:net-)?\w+\.log$/ && -f "$opt{corpus}/$_" && -M _ < 10 } @files;
-    @files = grep {
-	my $time = 0;
-	my $tag = 0;
-	$revision{$_} = "unknown";
-	open(FILE, "$opt{corpus}/$_");
-	while (my $line = <FILE>) {
-	    last if $line !~ /^#/;
-	    $time++ if $line =~ /\b(?!08)\d\d:\d\d:\d\d\b/;
-	    $revision{$_} = $1 if $line =~ m/(?:CVS|SVN) revision:\s*(\S+)/;
-	}
-	close(FILE);
-	if (!$time) {
-	    $skip .= "# skipped $_: time is between 0800 UTC and 0900 UTC\n";
-	}
-	$time;
-    } @files;
+  @files = grep {
+    /^(?:spam|ham)-(?:net-)?\w+\.log$/ && -f "$opt{corpus}/$_" && -M _ < 10 
+  } @files;
+
+  foreach my $file (@files) {
+    # my $time = 0;
+    my $tag = 0;
+    open(FILE, "$opt{corpus}/$file") or warn "cannot read $opt{corpus}/$file";
+    while (my $line = <FILE>) {
+      last if $line !~ /^#/;
+      if ($line =~ /, on (... ... .. )(..)(:..:.. ... ....)/) {
+        my ($datepre, $hh, $datepost) = ($1,$2,$3);
+        
+        use Time::ParseDate;
+        my $timet = Time::ParseDate::parsedate($datepre.$hh.$datepost,
+                    GMT => 1, PREFER_PAST => 1);
+        $time{$file} = $timet;
+        print "$opt{corpus}/$file: time=$timet\n";
+
+        # if ($hh != 8) { $time++; }
+      }
+      if ($line =~ m/^# SVN revision:\s*(\S+)/) {
+        my $rev = $1;
+        $revision{$file} = $rev;
+
+        $logs_by_rev{$rev} ||= [ ];
+        push (@{$logs_by_rev{$rev}}, $file);
+
+        if ($file =~ /-net-/) {
+          $is_net_revision{$rev} = 1;
+          print "$opt{corpus}/$file: rev=$rev (net)\n";
+        }
+        else {
+          print "$opt{corpus}/$file: rev=$rev (non-net)\n";
+        }
+      }
+    }
+    close(FILE);
+    # if (!$time) {
+    # $skip .= "# skipped $_: time is between 0800 UTC and 0900 UTC\n";
+    # }
+  }
 }
 
 sub rename {
-    use File::Copy qw(move);
+  use File::Copy qw(move);
 
-    my $hour = (gmtime($time_start))[2];
-    if ($hour == 9) {
+  my $hour = (gmtime($time_start))[2];
+  if ($hour == 9) {
 	chdir $opt{html};
 	opendir(HTML, $opt{html});
 	my @html = readdir(HTML);
 	closedir(HTML);
 	@html = grep { -f } @html;
 	for (@html) {
-	    move($_, "last/$_");
+	  move($_, "last/$_");
 	}
-    }
+  }
 }
 
 sub sort_all {
-    my ($a1, $a2) = ($a =~ m/(\(.*?\)|\S+)(?::(\S+))?$/);
-    my ($b1, $b2) = ($b =~ m/(\(.*?\)|\S+)(?::(\S+))?$/);
+  my ($a1, $a2) = ($a =~ m/(\(.*?\)|\S+)(?::(\S+))?$/);
+  my ($b1, $b2) = ($b =~ m/(\(.*?\)|\S+)(?::(\S+))?$/);
 
-    my $n = ($a1 cmp $b1) || (($a2 || '') cmp ($b2 || ''));
-    if ($a1 =~ /^OVERALL/)			{ $n -= 1000; }
-    elsif ($a1 =~ /^\(all messages\)/)		{ $n -= 100; }
-    elsif ($a1 =~ /^\(all messages as \%\)/)	{ $n -= 10; }
-    if ($b1 =~ /^OVERALL/)			{ $n += 1000; }
-    elsif ($b1 =~ /^\(all messages\)/)		{ $n += 100; }
-    elsif ($b1 =~ /^\(all messages as \%\)/)	{ $n += 10; }
-    return $n;
+  my $n = ($a1 cmp $b1) || (($a2 || '') cmp ($b2 || ''));
+  if ($a1 =~ /^OVERALL/)			{ $n -= 1000; }
+  elsif ($a1 =~ /^\(all messages\)/)		{ $n -= 100; }
+  elsif ($a1 =~ /^\(all messages as \%\)/)	{ $n -= 10; }
+  if ($b1 =~ /^OVERALL/)			{ $n += 1000; }
+  elsif ($b1 =~ /^\(all messages\)/)		{ $n += 100; }
+  elsif ($b1 =~ /^\(all messages as \%\)/)	{ $n += 10; }
+  return $n;
 }
 
 sub time_filter {
-    my ($after, $before) = @_;
-    if (/time=(\d+)/) {
-	return (($time_start - $1 >= MONTH * $after) &&
-		($time_start - $1 < MONTH * $before));
-    }
-    return 0;
+  my ($after, $before) = @_;
+  if (/time=(\d+)/) {
+	return (($time_start - $1 >= WEEK * $after) &&
+		($time_start - $1 < WEEK * $before));
+  }
+  return 0;
 }
 
 sub current {
-    my $classes = $opt{output_classes};
-    $classes ||= "DETAILS.new DETAILS.all DETAILS.age HTML.new HTML.all HTML.age NET.new NET.all NET.age";
+  my $classes = $opt{output_classes};
+  $classes ||= "DETAILS.new DETAILS.all DETAILS.age HTML.new HTML.all HTML.age NET.new NET.all NET.age";
 
-    foreach my $entry (split(' ', $classes)) {
-        $entry =~ /^(\S+)\.(\S+)$/;
-        my $class = $1;
-        my $age = $2;
-        if (!$age) { warn "no age in $entry"; next; }
-        gen_class ($class, $age);
+  foreach my $entry (split(' ', $classes)) {
+    $entry =~ /^(\S+)\.(\S+)$/;
+    my $class = $1;
+    my $age = $2;
+    if (!$age) { warn "no age in $entry"; next; }
+
+    foreach my $rev (sort keys %logs_by_rev) {
+      next if ($rev eq 'unknown');
+
+      if ($class =~ /NET/) {
+        next unless $is_net_revision{$rev};
+      }
+
+      gen_class ($rev, $class, $age);
     }
+  }
 }
 
 sub gen_class {
-    my ($class, $age) = @_;
+  my ($rev, $class, $age) = @_;
 
-    print STDERR "generating $class.$age\n";
+  print STDERR "\ngenerating r$rev $class.$age:\n";
 
-    next if ($class eq "NET" && $age !~ /^(?:new|all|age|7day)$/);
+  next if ($class eq "NET" && $age !~ /^(?:new|all|age|7day)$/);
 
-    my @ham = grep { /^ham/ } @files;
-    my @spam = grep { /^spam/ } @files;
+  my @ham = grep { /^ham/ } @{$logs_by_rev{$rev}};
+  my @spam = grep { /^spam/ } @{$logs_by_rev{$rev}};
 
-    print STDERR "ham: " . join(' ', @ham) . "\n";
-    print STDERR "spam: " . join(' ', @spam) . "\n";
+  print STDERR "input h: " . join(' ', @ham) . "\n";
+  print STDERR "input s: " . join(' ', @spam) . "\n";
 
-    chdir $opt{corpus};
+  chdir $opt{corpus};
 
-    # net vs. local
-    if ($class eq "NET") {
-        @ham = grep { /-net-/ } @ham;
-        @spam = grep { /-net-/ } @spam;
-        print STDERR "ham (NET): " . join(' ', @ham) . "\n";
-        print STDERR "spam (NET): " . join(' ', @spam) . "\n";
-    }
-    else {
-        # if both net and local exist, use newer
-        my %spam;
-        my %ham;
-        
-        for my $file (@spam) {
-            $spam{$1}++ if ($file =~ m/-(\w+)\.log$/);
-        }
-        for my $file (@ham) {
-            $ham{$1}++ if ($file =~ m/-(\w+)\.log$/);
-        }
-        while (my ($user, $count) = each %ham) {
-            if ($count > 1) {
-                my $nightly = "ham-$user.log";
-                my $weekly = "ham-net-$user.log";
-                if ($revision{$nightly} >= $revision{$weekly}) {
-                    @ham = grep { $_ ne $weekly } @ham;
-                }
-                else {
-                    @ham = grep { $_ ne $nightly } @ham;
-                }
-            }
-        }
-        while (my ($user, $count) = each %spam) {
-            if ($count > 1) {
-                my $nightly = "spam-$user.log";
-                my $weekly = "spam-net-$user.log";
-                if ($revision{$nightly} >= $revision{$weekly}) {
-                    @spam = grep { $_ ne $weekly } @spam;
-                }
-                else {
-                    @spam = grep { $_ ne $nightly } @spam;
-                }
-            }
-        }
-        print STDERR "ham (non-NET): " . join(' ', @ham) . "\n";
-        print STDERR "spam (non-NET): " . join(' ', @spam) . "\n";
-    }
+  # net vs. local
+  if ($class eq "NET") {
+    @ham = grep { /-net-/ } @ham;
+    @spam = grep { /-net-/ } @spam;
+  }
+  else {
+    # if both net and local exist, use newer
+    my %spam;
+    my %ham;
     
-    # age
-    if ($class eq "NET" && $age ne "7day") {
-        @ham = grep { -M "$_" < 10 } @ham;
-        @spam = grep { -M "$_" < 10 } @spam;
-        # find most recent CVS revision
-        my $wanted = 0.0;
-        for (@spam, @ham) {
-            $wanted = $revision{$_} if ($revision{$_} > $wanted);
-        }
-        @spam = grep { $revision{$_} eq $wanted } @spam;
-        @ham = grep { $revision{$_} eq $wanted } @ham;
-        print STDERR "ham (NET $age): " . join(' ', @ham) . "\n";
-        print STDERR "spam (NET $age): " . join(' ', @spam) . "\n";
+    for my $file (@spam) {
+      $spam{$1}++ if ($file =~ m/-(\w+)\.log$/);
     }
-    elsif ($age =~ /^(?:new|all|age)$/)
-    {
-        my $tt = (-M $opt{tagtime});
-        @ham = grep { !defined($tt) || ((-M "$_") < $tt) } @ham;
-        @spam = grep { !defined($tt) || ((-M "$_") < $tt) } @spam;
+    for my $file (@ham) {
+      $ham{$1}++ if ($file =~ m/-(\w+)\.log$/);
+    }
+    while (my ($user, $count) = each %ham) {
+      if ($count > 1) {
+        my $nightly = "ham-$user.log";
+        my $weekly = "ham-net-$user.log";
+        if ($revision{$nightly} >= $revision{$weekly}) {
+          @ham = grep { $_ ne $weekly } @ham;
+        }
+        else {
+          @ham = grep { $_ ne $nightly } @ham;
+        }
+      }
+    }
+    while (my ($user, $count) = each %spam) {
+      if ($count > 1) {
+        my $nightly = "spam-$user.log";
+        my $weekly = "spam-net-$user.log";
+        if ($revision{$nightly} >= $revision{$weekly}) {
+          @spam = grep { $_ ne $weekly } @spam;
+        }
+        else {
+          @spam = grep { $_ ne $nightly } @spam;
+        }
+      }
+    }
+  }
+  
+  # age
+  if ($age =~ /(\d+)day/) {
+    my $mtime = $1;
+    @ham = grep { -M "$_" < $mtime } @ham;
+    @spam = grep { -M "$_" < $mtime } @spam;
+  }
+  elsif ($class ne 'NET' && $age =~ /^(?:new|all|age)$/)
+  {
+    # just ignore the tagtime stuff; since we now may be
+    # dealing with multiple mass-checks per day, just use svn rev data
+    # my $tt = (-M $opt{tagtime});
+    # @ham = grep { !defined($tt) || ((-M "$_") < $tt) } @ham;
+    # @spam = grep { !defined($tt) || ((-M "$_") < $tt) } @spam;
+  }
 
-        if (!$opt{ignore_revisions}) {
-            @ham = grep { $revision{$_} eq $revision } @ham;
-            @spam = grep { $revision{$_} eq $revision } @spam;
-        }
-        print STDERR "ham (non-NET $age): " . join(' ', @ham) . "\n";
-        print STDERR "spam (non-NET $age): " . join(' ', @spam) . "\n";
+  print STDERR "selected h: " . join(' ', @ham) . "\n";
+  print STDERR "selected s: " . join(' ', @spam) . "\n";
+  
+  # we cannot continue if we have no files that match the criteria...
+  # demand at least 1 ham and 1 spam file
+  if (scalar @spam <= 0 || scalar @ham <= 0) {
+    warn "not enough files found matching criteria ($rev $class $age)\n";
+    return;
+  }
+
+  my $time = $time{$ham[0]};        # use the ham file's time
+  my $dir = create_outputdir($rev, $time);
+
+  my $fname = "$dir/$class.$age";
+
+  # now, if the target file already exists, check to see if it's newer
+  # than all the sources, make-style
+  if (-f $fname) {
+    my $targetfreshness = (-M $fname);
+    my $needsrebuild = 0;
+
+    foreach my $srcfile (@spam, @ham) {
+      my $srcfreshness = (-M $srcfile);
+      if ($targetfreshness > $srcfreshness) {     # src is fresher
+        print "$fname is older than $srcfile: $targetfreshness > $srcfreshness\n";
+        $needsrebuild = 1;
+        last;
+      }
     }
-    elsif ($age =~ /(\d+)day/) {
-        my $mtime = $1;
-        @ham = grep { -M "$_" < $mtime } @ham;
-        @spam = grep { -M "$_" < $mtime } @spam;
-        print STDERR "ham (non-NET $age): " . join(' ', @ham) . "\n";
-        print STDERR "spam (non-NET $age): " . join(' ', @spam) . "\n";
+
+    if (!$needsrebuild) {
+      print "existing: $fname, fresher than sources\n";
+      return;
     }
+  }
+
+  open(OUT, "> $fname") or warn "cannot write to $fname";
+  print OUT "# ham results used for $rev $class $age: " . join(" ", @ham) . "\n";
+  print OUT "# spam results used for $rev $class $age: " . join(" ", @spam) . "\n";
+  for (@ham) {
+    print OUT "# $_ was at r$revision{$_}\n";
+  }
+  for (@spam) {
+    print OUT "# $_ was at r$revision{$_}\n";
+  }
+
+  print "creating: ${fname}...\n";
+
+  my $flags = "";
+  $flags = "-t net -s 1" if $class eq "NET";
+  $flags = "-M HTML_MESSAGE" if $class eq "HTML";
+  $flags = "-o" if $class eq "OVERLAP";
+
+  if ($age eq "all") {
+    my %spam;
+    my %ham;
+    my @output;
     
-    open(OUT, "> $opt{html}/$class.$age");
-    print OUT "# ham results used: " . join(" ", @ham) . "\n";
-    print OUT "# spam results used: " . join(" ", @spam) . "\n";
-    for (@ham) {
-        print OUT "# $_=$revision{$_}\n" if $revision{$_} ne $revision;
+    for my $file (@spam) {
+      $spam{$1} = $file if ($file =~ m/-(\w+)\.log$/);
     }
-    for (@spam) {
-        print OUT "# $_=$revision{$_}\n" if $revision{$_} ne $revision;
+    for my $file (@ham) {
+      $ham{$1} = $file if ($file =~ m/-(\w+)\.log$/);
+    }
+    unlink "$opt{tmp}/ham.log.$$";
+    unlink "$opt{tmp}/spam.log.$$";
+
+    if (scalar keys %spam <= 0 || scalar keys %ham <= 0) {
+      warn "no files found for $class.$age";
+      return;
     }
 
-    my $flags = "";
-    $flags = "-t net -s 1" if $class eq "NET";
-    $flags = "-M HTML_MESSAGE" if $class eq "HTML";
-    $flags = "-o" if $class eq "OVERLAP";
-
-    if ($age eq "all") {
-        my %spam;
-        my %ham;
-        my @output;
-        
-        for my $file (@spam) {
-            $spam{$1} = $file if ($file =~ m/-(\w+)\.log$/);
-        }
-        for my $file (@ham) {
-            $ham{$1} = $file if ($file =~ m/-(\w+)\.log$/);
-        }
-        unlink "$opt{tmp}/ham.log.$$";
-        unlink "$opt{tmp}/spam.log.$$";
-
-        if (!(scalar keys %spam && scalar keys %ham)) {
-            warn "no files found for $class.$age";
-            return;
-        }
-
-        for my $user (sort keys %spam) {
-            next unless defined $ham{$user};
-            chdir "$opt{tree}/masses";
-            system("cat $opt{corpus}/$ham{$user} >> $opt{tmp}/ham.log.$$");
-            system("cat $opt{corpus}/$spam{$user} >> $opt{tmp}/spam.log.$$");
-            open(IN, "./hit-frequencies -xpa $flags $opt{corpus}/$spam{$user} $opt{corpus}/$ham{$user} |");
-            while(<IN>) {
-                chomp;
-                push @output, "$_:$user\n";
-            }
-            close(IN);
-        }
-        open(IN, "./hit-frequencies -xpa $flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
-        while(<IN>) {
-            push @output, $_;
-        }
-        close(IN);
-        for (sort sort_all @output) {
-            print OUT $_;
-        }
+    chdir "$opt{tree}/masses";
+    for my $user (sort keys %spam) {
+      next unless $ham{$user};
+      system("cat $opt{corpus}/$ham{$user} >> $opt{tmp}/ham.log.$$");
+      system("cat $opt{corpus}/$spam{$user} >> $opt{tmp}/spam.log.$$");
+      open(IN, "./hit-frequencies -xpa $flags $opt{corpus}/$spam{$user} $opt{corpus}/$ham{$user} |");
+      while(<IN>) {
+        chomp;
+        push @output, "$_:$user\n";
+      }
+      close(IN);
     }
-    elsif ($age eq "age") {
-        my @output;
-
-        for my $which (("0-1", "1-3", "3-6")) {
-            my ($after, $before) = split(/-/, $which);
-            # get and filter logs
-            chdir $opt{corpus};
-            for my $type (("ham", "spam")) {
-                open(TMP, "> $opt{tmp}/$type.log.$$");
-                my @array = ($type eq "ham") ? @ham : @spam;
-                for my $file (@array) {
-                    open(IN, $file);
-                    while (<IN>) {
-                        print TMP $_ if time_filter($after, $before);
-                    }
-                    close(IN);
-                }
-                close (TMP);
-            }
-            # print out by age
-            chdir "$opt{tree}/masses";
-            open(IN, "./hit-frequencies -xpa $flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
-            while(<IN>) {
-                chomp;
-                push @output, "$_:$which\n";
-            }
-            close(IN);
-        }
-        for (sort sort_all @output) {
-            print OUT $_;
-        }
+    open(IN, "./hit-frequencies -xpa $flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
+    while(<IN>) {
+      push @output, $_;
     }
-    elsif (@ham && @spam) {
-        # get logs
-        system("cat " . join(" ", @ham) . " > $opt{tmp}/ham.log.$$");
-        system("cat " . join(" ", @spam) . " > $opt{tmp}/spam.log.$$");
+    close(IN);
+    for (sort sort_all @output) { print OUT; }
+  }
+  elsif ($age eq "age") {
+    my @output;
 
-        chdir "$opt{tree}/masses";
-        open(IN, "./hit-frequencies -xpa $flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
-        while(<IN>) {
-            print(OUT);
+    for my $which (("0-1", "1-2", "2-3", "3-6")) {
+      my ($after, $before) = split(/-/, $which);
+      # get and filter logs
+      chdir $opt{corpus};
+      for my $type (("ham", "spam")) {
+        open(TMP, "> $opt{tmp}/$type.log.$$");
+        my @array = ($type eq "ham") ? @ham : @spam;
+        for my $file (@array) {
+          open(IN, $file) or warn "cannot read $file";
+          while (<IN>) {
+            print TMP $_ if time_filter($after, $before);
+          }
+          close(IN);
         }
-        close(IN);
+        close (TMP);
+      }
+      # print out by age
+      chdir "$opt{tree}/masses";
+      open(IN, "./hit-frequencies -xpa $flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
+      while(<IN>) {
+        chomp;
+        push @output, "$_:$which\n";
+      }
+      close(IN);
     }
-    close(OUT);
+    for (sort sort_all @output) { print OUT; }
+  }
+  elsif (@ham && @spam) {
+    # get logs
+    system("cat " . join(" ", @ham) . " > $opt{tmp}/ham.log.$$");
+    system("cat " . join(" ", @spam) . " > $opt{tmp}/spam.log.$$");
+
+    chdir "$opt{tree}/masses";
+    open(IN, "./hit-frequencies -xpa $flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
+    while(<IN>) { print(OUT); }
+    close(IN);
+  }
+
+  my $bytes = (-s OUT);
+  print "created: $fname, $bytes bytes\n";
+  close(OUT);
 }
+
+sub create_outputdir {
+  my ($rev, $time) = @_;
+  my $dir = $opt{html} .'/'. strftime("%Y%m%d", gmtime($time)) . "/r$rev";
+  # print "output dir: $dir\n";
+  if (!-d $dir) {
+    mkpath($dir) or warn "failed to mkdir $dir";
+  }
+  return $dir;
+}
+
