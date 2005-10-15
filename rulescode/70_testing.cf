@@ -86,3 +86,7 @@ body T_DEAR_WINNER /\bdear.{1,20}winner/i
 meta T_SUBJECT_NEEDS_ENCODING    (!__SUBJECT_ENCODED_B64 && !__SUBJECT_ENCODED_QP) && __SUBJECT_NEEDS_MIME
 
 body T_SPACED_PHONE /(?:\d\s){2}\d\s?[.-]\s?(?:\d\s){2}\d\s?[.-]\s?(?:\d\s){3}\d/
+
+header __SUBJ_RE_NUM	Subject =~ /^\s*Re\[\d+\]:/i
+meta T_SUBJ_RE_NUM	!__THEBAT_MUA && __SUBJ_RE_NUM
+describe T_SUBJ_RE_NUM	Subject is faking 'The Bat!' responses
