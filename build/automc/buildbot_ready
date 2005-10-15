@@ -2,13 +2,14 @@
 
 use strict;
 
+my $perl = $0;
 my $command = shift @ARGV;
 
-elsif ($command eq 'start') {
+if ($command eq 'start') {
   do_start();
-
 }
 elsif ($command eq 'stop') {
+  do_stop();
 }
 exit;
 
@@ -19,3 +20,8 @@ sub do_start {
   system ("$perl Makefile.PL < /dev/null");
   system ("make");
 }
+
+sub do_stop {
+  # TODO
+}
+
