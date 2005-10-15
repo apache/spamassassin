@@ -1,4 +1,4 @@
-!/local/perl586/bin/perl -w
+#!/local/perl586/bin/perl -w
 my $automcdir = "/home/automc/svn/spamassassin/masses/rule-qa/automc";
 
 ###!/usr/bin/perl -w
