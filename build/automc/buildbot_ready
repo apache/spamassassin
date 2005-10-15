@@ -1,0 +1,21 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+my $command = shift @ARGV;
+
+elsif ($command eq 'start') {
+  do_start();
+
+}
+elsif ($command eq 'stop') {
+}
+exit;
+
+
+
+sub do_start {
+  # ensure all pre-reqs (and rules) are built
+  system ("$perl Makefile.PL < /dev/null");
+  system ("make");
+}
