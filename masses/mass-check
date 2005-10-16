@@ -138,7 +138,7 @@ require "rules.pl" if $opt_reuse;
 # test messages for the mass-check
 my @targets;
 if ($opt_f) {
-  open(F, $opt_f) || die $!;
+  open(F, $opt_f) || die "cannot read target $opt_f: $!";
   push(@targets, map { chomp; $_ } <F>);
   close(F);
 }
