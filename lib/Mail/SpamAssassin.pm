@@ -206,6 +206,11 @@ from files, read them in yourself and set this instead.  As a result, this will
 override the settings for C<rules_filename>, C<site_rules_filename>,
 and C<userprefs_filename>.
 
+=item force_ipv4
+
+If set to 1, DNS tests will not attempt to use IPv6. Use if the existing tests
+for IPv6 availablity produce incorrect results or crashes.
+
 =item languages_filename
 
 If you want to be able to use the language-guessing rule

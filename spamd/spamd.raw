@@ -166,6 +166,7 @@ GetOptions(
   'helper-home-dir|H:s'      => \$opt{'home_dir_for_helpers'},
   'help|h'                   => \$opt{'help'},
   'ident-timeout=f'          => \$opt{'ident-timeout'},
+  'ipv4only|ipv4-only|ipv4'  => \$opt{'force_ipv4'},
   'ldap-config!'             => \$opt{'ldap-config'},
   'listen-ip|ip-address|i:s' => \$opt{'listen-ip'},
   'local!'                   => \$opt{'local'},
@@ -685,6 +686,7 @@ my $spamtest = Mail::SpamAssassin->new(
     dont_copy_prefs      => $dontcopy,
     rules_filename       => ( $opt{'configpath'} || 0 ),
     site_rules_filename  => ( $opt{'siteconfigpath'} || 0 ),
+    force_ipv4           => ( $opt{'force_ipv4'} || 0 ),
     local_tests_only     => ( $opt{'local'} || 0 ),
     debug                => ( $opt{'debug'} || 0 ),
     paranoid             => ( $opt{'paranoid'} || 0 ),
@@ -2181,6 +2183,7 @@ Options:
  -d, --daemonize                    Daemonize
  -h, --help                         Print usage message.
  -i [ipaddr], --listen-ip=ipaddr    Listen on the IP ipaddr
+ --ipv4only, --ipv4-only, --ipv4    Disable attempted use of ipv6 for DNS
  -p port, --port=port               Listen on specified port
  -m num, --max-children=num         Allow maximum num children
  --min-children=num                 Allow minimum num children
@@ -2498,6 +2501,11 @@ diagnostic output on bayes, learn, and dns, use:
 
 Higher priority informational messages that are suitable for logging in normal
 circumstances are available with an area of "info".
+
+=item B< --ipv4only>, B<--ipv4-only>, B<--ipv4>
+
+Do not use IPv6 for DNS tests. Use if the existing tests
+for IPv6 availablity produce incorrect results or crashes.
 
 =item B<-L>, B<--local>
 
