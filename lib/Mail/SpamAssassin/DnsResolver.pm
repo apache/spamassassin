@@ -44,7 +44,7 @@ use Mail::SpamAssassin::Logger;
 use IO::Socket::INET;
 use Errno qw(EINVAL EADDRINUSE);
 
-use constant HAS_SOCKET_INET6 => eval { require IO::Socket::INET6 };
+use constant HAS_SOCKET_INET6 => eval { require IO::Socket::INET6; defined AF_INET6 };
 
 our @ISA = qw();
 
@@ -81,13 +81,26 @@ sub load_resolver {
 
   if (defined $self->{res}) { return 1; }
   $self->{no_resolver} = 1;
-
+  # force only ipv4 if no IO::Socket::INET6 or ipv6 doesn't work
+  my $force_ipv4 = (!HAS_SOCKET_INET6) || $self->{main}->{force_ipv4} ||
+    !eval {
+      my $sock6 = IO::Socket::INET6->new(
+                                         LocalAddr => "::",
+                                         Proto     => 'udp',
+                                         );
+      if ($sock6) {
+        $sock6->close();
+        1;
+      }
+    };
+  
   eval {
     require Net::DNS;
     $self->{res} = Net::DNS::Resolver->new;
     if (defined $self->{res}) {
       $self->{no_resolver} = 0;
-      $self->{retry} = 1;               # retries for non-nackgrounded query
+      $self->{force_ipv4} = $force_ipv4;
+      $self->{retry} = 1;               # retries for non-backgrounded query
       $self->{retrans} = 3;   # initial timeout for "non-backgrounded" query run in background
       $self->{res}->retry(1);           # If it fails, it fails
       $self->{res}->retrans(0);         # If it fails, it fails
@@ -97,10 +110,12 @@ sub load_resolver {
       $self->{res}->udp_timeout(3);     # timeout of 3 seconds only
       $self->{res}->persistent_tcp(0);  # bug 3997
       $self->{res}->persistent_udp(0);  # bug 3997
+      $self->{res}->force_v4($force_ipv4);
     }
     1;
   };   #  or warn "dns: eval failed: $@ $!\n";
 
+  dbg("dns: no ipv6") if $force_ipv4;
   dbg("dns: is Net::DNS::Resolver available? " .
        ($self->{no_resolver} ? "no" : "yes"));
   if (!$self->{no_resolver} && defined $Net::DNS::VERSION) {
@@ -123,7 +138,7 @@ sub get_resolver {
 
 =item $res->nameservers()
 
-Wrapper for Net::DNS::Reslolver->nameservers to get or set list of nameservers
+Wrapper for Net::DNS::Resolver->nameservers to get or set list of nameservers
 
 =cut
 
@@ -156,13 +171,14 @@ sub connect_sock {
   my $ip64 = IP_ADDRESS;
   my $ip4 = IPV4_ADDRESS;
   my $ns = $self->{res}->{nameservers}[0];
-  my $ipv6 = 0;
+  my $ipv6 = 0; # this will be set if we have an ipv6 nameserver
+  my $ipv6opt = !($self->{force_ipv4});
 
   # now, attempt to set the family to AF_INET6 if we can.  Some
   # platforms don't have it (bug 4412 comment 29)...
   # also, only set $ipv6 to true if that succeeds.
   my $family;
-  if (HAS_SOCKET_INET6 && $ns=~/^${ip64}$/o && $ns!~/^${ip4}$/o) {
+  if ($ipv6opt && $ns=~/^${ip64}$/o && $ns!~/^${ip4}$/o) {
     eval '$family = AF_INET6; $ipv6 = 1;';
   }
   if (!defined $family) {
@@ -186,7 +202,7 @@ sub connect_sock {
         Domain => $family,
     );
 
-    if (HAS_SOCKET_INET6) {
+    if ($ipv6opt) {
       $sock = IO::Socket::INET6->new(%args);
     } else {
       $sock = IO::Socket::INET->new(%args);
