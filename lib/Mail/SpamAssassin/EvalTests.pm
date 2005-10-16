@@ -3171,4 +3171,10 @@ sub check_from_format {
   return 1;
 }
 
+sub subject_length {
+  my ($self, $min, $max) = @_;
+  my $len = length($self->get('Subject'));
+  return($len < $max && $len >= $min);
+}
+
 1;

@@ -90,3 +90,9 @@ body T_SPACED_PHONE /(?:\d\s){2}\d\s?[.-]\s?(?:\d\s){2}\d\s?[.-]\s?(?:\d\s){3}\d
 header __SUBJ_RE_NUM	Subject =~ /^\s*Re\[\d+\]:/i
 meta T_SUBJ_RE_NUM	!__THEBAT_MUA && __SUBJ_RE_NUM
 describe T_SUBJ_RE_NUM	Subject is faking 'The Bat!' responses
+
+# tvd
+# 1.345   1.5187   0.0000    1.000   1.00    0.01  T_SUBJ_LEN_SHORT
+# 0.224   0.2525   0.0000    1.000   0.50    0.01  T_SUBJ_LEN_LONG
+header T_SUBJ_LEN_SHORT eval:subject_length('0','4')
+header T_SUBJ_LEN_LONG eval:subject_length('149','999')
