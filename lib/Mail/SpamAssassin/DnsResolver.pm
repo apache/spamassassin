@@ -44,7 +44,7 @@ use Mail::SpamAssassin::Logger;
 use IO::Socket::INET;
 use Errno qw(EINVAL EADDRINUSE);
 
-use constant HAS_SOCKET_INET6 => eval { require IO::Socket::INET6; defined AF_INET6 };
+use constant HAS_SOCKET_INET6 => eval { require IO::Socket::INET6; };
 
 our @ISA = qw();
 
@@ -82,10 +82,23 @@ sub load_resolver {
   if (defined $self->{res}) { return 1; }
   $self->{no_resolver} = 1;
   # force only ipv4 if no IO::Socket::INET6 or ipv6 doesn't work
+  # to be safe test both ipv6 and ipv4 addresses in INET6
   my $force_ipv4 = (!HAS_SOCKET_INET6) || $self->{main}->{force_ipv4} ||
     !eval {
       my $sock6 = IO::Socket::INET6->new(
                                          LocalAddr => "::",
+                                         Proto     => 'udp',
+                                         );
+      if ($sock6) {
+        $sock6->close();
+        1;
+      }
+    } ||
+    !eval {
+      my $sock6 = IO::Socket::INET6->new(
+                                         LocalAddr => "0.0.0.0",
+                                         PeerAddr => "0.0.0.0",
+					 PeerPort => 53,
                                          Proto     => 'udp',
                                          );
       if ($sock6) {
@@ -171,21 +184,17 @@ sub connect_sock {
   my $ip64 = IP_ADDRESS;
   my $ip4 = IPV4_ADDRESS;
   my $ns = $self->{res}->{nameservers}[0];
-  my $ipv6 = 0; # this will be set if we have an ipv6 nameserver
   my $ipv6opt = !($self->{force_ipv4});
 
-  # now, attempt to set the family to AF_INET6 if we can.  Some
-  # platforms don't have it (bug 4412 comment 29)...
-  # also, only set $ipv6 to true if that succeeds.
-  my $family;
+  # ensure families of src and dest addresses match (bug 4412 comment 29)
+  my $srcaddr;
   if ($ipv6opt && $ns=~/^${ip64}$/o && $ns!~/^${ip4}$/o) {
-    eval '$family = AF_INET6; $ipv6 = 1;';
-  }
-  if (!defined $family) {
-    $family = AF_INET;       # that didn't work ;)
+    $srcaddr = "::";
+  } else {
+    $srcaddr = "0.0.0.0";
   }
 
-  dbg("dns: name server: $ns, family: $family, ipv6: $ipv6");
+  dbg("dns: name server: $ns, LocalAddr: $srcaddr");
 
   # find next available unprivileged port (1024 - 65535)
   # starting at a random value to spread out use of ports
@@ -199,7 +208,7 @@ sub connect_sock {
         Proto => 'udp',
         LocalPort => $lport,
         Type => SOCK_DGRAM,
-        Domain => $family,
+        LocalAddr => $srcaddr,
     );
 
     if ($ipv6opt) {
@@ -213,8 +222,6 @@ sub connect_sock {
     } elsif ($! == EADDRINUSE) {  # in use, let's try another source port
       dbg("dns: UDP port $lport already in use, trying another port");
     } else {
-      # did we fail due to the attempted use of an IPv6 nameserver?
-      $self->_ipv6_ns_warning()  if (!$ipv6 && $errno==EINVAL);
       die "Error creating a DNS resolver socket: $errno";
     }
   }
