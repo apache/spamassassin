@@ -27,12 +27,14 @@ use IO::Socket;
 use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::AICache;
 
 use constant BIG_BYTES => 256*1024;	# 256k is a big email
 use constant BIG_LINES => BIG_BYTES/65;	# 65 bytes/line is a good approximation
 
 use vars qw {
   $MESSAGES
+  $AICache
 };
 
 my @ISA = qw($MESSAGES);
@@ -45,9 +47,10 @@ Mail::SpamAssassin::ArchiveIterator - find and process messages one at a time
 
   my $iter = new Mail::SpamAssassin::ArchiveIterator(
     { 
-      'opt_j'   => 0,
-      'opt_n'   => 1,
-      'opt_all' => 1,
+      'opt_j'     => 0,
+      'opt_n'     => 1,
+      'opt_all'   => 1,
+      'opt_cache' => 1,
     }
   );
 
@@ -158,6 +161,11 @@ in the C<wanted_sub> callback below.  Set this to 0 to avoid this;
 it's a good idea to set this to 0 if you can, as it imposes a performance
 hit.
 
+=item opt_cache
+
+Set to 0 (default) if you don't want to use cached information to help speed
+up ArchiveIterator.  Set to 1 to enable.
+
 =item wanted_sub
 
 Reference to a subroutine which will process message data.  Usually
@@ -194,6 +202,7 @@ sub new {
   $self->{opt_head} = 0 unless (defined $self->{opt_head});
   $self->{opt_tail} = 0 unless (defined $self->{opt_tail});
   $self->{opt_want_date} = 1 unless (defined $self->{opt_want_date});
+  $self->{opt_cache} = 0 unless (defined $self->{opt_cache});
 
   # If any of these options are set, we need to figure out the message's
   # receive date at scan time.  opt_n == 0, opt_after, opt_before
@@ -887,8 +896,18 @@ sub scan_directory {
     return;
   }
 
+  if ($self->{opt_cache}) {
+    $AICache = Mail::SpamAssassin::AICache->new({	'type' => 'dir',
+      							'path' => $folder,
+					        });
+  }
+
   foreach my $mail (@files) {
     $self->scan_file($class, $mail);
+  }
+
+  if (defined $AICache) {
+    $AICache = $AICache->finish();
   }
 }
 
@@ -899,14 +918,23 @@ sub scan_file {
     push(@{$self->{$class}}, scan_index_pack(AI_TIME_UNKNOWN, $class, "f", $mail));
     return;
   }
-  my $header;
-  mail_open($mail) or return;
-  while (<INPUT>) {
-    last if /^\s*$/;
-    $header .= $_;
+
+  my $date;
+
+  unless (defined $AICache and $date = $AICache->check($mail)) {
+    my $header;
+    mail_open($mail) or return;
+    while (<INPUT>) {
+      last if /^\s*$/;
+      $header .= $_;
+    }
+    close(INPUT);
+    $date = Mail::SpamAssassin::Util::receive_date($header);
+    if (defined $AICache) {
+      $AICache->update($mail, $date);
+    }
   }
-  close(INPUT);
-  my $date = Mail::SpamAssassin::Util::receive_date($header);
+
   return if !$self->message_is_useful_by_date($date);
   push(@{$self->{$class}}, scan_index_pack($date, $class, "f", $mail));
 }
@@ -935,45 +963,69 @@ sub scan_mailbox {
       die "archive-iterator: compressed mbox folders are not supported at this time\n";
     }
 
-    mail_open($file) or return;
-    
-    my $start = 0;		# start of a message
-    my $where = 0;		# current byte offset
-    my $first = '';		# first line of message
-    my $header = '';		# header text
-    my $in_header = 0;		# are in we a header?
-    while (!eof INPUT) {
-      my $offset = $start;	# byte offset of this message
-      my $header = $first;	# remember first line
-      while (<INPUT>) {
-	if ($in_header) {
-	  if (/^\s*$/) {
-	    $in_header = 0;
-	  }
-	  else {
-	    $header .= $_;
-	  }
-	}
-	if (substr($_,0,5) eq "From ") {
-	  $in_header = 1;
-	  $first = $_;
-	  $start = $where;
-	  $where = tell INPUT;
-	  last;
-	}
-	$where = tell INPUT;
-      }
-      if ($header) {
-	my $date = Mail::SpamAssassin::Util::receive_date($header);
+    my $info = {};
+    my $count;
 
-	if ($self->{determine_receive_date}) {
-	  next if !$self->message_is_useful_by_date($date);
-	}
-
-	push(@{$self->{$class}}, scan_index_pack($date, $class, "m", "$file.$offset"));
+    if ($self->{opt_cache}) {
+      $AICache = Mail::SpamAssassin::AICache->new({	'type' => 'mbox',
+      							'path' => $file,
+					          });
+      if ($count = $AICache->count()) {
+        $info = $AICache->check();
       }
     }
-    close INPUT;
+
+    unless ($count) {
+      mail_open($file) or return;
+    
+      my $start = 0;		# start of a message
+      my $where = 0;		# current byte offset
+      my $first = '';		# first line of message
+      my $header = '';		# header text
+      my $in_header = 0;		# are in we a header?
+      while (!eof INPUT) {
+        my $offset = $start;	# byte offset of this message
+        my $header = $first;	# remember first line
+        while (<INPUT>) {
+	  if ($in_header) {
+	    if (/^\s*$/) {
+	      $in_header = 0;
+	    }
+	    else {
+	      $header .= $_;
+	    }
+	  }
+	  if (substr($_,0,5) eq "From ") {
+	    $in_header = 1;
+	    $first = $_;
+	    $start = $where;
+	    $where = tell INPUT;
+	    last;
+	  }
+	  $where = tell INPUT;
+        }
+        if ($header) {
+	  $info->{$offset} = Mail::SpamAssassin::Util::receive_date($header);
+	}
+      }
+      close INPUT;
+    }
+
+    while(my($k,$v) = each %{$info}) {
+      if (defined $AICache && !$count) {
+	$AICache->update($k, $v);
+      }
+
+      if ($self->{determine_receive_date}) {
+        next if !$self->message_is_useful_by_date($v);
+      }
+
+      push(@{$self->{$class}}, scan_index_pack($v, $class, "m", "$file.$k"));
+    }
+
+    if (defined $AICache) {
+      $AICache = $AICache->finish();
+    }
   }
 }
 
@@ -1000,46 +1052,72 @@ sub scan_mbx {
     if ($folder =~ /\.(?:gz|bz2)$/) {
       die "archive-iterator: compressed mbx folders are not supported at this time\n";
     }
-    mail_open($file) or return;
 
-    # check the mailbox is in mbx format
-    $fp = <INPUT>;
-    if ($fp !~ /\*mbx\*/) {
-      die "archive-iterator: error: mailbox not in mbx format!\n";
-    }
+    my $info = {};
+    my $count;
 
-    # skip mbx headers to the first email...
-    seek(INPUT, 2048, 0);
-
-    my $sep = MBX_SEPARATOR;
-
-    while (<INPUT>) {
-      if ($_ =~ /$sep/) {
-	my $offset = tell INPUT;
-	my $size = $2;
-
-	# gather up the headers...
-	my $header = '';
-	while (<INPUT>) {
-	  last if (/^\s*$/);
-	  $header .= $_;
-	}
-
-	my $date = Mail::SpamAssassin::Util::receive_date($header);
-
-	if ($self->{determine_receive_date}) {
-	  next if !$self->message_is_useful_by_date($date);
-	}
-
-	push(@{$self->{$class}}, scan_index_pack($date, $class, "b", "$file.$offset"));
-
-	seek(INPUT, $offset + $size, 0);
-      }
-      else {
-	die "archive-iterator: error: failure to read message body!\n";
+    if ($self->{opt_cache}) {
+      $AICache = Mail::SpamAssassin::AICache->new({	'type' => 'mbx',
+      							'path' => $file,
+					          });
+      if ($count = $AICache->count()) {
+        $info = $AICache->check();
       }
     }
-    close INPUT;
+
+    unless ($count) {
+      mail_open($file) or return;
+
+      # check the mailbox is in mbx format
+      $fp = <INPUT>;
+      if ($fp !~ /\*mbx\*/) {
+        die "archive-iterator: error: mailbox not in mbx format!\n";
+      }
+
+      # skip mbx headers to the first email...
+      seek(INPUT, 2048, 0);
+
+      my $sep = MBX_SEPARATOR;
+
+      while (<INPUT>) {
+        if ($_ =~ /$sep/) {
+	  my $offset = tell INPUT;
+	  my $size = $2;
+
+	  # gather up the headers...
+	  my $header = '';
+	  while (<INPUT>) {
+	    last if (/^\s*$/);
+	    $header .= $_;
+	  }
+
+	  $info->{"$file.$offset"} = Mail::SpamAssassin::Util::receive_date($header);
+
+	  # go onto the next message
+	  seek(INPUT, $offset + $size, 0);
+	}
+        else {
+	  die "archive-iterator: error: failure to read message body!\n";
+        }
+      }
+      close INPUT;
+    }
+
+    while(my($k,$v) = each %{$info}) {
+      if (defined $AICache && !$count) {
+	$AICache->update($k, $v);
+      }
+
+      if ($self->{determine_receive_date}) {
+        next if !$self->message_is_useful_by_date($v);
+      }
+
+      push(@{$self->{$class}}, scan_index_pack($v, $class, "b", "$file.$k"));
+    }
+
+    if (defined $AICache) {
+      $AICache = $AICache->finish();
+    }
   }
 }
 
