@@ -1295,14 +1295,26 @@ sub finish_tests {
     if (defined &{'_head_tests_'.$clean_priority}) {
       undef &{'_head_tests_'.$clean_priority};
     }
+    foreach my $rulename (keys %{$conf->{head_tests}->{$priority}}) {
+      undef &{$rulename.'_head_test'};
+    }
     if (defined &{'_body_tests_'.$clean_priority}) {
       undef &{'_body_tests_'.$clean_priority};
+    }
+    foreach my $rulename (keys %{$conf->{body_tests}->{$priority}}) {
+      undef &{$rulename.'_body_test'};
     }
     if (defined &{'_body_uri_tests_'.$clean_priority}) {
       undef &{'_body_uri_tests_'.$clean_priority};
     }
+    foreach my $rulename (keys %{$conf->{uri_tests}->{$priority}}) {
+      undef &{$rulename.'_uri_test'};
+    }
     if (defined &{'_rawbody_tests_'.$clean_priority}) {
       undef &{'_rawbody_tests_'.$clean_priority};
+    }
+    foreach my $rulename (keys %{$conf->{rawbody_tests}->{$priority}}) {
+      undef &{$rulename.'_rawbody_test'};
     }
     if (defined &{'_full_tests_'.$clean_priority}) {
       undef &{'_full_tests_'.$clean_priority};
