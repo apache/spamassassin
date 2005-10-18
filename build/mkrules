@@ -28,10 +28,18 @@ sub usage {
 use strict;
 use File::Find;
 use File::Copy;
-
 use Getopt::Long;
-use vars qw(@opt_srcs $opt_out $opt_sandboxout);
-GetOptions("src=s" => \@opt_srcs, "out=s", "sandboxout=s");
+
+use vars qw(
+    @opt_srcs $opt_out $opt_sandboxout $opt_manifest
+    $opt_manifestskip
+);
+GetOptions("src=s" => \@opt_srcs,
+    "out=s",
+    "sandboxout=s",
+    "manifest=s",
+    "manifestskip=s"
+  );
 
 if (!@opt_srcs) {
   foreach ( 'rulescode', 'rulesrc' ) {
@@ -46,19 +54,31 @@ die "no src" unless (@opt_srcs >= 1);
 die "no out" unless ($opt_out);
 die "unreadable out" unless (-d $opt_out);
 
-$opt_sandboxout ||= "$opt_out/70_sandbox.cf";
+$opt_sandboxout ||= "70_sandbox.cf";
 
 # source files that need compilation, and their targets
 my $needs_compile = { };
 my $current_src;
 
 foreach my $src (@opt_srcs) {
-  die "unreadable src" unless (-d $src);
+  if (!-d $src) {
+    warn "WARNING: unreadable src '$src'\n";
+    next;
+  }
   $current_src = $src;
   File::Find::find ({
           wanted => \&wanted,
           no_chdir => 1
         }, $src);
+}
+
+my $file_manifest = { };
+my $file_manifest_skip = [ ];
+if ($opt_manifest) {
+  read_manifest($opt_manifest);
+}
+if ($opt_manifestskip) {
+  read_manifest_skip($opt_manifestskip);
 }
 
 # context for the rules compiler
@@ -253,6 +273,14 @@ sub rule_file_compile_sandbox {
         # is set to "0".  iow: publish RULE_NAME [(0 | 1)]  [default: 1]
         if (!defined $val) { $val = '1'; }
       }
+      elsif ($command eq 'pubfile') {
+        if (!filename_in_manifest($opt_out.'/'.$val)) {
+          my $sbout = $opt_out.'/'.$opt_sandboxout;
+          warn "$val: WARNING: not listed in manifest file, using $sbout\n";
+          $val = $sbout;
+        }
+      }
+
       $rules->{$name}->{$command} = $val;
     }
     elsif (/^
@@ -287,7 +315,7 @@ sub rule_file_compile_sandbox {
       $pubfile = ($rules->{$name}->{pubfile} || $filename);
       $pubfile = $opt_out.'/'.$pubfile;
     } else {
-      $pubfile = $opt_sandboxout;
+      $pubfile = $opt_out.'/'.$opt_sandboxout;
     }
     $output_files->{$pubfile} = 1;
 
@@ -373,7 +401,7 @@ sub rule_file_compile_core {
       my $name = $2;
       my $val = $3;
 
-      warn "$f: cannot use 'publish' in non-sandbox files\n";
+      warn "$f: WARNING: cannot use 'publish' in non-sandbox files\n";
     }
   }
   close IN;
@@ -386,6 +414,11 @@ sub write_output_files {
   foreach my $pubfile (sort keys %$output_files) {
     if (-f $pubfile) {
       unlink $pubfile or die "cannot remove output file '$pubfile'";
+    }
+
+    if (!filename_in_manifest($pubfile)) {
+      # if (!filename_in_manifest($opt_out.'/'.$val)) {
+      warn "$pubfile: WARNING: not listed in manifest file\n";
     }
 
     if ($output_file_text->{$pubfile}) {
@@ -434,4 +467,35 @@ sub output_file_header {
   my $now = scalar localtime time;
   return "# [compiled from '$filename' on $now]\n";
 }
+
+sub read_manifest {
+  my ($mfest) = @_;
+  open (IN, "<$mfest") or warn "cannot read $mfest";
+  while (<IN>) {
+    next if /^#/;
+    /^\s*(.*?)\s*$/ and $file_manifest->{$1} = 1;
+  }
+  close IN;
+}
+
+sub read_manifest_skip {
+  my ($mfest) = @_;
+  open (IN, "<$mfest") or warn "cannot read $mfest";
+  while (<IN>) {
+    next if /^#/;
+    /^\s*(.*?)\s*$/ and push (@{$file_manifest_skip}, qr/$1/);
+  }
+  close IN;
+}
+
+sub filename_in_manifest {
+  my ($fname) = @_;
+  return 1 if ($file_manifest->{$fname});
+  foreach my $skipre (@{$file_manifest_skip}) {
+    # warn "JMD $skipre $fname";
+    return 1 if ($fname =~ $skipre);
+  }
+  return 0;
+}
+
 
