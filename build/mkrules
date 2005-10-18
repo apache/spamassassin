@@ -30,8 +30,8 @@ use File::Find;
 use File::Copy;
 
 use Getopt::Long;
-use vars qw(@opt_srcs $opt_out);
-GetOptions("src=s" => \@opt_srcs, "out=s");
+use vars qw(@opt_srcs $opt_out $opt_sandboxout);
+GetOptions("src=s" => \@opt_srcs, "out=s", "sandboxout=s");
 
 if (!@opt_srcs) {
   foreach ( 'rulescode', 'rulesrc' ) {
@@ -45,6 +45,8 @@ if (!@opt_srcs) {
 die "no src" unless (@opt_srcs >= 1);
 die "no out" unless ($opt_out);
 die "unreadable out" unless (-d $opt_out);
+
+$opt_sandboxout ||= "$opt_out/70_sandbox.cf";
 
 # source files that need compilation, and their targets
 my $needs_compile = { };
@@ -76,7 +78,7 @@ sub wanted {
   return if (!-f $path);
   
   # limit what will be copied from sandboxes
-  return if ($path =~ /sandbox/ && /\d.*\.(?:cf|pm)$/i);
+  return if ($path =~ /sandbox/ && !/\d.*\.(?:cf|pm)$/i);
 
   # a bit of sanity please - no svn metadata ;)
   return if ($path =~ /\.svn/);
@@ -145,8 +147,8 @@ sub compile_sorted {
 # filename is preserved; so a rule in a file called "20_foo.cf" in the source
 # directory will be output to the file "20_foo.cf".
 #
-# ('pubfile' is another command to select the name of the output file in the
-# "rules" directory: pubfile NN_filename.cf , and override that behaviour.)
+# If the rule is not "publish"-tagged, it will be output as a testing rule
+# to "70_sandbox.cf".
 #
 # Rules will be autorenamed, if there's a collision between a new rule name and
 # one that's already been output by the compiler in another source file. The
@@ -181,7 +183,7 @@ sub rule_file_compile_sandbox {
   # another "fake name" for lines that should always be published, to an
   # output file with the same name as the input file.
   my $ALWAYS_PUBLISH = '!always_publish!';
-  $rules->{$ALWAYS_PUBLISH} = { text => '', publish => 1 };
+  $rules->{$ALWAYS_PUBLISH} = { text => '', publish => 0 };
 
   # an "ifplugin" or "if" scope
   my $current_conditional;
@@ -220,6 +222,8 @@ sub rule_file_compile_sandbox {
       my $origname = $name;
       $name = rule_name_avoid_collisions($name, $f);
 
+      # TODO: sandbox rules -- enforce "T_" prefix
+
       if (!$rules->{$name}) { $rules->{$name} = rule_entry_create(); }
       $rules->{$name}->{origname} = $origname;
       $rules->{$name}->{cond} = $current_conditional;
@@ -246,7 +250,7 @@ sub rule_file_compile_sandbox {
 
       if ($command eq 'publish') {
         # the 'publish' command defaults to "1", unless it explicitly
-        # is set to "0".  iow: publish RULE_NAME (0 | 1)  [default: 1]
+        # is set to "0".  iow: publish RULE_NAME [(0 | 1)]  [default: 1]
         if (!defined $val) { $val = '1'; }
       }
       $rules->{$name}->{$command} = $val;
@@ -271,21 +275,21 @@ sub rule_file_compile_sandbox {
 
   # now append all the found text to the output file buffers
   my %already_done = ();
+  my $copied = 0;
   foreach my $name ($ALWAYS_PUBLISH, @$rule_order)
   {
     # only do each rule once, please ;)
     next if exists $already_done{$name};
     $already_done{$name} = undef;
 
-    my $pubfile = $rules->{$name}->{pubfile};
-    $pubfile ||= $filename;
-    $pubfile = $opt_out.'/'.$filename;
-    $output_files->{$pubfile} = 1;
-
-    if (!$rules->{$name}->{publish}) {
-      # don't output non-published rules
-      next;     
+    my $pubfile;
+    if ($rules->{$name}->{publish}) {
+      $pubfile = ($rules->{$name}->{pubfile} || $filename);
+      $pubfile = $opt_out.'/'.$pubfile;
+    } else {
+      $pubfile = $opt_sandboxout;
     }
+    $output_files->{$pubfile} = 1;
 
     my $text = $rules->{$name}->{text};
     if (!$text) {
@@ -307,9 +311,11 @@ sub rule_file_compile_sandbox {
     else {
       $output_file_text->{$pubfile} .= $text;
     }
+
+    $copied++;
   }
 
-  print "$f: ".(scalar @$rule_order)." rules copied\n";
+  print "$f: $copied sandbox rules copied\n";
 
   # ok; file complete.  now mark all those rules as "seen"; future
   # refs to those rule names will trigger an autorename.
