@@ -74,6 +74,7 @@ sub set_config {
 
   push(@cmds, {
 	       setting => 'whitelist_subject',
+	       default => {},
 	       code => sub {
 		 my ($self, $key, $value, $line) = @_;
 
@@ -88,6 +89,7 @@ sub set_config {
 
   push(@cmds, {
 	       setting => 'blacklist_subject',
+	       default => {},
 	       code => sub {
 		 my ($self, $key, $value, $line) = @_;
 
