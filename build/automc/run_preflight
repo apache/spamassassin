@@ -3,8 +3,10 @@
 use strict;
 sub run;
 
+my $perl = $0;
+
 # build, as necessary
-run "perl Makefile.PL < /dev/null";
+run "$perl Makefile.PL < /dev/null";
 run "make";
 
 chdir "masses" or die;
@@ -20,8 +22,8 @@ warn "using corpus targets file: $targets\n";
 # this is run in a chroot jail, just in case there's hostile
 # rule code in there...
 
-run "/local/bbmasstools/masschroot ./mass-check ".
-    "--cache --progress -j=1 -f $targets";
+run "/local/bbmasstools/masschroot $perl ".
+    "mass-check --cache --progress -j=1 -f $targets";
 
 exit;
 
