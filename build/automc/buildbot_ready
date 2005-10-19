@@ -2,7 +2,11 @@
 
 use strict;
 
-my $perl = $0;
+my $perl = $^X;
+if (!$perl) {
+  die "no perl path found in ARGV!";
+}
+
 my $command = shift @ARGV;
 
 if ($command eq 'start') {
