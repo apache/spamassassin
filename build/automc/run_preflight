@@ -1,4 +1,39 @@
 #!/usr/bin/perl -w
 
 use strict;
+sub run;
+
+# build, as necessary
+
+run "make";
+
+chdir "masses" or die;
+
+my $slavename = "generic";
+
+my $pwd = `pwd`;
+$pwd =~ /slaves\/([-_A-Za-z0-9]+)\//; if ($1) { $slavename = $1; }
+
+my $targets = "/cor/$1/targets";
+warn "using corpus targets file: $targets\n";
+
+# this is run in a chroot jail, just in case there's hostile
+# rule code in there...
+
+run "/local/bbmasstools/masschroot ./mass-check ".
+    "--cache --progress -j=1 -f $targets";
+
+exit;
+
+
+sub run {
+  my ($cmd, $ignoreexit) = @_;
+
+  print "[$cmd]\n";
+  system ($cmd);
+
+  if (!$ignoreexit) {
+    die "command '$cmd' failed with status $?" if (($? >> 8) != 0);
+  }
+}
 
