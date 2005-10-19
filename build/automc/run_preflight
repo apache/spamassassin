@@ -2,8 +2,12 @@
 
 use strict;
 sub run;
+sleep 5;        # temp; avoid overloading
 
-my $perl = $0;
+my $perl = $^X;
+if (!$perl) {
+  die "no perl path found in ARGV!";
+}
 
 # build, as necessary
 run "$perl Makefile.PL < /dev/null";
