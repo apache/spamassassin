@@ -2,16 +2,11 @@
 
 use strict;
 sub run;
-sleep 5;        # temp; avoid overloading
 
 my $perl = $^X;
 if (!$perl) {
   die "no perl path found in ARGV!";
 }
-
-# build, as necessary
-run "$perl Makefile.PL < /dev/null";
-run "make";
 
 chdir "masses" or die;
 
@@ -21,7 +16,7 @@ my $pwd = `pwd`;
 $pwd =~ /slaves\/([-_A-Za-z0-9]+)\//; if ($1) { $slavename = $1; }
 
 my $targets = "/cor/$1/targets";
-warn "using corpus targets file: $targets\n";
+print "[using corpus targets file: $targets]\n";
 
 # this is run in a chroot jail, just in case there's hostile
 # rule code in there...
