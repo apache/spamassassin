@@ -4,7 +4,7 @@ use strict;
 sub run;
 
 # build, as necessary
-
+run "perl Makefile.PL < /dev/null";
 run "make";
 
 chdir "masses" or die;
