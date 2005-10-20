@@ -32,7 +32,7 @@ run "cp ../rules/70_sandbox.cf tstrules";
 # rule code in there...
 #
 run "/local/bbmasstools/masschroot $perl ".
-    "mass-check -C tstrules --cache --progress -j=1 -f $targets";
+    "mass-check -c=tstrules --cache --progress -j=1 -f $targets";
 
 exit;
 
