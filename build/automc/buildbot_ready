@@ -23,14 +23,17 @@ sub do_start {
   # ensure all pre-reqs (and rules) are built
   system ("$perl Makefile.PL < /dev/null");
   system ("make");
+
+  # for mass-check to report, without having to have a working "svn" client
+  # in the chroot
+  system ("svn info --non-interactive > masses/svninfo.tmp");
 }
 
 # ---------------------------------------------------------------------------
 
 sub do_stop {
   chdir("masses") or die;
-  system ("make freqs");
-  system ("cat freqs");
+  system ("$perl hit-frequencies -c tstrules -x -p -s $(SCORESET)");
 }
 
 
