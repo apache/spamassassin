@@ -20,16 +20,23 @@ print "[using corpus targets file: $targets]\n";
 
 # super-nice please!
 #
-system ("renice +20 $$");
+system ("renice +19 $$");
+
+# just the sandbox rules
+#
+system ("rm -rf tstrules");
+run "mkdir tstrules";
+run "cp ../rules/70_sandbox.cf tstrules";
 
 # this is run in a chroot jail, just in case there's hostile
 # rule code in there...
 #
 run "/local/bbmasstools/masschroot $perl ".
-    "mass-check --cache --progress -j=1 -f $targets";
+    "mass-check -C tstrules --cache --progress -j=1 -f $targets";
 
 exit;
 
+# ---------------------------------------------------------------------------
 
 sub run {
   my ($cmd, $ignoreexit) = @_;

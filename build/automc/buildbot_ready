@@ -17,7 +17,7 @@ elsif ($command eq 'stop') {
 }
 exit;
 
-
+# ---------------------------------------------------------------------------
 
 sub do_start {
   # ensure all pre-reqs (and rules) are built
@@ -25,7 +25,12 @@ sub do_start {
   system ("make");
 }
 
+# ---------------------------------------------------------------------------
+
 sub do_stop {
-  # TODO
+  chdir("masses") or die;
+  system ("make freqs");
+  system ("cat freqs");
 }
+
 
