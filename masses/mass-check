@@ -673,8 +673,14 @@ sub memory_track_finish {
 sub get_current_svn_revision {
   my $revision;
 
-  if (-d ".svn") {
-    open (SVNINFO, "svn info --non-interactive 2>&1 |");
+  if (-d ".svn" || -f "svninfo.tmp") {
+    if (-f "svninfo.tmp") {
+      # created by build/automc/buildbot_ready for chrooted mass-checks
+      open (SVNINFO, "< svninfo.tmp");
+    } elsif (-d ".svn") {
+      open (SVNINFO, "svn info --non-interactive 2>&1 |");
+    }
+
     while (<SVNINFO>) {
       # Revision: 320871
       next unless /^Revision: (\d+)/;
