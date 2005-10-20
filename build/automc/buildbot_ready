@@ -26,7 +26,10 @@ sub do_start {
 
   # for mass-check to report, without having to have a working "svn" client
   # in the chroot
-  system ("svn info --non-interactive > masses/svninfo.tmp");
+
+  # --non-interactive not on the zone yet.  duh!
+  # system ("svn info --non-interactive > masses/svninfo.tmp");
+  system ("svn info > masses/svninfo.tmp < /dev/null");
 }
 
 # ---------------------------------------------------------------------------
