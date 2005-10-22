@@ -103,6 +103,9 @@
 /* May 5, 2005 NP: added list reporting support */
 #define SPAMC_REPORT_MSG      (1<<20)
 
+/* Oct 21, 2005 sidney: added ping test */
+#define SPAMC_PING      (1<<19)
+
 
 #define SPAMC_MESSAGE_CLASS_SPAM 1
 #define SPAMC_MESSAGE_CLASS_HAM  2

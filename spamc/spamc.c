@@ -180,6 +180,7 @@ print_usage(void)
 #endif
     usg("  -h                  Print this help message and exit.\n");
     usg("  -V                  Print spamc version and exit.\n");
+    usg("  -K                  Keepalive check of spamd.\n");
     usg("  -f                  (Now default, ignored.)\n");
     usg("\n");
 }
@@ -197,9 +198,9 @@ read_args(int argc, char **argv,
           struct transport *ptrn)
 {
 #ifndef _WIN32
-    const char *opts = "-BcrRd:e:fyp:t:s:u:L:C:xSHU:ElhVF:";
+    const char *opts = "-BcrRd:e:fyp:t:s:u:L:C:xSHU:ElhVKF:";
 #else
-    const char *opts = "-BcrRd:fyp:t:s:u:L:C:xSHElhVF:";
+    const char *opts = "-BcrRd:fyp:t:s:u:L:C:xSHElhVKF:";
 #endif
     int opt;
     int ret = EX_OK;
@@ -248,6 +249,11 @@ read_args(int argc, char **argv,
             case 'f':
             {
                 /* obsolete, backwards compat */
+                break;
+            }
+            case 'K':
+            {
+                flags |= SPAMC_PING;
                 break;
             }
             case 'l':
@@ -380,6 +386,10 @@ read_args(int argc, char **argv,
     if (flags & SPAMC_LEARN) {
         if (flags & SPAMC_CHECK_ONLY) {
 	    libspamc_log(flags, LOG_ERR, "Learning excludes check only");
+	    ret = EX_USAGE;
+	}
+        if (flags & SPAMC_PING) {
+	    libspamc_log(flags, LOG_ERR, "Learning excludes ping");
 	    ret = EX_USAGE;
 	}
 	if (flags & SPAMC_REPORT_IFSPAM) {
@@ -825,13 +835,12 @@ main(int argc, char *argv[])
 	message_cleanup(&m);
 	ret = result;
     }
-    else if (flags & SPAMC_CHECK_ONLY || flags & SPAMC_REPORT
-	     || flags & SPAMC_REPORT_IFSPAM) {
+    else if (flags & (SPAMC_CHECK_ONLY | SPAMC_REPORT | SPAMC_REPORT_IFSPAM)) {
 	full_write(out_fd, 1, "0/0\n", 4);
 	message_cleanup(&m);
 	ret = EX_NOTSPAM;
     }
-    else if (flags & SPAMC_LEARN ) {
+    else if (flags & (SPAMC_LEARN|SPAMC_PING) ) {
         message_cleanup(&m);
     }
     else {
