@@ -600,6 +600,11 @@ int message_read(int fd, int flags, struct message *m)
     }
     m->priv->flags = flags;
 
+    if (flags & SPAMC_PING) {
+      _clear_message(m);
+      return EX_OK;
+    }
+
     switch (flags & SPAMC_MODE_MASK) {
     case SPAMC_RAW_MODE:
 	return _message_read_raw(fd, m);
@@ -623,7 +628,7 @@ long message_write(int fd, struct message *m)
 
     assert(m != NULL);
 
-    if (m->priv->flags & SPAMC_CHECK_ONLY) {
+    if (m->priv->flags & (SPAMC_CHECK_ONLY|SPAMC_PING)) {
 	if (m->is_spam == EX_ISSPAM || m->is_spam == EX_NOTSPAM) {
 	    return full_write(fd, 1, m->out, m->out_len);
 
@@ -924,6 +929,8 @@ int message_filter(struct transport *tp, const char *username,
 	strcpy(buf, "REPORT ");
     else if (flags & SPAMC_SYMBOLS)
 	strcpy(buf, "SYMBOLS ");
+    else if (flags & SPAMC_PING)
+	strcpy(buf, "PING ");
     else
 	strcpy(buf, "PROCESS ");
 
@@ -937,21 +944,23 @@ int message_filter(struct transport *tp, const char *username,
     strcat(buf, "\r\n");
     len = strlen(buf);
 
-    if (username != NULL) {
+    if (!(flags & SPAMC_PING)) {
+      if (username != NULL) {
 	if (strlen(username) + 8 >= (bufsiz - len)) {
-	    _use_msg_for_out(m);
-	    return EX_OSERR;
+          _use_msg_for_out(m);
+          return EX_OSERR;
 	}
 	strcpy(buf + len, "User: ");
 	strcat(buf + len, username);
 	strcat(buf + len, "\r\n");
 	len += strlen(buf + len);
-    }
-    if ((m->msg_len > 9999999) || ((len + 27) >= (bufsiz - len))) {
+      }
+      if ((m->msg_len > 9999999) || ((len + 27) >= (bufsiz - len))) {
 	_use_msg_for_out(m);
 	return EX_OSERR;
+      }
+      len += sprintf(buf + len, "Content-length: %d\r\n\r\n", m->msg_len);
     }
-    len += sprintf(buf + len, "Content-length: %d\r\n\r\n", m->msg_len);
 
     libspamc_timeout = m->timeout;
 
@@ -1006,6 +1015,14 @@ int message_filter(struct transport *tp, const char *username,
 	       versbuf);
 	failureval = EX_PROTOCOL;
 	goto failure;
+    }
+
+    if (flags & SPAMC_PING) {
+	closesocket(sock);
+	sock = -1;
+        m->out_len = sprintf(m->out, "SPAMD/%s %d\n", versbuf, response);
+        m->is_spam = EX_NOTSPAM;
+        return EX_OK;
     }
 
     m->score = 0;
