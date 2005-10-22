@@ -3,8 +3,19 @@
 # settings are located in $HOME/.corpus
 
 use strict;
+use Getopt::Long;
+
+use vars qw(
+    $corpusdir
+);
+GetOptions(
+    "dir=s" => \$corpusdir
+);
+
+
 use File::Path;
 use Time::ParseDate;
+use Cwd;
 use POSIX qw(nice strftime);
 
 use constant WEEK => 60*60*24;
@@ -12,7 +23,6 @@ nice(15);
 
 my $configuration = "$ENV{HOME}/.corpus";
 my %opt;
-# my $revision = "unknown";
 my %revision = ();
 my %logs_by_rev = ();
 my %is_net_revision = ();
@@ -22,33 +32,31 @@ my $skip = '';
 my $time_start = time;
 
 &configure;
-# &version;
 &init;
-&update;
+
+if (!$corpusdir) {
+  print "reading logs from '$corpusdir'\n";
+  $corpusdir = $opt{corpus};
+}
+else {
+  &update_rsync;
+}
+
 &locate;
-# &rename;
 &current;
 &clean_up;
-
-# sub version {
-# my $line;
-# if (open(TESTING, "$opt{tree}/rules/70_testing.cf")) {
-# chomp($line = <TESTING>);
-# if ($line =~ m/^#.*Rev(?:ision)?:\s*(\S+).*/) {
-# $revision = $1;
-# }
-# close(TESTING);
-# }
-# }
 
 sub configure {
   # does rough equivalent of source
   open(C, $configuration) || die "open failed: $configuration: $!\n";
+  my $pwd = getcwd;
   while(<C>) {
 	chomp;
 	s/#.*//;
 	if (/^\s*(.*?)\s*=\s*(.*?)\s*$/) {
-	  $opt{$1} = $2;
+          my ($key, $val) = ($1, $2);
+          $val =~ s/\$PWD/$pwd/gs;
+	  $opt{$key} = $val;
 	}
   }
   close(C);
@@ -67,8 +75,8 @@ sub init {
   $ENV{TZ} = 'UTC';
 }
 
-sub update {
-  chdir $opt{corpus};
+sub update_rsync {
+  chdir $corpusdir;
 
   # allow non-running of rsync under some circumstances
   if ($opt{rsync_command}) {
@@ -77,7 +85,9 @@ sub update {
     system "rsync -CPcvuzt --timeout=300 $opt{username}" . '@rsync.spamassassin.org::corpus/*.log .';
   }
 
-  if (!$opt{always_update_html}) {
+  # this block is no longer required -- we do sensible things with modtime
+  # comparisons to work it out!
+  if (0 && !$opt{always_update_html}) {
     if (-f "rsync.last") {
       open(FIND, "find . -type f -newer rsync.last |");
       my $files = "";
@@ -96,25 +106,27 @@ sub update {
       }
     }
   }
+
   open(RSYNC, "> rsync.last");
   close(RSYNC);
   system "chmod +r *.log";
 }
 
 sub locate {
-  chdir "$opt{tree}/masses";
-  opendir(CORPUS, $opt{corpus});
+  # chdir "$opt{tree}/masses" or die "cannot chdir $opt{tree}/masses";
+
+  opendir(CORPUS, $corpusdir);
   @files = sort readdir(CORPUS);
   closedir(CORPUS);
 
   @files = grep {
-    /^(?:spam|ham)-(?:net-)?\w+\.log$/ && -f "$opt{corpus}/$_" && -M _ < 10 
+    /^(?:spam|ham)-(?:net-)?\w+\.log$/ && -f "$corpusdir/$_" && -M _ < 10 
   } @files;
 
   foreach my $file (@files) {
     # my $time = 0;
     my $tag = 0;
-    open(FILE, "$opt{corpus}/$file") or warn "cannot read $opt{corpus}/$file";
+    open(FILE, "$corpusdir/$file") or warn "cannot read $corpusdir/$file";
     while (my $line = <FILE>) {
       last if $line !~ /^#/;
       if ($line =~ /, on (... ... .. )(..)(:..:.. ... ....)/) {
@@ -123,7 +135,7 @@ sub locate {
         my $timet = Time::ParseDate::parsedate($datepre.$hh.$datepost,
                     GMT => 1, PREFER_PAST => 1);
         $time{$file} = $timet;
-        print "$opt{corpus}/$file: time=$timet\n";
+        print "$corpusdir/$file: time=$timet\n";
 
         # if ($hh != 8) { $time++; }
       }
@@ -136,10 +148,10 @@ sub locate {
 
         if ($file =~ /-net-/) {
           $is_net_revision{$rev} = 1;
-          print "$opt{corpus}/$file: rev=$rev (net)\n";
+          print "$corpusdir/$file: rev=$rev (net)\n";
         }
         else {
-          print "$opt{corpus}/$file: rev=$rev (non-net)\n";
+          print "$corpusdir/$file: rev=$rev (non-net)\n";
         }
       }
     }
@@ -147,22 +159,6 @@ sub locate {
     # if (!$time) {
     # $skip .= "# skipped $_: time is between 0800 UTC and 0900 UTC\n";
     # }
-  }
-}
-
-sub rename {
-  use File::Copy qw(move);
-
-  my $hour = (gmtime($time_start))[2];
-  if ($hour == 9) {
-	chdir $opt{html};
-	opendir(HTML, $opt{html});
-	my @html = readdir(HTML);
-	closedir(HTML);
-	@html = grep { -f } @html;
-	for (@html) {
-	  move($_, "last/$_");
-	}
   }
 }
 
@@ -224,7 +220,7 @@ sub gen_class {
   print STDERR "input h: " . join(' ', @ham) . "\n";
   print STDERR "input s: " . join(' ', @spam) . "\n";
 
-  chdir $opt{corpus};
+  chdir $corpusdir;
 
   # net vs. local
   if ($class eq "NET") {
@@ -355,12 +351,12 @@ sub gen_class {
       return;
     }
 
-    chdir "$opt{tree}/masses";
+    chdir "$opt{tree}/masses" or die "cannot chdir $opt{tree}/masses";
     for my $user (sort keys %spam) {
       next unless $ham{$user};
-      system("cat $opt{corpus}/$ham{$user} >> $opt{tmp}/ham.log.$$");
-      system("cat $opt{corpus}/$spam{$user} >> $opt{tmp}/spam.log.$$");
-      open(IN, "./hit-frequencies -xpa $flags $opt{corpus}/$spam{$user} $opt{corpus}/$ham{$user} |");
+      system("cat $corpusdir/$ham{$user} >> $opt{tmp}/ham.log.$$");
+      system("cat $corpusdir/$spam{$user} >> $opt{tmp}/spam.log.$$");
+      open(IN, "./hit-frequencies -xpa $flags $corpusdir/$spam{$user} $corpusdir/$ham{$user} |");
       while(<IN>) {
         chomp;
         push @output, "$_:$user\n";
@@ -380,7 +376,7 @@ sub gen_class {
     for my $which (("0-1", "1-2", "2-3", "3-6")) {
       my ($after, $before) = split(/-/, $which);
       # get and filter logs
-      chdir $opt{corpus};
+      chdir $corpusdir;
       for my $type (("ham", "spam")) {
         open(TMP, "> $opt{tmp}/$type.log.$$");
         my @array = ($type eq "ham") ? @ham : @spam;
@@ -394,7 +390,7 @@ sub gen_class {
         close (TMP);
       }
       # print out by age
-      chdir "$opt{tree}/masses";
+      chdir "$opt{tree}/masses" or die "cannot chdir $opt{tree}/masses";
       open(IN, "./hit-frequencies -xpa $flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
       while(<IN>) {
         chomp;
@@ -409,7 +405,7 @@ sub gen_class {
     system("cat " . join(" ", @ham) . " > $opt{tmp}/ham.log.$$");
     system("cat " . join(" ", @spam) . " > $opt{tmp}/spam.log.$$");
 
-    chdir "$opt{tree}/masses";
+    chdir "$opt{tree}/masses" or die "cannot chdir $opt{tree}/masses";
     open(IN, "./hit-frequencies -xpa $flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
     while(<IN>) { print(OUT); }
     close(IN);
@@ -422,11 +418,17 @@ sub gen_class {
 
 sub create_outputdir {
   my ($rev, $time) = @_;
-  my $dir = $opt{html} .'/'. strftime("%Y%m%d", gmtime($time)) . "/r$rev";
+  my $revpath = strftime("%Y%m%d", gmtime($time)) . "/r$rev";
+  my $dir = $opt{html} .'/'. $revpath;
+
   # print "output dir: $dir\n";
   if (!-d $dir) {
-    mkpath($dir) or warn "failed to mkdir $dir";
+    my $mode = oct($main->{conf}->{html_mode});
+    mkpath([$dir], 0, $mode) or warn "failed to mkdir $dir";
   }
+
+  print "URL: http://buildbot.spamassassin.org/ruleqa/ruleqa?daterev=$revpath\n";
+
   return $dir;
 }
 
