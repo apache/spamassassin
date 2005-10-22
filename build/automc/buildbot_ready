@@ -35,8 +35,58 @@ sub do_start {
 # ---------------------------------------------------------------------------
 
 sub do_stop {
+  my $rev = get_current_svn_revision();
+  my $slave = get_current_slave_name();
+
   chdir("masses") or die;
+
+  print "FAST FREQS REPORT:\n\n";
   system ("$perl hit-frequencies -c tstrules -x -p -s 0");
+
+  print "\n\nBUILDING SLOW FREQS REPORT:\n\n";
+
+  my $logdir = "/home/bbmass/tmp/logs-r$rev";
+  if (!-d $logdir) {
+    run ("mkdir $logdir");
+  }
+  run ("mv ham.log $logdir/ham-$slave.log");
+  run ("mv spam.log $logdir/spam-$slave.log");
+  run ("./rule-qa/corpus-hourly --dir $logdir");
 }
 
+
+
+# ---------------------------------------------------------------------------
+
+sub get_current_svn_revision {
+  open (SVNINFO, "(svn info --non-interactive || svn info) < /dev/null 2>&1 |");
+
+  my $revision;
+  while (<SVNINFO>) {
+    # Revision: 320871
+    next unless /^Revision: (\d+)/;
+    $revision = $1;
+    last;
+  }
+  close SVNINFO;
+  return $revision if $revision;
+}
+
+sub run {
+  my ($cmd, $ignoreexit) = @_;
+
+  print "[$cmd]\n";
+  system ($cmd);
+
+  if (!$ignoreexit) {
+    die "command '$cmd' failed with status $?" if (($? >> 8) != 0);
+  }
+}
+
+sub get_current_slave_name {
+  my $pwd = `pwd`;
+  $pwd =~ /\/slaves\/([^\/]+)\// and return $1;
+  warn "cannot work out slave name from $pwd";
+  return "unknown";
+}
 
