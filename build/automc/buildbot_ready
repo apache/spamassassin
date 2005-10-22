@@ -52,7 +52,10 @@ sub do_stop {
   run ("mv ham.log $logdir/ham-$slave.log");
   run ("mv spam.log $logdir/spam-$slave.log");
 
+  # now, generate the reports
   $ENV{HOME} = '/home/bbmass';
+  umask(022);
+
   run ("./rule-qa/corpus-hourly --dir $logdir");
 }
 
