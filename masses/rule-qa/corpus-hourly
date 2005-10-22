@@ -30,6 +30,7 @@ my %time = ();
 my @files;
 my $skip = '';
 my $time_start = time;
+my $output_revpath;
 
 &configure;
 &init;
@@ -415,7 +416,14 @@ sub gen_class {
   }
 
   my $bytes = (-s OUT);
-  print "created: $fname, $bytes bytes\n";
+  print qq{created: $fname, $bytes bytes
+
+See URL:
+
+  http://buildbot.spamassassin.org/ruleqa/ruleqa?daterev=$output_revpath
+
+};
+
   close(OUT);
 }
 
@@ -427,10 +435,12 @@ sub create_outputdir {
   # print "output dir: $dir\n";
   if (!-d $dir) {
     my $mode = oct($opt{html_mode});
-    mkpath([$dir], 0, $mode) or warn "failed to mkdir $dir";
+    my $prevu = umask 0;
+    mkpath([$dir], 0, oct($opt{html_mode})) or warn "failed to mkdir $dir";
+    umask $prevu;
   }
 
-  print "URL: http://buildbot.spamassassin.org/ruleqa/ruleqa?daterev=$revpath\n";
+  $output_revpath = $revpath;       # set the global
 
   return $dir;
 }
