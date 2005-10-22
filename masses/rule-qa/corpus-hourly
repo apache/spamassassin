@@ -34,11 +34,11 @@ my $time_start = time;
 &configure;
 &init;
 
-if (!$corpusdir) {
+if ($corpusdir) {
   print "reading logs from '$corpusdir'\n";
-  $corpusdir = $opt{corpus};
 }
 else {
+  $corpusdir = $opt{corpus};
   &update_rsync;
 }
 
@@ -120,7 +120,7 @@ sub locate {
   closedir(CORPUS);
 
   @files = grep {
-    /^(?:spam|ham)-(?:net-)?\w+\.log$/ && -f "$corpusdir/$_" && -M _ < 10 
+    /^(?:spam|ham)-(?:net-)?[-\w]+\.log$/ && -f "$corpusdir/$_" && -M _ < 10 
   } @files;
 
   foreach my $file (@files) {
