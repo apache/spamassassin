@@ -51,6 +51,8 @@ sub do_stop {
   }
   run ("mv ham.log $logdir/ham-$slave.log");
   run ("mv spam.log $logdir/spam-$slave.log");
+
+  $ENV{HOME} = '/home/bbmass';
   run ("./rule-qa/corpus-hourly --dir $logdir");
 }
 
