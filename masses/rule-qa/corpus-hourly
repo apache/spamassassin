@@ -28,6 +28,7 @@ my %logs_by_rev = ();
 my %is_net_revision = ();
 my %time = ();
 my @files;
+my @tmps = ();
 my $skip = '';
 my $time_start = time;
 my $output_revpath;
@@ -64,7 +65,7 @@ sub configure {
 }
 
 sub clean_up {
-  system "rm -f $opt{tmp}/*.$$";
+  system "rm -f $opt{tmp}/*.$$ ".join(' ', @tmps);
 }
 
 sub init {
@@ -234,10 +235,10 @@ sub gen_class {
     my %ham;
     
     for my $file (@spam) {
-      $spam{$1}++ if ($file =~ m/-(\w+)\.log$/);
+      $spam{$1}++ if ($file =~ m/-(\w[-\w]+)\.log$/);
     }
     for my $file (@ham) {
-      $ham{$1}++ if ($file =~ m/-(\w+)\.log$/);
+      $ham{$1}++ if ($file =~ m/-(\w[-\w]+)\.log$/);
     }
     while (my ($user, $count) = each %ham) {
       if ($count > 1) {
@@ -316,7 +317,8 @@ sub gen_class {
     }
   }
 
-  open(OUT, "> $fname") or warn "cannot write to $fname";
+  my $tmpfname = "$fname.$$";
+  open(OUT, "> $tmpfname") or warn "cannot write to $tmpfname";
   print OUT "# ham results used for $rev $class $age: " . join(" ", @ham) . "\n";
   print OUT "# spam results used for $rev $class $age: " . join(" ", @spam) . "\n";
   for (@ham) {
@@ -326,7 +328,12 @@ sub gen_class {
     print OUT "# $_ was at r$revision{$_}\n";
   }
 
-  print "creating: ${fname}...\n";
+  push (@tmps, $tmpfname);
+
+  my $when = scalar localtime time;
+  print qq{creating: $fname
+started $when...
+};
 
   my $flags = "";
   $flags = "-t net -s 1" if $class eq "NET";
@@ -342,10 +349,10 @@ sub gen_class {
     my @output;
     
     for my $file (@spam) {
-      $spam{$1} = $file if ($file =~ m/-(\w+)\.log$/);
+      $spam{$1} = $file if ($file =~ m/-(\w[-\w]+)\.log$/);
     }
     for my $file (@ham) {
-      $ham{$1} = $file if ($file =~ m/-(\w+)\.log$/);
+      $ham{$1} = $file if ($file =~ m/-(\w[-\w]+)\.log$/);
     }
     unlink "$opt{tmp}/ham.log.$$";
     unlink "$opt{tmp}/spam.log.$$";
@@ -416,15 +423,18 @@ sub gen_class {
   }
 
   my $bytes = (-s OUT);
-  print qq{created: $fname, $bytes bytes
+  close(OUT);
 
-See URL:
+  rename($tmpfname, $fname) or warn "cannot rename $tmpfname to $fname";
+
+  $when = scalar localtime time;
+  print qq{created: $bytes bytes, finished at $when
+URL:
 
   http://buildbot.spamassassin.org/ruleqa/ruleqa?daterev=$output_revpath
 
 };
 
-  close(OUT);
 }
 
 sub create_outputdir {
