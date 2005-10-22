@@ -423,7 +423,7 @@ sub create_outputdir {
 
   # print "output dir: $dir\n";
   if (!-d $dir) {
-    my $mode = oct($main->{conf}->{html_mode});
+    my $mode = oct($opt{html_mode});
     mkpath([$dir], 0, $mode) or warn "failed to mkdir $dir";
   }
 
