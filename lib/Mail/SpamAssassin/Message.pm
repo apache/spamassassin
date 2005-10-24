@@ -99,6 +99,7 @@ sub new {
   $self->{pristine_headers} =	'';
   $self->{pristine_body} =	'';
   $self->{mime_boundary_state} = {};
+  $self->{line_ending} =	"\n";
 
   bless($self,$class);
 
@@ -168,6 +169,14 @@ sub new {
       }
       $self->{'mbox_sep'} = "From $address $DAY_OF_WEEK[$arr[6]] $2 $1 $4:$5:$6 $3\n";
     }
+  }
+
+  # bug 4363
+  # Check to see if we should do CRLF instead of just LF
+  # For now, just check the first header and do whatever it does
+  if (@message && $message[0] =~ /\r\n/) {
+    $self->{line_ending} = "\r\n";
+    dbg("message: line ending changed to CRLF");
   }
 
   # Go through all the headers of the message
