@@ -413,7 +413,7 @@ sub read_freqs_file {
   if ($file =~ /\.all/) { $subset_is_user = 1; }
 
   while (<IN>) {
-    if (/(?: \(all messages| results used:)/) {
+    if (/(?: \(all messages| results used:|was at r\d+)/) {
       $freqs_head{$key} .= $_;
     }
     elsif (/OVERALL\%/) {
