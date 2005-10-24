@@ -17,10 +17,6 @@ date=date ; [ -x /opt/sfw/bin/gdate ] && date=gdate
 # then generate the various forms of 'freqs' files...
 $SADIR/masses/rule-qa/corpus-hourly
 
-# copy those output files to a datestamped archive dir...
-today=`$date +"%Y%m%d"`
-mkdir -p $html/$today
-cp -p $html/*.* $html/$today
 date
 
 # only post the comments to bugs in bugzilla once, on the first
