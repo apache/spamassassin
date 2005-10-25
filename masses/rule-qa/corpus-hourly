@@ -14,6 +14,7 @@ GetOptions(
 
 
 use File::Path;
+use File::Copy;
 use Time::ParseDate;
 use Cwd;
 use POSIX qw(nice strftime);
@@ -317,115 +318,132 @@ sub gen_class {
     }
   }
 
-  my $tmpfname = "$fname.$$";
-  open(OUT, "> $tmpfname") or warn "cannot write to $tmpfname";
-  print OUT "# ham results used for $rev $class $age: " . join(" ", @ham) . "\n";
-  print OUT "# spam results used for $rev $class $age: " . join(" ", @spam) . "\n";
-  for (@ham) {
-    print OUT "# $_ was at r$revision{$_}\n";
-  }
-  for (@spam) {
-    print OUT "# $_ was at r$revision{$_}\n";
-  }
-
-  push (@tmps, $tmpfname);
-
   my $when = scalar localtime time;
   print qq{creating: $fname
-started $when...
-};
+  started $when...
+  };
+  my $bytes = 0;
 
-  my $flags = "";
-  $flags = "-t net -s 1" if $class eq "NET";
-  $flags = "-M HTML_MESSAGE" if $class eq "HTML";
-  $flags = "-o" if $class eq "OVERLAP";
-  if ($opt{rules_dir}) {
-    $flags .= " -c '$opt{rules_dir}'";
-  }
+  if ($class eq 'LOGS') {
+    foreach my $f (@ham, @spam) {
+      $f =~ s/[^-_A-Za-z0-9]+/_/gs;    # sanitize!
 
-  if ($age eq "all") {
-    my %spam;
-    my %ham;
-    my @output;
-    
-    for my $file (@spam) {
-      $spam{$1} = $file if ($file =~ m/-(\w[-\w]+)\.log$/);
-    }
-    for my $file (@ham) {
-      $ham{$1} = $file if ($file =~ m/-(\w[-\w]+)\.log$/);
-    }
-    unlink "$opt{tmp}/ham.log.$$";
-    unlink "$opt{tmp}/spam.log.$$";
-
-    if (scalar keys %spam <= 0 || scalar keys %ham <= 0) {
-      warn "no files found for $class.$age";
-      return;
-    }
-
-    chdir "$opt{tree}/masses" or die "cannot chdir $opt{tree}/masses";
-    for my $user (sort keys %spam) {
-      next unless $ham{$user};
-      system("cat $corpusdir/$ham{$user} >> $opt{tmp}/ham.log.$$");
-      system("cat $corpusdir/$spam{$user} >> $opt{tmp}/spam.log.$$");
-      open(IN, "./hit-frequencies -xpa $flags $corpusdir/$spam{$user} $corpusdir/$ham{$user} |");
-      while(<IN>) {
-        chomp;
-        push @output, "$_:$user\n";
+      system("gzip -c < $f > $fname-$f.gz.$$");
+      if ($? >> 8 != 0) {
+        warn "gzip -c < $f > $fname-$f.gz.$$ failed";
       }
-      close(IN);
-    }
-    open(IN, "./hit-frequencies -xpa $flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
-    while(<IN>) {
-      push @output, $_;
-    }
-    close(IN);
-    for (sort sort_all @output) { print OUT; }
-  }
-  elsif ($age eq "age") {
-    my @output;
 
-    for my $which (("0-1", "1-2", "2-3", "3-6")) {
-      my ($after, $before) = split(/-/, $which);
-      # get and filter logs
-      chdir $corpusdir;
-      for my $type (("ham", "spam")) {
-        open(TMP, "> $opt{tmp}/$type.log.$$");
-        my @array = ($type eq "ham") ? @ham : @spam;
-        for my $file (@array) {
-          open(IN, $file) or warn "cannot read $file";
-          while (<IN>) {
-            print TMP $_ if time_filter($after, $before);
-          }
-          close(IN);
-        }
-        close (TMP);
+      rename("$fname-$f.gz.$$", "$fname-$f.gz") or
+                    warn "cannot rename $fname-$f.gz.$$ to $fname-$f.gz";
+      $bytes += (-s "$fname-$f");
+    }
+  }
+  else {
+    my $tmpfname = "$fname.$$";
+
+    open(OUT, "> $tmpfname") or warn "cannot write to $tmpfname";
+    print OUT "# ham results used for $rev $class $age: " . join(" ", @ham) . "\n";
+    print OUT "# spam results used for $rev $class $age: " . join(" ", @spam) . "\n";
+    for (@ham) {
+      print OUT "# $_ was at r$revision{$_}\n";
+    }
+    for (@spam) {
+      print OUT "# $_ was at r$revision{$_}\n";
+    }
+
+    push (@tmps, $tmpfname);
+
+    my $flags = "";
+    $flags = "-t net -s 1" if $class eq "NET";
+    $flags = "-M HTML_MESSAGE" if $class eq "HTML";
+    $flags = "-o" if $class eq "OVERLAP";
+    if ($opt{rules_dir}) {
+      $flags .= " -c '$opt{rules_dir}'";
+    }
+
+    if ($age eq "all") {
+      my %spam;
+      my %ham;
+      my @output;
+      
+      for my $file (@spam) {
+        $spam{$1} = $file if ($file =~ m/-(\w[-\w]+)\.log$/);
       }
-      # print out by age
+      for my $file (@ham) {
+        $ham{$1} = $file if ($file =~ m/-(\w[-\w]+)\.log$/);
+      }
+      unlink "$opt{tmp}/ham.log.$$";
+      unlink "$opt{tmp}/spam.log.$$";
+
+      if (scalar keys %spam <= 0 || scalar keys %ham <= 0) {
+        warn "no files found for $class.$age";
+        return;
+      }
+
       chdir "$opt{tree}/masses" or die "cannot chdir $opt{tree}/masses";
+      for my $user (sort keys %spam) {
+        next unless $ham{$user};
+        system("cat $corpusdir/$ham{$user} >> $opt{tmp}/ham.log.$$");
+        system("cat $corpusdir/$spam{$user} >> $opt{tmp}/spam.log.$$");
+        open(IN, "./hit-frequencies -xpa $flags $corpusdir/$spam{$user} $corpusdir/$ham{$user} |");
+        while(<IN>) {
+          chomp;
+          push @output, "$_:$user\n";
+        }
+        close(IN);
+      }
       open(IN, "./hit-frequencies -xpa $flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
       while(<IN>) {
-        chomp;
-        push @output, "$_:$which\n";
+        push @output, $_;
       }
       close(IN);
+      for (sort sort_all @output) { print OUT; }
     }
-    for (sort sort_all @output) { print OUT; }
+    elsif ($age eq "age") {
+      my @output;
+
+      for my $which (("0-1", "1-2", "2-3", "3-6")) {
+        my ($after, $before) = split(/-/, $which);
+        # get and filter logs
+        chdir $corpusdir;
+        for my $type (("ham", "spam")) {
+          open(TMP, "> $opt{tmp}/$type.log.$$");
+          my @array = ($type eq "ham") ? @ham : @spam;
+          for my $file (@array) {
+            open(IN, $file) or warn "cannot read $file";
+            while (<IN>) {
+              print TMP $_ if time_filter($after, $before);
+            }
+            close(IN);
+          }
+          close (TMP);
+        }
+        # print out by age
+        chdir "$opt{tree}/masses" or die "cannot chdir $opt{tree}/masses";
+        open(IN, "./hit-frequencies -xpa $flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
+        while(<IN>) {
+          chomp;
+          push @output, "$_:$which\n";
+        }
+        close(IN);
+      }
+      for (sort sort_all @output) { print OUT; }
+    }
+    elsif (@ham && @spam) {
+      # get logs
+      system("cat " . join(" ", @ham) . " > $opt{tmp}/ham.log.$$");
+      system("cat " . join(" ", @spam) . " > $opt{tmp}/spam.log.$$");
+
+      chdir "$opt{tree}/masses" or die "cannot chdir $opt{tree}/masses";
+      open(IN, "./hit-frequencies -xpa $flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
+      while(<IN>) { print(OUT); }
+      close(IN);
+    }
+
+    $bytes = (-s OUT);
+    close(OUT);
+    rename($tmpfname, $fname) or warn "cannot rename $tmpfname to $fname";
   }
-  elsif (@ham && @spam) {
-    # get logs
-    system("cat " . join(" ", @ham) . " > $opt{tmp}/ham.log.$$");
-    system("cat " . join(" ", @spam) . " > $opt{tmp}/spam.log.$$");
-
-    chdir "$opt{tree}/masses" or die "cannot chdir $opt{tree}/masses";
-    open(IN, "./hit-frequencies -xpa $flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
-    while(<IN>) { print(OUT); }
-    close(IN);
-  }
-
-  my $bytes = (-s OUT);
-  close(OUT);
-
-  rename($tmpfname, $fname) or warn "cannot rename $tmpfname to $fname";
 
   $when = scalar localtime time;
   print qq{created: $bytes bytes, finished at $when
@@ -444,7 +462,6 @@ sub create_outputdir {
 
   # print "output dir: $dir\n";
   if (!-d $dir) {
-    my $mode = oct($opt{html_mode});
     my $prevu = umask 0;
     mkpath([$dir], 0, oct($opt{html_mode})) or warn "failed to mkdir $dir";
     umask $prevu;
