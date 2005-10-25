@@ -109,7 +109,9 @@ sub load_resolver {
   
   eval {
     require Net::DNS;
-    $self->{res} = Net::DNS::Resolver->new;
+    # force_v4 is set in new() to avoid error in older versions of Net::DNS that don't have it
+    # other options are set by function calls so a typo or API change will cause an error here
+    $self->{res} = Net::DNS::Resolver->new(force_v4 => $force_ipv4);
     if (defined $self->{res}) {
       $self->{no_resolver} = 0;
       $self->{force_ipv4} = $force_ipv4;
@@ -123,7 +125,6 @@ sub load_resolver {
       $self->{res}->udp_timeout(3);     # timeout of 3 seconds only
       $self->{res}->persistent_tcp(0);  # bug 3997
       $self->{res}->persistent_udp(0);  # bug 3997
-      $self->{res}->force_v4($force_ipv4);
     }
     1;
   };   #  or warn "dns: eval failed: $@ $!\n";
