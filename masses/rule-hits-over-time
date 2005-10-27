@@ -1,43 +1,329 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
+#
+# rule-hits-over-time - produce graphs of rule hits over time, using GD::Graph
+#
+# <@LICENSE>
+# Copyright 2004 Apache Software Foundation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
 
-my $lastbucket = 0;
-my $nextbucket = 0;
-my $PERIOD = (24 * 60 * 60 * 7);
+use Getopt::Long;
+use SDBM_File;
+use GD;
+use GD::Graph;
 
-while (<>) {
-  my $found = 0;
-  /SARE_SUBJ/ and $found = 1;
-  s/^.*\btime=//; s/,.*$//;
-  
-  my $t = $_;
-  if ($lastbucket == 0) {
-    $lastbucket = $t;
-    $nextbucket = $t + $PERIOD;    # plus 2 hrs
-  }
-  if ($t < $nextbucket) {
-    if ($found) {
-      $seen_y++;
-    } else {
-      $seen_n++;
-    }
+use strict;
+use warnings;
+use Fcntl;
+
+sub usage {
+  die q{
+usage: rule-hits-over-time [options] --rule rulename log1 [log2 ...]
+
+  --rule=rulename       specify rule to map
+  --period=secs         specify period (default: 1 day)
+  --size_x=pixels       width of output graphs, in pixels (def: 800)
+  --size_y=pixels       height of ONE of the output graphs, in pixels
+                        (default: 400)
+  --as_counts           Do not scale to a percentage of messages;
+                        report absolute messages hit per time period
+  --cgi                 CGI output, to stdout with HTTP headers
+  --text                text output only
+};
+}
+
+use vars qw(
+        $opt_rule $opt_size_x $opt_size_y $opt_text $opt_cgi
+        $opt_period $opt_as_counts
+);
+
+GetOptions(
+        'rule=s',
+        'size_x=i',
+        'size_y=i',
+        'text',
+        'cgi',
+        'as_counts',
+        'period=i',
+) or usage();
+
+usage() unless $opt_rule;
+
+my $rule_re = qr/[, ]${opt_rule}[, ]/;
+
+my $period = $opt_period || (24 * 60 * 60 * 1);
+
+my $graph_x                         = $opt_size_x || 800;
+my $graph_y                         = $opt_size_y || 400;
+my $scale_to_total_volume           = ($opt_as_counts ? 0 : 1);
+my $graph_files_individually        = 0;    # or as ham & spam sets
+# my $y_ceiling                     = 3000; # mails per $period
+
+my $fname_counter = 1;
+my %allbuckets = ();
+my %allresults = ();
+my @allfiles = ();
+
+my $gd;
+my $graph_data;
+my $this_file_results;
+
+my $lastbucket;
+my $nextbucket;
+my $seen_y;
+my $seen_n;
+
+my $tmpdir = "/tmp/rulehits.$$";
+if ($opt_cgi) {
+  mkdir ($tmpdir) or die "collided on $tmpdir";
+  chdir ($tmpdir);
+}
+
+my $file_sets = [ ];    # split into ham and spam
+
+if (!$graph_files_individually) {
+  $file_sets = [ [ 'TITLE:hits in ham' ], [ 'TITLE:hits in spam' ] ];
+}
+
+foreach my $file (@ARGV) {
+  if ($graph_files_individually) {
+    push @{$file_sets}, [ $file ];
   }
   else {
-    while ($t >= $nextbucket) {
-      completeline();
-      $lastbucket = $nextbucket;
-      $nextbucket += $PERIOD;
+    if ($file =~ /ham/) {
+      push @{$file_sets->[0]}, $file;
+    } else {
+      push @{$file_sets->[1]}, $file;
     }
   }
+}
+
+foreach my $set (@{$file_sets}) {
+  @allfiles = ();
+  %allbuckets = ();
+  %allresults = ();
+  @allfiles = ();
+
+  my $settitle = '';
+  if ($set->[0] =~ /^TITLE:(.*)$/) {
+    $settitle = $1; shift(@{$set});
+  }
+  create_gd("$opt_rule $settitle");
+
+  foreach my $file (@{$set}) {
+    if (!$opt_text) {
+      my $title = $file;
+      $title =~ s/^.*\///;
+    }
+    push (@allfiles, $file);
+
+    if (1) {
+      # use an on-disk file to avoid massive VM usage for this hash
+      # on huge datasets
+      unlink("graph.tmp.dir");
+      unlink("graph.tmp.pag");
+      tie (%{$allresults{$file}}, 'SDBM_File', 'graph.tmp', O_RDWR|O_CREAT, 0600)
+            or die "tie failed: $!";
+    }
+    else {
+      %{$allresults{$file}} = ();
+    }
+
+    $this_file_results = $allresults{$file};
+    read_logs($file);
+
+    $graph_data = GD::Graph::Data->new();
+    summarise();
+  }
+
+  plot_gd();
+}
+
+if (!$graph_files_individually) {
+  system ("convert -append file01.gif file02.gif both.gif");
+}
+
+if ($opt_cgi) {
+  use CGI qw(:standard);
+  my $format = $gd->export_format;
+  print header("image/$format");
+  binmode STDOUT;
+  open (IN, "<both.gif") or die "no both.gif";
+  binmode IN;
+  while (<IN>) { print STDOUT; }
+  close IN;
+}
+
+if ($opt_cgi) {
+  system ("cd /; rm -rf $tmpdir");      # clean up tmp files
+}
+exit;
+
+sub summarise {
+  foreach my $bucket (sort keys %allbuckets) {
+    my $total_n = 0;
+    my @cols = ();
+    foreach my $file (@allfiles) {
+      my $seen_y = $allresults{$file}->{"y".$bucket} || 0;
+      my $seen_n = $allresults{$file}->{"n".$bucket} || 0;
+      if ($scale_to_total_volume) {
+        my $frac = $seen_y / (($seen_y + $seen_n) || 0.0001);
+        push @cols, ($frac * 100.0);
+        $total_n = 100;
+      }
+      else {
+        $total_n += $seen_n;
+        # if ($y_ceiling && $seen_y > $y_ceiling) { $seen_y = $y_ceiling; }
+        push (@cols, $seen_y);
+      }
+    }
+
+    if ($scale_to_total_volume) {
+      @cols = ($bucket, @cols);     # total_n is always "100"
+    } else {
+      # if ($y_ceiling && $total_n > $y_ceiling) { $total_n = $y_ceiling; }
+      @cols = ($bucket, $total_n, @cols);
+    }
+
+    if ($opt_text) {
+      print join(' ',@cols)."\n";
+    }
+    else {
+      $graph_data->add_point(@cols);
+    }
+  }
+}
+
+
+sub read_logs {
+  my $file = shift;
+
+  $lastbucket = undef;
+  $nextbucket = undef;
+  $seen_y = 0;
+  $seen_n = 0;
+
+  open (IN, "<$file") or die "cannot read $file";
+  while (<IN>) {
+    next if /^#/;
+
+    my $t;
+    /\btime=(\d+),/ and $t = $1;
+    next unless $t;
+
+    my $found = ($_ =~ $rule_re);
+    
+    if (!defined $lastbucket) {
+      $lastbucket = $t - ($t % $period);
+      $nextbucket = $lastbucket + $period;
+    }
+
+    if ($t < $nextbucket) {
+      if ($found) {
+        $seen_y++;
+      } else {
+        $seen_n++;
+      }
+    }
+    else {
+      while ($t >= $nextbucket) {
+        completeline();
+        $lastbucket = $nextbucket;
+        $nextbucket += $period;
+      }
+    }
+  }
+  close IN;
+  completeline();
 }
 
 sub completeline {
-  print "$lastbucket $seen_y $seen_n\n";
-  $seen_y = 0;
-  $seen_n = 0;
+  $allbuckets{$lastbucket} = undef;
+  $this_file_results->{"y".$lastbucket} = $seen_y; $seen_y = 0;
+  $this_file_results->{"n".$lastbucket} = $seen_n; $seen_n = 0;
 }
 
-print STDERR '
 
-plot "times" using 0:1, "times" using 0:2
+sub create_gd {
+  my $title = shift;
 
-';
+  use GD::Graph::lines;
+  $gd = GD::Graph::lines->new($graph_x, $graph_y);
+  $gd->set (
+      title => $title,
+      box_axis => 1,
+      # show_values => 1,
+
+      bgclr => "#ffffff",
+      fgclr => "#000000",
+      boxclr => "#fdfdfd",
+      labelclr => "#000000",
+
+      dclrs => [
+        "#33cc00",  # green
+        "#ff3300",  # red
+        "#0000cc",  # blue
+        "#99cc00",  # mauve
+        "#ff9900",  # orange
+        "#cccc00",  # yellowish
+        "#333333",  # dark grey
+        "#999999"   # light grey
+      ],
+      r_margin => 20,
+
+      y_label => ($scale_to_total_volume ?
+            "\%age of mail in period" : "Hits in period"),
+
+      zero_axis => 1,
+
+      # x_label => "Time (in blocks of $period secs)",
+      x_labels_vertical => 0,
+      x_tick_number => 'auto',
+      x_number_format => \&fmt_time_t,
+  );
+
+  if ($scale_to_total_volume) {
+    $gd->set (
+      y_min_value => 0,
+      y_max_value => 100,
+    );
+  }
+}
+
+sub fmt_time_t {
+  my $tt = shift;
+
+  use POSIX qw(strftime);
+  return strftime "%b %e %Y", gmtime($tt);
+}
+
+sub plot_gd {
+  if ($opt_text) {
+    print STDERR '
+
+    plot "times" using 0:1, "times" using 0:2
+
+    ';
+  }
+  else {
+    $gd->plot($graph_data);
+    my $format = $gd->export_format;
+    my $fname = sprintf("file%02d.%s", $fname_counter++, $format);
+    open(IMG, ">$fname") or die $!;
+    binmode IMG;
+    print IMG $gd->gd()->$format();
+    close IMG;
+
+  }
+}
