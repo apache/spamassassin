@@ -101,7 +101,7 @@ foreach my $file (@ARGV) {
     push @{$file_sets}, [ $file ];
   }
   else {
-    if ($file =~ /ham/) {
+    if ($file =~ /\bham\b/) {
       push @{$file_sets->[0]}, $file;
     } else {
       push @{$file_sets->[1]}, $file;
@@ -214,7 +214,12 @@ sub read_logs {
   $seen_y = 0;
   $seen_n = 0;
 
-  open (IN, "<$file") or die "cannot read $file";
+  if ($file =~ /\.gz$/) {
+    open (IN, "gunzip -cd '$file'|") or die "cannot gunzip $file";
+  } else {
+    open (IN, "<$file") or die "cannot read $file";
+  }
+
   while (<IN>) {
     next if /^#/;
 
