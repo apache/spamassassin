@@ -313,18 +313,16 @@ if ($s{detail}) {
   {
     my $graph_on = qq{
 
-      <p><strong>Rule's hit-rate over time:</strong>: <a 
+      <p><strong>Rule's hit-rate over time:</strong> <a 
         href="}.gen_switch_url("s_g_over_time", "0").qq{">Hide</a>
-      </p>
-
-      <img src="}.gen_switch_url("graph", "over_time").qq{" 
-            height=800 width=815 />
+      </p> <img src="}.gen_switch_url("graph", "over_time").qq{" 
+        width=800 height=815 />
 
     };
 
     my $graph_off = qq{
 
-      <p><strong>Rule's hit-rate over time:</strong>: <a 
+      <p><strong>Rule's hit-rate over time:</strong> <a 
         href="}.gen_switch_url("s_g_over_time", "1").qq{">Show</a>
       </p>
 
