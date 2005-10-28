@@ -317,11 +317,11 @@ if ($s{detail}) {
   my @parms =get_params_except(qw(
           rule s_age s_overlap s_all s_detail
         ));
-  $url = $cgi_url.'?'.join('&', sort @parms);
+  my $url_back = $cgi_url.'?'.join('&', sort @parms);
 
   print qq{
 
-    <p><a href="$url">&lt; Back</a> to overview.</p>
+    <p><a href="$url_back">&lt; Back</a> to overview.</p>
 
   };
 }
