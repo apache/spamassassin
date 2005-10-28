@@ -254,6 +254,7 @@ sub read_logs {
 }
 
 sub completeline {
+  return unless ($lastbucket);
   $allbuckets{$lastbucket} = undef;
   $this_file_results->{"y".$lastbucket} = $seen_y; $seen_y = 0;
   $this_file_results->{"n".$lastbucket} = $seen_n; $seen_n = 0;
