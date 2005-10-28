@@ -180,7 +180,7 @@ if (!$graph_files_individually) {
 
   if ($opt_cgi) {
     use CGI qw(:standard);
-    # print header("image/$format"); binmode STDOUT;
+    print header("image/$format"); binmode STDOUT;
     print STDOUT $both->$format();
   }
   else {
