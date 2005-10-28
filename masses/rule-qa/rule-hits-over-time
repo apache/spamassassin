@@ -22,6 +22,7 @@ use Getopt::Long;
 use SDBM_File;
 use GD;
 use GD::Graph;
+use GD::Graph::colour qw(:colours :lists :files :convert);
 
 use strict;
 use warnings;
@@ -71,6 +72,8 @@ my $graph_files_individually        = 0;    # or as ham & spam sets
 # my $y_ceiling                     = 3000; # mails per $period
 
 my $fname_counter = 1;
+my %graph_png_data = ();
+
 my %allbuckets = ();
 my %allresults = ();
 my @allfiles = ();
@@ -85,9 +88,10 @@ my $seen_y;
 my $seen_n;
 
 my $tmpdir = "/tmp/rulehits.$$";
+my $outdir = ".";
 if ($opt_cgi) {
   mkdir ($tmpdir) or die "collided on $tmpdir";
-  chdir ($tmpdir);
+  $outdir = $tmpdir;
 }
 
 my $file_sets = [ ];    # split into ham and spam
@@ -95,6 +99,9 @@ my $file_sets = [ ];    # split into ham and spam
 if (!$graph_files_individually) {
   $file_sets = [ [ 'TITLE:hits in ham' ], [ 'TITLE:hits in spam' ] ];
 }
+
+# create all images as truecolor, with opaque background
+GD::Image->trueColor(1);
 
 foreach my $file (@ARGV) {
   if ($graph_files_individually) {
@@ -128,7 +135,7 @@ foreach my $set (@{$file_sets}) {
     }
     push (@allfiles, $file);
 
-    if (1) {
+    if (0) {
       # use an on-disk file to avoid massive VM usage for this hash
       # on huge datasets
       unlink("graph.tmp.dir");
@@ -150,24 +157,35 @@ foreach my $set (@{$file_sets}) {
   plot_gd();
 }
 
-my $format = $gd->export_format;
+my $format = "png";
+# my $format = $gd->export_format;
 
 if (!$graph_files_individually) {
-  my $both = new GD::Image($graph_x, $graph_y * 2);
-  my $file01 = new GD::Image("file01.$format") or die;
-  my $file02 = new GD::Image("file02.$format") or die;
-  $both->copy($file01, 0, 0, 0, 0, $graph_x-1, $graph_y-1);
-  $both->copy($file02, 0, $graph_y, 0, 0, $graph_x-1, $graph_y-1);
+  my $both = GD::Image->new($graph_x, 15 + ($graph_y * 2), 1);
+  my $file01 = GD::Image->newFromPngData($graph_png_data{"file01"}, 1);
+  my $file02 = GD::Image->newFromPngData($graph_png_data{"file02"}, 1);
+
+  # I thought this might work around the "black background" issue,
+  # but it doesn't :(
+  # my $white = $both->colorAllocate(255,255,255);
+  # $both->filledRectangle(0, 0, $graph_x, 15 + ($graph_y * 2), $white);
+
+  $both->copy($file01, 0, 5, 0, 0, $graph_x-1, $graph_y-1);
+  $both->copy($file02, 0, 10 + $graph_y, 0, 0, $graph_x-1, $graph_y-1);
+
+  # $both->copyResampled($file01, 0, 5, 0, 0,
+  #            $graph_x/2, $graph_y/2, $graph_x-1, $graph_y-1);
+  # $both->copyResampled($file02, 0, 10 + $graph_y, 0, 0,
+  #            $graph_x/2, $graph_y/2, $graph_x-1, $graph_y-1);
 
   if ($opt_cgi) {
     use CGI qw(:standard);
-    my $format = $gd->export_format;
-    print header("image/$format"); binmode STDOUT;
+    # print header("image/$format"); binmode STDOUT;
     print STDOUT $both->$format();
   }
   else {
     open(IMG, ">both.$format") or die $!; binmode IMG;
-    print IMG $gd->gd()->$format();
+    print IMG $both->$format();
     close IMG;
   }
 
@@ -272,7 +290,6 @@ sub completeline {
   $this_file_results->{"n".$lastbucket} = $seen_n; $seen_n = 0;
 }
 
-
 sub create_gd {
   my $title = shift;
 
@@ -281,12 +298,14 @@ sub create_gd {
   $gd->set (
       title => $title,
       box_axis => 1,
+      transparent => 1,
+      interlaced => 0,
       # show_values => 1,
 
-      bgclr => "#ffffff",
-      fgclr => "#000000",
-      boxclr => "#fdfdfd",
-      labelclr => "#000000",
+      # bgclr => "#ffffff",     # doesn't seem to work?!
+      # boxclr => "#ffffff",
+      fgclr => "#444444",
+      labelclr => "#333333",
 
       dclrs => [
         "#33cc00",  # green
@@ -298,6 +317,10 @@ sub create_gd {
         "#333333",  # dark grey
         "#999999"   # light grey
       ],
+
+      t_margin => 5,
+      b_margin => 5,
+      l_margin => 5,
       r_margin => 20,
 
       y_label => ($scale_to_total_volume ?
@@ -334,14 +357,19 @@ sub plot_gd {
 
     ';
   }
+  elsif (!$graph_files_individually) {
+    $gd->plot($graph_data);
+    my $graphname = sprintf("file%02d", $fname_counter++);
+    $gd->gd()->transparent(-1);
+    $graph_png_data{$graphname} = $gd->gd()->png;
+  }
   else {
     $gd->plot($graph_data);
-    my $format = $gd->export_format;
-    my $fname = sprintf("file%02d.%s", $fname_counter++, $format);
+    my $format = "png";
+    my $fname = sprintf("$outdir/file%02d.%s", $fname_counter++, $format);
     open(IMG, ">$fname") or die $!;
     binmode IMG;
     print IMG $gd->gd()->$format();
     close IMG;
-
   }
 }
