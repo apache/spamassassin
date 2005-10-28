@@ -87,7 +87,7 @@ $daterev = date_in_direction($daterev, 0);
 
 my $rule = $q->url_param('rule') || '';
 
-$s{graph} = $q->url_param('graph') || '';
+$s{graph} = $q->url_param('s_graph') || '';
 if ($s{graph} eq 'ruleshit') {
   graph_ruleshit();
   die "oops! should not get here";  # prev method should exit
