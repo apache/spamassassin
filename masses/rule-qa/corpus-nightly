@@ -58,6 +58,10 @@ while true; do
 done
 set -e
 
+# build
+perl Makefile.PL < /dev/null
+make
+
 # run test
 cd masses
 rm -f spamassassin/auto*
