@@ -12,6 +12,8 @@ use strict;
 use bytes;
 use POSIX qw(strftime);
 
+my $myperl = $^X;
+
 open (CF, "<$automcdir/config");
 my %conf; while(<CF>) { /^(\S+)=(\S+)/ and $conf{$1} = $2; }
 close CF;
@@ -30,7 +32,6 @@ our %freqs_filenames = (
 );
 
 my $q = new CGI;
-print $q->header;
 
 my $ttk = Template->new;
 
@@ -79,11 +80,23 @@ my $daterev = $q->url_param('daterev') || '';
 $daterev =~ /(\d+\/r\d+)/;
 $daterev = $1;
 
+# all known date/revision combos.  warning: could get slow in future
+my @daterevs = get_all_daterevs();
+# turn possibly-empty $daterev into a real date/rev combo (that exists)
+$daterev = date_in_direction($daterev, 0);
+
 my $rule = $q->url_param('rule') || '';
+
+$s{graph} = $q->url_param('graph') || '';
+if ($s{graph} eq 'ruleshit') {
+  graph_ruleshit();
+  die "oops! should not get here";  # prev method should exit
+}
 
 my $nicerule = $rule; if (!$nicerule) { $nicerule = 'all rules'; }
 my $title = "Mass-check: $daterev $nicerule";
 
+print $q->header;
 print q{<html><head>
 
   <style type="text/css" media="all">
@@ -226,9 +239,6 @@ my $tmpl = q{
 
 };
 
-# all known date/revision combos.  warning: could get slow in future
-my @daterevs = get_all_daterevs();
-
 my $days = {
   neg3 => -3,
   neg2 => -2,
@@ -294,11 +304,20 @@ my %freqs_ordr = ();
 show_all_sets_for_daterev($daterev, $daterev);
 
 if ($s{detail}) {
-} else {
+  my $url_rh = gen_switch_url("s_graph", "ruleshit");
+  print qq{
+
+    <h3 class=graph_title>graphs</h3>
+    <ul>
+      <li><a href="$url_rh">rules hit over time</a></li>
+    </ul>
+
+  };
+
   my @parms =get_params_except(qw(
           rule s_age s_overlap s_all s_detail
         ));
-  my $url = $cgi_url.'?'.join('&', sort @parms);
+  $url = $cgi_url.'?'.join('&', sort @parms);
 
   print qq{
 
@@ -376,6 +395,25 @@ sub show_all_sets_for_daterev {
   # special case: we only build this for one set, as it's quite slow
   # to generate
   $s{overlap} and showfreqsubset("OVERLAP.new", $strdate);
+}
+
+###########################################################################
+
+sub graph_ruleshit {
+  $datadir = $conf{html}."/".$daterev."/";
+
+  # logs are named e.g.
+  # /home/automc/corpus/html/20051028/r328993/LOGS.all-ham-mc-fast.log.gz
+
+  # untaint
+  $rule =~ /([_0-9a-zA-Z]+)/; my $saferule = $1;
+  $datadir =~ /([-\.\,_0-9a-zA-Z]+)/; my $safedatadir = $1;
+
+  exec ("$myperl $automcdir/../../rule-hits-over-time ".
+        "--cgi --rule='$saferule' ".
+        "$safedatadir/LOGS.*.log.gz");
+
+  die "exec failed";
 }
 
 ###########################################################################
