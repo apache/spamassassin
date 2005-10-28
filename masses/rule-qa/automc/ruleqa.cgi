@@ -313,24 +313,21 @@ if ($s{detail}) {
   {
     my $graph_on = qq{
 
-      <p><strong>Rule's hit-rate over time:</strong> <a 
-        href="}.gen_switch_url("s_g_over_time", "0").qq{">Hide</a>
-      </p> <img src="}.gen_switch_url("graph", "over_time").qq{" 
+      <p><a href="}.gen_switch_url("s_g_over_time", "0").qq{">Hide Graph</a></p>
+      <img src="}.gen_switch_url("graph", "over_time").qq{" 
         width=800 height=815 />
 
     };
 
     my $graph_off = qq{
 
-      <p><strong>Rule's hit-rate over time:</strong> <a 
-        href="}.gen_switch_url("s_g_over_time", "1").qq{">Show</a>
-      </p>
+      <p><a href="}.gen_switch_url("s_g_over_time", "1").qq{">Show Graph</a></p>
 
     };
 
     print qq{
 
-      <h3 class=graph_title>graphs</h3>
+      <h3 class=graph_title>Graph, hit-rate over time</h3>
       }.($s{g_over_time} ? $graph_on : $graph_off).qq{
 
       </ul>
