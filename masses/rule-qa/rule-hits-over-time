@@ -158,7 +158,7 @@ foreach my $set (@{$file_sets}) {
   plot_gd();
 }
 
-my $format = "png";
+my $format = "gif";
 # my $format = $gd->export_format;
 
 if (!$graph_files_individually) {
@@ -190,7 +190,7 @@ if (!$graph_files_individually) {
     close IMG;
   }
 
-  $both->png();
+  $both->gif();
 }
 else {
   warn "TODO: cannot produce combined images in multi-file mode";
