@@ -88,8 +88,8 @@ $daterev = date_in_direction($daterev, 0);
 my $rule = $q->url_param('rule') || '';
 
 $s{graph} = $q->url_param('s_graph') || '';
-if ($s{graph} eq 'ruleshit') {
-  graph_ruleshit();
+if ($s{graph} eq 'over_time') {
+  graph_over_time();
   die "oops! should not get here";  # prev method should exit
 }
 
@@ -304,12 +304,12 @@ my %freqs_ordr = ();
 show_all_sets_for_daterev($daterev, $daterev);
 
 if ($s{detail}) {
-  my $url_rh = gen_switch_url("s_graph", "ruleshit");
+  my $url_rh = gen_switch_url("s_graph", "over_time");
   print qq{
 
     <h3 class=graph_title>graphs</h3>
     <ul>
-      <li><a href="$url_rh">rules hit over time</a></li>
+      <li><a href="$url_rh">Graph rule's hit-rate over time</a></li>
     </ul>
 
   };
@@ -399,7 +399,7 @@ sub show_all_sets_for_daterev {
 
 ###########################################################################
 
-sub graph_ruleshit {
+sub graph_over_time {
   $datadir = $conf{html}."/".$daterev."/";
 
   # logs are named e.g.
