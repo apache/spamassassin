@@ -94,7 +94,12 @@ if ($s{graph} eq 'over_time') {
 }
 
 my $nicerule = $rule; if (!$nicerule) { $nicerule = 'all rules'; }
-my $title = "Mass-check: $daterev $nicerule";
+my $title;
+if ($s{detail}) {
+  $title = "Rule QA: details for $nicerule (in $daterev)";
+} else {
+  $title = "Rule QA: overview of all rules (in $daterev)";
+}
 
 print $q->header;
 print q{<html><head>
