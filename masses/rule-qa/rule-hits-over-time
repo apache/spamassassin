@@ -335,12 +335,13 @@ sub create_gd {
       x_number_format => \&fmt_time_t,
   );
 
-  if ($scale_to_total_volume) {
-    $gd->set (
-      y_min_value => 0,
-      y_max_value => 100,
-    );
-  }
+  # turned off, so that the Y axis scales nicely.  can be reenabled
+  #if ($scale_to_total_volume) {
+    # $gd->set (
+    # y_min_value => 0,
+    # y_max_value => 100,
+    # );
+  #}
 }
 
 sub fmt_time_t {
