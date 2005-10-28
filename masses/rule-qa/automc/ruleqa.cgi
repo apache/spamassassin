@@ -313,7 +313,9 @@ if ($s{detail}) {
   {
     my $graph_on = qq{
 
-      <p><a href="}.gen_switch_url("s_g_over_time", "0").qq{">Hide Graph</a></p>
+      <p><a id="over_time_anchor" 
+        href="}.gen_switch_url("s_g_over_time", "0").qq{#over_time_anchor"
+        >Hide Graph</a></p>
       <img src="}.gen_switch_url("graph", "over_time").qq{" 
         width=800 height=815 />
 
@@ -321,7 +323,9 @@ if ($s{detail}) {
 
     my $graph_off = qq{
 
-      <p><a href="}.gen_switch_url("s_g_over_time", "1").qq{">Show Graph</a></p>
+      <p><a id="over_time_anchor" 
+        href="}.gen_switch_url("s_g_over_time", "1").qq{#over_time_anchor"
+        >Show Graph</a></p>
 
     };
 
