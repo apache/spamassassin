@@ -409,7 +409,7 @@ sub graph_ruleshit {
   $rule =~ /([_0-9a-zA-Z]+)/; my $saferule = $1;
   $datadir =~ /([-\.\,_0-9a-zA-Z]+)/; my $safedatadir = $1;
 
-  exec ("$myperl $automcdir/../../rule-hits-over-time ".
+  exec ("$myperl $automcdir/../rule-hits-over-time ".
         "--cgi --rule='$saferule' ".
         "$safedatadir/LOGS.*.log.gz");
 
