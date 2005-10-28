@@ -326,7 +326,7 @@ sub gen_class {
 
   if ($class eq 'LOGS') {
     foreach my $f (@ham, @spam) {
-      $f =~ s/[^-_A-Za-z0-9]+/_/gs;    # sanitize!
+      $f =~ s/[^-\._A-Za-z0-9]+/_/gs;    # sanitize!
 
       system("gzip -c < $f > $fname-$f.gz.$$");
       if ($? >> 8 != 0) {
