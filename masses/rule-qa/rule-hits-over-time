@@ -150,19 +150,31 @@ foreach my $set (@{$file_sets}) {
   plot_gd();
 }
 
-if (!$graph_files_individually) {
-  system ("convert -append file01.gif file02.gif both.gif");
-}
+my $format = $gd->export_format;
 
-if ($opt_cgi) {
-  use CGI qw(:standard);
-  my $format = $gd->export_format;
-  print header("image/$format");
-  binmode STDOUT;
-  open (IN, "<both.gif") or die "no both.gif";
-  binmode IN;
-  while (<IN>) { print STDOUT; }
-  close IN;
+if (!$graph_files_individually) {
+  my $both = new GD::Image($graph_x, $graph_y * 2);
+  my $file01 = new GD::Image("file01.$format") or die;
+  my $file02 = new GD::Image("file02.$format") or die;
+  $both->copy($file01, 0, 0, 0, 0, $graph_x-1, $graph_y-1);
+  $both->copy($file02, 0, $graph_y, 0, 0, $graph_x-1, $graph_y-1);
+
+  if ($opt_cgi) {
+    use CGI qw(:standard);
+    my $format = $gd->export_format;
+    print header("image/$format"); binmode STDOUT;
+    print STDOUT $both->$format();
+  }
+  else {
+    open(IMG, ">both.$format") or die $!; binmode IMG;
+    print IMG $gd->gd()->$format();
+    close IMG;
+  }
+
+  $both->png();
+}
+else {
+  warn "TODO: cannot produce combined images in multi-file mode";
 }
 
 if ($opt_cgi) {
