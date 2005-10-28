@@ -407,7 +407,9 @@ sub graph_ruleshit {
 
   # untaint
   $rule =~ /([_0-9a-zA-Z]+)/; my $saferule = $1;
-  $datadir =~ /([-\.\,_0-9a-zA-Z]+)/; my $safedatadir = $1;
+
+  $datadir =~ s/\.\.\//__\//gs;
+  $datadir =~ /([-\.\,_0-9a-zA-Z\/]+)/; my $safedatadir = $1;
 
   exec ("$myperl $automcdir/../rule-hits-over-time ".
         "--cgi --rule='$saferule' ".
