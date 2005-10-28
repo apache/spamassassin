@@ -101,8 +101,9 @@ if (!$graph_files_individually) {
 }
 
 # create all images as truecolor, with opaque background
-GD::Image->trueColor(1);
-
+# OFF: causes white parts to be output in black.  GD::Graph bug
+# GD::Image->trueColor(1);
+ 
 foreach my $file (@ARGV) {
   if ($graph_files_individually) {
     push @{$file_sets}, [ $file ];
@@ -161,7 +162,7 @@ my $format = "png";
 # my $format = $gd->export_format;
 
 if (!$graph_files_individually) {
-  my $both = GD::Image->new($graph_x, 15 + ($graph_y * 2), 1);
+  my $both = GD::Image->new($graph_x, 15 + ($graph_y * 2));
   my $file01 = GD::Image->newFromPngData($graph_png_data{"file01"}, 1);
   my $file02 = GD::Image->newFromPngData($graph_png_data{"file02"}, 1);
 
@@ -299,11 +300,11 @@ sub create_gd {
       title => $title,
       box_axis => 1,
       transparent => 1,
-      interlaced => 0,
+      ##interlaced => 0,
       # show_values => 1,
 
-      # bgclr => "#ffffff",     # doesn't seem to work?!
-      # boxclr => "#ffffff",
+      bgclr => "#ffffff",     # doesn't seem to work?!
+      boxclr => "#ffffff",
       fgclr => "#444444",
       labelclr => "#333333",
 
