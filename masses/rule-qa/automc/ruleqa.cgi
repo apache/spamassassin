@@ -49,6 +49,7 @@ $s{zero} = get_url_switch('s_zero', 0);
 
 $s{new} = get_url_switch('s_new', 1);
 $s{detail} = get_url_switch('s_detail', 0);
+$s{g_over_time} = get_url_switch('s_g_over_time', 0);
 
 # note: age, new, overlap are all now synonyms for detail ;)
 if ($s{age} || $s{overlap} || $s{detail}) {
@@ -87,10 +88,10 @@ $daterev = date_in_direction($daterev, 0);
 
 my $rule = $q->url_param('rule') || '';
 
-$s{graph} = $q->url_param('s_graph') || '';
-if ($s{graph} eq 'over_time') {
-  graph_over_time();
-  die "oops! should not get here";  # prev method should exit
+my $graph = $q->url_param('graph');
+if ($graph) {
+  if ($graph eq 'over_time') { graph_over_time(); }
+  die "graph '$graph' unknown, or fell out of exec";
 }
 
 my $nicerule = $rule; if (!$nicerule) { $nicerule = 'all rules'; }
@@ -309,15 +310,35 @@ my %freqs_ordr = ();
 show_all_sets_for_daterev($daterev, $daterev);
 
 if ($s{detail}) {
-  my $url_rh = gen_switch_url("s_graph", "over_time");
-  print qq{
+  {
+    my $graph_on = qq{
 
-    <h3 class=graph_title>graphs</h3>
-    <ul>
-      <li><a href="$url_rh">Graph rule's hit-rate over time</a></li>
-    </ul>
+      <p><strong>Rule's hit-rate over time:</strong>: <a 
+        href="}.gen_switch_url("s_g_over_time", "0").qq{">Hide</a>
+      </p>
 
-  };
+      <img src="}.gen_switch_url("graph", "over_time").qq{" 
+            height=800 width=815 />
+
+    };
+
+    my $graph_off = qq{
+
+      <p><strong>Rule's hit-rate over time:</strong>: <a 
+        href="}.gen_switch_url("s_g_over_time", "1").qq{">Show</a>
+      </p>
+
+    };
+
+    print qq{
+
+      <h3 class=graph_title>graphs</h3>
+      }.($s{g_over_time} ? $graph_on : $graph_off).qq{
+
+      </ul>
+
+    };
+  }
 
   my @parms =get_params_except(qw(
           rule s_age s_overlap s_all s_detail
