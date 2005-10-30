@@ -455,7 +455,34 @@ sub showfreqset {
 sub showfreqsubset {
   my ($filename, $strdate) = @_;
   read_freqs_file($filename);
+
+  if ($key eq 'DETAILS.new') {
+    # report which sets we used
+    summarise_head($freqs_head{$key}, $filename, $strdate, $rule);
+  }
+
   get_freqs_for_rule($filename, $strdate, $rule);
+}
+
+sub summarise_head {
+  my ($head, $filename, $strdate, $rule) = @_;
+
+  my @mcfiles = ();
+  if ($head =~ / ham results used for \S+ \S+ \S+: (.*)$/) {
+    @mcfiles = split(' ', $1);
+  }
+
+  map {
+    s/^ham-//; s/\.log$//;
+  } @mcfiles;
+
+  my $who = join(', ', @mcfiles);
+
+  print qq{
+
+    <p><em>(Using mass-check data from: $who)</em></p>
+
+  };
 }
 
 sub read_freqs_file {
