@@ -327,7 +327,7 @@ sub fmt_time_t {
 sub plot_gp {
   if (!$opt_text)
   {
-    open (DATA, ">plot.data") or die;
+    open (DATA, ">$tmpdir/plot.data") or die;
     foreach my $line (@{$graph_data}) {
       my $tt = shift @$line;
       print DATA fmt_time_t($tt)," ",join(' ', @$line),"\n";
@@ -341,7 +341,7 @@ sub plot_gp {
       my $col = $i+2;
 
       push @plot,
-        qq{ 'plot.data' using }.
+        qq{ '$tmpdir/plot.data' using }.
 
             # to plot "undefined" values as 0
             # qq{ 1:(\$$col >= 0 ? \$$col : 0) }.
