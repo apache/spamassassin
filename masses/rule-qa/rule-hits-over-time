@@ -306,7 +306,7 @@ sub create_gp {
     set ylabel '$y_label'
 
     set terminal png small \\
-        size $graph_x,$graph_y \\
+        interlace size $graph_x,$graph_y \\
         xffffff x444444 x33cc00 \\
         xff3300 x0000cc x99cc00 xff9900 \\
         xcccc00 x333333 x999999 x9500d3
