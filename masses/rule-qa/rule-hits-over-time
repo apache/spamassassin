@@ -293,14 +293,18 @@ sub completeline {
 sub create_gp {
   my $title = shift;
 
+  my $mailtype = 'mail';
+  if ($title =~ /\b(ham|spam)\b/) { $mailtype = $1; }
+
   my $y_label = ($scale_to_total_volume ?
-            "\%age of mail in period" : "Hits in period");
+            "\%age of $mailtype in period" : "Num $mailtype messages in period");
 
   open (GP, "| gnuplot - > $tmpdir/gp.log 2>&1") or die "cannot run gnuplot";
 
+  # (NOTE: -1% hitrate means no data for that time period)'
   print GP qq{
 
-    set xlabel 'Time, in blocks of $period secs.   (NOTE: -1% hitrate means no data for that time period)'
+    set xlabel 'Time, in blocks of $period secs'
     set ylabel '$y_label'
 
     set terminal png small \\
@@ -349,7 +353,7 @@ sub plot_gp {
             # qq{ 1:(\$$col >= 0 ? \$$col : 0) }.
             # as -1
             # qq{ 1:(\$$col >= 0 ? \$$col : -1) }.
-            # to not plot "undefined" values at all (ugly!)
+            # to not plot "undefined" values at all (linespoints rec'd)
             qq{ 1:(\$$col >= 0 ? \$$col : 1/0) }.
 
             ## smoothing: not so useful
