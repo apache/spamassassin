@@ -59,6 +59,9 @@ GetOptions(
 
 usage() unless $opt_rule;
 
+# fix PATH for sucky Solaris compatibility
+$ENV{PATH} .= ":/opt/sfw/bin/gnuplot";
+
 my $rule_re = qr/[, ]${opt_rule}[, ]/;
 
 my $period = $opt_period || (24 * 60 * 60 * 1);
