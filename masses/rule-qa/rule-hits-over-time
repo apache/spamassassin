@@ -347,16 +347,16 @@ sub plot_gp {
 
             # to plot "undefined" values as 0
             # qq{ 1:(\$$col >= 0 ? \$$col : 0) }.
-            qq{ 1:(\$$col >= 0 ? \$$col : -1) }.
-
-            ## to not plot "undefined" values at all (ugly!)
-            # qq{ 1:(\$$col >= 0 ? \$$col : 1/0) }.
+            # as -1
+            # qq{ 1:(\$$col >= 0 ? \$$col : -1) }.
+            # to not plot "undefined" values at all (ugly!)
+            qq{ 1:(\$$col >= 0 ? \$$col : 1/0) }.
 
             ## smoothing: not so useful
             # qq{ smooth bezier }.
 
-            qq{ with lines lt $style }.
-            # qq{ with linespoints lt $style pt $style }.
+            # qq{ with lines lt $style }.
+            qq{ with linespoints lt $style pt $style }.
 
             qq{ title '$legend' };
 
