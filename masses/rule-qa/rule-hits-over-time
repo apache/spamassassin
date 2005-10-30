@@ -193,22 +193,20 @@ sub summarise {
     my $total_n = 0;
     my @cols = ();
     foreach my $file (@allfiles) {
-      my $seen_y = $allresults{$file}->{"y".$bucket};
-      my $seen_n = $allresults{$file}->{"n".$bucket};
-      if (!defined $seen_y && !defined $seen_n) {
-        $seen_n = $seen_y = -1;
-      } elsif (!defined $seen_y || !defined $seen_n) {
-        # assert: enforce both < 0, if either is
-        warn "oops? seen_y=$seen_y seen_n=$seen_n, should be both < 0";
-        $seen_n = $seen_y = -1;
-      }
+      my $sy = $allresults{$file}->{"y".$bucket};
+      my $sn = $allresults{$file}->{"n".$bucket};
 
-      if ($seen_y < 0 && $seen_n > 0 || $seen_n < 0 && $seen_y > 0) {
+      if (!defined $sy && !defined $sn) {
+        $sn = $sy = -1;
+      } elsif (!defined $sy || !defined $sn) {
+        # assert: enforce both < 0, if either is
+        warn "oops? sy=$sy sn=$sn, should be both < 0";
+        $sn = $sy = -1;
       }
 
       if ($scale_to_total_volume) {
-        if ($seen_y > 0) {
-          my $frac = $seen_y / (($seen_y + $seen_n) || 0.0001);
+        if ($sy >= 0) {
+          my $frac = $sy / (($sy + $sn) || 0.0001);
           push @cols, ($frac * 100.0);
         }
         else {
@@ -217,8 +215,8 @@ sub summarise {
         $total_n = 100;
       }
       else {
-        $total_n += $seen_n;
-        push (@cols, $seen_y);
+        $total_n += $sn;
+        push (@cols, $sy);
       }
     }
 
