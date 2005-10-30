@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# rule-hits-over-time - produce graphs of rule hits over time, using GD::Graph
+# rule-hits-over-time - produce graphs of rule hits over time, using gnuplot
 #
 # <@LICENSE>
 # Copyright 2004 Apache Software Foundation
@@ -21,8 +21,6 @@
 use Getopt::Long;
 use SDBM_File;
 use GD;
-use GD::Graph;
-use GD::Graph::colour qw(:colours :lists :files :convert);
 
 use strict;
 use warnings;
@@ -68,8 +66,6 @@ my $period = $opt_period || (24 * 60 * 60 * 1);
 my $graph_x                         = $opt_size_x || 800;
 my $graph_y                         = $opt_size_y || 400;
 my $scale_to_total_volume           = ($opt_as_counts ? 0 : 1);
-my $graph_files_individually        = 0;    # or as ham & spam sets
-# my $y_ceiling                     = 3000; # mails per $period
 
 my $fname_counter = 1;
 my %graph_png_data = ();
@@ -78,8 +74,8 @@ my %allbuckets = ();
 my %allresults = ();
 my @allfiles = ();
 
-my $gd;
-my $graph_data;
+my $graph_data = [];
+
 my $this_file_results;
 
 my $lastbucket;
@@ -95,25 +91,13 @@ if ($opt_cgi) {
 }
 
 my $file_sets = [ ];    # split into ham and spam
+$file_sets = [ [ 'TITLE:hits in ham' ], [ 'TITLE:hits in spam' ] ];
 
-if (!$graph_files_individually) {
-  $file_sets = [ [ 'TITLE:hits in ham' ], [ 'TITLE:hits in spam' ] ];
-}
-
-# create all images as truecolor, with opaque background
-# OFF: causes white parts to be output in black.  GD::Graph bug
-# GD::Image->trueColor(1);
- 
 foreach my $file (@ARGV) {
-  if ($graph_files_individually) {
-    push @{$file_sets}, [ $file ];
-  }
-  else {
-    if ($file =~ /\bham\b/) {
-      push @{$file_sets->[0]}, $file;
-    } else {
-      push @{$file_sets->[1]}, $file;
-    }
+  if ($file =~ /\bham\b/) {
+    push @{$file_sets->[0]}, $file;
+  } else {
+    push @{$file_sets->[1]}, $file;
   }
 }
 
@@ -121,13 +105,13 @@ foreach my $set (@{$file_sets}) {
   @allfiles = ();
   %allbuckets = ();
   %allresults = ();
-  @allfiles = ();
 
   my $settitle = '';
   if ($set->[0] =~ /^TITLE:(.*)$/) {
     $settitle = $1; shift(@{$set});
   }
-  create_gd("$opt_rule $settitle");
+
+  create_gp("$opt_rule $settitle");
 
   foreach my $file (@{$set}) {
     if (!$opt_text) {
@@ -151,17 +135,16 @@ foreach my $set (@{$file_sets}) {
     $this_file_results = $allresults{$file};
     read_logs($file);
 
-    $graph_data = GD::Graph::Data->new();
+    $graph_data = [];
     summarise();
   }
 
-  plot_gd();
+  plot_gp();
 }
 
 my $format = "gif";
-# my $format = $gd->export_format;
 
-if (!$graph_files_individually) {
+{
   my $both = GD::Image->new($graph_x, 15 + ($graph_y * 2));
   my $file01 = GD::Image->newFromPngData($graph_png_data{"file01"}, 1);
   my $file02 = GD::Image->newFromPngData($graph_png_data{"file02"}, 1);
@@ -192,9 +175,6 @@ if (!$graph_files_individually) {
 
   $both->gif();
 }
-else {
-  warn "TODO: cannot produce combined images in multi-file mode";
-}
 
 if ($opt_cgi) {
   system ("cd /; rm -rf $tmpdir");      # clean up tmp files
@@ -206,16 +186,31 @@ sub summarise {
     my $total_n = 0;
     my @cols = ();
     foreach my $file (@allfiles) {
-      my $seen_y = $allresults{$file}->{"y".$bucket} || 0;
-      my $seen_n = $allresults{$file}->{"n".$bucket} || 0;
+      my $seen_y = $allresults{$file}->{"y".$bucket};
+      my $seen_n = $allresults{$file}->{"n".$bucket};
+      if (!defined $seen_y && !defined $seen_n) {
+        $seen_n = $seen_y = -1;
+      } elsif (!defined $seen_y || !defined $seen_n) {
+        # assert: enforce both < 0, if either is
+        warn "oops? seen_y=$seen_y seen_n=$seen_n, should be both < 0";
+        $seen_n = $seen_y = -1;
+      }
+
+      if ($seen_y < 0 && $seen_n > 0 || $seen_n < 0 && $seen_y > 0) {
+      }
+
       if ($scale_to_total_volume) {
-        my $frac = $seen_y / (($seen_y + $seen_n) || 0.0001);
-        push @cols, ($frac * 100.0);
+        if ($seen_y > 0) {
+          my $frac = $seen_y / (($seen_y + $seen_n) || 0.0001);
+          push @cols, ($frac * 100.0);
+        }
+        else {
+          push @cols, -1;
+        }
         $total_n = 100;
       }
       else {
         $total_n += $seen_n;
-        # if ($y_ceiling && $seen_y > $y_ceiling) { $seen_y = $y_ceiling; }
         push (@cols, $seen_y);
       }
     }
@@ -223,7 +218,6 @@ sub summarise {
     if ($scale_to_total_volume) {
       @cols = ($bucket, @cols);     # total_n is always "100"
     } else {
-      # if ($y_ceiling && $total_n > $y_ceiling) { $total_n = $y_ceiling; }
       @cols = ($bucket, $total_n, @cols);
     }
 
@@ -231,7 +225,7 @@ sub summarise {
       print join(' ',@cols)."\n";
     }
     else {
-      $graph_data->add_point(@cols);
+      push (@{$graph_data}, \@cols);
     }
   }
 }
@@ -291,87 +285,96 @@ sub completeline {
   $this_file_results->{"n".$lastbucket} = $seen_n; $seen_n = 0;
 }
 
-sub create_gd {
+sub create_gp {
   my $title = shift;
 
-  use GD::Graph::lines;
-  $gd = GD::Graph::lines->new($graph_x, $graph_y);
-  $gd->set (
-      title => $title,
-      box_axis => 1,
-      transparent => 1,
-      ##interlaced => 0,
-      # show_values => 1,
+  my $y_label = ($scale_to_total_volume ?
+            "\%age of mail in period" : "Hits in period");
 
-      bgclr => "#ffffff",     # doesn't seem to work?!
-      boxclr => "#ffffff",
-      fgclr => "#444444",
-      labelclr => "#333333",
+  open (GP, "| gnuplot -") or die "cannot run gnuplot";
 
-      dclrs => [
-        "#33cc00",  # green
-        "#ff3300",  # red
-        "#0000cc",  # blue
-        "#99cc00",  # mauve
-        "#ff9900",  # orange
-        "#cccc00",  # yellowish
-        "#333333",  # dark grey
-        "#999999"   # light grey
-      ],
+  print GP qq{
 
-      t_margin => 5,
-      b_margin => 5,
-      l_margin => 5,
-      r_margin => 20,
+    set xlabel 'Time, in blocks of $period secs.   (NOTE: -1% hitrate means no data for that time period)'
+    set ylabel '$y_label'
 
-      y_label => ($scale_to_total_volume ?
-            "\%age of mail in period" : "Hits in period"),
+    set terminal png medium size $graph_x,$graph_y \\
+        xffffff x444444 x33cc00 \\
+        xff3300 x0000cc x99cc00 xff9900 \\
+        xcccc00 x333333 x999999 x9500d3
 
-      zero_axis => 1,
+    set out 'out.png'
 
-      # x_label => "Time (in blocks of $period secs)",
-      x_labels_vertical => 0,
-      x_tick_number => 'auto',
-      x_number_format => \&fmt_time_t,
-  );
+    set grid back xtics ytics
 
-  # turned off, so that the Y axis scales nicely.  can be reenabled
-  #if ($scale_to_total_volume) {
-    # $gd->set (
-    # y_min_value => 0,
-    # y_max_value => 100,
-    # );
-  #}
+    set xdata time
+    set timefmt "%Y-%m-%d"
+    set title "$title"
+
+  };
 }
 
 sub fmt_time_t {
   my $tt = shift;
-
   use POSIX qw(strftime);
-  return strftime "%b %e %Y", gmtime($tt);
+  return strftime "%Y-%m-%d", gmtime($tt);
 }
 
-sub plot_gd {
-  if ($opt_text) {
-    print STDERR '
+sub plot_gp {
+  if (!$opt_text)
+  {
+    open (DATA, ">plot.data") or die;
+    foreach my $line (@{$graph_data}) {
+      my $tt = shift @$line;
+      print DATA fmt_time_t($tt)," ",join(' ', @$line),"\n";
+    }
+    close DATA or die;
 
-    plot "times" using 0:1, "times" using 0:2
+    my @plot = ();
+    foreach my $i (0 .. (scalar @allfiles - 1)) {
+      my $legend = filename_to_legend ($allfiles[$i]);
+      my $style = $i+1;
+      my $col = $i+2;
 
-    ';
-  }
-  elsif (!$graph_files_individually) {
-    $gd->plot($graph_data);
+      push @plot,
+        qq{ 'plot.data' using }.
+
+            # to plot "undefined" values as 0
+            # qq{ 1:(\$$col >= 0 ? \$$col : 0) }.
+            qq{ 1:(\$$col >= 0 ? \$$col : -1) }.
+
+            ## to not plot "undefined" values at all (ugly!)
+            # qq{ 1:(\$$col >= 0 ? \$$col : 1/0) }.
+
+            ## smoothing: not so useful
+            # qq{ smooth bezier }.
+
+            qq{ with linespoints lt $style pt $style }.
+            qq{ t '$legend' };
+
+    }
+
+    print GP "plot ",join(", ", @plot), "\n";
+    close GP;
+
     my $graphname = sprintf("file%02d", $fname_counter++);
-    $gd->gd()->transparent(-1);
-    $graph_png_data{$graphname} = $gd->gd()->png;
+    $graph_png_data{$graphname} = readfile("out.png");
   }
-  else {
-    $gd->plot($graph_data);
-    my $format = "png";
-    my $fname = sprintf("$outdir/file%02d.%s", $fname_counter++, $format);
-    open(IMG, ">$fname") or die $!;
-    binmode IMG;
-    print IMG $gd->gd()->$format();
-    close IMG;
-  }
+}
+
+sub readfile {
+  open (IN, "<$_[0]") or die "cannot read $_[0]";
+  binmode IN;
+  my $str = join('',<IN>);
+  close IN;
+  return $str;
+}
+
+sub filename_to_legend {
+  my $f = shift;
+
+  $f =~ s/^.*\///;
+  $f =~ s/LOGS\.all-//;
+  $f =~ s/\.log\.\S+$//;
+  return $f;
 }

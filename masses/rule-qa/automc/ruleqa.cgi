@@ -19,13 +19,13 @@ my %conf; while(<CF>) { /^(\S+)=(\S+)/ and $conf{$1} = $2; }
 close CF;
 
 our %freqs_filenames = (
-    'DETAILS.age' => 'set 0, broken down by message age',
+    'DETAILS.age' => 'set 0, broken down by message age in weeks',
     'DETAILS.all' => 'set 0, broken down by contributor',
     'DETAILS.new' => 'set 0, in aggregate',
     'HTML.age' => 'set 0, by message age, HTML messages only',
     'HTML.all' => 'set 0, by contributor, HTML messages only',
     'HTML.new' => 'set 0, in aggregate, HTML messages only',
-    'NET.age' => 'set 1 (network), by message age',
+    'NET.age' => 'set 1 (network), by message age in weeks',
     'NET.all' => 'set 1 (network), by contributor',
     'NET.new' => 'set 1 (network), in aggregate',
     'OVERLAP.new' => 'set 0, overlaps between rules',
