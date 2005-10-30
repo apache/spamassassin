@@ -60,7 +60,9 @@ GetOptions(
 usage() unless $opt_rule;
 
 # fix PATH for sucky Solaris compatibility.
+# fix PATHs for sucky Solaris compatibility.
 $ENV{PATH} .= ":/local/gnuplot-4.0.0/bin:/opt/sfw/bin";
+$ENV{LD_LIBRARY_PATH} .= ":/local/gd-2.0.33/lib";
 
 my $rule_re = qr/[, ]${opt_rule}[, ]/;
 
@@ -182,8 +184,7 @@ my $format = "gif";
   $both->gif();
 }
 
-unlink(<$tmpdir/*.*>);
-rmdir $tmpdir;
+unlink(<$tmpdir/*.*>); rmdir $tmpdir;
 
 exit;
 
@@ -356,7 +357,9 @@ sub plot_gp {
             ## smoothing: not so useful
             # qq{ smooth bezier }.
 
-            qq{ with linespoints lt $style pt $style }.
+            qq{ with lines lt $style }.
+            # qq{ with linespoints lt $style pt $style }.
+
             qq{ title '$legend' };
 
     }
