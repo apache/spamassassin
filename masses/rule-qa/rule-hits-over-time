@@ -87,9 +87,10 @@ my $seen_y;
 my $seen_n;
 
 my $tmpdir = "/tmp/rulehits.$$";
+mkdir ($tmpdir) or die "collided on $tmpdir";
+
 my $outdir = ".";
 if ($opt_cgi) {
-  mkdir ($tmpdir) or die "collided on $tmpdir";
   $outdir = $tmpdir;
 }
 
@@ -179,9 +180,9 @@ my $format = "gif";
   $both->gif();
 }
 
-if ($opt_cgi) {
-  system ("cd /; rm -rf $tmpdir");      # clean up tmp files
-}
+unlink(<$tmpdir/*.*>);
+rmdir $tmpdir;
+
 exit;
 
 sub summarise {
@@ -306,7 +307,7 @@ sub create_gp {
         xff3300 x0000cc x99cc00 xff9900 \\
         xcccc00 x333333 x999999 x9500d3
 
-    set out 'out.png'
+    set out '$tmpdir/out.png'
 
     set grid back xtics ytics
 
@@ -361,7 +362,7 @@ sub plot_gp {
     close GP;
 
     my $graphname = sprintf("file%02d", $fname_counter++);
-    $graph_png_data{$graphname} = readfile("out.png");
+    $graph_png_data{$graphname} = readfile("$tmpdir/out.png");
   }
 }
 
