@@ -1,0 +1,324 @@
+#!/usr/bin/perl
+#
+# mk-corpus-link-farm - distribute a bunch of mail tidily into a set of corpora
+# (see EOF for an example/testcase)
+#
+# Note: creates symbolic links only; renaming/moving the originals will
+# cause breakage.
+# 
+# <@LICENSE>
+# Copyright 2004 Apache Software Foundation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+
+
+use strict;
+use warnings;
+
+sub usage {
+  die "
+usage: mk-corpus-link-farm [options] [dest] src [...]
+
+dest:
+  -dest outputdir [-num num]
+
+options:
+  -most_recent:         select the most recent messages (default)
+
+";
+}
+
+use Cwd;
+use File::Path;
+use File::Find;
+use Data::Dumper;
+
+my $DEBUG; #$DEBUG=1;
+
+my @classes = qw(ham spam);
+my $srcs = [ ];
+my $dests = [ ];
+sub dbg;
+
+use Getopt::Long;
+use vars qw(
+
+  $opt_most_recent $opt_reuse
+
+);
+
+$opt_most_recent = 0;
+$opt_reuse = 0;
+
+my $curdest;
+GetOptions(
+    'dest=s' => sub {
+      my ($switch, $dir) = @_;
+      $curdest = {
+          ham => { },
+          spam => { },
+          dir => $dir
+        };
+      push (@$dests, $curdest);
+    },
+
+    'num=i' => sub {
+      my ($switch, $num) = @_;
+      $curdest->{num_msgs} = $num; 
+    },
+
+    'most_recent' => \$opt_most_recent,
+) or usage();
+
+foreach my $arg (@ARGV) {
+  push (@$srcs, { dir => $arg });
+}
+
+# test data: $srcs = [ { dir => "/src1", ham => { dests => [ ], dir =>
+# "/src1/ham", num => 100 }, spam => { dests => [ ], dir => "/src1/spam", num
+# => 100 }, }, { dir => "/src2", ham => { dests => [ ], dir => "/src2/ham", num
+# => 300 }, spam => { dests => [ ], dir => "/src2/spam", num => 300 }, }, { dir
+# => "/src3", ham => { dests => [ ], dir => "/src3/ham", num => 500 }, spam =>
+# { dests => [ ], dir => "/src3/spam", num => 500 }, } ];
+
+my $cwd = cwd();
+main();
+exit;
+
+
+sub main {
+  find_srcs();
+  dist_across_dests();
+  make_links_in_dests();
+}
+
+
+
+sub find_srcs {
+  foreach my $src (@$srcs) {
+    my $num_files;
+    my $cb = sub {
+      if (-f $_ && -r _) { $num_files++; }
+    };
+
+    $src->{ham}  = { num => 0, dests => [ ] };
+    $src->{spam} = { num => 0, dests => [ ] };
+
+    my $try_dir = "$src->{dir}/ham";
+    if (-d $try_dir) {
+      $num_files = 0;
+      File::Find::find($cb, $try_dir);
+      $src->{ham}{subdir} = $try_dir;
+      $src->{ham}{num} = $num_files;
+    }
+
+    $try_dir = "$src->{dir}/spam";
+    if (-d $try_dir) {
+      $num_files = 0;
+      File::Find::find($cb, $try_dir);
+      $src->{spam}{subdir} = $try_dir;
+      $src->{spam}{num} = $num_files;
+    }
+
+    print "$src->{dir}: found $src->{ham}{num} ham, $src->{spam}{num} spam\n";
+  }
+}
+
+sub dist_across_dests {
+  foreach my $dest (@$dests) {
+    my %want = ();
+    foreach my $class (@classes) {
+      $want{$class} = $dest->{num_msgs} || 99999999;
+    }
+
+    $dest->{srcs} = [ ];
+    print "\n$dest->{dir}: want $dest->{num_msgs} messages\n";
+
+    foreach my $src (@$srcs) {
+      foreach my $class (@classes) {
+        if ($want{$class} > 0) {
+          allocate ($src, $dest, \$want{$class}, $class);
+        }
+      }
+    }
+
+    foreach my $class (@classes) {
+      print "$class:";
+      ($class eq 'ham') and print " ";
+      my $added = 0;
+      foreach my $src (@{$dest->{$class}{srcs}}) {
+        print "  $src->{num} of $src->{from}{$class}{subdir}";
+        $added += $src->{num};
+      }
+      print "\n";
+
+      if ($want{$class} > 0) {
+        warn "       WARNING: failed to fill $dest->{dir}/$class: ".
+                "only $added, wanted $want{$class} more\n";
+      }
+    }
+  }
+}
+
+sub make_links_in_dests {
+  foreach my $class (@classes) {
+    foreach my $dest (@$dests) {
+      my $dir = $dest->{dir}.'/'.$class;
+      if (-d $dir) {
+        rmtree($dir) or warn "cannot rmtree $dir: $!"; 
+      }
+      mkpath($dir) or warn "cannot mkdir $dir: $!";
+    }
+    foreach my $src (@$srcs) {
+      _mklink($class, $src);
+    }
+  }
+}
+
+sub _mklink {
+  my ($class, $src) = @_;
+
+  my $srcdir = $src->{$class}{subdir};
+  if (!$srcdir) {
+    dbg "no srcdir, skipping $src";
+    return;
+  }
+  if (!-d $srcdir) {
+    warn "cannot read $srcdir, ignoring: $!";
+    return;
+  }
+
+  # create a hash of modtime -> filepath, so we can be sure we pick up
+  # "new" files first if so desired. note that -M gives (now - modtime) in
+  # days, so larger numbers means earlier.
+
+  my %files = ();
+  File::Find::find(sub {
+    return unless (-f $_ && -r _);    # not a file
+    my $mtime = (-M _);
+    if (!exists $files{$mtime}) {
+      $files{$mtime} = [ ];
+    }
+    push(@{$files{$mtime}}, $File::Find::name);
+
+  }, $srcdir);
+
+  my @files = ();
+  foreach my $key (sort { $a <=> $b } keys %files) {
+    push (@files, @{$files{$key}});
+  }
+  undef %files;     # no longer need that
+
+  # @files is now sorted with the "youngest" files first.  check:
+  if (-M $files[0] > -M $files[-1]) {
+    warn "oops! files out of order, should be youngest first: ".
+                    join(' ',@files);
+  }
+
+  foreach my $destobj (@{$src->{$class}{dests}}) {
+    my $dest = $destobj->{dest};
+    my $num = $destobj->{num};
+    my $destdir = $dest->{dir};
+
+    my $i;
+    for ($i = 0; $i <= $num; $i++)
+    {
+      my $srcname = shift @files;
+      if (!$srcname) {
+        die "oops! ran out of srcs. dump: ".Dumper($destobj);
+      }
+
+      my $dstname = $srcname;
+      $dstname =~ s/[^-_\.A-Za-z0-9]/_/gs;
+      $dstname =~ s/_+/_/gs;
+      $dstname =~ s/^_//gs;
+      $dstname = $destdir."/".$class."/".$dstname;
+
+      if ($srcname !~ m,^/,) {           # unrooted.  root it
+        $srcname = $cwd.'/'.$srcname;
+      }
+
+      if (symlink($srcname, $dstname)) {
+        dbg "  $srcname -> $dstname";
+        $num--;
+      } else {
+        warn "symlink $srcname -> $dstname failed: $!";
+      }
+    }
+  }
+}
+
+sub allocate {
+  my ($src, $dest, $nhamref, $class) = @_;
+  my $nsrc = $src->{$class}{num};
+
+  dbg "$class nsrc=$nsrc nwanted=$$nhamref";
+  if ($nsrc == 0) {
+    dbg "already exhausted src";
+  }
+  elsif ($nsrc <= $$nhamref) {
+    dbg "exhausted src";
+    push (@{$dest->{$class}{srcs}}, { from => $src, num => $nsrc });
+    push (@{$src->{$class}{dests}}, { dest => $dest, num => $nsrc });
+    $$nhamref -= $nsrc;
+    $src->{$class}{num} = 0;
+  }
+  else {
+    dbg "filled dest, some left in src";
+    push (@{$dest->{$class}{srcs}}, { from => $src, num => $$nhamref });
+    push (@{$src->{$class}{dests}}, { dest => $dest, num => $$nhamref });
+    $src->{$class}{num} -= $$nhamref;
+    $$nhamref = 0;
+  }
+}
+
+sub dbg {
+  return unless $DEBUG;
+  warn "debug: ".join("", @_)."\n";
+}
+
+
+__DATA__
+
+Quick test/demo.   Given the following input structure:
+
+  src1/{ham,spam}/{1,2,3}
+  src2/{ham,spam}/{1,2}
+  src4/{ham,spam}/1
+
+and this command:
+
+  ../mk-corpus-link-farm \
+      -dest ./out1 -num 1 -dest ./out2 -num 2 -dest ./out3 -num 5 \
+      src*
+
+we want:
+
+  out1/{ham,spam}/1
+  out2/{ham,spam}/{1,2}
+  out3/{ham,spam}/{1,2,3}
+
+  [and a warning that we exhausted the sources, because we actually
+  asked for 5 mails in each class of out3.]
+
+test commands:
+
+  mkdir t_splitcorpus; cd t_splitcorpus; mkdir -p src{1,2,3}/{ham,spam}
+  for f in src1/{ham,spam}/{1,2,3} src2/{ham,spam}/{1,2} src3/{ham,spam}/1
+  do echo > $f ; done; 
+  ../mk-corpus-link-farm \
+      -dest ./out1 -num 1 -dest ./out2 -num 2 -dest ./out3 -num 5 \
+      src*
+
+
