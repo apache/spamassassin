@@ -304,7 +304,7 @@ sub create_gp {
     set xlabel 'Time, in blocks of $period secs.   (NOTE: -1% hitrate means no data for that time period)'
     set ylabel '$y_label'
 
-    set terminal png medium \\
+    set terminal png small \\
         size $graph_x,$graph_y \\
         xffffff x444444 x33cc00 \\
         xff3300 x0000cc x99cc00 xff9900 \\
