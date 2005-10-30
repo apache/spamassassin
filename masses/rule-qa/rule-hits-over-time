@@ -59,8 +59,8 @@ GetOptions(
 
 usage() unless $opt_rule;
 
-# fix PATH for sucky Solaris compatibility
-$ENV{PATH} .= ":/opt/sfw/bin";
+# fix PATH for sucky Solaris compatibility.
+$ENV{PATH} .= ":/local/gnuplot-4.0.0/bin:/opt/sfw/bin";
 
 my $rule_re = qr/[, ]${opt_rule}[, ]/;
 
@@ -86,7 +86,9 @@ my $nextbucket;
 my $seen_y;
 my $seen_n;
 
+# my $tmpdir = "/tmp/rulehits.tmp";   # static for debugging
 my $tmpdir = "/tmp/rulehits.$$";
+
 mkdir ($tmpdir) or die "collided on $tmpdir";
 
 my $outdir = ".";
