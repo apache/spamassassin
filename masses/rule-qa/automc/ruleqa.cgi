@@ -7,6 +7,7 @@ my $automcdir = "/home/automc/svn/spamassassin/masses/rule-qa/automc";
 use CGI;
 use Template;
 use Date::Manip;
+use XML::Simple;
 
 use strict;
 use bytes;
@@ -257,7 +258,6 @@ my $days = {
 my ($key, $daycount);
 while (($key, $daycount) = each %{$days}) {
   my $dr = date_in_direction($daterev, $daycount);
-  my $drtext = $dr;
   if (!$dr) {
     $tmpl =~ s/!daylink${key}!/
         (no logs<br\/>available)
@@ -265,7 +265,7 @@ while (($key, $daycount) = each %{$days}) {
   }
   else {
     $dr = gen_switch_url("daterev", $dr);
-    $drtext =~ s,-,-<br/>,gs;         # allow line-break
+    my $drtext = get_daterev_description($dr);
 
     $tmpl =~ s/!daylink${key}!/
         <a href="$dr">$drtext<\/a>
@@ -274,8 +274,7 @@ while (($key, $daycount) = each %{$days}) {
 }
 
 $daterev = date_in_direction($daterev, 0);
-my $todaytext = $daterev;
-$todaytext =~ s,-,-<br/>,gs;         # allow line-break
+my $todaytext = get_daterev_description($daterev);
 $tmpl =~ s/!todaytext!/$todaytext/gs;
 
 
@@ -793,6 +792,39 @@ sub get_datadir_for_daterev {
   my $npath = shift;
   $npath =~ s/-/\//;
   return $conf{html}."/".$npath."/";
+}
+
+sub get_daterev_description {
+  my ($dr) = @_;
+  my $fname = get_datadir_for_daterev($dr)."/info.xml";
+
+  my $txt;
+  if (-f $fname) {
+    eval {
+      my $info = XMLin($fname);
+      my $net = $info->{includes_net} ?
+            "[net]" :
+            "";
+      
+      $txt = qq{
+
+        $info->{date} <br/>
+        $info->{rev} <br/>
+        $info->{checkin_date} <br/>
+        $info->{author} <br/>
+        $net
+
+      };
+
+      return $txt;
+    };
+  }
+
+  # if that failed, just use the daterev itself.
+  
+  $txt = $dr;
+  $txt =~ s,-,-<br/>,gs;         # allow line-break
+  return $txt;
 }
 
 =cut

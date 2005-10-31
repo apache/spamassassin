@@ -1,0 +1,85 @@
+#!/local/perl586/bin/perl -w
+my $automcdir = "/home/automc/svn/spamassassin/masses/rule-qa/automc";
+
+use XML::Simple;
+
+use strict;
+use bytes;
+use POSIX qw(strftime);
+
+my $myperl = $^X;
+
+open (CF, "<$automcdir/config");
+my %conf; while(<CF>) { /^(\S+)=(\S+)/ and $conf{$1} = $2; }
+close CF;
+
+die "no conf{html}: $conf{html}" unless (-d $conf{html});
+
+# all known date/revision combos.  warning: could get slow in future
+my @daterevs = get_all_daterevs();
+
+foreach my $dr (@daterevs) {
+  my $drdir = get_datadir_for_daterev($dr);
+  if (-f "$drdir/info.xml" && -s _) {
+    print "$drdir/info.xml: good\n";
+  }
+
+  print "$drdir/info.xml: creating...\n";
+  my $info = get_info($dr, $drdir);
+  open (OUT, ">$drdir/info.xml") or die "cannot write $drdir/info.xml";
+  print OUT $info;
+  close OUT or die "failed to write to $drdir/info.xml";
+}
+
+sub get_info {
+  my ($dr, $drdir) = @_;
+
+  $dr =~ /^(\d+)[-\/]r(\d+)$/;
+  my $date = $1;
+  my $rev = $2;
+
+  my $info = {
+    date => $date,
+    rev => $rev,
+    includes_net => 0
+  };
+
+  if (open (IN, "svn log --xml -r$rev |")) {
+    eval {
+      my $xml = join('', <IN>);
+      my $ref = XMLin($xml);
+      $info->{msg} = $ref->msg;
+      $info->{checkin_date} = $ref->date;   # '2005-10-31T04:20:10.686485Z'
+      $info->{author} = $ref->author;
+    };
+    if ($@) {
+      warn "svn xml: $@";
+    }
+    close IN or warn "svn failed: $!";
+  }
+
+  if (-f "$drdir/NET.all") {
+    $info->{includes_net} = 1;
+  }
+
+  return XMLout($info);
+}
+
+sub get_all_daterevs {
+  return sort map {
+      s/^.*\/(\d+)\/(r\d+)$/$1-$2/; $_;
+    } grep { /\/(\d+\/r\d+)$/ && -d $_ } (<$conf{html}/2*/r*>);
+}
+
+sub get_datadir_for_daterev {
+  my $npath = shift;
+  $npath =~ s/-/\//;
+  return $conf{html}."/".$npath."/";
+}
+
+=cut
+
+to install, add this line to httpd.conf:
+
+  ScriptAlias /ruleqa "/path/to/spamassassin/automc/ruleqa.cgi"
+

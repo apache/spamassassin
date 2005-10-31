@@ -117,6 +117,7 @@ $opt_spamlog = "spam.log";
 $opt_learn = 0;
 $reuse_rules_loaded_p = 0;
 
+my @ORIG_ARGV = @ARGV;
 GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug:s",
 	   "hamlog=s", "head=i", "loghits", "mh", "mid", "ms", "net",
 	   "progress", "rewrite:s", "showdots", "spamlog=s", "tail=i",
@@ -227,11 +228,13 @@ chomp $where;
 chomp $when;
 chomp $host;
 my $revision = get_current_svn_revision();
+my $cmdline = join(' ',@ORIG_ARGV); $cmdline =~ s/\s+/ /gs;
 
 my $log_header = "# mass-check results from $who\@$where, on $when\n" .
 		 "# M:SA version ".$spamtest->Version()."\n" .
 		 "# SVN revision: $revision\n" .
-		 "# Perl version: $] on $Config{archname}\n";
+		 "# Perl version: $] on $Config{archname}\n" .
+                 "# Switches: '$cmdline'\n";
 
 my $updates = 10;
 my $total_count = 0;
