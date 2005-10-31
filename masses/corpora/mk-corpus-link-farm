@@ -255,7 +255,8 @@ sub _mklink {
     {
       my $srcname = shift @files;
       if (!$srcname) {
-        die "oops! ran out of srcs. dump: ".Dumper($destobj);
+        # die "oops! ran out of srcs. at $i / $num. dump: ".Dumper($destobj);
+        last;
       }
 
       my $dstname = $srcname;
@@ -270,7 +271,6 @@ sub _mklink {
 
       if (symlink($srcname, $dstname)) {
         dbg "  $srcname -> $dstname";
-        $num--;
       } else {
         warn "symlink $srcname -> $dstname failed: $!";
       }
