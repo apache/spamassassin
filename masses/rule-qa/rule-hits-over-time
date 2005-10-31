@@ -301,10 +301,16 @@ sub create_gp {
 
   open (GP, "| gnuplot - > $tmpdir/gp.log 2>&1") or die "cannot run gnuplot";
 
+  # eye-candy
+  my $niceperiod = "$period secs";
+  if ($period % (24*60*60) == 0) {
+    $niceperiod = ($period / (24*60*60))." days";
+  }
+
   # (NOTE: -1% hitrate means no data for that time period)'
   print GP qq{
 
-    set xlabel 'Time, in blocks of $period secs'
+    set xlabel 'Time, in blocks of $niceperiod'
     set ylabel '$y_label'
 
     set terminal png small \\
