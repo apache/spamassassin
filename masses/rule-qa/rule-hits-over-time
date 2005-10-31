@@ -63,14 +63,15 @@ GetOptions(
 
 usage() unless $opt_rule;
 
-# fix PATH for sucky Solaris compatibility.
+my $DEBUG_TMPDIR = 0;   # keep the tmpdir around after exiting, for debug
+
 # fix PATHs for sucky Solaris compatibility.
 $ENV{PATH} .= ":/local/gnuplot-4.0.0/bin:/opt/sfw/bin";
 $ENV{LD_LIBRARY_PATH} .= ":/local/gd-2.0.33/lib";
 
 my $rule_re = qr/[, ]${opt_rule}[, ]/;
 
-# my $period = $opt_period || (24 * 60 * 60 * 0.5);
+# my $period = $opt_period || (24 * 60 * 60 * 1);
 my $period = $opt_period || 3600;
 
 my $graph_x                         = $opt_size_x || 800;
@@ -95,8 +96,6 @@ my $seen_y;
 my $seen_n;
 
 my $tmpdir = "/tmp/rulehits.$$";
-
-my $DEBUG_TMPDIR = 1;
 if ($DEBUG_TMPDIR) { $tmpdir = "/tmp/rulehits.tmp"; system("rm -rf $tmpdir"); }
 
 mkdir ($tmpdir) or die "collided on $tmpdir";
@@ -357,9 +356,6 @@ sub create_gp {
   # (NOTE: -1% hitrate means no data for that time period)'
   print GP qq{
 
-    set xlabel 'Time, in blocks of $niceperiod'
-    set ylabel '$y_label'
-
     set terminal png small \\
         interlace size $graph_x,$graph_y \\
         xffffff x444444 x33cc00 \\
@@ -370,9 +366,13 @@ sub create_gp {
 
     set grid back xtics ytics
 
+    set xlabel 'Time, in blocks of $niceperiod'
     set xdata time
     set timefmt "%Y-%m-%d-%H"
-    set format x "%04Y-%02m-%02d-%02H00"
+    set format x "%04Y%02m%02d%02H00"
+
+    set ylabel '$y_label'
+    set yrange [0:*]
 
     set title "$title"
     set key left top Left nobox
@@ -407,7 +407,7 @@ sub plot_gp {
       foreach my $i (0 .. $num_files) {
         foreach my $a (0 .. $num_alphas) {
           $deas->[$a]->[$i] =
-                Statistics::DEA->new($dea_alphas->[$a], $period * 100);
+                Statistics::DEA->new($dea_alphas->[$a], $period * 3);
         }
       }
 
@@ -429,7 +429,7 @@ sub plot_gp {
               # so trap with an eval.
               $avg = $deas->[$a]->[$i]->average();
             };
-            $avgs->[$a]->[$j]->[$i] = (!defined $avg) ? -1 : $avg;
+            $avgs->[$a]->[$j]->[$i] = (defined $avg) ? $avg : -1;
           }
         }
       }
