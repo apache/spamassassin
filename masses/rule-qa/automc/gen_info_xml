@@ -106,8 +106,10 @@ sub read_submitters {
     # spam results used for 329933 DETAILS all: spam-mc-fast.log spam-foo.log
     if (/^# spam results used for \S+ \S+ \S+: (.*)$/) {
       my $sub = $1;
-      $sub =~ s/\bspam-/ /;
-      $sub =~ s/\.log\b/ /;
+      $sub =~ s/\bspam-/ /gs;
+      $sub =~ s/\.log\b/ /gs;
+      $sub =~ s/^\s+//gs;
+      $sub =~ s/\s+$//gs;
       $sub =~ s/\s+/ /gs;
       $info->{submitters} = $sub;
     }
