@@ -157,18 +157,13 @@ my $format = "gif";
   my $file01 = GD::Image->newFromPngData($graph_png_data{"file01"}, 1);
   my $file02 = GD::Image->newFromPngData($graph_png_data{"file02"}, 1);
 
-  # I thought this might work around the "black background" issue,
-  # but it doesn't :(
-  # my $white = $both->colorAllocate(255,255,255);
-  # $both->filledRectangle(0, 0, $graph_x, 15 + ($graph_y * 2), $white);
-
-  $both->copy($file01, 0, 5, 0, 0, $graph_x-1, $graph_y-1);
-  $both->copy($file02, 0, 10 + $graph_y, 0, 0, $graph_x-1, $graph_y-1);
-
-  # $both->copyResampled($file01, 0, 5, 0, 0,
-  #            $graph_x/2, $graph_y/2, $graph_x-1, $graph_y-1);
-  # $both->copyResampled($file02, 0, 10 + $graph_y, 0, 0,
-  #            $graph_x/2, $graph_y/2, $graph_x-1, $graph_y-1);
+  if (!$file01 || !$file02) {
+    warn "bad input.  leaving graph blank";
+  }
+  else {
+    $both->copy($file01, 0, 5, 0, 0, $graph_x-1, $graph_y-1);
+    $both->copy($file02, 0, 10 + $graph_y, 0, 0, $graph_x-1, $graph_y-1);
+  }
 
   if ($opt_cgi) {
     use CGI qw(:standard);
@@ -343,9 +338,14 @@ sub plot_gp {
   if (!$opt_text)
   {
     open (DATA, ">$tmpdir/plot.data") or die;
-    foreach my $line (@{$graph_data}) {
-      my $tt = shift @$line;
-      print DATA fmt_time_t($tt)," ",join(' ', @$line),"\n";
+    if (@{$graph_data}) {
+      foreach my $line (@{$graph_data}) {
+       my $tt = shift @$line;
+       print DATA fmt_time_t($tt)," ",join(' ', @$line),"\n";
+      }
+    } else {
+      # a fake datapoint so gnuplot doesn't puke on us
+      print DATA fmt_time_t(0)," 0 0\n";
     }
     close DATA or die;
 

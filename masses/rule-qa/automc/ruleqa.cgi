@@ -457,7 +457,7 @@ sub showfreqsubset {
   my ($filename, $strdate) = @_;
   read_freqs_file($filename);
 
-  if ($key eq 'DETAILS.new') {
+  if ($filename eq 'DETAILS.new') {
     # report which sets we used
     summarise_head($freqs_head{$key}, $filename, $strdate, $rule);
   }
