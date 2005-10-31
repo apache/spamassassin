@@ -66,7 +66,7 @@ $ENV{LD_LIBRARY_PATH} .= ":/local/gd-2.0.33/lib";
 
 my $rule_re = qr/[, ]${opt_rule}[, ]/;
 
-my $period = $opt_period || (24 * 60 * 60 * 7);
+my $period = $opt_period || (24 * 60 * 60 * 3);
 
 my $graph_x                         = $opt_size_x || 800;
 my $graph_y                         = $opt_size_y || 400;
