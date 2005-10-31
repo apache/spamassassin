@@ -100,6 +100,7 @@ sub do_stop {
   umask(022);
 
   run ("./rule-qa/corpus-hourly --dir $logdir");
+  run ("./rule-qa/automc/gen_info_xml");
 }
 
 # ---------------------------------------------------------------------------
