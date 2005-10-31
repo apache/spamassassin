@@ -6,7 +6,6 @@ SADIR=/home/automc/svn/spamassassin
 
 cd /home/bbmass/rawcor
 date
-renice +20 $$
 
 TMPDIR=/home/bbmass/tmp \
   $SADIR/masses/corpora/mk-corpus-link-farm \
