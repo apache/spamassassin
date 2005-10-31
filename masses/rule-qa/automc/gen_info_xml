@@ -1,6 +1,9 @@
 #!/local/perl586/bin/perl -w
 my $automcdir = "/home/automc/svn/spamassassin/masses/rule-qa/automc";
 
+# need this to ensure that 'svn log' will include ALL changes
+my $svn_checkins_root = "../../..";
+
 use XML::Simple;
 
 use strict;
@@ -15,6 +18,8 @@ close CF;
 
 die "no conf{html}: $conf{html}" unless (-d $conf{html});
 
+my $svn_log;
+
 # all known date/revision combos.  warning: could get slow in future
 my @daterevs = get_all_daterevs();
 
@@ -22,6 +27,7 @@ foreach my $dr (@daterevs) {
   my $drdir = get_datadir_for_daterev($dr);
   if (-f "$drdir/info.xml" && -s _) {
     print "$drdir/info.xml: good\n";
+    next;
   }
 
   print "$drdir/info.xml: creating...\n";
@@ -44,18 +50,17 @@ sub get_info {
     includes_net => 0
   };
 
-  if (open (IN, "svn log --xml -r$rev |")) {
-    eval {
-      my $xml = join('', <IN>);
-      my $ref = XMLin($xml);
-      $info->{msg} = $ref->msg;
-      $info->{checkin_date} = $ref->date;   # '2005-10-31T04:20:10.686485Z'
-      $info->{author} = $ref->author;
-    };
-    if ($@) {
-      warn "svn xml: $@";
-    }
-    close IN or warn "svn failed: $!";
+  if (!$svn_log) {
+    get_svn_log();
+  }
+
+  foreach my $logentry (@{$svn_log->{logentry}}) {
+    next if ($logentry->{revision} > $rev);
+    $info->{msg} = $logentry->{msg} || '';
+    $info->{checkin_rev} = $logentry->{revision} || '';
+    $info->{checkin_date} = $logentry->{date} || '';   # '2005-10-31T04:20:10.686485Z'
+    $info->{author} = $logentry->{author} || '';
+    last;
   }
 
   if (-f "$drdir/NET.all") {
@@ -77,9 +82,23 @@ sub get_datadir_for_daterev {
   return $conf{html}."/".$npath."/";
 }
 
-=cut
+sub get_svn_log {
+  print "getting svn log...\n";
+  if (open (IN, "svn log --xml $svn_checkins_root |")) {
+    eval {
+      my $xml = join('', <IN>);
+      $svn_log = XMLin($xml);
+    };
+    if ($@) {
+      die "svn xml: $@";
+    }
+    close IN or die "svn failed: $!";
+  }
+  if (!$svn_log) {
+    die "no svn log --xml";
+  }
+  print "got ".(scalar @{$svn_log->{logentry}})." log entries\n";
 
-to install, add this line to httpd.conf:
-
-  ScriptAlias /ruleqa "/path/to/spamassassin/automc/ruleqa.cgi"
+  # use Data::Dumper; print Dumper($svn_log); die;
+}
 

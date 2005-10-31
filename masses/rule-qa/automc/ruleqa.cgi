@@ -802,15 +802,20 @@ sub get_daterev_description {
   if (-f $fname) {
     eval {
       my $info = XMLin($fname);
+
+      my $cdate = $info->{checkin_date};
+      $cdate =~ s/\.\d+Z$//;
+      $cdate =~ s/T/ /;
+
       my $net = $info->{includes_net} ?
-            "[net]" :
-            "";
+            "[net]" : "";
       
       $txt = qq{
 
         $info->{date} <br/>
         $info->{rev} <br/>
-        $info->{checkin_date} <br/>
+        $cdate <br/>
+        $info->{checkin_rev} <br/>
         $info->{author} <br/>
         $net
 
