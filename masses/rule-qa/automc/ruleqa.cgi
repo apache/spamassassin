@@ -78,8 +78,8 @@ sub get_url_switch {
 my $daterev = $q->url_param('daterev') || '';
 
 # sanitise daterev string
-$daterev =~ /(\d+\/r\d+)/;
-$daterev = $1;
+$daterev =~ /(\d+)[\/-](r\d+)/; undef $daterev;
+$daterev = "$1-$2";
 
 # all known date/revision combos.  warning: could get slow in future
 my @daterevs = get_all_daterevs();
@@ -265,7 +265,7 @@ while (($key, $daycount) = each %{$days}) {
   }
   else {
     $dr = gen_switch_url("daterev", $dr);
-    $drtext =~ s,/,/<br/>,gs;         # allow line-break
+    $drtext =~ s,-,-<br/>,gs;         # allow line-break
 
     $tmpl =~ s/!daylink${key}!/
         <a href="$dr">$drtext<\/a>
@@ -275,7 +275,7 @@ while (($key, $daycount) = each %{$days}) {
 
 $daterev = date_in_direction($daterev, 0);
 my $todaytext = $daterev;
-$todaytext =~ s,/,/<br/>,gs;         # allow line-break
+$todaytext =~ s,-,-<br/>,gs;         # allow line-break
 $tmpl =~ s/!todaytext!/$todaytext/gs;
 
 
@@ -361,7 +361,7 @@ exit;
 
 sub get_all_daterevs {
   return sort map {
-      s/^.*\/(\d+\/r\d+)$/$1/; $_;
+      s/^.*\/(\d+)\/(r\d+)$/$1-$2/; $_;
     } grep { /\/(\d+\/r\d+)$/ && -d $_ } (<$conf{html}/2*/r*>);
 }
 
@@ -369,8 +369,8 @@ sub date_in_direction {
   my ($origdaterev, $dir) = @_;
 
   my $orig;
-  if ($origdaterev && $origdaterev =~ /^\d+\/r\d+$/) {
-    $orig = $origdaterev;
+  if ($origdaterev && $origdaterev =~ /^(\d+)[\/-](r\d+)$/) {
+    $orig = "$1-$2";
   } else {
     $orig = $daterevs[-1];      # the most recent
   }
@@ -411,7 +411,8 @@ sub show_all_sets_for_daterev {
   my ($path, $strdate) = @_;
 
   $strdate = "mass-check date/rev: $path";
-  $datadir = $conf{html}."/".$path."/";
+
+  $datadir = get_datadir_for_daterev($path);
 
   $s{defcorpus} and showfreqset('DETAILS', $strdate);
   $s{html} and showfreqset('HTML', $strdate);
@@ -425,7 +426,7 @@ sub show_all_sets_for_daterev {
 ###########################################################################
 
 sub graph_over_time {
-  $datadir = $conf{html}."/".$daterev."/";
+  $datadir = get_datadir_for_daterev($daterev);
 
   # logs are named e.g.
   # /home/automc/corpus/html/20051028/r328993/LOGS.all-ham-mc-fast.log.gz
@@ -786,6 +787,12 @@ sub get_params_except {
 nextnext: ;
   }
   @str;
+}
+
+sub get_datadir_for_daterev {
+  my $npath = shift;
+  $npath =~ s/-/\//;
+  return $conf{html}."/".$npath."/";
 }
 
 =cut
