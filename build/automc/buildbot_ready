@@ -62,7 +62,8 @@ sub perform_singleton_actions {
   }
 
   kill_lock();
-  $SIG{INT} = $SIG{TERM} = undef;
+  $SIG{INT} = 'DEFAULT';
+  $SIG{TERM} = 'DEFAULT';
   return 1;
 }
 
