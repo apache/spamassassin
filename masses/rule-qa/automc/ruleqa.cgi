@@ -461,7 +461,7 @@ sub graph_over_time {
   $datadir =~ /([-\.\,_0-9a-zA-Z\/]+)/; my $safedatadir = $1;
 
   exec ("$myperl $automcdir/../rule-hits-over-time ".
-        "--cgi --rule='$saferule' ".
+        "--cgi --scale_period=250 --rule='$saferule' ".
         "$safedatadir/LOGS.*.log.gz");
 
   die "exec failed";
