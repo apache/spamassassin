@@ -18,13 +18,14 @@
 # limitations under the License.
 # </@LICENSE>
 
-use Getopt::Long;
-use SDBM_File;
 use GD;
+use Statistics::DEA;
 
 use strict;
 use warnings;
 use Fcntl;
+use Getopt::Long;
+use SDBM_File;
 
 sub usage {
   die q{
@@ -32,6 +33,8 @@ usage: rule-hits-over-time [options] --rule rulename log1 [log2 ...]
 
   --rule=rulename       specify rule to map
   --period=secs         specify period (default: 1 day)
+  --scale_period=n      scale period up to N items of data, 0=no scaling
+                        (default: 0)
   --size_x=pixels       width of output graphs, in pixels (def: 800)
   --size_y=pixels       height of ONE of the output graphs, in pixels
                         (default: 400)
@@ -44,7 +47,7 @@ usage: rule-hits-over-time [options] --rule rulename log1 [log2 ...]
 
 use vars qw(
         $opt_rule $opt_size_x $opt_size_y $opt_text $opt_cgi
-        $opt_period $opt_as_counts
+        $opt_period $opt_as_counts $opt_scale_period
 );
 
 GetOptions(
@@ -54,6 +57,7 @@ GetOptions(
         'text',
         'cgi',
         'as_counts',
+        'scale_period=i',
         'period=i',
 ) or usage();
 
@@ -66,7 +70,8 @@ $ENV{LD_LIBRARY_PATH} .= ":/local/gd-2.0.33/lib";
 
 my $rule_re = qr/[, ]${opt_rule}[, ]/;
 
-my $period = $opt_period || (24 * 60 * 60 * 3);
+# my $period = $opt_period || (24 * 60 * 60 * 0.5);
+my $period = $opt_period || 3600;
 
 my $graph_x                         = $opt_size_x || 800;
 my $graph_y                         = $opt_size_y || 400;
@@ -79,6 +84,7 @@ my %allbuckets = ();
 my %allresults = ();
 my @allfiles = ();
 
+my $graph_times = [];
 my $graph_data = [];
 
 my $this_file_results;
@@ -88,8 +94,10 @@ my $nextbucket;
 my $seen_y;
 my $seen_n;
 
-# my $tmpdir = "/tmp/rulehits.tmp";   # static for debugging
 my $tmpdir = "/tmp/rulehits.$$";
+
+my $DEBUG_TMPDIR = 1;
+if ($DEBUG_TMPDIR) { $tmpdir = "/tmp/rulehits.tmp"; system("rm -rf $tmpdir"); }
 
 mkdir ($tmpdir) or die "collided on $tmpdir";
 
@@ -143,9 +151,12 @@ foreach my $set (@{$file_sets}) {
     $this_file_results = $allresults{$file};
     read_logs($file);
 
+    $graph_times = [];
     $graph_data = [];
     summarise();
   }
+
+  $opt_scale_period and collapse_periods();
 
   plot_gp();
 }
@@ -179,7 +190,11 @@ my $format = "gif";
   $both->gif();
 }
 
-unlink(<$tmpdir/*.*>); rmdir $tmpdir;
+if (!$DEBUG_TMPDIR) {
+  unlink(<$tmpdir/*.*>); rmdir $tmpdir;
+} else {
+  system ("ls -l $tmpdir/*.* 1>&2");
+}
 
 exit;
 
@@ -216,17 +231,54 @@ sub summarise {
     }
 
     if ($scale_to_total_volume) {
-      @cols = ($bucket, @cols);     # total_n is always "100"
+      @cols = (@cols);     # total_n is always "100"
     } else {
-      @cols = ($bucket, $total_n, @cols);
+      @cols = ($total_n, @cols);
     }
 
     if ($opt_text) {
-      print join(' ',@cols)."\n";
+      print $bucket," ".join(' ',@cols)."\n";
     }
     else {
+      push (@{$graph_times}, $bucket);
       push (@{$graph_data}, \@cols);
     }
+  }
+}
+
+
+sub collapse_periods {
+  while (scalar @{$graph_data} > $opt_scale_period) {
+    my $num_files = (scalar @allfiles - 1);
+    my $newtimes = [ ];
+    my $newdata = [ ];
+    my $i;
+    for ($i = 0; $i < (scalar @{$graph_data}); $i += 2) {
+      $newtimes->[$i >> 1] = $graph_times->[$i];
+      foreach my $j (0 .. $num_files)
+      {
+        my $v1 = $graph_data->[$i]->[$j];
+        my $v2 = $graph_data->[$i+1]->[$j];
+        if (!defined $v2) { $v2 = -1; }
+
+        if ($v1 >= 0.0 && $v2 >= 0.0) {
+          # both are valid.  take their mean
+          $v1 = ($v1 + $v2) / 2.0;
+        }
+        elsif ($v2 >= 0.0) {
+          # only one is valid; use it and ignore the invalid one
+          $v1 = $v2;
+        }
+        else {
+          # we're good, v1 is the valid one anyway
+        }
+
+        $newdata->[$i >> 1]->[$j] = $v1;
+      }
+    }
+    @{$graph_times} = @{$newtimes};
+    @{$graph_data} = @{$newdata};
+    $period *= 2;
   }
 }
 
@@ -319,8 +371,8 @@ sub create_gp {
     set grid back xtics ytics
 
     set xdata time
-    set timefmt "%Y-%m-%d"
-    set format x "%04Y%02m%02d"
+    set timefmt "%Y-%m-%d-%H"
+    set format x "%04Y-%02m-%02d-%02H00"
 
     set title "$title"
     set key left top Left nobox
@@ -331,17 +383,64 @@ sub create_gp {
 sub fmt_time_t {
   my $tt = shift;
   use POSIX qw(strftime);
-  return strftime "%Y-%m-%d", gmtime($tt);
+  return strftime "%Y-%m-%d-%H", gmtime($tt);
 }
 
 sub plot_gp {
+  my $num_files = (scalar @allfiles - 1);
+  my $num_datapoints = (scalar @{$graph_data} - 1);
+
+  # specify a number of alphas for Statistics::DEA.  Right now,
+  # the graph is pretty unreadable with more than one.
+  my $dea_alphas = [ 0.9 ];
+  my $num_alphas = (scalar @{$dea_alphas} - 1);
+
+  my $times = [ ];
+  my $avgs = [ ];
+
+  my $graphname = sprintf("file%02d", $fname_counter++);
+
   if (!$opt_text)
   {
-    open (DATA, ">$tmpdir/plot.data") or die;
     if (@{$graph_data}) {
-      foreach my $line (@{$graph_data}) {
-       my $tt = shift @$line;
-       print DATA fmt_time_t($tt)," ",join(' ', @$line),"\n";
+      my $deas = ();
+      foreach my $i (0 .. $num_files) {
+        foreach my $a (0 .. $num_alphas) {
+          $deas->[$a]->[$i] =
+                Statistics::DEA->new($dea_alphas->[$a], $period * 100);
+        }
+      }
+
+      foreach my $j (0 .. $num_datapoints) {
+        my (@datas) = @{$graph_data->[$j]};
+        $times->[$j] = fmt_time_t($graph_times->[$j]);
+
+        foreach my $i (0 .. $num_files) {
+          my $d = $datas[$i];
+
+          foreach my $a (0 .. $num_alphas) {
+            if ($d >= 0) {
+              $deas->[$a]->[$i]->update($d, $j);
+            }
+
+            my $avg;
+            eval {
+              # this can die if it hasn't received enough data!
+              # so trap with an eval.
+              $avg = $deas->[$a]->[$i]->average();
+            };
+            $avgs->[$a]->[$j]->[$i] = (!defined $avg) ? -1 : $avg;
+          }
+        }
+      }
+    }
+
+    # write the data plotfile
+    open (DATA, ">$tmpdir/plot.$graphname.data") or die;
+    if (@{$graph_data})
+    {
+      foreach my $j (0 .. $num_datapoints) {
+        print DATA $times->[$j]," ",join(' ', @{$graph_data->[$j]}),"\n";
       }
     } else {
       # a fake datapoint so gnuplot doesn't puke on us
@@ -349,40 +448,49 @@ sub plot_gp {
     }
     close DATA or die;
 
+
+    # write the avgs plotfiles
+    foreach my $a (0 .. $num_alphas) {
+      open (DATA, ">$tmpdir/avgs$a.$graphname.data") or die;
+      if (@{$graph_data}) {
+        foreach my $j (0 .. $num_datapoints) {
+          print DATA $times->[$j]," ",join(' ', @{$avgs->[$a]->[$j]}),"\n";
+        }
+      } else {
+        # a fake datapoint so gnuplot doesn't puke on us
+        print DATA fmt_time_t(0)," 0 0\n";
+      }
+      close DATA or die;
+    }
+
+
+    # and the commands file
     my @plot = ();
-    foreach my $i (0 .. (scalar @allfiles - 1)) {
+    foreach my $i (0 .. $num_files) {
       my $legend = filename_to_legend ($allfiles[$i]);
       my $style = $i+1;
       my $col = $i+2;
 
       push @plot,
-        qq{ '$tmpdir/plot.data' using }.
-
-            # to plot "undefined" values as 0
-            # qq{ 1:(\$$col >= 0 ? \$$col : 0) }.
-            # as -1
-            # qq{ 1:(\$$col >= 0 ? \$$col : -1) }.
-            # to not plot "undefined" values at all (linespoints rec'd)
+        qq{ '$tmpdir/plot.$graphname.data' using }.
             qq{ 1:(\$$col >= 0 ? \$$col : 1/0) }.
 
-            # qq{ with lines lt $style }.
-            qq{ with linespoints lt $style pt $style }.
-
+            qq{ with points pt $style ps 1 }.
             qq{ title '$legend' };
 
-      push @plot,
-        qq{ '$tmpdir/plot.data' using }.
-            qq{ 1:(\$$col >= 0 ? \$$col : 1/0) }.
-            qq{ smooth bezier }.
-            qq{ with lines lt $style lw 3 }.
-            qq{ title '' };
-
+      foreach my $a (0 .. $num_alphas) {
+        push @plot,
+          qq{ '$tmpdir/avgs$a.$graphname.data' using }.
+              qq{ 1:(\$$col >= 0 ? \$$col : 1/0) }.
+              # qq{ smooth bezier }.
+              qq{ with lines lt $style lw 3 }.
+              qq{ title '  (DEA a=$dea_alphas->[$a])' };
+      }
     }
 
     print GP "plot ",join(", ", @plot), "\n";
     close GP;
 
-    my $graphname = sprintf("file%02d", $fname_counter++);
     $graph_png_data{$graphname} = readfile("$tmpdir/out.png");
   }
 }
