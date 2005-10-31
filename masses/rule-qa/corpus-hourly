@@ -469,6 +469,7 @@ sub create_outputdir {
   }
 
   $output_revpath = $revpath;       # set the global
+  $output_revpath =~ s/\//-/;       # looks nicer
 
   return $dir;
 }
