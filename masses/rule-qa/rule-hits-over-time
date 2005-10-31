@@ -66,7 +66,7 @@ $ENV{LD_LIBRARY_PATH} .= ":/local/gd-2.0.33/lib";
 
 my $rule_re = qr/[, ]${opt_rule}[, ]/;
 
-my $period = $opt_period || (24 * 60 * 60 * 1);
+my $period = $opt_period || (24 * 60 * 60 * 7);
 
 my $graph_x                         = $opt_size_x || 800;
 my $graph_y                         = $opt_size_y || 400;
@@ -99,13 +99,13 @@ if ($opt_cgi) {
 }
 
 my $file_sets = [ ];    # split into ham and spam
-$file_sets = [ [ 'TITLE:hits in ham' ], [ 'TITLE:hits in spam' ] ];
+$file_sets = [ [ 'TITLE:hits in spam' ], [ 'TITLE:hits in ham' ] ];
 
 foreach my $file (@ARGV) {
   if ($file =~ /\bham\b/) {
-    push @{$file_sets->[0]}, $file;
-  } else {
     push @{$file_sets->[1]}, $file;
+  } else {
+    push @{$file_sets->[0]}, $file;
   }
 }
 
@@ -321,6 +321,8 @@ sub create_gp {
     set timefmt "%Y-%m-%d"
     set title "$title"
 
+    set key left top Left nobox
+
   };
 }
 
@@ -356,13 +358,17 @@ sub plot_gp {
             # to not plot "undefined" values at all (linespoints rec'd)
             qq{ 1:(\$$col >= 0 ? \$$col : 1/0) }.
 
-            ## smoothing: not so useful
-            # qq{ smooth bezier }.
-
             # qq{ with lines lt $style }.
             qq{ with linespoints lt $style pt $style }.
 
             qq{ title '$legend' };
+
+      push @plot,
+        qq{ '$tmpdir/plot.data' using }.
+            qq{ 1:(\$$col >= 0 ? \$$col : 1/0) }.
+            qq{ smooth bezier }.
+            qq{ with lines lt $style lw 3 }.
+            qq{ title '' };
 
     }
 
