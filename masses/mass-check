@@ -673,12 +673,15 @@ sub memory_track_finish {
 sub get_current_svn_revision {
   my $revision;
 
-  if (-d ".svn" || -f "svninfo.tmp") {
-    if (-f "svninfo.tmp") {
+  my $dir = $FindBin::Bin || ".";
+
+  if (-d "$dir/.svn" || -f "$dir/svninfo.tmp") {
+    if (-f "$dir/svninfo.tmp") {
       # created by build/automc/buildbot_ready for chrooted mass-checks
-      open (SVNINFO, "< svninfo.tmp");
-    } elsif (-d ".svn") {
-      open (SVNINFO, "svn info --non-interactive 2>&1 |");
+      open (SVNINFO, "< $dir/svninfo.tmp");
+    } 
+    else {
+      open (SVNINFO, "svn info --non-interactive $dir 2>&1 |");
     }
 
     while (<SVNINFO>) {
