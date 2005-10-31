@@ -152,12 +152,13 @@ sub find_srcs {
 sub dist_across_dests {
   foreach my $dest (@$dests) {
     my %want = ();
+my $wantnum = $dest->{num_msgs} || 99999999;
     foreach my $class (@classes) {
-      $want{$class} = $dest->{num_msgs} || 99999999;
+      $want{$class} = $wantnum;
     }
 
     $dest->{srcs} = [ ];
-    print "\n$dest->{dir}: want $dest->{num_msgs} messages\n";
+    print "\n$dest->{dir}: want $wantnum messages\n";
 
     foreach my $src (@$srcs) {
       foreach my $class (@classes) {
@@ -239,7 +240,7 @@ sub _mklink {
   undef %files;     # no longer need that
 
   # @files is now sorted with the "youngest" files first.  check:
-  if (-M $files[0] > -M $files[-1]) {
+  if (scalar @files && -M $files[0] > -M $files[-1]) {
     warn "oops! files out of order, should be youngest first: ".
                     join(' ',@files);
   }
