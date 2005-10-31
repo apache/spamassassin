@@ -95,10 +95,11 @@ foreach my $arg (@ARGV) {
 # { dests => [ ], dir => "/src3/spam", num => 500 }, } ];
 
 my $cwd = cwd();
+my $poss_delete = { };
 
 my $mbox_work = "$mbox_tmpdir/mboxes.d";
 if (-d $mbox_work) {
-  rmtree($mbox_work) or warn "cannot rmtree $mbox_work: $!"; 
+  mark_for_poss_deletion($mbox_work);
 }
 
 main();
@@ -109,6 +110,7 @@ sub main {
   find_srcs();
   dist_across_dests();
   make_links_in_dests();
+  perform_poss_deletion();
 }
 
 
@@ -191,9 +193,11 @@ sub make_links_in_dests {
     foreach my $dest (@$dests) {
       my $dir = $dest->{dir}.'/'.$class;
       if (-d $dir) {
-        rmtree($dir) or warn "cannot rmtree $dir: $!"; 
+        mark_for_poss_deletion($dir);
       }
-      mkpath($dir) or warn "cannot mkdir $dir: $!";
+      else {
+        mkpath($dir) or warn "cannot mkdir $dir: $!";
+      }
     }
     foreach my $src (@$srcs) {
       _mklink($class, $src);
@@ -269,6 +273,9 @@ sub _mklink {
         $srcname = $cwd.'/'.$srcname;
       }
 
+      if (remove_from_poss_delete($dstname)) {
+        unlink $dstname;
+      }
       if (symlink($srcname, $dstname)) {
         dbg "  $srcname -> $dstname";
       } else {
@@ -299,6 +306,35 @@ sub allocate {
     push (@{$src->{$class}{dests}}, { dest => $dest, num => $$nhamref });
     $src->{$class}{num} -= $$nhamref;
     $$nhamref = 0;
+  }
+}
+
+sub mark_for_poss_deletion {
+  my ($dir) = @_;
+
+  File::Find::find(sub {
+      if (-f $_) {
+        my $fname = $File::Find::name;
+        $poss_delete->{$fname} = 1;
+      } else {
+        # TODO: delete dirs?  for now, leave 'em behind
+      }
+    }, $dir);
+}
+
+sub perform_poss_deletion {
+  foreach my $fname (keys %{$poss_delete}) {
+    unlink $fname or warn "cannot unlink $fname";
+  }
+}
+
+sub remove_from_poss_delete {
+  my ($fname) = @_;
+  if (exists $poss_delete->{$fname}) {
+    delete $poss_delete->{$fname};
+    return 1;
+  } else {
+    return 0;
   }
 }
 
