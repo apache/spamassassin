@@ -11,8 +11,9 @@ PATH=$PATH:/usr/local/bin
 date=date ; [ -x /opt/sfw/bin/gdate ] && date=gdate
 
 # hit-frequencies now requires up-to-date rules to generate valid reports!
-# so we need to do an svn update
-( cd $SADIR ; svn update )
+# so we need to do an svn update, and a make
+# TODO: it'd be nice if hit-frequencies didn't require this.
+( cd $SADIR ; svn update ; perl Makefile.PL ; make ) < /dev/null
 
 # then generate the various forms of 'freqs' files...
 $SADIR/masses/rule-qa/corpus-hourly
