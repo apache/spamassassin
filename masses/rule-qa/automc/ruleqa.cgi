@@ -79,8 +79,14 @@ sub get_url_switch {
 my $daterev = $q->url_param('daterev') || '';
 
 # sanitise daterev string
-$daterev =~ /(\d+)[\/-](r\d+)/; undef $daterev;
-$daterev = "$1-$2";
+if (defined $daterev) {
+  $daterev =~ /(\d+)[\/-](r\d+)/; undef $daterev;
+  if ($2) {
+    $daterev = "$1-$2";
+  } else {
+    $daterev = undef;
+  }
+}
 
 # all known date/revision combos.  warning: could get slow in future
 my @daterevs = get_all_daterevs();
@@ -169,8 +175,16 @@ print q{<html><head>
 
     td.daterevtd {
       font-size: 75%;
+      padding: 1px 3px 1px 5px;
     }
 
+    tr.daterevtr {
+      background: #fff;
+    }
+
+    tr.daterevdesc {
+      background: #f0e0a0;
+    }
 
   </style>
 
@@ -203,30 +217,31 @@ my $tmpl = q{
   <br/>
   <table style="padding-left: 0px" class=datetable>
 
-    <tr>
-      <th>
-        &lt;&lt;
-      </th><th>
-        Past
-      </th><th>
-      </th><th>
-        Displaying
-      </th><th>
-      </th><th>
-        Future
-      </th><th>
-        &gt;&gt;
-      </th>
-    </tr><tr>
-           <td class=daterevtd> !daylinkneg3!
-      </td><td class=daterevtd> !daylinkneg2!
-      </td><td class=daterevtd> !daylinkneg1!
-      </td><td class=daterevtd> !todaytext!
-      </td><td class=daterevtd> !daylinkpls1!
-      </td><td class=daterevtd> !daylinkpls2!
-      </td><td class=daterevtd> !daylinkpls3!
-      </td>
-    </tr>
+      <tr>
+       <th> Mass-Check: </th>
+       <th> Date </th>
+       <th> MC-Rev </th>
+       <th> SVN Commit </th>
+       <th> Rev </th>
+       <th> Author </th>
+       <th> Net </th>
+      </tr>
+
+           <tr class=daterevtr><td class=daterevtd><b>Past</b></td>
+               !daylinkneg3!
+      </tr><tr class=daterevtr><td class=daterevtd></td>
+       !daylinkneg2!
+      </tr><tr class=daterevtr><td class=daterevtd></td>
+       !daylinkneg1!
+      </tr><tr class=daterevtr><td class=daterevtd><b>Today</b></td>
+       !todaytext!
+      </tr><tr class=daterevtr><td class=daterevtd></td>
+       !daylinkpls1!
+      </tr><tr class=daterevtr><td class=daterevtd></td>
+       !daylinkpls2!
+      </tr><tr class=daterevtr><td class=daterevtd><b>Future</b></td>
+       !daylinkpls3!
+      </tr>
 
   </table>
   Date/Rev to display (UTC timezone):
@@ -258,24 +273,33 @@ my $days = {
 my ($key, $daycount);
 while (($key, $daycount) = each %{$days}) {
   my $dr = date_in_direction($daterev, $daycount);
+  my $drtext = $dr;
+
   if (!$dr) {
-    $tmpl =~ s/!daylink${key}!/
-        (no logs<br\/>available)
-    /gs;
+    $tmpl =~ s,!daylink${key}!,
+       <td colspan=5>
+         <em>(no logs available)</em>
+       </td>
+    ,gs;
   }
   else {
     $dr = gen_switch_url("daterev", $dr);
-    my $drtext = get_daterev_description($dr);
+    my $drtext = get_daterev_description($drtext);
+    $drtext =~ s/!drhref!/$dr/gs;
 
-    $tmpl =~ s/!daylink${key}!/
-        <a href="$dr">$drtext<\/a>
-    /gs;
+    $tmpl =~ s,!daylink${key}!,
+       $drtext
+    ,gs;
   }
 }
 
 $daterev = date_in_direction($daterev, 0);
-my $todaytext = get_daterev_description($daterev);
-$tmpl =~ s/!todaytext!/$todaytext/gs;
+{
+  my $todaytext = get_daterev_description($daterev);
+  my $dr = gen_switch_url("daterev", $daterev);
+  $todaytext =~ s/!drhref!/$dr/gs;
+  $tmpl =~ s/!todaytext!/$todaytext/gs;
+}
 
 
 $tmpl =~ s/!THISURL!/$cgi_url/gs;
@@ -802,36 +826,69 @@ sub get_daterev_description {
   if (-f $fname) {
     eval {
       my $info = XMLin($fname);
+      # use Data::Dumper; print Dumper $info;
 
       my $cdate = $info->{checkin_date};
-      $cdate =~ s/\.\d+Z$//;
-      $cdate =~ s/T/ /;
+      $cdate =~ s/T(\S+)\.\d+Z$/ $1/;
 
-      my $net = $info->{includes_net} ?
-            "[net]" : "";
-      
+      my $net = $info->{includes_net} ? "[net]" : "";
+
+      my $drtitle = ($info->{msg} ? $info->{msg} : '');
+      $drtitle =~ s/[\"\']/ /gs;
+      $drtitle =~ s/\s+/ /gs;
+      $drtitle =~ s/^(.{0,160}).*$/$1/gs;
+
       $txt = qq{
 
-        $info->{date} <br/>
-        $info->{rev} <br/>
-        $cdate <br/>
-        $info->{checkin_rev} <br/>
-        $info->{author} <br/>
-        $net
+        <td class=daterevtd>
+       <a title="$drtitle" href="!drhref!">$info->{date}</a></td>
+        <td class=daterevtd>
+       <a title="$drtitle" href="!drhref!">$info->{rev}</a></td>
+        <td class=daterevtd>
+       <a title="$drtitle" href="!drhref!">$cdate</a></td>
+        <td class=daterevtd>
+       <a title="$drtitle" href="!drhref!">$info->{checkin_rev}</a></td>
+        <td class=daterevtd> <em>$info->{author}</em></td>
+        <td class=daterevtd> <em>$net</em> </td>
+
+       </tr><tr class=daterevdesc><td></td>
+       <td class=daterevtd colspan=4><em>($drtitle)</em></td>
+       <td></td><td></td>
 
       };
-
-      return $txt;
     };
+
+    if ($@) {
+      warn "daterev info.xml: $@";
+    }
+
+    if ($txt) { return $txt; }
   }
 
   # if that failed, just use the daterev itself.
-  
-  $txt = $dr;
-  $txt =~ s,-,-<br/>,gs;         # allow line-break
+  $dr =~ /^(\d+)-r(\d+)$/;
+  my $date = $1;
+  my $rev = $2;
+  my $drtitle = "(no info)";
+
+  $txt = qq{
+
+        <td class=daterevtd>
+       <a title="$drtitle" href="!drhref!">$date</a></td>
+        <td class=daterevtd>
+       <a title="$drtitle" href="!drhref!">$rev</a></td>
+        <td class=daterevtd>
+       <a title="$drtitle" href="!drhref!">(no info)</a></td>
+        <td class=daterevtd>
+       <a title="$drtitle" href="!drhref!">(no info)</a></td>
+        <td class=daterevtd></td>
+        <td class=daterevtd></td>
+
+  };
+
   return $txt;
 }
-
+  
 =cut
 
 to install, add this line to httpd.conf:
