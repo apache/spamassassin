@@ -400,7 +400,7 @@ sub date_in_direction {
     }
   }
 
-  if ($new && -d $conf{html}."/".$new) {
+  if ($new && -d get_datadir_for_daterev($new)) {
     return $new;
   }
 
