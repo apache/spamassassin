@@ -325,8 +325,9 @@ sub create_gp {
 
     set xdata time
     set timefmt "%Y-%m-%d"
-    set title "$title"
+    set format x "%04Y%02m%02d"
 
+    set title "$title"
     set key left top Left nobox
 
   };
