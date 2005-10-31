@@ -49,6 +49,8 @@ my $DEBUG; #$DEBUG=1;
 my @classes = qw(ham spam);
 my $srcs = [ ];
 my $dests = [ ];
+my $mbox_tmpdir = $ENV{TMPDIR} || "/tmp";
+
 sub dbg;
 
 use Getopt::Long;
@@ -93,6 +95,12 @@ foreach my $arg (@ARGV) {
 # { dests => [ ], dir => "/src3/spam", num => 500 }, } ];
 
 my $cwd = cwd();
+
+my $mbox_work = "$mbox_tmpdir/mboxes.d";
+if (-d $mbox_work) {
+  rmtree($mbox_work) or warn "cannot rmtree $mbox_work: $!"; 
+}
+
 main();
 exit;
 
@@ -109,7 +117,13 @@ sub find_srcs {
   foreach my $src (@$srcs) {
     my $num_files;
     my $cb = sub {
-      if (-f $_ && -r _) { $num_files++; }
+      if (-f $_ && -r _) {
+        if ($_ =~ /\.mbox/) {
+          $num_files += mbox_count($File::Find::name);
+        } else {
+          $num_files++;
+        }
+      }
     };
 
     $src->{ham}  = { num => 0, dests => [ ] };
@@ -210,7 +224,11 @@ sub _mklink {
     if (!exists $files{$mtime}) {
       $files{$mtime} = [ ];
     }
-    push(@{$files{$mtime}}, $File::Find::name);
+    if ($_ =~ /\.mbox/) {
+      push(@{$files{$mtime}}, mbox_extract_all($File::Find::name));
+    } else {
+      push(@{$files{$mtime}}, $File::Find::name);
+    }
 
   }, $srcdir);
 
@@ -281,6 +299,97 @@ sub allocate {
     $src->{$class}{num} -= $$nhamref;
     $$nhamref = 0;
   }
+}
+
+sub mbox_count {
+  my ($mboxpath) = @_;
+  return _mbox_extract_all($mboxpath, 1);
+}
+
+sub mbox_extract_all {
+  my ($mboxpath) = @_;
+  return _mbox_extract_all($mboxpath, 0);
+}
+
+sub _mbox_extract_all {
+  my ($mboxpath, $justcount) = @_;
+
+  # create an area to hold extracted mbox files
+  # this cannot use $$, it must remain the same between runs
+  if (!-d $mbox_work) {
+    mkdir $mbox_work or die "cannot create tmpdir: $mbox_work";
+    # fatal error, could be an attack
+  }
+
+  my $counter = 0;
+  my @created_files = ();
+
+  open (INPUT, "<$mboxpath") or die "cannot read $mboxpath";
+  binmode INPUT;
+
+  my $start = 0;            # start of a message
+  my $where = 0;            # current byte offset
+  my $in_header = 0;        # are in we a header?
+  while (!eof INPUT) {
+    my $offset = $start;    # byte offset of this message
+    while (<INPUT>) {
+      if ($in_header) {
+        if (/^\s*$/) {
+          $in_header = 0;
+        }
+      }
+      if (substr($_,0,5) eq "From ") {
+        $in_header = 1;
+        $start = $where;
+        $where = tell INPUT;
+        last;
+      }
+      $where = tell INPUT;
+
+      if ($justcount) {
+        $counter++;
+      }
+      else {
+        my $newname = get_mbox_name ($mboxpath, $offset);
+        seek (INPUT, $offset, 0);
+        open (OUTPUT, ">$newname") or die "cannot write to $newname";
+        binmode OUTPUT;
+
+        my $past = 0;
+        while (<INPUT>) {
+          if ($past) {
+            last if substr($_,0,5) eq "From ";
+          } else {
+            $past = 1;
+          }
+          print OUTPUT;
+        }
+
+        close OUTPUT or die "failed to write to $newname";
+        push @created_files, $newname;
+        seek (INPUT, $where, 0);    # back to where we were
+      }
+    }
+  }
+  close INPUT;
+
+  if ($justcount) {
+    return $counter;
+  }
+  else {
+    return @created_files;
+  }
+}
+
+sub get_mbox_name {
+  my ($mboxpath, $where) = @_;
+
+  my $dstname = $mboxpath;
+  $dstname =~ s/[^-_\.A-Za-z0-9]/_/gs;
+  $dstname =~ s/_+/_/gs;
+  $dstname =~ s/^_//gs;
+  $dstname = $mbox_work."/".$dstname.".OFF".$where;
+  return $dstname;
 }
 
 sub dbg {
