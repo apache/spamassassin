@@ -218,28 +218,28 @@ my $tmpl = q{
   <table style="padding-left: 0px" class=datetable>
 
       <tr>
-       <th> Mass-Check: </th>
+       <th> Mass-Check </th>
        <th> Date </th>
        <th> MC-Rev </th>
-       <th> SVN Commit </th>
+       <th> Prior Commit </th>
        <th> Rev </th>
        <th> Author </th>
        <th> Net </th>
       </tr>
 
-           <tr class=daterevtr><td class=daterevtd><b>Past</b></td>
+           <tr class=daterevtr><td class=daterevtd><b>Earlier</b></td>
                !daylinkneg3!
       </tr><tr class=daterevtr><td class=daterevtd></td>
        !daylinkneg2!
       </tr><tr class=daterevtr><td class=daterevtd></td>
        !daylinkneg1!
-      </tr><tr class=daterevtr><td class=daterevtd><b>Today</b></td>
+      </tr><tr class=daterevtr><td class=daterevtd><b>Viewing</b></td>
        !todaytext!
       </tr><tr class=daterevtr><td class=daterevtd></td>
        !daylinkpls1!
       </tr><tr class=daterevtr><td class=daterevtd></td>
        !daylinkpls2!
-      </tr><tr class=daterevtr><td class=daterevtd><b>Future</b></td>
+      </tr><tr class=daterevtr><td class=daterevtd><b>Later</b></td>
        !daylinkpls3!
       </tr>
 
