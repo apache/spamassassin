@@ -8,6 +8,9 @@ if (!$perl) {
   die "no perl path found in ARGV!";
 }
 
+# get the mass-check corpora ready
+run "/home/bbmass/populate_cor";
+
 chdir "masses" or die;
 
 my $slavename = "generic";
