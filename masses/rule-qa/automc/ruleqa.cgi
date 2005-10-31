@@ -277,9 +277,11 @@ while (($key, $daycount) = each %{$days}) {
 
   if (!$dr) {
     $tmpl =~ s,!daylink${key}!,
-       <td colspan=5>
+
+       <td colspan=6 class=daterevtd>
          <em>(no logs available)</em>
        </td>
+
     ,gs;
   }
   else {
@@ -821,17 +823,19 @@ sub get_datadir_for_daterev {
 sub get_daterev_description {
   my ($dr) = @_;
   my $fname = get_datadir_for_daterev($dr)."/info.xml";
+  my $fastfname = get_datadir_for_daterev($dr)."/fastinfo.xml";
 
   my $txt;
   if (-f $fname) {
     eval {
       my $info = XMLin($fname);
+      my $fastinfo = XMLin($fastfname);
       # use Data::Dumper; print Dumper $info;
 
       my $cdate = $info->{checkin_date};
       $cdate =~ s/T(\S+)\.\d+Z$/ $1/;
 
-      my $net = $info->{includes_net} ? "[net]" : "";
+      my $net = $fastinfo->{includes_net} ? "[net]" : "";
 
       my $drtitle = ($info->{msg} ? $info->{msg} : '');
       $drtitle =~ s/[\"\']/ /gs;
@@ -841,9 +845,9 @@ sub get_daterev_description {
       $txt = qq{
 
         <td class=daterevtd>
-       <a title="$drtitle" href="!drhref!">$info->{date}</a></td>
+       <a title="$drtitle" href="!drhref!">$fastinfo->{date}</a></td>
         <td class=daterevtd>
-       <a title="$drtitle" href="!drhref!">$info->{rev}</a></td>
+       <a title="$drtitle" href="!drhref!">$fastinfo->{rev}</a></td>
         <td class=daterevtd>
        <a title="$drtitle" href="!drhref!">$cdate</a></td>
         <td class=daterevtd>
@@ -852,7 +856,9 @@ sub get_daterev_description {
         <td class=daterevtd> <em>$net</em> </td>
 
        </tr><tr class=daterevdesc><td></td>
-       <td class=daterevtd colspan=4><em>($drtitle)</em></td>
+       <td class=daterevtd colspan=4><em>($drtitle)
+            <br>$fastinfo->{submitters}
+       </em></td>
        <td></td><td></td>
 
       };
