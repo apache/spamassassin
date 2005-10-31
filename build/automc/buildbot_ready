@@ -36,9 +36,11 @@ sub do_start {
   # system ("svn info --non-interactive > masses/svninfo.tmp");
   system ("svn info > masses/svninfo.tmp < /dev/null");
 
-  # sleep 10 -- give the "winning" slave time to get started on the
-  # work we also need done
-  perform_singleton_actions() or sleep 10;
+  if (!perform_singleton_actions()) {
+    # give the "winning" slave time to do the work we also need done
+    print "sleeping for 60 seconds so that corpus is rebuilt\n";
+    sleep 60;
+  }
 }
 
 sub perform_singleton_actions {
