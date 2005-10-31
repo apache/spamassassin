@@ -1,0 +1,26 @@
+#!/bin/sh -x
+#
+# as seen on the zone's "bbmass" mass-checking buildbot
+
+SADIR=/home/automc/svn/spamassassin
+
+cd /home/bbmass/rawcor
+date
+renice +20 $$
+
+TMPDIR=/home/bbmass/tmp \
+  $SADIR/masses/corpora/mk-corpus-link-farm \
+          -dest /home/bbmass/cor/mc-fast -num 1000 \
+          -dest /home/bbmass/cor/mc-med -num 5000 \
+          -dest /home/bbmass/cor/mc-slow -num 10000 \
+          -dest /home/bbmass/cor/mc-slower \
+        *
+
+for dir in mc-fast mc-med mc-slow mc-slower
+do
+echo "ham:dir:/home/bbmass/cor/$dir/ham
+spam:dir:/home/bbmass/cor/$dir/spam" > /home/bbmass/cor/$dir/targets
+done
+
+date
+
