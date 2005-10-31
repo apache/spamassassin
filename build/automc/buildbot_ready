@@ -132,7 +132,13 @@ sub get_current_slave_name {
 
 
 sub try_get_exclusive_lock {
-  return 1 if (!-d $LOCKDIR);       # no locking needed
+  if (!-d $LOCKDIR) {
+    print "singleton lock: $LOCKDIR does not exist, so no locking is required.\n";
+    return 1;
+  }
+  if (!-w $LOCKDIR) {
+    die "cannot write to $LOCKDIR";
+  }
 
   $got_lock = undef;
   my $newf = $LOCKDIR."/singleton_lock.active";
