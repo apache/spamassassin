@@ -459,7 +459,7 @@ sub showfreqsubset {
 
   if ($filename eq 'DETAILS.new') {
     # report which sets we used
-    summarise_head($freqs_head{$key}, $filename, $strdate, $rule);
+    summarise_head($freqs_head{$filename}, $filename, $strdate, $rule);
   }
 
   get_freqs_for_rule($filename, $strdate, $rule);
@@ -469,7 +469,7 @@ sub summarise_head {
   my ($head, $filename, $strdate, $rule) = @_;
 
   my @mcfiles = ();
-  if ($head =~ / ham results used for \S+ \S+ \S+: (.*)$/) {
+  if ($head =~ /^# ham results used for \S+ \S+ \S+: (.*)$/m) {
     @mcfiles = split(' ', $1);
   }
 

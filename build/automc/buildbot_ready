@@ -1,6 +1,11 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 
 use strict;
+use warnings;
+sub run;
+
+my $LOCKDIR = "/home/bbmass/mclocks";
+my $got_lock = undef;
 
 my $perl = $^X;
 if (!$perl) {
@@ -30,6 +35,38 @@ sub do_start {
   # --non-interactive not on the zone yet.  duh!
   # system ("svn info --non-interactive > masses/svninfo.tmp");
   system ("svn info > masses/svninfo.tmp < /dev/null");
+
+  perform_singleton_actions();
+}
+
+sub perform_singleton_actions {
+  if (!try_get_exclusive_lock()) {
+    print "cannot get the exclusive lock; some other BB slave is\n".    
+        "doing the singleton actions for us.\n";
+    return;
+  }
+
+  $SIG{INT} = $SIG{TERM} = sub {
+    kill_lock(); die "killed!";
+  };
+
+  eval {
+    _perform_singleton_actions_unlocked();
+  };
+  if ($@) {
+    warn $@;
+    kill_lock();
+    die "aargh";
+  }
+
+  kill_lock();
+  $SIG{INT} = $SIG{TERM} = undef;
+}
+
+sub _perform_singleton_actions_unlocked
+{
+  print "got lock: performing singleton actions\n";
+  run "build/automc/populate_cor";
 }
 
 # ---------------------------------------------------------------------------
@@ -58,8 +95,6 @@ sub do_stop {
 
   run ("./rule-qa/corpus-hourly --dir $logdir");
 }
-
-
 
 # ---------------------------------------------------------------------------
 
@@ -93,5 +128,49 @@ sub get_current_slave_name {
   $pwd =~ /\/slaves\/([^\/]+)\// and return $1;
   warn "cannot work out slave name from $pwd";
   return "unknown";
+}
+
+
+sub try_get_exclusive_lock {
+  return 1 if (!-d $LOCKDIR);       # no locking needed
+
+  $got_lock = undef;
+  my $newf = $LOCKDIR."/singleton_lock.active";
+  if (-f $newf) {
+    open (IN, "<$newf");
+    my $pid = <IN> + 0; close IN;
+
+    if ($pid > 0 && kill(0, $pid)) {
+      print "singleton lock: locked by $pid, still active.\n";
+      return 0;
+    }
+    else {
+      print "singleton lock: locked by $pid, no longer active. killing lock\n";
+      # should have to do this too often, which is just as well, as there's
+      # a tiny little racelet here
+      unlink $newf;
+    }
+  }
+
+  my $tmpf = $LOCKDIR."/singleton_lock.new.$$";
+  open (OUT, ">$tmpf") or die "cannot write to $tmpf";
+  print OUT $$;
+  close OUT or die "cannot write to $tmpf";
+
+  if (!-f $newf && rename($tmpf, $newf)) {
+    print "singleton lock: taking\n";
+    $got_lock = $newf;
+    return 1;
+  }
+  else {
+    print "singleton lock: missed the lock\n";
+    unlink $tmpf;
+    return 0;
+  }
+}
+
+sub kill_lock {
+  return unless $got_lock;
+  unlink $got_lock or warn "singleton lock: unlink $got_lock failed: $!";
 }
 
