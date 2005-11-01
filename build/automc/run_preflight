@@ -15,7 +15,7 @@ my $slavename = "generic";
 my $pwd = `pwd`;
 $pwd =~ /slaves\/([-_A-Za-z0-9]+)\//; if ($1) { $slavename = $1; }
 
-my $targets = "/cor/$1/targets";
+my $targets = "/tmpfs/cor/$1/targets";
 print "[using corpus targets file: $targets]\n";
 
 # super-nice please!
