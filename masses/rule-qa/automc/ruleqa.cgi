@@ -862,7 +862,7 @@ sub get_daterev_description {
           <td class=daterevtd colspan=4>
             <em>($drtitle)</em>
           </td>
-          <td colspan=2>
+          <td class=daterevtd colspan=2>
             <em> $fastinfo->{submitters} </em>
           </td>
 
