@@ -7,7 +7,7 @@ set -x
 
 echo "RUNME.after starting"; date
 
-PATH=$PATH:/usr/local/bin
+PATH=/local/perl586/bin:$PATH:/usr/local/bin
 date=date ; [ -x /opt/sfw/bin/gdate ] && date=gdate
 
 # hit-frequencies now requires up-to-date rules to generate valid reports!
