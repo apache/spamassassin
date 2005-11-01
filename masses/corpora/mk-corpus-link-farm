@@ -274,9 +274,9 @@ sub _mklink {
       }
 
       if (remove_from_poss_delete($dstname)) {
-        if (-l $srcname) {
-          my $link = readlink($srcname);
-          if ($link eq $dstname) {
+        if (-l $dstname) {
+          my $link = readlink($dstname);
+          if ($link eq $srcname) {
             dbg "  $srcname already linked to $dstname";
             next;
           }
