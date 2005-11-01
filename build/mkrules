@@ -467,7 +467,7 @@ sub sandbox_rule_name_avoid_collisions {
 
   if (!$renamed_rules->{$new}) {
     $renamed_rules->{$new} = $rule;
-    warn "WARNING: $rule: needs renaming to $new due to $newreason\n";
+    warn "WARNING: $rule: renamed as $new due to $newreason\n";
   }
 
   return $new;
