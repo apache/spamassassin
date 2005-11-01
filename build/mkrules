@@ -83,7 +83,7 @@ if ($opt_manifestskip) {
 
 # context for the rules compiler
 my $seen_rules = { };
-my $said_renamed_warning = { };
+my $renamed_rules = { };
 my $output_files = { };
 my $output_file_text = { };
 
@@ -240,7 +240,7 @@ sub rule_file_compile_sandbox {
       my $val = $3;
 
       my $origname = $name;
-      $name = rule_name_avoid_collisions($name, $f);
+      $name = sandbox_rule_name_avoid_collisions($name, $f);
 
       # TODO: sandbox rules -- enforce "T_" prefix
 
@@ -263,7 +263,7 @@ sub rule_file_compile_sandbox {
       my $val = $3;
 
       my $origname = $name;
-      $name = rule_name_avoid_collisions($name, $f);
+      $name = sandbox_rule_name_avoid_collisions($name, $f);
 
       if (!$rules->{$name}) { $rules->{$name} = rule_entry_create(); }
       $rules->{$name}->{origname} = $origname;
@@ -331,6 +331,9 @@ sub rule_file_compile_sandbox {
       my $cmts = $rules->{$COMMENTS}->{text}; $cmts ||= '';
       $output_file_text->{$pubfile} .= $cmts;
     }
+
+    # fix up any rule renamings we were supposed to do
+    sed_renamed_rule_names(\$text);
 
     my $cond = $rules->{$name}->{cond};
     if ($cond) {
@@ -440,25 +443,41 @@ sub rule_entry_create {
   };
 }
 
-sub rule_name_avoid_collisions {
+sub sandbox_rule_name_avoid_collisions {
   my ($rule, $path) = @_;
-  if (!exists $seen_rules->{$rule}) {
+  my $new;
+  my $newreason;
+
+  if ($rule !~ /^(?:T_|__)/) {
+    $new = "T_".$rule;
+    $newreason = "missing T_ prefix";
+  }
+  elsif (!exists $seen_rules->{$rule}) {
     return $rule;
   }
   else {
-    my $new = $path;
+    $new = $path;
     $new =~ s/[^A-Za-z0-9]+/_/gs;
     $new =~ s/_+/_/gs;
     $new =~ s/^_//;
     $new =~ s/_$//;
     $new = $rule.'_'.$new;
+    $newreason = "collision with existing rule";
+  }
 
-    if (!$said_renamed_warning->{$new}) {
-      $said_renamed_warning->{$new} = 1;
-      warn "$rule: renamed to $new due to collision with existing rule\n";
-    }
+  if (!$renamed_rules->{$new}) {
+    $renamed_rules->{$new} = $rule;
+    warn "WARNING: $rule: needs renaming to $new due to $newreason\n";
+  }
 
-    return $new;
+  return $new;
+}
+
+sub sed_renamed_rule_names {
+  my ($textref) = @_;
+  foreach my $new (keys %{$renamed_rules}) {
+    my $rule = $renamed_rules->{$new};
+    $$textref =~ s/\b${rule}\b/${new}/gs;
   }
 }
 
