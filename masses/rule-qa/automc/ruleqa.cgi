@@ -844,22 +844,27 @@ sub get_daterev_description {
 
       $txt = qq{
 
-        <td class=daterevtd>
-       <a title="$drtitle" href="!drhref!">$fastinfo->{date}</a></td>
-        <td class=daterevtd>
-       <a title="$drtitle" href="!drhref!">$fastinfo->{rev}</a></td>
-        <td class=daterevtd>
-       <a title="$drtitle" href="!drhref!">$cdate</a></td>
-        <td class=daterevtd>
-       <a title="$drtitle" href="!drhref!">$info->{checkin_rev}</a></td>
-        <td class=daterevtd> <em>$info->{author}</em></td>
-        <td class=daterevtd> <em>$net</em> </td>
+          <td class=daterevtd>
+        <a title="$drtitle" href="!drhref!">$fastinfo->{date}</a></td>
+          <td class=daterevtd>
+        <a title="$drtitle" href="!drhref!">$fastinfo->{rev}</a></td>
+          <td class=daterevtd>
+        <a title="$drtitle" href="!drhref!">$cdate</a></td>
+          <td class=daterevtd>
+        <a title="$drtitle" href="!drhref!">$info->{checkin_rev}</a></td>
+          <td class=daterevtd> <em>$info->{author}</em></td>
+          <td class=daterevtd> <em>$net</em> </td>
 
-       </tr><tr class=daterevdesc><td></td>
-       <td class=daterevtd colspan=4><em>($drtitle)
-            <br>$fastinfo->{submitters}
-       </em></td>
-       <td></td><td></td>
+        </tr>
+        <tr class=daterevdesc>
+
+          <td></td>
+          <td class=daterevtd colspan=4>
+            <em>($drtitle)</em>
+          </td>
+          <td colspan=2>
+            <em> $fastinfo->{submitters} </em>
+          </td>
 
       };
     };
