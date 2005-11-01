@@ -4,21 +4,24 @@
 
 SADIR=/home/automc/svn/spamassassin
 
+[ -d /home/bbmass/tmpfs/cor ] || \
+    mkdir /home/bbmass/tmpfs/tmp /home/bbmass/tmpfs/cor
+
 cd /home/bbmass/rawcor
 date
 
 TMPDIR=/home/bbmass/tmp \
   $SADIR/masses/corpora/mk-corpus-link-farm \
-          -dest /home/bbmass/cor/mc-fast -num 1000 \
-          -dest /home/bbmass/cor/mc-med -num 5000 \
-          -dest /home/bbmass/cor/mc-slow -num 10000 \
-          -dest /home/bbmass/cor/mc-slower \
+          -dest /home/bbmass/tmpfs/cor/mc-fast -num 1000 \
+          -dest /home/bbmass/tmpfs/cor/mc-med -num 5000 \
+          -dest /home/bbmass/tmpfs/cor/mc-slow -num 10000 \
+          -dest /home/bbmass/tmpfs/cor/mc-slower \
         *
 
 for dir in mc-fast mc-med mc-slow mc-slower
 do
-echo "ham:dir:/home/bbmass/cor/$dir/ham
-spam:dir:/home/bbmass/cor/$dir/spam" > /home/bbmass/cor/$dir/targets
+echo "ham:dir:/home/bbmass/tmpfs/cor/$dir/ham
+spam:dir:/home/bbmass/tmpfs/cor/$dir/spam" > /home/bbmass/tmpfs/cor/$dir/targets
 done
 
 date

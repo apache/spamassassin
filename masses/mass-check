@@ -296,6 +296,8 @@ if (defined $opt_rewrite) {
   close(REWRITE);
 }
 
+$spamtest->finish();
+
 # exit status: did we check at least one message correctly?
 exit(!($ham_count || $spam_count));
 
