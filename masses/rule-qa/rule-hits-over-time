@@ -474,15 +474,15 @@ sub plot_gp {
       push @plot,
         qq{ '$tmpdir/plot.$graphname.data' using }.
             qq{ 1:(\$$col >= 0 ? \$$col : 1/0) }.
-
-            qq{ with points pt $style ps 1 }.
+            # note: using "lt $style" gives us points in the same
+            # colour as the lines in the smoothed graph below
+            qq{ with points lt $style pt $style ps 1 }.
             qq{ title '$legend' };
 
       foreach my $a (0 .. $num_alphas) {
         push @plot,
           qq{ '$tmpdir/avgs$a.$graphname.data' using }.
               qq{ 1:(\$$col >= 0 ? \$$col : 1/0) }.
-              # qq{ smooth bezier }.
               qq{ with lines lt $style lw 3 }.
               qq{ title '  (DEA a=$dea_alphas->[$a])' };
       }
