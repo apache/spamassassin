@@ -108,9 +108,9 @@ sub read_submitters {
       my $sub = $1;
       $sub =~ s/\bspam-/ /gs;
       $sub =~ s/\.log\b/ /gs;
-      $sub =~ s/^\s+//gs;
-      $sub =~ s/\s+$//gs;
       $sub =~ s/\s+/ /gs;
+      $sub =~ s/^ //gs;
+      $sub =~ s/ $//gs;
       $info->{submitters} = $sub;
     }
     last if (!/^#/);        # don't want anything after the comments end
