@@ -274,6 +274,14 @@ sub _mklink {
       }
 
       if (remove_from_poss_delete($dstname)) {
+        if (-l $srcname) {
+          my $link = readlink($srcname);
+          if ($link eq $dstname) {
+            dbg "  $srcname already linked to $dstname";
+            next;
+          }
+        }
+
         unlink $dstname;
       }
       if (symlink($srcname, $dstname)) {
