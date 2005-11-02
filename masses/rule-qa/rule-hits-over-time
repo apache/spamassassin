@@ -369,7 +369,7 @@ sub create_gp {
     set xlabel 'Time, in blocks of $niceperiod'
     set xdata time
     set timefmt "%Y-%m-%d-%H"
-    set format x "%04Y%02m%02d%02H00"
+    set format x "%04Y%02m%02d"
 
     set ylabel '$y_label'
     set yrange [0:*]
