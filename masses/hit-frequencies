@@ -19,16 +19,16 @@
 use strict;
 use FindBin;
 use Getopt::Std;
-getopts("fm:M:X:l:L:pxhc:at:s:io");
+getopts("fm:M:X:l:L:pxhc:at:s:ioT");
 
 use vars qw {
   $opt_f $opt_m $opt_M $opt_X $opt_p $opt_x $opt_h $opt_l $opt_L $opt_c
-  $opt_a $opt_t $opt_s $opt_i $sorting $opt_o 
+  $opt_a $opt_t $opt_s $opt_i $sorting $opt_o $opt_T
 };
 
 sub usage {
   die "hit-frequencies [-c rules dir] [-f] [-m RE] [-M RE] [-X RE] [-l LC]
-                [-s SC] [-a] [-p] [-x] [-i] [-o] [spam log] [ham log]
+                [-s SC] [-a] [-p] [-x] [-i] [-T] [-o] [spam log] [ham log]
 
     -c p   use p as the rules directory
     -f     falses. count only false-negative or false-positive matches
@@ -43,6 +43,7 @@ sub usage {
     -x     extended output, with S/O ratio and scores
     -s SC  which scoreset to use
     -i     use IG (information gain) for ranking
+    -T     display rule times. implies -x, -p
     -o     display hit overlaps against all other rules
 
     options -l and -L are mutually exclusive.
@@ -80,6 +81,8 @@ my $num_ham = 0;
 my %ranking = ();
 my $ok_lang = '';
 
+my %rule_times = ();
+
 readscores($cffile);
 
 $ok_lang = lc ($opt_l || $opt_L || '');
@@ -111,13 +114,29 @@ my $hdr_ham = $num_ham;
 my $sorting = $opt_i ? "IG" : "RANK";
 
 if ($opt_p) {
-  if ($opt_f) {
-    printf "%7s %7s %7s  %6s  %6s  %6s  %s\n",
-  	"OVERALL%", "FNEG%", "FPOS%", "S/O", $sorting, "SCORE", "NAME";
-  } else {
-    printf "%7s %7s  %7s  %6s  %6s  %6s  %s\n",
-  	"OVERALL%", "SPAM%", "HAM%", "S/O", $sorting, "SCORE", "NAME";
-  }
+  printf "%7s  %7s  %7s  %6s  %6s  %6s  %s\n",
+  	"MSECS", $opt_f?"FNEG%":"SPAM%", $opt_f?"FPO%":"HAM%",
+        "S/O", $sorting, "SCORE", "NAME";
+
+  printf "%7d  %7d  %7d  %7.3f %6.2f  %6.2f  (all messages)\n",
+  	0, $hdr_spam, $hdr_ham,
+        soratio ($num_spam,$num_ham), 0, 0;
+
+  $hdr_all ||= 0.00001;     # avoid div by 0 in the next 2 statements
+  $hdr_spam = ($num_spam / $hdr_all) * 100.0;
+  $hdr_ham = ($num_ham / $hdr_all) * 100.0;
+  $hdr_all = 100.0;             # this is obvious
+
+  printf "%7.5f  %7.4f  %7.4f  %7.3f %6.2f  %6.2f  (all messages as %%)\n",
+  	0, $hdr_spam, $hdr_ham,
+        soratio ($num_spam,$num_ham), 0, 0;
+
+}
+elsif ($opt_p) {
+  printf "%8s %7s  %7s  %6s  %6s  %6s  %s\n",
+  	"OVERALL%", $opt_f?"FNEG%":"SPAM%", $opt_f?"FPO%":"HAM%",
+        "S/O", $sorting, "SCORE", "NAME";
+
   printf "%7d  %7d  %7d  %7.3f %6.2f  %6.2f  (all messages)\n",
   	$hdr_all, $hdr_spam, $hdr_ham,
         soratio ($num_spam,$num_ham), 0, 0;
@@ -131,7 +150,8 @@ if ($opt_p) {
   	$hdr_all, $hdr_spam, $hdr_ham,
         soratio ($num_spam,$num_ham), 0, 0;
 
-} elsif ($opt_x) {
+}
+elsif ($opt_x) {
   printf "%7s %7s  %7s  %6s  %6s %6s  %s\n",
   	"OVERALL%", "SPAM%", "HAM%", "S/O", $sorting, "SCORE", "NAME";
   printf "%7d  %7d  %7d  %7.3f %6.2f %6.2f  (all messages)\n",
@@ -291,6 +311,10 @@ if (! $opt_i) {
   }
 }
 
+if ($opt_T) {
+  read_timings();
+}
+
 foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
   next unless (exists $rules{$test});           # only valid tests
   next if (!$opt_a && $rules{$test}->{issubrule});
@@ -333,7 +357,13 @@ foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
     $soratio{$test} = soratio ($fsadj, $fnadj);
   }
 
-  if ($opt_p) {
+  if ($opt_T) {
+    printf "%7.5f  %7.4f  %7.4f  %7.3f %6.2f  %6.2f  %s\n",
+  	$rule_times{$test}||0, $fs, $fn, $soratio, $ranking{$test},
+        $scores{$test}||0,
+        $test;
+
+  } elsif ($opt_p) {
     printf "%7.3f  %7.4f  %7.4f  %7.3f %6.2f  %6.2f  %s\n",
   	$fa, $fs, $fn, $soratio, $ranking{$test}, $scores{$test}||0, $test;
 
@@ -570,5 +600,25 @@ sub soratio {
   } else {
       return 0.5;		# no results -> not effective
   }
+}
+
+sub read_timings {
+  if (!open (IN, "<timing.log")) {
+    warn "hit-frequencies: cannot read 'timing.log', timings will be 0";
+    return;
+  }
+  my $ver = <IN>;
+  if ($ver !~ /^v1/) {
+    warn "hit-frequencies: unknown version in 'timing.log', timings will be 0";
+    close IN;
+    return;
+  }
+  while (<IN>) {
+    if (/^T\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/) {
+      my ($name, $duration, $max, $runs) = ($1,$2,$3,$4);
+      $rule_times{$name} = ($duration / ($runs||0.00001)) * 1000;
+    }
+  }
+  close IN;
 }
 

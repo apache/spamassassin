@@ -84,7 +84,7 @@ sub do_stop {
   chdir("masses") or die;
 
   print "FAST FREQS REPORT:\n\n";
-  system ("$perl hit-frequencies -c tstrules -x -p -s 0");
+  system ("$perl hit-frequencies -c tstrules -x -p -T -s 0");
 
   print "\n\nBUILDING SLOW FREQS REPORT:\n\n";
 
