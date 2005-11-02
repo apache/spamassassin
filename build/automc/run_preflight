@@ -8,8 +8,6 @@ if (!$perl) {
   die "no perl path found in ARGV!";
 }
 
-chdir "masses" or die;
-
 my $slavename = "generic";
 
 my $pwd = `pwd`;
@@ -22,11 +20,16 @@ print "[using corpus targets file: $targets]\n";
 #
 system ("renice +19 $$");
 
-# just the sandbox rules
+# cd to masses
+#
+chdir "masses" or die;
+
+# just the sandbox rules and the timing plugin
 #
 system ("rm -rf tstrules");
 run "mkdir tstrules";
 run "cp ../rules/70_sandbox.cf tstrules";
+run "cp plugins/*.* tstrules";
 
 # this is run in a chroot jail, just in case there's hostile
 # rule code in there...
