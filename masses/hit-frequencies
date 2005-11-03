@@ -19,16 +19,17 @@
 use strict;
 use FindBin;
 use Getopt::Std;
-getopts("fm:M:X:l:L:pxhc:at:s:ioT");
+getopts("fm:M:X:l:L:pxhc:at:s:ioTSd");
 
 use vars qw {
   $opt_f $opt_m $opt_M $opt_X $opt_p $opt_x $opt_h $opt_l $opt_L $opt_c
-  $opt_a $opt_t $opt_s $opt_i $sorting $opt_o $opt_T
+  $opt_a $opt_t $opt_s $opt_i $sorting $opt_o $opt_T $opt_S $opt_X
+  $opt_d
 };
 
 sub usage {
   die "hit-frequencies [-c rules dir] [-f] [-m RE] [-M RE] [-X RE] [-l LC]
-                [-s SC] [-a] [-p] [-x] [-i] [-T] [-o] [spam log] [ham log]
+          [-s SC] [-a] [-p] [-x] [-i] [-T] [-S] [-o] [-d] [spam log] [ham log]
 
     -c p   use p as the rules directory
     -f     falses. count only false-negative or false-positive matches
@@ -45,6 +46,8 @@ sub usage {
     -i     use IG (information gain) for ranking
     -T     display rule times. implies -x, -p
     -o     display hit overlaps against all other rules
+    -S     display score-map of hits
+    -d     XML output.  conflicts with -x, -p
 
     options -l and -L are mutually exclusive.
 
@@ -57,9 +60,14 @@ sub usage {
 }
 
 usage() if($opt_h || ($opt_l && $opt_L));
+usage() if($opt_d && ($opt_x || $opt_p));
 
 if ($opt_p) {
   $opt_x = 1;
+}
+
+if ($opt_d) {
+  $opt_x = $opt_p = 1;
 }
 
 $opt_s = 0 if ( !defined $opt_s );
@@ -75,6 +83,8 @@ my %freq_spam = ();
 my %freq_ham = ();
 my %hmap_spam = ();
 my %hmap_ham = ();
+my %scoremap_spam = ();
+my %scoremap_ham = ();
 my %freq = ();
 my $num_spam = 0;
 my $num_ham = 0;
@@ -113,7 +123,25 @@ my $hdr_ham = $num_ham;
 
 my $sorting = $opt_i ? "IG" : "RANK";
 
-if ($opt_p) {
+if ($opt_d) {
+  $hdr_all ||= 0.00001;     # avoid div by 0 in the next 2 statements
+  $hdr_spam = ($num_spam / $hdr_all) * 100.0;
+  $hdr_ham = ($num_ham / $hdr_all) * 100.0;
+
+  print qq{
+
+      <freqs scoreset='$opt_s'>
+        <allmessages>
+          <count class='spam'>$num_spam</count>
+          <count class='ham'>$num_spam</count>
+          <pc class='spam'>$hdr_spam</pc>
+          <pc class='ham'>$hdr_spam</pc>
+        </allmessages>
+
+  };
+
+}
+elsif ($opt_p) {
   printf "%7s  %7s  %7s  %6s  %6s  %6s  %s\n",
   	"MSECS", $opt_f?"FNEG%":"SPAM%", $opt_f?"FPO%":"HAM%",
         "S/O", $sorting, "SCORE", "NAME";
@@ -322,6 +350,9 @@ foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
   my $fs = $freq_spam{$test}; $fs ||= 0;
   my $fn = $freq_ham{$test}; $fn ||= 0;
   my $fa = $fs+$fn;
+  my $num_fs = $fs;
+  my $num_fn = $fn;
+  my $num_fa = $fa;
 
   # match certain tests
   next if ($opt_m && $test !~ m/$opt_m/);
@@ -357,7 +388,25 @@ foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
     $soratio{$test} = soratio ($fsadj, $fnadj);
   }
 
-  if ($opt_T) {
+  if ($opt_d) {
+    my $tflags = $rules{$test}->{tflags} || ''; # good to know
+    print qq{
+      <rule>
+        <time>}.($rule_times{$test}||0).qq{</time>
+        <count class='all'>$num_fa</count>
+        <count class='spam'>$num_fs</count>
+        <count class='ham'>$num_fn</count>
+        <pc class='all'>$fa</pc>
+        <pc class='spam'>$fs</pc>
+        <pc class='ham'>$fn</pc>
+        <so>$soratio</so>
+        <rank>$ranking{$test}</rank>
+        <score>}.($scores{$test}||0).qq{</score>
+        <test>$test</test>
+        <tflags>$tflags</tflags>
+    };
+
+  } elsif ($opt_T) {
     printf "%7.5f  %7.4f  %7.4f  %7.3f %6.2f  %6.2f  %s\n",
   	$rule_times{$test}||0, $fs, $fn, $soratio, $ranking{$test},
         $scores{$test}||0,
@@ -375,12 +424,65 @@ foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
     printf "%10d  %10d  %10d  %s\n", $fa, $fs, $fn, $test;
   }
 
+  if ($opt_S) {
+    _print_scoremap("ham", $scoremap_ham{$test});
+    _print_scoremap("spam", $scoremap_spam{$test});
+  }
+
   if ($opt_o) {
     compute_overlaps_for_rule($test);
+  }
+
+  if ($opt_d) {
+    print qq{ </rule> };
   }
 }
 exit;
 
+
+sub _print_scoremap {
+  my ($name, $smap) = @_;
+
+  if ($opt_d) {
+    print qq{ <scoremap class='$name'> };
+  }
+
+  $smap ||= { };
+  my @scores = (sort { $a <=> $b } keys %{$smap});
+
+  my $total = 0;
+  foreach my $score (@scores) {
+    $total += $smap->{$score};
+  }
+
+  foreach my $score (@scores) {
+    my $num = $smap->{$score};
+    my $pc = sprintf("%.4f", ($num / ($total||0.0001)) * 100);
+
+    if ($opt_d) {
+      print qq{
+        <si score='$score' pc='$pc' count='$num' /> };
+
+    }
+    else {
+      printf "  scoremap %4s: %2d %6.2f%% %4d %s\n",
+          $name, $score, $pc, $num, _scoremap_graph($pc);
+
+    }
+  }
+
+  if ($opt_d) {
+    print qq{ </scoremap> };
+
+  } else {
+    print "\n";
+  }
+}
+
+sub _scoremap_graph {
+  my ($pc) = @_;
+  return '*' x ($pc * (40/100));
+}
 
 
 sub readlogs {
@@ -393,6 +495,7 @@ sub readlogs {
     my $isspam = ($file eq $spam);
     my $caught;
     my $rules;
+    my $score;
 
     # this is very speed-sensitive code.  remove all possible
     # conditionals using an eval('..').
@@ -414,7 +517,7 @@ sub readlogs {
     # note: doing the match with a regexp shaves off no less than
     # 7 opcodes. nice!
     $evalstr .= '
-        ($caught, undef, undef, $rules) = split(\' \', $_, 5);
+        ($caught, $score, undef, $rules) = split(\' \', $_, 5);
         next unless ($caught =~ /^[Y\.]$/ && $rules);
     ';
 
@@ -424,7 +527,14 @@ sub readlogs {
       ';
     }
 
+    if ($opt_S) {
+      $evalstr .= '
+        $score = int $score;
+      ';
+    }
+
     my $hmapstr = '';
+    my $smapstr = '';
     if ($isspam) {
       if ($opt_o) {
         $hmapstr = '
@@ -435,11 +545,15 @@ sub readlogs {
         ';
       }
 
+      if ($opt_S) {
+        $smapstr = ' $scoremap_spam{$r}{$score}++; ';
+      }
+
       $evalstr .= '
         $num_spam++;
         foreach my $r (split(/,/, $rules)) {
           $freq_spam{$r}++;
-          '.$hmapstr.'
+          '.$hmapstr.$smapstr.'
         }
       ';
     } else {
@@ -452,11 +566,15 @@ sub readlogs {
         ';
       }
 
+      if ($opt_S) {
+        $smapstr = ' $scoremap_ham{$r}{$score}++; ';
+      }
+
       $evalstr .= '
         $num_ham++;
         foreach my $r (split(/,/, $rules)) {
           $freq_ham{$r}++;
-          '.$hmapstr.'
+          '.$hmapstr.$smapstr.'
         }
       ';
     }
@@ -516,13 +634,29 @@ sub compute_overlaps_for_rule {
 sub _print_overlap_ratios {
   my ($r1, $hash, $type) = @_;
 
+  if ($opt_d) {
+    print qq{ <overlap class='$type'> };
+  }
+
   foreach my $full (sort { $b <=> $a } keys %$hash) {
     my $ratio = $full * 100;
 
     last if ($ratio < 30);     # 30% cutoff
     my $rules = _prettify_overlap_rules($r1, $hash->{$full});
     next if ($rules eq '');
-    printf "  overlap %s: %3d%% %s\n", $type, $ratio, $rules;
+
+    if ($opt_d) {
+      print qq{
+        <overlaprules ratio='$ratio'>$rules</overlaprules>
+      };
+
+    } else {
+      printf "  overlap %s: %3d%% %s\n", $type, $ratio, $rules;
+    }
+  }
+
+  if ($opt_d) {
+    print qq{ </overlap };
   }
 }
 
