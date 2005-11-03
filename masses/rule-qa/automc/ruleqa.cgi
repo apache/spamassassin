@@ -161,9 +161,14 @@ print q{<html><head>
     tr.freqshead {
       background: #ddd;
     }
-    tr.freqsline td {
+    tr.freqsline_a td {
       text-align: right;
       padding: 0.1em 0.2em 0.1em 0.2em;
+    }
+    tr.freqsline_b td {
+      text-align: right;
+      padding: 0.1em 0.2em 0.1em 0.2em;
+      background: #f0f0d8;
     }
 
     h3 {
@@ -331,6 +336,7 @@ my $datadir;
 my %freqs_head = ();
 my %freqs_data = ();
 my %freqs_ordr = ();
+my $line_counter = 0;
 
 show_all_sets_for_daterev($daterev, $daterev);
 
@@ -534,7 +540,7 @@ sub read_freqs_file {
     if (/(?: \(all messages| results used:|was at r\d+)/) {
       $freqs_head{$key} .= $_;
     }
-    elsif (/OVERALL\%/) {
+    elsif (/MSEC/) {
       next;	# just ignored for now
     }
     elsif (/\s+overlap (.*)$/) {
@@ -555,7 +561,7 @@ sub read_freqs_file {
 
       my $line = {
         name => $lastrule,
-        overallpc => $vals[0],
+        msecs => $vals[0],
         spampc => $vals[1],
         hampc => $vals[2],
         so => $vals[3],
@@ -610,6 +616,7 @@ sub get_freqs_for_rule {
       <th>
     <a name='$titleplink'></a><a href='#$titleplink' class=title_permalink>#</a>
       </th>
+      <th>MSECS</th>
       <th>SPAM%</th>
       <th>HAM%</th>
       <th>S/O%</th>
@@ -683,12 +690,13 @@ sub output_freqs_data_line {
 
   my $LINE_TEMPLATE = qq{
 
-    <tr class=freqsline>
+    <tr class=freqsline_[% LINEALT %]>
       <td>
       [% IF RULEDETAIL != '' %]
 	<a href="[% RULEDETAIL %]">&gt;</a>
       [% END %]
       </td>
+      <td>[% MSECS %]</td>
       <td>[% SPAMPC %]</td>
       <td>[% HAMPC %]</td>
       <td>[% SO %]</td>
@@ -713,7 +721,7 @@ sub output_freqs_data_line {
   my $out = '';
   foreach my $line (@{$obj->{lines}}) {
     if (!$s{zero}) {
-      my $ov = $line->{overallpc};
+      my $ov = $line->{spampc} + $line->{hampc};
       if (!$ov || $ov !~ /^\s*\d/ || $ov+0 == 0) {
         next;       # skip this line, it's a 0-hitter
       }
@@ -724,19 +732,27 @@ sub output_freqs_data_line {
       $detailurl = create_detail_url($line->{name});
     }
 
+    my $score = $line->{score};
+    if ($line->{name} =~ /^__/) {
+      $score = '(meta)';
+    }
+
     $ttk->process(\$LINE_TEMPLATE, {
         RULEDETAIL => $detailurl,
-        OVERALLPC => $line->{overallpc},
+        MSECS => $line->{msecs},
         SPAMPC => $line->{spampc},
         HAMPC => $line->{hampc},
         SO => $line->{so},
         RANK => $line->{rank},
-        SCORE => $line->{score},
+        SCORE => $score,
         NAME => $line->{name},
         NAMEREF => create_detail_url($line->{name}),
         USERNAME => $line->{username} || '',
         AGE => $line->{age} || '',
+       LINEALT => (($line_counter & 1) == 0 ? "a" : "b")
     }, \$out) or die $ttk->error();
+
+    $line_counter++;
   }
 
   # add overlap using the EXTRA_TEMPLATE if it's present
