@@ -358,6 +358,7 @@ sub gen_class {
     $flags = "-t net -s 1" if $class eq "NET";
     $flags = "-M HTML_MESSAGE" if $class eq "HTML";
     $flags = "-o" if $class eq "OVERLAP";
+    $flags = "-S" if $class eq "SCOREMAP";
     if ($opt{rules_dir}) {
       $flags .= " -c '$opt{rules_dir}'";
     }

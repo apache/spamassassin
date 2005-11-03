@@ -29,6 +29,7 @@ our %freqs_filenames = (
     'NET.age' => 'set 1 (network), by message age in weeks',
     'NET.all' => 'set 1 (network), by contributor',
     'NET.new' => 'set 1 (network), in aggregate',
+    'SCOREMAP.new' => 'set 0, score-map',
     'OVERLAP.new' => 'set 0, overlaps between rules',
 );
 
@@ -58,6 +59,7 @@ if ($s{age} || $s{overlap} || $s{detail}) {
   $s{all} = 1;
   $s{new} = 1;
   $s{overlap} = 1;
+  $s{scoremap} = 1;
 }
 
 if (!grep { $_ } values %s) {
@@ -451,6 +453,7 @@ sub show_all_sets_for_daterev {
 
   # special case: we only build this for one set, as it's quite slow
   # to generate
+  $s{scoremap} and showfreqsubset("SCOREMAP.new", $strdate);
   $s{overlap} and showfreqsubset("OVERLAP.new", $strdate);
 }
 
@@ -542,6 +545,9 @@ sub read_freqs_file {
     }
     elsif (/MSEC/) {
       next;	# just ignored for now
+    }
+    elsif (/\s+scoremap (.*)$/) {
+      $freqs_data{$key}{$lastrule}{scoremap} .= $_;
     }
     elsif (/\s+overlap (.*)$/) {
       $freqs_data{$key}{$lastrule}{overlap} .= $_;
@@ -753,6 +759,16 @@ sub output_freqs_data_line {
     }, \$out) or die $ttk->error();
 
     $line_counter++;
+  }
+
+  # add scoremap using the EXTRA_TEMPLATE if it's present
+  if ($obj->{scoremap}) {
+    my $ovl = $obj->{scoremap} || '';
+    #   scoremap spam: 16  12.11%  777 ****
+
+    $ttk->process(\$EXTRA_TEMPLATE, {
+        EXTRA => $ovl,
+    }, \$out) or die $ttk->error();
   }
 
   # add overlap using the EXTRA_TEMPLATE if it's present
