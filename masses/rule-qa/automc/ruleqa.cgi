@@ -158,7 +158,7 @@ print q{<html><head>
     table.freqs {
       border: 1px dashed #ddb;
       background: #fff;
-      padding: 10px 20px 10px 20px;
+      padding: 10px 5px 10px 5px;
     }
     tr.freqshead {
       background: #ddd;
@@ -937,4 +937,5 @@ sub get_daterev_description {
 to install, add this line to httpd.conf:
 
   ScriptAlias /ruleqa "/path/to/spamassassin/automc/ruleqa.cgi"
+
 
