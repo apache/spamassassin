@@ -30,6 +30,11 @@ use File::Find;
 use File::Copy;
 use Getopt::Long;
 
+# use SpamAssassin classes directly, so we can lint rules
+# as we go
+use lib 'lib';
+use Mail::SpamAssassin;
+
 use vars qw(
     @opt_srcs $opt_out $opt_sandboxout $opt_manifest
     $opt_manifestskip
@@ -60,6 +65,7 @@ $opt_sandboxout ||= "70_sandbox.cf";
 my $needs_compile = { };
 my $current_src;
 
+
 foreach my $src (@opt_srcs) {
   if (!-d $src) {
     warn "WARNING: unreadable src '$src'\n";
@@ -86,9 +92,34 @@ my $seen_rules = { };
 my $renamed_rules = { };
 my $output_files = { };
 my $output_file_text = { };
+my $files_to_lint = { };
 
 compile_sorted($needs_compile);
+lint_output_files();
 write_output_files();
+
+sub lint_output_files {
+  foreach my $file (keys %{$files_to_lint}) {
+    my $text = $output_file_text->{file};
+    if (lint_rule_text($text) != 0) {
+      warn "\nERROR: LINT FAILED, suppressing output: $file\n\n";
+      delete $output_file_text->{$file};
+    }
+  }
+}
+
+sub lint_rule_text {
+  my ($text) = @_;
+  my $mailsa = Mail::SpamAssassin->new({
+      rules_filename => "./rules",
+      # debug => 1,
+      local_tests_only => 1,
+      dont_copy_prefs => 1,
+      config_text => $text
+  });
+  my $res = $mailsa->lint_rules();
+  return $res;       # 0 means good
+}
 
 exit;
 
@@ -343,9 +374,10 @@ sub rule_file_compile_sandbox {
       $output_file_text->{$pubfile} .= $text;
     }
 
+    $files_to_lint->{$pubfile} = 1;
+
     $copied++;
   }
-
   print "$f: $copied sandbox rules copied\n";
 
   # ok; file complete.  now mark all those rules as "seen"; future
@@ -428,7 +460,7 @@ sub write_output_files {
       open (OUT, ">".$pubfile) or die "cannot write to output file '$pubfile'";
       print OUT $output_file_text->{$pubfile};
       close OUT or die "cannot close output file '$pubfile'";
-      print "$pubfile: written\n";
+      # print "$pubfile: written\n";        # too noisy
     }
     else {
       print "$pubfile: no rules promoted\n";
