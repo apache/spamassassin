@@ -1743,7 +1743,7 @@ the start of a comment and not part of the regexp.
 If the C<[if-unset: STRING]> tag is present, then C<STRING> will
 be used if the header is not found in the mail message.
 
-Test names should not start with a number, and must contain only
+Test names must not start with a number, and must contain only
 alphanumerics and underscores.  It is suggested that lower-case characters
 not be used, and names have a length of no more than 22 characters,
 as an informal convention.  Dashes are not allowed.

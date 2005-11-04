@@ -533,13 +533,6 @@ sub set_default_scores {
   my ($k, $v);
 
   while ( ($k,$v) = each %{$conf->{tests}} ) {
-    if ($conf->{lint_rules}) {
-      if (length($k) > 50 && $k !~ /^__/ && $k !~ /^T_/) {
-        warn "config: warning: rule name '$k' is over 50 chars\n";
-        $conf->{errors}++;
-      }
-    }
-
     if ( ! exists $conf->{scores}->{$k} ) {
       # T_ rules (in a testing probationary period) get low, low scores
       my $set_score = ($k =~/^T_/) ? 0.01 : 1.0;
@@ -771,10 +764,30 @@ sub add_test {
   my $conf = $self->{conf};
 
   # Don't allow invalid names ...
-  if ($name !~ /^\w+$/) {
-    warn "config: error: rule '$name' has invalid characters (not Alphanumeric + Underscore)\n";
+  if ($name !~ /^\D\w*$/) {
+    warn "config: error: rule '$name' has invalid characters ".
+	   "(not Alphanumeric + Underscore + starting with a non-digit)\n";
     $conf->{errors}++;
     return;
+  }
+
+  # Also set a hard limit for ALL rules (rule names longer than 242
+  # characters throw warnings).  Check this separately from the above
+  # pattern to avoid vague error messages.
+  if (length $name > 200) {
+    warn "config: error: rule '$name' is way too long ".
+	   "(recommended maximum length is 22 characters)\n";
+    $conf->{errors}++;
+    return;
+  }
+
+  # Warn about, but use, long rule names during --lint
+  if ($conf->{lint_rules}) {
+    if (length($name) > 50 && $name !~ /^__/ && $name !~ /^T_/) {
+      warn "config: warning: rule name '$name' is over 50 chars ".
+	     "(recommended maximum length is 22 characters)\n";
+      $conf->{errors}++;
+    }
   }
 
   # all of these rule types are regexps
