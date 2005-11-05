@@ -42,6 +42,7 @@ options:
 use Cwd;
 use File::Path;
 use File::Find;
+use File::Basename;
 use Data::Dumper;
 
 my $DEBUG; #$DEBUG=1;
@@ -118,10 +119,12 @@ sub main {
 sub find_srcs {
   foreach my $src (@$srcs) {
     my $num_files;
+    my @mboxes = ();
+
     my $cb = sub {
       if (-f $_ && -r _) {
         if ($_ =~ /\.mbox/) {
-          $num_files += mbox_count($File::Find::name);
+         push @mboxes, $File::Find::name;
         } else {
           $num_files++;
         }
@@ -134,7 +137,13 @@ sub find_srcs {
     my $try_dir = "$src->{dir}/ham";
     if (-d $try_dir) {
       $num_files = 0;
+      @mboxes = ();
+
       File::Find::find($cb, $try_dir);
+
+      foreach my $mbox (@mboxes) {
+       $num_files += mbox_count($mbox);
+      }
       $src->{ham}{subdir} = $try_dir;
       $src->{ham}{num} = $num_files;
     }
@@ -142,7 +151,13 @@ sub find_srcs {
     $try_dir = "$src->{dir}/spam";
     if (-d $try_dir) {
       $num_files = 0;
+      @mboxes = ();
+
       File::Find::find($cb, $try_dir);
+
+      foreach my $mbox (@mboxes) {
+       $num_files += mbox_count($mbox);
+      }
       $src->{spam}{subdir} = $try_dir;
       $src->{spam}{num} = $num_files;
     }
@@ -230,7 +245,7 @@ sub _mklink {
       $files{$mtime} = [ ];
     }
     if ($_ =~ /\.mbox/) {
-      push(@{$files{$mtime}}, mbox_extract_all($File::Find::name));
+      push(@{$files{$mtime}}, mbox_extract_all($_));
     } else {
       push(@{$files{$mtime}}, $File::Find::name);
     }
@@ -244,7 +259,8 @@ sub _mklink {
   undef %files;     # no longer need that
 
   # @files is now sorted with the "youngest" files first.  check:
-  if (scalar @files && -M $files[0] > -M $files[-1]) {
+  if (scalar @files && $files[0] && $files[1] && -M $files[0] > -M $files[-1])
+  {
     warn "oops! files out of order, should be youngest first: ".
                     join(' ',@files);
   }
@@ -273,17 +289,17 @@ sub _mklink {
         $srcname = $cwd.'/'.$srcname;
       }
 
-      if (remove_from_poss_delete($dstname)) {
-        if (-l $dstname) {
-          my $link = readlink($dstname);
-          if ($link eq $srcname) {
-            dbg "  $srcname already linked to $dstname";
-            next;
-          }
-        }
+      remove_from_poss_delete($dstname);
 
+      if (-l $dstname) {
+       my $link = readlink($dstname);
+       if ($link eq $srcname) {
+         dbg "  $srcname already linked to $dstname";
+         next;
+       }
         unlink $dstname;
       }
+
       if (symlink($srcname, $dstname)) {
         dbg "  $srcname -> $dstname";
       } else {
@@ -348,11 +364,13 @@ sub remove_from_poss_delete {
 
 sub mbox_count {
   my ($mboxpath) = @_;
+  print "counting mbox: $mboxpath\n";
   return _mbox_extract_all($mboxpath, 1);
 }
 
 sub mbox_extract_all {
   my ($mboxpath) = @_;
+  print "extracting mbox: $mboxpath\n";
   return _mbox_extract_all($mboxpath, 0);
 }
 
@@ -371,6 +389,17 @@ sub _mbox_extract_all {
 
   open (INPUT, "<$mboxpath") or die "cannot read $mboxpath";
   binmode INPUT;
+
+  # get stat details for the input mbox
+  my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
+               $atime,$mtime,$ctime) = stat INPUT;
+
+  # assumption: get_mbox_name() uses the same dir for all offsets
+  my $newname = get_mbox_name ($mboxpath, 0);
+  my $dir = dirname ($newname);
+  if (!-d $dir) {
+    mkdir $dir or die "cannot mkdir $dir";
+  }
 
   my $start = 0;            # start of a message
   my $where = 0;            # current byte offset
@@ -391,28 +420,39 @@ sub _mbox_extract_all {
       }
       $where = tell INPUT;
 
-      if ($justcount) {
-        $counter++;
-      }
-      else {
-        my $newname = get_mbox_name ($mboxpath, $offset);
-        seek (INPUT, $offset, 0);
-        open (OUTPUT, ">$newname") or die "cannot write to $newname";
-        binmode OUTPUT;
+      $counter++;
 
-        my $past = 0;
-        while (<INPUT>) {
-          if ($past) {
-            last if substr($_,0,5) eq "From ";
-          } else {
-            $past = 1;
-          }
-          print OUTPUT;
-        }
+      if (!$justcount) {
+        $newname = get_mbox_name ($mboxpath, $offset);
 
-        close OUTPUT or die "failed to write to $newname";
-        push @created_files, $newname;
-        seek (INPUT, $where, 0);    # back to where we were
+       if (-f $newname && (-M _ >= -M INPUT)) {
+         # no need to recreate it, it's fresh
+       }
+       else {
+         seek (INPUT, $offset, 0);
+         open (OUTPUT, ">$newname") or die "cannot write to $newname";
+         binmode OUTPUT;
+
+         my $past = 0;
+         while (<INPUT>) {
+           if ($past) {
+             last if substr($_,0,5) eq "From ";
+           } else {
+             $past = 1;
+           }
+           print OUTPUT;
+         }
+
+         close OUTPUT or die "failed to write to $newname";
+
+         utime $atime, $mtime, $newname
+                         or warn "failed to touch $newname";
+
+         seek (INPUT, $where, 0);    # back to where we were
+       }
+
+       push @created_files, $newname;
+       remove_from_poss_delete($newname);
       }
     }
   }
@@ -422,6 +462,7 @@ sub _mbox_extract_all {
     return $counter;
   }
   else {
+    print "extracted: $mboxpath: $counter files\n";
     return @created_files;
   }
 }
@@ -433,7 +474,7 @@ sub get_mbox_name {
   $dstname =~ s/[^-_\.A-Za-z0-9]/_/gs;
   $dstname =~ s/_+/_/gs;
   $dstname =~ s/^_//gs;
-  $dstname = $mbox_work."/".$dstname.".OFF".$where;
+  $dstname = $mbox_work."/".$dstname."/OFF".$where;
   return $dstname;
 }
 
