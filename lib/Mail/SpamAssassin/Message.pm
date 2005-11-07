@@ -856,12 +856,12 @@ sub get_rendered_body_text_array {
   my $html_needs_setting = !exists $self->{metadata}->{html};
 
   # Go through each part
-  my $text = $self->get_header ('subject') || '';
+  my $text = $self->get_header ('subject') || "\n";
   for(my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
     my $p = $parts[$pt];
 
     # put a blank line between parts ...
-    $text .= "\n" if ( $text );
+    $text .= "\n";
 
     my($type, $rnd) = $p->rendered(); # decode this part
     if ( defined $rnd ) {
@@ -916,12 +916,12 @@ sub get_visible_rendered_body_text_array {
   my $html_needs_setting = !exists $self->{metadata}->{html};
 
   # Go through each part
-  my $text = $self->get_header ('subject') || '';
+  my $text = $self->get_header ('subject') || "\n";
   for(my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
     my $p = $parts[$pt];
 
     # put a blank line between parts ...
-    $text .= "\n" if ( $text );
+    $text .= "\n";
 
     my($type, $rnd) = $p->visible_rendered(); # decode this part
     if ( defined $rnd ) {
