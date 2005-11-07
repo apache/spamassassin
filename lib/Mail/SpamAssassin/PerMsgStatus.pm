@@ -2644,9 +2644,11 @@ sub run_eval_tests {
     # run
     $self->{current_rule_name} = $rulename;
 
+    $self->{main}->call_plugins("start_rules", { permsgstatus => $self, ruletype => "eval" });
     eval {
       $result = $self->$function(@args);
     };
+    $self->{main}->call_plugins("ran_rule", { permsgstatus => $self, ruletype => "eval", rulename => $rulename });
 
     if ($@) {
       warn "rules: failed to run $rulename test, skipping:\n" . "\t($@)\n";
@@ -2657,6 +2659,7 @@ sub run_eval_tests {
     if ($result) {
       $self->got_hit ($rulename, $prepend2desc);
       dbg("rules: ran eval rule $rulename ======> got hit") if $debugenabled;
+      $self->{main}->call_plugins("hit_rule", { permsgstatus => $self, ruletype => "eval", rulename => $rulename });
     }
     #else {
     #  dbg("rules: ran eval rule $rulename ======> no hit") if $debugenabled;
