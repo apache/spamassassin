@@ -55,6 +55,14 @@ if (!@opt_srcs) {
   }
 }
 
+if (!$opt_manifest && -f "MANIFEST") {
+  $opt_manifest = "MANIFEST";
+}
+
+if (!$opt_manifestskip && -f "MANIFEST.SKIP") {
+  $opt_manifestskip = "MANIFEST.SKIP";
+}
+
 die "no src" unless (@opt_srcs >= 1);
 die "no out" unless ($opt_out);
 die "unreadable out" unless (-d $opt_out);
