@@ -234,6 +234,30 @@ sub _check_spf {
     return;
   }
 
+  # make sure we're checking against the relay that passsed the mail to the internal network
+  my $lasttrusted = $scanner->{relays_trusted}->[-1];
+  if (defined $lasttrusted && $scanner->{conf}->{internal_networks}->get_num_nets() > 0 && !$lasttrusted->{internal}) {
+    dbg("spf: last trusted relay was marked as non-internal, cannot use first untrusted relay for spf checks");
+
+    # look for the relay that passed the message to the trusted & internal
+    # network from the trusted & external network
+    my $found = 0;
+    my $i = scalar @{$scanner->{relays_trusted}}; # - 1;
+    for (; $i > 0 && !$found; $i--) {
+      if ($scanner->{relays_trusted}->[$i-1]->{internal}) {
+	$lasthop = $scanner->{relays_trusted}->[$i];
+	$found = 1;
+      }
+    }
+
+    if ($found) {
+      dbg("spf: using first trusted, but non-internal, relay for spf checks");
+    } else {
+      dbg("spf: could not determine a suitable relay to do spf checks against");
+      return;
+    }
+  }
+
   my $ip = $lasthop->{ip};
   my $helo = $lasthop->{helo};
   $scanner->{sender} = '' unless $scanner->{sender_got};
