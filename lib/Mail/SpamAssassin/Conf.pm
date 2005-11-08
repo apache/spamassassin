@@ -2244,9 +2244,12 @@ not have any execute bits set (the umask is set to 111).
 
 =item bayes_store_module Name::Of::BayesStore::Module
 
-If this option is set, the module given will be used as an alternate to the
-default bayes storage mechanism.  It must conform to the published storage
-specification (see Mail::SpamAssassin::BayesStore).
+If this option is set, the module given will be used as an alternate
+to the default bayes storage mechanism.  It must conform to the
+published storage specification (see
+Mail::SpamAssassin::BayesStore). For example, set this to
+Mail::SpamAssassin::BayesStore::SQL to use the generic SQL storage
+module.
 
 =cut
 
