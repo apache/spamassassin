@@ -52,6 +52,7 @@ sub add_cidr {
   my $numadded = 0;
 
   foreach (@nets) {
+    my $exclude = s/^\s*!// ? 1 : 0;
     my ($ip, $bits) = m#^\s*([\d\.]+)(?:/(\d+))?\s*$#;
 
     my $err = "netset: illegal network address given: '$_'\n";
@@ -74,8 +75,9 @@ sub add_cidr {
     my $mask = 0xFFffFFff ^ ((2 ** (32-$bits)) - 1);
 
     push @{$self->{nets}}, {
-      mask => $mask,
-      ip   => Mail::SpamAssassin::Util::my_inet_aton($ip) & $mask
+      mask    => $mask,
+      exclude => $exclude,
+      ip      => Mail::SpamAssassin::Util::my_inet_aton($ip) & $mask
     };
     $numadded++;
   }
@@ -97,7 +99,7 @@ sub contains_ip {
 
   $ip = Mail::SpamAssassin::Util::my_inet_aton($ip);
   foreach my $net (@{$self->{nets}}) {
-    return 1 if (($ip & $net->{mask}) == $net->{ip});
+    return !$net->{exclude} if (($ip & $net->{mask}) == $net->{ip});
   }
   0;
 }
