@@ -32,7 +32,7 @@ foreach my $dr (@daterevs) {
   my $drdir = get_datadir_for_daterev($dr);
 
   # this one is always rebuilt.
-  print "$drdir/fastinfo.xml: creating...\n";
+  # print "$drdir/fastinfo.xml: creating...\n";
   my $fastinfo = get_fastinfo($dr, $drdir);
   open (OUT, ">$drdir/fastinfo.xml") or die "cannot write $drdir/fastinfo.xml";
   print OUT $fastinfo;
@@ -42,7 +42,7 @@ foreach my $dr (@daterevs) {
   # this one is only built if it doesn't already exist, because
   # it's quite expensive to build
   if (!$full_rebuild && -f "$drdir/info.xml" && -s _) {
-    print "$drdir/info.xml: good\n";
+    # print "$drdir/info.xml: good\n";
     next;
   }
 
