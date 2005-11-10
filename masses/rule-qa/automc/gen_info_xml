@@ -2,7 +2,7 @@
 my $automcdir = "/home/automc/svn/spamassassin/masses/rule-qa/automc";
 
 # need this to ensure that 'svn log' will include ALL changes
-my $svn_checkins_root = "$automcdir/../../..";
+my $svn_checkins_root = "http://svn.apache.org/repos/asf/spamassassin/";
 
 my $full_rebuild = 0;
 if ($ARGV[0] && $ARGV[0] =~ /^-f/) {
