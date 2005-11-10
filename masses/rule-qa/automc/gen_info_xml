@@ -4,6 +4,11 @@ my $automcdir = "/home/automc/svn/spamassassin/masses/rule-qa/automc";
 # need this to ensure that 'svn log' will include ALL changes
 my $svn_checkins_root = "$automcdir/../../..";
 
+my $full_rebuild = 0;
+if ($ARGV[0] && $ARGV[0] =~ /^-f/) {
+  $full_rebuild = 1;
+}
+
 use XML::Simple;
 
 use strict;
@@ -35,7 +40,7 @@ foreach my $dr (@daterevs) {
 
   # this one is only built if it doesn't already exist, because
   # it's quite expensive to build
-  if (-f "$drdir/info.xml" && -s _) {
+  if (!$full_rebuild && -f "$drdir/info.xml" && -s _) {
     print "$drdir/info.xml: good\n";
     next;
   }
