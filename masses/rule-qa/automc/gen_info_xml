@@ -37,6 +37,7 @@ foreach my $dr (@daterevs) {
   open (OUT, ">$drdir/fastinfo.xml") or die "cannot write $drdir/fastinfo.xml";
   print OUT $fastinfo;
   close OUT or die "failed to write to $drdir/fastinfo.xml";
+  chmod 0666, "$drdir/fastinfo.xml" or warn "failed to chmod $drdir/fastinfo.xml";
 
   # this one is only built if it doesn't already exist, because
   # it's quite expensive to build
@@ -50,6 +51,7 @@ foreach my $dr (@daterevs) {
   open (OUT, ">$drdir/info.xml") or die "cannot write $drdir/info.xml";
   print OUT $info;
   close OUT or die "failed to write to $drdir/info.xml";
+  chmod 0666, "$drdir/info.xml" or warn "failed to chmod $drdir/info.xml";
 }
 
 sub get_info {
