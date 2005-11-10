@@ -66,7 +66,7 @@ usage() unless $opt_rule;
 my $DEBUG_TMPDIR = 0;   # keep the tmpdir around after exiting, for debug
 
 # fix PATHs for sucky Solaris compatibility.
-$ENV{PATH} .= ":/local/gnuplot-4.0.0/bin:/opt/sfw/bin";
+$ENV{PATH} = "/local/gnuplot-4.0.0/bin:/opt/sfw/bin:".$ENV{PATH};
 $ENV{LD_LIBRARY_PATH} .= ":/local/gd-2.0.33/lib";
 
 my $rule_re = qr/[, ]${opt_rule}[, ]/;
