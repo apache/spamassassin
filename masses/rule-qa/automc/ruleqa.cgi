@@ -60,6 +60,7 @@ if ($s{age} || $s{overlap} || $s{detail}) {
   $s{new} = 1;
   $s{overlap} = 1;
   $s{scoremap} = 1;
+  $s{zero} = 1;
 }
 
 if (!grep { $_ } values %s) {
