@@ -7,10 +7,14 @@ use Getopt::Long;
 
 use vars qw(
     $corpusdir
+    $opt_override
 );
 GetOptions(
-    "dir=s" => \$corpusdir
+    "dir=s" => \$corpusdir,
+    "override=s" => \$opt_override,
 );
+
+$opt_override ||= '';
 
 
 use File::Path;
@@ -53,7 +57,11 @@ sub configure {
   # does rough equivalent of source
   open(C, $configuration) || die "open failed: $configuration: $!\n";
   my $pwd = getcwd;
-  while(<C>) {
+
+  # add 'override' options
+  my @lines = (<C>, split(/\|/, $opt_override));
+
+  foreach $_ (@lines) {
 	chomp;
 	s/#.*//;
 	if (/^\s*(.*?)\s*=\s*(.*?)\s*$/) {

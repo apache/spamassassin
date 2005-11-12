@@ -1,0 +1,75 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+sub run;
+
+# ---------------------------------------------------------------------------
+
+# by separating this into two processes, we can get the parent reports issued
+# immediately, and the slow reports can gronk away in the background
+
+# the parent process continually generates the faster reports
+my $parent_reports = "LOGS.all DETAILS.new DETAILS.all DETAILS.age ".
+  "HTML.new HTML.all HTML.age NET.new NET.all NET.age SCOREMAP.new";
+
+# the child process generates the slow reports
+my $child_reports = "OVERLAP.new";
+
+# ---------------------------------------------------------------------------
+
+my $am_parent;
+my $child_pid = fork();
+if ($child_pid < 0) {
+  die "fork failed";
+}
+elsif ($child_pid != 0) {
+  $am_parent = 0;
+}
+else {
+  $am_parent = 1;
+}
+
+$SIG{HUP} = \&sighup_handler;
+$SIG{TERM} = sub { kill(15, $child_pid); die "terminated"; };
+
+while (1) {
+  if ($am_parent) {
+    parent_loop();
+  }
+  else {
+    child_loop();
+  }
+}
+
+# ---------------------------------------------------------------------------
+
+sub parent_loop {
+  print "starting faster reports ($$) at ".(scalar localtime time)."\n";
+  system ("cd masses/rule-qa; ./corpus-hourly ".
+        "--override='output_classes=$parent_reports'");
+  print "completed faster reports ($$) at ".(scalar localtime time)."\n";
+
+  sleep 600;        # sleep until timeout, or we get SIGHUPped
+}
+
+# ---------------------------------------------------------------------------
+
+sub child_loop {
+  print "starting slow reports ($$) at ".(scalar localtime time)."\n";
+  system ("cd masses/rule-qa; ./corpus-hourly ".
+        "--override='output_classes=$child_reports'");
+  print "completed slow reports ($$) at ".(scalar localtime time)."\n";
+
+  sleep 600;        # sleep until timeout, or we get SIGHUPped
+}
+
+# ---------------------------------------------------------------------------
+
+sub sighup_handler {
+  warn "received SIGHUP at ".(scalar localtime time)."\n";
+  # this SIGHUP will interrupt a sleep() if one is in progress
+  if ($am_parent) { kill(1, $child_pid); } # pass it on
+}
+
+
