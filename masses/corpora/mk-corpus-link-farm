@@ -34,10 +34,15 @@ dest:
   -dest outputdir [-num num]
 
 options:
-  -most_recent:         select the most recent messages (default)
+  -most_recent:  select the most recent messages (default)
+  -after=N       only test mails received after time_t N (negative values
+                 are an offset from current time, e.g. -86400 = last day)
+                 or after date as parsed by Time::ParseDate (e.g. '-6 months')
 
 ";
 }
+
+use Time::ParseDate;
 
 use Cwd;
 use File::Path;
@@ -59,12 +64,11 @@ sub dbg;
 use Getopt::Long;
 use vars qw(
 
-  $opt_most_recent $opt_reuse
+  $opt_most_recent $opt_after $opt_before
 
 );
 
 $opt_most_recent = 0;
-$opt_reuse = 0;
 
 my $curdest;
 GetOptions(
@@ -84,11 +88,24 @@ GetOptions(
     },
 
     'most_recent' => \$opt_most_recent,
+    'before=s' => \$opt_before,
+    'after=s' => \$opt_after,
 ) or usage();
 
 foreach my $arg (@ARGV) {
   push (@$srcs, { dir => $arg });
 }
+
+# Deal with --before and --after
+foreach my $time ($opt_before, $opt_after) {
+  if ($time && $time =~ /^-\d+$/) {
+    $time = time + $time;
+  }
+  elsif ($time && $time !~ /^-?\d+$/) {
+    $time = Time::ParseDate::parsedate($time, GMT => 1, PREFER_PAST => 1);
+  }
+}
+
 
 # test data: $srcs = [ { dir => "/src1", ham => { dests => [ ], dir =>
 # "/src1/ham", num => 100 }, spam => { dests => [ ], dir => "/src1/spam", num
@@ -258,7 +275,11 @@ sub _mklink {
   my %files = ();
   File::Find::find(sub {
     return unless (-f $_ && -r _);    # not a file
-    my $mtime = (-M _);
+
+    my @stat = stat _;
+    my $mtime = $stat[9];
+    return unless message_is_useful_by_date($mtime);
+
     if (!exists $files{$mtime}) {
       $files{$mtime} = [ ];
     }
@@ -271,7 +292,7 @@ sub _mklink {
   }, $srcdir);
 
   my @files = ();
-  foreach my $key (sort { $a <=> $b } keys %files) {
+  foreach my $key (sort { $b <=> $a } keys %files) {
     push (@files, @{$files{$key}});
   }
   undef %files;     # no longer need that
@@ -423,6 +444,7 @@ sub _mbox_extract_all {
   my $start = 0;            # start of a message
   my $where = 0;            # current byte offset
   my $in_header = 0;        # are in we a header?
+  my $fromline;
   while (!eof INPUT) {
     my $offset = $start;    # byte offset of this message
     while (<INPUT>) {
@@ -435,43 +457,47 @@ sub _mbox_extract_all {
         $in_header = 1;
         $start = $where;
         $where = tell INPUT;
+        $fromline = $_;
         last;
       }
       $where = tell INPUT;
 
-      $counter++;
+      if (mbox_new_enough($fromline))
+      {
+        $counter++;
 
-      if (!$justcount) {
-        $newname = get_mbox_name ($mboxpath, $offset);
+        if (!$justcount) {
+          $newname = get_mbox_name ($mboxpath, $offset);
 
-        if (-f $newname && (-M _ >= -M INPUT)) {
-          # no need to recreate it, it's fresh
-        }
-        else {
-          seek (INPUT, $offset, 0);
-          open (OUTPUT, ">$newname") or die "cannot write to $newname";
-          binmode OUTPUT;
- 
-          my $past = 0;
-          while (<INPUT>) {
-            if ($past) {
-              last if substr($_,0,5) eq "From ";
-            } else {
-              $past = 1;
-            }
-            print OUTPUT;
+          if (-f $newname && (-M _ >= -M INPUT)) {
+            # no need to recreate it, it's fresh
           }
- 
-          close OUTPUT or die "failed to write to $newname";
- 
-          utime $atime, $mtime, $newname
-                          or warn "failed to touch $newname";
- 
-          seek (INPUT, $where, 0);    # back to where we were
+          else {
+            seek (INPUT, $offset, 0);
+            open (OUTPUT, ">$newname") or die "cannot write to $newname";
+            binmode OUTPUT;
+  
+            my $past = 0;
+            while (<INPUT>) {
+              if ($past) {
+                last if substr($_,0,5) eq "From ";
+              } else {
+                $past = 1;
+              }
+              print OUTPUT;
+            }
+  
+            close OUTPUT or die "failed to write to $newname";
+  
+            utime $atime, $mtime, $newname
+                            or warn "failed to touch $newname";
+  
+            seek (INPUT, $where, 0);    # back to where we were
+          }
+  
+          push @created_files, $newname;
+          remove_from_poss_delete($newname);
         }
- 
-        push @created_files, $newname;
-        remove_from_poss_delete($newname);
       }
     }
   }
@@ -497,11 +523,226 @@ sub get_mbox_name {
   return $dstname;
 }
 
+sub mbox_new_enough {
+  my ($fromline) = @_;
+
+  # From xscludshmkjgc@yahoo.com  Thu Apr 29 20:02:18 2004
+  $fromline .= " ".local_tz() unless $fromline =~ /(?:[-+]\d{4}|\b[A-Z]{2,4}\b)/;
+  my $time = first_date($fromline);
+  return $time;
+}
+
+sub message_is_useful_by_date {
+  my ($self, $date) = @_;
+
+  return 0 unless $date;        # undef or 0 date = unusable
+
+  if (!$opt_after && !$opt_before) {
+    # Not using the feature
+    return 1;
+  }
+  elsif (!$opt_before) {
+    # Just care about after
+    return $date > $opt_after;
+  }
+  else {
+    return (($date < $opt_before) && ($date > $opt_after));
+  }
+}
+
 sub dbg {
   return unless $DEBUG;
   warn "debug: ".join("", @_)."\n";
 }
 
+sub first_date {
+  my (@strings) = @_;
+
+  foreach my $string (@strings) {
+    my $time = parse_rfc822_date($string);
+    return $time if defined($time) && $time;
+  }
+  return undef;
+}
+
+###########################################################################
+
+# timezone mappings: in case of conflicts, use RFC 2822, then most
+# common and least conflicting mapping
+my %TZ = (
+	# standard
+	'UT'   => '+0000',
+	'UTC'  => '+0000',
+	# US and Canada
+	'NDT'  => '-0230',
+	'AST'  => '-0400',
+	'ADT'  => '-0300',
+	'NST'  => '-0330',
+	'EST'  => '-0500',
+	'EDT'  => '-0400',
+	'CST'  => '-0600',
+	'CDT'  => '-0500',
+	'MST'  => '-0700',
+	'MDT'  => '-0600',
+	'PST'  => '-0800',
+	'PDT'  => '-0700',
+	'HST'  => '-1000',
+	'AKST' => '-0900',
+	'AKDT' => '-0800',
+	'HADT' => '-0900',
+	'HAST' => '-1000',
+	# Europe
+	'GMT'  => '+0000',
+	'BST'  => '+0100',
+	'IST'  => '+0100',
+	'WET'  => '+0000',
+	'WEST' => '+0100',
+	'CET'  => '+0100',
+	'CEST' => '+0200',
+	'EET'  => '+0200',
+	'EEST' => '+0300',
+	'MSK'  => '+0300',
+	'MSD'  => '+0400',
+	'MET'  => '+0100',
+	'MEZ'  => '+0100',
+	'MEST' => '+0200',
+	'MESZ' => '+0200',
+	# South America
+	'BRST' => '-0200',
+	'BRT'  => '-0300',
+	# Australia
+	'AEST' => '+1000',
+	'AEDT' => '+1100',
+	'ACST' => '+0930',
+	'ACDT' => '+1030',
+	'AWST' => '+0800',
+	# New Zealand
+	'NZST' => '+1200',
+	'NZDT' => '+1300',
+	# Asia
+	'JST'  => '+0900',
+	'KST'  => '+0900',
+	'HKT'  => '+0800',
+	'SGT'  => '+0800',
+	'PHT'  => '+0800',
+	# Middle East
+	'IDT'  => '+0300',
+	);
+
+# month mappings
+my %MONTH = (jan => 1, feb => 2, mar => 3, apr => 4, may => 5, jun => 6,
+	     jul => 7, aug => 8, sep => 9, oct => 10, nov => 11, dec => 12);
+
+sub local_tz {
+  # standard method for determining local timezone
+  my $time = time;
+  my @g = gmtime($time);
+  my @t = localtime($time);
+  my $z = $t[1]-$g[1]+($t[2]-$g[2])*60+($t[7]-$g[7])*1440+($t[5]-$g[5])*525600;
+  return sprintf("%+.2d%.2d", $z/60, $z%60);
+}
+
+sub parse_rfc822_date {
+  my ($date) = @_;
+  local ($_);
+  my ($yyyy, $mmm, $dd, $hh, $mm, $ss, $mon, $tzoff);
+
+  # make it a bit easier to match
+  $_ = " $date "; s/, */ /gs; s/\s+/ /gs;
+
+  # now match it in parts.  Date part first:
+  if (s/ (\d+) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{4}) / /i) {
+    $dd = $1; $mon = lc($2); $yyyy = $3;
+  } elsif (s/ (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) +(\d+) \d+:\d+:\d+ (\d{4}) / /i) {
+    $dd = $2; $mon = lc($1); $yyyy = $3;
+  } elsif (s/ (\d+) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{2,3}) / /i) {
+    $dd = $1; $mon = lc($2); $yyyy = $3;
+  } else {
+    dbg("util: time cannot be parsed: $date");
+    return undef;
+  }
+
+  # handle two and three digit dates as specified by RFC 2822
+  if (defined $yyyy) {
+    if (length($yyyy) == 2 && $yyyy < 50) {
+      $yyyy += 2000;
+    }
+    elsif (length($yyyy) != 4) {
+      # three digit years and two digit years with values between 50 and 99
+      $yyyy += 1900;
+    }
+  }
+
+  # hh:mm:ss
+  if (s/ (\d?\d):(\d\d)(:(\d\d))? / /) {
+    $hh = $1; $mm = $2; $ss = $4 || 0;
+  }
+
+  # numeric timezones
+  if (s/ ([-+]\d{4}) / /) {
+    $tzoff = $1;
+  }
+  # common timezones
+  elsif (s/\b([A-Z]{2,4}(?:-DST)?)\b/ / && exists $TZ{$1}) {
+    $tzoff = $TZ{$1};
+  }
+  # all other timezones are considered equivalent to "-0000"
+  $tzoff ||= '-0000';
+
+  # months
+  if (exists $MONTH{$mon}) {
+    $mmm = $MONTH{$mon};
+  }
+
+  $hh ||= 0; $mm ||= 0; $ss ||= 0; $dd ||= 0; $mmm ||= 0; $yyyy ||= 0;
+
+  # Time::Local (v1.10 at least) throws warnings when the dates cause
+  # a 32-bit overflow.  So force a min/max for year.
+  if ($yyyy > 2037) {
+    dbg("util: date after supported range, forcing year to 2037: $date");
+    $yyyy = 2037;
+  }
+  elsif ($yyyy < 1970) {
+    dbg("util: date before supported range, forcing year to 1970: $date");
+    $yyyy = 1971;
+  }
+
+  my $time;
+  eval {		# could croak
+    $time = timegm($ss, $mm, $hh, $dd, $mmm-1, $yyyy);
+  };
+
+  if ($@) {
+    dbg("util: time cannot be parsed: $date, $yyyy-$mmm-$dd $hh:$mm:$ss");
+    return undef;
+  }
+
+  if ($tzoff =~ /([-+])(\d\d)(\d\d)$/)	# convert to seconds difference
+  {
+    $tzoff = (($2 * 60) + $3) * 60;
+    if ($1 eq '-') {
+      $time += $tzoff;
+    } else {
+      $time -= $tzoff;
+    }
+  }
+
+  return $time;
+}
+
+sub time_to_rfc822_date {
+  my($time) = @_;
+
+  my @days = qw/Sun Mon Tue Wed Thu Fri Sat/;
+  my @months = qw/Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec/;
+  my @localtime = localtime($time || time);
+  $localtime[5]+=1900;
+
+  sprintf("%s, %02d %s %4d %02d:%02d:%02d %s", $days[$localtime[6]], $localtime[3],
+    $months[$localtime[4]], @localtime[5,2,1,0], local_tz());
+}
+
+###########################################################################
 
 __DATA__
 
