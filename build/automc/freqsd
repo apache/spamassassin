@@ -2,7 +2,32 @@
 
 use strict;
 use warnings;
-sub run;
+
+use Getopt::Long;
+
+use vars qw(
+    $pidfile
+    $opt_wake
+);
+GetOptions(
+    "pidfile=s" => \$pidfile,
+    "wake" => \$opt_wake,
+);
+
+if ($opt_wake) {
+  die "wake needs pidfile" if (!$pidfile);
+  open(IN, "<$pidfile") or die "cannot read $pidfile";
+  my $pid = <IN> + 0;
+  close IN;
+
+  if ($pid <= 1) {
+    die "pid out of range: $pid";
+  }
+
+  kill (1,$pid) or die "kill -1 $pid failed";
+  print "signalled $pid\n";
+  exit;
+}
 
 # ---------------------------------------------------------------------------
 
@@ -15,6 +40,9 @@ my $parent_reports = "LOGS.all DETAILS.new DETAILS.all DETAILS.age ".
 
 # the child process generates the slow reports
 my $child_reports = "OVERLAP.new";
+
+# seconds between build-polls
+my $idle_sleep = 30;
 
 # ---------------------------------------------------------------------------
 
@@ -31,7 +59,14 @@ else {
 }
 
 $SIG{HUP} = \&sighup_handler;
-$SIG{TERM} = sub { kill(15, $child_pid); die "terminated"; };
+$SIG{INT} = \&sigterm_handler;
+$SIG{TERM} = \&sigterm_handler;
+
+if ($pidfile) {
+  open(OUT, ">$pidfile") or die "cannot write to $pidfile";
+  print OUT $$;
+  close OUT or die "cannot save $pidfile";
+}
 
 while (1) {
   if ($am_parent) {
@@ -50,7 +85,7 @@ sub parent_loop {
         "--override='output_classes=$parent_reports'");
   print "completed faster reports ($$) at ".(scalar localtime time)."\n";
 
-  sleep 600;        # sleep until timeout, or we get SIGHUPped
+  sleep $idle_sleep;        # sleep until timeout, or we get SIGHUPped
 }
 
 # ---------------------------------------------------------------------------
@@ -61,7 +96,7 @@ sub child_loop {
         "--override='output_classes=$child_reports'");
   print "completed slow reports ($$) at ".(scalar localtime time)."\n";
 
-  sleep 600;        # sleep until timeout, or we get SIGHUPped
+  sleep $idle_sleep;        # sleep until timeout, or we get SIGHUPped
 }
 
 # ---------------------------------------------------------------------------
@@ -70,6 +105,15 @@ sub sighup_handler {
   warn "received SIGHUP at ".(scalar localtime time)."\n";
   # this SIGHUP will interrupt a sleep() if one is in progress
   if ($am_parent) { kill(1, $child_pid); } # pass it on
+}
+
+# ---------------------------------------------------------------------------
+
+sub sigterm_handler {
+  warn "received SIGTERM at ".(scalar localtime time)."\n";
+  kill(15, $child_pid);
+  if ($pidfile) { unlink($pidfile); }
+  die "terminated";
 }
 
 
