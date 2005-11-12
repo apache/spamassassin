@@ -44,6 +44,7 @@ use File::Path;
 use File::Find;
 use File::Basename;
 use Data::Dumper;
+use SDBM_File;
 
 my $DEBUG; #$DEBUG=1;
 
@@ -96,7 +97,12 @@ foreach my $arg (@ARGV) {
 # { dests => [ ], dir => "/src3/spam", num => 500 }, } ];
 
 my $cwd = cwd();
-my $poss_delete = { };
+
+# use an on-disk file -- this list can get pretty big!
+my $poss_del_path = "$mbox_tmpdir/dels.$$";
+tie(%h, 'SDBM_File', $poss_del_path, O_RDWR|O_CREAT, 0600)
+    or die "Couldn't tie SDBM file $poss_del_path: $!; aborting";
+my $poss_delete = \%h;
 
 my $mbox_work = "$mbox_tmpdir/mboxes.d";
 if (-d $mbox_work) {
@@ -104,6 +110,10 @@ if (-d $mbox_work) {
 }
 
 main();
+
+unlink $poss_del_path;
+unlink "$poss_del_path.dir";
+unlink "$poss_del_path.pag";
 exit;
 
 
