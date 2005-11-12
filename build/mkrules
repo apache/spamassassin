@@ -242,7 +242,8 @@ sub rule_file_compile_sandbox {
   # another "fake name" for lines that should always be published, to an
   # output file with the same name as the input file.
   my $ALWAYS_PUBLISH = '!always_publish!';
-  $rules->{$ALWAYS_PUBLISH} = { text => '', publish => 0 };
+  $rules->{$ALWAYS_PUBLISH} = rule_entry_create();
+  my %ALWAYS = ( $ALWAYS_PUBLISH => 1 );
 
   # an "ifplugin" or "if" scope
   my $current_conditional;
@@ -334,8 +335,18 @@ sub rule_file_compile_sandbox {
       undef $current_conditional;
     }
     else {
+      my $NAME = $ALWAYS_PUBLISH;
+      if ($current_conditional) {
+        $NAME .= $current_conditional . '!';
+        unless ($rules->{$NAME}) {
+	  $rules->{$NAME} = rule_entry_create();
+	  $ALWAYS{$NAME} = 1;
+	}
+	$rules->{$NAME}->{cond} = $current_conditional;
+      }
+
       # warn "unknown line in rules file '$f', saving to default: $orig";
-      $rules->{$ALWAYS_PUBLISH}->{text} .= $orig;
+      $rules->{$NAME}->{text} .= $orig;
     }
   }
   close IN;
@@ -343,7 +354,7 @@ sub rule_file_compile_sandbox {
   # now append all the found text to the output file buffers
   my %already_done = ();
   my $copied = 0;
-  foreach my $name ($ALWAYS_PUBLISH, @$rule_order)
+  foreach my $name (@$rule_order, keys(%ALWAYS))
   {
     # only do each rule once, please ;)
     next if exists $already_done{$name};
