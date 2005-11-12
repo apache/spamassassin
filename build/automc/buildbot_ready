@@ -86,7 +86,15 @@ sub do_stop {
   print "FAST FREQS REPORT:\n\n";
   system ("$perl hit-frequencies -c tstrules -x -p -T -s 0");
 
-  print "\n\nBUILDING SLOW FREQS REPORT:\n\n";
+  use POSIX qw(strftime);
+  my $daterev = strftime("%Y%m%d", gmtime(time)) . "-r$rev";
+  print qq{
+
+BUILDING SLOW FREQS REPORT:
+
+    http://buildbot.spamassassin.org/ruleqa?daterev=$daterev
+
+  };
 
   my $logdir = "/home/bbmass/tmp/logs-r$rev";
   if (!-d $logdir) {
@@ -95,26 +103,18 @@ sub do_stop {
   run ("mv ham.log $logdir/ham-$slave.log");
   run ("mv spam.log $logdir/spam-$slave.log");
 
-  # ensure they're readable
+  # ensure those log files are readable by the freqsd
   run ("chmod 755 $logdir");
   run ("chmod 644 $logdir/ham-$slave.log $logdir/spam-$slave.log");
 
-  # enqueue a request with the report-generation daemon
+  # run our fast report generator
+  $ENV{HOME} = '/home/bbmass';
+  umask(022);
+  run ("./rule-qa/corpus-hourly --dir $logdir");
+  run ("./rule-qa/automc/gen_info_xml");
+
+  # enqueue a request for the slow stuff with the report-generation daemon
   run ("../build/automc/freqsd --enq $logdir");
-
-  use POSIX qw(strftime);
-  my $daterev = strftime("%Y%m%d", gmtime(time)) . "-r$rev";
-  print qq{
-    Reports will become visible at:
-
-    http://buildbot.spamassassin.org/ruleqa?daterev=$daterev
-
-  };
-
-  # $ENV{HOME} = '/home/bbmass';
-  # umask(022);
-  # run ("./rule-qa/corpus-hourly --dir $logdir");
-  # run ("./rule-qa/automc/gen_info_xml");
 }
 
 # ---------------------------------------------------------------------------
