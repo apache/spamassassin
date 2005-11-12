@@ -19,8 +19,8 @@ my $dq_fast = IPC::DirQueue->new({ dir => "/home/automc/freqsd/dq_fast" });
 my $dq_slow = IPC::DirQueue->new({ dir => "/home/automc/freqsd/dq_slow" });
 $pidfile ||= "/home/automc/freqsd/pid";
 
-$ENV{HOME} = '/home/bbmass';
-umask(022);
+# $ENV{HOME} = '/home/bbmass';
+umask(002);
 
 # ---------------------------------------------------------------------------
 
