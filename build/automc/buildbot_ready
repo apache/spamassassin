@@ -95,12 +95,13 @@ sub do_stop {
   run ("mv ham.log $logdir/ham-$slave.log");
   run ("mv spam.log $logdir/spam-$slave.log");
 
-  # now, generate the reports
-  $ENV{HOME} = '/home/bbmass';
-  umask(022);
+  # enqueue a request with the report-generation daemon
+  run ("../build/automc/freqsd --enq $logdir");
 
-  run ("./rule-qa/corpus-hourly --dir $logdir");
-  run ("./rule-qa/automc/gen_info_xml");
+  # $ENV{HOME} = '/home/bbmass';
+  # umask(022);
+  # run ("./rule-qa/corpus-hourly --dir $logdir");
+  # run ("./rule-qa/automc/gen_info_xml");
 }
 
 # ---------------------------------------------------------------------------
@@ -108,10 +109,15 @@ sub do_stop {
 sub get_current_svn_revision {
   open (SVNINFO, "(svn info --non-interactive || svn info) < /dev/null 2>&1 |");
 
+  # note: use 'Last Changed Rev' instead of 'Revision'.  Because we share
+  # an SVN repository with other projects, this means that the same
+  # rev of *our* codebase may appear under multiple rev#s, as other projects
+  # check their changes in.
+
   my $revision;
   while (<SVNINFO>) {
-    # Revision: 320871
-    next unless /^Revision: (\d+)/;
+    # Last Changed Rev: 332684
+    next unless /^Last Changed Rev: (\d+)/;
     $revision = $1;
     last;
   }

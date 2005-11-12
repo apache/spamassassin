@@ -690,8 +690,8 @@ sub get_current_svn_revision {
     }
 
     while (<SVNINFO>) {
-      # Revision: 320871
-      next unless /^Revision: (\d+)/;
+      # Last Changed Rev: 320871
+      next unless /^Last Changed Rev: (\d+)/;
       $revision = $1;
       last;
     }

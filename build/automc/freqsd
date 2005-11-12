@@ -4,35 +4,29 @@ use strict;
 use warnings;
 
 use Getopt::Long;
+use IPC::DirQueue;
 
 use vars qw(
     $pidfile
-    $opt_wake
+    $opt_enq
 );
 GetOptions(
     "pidfile=s" => \$pidfile,
-    "wake" => \$opt_wake,
+    "enq=s" => \$opt_enq,
 );
 
-if ($opt_wake) {
-  die "wake needs pidfile" if (!$pidfile);
-  open(IN, "<$pidfile") or die "cannot read $pidfile";
-  my $pid = <IN> + 0;
-  close IN;
+my $dq_fast = IPC::DirQueue->new({ dir => "/home/automc/freqsd/dq_fast" });
+my $dq_slow = IPC::DirQueue->new({ dir => "/home/automc/freqsd/dq_slow" });
+$pidfile ||= "/home/automc/freqsd/pid";
 
-  if ($pid <= 1) {
-    die "pid out of range: $pid";
-  }
-
-  kill (1,$pid) or die "kill -1 $pid failed";
-  print "signalled $pid\n";
-  exit;
-}
+$ENV{HOME} = '/home/bbmass';
+umask(022);
 
 # ---------------------------------------------------------------------------
 
 # by separating this into two processes, we can get the parent reports issued
-# immediately, and the slow reports can gronk away in the background
+# immediately, and the slow reports can gronk away in the background.
+# by using IPC::DirQueue,
 
 # the parent process continually generates the faster reports
 my $parent_reports = "LOGS.all DETAILS.new DETAILS.all DETAILS.age ".
@@ -46,6 +40,15 @@ my $idle_sleep = 30;
 
 # ---------------------------------------------------------------------------
 
+if ($opt_enq) {
+  $dq_fast->enqueue_string("", { dir => $opt_enq });
+  $dq_slow->enqueue_string("", { dir => $opt_enq });
+  exit;
+}
+
+# ---------------------------------------------------------------------------
+
+sub run;
 my $am_parent;
 my $child_pid = fork();
 if ($child_pid < 0) {
@@ -58,7 +61,6 @@ else {
   $am_parent = 1;
 }
 
-$SIG{HUP} = \&sighup_handler;
 $SIG{INT} = \&sigterm_handler;
 $SIG{TERM} = \&sigterm_handler;
 
@@ -68,11 +70,13 @@ if ($pidfile) {
   close OUT or die "cannot save $pidfile";
 }
 
-while (1) {
-  if ($am_parent) {
+if ($am_parent) {
+  while (1) {
     parent_loop();
   }
-  else {
+}
+else {
+  while (1) {
     child_loop();
   }
 }
@@ -80,31 +84,49 @@ while (1) {
 # ---------------------------------------------------------------------------
 
 sub parent_loop {
+  my $job = $dq_fast->wait_for_queued_job($idle_sleep);
+
   print "starting faster reports ($$) at ".(scalar localtime time)."\n";
-  system ("cd masses/rule-qa; ./corpus-hourly ".
-        "--override='output_classes=$parent_reports'");
+
+  # add optional --dir switch
+  my $logdir = '';
+  if ($job->{metadata}->{dir}) {
+    $logdir = "--dir ".$job->{metadata}->{dir};
+  }
+
+  run ("cd masses/rule-qa ; ./corpus-hourly ".
+        "--override='output_classes=$parent_reports' ".
+        "$logdir");
+
+  run ("cd masses ; ./rule-qa/automc/gen_info_xml");
+
   print "completed faster reports ($$) at ".(scalar localtime time)."\n";
 
-  sleep $idle_sleep;        # sleep until timeout, or we get SIGHUPped
+  if ($job) {
+    $job->finish();
+  }
 }
 
 # ---------------------------------------------------------------------------
 
 sub child_loop {
+  my $job = $dq_fast->wait_for_queued_job($idle_sleep);
+
   print "starting slow reports ($$) at ".(scalar localtime time)."\n";
-  system ("cd masses/rule-qa; ./corpus-hourly ".
-        "--override='output_classes=$child_reports'");
+
+  # add optional --dir switch
+  my $logdir = '';
+  if ($job->{metadata}->{dir}) {
+    $logdir = "--dir ".$job->{metadata}->{dir};
+  }
+
+  run ("cd masses/rule-qa; ./corpus-hourly ".
+        "--override='output_classes=$child_reports' ".
+        "$logdir");
+
   print "completed slow reports ($$) at ".(scalar localtime time)."\n";
 
   sleep $idle_sleep;        # sleep until timeout, or we get SIGHUPped
-}
-
-# ---------------------------------------------------------------------------
-
-sub sighup_handler {
-  warn "received SIGHUP at ".(scalar localtime time)."\n";
-  # this SIGHUP will interrupt a sleep() if one is in progress
-  if ($am_parent) { kill(1, $child_pid); } # pass it on
 }
 
 # ---------------------------------------------------------------------------
@@ -116,4 +138,16 @@ sub sigterm_handler {
   die "terminated";
 }
 
+# ---------------------------------------------------------------------------
+
+sub run {
+  my ($cmd, $ignoreexit) = @_;
+
+  print "[$cmd]\n";
+  system ($cmd);
+
+  if (!$ignoreexit) {
+    die "command '$cmd' failed with status $?" if (($? >> 8) != 0);
+  }
+}
 
