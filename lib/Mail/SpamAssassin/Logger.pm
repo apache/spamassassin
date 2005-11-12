@@ -140,8 +140,17 @@ sub log_message {
   # return unless $message[0] =~ /^\S+:/;
   # }
 
-  # dos: don't log alarm timeouts or broken pipes of various plugins' network checks
-  return if ($level eq "error" && $message[0] =~ /__(?:alarm|brokenpipe)__ignore__/);
+  if ($level eq "error") {
+    # don't log alarm timeouts or broken pipes of various plugins' network checks
+    return if ($message[0] =~ /__(?:alarm|brokenpipe)__ignore__/);
+
+    # dos: we can safely ignore any die's that we eval'd in our own modules so
+    # don't log them -- this is caller 0, the use'ing package is 1, the eval is 2
+    my @caller = caller 2;
+    return if (defined $caller[3] && defined $caller[0] &&
+		       $caller[3] =~ /^\(eval\)$/ &&
+		       $caller[0] =~ m#^Mail::SpamAssassin(?:$|::)#);
+  }
 
   my $message = join(" ", @message);
   $message =~ s/[\r\n]+$//;		# remove any trailing newlines
