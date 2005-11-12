@@ -54,7 +54,7 @@ use Data::Dumper;
 use SDBM_File;
 use Fcntl;
 
-my $DEBUG; $DEBUG=1;
+my $DEBUG; # $DEBUG=1;
 
 my @classes = qw(ham spam);
 my $srcs = [ ];
@@ -575,6 +575,7 @@ sub first_date {
 
 my %TZ;
 my %MONTH;
+my $LOCALTZ;
 
 sub tz_init {
 
@@ -647,12 +648,15 @@ sub tz_init {
 }
 
 sub local_tz {
+  return $LOCALTZ if defined($LOCALTZ);
+
   # standard method for determining local timezone
   my $time = time;
   my @g = gmtime($time);
   my @t = localtime($time);
   my $z = $t[1]-$g[1]+($t[2]-$g[2])*60+($t[7]-$g[7])*1440+($t[5]-$g[5])*525600;
-  return sprintf("%+.2d%.2d", $z/60, $z%60);
+  $LOCALTZ = sprintf("%+.2d%.2d", $z/60, $z%60);
+  return $LOCALTZ;
 }
 
 sub parse_rfc822_date {

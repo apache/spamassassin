@@ -350,13 +350,18 @@ my %TZ = (
 my %MONTH = (jan => 1, feb => 2, mar => 3, apr => 4, may => 5, jun => 6,
 	     jul => 7, aug => 8, sep => 9, oct => 10, nov => 11, dec => 12);
 
+my $LOCALTZ;
+
 sub local_tz {
+  return $LOCALTZ if defined($LOCALTZ);
+
   # standard method for determining local timezone
   my $time = time;
   my @g = gmtime($time);
   my @t = localtime($time);
   my $z = $t[1]-$g[1]+($t[2]-$g[2])*60+($t[7]-$g[7])*1440+($t[5]-$g[5])*525600;
-  return sprintf("%+.2d%.2d", $z/60, $z%60);
+  $LOCALTZ = sprintf("%+.2d%.2d", $z/60, $z%60);
+  return $LOCALTZ;
 }
 
 sub parse_rfc822_date {
