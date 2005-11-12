@@ -95,8 +95,20 @@ sub do_stop {
   run ("mv ham.log $logdir/ham-$slave.log");
   run ("mv spam.log $logdir/spam-$slave.log");
 
+  # ensure they're readable
+  run ("chmod 755 $logdir");
+  run ("chmod 644 $logdir/ham-$slave.log $logdir/spam-$slave.log");
+
   # enqueue a request with the report-generation daemon
   run ("../build/automc/freqsd --enq $logdir");
+
+  my $daterev = strftime("%Y%m%d", gmtime($time)) . "-r$rev";
+  print qq{
+    Reports will become visible at:
+
+    http://buildbot.spamassassin.org/ruleqa?daterev=$daterev
+
+  };
 
   # $ENV{HOME} = '/home/bbmass';
   # umask(022);
