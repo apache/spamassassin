@@ -108,7 +108,7 @@ write_output_files();
 
 sub lint_output_files {
   foreach my $file (keys %{$files_to_lint}) {
-    my $text = $output_file_text->{file};
+    my $text = $output_file_text->{$file};
     if (lint_rule_text($text) != 0) {
       warn "\nERROR: LINT FAILED, suppressing output: $file\n\n";
       delete $output_file_text->{$file};
