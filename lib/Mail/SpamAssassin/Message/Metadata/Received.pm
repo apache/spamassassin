@@ -361,17 +361,24 @@ sub parse_received_line {
   }
 
   # try to catch authenticated message identifier
-  # the first one works for Sendmail, MDaemon, some webmail servers, and others
-  # the second one works for Critical Path Messaging Server
+  #
   # with ESMTPA, ESMTPSA, LMTPA, LMTPSA should cover RFC 3848 compliant MTAs
   # with ASMTP (Authenticated SMTP) is used by Earthlink, Exim 4.34, and others
   # with HTTP should only be authenticated webmail sessions
-  if (/^from .*?(?:\]\)|\)\]) .*?\(.*?authenticated.*?\).*? by/) {
-    $auth = 'Sendmail';
-  } elsif (/\) by .+ \(\d{1,2}\.\d\.\d{3}(?:\.\d{1,3})?\) \(authenticated as .+\) id /) {
-    $auth = 'CriticalPath';
-  } elsif (/ by .*? with (ESMTPA|ESMTPSA|LMTPA|LMTPSA|ASMTP|HTTP)\;? /i) {
+  if (/ by .*? with (ESMTPA|ESMTPSA|LMTPA|LMTPSA|ASMTP|HTTP)\;? /i) {
     $auth = $1;
+  }
+  # Courier v0.47 and possibly others
+  elsif (/^from .*?(?:\]\)|\)\])\s+\(AUTH: (LOGIN|PLAIN|DIGEST-MD5|CRAM-MD5) \S+(?:, .*?)?\)\s+by\s+/) {
+    $auth = $1;
+  }
+  # Sendmail, MDaemon, some webmail servers, and others
+  elsif (/^from .*?(?:\]\)|\)\]) .*?\(.*?authenticated.*?\).*? by/) {
+    $auth = 'Sendmail';
+  }
+  # Critical Path Messaging Server
+  elsif (/\) by .+ \(\d{1,2}\.\d\.\d{3}(?:\.\d{1,3})?\) \(authenticated as .+\) id /) {
+    $auth = 'CriticalPath';
   }
 
   if (/^from /) {

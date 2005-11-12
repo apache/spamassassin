@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rcvd_parser");
-use Test; BEGIN { plan tests => 43 };
+use Test; BEGIN { plan tests => 44 };
 
 
 use strict;
@@ -262,7 +262,7 @@ Received: from a1200 ([24.83.2.7])
 
 } => q{
 
-[ ip=66.199.2.3 rdns= helo=bigass1.example.com by=slim1.example.com ident= envfrom= id= auth= ] [ ip=24.83.2.4 rdns= helo=a1200 by=bigass1.example.com ident= envfrom= id= auth= ] [ ip=66.199.2.5 rdns=ns1.example.com helo=bigass1.example.com by=fiat.example.edu ident= envfrom= id=i06MBJ6U020255 auth= ] [ ip=24.83.2.6 rdns= helo=a1200 by=bigass1.example.com ident= envfrom= id= auth= ] [ ip=24.83.2.7 rdns= helo=a1200 by=bigass1.example.com ident= envfrom= id= auth= ]
+[ ip=66.199.2.3 rdns= helo=bigass1.example.com by=slim1.example.com ident= envfrom= id= auth= ] [ ip=24.83.2.4 rdns= helo=a1200 by=bigass1.example.com ident= envfrom= id= auth=LOGIN ] [ ip=66.199.2.5 rdns=ns1.example.com helo=bigass1.example.com by=fiat.example.edu ident= envfrom= id=i06MBJ6U020255 auth= ] [ ip=24.83.2.6 rdns= helo=a1200 by=bigass1.example.com ident= envfrom= id= auth=LOGIN ] [ ip=24.83.2.7 rdns= helo=a1200 by=bigass1.example.com ident= envfrom= id= auth=LOGIN ]
 
 },
 q{
@@ -554,8 +554,19 @@ Received: from bgp01132961bgs.ypeast01.mi.comcast.net ([68.42.119.201] helo=moon
  
   [ ip=84.131.183.192 rdns=p5483b7c0.dip.t-dialin.net helo=192.168.1.23 by=moonflower.de ident= envfrom= id=1CIoQP-0006SN-GV auth=asmtp ] [ ip=68.42.119.201 rdns=bgp01132961bgs.ypeast01.mi.comcast.net helo=moonweaver.home.awesomeplay.com by=outbound.mailhop.org ident= envfrom= id=1CJic5-00067m-U7 auth=esmtpsa ]
 
-  
 },
+q{
+
+Received: from gorkcomputer (my.dns.com [1.2.3.4])
+  (AUTH: LOGIN gork@mydomain.com, SSL: TLSv1/SSLv3,128bits,RC4-MD5)
+  by mydomain.com with esmtp; Thu, 10 Nov 2005 08:24:21 -0600
+  id 000000DB.43735815.00001E11
+
+} => q{
+
+  [ ip=1.2.3.4 rdns=my.dns.com helo=gorkcomputer by=mydomain.com ident= envfrom= id=000000DB.43735815.00001E11 auth=LOGIN ]
+
+}
 );
 
 tstprefs ("add_header all Relays _RELAYSUNTRUSTED_ _RELAYSTRUSTED_\n");
