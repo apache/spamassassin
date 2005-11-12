@@ -7,6 +7,10 @@ start() {
 
     cd /home/automc/svn/spamassassin
     rm /home/automc/freqsd/log
+
+    HOME=/home/automc
+    export HOME
+
     su automc -c "./build/automc/freqsd" \
 	> /home/automc/freqsd/log 2>&1 \
 	< /dev/null &
