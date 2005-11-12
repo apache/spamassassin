@@ -11,7 +11,9 @@ cd /home/bbmass/rawcor
 date
 
 TMPDIR=/home/bbmass/tmpfs/tmp \
+  /local/perl586/bin/perl \
   $SADIR/masses/corpora/mk-corpus-link-farm \
+          -after="4 months ago" \
           -dest /home/bbmass/tmpfs/cor/mc-fast -num 1000 \
           -dest /home/bbmass/tmpfs/cor/mc-med -num 5000 \
           -dest /home/bbmass/tmpfs/cor/mc-slow -num 10000 \
