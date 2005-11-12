@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/local/perl586/bin/perl
 
 use strict;
 use warnings;
@@ -70,6 +70,9 @@ if ($pidfile) {
   close OUT or die "cannot save $pidfile";
 }
 
+$| = 1;
+print "freqsd starting: process $$\n";
+
 if ($am_parent) {
   while (1) {
     parent_loop();
@@ -90,7 +93,7 @@ sub parent_loop {
 
   # add optional --dir switch
   my $logdir = '';
-  if ($job->{metadata}->{dir}) {
+  if ($job && $job->{metadata}->{dir}) {
     $logdir = "--dir ".$job->{metadata}->{dir};
   }
 
@@ -116,7 +119,7 @@ sub child_loop {
 
   # add optional --dir switch
   my $logdir = '';
-  if ($job->{metadata}->{dir}) {
+  if ($job && $job->{metadata}->{dir}) {
     $logdir = "--dir ".$job->{metadata}->{dir};
   }
 
@@ -126,7 +129,9 @@ sub child_loop {
 
   print "completed slow reports ($$) at ".(scalar localtime time)."\n";
 
-  sleep $idle_sleep;        # sleep until timeout, or we get SIGHUPped
+  if ($job) {
+    $job->finish();
+  }
 }
 
 # ---------------------------------------------------------------------------

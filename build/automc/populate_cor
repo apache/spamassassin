@@ -10,7 +10,7 @@ SADIR=/home/automc/svn/spamassassin
 cd /home/bbmass/rawcor
 date
 
-TMPDIR=/home/bbmass/tmp \
+TMPDIR=/home/bbmass/tmpfs/tmp \
   $SADIR/masses/corpora/mk-corpus-link-farm \
           -dest /home/bbmass/tmpfs/cor/mc-fast -num 1000 \
           -dest /home/bbmass/tmpfs/cor/mc-med -num 5000 \
