@@ -43,6 +43,8 @@ options:
 }
 
 use Time::ParseDate;
+use Time::Local;
+
 
 use Cwd;
 use File::Path;
@@ -52,7 +54,7 @@ use Data::Dumper;
 use SDBM_File;
 use Fcntl;
 
-my $DEBUG; #$DEBUG=1;
+my $DEBUG; $DEBUG=1;
 
 my @classes = qw(ham spam);
 my $srcs = [ ];
@@ -69,6 +71,7 @@ use vars qw(
 );
 
 $opt_most_recent = 0;
+tz_init();
 
 my $curdest;
 GetOptions(
@@ -527,13 +530,16 @@ sub mbox_new_enough {
   my ($fromline) = @_;
 
   # From xscludshmkjgc@yahoo.com  Thu Apr 29 20:02:18 2004
+  return unless ($fromline =~ /^From \S+  (.*)$/);
+
+  $fromline = $1;
   $fromline .= " ".local_tz() unless $fromline =~ /(?:[-+]\d{4}|\b[A-Z]{2,4}\b)/;
   my $time = first_date($fromline);
-  return $time;
+  return message_is_useful_by_date($time);
 }
 
 sub message_is_useful_by_date {
-  my ($self, $date) = @_;
+  my ($date) = @_;
 
   return 0 unless $date;        # undef or 0 date = unusable
 
@@ -567,9 +573,14 @@ sub first_date {
 
 ###########################################################################
 
+my %TZ;
+my %MONTH;
+
+sub tz_init {
+
 # timezone mappings: in case of conflicts, use RFC 2822, then most
 # common and least conflicting mapping
-my %TZ = (
+%TZ = (
 	# standard
 	'UT'   => '+0000',
 	'UTC'  => '+0000',
@@ -630,8 +641,10 @@ my %TZ = (
 	);
 
 # month mappings
-my %MONTH = (jan => 1, feb => 2, mar => 3, apr => 4, may => 5, jun => 6,
+%MONTH = (jan => 1, feb => 2, mar => 3, apr => 4, may => 5, jun => 6,
 	     jul => 7, aug => 8, sep => 9, oct => 10, nov => 11, dec => 12);
+
+}
 
 sub local_tz {
   # standard method for determining local timezone
@@ -713,7 +726,7 @@ sub parse_rfc822_date {
   };
 
   if ($@) {
-    dbg("util: time cannot be parsed: $date, $yyyy-$mmm-$dd $hh:$mm:$ss");
+    dbg("util: time cannot be parsed: $date, $yyyy-$mmm-$dd $hh:$mm:$ss: $@");
     return undef;
   }
 
