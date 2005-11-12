@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rcvd_parser");
-use Test; BEGIN { plan tests => 44 };
+use Test; BEGIN { plan tests => 45 };
 
 
 use strict;
@@ -565,6 +565,18 @@ Received: from gorkcomputer (my.dns.com [1.2.3.4])
 } => q{
 
   [ ip=1.2.3.4 rdns=my.dns.com helo=gorkcomputer by=mydomain.com ident= envfrom= id=000000DB.43735815.00001E11 auth=LOGIN ]
+
+},
+q{
+
+Received: FROM hackers.mr.itd.umich.edu (smtp.mail.umich.edu [141.211.14.81])
+	BY madman.mr.itd.umich.edu ID 434B508E.174A6.13932 ; 11 Oct 2005 01:41:34 -0400
+Received: FROM [192.168.1.24] (s233-64-90-216.try.wideopenwest.com [64.233.216.90])
+	BY hackers.mr.itd.umich.edu ID 434B5051.8CDE5.15436 ; 11 Oct 2005 01:40:33 -0400
+
+} => q{
+
+  [ ip=141.211.14.81 rdns=smtp.mail.umich.edu helo=hackers.mr.itd.umich.edu by=madman.mr.itd.umich.edu ident= envfrom= id=434B508E.174A6.13932 auth= ] [ ip=64.233.216.90 rdns=s233-64-90-216.try.wideopenwest.com helo=!192.168.1.24! by=hackers.mr.itd.umich.edu ident= envfrom= id=434B5051.8CDE5.15436 auth= ]
 
 }
 );
