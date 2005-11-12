@@ -102,7 +102,7 @@ sub do_stop {
   # enqueue a request with the report-generation daemon
   run ("../build/automc/freqsd --enq $logdir");
 
-  my $daterev = strftime("%Y%m%d", gmtime($time)) . "-r$rev";
+  my $daterev = strftime("%Y%m%d", gmtime(time)) . "-r$rev";
   print qq{
     Reports will become visible at:
 
