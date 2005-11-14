@@ -933,6 +933,20 @@ sub parse_received_line {
     if (/^from (\S+) \((?:\S+\@)?(${IP_ADDRESS})\) by (\S+) with /) {
       $rdns = $1; $ip = $2; $by = $3; goto enough;
     }
+
+    # Obtuse smtpd: http://www.obtuse.com/
+    # Received: from TCE-E-7-182-54.bta.net.cn(202.106.182.54) via SMTP
+    #  by st.tahina.priv.at, id smtpdEDUB8h; Sun Nov 13 14:50:12 2005
+    # Received: from pl027.nas934.d-osaka.nttpc.ne.jp(61.197.82.27), claiming to be "foo.woas.net" via SMTP
+    #  by st.tahina.priv.at, id smtpd1PBsZT; Sun Nov 13 15:38:52 2005
+    if (/^from (\S+)\((${IP_ADDRESS})\)(?:, claiming to be "(\S+)")? via \S+ by (\S+),/) {
+      $rdns = $1; $ip = $2; $helo = (defined $3) ? $3 : ''; $by = $4;
+      if ($1 ne 'UNKNOWN') {
+	$mta_looked_up_dns = 1;
+	$rdns = $1;
+      }
+      goto enough;
+    }
   }
 
   # simta: http://rsug.itd.umich.edu/software/simta/
