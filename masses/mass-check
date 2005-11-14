@@ -102,6 +102,7 @@ use Mail::SpamAssassin::ArchiveIterator;
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Logger;
 use File::Copy;
+use File::Spec;
 use Getopt::Long;
 use POSIX qw(strftime);
 use constant HAS_TIME_PARSEDATE => eval { require Time::ParseDate; };
@@ -132,7 +133,10 @@ GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug:s",
 
 # rules.pl is for the --reuse option, score set doesn't matter
 if ($opt_reuse && ! -f "$FindBin::Bin/tmp/rules.pl") {
-  system("cd $FindBin::Bin; perl parse-rules-for-masses -d $opt_c");
+  # some people specify paths relatively, whereas this needs an absolute path,
+  # so "do the right thing"(tm).
+  my $abs_opt_c = File::Spec->rel2abs($opt_c);
+  system("cd $FindBin::Bin; perl parse-rules-for-masses -d $abs_opt_c");
 }
 
 require "rules.pl" if $opt_reuse;
