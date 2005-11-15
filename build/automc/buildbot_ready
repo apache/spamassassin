@@ -71,8 +71,9 @@ sub perform_singleton_actions {
 
 sub _perform_singleton_actions_unlocked
 {
-  print "got lock: performing singleton actions\n";
-  run "build/automc/populate_cor";
+  # print "got lock: performing singleton actions\n";
+  # run "build/automc/populate_cor";
+  # better off doing this periodically from the qproc
 }
 
 # ---------------------------------------------------------------------------
