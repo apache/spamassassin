@@ -2046,8 +2046,9 @@ rule names, and that there is no C<XOR> operator.
 =item meta SYMBOLIC_TEST_NAME boolean arithmetic expression
 
 Can also define a boolean arithmetic expression in terms of other
-tests, with a hit test having the value "1" and an unhit test having
-the value "0".  For example:
+tests, with a hit test having the value "1" (or the number of hits for
+tests with the 'multiple' tflag) and an unhit test having the value "0".
+For example:
 
 meta META2        (3 * TEST1 - 2 * TEST2) > 0
 
@@ -2075,7 +2076,7 @@ ignore these for scoring.
     }
   });
 
-=item tflags SYMBOLIC_TEST_NAME [ {net|nice|learn|userconf|noautolearn} ]
+=item tflags SYMBOLIC_TEST_NAME [ {net|nice|learn|userconf|noautolearn|multiple} ]
 
 Used to set flags on a test.  These flags are used in the
 score-determination back end system for details of the test's
@@ -2108,6 +2109,11 @@ The test requires training before it can be used.
 
 The test will explicitly be ignored when calculating the score for
 learning systems.
+
+=item multiple
+
+The test will be evaluated multiple times, for use with meta rules.
+For now only body, rawbody, uri, and full tests can have multiple hits.
 
 =back
 
