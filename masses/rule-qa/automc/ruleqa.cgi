@@ -97,14 +97,33 @@ my @daterevs = get_all_daterevs();
 $daterev = date_in_direction($daterev, 0);
 
 my $rule = $q->url_param('rule') || '';
+my $nicerule = $rule; if (!$nicerule) { $nicerule = 'all rules'; }
+
+my $datadir;
+my %freqs_head = ();
+my %freqs_data = ();
+my %freqs_ordr = ();
+my $line_counter = 0;
+
+# ---------------------------------------------------------------------------
+# supported views
 
 my $graph = $q->url_param('graph');
 if ($graph) {
   if ($graph eq 'over_time') { graph_over_time(); }
-  die "graph '$graph' unknown, or fell out of exec";
+  else { die "graph '$graph' unknown"; }
 }
+elsif ($q->url_param('longdatelist')) {
+  show_daterev_selector_page();
+}
+else {
+  show_default_view();
+}
+exit;
 
-my $nicerule = $rule; if (!$nicerule) { $nicerule = 'all rules'; }
+# ---------------------------------------------------------------------------
+
+sub show_default_view {
 my $title;
 if ($s{detail}) {
   $title = "Rule QA: details for $nicerule (in $daterev)";
@@ -223,6 +242,7 @@ my $tmpl = q{
   <input type=checkbox name=s_net !s_net!> Show frequencies from network tests, set 1<br/>
   <input type=checkbox name=s_html !s_html!> Show frequencies for mails containing HTML only, set 0<br/>
   <br/>
+
   <table style="padding-left: 0px" class=datetable>
 
       <tr>
@@ -250,10 +270,13 @@ my $tmpl = q{
       </tr><tr class=daterevtr><td class=daterevtd><b>Later</b></td>
        !daylinkpls3!
       </tr>
-
   </table>
+
   Date/Rev to display (UTC timezone):
   <input type=textfield name=daterev value="!daterev!"><br/>
+
+  <a href="!THISURL!&longdatelist=1">Display Full Date/Rev List</a><br/>
+
   <br/>
   <h4> Which Rules?</h4>
   Show only these rules (space separated, or regexp with '/' prefix):<br/>
@@ -335,12 +358,6 @@ if (!$s{detail}) {
   };
 }
 
-my $datadir;
-my %freqs_head = ();
-my %freqs_data = ();
-my %freqs_ordr = ();
-my $line_counter = 0;
-
 show_all_sets_for_daterev($daterev, $daterev);
 
 if ($s{detail}) {
@@ -392,6 +409,8 @@ print qq{
   };
 
 exit;
+
+}
 
 sub get_all_daterevs {
   return sort map {
@@ -868,7 +887,7 @@ sub get_daterev_description {
       my $cdate = $info->{checkin_date};
       $cdate =~ s/T(\S+)\.\d+Z$/ $1/;
 
-      my $net = $fastinfo->{includes_net} ? "[net]" : "";
+      my $net = $fastinfo->{includes_net} ? "net" : "";
 
       my $drtitle = ($info->{msg} ? $info->{msg} : '');
       $drtitle =~ s/[\"\']/ /gs;
@@ -885,8 +904,8 @@ sub get_daterev_description {
         <a title="$drtitle" href="!drhref!">$cdate</a></td>
           <td class=daterevtd>
         <a title="$drtitle" href="!drhref!">$info->{checkin_rev}</a></td>
-          <td class=daterevtd> <em>$info->{author}</em></td>
-          <td class=daterevtd> <em>$net</em> </td>
+          <td class=daterevtd> <em><mcauthor>$info->{author}</mcauthor></em></td>
+          <td class=daterevtd> <em><mcwasnet>$net</mcwasnet></em> </td>
 
         </tr>
         <tr class=daterevdesc>
@@ -896,7 +915,7 @@ sub get_daterev_description {
             <em>($drtitle)</em>
           </td>
           <td class=daterevtd colspan=2>
-            <em> $fastinfo->{submitters} </em>
+            <em><mcsubmitters>$fastinfo->{submitters}</mcsubmitters></em>
           </td>
 
       };
@@ -931,6 +950,62 @@ sub get_daterev_description {
   };
 
   return $txt;
+}
+
+sub show_daterev_selector_page {
+  my @drs_net = ();
+  my @drs_nightly = ();
+  my @drs_preflight = ();
+
+  # foreach my $i (-50 .. +50) { my $dr = date_in_direction($daterev, $i); }
+  foreach my $dr (@daterevs) {
+    next unless $dr;
+
+    my $obj = {
+        dr => $dr,
+        text => get_daterev_description($dr) || ''
+      };
+
+    # now match against the microformat data in the HTML, to select
+    # the desired subsets of certain types
+    if ($obj->{text} =~ /<mcsubmitters>\s*mc-/) {
+      push @drs_preflight, $obj;
+    } else {
+      push @drs_nightly, $obj;
+    }
+
+    if ($obj->{text} =~ /<mcwasnet>\s*net/) {
+      push @drs_net, $obj;
+    }
+  }
+
+  print "<h3> Network Mass-Checks </h3> ".
+                gen_daterev_table(@drs_net);
+
+  print "<h3> Nightly Mass-Checks </h3> ".
+                gen_daterev_table(@drs_nightly);
+
+  print "<h3> Preflight Mass-Checks </h3> ".
+                gen_daterev_table(@drs_preflight);
+}
+
+sub daterev_table {
+  my @list = @_;
+
+  my $str = qq{
+
+      <table style="padding-left: 0px" class=datetable>
+
+    }. join(' ', map {
+      my $dr = $_->{dr};
+      my $text = $_->{text};
+      $text =~ s/!drhref!/$dr/gs;
+      $text;
+    } @list). qq{
+
+      </table>
+
+    };
 }
   
 =cut
