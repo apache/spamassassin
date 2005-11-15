@@ -89,7 +89,6 @@ my $graph_times = [];
 my $graph_data = [];
 
 my $this_file_results;
-
 my $lastbucket;
 my $nextbucket;
 my $seen_y;
@@ -202,8 +201,12 @@ sub summarise {
     my $total_n = 0;
     my @cols = ();
     foreach my $file (@allfiles) {
-      my $sy = $allresults{$file}->{"y".$bucket};
-      my $sn = $allresults{$file}->{"n".$bucket};
+      my $res = $allresults{$file}->{$bucket};
+      if ($res !~ /^y(\d+)n(\d+)$/) {
+        warn "bad results: $res for $file $bucket";
+      }
+      my $sy = $1;
+      my $sn = $2;
 
       if (!defined $sy && !defined $sn) {
         $sn = $sy = -1;
@@ -332,8 +335,9 @@ sub read_logs {
 sub completeline {
   return unless ($lastbucket);
   $allbuckets{$lastbucket} = undef;
-  $this_file_results->{"y".$lastbucket} = $seen_y; $seen_y = 0;
-  $this_file_results->{"n".$lastbucket} = $seen_n; $seen_n = 0;
+  $this_file_results->{$lastbucket} = "y".$seen_y."n".$seen_n;
+  $seen_y = 0;
+  $seen_n = 0;
 }
 
 sub create_gp {
