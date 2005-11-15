@@ -1813,7 +1813,7 @@ sub do_body_tests {
                 $self->got_pattern_hit(q{'.$rulename.'}, "BODY: "); 
                 '. $self->hit_rule_plugin_code($rulename, "body") . '
 		# Ok, we hit, stop now.
-		last;
+		last unless $self->{conf}->{tflags}->{q{'.$rulename.'}} =~ /\bmultiple\b/;
              }
            }
     }
@@ -2226,7 +2226,7 @@ sub do_body_uri_tests {
             $self->got_pattern_hit(q{'.$rulename.'}, "URI: ");
             '. $self->hit_rule_plugin_code($rulename, "uri") . '
             # Ok, we hit, stop now.
-            last;
+	    last unless $self->{conf}->{tflags}->{q{'.$rulename.'}} =~ /\bmultiple\b/;
          }
        }
     }
@@ -2316,7 +2316,7 @@ sub do_rawbody_tests {
             $self->got_pattern_hit(q{'.$rulename.'}, "RAW: ");
             '. $self->hit_rule_plugin_code($rulename, "rawbody") . '
             # Ok, we hit, stop now.
-            last;
+	    last unless $self->{conf}->{tflags}->{q{'.$rulename.'}} =~ /\bmultiple\b/;
          }
        }
     }
@@ -2389,9 +2389,12 @@ sub do_full_tests {
     $evalstr .= '
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
         '.$self->hash_line_for_rule($rulename).'
-        if ($$fullmsgref =~ '.$pat.') {
+        pos $$fullmsgref = 0;
+        while ($$fullmsgref =~ '.$pat.'g) {
           $self->got_pattern_hit(q{'.$rulename.'}, "FULL: ");
           '. $self->hit_rule_plugin_code($rulename, "full") . '
+	  # Ok, we hit, stop now.
+	  last unless $self->{conf}->{tflags}->{q{'.$rulename.'}} =~ /\bmultiple\b/;
         }
         '.$self->ran_rule_plugin_code($rulename, "full").'
       }
@@ -2730,9 +2733,6 @@ sub run_rbl_eval_tests {
 sub got_pattern_hit {
   my ($self, $rulename, $prefix) = @_;
 
-  # only allow each test to hit once per mail
-  return if (defined $self->{tests_already_hit}->{$rulename});
-
   $self->got_hit ($rulename, $prefix);
 }
 
@@ -2807,7 +2807,11 @@ sub _wrap_desc {
 sub got_hit {
   my ($self, $rule, $area) = @_;
 
-  $self->{tests_already_hit}->{$rule} = 1;
+  my $already_hit = $self->{tests_already_hit}->{$rule} || 0;
+  $self->{tests_already_hit}->{$rule} = $already_hit + 1;
+
+  # only allow each test to be scored once per mail
+  return if ($already_hit);
 
   my $desc = $self->{conf}->{descriptions}->{$rule};
   $desc ||= $rule;
