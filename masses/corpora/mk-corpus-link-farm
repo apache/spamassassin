@@ -137,6 +137,7 @@ if (-d $mbox_work) {
 
 main();
 
+# and clean up again.
 unlink $poss_del_path;
 unlink "$poss_del_path.dir";
 unlink "$poss_del_path.pag";
