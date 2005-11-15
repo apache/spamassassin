@@ -2804,28 +2804,17 @@ sub _wrap_desc {
   $wrapped;
 }
 
-sub handle_hit {
-  my ($self, $rule, $area, $deffallbackdesc) = @_;
+sub got_hit {
+  my ($self, $rule, $area) = @_;
+
+  $self->{tests_already_hit}->{$rule} = 1;
 
   my $desc = $self->{conf}->{descriptions}->{$rule};
-  $desc ||= $deffallbackdesc;
   $desc ||= $rule;
 
   my $score = $self->{conf}->{scores}->{$rule};
 
   $self->_handle_hit($rule, $score, $area, $desc);
-}
-
-sub got_hit {
-  my ($self, $rule, $prepend2desc) = @_;
-
-  $self->{tests_already_hit}->{$rule} = 1;
-
-  my $txt = $self->{conf}->{full_tests}->{$rule};
-  $txt ||= $self->{conf}->{full_evals}->{$rule};
-  $txt ||= $self->{conf}->{head_tests}->{$rule};
-  $txt ||= $self->{conf}->{body_tests}->{$rule};
-  $self->handle_hit ($rule, $prepend2desc, $txt);
 }
 
 sub test_log {
