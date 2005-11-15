@@ -134,13 +134,13 @@ foreach my $set (@{$file_sets}) {
     }
     push (@allfiles, $file);
 
-    if (0) {
+    if (1) {
       # use an on-disk file to avoid massive VM usage for this hash
       # on huge datasets
-      unlink("graph.tmp.dir");
-      unlink("graph.tmp.pag");
-      tie (%{$allresults{$file}}, 'SDBM_File', 'graph.tmp', O_RDWR|O_CREAT, 0600)
-            or die "tie failed: $!";
+      unlink("$tmpdir/graph.tmp.dir");
+      unlink("$tmpdir/graph.tmp.pag");
+      tie (%{$allresults{$file}}, 'SDBM_File', "$tmpdir/graph.tmp",
+                O_RDWR|O_CREAT, 0600) or die "tie failed: $!";
     }
     else {
       %{$allresults{$file}} = ();
@@ -288,6 +288,11 @@ sub collapse_periods {
 sub read_logs {
   my $file = shift;
 
+  # limit to a range from [4 years ago, today] to avoid OOM craziness
+  # from corrupt input
+  my $limit_hi = time;
+  my $limit_lo = $limit_hi - (24*60*60*365*4);
+
   $lastbucket = undef;
   $nextbucket = undef;
   $seen_y = 0;
@@ -305,6 +310,11 @@ sub read_logs {
     my $t;
     /\btime=(\d+),/ and $t = $1;
     next unless $t;
+
+    if ($t < $limit_lo || $t > $limit_hi) {
+      warn "ignoring out-of-range time $t (limit: $limit_lo < t < $limit_hi)";
+      next;
+    }
 
     my $found = ($_ =~ $rule_re);
     

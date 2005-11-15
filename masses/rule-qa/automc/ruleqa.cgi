@@ -340,7 +340,10 @@ $daterev = date_in_direction($daterev, 0);
 }
 
 
-$tmpl =~ s/!longdatelist!/ gen_switch_url("longdatelist", 1) /ges;
+my $dranchor = "r".$daterev; $dranchor =~ s/[^A-Za-z0-9]/_/gs;
+my $ldlurl = gen_switch_url("longdatelist", 1)."#".$dranchor;
+
+$tmpl =~ s/!longdatelist!/$ldlurl/gs;
 $tmpl =~ s/!THISURL!/$cgi_url/gs;
 $tmpl =~ s/!daterev!/$daterev/gs;
 $tmpl =~ s/!rule!/$rule/gs;
@@ -887,6 +890,8 @@ sub get_daterev_description {
   my $fname = get_datadir_for_daterev($dr)."/info.xml";
   my $fastfname = get_datadir_for_daterev($dr)."/fastinfo.xml";
 
+  my $dranchor = "r".$dr; $dranchor =~ s/[^A-Za-z0-9]/_/gs;
+
   my $txt;
   if (-f $fname) {
     eval {
@@ -907,7 +912,7 @@ sub get_daterev_description {
       $txt = qq{
 
           <td class=daterevtd>
-        <a title="$drtitle" href="!drhref!">$fastinfo->{date}</a></td>
+        <a name="$dranchor" title="$drtitle" href="!drhref!">$fastinfo->{date}</a></td>
           <td class=daterevtd>
         <a title="$drtitle" href="!drhref!">$fastinfo->{rev}</a></td>
           <td class=daterevtd>
@@ -1048,7 +1053,7 @@ sub gen_daterev_table {
        </tr>
 
       };
-    } @list). qq{
+    } reverse @list). qq{
 
       </table></div>
 
