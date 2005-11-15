@@ -123,9 +123,15 @@ sub child_loop {
     $logdir = "--dir ".$job->{metadata}->{dir};
   }
 
+  # create slow reports
   run ("cd masses/rule-qa; ./corpus-hourly ".
         "--override='output_classes=$child_reports' ".
         "$logdir");
+
+  print "running 'freqsd-infrequent' tasks ($$) at ".(scalar localtime time)."\n";
+
+  # recreate the corpus link-farm
+  run ("build/automc/freqsd-infreqent");
 
   print "completed slow reports ($$) at ".(scalar localtime time)."\n";
 
