@@ -1604,7 +1604,7 @@ sub start_rules_plugin_code {
 }
 
 sub hit_rule_plugin_code {
-  my ($self, $rulename, $ruletype, $bit) = @_;
+  my ($self, $rulename, $ruletype) = @_;
 
   return '' unless exists($self->{should_log_rule_hits}) || $self->{main}->have_plugin("hit_rule");
 
@@ -1723,7 +1723,7 @@ sub do_head_tests {
         '.$self->hash_line_for_rule($rulename).'
         if ($self->get(q#'.$hdrname.'#, q#'.$def.'#) '.$testtype.'~ '.$pat.') {
           $self->got_hit (q#'.$rulename.'#, q{});
-          '. $self->hit_rule_plugin_code($rulename, "header", 1) . '
+          '. $self->hit_rule_plugin_code($rulename, "header") . '
         }
       }';
 
@@ -1811,7 +1811,7 @@ sub do_body_tests {
              '.$self->hash_line_for_rule($rulename).'
              if ('.$pat.') { 
                 $self->got_pattern_hit(q{'.$rulename.'}, "BODY: "); 
-                '. $self->hit_rule_plugin_code($rulename, "body", 2) . '
+                '. $self->hit_rule_plugin_code($rulename, "body") . '
 		# Ok, we hit, stop now.
 		last;
              }
@@ -2224,7 +2224,7 @@ sub do_body_uri_tests {
          '.$self->hash_line_for_rule($rulename).'
          if ('.$pat.') { 
             $self->got_pattern_hit(q{'.$rulename.'}, "URI: ");
-            '. $self->hit_rule_plugin_code($rulename, "uri", 4) . '
+            '. $self->hit_rule_plugin_code($rulename, "uri") . '
             # Ok, we hit, stop now.
             last;
          }
@@ -2314,7 +2314,7 @@ sub do_rawbody_tests {
          '.$self->hash_line_for_rule($rulename).'
          if ('.$pat.') { 
             $self->got_pattern_hit(q{'.$rulename.'}, "RAW: ");
-            '. $self->hit_rule_plugin_code($rulename, "rawbody", 8) . '
+            '. $self->hit_rule_plugin_code($rulename, "rawbody") . '
             # Ok, we hit, stop now.
             last;
          }
@@ -2391,7 +2391,7 @@ sub do_full_tests {
         '.$self->hash_line_for_rule($rulename).'
         if ($$fullmsgref =~ '.$pat.') {
           $self->got_pattern_hit(q{'.$rulename.'}, "FULL: ");
-          '. $self->hit_rule_plugin_code($rulename, "full", 16) . '
+          '. $self->hit_rule_plugin_code($rulename, "full") . '
         }
         '.$self->ran_rule_plugin_code($rulename, "full").'
       }
