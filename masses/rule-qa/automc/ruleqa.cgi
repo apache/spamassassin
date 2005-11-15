@@ -123,16 +123,10 @@ exit;
 
 # ---------------------------------------------------------------------------
 
-sub show_default_view {
-my $title;
-if ($s{detail}) {
-  $title = "Rule QA: details for $nicerule (in $daterev)";
-} else {
-  $title = "Rule QA: overview of all rules (in $daterev)";
-}
+sub show_default_header {
+my $title = shift;
 
-print $q->header;
-print q{<html><head>
+my $hdr = $q->header . q{<html><head>
 
   <style type="text/css" media="all">
 
@@ -232,6 +226,17 @@ print q{<html><head>
   </head><body>
 
 };
+return $hdr;
+}
+
+sub show_default_view {
+my $title;
+if ($s{detail}) {
+  $title = "Rule QA: details for $nicerule (in $daterev)";
+} else {
+  $title = "Rule QA: overview of all rules (in $daterev)";
+}
+print show_default_header($title);
 
 my $tmpl = q{
 
@@ -252,7 +257,7 @@ my $tmpl = q{
        <th> Prior Commit </th>
        <th> Rev </th>
        <th> Author </th>
-       <th> Net </th>
+       <th> Special / Who </th>
       </tr>
 
            <tr class=daterevtr><td class=daterevtd><b>Earlier</b></td>
@@ -275,7 +280,7 @@ my $tmpl = q{
   Date/Rev to display (UTC timezone):
   <input type=textfield name=daterev value="!daterev!"><br/>
 
-  <a href="!THISURL!&longdatelist=1">Display Full Date/Rev List</a><br/>
+  <a href="!longdatelist!">Display Full Date/Rev List</a><br/>
 
   <br/>
   <h4> Which Rules?</h4>
@@ -335,6 +340,7 @@ $daterev = date_in_direction($daterev, 0);
 }
 
 
+$tmpl =~ s/!longdatelist!/ gen_switch_url("longdatelist", 1) /ges;
 $tmpl =~ s/!THISURL!/$cgi_url/gs;
 $tmpl =~ s/!daterev!/$daterev/gs;
 $tmpl =~ s/!rule!/$rule/gs;
@@ -393,7 +399,7 @@ if ($s{detail}) {
   my @parms =get_params_except(qw(
           rule s_age s_overlap s_all s_detail
         ));
-  my $url_back = $cgi_url.'?'.join('&', sort @parms);
+  my $url_back = assemble_url(@parms);
 
   print qq{
 
@@ -819,8 +825,7 @@ sub create_detail_url {
         )), 
         "rule=".uri_escape($rulename), "s_detail=1",
       );
-  my $url = $cgi_url.'?'.join('&', sort @parms);
-  return $url;
+  return assemble_url(@parms);
 }
 
 sub gen_rule_link {
@@ -836,6 +841,11 @@ sub gen_switch_url {
   if (!defined $switch) { warn "switch '$switch'='$newval' undef value"; }
   # if (!defined $newval) { warn "newval '$switch'='$newval' undef value"; }
   push (@parms, "$switch=$newval");
+  return assemble_url(@parms);
+}
+
+sub assemble_url {
+  my @parms = @_;
   my $url = $cgi_url.'?'.join('&', sort @parms);
   return $url;
 }
@@ -953,6 +963,9 @@ sub get_daterev_description {
 }
 
 sub show_daterev_selector_page {
+  my $title = "Rule QA: all recent mass-check results";
+  print show_default_header($title);
+
   my @drs_net = ();
   my @drs_nightly = ();
   my @drs_preflight = ();
@@ -970,40 +983,74 @@ sub show_daterev_selector_page {
     # the desired subsets of certain types
     if ($obj->{text} =~ /<mcsubmitters>\s*mc-/) {
       push @drs_preflight, $obj;
-    } else {
-      push @drs_nightly, $obj;
     }
-
-    if ($obj->{text} =~ /<mcwasnet>\s*net/) {
+    elsif ($obj->{text} =~ /<mcwasnet>\s*net/) {
       push @drs_net, $obj;
+    }
+    else {
+      push @drs_nightly, $obj;
     }
   }
 
-  print "<h3> Network Mass-Checks </h3> ".
-                gen_daterev_table(@drs_net);
+  if (scalar @drs_net > 100)       { splice(@drs_net, 0, -100); }
+  if (scalar @drs_preflight > 100) { splice(@drs_preflight, 0, -100); }
+  if (scalar @drs_nightly > 100)   { splice(@drs_nightly, 0, -100); }
 
-  print "<h3> Nightly Mass-Checks </h3> ".
-                gen_daterev_table(@drs_nightly);
+  print qq{
+    <h3> Network Mass-Checks </h3>
+    <br/> <a href='#net' name=net>#</a>
+  }.  gen_daterev_table(@drs_net);
 
-  print "<h3> Preflight Mass-Checks </h3> ".
-                gen_daterev_table(@drs_preflight);
+  print qq{
+    <h3> Nightly Mass-Checks </h3>
+    <br/> <a href='#nightly' name=nightly>#</a>
+  }.  gen_daterev_table(@drs_nightly);
+
+  print qq{
+    <h3> Preflight Mass-Checks </h3>
+    <br/> <a href='#preflight' name=preflight>#</a>
+  }.  gen_daterev_table(@drs_preflight);
 }
 
-sub daterev_table {
+sub gen_daterev_table {
   my @list = @_;
+
+  my @parms =get_params_except(qw(
+          daterev longdatelist
+        ));
+  my $url_back = assemble_url(@parms);
 
   my $str = qq{
 
-      <table style="padding-left: 0px" class=datetable>
+      <br clear=all />
+      <div class=updateform>
+       <table style="padding-left: 0px" class=datetable>
+       <tr>
+        <th> Date </th>
+        <th> MC-Rev </th>
+        <th> Prior Commit </th>
+        <th> Rev </th>
+        <th> Author </th>
+        <th> Special / Who </th>
+       </tr>
 
     }. join(' ', map {
       my $dr = $_->{dr};
       my $text = $_->{text};
-      $text =~ s/!drhref!/$dr/gs;
-      $text;
+      my $drhref = assemble_url("daterev=".$dr, @parms);
+      $text =~ s/!drhref!/$drhref/gs;
+      qq{
+
+       <tr class=daterevtr>
+
+      }.$text.qq{
+
+       </tr>
+
+      };
     } @list). qq{
 
-      </table>
+      </table></div>
 
     };
 }
