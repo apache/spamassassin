@@ -131,7 +131,7 @@ sub child_loop {
   print "running 'freqsd-infrequent' tasks ($$) at ".(scalar localtime time)."\n";
 
   # recreate the corpus link-farm
-  run ("build/automc/freqsd-infreqent");
+  run ("build/automc/freqsd-infrequent");
 
   print "completed slow reports ($$) at ".(scalar localtime time)."\n";
 
