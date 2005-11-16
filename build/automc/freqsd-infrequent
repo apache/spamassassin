@@ -1,5 +1,12 @@
 #!/bin/sh
 
-# recreate the corpus link-farm
-./build/automc/populate_cor
+# recreate the corpus link-farm; log results to a web-visible file
+
+(
+  date
+  ./build/automc/populate_cor
+  date
+
+) 2>&1 | tee \
+    /var/www/buildbot.spamassassin.org/bbmass/corpus_makeup.txt
 
