@@ -206,6 +206,8 @@ sub find_srcs {
 }
 
 sub dist_across_dests {
+  my @srcorder = @$srcs;
+
   foreach my $dest (@$dests) {
     my %want = ();
 my $wantnum = $dest->{num_msgs} || 99999999;
@@ -216,11 +218,10 @@ my $wantnum = $dest->{num_msgs} || 99999999;
     $dest->{srcs} = [ ];
     print "\n$dest->{dir}: want $wantnum messages\n";
 
-    foreach my $src (@$srcs) {
-      foreach my $class (@classes) {
-        if ($want{$class} > 0) {
-          allocate ($src, $dest, \$want{$class}, $class);
-        }
+    foreach my $class (@classes) {
+      foreach my $src (@srcorder) {
+        last unless ($want{$class} > 0);
+       allocate ($src, $dest, \$want{$class}, $class);
       }
     }
 
@@ -239,6 +240,13 @@ my $wantnum = $dest->{num_msgs} || 99999999;
                 "only $added, wanted $want{$class} more\n";
       }
     }
+
+    # for the next dest, try to take some more entries from
+    # other sources as well.  do this by moving the source that's
+    # currently at the head of the list, to the end.
+
+    my $first = shift @srcorder;
+    @srcorder = (@srcorder, $first);
   }
 }
 
@@ -385,6 +393,7 @@ sub mark_for_poss_deletion {
   my ($dir) = @_;
 
   File::Find::find(sub {
+      return if (/mboxcountcache$/);
       if (!-d $_) {
         my $fname = $File::Find::name;
         $poss_delete->{$fname} = 1;
@@ -431,6 +440,15 @@ sub _mbox_extract_all {
   if (!-d $mbox_work) {
     mkdir $mbox_work or die "cannot create tmpdir: $mbox_work";
     # fatal error, could be an attack
+  }
+
+  my $countcache = get_mbox_name ($mboxpath, 0);
+  $countcache =~ s/OFF\d+$/mboxcountcache/gs;
+  if ($justcount && -f $countcache && -M $countcache < -M $mboxpath) {
+    open (CACHE, "<$countcache");
+    my $count = <CACHE> + 0;
+    close CACHE;
+    return $count;
   }
 
   my $counter = 0;
@@ -524,6 +542,9 @@ nextfrom:
   close INPUT;
 
   if ($justcount) {
+    open (CACHE, ">$countcache");
+    print CACHE $counter;
+    close CACHE;
     return $counter;
   }
   else {
