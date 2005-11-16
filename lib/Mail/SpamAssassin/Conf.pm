@@ -2049,9 +2049,9 @@ Can also define a boolean arithmetic expression in terms of other
 tests, with an unhit test having the value "0" and a hit test having a
 nonzero value.  The value of a hit meta test is that of its arithmetic
 expression.  The value of a hit eval test is that returned by its
-method.  The value of a hit body, rawbody, uri, or full test which has
-the "multiple" tflag is the number of times the test hit.  The value
-of any other type of hit test is "1".
+method.  The value of a hit header, body, rawbody, uri, or full test
+which has the "multiple" tflag is the number of times the test hit.
+The value of any other type of hit test is "1".
 
 For example:
 
@@ -2118,7 +2118,7 @@ learning systems.
 =item multiple
 
 The test will be evaluated multiple times, for use with meta rules.
-Only affects body, rawbody, uri, and full tests.
+Only affects header, body, rawbody, uri, and full tests.
 
 =back
 

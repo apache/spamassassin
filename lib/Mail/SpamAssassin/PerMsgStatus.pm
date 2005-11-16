@@ -1721,9 +1721,12 @@ sub do_head_tests {
         my $self = shift;
         $_ = shift;
         '.$self->hash_line_for_rule($rulename).'
-        if ($self->get(q#'.$hdrname.'#, q#'.$def.'#) '.$testtype.'~ '.$pat.') {
+        my $text = $self->get(q#'.$hdrname.'#, q#'.$def.'#);
+        while ($text '.$testtype.'~ '.$pat.'g) {
           $self->got_hit (q#'.$rulename.'#, q{});
           '. $self->hit_rule_plugin_code($rulename, "header") . '
+          # Ok, we hit, stop now.
+          last unless $self->{conf}->{tflags}->{q{'.$rulename.'}} =~ /\bmultiple\b/;
         }
       }';
 

@@ -2,12 +2,13 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rule_multiple");
-use Test; BEGIN { plan tests => 8 };
+use Test; BEGIN { plan tests => 10 };
 
 # ---------------------------------------------------------------------------
 
 %patterns = (
 
+q{ META_HEADER_RULE }, 'header',
 q{ META_URI_RULE }, 'uri',
 q{ META_BODY_RULE }, 'body',
 q{ META_RAWBODY_RULE }, 'rawbody',
@@ -19,12 +20,20 @@ q{ META_EVAL_RULE }, 'eval',
 
 %anti_patterns = (
 
+q{ META_HEADER_RULE_2 }, 'header_2',
 q{ META_BODY_RULE_2 }, 'body_2',
 q{ META_FULL_RULE_2 }, 'full_2',
 
 );
 
 tstlocalrules ('
+
+header HEADER_RULE	Subject =~ /--/
+tflags HEADER_RULE multiple
+meta META_HEADER_RULE HEADER_RULE > 1
+
+header HEADER_RULE_2	Subject =~ /--/
+meta META_HEADER_RULE_2 HEADER_RULE_2 > 1
 
 uri URI_RULE		/WWW.SUPERSITESCENTRAL.COM/i
 tflags URI_RULE	multiple
