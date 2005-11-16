@@ -202,11 +202,20 @@ sub summarise {
     my @cols = ();
     foreach my $file (@allfiles) {
       my $res = $allresults{$file}->{$bucket};
-      if ($res !~ /^y(\d+)n(\d+)$/) {
-        warn "bad results: $res for $file $bucket";
+      my $sy;
+      my $sn;
+
+      if (!$res) {
+       $sn = $sy = -1;
       }
-      my $sy = $1;
-      my $sn = $2;
+      elsif ($res !~ /^y(\d+)n(\d+)$/) {
+        warn "bad results: $res for $file $bucket";
+       next;
+      }
+      else {
+       $sy = $1;
+       $sn = $2;
+      }
 
       if (!defined $sy && !defined $sn) {
         $sn = $sy = -1;
