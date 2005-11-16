@@ -467,6 +467,7 @@ sub _mbox_extract_all {
   if (!-d $dir) {
     mkdir $dir or die "cannot mkdir $dir";
   }
+  chmod 0755, $dir or warn "cannot chmod $dir";
 
   my $start = 0;            # start of a message
   my $where = 0;            # current byte offset
@@ -523,6 +524,8 @@ nextfrom:
   
             close OUTPUT or die "failed to write to $newname";
   
+            chmod 0644, $newname or warn "cannot chmod $newname";
+
             utime $atime, $mtime, $newname
                             or warn "failed to touch $newname";
           }
