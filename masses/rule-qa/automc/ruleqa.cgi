@@ -254,15 +254,12 @@ my $tmpl = q{
        <th> Mass-Check </th>
        <th> Date </th>
        <th> MC-Rev </th>
-       <th> Prior Commit </th>
+       <th> Commit </th>
        <th> Rev </th>
        <th> Author </th>
-       <th> Special / Who </th>
       </tr>
 
            <tr class=daterevtr><td class=daterevtd><b>Earlier</b></td>
-               !daylinkneg3!
-      </tr><tr class=daterevtr><td class=daterevtd></td>
        !daylinkneg2!
       </tr><tr class=daterevtr><td class=daterevtd></td>
        !daylinkneg1!
@@ -270,17 +267,22 @@ my $tmpl = q{
        !todaytext!
       </tr><tr class=daterevtr><td class=daterevtd></td>
        !daylinkpls1!
-      </tr><tr class=daterevtr><td class=daterevtd></td>
-       !daylinkpls2!
       </tr><tr class=daterevtr><td class=daterevtd><b>Later</b></td>
-       !daylinkpls3!
+       !daylinkpls2!
       </tr>
   </table>
 
+<table width=100%>
+<tr>
+<td width=90%>
   Date/Rev to display (UTC timezone):
-  <input type=textfield name=daterev value="!daterev!"><br/>
-
-  <a href="!longdatelist!">Display Full Date/Rev List</a><br/>
+  <input type=textfield name=daterev value="!daterev!">
+</td>
+<td width=10%><div align=right>
+  <a href="!longdatelist!">(List&nbsp;All)</a><br/>
+</div></td>
+</tr>
+</table>
 
   <br/>
   <h4> Which Rules?</h4>
@@ -569,7 +571,7 @@ sub read_freqs_file {
   if ($file =~ /\.all/) { $subset_is_user = 1; }
 
   while (<IN>) {
-    if (/(?: \(all messages| results used:|was at r\d+)/) {
+    if (/(?: \(all messages| results used|OVERALL\%|was at r\d+)/) {
       $freqs_head{$key} .= $_;
     }
     elsif (/MSEC/) {
@@ -902,7 +904,7 @@ sub get_daterev_description {
       my $cdate = $info->{checkin_date};
       $cdate =~ s/T(\S+)\.\d+Z$/ $1/;
 
-      my $net = $fastinfo->{includes_net} ? "net" : "";
+      my $net = $fastinfo->{includes_net} ? "[net]" : "";
 
       my $drtitle = ($info->{msg} ? $info->{msg} : '');
       $drtitle =~ s/[\"\']/ /gs;
@@ -919,8 +921,8 @@ sub get_daterev_description {
         <a title="$drtitle" href="!drhref!">$cdate</a></td>
           <td class=daterevtd>
         <a title="$drtitle" href="!drhref!">$info->{checkin_rev}</a></td>
-          <td class=daterevtd> <em><mcauthor>$info->{author}</mcauthor></em></td>
-          <td class=daterevtd> <em><mcwasnet>$net</mcwasnet></em> </td>
+          <td class=daterevtd> <em><mcauthor>$info->{author}</mcauthor></em>
+            <em><mcwasnet>$net</mcwasnet></em> </td>
 
         </tr>
         <tr class=daterevdesc>
@@ -929,7 +931,7 @@ sub get_daterev_description {
           <td class=daterevtd colspan=4>
             <em>($drtitle)</em>
           </td>
-          <td class=daterevtd colspan=2>
+          <td class=daterevtd colspan=1>
             <em><mcsubmitters>$fastinfo->{submitters}</mcsubmitters></em>
           </td>
 
@@ -955,12 +957,8 @@ sub get_daterev_description {
        <a title="$drtitle" href="!drhref!">$date</a></td>
         <td class=daterevtd>
        <a title="$drtitle" href="!drhref!">$rev</a></td>
-        <td class=daterevtd>
-       <a title="$drtitle" href="!drhref!">(no info)</a></td>
-        <td class=daterevtd>
-       <a title="$drtitle" href="!drhref!">(no info)</a></td>
-        <td class=daterevtd></td>
-        <td class=daterevtd></td>
+        <td class=daterevtd colspan=3>
+       <a title="$drtitle" href="!drhref!">(no info on this commit)</a></td>
 
   };
 
@@ -989,7 +987,7 @@ sub show_daterev_selector_page {
     if ($obj->{text} =~ /<mcsubmitters>\s*mc-/) {
       push @drs_preflight, $obj;
     }
-    elsif ($obj->{text} =~ /<mcwasnet>\s*net/) {
+    elsif ($obj->{text} =~ /<mcwasnet>\s*.net/) {
       push @drs_net, $obj;
     }
     else {
@@ -1031,12 +1029,12 @@ sub gen_daterev_table {
       <div class=updateform>
        <table style="padding-left: 0px" class=datetable>
        <tr>
+       <th> </th>
         <th> Date </th>
         <th> MC-Rev </th>
         <th> Prior Commit </th>
         <th> Rev </th>
         <th> Author </th>
-        <th> Special / Who </th>
        </tr>
 
     }. join(' ', map {
@@ -1046,7 +1044,7 @@ sub gen_daterev_table {
       $text =~ s/!drhref!/$drhref/gs;
       qq{
 
-       <tr class=daterevtr>
+       <tr class=daterevtr><td></td>
 
       }.$text.qq{
 
