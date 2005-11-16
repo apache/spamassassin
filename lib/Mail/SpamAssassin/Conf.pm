@@ -2046,8 +2046,13 @@ rule names, and that there is no C<XOR> operator.
 =item meta SYMBOLIC_TEST_NAME boolean arithmetic expression
 
 Can also define a boolean arithmetic expression in terms of other
-tests, with a hit test having the value "1" (or the number of hits for
-tests with the 'multiple' tflag) and an unhit test having the value "0".
+tests, with an unhit test having the value "0" and a hit test having a
+nonzero value.  The value of a hit meta test is that of its arithmetic
+expression.  The value of a hit eval test is that returned by its
+method.  The value of a hit body, rawbody, uri, or full test which has
+the "multiple" tflag is the number of times the test hit.  The value
+of any other type of hit test is "1".
+
 For example:
 
 meta META2        (3 * TEST1 - 2 * TEST2) > 0
@@ -2113,7 +2118,7 @@ learning systems.
 =item multiple
 
 The test will be evaluated multiple times, for use with meta rules.
-For now only body, rawbody, uri, and full tests can have multiple hits.
+Only affects body, rawbody, uri, and full tests.
 
 =back
 

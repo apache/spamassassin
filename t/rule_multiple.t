@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rule_multiple");
-use Test; BEGIN { plan tests => 6 };
+use Test; BEGIN { plan tests => 8 };
 
 # ---------------------------------------------------------------------------
 
@@ -12,6 +12,8 @@ q{ META_URI_RULE }, 'uri',
 q{ META_BODY_RULE }, 'body',
 q{ META_RAWBODY_RULE }, 'rawbody',
 q{ META_FULL_RULE }, 'full',
+q{ META_META_RULE }, 'meta',
+q{ META_EVAL_RULE }, 'eval',
 
 );
 
@@ -22,7 +24,7 @@ q{ META_FULL_RULE_2 }, 'full_2',
 
 );
 
-tstprefs ('
+tstlocalrules ('
 
 uri URI_RULE		/WWW.SUPERSITESCENTRAL.COM/i
 tflags URI_RULE	multiple
@@ -46,6 +48,12 @@ meta META_FULL_RULE FULL_RULE > 2
 full FULL_RULE_2		/WWW.SUPERSITESCENTRAL.COM/i
 meta META_FULL_RULE_2 FULL_RULE_2 > 2
 
+meta META_RULE		META_BODY_RULE + META_RAWBODY_RULE
+meta META_META_RULE	META_RULE > 1
+
+loadplugin myTestPlugin ../../data/testplugin.pm
+header EVAL_RULE	eval:check_return_2()
+meta META_EVAL_RULE	EVAL_RULE > 1
     ');
 
 sarun ("-L -t < data/spam/002", \&patterns_run_cb);
