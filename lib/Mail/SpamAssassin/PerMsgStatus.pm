@@ -2543,7 +2543,7 @@ sub do_meta_tests {
       next if (grep( $metas{$_}, @{ $rule_deps{ $metas[$i] } }));
 
       # Add this meta rule to the eval line
-      $evalstr .= '  if ('.$meta{$metas[$i]}.') { $self->got_hit (q#'.$metas[$i].'#, ""); }'."\n";
+      $evalstr .= '  if (my $result = '.$meta{$metas[$i]}.') { $self->got_hit (q#'.$metas[$i].'#, "", $result); }'."\n";
       splice @metas, $i--, 1;    # remove this rule from our list
     }
   } while ($#metas != $count && $#metas > -1); # run until we can't go anymore
@@ -2660,8 +2660,8 @@ sub run_eval_tests {
     }
 
     if ($result) {
-      $self->got_hit ($rulename, $prepend2desc);
-      dbg("rules: ran eval rule $rulename ======> got hit") if $debugenabled;
+      $self->got_hit ($rulename, $prepend2desc, $result);
+      dbg("rules: ran eval rule $rulename ======> got hit ($result)") if $debugenabled;
       $self->{main}->call_plugins("hit_rule", { permsgstatus => $self, ruletype => "eval", rulename => $rulename });
     }
     #else {
@@ -2805,10 +2805,11 @@ sub _wrap_desc {
 }
 
 sub got_hit {
-  my ($self, $rule, $area) = @_;
+  my ($self, $rule, $area, $value) = @_;
+  $value ||= 1;
 
   my $already_hit = $self->{tests_already_hit}->{$rule} || 0;
-  $self->{tests_already_hit}->{$rule} = $already_hit + 1;
+  $self->{tests_already_hit}->{$rule} = $already_hit + $value;
 
   # only allow each test to be scored once per mail
   return if ($already_hit);
