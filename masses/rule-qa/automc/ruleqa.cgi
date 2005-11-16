@@ -429,8 +429,9 @@ if ($s{detail}) {
 
 print qq{
 
-  <p>(thanks to <a href=http://www.kryogenix.org/code/browser/sorttable/>Stuart
-  Langridge</a> for the sort-table DHTML code used here.)</p>
+  <p>Note: the freqs tables are sortable.  Click on the headers to resort them
+  by that column.  <a
+  href=http://www.kryogenix.org/code/browser/sorttable/>(thanks!)</a></p>
 
   </body></html>
 
