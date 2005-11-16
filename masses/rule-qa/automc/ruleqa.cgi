@@ -128,6 +128,8 @@ my $title = shift;
 
 my $hdr = $q->header . q{<html><head>
 
+  <title>}.$title.q{</title>
+
   <style type="text/css" media="all">
 
     body {
@@ -174,9 +176,6 @@ my $hdr = $q->header . q{<html><head>
       background: #fff;
       padding: 10px 5px 10px 5px;
     }
-    tr.freqshead {
-      background: #ddd;
-    }
     tr.freqsline_a td {
       text-align: right;
       padding: 0.1em 0.2em 0.1em 0.2em;
@@ -207,6 +206,22 @@ my $hdr = $q->header . q{<html><head>
       background: #f0e0a0;
     }
 
+    /* Sortable tables, see http://www.kryogenix.org/code/browser/sorttable/ */
+    table.sortable a.sortheader {
+       background: #ddd;
+       color:#666;
+       font-weight: bold;
+       text-decoration: none;
+       display: block;
+    }
+    tr.freqsheader {
+       background: #ddd;
+    }
+    table.sortable span.sortarrow {
+       color: black;
+       text-decoration: none;
+    }
+
   </style>
 
   <script type="text/javascript"><!--
@@ -220,8 +235,7 @@ my $hdr = $q->header . q{<html><head>
 
     //-->
   </script>
-
-  <title>}.$title.q{</title>
+  <script src="http://buildbot.spamassassin.org/sorttable.js"></script>
 
   </head><body>
 
@@ -415,6 +429,9 @@ if ($s{detail}) {
 
 print qq{
 
+  <p>(thanks to <a href=http://www.kryogenix.org/code/browser/sorttable/>Stuart
+  Langridge</a> for the sort-table DHTML code used here.)</p>
+
   </body></html>
 
   };
@@ -546,7 +563,7 @@ sub summarise_head {
 
   print qq{
 
-    <p><em>(Using mass-check data from: $who)</em></p>
+    <!-- <em>(Using mass-check data from: $who)</em> -->
 
   };
 }
@@ -647,12 +664,12 @@ sub get_freqs_for_rule {
   $comment .= qq{
     <br clear="all"/>
     <p class=showfreqslink><a
-      href="javascript:show_header('$headers_id')">(more info)</a></p>
+      href="javascript:show_header('$headers_id')">(source details)</a></p>
 
-    <table class=freqs><tr class=freqshead>
-      <th>
-    <a name='$titleplink'></a><a href='#$titleplink' class=title_permalink>#</a>
-      </th>
+    <table class=sortable id='freqs_${headers_id}' class=freqs>
+      <tr class=freqshead>
+      <th><a name='$titleplink' href='#$titleplink'
+          class=title_permalink>#</a></th>
       <th>MSECS</th>
       <th>SPAM%</th>
       <th>HAM%</th>
@@ -771,7 +788,7 @@ sub output_freqs_data_line {
 
     my $score = $line->{score};
     if ($line->{name} =~ /^__/) {
-      $score = '(meta)';
+      $score = '(n/a)';
     }
 
     $ttk->process(\$LINE_TEMPLATE, {
