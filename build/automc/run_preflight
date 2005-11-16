@@ -34,8 +34,11 @@ run "cp plugins/*.* tstrules";
 # this is run in a chroot jail, just in case there's hostile
 # rule code in there...
 #
+# limit to the most recent 20k messages of each type, as the corpora are
+# getting big.
+#
 run "/local/bbmasstools/masschroot $perl ".
-    "mass-check -c=tstrules --cache --progress -j=1 -f $targets";
+    "mass-check -c=tstrules --tail=20000 --cache --progress -j=1 -f $targets";
 
 exit;
 
