@@ -45,10 +45,10 @@ $parser->output_dir("$OUT_DIR/tmp");
 
 my $ent = $parser->parse(\*STDIN) or die "parse failed\n";
 
-warn "Parsed message:
+print "Parsed message:
 ---------------------------------------------------------------------------\n";
 $ent->print(\*STDOUT);
-warn "[EOM]
+print "[EOM]
 ---------------------------------------------------------------------------\n";
 
 my $from = $ent->head()->get("From");
@@ -69,13 +69,13 @@ if ($from !~ $ALLOWED_MAIL_PEOPLE) {
 }
 
 foreach my $part ($ent->parts) {
-  my $ctype = $part->head->get("Content-Type") || '';
-  my $disp = $part->head->get("Content-Disposition") || '';
-  my $desc = $part->head->get("Content-Description") || '';
+  my $ctype = $part->head->get("Content-Type") || ''; chomp $ctype;
+  my $disp = $part->head->get("Content-Disposition") || ''; chomp $disp;
+  my $desc = $part->head->get("Content-Description") || ''; chomp $desc;
 
   my $fname;
   if ($desc && $desc =~ /\S/) {
-    chomp $desc; $fname = $desc;
+    $fname = $desc;
   } elsif ($disp && $disp =~ /filename=\"([^\"]+)\"/) {
     $fname = $1;
   } elsif ($disp && $disp =~ /filename=\'([^\']+)\'/) {
@@ -83,16 +83,17 @@ foreach my $part ($ent->parts) {
   } elsif ($disp && $disp =~ /filename=([^\;\s]+)/) {
     $fname = $1;
   }
+  $fname =~ s/^\s*//; $fname =~ s/\s*$//;
 
-  warn "part: (type=$ctype / disp=$disp)\n";
+  print "part: fname=$fname, type=$ctype, disp=$disp\n";
 
   if ($ctype !~ /^text.plain\b/) {
-    warn "skipping part: not text/plain";
+    print "skipping part: not text/plain\n";
     next;
   }
 
   if (!$fname || $fname !~ /\.cf$/) {
-    warn "skipping part: filename doesn't end in '.cf'";
+    print "skipping part: filename doesn't end in '.cf'\n";
     next;
   }
 
