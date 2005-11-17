@@ -10,6 +10,8 @@ my $OUT_DIR = "/home/bbmass/bymail";
 my $BB_URL = 'http://buildbot.spamassassin.org/preflight/__SLAVE__'.
 		'/force?username=mail&comments=__WHY__';
 
+my $WHY = 'rules received via email';
+
 # name of the Buildbot slaves to trigger
 my @SLAVES = qw(
 
@@ -106,8 +108,9 @@ foreach my $part ($ent->parts) {
 
   foreach my $slave (@SLAVES) {
     my $url = $BB_URL;
+    my $why = $WHY; $why =~ s/\s+/%20/gs;
     $url =~ s/__SLAVE__/$slave/gs;
-    $url =~ s/__WHY__/mail/gs;
+    $url =~ s/__WHY__/$why/gs;
 
     print "invoking force-build: $url\n";
     get($url);
