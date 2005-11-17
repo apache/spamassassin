@@ -44,7 +44,13 @@ my $parser = new MIME::Parser;
 $parser->output_dir("$OUT_DIR/tmp");
 
 my $ent = $parser->parse(\*STDIN) or die "parse failed\n";
-$ent->dump_skeleton();
+
+warn "Parsed message:
+---------------------------------------------------------------------------\n";
+$ent->print(\*STDOUT);
+warn "[EOM]
+---------------------------------------------------------------------------\n";
+
 my $from = $ent->head()->get("From");
 if ($from =~ /<(.*?)>/) {
   $from = $1;
