@@ -4,6 +4,9 @@ use strict;
 use warnings;
 sub run;
 
+my $BYMAILLOG = '/home/bbmass/bymail/extract.log';
+my $BYMAILCF = '/home/bbmass/bymail/latest.cf';
+
 my $LOCKDIR = "/home/bbmass/mclocks";
 my $got_lock = undef;
 
@@ -36,11 +39,25 @@ sub do_start {
   # system ("svn info --non-interactive > masses/svninfo.tmp");
   system ("svn info > masses/svninfo.tmp < /dev/null");
 
-  if (!perform_singleton_actions()) {
-    # give the "winning" slave time to do the work we also need done
-    print "sleeping for 60 seconds so that corpus is rebuilt\n";
-    sleep 60;
+  if (-f $BYMAILCF) {
+    print "\nFound recent rules-by-mail rules file:\n\n";
+    system ("cp $BYMAILCF masses/mailed.cf");
+    print ("-" x 75), "\n";
+    system ("cat masses/mailed.cf");
+    print ("-" x 75), "\n";
+  } else {
+    unlink "masses/mailed.cf";
   }
+  if (-f $BYMAILLOG) {
+    print "\nRules-by-mail extraction log:\n\n";
+    system ("cat $BYMAILLOG");
+  }
+
+  # if (!perform_singleton_actions()) {
+    # # give the "winning" slave time to do the work we also need done
+    # print "sleeping for 60 seconds so that corpus is rebuilt\n";
+    # sleep 60;
+  # }
 }
 
 sub perform_singleton_actions {
