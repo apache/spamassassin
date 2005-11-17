@@ -1,0 +1,110 @@
+#!/local/perl586/bin/perl
+
+use LWP::Simple;
+use MIME::Parser;
+
+# where the files are saved
+my $OUT_DIR = "/home/bbmass/bymail";
+
+# URL used to trigger the buildbot to build
+my $BB_URL = 'http://buildbot.spamassassin.org/preflight/__SLAVE__'.
+		'/force?username=mail&comments=__WHY__';
+
+# name of the Buildbot slaves to trigger
+my @SLAVES = qw(
+
+	  	mc-fast mc-med mc-slow mc-slower
+
+	);
+
+# feel free to add your name here -- or that of anyone you want
+# to allow to use this system
+my $ALLOWED_MAIL_PEOPLE = qr/^(?:
+
+		jm\@jmason\.org|
+		quinlan\@pathname\.com|
+		duncf\@debian\.org
+
+	)/isx;
+
+my $EXTRACT_LOG = "$OUT_DIR/extract.log";
+my $LATEST_CF =   "$OUT_DIR/latest.cf";
+
+# ---------------------------------------------------------------------------
+
+use strict;
+use warnings;
+
+open (STDOUT, ">$EXTRACT_LOG") or die "cannot redir STDOUT to $EXTRACT_LOG";
+open (STDERR, ">&STDOUT") or die "cannot redir STDERR";
+chmod 0666, $EXTRACT_LOG;
+
+my $parser = new MIME::Parser;
+(-d "$OUT_DIR/tmp") || mkdir("$OUT_DIR/tmp", 0700);
+$parser->output_dir("$OUT_DIR/tmp");
+
+my $ent = $parser->parse(\*STDIN) or die "parse failed\n";
+$ent->dump_skeleton();
+my $from = $ent->head()->get("From");
+if ($from =~ /<(.*?)>/) {
+  $from = $1;
+}
+else {
+  $from =~ s/\s*\(.*?\)\s*//;
+}
+
+if ($from !~ $ALLOWED_MAIL_PEOPLE) {
+  print "$from is not on the 'allowed' list, ignoring";
+  goto done;
+}
+
+foreach my $part ($ent->parts) {
+  my $ctype = $part->head->get("Content-Type") || '';
+  my $disp = $part->head->get("Content-Disposition") || '';
+  my $desc = $part->head->get("Content-Description") || '';
+
+  my $fname;
+  if ($desc && $desc =~ /\S/) {
+    chomp $desc; $fname = $desc;
+  } elsif ($disp && $disp =~ /filename=\"([^\"]+)\"/) {
+    $fname = $1;
+  } elsif ($disp && $disp =~ /filename=\'([^\']+)\'/) {
+    $fname = $1;
+  } elsif ($disp && $disp =~ /filename=([^\;\s]+)/) {
+    $fname = $1;
+  }
+
+  warn "part: (type=$ctype / disp=$disp)\n";
+
+  if ($ctype !~ /^text.plain\b/) {
+    warn "skipping part: not text/plain";
+    next;
+  }
+
+  if (!$fname || $fname !~ /\.cf$/) {
+    warn "skipping part: filename isn't 'something.cf'";
+    next;
+  }
+
+  open (SAVE, ">$LATEST_CF") or die "cannot save to $LATEST_CF";
+  $part->print_body(\*SAVE);
+  close SAVE or die "cannot write to $LATEST_CF";
+  chmod 0666, "$LATEST_CF";
+
+  system ("ls -l $LATEST_CF");
+
+  foreach my $slave (@SLAVES) {
+    my $url = $BB_URL;
+    $url =~ s/__SLAVE__/$slave/gs;
+    $url =~ s/__WHY__/mail/gs;
+
+    print "TODO: get $url\n";
+    # my $text = get($url);
+    # print $text;
+  }
+}
+
+done:
+$ent->purge();
+exit;
+
