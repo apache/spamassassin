@@ -47,7 +47,7 @@ run "ls -l tstrules";
 # lint those rule files, and abort if they fail; this is a sanity check
 # now that we have mailed-in rules used in this mass-check
 #
-if (run ("../spamassassin --lint -C tstrules", 1) != 0) {
+if (run ("../spamassassin --lint -x -C tstrules", 1) != 0) {
   warn "*** lint failed; exiting without mass-check! ***\n\n";
 
   warn "Deleting 'mailed.cf', if it exists.\n"; unlink $BYMAILCF;
