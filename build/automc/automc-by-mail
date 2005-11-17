@@ -59,6 +59,10 @@ else {
   $from =~ s/\s*\(.*?\)\s*//;
 }
 
+# TODO: less stupid auth using SPF.  this doesn't really matter all that much,
+# however, since we lint any submitted rules before using them, which should
+# catch dangerous stuff, and that lint takes place in an unpriv chroot.
+#
 if ($from !~ $ALLOWED_MAIL_PEOPLE) {
   print "$from is not on the 'allowed' list, ignoring";
   goto done;
@@ -88,7 +92,7 @@ foreach my $part ($ent->parts) {
   }
 
   if (!$fname || $fname !~ /\.cf$/) {
-    warn "skipping part: filename isn't 'something.cf'";
+    warn "skipping part: filename doesn't end in '.cf'";
     next;
   }
 
@@ -104,9 +108,8 @@ foreach my $part ($ent->parts) {
     $url =~ s/__SLAVE__/$slave/gs;
     $url =~ s/__WHY__/mail/gs;
 
-    print "TODO: get $url\n";
-    # my $text = get($url);
-    # print $text;
+    print "invoking force-build: $url\n";
+    get($url);
   }
 }
 
