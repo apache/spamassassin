@@ -39,12 +39,14 @@ sub do_start {
   # system ("svn info --non-interactive > masses/svninfo.tmp");
   system ("svn info > masses/svninfo.tmp < /dev/null");
 
+  # mass-check-by-mail support
+  #
   if (-f $BYMAILCF) {
-    print "\nFound recent rules-by-mail rules file:\n\n";
+    print "\nFound recent rules-by-mail rules file, will mass-check:\n\n";
     system ("cp $BYMAILCF masses/mailed.cf");
-    print ("-" x 75)."\n";
+    print "".("-" x 75)."\n";
     system ("cat masses/mailed.cf");
-    print ("-" x 75)."\n";
+    print "".("-" x 75)."\n";
   } else {
     unlink "masses/mailed.cf";
   }
