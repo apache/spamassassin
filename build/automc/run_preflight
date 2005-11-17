@@ -49,11 +49,11 @@ run "ls -l tstrules";
 #
 if (run ("../spamassassin --lint -x -C tstrules", 1) != 0) {
   warn "*** lint failed; exiting without mass-check! ***\n\n";
-
   warn "Deleting 'mailed.cf', if it exists.\n"; unlink $BYMAILCF;
-warn "Rule files:\n"; system ("cat tstrules/*.cf");
-
+  warn "Rule files:\n"; system ("cat tstrules/*.cf");
   die "lint failure";
+} else {
+  print "lint passed.\n";
 }
 
 # notes on this mass-check command:
