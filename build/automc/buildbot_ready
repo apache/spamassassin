@@ -131,7 +131,7 @@ BUILDING SLOW FREQS REPORT:
   # run our fast report generator
   $ENV{HOME} = '/home/bbmass';
   umask(022);
-  run ("./rule-qa/corpus-hourly --dir $logdir");
+  run ("./rule-qa/corpus-hourly --dir $logdir --tag b");
   run ("./rule-qa/automc/gen_info_xml");
 
   # enqueue a request for the slow stuff with the report-generation daemon
