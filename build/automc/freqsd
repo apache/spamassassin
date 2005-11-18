@@ -94,10 +94,14 @@ sub parent_loop {
   # add switches
   my $opts = '';
   if ($job && $job->{metadata}->{dir}) {
+    # if a dir was specified, it's always a "b" (buildbot) mass-check;
+    # that's the assumption here at least
     $opts = "--tag=b --dir ".$job->{metadata}->{dir};
   }
   else {
     $opts = "--tag=n";      # nightly
+    # may also be weekly.  no way to differentiate currently until
+    # AFTER corpus.hourly is run!  TODO?
   }
 
   run ("cd masses/rule-qa ; ./corpus-hourly ".
