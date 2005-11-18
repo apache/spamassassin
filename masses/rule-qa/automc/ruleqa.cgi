@@ -935,6 +935,7 @@ sub get_daterev_description {
         <a name="$dranchor" title="$drtitle" href="!drhref!">$fastinfo->{date}</a></td>
           <td class=daterevtd>
         <a title="$drtitle" href="!drhref!">$fastinfo->{rev}</a></td>
+          <!-- tag=$fastinfo->{tag} -->
           <td class=daterevtd>
         <a title="$drtitle" href="!drhref!">$cdate</a></td>
           <td class=daterevtd>
@@ -1002,7 +1003,7 @@ sub show_daterev_selector_page {
 
     # now match against the microformat data in the HTML, to select
     # the desired subsets of certain types
-    if ($obj->{text} =~ /<mcsubmitters>\s*mc-/) {
+    if ($obj->{text} =~ / tag=b /) {
       push @drs_preflight, $obj;
     }
     elsif ($obj->{text} =~ /<mcwasnet>\s*.net/) {

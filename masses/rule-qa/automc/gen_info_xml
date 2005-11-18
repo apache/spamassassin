@@ -34,6 +34,8 @@ foreach my $dr (@daterevs) {
   # this one is always rebuilt.
   # print "$drdir/fastinfo.xml: creating...\n";
   my $fastinfo = get_fastinfo($dr, $drdir);
+  if (!defined $fastinfo) { next; }
+
   open (OUT, ">$drdir/fastinfo.xml") or die "cannot write $drdir/fastinfo.xml";
   print OUT $fastinfo;
   close OUT or die "failed to write to $drdir/fastinfo.xml";
@@ -88,6 +90,11 @@ sub get_fastinfo {
   my $date = $1;
   my $rev = $2;
   my $tag = $3;
+
+  if (!defined $tag) {
+    warn "dir with no tag! ignored: $dr\n";
+    return;
+  }
 
   my $info = {
     date => $date,
