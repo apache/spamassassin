@@ -176,15 +176,17 @@ my $hdr = $q->header . q{<html><head>
       background: #fff;
       padding: 10px 5px 10px 5px;
     }
-    tr.freqsline_a td {
+
+    tr.freqsline_promo1 td {
       text-align: right;
       padding: 0.1em 0.2em 0.1em 0.2em;
     }
-    tr.freqsline_b td {
+    tr.freqsline_promo0 td {
       text-align: right;
       padding: 0.1em 0.2em 0.1em 0.2em;
-      background: #f0f0d8;
+      color: #aaa;
     }
+    tr.freqsline_promo0 td a { color: #aaa; }
 
     h3 {
       border: 1px solid;
@@ -601,10 +603,19 @@ sub read_freqs_file {
     elsif (/\s+overlap (.*)$/) {
       $freqs_data{$key}{$lastrule}{overlap} .= $_;
     }
-    elsif (/\s+(\S+?)(\:\S+)?\s*$/) {
-      $lastrule = $1;
-      my $subset = $2;
+    elsif (/\s+(|[\+\-] )(\S+?)(\:\S+)?\s*$/) {
+      my $promo = $1;
+      $lastrule = $2;
+      my $subset = $3;
       if ($subset) { $subset =~ s/^://; }
+
+      if ($promo eq '+ ') {
+        $promo = 1;
+      } elsif ($promo eq '- ') {
+        $promo = 0;
+      } else {
+        $promo = 1;      # assume a default otherwise; backwards compat
+      }
 
       my @vals = split;
       if (!exists $freqs_data{$key}{$1}) {
@@ -624,6 +635,7 @@ sub read_freqs_file {
         score => $vals[5],
         username => ($subset_is_user ? $subset : undef),
         age => ($subset_is_age ? $subset : undef),
+        promotable => $promo,
       };
       push @{$freqs_data{$key}{$1}{lines}}, $line;
     }
@@ -745,7 +757,7 @@ sub output_freqs_data_line {
 
   my $LINE_TEMPLATE = qq{
 
-    <tr class=freqsline_[% LINEALT %]>
+    <tr class=freqsline_promo[% PROMO %]>
       <td>
       [% IF RULEDETAIL != '' %]
 	<a href="[% RULEDETAIL %]">&gt;</a>
@@ -804,7 +816,7 @@ sub output_freqs_data_line {
         NAMEREF => create_detail_url($line->{name}),
         USERNAME => $line->{username} || '',
         AGE => $line->{age} || '',
-       LINEALT => (($line_counter & 1) == 0 ? "a" : "b")
+        PROMO => $line->{promo},
     }, \$out) or die $ttk->error();
 
     $line_counter++;
