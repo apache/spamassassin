@@ -415,11 +415,11 @@ foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
         <count class='all'>$num_fa</count>
         <count class='spam'>$num_fs</count>
         <count class='ham'>$num_fn</count>
-        <pc class='all'>$fa</pc>
-        <pc class='spam'>$fs</pc>
-        <pc class='ham'>$fn</pc>
-        <so>$soratio</so>
-        <rank>$ranking{$test}</rank>
+        <pc class='all'>}.sprintf("%.5f", $fa).qq{</pc>
+        <pc class='spam'>}.sprintf("%.5f", $fs).qq{</pc>
+        <pc class='ham'>}.sprintf("%.5f", $fn).qq{</pc>
+        <so>}.sprintf("%.8f", $soratio).qq{</so>
+        <rank>}.sprintf("%.8f", $ranking{$test}).qq{</rank>
         <score>}.($scores{$test}||0).qq{</score>
         <test>$test</test>
         <tflags>$tflags</tflags>

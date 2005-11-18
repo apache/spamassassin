@@ -10,6 +10,7 @@ my $BYMAILCF = '/home/bbmass/bymail/latest.cf';
 my $LOCKDIR = "/home/bbmass/mclocks";
 my $got_lock = undef;
 
+$|=1;
 my $perl = $^X;
 if (!$perl) {
   die "no perl path found in ARGV!";
