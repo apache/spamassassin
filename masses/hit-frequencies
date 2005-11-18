@@ -75,6 +75,7 @@ $opt_s = 0 if ( !defined $opt_s );
 my $cffile = $opt_c || "$FindBin::Bin/../rules";
 
 # "our" so that the require'd file can overwrite them
+my $rules_pl_unparseable;
 our %rules = ();
 our %scores = ();
 
@@ -97,6 +98,10 @@ readscores($cffile);
 
 $ok_lang = lc ($opt_l || $opt_L || '');
 if ($ok_lang eq 'all') { $ok_lang = '.'; }
+
+if ($opt_t && $rules_pl_unparseable) {
+  die "-t requires rules.pl to be parseable";
+}
 
 foreach my $key (keys %rules) {
 
@@ -210,15 +215,23 @@ $freq{$_}++ for keys %freq_spam;
 
 my $test;
 foreach $test (keys %freq) {
-  next unless (exists $rules{$test});           # only valid tests
-  next if (!$opt_a && $rules{$test}->{issubrule});
+  my $parsed_rules_entry = $rules{$test};
+
+  # do not require 'tmp/rules.pl' to have been built from the
+  # exact same ruleset version; this assumption screws up nightly
+  # mass-check reports if they are generated with a different SVN rev
+  # next unless (exists $rules{$test});
+
+  next if (!$opt_a && $test =~ /^__/);
 
   next if $done{$test}; $done{$test} = 1;
   push (@tests, $test);
 
   my $isnice = 0;
-  if ($rules{$test}->{tflags} && $rules{$test}->{tflags} =~ /\bnice\b/) {
-    $isnice = 1;
+  if ($parsed_rules_entry) {
+    if ($parsed_rules_entry->{tflags} && $parsed_rules_entry->{tflags} =~ /\bnice\b/) {
+      $isnice = 1;
+    }
   }
 
   my $fs = $freq_spam{$test}; $fs ||= 0;
@@ -344,8 +357,14 @@ if ($opt_T) {
 }
 
 foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
-  next unless (exists $rules{$test});           # only valid tests
-  next if (!$opt_a && $rules{$test}->{issubrule});
+  my $parsed_rules_entry = $rules{$test};
+
+  # do not require 'tmp/rules.pl' to have been built from the
+  # exact same ruleset version; this assumption screws up nightly
+  # mass-check reports if they are generated with a different SVN rev
+  # next unless (exists $rules{$test});
+  
+  next if (!$opt_a && $test =~ /^__/);
 
   my $fs = $freq_spam{$test}; $fs ||= 0;
   my $fn = $freq_ham{$test}; $fn ||= 0;
@@ -357,17 +376,17 @@ foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
   # match certain tests
   next if ($opt_m && $test !~ m/$opt_m/);
   # match tflags
-  next if ($opt_t && (!$rules{$test}->{tflags} ||
-		      $rules{$test}->{tflags} !~ /$opt_t/));
+  next if ($opt_t && (!$parsed_rules_entry->{tflags} ||
+		      $parsed_rules_entry->{tflags} !~ /$opt_t/));
 
-  if (!$opt_a && !$opt_t && $rules{$test}->{tflags}) {
+  if (!$opt_a && !$opt_t && $parsed_rules_entry->{tflags}) {
     # not net tests
-    next if ($rules{$test}->{tflags} =~ /\bnet\b/ && ($opt_s % 2 == 0));
+    next if ($parsed_rules_entry->{tflags} =~ /\bnet\b/ && ($opt_s % 2 == 0));
 
     # not userconf
     # Jul 13 2005 jm: removed.  this blocks SPF_PASS from showing up!
     # why should userconf rules not be visible in freqs output?
-    # next if ($rules{$test}->{tflags} =~ /\buserconf\b/);
+    # next if ($parsed_rules_entry->{tflags} =~ /\buserconf\b/);
   }
 
   # adjust based on corpora sizes (and cvt to % while we're at it)
@@ -389,7 +408,7 @@ foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
   }
 
   if ($opt_d) {
-    my $tflags = $rules{$test}->{tflags} || ''; # good to know
+    my $tflags = $parsed_rules_entry->{tflags} || ''; # good to know
     print qq{
       <rule>
         <time>}.($rule_times{$test}||0).qq{</time>
@@ -719,7 +738,10 @@ sub readscores {
   };
   if ($@) {
     warn "tmp/rules.pl is unparseable: $@";
-    # but carry on
+    $rules_pl_unparseable = 1;
+    # but carry on anyway (for most uses)
+  } else {
+    $rules_pl_unparseable = 0;
   }
 }
 
