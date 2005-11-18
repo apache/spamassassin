@@ -103,7 +103,8 @@ foreach my $part ($ent->parts) {
   }
 
   open (SAVE, ">$LATEST_CF") or die "cannot save to $LATEST_CF";
-  $part->print_body(\*SAVE);
+
+  print SAVE $part->bodyhandle()->as_string();
   close SAVE or die "cannot write to $LATEST_CF";
   chmod 0666, "$LATEST_CF";
 
