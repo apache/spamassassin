@@ -29,8 +29,8 @@ use vars qw {
 
 # as per http://wiki.apache.org/spamassassin/RulesProjPromotion, for -P
 my $promote_so_min      = 0.95;
-my $promote_hitrate_min = 0.0025;
-my $promote_fprate_max  = 0.0100;
+my $promote_hitrate_min = 0.25;
+my $promote_fprate_max  = 1.00;
 
 sub usage {
   die "hit-frequencies [-c rules dir] [-f] [-m RE] [-M RE] [-X RE] [-l LC]
