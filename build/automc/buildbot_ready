@@ -108,14 +108,14 @@ sub do_stop {
   system ("$perl hit-frequencies -c tstrules -x -p -T -s 0");
 
   use POSIX qw(strftime);
-  my $daterev = strftime("%Y%m%d", gmtime(time)) . "-r$rev";
+  my $daterev = strftime("%Y%m%d", gmtime(time)) . "-r$rev-b";
   print qq{
 
 BUILDING SLOW FREQS REPORT:
 
     http://buildbot.spamassassin.org/ruleqa?daterev=$daterev
 
-  };
+};
 
   my $logdir = "/home/bbmass/tmp/logs-r$rev";
   if (!-d $logdir) {

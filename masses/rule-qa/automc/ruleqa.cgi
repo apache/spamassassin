@@ -973,9 +973,10 @@ sub get_daterev_description {
   }
 
   # if that failed, just use the daterev itself.
-  $dr =~ /^(\d+)-r(\d+)$/;
+  $dr =~ /^(\d+)-r(\d+)-(\S+)$/;
   my $date = $1;
   my $rev = $2;
+  my $tag = $3;
   my $drtitle = "(no info)";
 
   $txt = qq{
@@ -985,7 +986,7 @@ sub get_daterev_description {
         <td class=daterevtd>
        <a title="$drtitle" href="!drhref!">$rev</a></td>
         <td class=daterevtd colspan=3>
-       <a title="$drtitle" href="!drhref!">(no info on this commit)</a></td>
+       <a title="$drtitle" href="!drhref!">(no info on this commit yet)</a></td>
 
   };
 
