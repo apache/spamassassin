@@ -513,6 +513,7 @@ sub readlogs {
 
     my $isspam = ($file eq $spam);
     my $caught;
+    my $restofline;
     my $rules;
     my $score;
 
@@ -535,9 +536,19 @@ sub readlogs {
 
     # note: doing the match with a regexp shaves off no less than
     # 7 opcodes. nice!
+
+    # the additional split() is for this case:
+    # ".  -20 /path  time=1112116980,scantime=0,format=f,reuse=no"
+    # in other words, no hits.  split(' ') cannot deal with this
+    # correctly, seeing (".", "-20", "/path", "time=...etc").  Work
+    # around this by using a literal / / regexp split to discard
+    # the csv stuff we don't want out of the rest of the line.
+
+
     $evalstr .= '
-        ($caught, $score, undef, $rules) = split(\' \', $_, 5);
-        next unless ($caught =~ /^[Y\.]$/ && $rules);
+        ($caught, $score, $restofline) = split(\' \', $_, 3);
+        next unless ($caught =~ /^[Y\.]$/ && $restofline);
+        (undef, $rules) = split(/ /, $restofline, 3);
     ';
 
     if ($opt_f) {
@@ -684,7 +695,7 @@ sub _prettify_overlap_rules {
   my $str = shift;
 
   my @rules = sort split(' ', $str);
-  if ($rules{$rule}->{type} eq 'meta') {
+  if ($rules{$rule} && $rules{$rule}->{type} eq 'meta') {
     # ignore meta-subrules that match the rule they make up.
     # TODO: this is simplistic; it doesn't look to see if those subrules
     # are in turn meta rules with further subrules that should be ignored.
