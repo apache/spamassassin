@@ -8,13 +8,16 @@ use Getopt::Long;
 use vars qw(
     $corpusdir
     $opt_override
+    $opt_tag
 );
 GetOptions(
+    "tag=s" => \$opt_tag,
     "dir=s" => \$corpusdir,
     "override=s" => \$opt_override,
 );
 
 $opt_override ||= '';
+$opt_tag ||= 'n';       # nightly is the default
 
 
 use File::Path;
@@ -468,7 +471,7 @@ URL:
 sub create_outputdir {
   my ($rev, $time) = @_;
   my $revpath = strftime("%Y%m%d", gmtime($time)) . "/r$rev";
-  my $dir = $opt{html} .'/'. $revpath;
+  my $dir = $opt{html} .'/'. $revpath . '-' .$opt_tag;
 
   # print "output dir: $dir\n";
   if (!-d $dir) {

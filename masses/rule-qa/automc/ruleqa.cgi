@@ -83,9 +83,9 @@ my $daterev = $q->url_param('daterev') || '';
 
 # sanitise daterev string
 if (defined $daterev) {
-  $daterev =~ /(\d+)[\/-](r\d+)/; undef $daterev;
+  $daterev =~ /(\d+)[\/-](r\d+)-(\S+)/; undef $daterev;
   if ($2) {
-    $daterev = "$1-$2";
+    $daterev = "$1-$2-$3";
   } else {
     $daterev = undef;
   }
@@ -443,15 +443,15 @@ exit;
 
 sub get_all_daterevs {
   return sort map {
-      s/^.*\/(\d+)\/(r\d+)$/$1-$2/; $_;
-    } grep { /\/(\d+\/r\d+)$/ && -d $_ } (<$conf{html}/2*/r*>);
+      s/^.*\/(\d+)\/(r\d+-\S+)$/$1-$2/; $_;
+    } grep { /\/\d+\/r\d+-\S+$/ && -d $_ } (<$conf{html}/2*/r*>);
 }
 
 sub date_in_direction {
   my ($origdaterev, $dir) = @_;
 
   my $orig;
-  if ($origdaterev && $origdaterev =~ /^(\d+)[\/-](r\d+)$/) {
+  if ($origdaterev && $origdaterev =~ /^(\d+)[\/-](r\d+-\S+)$/) {
     $orig = "$1-$2";
   } else {
     $orig = $daterevs[-1];      # the most recent
