@@ -135,13 +135,13 @@ if ($opt_d) {
 
   print qq{
 
-      <freqs scoreset='$opt_s'>
-        <allmessages>
-          <count class='spam'>$num_spam</count>
-          <count class='ham'>$num_spam</count>
-          <pc class='spam'>$hdr_spam</pc>
-          <pc class='ham'>$hdr_spam</pc>
-        </allmessages>
+    <freqs>
+      <allmessages>
+        <count class='spam'>$num_spam</count>
+        <count class='ham'>$num_spam</count>
+        <pc class='spam'>$hdr_spam</pc>
+        <pc class='ham'>$hdr_spam</pc>
+      </allmessages>
 
   };
 
@@ -420,9 +420,8 @@ foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
         <pc class='ham'>}.sprintf("%.5f", $fn).qq{</pc>
         <so>}.sprintf("%.8f", $soratio).qq{</so>
         <rank>}.sprintf("%.8f", $ranking{$test}).qq{</rank>
-        <score>}.($scores{$test}||0).qq{</score>
+        <score set='$opt_s'>}.($scores{$test}||0).qq{</score>
         <test>$test</test>
-        <tflags>$tflags</tflags>
     };
 
   } elsif ($opt_T) {
@@ -455,6 +454,12 @@ foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
   if ($opt_d) {
     print qq{ </rule> };
   }
+}
+
+if ($opt_d) {
+  print qq{
+    </freqs>
+  };
 }
 exit;
 
