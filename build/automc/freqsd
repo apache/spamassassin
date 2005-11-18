@@ -91,15 +91,18 @@ sub parent_loop {
 
   print "starting faster reports ($$) at ".(scalar localtime time)."\n";
 
-  # add optional --dir switch
-  my $logdir = '';
+  # add switches
+  my $opts = '';
   if ($job && $job->{metadata}->{dir}) {
-    $logdir = "--dir ".$job->{metadata}->{dir};
+    $opts = "--tag=b --dir ".$job->{metadata}->{dir};
+  }
+  else {
+    $opts = "--tag=n";      # nightly
   }
 
   run ("cd masses/rule-qa ; ./corpus-hourly ".
         "--override='output_classes=$parent_reports' ".
-        "$logdir");
+        "$opts");
 
   run ("cd masses ; ./rule-qa/automc/gen_info_xml");
 
@@ -117,10 +120,13 @@ sub child_loop {
 
   print "starting slow reports ($$) at ".(scalar localtime time)."\n";
 
-  # add optional --dir switch
-  my $logdir = '';
+  # add switches
+  my $opts = '';
   if ($job && $job->{metadata}->{dir}) {
-    $logdir = "--dir ".$job->{metadata}->{dir};
+    $opts = "--tag=b --dir ".$job->{metadata}->{dir};
+  }
+  else {
+    $opts = "--tag=n";      # nightly
   }
 
   # create slow reports
