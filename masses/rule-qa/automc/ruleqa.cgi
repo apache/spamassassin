@@ -603,24 +603,24 @@ sub read_freqs_file {
     elsif (/\s+overlap (.*)$/) {
       $freqs_data{$key}{$lastrule}{overlap} .= $_;
     }
-    elsif (/\s+(|[\+\-] )(\S+?)(\:\S+)?\s*$/) {
+    elsif (/ ([\+\-])? *(\S+?)(\:\S+)?\s*$/) {
       my $promo = $1;
       $lastrule = $2;
       my $subset = $3;
       if ($subset) { $subset =~ s/^://; }
 
-      if ($promo eq '+ ') {
+      if ($promo eq '+') {
         $promo = 1;
-      } elsif ($promo eq '- ') {
+      } elsif ($promo eq '-') {
         $promo = 0;
       } else {
         $promo = 1;      # assume a default otherwise; backwards compat
       }
 
       my @vals = split;
-      if (!exists $freqs_data{$key}{$1}) {
-        push (@{$freqs_ordr{$key}}, $1);
-        $freqs_data{$key}{$1} = {
+      if (!exists $freqs_data{$key}{$lastrule}) {
+        push (@{$freqs_ordr{$key}}, $lastrule);
+        $freqs_data{$key}{$lastrule} = {
           lines => [ ]
         };
       }
@@ -637,7 +637,7 @@ sub read_freqs_file {
         age => ($subset_is_age ? $subset : undef),
         promotable => $promo,
       };
-      push @{$freqs_data{$key}{$1}{lines}}, $line;
+      push @{$freqs_data{$key}{$lastrule}{lines}}, $line;
     }
     else {
       warn "ERROR: dunno $_";
@@ -703,10 +703,6 @@ sub get_freqs_for_rule {
   # my $first_round_in_loop = 1;
 
   foreach my $rule (@rules) {
-    # if (!$first_round_in_loop) {
-    # $comment .= "<table class=freqs>";
-    # $first_round_in_loop = 0;
-    # }
     if ($rule && defined $freqs_data{$key}{$rule}) {
       $comment .= rule_anchor($key,$rule);
       $comment .= output_freqs_data_line($freqs_data{$key}{$rule});
@@ -816,7 +812,7 @@ sub output_freqs_data_line {
         NAMEREF => create_detail_url($line->{name}),
         USERNAME => $line->{username} || '',
         AGE => $line->{age} || '',
-        PROMO => $line->{promo},
+        PROMO => $line->{promotable},
     }, \$out) or die $ttk->error();
 
     $line_counter++;
