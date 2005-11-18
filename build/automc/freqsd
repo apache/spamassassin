@@ -136,7 +136,7 @@ sub child_loop {
   # create slow reports
   run ("cd masses/rule-qa; ./corpus-hourly ".
         "--override='output_classes=$child_reports' ".
-        "$logdir");
+        $opts);
 
   print "running 'freqsd-infrequent' tasks ($$) at ".(scalar localtime time)."\n";
 
