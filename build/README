@@ -170,6 +170,8 @@ SPAMASSASSIN RELEASE PROCEDURE
   the release official.  The release manager (that's you) may vote as
   well.  Once there are three or more +1 votes, you may proceed.
 
+- (for a full release) You need 3 +1's from PMC members.
+
 - !WARNING! After the next step, the version number will be considered
   "burned". The number is locked for this particular code.  The same
   number cannot be used for a future different release.  So make sure
@@ -186,13 +188,10 @@ SPAMASSASSIN RELEASE PROCEDURE
 - publish the tarballs.
 
   (for rc and prerelease builds) copy the tarballs to the website.
-
-        cp -p ~/site/released/Mail-SpamAssassin-$version.* \
-            /www/spamassassin.apache.org/devel/
-
-  BTW, note that http://spamassassin.apache.org/devel/ is served via a
-  mirror which takes several hours to catch up.  However that directory is
-  ALSO accessible directly, and immediately, as
+  ASF bylaws prohibit the distribution of files claiming to be
+  releases from the website, without 3 PMC +1 votes, so you need to
+  make it clear that this is an unofficial "test build" by placing it
+  in your public_html dir:
 
         http://people.apache.org/~jm/devel/
 
