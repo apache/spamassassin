@@ -19,13 +19,18 @@
 use strict;
 use FindBin;
 use Getopt::Std;
-getopts("fm:M:X:l:L:pxhc:at:s:ioTSd");
+getopts("fm:M:X:l:L:pxhc:at:s:ioTSdP");
 
 use vars qw {
   $opt_f $opt_m $opt_M $opt_X $opt_p $opt_x $opt_h $opt_l $opt_L $opt_c
   $opt_a $opt_t $opt_s $opt_i $sorting $opt_o $opt_T $opt_S $opt_X
-  $opt_d
+  $opt_d $opt_P
 };
+
+# as per http://wiki.apache.org/spamassassin/RulesProjPromotion, for -P
+my $promote_so_min      = 0.95;
+my $promote_hitrate_min = 0.0025;
+my $promote_fprate_max  = 0.0100;
 
 sub usage {
   die "hit-frequencies [-c rules dir] [-f] [-m RE] [-M RE] [-X RE] [-l LC]
@@ -47,6 +52,7 @@ sub usage {
     -T     display rule times. implies -x, -p
     -o     display hit overlaps against all other rules
     -S     display score-map of hits
+    -P     flag which rules pass the promotion criteria
     -d     XML output.  conflicts with -x, -p
 
     options -l and -L are mutually exclusive.
@@ -132,6 +138,7 @@ if ($opt_d) {
   $hdr_all ||= 0.00001;     # avoid div by 0 in the next 2 statements
   $hdr_spam = ($num_spam / $hdr_all) * 100.0;
   $hdr_ham = ($num_ham / $hdr_all) * 100.0;
+  $opt_P = 1;
 
   print qq{
 
@@ -206,6 +213,7 @@ my $rank_lo = 9999999;
 # variables for wanted/unwanted RANK
 my %wanted;
 my %unwanted;
+my %isnice;
 my %wranks;
 my %uranks;
 
@@ -229,10 +237,13 @@ foreach $test (keys %freq) {
 
   my $isnice = 0;
   if ($parsed_rules_entry) {
-    if ($parsed_rules_entry->{tflags} && $parsed_rules_entry->{tflags} =~ /\bnice\b/) {
+    if ($parsed_rules_entry->{tflags} &&
+            $parsed_rules_entry->{tflags} =~ /\bnice\b/)
+    {
       $isnice = 1;
     }
   }
+  $isnice{$test} = $isnice;
 
   my $fs = $freq_spam{$test}; $fs ||= 0;
   my $fn = $freq_ham{$test}; $fn ||= 0;
@@ -373,20 +384,24 @@ foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
   my $num_fn = $fn;
   my $num_fa = $fa;
 
+  my $tflags = '';
+  if ($parsed_rules_entry) {
+    $tflags = $parsed_rules_entry->{tflags};
+  }
+
   # match certain tests
   next if ($opt_m && $test !~ m/$opt_m/);
   # match tflags
-  next if ($opt_t && (!$parsed_rules_entry->{tflags} ||
-		      $parsed_rules_entry->{tflags} !~ /$opt_t/));
+  next if ($opt_t && (!$tflags || $tflags !~ /$opt_t/));
 
-  if (!$opt_a && !$opt_t && $parsed_rules_entry->{tflags}) {
+  if (!$opt_a && !$opt_t && $tflags) {
     # not net tests
-    next if ($parsed_rules_entry->{tflags} =~ /\bnet\b/ && ($opt_s % 2 == 0));
+    next if ($tflags =~ /\bnet\b/ && ($opt_s % 2 == 0));
 
     # not userconf
     # Jul 13 2005 jm: removed.  this blocks SPF_PASS from showing up!
     # why should userconf rules not be visible in freqs output?
-    # next if ($parsed_rules_entry->{tflags} =~ /\buserconf\b/);
+    # next if ($tflags =~ /\buserconf\b/);
   }
 
   # adjust based on corpora sizes (and cvt to % while we're at it)
@@ -407,8 +422,29 @@ foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
     $soratio{$test} = soratio ($fsadj, $fnadj);
   }
 
+  my $promotable;
+  if ($opt_P) {
+    $promotable = 1;
+
+    if ($isnice{$test}) {
+      if (($soratio{$test} > (1.0 - $promote_so_min))
+          || ($fn < $promote_hitrate_min)
+          || ($fs >= $promote_fprate_max))
+      {
+        $promotable = 0;
+      }
+    } else {
+      if (($soratio{$test} < $promote_so_min)
+          || ($fs < $promote_hitrate_min)
+          || ($fn >= $promote_fprate_max))
+      {
+        $promotable = 0;
+      }
+    }
+  }
+  my $promotable_str = $opt_P ? ($promotable ? '+ ' : '- ') : '';
+
   if ($opt_d) {
-    my $tflags = $parsed_rules_entry->{tflags} || ''; # good to know
     print qq{
       <rule>
         <time>}.($rule_times{$test}||0).qq{</time>
@@ -421,22 +457,25 @@ foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
         <so>}.sprintf("%.8f", $soratio).qq{</so>
         <rank>}.sprintf("%.8f", $ranking{$test}).qq{</rank>
         <score set='$opt_s'>}.($scores{$test}||0).qq{</score>
+        <promotable>$promotable</promotable>
         <test>$test</test>
     };
 
   } elsif ($opt_T) {
-    printf "%7.5f  %7.4f  %7.4f  %7.3f %6.2f  %6.2f  %s\n",
+    printf "%7.5f  %7.4f  %7.4f  %7.3f %6.2f  %6.2f  %s%s\n",
   	$rule_times{$test}||0, $fs, $fn, $soratio, $ranking{$test},
         $scores{$test}||0,
-        $test;
+        $promotable_str, $test;
 
   } elsif ($opt_p) {
-    printf "%7.3f  %7.4f  %7.4f  %7.3f %6.2f  %6.2f  %s\n",
-  	$fa, $fs, $fn, $soratio, $ranking{$test}, $scores{$test}||0, $test;
+    printf "%7.3f  %7.4f  %7.4f  %7.3f %6.2f  %6.2f  %s%s\n",
+  	$fa, $fs, $fn, $soratio, $ranking{$test}, $scores{$test}||0,
+        $promotable_str, $test;
 
   } elsif ($opt_x) {
-    printf "%7d  %7d  %7d  %7.3f %6.2f %6.2f  %s\n",
-  	$fa, $fs, $fn, $soratio, $ranking{$test}, $scores{$test}||0, $test;
+    printf "%7d  %7d  %7d  %7.3f %6.2f %6.2f  %s%s\n",
+  	$fa, $fs, $fn, $soratio, $ranking{$test}, $scores{$test}||0,
+        $promotable_str, $test;
 
   } else {
     printf "%10d  %10d  %10d  %s\n", $fa, $fs, $fn, $test;
