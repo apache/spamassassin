@@ -470,8 +470,8 @@ URL:
 
 sub create_outputdir {
   my ($rev, $time) = @_;
-  my $revpath = strftime("%Y%m%d", gmtime($time)) . "/r$rev";
-  my $dir = $opt{html} .'/'. $revpath . '-' .$opt_tag;
+  my $revpath = strftime("%Y%m%d", gmtime($time)) . "/r$rev-$opt_tag";
+  my $dir = $opt{html} .'/'. $revpath;
 
   # print "output dir: $dir\n";
   if (!-d $dir) {
