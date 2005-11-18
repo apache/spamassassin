@@ -179,6 +179,8 @@ sub locate {
 sub sort_all {
   my ($a1, $a2) = ($a =~ m/(\(.*?\)|\S+)(?::(\S+))?$/);
   my ($b1, $b2) = ($b =~ m/(\(.*?\)|\S+)(?::(\S+))?$/);
+  $a1 =~ s/^[\+\-]//;
+  $b1 =~ s/^[\+\-]//;
 
   my $n = ($a1 cmp $b1) || (($a2 || '') cmp ($b2 || ''));
   if ($a1 =~ /^OVERALL/)			{ $n -= 1000; }
@@ -398,14 +400,14 @@ sub gen_class {
         next unless $ham{$user};
         system("cat $corpusdir/$ham{$user} >> $opt{tmp}/ham.log.$$");
         system("cat $corpusdir/$spam{$user} >> $opt{tmp}/spam.log.$$");
-        open(IN, "./hit-frequencies -Txpa $flags $corpusdir/$spam{$user} $corpusdir/$ham{$user} |");
+        open(IN, "./hit-frequencies -TxpaP $flags $corpusdir/$spam{$user} $corpusdir/$ham{$user} |");
         while(<IN>) {
           chomp;
           push @output, "$_:$user\n";
         }
         close(IN);
       }
-      open(IN, "./hit-frequencies -Txpa $flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
+      open(IN, "./hit-frequencies -TxpaP $flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
       while(<IN>) {
         push @output, $_;
       }
@@ -433,7 +435,7 @@ sub gen_class {
         }
         # print out by age
         chdir "$opt{tree}/masses" or die "cannot chdir $opt{tree}/masses";
-        open(IN, "./hit-frequencies -Txpa $flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
+        open(IN, "./hit-frequencies -TxpaP $flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
         while(<IN>) {
           chomp;
           push @output, "$_:$which\n";
@@ -448,7 +450,7 @@ sub gen_class {
       system("cat " . join(" ", @spam) . " > $opt{tmp}/spam.log.$$");
 
       chdir "$opt{tree}/masses" or die "cannot chdir $opt{tree}/masses";
-      open(IN, "./hit-frequencies -Txpa $flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
+      open(IN, "./hit-frequencies -TxpaP $flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
       while(<IN>) { print(OUT); }
       close(IN);
     }
