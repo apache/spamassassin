@@ -804,7 +804,11 @@ if ( $opt{'debug'} ) {
 }
 
 while (1) {
-  sleep;    # wait for a signal (ie: child's death)
+   # wait for a signal (ie: child's death)
+   # bug 4190: use a time-limited sleep, and call child_handler() even
+   # if haven't received a SIGCHLD, due to inherent race condition
+   sleep 10;
+   child_handler();
 
   if ( defined $got_sighup ) {
     if (defined($opt{'pidfile'})) {
@@ -1766,17 +1770,22 @@ sub kill_handler {
 sub child_handler {
   my ($sig) = @_;
 
-  unless ($main::INHIBIT_LOGGING_IN_SIGCHLD_HANDLER) {
-    logmsg("server hit by SIG$sig");
-  }
+  # do NOT call syslog here unless the child's pid is in our list of known
+  # children.  This is due to syslog-ng brokenness -- bugs 3625, 4237.
 
   # clean up any children which have exited
   while((my $pid = waitpid(-1, WNOHANG)) > 0) {
+    if (!defined $children{$pid}) {
+      # ignore this child; we didn't realise we'd forked it. bug 4237
+      next;
+    }
+
     # remove them from our child listing
     delete $children{$pid};
 
     unless ($main::INHIBIT_LOGGING_IN_SIGCHLD_HANDLER) {
-      logmsg("handled cleanup of child pid $pid");
+      logmsg("handled cleanup of child pid $pid".
+                 ((defined $sig) ? "due to SIG$sig" : ""));
     }
   }
 
