@@ -19,6 +19,7 @@
 
 # Set default spamd configuration.
 SPAMDOPTIONS="-d -c -m5 -H"
+SPAMD_PID=/var/run/spamassassin/spamd.pid
 
 # Source spamd configuration.
 if [ -f /etc/sysconfig/spamassassin ] ; then
@@ -36,10 +37,13 @@ case "$1" in
   start)
 	# Start daemon.
 	echo -n "Starting spamd: "
-	daemon $NICELEVEL spamd $SPAMDOPTIONS
+	daemon $NICELEVEL spamd $SPAMDOPTIONS -r $SPAMD_PID
 	RETVAL=$?
         echo
-        [ $RETVAL = 0 ] && touch /var/lock/subsys/spamassassin
+	if [ $RETVAL = 0 ]; then
+		[ -n "$SPAMD_PID" ] && ln -s $SPAMD_PID /var/run/spamd.pid
+		touch /var/lock/subsys/spamassassin
+	fi
         ;;
   stop)
         # Stop daemons.
@@ -47,7 +51,10 @@ case "$1" in
         killproc spamd
         RETVAL=$?
         echo
-        [ $RETVAL = 0 ] && rm -f /var/lock/subsys/spamassassin
+	if [ $RETVAL = 0 ]; then
+		rm -f /var/lock/subsys/spamassassin
+		rm -f /var/run/spamd.pid
+	fi
         ;;
   restart)
         $0 stop
