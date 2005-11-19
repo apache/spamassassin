@@ -1732,7 +1732,7 @@ sub is_user_rule_sub {
 # Taken from URI and URI::Find
 my $reserved   = q(;/?:@&=+$,[]\#|);
 my $mark       = q(-_.!~*'());                                    #'; emacs
-my $unreserved = "A-Za-z0-9\Q$mark\E\x00-\x08\x0b\x0c\x0e-\x1f";
+my $unreserved = "A-Za-z0-9\Q$mark\E\x00-\x08\x0b\x0c\x0e-\x1a\x1c-\x1f";
 my $uricSet = quotemeta($reserved) . $unreserved . "%";
 
 my $schemeRE = qr/(?:https?|ftp|mailto|javascript|file)/i;
