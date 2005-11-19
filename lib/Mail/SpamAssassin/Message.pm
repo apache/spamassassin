@@ -505,7 +505,7 @@ sub _parse_multipart {
   foreach ( @{$body} ) {
     # if we're on the last body line, or we find any boundary marker,
     # deal with the mime part
-    if ( --$line_count == 0 || (defined $boundary && /^--\Q$boundary\E(?:--|\s*$)/) ) {
+    if ( --$line_count == 0 || (defined $boundary && /^--\Q$boundary\E(?:--)?\s*$/) ) {
       my $line = $_; # remember the last line
 
       # per rfc 1521, the CRLF before the boundary is part of the boundary:
@@ -532,10 +532,10 @@ sub _parse_multipart {
       dbg("found part of type ".$part_msg->{'type'}.", boundary: ".(defined $p_boundary ? $p_boundary : ''));
       $self->parse_body( $msg, $part_msg, $p_boundary, $part_array, 0 );
 
-      # rfc 1521 says /^--boundary--$/ but MUAs have a tendancy to just
-      # require /^--boundary--/ due to malformed messages, so that'll work for
-      # us as well.
-      if (defined $boundary && $line =~ /^--\Q${boundary}\E--/) {
+      # rfc 1521 says /^--boundary--$/, some MUAs may just require /^--boundary--/
+      # but this causes problems with horizontal lines when the boundary is
+      # made up of dashes as well, etc.
+      if (defined $boundary && $line =~ /^--\Q${boundary}\E--\s*$/) {
 	# Make a note that we've seen the end boundary
 	$self->{mime_boundary_state}->{$boundary}--;
         last;
