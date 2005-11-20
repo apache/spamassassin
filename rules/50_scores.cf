@@ -627,6 +627,11 @@ score HEAD_LONG 2.5
 # HTML control test
 score HTML_MESSAGE 0.001
 
+# Informational rules about Received header parsing
+score NO_RELAYS -0.001
+score NO_RECEIVED -0.001
+score UNPARSEABLE_RELAY 0.001
+
 # ok_languages and ok_locales
 score BODY_8BITS 1.500
 score CHARSET_FARAWAY 3.200

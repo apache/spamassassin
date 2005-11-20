@@ -1263,6 +1263,7 @@ sub extract_message_metadata {
   foreach my $item (qw(
 	relays_trusted relays_trusted_str num_relays_trusted
 	relays_untrusted relays_untrusted_str num_relays_untrusted
+	num_relays_unparseable
 	))
   {
     $self->{$item} = $self->{msg}->{metadata}->{$item};

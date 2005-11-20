@@ -83,6 +83,8 @@ sub parse_received_headers {
   $self->{num_relays_untrusted} = 0;
   $self->{relays_untrusted_str} = '';
 
+  $self->{num_relays_unparseable} = 0;
+
   # now figure out what relays are trusted...
   my $trusted = $main->{conf}->{trusted_networks};
   my $internal = $main->{conf}->{internal_networks};
@@ -401,6 +403,7 @@ sub parse_received_line {
   } elsif (/ by .*? with (ESMTPA|ESMTPSA|LMTPA|LMTPSA|ASMTP|HTTP)\;? /i) {
     $auth = $1;
   }
+
 
   if (/^from /) {
     # try to catch enveloper senders
@@ -859,12 +862,10 @@ sub parse_received_line {
       goto enough;
     }
 
-    # Received: from raptor.research.att.com (bala@localhost) by
-    # raptor.research.att.com (SGI-8.9.3/8.8.7) with ESMTP id KAA14788 
-    # for <asrg@example.com>; Fri, 7 Mar 2003 10:37:56 -0500 (EST)
-    if (/^from (\S+) \((\S+\@\S+)\) by (\S+) \(/) { return; }
-
-    # Received: from mmail by argon.connect.org.uk with local (connectmail/exim) id 18tOsg-0008FX-00; Thu, 13 Mar 2003 09:20:06 +0000
+    # Received: from mmail by argon.connect.org.uk with local (connectmail/exim)
+    # id 18tOsg-0008FX-00; Thu, 13 Mar 2003 09:20:06 +0000
+    # Received: from andrew by trinity.supernews.net with local (Exim 4.12)
+    # id 18xeL6-000Dn1-00; Tue, 25 Mar 2003 02:39:00 +0000
     if (/^from (\S+) by (\S+) with local/) { return; }
 
     # Received: from [192.168.1.104] (account nazgul HELO [192.168.1.104])
@@ -969,11 +970,23 @@ sub parse_received_line {
   # ------------------------------------------------------------------------
   # IGNORED LINES: generally local-to-local or non-TCP/IP handovers
 
+  # Received: by faerber.muc.de (OpenXP/32 v3.9.4 (Win32) alpha @
+  # 2003-03-07-1751d); 07 Mar 2003 22:10:29 +0000
+  # Received: by x.x.org (bulk_mailer v1.13); Wed, 26 Mar 2003 20:44:41 -0600
+  # Received: by SPIDERMAN with Internet Mail Service (5.5.2653.19) id <19AF8VY2>; Tue, 25 Mar 2003 11:58:27 -0500
+  # Received: by oak.ein.cz (Postfix, from userid 1002) id DABBD1BED3;
+  # Thu, 13 Feb 2003 14:02:21 +0100 (CET)
+  # ignore any lines starting with "by", we want the "from"s!
+  if (/^by /) { return; }
+
+  # Received: from raptor.research.att.com (bala@localhost) by
+  # raptor.research.att.com (SGI-8.9.3/8.8.7) with ESMTP id KAA14788
+  # for <asrg@example.com>; Fri, 7 Mar 2003 10:37:56 -0500 (EST)
+  # make this localhost-specific, so we know it's safe to ignore
+  if (/^from \S+ \(\S+\@${LOCALHOST}\) by \S+ \(/) { return; }
+
   # from qmail-scanner-general-admin@lists.sourceforge.net by alpha by uid 7791 with qmail-scanner-1.14 (spamassassin: 2.41. Clear:SA:0(-4.1/5.0):. Processed in 0.209512 secs)
   if (/^from \S+\@\S+ by \S+ by uid \S+ /) { return; }
-
-  # Received: by x.x.org (bulk_mailer v1.13); Wed, 26 Mar 2003 20:44:41 -0600
-  if (/^by (\S+) \(bulk_mailer /) { return; }
 
   # Received: from DSmith1204@aol.com by imo-m09.mx.aol.com (mail_out_v34.13.) id 7.53.208064a0 (4394); Sat, 11 Jan 2003 23:24:31 -0500 (EST)
   if (/^from \S+\@\S+ by \S+ /) { return; }
@@ -981,54 +994,46 @@ sub parse_received_line {
   # Received: from Unknown/Local ([?.?.?.?]) by mailcity.com; Fri, 17 Jan 2003 15:23:29 -0000
   if (/^from Unknown\/Local \(/) { return; }
 
-  # Received: by SPIDERMAN with Internet Mail Service (5.5.2653.19) id <19AF8VY2>; Tue, 25 Mar 2003 11:58:27 -0500
-  if (/^by \S+ with Internet Mail Service \(/) { return; }
-
-  # Received: by oak.ein.cz (Postfix, from userid 1002) id DABBD1BED3;
-  # Thu, 13 Feb 2003 14:02:21 +0100 (CET)
-  if (/^by (\S+) \(Postfix, from userid /) { return; }
-
   # Received: from localhost (mailnull@localhost) by x.org (8.12.6/8.9.3) 
   # with SMTP id h2R2iivG093740; Wed, 26 Mar 2003 20:44:44 -0600 
   # (CST) (envelope-from x@x.org)
   # Received: from localhost (localhost [127.0.0.1]) (uid 500) by mail with local; Tue, 07 Jan 2003 11:40:47 -0600
-  if (/^from ${LOCALHOST} \((?:\S+\@)?${LOCALHOST}[\) ]/) { return; }
+  if (/^from ${LOCALHOST} \((?:\S+\@)?${LOCALHOST}[\)\[]/) { return; }
 
   # Received: from olgisoft.com (127.0.0.1) by 127.0.0.1 (EzMTS MTSSmtp
   # 1.55d5) ; Thu, 20 Mar 03 10:06:43 +0100 for <asrg@ietf.org>
   if (/^from \S+ \((?:\S+\@)?${LOCALHOST}\) /) { return; }
 
   # Received: from casper.ghostscript.com (raph@casper [127.0.0.1]) h148aux8016336verify=FAIL); Tue, 4 Feb 2003 00:36:56 -0800
-  # TODO: could use IPv6 localhost
-  if (/^from (\S+) \(\S+\@\S+ \[127\.0\.0\.1\]\) /) { return; }
+  if (/^from (\S+) \(\S+\@\S+ \[${LOCALHOST}\]\) /) { return; }
 
   # Received: from (AUTH: e40a9cea) by vqx.net with esmtp (courier-0.40) for <asrg@ietf.org>; Mon, 03 Mar 2003 14:49:28 +0000
   if (/^from \(AUTH: (\S+)\) by (\S+) with /) { return; }
 
-  # Received: by faerber.muc.de (OpenXP/32 v3.9.4 (Win32) alpha @
-  # 2003-03-07-1751d); 07 Mar 2003 22:10:29 +0000
-  # ignore any lines starting with "by", we want the "from"s!
-  if (/^by \S+ /) { return; }
+  # Received: Message by Barricade wilhelm.eyp.ee with ESMTP id h1I7hGU06122 for <spamassassin-talk@lists.sourceforge.net>; Tue, 18 Feb 2003 09:43:16 +0200
+  if (/^Message by /) {
+    return;    # whatever
+  }
 
   # Received: FROM ca-ex-bridge1.nai.com BY scwsout1.nai.com ;
   # Fri Feb 07 10:18:12 2003 -0800
   if (/^FROM \S+ BY \S+ \; /) { return; }
 
-  # Received: from andrew by trinity.supernews.net with local (Exim 4.12)
-  # id 18xeL6-000Dn1-00; Tue, 25 Mar 2003 02:39:00 +0000
+  # ------------------------------------------------------------------------
+  # HANDOVERS WE KNOW WE CAN'T DEAL WITH: TCP transmission, but to MTAs that
+  # just don't log enough info for us to use (ie. no IP address present).
+  # Note: "goto unparseable" is strongly recommended here, unless you're sure
+  # the regexp won't match something in the field; otherwise ALL_TRUSTED may
+  # fire even in the presence of an unparseable Received header.
+
   # Received: from CATHY.IJS.SI by CATHY.IJS.SI (PMDF V4.3-10 #8779) id <01KTSSR50NSW001MXN@CATHY.IJS.SI>; Fri, 21 Mar 2003 20:50:56 +0100
   # Received: from MATT_LINUX by hippo.star.co.uk via smtpd (for mail.webnote.net [193.120.211.219]) with SMTP; 3 Jul 2002 15:43:50 UT
   # Received: from cp-its-ieg01.mail.saic.com by cpmx.mail.saic.com for me@jmason.org; Tue, 23 Jul 2002 14:09:10 -0700
-  if (/^from \S+ by \S+ (?:with|via|for|\()/) { return; }
+  if (/^from \S+ by \S+ (?:with|via|for|\()/) { goto unparseable; }
 
   # Received: from virtual-access.org by bolero.conactive.com ; Thu, 20 Feb 2003 23:32:58 +0100
   if (/^from (\S+) by (\S+) *\;/) {
-    return;	# can't trust this
-  }
-
-  # Received: Message by Barricade wilhelm.eyp.ee with ESMTP id h1I7hGU06122 for <spamassassin-talk@lists.sourceforge.net>; Tue, 18 Feb 2003 09:43:16 +0200
-  if (/^Message by /) {
-    return;	# whatever
+    goto unparseable;  # can't trust this
   }
 
   # ------------------------------------------------------------------------
@@ -1046,6 +1051,10 @@ sub parse_received_line {
 
   dbg ("received-header: unknown format: $_");
   # and skip the line entirely!  We can't parse it...
+
+unparseable:
+
+  $self->{num_relays_unparseable}++;
   return;
 
   # ------------------------------------------------------------------------
