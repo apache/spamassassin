@@ -38,8 +38,6 @@ usage: rule-hits-over-time [options] --rule rulename log1 [log2 ...]
   --size_x=pixels       width of output graphs, in pixels (def: 800)
   --size_y=pixels       height of ONE of the output graphs, in pixels
                         (default: 400)
-  --as_counts           Do not scale to a percentage of messages;
-                        report absolute messages hit per time period
   --cgi                 CGI output, to stdout with HTTP headers
   --text                text output only
 };
@@ -47,7 +45,7 @@ usage: rule-hits-over-time [options] --rule rulename log1 [log2 ...]
 
 use vars qw(
         $opt_rule $opt_size_x $opt_size_y $opt_text $opt_cgi
-        $opt_period $opt_as_counts $opt_scale_period
+        $opt_period $opt_scale_period
         $opt_debug
 );
 
@@ -57,7 +55,6 @@ GetOptions(
         'size_y=i',
         'text',
         'cgi',
-        'as_counts',
         'scale_period=i',
         'period=i',
         'debug'
@@ -78,7 +75,6 @@ my $period = $opt_period || 3600;
 
 my $graph_x                         = $opt_size_x || 800;
 my $graph_y                         = $opt_size_y || 400;
-my $scale_to_total_volume           = ($opt_as_counts ? 0 : 1);
 
 my $fname_counter = 1;
 my %graph_png_data = ();
@@ -200,7 +196,6 @@ exit;
 
 sub summarise {
   foreach my $bucket (sort keys %allbuckets) {
-    my $total_n = 0;
     my @cols = ();
     foreach my $file (@allfiles) {
       my $res = $allresults{$file}->{$bucket};
@@ -208,15 +203,15 @@ sub summarise {
       my $sn;
 
       if (!$res) {
-       $sn = $sy = -1;
+        $sn = $sy = -1;
       }
       elsif ($res !~ /^y(\d+)n(\d+)$/) {
         warn "bad results: $res for $file $bucket";
-       next;
+        next;
       }
       else {
-       $sy = $1;
-       $sn = $2;
+        $sy = $1;
+        $sn = $2;
       }
 
       if (!defined $sy && !defined $sn) {
@@ -227,26 +222,12 @@ sub summarise {
         $sn = $sy = -1;
       }
 
-      if ($scale_to_total_volume) {
-        if ($sy >= 0 && ($sy+$sn) > 0) {
-          my $frac = $sy / ($sy + $sn);
-          push @cols, ($frac * 100.0);
-        }
-        else {
-          push @cols, -1;
-        }
-        $total_n = 100;
+      if (($sy+$sn) > 0) {
+        push @cols, ($sy / ($sy + $sn)) * 100.0;
       }
       else {
-        $total_n += $sn;
-        push (@cols, $sy);
+        push @cols, -1;
       }
-    }
-
-    if ($scale_to_total_volume) {
-      @cols = (@cols);     # total_n is always "100"
-    } else {
-      @cols = ($total_n, @cols);
     }
 
     if ($opt_text) {
@@ -366,9 +347,7 @@ sub create_gp {
 
   my $mailtype = 'mail';
   if ($title =~ /\b(ham|spam)\b/) { $mailtype = $1; }
-
-  my $y_label = ($scale_to_total_volume ?
-            "\%age of $mailtype in period" : "Num $mailtype messages in period");
+  my $y_label = "\%age of $mailtype in period";
 
   open (GP, "| gnuplot - > $tmpdir/gp.log 2>&1") or die "cannot run gnuplot";
 
