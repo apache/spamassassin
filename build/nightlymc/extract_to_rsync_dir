@@ -34,3 +34,8 @@ rm -rf $RSYNC_DIR/$subdir
 echo Command: $SVN export --non-interactive -r $REV $REPO_URL $RSYNC_DIR/$subdir
 $SVN export --non-interactive -r $REV $REPO_URL $RSYNC_DIR/$subdir
 
+# create "svn info" file for mass-check
+$SVN info --non-interactive -r $REV $REPO_URL \
+    > $RSYNC_DIR/$subdir/masses/svninfo.tmp \
+    < /dev/null
+
