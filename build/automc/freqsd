@@ -83,8 +83,14 @@ if ($pidfile) {
   close OUT or die "cannot save $pidfile";
 }
 
+sub logit {
+  print "LOG: ".join('', @_)." ($$) at ".(scalar localtime time)."\n";
+}
+
+# ---------------------------------------------------------------------------
+
 $| = 1;
-print "freqsd starting: process $$\n";
+logit "freqsd starting";
 
 if ($am_parent) {
   while (1) {
@@ -96,42 +102,32 @@ else {
     child_loop();
   }
 }
+die "oops! cannot get here";
 
 # ---------------------------------------------------------------------------
-
-sub logit {
-  print "LOG: ".join('', @_)." ($$) at ".(scalar localtime time)."\n";
-}
 
 sub parent_loop {
   my $job = $dq_fast->wait_for_queued_job($idle_sleep);
 
-  # add switches
-  my $opts = '';
   if ($job && $job->{metadata}->{dir}) {
-    logit "starting requested faster reports";
     # if a dir was specified, it's always a "b" (buildbot) mass-check;
     # that's the assumption here at least
-    $opts = "--tag=b --dir ".$job->{metadata}->{dir};
+    logit "starting buildbot-requested faster reports";
+    run_corpus_hourly($parent_reports, "--tag=b --dir ".$job->{metadata}->{dir});
   }
   else {
-    logit "starting idle-time faster reports";
-    $opts = "--tag=n";      # nightly
+    logit "starting rsync faster reports";
+    run_corpus_hourly($parent_reports, "--tag=n");
     # may also be weekly.  no way to differentiate currently until
     # AFTER corpus.hourly is run!  TODO?
   }
 
-  run ("cd masses/rule-qa ; ./corpus-hourly ".
-        "--override='output_classes=$parent_reports' ".
-        "$opts");
-
+  # and the XML indices
   run ("cd masses ; ./rule-qa/automc/gen_info_xml");
 
-  if ($job) {
-    $job->finish();
-  }
-
   logit "completed faster reports";
+
+  if ($job) { $job->finish(); }
 }
 
 # ---------------------------------------------------------------------------
@@ -140,31 +136,30 @@ sub child_loop {
   my $job = $dq_fast->wait_for_queued_job($idle_sleep);
 
   # add switches
-  my $opts = '';
   if ($job && $job->{metadata}->{dir}) {
-    logit "starting requested slow reports";
-    $opts = "--tag=b --dir ".$job->{metadata}->{dir};
+    logit "starting buildbot-requested slow reports";
+    run_corpus_hourly($child_reports, "--tag=b --dir ".$job->{metadata}->{dir});
   }
   else {
-    logit "starting idle-time slow reports";
-    $opts = "--tag=n";      # nightly
-  }
+    # create slow reports
+    logit "starting rsync slow reports";
+    run_corpus_hourly($child_reports, "--tag=n");
 
-  # create slow reports
-  run ("cd masses/rule-qa; ./corpus-hourly ".
-        "--override='output_classes=$child_reports' ".
-        $opts);
-
-  logit "running 'freqsd-infrequent' tasks";
-
-  # recreate the corpus link-farm
-  run ("build/automc/freqsd-infrequent");
-
-  if ($job) {
-    $job->finish();
+    # recreate the corpus link-farm
+    logit "running 'freqsd-infrequent' tasks";
+    run ("build/automc/freqsd-infrequent");
   }
 
   logit "completed slow reports";
+
+  if ($job) { $job->finish(); }
+}
+
+sub run_corpus_hourly {
+  my ($reports, $opts) = @_;
+  run ("cd masses/rule-qa ; ./corpus-hourly ".
+        "--override='output_classes=$reports' ".
+        "$opts");
 }
 
 # ---------------------------------------------------------------------------
