@@ -9,10 +9,12 @@ use IPC::DirQueue;
 use vars qw(
     $pidfile
     $opt_enq
+    $opt_kill
 );
 GetOptions(
     "pidfile=s" => \$pidfile,
     "enq=s" => \$opt_enq,
+    "kill" => \$opt_kill,
 );
 
 my $dq_fast = IPC::DirQueue->new({ dir => "/home/automc/freqsd/dq_fast" });
@@ -46,6 +48,18 @@ if ($opt_enq) {
   exit;
 }
 
+if ($opt_kill) {
+  die "no -pidfile" unless $pidfile;
+  open (IN, "<$pidfile") or die "cannot read $pidfile";
+  my $pid = <IN> + 0;
+  close IN;
+  if ($pid < 2) {
+    die "invalid pid: '$pid'";
+  }
+  kill (15, $pid) or die "kill $pid failed: $!";
+  exit;
+}
+
 # ---------------------------------------------------------------------------
 
 sub run;
@@ -59,10 +73,9 @@ elsif ($child_pid != 0) {
 }
 else {
   $am_parent = 1;
+  $SIG{INT} = \&sigterm_handler;
+  $SIG{TERM} = \&sigterm_handler;
 }
-
-$SIG{INT} = \&sigterm_handler;
-$SIG{TERM} = \&sigterm_handler;
 
 if ($pidfile) {
   open(OUT, ">$pidfile") or die "cannot write to $pidfile";
@@ -86,19 +99,23 @@ else {
 
 # ---------------------------------------------------------------------------
 
+sub logit {
+  print "LOG: ".join('', @_)." ($$) at ".(scalar localtime time)."\n";
+}
+
 sub parent_loop {
   my $job = $dq_fast->wait_for_queued_job($idle_sleep);
-
-  print "starting faster reports ($$) at ".(scalar localtime time)."\n";
 
   # add switches
   my $opts = '';
   if ($job && $job->{metadata}->{dir}) {
+    logit "starting requested faster reports";
     # if a dir was specified, it's always a "b" (buildbot) mass-check;
     # that's the assumption here at least
     $opts = "--tag=b --dir ".$job->{metadata}->{dir};
   }
   else {
+    logit "starting idle-time faster reports";
     $opts = "--tag=n";      # nightly
     # may also be weekly.  no way to differentiate currently until
     # AFTER corpus.hourly is run!  TODO?
@@ -110,11 +127,11 @@ sub parent_loop {
 
   run ("cd masses ; ./rule-qa/automc/gen_info_xml");
 
-  print "completed faster reports ($$) at ".(scalar localtime time)."\n";
-
   if ($job) {
     $job->finish();
   }
+
+  logit "completed faster reports";
 }
 
 # ---------------------------------------------------------------------------
@@ -122,14 +139,14 @@ sub parent_loop {
 sub child_loop {
   my $job = $dq_fast->wait_for_queued_job($idle_sleep);
 
-  print "starting slow reports ($$) at ".(scalar localtime time)."\n";
-
   # add switches
   my $opts = '';
   if ($job && $job->{metadata}->{dir}) {
+    logit "starting requested slow reports";
     $opts = "--tag=b --dir ".$job->{metadata}->{dir};
   }
   else {
+    logit "starting idle-time slow reports";
     $opts = "--tag=n";      # nightly
   }
 
@@ -138,16 +155,16 @@ sub child_loop {
         "--override='output_classes=$child_reports' ".
         $opts);
 
-  print "running 'freqsd-infrequent' tasks ($$) at ".(scalar localtime time)."\n";
+  logit "running 'freqsd-infrequent' tasks";
 
   # recreate the corpus link-farm
   run ("build/automc/freqsd-infrequent");
 
-  print "completed slow reports ($$) at ".(scalar localtime time)."\n";
-
   if ($job) {
     $job->finish();
   }
+
+  logit "completed slow reports";
 }
 
 # ---------------------------------------------------------------------------
