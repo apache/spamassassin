@@ -111,6 +111,12 @@ sub get_fastinfo {
   if (-f "$drdir/DETAILS.all") {
     read_submitters("$drdir/DETAILS.all", $info);
   }
+  elsif (-f "$drdir/NET.all") {
+    # this can happen when a weekly mass-check shares a rev with a previous or
+    # later night's nightly m-c; all the non-weekly data winds up under another
+    # date.
+    read_submitters("$drdir/NET.all", $info);
+  }
 
   return XMLout($info);
 }
