@@ -11,7 +11,7 @@ start() {
     HOME=/home/automc
     export HOME
 
-    su automc -c "./build/automc/freqsd" \
+    su automc -c "./build/automc/freqsd -pidfile /home/automc/freqsd/pid" \
 	> /home/automc/freqsd/log 2>&1 \
 	< /dev/null &
 
@@ -20,9 +20,11 @@ start() {
 }
 
 stop() {
-    pkill -15 automc/freqsd
-    RETVAL=$?
-    return $RETVAL
+    cd /home/automc/svn/spamassassin
+    su automc -c "./build/automc/freqsd -pidfile /home/automc/freqsd/pid -kill"
+
+    sleep 1
+    pkill -15 automc/freqsd            # just in case
 }
 
 case "$1" in
