@@ -1,0 +1,36 @@
+#!/bin/sh
+
+# Cron script for "release".  See "build/nightlymc/crontab.txt"
+
+RSYNC_DIR=/home/corpus-rsync/tagged_builds
+REPO_URL=http://svn.apache.org/repos/asf/spamassassin/trunk
+
+SVN=/opt/subversion-1.1.4/bin/svn
+
+type="$1"
+versfile="$2"
+
+if [ -z "$type" ]; then
+  echo "Type not specified" >&2
+  exit 1
+fi
+
+if [ ! -f $versfile ]; then
+  echo "Version file not specified" >&2
+  exit 1
+fi
+
+subdir=${type}_mass_check
+
+echo "Type: $type"
+echo "Version File: $versfile"
+echo "Subdir: $subdir"
+
+REV=`tail -1 $versfile | awk '{print $2}'`
+
+echo "Revision: $REV"
+
+rm -rf $RSYNC_DIR/$subdir
+echo Command: $SVN export --non-interactive -r $REV $REPO_URL $RSYNC_DIR/$subdir
+$SVN export --non-interactive -r $REV $REPO_URL $RSYNC_DIR/$subdir
+
