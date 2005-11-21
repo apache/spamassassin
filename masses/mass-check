@@ -233,10 +233,12 @@ chomp $when;
 chomp $host;
 my $revision = get_current_svn_revision();
 my $cmdline = join(' ',@ORIG_ARGV); $cmdline =~ s/\s+/ /gs;
+my $isowhen = strftime("%Y%m%dT%H%M%SZ", gmtime(time)); # better
 
 my $log_header = "# mass-check results from $who\@$where, on $when\n" .
 		 "# M:SA version ".$spamtest->Version()."\n" .
 		 "# SVN revision: $revision\n" .
+                 "# Date: $isowhen\n" .
 		 "# Perl version: $] on $Config{archname}\n" .
                  "# Switches: '$cmdline'\n";
 
