@@ -2546,7 +2546,9 @@ sub do_meta_tests {
       next if (grep( $metas{$_}, @{ $rule_deps{ $metas[$i] } }));
 
       # Add this meta rule to the eval line
-      $evalstr .= '  if (my $result = '.$meta{$metas[$i]}.') { $self->got_hit (q#'.$metas[$i].'#, "", $result); }'."\n";
+      $evalstr .= '  $result = '.$meta{$metas[$i]}.";\n";
+      $evalstr .= '  if ($result) { $self->got_hit (q#'.$metas[$i].'#, "", $result); }'."\n";
+
       splice @metas, $i--, 1;    # remove this rule from our list
     }
   } while ($#metas != $count && $#metas > -1); # run until we can't go anymore
@@ -2582,6 +2584,7 @@ sub do_meta_tests {
         # crashes meta tests.
 
         my (\$self) = \@_;
+	my \$result;
 
         $evalstr;
     }
