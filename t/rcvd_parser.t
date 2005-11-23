@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rcvd_parser");
-use Test; BEGIN { plan tests => 45 };
+use Test; BEGIN { plan tests => 46 };
 
 
 use strict;
@@ -577,6 +577,17 @@ Received: FROM [192.168.1.24] (s233-64-90-216.try.wideopenwest.com [64.233.216.9
 } => q{
 
   [ ip=141.211.14.81 rdns=smtp.mail.umich.edu helo=hackers.mr.itd.umich.edu by=madman.mr.itd.umich.edu ident= envfrom= id=434B508E.174A6.13932 auth= ] [ ip=64.233.216.90 rdns=s233-64-90-216.try.wideopenwest.com helo=!192.168.1.24! by=hackers.mr.itd.umich.edu ident= envfrom= id=434B5051.8CDE5.15436 auth= ]
+
+},
+q{
+
+Received: from TCE-E-7-182-54.bta.net.cn(202.106.182.54) via SMTP
+	by st.tahina.priv.at, id smtpdEDUB8h; Sun Nov 13 14:50:12 2005
+Received: from pl027.nas934.d-osaka.nttpc.ne.jp(61.197.82.27), claiming to be "foo.woas.net" via SMTP
+	by st.tahina.priv.at, id smtpd1PBsZT; Sun Nov 13 15:38:52 2005
+} => q{
+
+  [ ip=202.106.182.54 rdns=TCE-E-7-182-54.bta.net.cn helo= by=st.tahina.priv.at ident= envfrom= id=smtpdEDUB8h auth= ] [ ip=61.197.82.27 rdns=pl027.nas934.d-osaka.nttpc.ne.jp helo=foo.woas.net by=st.tahina.priv.at ident= envfrom= id=smtpd1PBsZT auth= ]
 
 }
 );
