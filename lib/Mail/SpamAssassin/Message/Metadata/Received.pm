@@ -935,6 +935,19 @@ sub parse_received_line {
     }
   }
 
+  # simta: http://rsug.itd.umich.edu/software/simta/
+  # Note the ugly uppercase FROM/BY/ID
+  # Received: FROM hackers.mr.itd.umich.edu (smtp.mail.umich.edu [141.211.14.81])
+  #  BY madman.mr.itd.umich.edu ID 434B508E.174A6.13932 ; 11 Oct 2005 01:41:34 -0400
+  # Received: FROM [192.168.1.24] (s233-64-90-216.try.wideopenwest.com [64.233.216.90])
+  #  BY hackers.mr.itd.umich.edu ID 434B5051.8CDE5.15436 ; 11 Oct 2005 01:40:33 -0400
+  if (/^FROM (\S+) \((\S+) \[(${IP_ADDRESS})\]\) BY (\S+) (?:ID (\S+) )?/ ) {
+      $mta_looked_up_dns = 1;
+      $helo = $1; $rdns = $2; $ip = $3; $by = $4;
+      $id = $5 if (defined $5);
+      goto enough;
+  }
+
   # ------------------------------------------------------------------------
   # IGNORED LINES: generally local-to-local or non-TCP/IP handovers
 
