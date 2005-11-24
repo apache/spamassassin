@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rcvd_parser");
-use Test; BEGIN { plan tests => 46 };
+use Test; BEGIN { plan tests => 47 };
 
 
 use strict;
@@ -585,9 +585,21 @@ Received: from TCE-E-7-182-54.bta.net.cn(202.106.182.54) via SMTP
 	by st.tahina.priv.at, id smtpdEDUB8h; Sun Nov 13 14:50:12 2005
 Received: from pl027.nas934.d-osaka.nttpc.ne.jp(61.197.82.27), claiming to be "foo.woas.net" via SMTP
 	by st.tahina.priv.at, id smtpd1PBsZT; Sun Nov 13 15:38:52 2005
+
 } => q{
 
   [ ip=202.106.182.54 rdns=TCE-E-7-182-54.bta.net.cn helo= by=st.tahina.priv.at ident= envfrom= id=smtpdEDUB8h auth= ] [ ip=61.197.82.27 rdns=pl027.nas934.d-osaka.nttpc.ne.jp helo=foo.woas.net by=st.tahina.priv.at ident= envfrom= id=smtpd1PBsZT auth= ]
+
+},
+q{
+
+Received: from [206.51.230.145] (helo=t-online.de)
+	by mxeu2.kundenserver.de with ESMTP (Nemesis),
+	id 0MKpdM-1CkRpr14PF-000608; Fri, 31 Dec 2004 19:49:15 +0100
+
+} => q{
+
+  [ ip=206.51.230.145 rdns= helo=t-online.de by=mxeu2.kundenserver.de ident= envfrom= id=0MKpdM-1CkRpr14PF-000608 auth= ]
 
 }
 );
