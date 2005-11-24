@@ -851,13 +851,13 @@ sub parse_received_line {
 
     # Received: from ironport.com (10.1.1.5) by a50.ironport.com with ESMTP; 01 Apr 2003 12:00:51 -0800
     # Received: from dyn-81-166-39-132.ppp.tiscali.fr (81.166.39.132) by cpmail.dk.tiscali.com (6.7.018)
-    # note: must be before 'Content Technologies SMTPRS' rule, cf. bug 2787
     if (/^from ([^\d]\S+) \((${IP_ADDRESS})\) by (\S+) /) {
       $helo = $1; $ip = $2; $by = $3; goto enough;
     }
 
     # Received: from scv3.apple.com (scv3.apple.com) by mailgate2.apple.com (Content Technologies SMTPRS 4.2.1) with ESMTP id <T61095998e1118164e13f8@mailgate2.apple.com>; Mon, 17 Mar 2003 17:04:54 -0800
-    if (/^from (\S+) \((\S+)\) by (\S+) \(/) {
+    # bug 4704: Only let this match Content Technologies so it stops breaking things that come after it by matching first
+    if (/^from (\S+) \((\S+)\) by (\S+) \(Content Technologies /) {
       return;		# useless without the $ip anyway!
       #$helo = $1; $rdns = $2; $by = $3; goto enough;
     }
@@ -925,8 +925,17 @@ sub parse_received_line {
     }
 
     # Received: from [212.87.144.30] (account seiz [212.87.144.30] verified) by x.imd.net (CommuniGate Pro SMTP 4.0.3) with ESMTP-TLS id 5026665 for spamassassin-talk@lists.sourceforge.net; Wed, 15 Jan 2003 16:27:05 +0100
-    if (/^from \[(${IP_ADDRESS})\] \([^\)]+\) by (\S+) /) {
-      $ip = $1; $by = $2; goto enough;
+    # bug 4704 This pattern was checked as just an Exim format, but it does exist elsewhere
+    # Received: from [206.51.230.145] (helo=t-online.de)
+    #   by mxeu2.kundenserver.de with ESMTP (Nemesis),
+    #  id 0MKpdM-1CkRpr14PF-000608; Fri, 31 Dec 2004 19:49:15 +0100
+    # Received: from [218.19.142.229] (helo=hotmail.com ident=yiuhyotp)
+    #   by yzordderrex with smtp (Exim 3.35 #1 (Debian)) id 194BE5-0005Zh-00; Sat, 12 Apr 2003 03:58:53 +0100
+    if (/^from \[(${IP_ADDRESS})\] \(([^\)]+)\) by (\S+) /) {
+      $ip = $1; my $sub = $2; $by = $3;
+      $sub =~ s/helo=(\S+)// and $helo = $1;
+      $sub =~ s/ident=(\S*)// and $ident = $1;
+      goto enough;
     }
 
     # Received: from mtsbp606.email-info.net (?dXqpg3b0hiH9faI2OxLT94P/YKDD3rQ1?@64.253.199.166) by kde.informatik.uni-kl.de with SMTP; 30 Apr 2003 15:06:29
