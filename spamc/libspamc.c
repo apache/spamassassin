@@ -536,16 +536,15 @@ static int _message_read_bsmtp(int fd, struct message *m)
     if (m->raw_len > m->max_len)
 	return EX_TOOBIG;
     m->pre = m->raw;
-    for (i = 0; i < m->raw_len - 6; i++) {
-	if ((m->raw[i] == '\n') &&
-	    (m->raw[i + 1] == 'D' || m->raw[i + 1] == 'd') &&
-	    (m->raw[i + 2] == 'A' || m->raw[i + 2] == 'a') &&
-	    (m->raw[i + 3] == 'T' || m->raw[i + 3] == 't') &&
-	    (m->raw[i + 4] == 'A' || m->raw[i + 4] == 'a') &&
-	    ((m->raw[i + 5] == '\r' && m->raw[i + 6] == '\n')
-	     || m->raw[i + 5] == '\n')) {
+    for (i = 6; i < m->raw_len; i++) {
+	if ((m->raw[i - 6] == '\n') &&
+	    (m->raw[i - 5 ] == 'D' || m->raw[i - 5] == 'd') &&
+	    (m->raw[i - 4] == 'A' || m->raw[i - 4] == 'a') &&
+	    (m->raw[i - 3] == 'T' || m->raw[i - 3] == 't') &&
+	    (m->raw[i - 2] == 'A' || m->raw[i - 2] == 'a') &&
+	    ((m->raw[i - 1] == '\r' && m->raw[i] == '\n')
+	     || m->raw[i - 1] == '\n')) {
 	    /* Found it! */
-	    i += 6;
 	    if (m->raw[i - 1] == '\r')
 		i++;
 	    m->pre_len = i;
