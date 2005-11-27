@@ -852,7 +852,7 @@ _handle_spamd_header(struct message *m, int flags, char *buf, int len,
 	}
 	return EX_OK;
     }
-    else if (sscanf(buf, "DidSet: %s", didset_ret) == 1) {
+    else if (sscanf(buf, "DidSet: %14s", didset_ret) == 1) {
       if (strstr(didset_ret, "local")) {
 	  *didtellflags |= SPAMC_SET_LOCAL;
 	}
@@ -860,7 +860,7 @@ _handle_spamd_header(struct message *m, int flags, char *buf, int len,
 	  *didtellflags |= SPAMC_SET_REMOTE;
 	}
     }
-    else if (sscanf(buf, "DidRemove: %s", didremove_ret) == 1) {
+    else if (sscanf(buf, "DidRemove: %14s", didremove_ret) == 1) {
         if (strstr(didremove_ret, "local")) {
 	  *didtellflags |= SPAMC_REMOVE_LOCAL;
 	}
