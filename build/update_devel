@@ -29,9 +29,8 @@ perl Makefile.PL < /dev/null || exit $?
 make version.env || exit $?
 . version.env
 
-# $VERSION will be x.y.z for released not marked $IS_DEVEL_BUILD, else
-# x-y-latest while $DIST_VERSION is always the x.y.z variant.
-VERSION=`echo $FULL_VERSION | perl -pe 's/\.\d+(-.*)-r\d+$/-dev/'`
+# "3.1.0-pre2-r202405" should appear as "3.1.0-pre2" after this!
+VERSION=`echo $FULL_VERSION | perl -pe 's/-r\d+$//'`
 
 DISTDNAME=$DISTNAME-$DIST_VERSION
 DISTVNAME=$DISTNAME-$VERSION
@@ -49,7 +48,7 @@ echo $VERSION > $WEBDIR/latest_version
 rm -f $DISTVNAME.*
 
 make distdir || exit $?
-tar -cWvf   $DISTVNAME.tar $DISTDNAME         || exit $?
+tar -cvf   $DISTVNAME.tar $DISTDNAME         || exit $?
 
 gzip  -f9vc $DISTVNAME.tar > $DISTVNAME.tar.gz  || exit $?
 bzip2 -f9vc $DISTVNAME.tar > $DISTVNAME.tar.bz2 || exit $?
