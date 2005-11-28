@@ -1,0 +1,98 @@
+# SpamAssassin - URIDNSBL rules
+#
+# Please don't modify this file as your changes will be overwritten with
+# the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
+# See 'perldoc Mail::SpamAssassin::Conf' for details.
+#
+# <@LICENSE>
+# Copyright 2004 Apache Software Foundation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+#
+###########################################################################
+
+# Requires the Mail::SpamAssassin::Plugin::URIDNSBL plugin be loaded.
+# Note that this plugin defines a new config setting, 'uridnsbl',
+# which lists the zones to look up in advance.  The rules will
+# not hit unless each rule has a corresponding 'uridnsbl' line.
+
+ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
+
+# URI-DNSBL lookups can take a *maximum* of this many seconds past the
+# normal DNSBL lookups.
+uridnsbl_timeout	2
+
+uridnsbl	URIBL_SBL	sbl.spamhaus.org.	TXT
+body		URIBL_SBL	eval:check_uridnsbl('URIBL_SBL')
+describe	URIBL_SBL	Contains an URL listed in the SBL blocklist
+tflags		URIBL_SBL	net
+
+urirhssub	URIBL_SC_SURBL	multi.surbl.org.	A   2
+body		URIBL_SC_SURBL	eval:check_uridnsbl('URIBL_SC_SURBL')
+describe	URIBL_SC_SURBL	Contains an URL listed in the SC SURBL blocklist
+tflags		URIBL_SC_SURBL	net
+
+urirhssub	URIBL_WS_SURBL	multi.surbl.org.	A   4
+body		URIBL_WS_SURBL	eval:check_uridnsbl('URIBL_WS_SURBL')
+describe	URIBL_WS_SURBL	Contains an URL listed in the WS SURBL blocklist
+tflags		URIBL_WS_SURBL	net
+
+urirhssub	URIBL_PH_SURBL	multi.surbl.org.	A   8
+body		URIBL_PH_SURBL	eval:check_uridnsbl('URIBL_PH_SURBL')
+describe	URIBL_PH_SURBL	Contains an URL listed in the PH SURBL blocklist
+tflags		URIBL_PH_SURBL	net
+
+urirhssub	URIBL_OB_SURBL	multi.surbl.org.	A   16
+body		URIBL_OB_SURBL	eval:check_uridnsbl('URIBL_OB_SURBL')
+describe	URIBL_OB_SURBL	Contains an URL listed in the OB SURBL blocklist
+tflags		URIBL_OB_SURBL	net
+
+urirhssub	URIBL_AB_SURBL	multi.surbl.org.	A   32
+body		URIBL_AB_SURBL	eval:check_uridnsbl('URIBL_AB_SURBL')
+describe	URIBL_AB_SURBL	Contains an URL listed in the AB SURBL blocklist
+tflags		URIBL_AB_SURBL	net
+
+urirhssub	URIBL_JP_SURBL	multi.surbl.org.	A   64
+body		URIBL_JP_SURBL	eval:check_uridnsbl('URIBL_JP_SURBL')
+describe	URIBL_JP_SURBL	Contains an URL listed in the JP SURBL blocklist
+tflags		URIBL_JP_SURBL	net
+
+# Top 125 domains whitelisted by SURBL
+uridnsbl_skip_domain yahoo.com w3.org msn.com com.com yimg.com
+uridnsbl_skip_domain hotmail.com doubleclick.net flowgo.com ebaystatic.com aol.com
+uridnsbl_skip_domain akamai.net yahoogroups.com ebay.com classmates.com akamaitech.net
+uridnsbl_skip_domain incredimail.com tiscali.co.uk google.com chtah.com ediets.com
+uridnsbl_skip_domain directtrack.com microsoft.com paypal.com jexiste.fr amazon.com
+uridnsbl_skip_domain nytimes.com unitedoffers.com sitesolutions.it m0.net hyperpc.co.jp
+uridnsbl_skip_domain terra.com.br macromedia.com ed10.net earthlink.net citibank.com
+uridnsbl_skip_domain sourceforge.net marketwatch.com comcast.net messagelabs.com mcafee.com
+uridnsbl_skip_domain grisoft.com geocities.com yourfreedvds.com smileycentral.com ual.com
+uridnsbl_skip_domain monster.com e-trend.co.jp cnn.com cnet.com bfi0.com
+uridnsbl_skip_domain atdmt.com sportsline.com rs6.net rr.com redhat.com
+uridnsbl_skip_domain partner2profit.com joingevalia.com hotbar.com advertising.com topica.com
+uridnsbl_skip_domain rm04.net ed4.net dsbl.org extm.us edgesuite.net
+uridnsbl_skip_domain debian.org click-url.com bbc.co.uk adobe.com gte.net
+uridnsbl_skip_domain go.com weatherbug.com speedera.net sbcglobal.net ientrymail.com
+uridnsbl_skip_domain ibm.com att.net apple.com 5iantlavalamp.com verizon.net
+uridnsbl_skip_domain plaxo.com pandasoftware.com p0.com mediaplex.com gmail.com
+uridnsbl_skip_domain exacttarget.com constantcontact.com sf.net roving.com netflix.com
+uridnsbl_skip_domain moveon.org cc-dt.com xmr3.com spamcop.net postdirect.com
+uridnsbl_skip_domain norman.com netatlantic.com mail.com investorplace.com hitbox.com
+uridnsbl_skip_domain citizensbank.com chase.com bridgetrack.com apache.org washingtonpost.com
+uridnsbl_skip_domain si.com shockwave.com sears.com quickinspirations.com prserv.net
+uridnsbl_skip_domain mac.com myweathercheck.com dsi-enews.net cheaptickets.com bravenet.com
+uridnsbl_skip_domain arcamax.com afa.net 4at1.com yahoo.co.uk uclick.com
+uridnsbl_skip_domain suntrust.com sun.com ups.com pcmag.com mycomicspage.com
+
+endif	# Mail::SpamAssassin::Plugin::URIDNSBL

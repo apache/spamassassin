@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -x
+
+# A whole bunch of variables are defined in that file!
+. build/update_devel
+
+# build/mkrpm
+
+rm -rf $WEBDIR/doc
+tar cf - --exclude=CVS --exclude='.#*' doc | ( cd $WEBDIR ; tar xf - )
+
+for ext in tar.bz2 tar.gz zip ; do
+  for fxt in '' .asc .md5 .sha1 ; do
+    rm -f $RELDIR/$DISTVNAME.$ext$fxt
+    cp -p $DEVDIR/$DISTVNAME.$ext$fxt $RELDIR || exit $?
+    rm -f $DEVDIR/$DISTVNAME.$ext$fxt
+  done
+done
+
+
+# cp WebMake-${vers}-1.noarch.rpm WebMake-${vers}-1.src.rpm $WEBDIR/released
+( cd $RELDIR && svn add *SpamAssassin* )
+
+set +x
+echo
+
+echo "md5sum of archive files:"
+cat $RELDIR/$DISTVNAME.*.md5
+
+echo "sha1sum of archive files:"
+cat $RELDIR/$DISTVNAME.*.sha1
+

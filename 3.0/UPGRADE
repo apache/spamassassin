@@ -1,0 +1,181 @@
+Note for Users Upgrading to SpamAssassin 3.0.0
+-----------------------------------------------
+
+- The SpamAssassin 2.6x release series was the last set of releases to
+  officially support perl versions earlier than perl 5.6.1.  If you are
+  using an earlier version of perl, you will need to upgrade before you
+  can use the 3.0.0 version of SpamAssassin.  You will also want to make
+  sure that you have the appropriate versions of required and optional
+  modules as they may have changed from old versions.  The INSTALL
+  document has the modules and version requirements listed.
+
+- See http://wiki.apache.org/spamassassin/UpgradeTo300 for a
+  supplementary list of upgrade notes.  It will be updated with any
+  upgrade notes not captured in this document.
+
+- SpamAssassin 3.0.0 has a significantly different API (Application Program
+  Interface) from the 2.x series of code.  This means that if you use
+  SpamAssassin through a third-party utility (milter, etc,) you need to make
+  sure you have an updated version which supports 3.0.0.  See
+  http://wiki.apache.org/spamassassin/UpgradeTo300 for information about
+  third-party software.
+
+- The --auto-whitelist, --whitelist and -a options for "spamd" and
+  "spamassassin" to turn on the auto-whitelist have been removed and
+  replaced by the "use_auto_whitelist" configuration option which is
+  also now turned on by default.
+
+- The --virtual-config switch for spamd had to be dropped, due to licensing
+  issues.  It is replaced by the --virtual-config-dir switch.
+
+- The "rewrite_subject" and "subject_tag" configuration options were
+  deprecated and are now removed. Instead, using "rewrite_header Subject
+  [your desired setting]".  e.g.
+
+    rewrite_subject 1
+    subject_tag ****SPAM(_SCORE_)****
+
+  becomes
+
+    rewrite_header Subject ****SPAM(_SCORE_)****
+
+- The "sa-learn --rebuild" command has been deprecated; please use
+  "sa-learn --sync" instead.  The --rebuild option will remain temporarily
+  for backwards compatability.
+
+- The Bayesian storage modules have been completely re-written and now
+  include Berkeley DB (DBM) storage as well as SQL based storage (see
+  sql/README.bayes for more information).  In addition, a new format
+  has been introduced for the bayes database that stores tokens in fixed
+  length hashes (Bayes v3).  All DBM databases should be automatically
+  converted to this new format the first time they are opened for write.
+  You can manually perform the upgrade by running "sa-learn --sync"
+  from the command line.
+
+  Due to the database format change, you will want to do something like
+  this when upgrading:
+
+  - stop running spamassassin/spamd (ie: you don't want it to be running
+    during the upgrade)
+  - run "sa-learn --rebuild", this will sync your journal.  if you skip
+    this step, any data from the journal will be lost when the DB is
+    upgraded.
+  - upgrade SA to 3.0.0
+  - run "sa-learn --sync", which will cause the db format to be upgraded.
+    if you want to see what is going on, you can add the "-D" option.
+  - test the new database by running some sample mails through
+    SpamAssassin, and/or at least running "sa-learn --dump" to make sure
+    the data looks valid.
+  - start running spamassassin/spamd again
+
+- "spamd" now has a default max-children setting of 5; no more than 5
+  child scanner processes will be run in parallel.  Previously, there was
+  no default limit unless you specified the "-m" switch when starting
+  spamd.
+
+- If you are using a UNIX machine with all database files on local disks,
+  and no sharing of those databases across NFS filesystems, you can use a
+  more efficient, but non-NFS-safe, locking mechanism.   Do this by adding
+  the line "lock_method flock" to the /etc/mail/spamassassin/local.cf
+  file. This is strongly recommended if you're not using NFS, as it is
+  much faster than the NFS-safe locker.
+
+- Please note that the use of the following commandline parameters for
+  spamassassin and spamd have been deprecated and may be removed in
+  upcoming versions of SpamAssassin.  Please discontinue usage of these
+  options:
+
+    in the 2.6x series:		--add-from, --pipe, -F, --stop-at-threshold,
+    				-S, -P (spamassassin only)
+    in the 3.0.x series:	--auto-whitelist, -a, --whitelist-factory, -M,
+    				--warning-from, -w, --log-to-mbox, -l
+
+- user_scores_sql_table is no longer supported.  If you need to use a table
+  name, other than the default, create a custom query using the
+  user_scores_sql_custom_query config option.
+
+- SpamAssassin runs in "taint mode" by default for improved security.
+  Certain third-party modules, such as Razor v2, may be incompatible with
+  taint mode. For Razor v2, you will need to be using v2.40 of
+  razor-agents or higher which allows taint mode by default.  Earlier
+  versions which are patched to allow taint mode may be used as well.
+
+- 2.6x deprecated the use of the "check_bayes_db" script, and it
+  has been removed in 3.0.0.  Please see the sa-learn man/pod
+  documentation for more info.
+
+- Finally, this document is likely not complete.  Other configuration
+  options/arguments may have changed from older versions, etc.  It would
+  be good to double-check any custom configuration options to make sure
+  they're still valid.  This could be as simple as running "spamassassin
+  --lint", or more complex, as required by the environment.
+
+  An example: "require_version <version>" hasn't changed itself, but the
+  internal version representation is now "x.yyyzzz" instead of "x.yz"
+  which could cause issues if "require_version 3.00" is expected to work
+  (it won't, it needs to be "require_version 3.000000").
+
+
+Note for Users Upgrading from SpamAssassin 2.5x
+-----------------------------------------------
+
+- Due to major reliability shortcomings in the database support libraries
+  other than DB_File, we now require that the DB_File module be installed
+  to use SpamAssassin's Bayes rules.
+
+  SpamAssassin will still work without DB_File installed, but the Bayes
+  support will be disabled.
+
+  If you install DB_File and wish to import old Bayes database data, each
+  user with a Bayes db should run "sa-learn --import" to copy old entries
+  from the other formats into a new DB_File file.
+
+  Due to the database library change, and the change to the database
+  format itself, you will want to do something like this when upgrading:
+
+  - stop running spamassassin/spamd (ie: you don't want it to be running
+    during the upgrade)
+  - run "sa-learn --rebuild", this will sync your journal.  if you skip
+    this step, any data from the journal will be lost when the DB is
+    upgraded.
+  - install DB_File module if necessary
+  - upgrade SA to 3.0.0
+  - if you were using another database module previously, run "sa-learn
+    --import" to migrate the data into new DB_File files
+  - run "sa-learn --sync", which will cause the db format to be upgraded.
+    if you want to see what is going on, you can add the "-D" option.
+  - test the new database by running some sample mails through
+    SpamAssassin, and/or at least running "sa-learn --dump" to make sure
+    the data looks valid.
+  - start running spamassassin/spamd again
+
+  Obviously the steps will be different depending on your environment, but
+  you get the idea. :)
+
+
+Note For Users Upgrading From SpamAssassin 2.3x or 2.4x
+-------------------------------------------------------
+
+- SpamAssassin no longer includes code to handle local mail delivery, as
+  it was not reliable enough, compared to procmail.  So now, if you relied
+  on spamassassin to write the mail into your mail folder, you'll have to
+  change your setup to use procmail as detailed below.  If you used
+  spamassassin to filter your mail and then something else wrote it into a
+  folder for you, then you should be fine.
+
+- Support for versions of the optional Mail::Audit module is no longer
+  included.
+
+- The default mode of tagging (which used to be ***SPAM*** in the subject
+  line) no longer takes place.  Instead the message is rewritten. If an
+  incoming message is tagged as spam, instead of modifying the original
+  message, SpamAssassin will create a new report message and attach the
+  original message as a message/rfc822 MIME part (ensuring the original
+  message is completely preserved and easier to recover).  If you do not
+  want to modify the body of incoming spam, use the "report_safe" option.
+  The "report_header" and "defang_mime" options have been removed as a
+  result.
+
+(end of UPGRADE)
+
+//vim:tw=74:

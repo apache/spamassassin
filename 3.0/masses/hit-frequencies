@@ -1,0 +1,394 @@
+#!/usr/bin/perl -w
+#
+# <@LICENSE>
+# Copyright 2004 Apache Software Foundation
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+
+use FindBin;
+use Getopt::Std;
+getopts("fm:M:X:l:L:pxhc:at:s:i");
+
+use vars qw {
+  $opt_f $opt_m $opt_M $opt_X $opt_p $opt_x $opt_h $opt_l $opt_L $opt_c
+  $opt_a $opt_t $opt_s $opt_i $sorting
+};
+
+sub usage {
+  die "hit-frequencies [-c rules dir] [-f] [-m RE] [-M RE] [-X RE] [-l LC]
+                [-s SC] [-a] [-p] [-x] [-i] [spam log] [ham log]
+
+    -c p   use p as the rules directory
+    -f     falses. count only false-negative or false-positive matches
+    -m RE  print rules matching regular expression
+    -t RE  print rules with tflags matching regular expression
+    -M RE  only consider log entries matching regular expression
+    -X RE  don't consider log entries matching regular expression
+    -l LC  also print language specific rules for lang code LC (or 'all')
+    -L LC  only print language specific rules for lang code LC (or 'all')
+    -a     display all tests
+    -p     percentages. implies -x
+    -x     extended output, with S/O ratio and scores
+    -s SC  which scoreset to use
+    -i     use IG (information gain) for ranking
+
+    options -l and -L are mutually exclusive.
+
+    options -M and -X are *not* mutually exclusive.
+
+    if either the spam or and ham logs are unspecified, the defaults
+    are \"spam.log\" and \"ham.log\" in the cwd.
+
+";
+}
+
+usage() if($opt_h || ($opt_l && $opt_L));
+
+if ($opt_p) {
+  $opt_x = 1;
+}
+
+$opt_s = 0 if ( !defined $opt_s );
+
+my $cffile = $opt_c || "$FindBin::Bin/../rules";
+
+my %freq_spam = ();
+my %freq_ham = ();
+my %freq = ();
+my $num_spam = 0;
+my $num_ham = 0;
+my %ranking = ();
+my $ok_lang = '';
+
+readscores($cffile);
+
+$ok_lang = lc ($opt_l || $opt_L || '');
+if ($ok_lang eq 'all') { $ok_lang = '.'; }
+
+foreach my $key (keys %rules) {
+
+  if ( ($opt_L && !$rules{$key}->{lang}) ||
+       ($rules{$key}->{lang} &&
+         (!$ok_lang || $rules{$key}->{lang} !~ /^$ok_lang/i)
+     ) ) {
+    delete $rules{$key} ; next;
+  }
+
+  $freq_spam{$key} = 0;
+  $freq_ham{$key} = 0;
+}
+
+readlogs();
+
+my $hdr_all = $num_spam + $num_ham;
+my $hdr_spam = $num_spam;
+my $hdr_ham = $num_ham;
+
+my $sorting = $opt_i ? "IG" : "RANK";
+
+if ($opt_p) {
+  if ($opt_f) {
+    printf "%7s %7s %7s  %6s  %6s  %6s  %s\n",
+  	"OVERALL%", "FNEG%", "FPOS%", "S/O", $sorting, "SCORE", "NAME";
+  } else {
+    printf "%7s %7s  %7s  %6s  %6s  %6s  %s\n",
+  	"OVERALL%", "SPAM%", "HAM%", "S/O", $sorting, "SCORE", "NAME";
+  }
+  printf "%7d  %7d  %7d  %7.3f %6.2f  %6.2f  (all messages)\n",
+  	$hdr_all, $hdr_spam, $hdr_ham,
+        soratio ($num_spam,$num_ham), 0, 0;
+
+  $hdr_spam = ($num_spam / $hdr_all) * 100.0;
+  $hdr_ham = ($num_ham / $hdr_all) * 100.0;
+  $hdr_all = 100.0;             # this is obvious
+  printf "%7.3f  %7.4f  %7.4f  %7.3f %6.2f  %6.2f  (all messages as %%)\n",
+  	$hdr_all, $hdr_spam, $hdr_ham,
+        soratio ($num_spam,$num_ham), 0, 0;
+
+} elsif ($opt_x) {
+  printf "%7s %7s  %7s  %6s  %6s %6s  %s\n",
+  	"OVERALL%", "SPAM%", "HAM%", "S/O", $sorting, "SCORE", "NAME";
+  printf "%7d  %7d  %7d  %7.3f %6.2f %6.2f  (all messages)\n",
+  	$hdr_all, $hdr_spam, $hdr_ham,
+        soratio ($num_spam,$num_ham), 0, 0;
+
+} else {
+  printf "%10s  %10s  %10s  %s\n",
+  	"OVERALL", "SPAM", "HAM", "NAME";
+  printf "%10d  %10d  %10d  (all messages)\n",
+  	$hdr_all, $hdr_spam, $hdr_ham;
+}
+
+my %done = ();
+my @tests = ();
+my $rank_hi = 0;
+my $rank_lo = 9999999;
+
+# variables for wanted/unwanted RANK
+my %wanted;
+my %unwanted;
+my %wranks;
+my %uranks;
+
+# rules that we want to look at
+$freq{$_}++ for keys %freq_ham;
+$freq{$_}++ for keys %freq_spam;
+
+foreach my $test (keys %freq) {
+  next unless (exists $rules{$test});           # only valid tests
+  next if (!$opt_a && $rules{$test}->{issubrule});
+
+  next if $done{$test}; $done{$test} = 1;
+  push (@tests, $test);
+
+  my $isnice = 0;
+  if ($rules{$test}->{tflags} && $rules{$test}->{tflags} =~ /\bnice\b/) {
+    $isnice = 1;
+  }
+
+  my $fs = $freq_spam{$test}; $fs ||= 0;
+  my $fn = $freq_ham{$test}; $fn ||= 0;
+  my $fsadj = $num_spam == 0 ? 0 : ($fs / ($num_spam)) * 100.0;
+  my $fnadj = $num_ham == 0 ? 0 : ($fn / ($num_ham)) * 100.0;
+
+  my $soratio = $soratio{$test} = soratio ($fsadj, $fnadj);
+
+  if ($isnice) {
+    $soratio = 1.0 - $soratio;
+    my $tmp = $fsadj; $fsadj = $fnadj; $fnadj = $tmp;
+  }
+
+  if ($opt_i) {
+    # come up with a ranking
+    my $rank;
+
+    # New new system: from "Learning to Filter Unsolicited Commercial E-Mail",
+    # Ion Androutsopoulos et al: determine the information gain IG(X, C) of the
+    # Boolean attributes (ie. the rules). Measures "the average reduction in
+    # the entropy of C (classification) given the value of X (the rule)". Makes
+    # a good ranking measure with a proper statistical basis. ;)
+    #
+    # Still would like to get an entropy measure in, too.
+    #
+    #             sum                                    P(X = x ^ C = c)
+    # IG(X,C) = x in [0, 1]    P(X = x ^ C = c) . log2( ------------------- )
+    #           c in [Ch, Cs]                           P(X = x) . P(C = c)
+    #
+    my $safe_nspam = $num_spam || 0.0000001;
+    my $safe_nham = $num_ham || 0.0000001;
+
+    my $num_all = ($num_spam + $num_ham);
+    my $safe_all = $num_all || 0.0000001;
+    my $f_all = $fs+$fn;
+
+    my $px0 = (($num_all - $f_all) / $safe_all);         # P(X = 0)
+    my $px1 = ($f_all / $safe_all);                      # P(X = 1)
+    my $pccs = ($num_spam / $safe_all);                  # P(C = Cs)
+    my $pcch = ($num_ham / $safe_all);                   # P(C = Ch)
+    my $px1ccs = ($fs / $safe_nspam);                   # P(X = 1 ^ C = Cs)
+    my $px1cch = ($fn / $safe_nham);                    # P(X = 1 ^ C = Ch)
+    my $px0ccs = (($num_spam - $fs) / $safe_nspam);     # P(X = 0 ^ C = Cs)
+    my $px0cch = (($num_ham - $fn) / $safe_nham);       # P(X = 0 ^ C = Ch)
+    my $safe_px0_dot_pccs = ($px0 * $pccs) || 0.00000001;
+    my $safe_px0_dot_pcch = ($px0 * $pcch) || 0.00000001;
+    my $safe_px1_dot_pccs = ($px1 * $pccs) || 0.00000001;
+    my $safe_px1_dot_pcch = ($px1 * $pcch) || 0.00000001;
+
+    sub log2 { return log($_[0]) / 0.693147180559945; } # log(2) = 0.6931...
+
+    my $safe_px0ccs = ($px0ccs || 0.0000001);
+    my $safe_px0cch = ($px0cch || 0.0000001);
+    my $safe_px1ccs = ($px1ccs || 0.0000001);
+    my $safe_px1cch = ($px1cch || 0.0000001);
+    $rank = ( $px0ccs * log2($safe_px0ccs / $safe_px0_dot_pccs) ) +
+                    ( $px0cch * log2($safe_px0cch / $safe_px0_dot_pcch) ) +
+                    ( $px1ccs * log2($safe_px1ccs / $safe_px1_dot_pccs) ) +
+                    ( $px1cch * log2($safe_px1cch / $safe_px1_dot_pcch) );
+
+    $ranking{$test} = $rank;
+    $rank_hi = $rank if ($rank > $rank_hi);
+    $rank_lo = $rank if ($rank < $rank_lo);
+  }
+  else {
+    # basic wanted/unwanted ranking
+    $wanted{$test} = $isnice ? $fn : $fs;
+    $unwanted{$test} = $isnice ? $fs : $fn;
+    # count number of ranks of each type
+    $wranks{$wanted{$test}} = 1;
+    $uranks{$unwanted{$test}} = 1;
+  }
+}
+
+# finish basic wanted/unwanted ranking
+if (! $opt_i) {
+  my @wanted = sort { $wanted{$a} <=> $wanted{$b} } keys %wanted;
+  my @unwanted = sort { $unwanted{$b} <=> $unwanted{$a} } keys %unwanted;
+
+  # first half of ranking is the wanted rank
+  my $position = 0;
+  my $last = undef;
+  for my $test (@wanted) {
+    $position++ if defined $last && $last != $wanted{$test};
+    $ranking{$test} += $position;
+    $last = $wanted{$test}
+  }
+
+  # second half of ranking is the unwanted rank
+  my $normalize = (scalar keys %wranks) / (scalar keys %uranks);
+  $position = 0;
+  $last = undef;
+  for my $test (@unwanted) {
+    $position++ if defined $last && $last != $unwanted{$test};
+    $ranking{$test} += ($position * $normalize);
+    $last = $unwanted{$test};
+    $rank_hi = $ranking{$test} if ($ranking{$test} > $rank_hi);
+    $rank_lo = $ranking{$test} if ($ranking{$test} < $rank_lo);
+  }
+}
+
+{
+  # now normalise the rankings to [0, 1]
+  $rank_hi -= $rank_lo;
+  foreach $test (@tests) {
+    $ranking{$test} = $rank_hi == 0 ? 0.001 : ($ranking{$test} - $rank_lo) / ($rank_hi);
+  }
+}
+
+foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
+  next unless (exists $rules{$test});           # only valid tests
+  next if (!$opt_a && $rules{$test}->{issubrule});
+
+  my $fs = $freq_spam{$test}; $fs ||= 0;
+  my $fn = $freq_ham{$test}; $fn ||= 0;
+  my $fa = $fs+$fn;
+
+  # match certain tests
+  next if ($opt_m && $test !~ m/$opt_m/);
+  # match tflags
+  next if ($opt_t && (!$rules{$test}->{tflags} ||
+		      $rules{$test}->{tflags} !~ /$opt_t/));
+
+  if (!$opt_a && !$opt_t && $rules{$test}->{tflags}) {
+    # not net tests
+    next if ($rules{$test}->{tflags} =~ /\bnet\b/ && ($opt_s % 2 == 0));
+    # not userconf
+    next if ($rules{$test}->{tflags} =~ /\buserconf\b/);
+  }
+
+  # adjust based on corpora sizes (and cvt to % while we're at it)
+  my $fsadj = $num_spam == 0 ? 0 : ($fs / ($num_spam)) * 100.0;
+  my $fnadj = $num_ham == 0 ? 0 : ($fn / ($num_ham)) * 100.0;
+
+  if ($opt_f && $fsadj == 0 && $fnadj == 0) { next; }
+
+  if ($opt_p) {
+    $fa = ($fa / ($num_spam + $num_ham)) * 100.0;
+    $fs = $fsadj;
+    $fn = $fnadj;
+  }
+
+  my $soratio = $soratio{$test};
+  if (!defined $soratio) {
+    $soratio{$test} = soratio ($fsadj, $fnadj);
+  }
+
+  if ($opt_p) {
+    printf "%7.3f  %7.4f  %7.4f  %7.3f %6.2f  %6.2f  %s\n",
+  	$fa, $fs, $fn, $soratio, $ranking{$test}, $scores{$test}, $test;
+
+  } elsif ($opt_x) {
+    printf "%7d  %7d  %7d  %7.3f %6.2f %6.2f  %s\n",
+  	$fa, $fs, $fn, $soratio, $ranking{$test}, $scores{$test}, $test;
+
+  } else {
+    printf "%10d  %10d  %10d  %s\n", $fa, $fs, $fn, $test;
+  }
+}
+exit;
+
+
+
+sub readlogs {
+  my $spam = $ARGV[0] || "spam.log";
+  my $ham = $ARGV[1] || (-f "good.log" ? "good.log" : "ham.log");
+
+  foreach my $file ($spam, $ham) {
+    open (IN, "<$file") || die "Could not open file '$file': $!";
+
+    my $isspam = ($file eq $spam);
+    my $caught;
+    my $rules;
+
+    while (<IN>) {
+      next unless (!$opt_M || /$opt_M/o);
+      next if ($opt_X && /$opt_X/o);
+
+      ($caught, undef, undef, $rules) = split;
+
+      next unless ($caught eq 'Y' || $caught eq '.') && $rules;
+      next if ($opt_f && !(($caught eq 'Y') xor $isspam));
+
+      if ($isspam) {
+	$num_spam++;
+	$freq_spam{$_}++ for split(/,/, $rules);
+      }
+      else {
+	$num_ham++;
+	$freq_ham{$_}++ for split(/,/, $rules);
+      }
+    }
+    close IN;
+  }
+  # paranoia: remove zero length rules
+  undef $freq_spam{''};
+  undef $freq_ham{''};
+}
+
+
+sub readscores {
+  my($cffile) = @_;
+  system ("$FindBin::Bin/parse-rules-for-masses -d \"$cffile\" -s $opt_s") and die;
+  require "./tmp/rules.pl";
+}
+
+sub soratio {
+  my ($s, $n) = @_;
+
+  $s ||= 0;
+  $n ||= 0;
+
+  if ($s + $n > 0) {
+      return $s / ($s + $n);
+  } else {
+      return 0.5;		# no results -> not effective
+  }
+}
+
+sub tcr {
+  my ($nspam, $nlegit, $nspamspam, $nlegitspam) = @_;
+  my $nspamlegit = $nspam - $nspamspam;
+  my $nlegitlegit = $nlegit - $nlegitspam;
+
+  my $lambda = 50;
+
+  my $werr = ($lambda * $nlegitspam + $nspamlegit)
+                  / ($lambda * $nlegit + $nspam);
+
+  my $werr_base = $nspam
+                  / ($lambda * $nlegit + $nspam);
+
+  $werr ||= 0.000001;     # avoid / by 0
+  my $tcr = $werr_base / $werr;
+  return $tcr;
+}
