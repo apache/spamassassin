@@ -230,6 +230,7 @@ sub pyzor_lookup {
     # since there are no killer regexp hang dangers here
     local $SIG{ALRM} = sub { die "__alarm__ignore__\n" };
     local $SIG{PIPE} = sub { die "__brokenpipe__ignore__\n" };
+    local $SIG{__DIE__};   # bug 4631
 
     $oldalarm = alarm $timeout;
 
@@ -360,6 +361,7 @@ sub pyzor_report {
   eval {
     local $SIG{ALRM} = sub { die "__alarm__ignore__\n" };
     local $SIG{PIPE} = sub { die "__brokenpipe__ignore__\n" };
+    local $SIG{__DIE__};   # bug 4631
 
     $oldalarm = alarm $timeout;
 
