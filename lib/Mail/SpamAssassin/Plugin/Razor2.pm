@@ -149,6 +149,7 @@ sub razor2_access {
     local ($^W) = 0;    # argh, warnings in Razor
 
     local $SIG{ALRM} = sub { die "__alarm__ignore__\n" };
+    local $SIG{__DIE__};   # bug 4631
     $oldalarm = alarm $timeout;
 
     # everything's in the module!
