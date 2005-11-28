@@ -1,4 +1,68 @@
 ------------------------------------------------------------------------
+r345792 | sidney | 2005-11-20 23:28:48 +0000 (Sun, 20 Nov 2005) | 1 line
+
+bug 3949: fix ALL_TRUSTED misfires
+------------------------------------------------------------------------
+r345616 | sidney | 2005-11-19 00:57:14 +0000 (Sat, 19 Nov 2005) | 1 line
+
+bug 4535: parse mime content boundary with -- correctly
+------------------------------------------------------------------------
+r345611 | sidney | 2005-11-19 00:40:38 +0000 (Sat, 19 Nov 2005) | 1 line
+
+bug 4190: race condition in round-robin forking algorithm
+------------------------------------------------------------------------
+r345610 | sidney | 2005-11-19 00:28:35 +0000 (Sat, 19 Nov 2005) | 1 line
+
+bug4655: fix redhat init script for spamd to be smarter about stopping processes
+------------------------------------------------------------------------
+r345608 | sidney | 2005-11-19 00:20:53 +0000 (Sat, 19 Nov 2005) | 1 line
+
+bug 4522: URI parsing with JIS encoding
+------------------------------------------------------------------------
+r345453 | jm | 2005-11-18 05:45:21 +0000 (Fri, 18 Nov 2005) | 1 line
+
+bug 4565: [backport] new Yahoo server naming is causing FORGED_YAHOO_RCVD false positives
+------------------------------------------------------------------------
+r332970 | sidney | 2005-11-13 12:14:48 +0000 (Sun, 13 Nov 2005) | 1 line
+
+bug 4439 Fix removal of markup when there are DOS newlines
+------------------------------------------------------------------------
+r332969 | sidney | 2005-11-13 12:09:48 +0000 (Sun, 13 Nov 2005) | 1 line
+
+bug 4390 Recognize URLs obfuscated using backslashes
+------------------------------------------------------------------------
+r332968 | sidney | 2005-11-13 12:01:13 +0000 (Sun, 13 Nov 2005) | 1 line
+
+bug 4065 Recognize new outlook express msgid format
+------------------------------------------------------------------------
+r332967 | sidney | 2005-11-13 11:52:01 +0000 (Sun, 13 Nov 2005) | 1 line
+
+bug 3712 more efficient parsing of messages with lots of newlines in header
+------------------------------------------------------------------------
+r332647 | sidney | 2005-11-11 21:06:09 +0000 (Fri, 11 Nov 2005) | 1 line
+
+Bug 4275: Fix some incorrectly case-insensitive URL parsing regexps
+------------------------------------------------------------------------
+r331942 | sidney | 2005-11-09 03:58:11 +0000 (Wed, 09 Nov 2005) | 1 line
+
+bug 4570: Optimize a regexp that was  blowing perl stack trying to parse very long headers
+------------------------------------------------------------------------
+r331684 | sidney | 2005-11-08 05:19:35 +0000 (Tue, 08 Nov 2005) | 1 line
+
+bug 4346: Skip large messages in sa-learn
+------------------------------------------------------------------------
+r331607 | sidney | 2005-11-07 21:57:41 +0000 (Mon, 07 Nov 2005) | 1 line
+
+bug 4464 Trivial doco change
+------------------------------------------------------------------------
+r180192 | felicity | 2005-06-06 01:44:41 +0000 (Mon, 06 Jun 2005) | 1 line
+
+prep 3.0.5 development cycle
+------------------------------------------------------------------------
+r180189 | felicity | 2005-06-06 01:35:14 +0000 (Mon, 06 Jun 2005) | 1 line
+
+preparing to release 3.0.4
+------------------------------------------------------------------------
 r180169 | dos | 2005-06-05 23:11:06 +0000 (Sun, 05 Jun 2005) | 1 line
 
 bug 4328: still have issues getting filename from parsed part.  this commit makes it very explicit where the info should come from.
