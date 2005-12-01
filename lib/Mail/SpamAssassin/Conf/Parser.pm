@@ -920,12 +920,7 @@ sub is_regexp_valid {
   # security of the regexp.  simply using ("" =~ $re) will NOT do that, and
   # will therefore open a hole!
   if (eval { ("" =~ m#${re}#); 1; }) {
-
-    # now double-check -- try with the user-supplied delimiters as well
-    my $evalstr = '("" =~ '.$safere.'); 1;';
-    if (eval $evalstr) {
-      return 1;
-    }
+    return 1;
   }
 
   my $err = $@;
