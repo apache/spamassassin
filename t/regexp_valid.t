@@ -20,7 +20,7 @@ use SATest; sa_t_init("regexp_valid");
 use Test;
 
 # settings
-plan tests => 25;
+plan tests => 24;
 
 # initialize SpamAssassin
 use Mail::SpamAssassin;
@@ -88,7 +88,7 @@ ok badone 'foo(?{1})bar';
 
 ok badone '/foo(?{1})bar/';
 ok badone 'm!foo(?{1})bar!';
-ok badone '/test//';
+# ok badone '/test//';          # removed for bug 4700
 ok goodone '.*';
 ok goodone 'm*<a[^<]{0,60} onMouseMove=(?:3D)?"window.status=(?:3D)?\'https?://*';
 
