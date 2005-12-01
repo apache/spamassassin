@@ -282,7 +282,7 @@ sub main_ping_kids {
 
   my ($sock, $kid);
   while (($kid, $sock) = each %{$self->{backchannel}->{kids}}) {
-    $self->syswrite_with_retry($sock, PF_PING_ORDER) and next;
+    $self->syswrite_with_retry($sock, PF_PING_ORDER, $kid, 3) and next;
 
     warn "prefork: write of ping failed to $kid fd=".$sock->fileno.": ".$!;
 
@@ -353,7 +353,7 @@ sub order_idle_child_to_accept {
       return $self->order_idle_child_to_accept();
     }
 
-    if (!$self->syswrite_with_retry($sock, PF_ACCEPT_ORDER))
+    if (!$self->syswrite_with_retry($sock, PF_ACCEPT_ORDER, $kid))
     {
       # failure to write to the child; bad news.  call it dead
       warn "prefork: killing rogue child $kid, failed to write on fd ".$sock->fileno.": $!\n";
@@ -396,7 +396,7 @@ sub child_now_ready_to_accept {
   my ($self, $kid) = @_;
   if ($self->{waiting_for_idle_child}) {
     my $sock = $self->{backchannel}->get_socket_for_child($kid);
-    $self->syswrite_with_retry($sock, PF_ACCEPT_ORDER)
+    $self->syswrite_with_retry($sock, PF_ACCEPT_ORDER, $kid)
         or die "prefork: $kid claimed it was ready, but write failed on fd ".
                             $sock->fileno.": ".$!;
     $self->{waiting_for_idle_child} = 0;
@@ -426,7 +426,7 @@ sub update_child_status_busy {
 sub report_backchannel_socket {
   my ($self, $str) = @_;
   my $sock = $self->{backchannel}->get_parent_socket();
-  $self->syswrite_with_retry($sock, $str)
+  $self->syswrite_with_retry($sock, $str, 'parent')
         or write "syswrite() to parent failed: $!";
 }
 
@@ -537,12 +537,31 @@ retry_read:
 }
 
 sub syswrite_with_retry {
-  my ($self, $sock, $buf) = @_;
+  my ($self, $sock, $buf, $targetname, $numretries) = @_;
+  $numretries ||= 10;       # default 10 retries
 
   my $written = 0;
+  my $try = 0;
 
 retry_write:
+
+  $try++;
+  if ($try > 1) {
+    warn "prefork: syswrite(".$sock->fileno.") to $targetname failed on try $try";
+    if ($try > $numretries) {
+      warn "prefork: giving up";
+      return undef;
+    }
+    else {
+      # give it 1 second to recover.  we retry indefinitely.
+      my $rout = '';
+      vec($rout, $sock->fileno, 1) = 1;
+      select(undef, $rout, undef, 1);
+    }
+  }
+
   my $nbytes = $sock->syswrite($buf);
+
   if (!defined $nbytes) {
     unless ((exists &Errno::EAGAIN && $! == &Errno::EAGAIN)
         || (exists &Errno::EWOULDBLOCK && $! == &Errno::EWOULDBLOCK))
@@ -551,13 +570,7 @@ retry_write:
       return undef;
     }
 
-    warn "prefork: syswrite(".$sock->fileno.") failed, retrying...";
-
-    # give it 5 seconds to recover.  we retry indefinitely.
-    my $rout = '';
-    vec($rout, $sock->fileno, 1) = 1;
-    select(undef, $rout, undef, 5);
-
+    warn "prefork: retrying syswrite(): $!";
     goto retry_write;
   }
   else {
@@ -568,7 +581,8 @@ retry_write:
       return $written;      # it's complete, we can return
     }
     else {
-      warn "prefork: partial write of $nbytes, towrite=".length($buf).
+      warn "prefork: partial write of $nbytes to ".
+            $targetname.", towrite=".length($buf).
             " sofar=".$written." fd=".$sock->fileno.", recovering";
       goto retry_write;
     }
