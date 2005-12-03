@@ -96,6 +96,7 @@ sub contains_ip {
   my ($self, $ip) = @_;
 
   if (!defined $self->{nets}) { return 0; }
+  if ($ip !~ m/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/) { return 0; }
 
   $ip = Mail::SpamAssassin::Util::my_inet_aton($ip);
   foreach my $net (@{$self->{nets}}) {
