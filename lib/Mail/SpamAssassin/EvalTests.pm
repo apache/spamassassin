@@ -3176,24 +3176,3 @@ sub subject_length {
   my $len = length($self->get('Subject'));
   return($len < $max && $len >= $min);
 }
-
-# new ratware format, more complex than a standard rule can handle
-# unfortunately
-#word
-#some number of lines
-#word
-#\s*-------Original Message-------
-sub message_ratware_format_1 {
-  my($self, $body) = @_;
-  return unless $self->{'msg'}->{'type'} eq 'text/plain';
-  return unless (defined $body->[1] && $body->[1] =~ /^\s*\w+\s*[:,!.?-]*\s*$/);
-  my $i;
-  for($i=2;$i<10;$i++) {
-    last if (!defined $body->[$i] || $body->[$i] =~ /^\s*\w+\s*[:,!.?-]*\s*$/ || length($body->[$i]) > 100);
-  }
-  $i++;
-  return unless (defined $body->[$i] && $body->[$i] =~ /-\s*Original Message\s*-/i);
-  return 1;
-}
-
-1;
