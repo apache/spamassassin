@@ -3176,3 +3176,5 @@ sub subject_length {
   my $len = length($self->get('Subject'));
   return($len < $max && $len >= $min);
 }
+
+1;
