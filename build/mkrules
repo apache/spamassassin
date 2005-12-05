@@ -352,6 +352,12 @@ sub rule_file_compile_sandbox {
     {
       undef $current_conditional;
     }
+    elsif (/^loadplugin\s*(\S+)\b/) {
+      my $name = 'loadplugin';
+      if (!$rules->{$name}) { $rules->{$name} = rule_entry_create(); }
+      $rules->{$name}->{text} .= $orig;
+      unshift (@$rule_order, $name);
+    }
     else {
       my $NAME = $ALWAYS_PUBLISH;
       if ($current_conditional) {
