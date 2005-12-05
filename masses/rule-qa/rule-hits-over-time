@@ -63,6 +63,7 @@ GetOptions(
 usage() unless $opt_rule;
 
 my $DEBUG_TMPDIR = $opt_debug; # keep the tmpdir around after exiting, for debug
+# $DEBUG_TMPDIR = 1;
 
 # fix PATHs for sucky Solaris compatibility.
 $ENV{PATH} = "/local/gnuplot-4.0.0/bin:/opt/sfw/bin:".$ENV{PATH};
