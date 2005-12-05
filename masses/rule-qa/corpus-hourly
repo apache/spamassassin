@@ -256,47 +256,6 @@ sub gen_class {
     @spam = grep { /-net-/ } @spam;
   }
 
-
-# this block is no longer necessary; we now strictly match dates
-# and revisions, so there won't be mismatching revisions treated
-# as equivalent.
-if (0) {
-    # if both net and local exist, use newer
-    my %spam;
-    my %ham;
-    
-    for my $file (@spam) {
-      $spam{$1}++ if ($file =~ m/-(\w[-\w]+)\.log$/);
-    }
-    for my $file (@ham) {
-      $ham{$1}++ if ($file =~ m/-(\w[-\w]+)\.log$/);
-    }
-    while (my ($user, $count) = each %ham) {
-      if ($count > 1) {
-        my $nightly = "ham-$user.log";
-        my $weekly = "ham-net-$user.log";
-        if ($revision{$nightly} >= $revision{$weekly}) {
-          @ham = grep { $_ ne $weekly } @ham;
-        }
-        else {
-          @ham = grep { $_ ne $nightly } @ham;
-        }
-      }
-    }
-    while (my ($user, $count) = each %spam) {
-      if ($count > 1) {
-        my $nightly = "spam-$user.log";
-        my $weekly = "spam-net-$user.log";
-        if ($revision{$nightly} >= $revision{$weekly}) {
-          @spam = grep { $_ ne $weekly } @spam;
-        }
-        else {
-          @spam = grep { $_ ne $nightly } @spam;
-        }
-      }
-    }
-}
-
   # age
   if ($age =~ /(\d+)day/) {
     my $mtime = $1;
