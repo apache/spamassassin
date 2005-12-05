@@ -102,7 +102,7 @@ sub sa_t_init {
   rmtree ("log/test_rules_copy");
   mkdir ("log/test_rules_copy", 0755);
 
-  for $file (<../rules/*.cf>) {
+  for $file (<../rules/*.cf>, <../rules/*.pm>) {
     $base = basename $file;
     copy ($file, "log/test_rules_copy/$base")
       or warn "cannot copy $file to log/test_rules_copy/$base";
