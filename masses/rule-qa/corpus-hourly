@@ -159,13 +159,13 @@ sub locate {
     close(FILE);
 
     if (!defined $time{$file}) {
-      warn "$file: no time found"; next;
+      warn "$corpusdir/$file: no time found, ignored\n"; next;
     }
     if (!defined $revision{$file}) {
-      warn "$file: no revision found"; next;
+      warn "$corpusdir/$file: no revision found, ignored\n"; next;
     }
     if ($revision{$file} eq 'unknown') {
-      warn "$file: not tagged with a revision"; next;
+      warn "$corpusdir/$file: not tagged with a revision, ignored\n"; next;
     }
 
     my $daterev = mk_daterev($time{$file},$revision{$file},$opt_tag);
