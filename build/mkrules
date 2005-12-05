@@ -108,7 +108,7 @@ write_output_files();
 
 sub lint_output_files {
   foreach my $file (keys %{$files_to_lint}) {
-    my $text = $output_file_text->{$file};
+    my $text = join("\n", "file start $file", $output_file_text->{$file}, "file end $file");
     if (lint_rule_text($text) != 0) {
       warn "\nERROR: LINT FAILED, suppressing output: $file\n\n";
       delete $output_file_text->{$file};
@@ -137,7 +137,7 @@ sub wanted {
   return if (!-f $path);
   
   # limit what will be copied from sandboxes
-  return if ($path =~ /sandbox/ && !/\d.*\.(?:cf|pm)$/i);
+  return if ($path =~ /sandbox/ && !/(?:\d.*\.cf|\.pm)$/i);
 
   # a bit of sanity please - no svn metadata ;)
   return if ($path =~ /\.svn/);
@@ -164,7 +164,14 @@ sub wanted {
 sub compile_sorted {
   my ($sources) = @_;
 
-  foreach my $f (sort keys %$sources) {
+  # deal with the perl modules first, so that later linting w/ loadplugin will
+  # work appropriately.
+  foreach my $f (sort {
+    my ($ae) = $a =~ /\.(cf|pm)$/;
+    my ($be) = $b =~ /\.(cf|pm)$/;
+    return $be cmp $ae || $a cmp $b;
+    } keys %$sources) {
+
     my $entry = $needs_compile->{$f};
     my $t = $entry->{t};
 
@@ -177,7 +184,18 @@ sub compile_sorted {
 
     my $needs_rebuild = 1;
 
-    if ($entry->{dir} =~ /sandbox/) {
+    if ($entry->{filename} =~ /\.pm$/) {
+      # just copy the raw perl module over to the new area
+      # we can't really rename to avoid conflicts since the loadplugin lines
+      # are going to be all screwed up in that case.
+      if (-e $entry->{t}) {
+	warn "The perl module ".$entry->{t}." already exists, can't copy from ".$entry->{f}."\n";
+      }
+      else {
+        copy($entry->{f}, $entry->{t}) || warn "Couldn't copy ".$entry->{f}.": $!";
+      }
+    }
+    elsif ($entry->{dir} =~ /sandbox/) {
       rule_file_compile_sandbox($f, $t, $entry->{filename});
     }
     elsif ($entry->{dir} =~ /extra/) {
