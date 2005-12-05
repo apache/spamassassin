@@ -164,6 +164,9 @@ sub locate {
     if (!defined $revision{$file}) {
       warn "$file: no revision found"; next;
     }
+    if ($revision{$file} eq 'unknown') {
+      warn "$file: not tagged with a revision"; next;
+    }
 
     my $daterev = mk_daterev($time{$file},$revision{$file},$opt_tag);
     $logs_by_daterev{$daterev} ||= [ ];
