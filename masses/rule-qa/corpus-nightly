@@ -62,6 +62,11 @@ set -e
 perl Makefile.PL < /dev/null
 make
 
+# call ext command, if required
+if [ "x${pre_mass_check_command:-}" != x ] ; then
+  $pre_mass_check_command
+fi
+
 # run test
 cd masses
 rm -f spamassassin/auto*
