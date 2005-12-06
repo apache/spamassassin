@@ -28,13 +28,13 @@ foreach my $submitter (<*>) {
 
   foreach my $type (qw(ham spam))
   {
-    foreach my $dir (<$submitter/*>) {
+    foreach my $dir (<$submitter/$type/*>) {
       next unless (-d $dir);
-      print OUT "$type:dir:$dir\n";
+      print OUT "$type:dir:$RAWCOR_DIR/$dir\n";
     }
-    foreach my $mbox (<$submitter/*.mbox>) {
+    foreach my $mbox (<$submitter/$type/*.mbox>) {
       next unless (-f $mbox);
-      print OUT "$type:mbox:$mbox\n";
+      print OUT "$type:mbox:$RAWCOR_DIR/$mbox\n";
     }
   }
 
