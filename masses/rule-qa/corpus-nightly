@@ -95,7 +95,7 @@ if [ -n "$prefs" -a -f "$prefs" ]; then
 else
 	rm -f spamassassin/user_prefs
 fi
-./mass-check $opts
+$PERL mass-check $opts
 uptime
 date > test.end
 
@@ -107,7 +107,8 @@ mv ham.log ham-$net$username.log
 set +e
 retry=0
 while true; do
-	if rsync -CPcvuzb --timeout=120 spam-$net$username.log ham-$net$username.log $username@rsync.spamassassin.org::corpus/; then
+	if rsync -Pcvuzb --timeout=120 spam-$net$username.log ham-$net$username.log $username@rsync.spamassassin.org::corpus/
+        then
 		break;
 	fi
 	if [ $retry -eq 120 ]; then
