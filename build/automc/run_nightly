@@ -1,0 +1,26 @@
+#!/bin/sh
+#
+# driver for nightly mass-checks on the zone.
+
+# add usernames who you want to do nightlies for here:
+nightly_users="
+  doc
+  zmi
+"
+
+# and where the $HOMEs are:
+nightly_trees="/home/bbmass/mc-nightly"
+
+for user in $nightly_users ; do
+  dir="$nightly_trees/$user"
+
+  echo "Starting corpus-nightly for $user ($dir)"
+
+  (
+    HOME=$dir
+    export HOME
+    $dir/svn/rule-qa/corpus-nightly
+  )
+
+done
+
