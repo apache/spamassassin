@@ -8,9 +8,9 @@ renice 10 -p $$
 
 set -x
 set -e
-export RSYNC_PASSWORD=$password
-export TIME="%e,%U,%S"
-export TZ=UTC
+RSYNC_PASSWORD=$password ; export RSYNC_PASSWORD
+TIME="%e,%U,%S" ; export TIME
+TZ=UTC ; export TZ
 
 # ensure we're running after 0900 UTC
 if date | egrep -q '^... ... .. (08|10):'; then
