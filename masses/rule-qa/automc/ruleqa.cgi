@@ -36,6 +36,7 @@ our %freqs_filenames = (
 my $q = new CGI;
 
 my $ttk = Template->new;
+set_freqs_templates();
 
 my $cgi_url;
 my @cgi_params;
@@ -184,9 +185,9 @@ my $hdr = $q->header . q{<html><head>
     tr.freqsline_promo0 td {
       text-align: right;
       padding: 0.1em 0.2em 0.1em 0.2em;
-      color: #aaa;
+      color: #999;
     }
-    tr.freqsline_promo0 td a { color: #aaa; }
+    tr.freqsline_promo0 td a { color: #999; }
 
     h3 {
       border: 1px solid;
@@ -604,17 +605,19 @@ sub read_freqs_file {
       $freqs_data{$key}{$lastrule}{overlap} .= $_;
     }
     elsif (/ ([\+\-])? *(\S+?)(\:\S+)?\s*$/) {
-      my $promo = $1;
+      my $promochar = $1;
       $lastrule = $2;
       my $subset = $3;
       if ($subset) { $subset =~ s/^://; }
 
-      if ($promo eq '+') {
-        $promo = 1;
-      } elsif ($promo eq '-') {
+      my $is_testing = ($lastrule =~ /^T_/);
+      my $is_subrule = ($lastrule =~ /^__/);
+
+      # assume a default based on rule name; turn off explicitly
+      # the test rules that are not hitting qual thresholds
+      my $promo = ($is_testing && !$is_subrule);
+      if ($promochar eq '-') {
         $promo = 0;
-      } else {
-        $promo = 1;      # assume a default otherwise; backwards compat
       }
 
       my @vals = split;
@@ -635,7 +638,7 @@ sub read_freqs_file {
         score => $vals[5],
         username => ($subset_is_user ? $subset : undef),
         age => ($subset_is_age ? $subset : undef),
-        promotable => $promo,
+        promotable => $promo ? '1' : '0',
       };
       push @{$freqs_data{$key}{$lastrule}{lines}}, $line;
     }
@@ -748,37 +751,41 @@ sub sub_freqs_head_line {
   return $str;
 }
 
+my $FREQS_LINE_TEMPLATE;
+my $FREQS_EXTRA_TEMPLATE;
+
+sub set_freqs_templates {
+  $FREQS_LINE_TEMPLATE = qq{
+
+  <tr class=freqsline_promo[% PROMO %]>
+    <td>[% IF RULEDETAIL != '' %]<a href="[% RULEDETAIL %]">&gt;</a>[% END %]</td>
+    <td>[% MSECS %]</td>
+    <td>[% SPAMPC %]</td>
+    <td>[% HAMPC %]</td>
+    <td>[% SO %]</td>
+    <td>[% RANK %]</td>
+    <td>[% SCORE %]</td>
+    <td style='text-align: left'><a href="[% NAMEREF %]">[% NAME %]</a></td>
+    <td>[% USERNAME %]</td>
+    <td>[% AGE %]</td>
+  </tr>
+
+  };
+
+  $FREQS_EXTRA_TEMPLATE = qq{
+
+  <tr class=freqsextra>
+    <td colspan=7><pre class=perruleextra>[% EXTRA %]</pre></td>
+  </tr>
+
+  };
+
+  $FREQS_LINE_TEMPLATE =~ s/^\s+//gm;
+  $FREQS_EXTRA_TEMPLATE =~ s/^\s+//gm;
+}
+
 sub output_freqs_data_line {
   my ($obj) = @_;
-
-  my $LINE_TEMPLATE = qq{
-
-    <tr class=freqsline_promo[% PROMO %]>
-      <td>
-      [% IF RULEDETAIL != '' %]
-	<a href="[% RULEDETAIL %]">&gt;</a>
-      [% END %]
-      </td>
-      <td>[% MSECS %]</td>
-      <td>[% SPAMPC %]</td>
-      <td>[% HAMPC %]</td>
-      <td>[% SO %]</td>
-      <td>[% RANK %]</td>
-      <td>[% SCORE %]</td>
-      <td style='text-align: left'><a href="[% NAMEREF %]">[% NAME %]</a></td>
-      <td>[% USERNAME %]</td>
-      <td>[% AGE %]</td>
-    </tr>
-
-  };
-
-  my $EXTRA_TEMPLATE = qq{
-
-    <tr class=freqsextra>
-      <td colspan=7><pre class=perruleextra>[% EXTRA %]</pre></td>
-    </tr>
-
-  };
 
   # normal freqs lines, with optional subselector after rule name
   my $out = '';
@@ -800,7 +807,7 @@ sub output_freqs_data_line {
       $score = '(n/a)';
     }
 
-    $ttk->process(\$LINE_TEMPLATE, {
+    $ttk->process(\$FREQS_LINE_TEMPLATE, {
         RULEDETAIL => $detailurl,
         MSECS => $line->{msecs},
         SPAMPC => $line->{spampc},
@@ -818,17 +825,17 @@ sub output_freqs_data_line {
     $line_counter++;
   }
 
-  # add scoremap using the EXTRA_TEMPLATE if it's present
+  # add scoremap using the FREQS_EXTRA_TEMPLATE if it's present
   if ($obj->{scoremap}) {
     my $ovl = $obj->{scoremap} || '';
     #   scoremap spam: 16  12.11%  777 ****
 
-    $ttk->process(\$EXTRA_TEMPLATE, {
+    $ttk->process(\$FREQS_EXTRA_TEMPLATE, {
         EXTRA => $ovl,
     }, \$out) or die $ttk->error();
   }
 
-  # add overlap using the EXTRA_TEMPLATE if it's present
+  # add overlap using the FREQS_EXTRA_TEMPLATE if it's present
   if ($obj->{overlap}) {
     my $ovl = $obj->{overlap} || '';
 
@@ -840,7 +847,7 @@ sub output_freqs_data_line {
         $str;
       /gem;
 
-    $ttk->process(\$EXTRA_TEMPLATE, {
+    $ttk->process(\$FREQS_EXTRA_TEMPLATE, {
         EXTRA => $ovl,
     }, \$out) or die $ttk->error();
   }
