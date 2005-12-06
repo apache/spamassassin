@@ -188,7 +188,9 @@ sub compile_sorted {
       # just copy the raw perl module over to the new area
       # we can't really rename to avoid conflicts since the loadplugin lines
       # are going to be all screwed up in that case.
-      if (-e $entry->{t}) {
+      # jm: we always want to update the output file in case the input
+      # has been changed!
+      if (0 && -e $entry->{t}) {
 	warn "The perl module ".$entry->{t}." already exists, can't copy from ".$entry->{f}."\n";
       }
       else {
