@@ -81,19 +81,24 @@ sub get_url_switch {
 
 # when and what
 my $daterev = $q->url_param('daterev') || '';
+# all known date/revision combos.  warning: could get slow in future
+my @daterevs = get_all_daterevs();
 
 # sanitise daterev string
 if (defined $daterev) {
-  $daterev =~ /(\d+)[\/-](r\d+)-(\S+)/; undef $daterev;
-  if ($2) {
-    $daterev = "$1-$2-$3";
-  } else {
-    $daterev = undef;
+  if ($daterev eq 'last-night') {
+    $daterev = get_last_night_daterev();
+  }
+  else {
+    $daterev =~ /(\d+)[\/-](r\d+)-(\S+)/; undef $daterev;
+    if ($2) {
+      $daterev = "$1-$2-$3";
+    } else {
+      $daterev = undef;
+    }
   }
 }
 
-# all known date/revision combos.  warning: could get slow in future
-my @daterevs = get_all_daterevs();
 # turn possibly-empty $daterev into a real date/rev combo (that exists)
 $daterev = date_in_direction($daterev, 0);
 
@@ -492,6 +497,17 @@ sub date_in_direction {
   return undef;       # couldn't find one
 }
 
+sub get_last_night_daterev {
+  foreach my $dr (reverse @daterevs) {
+    my $t = get_daterev_description($dr);
+    next unless $t;
+    if ($t =~ / tag=n /) {
+      return $dr;
+    }
+  }
+  return undef;
+}
+
 sub show_all_sets_for_daterev {
   my ($path, $strdate) = @_;
 
@@ -769,6 +785,9 @@ sub set_freqs_templates {
     <td>[% USERNAME %]</td>
     <td>[% AGE %]</td>
   </tr>
+  <!--
+    <rule><n>[% NAME %]</n><p>[% PROMO %]</p><sp>[% SPAMPC %]</sp><hp>[% HAMPC %]</hp><so>[% SO %]</so><href>[% NAMEREF %]</href></rule>
+  -->
 
   };
 
