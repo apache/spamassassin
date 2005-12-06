@@ -11,9 +11,10 @@ if [ "x${PERL:-}" = x ] ; then
   PERL=perl
 fi
 
+RSYNC_PASSWORD=$password ; export RSYNC_PASSWORD
+
 set -x
 set -e
-RSYNC_PASSWORD=$password ; export RSYNC_PASSWORD
 TIME="%e,%U,%S" ; export TIME
 TZ=UTC ; export TZ
 
