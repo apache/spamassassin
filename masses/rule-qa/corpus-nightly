@@ -6,6 +6,11 @@
 
 renice 10 -p $$
 
+# use $PERL from env if unset
+if [ "x${PERL:-}" = x ] ; then
+  PERL=perl
+fi
+
 set -x
 set -e
 RSYNC_PASSWORD=$password ; export RSYNC_PASSWORD
@@ -13,12 +18,12 @@ TIME="%e,%U,%S" ; export TIME
 TZ=UTC ; export TZ
 
 # ensure we're running after 0900 UTC
-if date | egrep -q '^... ... .. (08|10):'; then
+if date | egrep '^... ... .. (08|10):'; then
 	exit
 fi
 
 # day of week
-if date | egrep -q '^Sat' || [ "$1" = "net" ]; then
+if date | egrep '^Sat' || [ "$1" = "net" ]; then
 	net="net-"
 else
 	net=""
@@ -43,9 +48,9 @@ fi
 set +e
 retry=0
 while true; do
-	killall -TERM svn
+	pkill -TERM svn
 	sleep 10
-	killall -KILL svn
+	pkill -KILL svn
 	if svn update -r $revision; then
 		break;
 	fi
@@ -59,7 +64,7 @@ done
 set -e
 
 # build
-perl Makefile.PL < /dev/null
+$PERL Makefile.PL < /dev/null
 make
 
 # call ext command, if required
