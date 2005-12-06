@@ -160,7 +160,7 @@ sub find_srcs {
 
     my $cb = sub {
       if (-f $_ && -r _) {
-        if ($_ =~ /\.mbox/) {
+        if ($_ =~ /\.mbox/i) {
          push @mboxes, $File::Find::name;
         } else {
           $num_files++;
@@ -297,7 +297,7 @@ sub _mklink {
     if (!exists $files{$mtime}) {
       $files{$mtime} = [ ];
     }
-    if ($_ =~ /\.mbox/) {
+    if ($_ =~ /\.mbox/i) {
       push(@{$files{$mtime}}, mbox_extract_all($_));
     } else {
       push(@{$files{$mtime}}, $File::Find::name);

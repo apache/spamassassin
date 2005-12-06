@@ -32,7 +32,7 @@ foreach my $submitter (<*>) {
       next unless (-d $dir);
       print OUT "$type:dir:$RAWCOR_DIR/$dir\n";
     }
-    foreach my $mbox (<$submitter/$type/*.mbox>) {
+    foreach my $mbox (<$submitter/$type/*.[mM][bB][oO][xX]>) {
       next unless (-f $mbox);
       print OUT "$type:mbox:$RAWCOR_DIR/$mbox\n";
     }
