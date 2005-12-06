@@ -23,7 +23,9 @@ for user in $nightly_users ; do
 
   (
     HOME=$dir
-    export HOME
+    PERL=/local/perl586/bin/perl
+    export HOME PERL
+
     # use bash to work around Solaris breakage
     bash $dir/svn/masses/rule-qa/corpus-nightly
   )
