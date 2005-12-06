@@ -1,6 +1,7 @@
 #!/bin/sh
 #
-# driver for nightly mass-checks on the zone.
+# driver for nightly mass-checks on the zone. run from cron as:
+# 10 9,10 * * * /home/automc/svn/spamassassin/build/automc/run_nightly > /var/www/buildbot.spamassassin.org/bbmass/nightly_masschecks.txt 2>&1
 
 # add usernames who you want to do nightlies for here:
 nightly_users="
@@ -11,6 +12,10 @@ nightly_users="
 # and where the $HOMEs are:
 nightly_trees="/home/bbmass/mc-nightly"
 
+# create the targets files:
+/home/automc/svn/spamassassin/build/automc/populate_cor_nightly
+
+# and run each mass-check using "corpus-nightly"
 for user in $nightly_users ; do
   dir="$nightly_trees/$user"
 
