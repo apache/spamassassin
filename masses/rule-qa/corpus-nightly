@@ -48,9 +48,14 @@ fi
 set +e
 retry=0
 while true; do
+	if svn update -r $revision < /dev/null ; then
+		break;
+	fi
+
 	pkill -TERM svn
 	sleep 10
 	pkill -KILL svn
+
 	if svn update -r $revision; then
 		break;
 	fi
