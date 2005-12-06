@@ -83,6 +83,12 @@ sub load_plugin {
     $path = Mail::SpamAssassin::Util::untaint_file_path(
               File::Spec->rel2abs($path)
 	    );
+
+    if (exists $INC{$path}) {
+      dbg("plugin: not loading $package from $path, already loaded");
+      return;
+    }
+
     dbg("plugin: loading $package from $path");
     $ret = do $path;
   }
