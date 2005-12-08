@@ -692,7 +692,7 @@ sub get_current_svn_revision {
       open (SVNINFO, "< $dir/svninfo.tmp");
     } 
     else {
-      open (SVNINFO, "svn info --non-interactive $dir 2>&1 |");
+      open (SVNINFO, "( svn info --non-interactive $dir || svn info $dir ) 2>&1 |");
     }
 
     while (<SVNINFO>) {
