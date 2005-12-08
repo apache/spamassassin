@@ -394,7 +394,7 @@ sub check_from_in_auto_whitelist {
     if (!$evalok) {
       warn("auto-whitelist: open of auto-whitelist file failed: $@");
       # try an unlock, in case we got that far
-      eval { $whitelist->finish(); };
+      eval { $whitelist->finish(); } if $whitelist;
       return 0;
     }
 
