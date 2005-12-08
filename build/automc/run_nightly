@@ -15,6 +15,8 @@ nightly_trees="/home/bbmass/mc-nightly"
 # create the targets files:
 /home/automc/svn/spamassassin/build/automc/populate_cor_nightly
 
+echo "run_nightly starting at" ; date
+
 # and run each mass-check using "corpus-nightly"
 for user in $nightly_users ; do
   dir="$nightly_trees/$user"
@@ -23,8 +25,12 @@ for user in $nightly_users ; do
 
   (
     HOME=$dir
+
+    # oh Solaris, you really suck
     PERL=/local/perl586/bin/perl
-    export HOME PERL
+    PATH=$PATH:/usr/sfw/bin:/opt/sfw/bin:/opt/SUNWspro/bin:/usr/X/bin:/usr/ucb:/usr/sbin:/usr/ccs/bin:/opt/subversion-1.1.4/bin:/usr/apache2/bin:/local/bin
+
+    export HOME PERL PATH
 
     # use bash to work around Solaris breakage
     bash $dir/svn/masses/rule-qa/corpus-nightly
