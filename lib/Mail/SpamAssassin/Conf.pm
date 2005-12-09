@@ -870,11 +870,26 @@ trailing dot, that's considered a mask to allow all addresses in the remaining
 octets.  If a mask is not specified, and there is not trailing dot, then just
 the single IP address specified is used, as if the mask was C</32>.
 
+If a network or host address is prefaced by a C<!> the network or host will be
+excluded (or included) in a first listed match fashion.
+
 Examples:
 
     trusted_networks 192.168/16 127/8		# all in 192.168.*.* and 127.*.*.*
     trusted_networks 212.17.35.15		# just that host
     trusted_networks 127.			# all in 127.*.*.*
+
+Inclusion/Exclusion examples:
+
+    # include all of 10.0.1/24 except for 10.0.1.5
+    trusted_networks !10.0.1.5 10.0.1/24
+
+    # include all of 10.0.1/24, the !10.0.1.5 has no effect
+    trusted_networks 10.0.1/24 !10.0.1.5
+
+    # include all RFC1918 address space except subnet 172.16.3/24 but
+    # including host 172.16.3.3 within the excluded 172.16.3/24
+    trusted_networks 172.16.3.3 !172.16.3/24 172.16/12 10/8 192.168/16
 
 This operates additively, so a C<trusted_networks> line after another one
 will result in all those networks becoming trusted.  To clear out the
