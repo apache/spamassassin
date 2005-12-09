@@ -345,6 +345,7 @@ sub dccifd_lookup {
     # safe to use $SIG{ALRM} here instead of Util::trap_sigalrm_fully(),
     # since there are no killer regexp hang dangers here
     local $SIG{ALRM} = sub { die "__alarm__ignore__\n" };
+    local $SIG{__DIE__};   # bug 4631
 
     $oldalarm = alarm $timeout;
 
@@ -465,6 +466,7 @@ sub dccproc_lookup {
     # since there are no killer regexp hang dangers here
     local $SIG{ALRM} = sub { die "__alarm__ignore__\n" };
     local $SIG{PIPE} = sub { die "__brokenpipe__ignore__\n" };
+    local $SIG{__DIE__};   # bug 4631
 
     $oldalarm = alarm $timeout;
 
@@ -614,6 +616,7 @@ sub dcc_report {
   eval {
     local $SIG{ALRM} = sub { die "__alarm__ignore__\n" };
     local $SIG{PIPE} = sub { die "__brokenpipe__ignore__\n" };
+    local $SIG{__DIE__};   # bug 4631
 
     $oldalarm = alarm $timeout;
 
