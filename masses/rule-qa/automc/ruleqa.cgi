@@ -8,6 +8,7 @@ use CGI;
 use Template;
 use Date::Manip;
 use XML::Simple;
+use URI::Escape;
 
 use strict;
 use bytes;
@@ -88,6 +89,7 @@ my @daterevs = get_all_daterevs();
 if (defined $daterev) {
   if ($daterev eq 'last-night') {
     $daterev = get_last_night_daterev();
+    $q->url_param('daterev', $daterev);                # make it absolute
   }
   else {
     $daterev =~ /(\d+)[\/-](r\d+)-(\S+)/; undef $daterev;
@@ -784,10 +786,10 @@ sub set_freqs_templates {
     <td style='text-align: left'><a href="[% NAMEREF %]">[% NAME %]</a></td>
     <td>[% USERNAME %]</td>
     <td>[% AGE %]</td>
+    <!--
+      <rule><test>[% NAME %]</test><promo>[% PROMO %]</promo> <spc>[% SPAMPC %]</spc><hpc>[% HAMPC %]</hpc><so>[% SO %]</so> <detailhref esc='1'>[% NAMEREFENCD %]</detailhref></rule>
+    -->
   </tr>
-  <!--
-    <rule><n>[% NAME %]</n><p>[% PROMO %]</p><sp>[% SPAMPC %]</sp><hp>[% HAMPC %]</hp><so>[% SO %]</so><href>[% NAMEREF %]</href></rule>
-  -->
 
   };
 
@@ -836,6 +838,7 @@ sub output_freqs_data_line {
         SCORE => $score,
         NAME => $line->{name},
         NAMEREF => create_detail_url($line->{name}),
+        NAMEREFENCD => uri_encode(create_detail_url($line->{name})),
         USERNAME => $line->{username} || '',
         AGE => $line->{age} || '',
         PROMO => $line->{promotable},
@@ -879,8 +882,9 @@ sub create_detail_url {
   my @parms = (
         get_params_except(qw(
           rule s_age s_overlap s_all s_detail
+          rule s_age s_overlap s_all s_detail daterev
         )), 
-        "rule=".uri_escape($rulename), "s_detail=1",
+        "daterev=".$daterev, "rule=".uri_escape($rulename), "s_detail=1",
       );
   return assemble_url(@parms);
 }
@@ -1067,6 +1071,11 @@ sub show_daterev_selector_page {
     <h3> Preflight Mass-Checks </h3>
     <br/> <a href='#preflight' name=preflight>#</a>
   }.  gen_daterev_table(@drs_preflight);
+}
+
+sub uri_encode {
+  my ($str) = @_;
+  return uri_escape($str);
 }
 
 sub gen_daterev_table {
