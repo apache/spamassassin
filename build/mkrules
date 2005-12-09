@@ -37,19 +37,20 @@ use Mail::SpamAssassin;
 
 use vars qw(
     @opt_srcs $opt_out $opt_sandboxout $opt_manifest
-    $opt_manifestskip
+    $opt_manifestskip $opt_listpromotable
 );
 GetOptions("src=s" => \@opt_srcs,
     "out=s",
     "sandboxout=s",
     "manifest=s",
-    "manifestskip=s"
+    "manifestskip=s",
+    "listpromotable=s",
   );
 
 if (!@opt_srcs) {
   foreach ( 'rulescode', 'rulesrc' ) {
     if (-d $_) {
-      print "using default src $_\n";
+      # print "using default src $_\n";
       push(@opt_srcs, $_);
     }
   }
@@ -64,9 +65,17 @@ if (!$opt_manifestskip && -f "MANIFEST.SKIP") {
 }
 
 die "no src" unless (@opt_srcs >= 1);
-die "no out" unless ($opt_out);
-die "unreadable out" unless (-d $opt_out);
 
+my $promolist;
+if ($opt_listpromotable) {
+  my $list = do $opt_listpromotable;
+  die "no listpromotable list" unless $list;
+  $promolist = $list;
+}
+else {
+  die "no out" unless ($opt_out);
+  die "unreadable out" unless (-d $opt_out);
+}
 $opt_sandboxout ||= "70_sandbox.cf";
 
 # source files that need compilation, and their targets
@@ -104,7 +113,19 @@ my $files_to_lint = { };
 
 compile_sorted($needs_compile);
 lint_output_files();
-write_output_files();
+
+if ($opt_listpromotable) {
+  list_promotable();
+}
+else {
+  write_output_files();
+}
+exit;
+
+sub list_promotable {
+}
+
+# ---------------------------------------------------------------------------
 
 sub lint_output_files {
   foreach my $file (keys %{$files_to_lint}) {
@@ -129,8 +150,6 @@ sub lint_rule_text {
   return $res;       # 0 means good
 }
 
-exit;
-
 sub wanted {
   my $path = $File::Find::name;
   # only files
@@ -149,7 +168,12 @@ sub wanted {
 
 
   my $f = "$current_src/$dir$filename";
-  my $t = "$opt_out/$filename";
+  my $t;
+
+  if (!$opt_listpromotable) {
+    $t = "$opt_out/$filename";
+  }
+
   $needs_compile->{$f} = {
           f => $f,
           t => $t,
@@ -160,7 +184,6 @@ sub wanted {
 
 # compile all the source files found by the wanted() sub, in sorted
 # order so that the order of precedence makes sense.
-
 sub compile_sorted {
   my ($sources) = @_;
 
@@ -185,17 +208,7 @@ sub compile_sorted {
     my $needs_rebuild = 1;
 
     if ($entry->{filename} =~ /\.pm$/) {
-      # just copy the raw perl module over to the new area
-      # we can't really rename to avoid conflicts since the loadplugin lines
-      # are going to be all screwed up in that case.
-      # jm: we always want to update the output file in case the input
-      # has been changed!
-      if (0 && -e $entry->{t}) {
-	warn "The perl module ".$entry->{t}." already exists, can't copy from ".$entry->{f}."\n";
-      }
-      else {
-        copy($entry->{f}, $entry->{t}) || warn "Couldn't copy ".$entry->{f}.": $!";
-      }
+      plugin_file_compile($entry);
     }
     elsif ($entry->{dir} =~ /sandbox/) {
       rule_file_compile_sandbox($f, $t, $entry->{filename});
@@ -233,9 +246,9 @@ sub compile_sorted {
 # one that's already been output by the compiler in another source file. The
 # autorenaming is very simple -- portions of the current source path are
 # appended to the rule name, sanitised.
-#
-# TODO: linting during compilation, and ignore lint-failures? may have to
-# reimplement a small subset of lint behaviour to do this.
+
+my $COMMENTS;
+my $ALWAYS_PUBLISH;
 
 sub rule_file_compile_sandbox {
   my ($f, $t, $filename) = @_;
@@ -249,24 +262,25 @@ sub rule_file_compile_sandbox {
   my $rules = { };
   my $rule_order = [ ];
 
-  # $COMMENTS is a "catch-all" "name", for lines that appear before the first
+  # $COMMENTS is a "catch-all" "name", for lines that appear after the last
   # line that refers to a rule by name.  Those lines are not published by
   # themselves; they'll be published to all pubfiles found in the file.
   #
-  # It's assumed they are comments, because they generally are, but could
-  # be all sorts of unparseable lines.
+  # It's assumed they are comments, because they generally are, but could be
+  # all sorts of unparseable lines.
+  $COMMENTS = '!comments!';
 
-  my $COMMENTS = '!comments!';
   my $lastrule = $COMMENTS;
 
   # another "fake name" for lines that should always be published, to an
   # output file with the same name as the input file.
-  my $ALWAYS_PUBLISH = '!always_publish!';
+  $ALWAYS_PUBLISH = '!always_publish!';
   $rules->{$ALWAYS_PUBLISH} = rule_entry_create();
-  my %ALWAYS = ( $ALWAYS_PUBLISH => 1 );
+  my $ALWAYS = { $ALWAYS_PUBLISH => 1 };
 
   # an "ifplugin" or "if" scope
   my $current_conditional;
+  my $current_comments = '';
 
   while (<IN>) {
     my $orig = $_;
@@ -276,9 +290,9 @@ sub rule_file_compile_sandbox {
 
     s/#.*$//g; s/^\s+//; s/\s+$//;
 
-    # send comments/blank lines to the current default output
+    # send comments/blank lines to the holding area for next rule
     if (/^$/) {
-      $rules->{$lastrule}->{text} .= $orig;
+      $current_comments .= $orig;
       next;
     }
 
@@ -302,12 +316,13 @@ sub rule_file_compile_sandbox {
       my $origname = $name;
       $name = sandbox_rule_name_avoid_collisions($name, $f);
 
-      # TODO: sandbox rules -- enforce "T_" prefix
-
       if (!$rules->{$name}) { $rules->{$name} = rule_entry_create(); }
       $rules->{$name}->{origname} = $origname;
       $rules->{$name}->{cond} = $current_conditional;
-      $rules->{$name}->{text} .= $orig;
+      $rules->{$name}->{text} .= $current_comments . $orig;
+      $rules->{$name}->{srcfile} = $f;
+
+      $current_comments = '';
 
       $lastrule = $name;
       push (@$rule_order, $name);
@@ -366,7 +381,7 @@ sub rule_file_compile_sandbox {
         $NAME .= $current_conditional . '!';
         unless ($rules->{$NAME}) {
 	  $rules->{$NAME} = rule_entry_create();
-	  $ALWAYS{$NAME} = 1;
+	  $ALWAYS->{$NAME} = 1;
 	}
 	$rules->{$NAME}->{cond} = $current_conditional;
       }
@@ -377,53 +392,12 @@ sub rule_file_compile_sandbox {
   }
   close IN;
 
-  # now append all the found text to the output file buffers
-  my %already_done = ();
-  my $copied = 0;
-  foreach my $name (@$rule_order, keys(%ALWAYS))
-  {
-    # only do each rule once, please ;)
-    next if exists $already_done{$name};
-    $already_done{$name} = undef;
-
-    my $pubfile;
-    if ($rules->{$name}->{publish}) {
-      $pubfile = ($rules->{$name}->{pubfile} || $filename);
-      $pubfile = $opt_out.'/'.$pubfile;
-    } else {
-      $pubfile = $opt_out.'/'.$opt_sandboxout;
-    }
-    $output_files->{$pubfile} = 1;
-
-    my $text = $rules->{$name}->{text};
-    if (!$text) {
-      next;     # nothing to write!
-    }
-
-    if (!$output_file_text->{$pubfile}) {
-      $output_file_text->{$pubfile} = output_file_header($f);
-
-      # do we have any top-of-file comments?  if so, add it
-      my $cmts = $rules->{$COMMENTS}->{text}; $cmts ||= '';
-      $output_file_text->{$pubfile} .= $cmts;
-    }
-
-    # fix up any rule renamings we were supposed to do
-    sed_renamed_rule_names(\$text);
-
-    my $cond = $rules->{$name}->{cond};
-    if ($cond) {
-      $output_file_text->{$pubfile} .= $cond.$text."endif\n";
-    }
-    else {
-      $output_file_text->{$pubfile} .= $text;
-    }
-
-    $files_to_lint->{$pubfile} = 1;
-
-    $copied++;
+  if ($current_comments) {
+    $rules->{$COMMENTS}->{text} .= $current_comments;
   }
-  print "$f: $copied sandbox rules copied\n";
+
+  # now append all the found text to the output file buffers
+  copy_to_output_buffers($rule_order, $rules, $ALWAYS, $f, $filename);
 
   # ok; file complete.  now mark all those rules as "seen"; future
   # refs to those rule names will trigger an autorename.
@@ -432,8 +406,97 @@ sub rule_file_compile_sandbox {
   }
 }
 
+sub copy_to_output_buffers {
+  my ($rule_order, $rules, $ALWAYS, $f, $filename) = @_;
+
+  my %already_done = ();
+  my $copied = 0;
+  foreach my $name (@$rule_order, keys(%$ALWAYS))
+  {
+    # only do each rule once, please ;)
+    next if exists $already_done{$name};
+    $already_done{$name} = undef;
+
+    my $text = $rules->{$name}->{text};
+    if (!$text) {
+      next;     # nothing to write!
+    }
+
+    if ($opt_listpromotable) {
+      promo_rule ($rules, $name, $text);
+    }
+    else {
+      copy_rule ($rules, $name, $text, $filename);
+      $copied++;
+    }
+  }
+
+  if (!$opt_listpromotable) {
+    print "$f: $copied sandbox rules copied\n";
+  }
+}
+
+sub copy_rule {
+  my ($rules, $name, $text, $filename) = @_;
+
+  my $f = $rules->{$name}->{srcfile};
+
+  my $pubfile;
+  if ($rules->{$name}->{publish}) {
+    $pubfile = ($rules->{$name}->{pubfile} || $filename);
+    $pubfile = $opt_out.'/'.$pubfile;
+  } else {
+    $pubfile = $opt_out.'/'.$opt_sandboxout;
+  }
+  $output_files->{$pubfile} = 1;
+
+  if (!$output_file_text->{$pubfile}) {
+    $output_file_text->{$pubfile} = output_file_header($f);
+  }
+
+  # fix up any rule renamings we were supposed to do
+  sed_renamed_rule_names(\$text);
+
+  my $cond = $rules->{$name}->{cond};
+  if ($cond) {
+    $output_file_text->{$pubfile} .= $cond.$text."endif\n";
+  }
+  else {
+    $output_file_text->{$pubfile} .= $text;
+  }
+
+  # do we have any end-of-file comments?  if so, add it
+  my $cmts = $rules->{$COMMENTS}->{text};
+  if ($cmts) {
+    $output_file_text->{$pubfile} .= $cmts;
+  }
+
+  $files_to_lint->{$pubfile} = 1;
+}
+
+sub promo_rule {
+  my ($rules, $name, $text) = @_;
+
+  return unless $promolist->{$name};
+  my $pent = $promolist->{$name};
+  return unless $pent->{promo};
+
+  $text =~ s/^\s+//s;
+  $text =~ s/\s+$//s;
+
+  print "\n## ".("-" x 70)."\n";
+  print "## Promotable rule: $name\n";
+  printf "## so=%5.3f   spc=%5.3f   hpc=%5.3f\n",
+            $pent->{so}, $pent->{spc}, $pent->{hpc};
+  print "## $rules->{$name}->{srcfile}\n";
+  print "## $pent->{detailhref}\n\n";
+  print $text,"\n";
+}
+
 sub rule_file_compile_core {
   my ($f, $t, $filename) = @_;
+
+  return if $opt_listpromotable;
 
   my $pubfile = $opt_out.'/'.$filename;
   $output_files->{$pubfile} = 1;
@@ -490,6 +553,23 @@ sub rule_file_compile_core {
   print "$f: all lines copied\n";
 }
 
+sub plugin_file_compile {
+  my ($entry) = @_;
+
+  return if $opt_listpromotable;
+  # just copy the raw perl module over to the new area
+  # we can't really rename to avoid conflicts since the loadplugin lines
+  # are going to be all screwed up in that case.
+  # jm: we always want to update the output file in case the input
+  # has been changed!
+  if (0 && -e $entry->{t}) {
+    warn "The perl module ".$entry->{t}." already exists, can't copy from ".$entry->{f}."\n";
+  }
+  else {
+    copy($entry->{f}, $entry->{t}) || warn "Couldn't copy ".$entry->{f}.": $!";
+  }
+}
+
 sub write_output_files {
   foreach my $pubfile (sort keys %$output_files) {
     if (-f $pubfile) {
@@ -524,6 +604,8 @@ sub sandbox_rule_name_avoid_collisions {
   my ($rule, $path) = @_;
   my $new;
   my $newreason;
+
+  return $rule if $opt_listpromotable;
 
   if ($rule !~ /^(?:T_|__)/) {
     $new = "T_".$rule;
