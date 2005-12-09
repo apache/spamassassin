@@ -141,6 +141,7 @@ sub _check_domainkeys {
 
   eval {
     local $SIG{ALRM} = sub { die "__alarm__ignore__\n" };
+    local $SIG{__DIE__};   # bug 4631
     $oldalarm = alarm($timeout);
     $self->_dk_lookup_trapped($scan, $message, $domain);
     if (defined $oldalarm) {

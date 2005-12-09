@@ -291,6 +291,7 @@ sub _check_spf {
 
   eval {
     local $SIG{ALRM} = sub { die "__alarm__ignore__\n" };
+    local $SIG{__DIE__};   # bug 4631
     $oldalarm = alarm($timeout);
     ($result, $comment) = $query->result();
     if (defined $oldalarm) {
