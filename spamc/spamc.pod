@@ -210,13 +210,9 @@ treated as equivalent to spaces. Existing command line switches will override
 any settings in the configuration file.
 
 If the B<-F> switch is specified, that file will be used.  Otherwise,
-C<spamc> will attempt to load defaults as follows.
-
-If the installation prefix begins with C</usr>,
-C</etc/mail/spamassassin/spamc.conf> will be attempted. If it begins with
-C</opt>, C</etc/opt/mail/spamassassin/spamc.conf> will be attempted. If those
-don't exist, C</etc/spamc.conf> will be appended to the prefix and tried. If
-none of those exist, no configuration file will be read by default.
+C<spamc> will attempt to load spamc.conf in C<SYSCONFDIR> (default:
+/etc/mail/spamassassin). If that file doesn't exist, and the B<-F>
+switch is not specified, no configuration file will be read.
 
 Example:
 
