@@ -4,9 +4,16 @@
 
 (
 
+  # create links to the user-submitted corpora in the right
+  # volumes etc.
   date
   ./build/automc/populate_cor
   date
+
+  # permit mass-check processes to create files in these dirs,
+  # so they can use the ArchiveIterator cache code
+  cd /home/bbmass/tmpfs/cor
+  find . -type d | xargs chmod 1777
 
 ) 2>&1 | tee \
     /var/www/buildbot.spamassassin.org/bbmass/corpus_makeup.txt
