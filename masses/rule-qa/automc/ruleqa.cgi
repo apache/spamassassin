@@ -49,7 +49,7 @@ my %s = ();
 $s{defcorpus} = get_url_switch('s_defcorpus', 1);
 $s{html} = get_url_switch('s_html', 0);
 $s{net} = get_url_switch('s_net', 0);
-$s{zero} = get_url_switch('s_zero', 0);
+$s{zero} = get_url_switch('s_zero', 1);
 
 $s{new} = get_url_switch('s_new', 1);
 $s{detail} = get_url_switch('s_detail', 0);
@@ -266,12 +266,6 @@ my $tmpl = q{
 
 <div class=updateform>
 <form action="!THISURL!" method=GET>
-  <h4> Which Corpus? </h4>
-  <input type=checkbox name=s_defcorpus !s_defcorpus!> Show default non-net ruleset and corpus, set 0<br/>
-  <input type=checkbox name=s_net !s_net!> Show frequencies from network tests, set 1<br/>
-  <input type=checkbox name=s_html !s_html!> Show frequencies for mails containing HTML only, set 0<br/>
-  <br/>
-
   <table style="padding-left: 0px" class=datetable>
 
       <tr>
@@ -309,6 +303,13 @@ my $tmpl = q{
 </table>
 
   <br/>
+
+  <h4> Which Corpus? </h4>
+  <input type=checkbox name=s_defcorpus !s_defcorpus!> Show default non-net ruleset and corpus, set 0<br/>
+  <input type=checkbox name=s_net !s_net!> Show frequencies from network tests, set 1<br/>
+  <input type=checkbox name=s_html !s_html!> Show frequencies for mails containing HTML only, set 0<br/>
+  <br/>
+
   <h4> Which Rules?</h4>
   Show only these rules (space separated, or regexp with '/' prefix):<br/>
   <input type=textfield size=60 name=rule value="!rule!"><br/>

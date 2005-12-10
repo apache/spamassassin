@@ -187,6 +187,12 @@ from wanted_sub), and received date (scalar).
 Note that if C<opt_want_date> is set to 0, the received date scalar will be
 undefined.
 
+=item scan_progress_sub
+
+Reference to a subroutine which will be called intermittently during
+the 'scan' phase of the mass-check.  No guarantees are made as to
+how frequently this may happen, mind you.
+
 =back
 
 =cut
@@ -914,6 +920,7 @@ sub scan_directory {
 sub scan_file {
   my ($self, $class, $mail) = @_;
 
+  $self->bump_scan_progress();
   if (!$self->{determine_receive_date}) {
     push(@{$self->{$class}}, scan_index_pack(AI_TIME_UNKNOWN, $class, "f", $mail));
     return;
@@ -959,6 +966,7 @@ sub scan_mailbox {
   }
 
   foreach my $file (@files) {
+    $self->bump_scan_progress();
     if ($file =~ /\.(?:gz|bz2)$/) {
       die "archive-iterator: compressed mbox folders are not supported at this time\n";
     }
@@ -1005,6 +1013,7 @@ sub scan_mailbox {
 	  $where = tell INPUT;
         }
         if ($header) {
+          $self->bump_scan_progress();
 	  $info->{$offset} = Mail::SpamAssassin::Util::receive_date($header);
 	}
       }
@@ -1049,6 +1058,8 @@ sub scan_mbx {
   }
 
   foreach my $file (@files) {
+    $self->bump_scan_progress();
+
     if ($folder =~ /\.(?:gz|bz2)$/) {
       die "archive-iterator: compressed mbx folders are not supported at this time\n";
     }
@@ -1091,6 +1102,7 @@ sub scan_mbx {
 	    $header .= $_;
 	  }
 
+          $self->bump_scan_progress();
 	  $info->{"$file.$offset"} = Mail::SpamAssassin::Util::receive_date($header);
 
 	  # go onto the next message
@@ -1118,6 +1130,16 @@ sub scan_mbx {
     if (defined $AICache) {
       $AICache = $AICache->finish();
     }
+  }
+}
+
+############################################################################
+
+sub bump_scan_progress {
+  my ($self) = @_;
+  if (exists $self->{scan_progress_sub}) {
+    return unless ($self->{scan_progress_counter}++ % 50 == 0);
+    $self->{scan_progress_sub}->();
   }
 }
 

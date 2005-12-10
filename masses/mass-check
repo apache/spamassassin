@@ -33,8 +33,8 @@ usage: mass-check [options] target ...
                 is a comma-separated list of facilities)
   --progress    show progress updates during check
   --noisy       show noisier progress updates during check
-  --rewrite=OUT save rewritten message to OUT (default is /tmp/out)
   --showdots    print a dot for each scanned message
+  --rewrite=OUT save rewritten message to OUT (default is /tmp/out)
   --rules=RE    Only test rules matching the given regexp RE
   --restart=N   restart all of the children after processing N messages
   --deencap=RE  Extract SpamAssassin-encapsulated spam mails only if they
@@ -289,10 +289,17 @@ my $iter = new Mail::SpamAssassin::ArchiveIterator({
 	'opt_after' => $opt_after,
 	'opt_before' => $opt_before,
 	'opt_restart' => $opt_restart,
+        'scan_progress_sub' => \&scan_progress_cb
 });
 
 if ($opt_progress) {
   status('starting scan stage');
+}
+
+sub scan_progress_cb {
+  if ($opt_showdots) {
+    print STDERR '.';
+  }
 }
 
 $iter->set_functions(\&wanted, \&result);
@@ -329,6 +336,8 @@ sub target  {
 ###########################################################################
 
 sub init_results {
+  print STDERR "\n" if ($opt_showdots);
+
   if ($opt_progress) {
     # make it a local variable for now
     $total_messages = $Mail::SpamAssassin::ArchiveIterator::MESSAGES;
