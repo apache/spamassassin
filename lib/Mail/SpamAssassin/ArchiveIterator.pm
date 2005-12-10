@@ -474,18 +474,17 @@ sub run_file {
     return;
   }
   my @msg;
-  my $header = '';
+  my $header;
   while (<INPUT>) {
-    if (!$header && /^\s*$/) {
-      $header = join('', @msg);
-    }
-
     push(@msg, $_);
+    if (!defined $header && /^\s*$/) {
+      $header = $#msg;
+    }
   }
   close INPUT;
 
   if ($date == AI_TIME_UNKNOWN && $self->{determine_receive_date}) {
-    $date = Mail::SpamAssassin::Util::receive_date($header);
+    $date = Mail::SpamAssassin::Util::receive_date(join('', splice(@msg, 0, $header)));
   }
 
   return($class, $format, $date, $where, &{$self->{wanted_sub}}($class, $where, $date, \@msg, $format));
@@ -496,17 +495,12 @@ sub run_mailbox {
 
   my ($file, $offset) = ($where =~ m/(.*)\.(\d+)$/);
   my @msg;
-  my $header = '';
+  my $header;
   mail_open($file) or return;
   seek(INPUT,$offset,0);
-  my $past = 0;
   while (<INPUT>) {
-    if ($past) {
-      last if substr($_,0,5) eq "From ";
-    }
-    else {
-      $past = 1;
-    }
+    last if (substr($_,0,5) eq "From " && @msg);
+    push (@msg, $_);
 
     # skip too-big mails
     if (! $self->{opt_all} && @msg > BIG_LINES) {
@@ -515,16 +509,14 @@ sub run_mailbox {
       return;
     }
 
-    if (!$header && /^\s*$/) {
-      $header = join('', @msg);
+    if (!defined $header && /^\s*$/) {
+      $header = $#msg;
     }
-
-    push (@msg, $_);
   }
   close INPUT;
 
-  if ($date == AI_TIME_UNKNOWN) {
-    $date = Mail::SpamAssassin::Util::receive_date($header);
+  if ($date == AI_TIME_UNKNOWN && $self->{determine_receive_date}) {
+    $date = Mail::SpamAssassin::Util::receive_date(join('', splice(@msg, 0, $header)));
   }
 
   return($class, $format, $date, $where, &{$self->{wanted_sub}}($class, $where, $date, \@msg, $format));
@@ -535,14 +527,15 @@ sub run_mbx {
 
   my ($file, $offset) = ($where =~ m/(.*)\.(\d+)$/);
   my @msg;
-  my $header = '';
+  my $header;
 
   mail_open($file) or return;
   seek(INPUT, $offset, 0);
     
   while (<INPUT>) {
     last if ($_ =~ MBX_SEPARATOR);
-	
+    push (@msg, $_);
+
     # skip mails that are too big
     if (! $self->{opt_all} && @msg > BIG_LINES) {
       info("archive-iterator: skipping large message\n");
@@ -550,16 +543,14 @@ sub run_mbx {
       return;
     }
 
-    if (!$header && /^\s*$/) {
-      $header = join('', @msg);
+    if (!defined $header && /^\s*$/) {
+      $header = $#msg;
     }
-
-    push (@msg, $_);
   }
   close INPUT;
 
-  if ($date == AI_TIME_UNKNOWN) {
-    $date = Mail::SpamAssassin::Util::receive_date($header);
+  if ($date == AI_TIME_UNKNOWN && $self->{determine_receive_date}) {
+    $date = Mail::SpamAssassin::Util::receive_date(join('', splice(@msg, 0, $header)));
   }
 
   return($class, $format, $date, $where, &{$self->{wanted_sub}}($class, $where, $date, \@msg, $format));
