@@ -61,11 +61,13 @@ if (run ("../spamassassin --lint -x -C tstrules", 1) != 0) {
 #
 # this is run in a chroot jail, just in case there's hostile rule code in
 # there. limit to the most recent 30k messages of each type, as the corpora are
-# getting big.  and de-encapsulate 'report_safe' messages from
-# petuniapress.com.
+# getting big.  de-encapsulate 'report_safe' messages from
+# petuniapress.com.  produce lots of noisy output to stop the buildbot from
+# timing out on mass-checks of large corpora.
 
 run "/local/bbmasstools/masschroot $perl ".
-    "mass-check -c=tstrules --tail=30000 --cache --progress -j=1 ".
+    "mass-check -c=tstrules --tail=30000 --cache -j=1 ".
+    "--noisy --showdots ".
     "--deencap='petuniapress.com' ".
     "-f $targets";
 
