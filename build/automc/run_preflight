@@ -67,7 +67,7 @@ if (run ("../spamassassin --lint -x -C tstrules", 1) != 0) {
 
 run "/local/bbmasstools/masschroot $perl ".
     "mass-check -c=tstrules --tail=30000 --cache -j=1 ".
-    "--noisy --showdots ".
+    "--noisy ".
     "--deencap='petuniapress.com' ".
     "-f $targets";
 

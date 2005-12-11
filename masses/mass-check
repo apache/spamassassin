@@ -107,7 +107,7 @@ use File::Spec;
 use Getopt::Long;
 use POSIX qw(strftime);
 use constant HAS_TIME_PARSEDATE => eval { require Time::ParseDate; };
-use Config;
+use Config; 
 
 # default settings
 $opt_c = "$FindBin::Bin/../rules";
@@ -254,6 +254,10 @@ my $spam_count = 0;
 my $ham_count = 0;
 my $init_results = 0;
 
+my $showdots_active = ($opt_showdots || $opt_noisy);
+my $showdots_counter = 0;
+my $showdots_every = ($opt_showdots ? 1 : 20);
+
 # Deal with --rewrite
 if (defined $opt_rewrite) {
   my $rewrite = ($opt_rewrite ? $opt_rewrite : "/tmp/out");
@@ -297,9 +301,7 @@ if ($opt_progress) {
 }
 
 sub scan_progress_cb {
-  if ($opt_showdots) {
-    print STDERR '.';
-  }
+  showdots_blip();
 }
 
 $iter->set_functions(\&wanted, \&result);
@@ -309,7 +311,7 @@ if ($opt_progress) {
   status('completed run stage');
 }
 
-print STDERR "\n" if ($opt_showdots);
+showdots_finish();
 
 if (defined $opt_rewrite) {
   close(REWRITE);
@@ -336,7 +338,10 @@ sub target  {
 ###########################################################################
 
 sub init_results {
-  print STDERR "\n" if ($opt_showdots);
+  showdots_finish();
+
+  # now, showdots only happens if --showdots was used
+  $showdots_active = $opt_showdots;
 
   if ($opt_progress) {
     # make it a local variable for now
@@ -585,11 +590,25 @@ sub wanted {
   undef $ma;		# clean 'em up
   undef $status;
 
-  if ($opt_showdots) {
-    print STDERR '.';
-  }
-
+  showdots_blip();
   return $out;
+}
+
+sub showdots_blip {
+  return unless ($showdots_active);
+
+  $showdots_counter++;
+  if ($showdots_counter % $showdots_every == 0) {
+    print STDERR '.';
+    if ($showdots_counter % (60 * $showdots_every) == 0) {
+      print STDERR "\n";
+    }
+  }
+}
+
+sub showdots_finish {
+  print STDERR "\n" if ($showdots_active);
+  $showdots_counter = 0;
 }
 
 # ick.  We have to go grovelling through the body parts to see if a message
