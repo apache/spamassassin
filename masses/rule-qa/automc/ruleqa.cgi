@@ -633,8 +633,9 @@ sub read_freqs_file {
       my $is_subrule = ($lastrule =~ /^__/);
 
       # assume a default based on rule name; turn off explicitly
-      # the test rules that are not hitting qual thresholds
-      my $promo = ($is_testing && !$is_subrule);
+      # the rules that are not hitting qual thresholds.  list
+      # both testing and core rules.
+      my $promo = (!$is_subrule);
       if ($promochar eq '-') {
         $promo = 0;
       }
