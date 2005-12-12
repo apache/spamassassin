@@ -224,15 +224,8 @@ it from running.
       }
 
       if ($relative && !exists $self->{scoreset}->[0]->{$rule}) {
-        my $msg = "config: relative score without previous setting in ".
-                    "configuration, skipping: $line";
-
-        if ($self->{lint_rules}) {
-          warn $msg."\n";
-        } else {
-          info($msg);
-        }
-        $self->{errors}++;
+        $self->{parser}->lint_warn("config: relative score without ".
+            "previous setting in configuration, skipping: $line", $rule);
         return $INVALID_VALUE;
       }
 
@@ -252,15 +245,9 @@ it from running.
         }
       }
       else {
-        my $msg = "config: score configuration option without actual scores, skipping: $line";
-
-        if ($self->{lint_rules}) {
-          warn $msg."\n";
-        } else {
-          info($msg);
-        }
-        $self->{errors}++;
-        return $MISSING_REQUIRED_VALUE;
+        $self->{parser}->lint_warn("config: score configuration ".
+            "option without actual scores, skipping: $line", $rule);
+        return $INVALID_VALUE;
       }
     }
   });
