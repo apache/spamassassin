@@ -185,7 +185,7 @@ debugging facilities are enabled.
 
 =item rules_filename
 
-The filename to load spam-identifying rules from. (optional)
+The filename/directory to load spam-identifying rules from. (optional)
 
 =item site_rules_filename
 
@@ -198,6 +198,11 @@ The filename to load preferences from. (optional)
 =item userstate_dir
 
 The directory user state is stored in. (optional)
+
+=item config_tree_recurse
+
+Set to C<1> to recurse through directories when reading configuration
+files, instead of just reading a single level.  (optional, default 0)
 
 =item config_text
 
@@ -1608,24 +1613,44 @@ sub first_existing_path {
   $path;
 }
 
+###########################################################################
+
 sub get_cf_files_in_dir {
   my ($self, $dir) = @_;
-
-  opendir(SA_CF_DIR, $dir) or warn "config: cannot opendir $dir: $!\n";
-  my @cfs = grep { /\.cf$/i && -f "$dir/$_" } readdir(SA_CF_DIR);
-  closedir SA_CF_DIR;
-
-  return map { "$dir/$_" } sort { $a cmp $b } @cfs;
+  return $self->_get_cf_pre_files_in_dir($dir, 'cf');
 }
 
 sub get_pre_files_in_dir {
   my ($self, $dir) = @_;
+  return $self->_get_cf_pre_files_in_dir($dir, 'pre');
+}
 
-  opendir(SA_PRE_DIR, $dir) or warn "config: cannot opendir $dir: $!\n";
-  my @cfs = grep { /\.pre$/i && -f "$dir/$_" } readdir(SA_PRE_DIR);
-  closedir SA_PRE_DIR;
+sub _get_cf_pre_files_in_dir {
+  my ($self, $dir, $type) = @_;
 
-  return map { "$dir/$_" } sort { $a cmp $b } @cfs;
+  if ($self->{config_tree_recurse}) {
+    # use "eval" to avoid loading File::Find unless this is specified
+    eval {
+      use File::Find qw();
+
+      my @cfs = ();
+      File::Find::find(
+        sub {
+          return unless /\.${type}$/i && -f $_;
+          push @cfs, $File::Find::name;
+        }, $dir);
+      return map { "$dir/$_" } sort { $a cmp $b } @cfs;
+    };
+
+    die "oops! $@";     # should never get here
+  }
+  else {
+    opendir(SA_CF_DIR, $dir) or warn "config: cannot opendir $dir: $!\n";
+    my @cfs = grep { /\.${type}$/i && -f "$dir/$_" } readdir(SA_CF_DIR);
+    closedir SA_CF_DIR;
+
+    return map { "$dir/$_" } sort { $a cmp $b } @cfs;
+  }
 }
 
 ###########################################################################

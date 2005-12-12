@@ -270,8 +270,10 @@ sub parse {
           my $cond = pop @if_stack;
 
           if ($cond->{type} eq 'if') {
-            warn "config: unclosed 'if' in ".
+            my $msg = "config: unclosed 'if' in ".
                   $self->{currentfile}.": if ".$cond->{conditional}."\n";
+            warn $msg;
+            $self->lint_warn($msg, undef);
           }
           else {
             # die seems a bit excessive here, but this shouldn't be possible
@@ -279,7 +281,6 @@ sub parse {
             die "config: unknown 'if' type: ".$cond->{type}."\n";
           }
 
-          $conf->{errors}++;
           @if_stack = ();
         }
         $skip_parsing = 0;
@@ -339,13 +340,14 @@ sub parse {
       #$value =~ s/^(\d+)\.(\d{1,3}).*$/sprintf "%d.%d", $1, $2/e;
 
       if ($ver ne $value) {
-        warn "config: configuration file \"$self->{currentfile}\" requires version ".
-                "$value of SpamAssassin, but this is code version ".
+        my $msg = "config: configuration file \"$self->{currentfile}\" requires ".
+                "version $value of SpamAssassin, but this is code version ".
                 "$ver. Maybe you need to use ".
                 "the -C switch, or remove the old config files? ".
                 "Skipping this file";
+        warn $msg;
+        $self->lint_warn($msg, undef);
         $skip_parsing = 1;
-        $conf->{errors}++;
       }
       next;
     }
@@ -424,15 +426,7 @@ failed_line:
       }
     }
 
-    if ($conf->{lint_rules}) {
-      warn $msg."\n";
-    } else {
-      info($msg);
-    }
-
-    if ($is_error) {
-      $conf->{errors}++;
-    }
+    $self->lint_warn($msg, undef, $is_error);
   }
 
   $self->lint_check();
@@ -471,7 +465,7 @@ sub handle_conditional {
   }
 
   if ($bad) {
-    $conf->{errors}++;
+    $self->lint_warn("bad 'if' line", undef);
     return -1;
   }
 
@@ -508,15 +502,13 @@ sub lint_check {
     # Check for description and score issues in lint fashion
     while ( ($k,$v) = each %{$conf->{descriptions}} ) {
       if (!exists $conf->{tests}->{$k}) {
-        warn "config: warning: description exists for non-existent rule $k\n";
-        $conf->{errors}++;
+        $self->lint_warn("config: warning: description exists for non-existent rule $k\n", $k);
       }
     }
 
     while ( my($sk) = each %{$conf->{scores}} ) {
       if (!exists $conf->{tests}->{$sk}) {
-        warn "config: warning: score set for non-existent rule $sk\n";
-        $conf->{errors}++;
+        $self->lint_warn("config: warning: score set for non-existent rule $k\n", $k);
       }
     }
   }
@@ -682,8 +674,7 @@ sub finish_parsing {
 	}
         unshift(@args, $function);
 	if ($args) {
-	  $conf->{errors}++;
-	  warn("syntax error (unparsable argument: $args) for eval function: $name: $text");
+          $self->lint_warn("syntax error (unparsable argument: $args) for eval function: $name: $text", $name);
 	}
         elsif ($type == $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS) {
           $conf->{body_evals}->{$priority}->{$name} = \@args;
@@ -705,13 +696,11 @@ sub finish_parsing {
         #  $conf->{uri_evals}->{$priority}->{$name} = \@args;
         #}
         else {
-          $conf->{errors}++;
-	  warn("unknown type $type for $name: $text");
+          $self->lint_warn("unknown type $type for $name: $text", $name);
         }
       }
       else {
-        $conf->{errors}++;
-        warn("syntax error for eval function $name: $text");
+        $self->lint_warn("syntax error for eval function $name: $text", $name);
       }
     }
     # non-eval tests
@@ -744,8 +733,7 @@ sub finish_parsing {
         $conf->{full_tests}->{$priority}->{$name} = $text;
       }
       else {
-        $conf->{errors}++;
-        warn("unknown type $type for $name: $text");
+        $self->lint_warn("unknown type $type for $name: $text", $name);
       }
     }
   }
@@ -765,9 +753,8 @@ sub add_test {
 
   # Don't allow invalid names ...
   if ($name !~ /^\D\w*$/) {
-    warn "config: error: rule '$name' has invalid characters ".
-	   "(not Alphanumeric + Underscore + starting with a non-digit)\n";
-    $conf->{errors}++;
+    $self->lint_warn("config: error: rule '$name' has invalid characters ".
+	   "(not Alphanumeric + Underscore + starting with a non-digit)\n", $name);
     return;
   }
 
@@ -775,18 +762,16 @@ sub add_test {
   # characters throw warnings).  Check this separately from the above
   # pattern to avoid vague error messages.
   if (length $name > 200) {
-    warn "config: error: rule '$name' is way too long ".
-	   "(recommended maximum length is 22 characters)\n";
-    $conf->{errors}++;
+    $self->lint_warn("config: error: rule '$name' is way too long ".
+	   "(recommended maximum length is 22 characters)\n", $name);
     return;
   }
 
   # Warn about, but use, long rule names during --lint
   if ($conf->{lint_rules}) {
     if (length($name) > 50 && $name !~ /^__/ && $name !~ /^T_/) {
-      warn "config: warning: rule name '$name' is over 50 chars ".
-	     "(recommended maximum length is 22 characters)\n";
-      $conf->{errors}++;
+      $self->lint_warn("config: warning: rule name '$name' is over 50 chars ".
+	     "(recommended maximum length is 22 characters)\n", $name);
     }
   }
 
@@ -865,8 +850,7 @@ sub is_meta_valid {
     my $err = $@;
     $err =~ s/\s+(?:at|near)\b.*//s;
     $err =~ s/Illegal division by zero/division by zero possible/i;
-    warn "config: invalid expression for rule $name: \"$rule\": $err\n";
-    $self->{conf}->{errors}++;
+    $self->lint_warn("config: invalid expression for rule $name: \"$rule\": $err\n", $name);
     return 0;
   }
 }
@@ -875,8 +859,7 @@ sub is_delimited_regexp_valid {
   my ($self, $name, $re) = @_;
 
   unless ($re =~ /^\s*m?(\W).*(?:\1|>|}|\)|\])[a-z]*\s*$/) {
-    warn "config: invalid regexp for rule $name: $re: missing or invalid delimiters\n";
-    $self->{conf}->{errors}++;
+    $self->lint_warn("config: invalid regexp for rule $name: $re: missing or invalid delimiters\n", $name);
     return 0;
   }
   return $self->is_regexp_valid($name, $re);
@@ -925,8 +908,7 @@ sub is_regexp_valid {
 
   my $err = $@;
   $err =~ s/ at .*? line \d.*$//;
-  warn "config: invalid regexp for rule $name: $origre: $err\n";
-  $self->{conf}->{errors}++;
+  $self->lint_warn("config: invalid regexp for rule $name: $origre: $err\n", $name);
   return 0;
 }
 
@@ -995,6 +977,32 @@ sub fix_path_relative_to_current_file {
     dbg("plugin: fixed relative path: $path");
   }
   return $path;
+}
+
+###########################################################################
+
+sub lint_warn {
+  my ($self, $msg, $rule, $iserror) = @_;
+
+  if (!defined $iserror) { $iserror = 1; }
+
+  if ($self->{main}->{lint_callback}) {
+    $self->{main}->{lint_callback}->(
+          msg => $msg,
+          rule => $rule,
+          iserror => $iserror
+        );
+  }
+  elsif ($self->{conf}->{lint_rules}) {
+    warn $msg."\n";
+  }
+  else {
+    info($msg);
+  }
+
+  if ($iserror) {
+    $self->{conf}->{errors}++;
+  }
 }
 
 ###########################################################################
