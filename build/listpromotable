@@ -22,7 +22,7 @@ if (!$doc) {
 # <spc>8.7654</spc><hpc>0.2056</hpc><so>0.977</so>
 # <detailhref>ruleqa%3Fdaterev%3Dlast-night%26rule%3D__HIGHBITS%26s_detail%3D1</detailhref></rule>
 
-my $todump = { };
+# my $todump = { };
 while ($doc =~ m!<rule>(.*?)</rule>!xg) {
   my $xml = $1;
   my $obj = { };
@@ -37,26 +37,29 @@ while ($doc =~ m!<rule>(.*?)</rule>!xg) {
   my $name = $obj->{test};
   $obj->{detailhref} = $cgi_url.$obj->{detailhref};
 
-  $todump->{$name} = $obj;
+  ## $todump->{$name} = $obj;
+
+  next unless ($obj->{promo});
+  print "$name\n";
 }
 
-if (!scalar keys %$todump) {
-  die "no rules found?\n$doc\n";
-}
+# if (!scalar keys %$todump) {
+# die "no rules found?\n$doc\n";
+# }
 
-my $dump = Data::Dumper->Dump([$todump], ['promolist']);
-# print $dump;
-
-# now write that to a tmp file so 'mkrules' can use it
-my $tmp = new File::Temp( UNLINK => 1, SUFFIX => '.pl' );
-print $tmp $dump;
-
-my $perl = $^X;
-if (!$perl) {
-  die "no perl path found in ARGV!";
-}
-
-# and exec that script
-exec $perl, "build/mkrules", "--listpromotable=$tmp";
-die "exec failed";
+## my $dump = Data::Dumper->Dump([$todump], ['promolist']);
+## # print $dump;
+## 
+## # now write that to a tmp file so 'mkrules' can use it
+## my $tmp = new File::Temp( UNLINK => 1, SUFFIX => '.pl' );
+## print $tmp $dump;
+## 
+## my $perl = $^X;
+## if (!$perl) {
+## die "no perl path found in ARGV!";
+## }
+## 
+## # and exec that script
+## exec $perl, "build/mkrules", "--listpromotable=$tmp";
+## die "exec failed";
 
