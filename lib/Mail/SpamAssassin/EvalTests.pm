@@ -1236,7 +1236,7 @@ sub check_rbl_backend {
   # relays, so we can return right now.
   return 0 unless (scalar @ips + scalar @originating > 0);
 
-  dbg("dns: IPs found: full-external: ".join(", ", @fullips).
+  dbg("dns: IPs found: full-external: ".join(", ", @fullexternal).
 	" untrusted: ".join(", ", @ips).
 	" originating: ".join(", ", @originating));
 
@@ -1248,14 +1248,21 @@ sub check_rbl_backend {
     # note that if there's only 1 IP in the untrusted set, do NOT pop the
     # list, since it'd remove that one, and a legit user is supposed to
     # use their SMTP server (ie. have at least 1 more hop)!
-    if ($set =~ /-notfirsthop$/)
+    # If name is foo-lastexternal, check only the Received header just before
+    # it enters our internal networks; we can trust it and it's the one that
+    # passed mail between networks
+    if ($set =~ /-(notfirsthop|lastexternal)$/)
     {
       # use the external IP set, instead of the trusted set; the user may have
       # specified some third-party relays as trusted.  Also, don't use
       # @originating; those headers are added by a phase of relaying through
       # a server like Hotmail, which is not going to be in dialup lists anyway.
       @ips = $self->ip_list_uniq_and_strip_private(@fullexternal);
-      if (scalar @ips > 1) { pop @ips; }
+      if ($1 eq "lastexternal") {
+        @ips = (defined $ips[0]) ? ($ips[0]) : ();
+      } else {
+	pop @ips if (scalar @ips > 1);
+      }
     }
     # If name is foo-firsttrusted, check only the Received header just
     # after it enters our trusted networks; that's the only one we can
