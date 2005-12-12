@@ -35,10 +35,14 @@ cd $tree
 
 # find current revision
 rm -f weekly-versions.txt nightly-versions.txt
-if ! wget --tries=120 --wait=30 http://rsync.spamassassin.org/weekly-versions.txt http://rsync.spamassassin.org/nightly-versions.txt; then
+if ! wget --tries=120 --wait=30 \
+    http://rsync.spamassassin.org/weekly-versions.txt \
+    http://rsync.spamassassin.org/nightly-versions.txt
+then
 	echo "wget failed" 1>&2
 	exit 0
 fi
+
 if [ -n "$net" ]; then
 	revision=$(tail -1 weekly-versions.txt|awk '{print $2}')
 else
@@ -97,8 +101,10 @@ else
 	rm -f spamassassin/user_prefs
 fi
 $PERL mass-check $opts
-uptime
 date > test.end
+
+uptime
+ls -l spam.log ham.log
 
 # results name
 mv spam.log spam-$net$username.log
@@ -108,7 +114,9 @@ mv ham.log ham-$net$username.log
 set +e
 retry=0
 while true; do
-	if rsync -Pcvuzb --timeout=120 spam-$net$username.log ham-$net$username.log $username@rsync.spamassassin.org::corpus/
+	if rsync -Pcvuzb --timeout=120 \
+            spam-$net$username.log ham-$net$username.log \
+            $username@rsync.spamassassin.org::corpus/
         then
 		break;
 	fi
