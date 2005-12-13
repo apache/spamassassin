@@ -8,21 +8,36 @@ use LWP::Simple;
 use URI::Escape;
 use Data::Dumper;
 
-my $cgi_url = "http://buildbot.spamassassin.org/";
+my $FROM_CACHE = 1;
+my $MAKE_CACHE = 1;
 
-my $url = $cgi_url."ruleqa?daterev=last-night";
-my $doc = get ($url);
-if (!$doc) {
-  die "HTTP get failed: $doc\n";
+###########################################################################
+
+my $cgi_url = "http://buildbot.spamassassin.org/";
+my $doc;
+
+if ($FROM_CACHE == 0) {
+  my $url = $cgi_url."ruleqa?daterev=last-night";
+  $doc = get ($url);
+  if (!$doc) {
+    die "HTTP get failed: $doc\n";
+  }
+
+  if ($MAKE_CACHE) {
+    open(O, ">ruleqa.cache"); print O $doc; close O;
+  }
+}
+else {
+  open(I, "<ruleqa.cache") or die; $doc = join('',<I>); close I;
 }
 
-# print $doc;
+###########################################################################
 
 # <rule><test>__HIGHBITS</test><promo>0</promo>
 # <spc>8.7654</spc><hpc>0.2056</hpc><so>0.977</so>
 # <detailhref>ruleqa%3Fdaterev%3Dlast-night%26rule%3D__HIGHBITS%26s_detail%3D1</detailhref></rule>
 
-# my $todump = { };
+my $plist = { };
 while ($doc =~ m!<rule>(.*?)</rule>!xg) {
   my $xml = $1;
   my $obj = { };
@@ -37,19 +52,56 @@ while ($doc =~ m!<rule>(.*?)</rule>!xg) {
   my $name = $obj->{test};
   $obj->{detailhref} = $cgi_url.$obj->{detailhref};
 
-  ## $todump->{$name} = $obj;
-
-  next unless ($obj->{promo});
-  print "$name\n";
+  $plist->{$name} = $obj;
 }
 
-# if (!scalar keys %$todump) {
-# die "no rules found?\n$doc\n";
-# }
+if (!scalar keys %$plist) {
+  die "no rules found?\n$doc\n";
+}
 
-## my $dump = Data::Dumper->Dump([$todump], ['promolist']);
-## # print $dump;
-## 
+###########################################################################
+
+## my $dump = Data::Dumper->Dump([$plist], ['promolist']); print $dump;
+
+# use SpamAssassin classes directly, so we can lint rules
+# as we go
+use lib 'lib';
+use Mail::SpamAssassin;
+
+my $mailsa = Mail::SpamAssassin->new({
+    rules_filename => join("\000", qw( rulesrc/core rulesrc/sandbox )),
+    site_rules_filename => "rules",
+    local_tests_only => 1,
+    dont_copy_prefs => 1,
+    config_tree_recurse => 1,
+    # debug => 1,
+});
+
+my %rules_with_errors = ();
+
+$mailsa->{lint_callback} = sub {
+  my %opts = @_;
+  warn "lint failure: $opts{rule}: $opts{msg}";
+  if ($opts{iserror}) {
+    $rules_with_errors{$opts{rule}}++;
+  }
+};
+
+$mailsa->lint_rules();
+
+foreach my $name (sort keys %$plist) {
+  my $obj = $plist->{$name};
+  next unless ($obj->{promo});
+
+  my $tfs = $mailsa->{conf}->{tflags}->{$name};
+  if ($tfs) {
+    next if ($tfs =~ /\bnopublish\b/);
+  }
+
+  next if $rules_with_errors{$name};
+}
+
+
 ## # now write that to a tmp file so 'mkrules' can use it
 ## my $tmp = new File::Temp( UNLINK => 1, SUFFIX => '.pl' );
 ## print $tmp $dump;

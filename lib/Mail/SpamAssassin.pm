@@ -1411,45 +1411,38 @@ sub init {
 }
 
 sub read_cf {
-  my ($self, $path, $desc) = @_;
-
-  return '' unless defined ($path);
-
-  dbg("config: using \"$path\" for $desc");
-  my $txt = '';
-
-  if (-d $path) {
-    foreach my $file ($self->get_cf_files_in_dir ($path)) {
-      $txt .= read_cf_file($file);
-    }
-
-  } elsif (-f $path && -s _ && -r _) {
-    $txt .= read_cf_file($path);
-  }
-
-  return $txt;
+  my ($self, $allpaths, $desc) = @_;
+  return $self->_read_cf_pre($allpaths,$desc,\&get_cf_files_in_dir);
 }
-
 
 sub read_pre {
-  my ($self, $path, $desc) = @_;
+  my ($self, $allpaths, $desc) = @_;
+  return $self->_read_cf_pre($allpaths,$desc,\&get_pre_files_in_dir);
+}
 
-  return '' unless defined ($path);
+sub _read_cf_pre {
+  my ($self, $allpaths, $desc, $filelistmethod) = @_;
 
-  dbg("config: using \"$path\" for $desc");
+  return '' unless defined ($allpaths);
+
   my $txt = '';
+  foreach my $path (split("\000", $allpaths)) 
+  {
+    dbg("config: using \"$path\" for $desc");
 
-  if (-d $path) {
-    foreach my $file ($self->get_pre_files_in_dir($path)) {
-      $txt .= read_cf_file($file); # ok to use read_cf_file at this point
+    if (-d $path) {
+      foreach my $file ($self->$filelistmethod($path)) {
+        $txt .= read_cf_file($file);
+      }
+
+    } elsif (-f $path && -s _ && -r _) {
+      $txt .= read_cf_file($path);
     }
-
-  } elsif (-f $path && -s _ && -r _) {
-    $txt .= read_cf_file($path);
   }
 
   return $txt;
 }
+
 
 sub read_cf_file {
   my($path) = @_;
@@ -1629,18 +1622,18 @@ sub _get_cf_pre_files_in_dir {
   my ($self, $dir, $type) = @_;
 
   if ($self->{config_tree_recurse}) {
+    my @cfs = ();
+
     # use "eval" to avoid loading File::Find unless this is specified
     eval {
       use File::Find qw();
-
-      my @cfs = ();
       File::Find::find(
         sub {
-          return unless /\.${type}$/i && -f $_;
+          return unless (/\.${type}$/i && -f $_);
           push @cfs, $File::Find::name;
         }, $dir);
-      return map { "$dir/$_" } sort { $a cmp $b } @cfs;
     };
+    return sort { $a cmp $b } @cfs;
 
     die "oops! $@";     # should never get here
   }
