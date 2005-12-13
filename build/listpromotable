@@ -103,6 +103,8 @@ $mailsa->{lint_callback} = sub {
 
 $mailsa->lint_rules();
 
+my $date = scalar localtime time;
+print "# active ruleset list generated on $date\n";
 foreach my $name (sort keys %$plist) {
   my $obj = $plist->{$name};
   my $notes = '';
