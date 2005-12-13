@@ -69,19 +69,33 @@ use lib 'lib';
 use Mail::SpamAssassin;
 
 my $mailsa = Mail::SpamAssassin->new({
-    rules_filename => join("\000", qw( rulesrc/core rulesrc/sandbox )),
-    site_rules_filename => "rules",
+    rules_filename => "rules",
+    site_rules_filename => join("\000", qw( rulesrc/core rulesrc/sandbox )),
     local_tests_only => 1,
     dont_copy_prefs => 1,
     config_tree_recurse => 1,
     # debug => 1,
 });
 
+# hack hack hack!!  we don't want to load plugin files twice,
+# and since the mkrules compiler copies from rulesrc/sandbox/*/*.pm
+# to rules/*.pm, they would otherwise appear twice.
+foreach my $fname (<rules/*.pm>) {
+  my $path = File::Spec->rel2abs($fname);
+  $INC{$path} = 1;
+  # warn "JMD $path";
+}
+
 my %rules_with_errors = ();
 
 $mailsa->{lint_callback} = sub {
   my %opts = @_;
-  warn "lint failure: $opts{rule}: $opts{msg}";
+
+  return if ($opts{msg} =~ /
+        (?:score\sset\sfor\snon-existent|description\sexists)
+    /x);
+
+  warn "demoting $opts{rule}: $opts{msg}";
   if ($opts{iserror}) {
     $rules_with_errors{$opts{rule}}++;
   }
@@ -91,14 +105,37 @@ $mailsa->lint_rules();
 
 foreach my $name (sort keys %$plist) {
   my $obj = $plist->{$name};
+  my $notes = '';
+
+  next unless ($mailsa->{conf}->{descriptions}->{$name}
+        || $mailsa->{conf}->{scores}->{$name});
+
+  # ignore rules that are not marked as promotable
   next unless ($obj->{promo});
 
+  # "nopublish" tflags
   my $tfs = $mailsa->{conf}->{tflags}->{$name};
   if ($tfs) {
     next if ($tfs =~ /\bnopublish\b/);
+
+    if ($tfs =~ /\bpublish\b/) {
+      $notes = "tflags publish";
+      goto publish;
+    }
   }
 
+  # only rules from "rulesrc" dirs
+  my $src = $mailsa->{conf}->{source_file}->{$name};
+  next if (!$src || $src !~ /rulesrc/);
+
+  # rules that fail lint
   next if $rules_with_errors{$name};
+
+  $notes = "spam=$obj->{spc} ham=$obj->{hpc} so=$obj->{so}";
+
+publish:
+
+  print "\n# $notes\n$name\n";
 }
 
 

@@ -84,13 +84,16 @@ sub load_plugin {
               File::Spec->rel2abs($path)
 	    );
 
-    if (exists $INC{$path}) {
-      dbg("plugin: not loading $package from $path, already loaded");
-      return;
-    }
+    # if (exists $INC{$path}) {
+      # dbg("plugin: not loading $package from $path, already loaded");
+      # return;
+    # }
 
     dbg("plugin: loading $package from $path");
-    $ret = do $path;
+
+    # use require instead of "do", so we get built-in $INC{filename}
+    # smarts
+    $ret = eval { require $path; };
   }
   else {
     dbg("plugin: loading $package from \@INC");
