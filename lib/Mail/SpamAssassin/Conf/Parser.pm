@@ -508,7 +508,7 @@ sub lint_check {
 
     while ( my($sk) = each %{$conf->{scores}} ) {
       if (!exists $conf->{tests}->{$sk}) {
-        $self->lint_warn("config: warning: score set for non-existent rule $k\n", $k);
+        $self->lint_warn("config: warning: score set for non-existent rule $sk\n", $sk);
       }
     }
   }
@@ -786,7 +786,7 @@ sub add_test {
   if ($type == $Mail::SpamAssassin::Conf::TYPE_HEAD_TESTS)
   {
     my ($pat) = ($text =~ /^\s*\S+\s*(?:\=|\!)\~\s*(\S.*?\S)\s*$/);
-    $pat =~ s/\s+\[if-unset:\s+(.+)\]\s*$//;
+    if ($pat) { $pat =~ s/\s+\[if-unset:\s+(.+)\]\s*$//; }
     return unless $self->is_delimited_regexp_valid($name, $pat);
   }
   elsif ($type == $Mail::SpamAssassin::Conf::TYPE_META_TESTS)
@@ -858,7 +858,7 @@ sub is_meta_valid {
 sub is_delimited_regexp_valid {
   my ($self, $name, $re) = @_;
 
-  unless ($re =~ /^\s*m?(\W).*(?:\1|>|}|\)|\])[a-z]*\s*$/) {
+  if (!$re || $re !~ /^\s*m?(\W).*(?:\1|>|}|\)|\])[a-z]*\s*$/) {
     $self->lint_warn("config: invalid regexp for rule $name: $re: missing or invalid delimiters\n", $name);
     return 0;
   }
@@ -986,8 +986,8 @@ sub lint_warn {
 
   if (!defined $iserror) { $iserror = 1; }
 
-  if ($self->{main}->{lint_callback}) {
-    $self->{main}->{lint_callback}->(
+  if ($self->{conf}->{main}->{lint_callback}) {
+    $self->{conf}->{main}->{lint_callback}->(
           msg => $msg,
           rule => $rule,
           iserror => $iserror
