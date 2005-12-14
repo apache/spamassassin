@@ -76,7 +76,7 @@ sub readrules {
     my %langs = ();
     foreach $file (sort @files) {
       if ($skip_test_rules) {
-	next if ($file =~ /7\d_/);
+	next if ($file =~ /70_/);
       }
       open (IN, "<$file");
       while (<IN>)

@@ -112,9 +112,6 @@ foreach my $name (sort keys %$plist) {
   next unless ($mailsa->{conf}->{descriptions}->{$name}
         || $mailsa->{conf}->{scores}->{$name});
 
-  # ignore rules that are not marked as promotable
-  next unless ($obj->{promo});
-
   # "nopublish" tflags
   my $tfs = $mailsa->{conf}->{tflags}->{$name};
   if ($tfs) {
@@ -124,7 +121,14 @@ foreach my $name (sort keys %$plist) {
       $notes = "tflags publish";
       goto publish;
     }
+    if ($tfs =~ /\buserconf\b/) {
+      $notes = "tflags userconf";
+      goto publish;
+    }
   }
+
+  # ignore rules that are not marked as promotable
+  next unless ($obj->{promo});
 
   # only rules from "rulesrc" dirs
   my $src = $mailsa->{conf}->{source_file}->{$name};
