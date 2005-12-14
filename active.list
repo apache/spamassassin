@@ -1,4 +1,4 @@
-# active ruleset list generated on Mon Dec 12 17:12:08 2005
+# active ruleset list generated on Tue Dec 13 16:38:48 2005
 
 # spam=2.8371 ham=0.0690 so=0.976
 ADVANCE_FEE_2
@@ -15,8 +15,17 @@ ALL_NATURAL
 # spam=0.0000 ham=0.3866 so=0.000
 ALL_TRUSTED
 
+# tflags userconf
+AWL
+
 # spam=1.3418 ham=0.0050 so=0.996
 BODY_ENHANCEMENT2
+
+# tflags userconf
+CHARSET_FARAWAY
+
+# tflags userconf
+CHARSET_FARAWAY_HEADER
 
 # spam=0.8825 ham=0.0138 so=0.985
 DATE_IN_FUTURE_03_06
@@ -74,6 +83,9 @@ EMPTY_MESSAGE
 
 # spam=0.3132 ham=0.0000 so=1.000
 EM_ROLEX
+
+# tflags userconf
+ENV_AND_HDR_SPF_MATCH
 
 # spam=0.2770 ham=0.0000 so=1.000
 FAKE_HELO_MAIL_COM_DOM
@@ -189,6 +201,33 @@ FUZZY_XPILL
 # spam=0.2923 ham=0.0063 so=0.979
 GAPPY_SUBJECT
 
+# tflags userconf
+GTUBE
+
+# tflags userconf
+HASHCASH_20
+
+# tflags userconf
+HASHCASH_21
+
+# tflags userconf
+HASHCASH_22
+
+# tflags userconf
+HASHCASH_23
+
+# tflags userconf
+HASHCASH_24
+
+# tflags userconf
+HASHCASH_25
+
+# tflags userconf
+HASHCASH_2SPEND
+
+# tflags userconf
+HASHCASH_HIGH
+
 # spam=0.6102 ham=0.0000 so=1.000
 HEADER_SPAM
 
@@ -215,6 +254,9 @@ HELO_DYNAMIC_SPLIT_IP
 
 # spam=0.7028 ham=0.0038 so=0.995
 HG_HORMONE
+
+# tflags userconf
+HTML_CHARSET_FARAWAY
 
 # spam=2.7616 ham=0.0000 so=1.000
 HTTP_77
@@ -254,6 +296,9 @@ MIME_BOUND_DD_DIGITS
 
 # spam=0.2786 ham=0.0013 so=0.996
 MIME_BOUND_MANY_HEX
+
+# tflags userconf
+MIME_CHARSET_FARAWAY
 
 # spam=1.2325 ham=0.0615 so=0.952
 MIME_HTML_MOSTLY
@@ -299,6 +344,12 @@ NA_DOLLARS
 
 # spam=1.4883 ham=0.0025 so=0.998
 NO_PRESCRIPTION
+
+# tflags userconf
+NO_RECEIVED
+
+# tflags userconf
+NO_RELAYS
 
 # spam=0.3899 ham=0.0025 so=0.994
 NUMERIC_HTTP_ADDR
@@ -384,6 +435,12 @@ SATIS_GUAR
 # spam=1.4109 ham=0.0100 so=0.993
 SORTED_RECIPS
 
+# tflags userconf
+SPF_HELO_PASS
+
+# tflags userconf
+SPF_PASS
+
 # spam=0.3183 ham=0.0075 so=0.977
 SPOOF_OURI
 
@@ -404,6 +461,15 @@ SUBJECT_FUZZY_MEDS
 
 # spam=0.3877 ham=0.0000 so=1.000
 SUBJECT_FUZZY_PENIS
+
+# tflags userconf
+SUBJECT_IN_BLACKLIST
+
+# tflags userconf
+SUBJECT_IN_WHITELIST
+
+# spam=21.3632 ham=0.0063 so=1.000
+SUBJ_ILLEGAL_CHARS
 
 # spam=0.4457 ham=0.0000 so=1.000
 T_DRUGS_HDIA
@@ -462,6 +528,9 @@ UNCLOSED_BRACKET
 # spam=0.5966 ham=0.0314 so=0.950
 UNIQUE_WORDS
 
+# tflags userconf
+UNPARSEABLE_RELAY
+
 # spam=0.5256 ham=0.0000 so=1.000
 UNRESOLVED_TEMPLATE
 
@@ -476,6 +545,33 @@ URI_NOVOWEL
 
 # spam=1.9425 ham=0.0013 so=0.999
 URI_NO_WWW_INFO_CGI
+
+# tflags userconf
+USER_IN_ALL_SPAM_TO
+
+# tflags userconf
+USER_IN_BLACKLIST
+
+# tflags userconf
+USER_IN_BLACKLIST_TO
+
+# tflags userconf
+USER_IN_DEF_SPF_WL
+
+# tflags userconf
+USER_IN_DEF_WHITELIST
+
+# tflags userconf
+USER_IN_MORE_SPAM_TO
+
+# tflags userconf
+USER_IN_SPF_WHITELIST
+
+# tflags userconf
+USER_IN_WHITELIST
+
+# tflags userconf
+USER_IN_WHITELIST_TO
 
 # spam=1.5009 ham=0.0653 so=0.958
 US_DOLLARS_3
