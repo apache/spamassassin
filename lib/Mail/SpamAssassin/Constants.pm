@@ -37,6 +37,7 @@ use base qw( Exporter );
 	META_TEST_MIN_PRIORITY HARVEST_DNSBL_PRIORITY MBX_SEPARATOR
 	MAX_BODY_LINE_LENGTH MAX_HEADER_KEY_LENGTH MAX_HEADER_VALUE_LENGTH
 	MAX_HEADER_LENGTH ARITH_EXPRESSION_LEXER AI_TIME_UNKNOWN
+	CHARSETS_LIKELY_TO_FP_AS_CAPS
 );
 
 %EXPORT_TAGS = (
@@ -196,5 +197,10 @@ use constant ARITH_EXPRESSION_LEXER => qr/(?:
 # second pass (when the message is actually read + processed) the received
 # date is calculated.  this value signifies "unknown" from the first pass.
 use constant AI_TIME_UNKNOWN => 0;
+
+# Charsets which use capital letters heavily in their encoded representation.
+use constant CHARSETS_LIKELY_TO_FP_AS_CAPS => qr{[-_a-z0-9]*(?:
+	  koi|jp|jis|euc|gb|big5|isoir|cp1251|georgianps|pt154|tis
+	)[-_a-z0-9]*}ix;
 
 1;

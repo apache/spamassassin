@@ -51,7 +51,6 @@ use warnings;
 use Carp;
 
 use Mail::SpamAssassin::Constants qw(:sa);
-use Mail::SpamAssassin::EvalTests;
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::Logger;

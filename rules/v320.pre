@@ -1,0 +1,22 @@
+# This is the right place to customize your installation of SpamAssassin.
+#
+# See 'perldoc Mail::SpamAssassin::Conf' for details of what can be
+# tweaked.
+#
+# This file was installed during the installation of SpamAssassin 3.1.0,
+# and contains plugin loading commands for the new plugins added in that
+# release.  It will not be overwritten during future SpamAssassin installs,
+# so you can modify it to enable some disabled-by-default plugins below,
+# if you so wish.
+#
+###########################################################################
+
+loadplugin Mail::SpamAssassin::Plugin::Bayes
+loadplugin Mail::SpamAssassin::Plugin::BodyEval
+loadplugin Mail::SpamAssassin::Plugin::DNSEval
+loadplugin Mail::SpamAssassin::Plugin::HTMLEval
+loadplugin Mail::SpamAssassin::Plugin::HeaderEval
+loadplugin Mail::SpamAssassin::Plugin::MIMEEval
+loadplugin Mail::SpamAssassin::Plugin::RelayEval
+loadplugin Mail::SpamAssassin::Plugin::URIEval
+loadplugin Mail::SpamAssassin::Plugin::WLBLEval

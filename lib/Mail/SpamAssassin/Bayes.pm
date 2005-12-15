@@ -670,8 +670,10 @@ sub ignore_message {
 
   return 0 unless $self->{use_ignores};
 
-  my $ignore = $PMS->check_from_in_list('bayes_ignore_from')
-    		|| $PMS->check_to_in_list('bayes_ignore_to');
+  my $ig_from = $self->{main}->call_plugins ("check_wb_list", { permsgstatus => $PMS, type => 'from', list => 'bayes_ignore_from' });
+  my $ig_to = $self->{main}->call_plugins ("check_wb_list", { permsgstatus => $PMS, type => 'to', list => 'bayes_ignore_to' });
+
+  my $ignore = $ig_from || $ig_to;
 
   dbg("bayes: not using bayes, bayes_ignore_from or _to rule") if $ignore;
 
