@@ -735,4 +735,12 @@ sub cleanup_kids {
 
 ###########################################################################
 
+# interface called by SPF plugin
+sub check_for_from_dns {
+  my ($self, $pms) = @_;
+  if (defined $pms->{sender_host_fail}) {
+    return ($pms->{sender_host_fail} == 2); # both MX and A need to fail
+  }
+}
+
 1;
