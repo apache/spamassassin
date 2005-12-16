@@ -117,12 +117,9 @@ foreach my $name (sort keys %$plist) {
   if ($tfs) {
     next if ($tfs =~ /\bnopublish\b/);
 
-    if ($tfs =~ /\bpublish\b/) {
-      $notes = "tflags publish";
-      goto publish;
-    }
-    if ($tfs =~ /\buserconf\b/) {
-      $notes = "tflags userconf";
+    # all of these tflags force publication
+    if ($tfs =~ /\b(publish|userconf|learn)\b/) {
+      $notes = "tflags ".$1;
       goto publish;
     }
   }
