@@ -398,33 +398,43 @@ sub rule_file_compile {
       unless ($rules->{$name}) {
         $rules->{$name} = rule_entry_create();
         $rules->{$name}->{issandbox} = $issandbox;
-        unshift (@$rule_order, $name);
       }
 
       $rules->{$name}->{text} .= $orig;
       unshift (@$rule_order, $name);
     }
     else {
-      my $name = $ALWAYS_PUBLISH;
-      if ($current_conditional)
-      {
-        $name = $current_conditional;
-        $name =~ s/\n//gs;
+      # an unhandled configuration line; "redirector_pattern",
+      # "report", something like that.  This should be sent to
+      # the active.cf output (or sandbox if it appeared in a sandbox
+      # input file).
 
-        if ($issandbox) {
-          $name .= "_sandbox";
-        }
+      # use the line itself as a key
+      my $name = $_;
+      /^\s*(\S+)/ and $name = $1;
+      $name =~ s/\s+/ /gs;
 
-        unless ($rules->{$name}) {
-	  $rules->{$name} = rule_entry_create();
-          unshift (@$rule_order, $name);
-	}
-	$rules->{$name}->{cond} = $current_conditional;
-        $rules->{$name}->{issandbox} = $issandbox;
+      my $cond;
+      if ($current_conditional) {
+        $name = $current_conditional; $name =~ s/\s+/ /gs;
+        $cond = $current_conditional;
       }
 
+      if ($issandbox) {
+        $name .= "_sandbox";
+      }
+
+      unless ($rules->{$name}) {
+        $rules->{$name} = rule_entry_create();
+      }
+      $rules->{$name}->{cond} = $cond;
+      $rules->{$name}->{issandbox} = $issandbox;
+      $rules->{$name}->{forceactive} = 1;
+
       # warn "unknown line in rules file '$f', saving to default: $orig";
+
       $rules->{$name}->{text} .= $orig;
+      unshift (@$rule_order, $name);
     }
   }
   close IN;
@@ -500,7 +510,7 @@ sub pubfile_for_rule {
 
   # default: "70_sandbox.cf" or "72_active.cf"
   if (!$pubfile) {
-    if ($active_rules->{$name}) {
+    if ($active_rules->{$name} || $rules->{$name}->{forceactive}) {
       $pubfile = $opt_out.'/'.$opt_activeout;
     }
     elsif ($rules->{$name}->{issandbox}) {
