@@ -38,12 +38,13 @@ use Mail::SpamAssassin;
 use vars qw(
     @opt_srcs $opt_out $opt_sandboxout $opt_manifest
     $opt_manifestskip $opt_listpromotable $opt_active
-    $opt_activeout
+    $opt_activeout $opt_inactiveout
 );
 GetOptions("src=s" => \@opt_srcs,
     "out=s",
     "sandboxout=s",
     "activeout=s",
+    "inactiveout=s",
     "active=s",
     "manifest=s",
     "manifestskip=s",
@@ -78,8 +79,9 @@ my $promolist;
   die "unreadable out" unless (-d $opt_out);
   die "unreadable active" unless (-f $opt_active);
 
-$opt_sandboxout ||= "70_sandbox.cf";
-$opt_activeout  ||= "72_active.cf";
+$opt_sandboxout  ||= "70_sandbox.cf";
+$opt_activeout   ||= "72_active.cf";
+$opt_inactiveout ||= "70_inactive.cf";
 
 # source files that need compilation, and their targets
 my $needs_compile = { };
@@ -325,10 +327,18 @@ sub rule_file_compile {
       # non-sandbox rules always use the same name
 
       if (!$rules->{$name}) { $rules->{$name} = rule_entry_create(); }
+      $rules->{$name}->{issandbox} = $issandbox;
       $rules->{$name}->{origname} = $origname;
       $rules->{$name}->{cond} = $current_conditional;
       $rules->{$name}->{text} .= $current_comments . $orig;
       $rules->{$name}->{srcfile} = $f;
+
+      if ($type =~ /^
+          (?:header|rawbody|body|full|uri|meta|mimeheader)
+        $/x)
+      {
+        $rules->{$name}->{found_definition} = 1;
+      }
 
       $current_comments = '';
 
@@ -379,27 +389,42 @@ sub rule_file_compile {
       undef $current_conditional;
     }
     elsif (/^loadplugin\s*(\S+)\b/) {
-      my $name = 'loadplugin';
-      if (!$rules->{$name}) { $rules->{$name} = rule_entry_create(); }
+      my $name = 'loadplugin_'.$1;
+
+      if ($issandbox) {
+        $name .= "_sandbox";
+      }
+
+      unless ($rules->{$name}) {
+        $rules->{$name} = rule_entry_create();
+        $rules->{$name}->{issandbox} = $issandbox;
+        unshift (@$rule_order, $name);
+      }
+
       $rules->{$name}->{text} .= $orig;
       unshift (@$rule_order, $name);
     }
     else {
-      my $NAME = $ALWAYS_PUBLISH;
-      if ($current_conditional) {
+      my $name = $ALWAYS_PUBLISH;
+      if ($current_conditional)
+      {
+        $name = $current_conditional;
+        $name =~ s/\n//gs;
 
-        $NAME .= $current_conditional . '!';
-        $NAME =~ s/\n//gs;
+        if ($issandbox) {
+          $name .= "_sandbox";
+        }
 
-        unless ($rules->{$NAME}) {
-	  $rules->{$NAME} = rule_entry_create();
-	  $ALWAYS->{$NAME} = 1;
+        unless ($rules->{$name}) {
+	  $rules->{$name} = rule_entry_create();
+          unshift (@$rule_order, $name);
 	}
-	$rules->{$NAME}->{cond} = $current_conditional;
+	$rules->{$name}->{cond} = $current_conditional;
+        $rules->{$name}->{issandbox} = $issandbox;
       }
 
       # warn "unknown line in rules file '$f', saving to default: $orig";
-      $rules->{$NAME}->{text} .= $orig;
+      $rules->{$name}->{text} .= $orig;
     }
   }
   close IN;
@@ -477,8 +502,12 @@ sub pubfile_for_rule {
   if (!$pubfile) {
     if ($active_rules->{$name}) {
       $pubfile = $opt_out.'/'.$opt_activeout;
-    } else {
+    }
+    elsif ($rules->{$name}->{issandbox}) {
       $pubfile = $opt_out.'/'.$opt_sandboxout;
+    }
+    else {
+      $pubfile = $opt_out.'/'.$opt_inactiveout;
     }
   }
   return $pubfile;
