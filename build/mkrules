@@ -128,8 +128,7 @@ my $files_to_lint = { };
 my $COMMENTS = '!comments!';
 
 # another "fake name" for lines that should always be published.  They'll
-# be published to all files, in duplicate.  This should probably be improved
-# somehow, TODO.
+# be published to the non-sandbox file.
 my $ALWAYS_PUBLISH = '!always_publish!';
 
 read_all_rules($needs_compile);
@@ -282,7 +281,7 @@ sub rule_file_compile {
     $rules->{$ALWAYS_PUBLISH} = rule_entry_create();
   }
 
-  my $ALWAYS = { $ALWAYS_PUBLISH => 1 };
+  my $ALWAYS = { };
 
   # an "ifplugin" or "if" scope
   my $current_conditional;
@@ -505,12 +504,15 @@ sub plugin_file_compile {
 ###########################################################################
 
 sub compile_output_files {
+  my $always = $rules->{$ALWAYS_PUBLISH}->{output_text};
+
   # create all known output files
   foreach my $file (keys %$output_files) {
-    my $always_publish_text = $rules->{$ALWAYS_PUBLISH}->{output_text};
+    $output_file_text->{$file} = $output_files->{$file}->{header};
 
-    $output_file_text->{$file} = $output_files->{$file}->{header}.
-        $always_publish_text;
+    if ($always && $file =~ /\Q$opt_activeout\E$/) {
+      $output_file_text->{$file} .= $always;
+    }
   }
 
   my @rulenames = sort keys %$rules;
@@ -538,7 +540,9 @@ sub compile_output_files {
     my $pubfile = $rules->{$rule}->{output_file};
     my $text    = $rules->{$rule}->{output_text};
     next unless defined ($text);
-    $output_file_text->{$pubfile} .= "## ".$rule."\n".$text."\n";
+    $output_file_text->{$pubfile} .= "##{ ".$rule."\n".
+                            $text.
+                            "##} ".$rule."\n\n";
   }
 
   # now output all subrules (in a slightly more compact form)
