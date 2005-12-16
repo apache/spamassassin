@@ -333,6 +333,9 @@ sub rule_file_compile {
       $rules->{$name}->{text} .= $current_comments . $orig;
       $rules->{$name}->{srcfile} = $f;
 
+      # note if we found the rule defn or not.  if we did not,
+      # that means the rule was a code-tied rule, which should always
+      # have its descriptions/scores/etc. published in "active".
       if ($type =~ /^
           (?:header|rawbody|body|full|uri|meta|mimeheader)
         $/x)
@@ -510,7 +513,9 @@ sub pubfile_for_rule {
 
   # default: "70_sandbox.cf" or "72_active.cf"
   if (!$pubfile) {
-    if ($active_rules->{$name} || $rules->{$name}->{forceactive}) {
+    if ($active_rules->{$name} || $rules->{$name}->{forceactive}
+        || !$rules->{$name}->{found_definition})
+    {
       $pubfile = $opt_out.'/'.$opt_activeout;
     }
     elsif ($rules->{$name}->{issandbox}) {
