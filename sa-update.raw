@@ -162,7 +162,8 @@ my $SA = new Mail::SpamAssassin({
 
   PREFIX          => $PREFIX,
   DEF_RULES_DIR   => $DEF_RULES_DIR,
-  LOCAL_RULES_DIR => $LOCAL_RULES_DIR
+  LOCAL_RULES_DIR => $LOCAL_RULES_DIR,
+  LOCAL_STATE_DIR => $LOCAL_STATE_DIR,
 });
 $site_rules_path ||= $SA->first_existing_path(@Mail::SpamAssassin::site_rules_path);
 
@@ -180,7 +181,7 @@ $SA->finish();
 if (@{$opt{'gpgkey'}}) {
   $GPG_ENABLED = 1;
   foreach my $key (@{$opt{'gpgkey'}}) {
-    unless ($key =~ /^[a-fA-F0-9]{8}$/) {
+    unless (is_valid_gpg_key_id($key)) {
       dbg("gpg: invalid gpgkey parameter $key");
       next;
     }
@@ -197,7 +198,7 @@ if (defined $opt{'gpgkeyfile'}) {
 
   dbg("gpg: reading in gpgfile ".$opt{'gpgkeyfile'});
   while(my $key = <GPG>) {
-    unless ($key =~ /^[a-fA-F0-9]{8}$/) {
+    unless (is_valid_gpg_key_id($key)) {
       dbg("gpg: invalid key id $key");
       next;
     }
@@ -206,6 +207,11 @@ if (defined $opt{'gpgkeyfile'}) {
     $valid_GPG{$key} = 1;
   }
   close(GPG);
+}
+
+sub is_valid_gpg_key_id {
+  # TODO: long gpg keys (over 8 hex digits)
+  return ($_[0] =~ /^[a-fA-F0-9]{8}$/);
 }
 
 # Deal with channel-related options
