@@ -123,6 +123,7 @@ $HOME_URL = "http://spamassassin.apache.org/";
 @default_rules_path = (
   './rules',              # REMOVEFORINST
   '../rules',             # REMOVEFORINST
+  '__local_state_dir__/spamassassin/__version__',
   '__def_rules_dir__',
   '__prefix__/share/spamassassin',
   '/usr/local/share/spamassassin',
@@ -1586,9 +1587,11 @@ sub sed_path {
   my $orig_path = $path;
 
   $path =~ s/__local_rules_dir__/$self->{LOCAL_RULES_DIR} || ''/ges;
+  $path =~ s/__local_state_dir__/$self->{LOCAL_STATE_DIR} || ''/ges;
   $path =~ s/__def_rules_dir__/$self->{DEF_RULES_DIR} || ''/ges;
   $path =~ s{__prefix__}{$self->{PREFIX} || $Config{prefix} || '/usr'}ges;
   $path =~ s{__userstate__}{$self->get_and_create_userstate_dir()}ges;
+  $path =~ s/__version__/${VERSION}/gs;
   $path =~ s/^\~([^\/]*)/$self->expand_name($1)/es;
 
   $path = Mail::SpamAssassin::Util::untaint_file_path ($path);

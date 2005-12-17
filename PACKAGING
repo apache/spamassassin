@@ -156,6 +156,22 @@ CONFDIR (LOCALRULESDIR):
     try this:
     	perl Makefile.PL CONFDIR=/etc/spamassassin
 
+LOCALSTATEDIR:
+  "sa-update" will download rule updates into LOCALSTATEDIR/spamassassin.
+
+  The default depends on the PREFIX and is compliant to the FHS:
+    - if PREFIX is either /usr or /usr/local:
+      /var/lib
+    - if PREFIX starts with /opt:
+      /var/opt
+    - else:
+      PREFIX/var
+
+  Samples:
+    If you'd like to have the downloaded rules files in /var/spamassassin
+    try this:
+    	perl Makefile.PL LOCALSTATEDIR=/var
+
 
 Installing to a directory different from the final destination
 --------------------------------------------------------------
