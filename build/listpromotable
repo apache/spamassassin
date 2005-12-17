@@ -8,15 +8,15 @@ use LWP::Simple;
 use URI::Escape;
 use Data::Dumper;
 
-my $FROM_CACHE = 1;
-my $MAKE_CACHE = 1;
+my $FROM_CACHE; # $FROM_CACHE = 1;
+my $MAKE_CACHE; # $MAKE_CACHE = 1;
 
 ###########################################################################
 
 my $cgi_url = "http://buildbot.spamassassin.org/";
 my $doc;
 
-if ($FROM_CACHE == 0) {
+if (!$FROM_CACHE) {
   my $url = $cgi_url."ruleqa?daterev=last-night";
   $doc = get ($url);
   if (!$doc) {
