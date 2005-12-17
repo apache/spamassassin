@@ -24,6 +24,7 @@ use File::Spec;
 my $PREFIX          = '@@PREFIX@@';             # substituted at 'make' time
 my $DEF_RULES_DIR   = '@@DEF_RULES_DIR@@';      # substituted at 'make' time
 my $LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';    # substituted at 'make' time
+my $LOCAL_STATE_DIR = '@@LOCAL_STATE_DIR@@';    # substituted at 'make' time
 
 use lib '@@INSTALLSITELIB@@';                   # substituted at 'make' time
 
@@ -248,6 +249,7 @@ my $spamtest = new Mail::SpamAssassin(
     PREFIX              => $PREFIX,
     DEF_RULES_DIR       => $DEF_RULES_DIR,
     LOCAL_RULES_DIR     => $LOCAL_RULES_DIR,
+    LOCAL_STATE_DIR     => $LOCAL_STATE_DIR,
   }
 );
 
@@ -548,6 +550,8 @@ in:
 
 =over 4
 
+=item @@LOCAL_STATE_DIR@@/spamassassin/@@VERSION@@
+
 =item @@DEF_RULES_DIR@@
 
 =item @@PREFIX@@/share/spamassassin
@@ -581,7 +585,7 @@ already been set.  This is loaded from the first existing directory in:
 
 =back
 
-From those two directories, SpamAssassin will first read files ending in
+From those three directories, SpamAssassin will first read files ending in
 ".pre" in lexical order and then it will read files ending in ".cf" in
 lexical order (most files begin with two numbers to make the sorting
 order obvious).
