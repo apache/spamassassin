@@ -698,7 +698,7 @@ my $spamtest = Mail::SpamAssassin->new(
     ),
     PREFIX          => $PREFIX,
     DEF_RULES_DIR   => $DEF_RULES_DIR,
-    LOCAL_RULES_DIR => $LOCAL_RULES_DIR
+    LOCAL_RULES_DIR => $LOCAL_RULES_DIR,
     LOCAL_STATE_DIR => $LOCAL_STATE_DIR
   }
 );
