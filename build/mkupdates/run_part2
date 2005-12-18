@@ -3,7 +3,7 @@
 # Continue the updates-building process, post the user approval step.
 # Currently this is interactive as it requires a GPG passphrase entry.
 #
-# usage: bash build/mkupdates/run_part2
+# usage: sudo -u updatesd /home/updatesd/svn/spamassassin/build/mkupdates/run_part2
 
 set -x
 
@@ -19,17 +19,6 @@ stagedir=/var/www/buildbot.spamassassin.org/updatestage
 versions="3.2.0"
 
 # ---------------------------------------------------------------------------
-
-[ -d $stagedir ] || echo "no stagedir" 1>&2
-[ -d $stagedir ] || exit 6
-
-for version in $versions ; do
-  make_tarball_for_version $version
-done
-
-ls -l $stagedir
-cycle_logfiles
-exit
 
 make_tarball_for_version () {
 
@@ -110,4 +99,17 @@ cycle_logfiles () {
   mv mkupdatespt2.txt    mkupdatespt2_1.txt
 )
 }
+
+# ---------------------------------------------------------------------------
+
+[ -d $stagedir ] || echo "no stagedir" 1>&2
+[ -d $stagedir ] || exit 6
+
+for version in $versions ; do
+  make_tarball_for_version $version
+done
+
+ls -l $stagedir
+cycle_logfiles
+exit
 
