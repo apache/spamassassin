@@ -8,15 +8,16 @@ use LWP::Simple;
 use URI::Escape;
 use Data::Dumper;
 
-my $FROM_CACHE; # $FROM_CACHE = 1;
-my $MAKE_CACHE; # $MAKE_CACHE = 1;
+my $FROM_CACHE;  $FROM_CACHE = 1;
+my $MAKE_CACHE;  $MAKE_CACHE = 1;
 
 ###########################################################################
 
 my $cgi_url = "http://buildbot.spamassassin.org/";
 my $doc;
+my $cache = 'ruleqa.cache';
 
-if (!$FROM_CACHE) {
+if (!$FROM_CACHE || !-f $cache) {
   my $url = $cgi_url."ruleqa?daterev=last-night";
   $doc = get ($url);
   if (!$doc) {
@@ -24,11 +25,11 @@ if (!$FROM_CACHE) {
   }
 
   if ($MAKE_CACHE) {
-    open(O, ">ruleqa.cache"); print O $doc; close O;
+    open(O, ">$cache"); print O $doc; close O;
   }
 }
 else {
-  open(I, "<ruleqa.cache") or die; $doc = join('',<I>); close I;
+  open(I, "<$cache") or die; $doc = join('',<I>); close I;
 }
 
 ###########################################################################
@@ -91,6 +92,7 @@ my %rules_with_errors = ();
 $mailsa->{lint_callback} = sub {
   my %opts = @_;
 
+  # ignore non-issue lint failures
   return if ($opts{msg} =~ /
         (?:score\sset\sfor\snon-existent|description\sexists)
     /x);
@@ -109,6 +111,12 @@ foreach my $name (sort keys %$plist) {
   my $obj = $plist->{$name};
   my $notes = '';
 
+  # now that it's ok to have sandbox rules without a T_ prefix,
+  # "T_" prefix implies "tflags nopublish"
+  next if ($name =~ /^T_/);
+
+  # ignore rules that don't exist (if they have a desc or score,
+  # they exist according to the Conf parser)
   next unless ($mailsa->{conf}->{descriptions}->{$name}
         || $mailsa->{conf}->{scores}->{$name});
 
