@@ -17,17 +17,17 @@ $PERL ./build/mkupdates/listpromotable > rules/active.list
 (
 echo "
 
-To perform this, someone log into the zone and type:
+To enact this, someone log into the zone and type:
 
         ssh spamassassin.zones.apache.org
         cd /home/updatesd/svn/spamassassin
-        sudo su updatesd -c \"svn commit -m 'daily promoted rules list' rules/active.list\"
+        sudo -u updatesd svn commit -m 'daily promotions' rules/active.list
 
 "
 svn diff
 
 ) | mailx \
-        -s "Planned commit for active.list" \
+        -s "[admin] planned commit for active.list" \
         dev@Spamassassin.apache.org
 
 
