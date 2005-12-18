@@ -1,0 +1,9 @@
+
+If you need to change things, please edit the spamassassin/trunk/build/buildbot
+files in svn, then do a "sudo svn update" in /home/buildbot/bots/sa on the zones
+box:
+
+    ssh spamassassin.zones.apache.org
+    cd /home/buildbot/bots/sa
+    sudo svn update
+    
