@@ -3,16 +3,16 @@
 # driver for cron.
 # 30 8 * * * bash /home/updatesd/svn/spamassassin/build/mkupdates/run_nightly > /var/www/buildbot.spamassassin.org/bbmass/mkupdates.txt 2>&1
 
-cd /home/updatesd/svn/spamassassin
-
 set -x
+
+cd /home/updatesd/svn/spamassassin
 
 PERL=/local/perl586/bin/perl
 PATH=$PATH:/usr/sfw/bin:/opt/sfw/bin:/opt/SUNWspro/bin:/usr/X/bin:/usr/ucb:/usr/sbin:/usr/ccs/bin:/opt/subversion-1.1.4/bin:/usr/apache2/bin:/local/bin
 
 export PERL PATH
 
-$PERL ./build/listpromotable > rules/active.list
+$PERL ./build/mkupdates/listpromotable > rules/active.list
 
 (
 echo "
