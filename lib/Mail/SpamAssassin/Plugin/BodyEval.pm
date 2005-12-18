@@ -17,6 +17,7 @@
 package Mail::SpamAssassin::Plugin::BodyEval;
 
 use Mail::SpamAssassin::Plugin;
+use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Constants qw(:sa);
 
 use strict;
@@ -46,11 +47,11 @@ sub new {
 }
 
 sub check_unique_words {
-  my ($self, undef, $body, $m, $b) = @_;
+  my ($self, $pms, $body, $m, $b) = @_;
 
-  if (!defined $self->{unique_words_repeat}) {
-    $self->{unique_words_repeat} = 0;
-    $self->{unique_words_unique} = 0;
+  if (!defined $pms->{unique_words_repeat}) {
+    $pms->{unique_words_repeat} = 0;
+    $pms->{unique_words_unique} = 0;
     my %count;
     for (@$body) {
       # copy to avoid changing @$body
@@ -64,13 +65,13 @@ sub check_unique_words {
         $count{$token}++;
       }
     }
-    $self->{unique_words_unique} = scalar grep { $_ == 1 } values(%count);
-    $self->{unique_words_repeat} = scalar keys(%count) - $self->{unique_words_unique};
+    $pms->{unique_words_unique} = scalar grep { $_ == 1 } values(%count);
+    $pms->{unique_words_repeat} = scalar keys(%count) - $pms->{unique_words_unique};
   }
 
   # y = mx+b where y is number of unique words needed
-  my $unique = $self->{unique_words_unique};
-  my $repeat = $self->{unique_words_repeat};
+  my $unique = $pms->{unique_words_unique};
+  my $repeat = $pms->{unique_words_repeat};
   my $y = ($unique + $repeat) * $m + $b;
   return ($unique > $y);
 }
@@ -78,10 +79,10 @@ sub check_unique_words {
 sub multipart_alternative_difference {
   my ($self, $pms, $fulltext, $min, $max) = @_;
 
-  $self->_multipart_alternative_difference($pms->{msg}) unless (exists $self->{madiff});
+  $self->_multipart_alternative_difference($pms) unless (exists $pms->{madiff});
 
-  if (($min == 0 || $self->{madiff} > $min) &&
-      ($max eq "undef" || $self->{madiff} <= $max)) {
+  if (($min == 0 || $pms->{madiff} > $min) &&
+      ($max eq "undef" || $pms->{madiff} <= $max)) {
       return 1;
   }
   return 0;
@@ -89,16 +90,18 @@ sub multipart_alternative_difference {
 
 sub multipart_alternative_difference_count {
   my ($self, $pms, $fulltext, $ratio, $minhtml) = @_;
-  $self->_multipart_alternative_difference($pms->{msg}) unless (exists $self->{madiff});
-  return 0 unless $self->{madiff_html} > $minhtml;
-  return(($self->{madiff_text} / $self->{madiff_html}) > $ratio);
+  $self->_multipart_alternative_difference($pms) unless (exists $pms->{madiff});
+  return 0 unless $pms->{madiff_html} > $minhtml;
+  return(($pms->{madiff_text} / $pms->{madiff_html}) > $ratio);
 }
 
 sub _multipart_alternative_difference {
-  my ($self, $msg) = @_;
-  $self->{madiff} = 0;
-  $self->{madiff_html} = 0;
-  $self->{madiff_text} = 0;
+  my ($self, $pms) = @_;
+  $pms->{madiff} = 0;
+  $pms->{madiff_html} = 0;
+  $pms->{madiff_text} = 0;
+
+  my $msg = $pms->{msg};
 
   # Find all multipart/alternative parts in the message
   my @ma = $msg->find_parts(qr@^multipart/alternative\b@i);
@@ -142,7 +145,7 @@ sub _multipart_alternative_difference {
         }
 
 	# If there are no words, mark if there's at least 1 image ...
-	if (keys %html == 0 && exists $self->{html}{inside}{img}) {
+	if (keys %html == 0 && exists $pms->{html}{inside}{img}) {
 	  # Use "\n" as the mark since it can't ever occur normally
 	  $html{"\n"}=1;
 	}
@@ -159,9 +162,9 @@ sub _multipart_alternative_difference {
     my $orig = keys %html;
     next if ($orig == 0);
 
-    $self->{madiff_html} = $orig;
-    $self->{madiff_text} = keys %text;
-    dbg('eval: text words: ' . $self->{madiff_text} . ', html words: ' . $self->{madiff_html});
+    $pms->{madiff_html} = $orig;
+    $pms->{madiff_text} = keys %text;
+    dbg('eval: text words: ' . $pms->{madiff_text} . ', html words: ' . $pms->{madiff_html});
 
     # If the token appears at least as many times in the text part as
     # in the html part, remove it from the list of html tokens.
@@ -176,9 +179,9 @@ sub _multipart_alternative_difference {
     # a 0% difference rate.  Calculate it here, and record the difference
     # if it's been the highest so far in this message.
     my $diff = scalar(keys %html)/$orig*100;
-    $self->{madiff} = $diff if ($diff > $self->{madiff});
+    $pms->{madiff} = $diff if ($diff > $pms->{madiff});
 
-    dbg("eval: " . sprintf "madiff: left: %d, orig: %d, max-difference: %0.2f%%", scalar(keys %html), $orig, $self->{madiff});
+    dbg("eval: " . sprintf "madiff: left: %d, orig: %d, max-difference: %0.2f%%", scalar(keys %html), $orig, $pms->{madiff});
   }
 
   return;
@@ -192,7 +195,7 @@ sub check_blank_line_ratio {
     $minlines = 1;
   }
 
-  if (! exists $self->{blank_line_ratio}->{$minlines}) {
+  if (! exists $pms->{blank_line_ratio}->{$minlines}) {
     $fulltext = $pms->get_decoded_body_text_array();
     my ($blank) = 0;
     if (scalar @{$fulltext} >= $minlines) {
@@ -200,15 +203,16 @@ sub check_blank_line_ratio {
         next if ($line =~ /\S/);
         $blank++;
       }
-      $self->{blank_line_ratio}->{$minlines} = 100 * $blank / scalar @{$fulltext};
+      $pms->{blank_line_ratio}->{$minlines} = 100 * $blank / scalar @{$fulltext};
     }
     else {
-      $self->{blank_line_ratio}->{$minlines} = -1; # don't report if it's a blank message ...
+      $pms->{blank_line_ratio}->{$minlines} = -1; # don't report if it's a blank message ...
     }
   }
 
-  return (($min == 0 && $self->{blank_line_ratio}->{$minlines} <= $max) ||
-	  ($self->{blank_line_ratio}->{$minlines} > $min &&
-	   $self->{blank_line_ratio}->{$minlines} <= $max));
+  return (($min == 0 && $pms->{blank_line_ratio}->{$minlines} <= $max) ||
+	  ($pms->{blank_line_ratio}->{$minlines} > $min &&
+	   $pms->{blank_line_ratio}->{$minlines} <= $max));
 }
+
 1;

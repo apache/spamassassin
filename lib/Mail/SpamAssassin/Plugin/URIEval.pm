@@ -17,6 +17,8 @@
 package Mail::SpamAssassin::Plugin::URIEval;
 
 use Mail::SpamAssassin::Plugin;
+use Mail::SpamAssassin::Logger;
+
 use strict;
 use warnings;
 use bytes;

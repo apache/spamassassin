@@ -17,6 +17,7 @@
 package Mail::SpamAssassin::Plugin::HeaderEval;
 
 use Mail::SpamAssassin::Plugin;
+use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Constants qw(:sa :ip);
 
 use strict;
@@ -40,7 +41,6 @@ sub new {
   $self->register_eval_rule("check_for_fake_aol_relay_in_rcvd");
   $self->register_eval_rule("check_for_faraway_charset_in_headers");
   $self->register_eval_rule("check_for_unique_subject_id");
-  $self->register_eval_rule("word_is_in_dictionary");
   $self->register_eval_rule("check_illegal_chars");
   $self->register_eval_rule("check_for_forged_hotmail_received_headers");
   $self->register_eval_rule("check_for_no_hotmail_received_headers");
@@ -57,7 +57,6 @@ sub new {
   $self->register_eval_rule("check_for_round_the_world_received_helo");
   $self->register_eval_rule("check_for_round_the_world_received_revdns");
   $self->register_eval_rule("check_for_shifted_date");
-  $self->register_eval_rule("received_within_months");
   $self->register_eval_rule("subject_is_all_caps");
   $self->register_eval_rule("check_for_to_in_subject");
   $self->register_eval_rule("check_outlook_message_id");
@@ -68,6 +67,13 @@ sub new {
   $self->register_eval_rule("check_ratware_envelope_from");
 
   return $self;
+}
+
+# load triplets.txt into memory 
+sub compile_now_start {
+  my ($self) = @_;
+
+  $self->word_is_in_dictionary("aba");
 }
 
 # sad but true. sort it out, sysadmins!
@@ -316,10 +322,10 @@ sub gated_through_received_hdr_remover {
 sub _check_for_forged_hotmail_received_headers {
   my ($self, $pms) = @_;
 
-  if (defined $self->{hotmail_addr_but_no_hotmail_received}) { return; }
+  if (defined $pms->{hotmail_addr_but_no_hotmail_received}) { return; }
 
-  $self->{hotmail_addr_with_forged_hotmail_received} = 0;
-  $self->{hotmail_addr_but_no_hotmail_received} = 0;
+  $pms->{hotmail_addr_with_forged_hotmail_received} = 0;
+  $pms->{hotmail_addr_but_no_hotmail_received} = 0;
 
   my $rcvd = $pms->get('Received');
   $rcvd =~ s/\s+/ /gs;		# just spaces, simplify the regexp
@@ -350,12 +356,12 @@ sub _check_for_forged_hotmail_received_headers {
 
   if ($rcvd =~ /(?:from |HELO |helo=)\S*hotmail\.com\b/) {
     # HELO'd as hotmail.com, despite not being hotmail
-    $self->{hotmail_addr_with_forged_hotmail_received} = 1;
+    $pms->{hotmail_addr_with_forged_hotmail_received} = 1;
   } else {
     # check to see if From claimed to be @hotmail.com
     my $from = $pms->get('From:addr');
     if ($from !~ /hotmail.com/) { return; }
-    $self->{hotmail_addr_but_no_hotmail_received} = 1;
+    $pms->{hotmail_addr_but_no_hotmail_received} = 1;
   }
 }
 
@@ -363,14 +369,14 @@ sub _check_for_forged_hotmail_received_headers {
 sub check_for_forged_hotmail_received_headers {
   my ($self, $pms) = @_;
   $self->_check_for_forged_hotmail_received_headers($pms);
-  return $self->{hotmail_addr_with_forged_hotmail_received};
+  return $pms->{hotmail_addr_with_forged_hotmail_received};
 }
 
 # SEMIFORGED_HOTMAIL_RCVD
 sub check_for_no_hotmail_received_headers {
   my ($self, $pms) = @_;
   $self->_check_for_forged_hotmail_received_headers($pms);
-  return $self->{hotmail_addr_but_no_hotmail_received};
+  return $pms->{hotmail_addr_but_no_hotmail_received};
 }
 
 # MSN_GROUPS
@@ -581,20 +587,20 @@ sub check_for_matching_env_and_hdr_from {
 sub sorted_recipients {
   my ($self, $pms) = @_;
 
-  if (!exists $self->{tocc_sorted}) {
+  if (!exists $pms->{tocc_sorted}) {
     $self->_check_recipients($pms);
   }
-  return $self->{tocc_sorted};
+  return $pms->{tocc_sorted};
 }
 
 sub similar_recipients {
   my ($self, $pms, $min, $max) = @_;
 
-  if (!exists $self->{tocc_similar}) {
+  if (!exists $pms->{tocc_similar}) {
     $self->_check_recipients($pms);
   }
-  return (($min eq 'undef' || $self->{tocc_similar} >= $min) &&
-	  ($max eq 'undef' || $self->{tocc_similar} < $max));
+  return (($min eq 'undef' || $pms->{tocc_similar} >= $min) &&
+	  ($max eq 'undef' || $pms->{tocc_similar} < $max));
 }
 
 # best experimentally derived values
@@ -626,12 +632,12 @@ sub _check_recipients {
   # ideas that had both poor S/O ratios and poor hit rates:
   # - testing for reverse sorted recipient lists
   # - testing To: and Cc: headers separately
-  $self->{tocc_sorted} = (scalar(@address) >= TOCC_SORTED_COUNT &&
+  $pms->{tocc_sorted} = (scalar(@address) >= TOCC_SORTED_COUNT &&
 			  join(',', @address) eq (join(',', sort @address)));
 
   # a good S/O ratio and hit rate is achieved by comparing 2-byte
   # substrings and requiring 5 or more addresses
-  $self->{tocc_similar} = 0;
+  $pms->{tocc_similar} = 0;
   if (scalar (@address) >= TOCC_SIMILAR_COUNT) {
     my @user = map { substr($_,0,TOCC_SIMILAR_LENGTH) } @address;
     my @fqhn = map { m/\@(.*)/ } @address;
@@ -645,7 +651,7 @@ sub _check_recipients {
 	$combinations++;
       }
     }
-    $self->{tocc_similar} = $hits / $combinations;
+    $pms->{tocc_similar} = $hits / $combinations;
   }
 }
 
@@ -682,8 +688,8 @@ sub _check_for_round_the_world_received {
   my ($self, $pms) = @_;
   my ($relayer, $relayerip, $relay);
 
-  $self->{round_the_world_revdns} = 0;
-  $self->{round_the_world_helo} = 0;
+  $pms->{round_the_world_revdns} = 0;
+  $pms->{round_the_world_helo} = 0;
   my $rcvd = $pms->get('Received');
   my $IPV4_ADDRESS = IPV4_ADDRESS;
 
@@ -712,13 +718,13 @@ gotone:
 
   if ($revdns =~ /\.${ROUND_THE_WORLD_RELAYERS}$/oi) {
     dbg("eval: round-the-world: yep, I think so (from rev dns)");
-    $self->{round_the_world_revdns} = 1;
+    $pms->{round_the_world_revdns} = 1;
     return;
   }
 
   if ($relayer =~ /\.${ROUND_THE_WORLD_RELAYERS}$/oi) {
     dbg("eval: round-the-world: yep, I think so (from HELO)");
-    $self->{round_the_world_helo} = 1;
+    $pms->{round_the_world_helo} = 1;
     return;
   }
 
@@ -728,19 +734,19 @@ gotone:
 
 sub check_for_round_the_world_received_helo {
   my ($self, $pms) = @_;
-  if (!defined $self->{round_the_world_helo}) {
+  if (!defined $pms->{round_the_world_helo}) {
     $self->_check_for_round_the_world_received($pms);
   }
-  if ($self->{round_the_world_helo}) { return 1; }
+  if ($pms->{round_the_world_helo}) { return 1; }
   return 0;
 }
 
 sub check_for_round_the_world_received_revdns {
   my ($self, $pms) = @_;
-  if (!defined $self->{round_the_world_revdns}) {
+  if (!defined $pms->{round_the_world_revdns}) {
     $self->_check_for_round_the_world_received($pms);
   }
-  if ($self->{round_the_world_revdns}) { return 1; }
+  if ($pms->{round_the_world_revdns}) { return 1; }
   return 0;
 }
 
@@ -749,21 +755,21 @@ sub check_for_round_the_world_received_revdns {
 sub check_for_shifted_date {
   my ($self, $pms, $min, $max) = @_;
 
-  if (!exists $self->{date_diff}) {
+  if (!exists $pms->{date_diff}) {
     $self->_check_date_diff($pms);
   }
-  return (($min eq 'undef' || $self->{date_diff} >= (3600 * $min)) &&
-	  ($max eq 'undef' || $self->{date_diff} < (3600 * $max)));
+  return (($min eq 'undef' || $pms->{date_diff} >= (3600 * $min)) &&
+	  ($max eq 'undef' || $pms->{date_diff} < (3600 * $max)));
 }
 
 # filters out some false positives in old corpus mail - Allen
 sub received_within_months {
   my ($self,$pms,$min,$max) = @_;
 
-  if (!exists($self->{date_received})) {
+  if (!exists($pms->{date_received})) {
     $self->_check_date_received($pms);
   }
-  my $diff = time() - $self->{date_received};
+  my $diff = time() - $pms->{date_received};
 
   # 365.2425 * 24 * 60 * 60 = 31556952 = seconds in year (including leap)
 
@@ -791,18 +797,18 @@ sub _get_date_header_time {
     last if defined($time);
   }
   if (defined($time)) {
-    $self->{date_header_time} = $time;
+    $pms->{date_header_time} = $time;
   }
   else {
-    $self->{date_header_time} = undef;
+    $pms->{date_header_time} = undef;
   }
 }
 
 sub _get_received_header_times {
   my ($self, $pms) = @_;
 
-  $self->{received_header_times} = [ () ];
-  $self->{received_fetchmail_time} = undef;
+  $pms->{received_header_times} = [ () ];
+  $pms->{received_fetchmail_time} = undef;
 
   my (@received);
   my $received = $pms->get('Received');
@@ -846,10 +852,10 @@ sub _get_received_header_times {
       }
     }
     if (scalar(@fetchmail_times) > 1) {
-      $self->{received_fetchmail_time} =
+      $pms->{received_fetchmail_time} =
        (sort {$b <=> $a} (@fetchmail_times))[0];
     } elsif (scalar(@fetchmail_times)) {
-      $self->{received_fetchmail_time} = $fetchmail_times[0];
+      $pms->{received_fetchmail_time} = $fetchmail_times[0];
     }
   }
 
@@ -867,7 +873,7 @@ sub _get_received_header_times {
   }
 
   if (scalar(@header_times)) {
-    $self->{received_header_times} = [ @header_times ];
+    $pms->{received_header_times} = [ @header_times ];
   } else {
     dbg("eval: no dates found in Received headers");
   }
@@ -878,39 +884,39 @@ sub _check_date_received {
 
   my (@dates_poss);
 
-  $self->{date_received} = 0;
+  $pms->{date_received} = 0;
 
-  if (!exists($self->{date_header_time})) {
+  if (!exists($pms->{date_header_time})) {
     $self->_get_date_header_time($pms);
   }
 
-  if (defined($self->{date_header_time})) {
-    push @dates_poss, $self->{date_header_time};
+  if (defined($pms->{date_header_time})) {
+    push @dates_poss, $pms->{date_header_time};
   }
 
-  if (!exists($self->{received_header_times})) {
+  if (!exists($pms->{received_header_times})) {
     $self->_get_received_header_times($pms);
   }
-  my (@received_header_times) = @{ $self->{received_header_times} };
+  my (@received_header_times) = @{ $pms->{received_header_times} };
   if (scalar(@received_header_times)) {
     push @dates_poss, $received_header_times[0];
   }
-  if (defined($self->{received_fetchmail_time})) {
-    push @dates_poss, $self->{received_fetchmail_time};
+  if (defined($pms->{received_fetchmail_time})) {
+    push @dates_poss, $pms->{received_fetchmail_time};
   }
 
-  if (defined($self->{date_header_time}) && scalar(@received_header_times)) {
-    if (!exists($self->{date_diff})) {
+  if (defined($pms->{date_header_time}) && scalar(@received_header_times)) {
+    if (!exists($pms->{date_diff})) {
       $self->_check_date_diff($pms);
     }
-    push @dates_poss, $self->{date_header_time} - $self->{date_diff};
+    push @dates_poss, $pms->{date_header_time} - $pms->{date_diff};
   }
 
   if (scalar(@dates_poss)) {	# use median
-    $self->{date_received} = (sort {$b <=> $a}
+    $pms->{date_received} = (sort {$b <=> $a}
 			      (@dates_poss))[int($#dates_poss/2)];
     dbg("eval: date chosen from message: " .
-	scalar(localtime($self->{date_received})));
+	scalar(localtime($pms->{date_received})));
   } else {
     dbg("eval: no dates found in message");
   }
@@ -919,26 +925,26 @@ sub _check_date_received {
 sub _check_date_diff {
   my ($self, $pms) = @_;
 
-  $self->{date_diff} = 0;
+  $pms->{date_diff} = 0;
 
-  if (!exists($self->{date_header_time})) {
+  if (!exists($pms->{date_header_time})) {
     $self->_get_date_header_time($pms);
   }
 
-  if (!defined($self->{date_header_time})) {
+  if (!defined($pms->{date_header_time})) {
     return;			# already have tests for this
   }
 
-  if (!exists($self->{received_header_times})) {
+  if (!exists($pms->{received_header_times})) {
     $self->_get_received_header_times($pms);
   }
-  my (@header_times) = @{ $self->{received_header_times} };
+  my (@header_times) = @{ $pms->{received_header_times} };
 
   if (!scalar(@header_times)) {
     return;			# archived mail?
   }
 
-  my (@diffs) = map {$self->{date_header_time} - $_} (@header_times);
+  my (@diffs) = map {$pms->{date_header_time} - $_} (@header_times);
 
   # if the last Received: header has no difference, then we choose to
   # exclude it
@@ -949,7 +955,7 @@ sub _check_date_diff {
   # use the date with the smallest absolute difference
   # (experimentally, this results in the fewest false positives)
   @diffs = sort { abs($a) <=> abs($b) } @diffs;
-  $self->{date_diff} = $diffs[0];
+  $pms->{date_diff} = $diffs[0];
 }
 
 
@@ -967,7 +973,8 @@ sub subject_is_all_caps {
    # If so, punt on this test to avoid FPs.  We just list the known charsets
    # this test will FP on, here.
    my $subjraw = $pms->get('Subject:raw');
-   if ($subjraw =~ /=\?${Mail::SpamAssassin::Constants::CHARSETS_LIKELY_TO_FP_AS_CAPS}\?/i) {
+   my $CLTFAC = Mail::SpamAssassin::Constants::CHARSETS_LIKELY_TO_FP_AS_CAPS;
+   if ($subjraw =~ /=\?${CLTFAC}\?/i) {
      return 0;
    }
 
@@ -1012,7 +1019,7 @@ sub check_outlook_message_id {
   my $diff = $timetoken - $expected;
   return 0 if (abs($diff) < $fudge);
 
-  $_ = $self->get('Received');
+  $_ = $pms->get('Received');
   /(\s.?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+).*?$/;
   $_ = Mail::SpamAssassin::Util::parse_rfc822_date($_) || 0;
   $expected = int(($_ * $x) + $y);
@@ -1040,7 +1047,7 @@ sub check_messageid_not_usable {
   return 1 if /iPlanet Messaging Server/;
 
   # too old; older versions of clients used different formats
-  return 1 if ($self->received_within_months('6','undef'));
+  return 1 if ($self->received_within_months($pms, '6','undef'));
 
   return 0;
 }

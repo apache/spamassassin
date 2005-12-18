@@ -90,8 +90,8 @@ sub check_for_faraway_charset {
 sub check_for_mime {
   my ($self, $pms, undef, $test) = @_;
 
-  $self->_check_attachments($pms->{msg}) unless exists $self->{$test};
-  return $self->{$test};
+  $self->_check_attachments($pms) unless exists $pms->{$test};
+  return $pms->{$test};
 }
 
 # any text/html MIME part
@@ -101,8 +101,8 @@ sub check_for_mime_html {
   my $ctype = $pms->get('Content-Type');
   return 1 if (defined($ctype) && $ctype =~ m@^text/html@i);
 
-  $self->_check_attachments($pms->{msg}) unless exists $self->{mime_body_html_count};
-  return ($self->{mime_body_html_count} > 0);
+  $self->_check_attachments($pms) unless exists $pms->{mime_body_html_count};
+  return ($pms->{mime_body_html_count} > 0);
 }
 
 # HTML without some other type of MIME text part
@@ -112,41 +112,41 @@ sub check_for_mime_html_only {
   my $ctype = $pms->get('Content-Type');
   return 1 if (defined($ctype) && $ctype =~ m@^text/html@i);
 
-  $self->_check_attachments($pms->{msg}) unless exists $self->{mime_body_html_count};
-  return ($self->{mime_body_html_count} > 0 &&
-	  $self->{mime_body_text_count} == 0);
+  $self->_check_attachments($pms) unless exists $pms->{mime_body_html_count};
+  return ($pms->{mime_body_html_count} > 0 &&
+	  $pms->{mime_body_text_count} == 0);
 }
 
 sub check_mime_multipart_ratio {
   my ($self, $pms, undef, $min, $max) = @_;
 
-  $self->_check_attachments($pms->{msg}) unless exists $self->{mime_multipart_alternative};
+  $self->_check_attachments($pms) unless exists $pms->{mime_multipart_alternative};
 
-  return ($self->{mime_multipart_ratio} >= $min &&
-	  $self->{mime_multipart_ratio} < $max);
+  return ($pms->{mime_multipart_ratio} >= $min &&
+	  $pms->{mime_multipart_ratio} < $max);
 }
 
 sub _check_mime_header {
-  my ($self, $ctype, $cte, $cd, $charset, $name) = @_;
+  my ($self, $pms, $ctype, $cte, $cd, $charset, $name) = @_;
 
   $charset ||= '';
 
   if ($ctype eq 'text/html') {
-    $self->{mime_body_html_count}++;
+    $pms->{mime_body_html_count}++;
   }
   elsif ($ctype =~ m@^text@i) {
-    $self->{mime_body_text_count}++;
+    $pms->{mime_body_text_count}++;
   }
 
   if ($cte =~ /base64/) {
-    $self->{mime_base64_count}++;
+    $pms->{mime_base64_count}++;
   }
   elsif ($cte =~ /quoted-printable/) {
-    $self->{mime_qp_count}++;
+    $pms->{mime_qp_count}++;
   }
 
   if ($cd && $cd =~ /attachment/) {
-    $self->{mime_attachment}++;
+    $pms->{mime_attachment}++;
   }
 
   if ($ctype =~ /^text/ &&
@@ -154,17 +154,17 @@ sub _check_mime_header {
       $charset !~ /utf-8/ &&
       !($cd && $cd =~ /^(?:attachment|inline)/))
   {
-    $self->{mime_base64_encoded_text} = 1;
+    $pms->{mime_base64_encoded_text} = 1;
   }
 
   if ($cte =~ /base64/ && !$name) {
-    $self->{mime_base64_no_name} = 1;
+    $pms->{mime_base64_no_name} = 1;
   }
 
   if ($charset =~ /iso-\S+-\S+\b/i &&
       $charset !~ /iso-(?:8859-\d{1,2}|2022-(?:jp|kr))\b/)
   {
-    $self->{mime_bad_iso_charset} = 1;
+    $pms->{mime_bad_iso_charset} = 1;
   }
 
   # MIME_BASE64_LATIN: now a zero-hitter
@@ -172,12 +172,12 @@ sub _check_mime_header {
   # $cte =~ /base64/ &&
   # $charset =~ /\b(?:us-ascii|iso-8859-(?:[12349]|1[0345])|windows-(?:125[0247]))\b/)
   # {
-  # $self->{mime_base64_latin} = 1;
+  # $pms->{mime_base64_latin} = 1;
   # }
 
   # MIME_QP_NO_CHARSET: now a zero-hitter
   # if ($cte =~ /quoted-printable/ && $cd =~ /inline/ && !$charset) {
-  # $self->{mime_qp_inline_no_charset} = 1;
+  # $pms->{mime_qp_inline_no_charset} = 1;
   # }
 
   # MIME_HTML_NO_CHARSET: now a zero-hitter
@@ -185,30 +185,30 @@ sub _check_mime_header {
   # !(defined($charset) && $charset) &&
   # !($cd && $cd =~ /^(?:attachment|inline)/))
   # {
-  # $self->{mime_html_no_charset} = 1;
+  # $pms->{mime_html_no_charset} = 1;
   # }
 
   if ($charset =~ /[a-z]/i) {
-    if (defined $self->{mime_html_charsets}) {
-      $self->{mime_html_charsets} .= " ".$charset;
+    if (defined $pms->{mime_html_charsets}) {
+      $pms->{mime_html_charsets} .= " ".$charset;
     } else {
-      $self->{mime_html_charsets} = $charset;
+      $pms->{mime_html_charsets} = $charset;
     }
 
-    if (! $self->{mime_faraway_charset}) {
+    if (! $pms->{mime_faraway_charset}) {
       my @l = Mail::SpamAssassin::Util::get_my_locales($self->{main}->{conf}->{ok_locales});
 
       if (!(grep { $_ eq "all" } @l) &&
 	  !Mail::SpamAssassin::Locales::is_charset_ok_for_locales($charset, @l))
       {
-	$self->{mime_faraway_charset} = 1;
+	$pms->{mime_faraway_charset} = 1;
       }
     }
   }
 }
 
 sub _check_attachments {
-  my ($self, $msg) = @_;
+  my ($self, $pms) = @_;
 
   # MIME status
   my $where = -1;		# -1 = start, 0 = nowhere, 1 = header, 2 = body
@@ -221,35 +221,35 @@ sub _check_attachments {
   my $part = -1;		# MIME part index
 
   # indicate the scan has taken place
-  $self->{mime_checked_attachments} = 1;
+  $pms->{mime_checked_attachments} = 1;
 
   # results
-  $self->{mime_base64_blanks} = 0;
-  $self->{mime_base64_count} = 0;
-  $self->{mime_base64_encoded_text} = 0;
-  # $self->{mime_base64_illegal} = 0;
-  # $self->{mime_base64_latin} = 0;
-  $self->{mime_base64_no_name} = 0;
-  $self->{mime_body_html_count} = 0;
-  $self->{mime_body_text_count} = 0;
-  $self->{mime_faraway_charset} = 0;
-  # $self->{mime_html_no_charset} = 0;
-  $self->{mime_missing_boundary} = 0;
-  $self->{mime_multipart_alternative} = 0;
-  $self->{mime_multipart_ratio} = 1.0;
-  $self->{mime_qp_count} = 0;
-  # $self->{mime_qp_illegal} = 0;
-  # $self->{mime_qp_inline_no_charset} = 0;
-  $self->{mime_qp_long_line} = 0;
-  $self->{mime_qp_ratio} = 0;
+  $pms->{mime_base64_blanks} = 0;
+  $pms->{mime_base64_count} = 0;
+  $pms->{mime_base64_encoded_text} = 0;
+  # $pms->{mime_base64_illegal} = 0;
+  # $pms->{mime_base64_latin} = 0;
+  $pms->{mime_base64_no_name} = 0;
+  $pms->{mime_body_html_count} = 0;
+  $pms->{mime_body_text_count} = 0;
+  $pms->{mime_faraway_charset} = 0;
+  # $pms->{mime_html_no_charset} = 0;
+  $pms->{mime_missing_boundary} = 0;
+  $pms->{mime_multipart_alternative} = 0;
+  $pms->{mime_multipart_ratio} = 1.0;
+  $pms->{mime_qp_count} = 0;
+  # $pms->{mime_qp_illegal} = 0;
+  # $pms->{mime_qp_inline_no_charset} = 0;
+  $pms->{mime_qp_long_line} = 0;
+  $pms->{mime_qp_ratio} = 0;
 
   # Get all parts ...
-  foreach my $p ($msg->find_parts(qr/./)) {
+  foreach my $p ($pms->{msg}->find_parts(qr/./)) {
     # message headers
     my ($ctype, $boundary, $charset, $name) = Mail::SpamAssassin::Util::parse_content_type($p->get_header("content-type"));
 
     if ($ctype eq 'multipart/alternative') {
-      $self->{mime_multipart_alternative} = 1;
+      $pms->{mime_multipart_alternative} = 1;
     }
 
     my $cte = $p->get_header('Content-Transfer-Encoding') || '';
@@ -261,7 +261,7 @@ sub _check_attachments {
     $charset = lc $charset if ($charset);
     $name = lc $name if ($name);
 
-    $self->_check_mime_header($ctype, $cte, $cd, $charset, $name);
+    $self->_check_mime_header($pms, $ctype, $cte, $cd, $charset, $name);
 
     # If we're not in a leaf node in the tree, there will be no raw
     # section, so skip it.
@@ -277,25 +277,25 @@ sub _check_attachments {
     foreach (@{$p->raw()}) {
       if ($cte =~ /base64/i) {
         if ($previous =~ /^\s*$/ && /^\s*$/) {
-	  $self->{mime_base64_blanks} = 1;
+	  $pms->{mime_base64_blanks} = 1;
         }
         # MIME_BASE64_ILLEGAL: now a zero-hitter
         # if (m@[^A-Za-z0-9+/=\n]@ || /=[^=\s]/) {
-        # $self->{mime_base64_illegal} = 1;
+        # $pms->{mime_base64_illegal} = 1;
         # }
       }
 
-      # if ($self->{mime_html_no_charset} && $ctype eq 'text/html' && defined $charset) {
-      # $self->{mime_html_no_charset} = 0;
+      # if ($pms->{mime_html_no_charset} && $ctype eq 'text/html' && defined $charset) {
+      # $pms->{mime_html_no_charset} = 0;
       # }
-      if ($self->{mime_multipart_alternative} && $cd !~ /attachment/ &&
+      if ($pms->{mime_multipart_alternative} && $cd !~ /attachment/ &&
           ($ctype eq 'text/plain' || $ctype eq 'text/html')) {
 	$part_bytes[$part] += length;
       }
 
       if ($where != 1 && $cte eq "quoted-printable" && ! /^SPAM: /) {
         if (length > 77) {
-	  $self->{mime_qp_long_line} = 1;
+	  $pms->{mime_qp_long_line} = 1;
         }
         $qp_bytes += length;
 
@@ -303,9 +303,9 @@ sub _check_attachments {
 
         # check for illegal substrings (RFC 2045), hexadecimal values 7F-FF and
         # control characters other than TAB, or CR and LF as parts of CRLF pairs
-        # if (!$self->{mime_qp_illegal} && /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]/)
+        # if (!$pms->{mime_qp_illegal} && /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]/)
         # {
-        # $self->{mime_qp_illegal} = 1;
+        # $pms->{mime_qp_illegal} = 1;
         # }
 
         # count excessive QP bytes
@@ -328,10 +328,10 @@ sub _check_attachments {
   }
 
   if ($qp_bytes) {
-    $self->{mime_qp_ratio} = $qp_count / $qp_bytes;
+    $pms->{mime_qp_ratio} = $qp_count / $qp_bytes;
   }
 
-  if ($self->{mime_multipart_alternative}) {
+  if ($pms->{mime_multipart_alternative}) {
     my $text;
     my $html;
     # bug 4207: we want the size of the last parts
@@ -346,14 +346,14 @@ sub _check_attachments {
       last if (defined($html) && defined($text));
     }
     if (defined($text) && defined($html) && $html > 0) {
-      $self->{mime_multipart_ratio} = ($text / $html);
+      $pms->{mime_multipart_ratio} = ($text / $html);
     }
   }
 
   # Look to see if any multipart boundaries are not "balanced"
-  foreach my $val (values %{$msg->{mime_boundary_state}}) {
+  foreach my $val (values %{$pms->{msg}->{mime_boundary_state}}) {
     if ($val != 0) {
-      $self->{mime_missing_boundary} = 1;
+      $pms->{mime_missing_boundary} = 1;
       last;
     }
   }
@@ -369,12 +369,12 @@ sub check_for_uppercase {
   my ($self, $pms, $body, $min, $max) = @_;
   local ($_);
 
-  if (exists $self->{uppercase}) {
-    return ($self->{uppercase} > $min && $self->{uppercase} <= $max);
+  if (exists $pms->{uppercase}) {
+    return ($pms->{uppercase} > $min && $pms->{uppercase} <= $max);
   }
 
   if ($self->body_charset_is_likely_to_fp($pms)) {
-    $self->{uppercase} = 0; return 0;
+    $pms->{uppercase} = 0; return 0;
   }
 
   # Dec 20 2002 jm: trade off some speed for low memory footprint, by
@@ -405,16 +405,16 @@ sub check_for_uppercase {
   # report only on mails above a minimum size; otherwise one
   # or two acronyms can throw it off
   if ($len < 200) {
-    $self->{uppercase} = 0;
+    $pms->{uppercase} = 0;
     return 0;
   }
   if (($upper + $lower) == 0) {
-    $self->{uppercase} = 0;
+    $pms->{uppercase} = 0;
   } else {
-    $self->{uppercase} = ($upper / ($upper + $lower)) * 100;
+    $pms->{uppercase} = ($upper / ($upper + $lower)) * 100;
   }
 
-  return ($self->{uppercase} > $min && $self->{uppercase} <= $max);
+  return ($pms->{uppercase} > $min && $pms->{uppercase} <= $max);
 }
 
 sub body_charset_is_likely_to_fp {
@@ -423,15 +423,15 @@ sub body_charset_is_likely_to_fp {
   # check for charsets where this test will FP -- iso-2022-jp, gb2312,
   # koi8-r etc.
   #
-  $self->_check_attachments($pms->{msg}) unless exists $self->{mime_checked_attachments};
+  $self->_check_attachments($pms) unless exists $pms->{mime_checked_attachments};
   my @charsets = ();
   my $type = $pms->get('Content-Type');
   $type = get_charset_from_ct_line ($type);
   if (defined $type) {
     push (@charsets, $type);
   }
-  if (defined $self->{mime_html_charsets}) {
-    push (@charsets, split(' ', $self->{mime_html_charsets}));
+  if (defined $pms->{mime_html_charsets}) {
+    push (@charsets, split(' ', $pms->{mime_html_charsets}));
   }
 
   my $CHARSETS_LIKELY_TO_FP_AS_CAPS = CHARSETS_LIKELY_TO_FP_AS_CAPS;

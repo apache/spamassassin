@@ -17,6 +17,7 @@
 package Mail::SpamAssassin::Plugin::DNSEval;
 
 use Mail::SpamAssassin::Plugin;
+use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Constants qw(:ip);
 
 use strict;
@@ -70,11 +71,11 @@ sub ip_list_uniq_and_strip_private {
 sub check_rbl_accreditor {
   my ($self, $pms, $rule, $set, $rbl_server, $subtest, $accreditor) = @_;
 
-  if (!defined $self->{accreditor_tag}) {
-    $self->message_accreditor_tag($pms);
+  if (!defined $pms->{accreditor_tag}) {
+    $pms->message_accreditor_tag($pms);
   }
-  if ($self->{accreditor_tag}->{$accreditor}) {
-    $self->check_rbl_backend($pms, $rule, $set, $rbl_server, 'A', $subtest);
+  if ($pms->{accreditor_tag}->{$accreditor}) {
+    $pms->check_rbl_backend($pms, $rule, $set, $rbl_server, 'A', $subtest);
   }
   return 0;
 }
@@ -112,7 +113,7 @@ sub message_accreditor_tag {
       }
     }
   }
-  $self->{accreditor_tag} = \%acctags;
+  $pms->{accreditor_tag} = \%acctags;
 }
 
 sub check_rbl_backend {

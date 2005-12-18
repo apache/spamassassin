@@ -17,7 +17,9 @@
 package Mail::SpamAssassin::Plugin::RelayEval;
 
 use Mail::SpamAssassin::Plugin;
+use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Constants qw(:ip);
+
 use strict;
 use warnings;
 use bytes;
@@ -264,43 +266,43 @@ sub check_for_sender_no_reverse {
 sub check_for_from_domain_in_received_headers {
   my ($self, $pms, $domain, $desired) = @_;
   
-  if (exists $self->{from_domain_in_received}) {
-      if (exists $self->{from_domain_in_received}->{$domain}) {
+  if (exists $pms->{from_domain_in_received}) {
+      if (exists $pms->{from_domain_in_received}->{$domain}) {
 	  if ($desired eq 'true') {
 	      # See use of '0e0' below for why we force int() here:
-	      return int($self->{from_domain_in_received}->{$domain});
+	      return int($pms->{from_domain_in_received}->{$domain});
 	  }
 	  else {
 	      # And why we deliberately do NOT use integers here:
-	      return !$self->{from_domain_in_received}->{$domain};
+	      return !$pms->{from_domain_in_received}->{$domain};
 	  }
       }
   } else {
-      $self->{from_domain_in_received} = {};
+      $pms->{from_domain_in_received} = {};
   }
 
   my $from = $pms->get('From:addr');
   if ($from !~ /\b\Q$domain\E/i) {
       # '0e0' is Perl idiom for "true but zero":
-      $self->{from_domain_in_received}->{$domain} = '0e0';
+      $pms->{from_domain_in_received}->{$domain} = '0e0';
       return 0;
   }
 
   my $rcvd = $pms->{relays_trusted_str}."\n".$pms->{relays_untrusted_str};
 
   if ($rcvd =~ / rdns=\S*\b${domain} [^\]]*by=\S*\b${domain} /) {
-      $self->{from_domain_in_received}->{$domain} = 1;
+      $pms->{from_domain_in_received}->{$domain} = 1;
       return ($desired eq 'true');
   }
 
-  $self->{from_domain_in_received}->{$domain} = 0;
+  $pms->{from_domain_in_received}->{$domain} = 0;
   return ($desired ne 'true');   
 }
 
 sub check_for_no_rdns_dotcom_helo {
   my ($self, $pms) = @_;
-  if (!exists $self->{no_rdns_dotcom_helo}) { $self->_check_received_helos($pms); }
-  return $self->{no_rdns_dotcom_helo};
+  if (!exists $pms->{no_rdns_dotcom_helo}) { $self->_check_received_helos($pms); }
+  return $pms->{no_rdns_dotcom_helo};
 }
 
 # Bug 1133
@@ -341,7 +343,7 @@ sub _check_received_helos {
     # allow stuff before the dot-com for both from-name and HELO-name,
     # so HELO="outgoing.aol.com" and from="mx34853495.mx.aol.com" works OK.
     #
-    $self->{no_rdns_dotcom_helo} = 0;
+    $pms->{no_rdns_dotcom_helo} = 0;
     if ($helo_host =~ /(?:\.|^)(lycos\.com|lycos\.co\.uk|hotmail\.com
 		|localhost\.com|excite\.com|caramail\.com
 		|cs\.com|aol\.com|msn\.com|yahoo\.com|drizzle\.com)$/ix)
@@ -351,7 +353,7 @@ sub _check_received_helos {
       # ok, let's catch the case where there's *no* reverse DNS there either
       if ($no_rdns) {
 	dbg("eval: Received: no rDNS for dotcom HELO: from=$from_host HELO=$helo_host");
-	$self->{no_rdns_dotcom_helo} = 1;
+	$pms->{no_rdns_dotcom_helo} = 1;
       }
     }
   }
@@ -375,30 +377,30 @@ sub message_id_from_mta {
 # FORGED_RCVD_TRAIL
 sub check_for_forged_received_trail {
   my ($self, $pms) = @_;
-  $self->_check_for_forged_received($pms) unless exists $self->{mismatch_from};
-  return ($self->{mismatch_from} > 1);
+  $self->_check_for_forged_received($pms) unless exists $pms->{mismatch_from};
+  return ($pms->{mismatch_from} > 1);
 }
 
 # FORGED_RCVD_HELO
 sub check_for_forged_received_helo {
   my ($self, $pms) = @_;
-  $self->_check_for_forged_received($pms) unless exists $self->{mismatch_helo};
-  return ($self->{mismatch_helo} > 0);
+  $self->_check_for_forged_received($pms) unless exists $pms->{mismatch_helo};
+  return ($pms->{mismatch_helo} > 0);
 }
 
 # FORGED_RCVD_IP_HELO
 sub check_for_forged_received_ip_helo {
   my ($self, $pms) = @_;
-  $self->_check_for_forged_received($pms) unless exists $self->{mismatch_ip_helo};
-  return ($self->{mismatch_ip_helo} > 0);
+  $self->_check_for_forged_received($pms) unless exists $pms->{mismatch_ip_helo};
+  return ($pms->{mismatch_ip_helo} > 0);
 }
 
 sub _check_for_forged_received {
   my ($self, $pms) = @_;
 
-  $self->{mismatch_from} = 0;
-  $self->{mismatch_helo} = 0;
-  $self->{mismatch_ip_helo} = 0;
+  $pms->{mismatch_from} = 0;
+  $pms->{mismatch_helo} = 0;
+  $pms->{mismatch_ip_helo} = 0;
 
   my $IP_PRIVATE = IP_PRIVATE;
 
@@ -447,7 +449,7 @@ sub _check_for_forged_received {
 		&& $frm ne $hlo && !helo_forgery_whitelisted($frm, $hlo))
     {
       dbg("eval: forged-HELO: mismatch on HELO: '$hlo' != '$frm'");
-      $self->{mismatch_helo}++;
+      $pms->{mismatch_helo}++;
     }
 
     my $fip = $fromip[$i];
@@ -466,7 +468,7 @@ sub _check_for_forged_received {
 		!($hlo =~ /$IP_PRIVATE/o))
 	{
 	  dbg("eval: forged-HELO: massive mismatch on IP-addr HELO: '$hlo' != '$fip'");
-	  $self->{mismatch_ip_helo}++;
+	  $pms->{mismatch_ip_helo}++;
 	}
       }
     }
@@ -477,7 +479,7 @@ sub _check_for_forged_received {
 		&& $by ne $prev && !helo_forgery_whitelisted($by, $prev))
     {
       dbg("eval: forged-HELO: mismatch on from: '$prev' != '$by'");
-      $self->{mismatch_from}++;
+      $pms->{mismatch_from}++;
     }
   }
 }

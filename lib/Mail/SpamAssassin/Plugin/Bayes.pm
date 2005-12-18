@@ -45,21 +45,21 @@ sub check_bayes {
 
   return 0 if (!$pms->{conf}->{use_bayes} || !$pms->{conf}->{use_bayes_rules});
 
-  if (!exists ($self->{bayes_score})) {
-    $self->{bayes_score} = $self->{main}->{bayes_scanner}->scan ($pms, $pms->{msg});
+  if (!exists ($pms->{bayes_score})) {
+    $pms->{bayes_score} = $self->{main}->{bayes_scanner}->scan ($pms, $pms->{msg});
   }
 
-  if (defined $self->{bayes_score} &&
-      ($min == 0 || $self->{bayes_score} > $min) &&
-      ($max eq "undef" || $self->{bayes_score} <= $max))
+  if (defined $pms->{bayes_score} &&
+      ($min == 0 || $pms->{bayes_score} > $min) &&
+      ($max eq "undef" || $pms->{bayes_score} <= $max))
   {
       if ($pms->{conf}->{detailed_bayes_score}) {
         $pms->test_log(sprintf ("score: %3.4f, hits: %s",
-                                 $self->{bayes_score},
-                                 $self->{bayes_hits}));
+                                 $pms->{bayes_score},
+                                 $pms->{bayes_hits}));
       }
       else {
-        $pms->test_log(sprintf ("score: %3.4f", $self->{bayes_score}));
+        $pms->test_log(sprintf ("score: %3.4f", $pms->{bayes_score}));
       }
       return 1;
   }
