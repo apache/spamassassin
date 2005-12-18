@@ -32,7 +32,7 @@ rm -rf $tmpdir; mkdir -p $tmpdir         || exit $?
 # to what's installed
 # TODO: this *would* be performed in a checkout of the desired
 # version's branch
-$PERL Makefile.PL PREFIX=$tmpdir         || exit $?
+$PERL Makefile.PL PREFIX=$tmpdir < /dev/null || exit $?
 make                                     || exit $?
 make install                             || exit $?
 
@@ -48,7 +48,7 @@ rulesdir=$tmpdir/share/spamassassin
 # ensure non-empty
 [ -s $tmpdir/update.tgz ] || exit 3
 # ensure valid tarfile
-tar tf $tmpdir/update.tgz || exit 4
+gunzip -cd < $tmpdir/update.tgz | tar tf - || exit 4
 
 
 # TODO: sign!  currently requires passphrase, this is a problem
