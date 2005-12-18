@@ -142,7 +142,7 @@ foreach my $name (sort keys %$plist) {
   # rules that fail lint
   next if $rules_with_errors{$name};
 
-  $notes = "spam=$obj->{spc} ham=$obj->{hpc} so=$obj->{so}";
+  # $notes = "spam=$obj->{spc} ham=$obj->{hpc} so=$obj->{so}";
 
 publish:
 
