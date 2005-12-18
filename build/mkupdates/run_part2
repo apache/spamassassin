@@ -1,0 +1,91 @@
+#!/usr/bin/bash
+#
+# Continue the updates-building process, post the user approval step.
+# Currently this is interactive as it requires a GPG passphrase entry.
+#
+# usage: bash build/mkupdates/run_part2
+
+set -x
+
+cd /home/updatesd/svn/spamassassin
+
+PERL=/local/perl586/bin/perl
+PATH=$PATH:/usr/sfw/bin:/opt/sfw/bin:/opt/SUNWspro/bin:/usr/X/bin:/usr/ucb:/usr/sbin:/usr/ccs/bin:/opt/subversion-1.1.4/bin:/usr/apache2/bin:/local/bin
+
+export PERL PATH
+
+stagedir=/var/www/buildbot.spamassassin.org/updatestage
+
+# ---------------------------------------------------------------------------
+
+[ -d $stagedir ] || echo "no stagedir" 1>&2
+[ -d $stagedir ] || exit 6
+
+tmpdir=/home/updatesd/tmp/stage
+rm -rf $tmpdir; mkdir -p $tmpdir         || exit $?
+
+# use "make install" logic, since we want rules as close as possible
+# to what's installed
+$PERL Makefile.PL PREFIX=$tmpdir         || exit $?
+make                                     || exit $?
+make install                             || exit $?
+
+rulesdir=$tmpdir/share/spamassassin
+
+(
+  # TODO: is *.cf too restrictive?  do we want to ship plugins? (.pm)
+  cd $rulesdir 
+  tar cf - . *.cf                        || exit $?
+
+) | gzip -9 > $tmpdir/update.tgz         || exit $?
+
+# ensure non-empty
+[ -s $tmpdir/update.tgz ] || exit 3
+# ensure valid tarfile
+tar tf $tmpdir/update.tgz || exit 4
+
+
+# TODO: sign!  currently requires passphrase, this is a problem
+# gpg -bas $tmpdir/update.tgz  || exit $?
+
+build/sha1sum.pl $tmpdir/update.tgz > $tmpdir/update.tgz.sha1  || exit $?
+
+# get SVN revision number.
+# note: use 'Last Changed Rev' instead of 'Revision'.  Because we share
+# an SVN repository with other projects, this means that the same
+# rev of *our* codebase may appear under multiple rev#s, as other projects
+# check their changes in.
+(svn info --non-interactive || svn info) < /dev/null \
+                > $tmpdir/svn 2>&1 || exit $?
+
+svnrev=`(grep 'Last Changed Rev: ' $tmpdir/svn || exit 1) | \
+        sed -e 's/^.*: //'`
+
+if [ "$svnrev" -lt 1 ] ; then
+  echo "bad SVN revision: $svnrev"
+  cat $tmpdir/svn
+  exit 5
+fi
+
+mv $tmpdir/update.tgz      $stagedir/$svnrev.tar.gz            || exit $?
+mv $tmpdir/update.tgz.sha1 $stagedir/$svnrev.tar.gz.sha1       || exit $?
+# mv $tmpdir/update.tgz.asc  $stagedir/$svnrev.tar.gz.asc        || exit $?
+
+chmod 644 $stagedir/$svnrev.*
+
+ls -l $stagedir
+
+# ---------------------------------------------------------------------------
+
+# cycle the logfiles; keep 6 (3 days worth I think)
+(
+  cd /var/www/buildbot.spamassassin.org/bbmass
+  rm mkupdatespt2_6.txt
+  mv mkupdatespt2_5.txt  mkupdatespt2_6.txt
+  mv mkupdatespt2_4.txt  mkupdatespt2_5.txt
+  mv mkupdatespt2_3.txt  mkupdatespt2_4.txt
+  mv mkupdatespt2_2.txt  mkupdatespt2_3.txt
+  mv mkupdatespt2_1.txt  mkupdatespt2_2.txt
+  mv mkupdatespt2.txt    mkupdatespt2_1.txt
+)
+
