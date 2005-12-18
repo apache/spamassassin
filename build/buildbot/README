@@ -6,4 +6,11 @@ box:
     ssh spamassassin.zones.apache.org
     cd /home/buildbot/bots/sa
     sudo svn update
+
+once it's good to go, apply changes:
     
+    sudo /etc/init.d/buildbot restart
+
+note that you'll probably have to restart buildbot slaves on the slave
+machines.   This is a PITA.
+
