@@ -2806,6 +2806,8 @@ sub new {
   $self->{bayes_expiry_period} = 43200;
   $self->{bayes_expiry_max_exponent} = 9;
 
+  $self->{encapsulated_content_description} = 'original message before SpamAssassin';
+
   $self;
 }
 

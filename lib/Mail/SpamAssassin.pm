@@ -292,9 +292,6 @@ sub new {
   # Make sure that we clean $PATH if we're tainted
   Mail::SpamAssassin::Util::clean_path_in_taint_mode();
 
-  # TODO: this should be in Conf!
-  $self->{encapsulated_content_description} = 'original message before SpamAssassin';
-
   if (!defined $self->{username}) {
     $self->{username} = (Mail::SpamAssassin::Util::portable_getpwuid ($>))[0];
   }
@@ -900,7 +897,7 @@ sub remove_spamassassin_markup {
         # Ok, we found the encapsulated piece ...
 	if ($ct =~ m@^(?:message/rfc822|text/plain);\s+x-spam-type=original@ ||
 	    ($ct eq "message/rfc822" &&
-	     $cd eq $self->{'encapsulated_content_description'}))
+	     $cd eq $self->{conf}->{'encapsulated_content_description'}))
         {
           splice @msg, 0, $i+1;  # remove the front part, including the blank line
 

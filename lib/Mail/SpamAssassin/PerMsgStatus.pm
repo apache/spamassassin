@@ -832,7 +832,7 @@ sub rewrite_report_safe {
   my $type = "message/rfc822";
   $type = "text/plain" if $self->{conf}->{report_safe} > 1;
 
-  my $description = $self->{main}->{'encapsulated_content_description'};
+  my $description = $self->{conf}->{'encapsulated_content_description'};
 
   # Note: the message should end in blank line since mbox format wants
   # blank line at end and messages may be concatenated!  In addition, the
