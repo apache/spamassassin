@@ -1,13 +1,18 @@
 #!/bin/sh
 #
 # driver for cron.
-# 30 8 * * * bash /home/automc/svn/spamassassin/build/mkupdates/run_nightly > /var/www/buildbot.spamassassin.org/bbmass/mkupdates.txt 2>&1
+# 30 8 * * * bash /home/updatesd/svn/spamassassin/build/mkupdates/run_nightly > /var/www/buildbot.spamassassin.org/bbmass/mkupdates.txt 2>&1
 
-cd /home/automc/svn/spamassassin
+cd /home/updatesd/svn/spamassassin
 
 set -x
 
-./build/listpromotable > rules/active.list
+PERL=/local/perl586/bin/perl
+PATH=$PATH:/usr/sfw/bin:/opt/sfw/bin:/opt/SUNWspro/bin:/usr/X/bin:/usr/ucb:/usr/sbin:/usr/ccs/bin:/opt/subversion-1.1.4/bin:/usr/apache2/bin:/local/bin
+
+export PERL PATH
+
+$PERL ./build/listpromotable > rules/active.list
 
 (
 echo "
@@ -15,9 +20,8 @@ echo "
 To perform this, someone log into the zone and type:
 
         ssh spamassassin.zones.apache.org
-        sudo su - automc
-        cd /home/automc/svn/spamassassin
-        svn commit -m 'daily promoted rules list' rules/active.list
+        cd /home/updatesd/svn/spamassassin
+        sudo su updatesd -c \"svn commit -m 'daily promoted rules list' rules/active.list\"
 
 "
 svn diff
