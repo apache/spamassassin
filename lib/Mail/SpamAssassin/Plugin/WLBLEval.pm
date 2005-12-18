@@ -457,28 +457,28 @@ sub check_to_in_list {
 
 sub check_from_in_whitelist {
   my ($self, $pms) = @_;
-  $self->_check_from_in_whitelist($pms) unless exists $self->{from_in_whitelist};
-  return ($self->{from_in_whitelist} > 0);
+  $self->_check_from_in_whitelist($pms) unless exists $pms->{from_in_whitelist};
+  return ($pms->{from_in_whitelist} > 0);
 }
 
 sub check_forged_in_whitelist {
   my ($self, $pms) = @_;
-  $self->_check_from_in_whitelist($pms) unless exists $self->{from_in_whitelist};
-  $self->_check_from_in_default_whitelist($pms) unless exists $self->{from_in_default_whitelist};
-  return ($self->{from_in_whitelist} < 0) && ($self->{from_in_default_whitelist} == 0);
+  $self->_check_from_in_whitelist($pms) unless exists $pms->{from_in_whitelist};
+  $self->_check_from_in_default_whitelist($pms) unless exists $pms->{from_in_default_whitelist};
+  return ($pms->{from_in_whitelist} < 0) && ($pms->{from_in_default_whitelist} == 0);
 }
 
 sub check_from_in_default_whitelist {
   my ($self, $pms) = @_;
-  $self->_check_from_in_default_whitelist($pms) unless exists $self->{from_in_default_whitelist};
-  return ($self->{from_in_default_whitelist} > 0);
+  $self->_check_from_in_default_whitelist($pms) unless exists $pms->{from_in_default_whitelist};
+  return ($pms->{from_in_default_whitelist} > 0);
 }
 
 sub check_forged_in_default_whitelist {
   my ($self, $pms) = @_;
-  $self->_check_from_in_default_whitelist($pms) unless exists $self->{from_in_default_whitelist};
-  $self->_check_from_in_whitelist($pms) unless exists $self->{from_in_whitelist};
-  return ($self->{from_in_default_whitelist} < 0) && ($self->{from_in_whitelist} == 0);
+  $self->_check_from_in_default_whitelist($pms) unless exists $pms->{from_in_default_whitelist};
+  $self->_check_from_in_whitelist($pms) unless exists $pms->{from_in_whitelist};
+  return ($pms->{from_in_default_whitelist} < 0) && ($pms->{from_in_whitelist} == 0);
 }
 
 ###########################################################################
@@ -489,12 +489,12 @@ sub _check_from_in_whitelist {
   local ($_);
   foreach $_ ($self->all_from_addrs($pms)) {
     if ($self->_check_whitelist ($self->{main}->{conf}->{whitelist_from}, $_)) {
-      $self->{from_in_whitelist} = 1;
+      $pms->{from_in_whitelist} = 1;
       return;
     }
     my $wh = $self->_check_whitelist_rcvd ($pms, $self->{main}->{conf}->{whitelist_from_rcvd}, $_);
     if ($wh == 1) {
-      $self->{from_in_whitelist} = 1;
+      $pms->{from_in_whitelist} = 1;
       return;
     }
     elsif ($wh == -1) {
@@ -502,7 +502,7 @@ sub _check_from_in_whitelist {
     }
   }
 
-  $self->{from_in_whitelist} = $found_match;
+  $pms->{from_in_whitelist} = $found_match;
   return;
 }
 
@@ -515,7 +515,7 @@ sub _check_from_in_default_whitelist {
   foreach $_ ($self->all_from_addrs($pms)) {
     my $wh = $self->_check_whitelist_rcvd ($pms, $self->{main}->{conf}->{def_whitelist_from_rcvd}, $_);
     if ($wh == 1) {
-      $self->{from_in_default_whitelist} = 1;
+      $pms->{from_in_default_whitelist} = 1;
       return;
     }
     elsif ($wh == -1) {
@@ -523,7 +523,7 @@ sub _check_from_in_default_whitelist {
     }
   }
 
-  $self->{from_in_default_whitelist} = $found_match;
+  $pms->{from_in_default_whitelist} = $found_match;
   return;
 }
 
@@ -600,7 +600,7 @@ sub _check_whitelist {
 sub all_from_addrs {
   my ($self, $pms) = @_;
 
-  if (exists $self->{all_from_addrs}) { return @{$self->{all_from_addrs}}; }
+  if (exists $pms->{all_from_addrs}) { return @{$pms->{all_from_addrs}}; }
 
   my @addrs;
 
@@ -633,14 +633,14 @@ sub all_from_addrs {
   @addrs = keys %addrs;
 
   dbg("eval: all '*From' addrs: " . join(" ", @addrs));
-  $self->{all_from_addrs} = \@addrs;
+  $pms->{all_from_addrs} = \@addrs;
   return @addrs;
 }
 
 sub all_to_addrs {
   my ($self, $pms) = @_;
 
-  if (exists $self->{all_to_addrs}) { return @{$self->{all_to_addrs}}; }
+  if (exists $pms->{all_to_addrs}) { return @{$pms->{all_to_addrs}}; }
 
   my @addrs;
 
@@ -687,7 +687,7 @@ sub all_to_addrs {
   }
 
   dbg("eval: all '*To' addrs: " . join(" ", @addrs));
-  $self->{all_to_addrs} = \@addrs;
+  $pms->{all_to_addrs} = \@addrs;
   return @addrs;
 
 # http://www.cs.tut.fi/~jkorpela/headers.html is useful here, also
