@@ -11,6 +11,9 @@ once it's good to go, apply changes:
     
     sudo /etc/init.d/buildbot restart
 
+Keep an eye on "tail -f twistd.log" for a few seconds to ensure it works,
+and hit http://buildbot.spamassassin.org:8010/ .
+
 note that you'll probably have to restart buildbot slaves on the slave
 machines.   This is a PITA.
 
