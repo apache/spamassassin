@@ -534,8 +534,6 @@ scalar context or both are returned in array context.
 
 =cut
 
-# TODO: this could be made much faster by only processing all headers
-# when called in array context, otherwise just do one header
 sub get_header {
   my ($self, $hdr, $raw) = @_;
   $raw ||= 0;
