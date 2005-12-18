@@ -1,0 +1,41 @@
+#!/bin/sh
+#
+# driver for cron.
+# 30 8 * * * bash /home/automc/svn/spamassassin/build/mkupdates/run_nightly > /var/www/buildbot.spamassassin.org/bbmass/mkupdates.txt 2>&1
+
+cd /home/automc/svn/spamassassin
+
+set -x
+
+./build/listpromotable > rules/active.list
+
+(
+echo "
+
+To perform this, someone log into the zone and type:
+
+        ssh spamassassin.zones.apache.org
+        sudo su - automc
+        cd /home/automc/svn/spamassassin
+        svn commit -m 'daily promoted rules list' rules/active.list
+
+"
+svn diff
+
+) | mailx \
+        -s "Planned commit for active.list" \
+        dev@Spamassassin.apache.org
+
+
+# cycle the logfiles; keep 6 (3 days worth I think)
+(
+  cd /var/www/buildbot.spamassassin.org/bbmass
+  rm mkupdates_6.txt
+  mv mkupdates_5.txt  mkupdates_6.txt
+  mv mkupdates_4.txt  mkupdates_5.txt
+  mv mkupdates_3.txt  mkupdates_4.txt
+  mv mkupdates_2.txt  mkupdates_3.txt
+  mv mkupdates_1.txt  mkupdates_2.txt
+  mv mkupdates.txt    mkupdates_1.txt
+)
+
