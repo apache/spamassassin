@@ -211,7 +211,15 @@ sub _dk_lookup_trapped {
 # get the DK status "header" from the Mail::DomainKeys::Message object
 sub _dkmsg_hdr {
   my ($self, $message) = @_;
-  return $message->header->value();
+  # try to use the signature() API if it exists (post-0.80)
+  if ($message->can("signature")) {
+    if (!$message->signed) {
+      return "no signature";
+    }
+    return $message->signature->status;
+  } else {
+    return $message->header->value;
+  }
 }
 
 sub sanitize_header_for_dk {
