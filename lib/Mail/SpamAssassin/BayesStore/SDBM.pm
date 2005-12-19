@@ -47,6 +47,23 @@ sub DB_EXTENSIONS {
   return ('.pag', '.dir');
 }
 
+sub _unlink_file {
+  my ($self, $filename) = @_;
+
+  for my $ext ($self->DB_EXTENSIONS) {
+    unlink $filename . $ext;
+  }
+}
+
+sub _rename_file {
+  my ($self, $sourcefilename, $targetfilename) = @_;
+
+  for my $ext ($self->DB_EXTENSIONS) {
+    return 0 unless (rename($sourcefilename . $ext, $targetfilename . $ext));
+  }
+  return 1;
+}
+
 # this is called directly from sa-learn(1).
 sub perform_upgrade {
 
