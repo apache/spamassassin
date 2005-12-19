@@ -286,7 +286,8 @@ sub tie_db_writable {
 
   # set our cache to what version DB we're using
   $self->{db_version} = ($self->get_storage_variables())[6];
-  dbg("bayes: found bayes db version ".$self->{db_version});
+  # don't bother printing this unless found since it would be bogus anyway
+  dbg("bayes: found bayes db version ".$self->{db_version}) if ($found);
 
   # figure out if we can read the current DB and if we need to do a
   # DB version update and do it if necessary if either has a problem,
