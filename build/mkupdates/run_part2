@@ -41,7 +41,7 @@ rulesdir=$tmpdir/share/spamassassin
 (
   # TODO: is *.cf too restrictive?  do we want to ship plugins? (.pm)
   cd $rulesdir 
-  tar cf - . *.cf                        || exit $?
+  tar cf - *.cf                          || exit $?
 
 ) | gzip -9 > $tmpdir/update.tgz         || exit $?
 
