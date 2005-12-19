@@ -225,7 +225,7 @@ sub get_sock {
 
 =item $packet = new_dns_packet ($host, $type, $class)
 
-A wrapper for C<Net::DNS::Packet::new()> which traps a die thrown by it
+A wrapper for C<Net::DNS::Packet::new()> which traps a die thrown by it.
 
 To use this, change calls to C<Net::DNS::Resolver::bgsend> from:
 
@@ -241,6 +241,12 @@ sub new_dns_packet {
   my ($self, $host, $type, $class) = @_;
 
   return if $self->{no_resolver};
+
+  # construct a PTR query if it looks like an IPv4 address
+  if ((!defined($type) || $type eq 'PTR') && $host =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) {
+    $host = "$4.$3.$2.$1.in-addr.arpa.";
+    $type = 'PTR';
+  }
 
   my $packet;
   eval {
