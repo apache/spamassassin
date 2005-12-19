@@ -54,7 +54,7 @@ gunzip -cd < $tmpdir/update.tgz | tar tf - || exit 4
 # TODO: sign!  currently requires passphrase, this is a problem
 # gpg -bas $tmpdir/update.tgz  || exit $?
 
-build/sha1sum.pl $tmpdir/update.tgz > $tmpdir/update.tgz.sha1  || exit $?
+$PERL build/sha1sum.pl $tmpdir/update.tgz > $tmpdir/update.tgz.sha1  || exit $?
 
 # get SVN revision number.
 # note: use 'Last Changed Rev' instead of 'Revision'.  Because we share
@@ -89,7 +89,7 @@ chmod 644 $stagedir/$svnrev.*
 cycle_logfiles () {
 # cycle the logfiles; keep 6 (3 days worth I think)
 (
-  cd /var/www/buildbot.spamassassin.org/bbmass
+  cd /var/www/buildbot.spamassassin.org/updatesd
   rm mkupdatespt2_6.txt
   mv mkupdatespt2_5.txt  mkupdatespt2_6.txt
   mv mkupdatespt2_4.txt  mkupdatespt2_5.txt
