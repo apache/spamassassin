@@ -19,7 +19,7 @@ use constant DO_RUN     => TEST_ENABLED && HAS_SPFQUERY &&
 
 BEGIN {
   
-  plan tests => (DO_RUN ? 8 : 0);
+  plan tests => (DO_RUN ? 28 : 0);
 
 };
 
@@ -69,3 +69,150 @@ ok_all_patterns();
 
 sarun ("-t < data/spam/spf3", \&patterns_run_cb);
 ok_all_patterns();
+
+
+# Test using an assortment of trusted and internal network definitions
+
+# 9-10: Trusted networks contain first header.
+
+tstprefs("
+clear_trusted_networks
+clear_internal_networks
+trusted_networks 65.214.43.157
+always_trust_envelope_sender 1
+");
+
+%patterns = (
+    q{ SPF_HELO_PASS }, 'helo_pass',
+    q{ SPF_PASS }, 'pass',
+);
+
+sarun ("-t < data/nice/spf2", \&patterns_run_cb);
+ok_all_patterns();
+
+
+# 11-12: Internal networks contain first header.
+#	 Trusted networks not defined.
+
+tstprefs("
+clear_trusted_networks
+clear_internal_networks
+internal_networks 65.214.43.157
+always_trust_envelope_sender 1
+");
+
+%patterns = (
+    q{ SPF_HELO_PASS }, 'helo_pass',
+    q{ SPF_PASS }, 'pass',
+);
+
+sarun ("-t < data/nice/spf2", \&patterns_run_cb);
+ok_all_patterns();
+
+
+# 13-14: Internal networks contain first header.
+#	 Trusted networks contain some other IP.
+
+tstprefs("
+clear_trusted_networks
+clear_internal_networks
+trusted_networks 1.2.3.4
+internal_networks 65.214.43.157
+always_trust_envelope_sender 1
+");
+
+%patterns = (
+    q{ SPF_HELO_NEUTRAL }, 'helo_neutral',
+    q{ SPF_NEUTRAL }, 'neutral',
+);
+
+sarun ("-t < data/nice/spf2", \&patterns_run_cb);
+ok_all_patterns();
+
+
+# 15-16: Trusted+Internal networks contain first header.
+
+tstprefs("
+clear_trusted_networks
+clear_internal_networks
+trusted_networks 65.214.43.157
+internal_networks 65.214.43.157
+always_trust_envelope_sender 1
+");
+
+%patterns = (
+    q{ SPF_HELO_PASS }, 'helo_pass',
+    q{ SPF_PASS }, 'pass',
+);
+
+sarun ("-t < data/nice/spf2", \&patterns_run_cb);
+ok_all_patterns();
+
+
+# 17-18: Trusted networks contain first and second header.
+#	 Internal networks contain first header.
+
+tstprefs("
+clear_trusted_networks
+clear_internal_networks
+trusted_networks 65.214.43.157 64.142.3.173
+internal_networks 65.214.43.157
+always_trust_envelope_sender 1
+");
+
+%patterns = (
+    q{ SPF_HELO_PASS }, 'helo_pass',
+    q{ SPF_PASS }, 'pass',
+);
+
+sarun ("-t < data/nice/spf2", \&patterns_run_cb);
+ok_all_patterns();
+
+
+# 19-26: Trusted networks contain first and second header.
+#	 Internal networks contain first and second header.
+
+tstprefs("
+clear_trusted_networks
+clear_internal_networks
+trusted_networks 65.214.43.157 64.142.3.173
+internal_networks 65.214.43.157 64.142.3.173
+always_trust_envelope_sender 1
+");
+
+%anti_patterns = (
+    q{ SPF_HELO_PASS }, 'helo_pass',
+    q{ SPF_HELO_FAIL }, 'helo_fail',
+    q{ SPF_HELO_SOFTFAIL }, 'helo_softfail',
+    q{ SPF_HELO_NEUTRAL }, 'helo_neutral',
+    q{ SPF_PASS }, 'pass',
+    q{ SPF_FAIL }, 'fail',
+    q{ SPF_SOFTFAIL }, 'softfail',
+    q{ SPF_NEUTRAL }, 'neutral',
+);
+%patterns = ();
+
+sarun ("-t < data/nice/spf2", \&patterns_run_cb);
+ok_all_patterns();
+
+
+# 27-28: Trusted networks contain first header.
+#	 Internal networks contain first and second header.
+
+tstprefs("
+clear_trusted_networks
+clear_internal_networks
+trusted_networks 65.214.43.157
+internal_networks 65.214.43.157 64.142.3.173
+always_trust_envelope_sender 1
+");
+
+%anti_patterns = ();
+%patterns = (
+    q{ SPF_HELO_PASS }, 'helo_pass',
+    q{ SPF_PASS }, 'pass',
+);
+
+sarun ("-t < data/nice/spf2", \&patterns_run_cb);
+ok_all_patterns();
+
