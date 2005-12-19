@@ -1604,7 +1604,7 @@ sub restore_database {
 	  (oct ($main->{conf}->{bayes_file_mode}) & 0666)) {
     dbg("bayes: failed to tie temp seen db: $!");
     untie %new_toks;
-    unlink $tmptoksdbname;
+    $self->_unlink_file($tmptoksdbname);
     $self->untie_db();
     umask $umask;
     return 0;
@@ -1636,8 +1636,8 @@ sub restore_database {
     dbg("bayes: database version must be the first line in the backup file, correct and re-run");
     untie %new_toks;
     untie %new_seen;
-    unlink $tmptoksdbname;
-    unlink $tmpseendbname;
+    $self->_unlink_file($tmptoksdbname);
+    $self->_unlink_file($tmpseendbname);
     $self->untie_db();
     return 0;
   }
@@ -1646,8 +1646,8 @@ sub restore_database {
     warn("bayes: database version $db_version is unsupported, must be version 2 or 3");
     untie %new_toks;
     untie %new_seen;
-    unlink $tmptoksdbname;
-    unlink $tmpseendbname;
+    $self->_unlink_file($tmptoksdbname);
+    $self->_unlink_file($tmpseendbname);
     $self->untie_db();
     return 0;
   }
@@ -1768,8 +1768,8 @@ sub restore_database {
 
     untie %new_toks;
     untie %new_seen;
-    unlink $tmptoksdbname;
-    unlink $tmpseendbname;
+    $self->_unlink_file($tmptoksdbname);
+    $self->_unlink_file($tmpseendbname);
     $self->untie_db();
     return 0;
   }
@@ -1800,11 +1800,11 @@ sub restore_database {
   # database files.  If we are able to copy one and not the other then it
   # will leave the database in an inconsistent state.  Since this is an
   # edge case, and they're trying to replace the DB anyway we should be ok.
-  unless (rename($tmptoksdbname, $toksdbname)) {
+  unless ($self->_rename_file($tmptoksdbname, $toksdbname)) {
     dbg("bayes: error while renaming $tmptoksdbname to $toksdbname: $!");
     return 0;
   }
-  unless (rename($tmpseendbname, $seendbname)) {
+  unless ($self->_rename_file($tmpseendbname, $seendbname)) {
     dbg("bayes: error while renaming $tmpseendbname to $seendbname: $!");
     dbg("bayes: database now in inconsistent state");
     return 0;
@@ -1815,7 +1815,6 @@ sub restore_database {
 
   return 1;
 }
-
 
 ###########################################################################
 
@@ -1899,6 +1898,20 @@ sub db_writable {
 }
 
 ###########################################################################
+
+sub _unlink_file {
+  my ($self, $filename) = @_;
+
+  unlink $filename;
+}
+
+sub _rename_file {
+  my ($self, $sourcefilename, $targetfilename) = @_;
+
+  return 0 unless (rename($sourcefilename, $targetfilename));
+
+  return 1;
+}
 
 sub sa_die { Mail::SpamAssassin::sa_die(@_); }
 
