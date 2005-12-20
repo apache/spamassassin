@@ -4,17 +4,24 @@
 # Currently this is interactive as it requires a GPG passphrase entry.
 #
 # usage: sudo -u updatesd /home/updatesd/svn/spamassassin/build/mkupdates/run_part2
+#
+# required setup, in /etc/sudoers or /opt/sfw/etc/sudoers:
+#   updatesd     ALL = NOPASSWD: /usr/sbin/rndc reload
 
 set -x
 
 cd /home/updatesd/svn/spamassassin
 
 PERL=/local/perl586/bin/perl
-PATH=$PATH:/usr/sfw/bin:/opt/sfw/bin:/opt/SUNWspro/bin:/usr/X/bin:/usr/ucb:/usr/sbin:/usr/ccs/bin:/opt/subversion-1.1.4/bin:/usr/apache2/bin:/local/bin
+PATH=/local/gnupg-1.4.2/bin:$PATH:/usr/sfw/bin:/opt/sfw/bin:/opt/SUNWspro/bin:/usr/X/bin:/usr/ucb:/usr/sbin:/usr/ccs/bin:/opt/subversion-1.1.4/bin:/usr/apache2/bin:/local/bin
 
 export PERL PATH
 
 stagedir=/var/www/buildbot.spamassassin.org/updatestage
+
+dnsdir=/var/named/updates
+# updates DNS zone.  note: do NOT use a trailing dot here
+dnszone=updates.spamassassin.org
 
 versions="3.2.0"
 
@@ -28,10 +35,14 @@ version="$1"
 tmpdir=/home/updatesd/tmp/stage
 rm -rf $tmpdir; mkdir -p $tmpdir         || exit $?
 
+
+
+# extract the new rules files.
+
 # use "make install" logic, since we want rules as close as possible
 # to what's installed
 # TODO: this *would* be performed in a checkout of the desired
-# version's branch
+# version's branch.  right now we're only using 1 version though
 $PERL Makefile.PL PREFIX=$tmpdir < /dev/null || exit $?
 make                                     || exit $?
 make install                             || exit $?
@@ -51,10 +62,15 @@ rulesdir=$tmpdir/share/spamassassin
 gunzip -cd < $tmpdir/update.tgz | tar tf - || exit 4
 
 
-# TODO: sign!  currently requires passphrase, this is a problem
-# gpg -bas $tmpdir/update.tgz  || exit $?
+
+# sign and get sums
+
+gpg --batch --homedir /home/updatesd/key \
+	-bas $tmpdir/update.tgz  		|| exit $?
 
 $PERL build/sha1sum.pl $tmpdir/update.tgz > $tmpdir/update.tgz.sha1  || exit $?
+
+
 
 # get SVN revision number.
 # note: use 'Last Changed Rev' instead of 'Revision'.  Because we share
@@ -78,9 +94,68 @@ fi
 
 mv $tmpdir/update.tgz      $stagedir/$svnrev.tar.gz            || exit $?
 mv $tmpdir/update.tgz.sha1 $stagedir/$svnrev.tar.gz.sha1       || exit $?
-# mv $tmpdir/update.tgz.asc  $stagedir/$svnrev.tar.gz.asc        || exit $?
+mv $tmpdir/update.tgz.asc  $stagedir/$svnrev.tar.gz.asc        || exit $?
 
 chmod 644 $stagedir/$svnrev.*
+
+
+
+# next, create the new DNS record....
+
+# turn "3.2.0" into "0.2.3"
+rvers=`echo "$version" | perl -pe 's/^(\d+)\.(\d+)\.(\d+)$/$3.$2.$1/'`
+
+dnsfile="$dnsdir/$version"
+if echo "
+$rvers.$dnszone.	TXT	\"$svnrev\"
+" > $dnsfile.new
+then
+  mv $dnsfile.new $dnsfile || exit $?
+else
+  echo "failed to create $dnsfile.new" 1>&2 ; exit 1
+fi
+
+
+
+# increment the zone serial.  we use a counter, with rollover at 100,
+# and a datestamp too.
+
+oldcount=`cat $dnsdir/counter`
+newserial=`perl -e '
+
+	my $count = (($ARGV[0] + 1) % 100);
+	my @t = localtime time;
+	printf "%04d%02d%02d%02d", $t[5]+1900, $t[4]+1, $t[3], $count;
+
+	open (INCR, ">'"$dnsdir"'/counter"); print INCR $count,"\n"; close INCR;
+
+' $oldcount`
+
+soafile=$dnsdir/soa_line
+rm -f $soafile.bak \
+      $soafile.new
+
+if sed -e 's/__SERIAL__/'"$newserial"'/' \
+	< $soafile.tmpl > $soafile.new && \
+    [ -s $soafile.new ] && \
+    mv $soafile     $soafile.bak && \
+    mv $soafile.new $soafile
+then
+  true
+else
+  [ -f $soafile.bak ] && mv $soafile.bak $soafile
+  echo "failed to create new $soafile" 1>&2 ; exit 1
+fi
+
+
+# trigger a named reload of that changed zone
+sudo rndc reload
+
+
+
+# clean up 4-day-old (and older) update tarballs.  This seems as
+# good a place as any to do this!
+find $stagedir -mtime 4 -type f | xargs rm
 
 }
 
