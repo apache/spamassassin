@@ -12,6 +12,7 @@ PATH=$PATH:/usr/sfw/bin:/opt/sfw/bin:/opt/SUNWspro/bin:/usr/X/bin:/usr/ucb:/usr/
 
 export PERL PATH
 
+svn update
 $PERL ./build/mkupdates/listpromotable > rules/active.list
 
 (
@@ -25,11 +26,11 @@ To enact this, someone log into the zone and type:
 
 "
 svn diff
+) > mail.tmp
 
-) | mailx \
-        -s "[admin] planned commit for active.list" \
-        dev@Spamassassin.apache.org
-
+cat mail.tmp
+mailx -s "[admin] planned commit for active.list" \
+               dev@Spamassassin.apache.org < mail.tmp
 
 # cycle the logfiles; keep 6 (3 days worth I think)
 (
