@@ -21,7 +21,7 @@ export PERL PATH
 #
 stagedir=/var/www/buildbot.spamassassin.org/updatestage
 
-# directory where "counter", "soa_line.tmpl", "soa_line" and "0.2.3" live.
+# directory where "0.2.3" and other version-specific files live.
 # it's assumed that the *real* zone $INCLUDEs files from this dir.
 # it must be writable by the user this script runs as.
 #
@@ -31,6 +31,12 @@ stagedir=/var/www/buildbot.spamassassin.org/updatestage
 # dnsdir=/var/named/updates.spamassassin.org.d
 #
 dnsdir=/var/named/updates.dev.spamassassin.org.d
+
+# directory where "counter", "soa_line.tmpl", "soa_line" live.
+# it's assumed that the *real* zone $INCLUDEs files from this dir.
+# it must be writable by the user this script runs as.
+#
+soadir=/var/named/spamassassin.org.d
 
 versions="3.2.0"
 
@@ -129,18 +135,18 @@ fi
 # increment the zone serial.  we use a counter, with rollover at 100,
 # and a datestamp too.
 
-oldcount=`cat $dnsdir/counter`
+oldcount=`cat $soadir/counter`
 newserial=`perl -e '
 
 	my $count = (($ARGV[0] + 1) % 100);
 	my @t = localtime time;
 	printf "%04d%02d%02d%02d", $t[5]+1900, $t[4]+1, $t[3], $count;
 
-	open (INCR, ">'"$dnsdir"'/counter"); print INCR $count,"\n"; close INCR;
+	open (INCR, ">'"$soadir"'/counter"); print INCR $count,"\n"; close INCR;
 
 ' $oldcount`
 
-soafile=$dnsdir/soa_line
+soafile=$soadir/soa_line
 rm -f $soafile.bak \
       $soafile.new
 
