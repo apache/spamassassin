@@ -17,11 +17,20 @@ PATH=/local/gnupg-1.4.2/bin:$PATH:/usr/sfw/bin:/opt/sfw/bin:/opt/SUNWspro/bin:/u
 
 export PERL PATH
 
+# download stage, where update tarballs are deposited for downloaders
+#
 stagedir=/var/www/buildbot.spamassassin.org/updatestage
 
-dnsdir=/var/named/updates
-# updates DNS zone.  note: do NOT use a trailing dot here
-dnszone=updates.spamassassin.org
+# directory where "counter", "soa_line.tmpl", "soa_line" and "0.2.3" live.
+# it's assumed that the *real* zone $INCLUDEs files from this dir.
+# it must be writable by the user this script runs as.
+#
+# dev, testing:
+# dnsdir=/var/named/updates.dev.spamassassin.org.d
+# live:
+# dnsdir=/var/named/updates.spamassassin.org.d
+#
+dnsdir=/var/named/updates.dev.spamassassin.org.d
 
 versions="3.2.0"
 
@@ -107,7 +116,7 @@ rvers=`echo "$version" | perl -pe 's/^(\d+)\.(\d+)\.(\d+)$/$3.$2.$1/'`
 
 dnsfile="$dnsdir/$version"
 if echo "
-$rvers.$dnszone.	TXT	\"$svnrev\"
+$rvers	TXT	\"$svnrev\"
 " > $dnsfile.new
 then
   mv $dnsfile.new $dnsfile || exit $?
