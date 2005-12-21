@@ -130,7 +130,7 @@ GetOptions(
   'gpgkeyfile=s'			=> \$opt{'gpgkeyfile'},
   'channelfile=s'			=> \$opt{'channelfile'},
   'updatedir=s'				=> \$opt{'updatedir'},
-  'usegpg!'				=> \$GPG_ENABLED,
+  'gpg!'				=> \$GPG_ENABLED,
 ) or print_usage_and_exit();
 
 if ( defined $opt{'help'} ) {               
