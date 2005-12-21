@@ -90,11 +90,21 @@ Mail::SpamAssassin::Util::clean_path_in_taint_mode();
 
 # Default list of GPG keys allowed to sign update releases
 #
-# pub  1024D/265FA05B 2003-06-09 SpamAssassin Signing Key <release@spamassassin.org>
-#      Key fingerprint = 26C9 00A4 6DD4 0CD5 AD24  F6D7 DEE0 1987 265F A05B
-# sub  1024D/FC51569B 2003-08-21
+# pub   1024D/265FA05B 2003-06-09
+#       Key fingerprint = 26C9 00A4 6DD4 0CD5 AD24  F6D7 DEE0 1987 265F A05B
+# uid                  SpamAssassin Signing Key <release@spamassassin.org>
+# sub   1024D/FC51569B 2003-08-21
 #
-my %valid_GPG = ( '265FA05B' => 1 );
+# pub   4096R/5244EC45 2005-12-20
+#       Key fingerprint = 5E54 1DC9 59CB 8BAC 7C78  DFDC 4056 A61A 5244 EC45
+# uid                  updates.spamassassin.org Signing Key <release@spamassassin.org>
+# sub   4096R/24F434CE 2005-12-20
+#
+my %valid_GPG = ( 
+  '26C900A46DD40CD5AD24F6D7DEE01987265FA05B' => 1,
+  '0C2B1D7175B852C64B3CDC716C55397824F434CE' => 1,
+  '5E541DC959CB8BAC7C78DFDC4056A61A5244EC45' => 1,
+);
 
 # Default list of channels to update against
 #
@@ -104,7 +114,7 @@ my @channels = ( 'updates.spamassassin.org' );
 my %opt = ();
 @{$opt{'gpgkey'}} = ();
 @{$opt{'channel'}} = ();
-my $GPG_ENABLED;
+my $GPG_ENABLED = 1;
 
 Getopt::Long::Configure(
   qw(bundling no_getopt_compat no_auto_abbrev no_ignore_case));
@@ -120,7 +130,7 @@ GetOptions(
   'gpgkeyfile=s'			=> \$opt{'gpgkeyfile'},
   'channelfile=s'			=> \$opt{'channelfile'},
   'updatedir=s'				=> \$opt{'updatedir'},
-  'usegpg'				=> \$GPG_ENABLED,
+  'usegpg!'				=> \$GPG_ENABLED,
 ) or print_usage_and_exit();
 
 if ( defined $opt{'help'} ) {               
@@ -213,9 +223,10 @@ if (defined $opt{'gpgkeyfile'}) {
   close(GPG);
 }
 
-sub is_valid_gpg_key_id {
-  # TODO: long gpg keys (over 8 hex digits)
-  return ($_[0] =~ /^[a-fA-F0-9]{8}$/);
+# convert fingerprint gpg ids to keyids
+foreach (keys %valid_GPG) {
+  my $id = substr $_, -8;
+  $valid_GPG{$id} = 1;
 }
 
 # Deal with channel-related options
@@ -467,7 +478,8 @@ foreach my $channel (@channels) {
 
   # to sign  : gpg -bas file
   # to verify: gpg --verify --batch --no-tty --status-fd=1 -q --logger-fd=1 file.asc file
-  # look for : /^\[GNUPG:\] GOODSIG \S+(\S{8})
+  # look for : [GNUPG:] GOODSIG 6C55397824F434CE updates.spamassassin.org [...]
+  #            [GNUPG:] VALIDSIG 0C2B1D7175B852C64B3CDC716C55397824F434CE [...]
   if ($GPG) {
     dbg("gpg: populating temp signature file");
     my $sig_file;
@@ -486,20 +498,32 @@ foreach my $channel (@channels) {
     # Determine the fate of the signature
     my $signer = '';
     while(my $GNUPG = <CMD>) {
-      next unless ($GNUPG =~ /^\Q[GNUPG:] GOODSIG\E \S+(\S{8})/);
-      $signer = $1;
+      next unless ($GNUPG =~ /^\Q[GNUPG:]\E (?:VALID|GOOD)SIG (\S{8,40})/);
+      my $key = $1;
+
+      # we want either a keyid (8) or a fingerprint (40)
+      if (length $key > 8 && length $key < 40) {
+        substr($key, 8) = '';
+      }
+
+      # use the longest match we can find
+      $signer = $key if (length $key > length $signer);
     }
 
     close(CMD);
     unlink $sig_file || warn "Can't unlink $sig_file: $!\n";
 
     if ($signer) {
-      dbg("gpg: good signature made by key id $signer");
+      my $keyid = substr $signer, -8;
+      dbg("gpg: found signature made by key $signer");
       if (exists $valid_GPG{$signer}) {
 	dbg("gpg: key id $signer is release trusted");
       }
+      elsif (exists $valid_GPG{$keyid}) {
+	dbg("gpg: key id $keyid is release trusted");
+      }
       else {
-	dbg("gpg: key id $signer is not release trusted");
+	dbg("gpg: key id $keyid is not release trusted");
 	$signer = undef;
       }
     }
@@ -721,6 +745,11 @@ sub usage {
   my ( $verbose, $message ) = @_;
   print "sa-update version $VERSION\n";
   pod2usage( -verbose => $verbose, -message => $message, -exitval => 64 );
+}
+
+sub is_valid_gpg_key_id {
+  # either a keyid (8 bytes) or a fingerprint (40 bytes)
+  return ($_[0] =~ /^[a-fA-F0-9]+$/ && (length $_[0] == 8 || length $_[0] == 40));
 }
 
 # ---------------------------------------------------------------------------
