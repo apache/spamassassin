@@ -30,6 +30,7 @@ use File::Spec;
 use File::Path;
 use Getopt::Long;
 use Pod::Usage;
+use Cwd;
 use strict;
 use warnings;
 
@@ -168,7 +169,7 @@ my $SA = new Mail::SpamAssassin({
 });
 
 # $opt{'updatedir'} ||= $SA->first_existing_path(@Mail::SpamAssassin::site_rules_path);
-$opt{'updatedir'} = $SA->sed_path('__local_state_dir__/spamassassin/__version__');
+$opt{'updatedir'} ||= $SA->sed_path('__local_state_dir__/spamassassin/__version__');
 
 dbg("generic: sa-update version $VERSION");
 dbg("generic: using update directory: $opt{'updatedir'}");
@@ -219,7 +220,7 @@ sub is_valid_gpg_key_id {
 
 # Deal with channel-related options
 if (defined $opt{'channel'}) {
-  push(@channels, @{$opt{'channel'}});
+  @channels = @{$opt{'channel'}};
 }
 if (defined $opt{'channelfile'}) {
   unless (open(CHAN, $opt{'channelfile'})) {
@@ -227,6 +228,7 @@ if (defined $opt{'channelfile'}) {
   }
 
   dbg("channel: reading in channelfile ".$opt{'channelfile'});
+  @channels = ();
   while(my $chan = <CHAN>) {
     $chan = lc $chan;
     dbg("channel: adding $chan");
@@ -547,6 +549,7 @@ foreach my $channel (@channels) {
   die "fatal: couldn't create Archive::Tar object!\n" unless $tar;
 
   # make sure we're doing the work in the update directory
+  my $oldwd = getcwd();
   unless (chdir $UPDDir) {
     warn "error: can't chdir into $UPDDir: $!\n";
     dbg("channel: chdir failed, channel failed");
@@ -555,7 +558,10 @@ foreach my $channel (@channels) {
   }
 
   dbg("channel: extracting archive");
-  unless ($tar->extract()) {
+  my $ret = ($tar->extract());
+  chdir $oldwd;     # chdir back so relative paths on --updatedir work
+
+  unless ($ret) {
     close($tfh);
     warn "error: couldn't extract the tar archive!\n";
     dbg("channel: archive extraction failed, channel failed");
@@ -582,6 +588,7 @@ foreach my $channel (@channels) {
     next unless ($file =~ /\.cf$/);
     dbg("channel: adding $file");
     print CF "include $UPDDir/$file\n";
+    # TODO: this fails for relative paths, e.g. "--updatedir ./updtest"
   }
   closedir(DIR);
   close(CF);
@@ -643,7 +650,13 @@ sub http_get {
     return $response->content;
   }
 
-  dbg("http: request failed: " . $response->status_line);
+  # include the text in the debug output; it's useful in some cases,
+  # e.g. proxies that require authentication, diagnosing fascist
+  # filtering false positives, etc.
+  my $text = $response->content;
+  $text ||= "(no body)";
+  $text =~ s/\s+/ /gs;
+  dbg("http: request failed: " . $response->status_line.": ".$text);
   return;
 }
 
