@@ -19,7 +19,7 @@ use constant DO_RUN     => TEST_ENABLED && HAS_SPFQUERY &&
 
 BEGIN {
   
-  plan tests => (DO_RUN ? 28 : 0);
+  plan tests => (DO_RUN ? 36 : 0);
 
 };
 
@@ -214,5 +214,89 @@ always_trust_envelope_sender 1
 );
 
 sarun ("-t < data/nice/spf2", \&patterns_run_cb);
+ok_all_patterns();
+
+
+# 29-30: Trusted networks contain top 5 headers.
+#	 Internal networks contain first header.
+
+tstprefs("
+clear_trusted_networks
+clear_internal_networks
+trusted_networks 65.214.43.158 64.142.3.173 65.214.43.155 65.214.43.156 65.214.43.157
+internal_networks 65.214.43.158
+always_trust_envelope_sender 1
+");
+
+%anti_patterns = ();
+%patterns = (
+    q{ SPF_HELO_PASS }, 'helo_pass',
+    q{ SPF_PASS }, 'pass',
+);
+
+sarun ("-t < data/nice/spf3", \&patterns_run_cb);
+ok_all_patterns();
+
+
+# 31-32: Trusted networks contain top 5 headers.
+#	 Internal networks contain top 2 headers.
+
+tstprefs("
+clear_trusted_networks
+clear_internal_networks
+trusted_networks 65.214.43.158 64.142.3.173 65.214.43.155 65.214.43.156 65.214.43.157
+internal_networks 65.214.43.158 64.142.3.173
+always_trust_envelope_sender 1
+");
+
+%anti_patterns = ();
+%patterns = (
+    q{ SPF_HELO_FAIL }, 'helo_fail',
+    q{ SPF_FAIL }, 'fail',
+);
+
+sarun ("-t < data/nice/spf3", \&patterns_run_cb);
+ok_all_patterns();
+
+
+# 33-34: Trusted networks contain top 5 headers.
+#	 Internal networks contain top 3 headers.
+
+tstprefs("
+clear_trusted_networks
+clear_internal_networks
+trusted_networks 65.214.43.158 64.142.3.173 65.214.43.155 65.214.43.156 65.214.43.157
+internal_networks 65.214.43.158 64.142.3.173 65.214.43.155
+always_trust_envelope_sender 1
+");
+
+%anti_patterns = ();
+%patterns = (
+    q{ SPF_HELO_SOFTFAIL }, 'helo_softfail',
+    q{ SPF_SOFTFAIL }, 'softfail',
+);
+
+sarun ("-t < data/nice/spf3", \&patterns_run_cb);
+ok_all_patterns();
+
+
+# 35-36: Trusted networks contain top 5 headers.
+#	 Internal networks contain top 4 headers.	
+
+tstprefs("
+clear_trusted_networks
+clear_internal_networks
+trusted_networks 65.214.43.158 64.142.3.173 65.214.43.155 65.214.43.156 65.214.43.157
+internal_networks 65.214.43.158 64.142.3.173 65.214.43.155 65.214.43.156
+always_trust_envelope_sender 1
+");
+
+%anti_patterns = ();
+%patterns = (
+    q{ SPF_HELO_NEUTRAL }, 'helo_neutral',
+    q{ SPF_NEUTRAL }, 'neutral',
+);
+
+sarun ("-t < data/nice/spf3", \&patterns_run_cb);
 ok_all_patterns();
 
