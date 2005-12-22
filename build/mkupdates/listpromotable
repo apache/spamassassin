@@ -105,8 +105,8 @@ $mailsa->{lint_callback} = sub {
 
 $mailsa->lint_rules();
 
-my $date = scalar localtime time;
-# print "# active ruleset list generated on $date\n";
+print "# active ruleset list (automatically generated from $cgi_url)\n";
+
 foreach my $name (sort keys %$plist) {
   my $obj = $plist->{$name};
   my $notes = '';
@@ -142,7 +142,9 @@ foreach my $name (sort keys %$plist) {
   # rules that fail lint
   next if $rules_with_errors{$name};
 
+  # don't include ever-changing bits of data
   # $notes = "spam=$obj->{spc} ham=$obj->{hpc} so=$obj->{so}";
+  $notes = "good enough";
 
 publish:
 
