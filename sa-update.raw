@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -w -T
 
 # <@LICENSE>
 # Copyright 2004 Apache Software Foundation
@@ -99,6 +99,9 @@ Mail::SpamAssassin::Util::clean_path_in_taint_mode();
 #       Key fingerprint = 5E54 1DC9 59CB 8BAC 7C78  DFDC 4056 A61A 5244 EC45
 # uid                  updates.spamassassin.org Signing Key <release@spamassassin.org>
 # sub   4096R/24F434CE 2005-12-20
+#
+# note for gpg newbs: these are "long" gpg keyids.  It's common to also
+# use the last 8 hex digits as a shorter keyid string.
 #
 my %valid_GPG = ( 
   '26C900A46DD40CD5AD24F6D7DEE01987265FA05B' => 1,
@@ -230,7 +233,7 @@ foreach (keys %valid_GPG) {
 }
 
 # Deal with channel-related options
-if (defined $opt{'channel'}) {
+if (defined $opt{'channel'} && scalar @{$opt{'channel'}} > 0) {
   @channels = @{$opt{'channel'}};
 }
 if (defined $opt{'channelfile'}) {
@@ -241,6 +244,7 @@ if (defined $opt{'channelfile'}) {
   dbg("channel: reading in channelfile ".$opt{'channelfile'});
   @channels = ();
   while(my $chan = <CHAN>) {
+    chomp $chan;
     $chan = lc $chan;
     dbg("channel: adding $chan");
     push(@channels, $chan);
@@ -267,9 +271,9 @@ if ($GPG_ENABLED) {
 
 my $res = Net::DNS::Resolver->new();
 
-my $ua = LWP::UserAgent->new;
+my $ua = LWP::UserAgent->new();
 $ua->agent("sa-update/$VERSION");
-$ua->timeout(10);
+$ua->timeout(180);      # a good long timeout; 10 is too short for Coral!
 $ua->env_proxy;
 
 # Generate a temporary file to put channel content in for later use ...
@@ -377,6 +381,8 @@ foreach my $channel (@channels) {
   dbg("channel: reading MIRRORED.BY file");
   my %mirrors = ();
   while(my $mirror = <MIR>) {
+    next if ($mirror =~ /^#/);  # explicitly skip comments
+
     # We only support HTTP right now
     if ($mirror !~ m@^http://@i) {
       dbg("channel: skipping non-HTTP mirror: $mirror");
@@ -480,6 +486,7 @@ foreach my $channel (@channels) {
   # to verify: gpg --verify --batch --no-tty --status-fd=1 -q --logger-fd=1 file.asc file
   # look for : [GNUPG:] GOODSIG 6C55397824F434CE updates.spamassassin.org [...]
   #            [GNUPG:] VALIDSIG 0C2B1D7175B852C64B3CDC716C55397824F434CE [...]
+  #            [GNUPG:] NO_PUBKEY 6C55397824F434CE
   if ($GPG) {
     dbg("gpg: populating temp signature file");
     my $sig_file;
@@ -489,7 +496,12 @@ foreach my $channel (@channels) {
     close($tfh);
 
     dbg("gpg: calling gpg");
-    my $CMD = "$GPGPath --verify --batch --no-tty --status-fd=1 -q --logger-fd=1";
+
+    # TODO: we could also use "--keyserver pgp.mit.edu" or similar,
+    # to autodownload missing keys...
+    my $CMD = "$GPGPath --verify --batch ".
+        "--no-tty --status-fd=1 -q --logger-fd=1";
+
     unless (open(CMD, "$CMD $sig_file $content_file|")) {
       unlink $sig_file || warn "error: can't unlink $sig_file: $!\n";
       die "fatal: couldn't execute $GPGPath: $!\n";
@@ -497,7 +509,15 @@ foreach my $channel (@channels) {
 
     # Determine the fate of the signature
     my $signer = '';
+    my $missingkeys = '';
     while(my $GNUPG = <CMD>) {
+      chop $GNUPG;
+      dbg ("gpg: $GNUPG");
+
+      if ($GNUPG =~ /^\Q[GNUPG:]\E NO_PUBKEY \S+(\S{8})$/) {
+        $missingkeys .= $1." ";
+      }
+
       next unless ($GNUPG =~ /^\Q[GNUPG:]\E (?:VALID|GOOD)SIG (\S{8,40})/);
       my $key = $1;
 
@@ -529,8 +549,22 @@ foreach my $channel (@channels) {
     }
 
     unless ($signer) {
-      warn "error: GPG validation failed\n";
-      dbg("channel: GPG verification failed, channel failed");
+
+      warn <<ENDOFVALIDATIONERR;
+error: GPG validation failed!
+
+The update downloaded successfully, but it was not signed with a trusted GPG
+key.  Instead, it was signed with the following keys:
+
+    $missingkeys
+
+Perhaps you need to import the channel's GPG key?  For example:
+
+    wget http://spamassassin.apache.org/updates/GPG.KEY
+    gpg --import GPG.KEY
+
+ENDOFVALIDATIONERR
+
       $exit++;
       next;
     }
