@@ -18,13 +18,14 @@ $PERL ./build/mkupdates/listpromotable > rules/active.list
 (
 echo "
 
-To enact this, someone log into the zone and type:
+To commit this and proceed with update tarball creation:
 
         ssh spamassassin.zones.apache.org
         cd /home/updatesd/svn/spamassassin
-        sudo -u updatesd svn commit -m 'daily promotions' rules/active.list
+        sudo -u updatesd /home/updatesd/svn/spamassassin/build/mkupdates/run_part2
 
 "
+
 svn diff
 ) > mail.tmp
 

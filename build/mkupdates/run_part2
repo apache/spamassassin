@@ -12,6 +12,7 @@ set -x
 
 cd /home/updatesd/svn/spamassassin
 
+
 PERL=/local/perl586/bin/perl
 PATH=/local/gnupg-1.4.2/bin:$PATH:/usr/sfw/bin:/opt/sfw/bin:/opt/SUNWspro/bin:/usr/X/bin:/usr/ucb:/usr/sbin:/usr/ccs/bin:/opt/subversion-1.1.4/bin:/usr/apache2/bin:/local/bin
 
@@ -30,7 +31,7 @@ stagedir=/var/www/buildbot.spamassassin.org/updatestage
 # live:
 # dnsdir=/var/named/updates.spamassassin.org.d
 #
-dnsdir=/var/named/updates.dev.spamassassin.org.d
+dnsdir=/var/named/updates.spamassassin.org.d
 
 # directory where "counter", "soa_line.tmpl", "soa_line" live.
 # it's assumed that the *real* zone $INCLUDEs files from this dir.
@@ -39,6 +40,12 @@ dnsdir=/var/named/updates.dev.spamassassin.org.d
 soadir=/var/named/spamassassin.org.d
 
 versions="3.2.0"
+
+# ---------------------------------------------------------------------------
+# TODO: if/when this becomes fully automatic, this commit will be superfluous
+
+echo "Committing promotions in rules/active.list..."
+svn commit -m 'promotions validated' rules/active.list
 
 # ---------------------------------------------------------------------------
 
@@ -60,6 +67,12 @@ rm -rf $tmpdir; mkdir -p $tmpdir         || exit $?
 # version's branch.  right now we're only using 1 version though
 $PERL Makefile.PL PREFIX=$tmpdir < /dev/null || exit $?
 make                                     || exit $?
+
+# remove the rules files for rules we won't be shipping
+rm rules/70_sandbox.cf rules/70_inactive.cf
+# and ensure the ruleset lints!
+./spamassassin --lint                    || exit $?
+
 make install                             || exit $?
 
 rulesdir=$tmpdir/share/spamassassin
