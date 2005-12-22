@@ -1812,11 +1812,12 @@ sub do_body_tests {
            my $self = shift;
            foreach (@_) {
              '.$self->hash_line_for_rule($rulename).'
-             if ('.$pat.') { 
+             pos = 0;
+             while ('.$pat.'g) { 
                 $self->got_pattern_hit(q{'.$rulename.'}, "BODY: "); 
                 '. $self->hit_rule_plugin_code($rulename, "body") . '
 		# Ok, we hit, stop now.
-		last unless $self->{conf}->{tflags}->{q{'.$rulename.'}} =~ /\bmultiple\b/;
+		return unless $self->{conf}->{tflags}->{q{'.$rulename.'}} =~ /\bmultiple\b/;
              }
            }
     }
@@ -2225,11 +2226,12 @@ sub do_body_uri_tests {
        my $self = shift;
        foreach (@_) {
          '.$self->hash_line_for_rule($rulename).'
-         if ('.$pat.') { 
+         pos = 0;
+         while ('.$pat.'g) { 
             $self->got_pattern_hit(q{'.$rulename.'}, "URI: ");
             '. $self->hit_rule_plugin_code($rulename, "uri") . '
             # Ok, we hit, stop now.
-	    last unless $self->{conf}->{tflags}->{q{'.$rulename.'}} =~ /\bmultiple\b/;
+	    return unless $self->{conf}->{tflags}->{q{'.$rulename.'}} =~ /\bmultiple\b/;
          }
        }
     }
@@ -2315,11 +2317,12 @@ sub do_rawbody_tests {
        my $self = shift;
        foreach (@_) {
          '.$self->hash_line_for_rule($rulename).'
-         if ('.$pat.') { 
+         pos = 0;
+         while ('.$pat.'g) { 
             $self->got_pattern_hit(q{'.$rulename.'}, "RAW: ");
             '. $self->hit_rule_plugin_code($rulename, "rawbody") . '
             # Ok, we hit, stop now.
-	    last unless $self->{conf}->{tflags}->{q{'.$rulename.'}} =~ /\bmultiple\b/;
+	    return unless $self->{conf}->{tflags}->{q{'.$rulename.'}} =~ /\bmultiple\b/;
          }
        }
     }
