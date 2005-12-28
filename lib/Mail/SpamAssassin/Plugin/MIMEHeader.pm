@@ -93,7 +93,7 @@ sub set_config {
     setting => 'mimeheader',
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      if ($value !~ /^(\S+)\s+(\S+)\s+([\=\!]\~)\s+(.+)$/) {
+      if ($value !~ /^(\S+)\s+(\S+)\s*([\=\!]\~)\s*(.+)$/) {
         return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
 
