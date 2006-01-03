@@ -30,7 +30,6 @@ use File::Spec;
 use File::Path;
 use Getopt::Long;
 use Pod::Usage;
-use Cwd;
 use strict;
 use warnings;
 
@@ -84,6 +83,7 @@ use Digest::SHA1 qw/sha1_hex/;
 
 # Make the main dbg() accessible in our package w/o an extra function
 *dbg=\&Mail::SpamAssassin::dbg;
+sub dbg;
 
 # Clean up PATH appropriately
 Mail::SpamAssassin::Util::clean_path_in_taint_mode();
@@ -193,6 +193,16 @@ dbg("generic: using update directory: $opt{'updatedir'}");
 eval { $SA->debug_diagnostics(); 1; };
 
 $SA->finish();
+
+# untaint the command-line args; since the root user supplied these, and
+# we're not a setuid script, we trust them
+foreach my $optkey (keys %opt) {
+  next if ref $opt{$optkey};
+  my $untaint = $opt{$optkey};
+  next unless defined $untaint;
+  $untaint =~ /^(.*)$/;
+  $opt{$optkey} = $1;
+}
 
 # deal with gpg-related options
 if (@{$opt{'gpgkey'}}) {
@@ -606,18 +616,8 @@ ENDOFVALIDATIONERR
   my $tar = Archive::Tar->new($tfh);
   die "fatal: couldn't create Archive::Tar object!\n" unless $tar;
 
-  # make sure we're doing the work in the update directory
-  my $oldwd = getcwd();
-  unless (chdir $UPDDir) {
-    warn "error: can't chdir into $UPDDir: $!\n";
-    dbg("channel: chdir failed, channel failed");
-    $exit++;
-    next;
-  }
-
   dbg("channel: extracting archive");
-  my $ret = ($tar->extract());
-  chdir $oldwd;     # chdir back so relative paths on --updatedir work
+  my $ret = taint_safe_archive_extract($UPDDir, $tar);
 
   unless ($ret) {
     close($tfh);
@@ -637,6 +637,13 @@ ENDOFVALIDATIONERR
   # Put in whatever metadata we need
   print CF "# UPDATE version $newV\n";
 
+  # try to figure out the relative path dir name
+  my $relativeDir = $UPDDir;
+  $UPDDir =~ m,([^/]+)/[^/]+$,;
+  if ($1) {
+    $relativeDir = $1;
+  }
+
   # now include *.cf
   unless (opendir(DIR, $UPDDir)) {
     die "fatal: can't access $UPDDir: $!\n";
@@ -645,8 +652,8 @@ ENDOFVALIDATIONERR
     next unless (-f "$UPDDir/$file");
     next unless ($file =~ /\.cf$/);
     dbg("channel: adding $file");
-    print CF "include $UPDDir/$file\n";
-    # TODO: this fails for relative paths, e.g. "--updatedir ./updtest"
+
+    print CF "include $relativeDir/$file\n";
   }
   closedir(DIR);
   close(CF);
@@ -658,6 +665,42 @@ unlink $content_file || warn "error: couldn't remove tmpfile $content_file: $!\n
 
 dbg("diag: updates complete, exiting with code $exit");
 exit $exit;
+
+sub taint_safe_archive_extract {
+  my $todir = shift;
+  my $tar = shift;
+
+  # stupid Archive::Tar is not natively taint-safe! duh.
+  # return $tar->extract();
+  # instead, get the file list, untaint, and extract one-by-one.
+
+  my @files = $tar->list_files();
+  foreach my $file (@files) {
+    next if ($file =~ /^\/$/);  # ignore dirs
+
+    $file =~ /^([-\.\,\/a-zA-Z0-9_]+)$/;
+    my $outfname = $1;
+    $outfname =~ s/\.\.\//__\//gs;      # avoid "../" dir traversal attacks
+    $outfname = "$todir/$outfname";
+
+    dbg "extracting: $outfname";
+    if (open OUT, ">".$outfname) {
+      print OUT $tar->get_content($file);
+      if (!close OUT) {
+        warn "error: write failed to $outfname: $!";
+        goto failed;
+      }
+    } else {
+      warn "error: failed to open $outfname for write: $!";
+      goto failed;
+    }
+  }
+
+  return @files;
+
+failed:
+  return;       # undef = failure
+}
 
 # Do a generic TXT query
 sub do_txt_query {
