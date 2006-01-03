@@ -1,5 +1,8 @@
 #!/bin/sh
 
+PATH=$PATH:/sbin:/usr/sbin:/usr/local/bin:/usr/sfw/bin:/opt/sfw/bin:/opt/SUNWspro/bin:/opt/subversion-1.1.4/bin:/usr/apache2/bin:/local/bin
+export PATH
+
 prog=freqsd
 
 start() {
