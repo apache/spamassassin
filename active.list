@@ -1,6 +1,9 @@
 # active ruleset list (automatically generated from http://buildbot.spamassassin.org/)
 
 # good enough
+ADVANCE_FEE_1
+
+# good enough
 ADVANCE_FEE_2
 
 # good enough
@@ -17,6 +20,9 @@ ALL_TRUSTED
 
 # tflags userconf
 AWL
+
+# good enough
+BAD_CREDIT
 
 # good enough
 BAD_ENC_HEADER
@@ -49,6 +55,12 @@ BAYES_95
 BAYES_99
 
 # good enough
+BIZ_TLD
+
+# good enough
+BODY_ENHANCEMENT
+
+# good enough
 BODY_ENHANCEMENT2
 
 # tflags userconf
@@ -56,9 +68,6 @@ CHARSET_FARAWAY
 
 # tflags userconf
 CHARSET_FARAWAY_HEADER
-
-# good enough
-CONFIRMED_FORGED
 
 # good enough
 CUM_SHOT
@@ -82,7 +91,19 @@ DATE_IN_PAST_96_XX
 DATE_SPAMWARE_Y2K
 
 # good enough
+DEAR_FRIEND
+
+# good enough
+DEAR_SOMETHING
+
+# good enough
+DIET_1
+
+# good enough
 DOMAIN_4U2
+
+# good enough
+DOMAIN_RATIO
 
 # good enough
 DRUGS_ANXIETY
@@ -109,6 +130,9 @@ DRUGS_ERECTILE_OBFU
 DRUGS_MANYKINDS
 
 # good enough
+DRUGS_MUSCLE
+
+# good enough
 DRUGS_SLEEP
 
 # good enough
@@ -133,10 +157,13 @@ EM_ROLEX
 ENV_AND_HDR_SPF_MATCH
 
 # good enough
-FAKE_HELO_MAIL_COM
+EXCUSE_10
 
 # good enough
-FAKE_HELO_MAIL_COM_DOM
+EXCUSE_6
+
+# good enough
+EXTRA_MPART_TYPE
 
 # good enough
 FAKE_OUTBLAZE_RCVD
@@ -157,9 +184,6 @@ FORGED_IMS_HTML
 FORGED_IMS_TAGS
 
 # good enough
-FORGED_MSGID_EXCITE
-
-# good enough
 FORGED_MSGID_HOTMAIL
 
 # good enough
@@ -176,9 +200,6 @@ FORGED_MUA_EUDORA
 
 # good enough
 FORGED_MUA_IMS
-
-# good enough
-FORGED_MUA_MOZILLA
 
 # good enough
 FORGED_MUA_OIMO
@@ -217,7 +238,13 @@ FROM_DOMAIN_NOVOWEL
 FROM_ENDS_IN_NUMS
 
 # good enough
+FROM_EXCESS_BASE64
+
+# good enough
 FROM_HAS_MIXED_NUMS
+
+# good enough
+FROM_HAS_ULINE_NUMS
 
 # good enough
 FROM_ILLEGAL_CHARS
@@ -227,6 +254,9 @@ FROM_LOCAL_HEX
 
 # good enough
 FROM_LOCAL_NOVOWEL
+
+# good enough
+FROM_OFFERS
 
 # good enough
 FRONTPAGE
@@ -272,6 +302,9 @@ FUZZY_PRICES
 
 # good enough
 FUZZY_REFINANCE
+
+# good enough
+FUZZY_REMOVE
 
 # good enough
 FUZZY_THOUSANDS
@@ -322,16 +355,10 @@ HEADER_SPAM
 HEAD_ILLEGAL_CHARS
 
 # good enough
-HELO_DYNAMIC_COMCAST
-
-# good enough
 HELO_DYNAMIC_DHCP
 
 # good enough
 HELO_DYNAMIC_HCC
-
-# good enough
-HELO_DYNAMIC_HOME_NL
 
 # good enough
 HELO_DYNAMIC_IPADDR
@@ -355,10 +382,25 @@ HTTPS_IP_MISMATCH
 HTTP_77
 
 # good enough
+HTTP_ESCAPED_HOST
+
+# good enough
 HTTP_EXCESSIVE_ESCAPES
 
 # good enough
+IMPOTENCE
+
+# good enough
 INTERRUPTUS
+
+# good enough
+INVALID_DATE
+
+# good enough
+INVALID_MSGID
+
+# good enough
+INVALID_TZ_GMT
 
 # good enough
 INVESTMENT_ADVICE
@@ -370,16 +412,31 @@ IP_LINK_PLUS
 KOREAN_UCE_SUBJECT
 
 # good enough
+LOCALPART_IN_SUBJECT
+
+# good enough
 LONGWORDS
 
 # good enough
+MAILTO_SUBJ_REMOVE
+
+# good enough
 MALE_ENHANCE
+
+# good enough
+MANY_EXCLAMATIONS
+
+# good enough
+MARKETING_PARTNERS
 
 # good enough
 MILLION_USD
 
 # good enough
 MIME_BAD_ISO_CHARSET
+
+# good enough
+MIME_BASE64_BLANKS
 
 # good enough
 MIME_BASE64_TEXT
@@ -393,26 +450,44 @@ MIME_BOUND_DIGITS_15
 # good enough
 MIME_BOUND_MANY_HEX
 
+# good enough
+MIME_BOUND_NEXTPART
+
 # tflags userconf
 MIME_CHARSET_FARAWAY
+
+# good enough
+MIME_HEADER_CTYPE_ONLY
 
 # good enough
 MIME_HTML_MOSTLY
 
 # good enough
+MIME_HTML_ONLY
+
+# good enough
 MIME_HTML_ONLY_MULTI
+
+# good enough
+MIME_QP_LONG_LINE
 
 # good enough
 MISSING_MIMEOLE
 
 # good enough
-ML_MARKETING
+MONEY_BACK
 
 # good enough
 MORE_SEX
 
 # good enough
+MORTGAGE_PITCH
+
+# good enough
 MPART_ALT_DIFF
+
+# good enough
+MPART_ALT_DIFF_COUNT
 
 # good enough
 MSGID_DOLLARS
@@ -421,10 +496,16 @@ MSGID_DOLLARS
 MSGID_DOLLARS_RANDOM
 
 # good enough
+MSGID_FROM_MTA_ID
+
+# good enough
 MSGID_LONG
 
 # good enough
 MSGID_MULTIPLE_AT
+
+# good enough
+MSGID_NO_HOST
 
 # good enough
 MSGID_OUTLOOK_INVALID
@@ -450,6 +531,9 @@ NA_DOLLARS
 # good enough
 NO_PRESCRIPTION
 
+# good enough
+NO_RDNS_DOTCOM_HELO
+
 # tflags userconf
 NO_RECEIVED
 
@@ -460,7 +544,22 @@ NO_RELAYS
 NUMERIC_HTTP_ADDR
 
 # good enough
+ONE_TIME
+
+# good enough
+ONLINE_PHARMACY
+
+# good enough
 PERCENT_RANDOM
+
+# good enough
+PLING_PLING
+
+# good enough
+PLING_QUERY
+
+# good enough
+PRIORITY_NO_NAME
 
 # good enough
 RATWARE_EFROM
@@ -470,12 +569,6 @@ RATWARE_EGROUPS
 
 # good enough
 RATWARE_GECKO_BUILD
-
-# good enough
-RATWARE_HASH_2
-
-# good enough
-RATWARE_HASH_2_V2
 
 # good enough
 RATWARE_MOZ_MALFORMED
@@ -493,7 +586,16 @@ RATWARE_OE_MALFORMED
 RATWARE_OUTLOOK_NONAME
 
 # good enough
+RATWARE_RCVD_AT
+
+# good enough
+RATWARE_RCVD_LC_ESMTP
+
+# good enough
 RATWARE_RCVD_PF
+
+# good enough
+RCVD_BY_IP
 
 # good enough
 RCVD_DOUBLE_IP_LOOSE
@@ -556,6 +658,12 @@ SPF_PASS
 SPOOF_COM2COM
 
 # good enough
+SPOOF_NET2COM
+
+# good enough
+SPOOF_OURI
+
+# good enough
 STOCK_ALERT
 
 # good enough
@@ -568,16 +676,10 @@ SUBJECT_DRUG_GAP_C
 SUBJECT_DRUG_GAP_L
 
 # good enough
-SUBJECT_DRUG_GAP_VA
-
-# good enough
 SUBJECT_DRUG_GAP_X
 
 # good enough
 SUBJECT_EXCESS_BASE64
-
-# good enough
-SUBJECT_FUZZY_CHEAP
 
 # good enough
 SUBJECT_FUZZY_MEDS
@@ -595,13 +697,25 @@ SUBJECT_IN_BLACKLIST
 SUBJECT_IN_WHITELIST
 
 # good enough
-SUBJECT_NOVOWEL
-
-# good enough
 SUBJECT_SEXUAL
 
 # good enough
+SUBJ_ALL_CAPS
+
+# good enough
+SUBJ_BUY
+
+# good enough
 SUBJ_ILLEGAL_CHARS
+
+# good enough
+SUBJ_YOUR_OWN
+
+# good enough
+SUSPICIOUS_RECIPS
+
+# good enough
+TO_CC_NONE
 
 # good enough
 UNCLAIMED_MONEY
@@ -611,6 +725,9 @@ UNCLOSED_BRACKET
 
 # good enough
 UNDISC_RECIPS
+
+# good enough
+UNIQUE_WORDS
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -635,6 +752,9 @@ URI_NO_WWW_BIZ_CGI
 
 # good enough
 URI_NO_WWW_INFO_CGI
+
+# good enough
+URI_OFFERS
 
 # good enough
 URI_SCHEME_MIXED_CASE
@@ -670,16 +790,22 @@ USER_IN_WHITELIST
 USER_IN_WHITELIST_TO
 
 # good enough
+US_DOLLARS_3
+
+# good enough
 WEIRD_QUOTING
 
 # good enough
-WHY_PAY_MORE
+WHY_WAIT
 
 # good enough
 X_IP
 
 # good enough
 X_LIBRARY
+
+# good enough
+X_MAILER_SPAM
 
 # good enough
 X_MESSAGE_INFO
