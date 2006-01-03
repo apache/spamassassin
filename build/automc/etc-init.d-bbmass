@@ -1,13 +1,15 @@
 #!/bin/sh
 
-# added to /etc/vfstab:
-#
-# swap            -               /export/home/bbmass/tmpfs       tmpfs - no      -
-
 # to create a new slave:
 #
 # PASSWORD=[whatever]
 # buildbot slave /home/buildbot/slaves/slave-name buildbot.spamassassin.org:9989 slave-name $PASSWORD
+
+# to use a real tmpfs, add this to /etc/vfstab:
+#
+# swap            -               /export/home/bbmass/tmpfs       tmpfs - no      -
+#
+# this is now off; the disk I/O speeds have improved, it's no longer necessary.
 
 PATH=$PATH:/sbin:/usr/sbin:/usr/local/bin:/usr/sfw/bin:/opt/sfw/bin:/opt/SUNWspro/bin:/opt/subversion-1.1.4/bin:/usr/apache2/bin:/local/bin
 export PATH
@@ -15,17 +17,18 @@ export PATH
 prog=bbmass
 runall () {
     buildbot $1 /home/buildbot/bots/bbmass
-    buildbot $1 /home/bbmass/slaves/mc-fast
-    buildbot $1 /home/bbmass/slaves/mc-med
-    buildbot $1 /home/bbmass/slaves/mc-slow
-    buildbot $1 /home/bbmass/slaves/mc-slower
+    nice buildbot $1 /home/bbmass/slaves/mc-fast
+    nice buildbot $1 /home/bbmass/slaves/mc-med
+    nice buildbot $1 /home/bbmass/slaves/mc-slow
+    nice buildbot $1 /home/bbmass/slaves/mc-slower
 }
 
 start() {
-    echo "Mounting tmpfs: "
-    mount /export/home/bbmass/tmpfs
+    # echo "Mounting tmpfs: "
+    # mount /export/home/bbmass/tmpfs
+    # echo "Done."
+
     chmod 1777 /export/home/bbmass/tmpfs
-    echo "Done."
 
     echo "Starting $prog: " 
     runall start
@@ -39,7 +42,7 @@ stop() {
     RETVAL=$?
     return $RETVAL
 
-    umount /export/home/bbmass/tmpfs
+    # umount /export/home/bbmass/tmpfs
 }
 
 case "$1" in
