@@ -11,8 +11,8 @@ export PATH
 prog=buildbot
 runall () {
     buildbot $1 /home/buildbot/bots/sa
-    buildbot $1 /home/buildbot/slaves/zone-sol10
-    buildbot $1 /home/buildbot/slaves/sol10-perl561
+    nice buildbot $1 /home/buildbot/slaves/zone-sol10
+    nice buildbot $1 /home/buildbot/slaves/sol10-perl561
 }
 
 start() {
