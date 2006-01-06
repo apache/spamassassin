@@ -1,6 +1,9 @@
 # active ruleset list (automatically generated from http://buildbot.spamassassin.org/)
 
 # good enough
+ADDR_FREE
+
+# good enough
 ADVANCE_FEE_1
 
 # good enough
@@ -20,9 +23,6 @@ ALL_TRUSTED
 
 # tflags userconf
 AWL
-
-# good enough
-BAD_CREDIT
 
 # good enough
 BAD_ENC_HEADER
@@ -58,7 +58,7 @@ BAYES_99
 BIZ_TLD
 
 # good enough
-BODY_ENHANCEMENT
+BLANK_LINES_70_80
 
 # good enough
 BODY_ENHANCEMENT2
@@ -268,6 +268,9 @@ FROM_LOCAL_NOVOWEL
 FROM_OFFERS
 
 # good enough
+FROM_STARTS_WITH_NUMS
+
+# good enough
 FRONTPAGE
 
 # good enough
@@ -430,9 +433,6 @@ LONGWORDS
 MAILTO_SUBJ_REMOVE
 
 # good enough
-MAILTO_TO_REMOVE
-
-# good enough
 MALE_ENHANCE
 
 # good enough
@@ -476,9 +476,6 @@ MIME_HTML_ONLY
 
 # good enough
 MIME_HTML_ONLY_MULTI
-
-# good enough
-MIME_QP_LONG_LINE
 
 # good enough
 MISSING_MIMEOLE
@@ -559,9 +556,6 @@ ONLINE_PHARMACY
 PERCENT_RANDOM
 
 # good enough
-PLING_PLING
-
-# good enough
 PRIORITY_NO_NAME
 
 # good enough
@@ -617,9 +611,6 @@ RCVD_ILLEGAL_IP
 
 # good enough
 RCVD_NUMERIC_HELO
-
-# good enough
-REMOVE_BEFORE_LINK
 
 # good enough
 REPLICA_WATCH
@@ -712,6 +703,9 @@ SUBJ_ALL_CAPS
 SUBJ_BUY
 
 # good enough
+SUBJ_HAS_SPACES
+
+# good enough
 SUBJ_ILLEGAL_CHARS
 
 # good enough
@@ -724,10 +718,58 @@ SUSPICIOUS_RECIPS
 TO_CC_NONE
 
 # good enough
+FORGED_IMS_HTML
+
+# good enough
+FORGED_IMS_TAGS
+
+# good enough
+FORGED_OUTLOOK_HTML
+
+# good enough
+FORGED_OUTLOOK_TAGS
+
+# good enough
+GEO_QUERY_STRING
+
+# good enough
+HS_FAST_FORWARD
+
+# good enough
+HS_ODD_OE_ORIGINAL_MESSAGE
+
+# good enough
+HS_OE_FUNNY_BODY_FROM
+
+# good enough
+HS_SUBJ_ONLINE_PHARMACEUTICAL
+
+# good enough
+HS_SYNDICATE_P2
+
+# good enough
+HS_SYNDICATE_P3
+
+# good enough
+HS_SYNDICATE_P4
+
+# good enough
+HS_SYNDICATE_P5
+
+# good enough
+INVALID_DATE
+
+# good enough
+VERTICAL_DRUGS_1
+
+# good enough
 UNCLAIMED_MONEY
 
 # good enough
 UNCLOSED_BRACKET
+
+# good enough
+UNDISC_RECIPS
 
 # good enough
 UNIQUE_WORDS
