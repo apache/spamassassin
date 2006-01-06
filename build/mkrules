@@ -672,6 +672,7 @@ sub sandbox_rule_name_avoid_collisions {
   my $newreason;
 
   return $rule if $opt_listpromotable;
+  return $rule if $active_rules->{$rule};
 
   if ($rule !~ /^(?:T_|__)/) {
     $new = "T_".$rule;
