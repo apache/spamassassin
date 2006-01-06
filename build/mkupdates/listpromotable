@@ -107,9 +107,21 @@ $mailsa->lint_rules();
 
 print "# active ruleset list (automatically generated from $cgi_url)\n";
 
-foreach my $name (sort keys %$plist) {
-  my $obj = $plist->{$name};
+foreach my $plistkey (sort keys %$plist) {
+  my $name = $plistkey;
+  my $obj = $plist->{$plistkey};
   my $notes = '';
+
+  # rules in sandboxes without a T_ prefix, will be renamed during the
+  # ruleqa process... in other words, the output freqs line will talk
+  # about rule "T_FOO".   if there's a rule "FOO" defined, assume that's
+  # the one being talked about.
+  my $no_t = $name;
+  if ($no_t =~ s/^T_//) {
+    if (defined $mailsa->{conf}->{scores}->{$no_t}) {
+      $name = $no_t;
+    }
+  }
 
   # now that it's ok to have sandbox rules without a T_ prefix,
   # "T_" prefix implies "tflags nopublish"
