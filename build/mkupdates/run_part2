@@ -70,6 +70,13 @@ make                                     || exit $?
 
 # remove the rules files for rules we won't be shipping
 rm rules/70_sandbox.cf rules/70_inactive.cf
+
+# remove loadplugin lines; sandbox-promoted files shouldn't require this
+egrep -v '^loadplugin' rules/72_active.cf \
+        > rules/72_active.cf.new         || exit $?
+
+mv rules/72_active.cf.new rules/72_active.cf || exit $?
+
 # and ensure the ruleset lints!
 ./spamassassin --lint                    || exit $?
 
