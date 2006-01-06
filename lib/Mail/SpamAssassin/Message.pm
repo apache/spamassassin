@@ -772,6 +772,7 @@ sub _parse_normal {
   # 0: content-type, 1: boundary, 2: charset, 3: filename
   my @ct = Mail::SpamAssassin::Util::parse_content_type($part_msg->header('content-type'));
   $part_msg->{'type'} = $ct[0];
+  $part_msg->{'charset'} = $ct[2];
 
   # multipart sections are required to have a boundary set ...  If this
   # one doesn't, assume it's malformed and revert to text/plain

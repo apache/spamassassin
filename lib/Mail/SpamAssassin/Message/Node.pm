@@ -41,6 +41,8 @@ use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::HTML;
 use Mail::SpamAssassin::Logger;
 
+our $normalize_supported = ( $] > 5.008004 && eval 'require Encode::Detect::Detector' && eval 'require Encode' );
+
 =item new()
 
 Generates an empty Node object and returns it.  Typically only called
@@ -341,6 +343,30 @@ sub _html_render {
   return 0;
 }
 
+sub _normalize {
+  my ($data, $charset) = @_;
+  return $data unless $normalize_supported;
+  my $detected = Encode::Detect::Detector::detect($data);
+
+  my $converter;
+
+  if ($charset && $charset !~ /^us-ascii$/i &&
+      ($detected || 'none') !~ /^(?:UTF|EUC|ISO-2022|Shift_JIS|Big5|GB)/i) {
+      dbg("Using labeled charset $charset");
+      $converter = Encode::find_encoding($charset);
+  }
+
+  $converter = Encode::find_encoding($detected) unless $converter || !defined($detected);
+
+  return $data unless $converter;
+
+  dbg("Converting...");
+
+  my $rv = $converter->decode($data, 0);
+  utf8::downgrade($rv, 1);
+  return $rv
+}
+
 =item rendered()
 
 render_text() takes the given text/* type MIME part, and attempts to
@@ -358,7 +384,7 @@ sub rendered {
   return(undef,undef) unless ( $self->{'type'} =~ /^text\b/i );
 
   if (!exists $self->{rendered}) {
-    my $text = $self->decode();
+    my $text = _normalize($self->decode(), $self->{charset});
     my $raw = length($text);
 
     # render text/html always, or any other text|text/plain part as text/html
@@ -385,7 +411,7 @@ sub rendered {
     }
     else {
       $self->{rendered_type} = $self->{type};
-      $self->{rendered} = $text;
+      $self->{rendered} = $self->{visible_rendered} = $text;
     }
   }
 
@@ -477,7 +503,7 @@ sub __decode_header {
 
   if ( $cte eq 'B' ) {
     # base 64 encoded
-    return Mail::SpamAssassin::Util::base64_decode($data);
+    $data = Mail::SpamAssassin::Util::base64_decode($data);
   }
   elsif ( $cte eq 'Q' ) {
     # quoted printable
@@ -485,12 +511,13 @@ sub __decode_header {
     # the RFC states that in the encoded text, "_" is equal to "=20"
     $data =~ s/_/=20/g;
 
-    return Mail::SpamAssassin::Util::qp_decode($data);
+    $data = Mail::SpamAssassin::Util::qp_decode($data);
   }
   else {
     # not possible since the input has already been limited to 'B' and 'Q'
     die "message: unknown encoding type '$cte' in RFC2047 header";
   }
+  return _normalize($data, $encoding);
 }
 
 # Decode base64 and quoted-printable in headers according to RFC2047.
@@ -504,15 +531,15 @@ sub _decode_header {
   $header =~ s/\n[ \t]+/\n /g;
   $header =~ s/\r?\n//g;
 
-  return $header unless $header =~ /=\?/;
-
   # multiple encoded sections must ignore the interim whitespace.
   # to avoid possible FPs with (\s+(?==\?))?, look for the whole RE
   # separated by whitespace.
   1 while ($header =~ s/(=\?[\w_-]+\?[bqBQ]\?[^?]+\?=)\s+(=\?[\w_-]+\?[bqBQ]\?[^?]+\?=)/$1$2/g);
 
-  $header =~
-    s/=\?([\w_-]+)\?([bqBQ])\?([^?]+)\?=/__decode_header($1, uc($2), $3)/ge;
+  unless ($header =~
+	  s/=\?([\w_-]+)\?([bqBQ])\?([^?]+)\?=/__decode_header($1, uc($2), $3)/ge) {
+    $header = _normalize($header);
+  }
 
   return $header;
 }

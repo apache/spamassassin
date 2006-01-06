@@ -166,6 +166,12 @@ my @OPTIONAL_MODULES = (
   desc => 'The "sa-update" script requires this module to access compressed
   update archive files.',
 },
+{
+  module => 'Encode::Detect',
+  version => '0.00',
+  desc => 'If this module is installed, SpamAssassin will detect charsets
+  and convert them into Unicode.',
+},
 );
 
 ###########################################################################
