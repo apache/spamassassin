@@ -29,7 +29,7 @@ use vars qw {
 
 # as per http://wiki.apache.org/spamassassin/RulesProjPromotion, for -P
 my $promote_so_min      = 0.95;
-my $promote_hitrate_min = 0.10;
+my $promote_hitrate_min = 0.02;
 my $promote_fprate_max  = 1.00;
 
 sub usage {
