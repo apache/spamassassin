@@ -21,17 +21,16 @@ echo "
 To commit this and proceed with update tarball creation:
 
         ssh spamassassin.zones.apache.org
-        cd /home/updatesd/svn/spamassassin
         sudo -u updatesd /home/updatesd/svn/spamassassin/build/mkupdates/run_part2
 
 "
 
 svn diff
-) > mail.tmp
+) > /home/updatesd/LATEST
 
-cat mail.tmp
-mailx -s "[admin] planned commit for active.list" \
-               dev@Spamassassin.apache.org < mail.tmp
+cat /home/updatesd/LATEST
+# mailx -s "[admin] planned commit for active.list" \
+#              dev@Spamassassin.apache.org < /home/updatesd/LATEST
 
 # cycle the logfiles; keep 6 (3 days worth I think)
 (
