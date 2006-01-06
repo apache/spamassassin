@@ -641,10 +641,11 @@ ENDOFVALIDATIONERR
 
   # try to figure out the relative path dir name
   my $relativeDir = $UPDDir;
-  $UPDDir =~ m,([^/]+)/[^/]+$,;
+  $UPDDir =~ m,/([^/]+)/*$,;
   if ($1) {
     $relativeDir = $1;
   }
+  dbg("channel: updatedir=$UPDDir relativepath=$relativeDir");
 
   # now include *.cf
   unless (opendir(DIR, $UPDDir)) {
