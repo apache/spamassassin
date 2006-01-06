@@ -605,6 +605,8 @@ ENDOFVALIDATIONERR
     next unless (-f "$UPDDir/$file");
     next if ($file eq 'MIRRORED.BY');
     dbg("channel: unlinking $file");
+    $file =~ /^([^\/]+)$/;       # untaint
+    $file = $1;
     unlink "$UPDDir/$file" || warn "error: can't remove file $UPDDir/$file: $!\n";
   }
   closedir(DIR);
