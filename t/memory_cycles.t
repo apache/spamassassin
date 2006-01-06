@@ -21,7 +21,7 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("memory_cycles");
 
 use Test; BEGIN {
-  plan tests => (HAVE_DEVEL_CYCLE ? 3 : 0);
+  plan tests => (HAVE_DEVEL_CYCLE ? 4 : 0);
 }
 unless (HAVE_DEVEL_CYCLE) {
   print "# Devel::Cycle module required for this test, skipped\n";
@@ -55,8 +55,12 @@ my $output = $status->get_report();
 $status->finish();
 ok (check_for_cycles($status));
 
+$mail->finish();
+ok (check_for_cycles($mail));
+
 $spamtest->finish();
 ok (check_for_cycles($spamtest));
+
 exit;
 
 ############################################################################
