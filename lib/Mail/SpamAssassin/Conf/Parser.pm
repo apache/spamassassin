@@ -235,6 +235,7 @@ sub parse {
   my @if_stack = ();
   my @conf_lines = split (/\n/, $_[1]);
   my $line;
+  $self->{if_stack} = \@if_stack;
 
   while (defined ($line = shift @conf_lines)) {
     $line =~ s/(?<!\\)#.*$//; # remove comments
@@ -799,6 +800,7 @@ sub add_test {
   $conf->{tflags}->{$name} ||= '';
   $conf->{priority}->{$name} ||= 0;
   $conf->{source_file}->{$name} = $self->{currentfile};
+  $conf->{if_stack}->{$name} = $self->get_if_stack_as_string();
 
   if ($self->{scoresonly}) {
     $conf->{user_rules_to_compile}->{$type} = 1;
@@ -1003,6 +1005,15 @@ sub lint_warn {
   if ($iserror) {
     $self->{conf}->{errors}++;
   }
+}
+
+###########################################################################
+
+sub get_if_stack_as_string {
+  my ($self) = @_;
+  return join ' ', map {
+    $_->{conditional}
+  } @{$self->{if_stack}};
 }
 
 ###########################################################################

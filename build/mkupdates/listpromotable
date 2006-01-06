@@ -93,9 +93,10 @@ $mailsa->{lint_callback} = sub {
   my %opts = @_;
 
   # ignore non-issue lint failures
-  return if ($opts{msg} =~ /
-        (?:score\sset\sfor\snon-existent|description\sexists)
-    /x);
+  return if ($opts{msg} =~ /(?:
+        score\sset\sfor\snon-existent|
+        description\sexists
+    )/x);
 
   warn "demoting $opts{rule}: $opts{msg}";
   if ($opts{iserror}) {
@@ -154,7 +155,20 @@ foreach my $plistkey (sort keys %$plist) {
   # rules that fail lint
   next if $rules_with_errors{$name};
 
-  # don't include ever-changing bits of data
+  # that require a plugin we won't have
+  my $skip = 0;
+  my $ifs = $mailsa->{conf}->{if_stack}->{$name};
+  while ($ifs =~ /plugin\s*\((.+?)\)/g) {
+    my $pkg = $1;
+    # grep out the ones we *do* have, and do use in "ifplugin"
+    # lines in "rulesrc", here...
+    next if ($pkg =~ /(?:ReplaceTags|SomethingElse)/);
+    print "\n# not publishing $name: needs $ifs\n";
+    $skip++;
+  }
+  next if $skip;
+
+  # don't output the ever-changing bits of data
   # $notes = "spam=$obj->{spc} ham=$obj->{hpc} so=$obj->{so}";
   $notes = "good enough";
 
