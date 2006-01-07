@@ -38,7 +38,7 @@ use Mail::SpamAssassin;
 use vars qw(
     @opt_srcs $opt_out $opt_sandboxout $opt_manifest
     $opt_manifestskip $opt_listpromotable $opt_active
-    $opt_activeout $opt_inactiveout
+    $opt_activeout $opt_inactiveout $default_file_header
 );
 GetOptions("src=s" => \@opt_srcs,
     "out=s",
@@ -87,6 +87,7 @@ $opt_inactiveout ||= "70_inactive.cf";
 my $needs_compile = { };
 my $current_src;
 
+my $default_file_header = join('', <DATA>);
 
 foreach my $src (@opt_srcs) {
   if (!-d $src) {
@@ -298,8 +299,9 @@ sub rule_file_compile {
     s/#.*$//g; s/^\s+//; s/\s+$//;
 
     # send comments/blank lines to the holding area for next rule
+    # OFF: just drop them.
     if (/^$/) {
-      $current_comments .= $orig;
+      # $current_comments .= $orig;
       next;
     }
 
@@ -391,6 +393,9 @@ sub rule_file_compile {
     {
       undef $current_conditional;
     }
+    elsif (/^require_version\s*(\S+)\b/) {
+      # silently ignored.  TODO?  (meh)
+    }
     elsif (/^loadplugin\s*(\S+)\b/) {
       my $name = 'loadplugin_'.$1;
 
@@ -401,6 +406,7 @@ sub rule_file_compile {
       unless ($rules->{$name}) {
         $rules->{$name} = rule_entry_create();
         $rules->{$name}->{issandbox} = $issandbox;
+        $rules->{$name}->{iscommand} = 1;
       }
 
       $rules->{$name}->{text} .= $orig;
@@ -433,6 +439,7 @@ sub rule_file_compile {
       $rules->{$name}->{cond} = $cond;
       $rules->{$name}->{issandbox} = $issandbox;
       $rules->{$name}->{forceactive} = 1;
+      $rules->{$name}->{iscommand} = 1;
 
       # warn "unknown line in rules file '$f', saving to default: $orig";
 
@@ -476,10 +483,7 @@ sub copy_to_output_buffers {
     my $pubfile = pubfile_for_rule($rules, $name);
 
     $output_files->{$pubfile} = {
-      header => "",
-      # header => "# [compiled from '$srcfile']\n",
-      # don't use that header; we now have multiple srcfiles in each
-      # output file!
+      header => $default_file_header
     };
 
     # fix up any rule renamings we were supposed to do
@@ -513,8 +517,10 @@ sub pubfile_for_rule {
 
   # default: "70_sandbox.cf" or "72_active.cf"
   if (!$pubfile) {
-    if ($active_rules->{$name} || $rules->{$name}->{forceactive}
-        || !$rules->{$name}->{found_definition})
+    if ($active_rules->{$name}      # is active
+        || $rules->{$name}->{forceactive}   # or is forced to be
+        || (!$rules->{$name}->{found_definition} && !$rules->{$name}->{iscommand}))
+                # or is a rule-related setting in reference to an unknown rule
     {
       $pubfile = $opt_out.'/'.$opt_activeout;
     }
@@ -581,10 +587,12 @@ sub compile_output_files {
   # output the known rules that are not meta subrules.
   foreach my $rule (@rulenames) {
     next if ($rule =~ /^__/);
+
     my $pubfile = $rules->{$rule}->{output_file};
     my $text    = $rules->{$rule}->{output_text};
     next unless defined ($text);
-    $output_file_text->{$pubfile} .= "##{ ".$rule."\n".
+
+    $output_file_text->{$pubfile} .= "##{ $rule\n".
                             $text.
                             "##} ".$rule."\n\n";
   }
@@ -751,10 +759,29 @@ sub filename_in_manifest {
 
 
 __DATA__
+# SpamAssassin rules file
+#
+# Please don't modify this file as your changes will be overwritten with
+# the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
+# See 'perldoc Mail::SpamAssassin::Conf' for details.
+#
+# <@LICENSE>
+# Copyright 2004 Apache Software Foundation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+#
+###########################################################################
 
-TODO list for this script:
-
-- license blocks at the top of each rulesrc/*/*.cf file need to be
-  ignored when compiling, instead of being duplicated into the
-  compiled output files.
+require_version @@VERSION@@
 
