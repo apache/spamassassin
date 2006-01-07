@@ -28,6 +28,7 @@ use lib '@@INSTALLSITELIB@@';                   # substituted at 'make' time
 # Standard perl modules
 use File::Spec;
 use File::Path;
+use File::Copy;
 use Getopt::Long;
 use Pod::Usage;
 use strict;
@@ -290,6 +291,10 @@ $ua->env_proxy;
 my ($content_file, $tfh) = Mail::SpamAssassin::Util::secure_tmpfile();
 close($tfh);
 
+# and another, for the new config file
+my ($newcf_file, $tfh2) = Mail::SpamAssassin::Util::secure_tmpfile();
+close($tfh2);
+
 # Go ahead and loop through all of the channels
 my $exit = 0;
 foreach my $channel (@channels) {
@@ -300,10 +305,14 @@ foreach my $channel (@channels) {
   $nicechannel =~ tr/A-Za-z0-9-/_/cs;
 
   my $UPDDir = "$opt{'updatedir'}/$nicechannel";
+  my $UPDTmp = "$opt{'updatedir'}/$nicechannel.tmp";
   my $CFFile = "$UPDDir.cf";
+  my $CFFTmp = $newcf_file;
 
   dbg("channel: update directory $UPDDir");
+  dbg("channel: update tmp directory $UPDTmp");
   dbg("channel: channel cf file $CFFile");
+  dbg("channel: channel tmp cf file $CFFTmp");
 
   # try to read metadata from channel.cf file
   my $currentV = -1;
@@ -346,8 +355,25 @@ foreach my $channel (@channels) {
     next;
   }
 
-  # We don't currently have the list of mirrors, so go grab it.
-  unless (-f "$UPDDir/MIRRORED.BY") {
+  # ensure dirs exist, upfront
+  unless (-d $UPDDir) {
+    dbg("channel: creating $UPDDir");
+    mkpath([$UPDDir], 0, 0777) or die "fatal: can't create $UPDDir: $!\n";
+  }
+  unless (-d $UPDTmp) {
+    dbg("channel: creating $UPDTmp");
+    mkpath([$UPDTmp], 0, 0777) or die "fatal: can't create $UPDTmp: $!\n";
+  }
+
+  # copy the MIRRORED.BY file to the tmpdir, if it exists
+  if (-f "$UPDDir/MIRRORED.BY") {
+    unlink("$UPDTmp/MIRRORED.BY");
+    copy("$UPDDir/MIRRORED.BY", "$UPDTmp/MIRRORED.BY")
+            or die "fatal: cannot copy $UPDDir/MIRRORED.BY to $UPDTmp/MIRRORED.BY";
+  }
+
+  unless (-f "$UPDTmp/MIRRORED.BY") {
+    # We don't currently have the list of mirrors, so go grab it.
     dbg("channel: no MIRRORED.BY file available");
     my $mirror = do_txt_query("mirrors.$channel");
     unless ($mirror) {
@@ -364,12 +390,7 @@ foreach my $channel (@channels) {
       next;
     }
 
-    unless (-d $UPDDir) {
-      dbg("channel: creating $UPDDir");
-      mkpath([$UPDDir], 0, 0777) or die "fatal: can't create $UPDDir: $!\n";
-    }
-
-    unless (open(MIR, ">$UPDDir/MIRRORED.BY")) {
+    unless (open(MIR, ">$UPDTmp/MIRRORED.BY")) {
       warn "error: can't create mirrors file: $!\n";
       dbg("channel: MIRRORED.BY creation failure, channel failed");
       $exit++;
@@ -381,7 +402,7 @@ foreach my $channel (@channels) {
   }
 
   # Read in the list of mirrors
-  unless (open(MIR, "$UPDDir/MIRRORED.BY")) {
+  unless (open(MIR, "$UPDTmp/MIRRORED.BY")) {
     warn "error: can't read mirrors file: $!\n";
     dbg("channel: MIRRORED.BY file is unreadable, channel failed");
     $exit++;
@@ -422,7 +443,7 @@ foreach my $channel (@channels) {
   }
 
   # remember the mtime of the file so we can IMS GET later on
-  my $mirby_time = (stat("$UPDDir/MIRRORED.BY"))[9];
+  my $mirby_time = (stat("$UPDTmp/MIRRORED.BY"))[9];
 
 
   # Now that we've laid the foundation, go grab the appropriate files
@@ -585,7 +606,7 @@ ENDOFVALIDATIONERR
 
   if ($mirby) {
     dbg("channel: updating MIRRORED.BY contents");
-    if (open(MBY, ">$UPDDir/MIRRORED.BY")) {
+    if (open(MBY, ">$UPDTmp/MIRRORED.BY")) {
       print MBY $mirby;
       close(MBY);
     }
@@ -595,22 +616,13 @@ ENDOFVALIDATIONERR
   }
 
   dbg("channel: cleaning out update directory");
-  unless (opendir(DIR, $UPDDir)) {
-    warn "error: can't readdir $UPDDir: $!\n";
-    dbg("channel: attempt to readdir failed, channel failed");
+  if (!clean_update_dir($UPDTmp)) {
+    dbg("channel: attempt to clean update dir failed, channel failed");
     $exit++;
     next;
   }
-  while(my $file = readdir(DIR)) {
-    next unless (-f "$UPDDir/$file");
-    next if ($file eq 'MIRRORED.BY');
-    dbg("channel: unlinking $file");
-    $file =~ /^([^\/]+)$/;       # untaint
-    $file = $1;
-    unlink "$UPDDir/$file" || warn "error: can't remove file $UPDDir/$file: $!\n";
-  }
-  closedir(DIR);
-  unlink "$UPDDir.cf" || warn "error: can't remove file $UPDDir.cf: $!\n";
+
+  unlink $CFFTmp || warn "error: can't remove file $CFFTmp: $!\n";
 
   $tfh = IO::Zlib->new($content_file, "rb");
   die "fatal: couldn't read content tmpfile $content_file: $!\n" unless $tfh;
@@ -619,7 +631,7 @@ ENDOFVALIDATIONERR
   die "fatal: couldn't create Archive::Tar object!\n" unless $tar;
 
   dbg("channel: extracting archive");
-  my $ret = taint_safe_archive_extract($UPDDir, $tar);
+  my $ret = taint_safe_archive_extract($UPDTmp, $tar);
 
   unless ($ret) {
     close($tfh);
@@ -630,10 +642,20 @@ ENDOFVALIDATIONERR
   }
   close($tfh);
 
+  # check --lint
+
+  if (!lint_check_dir($UPDTmp)) {
+    warn "error: lint check of update failed!  channel failed\n";
+    $exit++;
+    next;
+  }
+
+
+  # OK, lint passed. now create the update config file
 
   dbg("channel: creating update config file");
-  unless (open(CF, ">$UPDDir.cf")) {
-    die "fatal: can't create new channel cf $UPDDir.cf: $!\n";
+  unless (open(CF, ">$CFFTmp")) {
+    die "fatal: can't create new channel cf $CFFTmp: $!\n";
   }
 
   # Put in whatever metadata we need
@@ -647,19 +669,48 @@ ENDOFVALIDATIONERR
   }
   dbg("channel: updatedir=$UPDDir relativepath=$relativeDir");
 
+  my @files = ();
   # now include *.cf
-  unless (opendir(DIR, $UPDDir)) {
-    die "fatal: can't access $UPDDir: $!\n";
+  unless (opendir(DIR, $UPDTmp)) {
+    die "fatal: can't access $UPDTmp: $!\n";
   }
+  unlink (<$UPDDir/*.cf>);
   while(my $file = readdir(DIR)) {
-    next unless (-f "$UPDDir/$file");
+    $file =~ /^([^\/]+)$/;       # untaint
+    $file = $1;
+    next unless (-f "$UPDTmp/$file");
     next unless ($file =~ /\.cf$/);
     dbg("channel: adding $file");
 
     print CF "include $relativeDir/$file\n";
+    push (@files, $file);
   }
   closedir(DIR);
-  close(CF);
+  if (!close(CF)) {
+    warn "write to $CFFTmp failed! attempting to continue";
+    $exit++;
+    next;
+  }
+
+  dbg("channel: applying changes to $UPDDir...");
+
+  # too late to stop now!   At this stage, if there are errors,
+  # we have to attempt to carry on regardless, since we've already
+  # blown away the old ruleset.
+
+  # clean out the "real" update dir, and copy from tmp areas
+  if (!clean_update_dir($UPDDir)) {
+    warn("channel: attempt to rm contents failed, attempting to continue anyway");
+  }
+
+  foreach my $file (@files) {
+    rename("$UPDTmp/$file", "$UPDDir/$file")
+        or warn "rename $UPDTmp/$file $UPDDir/$file failed: $!";
+  }
+
+  unlink $CFFile || warn "error: can't remove file $CFFile: $!\n";
+  rename("$CFFTmp", "$CFFile")
+      or warn "rename $CFFTmp $CFFile failed: $!";
 
   dbg("channel: update complete");
 }
@@ -830,6 +881,35 @@ sub usage {
 sub is_valid_gpg_key_id {
   # either a keyid (8 bytes) or a fingerprint (40 bytes)
   return ($_[0] =~ /^[a-fA-F0-9]+$/ && (length $_[0] == 8 || length $_[0] == 40));
+}
+
+sub clean_update_dir {
+  my $dir = shift;
+  unless (opendir(DIR, $dir)) {
+    warn "error: can't readdir $dir: $!\n";
+    dbg("channel: attempt to readdir failed, channel failed");
+    return 0;
+  }
+  while(my $file = readdir(DIR)) {
+    next unless (-f "$dir/$file");
+    next if ($file eq 'MIRRORED.BY');
+    dbg("channel: unlinking $file");
+    $file =~ /^([^\/]+)$/;       # untaint
+    $file = $1;
+    if (!unlink "$dir/$file") {
+      warn "error: can't remove file $dir/$file: $!\n";
+      return 0;
+    }
+  }
+  closedir(DIR);
+  return 1;
+}
+
+sub lint_check_dir {
+  my $dir = shift;
+
+  system ("spamassassin --configpath='$dir' --prefspath=/dev/null --lint");
+  return (($? >> 8) == 0);
 }
 
 # ---------------------------------------------------------------------------

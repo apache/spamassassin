@@ -93,13 +93,20 @@ rulesdir=$tmpdir/share/spamassassin
 
 # ensure non-empty
 [ -s $tmpdir/update.tgz ] || exit 3
-# ensure valid tarfile
-gunzip -cd < $tmpdir/update.tgz | tar tf - || exit 4
 
+linttmp=$tmpdir/lintdir
+(
+  cd $linttmp
+  # check validity of tarball; also extract
+  gunzip -cd < $tmpdir/update.tgz | tar xf - || exit $?
+)
 
+# now, ensure the ruleset (entirely as distributed) lints, also.
+# use "-p /dev/null" so any user_prefs data is ignored.
+./spamassassin --configpath=$linttmp -p /dev/null --lint \
+                || exit $?
 
 # sign and get sums
-
 gpg --batch --homedir /home/updatesd/key \
 	-bas $tmpdir/update.tgz  		|| exit $?
 
