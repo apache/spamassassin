@@ -95,6 +95,8 @@ rulesdir=$tmpdir/share/spamassassin
 [ -s $tmpdir/update.tgz ] || exit 3
 
 linttmp=$tmpdir/lintdir
+rm -rf $linttmp
+mkdir $linttmp
 (
   cd $linttmp
   # check validity of tarball; also extract
@@ -103,7 +105,7 @@ linttmp=$tmpdir/lintdir
 
 # now, ensure the ruleset (entirely as distributed) lints, also.
 # use "-p /dev/null" so any user_prefs data is ignored.
-./spamassassin --configpath=$linttmp -p /dev/null --lint \
+./spamassassin -x --configpath=$linttmp -p /dev/null --lint \
                 || exit $?
 
 # sign and get sums
