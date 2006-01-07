@@ -8,7 +8,7 @@ use LWP::Simple;
 use URI::Escape;
 use Data::Dumper;
 
-my $FROM_CACHE; # $FROM_CACHE = 1;
+my $FROM_CACHE;  $FROM_CACHE = 1;
 my $MAKE_CACHE; # $MAKE_CACHE = 1;
 
 ###########################################################################
@@ -92,7 +92,7 @@ my %rules_with_errors = ();
 $mailsa->{lint_callback} = sub {
   my %opts = @_;
 
-  # ignore non-issue lint failures
+  # ignore non-rule-issue lint failures
   return if ($opts{msg} =~ /(?:
         score\sset\sfor\snon-existent|
         description\sexists
