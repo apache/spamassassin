@@ -368,11 +368,17 @@ foreach my $channel (@channels) {
   # copy the MIRRORED.BY file to the tmpdir, if it exists
   if (-f "$UPDDir/MIRRORED.BY") {
     unlink("$UPDTmp/MIRRORED.BY");
+
+    my ($x, $atime, $mtime);
+    ($x,$x,$x,$x,$x,$x,$x,$x,$atime,$mtime,$x) = stat "$UPDDir/MIRRORED.BY";
+
     copy("$UPDDir/MIRRORED.BY", "$UPDTmp/MIRRORED.BY")
             or die "fatal: cannot copy $UPDDir/MIRRORED.BY to $UPDTmp/MIRRORED.BY";
-  }
 
-  unless (-f "$UPDTmp/MIRRORED.BY") {
+    # ensure modtimes match
+    utime($atime, $mtime, "$UPDTmp/MIRRORED.BY");
+  }
+  else {
     # We don't currently have the list of mirrors, so go grab it.
     dbg("channel: no MIRRORED.BY file available");
     my $mirror = do_txt_query("mirrors.$channel");
@@ -711,6 +717,12 @@ ENDOFVALIDATIONERR
   unlink $CFFile || warn "error: can't remove file $CFFile: $!\n";
   rename("$CFFTmp", "$CFFile")
       or warn "rename $CFFTmp $CFFile failed: $!";
+
+  unlink("$UPDDir/MIRRORED.BY");
+  rename("$UPDTmp/MIRRORED.BY", "$UPDDir/MIRRORED.BY")
+      || warn "error: couldn't mv $UPDTmp/MIRRORED.BY $UPDDir/MIRRORED.BY: $!\n";
+
+  rmdir $UPDTmp;
 
   dbg("channel: update complete");
 }
