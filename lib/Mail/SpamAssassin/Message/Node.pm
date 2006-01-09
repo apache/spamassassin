@@ -41,7 +41,7 @@ use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::HTML;
 use Mail::SpamAssassin::Logger;
 
-our $normalize_supported = ( $] > 5.008004 && eval 'require Encode::Detect::Detector' && eval 'require Encode' );
+our $normalize_supported = ( $] > 5.008004 && $HTML::Parser::VERSION >= 3.46 && eval 'require Encode::Detect::Detector' && eval 'require Encode' );
 
 =item new()
 
