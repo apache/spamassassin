@@ -263,5 +263,5 @@ baeb1fai@@example.com			!baeb1fai@@example.com
 
 http://foo23498.com/{ESC}(B	^http://foo23498.com/$
 {ESC}(Bhttp://foo23499.com/	^http://foo23499.com/$
-http://foo23500.com{ESC}(B/	^http://foo23500.com$
+http://foo23500.com{ESC}(B/	^http://foo23500.com(?:/?)$
 
