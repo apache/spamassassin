@@ -680,7 +680,6 @@ ENDOFVALIDATIONERR
   unless (opendir(DIR, $UPDTmp)) {
     die "fatal: can't access $UPDTmp: $!\n";
   }
-  unlink (<$UPDDir/*.cf>);
   while(my $file = readdir(DIR)) {
     $file =~ /^([^\/]+)$/;       # untaint
     $file = $1;
