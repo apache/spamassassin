@@ -135,6 +135,12 @@ sub parse_received_headers {
       $in_internal = 0;
     }
 
+    # note: you can't be in internal networks, but not be in a trusted 
+    # net. (bug 4760)
+    if ($in_internal && !$in_trusted) {
+      $in_trusted = 1;
+    }
+
 # OK, infer the trusted/untrusted handover, if we don't have real info.
 # Here's the algorithm used (taken from Dan's mail):
 # 
