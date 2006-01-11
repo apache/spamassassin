@@ -467,7 +467,8 @@ sub copy_to_output_buffers {
   my ($rule_order, $issandbox, $ALWAYS, $f, $filename) = @_;
 
   my %already_done = ();
-  my $copied = 0;
+  my $copied_active = 0;
+  my $copied_other = 0;
   foreach my $name (@$rule_order, keys(%$ALWAYS))
   {
     # only do each rule once, please ;)
@@ -497,11 +498,15 @@ sub copy_to_output_buffers {
     }
     $rules->{$name}->{output_file} = $pubfile;
 
-    $copied++;
+    if ($pubfile =~ /${opt_activeout}$/) {
+      $copied_active++;
+    } else {
+      $copied_other++;
+    }
   }
 
-  print "$f: $copied ".
-    ($issandbox ? "sandbox" : "core")." rules copied\n";
+  print "$f: $copied_active active rules, ".
+            "$copied_other other\n";
 }
 
 sub pubfile_for_rule {
