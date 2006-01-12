@@ -284,7 +284,7 @@ my $res = Net::DNS::Resolver->new();
 
 my $ua = LWP::UserAgent->new();
 $ua->agent("sa-update/$VERSION");
-$ua->timeout(30);      # a good long timeout; 10 is too short for Coral!
+$ua->timeout(60);      # a good long timeout; 10 is too short for Coral!
 $ua->env_proxy;
 
 # Generate a temporary file to put channel content in for later use ...
