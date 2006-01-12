@@ -284,7 +284,7 @@ my $res = Net::DNS::Resolver->new();
 
 my $ua = LWP::UserAgent->new();
 $ua->agent("sa-update/$VERSION");
-$ua->timeout(180);      # a good long timeout; 10 is too short for Coral!
+$ua->timeout(30);      # a good long timeout; 10 is too short for Coral!
 $ua->env_proxy;
 
 # Generate a temporary file to put channel content in for later use ...
@@ -295,8 +295,10 @@ close($tfh);
 my ($newcf_file, $tfh2) = Mail::SpamAssassin::Util::secure_tmpfile();
 close($tfh2);
 
+# by default, exit code is 1, to indicate no updates occurred
+my $exit = 1;
+
 # Go ahead and loop through all of the channels
-my $exit = 0;
 foreach my $channel (@channels) {
   dbg("channel: attempting channel $channel");
 
@@ -384,22 +386,18 @@ foreach my $channel (@channels) {
     my $mirror = do_txt_query("mirrors.$channel");
     unless ($mirror) {
       warn "error: no mirror data available for channel $channel\n";
-      dbg("channel: MIRRORED.BY file location was not in DNS, channel failed");
-      $exit++;
-      next;
+      channel_failed("channel: MIRRORED.BY file location was not in DNS");
     }
     $mirror = http_get($mirror);
     unless ($mirror) {
       warn "error: no mirror data available for channel $channel\n";
-      dbg("channel: MIRRORED.BY contents were missing, channel failed");
-      $exit++;
+      channel_failed("channel: MIRRORED.BY contents were missing");
       next;
     }
 
     unless (open(MIR, ">$UPDTmp/MIRRORED.BY")) {
       warn "error: can't create mirrors file: $!\n";
-      dbg("channel: MIRRORED.BY creation failure, channel failed");
-      $exit++;
+      channel_failed("channel: MIRRORED.BY creation failure");
       next;
     }
     print MIR $mirror;
@@ -410,8 +408,7 @@ foreach my $channel (@channels) {
   # Read in the list of mirrors
   unless (open(MIR, "$UPDTmp/MIRRORED.BY")) {
     warn "error: can't read mirrors file: $!\n";
-    dbg("channel: MIRRORED.BY file is unreadable, channel failed");
-    $exit++;
+    channel_failed("channel: MIRRORED.BY file is unreadable");
     next;
   }
 
@@ -443,8 +440,7 @@ foreach my $channel (@channels) {
 
   unless (keys %mirrors) {
     warn "error: no mirrors available for channel $channel\n";
-    dbg("channel: no mirrors available, channel failed");
-    $exit++;
+    channel_failed("channel: no mirrors available");
     next;
   }
 
@@ -492,8 +488,7 @@ foreach my $channel (@channels) {
 
   unless ($content && $SHA1 && (!$GPG_ENABLED || $GPG)) {
     warn "error: channel $channel has no working mirrors\n";
-    dbg("channel: could not find working mirror, channel failed");
-    $exit++;
+    channel_failed("channel: could not find working mirror");
     next;
   }
 
@@ -507,8 +502,7 @@ foreach my $channel (@channels) {
   dbg("sha1: verification got     : $digest");
   unless ($digest eq $SHA1) {
     warn "error: can't verify SHA1 signature\n";
-    dbg("channel: SHA1 verification failed, channel failed");
-    $exit++;
+    channel_failed("channel: SHA1 verification failed");
     next;
   }
 
@@ -602,7 +596,7 @@ Perhaps you need to import the channel's GPG key?  For example:
 
 ENDOFVALIDATIONERR
 
-      $exit++;
+      channel_failed("channel: GPG validation failed");
       next;
     }
   }
@@ -623,8 +617,7 @@ ENDOFVALIDATIONERR
 
   dbg("channel: cleaning out update directory");
   if (!clean_update_dir($UPDTmp)) {
-    dbg("channel: attempt to clean update dir failed, channel failed");
-    $exit++;
+    channel_failed("channel: attempt to clean update dir failed");
     next;
   }
 
@@ -642,8 +635,7 @@ ENDOFVALIDATIONERR
   unless ($ret) {
     close($tfh);
     warn "error: couldn't extract the tar archive!\n";
-    dbg("channel: archive extraction failed, channel failed");
-    $exit++;
+    channel_failed("channel: archive extraction failed");
     next;
   }
   close($tfh);
@@ -652,7 +644,7 @@ ENDOFVALIDATIONERR
 
   if (!lint_check_dir($UPDTmp)) {
     warn "error: lint check of update failed!  channel failed\n";
-    $exit++;
+    channel_failed("channel: lint check of update failed");
     next;
   }
 
@@ -693,7 +685,7 @@ ENDOFVALIDATIONERR
   closedir(DIR);
   if (!close(CF)) {
     warn "write to $CFFTmp failed! attempting to continue";
-    $exit++;
+    channel_failed("write to $CFFTmp failed");
     next;
   }
 
@@ -722,6 +714,7 @@ ENDOFVALIDATIONERR
       || warn "error: couldn't mv $UPDTmp/MIRRORED.BY $UPDDir/MIRRORED.BY: $!\n";
 
   rmdir $UPDTmp;
+  $exit = 0;            # "exit 0" means an update occurred
 
   dbg("channel: update complete");
 }
@@ -730,6 +723,16 @@ unlink $content_file || warn "error: couldn't remove tmpfile $content_file: $!\n
 
 dbg("diag: updates complete, exiting with code $exit");
 exit $exit;
+
+sub channel_failed {
+  my $reason = shift;
+  warn("$reason, channel failed\n");
+  if ($exit > 4) {
+    $exit++;
+  } else {
+    $exit = 4;      # 4 or higher means channel failed
+  }
+}
 
 sub taint_safe_archive_extract {
   my $todir = shift;
@@ -798,31 +801,48 @@ sub do_txt_query {
 sub http_get {
   my($url, $ims) = @_;
 
-  my $request = HTTP::Request->new("GET");
-  $request->url($url);
+  my $response;
+  my $text;
 
-  if (defined $ims) {
-    my $str = time2str($ims);
-    $request->header('If-Modified-Since', $str);
-    dbg("http: IMS GET request, $url, $str");
+  # retry 3 times; this works better with Coral
+  foreach my $retries (1 .. 3) {
+    my $request = HTTP::Request->new("GET");
+    $request->url($url);
+
+    if (defined $ims) {
+      my $str = time2str($ims);
+      $request->header('If-Modified-Since', $str);
+      dbg("http: IMS GET request, $url, $str");
+    }
+    else {
+      dbg("http: GET request, $url");
+    }
+
+    $response = $ua->request($request);
+
+    if ($response->is_success) {
+      return $response->content;
+    }
+
+    # could be a "304 not modified" or similar.
+    # TODO: should use a special return type for "not modified" here
+    # instead of overloading the failure return type
+    if ($ims && $response->status_line =~ /^3/) {
+      return;
+    }
+
+    # include the text in the debug output; it's useful in some cases,
+    # e.g. proxies that require authentication, diagnosing fascist
+    # filtering false positives, etc.
+    $text = $response->content;
+    $text ||= "(no body)";
+    $text =~ s/\s+/ /gs;
+
+    dbg ("http: request failed, retrying: " . $response->status_line.": ".$text);
   }
-  else {
-    dbg("http: GET request, $url");
-  }
 
-  my $response = $ua->request($request);
-
-  if ($response->is_success) {
-    return $response->content;
-  }
-
-  # include the text in the debug output; it's useful in some cases,
-  # e.g. proxies that require authentication, diagnosing fascist
-  # filtering false positives, etc.
-  my $text = $response->content;
-  $text ||= "(no body)";
-  $text =~ s/\s+/ /gs;
-  dbg("http: request failed: " . $response->status_line.": ".$text);
+  # this should be a user-readable warning without --debug
+  warn "http: request failed: " . $response->status_line.": ".$text."\n";
   return;
 }
 
@@ -1046,6 +1066,16 @@ Print help message and exit.
 Print sa-update version and exit.
 
 =back
+
+=head1 EXIT CODES
+
+An exit code of C<0> means an update was available, and was downloaded and
+installed successfully.
+
+An exit code of C<1> means no fresh updates were available.
+
+An exit code of C<4> or higher, indicates that errors occurred while
+attempting to download and extract updates.
 
 =head1 SEE ALSO
 
