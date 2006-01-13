@@ -28,6 +28,7 @@ sub usage {
 use strict;
 use File::Find;
 use File::Copy;
+use File::Basename;
 use Getopt::Long;
 
 # use SpamAssassin classes directly, so we can lint rules
@@ -177,6 +178,7 @@ sub lint_rule_text {
     }
   };
 
+  $mailsa->lint_rules();
   return $errors;       # 0 means good
 }
 
@@ -335,6 +337,12 @@ sub rule_file_compile {
       $rules->{$name}->{text} .= $current_comments . $orig;
       $rules->{$name}->{srcfile} = $f;
 
+      # note if the conditional is a plugin reference, as we need to
+      # ensure that "loadplugin" lines stay in the same place
+      if ($current_conditional && $current_conditional =~ /ifplugin\s+(\S+)/) {
+        $rules->{$name}->{ifplugin} = $1;
+      }
+
       # note if we found the rule defn or not.  if we did not,
       # that means the rule was a code-tied rule, which should always
       # have its descriptions/scores/etc. published in "active".
@@ -399,8 +407,22 @@ sub rule_file_compile {
     elsif (/^loadplugin\s*(\S+)\b/) {
       my $name = 'loadplugin_'.$1;
 
-      if ($issandbox) {
-        $name .= "_sandbox";
+      # if ($issandbox) {       # I think this is now superfluous
+      # $name .= "_sandbox";
+      # }
+
+      if (/^loadplugin\s*\S+\s+(\S+)/) {
+        my $fname = $1;
+        my $fpath = dirname($f)."/".$fname;
+        if (!-f $fpath) {
+          warn "$f: WARNING: plugin code file '$fpath' not found, line ignored: $orig";
+          next;
+        }
+
+        if (!filename_in_manifest($opt_out.'/'.$fname)) {
+          warn "$f: WARNING: '$opt_out/$fname' not listed in manifest file, line ignored: $orig";
+          next;     # don't set 'pubfile' below
+        }
       }
 
       unless ($rules->{$name}) {
@@ -466,6 +488,15 @@ sub rule_file_compile {
 sub copy_to_output_buffers {
   my ($rule_order, $issandbox, $ALWAYS, $f, $filename) = @_;
 
+  # always output these two files, even if they're empty!
+  foreach my $pubfile ($opt_out.'/'.$opt_sandboxout,
+                $opt_out.'/'.$opt_activeout)
+  {
+    $output_files->{$pubfile} = {
+      header => $default_file_header
+    };
+  }
+
   my %already_done = ();
   my $copied_active = 0;
   my $copied_other = 0;
@@ -482,6 +513,10 @@ sub copy_to_output_buffers {
 
     my $srcfile = $rules->{$name}->{srcfile};
     my $pubfile = pubfile_for_rule($rules, $name);
+    my $is_active = 0;
+    if ($pubfile =~ /${opt_activeout}$/) {
+      $is_active++;
+    }
 
     $output_files->{$pubfile} = {
       header => $default_file_header
@@ -493,12 +528,21 @@ sub copy_to_output_buffers {
     my $cond = $rules->{$name}->{cond};
     if ($cond) {
       $rules->{$name}->{output_text} = "\n".$cond.$text."endif\n";
+
+      # also, if the rule is active, ensure its "loadplugin" line
+      # is copied to the active output file, too
+      my $pluginclass = $rules->{$name}->{ifplugin};
+      if ($is_active && $pluginclass) {
+        my $ifplugin_text_name = "loadplugin_".$pluginclass;
+        $rules->{$ifplugin_text_name}->{output_file} = $pubfile;
+      }
+
     } else {
       $rules->{$name}->{output_text} = $text;
     }
     $rules->{$name}->{output_file} = $pubfile;
 
-    if ($pubfile =~ /${opt_activeout}$/) {
+    if ($is_active) {
       $copied_active++;
     } else {
       $copied_other++;
