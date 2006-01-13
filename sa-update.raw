@@ -676,7 +676,6 @@ ENDOFVALIDATIONERR
     $file =~ /^([^\/]+)$/;       # untaint
     $file = $1;
     next unless (-f "$UPDTmp/$file");
-    next unless ($file =~ /\.cf$/);
     dbg("channel: adding $file");
 
     print CF "include $relativeDir/$file\n";
