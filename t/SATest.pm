@@ -232,8 +232,7 @@ sub sarun {
   rmtree ("log/outputdir.tmp"); # some tests use this
   mkdir ("log/outputdir.tmp", 0755);
 
-  %found = ();
-  %found_anti = ();
+  clear_pattern_counters();
 
   if (defined $ENV{'SA_ARGS'}) {
     $args = $ENV{'SA_ARGS'} . " ". $args;
@@ -527,7 +526,14 @@ sub checkfile {
 
   # print "Checking $filename\n";
   if (!open (IN, "< log/$filename")) {
-    warn "cannot open log/$filename"; return undef;
+    # could be it already contains the "log/" prefix?
+    if (!open (IN, "< $filename")) {
+      warn "cannot open log/$filename or $filename"; return undef;
+    } else {
+      push @files_checked, "$filename";
+    }
+  } else {
+    push @files_checked, "log/$filename";
   }
   &$read_sub();
   close IN;
@@ -582,6 +588,7 @@ sub patterns_run_cb {
 }
 
 sub ok_all_patterns {
+  my $wasfailure = 0;
   foreach my $pat (sort keys %patterns) {
     my $type = $patterns{$pat};
     print "\tChecking $type\n";
@@ -590,6 +597,7 @@ sub ok_all_patterns {
     } else {
       warn "\tNot found: $type = $pat\n";
       ok (0);                     # keep the right # of tests
+      $wasfailure++;
     }
   }
   foreach my $pat (sort keys %anti_patterns) {
@@ -598,11 +606,19 @@ sub ok_all_patterns {
     if (defined $found_anti{$type}) {
       warn "\tFound anti-pattern: $type = $pat\n";
       ok (0);
+      $wasfailure++;
     }
     else
     {
       ok (1);
     }
+  }
+
+  if ($wasfailure) {
+    warn "Output can be examined in: ".join(' ', @files_checked)."\n";
+    return 0;
+  } else {
+    return 1;
   }
 }
 
@@ -640,6 +656,7 @@ sub skip_all_patterns {
 sub clear_pattern_counters {
   %found = ();
   %found_anti = ();
+  @files_checked = ();
 }
 
 sub read_config {

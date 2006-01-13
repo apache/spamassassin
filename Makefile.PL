@@ -232,7 +232,9 @@ my %makefile = (
 
 	'version.env',
 
-        't/bayessql.cf', 't/do_net', 't/log', 't/sql_based_whitelist.cf'
+        't/bayessql.cf', 't/do_net', 't/log', 't/sql_based_whitelist.cf',
+
+        'rules/*.pm'
       )
 
     },
