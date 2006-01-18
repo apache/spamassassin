@@ -2171,7 +2171,7 @@ sub check_for_uppercase {
 sub check_for_mime {
   my ($self, undef, $test) = @_;
 
-  $self->_check_attachments unless exists $self->{$test};
+  $self->_check_attachments unless exists $self->{mime_checked_attachments};
   return $self->{$test};
 }
 
@@ -2182,7 +2182,7 @@ sub check_for_mime_html {
   my $ctype = $self->get('Content-Type');
   return 1 if (defined($ctype) && $ctype =~ m@^text/html@i);
 
-  $self->_check_attachments unless exists $self->{mime_body_html_count};
+  $self->_check_attachments unless exists $self->{mime_checked_attachments};
   return ($self->{mime_body_html_count} > 0);
 }
 
@@ -2193,7 +2193,7 @@ sub check_for_mime_html_only {
   my $ctype = $self->get('Content-Type');
   return 1 if (defined($ctype) && $ctype =~ m@^text/html@i);
 
-  $self->_check_attachments unless exists $self->{mime_body_html_count};
+  $self->_check_attachments unless exists $self->{mime_checked_attachments};
   return ($self->{mime_body_html_count} > 0 &&
 	  $self->{mime_body_text_count} == 0);
 }
@@ -2201,7 +2201,7 @@ sub check_for_mime_html_only {
 sub check_for_mime_excessive_qp {
   my ($self, undef, $min) = @_;
 
-  $self->_check_attachments unless exists $self->{mime_qp_ratio};
+  $self->_check_attachments unless exists $self->{mime_checked_attachments};
 
   return $self->{mime_qp_ratio} >= $min;
 }
@@ -2209,7 +2209,7 @@ sub check_for_mime_excessive_qp {
 sub check_mime_multipart_ratio {
   my ($self, undef, $min, $max) = @_;
 
-  $self->_check_attachments unless exists $self->{mime_multipart_alternative};
+  $self->_check_attachments unless exists $self->{mime_checked_attachments};
 
   return ($self->{mime_multipart_ratio} >= $min &&
 	  $self->{mime_multipart_ratio} < $max);
