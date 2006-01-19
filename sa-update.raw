@@ -678,7 +678,10 @@ ENDOFVALIDATIONERR
     next unless (-f "$UPDTmp/$file");
     dbg("channel: adding $file");
 
-    print CF "include $relativeDir/$file\n";
+    if ($file =~ /\.cf$/) {
+      print CF "include $relativeDir/$file\n";
+    }
+
     push (@files, $file);
   }
   closedir(DIR);
@@ -710,7 +713,7 @@ ENDOFVALIDATIONERR
 
   unlink("$UPDDir/MIRRORED.BY");
   rename("$UPDTmp/MIRRORED.BY", "$UPDDir/MIRRORED.BY")
-      || warn "error: couldn't mv $UPDTmp/MIRRORED.BY $UPDDir/MIRRORED.BY: $!\n";
+      or warn "error: couldn't mv $UPDTmp/MIRRORED.BY $UPDDir/MIRRORED.BY: $!\n";
 
   rmdir $UPDTmp;
   $exit = 0;            # "exit 0" means an update occurred
