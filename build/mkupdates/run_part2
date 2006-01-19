@@ -80,7 +80,7 @@ rulesdir=$tmpdir/share/spamassassin
 
 (
   cd $rulesdir 
-  tar cf - *                             || exit $?
+  tar cf - *.cf                          || exit $?
 
 ) | gzip -9 > $tmpdir/update.tgz         || exit $?
 

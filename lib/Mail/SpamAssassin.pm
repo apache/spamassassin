@@ -1348,8 +1348,15 @@ sub init {
     $fname = $sysrules;
     if ($fname) {
       $self->{config_text} .= $self->read_cf ($fname, 'default rules dir');
-      if (-f "$fname/languages") {
-	$self->{languages_filename} = "$fname/languages";
+    }
+
+    if (!$self->{languages_filename}) {
+      my $langs = $self->first_existing_path (map {
+            s/$/\/languages/; $_;
+          } @default_rules_path);
+
+      if ($langs && -f $langs) {
+	$self->{languages_filename} = $langs;
       }
     }
 
