@@ -72,6 +72,9 @@ sub add_cidr {
     }
 
     $bits = 32 if (!defined $bits);
+
+    next if ($self->is_net_declared($ip, $bits, $exclude, 0));
+
     my $mask = 0xFFffFFff ^ ((2 ** (32-$bits)) - 1);
 
     push @{$self->{nets}}, {
@@ -90,6 +93,38 @@ sub get_num_nets {
 
   if (!exists $self->{nets}) { return 0; }
   return scalar @{$self->{nets}};
+}
+
+sub is_net_declared {
+  my ($self, $network, $bits, $exclude, $quiet) = @_;
+
+  return 0 unless (defined $self->{nets});
+  return 0 unless ($network =~ m/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/);
+
+  my $netname = "$network/$bits";
+
+  my $mask = 0xFFffFFff ^ ((2 ** (32-$bits)) - 1);
+  $network = Mail::SpamAssassin::Util::my_inet_aton($network);
+
+  $exclude = 0 if (!defined $exclude);
+  $quiet = 0 if (!defined $quiet);
+
+  foreach my $net (@{$self->{nets}}) {
+    # inclusion/exclusion need NOT be the same since we match on the first
+    # listed basis there's no point in including the same networks later on
+
+    # a net can not be contained by a (smaller) net with a larger mask
+    next if ($net->{mask} > $mask);
+
+    # check to see if the new network is contained by the old network
+    if (($network & $net->{mask}) == $net->{ip}) {
+      warn "netset: cannot " . ($exclude ? "exclude" : "include") 
+	 . " $netname as it has already been "
+	 . ($net->{exclude} ? "excluded" : "included") . "\n" unless $quiet;
+      return 1;
+    }
+  }
+  return 0;
 }
 
 sub contains_ip {
