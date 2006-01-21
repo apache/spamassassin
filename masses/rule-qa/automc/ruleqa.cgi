@@ -860,6 +860,9 @@ sub extract_freqs_head_info {
 sub create_spampc_detail {
   my ($percent, $isspam, $ctx, $who) = @_;
 
+  # optimization: no need to look anything up if it's 0.0000%
+  if ($percent) { return '0 messages'; }
+
   my $obj;
   if ($who) {
     $obj = $ctx->{'message_count:'.$who};
