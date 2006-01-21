@@ -216,6 +216,7 @@ my $hdr = $q->header . q{<html><head>
       background: #f0e0a0;
     }
 
+
     /* Sortable tables, see http://www.kryogenix.org/code/browser/sorttable/ */
     table.sortable a.sortheader {
        background: #ddd;
@@ -231,6 +232,27 @@ my $hdr = $q->header . q{<html><head>
        color: black;
        text-decoration: none;
     }
+
+
+    /* mouseover data for the freqs spam% and ham% figures using CSS2.
+     * see: http://www.meyerweb.com/eric/css/edge/popups/demo.html
+     */
+    table tr td a.ftd {
+      position: relative;
+      /* relative positioning so that the span will be
+       * "absolute" positioned relative to this block */
+    }
+    table tr td a.ftd span {
+      display: none;
+    }
+    table tr td a.ftd:hover span {
+      display: block;
+      position: absolute; top: 1em; left: 0.5em;
+      padding: 5px 20px 5px 20px; margin: 10px; z-index: 100;
+      border: 1px dashed;
+      background: #ffc;
+    }
+
 
   </style>
 
@@ -538,9 +560,11 @@ sub graph_over_time {
 
   # untaint
   $rule =~ /([_0-9a-zA-Z]+)/; my $saferule = $1;
-
-  $datadir =~ s/\.\.\//__\//gs;
   $datadir =~ /([-\.\,_0-9a-zA-Z\/]+)/; my $safedatadir = $1;
+
+  # outright block possibly-hostile stuff here:
+  # no "../" path traversal
+  die "forbidden: $safedatadir .." if ($safedatadir =~ /\.\./);
 
   exec ("$myperl $automcdir/../rule-hits-over-time ".
         "--cgi --scale_period=200 --rule='$saferule' ".
@@ -685,6 +709,8 @@ sub get_freqs_for_rule {
   };
 
   my $heads = sub_freqs_head_line($freqs_head{$key});
+  my $header_context = extract_freqs_head_info($freqs_head{$key});
+
   my $headers_id = $key; $headers_id =~ s/[^A-Za-z0-9]/_/gs;
 
   $comment .= qq{ 
@@ -723,18 +749,18 @@ sub get_freqs_for_rule {
   my @rules = split (' ', $ruleslist);
   if (scalar @rules == 0) { @rules = (''); }
 
-  # my $first_round_in_loop = 1;
-
   foreach my $rule (@rules) {
     if ($rule && defined $freqs_data{$key}{$rule}) {
       $comment .= rule_anchor($key,$rule);
-      $comment .= output_freqs_data_line($freqs_data{$key}{$rule});
+      $comment .= output_freqs_data_line($freqs_data{$key}{$rule},
+                $header_context);
     }
     elsif ($rule eq '') {
       # all rules please...
       foreach my $r (@{$freqs_ordr{$key}}) {
         $comment .= rule_anchor($key,$r);
-        $comment .= output_freqs_data_line($freqs_data{$key}{$r});
+        $comment .= output_freqs_data_line($freqs_data{$key}{$r},
+                $header_context);
       }
     }
     elsif ($rule =~ /^\/(.*)$/) {
@@ -742,7 +768,8 @@ sub get_freqs_for_rule {
       foreach my $r (@{$freqs_ordr{$key}}) {
         next unless ($r =~/${regexp}/i);
         $comment .= rule_anchor($key,$r);
-        $comment .= output_freqs_data_line($freqs_data{$key}{$r});
+        $comment .= output_freqs_data_line($freqs_data{$key}{$r},
+                $header_context);
       }
     }
     else {
@@ -780,8 +807,8 @@ sub set_freqs_templates {
   <tr class=freqsline_promo[% PROMO %]>
     <td>[% IF RULEDETAIL != '' %]<a href="[% RULEDETAIL %]">&gt;</a>[% END %]</td>
     <td>[% MSECS %]</td>
-    <td>[% SPAMPC %]</td>
-    <td>[% HAMPC %]</td>
+    <td><a class=ftd>[% SPAMPC %]<span>[% SPAMPCDETAIL %]</span></a>
+    <td><a class=ftd>[% HAMPC %]<span>[% HAMPCDETAIL %]</span></a>
     <td>[% SO %]</td>
     <td>[% RANK %]</td>
     <td>[% SCORE %]</td>
@@ -807,8 +834,52 @@ sub set_freqs_templates {
   $FREQS_EXTRA_TEMPLATE =~ s/^\s+//gm;
 }
 
+sub extract_freqs_head_info {
+  my $headstr = shift;
+  my $ctx = { };
+
+  # extract the "real" numbers of mails for particular classes, for
+  # some of the report types:
+  #   0     1000     1000    0.500   0.00    0.00  (all messages):mc-fast
+  #   0     4983     4995    0.499   0.00    0.00  (all messages):mc-med
+  #   0     9974     9995    0.499   0.00    0.00  (all messages):mc-slow
+  #   0    19972    19994    0.500   0.00    0.00  (all messages):mc-slower
+  # or just:
+  #   0    35929    35984    0.500   0.00    0.00  (all messages)
+  while ($headstr =~ m/^
+        \s+\d+\s+(\d+)\s+(\d+)\s+\S+\s+\S+\s+\S+\s+\(all\smessages\)(?:|:\S+)\s*
+        $/gmx)
+  {
+    $ctx->{'message_count'.$3} = {
+          nspam => $1,
+          nham => $2
+        };
+  }
+}
+
+sub create_spampc_detail {
+  my ($percent, $isspam, $ctx, $who) = @_;
+
+  my $obj;
+  if ($who) {
+    $obj = $ctx->{'message_count:'.$who};
+  } else {
+    $obj = $ctx->{'message_count'};
+  }
+
+  if (!$obj) {
+    return "???";      # no data found for that submitter, stop here!
+  }
+
+  my $outof = ($isspam ? $obj->{nspam} : $obj->{nham});
+  my $count = int (($percent/100.0) * $outof);
+  return qq{
+    $count of $outof messages
+  };
+}
+
 sub output_freqs_data_line {
-  my ($obj) = @_;
+  my ($obj, $header_context) = @_;
 
   # normal freqs lines, with optional subselector after rule name
   my $out = '';
@@ -835,6 +906,10 @@ sub output_freqs_data_line {
         MSECS => $line->{msecs},
         SPAMPC => $line->{spampc},
         HAMPC => $line->{hampc},
+        SPAMPCDETAIL => create_spampc_detail($line->{spampc}, 1,
+                 $header_context, $line->{username}),
+        HAMPCDETAIL => create_spampc_detail($line->{hampc}, 0,
+                 $header_context, $line->{username}),
         SO => $line->{so},
         RANK => $line->{rank},
         SCORE => $score,
