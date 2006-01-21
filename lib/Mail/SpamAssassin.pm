@@ -1351,13 +1351,7 @@ sub init {
     }
 
     if (!$self->{languages_filename}) {
-      my $langs = $self->first_existing_path (map {
-            s/$/\/languages/; $_;
-          } @default_rules_path);
-
-      if ($langs && -f $langs) {
-	$self->{languages_filename} = $langs;
-      }
+      $self->{languages_filename} = $self->find_rule_support_file("languages");
     }
 
     $fname = $siterules;
@@ -1493,6 +1487,27 @@ sub get_and_create_userstate_dir {
     eval { mkpath($fname, 0, 0700) } or dbg("config: mkdir $fname failed: $@ $!\n");
   }
   $fname;
+}
+
+=item $fullpath = $f->find_rule_support_file ($filename)
+
+Find a rule-support file, such as C<languages> or C<triplets.txt>,
+in the system-wide rules directory, and return its full path if
+it exists.
+
+(This API was added in SpamAssassin 3.2.0.)
+
+=cut
+
+sub find_rule_support_file {
+  my ($self, $filename) = @_;
+
+  # take a copy to avoid modifying the real one (stupid map { } side-effect)
+  my @paths = @default_rules_path;
+  return $self->first_existing_path (map {
+      s/$/\/${filename}/;
+      $_;
+    } @paths);
 }
 
 =item $f->create_default_prefs ($filename, $username [ , $userdir ] )
