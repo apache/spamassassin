@@ -847,7 +847,7 @@ sub extract_freqs_head_info {
   # or just:
   #   0    35929    35984    0.500   0.00    0.00  (all messages)
   while ($headstr =~ m/^
-        \s+\d+\s+(\d+)\s+(\d+)\s+\S+\s+\S+\s+\S+\s+\(all\smessages\)(?:|:\S+)\s*
+        \s+\d+\s+(\d+)\s+(\d+)\s+\S+\s+\S+\s+\S+\s+\(all\smessages\)(|:\S+)\s*
         $/gmx)
   {
     $ctx->{'message_count'.$3} = {
@@ -855,14 +855,17 @@ sub extract_freqs_head_info {
           nham => $2
         };
   }
+
+  return $ctx;
 }
 
 sub create_spampc_detail {
-  my ($percent, $isspam, $ctx, $who) = @_;
+  my ($percent, $isspam, $ctx, $line) = @_;
 
   # optimization: no need to look anything up if it's 0.0000%
-  if ($percent) { return '0 messages'; }
+  if ($percent == 0.0) { return qq{ 0\&nbsp;messages }; }
 
+  my $who = $line->{username} || $line->{age};
   my $obj;
   if ($who) {
     $obj = $ctx->{'message_count:'.$who};
@@ -877,7 +880,7 @@ sub create_spampc_detail {
   my $outof = ($isspam ? $obj->{nspam} : $obj->{nham});
   my $count = int (($percent/100.0) * $outof);
   return qq{
-    $count of $outof messages
+    $count\&nbsp;of\&nbsp;$outof\&nbsp;messages
   };
 }
 
@@ -910,9 +913,9 @@ sub output_freqs_data_line {
         SPAMPC => $line->{spampc},
         HAMPC => $line->{hampc},
         SPAMPCDETAIL => create_spampc_detail($line->{spampc}, 1,
-                 $header_context, $line->{username}),
+                 $header_context, $line),
         HAMPCDETAIL => create_spampc_detail($line->{hampc}, 0,
-                 $header_context, $line->{username}),
+                 $header_context, $line),
         SO => $line->{so},
         RANK => $line->{rank},
         SCORE => $score,
