@@ -676,6 +676,8 @@ ENDOFVALIDATIONERR
     $file =~ /^([^\/]+)$/;       # untaint
     $file = $1;
     next unless (-f "$UPDTmp/$file");
+    next if ($file eq "MIRRORED.BY");   # handled separately
+
     dbg("channel: adding $file");
 
     if ($file =~ /\.cf$/) {
