@@ -225,16 +225,35 @@ my %makefile = (
         'spamc/*.so',
         'spamc/Makefile',
         'spamc/config.h', 'spamc/version.h', 'spamc/spamc.h',
-        'spamc/config.status', 'spamc/config.cache', 'spamc/config.log', 'spamc/autom4te.cache',
+        'spamc/config.status', 'spamc/*.cache', 'spamc/config.log',
         'spamd/*spamc*', 'qmail',
 
-        'doc', 'pod2htm*',
+        'doc', 'pod2htm*', '*.cache',
 
 	'version.env',
 
         't/bayessql.cf', 't/do_net', 't/log', 't/sql_based_whitelist.cf',
 
-        'rules/*.pm'
+        'rules/*.pm',
+
+        # at one stage, these were copied from rulesrc into the rules
+        # build dir, but this no longer is the case.  Ensure they
+        # get cleaned on "make clean".
+        'rules/20_head_tests.cf',
+        'rules/25_replace.cf',
+        'rules/20_advance_fee.cf',
+        'rules/20_meta_tests.cf',
+        'rules/20_body_tests.cf',
+        'rules/20_phrases.cf',
+        'rules/50_scores.cf',
+        'rules/20_compensate.cf',
+        'rules/20_porn.cf',
+        'rules/60_whitelist_spf.cf',
+        'rules/20_drugs.cf',
+        'rules/20_ratware.cf',
+        'rules/20_fake_helo_tests.cf',
+        'rules/20_uri_tests.cf',
+
       )
 
     },
