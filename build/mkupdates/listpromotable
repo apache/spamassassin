@@ -9,7 +9,15 @@ use URI::Escape;
 use Data::Dumper;
 
 my $FROM_CACHE; # $FROM_CACHE = 1;
-my $MAKE_CACHE; # $MAKE_CACHE = 1;
+my $MAKE_CACHE; $MAKE_CACHE = 1;        # turn this on by default, no harm
+
+# we allow promotion of rules that are "ifplugin" one of these
+my @def_plugins = map {
+    s,^lib/Mail/SpamAssassin/Plugin/(\S+)\.pm$,Mail::SpamAssassin::Plugin::$1,gs;
+    $_;
+  } <lib/Mail/SpamAssassin/Plugin/*.pm>;
+
+my $PROMOTABLE_PLUGINS_RE = "^" . join("|", @def_plugins) . "\$";
 
 ###########################################################################
 
@@ -162,7 +170,7 @@ foreach my $plistkey (sort keys %$plist) {
     my $pkg = $1;
     # grep out the ones we *do* have, and do use in "ifplugin"
     # lines in "rulesrc", here...
-    next if ($pkg =~ /(?:ReplaceTags|SomethingElse)/);
+    next if ($pkg =~ /${PROMOTABLE_PLUGINS_RE}/o);
     print "\n# not publishing $name: needs $ifs\n";
     $skip++;
   }
