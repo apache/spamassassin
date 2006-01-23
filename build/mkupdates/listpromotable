@@ -146,8 +146,11 @@ foreach my $plistkey (sort keys %$plist) {
   if ($tfs) {
     next if ($tfs =~ /\bnopublish\b/);
 
-    # all of these tflags force publication
-    if ($tfs =~ /\b(publish|userconf|learn)\b/) {
+    # all of these tflags force publication;
+    # include "net", since otherwise this script has to be aware
+    # what day of the week it is for weekly net/non-net mass-checks!
+    # very messy.  TODO?
+    if ($tfs =~ /\b(publish|userconf|learn|net)\b/) {
       $notes = "tflags ".$1;
       goto publish;
     }
