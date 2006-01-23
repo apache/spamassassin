@@ -1,6 +1,9 @@
 # active ruleset list (automatically generated from http://buildbot.spamassassin.org/)
 
 # good enough
+ACT_NOW_CAPS
+
+# good enough
 ADVANCE_FEE_1
 
 # good enough
@@ -29,6 +32,12 @@ BAD_CREDIT
 
 # good enough
 BAD_ENC_HEADER
+
+# good enough
+BANG_EXERCISE
+
+# good enough
+BANG_GUAR
 
 # tflags learn
 BAYES_00
@@ -79,16 +88,10 @@ CHINA_HEADER
 CONFIRMED_FORGED
 
 # good enough
-CONSOLIDATE_DEBT
-
-# good enough
 CUM_SHOT
 
 # good enough
 DATE_IN_FUTURE_03_06
-
-# good enough
-DATE_IN_FUTURE_06_12
 
 # good enough
 DATE_IN_FUTURE_12_24
@@ -115,7 +118,40 @@ DEAR_FRIEND
 DEAR_SOMETHING
 
 # good enough
+DIET_1
+
+# tflags net
+DIGEST_MULTIPLE
+
+# good enough
+DISGUISE_PORN_MUNDANE
+
+# tflags net
+DNS_FROM_AHBL_RHSBL
+
+# tflags net
+DNS_FROM_RFC_ABUSE
+
+# tflags net
+DNS_FROM_RFC_BOGUSMX
+
+# tflags net
+DNS_FROM_RFC_DSN
+
+# tflags net
+DNS_FROM_RFC_POST
+
+# tflags net
+DNS_FROM_RFC_WHOIS
+
+# tflags net
+DNS_FROM_SECURITYSAGE
+
+# good enough
 DOMAIN_4U2
+
+# good enough
+DOMAIN_RATIO
 
 # good enough
 DRUGS_ANXIETY
@@ -163,13 +199,22 @@ DRUG_ED_GENERIC
 DRUG_ED_ONLINE
 
 # good enough
+DRUG_ED_SILD
+
+# good enough
 EARN_PER_WEEK
+
+# good enough
+EMPTY_MESSAGE
 
 # good enough
 EM_ROLEX
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
+
+# good enough
+EXCUSE_10
 
 # good enough
 EXCUSE_24
@@ -202,6 +247,9 @@ FIN_FREE
 FORGED_AOL_TAGS
 
 # good enough
+FORGED_HOTMAIL_RCVD
+
+# good enough
 FORGED_HOTMAIL_RCVD2
 
 # good enough
@@ -212,6 +260,9 @@ FORGED_IMS_TAGS
 
 # good enough
 FORGED_MSGID_AOL
+
+# good enough
+FORGED_MSGID_EXCITE
 
 # good enough
 FORGED_MSGID_HOTMAIL
@@ -298,6 +349,12 @@ FROM_OFFERS
 FRONTPAGE
 
 # good enough
+FUZZY_AFFORDABLE
+
+# good enough
+FUZZY_AMBIEN
+
+# good enough
 FUZZY_BILLION
 
 # good enough
@@ -378,8 +435,20 @@ GAPPY_SUBJECT
 # good enough
 GEO_QUERY_STRING
 
+# good enough
+GET_PAID
+
 # tflags userconf
 GTUBE
+
+# tflags net
+HABEAS_ACCREDITED_COI
+
+# tflags net
+HABEAS_ACCREDITED_SOI
+
+# tflags net
+HABEAS_CHECKED
 
 # tflags userconf
 HASHCASH_20
@@ -436,6 +505,9 @@ HELO_DYNAMIC_IPADDR
 HELO_DYNAMIC_IPADDR2
 
 # good enough
+HELO_DYNAMIC_ROGERS
+
+# good enough
 HELO_DYNAMIC_SPLIT_IP
 
 # good enough
@@ -481,16 +553,19 @@ HTTPS_IP_MISMATCH
 HTTP_77
 
 # good enough
+HTTP_ESCAPED_HOST
+
+# good enough
 HTTP_EXCESSIVE_ESCAPES
 
 # good enough
 IMPOTENCE
 
 # good enough
-INFO_TLD
+INTERRUPTUS
 
 # good enough
-INTERRUPTUS
+INVALID_DATE
 
 # good enough
 INVALID_DATE_TZ_ABSURD
@@ -517,6 +592,9 @@ IP_LINK_PLUS
 JAPANESE_UCE_SUBJECT
 
 # good enough
+JOIN_MILLIONS
+
+# good enough
 KOREAN_UCE_SUBJECT
 
 # good enough
@@ -527,6 +605,9 @@ LOCALPART_IN_SUBJECT
 
 # good enough
 LONGWORDS
+
+# good enough
+MAILTO_SUBJ_REMOVE
 
 # good enough
 MALE_ENHANCE
@@ -545,6 +626,9 @@ MILLION_USD
 
 # good enough
 MIME_BAD_ISO_CHARSET
+
+# good enough
+MIME_BASE64_BLANKS
 
 # good enough
 MIME_BASE64_TEXT
@@ -580,16 +664,28 @@ MIME_HTML_ONLY
 MIME_HTML_ONLY_MULTI
 
 # good enough
+MIME_QP_LONG_LINE
+
+# good enough
 MISSING_HB_SEP
 
 # good enough
 MISSING_MIMEOLE
 
 # good enough
+MONEY_BACK
+
+# good enough
 MORE_SEX
 
 # good enough
+MORTGAGE_PITCH
+
+# good enough
 MPART_ALT_DIFF
+
+# good enough
+MPART_ALT_DIFF_COUNT
 
 # good enough
 MSGID_DOLLARS
@@ -613,10 +709,16 @@ MSGID_OUTLOOK_INVALID
 MSGID_RANDY
 
 # good enough
+MSGID_RATWARE1
+
+# good enough
 MSGID_SHORT
 
 # good enough
 MSGID_SPAM_CAPS
+
+# good enough
+MSGID_SPAM_LETTERS
 
 # good enough
 MSGID_YAHOO_CAPS
@@ -627,8 +729,14 @@ NA_DOLLARS
 # good enough
 NOT_ADVISOR
 
+# tflags net
+NO_DNS_FOR_FROM
+
 # good enough
 NO_PRESCRIPTION
+
+# good enough
+NO_RDNS_DOTCOM_HELO
 
 # tflags userconf
 NO_RECEIVED
@@ -638,9 +746,6 @@ NO_RELAYS
 
 # good enough
 NUMERIC_HTTP_ADDR
-
-# good enough
-OFFSHORE_SCAM
 
 # good enough
 ONE_TIME
@@ -655,10 +760,25 @@ ORG_MIME_TOOLS
 PERCENT_RANDOM
 
 # good enough
+PLING_PLING
+
+# good enough
+PLING_QUERY
+
+# good enough
 PORN_15
 
 # good enough
+PORN_URL_SEX
+
+# good enough
 PRICES_ARE_AFFORDABLE
+
+# good enough
+PRIORITY_NO_NAME
+
+# tflags net
+PYZOR_CHECK
 
 # good enough
 RATWARE_BOUND_PIECE
@@ -697,6 +817,9 @@ RATWARE_OUTLOOK_NONAME
 RATWARE_RCVD_AT
 
 # good enough
+RATWARE_RCVD_LC_ESMTP
+
+# good enough
 RATWARE_RCVD_PF
 
 # good enough
@@ -720,8 +843,95 @@ RCVD_HELO_IP_MISMATCH
 # good enough
 RCVD_ILLEGAL_IP
 
+# tflags net
+RCVD_IN_BL_SPAMCOP_NET
+
+# tflags net
+RCVD_IN_BSP_OTHER
+
+# tflags net
+RCVD_IN_BSP_TRUSTED
+
+# tflags net
+RCVD_IN_DSBL
+
+# tflags net
+RCVD_IN_IADB_VOUCHED
+
+# tflags net
+RCVD_IN_MAPS_DUL
+
+# tflags net
+RCVD_IN_MAPS_NML
+
+# tflags net
+RCVD_IN_MAPS_RBL
+
+# tflags net
+RCVD_IN_MAPS_RSS
+
+# tflags net
+RCVD_IN_NJABL_CGI
+
+# tflags net
+RCVD_IN_NJABL_DUL
+
+# tflags net
+RCVD_IN_NJABL_MULTI
+
+# tflags net
+RCVD_IN_NJABL_PROXY
+
+# tflags net
+RCVD_IN_NJABL_RELAY
+
+# tflags net
+RCVD_IN_NJABL_SPAM
+
+# tflags net
+RCVD_IN_SBL
+
+# tflags net
+RCVD_IN_SORBS_BLOCK
+
+# tflags net
+RCVD_IN_SORBS_DUL
+
+# tflags net
+RCVD_IN_SORBS_HTTP
+
+# tflags net
+RCVD_IN_SORBS_MISC
+
+# tflags net
+RCVD_IN_SORBS_SMTP
+
+# tflags net
+RCVD_IN_SORBS_SOCKS
+
+# tflags net
+RCVD_IN_SORBS_WEB
+
+# tflags net
+RCVD_IN_SORBS_ZOMBIE
+
+# tflags net
+RCVD_IN_WHOIS_BOGONS
+
+# tflags net
+RCVD_IN_WHOIS_HIJACKED
+
+# tflags net
+RCVD_IN_WHOIS_INVALID
+
+# tflags net
+RCVD_IN_XBL
+
 # good enough
 RCVD_NUMERIC_HELO
+
+# good enough
+REFINANCE_NOW
 
 # good enough
 REFINANCE_YOUR_HOME
@@ -747,6 +957,9 @@ REPTO_QUOTE_QUALCOMM
 # good enough
 REPTO_QUOTE_YAHOO
 
+# tflags net
+ROUND_THE_WORLD
+
 # good enough
 ROUND_THE_WORLD_LOCAL
 
@@ -754,19 +967,46 @@ ROUND_THE_WORLD_LOCAL
 RUDE_HTML
 
 # good enough
+SAVE_THOUSANDS
+
+# good enough
 SORTED_RECIPS
 
-# tflags userconf
+# tflags net
+SPF_FAIL
+
+# tflags net
+SPF_HELO_FAIL
+
+# tflags net
+SPF_HELO_NEUTRAL
+
+# tflags net
 SPF_HELO_PASS
 
-# tflags userconf
+# tflags net
+SPF_HELO_SOFTFAIL
+
+# tflags net
+SPF_NEUTRAL
+
+# tflags net
 SPF_PASS
+
+# tflags net
+SPF_SOFTFAIL
 
 # good enough
 SPOOF_COM2COM
 
 # good enough
+SPOOF_COM2OTH
+
+# good enough
 SPOOF_NET2COM
+
+# good enough
+SPOOF_OURI
 
 # good enough
 STOCK_ALERT
@@ -791,6 +1031,9 @@ SUBJECT_DRUG_GAP_VA
 
 # good enough
 SUBJECT_DRUG_GAP_X
+
+# good enough
+SUBJECT_EXCESS_BASE64
 
 # good enough
 SUBJECT_FUZZY_CHEAP
@@ -823,10 +1066,19 @@ SUBJECT_SEXUAL
 SUBJ_ALL_CAPS
 
 # good enough
+SUBJ_AS_SEEN
+
+# good enough
 SUBJ_BUY
 
 # good enough
+SUBJ_GUARANTEED
+
+# good enough
 SUBJ_ILLEGAL_CHARS
+
+# good enough
+SUBJ_LIFE_INSURANCE
 
 # good enough
 SUBJ_YOUR_DEBT
@@ -838,10 +1090,16 @@ SUBJ_YOUR_FAMILY
 SUBJ_YOUR_OWN
 
 # good enough
+SUB_HELLO
+
+# good enough
 SUSPICIOUS_RECIPS
 
 # good enough
 TERRA_ES
+
+# good enough
+TO_CC_NONE
 
 # good enough
 TRACKER_ID
@@ -857,6 +1115,33 @@ FORGED_OUTLOOK_HTML
 
 # good enough
 FORGED_OUTLOOK_TAGS
+
+# good enough
+HS_SYNDICATE_P1
+
+# good enough
+HS_SYNDICATE_P2
+
+# good enough
+INVALID_DATE
+
+# tflags net
+RCVD_IN_DSBL
+
+# tflags net
+RCVD_IN_MAPS_DUL
+
+# tflags net
+RCVD_IN_NJABL_DUL
+
+# tflags net
+RCVD_IN_SORBS_DUL
+
+# tflags net
+RCVD_IN_WHOIS_INVALID
+
+# tflags net
+RCVD_IN_XBL
 
 # good enough
 UNCLAIMED_MONEY
@@ -879,9 +1164,35 @@ UPPERCASE_75_100
 # good enough
 URG_BIZ
 
-# not publishing URIBL_BLACK: needs plugin (Mail::SpamAssassin::Plugin::URIDNSBL)
+# tflags net
+URIBL_AB_SURBL
 
-# not publishing URIBL_GREY: needs plugin (Mail::SpamAssassin::Plugin::URIDNSBL)
+# tflags net
+URIBL_BLACK
+
+# tflags net
+URIBL_GREY
+
+# tflags net
+URIBL_JP_SURBL
+
+# tflags net
+URIBL_OB_SURBL
+
+# tflags net
+URIBL_PH_SURBL
+
+# tflags net
+URIBL_RED
+
+# tflags net
+URIBL_SBL
+
+# tflags net
+URIBL_SC_SURBL
+
+# tflags net
+URIBL_WS_SURBL
 
 # good enough
 URI_4YOU
@@ -935,6 +1246,9 @@ USER_IN_WHITELIST
 USER_IN_WHITELIST_TO
 
 # good enough
+US_DOLLARS_3
+
+# good enough
 VERTICAL_DRUGS_1
 
 # good enough
@@ -963,3 +1277,21 @@ X_MESSAGE_INFO
 
 # good enough
 X_PRIORITY_CC
+
+# tflags net
+__RCVD_IN_IADB
+
+# tflags net
+__RCVD_IN_NJABL
+
+# tflags net
+__RCVD_IN_SBL_XBL
+
+# tflags net
+__RCVD_IN_SORBS
+
+# tflags net
+__RCVD_IN_WHOIS
+
+# tflags net
+__RFC_IGNORANT_ENVFROM
