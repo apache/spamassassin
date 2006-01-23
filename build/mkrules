@@ -25,6 +25,12 @@ sub usage {
   die "mkrules/run [--src srcdir] [--out outputdir]\n";
 }
 
+my $RULE_KEYWORDS_RE = qr{
+        header|rawbody|body|full|uri
+        |meta|mimeheader|describe|tflags
+        |reuse|score|urirhssub|uridnsbl
+    }x;
+
 use strict;
 use File::Find;
 use File::Copy;
@@ -313,11 +319,7 @@ sub rule_file_compile {
       $lang = $1;
     }
 
-    if (/^
-        (header|rawbody|body|full|uri|meta|mimeheader|describe|
-        tflags|reuse|score)
-        \s+(\S+)\s+(.*)$
-      /x)
+    if (/^(${RULE_KEYWORDS_RE})\s+(\S+)\s+(.*)$/)
     {
       # rule definitions
       my $type = $1;
