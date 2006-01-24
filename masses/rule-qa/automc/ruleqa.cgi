@@ -44,6 +44,19 @@ my @cgi_params;
 my %cgi_params = ();
 precache_params();
 
+# Allow path info to become CGI-ish parameters.
+# the two parts of path info double as (a) daterev, (b) rulename,
+# (c) "s_detail=1".
+# CGI parameters "daterev", "rule", "s_detail" override them though
+#
+my $url_abs = $q->url(-absolute=>1);
+my $url_with_path = $q->url(-absolute=>1, -path_info=>1);
+$url_with_path =~ s,^${url_abs},,;
+
+if ($url_with_path =~ s,^/*([^/]+),,) { add_cgi_path_param("daterev", $1); }
+if ($url_with_path =~ s,^/*([^/]+),,) { add_cgi_path_param("rule", $1); }
+if ($url_with_path =~ s,^/detail,,) { add_cgi_path_param("s_detail", "1"); }
+
 my %s = ();
 # selection of what will be displayed.
 $s{defcorpus} = get_url_switch('s_defcorpus', 1);
@@ -72,23 +85,13 @@ if (!grep { $_ } values %s) {
 
 sub get_url_switch {
   my ($name, $defval) = @_;
-  my $val = $q->url_param($name);
+  my $val = $q->param($name);
   if (!defined $val) { return $defval; }
   return ($val) ? 1 : 0;
 }
 
-my $url_with_path = $q->url(-path_info=>1);
-warn "JMD $url_with_path";
-
-# the two parts of path info double as (a) daterev and (b) rulename.
-# CGI parameters "daterev" and "rule" override them though
-my $url_path_1 = '';
-if ($url_with_path =~ s,^/*([^/]+),,) { $url_path_1 = $1; }
-my $url_path_2 = '';
-if ($url_with_path =~ s,^/*([^/]+),,) { $url_path_2 = $1; }
-
 # when and what
-my $daterev = $q->url_param('daterev') || $url_path_1;
+my $daterev = $q->param('daterev') || '';
 # all known date/revision combos.  warning: could get slow in future
 my @daterevs = get_all_daterevs();
 
@@ -96,7 +99,7 @@ my @daterevs = get_all_daterevs();
 if (defined $daterev) {
   if ($daterev eq 'last-night') {
     $daterev = get_last_night_daterev();
-    $q->url_param('daterev', $daterev);                # make it absolute
+    $q->param('daterev', $daterev);                # make it absolute
   }
   else {
     $daterev =~ /(\d+)[\/-](r\d+)-(\S+)/; undef $daterev;
@@ -111,7 +114,7 @@ if (defined $daterev) {
 # turn possibly-empty $daterev into a real date/rev combo (that exists)
 $daterev = date_in_direction($daterev, 0);
 
-my $rule = $q->url_param('rule') || $url_path_2;
+my $rule = $q->param('rule') || '';
 my $nicerule = $rule; if (!$nicerule) { $nicerule = 'all rules'; }
 
 my $datadir;
@@ -123,12 +126,12 @@ my $line_counter = 0;
 # ---------------------------------------------------------------------------
 # supported views
 
-my $graph = $q->url_param('graph');
+my $graph = $q->param('graph');
 if ($graph) {
   if ($graph eq 'over_time') { graph_over_time(); }
   else { die "graph '$graph' unknown"; }
 }
-elsif ($q->url_param('longdatelist')) {
+elsif ($q->param('longdatelist')) {
   show_daterev_selector_page();
 }
 else {
@@ -417,8 +420,8 @@ if (!$s{detail}) {
 
   print qq{
 
-    <p class=intro> <strong>Instructions</strong>: click the '&gt;' symbol, or
-    the rule name, to view details of a particular rule. </p>
+    <p class=intro> <strong>Instructions</strong>: click
+    the rule name to view details of a particular rule. </p>
 
   };
 }
@@ -733,12 +736,12 @@ sub get_freqs_for_rule {
   $comment .= qq{
     <br clear="all"/>
     <p class=showfreqslink><a
-      href="javascript:show_header('$headers_id')">(source details)</a></p>
+      href="javascript:show_header('$headers_id')">(source details)</a>
+      <a name='$titleplink' href='#$titleplink' class=title_permalink>(#)</a>
+    </p>
 
     <table class=sortable id='freqs_${headers_id}' class=freqs>
       <tr class=freqshead>
-      <th><a name='$titleplink' href='#$titleplink'
-          class=title_permalink>#</a></th>
       <th>MSECS</th>
       <th>SPAM%</th>
       <th>HAM%</th>
@@ -812,7 +815,6 @@ sub set_freqs_templates {
   $FREQS_LINE_TEMPLATE = qq{
 
   <tr class=freqsline_promo[% PROMO %]>
-    <td>[% IF RULEDETAIL != '' %]<a href="[% RULEDETAIL %]">&gt;</a>[% END %]</td>
     <td>[% MSECS %]</td>
     <td><a class=ftd>[% SPAMPC %]<span>[% SPAMPCDETAIL %]</span></a>
     <td><a class=ftd>[% HAMPC %]<span>[% HAMPCDETAIL %]</span></a>
@@ -971,7 +973,6 @@ sub create_detail_url {
   my ($rulename) = @_;
   my @parms = (
         get_params_except(qw(
-          rule s_age s_overlap s_all s_detail
           rule s_age s_overlap s_all s_detail daterev
         )), 
         "daterev=".$daterev, "rule=".uri_escape($rulename), "s_detail=1",
@@ -996,29 +997,41 @@ sub gen_switch_url {
 }
 
 sub assemble_url {
-  my @parms = ();
+  my @orig = @_;
 
   # e.g. http://buildbot.spamassassin.org/ruleqa?
   #     daterev=20060120-r370897-b&rule=T_PH_SEC&s_detail=1
 
   # we support special treatment for 'daterev' and 'rule'
-  my %p = ();
-  $p{daterev} = '';
-  $p{rule} = '';
-  foreach my $p (@_) {
-    if (/^rule=(.*)$/) { $p{rule} = $1; }
-    if (/^daterev=(.*)$/) { $p{daterev} = $1; }
-    else { push (@parms, $_); }
+  my %path = ();
+  my @parms = ();
+  $path{daterev} = '';
+  $path{rule} = '';
+  foreach my $p (@orig) {
+    # some ignored parameter noise, from the form
+    if (!$p) { next; }
+    elsif ($p =~ /^keywords=$/) { next; }
+    elsif ($p =~ /^g=Change$/) { next; }
+    # the ones we can put in the path
+    elsif ($p =~ /^rule=(.*)$/) { $path{rule} = $1; }
+    elsif ($p =~ /^daterev=(.*)$/) { $path{daterev} = $1; }
+    elsif ($p =~ /^s_detail=1$/) { $path{s_detail} = 1; }
+    # and all the rest
+    else { push (@parms, $p); }
   }
 
   my $url = $cgi_url.
-        ($p{daterev} ? '/'.$p{daterev} : '').
-        ($p{rule} ? '/'.$p{rule} : '').
+        ($path{daterev}  ? '/'.$path{daterev} : '').
+        ($path{rule}     ? '/'.$path{rule}    : '').
+        ($path{s_detail} ? '/detail'          : '').
         '?'.join('&', sort @parms);
+
+  # no need for a trailing ? if there were no parms
+  $url =~ s/\?$//;
 
   # now, a much more readable
   # http://buildbot.spamassassin.org/ruleqa/
-  #      20060120-r370897-b/T_PH_SEC?s_detail=1
+  #      20060120-r370897-b/T_PH_SEC/detail
 
   return $url;
 }
@@ -1026,16 +1039,25 @@ sub assemble_url {
 sub precache_params {
   use URI::Escape;
 
-  $cgi_url = $q->url(-relative=>1);
-  $cgi_url =~ s,/ruleqa/ruleqa,/ruleqa,s;
+  $cgi_url = $q->url(-absolute=>1);
+  $cgi_url =~ s,/ruleqa/ruleqa$,/ruleqa,s;
 
-  @cgi_params = $q->url_param();
+  @cgi_params = $q->param();
   foreach my $k (@cgi_params) {
     next unless defined ($k);
-    my $v = $q->url_param($k);
+    my $v = $q->param($k);
     if (!defined $v) { $v = ''; }
     $cgi_params{$k} = "$k=".uri_escape($v);
   }
+}
+
+sub add_cgi_path_param {
+  my ($k, $v) = @_;
+  if (!defined $cgi_params{$k}) {
+    $cgi_params{$k} = "$k=$v";
+    push (@cgi_params, $k);
+  }
+  $q->param(-name=>$k, -value=>$v);
 }
 
 sub get_params_except {
