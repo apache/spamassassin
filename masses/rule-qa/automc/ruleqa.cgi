@@ -70,18 +70,25 @@ if (!grep { $_ } values %s) {
   $s{new} = 1;
 }
 
-# $s{headers} = get_url_switch('s_headers', 0);
-
 sub get_url_switch {
   my ($name, $defval) = @_;
   my $val = $q->url_param($name);
-
   if (!defined $val) { return $defval; }
   return ($val) ? 1 : 0;
 }
 
+my $url_with_path = $q->url(-path_info=>1);
+warn "JMD $url_with_path";
+
+# the two parts of path info double as (a) daterev and (b) rulename.
+# CGI parameters "daterev" and "rule" override them though
+my $url_path_1 = '';
+if ($url_with_path =~ s,^/*([^/]+),,) { $url_path_1 = $1; }
+my $url_path_2 = '';
+if ($url_with_path =~ s,^/*([^/]+),,) { $url_path_2 = $1; }
+
 # when and what
-my $daterev = $q->url_param('daterev') || '';
+my $daterev = $q->url_param('daterev') || $url_path_1;
 # all known date/revision combos.  warning: could get slow in future
 my @daterevs = get_all_daterevs();
 
@@ -104,7 +111,7 @@ if (defined $daterev) {
 # turn possibly-empty $daterev into a real date/rev combo (that exists)
 $daterev = date_in_direction($daterev, 0);
 
-my $rule = $q->url_param('rule') || '';
+my $rule = $q->url_param('rule') || $url_path_2;
 my $nicerule = $rule; if (!$nicerule) { $nicerule = 'all rules'; }
 
 my $datadir;
@@ -464,7 +471,7 @@ print qq{
 
   <p>Note: the freqs tables are sortable.  Click on the headers to resort them
   by that column.  <a
-  href=http://www.kryogenix.org/code/browser/sorttable/>(thanks!)</a></p>
+  href="http://www.kryogenix.org/code/browser/sorttable/">(thanks!)</a></p>
 
   </body></html>
 
@@ -989,14 +996,39 @@ sub gen_switch_url {
 }
 
 sub assemble_url {
-  my @parms = @_;
-  my $url = $cgi_url.'?'.join('&', sort @parms);
+  my @parms = ();
+
+  # e.g. http://buildbot.spamassassin.org/ruleqa?
+  #     daterev=20060120-r370897-b&rule=T_PH_SEC&s_detail=1
+
+  # we support special treatment for 'daterev' and 'rule'
+  my %p = ();
+  $p{daterev} = '';
+  $p{rule} = '';
+  foreach my $p (@_) {
+    if (/^rule=(.*)$/) { $p{rule} = $1; }
+    if (/^daterev=(.*)$/) { $p{daterev} = $1; }
+    else { push (@parms, $_); }
+  }
+
+  my $url = $cgi_url.
+        ($p{daterev} ? '/'.$p{daterev} : '').
+        ($p{rule} ? '/'.$p{rule} : '').
+        '?'.join('&', sort @parms);
+
+  # now, a much more readable
+  # http://buildbot.spamassassin.org/ruleqa/
+  #      20060120-r370897-b/T_PH_SEC?s_detail=1
+
   return $url;
 }
 
 sub precache_params {
   use URI::Escape;
+
   $cgi_url = $q->url(-relative=>1);
+  $cgi_url =~ s,/ruleqa/ruleqa,/ruleqa,s;
+
   @cgi_params = $q->url_param();
   foreach my $k (@cgi_params) {
     next unless defined ($k);
