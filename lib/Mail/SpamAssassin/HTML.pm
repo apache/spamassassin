@@ -479,7 +479,7 @@ sub text_style {
 	  # relative font size
 	  $new{size} = $self->{basefont} + $1;
 	}
-	elsif ($attr->{size} !~ /^\s*(\d+)/) {
+	elsif ($attr->{size} =~ /^\s*(\d+)/) {
 	  # absolute font size
 	  $new{size} = $1;
         }
