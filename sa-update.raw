@@ -710,7 +710,7 @@ ENDOFVALIDATIONERR
   }
 
   unlink $CFFile || warn "error: can't remove file $CFFile: $!\n";
-  rename("$CFFTmp", "$CFFile")
+  cross_fs_rename($CFFTmp, $CFFile)
       or warn "rename $CFFTmp $CFFile failed: $!";
 
   unlink("$UPDDir/MIRRORED.BY");
@@ -945,6 +945,28 @@ sub lint_check_dir {
 
   system ("spamassassin --configpath='$dir' --prefspath=/dev/null --lint");
   return (($? >> 8) == 0);
+}
+
+# a version of rename() that can cope with renaming files across filesystems,
+# as mv(1) can.
+sub cross_fs_rename {
+  my ($from, $to) = @_;
+  my $ret = rename ($from, $to);
+
+  if ($ret) {
+    return $ret;        # success first time! great
+  }
+
+  # try a copy
+  if (!copy($from, $to)) {
+    # copy failed, too.  we have no further fallbacks; return the rename()
+    # failure code
+    return $ret;
+  }
+
+  # copy succeeded, we're good; remove the source, and return success
+  unlink($from);
+  return 1;
 }
 
 # ---------------------------------------------------------------------------
