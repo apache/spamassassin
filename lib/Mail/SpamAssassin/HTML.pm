@@ -474,9 +474,15 @@ sub text_style {
 	# two different names for text color
 	$new{fgcolor} = name_to_rgb($attr->{$name});
       }
-      elsif ($name eq "size" && $attr->{size} =~ /^\s*([+-]\d+)/) {
-	# relative font size
-	$new{size} = $self->{basefont} + $1;
+      elsif ($name eq "size") {
+	if ($attr->{size} =~ /^\s*([+-]\d+)/) {
+	  # relative font size
+	  $new{size} = $self->{basefont} + $1;
+	}
+	elsif ($attr->{size} !~ /^\s*(\d+)/) {
+	  # absolute font size
+	  $new{size} = $1;
+        }
       }
       elsif ($tag eq "span" && $name eq "style") {
         my $style = $new{style} = $attr->{style};
@@ -516,9 +522,6 @@ sub text_style {
 	  # overwrite with hex value, $new{bgcolor} is set below
 	  $attr->{bgcolor} = name_to_rgb($attr->{bgcolor});
 	}
-	if ($name eq "size" && $attr->{size} !~ /^\s*([+-])(\d+)/) {
-	  # attribute is malformed
-	}
 	else {
 	  # attribute is probably okay
 	  $new{$name} = $attr->{$name};
@@ -547,6 +550,7 @@ sub html_font_invisible {
 
   my $fg = $self->{text_style}[-1]->{fgcolor};
   my $bg = $self->{text_style}[-1]->{bgcolor};
+  my $size = $self->{text_style}[-1]->{size};
   my $display = $self->{text_style}[-1]->{display};
 
   # invisibility
@@ -580,6 +584,11 @@ sub html_font_invisible {
     }
   }
 
+  # size too small
+  if ($size <= 1) {
+    return 1;
+  }
+
   # <span style="display: none">
   if ($display && lc $display eq 'none') {
     return 1;
@@ -611,7 +620,7 @@ sub html_tests {
   }
   if ($tag eq "font" && exists $attr->{size}) {
     my $size = $attr->{size};
-    $self->put_results(tiny_font => 1) if (($size =~ /^\s*(\d+)/ && $1 < 1) ||
+    $self->put_results(tiny_font => 1) if (($size =~ /^\s*(\d+)/ && $1 <= 1) ||
 					   ($size =~ /\-(\d+)/ && $1 >= 3));
     $self->put_results(big_font => 1) if (($size =~ /^\s*(\d+)/ && $1 > 3) ||
 					  ($size =~ /\+(\d+)/ && $1 >= 1));
