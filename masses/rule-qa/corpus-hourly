@@ -432,7 +432,7 @@ sub gen_class {
   print qq{created: $bytes bytes, finished at $when
 URL:
 
-  http://buildbot.spamassassin.org/ruleqa?daterev=$output_revpath
+  http://buildbot.spamassassin.org/ruleqa/$output_revpath
 
 };
 
