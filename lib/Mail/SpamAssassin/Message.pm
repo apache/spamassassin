@@ -438,18 +438,18 @@ sub get_pristine_body {
 
 # ---------------------------------------------------------------------------
 
-=item extract_message_metadata($main)
+=item extract_message_metadata($permsgstatus)
 
 =cut
 
 sub extract_message_metadata {
-  my ($self, $main) = @_;
+  my ($self, $permsgstatus) = @_;
 
   # do this only once per message, it can be expensive
   if ($self->{already_extracted_metadata}) { return; }
   $self->{already_extracted_metadata} = 1;
 
-  $self->{metadata}->extract ($self, $main);
+  $self->{metadata}->extract ($self, $permsgstatus);
 }
 
 # ---------------------------------------------------------------------------

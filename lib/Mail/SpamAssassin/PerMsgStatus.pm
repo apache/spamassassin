@@ -1353,7 +1353,7 @@ sub get_current_eval_rule_name {
 sub extract_message_metadata {
   my ($self) = @_;
   
-  $self->{msg}->extract_message_metadata($self->{main});
+  $self->{msg}->extract_message_metadata($self);
 
   foreach my $item (qw(
 	relays_trusted relays_trusted_str num_relays_trusted

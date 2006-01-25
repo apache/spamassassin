@@ -74,13 +74,13 @@ sub new {
 }
 
 sub extract {
-  my ($self, $msg, $main) = @_;
+  my ($self, $msg, $permsgstatus) = @_;
 
   # pre-chew Received headers
-  $self->parse_received_headers ($main, $msg);
+  $self->parse_received_headers ($permsgstatus, $msg);
 
-  $main->call_plugins("extract_metadata", { msg => $msg,
-					    conf => $main->{conf} });
+  $permsgstatus->{main}->call_plugins("extract_metadata", { msg => $msg,
+					    conf => $permsgstatus->{main}->{conf} });
 }
 
 sub finish {

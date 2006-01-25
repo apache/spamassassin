@@ -47,7 +47,10 @@ sub new {
   };
 
   bless($self, $class);
-  $self->{msg}->extract_message_metadata($self->{main});
+  my $permsgstatus =
+        Mail::SpamAssassin::PerMsgStatus->new($self->{main}, $msg);
+  $msg->extract_message_metadata ($permsgstatus);
+  $permsgstatus->finish();
   $self;
 }
 
