@@ -106,6 +106,17 @@ sub new {
 		],
 		marked_sections => 1);
 
+  # bug 4695: we want "<br/>" to be treated the same as "<br>".
+  # TODO: breaks uri.t lines 45, 46, 47.  very wierd, not good
+  # for now, just use the s/// workaround instead.
+
+  # if (!$self->can("empty_element_tags") || !eval {
+  # $self->empty_element_tags(1);
+  # }) {
+  # # can't use that API; fall back to fixing up in advance
+  # $self->{preclean_empty_elements} = 1;
+  # }
+
   $self;
 }
 
@@ -250,6 +261,12 @@ sub parse {
   # HTML::Parser converts &nbsp; into a question mark ("?") for some
   # reason, so convert them to spaces.  Confirmed in 3.31, at least.
   $text =~ s/&nbsp;/ /g;
+
+  # bug 4695: we want "<br/>" to be treated the same as "<br>", and
+  # the HTML::Parser API won't do it for us
+  # if ($self->{preclean_empty_elements}) {
+  $text =~ s/<br\s*\/>/<br>/gis;
+  # }
 
   # Ignore stupid warning that can't be suppressed: 'Parsing of
   # undecoded UTF-8 will give garbage when decoding entities at ..' (bug 4046)
