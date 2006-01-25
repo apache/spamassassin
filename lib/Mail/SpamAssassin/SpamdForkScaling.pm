@@ -190,10 +190,11 @@ sub main_server_poll {
 
   my ($rout, $eout, $nfound, $timeleft);
 
-  # use alarm to back up select()'s built-in alarm, to debug theo's bug
+  # use alarm to back up select()'s built-in alarm, to debug theo's bug.
+  # give it an extra 10 seconds, to avoid spurious warnings (bug 4696)
   eval {
-    Mail::SpamAssassin::Util::trap_sigalrm_fully(sub { die "tcp timeout"; });
-    alarm ($tout*2) if ($tout);
+    Mail::SpamAssassin::Util::trap_sigalrm_fully(sub { die "pf select timeout"; });
+    alarm (($tout*2) + 10) if ($tout);
     ($nfound, $timeleft) = select($rout=$rin, undef, $eout=$rin, $tout);
   };
   alarm 0;
