@@ -298,13 +298,6 @@ sub new {
 
   $self->create_locker();
 
-  # argh.  this is only used to perform DNS lookups in
-  # Mail::SpamAssassin::Message::Metadata::Received. TODO! we need to get
-  # Dns.pm code into a class that is NOT part of
-  # Mail::SpamAssassin::PerMsgStatus to avoid this crap!
-  my $tmpmsg = $self->parse([ ], 1);
-  $self->{parser_dns_pms} = Mail::SpamAssassin::PerMsgStatus->new($self, $tmpmsg);
-
   $self->{resolver} = Mail::SpamAssassin::DnsResolver->new($self);
 
   $self;
@@ -1282,7 +1275,6 @@ method is called.
 sub finish {
   my ($self) = @_;
 
-  $self->{parser_dns_pms}->finish();
   Mail::SpamAssassin::PerMsgStatus::finish_tests($self->{conf});
   $self->{conf}->finish(); delete $self->{conf};
   $self->{plugins}->finish(); delete $self->{plugins};

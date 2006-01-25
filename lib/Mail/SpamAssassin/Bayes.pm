@@ -973,9 +973,9 @@ sub get_body_from_msg {
     return { };
   }
 
-  $msg->extract_message_metadata ($self->{main});
   my $permsgstatus =
         Mail::SpamAssassin::PerMsgStatus->new($self->{main}, $msg);
+  $msg->extract_message_metadata ($permsgstatus);
   my $msgdata = $self->get_msgdata_from_permsgstatus ($permsgstatus);
   $permsgstatus->finish();
 

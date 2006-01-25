@@ -52,12 +52,9 @@ use Mail::SpamAssassin::Constants qw(:ip);
 # ---------------------------------------------------------------------------
 
 sub parse_received_headers {
-  my ($self, $main, $msg) = @_;
+  my ($self, $permsgstatus, $msg) = @_;
 
-  # argh.  this is only used to perform DNS lookups.
-  # TODO! we need to get Dns.pm code into a class that is NOT
-  # part of Mail::SpamAssassin::PerMsgStatus to avoid this crap!
-  $self->{dns_pms} = $main->{parser_dns_pms};
+  $self->{dns_pms} = $permsgstatus;
   $self->{is_dns_available} = $self->{dns_pms}->is_dns_available();
 
   $self->{relays_trusted} = [ ];
@@ -71,8 +68,8 @@ sub parse_received_headers {
   $self->{num_relays_unparseable} = 0;
 
   # now figure out what relays are trusted...
-  my $trusted = $main->{conf}->{trusted_networks};
-  my $internal = $main->{conf}->{internal_networks};
+  my $trusted = $permsgstatus->{main}->{conf}->{trusted_networks};
+  my $internal = $permsgstatus->{main}->{conf}->{internal_networks};
   my $first_by;
   my $in_trusted = 1;
   my $in_internal = 1;
