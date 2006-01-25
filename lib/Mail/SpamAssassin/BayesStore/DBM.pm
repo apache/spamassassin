@@ -1122,8 +1122,12 @@ sub cleanup {
 
     # argh, write failure, give up
     if (!defined $len || $len < 0) {
-      $len = 0 unless (defined $len);
-      warn "bayes: write failed to Bayes journal $path ($len of $nbytes)!\n";
+      my $err = '';
+      if (!defined $len) {
+	$len = 0;
+	$err = "  ($!)";
+      }
+      warn "bayes: write failed to Bayes journal $path ($len of $nbytes)!$err\n";
       last;
     }
 
