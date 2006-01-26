@@ -169,8 +169,9 @@ my @OPTIONAL_MODULES = (
 {
   module => 'Encode::Detect',
   version => '0.00',
-  desc => 'If this module is installed, SpamAssassin will detect charsets
-  and convert them into Unicode.',
+  desc => 'If you plan to use the normalize_charset config setting to detect
+  charsets and convert them into Unicode, you will need to install
+  this module.',
 },
 );
 

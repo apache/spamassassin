@@ -94,7 +94,13 @@ my @DAY_OF_WEEK = qw/Sun Mon Tue Wed Thu Fri Sat/ ;
 sub new {
   my $class = shift;
   $class = ref($class) || $class;
-  my $self = $class->SUPER::new();
+
+  my($opts) = @_;
+  my $message = $opts->{'message'} || \*STDIN;
+  my $parsenow = $opts->{'parsenow'} || 0;
+  my $normalize = $opts->{'normalize'} || 0;
+
+  my $self = $class->SUPER::new({normalize=>$normalize});
 
   $self->{pristine_headers} =	'';
   $self->{pristine_body} =	'';
@@ -107,9 +113,6 @@ sub new {
   $self->{metadata} = Mail::SpamAssassin::Message::Metadata->new($self);
 
   # Ok, go ahead and do the message "parsing"
-  my($opts) = @_;
-  my $message = $opts->{'message'} || \*STDIN;
-  my $parsenow = $opts->{'parsenow'} || 0;
 
   # Specifies whether or not to parse message/rfc822 parts into its own tree.
   # If the # > 0, it'll subparse, otherwise it won't.  By default, do one
@@ -657,7 +660,7 @@ sub _parse_multipart {
   }
 
   # prepare a new tree node
-  my $part_msg = Mail::SpamAssassin::Message::Node->new({ subparse=>$msg->{subparse} });
+  my $part_msg = Mail::SpamAssassin::Message::Node->new({ subparse=>$msg->{subparse}, normalize=>$msg->{normalize} });
   my $in_body = 0;
   my $header;
   my $part_array;
@@ -704,7 +707,7 @@ sub _parse_multipart {
 
       # make sure we start with a new clean node
       $in_body  = 0;
-      $part_msg = Mail::SpamAssassin::Message::Node->new({ subparse=>$msg->{subparse} });
+      $part_msg = Mail::SpamAssassin::Message::Node->new({ subparse=>$msg->{subparse}, normalize=>$msg->{normalize} });
       undef $part_array;
       undef $header;
 
@@ -801,6 +804,7 @@ sub _parse_normal {
       	message		=>	$message,
 	parsenow	=>	1,
 	subparse	=>	$msg->{subparse}-1,
+	normalize	=>	$msg->{normalize},
 	});
 
       # main message is a message/* part ...
