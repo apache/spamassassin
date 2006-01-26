@@ -832,6 +832,48 @@ Select the locales to allow from the list below:
     type => $CONF_TYPE_STRING
   });
 
+=item normalize_charset ( 0 | 1)        (default: 0)
+
+Whether to detect character sets and normalize message content to
+Unicode.  Requires the Encode::Detect module, HTML::Parser version
+3.46 or later, and Perl 5.8.5 or later.
+
+=cut
+
+  push (@cmds, {
+    setting => 'normalize_charset',
+    default => 0,
+    code => sub {
+	my ($self, $key, $value, $line) = @_;
+	unless (defined $value && $value !~ /^$/) {
+	    return $MISSING_REQUIRED_VALUE;
+	}
+	return undef if $value == 0;
+	return $INVALID_VALUE unless $value == 1;
+
+	unless ($] > 5.008004) {
+	    $self->{parser}->lint_warn("config: normalize_charset requires Perl 5.8.5 or later");
+	    return $INVALID_VALUE;
+	}
+	require HTML::Parser;
+	unless ($HTML::Parser::VERSION >= 3.46) {
+	    $self->{parser}->lint_warn("config: normalize_charset requires HTML::Parser 3.46 or later");
+	    return $INVALID_VALUE;
+	}
+	unless (eval 'require Encode::Detect::Detector') {
+	    $self->{parser}->lint_warn("config: normalize_charset requires Encode::Detect");
+	    return $INVALID_VALUE;
+	}
+	unless (eval 'require Encode') {
+	    $self->{parser}->lint_warn("config: normalize_charset requires Encode");
+	    return $INVALID_VALUE;
+	}
+
+	$self->{normalize_charset} = 1;
+    }
+  });
+
+
 =back
 
 =head2 NETWORK TEST OPTIONS

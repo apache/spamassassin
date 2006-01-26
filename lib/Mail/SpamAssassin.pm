@@ -359,7 +359,8 @@ and C<Mail::SpamAssassin::Message::Node> POD.
 
 sub parse {
   my($self, $message, $parsenow) = @_;
-  my $msg = Mail::SpamAssassin::Message->new({message=>$message, parsenow=>$parsenow});
+  $self->init(1);
+  my $msg = Mail::SpamAssassin::Message->new({message=>$message, parsenow=>$parsenow, normalize=>$self->{conf}->{normalize_charset}});
   return $msg;
 }
 

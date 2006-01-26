@@ -41,8 +41,6 @@ use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::HTML;
 use Mail::SpamAssassin::Logger;
 
-our $normalize_supported = ( $] > 5.008004 && $HTML::Parser::VERSION >= 3.46 && eval 'require Encode::Detect::Detector' && eval 'require Encode' );
-
 =item new()
 
 Generates an empty Node object and returns it.  Typically only called
@@ -66,6 +64,7 @@ sub new {
   if (defined $opts->{'subparse'}) {
     $self->{subparse} = $opts->{'subparse'};
   }
+  $self->{normalize} = $opts->{'normalize'} || 0;
 
   bless($self,$class);
   $self;
@@ -176,7 +175,7 @@ sub header {
       $self->{'raw_headers'}->{$key} = [];
     }
 
-    push @{ $self->{'headers'}->{$key} },     _decode_header($raw_value);
+    push @{ $self->{'headers'}->{$key} },     $self->_decode_header($raw_value);
     push @{ $self->{'raw_headers'}->{$key} }, $raw_value;
 
     return $self->{'headers'}->{$key}->[-1];
@@ -344,8 +343,9 @@ sub _html_render {
 }
 
 sub _normalize {
-  my ($data, $charset) = @_;
-  return $data unless $normalize_supported;
+  my ($self, $data, $charset) = @_;
+  return $data unless $self->{normalize};
+
   my $detected = Encode::Detect::Detector::detect($data);
 
   my $converter;
@@ -384,7 +384,7 @@ sub rendered {
   return(undef,undef) unless ( $self->{'type'} =~ /^text\b/i );
 
   if (!exists $self->{rendered}) {
-    my $text = _normalize($self->decode(), $self->{charset});
+    my $text = $self->_normalize($self->decode(), $self->{charset});
     my $raw = length($text);
 
     # render text/html always, or any other text|text/plain part as text/html
@@ -499,7 +499,7 @@ sub delete_header {
 
 # decode a header appropriately.  don't bother adding it to the pod documents.
 sub __decode_header {
-  my ( $encoding, $cte, $data ) = @_;
+  my ( $self, $encoding, $cte, $data ) = @_;
 
   if ( $cte eq 'B' ) {
     # base 64 encoded
@@ -517,13 +517,13 @@ sub __decode_header {
     # not possible since the input has already been limited to 'B' and 'Q'
     die "message: unknown encoding type '$cte' in RFC2047 header";
   }
-  return _normalize($data, $encoding);
+  return $self->_normalize($data, $encoding);
 }
 
 # Decode base64 and quoted-printable in headers according to RFC2047.
 #
 sub _decode_header {
-  my($header) = @_;
+  my($self, $header) = @_;
 
   return '' unless $header;
 
@@ -537,8 +537,8 @@ sub _decode_header {
   1 while ($header =~ s/(=\?[\w_-]+\?[bqBQ]\?[^?]+\?=)\s+(=\?[\w_-]+\?[bqBQ]\?[^?]+\?=)/$1$2/g);
 
   unless ($header =~
-	  s/=\?([\w_-]+)\?([bqBQ])\?([^?]+)\?=/__decode_header($1, uc($2), $3)/ge) {
-    $header = _normalize($header);
+	  s/=\?([\w_-]+)\?([bqBQ])\?([^?]+)\?=/$self->__decode_header($1, uc($2), $3)/ge) {
+    $header = $self->_normalize($header);
   }
 
   return $header;
