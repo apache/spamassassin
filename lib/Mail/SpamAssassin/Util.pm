@@ -886,7 +886,7 @@ sub secure_tmpfile {
     }
     
     # error, maybe "out of quota" or "too many open files" (bug 4017)
-    warn "util: secure_tmpfile failed to create file '$tmpfile': $!\n";
+    warn "util: secure_tmpfile failed to create file '$reportfile': $!\n";
 
     # ensure the file handle is not semi-open in some way
     if ($tmpfile) {
