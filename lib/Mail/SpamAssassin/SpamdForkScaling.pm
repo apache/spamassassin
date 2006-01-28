@@ -188,25 +188,80 @@ sub main_server_poll {
     vec($rin, $self->{server_fileno}, 1) = 0;
   }
 
-  my ($rout, $eout, $nfound, $timeleft);
+  my ($rout, $eout, $nfound, $timeleft, $selerr);
 
-  # use alarm to back up select()'s built-in alarm, to debug theo's bug.
-  # give it an extra 10 seconds, to avoid spurious warnings (bug 4696)
-  eval {
-    Mail::SpamAssassin::Util::trap_sigalrm_fully(sub { die "pf select timeout"; });
-    alarm (($tout*2) + 10) if ($tout);
-    ($nfound, $timeleft) = select($rout=$rin, undef, $eout=$rin, $tout);
-  };
-  alarm 0;
+  # use alarm to back up select()'s built-in alarm, to debug Theo's bug.
+  # not that I can remember what Theo's bug was, but hey ;)    A good
+  # 60 seconds extra on the alarm() should make that quite rare...
 
-  if ($@) {
-    warn "prefork: select timeout failed! recovering\n";
+  # TODO: we need to come up with a clean way for all the code that
+  # uses the various kludges that alarm() requires, to share that code.
+  # it's ridiculous having to remember each of these every time, and
+  # the side-effects are hard to debug.
+  #
+  my $oldalarm = 0;
+
+  if ($tout) {
+    eval {
+      # safe to use $SIG{ALRM} here instead of Util::trap_sigalrm_fully(),
+      # since there are no killer regexp hang dangers here
+      local $SIG{ALRM} = sub { die "__alarm__ignore__\n" };
+      local $SIG{__DIE__};   # bug 4631
+
+      $oldalarm = alarm(($tout*2) + 60);
+
+      ($nfound, $timeleft) = select($rout=$rin, undef, $eout=$rin, $tout);
+      $selerr = $!;
+
+      if (defined $oldalarm) {      # unset before we leave eval{}
+        alarm $oldalarm; $oldalarm = undef;
+      }
+    };
+  } else {
+    # no timeouts involved, much simpler
+    ($nfound, $timeleft) = select($rout=$rin, undef, $eout=$rin, undef);
+    $selerr = $!;
+  }
+
+  my $err = $@;
+  if ($tout && defined $oldalarm) {
+    alarm $oldalarm; $oldalarm = undef;
+  }
+
+  # bug 4696: under load, the process can go for such a long time without
+  # being context-switched in, that when it does return the alarm() fires
+  # before the select() timeout does.   Treat this as a select() timeout
+  if ($tout && $err && $err =~ /__alarm__ignore__/) {
+    dbg("prefork: select timed out (via alarm)");
+    $nfound = 0;
+    $timeleft = 0;
+    $err = undef;
+  }
+
+  if ($err) {
+    warn "prefork: select timeout failed! recovering: $err/$selerr\n";
     sleep 1;        # avoid overload
     return;
   }
 
-  if (!defined $nfound) {
-    warn "prefork: select returned undef! recovering\n";
+  # errors; handle undef *or* -1 returned.  do this before "errors on
+  # the handle" below, since an error condition is signalled both via
+  # a -1 return and a $eout bit.
+  if (!defined $nfound || $nfound < 0)
+  {
+    if (exists &Errno::EINTR && $selerr == &Errno::EINTR)
+    {
+      # this happens if the process is signalled during the select(),
+      # for example if someone sends SIGHUP to reload the configuration.
+      # just return inmmediately
+      dbg("prefork: select returned err $selerr, probably signalled");
+      return;
+    }
+
+    warn "prefork: select returned ".
+            (defined $nfound ? $nfound : "undef").
+            "! recovering: $selerr\n";
+
     sleep 1;        # avoid overload
     return;
   }
@@ -214,7 +269,7 @@ sub main_server_poll {
   # errors on the handle?
   # return them immediately, they may be from a SIGHUP restart signal
   if (vec ($eout, $self->{server_fileno}, 1)) {
-    warn "prefork: select returned error on server filehandle: $!\n";
+    warn "prefork: select returned error on server filehandle: $selerr $!\n";
     return;
   }
 
