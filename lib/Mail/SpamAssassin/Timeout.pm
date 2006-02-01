@@ -135,7 +135,7 @@ sub _run {      # private
 
   eval {
     # note use of local to ensure closed scope here
-    local $SIG{ALRM} = sub { die "__alarm___ignore__\n" };
+    local $SIG{ALRM} = sub { die "__alarm__ignore__\n" };
     local $SIG{__DIE__};   # bug 4631
 
     $oldalarm = alarm($self->{secs});
