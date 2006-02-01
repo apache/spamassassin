@@ -34,6 +34,8 @@ package Mail::SpamAssassin::Plugin::DomainKeys;
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Timeout;
+
 use strict;
 use warnings;
 use bytes;
@@ -137,30 +139,22 @@ sub _check_domainkeys {
   }
 
   my $timeout = 5;              # TODO: tunable timeout
-  my $oldalarm = 0;
 
-  eval {
-    local $SIG{ALRM} = sub { die "__alarm__ignore__\n" };
-    local $SIG{__DIE__};   # bug 4631
-    $oldalarm = alarm($timeout);
+  my $timer = Mail::SpamAssassin::Timeout->new({ secs => $timeout });
+  my $err = $timer->run_and_catch(sub {
+
     $self->_dk_lookup_trapped($scan, $message, $domain);
-    if (defined $oldalarm) {
-      alarm $oldalarm; $oldalarm = undef;
-    }
-  };
 
-  my $err = $@;
-  if (defined $oldalarm) {
-    alarm $oldalarm; $oldalarm = undef;
+  });
+
+  if ($timer->timed_out()) {
+    dbg("dk: lookup timed out after $timeout seconds");
+    return 0;
   }
 
   if ($err) {
     chomp $err;
-    if ($err eq "__alarm__ignore__") {
-      dbg("dk: lookup timed out after $timeout seconds");
-    } else {
-      warn("dk: lookup failed: $err\n");
-    }
+    warn("dk: lookup failed: $err\n");
     return 0;
   }
 

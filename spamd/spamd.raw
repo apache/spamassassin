@@ -2053,6 +2053,9 @@ sub restart_handler {
   foreach (keys %children) {
     kill 'INT' => $_;
     my $pid = waitpid($_, 0);
+    if ($scaling) {
+      $scaling->child_exited($pid);
+    }
     info("spamd: child $pid killed successfully");
   }
   %children = ();
