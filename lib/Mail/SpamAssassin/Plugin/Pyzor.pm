@@ -35,6 +35,7 @@ package Mail::SpamAssassin::Plugin::Pyzor;
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Timeout;
 use strict;
 use warnings;
 use bytes;
@@ -217,27 +218,22 @@ sub pyzor_lookup {
 
   $pyzor_count = 0;
   $pyzor_whitelisted = 0;
-
-  $permsgstatus->enter_helper_run_mode();
+  my $pid;
 
   # use a temp file here -- open2() is unreliable, buffering-wise, under spamd
   my $tmpf = $permsgstatus->create_fulltext_tmpfile($fulltext);
-  my $oldalarm = 0;
 
-  my $pid;
-  eval {
-    # safe to use $SIG{ALRM} here instead of Util::trap_sigalrm_fully(),
-    # since there are no killer regexp hang dangers here
-    local $SIG{ALRM} = sub { die "__alarm__ignore__\n" };
+  # note: not really tainted, this came from system configuration file
+  my $path = Mail::SpamAssassin::Util::untaint_file_path($self->{main}->{conf}->{pyzor_path});
+
+  my $opts = $self->{main}->{conf}->{pyzor_options} || '';
+
+  $permsgstatus->enter_helper_run_mode();
+
+  my $timer = Mail::SpamAssassin::Timeout->new({ secs => $timeout });
+  my $err = $timer->run_and_catch(sub {
+
     local $SIG{PIPE} = sub { die "__brokenpipe__ignore__\n" };
-    local $SIG{__DIE__};   # bug 4631
-
-    $oldalarm = alarm $timeout;
-
-    # note: not really tainted, this came from system configuration file
-    my $path = Mail::SpamAssassin::Util::untaint_file_path($self->{main}->{conf}->{pyzor_path});
-
-    my $opts = $self->{main}->{conf}->{pyzor_options} || '';
  
     dbg("pyzor: opening pipe: " . join(' ', $path, $opts, "check", "< $tmpf"));
 
@@ -261,21 +257,7 @@ sub pyzor_lookup {
       die("internal error\n");
     }
 
-    # note: this must be called BEFORE leave_helper_run_mode()
-    # $self->cleanup_kids($pid);
-
-    # attempt to call this inside the eval, as leaving this scope is
-    # a slow operation and timing *that* out is pointless
-    if (defined $oldalarm) { 
-      alarm $oldalarm; $oldalarm = undef;
-    }
-  };
-
-  # clear the alarm before doing lots of time-consuming hard work
-  my $err = $@;
-  if (defined $oldalarm) { 
-    alarm $oldalarm; $oldalarm = undef;
-  }
+  });
 
   if (defined(fileno(*PYZOR))) {  # still open
     if ($pid) {
@@ -287,11 +269,14 @@ sub pyzor_lookup {
   }
   $permsgstatus->leave_helper_run_mode();
 
+  if ($timer->timed_out()) {
+    dbg("pyzor: check timed out after $timeout seconds");
+    return 0;
+  }
+
   if ($err) {
     chomp $err;
-    if ($err eq "__alarm__ignore__") {
-      dbg("pyzor: check timed out after $timeout seconds");
-    } elsif ($err eq "__brokenpipe__ignore__") {
+    if ($err eq "__brokenpipe__ignore__") {
       dbg("pyzor: check failed: broken pipe");
     } elsif ($err eq "no response") {
       dbg("pyzor: check failed: no response");
@@ -352,23 +337,19 @@ sub plugin_report {
 
 sub pyzor_report {
   my ($self, $options, $tmpf) = @_;
+
+  # note: not really tainted, this came from system configuration file
+  my $path = Mail::SpamAssassin::Util::untaint_file_path($options->{report}->{conf}->{pyzor_path});
+
+  my $opts = $options->{report}->{conf}->{pyzor_options} || '';
   my $timeout = $self->{main}->{conf}->{pyzor_timeout};
 
   $options->{report}->enter_helper_run_mode();
 
-  my $oldalarm = 0;
+  my $timer = Mail::SpamAssassin::Timeout->new({ secs => $timeout });
+  my $err = $timer->run_and_catch(sub {
 
-  eval {
-    local $SIG{ALRM} = sub { die "__alarm__ignore__\n" };
     local $SIG{PIPE} = sub { die "__brokenpipe__ignore__\n" };
-    local $SIG{__DIE__};   # bug 4631
-
-    $oldalarm = alarm $timeout;
-
-    # note: not really tainted, this came from system configuration file
-    my $path = Mail::SpamAssassin::Util::untaint_file_path($options->{report}->{conf}->{pyzor_path});
-
-    my $opts = $options->{report}->{conf}->{pyzor_options} || '';
 
     dbg("pyzor: opening pipe: " . join(' ', $path, $opts, "report", "< $tmpf"));
 
@@ -379,23 +360,19 @@ sub pyzor_report {
     my @ignored = <PYZOR>;
     $options->{report}->close_pipe_fh(\*PYZOR);
 
-    if (defined $oldalarm) { 
-      alarm $oldalarm; $oldalarm = undef;
-    }
     waitpid ($pid, 0);
-  };
+  });
 
-  my $err = $@;
-  if (defined $oldalarm) { 
-    alarm $oldalarm; $oldalarm = undef;
-  }
   $options->{report}->leave_helper_run_mode();
+
+  if ($timer->timed_out()) {
+    dbg("reporter: pyzor report timed out after $timeout seconds");
+    return 0;
+  }
 
   if ($err) {
     chomp $err;
-    if ($err eq '__alarm__ignore__') {
-      dbg("reporter: pyzor report timed out after $timeout seconds");
-    } elsif ($err eq '__brokenpipe__ignore__') {
+    if ($err eq '__brokenpipe__ignore__') {
       dbg("reporter: pyzor report failed: broken pipe");
     } else {
       warn("reporter: pyzor report failed: $err\n");

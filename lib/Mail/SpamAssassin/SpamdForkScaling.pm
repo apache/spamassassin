@@ -25,6 +25,7 @@ use Errno qw();
 
 use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Timeout;
 
 use vars qw {
   @PFSTATE_VARS %EXPORT_TAGS @EXPORT_OK
@@ -108,6 +109,9 @@ sub child_exited {
   my ($self, $pid) = @_;
 
   delete $self->{kids}->{$pid};
+
+  # note this for the select()-caller's benefit
+  $self->{child_just_exited} = 1;
 
   # remove the child from the backchannel list, too
   $self->{backchannel}->delete_socket_for_child($pid);
@@ -194,54 +198,23 @@ sub main_server_poll {
   # not that I can remember what Theo's bug was, but hey ;)    A good
   # 60 seconds extra on the alarm() should make that quite rare...
 
-  # TODO: we need to come up with a clean way for all the code that
-  # uses the various kludges that alarm() requires, to share that code.
-  # it's ridiculous having to remember each of these every time, and
-  # the side-effects are hard to debug.
-  #
-  my $oldalarm = 0;
+  my $timer = Mail::SpamAssassin::Timeout->new({ secs => ($tout*2) + 60 });
 
-  if ($tout) {
-    eval {
-      # safe to use $SIG{ALRM} here instead of Util::trap_sigalrm_fully(),
-      # since there are no killer regexp hang dangers here
-      local $SIG{ALRM} = sub { die "__alarm__ignore__\n" };
-      local $SIG{__DIE__};   # bug 4631
+  $timer->run(sub {
 
-      $oldalarm = alarm(($tout*2) + 60);
-
-      ($nfound, $timeleft) = select($rout=$rin, undef, $eout=$rin, $tout);
-      $selerr = $!;
-
-      if (defined $oldalarm) {      # unset before we leave eval{}
-        alarm $oldalarm; $oldalarm = undef;
-      }
-    };
-  } else {
-    # no timeouts involved, much simpler
-    ($nfound, $timeleft) = select($rout=$rin, undef, $eout=$rin, undef);
+    $self->{child_just_exited} = 0;
+    ($nfound, $timeleft) = select($rout=$rin, undef, $eout=$rin, $tout);
     $selerr = $!;
-  }
 
-  my $err = $@;
-  if ($tout && defined $oldalarm) {
-    alarm $oldalarm; $oldalarm = undef;
-  }
+  });
 
   # bug 4696: under load, the process can go for such a long time without
   # being context-switched in, that when it does return the alarm() fires
   # before the select() timeout does.   Treat this as a select() timeout
-  if ($tout && $err && $err =~ /__alarm__ignore__/) {
+  if ($timer->timed_out) {
     dbg("prefork: select timed out (via alarm)");
     $nfound = 0;
     $timeleft = 0;
-    $err = undef;
-  }
-
-  if ($err) {
-    warn "prefork: select timeout failed! recovering: $err/$selerr\n";
-    sleep 1;        # avoid overload
-    return;
   }
 
   # errors; handle undef *or* -1 returned.  do this before "errors on
@@ -255,6 +228,20 @@ sub main_server_poll {
       # for example if someone sends SIGHUP to reload the configuration.
       # just return inmmediately
       dbg("prefork: select returned err $selerr, probably signalled");
+      return;
+    }
+
+    # if a child exits during that select() call, it generates a spurious
+    # error, like this:
+    #
+    # Jan 29 12:53:17 dogma spamd[18518]: prefork: child states: BI
+    # Jan 29 12:53:17 dogma spamd[18518]: spamd: handled cleanup of child pid 13101 due to SIGCHLD
+    # Jan 29 12:53:17 dogma spamd[18518]: prefork: select returned -1! recovering:
+    #
+    # avoid by setting a boolean in the child_exited() callback and checking
+    # it here.  log $! just in case, though.
+    if ($self->{child_just_exited} && $nfound == -1) {
+      dbg("prefork: select returned -1 due to child exiting, ignored ($selerr)");
       return;
     }
 
@@ -609,7 +596,7 @@ retry_write:
       return undef;
     }
     else {
-      # give it 1 second to recover.  we retry indefinitely.
+      # give it 1 second to recover
       my $rout = '';
       vec($rout, $sock->fileno, 1) = 1;
       select(undef, $rout, undef, 1);

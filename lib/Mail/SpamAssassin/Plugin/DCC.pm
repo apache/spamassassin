@@ -44,6 +44,7 @@ package Mail::SpamAssassin::Plugin::DCC;
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Timeout;
 use IO::Socket;
 use strict;
 use warnings;
@@ -339,15 +340,10 @@ sub dccifd_lookup {
 
   $permsgstatus->enter_helper_run_mode();
 
-  my $oldalarm = 0;
+  my $timer = Mail::SpamAssassin::Timeout->new({ secs => $timeout });
+  my $err = $timer->run_and_catch(sub {
 
-  eval {
-    # safe to use $SIG{ALRM} here instead of Util::trap_sigalrm_fully(),
-    # since there are no killer regexp hang dangers here
-    local $SIG{ALRM} = sub { die "__alarm__ignore__\n" };
-    local $SIG{__DIE__};   # bug 4631
-
-    $oldalarm = alarm $timeout;
+    local $SIG{PIPE} = sub { die "__brokenpipe__ignore__\n" };
 
     my $sock = IO::Socket::UNIX->new(Type => SOCK_STREAM,
       Peer => $sockpath) || dbg("dcc: failed to open socket") && die;
@@ -383,28 +379,20 @@ sub dccifd_lookup {
     }
 
     dbg("dcc: dccifd got response: $response");
+  
+  });
 
-    if (defined $oldalarm) {
-      alarm $oldalarm; $oldalarm = undef;
-    }
-  };
-
-  my $err = $@;
-  if (defined $oldalarm) {
-    alarm $oldalarm; $oldalarm = undef;
-  }
   $permsgstatus->leave_helper_run_mode();
+
+  if ($timer->timed_out()) {
+    dbg("dcc: dccifd check timed out after $timeout secs.");
+    return 0;
+  }
 
   if ($err) {
     chomp $err;
-    $response = undef;
-    if ($err eq "__alarm__ignore__") {
-      dbg("dcc: dccifd check timed out after $timeout secs.");
-      return 0;
-    } else {
-      warn("dcc: dccifd -> check skipped: $! $err");
-      return 0;
-    }
+    warn("dcc: dccifd -> check skipped: $! $err");
+    return 0;
   }
 
   if (!defined $response || $response !~ /^X-DCC/) {
@@ -458,17 +446,12 @@ sub dccproc_lookup {
 
   # use a temp file here -- open2() is unreliable, buffering-wise, under spamd
   my $tmpf = $permsgstatus->create_fulltext_tmpfile($fulltext);
-  my $oldalarm = 0;
-
   my $pid;
-  eval {
-    # safe to use $SIG{ALRM} here instead of Util::trap_sigalrm_fully(),
-    # since there are no killer regexp hang dangers here
-    local $SIG{ALRM} = sub { die "__alarm__ignore__\n" };
-    local $SIG{PIPE} = sub { die "__brokenpipe__ignore__\n" };
-    local $SIG{__DIE__};   # bug 4631
 
-    $oldalarm = alarm $timeout;
+  my $timer = Mail::SpamAssassin::Timeout->new({ secs => $timeout });
+  my $err = $timer->run_and_catch(sub {
+
+    local $SIG{PIPE} = sub { die "__brokenpipe__ignore__\n" };
 
     # note: not really tainted, this came from system configuration file
     my $path = Mail::SpamAssassin::Util::untaint_file_path($self->{main}->{conf}->{dcc_path});
@@ -506,17 +489,7 @@ sub dccproc_lookup {
 
     dbg("dcc: got response: $response");
 
-    # note: this must be called BEFORE leave_helper_run_mode()
-    # $self->cleanup_kids($pid);
-    if (defined $oldalarm) {
-      alarm $oldalarm; $oldalarm = undef;
-    }
-  };
-
-  my $err = $@;
-  if (defined $oldalarm) {
-    alarm $oldalarm; $oldalarm = undef;
-  }
+  });
 
   if (defined(fileno(*DCC))) {  # still open
     if ($pid) {
@@ -528,11 +501,14 @@ sub dccproc_lookup {
   }
   $permsgstatus->leave_helper_run_mode();
 
+  if ($timer->timed_out()) {
+    dbg("dcc: check timed out after $timeout seconds");
+    return 0;
+  }
+
   if ($err) {
     chomp $err;
-    if ($err eq "__alarm__ignore__") {
-      dbg("dcc: check timed out after $timeout seconds");
-    } elsif ($err eq "__brokenpipe__ignore__") {
+    if ($err eq "__brokenpipe__ignore__") {
       dbg("dcc: check failed: broken pipe");
     } elsif ($err eq "no response") {
       dbg("dcc: check failed: no response");
@@ -609,47 +585,37 @@ sub dcc_report {
   my ($self, $options, $tmpf) = @_;
   my $timeout = $options->{report}->{conf}->{dcc_timeout};
 
+  # note: not really tainted, this came from system configuration file
+  my $path = Mail::SpamAssassin::Util::untaint_file_path($options->{report}->{conf}->{dcc_path});
+
+  my $opts = $options->{report}->{conf}->{dcc_options} || '';
+
+  my $timer = Mail::SpamAssassin::Timeout->new({ secs => $timeout });
+
   $options->{report}->enter_helper_run_mode();
+  my $err = $timer->run_and_catch(sub {
 
-  my $oldalarm = 0;
-
-  eval {
-    local $SIG{ALRM} = sub { die "__alarm__ignore__\n" };
     local $SIG{PIPE} = sub { die "__brokenpipe__ignore__\n" };
-    local $SIG{__DIE__};   # bug 4631
-
-    $oldalarm = alarm $timeout;
-
-    # note: not really tainted, this came from system configuration file
-    my $path = Mail::SpamAssassin::Util::untaint_file_path($options->{report}->{conf}->{dcc_path});
-
-    my $opts = $options->{report}->{conf}->{dcc_options} || '';
 
     my $pid = Mail::SpamAssassin::Util::helper_app_pipe_open(*DCC,
-	$tmpf, 1, $path, "-t", "many", split(' ', $opts));
+        $tmpf, 1, $path, "-t", "many", split(' ', $opts));
     $pid or die "$!\n";
 
     my @ignored = <DCC>;
     $options->{report}->close_pipe_fh(\*DCC);
-
     waitpid ($pid, 0);
-    if (defined $oldalarm) {
-      alarm $oldalarm; $oldalarm = undef;
-    }
-  };
-
-  my $err = $@;
-  if (defined $oldalarm) {
-    alarm $oldalarm; $oldalarm = undef;
-  }
-
+  
+  });
   $options->{report}->leave_helper_run_mode();
+
+  if ($timer->timed_out()) {
+    dbg("reporter: DCC report timed out after $timeout seconds");
+    return 0;
+  }
 
   if ($err) {
     chomp $err;
-    if ($err eq "__alarm__ignore__") {
-      dbg("reporter: DCC report timed out after $timeout seconds");
-    } elsif ($err eq "__brokenpipe__ignore__") {
+    if ($err eq "__brokenpipe__ignore__") {
       dbg("reporter: DCC report failed: broken pipe");
     } else {
       warn("reporter: DCC report failed: $err\n");

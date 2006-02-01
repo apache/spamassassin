@@ -988,6 +988,9 @@ If neither C<trusted_networks> or C<internal_networks> is set, no addresses
 will be considered local; in other words, any relays past the machine where
 SpamAssassin is running will be considered external.
 
+TODO If an IP address is specified in <Cinternal_networks> but not in
+C<trusted_networks>, it will be ignored.TODO bug 4760
+
 =cut
 
   push (@cmds, {
