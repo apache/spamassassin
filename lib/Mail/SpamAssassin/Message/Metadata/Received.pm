@@ -257,8 +257,10 @@ sub parse_received_headers {
 
     if ($in_trusted) {
       push (@{$self->{relays_trusted}}, $relay);
+      $self->{allow_fetchmail_markers} = 1;
     } else {
       push (@{$self->{relays_untrusted}}, $relay);
+      $self->{allow_fetchmail_markers} = 0;
     }
   }
 
@@ -1217,8 +1219,12 @@ sub make_relay_as_string {
 # spamcop does this, and it's a great idea ;)
 sub found_pop_fetcher_sig {
   my ($self) = @_;
-  dbg("received-header: found fetchmail marker, restarting parse");
-  $self->{relays} = [ ];
+  if ($self->{allow_fetchmail_markers}) {
+    dbg("received-header: found fetchmail marker, restarting parse");
+    $self->{relays_trusted} = [ ];
+  } else {
+    dbg("received-header: found fetchmail marker outside trusted area, ignored");
+  }
 }
 
 # ---------------------------------------------------------------------------
