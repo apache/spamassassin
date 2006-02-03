@@ -26,7 +26,7 @@ my $sa = Mail::SpamAssassin->new({
     rules_filename => "$prefix/rules",
 });
 
-plan tests => 71;
+plan tests => 77;
 
 sub tryone {
   my ($pat, $testip) = @_;
@@ -77,8 +77,8 @@ ok (tryone (Mail::SpamAssassin::Constants::IP_ADDRESS, "::192.168.0.1"));
 ok (!tryone (Mail::SpamAssassin::Constants::IP_ADDRESS, "FEDC:BA98:7654:3210:FEDC:BA98:7654:3210:"));
 ok (!tryone (Mail::SpamAssassin::Constants::IP_ADDRESS, "FEDC:BA98:7654:3210:FEDC:BA98:7654:3210:9348"));
 ok (!tryone (Mail::SpamAssassin::Constants::IP_ADDRESS, "3ffe:fffff:100:f101:210:a4ff:fee3:9566"));
-ok (tryone (Mail::SpamAssassin::Constants::IP_ADDRESS, "ff02:0:0:0:0:0:1"));
-ok (tryone (Mail::SpamAssassin::Constants::IP_ADDRESS, "ff02:0:0:0:0:0:2"));
+ok (tryone (Mail::SpamAssassin::Constants::IP_ADDRESS, "ff02:0:0:0:0:0:0:1"));
+ok (tryone (Mail::SpamAssassin::Constants::IP_ADDRESS, "ff02:0:0:0:0:0:0:2"));
 ok (tryone (Mail::SpamAssassin::Constants::IP_ADDRESS, "IPv6:::1"));
 ok (tryone (Mail::SpamAssassin::Constants::IP_ADDRESS, "IPv6:3ffe:2500:310:3:20a:95ff:fef5:246e"));
 
@@ -86,8 +86,9 @@ ok (tryone (Mail::SpamAssassin::Constants::LOCALHOST, "localhost"));
 ok (tryone (Mail::SpamAssassin::Constants::LOCALHOST, "localhost.localdomain"));
 ok (tryone (Mail::SpamAssassin::Constants::LOCALHOST, "127.0.0.1"));
 ok (tryone (Mail::SpamAssassin::Constants::LOCALHOST, "::ffff:127.0.0.1"));
-ok (tryone (Mail::SpamAssassin::Constants::LOCALHOST, ":::ffff:127.0.0.1"));
-ok (tryone (Mail::SpamAssassin::Constants::LOCALHOST, "0000:0000:0000:ffff:127.0.0.1"));
+ok (!tryone (Mail::SpamAssassin::Constants::LOCALHOST, ":::ffff:127.0.0.1"));
+ok (!tryone (Mail::SpamAssassin::Constants::LOCALHOST, "0000:0000:0000:ffff:127.0.0.1"));
+ok (tryone (Mail::SpamAssassin::Constants::LOCALHOST, "0000:0000:0000:0000:0000:ffff:127.0.0.1"));
 ok (tryone (Mail::SpamAssassin::Constants::LOCALHOST, "::1"));
 ok (tryone (Mail::SpamAssassin::Constants::LOCALHOST, "0:0:0:0:0:0:0:1"));
 ok (!tryone (Mail::SpamAssassin::Constants::LOCALHOST, "3ffe:fffff:100:f101:210:a4ff:fee3:9566"));
@@ -95,6 +96,13 @@ ok (!tryone (Mail::SpamAssassin::Constants::LOCALHOST, "::192.168.0.1"));
 ok (!tryone (Mail::SpamAssassin::Constants::LOCALHOST, "notlocalhost"));
 ok (tryone (Mail::SpamAssassin::Constants::LOCALHOST, "IPv6:::1"));
 ok (!tryone (Mail::SpamAssassin::Constants::LOCALHOST, "IPv6:3ffe:2500:310:3:20a:95ff:fef5:246e"));
+
+ok (tryone (Mail::SpamAssassin::Constants::LOCALHOST, "::0:0:0:0:0:0:1"));
+ok (tryone (Mail::SpamAssassin::Constants::LOCALHOST, "::0:0:0:0:1"));
+ok (tryone (Mail::SpamAssassin::Constants::LOCALHOST, "0::0:0:0:0:0:1"));
+ok (tryone (Mail::SpamAssassin::Constants::LOCALHOST, "0:0::0:0:0:0:1"));
+ok (tryone (Mail::SpamAssassin::Constants::LOCALHOST, "0:0:0::0:0:1"));
+
 
 sub tsttrim {
   my $dom = shift;
