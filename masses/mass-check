@@ -718,6 +718,7 @@ sub memory_track_finish {
 sub get_current_svn_revision {
   my $revision;
 
+  # this is usually "${TOPDIR}/masses"
   my $dir = $FindBin::Bin || ".";
 
   if (-d "$dir/.svn" || -f "$dir/svninfo.tmp") {
@@ -726,7 +727,9 @@ sub get_current_svn_revision {
       open (SVNINFO, "< $dir/svninfo.tmp");
     } 
     else {
-      open (SVNINFO, "( svn info --non-interactive $dir || svn info $dir ) 2>&1 |");
+      # note, ".." since we want to pick up changes outside 'masses'
+      # too!
+      open (SVNINFO, "( svn info --non-interactive $dir/.. || svn info $dir/.. ) 2>&1 |");
     }
 
     while (<SVNINFO>) {
