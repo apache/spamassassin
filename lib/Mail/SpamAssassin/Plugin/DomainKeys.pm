@@ -59,7 +59,35 @@ sub new {
   $self->register_eval_rule ("check_domainkeys_testing");
   $self->register_eval_rule ("check_domainkeys_signall");
 
+  $self->set_config($mailsaobject->{conf});
+
   return $self;
+}
+
+###########################################################################
+
+sub set_config {
+  my($self, $conf) = @_;
+  my @cmds = ();
+
+=head1 USER SETTINGS
+
+=over 4
+
+=item domainkeys_timeout n             (default: 5)
+
+How many seconds to wait for a DomainKeys query to complete, before
+scanning continues without the DomainKeys result.
+
+=cut
+
+  push (@cmds, {
+    setting => 'domainkeys_timeout',
+    default => 5,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
+  });
+
+  $conf->{parser}->register_commands(\@cmds);
 }
 
 
@@ -136,7 +164,7 @@ sub _check_domainkeys {
     return;
   }
 
-  my $timeout = 5;              # TODO: tunable timeout
+  my $timeout = $scan->{conf}->{domainkeys_timeout};
   my $oldalarm = 0;
 
   eval {
