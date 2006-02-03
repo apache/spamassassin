@@ -22,14 +22,16 @@ TMPDIR=/home/bbmass/tmpfs/tmp \
           -dest /home/bbmass/tmpfs/newcor/mc-slower -num 20000 \
         *
 
-rm -rf /home/bbmass/tmpfs/cor.old       # just in case
+# remove this "out of the way" name, just in case.   for some reason
+# this seems to occasionally be un-rm'able; Solaris zones bug?
+rm -rf /home/bbmass/tmpfs/cor.old.$$
 
 # and put the new corpus linkfarm in place...
-mv /home/bbmass/tmpfs/cor /home/bbmass/tmpfs/cor.old
+mv /home/bbmass/tmpfs/cor /home/bbmass/tmpfs/cor.old.$$
 mv /home/bbmass/tmpfs/newcor /home/bbmass/tmpfs/cor
 
-# remove the old one
-rm -rf /home/bbmass/tmpfs/cor.old
+# remove the old one (or try, at least)
+rm -rf /home/bbmass/tmpfs/cor.old.$$
 
 for dir in mc-fast mc-med mc-slow mc-slower
 do
