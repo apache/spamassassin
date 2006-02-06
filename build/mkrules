@@ -616,7 +616,21 @@ sub compile_output_files {
     }
   }
 
-  my @rulenames = sort keys %$rules;
+  # this is a horrible kluge.
+  # at this point in the game, we've lost the ordered list of rules, so the
+  # loadplugin lines have no guarantee that they'll be loaded before the rules
+  # that require them.  so we kluge the sort to always have loadplugin lines
+  # appear at the very top of the array so we know they'll be listed before
+  # anything else.
+  my @rulenames = sort {
+    if ($a =~ /^loadplugin_/) {
+      return -1;
+    }
+    elsif ($b =~ /^loadplugin_/) {
+      return 1;
+    }
+    return $a cmp $b;
+  } keys %$rules;
   my %seen = ();
 
   # go through the rules looking for meta subrules we
