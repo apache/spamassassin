@@ -292,8 +292,6 @@ sub rule_file_compile {
     $rules->{$ALWAYS_PUBLISH} = rule_entry_create();
   }
 
-  my $ALWAYS = { };
-
   # an "ifplugin" or "if" scope
   my $current_conditional;
   my $current_comments = '';
@@ -478,7 +476,7 @@ sub rule_file_compile {
   }
 
   # now append all the found text to the output file buffers
-  copy_to_output_buffers($rule_order, $issandbox, $ALWAYS, $f, $filename);
+  copy_to_output_buffers($rule_order, $issandbox, $f, $filename);
 
   # ok; file complete.  now mark all those rules as "seen"; future
   # refs to those rule names will trigger an autorename.
@@ -488,7 +486,7 @@ sub rule_file_compile {
 }
 
 sub copy_to_output_buffers {
-  my ($rule_order, $issandbox, $ALWAYS, $f, $filename) = @_;
+  my ($rule_order, $issandbox, $f, $filename) = @_;
 
   # always output these two files, even if they're empty!
   foreach my $pubfile ($opt_out.'/'.$opt_sandboxout,
@@ -502,7 +500,7 @@ sub copy_to_output_buffers {
   my %already_done = ();
   my $copied_active = 0;
   my $copied_other = 0;
-  foreach my $name (@$rule_order, keys(%$ALWAYS))
+  foreach my $name (@$rule_order)
   {
     # only do each rule once, please ;)
     next if exists $already_done{$name};
