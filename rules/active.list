@@ -226,9 +226,6 @@ FAKE_OUTBLAZE_RCVD
 FORGED_AOL_TAGS
 
 # good enough
-FORGED_EUDORAMAIL_RCVD
-
-# good enough
 FORGED_HOTMAIL_RCVD
 
 # good enough
@@ -308,6 +305,9 @@ FROM_DOMAIN_NOVOWEL
 
 # good enough
 FROM_ENDS_IN_NUMS
+
+# good enough
+FROM_EXCESS_BASE64
 
 # good enough
 FROM_HAS_MIXED_NUMS
@@ -1054,6 +1054,9 @@ SUBJ_ILLEGAL_CHARS
 SUBJ_RE_NUM
 
 # good enough
+SUBJ_YOUR_OWN
+
+# good enough
 SUB_HELLO
 
 # good enough
@@ -1110,6 +1113,11 @@ FORGED_OUTLOOK_TAGS
 # good enough
 FUZZY_STOCK
 
+# not publishing HS_FAST_FORWARD: needs plugin (Mail::SpamAssassin::Plugin::Sandbox::hstern)
+
+# good enough
+HS_SYNDICATE_P5
+
 # tflags net
 RCVD_IN_DSBL
 
@@ -1127,6 +1135,12 @@ RCVD_IN_WHOIS_INVALID
 
 # tflags net
 RCVD_IN_XBL
+
+# good enough
+TVD_PH_1
+
+# good enough
+TVD_PH_META
 
 # good enough
 UNCLAIMED_MONEY
