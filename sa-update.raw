@@ -723,7 +723,12 @@ ENDOFVALIDATIONERR
   dbg("channel: update complete");
 }
 
-unlink $content_file || warn "error: couldn't remove tmpfile $content_file: $!\n";
+# clear out the temp files if they still exist
+foreach ( $newcf_file, $content_file ) {
+  if (-e $_) {
+    unlink $_ || warn "error: can't remove file $_: $!\n";
+  }
+}
 
 dbg("diag: updates complete, exiting with code $exit");
 exit $exit;
