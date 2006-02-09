@@ -183,7 +183,12 @@ my $SA = new Mail::SpamAssassin({
 });
 
 # $opt{'updatedir'} ||= $SA->first_existing_path(@Mail::SpamAssassin::site_rules_path);
-$opt{'updatedir'} ||= $SA->sed_path('__local_state_dir__/spamassassin/__version__');
+if (defined $opt{'updatedir'}) {
+  $opt{'updatedir'} = Mail::SpamAssassin::Util::untaint_file_path($opt{'updatedir'});
+}
+else {
+  $opt{'updatedir'} = $SA->sed_path('__local_state_dir__/spamassassin/__version__');
+}
 
 dbg("generic: sa-update version $VERSION");
 dbg("generic: using update directory: $opt{'updatedir'}");
@@ -261,6 +266,16 @@ if (defined $opt{'channelfile'}) {
     push(@channels, $chan);
   }
   close(CHAN);
+}
+
+# untaint the channel listing
+for(my $ind = 0; $ind < @channels; $ind++) {
+  if ($channels[$ind] =~ /^([a-zA-Z0-9._-]+)$/) {
+    $channels[$ind] = $1;
+  }
+  else {
+    splice @channels, $ind, 1;
+  }
 }
 
 # find GPG in the PATH
