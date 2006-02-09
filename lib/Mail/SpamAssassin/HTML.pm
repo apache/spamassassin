@@ -253,7 +253,7 @@ sub parse {
 
   # bug 4695: we want "<br/>" to be treated the same as "<br>", and
   # the HTML::Parser API won't do it for us
-  $text =~ s/<([^>]+?)\s*\/>/<$1>/gi;
+  $text =~ s/<(\S+)\s*\/>/<$1>/gi;
 
   # Ignore stupid warning that can't be suppressed: 'Parsing of
   # undecoded UTF-8 will give garbage when decoding entities at ..' (bug 4046)
