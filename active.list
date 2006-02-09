@@ -193,9 +193,6 @@ DRUG_ED_ONLINE
 DRUG_ED_SILD
 
 # good enough
-EARN_PER_WEEK
-
-# good enough
 EMPTY_MESSAGE
 
 # good enough
@@ -343,9 +340,6 @@ FUZZY_CELEBREX
 FUZZY_CPILL
 
 # good enough
-FUZZY_CREDIT
-
-# good enough
 FUZZY_ERECT
 
 # good enough
@@ -401,6 +395,9 @@ FUZZY_SOFTWARE
 
 # good enough
 FUZZY_SPRM
+
+# good enough
+FUZZY_STOCK
 
 # good enough
 FUZZY_THOUSANDS
@@ -1110,13 +1107,12 @@ FORGED_OUTLOOK_HTML
 # good enough
 FORGED_OUTLOOK_TAGS
 
-# good enough
-FUZZY_STOCK
-
 # not publishing HS_FAST_FORWARD: needs plugin (Mail::SpamAssassin::Plugin::Sandbox::hstern)
 
 # good enough
 HS_SYNDICATE_P5
+
+# not publishing HTML_IFRAME_SRC: needs plugin (Mail::SpamAssassin::Plugin::Sandbox::felicity)
 
 # tflags net
 RCVD_IN_DSBL
@@ -1141,6 +1137,8 @@ TVD_PH_1
 
 # good enough
 TVD_PH_META
+
+# not publishing URI_HTML_ONLY: needs plugin (Mail::SpamAssassin::Plugin::Sandbox::felicity)
 
 # good enough
 UNCLAIMED_MONEY
