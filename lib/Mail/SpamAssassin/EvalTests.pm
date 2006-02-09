@@ -3013,4 +3013,34 @@ sub check_ratware_envelope_from {
   return 0;
 }
 
+sub check_iframe_src {
+  my ($self) = @_;
+
+  while (my($k,$v) = each %{$self->{html}->{uri_detail}}) {
+    return 1 if $v->{types}->{iframe};
+  }
+
+  return 0;
+}
+
+sub check_html_uri_only {
+  my ($self) = @_;
+
+  # Find out if there are any multipart/alternative parts in the message
+  my @ma = $self->{msg}->find_parts(qr@^multipart/alternative\b@i);
+
+  # If there are no multipart/alternative sections, skip this test.
+  return if (!@ma);
+
+  # At this point, we're not actually checking the alternates, just the entire
+  # message.
+  my $return = 0;
+  while (my($k,$v) = each %{$self->{html}->{uri_detail}}) {
+    $return = 1; # make sure there's at least 1 URI
+    return 0 if ($v->{types}->{parsed});
+  }
+
+  return $return;
+}
+
 1;
