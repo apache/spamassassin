@@ -1168,7 +1168,6 @@ sub show_daterev_selector_page {
   my @drs_nightly = ();
   my @drs_preflight = ();
 
-  # foreach my $i (-50 .. +50) { my $dr = date_in_direction($daterev, $i); }
   foreach my $dr (@daterevs) {
     next unless $dr;
 
@@ -1190,6 +1189,7 @@ sub show_daterev_selector_page {
     }
   }
 
+  # remove all but the most recent 100.  (TODO: need a "full" view?)
   if (scalar @drs_net > 100)       { splice(@drs_net, 0, -100); }
   if (scalar @drs_preflight > 100) { splice(@drs_preflight, 0, -100); }
   if (scalar @drs_nightly > 100)   { splice(@drs_nightly, 0, -100); }
