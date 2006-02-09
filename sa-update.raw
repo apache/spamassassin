@@ -963,8 +963,16 @@ sub clean_update_dir {
 sub lint_check_dir {
   my $dir = shift;
 
-  system ("spamassassin --configpath='$dir' --prefspath=/dev/null --lint");
-  return (($? >> 8) == 0);
+  # TODO: make this work
+  #
+  # this doesn't work for channels other than updates.spamassassin.org, and
+  # then only when the update is a full rule distribution, and then (likely)
+  # only on a *NIX platform which has /dev/null ...  ignore it for now.
+  #
+  #system ("spamassassin --configpath='$dir' --prefspath=/dev/null --lint");
+  #return (($? >> 8) == 0);
+
+  return 1;
 }
 
 # a version of rename() that can cope with renaming files across filesystems,
