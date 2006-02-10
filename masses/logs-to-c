@@ -20,15 +20,15 @@ use Getopt::Long;
 use vars qw($opt_cffile $opt_count $opt_lambda $opt_threshold
 	    $opt_spam $opt_ham $opt_fplog $opt_fnlog);
 
+$opt_cffile = "../rules";
+$opt_count = 0;
+$opt_threshold = 5;
+$opt_spam = 'spam.log';
+$opt_ham = 'ham.log';
+$opt_scoreset = 0;
+
 GetOptions("cffile=s", "count", "lambda=f", "threshold=f", "spam=s",
 	   "ham=s", "scoreset=i", "fplog=s", "fnlog=s");
-
-$opt_cffile ||= "../rules";
-$opt_count ||= 0;
-$opt_threshold ||= 5;
-$opt_spam ||= 'spam.log';
-$opt_ham ||= 'ham.log';
-$opt_scoreset = 0 if (!defined $opt_scoreset);
 
 # If desired, report false positives and false negatives for analysis
 if (defined $opt_fnlog) { open (FNLOG, ">$opt_fnlog"); }
