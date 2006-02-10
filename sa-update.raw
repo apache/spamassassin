@@ -560,6 +560,10 @@ foreach my $channel (@channels) {
       chop $GNUPG;
       dbg ("gpg: $GNUPG");
 
+      if ($GNUPG =~ /^gpg: fatal:/) {
+        warn $GNUPG;        # report bad news
+      }
+
       if ($GNUPG =~ /^\Q[GNUPG:]\E NO_PUBKEY \S+(\S{8})$/) {
         $missingkeys .= $1." ";
       }
@@ -595,10 +599,11 @@ foreach my $channel (@channels) {
     }
 
     unless ($signer) {
+      warn "error: GPG validation failed!\n";
 
-      warn <<ENDOFVALIDATIONERR;
-error: GPG validation failed!
+      if ($missingkeys) {
 
+        warn <<ENDOFVALIDATIONERR;
 The update downloaded successfully, but it was not signed with a trusted GPG
 key.  Instead, it was signed with the following keys:
 
@@ -610,6 +615,15 @@ Perhaps you need to import the channel's GPG key?  For example:
     gpg --import GPG.KEY
 
 ENDOFVALIDATIONERR
+
+      } else {
+
+        warn <<ENDOFVALIDATIONERR;
+The update downloaded successfully, but the GPG signature verification
+failed.
+ENDOFVALIDATIONERR
+
+      }
 
       channel_failed("channel: GPG validation failed");
       next;
