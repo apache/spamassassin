@@ -304,9 +304,6 @@ FROM_DOMAIN_NOVOWEL
 FROM_ENDS_IN_NUMS
 
 # good enough
-FROM_EXCESS_BASE64
-
-# good enough
 FROM_HAS_MIXED_NUMS
 
 # good enough
@@ -554,6 +551,9 @@ HS_SYNDICATE_P3
 
 # good enough
 HS_SYNDICATE_P4
+
+# good enough
+HS_SYNDICATE_P5
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -1075,6 +1075,9 @@ TVD_EB_PHISH
 TVD_FROM_1
 
 # good enough
+TVD_PH_1
+
+# good enough
 TVD_PH_11
 
 # good enough
@@ -1082,6 +1085,9 @@ TVD_PH_7
 
 # good enough
 TVD_PH_FR5
+
+# good enough
+TVD_PH_META
 
 # good enough
 TVD_PH_REC
@@ -1109,11 +1115,6 @@ FORGED_OUTLOOK_TAGS
 
 # not publishing HS_FAST_FORWARD: needs plugin (Mail::SpamAssassin::Plugin::Sandbox::hstern)
 
-# good enough
-HS_SYNDICATE_P5
-
-# not publishing HTML_IFRAME_SRC: needs plugin (Mail::SpamAssassin::Plugin::Sandbox::felicity)
-
 # tflags net
 RCVD_IN_DSBL
 
@@ -1131,14 +1132,6 @@ RCVD_IN_WHOIS_INVALID
 
 # tflags net
 RCVD_IN_XBL
-
-# good enough
-TVD_PH_1
-
-# good enough
-TVD_PH_META
-
-# not publishing URI_HTML_ONLY: needs plugin (Mail::SpamAssassin::Plugin::Sandbox::felicity)
 
 # good enough
 UNCLAIMED_MONEY
@@ -1211,9 +1204,6 @@ URI_NO_WWW_INFO_CGI
 
 # good enough
 URI_OFFERS
-
-# good enough
-URI_SCHEME_MIXED_CASE
 
 # good enough
 URI_UNSUBSCRIBE
