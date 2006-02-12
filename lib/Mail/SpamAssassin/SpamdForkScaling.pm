@@ -652,6 +652,14 @@ sub adapt_num_children {
 
   foreach my $pid (@pids) {
     my $k = $kids->{$pid};
+
+    # note: race condition here.  if a child exits between the keys() call
+    # above, and this point, then $k will be undef here due to its deletion
+    # from the hash in the SIGCHLD handler.  This is harmless, but ugly, since
+    # it produces a 'Use of uninitialized value in numeric eq (==)' warning at
+    # the "== PFSTATE_IDLE" line below.
+    next unless defined $k;
+
     if ($k == PFSTATE_IDLE) {
       $statestr .= 'I';
       $num_idle++;
