@@ -195,7 +195,7 @@ sub debug_diagnostics {
     sub Net::Ident::_export_hooks;
   ';
 
-  foreach my $moddef (sort (@MODULES, @OPTIONAL_MODULES)) {
+  foreach my $moddef (@MODULES, @OPTIONAL_MODULES) {
     my $module = $moddef->{module};
     my $modver;
     if (eval ' require '.$module.'; $modver = $'.$module.'::VERSION; 1;')
