@@ -214,6 +214,13 @@ it from running.
     code => sub {
       my ($self, $key, $value, $line) = @_;
       my($rule, @scores) = split(/\s+/, $value);
+      unless (defined $value && $value !~ /^$/ &&
+		(scalar @scores == 1 || scalar @scores == 4)) {
+	$self->{parser}->lint_warn("config: score configuration option " .
+	  "requires a symbolic rule name and 1 or 4 scores, skipping: $line",
+	  $rule);
+	return;
+      }
 
       # Figure out if we're doing relative scores, remove the parens if we are
       my $relative = 0;
@@ -221,12 +228,17 @@ it from running.
         if (s/^\((-?\d+(?:\.\d+)?)\)$/$1/) {
 	  $relative = 1;
 	}
+	unless (/^-?\d+(?:\.\d+)?$/) {
+	  $self->{parser}->lint_warn("config: the non-numeric score ($_) is ".
+	    "invalid, numeric score required, skipping: $line", $rule);
+	  return;
+	}
       }
 
       if ($relative && !exists $self->{scoreset}->[0]->{$rule}) {
         $self->{parser}->lint_warn("config: relative score without ".
             "previous setting in configuration, skipping: $line", $rule);
-        return $INVALID_VALUE;
+        return;
       }
 
       # If we're only passed 1 score, copy it to the other scoresets
@@ -243,11 +255,6 @@ it from running.
 
           $self->{scoreset}->[$index]->{$rule} = $score + 0.0;
         }
-      }
-      else {
-        $self->{parser}->lint_warn("config: score configuration ".
-            "option without actual scores, skipping: $line", $rule);
-        return $INVALID_VALUE;
       }
     }
   });
