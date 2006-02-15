@@ -3043,4 +3043,32 @@ sub check_html_uri_only {
   return $return;
 }
 
+sub tvd_vertical_words {
+  my ($self, $text, $min, $max) = @_;
+
+  # klugy
+  $max = 101 if ($max >= 100);
+
+  if (!defined $self->{tvd_vertical_words}) {
+    $self->{tvd_vertical_words} = 0;
+
+    foreach (@{$text}) {
+      my $l = length $_;
+      next unless ($l > 5);
+      my $spaces = tr/ / /;
+      my $nonspaces = $l - $spaces;
+      my $pct;
+      if ($spaces > $nonspaces || $nonspaces == 0) {
+        $pct = 100;
+      }
+      else {
+        $pct = int(100*$spaces/$nonspaces);
+      }
+      $self->{tvd_vertical_words} = $pct if ($pct > $self->{tvd_vertical_words});
+    }
+  }
+
+  return 1 if ($self->{tvd_vertical_words} >= $min && $self->{tvd_vertical_words} < $max);
+}
+
 1;
