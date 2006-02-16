@@ -304,6 +304,9 @@ FROM_DOMAIN_NOVOWEL
 FROM_ENDS_IN_NUMS
 
 # good enough
+FROM_EXCESS_BASE64
+
+# good enough
 FROM_HAS_MIXED_NUMS
 
 # good enough
@@ -644,9 +647,6 @@ MIME_HTML_MOSTLY
 
 # good enough
 MIME_HTML_ONLY_MULTI
-
-# good enough
-MISSING_HB_SEP
 
 # good enough
 MISSING_MIMEOLE
@@ -1036,9 +1036,6 @@ SUBJ_ILLEGAL_CHARS
 SUBJ_RE_NUM
 
 # good enough
-SUBJ_YOUR_DEBT
-
-# good enough
 SUB_HELLO
 
 # good enough
@@ -1169,6 +1166,9 @@ FORGED_OUTLOOK_TAGS
 
 # not publishing HS_FAST_FORWARD: needs plugin (Mail::SpamAssassin::Plugin::Sandbox::hstern)
 
+# good enough
+HS_SEXOHOLICS_DATESITE
+
 # tflags net
 RCVD_IN_DSBL
 
@@ -1187,7 +1187,11 @@ RCVD_IN_WHOIS_INVALID
 # tflags net
 RCVD_IN_XBL
 
-# not publishing TVD_SPACE_RATIO: needs plugin (Mail::SpamAssassin::Plugin::Sandbox::felicity)
+# good enough
+TVD_LONG_WORD5
+
+# good enough
+TVD_SPACE_RATIO
 
 # good enough
 UNCLAIMED_MONEY
