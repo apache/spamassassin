@@ -2375,7 +2375,16 @@ sub check_for_to_in_subject {
   elsif ($test eq "user") {
     my $to = $full_to;
     $to =~ s/\@.*//;
-    return $subject =~ /^\s*\Q$to\E,\s/i;	# "user,\s" case insensitive
+    my $subj = $subject;
+    $subj =~ s/^\s+//;
+    $subj =~ s/\s+$//;
+
+    return $subject =~ /^(?:
+    	(?:re|fw):\s*(?:\w+\s+)?\Q$to\E$
+	|(?-i:\Q$to\E)\s*[,:;!?-](?:$|\s)
+	|\Q$to\E$
+	|,\s*\Q$to\E[,:;!?-]$
+	)/ix;
   }
   return 0;
 }
