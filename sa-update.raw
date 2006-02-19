@@ -977,16 +977,27 @@ sub clean_update_dir {
 sub lint_check_dir {
   my $dir = shift;
 
-  # TODO: make this work
-  #
-  # this doesn't work for channels other than updates.spamassassin.org, and
-  # then only when the update is a full rule distribution, and then (likely)
-  # only on a *NIX platform which has /dev/null ...  ignore it for now.
-  #
-  #system ("spamassassin --configpath='$dir' --prefspath=/dev/null --lint");
-  #return (($? >> 8) == 0);
+  # due to the Logger module's globalness (all M::SA objects share the same
+  # Logger setup), we can't change the debug level here to only include
+  # "config" or otherwise be more terse. :(
+  my $spamtest = new Mail::SpamAssassin( {
+    rules_filename      => $dir,
+    site_rules_filename => "$dir/doesnotexist",
+    userprefs_filename  => "$dir/doesnotexist",
 
-  return 1;
+    local_tests_only    => 1,
+    dont_copy_prefs     => 1,
+
+    PREFIX              => $PREFIX,
+    DEF_RULES_DIR       => $DEF_RULES_DIR,
+    LOCAL_RULES_DIR     => $LOCAL_RULES_DIR,
+    LOCAL_STATE_DIR     => $LOCAL_STATE_DIR,
+  });
+
+  my $res = $spamtest->lint_rules();
+  $spamtest->finish();
+
+  return $res == 0;
 }
 
 # a version of rename() that can cope with renaming files across filesystems,
