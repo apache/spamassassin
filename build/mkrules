@@ -333,7 +333,7 @@ sub rule_file_compile {
       if (!$rules->{$name}) { $rules->{$name} = rule_entry_create(); }
       $rules->{$name}->{issandbox} = $issandbox;
       $rules->{$name}->{origname} = $origname;
-      $rules->{$name}->{cond} = $current_conditional;
+      $rules->{$name}->{cond} ||= $current_conditional;
       $rules->{$name}->{text} .= $current_comments . $orig;
       $rules->{$name}->{srcfile} = $f;
 
@@ -458,7 +458,7 @@ sub rule_file_compile {
       unless ($rules->{$name}) {
         $rules->{$name} = rule_entry_create();
       }
-      $rules->{$name}->{cond} = $cond;
+      $rules->{$name}->{cond} ||= $cond;
       $rules->{$name}->{issandbox} = $issandbox;
       $rules->{$name}->{forceactive} = 1;
       $rules->{$name}->{iscommand} = 1;
