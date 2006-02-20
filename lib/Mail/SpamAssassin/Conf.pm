@@ -977,14 +977,17 @@ Empty the list of trusted networks.
 
 =item internal_networks ip.add.re.ss[/mask] ...   (default: none)
 
-What networks or hosts are 'internal' in your setup.   B<Internal> means that
-relay hosts on these networks are considered to be MXes for your domain(s), or
-internal relays.  This uses the same format as C<trusted_networks>, above.
+What networks or hosts are 'internal' in your setup.   B<Internal> means
+that relay hosts on these networks are considered to be MXes for your
+domain(s), or internal relays.  This uses the same format as
+C<trusted_networks>, above.
 
 This value is used when checking 'dial-up' or dynamic IP address
-blocklists, in order to detect direct-to-MX spamming. Trusted relays
-that accept mail directly from dial-up connections should not be
-listed in C<internal_networks>. List them only in C<trusted_networks>.
+blocklists, in order to detect direct-to-MX spamming.
+
+Trusted relays that accept mail directly from dial-up connections should
+not be listed in C<internal_networks>. List them only in
+C<trusted_networks>.
 
 If C<trusted_networks> is set and C<internal_networks> is not, the value
 of C<trusted_networks> will be used for this parameter.
@@ -1872,7 +1875,7 @@ IP address from the most recent 'untrusted line', as used in '-firsttrusted'
 above.  That's because we're talking about the trustworthiness of the
 IP address data, not the source header line, here; and in the case of 
 the most recent header (the 'firsttrusted'), that data can be trusted.
-See the Wiki page at http://wiki.apache.org/spamassassin/TrustedRelays
+See the Wiki page at C<http://wiki.apache.org/spamassassin/TrustedRelays>
 for more information on this.
 
 =back
