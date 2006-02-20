@@ -120,6 +120,8 @@ my %opt = ();
 @{$opt{'channel'}} = ();
 my $GPG_ENABLED = 1;
 
+$opt{'gpghomedir'} = File::Spec->catfile($LOCAL_RULES_DIR, '/sa-update-keys');
+
 Getopt::Long::Configure(
   qw(bundling no_getopt_compat no_auto_abbrev no_ignore_case));
 GetOptions(
@@ -129,8 +131,10 @@ GetOptions(
 
   # allow multiple of these on the commandline
   'gpgkey=s'				=> $opt{'gpgkey'},
+  'gpghomedir=s'			=> \$opt{'gpghomedir'},
   'channel=s'				=> $opt{'channel'},
 
+  'import=s'			        => \$opt{'import'},
   'gpgkeyfile=s'			=> \$opt{'gpgkeyfile'},
   'channelfile=s'			=> \$opt{'channelfile'},
   'updatedir=s'				=> \$opt{'updatedir'},
@@ -210,6 +214,8 @@ foreach my $optkey (keys %opt) {
   $opt{$optkey} = $1;
 }
 
+my $GPGPath;
+
 # deal with gpg-related options
 if (@{$opt{'gpgkey'}}) {
   $GPG_ENABLED = 1;
@@ -240,6 +246,18 @@ if (defined $opt{'gpgkeyfile'}) {
     $valid_GPG{$key} = 1;
   }
   close(GPG);
+}
+if ( $opt{'import'} ) {
+  my $ex = import_gpg_key($opt{'import'});
+  exit $ex;
+}
+
+# does the sa-update keyring exist?  if not, import it
+if ($GPG_ENABLED) {
+  if(!-f File::Spec->catfile($opt{'gpghomedir'}, "secring.gpg")) {
+    import_default_keyring();
+    # attempt to continue even if this fails, anyway
+  }
 }
 
 # convert fingerprint gpg ids to keyids
@@ -279,18 +297,8 @@ for(my $ind = 0; $ind < @channels; $ind++) {
 }
 
 # find GPG in the PATH
-my $GPGPath;
 if ($GPG_ENABLED) {
-  dbg("gpg: Searching for 'gpg' in ".$ENV{'PATH'});
-  foreach my $dir (split(/:/, $ENV{'PATH'})) {
-    $dir = File::Spec->catfile($dir, 'gpg');
-    if (-x $dir) {
-      $GPGPath = $dir;
-      last;
-    }
-  }
-  die "fatal: couldn't find GPG in \$PATH\n" unless ($GPGPath);
-  dbg("gpg: found $GPGPath");
+  $GPGPath = find_gpg_path();
   dbg("gpg: release trusted key id list: ".join(" ", keys %valid_GPG));
 }
 
@@ -543,9 +551,11 @@ foreach my $channel (@channels) {
 
     dbg("gpg: calling gpg");
 
+    my $gpghome = interpolate_gpghomedir();
+
     # TODO: we could also use "--keyserver pgp.mit.edu" or similar,
     # to autodownload missing keys...
-    my $CMD = "$GPGPath --verify --batch ".
+    my $CMD = "$GPGPath $gpghome --verify --batch ".
         "--no-tty --status-fd=1 -q --logger-fd=1";
 
     unless (open(CMD, "$CMD $sig_file $content_file|")) {
@@ -561,7 +571,7 @@ foreach my $channel (@channels) {
       dbg ("gpg: $GNUPG");
 
       if ($GNUPG =~ /^gpg: fatal:/) {
-        warn $GNUPG;        # report bad news
+        warn $GNUPG."\n";        # report bad news
       }
 
       if ($GNUPG =~ /^\Q[GNUPG:]\E NO_PUBKEY \S+(\S{8})$/) {
@@ -947,6 +957,72 @@ sub usage {
   pod2usage( -verbose => $verbose, -message => $message, -exitval => 64 );
 }
 
+sub find_gpg_path {
+  dbg("gpg: Searching for 'gpg' in ".$ENV{'PATH'});
+  my $path;
+  foreach my $dir (split(/:/, $ENV{'PATH'})) {
+    $dir = File::Spec->catfile($dir, 'gpg');
+    if (-x $dir) {
+      $path = $dir;
+      last;
+    }
+  }
+  die "fatal: couldn't find GPG in \$PATH\n" unless ($path);
+  dbg("gpg: found $path");
+  return $path;
+}
+
+sub interpolate_gpghomedir {
+  my $gpghome = '';
+  if ($opt{'gpghomedir'}) {
+    $gpghome = $opt{'gpghomedir'};
+    $gpghome =~ s/\'/\\\'/gs;
+    $gpghome = "--homedir='$gpghome'";
+  }
+  return $gpghome;
+}
+
+sub import_gpg_key {
+  my $keyfile = shift;
+
+  $GPGPath = find_gpg_path();
+  my $gpghome = interpolate_gpghomedir();
+
+  my $CMD = "$GPGPath $gpghome --batch ".
+      "--no-tty --status-fd=1 -q --logger-fd=1 --import";
+
+  unless (open(CMD, "$CMD $keyfile|")) {
+    die "fatal: couldn't execute $GPGPath: $!\n";
+  }
+
+  # Determine the fate of the signature
+  while(my $GNUPG = <CMD>) {
+    chop $GNUPG;
+    dbg ("gpg: $GNUPG");
+
+    if ($GNUPG =~ /^gpg: /) {
+      warn $GNUPG."\n";        # report bad news
+    }
+
+    if ($GNUPG =~ /^IMPORTED /) {
+      print "sa-update --import: success. $GNUPG\n";
+    }
+  }
+
+  close(CMD);
+  return ($? >> 8);
+}
+
+sub import_default_keyring {
+  my $defkey = File::Spec->catfile ($DEF_RULES_DIR, "sa-update-pubkey.txt");
+  return unless (-f $defkey);
+
+  print "sa-update: importing default keyring to '".$opt{gpghomedir}."'...\n";
+  # use 0700 to avoid "unsafe permissions" warning
+  mkdir ($opt{gpghomedir}, 0700) or die "cannot mkdir $opt{gpghomedir}";
+  import_gpg_key($defkey);
+}
+
 sub is_valid_gpg_key_id {
   # either a keyid (8 bytes) or a fingerprint (40 bytes)
   return ($_[0] =~ /^[a-fA-F0-9]+$/ && (length $_[0] == 8 || length $_[0] == 40));
@@ -1046,9 +1122,10 @@ Options:
   --gpgkey key			Trust the key id to sign releases
   				Use multiple times for multiple keys
   --gpgkeyfile file		Trust the key ids in the file to sign releases
+  --gpghomedir path             Store the GPG keyring in this directory
   --usegpg			Use GPG to verify updates
-  				This is auto-enabled by use of the above
-				gpgkey and gpgkeyfile options.
+  				(This is auto-enabled by use of the above
+				--gpgkey and --gpgkeyfile options)
 
   -D, --debug [area=n,...]	Print debugging messages
   -V, --version			Print version
@@ -1056,10 +1133,10 @@ Options:
 
 =head1 DESCRIPTION
 
-sa-update automates the process of downloading and installing new
-rules and configuration, based on channels.  The default channel
-is I<updates.spamassassin.org>, which has updated rules since the
-previous release.
+sa-update automates the process of downloading and installing new rules and
+configuration, based on channels.  The default channel is
+I<updates.spamassassin.org>, which has updated rules since the previous
+release.
 
 Update archives are verified by SHA1 hashes, and optionally GPG.
 
@@ -1067,7 +1144,7 @@ Update archives are verified by SHA1 hashes, and optionally GPG.
 
 =over 4
 
-=item B<updatedir>
+=item B<--updatedir>
 
 By default, C<sa-update> will use the system-wide rules update directory:
 
@@ -1075,7 +1152,7 @@ By default, C<sa-update> will use the system-wide rules update directory:
 
 If the updates should be stored in another location, specify it here.
 
-=item B<channel>
+=item B<--channel>
 
 sa-update can update multiple channels at the same time.  By default, it will
 only access "updates.spamassassin.org", but more channels can be specified via
@@ -1084,13 +1161,13 @@ multiple times, once per channel.  i.e.:
 
 	sa-update --channel foo.example.com --channel bar.example.com
 
-=item B<channelfile>
+=item B<--channelfile>
 
-Similar to the B<channel> option, except specify the additional channels in a
+Similar to the B<--channel> option, except specify the additional channels in a
 file instead of on the commandline.  This is extremely useful when there are a
 lot of additional channels.
 
-=item B<usegpg>
+=item B<--usegpg>
 
 sa-update only verifies update archives by use of a SHA1 checksum.  While this
 verifies whether or not the downloaded archive has been corrupted, it does not
@@ -1098,13 +1175,14 @@ offer any form of security regarding whether or not the downloaded archive is
 legitimate (aka: non-modifed by evildoers).  Use this option to enable GPG
 verification of the archive to solve the problem.
 
-Note: Use of the following gpgkey-related options will automatically enable
-GPG verification.
+Use of the following gpgkey-related options will automatically enable GPG
+verification.  In addition, use of the default sa-update channel,
+I<updates.spamassassin.org>, does the same.
 
 Note: Currently, only GPG itself is supported (ie: not PGP).  v1.2 has been
 tested, although later versions ought to work as well.
 
-=item B<gpgkey>
+=item B<--gpgkey>
 
 sa-update has the concept of "release trusted" GPG keys.  When an archive is
 downloaded and the signature verified, sa-update requires that the signature
@@ -1112,7 +1190,7 @@ be from one of these "release trusted" keys or else verification fails.  This
 prevents third parties from manipulating the files on a mirror, for instance,
 and signing with their own key.
 
-By default, sa-update trusts key id 265FA05B, which is the standard
+By default, sa-update trusts key id C<265FA05B>, which is the standard
 SpamAssassin release key.  Use this option to add more trusted keys.
 
 For multiple keys, use the option multiple times.  i.e.:
@@ -1121,11 +1199,18 @@ For multiple keys, use the option multiple times.  i.e.:
 
 Note: use of this option automatically enables GPG verification.
 
-=item B<gpgkeyfile>
+=item B<--gpgkeyfile>
 
-Similar to the B<gpgkey> option, except specify the additional keys in a file
+Similar to the B<--gpgkey> option, except specify the additional keys in a file
 instead of on the commandline.  This is extremely useful when there are a lot
 of additional keys that you wish to trust.
+
+=item B<--gpghomedir>
+
+Specify a directory path to use as a storage area for the C<sa-update> GPG
+keyring.  By default, this is
+
+        @@LOCAL_RULES_DIR@@/sa-update-keys
 
 =item B<-D> [I<area,...>], B<--debug> [I<area,...>]
 
@@ -1173,7 +1258,7 @@ See <http://bugzilla.spamassassin.org/>
 
 =head1 AUTHORS
 
-The SpamAssassin(tm) Project <http://spamassassin.apache.org/>
+The Apache SpamAssassin(tm) Project <http://spamassassin.apache.org/>
 
 =head1 COPYRIGHT
 
