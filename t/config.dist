@@ -42,3 +42,9 @@ bayes_sql_password=
 # this to "y".
 run_spamd_prefork_stress_test=n
 
+# ---------------------------------------------------------------------------
+
+# rule_names.t fails continually due to changes in the rulesrc repository;
+# TODO: we need a better way to test this.
+run_rule_name_tests=n
+
