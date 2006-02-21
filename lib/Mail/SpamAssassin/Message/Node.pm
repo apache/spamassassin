@@ -404,8 +404,12 @@ sub rendered {
 
       # end-of-document result values that require looking at the text
       my $r = $self->{html_results};	# temporary reference for brevity
-      my $space = ($self->{rendered} =~ tr/ \t\n\r\x0b\xa0/ \t\n\r\x0b\xa0/);
-      $r->{html_length} = length($self->{rendered});
+
+      # count the number of spaces in the rendered text
+      my $rt = pack "C0A*", $self->{rendered};
+      my $space = ($rt =~ tr/ \t\n\r\x0b\xa0/ \t\n\r\x0b\xa0/);
+      $r->{html_length} = length($rt);
+
       $r->{non_space_len} = $r->{html_length} - $space;
       $r->{ratio} = ($raw - $r->{html_length}) / $raw;
     }
