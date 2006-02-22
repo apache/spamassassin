@@ -575,7 +575,8 @@ comment following the address in parantheses. For the Subject header,
 this will be prepended to the original subject. Note that you should
 only use the _REQD_ and _SCORE_ tags when rewriting the Subject header
 if C<report_safe> is 0. Otherwise, you may not be able to remove
-the SpamAssassin markup via the normal methods.  
+the SpamAssassin markup via the normal methods.  More information
+about tags is explained below in the B<TEMPLATE TAGS> section.
 
 Parentheses are not permitted in STRING if rewriting the From or To headers.
 (They will be converted to square brackets.)
@@ -2609,7 +2610,9 @@ version.  So 3.0.0 is C<3.000000>, and 3.4.80 is C<3.004080>.
 =head1 TEMPLATE TAGS
 
 The following C<tags> can be used as placeholders in certain options.
-They will be replaced by the corresponding value when they are used.
+They will be replaced by the corresponding value when they are used.  Keep in
+mind that anything that looks like a tag will be replaced (C<_STRING_>), even
+in the middle of other characters (C<FOR_STRING_EXAMPLE>).
 
 Some tags can take an argument (in parentheses). The argument is
 optional, and the default is shown below.
