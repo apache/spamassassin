@@ -4,6 +4,7 @@
 
 RSYNC_DIR=/home/corpus-rsync/tagged_builds
 REPO_URL=http://svn.apache.org/repos/asf/spamassassin/trunk
+PERL=/local/perl586/bin/perl
 
 SVN=/opt/subversion-1.1.4/bin/svn
 
@@ -35,7 +36,7 @@ echo Command: $SVN export --non-interactive -r $REV $REPO_URL $RSYNC_DIR/$subdir
 $SVN export --non-interactive -r $REV $REPO_URL $RSYNC_DIR/$subdir
 
 cd $RSYNC_DIR/$subdir
-build/mkrules --out rules > /dev/null
+$PERL build/mkrules --out rules > /dev/null
 
 # create "svn info" file for mass-check
 # we assume that the current directory was updated via cron to the correct
