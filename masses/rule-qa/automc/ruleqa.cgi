@@ -4,6 +4,8 @@ my $automcdir = "/home/automc/svn/spamassassin/masses/rule-qa/automc";
 ###!/usr/bin/perl -w
 ##my $automcdir = "/home/jm/ftp/spamassassin/masses/rule-qa/automc";
 
+# open (O, ">/tmp/xx");print O "foo"; close O;
+
 use CGI;
 use Template;
 use Date::Manip;
@@ -44,6 +46,8 @@ my @cgi_params;
 my %cgi_params = ();
 precache_params();
 
+# ---------------------------------------------------------------------------
+
 # Allow path info to become CGI-ish parameters.
 # the two parts of path info double as (a) daterev, (b) rulename,
 # (c) "s_detail=1".
@@ -51,11 +55,30 @@ precache_params();
 #
 my $url_abs = $q->url(-absolute=>1);
 my $url_with_path = $q->url(-absolute=>1, -path_info=>1);
-$url_with_path =~ s,^${url_abs},,;
+
+# if we have a valid, full URL (non-cgi use), use that instead of
+# the "path_info" one, since CGI.pm will unhelpfully remove duplicate
+# slashes.  this screws up "/FOO" rule grep searches.   Also,
+# fix $url_abs to be correct for the "entire website is web app" case,
+# as CGI.pm gets that wrong, too!
+
+if ($url_abs =~ m,^/\d,) {
+  $url_with_path = $url_abs;
+  $url_abs = "/";
+} else {
+  $url_with_path =~ s,^${url_abs},,;
+}
 
 if ($url_with_path =~ s,^/*([^/]+),,) { add_cgi_path_param("daterev", $1); }
-if ($url_with_path =~ s,^/*([^/]+),,) { add_cgi_path_param("rule", $1); }
+if ($url_with_path =~ s,^/(/?[^/]+),,) { add_cgi_path_param("rule", $1); }
 if ($url_with_path =~ s,^/detail,,) { add_cgi_path_param("s_detail", "1"); }
+
+# cgi_url: used in hrefs from the generated document
+$cgi_url = $url_abs;
+$cgi_url =~ s,/ruleqa/ruleqa$,/ruleqa,s;
+$cgi_url ||= '/';
+
+# ---------------------------------------------------------------------------
 
 my %s = ();
 # selection of what will be displayed.
@@ -114,8 +137,13 @@ if (defined $daterev) {
 # turn possibly-empty $daterev into a real date/rev combo (that exists)
 $daterev = date_in_direction($daterev, 0);
 
+# which rules?
 my $rule = $q->param('rule') || '';
-my $nicerule = $rule; if (!$nicerule) { $nicerule = 'all rules'; }
+my $rules_all = 0;
+my $rules_grep = 0;
+my $nicerule = $rule;
+if (!$nicerule) { $rules_all++; $nicerule = 'all rules'; }
+if ($rule =~ /^\//) { $rules_grep++; $nicerule = 'regexp '.$rule; }
 
 my $datadir;
 my %freqs_head = ();
@@ -132,9 +160,11 @@ if ($graph) {
   else { die "graph '$graph' unknown"; }
 }
 elsif ($q->param('longdatelist')) {
+  print $q->header();
   show_daterev_selector_page();
 }
 else {
+  print $q->header();
   show_default_view();
 }
 exit;
@@ -144,7 +174,7 @@ exit;
 sub show_default_header {
 my $title = shift;
 
-my $hdr = $q->header . q{<html><head>
+my $hdr = q{<html><head>
 
   <title>}.$title.q{</title>
 
@@ -277,7 +307,7 @@ my $hdr = $q->header . q{<html><head>
 
     //-->
   </script>
-  <script src="http://buildbot.spamassassin.org/sorttable.js"></script>
+  <script src="http://ruleqa.spamassassin.org/sorttable.js"></script>
 
   </head><body>
 
@@ -428,7 +458,9 @@ if (!$s{detail}) {
 
 show_all_sets_for_daterev($daterev, $daterev);
 
-if ($s{detail}) {
+# don't show "graph" link unless only a single rule is being displayed
+if ($s{detail} && !($rules_all || $rules_grep))
+{
   {
     my $graph_on = qq{
 
@@ -696,8 +728,11 @@ sub read_freqs_file {
       };
       push @{$freqs_data{$key}{$lastrule}{lines}}, $line;
     }
+    elsif (!/\S/) {
+      # silently ignore empty lines
+    }
     else {
-      warn "ERROR: dunno $_";
+      warn "warning: unknown freqs line in $file: '$_'";
     }
   }
   close IN;
@@ -765,7 +800,7 @@ sub get_freqs_for_rule {
       $comment .= output_freqs_data_line($freqs_data{$key}{$rule},
                 $header_context);
     }
-    elsif ($rule eq '') {
+    elsif ($rules_all) {
       # all rules please...
       foreach my $r (@{$freqs_ordr{$key}}) {
         $comment .= rule_anchor($key,$r);
@@ -773,7 +808,7 @@ sub get_freqs_for_rule {
                 $header_context);
       }
     }
-    elsif ($rule =~ /^\/(.*)$/) {
+    elsif ($rules_grep && $rule =~ /^\/(.*)$/) {
       my $regexp = $1;
       foreach my $r (@{$freqs_ordr{$key}}) {
         next unless ($r =~/${regexp}/i);
@@ -1020,6 +1055,9 @@ sub assemble_url {
     else { push (@parms, $p); }
   }
 
+  # ensure "/FOO" rule greps are encoded as "%2FFOO"
+  $path{rule} =~ s,^/,\%2F,;
+
   my $url = $cgi_url.
         ($path{daterev}  ? '/'.$path{daterev} : '').
         ($path{rule}     ? '/'.$path{rule}    : '').
@@ -1029,8 +1067,11 @@ sub assemble_url {
   # no need for a trailing ? if there were no parms
   $url =~ s/\?$//;
 
+  # ensure local URL (not starting with "//", which confuses Firefox)
+  $url =~ s,^/+,/,;
+
   # now, a much more readable
-  # http://buildbot.spamassassin.org/ruleqa/
+  # http://ruleqa.spamassassin.org/
   #      20060120-r370897-b/T_PH_SEC/detail
 
   return $url;
@@ -1038,9 +1079,6 @@ sub assemble_url {
 
 sub precache_params {
   use URI::Escape;
-
-  $cgi_url = $q->url(-absolute=>1);
-  $cgi_url =~ s,/ruleqa/ruleqa$,/ruleqa,s;
 
   @cgi_params = $q->param();
   foreach my $k (@cgi_params) {
