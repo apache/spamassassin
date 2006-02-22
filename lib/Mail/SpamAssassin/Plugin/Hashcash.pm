@@ -291,6 +291,7 @@ sub was_hashcash_token_double_spent {
   }
 
   if (exists $spenddb{$token}) {
+    untie %spenddb;
     dbg("hashcash: token '$token' spent already");
     return 1;
   }
