@@ -152,42 +152,8 @@ else
   echo "failed to create $dnsfile.new" 1>&2 ; exit 1
 fi
 
-
-
-# increment the zone serial.  we use a counter, with rollover at 100,
-# and a datestamp too.
-
-oldcount=`cat $soadir/counter`
-newserial=`perl -e '
-
-	my $count = (($ARGV[0] + 1) % 100);
-	my @t = localtime time;
-	printf "%04d%02d%02d%02d", $t[5]+1900, $t[4]+1, $t[3], $count;
-
-	open (INCR, ">'"$soadir"'/counter"); print INCR $count,"\n"; close INCR;
-
-' $oldcount`
-
-soafile=$soadir/soa_line
-rm -f $soafile.bak \
-      $soafile.new
-
-if sed -e 's/__SERIAL__/'"$newserial"'/' \
-	< $soafile.tmpl > $soafile.new && \
-    [ -s $soafile.new ] && \
-    mv $soafile     $soafile.bak && \
-    mv $soafile.new $soafile
-then
-  true
-else
-  [ -f $soafile.bak ] && mv $soafile.bak $soafile
-  echo "failed to create new $soafile" 1>&2 ; exit 1
-fi
-
-
-# trigger a named reload of that changed zone
-sudo rndc reload
-
+# increment the zone serial.
+./build/mkupdates/tick_zone_serial || exit $?
 
 
 # clean up 4-day-old (and older) update tarballs.  This seems as
