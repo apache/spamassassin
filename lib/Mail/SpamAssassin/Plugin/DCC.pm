@@ -163,7 +163,19 @@ interface that instead of C<dccproc>.
   push (@cmds, {
     setting => 'dcc_home',
     is_admin => 1,
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if (!defined $value || !length $value) {
+	return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
+      $value = Mail::SpamAssassin::Util::untaint_file_path($value);
+      if (!-d $value) {
+	info("config: dcc_home \"$value\" isn't a directory");
+	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+
+      $self->{dcc_home} = $value;
+    }
   });
 
 =item dcc_dccifd_path STRING
@@ -178,7 +190,19 @@ C<dccproc>.
   push (@cmds, {
     setting => 'dcc_dccifd_path',
     is_admin => 1,
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if (!defined $value || !length $value) {
+	return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
+      $value = Mail::SpamAssassin::Util::untaint_file_path($value);
+      if (!-S $value) {
+	info("config: dcc_dccifd_path \"$value\" isn't a socket");
+	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+
+      $self->{dcc_dccifd_path} = $value;
+    }
   });
 
 =item dcc_path STRING
@@ -194,7 +218,19 @@ use this, as the current PATH will have been cleared.
     setting => 'dcc_path',
     is_admin => 1,
     default => undef,
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if (!defined $value || !length $value) {
+	return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
+      $value = Mail::SpamAssassin::Util::untaint_file_path($value);
+      if (!-x $value) {
+	info("config: dcc_path \"$value\" isn't an executable");
+	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+
+      $self->{dcc_path} = $value;
+    }
   });
 
 =item dcc_options options
