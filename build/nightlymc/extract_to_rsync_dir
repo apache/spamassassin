@@ -34,6 +34,9 @@ rm -rf $RSYNC_DIR/$subdir
 echo Command: $SVN export --non-interactive -r $REV $REPO_URL $RSYNC_DIR/$subdir
 $SVN export --non-interactive -r $REV $REPO_URL $RSYNC_DIR/$subdir
 
+cd $RSYNC_DIR/$subdir
+build/mkrules --out rules > /dev/null
+
 # create "svn info" file for mass-check
 # we assume that the current directory was updated via cron to the correct
 # revision, so just info it. (can't do remote info with the svn version
