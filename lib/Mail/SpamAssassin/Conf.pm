@@ -2082,6 +2082,10 @@ ignore these for scoring.
       if (@values != 2) {
         return $MISSING_REQUIRED_VALUE;
       }
+      if ($values[1] =~ /\*\s*\*/) {
+	info("config: found invalid '**' or '* *' operator in meta command");
+        return $INVALID_VALUE;
+      }
       $self->{parser}->add_test (@values, $TYPE_META_TESTS);
     }
   });
