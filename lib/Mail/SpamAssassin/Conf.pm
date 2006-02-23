@@ -344,9 +344,9 @@ other words, if the host that connected to your MX had an IP address that
 mapped to 'sendinghost.spamassassin.org', you should specify
 C<sendinghost.spamassassin.org> or just C<spamassassin.org> here.
 
-Note that this requires that C<internal_networks> be correct.  For simple cases,
-it will be, but for a complex network, or running with DNS checks off
-or with C<-L>, you may get better results by setting that parameter.
+Note that this requires that C<internal_networks> be correct.  For simple
+cases, it will be, but for a complex network, or running with DNS checks
+off or with C<-L>, you may get better results by setting that parameter.
 
 e.g.
 
@@ -1852,6 +1852,12 @@ the most recent header (the 'firsttrusted'), that data can be trusted.
 See the Wiki page at http://wiki.apache.org/spamassassin/TrustedRelays
 for more information on this.
 
+=item Selecting just the last external IP
+
+By using '-lastexternal' at the end of the set name, you can select only
+the external host that connected to your internal network, or at least
+the last external host with a public IP.
+
 =back
 
 =item header SYMBOLIC_TEST_NAME eval:check_rbl_txt('set', 'zone')
@@ -1872,7 +1878,8 @@ beginning with "sb:", or (if none of the preceding options seem to fit) a
 regular expression.
 
 Note: the set name must be exactly the same for as the main query rule,
-including selections like '-notfirsthop' appearing at the end of the set name.
+including selections like '-notfirsthop' appearing at the end of the set
+name.
 
 =cut
 
