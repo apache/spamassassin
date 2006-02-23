@@ -269,6 +269,10 @@ sub parse {
   # reason, so convert them to spaces.  Confirmed in 3.31, at least.
   $text =~ s/&nbsp;/ /g;
 
+  # bug 4695: we want "<br/>" to be treated the same as "<br>", and
+  # the HTML::Parser API won't do it for us
+  $text =~ s/<(\w+)\s*\/>/<$1>/gi;
+
   # ALWAYS pack it into byte-representation, even if we're using 'use bytes',
   # since the HTML::Parser object may use Unicode internally. (bug 1417,
   # maybe).  Also, ignore stupid warning that can't be suppressed: 'Parsing of
