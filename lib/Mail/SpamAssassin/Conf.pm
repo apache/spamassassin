@@ -997,6 +997,9 @@ If neither C<trusted_networks> or C<internal_networks> is set, no addresses
 will be considered local; in other words, any relays past the machine where
 SpamAssassin is running will be considered external.
 
+Every entry in C<internal_networks> must appear in C<trusted_networks>; in
+other words, C<internal_networks> is always a subset of the trusted set.
+
 =cut
 
   push (@cmds, {

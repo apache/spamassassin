@@ -80,7 +80,8 @@ sub add_cidr {
     push @{$self->{nets}}, {
       mask    => $mask,
       exclude => $exclude,
-      ip      => Mail::SpamAssassin::Util::my_inet_aton($ip) & $mask
+      ip      => (Mail::SpamAssassin::Util::my_inet_aton($ip) & $mask),
+      as_string => $_
     };
     $numadded++;
   }
@@ -95,16 +96,10 @@ sub get_num_nets {
   return scalar @{$self->{nets}};
 }
 
-sub is_net_declared {
-  my ($self, $network, $bits, $exclude, $quiet) = @_;
+sub _nets_contains_network {
+  my ($self, $network, $mask, $exclude, $quiet, $netname) = @_;
 
   return 0 unless (defined $self->{nets});
-  return 0 unless ($network =~ m/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/);
-
-  my $netname = "$network/$bits";
-
-  my $mask = 0xFFffFFff ^ ((2 ** (32-$bits)) - 1);
-  $network = Mail::SpamAssassin::Util::my_inet_aton($network);
 
   $exclude = 0 if (!defined $exclude);
   $quiet = 0 if (!defined $quiet);
@@ -127,6 +122,17 @@ sub is_net_declared {
   return 0;
 }
 
+sub is_net_declared {
+  my ($self, $network, $bits, $exclude, $quiet) = @_;
+
+  return 0 unless ($network =~ m/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/);
+  my $mask = 0xFFffFFff ^ ((2 ** (32-$bits)) - 1);
+  my $aton = Mail::SpamAssassin::Util::my_inet_aton($network);
+
+  return $self->_nets_contains_network($aton, $mask, $exclude,
+                $quiet, "$network/$bits");
+}
+
 sub contains_ip {
   my ($self, $ip) = @_;
 
@@ -138,6 +144,15 @@ sub contains_ip {
     return !$net->{exclude} if (($ip & $net->{mask}) == $net->{ip});
   }
   0;
+}
+
+sub contains_net {
+  my ($self, $net) = @_;
+  my $mask    = $net->{mask};
+  my $exclude = $net->{exclude};
+  my $network = $net->{ip};
+
+  return $self->_nets_contains_network($network, $mask, $exclude, 1, "");
 }
 
 sub clone {
