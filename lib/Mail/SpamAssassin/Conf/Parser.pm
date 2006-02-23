@@ -739,11 +739,51 @@ sub finish_parsing {
     }
   }
 
+  $self->lint_trusted_networks();
+
   # named this way just in case we ever want a "finish_parsing_start"
   $conf->{main}->call_plugins("finish_parsing_end", { conf => $conf });
 
   delete $conf->{tests};                # free it up
   delete $conf->{priority};             # free it up
+}
+
+###########################################################################
+
+sub lint_trusted_networks {
+  my ($self) = @_;
+  my $conf = $self->{conf};
+
+  my $nt = $conf->{trusted_networks};
+  my $ni = $conf->{internal_networks};
+
+  # validate trusted_networks and internal_networks, bug 4760.
+  # check that all internal_networks are listed in trusted_networks
+  # too.
+
+  if ($ni->get_num_nets() > 0 && $nt->get_num_nets() > 0) {
+    my $replace_nets;
+    my @valid_ni = ();
+
+    foreach my $net (@{$ni->{nets}}) {
+      if (!$nt->contains_net($net)) {
+        my $msg = "trusted_networks doesn't contain internal_networks entry '".
+                ($net->{as_string})."'";
+
+        $self->lint_warn($msg, undef);      # complain
+        $replace_nets = 1;  # and omit it from the new internal set
+      }
+      else {
+        push @valid_ni, $net;
+      }
+    }
+
+    if ($replace_nets) {
+      # something was invalid. replace the old nets list with a fixed version
+      # (which may be empty)
+      $ni->{nets} = \@valid_ni;
+    }
+  }
 }
 
 ###########################################################################
