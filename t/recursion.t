@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("recursion");
-use Test; BEGIN { plan tests => 7 };
+use Test; BEGIN { plan tests => 10 };
 use IO::File;
 
 # ---------------------------------------------------------------------------
@@ -86,6 +86,28 @@ sub create_test_message {
   close OUT or die;
 }
 
+sub create_test_message_3 {
+  my $boundstr = "AAAAAAAAAAAAAAAAAAA";
+  my $bound = $boundstr; $boundstr++;
+  my $text = q{From: foo
+Message-Id: <bar>
+To: baz
+Subject: testing recursion 3
+};
+
+  for my $i (1 .. 600) {
+      $text .= qq{Content-Type: multipart/mixed; boundary="$boundstr"
+
+--$boundstr
+};
+    $boundstr++;
+  }
+
+  open (OUT, ">log/recurse.eml") or die;
+  print OUT $text;
+  close OUT or die;
+}
+
 sub try_scan {
   my $fh = IO::File->new_tmpfile();
   ok($fh);
@@ -108,6 +130,8 @@ sub try_scan {
 create_test_message($msg1);
 try_scan();
 create_test_message($msg2);
+try_scan();
+create_test_message_3();
 try_scan();
 
 ok(unlink 'log/recurse.eml');
