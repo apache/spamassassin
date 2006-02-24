@@ -79,8 +79,8 @@ tree is not going to be used.  This is handy, for instance, when running
 C<spamassassin -d>, which only needs the pristine header and body which
 is always handled when the object is created.
 
-C<subparse> specifies how many levels of message/* attachment should be parsed
-into a subtree.  Defaults to 1.
+C<subparse> specifies how many MIME recursion levels should be parsed.
+Defaults to 20.
 
 =cut
 
@@ -113,7 +113,7 @@ sub new {
   # Specifies whether or not to parse message/rfc822 parts into its own tree.
   # If the # > 0, it'll subparse, otherwise it won't.  By default, do one
   # level deep.
-  $self->{subparse} = defined $opts->{'subparse'} ? $opts->{'subparse'} : 1;
+  $self->{subparse} = defined $opts->{'subparse'} ? $opts->{'subparse'} : 20;
 
   # protect it from abuse ...
   local $_;
@@ -588,7 +588,7 @@ sub parse_body {
   # one doesn't, assume it's malformed and send it to be parsed as a
   # non-multipart section
   #
-  if ( $type =~ /^multipart\//i && defined $boundary ) {
+  if ( $type =~ /^multipart\//i && defined $boundary && ($msg->{subparse} > 0)) {
     # Treat an initial multipart parse differently.  This will keep the tree:
     # obj(multipart->[ part1, part2 ]) instead of
     # obj(obj(multipart ...))
@@ -645,7 +645,7 @@ sub _parse_multipart {
   }
 
   # prepare a new tree node
-  my $part_msg = Mail::SpamAssassin::Message::Node->new({ subparse=>$msg->{subparse} });
+  my $part_msg = Mail::SpamAssassin::Message::Node->new({ subparse=>$msg->{subparse}-1 });
   my $in_body = 0;
   my $header;
   my $part_array;
@@ -692,7 +692,7 @@ sub _parse_multipart {
 
       # make sure we start with a new clean node
       $in_body  = 0;
-      $part_msg = Mail::SpamAssassin::Message::Node->new({ subparse=>$msg->{subparse} });
+      $part_msg = Mail::SpamAssassin::Message::Node->new({ subparse=>$msg->{subparse}-1 });
       undef $part_array;
       undef $header;
 
