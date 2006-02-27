@@ -30,6 +30,14 @@ soadir=/var/named/spamassassin.org.d
 # and a datestamp too.
 
 oldcount=`cat $soadir/counter`
+
+# avoid issues where oldcount=99 and then we can't do any other updates that
+# day.  if the old counter was last updated before midnight, reset counter to
+# 0.
+if perl -e 'use Time::Local; @t=localtime; $mn=timelocal 0,0,0,@t[3..6]; ($mtime) = (stat("'"$soadir"'/counter"))[9]; exit($mn<=$mtime);'; then
+  oldcount=-1
+fi
+
 newserial=`perl -e '
 
   my $count = (($ARGV[0] + 1) % 100);
@@ -39,7 +47,7 @@ newserial=`perl -e '
   open (INCR, ">'"$soadir"'/counter") or die "open failed $soadir";
   print INCR $count,"\n"; close INCR or die "close failed $soadir";
 
-' $oldcount`
+' -- $oldcount`
 
 soafile=$soadir/soa_line
 rm -f $soafile.bak \
