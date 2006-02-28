@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("trust_path");
-use Test; BEGIN { plan tests => 18 };
+use Test; BEGIN { plan tests => 24 };
 
 
 use strict;
@@ -122,6 +122,43 @@ q{
 } => q{
 
 Lint-Error
+Trusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= ]
+Untrusted:
+
+},
+
+# ---------------------------------------------------------------------------
+
+# this should be a lint error; internal_networks is not a subset of trusted.
+# note: "intl=1" in expected, because the error means that the internal_networks
+# line is ignored and the default setting is intl==trusted.
+q{
+
+  trusted_networks !1.1.1.1 1.1/16
+  internal_networks 1.1.1.1
+  Received: from sender.net (1.1.1.2) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+
+} => q{
+
+Lint-Error
+Trusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= ]
+Untrusted:
+
+},
+
+# ---------------------------------------------------------------------------
+
+# internal_networks are valid, even if the !4.3.2.1 is pointless
+q{
+
+  trusted_networks 1.1/16
+  internal_networks !4.3.2.1 1.1/16
+  Received: from sender.net (1.1.1.2) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+
+} => q{
+
 Trusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= ]
 Untrusted:
 

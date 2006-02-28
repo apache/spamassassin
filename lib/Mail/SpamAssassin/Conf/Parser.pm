@@ -766,7 +766,8 @@ sub lint_trusted_networks {
     my @valid_ni = ();
 
     foreach my $net (@{$ni->{nets}}) {
-      if (!$nt->contains_net($net)) {
+      # don't check to see if an excluded network is included - that's senseless
+      if (!$net->{exclude} && !$nt->contains_net($net)) {
         my $msg = "trusted_networks doesn't contain internal_networks entry '".
                 ($net->{as_string})."'";
 
