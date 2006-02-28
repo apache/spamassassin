@@ -588,7 +588,7 @@ sub set_bool_value {
   unless (defined $value && $value !~ /^$/) {
     return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
   }
-  unless ($value == 1 || $value == 0) {
+  unless ($value =~ /^[01]$/) {
     return $Mail::SpamAssassin::Conf::INVALID_VALUE;
   }
 
