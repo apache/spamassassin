@@ -26,7 +26,8 @@ RelayCountry - add message metadata indicating the country code of each relay
 
 By the RelayCountry plugin attempts to determine the domain country
 codes of each relay used in the delivery path of messages and add that
-information to the message metadata as "X-Relay-Countries".
+information to the message metadata as "X-Relay-Countries", or 
+the C<_RELAYCOUNTRY_> header markup.
 
 =head1 REQUIREMENT
 
@@ -81,6 +82,7 @@ sub extract_metadata {
   }
 
   chop $countries;
+  $msg->{tag_data}{RELAYCOUNTRY} = $countries;
   $msg->put_metadata("X-Relay-Countries", $countries);
   dbg("metadata: X-Relay-Countries: $countries");
 
