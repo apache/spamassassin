@@ -1,0 +1,22 @@
+# 
+# ls -l /home/bbmass/.corpus
+# -rw-r--r--   1 root     root         430 Nov 12 01:12 /home/bbmass/.corpus
+
+corpus=/SPECIFIED_BY_CALLER
+
+html=/home/automc/corpus/html
+html_mode=0777
+
+# temporary working directory for summary results
+tmp=/home/bbmass/tmp
+
+tree=$PWD/..
+username=unused
+password=unused
+rsync_command=true
+
+ignore_revisions=1
+rules_dir=tstrules
+
+output_classes=DETAILS.new DETAILS.all DETAILS.age LOGS.all HTML.new HTML.all HTML.age NET.new NET.all NET.age SCOREMAP.new
+
