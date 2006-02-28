@@ -156,7 +156,19 @@ you should use this, as the current PATH will have been cleared.
     setting => 'pyzor_path',
     is_admin => 1,
     default => undef,
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if (!defined $value || !length $value) {
+	return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
+      $value = Mail::SpamAssassin::Util::untaint_file_path($value);
+      if (!-x $value) {
+	info("config: pyzor_path \"$value\" isn't an executable");
+	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+
+      $self->{pyzor_path} = $value;
+    }
   });
 
   $conf->{parser}->register_commands(\@cmds);
