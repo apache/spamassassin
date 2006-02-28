@@ -97,17 +97,15 @@ sub get_num_nets {
 }
 
 sub _nets_contains_network {
-  my ($self, $network, $mask, $exclude, $quiet, $netname) = @_;
+  my ($self, $network, $mask, $exclude, $quiet, $netname, $declared) = @_;
 
   return 0 unless (defined $self->{nets});
 
   $exclude = 0 if (!defined $exclude);
   $quiet = 0 if (!defined $quiet);
+  $declared = 0 if (!defined $declared);
 
   foreach my $net (@{$self->{nets}}) {
-    # inclusion/exclusion need NOT be the same since we match on the first
-    # listed basis there's no point in including the same networks later on
-
     # a net can not be contained by a (smaller) net with a larger mask
     next if ($net->{mask} > $mask);
 
@@ -116,6 +114,10 @@ sub _nets_contains_network {
       warn "netset: cannot " . ($exclude ? "exclude" : "include") 
 	 . " $netname as it has already been "
 	 . ($net->{exclude} ? "excluded" : "included") . "\n" unless $quiet;
+
+      # a network that matches an excluded network isn't contained by "nets"
+      # return 0 if we're not just looking to see if the network was declared
+      return 0 if (!$declared && $net->{exclude});
       return 1;
     }
   }
@@ -130,7 +132,7 @@ sub is_net_declared {
   my $aton = Mail::SpamAssassin::Util::my_inet_aton($network);
 
   return $self->_nets_contains_network($aton, $mask, $exclude,
-                $quiet, "$network/$bits");
+                $quiet, "$network/$bits", 1);
 }
 
 sub contains_ip {
@@ -152,7 +154,7 @@ sub contains_net {
   my $exclude = $net->{exclude};
   my $network = $net->{ip};
 
-  return $self->_nets_contains_network($network, $mask, $exclude, 1, "");
+  return $self->_nets_contains_network($network, $mask, $exclude, 1, "", 0);
 }
 
 sub clone {
