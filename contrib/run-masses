@@ -1,16 +1,14 @@
 #!/bin/sh
 
-# run-masses
-#
 # <@LICENSE>
 # Copyright 2004 Apache Software Foundation
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,52 +26,69 @@
 #  ham					directory of ham
 #
 # By default, the script looks for "spamassassin-head" which on my
-# machine is the latest version from CVS.  You can easily change this
+# machine is the latest version from SVN.  You can easily change this
 # by passing parameters to this script as such:
 #
-# run-masses ../spamassassin-garun --progress
+# run-masses ../spamassassin-garun --progress -n
 #
-# The first parameter is the directory to use for mass-check, and all
-# other parameters are passed to mass-check itself.
+# The first parameter is the directory to use for mass-check (if the first
+# parameter isn't a directory, ../spamassassin-head will be the default),
+# and all other parameters are passed to mass-check itself.
 #
 # At the end, you will have a ham.log, spam.log, and results.log in the
 # corpus directory.
 #
-# BTW: cpucount is a small script to figure out the number
-# of CPUs on the current machine.  It is available from
-# http://www.kluge.net/~felicity/random/
-#
+
+ulimit -c 0
+ulimit -v 204800
+ulimit -m 204800
+ulimit -n 256
+ulimit -u 32
+
+umask 002
 
 # Setup the path as necessary
-PATH=/bin:/usr/bin:/usr/local/bin:${HOME}/bin:.
+PATH=/bin:/usr/bin:/usr/local/bin
 if [ -d /sw/bin ]; then
 	PATH=${PATH}:/sw/bin
 fi
 export PATH
 
+if [ -d $HOME/Obsolete -a -w $HOME/Obsolete ]; then
+  TMPDIR=$HOME/Obsolete
+  export TMPDIR
+fi
+
 # Use the specified directory for tests
-if [ -z "$1" ]; then
+if [ -z "$1" -o ! -d "$1" ]; then
 	DIR=../spamassassin-head
 else
 	DIR="$1"
 	shift
 fi
 
-# How many processes should we run at once?
-PROCS=`cpucount`
-
 # Where are our files located?
 MASS=$DIR/masses
 RULES=$DIR/rules
+CORPUS="`dirname $0`"
+MBOX2CHECK="$CORPUS/mbox-to-check $CORPUS"
+
+# Make sure the old rules.pl file is gone
+rm -rf $MASS/tmp
+
+# How many processes should we run at once?
+PROCS=`$MASS/cpucount`
 
 # do the mass-check
 # class:format:path
 # class = ham | spam
 # format = file (file w/ single message) | mbox (file w/ multiple messsages) | dir (of 'file's)
-$MASS/mass-check --all -c $RULES -j $PROCS "$@" `mbox-to-check`
+$MASS/mass-check --progress --cache --all -c $RULES -j $PROCS "$@" `$MBOX2CHECK`
 
-echo "Generating hit frequency results"
-$MASS/hit-frequencies -c $RULES -x -p -a > results.log
+if [ -f spam.log -a -f ham.log ]; then
+  echo "Generating hit frequency results"
+  $MASS/hit-frequencies -c $RULES -x -p -a > results.log
+fi
 
 # remove the parse-rules-for-masses tmp directory
 echo "Removing temporary files"

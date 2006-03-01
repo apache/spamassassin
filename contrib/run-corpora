@@ -8,7 +8,7 @@
 # You may obtain a copy of the License at
 # 
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,18 +26,23 @@
 # --net by itself will automatically try running 4 mass-checks in parallel
 #
 
+PATH=/bin:/usr/bin:/usr/local/bin
+export PATH
+
 CORPUS=/home/felicity/SA/corpus
-SA_VER=/home/felicity/SA/spamassassin-corpora
-SVN=/usr/local/bin/svn
-SVNVERS=/usr/local/bin/svnversion
+SA_VER=$HOME/SA/spamassassin-corpora
+SVN=svn
+SVNVERS=svnversion
+WGET=wget
 
 NET=0
 BAYES=0
-OPTS="--progress --after=-2592000"
-RSYNC_USER=your_rsync_username
-RSYNC_PASSWORD="your_rsync_password"; export RSYNC_PASSWORD
+OPTS=""
+RSYNC_USER=YOURUSERNAME
+RSYNC_PASSWORD="YOURPASSWORD"; export RSYNC_PASSWORD
 VERS=nightly
 FILENAME=$RSYNC_USER
+umask 002
 
 while [ ! -z "$1" ]; do
   if [ "$1" = "--net" ]; then
@@ -50,24 +55,39 @@ done
 
 if [ $NET -eq 1 ]; then
   FILENAME="net-$FILENAME"
-  OPTS="$OPTS --net"
+  OPTS="$OPTS --net --reuse"
+  AFTER="-60 days"
   VERS=weekly
 
   # We want to do this with more parallelization, but not if Bayes is also running ...
   if [ $BAYES -eq 0 ]; then
-    OPTS="$OPTS -j 4 --restart 1000"
+    OPTS="$OPTS -j 4"
   fi
+else
+  AFTER="-120 days"
 fi
+
 if [ $BAYES -eq 1 ]; then
   FILENAME="bayes-$FILENAME"
   OPTS="$OPTS --bayes"
+else
+  OPTS="$OPTS -n"
 fi
+
+cd $HOME/Obsolete
+if [ -f ham.log -o -f spam.log ]; then
+  echo "A previous run still has log files, exiting." >&2
+  exit 2
+fi
+
+rm -f ham.log spam.log results.log
+
 
 # Update SA version before our run
 echo "[Updating $SA_VER]"
 cd $SA_VER
 COUNT=0
-while ! wget -q -nd -m http://rsync.spamassassin.org/$VERS-versions.txt ; do
+while ! $WGET -q -nd -m http://rsync.spamassassin.org/$VERS-versions.txt ; do
   sleep 60
   COUNT=`expr $COUNT + 1`
   if [ $COUNT -gt 5 ]; then
@@ -76,7 +96,7 @@ while ! wget -q -nd -m http://rsync.spamassassin.org/$VERS-versions.txt ; do
   fi
 done
 
-CREV=`$SVNVERS .`
+CREV=`$SVNVERS . | awk -F: '{print $1}'`
 NREV=`tail -1 $VERS-versions.txt | awk '{print $2}'`
 
 if [ $CREV -ge $NREV ]; then
@@ -84,8 +104,11 @@ if [ $CREV -ge $NREV ]; then
   exit 0
 fi
 
+# blow away the last generated rules dir
+rm -f rules/*
+
 COUNT=0
-while ! $SVN update -r $NREV; do
+while ! $SVN -q update -r $NREV; do
   sleep 60
   COUNT=`expr $COUNT + 1`
   if [ $COUNT -gt 5 ]; then
@@ -94,32 +117,41 @@ while ! $SVN update -r $NREV; do
   fi
 done
 
-# update the corpus with the latest/greatest mail files
-echo "[Updating Corpus]"
-cd $CORPUS
-$CORPUS/update -q
+# generate the new full rules dir
+build/mkrules --out rules > /dev/null
 
 # remove current bayes db set
 echo "[Removing old Bayes DB]"
 rm -f $SA_VER/masses/spamassassin/bayes*
 
 # do the run
+cd $HOME/Obsolete
 echo "[Running mass-check '$OPTS' in $CORPUS]"
-$CORPUS/run-masses $SA_VER $OPTS > /dev/null
+if [ -z "$AFTER" ]; then
+  $CORPUS/run-masses $SA_VER $OPTS > /dev/null
+else
+  echo "[Using '$AFTER' for --after setting]"
+  $CORPUS/run-masses $SA_VER $OPTS --after "$AFTER" > /dev/null
+fi
 
 if [ ! -s ham.log -o ! -s spam.log ]; then
 	echo "There seems to be a problem with either ham.log or spam.log, aborting!" >&2
 	exit 1
 fi
 
-mv -f ham.log results/ham-$FILENAME.log
-mv -f spam.log results/spam-$FILENAME.log
-mv -f results.log results/hf/results-$FILENAME.log
+mv -f ham.log $CORPUS/results/ham-$FILENAME.log
+mv -f spam.log $CORPUS/results/spam-$FILENAME.log
+mv -f results.log $CORPUS/results/hf/results-$FILENAME.log
 
-cd results
+if [ -f ham.log -o -f spam.log ]; then
+  echo "There was an error moving files around, aborting!" >&2
+  exit 1
+fi
+
 # now we have our ham.log and spam.log files...
+cd $CORPUS/results
 echo "[Uploading daily corpus logs]"
-rsync -qCPcvuzb *-$FILENAME.log $RSYNC_USER@rsync.spamassassin.org::corpus/
+rsync -qPcvuzb *-$FILENAME.log $RSYNC_USER@rsync.spamassassin.org::corpus/
 
 echo "[Our results]"
 cat hf/results-$FILENAME.log
