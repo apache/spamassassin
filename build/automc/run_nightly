@@ -12,6 +12,12 @@ nightly_users="
 # and where the $HOMEs are:
 nightly_trees="/home/bbmass/mc-nightly"
 
+# ensure we're running at/just after 0900 UTC, complex due to daylight savings
+(
+  TIME="%e,%U,%S"; TZ=UTC; export TIME TZ
+  if date | egrep '^... ... .. (08|10):'; then exit ; fi
+)
+
 # create the targets files:
 /home/automc/svn/spamassassin/build/automc/populate_cor_nightly
 
