@@ -176,7 +176,7 @@ sub find_srcs {
       $num_files = 0;
       @mboxes = ();
 
-      File::Find::find($cb, $try_dir);
+      File::Find::find({ wanted => $cb, follow => 1 }, $try_dir);
 
       foreach my $mbox (@mboxes) {
        $num_files += mbox_count($mbox);
@@ -191,7 +191,7 @@ sub find_srcs {
       $num_files = 0;
       @mboxes = ();
 
-      File::Find::find($cb, $try_dir);
+      File::Find::find({ wanted => $cb, follow => 1 }, $try_dir);
 
       foreach my $mbox (@mboxes) {
        $num_files += mbox_count($mbox);
