@@ -287,7 +287,7 @@ sub _mklink {
   # days, so larger numbers means earlier.
 
   my %files = ();
-  File::Find::find(sub {
+  File::Find::find({ follow => 1, wanted => sub {
     return unless (-f $_ && -r _);    # not a file
 
     my @stat = stat _;
@@ -303,7 +303,7 @@ sub _mklink {
       push(@{$files{$mtime}}, $File::Find::name);
     }
 
-  }, $srcdir);
+  } }, $srcdir);
 
   my @files = ();
   foreach my $key (sort { $b <=> $a } keys %files) {
@@ -392,7 +392,8 @@ sub allocate {
 sub mark_for_poss_deletion {
   my ($dir) = @_;
 
-  File::Find::find(sub {
+  File::Find::find({ follow => 1, wanted => sub {
+
       return if (/mboxcountcache$/);
       if (!-d $_) {
         my $fname = $File::Find::name;
@@ -401,7 +402,8 @@ sub mark_for_poss_deletion {
       } else {
         # TODO: delete dirs?  for now, leave 'em behind
       }
-    }, $dir);
+
+  } }, $dir);
 }
 
 sub perform_poss_deletion {
