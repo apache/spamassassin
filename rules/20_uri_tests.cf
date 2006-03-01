@@ -33,6 +33,41 @@ redirector_pattern	/^http:\/\/(?:.*?\.)?adtech\.de\/.*(?:;|\|)link=(.*?)(?:;|$)/
 redirector_pattern	m'^http.*?/redirect\.php\?.*(?<=[?&])goto=(.*?)(?:$|[&\#])'i
 redirector_pattern      m'^https?:/*(?:[^/]+\.)?emf\d\.com/r\.cfm.*?&r=(.*)'i
 
+# ExpressionEngine redirector
+# see http://www.pmachine.com/forums/viewthread/29561/
+# e.g. http://www.someEEBasedSite.com/index.php?URL=http://www.NastyPR0nSite.com
+# e.g. http://www.pmachine.com/ee/knowledgeblog/?URL=http://www.google.com
+redirector_pattern m'/(?:index.php)?\?.*(?<=[?&])URL=(.*?)(?:$|[&\#])'i
+
+# Google redirector.
+# Common form:
+# http://www.google.com/url?sa=U&start=4&q=http://urlofspammer
+#       -> http://urlofspammer
+# Unhandled form:
+# http://www.google.com/url?q=http://urlofspammer/space&q=here
+#       -> http://urlofspammer/space%20here
+#       Redirector gets http://urlofspammer/space
+# http://www.google.com/url?q=http://urlof&q=spammer does not work
+redirector_pattern m'^http:/*(?:\w+\.)?google(?:\.\w{2,3}){1,2}/url\?.*?(?<=[?&])q=(.*?)(?:$|[&\#])'i
+
+# Google site search
+# http://www.google.com/search?q=site:bluevallet.com
+#       -> links to http://www.bluevallet.com/
+redirector_pattern m'^http:/*(?:\w+\.)?google(?:\.\w{2,3}){1,2}/search\?.*?(?<=[?&])q=[^&]*?(?<=%20|..[=+\s])site:(.*?)(?:$|%20|[\s+&\#])'i
+
+# Google search for pages that contain the site name
+# http://www.google.com/search?q="bluevallet.com"
+# http://www.google.com/search?q=%22bluevallet.com%22
+#       -> links to search page that probably has http://bluevallet.com
+#          at the top
+redirector_pattern m'^http:/*(?:\w+\.)?google(?:\.\w{2,3}){1,2}/search\?.*?(?<=[?&])q=[^&]*?(?<=%20|..[=+\s])(?:"|%22)(.*?)(?:$|%22|["\s+&\#])'i
+
+# Google translate
+# http://translate.google.com/translate?u=www.domain.tld&langpair=en%7Cen&hl=en
+#       -> http://www.domain.tld inside a frame
+redirector_pattern m'^http:/*(?:\w+\.)?google(?:\.\w{2,3}){1,2}/translate\?.*?(?<=[?&])u=(.*?)(?:$|[&\#])'i
+
+
 uri NUMERIC_HTTP_ADDR		/^https?\:\/\/\d{7}/is
 describe NUMERIC_HTTP_ADDR	Uses a numeric IP address in URL
 
