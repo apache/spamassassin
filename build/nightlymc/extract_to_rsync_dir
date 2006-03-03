@@ -34,13 +34,16 @@ echo "Revision: $REV"
 
 # export the main repo:
 rm -rf $RSYNC_DIR/$subdir
-echo Command: $SVN export --non-interactive -r $REV $REPO_URL $RSYNC_DIR/$subdir
-$SVN export --non-interactive -r $REV $REPO_URL $RSYNC_DIR/$subdir
+echo Command: $SVN export --ignore-externals --non-interactive \
+        -r $REV $REPO_URL $RSYNC_DIR/$subdir
+$SVN export --ignore-externals --non-interactive \
+        -r $REV $REPO_URL $RSYNC_DIR/$subdir
 
 # and the "svn external" for rulesrc, separately due to svn export bug:
-rm -rf $RSYNC_DIR/$subdir/rulesrc
-echo Command: $SVN export --non-interactive -r $REV $REPO2_URL $RSYNC_DIR/$subdir/rulesrc
-$SVN export --non-interactive -r $REV $REPO2_URL $RSYNC_DIR/$subdir/rulesrc
+echo Command: $SVN export --non-interactive \
+        -r $REV $REPO2_URL $RSYNC_DIR/$subdir/rulesrc
+$SVN export --non-interactive \
+        -r $REV $REPO2_URL $RSYNC_DIR/$subdir/rulesrc
 
 cd $RSYNC_DIR/$subdir
 $PERL build/mkrules --out rules > /dev/null
