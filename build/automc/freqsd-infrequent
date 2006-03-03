@@ -2,6 +2,8 @@
 
 # recreate the corpus link-farm; log results to a web-visible file
 
+BBMHOME=/home/bbmass
+
 (
 
   # create links to the user-submitted corpora in the right
@@ -12,9 +14,10 @@
 
   # permit mass-check processes to create files in these dirs,
   # so they can use the ArchiveIterator cache code
-  cd /home/bbmass/tmpfs/cor
+  cd $BBMHOME/tmpfs/cor
   find . -type d | xargs chmod 1777
 
 ) 2>&1 | tee \
     /var/www/buildbot.spamassassin.org/bbmass/corpus_makeup.txt
+    # note: needs to be customised for each site
 
