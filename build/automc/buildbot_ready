@@ -141,7 +141,7 @@ sub do_stop {
   run ("chmod 644 $logdir/ham-$slave.log $logdir/spam-$slave.log");
 
   # run our fast report generator
-  $ENV{HOME} = $BBHOME;
+  $ENV{HOME} = $BBMHOME;
   umask(022);
 
   run ("$REPORTSCRIPTSADIR/masses/rule-qa/corpus-hourly --dir $logdir --tag b");
