@@ -350,6 +350,10 @@ sub create_gp {
   if ($title =~ /\b(ham|spam)\b/) { $mailtype = $1; }
   my $y_label = "\%age of $mailtype in period";
 
+  $SIG{PIPE} = sub {
+            die "unexpected SIGPIPE received!";
+        };
+
   open (GP, "| gnuplot - > $tmpdir/gp.log 2>&1") or die "cannot run gnuplot";
 
   # eye-candy
@@ -496,7 +500,8 @@ sub plot_gp {
     }
 
     print GP "plot ",join(", ", @plot), "\n";
-    close GP;
+    close GP
+        or warn "gnuplot command exited: $?";
 
     $graph_png_data{$graphname} = readfile("$tmpdir/out.png");
   }
