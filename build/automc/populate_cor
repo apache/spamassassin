@@ -3,40 +3,41 @@
 # as seen on the zone's "bbmass" mass-checking buildbot
 
 SADIR=/home/automc/svn/spamassassin
+BBMHOME=/home/bbmass
 
-[ -d /home/bbmass/tmpfs/cor ] || \
-    mkdir /home/bbmass/tmpfs/tmp /home/bbmass/tmpfs/cor
+[ -d $BBMHOME/tmpfs/cor ] || \
+    mkdir $BBMHOME/tmpfs/tmp $BBMHOME/tmpfs/cor
 
-cd /home/bbmass/rawcor
+cd $BBMHOME/rawcor
 date
 
-mkdir /home/bbmass/tmpfs/newcor
+mkdir $BBMHOME/tmpfs/newcor
 
-TMPDIR=/home/bbmass/tmpfs/tmp \
+TMPDIR=$BBMHOME/tmpfs/tmp \
   /local/perl586/bin/perl \
   $SADIR/masses/corpora/mk-corpus-link-farm \
           -after="6 months ago" \
-          -dest /home/bbmass/tmpfs/newcor/mc-fast -num 1000 \
-          -dest /home/bbmass/tmpfs/newcor/mc-med -num 5000 \
-          -dest /home/bbmass/tmpfs/newcor/mc-slow -num 10000 \
-          -dest /home/bbmass/tmpfs/newcor/mc-slower -num 20000 \
+          -dest $BBMHOME/tmpfs/newcor/mc-fast -num 1000 \
+          -dest $BBMHOME/tmpfs/newcor/mc-med -num 5000 \
+          -dest $BBMHOME/tmpfs/newcor/mc-slow -num 10000 \
+          -dest $BBMHOME/tmpfs/newcor/mc-slower -num 20000 \
         *
 
 # remove this "out of the way" name, just in case.   for some reason
 # this seems to occasionally be un-rm'able; Solaris zones bug?
-rm -rf /home/bbmass/tmpfs/cor.old.$$
+rm -rf $BBMHOME/tmpfs/cor.old.$$
 
 # and put the new corpus linkfarm in place...
-mv /home/bbmass/tmpfs/cor /home/bbmass/tmpfs/cor.old.$$
-mv /home/bbmass/tmpfs/newcor /home/bbmass/tmpfs/cor
+mv $BBMHOME/tmpfs/cor $BBMHOME/tmpfs/cor.old.$$
+mv $BBMHOME/tmpfs/newcor $BBMHOME/tmpfs/cor
 
 # remove the old one (or try, at least)
-rm -rf /home/bbmass/tmpfs/cor.old.$$
+rm -rf $BBMHOME/tmpfs/cor.old.$$
 
 for dir in mc-fast mc-med mc-slow mc-slower
 do
-echo "ham:dir:/home/bbmass/tmpfs/cor/$dir/ham
-spam:dir:/home/bbmass/tmpfs/cor/$dir/spam" > /home/bbmass/tmpfs/cor/$dir/targets
+echo "ham:dir:$BBMHOME/tmpfs/cor/$dir/ham
+spam:dir:$BBMHOME/tmpfs/cor/$dir/spam" > $BBMHOME/tmpfs/cor/$dir/targets
 done
 
 date

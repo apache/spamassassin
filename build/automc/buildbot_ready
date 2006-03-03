@@ -1,13 +1,21 @@
 #!/usr/bin/perl
 
+my $BBMHOME   = '/home/bbmass';
+my $BYMAILLOG = '/home/bbmass/bymail/extract.log';
+my $BYMAILCF  = '/home/bbmass/bymail/latest.cf';
+my $RULEQAURL = 'http://ruleqa.spamassassin.org/';
+
+  # where do the reporting scripts get run from?
+my $REPORTSCRIPTSADIR = "/home/automc/svn/spamassassin";
+
+# ---------------------------------------------------------------------------
+
 use strict;
 use warnings;
 sub run;
 
-my $BYMAILLOG = '/home/bbmass/bymail/extract.log';
-my $BYMAILCF = '/home/bbmass/bymail/latest.cf';
-
-my $LOCKDIR = "/home/bbmass/mclocks";
+# directory used to lock between slaves; no longer used
+my $LOCKDIR = "/not/in/use";
 my $got_lock = undef;
 
 $|=1;
@@ -106,22 +114,22 @@ sub do_stop {
   my $rev = get_current_svn_revision();
   my $slave = get_current_slave_name();
 
-  chdir("masses") or die;
-
-  print "FAST FREQS REPORT:\n\n";
-  system ("$perl hit-frequencies -c tstrules -x -p -T -s 0");
-
   use POSIX qw(strftime);
   my $daterev = strftime("%Y%m%d", gmtime(time)) . "-r$rev-b";
-  print qq{
+  my $rurl = $RULEQAURL.$daterev;
 
-BUILDING SLOW FREQS REPORT:
+  chdir("masses") or die;
 
-    http://buildbot.spamassassin.org/ruleqa?daterev=$daterev
+  print "REPORTS\n\n";
+  print "Rule-QA resuts from this mass-check will be published to\n\n";
+  print "    $rurl\n\n";
+  print "QUICK FREQS REPORT:\n\n";
 
-};
+  system ("$perl hit-frequencies -c tstrules -x -p -T -s 0");
 
-  my $logdir = "/home/bbmass/tmp/logs-r$rev";
+  print "\n\nBUILDING SLOW REPORTS:\n\n";
+
+  my $logdir = "$BBMHOME/tmp/logs-r$rev";
   if (!-d $logdir) {
     run ("mkdir $logdir");
   }
@@ -133,13 +141,14 @@ BUILDING SLOW FREQS REPORT:
   run ("chmod 644 $logdir/ham-$slave.log $logdir/spam-$slave.log");
 
   # run our fast report generator
-  $ENV{HOME} = '/home/bbmass';
+  $ENV{HOME} = $BBHOME;
   umask(022);
-  run ("./rule-qa/corpus-hourly --dir $logdir --tag b");
-  run ("./rule-qa/automc/gen_info_xml");
+
+  run ("$REPORTSCRIPTSADIR/masses/rule-qa/corpus-hourly --dir $logdir --tag b");
+  run ("$REPORTSCRIPTSADIR/masses/rule-qa/automc/gen_info_xml");
 
   # enqueue a request for the slow stuff with the report-generation daemon
-  run ("../build/automc/freqsd --enq $logdir");
+  run ("$REPORTSCRIPTSADIR/build/automc/freqsd --enq $logdir");
 }
 
 # ---------------------------------------------------------------------------
