@@ -123,7 +123,7 @@ sub do_stop {
   print "REPORTS\n\n";
   print "Rule-QA results from this mass-check will be published at\n\n";
   print "    $rurl\n\n";
-  print "QUICK FREQS REPORT:\n\n";
+  print "QUICK FREQS REPORT (this mass-check only):\n\n";
 
   system ("$perl hit-frequencies -c tstrules -x -p -T -s 0");
 
