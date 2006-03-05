@@ -34,10 +34,13 @@ echo "Revision: $REV"
 
 # export the main repo:
 rm -rf $RSYNC_DIR/$subdir
-echo Command: $SVN export --ignore-externals --non-interactive \
+echo Command: $SVN export --non-interactive \
         -r $REV $REPO_URL $RSYNC_DIR/$subdir
-$SVN export --ignore-externals --non-interactive \
+$SVN export --non-interactive \
         -r $REV $REPO_URL $RSYNC_DIR/$subdir
+
+# normally we'd use --ignore-externals, if we had a newer svn build
+rm -rf $RSYNC_DIR/$subdir/rulesrc
 
 # and the "svn external" for rulesrc, separately due to svn export bug:
 echo Command: $SVN export --non-interactive \
