@@ -193,7 +193,7 @@ static int _opensocket(int flags, int type, int *psock)
     }
 
 #ifdef DO_CONNECT_DEBUG_SYSLOGS
-    libspamc_log(flags, DEBUG_LEVEL, "dbg: create socket(%s)", typename);
+    libspamc_log(flags, LOG_DEBUG, "dbg: create socket(%s)", typename);
 #endif
 
     if ((*psock = socket(type, SOCK_STREAM, proto))
@@ -334,17 +334,17 @@ static int _try_to_connect_unix(struct transport *tp, int *sockptr)
     addrbuf.sun_path[sizeof addrbuf.sun_path - 1] = '\0';
 
 #ifdef DO_CONNECT_DEBUG_SYSLOGS
-    libspamc_log(tp->flags, DEBUG_LEVEL, "dbg: connect(AF_UNIX) to spamd at %s",
+    libspamc_log(tp->flags, LOG_DEBUG, "dbg: connect(AF_UNIX) to spamd at %s",
 	   addrbuf.sun_path);
 #endif
 
-    status = connect(mysock, (struct sockaddr *) &addrbuf, sizeof(addrbuf));
+    status = timeout_connect(mysock, (struct sockaddr *) &addrbuf, sizeof(addrbuf));
 
     origerr = errno;
 
     if (status >= 0) {
 #ifdef DO_CONNECT_DEBUG_SYSLOGS
-	libspamc_log(tp->flags, DEBUG_LEVEL, "dbg: connect(AF_UNIX) ok");
+	libspamc_log(tp->flags, LOG_DEBUG, "dbg: connect(AF_UNIX) ok");
 #endif
 
 	*sockptr = mysock;
@@ -412,13 +412,13 @@ static int _try_to_connect_tcp(const struct transport *tp, int *sockptr)
 	ipaddr = inet_ntoa(addrbuf.sin_addr);
 
 #ifdef DO_CONNECT_DEBUG_SYSLOGS
-	libspamc_log(tp->flags, DEBUG_LEVEL,
+	libspamc_log(tp->flags, LOG_DEBUG,
 	       "dbg: connect(AF_INET) to spamd at %s (try #%d of %d)",
 		ipaddr, numloops + 1, MAX_CONNECT_RETRIES);
 #endif
 
 	status =
-	    connect(mysock, (struct sockaddr *) &addrbuf, sizeof(addrbuf));
+	    timeout_connect(mysock, (struct sockaddr *) &addrbuf, sizeof(addrbuf));
 
 	if (status != 0) {
 #ifndef _WIN32
@@ -438,7 +438,7 @@ static int _try_to_connect_tcp(const struct transport *tp, int *sockptr)
 	}
 	else {
 #ifdef DO_CONNECT_DEBUG_SYSLOGS
-	    libspamc_log(tp->flags, DEBUG_LEVEL,
+	    libspamc_log(tp->flags, LOG_DEBUG,
 		   "dbg: connect(AF_INET) to spamd at %s done", ipaddr);
 #endif
 	    *sockptr = mysock;

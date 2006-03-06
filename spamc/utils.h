@@ -87,6 +87,7 @@ typedef int SSL_METHOD;
 
 int fd_timeout_read(int fd, char fdflag, void *, size_t);
 int ssl_timeout_read(SSL * ssl, void *, int);
+int timeout_connect (int sockfd, const struct sockaddr *serv_addr, socklen_t addrlen);
 
 /* these are fd-only, no SSL support */
 int full_read(int fd, char fdflag, void *buf, int min, int len);
