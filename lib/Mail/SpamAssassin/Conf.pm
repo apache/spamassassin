@@ -2697,6 +2697,8 @@ optional, and the default is shown below.
                    (note: limited to 50 'stars')
  _RELAYSTRUSTED_   relays used and deemed to be trusted
  _RELAYSUNTRUSTED_ relays used that can not be trusted
+ _RELAYSINTERNAL_  relays used and deemed to be internal
+ _RELAYSEXTERNAL_  relays used and deemed to be external
  _AUTOLEARN_       autolearn status ("ham", "no", "spam", "disabled",
                    "failed", "unavailable")
  _TESTS(,)_        tests hit separated by "," (or other separator)
