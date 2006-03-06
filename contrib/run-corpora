@@ -29,17 +29,21 @@
 PATH=/bin:/usr/bin:/usr/local/bin
 export PATH
 
-CORPUS=/home/felicity/SA/corpus
+RSYNC_USER=YOURNAME
+RSYNC_PASSWORD="YOURPASSWORD"; export RSYNC_PASSWORD
+CORPUS=$HOME/SA/corpus
 SA_VER=$HOME/SA/spamassassin-corpora
+OUTDIR=$SA_VER/masses
+FINALDIR=
+
 SVN=svn
 SVNVERS=svnversion
 WGET=wget
+RSYNC=rsync
 
 NET=0
 BAYES=0
 OPTS=""
-RSYNC_USER=YOURUSERNAME
-RSYNC_PASSWORD="YOURPASSWORD"; export RSYNC_PASSWORD
 VERS=nightly
 FILENAME=$RSYNC_USER
 umask 002
@@ -74,18 +78,14 @@ else
   OPTS="$OPTS -n"
 fi
 
-cd $HOME/Obsolete
+cd $OUTDIR
 if [ -f ham.log -o -f spam.log ]; then
   echo "A previous run still has log files, exiting." >&2
   exit 2
 fi
 
-rm -f ham.log spam.log results.log
-
-
-# Update SA version before our run
+# Verify appropriate version to run with
 echo "[Updating $SA_VER]"
-cd $SA_VER
 COUNT=0
 while ! $WGET -q -nd -m http://rsync.spamassassin.org/$VERS-versions.txt ; do
   sleep 60
@@ -96,36 +96,31 @@ while ! $WGET -q -nd -m http://rsync.spamassassin.org/$VERS-versions.txt ; do
   fi
 done
 
-CREV=`$SVNVERS . | awk -F: '{print $1}'`
 NREV=`tail -1 $VERS-versions.txt | awk '{print $2}'`
-
-if [ $CREV -ge $NREV ]; then
-  echo "Current rev ($CREV) newer or equal to nightly rev ($NREV)"
-  exit 0
-fi
-
-# blow away the last generated rules dir
-rm -f rules/*
-
-COUNT=0
-while ! $SVN -q update -r $NREV; do
-  sleep 60
-  COUNT=`expr $COUNT + 1`
-  if [ $COUNT -gt 5 ]; then
-    echo "Couldn't do a SVN update, aborting!" >&2
+if [ -f "$SA_VER/masses/svninfo.tmp" ]; then
+  CREV=`grep ^Revision: $SA_VER/masses/svninfo.tmp | awk '{print $2}'`
+  if [ $CREV -eq $NREV ]; then
+    echo "Looks like a problem with the $VERS-versions.txt update, same rev ($CREV)" >&2
     exit 2
   fi
-done
+fi
 
-# generate the new full rules dir
-build/mkrules --out rules > /dev/null
+if ! $RSYNC -uaqrC --exclude masses/spamassassin/ --delete rsync.spamassassin.org::tagged_builds/nightly_mass_check/ $SA_VER; then
+  echo "Couldn't rsync update the $VERS spamassassin corpora code" >&2
+  exit 2
+fi
 
-# remove current bayes db set
+CREV=`grep ^Revision: $SA_VER/masses/svninfo.tmp | awk '{print $2}'`
+if [ $CREV -ne $NREV ]; then
+  echo "Looks like a problem with the rsync area, found rev $CREV but expected rev $NREV" >&2
+  exit 2
+fi
+
+# remove existing bayes db set
 echo "[Removing old Bayes DB]"
 rm -f $SA_VER/masses/spamassassin/bayes*
 
-# do the run
-cd $HOME/Obsolete
+# do the run, treat $AFTER differently due to commandline parsing and "-"
 echo "[Running mass-check '$OPTS' in $CORPUS]"
 if [ -z "$AFTER" ]; then
   $CORPUS/run-masses $SA_VER $OPTS > /dev/null
@@ -135,23 +130,35 @@ else
 fi
 
 if [ ! -s ham.log -o ! -s spam.log ]; then
-	echo "There seems to be a problem with either ham.log or spam.log, aborting!" >&2
-	exit 1
-fi
-
-mv -f ham.log $CORPUS/results/ham-$FILENAME.log
-mv -f spam.log $CORPUS/results/spam-$FILENAME.log
-mv -f results.log $CORPUS/results/hf/results-$FILENAME.log
-
-if [ -f ham.log -o -f spam.log ]; then
-  echo "There was an error moving files around, aborting!" >&2
+  echo "There seems to be a problem with either ham.log or spam.log, aborting!" >&2
   exit 1
 fi
 
 # now we have our ham.log and spam.log files...
-cd $CORPUS/results
 echo "[Uploading daily corpus logs]"
-rsync -qPcvuzb *-$FILENAME.log $RSYNC_USER@rsync.spamassassin.org::corpus/
+mv ham.log ham-$FILENAME.log
+mv spam.log spam-$FILENAME.log
+mv results.log results-$FILENAME.log
+
+if ! $RSYNC -qPcvzb ham-$FILENAME.log spam-$FILENAME.log $RSYNC_USER@rsync.spamassassin.org::corpus/; then
+  echo "There was an error during rsync!" >&2
+fi
+
+RESULTDIR=.
+if [ "$FINALDIR" ]; then
+  mv -f ham-$FILENAME.log spam-$FILENAME.log $FINALDIR
+
+  if [ -f "ham-$FILENAME.log" -o -f "spam-$FILENAME.log" ]; then
+    echo "There was an error moving files around, aborting!" >&2
+    exit 1
+  fi
+
+  RESULTDIR=$FINALDIR
+  if [ -d "$FINALDIR/hf" ]; then
+    RESULTDIR="$FINALDIR/hf"
+  fi
+  mv -f results-$FILENAME.log $RESULTDIR
+fi
 
 echo "[Our results]"
-cat hf/results-$FILENAME.log
+cat $RESULTDIR/results-$FILENAME.log
