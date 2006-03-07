@@ -240,7 +240,6 @@ my %makefile = (
         # build dir, or were in SVN in this dir, but this no longer
         # is the case.  Ensure they get cleaned on "make clean".
         'rules/20_advance_fee.cf',
-        'rules/20_body_tests.cf',
         'rules/20_compensate.cf',
         'rules/20_drugs.cf',
         'rules/20_fake_helo_tests.cf',
@@ -251,7 +250,6 @@ my %makefile = (
         'rules/20_uri_tests.cf',
         'rules/25_body_tests_es.cf',
         'rules/25_body_tests_pl.cf',
-        'rules/25_replace.cf',
         'rules/30_text_de.cf',
         'rules/30_text_fr.cf',
         'rules/30_text_it.cf',
@@ -259,7 +257,6 @@ my %makefile = (
         'rules/30_text_pl.cf',
         'rules/30_text_pt_br.cf',
         'rules/50_scores.cf',
-        'rules/60_whitelist_spf.cf',
         'rules/70_broken_rules.cf',
 
         # don't remove these. they are built from 'rulesrc' in SVN, but
