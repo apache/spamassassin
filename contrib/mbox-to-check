@@ -1,4 +1,5 @@
 #! /usr/bin/perl -w
+use strict;
 
 # <@LICENSE>
 # Copyright 2004 Apache Software Foundation
@@ -15,21 +16,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # </@LICENSE>
-#
+
+# Written by Theo Van Dinter <felicity@apache.org>
+# Please feel free to mail with any questions. :)
+
 # This goes with the run-masses script to take the ham/spam directories
 # and spit out the appropriate spam:mbox:path statements for mass-check.
+# The directory structure is assumed to look something like this:
 #
+# $CORPUS		(this script, run-masses, etc)
+# |-- ham		(dir with mbox files for ham)
+# |   |-- hamtrap	(dirs split into YYYY/MM/DD)
+# |   `-- personal	(dirs split into YYYY/MM/DD)
+# `-- spam		(empty)
+#    |-- personal	(dirs split into YYYY/MM/DD)
+#    `-- spamtrap	(dirs split into YYYY/MM/DD)
 
-use strict;
+
+# if you don't have {ham,spam}trap mail broken out, set this to 0.
+my $include_traps = 1;
+
+# which dirs have mbox files?
+my @dirs = ( 'ham' );
+
+# how many days should we limit to searching for the dir areas?
+# ie: assuming we have years of messages in YYYY/MM/DD directories, only look
+# at the most recent X so that mass-check will go faster in the scan stage.
+# comment out the line if you don't want to limit.
+my $RECENT = 120;
+
 
 my $actualdir = "./";
-
 if (@ARGV) {
   $actualdir = shift(@ARGV) . "/";
   chdir $actualdir;
 }
 
-my $include_traps = 1;
 my @do_dirs;
 
 foreach ( 'ham', 'spam' ) {
@@ -38,8 +60,7 @@ foreach ( 'ham', 'spam' ) {
 }
 
 # mbox laden areas
-my @dirs = ( 'ham' ); #, 'spam/evil' );
-foreach my $dir (@dirs) {
+while (my $dir = shift @dirs) {
   if (-d $dir) {
     $dir =~ m@^([^/]+)@;
     print "$1:mbox:$actualdir$dir\n";
@@ -50,9 +71,6 @@ foreach my $dir (@dirs) {
 }
 
 # Ok, now figure out the most recent X days of spam ...
-my $RECENT = 120;
-
-@dirs = ();
 foreach my $pdir ( @do_dirs ) {
   $pdir =~ m@^([^/]+)@;
   my $type = $1;
@@ -77,7 +95,7 @@ foreach my $pdir ( @do_dirs ) {
     }
     closedir(DIR1);
     @dlist = reverse sort @dlist;
-    splice @dlist, $RECENT if (@dlist > $RECENT);
+    splice @dlist, $RECENT if (defined $RECENT && @dlist > $RECENT);
     push(@dirs, @dlist);
   }
 }
