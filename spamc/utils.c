@@ -67,7 +67,7 @@ static void catch_alrm(int x)
 }
 #endif
 
-int timeout_connect (int sockfd, const struct sockaddr *serv_addr, socklen_t addrlen)
+int timeout_connect (int sockfd, const struct sockaddr *serv_addr, size_t addrlen)
 {
     int ret;
 
