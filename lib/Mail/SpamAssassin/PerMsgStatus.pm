@@ -682,13 +682,21 @@ above headers added/modified.
 sub rewrite_mail {
   my ($self) = @_;
 
-  my $mbox = $self->{msg}->get_mbox_separator() || '';
+  my $msg = $self->{msg}->get_mbox_separator() || '';
+
   if ($self->{is_spam} && $self->{conf}->{report_safe}) {
-    return $mbox.$self->rewrite_report_safe();
+    $msg .= $self->rewrite_report_safe();
   }
   else {
-    return $mbox.$self->rewrite_no_report_safe();
+    $msg .= $self->rewrite_no_report_safe();
   }
+
+  # Make the line endings appropriate for the situation
+  if ($self->{msg}->{line_ending} ne "\n") {
+    $msg =~ s/\r?\n/$self->{msg}->{line_ending}/g;
+  }
+
+  return $msg;
 }
 
 # rewrite the message in report_safe mode
