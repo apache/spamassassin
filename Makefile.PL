@@ -243,7 +243,6 @@ my %makefile = (
         'rules/20_compensate.cf',
         'rules/20_drugs.cf',
         'rules/20_fake_helo_tests.cf',
-        'rules/20_head_tests.cf',
         'rules/20_phrases.cf',
         'rules/20_porn.cf',
         'rules/20_ratware.cf',
