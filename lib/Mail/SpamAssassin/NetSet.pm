@@ -72,12 +72,16 @@ sub add_cidr {
     }
 
     $bits = 32 if (!defined $bits);
+
+    next if ($self->is_net_declared($ip, $bits, $exclude, 0));
+
     my $mask = 0xFFffFFff ^ ((2 ** (32-$bits)) - 1);
 
     push @{$self->{nets}}, {
       mask    => $mask,
       exclude => $exclude,
-      ip      => Mail::SpamAssassin::Util::my_inet_aton($ip) & $mask
+      ip      => (Mail::SpamAssassin::Util::my_inet_aton($ip) & $mask),
+      as_string => $_
     };
     $numadded++;
   }
@@ -92,6 +96,45 @@ sub get_num_nets {
   return scalar @{$self->{nets}};
 }
 
+sub _nets_contains_network {
+  my ($self, $network, $mask, $exclude, $quiet, $netname, $declared) = @_;
+
+  return 0 unless (defined $self->{nets});
+
+  $exclude = 0 if (!defined $exclude);
+  $quiet = 0 if (!defined $quiet);
+  $declared = 0 if (!defined $declared);
+
+  foreach my $net (@{$self->{nets}}) {
+    # a net can not be contained by a (smaller) net with a larger mask
+    next if ($net->{mask} > $mask);
+
+    # check to see if the new network is contained by the old network
+    if (($network & $net->{mask}) == $net->{ip}) {
+      warn "netset: cannot " . ($exclude ? "exclude" : "include") 
+	 . " $netname as it has already been "
+	 . ($net->{exclude} ? "excluded" : "included") . "\n" unless $quiet;
+
+      # a network that matches an excluded network isn't contained by "nets"
+      # return 0 if we're not just looking to see if the network was declared
+      return 0 if (!$declared && $net->{exclude});
+      return 1;
+    }
+  }
+  return 0;
+}
+
+sub is_net_declared {
+  my ($self, $network, $bits, $exclude, $quiet) = @_;
+
+  return 0 unless ($network =~ m/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/);
+  my $mask = 0xFFffFFff ^ ((2 ** (32-$bits)) - 1);
+  my $aton = Mail::SpamAssassin::Util::my_inet_aton($network);
+
+  return $self->_nets_contains_network($aton, $mask, $exclude,
+                $quiet, "$network/$bits", 1);
+}
+
 sub contains_ip {
   my ($self, $ip) = @_;
 
@@ -103,6 +146,15 @@ sub contains_ip {
     return !$net->{exclude} if (($ip & $net->{mask}) == $net->{ip});
   }
   0;
+}
+
+sub contains_net {
+  my ($self, $net) = @_;
+  my $mask    = $net->{mask};
+  my $exclude = $net->{exclude};
+  my $network = $net->{ip};
+
+  return $self->_nets_contains_network($network, $mask, $exclude, 1, "", 0);
 }
 
 sub clone {
