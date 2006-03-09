@@ -112,6 +112,7 @@ ok_all_patterns();
 
 # 13-14: Internal networks contain first header.
 #	 Trusted networks contain some other IP.
+#      jm: commented; this is now an error condition.
 
 tstprefs("
 clear_trusted_networks
@@ -122,12 +123,17 @@ always_trust_envelope_sender 1
 ");
 
 %patterns = (
-    q{ SPF_HELO_NEUTRAL }, 'helo_neutral',
-    q{ SPF_NEUTRAL }, 'neutral',
+  q{ SPF_HELO_NEUTRAL }, 'helo_neutral',
+  q{ SPF_NEUTRAL }, 'neutral',
 );
 
-sarun ("-t < data/nice/spf2", \&patterns_run_cb);
-ok_all_patterns();
+if (0) {
+  sarun ("-t < data/nice/spf2", \&patterns_run_cb);
+  ok_all_patterns();
+} else {
+  ok(1);        # skip the tests
+  ok(1);
+}
 
 
 # 15-16: Trusted+Internal networks contain first header.
