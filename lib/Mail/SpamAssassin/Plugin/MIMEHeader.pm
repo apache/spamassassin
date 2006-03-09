@@ -121,6 +121,11 @@ sub set_config {
       my $evalfn = "_mimeheader_eval_$rulename";
       $evalfn =~ s/[^a-zA-Z0-9_]/_/gs;
 
+      # don't redefine the subroutine if it already exists!
+      # this causes lots of annoying warnings and such during things like
+      # "make test".
+      return if (defined &{'Mail::SpamAssassin::Plugin::MIMEHeader::'.$evalfn});
+
       $self->{parser}->add_test($rulename, $evalfn."()",
                 $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
       my $evalcode = '
