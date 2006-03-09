@@ -139,6 +139,9 @@ GetOptions(
   'channelfile=s'			=> \$opt{'channelfile'},
   'updatedir=s'				=> \$opt{'updatedir'},
   'gpg!'				=> \$GPG_ENABLED,
+
+  # backward compatibility
+  'usegpg'				=> \$GPG_ENABLED,
 ) or print_usage_and_exit();
 
 if ( defined $opt{'help'} ) {               
@@ -1123,8 +1126,8 @@ Options:
   				Use multiple times for multiple keys
   --gpgkeyfile file		Trust the key ids in the file to sign releases
   --gpghomedir path             Store the GPG keyring in this directory
-  --usegpg			Use GPG to verify updates
-  				(This is auto-enabled by use of the above
+  --gpg and --nogpg		Use (or do not use) GPG to verify updates
+  				(--gpg is assumed by use of the above
 				--gpgkey and --gpgkeyfile options)
 
   -D, --debug [area=n,...]	Print debugging messages
@@ -1138,7 +1141,7 @@ configuration, based on channels.  The default channel is
 I<updates.spamassassin.org>, which has updated rules since the previous
 release.
 
-Update archives are verified by SHA1 hashes, and optionally GPG.
+Update archives are verified by default using SHA1 hashes and GPG signatures.
 
 =head1 OPTIONS
 
@@ -1167,17 +1170,18 @@ Similar to the B<--channel> option, except specify the additional channels in a
 file instead of on the commandline.  This is extremely useful when there are a
 lot of additional channels.
 
-=item B<--usegpg>
+=item B<--gpg>, B<--nogpg>
 
-sa-update only verifies update archives by use of a SHA1 checksum.  While this
-verifies whether or not the downloaded archive has been corrupted, it does not
-offer any form of security regarding whether or not the downloaded archive is
-legitimate (aka: non-modifed by evildoers).  Use this option to enable GPG
-verification of the archive to solve the problem.
+sa-update by default will verify update archives by use of a SHA1 checksum
+and GPG signature.  SHA1 hashes can verify whether or not the downloaded
+archive has been corrupted, but it does not offer any form of security
+regarding whether or not the downloaded archive is legitimate (aka:
+non-modifed by evildoers).  GPG verification of the archive is used to
+solve that problem.
 
-Use of the following gpgkey-related options will automatically enable GPG
-verification.  In addition, use of the default sa-update channel,
-I<updates.spamassassin.org>, does the same.
+If you wish to skip GPG verification, you can use the B<--nogpg> option
+to disable its use.  Use of the following gpgkey-related options will
+override B<--nogpg> and keep GPG verification enabled.
 
 Note: Currently, only GPG itself is supported (ie: not PGP).  v1.2 has been
 tested, although later versions ought to work as well.
