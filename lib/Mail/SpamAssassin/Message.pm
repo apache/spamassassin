@@ -1023,7 +1023,7 @@ sub get_decoded_body_text_array {
   # Go through each part
   for(my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
     push(@{$self->{text_decoded}}, "\n") if ( @{$self->{text_decoded}} );
-    push(@{$self->{text_decoded}}, split_into_array_of_short_lines($parts[$pt]->decode()));
+    push(@{$self->{text_decoded}}, $parts[$pt]->decode());
   }
 
   return $self->{text_decoded};
