@@ -143,14 +143,11 @@ sub razor2_access {
   }
 
   Mail::SpamAssassin::PerMsgStatus::enter_helper_run_mode($self);
-  my $oldalarm = 0;
 
-  eval {
+  my $timer = Mail::SpamAssassin::Timeout->new({ secs => $timeout });
+  my $err = $timer->run_and_catch(sub {
+
     local ($^W) = 0;    # argh, warnings in Razor
-
-    local $SIG{ALRM} = sub { die "__alarm__ignore__\n" };
-    local $SIG{__DIE__};   # bug 4631
-    $oldalarm = alarm $timeout;
 
     # everything's in the module!
     my $rc = Razor2::Client::Agent->new("razor-$type");
@@ -184,7 +181,7 @@ sub razor2_access {
       # let's reset the alarm since get_server_info() calls
       # nextserver() which calls discover() which very likely will
       # reset the alarm for us ... how polite.  :(
-      alarm $timeout;
+      $timer->reset();
 
       # no facility prefix on this die
       my $sigs = $rc->compute_sigs($objects)
@@ -219,100 +216,96 @@ sub razor2_access {
 	  my $error = $rc->errprefix("$debug: spamassassin") || "$debug: razor2 had unknown error during disconnect";
 	  die $error;
 	}
+      }
 
-	# if we got here, we're done doing remote stuff, abort the alert
-        if (defined $oldalarm) {
-          alarm $oldalarm; $oldalarm = undef;
+      # Razor 2.14 says that if we get here, we did ok.
+      $return = 1;
+
+      # figure out if we have a log file we need to close...
+      if (ref($rc->{logref}) && exists $rc->{logref}->{fd}) {
+        # the fd can be stdout or stderr, so we need to find out if it is
+        # so we don't close them by accident.  Note: we can't just
+        # undef the fd here (like the IO::Handle manpage says we can)
+        # because it won't actually close, unfortunately. :(
+        my $untie = 1;
+        foreach my $log (*STDOUT{IO}, *STDERR{IO}) {
+          if ($log == $rc->{logref}->{fd}) {
+            $untie = 0;
+            last;
+          }
         }
+        close $rc->{logref}->{fd} if ($untie);
+      }
 
-	# Razor 2.14 says that if we get here, we did ok.
-	$return = 1;
+      if ($type eq 'check') {
+        # so $objects->[0] is the first (only) message, and ->{spam} is a general yes/no
+        push(@results, { result => $objects->[0]->{spam} });
 
-	# figure out if we have a log file we need to close...
-	if (ref($rc->{logref}) && exists $rc->{logref}->{fd}) {
-	  # the fd can be stdout or stderr, so we need to find out if it is
-	  # so we don't close them by accident.  Note: we can't just
-	  # undef the fd here (like the IO::Handle manpage says we can)
-	  # because it won't actually close, unfortunately. :(
-	  my $untie = 1;
-	  foreach my $log (*STDOUT{IO}, *STDERR{IO}) {
-	    if ($log == $rc->{logref}->{fd}) {
-	      $untie = 0;
-	      last;
-	    }
-	  }
-	  close $rc->{logref}->{fd} if ($untie);
-	}
+        # great for debugging, but leave this off!
+        #use Data::Dumper;
+        #print Dumper($objects),"\n";
 
-	if ($type eq 'check') {
-	  # so $objects->[0] is the first (only) message, and ->{spam} is a general yes/no
-	  push(@results, { result => $objects->[0]->{spam} });
+        # ->{p} is for each part of the message
+        # so go through each part, taking the highest cf we find
+        # of any part that isn't contested (ct).  This helps avoid false
+        # positives.  equals logic_method 4.
+        #
+        # razor-agents < 2.14 have a different object format, so we now support both.
+        # $objects->[0]->{resp} vs $objects->[0]->{p}->[part #]->{resp}
+        my $part = 0;
+        my $arrayref = $objects->[0]->{p} || $objects;
+        if (defined $arrayref) {
+          foreach my $cf (@{$arrayref}) {
+            if (exists $cf->{resp}) {
+              for (my $response=0; $response<@{$cf->{resp}}; $response++) {
+                my $tmp = $cf->{resp}->[$response];
+                my $tmpcf = $tmp->{cf}; # Part confidence
+                my $tmpct = $tmp->{ct}; # Part contested?
+                my $engine = $cf->{sent}->[$response]->{e};
 
-	  # great for debugging, but leave this off!
-	  #use Data::Dumper;
-	  #print Dumper($objects),"\n";
+                # These should always be set, but just in case ...
+                $tmpcf = 0 unless defined $tmpcf;
+                $tmpct = 0 unless defined $tmpct;
+                $engine = 0 unless defined $engine;
 
-	  # ->{p} is for each part of the message
-	  # so go through each part, taking the highest cf we find
-	  # of any part that isn't contested (ct).  This helps avoid false
-	  # positives.  equals logic_method 4.
-	  #
-	  # razor-agents < 2.14 have a different object format, so we now support both.
-	  # $objects->[0]->{resp} vs $objects->[0]->{p}->[part #]->{resp}
-	  my $part = 0;
-	  my $arrayref = $objects->[0]->{p} || $objects;
-	  if (defined $arrayref) {
-	    foreach my $cf (@{$arrayref}) {
-	      if (exists $cf->{resp}) {
-		for (my $response=0; $response<@{$cf->{resp}}; $response++) {
-		  my $tmp = $cf->{resp}->[$response];
-		  my $tmpcf = $tmp->{cf}; # Part confidence
-		  my $tmpct = $tmp->{ct}; # Part contested?
-		  my $engine = $cf->{sent}->[$response]->{e};
-
-		  # These should always be set, but just in case ...
-		  $tmpcf = 0 unless defined $tmpcf;
-		  $tmpct = 0 unless defined $tmpct;
-		  $engine = 0 unless defined $engine;
-
-		  push(@results,
-		       { part => $part, engine => $engine, contested => $tmpct, confidence => $tmpcf });
-		}
-	      }
-	      else {
-		push(@results, { part => $part, noresponse => 1 });
-	      }
-	      $part++;
-	    }
-	  }
-	  else {
-	    # If we have some new $objects format that isn't close to
-	    # the current razor-agents 2.x version, we won't FP but we
-	    # should alert in debug.
-	    dbg("$debug: it looks like the internal Razor object has changed format!");
-	  }
-	}
+                push(@results,
+                      { part => $part, engine => $engine, contested => $tmpct, confidence => $tmpcf });
+              }
+            }
+            else {
+              push(@results, { part => $part, noresponse => 1 });
+            }
+            $part++;
+          }
+        }
+        else {
+          # If we have some new $objects format that isn't close to
+          # the current razor-agents 2.x version, we won't FP but we
+          # should alert in debug.
+          dbg("$debug: it looks like the internal Razor object has changed format!");
+        }
       }
     }
     else {
       warn "$debug: undefined Razor2::Client::Agent\n";
     }
   
-    if (defined $oldalarm) {
-      alarm $oldalarm; $oldalarm = undef;
-    }
-  };
+  });
 
-  my $err = $@;
-  if (defined $oldalarm) {
-    alarm $oldalarm; $oldalarm = undef;
+  # OK, that's enough Razor stuff. now, reset all that global
+  # state it futzes with :(
+  # work around serious brain damage in Razor2 (constant seed)
+  srand;
+
+  Mail::SpamAssassin::PerMsgStatus::leave_helper_run_mode($self);
+
+  if ($timer->timed_out()) {
+    dbg("$debug: razor2 $type timed out after $timeout seconds");
   }
 
   if ($err) {
     chomp $err;
-    if ($err eq "__alarm__ignore__") {
-      dbg("$debug: razor2 $type timed out after $timeout seconds");
-    } elsif ($err =~ /(?:could not connect|network is unreachable)/) {
+    if ($err =~ /(?:could not connect|network is unreachable)/) {
       # make this a dbg(); SpamAssassin will still continue,
       # but without Razor checking.  otherwise there may be
       # DSNs and errors in syslog etc., yuck
@@ -323,11 +316,6 @@ sub razor2_access {
       warn("$debug: razor2 $type failed: $! $err");
     }
   }
-
-  # work around serious brain damage in Razor2 (constant seed)
-  srand;
-
-  Mail::SpamAssassin::PerMsgStatus::leave_helper_run_mode($self);
 
   # razor also debugs to stdout. argh. fix it to stderr...
   if (would_log('dbg', $debug)) {

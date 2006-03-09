@@ -25,6 +25,7 @@ use Errno qw();
 
 use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Timeout;
 
 use vars qw {
   @PFSTATE_VARS %EXPORT_TAGS @EXPORT_OK
@@ -109,6 +110,9 @@ sub child_exited {
 
   delete $self->{kids}->{$pid};
 
+  # note this for the select()-caller's benefit
+  $self->{child_just_exited} = 1;
+
   # remove the child from the backchannel list, too
   $self->{backchannel}->delete_socket_for_child($pid);
 
@@ -188,24 +192,63 @@ sub main_server_poll {
     vec($rin, $self->{server_fileno}, 1) = 0;
   }
 
-  my ($rout, $eout, $nfound, $timeleft);
+  my ($rout, $eout, $nfound, $timeleft, $selerr);
 
-  # use alarm to back up select()'s built-in alarm, to debug theo's bug
-  eval {
-    Mail::SpamAssassin::Util::trap_sigalrm_fully(sub { die "tcp timeout"; });
-    alarm ($tout*2) if ($tout);
+  # use alarm to back up select()'s built-in alarm, to debug Theo's bug.
+  # not that I can remember what Theo's bug was, but hey ;)    A good
+  # 60 seconds extra on the alarm() should make that quite rare...
+
+  my $timer = Mail::SpamAssassin::Timeout->new({ secs => ($tout*2) + 60 });
+
+  $timer->run(sub {
+
+    $self->{child_just_exited} = 0;
     ($nfound, $timeleft) = select($rout=$rin, undef, $eout=$rin, $tout);
-  };
-  alarm 0;
+    $selerr = $!;
 
-  if ($@) {
-    warn "prefork: select timeout failed! recovering\n";
-    sleep 1;        # avoid overload
-    return;
+  });
+
+  # bug 4696: under load, the process can go for such a long time without
+  # being context-switched in, that when it does return the alarm() fires
+  # before the select() timeout does.   Treat this as a select() timeout
+  if ($timer->timed_out) {
+    dbg("prefork: select timed out (via alarm)");
+    $nfound = 0;
+    $timeleft = 0;
   }
 
-  if (!defined $nfound) {
-    warn "prefork: select returned undef! recovering\n";
+  # errors; handle undef *or* -1 returned.  do this before "errors on
+  # the handle" below, since an error condition is signalled both via
+  # a -1 return and a $eout bit.
+  if (!defined $nfound || $nfound < 0)
+  {
+    if (exists &Errno::EINTR && $selerr == &Errno::EINTR)
+    {
+      # this happens if the process is signalled during the select(),
+      # for example if someone sends SIGHUP to reload the configuration.
+      # just return inmmediately
+      dbg("prefork: select returned err $selerr, probably signalled");
+      return;
+    }
+
+    # if a child exits during that select() call, it generates a spurious
+    # error, like this:
+    #
+    # Jan 29 12:53:17 dogma spamd[18518]: prefork: child states: BI
+    # Jan 29 12:53:17 dogma spamd[18518]: spamd: handled cleanup of child pid 13101 due to SIGCHLD
+    # Jan 29 12:53:17 dogma spamd[18518]: prefork: select returned -1! recovering:
+    #
+    # avoid by setting a boolean in the child_exited() callback and checking
+    # it here.  log $! just in case, though.
+    if ($self->{child_just_exited} && $nfound == -1) {
+      dbg("prefork: select returned -1 due to child exiting, ignored ($selerr)");
+      return;
+    }
+
+    warn "prefork: select returned ".
+            (defined $nfound ? $nfound : "undef").
+            "! recovering: $selerr\n";
+
     sleep 1;        # avoid overload
     return;
   }
@@ -213,7 +256,7 @@ sub main_server_poll {
   # errors on the handle?
   # return them immediately, they may be from a SIGHUP restart signal
   if (vec ($eout, $self->{server_fileno}, 1)) {
-    warn "prefork: select returned error on server filehandle: $!\n";
+    warn "prefork: select returned error on server filehandle: $selerr $!\n";
     return;
   }
 
@@ -282,7 +325,7 @@ sub main_ping_kids {
 
   my ($sock, $kid);
   while (($kid, $sock) = each %{$self->{backchannel}->{kids}}) {
-    $self->syswrite_with_retry($sock, PF_PING_ORDER) and next;
+    $self->syswrite_with_retry($sock, PF_PING_ORDER, $kid, 3) and next;
 
     warn "prefork: write of ping failed to $kid fd=".$sock->fileno.": ".$!;
 
@@ -353,7 +396,7 @@ sub order_idle_child_to_accept {
       return $self->order_idle_child_to_accept();
     }
 
-    if (!$self->syswrite_with_retry($sock, PF_ACCEPT_ORDER))
+    if (!$self->syswrite_with_retry($sock, PF_ACCEPT_ORDER, $kid))
     {
       # failure to write to the child; bad news.  call it dead
       warn "prefork: killing rogue child $kid, failed to write on fd ".$sock->fileno.": $!\n";
@@ -396,7 +439,7 @@ sub child_now_ready_to_accept {
   my ($self, $kid) = @_;
   if ($self->{waiting_for_idle_child}) {
     my $sock = $self->{backchannel}->get_socket_for_child($kid);
-    $self->syswrite_with_retry($sock, PF_ACCEPT_ORDER)
+    $self->syswrite_with_retry($sock, PF_ACCEPT_ORDER, $kid)
         or die "prefork: $kid claimed it was ready, but write failed on fd ".
                             $sock->fileno.": ".$!;
     $self->{waiting_for_idle_child} = 0;
@@ -426,7 +469,7 @@ sub update_child_status_busy {
 sub report_backchannel_socket {
   my ($self, $str) = @_;
   my $sock = $self->{backchannel}->get_parent_socket();
-  $self->syswrite_with_retry($sock, $str)
+  $self->syswrite_with_retry($sock, $str, 'parent')
         or write "syswrite() to parent failed: $!";
 }
 
@@ -537,12 +580,31 @@ retry_read:
 }
 
 sub syswrite_with_retry {
-  my ($self, $sock, $buf) = @_;
+  my ($self, $sock, $buf, $targetname, $numretries) = @_;
+  $numretries ||= 10;       # default 10 retries
 
   my $written = 0;
+  my $try = 0;
 
 retry_write:
+
+  $try++;
+  if ($try > 1) {
+    warn "prefork: syswrite(".$sock->fileno.") to $targetname failed on try $try";
+    if ($try > $numretries) {
+      warn "prefork: giving up";
+      return undef;
+    }
+    else {
+      # give it 1 second to recover.  we retry indefinitely.
+      my $rout = '';
+      vec($rout, $sock->fileno, 1) = 1;
+      select(undef, $rout, undef, 1);
+    }
+  }
+
   my $nbytes = $sock->syswrite($buf);
+
   if (!defined $nbytes) {
     unless ((exists &Errno::EAGAIN && $! == &Errno::EAGAIN)
         || (exists &Errno::EWOULDBLOCK && $! == &Errno::EWOULDBLOCK))
@@ -551,13 +613,7 @@ retry_write:
       return undef;
     }
 
-    warn "prefork: syswrite(".$sock->fileno.") failed, retrying...";
-
-    # give it 5 seconds to recover.  we retry indefinitely.
-    my $rout = '';
-    vec($rout, $sock->fileno, 1) = 1;
-    select(undef, $rout, undef, 5);
-
+    warn "prefork: retrying syswrite(): $!";
     goto retry_write;
   }
   else {
@@ -568,7 +624,8 @@ retry_write:
       return $written;      # it's complete, we can return
     }
     else {
-      warn "prefork: partial write of $nbytes, towrite=".length($buf).
+      warn "prefork: partial write of $nbytes to ".
+            $targetname.", towrite=".length($buf).
             " sofar=".$written." fd=".$sock->fileno.", recovering";
       goto retry_write;
     }

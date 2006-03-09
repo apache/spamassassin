@@ -142,7 +142,7 @@ sub log_message {
 
   if ($level eq "error") {
     # don't log alarm timeouts or broken pipes of various plugins' network checks
-    return if ($message[0] =~ /__(?:alarm|brokenpipe)__ignore__/);
+    return if ($message[0] =~ /__ignore__/);
 
     # dos: we can safely ignore any die's that we eval'd in our own modules so
     # don't log them -- this is caller 0, the use'ing package is 1, the eval is 2
