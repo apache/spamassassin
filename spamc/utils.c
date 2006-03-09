@@ -67,6 +67,33 @@ static void catch_alrm(int x)
 }
 #endif
 
+int timeout_connect (int sockfd, const struct sockaddr *serv_addr, size_t addrlen)
+{
+    int ret;
+
+#ifndef _WIN32
+    sigfunc* sig;
+
+    sig = sig_catch(SIGALRM, catch_alrm);
+    if (libspamc_timeout > 0) {
+      alarm(libspamc_timeout);
+    }
+#endif
+
+    ret = connect(sockfd, serv_addr, addrlen);
+
+#ifndef _WIN32
+    if (libspamc_timeout > 0) {
+      alarm(0);
+    }
+  
+    /* restore old signal handler */
+    sig_catch(SIGALRM, sig);
+#endif
+  
+    return ret;
+}
+
 int fd_timeout_read(int fd, char fdflag, void *buf, size_t nbytes)
 {
     int nred;

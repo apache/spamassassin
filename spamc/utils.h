@@ -20,6 +20,8 @@
 
 #define UNUSED_VARIABLE(v)	((void)(v))
 
+#include <stddef.h>
+
 extern int libspamc_timeout;	/* default timeout in seconds */
 
 #ifdef SPAMC_SSL
@@ -87,6 +89,9 @@ typedef int SSL_METHOD;
 
 int fd_timeout_read(int fd, char fdflag, void *, size_t);
 int ssl_timeout_read(SSL * ssl, void *, int);
+
+/* uses size_t instead of socket_t because socket_t not defined on some platforms */
+int timeout_connect (int sockfd, const struct sockaddr *serv_addr, size_t addrlen);
 
 /* these are fd-only, no SSL support */
 int full_read(int fd, char fdflag, void *buf, int min, int len);
