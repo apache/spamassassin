@@ -1073,6 +1073,10 @@ sub lint_check_dir {
     LOCAL_STATE_DIR     => $LOCAL_STATE_DIR,
   });
 
+  # need to kluge disabling bayes since it may try to expire the DB, and
+  # without the proper config it's not going to be good.
+  $spamtest->{conf}->{use_bayes} = 0;
+
   my $res = $spamtest->lint_rules();
   $spamtest->finish();
 
