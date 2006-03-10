@@ -158,7 +158,9 @@ fi
 
 # clean up 4-day-old (and older) update tarballs.  This seems as
 # good a place as any to do this!
-#find $stagedir -mtime +4 -type f -name '*.tar.*' | xargs rm
+# note: for manual updates, the file permissions should be 0444 so let's clean
+# out only 0644 (automatic) updates.  a bit of a kluge, but ...
+find $stagedir -mtime +4 -perm 0644 -type f -name '*.tar.*' | xargs rm
 
 }
 
