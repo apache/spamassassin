@@ -27,8 +27,10 @@ Mail::SpamAssassin::PerMsgStatus - per-message status (spam or not-spam)
   my $mail = $spamtest->parse();
 
   my $status = $spamtest->check ($mail);
+
+  my $rewritten_mail;
   if ($status->is_spam()) {
-    $status->rewrite_mail ();
+    $rewritten_mail = $status->rewrite_mail ();
   }
   ...
 
