@@ -54,6 +54,11 @@ my @ATT_KEYS = (
   'DEFRULESDIR',      # A synonym for 'DATADIR'.
   'LOCALRULESDIR',    # " "       "   'CONFDIR'.
 
+  'LOCALSTATEDIR',    # normally determined based on $*PREFIX.
+  'PERLLOCALSTATEDIR',
+  'SITELOCALSTATEDIR',
+  'VENDORLOCALSTATEDIR',
+
   'PERL_BIN',         # Sets the Perl interpreter used by the scripts.
   'PERL_VERSION',     # Some parts in SpamAssassin were dependant on the version
   'PERL_WARN',        # Can be used to disable warnings in the scripts
@@ -142,7 +147,7 @@ foreach my $key (@ATT_KEYS) {
 
 # Gather the rules files in the range 00-69; we do this in perl because it's more portable
 my @datafiles = map { s,^rules/,,; $_ } (<rules/*.cf>);
-my $datafiles = join(' ', (grep { /^[0-6][0-9]_/ } @datafiles), qw(user_prefs.template triplets.txt languages));
+my $datafiles = join(' ', (grep { /^(?:[0-6][0-9]|72)_/ } @datafiles), qw(user_prefs.template triplets.txt languages sa-update-pubkey.txt));
 
 
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
@@ -594,6 +599,49 @@ sub _set_macro_SYSCONFDIR {
   );
 }
 
+# This routine determines the correct LOCALSTATEDIR to use for the given
+# repository.
+#
+# The first parameter must be one value from @REPOSITORIES.
+#
+# *LOCALSTATEDIR can be overwritten with:
+#   *LOCALSTATEDIR
+#   LOCALSTATEDIR
+# If none of those is specified, it will chose an FHS-compliant dir
+# based on the corresponding *PREFIX:
+#   *PREFIX     *LOCALSTATEDIR
+#   /usr        /etc
+#   /usr/local  /etc
+#   /opt/*      /etc/opt
+#   /foo/*      /foo/*/etc
+sub _set_macro_LOCALSTATEDIR {
+  my($repository) = (@_);
+
+  my($macro);
+  $macro = $repository . "LOCALSTATEDIR";
+
+  # Is this macro already set?
+  return if get_macro($macro);
+
+  # Is this macro supposed to be overwritten?
+  if (get_macro('LOCALSTATEDIR')) {
+    set_macro($macro, macro_ref('LOCALSTATEDIR'));
+    return;
+  }
+
+  my($rprefix);
+  $rprefix = get_expanded_macro("${repository}PREFIX");
+
+  # Set the default, depending on the corresponding full PREFIX
+  set_macro($macro,
+    ($rprefix =~ m{^$})                ? ''         :
+    ($rprefix =~ m{^/usr(/local)?/?$}) ? '/var/lib' :
+    ($rprefix =~ m{^/opt(/|$)})        ? '/var/opt' :
+    macro_ref("${repository}PREFIX") . '/var'
+  );
+}
+
+
 # This routine determines the correct INSTALLDATADIR (aka DEFRULESDIR)
 # to use for the given repository.
 #
@@ -888,10 +936,12 @@ sub MY::constants {
   # Add some additional target dirs
   {
     set_macro('SYSCONFDIR', "") unless get_macro('SYSCONFDIR');
+    set_macro('LOCALSTATEDIR', "") unless get_macro('LOCALSTATEDIR');
 
     # Determine the correct settings for each repository...
     foreach my $r (@REPOSITORIES) {
       _set_macro_SYSCONFDIR($r);
+      _set_macro_LOCALSTATEDIR($r);
       _set_macro_DATADIR($r);
       _set_macro_CONFDIR($r);
     }
@@ -902,6 +952,13 @@ sub MY::constants {
     push(@code, macro_def('SYSCONFDIR'));
     foreach my $r (@REPOSITORIES) {
       push(@code, macro_def($r . 'SYSCONFDIR'));
+    }
+
+    push(@code, qq{});
+    push(@code, qq{# Where to install local state files});
+    push(@code, macro_def('LOCALSTATEDIR'));
+    foreach my $r (@REPOSITORIES) {
+      push(@code, macro_def($r . 'LOCALSTATEDIR'));
     }
 
     foreach my $m (qw(DATA CONF)) {
@@ -953,7 +1010,7 @@ sub MY::constants {
     $repository = uc($SELF->{INSTALLDIRS}) || 'SITE';
 
     # For these the install paths are needed only.
-    foreach my $macro (qw(PREFIX SYSCONFDIR)) {
+    foreach my $macro (qw(PREFIX SYSCONFDIR LOCALSTATEDIR)) {
       push(@code, macro_def('I_' . $macro,
                     macro_ref($repository . $macro)));
     }
@@ -1014,6 +1071,7 @@ FIXVARS		= -Mvars \
 		  -DPREFIX="$(I_PREFIX)" \
 		  -DDEF_RULES_DIR="$(I_DATADIR)" \
 		  -DLOCAL_RULES_DIR="$(I_CONFDIR)" \
+                  -DLOCAL_STATE_DIR="$(I_LOCALSTATEDIR)" \
 		  -DINSTALLSITELIB="$(I_LIBDIR)" \
 		  -DCONTACT_ADDRESS="$(CONTACT_ADDRESS)"
 

@@ -1525,11 +1525,7 @@ sub word_is_in_dictionary {
   return 1 if ($word_len < 3);
 
   if (!$triplets_loaded) {
-    # take a copy to avoid modifying the real one
-    my @default_triplets_path = @Mail::SpamAssassin::default_rules_path;
-    @default_triplets_path = map { s,$,/triplets.txt,; $_; }
-				    @default_triplets_path;
-    my $filename = $self->{main}->first_existing_path (@default_triplets_path);
+    my $filename = $self->{main}->find_rule_support_file('triplets.txt');
 
     if (!defined $filename) {
       dbg("eval: failed to locate the triplets.txt file");
