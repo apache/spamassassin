@@ -1704,7 +1704,7 @@ Example: http://chkpt.zdnet.com/chkpt/whatever/spammer.domain/yo/dude
       $pattern = qr/$pattern/;
 
       push @{$self->{main}->{conf}->{redirector_patterns}}, $pattern;
-      dbg("config: adding redirector regex: " . $value);
+      # dbg("config: adding redirector regex: " . $value);
     }
   });
 
