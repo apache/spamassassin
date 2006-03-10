@@ -1487,7 +1487,7 @@ Find a rule-support file, such as C<languages> or C<triplets.txt>,
 in the system-wide rules directory, and return its full path if
 it exists.
 
-(This API was added in SpamAssassin 3.2.0.)
+(This API was added in SpamAssassin 3.1.1.)
 
 =cut
 
