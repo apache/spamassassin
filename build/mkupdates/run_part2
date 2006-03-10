@@ -158,7 +158,7 @@ fi
 
 # clean up 4-day-old (and older) update tarballs.  This seems as
 # good a place as any to do this!
-find $stagedir -mtime +4 -type f -name '*.tar.*' | xargs rm
+#find $stagedir -mtime +4 -type f -name '*.tar.*' | xargs rm
 
 }
 
