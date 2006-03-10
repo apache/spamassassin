@@ -25,7 +25,7 @@ Mail::SpamAssassin - Spam detector and markup engine
   my $status = $spamtest->check($mail);
 
   if ($status->is_spam()) {
-    $mail = $status->rewrite_mail();
+    $message = $status->rewrite_mail();
   }
   else {
     ...
