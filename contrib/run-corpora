@@ -144,7 +144,7 @@ if [ -f "$SA_VER/masses/svninfo.tmp" ]; then
   fi
 fi
 
-if ! $RSYNC -uaqrC --exclude masses/spamassassin/ --delete rsync.spamassassin.org::tagged_builds/nightly_mass_check/ $SA_VER; then
+if ! $RSYNC -uaqrC --exclude masses/spamassassin/ --delete rsync.spamassassin.org::tagged_builds/${VERS}_mass_check/ $SA_VER; then
   echo "Couldn't rsync update the $VERS spamassassin corpora code" >&2
   exit 2
 fi
