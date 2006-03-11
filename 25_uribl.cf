@@ -33,11 +33,17 @@ ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
 # normal DNSBL lookups.
 uridnsbl_timeout	2
 
+###########################################################################
+## SBL
+
 uridnsbl	URIBL_SBL	sbl.spamhaus.org.	TXT
 body		URIBL_SBL	eval:check_uridnsbl('URIBL_SBL')
 describe	URIBL_SBL	Contains an URL listed in the SBL blocklist
 tflags		URIBL_SBL	net
 #reuse		URIBL_SBL
+
+###########################################################################
+## SURBL
 
 urirhssub	URIBL_SC_SURBL	multi.surbl.org.	A   2
 body		URIBL_SC_SURBL	eval:check_uridnsbl('URIBL_SC_SURBL')
@@ -74,6 +80,30 @@ body		URIBL_JP_SURBL	eval:check_uridnsbl('URIBL_JP_SURBL')
 describe	URIBL_JP_SURBL	Contains an URL listed in the JP SURBL blocklist
 tflags		URIBL_JP_SURBL	net
 #reuse		URIBL_JP_SURBL
+
+###########################################################################
+## URIBL
+
+urirhssub	URIBL_BLACK	multi.uribl.com.        A   2
+body		URIBL_BLACK	eval:check_uridnsbl('URIBL_BLACK')
+describe	URIBL_BLACK	Contains an URL listed in the URIBL blacklist
+tflags		URIBL_BLACK	net
+#reuse		URIBL_BLACK
+
+urirhssub	URIBL_GREY	multi.uribl.com.        A   4
+body		URIBL_GREY	eval:check_uridnsbl('URIBL_GREY')
+describe	URIBL_GREY	Contains an URL listed in the URIBL greylist
+tflags		URIBL_GREY	net
+#reuse		URIBL_GREY
+
+urirhssub	URIBL_RED	multi.uribl.com.        A   8
+body		URIBL_RED	eval:check_uridnsbl('URIBL_RED')
+describe	URIBL_RED	Contains an URL listed in the URIBL redlist
+tflags		URIBL_RED	net
+#reuse		URIBL_RED
+
+###########################################################################
+## DOMAINS TO SKIP (KNOWN GOOD)
 
 # Don't bother looking for example domains as per RFC 2606.
 uridnsbl_skip_domain example.com example.net example.org
