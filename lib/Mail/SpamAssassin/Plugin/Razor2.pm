@@ -46,6 +46,7 @@ package Mail::SpamAssassin::Plugin::Razor2;
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Timeout;
 use strict;
 use warnings;
 use bytes;
