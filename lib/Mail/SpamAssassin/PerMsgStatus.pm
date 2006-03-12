@@ -1703,6 +1703,9 @@ sub do_head_tests {
   my $evalstr = $self->start_rules_plugin_code("header");
   my $evalstr2 = '';
 
+  # hash to hold the rules, "header\tdefault value" => rulename
+  my %ordered = ();
+
   while (my($rulename, $rule) = each %{$self->{conf}{head_tests}->{$priority}}) {
     my $def = '';
     my ($hdrname, $testtype, $pat) =
@@ -1719,12 +1722,7 @@ sub do_head_tests {
     $hdrname =~ s/#/[HASH]/g;                # avoid probs with eval below
     $def =~ s/#/[HASH]/g;
 
-    $evalstr .= '
-      if ($self->{conf}->{scores}->{q#'.$rulename.'#}) {
-         '.$rulename.'_head_test($self, $_); # no need for OO calling here (its faster this way)
-         '.$self->ran_rule_plugin_code($rulename, "header").'
-      }
-    ';
+    push(@{$ordered{"$hdrname\t$def"}}, $rulename);
 
     if ($doing_user_rules) {
       next if (!$self->is_user_rule_sub ($rulename.'_head_test'));
@@ -1732,10 +1730,8 @@ sub do_head_tests {
 
     $evalstr2 .= '
       sub '.$rulename.'_head_test {
-        my $self = shift;
-        $_ = shift;
+        my($self,$text) = @_;
         '.$self->hash_line_for_rule($rulename).'
-        my $text = $self->get(q#'.$hdrname.'#, q#'.$def.'#);
         while ($text '.$testtype.'~ '.$pat.'g) {
           $self->got_hit (q#'.$rulename.'#, q{});
           '. $self->hit_rule_plugin_code($rulename, "header") . '
@@ -1744,6 +1740,20 @@ sub do_head_tests {
         }
       }';
 
+  }
+
+  # setup the function to run the rules
+  while(my($k,$v) = each %ordered) {
+    my($hdrname, $def) = split(/\t/, $k, 2);
+    $evalstr .= ' $hval = $self->get(q#'.$hdrname.'#, q#'.$def.'#);';
+    foreach my $rulename (@{$v}) {
+      $evalstr .= '
+      if ($self->{conf}->{scores}->{q#'.$rulename.'#}) {
+         '.$rulename.'_head_test($self, $hval); # no need for OO calling here (its faster this way)
+         '.$self->ran_rule_plugin_code($rulename, "header").'
+      }
+      ';
+    }
   }
 
   # clear out a previous version of this fn, if already defined
@@ -1761,6 +1771,7 @@ sub do_head_tests {
 
     sub _head_tests_$clean_priority {
         my (\$self) = \@_;
+        my \$hval;
 
         $evalstr;
     }
