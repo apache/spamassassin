@@ -42,7 +42,7 @@ describe NORMAL_HTTP_TO_IP	Uses a dotted-decimal IP address in URL
 # Theo sez:
 # Have gotten FPs off this, and whitespace can't be in the host, so...
 # %    Visit my homepage: http://i.like.foo.com %
-uri HTTP_ESCAPED_HOST		/^https?\:\/\/[^\/\s]*%[0-9a-fA-F][0-9a-fA-F]/
+uri HTTP_ESCAPED_HOST		/^https?\:\/\/[^\/\s\?\']*%[0-9a-fA-F][0-9a-fA-F]/
 describe HTTP_ESCAPED_HOST	Uses %-escapes inside a URL's hostname
 
 # note: do not match \r or \n
