@@ -22,8 +22,6 @@
 #
 ###########################################################################
 
-require_version @@VERSION@@
-
 header HEAD_LONG		eval:check_msg_parse_flags('truncated_header')
 describe HEAD_LONG		Message headers are very long
 

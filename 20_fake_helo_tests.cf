@@ -24,10 +24,6 @@
 #
 ###########################################################################
 
-require_version @@VERSION@@
-
-###########################################################################
-
 header FAKE_HELO_MSN		eval:check_for_rdns_helo_mismatch("msn\.com","msn\.com")
 describe FAKE_HELO_MSN		Host HELO did not match rDNS: msn.com
 header FAKE_HELO_MAIL_COM	eval:check_for_rdns_helo_mismatch("mail\.com","mail\.com")

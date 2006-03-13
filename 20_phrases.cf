@@ -26,10 +26,6 @@
 #
 ###########################################################################
 
-require_version @@VERSION@@
-
-###########################################################################
-
 # bug 1022: MGM_POSTCARD #2 original
 body REMOVE_POSTAL		/(?:Send(?:ing)? a (?:postal mail|postcard) to (?:Unsubscribe|Customer ?Service|remove)|unsubscribe by (?:postal mail|postcard))/i
 describe REMOVE_POSTAL		Send real mail to be unsubscribed

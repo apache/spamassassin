@@ -23,8 +23,6 @@
 ###########################################################################
 # Header compensation tests
 
-require_version @@VERSION@@
-
 # The message was never sent via an untrustworthy host.
 header ALL_TRUSTED      eval:check_all_trusted()
 describe ALL_TRUSTED    Passed through trusted hosts only via SMTP
