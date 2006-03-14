@@ -22,120 +22,157 @@
 # 2006/03/13
 # 0.176   0.2222   0.0000    1.000   0.67    1.00  DEAR_WINNER
 body DEAR_WINNER		/\bdear.{1,20}winner/i
-score DEAR_WINNER		2.0
 
 # 2006/03/13
 # 0.233   0.2935   0.0000    1.000   0.70    1.00  DRUGS_HDIA
 header DRUGS_HDIA		Subject =~ /\bhoodia\b/i
-score DRUGS_HDIA		2.0
-
-# 2006/03/13
-# 0.123   0.1549   0.0000    1.000   0.64    1.00  FUZZY_MERIDIA
-ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-body FUZZY_MERIDIA		/<inter W3><post P2>\b(?!meridia)<M><E><R><I><D><I><A>\b/i
-score FUZZY_MERIDIA		2.0
-replace_rules FUZZY_MERIDIA
-endif
 
 # 2006/03/13
 # 0.609   0.7682   0.0011    0.999   0.81    1.00  HS_EXTRA
 uri HS_EXTRA			m'/extra(?:$|[/\#?])'
 describe HS_EXTRA		Link contains common spam pattern: '/extra/'
-score HS_EXTRA			1.2
 
 # 2006/03/13
 # 0.737   0.9309   0.0000    1.000   0.82    1.00  HS_GETMEOFF
 uri HS_GETMEOFF			m'/get(?:me)?off\.php(?:$|[\#?])'
 describe HS_GETMEOFF		Links to common unsubscribe script: 'getmeoff.php'
-score HS_GETMEOFF		2.0
 
 # 2006/03/13
 # 0.261   0.3299   0.0000    1.000   0.71    1.00 HS_SUBJ_ONLINE_PHARMACEUTICAL
 header HS_SUBJ_ONLINE_PHARMACEUTICAL	Subject =~ /\bOnline Pharmaceutical/i
 describe HS_SUBJ_ONLINE_PHARMACEUTICAL	Subject contains the phrase 'Online pharmaceutical'
-score HS_SUBJ_ONLINE_PHARMACEUTICAL	2.0
 
 # 2006/03/13
 # 1.112   1.4041   0.0000    1.000   0.86    1.00  KAM_STOCKOTC
 # was: /(OTC|OTCBB|OTC Pink Sheets):/is
 body KAM_STOCKOTC		/OTC(?:BB| Pink Sheets)?:/i
-score KAM_STOCKOTC		1.0
 
 # 2006/03/13
 # 0.500   0.6316   0.0011    0.998   0.79    1.00  SUBJ_RE_NUM
 meta SUBJ_RE_NUM		!__THEBAT_MUA && __SUBJ_RE_NUM
 describe SUBJ_RE_NUM		Subject is faking 'The Bat!' responses
-score SUBJ_RE_NUM		1.2
 header __SUBJ_RE_NUM		Subject =~ /^\s*Re\[\d+\]:/i
 
 # 2006/03/13
 # 1.648   2.0784   0.0077    0.996   0.88    1.00  TVD_ACT_193
 body TVD_ACT_193		/\bact of (?:193|nineteen thirty)/i
-score TVD_ACT_193		2.0
 
 # 2006/03/13
 # 0.316   0.3996   0.0000    1.000   0.73    1.00  TVD_DEAR_HOMEOWNER
 body TVD_DEAR_HOMEOWNER		/^dear homeowner/i
-score TVD_DEAR_HOMEOWNER	2.0
 
 # 2006/03/13
 # 0.139   0.1757   0.0011    0.994   0.65    1.00  TVD_DOLLARS_US
 body TVD_DOLLARS_US		/\s\d[\d.,]+US/
-score TVD_DOLLARS_US		1.2
 
 # 2006/03/13
 # 0.122   0.1543   0.0000    1.000   0.64    1.00  TVD_EB_PHISH
 header __FROM_EBAY		From:addr =~ /\@ebay\.com$/i
 meta TVD_EB_PHISH		__FROM_EBAY && NORMAL_HTTP_TO_IP
-score TVD_EB_PHISH		2.0
+
+# 2006/03/13
+# 0.297   0.3750   0.0000    1.000   0.72    1.00  TVD_FW_MESG2
+# 0.196   0.2479   0.0000    1.000   0.68    1.00  TVD_FW_MESG1
+body TVD_FW_MESG1		/^-+ Original Message -+ From: (?:\w+ )+To: \S+ (?:Sent|Date):.{1,60}Subject: \w+\s*$/
+body TVD_FW_MESG2		/^-- Best Regards, \w+ \w+\s+mailto:/
+
+# 2006/03/13
+# 0.091   0.1144   0.0011    0.990   0.61    1.00  TVD_HEAD_EDITION
+header TVD_HEAD_EDITION		exists:X-Edition
+
+# 2006/03/13
+# 0.091   0.1144   0.0000    1.000   0.61    1.00  TVD_HEAD_USR
+header TVD_HEAD_USR		exists:X-Usr
+
+# 2006/03/13
+# 0.327   0.4134   0.0000    1.000   0.74    1.00  TVD_INCREASE_SIZE
+body TVD_INCREASE_SIZE		/\bsize of .{1,20}(?:penis|dick|manhood)/i
+
+# 2006/03/13
+# 0.107   0.1349   0.0000    1.000   0.63    1.00  TVD_NOT_SATISFIED
+body TVD_NOT_SATISFIED		/not satisfied .{1,32}(?:lover|size)/i
+
+# 2006/03/13
+# 0.810   1.0225   0.0000    1.000   0.83    1.00  TVD_SECTION
+body TVD_SECTION		/\bSection (?:27A|21B)/i
+
+# 2006/03/13
+# 0.222   0.2797   0.0022    0.992   0.69    1.00  TVD_SUBJ_ACC_NUM
+header TVD_SUBJ_ACC_NUM		Subject =~ /\b[a-zA-Z]+ [\#\s]{1,4}\d+[A-Z]+/
+describe TVD_SUBJ_ACC_NUM	Subject has spammy looking monetary reference
+
+# 2006/03/13
+# 0.094   0.1190   0.0000    1.000   0.62    1.00  TVD_SUBJ_APPR_LOAN
+header TVD_SUBJ_APPR_LOAN	Subject =~ /approved? .{0,20}loan/i
+
+# 2006/03/13
+# 0.317   0.4004   0.0000    1.000   0.73    1.00  TVD_SUBJ_OWE
+header TVD_SUBJ_OWE		Subject =~ /^\s*(?:\w+\s+)+you\s+(?:\w+\s+)*(?:owe|indebted)\s+(?:\w+\s+)+an\s*other/i
+
+# 2006/03/13
+# 0.106   0.1341   0.0000    1.000   0.63    1.00  TVD_SUBJ_WIPE_DEBT
+header TVD_SUBJ_WIPE_DEBT	Subject =~ /(?:wipe out|remove|get (?:rid|out) of|eradicate) .{0,20}(?:owe|debt|obligation)/i
+
+# 2006/03/13
+# 0.199   0.2505   0.0022    0.991   0.68    1.00  TVD_UNDER_VALUED
+body TVD_UNDER_VALUED		/(?:company|stock) .{1,20}under-?valued/i
+
+# 2006/03/13
+# 0.236   0.2976   0.0000    1.000   0.70    1.00  VERTICAL_DRUGS_1
+body VERTICAL_DRUGS_1		/(?!A A A A A|V V V V V|C C C C C|X X X X X|P P P P P)(?:[AVCXVP] ){4}[AVCXP]/
+describe VERTICAL_DRUGS_1	Looks like drug names spelled vertically
+
+# 2006/03/13
+# 2.036   2.5693   0.0022    0.999   0.90    0.01  NULL_IN_BODY
+full NULL_IN_BODY       /\x00/
+describe NULL_IN_BODY	Message has NUL (ASCII 0) byte in message
+
+
+###########################################################################
+# ReplaceTags rules
+
+ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
+
+# 2006/03/13
+# 0.123   0.1549   0.0000    1.000   0.64    1.00  FUZZY_MERIDIA
+body FUZZY_MERIDIA		/<inter W3><post P2>\b(?!meridia)<M><E><R><I><D><I><A>\b/i
+replace_rules FUZZY_MERIDIA
 
 # 2006/03/13
 # 0.239   0.3022   0.0000    1.000   0.70    1.00  TVD_FUZZY_FINANCE
-ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 body TVD_FUZZY_FINANCE		/(?!finance)<F><I><N><A><N><C><E>/i
-score TVD_FUZZY_FINANCE		2.0
 replace_rules TVD_FUZZY_FINANCE
-endif
 
 # 2006/03/13
 # 0.134   0.1687   0.0000    1.000   0.65    1.00  TVD_FUZZY_FIXED_RATE
-ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 body TVD_FUZZY_FIXED_RATE	/<inter W2><post P2>(?!fixed rate)<F><I><X><E><D>\s+<R><A><T><E>/i
-score TVD_FUZZY_FIXED_RATE	2.0
 replace_rules TVD_FUZZY_FIXED_RATE
-endif
 
 # 2006/03/13
 # 0.368   0.4640   0.0000    1.000   0.75    1.00  TVD_FUZZY_MICROCAP
-ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 body TVD_FUZZY_MICROCAP		/<inter W2><post P2>(?!microcap)(?!micro-cap)<M><I><C><R><O>-?<C><A><P>/i
-score TVD_FUZZY_MICROCAP	2.2
 replace_rules TVD_FUZZY_MICROCAP
-endif
 
 # 2006/03/13
 # 0.133   0.1676   0.0000    1.000   0.64    1.00  TVD_FUZZY_PHARMACEUTICAL
-ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 body TVD_FUZZY_PHARMACEUTICAL	/<inter W2><post P2>(?!pharmaceutical)<P><H><A><R><M><A><C><E><U><T><I><C><A><L>/i
-score TVD_FUZZY_PHARMACEUTICAL	2.0
 replace_rules TVD_FUZZY_PHARMACEUTICAL
-endif
 
 # 2006/03/13
 # 2.028   2.5563   0.0154    0.994   0.88    1.00  TVD_FUZZY_SECURITIES
-ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 body TVD_FUZZY_SECURITIES	/<inter W2><post P2>(?!securities)<S><E><C><U><R><I><T><I><E><S>/i
-score TVD_FUZZY_SECURITIES	1.8
 replace_rules TVD_FUZZY_SECURITIES
-endif
 
 # 2006/03/13
 # 1.692   2.1330   0.0121    0.994   0.87    1.00  TVD_FUZZY_SYMBOL
-ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 body TVD_FUZZY_SYMBOL		/<inter W2><post P2>(?!symbol)<S><Y><M><B><O><L>/i
-score TVD_FUZZY_SYMBOL		1.8
 replace_rules TVD_FUZZY_SYMBOL
+
 endif
+
+
+###########################################################################
+# MIMEHeader Rules
 
 # 2006/03/13
 # 3.303   4.1687   0.0044    0.999   0.93    1.00  TVD_FW_GRAPHIC_ID1
@@ -144,82 +181,60 @@ endif
 # 0.421   0.5304   0.0033    0.994   0.76    0.01  TVD_FW_GRAPHIC_NAME_MID
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader 
 mimeheader TVD_FW_GRAPHIC_ID1		Content-Id =~ /<[0-9a-f]{12}(?:\$[0-9a-f]{8}){2}\@/
-score TVD_FW_GRAPHIC_ID1		2.8
 mimeheader TVD_FW_GRAPHIC_ID2		Content-Id =~ /<(?:[0-9A-F]{8}\.){3}[0-9A-F]{8}/
-score TVD_FW_GRAPHIC_ID2		2.2
 mimeheader TVD_FW_GRAPHIC_NAME_LONG	Content-Type =~ /\bname="[a-z]{8,}\.gif/
-score TVD_FW_GRAPHIC_NAME_LONG		1.8
 mimeheader TVD_FW_GRAPHIC_NAME_MID	Content-Type =~ /\bname="[a-z]{6,7}\.gif/
-score TVD_FW_GRAPHIC_NAME_MID		1.2
 endif
 
-# 2006/03/13
-# 0.297   0.3750   0.0000    1.000   0.72    1.00  TVD_FW_MESG2
-# 0.196   0.2479   0.0000    1.000   0.68    1.00  TVD_FW_MESG1
-body TVD_FW_MESG1		/^-+ Original Message -+ From: (?:\w+ )+To: \S+ (?:Sent|Date):.{1,60}Subject: \w+\s*$/
-score TVD_FW_MESG1		2.0
-body TVD_FW_MESG2		/^-- Best Regards, \w+ \w+\s+mailto:/
-score TVD_FW_MESG2		2.0
 
-# 2006/03/13
-# 0.091   0.1144   0.0011    0.990   0.61    1.00  TVD_HEAD_EDITION
-header TVD_HEAD_EDITION		exists:X-Edition
-score TVD_HEAD_EDITION		1.0
+###########################################################################
+# SCORES
 
-# 2006/03/13
-# 0.091   0.1144   0.0000    1.000   0.61    1.00  TVD_HEAD_USR
-header TVD_HEAD_USR		exists:X-Usr
-score TVD_HEAD_USR		1.0
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader 
+# <gen:mutable>
+score TVD_FW_GRAPHIC_ID1		2.8
+score TVD_FW_GRAPHIC_ID2		2.2
+score TVD_FW_GRAPHIC_NAME_LONG		1.8
+score TVD_FW_GRAPHIC_NAME_MID		1.2
+# </gen:mutable>
+endif
 
-# 2006/03/13
-# 0.327   0.4134   0.0000    1.000   0.74    1.00  TVD_INCREASE_SIZE
-body TVD_INCREASE_SIZE		/\bsize of .{1,20}(?:penis|dick|manhood)/i
-score TVD_INCREASE_SIZE		2.2
+ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
+# <gen:mutable>
+score TVD_FUZZY_FINANCE		2.0
+score TVD_FUZZY_FIXED_RATE	2.0
+score TVD_FUZZY_MICROCAP	2.2
+score TVD_FUZZY_PHARMACEUTICAL	2.0
+score TVD_FUZZY_SECURITIES	1.8
+score TVD_FUZZY_SYMBOL		1.8
+score FUZZY_MERIDIA		2.0
+# </gen:mutable>
+endif
 
-# 2006/03/13
-# 0.107   0.1349   0.0000    1.000   0.63    1.00  TVD_NOT_SATISFIED
-body TVD_NOT_SATISFIED		/not satisfied .{1,32}(?:lover|size)/i
-score TVD_NOT_SATISFIED		2.0
-
-# 2006/03/13
-# 0.810   1.0225   0.0000    1.000   0.83    1.00  TVD_SECTION
-body TVD_SECTION		/\bSection (?:27A|21B)/i
-score TVD_SECTION		2.5
-
-# 2006/03/13
-# 0.222   0.2797   0.0022    0.992   0.69    1.00  TVD_SUBJ_ACC_NUM
-header TVD_SUBJ_ACC_NUM		Subject =~ /\b[a-zA-Z]+ [\#\s]{1,4}\d+[A-Z]+/
-describe TVD_SUBJ_ACC_NUM	Subject has spammy looking monetary reference
+# <gen:mutable>
+score NULL_IN_BODY		2.2
+score HS_EXTRA			1.2
+score DEAR_WINNER		2.0
+score DRUGS_HDIA		2.0
 score TVD_SUBJ_ACC_NUM		1.8
-
-# 2006/03/13
-# 0.094   0.1190   0.0000    1.000   0.62    1.00  TVD_SUBJ_APPR_LOAN
-header TVD_SUBJ_APPR_LOAN	Subject =~ /approved? .{0,20}loan/i
 score TVD_SUBJ_APPR_LOAN	2.0
-
-# 2006/03/13
-# 0.317   0.4004   0.0000    1.000   0.73    1.00  TVD_SUBJ_OWE
-header TVD_SUBJ_OWE		Subject =~ /^\s*(?:\w+\s+)+you\s+(?:\w+\s+)*(?:owe|indebted)\s+(?:\w+\s+)+an\s*other/i
 score TVD_SUBJ_OWE		2.4
-
-# 2006/03/13
-# 0.106   0.1341   0.0000    1.000   0.63    1.00  TVD_SUBJ_WIPE_DEBT
-header TVD_SUBJ_WIPE_DEBT	Subject =~ /(?:wipe out|remove|get (?:rid|out) of|eradicate) .{0,20}(?:owe|debt|obligation)/i
 score TVD_SUBJ_WIPE_DEBT	2.0
-
-# 2006/03/13
-# 0.199   0.2505   0.0022    0.991   0.68    1.00  TVD_UNDER_VALUED
-body TVD_UNDER_VALUED		/(?:company|stock) .{1,20}under-?valued/i
 score TVD_UNDER_VALUED		1.8
-
-# 2006/03/13
-# 0.236   0.2976   0.0000    1.000   0.70    1.00  VERTICAL_DRUGS_1
-body VERTICAL_DRUGS_1		/(?!A A A A A|V V V V V|C C C C C|X X X X X|P P P P P)(?:[AVCXVP] ){4}[AVCXP]/
-describe VERTICAL_DRUGS_1	Looks like drug names spelled vertically
 score VERTICAL_DRUGS_1		2.2
-
-# 2006/03/13
-# 2.036   2.5693   0.0022    0.999   0.90    0.01  NULL_IN_BODY
-full NULL_IN_BODY       /\x00/
-describe NULL_IN_BODY	Message has NUL (ASCII 0) byte in message
-score NULL_IN_BODY	2.2
+score TVD_SECTION		2.5
+score TVD_FW_MESG1		2.0
+score TVD_FW_MESG2		2.0
+score TVD_HEAD_EDITION		1.0
+score TVD_HEAD_USR		1.0
+score TVD_INCREASE_SIZE		2.2
+score TVD_NOT_SATISFIED		2.0
+score HS_GETMEOFF		2.0
+score HS_SUBJ_ONLINE_PHARMACEUTICAL	2.0
+score KAM_STOCKOTC		1.0
+score SUBJ_RE_NUM		1.2
+score TVD_ACT_193		2.0
+score TVD_DEAR_HOMEOWNER	2.0
+score TVD_DOLLARS_US		1.2
+score TVD_EB_PHISH		2.0
+# </gen:mutable>
