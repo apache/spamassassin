@@ -40,5 +40,4 @@ tmp/.created:
 	touch tmp/.created
 
 clean:
-	rm -rf *.o perceptron tmp freqs
-
+	rm -rf *.o perceptron tmp freqs badrules perceptron.scores
