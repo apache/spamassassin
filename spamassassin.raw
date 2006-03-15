@@ -338,7 +338,7 @@ if ( $targets[0] =~ /:mbo?x:-$/ ) {
 }
 
 # Go run the messages!
-eval { $iter->run(@targets); };
+eval { $exitvalue ||= !$iter->run(@targets); };
 
 $progress->final() if ($opt{progress} && $progress);
 
