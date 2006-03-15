@@ -343,6 +343,9 @@ if ( !$opt{nosync} ) {
   $spamtest->rebuild_learner_caches();
 }
 
+# what is the result of the run?  will end up being the exit code.
+my $exit_status = 0;
+
 # run this lot in an eval block, so we can catch die's and clear
 # up the dbs.
 eval {
@@ -403,7 +406,9 @@ eval {
   $init_results = 0;
   $start_time = time;
 
-  eval { $iter->run(@targets); };
+  # if exit_status isn't already set to non-zero, set it to the reverse of the
+  # run result (0 is bad, 1+ is good -- the opposite of exit status codes)
+  eval { $exit_status ||= ! $iter->run(@targets); };
 
   print STDERR "\n" if ($opt{showdots});
   $progress->final() if ($opt{progress} && $progress);
@@ -426,7 +431,7 @@ if ($@) {
 }
 
 $spamtest->finish_learner();
-exit 0;
+exit $exit_status;
 
 ###########################################################################
 
