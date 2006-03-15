@@ -599,7 +599,17 @@ Received: from [206.51.230.145] (helo=t-online.de)
 
   [ ip=206.51.230.145 rdns= helo=t-online.de by=mxeu2.kundenserver.de ident= envfrom= id=0MKpdM-1CkRpr14PF-000608 auth= ]
 
-}
+},
+q{
+
+Received: from Amazon.com ([66.0.37.1])
+        by bi-staff1.beckman.uiuc.edu (8.12.8/8.12.8) with SMTP id k1SCIR87017358;
+        Tue, 28 Feb 2006 06:18:27 -0600
+} => q{
+
+[ ip=66.0.37.1 rdns= helo=Amazon.com by=bi-staff1.beckman.uiuc.edu ident= envfrom= intl=0 id=k1SCIR87017358 auth= ]
+
+},
 );
 
 tstprefs ("add_header all Relays _RELAYSUNTRUSTED_ _RELAYSTRUSTED_\n");
