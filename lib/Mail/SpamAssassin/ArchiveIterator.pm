@@ -1006,7 +1006,7 @@ sub scan_mailbox {
     unless ($count) {
       if (!mail_open($file)) {
         $self->{access_problem} = 1;
-	return;
+	next;
       }
 
       my $start = 0;		# start of a message
@@ -1109,7 +1109,7 @@ sub scan_mbx {
     unless ($count) {
       if (!mail_open($file)) {
 	$self->{access_problem} = 1;
-        return;
+        next;
       }
 
       # check the mailbox is in mbx format
