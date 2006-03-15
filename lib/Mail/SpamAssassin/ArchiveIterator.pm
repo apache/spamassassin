@@ -219,6 +219,8 @@ sub new {
   $self->{s} = [ ];		# spam, of course
   $self->{h} = [ ];		# ham, as if you couldn't guess
 
+  $self->{access_problem} = 0;
+
   $self;
 }
 
@@ -248,6 +250,9 @@ respectively.
 
 The target_paths array is expected to be one element per path in the following
 format: class:format:raw_location
+
+run() returns 0 if there was an error (can't open a file, etc,) and 1 if there
+were no errors.
 
 =over 4
 
@@ -282,7 +287,8 @@ sub run {
   my ($self, @targets) = @_;
 
   if (!defined $self->{wanted_sub}) {
-    die "archive-iterator: set_functions never called";
+    warn "archive-iterator: set_functions never called";
+    return 0;
   }
 
   # non-forking model (generally sa-learn), everything in a single process
@@ -441,6 +447,8 @@ sub run {
     # close tempfile so it will be unlinked
     close($self->{messageh});
   }
+
+  return ! $self->{access_problem};
 }
 
 ############################################################################
@@ -466,7 +474,11 @@ sub run_message {
 sub run_file {
   my ($self, $class, $format, $where, $date) = @_;
 
-  mail_open($where) or return;
+  if (!mail_open($where)) {
+    $self->{access_problem} = 1;
+    return;
+  }
+
   # skip too-big mails
   if (! $self->{opt_all} && -s INPUT > BIG_BYTES) {
     info("archive-iterator: skipping large message\n");
@@ -496,7 +508,10 @@ sub run_mailbox {
   my ($file, $offset) = ($where =~ m/(.*)\.(\d+)$/);
   my @msg;
   my $header;
-  mail_open($file) or return;
+  if (!mail_open($file)) {
+    $self->{access_problem} = 1;
+    return;
+  }
   seek(INPUT,$offset,0);
   while (<INPUT>) {
     last if (substr($_,0,5) eq "From " && @msg);
@@ -529,7 +544,11 @@ sub run_mbx {
   my @msg;
   my $header;
 
-  mail_open($file) or return;
+  if (!mail_open($file)) {
+    $self->{access_problem} = 1;
+    return;
+  }
+
   seek(INPUT, $offset, 0);
     
   while (<INPUT>) {
@@ -921,7 +940,10 @@ sub scan_file {
 
   unless (defined $AICache and $date = $AICache->check($mail)) {
     my $header;
-    mail_open($mail) or return;
+    if (!mail_open($mail)) {
+      $self->{access_problem} = 1;
+      return;
+    }
     while (<INPUT>) {
       last if /^\s*$/;
       $header .= $_;
@@ -944,7 +966,12 @@ sub scan_mailbox {
   if ($folder ne '-' && -d $folder) {
     # passed a directory of mboxes
     $folder =~ s/\/\s*$//; #Remove trailing slash, if there
-    opendir(DIR, $folder) || die "archive-iterator: can't open '$folder' dir: $!\n";
+    if (!opendir(DIR, $folder)) {
+      warn "archive-iterator: can't open '$folder' dir: $!\n";
+      $self->{access_problem} = 1;
+      return;
+    }
+
     while ($_ = readdir(DIR)) {
       if(/^[^\.]\S*$/ && ! -d "$folder/$_") {
 	push(@files, "$folder/$_");
@@ -959,7 +986,9 @@ sub scan_mailbox {
   foreach my $file (@files) {
     $self->bump_scan_progress();
     if ($file =~ /\.(?:gz|bz2)$/) {
-      die "archive-iterator: compressed mbox folders are not supported at this time\n";
+      warn "archive-iterator: compressed mbox folders are not supported at this time\n";
+      $self->{access_problem} = 1;
+      next;
     }
 
     my $info = {};
@@ -975,8 +1004,11 @@ sub scan_mailbox {
     }
 
     unless ($count) {
-      mail_open($file) or return;
-    
+      if (!mail_open($file)) {
+        $self->{access_problem} = 1;
+	return;
+      }
+
       my $start = 0;		# start of a message
       my $where = 0;		# current byte offset
       my $first = '';		# first line of message
@@ -1036,7 +1068,12 @@ sub scan_mbx {
   if ($folder ne '-' && -d $folder) {
     # got passed a directory full of mbx folders.
     $folder =~ s/\/\s*$//; # remove trailing slash, if there is one
-    opendir(DIR, $folder) || die "archive-iterator: can't open '$folder' dir: $!\n";
+    if (!opendir(DIR, $folder)) {
+      warn "archive-iterator: can't open '$folder' dir: $!\n";
+      $self->{access_problem} = 1;
+      return;
+    }
+
     while ($_ = readdir(DIR)) {
       if(/^[^\.]\S*$/ && ! -d "$folder/$_") {
 	push(@files, "$folder/$_");
@@ -1052,7 +1089,9 @@ sub scan_mbx {
     $self->bump_scan_progress();
 
     if ($folder =~ /\.(?:gz|bz2)$/) {
-      die "archive-iterator: compressed mbx folders are not supported at this time\n";
+      warn "archive-iterator: compressed mbx folders are not supported at this time\n";
+      $self->{access_problem} = 1;
+      next;
     }
 
     my $info = {};
@@ -1068,7 +1107,10 @@ sub scan_mbx {
     }
 
     unless ($count) {
-      mail_open($file) or return;
+      if (!mail_open($file)) {
+	$self->{access_problem} = 1;
+        return;
+      }
 
       # check the mailbox is in mbx format
       $fp = <INPUT>;
