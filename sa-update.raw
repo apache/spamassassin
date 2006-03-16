@@ -189,7 +189,6 @@ my $SA = new Mail::SpamAssassin({
   LOCAL_STATE_DIR => $LOCAL_STATE_DIR,
 });
 
-# $opt{'updatedir'} ||= $SA->first_existing_path(@Mail::SpamAssassin::site_rules_path);
 if (defined $opt{'updatedir'}) {
   $opt{'updatedir'} = Mail::SpamAssassin::Util::untaint_file_path($opt{'updatedir'});
 }
