@@ -2990,15 +2990,21 @@ sub check_ratware_name_id {
 sub check_https_ip_mismatch {
   my ($self) = @_;
 
+  my $flag = 0;
+
   while (my($k,$v) = each %{$self->{html}->{uri_detail}}) {
+    next if $flag;
     next if ($k !~ m%^https?:/*(?:[^\@/]+\@)?\d+\.\d+\.\d+\.\d+%i);
     foreach (@{$v->{anchor_text}}) {
       next if (m%^https:/*(?:[^\@/]+\@)?\d+\.\d+\.\d+\.\d+%i);
-      return 1 if (m%https:%i);
+      if (m%https:%i) {
+	$flag = 1;
+	last;
+      }
     }
   }
 
-  return 0;
+  return $flag;
 }
 
 sub check_ratware_envelope_from {
@@ -3025,7 +3031,7 @@ sub check_ratware_envelope_from {
 sub check_iframe_src {
   my ($self) = @_;
 
-  while (my($k,$v) = each %{$self->{html}->{uri_detail}}) {
+  foreach my $v ( values %{$self->{html}->{uri_detail}} ) {
     return 1 if $v->{types}->{iframe};
   }
 
@@ -3043,13 +3049,11 @@ sub check_html_uri_only {
 
   # At this point, we're not actually checking the alternates, just the entire
   # message.
-  my $return = 0;
-  while (my($k,$v) = each %{$self->{html}->{uri_detail}}) {
-    $return = 1; # make sure there's at least 1 URI
-    return 0 if ($v->{types}->{parsed});
+  foreach my $v ( values %{$self->{html}->{uri_detail}} ) {
+    return 0 if (exists $v->{types}->{parsed});
   }
 
-  return $return;
+  return 1;
 }
 
 sub tvd_vertical_words {

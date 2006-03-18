@@ -496,12 +496,10 @@ sub cond_clause_plugin_loaded {
 sub lint_check {
   my ($self) = @_;
   my $conf = $self->{conf};
-  my ($k, $v);
 
-  if ($conf->{lint_rules})
-  {
+  if ($conf->{lint_rules}) {
     # Check for description and score issues in lint fashion
-    while ( ($k,$v) = each %{$conf->{descriptions}} ) {
+    while ( my $k = each %{$conf->{descriptions}} ) {
       if (!exists $conf->{tests}->{$k}) {
         $self->lint_warn("config: warning: description exists for non-existent rule $k\n", $k);
       }
@@ -523,9 +521,8 @@ sub lint_check {
 sub set_default_scores {
   my ($self) = @_;
   my $conf = $self->{conf};
-  my ($k, $v);
 
-  while ( ($k,$v) = each %{$conf->{tests}} ) {
+  while ( my $k = each %{$conf->{tests}} ) {
     if ( ! exists $conf->{scores}->{$k} ) {
       # T_ rules (in a testing probationary period) get low, low scores
       my $set_score = ($k =~/^T_/) ? 0.01 : 1.0;
