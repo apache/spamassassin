@@ -304,12 +304,8 @@ sub rule_file_compile {
 
     s/#.*$//g; s/^\s+//; s/\s+$//;
 
-    # send comments/blank lines to the holding area for next rule
-    # OFF: just drop them.
-    if (/^$/) {
-      # $current_comments .= $orig;
-      next;
-    }
+    # drop comments/blank lines from output
+    next if (/^$/);
 
     # save "lang" declarations
     my $lang = '';
@@ -407,10 +403,6 @@ sub rule_file_compile {
     elsif (/^loadplugin\s*(\S+)\b/) {
       my $name = 'loadplugin_'.$1;
 
-      # if ($issandbox) {       # I think this is now superfluous
-      # $name .= "_sandbox";
-      # }
-
       if (/^loadplugin\s*\S+\s+(\S+)/) {
         my $fname = $1;
         my $fpath = dirname($f)."/".$fname;
@@ -419,9 +411,22 @@ sub rule_file_compile {
           next;
         }
 
+        # If a 'loadplugin' line is found, and the plugin .pm is not listed in
+        # the MANIFEST file, this will mean that the .pm will not be copied
+        # during "make dist".  This causes failures during "make disttest",
+        # since the file does not exist.
+        #
+        # However, we do want to preserve these lines in the 'rules' dir, for
+        # use during development -- without requiring that the .pm's be put
+        # into MANIFEST -- ie. before the plugin is considered release-ready,
+        # ie. sandbox plugins.
+        #
+        # fix: make it a "tryplugin" line instead; these are ignored if the
+        # target file is nonexistent.
+
         if (!filename_in_manifest($opt_out.'/'.$fname)) {
-          warn "$f: WARNING: '$opt_out/$fname' not listed in manifest file, line ignored: $orig";
-          next;     # don't set 'pubfile' below
+          warn "$f: WARNING: '$opt_out/$fname' not listed in manifest file, making 'tryplugin': $orig";
+          $orig =~ s/^\s*loadplugin\b/tryplugin/;
         }
       }
 
@@ -710,7 +715,6 @@ sub write_output_files {
     }
 
     if (!filename_in_manifest($pubfile)) {
-      # if (!filename_in_manifest($opt_out.'/'.$val)) {
       warn "$pubfile: WARNING: not listed in manifest file\n";
     }
 

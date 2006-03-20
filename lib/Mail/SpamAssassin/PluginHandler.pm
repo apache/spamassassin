@@ -73,7 +73,7 @@ sub new {
 ###########################################################################
 
 sub load_plugin {
-  my ($self, $package, $path) = @_;
+  my ($self, $package, $path, $silent) = @_;
 
   my $ret;
   if ($path) {
@@ -102,13 +102,22 @@ sub load_plugin {
   }
 
   if (!$ret) {
-    if ($@) { warn "plugin: failed to parse plugin $path: $@\n"; }
-    elsif ($!) { warn "plugin: failed to load plugin $path: $!\n"; }
+    if ($silent) {
+      if ($@) { dbg("plugin: failed to parse tryplugin $path: $@\n"); }
+      elsif ($!) { dbg("plugin: failed to load tryplugin $path: $!\n"); }
+    }
+    else {
+      if ($@) { warn "plugin: failed to parse plugin $path: $@\n"; }
+      elsif ($!) { warn "plugin: failed to load plugin $path: $!\n"; }
+    }
+    return;           # failure!  no point in continuing here
   }
 
   my $plugin = eval $package.q{->new ($self->{main}); };
 
-  if ($@ || !$plugin) { warn "plugin: failed to create instance of plugin $package: $@\n"; }
+  if ($@ || !$plugin) {
+    warn "plugin: failed to create instance of plugin $package: $@\n";
+  }
 
   # Don't load the same plugin twice!
   foreach my $old_plugin (@{$self->{plugins}}) {

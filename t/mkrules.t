@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("mkrules");
-use Test; BEGIN { plan tests => 85 };
+use Test; BEGIN { plan tests => 86 };
 use File::Path;
 
 # ---------------------------------------------------------------------------
@@ -342,10 +342,10 @@ save_tdir();
   "describe GOOD desc_found"  => rule_line_2,
   "ifplugin Good" => if1,
   "endif" => endif_found,
-  "log/mkrules_t/rulesrc/sandbox/foo/20_foo.cf: WARNING: 'log/mkrules_t/rules/plugin.pm' not listed in manifest file, line ignored: loadplugin Good plugin.pm" => not_found_in_manifest_warning
+  "tryplugin Good plugin.pm" => tryplugin,
+  "log/mkrules_t/rulesrc/sandbox/foo/20_foo.cf: WARNING: 'log/mkrules_t/rules/plugin.pm' not listed in manifest file, making 'tryplugin': loadplugin Good plugin.pm" => not_found_in_manifest_warning
 );
 %anti_patterns = (
-  "describe T_GOOD desc_found"  => rule_line_2,
 );
 
 rmtree([ $tdir ]); mkpath ([ "$tdir/rulesrc/sandbox/foo", "$tdir/rules" ]);
@@ -372,7 +372,7 @@ write_file("$tdir/rulesrc/sandbox/foo/plugin.pm", [
 ok (mkrun ("--src $tdir/rulesrc --out $tdir/rules --manifest $tdir/MANIFEST --manifestskip $tdir/MANIFEST.SKIP --active $tdir/rules/active.list 2>&1", \&patterns_run_cb));
 checkfile("$tdir/rules/72_active.cf", \&patterns_run_cb);
 # checkfile("$tdir/rules/70_sandbox.cf", \&patterns_run_cb);
-# ok (!-f "$tdir/rules/plugin.pm"); # the file is still copied, just never loaded
+ok (-f "$tdir/rules/plugin.pm");
 ok ok_all_patterns();
 save_tdir();
 
