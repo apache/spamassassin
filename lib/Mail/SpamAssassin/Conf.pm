@@ -2573,6 +2573,31 @@ See C<Mail::SpamAssassin::Plugin> for more details on writing plugins.
     }
   });
 
+=item tryplugin PluginModuleName [/path/module.pm]
+
+Same as C<loadplugin>, but silently ignored if the .pm file cannot be found in
+the filesystem.
+
+=cut
+
+  push (@cmds, {
+    setting => 'tryplugin',
+    is_admin => 1,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value eq '') {
+        return $MISSING_REQUIRED_VALUE;
+      }
+      if ($value =~ /^(\S+)\s+(\S+)$/) {
+        $self->load_plugin ($1, $2, 1);
+      } elsif ($value =~ /^(?:\S+)$/) {
+        $self->load_plugin ($value, undef, 1);
+      } else {
+	return $INVALID_VALUE;
+      }
+    }
+  });
+
 =back
 
 =head1 PREPROCESSING OPTIONS
@@ -3158,11 +3183,11 @@ sub maybe_body_only {
 ###########################################################################
 
 sub load_plugin {
-  my ($self, $package, $path) = @_;
+  my ($self, $package, $path, $silent) = @_;
   if ($path) {
     $path = $self->{parser}->fix_path_relative_to_current_file($path);
   }
-  $self->{main}->{plugins}->load_plugin ($package, $path);
+  $self->{main}->{plugins}->load_plugin ($package, $path, $silent);
 }
 
 sub load_plugin_succeeded {
