@@ -127,6 +127,10 @@ describe VERTICAL_DRUGS_1	Looks like drug names spelled vertically
 full NULL_IN_BODY       /\x00/
 describe NULL_IN_BODY	Message has NUL (ASCII 0) byte in message
 
+# 2006/03/19
+# 0.095   0.1199   0.0000    1.000   0.62    0.01  T_TVD_UA_FOSTERING
+header TVD_UA_FOSTERING         User-Agent =~ /^fostering/i
+describe TVD_UA_FOSTERING	User-Agent header includes spam indication
 
 ###########################################################################
 # ReplaceTags rules
@@ -237,4 +241,5 @@ score TVD_ACT_193		2.0
 score TVD_DEAR_HOMEOWNER	2.0
 score TVD_DOLLARS_US		1.2
 score TVD_EB_PHISH		2.0
+score TVD_UA_FOSTERING		1.8
 # </gen:mutable>
