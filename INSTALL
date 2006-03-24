@@ -301,8 +301,19 @@ version is too low for them to be used.
   - Mail::DomainKeys (from CPAN)
 
     If this module is installed, and you enable the DomainKeys plugin,
-    SpamAssassin will perform domain key lookups when domain key information
-    is present in the message headers.
+    SpamAssassin will perform Domain Key lookups when Domain Key
+    information is present in the message headers.   Note that the
+    Mail::DomainKeys module in turn requres the OpenSSL libraries and the
+    CPAN module Crypt::OpenSSL::Bignum.
+
+
+  - Mail::DKIM (from CPAN)
+
+    If this module is installed, and you enable the DKIM plugin,
+    SpamAssassin will perform DKIM lookups when a DKIM-Signature header is
+    present in the message headers.   Note that the Mail::DKIM module in
+    turn requres the OpenSSL libraries and the CPAN module
+    Crypt::OpenSSL::Bignum.
 
 
   - DBI *and* DBD driver/modules for your database (from CPAN)
