@@ -75,6 +75,8 @@ sub new {
   $self->register_eval_rule ("check_dkim_signsome");
   $self->register_eval_rule ("check_dkim_testing");
   $self->register_eval_rule ("check_dkim_signall");
+  $self->register_eval_rule ("check_for_dkim_whitelist_from");
+  $self->register_eval_rule ("check_for_def_dkim_whitelist_from");
 
   $self->set_config($mailsaobject->{conf});
 
@@ -102,6 +104,85 @@ scanning continues without the DKIM result.
     setting => 'dkim_timeout',
     default => 5,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
+  });
+
+=item whitelist_from_dkim add@ress.com [signing.domain]
+
+Use this to supplement the whitelist_from addresses with a check to make sure
+the message has been signed by a Domain Keys Identified Mail (DKIM) signature
+that can be verified against the sender domain's DKIM public key.
+
+In order to support signing domains that differ from the sender's domain, only
+one whitelist entry is allowed per line, exactly like C<whitelist_from_rcvd>.
+Multiple C<whitelist_from_dkim> lines are allowed.  File-glob style
+meta characters are allowed for the sender address, just like with
+C<whitelist_from_rcvd>.  The optional signer domain parameter must match from
+the right-most side, also like in C<whitelist_from_rcvd>.
+
+If no signer domain parameter is specified the domain of the address parameter
+specified will be used instead.
+
+The senders domain is obtained from a signed part of the message (ie. the
+"From:" header), not from envelope data that is possible to forge.
+
+Since this whitelist requires an DKIM check to be made, network tests must be
+enabled.
+
+Examples:
+
+  whitelist_from_dkim joe@example.com
+  whitelist_from_dkim *@corp.example.com
+
+  whitelist_from_dkim jane@example.net  example.org
+
+=item def_whitelist_from_dkim add@ress.com [signing.domain]
+
+Same as C<whitelist_from_dkim>, but used for the default whitelist entries
+in the SpamAssassin distribution.  The whitelist score is lower, because
+these are often targets for spammer spoofing.
+
+=cut
+
+  push (@cmds, {
+    setting => 'whitelist_from_dkim',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      unless (defined $value && $value !~ /^$/) {
+        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
+      unless ($value =~ /^(\S+)(?:\s+(\S+))?$/) {
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+      my $address = $1;
+      my $signer = (defined $2 ? $2 : $1);
+
+      unless (defined $2) {
+	$signer =~ s/^.*@//;
+      }
+      $self->{parser}->add_to_addrlist_rcvd ('whitelist_from_dkim',
+						$address, $signer);
+    }
+  });
+
+  push (@cmds, {
+    setting => 'def_whitelist_from_dkim',,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      unless (defined $value && $value !~ /^$/) {
+        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
+      unless ($value =~ /^(\S+)(?:\s+(\S+))?$/) {
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+      my $address = $1;
+      my $signer = (defined $2 ? $2 : $1);
+
+      unless (defined $2) {
+	$signer =~ s/^.*@//;
+      }
+      $self->{parser}->add_to_addrlist_rcvd ('def_whitelist_from_dkim',
+						$address, $signer);
+    }
   });
 
   $conf->{parser}->register_commands(\@cmds);
@@ -137,6 +218,18 @@ sub check_dkim_signall {
   my ($self, $scan) = @_;
   $self->_check_dkim($scan) unless $scan->{dkim_checked};
   return $scan->{dkim_signall};
+}
+
+sub check_for_dkim_whitelist_from {
+  my ($self, $scanner) = @_;
+  $self->_check_dkim_whitelist($scanner, 0) unless $scanner->{dkim_whitelist_from_checked};
+  $scanner->{dkim_whitelist_from};
+}
+
+sub check_for_def_dkim_whitelist_from {
+  my ($self, $scanner) = @_;
+  $self->_check_dkim_whitelist($scanner, 1) unless $scanner->{def_dkim_whitelist_from_checked};
+  $scanner->{def_dkim_whitelist_from};
 }
 
 # ---------------------------------------------------------------------------
@@ -190,8 +283,16 @@ sub _check_dkim {
     dbg("dkim: performing lookup");
     $message->CLOSE();      # the action happens here
 
-    dbg("dkim: originator address: ".($message->message_originator ? $message->message_originator->address() : 'none'));
-    dbg("dkim: signature identity: ".($message->signature ? $message->signature->identity() : 'none'));
+    $scan->{dkim_address} = ($message->message_originator ? $message->message_originator->address() : '');
+    $scan->{dkim_signer} = ($message->signature ? $message->signature->identity() : '');
+
+    # remove the leader @ from dkim_signer  -- it doesn't appear in
+    # DKIM-Signature headers so requiring it (and including it here) will only
+    # lead to confusion of users
+    $scan->{dkim_signer} =~ s/^@//;
+
+    dbg("dkim: originator address: ".($scan->{dkim_address} ? $scan->{dkim_address} : 'none'));
+    dbg("dkim: signature identity: ".($scan->{dkim_signer} ? $scan->{dkim_signer} : 'none'));
 
     my $result = $message->result();
     my $detail = $message->result_detail();
@@ -322,6 +423,102 @@ sub sanitize_header_for_dkim {
   # $$ref =~ s/^\n//gs; $$ref =~ s/\n$//gs;
   $$ref =~ s/!nl;/\n/gs;
   $$ref =~ s/!ex;/!/gs;
+}
+
+sub _check_dkim_whitelist {
+  my ($self, $scanner, $default) = @_;
+
+  return unless $scanner->is_dns_available();
+
+  # trigger an DKIM check so we can get address/signer info
+  # if verification failed only continue if we want the debug info
+  unless ($self->check_dkim_verified($scanner)) {
+    unless (would_log("dbg", "dkim")) {
+      return;
+    }
+  }
+
+  unless ($scanner->{dkim_address}) {
+    dbg("dkim: ". ($default ? "def_" : "") ."whitelist_from_dkim: could not find originator address");
+    return;
+  }
+  unless ($scanner->{dkim_signer}) {
+    dbg("dkim: ". ($default ? "def_" : "") ."whitelist_from_dkim: could not find signer");
+    return;
+  }
+
+  if ($default) {
+    $scanner->{def_dkim_whitelist_from_checked} = 1;
+    $scanner->{def_dkim_whitelist_from} = 0;
+
+    # copied and butchered from the code for whitelist_from_rcvd in Evaltests.pm
+    ONE: foreach my $white_addr (keys %{$scanner->{conf}->{def_whitelist_from_dkim}}) {
+      my $regexp = qr/$scanner->{conf}->{def_whitelist_from_dkim}->{$white_addr}{re}/i;
+      foreach my $domain (@{$scanner->{conf}->{def_whitelist_from_dkim}->{$white_addr}{domain}}) {
+        if ($scanner->{dkim_address} =~ $regexp) {
+	  if ($scanner->{dkim_signer} =~ /(?:^|\.)\Q${domain}\E$/i) {
+	    dbg("dkim: address: $scanner->{dkim_address} matches def_whitelist_from_dkim ".
+		"$scanner->{conf}->{def_whitelist_from_dkim}->{$white_addr}{re} ${domain}");
+	    $scanner->{def_dkim_whitelist_from} = 1;
+	    last ONE;
+	  }
+	}
+      }
+    }
+  } else {
+    $scanner->{dkim_whitelist_from_checked} = 1;
+    $scanner->{dkim_whitelist_from} = 0;
+
+    # copied and butchered from the code for whitelist_from_rcvd in Evaltests.pm
+    ONE: foreach my $white_addr (keys %{$scanner->{conf}->{whitelist_from_dkim}}) {
+      my $regexp = qr/$scanner->{conf}->{whitelist_from_dkim}->{$white_addr}{re}/i;
+      foreach my $domain (@{$scanner->{conf}->{whitelist_from_dkim}->{$white_addr}{domain}}) {
+        if ($scanner->{dkim_address} =~ $regexp) {
+	  if ($scanner->{dkim_signer} =~ /(?:^|\.)\Q${domain}\E$/i) {
+	    dbg("dkim: address: $scanner->{dkim_address} matches whitelist_from_dkim ".
+		"$scanner->{conf}->{whitelist_from_dkim}->{$white_addr}{re} ${domain}");
+	    $scanner->{dkim_whitelist_from} = 1;
+	    last ONE;
+	  }
+	}
+      }
+    }
+  }
+
+  # if the message doesn't pass DKIM validation, it can't pass an DKIM whitelist
+  if ($default) {
+    if ($scanner->{def_dkim_whitelist_from}) {
+      if ($self->check_dkim_verified($scanner)) {
+	dbg("dkim: address: $scanner->{dkim_address} signer: ".
+	  "$scanner->{dkim_signer} is in user's DEF_WHITELIST_FROM_DKIM and ".
+	  "passed DKIM verification");
+      } else {
+	dbg("dkim: address: $scanner->{dkim_address} signer: ".
+	  "$scanner->{dkim_signer} is in user's DEF_WHITELIST_FROM_DKIM but ".
+	  "failed DKIM verification");
+	$scanner->{def_dkim_whitelist_from} = 0;
+      }
+    } else {
+      dbg("dkim: address: $scanner->{dkim_address} signer: ".
+	  "$scanner->{dkim_signer} is not in user's DEF_WHITELIST_FROM_DKIM");
+    }
+  } else {
+    if ($scanner->{dkim_whitelist_from}) {
+      if ($self->check_dkim_verified($scanner)) {
+	dbg("dkim: address: $scanner->{dkim_address} signer: ".
+	  "$scanner->{dkim_signer} is in user's WHITELIST_FROM_DKIM and ".
+	  "passed DKIM verification");
+      } else {
+	dbg("dkim: address: $scanner->{dkim_address} signer: ".
+	  "$scanner->{dkim_signer} is in user's WHITELIST_FROM_DKIM but ".
+	  "failed DKIM verification");
+	$scanner->{dkim_whitelist_from} = 0;
+      }
+    } else {
+      dbg("dkim: address: $scanner->{dkim_address} signer: ".
+	  "$scanner->{dkim_signer} is not in user's WHITELIST_FROM_DKIM");
+    }
+  }
 }
 
 1;
