@@ -72,6 +72,7 @@ lib/Mail/SpamAssassin/Plugin/AccessDB.pm
 lib/Mail/SpamAssassin/Plugin/AntiVirus.pm
 lib/Mail/SpamAssassin/Plugin/AutoLearnThreshold.pm
 lib/Mail/SpamAssassin/Plugin/DCC.pm
+lib/Mail/SpamAssassin/Plugin/DKIM.pm
 lib/Mail/SpamAssassin/Plugin/DomainKeys.pm
 lib/Mail/SpamAssassin/Plugin/Hashcash.pm
 lib/Mail/SpamAssassin/Plugin/MIMEHeader.pm
@@ -428,6 +429,7 @@ rules/23_bayes.cf
 rules/25_accessdb.cf
 rules/25_antivirus.cf
 rules/25_dcc.cf
+rules/25_dkim.cf
 rules/25_domainkeys.cf
 rules/25_hashcash.cf
 rules/25_pyzor.cf
@@ -459,3 +461,15 @@ rules/active.list
 rules/70_inactive.cf
 t/mkrules.t
 t/trust_path.t
+t/data/nice/dkim/AddedVtag_07
+t/data/nice/dkim/BasicTest_01
+t/data/nice/dkim/MIMEnowsp_05
+t/data/nice/dkim/MIMEsimple_04
+t/data/nice/dkim/MultipleAuthRes_10
+t/data/nice/dkim/MultipleReceived_08
+t/data/nice/dkim/MultipleSig_06
+t/data/nice/dkim/NonExistingHeader_09
+t/data/nice/dkim/Nowsp_03
+t/data/nice/dkim/Simple_02
+t/dkim.t
+rules/v320.pre
