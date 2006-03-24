@@ -12,7 +12,8 @@ use constant HAS_MODULES => eval { require Mail::DKIM; require Mail::DKIM::Verif
 # use constant IS_WINDOWS => ($^O =~ /^(mswin|dos|os2)/oi);
 # use constant AM_ROOT    => $< == 0;
 
-use constant DO_RUN     => TEST_ENABLED && HAS_MODULES;
+# Since the plugin is disabled by default, so are the tests
+use constant DO_RUN     => TEST_ENABLED && HAS_MODULES && 0;
 
 BEGIN {
   
