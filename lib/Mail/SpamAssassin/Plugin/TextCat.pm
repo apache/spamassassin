@@ -85,7 +85,7 @@ sub new {
 
   # load language models once
   if (! @nm) {
-    if (!defined $mailsaobject->{lanuages_filename}) {
+    if (!defined $mailsaobject->{languages_filename}) {
       warn "textcat: languages filename not defined\n";
     }
     else {
