@@ -2186,7 +2186,9 @@ Only affects header, body, rawbody, uri, and full tests.
 =item priority SYMBOLIC_TEST_NAME n
 
 Assign a specific priority to a test.  All tests, except for DNS and Meta
-tests, are run in priority order. The default test priority is 0 (zero).
+tests, are run in increasing priority value order (negative priority values
+are run before positive priority values). The default test priority is 0
+(zero).
 
 =cut
 
