@@ -943,9 +943,13 @@ sub spawn {
         # that can cause spamd to hang -- see bug 3828 comment 154.
         # we don't use Storable any more, but leave this in -- just
         # in case.
+	# dos: under high load an alarm may fire while $@ will contain ""
+	# which isn't very useful... workaround with $timedout counter, which
+	# is safe since it doesn't require malloc() being called, see bug 4699
         my $oldalarm = 0;
+	my $timedout = 0;
         eval {
-          local $SIG{ALRM} = sub { die "__alarm__\n" };
+          local $SIG{ALRM} = sub { $timedout++; die "__alarm__\n" };
           $oldalarm = alarm 10;
 
           while(my($k,$v) = each %msa_backup) {
@@ -973,6 +977,11 @@ sub spawn {
             die $err;     # propagate failures
           }
         }
+	if ($timedout) {
+          warn("spamd: copy_config timeout (with empty \$@), respawning ".
+		"child process after ".($i+1)." messages");
+          exit;         # so that the master spamd can respawn
+	}
       }
       undef $current_user;
 
