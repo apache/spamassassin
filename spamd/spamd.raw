@@ -976,8 +976,7 @@ sub spawn {
           } else {
             die $err;     # propagate failures
           }
-        }
-	if ($timedout) {
+        } elsif ($timedout) {
           warn("spamd: copy_config timeout (with empty \$@), respawning ".
 		"child process after ".($i+1)." messages");
           exit;         # so that the master spamd can respawn
