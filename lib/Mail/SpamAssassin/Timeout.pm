@@ -178,9 +178,7 @@ sub _run {      # private
         die $@;             # propagate any "real" errors
       }
     }
-  }
-
-  if ($timedout) {
+  } elsif ($timedout) {
     warn "timeout with empty \$@";  # this is worth complaining about
     $self->{timed_out} = 1;
   }
