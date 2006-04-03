@@ -342,7 +342,7 @@ save_tdir();
   "describe GOOD desc_found"  => rule_line_2,
   "ifplugin Good" => if1,
   "endif" => endif_found,
-  "tryplugin Good plugin.pm" => tryplugin,
+  "tryplugin Good plugin.pm" => 'tryplugin',
   "log/mkrules_t/rulesrc/sandbox/foo/20_foo.cf: WARNING: 'log/mkrules_t/rules/plugin.pm' not listed in manifest file, making 'tryplugin': loadplugin Good plugin.pm" => not_found_in_manifest_warning
 );
 %anti_patterns = (
