@@ -157,8 +157,10 @@ sub log_message {
 
   # split on newlines and call log_message multiple times; saves
   # the subclasses having to understand multi-line logs
-  foreach my $line (split(/\n/s, $message)) {
-    $line =~ s/[\x00-\x1f]/_/gm; # replace control characters with "_"
+  foreach my $line (split(/\n/, $message)) {
+    # replace control characters with "_", tabs and spaces get
+    # replaced with a single space.
+    $line =~ tr/\x09\x20\x00-\x1f/  _/s;
     while (my ($name, $object) = each %{ $LOG_SA{method} }) {
       $object->log_message($level, $line);
     }
