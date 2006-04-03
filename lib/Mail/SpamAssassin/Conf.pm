@@ -2198,6 +2198,106 @@ are run before positive priority values). The default test priority is 0
     type => $CONF_TYPE_HASH_KEY_VALUE
   });
 
+=item shortcircuit SYMBOLIC_TEST_NAME {spam|ham|default|off}
+
+Short Circuiting a test will force all other pending rules to be skipped.
+Recomended usage would be in conjunction with priority to set rules with strong
+S/O values (ie 1.0) to be ran first and make instant spam or ham classification
+based on that.  To override a test that uses shortcircuiting, you can set the
+classification type to off.
+
+=over 4
+
+=item spam
+
+Override the default score of this rule with the score from
+C<shortcircuit_spam_score>.
+
+=item ham
+
+Override the default score of this rule with the score from
+C<shortcircuit_ham_score>.
+
+=item default
+
+Shortcircuits the rest of the tests, but does not make a strict classification
+of spam or ham.  rather, it uses the default score for the rule being
+shortcircuited.  this would allow you, for example, to define a rule such as 
+  
+=over 4
+
+  body TEST /test/
+  describe TEST test rule that scores barely over spam threshold
+  score TEST 5.5
+  priority TEST -10
+  shortcircuit TEST default
+
+=back
+
+the result of a message hitting the above rule would be a final score of 5.5,
+as opposed to 100 (default) if it were classified as spam.
+
+=item off
+
+disables shortcircuiting on said rule.
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'shortcircuit',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      my ($rule,$type);
+      unless (defined $value && $value !~ /^$/) {
+        return $MISSING_REQUIRED_VALUE;
+      }
+      if ($value =~ /^(\S+)\s+(\S+)$/) {
+        $rule=$1;
+        $type=$2;
+      } else {
+        return $INVALID_VALUE;
+      }
+      if ($type =~ m/^(?:spam|ham|default)$/) {
+        dbg("shortcircuit: adding $rule $type");
+        $self->{main}->{conf}->{shortcircuit}->{$rule} = $type;
+      } elsif ($type eq "off") {
+        undef $self->{main}->{conf}->{shortcircuit}->{$rule} if $self->{main}->{conf}->{shortcircuit}->{$rule};
+      } else {
+        return $INVALID_VALUE;
+      }
+    }
+  });
+
+=item shortcircuit_spam_score n.nn (default: 100)
+
+when shortcircuit is used on a rule, and the shortcircuit classification type
+is set to C<spam>, this value should be applied in place of the default score
+for that rule.
+
+=cut
+
+  push (@cmds, {
+    setting => 'shortcircuit_spam_score',
+    default => 100,
+    type => $CONF_TYPE_NUMERIC
+  });
+
+=item shortcircuit_ham_score n.nn (default: -100)
+
+when shortcircuit is used on a rule, and the shortcircuit classification type
+is set to C<ham>, this value should be applied in place of the default score
+for that rule.
+
+=cut
+
+  push (@cmds, {
+    setting => 'shortcircuit_ham_score',
+    default => -100,
+    type => $CONF_TYPE_NUMERIC
+  });
+
 =back
 
 =head1 ADMINISTRATOR SETTINGS
@@ -2734,6 +2834,9 @@ optional, and the default is shown below.
  _DCCR_            DCC's results
  _PYZOR_           Pyzor results
  _RBL_             full results for positive RBL queries in DNS URI format
+ _SC_              shortcircuit status (classification and rule name)
+ _SCRULE_          rulename that caused the shortcircuit 
+ _SCTYPE_          shortcircuit classification ("spam", "ham", "default", "none")
  _LANGUAGES_       possible languages of mail
  _PREVIEW_         content preview
  _REPORT_          terse report of tests hit (for header reports)

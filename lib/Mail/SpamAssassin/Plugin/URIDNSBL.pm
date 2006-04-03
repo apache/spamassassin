@@ -400,6 +400,8 @@ sub check_post_dnsbl {
   my $scan = $opts->{permsgstatus};
   my $scanstate = $scan->{uribl_scanstate};
 
+  return if (exists $scan->{shortcircuit_type});
+
   # try to complete a few more
   if (!$self->complete_lookups($scanstate, 0.1)) {
     my $secs_to_wait = $scan->{conf}->{uridnsbl_timeout};
