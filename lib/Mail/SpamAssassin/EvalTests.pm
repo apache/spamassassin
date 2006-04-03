@@ -2993,7 +2993,7 @@ sub check_https_ip_mismatch {
   my $flag = 0;
 
   while (my($k,$v) = each %{$self->{html}->{uri_detail}}) {
-    next if $flag;
+    last if $flag;
     next if ($k !~ m%^https?:/*(?:[^\@/]+\@)?\d+\.\d+\.\d+\.\d+%i);
     foreach (@{$v->{anchor_text}}) {
       next if (m%^https:/*(?:[^\@/]+\@)?\d+\.\d+\.\d+\.\d+%i);
@@ -3003,6 +3003,7 @@ sub check_https_ip_mismatch {
       }
     }
   }
+  keys %{$self->{html}->{uri_detail}}; # resets iterator, bug 4829
 
   return $flag;
 }
