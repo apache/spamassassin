@@ -229,7 +229,7 @@ sub new {
   my $self = {
     'main'              => $main,
     'conf'		=> $main->{conf},
-    'log_raw_counts'	=> 0,
+    ## 'log_raw_counts'	=> 0, # see compute_prob_for_token()
     'use_ignores'       => 1,
     'tz'		=> Mail::SpamAssassin::Util::local_tz(),
   };
@@ -1063,9 +1063,15 @@ sub compute_prob_for_token {
             ($Mail::SpamAssassin::Bayes::Combine::FW_S_CONSTANT + $robn);
   }
 
-  if ($self->{log_raw_counts}) {
-    $self->{raw_counts} .= " s=$s,n=$n ";
-  }
+  # 'log_raw_counts' is used to log the raw data for the Bayes equations during
+  # a mass-check, allowing the S and X constants to be optimized quickly
+  # without requiring re-tokenization of the messages for each attempt. There's
+  # really no need for this code to be uncommented in normal use, however.   It
+  # has never been publicly documented, so commenting it out is fine. ;)
+
+  ## if ($self->{log_raw_counts}) {
+  ## $self->{raw_counts} .= " s=$s,n=$n ";
+  ## }
 
   return $prob;
 }
@@ -1171,9 +1177,9 @@ sub scan {
 
   my ($ns, $nn) = $self->{store}->nspam_nham_get();
 
-  if ($self->{log_raw_counts}) {
-    $self->{raw_counts} = " ns=$ns nn=$nn ";
-  }
+  ## if ($self->{log_raw_counts}) { # see compute_prob_for_token()
+  ## $self->{raw_counts} = " ns=$ns nn=$nn ";
+  ## }
 
   dbg("bayes: corpus size: nspam = $ns, nham = $nn");
 
@@ -1183,17 +1189,19 @@ sub scan {
 
   my $tokensdata = $self->{store}->tok_get_all(keys %{$msgtokens});
 
-  my %pw;
+  my %pw = ();
 
   foreach my $tokendata (@{$tokensdata}) {
     my ($token, $tok_spam, $tok_ham, $atime) = @{$tokendata};
     my $prob = $self->compute_prob_for_token($token, $ns, $nn, $tok_spam, $tok_ham);
-    if (defined($prob)) {
-      $pw{$token}->{prob} = $prob;
-      $pw{$token}->{spam_count} = $tok_spam;
-      $pw{$token}->{ham_count} = $tok_ham;
-      $pw{$token}->{atime} = $atime;
-    }
+    next unless defined $prob;
+
+    $pw{$token} = {
+      prob => $prob,
+      spam_count => $tok_spam,
+      ham_count => $tok_ham,
+      atime => $atime
+    };
   }
 
   # If none of the tokens were found in the DB, we're going to skip
@@ -1219,38 +1227,44 @@ sub scan {
   my $count = N_SIGNIFICANT_TOKENS;
   my @sorted = ();
 
-  my ($tcount_spammy,$tcount_hammy) = (0,0);
+  my @touch_tokens;
   my $tinfo_spammy = $permsgstatus->{bayes_token_info_spammy} = [];
   my $tinfo_hammy = $permsgstatus->{bayes_token_info_hammy} = [];
 
-  my @touch_tokens;
+  my %tok_strength = map { $_ => (abs($pw{$_}->{prob} - 0.5)) } keys %pw;
+  my $log_each_token = (would_log('dbg', 'bayes') > 1);
 
-  for (sort {
-              abs($pw{$b}->{prob} - 0.5) <=> abs($pw{$a}->{prob} - 0.5)
+  foreach my $tok (sort {
+              $tok_strength{$b} <=> $tok_strength{$a}
             } keys %pw)
   {
     if ($count-- < 0) { last; }
-    my $pw = $pw{$_}->{prob};
-    next if (abs($pw - 0.5) < 
+    next if ($tok_strength{$tok} <
                 $Mail::SpamAssassin::Bayes::Combine::MIN_PROB_STRENGTH);
+
+    my $pw = $pw{$tok}->{prob};
 
     # What's more expensive, scanning headers for HAMMYTOKENS and
     # SPAMMYTOKENS tags that aren't there or collecting data that
     # won't be used?  Just collecting the data is certainly simpler.
     #
-    my $raw_token = $msgtokens->{$_} || "(unknown)";
-    my $s = $pw{$_}->{spam_count};
-    my $n = $pw{$_}->{ham_count};
-    my $a = $pw{$_}->{atime};
-    push @$tinfo_spammy, [$raw_token,$pw,$s,$n,$a] if $pw >= 0.5 && ++$tcount_spammy;
-    push @$tinfo_hammy,  [$raw_token,$pw,$s,$n,$a] if $pw <  0.5 && ++$tcount_hammy;
+    my $raw_token = $msgtokens->{$tok} || "(unknown)";
+    my $s = $pw{$tok}->{spam_count};
+    my $n = $pw{$tok}->{ham_count};
+    my $a = $pw{$tok}->{atime};
+
+    if ($pw < 0.5) {
+      push @$tinfo_hammy,  [$raw_token,$pw,$s,$n,$a];
+    } else {
+      push @$tinfo_spammy, [$raw_token,$pw,$s,$n,$a];
+    }
 
     push (@sorted, $pw);
 
     # update the atime on this token, it proved useful
-    push(@touch_tokens, $_);
+    push(@touch_tokens, $tok);
 
-    if (would_log('dbg', 'bayes') > 1) {
+    if ($log_each_token) {
       dbg("bayes: token '$raw_token' => $pw");
     }
   }
@@ -1277,9 +1291,9 @@ sub scan {
   $permsgstatus->{bayes_nspam} = $ns;
   $permsgstatus->{bayes_nham} = $nn;
 
-  if ($self->{log_raw_counts}) {
-    print "#Bayes-Raw-Counts: $self->{raw_counts}\n";
-  }
+  ## if ($self->{log_raw_counts}) { # see compute_prob_for_token()
+  ## print "#Bayes-Raw-Counts: $self->{raw_counts}\n";
+  ## }
 
   $self->{main}->call_plugins("bayes_scan", { toksref => $msgtokens,
 					      probsref => \%pw,
@@ -1315,8 +1329,10 @@ skip:
     $self->{store}->untie_db();
   }
 
-  $permsgstatus->{tag_data}{BAYESTCHAMMY} = $tcount_hammy;
-  $permsgstatus->{tag_data}{BAYESTCSPAMMY} = $tcount_spammy;
+  $permsgstatus->{tag_data}{BAYESTCHAMMY} = 
+                        ($tinfo_hammy ? scalar @{$tinfo_hammy} : 0);
+  $permsgstatus->{tag_data}{BAYESTCSPAMMY} = 
+                        ($tinfo_spammy ? scalar @{$tinfo_spammy} : 0);
   $permsgstatus->{tag_data}{BAYESTCLEARNED} = $tcount_learned;
   $permsgstatus->{tag_data}{BAYESTC} = $tcount_total;
 
