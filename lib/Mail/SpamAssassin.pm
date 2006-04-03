@@ -1321,8 +1321,15 @@ sub init {
     if ($siterules) {
       $self->{config_text} .= $self->read_pre($siterules, 'site rules pre files');
     }
+    else {
+      warn "config: could not find site rules directory\n";
+    }
+
     if ($sysrules) {
       $self->{config_text} .= $self->read_pre($sysrules, 'sys rules pre files');
+    }
+    else {
+      warn "config: could not find sys rules directory\n";
     }
 
     $fname = $sysrules;
@@ -1350,6 +1357,9 @@ sub init {
         if (!-f $fname && !$self->{dont_copy_prefs} && !$self->create_default_prefs($fname)) {
           warn "config: failed to create default user preference file $fname\n";
         }
+      }
+      else {
+	warn "config: could not find userprefs file\n";
       }
 
       $self->{config_text} .= $self->read_cf ($fname, 'user prefs file');
@@ -1462,14 +1472,20 @@ sub get_and_create_userstate_dir {
 
   $fname ||= $self->first_existing_path (@default_userstate_dir);
 
-  if (defined $fname && !$self->{dont_copy_prefs}) {
-    dbg("config: using \"$fname\" for user state dir");
+  if (defined $fname) {
+    if (!$self->{dont_copy_prefs}) {
+      dbg("config: using \"$fname\" for user state dir");
+    }
+
+    if (!-d $fname) {
+      # not being able to create the *dir* is not worth a warning at all times
+      eval { mkpath($fname, 0, 0700) } or dbg("config: mkdir $fname failed: $@ $!\n");
+    }
+  }
+  else {
+    warn "config: can not determine userstate dir\n";
   }
 
-  if (!-d $fname) {
-    # not being able to create the *dir* is not worth a warning at all times
-    eval { mkpath($fname, 0, 0700) } or dbg("config: mkdir $fname failed: $@ $!\n");
-  }
   $fname;
 }
 
@@ -1477,7 +1493,7 @@ sub get_and_create_userstate_dir {
 
 Find a rule-support file, such as C<languages> or C<triplets.txt>,
 in the system-wide rules directory, and return its full path if
-it exists.
+it exists, or undef if it doesn't exist.
 
 (This API was added in SpamAssassin 3.1.1.)
 
@@ -1525,7 +1541,7 @@ sub create_default_prefs {
     # copy in the default one for later editing
     my $defprefs = $self->first_existing_path (@Mail::SpamAssassin::default_prefs_path);
 
-    if (open (IN, "<$defprefs")) {
+    if (defined $defprefs && open (IN, "<$defprefs")) {
       $fname = Mail::SpamAssassin::Util::untaint_file_path($fname);
       if (open (OUT, ">$fname")) {
         while (<IN>) {
@@ -1548,8 +1564,11 @@ sub create_default_prefs {
         warn "config: cannot write to $fname: $!\n";
       }
     }
-    else {
+    elsif (defined $defprefs) {
       warn "config: cannot open $defprefs: $!\n";
+    }
+    else {
+      warn "config: can not determine default prefs path\n";
     }
   }
 
@@ -1593,7 +1612,7 @@ sub sed_path {
   $path =~ s/__local_state_dir__/$self->{LOCAL_STATE_DIR} || ''/ges;
   $path =~ s/__def_rules_dir__/$self->{DEF_RULES_DIR} || ''/ges;
   $path =~ s{__prefix__}{$self->{PREFIX} || $Config{prefix} || '/usr'}ges;
-  $path =~ s{__userstate__}{$self->get_and_create_userstate_dir()}ges;
+  $path =~ s{__userstate__}{$self->get_and_create_userstate_dir() || ''}ges;
   $path =~ s/__version__/${VERSION}/gs;
   $path =~ s/^\~([^\/]*)/$self->expand_name($1)/es;
 
@@ -1609,7 +1628,7 @@ sub first_existing_path {
     $path = $self->sed_path ($p);
     if (defined $path && -e $path) { return $path; }
   }
-  $path;
+  return;
 }
 
 sub get_cf_files_in_dir {
