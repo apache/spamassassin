@@ -29,7 +29,9 @@ stop() {
     su automc -c "./build/automc/freqsd -pidfile /home/automc/freqsd/pid -kill"
 
     sleep 1
-    pkill -15 automc/freqsd            # just in case
+    pkill -15 -f automc/freqsd            # just in case
+    sleep 1
+    pkill -15 -u automc
 }
 
 case "$1" in
