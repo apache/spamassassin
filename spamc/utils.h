@@ -37,9 +37,9 @@ typedef int SSL_METHOD;
 
 #ifdef _WIN32
 #include <winsock.h>
-//
-// BSD-compatible socket error codes for Win32
-//
+/*
+ * BSD-compatible socket error codes for Win32
+ */
 
 #define EWOULDBLOCK             WSAEWOULDBLOCK
 #define EINPROGRESS             WSAEINPROGRESS
@@ -69,17 +69,17 @@ typedef int SSL_METHOD;
 #define ETIMEDOUT               WSAETIMEDOUT
 #define ECONNREFUSED            WSAECONNREFUSED
 #define ELOOP                   WSAELOOP
-// #define ENAMETOOLONG            WSAENAMETOOLONG
+/* #define ENAMETOOLONG            WSAENAMETOOLONG */
 #define EHOSTDOWN               WSAEHOSTDOWN
 #define EHOSTUNREACH            WSAEHOSTUNREACH
-// #define ENOTEMPTY               WSAENOTEMPTY
+/* #define ENOTEMPTY               WSAENOTEMPTY */
 #define EPROCLIM                WSAEPROCLIM
 #define EUSERS                  WSAEUSERS
 #define EDQUOT                  WSAEDQUOT
 #define ESTALE                  WSAESTALE
 #define EREMOTE                 WSAEREMOTE
 
-// NOTE: these are not errno constants in UNIX!
+/* NOTE: these are not errno constants in UNIX! */
 #define HOST_NOT_FOUND          WSAHOST_NOT_FOUND
 #define TRY_AGAIN               WSATRY_AGAIN
 #define NO_RECOVERY             WSANO_RECOVERY
