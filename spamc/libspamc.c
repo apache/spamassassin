@@ -500,7 +500,7 @@ static int _message_read_raw(int fd, struct message *m)
 	return EX_IOERR;
     }
     m->type = MESSAGE_ERROR;
-    if (m->raw_len > m->max_len)
+    if (m->raw_len > (int) m->max_len)
     {
         libspamc_log(m->priv->flags, LOG_ERR,
                 "skipped message, greater than max message size (%d bytes)",
@@ -534,7 +534,7 @@ static int _message_read_bsmtp(int fd, struct message *m)
 	return EX_IOERR;
     }
     m->type = MESSAGE_ERROR;
-    if (m->raw_len > m->max_len)
+    if (m->raw_len > (int) m->max_len)
 	return EX_TOOBIG;
     p = m->pre = m->raw;
     /* Search for \nDATA\n which marks start of actual message */
@@ -555,15 +555,20 @@ static int _message_read_bsmtp(int fd, struct message *m)
 	  break;
 	}
       }
-      p = q; // the above code ensures no other '\n' comes before q
+      p = q; /* the above code ensures no other '\n' comes before q */
     }
     if (m->msg == NULL)
 	return EX_DATAERR;
 
+    /* ensure this is >= 0 */
+    if (m->msg_len < 0) {
+	return EX_SOFTWARE;
+    }
+
     /* Find the end-of-DATA line */
     /* if bad format with no end ".\n" will truncate the last two characters of the buffer */
     prev = '\n';
-    for (i = j = 0; (i+2) < m->msg_len; i++) { /* (i+2) prevents out of bound reference msg[i+2] */
+    for (i = j = 0; (i+2) < (unsigned int) m->msg_len; i++) { /* (i+2) prevents out of bound reference msg[i+2] */
 	if (prev == '\n' && m->msg[i] == '.') {
 	    /* Dot at the beginning of a line */
 	    if ((m->msg[i + 1] == '\r' && m->msg[i + 2] == '\n')
@@ -963,7 +968,7 @@ int message_filter(struct transport *tp, const char *username,
 	_use_msg_for_out(m);
 	return EX_OSERR;
       }
-      len += sprintf(buf + len, "Content-length: %d\r\n\r\n", m->msg_len);
+      len += sprintf(buf + len, "Content-length: %d\r\n\r\n", (int) m->msg_len);
     }
 
     libspamc_timeout = m->timeout;
@@ -1140,7 +1145,13 @@ int message_process(struct transport *trans, char *username, int max_size,
 
     m.type = MESSAGE_NONE;
 
-    m.max_len = max_size;
+    /* enforce max_size being unsigned, therefore >= 0 */
+    if (max_size < 0) {
+	ret = EX_SOFTWARE;
+        goto FAIL;
+    }
+    m.max_len = (unsigned int) max_size;
+
     ret = message_read(in_fd, flags, &m);
     if (ret != EX_OK)
         goto FAIL;
@@ -1284,7 +1295,7 @@ int message_tell(struct transport *tp, const char *username, int flags,
 	_use_msg_for_out(m);
 	return EX_OSERR;
     }
-    len += sprintf(buf + len, "Content-length: %d\r\n\r\n", m->msg_len);
+    len += sprintf(buf + len, "Content-length: %d\r\n\r\n", (int) m->msg_len);
 
     libspamc_timeout = m->timeout;
 
@@ -1487,7 +1498,7 @@ int transport_setup(struct transport *tp, int flags)
     char **addrp;
 
 #ifdef _WIN32
-    // Start Winsock up
+    /* Start Winsock up */
     WSADATA wsaData;
     int nCode;
     if ((nCode = WSAStartup(MAKEWORD(1, 1), &wsaData)) != 0) {
@@ -1646,11 +1657,11 @@ libspamc_log (int flags, int level, char *msg, ...)
     va_start(ap, msg);
 
     if ((flags & SPAMC_LOG_TO_STDERR) != 0) {
-        // create a log-line buffer
+        /* create a log-line buffer */
         len = snprintf(buf, LOG_BUFSIZ, "spamc: ");
         len += vsnprintf(buf+len, LOG_BUFSIZ-len, msg, ap);
 
-        // avoid buffer overflow
+        /* avoid buffer overflow */
         if (len > (LOG_BUFSIZ-2)) { len = (LOG_BUFSIZ-3); }
 
         len += snprintf(buf+len, LOG_BUFSIZ-len, "\n");
