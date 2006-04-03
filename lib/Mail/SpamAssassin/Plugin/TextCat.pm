@@ -85,8 +85,12 @@ sub new {
 
   # load language models once
   if (! @nm) {
-    # load_models will die() if it fails
-    load_models($mailsaobject->{languages_filename});
+    if (!defined $mailsaobject->{languages_filename}) {
+      warn "textcat: languages filename not defined\n";
+    }
+    else {
+      load_models($mailsaobject->{languages_filename});
+    }
   }
 
   $self->register_eval_rule("check_language");
@@ -316,12 +320,11 @@ sub load_models {
   my $rang = 1;
   dbg("textcat: loading languages file...");
 
-  if (!defined $languages_filename) {
-    die "textcat: languages filename not defined";
+  if (!open(LM, $languages_filename)) {
+    warn "textcat: cannot open languages file: $!\n";
+    return;
   }
 
-  open(LM, $languages_filename)
-      || die "textcat: cannot open languages: $!\n";
   local $/ = undef;
   @lm = split(/\n/, <LM>);
   close(LM);
@@ -340,9 +343,11 @@ sub load_models {
     }
   }
   if (! @nm) {
-    die "textcat: no language models loaded";
+    warn "textcat: no language models loaded\n";
   }
-  dbg("textcat: loaded " . scalar(@nm) . " language models");
+  else {
+    dbg("textcat: loaded " . scalar(@nm) . " language models");
+  }
 }
 
 sub classify {
