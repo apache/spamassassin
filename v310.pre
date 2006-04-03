@@ -24,11 +24,7 @@ loadplugin Mail::SpamAssassin::Plugin::Pyzor
 
 # Razor2 - perform Razor2 message checks.
 #
-# Razor2 is disabled here because it is not available for unlimited free
-# use.  It is currently free for personal use, subject to capacity
-# constraints.  See the Cloudmark SpamNet Service Policy for more details.
-#
-#loadplugin Mail::SpamAssassin::Plugin::Razor2
+loadplugin Mail::SpamAssassin::Plugin::Razor2
 
 # SpamCop - perform SpamCop message reporting
 #
