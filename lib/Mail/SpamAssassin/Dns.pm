@@ -33,7 +33,7 @@ use bytes;
 use Carp;
 
 use vars qw{
-  $KNOWN_BAD_DIALUP_RANGES @EXISTING_DOMAINS $IS_DNS_AVAILABLE $VERSION
+  $KNOWN_BAD_DIALUP_RANGES @EXISTING_DOMAINS $IS_DNS_AVAILABLE $LAST_DNS_CHECK $VERSION
 };
 
 # use very well-connected domains (fast DNS response, many DNS servers,
@@ -556,7 +556,19 @@ sub lookup_a {
 sub is_dns_available {
   my ($self) = @_;
   my $dnsopt = $self->{conf}->{dns_available};
+  my $dnsint = $self->{conf}->{dns_test_interval} || 600;
   my @domains;
+
+  $LAST_DNS_CHECK ||= 0;
+  my $diff = time() - $LAST_DNS_CHECK;
+
+  # undef $IS_DNS_AVAILABLE if we should be testing for
+  # working DNS and our check interval time has passed
+  dbg("dns: dnsopt=$dnsopt dnsint=$dnsint diff=$diff");
+  $IS_DNS_AVAILABLE=undef if ($dnsopt eq "test" && $diff > $dnsint);
+
+  dbg("dns: is_dns_available() last checked $diff seconds ago; dns available=".
+            ($IS_DNS_AVAILABLE ? $IS_DNS_AVAILABLE : "(undef)"));
 
   return $IS_DNS_AVAILABLE if (defined $IS_DNS_AVAILABLE);
 
@@ -611,6 +623,7 @@ sub is_dns_available {
   # but only uses the first in a background query like we use.
   # Try the different nameservers here in case the first one is not woorking
   
+  $LAST_DNS_CHECK = time();
   my @nameservers = $self->{resolver}->nameservers();
   dbg("dns: testing resolver nameservers: ".join(", ", @nameservers));
   my $ns;
