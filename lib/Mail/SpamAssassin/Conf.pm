@@ -1114,6 +1114,23 @@ minimum limit on file descriptors be raised to at least 256 for safety.
     }
   });
 
+=item dns_test_interval n   (default: 600 seconds)
+
+If dns_available is set to 'test' (which is the default), the dns_test_interval
+time in number of seconds will tell SpamAssassin how often to retest for working DNS.
+
+=cut
+
+  push (@cmds, {
+    setting => 'dns_test_interval',
+    default => 600,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value !~ /^\d+$/) { return $INVALID_VALUE; }
+      $self->{dns_test_interval} = $value;
+    }
+  });
+
 =back
 
 =head2 LEARNING OPTIONS
