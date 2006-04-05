@@ -565,9 +565,16 @@ sub date_in_direction {
 }
 
 sub get_last_night_daterev {
+  # don't use a daterev after (now - 12 hours); that's too recent
+  # to be "last night", for purposes of rule-update generation
+  my $notafter = strftime "%Y%m%d", localtime time - (12*60*60);
+
   foreach my $dr (reverse @daterevs) {
     my $t = get_daterev_description($dr);
     next unless $t;
+    if ($t =~ /<span class="date">(.+?)<\/span>/) {
+      next if ($1+0 > $notafter);
+    }
     if ($t =~ / tag=n /) {
       return $dr;
     }
@@ -1138,33 +1145,40 @@ sub get_daterev_description {
       my $net = $fastinfo->{includes_net} ? "[net]" : "";
 
       my $drtitle = ($info->{msg} ? $info->{msg} : '');
-      $drtitle =~ s/[\"\']/ /gs;
+      $drtitle =~ s/[\"\'\&\>\<]/ /gs;
       $drtitle =~ s/\s+/ /gs;
       $drtitle =~ s/^(.{0,160}).*$/$1/gs;
 
       $txt = qq{
 
           <td class=daterevtd>
-        <a name="$dranchor" title="$drtitle" href="!drhref!">$fastinfo->{date}</a></td>
+            <a name="$dranchor" title="$drtitle"
+                href="!drhref!"><span class="date">$fastinfo->{date}</span></a>
+          </td>
           <td class=daterevtd>
-        <a title="$drtitle" href="!drhref!">$fastinfo->{rev}</a></td>
+            <a title="$drtitle" href="!drhref!">$fastinfo->{rev}</a>
+          </td>
+          <td class=daterevtd>
+            <a title="$drtitle" href="!drhref!">$cdate</a>
+          </td>
+          <td class=daterevtd>
+            <a title="$drtitle" href="!drhref!">$info->{checkin_rev}</a>
+          </td>
+          <td class=daterevtd>
+            <em><mcauthor>$info->{author}</mcauthor></em>
+            <em><mcwasnet>$net</mcwasnet></em>
+          </td>
           <!-- tag=$fastinfo->{tag} -->
-          <td class=daterevtd>
-        <a title="$drtitle" href="!drhref!">$cdate</a></td>
-          <td class=daterevtd>
-        <a title="$drtitle" href="!drhref!">$info->{checkin_rev}</a></td>
-          <td class=daterevtd> <em><mcauthor>$info->{author}</mcauthor></em>
-            <em><mcwasnet>$net</mcwasnet></em> </td>
 
         </tr>
         <tr class=daterevdesc>
 
           <td></td>
           <td class=daterevtd colspan=4>
-            <em>($drtitle)</em>
+              <em>($drtitle)</em>
           </td>
           <td class=daterevtd colspan=1>
-            <em><mcsubmitters>$fastinfo->{submitters}</mcsubmitters></em>
+              <em><mcsubmitters>$fastinfo->{submitters}</mcsubmitters></em>
           </td>
 
       };
