@@ -325,9 +325,16 @@ sub main_ping_kids {
 
   my ($sock, $kid);
   while (($kid, $sock) = each %{$self->{backchannel}->{kids}}) {
-    $self->syswrite_with_retry($sock, PF_PING_ORDER, $kid, 3) and next;
-
-    warn "prefork: write of ping failed to $kid fd=".$sock->fileno.": ".$!;
+    # if the file handle is still defined ping the child
+    # bug 4852: if not, we've run into a race condition with the child's
+    # SIGCHLD handler... try killing again just in case something else happened
+    if (defined $sock->fileno) {
+      $self->syswrite_with_retry($sock, PF_PING_ORDER, $kid, 3) and next;
+      warn "prefork: write of ping failed to $kid fd=".$sock->fileno.": ".$!;
+    } else {
+      warn "prefork: cannot ping $kid, file handle not defined, child likely ".
+	   "to still be processing SIGCHLD handler after killing itself\n";
+    }
 
     # note: this is safe according to the note in perldoc -f each; 'it is
     # always safe to delete the item most recently returned by each()'
