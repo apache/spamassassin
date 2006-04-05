@@ -328,7 +328,7 @@ sub main_ping_kids {
     # if the file handle is still defined ping the child
     # bug 4852: if not, we've run into a race condition with the child's
     # SIGCHLD handler... try killing again just in case something else happened
-    if (defined $sock->fileno) {
+    if (defined $sock && defined $sock->fileno) {
       $self->syswrite_with_retry($sock, PF_PING_ORDER, $kid, 3) and next;
       warn "prefork: write of ping failed to $kid fd=".$sock->fileno.": ".$!;
     } else {
