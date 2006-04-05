@@ -82,10 +82,16 @@ sub extract_metadata {
   }
 
   chop $countries;
-  $msg->{tag_data}{RELAYCOUNTRY} = $countries;
   $msg->put_metadata("X-Relay-Countries", $countries);
   dbg("metadata: X-Relay-Countries: $countries");
 
+  return 1;
+}
+
+sub parsed_metadata {
+  my ($self, $opts) = @_;
+  $opts->{permsgstatus}->set_tag ("RELAYCOUNTRY",
+          $opts->{permsgstatus}->get_message->get_metadata('X-Relay-Countries'));
   return 1;
 }
 
