@@ -164,6 +164,7 @@ GetOptions(
   'daemonize!'               => \$opt{'daemonize'},
   'debug|D:s'                => \$opt{'debug'},
   'd'                        => \$opt{'daemonize'},
+  'groupname|g=s'            => \$opt{'groupname'},
   'helper-home-dir|H:s'      => \$opt{'home_dir_for_helpers'},
   'help|h'                   => \$opt{'help'},
   'ident-timeout=f'          => \$opt{'ident-timeout'},
@@ -852,6 +853,10 @@ sub spawn {
       my ( $uuid, $ugid ) = ( getpwnam( $opt{'username'} ) )[ 2, 3 ];
       if ( !defined $uuid || $uuid == 0 ) {
         die "spamd: cannot run as nonexistent user or root with -u option\n";
+      }
+
+      if ( $opt{'groupname'} ) {
+        $ugid = getgrnam( $opt{'groupname'} ) || $ugid;
       }
 
       $uuid =~ /^(\d+)$/ and $uuid = $1;    # de-taint
@@ -2208,6 +2213,7 @@ Options:
  -s facility, --syslog=facility     Specify the syslog facility
  --syslog-socket=type               How to connect to syslogd
  -u username, --username=username   Run as username
+ -g groupname, --groupname=groupname Run as groupname
  -v, --vpopmail                     Enable vpopmail config
  -x, --nouser-config                Disable user config files
  --auth-ident                       Use ident to authenticate spamc user
@@ -2443,6 +2449,12 @@ as root.
 
 Note: "--username=root" is not a valid option.  If specified, C<spamd> will
 exit with a fatal error on startup.
+
+=item B<-g> I<groupname>, B<--groupname>=I<groupname>
+
+Run as the named group if --username is being used. If this option is
+not set when --username is used then the primary group for the user
+given to --username is used.
 
 =item B<-x>, B<--nouser-config>, B<--user-config>
 
