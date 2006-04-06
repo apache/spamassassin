@@ -134,11 +134,12 @@ struct message
     /* Filled in by message_read */
     message_type_t type;
     char *raw;
-    unsigned int raw_len;		/* Raw message buffer */
+    int raw_len;		/* Raw message buffer */
+    /* note: do not make "raw_len" in particular unsigned! see bug 4593 */
     char *pre;
     int pre_len;		/* Pre-message data (e.g. SMTP commands) */
     char *msg;
-    unsigned int msg_len;		/* The message */
+    int msg_len;		/* The message */
     char *post;
     int post_len;		/* Post-message data (e.g. SMTP commands) */
     int content_length;
