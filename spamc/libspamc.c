@@ -97,7 +97,7 @@ extern char *optarg;
 #undef DO_CONNECT_DEBUG_SYSLOGS
 /* or #define DO_CONNECT_DEBUG_SYSLOGS 1 */
 
-static const int ESC_PASSTHROUGHRAW = EX__MAX + 666;
+/* static const int ESC_PASSTHROUGHRAW = EX__MAX + 666;  No longer seems to be used */
 
 /* set EXPANSION_ALLOWANCE to something more than might be
    added to a message in X-headers and the report template */
@@ -517,8 +517,9 @@ static int _message_read_raw(int fd, struct message *m)
 
 static int _message_read_bsmtp(int fd, struct message *m)
 {
-    unsigned int i, j;
+    unsigned int i, j, p_len;
     char prev;
+    char* p;
 
     _clear_message(m);
     if ((m->raw = malloc(m->max_len + 1)) == NULL)
@@ -535,31 +536,34 @@ static int _message_read_bsmtp(int fd, struct message *m)
     m->type = MESSAGE_ERROR;
     if (m->raw_len > m->max_len)
 	return EX_TOOBIG;
-    m->pre = m->raw;
-    for (i = 0; i < m->raw_len - 6; i++) {
-	if ((m->raw[i] == '\n') &&
-	    (m->raw[i + 1] == 'D' || m->raw[i + 1] == 'd') &&
-	    (m->raw[i + 2] == 'A' || m->raw[i + 2] == 'a') &&
-	    (m->raw[i + 3] == 'T' || m->raw[i + 3] == 't') &&
-	    (m->raw[i + 4] == 'A' || m->raw[i + 4] == 'a') &&
-	    ((m->raw[i + 5] == '\r' && m->raw[i + 6] == '\n')
-	     || m->raw[i + 5] == '\n')) {
-	    /* Found it! */
-	    i += 6;
-	    if (m->raw[i - 1] == '\r')
-		i++;
-	    m->pre_len = i;
-	    m->msg = m->raw + i;
-	    m->msg_len = m->raw_len - i;
-	    break;
+    p = m->pre = m->raw;
+    /* Search for \nDATA\n which marks start of actual message */
+    while ((p_len = (m->raw_len - (p - m->raw))) > 8) { /* leave room for at least \nDATA\n.\n */
+      char* q = memchr(p, '\n', p_len - 8);  /* find next \n then see if start of \nDATA\n */
+      if (q == NULL) break;
+      q++;
+      if (((q[0]|0x20) == 'd') && /* case-insensitive ASCII comparison */
+	  ((q[1]|0x20) == 'a') &&
+	  ((q[2]|0x20) == 't') &&
+	  ((q[3]|0x20) == 'a')) {
+	q+=4;
+	if (q[0] == '\r') ++q;
+	if (*(q++) == '\n') {  /* leave q at start of message if we found it */
+	  m->msg = q;
+	  m->pre_len = q - m->raw;
+	  m->msg_len = m->raw_len - m->pre_len;
+	  break;
 	}
+      }
+      p = q; // the above code ensures no other '\n' comes before q
     }
     if (m->msg == NULL)
 	return EX_DATAERR;
 
     /* Find the end-of-DATA line */
+    /* if bad format with no end ".\n" will truncate the last two characters of the buffer */
     prev = '\n';
-    for (i = j = 0; i < m->msg_len; i++) {
+    for (i = j = 0; (i+2) < m->msg_len; i++) { /* (i+2) prevents out of bound reference msg[i+2] */
 	if (prev == '\n' && m->msg[i] == '.') {
 	    /* Dot at the beginning of a line */
 	    if ((m->msg[i + 1] == '\r' && m->msg[i + 2] == '\n')
