@@ -385,9 +385,19 @@ sub dccifd_lookup {
       Peer => $sockpath) || dbg("dcc: failed to open socket") && die;
 
     # send the options and other parameters to the daemon
+    my $client = $permsgstatus->{relays_external}->[0]->{ip};
+    my $clientname = $permsgstatus->{relays_external}->[0]->{rdns};
+    my $helo = $permsgstatus->{relays_external}->[0]->{helo} || "";
+    if ($client) {
+      if ($clientname) {
+        $client = $client . "\r" . $clientname;
+      }
+    } else {
+      $client = "0.0.0.0";
+    }
     $sock->print("header\n") || dbg("dcc: failed write") && die; # options
-    $sock->print("0.0.0.0\n") || dbg("dcc: failed write") && die; # client
-    $sock->print("\n") || dbg("dcc: failed write") && die; # HELO value
+    $sock->print($client . "\n") || dbg("dcc: failed write") && die; # client
+    $sock->print($helo . "\n") || dbg("dcc: failed write") && die; # HELO value
     $sock->print("\n") || dbg("dcc: failed write") && die; # sender
     $sock->print("unknown\r\n") || dbg("dcc: failed write") && die; # recipients
     $sock->print("\n") || dbg("dcc: failed write") && die; # recipients
