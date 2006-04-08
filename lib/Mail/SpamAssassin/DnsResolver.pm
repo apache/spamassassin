@@ -42,7 +42,7 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::Logger;
 
 use IO::Socket::INET;
-use Errno qw(EINVAL EADDRINUSE);
+use Errno qw(EADDRINUSE);
 
 use constant HAS_SOCKET_INET6 => eval { require IO::Socket::INET6; };
 
@@ -528,26 +528,6 @@ sub reinit_post_fork {
   # and a new socket, so we don't have 5 spamds sharing the same
   # socket
   $self->connect_sock();
-}
-
-sub _ipv6_ns_warning {
-  my ($self) = @_;
-
-  # warn about the attempted use of an IPv6 nameserver without
-  # IO::Socket::INET6 installed (bug 4412)
-  my $firstns = $self->{res}->{nameservers}[0];
-
-  use Mail::SpamAssassin::Constants qw(:ip);
-  my $ip64 = IP_ADDRESS;
-  my $ip4 = IPV4_ADDRESS;
-
-  # was the nameserver in IPv6 format?
-  if ($firstns =~ /^${ip64}$/o && $firstns !~ /^${ip4}$/o) {
-    my $addr = inet_aton($firstns);
-    if (!defined $addr) {
-      die "IO::Socket::INET6 module is required to use IPv6 nameservers such as '$firstns': $@\n";
-    }
-  }
 }
 
 1;
