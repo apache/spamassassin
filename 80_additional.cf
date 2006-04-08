@@ -73,7 +73,9 @@ meta TVD_EB_PHISH		__FROM_EBAY && NORMAL_HTTP_TO_IP
 # 2006/03/13
 # 0.297   0.3750   0.0000    1.000   0.72    1.00  TVD_FW_MESG2
 # 0.196   0.2479   0.0000    1.000   0.68    1.00  TVD_FW_MESG1
-body TVD_FW_MESG1		/^-+ Original Message -+ From: (?:\w+ )+To: \S+ (?:Sent|Date):.{1,60}Subject: \w+\s*$/
+# 2006/04/08 - updated MESG1 to meta, loosened up the RE
+body __TVD_FW_MESG /^-+ Original Message -+ From: (?:\w+ )+To: \S+ (?:Sent|Date):.{1,60}Subject:/
+meta TVD_FW_MESG1 __TVD_FW_MESG && __GIF_ATTACH
 body TVD_FW_MESG2		/^-- Best Regards, \w+ \w+\s+mailto:/
 
 # 2006/03/13
@@ -193,6 +195,7 @@ mimeheader TVD_FW_GRAPHIC_ID1		Content-Id =~ /<[0-9a-f]{12}(?:\$[0-9a-f]{8}){2}\
 mimeheader TVD_FW_GRAPHIC_ID2		Content-Id =~ /<(?:[0-9A-F]{8}\.){3}[0-9A-F]{8}/
 mimeheader TVD_FW_GRAPHIC_NAME_LONG	Content-Type =~ /\bname="[a-z]{8,}\.gif/
 mimeheader TVD_FW_GRAPHIC_NAME_MID	Content-Type =~ /\bname="[a-z]{6,7}\.gif/
+mimeheader __GIF_ATTACH Content-Type =~ /^image\/gif\b/i
 endif
 
 
