@@ -800,6 +800,7 @@ sub abort_remaining_lookups  {
 
     delete $pending->{$key};
   }
+  $self->{main}->{resolver}->bgabort();
 }
 
 # ---------------------------------------------------------------------------
