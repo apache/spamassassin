@@ -402,6 +402,19 @@ sub poll_responses {
 
 ###########################################################################
 
+=item $res->bgabort()
+
+Call this to release pending requests from memory when aborting backgrounded requests
+
+=cut
+
+sub bgabort {
+  my ($self) = @_;
+  $self->{id_to_callback} = {};
+}
+
+###########################################################################
+
 =item $packet = $res->send($name, $type, $class)
 
 Emulates C<Net::DNS::Resolver::send()>.
