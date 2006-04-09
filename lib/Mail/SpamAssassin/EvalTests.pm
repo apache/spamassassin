@@ -3103,7 +3103,10 @@ sub check_https_ip_mismatch {
     next if ($k !~ m%^https?:/*(?:[^\@/]+\@)?\d+\.\d+\.\d+\.\d+%i);
     foreach (@{$v->{anchor_text}}) {
       next if (m%^https:/*(?:[^\@/]+\@)?\d+\.\d+\.\d+\.\d+%i);
-      return 1 if (m%https:%i);
+      if (m%https:%i) {
+        keys %{$self->{html}->{uri_detail}}; # resets iterator, bug 4829
+        return 1;
+      }
     }
   }
 
@@ -3113,7 +3116,7 @@ sub check_https_ip_mismatch {
 sub check_iframe_src {
   my ($self) = @_;
 
-  while (my($k,$v) = each %{$self->{html}->{uri_detail}}) {
+  foreach my $v ( values %{$self->{html}->{uri_detail}} ) {
     return 1 if $v->{types}->{iframe};
   }
 
