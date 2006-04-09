@@ -2990,22 +2990,18 @@ sub check_ratware_name_id {
 sub check_https_ip_mismatch {
   my ($self) = @_;
 
-  my $flag = 0;
-
   while (my($k,$v) = each %{$self->{html}->{uri_detail}}) {
-    last if $flag;
     next if ($k !~ m%^https?:/*(?:[^\@/]+\@)?\d+\.\d+\.\d+\.\d+%i);
     foreach (@{$v->{anchor_text}}) {
       next if (m%^https:/*(?:[^\@/]+\@)?\d+\.\d+\.\d+\.\d+%i);
       if (m%https:%i) {
-	$flag = 1;
-	last;
+        keys %{$self->{html}->{uri_detail}}; # resets iterator, bug 4829
+        return 1;
       }
     }
   }
-  keys %{$self->{html}->{uri_detail}}; # resets iterator, bug 4829
 
-  return $flag;
+  return 0;
 }
 
 sub check_ratware_envelope_from {
