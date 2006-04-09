@@ -139,6 +139,24 @@ describe TVD_UA_FOSTERING	User-Agent header includes spam indication
 rawbody TVD_SINGLE_SPAN		/<\/span>\s*[a-zA-Z]\s*<span\b/i
 describe TVD_SINGLE_SPAN 	Message has questionable span tags
 
+# 2006/04/09
+# 0.091   0.1107   0.0000    1.000   0.59    1.00  TVD_FINGER_01
+meta TVD_FINGER_01	__TVD_HAPPY_WITH || __TVD_GOT_UR || __TVD_VISIT_SITE
+body __TVD_HAPPY_WITH	/\b(?:satisfied|glad|complaining|happy|content) with (?:ur?|your (?:thing|unit))\b/i
+body __TVD_GOT_UR	/\bgot ur (?:msg|message|email)/i
+body __TVD_VISIT_SITE	/\bvisit (?:this site|here),? www\./i
+describe TVD_FINGER_01	Message talking about how size matters
+
+# 2006/04/09
+# 0.137   0.1672   0.0000    1.000   0.63    0.01  TVD_SUBJ_FINGER_03
+header TVD_SUBJ_FINGER_03	Subject =~ /^\s*\*\s+(?:\w+\W+)+\*\s*$/
+describe TVD_SUBJ_FINGER_03	Subject looks like a standard spam format
+
+# 2006/04/09
+# 0.250   0.3063   0.0000    1.000   0.71    0.01  T_TVD_STOCK1
+body TVD_STOCK1		/(?:(?:Trading Date|Company Name|S\W?t\W?o\W?c\W?k|Current Price|weeks? high|market performance)\s*:.{1,40}){2}/i
+describe TVD_STOCK1	Message looks like it's pushing a stock...
+
 ###########################################################################
 # ReplaceTags rules
 
@@ -178,6 +196,11 @@ replace_rules TVD_FUZZY_SECURITIES
 # 1.692   2.1330   0.0121    0.994   0.87    1.00  TVD_FUZZY_SYMBOL
 body TVD_FUZZY_SYMBOL		/<inter W2><post P2>(?!symbol)<S><Y><M><B><O><L>/i
 replace_rules TVD_FUZZY_SYMBOL
+
+# 2006/04/09
+# 0.110   0.1348   0.0000    1.000   0.61    0.01  TVD_FUZZY_DEGREE
+body TVD_FUZZY_DEGREE	/<inter W1><post P1>\b(?!degree)<D><E><G><R><E><E>\b/i
+replace_rules TVD_FUZZY_DEGREE
 
 endif
 
@@ -220,6 +243,7 @@ score TVD_FUZZY_PHARMACEUTICAL	2.0
 score TVD_FUZZY_SECURITIES	1.8
 score TVD_FUZZY_SYMBOL		1.8
 score FUZZY_MERIDIA		2.0
+score TVD_FUZZY_DEGREE		2.0
 # </gen:mutable>
 endif
 
@@ -251,4 +275,7 @@ score TVD_DOLLARS_US		1.2
 score TVD_EB_PHISH		2.0
 score TVD_SINGLE_SPAN		1.8
 score TVD_UA_FOSTERING		2.0
+score TVD_FINGER_01		2.0
+score TVD_SUBJ_FINGER_03	2.0
+score TVD_STOCK1		2.4
 # </gen:mutable>
