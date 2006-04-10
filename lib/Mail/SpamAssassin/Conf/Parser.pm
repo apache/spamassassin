@@ -836,12 +836,6 @@ sub add_test {
   $conf->{tests}->{$name} = $text;
   $conf->{test_types}->{$name} = $type;
   $conf->{tflags}->{$name} ||= '';
-  if ($type == $Mail::SpamAssassin::Conf::TYPE_META_TESTS) {
-    $conf->{priority}->{$name} ||= 500;
-  }
-  else {
-    $conf->{priority}->{$name} ||= 0;
-  }
   $conf->{priority}->{$name} ||= 0;
   $conf->{source_file}->{$name} = $self->{currentfile};
   $conf->{if_stack}->{$name} = $self->get_if_stack_as_string();

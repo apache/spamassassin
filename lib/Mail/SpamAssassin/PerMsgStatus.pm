@@ -169,15 +169,11 @@ sub check {
       # happen in Conf.pm when we switch a rules from one priority to another
       next unless ($self->{conf}->{priorities}->{$priority} > 0);
 
-      # if shortcircuiting is hit, we skip all other priorities...
-      last if (exists $self->{shortcircuit_type});
-
       dbg("check: running tests for priority: $priority");
 
       # only harvest the dnsbl queries once priority HARVEST_DNSBL_PRIORITY
       # has been reached and then only run once
-      if ($priority >= HARVEST_DNSBL_PRIORITY && $needs_dnsbl_harvest_p && !exists $self->{shortcircuit_type})
-      {
+      if ($priority >= HARVEST_DNSBL_PRIORITY && $needs_dnsbl_harvest_p) {
 	# harvest the DNS results
 	$self->harvest_dnsbl_queries();
 	$needs_dnsbl_harvest_p = 0;
@@ -216,7 +212,7 @@ sub check {
 
     # sanity check, it is possible that no rules >= HARVEST_DNSBL_PRIORITY ran so the harvest
     # may not have run yet.  Check, and if so, go ahead and harvest here.
-    if ($needs_dnsbl_harvest_p && !exists $self->{shortcircuit_type}) {
+    if ($needs_dnsbl_harvest_p) {
       # harvest the DNS results
       $self->harvest_dnsbl_queries();
 
@@ -1243,17 +1239,6 @@ sub _get_tag {
 
             AUTOLEARN => sub { return $self->get_autolearn_status(); },
 
-            SC => sub {
-              my $rule = $self->{shortcircuit_rule};
-              my $type = $self->{shortcircuit_type};
-              return "$rule ($type)" if ($rule);
-              return "no";
-            },
-
-            SCRULE => sub { return ($self->{shortcircuit_rule} || "none") ; },
-
-            SCTYPE => sub { return ($self->{shortcircuit_type} || "no") ; },
-
             TESTS => sub {
               my $arg = (shift || ',');
               return (join($arg, sort(@{$self->{test_names_hit}})) || "none");
@@ -1705,8 +1690,6 @@ sub do_head_tests {
   my ($self, $priority) = @_;
   local ($_);
 
-  return if (exists $self->{shortcircuit_type});
-
   # note: we do this only once for all head pattern tests.  Only
   # eval tests need to use stuff in here.
   $self->{test_log_msgs} = ();        # clear test state
@@ -1825,8 +1808,6 @@ EOT
 sub do_body_tests {
   my ($self, $priority, $textary) = @_;
   local ($_);
-    
-  return if (exists $self->{shortcircuit_type});
 
   dbg("rules: running body-text per-line regexp tests; score so far=".$self->{score});
 
@@ -2242,8 +2223,6 @@ sub do_body_uri_tests {
   my ($self, $priority, @uris) = @_;
   local ($_);
 
-  return if (exists $self->{shortcircuit_type});
-  
   dbg("uri: running uri tests; score so far=".$self->{score});
 
   my $doing_user_rules = 
@@ -2267,7 +2246,6 @@ sub do_body_uri_tests {
   my $evalstr2 = '';
 
   while (my($rulename, $pat) = each %{$self->{conf}{uri_tests}->{$priority}}) {
-
     $evalstr .= '
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
         '.$rulename.'_uri_test($self, @_); # call procedurally for speed
@@ -2336,8 +2314,6 @@ EOT
 sub do_rawbody_tests {
   my ($self, $priority, $textary) = @_;
   local ($_);
-
-  return if (exists $self->{shortcircuit_type});
 
   dbg("rules: running raw-body-text per-line regexp tests; score so far=".$self->{score});
 
@@ -2429,8 +2405,6 @@ EOT
 sub do_full_tests {
   my ($self, $priority, $fullmsgref) = @_;
   local ($_);
-    
-  return if (exists $self->{shortcircuit_type});
   
   dbg("rules: running full-text regexp tests; score so far=".$self->{score});
 
@@ -2533,8 +2507,6 @@ sub do_full_eval_tests {
 sub do_meta_tests {
   my ($self, $priority) = @_;
   local ($_);
-    
-  return if (exists $self->{shortcircuit_type});
 
   dbg("rules: running meta tests; score so far=" . $self->{score} );
 
@@ -2679,14 +2651,11 @@ EOT
 sub run_eval_tests {
   my ($self, $evalhash, $prepend2desc, @extraevalargs) = @_;
   local ($_);
-
-  return if (exists $self->{shortcircuit_type});
   
   my $debugenabled = would_log('dbg');
 
   my $scoreset = $self->{conf}->get_score_set();
   while (my ($rulename, $test) = each %{$evalhash}) {
-    last if (exists $self->{shortcircuit_type});
 
     # Score of 0, skip it.
     next unless ($self->{conf}->{scores}->{$rulename});
@@ -2836,15 +2805,7 @@ sub clear_test_state {
 }
 
 sub _handle_hit {
-    my ($self, $rule, $score, $area, $desc, $scrule) = @_;
-
-    # if this was a shortcircuited rule hit, lets do some cleanup first  
-    if ($scrule) {
-       undef $self->{test_names_hit};       # reset rule hits
-       $self->{score}                = 0;   # reset score
-       $self->{tag_data}->{REPORT}   = '';  # reset tag data
-       $self->{tag_data}->{SUMMARY}  = '';  # reset tag data
-    }
+    my ($self, $rule, $score, $area, $desc) = @_;
 
     # ignore meta-match sub-rules.
     if ($rule =~ /^__/) { push(@{$self->{subtest_names_hit}}, $rule); return; }
@@ -2893,8 +2854,6 @@ sub got_hit {
   my ($self, $rule, $area, $value) = @_;
   $value ||= 1;
 
-  return if (exists $self->{shortcircuit_type});
-
   my $already_hit = $self->{tests_already_hit}->{$rule} || 0;
   $self->{tests_already_hit}->{$rule} = $already_hit + $value;
 
@@ -2906,26 +2865,7 @@ sub got_hit {
 
   my $score = $self->{conf}->{scores}->{$rule};
 
-  my $sc = $self->{conf}->{shortcircuit};
-
-  if (exists $sc->{$rule}) {
-    $self->{shortcircuit_rule} = $rule;
-    $self->{shortcircuit_type} = $sc->{$rule};
-
-    if ($self->{shortcircuit_type} eq "spam") {
-      $score = $self->{conf}->{shortcircuit_spam_score};
-      dbg("shortcircuit: s/c as spam, score of $score");
-    }
-    elsif ($self->{shortcircuit_type} eq "ham") {
-      $score = $self->{conf}->{shortcircuit_ham_score};
-      dbg("shortcircuit: s/c as ham, score of $score");
-    }
-    else {
-      dbg("shortcircuit: s/c classification not specified, using default score of $score");
-    }
-  }
-
-  $self->_handle_hit($rule, $score, $area, $desc, $self->{shortcircuit_rule});
+  $self->_handle_hit($rule, $score, $area, $desc);
 }
 
 sub test_log {
