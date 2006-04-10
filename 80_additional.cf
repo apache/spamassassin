@@ -152,9 +152,9 @@ describe TVD_FINGER_01	Message talking about how size matters
 header TVD_SUBJ_FINGER_03	Subject =~ /^\s*\*\s+(?:\w+\W+)+\*\s*$/
 describe TVD_SUBJ_FINGER_03	Subject looks like a standard spam format
 
-# 2006/04/09
-# 0.250   0.3063   0.0000    1.000   0.71    0.01  T_TVD_STOCK1
-body TVD_STOCK1		/(?:(?:Trading Date|Company Name|S\W?t\W?o\W?c\W?k|Current Price|weeks? high|market performance)\s*:.{1,40}){2}/i
+# 2006/04/09 original, 2006/04/11 updated
+# 0.587   0.7180   0.0000    1.000   0.80    0.01  TVD_STOCK1
+body TVD_STOCK1 /(?:(?:Trad(?:e|ing) Date|Company(?: Name)?|S\W?t\W?o\W?c\W?k|Current Price|expectations|weeks? high|market performance|(?:year|week|month) target)\s*:.{1,40}){2}/i
 describe TVD_STOCK1	Message looks like it's pushing a stock...
 
 ###########################################################################
