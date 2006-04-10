@@ -33,7 +33,7 @@ report _CONTACTADDRESS_ for details.
 report 
 report Content preview:  _PREVIEW_
 report 
-report Content analysis details:   (_SCORE_ points, _REQD_ required, s/c _SCTYPE_)
+report Content analysis details:   (_SCORE_ points, _REQD_ required)
 report
 report " pts rule name              description"
 report  ---- ---------------------- --------------------------------------------------
@@ -92,7 +92,7 @@ add_header all Level _STARS(*)_
 #        FROM_HAS_MIXED_NUMS3,HOME_EMPLOYMENT,INVALID_DATE,INVALID_MSGID
 #        LINES_OF_YELLING,MSGID_HAS_NO_AT,NO_REAL_NAME,ONCE_IN_LIFETIME
 #        UNDISC_RECIPS autolearn=spam version=2.60-cvs
-add_header all Status "_YESNO_, score=_SCORE_ required=_REQD_ tests=_TESTS_ shortcircuit=_SCTYPE_ autolearn=_AUTOLEARN_ version=_VERSION_"
+add_header all Status "_YESNO_, score=_SCORE_ required=_REQD_ tests=_TESTS_ autolearn=_AUTOLEARN_ version=_VERSION_"
 
 ###########################################################################
 # Default prefs values: users can override these in their 

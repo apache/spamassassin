@@ -259,8 +259,8 @@ use constant IP_ADDRESS => qr/
 
 # ---------------------------------------------------------------------------
 
-use constant META_TEST_MIN_PRIORITY => -500;
-use constant HARVEST_DNSBL_PRIORITY =>  500;
+use constant META_TEST_MIN_PRIORITY => 500;
+use constant HARVEST_DNSBL_PRIORITY => 500;
 
 # regular expression that matches message separators in The University of
 # Washington's MBX mailbox format
