@@ -648,6 +648,9 @@ sub finish_parsing {
   my ($self) = @_;
   my $conf = $self->{conf};
 
+  $self->trace_meta_dependencies();
+  $self->fix_priorities();
+
   while (my ($name, $text) = each %{$conf->{tests}}) {
     my $type = $conf->{test_types}->{$name};
     my $priority = $conf->{priority}->{$name} || 0;
@@ -710,15 +713,6 @@ sub finish_parsing {
         $conf->{head_tests}->{$priority}->{$name} = $text;
       }
       elsif ($type == $Mail::SpamAssassin::Conf::TYPE_META_TESTS) {
-        # Meta Tests must have a priority of at least META_TEST_MIN_PRIORITY,
-        # if it's lower then reset the value
-        if ($priority < META_TEST_MIN_PRIORITY) {
-          # we need to lower the count of the old priority and raise the
-          # count of the new priority
-          $conf->{priorities}->{$priority}--;
-          $priority = META_TEST_MIN_PRIORITY;
-          $conf->{priorities}->{$priority}++;
-        }
         $conf->{meta_tests}->{$priority}->{$name} = $text;
       }
       elsif ($type == $Mail::SpamAssassin::Conf::TYPE_URI_TESTS) {
@@ -743,6 +737,88 @@ sub finish_parsing {
 
   delete $conf->{tests};                # free it up
   delete $conf->{priority};             # free it up
+}
+
+sub trace_meta_dependencies {
+  my ($self) = @_;
+  my $conf = $self->{conf};
+  $conf->{meta_dependencies} = { };
+
+  foreach my $name (keys %{$conf->{tests}}) {
+    next unless ($conf->{test_types}->{$name}
+                    == $Mail::SpamAssassin::Conf::TYPE_META_TESTS);
+
+    my $deps = [ ];
+
+    # Lex the rule into tokens using a rather simple RE method ...
+    my $rule = $conf->{tests}->{$name};
+    my $lexer = ARITH_EXPRESSION_LEXER;
+    my @tokens = ($rule =~ m/$lexer/g);
+
+    # Go through each token in the meta rule
+    foreach my $token (@tokens) {
+
+      # Numbers can't be rule names
+      next if ($token =~ /^(?:\W+|\d+)$/);
+
+      # If the token is a rule name, add it as a dependency
+      next unless exists $conf->{tests}->{$token};
+      push @{$deps}, $token;
+    }
+
+    # this is too noisy
+    # if (scalar @$deps > 0) {
+    # dbg("rules: meta rule $name depends on ".join(' ', @$deps));
+    # }
+
+    $conf->{meta_dependencies}->{$name} = $deps;
+  }
+}
+
+sub fix_priorities {
+  my ($self) = @_;
+  my $conf = $self->{conf};
+
+  die unless $conf->{meta_dependencies};    # order requirement
+  my $pri = $conf->{priority};
+  my $alreadydone = { };
+
+  # sort into priority order, lowest first -- this way we ensure that if we
+  # rearrange the pri of a rule deep in recursion here, then later iterate in
+  # *this* loop to that rule, we cannot accidentally increase its priority.
+
+  foreach my $rule (sort {
+            $pri->{$a} <=> $pri->{$b}
+          } keys %{$pri})
+  {
+    $self->_fix_pri_recurse($conf, $rule, $rule, $alreadydone);
+  }
+}
+
+sub _fix_pri_recurse {
+  my ($self, $conf, $rule, $shorter, $alreadydone) = @_;
+
+  # avoid infinite recursion by only looking at each rule once
+  return if $alreadydone->{$rule};
+  $alreadydone->{$rule} = 1;
+
+  # we only need to worry about meta rules -- they are the
+  # only type of rules who depend on other rules
+  my $deps = $conf->{meta_dependencies}->{$rule};
+  return unless (defined $deps);
+
+  my $basepri = $conf->{priority}->{$rule};
+
+  foreach my $dep (@$deps) {
+    my $deppri = $conf->{priority}->{$dep};
+    if ($deppri > $basepri) {
+      dbg("rules: meta $shorter (pri $basepri) depends on $dep (pri $deppri): fixing");
+      $conf->{priority}->{$dep} = $basepri;
+    }
+
+    # and recurse
+    $self->_fix_pri_recurse($conf, $dep, $shorter, $alreadydone);
+  }
 }
 
 ###########################################################################

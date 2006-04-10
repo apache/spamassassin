@@ -190,13 +190,6 @@ sub check {
        $self->{resolver}->finish_socket() if $self->{resolver};
       }
 
-      # since meta tests must have a priority of META_TEST_MIN_PRIORITY or
-      # higher then there is no reason to even call the do_meta_tests method
-      # if we are less than that.
-      if ($priority >= META_TEST_MIN_PRIORITY) {
-	$self->do_meta_tests($priority);
-      }
-
       # do head tests
       $self->do_head_tests($priority);
       $self->do_head_eval_tests($priority);
@@ -210,6 +203,8 @@ sub check {
   
       $self->do_full_tests($priority, \$fulltext);
       $self->do_full_eval_tests($priority, \$fulltext);
+
+      $self->do_meta_tests($priority);
 
       # we may need to call this more often than once through the loop, but
       # it needs to be done at least once, either at the beginning or the end.
@@ -2547,9 +2542,10 @@ sub do_meta_tests {
   return if (exists $self->{shortcircuit_type});
 
   dbg("rules: running meta tests; score so far=" . $self->{score} );
+  my $conf = $self->{conf};
 
   my $doing_user_rules = 
-    $self->{conf}->{user_rules_to_compile}->{$Mail::SpamAssassin::Conf::TYPE_META_TESTS};
+    $conf->{user_rules_to_compile}->{$Mail::SpamAssassin::Conf::TYPE_META_TESTS};
 
   # clean up priority value so it can be used in a subroutine name
   my $clean_priority;
@@ -2568,11 +2564,11 @@ sub do_meta_tests {
   my $evalstr = '';
 
   # Get the list of meta tests
-  my @metas = keys %{ $self->{conf}{meta_tests}->{$priority} };
+  my @metas = keys %{ $conf->{meta_tests}->{$priority} };
 
   # Go through each rule and figure out what we need to do
   foreach $rulename (@metas) {
-    my $rule   = $self->{conf}->{meta_tests}->{$priority}->{$rulename};
+    my $rule   = $conf->{meta_tests}->{$priority}->{$rulename};
     my $token;
 
     # Lex the rule into tokens using a rather simple RE method ...
@@ -2582,8 +2578,8 @@ sub do_meta_tests {
     # Set the rule blank to start
     $meta{$rulename} = "";
 
-    # By default, there are no dependencies for a rule
-    @{ $rule_deps{$rulename} } = ();
+    # List dependencies that are meta tests in the same priority band
+    $rule_deps{$rulename} = [ ];
 
     # Go through each token in the meta rule
     foreach $token (@tokens) {
@@ -2598,7 +2594,7 @@ sub do_meta_tests {
 
         # If the token is another meta rule, add it as a dependency
         push (@{ $rule_deps{$rulename} }, $token)
-          if (exists $self->{conf}{meta_tests}->{$priority}->{$token});
+          if (exists $conf->{meta_tests}->{$priority}->{$token});
       }
     }
   }
