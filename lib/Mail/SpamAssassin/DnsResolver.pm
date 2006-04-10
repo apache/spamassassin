@@ -315,7 +315,7 @@ sub _packet_id {
   my $ques = $questions[0];
 
   if (defined $ques) {
-    return $id . $ques->qname . $ques->qtype . $ques->qclass;
+    return join '/', $id, $ques->qname, $ques->qtype, $ques->qclass;
   } else {
     # odd.  this should not happen, but clearly some DNS servers
     # can return something that Net::DNS interprets as having no
