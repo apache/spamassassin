@@ -2561,7 +2561,11 @@ sub do_meta_tests {
   }
 
   my (%rule_deps, %setup_rules, %meta, $rulename);
-  my $evalstr = '';
+  my $evalstr = '
+
+    my $hit = $self->{tests_already_hit};
+  
+  ';
 
   # Get the list of meta tests
   my @metas = keys %{ $conf->{meta_tests}->{$priority} };
@@ -2589,7 +2593,7 @@ sub do_meta_tests {
         $meta{$rulename} .= "$token ";
       }
       else {
-        $meta{$rulename} .= "\$self->{'tests_already_hit'}->{'$token'} ";
+        $meta{$rulename} .= "\$hit->{'$token'} ";
         $setup_rules{$token}=1;
 
         # If the token is another meta rule, add it as a dependency
@@ -2600,13 +2604,14 @@ sub do_meta_tests {
   }
 
   # avoid "undefined" warnings by providing a default value for needed rules
-  $evalstr .= join("\n", (map { "\$self->{'tests_already_hit'}->{'$_'} ||= 0;" } keys %setup_rules), "");
+  $evalstr .= join("\n", (map { "\$hit->{'$_'} ||= 0;" } keys %setup_rules), "");
 
   # Sort by length of dependencies list.  It's more likely we'll get
   # the dependencies worked out this way.
   @metas = sort { @{ $rule_deps{$a} } <=> @{ $rule_deps{$b} } } @metas;
 
   my $count;
+  my $tflags = $conf->{tflags};
 
   # Now go ahead and setup the eval string
   do {
@@ -2619,9 +2624,19 @@ sub do_meta_tests {
       # If we depend on meta rules that haven't run yet, skip it
       next if (grep( $metas{$_}, @{ $rule_deps{ $metas[$i] } }));
 
+      # If we depend on network tests, call ensure_rules_are_complete()
+      # to block until they are
+      my $alldeps = join ' ', grep {
+              $tflags->{$_} =~ /\bnet\b/
+            } @{ $conf->{meta_dependencies}->{ $metas[$i] } };
+
+      if ($alldeps ne '') {
+        $evalstr .= '  $self->ensure_rules_are_complete(qw{'.$alldeps.'});';
+      }
+
       # Add this meta rule to the eval line
-      $evalstr .= '  $result = '.$meta{$metas[$i]}.";\n";
-      $evalstr .= '  if ($result) { $self->got_hit (q#'.$metas[$i].'#, "", $result); }'."\n";
+      $evalstr .= '  $r = '.$meta{$metas[$i]}.";\n";
+      $evalstr .= '  if ($r) { $self->got_hit (q#'.$metas[$i].'#, "", $r); }'."\n";
 
       splice @metas, $i--, 1;    # remove this rule from our list
     }
@@ -2658,7 +2673,7 @@ sub do_meta_tests {
         # crashes meta tests.
 
         my (\$self) = \@_;
-	my \$result;
+	my \$r;
 
         $evalstr;
     }
@@ -2679,6 +2694,21 @@ EOT
     use strict "refs";
   }
 }    # do_meta_tests()
+
+sub ensure_rules_are_complete {
+  my $self = shift;
+  # @_ is now the list of rules
+  foreach my $r (@_) {
+    # dbg("rules: meta rule depends on net rule $r");
+    next if ($self->is_rule_complete($r));
+    dbg("rules: meta rule depends on pending rule $r, blocking");
+    $self->harvest_until_rule_completes($r);
+
+    if (!$self->is_rule_complete($r)) {
+      dbg ("rules: rule $r is still not complete; exited early?");
+    }
+  }
+}
 
 ###########################################################################
 
