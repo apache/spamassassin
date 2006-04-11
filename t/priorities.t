@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 
+use constant NUM_TESTS => 10;
+
 BEGIN {
   if (-e 't/test_dir') { # if we are running "t/priorities.t", kluge around ...
     chdir 't';
@@ -17,7 +19,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use SATest; sa_t_init("priorities");
 use strict;
-use Test; BEGIN { plan tests => 8 };
+use Test; BEGIN { plan tests => NUM_TESTS };
 
 use Mail::SpamAssassin;
 
@@ -58,6 +60,14 @@ tstlocalrules (q{
   shortcircuit DIGEST_MULTIPLE       spam
   priority DIGEST_MULTIPLE           -300
 
+  meta FOO1 (FOO2 && FOO3)
+  meta FOO2 (1)
+  meta FOO3 (FOO4 && FOO5)
+  meta FOO4 (1)
+  meta FOO5 (1)
+  priority FOO5 -23
+  priority FOO1 -28
+
 });
 
 my $sa = create_saobj({
@@ -81,6 +91,8 @@ ok assert_rule_pri 'XX_RCVD_IN_NJABL_MULTI', -530;
 # SC_URIBL_BAYES will have overridden its base priority setting
 ok assert_rule_pri 'BAYES_99', -510;
 
+ok assert_rule_pri 'FOO5', -28;
+ok assert_rule_pri 'FOO1', -28;
 
 # ---------------------------------------------------------------------------
 

@@ -749,29 +749,42 @@ sub trace_meta_dependencies {
                     == $Mail::SpamAssassin::Conf::TYPE_META_TESTS);
 
     my $deps = [ ];
-
-    # Lex the rule into tokens using a rather simple RE method ...
-    my $rule = $conf->{tests}->{$name};
-    my $lexer = ARITH_EXPRESSION_LEXER;
-    my @tokens = ($rule =~ m/$lexer/g);
-
-    # Go through each token in the meta rule
-    foreach my $token (@tokens) {
-
-      # Numbers can't be rule names
-      next if ($token =~ /^(?:\W+|\d+)$/);
-
-      # If the token is a rule name, add it as a dependency
-      next unless exists $conf->{tests}->{$token};
-      push @{$deps}, $token;
-    }
+    my $alreadydone = { };
+    $self->_meta_deps_recurse($conf, $name, $name, $deps, $alreadydone);
+    $conf->{meta_dependencies}->{$name} = $deps;
 
     # this is too noisy
     # if (scalar @$deps > 0) {
-    # dbg("rules: meta rule $name depends on ".join(' ', @$deps));
+    # dbg("rules: meta dependencies: $name => ".join(' ', @$deps));
     # }
+  }
+}
 
-    $conf->{meta_dependencies}->{$name} = $deps;
+sub _meta_deps_recurse {
+  my ($self, $conf, $toprule, $name, $deps, $alreadydone) = @_;
+
+  # Only do each rule once per top-level meta; avoid infinite recursion
+  return if $alreadydone->{$name};
+  $alreadydone->{$name} = 1;
+
+  # Obviously, don't trace empty or nonexistent rules
+  my $rule = $conf->{tests}->{$name};
+  return unless $rule;
+
+  # Lex the rule into tokens using a rather simple RE method ...
+  my $lexer = ARITH_EXPRESSION_LEXER;
+  my @tokens = ($rule =~ m/$lexer/g);
+
+  # Go through each token in the meta rule
+  foreach my $token (@tokens) {
+    # has to be an alpha+numeric token
+    next if ($token =~ /^(?:\W+|\d+)$/);
+    # and has to be a rule name
+    next unless exists $conf->{tests}->{$token};
+
+    # add and recurse
+    push @{$deps}, $token;
+    $self->_meta_deps_recurse($conf, $toprule, $token, $deps, $alreadydone);
   }
 }
 
@@ -781,43 +794,27 @@ sub fix_priorities {
 
   die unless $conf->{meta_dependencies};    # order requirement
   my $pri = $conf->{priority};
-  my $alreadydone = { };
 
   # sort into priority order, lowest first -- this way we ensure that if we
-  # rearrange the pri of a rule deep in recursion here, then later iterate in
-  # *this* loop to that rule, we cannot accidentally increase its priority.
-
+  # rearrange the pri of a rule early on, we cannot accidentally increase its
+  # priority later.
   foreach my $rule (sort {
             $pri->{$a} <=> $pri->{$b}
           } keys %{$pri})
   {
-    $self->_fix_pri_recurse($conf, $rule, $rule, $alreadydone);
-  }
-}
+    # we only need to worry about meta rules -- they are the
+    # only type of rules which depend on other rules
+    my $deps = $conf->{meta_dependencies}->{$rule};
+    next unless (defined $deps);
 
-sub _fix_pri_recurse {
-  my ($self, $conf, $rule, $shorter, $alreadydone) = @_;
-
-  # avoid infinite recursion by only looking at each rule once
-  return if $alreadydone->{$rule};
-  $alreadydone->{$rule} = 1;
-
-  # we only need to worry about meta rules -- they are the
-  # only type of rules who depend on other rules
-  my $deps = $conf->{meta_dependencies}->{$rule};
-  return unless (defined $deps);
-
-  my $basepri = $conf->{priority}->{$rule};
-
-  foreach my $dep (@$deps) {
-    my $deppri = $conf->{priority}->{$dep};
-    if ($deppri > $basepri) {
-      dbg("rules: meta $shorter (pri $basepri) depends on $dep (pri $deppri): fixing");
-      $conf->{priority}->{$dep} = $basepri;
+    my $basepri = $pri->{$rule};
+    foreach my $dep (@$deps) {
+      my $deppri = $pri->{$dep};
+      if ($deppri > $basepri) {
+        dbg("rules: $rule (pri $basepri) requires $dep (pri $deppri): fixed");
+        $pri->{$dep} = $basepri;
+      }
     }
-
-    # and recurse
-    $self->_fix_pri_recurse($conf, $dep, $shorter, $alreadydone);
   }
 }
 
