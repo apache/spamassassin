@@ -11,6 +11,10 @@
 #
 ###########################################################################
 
+# HTTPSMismatch - find URI mismatches between href and anchor text
+#
+loadplugin Mail::SpamAssassin::Plugin::HTTPSMismatch
+
 ###########################################################################
 # experimental plugins
 
@@ -19,4 +23,3 @@
 # Mail::DKIM module required for use, see INSTALL for more information.
 #
 #loadplugin Mail::SpamAssassin::Plugin::DKIM
-
