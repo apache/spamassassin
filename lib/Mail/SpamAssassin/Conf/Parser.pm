@@ -238,6 +238,8 @@ sub parse {
   $self->{if_stack} = \@if_stack;
 
   while (defined ($line = shift @conf_lines)) {
+    local ($1);         # bug 3838: prevent random taint flagging of $1
+
     $line =~ s/(?<!\\)#.*$//; # remove comments
     $line =~ s/^\s+//;  # remove leading whitespace
     $line =~ s/\s+$//;  # remove tailing whitespace
