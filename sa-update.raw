@@ -120,7 +120,7 @@ my %opt = ();
 @{$opt{'channel'}} = ();
 my $GPG_ENABLED = 1;
 
-$opt{'gpghomedir'} = File::Spec->catfile($LOCAL_RULES_DIR, '/sa-update-keys');
+$opt{'gpghomedir'} = File::Spec->catfile($LOCAL_RULES_DIR, 'sa-update-keys');
 
 Getopt::Long::Configure(
   qw(bundling no_getopt_compat no_auto_abbrev no_ignore_case));
