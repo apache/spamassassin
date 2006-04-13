@@ -488,11 +488,11 @@ sub text_style {
 	  $new{size} = $1;
         }
       }
-      elsif ($tag eq "span" && $name eq "style") {
-        my $style = $new{style} = $attr->{style};
-	my @parts = split(/;/, $style);
+      elsif ($name eq 'style') {
+        $new{style} = $attr->{style};
+	my @parts = split(/;/, $new{style});
 	foreach (@parts) {
-	  if (/\s*(background-)?color:\s*([^;]+)\s*/i) {
+	  if (/^\s*(background-)?color:\s*(.+)\s*$/i) {
 	    my $whcolor = $1 ? 'bgcolor' : 'fgcolor';
 	    my $value = lc $2;
 
@@ -515,26 +515,21 @@ sub text_style {
 	      $new{$whcolor} = name_to_rgb($value);
 	    }
 	  }
-	  elsif (/\s*display:\s*none\b/i) {
-	    $new{display} = 'none';
-	    $self->put_results(span_invisible => 1);
-	  }
-	  elsif (/\s*visibility:\s*hidden\b/i) {
-	    $new{visibility} = 'hidden';
-	    $self->put_results(span_invisible => 1);
+	  elsif (/^\s*([a-z_-]+)\s*:\s*(\S.*?)\s*$/i) {
+	    # "display: none", "visibility: hidden", etc.
+	    $new{'style_'.$1} = $2;
 	  }
 	}
+      }
+      elsif ($name eq "bgcolor") {
+	# overwrite with hex value, $new{bgcolor} is set below
+        $attr->{bgcolor} = name_to_rgb($attr->{bgcolor});
       }
       else {
-	if ($name eq "bgcolor") {
-	  # overwrite with hex value, $new{bgcolor} is set below
-	  $attr->{bgcolor} = name_to_rgb($attr->{bgcolor});
-	}
-	else {
-	  # attribute is probably okay
-	  $new{$name} = $attr->{$name};
-	}
+        # attribute is probably okay
+	$new{$name} = $attr->{$name};
       }
+
       if ($new{size} > $self->{max_size}) {
 	$self->{max_size} = $new{size};
       }
@@ -559,8 +554,8 @@ sub html_font_invisible {
   my $fg = $self->{text_style}[-1]->{fgcolor};
   my $bg = $self->{text_style}[-1]->{bgcolor};
   my $size = $self->{text_style}[-1]->{size};
-  my $display = $self->{text_style}[-1]->{display};
-  my $visibility = $self->{text_style}[-1]->{visibility};
+  my $display = $self->{text_style}[-1]->{style_display};
+  my $visibility = $self->{text_style}[-1]->{style_visibility};
 
   # invisibility
   if (substr($fg,-6) eq substr($bg,-6)) {
