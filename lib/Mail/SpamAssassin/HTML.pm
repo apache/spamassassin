@@ -519,6 +519,10 @@ sub text_style {
 	    $new{display} = 'none';
 	    $self->put_results(span_invisible => 1);
 	  }
+	  elsif (/\s*visibility:\s*hidden\b/i) {
+	    $new{visibility} = 'hidden';
+	    $self->put_results(span_invisible => 1);
+	  }
 	}
       }
       else {
@@ -556,6 +560,7 @@ sub html_font_invisible {
   my $bg = $self->{text_style}[-1]->{bgcolor};
   my $size = $self->{text_style}[-1]->{size};
   my $display = $self->{text_style}[-1]->{display};
+  my $visibility = $self->{text_style}[-1]->{visibility};
 
   # invisibility
   if (substr($fg,-6) eq substr($bg,-6)) {
@@ -595,6 +600,10 @@ sub html_font_invisible {
 
   # <span style="display: none">
   if ($display && lc $display eq 'none') {
+    return 1;
+  }
+
+  if ($visibility && lc $visibility eq 'hidden') {
     return 1;
   }
 
