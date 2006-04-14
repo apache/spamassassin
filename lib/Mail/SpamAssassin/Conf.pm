@@ -2215,7 +2215,7 @@ are run before positive priority values). The default test priority is 0
     type => $CONF_TYPE_HASH_KEY_VALUE
   });
 
-=item shortcircuit SYMBOLIC_TEST_NAME {spam|ham|default|off}
+=item shortcircuit SYMBOLIC_TEST_NAME {ham|spam|on|off}
 
 Shortcircuiting a test will force all other pending rules to be skipped, if
 that test is hit.
@@ -2229,17 +2229,7 @@ type to C<off>.
 
 =over 4
 
-=item spam
-
-Override the default score of this rule with the score from
-C<shortcircuit_spam_score>.
-
-=item ham
-
-Override the default score of this rule with the score from
-C<shortcircuit_ham_score>.
-
-=item default
+=item on
 
 Shortcircuits the rest of the tests, but does not make a strict classification
 of spam or ham.  Rather, it uses the default score for the rule being
@@ -2250,8 +2240,8 @@ shortcircuited.  This would allow you, for example, to define a rule such as
   body TEST /test/
   describe TEST test rule that scores barely over spam threshold
   score TEST 5.5
-  priority TEST -10
-  shortcircuit TEST default
+  priority TEST -100
+  shortcircuit TEST on
 
 =back
 
@@ -2261,6 +2251,38 @@ as opposed to 100 (default) if it were classified as spam.
 =item off
 
 Disables shortcircuiting on said rule.
+
+=item spam
+
+Shortcircuit the rule using a set of defaults; override the default score of
+this rule with the score from C<shortcircuit_spam_score>, set the
+C<noautolearn> tflag, and set priority to C<-100>.  In other words,
+equivalent to:
+
+=over 4
+
+  shortcircuit TEST on
+  priority TEST -100
+  score TEST 100
+  tflags TEST noautolearn
+
+=back
+
+=item ham
+
+Shortcircuit the rule using a set of defaults; override the default score of
+this rule with the score from C<shortcircuit_ham_score>, set the C<noautolearn>
+and C<nice> tflags, and set priority to C<-100>.   In other words, equivalent
+to:
+
+=over 4
+
+  shortcircuit TEST on
+  priority TEST -100
+  score TEST -100
+  tflags TEST noautolearn nice
+
+=back
 
 =back
 
@@ -2280,12 +2302,26 @@ Disables shortcircuiting on said rule.
       } else {
         return $INVALID_VALUE;
       }
-      if ($type =~ m/^(?:spam|ham|default)$/) {
-        dbg("shortcircuit: adding $rule $type");
+
+      if ($type =~ m/^(?:spam|ham)$/) {
+        dbg("shortcircuit: adding $rule using abbreviation $type");
+
+        # set the defaults:
         $self->{shortcircuit}->{$rule} = $type;
-      } elsif ($type eq "off") {
+        $self->{priority}->{$rule} = -100;
+
+        my $tf = $self->{tflags}->{$rule};
+        $self->{tflags}->{$rule} = ($tf ? $tf." " : "") .
+                ($type eq 'ham' ? "nice " : "") .
+                "noautolearn";
+      }
+      elsif ($type eq "on") {
+        $self->{shortcircuit}->{$rule} = "on";
+      }
+      elsif ($type eq "off") {
         delete $self->{shortcircuit}->{$rule};
-      } else {
+      }
+      else {
         return $INVALID_VALUE;
       }
     }
