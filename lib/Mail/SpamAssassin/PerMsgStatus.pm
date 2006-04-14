@@ -2944,22 +2944,21 @@ sub got_hit {
 
   my $score = $self->{conf}->{scores}->{$rule};
 
-  my $sc = $self->{conf}->{shortcircuit};
-
-  if (exists $sc->{$rule}) {
+  my $sctype = $self->{conf}->{shortcircuit}->{$rule};
+  if ($sctype) {
     $self->{shortcircuit_rule} = $rule;
-    $self->{shortcircuit_type} = $sc->{$rule};
-
-    if ($self->{shortcircuit_type} eq "spam") {
-      $score = $self->{conf}->{shortcircuit_spam_score};
-      dbg("shortcircuit: s/c as spam, score of $score");
-    }
-    elsif ($self->{shortcircuit_type} eq "ham") {
-      $score = $self->{conf}->{shortcircuit_ham_score};
-      dbg("shortcircuit: s/c as ham, score of $score");
+    if ($sctype eq 'on') {  # guess by rule score
+      $self->{shortcircuit_type} = ($score < 0 ? 'ham' : 'spam');
+      dbg("shortcircuit: s/c due to $rule, using score of $score");
     }
     else {
-      dbg("shortcircuit: s/c classification not specified, using default score of $score");
+      $self->{shortcircuit_type} = $sctype;
+      if ($sctype eq 'ham') {
+        $score = $self->{conf}->{shortcircuit_ham_score};
+      } else {
+        $score = $self->{conf}->{shortcircuit_spam_score};
+      }
+      dbg("shortcircuit: s/c $sctype due to $rule, using score of $score");
     }
   }
 
