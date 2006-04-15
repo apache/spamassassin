@@ -384,61 +384,11 @@ sub set_config {
   $conf->{parser}->register_commands(\@cmds);
 }
 
-sub check_tick {
-  my ($self, $opts) = @_;
-
-  return if ($self->{dns_not_available});
-  $self->complete_lookups($opts->{permsgstatus}->{uribl_scanstate}, 0.3);
-  return 1;
-}
-
-sub check_post_dnsbl {
-  my ($self, $opts) = @_;
-
-  return if ($self->{dns_not_available});
-
-  my $scan = $opts->{permsgstatus};
-  my $scanstate = $scan->{uribl_scanstate};
-
-  # try to complete a few more
-  if (!$self->complete_lookups($scanstate, 0.1)) {
-    my $secs_to_wait = $scan->{conf}->{uridnsbl_timeout};
-    if ($secs_to_wait < 0) { $secs_to_wait = 0; }
-    my $now = time;
-    my $deadline = $now + $secs_to_wait;
-    dbg("uridnsbl: waiting $secs_to_wait seconds for URIDNSBL lookups to complete");
-
-    while ($now < $deadline) {
-      last if ($self->complete_lookups($scanstate, $deadline - $now));
-      $now = time;
-    }
-    dbg("uridnsbl: done waiting for URIDNSBL lookups to complete");
-  }
-
-  foreach my $rulename (keys %{$scanstate->{active_rules_revipbl}},
-                        keys %{$scanstate->{active_rules_rhsbl}})
-  {
-    $scan->clear_test_state();
-
-    if ($scanstate->{hits}->{$rulename}) {
-      my $uris = join (' ', keys %{$scanstate->{hits}->{$rulename}});
-      $scan->test_log ("URIs: $uris");
-      $scan->got_hit ($rulename, "");
-    }
-  }
-
-  $self->abort_remaining_lookups ($scanstate);
-}
-
 # ---------------------------------------------------------------------------
 
 sub setup {
   my ($self, $scanstate) = @_;
-
-  $scanstate->{pending_lookups} = { };
   $scanstate->{seen_domain} = { };
-  $scanstate->{last_count} = 0;
-  $scanstate->{times_count_was_same} = 0;
 }
 
 # ---------------------------------------------------------------------------
@@ -499,12 +449,11 @@ sub lookup_domain_ns {
   my ($self, $scanstate, $obj, $dom) = @_;
 
   my $key = "NS:".$dom;
-  return if $scanstate->{pending_lookups}->{$key};
+  return if $scanstate->{scanner}->{async}->get_lookup($key);
 
   # dig $dom ns
-  my $ent = $self->start_lookup ($scanstate, 'NS', $self->res_bgsend($dom, 'NS'));
+  my $ent = $self->start_lookup ($scanstate, 'NS', $self->res_bgsend($scanstate, $dom, 'NS'), $key);
   $ent->{obj} = $obj;
-  $scanstate->{pending_lookups}->{$key} = $ent;
 }
 
 sub complete_ns_lookup {
@@ -544,12 +493,11 @@ sub lookup_a_record {
   my ($self, $scanstate, $obj, $hname) = @_;
 
   my $key = "A:".$hname;
-  return if $scanstate->{pending_lookups}->{$key};
+  return if $scanstate->{scanner}->{async}->get_lookup($key);
 
   # dig $hname a
-  my $ent = $self->start_lookup ($scanstate, 'A', $self->res_bgsend($hname, 'A'));
+  my $ent = $self->start_lookup ($scanstate, 'A', $self->res_bgsend($scanstate, $hname, 'A'), $key);
   $ent->{obj} = $obj;
-  $scanstate->{pending_lookups}->{$key} = $ent;
 }
 
 sub complete_a_lookup {
@@ -585,16 +533,15 @@ sub lookup_single_dnsbl {
   my ($self, $scanstate, $obj, $rulename, $lookupstr, $dnsbl, $qtype) = @_;
 
   my $key = "DNSBL:".$dnsbl.":".$lookupstr;
-  return if $scanstate->{pending_lookups}->{$key};
+  return if $scanstate->{scanner}->{async}->get_lookup($key);
   my $item = $lookupstr.".".$dnsbl;
 
   # dig $ip txt
   my $ent = $self->start_lookup ($scanstate, 'DNSBL',
-        $self->res_bgsend($item, $qtype));
+        $self->res_bgsend($scanstate, $item, $qtype), $key);
   $ent->{obj} = $obj;
   $ent->{rulename} = $rulename;
   $ent->{zone} = $dnsbl;
-  $scanstate->{pending_lookups}->{$key} = $ent;
 }
 
 sub complete_dnsbl_lookup {
@@ -675,18 +622,55 @@ sub got_dnsbl_hit {
     $scanstate->{hits}->{$rulename} = { };
   };
   $scanstate->{hits}->{$rulename}->{$dom} = 1;
+
+  my $scan = $scanstate->{scanner};
+  if ($scanstate->{active_rules_revipbl}->{$rulename}
+    || $scanstate->{active_rules_rhsbl}->{$rulename})
+  {
+    # TODO: this needs to handle multiple domain hits per rule
+    $scan->clear_test_state();
+    my $uris = join (' ', keys %{$scanstate->{hits}->{$rulename}});
+    $scan->test_log ("URIs: $uris");
+    $scan->got_hit ($rulename, "");
+  }
 }
 
 # ---------------------------------------------------------------------------
 
 sub start_lookup {
-  my ($self, $scanstate, $type, $id) = @_;
+  my ($self, $scanstate, $type, $id, $key) = @_;
+
   my $ent = {
-    type => $type,
-    id => $id
+    key => $key,
+    type => "URI-".$type,
+    id => $id,
+    completed_callback => sub {
+      my $ent = shift;
+      $self->completed_lookup_callback ($scanstate, $ent);
+    }
   };
-  $scanstate->{queries_started}++;
-  $ent;
+  $scanstate->{scanner}->{async}->start_lookup($ent);
+  return $ent;
+}
+
+sub completed_lookup_callback {
+  my ($self, $scanstate, $ent) = @_;
+  my $type = $ent->{type};
+  my $key = $ent->{key};
+  $key =~ /:(\S+?)$/; my $val = $1;
+
+  if ($type eq 'URI-NS') {
+    $self->complete_ns_lookup ($scanstate, $ent, $val);
+  }
+  elsif ($type eq 'URI-A') {
+    $self->complete_a_lookup ($scanstate, $ent, $val);
+  }
+  elsif ($type eq 'URI-DNSBL') {
+    $self->complete_dnsbl_lookup ($scanstate, $ent, $val);
+    my $totalsecs = (time - $ent->{obj}->{querystart});
+    dbg("uridnsbl: query for ".$ent->{obj}->{dom}." took ".
+              $totalsecs." seconds to look up ($val)");
+  }
 }
 
 # ---------------------------------------------------------------------------
@@ -696,122 +680,18 @@ sub start_lookup {
 
 sub complete_lookups {
   my ($self, $scanstate, $timeout) = @_;
-  my %typecount = ();
-  my $stillwaiting = 0;
-
-  my $pending = $scanstate->{pending_lookups};
-  if (scalar keys %{$pending} <= 0) {
-    return 1;		# nothing left to do
-  }
-
-  $scanstate->{queries_started} = 0;
-  $scanstate->{queries_completed} = 0;
-
-  my $nfound = $self->{main}->{resolver}->poll_responses($timeout);
-  $nfound ||= 'no';
-  dbg ("uridnsbl: select found $nfound socks ready");
-
-  foreach my $key (keys %{$pending}) {
-    my $ent = $pending->{$key};
-    my $type = $ent->{type};
-
-    if (!exists ($self->{finished}->{$ent->{id}})) {
-      $typecount{$type}++;
-      #$stillwaiting = 1;
-      next;
-    }
-
-    $ent->{response_packet} = delete $self->{finished}->{$ent->{id}};
-    $key =~ /:(\S+)$/; my $val = $1;
-
-    if (LOG_COMPLETION_TIMES) {
-      my $secs = (time - $ent->{start});
-      my $totalsecs = (time - $ent->{obj}->{querystart});
-      printf "# time: %s %3.3f %3.3f %s\n",
-		$type, $secs, $totalsecs, $ent->{obj}->{dom};
-    }
-
-    if ($type eq 'NS') {
-      $self->complete_ns_lookup ($scanstate, $ent, $val);
-    }
-    elsif ($type eq 'A') {
-      $self->complete_a_lookup ($scanstate, $ent, $val);
-    }
-    elsif ($type eq 'DNSBL') {
-      $self->complete_dnsbl_lookup ($scanstate, $ent, $val);
-      my $totalsecs = (time - $ent->{obj}->{querystart});
-      dbg("uridnsbl: query for ".$ent->{obj}->{dom}." took ".
-		$totalsecs." seconds to look up ($val)");
-    }
-
-    $scanstate->{queries_completed}++;
-    delete $scanstate->{pending_lookups}->{$key};
-  }
-
-  dbg("uridnsbl: queries completed: ".$scanstate->{queries_completed}.
-		" started: ".$scanstate->{queries_started});
-
-  if (1) {
-    dbg("uridnsbl: queries active: ".
-	join (' ', map { "$_=$typecount{$_}" } sort keys %typecount)." at ".
-	localtime(time));
-  }
-
-  # ensure we don't get stuck if a request gets lost in the ether.
-  if (!$stillwaiting) {
-    my $numkeys = scalar keys %{$scanstate->{pending_lookups}};
-    if ($numkeys == 0) {
-      $stillwaiting = 0;
-
-    } else {
-      $stillwaiting = 1;
-
-      # avoid looping forever if we haven't got all results. 
-      if ($scanstate->{last_count} == $numkeys) {
-	$scanstate->{times_count_was_same}++;
-	if ($scanstate->{times_count_was_same} > 20) {
-	  dbg("uridnsbl: escaping: must have lost requests");
-	  $self->abort_remaining_lookups ($scanstate);
-	  $stillwaiting = 0;
-	}
-      } else {
-	$scanstate->{last_count} = $numkeys;
-	$scanstate->{times_count_was_same} = 0;
-      }
-    }
-  }
-
-  return (!$stillwaiting);
-}
-
-# ---------------------------------------------------------------------------
-
-sub abort_remaining_lookups  {
-  my ($self, $scanstate) = @_;
-
-  my $pending = $scanstate->{pending_lookups};
-  my $foundone = 0;
-  foreach my $key (keys %{$pending})
-  {
-    if (!$foundone) {
-      dbg("uridnsbl: aborting remaining lookups");
-      $foundone = 1;
-    }
-
-    delete $pending->{$key};
-  }
-  $self->{main}->{resolver}->bgabort();
+  return $scanstate->{scanner}->{async}->complete_lookups($timeout);
 }
 
 # ---------------------------------------------------------------------------
 
 sub res_bgsend {
-  my ($self, $host, $type) = @_;
+  my ($self, $scanstate, $host, $type) = @_;
 
   return $self->{main}->{resolver}->bgsend($host, $type, undef, sub {
         my $pkt = shift;
         my $id = shift;
-        $self->{finished}->{$id} = $pkt;
+        $scanstate->{scanner}->{async}->set_response_packet($id, $pkt);
       });
 }
 
