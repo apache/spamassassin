@@ -133,9 +133,14 @@ sub _run {      # private
   my $oldalarm = 0;
   my $ret;
 
+  # bug 4699: under heavy load, an alarm may fire while $@ will contain "",
+  # which isn't very useful.  this counter works around it safely, since
+  # it will not require malloc() be called if it fires
+  my $timedout = 0;
+
   eval {
     # note use of local to ensure closed scope here
-    local $SIG{ALRM} = sub { die "__alarm__ignore__\n" };
+    local $SIG{ALRM} = sub { $timedout++; die "__alarm__ignore__\n" };
     local $SIG{__DIE__};   # bug 4631
 
     $oldalarm = alarm($self->{secs});
@@ -173,6 +178,9 @@ sub _run {      # private
         die $@;             # propagate any "real" errors
       }
     }
+  } elsif ($timedout) {
+    warn "timeout with empty \$@";  # this is worth complaining about
+    $self->{timed_out} = 1;
   }
 
   if ($and_catch) {
