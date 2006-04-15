@@ -242,7 +242,7 @@ sub complete_lookups {
           if ($self->{times_count_was_same} > 20)
           {
             dbg("async: escaping: must have lost requests");
-            $self->abort_remaining_lookups ($self);
+            $self->abort_remaining_lookups();
             $stillwaiting = 0;
           }
         } else {
@@ -326,7 +326,3 @@ sub report_id_complete {
 # ---------------------------------------------------------------------------
 
 1;
-
-=back
-
-=cut

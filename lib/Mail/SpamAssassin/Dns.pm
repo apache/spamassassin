@@ -137,7 +137,7 @@ sub do_rbl_lookup {
     push @{$existing->{rules}}, $rule;
   }
 
-  $self->{rulename_to_key}->{$rule} = $key;
+  $self->{rule_to_rblkey}->{$rule} = $key;
 }
 
 # TODO: these are constant so they should only be added once at startup
@@ -329,6 +329,35 @@ sub process_dnsbl_set {
   }
 }
 
+sub harvest_until_rule_completes {
+  my ($self, $rule) = @_;
+
+  return if !defined $self->{query_launch_time};
+
+  my $deadline = $self->{conf}->{rbl_timeout} + $self->{query_launch_time};
+  my $now = time;
+
+  my @left = $self->{async}->get_pending_lookups();
+  my $total = scalar @left;
+
+  while (($now < $deadline) && !$self->{async}->complete_lookups(1))
+  {
+    if ($self->is_rule_complete($rule)) {
+      return 1;
+    }
+
+    $self->{main}->call_plugins ("check_tick", { permsgstatus => $self });
+    @left = $self->{async}->get_pending_lookups();
+
+    # dynamic timeout
+    my $dynamic = (int($self->{conf}->{rbl_timeout}
+                      * (1 - (($total - scalar @left) / $total) ** 2) + 0.5)
+                  + $self->{query_launch_time});
+    $deadline = $dynamic if ($dynamic < $deadline);
+    $now = time;
+  }
+}
+
 sub harvest_dnsbl_queries {
   my ($self) = @_;
 
@@ -340,9 +369,9 @@ sub harvest_dnsbl_queries {
   my @left = $self->{async}->get_pending_lookups();
   my $total = scalar @left;
 
-  while (!$self->{async}->complete_lookups(1) && ($now < $deadline)) {
+  while (($now < $deadline) && !$self->{async}->complete_lookups(1))
+  {
     $self->{main}->call_plugins ("check_tick", { permsgstatus => $self });
-
     @left = $self->{async}->get_pending_lookups();
 
     # dynamic timeout
@@ -350,7 +379,7 @@ sub harvest_dnsbl_queries {
                       * (1 - (($total - scalar @left) / $total) ** 2) + 0.5)
                   + $self->{query_launch_time});
     $deadline = $dynamic if ($dynamic < $deadline);
-    $now = time;
+    $now = time;    # and loop again
   }
 
   dbg("dns: success for " . ($total - @left) . " of $total queries");
@@ -367,8 +396,11 @@ sub harvest_dnsbl_queries {
     }
     my $delay = time - $self->{query_launch_time};
     dbg("dns: timeout for $string after $delay seconds");
-    # undef $query->[ID];   # TODO: seems unnecessary now
   }
+
+  # and explicitly abort anything left
+  $self->{async}->abort_remaining_lookups();
+  $self->mark_all_async_rules_complete();
 }
 
 sub set_rbl_tag_data {
@@ -767,21 +799,44 @@ sub cleanup_kids {
 
 ###########################################################################
 
+sub register_async_rule_start {
+  my ($self, $rule) = @_;
+  dbg ("dns: $rule lookup start");
+  $self->{rule_to_rblkey}->{$rule} = '*ASYNC_START';
+}
+
+sub register_async_rule_finish {
+  my ($self, $rule) = @_;
+  dbg ("dns: $rule lookup finished");
+  delete $self->{rule_to_rblkey}->{$rule};
+}
+
+sub mark_all_async_rules_complete {
+  my ($self) = @_;
+  $self->{rule_to_rblkey} = { };
+}
+
 sub is_rule_complete {
   my ($self, $rule) = @_;
 
-  my $key = $self->{rulename_to_key}->{$rule};
+  my $key = $self->{rule_to_rblkey}->{$rule};
   if (!defined $key) {
-    dbg("dns: $rule lookup complete, as it was never started");
+    # dbg("dns: $rule lookup complete, not in list");
     return 1;
+  }
+
+  if ($key eq '*ASYNC_START') {
+    dbg("dns: $rule lookup not yet complete");
+    return 0;       # not yet complete
   }
 
   my $obj = $self->{async}->get_lookup($key);
   if (!defined $obj) {
-    dbg("dns: $rule lookup complete, $key not in pending list");
+    dbg("dns: $rule lookup complete, $key no longer pending");
     return 1;
   }
 
+  dbg("dns: $rule lookup not yet complete");
   return 0;         # not yet complete
 }
 
