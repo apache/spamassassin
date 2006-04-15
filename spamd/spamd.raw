@@ -43,6 +43,7 @@ use Mail::SpamAssassin::NetSet;
 use Mail::SpamAssassin::SubProcBackChannel;
 use Mail::SpamAssassin::SpamdForkScaling qw(:pfstates);
 use Mail::SpamAssassin::Logger qw(:DEFAULT log_message);
+use Mail::SpamAssassin::Timeout;
 
 use Getopt::Long;
 use Pod::Usage;
@@ -940,16 +941,15 @@ sub spawn {
         }
       }
 
-      if ($copy_config_p)
-      {
+      if ($copy_config_p) {
         # use a timeout!  There are bugs in Storable on certain platforms
         # that can cause spamd to hang -- see bug 3828 comment 154.
         # we don't use Storable any more, but leave this in -- just
         # in case.
-        my $oldalarm = 0;
-        eval {
-          local $SIG{ALRM} = sub { die "__alarm__\n" };
-          $oldalarm = alarm 10;
+	# bug 4699: this is the alarm that often ends up with an empty $@
+
+	my $timer = Mail::SpamAssassin::Timeout->new({ secs => 20 });
+	my $err = $timer->run(sub {
 
           while(my($k,$v) = each %msa_backup) {
             $spamtest->{$k} = $v;
@@ -959,23 +959,14 @@ sub spawn {
           # (potentially), so let's restore back the saved version we
           # had before.
           $spamtest->copy_config(\%conf_backup, undef) ||
-            die "error returned from copy_config\n";
-          alarm $oldalarm;
-        };
+            die "spamd: error returned from copy_config\n";
+        });
 
-        alarm $oldalarm;
-        my $err = $@;
-
-        if ($err) {
-          if ($err =~ /__alarm__/) {
-            warn("spamd: copy_config timeout, respawning child process after ".
-                            ($i+1)." messages");
-            exit;         # so that the master spamd can respawn
-
-          } else {
-            die $err;     # propagate failures
-          }
-        }
+	if ($timer->timed_out()) {
+	  warn("spamd: copy_config timeout, respawning child process after ".
+		($i+1)." messages");
+	  exit;		# so that the master spamd can respawn
+	}
       }
       undef $current_user;
 
