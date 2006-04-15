@@ -410,7 +410,7 @@ sub query_domain {
   };
 
   my $single_dnsbl = 0;
-  if ($dom =~ /^\d+\.\d+\.\d+\.\d+$/) { 
+  if ($dom =~ /^\d+\.\d+\.\d+\.\d+$/) {
     my $IPV4_ADDRESS = IPV4_ADDRESS;
     my $IP_PRIVATE = IP_PRIVATE;
     # only look up the IP if it is public and valid
@@ -434,12 +434,23 @@ sub query_domain {
       my $rulecf = $scanstate->{scanner}->{conf}->{uridnsbls}->{$rulename};
       $self->lookup_single_dnsbl($scanstate, $obj, $rulename,
 				 $dom, $rulecf->{zone}, $rulecf->{type});
+
+      # see comment below
+      $scanstate->{scanner}->register_async_rule_start($rulename);
     }
 
     # perform NS, A lookups to look up the domain in the non-RHSBL subset
     if ($dom !~ /^\d+\.\d+\.\d+\.\d+$/) {
       $self->lookup_domain_ns($scanstate, $obj, $dom);
     }
+  }
+
+  # note that these rules are now underway.   important: unless the
+  # rule hits, in the current design, these will not be considered
+  # "finished" until harvest_dnsbl_queries() completes
+  my $cf = $scanstate->{active_rules_revipbl};
+  foreach my $rulename (keys %{$cf}) {
+    $scanstate->{scanner}->register_async_rule_start($rulename);
   }
 }
 
@@ -632,6 +643,9 @@ sub got_dnsbl_hit {
     my $uris = join (' ', keys %{$scanstate->{hits}->{$rulename}});
     $scan->test_log ("URIs: $uris");
     $scan->got_hit ($rulename, "");
+
+    # note that this rule has completed (since it got at least 1 hit)
+    $scanstate->{scanner}->register_async_rule_finish($rulename);
   }
 }
 
@@ -671,16 +685,6 @@ sub completed_lookup_callback {
     dbg("uridnsbl: query for ".$ent->{obj}->{dom}." took ".
               $totalsecs." seconds to look up ($val)");
   }
-}
-
-# ---------------------------------------------------------------------------
-
-# perform a poll of our lookups, to see if any are completed; if they
-# are, the next lookup in the sequence will be kicked off.
-
-sub complete_lookups {
-  my ($self, $scanstate, $timeout) = @_;
-  return $scanstate->{scanner}->{async}->complete_lookups($timeout);
 }
 
 # ---------------------------------------------------------------------------
