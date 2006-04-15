@@ -92,6 +92,9 @@ EOF
 );
 
 tstprefs("
+
+rbl_timeout 30
+
 add_header all RBL _RBL_
 add_header all Trusted _RELAYSTRUSTED_
 add_header all Untrusted _RELAYSUNTRUSTED_

@@ -54,6 +54,7 @@ use Carp;
 
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::EvalTests;
+use Mail::SpamAssassin::AsyncLoop;
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::Logger;
@@ -84,6 +85,7 @@ sub new {
     'disable_auto_learning' => 0,
     'auto_learn_status' => undef,
     'conf'                => $main->{conf},
+    'async'             => Mail::SpamAssassin::AsyncLoop->new($main)
   };
 
   if (defined $opts && $opts->{disable_auto_learning}) {
@@ -2719,7 +2721,9 @@ sub run_eval_tests {
 sub register_plugin_eval_glue {
   my ($self, $pluginobj, $function) = @_;
 
-  dbg("plugin: registering glue method for $function ($pluginobj)");
+  # stop reporting this -- it's too noisy!
+  # dbg("plugin: registering glue method for $function ($pluginobj)");
+
   my $evalstr = <<"ENDOFEVAL";
 {
     package Mail::SpamAssassin::PerMsgStatus;
