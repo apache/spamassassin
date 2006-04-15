@@ -354,11 +354,7 @@ sub harvest_until_rule_completes {
                       * (1 - (($total - scalar @left) / $total) ** 2) + 0.5)
                   + $self->{query_launch_time});
     $deadline = $dynamic if ($dynamic < $deadline);
-    until((($now = time) >= $deadline) ||
-            ($self->{resolver}->poll_responses(1) > 0))
-    {
-      # TODO: should we call check_tick() here?  we never did before
-    }
+    $now = time;
   }
 }
 
@@ -383,11 +379,7 @@ sub harvest_dnsbl_queries {
                       * (1 - (($total - scalar @left) / $total) ** 2) + 0.5)
                   + $self->{query_launch_time});
     $deadline = $dynamic if ($dynamic < $deadline);
-    until((($now = time) >= $deadline) ||
-            ($self->{resolver}->poll_responses(1) > 0))
-    {
-      # TODO: should we call check_tick() here?  we never did before
-    }
+    $now = time;    # and loop again
   }
 
   dbg("dns: success for " . ($total - @left) . " of $total queries");
