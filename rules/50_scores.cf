@@ -683,6 +683,12 @@ score SUBJECT_IN_WHITELIST -100
 score SUBJECT_IN_BLACKLIST 100
 endif # Mail::SpamAssassin::Plugin::WhiteListSubject
 
+ifplugin Mail::SpamAssassin::Plugin::DKIM
+score USER_IN_DKIM_WHITELIST -100.000
+score USER_IN_DEF_DKIM_WL -7.500
+score ENV_AND_HDR_DKIM_MATCH -7.500
+endif # Mail::SpamAssassin::Plugin::DKIM
+
 ifplugin Mail::SpamAssassin::Plugin::SPF
 score USER_IN_SPF_WHITELIST -100.000
 score USER_IN_DEF_SPF_WL -7.500
@@ -705,6 +711,15 @@ score HABEAS_CHECKED 0 -0.2 0 -0.2
 
 # CompleteWhois: http://www.completewhois.com/
 score RCVD_IN_WHOIS_HIJACKED 0 1.0 0 1.0
+
+# DKIM
+ifplugin Mail::SpamAssassin::Plugin::DKIM
+score DKIM_POLICY_SIGNALL 0.001
+score DKIM_POLICY_SIGNSOME 0.001
+score DKIM_POLICY_TESTING 0.001
+score DKIM_SIGNED 0.001
+score DKIM_VERIFIED -0.001
+endif # Mail::SpamAssassin::Plugin::DKIM
 
 # DomainKeys
 ifplugin Mail::SpamAssassin::Plugin::DomainKeys

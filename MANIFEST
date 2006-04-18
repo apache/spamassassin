@@ -71,6 +71,7 @@ lib/Mail/SpamAssassin/Plugin/AccessDB.pm
 lib/Mail/SpamAssassin/Plugin/AntiVirus.pm
 lib/Mail/SpamAssassin/Plugin/AutoLearnThreshold.pm
 lib/Mail/SpamAssassin/Plugin/DCC.pm
+lib/Mail/SpamAssassin/Plugin/DKIM.pm
 lib/Mail/SpamAssassin/Plugin/DomainKeys.pm
 lib/Mail/SpamAssassin/Plugin/Hashcash.pm
 lib/Mail/SpamAssassin/Plugin/MIMEHeader.pm
@@ -181,6 +182,7 @@ rules/25_antivirus.cf
 rules/25_body_tests_es.cf
 rules/25_body_tests_pl.cf
 rules/25_dcc.cf
+rules/25_dkim.cf
 rules/25_domainkeys.cf
 rules/25_hashcash.cf
 rules/25_pyzor.cf
@@ -198,6 +200,7 @@ rules/30_text_pt_br.cf
 rules/50_scores.cf
 rules/60_awl.cf
 rules/60_whitelist.cf
+rules/60_whitelist_dkim.cf
 rules/60_whitelist_spf.cf
 rules/60_whitelist_subject.cf
 rules/STATISTICS-set0.txt
@@ -206,6 +209,7 @@ rules/STATISTICS-set2.txt
 rules/STATISTICS-set3.txt
 rules/init.pre
 rules/v310.pre
+rules/v312.pre
 rules/languages
 rules/local.cf
 rules/name-triplets.txt
