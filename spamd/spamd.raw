@@ -1361,6 +1361,7 @@ sub check {
     push(@extra, "bayes=".$status->{bayes_score});
   }
   push(@extra, "autolearn=".$status->get_autolearn_status());
+  push(@extra, "shortcircuit=".$status->get_tag("SCTYPE"));
 
   my $yorn = $status->is_spam() ? 'Y' : '.';
   my $score = $status->get_score();
