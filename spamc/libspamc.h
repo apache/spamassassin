@@ -36,7 +36,7 @@
 #include <netinet/in.h>
 #endif
 
-#ifdef _WIN32
+#if (defined(_WIN32) || !defined(_SYSEXITS_H))
 /* FIXME: This stuff has to go somewhere else */
 
 #define EX_OK           0
