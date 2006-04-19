@@ -1358,7 +1358,7 @@ sub check {
     my $safe = $rmsgid; $safe =~ s/[\x00-\x20\s,]/_/gs; push(@extra, "rmid=$safe");
   }
   if (defined $status->{bayes_score}) {
-    push(@extra, "bayes=".$status->{bayes_score});
+    push(@extra, "bayes=".sprintf("%06f", $status->{bayes_score}));
   }
   push(@extra, "autolearn=".$status->get_autolearn_status());
   push(@extra, "shortcircuit=".$status->get_tag("SCTYPE"));
