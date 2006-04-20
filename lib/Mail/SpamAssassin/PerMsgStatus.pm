@@ -2631,7 +2631,7 @@ sub do_meta_tests {
             } @{ $conf->{meta_dependencies}->{ $metas[$i] } };
 
       if ($alldeps ne '') {
-        $evalstr .= '  $self->ensure_rules_are_complete(qw{'.$alldeps.'});';
+        $evalstr .= '  $self->ensure_rules_are_complete(q{'.$metas[$i].'}, qw{'.$alldeps.'});';
       }
 
       # Add this meta rule to the eval line
@@ -2697,15 +2697,23 @@ EOT
 
 sub ensure_rules_are_complete {
   my $self = shift;
+  my $metarule = shift;
   # @_ is now the list of rules
+
   foreach my $r (@_) {
     # dbg("rules: meta rule depends on net rule $r");
     next if ($self->is_rule_complete($r));
-    dbg("rules: meta rule depends on pending rule $r, blocking");
+
+    dbg("rules: meta rule $metarule depends on pending rule $r, blocking");
+    my $start = time;
     $self->harvest_until_rule_completes($r);
+    my $elapsed = time - $start;
 
     if (!$self->is_rule_complete($r)) {
       dbg ("rules: rule $r is still not complete; exited early?");
+    }
+    elsif ($elapsed > 0) {
+      info("rules: $r took $elapsed seconds to complete, for $metarule");
     }
   }
 }
