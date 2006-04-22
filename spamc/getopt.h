@@ -18,16 +18,32 @@
 #ifndef REPLACE_GETOPT_H
 #define REPLACE_GETOPT_H
 
-#ifdef WIN32
+extern char *spamc_optarg;
+extern int spamc_optreset;
+extern int spamc_optind;
+extern int spamc_opterr;
+extern int spamc_optopt;
+int spamc_getopt(int argc, char* const *argv, const char *optstr);
 
-extern char *optarg;
-extern int optreset;
-extern int optind;
-extern int opterr;
-extern int optopt;
-int getopt(int argc, char* const *argv, const char *optstr);
+struct option {
+#if (defined __STDC__ && __STDC__) || defined __cplusplus
+   const char *name;
+#else
+   char *name;
+#endif
+   int has_arg;
+   int *flag;
+   int val;
+};
 
-#endif /* WIN32 */
+int spamc_getopt_long(int argc, char* const argv[], const char *optstring,
+      struct option *longopts, int *longindex);
+
+int spamc_getopt_long_only(int argc, char* const *argv, const char *optstr,
+      const struct option *longoptions, int *longopt);
+
+#define no_argument (0)
+#define required_argument (1)
+#define optional_argument (2)
 
 #endif /* REPLACE_GETOPT_H */
-
