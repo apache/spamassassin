@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("mkrules");
-use Test; BEGIN { plan tests => 86 };
+use Test; BEGIN { plan tests => 85 };
 use File::Path;
 
 # ---------------------------------------------------------------------------
@@ -215,7 +215,7 @@ save_tdir();
 
 %patterns = (
   '70_sandbox.cf: WARNING: not listed in manifest file' => manif_found,
-  "WARNING: GOOD: renamed as T_GOOD due to missing T_ prefix" => warning_seen,
+  # "WARNING: GOOD: renamed as T_GOOD due to missing T_ prefix" => warning_seen,
   "loadplugin Good plugin.pm" => loadplugin_found,
   "body T_GOOD eval:check_foo()" => rule_line_1,
   "describe T_GOOD desc_found" => rule_line_2,
