@@ -28,7 +28,8 @@ dnl ----------------------------------------------------------------------
 AC_HEADER_STDC
 AC_CHECK_HEADERS(sys/time.h syslog.h unistd.h errno.h sys/errno.h)
 AC_CHECK_HEADERS(time.h sysexits.h sys/socket.h netdb.h netinet/in.h)
-AC_CHECK_HEADERS(getopt.h pwd.h signal.h openssl/crypto.h)
+AC_CHECK_HEADERS(pwd.h signal.h openssl/crypto.h)
+dnl AC_CHECK_HEADERS(getopt.h)
 
 AC_C_CONST
 AC_TYPE_OFF_T
@@ -92,16 +93,16 @@ fi
 
 dnl ----------------------------------------------------------------------
 
-AC_CACHE_CHECK([for optarg],
-        haveoptarg, [
-                AC_TRY_COMPILE([#include <getopt.h>],
-                        [if (optarg == (char *) 0L) { return 0; } return 1;],
-                                        [haveoptarg=yes],
-                                        [haveoptarg=no]),
-        ])
-if test $haveoptarg = yes ; then
-  AC_DEFINE(HAVE_OPTARG)
-fi
+dnl AC_CACHE_CHECK([for optarg],
+dnl         haveoptarg, [
+dnl                 AC_TRY_COMPILE([#include <getopt.h>],
+dnl                         [if (optarg == (char *) 0L) { return 0; } return 1;],
+dnl                                         [haveoptarg=yes],
+dnl                                         [haveoptarg=no]),
+dnl         ])
+dnl if test $haveoptarg = yes ; then
+dnl   AC_DEFINE(HAVE_OPTARG)
+dnl fi
 
 dnl ----------------------------------------------------------------------
 
