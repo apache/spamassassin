@@ -745,6 +745,7 @@ sub sandbox_rule_name_avoid_collisions {
   my ($rule, $path) = @_;
   my $new;
   my $newreason;
+  my $dowarn = 0;
 
   return $rule if $opt_listpromotable;
   return $rule if $active_rules->{$rule};
@@ -764,11 +765,14 @@ sub sandbox_rule_name_avoid_collisions {
     $new =~ s/_$//;
     $new = $rule.'_'.$new;
     $newreason = "collision with existing rule";
+    $dowarn = 1;
   }
 
   if (!$renamed_rules->{$new}) {
     $renamed_rules->{$new} = $rule;
-    warn "WARNING: $rule: renamed as $new due to $newreason\n";
+    if ($dowarn) {
+      warn "WARNING: $rule: renamed as $new due to $newreason\n";
+    }
   }
 
   return $new;
