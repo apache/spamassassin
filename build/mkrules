@@ -348,6 +348,11 @@ sub rule_file_compile {
       {
         $rules->{$name}->{found_definition} = 1;
       }
+      # userconf rules are always published in "active"
+      elsif (($type eq 'tflags') && ($val =~ /\buserconf\b/))
+      {
+        $rules->{$name}->{forceactive} = 1;
+      }
 
       $current_comments = '';
 
