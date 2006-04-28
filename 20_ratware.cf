@@ -127,7 +127,10 @@ meta FORGED_MUA_THEBAT_BOUN     (__THEBAT_MUA_V1 && __CTYPE_HAS_BOUNDARY && !__B
 describe FORGED_MUA_THEBAT_CS	Mail pretending to be from The Bat! (charset)
 describe FORGED_MUA_THEBAT_BOUN Mail pretending to be from The Bat! (boundary)
 
-meta FORGED_OUTLOOK_HTML	(__ANY_OUTLOOK_MUA && MIME_HTML_ONLY)
+# bug 4649: bulk mail sent via Yahoo! often looks forged, even when it is not
+header __YAHOO_BULK		Received =~ /from \[\S+\] by \S+\.(?:groups|scd|dcn)\.yahoo\.com with NNFMP/
+
+meta FORGED_OUTLOOK_HTML	(!__YAHOO_BULK && __ANY_OUTLOOK_MUA && MIME_HTML_ONLY)
 describe FORGED_OUTLOOK_HTML	Outlook can't send HTML message only
 
 # bug 2525: FORGED_IMS_HTML fp'ing because new IMS *DOES* use text/html
@@ -135,7 +138,7 @@ describe FORGED_OUTLOOK_HTML	Outlook can't send HTML message only
 # after that to get away with it.
 header __IMS_HTML_BUILDS	X-Mailer =~ /^Internet Mail Service .(?:[6789]\.|5\.[6789]|5\.5\.(?:[3456789]|2[789]|26[6789]|265[6789]))/
 header __IMS_HTML_RCVD		Received =~ /\bby \S+ with Internet Mail Service .(?:[6789]\.|5\.[6789]|5\.5\.(?:[3456789]|2[789]|26[6789]|265[6789]))/
-meta FORGED_IMS_HTML		(__IMS_MUA && MIME_HTML_ONLY && !(__IMS_HTML_BUILDS && __IMS_HTML_RCVD))
+meta FORGED_IMS_HTML		(!__YAHOO_BULK && __IMS_MUA && MIME_HTML_ONLY && !(__IMS_HTML_BUILDS && __IMS_HTML_RCVD))
 describe FORGED_IMS_HTML	IMS can't send HTML message only
 
 meta FORGED_THEBAT_HTML		(__THEBAT_MUA_V1 && MIME_HTML_ONLY)
@@ -197,10 +200,10 @@ describe FORGED_QUALCOMM_TAGS	QUALCOMM mailers can't send HTML in this format
 meta FORGED_AOL_TAGS		(__ANY_AOL_MUA && __MIME_HTML && !__TAG_EXISTS_HTML)
 describe FORGED_AOL_TAGS	AOL mailers can't send HTML in this format
 
-meta FORGED_IMS_TAGS		(__ANY_IMS_MUA && __MIME_HTML && !(__TAG_EXISTS_HTML && __TAG_EXISTS_HEAD && __TAG_EXISTS_META && __TAG_EXISTS_BODY))
+meta FORGED_IMS_TAGS		(!__YAHOO_BULK && __ANY_IMS_MUA && __MIME_HTML && !(__TAG_EXISTS_HTML && __TAG_EXISTS_HEAD && __TAG_EXISTS_META && __TAG_EXISTS_BODY))
 describe FORGED_IMS_TAGS	IMS mailers can't send HTML in this format
 
-meta FORGED_OUTLOOK_TAGS	(__ANY_OUTLOOK_MUA && __MIME_HTML && !(__TAG_EXISTS_HTML && __TAG_EXISTS_HEAD && __TAG_EXISTS_META && __TAG_EXISTS_BODY))
+meta FORGED_OUTLOOK_TAGS	(!__YAHOO_BULK && __ANY_OUTLOOK_MUA && __MIME_HTML && !(__TAG_EXISTS_HTML && __TAG_EXISTS_HEAD && __TAG_EXISTS_META && __TAG_EXISTS_BODY))
 describe FORGED_OUTLOOK_TAGS	Outlook can't send HTML in this format
 
 # Send-Safe ratware (idea from Alan Curry)
