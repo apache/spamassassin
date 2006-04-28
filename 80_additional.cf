@@ -157,6 +157,26 @@ describe TVD_SUBJ_FINGER_03	Subject looks like a standard spam format
 body TVD_STOCK1 /(?:(?:Trad(?:e|ing) Date|Company(?: Name)?|S\W?t\W?o\W?c\W?k|Current Price|expectations|weeks? high|market performance|(?:year|week|month) target)\s*:.{1,40}){2}/i
 describe TVD_STOCK1	Message looks like it's pushing a stock...
 
+# 2006/04/28
+# 0.617   0.7485   0.0000    1.000   0.82    1.00  TVD_VIS_HIDDEN
+rawbody TVD_VIS_HIDDEN	/<TEXTAREA[^>]+style\s*=\s*"visibility:\s*hidden\b/i
+describe TVD_VIS_HIDDEN	HTML has a hidden textarea
+
+# 2006/04/28
+# 0.200   0.2427   0.0000    1.000   0.68    1.00  TVD_SPACED_SUBJECT_WORD
+header TVD_SPACED_SUBJECT_WORD Subject =~ /^(?:(?:Re|Fw)[^:]{0,5}: )?[A-Z]+[a-z]+[A-Z]+$/
+describe TVD_SPACED_SUBJECT_WORD Subject has spammy looking subject
+
+# 2006/04/28
+# 0.248   0.3005   0.0000    1.000   0.71    1.00  TVD_SPACED_WORDS
+body TVD_SPACED_WORDS	/^(?:[A-Z]\s)+[a-z]\s(?:[A-Z]\s)+$/
+describe TVD_SPACED_WORDS	Message has spammy-looking obfuscation
+
+# 2006/04/28
+# 0.189   0.2296   0.0000    1.000   0.67    1.00  TVD_PH_SUBJ_URGENT
+header TVD_PH_SUBJ_URGENT	Subject =~ /^urgent(?:[\s\W]*$|.{1,40}(?:alert|response|assistance|proposal|reply|warning|noti(?:ce|fication)|greeting|matter))/i
+describe TVD_PH_SUBJ_URGENT	Subject looks like a phish
+
 ###########################################################################
 # ReplaceTags rules
 
@@ -278,4 +298,8 @@ score TVD_UA_FOSTERING		2.0
 score TVD_FINGER_01		2.0
 score TVD_SUBJ_FINGER_03	2.0
 score TVD_STOCK1		2.4
+score TVD_VIS_HIDDEN		2.4
+score TVD_SPACED_SUBJECT_WORD	2.0
+score TVD_SPACED_WORDS		2.2
+score TVD_PH_SUBJ_URGENT	2.0
 # </gen:mutable>
