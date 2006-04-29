@@ -29,10 +29,9 @@ use POSIX qw(nice strftime);
 use constant WEEK => 60*60*24;
 nice(15);
 
-# daterevs -- e.g. "20060429/r239832-r" -- are aligned to just before
-# the time of day when the mass-check tagging occurs; that's 0850 GMT,
-# so align the daterev to 0800 GMT.
-#
+# daterevs -- e.g. "20060429/r239832-r" -- are aligned to 0800 UTC, just before
+# the time of day when the mass-check tagging occurs; see
+# http://wiki.apache.org/spamassassin/DateRev for more details.
 use constant DATEREV_ADJ => - (8 * 60 * 60);
 
 my $configuration = "$ENV{HOME}/.corpus";
@@ -175,6 +174,7 @@ sub locate {
     }
 
     my $daterev = mk_daterev($time{$file},$revision{$file},$opt_tag);
+
     $logs_by_daterev{$daterev} ||= [ ];
     push (@{$logs_by_daterev{$daterev}}, $file);
 
