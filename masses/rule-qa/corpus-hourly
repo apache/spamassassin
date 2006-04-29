@@ -29,6 +29,12 @@ use POSIX qw(nice strftime);
 use constant WEEK => 60*60*24;
 nice(15);
 
+# daterevs -- e.g. "20060429/r239832-r" -- are aligned to just before
+# the time of day when the mass-check tagging occurs; that's 0850 GMT,
+# so align the daterev to 0800 GMT.
+#
+use constant DATEREV_ADJ => - (8 * 60 * 60);
+
 my $configuration = "$ENV{HOME}/.corpus";
 my %opt;
 my %revision = ();
@@ -440,7 +446,7 @@ URL:
 
 sub mk_daterev {
   my ($timet, $rev, $tag) = @_;
-  return strftime("%Y%m%d", gmtime($timet)) . "/r$rev-$tag";
+  return strftime("%Y%m%d", gmtime($timet + DATEREV_ADJ)) . "/r$rev-$tag";
 }
 
 sub create_outputdir {

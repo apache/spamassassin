@@ -36,6 +36,12 @@ our %freqs_filenames = (
     'OVERLAP.new' => 'set 0, overlaps between rules',
 );
 
+# daterevs -- e.g. "20060429/r239832-r" -- are aligned to just before
+# the time of day when the mass-check tagging occurs; that's 0850 GMT,
+# so align the daterev to 0800 GMT.
+#
+use constant DATEREV_ADJ => - (8 * 60 * 60);
+
 my $q = new CGI;
 
 my $ttk = Template->new;
@@ -566,8 +572,10 @@ sub date_in_direction {
 
 sub get_last_night_daterev {
   # don't use a daterev after (now - 12 hours); that's too recent
-  # to be "last night", for purposes of rule-update generation
-  my $notafter = strftime "%Y%m%d", localtime time - (12*60*60);
+  # to be "last night", for purposes of rule-update generation.
+
+  my $notafter = strftime "%Y%m%d",
+        gmtime ((time + DATEREV_ADJ) - (12*60*60));
 
   foreach my $dr (reverse @daterevs) {
     my $t = get_daterev_description($dr);
