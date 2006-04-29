@@ -3,7 +3,7 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("dcc");
 
-use constant TEST_ENABLED => conf_bool('run_net_tests');
+use constant TEST_ENABLED => conf_bool('run_dcc_tests');
 
 use Test;
 
