@@ -187,7 +187,7 @@ debugging facilities are enabled.
 
 =item rules_filename
 
-The filename to load spam-identifying rules from. (optional)
+The filename/directory to load spam-identifying rules from. (optional)
 
 =item site_rules_filename
 
