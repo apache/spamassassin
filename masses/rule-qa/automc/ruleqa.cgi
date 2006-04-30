@@ -1158,10 +1158,9 @@ sub get_daterev_description {
       $drtitle =~ s/^(.{0,160}).*$/$1/gs;
 
       my $mds_as_text = '';
-      if (defined $fastinfo->{mclogmds} && $fastinfo->{mclogmds}->{mclogmd}) {
-        # $mds_as_text = XMLout($fastinfo->{mclogmds});
-        # use Data::Dumper; $mds_as_text = Dumper($fastinfo->{mclogmds});
-
+      if ($fastinfo->{mclogmds} && 
+            ref $fastinfo->{mclogmds} =~ /HASH/)
+      {
         # 'mclogmd' => [
         #    {
         #      'daterev' => '20060430/r398298-n',
@@ -1172,20 +1171,26 @@ sub get_daterev_description {
         #      'fsize' => '3036336'
         #    }, [...]
 
+        # $mds_as_text = XMLout($fastinfo->{mclogmds});
+
+        # use Data::Dumper; $mds_as_text = Dumper($fastinfo->{mclogmds});
+
         my $all = '';
-        foreach my $f (@{$fastinfo->{mclogmds}->{mclogmd}}) {
-          my $started = $f->{mcstartdate};
-          my $subtime = strftime "%Y%m%dT%H%M%SZ", gmtime $f->{mtime};
+        if ($fastinfo->{mclogmds}->{mclogmd}) {
+          foreach my $f (@{$fastinfo->{mclogmds}->{mclogmd}}) {
+            my $started = $f->{mcstartdate};
+            my $subtime = strftime "%Y%m%dT%H%M%SZ", gmtime $f->{mtime};
 
-          $all .= qq{
-          
-            <p> <b>$f->{file}</b>:
-                started: $started;
-                submitted: $subtime;
-                size: $f->{fsize} bytes
-            </p>
+            $all .= qq{
+            
+              <p> <b>$f->{file}</b>:
+                  started: $started;
+                  submitted: $subtime;
+                  size: $f->{fsize} bytes
+              </p>
 
-          };
+            };
+          }
         }
 
         $mds_as_text = qq{ <span class="mclogmds"> $all </span> };
