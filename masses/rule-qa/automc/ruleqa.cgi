@@ -1184,8 +1184,8 @@ sub get_daterev_description {
             $all .= qq{
             
               <p> <b>$f->{file}</b>:<br />
-                  mass-check started: $started;<br />
-                  submitted: $subtime;<br />
+                  started:&nbsp;$started;<br />
+                  submitted:&nbsp;$subtime;<br />
                   size: $f->{fsize} bytes
               </p>
 
