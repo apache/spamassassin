@@ -52,6 +52,8 @@ my @cgi_params;
 my %cgi_params = ();
 precache_params();
 
+my $id_counter = 0;
+
 # ---------------------------------------------------------------------------
 
 # Allow path info to become CGI-ish parameters.
@@ -1158,9 +1160,7 @@ sub get_daterev_description {
       $drtitle =~ s/^(.{0,160}).*$/$1/gs;
 
       my $mds_as_text = '';
-      if ($fastinfo->{mclogmds} && 
-            ref $fastinfo->{mclogmds} =~ /HASH/)
-      {
+      if ($fastinfo->{mclogmds}) {
         # 'mclogmd' => [
         #    {
         #      'daterev' => '20060430/r398298-n',
@@ -1176,16 +1176,16 @@ sub get_daterev_description {
         # use Data::Dumper; $mds_as_text = Dumper($fastinfo->{mclogmds});
 
         my $all = '';
-        if ($fastinfo->{mclogmds}->{mclogmd}) {
+        if (ref $fastinfo->{mclogmds} && $fastinfo->{mclogmds}->{mclogmd}) {
           foreach my $f (@{$fastinfo->{mclogmds}->{mclogmd}}) {
             my $started = $f->{mcstartdate};
             my $subtime = strftime "%Y%m%dT%H%M%SZ", gmtime $f->{mtime};
 
             $all .= qq{
             
-              <p> <b>$f->{file}</b>:
-                  started: $started;
-                  submitted: $subtime;
+              <p> <b>$f->{file}</b>:<br />
+                  mass-check started: $started;<br />
+                  submitted: $subtime;<br />
                   size: $f->{fsize} bytes
               </p>
 
@@ -1193,7 +1193,15 @@ sub get_daterev_description {
           }
         }
 
-        $mds_as_text = qq{ <span class="mclogmds"> $all </span> };
+        my $id = "mclogmds_".($id_counter++);
+        $mds_as_text = qq{
+          <div id='$id' class='mclogmds' style='display: none'>
+            <p class=headclosep align=right><a
+                href="javascript:hide_header('$id')">[-]</a></p>
+
+            $all
+          </div> <a href="javascript:show_header('$id')">[+]</a>
+        };
       }
 
       $txt = qq{
@@ -1226,9 +1234,7 @@ sub get_daterev_description {
           </td>
           <td class=daterevtd colspan=1>
               <em><mcsubmitters>$fastinfo->{submitters}</mcsubmitters></em>
-              <!--
               $mds_as_text
-              -->
           </td>
 
       };
