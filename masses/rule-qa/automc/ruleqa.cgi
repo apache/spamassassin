@@ -1157,6 +1157,40 @@ sub get_daterev_description {
       $drtitle =~ s/\s+/ /gs;
       $drtitle =~ s/^(.{0,160}).*$/$1/gs;
 
+      my $mds_as_text = '';
+      if (defined $fastinfo->{mclogmds} && $fastinfo->{mclogmds}->{mclogmd}) {
+        # $mds_as_text = XMLout($fastinfo->{mclogmds});
+        # use Data::Dumper; $mds_as_text = Dumper($fastinfo->{mclogmds});
+
+        # 'mclogmd' => [
+        #    {
+        #      'daterev' => '20060430/r398298-n',
+        #      'mcstartdate' => '20060430T122405Z',
+        #      'mtime' => '1146404744',
+        #      'rev' => '398298',
+        #      'file' => 'ham-cthielen.log',
+        #      'fsize' => '3036336'
+        #    }, [...]
+
+        my $all = '';
+        foreach my $f (@{$fastinfo->{mclogmds}->{mclogmd}}) {
+          my $started = $f->{mcstartdate};
+          my $subtime = strftime "%Y%m%dT%H%M%SZ", gmtime $f->{mtime};
+
+          $all .= qq{
+          
+            <p> <b>$f->{file}</b>:
+                started: $started;
+                submitted: $subtime;
+                size: $f->{fsize} bytes
+            </p>
+
+          };
+        }
+
+        $mds_as_text = qq{ <span class="mclogmds"> $all </span> };
+      }
+
       $txt = qq{
 
           <td class=daterevtd>
@@ -1187,6 +1221,9 @@ sub get_daterev_description {
           </td>
           <td class=daterevtd colspan=1>
               <em><mcsubmitters>$fastinfo->{submitters}</mcsubmitters></em>
+              <!--
+              $mds_as_text
+              -->
           </td>
 
       };
