@@ -19,6 +19,7 @@ GetOptions(
 $opt_override ||= '';
 $opt_tag ||= 'n';       # nightly is the default
 
+my $LOGS_REPORT_FILE = "/var/www/ruleqa.spamassassin.org/logs_report.txt";
 
 use File::Path;
 use File::Copy;
@@ -136,15 +137,20 @@ sub locate {
   @files = sort readdir(CORPUS);
   closedir(CORPUS);
 
+  open_logs_report();
+
   @files = grep {
     /^(?:spam|ham)-(?:net-)?[-\w]+\.log$/ && -f "$corpusdir/$_" && -M _ < 10 
   } @files;
 
   foreach my $file (@files) {
     my $tag = 0;
+    my $headers = '';
+
     open(FILE, "$corpusdir/$file") or warn "cannot read $corpusdir/$file";
     while (my $line = <FILE>) {
       last if $line !~ /^#/;
+      $headers .= $line;
       if ($line =~ /, on (... ... .. )(..)(:..:.. ... ....)/) {
         my ($datepre, $hh, $datepost) = ($1,$2,$3);
         
@@ -185,7 +191,58 @@ sub locate {
     else {
       print "$corpusdir/$file: rev=$daterev time=$time{$file} (set 0)\n";
     }
+
+    add_to_logs_report({
+              file => "$corpusdir/$file",
+              daterev => $daterev,
+              timet => $time{$file},
+              isnet => $is_net_daterev{$daterev},
+              rev => $revision{$file},
+              headers => $headers
+            });
   }
+
+  complete_logs_report();
+}
+
+sub open_logs_report {
+  open (LOGREP, ">>$LOGS_REPORT_FILE")
+        or die "cannot write to $LOGS_REPORT_FILE";
+
+  my $now = localtime time;
+
+  print LOGREP qq{
+
+---------------------------------------------------------------------------
+Reading logs at $now:
+
+  };
+}
+
+sub add_to_logs_report {
+  my ($o) = @_;
+
+  $o->{file} =~ /(?:ham|spam)(?:-net)?-(\S+)\.log/
+            or return;
+
+  my $who = $1;
+  my $ls = `ls -l $o->{file}`;
+
+  my $hdrs = $o->{headers};
+  $hdrs =~ s/^\# /    /gm;
+
+  print LOGREP qq{
+Log from $who:
+    $ls
+    mass-check daterev: $o->{daterev}
+    $hdrs
+
+  };
+
+}
+
+sub complete_logs_report {
+  close LOGREP;
 }
 
 sub sort_all {
