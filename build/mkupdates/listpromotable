@@ -43,13 +43,12 @@ else {
 ###########################################################################
 
 my $submitters = '';
-if ($doc =~ m{
-    <td\sclass=daterevtd><b>Viewing</b></td>.*?
-            <mcsubmitters>(.*?)</mcsubmitters>
-  }x)
+if ($doc =~ m{ <td\sclass=daterevtd><b>Viewing</b></td>.*?
+                <mcsubmitters>(.*?)</mcsubmitters> }sx)
 {
   $submitters = $1;
 }
+
 ###########################################################################
 
 # <rule><test>__HIGHBITS</test><promo>0</promo>
