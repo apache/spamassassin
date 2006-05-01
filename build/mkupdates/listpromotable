@@ -21,12 +21,12 @@ my $PROMOTABLE_PLUGINS_RE = "^" . join("|", @def_plugins) . "\$";
 
 ###########################################################################
 
-my $cgi_url = "http://buildbot.spamassassin.org/";
+my $cgi_url = "http://ruleqa.spamassassin.org/";
 my $doc;
 my $cache = 'ruleqa.cache';
 
 if (!$FROM_CACHE || !-f $cache) {
-  my $url = $cgi_url."ruleqa?daterev=last-night";
+  my $url = $cgi_url."last-night?xml=1";
   $doc = get ($url);
   if (!$doc) {
     die "HTTP get failed: $doc\n";
