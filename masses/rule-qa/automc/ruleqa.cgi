@@ -53,6 +53,7 @@ my %cgi_params = ();
 precache_params();
 
 my $id_counter = 0;
+my $include_embedded_freqs_xml = 1;
 
 # ---------------------------------------------------------------------------
 
@@ -98,6 +99,9 @@ $s{zero} = get_url_switch('s_zero', 1);
 $s{new} = get_url_switch('s_new', 1);
 $s{detail} = get_url_switch('s_detail', 0);
 $s{g_over_time} = get_url_switch('s_g_over_time', 0);
+
+$s{xml} = get_url_switch('xml', 0);
+$include_embedded_freqs_xml = $s{xml};
 
 # note: age, new, overlap are all now synonyms for detail ;)
 if ($s{age} || $s{overlap} || $s{detail}) {
@@ -755,6 +759,9 @@ sub read_freqs_file {
   close IN;
 }
 
+my $FREQS_LINE_TEMPLATE;
+my $FREQS_EXTRA_TEMPLATE;
+
 sub get_freqs_for_rule {
   my ($key, $strdate, $ruleslist) = @_;
 
@@ -811,6 +818,10 @@ sub get_freqs_for_rule {
   my @rules = split (' ', $ruleslist);
   if (scalar @rules == 0) { @rules = (''); }
 
+  if ($include_embedded_freqs_xml == 0) {
+    $FREQS_LINE_TEMPLATE =~ s/<!--\s+<rule>.*?-->//gs;
+  }
+
   foreach my $rule (@rules) {
     if ($rule && defined $freqs_data{$key}{$rule}) {
       $comment .= rule_anchor($key,$rule);
@@ -859,9 +870,6 @@ sub sub_freqs_head_line {
   $str = "<em><tt>".($str || '')."</tt></em><br/>";
   return $str;
 }
-
-my $FREQS_LINE_TEMPLATE;
-my $FREQS_EXTRA_TEMPLATE;
 
 sub set_freqs_templates {
   $FREQS_LINE_TEMPLATE = qq{
