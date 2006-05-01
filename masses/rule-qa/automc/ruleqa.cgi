@@ -694,7 +694,7 @@ sub read_freqs_file {
   if ($file =~ /\.all/) { $subset_is_user = 1; }
 
   while (<IN>) {
-    if (/(?: \(all messages| results used|OVERALL\%|<mclogmd>|was at r\d+)/) {
+    if (/(?: \(all messages| results used|OVERALL\%|<mclogmd|was at r\d+)/) {
       $freqs_head{$key} .= $_;
     }
     elsif (/MSEC/) {
