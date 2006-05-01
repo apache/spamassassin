@@ -150,7 +150,7 @@ foreach my $plistkey (sort keys %$plist) {
   # now that it's ok to have sandbox rules without a T_ prefix,
   # "T_" prefix implies "tflags nopublish"
   next if ($name =~ /^T_/);
-
+  
   # ignore rules that don't exist (if they have a desc or score,
   # they exist according to the Conf parser)
   next unless ($mailsa->{conf}->{descriptions}->{$name}
@@ -202,18 +202,4 @@ publish:
 
   print "\n# $notes\n$name\n";
 }
-
-
-## # now write that to a tmp file so 'mkrules' can use it
-## my $tmp = new File::Temp( UNLINK => 1, SUFFIX => '.pl' );
-## print $tmp $dump;
-## 
-## my $perl = $^X;
-## if (!$perl) {
-## die "no perl path found in ARGV!";
-## }
-## 
-## # and exec that script
-## exec $perl, "build/mkrules", "--listpromotable=$tmp";
-## die "exec failed";
 
