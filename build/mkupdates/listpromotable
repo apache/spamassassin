@@ -42,6 +42,16 @@ else {
 
 ###########################################################################
 
+my $submitters = '';
+if ($doc =~ m{
+    <td\sclass=daterevtd><b>Viewing</b></td>.*?
+            <mcsubmitters>(.*?)</mcsubmitters>
+  }x)
+{
+  $submitters = $1;
+}
+###########################################################################
+
 # <rule><test>__HIGHBITS</test><promo>0</promo>
 # <spc>8.7654</spc><hpc>0.2056</hpc><so>0.977</so>
 # <detailhref>ruleqa%3Fdaterev%3Dlast-night%26rule%3D__HIGHBITS%26s_detail%3D1</detailhref></rule>
@@ -114,7 +124,13 @@ $mailsa->{lint_callback} = sub {
 
 $mailsa->lint_rules();
 
-print "# active ruleset list (automatically generated from $cgi_url)\n";
+print "# active ruleset list, automatically generated from $cgi_url\n";
+print "# with results from: $submitters\n";
+
+my @spcs = ($submitters =~ /\s+/g);
+if (scalar @spcs < 1) {
+  die "not generating results; less than 2 submitter results available!\n";
+}
 
 foreach my $plistkey (sort keys %$plist) {
   my $name = $plistkey;
