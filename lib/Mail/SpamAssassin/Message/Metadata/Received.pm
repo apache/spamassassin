@@ -734,7 +734,7 @@ sub parse_received_line {
     # Received: from cabbage.jmason.org [127.0.0.1]
     # by localhost with IMAP (fetchmail-5.9.0)
     # for jm@localhost (single-drop); Thu, 13 Mar 2003 20:39:56 -0800 (PST)
-    if (/^from (\S+) \[(${IP_ADDRESS})\] by (\S+) with \S+ \(fetchmail/) {
+    if (/^from (\S+) (?:\[(${IP_ADDRESS})\] )?by (\S+) with \S+ \(fetchmail/) {
       $self->found_pop_fetcher_sig();
       return;		# skip fetchmail handovers
     }
