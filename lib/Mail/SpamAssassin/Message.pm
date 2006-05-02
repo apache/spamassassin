@@ -129,11 +129,14 @@ sub new {
       @message = <$message>;
     }
   }
-  else {
+  elsif (defined $message) {
     @message = split ( /^/m, $message );
   }
-
-  return $self unless @message;
+  else {
+    # if we get here, it means that the input was null, so fake the message
+    # content as a single newline...
+    @message = ("\n");
+  }
 
   # Pull off mbox and mbx separators
   if ( $message[0] =~ /^From\s/ ) {
