@@ -2,6 +2,10 @@
 #
 # $NetBSD$
 #
+# Start script for 'spamd' installed by the pkgsrc package collection
+# running on *BSD, MacOS X, Solaris, Linux, and various other U*IX-like
+# systems.
+#
 # The 'spamd' daemon checks emails provided by the 'spamc' client for signs
 # of spam
 #
@@ -9,7 +13,7 @@
 #   @PREFIX@/share/doc/spamassassin/spamd/README.spamd
 # especially the section about security.
 
-## only for NetBSD
+## only for DragonFlyBSD/NetBSD
 # PROVIDE: spamd
 # REQUIRE: LOGIN
 # BEFORE: mail
@@ -34,15 +38,17 @@ command_args="-d -r ${pidfile}"
 extra_commands="reload"
 sig_reload="HUP"
 
-# default values, may be overridden on NetBSD by setting them in /etc/rc.conf
+# default values, may be overridden on NetBSD/DragonFlyBSD by setting them
+# in /etc/rc.conf
 spamd_flags=${spamd_flags-"-H -c"}
 spamd=${spamd:-NO}
 spamd_fdlimit=${spamd_fdlimit-"128"}
 
-OPSYS=@OPSYS@ # set during package build
-INTERPRETER_SUPPORT=@INTERPRETER_SUPPORT@ # set during package build
+# both set during package build
+OPSYS=@OPSYS@
+INTERPRETER_SUPPORT=@INTERPRETER_SUPPORT@
 
-# A default limit of 64 (at least on NetBSD) may be too low for many
+# A default limit of 64 on NetBSD may be too low for many
 # people (eg with addional RBL rules)
 SOFT_FDLIMIT=`ulimit -S -n`
 HARD_FDLIMIT=`ulimit -H -n`
@@ -96,7 +102,7 @@ spamd_reload()
 	kill -${sig_reload} ${the_spamd_pid}
 }
 
-if [ "${OPSYS}" = "NetBSD" ]; then
+if [ "${OPSYS}" = "NetBSD" -o "${OPSYS}" = "DragonFly" ]; then
 	if checkyesno INTERPRETER_SUPPORT; then
 	  : # support for 'command_interpreter' was added in NetBSD 1.6
 	else
@@ -110,7 +116,7 @@ if [ "${OPSYS}" = "NetBSD" ]; then
 	load_rc_config $name
 	run_rc_command "$1"
 
-else # not NetBSD
+else # not NetBSD or DragonFlyBSD
 
 	if [ -f ${pidfile} ];  then
 		the_spamd_pid=`head -1 ${pidfile}`
