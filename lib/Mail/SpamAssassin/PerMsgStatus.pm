@@ -1270,6 +1270,11 @@ sub _get_tag {
               return "\n" . ($self->{tag_data}->{REPORT} || "");
             },
 
+	    HEADER => sub {
+	      my $hdr = shift || return;
+	      return $self->get($hdr);
+	    },
+
           );
 
   my $data = "";
