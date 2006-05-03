@@ -1246,6 +1246,11 @@ sub _get_tag {
               return (join($arg, sort(@{$self->{test_names_hit}})) || "none");
             },
 
+            SUBTESTS => sub {
+              my $arg = (shift || ',');
+              return (join($arg, sort(@{$self->{subtest_names_hit}})) || "none");
+            },
+
             TESTSSCORES => sub {
               my $arg = (shift || ",");
               my $line = '';
