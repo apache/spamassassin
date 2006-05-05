@@ -177,6 +177,11 @@ describe TVD_SPACED_WORDS	Message has spammy-looking obfuscation
 header TVD_PH_SUBJ_URGENT	Subject =~ /^urgent(?:[\s\W]*$|.{1,40}(?:alert|response|assistance|proposal|reply|warning|noti(?:ce|fication)|greeting|matter))/i
 describe TVD_PH_SUBJ_URGENT	Subject looks like a phish
 
+# 2006/05/05
+# 1.150   1.3983   0.0000    1.000   0.87    0.01  T_TVD_FLOAT_GENERAL4
+rawbody TVD_FLOAT_GENERAL	/\bstyle="[^"]*\bfloat\s*:\s*[a-z]+\s*">\s*[a-zA-Z]+\s*</i
+describe TVD_FLOAT_GENERAL	Message contains HTML style indicating spam
+
 ###########################################################################
 # ReplaceTags rules
 
@@ -302,4 +307,5 @@ score TVD_VIS_HIDDEN		2.4
 score TVD_SPACED_SUBJECT_WORD	2.0
 score TVD_SPACED_WORDS		2.2
 score TVD_PH_SUBJ_URGENT	2.0
+score TVD_FLOAT_GENERAL		2.0
 # </gen:mutable>
