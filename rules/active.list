@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bzoetekouw cthielen daf parkerm theo wtogami zmi
+# with results from: bzoetekouw cthielen daf parkerm theo wtogami
 
 # good enough
 ADVANCE_FEE_3
@@ -296,6 +296,9 @@ FROM_ALL_NUMS
 FROM_BLANK_NAME
 
 # good enough
+FROM_DOMAIN_NOVOWEL
+
+# good enough
 FROM_ENDS_IN_NUMS
 
 # good enough
@@ -413,15 +416,6 @@ HG_HORMONE
 HS_DRUG_DOLLAR_1
 
 # good enough
-HS_DRUG_DOLLAR_2
-
-# good enough
-HS_DRUG_DOLLAR_3
-
-# good enough
-HS_DRUG_DOLLAR_MANY
-
-# good enough
 HS_EXTRA
 
 # good enough
@@ -462,6 +456,9 @@ HTTP_ESCAPED_HOST
 
 # good enough
 HTTP_EXCESSIVE_ESCAPES
+
+# good enough
+INFO_TLD
 
 # good enough
 INTERRUPTUS
@@ -510,9 +507,6 @@ KAM_STOCKTIP22
 
 # good enough
 KAM_STOCKTIP23
-
-# good enough
-KAM_STOCKTIP24
 
 # good enough
 KAM_STOCKTIP26
@@ -578,6 +572,9 @@ MIME_HTML_MOSTLY
 MIME_HTML_ONLY_MULTI
 
 # good enough
+MISSING_DATE
+
+# good enough
 MISSING_MIMEOLE
 
 # good enough
@@ -635,9 +632,6 @@ NULL_IN_BODY
 NUMERIC_HTTP_ADDR
 
 # good enough
-ONE_TIME
-
-# good enough
 ONLINE_PHARMACY
 
 # good enough
@@ -645,9 +639,6 @@ PERCENT_RANDOM
 
 # good enough
 PLING_QUERY
-
-# good enough
-PORN_15
 
 # good enough
 PORN_16
@@ -923,6 +914,9 @@ SUBJECT_IN_WHITELIST
 SUBJECT_NEEDS_ENCODING
 
 # good enough
+SUBJECT_NOVOWEL
+
+# good enough
 SUBJECT_SEXUAL
 
 # good enough
@@ -942,6 +936,9 @@ SUB_HELLO
 
 # good enough
 SUSPICIOUS_RECIPS
+
+# good enough
+TO_NO_USER
 
 # good enough
 TRACKER_ID
@@ -1032,9 +1029,6 @@ TVD_PH_7
 
 # good enough
 TVD_PH_BODY_META
-
-# good enough
-TVD_PH_FR5
 
 # good enough
 TVD_PH_REC
@@ -1130,10 +1124,16 @@ FORGED_OUTLOOK_HTML
 FORGED_OUTLOOK_TAGS
 
 # good enough
-TVD_FW_GRAPHIC_NAME_LONG
+KAM_STOCKTIP9
 
 # good enough
-TVD_FW_GRAPHIC_NAME_MID
+TVD_FLOAT_GENERAL
+
+# good enough
+TVD_FW_GRAPHIC_ID1
+
+# good enough
+TVD_FW_GRAPHIC_ID2
 
 # good enough
 UNCLAIMED_MONEY
