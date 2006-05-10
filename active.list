@@ -1,14 +1,11 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bzoetekouw cthielen daf theo wtogami zmi
+# with results from: bzoetekouw cthielen daf theo wtogami
 
 # good enough
 ADVANCE_FEE_3
 
 # good enough
 ADVANCE_FEE_4
-
-# good enough
-ALL_NATURAL
 
 # tflags userconf
 AWL
@@ -296,6 +293,9 @@ FROM_ALL_NUMS
 FROM_BLANK_NAME
 
 # good enough
+FROM_DOMAIN_NOVOWEL
+
+# good enough
 FROM_ENDS_IN_NUMS
 
 # good enough
@@ -455,6 +455,9 @@ HTTP_ESCAPED_HOST
 HTTP_EXCESSIVE_ESCAPES
 
 # good enough
+INFO_TLD
+
+# good enough
 INTERRUPTUS
 
 # good enough
@@ -468,9 +471,6 @@ INVALID_TZ_EST
 
 # good enough
 INVALID_TZ_GMT
-
-# good enough
-INVESTMENT_ADVICE
 
 # good enough
 JAPANESE_UCE_SUBJECT
@@ -500,9 +500,6 @@ KAM_STOCKTIP22
 KAM_STOCKTIP23
 
 # good enough
-KAM_STOCKTIP24
-
-# good enough
 KAM_STOCKTIP26
 
 # good enough
@@ -516,9 +513,6 @@ KAM_STOCKTIP5
 
 # good enough
 KAM_STOCKTIP6
-
-# good enough
-KAM_STOCKTIP7
 
 # good enough
 KAM_STOCKTIP8
@@ -542,6 +536,9 @@ MILLION_USD
 MIME_BAD_ISO_CHARSET
 
 # good enough
+MIME_BASE64_NO_NAME
+
+# good enough
 MIME_BASE64_TEXT
 
 # good enough
@@ -561,6 +558,9 @@ MIME_HTML_MOSTLY
 
 # good enough
 MIME_HTML_ONLY_MULTI
+
+# good enough
+MISSING_DATE
 
 # good enough
 MISSING_MIMEOLE
@@ -824,9 +824,6 @@ ROUND_THE_WORLD
 ROUND_THE_WORLD_LOCAL
 
 # good enough
-RUDE_HTML
-
-# good enough
 SORTED_RECIPS
 
 # tflags net
@@ -920,6 +917,9 @@ SUB_HELLO
 SUSPICIOUS_RECIPS
 
 # good enough
+TO_NO_USER
+
+# good enough
 TRACKER_ID
 
 # good enough
@@ -989,9 +989,6 @@ TVD_FW_MESG1
 TVD_FW_MESG2
 
 # good enough
-TVD_GET_STOCK
-
-# good enough
 TVD_HEAD_KERNEL
 
 # good enough
@@ -1020,9 +1017,6 @@ TVD_PH_REC
 
 # good enough
 TVD_PH_SEC
-
-# good enough
-TVD_PH_SUBJ_ACCOUNTS_POST
 
 # good enough
 TVD_PH_SUBJ_META
@@ -1109,10 +1103,13 @@ FORGED_OUTLOOK_HTML
 FORGED_OUTLOOK_TAGS
 
 # good enough
-TVD_FW_GRAPHIC_NAME_LONG
+KAM_STOCKTIP9
 
 # good enough
-TVD_FW_GRAPHIC_NAME_MID
+TVD_FW_GRAPHIC_ID1
+
+# good enough
+TVD_FW_GRAPHIC_ID2
 
 # good enough
 UNCLAIMED_MONEY
@@ -1218,9 +1215,6 @@ X_IP
 
 # good enough
 X_LIBRARY
-
-# good enough
-X_MAILER_SPAM
 
 # good enough
 X_MESSAGE_INFO
