@@ -362,66 +362,53 @@ sub run {
       # feed childen, make them work for it, repeat
       while ($select->count()) {
         foreach my $socket ($select->can_read()) {
-	  my $result = '';
-	  my $line;
-	  while ($line = readline $socket) {
-	    if ($line =~ /^RESULT (.+)$/) {
-	      my ($date,$class,$type) = run_index_unpack($1);
-	      #warn ">> RESULT: $class, $type, $date\n";
-
-	      if (defined $self->{opt_restart} &&
-		  ($total_count % $self->{opt_restart}) == 0)
-	      {
-	        $needs_restart = 1;
-	      }
-
-	      # if messages remain, and we don't need to restart, send message
-	      if (($MESSAGES > $total_count) && !$needs_restart) {
-	        print { $socket } $self->next_message() . "\n";
-	        $total_count++;
-	        #warn ">> recv: $MESSAGES $total_count\n";
-	      }
-	      else {
-	        # stop listening on this child since we're done with it
-	        #warn ">> removeresult: $needs_restart $MESSAGES $total_count\n";
-	        $select->remove($socket);
-	      }
-
-	      # deal with the result we received
-	      if ($result) {
-	        chop $result;	# need to chop the \n before RESULT
-	        &{$self->{result_sub}}($class, $result, $date);
-	      }
-
-	      last;	# this will avoid the read for this client
-	    }
-	    elsif ($line eq "START\n") {
-	      if ($MESSAGES > $total_count) {
-	        # we still have messages, send one to child
-	        print { $socket } $self->next_message() . "\n";
-	        $total_count++;
-	        #warn ">> new: $MESSAGES $total_count\n";
-	      }
-	      else {
-	        # no more messages, so stop listening on this child
-	        #warn ">> removestart: $needs_restart $MESSAGES $total_count\n";
-	        $select->remove($socket);
-	      }
-
-	      last;	# this will avoid the read for this client
-	    }
-	    else {
-	      # result line, remember it
-	      $result .= $line;
-	    }
-	  }
+	  my $line = $self->read_line($socket);
 
           # some error happened during the read!
-          if (!defined $line || !$line) {
+          if (!defined $line) {
             $needs_restart = 1;
             warn "archive-iterator: readline failed, attempting to recover\n";
             $select->remove($socket);
           }
+	  elsif ($line =~ /^([^\0]+)\0RESULT (.+)$/s) {
+	    my $result = $1;
+	    my ($date,$class,$type) = index_unpack($2);
+	    #warn ">> RESULT: $class, $type, $date\n";
+
+	    if (defined $self->{opt_restart} && ($total_count % $self->{opt_restart}) == 0) {
+	      $needs_restart = 1;
+	    }
+
+	    # if messages remain, and we don't need to restart, send message
+	    if (($MESSAGES > $total_count) && !$needs_restart) {
+	      $self->send_line($socket, $self->next_message());
+	      $total_count++;
+	      #warn ">> recv: $MESSAGES $total_count\n";
+	    }
+	    else {
+	      # stop listening on this child since we're done with it
+	      #warn ">> removeresult: $needs_restart $MESSAGES $total_count\n";
+	      $select->remove($socket);
+	    }
+
+	    # deal with the result we received
+	    if ($result) {
+	      &{$self->{result_sub}}($class, $result, $date);
+	    }
+	  }
+	  elsif ($line eq "START") {
+	    if ($MESSAGES > $total_count) {
+	      # we still have messages, send one to child
+	      $self->send_line($socket, $self->next_message());
+	      $total_count++;
+	      #warn ">> new: $MESSAGES $total_count\n";
+	    }
+	    else {
+	      # no more messages, so stop listening on this child
+	      #warn ">> removestart: $needs_restart $MESSAGES $total_count\n";
+	      $select->remove($socket);
+	    }
+	  }
         }
 
         #warn ">> out of loop, $MESSAGES $total_count $needs_restart ".$select->count()."\n";
@@ -458,7 +445,7 @@ sub run {
 sub run_message {
   my ($self, $msg) = @_;
 
-  my ($date, $class, $format, $mail) = run_index_unpack($msg);
+  my ($date, $class, $format, $mail) = index_unpack($msg);
 
   if ($format eq 'f') {
     return $self->run_file($class, $format, $mail, $date);
@@ -581,8 +568,7 @@ sub run_mbx {
 
 sub next_message {
   my ($self) = @_;
-  my $line = readline $self->{messageh};
-  chomp $line if defined $line;
+  my $line = $self->read_line($self->{messageh});
   return $line;
 }
 
@@ -621,11 +607,9 @@ sub start_children {
       close $child->[$i];
       select($parent);
       $| = 1;	# print to parent by default, turn off buffering
-      print "START\n";
-      while ($line = readline $parent) {
-	chomp $line;
+      $self->send_line($parent,"START");
+      while ($line = $self->read_line($parent)) {
 	if ($line eq "exit") {
-	  print "END\n";
 	  close $parent;
 	  exit;
 	}
@@ -638,10 +622,10 @@ sub start_children {
 	# the packed version if possible ...  use defined for date since
 	# it could == 0.
         if (!$self->{determine_receive_date} && $class && $format && defined $date && $where) {
-	  $line = run_index_pack($date, $class, $format, $where);
+	  $line = index_pack($date, $class, $format, $where);
         }
 
-	print "$result\nRESULT $line\n";
+	$self->send_line($parent,"$result\0RESULT $line");
       }
       exit;
     }
@@ -664,8 +648,7 @@ sub reap_children {
 
   for (my $i = 0; $i < $count; $i++) {
     #warn "debug: killing child $i (pid ",$pid->[$i],")\n";
-    print { $socket->[$i] } "exit\n"; # tell the child to die.
-    my $line = readline $socket->[$i]; # read its END statement.
+    $self->send_line($socket->[$i],"exit"); # tell the child to die.
     close $socket->[$i];
     waitpid($pid->[$i], 0); # wait for the signal ...
   }
@@ -673,17 +656,34 @@ sub reap_children {
 
 ############################################################################
 
-# 0 850852128			atime
-# 1 h				class
-# 2 m				format
-# 3 ./ham/goodmsgs.0		path
+# four bytes in network/vax format (little endian) as length of message
+# the rest is the actual message
 
-sub run_index_pack {
-  return join("\000", @_);
+sub read_line {
+  my($self, $fd) = @_;
+  my($length,$msg);
+
+  # read in the 4 byte length and unpack
+  sysread($fd, $length, 4);
+  $length = unpack("V", $length);
+#  warn "<< $$ $length\n";
+  return unless $length;
+
+  # read in the rest of the single message
+  sysread($fd, $msg, $length);
+#  warn "<< $$ $msg\n";
+  return $msg;
 }
 
-sub run_index_unpack {
-  return split(/\000/, $_[0]);
+sub send_line {
+  my $self = shift;
+  my $fd = shift;
+
+  foreach ( @_ ) {
+    my $length = pack("V", length $_);
+#    warn ">> $$ ".length($_)." $_\n";
+    syswrite($fd, $length . $_);
+  }
 }
 
 ############################################################################
@@ -813,16 +813,9 @@ sub message_array {
     splice(@messages, 0, $self->{opt_tail});
   }
 
-  # Convert scan index format to run index format
-  # TODO: figure out a better scan index format which doesn't include newlines
-  # so readline() works (or replace readline with something else ...?)
-  foreach (@messages) {
-    $_ = run_index_pack(scan_index_unpack($_));
-  }
-
   # Dump out the messages to the temp file if we're using one
   if (defined $fh) {
-    print { $fh } map { "$_\n" } scalar(@messages), @messages;
+    $self->send_line($fh, scalar(@messages), @messages);
     return;
   }
 
@@ -878,11 +871,11 @@ sub message_is_useful_by_date  {
 
 # put the date in first, big-endian packed format
 # this format lets cmp easily sort by date, then class, format, and path.
-sub scan_index_pack {
+sub index_pack {
   return pack("NAAA*", @_);
 }
 
-sub scan_index_unpack {
+sub index_unpack {
   return unpack("NAAA*", $_[0]);
 }
 
@@ -932,7 +925,7 @@ sub scan_file {
 
   $self->bump_scan_progress();
   if (!$self->{determine_receive_date}) {
-    push(@{$self->{$class}}, scan_index_pack(AI_TIME_UNKNOWN, $class, "f", $mail));
+    push(@{$self->{$class}}, index_pack(AI_TIME_UNKNOWN, $class, "f", $mail));
     return;
   }
 
@@ -956,7 +949,7 @@ sub scan_file {
   }
 
   return if !$self->message_is_useful_by_date($date);
-  push(@{$self->{$class}}, scan_index_pack($date, $class, "f", $mail));
+  push(@{$self->{$class}}, index_pack($date, $class, "f", $mail));
 }
 
 sub scan_mailbox {
@@ -1052,7 +1045,7 @@ sub scan_mailbox {
         next if !$self->message_is_useful_by_date($v);
       }
 
-      push(@{$self->{$class}}, scan_index_pack($v, $class, "m", "$file.$k"));
+      push(@{$self->{$class}}, index_pack($v, $class, "m", "$file.$k"));
     }
 
     if (defined $AICache) {
@@ -1157,7 +1150,7 @@ sub scan_mbx {
         next if !$self->message_is_useful_by_date($v);
       }
 
-      push(@{$self->{$class}}, scan_index_pack($v, $class, "b", "$file.$k"));
+      push(@{$self->{$class}}, index_pack($v, $class, "b", "$file.$k"));
     }
 
     if (defined $AICache) {
