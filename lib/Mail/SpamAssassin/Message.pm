@@ -139,7 +139,9 @@ sub new {
   }
 
   # Pull off mbox and mbx separators
-  if ( $message[0] =~ /^From\s/ ) {
+  if (!defined $message[0]) {
+    # no separator, there's no message ;)
+  } elsif ($message[0] =~ /^From\s/) {
     # mbox formated mailbox
     $self->{'mbox_sep'} = shift @message;
   } elsif ($message[0] =~ MBX_SEPARATOR) {
