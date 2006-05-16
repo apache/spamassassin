@@ -179,7 +179,7 @@ describe TVD_PH_SUBJ_URGENT	Subject looks like a phish
 
 # 2006/05/05
 # 1.150   1.3983   0.0000    1.000   0.87    0.01  T_TVD_FLOAT_GENERAL4
-rawbody TVD_FLOAT_GENERAL	/\bstyle="[^"]*\bfloat\s*:\s*[a-z]+\s*">\s*[a-zA-Z]+\s*</i
+rawbody TVD_FLOAT_GENERAL	/\bstyle\s*=\s*"[^"]*\bfloat\s*:\s*[a-z]+\s*">\s*[a-zA-Z]+\s*</i
 describe TVD_FLOAT_GENERAL	Message contains HTML style indicating spam
 
 ###########################################################################
