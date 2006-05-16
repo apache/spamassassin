@@ -30,11 +30,12 @@ chdir "masses" or die;
 
 unlink ("ham.log", "spam.log");
 
-# just the sandbox rules and the timing plugin
+# just the sandbox rules, sandbox plugins, and the timing plugin
 #
 system ("rm -rf tstrules");
 run "mkdir tstrules";
 run "cp ../rules/70_sandbox.cf tstrules";
+run "cp ../rules/*.pm tstrules";
 run "cp plugins/*.* tstrules";
 
 # well, ok just those, and anything that's been mailed-in
