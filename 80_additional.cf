@@ -134,10 +134,10 @@ describe NULL_IN_BODY		Message has NUL (ASCII 0) byte in message
 header TVD_UA_FOSTERING         User-Agent =~ /^fostering/i
 describe TVD_UA_FOSTERING	User-Agent header includes spam indication
 
-# 2006/03/23
-# 1.004   1.2242   0.0103    0.992   0.84    0.01  T_TVD_SINGLE_SPAN
-rawbody TVD_SINGLE_SPAN		/<\/span>\s*[a-zA-Z]\s*<span\b/i
-describe TVD_SINGLE_SPAN 	Message has questionable span tags
+# 2006/03/23 - updated 2006/05/17
+# 1.941   2.3331   0.0000    1.000   0.92    0.01  TVD_SINGLE_SPAN_DIV
+rawbody TVD_SINGLE_SPAN_DIV	/>\s+[a-zA-Z]\s+<\/(?:span|div)\b/i
+describe TVD_SINGLE_SPAN_DIV 	Message has questionable span tags
 
 # 2006/04/09
 # 0.091   0.1107   0.0000    1.000   0.59    1.00  TVD_FINGER_01
@@ -298,7 +298,7 @@ score TVD_ACT_193		2.0
 score TVD_DEAR_HOMEOWNER	2.0
 score TVD_DOLLARS_US		1.2
 score TVD_EB_PHISH		2.0
-score TVD_SINGLE_SPAN		1.8
+score TVD_SINGLE_SPAN_DIV	1.8
 score TVD_UA_FOSTERING		2.0
 score TVD_FINGER_01		2.0
 score TVD_SUBJ_FINGER_03	2.0
