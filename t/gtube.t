@@ -8,7 +8,7 @@ use Test; BEGIN { plan tests => 4 };
 
 %patterns = (
 
-q{ GTUBE }, 'gtube',
+q{ BODY: Generic Test for Unsolicited Bulk Email }, 'gtube',
 
 );
 
