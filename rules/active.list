@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bzoetekouw daf theo wtogami zmi
+# with results from: bzoetekouw daf theo wtogami
 
 # good enough
 ADDR_NUMS_AT_BIGSITE
@@ -15,9 +15,6 @@ AWL
 
 # good enough
 BAD_ENC_HEADER
-
-# good enough
-BANG_OPRAH
 
 # tflags learn
 BAYES_00
@@ -120,9 +117,6 @@ DRUGS_ANXIETY_EREC
 
 # good enough
 DRUGS_ANXIETY_OBFU
-
-# good enough
-DRUGS_DIET
 
 # good enough
 DRUGS_DIET_OBFU
@@ -296,6 +290,9 @@ FROM_ALL_NUMS
 FROM_BLANK_NAME
 
 # good enough
+FROM_DOMAIN_NOVOWEL
+
+# good enough
 FROM_ENDS_IN_NUMS
 
 # good enough
@@ -425,9 +422,6 @@ HS_INDEX_PARAM
 HS_MEETUP_FOR_SEX
 
 # good enough
-HS_NO_FLOWERS
-
-# good enough
 HS_PHARMA_1
 
 # good enough
@@ -450,6 +444,9 @@ HTTP_ESCAPED_HOST
 
 # good enough
 HTTP_EXCESSIVE_ESCAPES
+
+# good enough
+INFO_TLD
 
 # good enough
 INTERRUPTUS
@@ -506,9 +503,6 @@ KAM_STOCKTIP22
 KAM_STOCKTIP23
 
 # good enough
-KAM_STOCKTIP24
-
-# good enough
 KAM_STOCKTIP26
 
 # good enough
@@ -540,6 +534,9 @@ MILLION_USD
 
 # good enough
 MIME_BAD_ISO_CHARSET
+
+# good enough
+MIME_BASE64_NO_NAME
 
 # good enough
 MIME_BASE64_TEXT
@@ -896,9 +893,6 @@ SUBJECT_NEEDS_ENCODING
 SUBJECT_SEXUAL
 
 # good enough
-SUBJ_GUARANTEED
-
-# good enough
 SUBJ_ILLEGAL_CHARS
 
 # good enough
@@ -912,6 +906,15 @@ SUB_HELLO
 
 # good enough
 SUSPICIOUS_RECIPS
+
+# good enough
+TO_CC_NONE
+
+# good enough
+TO_EMPTY
+
+# good enough
+TO_NO_USER
 
 # good enough
 TRACKER_ID
@@ -975,6 +978,12 @@ TVD_FUZZY_SECURITIES
 
 # good enough
 TVD_FUZZY_SYMBOL
+
+# good enough
+TVD_FW_GRAPHIC_ID1
+
+# good enough
+TVD_FW_GRAPHIC_ID2
 
 # good enough
 TVD_FW_MESG1
@@ -1102,16 +1111,16 @@ FORGED_OUTLOOK_TAGS
 # not publishing JM_RCVD_SENDMAILID: needs plugin (Mail::SpamAssassin::Plugin::SendmailID)
 
 # good enough
-TVD_FW_GRAPHIC_NAME_LONG
-
-# good enough
-TVD_FW_GRAPHIC_NAME_MID
+KAM_STOCKTIP9
 
 # good enough
 UNCLAIMED_MONEY
 
 # good enough
 UNCLOSED_BRACKET
+
+# good enough
+UNDISC_RECIPS
 
 # tflags userconf
 UNPARSEABLE_RELAY
