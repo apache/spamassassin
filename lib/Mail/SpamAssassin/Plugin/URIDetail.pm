@@ -16,14 +16,14 @@
 
 =head1 NAME
 
-URI - test URIs using detailed URI information
+URIDetail - test URIs using detailed URI information
 
 =head1 SYNOPSIS
 
 This plugin creates a new rule test type, known as "uri_detail".  These
 rules apply to all URIs found in the message.
 
-  loadplugin    Mail::SpamAssassin::Plugin::URI
+  loadplugin    Mail::SpamAssassin::Plugin::URIDetail
 
 =head1 CONFIGURATION
 
@@ -62,7 +62,7 @@ Regular expressions should be delimited by slashes.
 
 =cut
 
-package Mail::SpamAssassin::Plugin::URI;
+package Mail::SpamAssassin::Plugin::URIDetail;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use Data::Dumper;
