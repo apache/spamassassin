@@ -1008,7 +1008,15 @@ sub _replace_tags {
   my $self = shift;
   my $text = shift;
 
-  $text =~ s/_(\w+?)(?:\((.*?)\))?_/${\($self->_get_tag($1,$2))}/g;
+  # default to leaving the original string in place, if we cannot find
+  # a tag for it (bug 4793)
+  $text =~ s{(_(\w+?)(?:\((.*?)\))?_)}{
+	my $full = $1;
+        my $tag = $2;
+        my $result = $self->_get_tag($tag,$3);
+        (defined $result) ? $result : $full;
+      }ge;
+
   return $text;
 }
 
@@ -1100,6 +1108,8 @@ templates, etc. This API is intended for use by plugins.  Tag names will be
 converted to an all-uppercase representation internally.  See
 C<Mail::SpamAssassin::Conf>'s C<TEMPLATE TAGS> section for more details on
 tags.
+
+C<undef> will be returned if a tag by that name has not been defined.
 
 =cut
 
@@ -1246,20 +1256,21 @@ sub _get_tag {
 
           );
 
+  my $data;
   if (exists $tags{$tag}) {
-    return $tags{$tag}->(@_);
+    $data = $tags{$tag}->(@_);
   }
-  elsif ($self->{tag_data}->{$tag}) {
-    my $data = $self->{tag_data}->{$tag};
+  elsif (exists($self->{tag_data}->{$tag})) {
+    $data = $self->{tag_data}->{$tag};
     if (ref $data eq 'CODE') {
-      return $data->(@_);
-    } else {
-      return $data;
+      $data = $data->(@_);
     }
   }
   else {
-    return "";
+    return;
   }
+  $data = "" unless defined $data;
+  return $data;
 }
 
 ###########################################################################
