@@ -168,10 +168,10 @@ words the message will be returned unprocessed.
 
 =item B<-u> I<username>, B<--username>=I<username>
 
-This argument has been semi-obsoleted.  To have spamd use per-user-config
-files, run spamc as the user whose config files spamd should load.  If you're
-running spamc as some other user, though, (eg. root, mail, nobody, cyrus, etc.)
-then you can still use this flag.
+To have spamd use per-user-config files, run spamc as the user whose config
+files spamd should load; by default the effective user-ID is sent to spamd.  If
+you're running spamc as some other user, though, (eg. root, mail, nobody,
+cyrus, etc.) then you may use this flag to override the default.
 
 =item B<-U> I<socketpath>, B<--socket>=I<path>
 
