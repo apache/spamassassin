@@ -334,10 +334,9 @@ sub bgsend {
 
   my $pkt = $self->new_dns_packet($host, $type, $class);
 
-  my $data = $pkt->data;
   $self->connect_sock_if_reqd();
-  if (!$self->{sock}->send ($pkt->data, 0)) {
-    warn "dns: sendto() failed: $@";
+  if (!defined($self->{sock}->send($pkt->data, 0))) {
+    warn "dns: sendto() failed: $!";
     return;
   }
   my $id = $self->_packet_id($pkt);
