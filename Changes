@@ -1,4 +1,196 @@
 ------------------------------------------------------------------------
+r409236 | felicity | 2006-05-24 20:04:44 +0000 (Wed, 24 May 2006) | 1 line
+
+bug 4861, 4760: handle dccifd and dccproc failover properly, backport relays_internal and relays_external code, backport bug 4760 fix so that it's not possible to be in internal_networks without being in trusted_networks as well
+------------------------------------------------------------------------
+r409210 | felicity | 2006-05-24 17:18:36 +0000 (Wed, 24 May 2006) | 1 line
+
+bug 4793: when replacing tags in a message (_TAG_), leave the tags that don't exist alone instead of just removing them
+------------------------------------------------------------------------
+r409209 | felicity | 2006-05-24 17:13:13 +0000 (Wed, 24 May 2006) | 1 line
+
+bug 4901: deal more properly with failures in bgsend().  also, use the proper variable to show when errors occur.
+------------------------------------------------------------------------
+r408695 | felicity | 2006-05-22 15:34:10 +0000 (Mon, 22 May 2006) | 1 line
+
+bug 4879: add in pointer to the wiki to find out more about debug channels
+------------------------------------------------------------------------
+r407623 | felicity | 2006-05-18 19:45:31 +0000 (Thu, 18 May 2006) | 1 line
+
+GTUBE test was matching "GTUBE" in the message body, regardless of whether the rule actually hit or not
+------------------------------------------------------------------------
+r407021 | felicity | 2006-05-16 18:34:59 +0000 (Tue, 16 May 2006) | 1 line
+
+add in missing MANIFEST entry
+------------------------------------------------------------------------
+r407018 | felicity | 2006-05-16 18:29:12 +0000 (Tue, 16 May 2006) | 1 line
+
+bug 4884: deal with the last commit and work around another (more common) issue about null messages
+------------------------------------------------------------------------
+r407003 | jm | 2006-05-16 17:36:45 +0000 (Tue, 16 May 2006) | 1 line
+
+trivial fix: inhibit 'undefined value' warnings
+------------------------------------------------------------------------
+r398795 | dos | 2006-05-02 04:00:02 +0000 (Tue, 02 May 2006) | 1 line
+
+bug 4877: zero out score for DKIM_POLICY_SIGNSOME to avoid bogus default in current Mail-DKIM module
+------------------------------------------------------------------------
+r398791 | felicity | 2006-05-02 03:38:22 +0000 (Tue, 02 May 2006) | 1 line
+
+bug 4870: add in rc script support for DragonFlyBSD
+------------------------------------------------------------------------
+r398790 | felicity | 2006-05-02 03:33:13 +0000 (Tue, 02 May 2006) | 1 line
+
+bug 4867: fetchmail changed header formats at some point making Received parsing fail in certain conditions
+------------------------------------------------------------------------
+r398787 | felicity | 2006-05-02 03:30:00 +0000 (Tue, 02 May 2006) | 1 line
+
+bug 4863: don't try to create the gpg home directory if it already exists
+------------------------------------------------------------------------
+r398785 | felicity | 2006-05-02 03:27:44 +0000 (Tue, 02 May 2006) | 1 line
+
+bug 4884: if a null message is passed in, there are several variables which end up undefined causing warnings.  fake an empty message if no input is given.
+------------------------------------------------------------------------
+r398424 | felicity | 2006-04-30 20:14:37 +0000 (Sun, 30 Apr 2006) | 1 line
+
+bug 4885: add documentation (backport from 3.2) about rules_filename (as passed to the M::SA constructor) also accepting a directory
+------------------------------------------------------------------------
+r398207 | felicity | 2006-04-29 17:03:22 +0000 (Sat, 29 Apr 2006) | 1 line
+
+since we've reenabled the razor2 plugin, update the docs to reflect that
+------------------------------------------------------------------------
+r397332 | dos | 2006-04-26 23:19:56 +0000 (Wed, 26 Apr 2006) | 1 line
+
+bug 4802: add DKIM info to INSTALL
+------------------------------------------------------------------------
+r396125 | jm | 2006-04-22 13:22:41 +0000 (Sat, 22 Apr 2006) | 1 line
+
+bug 4649: fix Outlook Express/Yahoo FPs
+------------------------------------------------------------------------
+r395392 | jm | 2006-04-19 20:47:25 +0000 (Wed, 19 Apr 2006) | 1 line
+
+bug 4630: fix HP-UX 11.11 libspamc build, patch from John Madden <maddenj+spamassassin at skynet.ie>
+------------------------------------------------------------------------
+r395011 | dos | 2006-04-18 19:38:51 +0000 (Tue, 18 Apr 2006) | 1 line
+
+bug 4802: v312.pre file for DKIM plugin
+------------------------------------------------------------------------
+r395009 | dos | 2006-04-18 19:37:52 +0000 (Tue, 18 Apr 2006) | 1 line
+
+bug 4802: implement DKIM plugin, including whitelist_from_dkim support
+------------------------------------------------------------------------
+r394400 | dos | 2006-04-15 23:34:18 +0000 (Sat, 15 Apr 2006) | 1 line
+
+bug 4852: race condition in spamd pre-fork causes harmless warnings in logs, fixed
+------------------------------------------------------------------------
+r394398 | dos | 2006-04-15 23:29:49 +0000 (Sat, 15 Apr 2006) | 1 line
+
+bug 4699: use M::SA::Timeout for spamd copy_config call and allow for empty $@ values
+------------------------------------------------------------------------
+r393590 | dos | 2006-04-12 20:18:28 +0000 (Wed, 12 Apr 2006) | 1 line
+
+bug 3838: work around Perl bug causing  to become tainted -- thanks to Mark Martinec for pointing out the bug with Perl itself
+------------------------------------------------------------------------
+r393346 | felicity | 2006-04-12 00:43:38 +0000 (Wed, 12 Apr 2006) | 1 line
+
+bug 4864: remove extraneous front-slash from gpghomedir path
+------------------------------------------------------------------------
+r392707 | sidney | 2006-04-09 12:31:35 +0000 (Sun, 09 Apr 2006) | 1 line
+
+bug 4829: deal with perl peculiarity with iterators when exiting early from a  while each loop
+------------------------------------------------------------------------
+r392640 | sidney | 2006-04-09 00:25:29 +0000 (Sun, 09 Apr 2006) | 1 line
+
+bug 4859: release per-message memory leak that was accumulating for as long as spamd child was alive
+------------------------------------------------------------------------
+r392081 | dos | 2006-04-06 21:21:47 +0000 (Thu, 06 Apr 2006) | 1 line
+
+bug 3871: add option to spamd to specify group to run as
+------------------------------------------------------------------------
+r392047 | sidney | 2006-04-06 19:33:28 +0000 (Thu, 06 Apr 2006) | 1 line
+
+Bug 4593: fix spamc crash from unsigned int declaration of variable that has to hold a negative error return and fix similar unsigned and warning issues
+------------------------------------------------------------------------
+r392044 | sidney | 2006-04-06 19:17:59 +0000 (Thu, 06 Apr 2006) | 1 line
+
+bug 4707: seg fault from buffer overflow not realistically exploitable but good to fix
+------------------------------------------------------------------------
+r391839 | jm | 2006-04-05 22:47:51 +0000 (Wed, 05 Apr 2006) | 1 line
+
+bug 3815: fix RELAYCOUNTRY tag so that it really works this time
+------------------------------------------------------------------------
+r391215 | felicity | 2006-04-04 02:45:18 +0000 (Tue, 04 Apr 2006) | 1 line
+
+bug 3754: if there's a problem opening a file via sa-learn or spamassassin, return an error exit value.
+------------------------------------------------------------------------
+r391117 | felicity | 2006-04-03 18:49:38 +0000 (Mon, 03 Apr 2006) | 1 line
+
+bug 4830: remove die() calls in TextCat plugin
+------------------------------------------------------------------------
+r391116 | felicity | 2006-04-03 18:46:40 +0000 (Mon, 03 Apr 2006) | 1 line
+
+bug 4827: M::SA::first_existing_path() would return the last array entry passed in if none of the paths were found.  Now return undef instead and handle the error when it happens.
+------------------------------------------------------------------------
+r391114 | felicity | 2006-04-03 18:37:39 +0000 (Mon, 03 Apr 2006) | 1 line
+
+bug 4839: Logger.pm converts control chars including tab into underscores which confuses a bunch of users when checking debug output.  Convert tab into space instead, etc.
+------------------------------------------------------------------------
+r391109 | felicity | 2006-04-03 18:33:42 +0000 (Mon, 03 Apr 2006) | 1 line
+
+bug 4813: generally open RE causes sendmail received header get read in as qmail in error
+------------------------------------------------------------------------
+r391102 | felicity | 2006-04-03 18:19:44 +0000 (Mon, 03 Apr 2006) | 1 line
+
+bug 4850: re-enable the Razor2 plugin by default due to a service policy change
+------------------------------------------------------------------------
+r390945 | felicity | 2006-04-03 03:22:10 +0000 (Mon, 03 Apr 2006) | 1 line
+
+bug 4851: a number of rule descriptions in the DE locale weren't properly surrounded by ifplugin conditionals
+------------------------------------------------------------------------
+r390309 | dos | 2006-03-31 02:52:49 +0000 (Fri, 31 Mar 2006) | 1 line
+
+bug 4837: update pod 'priority' description
+------------------------------------------------------------------------
+r388879 | duncf | 2006-03-26 04:58:19 +0000 (Sun, 26 Mar 2006) | 1 line
+
+document RelayCountry dependency on IP::Country::Fast in init.pre
+------------------------------------------------------------------------
+r388649 | duncf | 2006-03-24 21:40:51 +0000 (Fri, 24 Mar 2006) | 1 line
+
+Trivial typo fix
+------------------------------------------------------------------------
+r387451 | dos | 2006-03-21 07:34:18 +0000 (Tue, 21 Mar 2006) | 1 line
+
+MANIFEST deletion missed in r386895
+------------------------------------------------------------------------
+r386896 | felicity | 2006-03-18 22:38:46 +0000 (Sat, 18 Mar 2006) | 1 line
+
+get rid of script that doesn't work in 3.0+
+------------------------------------------------------------------------
+r386242 | felicity | 2006-03-16 02:11:22 +0000 (Thu, 16 Mar 2006) | 1 line
+
+get rid of superfluous comment
+------------------------------------------------------------------------
+r385847 | felicity | 2006-03-14 18:37:14 +0000 (Tue, 14 Mar 2006) | 1 line
+
+clean up some other perceptron-related files during 'make clean'
+------------------------------------------------------------------------
+r385367 | felicity | 2006-03-12 21:00:56 +0000 (Sun, 12 Mar 2006) | 1 line
+
+bug 4826: Razor2 plugin needs to load M::SA::Timeout module
+------------------------------------------------------------------------
+r385223 | felicity | 2006-03-12 00:44:37 +0000 (Sun, 12 Mar 2006) | 1 line
+
+bumping spec file to 3.1.2
+------------------------------------------------------------------------
+r385222 | felicity | 2006-03-12 00:43:59 +0000 (Sun, 12 Mar 2006) | 1 line
+
+3.1.1 has been released, start the 3.1.2 development process
+------------------------------------------------------------------------
+r384992 | felicity | 2006-03-11 02:30:46 +0000 (Sat, 11 Mar 2006) | 1 line
+
+preparing 3.1.1 again
+------------------------------------------------------------------------
 r384991 | felicity | 2006-03-11 02:26:29 +0000 (Sat, 11 Mar 2006) | 1 line
 
 bug 4655: fix issues with redhat spamd rc script
