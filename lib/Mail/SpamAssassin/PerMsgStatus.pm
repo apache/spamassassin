@@ -1021,10 +1021,11 @@ sub _replace_tags {
   # a tag for it (bug 4793)
   my $t;
   my $v;
-  $text =~ s{_(\w+?)(?:\((.*?)\))?_}{
-        $t = $1;
-        $v = $self->_get_tag($t,$2);
-        (defined $v) ? $v : "_".$t."_"
+  $text =~ s{(_(\w+?)(?:\((.*?)\))?_)}{
+	my $full = $1;
+        my $tag = $2;
+        my $result = $self->_get_tag($tag,$3);
+        (defined $result) ? $result : $full;
       }ge;
 
   return $text;
@@ -1100,6 +1101,8 @@ For example:
 
 See C<Mail::SpamAssassin::Conf>'s C<TEMPLATE TAGS> section for more details on
 how template tags are used.
+
+C<undef> will be returned if a tag by that name has not been defined.
 
 =cut
 
