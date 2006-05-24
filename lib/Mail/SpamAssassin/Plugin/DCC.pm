@@ -97,7 +97,7 @@ Whether to use DCC, if it is available.
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
   });
 
-=item dcc_timeout n		(default: 5)
+=item dcc_timeout n		(default: 8)
 
 How many seconds you wait for DCC to complete, before scanning continues
 without the DCC results.
@@ -106,7 +106,7 @@ without the DCC results.
 
   push (@cmds, {
     setting => 'dcc_timeout',
-    default => 5,
+    default => 8,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
 
@@ -238,20 +238,42 @@ use this, as the current PATH will have been cleared.
 Specify additional options to the dccproc(8) command. Please note that only
 characters in the range [0-9A-Za-z ,._/-] are allowed for security reasons.
 
-The default is C<-R>.
+The default is C<undef>.
 
 =cut
 
   push (@cmds, {
     setting => 'dcc_options',
     is_admin => 1,
-    default => '-R',
+    default => undef,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value !~ m{^([0-9A-Za-z ,._/-]+)$}) {
 	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
       $self->{dcc_options} = $1;
+    }
+  });
+
+=item dccifd_options options
+
+Specify additional options to send to the dccifd(8) daemon. Please note that only
+characters in the range [0-9A-Za-z ,._/-] are allowed for security reasons.
+
+The default is C<undef>.
+
+=cut
+
+  push (@cmds, {
+    setting => 'dccifd_options',
+    is_admin => 1,
+    default => undef,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value !~ m{^([0-9A-Za-z ,._/-]+)$}) {
+	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+      $self->{dccifd_options} = $1;
     }
   });
 
@@ -352,23 +374,34 @@ sub check_dcc {
     return 0;
   }
 
+  my $client = $permsgstatus->{relays_external}->[0]->{ip};
   if ($self->{dccifd_available}) {
-    return $self->dccifd_lookup($permsgstatus, $full);
+    my $clientname = $permsgstatus->{relays_external}->[0]->{rdns};
+    my $helo = $permsgstatus->{relays_external}->[0]->{helo} || "";
+    if ($client) {
+      if ($clientname) {
+        $client = $client . "\r" . $clientname;
+      }
+    } else {
+      $client = "0.0.0.0";
+    }
+    return $self->dccifd_lookup($permsgstatus, $full, $client, $clientname, $helo);
   }
   else {
-    return $self->dccproc_lookup($permsgstatus, $full);
+    return $self->dccproc_lookup($permsgstatus, $full, $client);
   }
   return 0;
 }
 
 sub dccifd_lookup {
-  my ($self, $permsgstatus, $fulltext) = @_;
+  my ($self, $permsgstatus, $fulltext, $client, $clientname, $helo) = @_;
   my $response = "";
   my %count;
   my $left;
   my $right;
   my $timeout = $self->{main}->{conf}->{dcc_timeout};
   my $sockpath = $self->{main}->{conf}->{dcc_dccifd_path};
+  my $opts = $self->{main}->{conf}->{dccifd_options} || '';
 
   $count{body} = 0;
   $count{fuz1} = 0;
@@ -385,9 +418,9 @@ sub dccifd_lookup {
       Peer => $sockpath) || dbg("dcc: failed to open socket") && die;
 
     # send the options and other parameters to the daemon
-    $sock->print("header\n") || dbg("dcc: failed write") && die; # options
-    $sock->print("0.0.0.0\n") || dbg("dcc: failed write") && die; # client
-    $sock->print("\n") || dbg("dcc: failed write") && die; # HELO value
+    $sock->print("header " . $opts . "\n") || dbg("dcc: failed write") && die; # options
+    $sock->print($client . "\n") || dbg("dcc: failed write") && die; # client
+    $sock->print($helo . "\n") || dbg("dcc: failed write") && die; # HELO value
     $sock->print("\n") || dbg("dcc: failed write") && die; # sender
     $sock->print("unknown\r\n") || dbg("dcc: failed write") && die; # recipients
     $sock->print("\n") || dbg("dcc: failed write") && die; # recipients
@@ -469,7 +502,7 @@ sub dccifd_lookup {
 }
 
 sub dccproc_lookup {
-  my ($self, $permsgstatus, $fulltext) = @_;
+  my ($self, $permsgstatus, $fulltext, $client) = @_;
   my $response = undef;
   my %count;
   my $timeout = $self->{main}->{conf}->{dcc_timeout};
@@ -493,11 +526,12 @@ sub dccproc_lookup {
     my $path = Mail::SpamAssassin::Util::untaint_file_path($self->{main}->{conf}->{dcc_path});
 
     my $opts = $self->{main}->{conf}->{dcc_options} || '';
+    $opts = "-a " . $client . " " . $opts if $client;
 
-    dbg("dcc: opening pipe: " . join(' ', $path, "-H", $opts, "< $tmpf"));
+    dbg("dcc: opening pipe: " . join(' ', $path, "-H", "-x", "0", $opts, "< $tmpf"));
 
     $pid = Mail::SpamAssassin::Util::helper_app_pipe_open(*DCC,
-	$tmpf, 1, $path, "-H", split(' ', $opts));
+	$tmpf, 1, $path, "-H", "-x", "0", split(' ', $opts));
     $pid or die "$!\n";
 
     my @null = <DCC>;
@@ -596,35 +630,112 @@ sub dccproc_lookup {
 sub plugin_report {
   my ($self, $options) = @_;
 
+  return if $self->{options}->{dont_report_to_dcc};
+  $self->get_dcc_interface();
   return if $self->{dcc_disabled};
 
-  if (!defined $self->{dccproc_available}) {
-    $self->is_dccproc_available();
-  }
-
-  if ($self->{dccproc_available} && !$self->{options}->{dont_report_to_dcc}) {
-    # use temporary file: open2() is unreliable due to buffering under spamd
-    my $tmpf = $options->{report}->create_fulltext_tmpfile($options->{text});
-    if ($self->dcc_report($options, $tmpf)) {
+  # get the metadata from the message so we can pass the external relay information
+  $options->{msg}->extract_message_metadata($options->{report}->{main});
+  my $client = $options->{msg}->{metadata}->{relays_external}->[0]->{ip};
+  if ($self->{dccifd_available}) {
+    my $clientname = $options->{msg}->{metadata}->{relays_external}->[0]->{rdns};
+    my $helo = $options->{msg}->{metadata}->{relays_external}->[0]->{helo} || "";
+    if ($client) {
+      if ($clientname) {
+        $client = $client . "\r" . $clientname;
+      }
+    } else {
+      $client = "0.0.0.0";
+    }
+    if ($self->dccifd_report($options, $options->{text}, $client, $helo)) {
       $options->{report}->{report_available} = 1;
       info("reporter: spam reported to DCC");
       $options->{report}->{report_return} = 1;
     }
     else {
-      info("reporter: could not report spam to DCC");
+      info("reporter: could not report spam to DCC via dccifd");
+    }
+  } else {
+    # use temporary file: open2() is unreliable due to buffering under spamd
+    my $tmpf = $options->{report}->create_fulltext_tmpfile($options->{text});
+    
+    if ($self->dcc_report($options, $tmpf, $client)) {
+      $options->{report}->{report_available} = 1;
+      info("reporter: spam reported to DCC");
+      $options->{report}->{report_return} = 1;
+    }
+    else {
+      info("reporter: could not report spam to DCC via dccproc");
     }
     $options->{report}->delete_fulltext_tmpfile();
   }
 }
 
+sub dccifd_report {
+  my ($self, $options, $fulltext, $client, $helo) = @_;
+  my $timeout = $self->{main}->{conf}->{dcc_timeout};
+  my $sockpath = $self->{main}->{conf}->{dcc_dccifd_path};
+  my $opts = $self->{main}->{conf}->{dccifd_options} || ''; # instead of header use whatever the report option is
+
+  $options->{report}->enter_helper_run_mode();
+  my $timer = Mail::SpamAssassin::Timeout->new({ secs => $timeout });
+
+  my $err = $timer->run_and_catch(sub {
+
+    local $SIG{PIPE} = sub { die "__brokenpipe__ignore__\n" };
+
+    my $sock = IO::Socket::UNIX->new(Type => SOCK_STREAM,
+                                     Peer => $sockpath) || dbg("report: dccifd failed to open socket") && die;
+
+    # send the options and other parameters to the daemon
+    $sock->print("spam " . $opts . "\n") || dbg("report: dccifd failed write") && die; # options
+    $sock->print($client . "\n") || dbg("report: dccifd failed write") && die; # client
+    $sock->print($helo . "\n") || dbg("report: dccifd failed write") && die; # HELO value
+    $sock->print("\n") || dbg("report: dccifd failed write") && die; # sender
+    $sock->print("unknown\r\n") || dbg("report: dccifd failed write") && die; # recipients
+    $sock->print("\n") || dbg("report: dccifd failed write") && die; # recipients
+
+    $sock->print($$fulltext);
+
+    $sock->shutdown(1) || dbg("report: dccifd failed socket shutdown: $!") && die;
+
+    $sock->getline() || dbg("report: dccifd failed read status") && die;
+    $sock->getline() || dbg("report: dccifd failed read multistatus") && die;
+
+    my @ignored = $sock->getlines();
+  });
+
+  $options->{report}->leave_helper_run_mode();
+  
+  if ($timer->timed_out()) {
+    dbg("reporter: DCC report via dccifd timed out after $timeout secs.");
+    return 0;
+  }
+  
+  if ($err) {
+    chomp $err;
+    if ($err eq "__brokenpipe__ignore__") {
+      dbg("reporter: DCC report via dccifd failed: broken pipe");
+    } else {
+      warn("reporter: DCC report via dccifd failed: $err\n");
+    }
+    return 0;
+  }
+  
+  return 1;
+}
+  
 sub dcc_report {
-  my ($self, $options, $tmpf) = @_;
+  my ($self, $options, $tmpf, $client) = @_;
   my $timeout = $options->{report}->{conf}->{dcc_timeout};
 
   # note: not really tainted, this came from system configuration file
   my $path = Mail::SpamAssassin::Util::untaint_file_path($options->{report}->{conf}->{dcc_path});
 
   my $opts = $options->{report}->{conf}->{dcc_options} || '';
+
+  # get the metadata from the message so we can pass the external relay information
+  $opts = "-a " . $client . " " . $opts if $client;
 
   my $timer = Mail::SpamAssassin::Timeout->new({ secs => $timeout });
 
@@ -633,8 +744,10 @@ sub dcc_report {
 
     local $SIG{PIPE} = sub { die "__brokenpipe__ignore__\n" };
 
+    dbg("report: opening pipe: " . join(' ', $path, "-H", "-t", "many", "-x", "0", $opts, "< $tmpf"));
+
     my $pid = Mail::SpamAssassin::Util::helper_app_pipe_open(*DCC,
-        $tmpf, 1, $path, "-t", "many", split(' ', $opts));
+        $tmpf, 1, $path, "-H", "-t", "many", "-x", "0", split(' ', $opts));
     $pid or die "$!\n";
 
     my @ignored = <DCC>;
@@ -645,16 +758,16 @@ sub dcc_report {
   $options->{report}->leave_helper_run_mode();
 
   if ($timer->timed_out()) {
-    dbg("reporter: DCC report timed out after $timeout seconds");
+    dbg("reporter: DCC report via dccproc timed out after $timeout seconds");
     return 0;
   }
 
   if ($err) {
     chomp $err;
     if ($err eq "__brokenpipe__ignore__") {
-      dbg("reporter: DCC report failed: broken pipe");
+      dbg("reporter: DCC report via dccproc failed: broken pipe");
     } else {
-      warn("reporter: DCC report failed: $err\n");
+      warn("reporter: DCC report via dccproc failed: $err\n");
     }
     return 0;
   }
