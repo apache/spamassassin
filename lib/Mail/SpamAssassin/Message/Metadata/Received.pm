@@ -68,6 +68,14 @@ sub parse_received_headers {
   $self->{num_relays_untrusted} = 0;
   $self->{relays_untrusted_str} = '';
 
+  $self->{relays_internal} = [ ];
+  $self->{num_relays_internal} = 0;
+  $self->{relays_internal_str} = '';
+
+  $self->{relays_external} = [ ];
+  $self->{num_relays_external} = 0;
+  $self->{relays_external_str} = '';
+
   $self->{num_relays_unparseable} = 0;
 
   # now figure out what relays are trusted...
@@ -133,6 +141,12 @@ sub parse_received_headers {
       # if the user didn't specify it, assume we immediately transition
       # to the external network (the internet) once we leave this host.
       $in_internal = 0;
+    }
+
+    # note: you can't be in internal networks, but not be in a trusted 
+    # net. (bug 4760)
+    if ($in_internal && !$in_trusted) {
+      $in_trusted = 1;
     }
 
 # OK, infer the trusted/untrusted handover, if we don't have real info.
@@ -262,12 +276,22 @@ sub parse_received_headers {
       push (@{$self->{relays_untrusted}}, $relay);
       $self->{allow_fetchmail_markers} = 0;
     }
+
+    if ($in_internal) {
+      push (@{$self->{relays_internal}}, $relay);
+    } else {
+      push (@{$self->{relays_external}}, $relay);
+    }
   }
 
   $self->{relays_trusted_str} = join(' ', map { $_->{as_string} }
                     @{$self->{relays_trusted}});
   $self->{relays_untrusted_str} = join(' ', map { $_->{as_string} }
                     @{$self->{relays_untrusted}});
+  $self->{relays_internal_str} = join(' ', map { $_->{as_string} }
+                    @{$self->{relays_internal}});
+  $self->{relays_external_str} = join(' ', map { $_->{as_string} }
+                    @{$self->{relays_external}});
 
   # drop the temp PerMsgStatus object
   delete $self->{dns_pms};
@@ -282,21 +306,31 @@ sub parse_received_headers {
   if ($self->{msg}->can ("delete_header")) {
     $self->{msg}->delete_header ("X-Spam-Relays-Trusted");
     $self->{msg}->delete_header ("X-Spam-Relays-Untrusted");
+    $self->{msg}->delete_header ("X-Spam-Relays-Internal");
+    $self->{msg}->delete_header ("X-Spam-Relays-External");
  
     if ($self->{msg}->can ("put_metadata")) {
       $self->{msg}->put_metadata ("X-Spam-Relays-Trusted",
 			$self->{relays_trusted_str});
       $self->{msg}->put_metadata ("X-Spam-Relays-Untrusted",
 			$self->{relays_untrusted_str});
+      $self->{msg}->put_metadata ("X-Spam-Relays-Internal",
+			$self->{relays_internal_str});
+      $self->{msg}->put_metadata ("X-Spam-Relays-External",
+			$self->{relays_external_str});
     }
   }
 
   # be helpful; save some cumbersome typing
   $self->{num_relays_trusted} = scalar (@{$self->{relays_trusted}});
   $self->{num_relays_untrusted} = scalar (@{$self->{relays_untrusted}});
+  $self->{num_relays_internal} = scalar (@{$self->{relays_internal}});
+  $self->{num_relays_external} = scalar (@{$self->{relays_external}});
 
   dbg("metadata: X-Spam-Relays-Trusted: ".$self->{relays_trusted_str});
   dbg("metadata: X-Spam-Relays-Untrusted: ".$self->{relays_untrusted_str});
+  dbg("metadata: X-Spam-Relays-Internal: ".$self->{relays_internal_str});
+  dbg("metadata: X-Spam-Relays-External: ".$self->{relays_external_str});
 }
 
 sub lookup_all_ips {
@@ -1224,6 +1258,8 @@ sub found_pop_fetcher_sig {
   if ($self->{allow_fetchmail_markers}) {
     dbg("received-header: found fetchmail marker, restarting parse");
     $self->{relays_trusted} = [ ];
+    $self->{relays_internal} = [ ];
+    $self->{relays_external} = [ ];
   } else {
     dbg("received-header: found fetchmail marker outside trusted area, ignored");
   }

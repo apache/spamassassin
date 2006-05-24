@@ -1351,6 +1351,8 @@ sub extract_message_metadata {
   foreach my $item (qw(
 	relays_trusted relays_trusted_str num_relays_trusted
 	relays_untrusted relays_untrusted_str num_relays_untrusted
+	relays_internal relays_internal_str num_relays_internal
+	relays_external relays_external_str num_relays_external
         num_relays_unparseable
 	))
   {
@@ -1359,6 +1361,8 @@ sub extract_message_metadata {
 
   $self->{tag_data}->{RELAYSTRUSTED} = $self->{relays_trusted_str};
   $self->{tag_data}->{RELAYSUNTRUSTED} = $self->{relays_untrusted_str};
+  $self->{tag_data}->{RELAYSINTERNAL} = $self->{relays_internal_str};
+  $self->{tag_data}->{RELAYSEXTERNAL} = $self->{relays_external_str};
   $self->{tag_data}->{LANGUAGES} = $self->{msg}->get_metadata("X-Languages");
 
   # This should happen before we get called, but just in case.
@@ -1494,6 +1498,14 @@ sub _get {
   # trusted relays list, as string
   elsif ($request eq 'X-Spam-Relays-Trusted') {
     $result = $self->{relays_trusted_str};
+  }
+  # external relays list, as string
+  elsif ($request eq 'X-Spam-Relays-External') {
+    $result = $self->{relays_external_str};
+  }
+  # internal relays list, as string
+  elsif ($request eq 'X-Spam-Relays-Internal') {
+    $result = $self->{relays_internal_str};
   }
   # ToCc: the combined recipients list
   elsif ($request eq 'ToCc') {
