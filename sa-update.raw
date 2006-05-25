@@ -314,10 +314,16 @@ $ua->env_proxy;
 
 # Generate a temporary file to put channel content in for later use ...
 my ($content_file, $tfh) = Mail::SpamAssassin::Util::secure_tmpfile();
+if ( !defined $content_file ) {
+  die "fatal: could not create temporary channel content file: $!\n";
+}
 close($tfh);
 
 # and another, for the new config file
 my ($newcf_file, $tfh2) = Mail::SpamAssassin::Util::secure_tmpfile();
+if ( !defined $newcf_file ) {
+  die "fatal: could not create temporary channel content file: $!\n";
+}
 close($tfh2);
 
 # by default, exit code is 1, to indicate no updates occurred
@@ -547,6 +553,9 @@ foreach my $channel (@channels) {
     dbg("gpg: populating temp signature file");
     my $sig_file;
     ($sig_file, $tfh) = Mail::SpamAssassin::Util::secure_tmpfile();
+    if ( !defined $sig_file ) {
+      die "fatal: couldn't create temp file for GPG signature: $!\n";
+    }
     binmode $tfh;
     print $tfh $GPG;
     close($tfh);
