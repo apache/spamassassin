@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: daf theo wtogami zmi
+# with results from: daf parkerm theo wtogami zmi
 
 # good enough
 ADDR_NUMS_AT_BIGSITE
@@ -200,6 +200,9 @@ FB_VIAGRA_LEO3
 FB_YOURSELF_MASTER
 
 # good enough
+FH_DATE_IS_19XX
+
+# good enough
 FH_DATE_PAST_20XX
 
 # good enough
@@ -216,9 +219,6 @@ FH_RCVD_WITHSMTPFOR
 
 # good enough
 FH_VIRUS_NORTON
-
-# good enough
-FM_CUSTOMLOGODSGNc
 
 # good enough
 FORGED_AOL_TAGS
@@ -285,6 +285,9 @@ FORGED_YAHOO_RCVD
 
 # good enough
 FORWARD_LOOKING
+
+# good enough
+FREE_PORN
 
 # good enough
 FROM_ALL_NUMS
@@ -428,6 +431,9 @@ HS_MEETUP_FOR_SEX
 HS_NO_FLOWERS
 
 # good enough
+HS_PHARMA_1
+
+# good enough
 HS_SUBJ_ONLINE_PHARMACEUTICAL
 
 # tflags userconf
@@ -488,6 +494,9 @@ KAM_STOCKTIP11
 KAM_STOCKTIP15
 
 # good enough
+KAM_STOCKTIP17
+
+# good enough
 KAM_STOCKTIP2
 
 # good enough
@@ -537,6 +546,9 @@ MILLION_USD
 
 # good enough
 MIME_BAD_ISO_CHARSET
+
+# good enough
+MIME_BASE64_BLANKS
 
 # good enough
 MIME_BASE64_TEXT
@@ -959,12 +971,6 @@ TVD_FUZZY_PHARMACEUTICAL
 TVD_FUZZY_SYMBOL
 
 # good enough
-TVD_FW_GRAPHIC_ID1
-
-# good enough
-TVD_FW_GRAPHIC_ID2
-
-# good enough
 TVD_FW_MESG1
 
 # good enough
@@ -1073,9 +1079,6 @@ TVD_VISIT_PHARMA
 TVD_VIS_HIDDEN
 
 # good enough
-FH_DATE_IS_19XX
-
-# good enough
 FORGED_IMS_HTML
 
 # good enough
@@ -1088,12 +1091,21 @@ FORGED_OUTLOOK_HTML
 FORGED_OUTLOOK_TAGS
 
 # good enough
-HS_PHARMA_1
+FUZZY_MERIDIA
 
 # not publishing JM_RCVD_SENDMAILID: needs plugin (Mail::SpamAssassin::Plugin::SendmailID)
 
 # good enough
-KAM_STOCKTIP17
+KAM_STOCKTIP12
+
+# good enough
+TVD_FW_GRAPHIC_NAME_LONG
+
+# good enough
+TVD_FW_GRAPHIC_NAME_MID
+
+# good enough
+ZMIde_EBAYJOBSURI
 
 # good enough
 UNCLAIMED_MONEY
