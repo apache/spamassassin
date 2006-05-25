@@ -1491,7 +1491,7 @@ sub get_and_create_userstate_dir {
     }
   }
   else {
-    warn "config: can not determine userstate dir\n";
+    info("config: can not determine userstate dir\n");
   }
 
   $fname;
