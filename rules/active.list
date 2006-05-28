@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: daf parkerm theo wtogami
+# with results from: net-daf net-parkerm net-theo
 
 # good enough
 ADDR_NUMS_AT_BIGSITE
@@ -44,10 +44,10 @@ BAYES_95
 BAYES_99
 
 # good enough
-BODY_ENHANCEMENT
+BEST_PORN
 
 # good enough
-CHINA_HEADER
+COMPETE
 
 # good enough
 CUM_SHOT
@@ -71,9 +71,6 @@ DATE_IN_FUTURE_96_XX
 DATE_IN_PAST_06_12
 
 # good enough
-DATE_IN_PAST_12_24
-
-# good enough
 DATE_IN_PAST_96_XX
 
 # good enough
@@ -87,9 +84,6 @@ DEAR_WINNER
 
 # tflags net
 DIGEST_MULTIPLE
-
-# good enough
-DISGUISE_PORN_MUNDANE
 
 # tflags net
 DNS_FROM_AHBL_RHSBL
@@ -113,16 +107,10 @@ DNS_FROM_RFC_WHOIS
 DNS_FROM_SECURITYSAGE
 
 # good enough
-DRUGS_ANXIETY
-
-# good enough
 DRUGS_ANXIETY_EREC
 
 # good enough
 DRUGS_ANXIETY_OBFU
-
-# good enough
-DRUGS_DIET_OBFU
 
 # good enough
 DRUGS_ERECTILE
@@ -149,13 +137,22 @@ DRUG_ED_GENERIC
 DRUG_ED_SILD
 
 # good enough
+EARN_PER_WEEK
+
+# good enough
 EMPTY_MESSAGE
 
 # good enough
 EM_ROLEX
 
+# good enough
+ENGLISH_UCE_SUBJECT
+
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
+
+# good enough
+FAKE_HELO_EXCITE
 
 # good enough
 FAKE_HELO_LYCOS
@@ -171,9 +168,6 @@ FAKE_HELO_MSN
 
 # good enough
 FAKE_OUTBLAZE_RCVD
-
-# good enough
-FB_CIALIS_LEO2
 
 # good enough
 FB_CIALIS_LEO3
@@ -215,9 +209,6 @@ FH_HELO_GMAILSMTP
 FH_RCVD_WITHSMTPFOR
 
 # good enough
-FH_VIRUS_NORTON
-
-# good enough
 FORGED_AOL_TAGS
 
 # good enough
@@ -231,6 +222,9 @@ FORGED_IMS_TAGS
 
 # good enough
 FORGED_MSGID_AOL
+
+# good enough
+FORGED_MSGID_EXCITE
 
 # good enough
 FORGED_MSGID_HOTMAIL
@@ -314,9 +308,6 @@ FROM_NO_LOWER
 FROM_NO_USER
 
 # good enough
-FROM_OFFERS
-
-# good enough
 FR_WWW_DOMAIN_23SUBDIR
 
 # good enough
@@ -326,9 +317,6 @@ FS_START_DOYOU2
 FUZZY_MERIDIA
 
 # good enough
-FUZZY_STOCK
-
-# good enough
 FU_HOODIA
 
 # good enough
@@ -336,9 +324,6 @@ GAPPY_SUBJECT
 
 # good enough
 GEO_QUERY_STRING
-
-# good enough
-GUARANTEED_100_PERCENT
 
 # tflags net
 HABEAS_ACCREDITED_COI
@@ -386,9 +371,6 @@ HEAD_ILLEGAL_CHARS
 HELO_DYNAMIC_CHELLO_NL
 
 # good enough
-HELO_DYNAMIC_COMCAST
-
-# good enough
 HELO_DYNAMIC_DHCP
 
 # good enough
@@ -420,12 +402,6 @@ HS_GETMEOFF
 
 # good enough
 HS_INDEX_PARAM
-
-# good enough
-HS_MEETUP_FOR_SEX
-
-# good enough
-HS_NO_FLOWERS
 
 # good enough
 HS_PHARMA_1
@@ -494,34 +470,13 @@ KAM_STOCKTIP12
 KAM_STOCKTIP15
 
 # good enough
-KAM_STOCKTIP17
-
-# good enough
 KAM_STOCKTIP2
 
 # good enough
 KAM_STOCKTIP20
 
 # good enough
-KAM_STOCKTIP21
-
-# good enough
-KAM_STOCKTIP22
-
-# good enough
-KAM_STOCKTIP23
-
-# good enough
-KAM_STOCKTIP24
-
-# good enough
-KAM_STOCKTIP26
-
-# good enough
 KAM_STOCKTIP3
-
-# good enough
-KAM_STOCKTIP5
 
 # good enough
 KAM_STOCKTIP6
@@ -546,12 +501,6 @@ MILLION_USD
 
 # good enough
 MIME_BAD_ISO_CHARSET
-
-# good enough
-MIME_BASE64_BLANKS
-
-# good enough
-MIME_BASE64_NO_NAME
 
 # good enough
 MIME_BASE64_TEXT
@@ -584,10 +533,10 @@ MISSING_MIME_HB_SEP
 MISSING_SUBJECT
 
 # good enough
-MORE_SEX
+MSGID_DOLLARS_RANDOM
 
 # good enough
-MSGID_DOLLARS_RANDOM
+MSGID_LONG
 
 # good enough
 MSGID_OUTLOOK_INVALID
@@ -635,10 +584,10 @@ ONLINE_PHARMACY
 PERCENT_RANDOM
 
 # good enough
-PLING_QUERY
+PLING_PLING
 
 # good enough
-PORN_15
+PLING_QUERY
 
 # good enough
 PREST_NON_ACCREDITED
@@ -806,13 +755,10 @@ RCVD_IN_XBL
 RCVD_NUMERIC_HELO
 
 # good enough
-REFINANCE_YOUR_HOME
-
-# good enough
-REMOVE_BEFORE_LINK
-
-# good enough
 REPLICA_WATCH
+
+# good enough
+REPLY_TO_EMPTY
 
 # good enough
 REPTO_OVERQUOTE_THEBAT
@@ -825,6 +771,9 @@ REPTO_QUOTE_IMS
 
 # good enough
 REPTO_QUOTE_MSN
+
+# good enough
+REPTO_QUOTE_QUALCOMM
 
 # good enough
 REPTO_QUOTE_YAHOO
@@ -866,9 +815,6 @@ SPF_SOFTFAIL
 SPOOF_COM2COM
 
 # good enough
-SPOOF_NET2COM
-
-# good enough
 SPOOF_OURI
 
 # good enough
@@ -881,9 +827,6 @@ SUBJECT_DIET
 SUBJECT_DRUG_GAP_C
 
 # good enough
-SUBJECT_DRUG_GAP_L
-
-# good enough
 SUBJECT_DRUG_GAP_S
 
 # good enough
@@ -891,6 +834,9 @@ SUBJECT_DRUG_GAP_VA
 
 # good enough
 SUBJECT_DRUG_GAP_X
+
+# good enough
+SUBJECT_ENCODED_TWICE
 
 # tflags userconf
 SUBJECT_IN_BLACKLIST
@@ -906,6 +852,9 @@ SUBJECT_NOVOWEL
 
 # good enough
 SUBJECT_SEXUAL
+
+# good enough
+SUBJ_AS_SEEN
 
 # good enough
 SUBJ_ILLEGAL_CHARS
@@ -932,22 +881,13 @@ TO_EMPTY
 TO_MALFORMED
 
 # good enough
-TO_NO_USER
-
-# good enough
 TRACKER_ID
-
-# good enough
-TVD_ACT_193
 
 # good enough
 TVD_APP_LOAN
 
 # good enough
 TVD_BODY_END_STAR
-
-# good enough
-TVD_COMPANY_PICK
 
 # good enough
 TVD_DEAD_JOB
@@ -968,13 +908,7 @@ TVD_ENHANCE
 TVD_FINGER_01
 
 # good enough
-TVD_FINGER_02
-
-# good enough
 TVD_FLOAT_GENERAL
-
-# good enough
-TVD_FROM_1
 
 # good enough
 TVD_FUZZY_DEGREE
@@ -998,13 +932,7 @@ TVD_FUZZY_SYMBOL
 TVD_FW_MESG1
 
 # good enough
-TVD_FW_MESG2
-
-# good enough
 TVD_HEAD_KERNEL
-
-# good enough
-TVD_HEAD_USR
 
 # good enough
 TVD_INCREASE_SIZE
@@ -1022,16 +950,10 @@ TVD_NOT_SATISFIED
 TVD_PH_7
 
 # good enough
-TVD_PH_BODY_META
-
-# good enough
 TVD_PH_REC
 
 # good enough
 TVD_PH_SUBJ_ACCOUNTS_POST
-
-# good enough
-TVD_PH_SUBJ_META
 
 # good enough
 TVD_PH_SUBJ_META_ALL
@@ -1070,6 +992,9 @@ TVD_SINGLE_SPAN_DIV
 TVD_SPACED_SUBJECT_WORD3
 
 # good enough
+TVD_SPACED_SUBJECT_WORD5
+
+# good enough
 TVD_SPACED_WORDS
 
 # good enough
@@ -1094,9 +1019,6 @@ TVD_SUBJ_WIPE_DEBT
 TVD_UA_FOSTERING
 
 # good enough
-TVD_UNDER_VALUED
-
-# good enough
 TVD_VISIT_PHARMA
 
 # good enough
@@ -1116,17 +1038,32 @@ FORGED_OUTLOOK_TAGS
 
 # not publishing JM_RCVD_SENDMAILID: needs plugin (Mail::SpamAssassin::Plugin::SendmailID)
 
-# good enough
-KAM_STOCKTIP9
+# tflags net
+RCVD_IN_DSBL
+
+# tflags net
+RCVD_IN_NJABL_DUL
+
+# tflags net
+RCVD_IN_SORBS_DUL
+
+# tflags net
+RCVD_IN_XBL
 
 # good enough
-TVD_FW_GRAPHIC_NAME_LONG
+TVD_FW_GRAPHIC_ID1
 
 # good enough
-TVD_FW_GRAPHIC_NAME_MID
+TVD_PH_BODY_ACCOUNTS_PRE
 
 # good enough
-TVD_SPACED_SUBJECT_WORD5
+TVD_PH_FR5
+
+# good enough
+TVD_SUBJ_FINGER_04
+
+# good enough
+ZMIvirSobY_SUB39
 
 # good enough
 UNCLAIMED_MONEY
@@ -1186,6 +1123,9 @@ URIBL_SC_SURBL
 URIBL_WS_SURBL
 
 # good enough
+URI_NOVOWEL
+
+# good enough
 URI_NO_WWW_INFO_CGI
 
 # good enough
@@ -1222,7 +1162,7 @@ USER_IN_WHITELIST_TO
 VERTICAL_DRUGS_1
 
 # good enough
-VIA_GAP_GRA
+WHY_PAY_MORE
 
 # good enough
 X_IP
@@ -1231,13 +1171,7 @@ X_IP
 X_LIBRARY
 
 # good enough
-X_MAILER_SPAM
-
-# good enough
 X_MESSAGE_INFO
-
-# good enough
-X_MIME_AUTOCONVERTED
 
 # good enough
 X_MSMAIL_PRIORITY_HIGH
