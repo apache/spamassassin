@@ -53,28 +53,6 @@ use vars qw(@ISA);
 # language models
 my @nm;
 
-# TextCat settings
-my $opt_a = 10;
-my $opt_f = 0;
-my $opt_t = 400;
-my $opt_u = 1.05;
-
-# $opt_a  If the number of languages to be returned by &classify is larger
-#         than the value of $opt_a then an empty list is returned signifying
-#         that the language is unknown.
-#
-# $opt_f  Before sorting is performed, the ngrams which occur $opt_f times
-#         or less are removed.  This can be used to speed up the program for
-#         longer inputs.  For shorter inputs, this should be set to 0.
-#
-# $opt_t  This option indicates the maximum number of ngrams that should be
-#         compared with each of the language models (note that each of those
-#         models is used completely).
-#
-# $opt_u  &classify returns a list of the best-scoring language together with
-#         all languages which are less than $opt_u times worse.  Typical
-#         values are 1.05 or 1.1.
-
 sub new {
   my $class = shift;
   my $mailsaobject = shift;
@@ -309,6 +287,58 @@ Rhaeto-Romance, Sanskrit, Scots, Slovenian, and Yiddish.
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
   });
 
+=item textcat_max_languages N (default: 5)
+
+The maximum number of languages before the classification is considered unknown.
+
+=cut
+
+  push (@cmds, {
+    setting => 'textcat_max_languages',
+    default => 5,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+  });
+
+=item textcat_optimal_ngrams N (default: 0)
+
+If the number of ngrams is lower than this number then they will be removed.  This
+can be used to speed up the program for longer inputs.  For shorter inputs, this
+should be set to 0.
+
+=cut
+
+  push (@cmds, {
+    setting => 'textcat_optimal_ngrams',
+    default => 0,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+  });
+
+=item textcat_max_ngrams N (default: 400)
+
+The maximum number of ngrams that should be compared with each of the languages
+models (note that each of those models is used completely).
+
+=cut
+
+  push (@cmds, {
+    setting => 'textcat_max_ngrams',
+    default => 400,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+  });
+
+=item textcat_acceptable_score N (default: 1.05)
+
+Include any language that scores at least C<textcat_acceptable_score> in the
+returned list of languages
+
+=cut
+
+  push (@cmds, {
+    setting => 'textcat_acceptable_score',
+    default => 1.05,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+  });
+
   $conf->{parser}->register_commands(\@cmds);
 }
 
@@ -351,13 +381,13 @@ sub load_models {
 }
 
 sub classify {
-  my ($inputptr, %skip) = @_;
+  my ($inputptr, $conf, %skip) = @_;
   my %results;
-  my $maxp = $opt_t;
+  my $maxp = $conf->{textcat_max_ngrams};
 
   # create ngrams for input
   # limit to 10000 characters, enough for accuracy and still fast enough
-  my @unknown = create_lm($inputptr);
+  my @unknown = create_lm($inputptr, $conf);
 
   # test each language
   foreach my $ngram (@nm) {
@@ -380,10 +410,10 @@ sub classify {
   my $best = $results{$results[0]};
 
   my @answers = (shift(@results));
-  while (@results && $results{$results[0]} < ($opt_u * $best)) {
+  while (@results && $results{$results[0]} < ($conf->{textcat_acceptable_score} * $best)) {
     @answers = (@answers, shift(@results));
   }
-  if (@answers > $opt_a) {
+  if (@answers > $conf->{textcat_max_languages}) {
     dbg("textcat: can't determine language uniquely enough");
     return ();
   }
@@ -394,6 +424,7 @@ sub classify {
 }
 
 sub create_lm {
+  my ($inputptr, $conf) = @_;
   my %ngram;
   my @sorted;
 
@@ -414,17 +445,17 @@ sub create_lm {
     }
   }
 
-  if ($opt_f > 0) {
+  if ($conf->{textcat_optimal_ngrams} > 0) {
     # as suggested by Karel P. de Vos <k.vos@elsevier.nl> we speed
     # up sorting by removing singletons, however I have very bad
     # results for short inputs, this way
     @sorted = sort { $ngram{$b} <=> $ngram{$a} }
-		   (grep { $ngram{$_} > $opt_f } keys %ngram);
+		   (grep { $ngram{$_} > $conf->{textcat_optimal_ngrams} } keys %ngram);
   }
   else {
     @sorted = sort { $ngram{$b} <=> $ngram{$a} } keys %ngram;
   }
-  splice(@sorted, $opt_t) if (@sorted > $opt_t);
+  splice(@sorted, $conf->{textcat_max_ngrams}) if (@sorted > $conf->{textcat_max_ngrams});
 
   return @sorted;
 }
@@ -457,7 +488,7 @@ sub extract_metadata {
     $skip{$_} = 1 for split(' ', $opts->{conf}->{inactive_languages});
     delete $skip{$_} for split(' ', $opts->{conf}->{ok_languages});
     dbg("textcat: classifying, skipping: " . join(" ", keys %skip));
-    @matches = classify(\$body, %skip);
+    @matches = classify(\$body, $opts->{conf}, %skip);
   }
   else {
     dbg("textcat: message too short for language analysis");
