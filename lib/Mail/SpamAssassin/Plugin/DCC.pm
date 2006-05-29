@@ -362,9 +362,15 @@ sub check_dcc {
 
   # short-circuit if there's already a X-DCC header with value of
   # "bulk" from an upstream DCC check
-  if ($permsgstatus->get('ALL') =~ /^X-DCC-(?:[^:]{1,80}-)?Metrics:.*bulk/m) {
+  if ($permsgstatus->get('ALL') =~ /^X-DCC-([^:]{1,80})?-?Metrics:.*bulk/m) {
+    $permsgstatus->{tag_data}->{DCCB} = $1;
+    $permsgstatus->{tag_data}->{DCCR} = "bulk";
     return 1;
   }
+
+  # initialize valid tags
+  $permsgstatus->{tag_data}->{DCCB} = "";
+  $permsgstatus->{tag_data}->{DCCR} = "";
 
   $self->get_dcc_interface();
   return 0 if $self->{dcc_disabled};
