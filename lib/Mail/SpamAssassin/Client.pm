@@ -423,7 +423,7 @@ sub ping {
 
   my ($version, $resp_code, $resp_msg) = $self->_parse_response_line($line);
 
-  return 0 unless ($resp_msg eq 'PONG');
+  return 0 unless ($resp_msg =~ /^PONG/);
 
   return 1;
 }
