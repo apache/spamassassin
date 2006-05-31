@@ -1368,7 +1368,7 @@ sub init {
       if (!$self->{dont_copy_prefs}) {
         # bug 4932: if the userprefs path doesn't exist, we need to make it, so
         # just use the last entry in the array as the default path.
-        $fname ||= $default_userprefs_path[-1];
+        $fname ||= $self->sed_path($default_userprefs_path[-1]);
 
 	if (!-f $fname && !$self->create_default_prefs($fname)) {
           warn "config: failed to create default user preference file $fname\n";
@@ -1484,7 +1484,7 @@ sub get_and_create_userstate_dir {
   if (!$self->{dont_copy_prefs}) {
     # bug 4932: use the last default_userstate_dir entry if none of the others
     # already exist
-    $fname ||= $default_userstate_dir[-1];
+    $fname ||= $self->sed_path($default_userstate_dir[-1]);
 
     dbg("config: using \"$fname\" for user state dir");
 
