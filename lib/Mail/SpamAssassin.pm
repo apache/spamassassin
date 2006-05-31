@@ -1481,17 +1481,17 @@ sub get_and_create_userstate_dir {
 
   $fname ||= $self->first_existing_path (@default_userstate_dir);
 
+  # bug 4932: use the last default_userstate_dir entry if none of the others
+  # already exist
+  $fname ||= $self->sed_path($default_userstate_dir[-1]);
+
   if (!$self->{dont_copy_prefs}) {
-    # bug 4932: use the last default_userstate_dir entry if none of the others
-    # already exist
-    $fname ||= $self->sed_path($default_userstate_dir[-1]);
-
     dbg("config: using \"$fname\" for user state dir");
+  }
 
-    if (!-d $fname) {
-      # not being able to create the *dir* is not worth a warning at all times
-      eval { mkpath($fname, 0, 0700) } or dbg("config: mkdir $fname failed: $@ $!\n");
-    }
+  if (!-d $fname) {
+    # not being able to create the *dir* is not worth a warning at all times
+    eval { mkpath($fname, 0, 0700) } or dbg("config: mkdir $fname failed: $@ $!\n");
   }
 
   $fname;
