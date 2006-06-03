@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: daf parkerm theo wtogami zmi
+# with results from: daf parkerm theo wtogami
 
 # good enough
 ADDR_NUMS_AT_BIGSITE
@@ -47,16 +47,10 @@ BAYES_95
 BAYES_99
 
 # good enough
-BODY_ENHANCEMENT
-
-# good enough
 CHINA_HEADER
 
 # good enough
 CUM_SHOT
-
-# good enough
-DATE_IN_FUTURE_03_06
 
 # good enough
 DATE_IN_FUTURE_12_24
@@ -224,9 +218,6 @@ FH_RCVD_WITHSMTPFOR
 FH_VIRUS_NORTON
 
 # good enough
-FM_CUSTOMLOGODSGNc
-
-# good enough
 FORGED_AOL_TAGS
 
 # good enough
@@ -327,9 +318,6 @@ FROM_OFFERS
 
 # good enough
 FR_WWW_DOMAIN_23SUBDIR
-
-# good enough
-FS_START_DOYOU
 
 # good enough
 FS_START_DOYOU2
@@ -461,6 +449,9 @@ HTTP_ESCAPED_HOST
 HTTP_EXCESSIVE_ESCAPES
 
 # good enough
+INFO_TLD
+
+# good enough
 INTERRUPTUS
 
 # good enough
@@ -518,9 +509,6 @@ KAM_STOCKTIP22
 KAM_STOCKTIP23
 
 # good enough
-KAM_STOCKTIP24
-
-# good enough
 KAM_STOCKTIP26
 
 # good enough
@@ -557,6 +545,9 @@ MIME_BAD_ISO_CHARSET
 MIME_BASE64_BLANKS
 
 # good enough
+MIME_BASE64_NO_NAME
+
+# good enough
 MIME_BASE64_TEXT
 
 # good enough
@@ -575,13 +566,19 @@ MIME_BOUND_RKFINDY
 MIME_HTML_MOSTLY
 
 # good enough
+MISSING_DATE
+
+# good enough
 MISSING_MIMEOLE
 
 # good enough
-MORE_SEX
+MISSING_MIME_HB_SEP
 
 # good enough
-MPART_ALT_DIFF
+MISSING_SUBJECT
+
+# good enough
+MORE_SEX
 
 # good enough
 MSGID_DOLLARS_RANDOM
@@ -604,9 +601,6 @@ MSGID_SPAM_LETTERS
 # good enough
 MSGID_YAHOO_CAPS
 
-# good enough
-NOT_ADVISOR
-
 # tflags net
 NO_DNS_FOR_FROM
 
@@ -615,9 +609,6 @@ NO_PRESCRIPTION
 
 # good enough
 NO_RDNS_DOTCOM_HELO
-
-# tflags userconf
-NO_RECEIVED
 
 # tflags userconf
 NO_RELAYS
@@ -866,7 +857,13 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
+SPOOF_COM2COM
+
+# good enough
 SPOOF_NET2COM
+
+# good enough
+SPOOF_OURI
 
 # good enough
 STOCK_ALERT
@@ -899,6 +896,9 @@ SUBJECT_IN_WHITELIST
 SUBJECT_NEEDS_ENCODING
 
 # good enough
+SUBJECT_NOVOWEL
+
+# good enough
 SUBJECT_SEXUAL
 
 # good enough
@@ -915,6 +915,18 @@ SUB_HELLO
 
 # good enough
 SUSPICIOUS_RECIPS
+
+# good enough
+TO_CC_NONE
+
+# good enough
+TO_EMPTY
+
+# good enough
+TO_MALFORMED
+
+# good enough
+TO_NO_USER
 
 # good enough
 TRACKER_ID
@@ -1099,13 +1111,13 @@ FORGED_OUTLOOK_TAGS
 # not publishing JM_RCVD_SENDMAILID: needs plugin (Mail::SpamAssassin::Plugin::SendmailID)
 
 # good enough
-TVD_FW_GRAPHIC_ID2
+KAM_STOCKTIP9
 
 # good enough
-TVD_FW_GRAPHIC_NAME_LONG
+TVD_FW_GRAPHIC_ID1
 
 # good enough
-TVD_FW_GRAPHIC_NAME_MID
+TVD_SPACED_SUBJECT_WORD5
 
 # good enough
 UNCLAIMED_MONEY
@@ -1115,6 +1127,9 @@ UNCLOSED_BRACKET
 
 # good enough
 UNDISC_RECIPS
+
+# good enough
+UNIQUE_WORDS
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1160,9 +1175,6 @@ URIBL_SC_SURBL
 
 # tflags net
 URIBL_WS_SURBL
-
-# good enough
-URI_NO_WWW_BIZ_CGI
 
 # good enough
 URI_NO_WWW_INFO_CGI
@@ -1225,10 +1237,10 @@ X_MSMAIL_PRIORITY_HIGH
 X_PRIORITY_CC
 
 # good enough
-ZMIde_EBAYJOBSURI
+X_PRIORITY_HIGH
 
 # good enough
-ZMIde_SEXUALEXPL1
+ZMIde_EBAYJOBSURI
 
 # tflags net
 __RCVD_IN_IADB
