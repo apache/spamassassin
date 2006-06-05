@@ -1,4 +1,36 @@
 ------------------------------------------------------------------------
+r411821 | felicity | 2006-06-05 15:35:40 +0000 (Mon, 05 Jun 2006) | 1 line
+
+bug 4926: given a certain set of parameters to spamd and a specially formatted input message, users could cause spamd to execute arbitrary commands as spamd user
+------------------------------------------------------------------------
+r410869 | felicity | 2006-06-01 14:35:36 +0000 (Thu, 01 Jun 2006) | 1 line
+
+bug 4932: continuing issues with bug 4827 fix -- make sure that the userstate dir is always created, let the userprefs file get created as necessary
+------------------------------------------------------------------------
+r409845 | felicity | 2006-05-27 17:56:55 +0000 (Sat, 27 May 2006) | 1 line
+
+bug 4922: v312.pre was added in 3.1.2, not 3.2.0
+------------------------------------------------------------------------
+r409510 | felicity | 2006-05-25 23:50:50 +0000 (Thu, 25 May 2006) | 1 line
+
+put the 3.1 branch back into development mode for 3.1.3
+------------------------------------------------------------------------
+r409413 | felicity | 2006-05-25 16:58:05 +0000 (Thu, 25 May 2006) | 1 line
+
+since having a userstate dir is not necessary, we shouldn't throw a warn() if the dir isn't found.  make it known via info() instead.
+------------------------------------------------------------------------
+r409246 | felicity | 2006-05-24 20:36:31 +0000 (Wed, 24 May 2006) | 1 line
+
+gpgsign doesn't work on minotaur anymore due to an os upgrade, so fix that.
+------------------------------------------------------------------------
+r409241 | felicity | 2006-05-24 20:19:18 +0000 (Wed, 24 May 2006) | 1 line
+
+fix config.dist to disable the dcc test by default
+------------------------------------------------------------------------
+r409239 | felicity | 2006-05-24 20:14:18 +0000 (Wed, 24 May 2006) | 1 line
+
+preparing release of 3.1.2
+------------------------------------------------------------------------
 r409236 | felicity | 2006-05-24 20:04:44 +0000 (Wed, 24 May 2006) | 1 line
 
 bug 4861, 4760: handle dccifd and dccproc failover properly, backport relays_internal and relays_external code, backport bug 4760 fix so that it's not possible to be in internal_networks without being in trusted_networks as well
