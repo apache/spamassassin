@@ -338,7 +338,10 @@ if ( $targets[0] =~ /:mbo?x:-$/ ) {
 }
 
 # Go run the messages!
-eval { $exitvalue ||= !$iter->run(@targets); };
+# bug 4930: use a temp variable since "||=" decides whether or not to set the
+# value before the RHS is actually run, so if the RHS separately sets the LHS
+# variable, things don't work right.  Stupid global variables. ;)
+eval { my $runreturn = !$iter->run(@targets);  $exitvalue ||= $runreturn; };
 
 $progress->final() if ($opt{progress} && $progress);
 
