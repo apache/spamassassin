@@ -1379,20 +1379,22 @@ sub handle_user {
   my ( $name, $pwd, $uid, $gid, $quota, $comment, $gcos, $dir, $etc ) =
     getpwnam($userid);
 
-  if ( !$spamtest->{'paranoid'} && !defined($uid) ) {
-
-    #if we are given a username, but can't look it up,
-    #Maybe NIS is down? lets break out here to allow
-    #them to get 'defaults' when we are not running paranoid.
-    logmsg("handle_user: unable to find user '$userid'!");
+  if (!defined $uid) {
+    my $errmsg = "spamd: handle_user unable to find user: '$userid'\n";
+    die $errmsg if $spamtest->{'paranoid'};
+    # if we are given a username, but can't look it up, maybe name
+    # services are down?  let's break out here to allow them to get
+    # 'defaults' when we are not running paranoid
+    logmsg($errmsg);
     return 0;
   }
 
-  # not sure if this is required, the doco says it isn't
-  $uid =~ /^(\d+)$/ and $uid = $1;    # de-taint
-  $gid =~ /^(\d+)$/ and $gid = $1;    # de-taint
-
   if ($setuid_to_user) {
+
+    # not sure if this is required, the documentation says it isn't
+    $uid =~ /^(\d+)$/ and $uid = $1;    # de-taint
+    $gid =~ /^(\d+)$/ and $gid = $1;    # de-taint
+
     $) = "$gid $gid";                 # change eGID
     $> = $uid;                        # change eUID
     if ( !defined($uid) || ( $> != $uid and $> != ( $uid - 2**32 ) ) ) {
@@ -1408,7 +1410,7 @@ sub handle_user {
   # If vpopmail config enabled then set $dir to virtual homedir
   #
   if ( $opt{'vpopmail'} ) {
-    $dir = `$dir/bin/vuserinfo -d $username`;
+    $dir = `$dir/bin/vuserinfo -d \Q$username\E`;
     chomp($dir);
   }
   my $cf_file = $dir . "/.spamassassin/user_prefs";
