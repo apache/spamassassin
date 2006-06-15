@@ -257,7 +257,7 @@ static int _opensocket(int flags, int type, int *psock)
             return EX_SOFTWARE;
 
         default:
-            break;		/* ignored */
+            break;             /* ignored */
         }
     }
 #endif

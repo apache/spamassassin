@@ -154,9 +154,7 @@ time_t value.
 =item opt_want_date
 
 Set to 1 (default) if you want the received date to be filled in
-in the C<wanted_sub> callback below.  Set this to 0 to avoid this;
-it's a good idea to set this to 0 if you can, as it imposes a performance
-hit.
+in the C<wanted_sub> callback below.
 
 =item wanted_sub
 

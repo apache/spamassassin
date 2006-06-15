@@ -272,42 +272,6 @@ data should be stored.
 
 =back
 
-=item $plugin->compile_now_start ( { options ... } )
-
-This is called at the beginning of Mail::SpamAssassin::compile_now() so
-plugins can do any necessary initialization for multi-process
-SpamAssassin (such as spamd or mass-check -j).
-
-=over 4
-
-=item use_user_prefs
-
-The value of $use_user_prefs option in compile_now().
-
-=item keep_userstate
-
-The value of $keep_userstate option in compile_now().
-
-=back
-
-=item $plugin->compile_now_finish ( { options ... } )
-
-This is called at the end of Mail::SpamAssassin::compile_now() so
-plugins can do any necessary initialization for multi-process
-SpamAssassin (such as spamd or mass-check -j).
-
-=over 4
-
-=item use_user_prefs
-
-The value of $use_user_prefs option in compile_now().
-
-=item keep_userstate
-
-The value of $keep_userstate option in compile_now().
-
-=back
-
 =item $plugin->check_start ( { options ... } )
 
 Signals that a message check operation is starting.
