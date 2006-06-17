@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: daf parkerm theo wtogami zmi
+# with results from: daf parkerm theo wtogami
 
 # good enough
 ADDR_NUMS_AT_BIGSITE
@@ -329,9 +329,6 @@ FS_START_DOYOU2
 FUZZY_MERIDIA
 
 # good enough
-FUZZY_STOCK
-
-# good enough
 FU_HOODIA
 
 # good enough
@@ -417,12 +414,6 @@ HS_GETMEOFF
 
 # good enough
 HS_INDEX_PARAM
-
-# good enough
-HS_MEETUP_FOR_SEX
-
-# good enough
-HS_NO_FLOWERS
 
 # good enough
 HS_PHARMA_1
@@ -530,6 +521,9 @@ MIME_BAD_ISO_CHARSET
 MIME_BASE64_BLANKS
 
 # good enough
+MIME_BASE64_NO_NAME
+
+# good enough
 MIME_BASE64_TEXT
 
 # good enough
@@ -554,10 +548,10 @@ MISSING_DATE
 MISSING_MIMEOLE
 
 # good enough
-MORE_SEX
+MISSING_SUBJECT
 
 # good enough
-MPART_ALT_DIFF
+MORE_SEX
 
 # good enough
 MSGID_DOLLARS_RANDOM
@@ -588,9 +582,6 @@ NO_PRESCRIPTION
 
 # good enough
 NO_RDNS_DOTCOM_HELO
-
-# tflags userconf
-NO_RECEIVED
 
 # tflags userconf
 NO_RELAYS
@@ -839,7 +830,10 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
-SPOOF_NET2COM
+SPOOF_COM2COM
+
+# good enough
+SPOOF_OURI
 
 # good enough
 STOCK_ALERT
@@ -872,6 +866,9 @@ SUBJECT_IN_WHITELIST
 SUBJECT_NEEDS_ENCODING
 
 # good enough
+SUBJECT_NOVOWEL
+
+# good enough
 SUBJECT_SEXUAL
 
 # good enough
@@ -890,10 +887,19 @@ SUB_HELLO
 SUSPICIOUS_RECIPS
 
 # good enough
-TRACKER_ID
+TO_CC_NONE
 
 # good enough
-TVD_ACT_193
+TO_EMPTY
+
+# good enough
+TO_MALFORMED
+
+# good enough
+TO_NO_USER
+
+# good enough
+TRACKER_ID
 
 # good enough
 TVD_APP_LOAN
@@ -945,6 +951,9 @@ TVD_FUZZY_PHARMACEUTICAL
 
 # good enough
 TVD_FUZZY_SYMBOL
+
+# good enough
+TVD_FW_GRAPHIC_ID1
 
 # good enough
 TVD_FW_MESG1
@@ -1069,13 +1078,10 @@ FORGED_OUTLOOK_TAGS
 # not publishing JM_RCVD_SENDMAILID: needs plugin (Mail::SpamAssassin::Plugin::SendmailID)
 
 # good enough
-TVD_FW_GRAPHIC_ID2
+KAM_STOCKTIP9
 
 # good enough
-TVD_FW_GRAPHIC_NAME_LONG
-
-# good enough
-TVD_FW_GRAPHIC_NAME_MID
+TVD_SPACED_SUBJECT_WORD5
 
 # good enough
 TVD_STOCK1
@@ -1088,6 +1094,9 @@ UNCLOSED_BRACKET
 
 # good enough
 UNDISC_RECIPS
+
+# good enough
+UNIQUE_WORDS
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1199,9 +1208,6 @@ X_PRIORITY_HIGH
 
 # good enough
 ZMIde_EBAYJOBSURI
-
-# good enough
-ZMIde_SEXUALEXPL1
 
 # tflags net
 __RCVD_IN_IADB
