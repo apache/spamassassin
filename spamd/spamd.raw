@@ -1718,19 +1718,22 @@ sub handle_user {
   my ($name, $pwd, $uid, $gid, $quota, $comment, $gcos, $dir, $etc) =
       getpwnam($userid);
 
-  if (!$spamtest->{'paranoid'} && !defined($uid)) {
-    # if we are given a username, but can't look it up, maybe name
-    # services are down?  let's break out here to allow them to get
-    # 'defaults' when we are not running paranoid
-    info("spamd: handle_user unable to find user: $userid\n");
-    return 0;
+  if (!defined $uid) {
+      my $errmsg = "spamd: handle_user unable to find user: '$userid'\n";
+      die $errmsg if $spamtest->{'paranoid'};
+      # if we are given a username, but can't look it up, maybe name
+      # services are down?  let's break out here to allow them to get
+      # 'defaults' when we are not running paranoid
+      info($errmsg);
+      return 0;
   }
 
-  # not sure if this is required, the documentation says it isn't
-  $uid =~ /^(\d+)$/ and $uid = $1;    # de-taint
-  $gid =~ /^(\d+)$/ and $gid = $1;    # de-taint
-
   if ($setuid_to_user) {
+
+    # not sure if this is required, the documentation says it isn't
+    $uid =~ /^(\d+)$/ and $uid = $1;    # de-taint
+    $gid =~ /^(\d+)$/ and $gid = $1;    # de-taint
+
     $) = "$gid $gid";                 # change eGID
     $> = $uid;                        # change eUID
     if ( !defined($uid) || ( $> != $uid and $> != ( $uid - 2**32 ) ) ) {
@@ -1747,12 +1750,12 @@ sub handle_user {
   #
   if ( $opt{'vpopmail'} ) {
     my $vpopdir = $dir;
-    $dir = `$vpopdir/bin/vuserinfo -d $username`;
+    $dir = `$vpopdir/bin/vuserinfo -d \Q$username\E`;
     if ($? != 0) {
       #
       # If vuserinfo failed $username could be an alias
       #
-      $dir = `$vpopdir/bin/valias $username`;
+      $dir = `$vpopdir/bin/valias \Q$username\E`;
       if ($? == 0 && $dir !~ /.+ -> &/) {
         $dir =~ s,.+ -> (/.+)/Maildir/,$1,;
       } else {
