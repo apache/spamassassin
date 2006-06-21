@@ -188,6 +188,7 @@ foreach my $plistkey (sort keys %$plist) {
     my $pkg = $1;
     # grep out the ones we *do* have, and do use in "ifplugin"
     # lines in "rulesrc", here...
+    next;   #JMD:
     next if ($pkg =~ /${PROMOTABLE_PLUGINS_RE}/o);
     print "\n# not publishing $name: needs $ifs\n";
     $skip++;
