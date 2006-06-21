@@ -152,9 +152,12 @@ describe TVD_FINGER_01	Message talking about how size matters
 header TVD_SUBJ_FINGER_03	Subject =~ /^\s*\*\s+(?:\w+\W+)+\*\s*$/
 describe TVD_SUBJ_FINGER_03	Subject looks like a standard spam format
 
-# 2006/04/09 original, 2006/04/11 updated
+# 2006/06/21
+# 1.117   1.3253   0.0000    1.000   0.87    0.01  TVD_STOCK1-new
+# 0.316   0.3751   0.0000    1.000   0.74    1.00  TVD_STOCK1-old
+# 2006/04/11
 # 0.587   0.7180   0.0000    1.000   0.80    0.01  TVD_STOCK1
-body TVD_STOCK1 /(?:(?:Trad(?:e|ing) Date|Company(?: Name)?|S\W?t\W?o\W?c\W?k|Current Price|expectations|weeks? high|market performance|(?:year|week|month) target)\s*:.{1,40}){2}/i
+body TVD_STOCK1 /(^Trad(?:e|ing) Date|Company(?: Name)?|S\W?t\W?o\W?c\W?k|S\W?Y\W?M\W?B\W?O\W?L|Ticker|(?:opening|Current)\WP(?:rice)?|position|expectations|weeks? high|market performance|recommendation|(?:year|week|month|day|price) (?:projected|target|estimates?))\s*:.{1,60}(?!\1)(?:\w+\s+Name|S\W?t\W?o\W?c\W?k|S\W?Y\W?M\W?B\W?O\W?L|Ticker|(?:opening|Current)\WP(?:rice)?|position|expectations|weeks? high|market performance|recommendation|(?:year|week|month|day|price) (?:projected|target|estimates?))\s*:/i
 describe TVD_STOCK1	Message looks like it's pushing a stock...
 
 # 2006/04/28
