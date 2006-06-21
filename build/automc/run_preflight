@@ -34,9 +34,29 @@ unlink ("ham.log", "spam.log");
 #
 system ("rm -rf tstrules");
 run "mkdir tstrules";
-run "cp ../rules/70_sandbox.cf tstrules";
 run "cp ../rules/*.pm tstrules";
 run "cp plugins/*.* tstrules";
+
+# don't just copy; instead, transcribe while dropping score and describe lines
+# (to avoid '[26260] warn: config: warning: score set for non-existent rule
+# HTML_SHORT_LENGTH').
+## run "cp ../rules/70_sandbox.cf tstrules";
+open IN, "<../rules/70_sandbox.cf" or die "cannot read ../rules/sandbox.cf";
+open OUT, ">tstrules/70_sandbox.cf" or die "cannot write tstrules/70_sandbox.cf";
+
+while (<IN>) {
+  s/^\s+//;
+  next if /^(?:
+    score|
+    describe|
+    lang
+    )/x;
+
+  print OUT;
+}
+
+close IN or die "close failed!";
+close OUT or die "close failed!";
 
 # well, ok just those, and anything that's been mailed-in
 # 
