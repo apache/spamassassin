@@ -649,6 +649,8 @@ sub finish_parsing {
   my ($self) = @_;
   my $conf = $self->{conf};
 
+  dbg("conf: finish parsing");
+
   while (my ($name, $text) = each %{$conf->{tests}}) {
     my $type = $conf->{test_types}->{$name};
     my $priority = $conf->{priority}->{$name} || 0;

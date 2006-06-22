@@ -162,6 +162,7 @@ sub lint_output_files {
 
 sub lint_rule_text {
   my ($text) = @_;
+
   my $mailsa = Mail::SpamAssassin->new({
       rules_filename => "./rules",
       # debug => 1,
@@ -185,6 +186,7 @@ sub lint_rule_text {
   };
 
   $mailsa->lint_rules();
+  $mailsa->finish();
   return $errors;       # 0 means good
 }
 
