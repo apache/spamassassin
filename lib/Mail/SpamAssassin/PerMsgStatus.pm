@@ -2827,6 +2827,12 @@ sub _handle_hit {
     # ignore meta-match sub-rules.
     if ($rule =~ /^__/) { push(@{$self->{subtest_names_hit}}, $rule); return; }
 
+    # this should not happen; warn about it
+    if (!defined $score) {
+      warn "rules: score undef for rule '$rule' in '$area' '$desc'";
+      return;
+    }
+
     # Add the rule hit to the score
     $self->{score} += $score;
 
