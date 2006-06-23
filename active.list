@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: daf parkerm theo wtogami
+# with results from: daf parkerm theo wtogami zmi
 
 # good enough
 ADDR_NUMS_AT_BIGSITE
@@ -329,9 +329,6 @@ FS_START_DOYOU2
 FUZZY_MERIDIA
 
 # good enough
-FUZZY_STOCK
-
-# good enough
 FU_HOODIA
 
 # good enough
@@ -467,6 +464,9 @@ JM_LC_MID
 JM_RCVD_QMAILV1
 
 # good enough
+JM_RCVD_SENDMAILID
+
+# good enough
 KAM_STOCKOTC
 
 # good enough
@@ -515,9 +515,6 @@ MIME_BAD_ISO_CHARSET
 MIME_BASE64_BLANKS
 
 # good enough
-MIME_BASE64_NO_NAME
-
-# good enough
 MIME_BASE64_TEXT
 
 # good enough
@@ -542,10 +539,10 @@ MISSING_DATE
 MISSING_MIMEOLE
 
 # good enough
-MISSING_SUBJECT
+MORE_SEX
 
 # good enough
-MORE_SEX
+MPART_ALT_DIFF
 
 # good enough
 MSGID_DOLLARS_RANDOM
@@ -576,6 +573,9 @@ NO_PRESCRIPTION
 
 # good enough
 NO_RDNS_DOTCOM_HELO
+
+# tflags userconf
+NO_RECEIVED
 
 # tflags userconf
 NO_RELAYS
@@ -824,10 +824,7 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
-SPOOF_COM2COM
-
-# good enough
-SPOOF_OURI
+SPOOF_NET2COM
 
 # good enough
 STOCK_ALERT
@@ -860,9 +857,6 @@ SUBJECT_IN_WHITELIST
 SUBJECT_NEEDS_ENCODING
 
 # good enough
-SUBJECT_NOVOWEL
-
-# good enough
 SUBJECT_SEXUAL
 
 # good enough
@@ -879,18 +873,6 @@ SUB_HELLO
 
 # good enough
 SUSPICIOUS_RECIPS
-
-# good enough
-TO_CC_NONE
-
-# good enough
-TO_EMPTY
-
-# good enough
-TO_MALFORMED
-
-# good enough
-TO_NO_USER
 
 # good enough
 TRACKER_ID
@@ -1067,19 +1049,25 @@ FORGED_OUTLOOK_HTML
 FORGED_OUTLOOK_TAGS
 
 # good enough
-JM_RCVD_SENDMAILID
+HS_MEETUP_FOR_SEX
 
 # good enough
-KAM_STOCKTIP9
+HS_NO_FLOWERS
 
 # good enough
-TVD_FW_GRAPHIC_NAME_LONG
+MID_DEGREES
 
 # good enough
-TVD_FW_GRAPHIC_NAME_MID
+TVD_ACT_193
 
 # good enough
-TVD_STOCK1
+TVD_FW_GRAPHIC_ID1
+
+# good enough
+TVD_FW_GRAPHIC_ID2
+
+# good enough
+ZMIde_SEXUALEXPL1
 
 # good enough
 UNCLAIMED_MONEY
@@ -1089,9 +1077,6 @@ UNCLOSED_BRACKET
 
 # good enough
 UNDISC_RECIPS
-
-# good enough
-UNIQUE_WORDS
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1182,6 +1167,9 @@ X_IP
 
 # good enough
 X_LIBRARY
+
+# good enough
+X_MAILER_SPAM
 
 # good enough
 X_MESSAGE_INFO
