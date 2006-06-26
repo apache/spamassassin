@@ -353,13 +353,13 @@ I<Mail::SpamAssassin::Message::Node> for more details.
 # objects which match.
 #
 sub find_parts {
-  my ($self, $re, $onlyleaves, $recursive) = @_;
+  my $self = shift;
 
   # ok, we need to do the parsing now...
   $self->_do_parse() if (exists $self->{'toparse'});
 
   # and pass through to the Message::Node version of the method
-  return $self->SUPER::find_parts($re, $onlyleaves, $recursive);
+  return $self->SUPER::find_parts(@_);
 }
 
 # ---------------------------------------------------------------------------
