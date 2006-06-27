@@ -988,16 +988,17 @@ sub usage {
 }
 
 sub find_gpg_path {
-  dbg("gpg: Searching for 'gpg' in ".$ENV{'PATH'});
-  my $path;
-  foreach my $dir (split(/:/, $ENV{'PATH'})) {
-    $dir = File::Spec->catfile($dir, 'gpg');
-    if (-x $dir) {
-      $path = $dir;
-      last;
-    }
+  # bug 4958: for *NIX it's "gpg", in Windows it's "gpg.exe"
+  my $gpg = 'gpg';
+  if (Mail::SpamAssassin::Util::am_running_on_windows()) {
+    $gpg .= '.exe';
   }
-  die "fatal: couldn't find GPG in \$PATH\n" unless ($path);
+
+  dbg("gpg: Searching for '$gpg'");
+
+  my $path = Mail::SpamAssassin::Util::find_executable_in_env_path($gpg) ||
+    die "fatal: couldn't find GPG\n";
+
   dbg("gpg: found $path");
   return $path;
 }
