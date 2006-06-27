@@ -262,6 +262,7 @@ sub finish {
   # use Carp qw(cluck); cluck "stack trace at untie";
 
   $self->{store}->untie_db();
+  delete $self->{store};
 }
 
 sub sa_die { Mail::SpamAssassin::sa_die(@_); }
@@ -270,12 +271,13 @@ sub sa_die { Mail::SpamAssassin::sa_die(@_); }
 
 sub sanity_check_is_untied {
   my $self = shift;
+  my $quiet = shift;
 
   # do a sanity check here.  Wierd things happen if we remain tied
   # after compiling; for example, spamd will never see that the
   # number of messages has reached the bayes-scanning threshold.
   if ($self->{store}->db_readable()) {
-    warn "bayes: oops! still tied to bayes DBs, untying\n";
+    warn "bayes: oops! still tied to bayes DBs, untying\n" unless $quiet;
     $self->{store}->untie_db();
   }
 }
