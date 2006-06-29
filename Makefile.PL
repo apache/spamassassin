@@ -145,9 +145,13 @@ foreach my $key (@ATT_KEYS) {
 }
 
 
-# Gather the rules files in the range 00-69; we do this in perl because it's more portable
-my @datafiles = map { s,^rules/,,; $_ } (<rules/*.cf>);
-my $datafiles = join(' ', (grep { /^(?:[0-6][0-9]|72)_/ } @datafiles), qw(user_prefs.template languages sa-update-pubkey.txt));
+# Gather the rules files in the range 00-69; we do this in perl because
+# it's more portable.  Also, plugin .pm files.
+my @datafiles = map { s,^rules/,,; $_ }
+                grep { -f $_ } (<rules/*.cf>, <rules/*.pm>);
+my $datafiles = join(' ', (grep 
+                { /^(?:(?:[0-6][0-9]|72)_\S+\.cf|\S+\.pm)/ } @datafiles),
+                qw(user_prefs.template languages sa-update-pubkey.txt));
 
 
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
