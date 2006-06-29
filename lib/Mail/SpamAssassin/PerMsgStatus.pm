@@ -1317,6 +1317,9 @@ sub finish {
 	});
 
   foreach(keys %{$self}) {
+    # TODO: we should not be explicitly deleting every key here,
+    # just the ones that need it.  This is surprisingly slow
+    # (in the top 10 measured with Devel::SmallProf)
     delete $self->{$_};
   }
 }
@@ -1621,11 +1624,14 @@ sub _get {
 # $_[1] is request
 # $_[2] is defval
 sub get {
-  # fill in cache entry if it is empty
-  $_[0]->{c}->{$_[1]} = _get(@_) unless exists $_[0]->{c}->{$_[1]};
-
   # return cache entry if it is defined
   return $_[0]->{c}->{$_[1]} if defined $_[0]->{c}->{$_[1]};
+
+  # fill in cache entry if it is empty
+  if (!exists $_[0]->{c}->{$_[1]}) {
+    $_[0]->{c}->{$_[1]} = _get(@_);
+    return $_[0]->{c}->{$_[1]} if defined $_[0]->{c}->{$_[1]};
+  }
 
   # if the requested header wasn't found, we should return either
   # a default value as specified by the caller, or the blank string ''
@@ -2542,7 +2548,11 @@ sub do_meta_tests {
   }
 
   my (%rule_deps, %setup_rules, %meta, $rulename);
-  my $evalstr = '';
+  my $evalstr = q{
+
+    my $h = $self->{tests_already_hit};
+
+  };
 
   # Get the list of meta tests
   my @metas = keys %{ $self->{conf}{meta_tests}->{$priority} };
@@ -2570,7 +2580,7 @@ sub do_meta_tests {
         $meta{$rulename} .= "$token ";
       }
       else {
-        $meta{$rulename} .= "\$self->{'tests_already_hit'}->{'$token'} ";
+        $meta{$rulename} .= " \$h->{'$token'} ";
         $setup_rules{$token}=1;
 
         # If the token is another meta rule, add it as a dependency
@@ -2581,7 +2591,7 @@ sub do_meta_tests {
   }
 
   # avoid "undefined" warnings by providing a default value for needed rules
-  $evalstr .= join("\n", (map { "\$self->{'tests_already_hit'}->{'$_'} ||= 0;" } keys %setup_rules), "");
+  $evalstr .= join("\n", (map { "\$h->{'$_'} ||= 0;" } keys %setup_rules), "");
 
   # Sort by length of dependencies list.  It's more likely we'll get
   # the dependencies worked out this way.
@@ -2601,8 +2611,8 @@ sub do_meta_tests {
       next if (grep( $metas{$_}, @{ $rule_deps{ $metas[$i] } }));
 
       # Add this meta rule to the eval line
-      $evalstr .= '  $result = '.$meta{$metas[$i]}.";\n";
-      $evalstr .= '  if ($result) { $self->got_hit (q#'.$metas[$i].'#, "", $result); }'."\n";
+      $evalstr .= '  $r = '.$meta{$metas[$i]}.";\n";
+      $evalstr .= '  if ($r) { $self->got_hit (q#'.$metas[$i].'#, "", $r); }'."\n";
 
       splice @metas, $i--, 1;    # remove this rule from our list
     }
@@ -2639,7 +2649,7 @@ sub do_meta_tests {
         # crashes meta tests.
 
         my (\$self) = \@_;
-	my \$result;
+	my \$r;
 
         $evalstr;
     }
@@ -2667,27 +2677,31 @@ sub run_eval_tests {
   my ($self, $evalhash, $prepend2desc, @extraevalargs) = @_;
   local ($_);
   
+  # look these up once in advance to save repeated lookups in loop below
   my $debugenabled = would_log('dbg');
+  my $scoresref = $self->{conf}->{scores};
+  my $tflagsref = $self->{conf}->{tflags};
+  my $have_start_rules = $self->{main}->have_plugin("start_rules");
+  my $have_ran_rule = $self->{main}->have_plugin("ran_rule");
 
   my $scoreset = $self->{conf}->get_score_set();
   while (my ($rulename, $test) = each %{$evalhash}) {
 
     # Score of 0, skip it.
-    next unless ($self->{conf}->{scores}->{$rulename});
+    my $score = $scoresref->{$rulename};
+    next unless $score;
 
     # If the rule is a net rule, and we're in a non-net scoreset, skip it.
-    next if (exists $self->{conf}->{tflags}->{$rulename} &&
-             (($scoreset & 1) == 0) &&
-             $self->{conf}->{tflags}->{$rulename} =~ /\bnet\b/);
+    next if ((($scoreset & 1) == 0) &&
+             $tflagsref->{$rulename} &&
+             $tflagsref->{$rulename} =~ /\bnet\b/);
 
     # If the rule is a bayes rule, and we're in a non-bayes scoreset, skip it.
-    next if (exists $self->{conf}->{tflags}->{$rulename} &&
-             (($scoreset & 2) == 0) &&
-             $self->{conf}->{tflags}->{$rulename} =~ /\bbayes\b/);
+    next if ((($scoreset & 2) == 0) &&
+             $tflagsref->{$rulename} &&
+             $tflagsref->{$rulename} =~ /\bbayes\b/);
 
-    my $score = $self->{conf}{scores}{$rulename};
     my $result;
-
     $self->{test_log_msgs} = ();        # clear test state
 
     my ($function, @args) = @{$test};
@@ -2708,11 +2722,13 @@ sub run_eval_tests {
     # run
     $self->{current_rule_name} = $rulename;
 
-    $self->{main}->call_plugins("start_rules", { permsgstatus => $self, ruletype => "eval" });
+    if ($have_start_rules) {
+      $self->{main}->call_plugins("start_rules", { permsgstatus => $self, ruletype => "eval" });
+    }
+
     eval {
       $result = $self->$function(@args);
     };
-    $self->{main}->call_plugins("ran_rule", { permsgstatus => $self, ruletype => "eval", rulename => $rulename });
 
     if ($@) {
       warn "rules: failed to run $rulename test, skipping:\n" . "\t($@)\n";
@@ -2720,14 +2736,15 @@ sub run_eval_tests {
       next;
     }
 
+    if ($have_ran_rule) {
+      $self->{main}->call_plugins("ran_rule", { permsgstatus => $self, ruletype => "eval", rulename => $rulename });
+    }
+
     if ($result) {
       $self->got_hit ($rulename, $prepend2desc, $result);
       dbg("rules: ran eval rule $rulename ======> got hit ($result)") if $debugenabled;
       $self->{main}->call_plugins("hit_rule", { permsgstatus => $self, ruletype => "eval", rulename => $rulename });
     }
-    #else {
-    #  dbg("rules: ran eval rule $rulename ======> no hit") if $debugenabled;
-    #}
   }
 }
 
