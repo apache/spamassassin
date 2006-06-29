@@ -143,6 +143,10 @@ N total messages regardless of class).
 Only use the last N ham and N spam (or if the value is -N, only use the last
 N total messages regardless of class).
 
+If both C<opt_head> and C<opt_tail> are specified, then the C<opt_head> value
+specifies a subset of the C<opt_tail> selection to use; in other words, the
+C<opt_tail> splice is applied first.
+
 =item opt_before
 
 Only use messages which are received after the given time_t value.
@@ -267,8 +271,9 @@ Specifies the format of the raw_location.  C<dir> is a directory whose
 files are individual messages, C<file> a file with a single message,
 C<mbox> an mbox formatted file, or C<mbx> for an mbx formatted directory.
 
-C<detect> can also be used; assumes C<file> for STDIN and anything that is not
-a directory, or C<directory> otherwise.
+C<detect> can also be used.  This assumes C<mbox> for any file whose path
+contains the pattern C</\.mbox/i>, C<file> for STDIN and anything that is
+not a directory, or C<directory> otherwise.
 
 =item raw_location
 
@@ -292,7 +297,7 @@ sub run {
   }
 
   # non-forking model (generally sa-learn), everything in a single process
-  if ($self->{opt_j} == 0) {
+  if ($self->{opt_j} < 2) {
     my $messages;
 
     # message-array
@@ -306,8 +311,9 @@ sub run {
   # forking model (generally mass-check), avoid extended memory usage
   else {
     my $tmpf;
-    ($tmpf, $self->{messageh}) = Mail::SpamAssassin::Util::secure_tmpfile();
-    unlink $tmpf;
+    ($tmpf, $self->{messageh}) = Mail::SpamAssassin::Util::secure_tmpfile()
+      or die 'archive-iterator: failed to create temp file';
+    unlink $tmpf or die "archive-iterator: unlink '$tmpf': $!";
     undef $tmpf;
 
     # forked child process scans messages
@@ -724,9 +730,13 @@ sub message_array {
 
       if ($format eq 'detect') {
 	# detect the format
-	if ($location eq '-' || !(-d $location)) {
+        if (!-d $location && $location =~ /\.mbox/i) {
+          # filename indicates mbox
+          $method = \&scan_mailbox;
+        } 
+	elsif ($location eq '-' || !(-d $location)) {
 	  # stdin is considered a file if not passed as mbox
-	  $method = \&scan_file;
+          $method = \&scan_file;
 	}
 	else {
 	  # it's a directory
@@ -762,13 +772,13 @@ sub message_array {
     # OPT_N == 1 means don't bother sorting on message receive date
 
     # head or tail > 0 means crop each list
-    if ($self->{opt_head} > 0) {
-      splice(@{$self->{s}}, $self->{opt_head});
-      splice(@{$self->{h}}, $self->{opt_head});
-    }
     if ($self->{opt_tail} > 0) {
       splice(@{$self->{s}}, 0, -$self->{opt_tail});
       splice(@{$self->{h}}, 0, -$self->{opt_tail});
+    }
+    if ($self->{opt_head} > 0) {
+      splice(@{$self->{s}}, min ($self->{opt_head}, scalar @{$self->{s}}));
+      splice(@{$self->{h}}, min ($self->{opt_head}, scalar @{$self->{h}}));
     }
 
     @messages = ( @{$self->{s}}, @{$self->{h}} );
@@ -785,13 +795,13 @@ sub message_array {
     undef $self->{h};
 
     # head or tail > 0 means crop each list
-    if ($self->{opt_head} > 0) {
-      splice(@s, $self->{opt_head});
-      splice(@h, $self->{opt_head});
-    }
     if ($self->{opt_tail} > 0) {
       splice(@s, 0, -$self->{opt_tail});
       splice(@h, 0, -$self->{opt_tail});
+    }
+    if ($self->{opt_head} > 0) {
+      splice(@s, min ($self->{opt_head}, scalar @s));
+      splice(@h, min ($self->{opt_head}, scalar @h));
     }
 
     # interleave ordered spam and ham
@@ -806,11 +816,11 @@ sub message_array {
   }
 
   # head or tail < 0 means crop the total list, negate the value appropriately
-  if ($self->{opt_head} < 0) {
-    splice(@messages, -$self->{opt_head});
-  }
   if ($self->{opt_tail} < 0) {
     splice(@messages, 0, $self->{opt_tail});
+  }
+  if ($self->{opt_head} < 0) {
+    splice(@messages, -$self->{opt_head});
   }
 
   # Dump out the messages to the temp file if we're using one
@@ -1012,7 +1022,7 @@ sub scan_mailbox {
         my $header = $first;	# remember first line
         while (<INPUT>) {
 	  if ($in_header) {
-	    if (/^\s*$/) {
+	    if (/^$/) {
 	      $in_header = 0;
 	    }
 	    else {
@@ -1204,6 +1214,10 @@ sub bump_scan_progress {
   }
 }
 
+sub min {
+  return ($_[0] < $_[1] ? $_[0] : $_[1]);
+}
+
 ############################################################################
 
 1;
@@ -1217,3 +1231,7 @@ __END__
 C<Mail::SpamAssassin>
 C<spamassassin>
 C<mass-check>
+
+=cut
+
+# vim: ts=8 sw=2 et
