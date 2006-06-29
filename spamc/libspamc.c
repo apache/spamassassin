@@ -410,9 +410,6 @@ static int _try_to_connect_tcp(const struct transport *tp, int *sockptr)
 
     char host[SPAMC_MAXHOST-1]; /* hostname, for logging */
     char port[SPAMC_MAXSERV-1]; /* port, for logging */
-                  /* needs larger size to accomodate strings for
-                    * ports (eg. port 783 resolves to 'spamd' from
-                    * getnameinfo() */
 
     assert(tp != 0);
     assert(sockptr != 0);
@@ -459,7 +456,7 @@ static int _try_to_connect_tcp(const struct transport *tp, int *sockptr)
                       family, host, port, numloops + 1, MAX_CONNECT_RETRIES);
 #endif
 
-              status = connect(mysock, res->ai_addr, res->ai_addrlen);
+            status = connect(mysock, res->ai_addr, res->ai_addrlen);
 
             if (status != 0) {
 #ifndef _WIN32
