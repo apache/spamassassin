@@ -77,9 +77,9 @@ sub load_plugin {
 
   my $ret;
   if ($path) {
+    # bug 3717:
     # At least Perl 5.8.0 seems to confuse $cwd internally at some point -- we
     # need to use an absolute path here else we get a "File not found" error.
-    # <http://bugzilla.spamassassin.org/show_bug.cgi?id=3717>
     $path = Mail::SpamAssassin::Util::untaint_file_path(
               File::Spec->rel2abs($path)
 	    );
