@@ -204,7 +204,7 @@ struct transport
 
     unsigned short port;	/* for TCP sockets              */
 
-    struct in_addr hosts[TRANSPORT_MAX_HOSTS];
+    struct addrinfo *hosts[TRANSPORT_MAX_HOSTS];
     int nhosts;
     int flags;
 };

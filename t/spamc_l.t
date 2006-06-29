@@ -15,7 +15,7 @@ my $errmsg = ($RUNNING_ON_WINDOWS?"10061":"Connection refused");
 %patterns = (
 
 q{ hello world }, 'spamc_l',
-q{ spamc: connect(AF_INET) to spamd at 127.0.0.1 failed, retrying (#1 of 3): } . $errmsg, 'connfailed',
+q{ spamc: connect to spamd failed, retrying (#1 of 3): } . $errmsg, 'connfailed',
 
 );
 
