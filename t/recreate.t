@@ -28,7 +28,17 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 our $warning = 0;
 
-$SIG{'__WARN__'} = sub { print STDERR @_; ++$warning; };
+$SIG{'__WARN__'} = sub {
+  print STDERR @_;
+
+  # certain warnings can be ignored for this test
+  if ($_[0] =~ m{plugin: failed to parse plugin.*: Can.t locate })
+  {
+    print STDERR "[ignored warning, not recreate-related]\n";
+  } else {
+    ++$warning; 
+  }
+};
 
 my $spamtest = Mail::SpamAssassin->new({
     rules_filename => "$prefix/t/log/test_rules_copy",
@@ -38,6 +48,10 @@ my $spamtest = Mail::SpamAssassin->new({
     debug             => 0,
     dont_copy_prefs   => 1,
 });
+
+# remove all plugin .pm files.  This should be ok as long as they are
+# being loaded with 'tryplugin' instead of 'loadplugin'
+unlink(<$prefix/t/log/test_rules_copy/*.pm>);
 
 $spamtest->init(0); # parse rules
 ok($spamtest);
