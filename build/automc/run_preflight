@@ -91,14 +91,16 @@ if (run ("../spamassassin --lint -x -C tstrules", 1) != 0) {
 # notes on this mass-check command:
 #
 # this is run in a chroot jail, just in case there's hostile rule code in
-# there. limit to the most recent messages of each type, as the corpora are
-# getting big.  de-encapsulate 'report_safe' messages from petuniapress.com.
+# there. 
+# de-encapsulate 'report_safe' messages from petuniapress.com.
 # produce lots of noisy output to stop the buildbot from timing out on
 # mass-checks of large corpora.
+# store AICache data in /tmpfs/aicache.
 
 run "/local/bbmasstools/masschroot $perl ".
     "mass-check -c=tstrules --cache -j=1 ".
     "--noisy --deencap='petuniapress.com' ".
+    "--cachedir=/tmpfs/aicache ".
     $mass_check_args{$slavename}." ".
     "ham:detect:/home/bbmass/rawcor/*/ham/* ".
     "spam:detect:/home/bbmass/rawcor/*/spam/*";

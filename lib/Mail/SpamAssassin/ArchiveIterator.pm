@@ -170,6 +170,12 @@ hit.
 Set to 0 (default) if you don't want to use cached information to help speed
 up ArchiveIterator.  Set to 1 to enable.
 
+=item opt_cachedir
+
+Set to the path of a directory where you wish to store cached information for
+C<opt_cache>, if you don't want to mix them with the input files (as is the
+default).  The directory must be both readable and writable.
+
 =item wanted_sub
 
 Reference to a subroutine which will process message data.  Usually
@@ -915,11 +921,7 @@ sub scan_directory {
     return;
   }
 
-  if ($self->{opt_cache}) {
-    $AICache = Mail::SpamAssassin::AICache->new({	'type' => 'dir',
-      							'path' => $folder,
-					        });
-  }
+  $self->create_cache('dir', $folder);
 
   foreach my $mail (@files) {
     $self->scan_file($class, $mail);
@@ -997,10 +999,9 @@ sub scan_mailbox {
     my $info = {};
     my $count;
 
+    $self->create_cache('mbox', $file);
+
     if ($self->{opt_cache}) {
-      $AICache = Mail::SpamAssassin::AICache->new({	'type' => 'mbox',
-      							'path' => $file,
-					          });
       if ($count = $AICache->count()) {
         $info = $AICache->check();
       }
@@ -1100,10 +1101,9 @@ sub scan_mbx {
     my $info = {};
     my $count;
 
+    $self->create_cache('mbx', $file);
+
     if ($self->{opt_cache}) {
-      $AICache = Mail::SpamAssassin::AICache->new({	'type' => 'mbx',
-      							'path' => $file,
-					          });
       if ($count = $AICache->count()) {
         $info = $AICache->check();
       }
@@ -1216,6 +1216,18 @@ sub bump_scan_progress {
 
 sub min {
   return ($_[0] < $_[1] ? $_[0] : $_[1]);
+}
+
+sub create_cache {
+  my ($self, $type, $path) = @_;
+
+  if ($self->{opt_cache}) {
+    $AICache = Mail::SpamAssassin::AICache->new({
+                                    'type' => $type,
+                                    'prefix' => $self->{opt_cachedir},
+                                    'path' => $path,
+                              });
+  }
 }
 
 ############################################################################
