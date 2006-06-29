@@ -2,22 +2,22 @@
 
 # recreate the corpus link-farm; log results to a web-visible file
 
-BBMHOME=/home/bbmass
-
-(
-
-  # create links to the user-submitted corpora in the right
-  # volumes etc.
-  date
-  ./build/automc/populate_cor
-  date
-
-  # permit mass-check processes to create files in these dirs,
-  # so they can use the ArchiveIterator cache code
-  cd $BBMHOME/tmpfs/cor
-  find . -type d | xargs chmod 1777
-
-) 2>&1 | tee \
-    /var/www/buildbot.spamassassin.org/bbmass/corpus_makeup.txt
-    # note: needs to be customised for each site
+# BBMHOME=/home/bbmass
+# 
+# (
+# 
+  # # create links to the user-submitted corpora in the right
+  # # volumes etc.
+  # date
+  # ./build/automc/populate_cor
+  # date
+# 
+  # # permit mass-check processes to create files in these dirs,
+  # # so they can use the ArchiveIterator cache code
+  # cd $BBMHOME/tmpfs/cor
+  # find . -type d | xargs chmod 1777
+# 
+# ) 2>&1 | tee \
+    # /var/www/buildbot.spamassassin.org/bbmass/corpus_makeup.txt
+    # # note: needs to be customised for each site
 

@@ -11,14 +11,24 @@ if (!$perl) {
   die "no perl path found in ARGV!";
 }
 
-my $slavename = "generic";
+my $slavename;
 
 $|=1;
 my $pwd = `pwd`;
-$pwd =~ /slaves\/([-_A-Za-z0-9]+)\//; if ($1) { $slavename = $1; }
+$pwd =~ /slaves\/([-_A-Za-z0-9]+)\//; if ($1) {
+  $slavename = $1;
+} else {
+  die "cannot work out slavename!  $pwd";
+}
 
-my $targets = "/tmpfs/cor/$1/targets";
-print "[using corpus targets file: $targets]\n";
+my %mass_check_args = (
+
+  'mc-fast' =>      '--tail=1000',
+  'mc-med' =>       '--tail=6000  --head=5000',
+  'mc-slow' =>      '--tail=16000 --head=10000',
+  'mc-slower' =>    '--tail=36000 --head=20000',
+
+);
 
 # super-nice please!
 #
@@ -81,16 +91,19 @@ if (run ("../spamassassin --lint -x -C tstrules", 1) != 0) {
 # notes on this mass-check command:
 #
 # this is run in a chroot jail, just in case there's hostile rule code in
-# there. limit to the most recent 30k messages of each type, as the corpora are
-# getting big.  de-encapsulate 'report_safe' messages from
-# petuniapress.com.  produce lots of noisy output to stop the buildbot from
-# timing out on mass-checks of large corpora.
+# there. limit to the most recent messages of each type, as the corpora are
+# getting big.  de-encapsulate 'report_safe' messages from petuniapress.com.
+# produce lots of noisy output to stop the buildbot from timing out on
+# mass-checks of large corpora.
 
 run "/local/bbmasstools/masschroot $perl ".
-    "mass-check -c=tstrules --tail=30000 --cache -j=1 ".
-    "--noisy ".
-    "--deencap='petuniapress.com' ".
-    "-f $targets";
+    "mass-check -c=tstrules --cache -j=1 ".
+    "--noisy --deencap='petuniapress.com' ".
+    $mass_check_args{$slavename}.
+    "ham:detect:/home/bbmass/rawcor/*/ham/* ".
+    "spam:detect:/home/bbmass/rawcor/*/spam/*";
+
+    # TODO: add --after="6 months ago"?
 
 exit;
 
