@@ -16,6 +16,7 @@ if (!-d $TGTS_DIR) {
   mkdir ($TGTS_DIR) or die "cannot create $TGTS_DIR";
 }
 
+chdir $RAWCOR_DIR or die "cd $RAWCOR_DIR failed";
 foreach my $submitter (<*>) {
   next unless (-d $submitter);
 
@@ -24,8 +25,8 @@ foreach my $submitter (<*>) {
   open (OUT, ">$TGTS_DIR/targets.$submitter")
     or warn "cannot write to $TGTS_DIR/targets.$submitter";
 
-  print OUT "ham:detect:$RAWCOR_DIR/*\n",
-            "spam:detect:$RAWCOR_DIR/*\n";
+  print OUT "ham:detect:$RAWCOR_DIR/$submitter/ham/*\n",
+            "spam:detect:$RAWCOR_DIR/$submitter/spam/*\n";
 
   close OUT or die "write failed";
 }
