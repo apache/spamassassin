@@ -3081,4 +3081,18 @@ sub tvd_vertical_words {
   return 1 if ($self->{tvd_vertical_words} >= $min && $self->{tvd_vertical_words} < $max);
 }
 
+# came up on the users@ list, look for multipart/alternative parts which
+# include non-text parts -- skip multipart/related parts which occurs in ham
+sub check_ma_non_text {
+  my $self = shift;
+
+  foreach my $map ($self->{msg}->find_parts(qr@^multipart/alternative$@i)) {
+    foreach my $p ($map->find_parts(qr/./, 1, 0)) {
+      return 1 if ($p->{'type'} !~ m@^text/@i && $p->{'type'} !~ m@^multipart/related$@i);
+    }
+  }
+  
+  return 0;
+}
+
 1;
