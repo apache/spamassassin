@@ -100,6 +100,19 @@ extern char *optarg;
 #define CONNECT_DEBUG_LEVEL LOG_DEBUG
 */
 
+/* bug 4477 comment 14 */
+#ifdef NI_MAXHOST
+#define SPAMC_MAXHOST NI_MAXHOST
+#else
+#define SPAMC_MAXHOST 256
+#endif
+
+#ifdef NI_MAXSERV
+#define SPAMC_MAXSERV NI_MAXSERV
+#else
+#define SPAMC_MAXSERV 256
+#endif
+
 /* static const int ESC_PASSTHROUGHRAW = EX__MAX + 666;  No longer seems to be used */
 
 /* set EXPANSION_ALLOWANCE to something more than might be
@@ -395,8 +408,8 @@ static int _try_to_connect_tcp(const struct transport *tp, int *sockptr)
     int ret;
     struct addrinfo *res = NULL;
 
-    char host[255]; /* hostname, for logging */
-    char port[255]; /* port, for logging */
+    char host[SPAMC_MAXHOST-1]; /* hostname, for logging */
+    char port[SPAMC_MAXSERV-1]; /* port, for logging */
                   /* needs larger size to accomodate strings for
                     * ports (eg. port 783 resolves to 'spamd' from
                     * getnameinfo() */
@@ -436,9 +449,9 @@ static int _try_to_connect_tcp(const struct transport *tp, int *sockptr)
             }
 
             getnameinfo(res->ai_addr, res->ai_addrlen,
-                  host, (sizeof(host)*sizeof(char)),
-                  port, (sizeof(port)*sizeof(char)),
-                  NI_NUMERICHOST);
+                  host, sizeof(host),
+                  port, sizeof(port),
+                  NI_NUMERICHOST|NI_NUMERICSERV);
 
 #ifdef DO_CONNECT_DEBUG_SYSLOGS
             libspamc_log(tp->flags, CONNECT_DEBUG_LEVEL,
@@ -1553,6 +1566,7 @@ int transport_setup(struct transport *tp, int flags)
     snprintf(port, 6, "%d", tp->port);
 
     memset(&hints, 0, sizeof(hints));
+    hints.ai_flags = 0;
     hints.ai_family = PF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
 
@@ -1563,7 +1577,13 @@ int transport_setup(struct transport *tp, int flags)
         return EX_OK;
 #endif
     case TRANSPORT_LOCALHOST:
-        getaddrinfo("localhost", port, &hints, &res);
+        /* getaddrinfo(NULL) will look up the loopback address */
+        if (origerr = getaddrinfo(NULL, port, &hints, &res)) {
+            libspamc_log(flags, LOG_ERR, 
+                  "getaddrinfo(NULL) failed: %s",
+                  gai_strerror(origerr));
+            return EX_OSERR;
+        }
         tp->hosts[0] = res;
         tp->nhosts = 1;
         return EX_OK;
