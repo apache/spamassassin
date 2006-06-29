@@ -480,7 +480,7 @@ static int _try_to_connect_tcp(const struct transport *tp, int *sockptr)
     } /* for(numloops...) */
 
     for(numloops=0;numloops<tp->nhosts;numloops++) {
-        freeaddrinfo(tp->hosts[tp->nhosts]);
+        freeaddrinfo(tp->hosts[numloops]);
     }
 
     libspamc_log(tp->flags, LOG_ERR,
