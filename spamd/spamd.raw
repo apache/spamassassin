@@ -33,7 +33,50 @@ BEGIN {    # added by jm for use inside the distro
 use strict;
 use warnings;
 
-use IO::Socket;
+# Big Ugly Hack; purpose: don't force requirement on IO::Socket::INET6
+BEGIN {
+  use Socket;
+  eval {
+    require IO::Socket::INET6;
+    require Socket6;
+  };
+  if ($@) {    # IPv4 only
+    *new_io_socket_inetx = sub { IO::Socket::INET->new(@_); };
+    *ip_or_name_to_ip    = sub {
+      my $in_addr = (gethostbyname(shift))[4] or return undef;
+      Socket::inet_ntoa($in_addr);
+    };
+    *peer_info_from_socket = sub {
+      my $sock = shift;
+      my ($port, $in_addr) = Socket::sockaddr_in($sock->peername)
+        or return;
+      my $addr = Socket::inet_ntoa($in_addr) or return;
+      my $host = gethostbyaddr($in_addr, Socket::AF_INET()) || $addr;
+      return ($port, $addr, $host);
+    };
+  }
+  else {    # IPv4+IPv6
+    *new_io_socket_inetx = sub { IO::Socket::INET6->new(@_); };
+    *ip_or_name_to_ip    = sub {
+      my $addr = (
+        Socket6::getaddrinfo(
+          shift, '', Socket::AF_UNSPEC(), Socket::SOCK_STREAM()
+        )
+        )[3]
+        or return undef;
+      $addr = (Socket6::getnameinfo($addr, Socket6::NI_NUMERICHOST()))[0];
+    };
+    *peer_info_from_socket = sub {
+      my $sock = shift;
+      my $addr = $sock->peerhost or return;
+      my $host =
+        (Socket6::getnameinfo($sock->peername, Socket6::NI_NAMEREQD()))[0]
+        || $addr;
+      return ($sock->peerport(), $addr, $host);
+    };
+  }
+}
+
 use IO::Handle;
 use IO::Pipe;
 
@@ -296,10 +339,10 @@ if (
 my $allowed_nets = Mail::SpamAssassin::NetSet->new();
 if ( not defined $opt{'socketpath'} ) {
   if ( @{ $opt{'allowed-ip'} } ) {
-    set_allowed_ip( split /,/, join ( ',', @{ $opt{'allowed-ip'} } ) );
+    set_allowed_ip( grep length, map { split /,/ } @{ $opt{'allowed-ip'} } );
   }
   else {
-    set_allowed_ip('127.0.0.1');
+    set_allowed_ip('127.0.0.1'); #, '::1'); M::SA::NetSet needs fixing for IPv6
   }
 }
 
@@ -510,17 +553,16 @@ if ( defined $opt{'socketpath'} ) {
   $listeninfo = "UNIX domain socket " . $opt{'socketpath'};
 }
 else {
-  $proto = getprotobyname('tcp');
+  $proto = getprotobyname('tcp') or die "getprotobyname(tcp): $!";
 
   $addr = $opt{'listen-ip'};
   if (defined $addr) {
     if ($addr ne '') {
-      $addr = ( gethostbyname($addr) )[4];
+      $addr = ip_or_name_to_ip($addr);
       die "spamd: invalid address: $opt{'listen-ip'}\n" unless $addr;
-      $addr = inet_ntoa($addr);
     }
     else {
-      $addr = '0.0.0.0';
+      $addr = '0.0.0.0';    # FIXME: this won't bind to IPv6 sockets
     }
   }
   else {
@@ -673,7 +715,7 @@ else {
     Listen    => SOMAXCONN
   );
   dbg("spamd: creating INET socket:\n" . join("\n", map { " $_: " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket));
-  $server = new IO::Socket::INET(%socket)
+  $server = new_io_socket_inetx(%socket)
          || die "spamd: could not create INET socket on $addr:$port: $!\n";
 }
 
@@ -1005,8 +1047,7 @@ sub accept_a_conn {
   # keep track of start time
   my $start = time;
 
-  my $remote_hostname;
-  my $remote_hostaddr;
+  my ($remote_hostname, $remote_hostaddr);
   if ($opt{'socketpath'}) {
     $remote_hostname = 'localhost';
     $remote_hostaddr = '127.0.0.1';
@@ -1014,14 +1055,11 @@ sub accept_a_conn {
     info("spamd: got connection over " . $opt{'socketpath'});
   }
   else {
-    my ( $port, $ip ) = sockaddr_in( $client->peername );
-    
-    $remote_hostaddr = inet_ntoa($ip);
-    $remote_hostname = gethostbyaddr($ip, AF_INET)
-                    || $remote_hostaddr;
-    $remote_port = $port;
+    ($remote_port, $remote_hostaddr, $remote_hostname) =
+      peer_info_from_socket($client)
+      or die 'failed to obtain port and ip from socket';
 
-    my $msg = "connection from ${remote_hostname} [${remote_hostaddr}] at port ${port}";
+    my $msg = "connection from ${remote_hostname} [${remote_hostaddr}] at port ${remote_port}";
     if (ip_is_allowed($remote_hostaddr)) {
       info("spamd: $msg");
     }
