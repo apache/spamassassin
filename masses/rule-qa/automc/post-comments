@@ -61,7 +61,7 @@ sub main {
   # login
   $mech->get (
   
-'http://bugzilla.spamassassin.org/query.cgi?Bugzilla_login='.$USERNAME.'&Bugzilla_password='.$password.'&GoAheadAndLogIn=1'
+'http://issues.apache.org/SpamAssassin/query.cgi?Bugzilla_login='.$USERNAME.'&Bugzilla_password='.$password.'&GoAheadAndLogIn=1'
 
     );
 
@@ -139,7 +139,7 @@ sub do_bug {
   }
 
   $mech->get (
-'http://bugzilla.spamassassin.org/show_bug.cgi?id='.$bug
+'http://issues.apache.org/SpamAssassin/show_bug.cgi?id='.$bug
   );
   my $current = $mech->content();
   $mech->submit_form (

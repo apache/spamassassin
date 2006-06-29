@@ -25,7 +25,7 @@ $ua = LWP::UserAgent->new;
 $ua->cookie_jar(HTTP::Cookies->new(file => "lwpcookies.txt",
                                             autosave => 1));
 
-my $lreq = POST 'http://bugzilla.spamassassin.org/query.cgi',
+my $lreq = POST 'http://issues.apache.org/SpamAssassin/query.cgi',
         [
           GoAheadAndLogIn => '1',
           Bugzilla_login => $USER,
@@ -75,7 +75,7 @@ goes above 0.7 (or below 0.3 for nice tests).
 print ("-" x 75);
 print "\nDesc: $DESC\n$LONGDESC\n\n";
 
-  my $req = POST 'http://bugzilla.spamassassin.org/post_bug.cgi',
+  my $req = POST 'http://issues.apache.org/SpamAssassin/post_bug.cgi',
           [ reporter => 'jm@jmason.org',
             product => 'Spamassassin',
             version => 'current-CVS',

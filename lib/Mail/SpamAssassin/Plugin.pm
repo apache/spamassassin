@@ -792,6 +792,6 @@ C<Mail::SpamAssassin::PerMsgStatus>
 
 http://wiki.apache.org/spamassassin/PluginWritingTips
 
-http://bugzilla.spamassassin.org/show_bug.cgi?id=2163
+http://issues.apache.org/SpamAssassin/show_bug.cgi?id=2163
 
 =cut

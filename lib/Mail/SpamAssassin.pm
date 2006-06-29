@@ -1805,7 +1805,7 @@ spamassassin(1)
 
 =head1 BUGS
 
-See E<lt>http://bugzilla.spamassassin.org/E<gt>
+See E<lt>http://issues.apache.org/SpamAssassin/E<gt>
 
 =head1 AUTHORS
 
