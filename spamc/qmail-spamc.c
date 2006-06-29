@@ -46,8 +46,7 @@ int main(int argc, char **argv)
 
 #ifdef HAVE_QMAIL_RELAYCLIENT
     /*
-     * use standard qmail-queue if this is a RELAYCLIENT,
-     * see <http://bugzilla.spamassassin.org/show_bug.cgi?id=2927>
+     * bug 2927: use standard qmail-queue if this is a RELAYCLIENT
      */
     if (getenv("RELAYCLIENT")) {
        TRY(execlp("qmail-queue", "qmail-queue", NULL));

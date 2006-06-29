@@ -6,9 +6,9 @@ use Test;
 
 use constant TEST_ENABLED => conf_bool('run_net_tests');
 use constant HAS_SPFQUERY => eval { require Mail::SPF::Query; };
+# bug 3806:
 # Do not run this test on non-Linux unices as root, due to a bug
 # in Sys::Hostname::Long (which Mail::Query::SPF uses.)
-# See <http://bugzilla.spamassassin.org/show_bug.cgi?id=3806>
 use constant IS_LINUX   => $^O eq 'linux';
 use constant IS_WINDOWS => ($^O =~ /^(mswin|dos|os2)/oi);
 use constant AM_ROOT    => $< == 0;
