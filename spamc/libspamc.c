@@ -78,6 +78,12 @@
 #define h_errno errno
 #endif
 
+#ifdef _WIN32
+#define spamc_get_errno()   WSAGetLastError()
+#else
+#define spamc_get_errno()   errno
+#endif
+
 #ifndef HAVE_OPTARG
 extern char *optarg;
 #endif
@@ -187,7 +193,7 @@ static int _translate_connect_errno(int err)
 static int _opensocket(int flags, struct addrinfo *res, int *psock)
 {
     const char *typename;
-
+    int origerr;
 #ifdef _WIN32
     int socktout;
 #endif
@@ -225,18 +231,16 @@ static int _opensocket(int flags, struct addrinfo *res, int *psock)
 	== INVALID_SOCKET
 #endif
 	) {
-	int origerr;
 
 		/*--------------------------------------------------------
 		 * At this point we had a failure creating the socket, and
 		 * this is pretty much fatal. Translate the error reason
 		 * into something the user can understand.
 		 */
+	origerr = spamc_get_errno();
 #ifndef _WIN32
-	origerr = errno;	/* take a copy before syslog() */
 	libspamc_log(flags, LOG_ERR, "socket(%s) to spamd failed: %s", typename, strerror(origerr));
 #else
-	origerr = WSAGetLastError();
 	libspamc_log(flags, LOG_ERR, "socket(%s) to spamd failed: %d", typename, origerr);
 #endif
 
@@ -265,16 +269,15 @@ static int _opensocket(int flags, struct addrinfo *res, int *psock)
     if (type == PF_INET
         && setsockopt(*psock, SOL_SOCKET, SO_RCVTIMEO, (char *)&socktout, sizeof(socktout)) != 0)
     {
-        int origerrno;
 
-        origerrno = WSAGetLastError();
-        switch (origerrno)
+        origerr = spamc_get_errno();
+        switch (origerr)
         {
         case EBADF:
         case ENOTSOCK:
         case ENOPROTOOPT:
         case EFAULT:
-            libspamc_log(flags, LOG_ERR, "setsockopt(SO_RCVTIMEO) failed: %d", origerrno);
+            libspamc_log(flags, LOG_ERR, "setsockopt(SO_RCVTIMEO) failed: %d", origerr);
             closesocket(*psock);
             return EX_SOFTWARE;
 
@@ -294,12 +297,7 @@ static int _opensocket(int flags, struct addrinfo *res, int *psock)
 
 	if (type == PF_INET
 	    && setsockopt(*psock, 0, TCP_NODELAY, &one, sizeof one) != 0) {
-	    int origerrno;
-#ifndef _WIN32
-	    origerr = errno;
-#else
-	    origerrno = WSAGetLastError();
-#endif
+	    origerr = spamc_get_errno();
 	    switch (origerr) {
 	    case EBADF:
 	    case ENOTSOCK:
@@ -459,13 +457,20 @@ static int _try_to_connect_tcp(const struct transport *tp, int *sockptr)
             status = connect(mysock, res->ai_addr, res->ai_addrlen);
 
             if (status != 0) {
-#ifndef _WIN32
-                  origerr = errno;
-#else
-                  origerr = WSAGetLastError();
-#endif
+                  origerr = spamc_get_errno();
                   closesocket(mysock);
-              } else {
+
+#ifndef _WIN32
+                  libspamc_log(tp->flags, LOG_ERR,
+                      "connect to spamd on %s failed, retrying (#%d of %d): %s",
+                      host, numloops+1, MAX_CONNECT_RETRIES, strerror(origerr));
+#else
+                  libspamc_log(tp->flags, LOG_ERR,
+                      "connect to spamd on %s failed, retrying (#%d of %d): %d",
+                      host, numloops+1, MAX_CONNECT_RETRIES, origerr);
+#endif
+
+            } else {
 #ifdef DO_CONNECT_DEBUG_SYSLOGS
                   libspamc_log(tp->flags, CONNECT_DEBUG_LEVEL,
                           "dbg: connect(%s) to spamd done",family);
@@ -477,16 +482,6 @@ static int _try_to_connect_tcp(const struct transport *tp, int *sockptr)
             res = res->ai_next;
         }
         sleep(CONNECT_RETRY_SLEEP);
-
-#ifndef _WIN32
-        libspamc_log(tp->flags, LOG_ERR,
-                "connect to spamd failed, retrying (#%d of %d): %s",
-                numloops+1, MAX_CONNECT_RETRIES, strerror(origerr));
-#else
-        libspamc_log(tp->flags, LOG_ERR,
-                "connect to spamd on %s failed, retrying (#%d of %d): %s",
-                family, host, numloops+1, MAX_CONNECT_RETRIES, origerr);
-#endif
     } /* for(numloops...) */
 
     for(numloops=0;numloops<tp->nhosts;numloops++) {
@@ -1575,7 +1570,7 @@ int transport_setup(struct transport *tp, int flags)
 #endif
     case TRANSPORT_LOCALHOST:
         /* getaddrinfo(NULL) will look up the loopback address */
-        if (origerr = getaddrinfo(NULL, port, &hints, &res)) {
+        if ((origerr = getaddrinfo(NULL, port, &hints, &res)) != 0) {
             libspamc_log(flags, LOG_ERR, 
                   "getaddrinfo(NULL) failed: %s",
                   gai_strerror(origerr));
