@@ -501,7 +501,7 @@ sub macro_ref {
 # If it is omitted, the value set in the current EU::MM instance is used.
 sub macro_def {
   my($name, $val) = (@_, undef);
-  my $MUST_NOT_HAPPEN = "THIS MUST NOT HAPPEN. PLEASE REPORT A BUG VIA <http://bugzilla.spamassassin.org>";
+  my $MUST_NOT_HAPPEN = "THIS MUST NOT HAPPEN. PLEASE REPORT A BUG VIA <http://issues.apache.org/SpamAssassin/>";
   die $MUST_NOT_HAPPEN  unless defined $name;
   die $MUST_NOT_HAPPEN  unless defined $EQ;
   $val = $SELF->{$name} unless defined $val;

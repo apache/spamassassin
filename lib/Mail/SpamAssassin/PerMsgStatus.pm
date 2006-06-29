@@ -1151,8 +1151,7 @@ sub _get_tag_value_for_score {
     $score = (substr($pad, 0, $count) . $score) if $count > 0;
   }
 
-  # Do some rounding tricks to avoid the 5.0!=5.0-phenomenon,
-  # see <http://bugzilla.spamassassin.org/show_bug.cgi?id=2607>
+  # bug 2607: Do some rounding tricks to avoid the 5.0!=5.0-phenomenon,
   return $score if $self->{is_spam} or $score < $rscore;
   return $rscore - 0.1;
 }
@@ -2934,11 +2933,11 @@ sub _test_log_line {
 sub get_envelope_from {
   my ($self) = @_;
   
+  # bug 2142:
   # Get the SMTP MAIL FROM:, aka. the "envelope sender", if our
   # calling app has helpfully marked up the source message
   # with it.  Various MTAs and calling apps each have their
   # own idea of what header to use for this!   see
-  # http://bugzilla.spamassassin.org/show_bug.cgi?id=2142 .
 
   my $envf;
 

@@ -171,11 +171,10 @@ my %opt = (
 );
 
 
+# bug 1725, 2192:
 # Untaint all command-line options and ENV vars, since spamd is launched
 # as a daemon from a known-safe environment. Also store away some of the
 # vars we need for a SIGHUP later on.
-# See also <http://bugzilla.spamassassin.org/show_bug.cgi?id=1725>
-# and      <http://bugzilla.spamassassin.org/show_bug.cgi?id=2192>.
 
 # Testing for taintedness only works before detainting %ENV
 Mail::SpamAssassin::Util::am_running_in_taint_mode();
@@ -779,9 +778,9 @@ if ($copy_config_p) {
     die "spamd: error returned from copy_config\n";
 }
 
-# setup signal handlers before the kids since we may have to kill them...
-# make sure this happens before setting up the pidfile to avoid a race
-# condition.  see bugzilla ticket 3443.
+# bug 3443: setup signal handlers before the kids since we may have to
+# kill them...  make sure this happens before setting up the pidfile to
+# avoid a race condition.
 my $got_sighup;
 setup_parent_sig_handlers();
 
