@@ -99,7 +99,7 @@ if (run ("../spamassassin --lint -x -C tstrules", 1) != 0) {
 run "/local/bbmasstools/masschroot $perl ".
     "mass-check -c=tstrules --cache -j=1 ".
     "--noisy --deencap='petuniapress.com' ".
-    $mass_check_args{$slavename}.
+    $mass_check_args{$slavename}." ".
     "ham:detect:/home/bbmass/rawcor/*/ham/* ".
     "spam:detect:/home/bbmass/rawcor/*/spam/*";
 
