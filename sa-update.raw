@@ -43,6 +43,7 @@ use File::Path;
 use File::Copy;
 use Getopt::Long;
 use Pod::Usage;
+use Config;
 use strict;
 use warnings;
 
@@ -989,10 +990,7 @@ sub usage {
 
 sub find_gpg_path {
   # bug 4958: for *NIX it's "gpg", in Windows it's "gpg.exe"
-  my $gpg = 'gpg';
-  if (Mail::SpamAssassin::Util::am_running_on_windows()) {
-    $gpg .= '.exe';
-  }
+  my $gpg = 'gpg' . $Config{_exe};
 
   dbg("gpg: Searching for '$gpg'");
 
