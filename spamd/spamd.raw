@@ -32,9 +32,52 @@ BEGIN {    # added by jm for use inside the distro
 
 use strict;
 use warnings;
-use Config;
 
-use IO::Socket;
+# Big Ugly Hack; purpose: don't force requirement on IO::Socket::INET6
+BEGIN {
+  use Socket;
+  eval {
+    require IO::Socket::INET6;
+    require Socket6;
+  };
+  if ($@) {    # IPv4 only
+    require IO::Socket::INET;
+    *new_io_socket_inetx = sub { IO::Socket::INET->new(@_); };
+    *ip_or_name_to_ip    = sub {
+      my $in_addr = (gethostbyname(shift))[4] or return undef;
+      Socket::inet_ntoa($in_addr);
+    };
+    *peer_info_from_socket = sub {
+      my $sock = shift;
+      my ($port, $in_addr) = Socket::sockaddr_in($sock->peername)
+        or return;
+      my $addr = Socket::inet_ntoa($in_addr) or return;
+      my $host = gethostbyaddr($in_addr, Socket::AF_INET()) || $addr;
+      return ($port, $addr, $host);
+    };
+  }
+  else {    # IPv4+IPv6
+    *new_io_socket_inetx = sub { IO::Socket::INET6->new(@_); };
+    *ip_or_name_to_ip    = sub {
+      my $addr = (
+        Socket6::getaddrinfo(
+          shift, '', Socket::AF_UNSPEC(), Socket::SOCK_STREAM()
+        )
+        )[3]
+        or return undef;
+      $addr = (Socket6::getnameinfo($addr, Socket6::NI_NUMERICHOST()))[0];
+    };
+    *peer_info_from_socket = sub {
+      my $sock = shift;
+      my $addr = $sock->peerhost or return;
+      my $host =
+        (Socket6::getnameinfo($sock->peername, Socket6::NI_NAMEREQD()))[0]
+        || $addr;
+      return ($sock->peerport(), $addr, $host);
+    };
+  }
+}
+
 use IO::Handle;
 use IO::Pipe;
 
@@ -129,11 +172,10 @@ my %opt = (
 );
 
 
+# bug 1725, 2192:
 # Untaint all command-line options and ENV vars, since spamd is launched
 # as a daemon from a known-safe environment. Also store away some of the
 # vars we need for a SIGHUP later on.
-# See also <http://bugzilla.spamassassin.org/show_bug.cgi?id=1725>
-# and      <http://bugzilla.spamassassin.org/show_bug.cgi?id=2192>.
 
 # Testing for taintedness only works before detainting %ENV
 Mail::SpamAssassin::Util::am_running_in_taint_mode();
@@ -297,10 +339,10 @@ if (
 my $allowed_nets = Mail::SpamAssassin::NetSet->new();
 if ( not defined $opt{'socketpath'} ) {
   if ( @{ $opt{'allowed-ip'} } ) {
-    set_allowed_ip( split /,/, join ( ',', @{ $opt{'allowed-ip'} } ) );
+    set_allowed_ip( grep length, map { split /,/ } @{ $opt{'allowed-ip'} } );
   }
   else {
-    set_allowed_ip('127.0.0.1');
+    set_allowed_ip('127.0.0.1'); #, '::1'); M::SA::NetSet needs fixing for IPv6
   }
 }
 
@@ -511,17 +553,16 @@ if ( defined $opt{'socketpath'} ) {
   $listeninfo = "UNIX domain socket " . $opt{'socketpath'};
 }
 else {
-  $proto = getprotobyname('tcp');
+  $proto = getprotobyname('tcp') or die "getprotobyname(tcp): $!";
 
   $addr = $opt{'listen-ip'};
   if (defined $addr) {
     if ($addr ne '') {
-      $addr = ( gethostbyname($addr) )[4];
+      $addr = ip_or_name_to_ip($addr);
       die "spamd: invalid address: $opt{'listen-ip'}\n" unless $addr;
-      $addr = inet_ntoa($addr);
     }
     else {
-      $addr = '0.0.0.0';
+      $addr = '0.0.0.0';    # FIXME: this won't bind to IPv6 sockets
     }
   }
   else {
@@ -674,7 +715,7 @@ else {
     Listen    => SOMAXCONN
   );
   dbg("spamd: creating INET socket:\n" . join("\n", map { " $_: " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket));
-  $server = new IO::Socket::INET(%socket)
+  $server = new_io_socket_inetx(%socket)
          || die "spamd: could not create INET socket on $addr:$port: $!\n";
 }
 
@@ -738,9 +779,9 @@ if ($copy_config_p) {
     die "spamd: error returned from copy_config\n";
 }
 
-# setup signal handlers before the kids since we may have to kill them...
-# make sure this happens before setting up the pidfile to avoid a race
-# condition.  see bugzilla ticket 3443.
+# bug 3443: setup signal handlers before the kids since we may have to
+# kill them...  make sure this happens before setting up the pidfile to
+# avoid a race condition.
 my $got_sighup;
 setup_parent_sig_handlers();
 
@@ -861,9 +902,6 @@ sub spawn {
       if ( $opt{'groupname'} ) {
         $ugid = getgrnam( $opt{'groupname'} ) || $ugid;
       }
-
-      $uuid =~ /^(\d+)$/ and $uuid = $1;    # de-taint
-      $ugid =~ /^(\d+)$/ and $ugid = $1;    # de-taint
 
       # Change GID
       $) = "$ugid $ugid";    # effective gid
@@ -1009,8 +1047,7 @@ sub accept_a_conn {
   # keep track of start time
   my $start = time;
 
-  my $remote_hostname;
-  my $remote_hostaddr;
+  my ($remote_hostname, $remote_hostaddr);
   if ($opt{'socketpath'}) {
     $remote_hostname = 'localhost';
     $remote_hostaddr = '127.0.0.1';
@@ -1018,14 +1055,11 @@ sub accept_a_conn {
     info("spamd: got connection over " . $opt{'socketpath'});
   }
   else {
-    my ( $port, $ip ) = sockaddr_in( $client->peername );
-    
-    $remote_hostaddr = inet_ntoa($ip);
-    $remote_hostname = gethostbyaddr($ip, AF_INET)
-                    || $remote_hostaddr;
-    $remote_port = $port;
+    ($remote_port, $remote_hostaddr, $remote_hostname) =
+      peer_info_from_socket($client)
+      or die 'failed to obtain port and ip from socket';
 
-    my $msg = "connection from ${remote_hostname} [${remote_hostaddr}] at port ${port}";
+    my $msg = "connection from ${remote_hostname} [${remote_hostaddr}] at port ${remote_port}";
     if (ip_is_allowed($remote_hostaddr)) {
       info("spamd: $msg");
     }
@@ -1147,8 +1181,6 @@ sub handle_setuid_to_user {
   warn("spamd: still running as root: user not specified with -u, "
        . "not found, or set to root, falling back to nobody" );
   my ($uid, $gid) = (getpwnam('nobody'))[2,3];
-  $uid =~ /^(\d+)$/ and $uid = $1;    # de-taint
-  $gid =~ /^(\d+)$/ and $gid = $1;    # de-taint
   
   $) = "$gid $gid";                   # eGID
   $> = $uid;                          # eUID
@@ -1719,17 +1751,15 @@ sub handle_user {
   my ($name, $pwd, $uid, $gid, $quota, $comment, $gcos, $dir, $etc) =
       getpwnam($userid);
 
-  if (!$spamtest->{'paranoid'} && !defined($uid)) {
-    # if we are given a username, but can't look it up, maybe name
-    # services are down?  let's break out here to allow them to get
-    # 'defaults' when we are not running paranoid
-    info("spamd: handle_user unable to find user: $userid\n");
-    return 0;
+  if (!defined $uid) {
+      my $errmsg = "spamd: handle_user unable to find user: '$userid'\n";
+      die $errmsg if $spamtest->{'paranoid'};
+      # if we are given a username, but can't look it up, maybe name
+      # services are down?  let's break out here to allow them to get
+      # 'defaults' when we are not running paranoid
+      info($errmsg);
+      return 0;
   }
-
-  # not sure if this is required, the documentation says it isn't
-  $uid =~ /^(\d+)$/ and $uid = $1;    # de-taint
-  $gid =~ /^(\d+)$/ and $gid = $1;    # de-taint
 
   if ($setuid_to_user) {
     $) = "$gid $gid";                 # change eGID
@@ -1748,12 +1778,12 @@ sub handle_user {
   #
   if ( $opt{'vpopmail'} ) {
     my $vpopdir = $dir;
-    $dir = `$vpopdir/bin/vuserinfo -d $username`;
+    $dir = `$vpopdir/bin/vuserinfo -d \Q$username\E`;
     if ($? != 0) {
       #
       # If vuserinfo failed $username could be an alias
       #
-      $dir = `$vpopdir/bin/valias $username`;
+      $dir = `$vpopdir/bin/valias \Q$username\E`;
       if ($? == 0 && $dir !~ /.+ -> &/) {
         $dir =~ s,.+ -> (/.+)/Maildir/,$1,;
       } else {
@@ -1881,9 +1911,6 @@ sub handle_user_setuid_with_sql {
     info("spamd: handle_user unable to find user: $username\n");
     return 0;
   }
-
-  $uid =~ /^(\d+)$/ and $uid = $1;    # de-taint
-  $gid =~ /^(\d+)$/ and $gid = $1;    # de-taint
 
   if ($setuid_to_user) {
     $) = "$gid $gid";                 # change eGID
@@ -2515,6 +2542,11 @@ circumstances are available with an area of "info".
 
 Do not use IPv6 for DNS tests. Use if the existing tests
 for IPv6 availablity produce incorrect results or crashes.
+
+For more information about which areas (also known as channels) are available,
+please see the documentation at:
+
+	C<http://wiki.apache.org/spamassassin/DebugChannels>
 
 =item B<-L>, B<--local>
 

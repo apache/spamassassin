@@ -127,7 +127,6 @@ use Mail::SpamAssassin::Logger;
 use strict;
 use warnings;
 use bytes;
-use Carp;
 
 use vars qw{
   @ISA
@@ -652,6 +651,8 @@ sub finish_parsing {
 
   $self->trace_meta_dependencies();
   $self->fix_priorities();
+
+  dbg("conf: finish parsing");
 
   while (my ($name, $text) = each %{$conf->{tests}}) {
     my $type = $conf->{test_types}->{$name};

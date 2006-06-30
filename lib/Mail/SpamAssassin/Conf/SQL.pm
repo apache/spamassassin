@@ -45,7 +45,6 @@ use Mail::SpamAssassin::Logger;
 use strict;
 use warnings;
 use bytes;
-use Carp;
 
 use vars qw{
   @ISA

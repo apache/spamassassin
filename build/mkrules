@@ -162,6 +162,7 @@ sub lint_output_files {
 
 sub lint_rule_text {
   my ($text) = @_;
+
   my $mailsa = Mail::SpamAssassin->new({
       rules_filename => "./rules",
       # debug => 1,
@@ -185,6 +186,7 @@ sub lint_rule_text {
   };
 
   $mailsa->lint_rules();
+  $mailsa->finish();
   return $errors;       # 0 means good
 }
 
@@ -347,6 +349,11 @@ sub rule_file_compile {
         $/x)
       {
         $rules->{$name}->{found_definition} = 1;
+      }
+      # userconf rules are always published in "active"
+      elsif (($type eq 'tflags') && ($val =~ /\buserconf\b/))
+      {
+        $rules->{$name}->{forceactive} = 1;
       }
 
       $current_comments = '';
@@ -745,6 +752,7 @@ sub sandbox_rule_name_avoid_collisions {
   my ($rule, $path) = @_;
   my $new;
   my $newreason;
+  my $dowarn = 0;
 
   return $rule if $opt_listpromotable;
   return $rule if $active_rules->{$rule};
@@ -764,11 +772,14 @@ sub sandbox_rule_name_avoid_collisions {
     $new =~ s/_$//;
     $new = $rule.'_'.$new;
     $newreason = "collision with existing rule";
+    $dowarn = 1;
   }
 
   if (!$renamed_rules->{$new}) {
     $renamed_rules->{$new} = $rule;
-    warn "WARNING: $rule: renamed as $new due to $newreason\n";
+    if ($dowarn) {
+      warn "WARNING: $rule: renamed as $new due to $newreason\n";
+    }
   }
 
   return $new;

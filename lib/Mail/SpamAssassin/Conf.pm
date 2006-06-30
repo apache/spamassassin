@@ -2885,6 +2885,8 @@ optional, and the default is shown below.
                    "failed", "unavailable")
  _TESTS(,)_        tests hit separated by "," (or other separator)
  _TESTSSCORES(,)_  as above, except with scores appended (eg. AWL=-3.0,...)
+ _SUBTESTS(,)_     subtests (start with "__") hit separated by ","
+                   (or other separator)
  _DCCB_            DCC's "Brand"
  _DCCR_            DCC's results
  _PYZOR_           Pyzor results
@@ -2897,6 +2899,8 @@ optional, and the default is shown below.
  _REPORT_          terse report of tests hit (for header reports)
  _SUMMARY_         summary of tests hit for standard report (for body reports)
  _CONTACTADDRESS_  contents of the 'report_contact' setting
+ _HEADER(NAME)_    includes the value of a message header.  value is the same
+                   as is found for header rules (see elsewhere in this doc)
 
 If a tag reference uses the name of a tag which is not in this list or defined
 by a loaded plugin, the reference will be left intact and not replaced by any

@@ -45,16 +45,19 @@ All options detailed below can be passed as command line arguments, or be
 contained in a configuration file, as described in the B<CONFIGURATION FILE>
 section below.
 
+Note that the long options, a la C<--long-options>, are new as of
+SpamAssassin 3.2.0, and were not available in earlier versions.
+
 =over
 
-=item B<-B>
+=item B<-B>, B<--bsmtp>
 
 Assume input is a single BSMTP-formatted message. In other words, spamc will
 pull out everything between the DATA line and the lone-dot line to feed to
 spamd, and will place the spamd output back in the same envelope (thus, any
 SIZE extension in your BSMTP file will cause many problems).
 
-=item B<-c>
+=item B<-c>, B<--check>
 
 Just check if the message is spam or not.  Set process exitcode to 1 if
 message is spam, 0 if not spam or processing failure occurs.  Will print
@@ -62,7 +65,7 @@ score/threshold to stdout (as ints) or 0/0 if there was an error.
 Combining B<-c> and B<-E> is a no-op, since B<-c> implies the behaviour
 of B<-E>.
 
-=item B<-d> I<host[,host2]>
+=item B<-d> I<host[,host2]>, B<--dest>=I<host[,host2]>
 
 In TCP/IP mode, connect to spamd server on given host (default: localhost).
 Several hosts can be specified if separated by commas.
@@ -71,7 +74,7 @@ If I<host> resolves to multiple addresses, then spamc will fail-over to the
 other addresses, if the first one cannot be connected to.  It will first try
 all addresses of one host before it tries the next one in the list.
 
-=item B<-e> I<command> I<[args]>
+=item B<-e> I<command> I<[args]>, B<--pipe-to> I<command> I<[args]>
 
 Instead of writing to stdout, pipe the output to I<command>'s standard input.
 Note that there is a very slight chance mail will be lost here, because if the
@@ -82,31 +85,31 @@ B<-e> is taken as arguments to the command (it's like I<rxvt> or I<xterm>).
 
 This option is not supported on Win32 platforms.
 
-=item B<-E>
+=item B<-E>, B<--exitcode>
 
 Filter according to the other options, but set the process exitcode to 1 if
 message is spam, 0 if not spam or processing failure occurs.
 
-=item B<-F> I</path/to/file>
+=item B<-F> I</path/to/file>, B<--config>=I<path>
 
 Specify a configuration file to read additional command-line flags from.
 See B<CONFIGURATION FILE> below.
 
-=item B<-h>
+=item B<-h>, B<--help>
 
 Print this help message and terminate without action.
 
-=item B<-H>
+=item B<-H>, B<--randomize>
 
 For TCP/IP sockets, randomize the IP addresses returned for the hosts given
 by the B<-d> switch. This provides for a simple kind of load balancing.  It
 will try only three times though.
 
-=item B<-l>
+=item B<-l>, B<--log-to-stderr>
 
 Send log messages to stderr, instead of to the syslog.
 
-=item B<-L> I<learn type>
+=item B<-L> I<learn type>, B<--learntype>=I<type>
 
 Send message to spamd for learning.  The C<learn type> can be either spam,
 ham or forget.  The exitcode for spamc will be set to 5 if the message
@@ -115,7 +118,7 @@ was learned, or 6 if it was already learned.
 Note that the C<spamd> must run with the C<--allow-tell> option for
 this to work.
 
-=item B<-C> I<report type>
+=item B<-C> I<report type>, B<--reporttype>=I<type>
 
 Report or revoke a message to one of the configured collaborative filtering
 databases.  The C<report type> can be either report or revoke.
@@ -123,12 +126,12 @@ databases.  The C<report type> can be either report or revoke.
 Note that the C<spamd> must run with the C<--allow-tell> option for
 this to work.
 
-=item B<-p> I<port>
+=item B<-p> I<port>, B<--port>=I<port>
 
 In TCP/IP mode, connect to spamd server listening on given port 
 (default: 783).
 
-=item B<-r>
+=item B<-r>, B<--full-spam>
 
 Just output the SpamAssassin report text to stdout, if the message is
 spam.  If the message is ham (non-spam), nothing will be printed.  The
@@ -137,12 +140,12 @@ this format:
 
 	score/threshold
 
-=item B<-R>
+=item B<-R>, B<--full>
 
 Just output the SpamAssassin report text to stdout, for all messages.
 See B<-r> for details of the output format used.
 
-=item B<-s> I<max_size>
+=item B<-s> I<max_size>, B<--max-size>=I<max_size>
 
 Set the maximum message size which will be sent to spamd -- any bigger than
 this threshold and the message will be returned unprocessed (default: 250 KB).
@@ -151,33 +154,33 @@ If spamc gets handed a message bigger than this, it won't be passed to spamd.
 The size is specified in bytes, as a positive integer greater than 0.
 For example, B<-s 250000>.
 
-=item B<-S>
+=item B<-S>, B<--ssl>
 
 If spamc was built with support for SSL, encrypt data to and from the
 spamd process with SSL; spamd must support SSL as well.
 
-=item B<-t> I<timeout>
+=item B<-t> I<timeout>, B<--timeout>=I<timeout>
 
 Set the timeout for spamc-to-spamd communications (default: 600, 0 disables).
 If spamd takes longer than this many seconds to reply to a message, spamc 
 will abort the connection and treat this as a failure to connect; in other 
 words the message will be returned unprocessed.  
 
-=item B<-u> I<username>
+=item B<-u> I<username>, B<--username>=I<username>
 
-This argument has been semi-obsoleted.  To have spamd use per-user-config
-files, run spamc as the user whose config files spamd should load.  If you're
-running spamc as some other user, though, (eg. root, mail, nobody, cyrus, etc.)
-then you can still use this flag.
+To have spamd use per-user-config files, run spamc as the user whose config
+files spamd should load; by default the effective user-ID is sent to spamd.  If
+you're running spamc as some other user, though, (eg. root, mail, nobody,
+cyrus, etc.) then you may use this flag to override the default.
 
-=item B<-U> I<socketpath>
+=item B<-U> I<socketpath>, B<--socket>=I<path>
 
 Connect to C<spamd> via UNIX domain socket I<socketpath> instead of a
 TCP/IP connection.
 
 This option is not supported on Win32 platforms.
 
-=item B<-V>
+=item B<-V>, B<--version>
 
 Report the version of this C<spamc> client.  If built with SSL support,
 an additional line will be included noting this, like so:
@@ -185,16 +188,20 @@ an additional line will be included noting this, like so:
   SpamAssassin Client version 3.0.0-rc4
     compiled with SSL support (OpenSSL 0.9.7d 17 Mar 2004)
 
-=item B<-x>
+=item B<-x>, B<--no-safe-fallback>
 
 Disables the 'safe fallback' error-recovery method, which passes through the
 unaltered message if an error occurs.  Instead, exit with an error code, and
 let the MTA queue up the mails for a retry later.  See also L<"EXIT CODES">.
 
-=item B<-y>
+=item B<-y>, B<--tests>
 
 Just output the names of the tests hit to stdout, on one line, separated
 by commas.
+
+=item B<-K>
+
+Perform a keep-alive check of spamd, instead of a full message check.
 
 =back
 

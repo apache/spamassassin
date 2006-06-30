@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rcvd_parser");
-use Test; BEGIN { plan tests => 48 };
+use Test; BEGIN { plan tests => 49 };
 
 
 use strict;
@@ -608,6 +608,17 @@ Received: from Amazon.com ([66.0.37.1])
 } => q{
 
 [ ip=66.0.37.1 rdns= helo=Amazon.com by=bi-staff1.beckman.uiuc.edu ident= envfrom= intl=0 id=k1SCIR87017358 auth= ]
+
+},
+q{
+
+Received: (from KRYPTIK [70.20.57.51])
+	by host.name (NAVGW 2.5.2.12) with SMTP id M2006040415284308595
+	for <user@domain.co.uk>; Tue, 04 Apr 2006 15:28:45 +0100
+
+} => q{
+
+[ ip=70.20.57.51 rdns= helo=KRYPTIK by=host.name ident= envfrom= id=M2006040415284308595 auth= ]
 
 },
 );

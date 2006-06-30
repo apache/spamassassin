@@ -86,7 +86,8 @@ the regexp, including multipart.  If you only want to see leaves of the
 tree (ie: parts that aren't multipart), set this to true (1).
 
 Recursive - By default, when find_parts() finds a multipart which has
-parts underneath it, it will recurse.
+parts underneath it, it will recurse through all sub-children.  If set to 0,
+only look at the part and any direct children of the part.
 
 =cut
 
@@ -101,16 +102,20 @@ sub find_parts {
   return () unless $re;
 
   $onlyleaves = 0 unless defined $onlyleaves;
-  $recursive = 1 unless defined $recursive;
+
+  my $depth;
+  if (defined $recursive && $recursive == 0) {
+    $depth = 1;
+  }
   
-  return $self->_find_parts($re, $onlyleaves, $recursive);
+  return $self->_find_parts($re, $onlyleaves, $depth);
 }
 
 # We have 2 functions in find_parts() to optimize out the penalty of
 # $onlyleaves, $re, and $recursive over and over again.
 #
 sub _find_parts {
-  my ($self, $re, $onlyleaves, $recursive) = @_;
+  my ($self, $re, $onlyleaves, $depth) = @_;
   my @ret = ();
 
   # If this object matches, mark it for return.
@@ -120,11 +125,13 @@ sub _find_parts {
     push(@ret, $self);
   }
   
-  if ( $recursive && !$amialeaf ) {
+  if ( !$amialeaf && (!defined $depth || $depth > 0)) {
+    $depth-- if defined $depth;
+
     # This object is a subtree root.  Search all children.
     foreach my $parts ( @{$self->{'body_parts'}} ) {
       # Add the recursive results to our results
-      push(@ret, $parts->_find_parts($re, $onlyleaves, 1));
+      push(@ret, $parts->_find_parts($re, $onlyleaves, $depth));
     }
   }
 

@@ -135,14 +135,18 @@ sub new {
   elsif (ref $message) {
     dbg("message: Input is a reference of unknown type!");
   }
-  else {
+  elsif (defined $message) {
     @message = split ( /^/m, $message );
   }
 
-  return $self unless @message;
-
   # Pull off mbox and mbx separators
-  if ( $message[0] =~ /^From\s/ ) {
+  # also deal with null messages
+  if (!@message) {
+    # bug 4884:
+    # if we get here, it means that the input was null, so fake the message
+    # content as a single newline...
+    @message = ("\n");
+  } elsif ($message[0] =~ /^From\s/) {
     # mbox formated mailbox
     $self->{'mbox_sep'} = shift @message;
   } elsif ($message[0] =~ MBX_SEPARATOR) {
@@ -349,13 +353,13 @@ I<Mail::SpamAssassin::Message::Node> for more details.
 # objects which match.
 #
 sub find_parts {
-  my ($self, $re, $onlyleaves, $recursive) = @_;
+  my $self = shift;
 
   # ok, we need to do the parsing now...
   $self->_do_parse() if (exists $self->{'toparse'});
 
   # and pass through to the Message::Node version of the method
-  return $self->SUPER::find_parts($re, $onlyleaves, $recursive);
+  return $self->SUPER::find_parts(@_);
 }
 
 # ---------------------------------------------------------------------------

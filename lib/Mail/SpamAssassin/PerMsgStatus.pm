@@ -50,7 +50,6 @@ package Mail::SpamAssassin::PerMsgStatus;
 
 use strict;
 use warnings;
-use Carp;
 
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::EvalTests;
@@ -1028,10 +1027,11 @@ sub _replace_tags {
   # a tag for it (bug 4793)
   my $t;
   my $v;
-  $text =~ s{_(\w+?)(?:\((.*?)\))?_}{
-        $t = $1;
-        $v = $self->_get_tag($t,$2);
-        (defined $v) ? $v : "_".$t."_"
+  $text =~ s{(_(\w+?)(?:\((.*?)\))?_)}{
+	my $full = $1;
+        my $tag = $2;
+        my $result = $self->_get_tag($tag,$3);
+        (defined $result) ? $result : $full;
       }ge;
 
   return $text;
@@ -1108,6 +1108,8 @@ For example:
 See C<Mail::SpamAssassin::Conf>'s C<TEMPLATE TAGS> section for more details on
 how template tags are used.
 
+C<undef> will be returned if a tag by that name has not been defined.
+
 =cut
 
 sub set_tag {
@@ -1156,8 +1158,7 @@ sub _get_tag_value_for_score {
     $score = (substr($pad, 0, $count) . $score) if $count > 0;
   }
 
-  # Do some rounding tricks to avoid the 5.0!=5.0-phenomenon,
-  # see <http://bugzilla.spamassassin.org/show_bug.cgi?id=2607>
+  # bug 2607: Do some rounding tricks to avoid the 5.0!=5.0-phenomenon,
   return $score if $self->{is_spam} or $score < $rscore;
   return $rscore - 0.1;
 }
@@ -1264,6 +1265,11 @@ sub _get_tag {
               return (join($arg, sort(@{$self->{test_names_hit}})) || "none");
             },
 
+            SUBTESTS => sub {
+              my $arg = (shift || ',');
+              return (join($arg, sort(@{$self->{subtest_names_hit}})) || "none");
+            },
+
             TESTSSCORES => sub {
               my $arg = (shift || ",");
               my $line = '';
@@ -1283,6 +1289,11 @@ sub _get_tag {
               return "\n" . ($self->{tag_data}->{REPORT} || "");
             },
 
+	    HEADER => sub {
+	      my $hdr = shift || return;
+	      return $self->get($hdr);
+	    },
+
           );
 
   my $data = "";
@@ -1295,7 +1306,8 @@ sub _get_tag {
       $data = $data->(@_);
     }
   }
-  else {
+  # known valid tags that might not get defined in some circumstances
+  elsif ($tag !~ /^(?:BAYESTC(?:|LEARNED|SPAMMY|HAMMY)|RBL)$/) {
     return undef;
   }
   $data = "" unless defined $data;
@@ -1322,6 +1334,9 @@ sub finish {
 	});
 
   foreach(keys %{$self}) {
+    # TODO: we should not be explicitly deleting every key here,
+    # just the ones that need it.  This is surprisingly slow
+    # (in the top 10 measured with Devel::SmallProf)
     delete $self->{$_};
   }
 }
@@ -1626,11 +1641,14 @@ sub _get {
 # $_[1] is request
 # $_[2] is defval
 sub get {
-  # fill in cache entry if it is empty
-  $_[0]->{c}->{$_[1]} = _get(@_) unless exists $_[0]->{c}->{$_[1]};
-
   # return cache entry if it is defined
   return $_[0]->{c}->{$_[1]} if defined $_[0]->{c}->{$_[1]};
+
+  # fill in cache entry if it is empty
+  if (!exists $_[0]->{c}->{$_[1]}) {
+    $_[0]->{c}->{$_[1]} = _get(@_);
+    return $_[0]->{c}->{$_[1]} if defined $_[0]->{c}->{$_[1]};
+  }
 
   # if the requested header wasn't found, we should return either
   # a default value as specified by the caller, or the blank string ''
@@ -2561,11 +2579,11 @@ sub do_meta_tests {
   }
 
   my (%rule_deps, %setup_rules, %meta, $rulename);
-  my $evalstr = '
+  my $evalstr = q{
 
-    my $hit = $self->{tests_already_hit};
-  
-  ';
+    my $h = $self->{tests_already_hit};
+
+  };
 
   # Get the list of meta tests
   my @metas = keys %{ $conf->{meta_tests}->{$priority} };
@@ -2593,7 +2611,7 @@ sub do_meta_tests {
         $meta{$rulename} .= "$token ";
       }
       else {
-        $meta{$rulename} .= "\$hit->{'$token'} ";
+        $meta{$rulename} .= "\$h->{'$token'} ";
         $setup_rules{$token}=1;
 
         # If the token is another meta rule, add it as a dependency
@@ -2604,7 +2622,7 @@ sub do_meta_tests {
   }
 
   # avoid "undefined" warnings by providing a default value for needed rules
-  $evalstr .= join("\n", (map { "\$hit->{'$_'} ||= 0;" } keys %setup_rules), "");
+  $evalstr .= join("\n", (map { "\$h->{'$_'} ||= 0;" } keys %setup_rules), "");
 
   # Sort by length of dependencies list.  It's more likely we'll get
   # the dependencies worked out this way.
@@ -2726,28 +2744,32 @@ sub run_eval_tests {
 
   return if (exists $self->{shortcircuit_type});
   
+  # look these up once in advance to save repeated lookups in loop below
   my $debugenabled = would_log('dbg');
+  my $scoresref = $self->{conf}->{scores};
+  my $tflagsref = $self->{conf}->{tflags};
+  my $have_start_rules = $self->{main}->have_plugin("start_rules");
+  my $have_ran_rule = $self->{main}->have_plugin("ran_rule");
 
   my $scoreset = $self->{conf}->get_score_set();
   while (my ($rulename, $test) = each %{$evalhash}) {
     last if (exists $self->{shortcircuit_type});
 
     # Score of 0, skip it.
-    next unless ($self->{conf}->{scores}->{$rulename});
+    my $score = $scoresref->{$rulename};
+    next unless $score;
 
     # If the rule is a net rule, and we're in a non-net scoreset, skip it.
-    next if (exists $self->{conf}->{tflags}->{$rulename} &&
-             (($scoreset & 1) == 0) &&
-             $self->{conf}->{tflags}->{$rulename} =~ /\bnet\b/);
+    next if ((($scoreset & 1) == 0) &&
+             $tflagsref->{$rulename} &&
+             $tflagsref->{$rulename} =~ /\bnet\b/);
 
     # If the rule is a bayes rule, and we're in a non-bayes scoreset, skip it.
-    next if (exists $self->{conf}->{tflags}->{$rulename} &&
-             (($scoreset & 2) == 0) &&
-             $self->{conf}->{tflags}->{$rulename} =~ /\bbayes\b/);
+    next if ((($scoreset & 2) == 0) &&
+             $tflagsref->{$rulename} &&
+             $tflagsref->{$rulename} =~ /\bbayes\b/);
 
-    my $score = $self->{conf}{scores}{$rulename};
     my $result;
-
     $self->{test_log_msgs} = ();        # clear test state
 
     my ($function, @args) = @{$test};
@@ -2768,11 +2790,13 @@ sub run_eval_tests {
     # run
     $self->{current_rule_name} = $rulename;
 
-    $self->{main}->call_plugins("start_rules", { permsgstatus => $self, ruletype => "eval" });
+    if ($have_start_rules) {
+      $self->{main}->call_plugins("start_rules", { permsgstatus => $self, ruletype => "eval" });
+    }
+
     eval {
       $result = $self->$function(@args);
     };
-    $self->{main}->call_plugins("ran_rule", { permsgstatus => $self, ruletype => "eval", rulename => $rulename });
 
     if ($@) {
       warn "rules: failed to run $rulename test, skipping:\n" . "\t($@)\n";
@@ -2780,14 +2804,15 @@ sub run_eval_tests {
       next;
     }
 
+    if ($have_ran_rule) {
+      $self->{main}->call_plugins("ran_rule", { permsgstatus => $self, ruletype => "eval", rulename => $rulename });
+    }
+
     if ($result) {
       $self->got_hit ($rulename, $prepend2desc, $result);
       dbg("rules: ran eval rule $rulename ======> got hit ($result)") if $debugenabled;
       $self->{main}->call_plugins("hit_rule", { permsgstatus => $self, ruletype => "eval", rulename => $rulename });
     }
-    #else {
-    #  dbg("rules: ran eval rule $rulename ======> no hit") if $debugenabled;
-    #}
   }
 }
 
@@ -2895,6 +2920,12 @@ sub _handle_hit {
     # ignore meta-match sub-rules.
     if ($rule =~ /^__/) { push(@{$self->{subtest_names_hit}}, $rule); return; }
 
+    # this should not happen; warn about it
+    if (!defined $score) {
+      warn "rules: score undef for rule '$rule' in '$area' '$desc'";
+      return;
+    }
+
     # Add the rule hit to the score
     $self->{score} += $score;
 
@@ -2999,11 +3030,11 @@ sub _test_log_line {
 sub get_envelope_from {
   my ($self) = @_;
   
+  # bug 2142:
   # Get the SMTP MAIL FROM:, aka. the "envelope sender", if our
   # calling app has helpfully marked up the source message
   # with it.  Various MTAs and calling apps each have their
   # own idea of what header to use for this!   see
-  # http://bugzilla.spamassassin.org/show_bug.cgi?id=2142 .
 
   my $envf;
 
