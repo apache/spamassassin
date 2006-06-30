@@ -1,4 +1,7 @@
 #!/local/perl586/bin/perl
+#
+# freqsd - perform "background" operations required by the automc
+# infrastructure, such as building indices and "hit-frequencies" reports
 
 use strict;
 use warnings;
@@ -91,6 +94,7 @@ sub logit {
 
 $| = 1;
 logit "freqsd starting";
+my $is_first_time = 1;
 
 if ($am_parent) {
   while (1) {
@@ -107,7 +111,18 @@ die "oops! cannot get here";
 # ---------------------------------------------------------------------------
 
 sub parent_loop {
-  my $job = $dq_fast->wait_for_queued_job($idle_sleep);
+  # I'm impatient.  many times when I have to restart this script, I want to
+  # see "faster" report results built immediately, without the 10-minute wait.
+  # So first time around, just sleep for 5 secs, so that we get started almost
+  # immediately.
+
+  my $this_sleep = $idle_sleep;
+  if ($is_first_time) {
+    $is_first_time = 0;
+    $this_sleep = 5;
+  }
+
+  my $job = $dq_fast->wait_for_queued_job($this_sleep);
 
   if ($job && $job->{metadata}->{dir}) {
     # if a dir was specified, it's always a "b" (buildbot) mass-check;
@@ -126,7 +141,6 @@ sub parent_loop {
   run ("cd masses ; ./rule-qa/automc/gen_info_xml");
 
   logit "completed faster reports";
-
   if ($job) { $job->finish(); }
 }
 

@@ -143,6 +143,10 @@ N total messages regardless of class).
 Only use the last N ham and N spam (or if the value is -N, only use the last
 N total messages regardless of class).
 
+If both C<opt_head> and C<opt_tail> are specified, then the C<opt_head> value
+specifies a subset of the C<opt_tail> selection to use; in other words, the
+C<opt_tail> splice is applied first.
+
 =item opt_before
 
 Only use messages which are received after the given time_t value.
@@ -165,6 +169,12 @@ hit.
 
 Set to 0 (default) if you don't want to use cached information to help speed
 up ArchiveIterator.  Set to 1 to enable.
+
+=item opt_cachedir
+
+Set to the path of a directory where you wish to store cached information for
+C<opt_cache>, if you don't want to mix them with the input files (as is the
+default).  The directory must be both readable and writable.
 
 =item wanted_sub
 
@@ -267,8 +277,9 @@ Specifies the format of the raw_location.  C<dir> is a directory whose
 files are individual messages, C<file> a file with a single message,
 C<mbox> an mbox formatted file, or C<mbx> for an mbx formatted directory.
 
-C<detect> can also be used; assumes C<file> for STDIN and anything that is not
-a directory, or C<directory> otherwise.
+C<detect> can also be used.  This assumes C<mbox> for any file whose path
+contains the pattern C</\.mbox/i>, C<file> for STDIN and anything that is
+not a directory, or C<directory> otherwise.
 
 =item raw_location
 
@@ -292,7 +303,7 @@ sub run {
   }
 
   # non-forking model (generally sa-learn), everything in a single process
-  if ($self->{opt_j} == 0) {
+  if ($self->{opt_j} < 2) {
     my $messages;
 
     # message-array
@@ -306,8 +317,9 @@ sub run {
   # forking model (generally mass-check), avoid extended memory usage
   else {
     my $tmpf;
-    ($tmpf, $self->{messageh}) = Mail::SpamAssassin::Util::secure_tmpfile();
-    unlink $tmpf;
+    ($tmpf, $self->{messageh}) = Mail::SpamAssassin::Util::secure_tmpfile()
+      or die 'archive-iterator: failed to create temp file';
+    unlink $tmpf or die "archive-iterator: unlink '$tmpf': $!";
     undef $tmpf;
 
     # forked child process scans messages
@@ -362,66 +374,53 @@ sub run {
       # feed childen, make them work for it, repeat
       while ($select->count()) {
         foreach my $socket ($select->can_read()) {
-	  my $result = '';
-	  my $line;
-	  while ($line = readline $socket) {
-	    if ($line =~ /^RESULT (.+)$/) {
-	      my ($date,$class,$type) = run_index_unpack($1);
-	      #warn ">> RESULT: $class, $type, $date\n";
-
-	      if (defined $self->{opt_restart} &&
-		  ($total_count % $self->{opt_restart}) == 0)
-	      {
-	        $needs_restart = 1;
-	      }
-
-	      # if messages remain, and we don't need to restart, send message
-	      if (($MESSAGES > $total_count) && !$needs_restart) {
-	        print { $socket } $self->next_message() . "\n";
-	        $total_count++;
-	        #warn ">> recv: $MESSAGES $total_count\n";
-	      }
-	      else {
-	        # stop listening on this child since we're done with it
-	        #warn ">> removeresult: $needs_restart $MESSAGES $total_count\n";
-	        $select->remove($socket);
-	      }
-
-	      # deal with the result we received
-	      if ($result) {
-	        chop $result;	# need to chop the \n before RESULT
-	        &{$self->{result_sub}}($class, $result, $date);
-	      }
-
-	      last;	# this will avoid the read for this client
-	    }
-	    elsif ($line eq "START\n") {
-	      if ($MESSAGES > $total_count) {
-	        # we still have messages, send one to child
-	        print { $socket } $self->next_message() . "\n";
-	        $total_count++;
-	        #warn ">> new: $MESSAGES $total_count\n";
-	      }
-	      else {
-	        # no more messages, so stop listening on this child
-	        #warn ">> removestart: $needs_restart $MESSAGES $total_count\n";
-	        $select->remove($socket);
-	      }
-
-	      last;	# this will avoid the read for this client
-	    }
-	    else {
-	      # result line, remember it
-	      $result .= $line;
-	    }
-	  }
+	  my $line = $self->read_line($socket);
 
           # some error happened during the read!
-          if (!defined $line || !$line) {
+          if (!defined $line) {
             $needs_restart = 1;
             warn "archive-iterator: readline failed, attempting to recover\n";
             $select->remove($socket);
           }
+	  elsif ($line =~ /^([^\0]+)\0RESULT (.+)$/s) {
+	    my $result = $1;
+	    my ($date,$class,$type) = index_unpack($2);
+	    #warn ">> RESULT: $class, $type, $date\n";
+
+	    if (defined $self->{opt_restart} && ($total_count % $self->{opt_restart}) == 0) {
+	      $needs_restart = 1;
+	    }
+
+	    # if messages remain, and we don't need to restart, send message
+	    if (($MESSAGES > $total_count) && !$needs_restart) {
+	      $self->send_line($socket, $self->next_message());
+	      $total_count++;
+	      #warn ">> recv: $MESSAGES $total_count\n";
+	    }
+	    else {
+	      # stop listening on this child since we're done with it
+	      #warn ">> removeresult: $needs_restart $MESSAGES $total_count\n";
+	      $select->remove($socket);
+	    }
+
+	    # deal with the result we received
+	    if ($result) {
+	      &{$self->{result_sub}}($class, $result, $date);
+	    }
+	  }
+	  elsif ($line eq "START") {
+	    if ($MESSAGES > $total_count) {
+	      # we still have messages, send one to child
+	      $self->send_line($socket, $self->next_message());
+	      $total_count++;
+	      #warn ">> new: $MESSAGES $total_count\n";
+	    }
+	    else {
+	      # no more messages, so stop listening on this child
+	      #warn ">> removestart: $needs_restart $MESSAGES $total_count\n";
+	      $select->remove($socket);
+	    }
+	  }
         }
 
         #warn ">> out of loop, $MESSAGES $total_count $needs_restart ".$select->count()."\n";
@@ -458,7 +457,7 @@ sub run {
 sub run_message {
   my ($self, $msg) = @_;
 
-  my ($date, $class, $format, $mail) = run_index_unpack($msg);
+  my ($date, $class, $format, $mail) = index_unpack($msg);
 
   if ($format eq 'f') {
     return $self->run_file($class, $format, $mail, $date);
@@ -581,8 +580,7 @@ sub run_mbx {
 
 sub next_message {
   my ($self) = @_;
-  my $line = readline $self->{messageh};
-  chomp $line if defined $line;
+  my $line = $self->read_line($self->{messageh});
   return $line;
 }
 
@@ -621,11 +619,9 @@ sub start_children {
       close $child->[$i];
       select($parent);
       $| = 1;	# print to parent by default, turn off buffering
-      print "START\n";
-      while ($line = readline $parent) {
-	chomp $line;
+      $self->send_line($parent,"START");
+      while ($line = $self->read_line($parent)) {
 	if ($line eq "exit") {
-	  print "END\n";
 	  close $parent;
 	  exit;
 	}
@@ -638,10 +634,10 @@ sub start_children {
 	# the packed version if possible ...  use defined for date since
 	# it could == 0.
         if (!$self->{determine_receive_date} && $class && $format && defined $date && $where) {
-	  $line = run_index_pack($date, $class, $format, $where);
+	  $line = index_pack($date, $class, $format, $where);
         }
 
-	print "$result\nRESULT $line\n";
+	$self->send_line($parent,"$result\0RESULT $line");
       }
       exit;
     }
@@ -664,8 +660,7 @@ sub reap_children {
 
   for (my $i = 0; $i < $count; $i++) {
     #warn "debug: killing child $i (pid ",$pid->[$i],")\n";
-    print { $socket->[$i] } "exit\n"; # tell the child to die.
-    my $line = readline $socket->[$i]; # read its END statement.
+    $self->send_line($socket->[$i],"exit"); # tell the child to die.
     close $socket->[$i];
     waitpid($pid->[$i], 0); # wait for the signal ...
   }
@@ -673,17 +668,34 @@ sub reap_children {
 
 ############################################################################
 
-# 0 850852128			atime
-# 1 h				class
-# 2 m				format
-# 3 ./ham/goodmsgs.0		path
+# four bytes in network/vax format (little endian) as length of message
+# the rest is the actual message
 
-sub run_index_pack {
-  return join("\000", @_);
+sub read_line {
+  my($self, $fd) = @_;
+  my($length,$msg);
+
+  # read in the 4 byte length and unpack
+  sysread($fd, $length, 4);
+  $length = unpack("V", $length);
+#  warn "<< $$ $length\n";
+  return unless $length;
+
+  # read in the rest of the single message
+  sysread($fd, $msg, $length);
+#  warn "<< $$ $msg\n";
+  return $msg;
 }
 
-sub run_index_unpack {
-  return split(/\000/, $_[0]);
+sub send_line {
+  my $self = shift;
+  my $fd = shift;
+
+  foreach ( @_ ) {
+    my $length = pack("V", length $_);
+#    warn ">> $$ ".length($_)." $_\n";
+    syswrite($fd, $length . $_);
+  }
 }
 
 ############################################################################
@@ -724,9 +736,13 @@ sub message_array {
 
       if ($format eq 'detect') {
 	# detect the format
-	if ($location eq '-' || !(-d $location)) {
+        if (!-d $location && $location =~ /\.mbox/i) {
+          # filename indicates mbox
+          $method = \&scan_mailbox;
+        } 
+	elsif ($location eq '-' || !(-d $location)) {
 	  # stdin is considered a file if not passed as mbox
-	  $method = \&scan_file;
+          $method = \&scan_file;
 	}
 	else {
 	  # it's a directory
@@ -762,13 +778,13 @@ sub message_array {
     # OPT_N == 1 means don't bother sorting on message receive date
 
     # head or tail > 0 means crop each list
-    if ($self->{opt_head} > 0) {
-      splice(@{$self->{s}}, $self->{opt_head});
-      splice(@{$self->{h}}, $self->{opt_head});
-    }
     if ($self->{opt_tail} > 0) {
       splice(@{$self->{s}}, 0, -$self->{opt_tail});
       splice(@{$self->{h}}, 0, -$self->{opt_tail});
+    }
+    if ($self->{opt_head} > 0) {
+      splice(@{$self->{s}}, min ($self->{opt_head}, scalar @{$self->{s}}));
+      splice(@{$self->{h}}, min ($self->{opt_head}, scalar @{$self->{h}}));
     }
 
     @messages = ( @{$self->{s}}, @{$self->{h}} );
@@ -785,13 +801,13 @@ sub message_array {
     undef $self->{h};
 
     # head or tail > 0 means crop each list
-    if ($self->{opt_head} > 0) {
-      splice(@s, $self->{opt_head});
-      splice(@h, $self->{opt_head});
-    }
     if ($self->{opt_tail} > 0) {
       splice(@s, 0, -$self->{opt_tail});
       splice(@h, 0, -$self->{opt_tail});
+    }
+    if ($self->{opt_head} > 0) {
+      splice(@s, min ($self->{opt_head}, scalar @s));
+      splice(@h, min ($self->{opt_head}, scalar @h));
     }
 
     # interleave ordered spam and ham
@@ -806,23 +822,16 @@ sub message_array {
   }
 
   # head or tail < 0 means crop the total list, negate the value appropriately
-  if ($self->{opt_head} < 0) {
-    splice(@messages, -$self->{opt_head});
-  }
   if ($self->{opt_tail} < 0) {
     splice(@messages, 0, $self->{opt_tail});
   }
-
-  # Convert scan index format to run index format
-  # TODO: figure out a better scan index format which doesn't include newlines
-  # so readline() works (or replace readline with something else ...?)
-  foreach (@messages) {
-    $_ = run_index_pack(scan_index_unpack($_));
+  if ($self->{opt_head} < 0) {
+    splice(@messages, -$self->{opt_head});
   }
 
   # Dump out the messages to the temp file if we're using one
   if (defined $fh) {
-    print { $fh } map { "$_\n" } scalar(@messages), @messages;
+    $self->send_line($fh, scalar(@messages), @messages);
     return;
   }
 
@@ -878,11 +887,11 @@ sub message_is_useful_by_date  {
 
 # put the date in first, big-endian packed format
 # this format lets cmp easily sort by date, then class, format, and path.
-sub scan_index_pack {
+sub index_pack {
   return pack("NAAA*", @_);
 }
 
-sub scan_index_unpack {
+sub index_unpack {
   return unpack("NAAA*", $_[0]);
 }
 
@@ -912,11 +921,7 @@ sub scan_directory {
     return;
   }
 
-  if ($self->{opt_cache}) {
-    $AICache = Mail::SpamAssassin::AICache->new({	'type' => 'dir',
-      							'path' => $folder,
-					        });
-  }
+  $self->create_cache('dir', $folder);
 
   foreach my $mail (@files) {
     $self->scan_file($class, $mail);
@@ -932,7 +937,7 @@ sub scan_file {
 
   $self->bump_scan_progress();
   if (!$self->{determine_receive_date}) {
-    push(@{$self->{$class}}, scan_index_pack(AI_TIME_UNKNOWN, $class, "f", $mail));
+    push(@{$self->{$class}}, index_pack(AI_TIME_UNKNOWN, $class, "f", $mail));
     return;
   }
 
@@ -956,7 +961,7 @@ sub scan_file {
   }
 
   return if !$self->message_is_useful_by_date($date);
-  push(@{$self->{$class}}, scan_index_pack($date, $class, "f", $mail));
+  push(@{$self->{$class}}, index_pack($date, $class, "f", $mail));
 }
 
 sub scan_mailbox {
@@ -994,10 +999,9 @@ sub scan_mailbox {
     my $info = {};
     my $count;
 
+    $self->create_cache('mbox', $file);
+
     if ($self->{opt_cache}) {
-      $AICache = Mail::SpamAssassin::AICache->new({	'type' => 'mbox',
-      							'path' => $file,
-					          });
       if ($count = $AICache->count()) {
         $info = $AICache->check();
       }
@@ -1019,7 +1023,7 @@ sub scan_mailbox {
         my $header = $first;	# remember first line
         while (<INPUT>) {
 	  if ($in_header) {
-	    if (/^\s*$/) {
+	    if (/^$/) {
 	      $in_header = 0;
 	    }
 	    else {
@@ -1052,7 +1056,7 @@ sub scan_mailbox {
         next if !$self->message_is_useful_by_date($v);
       }
 
-      push(@{$self->{$class}}, scan_index_pack($v, $class, "m", "$file.$k"));
+      push(@{$self->{$class}}, index_pack($v, $class, "m", "$file.$k"));
     }
 
     if (defined $AICache) {
@@ -1097,10 +1101,9 @@ sub scan_mbx {
     my $info = {};
     my $count;
 
+    $self->create_cache('mbx', $file);
+
     if ($self->{opt_cache}) {
-      $AICache = Mail::SpamAssassin::AICache->new({	'type' => 'mbx',
-      							'path' => $file,
-					          });
       if ($count = $AICache->count()) {
         $info = $AICache->check();
       }
@@ -1157,7 +1160,7 @@ sub scan_mbx {
         next if !$self->message_is_useful_by_date($v);
       }
 
-      push(@{$self->{$class}}, scan_index_pack($v, $class, "b", "$file.$k"));
+      push(@{$self->{$class}}, index_pack($v, $class, "b", "$file.$k"));
     }
 
     if (defined $AICache) {
@@ -1211,6 +1214,22 @@ sub bump_scan_progress {
   }
 }
 
+sub min {
+  return ($_[0] < $_[1] ? $_[0] : $_[1]);
+}
+
+sub create_cache {
+  my ($self, $type, $path) = @_;
+
+  if ($self->{opt_cache}) {
+    $AICache = Mail::SpamAssassin::AICache->new({
+                                    'type' => $type,
+                                    'prefix' => $self->{opt_cachedir},
+                                    'path' => $path,
+                              });
+  }
+}
+
 ############################################################################
 
 1;
@@ -1224,3 +1243,7 @@ __END__
 C<Mail::SpamAssassin>
 C<spamassassin>
 C<mass-check>
+
+=cut
+
+# vim: ts=8 sw=2 et

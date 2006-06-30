@@ -145,9 +145,13 @@ foreach my $key (@ATT_KEYS) {
 }
 
 
-# Gather the rules files in the range 00-69; we do this in perl because it's more portable
-my @datafiles = map { s,^rules/,,; $_ } (<rules/*.cf>);
-my $datafiles = join(' ', (grep { /^(?:[0-6][0-9]|72)_/ } @datafiles), qw(user_prefs.template languages sa-update-pubkey.txt));
+# Gather the rules files in the range 00-69; we do this in perl because
+# it's more portable.  Also, plugin .pm files.
+my @datafiles = map { s,^rules/,,; $_ }
+                grep { -f $_ } (<rules/*.cf>, <rules/*.pm>);
+my $datafiles = join(' ', (grep 
+                { /^(?:(?:[0-6][0-9]|72)_\S+\.cf|\S+\.pm)/ } @datafiles),
+                qw(user_prefs.template languages sa-update-pubkey.txt));
 
 
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
@@ -501,7 +505,7 @@ sub macro_ref {
 # If it is omitted, the value set in the current EU::MM instance is used.
 sub macro_def {
   my($name, $val) = (@_, undef);
-  my $MUST_NOT_HAPPEN = "THIS MUST NOT HAPPEN. PLEASE REPORT A BUG VIA <http://bugzilla.spamassassin.org>";
+  my $MUST_NOT_HAPPEN = "THIS MUST NOT HAPPEN. PLEASE REPORT A BUG VIA <http://issues.apache.org/SpamAssassin/>";
   die $MUST_NOT_HAPPEN  unless defined $name;
   die $MUST_NOT_HAPPEN  unless defined $EQ;
   $val = $SELF->{$name} unless defined $val;
@@ -1185,6 +1189,7 @@ conf__install:
 	$(PERL) -MFile::Copy -e "copy(q{rules/local.cf}, q{$(B_CONFDIR)/local.cf}) unless -f q{$(B_CONFDIR)/local.cf}"
 	$(PERL) -MFile::Copy -e "copy(q{rules/init.pre}, q{$(B_CONFDIR)/init.pre}) unless -f q{$(B_CONFDIR)/init.pre}"
 	$(PERL) -MFile::Copy -e "copy(q{rules/v310.pre}, q{$(B_CONFDIR)/v310.pre}) unless -f q{$(B_CONFDIR)/v310.pre}"
+	$(PERL) -MFile::Copy -e "copy(q{rules/v312.pre}, q{$(B_CONFDIR)/v312.pre}) unless -f q{$(B_CONFDIR)/v312.pre}"
 	$(PERL) -MFile::Copy -e "copy(q{rules/v320.pre}, q{$(B_CONFDIR)/v320.pre}) unless -f q{$(B_CONFDIR)/v320.pre}"
 
 data__install:

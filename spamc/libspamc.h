@@ -41,7 +41,7 @@
 #include <netinet/in.h>
 #endif
 
-#ifdef _WIN32
+#if (defined(_WIN32) || !defined(_SYSEXITS_H))
 /* FIXME: This stuff has to go somewhere else */
 
 #define EX_OK           0
@@ -204,7 +204,7 @@ struct transport
 
     unsigned short port;	/* for TCP sockets              */
 
-    struct in_addr hosts[TRANSPORT_MAX_HOSTS];
+    struct addrinfo *hosts[TRANSPORT_MAX_HOSTS];
     int nhosts;
     int flags;
 };

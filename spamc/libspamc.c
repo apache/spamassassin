@@ -78,6 +78,12 @@
 #define h_errno errno
 #endif
 
+#ifdef _WIN32
+#define spamc_get_errno()   WSAGetLastError()
+#else
+#define spamc_get_errno()   errno
+#endif
+
 #ifndef HAVE_OPTARG
 extern char *optarg;
 #endif
@@ -95,7 +101,23 @@ extern char *optarg;
 #endif
 
 #undef DO_CONNECT_DEBUG_SYSLOGS
-/* or #define DO_CONNECT_DEBUG_SYSLOGS 1 */
+/*
+#define DO_CONNECT_DEBUG_SYSLOGS 1
+#define CONNECT_DEBUG_LEVEL LOG_DEBUG
+*/
+
+/* bug 4477 comment 14 */
+#ifdef NI_MAXHOST
+#define SPAMC_MAXHOST NI_MAXHOST
+#else
+#define SPAMC_MAXHOST 256
+#endif
+
+#ifdef NI_MAXSERV
+#define SPAMC_MAXSERV NI_MAXSERV
+#else
+#define SPAMC_MAXSERV 256
+#endif
 
 /* static const int ESC_PASSTHROUGHRAW = EX__MAX + 666;  No longer seems to be used */
 
@@ -168,11 +190,10 @@ static int _translate_connect_errno(int err)
  *
  *	Upon failure we return one of the other EX_??? error codes.
  */
-static int _opensocket(int flags, int type, int *psock)
+static int _opensocket(int flags, struct addrinfo *res, int *psock)
 {
     const char *typename;
-    int proto = 0;
-
+    int origerr;
 #ifdef _WIN32
     int socktout;
 #endif
@@ -184,37 +205,42 @@ static int _opensocket(int flags, int type, int *psock)
 	 * type given by the user. The typename is strictly used for debug
 	 * reporting.
 	 */
-    if (type == PF_UNIX) {
-	typename = "PF_UNIX";
-    }
-    else {
-	typename = "PF_INET";
-	proto = IPPROTO_TCP;
+    switch(res->ai_family) {
+       case PF_UNIX:
+          typename = "PF_UNIX";
+          break;
+       case PF_INET:
+          typename = "PF_INET";
+          break;
+       case PF_INET6:
+          typename = "PF_INET6";
+          break;
+       default:
+          typename = "Unknown";
+          break;
     }
 
 #ifdef DO_CONNECT_DEBUG_SYSLOGS
-    libspamc_log(flags, LOG_DEBUG, "dbg: create socket(%s)", typename);
+    libspamc_log(flags, CONNECT_DEBUG_LEVEL, "dbg: create socket(%s)", typename);
 #endif
 
-    if ((*psock = socket(type, SOCK_STREAM, proto))
+    if ((*psock = socket(res->ai_family, res->ai_socktype, res->ai_protocol))
 #ifndef _WIN32
 	< 0
 #else
 	== INVALID_SOCKET
 #endif
 	) {
-	int origerr;
 
 		/*--------------------------------------------------------
 		 * At this point we had a failure creating the socket, and
 		 * this is pretty much fatal. Translate the error reason
 		 * into something the user can understand.
 		 */
+	origerr = spamc_get_errno();
 #ifndef _WIN32
-	origerr = errno;	/* take a copy before syslog() */
 	libspamc_log(flags, LOG_ERR, "socket(%s) to spamd failed: %s", typename, strerror(origerr));
 #else
-	origerr = WSAGetLastError();
 	libspamc_log(flags, LOG_ERR, "socket(%s) to spamd failed: %d", typename, origerr);
 #endif
 
@@ -243,16 +269,15 @@ static int _opensocket(int flags, int type, int *psock)
     if (type == PF_INET
         && setsockopt(*psock, SOL_SOCKET, SO_RCVTIMEO, (char *)&socktout, sizeof(socktout)) != 0)
     {
-        int origerrno;
 
-        origerrno = WSAGetLastError();
-        switch (origerrno)
+        origerr = spamc_get_errno();
+        switch (origerr)
         {
         case EBADF:
         case ENOTSOCK:
         case ENOPROTOOPT:
         case EFAULT:
-            libspamc_log(flags, LOG_ERR, "setsockopt(SO_RCVTIMEO) failed: %d", origerrno);
+            libspamc_log(flags, LOG_ERR, "setsockopt(SO_RCVTIMEO) failed: %d", origerr);
             closesocket(*psock);
             return EX_SOFTWARE;
 
@@ -272,12 +297,7 @@ static int _opensocket(int flags, int type, int *psock)
 
 	if (type == PF_INET
 	    && setsockopt(*psock, 0, TCP_NODELAY, &one, sizeof one) != 0) {
-	    int origerrno;
-#ifndef _WIN32
-	    origerr = errno;
-#else
-	    origerrno = WSAGetLastError();
-#endif
+	    origerr = spamc_get_errno();
 	    switch (origerr) {
 	    case EBADF:
 	    case ENOTSOCK:
@@ -315,16 +335,23 @@ static int _try_to_connect_unix(struct transport *tp, int *sockptr)
 #ifndef _WIN32
     int mysock, status, origerr;
     struct sockaddr_un addrbuf;
+    struct addrinfo hints, *res;
     int ret;
 
     assert(tp != 0);
     assert(sockptr != 0);
     assert(tp->socketpath != 0);
 
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = PF_UNIX;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_protocol = 0;
+    res = &hints;
+
 	/*----------------------------------------------------------------
 	 * If the socket itself can't be created, this is a fatal error.
 	 */
-    if ((ret = _opensocket(tp->flags, PF_UNIX, &mysock)) != EX_OK)
+    if ((ret = _opensocket(tp->flags, res, &mysock)) != EX_OK)
 	return ret;
 
     /* set up the UNIX domain socket */
@@ -334,7 +361,7 @@ static int _try_to_connect_unix(struct transport *tp, int *sockptr)
     addrbuf.sun_path[sizeof addrbuf.sun_path - 1] = '\0';
 
 #ifdef DO_CONNECT_DEBUG_SYSLOGS
-    libspamc_log(tp->flags, LOG_DEBUG, "dbg: connect(AF_UNIX) to spamd at %s",
+    libspamc_log(tp->flags, CONNECT_DEBUG_LEVEL, "dbg: connect(AF_UNIX) to spamd at %s",
 	   addrbuf.sun_path);
 #endif
 
@@ -344,7 +371,7 @@ static int _try_to_connect_unix(struct transport *tp, int *sockptr)
 
     if (status >= 0) {
 #ifdef DO_CONNECT_DEBUG_SYSLOGS
-	libspamc_log(tp->flags, LOG_DEBUG, "dbg: connect(AF_UNIX) ok");
+	libspamc_log(tp->flags, CONNECT_DEBUG_LEVEL, "dbg: connect(AF_UNIX) ok");
 #endif
 
 	*sockptr = mysock;
@@ -377,78 +404,93 @@ static int _try_to_connect_tcp(const struct transport *tp, int *sockptr)
     int numloops;
     int origerr = 0;
     int ret;
+    struct addrinfo *res = NULL;
+
+    char host[SPAMC_MAXHOST-1]; /* hostname, for logging */
+    char port[SPAMC_MAXSERV-1]; /* port, for logging */
 
     assert(tp != 0);
     assert(sockptr != 0);
     assert(tp->nhosts > 0);
 
-#ifdef DO_CONNECT_DEBUG_SYSLOGS
-    for (numloops = 0; numloops < tp->nhosts; numloops++) {
-	libspamc_log(tp->flags, LOG_ERR, "dbg: %d/%d: %s",
-		numloops + 1, tp->nhosts, inet_ntoa(tp->hosts[numloops]));
-    }
-#endif
-
     for (numloops = 0; numloops < MAX_CONNECT_RETRIES; numloops++) {
-	struct sockaddr_in addrbuf;
-	const int hostix = numloops % tp->nhosts;
-	int status, mysock;
-	const char *ipaddr;
+        const int hostix = numloops % tp->nhosts;
+        int status, mysock;
 
-		/*--------------------------------------------------------
-		 * We always start by creating the socket, as we get only
-		 * one attempt to connect() on each one. If this fails,
-		 * we're done.
-		 */
-	if ((ret = _opensocket(tp->flags, PF_INET, &mysock)) != EX_OK)
-	    return ret;
+                /*--------------------------------------------------------
+                * We always start by creating the socket, as we get only
+                * one attempt to connect() on each one. If this fails,
+                * we're done.
+                */
 
-	memset(&addrbuf, 0, sizeof(addrbuf));
+        res = tp->hosts[hostix];
+        while(res) {
+            char *family = NULL;
+            switch(res->ai_family) {
+            case AF_INET:
+                family = "AF_INET";
+                break;
+            case AF_INET6:
+                family = "AF_INET6";
+                break;
+            default:
+                family = "Unknown";
+                break;
+            }
 
-	addrbuf.sin_family = AF_INET;
-	addrbuf.sin_port = htons(tp->port);
-	addrbuf.sin_addr = tp->hosts[hostix];
+            if ((ret = _opensocket(tp->flags, res, &mysock)) != EX_OK) {
+                res = res->ai_next;
+                continue;
+            }
 
-	ipaddr = inet_ntoa(addrbuf.sin_addr);
+            getnameinfo(res->ai_addr, res->ai_addrlen,
+                  host, sizeof(host),
+                  port, sizeof(port),
+                  NI_NUMERICHOST|NI_NUMERICSERV);
 
 #ifdef DO_CONNECT_DEBUG_SYSLOGS
-	libspamc_log(tp->flags, LOG_DEBUG,
-	       "dbg: connect(AF_INET) to spamd at %s (try #%d of %d)",
-		ipaddr, numloops + 1, MAX_CONNECT_RETRIES);
+            libspamc_log(tp->flags, CONNECT_DEBUG_LEVEL,
+              "dbg: connect(%s) to spamd (host %s, port %s) (try #%d of %d)",
+                      family, host, port, numloops + 1, MAX_CONNECT_RETRIES);
 #endif
 
-	status =
-	    timeout_connect(mysock, (struct sockaddr *) &addrbuf, sizeof(addrbuf));
+            status = connect(mysock, res->ai_addr, res->ai_addrlen);
 
-	if (status != 0) {
+            if (status != 0) {
+                  origerr = spamc_get_errno();
+                  closesocket(mysock);
+
 #ifndef _WIN32
-	    origerr = errno;
-	    libspamc_log(tp->flags, LOG_ERR,
-		   "connect(AF_INET) to spamd at %s failed, retrying (#%d of %d): %s",
-		   ipaddr, numloops + 1, MAX_CONNECT_RETRIES, strerror(origerr));
+                  libspamc_log(tp->flags, LOG_ERR,
+                      "connect to spamd on %s failed, retrying (#%d of %d): %s",
+                      host, numloops+1, MAX_CONNECT_RETRIES, strerror(origerr));
 #else
-	    origerr = WSAGetLastError();
-	    libspamc_log(tp->flags, LOG_ERR,
-		   "connect(AF_INET) to spamd at %s failed, retrying (#%d of %d): %d",
-		   ipaddr, numloops + 1, MAX_CONNECT_RETRIES, origerr);
+                  libspamc_log(tp->flags, LOG_ERR,
+                      "connect to spamd on %s failed, retrying (#%d of %d): %d",
+                      host, numloops+1, MAX_CONNECT_RETRIES, origerr);
 #endif
-	    closesocket(mysock);
 
-	    sleep(CONNECT_RETRY_SLEEP);
-	}
-	else {
+            } else {
 #ifdef DO_CONNECT_DEBUG_SYSLOGS
-	    libspamc_log(tp->flags, LOG_DEBUG,
-		   "dbg: connect(AF_INET) to spamd at %s done", ipaddr);
+                  libspamc_log(tp->flags, CONNECT_DEBUG_LEVEL,
+                          "dbg: connect(%s) to spamd done",family);
 #endif
-	    *sockptr = mysock;
+                  *sockptr = mysock;
 
-	    return EX_OK;
-	}
+                  return EX_OK;
+            }
+            res = res->ai_next;
+        }
+        sleep(CONNECT_RETRY_SLEEP);
+    } /* for(numloops...) */
+
+    for(numloops=0;numloops<tp->nhosts;numloops++) {
+        freeaddrinfo(tp->hosts[numloops]);
     }
 
-    libspamc_log(tp->flags, LOG_ERR, "connection attempt to spamd aborted after %d retries",
-	    MAX_CONNECT_RETRIES);
+    libspamc_log(tp->flags, LOG_ERR,
+              "connection attempt to spamd aborted after %d retries",
+              MAX_CONNECT_RETRIES);
 
     return _translate_connect_errno(origerr);
 }
@@ -1455,6 +1497,8 @@ void transport_init(struct transport *tp)
 
 static void _randomize_hosts(struct transport *tp)
 {
+    struct addrinfo *tmp;
+    int i;
     int rnum;
 
     assert(tp != 0);
@@ -1465,8 +1509,7 @@ static void _randomize_hosts(struct transport *tp)
     rnum = rand() % tp->nhosts;
 
     while (rnum-- > 0) {
-        struct in_addr tmp = tp->hosts[0];
-        int i;
+        tmp = tp->hosts[0];
 
         for (i = 1; i < tp->nhosts; i++)
             tp->hosts[i - 1] = tp->hosts[i];
@@ -1492,10 +1535,11 @@ static void _randomize_hosts(struct transport *tp)
 */
 int transport_setup(struct transport *tp, int flags)
 {
-    struct hostent *hp;
+    struct addrinfo hints, *res; 
     char *hostlist, *hostname;
     int errbits;
-    char **addrp;
+    char port[6];
+    int origerr;
 
 #ifdef _WIN32
     /* Start Winsock up */
@@ -1511,6 +1555,13 @@ int transport_setup(struct transport *tp, int flags)
     assert(tp != NULL);
     tp->flags = flags;
 
+    snprintf(port, 6, "%d", tp->port);
+
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_flags = 0;
+    hints.ai_family = PF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+
     switch (tp->type) {
 #ifndef _WIN32
     case TRANSPORT_UNIX:
@@ -1518,7 +1569,14 @@ int transport_setup(struct transport *tp, int flags)
         return EX_OK;
 #endif
     case TRANSPORT_LOCALHOST:
-        tp->hosts[0].s_addr = inet_addr("127.0.0.1");
+        /* getaddrinfo(NULL) will look up the loopback address */
+        if ((origerr = getaddrinfo(NULL, port, &hints, &res)) != 0) {
+            libspamc_log(flags, LOG_ERR, 
+                  "getaddrinfo(NULL) failed: %s",
+                  gai_strerror(origerr));
+            return EX_OSERR;
+        }
+        tp->hosts[0] = res;
         tp->nhosts = 1;
         return EX_OK;
 
@@ -1550,17 +1608,24 @@ int transport_setup(struct transport *tp, int flags)
                 *hostend = '\0';
             }
             
-            if ((hp = gethostbyname(hostname)) == NULL) {
-                int origerr = h_errno; /* take a copy before syslog() */
-                libspamc_log(flags, LOG_DEBUG, "gethostbyname(%s) failed: h_errno=%d",
-                    hostname, origerr);
-                switch (origerr) {
-                case TRY_AGAIN:
+            if ((origerr = getaddrinfo(hostname, port, &hints, &res))) {
+                libspamc_log(flags, LOG_DEBUG, 
+                      "getaddrinfo(%s) failed: %s",
+                      hostname, gai_strerror(origerr));
+                switch (origerr) { 
+                case EAI_AGAIN:
                     errbits |= 1;
                     break;
-                case HOST_NOT_FOUND:
-                case NO_ADDRESS:
-                case NO_RECOVERY:
+                case EAI_FAMILY: /*address family not supported*/
+                case EAI_SOCKTYPE: /*socket type not supported*/
+                case EAI_BADFLAGS: /*ai_flags is invalid*/
+                case EAI_NONAME: /*node or service unknown*/
+                case EAI_SERVICE: /*service not available*/
+                case EAI_ADDRFAMILY: /*no addresses in requested family*/
+                case EAI_NODATA: /*address exists, but no data*/
+                case EAI_MEMORY: /*out of memory*/
+                case EAI_FAIL: /*name server returned permanent error*/
+                case EAI_SYSTEM: /*system error, check errno*/
                     errbits |= 2;
                     break;
                 default:
@@ -1571,14 +1636,8 @@ int transport_setup(struct transport *tp, int flags)
                 goto nexthost; /* try next host in list */
             }
             
-            /* If we have no hosts at all, or if they are some other
-             * kind of address family besides IPv4, then we really
-             * just have no hosts at all. TODO: IPv6
-             */
-            if (hp->h_addr_list[0] == NULL
-             || hp->h_length != sizeof tp->hosts[0]
-             || hp->h_addrtype != AF_INET) {
-                /* no hosts/bad size/wrong family */
+            /* If we have no hosts at all */
+            if(res == NULL) {
                 errbits |= 1;
                 goto nexthost; /* try next host in list */
             }
@@ -1588,15 +1647,14 @@ int transport_setup(struct transport *tp, int flags)
              * means we won't ever walk all over the list with other
              * calls.
              */
-            for (addrp = hp->h_addr_list; *addrp; addrp++) {
-                if (tp->nhosts == TRANSPORT_MAX_HOSTS) {
-                    libspamc_log(flags, LOG_NOTICE, "hit limit of %d hosts, ignoring remainder",
-                        TRANSPORT_MAX_HOSTS);
-                    break;
-                }
-                memcpy(&tp->hosts[tp->nhosts], *addrp, hp->h_length);
-                tp->nhosts++;
+            if(tp->nhosts == TRANSPORT_MAX_HOSTS) {
+               libspamc_log(flags, LOG_NOTICE, 
+                     "hit limit of %d hosts, ignoring remainder",
+                     TRANSPORT_MAX_HOSTS);
+               break;
             }
+            tp->hosts[tp->nhosts] = res;
+            tp->nhosts++;
             
 nexthost:
             hostname = hostend;

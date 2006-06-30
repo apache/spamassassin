@@ -86,6 +86,7 @@ lib/Mail/SpamAssassin/Plugin/SPF.pm
 lib/Mail/SpamAssassin/Plugin/SpamCop.pm
 lib/Mail/SpamAssassin/Plugin/Test.pm
 lib/Mail/SpamAssassin/Plugin/TextCat.pm
+lib/Mail/SpamAssassin/Plugin/URIDetail.pm
 lib/Mail/SpamAssassin/Plugin/URIDNSBL.pm
 lib/Mail/SpamAssassin/Plugin/WhiteListSubject.pm
 lib/Mail/SpamAssassin/PluginHandler.pm
@@ -187,9 +188,8 @@ spamc/configure.pl
 spamc/libspamc.c
 spamc/libspamc.h
 spamc/qmail-spamc.c
-spamc/replace/README.getopt
-spamc/replace/getopt.c
-spamc/replace/getopt.h
+spamc/getopt.c
+spamc/getopt.h
 spamc/spamc.c
 spamc/spamc.h.in
 spamc/spamc.h.win
@@ -296,6 +296,7 @@ t/data/spam/bsmtp
 t/data/spam/bsmtpnull
 t/data/spam/dnsbl.eml
 t/data/spam/gtube.eml
+t/data/spam/gtubedcc.eml
 t/data/spam/spf1
 t/data/spam/spf2
 t/data/spam/spf3
@@ -326,6 +327,7 @@ t/data/whitelists/yahoo-inc.com
 t/db_awl_path.t
 t/db_based_whitelist.t
 t/db_based_whitelist_ips.t
+t/dcc.t
 t/debug.t
 t/desc_wrap.t
 t/dnsbl.t
@@ -361,6 +363,7 @@ t/reportheader.t
 t/reportheader_8bit.t
 t/rule_multiple.t
 t/rule_names.t
+t/rule_tests.t
 t/rule_types.t
 t/sha1.t
 t/spam.t
@@ -461,6 +464,8 @@ rules/regression_tests.cf
 rules/sa-update-pubkey.txt
 rules/user_prefs.template
 rules/v310.pre
+rules/v312.pre
+rules/v320.pre
 rules/active.list
 rules/70_inactive.cf
 t/mkrules.t
@@ -476,5 +481,5 @@ t/data/nice/dkim/NonExistingHeader_09
 t/data/nice/dkim/Nowsp_03
 t/data/nice/dkim/Simple_02
 t/dkim.t
-rules/v320.pre
+t/uribl.t
 t/shortcircuit.t

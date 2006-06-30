@@ -25,12 +25,25 @@ my $LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';    # substituted at 'make' time
 my $LOCAL_STATE_DIR = '@@LOCAL_STATE_DIR@@';    # substituted at 'make' time
 use lib '@@INSTALLSITELIB@@';                   # substituted at 'make' time
 
+# We want to do a small amount of macro processing during channel installs,
+# based on the values as passed in via 'make'
+my %MACRO_VALUES = (
+	'VERSION'		=> '@@VERSION@@',
+	'CONTACT_ADDRESS'	=> '@@CONTACT_ADDRESS@@',
+	'PREFIX'		=> '@@PREFIX@@',
+	'DEF_RULES_DIR'		=> '@@DEF_RULES_DIR@@',
+	'LOCAL_RULES_DIR'	=> '@@LOCAL_RULES_DIR@@',
+	'LOCAL_STATE_DIR'	=> '@@LOCAL_STATE_DIR@@',
+	'INSTALLSITELIB'	=> '@@INSTALLSITELIB@@',
+);
+
 # Standard perl modules
 use File::Spec;
 use File::Path;
 use File::Copy;
 use Getopt::Long;
 use Pod::Usage;
+use Config;
 use strict;
 use warnings;
 
@@ -314,10 +327,16 @@ $ua->env_proxy;
 
 # Generate a temporary file to put channel content in for later use ...
 my ($content_file, $tfh) = Mail::SpamAssassin::Util::secure_tmpfile();
+if ( !defined $content_file ) {
+  die "fatal: could not create temporary channel content file: $!\n";
+}
 close($tfh);
 
 # and another, for the new config file
 my ($newcf_file, $tfh2) = Mail::SpamAssassin::Util::secure_tmpfile();
+if ( !defined $newcf_file ) {
+  die "fatal: could not create temporary channel content file: $!\n";
+}
 close($tfh2);
 
 # by default, exit code is 1, to indicate no updates occurred
@@ -547,6 +566,9 @@ foreach my $channel (@channels) {
     dbg("gpg: populating temp signature file");
     my $sig_file;
     ($sig_file, $tfh) = Mail::SpamAssassin::Util::secure_tmpfile();
+    if ( !defined $sig_file ) {
+      die "fatal: couldn't create temp file for GPG signature: $!\n";
+    }
     binmode $tfh;
     print $tfh $GPG;
     close($tfh);
@@ -803,7 +825,14 @@ sub taint_safe_archive_extract {
 
     dbg "extracting: $outfname";
     if (open OUT, ">".$outfname) {
-      print OUT $tar->get_content($file);
+      my $content = $tar->get_content($file);
+
+      # replace macros in the update files if it's a .pre or .cf
+      if ($outfname =~ /\.(?:pre|cf)$/) {
+        $content =~ s/\@\@([^\@]+)\@\@/$MACRO_VALUES{$1} || "\@\@$1\@\@"/ge;
+      }
+
+      print OUT $content;
       if (!close OUT) {
         warn "error: write failed to $outfname: $!";
         goto failed;
@@ -960,16 +989,14 @@ sub usage {
 }
 
 sub find_gpg_path {
-  dbg("gpg: Searching for 'gpg' in ".$ENV{'PATH'});
-  my $path;
-  foreach my $dir (split(/:/, $ENV{'PATH'})) {
-    $dir = File::Spec->catfile($dir, 'gpg');
-    if (-x $dir) {
-      $path = $dir;
-      last;
-    }
-  }
-  die "fatal: couldn't find GPG in \$PATH\n" unless ($path);
+  # bug 4958: for *NIX it's "gpg", in Windows it's "gpg.exe"
+  my $gpg = 'gpg' . $Config{_exe};
+
+  dbg("gpg: Searching for '$gpg'");
+
+  my $path = Mail::SpamAssassin::Util::find_executable_in_env_path($gpg) ||
+    die "fatal: couldn't find GPG\n";
+
   dbg("gpg: found $path");
   return $path;
 }
@@ -1020,8 +1047,10 @@ sub import_default_keyring {
   return unless (-f $defkey);
 
   print "sa-update: importing default keyring to '".$opt{gpghomedir}."'...\n";
-  # use 0700 to avoid "unsafe permissions" warning
-  mkdir ($opt{gpghomedir}, 0700) or die "cannot mkdir $opt{gpghomedir}";
+  unless (-d $opt{gpghomedir}) {
+    # use 0700 to avoid "unsafe permissions" warning
+    mkdir ($opt{gpghomedir}, 0700) or die "cannot mkdir $opt{gpghomedir}: $!";
+  } 
   import_gpg_key($defkey);
 }
 
@@ -1228,6 +1257,11 @@ diagnostic output on channel, gpg, and http, use:
 
         sa-update -D channel,gpg,http
 
+For more information about which areas (also known as channels) are available,
+please see the documentation at:
+
+	C<http://wiki.apache.org/spamassassin/DebugChannels>
+
 =item B<-h>, B<--help>
 
 Print help message and exit.
@@ -1261,7 +1295,7 @@ C<Mail::SpamAssassin>
 
 =head1 BUGS
 
-See <http://bugzilla.spamassassin.org/>
+See <http://issues.apache.org/SpamAssassin/>
 
 =head1 AUTHORS
 

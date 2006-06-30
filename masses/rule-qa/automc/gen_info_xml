@@ -107,6 +107,7 @@ sub get_fastinfo {
     $info->{includes_net} = 1;
   }
 
+  $info->{mclogmds} = '';
   $info->{submitters} = '';
   if (-f "$drdir/DETAILS.all") {
     read_submitters("$drdir/DETAILS.all", $info);
@@ -135,6 +136,9 @@ sub read_submitters {
       $sub =~ s/^ //gs;
       $sub =~ s/ $//gs;
       $info->{submitters} = $sub;
+    }
+    if (/^#\s*(<mclogmds>.*<\/mclogmds>)/) {
+      $info->{mclogmds} = XMLin($1); # incorporate raw XML
     }
     last if (!/^#/);        # don't want anything after the comments end
   }

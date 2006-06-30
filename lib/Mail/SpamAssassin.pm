@@ -561,7 +561,7 @@ Finish learning.
 
 sub finish_learner {
   my $self = shift;
-  $self->{bayes_scanner}->finish() if $self->{bayes_scanner};
+  $self->{bayes_scanner}->sanity_check_is_untied(1) if $self->{bayes_scanner};
   1;
 }
 
@@ -1365,13 +1365,14 @@ sub init {
       $fname = $self->{userprefs_filename};
       $fname ||= $self->first_existing_path (@default_userprefs_path);
 
-      if (defined $fname) {
-        if (!-f $fname && !$self->{dont_copy_prefs} && !$self->create_default_prefs($fname)) {
+      if (!$self->{dont_copy_prefs}) {
+        # bug 4932: if the userprefs path doesn't exist, we need to make it, so
+        # just use the last entry in the array as the default path.
+        $fname ||= $self->sed_path($default_userprefs_path[-1]);
+
+	if (!-f $fname && !$self->create_default_prefs($fname)) {
           warn "config: failed to create default user preference file $fname\n";
         }
-      }
-      else {
-	warn "config: could not find userprefs file\n";
       }
 
       $self->{config_text} .= $self->read_cf ($fname, 'user prefs file');
@@ -1480,18 +1481,17 @@ sub get_and_create_userstate_dir {
 
   $fname ||= $self->first_existing_path (@default_userstate_dir);
 
-  if (defined $fname) {
-    if (!$self->{dont_copy_prefs}) {
-      dbg("config: using \"$fname\" for user state dir");
-    }
+  # bug 4932: use the last default_userstate_dir entry if none of the others
+  # already exist
+  $fname ||= $self->sed_path($default_userstate_dir[-1]);
 
-    if (!-d $fname) {
-      # not being able to create the *dir* is not worth a warning at all times
-      eval { mkpath($fname, 0, 0700) } or dbg("config: mkdir $fname failed: $@ $!\n");
-    }
+  if (!$self->{dont_copy_prefs}) {
+    dbg("config: using \"$fname\" for user state dir");
   }
-  else {
-    warn "config: can not determine userstate dir\n";
+
+  if (!-d $fname) {
+    # not being able to create the *dir* is not worth a warning at all times
+    eval { mkpath($fname, 0, 0700) } or dbg("config: mkdir $fname failed: $@ $!\n");
   }
 
   $fname;
@@ -1840,7 +1840,7 @@ spamassassin(1)
 
 =head1 BUGS
 
-See E<lt>http://bugzilla.spamassassin.org/E<gt>
+See E<lt>http://issues.apache.org/SpamAssassin/E<gt>
 
 =head1 AUTHORS
 

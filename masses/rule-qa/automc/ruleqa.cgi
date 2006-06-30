@@ -36,6 +36,12 @@ our %freqs_filenames = (
     'OVERLAP.new' => 'set 0, overlaps between rules',
 );
 
+# daterevs -- e.g. "20060429/r239832-r" -- are aligned to just before
+# the time of day when the mass-check tagging occurs; that's 0850 GMT,
+# so align the daterev to 0800 GMT.
+#
+use constant DATEREV_ADJ => - (8 * 60 * 60);
+
 my $q = new CGI;
 
 my $ttk = Template->new;
@@ -45,6 +51,9 @@ my $cgi_url;
 my @cgi_params;
 my %cgi_params = ();
 precache_params();
+
+my $id_counter = 0;
+my $include_embedded_freqs_xml = 1;
 
 # ---------------------------------------------------------------------------
 
@@ -90,6 +99,9 @@ $s{zero} = get_url_switch('s_zero', 1);
 $s{new} = get_url_switch('s_new', 1);
 $s{detail} = get_url_switch('s_detail', 0);
 $s{g_over_time} = get_url_switch('s_g_over_time', 0);
+
+$s{xml} = get_url_switch('xml', 0);
+$include_embedded_freqs_xml = $s{xml};
 
 # note: age, new, overlap are all now synonyms for detail ;)
 if ($s{age} || $s{overlap} || $s{detail}) {
@@ -566,8 +578,10 @@ sub date_in_direction {
 
 sub get_last_night_daterev {
   # don't use a daterev after (now - 12 hours); that's too recent
-  # to be "last night", for purposes of rule-update generation
-  my $notafter = strftime "%Y%m%d", localtime time - (12*60*60);
+  # to be "last night", for purposes of rule-update generation.
+
+  my $notafter = strftime "%Y%m%d",
+        gmtime ((time + DATEREV_ADJ) - (12*60*60));
 
   foreach my $dr (reverse @daterevs) {
     my $t = get_daterev_description($dr);
@@ -684,7 +698,7 @@ sub read_freqs_file {
   if ($file =~ /\.all/) { $subset_is_user = 1; }
 
   while (<IN>) {
-    if (/(?: \(all messages| results used|OVERALL\%|was at r\d+)/) {
+    if (/(?: \(all messages| results used|OVERALL\%|<mclogmd|was at r\d+)/) {
       $freqs_head{$key} .= $_;
     }
     elsif (/MSEC/) {
@@ -745,6 +759,9 @@ sub read_freqs_file {
   close IN;
 }
 
+my $FREQS_LINE_TEMPLATE;
+my $FREQS_EXTRA_TEMPLATE;
+
 sub get_freqs_for_rule {
   my ($key, $strdate, $ruleslist) = @_;
 
@@ -801,6 +818,10 @@ sub get_freqs_for_rule {
   my @rules = split (' ', $ruleslist);
   if (scalar @rules == 0) { @rules = (''); }
 
+  if ($include_embedded_freqs_xml == 0) {
+    $FREQS_LINE_TEMPLATE =~ s/<!--\s+<rule>.*?-->//gs;
+  }
+
   foreach my $rule (@rules) {
     if ($rule && defined $freqs_data{$key}{$rule}) {
       $comment .= rule_anchor($key,$rule);
@@ -849,9 +870,6 @@ sub sub_freqs_head_line {
   $str = "<em><tt>".($str || '')."</tt></em><br/>";
   return $str;
 }
-
-my $FREQS_LINE_TEMPLATE;
-my $FREQS_EXTRA_TEMPLATE;
 
 sub set_freqs_templates {
   $FREQS_LINE_TEMPLATE = qq{
@@ -1149,6 +1167,51 @@ sub get_daterev_description {
       $drtitle =~ s/\s+/ /gs;
       $drtitle =~ s/^(.{0,160}).*$/$1/gs;
 
+      my $mds_as_text = '';
+      if ($fastinfo->{mclogmds}) {
+        # 'mclogmd' => [
+        #    {
+        #      'daterev' => '20060430/r398298-n',
+        #      'mcstartdate' => '20060430T122405Z',
+        #      'mtime' => '1146404744',
+        #      'rev' => '398298',
+        #      'file' => 'ham-cthielen.log',
+        #      'fsize' => '3036336'
+        #    }, [...]
+
+        # $mds_as_text = XMLout($fastinfo->{mclogmds});
+
+        # use Data::Dumper; $mds_as_text = Dumper($fastinfo->{mclogmds});
+
+        my $all = '';
+        if (ref $fastinfo->{mclogmds} && $fastinfo->{mclogmds}->{mclogmd}) {
+          foreach my $f (@{$fastinfo->{mclogmds}->{mclogmd}}) {
+            my $started = $f->{mcstartdate};
+            my $subtime = strftime "%Y%m%dT%H%M%SZ", gmtime $f->{mtime};
+
+            $all .= qq{
+            
+              <p> <b>$f->{file}</b>:<br />
+                  started:&nbsp;$started;<br />
+                  submitted:&nbsp;$subtime;<br />
+                  size: $f->{fsize} bytes
+              </p>
+
+            };
+          }
+        }
+
+        my $id = "mclogmds_".($id_counter++);
+        $mds_as_text = qq{
+          <div id='$id' class='mclogmds' style='display: none'>
+            <p class=headclosep align=right><a
+                href="javascript:hide_header('$id')">[-]</a></p>
+
+            $all
+          </div> <a href="javascript:show_header('$id')">[+]</a>
+        };
+      }
+
       $txt = qq{
 
           <td class=daterevtd>
@@ -1179,6 +1242,7 @@ sub get_daterev_description {
           </td>
           <td class=daterevtd colspan=1>
               <em><mcsubmitters>$fastinfo->{submitters}</mcsubmitters></em>
+              $mds_as_text
           </td>
 
       };

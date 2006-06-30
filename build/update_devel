@@ -12,9 +12,6 @@ if [ ! -d $WEBDIR ] ; then
   echo 1>&2
 fi
 
-GPGSIGN=$SA_GPGSIGN
-test -x "$GPGSIGN" || GPGSIGN=$HOME/sabuildtools/bin/gpgsign
-
 DEVDIR=$WEBDIR/devel
 RELDIR=$WEBDIR/released
 mkdir -p $DEVDIR $RELDIR
@@ -61,8 +58,8 @@ for ext in tar.bz2 tar.gz zip ; do
   build/sha1sum.pl $DISTVNAME.$ext > $DEVDIR/$DISTVNAME.$ext.sha1 || exit $?
 
   rm -f $DISTVNAME.$ext.asc*
-  if [ -x "$GPGSIGN" ]; then
-    $GPGSIGN $DISTVNAME.$ext                           || exit $?
+  if [ -d $HOME/sabuildtools/sasigningkey ]; then
+    gpg --homedir $HOME/sabuildtools/sasigningkey -bsa $DISTVNAME.$ext || exit $?
     mv $DISTVNAME.$ext.asc $DEVDIR/$DISTVNAME.$ext.asc || exit $?
   fi
 
@@ -71,8 +68,6 @@ done
 
 test -f Makefile && make distclean
 rm -f $DISTVNAME.*
-
-# ( cd $DEVDIR && svn add *SpamAssassin* )
 
 chgrp -R spamassassin $DEVDIR $RELDIR
 ls -l $DEVDIR

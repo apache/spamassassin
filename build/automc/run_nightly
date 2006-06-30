@@ -2,11 +2,14 @@
 #
 # driver for nightly mass-checks on the zone. run from cron as:
 # 10 9,10 * * * /home/automc/svn/spamassassin/build/automc/run_nightly > /var/www/buildbot.spamassassin.org/bbmass/nightly_masschecks.txt 2>&1
+#
+# details: http://wiki.apache.org/spamassassin/NightlyMassCheck
 
 # add usernames who you want to do nightlies for here:
 nightly_users="
   doc
   zmi
+  jm
 "
 
 # and where the $HOMEs are:

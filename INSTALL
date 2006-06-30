@@ -298,6 +298,13 @@ version is too low for them to be used.
     more precisely.
 
 
+  - Mail::DKIM (from CPAN)
+
+    If this module is installed, and you enable the DKIM plugin,
+    SpamAssassin will perform Domain Keys Identified Mail lookups when
+    DKIM information is present in the message headers.
+
+
   - Mail::DomainKeys (from CPAN)
 
     If this module is installed, and you enable the DomainKeys plugin,

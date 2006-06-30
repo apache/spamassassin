@@ -35,6 +35,8 @@ having to read every message separately.
 package Mail::SpamAssassin::AICache;
 
 use File::Spec;
+use File::Path;
+use File::Basename;
 
 use strict;
 use warnings;
@@ -54,17 +56,24 @@ sub new {
 
   $self->{cache} = {};
   $self->{dirty} = 0;
+  $self->{prefix} ||= '/';
 
   my $use_cache = 1;
 
   if ($self->{type} eq 'dir') {
-    $self->{cache_file} = File::Spec->catdir($self->{path}, '.spamassassin_cache');
+    $self->{cache_file} = File::Spec->catdir(
+                $self->{prefix},
+                $self->{path}, '.spamassassin_cache');
+
     $self->{cache_mtime} = (stat($self->{cache_file}))[9] || 0;
   }
   else {
     my @split = File::Spec->splitpath($self->{path});
-    $self->{cache_file} = File::Spec->catdir($split[1], join('_',
-	'.spamassassin_cache', $self->{type}, $split[2]));
+    $self->{cache_file} = File::Spec->catdir(
+                $self->{prefix},
+                $split[1],
+                join('_', '.spamassassin_cache', $self->{type}, $split[2]));
+
     $self->{cache_mtime} = (stat($self->{cache_file}))[9] || 0;
 
     # for mbox and mbx, verify whether mtime on cache file is >= mtime of
@@ -122,7 +131,16 @@ sub finish {
   my ($self) = @_;
 
   # Cache is dirty, so write out new file
-  if ($self->{dirty}) {
+  if ($self->{dirty})
+  {
+    # create enclosing dir tree, if required
+    eval {
+      mkpath(dirname($self->{cache_file}));
+    };
+    if ($@) {
+      warn "Can't mkpath for AI cache file (".$self->{cache_file}."): $@ $!";
+    }
+
     if (open(CACHE, ">" . $self->{cache_file})) {
       while(my($k,$v) = each %{$self->{cache}}) {
 	print CACHE "$k\t$v\n";
