@@ -11,6 +11,8 @@
 # Source function library.
 . /etc/rc.d/init.d/functions
 
+prog="spamd"
+
 # Source networking configuration.
 . /etc/sysconfig/network
 
@@ -36,7 +38,7 @@ RETVAL=0
 case "$1" in
   start)
 	# Start daemon.
-	echo -n "Starting spamd: "
+	echo -n $"Starting $prog: "
 	daemon $NICELEVEL spamd $SPAMDOPTIONS -r $SPAMD_PID
 	RETVAL=$?
         echo
@@ -46,7 +48,7 @@ case "$1" in
         ;;
   stop)
         # Stop daemons.
-        echo -n "Shutting down spamd: "
+        echo -n $"Stopping $prog: "
         killproc spamd
         RETVAL=$?
         echo
