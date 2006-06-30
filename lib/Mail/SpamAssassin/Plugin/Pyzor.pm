@@ -215,6 +215,9 @@ sub get_pyzor_interface {
 sub check_pyzor {
   my ($self, $permsgstatus, $full) = @_;
 
+  # initialize valid tags
+  $permsgstatus->{tag_data}->{PYZOR} = "";
+
   $self->get_pyzor_interface();
   return 0 unless $self->{pyzor_available};
 

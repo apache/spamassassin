@@ -1265,7 +1265,8 @@ sub _get_tag {
       $data = $data->(@_);
     }
   }
-  else {
+  # known valid tags that might not get defined in some circumstances
+  elsif ($tag !~ /^(?:BAYESTC(?:|LEARNED|SPAMMY|HAMMY)|RBL)$/) {
     return;
   }
   $data = "" unless defined $data;
