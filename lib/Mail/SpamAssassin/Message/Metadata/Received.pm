@@ -384,7 +384,8 @@ sub parse_received_line {
   # Received: (qmail 84907 invoked from network); 13 Feb 2003 20:59:28 -0000
   # Received: (ofmipd 208.31.42.38); 17 Mar 2003 04:09:01 -0000
   # we don't care about this kind of gateway noise
-  if (/^\(/) { return; }
+  # Bug 4943: give /^(from/ a chance to be parsed
+  if (/^\((?!from)/) { return; }
 
   # OK -- given knowledge of most Received header formats,
   # break them down.  We have to do something like this, because
@@ -1006,6 +1007,15 @@ sub parse_received_line {
       $helo = $1; $rdns = $2; $ip = $3; $by = $4;
       $id = $5 if (defined $5);
       goto enough;
+  }
+
+  # Norton AntiVirus Gateway
+  # Received: (from localhost [24.180.47.240])
+  #  by host.name (NAVGW 2.5.2.12) with SMTP id M2006060503484615455
+  #  for <user@domain.co.uk>; Mon, 05 Jun 2006 03:48:47 +0100
+  if (/^\(from (\S*) \[(${IP_ADDRESS})\]\) by (\S+) \(NAVGW .*?\) with /) {
+    $helo = $1; $ip = $2; $by = $3;
+    goto enough;
   }
 
   # ------------------------------------------------------------------------
