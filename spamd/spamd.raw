@@ -41,6 +41,7 @@ BEGIN {
     require Socket6;
   };
   if ($@) {    # IPv4 only
+    require IO::Socket::INET;
     *new_io_socket_inetx = sub { IO::Socket::INET->new(@_); };
     *ip_or_name_to_ip    = sub {
       my $in_addr = (gethostbyname(shift))[4] or return undef;
