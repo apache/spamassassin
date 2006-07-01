@@ -1,8 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: daf parkerm theo wtogami zmi
-
-# good enough
-ADDR_NUMS_AT_BIGSITE
+# with results from: bb-doc cthielen daf parkerm theo wtogami
 
 # good enough
 ADVANCE_FEE_3
@@ -119,6 +116,9 @@ DRUGS_ANXIETY_EREC
 DRUGS_ANXIETY_OBFU
 
 # good enough
+DRUGS_DIET
+
+# good enough
 DRUGS_DIET_OBFU
 
 # good enough
@@ -153,6 +153,9 @@ ENGLISH_UCE_SUBJECT
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
+
+# good enough
+EXCUSE_24
 
 # good enough
 FAKE_HELO_LYCOS
@@ -288,6 +291,9 @@ FROM_ALL_NUMS
 
 # good enough
 FROM_BLANK_NAME
+
+# good enough
+FROM_DOMAIN_NOVOWEL
 
 # good enough
 FROM_ENDS_IN_NUMS
@@ -509,7 +515,7 @@ MILLION_USD
 MIME_BAD_ISO_CHARSET
 
 # good enough
-MIME_BASE64_BLANKS
+MIME_BASE64_NO_NAME
 
 # good enough
 MIME_BASE64_TEXT
@@ -545,9 +551,6 @@ MPART_ALT_DIFF
 MSGID_DOLLARS_RANDOM
 
 # good enough
-MSGID_NO_HOST
-
-# good enough
 MSGID_OUTLOOK_INVALID
 
 # good enough
@@ -564,6 +567,9 @@ MSGID_SPAM_LETTERS
 
 # good enough
 MSGID_YAHOO_CAPS
+
+# good enough
+NOT_ADVISOR
 
 # tflags net
 NO_DNS_FOR_FROM
@@ -587,9 +593,6 @@ NULL_IN_BODY
 NUMERIC_HTTP_ADDR
 
 # good enough
-OBSCURED_EMAIL
-
-# good enough
 ONLINE_PHARMACY
 
 # good enough
@@ -599,16 +602,10 @@ PERCENT_RANDOM
 PLING_QUERY
 
 # good enough
-PORN_15
-
-# good enough
 PORN_URL_SEX
 
 # good enough
 PREST_NON_ACCREDITED
-
-# good enough
-PRIORITY_NO_NAME
 
 # tflags net
 PYZOR_CHECK
@@ -827,6 +824,15 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
+SPOOF_COM2COM
+
+# good enough
+SPOOF_NET2COM
+
+# good enough
+SPOOF_OURI
+
+# good enough
 STOCK_ALERT
 
 # good enough
@@ -857,6 +863,9 @@ SUBJECT_IN_WHITELIST
 SUBJECT_NEEDS_ENCODING
 
 # good enough
+SUBJECT_NOVOWEL
+
+# good enough
 SUBJECT_SEXUAL
 
 # good enough
@@ -870,6 +879,9 @@ SUBJ_YOUR_FAMILY
 
 # good enough
 SUSPICIOUS_RECIPS
+
+# good enough
+TO_MALFORMED
 
 # good enough
 TO_NO_USER
@@ -1001,9 +1013,6 @@ TVD_SINGLE_SPAN_DIV
 TVD_SPACED_SUBJECT_WORD3
 
 # good enough
-TVD_SPACED_SUBJECT_WORD5
-
-# good enough
 TVD_SPACED_WORDS
 
 # good enough
@@ -1037,6 +1046,9 @@ TVD_VISIT_PHARMA
 TVD_VIS_HIDDEN
 
 # good enough
+FM_CLAIM_IPOD
+
+# good enough
 FORGED_IMS_HTML
 
 # good enough
@@ -1049,10 +1061,16 @@ FORGED_OUTLOOK_HTML
 FORGED_OUTLOOK_TAGS
 
 # good enough
-TVD_FW_GRAPHIC_NAME_LONG
+HS_EXTRA
 
 # good enough
-TVD_FW_GRAPHIC_NAME_MID
+KAM_STOCKTIP9
+
+# good enough
+TVD_FW_GRAPHIC_ID1
+
+# good enough
+TVD_FW_GRAPHIC_ID2
 
 # good enough
 UNCLAIMED_MONEY
@@ -1062,6 +1080,9 @@ UNCLOSED_BRACKET
 
 # good enough
 UNDISC_RECIPS
+
+# good enough
+UNIQUE_WORDS
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1074,9 +1095,6 @@ UPPERCASE_50_75
 
 # good enough
 UPPERCASE_75_100
-
-# good enough
-URG_BIZ
 
 # tflags net
 URIBL_AB_SURBL
@@ -1107,6 +1125,9 @@ URIBL_SC_SURBL
 
 # tflags net
 URIBL_WS_SURBL
+
+# good enough
+URI_NO_WWW_BIZ_CGI
 
 # good enough
 URI_NO_WWW_INFO_CGI
@@ -1166,13 +1187,7 @@ X_MSMAIL_PRIORITY_HIGH
 X_PRIORITY_CC
 
 # good enough
-X_PRIORITY_HIGH
-
-# good enough
 ZMIde_EBAYJOBSURI
-
-# good enough
-ZMIde_SEXUALEXPL1
 
 # tflags net
 __RCVD_IN_IADB
