@@ -53,6 +53,9 @@ fi
 set +e
 retry=0
 while true; do
+        rm -rf rules    # causing trouble for some reason
+        rm -rf rulesrc/sandbox
+
 	if svn update -r $revision < /dev/null && \
             svn update -r $revision rulesrc < /dev/null
         then
