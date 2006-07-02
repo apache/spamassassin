@@ -95,7 +95,6 @@ cd masses
 rm -f spamassassin/auto*
 rm -f spamassassin/bayes*
 rm -f razor-agent.log
-date > test.start
 if [ -n "$net" ]; then
 	prefs=$prefs_weekly
 	opts=$opts_weekly
@@ -108,8 +107,12 @@ if [ -n "$prefs" -a -f "$prefs" ]; then
 else
 	rm -f spamassassin/user_prefs
 fi
+
+date | tee test.start
+
 $PERL mass-check $opts
-date > test.end
+
+date | tee test.end
 
 uptime
 ls -l spam.log ham.log
