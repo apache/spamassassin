@@ -42,7 +42,7 @@ for user in $nightly_users ; do
     export HOME PERL PATH
 
     # use bash to work around Solaris breakage
-    bash $dir/svn/masses/rule-qa/corpus-nightly
+    nice bash $dir/svn/masses/rule-qa/corpus-nightly
   )
 
 done
