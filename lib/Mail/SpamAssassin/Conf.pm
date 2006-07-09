@@ -126,8 +126,8 @@ $CONF_TYPE_NUMERIC          = 3;
 $CONF_TYPE_HASH_KEY_VALUE   = 4;
 $CONF_TYPE_ADDRLIST         = 5;
 $CONF_TYPE_TEMPLATE         = 6;
-$MISSING_REQUIRED_VALUE     = -998;
-$INVALID_VALUE              = -999;
+$MISSING_REQUIRED_VALUE     = -99999999999999;
+$INVALID_VALUE              = -99999999999998;
 
 # set to "1" by the test suite code, to record regression tests
 # $Mail::SpamAssassin::Conf::COLLECT_REGRESSION_TESTS = 1;
@@ -2206,6 +2206,9 @@ Assign a specific priority to a test.  All tests, except for DNS and Meta
 tests, are run in increasing priority value order (negative priority values
 are run before positive priority values). The default test priority is 0
 (zero).
+
+The values <-99999999999999> and <-99999999999998> have a special meaning
+internally, and should not be used.
 
 =cut
 
