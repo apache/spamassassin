@@ -11,7 +11,10 @@
 #
 ###########################################################################
 
+# HTTPSMismatch - find URI mismatches between href and anchor text
+#
+loadplugin Mail::SpamAssassin::Plugin::HTTPSMismatch
+
 # URIDetail - test URIs using detailed URI information
 #
 loadplugin Mail::SpamAssassin::Plugin::URIDetail
-
