@@ -15,10 +15,16 @@ nightly_users="
 # and where the $HOMEs are:
 nightly_trees="/home/bbmass/mc-nightly"
 
-# ensure we're running at/just after 0900 UTC, complex due to daylight savings
+
+# ensure we're running after 0900 UTC; complex due to daylight savings.
+# If we're running in the 08xx UTC hour-space, sleep for 1 hour; when
+# we wake, we will be in 09xx.
 (
   TIME="%e,%U,%S"; TZ=UTC; export TIME TZ
-  if date | egrep '^... ... .. (08|10):'; then exit ; fi
+  if date | egrep '^... ... .. 08:'; then
+    date; echo "sleeping for 1 hour to compensate for DST"
+    sleep 3600 ; date
+  fi
 )
 
 # create the targets files:
@@ -42,20 +48,20 @@ for user in $nightly_users ; do
     export HOME PERL PATH
 
     # use bash to work around Solaris breakage
-    bash $dir/svn/masses/rule-qa/corpus-nightly
+    nice bash $dir/svn/masses/rule-qa/corpus-nightly
   )
 
 done
 
 # cycle the logfiles; keep 6 (3 days worth I think)
-(
-  cd /var/www/buildbot.spamassassin.org/bbmass
-  rm nightly_masschecks_6.txt
-  mv nightly_masschecks_5.txt  nightly_masschecks_6.txt
-  mv nightly_masschecks_4.txt  nightly_masschecks_5.txt
-  mv nightly_masschecks_3.txt  nightly_masschecks_4.txt
-  mv nightly_masschecks_2.txt  nightly_masschecks_3.txt
-  mv nightly_masschecks_1.txt  nightly_masschecks_2.txt
-  mv nightly_masschecks.txt    nightly_masschecks_1.txt
-)
+# (
+  # cd /var/www/buildbot.spamassassin.org/bbmass
+  # rm nightly_masschecks_6.txt
+  # mv nightly_masschecks_5.txt  nightly_masschecks_6.txt
+  # mv nightly_masschecks_4.txt  nightly_masschecks_5.txt
+  # mv nightly_masschecks_3.txt  nightly_masschecks_4.txt
+  # mv nightly_masschecks_2.txt  nightly_masschecks_3.txt
+  # mv nightly_masschecks_1.txt  nightly_masschecks_2.txt
+  # mv nightly_masschecks.txt    nightly_masschecks_1.txt
+# )
 

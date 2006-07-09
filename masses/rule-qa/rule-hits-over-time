@@ -33,6 +33,7 @@ usage: rule-hits-over-time [options] --rule rulename log1 [log2 ...]
 
   --rule=rulename       specify rule to map
   --period=secs         specify period (default: 1 day)
+  --ignore_older=days   ignore hits older than N days (default: 0 = none)
   --scale_period=n      scale period up to N items of data, 0=no scaling
                         (default: 0)
   --size_x=pixels       width of output graphs, in pixels (def: 800)
@@ -45,7 +46,7 @@ usage: rule-hits-over-time [options] --rule rulename log1 [log2 ...]
 
 use vars qw(
         $opt_rule $opt_size_x $opt_size_y $opt_text $opt_cgi
-        $opt_period $opt_scale_period
+        $opt_period $opt_scale_period $opt_ignore_older
         $opt_debug
 );
 
@@ -56,6 +57,7 @@ GetOptions(
         'text',
         'cgi',
         'scale_period=i',
+        'ignore_older=i',
         'period=i',
         'debug'
 ) or usage();
@@ -283,8 +285,12 @@ sub read_logs {
 
   # limit to a range from [4 years ago, today] to avoid OOM craziness
   # from corrupt input
+  #
+  if ($opt_ignore_older <= 0) {
+    $opt_ignore_older = 365 * 4;
+  }
   my $limit_hi = time;
-  my $limit_lo = $limit_hi - (24*60*60*365*4);
+  my $limit_lo = $limit_hi - (24*60*60*$opt_ignore_older);
 
   $lastbucket = undef;
   $nextbucket = undef;

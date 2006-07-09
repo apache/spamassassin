@@ -1089,6 +1089,7 @@ sub bayes_report_make_list {
 ###########################################################################
 
 # public API for plugins
+
 =item $status->set_tag($tagname, $value)
 
 Set a template tag, as used in C<add_header>, report templates, etc. This API
@@ -1121,6 +1122,7 @@ sub set_tag {
 }
 
 # public API for plugins
+
 =item $string = $status->get_tag($tagname)
 
 Get the current value of a template tag, as used in C<add_header>, report
