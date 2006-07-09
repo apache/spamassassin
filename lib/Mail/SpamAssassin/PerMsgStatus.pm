@@ -2292,7 +2292,6 @@ sub do_body_uri_tests {
   my $evalstr2 = '';
 
   while (my($rulename, $pat) = each %{$self->{conf}{uri_tests}->{$priority}}) {
-
     $evalstr .= '
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
         '.$rulename.'_uri_test($self, @_); # call procedurally for speed
