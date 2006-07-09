@@ -417,7 +417,9 @@ sub wanted {
   my @previous;
   if ($x_spam_status) {
     $x_spam_status =~ s/,\s+/,/gs;
-    if ($x_spam_status =~ m/tests=(\S*)/) {
+    if ($x_spam_status =~ m/tests=(\S*)/
+        && $x_spam_status !~ /\bshortcircuit=(?:ham|spam|default)\b/)
+    {
       push @previous, split(/,/, $1);
 
       # we found previous tests, so move the reuse config into place
