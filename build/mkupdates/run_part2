@@ -85,7 +85,12 @@ rulesdir=$tmpdir/share/spamassassin
 
 (
   cd $rulesdir 
-  tar cvf - *.cf *.pm                    || exit $?
+
+  # Use this to include plugin .pm files:
+  # tar cvf - *.cf *.pm                    || exit $?
+
+  # or this, to ban code from the updates:
+  tar cvf - *.cf                         || exit $?
 
 ) | gzip -9 > $tmpdir/update.tgz         || exit $?
 

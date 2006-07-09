@@ -4,6 +4,9 @@
 
 . $HOME/.corpus
 
+RSYNC_PASSWORD=$password 
+export RSYNC_PASSWORD
+
 renice 10 -p $$
 
 # use $PERL from env if unset
@@ -11,17 +14,19 @@ if [ "x${PERL:-}" = x ] ; then
   PERL=perl
 fi
 
-RSYNC_PASSWORD=$password ; export RSYNC_PASSWORD
-
 set -x
 set -e
-TIME="%e,%U,%S" ; export TIME
-TZ=UTC ; export TZ
 
-# ensure we're running after 0900 UTC
-if date | egrep '^... ... .. (08|10):'; then
-	exit
-fi
+# ensure we're running after 0900 UTC; complex due to daylight savings.
+# If we're running in the 08xx UTC hour-space, sleep for 1 hour; when
+# we wake, we will be in 09xx.
+(
+  TIME="%e,%U,%S"; TZ=UTC; export TIME TZ
+  if date | egrep '^... ... .. 08:'; then
+    date; echo "sleeping for 1 hour to compensate for DST"
+    sleep 3600 ; date 
+  fi
+)
 
 # day of week
 if date | egrep '^Sat' || [ "$1" = "net" ]; then
@@ -53,6 +58,9 @@ fi
 set +e
 retry=0
 while true; do
+        rm -rf rules    # causing trouble for some reason
+        rm -rf rulesrc/sandbox
+
 	if svn update -r $revision < /dev/null && \
             svn update -r $revision rulesrc < /dev/null
         then
@@ -92,7 +100,6 @@ cd masses
 rm -f spamassassin/auto*
 rm -f spamassassin/bayes*
 rm -f razor-agent.log
-date > test.start
 if [ -n "$net" ]; then
 	prefs=$prefs_weekly
 	opts=$opts_weekly
@@ -105,8 +112,12 @@ if [ -n "$prefs" -a -f "$prefs" ]; then
 else
 	rm -f spamassassin/user_prefs
 fi
+
+date | tee test.start
+
 $PERL mass-check $opts
-date > test.end
+
+date | tee test.end
 
 uptime
 ls -l spam.log ham.log

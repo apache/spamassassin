@@ -631,6 +631,7 @@ sub graph_over_time {
 
   exec ("$myperl $automcdir/../rule-hits-over-time ".
         "--cgi --scale_period=200 --rule='$saferule' ".
+        "--ignore_older=180 ".
         "$safedatadir/LOGS.*.log.gz");
 
   die "exec failed";
