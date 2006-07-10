@@ -55,8 +55,6 @@ sub new_checker {
     'locked_file'	=> ''
   };
 
-  my $path;
-
   my @order = split (' ', $main->{conf}->{auto_whitelist_db_modules});
   my $dbm_module = Mail::SpamAssassin::Util::first_available_module (@order);
   if (!$dbm_module) {
@@ -64,43 +62,38 @@ sub new_checker {
 	$main->{conf}->{auto_whitelist_db_modules}."\n";
   }
 
-  my $umask = umask 0;
-  if(defined($main->{conf}->{auto_whitelist_path})) # if undef then don't worry -- empty hash!
-  {
-    $path = $main->sed_path ($main->{conf}->{auto_whitelist_path});
+  # if undef then don't worry -- empty hash!
+  if (defined($main->{conf}->{auto_whitelist_path})) {
+    my $path = $main->sed_path($main->{conf}->{auto_whitelist_path});
+    my ($mod1, $mod2);
 
     if ($main->{locker}->safe_lock
-			($path, 30, $main->{conf}->{auto_whitelist_file_mode}))
+                       ($path, 30, $main->{conf}->{auto_whitelist_file_mode}))
     {
       $self->{locked_file} = $path;
-      $self->{is_locked} = 1;
-      dbg("auto-whitelist: tie-ing to DB file of type $dbm_module R/W in $path");
-      tie %{$self->{accum}},$dbm_module,$path,
-		  O_RDWR|O_CREAT,   #open rw w/lock
-		  (oct ($main->{conf}->{auto_whitelist_file_mode}) & 0666)
-	 or goto failed_to_tie;
-
-    } else {
-      $self->{is_locked} = 0;
-      dbg("auto-whitelist: tie-ing to DB file of type $dbm_module R/O in $path");
-      tie %{$self->{accum}},$dbm_module,$path,
-		  O_RDONLY,         #open ro w/o lock
-		  (oct ($main->{conf}->{auto_whitelist_file_mode}) & 0666)
-	 or goto failed_to_tie;
+      $self->{is_locked}   = 1;
+      ($mod1, $mod2) = ('R/W', O_RDWR | O_CREAT);
     }
+    else {
+      $self->{is_locked} = 0;
+      ($mod1, $mod2) = ('R/O', O_RDONLY);
+    }
+
+    dbg("auto-whitelist: tie-ing to DB file of type $dbm_module $mod1 in $path");
+
+    if (! tie %{ $self->{accum} }, $dbm_module, $path, $mod2,
+      oct($main->{conf}->{auto_whitelist_file_mode}) ) {
+        my $err = $!;   # might get overwritten later
+        if ($self->{is_locked}) {
+          $self->{main}->{locker}->safe_unlock($self->{locked_file});
+          $self->{is_locked} = 0;
+        }
+        die "auto-whitelist: cannot open auto_whitelist_path $path: $err\n";
+      }
   }
-  umask $umask;
 
   bless ($self, $class);
   return $self;
-
-failed_to_tie:
-  umask $umask;
-  if ($self->{is_locked}) {
-    $self->{main}->{locker}->safe_unlock ($self->{locked_file});
-    $self->{is_locked} = 0;
-  }
-  die "auto-whitelist: cannot open auto_whitelist_path $path: $!\n";
 }
 
 ###########################################################################
