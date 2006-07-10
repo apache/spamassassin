@@ -60,7 +60,8 @@ sub safe_lock {
   my @stat;
 
   $max_retries ||= 30;
-  $mode ||= 0700;
+  $mode ||= 0600;
+  $mode = oct $mode if $mode =~ /^0/;   # accept number or string
 
   my $lock_file = "$path.lock";
   my $hname = Mail::SpamAssassin::Util::fq_hostname();
@@ -70,7 +71,7 @@ sub safe_lock {
   # keep this for unlocking
   $self->{lock_tmp} = $lock_tmp;
 
-  my $umask = umask (oct($mode) ^ 0700);
+  my $umask = umask(~$mode);
   if (!open(LTMP, ">$lock_tmp")) {
       umask $umask; # just in case
       die "locker: safe_lock: cannot create tmp lockfile $lock_tmp for $lock_file: $!\n";

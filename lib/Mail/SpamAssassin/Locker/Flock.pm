@@ -51,13 +51,14 @@ sub safe_lock {
   my @stat;
 
   $max_retries ||= 30;
-  $mode ||= 0700;
+  $mode ||= 0600;
+  $mode = oct $mode if $mode =~ /^0/;   # accept number or string
 
   my $lock_file = "$path.mutex";
-  my $umask = umask (oct($mode) ^ 0700);
+  my $umask = umask(~$mode);
   my $fh = new IO::File();
 
-  if (!$fh->open ("$lock_file", O_RDWR|O_CREAT)) {
+  if (!$fh->open ($lock_file, O_RDWR|O_CREAT)) {
       umask $umask; # just in case
       die "locker: safe_lock: cannot create lockfile $lock_file: $!\n";
   }
