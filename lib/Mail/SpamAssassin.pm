@@ -561,7 +561,7 @@ Finish learning.
 
 sub finish_learner {
   my $self = shift;
-  $self->{bayes_scanner}->finish();
+  $self->{bayes_scanner}->sanity_check_is_untied(1);
   1;
 }
 
