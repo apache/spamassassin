@@ -235,7 +235,7 @@ preclude its use for the AWL (see SpamAssassin bug 4353).
 		type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
 	       });
 
-=item auto_whitelist_file_mode		(default: 0700)
+=item auto_whitelist_file_mode		(default: 0600)
 
 The file mode bits used for the automatic-whitelist directory or file.
 
@@ -248,7 +248,7 @@ not have any execute bits set (the umask is set to 111).
   push (@cmds, {
 		setting => 'auto_whitelist_file_mode',
 		is_admin => 1,
-		default => '0700',
+		default => '0600',
 		type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
 	       });
 
