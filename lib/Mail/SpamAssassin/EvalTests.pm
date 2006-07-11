@@ -3144,4 +3144,21 @@ sub check_ratware_envelope_from {
   return 0;
 }
 
+# came up on the users@ list, look for multipart/alternative parts which
+# include non-text parts -- skip certain types which occur normally in ham
+sub check_ma_non_text {
+  my $self = shift;
+
+  foreach my $map ($self->{msg}->find_parts(qr@^multipart/alternative$@i)) {
+    foreach my $p ($map->find_parts(qr/./, 1, 0)) {
+      next if (lc $p->{'type'} eq 'multipart/related');
+      next if (lc $p->{'type'} eq 'application/rtf');
+      next if ($p->{'type'} =~ m@^text/@i);
+      return 1;
+    }
+  }
+  
+  return 0;
+}
+
 1;
