@@ -185,6 +185,14 @@ describe TVD_PH_SUBJ_URGENT	Subject looks like a phish
 rawbody TVD_FLOAT_GENERAL	/\bstyle\s*=\s*"[^"]*\bfloat\s*:\s*[a-z]+\s*">\s*[a-zA-Z]+\s*</i
 describe TVD_FLOAT_GENERAL	Message contains HTML style indicating spam
 
+# 2006/07/11
+# 0.750   0.9111   0.0000    1.000   0.84    1.00  MULTIPART_ALT_NON_TEXT
+# requires the find_parts() behavior from 3.1.4+
+if ( version > 3.001003 )
+body MULTIPART_ALT_NON_TEXT	eval:check_ma_non_text()
+score MULTIPART_ALT_NON_TEXT	2.0
+endif
+
 ###########################################################################
 # ReplaceTags rules
 
