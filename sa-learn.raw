@@ -563,7 +563,7 @@ Options:
  --mbx                             Input sources are in mbx format
  --showdots                        Show progress using dots
  --progress                        Show progress using progress bar
- --no-sync                         Skip syncronizing the database and journal
+ --no-sync                         Skip synchronizing the database and journal
                                    after learning
  -L, --local                       Operate locally, no network accesses
  --import                          Migrate data from older version/non DB_File
@@ -665,7 +665,7 @@ Forces an expiry attempt, regardless of whether it may be necessary
 or not.  Note: This doesn't mean any tokens will actually expire.
 Please see the EXPIRATION section below.
 
-Note: C<--force-expire> also causes the journal data to be syncronized
+Note: C<--force-expire> also causes the journal data to be synchronized
 into the Bayes databases.
 
 =item B<--forget>
@@ -754,7 +754,7 @@ circumstances are available with an area of "info".
 
 =item B<--no-sync>
 
-Skip the slow syncronization step which normally takes place after
+Skip the slow synchronization step which normally takes place after
 changing database entries.  If you plan to learn from many folders in
 a batch, or to learn many individual messages one-by-one, it is faster
 to use this switch and run C<sa-learn --sync> once all the folders have
@@ -849,7 +849,7 @@ http://www.paulgraham.com/ and see "A Plan for Spam". It's reasonably
 readable, even if statistics make me break out in hives.
 
 The short semi-inaccurate version: Given training, a spam heuristics engine
-can take the most "spammy" and "hammy" words and apply probablistic
+can take the most "spammy" and "hammy" words and apply probabilistic
 analysis. Furthermore, once given a basis for the analysis, the engine can
 continue to learn iteratively by applying both the non-Bayesian and Bayesian
 rulesets together to create evolving "intelligence".
@@ -885,7 +885,7 @@ easy to understand. If it generates a false positive or false negative,
 it is fairly easy to understand why.
 
 With Bayesian analysis, it's all probabilities - "because the past says
-it is likely as this falls into a probablistic distribution common to past
+it is likely as this falls into a probabilistic distribution common to past
 spam in your systems". Tell that to your users!  Tell that to the client
 when he asks "what can I do to change this". (By the way, the answer in
 this case is "use whitelisting".)
@@ -1070,12 +1070,12 @@ While SpamAssassin is scanning mails, it needs to track which tokens
 it uses in its calculations.  To avoid the contention of having each
 SpamAssassin process attempting to gain write access to the Bayes DB,
 the token timestamps are written to a 'journal' file which will later
-(either automatically or via C<sa-learn --sync>) be used to syncronize
+(either automatically or via C<sa-learn --sync>) be used to synchronize
 the Bayes DB.
 
 Also, through the use of C<bayes_learn_to_journal>, or when using the
 C<--no-sync> option with sa-learn, the actual learning data will take
-be placed into the journal for later syncronization.  This is typically
+be placed into the journal for later synchronization.  This is typically
 useful for high-traffic sites to avoid the same contention as stated
 above.
 
@@ -1213,7 +1213,7 @@ to new, remove old, rename new" shuffle.
 =over 4
 
 =item C<bayes_auto_expire> is used to specify whether or not SpamAssassin
-ought to opportunistically attempt to expire the Bayes databaase.
+ought to opportunistically attempt to expire the Bayes database.
 The default is 1 (yes).
 
 =item C<bayes_expiry_max_db_size> specifies both the auto-expire token
