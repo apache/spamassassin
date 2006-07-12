@@ -21,7 +21,6 @@ package Mail::SpamAssassin::Reporter;
 use strict;
 use warnings;
 use bytes;
-use Carp;
 use POSIX ":sys_wait_h";
 use Mail::SpamAssassin::Logger;
 

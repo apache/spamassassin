@@ -30,7 +30,6 @@ use POSIX ":sys_wait_h";
 use strict;
 use warnings;
 use bytes;
-use Carp;
 
 use vars qw{
   $KNOWN_BAD_DIALUP_RANGES @EXISTING_DOMAINS $IS_DNS_AVAILABLE $VERSION
