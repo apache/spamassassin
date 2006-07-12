@@ -51,7 +51,6 @@ package Mail::SpamAssassin::PerMsgStatus;
 use strict;
 use warnings;
 use bytes;
-use Carp;
 
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::EvalTests;
