@@ -417,6 +417,10 @@ sub parse_received_line {
   elsif (/\) by .+ \(\d{1,2}\.\d\.\d{3}(?:\.\d{1,3})?\) \(authenticated as .+\) id /) {
     $auth = 'CriticalPath';
   }
+  # Postfix 2.3 and later with "smtpd_sasl_authenticated_header yes"
+  elsif (/\)\s+\(Authenticated sender:\s+\S+\)\s+by\s+\S+\s+\(Postfix\)\s+with\s+/) {
+    $auth = 'Postfix';
+  }
 
   if (/^from /) {
     # try to catch enveloper senders
