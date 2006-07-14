@@ -1005,8 +1005,14 @@ sub interpolate_gpghomedir {
   my $gpghome = '';
   if ($opt{'gpghomedir'}) {
     $gpghome = $opt{'gpghomedir'};
-    $gpghome =~ s/\'/\\\'/gs;
-    $gpghome = "--homedir='$gpghome'";
+    if (Mail::SpamAssassin::Util::am_running_on_windows()) {
+      # windows is single-quote-phobic; bug 4958 cmt 7
+      $gpghome =~ s/\"/\\\"/gs;
+      $gpghome = "--homedir=\"$gpghome\"";
+    } else {
+      $gpghome =~ s/\'/\\\'/gs;
+      $gpghome = "--homedir='$gpghome'";
+    }
   }
   return $gpghome;
 }
