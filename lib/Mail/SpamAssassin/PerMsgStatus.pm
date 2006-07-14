@@ -59,10 +59,13 @@ use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::Logger;
 
 use vars qw{
-  @ISA
+  @ISA @TEMPORARY_METHODS
 };
 
 @ISA = qw();
+
+# methods defined by the compiled ruleset; deleted in finish_tests()
+@TEMPORARY_METHODS = ();
 
 ###########################################################################
 
@@ -83,7 +86,7 @@ sub new {
     'rule_errors'       => 0,
     'disable_auto_learning' => 0,
     'auto_learn_status' => undef,
-    'conf'                => $main->{conf},
+    'conf'              => $main->{conf},
     'async'             => Mail::SpamAssassin::AsyncLoop->new($main)
   };
 
@@ -1364,6 +1367,12 @@ sub finish_tests {
       undef &{'_meta_tests_'.$clean_priority};
     }
   }
+
+  foreach my $method (@TEMPORARY_METHODS) {
+    if (defined &{$method}) {
+      undef &{$method};
+    }
+  }
 }
 
 
@@ -2503,25 +2512,32 @@ EOT
 sub do_head_eval_tests {
   my ($self, $priority) = @_;
   return unless (defined($self->{conf}->{head_evals}->{$priority}));
-  $self->run_eval_tests ($self->{conf}->{head_evals}->{$priority}, '');
+  $self->run_eval_tests ($Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS,
+                         $self->{conf}->{head_evals}->{$priority}, '', $priority);
 }
 
 sub do_body_eval_tests {
   my ($self, $priority, $bodystring) = @_;
   return unless (defined($self->{conf}->{body_evals}->{$priority}));
-  $self->run_eval_tests ($self->{conf}->{body_evals}->{$priority}, 'BODY: ', $bodystring);
+  $self->run_eval_tests ($Mail::SpamAssassin::Conf::TYPE_BODY_EVALS,
+                         $self->{conf}->{body_evals}->{$priority}, 'BODY: ',
+                         $priority, $bodystring);
 }
 
 sub do_rawbody_eval_tests {
   my ($self, $priority, $bodystring) = @_;
   return unless (defined($self->{conf}->{rawbody_evals}->{$priority}));
-  $self->run_eval_tests ($self->{conf}->{rawbody_evals}->{$priority}, 'RAW: ', $bodystring);
+  $self->run_eval_tests ($Mail::SpamAssassin::Conf::TYPE_RAWBODY_EVALS,
+                         $self->{conf}->{rawbody_evals}->{$priority}, 'RAW: ',
+                         $priority, $bodystring);
 }
 
 sub do_full_eval_tests {
   my ($self, $priority, $fullmsgref) = @_;
   return unless (defined($self->{conf}->{full_evals}->{$priority}));
-  $self->run_eval_tests ($self->{conf}->{full_evals}->{$priority}, '', $fullmsgref);
+  $self->run_eval_tests ($Mail::SpamAssassin::Conf::TYPE_FULL_EVALS,
+                         $self->{conf}->{full_evals}->{$priority}, '',
+                         $priority, $fullmsgref);
 }
 
 ###########################################################################
@@ -2675,85 +2691,177 @@ EOT
 ###########################################################################
 
 sub run_eval_tests {
-  my ($self, $evalhash, $prepend2desc, @extraevalargs) = @_;
+  my ($self, $testtype, $evalhash, $prepend2desc, $priority, @extraevalargs) = @_;
   local ($_);
   
+  my $doing_user_rules = $self->{conf}->{user_rules_to_compile}->{$testtype};
+
+  # clean up priority value so it can be used in a subroutine name
+  my $clean_priority;
+  ($clean_priority = $priority) =~ s/-/neg/;
+
+  my $scoreset = $self->{conf}->get_score_set();
+
+  my $methodname = '_eval_tests'.
+                        '_type'.$testtype .
+                        '_pri'.$clean_priority .
+                        '_set'.$scoreset;
+
+  # Some of the rules are scoreset specific, so we need additional 
+  # subroutines to handle those
+  if (defined &{'Mail::SpamAssassin::PerMsgStatus::'.$methodname}
+        && !$doing_user_rules)
+  {
+    no strict "refs";
+    &{'Mail::SpamAssassin::PerMsgStatus::'.$methodname}($self,@extraevalargs);
+    use strict "refs";
+    return;
+  }
+
   # look these up once in advance to save repeated lookups in loop below
-  my $debugenabled = would_log('dbg');
-  my $scoresref = $self->{conf}->{scores};
   my $tflagsref = $self->{conf}->{tflags};
   my $have_start_rules = $self->{main}->have_plugin("start_rules");
   my $have_ran_rule = $self->{main}->have_plugin("ran_rule");
 
-  my $scoreset = $self->{conf}->get_score_set();
-  while (my ($rulename, $test) = each %{$evalhash}) {
+  # the buffer for the evaluated code
+  my $evalstr = q{ };
+$evalstr .= q{ my $function; };
 
-    # Score of 0, skip it.
-    my $score = $scoresref->{$rulename};
-    next unless $score;
+  # conditionally include the dbg in the eval str
+  my $dbgstr = q{ };
+  if (would_log('dbg')) {
+    $dbgstr = q{ 
+      dbg("rules: ran eval rule $rulename ======> got hit ($result)");
+    };
+  }
 
-    # If the rule is a net rule, and we're in a non-net scoreset, skip it.
-    next if ((($scoreset & 1) == 0) &&
-             $tflagsref->{$rulename} &&
-             $tflagsref->{$rulename} =~ /\bnet\b/);
-
-    # If the rule is a bayes rule, and we're in a non-bayes scoreset, skip it.
-    next if ((($scoreset & 2) == 0) &&
-             $tflagsref->{$rulename} &&
-             $tflagsref->{$rulename} =~ /\bbayes\b/);
-
-    my $result;
-    $self->{test_log_msgs} = ();        # clear test state
-
-    my ($function, @args) = @{$test};
-    unshift(@args, @extraevalargs);
-
-    # check to make sure the function is defined
-    if (!$self->can ($function)) {
-      my $pluginobj = $self->{conf}->{eval_plugins}->{$function};
-      if ($pluginobj) {
-	# we have a plugin for this.  eval its function
-	$self->register_plugin_eval_glue ($pluginobj, $function);
-      } else {
-	dbg("rules: no method found for eval test $function");
+  while (my ($rulename, $test) = each %{$evalhash})
+  {
+    if ($tflagsref->{$rulename}) {
+      # If the rule is a net rule, and we are in a non-net scoreset, skip it.
+      if ($tflagsref->{$rulename} =~ /\bnet\b/) {
+        next if (($scoreset & 1) == 0);
+      }
+      # If the rule is a bayes rule, and we are in a non-bayes scoreset, skip it.
+      if ($tflagsref->{$rulename} =~ /\bbayes\b/) {
+        next if (($scoreset & 2) == 0);
       }
     }
 
-    # let plugins get the name of the rule that's currently being
-    # run
-    $self->{current_rule_name} = $rulename;
+    my ($function, @args) = @{$test};
 
+    $evalstr .= '
+      $rulename = q#'.$rulename.'#;
+      $self->{test_log_msgs} = ();
+    ';
+
+    # only need to set current_rule_name for plugin evals
+    if ($self->{conf}->{eval_plugins}->{$function}) {
+      # let plugins get the name of the rule that is currently being run,
+      # and ensure their eval functions exist
+      $evalstr .= '
+        $self->{current_rule_name} = $rulename;
+        $self->register_plugin_eval_glue(q#'.$function.'#);
+      ';
+    }
+
+    # this stuff is quite slow, and totally superfluous if
+    # no plugin is loaded for those hooks
     if ($have_start_rules) {
-      $self->{main}->call_plugins("start_rules", { permsgstatus => $self, ruletype => "eval" });
+      $evalstr .= '
+        $self->{main}->call_plugins("start_rules", {
+                permsgstatus => $self, ruletype => "eval"
+              });
+      ';
     }
 
-    eval {
-      $result = $self->$function(@args);
-    };
-
-    if ($@) {
-      warn "rules: failed to run $rulename test, skipping:\n" . "\t($@)\n";
-      $self->{rule_errors}++;
-      next;
+    my $argstr = '';
+    if (scalar @args > 0) {
+      $argstr = ',' . join (', ', map { "q#".$_."#" } @args);
     }
+
+    $evalstr .= '
+      eval {
+        $result = $self->' . $function . ' (@extraevalargs '. $argstr .' );
+      };
+      if ($@) { $self->handle_eval_rule_errors($rulename); }
+    ';
 
     if ($have_ran_rule) {
-      $self->{main}->call_plugins("ran_rule", { permsgstatus => $self, ruletype => "eval", rulename => $rulename });
+      $evalstr .= '
+        $self->{main}->call_plugins("ran_rule", {
+            permsgstatus => $self, ruletype => "eval", rulename => $rulename
+          });
+      ';
     }
 
-    if ($result) {
-      $self->got_hit ($rulename, $prepend2desc, $result);
-      dbg("rules: ran eval rule $rulename ======> got hit ($result)") if $debugenabled;
-      $self->{main}->call_plugins("hit_rule", { permsgstatus => $self, ruletype => "eval", rulename => $rulename });
+    $evalstr .= '
+      if ($result) {
+        $self->got_eval_hit($rulename, $prepend2desc, $result); '. $dbgstr.'
+      }
+    ';
+  }
+
+  # nothing done in the loop, that means no rules
+  return unless ($evalstr);
+
+  $evalstr = <<"EOT";
+{
+  package Mail::SpamAssassin::PerMsgStatus;
+
+    sub ${methodname} {
+      my (\$self, \@extraevalargs) = \@_;
+
+      my \$prepend2desc = q#$prepend2desc#;
+      my \$rulename;
+      my \$result;
+
+      $evalstr
     }
+
+  1;
+}
+EOT
+
+  eval $evalstr;
+
+  push (@TEMPORARY_METHODS, $methodname);
+
+  if ($@) {
+    warn "rules: failed to compile eval tests, skipping some: $@\n";
+    $self->{rule_errors}++;
+  }
+  else {
+    no strict "refs";
+    &{'Mail::SpamAssassin::PerMsgStatus::'.$methodname}($self,@extraevalargs);
+    use strict "refs";
   }
 }
 
-sub register_plugin_eval_glue {
-  my ($self, $pluginobj, $function) = @_;
+# use a separate sub here, for brevity
+sub handle_eval_rule_errors {
+  my ($self, $rulename) = @_;
+  warn "rules: failed to run $rulename test, skipping:\n\t($@)\n";
+  $self->{rule_errors}++;
+}
 
-  # stop reporting this -- it's too noisy!
-  # dbg("plugin: registering glue method for $function ($pluginobj)");
+sub got_eval_hit {
+  my ($self, $rulename, $prepend2desc, $result) = @_;
+  $self->got_hit($rulename, $prepend2desc, $result);
+  $self->{main}->call_plugins("hit_rule", {
+      permsgstatus => $self, ruletype => "eval", rulename => $rulename
+    });
+}
+
+sub register_plugin_eval_glue {
+  my ($self, $function) = @_;
+
+  # return if it's not an eval_plugin function
+  return if (!exists $self->{conf}->{eval_plugins}->{$function});
+
+  # return if it's been registered already
+  return if ($self->can ($function) &&
+        defined &{'Mail::SpamAssassin::PerMsgStatus::'.$function});
 
   my $evalstr = <<"ENDOFEVAL";
 {
@@ -2774,13 +2882,15 @@ ENDOFEVAL
     warn "rules: failed to run header tests, skipping some: $@\n";
     $self->{rule_errors}++;
   }
+
+  # ensure this method is deleted if finish_tests() is called
+  push (@TEMPORARY_METHODS, $function);
 }
 
 ###########################################################################
 
 sub run_rbl_eval_tests {
   my ($self, $evalhash) = @_;
-  my ($rulename, $pat, @args);
   local ($_);
 
   if ($self->{main}->{local_tests_only}) {
