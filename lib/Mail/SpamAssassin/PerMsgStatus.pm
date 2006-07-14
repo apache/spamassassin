@@ -2479,6 +2479,13 @@ sub do_meta_tests {
         $meta{$rulename} .= "\$self->{'tests_already_hit'}->{'$token'} ";
         $setup_rules{$token}=1;
 
+        if (!exists $self->{conf}->{scores}->{$token}) {
+          info("rules: meta test $rulename has undefined dependency '$token'");
+        }
+        elsif ($self->{conf}->{scores}->{$token} == 0) {
+          info("rules: meta test $rulename has dependency '$token' with a zero score");
+        }
+
         # If the token is another meta rule, add it as a dependency
         push (@{ $rule_deps{$rulename} }, $token)
           if (exists $self->{conf}{meta_tests}->{$priority}->{$token});
