@@ -2596,10 +2596,10 @@ sub do_meta_tests {
         $meta{$rulename} .= "\$h->{'$token'} ";
         $setup_rules{$token}=1;
 
-        if (!exists $self->{conf}->{scores}->{$token}) {
+        if (!exists $conf->{scores}->{$token}) {
           info("rules: meta test $rulename has undefined dependency '$token'");
         }
-        elsif ($self->{conf}->{scores}->{$token} == 0) {
+        elsif ($conf->{scores}->{$token} == 0) {
           info("rules: meta test $rulename has dependency '$token' with a zero score");
         }
 
