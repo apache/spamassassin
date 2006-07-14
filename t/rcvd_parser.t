@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rcvd_parser");
-use Test; BEGIN { plan tests => 49 };
+use Test; BEGIN { plan tests => 50 };
 
 
 use strict;
@@ -621,6 +621,20 @@ Received: (from KRYPTIK [70.20.57.51])
 } => q{
 
 [ ip=70.20.57.51 rdns= helo=KRYPTIK by=host.name ident= envfrom= id=M2006040415284308595 auth= ]
+
+},
+q{
+
+Received: from bar.example.org (bar.example.org [127.0.0.1])
+	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+	(Client did not present a certificate)
+	(Authenticated sender: sender.example.net)
+	by foo.example.net (Postfix) with ESMTP id 44A8959ED6B0
+	for <recip@example.com>; Fri, 30 Jun 2006 08:02:00 +0100 (BST) 
+
+} => q{
+
+[ ip=127.0.0.1 rdns=bar.example.org helo=bar.example.org by=foo.example.net ident= envfrom= id=44A8959ED6B0 auth=Postfix ]
 
 },
 );
