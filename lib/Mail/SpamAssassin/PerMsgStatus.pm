@@ -188,13 +188,6 @@ sub check {
        $self->{resolver}->finish_socket() if $self->{resolver};
       }
 
-      # since meta tests must have a priority of META_TEST_MIN_PRIORITY or
-      # higher then there is no reason to even call the do_meta_tests method
-      # if we are less than that.
-      if ($priority >= META_TEST_MIN_PRIORITY) {
-	$self->do_meta_tests($priority);
-      }
-
       # do head tests
       $self->do_head_tests($priority);
       $self->do_head_eval_tests($priority);
@@ -208,6 +201,8 @@ sub check {
   
       $self->do_full_tests($priority, \$fulltext);
       $self->do_full_eval_tests($priority, \$fulltext);
+
+      $self->do_meta_tests($priority);
 
       # we may need to call this more often than once through the loop, but
       # it needs to be done at least once, either at the beginning or the end.
@@ -2547,9 +2542,10 @@ sub do_meta_tests {
   local ($_);
 
   dbg("rules: running meta tests; score so far=" . $self->{score} );
+  my $conf = $self->{conf};
 
   my $doing_user_rules = 
-    $self->{conf}->{user_rules_to_compile}->{$Mail::SpamAssassin::Conf::TYPE_META_TESTS};
+    $conf->{user_rules_to_compile}->{$Mail::SpamAssassin::Conf::TYPE_META_TESTS};
 
   # clean up priority value so it can be used in a subroutine name
   my $clean_priority;
@@ -2572,11 +2568,11 @@ sub do_meta_tests {
   };
 
   # Get the list of meta tests
-  my @metas = keys %{ $self->{conf}{meta_tests}->{$priority} };
+  my @metas = keys %{ $conf->{meta_tests}->{$priority} };
 
   # Go through each rule and figure out what we need to do
   foreach $rulename (@metas) {
-    my $rule   = $self->{conf}->{meta_tests}->{$priority}->{$rulename};
+    my $rule   = $conf->{meta_tests}->{$priority}->{$rulename};
     my $token;
 
     # Lex the rule into tokens using a rather simple RE method ...
@@ -2586,8 +2582,8 @@ sub do_meta_tests {
     # Set the rule blank to start
     $meta{$rulename} = "";
 
-    # By default, there are no dependencies for a rule
-    @{ $rule_deps{$rulename} } = ();
+    # List dependencies that are meta tests in the same priority band
+    $rule_deps{$rulename} = [ ];
 
     # Go through each token in the meta rule
     foreach $token (@tokens) {
@@ -2597,12 +2593,12 @@ sub do_meta_tests {
         $meta{$rulename} .= "$token ";
       }
       else {
-        $meta{$rulename} .= " \$h->{'$token'} ";
+        $meta{$rulename} .= "\$h->{'$token'} ";
         $setup_rules{$token}=1;
 
         # If the token is another meta rule, add it as a dependency
         push (@{ $rule_deps{$rulename} }, $token)
-          if (exists $self->{conf}{meta_tests}->{$priority}->{$token});
+          if (exists $conf->{meta_tests}->{$priority}->{$token});
       }
     }
   }
@@ -2615,6 +2611,7 @@ sub do_meta_tests {
   @metas = sort { @{ $rule_deps{$a} } <=> @{ $rule_deps{$b} } } @metas;
 
   my $count;
+  my $tflags = $conf->{tflags};
 
   # Now go ahead and setup the eval string
   do {
@@ -2626,6 +2623,16 @@ sub do_meta_tests {
 
       # If we depend on meta rules that haven't run yet, skip it
       next if (grep( $metas{$_}, @{ $rule_deps{ $metas[$i] } }));
+
+      # If we depend on network tests, call ensure_rules_are_complete()
+      # to block until they are
+      my $alldeps = join ' ', grep {
+              $tflags->{$_} =~ /\bnet\b/
+            } @{ $conf->{meta_dependencies}->{ $metas[$i] } };
+
+      if ($alldeps ne '') {
+        $evalstr .= '  $self->ensure_rules_are_complete(q{'.$metas[$i].'}, qw{'.$alldeps.'});';
+      }
 
       # Add this meta rule to the eval line
       $evalstr .= '  $r = '.$meta{$metas[$i]}.";\n";
@@ -2687,6 +2694,29 @@ EOT
     use strict "refs";
   }
 }    # do_meta_tests()
+
+sub ensure_rules_are_complete {
+  my $self = shift;
+  my $metarule = shift;
+  # @_ is now the list of rules
+
+  foreach my $r (@_) {
+    # dbg("rules: meta rule depends on net rule $r");
+    next if ($self->is_rule_complete($r));
+
+    dbg("rules: meta rule $metarule depends on pending rule $r, blocking");
+    my $start = time;
+    $self->harvest_until_rule_completes($r);
+    my $elapsed = time - $start;
+
+    if (!$self->is_rule_complete($r)) {
+      dbg ("rules: rule $r is still not complete; exited early?");
+    }
+    elsif ($elapsed > 0) {
+      info("rules: $r took $elapsed seconds to complete, for $metarule");
+    }
+  }
+}
 
 ###########################################################################
 
