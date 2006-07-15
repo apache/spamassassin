@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-jm bb-zmi cthielen daf parkerm theo wtogami zmi
+# with results from: bb-doc bb-jm bb-zmi cthielen daf parkerm theo wtogami
 
 # good enough
 ADVANCE_FEE_3
@@ -129,9 +129,6 @@ DRUGS_MANYKINDS
 
 # good enough
 DRUGS_SLEEP_EREC
-
-# good enough
-DRUG_DOSAGE
 
 # good enough
 DRUG_ED_GENERIC
@@ -290,10 +287,16 @@ FROM_ALL_NUMS
 FROM_BLANK_NAME
 
 # good enough
+FROM_DOMAIN_NOVOWEL
+
+# good enough
 FROM_ENDS_IN_NUMS
 
 # good enough
 FROM_HAS_MIXED_NUMS
+
+# good enough
+FROM_HAS_ULINE_NUMS
 
 # good enough
 FROM_ILLEGAL_CHARS
@@ -311,9 +314,6 @@ FROM_OFFERS
 FR_WWW_DOMAIN_23SUBDIR
 
 # good enough
-FS_START_DOYOU
-
-# good enough
 FS_START_DOYOU2
 
 # good enough
@@ -321,9 +321,6 @@ FUZZY_MERIDIA
 
 # good enough
 FUZZY_SPRM
-
-# good enough
-FUZZY_STOCK
 
 # good enough
 FU_HOODIA
@@ -405,6 +402,9 @@ HELO_DYNAMIC_SPLIT_IP
 
 # good enough
 HS_EXTRA
+
+# good enough
+HS_FORGED_OE_FW
 
 # good enough
 HS_GETMEOFF
@@ -512,10 +512,16 @@ MALE_ENHANCE
 MID_DEGREES
 
 # good enough
+MID_MJW_STOX
+
+# good enough
 MILLION_USD
 
 # good enough
 MIME_BAD_ISO_CHARSET
+
+# good enough
+MIME_BASE64_NO_NAME
 
 # good enough
 MIME_BASE64_TEXT
@@ -540,6 +546,9 @@ MISSING_DATE
 
 # good enough
 MISSING_MIMEOLE
+
+# good enough
+MISSING_SUBJECT
 
 # good enough
 MORE_SEX
@@ -827,6 +836,9 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
+SPOOF_COM2COM
+
+# good enough
 STOCK_ALERT
 
 # good enough
@@ -854,6 +866,9 @@ SUBJECT_IN_WHITELIST
 SUBJECT_NEEDS_ENCODING
 
 # good enough
+SUBJECT_NOVOWEL
+
+# good enough
 SUBJECT_SEXUAL
 
 # good enough
@@ -873,6 +888,9 @@ SUB_HELLO
 
 # good enough
 SUSPICIOUS_RECIPS
+
+# good enough
+TO_CC_NONE
 
 # good enough
 TO_MALFORMED
@@ -918,9 +936,6 @@ TVD_FINGER_02
 
 # good enough
 TVD_FLOAT_GENERAL
-
-# good enough
-TVD_FROM_1
 
 # good enough
 TVD_FUZZY_DEGREE
@@ -1040,9 +1055,6 @@ TVD_VISIT_PHARMA
 TVD_VIS_HIDDEN
 
 # good enough
-FM_CLAIM_IPOD
-
-# good enough
 FORGED_IMS_HTML
 
 # good enough
@@ -1055,13 +1067,10 @@ FORGED_OUTLOOK_HTML
 FORGED_OUTLOOK_TAGS
 
 # good enough
-HS_FORGED_OE_FW
+KAM_STOCKTIP9
 
 # good enough
-HS_SYNDICATE_P2
-
-# good enough
-MID_MJW_STOX
+MIME_BOUND_ALLHEX_17
 
 # good enough
 RATWARE_MS_HASH
@@ -1070,19 +1079,16 @@ RATWARE_MS_HASH
 RATWARE_OUTLOOK_NONAME
 
 # good enough
-TVD_FW_GRAPHIC_NAME_LONG
-
-# good enough
-TVD_FW_GRAPHIC_NAME_MID
-
-# good enough
-TVD_PH_BODY_META
+TVD_FW_GRAPHIC_ID1
 
 # good enough
 UNCLAIMED_MONEY
 
 # good enough
 UNCLOSED_BRACKET
+
+# good enough
+UNIQUE_WORDS
 
 # tflags userconf
 UNPARSEABLE_RELAY
