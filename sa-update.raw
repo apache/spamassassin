@@ -43,6 +43,7 @@ use File::Path;
 use File::Copy;
 use Getopt::Long;
 use Pod::Usage;
+use Config;
 use strict;
 use warnings;
 
@@ -979,16 +980,14 @@ sub usage {
 }
 
 sub find_gpg_path {
-  dbg("gpg: Searching for 'gpg' in ".$ENV{'PATH'});
-  my $path;
-  foreach my $dir (split(/:/, $ENV{'PATH'})) {
-    $dir = File::Spec->catfile($dir, 'gpg');
-    if (-x $dir) {
-      $path = $dir;
-      last;
-    }
-  }
-  die "fatal: couldn't find GPG in \$PATH\n" unless ($path);
+  # bug 4958: for *NIX it's "gpg", in Windows it's "gpg.exe"
+  my $gpg = 'gpg' . $Config{_exe};
+
+  dbg("gpg: Searching for '$gpg'");
+
+  my $path = Mail::SpamAssassin::Util::find_executable_in_env_path($gpg) ||
+    die "fatal: couldn't find GPG\n";
+
   dbg("gpg: found $path");
   return $path;
 }
@@ -997,8 +996,14 @@ sub interpolate_gpghomedir {
   my $gpghome = '';
   if ($opt{'gpghomedir'}) {
     $gpghome = $opt{'gpghomedir'};
-    $gpghome =~ s/\'/\\\'/gs;
-    $gpghome = "--homedir='$gpghome'";
+    if (Mail::SpamAssassin::Util::am_running_on_windows()) {
+      # windows is single-quote-phobic; bug 4958 cmt 7
+      $gpghome =~ s/\"/\\\"/gs;
+      $gpghome = "--homedir=\"$gpghome\"";
+    } else {
+      $gpghome =~ s/\'/\\\'/gs;
+      $gpghome = "--homedir='$gpghome'";
+    }
   }
   return $gpghome;
 }
