@@ -1,5 +1,8 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-jm bb-zmi cthielen daf parkerm theo wtogami
+# with results from: net-bb-doc net-bb-zmi net-daf net-parkerm
+
+# good enough
+ADDR_NUMS_AT_BIGSITE
 
 # good enough
 ADVANCE_FEE_3
@@ -47,10 +50,16 @@ BAYES_95
 BAYES_99
 
 # good enough
-CUM_SHOT
+BEST_PORN
 
 # good enough
-DATE_IN_FUTURE_03_06
+BODY_ENHANCEMENT2
+
+# good enough
+CONFIRMED_FORGED
+
+# good enough
+CUM_SHOT
 
 # good enough
 DATE_IN_FUTURE_12_24
@@ -65,13 +74,16 @@ DATE_IN_FUTURE_48_96
 DATE_IN_FUTURE_96_XX
 
 # good enough
-DATE_IN_PAST_06_12
-
-# good enough
 DATE_IN_PAST_96_XX
 
 # good enough
 DATE_SPAMWARE_Y2K
+
+# good enough
+DAV_NON_HOTMAIL
+
+# good enough
+DEAR_FRIEND
 
 # good enough
 DEAR_WINNER
@@ -116,7 +128,7 @@ DRUGS_ANXIETY_OBFU
 DRUGS_DIET
 
 # good enough
-DRUGS_ERECTILE
+DRUGS_DIET_OBFU
 
 # good enough
 DRUGS_ERECTILE_OBFU
@@ -132,6 +144,9 @@ DRUGS_SLEEP_EREC
 
 # good enough
 DRUG_ED_GENERIC
+
+# good enough
+DRUG_ED_ONLINE
 
 # good enough
 DRUG_ED_SILD
@@ -150,6 +165,15 @@ ENV_AND_HDR_SPF_MATCH
 
 # good enough
 EXCUSE_24
+
+# good enough
+EXCUSE_4
+
+# good enough
+FAKE_HELO_EMAIL_COM
+
+# good enough
+FAKE_HELO_EXCITE
 
 # good enough
 FAKE_HELO_LYCOS
@@ -203,9 +227,6 @@ FH_FROM_HOODIA
 FH_FROM_TO_PERC
 
 # good enough
-FH_HELO_GMAILSMTP
-
-# good enough
 FH_RCVD_WITHSMTPFOR
 
 # good enough
@@ -243,9 +264,6 @@ FORGED_MUA_EUDORA
 
 # good enough
 FORGED_MUA_IMS
-
-# good enough
-FORGED_MUA_MOZILLA
 
 # good enough
 FORGED_MUA_OIMO
@@ -305,16 +323,13 @@ FROM_ILLEGAL_CHARS
 FROM_LOCAL_NOVOWEL
 
 # good enough
+FROM_NO_LOWER
+
+# good enough
 FROM_NO_USER
 
 # good enough
-FROM_OFFERS
-
-# good enough
 FR_WWW_DOMAIN_23SUBDIR
-
-# good enough
-FS_START_DOYOU2
 
 # good enough
 FUZZY_MERIDIA
@@ -380,6 +395,9 @@ HEAD_ILLEGAL_CHARS
 HELO_DYNAMIC_CHELLO_NL
 
 # good enough
+HELO_DYNAMIC_COMCAST
+
+# good enough
 HELO_DYNAMIC_DHCP
 
 # good enough
@@ -387,9 +405,6 @@ HELO_DYNAMIC_DIALIN
 
 # good enough
 HELO_DYNAMIC_HCC
-
-# good enough
-HELO_DYNAMIC_HOME_NL
 
 # good enough
 HELO_DYNAMIC_IPADDR
@@ -408,9 +423,6 @@ HS_FORGED_OE_FW
 
 # good enough
 HS_GETMEOFF
-
-# good enough
-HS_INDEX_PARAM
 
 # good enough
 HS_MEETUP_FOR_SEX
@@ -440,6 +452,9 @@ HTTP_ESCAPED_HOST
 HTTP_EXCESSIVE_ESCAPES
 
 # good enough
+INFO_TLD
+
+# good enough
 INTERRUPTUS
 
 # good enough
@@ -456,9 +471,6 @@ INVALID_TZ_GMT
 
 # good enough
 INVESTMENT_ADVICE
-
-# good enough
-INVESTMENT_EXPERT
 
 # good enough
 JM_LC_MID
@@ -497,6 +509,9 @@ KAM_STOCKTIP6
 KAM_STOCKTIP8
 
 # good enough
+KAM_STOCKTIP9
+
+# good enough
 KOREAN_UCE_SUBJECT
 
 # good enough
@@ -509,16 +524,19 @@ LONGWORDS
 MALE_ENHANCE
 
 # good enough
-MID_DEGREES
+MEET_SINGLES
 
 # good enough
-MID_MJW_STOX
+MID_DEGREES
 
 # good enough
 MILLION_USD
 
 # good enough
 MIME_BAD_ISO_CHARSET
+
+# good enough
+MIME_BASE64_BLANKS
 
 # good enough
 MIME_BASE64_NO_NAME
@@ -536,25 +554,28 @@ MIME_BOUND_DIGITS_15
 MIME_BOUND_MANY_HEX
 
 # good enough
-MIME_BOUND_RKFINDY
-
-# good enough
 MIME_HTML_MOSTLY
 
 # good enough
 MISSING_DATE
 
 # good enough
+MISSING_HEADERS
+
+# good enough
 MISSING_MIMEOLE
+
+# good enough
+MISSING_MIME_HB_SEP
 
 # good enough
 MISSING_SUBJECT
 
 # good enough
-MORE_SEX
+ML_MARKETING
 
 # good enough
-MPART_ALT_DIFF
+MORE_SEX
 
 # good enough
 MSGID_DOLLARS_RANDOM
@@ -580,8 +601,17 @@ MSGID_SPAM_LETTERS
 # good enough
 MSGID_YAHOO_CAPS
 
+# good enough
+NA_DOLLARS
+
+# good enough
+NOT_ADVISOR
+
 # tflags net
 NO_DNS_FOR_FROM
+
+# good enough
+NO_MEDICAL
 
 # good enough
 NO_PRESCRIPTION
@@ -602,16 +632,19 @@ NULL_IN_BODY
 NUMERIC_HTTP_ADDR
 
 # good enough
+OBSCURED_EMAIL
+
+# good enough
+ONE_TIME
+
+# good enough
 ONLINE_PHARMACY
 
 # good enough
 PERCENT_RANDOM
 
 # good enough
-PLING_QUERY
-
-# good enough
-PORN_15
+PLING_PLING
 
 # good enough
 PREST_NON_ACCREDITED
@@ -785,6 +818,9 @@ REMOVE_BEFORE_LINK
 REPLICA_WATCH
 
 # good enough
+REPLY_TO_EMPTY
+
+# good enough
 REPTO_OVERQUOTE_THEBAT
 
 # good enough
@@ -839,6 +875,9 @@ SPF_SOFTFAIL
 SPOOF_COM2COM
 
 # good enough
+SPOOF_OURI
+
+# good enough
 STOCK_ALERT
 
 # good enough
@@ -875,13 +914,16 @@ SUBJECT_SEXUAL
 SUBJ_AS_SEEN
 
 # good enough
+SUBJ_CONSONANTS
+
+# good enough
+SUBJ_HAS_SPACES
+
+# good enough
 SUBJ_ILLEGAL_CHARS
 
 # good enough
 SUBJ_RE_NUM
-
-# good enough
-SUBJ_YOUR_FAMILY
 
 # good enough
 SUB_HELLO
@@ -893,10 +935,7 @@ SUSPICIOUS_RECIPS
 TO_CC_NONE
 
 # good enough
-TO_MALFORMED
-
-# good enough
-TO_NO_USER
+TO_EMPTY
 
 # good enough
 TRACKER_ID
@@ -912,9 +951,6 @@ TVD_APP_LOAN
 
 # good enough
 TVD_BODY_END_STAR
-
-# good enough
-TVD_DEAD_JOB
 
 # good enough
 TVD_DEAR_HOMEOWNER
@@ -965,9 +1001,6 @@ TVD_HEAD_KERNEL
 TVD_INCREASE_SIZE
 
 # good enough
-TVD_LINK_SAVE
-
-# good enough
 TVD_LONG_WORD5
 
 # good enough
@@ -987,12 +1020,6 @@ TVD_PH_SUBJ_META
 
 # good enough
 TVD_PH_SUBJ_META_ALL
-
-# good enough
-TVD_PH_SUBJ_SEC_MEASURES
-
-# good enough
-TVD_PH_SUBJ_UPDATE
 
 # good enough
 TVD_PH_SUBJ_URGENT
@@ -1019,9 +1046,6 @@ TVD_SECTION
 TVD_SINGLE_SPAN_DIV
 
 # good enough
-TVD_SPACED_SUBJECT_WORD3
-
-# good enough
 TVD_SPACED_WORDS
 
 # good enough
@@ -1046,13 +1070,22 @@ TVD_SUBJ_WIPE_DEBT
 TVD_UA_FOSTERING
 
 # good enough
-TVD_UNDER_VALUED
-
-# good enough
 TVD_VISIT_PHARMA
 
 # good enough
 TVD_VIS_HIDDEN
+
+# tflags net
+DNS_FROM_DOB
+
+# good enough
+FB_CIALIS_LEO2
+
+# good enough
+FM_3PLUS_NODNS
+
+# good enough
+FM_CLAIM_IPOD
 
 # good enough
 FORGED_IMS_HTML
@@ -1067,10 +1100,10 @@ FORGED_OUTLOOK_HTML
 FORGED_OUTLOOK_TAGS
 
 # good enough
-KAM_STOCKTIP9
+HS_NO_FLOWERS
 
 # good enough
-MIME_BOUND_ALLHEX_17
+HS_SYNDICATE_P2
 
 # good enough
 RATWARE_MS_HASH
@@ -1078,14 +1111,92 @@ RATWARE_MS_HASH
 # good enough
 RATWARE_OUTLOOK_NONAME
 
+# tflags net
+RCVD_IN_DOB
+
+# tflags net
+RCVD_IN_DSBL
+
+# tflags net
+RCVD_IN_NJABL_DUL
+
+# tflags net
+RCVD_IN_SORBS_DUL
+
+# tflags net
+RCVD_IN_WHOIS_INVALID
+
+# tflags net
+RCVD_IN_XBL
+
 # good enough
-TVD_FW_GRAPHIC_ID1
+TVD_FW_GRAPHIC_NAME_LONG
+
+# good enough
+TVD_FW_GRAPHIC_NAME_MID
+
+# good enough
+TVD_GET_STOCK
+
+# good enough
+TVD_HEAD_USR
+
+# good enough
+TVD_PH_FR5
+
+# good enough
+TVD_PH_SEC
+
+# good enough
+TVD_RATWARE_MSGID_01
+
+# tflags net
+URIBL_RHS_DOB
+
+# good enough
+ZMIde_EMARKETAT
+
+# good enough
+ZMIde_EMARKETCH
+
+# good enough
+ZMIde_EMARKETDE
+
+# good enough
+ZMIde_EMARKETDEATCH
+
+# good enough
+ZMIde_LOGOSHAK1
+
+# good enough
+ZMIde_LOGOSHAK2
+
+# good enough
+ZMIde_LOGOSHAK3
+
+# good enough
+ZMIde_LOGOSHAK4
+
+# good enough
+ZMIde_LOGOSHAKALL
+
+# good enough
+ZMIde_LOGOSHAKURI
+
+# good enough
+ZMIde_REPLICA1
+
+# good enough
+ZMIde_REPLICASURE
 
 # good enough
 UNCLAIMED_MONEY
 
 # good enough
 UNCLOSED_BRACKET
+
+# good enough
+UNDISC_RECIPS
 
 # good enough
 UNIQUE_WORDS
@@ -1136,13 +1247,22 @@ URIBL_SC_SURBL
 URIBL_WS_SURBL
 
 # good enough
+URI_4YOU
+
+# good enough
 URI_L_PHP
+
+# good enough
+URI_NOVOWEL
 
 # good enough
 URI_NO_WWW_BIZ_CGI
 
 # good enough
 URI_NO_WWW_INFO_CGI
+
+# good enough
+URI_SCHEME_MIXED_CASE
 
 # tflags userconf
 USER_IN_ALL_SPAM_TO
@@ -1178,6 +1298,9 @@ VERTICAL_DRUGS_1
 VIA_GAP_GRA
 
 # good enough
+WEIRD_QUOTING
+
+# good enough
 X_IP
 
 # good enough
@@ -1190,10 +1313,10 @@ X_MESSAGE_INFO
 X_MSMAIL_PRIORITY_HIGH
 
 # good enough
-X_ORIG_IP_NOT_IPV4
+X_PRIORITY_CC
 
 # good enough
-X_PRIORITY_CC
+X_PRIORITY_HIGH
 
 # good enough
 ZMIde_EBAYJOBSURI
@@ -1203,6 +1326,9 @@ ZMIde_REPLICA2
 
 # good enough
 ZMIde_SEXUALEXPL1
+
+# tflags net
+__RCVD_IN_DOB
 
 # tflags net
 __RCVD_IN_IADB
