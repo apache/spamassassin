@@ -1232,7 +1232,7 @@ sub helper_app_pipe_open_windows {
 
   # use a traditional open(FOO, "cmd |")
   my $cmd = join(' ', @cmdline);
-  if ($stdinfile) { $cmd .= " < '$stdinfile'"; }
+  if ($stdinfile) { $cmd .= qq/ < "$stdinfile"/; }
   if ($duperr2out) { $cmd .= " 2>&1"; }
   return open ($fh, $cmd.'|');
 }
