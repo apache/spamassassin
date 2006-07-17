@@ -1368,6 +1368,7 @@ sub finish_tests {
       undef &{$method};
     }
   }
+  @TEMPORARY_METHODS = ();      # clear for next time
 }
 
 
