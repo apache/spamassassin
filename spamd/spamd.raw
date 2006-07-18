@@ -1393,6 +1393,7 @@ sub check {
     push(@extra, "bayes=".sprintf("%06f", $status->{bayes_score}));
   }
   push(@extra, "autolearn=".$status->get_autolearn_status());
+  push(@extra, $status->get_spamd_result_log_items());
 
   my $yorn = $status->is_spam() ? 'Y' : '.';
   my $score = $status->get_score();

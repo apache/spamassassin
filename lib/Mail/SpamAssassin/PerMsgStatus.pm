@@ -81,6 +81,7 @@ sub new {
     'test_logs'         => '',
     'test_names_hit'    => [ ],
     'subtest_names_hit' => [ ],
+    'spamd_result_log_items' => [ ],
     'tests_already_hit' => { },
     'hdr_cache'         => { },
     'rule_errors'       => 0,
@@ -1129,6 +1130,46 @@ C<undef> will be returned if a tag by that name has not been defined.
 sub get_tag {
   # expose this previously-private API
   return shift->_get_tag(uc shift);
+}
+
+###########################################################################
+
+# public API for plugins
+
+=item $status->set_spamd_result_item($subref)
+
+Set an entry for the spamd result log line.  C<$subref> should be a code
+reference for a subroutine which will return a string in C<'name=VALUE'>
+format, similar to the other entries in the spamd result line:
+
+  Jul 17 14:10:47 radish spamd[16670]: spamd: result: Y 22 - ALL_NATURAL,
+  DATE_IN_FUTURE_03_06,DIET_1,DRUGS_ERECTILE,DRUGS_PAIN,
+  TEST_FORGED_YAHOO_RCVD,TEST_INVALID_DATE,TEST_NOREALNAME,
+  TEST_NORMAL_HTTP_TO_IP,UNDISC_RECIPS scantime=0.4,size=3138,user=jm,
+  uid=1000,required_score=5.0,rhost=localhost,raddr=127.0.0.1,
+  rport=33153,mid=<9PS291LhupY>,autolearn=spam
+
+C<name> and C<VALUE> must not contain C<=> or C<,> characters, as it
+is important that these log lines are easy to parse.
+
+The code reference will be called by spamd after the message has been scanned,
+and the C<PerMsgStatus::check()> method has returned.
+
+=cut
+
+sub set_spamd_result_item {
+  my ($self, $ref) = @_;
+  push @{$self->{spamd_result_log_items}}, $ref;
+}
+
+# called by spamd
+sub get_spamd_result_log_items {
+  my ($self) = @_;
+  my @ret = ();
+  foreach my $ref (@{$self->{spamd_result_log_items}}) {
+    push @ret, &$ref;
+  }
+  return @ret;
 }
 
 ###########################################################################
