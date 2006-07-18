@@ -833,7 +833,7 @@ main(int argc, char *argv[])
 	message_cleanup(&m);
 	ret = EX_NOTSPAM;
     }
-    else if (flags & SPAMC_LEARN ) {
+    else if (flags & SPAMC_LEARN) {
         message_cleanup(&m);
     }
     else {
