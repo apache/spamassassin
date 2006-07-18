@@ -880,6 +880,17 @@ main(int argc, char *argv[])
     else if (flags & (SPAMC_LEARN|SPAMC_PING) ) {
         message_cleanup(&m);
     }
+    else if (flags & SPAMC_SYMBOLS) {
+	/* bug 4991: -y should only output a blank line on connection failure */
+	full_write(out_fd, 1, "\n", 1);
+        message_cleanup(&m);
+        if (use_exit_code) {
+            ret = result;
+        }
+	else if (flags & SPAMC_SAFE_FALLBACK) {
+	    ret = EX_OK;
+	}
+    }
     else {
 	message_dump(STDIN_FILENO, out_fd, &m);
 	message_cleanup(&m);
