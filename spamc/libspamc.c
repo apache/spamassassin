@@ -566,20 +566,20 @@ static int _message_read_bsmtp(int fd, struct message *m)
     }
 
     /* Find the end-of-DATA line */
-    /* if bad format with no end ".\n" will truncate the last two characters of the buffer */
     prev = '\n';
-    for (i = j = 0; (i+2) < (unsigned int) m->msg_len; i++) { /* (i+2) prevents out of bound reference msg[i+2] */
+    for (i = j = 0; i < (unsigned int) m->msg_len; i++) {
 	if (prev == '\n' && m->msg[i] == '.') {
 	    /* Dot at the beginning of a line */
-	    if ((m->msg[i + 1] == '\r' && m->msg[i + 2] == '\n')
-		|| m->msg[i + 1] == '\n') {
+            if (((i+1) == m->msg_len)
+                || ((i+1) < m->msg_len && m->msg[i + 1] == '\n')
+                || ((i+2) < m->msg_len && m->msg[i + 1] == '\r' && m->msg[i + 2] == '\n')) {
 		/* Lone dot! That's all, folks */
 		m->post = m->msg + i;
 		m->post_len = m->msg_len - i;
 		m->msg_len = j;
 		break;
 	    }
-	    else if (m->msg[i + 1] == '.') {
+	    else if ((i+1) < m->msg_len && m->msg[i + 1] == '.') {
 		/* Escaping dot, eliminate. */
 		prev = '.';
 		continue;
@@ -589,6 +589,9 @@ static int _message_read_bsmtp(int fd, struct message *m)
 	m->msg[j++] = m->msg[i];
     }
 
+    /* if bad format with no end "\n.\n", error out */
+    if (m->post == NULL)
+	return EX_DATAERR;
     m->type = MESSAGE_BSMTP;
     m->out = m->msg;
     m->out_len = m->msg_len;
