@@ -11,8 +11,8 @@ DROPPRIVS=yes
 # Pipe the mail through spamassassin (replace 'spamassassin' with 'spamc'
 # if you use the spamc/spamd combination)
 #
-# The condition line ensures that only messages smaller than 250 kB
-# (250 * 1024 = 256000 bytes) are processed by SpamAssassin. Most spam
+# The condition line ensures that only messages smaller than 500 kB
+# (500 * 1024 = 512000 bytes) are processed by SpamAssassin. Most spam
 # isn't bigger than a few k and working with big messages can bring
 # SpamAssassin to its knees.
 #
@@ -20,7 +20,7 @@ DROPPRIVS=yes
 # at 1 time, to keep the load down.
 #
 :0fw: spamassassin.lock
-* < 256000
+* < 512000
 | spamassassin
 
 # Mails with a score of 15 or higher are almost certainly spam (with 0.05%
