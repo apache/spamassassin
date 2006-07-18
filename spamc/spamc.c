@@ -153,7 +153,7 @@ print_usage(void)
         "                      Timeout in seconds for communications to\n"
         "                      spamd. [default: 600]\n");
     usg("  -s, --max-size size Specify maximum message size, in bytes.\n"
-        "                      [default: 250k]\n");
+        "                      [default: 500k]\n");
     usg("  -u, --username username\n"
         "                      User for spamd to process this message under.\n"
         "                      [default: current user]\n");
@@ -673,7 +673,7 @@ main(int argc, char *argv[])
 #endif
 
     /* set some defaults */
-    max_size = 250 * 1024;
+    max_size = 500 * 1024;
     username = NULL;
  
     combo_argc = 1;
