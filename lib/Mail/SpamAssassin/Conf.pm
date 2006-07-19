@@ -43,8 +43,8 @@ loaded from the C</usr/share/spamassassin> and C</etc/mail/spamassassin>
 directories.
 
 The C<#> character starts a comment, which continues until end of line.
-B<NOTE:> using the C<#> character in the regular expression rules requires
-escaping.  i.e.: C<\#>
+B<NOTE:> if the C<#> character is to be used as part of a rule or
+configuration option, it must be escaped with a backslash.  i.e.: C<\#>
 
 Whitespace in the files is not significant, but please note that starting a
 line with whitespace is deprecated, as we reserve its use for multi-line rule
