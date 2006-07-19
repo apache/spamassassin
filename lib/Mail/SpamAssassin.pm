@@ -1235,8 +1235,13 @@ sub lint_rules {
   $self->{lint_rules} = $self->{conf}->{lint_rules} = 1;
   $self->{syntax_errors} = 0;
 
+  my $olddcp = $self->{dont_copy_prefs};
+  $self->{dont_copy_prefs} = 1;
+
   $self->init(1);
   $self->{syntax_errors} += $self->{conf}->{errors};
+
+  $self->{dont_copy_prefs} = $olddcp;       # revert back to previous
 
   my $mail = $self->parse(\@testmsg, 1);
   my $status = Mail::SpamAssassin::PerMsgStatus->new($self, $mail,
