@@ -88,8 +88,8 @@ BEGIN {
 eval { use Net::DNS; };
 eval { use LWP::UserAgent; };
 eval { use HTTP::Date qw(time2str); };
-eval { use Archive::Tar; };
-eval { use IO::Zlib; };
+eval { use Archive::Tar 1.23; };
+eval { use IO::Zlib 1.04; };
 
 # These should already be available
 use Mail::SpamAssassin;
