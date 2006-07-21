@@ -401,11 +401,7 @@ foreach my $channel (@channels) {
     next;
   }
 
-  # ensure dirs exist, upfront
-  unless (-d $UPDDir) {
-    dbg("channel: creating $UPDDir");
-    mkpath([$UPDDir], 0, 0777) or die "fatal: can't create $UPDDir: $!\n";
-  }
+  # ensure tmp dir exists, upfront
   unless (-d $UPDTmp) {
     dbg("channel: creating $UPDTmp");
     mkpath([$UPDTmp], 0, 0777) or die "fatal: can't create $UPDTmp: $!\n";
@@ -751,22 +747,62 @@ ENDOFVALIDATIONERR
   }
   closedir(DIR);
   if (!close(CF)) {
-    warn "write to $CFFTmp failed! attempting to continue";
-    channel_failed("write to $CFFTmp failed");
-    next;
+    die "write to $CFFTmp failed! $!";  # write failed = fatal
   }
+
+  # create a test file, in an attempt to mitigate dangers of incomplete
+  # upgrades.  If we fail to move this file the same way we expect to with the
+  # "real" upgrade files, there's no point in continuing.  (bug 4941)
+  my $testfile = "$UPDTmp/.rename_test.tmp";
+  my $testtofile = "$UPDDir/.rename_test.tmp";
+  open(TST, ">".$testfile) or die "write to $testfile failed! $!";
+  print TST time;
+  close TST or die "close of $testfile failed! $!";
 
   dbg("channel: applying changes to $UPDDir...");
 
-  # too late to stop now!   At this stage, if there are errors,
-  # we have to attempt to carry on regardless, since we've already
-  # blown away the old ruleset.
+  if (-d $UPDDir) {
+    if (!rename($testfile, $testtofile)) {
+      warn "rename $testfile $testtofile failed: $!";
+      unlink ($testfile, $testtofile);
+      die "rename test failed (existing dir), aborting upgrade"
+    }
 
-  # clean out the "real" update dir, and copy from tmp areas
-  if (!clean_update_dir($UPDDir)) {
-    warn("channel: attempt to rm contents failed, attempting to continue anyway");
+    unlink $testtofile;
+
+    # ok that worked, too late to stop now!   At this stage, if there are
+    # errors, we have to attempt to carry on regardless, since we've already
+    # blown away the old ruleset.
+    dbg("channel: point of no return for existing $UPDDir");
+
+    # clean out the "real" update dir
+    if (!clean_update_dir($UPDDir)) {
+      warn("channel: attempt to rm contents failed, attempting to continue anyway");
+    }
+
+  } else {
+    # create the dir, if it doesn't exist
+    dbg("channel: creating $UPDDir");
+    if (!mkpath([$UPDDir], 0, 0777)) {
+      rmdir $UPDDir;        # be sure it can't be used (bug 4941)
+      die "fatal: can't create $UPDDir: $!\n";
+    }
+
+    if (!rename($testfile, $testtofile)) {
+      warn "rename $testfile $testtofile failed: $!";
+      unlink ($testfile, $testtofile);
+      rmdir $UPDDir;        # be sure it can't be used (bug 4941)
+      die "rename test failed (new dir), aborting upgrade"
+    }
+
+    unlink $testtofile;
+
+    # ok, that test worked.  it's now likely that the .cf's will
+    # similarly be ok to rename, too.   Too late to stop from here on
+    dbg("channel: point of no return for new $UPDDir");
   }
 
+  # move in the files
   foreach my $file (@files) {
     rename("$UPDTmp/$file", "$UPDDir/$file")
         or warn "rename $UPDTmp/$file $UPDDir/$file failed: $!";
@@ -1067,6 +1103,7 @@ sub is_valid_gpg_key_id {
 
 sub clean_update_dir {
   my $dir = shift;
+
   unless (opendir(DIR, $dir)) {
     warn "error: can't readdir $dir: $!\n";
     dbg("channel: attempt to readdir failed, channel failed");
@@ -1080,6 +1117,7 @@ sub clean_update_dir {
     $file = $1;
     if (!unlink "$dir/$file") {
       warn "error: can't remove file $dir/$file: $!\n";
+      closedir(DIR);
       return 0;
     }
   }
