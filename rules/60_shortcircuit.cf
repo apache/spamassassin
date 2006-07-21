@@ -23,6 +23,8 @@
 ###########################################################################
 # HIGH PRIORITY RULES
 
+ifplugin Mail::SpamAssassin::Plugin::Shortcircuit
+
 priority USER_IN_WHITELIST     -1000
 priority USER_IN_DEF_WHITELIST -1000
 priority USER_IN_ALL_SPAM_TO   -1000
@@ -52,4 +54,6 @@ shortcircuit SUBJECT_IN_BLACKLIST    on
 
 # shortcircuit BAYES_99              spam
 # shortcircuit BAYES_00              ham
+
+endif # Mail::SpamAssassin::Plugin::Shortcircuit
 

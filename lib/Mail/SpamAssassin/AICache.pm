@@ -60,10 +60,13 @@ sub new {
 
   my $use_cache = 1;
 
+  # be sure to use rel2abs() here, since otherwise relative paths
+  # are broken by the prefix stuff
   if ($self->{type} eq 'dir') {
     $self->{cache_file} = File::Spec->catdir(
                 $self->{prefix},
-                $self->{path}, '.spamassassin_cache');
+                File::Spec->rel2abs($self->{path}),
+                '.spamassassin_cache');
 
     $self->{cache_mtime} = (stat($self->{cache_file}))[9] || 0;
   }
@@ -71,7 +74,7 @@ sub new {
     my @split = File::Spec->splitpath($self->{path});
     $self->{cache_file} = File::Spec->catdir(
                 $self->{prefix},
-                $split[1],
+                File::Spec->rel2abs($split[1]),
                 join('_', '.spamassassin_cache', $self->{type}, $split[2]));
 
     $self->{cache_mtime} = (stat($self->{cache_file}))[9] || 0;

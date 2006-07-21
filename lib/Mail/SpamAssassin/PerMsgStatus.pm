@@ -59,10 +59,13 @@ use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::Logger;
 
 use vars qw{
-  @ISA
+  @ISA @TEMPORARY_METHODS
 };
 
 @ISA = qw();
+
+# methods defined by the compiled ruleset; deleted in finish_tests()
+@TEMPORARY_METHODS = ();
 
 ###########################################################################
 
@@ -78,12 +81,13 @@ sub new {
     'test_logs'         => '',
     'test_names_hit'    => [ ],
     'subtest_names_hit' => [ ],
+    'spamd_result_log_items' => [ ],
     'tests_already_hit' => { },
     'hdr_cache'         => { },
     'rule_errors'       => 0,
     'disable_auto_learning' => 0,
     'auto_learn_status' => undef,
-    'conf'                => $main->{conf},
+    'conf'              => $main->{conf},
     'async'             => Mail::SpamAssassin::AsyncLoop->new($main)
   };
 
@@ -171,13 +175,14 @@ sub check {
       next unless ($self->{conf}->{priorities}->{$priority} > 0);
 
       # if shortcircuiting is hit, we skip all other priorities...
-      last if (exists $self->{shortcircuit_type});
+      last if $self->have_shortcircuited();
 
       dbg("check: running tests for priority: $priority");
 
       # only harvest the dnsbl queries once priority HARVEST_DNSBL_PRIORITY
       # has been reached and then only run once
-      if ($priority >= HARVEST_DNSBL_PRIORITY && $needs_dnsbl_harvest_p && !exists $self->{shortcircuit_type})
+      if ($priority >= HARVEST_DNSBL_PRIORITY && $needs_dnsbl_harvest_p
+            && !$self->have_shortcircuited())
       {
 	# harvest the DNS results
 	$self->harvest_dnsbl_queries();
@@ -213,20 +218,15 @@ sub check {
     # sanity check, it is possible that no rules >= HARVEST_DNSBL_PRIORITY ran so the harvest
     # may not have run yet.  Check, and if so, go ahead and harvest here.
     if ($needs_dnsbl_harvest_p) {
-      if (!exists $self->{shortcircuit_type}) {
+      if (!$self->have_shortcircuited()) {
         # harvest the DNS results
         $self->harvest_dnsbl_queries();
       }
 
       # finish the DNS results
+      # TODO: this should be consolidated with the identical code above
       $self->rbl_finish();
-
-      if (!exists $self->{shortcircuit_type}) {
-        # TODO: should we call this even if we're short-circuiting?
-        # in URIDNSBL, it used to be a time-consuming operation.
-        $self->{main}->call_plugins("check_post_dnsbl", { permsgstatus => $self });
-      }
-
+      $self->{main}->call_plugins ("check_post_dnsbl", { permsgstatus => $self });
       $self->{resolver}->finish_socket() if $self->{resolver};
     }
 
@@ -1142,6 +1142,46 @@ sub get_tag {
 
 ###########################################################################
 
+# public API for plugins
+
+=item $status->set_spamd_result_item($subref)
+
+Set an entry for the spamd result log line.  C<$subref> should be a code
+reference for a subroutine which will return a string in C<'name=VALUE'>
+format, similar to the other entries in the spamd result line:
+
+  Jul 17 14:10:47 radish spamd[16670]: spamd: result: Y 22 - ALL_NATURAL,
+  DATE_IN_FUTURE_03_06,DIET_1,DRUGS_ERECTILE,DRUGS_PAIN,
+  TEST_FORGED_YAHOO_RCVD,TEST_INVALID_DATE,TEST_NOREALNAME,
+  TEST_NORMAL_HTTP_TO_IP,UNDISC_RECIPS scantime=0.4,size=3138,user=jm,
+  uid=1000,required_score=5.0,rhost=localhost,raddr=127.0.0.1,
+  rport=33153,mid=<9PS291LhupY>,autolearn=spam
+
+C<name> and C<VALUE> must not contain C<=> or C<,> characters, as it
+is important that these log lines are easy to parse.
+
+The code reference will be called by spamd after the message has been scanned,
+and the C<PerMsgStatus::check()> method has returned.
+
+=cut
+
+sub set_spamd_result_item {
+  my ($self, $ref) = @_;
+  push @{$self->{spamd_result_log_items}}, $ref;
+}
+
+# called by spamd
+sub get_spamd_result_log_items {
+  my ($self) = @_;
+  my @ret = ();
+  foreach my $ref (@{$self->{spamd_result_log_items}}) {
+    push @ret, &$ref;
+  }
+  return @ret;
+}
+
+###########################################################################
+
 sub _get_tag_value_for_yesno {
   my $self   = shift;
   
@@ -1250,17 +1290,6 @@ sub _get_tag {
             },
 
             AUTOLEARN => sub { return $self->get_autolearn_status(); },
-
-            SC => sub {
-              my $rule = $self->{shortcircuit_rule};
-              my $type = $self->{shortcircuit_type};
-              return "$rule ($type)" if ($rule);
-              return "no";
-            },
-
-            SCRULE => sub { return ($self->{shortcircuit_rule} || "none") ; },
-
-            SCTYPE => sub { return ($self->{shortcircuit_type} || "no") ; },
 
             TESTS => sub {
               my $arg = (shift || ',');
@@ -1382,6 +1411,13 @@ sub finish_tests {
       undef &{'_meta_tests_'.$clean_priority};
     }
   }
+
+  foreach my $method (@TEMPORARY_METHODS) {
+    if (defined &{$method}) {
+      undef &{$method};
+    }
+  }
+  @TEMPORARY_METHODS = ();      # clear for next time
 }
 
 
@@ -1670,9 +1706,7 @@ sub start_rules_plugin_code {
 }
 
 sub hit_rule_plugin_code {
-  my ($self, $rulename, $ruletype) = @_;
-
-  return '' unless exists($self->{should_log_rule_hits}) || $self->{main}->have_plugin("hit_rule");
+  my ($self, $rulename, $ruletype, $loop_break_directive) = @_;
 
   # note: keep this in 'single quotes' to avoid the $ & performance hit,
   # unless specifically requested by the caller.   Also split the
@@ -1685,7 +1719,6 @@ sub hit_rule_plugin_code {
     $debug_code = '
         dbg("rules: ran '.$ruletype.' rule '.$rulename.' ======> got hit: \"" . '.
             $match.' . "\"");
-        
     ';
   }
 
@@ -1696,15 +1729,14 @@ sub hit_rule_plugin_code {
     ';
   }
 
-  my $plugin_code = '';
-  if ($self->{main}->have_plugin("hit_rule")) {
-    $plugin_code = '
-        $self->{main}->call_plugins ("hit_rule", { permsgstatus => $self, rulename => \''.$rulename.'\', ruletype => \''.$ruletype.'\' });
-    ';
+  # if we're not running "tflags multiple", break out of the matching
+  # loop this way
+  my $multiple_code = '';
+  if ($self->{conf}->{tflags}->{$rulename} !~ /\bmultiple\b/) {
+    $multiple_code = $loop_break_directive.';';
   }
 
-  return $debug_code.$save_hits_code.$plugin_code.'
-  ';
+  return $debug_code.$save_hits_code.$multiple_code;
 }
 
 sub ran_rule_plugin_code {
@@ -1730,7 +1762,7 @@ sub do_head_tests {
   my ($self, $priority) = @_;
   local ($_);
 
-  return if (exists $self->{shortcircuit_type});
+  return if $self->have_shortcircuited();
 
   # note: we do this only once for all head pattern tests.  Only
   # eval tests need to use stuff in here.
@@ -1787,10 +1819,8 @@ sub do_head_tests {
         my($self,$text) = @_;
         '.$self->hash_line_for_rule($rulename).'
         while ($text '.$testtype.'~ '.$pat.'g) {
-          $self->got_hit (q#'.$rulename.'#, q{});
-          '. $self->hit_rule_plugin_code($rulename, "header") . '
-          # Ok, we hit, stop now.
-          last unless $self->{conf}->{tflags}->{q{'.$rulename.'}} =~ /\bmultiple\b/;
+          $self->got_hit(q#'.$rulename.'#, "", ruletype => "header");
+          '. $self->hit_rule_plugin_code($rulename, "header", "last") . '
         }
       }';
 
@@ -1851,7 +1881,7 @@ sub do_body_tests {
   my ($self, $priority, $textary) = @_;
   local ($_);
     
-  return if (exists $self->{shortcircuit_type});
+  return if $self->have_shortcircuited();
 
   dbg("rules: running body-text per-line regexp tests; score so far=".$self->{score});
 
@@ -1895,10 +1925,8 @@ sub do_body_tests {
              '.$self->hash_line_for_rule($rulename).'
              pos = 0;
              while ('.$pat.'g) { 
-                $self->got_pattern_hit(q{'.$rulename.'}, "BODY: "); 
-                '. $self->hit_rule_plugin_code($rulename, "body") . '
-		# Ok, we hit, stop now.
-		return unless $self->{conf}->{tflags}->{q{'.$rulename.'}} =~ /\bmultiple\b/;
+                $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body"); 
+                '. $self->hit_rule_plugin_code($rulename, "body", "return") . '
              }
            }
     }
@@ -2267,7 +2295,7 @@ sub do_body_uri_tests {
   my ($self, $priority, @uris) = @_;
   local ($_);
 
-  return if (exists $self->{shortcircuit_type});
+  return if $self->have_shortcircuited();
   
   dbg("uri: running uri tests; score so far=".$self->{score});
 
@@ -2311,10 +2339,8 @@ sub do_body_uri_tests {
          '.$self->hash_line_for_rule($rulename).'
          pos = 0;
          while ('.$pat.'g) { 
-            $self->got_pattern_hit(q{'.$rulename.'}, "URI: ");
-            '. $self->hit_rule_plugin_code($rulename, "uri") . '
-            # Ok, we hit, stop now.
-	    return unless $self->{conf}->{tflags}->{q{'.$rulename.'}} =~ /\bmultiple\b/;
+            $self->got_hit(q{'.$rulename.'}, "URI: ", ruletype => "uri");
+            '. $self->hit_rule_plugin_code($rulename, "uri", "return") .'
          }
        }
     }
@@ -2361,7 +2387,7 @@ sub do_rawbody_tests {
   my ($self, $priority, $textary) = @_;
   local ($_);
 
-  return if (exists $self->{shortcircuit_type});
+  return if $self->have_shortcircuited();
 
   dbg("rules: running raw-body-text per-line regexp tests; score so far=".$self->{score});
 
@@ -2404,10 +2430,8 @@ sub do_rawbody_tests {
          '.$self->hash_line_for_rule($rulename).'
          pos = 0;
          while ('.$pat.'g) { 
-            $self->got_pattern_hit(q{'.$rulename.'}, "RAW: ");
-            '. $self->hit_rule_plugin_code($rulename, "rawbody") . '
-            # Ok, we hit, stop now.
-	    return unless $self->{conf}->{tflags}->{q{'.$rulename.'}} =~ /\bmultiple\b/;
+            $self->got_hit(q{'.$rulename.'}, "RAW: ", ruletype => "rawbody");
+            '. $self->hit_rule_plugin_code($rulename, "rawbody", "return") . '
          }
        }
     }
@@ -2454,7 +2478,7 @@ sub do_full_tests {
   my ($self, $priority, $fullmsgref) = @_;
   local ($_);
     
-  return if (exists $self->{shortcircuit_type});
+  return if $self->have_shortcircuited();
   
   dbg("rules: running full-text regexp tests; score so far=".$self->{score});
 
@@ -2484,10 +2508,8 @@ sub do_full_tests {
         '.$self->hash_line_for_rule($rulename).'
         pos $$fullmsgref = 0;
         while ($$fullmsgref =~ '.$pat.'g) {
-          $self->got_pattern_hit(q{'.$rulename.'}, "FULL: ");
-          '. $self->hit_rule_plugin_code($rulename, "full") . '
-	  # Ok, we hit, stop now.
-	  last unless $self->{conf}->{tflags}->{q{'.$rulename.'}} =~ /\bmultiple\b/;
+          $self->got_hit(q{'.$rulename.'}, "FULL: ", ruletype => "full");
+          '. $self->hit_rule_plugin_code($rulename, "full", "last") . '
         }
         '.$self->ran_rule_plugin_code($rulename, "full").'
       }
@@ -2531,25 +2553,32 @@ EOT
 sub do_head_eval_tests {
   my ($self, $priority) = @_;
   return unless (defined($self->{conf}->{head_evals}->{$priority}));
-  $self->run_eval_tests ($self->{conf}->{head_evals}->{$priority}, '');
+  $self->run_eval_tests ($Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS,
+                         $self->{conf}->{head_evals}->{$priority}, '', $priority);
 }
 
 sub do_body_eval_tests {
   my ($self, $priority, $bodystring) = @_;
   return unless (defined($self->{conf}->{body_evals}->{$priority}));
-  $self->run_eval_tests ($self->{conf}->{body_evals}->{$priority}, 'BODY: ', $bodystring);
+  $self->run_eval_tests ($Mail::SpamAssassin::Conf::TYPE_BODY_EVALS,
+                         $self->{conf}->{body_evals}->{$priority}, 'BODY: ',
+                         $priority, $bodystring);
 }
 
 sub do_rawbody_eval_tests {
   my ($self, $priority, $bodystring) = @_;
   return unless (defined($self->{conf}->{rawbody_evals}->{$priority}));
-  $self->run_eval_tests ($self->{conf}->{rawbody_evals}->{$priority}, 'RAW: ', $bodystring);
+  $self->run_eval_tests ($Mail::SpamAssassin::Conf::TYPE_RAWBODY_EVALS,
+                         $self->{conf}->{rawbody_evals}->{$priority}, 'RAW: ',
+                         $priority, $bodystring);
 }
 
 sub do_full_eval_tests {
   my ($self, $priority, $fullmsgref) = @_;
   return unless (defined($self->{conf}->{full_evals}->{$priority}));
-  $self->run_eval_tests ($self->{conf}->{full_evals}->{$priority}, '', $fullmsgref);
+  $self->run_eval_tests ($Mail::SpamAssassin::Conf::TYPE_FULL_EVALS,
+                         $self->{conf}->{full_evals}->{$priority}, '',
+                         $priority, $fullmsgref);
 }
 
 ###########################################################################
@@ -2558,7 +2587,7 @@ sub do_meta_tests {
   my ($self, $priority) = @_;
   local ($_);
     
-  return if (exists $self->{shortcircuit_type});
+  return if $self->have_shortcircuited();
 
   dbg("rules: running meta tests; score so far=" . $self->{score} );
   my $conf = $self->{conf};
@@ -2615,6 +2644,13 @@ sub do_meta_tests {
         $meta{$rulename} .= "\$h->{'$token'} ";
         $setup_rules{$token}=1;
 
+        if (!exists $conf->{scores}->{$token}) {
+          info("rules: meta test $rulename has undefined dependency '$token'");
+        }
+        elsif ($conf->{scores}->{$token} == 0) {
+          info("rules: meta test $rulename has dependency '$token' with a zero score");
+        }
+
         # If the token is another meta rule, add it as a dependency
         push (@{ $rule_deps{$rulename} }, $token)
           if (exists $conf->{meta_tests}->{$priority}->{$token});
@@ -2654,8 +2690,10 @@ sub do_meta_tests {
       }
 
       # Add this meta rule to the eval line
-      $evalstr .= '  $r = '.$meta{$metas[$i]}.";\n";
-      $evalstr .= '  if ($r) { $self->got_hit (q#'.$metas[$i].'#, "", $r); }'."\n";
+      $evalstr .= '
+        $r = '.$meta{$metas[$i]}.';
+        if ($r) { $self->got_hit(q#'.$metas[$i].'#, "", ruletype => "meta", value => $r); }
+      ';
 
       splice @metas, $i--, 1;    # remove this rule from our list
     }
@@ -2740,88 +2778,172 @@ sub ensure_rules_are_complete {
 ###########################################################################
 
 sub run_eval_tests {
-  my ($self, $evalhash, $prepend2desc, @extraevalargs) = @_;
+  my ($self, $testtype, $evalhash, $prepend2desc, $priority, @extraevalargs) = @_;
   local ($_);
 
-  return if (exists $self->{shortcircuit_type});
-  
+  return if $self->have_shortcircuited();
+
+  my $doing_user_rules = $self->{conf}->{user_rules_to_compile}->{$testtype};
+
+  # clean up priority value so it can be used in a subroutine name
+  my $clean_priority;
+  ($clean_priority = $priority) =~ s/-/neg/;
+
+  my $scoreset = $self->{conf}->get_score_set();
+
+  my $methodname = '_eval_tests'.
+                        '_type'.$testtype .
+                        '_pri'.$clean_priority .
+                        '_set'.$scoreset;
+
+  # Some of the rules are scoreset specific, so we need additional 
+  # subroutines to handle those
+  if (defined &{'Mail::SpamAssassin::PerMsgStatus::'.$methodname}
+        && !$doing_user_rules)
+  {
+    no strict "refs";
+    &{'Mail::SpamAssassin::PerMsgStatus::'.$methodname}($self,@extraevalargs);
+    use strict "refs";
+    return;
+  }
+
   # look these up once in advance to save repeated lookups in loop below
-  my $debugenabled = would_log('dbg');
-  my $scoresref = $self->{conf}->{scores};
   my $tflagsref = $self->{conf}->{tflags};
   my $have_start_rules = $self->{main}->have_plugin("start_rules");
   my $have_ran_rule = $self->{main}->have_plugin("ran_rule");
 
-  my $scoreset = $self->{conf}->get_score_set();
-  while (my ($rulename, $test) = each %{$evalhash}) {
-    last if (exists $self->{shortcircuit_type});
+  # the buffer for the evaluated code
+  my $evalstr = q{ };
+$evalstr .= q{ my $function; };
 
-    # Score of 0, skip it.
-    my $score = $scoresref->{$rulename};
-    next unless $score;
+  # conditionally include the dbg in the eval str
+  my $dbgstr = q{ };
+  if (would_log('dbg')) {
+    $dbgstr = q{ 
+      dbg("rules: ran eval rule $rulename ======> got hit ($result)");
+    };
+  }
 
-    # If the rule is a net rule, and we're in a non-net scoreset, skip it.
-    next if ((($scoreset & 1) == 0) &&
-             $tflagsref->{$rulename} &&
-             $tflagsref->{$rulename} =~ /\bnet\b/);
-
-    # If the rule is a bayes rule, and we're in a non-bayes scoreset, skip it.
-    next if ((($scoreset & 2) == 0) &&
-             $tflagsref->{$rulename} &&
-             $tflagsref->{$rulename} =~ /\bbayes\b/);
-
-    my $result;
-    $self->{test_log_msgs} = ();        # clear test state
-
-    my ($function, @args) = @{$test};
-    unshift(@args, @extraevalargs);
-
-    # check to make sure the function is defined
-    if (!$self->can ($function)) {
-      my $pluginobj = $self->{conf}->{eval_plugins}->{$function};
-      if ($pluginobj) {
-	# we have a plugin for this.  eval its function
-	$self->register_plugin_eval_glue ($pluginobj, $function);
-      } else {
-	dbg("rules: no method found for eval test $function");
+  while (my ($rulename, $test) = each %{$evalhash})
+  {
+    if ($tflagsref->{$rulename}) {
+      # If the rule is a net rule, and we are in a non-net scoreset, skip it.
+      if ($tflagsref->{$rulename} =~ /\bnet\b/) {
+        next if (($scoreset & 1) == 0);
+      }
+      # If the rule is a bayes rule, and we are in a non-bayes scoreset, skip it.
+      if ($tflagsref->{$rulename} =~ /\bbayes\b/) {
+        next if (($scoreset & 2) == 0);
       }
     }
 
-    # let plugins get the name of the rule that's currently being
-    # run
-    $self->{current_rule_name} = $rulename;
+    my ($function, @args) = @{$test};
 
+    $evalstr .= '
+      $rulename = q#'.$rulename.'#;
+      $self->{test_log_msgs} = ();
+    ';
+
+    # only need to set current_rule_name for plugin evals
+    if ($self->{conf}->{eval_plugins}->{$function}) {
+      # let plugins get the name of the rule that is currently being run,
+      # and ensure their eval functions exist
+      $evalstr .= '
+        $self->{current_rule_name} = $rulename;
+        $self->register_plugin_eval_glue(q#'.$function.'#);
+      ';
+    }
+
+    # this stuff is quite slow, and totally superfluous if
+    # no plugin is loaded for those hooks
     if ($have_start_rules) {
-      $self->{main}->call_plugins("start_rules", { permsgstatus => $self, ruletype => "eval" });
+      $evalstr .= '
+        $self->{main}->call_plugins("start_rules", {
+                permsgstatus => $self, ruletype => "eval"
+              });
+      ';
     }
 
-    eval {
-      $result = $self->$function(@args);
-    };
-
-    if ($@) {
-      warn "rules: failed to run $rulename test, skipping:\n" . "\t($@)\n";
-      $self->{rule_errors}++;
-      next;
+    my $argstr = '';
+    if (scalar @args > 0) {
+      $argstr = ',' . join (', ', map { "q#".$_."#" } @args);
     }
+
+    $evalstr .= '
+      eval {
+        $result = $self->' . $function . ' (@extraevalargs '. $argstr .' );
+      };
+      if ($@) { $self->handle_eval_rule_errors($rulename); }
+    ';
 
     if ($have_ran_rule) {
-      $self->{main}->call_plugins("ran_rule", { permsgstatus => $self, ruletype => "eval", rulename => $rulename });
+      $evalstr .= '
+        $self->{main}->call_plugins("ran_rule", {
+            permsgstatus => $self, ruletype => "eval", rulename => $rulename
+          });
+      ';
     }
 
-    if ($result) {
-      $self->got_hit ($rulename, $prepend2desc, $result);
-      dbg("rules: ran eval rule $rulename ======> got hit ($result)") if $debugenabled;
-      $self->{main}->call_plugins("hit_rule", { permsgstatus => $self, ruletype => "eval", rulename => $rulename });
+    $evalstr .= '
+      if ($result) {
+        $self->got_hit($rulename, $prepend2desc, ruletype => "eval", value => $result);
+        '.$dbgstr.'
+      }
+    ';
+  }
+
+  # nothing done in the loop, that means no rules
+  return unless ($evalstr);
+
+  $evalstr = <<"EOT";
+{
+  package Mail::SpamAssassin::PerMsgStatus;
+
+    sub ${methodname} {
+      my (\$self, \@extraevalargs) = \@_;
+
+      my \$prepend2desc = q#$prepend2desc#;
+      my \$rulename;
+      my \$result;
+
+      $evalstr
     }
+
+  1;
+}
+EOT
+
+  eval $evalstr;
+
+  push (@TEMPORARY_METHODS, $methodname);
+
+  if ($@) {
+    warn "rules: failed to compile eval tests, skipping some: $@\n";
+    $self->{rule_errors}++;
+  }
+  else {
+    no strict "refs";
+    &{'Mail::SpamAssassin::PerMsgStatus::'.$methodname}($self,@extraevalargs);
+    use strict "refs";
   }
 }
 
-sub register_plugin_eval_glue {
-  my ($self, $pluginobj, $function) = @_;
+# use a separate sub here, for brevity
+sub handle_eval_rule_errors {
+  my ($self, $rulename) = @_;
+  warn "rules: failed to run $rulename test, skipping:\n\t($@)\n";
+  $self->{rule_errors}++;
+}
 
-  # stop reporting this -- it's too noisy!
-  # dbg("plugin: registering glue method for $function ($pluginobj)");
+sub register_plugin_eval_glue {
+  my ($self, $function) = @_;
+
+  # return if it's not an eval_plugin function
+  return if (!exists $self->{conf}->{eval_plugins}->{$function});
+
+  # return if it's been registered already
+  return if ($self->can ($function) &&
+        defined &{'Mail::SpamAssassin::PerMsgStatus::'.$function});
 
   my $evalstr = <<"ENDOFEVAL";
 {
@@ -2842,13 +2964,15 @@ ENDOFEVAL
     warn "rules: failed to run header tests, skipping some: $@\n";
     $self->{rule_errors}++;
   }
+
+  # ensure this method is deleted if finish_tests() is called
+  push (@TEMPORARY_METHODS, $function);
 }
 
 ###########################################################################
 
 sub run_rbl_eval_tests {
   my ($self, $evalhash) = @_;
-  my ($rulename, $pat, @args);
   local ($_);
 
   if ($self->{main}->{local_tests_only}) {
@@ -2879,10 +3003,12 @@ sub run_rbl_eval_tests {
 
 ###########################################################################
 
-sub got_pattern_hit {
-  my ($self, $rulename, $prefix) = @_;
-
-  $self->got_hit ($rulename, $prefix);
+sub have_shortcircuited
+{
+  my ($self) = @_;
+  return 1 if $self->{main}->call_plugins ("have_shortcircuited", {
+        permsgstatus => $self
+      });
 }
 
 ###########################################################################
@@ -2907,16 +3033,17 @@ sub clear_test_state {
     $self->{test_log_msgs} = ();
 }
 
+# internal API, called only by get_hit()
+# TODO: refactor and merge this into that function
 sub _handle_hit {
-    my ($self, $rule, $score, $area, $desc, $scrule) = @_;
+    my ($self, $rule, $score, $area, $ruletype, $desc) = @_;
 
-    # if this was a shortcircuited rule hit, lets do some cleanup first  
-    if ($scrule) {
-       undef $self->{test_names_hit};       # reset rule hits
-       $self->{score}                = 0;   # reset score
-       $self->{tag_data}->{REPORT}   = '';  # reset tag data
-       $self->{tag_data}->{SUMMARY}  = '';  # reset tag data
-    }
+    $self->{main}->call_plugins ("hit_rule", {
+        permsgstatus => $self,
+        rulename => $rule,
+        ruletype => $ruletype,
+        score => $score
+      });
 
     # ignore meta-match sub-rules.
     if ($rule =~ /^__/) { push(@{$self->{subtest_names_hit}}, $rule); return; }
@@ -2967,44 +3094,77 @@ sub _wrap_desc {
   $wrapped;
 }
 
-sub got_hit {
-  my ($self, $rule, $area, $value) = @_;
-  $value ||= 1;
+###########################################################################
 
-  return if (exists $self->{shortcircuit_type});
+=item $status->got_hit ($rulename, $desc_prepend [, name => value, ...])
+
+Register a hit against a rule in the ruleset.
+
+There are two mandatory arguments. These are C<$rulename>, the name of the rule
+that fired, and C<$desc_prepend>, which is a short string that will be
+prepended to the rules C<describe> string in output reports.
+
+In addition, callers can supplement that with the following optional
+data:
+
+=over 4
+
+=item score => $num
+
+Optional: the score to use for the rule hit.  If unspecified,
+the value from the C<Mail::SpamAssassin::Conf> object's C<{scores}>
+hash will be used.
+
+=item value => $num
+
+Optional: the value to assign to the rule; the default value is C<1>.
+I<tflags multiple> rules use values of greater than 1 to indicate
+multiple hits.  This value is accessible to meta rules.
+
+=item ruletype => $type
+
+Optional, but recommended: the rule type string.  This is used in the
+C<hit_rule> plugin call, called by this method.  If unset, I<'unknown'> is
+used.
+
+=back
+
+Backwards compatibility: the two mandatory arguments have been part of this API
+since SpamAssassin 2.x.  The optional I<name=<gt>value> pairs, however, are a
+new addition in SpamAssassin 3.2.0.
+
+=cut
+
+sub got_hit {
+  my ($self, $rule, $area, %params) = @_;
+
+  return if $self->have_shortcircuited();
+
+  # ensure that rule values always result in an *increase* of
+  # $self->{tests_already_hit}->{$rule}:
+  my $value = $params{value}; if (!$value || $value <= 0) { $value = 1; }
+
+  # default ruletype, if not specified:
+  $params{ruletype} ||= 'unknown';
 
   my $already_hit = $self->{tests_already_hit}->{$rule} || 0;
   $self->{tests_already_hit}->{$rule} = $already_hit + $value;
 
-  # only allow each test to be scored once per mail
+  # only allow each test to be scored once per mail, once we
+  # get into this method ('tflags multiple' rules must be dealt
+  # with in callers to this method)
   return if ($already_hit);
 
-  my $desc = $self->{conf}->{descriptions}->{$rule};
-  $desc ||= $rule;
-
-  my $score = $self->{conf}->{scores}->{$rule};
-
-  my $sctype = $self->{conf}->{shortcircuit}->{$rule};
-  if ($sctype) {
-    $self->{shortcircuit_rule} = $rule;
-    if ($sctype eq 'on') {  # guess by rule score
-      $self->{shortcircuit_type} = ($score < 0 ? 'ham' : 'spam');
-      dbg("shortcircuit: s/c due to $rule, using score of $score");
-    }
-    else {
-      $self->{shortcircuit_type} = $sctype;
-      if ($sctype eq 'ham') {
-        $score = $self->{conf}->{shortcircuit_ham_score};
-      } else {
-        $score = $self->{conf}->{shortcircuit_spam_score};
-      }
-      dbg("shortcircuit: s/c $sctype due to $rule, using score of $score");
-    }
-  }
-
-  $self->_handle_hit($rule, $score, $area, $desc, $self->{shortcircuit_rule});
+  $self->_handle_hit($rule,
+            $params{score} || $self->{conf}->{scores}->{$rule},
+            $area,
+            $params{ruletype},
+            ($self->{conf}->{descriptions}->{$rule} || $rule));
 }
 
+###########################################################################
+
+# TODO: this needs API doc
 sub test_log {
   my ($self, $msg) = @_;
   while ($msg =~ s/^(.{30,48})\s//) {

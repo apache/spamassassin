@@ -12,6 +12,10 @@ q{ autolearn=ham } => 'autolearned as ham'
 
 tstlocalrules ('
 
+  loadplugin Mail::SpamAssassin::Plugin::Shortcircuit
+
+  add_header all Status "_YESNO_, score=_SCORE_ required=_REQD_ tests=_TESTS_ shortcircuit=_SCTYPE_ autolearn=_AUTOLEARN_ version=_VERSION_"
+
   # hits spam/001
   body X_FOO            /Congratulations/
   header X_BAR          From =~ /sb55/
