@@ -429,6 +429,10 @@ The type of the rule that fired.
 
 The name of the rule that fired.
 
+=item score
+
+The rule's score in the active scoreset.
+
 =back
 
 =item $plugin->ran_rule ( { options ... } )

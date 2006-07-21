@@ -43,8 +43,8 @@ loaded from the C</usr/share/spamassassin> and C</etc/mail/spamassassin>
 directories.
 
 The C<#> character starts a comment, which continues until end of line.
-B<NOTE:> using the C<#> character in the regular expression rules requires
-escaping.  i.e.: C<\#>
+B<NOTE:> if the C<#> character is to be used as part of a rule or
+configuration option, it must be escaped with a backslash.  i.e.: C<\#>
 
 Whitespace in the files is not significant, but please note that starting a
 line with whitespace is deprecated, as we reserve its use for multi-line rule
@@ -2218,146 +2218,6 @@ internally, and should not be used.
     type => $CONF_TYPE_HASH_KEY_VALUE
   });
 
-=item shortcircuit SYMBOLIC_TEST_NAME {ham|spam|on|off}
-
-Shortcircuiting a test will force all other pending rules to be skipped, if
-that test is hit.
-
-Recomended usage is to use C<priority> to set rules with strong S/O values (ie.
-1.0) to be run first, and make instant spam or ham classification based on
-that.
-
-To override a test that uses shortcircuiting, you can set the classification
-type to C<off>.
-
-=over 4
-
-=item on
-
-Shortcircuits the rest of the tests, but does not make a strict classification
-of spam or ham.  Rather, it uses the default score for the rule being
-shortcircuited.  This would allow you, for example, to define a rule such as 
-  
-=over 4
-
-  body TEST /test/
-  describe TEST test rule that scores barely over spam threshold
-  score TEST 5.5
-  priority TEST -100
-  shortcircuit TEST on
-
-=back
-
-The result of a message hitting the above rule would be a final score of 5.5,
-as opposed to 100 (default) if it were classified as spam.
-
-=item off
-
-Disables shortcircuiting on said rule.
-
-=item spam
-
-Shortcircuit the rule using a set of defaults; override the default score of
-this rule with the score from C<shortcircuit_spam_score>, set the
-C<noautolearn> tflag, and set priority to C<-100>.  In other words,
-equivalent to:
-
-=over 4
-
-  shortcircuit TEST on
-  priority TEST -100
-  score TEST 100
-  tflags TEST noautolearn
-
-=back
-
-=item ham
-
-Shortcircuit the rule using a set of defaults; override the default score of
-this rule with the score from C<shortcircuit_ham_score>, set the C<noautolearn>
-and C<nice> tflags, and set priority to C<-100>.   In other words, equivalent
-to:
-
-=over 4
-
-  shortcircuit TEST on
-  priority TEST -100
-  score TEST -100
-  tflags TEST noautolearn nice
-
-=back
-
-=back
-
-=cut
-
-  push (@cmds, {
-    setting => 'shortcircuit',
-    code => sub {
-      my ($self, $key, $value, $line) = @_;
-      my ($rule,$type);
-      unless (defined $value && $value !~ /^$/) {
-        return $MISSING_REQUIRED_VALUE;
-      }
-      if ($value =~ /^(\S+)\s+(\S+)$/) {
-        $rule=$1;
-        $type=$2;
-      } else {
-        return $INVALID_VALUE;
-      }
-
-      if ($type =~ m/^(?:spam|ham)$/) {
-        dbg("shortcircuit: adding $rule using abbreviation $type");
-
-        # set the defaults:
-        $self->{shortcircuit}->{$rule} = $type;
-        $self->{priority}->{$rule} = -100;
-
-        my $tf = $self->{tflags}->{$rule};
-        $self->{tflags}->{$rule} = ($tf ? $tf." " : "") .
-                ($type eq 'ham' ? "nice " : "") .
-                "noautolearn";
-      }
-      elsif ($type eq "on") {
-        $self->{shortcircuit}->{$rule} = "on";
-      }
-      elsif ($type eq "off") {
-        delete $self->{shortcircuit}->{$rule};
-      }
-      else {
-        return $INVALID_VALUE;
-      }
-    }
-  });
-
-=item shortcircuit_spam_score n.nn (default: 100)
-
-When shortcircuit is used on a rule, and the shortcircuit classification type
-is set to C<spam>, this value should be applied in place of the default score
-for that rule.
-
-=cut
-
-  push (@cmds, {
-    setting => 'shortcircuit_spam_score',
-    default => 100,
-    type => $CONF_TYPE_NUMERIC
-  });
-
-=item shortcircuit_ham_score n.nn (default: -100)
-
-When shortcircuit is used on a rule, and the shortcircuit classification type
-is set to C<ham>, this value should be applied in place of the default score
-for that rule.
-
-=cut
-
-  push (@cmds, {
-    setting => 'shortcircuit_ham_score',
-    default => -100,
-    type => $CONF_TYPE_NUMERIC
-  });
-
 =back
 
 =head1 ADMINISTRATOR SETTINGS
@@ -2894,9 +2754,6 @@ optional, and the default is shown below.
  _DCCR_            DCC's results
  _PYZOR_           Pyzor results
  _RBL_             full results for positive RBL queries in DNS URI format
- _SC_              shortcircuit status (classification and rule name)
- _SCRULE_          rulename that caused the shortcircuit 
- _SCTYPE_          shortcircuit classification ("spam", "ham", "default", "none")
  _LANGUAGES_       possible languages of mail
  _PREVIEW_         content preview
  _REPORT_          terse report of tests hit (for header reports)

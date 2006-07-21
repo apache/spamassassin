@@ -3082,13 +3082,16 @@ sub tvd_vertical_words {
 }
 
 # came up on the users@ list, look for multipart/alternative parts which
-# include non-text parts -- skip multipart/related parts which occurs in ham
+# include non-text parts -- skip certain types which occur normally in ham
 sub check_ma_non_text {
   my $self = shift;
 
   foreach my $map ($self->{msg}->find_parts(qr@^multipart/alternative$@i)) {
     foreach my $p ($map->find_parts(qr/./, 1, 0)) {
-      return 1 if ($p->{'type'} !~ m@^text/@i && $p->{'type'} !~ m@^multipart/related$@i);
+      next if (lc $p->{'type'} eq 'multipart/related');
+      next if (lc $p->{'type'} eq 'application/rtf');
+      next if ($p->{'type'} =~ m@^text/@i);
+      return 1;
     }
   }
   

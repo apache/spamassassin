@@ -156,13 +156,13 @@ my @OPTIONAL_MODULES = (
 },
 {
   module => 'Archive::Tar',
-  version => '0.00',
+  version => '1.23',
   desc => 'The "sa-update" script requires this module to access tar update
   archive files.',
 },
 {
   module => 'IO::Zlib',
-  version => '0.00',
+  version => '1.04',
   desc => 'The "sa-update" script requires this module to access compressed
   update archive files.',
 },
