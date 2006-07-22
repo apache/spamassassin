@@ -101,6 +101,8 @@ sub dbg;
 # Clean up PATH appropriately
 Mail::SpamAssassin::Util::clean_path_in_taint_mode();
 
+##############################################################################
+
 # Default list of GPG keys allowed to sign update releases
 #
 # pub   1024D/265FA05B 2003-06-09
@@ -125,6 +127,8 @@ my %valid_GPG = (
 # Default list of channels to update against
 #
 my @channels = ( 'updates.spamassassin.org' );
+
+##############################################################################
 
 use constant MIRBY_DOWNLOADED => -1;
 
@@ -229,9 +233,10 @@ foreach my $optkey (keys %opt) {
   $opt{$optkey} = $1;
 }
 
-my $GPGPath;
+##############################################################################
 
-# deal with gpg-related options
+# Deal with gpg-related options
+
 if (@{$opt{'gpgkey'}}) {
   $GPG_ENABLED = 1;
   foreach my $key (@{$opt{'gpgkey'}}) {
@@ -244,6 +249,7 @@ if (@{$opt{'gpgkey'}}) {
     $valid_GPG{$key} = 1;
   }
 }
+
 if (defined $opt{'gpgkeyfile'}) {
   $GPG_ENABLED = 1;
   unless (open(GPG, $opt{'gpgkeyfile'})) {
@@ -262,24 +268,45 @@ if (defined $opt{'gpgkeyfile'}) {
   }
   close(GPG);
 }
-if ( $opt{'import'} ) {
-  my $ex = import_gpg_key($opt{'import'});
-  exit $ex;
-}
 
-# does the sa-update keyring exist?  if not, import it
-if ($GPG_ENABLED) {
+# At this point, we need to know where GPG is ...
+my $GPGPath;
+if ($GPG_ENABLED || $opt{'import'}) {
+  # find GPG in the PATH
+  # bug 4958: for *NIX it's "gpg", in Windows it's "gpg.exe"
+  $GPGPath = 'gpg' . $Config{_exe};
+  dbg("gpg: Searching for '$GPGPath'");
+
+  if ($GPGPath = Mail::SpamAssassin::Util::find_executable_in_env_path($GPGPath)) {
+    dbg("gpg: found $GPGPath");
+  }
+  else {
+    die "error: gpg required but not found!\n";
+  }
+
+  # GPG was found, and we've been asked to import a key only
+  if ( $opt{'import'} ) {
+    my $ex = import_gpg_key($opt{'import'});
+    exit $ex;
+  }
+
+  # does the sa-update keyring exist?  if not, import it
   if(!-f File::Spec->catfile($opt{'gpghomedir'}, "secring.gpg")) {
     import_default_keyring();
     # attempt to continue even if this fails, anyway
   }
+
+  # specify which keys are trusted
+  dbg("gpg: release trusted key id list: ".join(" ", keys %valid_GPG));
+
+  # convert fingerprint gpg ids to keyids
+  foreach (keys %valid_GPG) {
+    my $id = substr $_, -8;
+    $valid_GPG{$id} = 1;
+  }
 }
 
-# convert fingerprint gpg ids to keyids
-foreach (keys %valid_GPG) {
-  my $id = substr $_, -8;
-  $valid_GPG{$id} = 1;
-}
+##############################################################################
 
 # Deal with channel-related options
 if (defined $opt{'channel'} && scalar @{$opt{'channel'}} > 0) {
@@ -311,13 +338,6 @@ for(my $ind = 0; $ind < @channels; $ind++) {
   }
 }
 
-# find GPG in the PATH
-if ($GPG_ENABLED) {
-  $GPGPath = find_gpg_path();
-  dbg("gpg: release trusted key id list: ".join(" ", keys %valid_GPG));
-}
-
-
 my $res = Net::DNS::Resolver->new();
 
 my $ua = LWP::UserAgent->new();
@@ -335,9 +355,8 @@ close($tfh);
 # by default, exit code is 1, to indicate no updates occurred
 my $exit = 1;
 
-# Set the temp directory that we'll use
-my $UPDTmp = Mail::SpamAssassin::Util::secure_tmpdir();
-dbg("channel: update tmp directory $UPDTmp");
+# Use a temporary directory for all update channels
+my $UPDTmp;
 
 # Go ahead and loop through all of the channels
 foreach my $channel (@channels) {
@@ -347,7 +366,7 @@ foreach my $channel (@channels) {
   my $nicechannel = $channel;
   $nicechannel =~ tr/A-Za-z0-9-/_/cs;
 
-  my $UPDDir = "$opt{'updatedir'}/$nicechannel";
+  my $UPDDir = File::Spec->catfile($opt{'updatedir'}, $nicechannel);
   my $CFFile = "$UPDDir.cf";
   my $PREFile = "$UPDDir.pre";
 
@@ -356,6 +375,7 @@ foreach my $channel (@channels) {
   dbg("channel: channel pre file $PREFile");
 
   my($mirby, $mirby_time);
+  my $mirby_path = File::Spec->catfile($UPDDir, "MIRRORED.BY");
 
   # try to read metadata from channel.cf file
   my $currentV = -1;
@@ -399,12 +419,12 @@ foreach my $channel (@channels) {
   }
 
   # Read in the MIRRORED.BY file if it exists
-  if (open(MIRBY, "$UPDDir/MIRRORED.BY")) {
+  if (open(MIRBY, $mirby_path)) {
     local $/ = undef;
     $mirby = <MIRBY>;
     close(MIRBY);
 
-    $mirby_time = (stat "$UPDDir/MIRRORED.BY")[9];
+    $mirby_time = (stat $mirby_path)[9];
   }
   else {
     # We don't currently have the list of mirrors, so go grab it.
@@ -502,7 +522,6 @@ foreach my $channel (@channels) {
   }
 
   unless ($content && $SHA1 && (!$GPG_ENABLED || $GPG)) {
-    warn "error: channel $channel has no working mirrors\n";
     channel_failed("channel: could not find working mirror");
     next;
   }
@@ -513,10 +532,9 @@ foreach my $channel (@channels) {
   $SHA1 =~ /^([a-fA-F0-9]{40})/;
   $SHA1 = $1 || 'INVALID';
   my $digest = sha1_hex($content);
-  dbg("sha1: verification expected: $SHA1");
-  dbg("sha1: verification got     : $digest");
+  dbg("sha1: verification wanted: $SHA1");
+  dbg("sha1: verification result: $digest");
   unless ($digest eq $SHA1) {
-    warn "error: can't verify SHA1 signature\n";
     channel_failed("channel: SHA1 verification failed");
     next;
   }
@@ -638,8 +656,12 @@ ENDOFVALIDATIONERR
   # OK, we're all validated at this point, install the new version
   dbg("channel: file verification passed, testing update");
 
-  dbg("channel: cleaning out temp directory");
-  if (!clean_update_dir($UPDTmp)) {
+  dbg("channel: preparing temp directory for new channel");
+  if (!$UPDTmp) {
+    $UPDTmp = Mail::SpamAssassin::Util::secure_tmpdir();
+    dbg("generic: update tmp directory $UPDTmp");
+  }
+  elsif (!clean_update_dir($UPDTmp)) {
     die "channel: attempt to clean update dir failed, aborting";
   }
 
@@ -664,9 +686,15 @@ ENDOFVALIDATIONERR
     # blown away the old ruleset.
     dbg("channel: point of no return for existing $UPDDir");
 
-    # clean out the "real" update dir
+    # clean out the previous channel files
+    if (! unlink $PREFile ) {
+      warn("channel: attempt to rm channel pre file failed, attempting to continue anyway");
+    }
+    if (! unlink $CFFile ) {
+      warn("channel: attempt to rm channel cf file failed, attempting to continue anyway");
+    }
     if (!clean_update_dir($UPDDir)) {
-      warn("channel: attempt to rm contents failed, attempting to continue anyway");
+      warn("channel: attempt to rm channel directory failed, attempting to continue anyway");
     }
   }
   else {
@@ -685,9 +713,26 @@ ENDOFVALIDATIONERR
     dbg("channel: point of no return for new $UPDDir");
   }
 
-  # Write out the mirby file
+  # extract the files again for the last time
+  if (!taint_safe_archive_extract($UPDDir, $content_file)) {
+    channel_failed("channel: archive extraction failed");
+
+    # bug 4941: try to get rid of the empty directories to avoid leaving SA
+    # with no rules.
+    if (!clean_update_dir($UPDDir)) {
+      warn "channel: attempt to clean up failed extraction also failed!\n";
+    }
+    else {
+      rmdir $UPDDir;
+      rmdir $opt{'updatedir'};
+    }
+
+    next;
+  }
+
+  # Write out the mirby file, not fatal if it doesn't work
   dbg("channel: creating MIRRORED.BY file");
-  if (open(MBY, ">$UPDDir/MIRRORED.BY")) {
+  if (open(MBY, ">$mirby_path")) {
     print MBY $mirby;
     close(MBY);
   }
@@ -695,17 +740,12 @@ ENDOFVALIDATIONERR
     warn "error: can't write new MIRRORED.BY file: $!\n";
   }
 
-  # extract the files again
-  if (!taint_safe_archive_extract($UPDDir, $content_file)) {
-    channel_failed("channel: archive extraction failed");
-    next;
-  }
-
-  # OK, lint passed. now create the update config file
+  # the last step is to create the .cf and .pre files to include the
+  # channel files
   my @CF = ();
   my @PRE = ();
 
-  dbg("channel: creating update config file");
+  dbg("channel: creating update cf/pre files");
 
   # Put in whatever metadata we need
   push(@CF, "# UPDATE version $newV\n");
@@ -715,9 +755,10 @@ ENDOFVALIDATIONERR
     die "fatal: can't access $UPDDir: $!\n";
   }
   while(my $file = readdir(DIR)) {
-    $file =~ /^([^\/]+)$/;       # untaint
+    $file =~ /^(.+)$/;       # untaint
     $file = $1;
-    next unless (-f "$UPDDir/$file");   # shouldn't ever happen
+    my $path = File::Spec->catfile($UPDDir, $file);
+    next unless (-f $path);   # shouldn't ever happen
 
     if ($file =~ /\.cf$/) {
       push(@CF, "include $nicechannel/$file\n");
@@ -748,23 +789,35 @@ ENDOFVALIDATIONERR
   dbg("channel: update complete");
 }
 
+##############################################################################
+
 # clean out the temp dir
-if (!clean_update_dir($UPDTmp)) {
-  warn "error: unable to clean out the files in $UPDTmp\n";
+if ($UPDTmp) {
+  dbg("generic: cleaning up temporary directory/files");
+  if (!clean_update_dir($UPDTmp)) {
+    warn "error: unable to clean out the files in $UPDTmp\n";
+  }
 }
 
 # clear out the temp files if they still exist
 foreach ( $content_file, $UPDTmp ) {
-  if (-d $_) {
+  next unless (defined $_ && -e $_);
+
+  if (-d _) {
     rmdir $_ || warn "error: can't remove directory $_: $!\n";
   }
-  elsif (-e _) {
+  elsif (-f _) {
     unlink $_ || warn "error: can't remove file $_: $!\n";
+  }
+  else {
+    warn "error: '$_' isn't a file nor a directory, skipping\n";
   }
 }
 
 dbg("diag: updates complete, exiting with code $exit");
 exit $exit;
+
+##############################################################################
 
 sub write_channel_file {
   my ($filename, $contents) = @_;
@@ -780,6 +833,8 @@ sub write_channel_file {
   return 0;
 }
 
+##############################################################################
+
 sub channel_failed {
   my $reason = shift;
   warn("$reason, channel failed\n");
@@ -789,6 +844,8 @@ sub channel_failed {
     $exit = 4;      # 4 or higher means channel failed
   }
 }
+
+##############################################################################
 
 sub taint_safe_archive_extract {
   my $todir = shift;
@@ -811,7 +868,7 @@ sub taint_safe_archive_extract {
     $file =~ /^([-\.\,\/a-zA-Z0-9_]+)$/;
     my $outfname = $1;
     $outfname =~ s/\.\.\//__\//gs;      # avoid "../" dir traversal attacks
-    $outfname = "$todir/$outfname";
+    $outfname = File::Spec->catfile($todir, $outfname);
 
     dbg "extracting: $outfname";
     if (open OUT, ">".$outfname) {
@@ -839,6 +896,8 @@ failed:
   return;       # undef = failure
 }
 
+##############################################################################
+
 # Do a generic TXT query
 sub do_txt_query {
   my($query) = shift;
@@ -864,6 +923,8 @@ sub do_txt_query {
 
   return $result;
 }
+
+##############################################################################
 
 # Do a GET request via HTTP for a certain URL
 # Use the optional time_t value to do an IMS GET
@@ -915,6 +976,8 @@ sub http_get {
   return;
 }
 
+##############################################################################
+
 # choose a random integer between 0 and the total weight of all mirrors
 # loop through the mirrors from largest to smallest weight
 # if random number is < largest weight, use it
@@ -952,10 +1015,14 @@ sub choose_mirror {
   return $mirrors[0];
 }
 
+##############################################################################
+
 sub print_version {
   print "sa-update version $VERSION\n"
       . "  running on Perl version " . join(".", map { $_||=0; $_*1 } ($] =~ /(\d)\.(\d{3})(\d{3})?/ )) . "\n";
 }
+
+##############################################################################
 
 sub print_usage_and_exit {
   my ( $message, $exitval ) = @_;
@@ -972,24 +1039,15 @@ sub print_usage_and_exit {
   );
 }
 
+##############################################################################
+
 sub usage {
   my ( $verbose, $message ) = @_;
   print "sa-update version $VERSION\n";
   pod2usage( -verbose => $verbose, -message => $message, -exitval => 64 );
 }
 
-sub find_gpg_path {
-  # bug 4958: for *NIX it's "gpg", in Windows it's "gpg.exe"
-  my $gpg = 'gpg' . $Config{_exe};
-
-  dbg("gpg: Searching for '$gpg'");
-
-  my $path = Mail::SpamAssassin::Util::find_executable_in_env_path($gpg) ||
-    die "fatal: couldn't find GPG\n";
-
-  dbg("gpg: found $path");
-  return $path;
-}
+##############################################################################
 
 sub interpolate_gpghomedir {
   my $gpghome = '';
@@ -1007,10 +1065,11 @@ sub interpolate_gpghomedir {
   return $gpghome;
 }
 
+##############################################################################
+
 sub import_gpg_key {
   my $keyfile = shift;
 
-  $GPGPath = find_gpg_path();
   my $gpghome = interpolate_gpghomedir();
 
   my $CMD = "$GPGPath $gpghome --batch ".
@@ -1030,7 +1089,7 @@ sub import_gpg_key {
     }
 
     if ($GNUPG =~ /^IMPORTED /) {
-      print "sa-update --import: success. $GNUPG\n";
+      dbg("gpg: gpg key imported successfully");
     }
   }
 
@@ -1038,45 +1097,59 @@ sub import_gpg_key {
   return ($? >> 8);
 }
 
+##############################################################################
+
 sub import_default_keyring {
   my $defkey = File::Spec->catfile ($DEF_RULES_DIR, "sa-update-pubkey.txt");
-  return unless (-f $defkey);
+  unless (-f $defkey) {
+    dbg("gpg: import of default keyring failed, couldn't find sa-update-pubkey.txt");
+    return;
+  }
 
-  print "sa-update: importing default keyring to '".$opt{gpghomedir}."'...\n";
+  dbg("gpg: importing default keyring to '".$opt{gpghomedir});
   unless (-d $opt{gpghomedir}) {
     # use 0700 to avoid "unsafe permissions" warning
-    mkdir ($opt{gpghomedir}, 0700) or die "cannot mkdir $opt{gpghomedir}: $!";
+    mkpath([$opt{'gpghomedir'}], 0, 0700) or die "cannot mkpath $opt{gpghomedir}: $!";
   } 
   import_gpg_key($defkey);
 }
+
+##############################################################################
 
 sub is_valid_gpg_key_id {
   # either a keyid (8 bytes) or a fingerprint (40 bytes)
   return ($_[0] =~ /^[a-fA-F0-9]+$/ && (length $_[0] == 8 || length $_[0] == 40));
 }
 
+##############################################################################
+
 sub clean_update_dir {
   my $dir = shift;
 
   unless (opendir(DIR, $dir)) {
     warn "error: can't readdir $dir: $!\n";
-    dbg("channel: attempt to readdir failed, channel failed");
-    return 0;
+    dbg("generic: attempt to readdir ($dir) failed");
+    return;
   }
   while(my $file = readdir(DIR)) {
-    next unless (-f "$dir/$file");
-    dbg("channel: unlinking $file");
-    $file =~ /^([^\/]+)$/;       # untaint
+    $file =~ /^(.+)$/;       # untaint
     $file = $1;
-    if (!unlink "$dir/$file") {
-      warn "error: can't remove file $dir/$file: $!\n";
+
+    my $path = File::Spec->catfile($dir, $file);
+    next unless (-f $path);
+
+    dbg("generic: unlinking $file");
+    if (!unlink $path) {
+      warn "error: can't remove file $path: $!\n";
       closedir(DIR);
-      return 0;
+      return;
     }
   }
   closedir(DIR);
   return 1;
 }
+
+##############################################################################
 
 sub lint_check_dir {
   my $dir = shift;
@@ -1086,8 +1159,8 @@ sub lint_check_dir {
   # "config" or otherwise be more terse. :(
   my $spamtest = new Mail::SpamAssassin( {
     rules_filename      => $dir,
-    site_rules_filename => "$dir/doesnotexist",
-    userprefs_filename  => "$dir/doesnotexist",
+    site_rules_filename => File::Spec->catfile($dir, "doesnotexist"),
+    userprefs_filename  => File::Spec->catfile($dir, "doesnotexist"),
 
     local_tests_only    => 1,
     dont_copy_prefs     => 1,
@@ -1108,7 +1181,9 @@ sub lint_check_dir {
   return $res == 0;
 }
 
-# ---------------------------------------------------------------------------
+##############################################################################
+
+=cut
 
 =head1 NAME
 
@@ -1263,6 +1338,7 @@ Mail::SpamAssassin(3)
 Mail::SpamAssassin::Conf(3)
 spamassassin(1)
 spamd(1)
+<http://wiki.apache.org/spamassassin/RuleUpdates>
 
 =head1 PREREQUESITES
 
