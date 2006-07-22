@@ -40,7 +40,6 @@ my %MACRO_VALUES = (
 # Standard perl modules
 use File::Spec;
 use File::Path;
-use File::Copy;
 use Getopt::Long;
 use Pod::Usage;
 use Config;
@@ -127,6 +126,7 @@ my %valid_GPG = (
 #
 my @channels = ( 'updates.spamassassin.org' );
 
+use constant MIRBY_DOWNLOADED => -1;
 
 my %opt = ();
 @{$opt{'gpgkey'}} = ();
@@ -332,15 +332,12 @@ if ( !defined $content_file ) {
 }
 close($tfh);
 
-# and another, for the new config file
-my ($newcf_file, $tfh2) = Mail::SpamAssassin::Util::secure_tmpfile();
-if ( !defined $newcf_file ) {
-  die "fatal: could not create temporary channel content file: $!\n";
-}
-close($tfh2);
-
 # by default, exit code is 1, to indicate no updates occurred
 my $exit = 1;
+
+# Set the temp directory that we'll use
+my $UPDTmp = Mail::SpamAssassin::Util::secure_tmpdir();
+dbg("channel: update tmp directory $UPDTmp");
 
 # Go ahead and loop through all of the channels
 foreach my $channel (@channels) {
@@ -351,14 +348,14 @@ foreach my $channel (@channels) {
   $nicechannel =~ tr/A-Za-z0-9-/_/cs;
 
   my $UPDDir = "$opt{'updatedir'}/$nicechannel";
-  my $UPDTmp = "$opt{'updatedir'}/$nicechannel.tmp";
   my $CFFile = "$UPDDir.cf";
-  my $CFFTmp = $newcf_file;
+  my $PREFile = "$UPDDir.pre";
 
   dbg("channel: update directory $UPDDir");
-  dbg("channel: update tmp directory $UPDTmp");
   dbg("channel: channel cf file $CFFile");
-  dbg("channel: channel tmp cf file $CFFTmp");
+  dbg("channel: channel pre file $PREFile");
+
+  my($mirby, $mirby_time);
 
   # try to read metadata from channel.cf file
   my $currentV = -1;
@@ -401,24 +398,13 @@ foreach my $channel (@channels) {
     next;
   }
 
-  # ensure tmp dir exists, upfront
-  unless (-d $UPDTmp) {
-    dbg("channel: creating $UPDTmp");
-    mkpath([$UPDTmp], 0, 0777) or die "fatal: can't create $UPDTmp: $!\n";
-  }
+  # Read in the MIRRORED.BY file if it exists
+  if (open(MIRBY, "$UPDDir/MIRRORED.BY")) {
+    local $/ = undef;
+    $mirby = <MIRBY>;
+    close(MIRBY);
 
-  # copy the MIRRORED.BY file to the tmpdir, if it exists
-  if (-f "$UPDDir/MIRRORED.BY") {
-    unlink("$UPDTmp/MIRRORED.BY");
-
-    my ($x, $atime, $mtime);
-    ($x,$x,$x,$x,$x,$x,$x,$x,$atime,$mtime,$x) = stat "$UPDDir/MIRRORED.BY";
-
-    copy("$UPDDir/MIRRORED.BY", "$UPDTmp/MIRRORED.BY")
-            or die "fatal: cannot copy $UPDDir/MIRRORED.BY to $UPDTmp/MIRRORED.BY";
-
-    # ensure modtimes match
-    utime($atime, $mtime, "$UPDTmp/MIRRORED.BY");
+    $mirby_time = (stat "$UPDDir/MIRRORED.BY")[9];
   }
   else {
     # We don't currently have the list of mirrors, so go grab it.
@@ -428,33 +414,22 @@ foreach my $channel (@channels) {
       warn "error: no mirror data available for channel $channel\n";
       channel_failed("channel: MIRRORED.BY file location was not in DNS");
     }
-    $mirror = http_get($mirror);
-    unless ($mirror) {
+    $mirby = http_get($mirror);
+    unless ($mirby) {
       warn "error: no mirror data available for channel $channel\n";
       channel_failed("channel: MIRRORED.BY contents were missing");
       next;
     }
+    $mirby_time = MIRBY_DOWNLOADED;
 
-    unless (open(MIR, ">$UPDTmp/MIRRORED.BY")) {
-      warn "error: can't create mirrors file: $!\n";
-      channel_failed("channel: MIRRORED.BY creation failure");
-      next;
-    }
-    print MIR $mirror;
-    close(MIR);
     dbg("channel: MIRRORED.BY file retrieved");
   }
 
   # Read in the list of mirrors
-  unless (open(MIR, "$UPDTmp/MIRRORED.BY")) {
-    warn "error: can't read mirrors file: $!\n";
-    channel_failed("channel: MIRRORED.BY file is unreadable");
-    next;
-  }
-
   dbg("channel: reading MIRRORED.BY file");
   my %mirrors = ();
-  while(my $mirror = <MIR>) {
+  my @mirrors = split(/^/, $mirby);
+  while(my $mirror = shift @mirrors) {
     next if ($mirror =~ /^#/);  # explicitly skip comments
 
     # We only support HTTP right now
@@ -476,7 +451,6 @@ foreach my $channel (@channels) {
       $mirrors{$mirror}->{$k} = $v;
     }
   }
-  close(MIR);
 
   unless (keys %mirrors) {
     warn "error: no mirrors available for channel $channel\n";
@@ -484,16 +458,11 @@ foreach my $channel (@channels) {
     next;
   }
 
-  # remember the mtime of the file so we can IMS GET later on
-  my $mirby_time = (stat("$UPDTmp/MIRRORED.BY"))[9];
-
-
   # Now that we've laid the foundation, go grab the appropriate files
   #
   my $content;
   my $SHA1;
   my $GPG;
-  my $mirby;
 
   # Loop through all available mirrors, choose from them randomly
   # if the archive get fails, choose another mirror,
@@ -521,7 +490,13 @@ foreach my $channel (@channels) {
 
     # try to update our list of mirrors.
     # a failure here doesn't cause channel failure.
-    $mirby = http_get("$mirror/MIRRORED.BY", $mirby_time);
+    if ($mirby_time != MIRBY_DOWNLOADED) {
+      my $mirby_tmp = http_get("$mirror/MIRRORED.BY", $mirby_time);
+      if ($mirby_tmp) {
+        $mirby = $mirby_tmp;
+        $mirby_time = MIRBY_DOWNLOADED;
+      }
+    }
 
     last;
   }
@@ -661,115 +636,29 @@ ENDOFVALIDATIONERR
   }
 
   # OK, we're all validated at this point, install the new version
-  dbg("channel: file verification passed, installing update");
+  dbg("channel: file verification passed, testing update");
 
-  if ($mirby) {
-    dbg("channel: updating MIRRORED.BY contents");
-    if (open(MBY, ">$UPDTmp/MIRRORED.BY")) {
-      print MBY $mirby;
-      close(MBY);
-    }
-    else {
-      warn "error: can't write new MIRRORED.BY file: $!\n";
-    }
-  }
-
-  dbg("channel: cleaning out update directory");
+  dbg("channel: cleaning out temp directory");
   if (!clean_update_dir($UPDTmp)) {
-    channel_failed("channel: attempt to clean update dir failed");
-    next;
+    die "channel: attempt to clean update dir failed, aborting";
   }
-
-  unlink $CFFTmp || warn "error: can't remove file $CFFTmp: $!\n";
-
-  $tfh = IO::Zlib->new($content_file, "rb");
-  die "fatal: couldn't read content tmpfile $content_file: $!\n" unless $tfh;
-
-  my $tar = Archive::Tar->new($tfh);
-  die "fatal: couldn't create Archive::Tar object!\n" unless $tar;
 
   dbg("channel: extracting archive");
-  my $ret = taint_safe_archive_extract($UPDTmp, $tar);
-
-  unless ($ret) {
-    close($tfh);
-    warn "error: couldn't extract the tar archive!\n";
+  if (!taint_safe_archive_extract($UPDTmp, $content_file)) {
     channel_failed("channel: archive extraction failed");
     next;
   }
-  close($tfh);
 
   # check --lint
 
   if (!lint_check_dir($UPDTmp)) {
-    warn "error: lint check of update failed!  channel failed\n";
     channel_failed("channel: lint check of update failed");
     next;
   }
 
-
-  # OK, lint passed. now create the update config file
-
-  dbg("channel: creating update config file");
-  unless (open(CF, ">$CFFTmp")) {
-    die "fatal: can't create new channel cf $CFFTmp: $!\n";
-  }
-
-  # Put in whatever metadata we need
-  print CF "# UPDATE version $newV\n";
-
-  # try to figure out the relative path dir name
-  my $relativeDir = $UPDDir;
-  $UPDDir =~ m,/([^/]+)/*$,;
-  if ($1) {
-    $relativeDir = $1;
-  }
-  dbg("channel: updatedir=$UPDDir relativepath=$relativeDir");
-
-  my @files = ();
-  # now include *.cf
-  unless (opendir(DIR, $UPDTmp)) {
-    die "fatal: can't access $UPDTmp: $!\n";
-  }
-  while(my $file = readdir(DIR)) {
-    $file =~ /^([^\/]+)$/;       # untaint
-    $file = $1;
-    next unless (-f "$UPDTmp/$file");
-    next if ($file eq "MIRRORED.BY");   # handled separately
-
-    dbg("channel: adding $file");
-
-    if ($file =~ /\.cf$/) {
-      print CF "include $relativeDir/$file\n";
-    }
-
-    push (@files, $file);
-  }
-  closedir(DIR);
-  if (!close(CF)) {
-    die "write to $CFFTmp failed! $!";  # write failed = fatal
-  }
-
-  # create a test file, in an attempt to mitigate dangers of incomplete
-  # upgrades.  If we fail to move this file the same way we expect to with the
-  # "real" upgrade files, there's no point in continuing.  (bug 4941)
-  my $testfile = "$UPDTmp/.rename_test.tmp";
-  my $testtofile = "$UPDDir/.rename_test.tmp";
-  open(TST, ">".$testfile) or die "write to $testfile failed! $!";
-  print TST time;
-  close TST or die "close of $testfile failed! $!";
-
-  dbg("channel: applying changes to $UPDDir...");
+  dbg("channel: lint check succeeded, extracting archive to $UPDDir...");
 
   if (-d $UPDDir) {
-    if (!rename($testfile, $testtofile)) {
-      warn "rename $testfile $testtofile failed: $!";
-      unlink ($testfile, $testtofile);
-      die "rename test failed (existing dir), aborting upgrade"
-    }
-
-    unlink $testtofile;
-
     # ok that worked, too late to stop now!   At this stage, if there are
     # errors, we have to attempt to carry on regardless, since we've already
     # blown away the old ruleset.
@@ -779,58 +668,117 @@ ENDOFVALIDATIONERR
     if (!clean_update_dir($UPDDir)) {
       warn("channel: attempt to rm contents failed, attempting to continue anyway");
     }
-
-  } else {
+  }
+  else {
     # create the dir, if it doesn't exist
     dbg("channel: creating $UPDDir");
     if (!mkpath([$UPDDir], 0, 0777)) {
-      rmdir $UPDDir;        # be sure it can't be used (bug 4941)
+      # bug 4941: try to get rid of the empty directories to avoid leaving SA
+      # with no rules.
+      rmdir $UPDDir;
+      rmdir $opt{'updatedir'};
       die "fatal: can't create $UPDDir: $!\n";
     }
-
-    if (!rename($testfile, $testtofile)) {
-      warn "rename $testfile $testtofile failed: $!";
-      unlink ($testfile, $testtofile);
-      rmdir $UPDDir;        # be sure it can't be used (bug 4941)
-      die "rename test failed (new dir), aborting upgrade"
-    }
-
-    unlink $testtofile;
 
     # ok, that test worked.  it's now likely that the .cf's will
     # similarly be ok to rename, too.   Too late to stop from here on
     dbg("channel: point of no return for new $UPDDir");
   }
 
-  # move in the files
-  foreach my $file (@files) {
-    rename("$UPDTmp/$file", "$UPDDir/$file")
-        or warn "rename $UPDTmp/$file $UPDDir/$file failed: $!";
+  # Write out the mirby file
+  dbg("channel: creating MIRRORED.BY file");
+  if (open(MBY, ">$UPDDir/MIRRORED.BY")) {
+    print MBY $mirby;
+    close(MBY);
+  }
+  else {
+    warn "error: can't write new MIRRORED.BY file: $!\n";
   }
 
-  unlink $CFFile || warn "error: can't remove file $CFFile: $!\n";
-  cross_fs_rename($CFFTmp, $CFFile)
-      or warn "rename $CFFTmp $CFFile failed: $!";
+  # extract the files again
+  if (!taint_safe_archive_extract($UPDDir, $content_file)) {
+    channel_failed("channel: archive extraction failed");
+    next;
+  }
 
-  unlink("$UPDDir/MIRRORED.BY");
-  rename("$UPDTmp/MIRRORED.BY", "$UPDDir/MIRRORED.BY")
-      or warn "error: couldn't mv $UPDTmp/MIRRORED.BY $UPDDir/MIRRORED.BY: $!\n";
+  # OK, lint passed. now create the update config file
+  my @CF = ();
+  my @PRE = ();
 
-  rmdir $UPDTmp;
+  dbg("channel: creating update config file");
+
+  # Put in whatever metadata we need
+  push(@CF, "# UPDATE version $newV\n");
+
+  # Find all of the cf and pre files
+  unless (opendir(DIR, $UPDDir)) {
+    die "fatal: can't access $UPDDir: $!\n";
+  }
+  while(my $file = readdir(DIR)) {
+    $file =~ /^([^\/]+)$/;       # untaint
+    $file = $1;
+    next unless (-f "$UPDDir/$file");   # shouldn't ever happen
+
+    if ($file =~ /\.cf$/) {
+      push(@CF, "include $nicechannel/$file\n");
+    }
+    elsif ($file =~ /\.pre$/) {
+      push(@PRE, "include $nicechannel/$file\n");
+    }
+    else {
+      next;
+    }
+
+    dbg("channel: adding $file");
+  }
+  closedir(DIR);
+
+  # Finally, write out the files to include the update files
+  if (!write_channel_file($PREFile, \@PRE)) {
+    channel_failed("channel: writing of $PREFile failed");
+    next;
+  }
+  if (!write_channel_file($CFFile, \@CF)) {
+    channel_failed("channel: writing of $CFFile failed");
+    next;
+  }
+
   $exit = 0;            # "exit 0" means an update occurred
 
   dbg("channel: update complete");
 }
 
+# clean out the temp dir
+if (!clean_update_dir($UPDTmp)) {
+  warn "error: unable to clean out the files in $UPDTmp\n";
+}
+
 # clear out the temp files if they still exist
-foreach ( $newcf_file, $content_file ) {
-  if (-e $_) {
+foreach ( $content_file, $UPDTmp ) {
+  if (-d $_) {
+    rmdir $_ || warn "error: can't remove directory $_: $!\n";
+  }
+  elsif (-e _) {
     unlink $_ || warn "error: can't remove file $_: $!\n";
   }
 }
 
 dbg("diag: updates complete, exiting with code $exit");
 exit $exit;
+
+sub write_channel_file {
+  my ($filename, $contents) = @_;
+
+  return 1 unless @{$contents};
+
+  if (open(FILE, ">$filename")) {
+    print FILE @{$contents};
+    close FILE or return 0;
+    return 1;
+  }
+
+  return 0;
+}
 
 sub channel_failed {
   my $reason = shift;
@@ -844,7 +792,13 @@ sub channel_failed {
 
 sub taint_safe_archive_extract {
   my $todir = shift;
-  my $tar = shift;
+  my $input = shift;
+
+  my $tfh = IO::Zlib->new($input, "rb");
+  die "fatal: couldn't read content tmpfile $content_file: $!\n" unless $tfh;
+
+  my $tar = Archive::Tar->new($tfh);
+  die "fatal: couldn't create Archive::Tar object!\n" unless $tar;
 
   # stupid Archive::Tar is not natively taint-safe! duh.
   # return $tar->extract();
@@ -1111,7 +1065,6 @@ sub clean_update_dir {
   }
   while(my $file = readdir(DIR)) {
     next unless (-f "$dir/$file");
-    next if ($file eq 'MIRRORED.BY');
     dbg("channel: unlinking $file");
     $file =~ /^([^\/]+)$/;       # untaint
     $file = $1;
@@ -1153,28 +1106,6 @@ sub lint_check_dir {
   $spamtest->finish();
 
   return $res == 0;
-}
-
-# a version of rename() that can cope with renaming files across filesystems,
-# as mv(1) can.
-sub cross_fs_rename {
-  my ($from, $to) = @_;
-  my $ret = rename ($from, $to);
-
-  if ($ret) {
-    return $ret;        # success first time! great
-  }
-
-  # try a copy
-  if (!copy($from, $to)) {
-    # copy failed, too.  we have no further fallbacks; return the rename()
-    # failure code
-    return $ret;
-  }
-
-  # copy succeeded, we're good; remove the source, and return success
-  unlink($from);
-  return 1;
 }
 
 # ---------------------------------------------------------------------------

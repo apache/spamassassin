@@ -930,6 +930,61 @@ sub secure_tmpfile {
   return ($reportfile, $tmpfile);
 }
 
+=item my ($dirpath) = secure_tmpdir();
+
+Generates a directory for temporary files.  Creates it securely and
+returns the path to the directory.
+
+If it cannot create a directory after 20 tries, it returns C<undef>.
+
+=cut
+
+# stolen from secure_tmpfile()
+sub secure_tmpdir {
+  my $tmpdir = Mail::SpamAssassin::Util::untaint_file_path(File::Spec->tmpdir());
+
+  if (!$tmpdir) {
+    # Note: we would prefer to keep this fatal, as not being able to
+    # find a writable tmpdir is a big deal for the calling code too.
+    # That would be quite a psychotic case, also.
+    warn "util: cannot find a temporary directory, set TMP or TMPDIR in environment";
+    return;
+  }
+
+  my ($reportpath, $tmppath);
+  my $umask = umask 077;
+
+  for (my $retries = 20; $retries > 0; $retries--) {
+    # we do not rely on the obscurity of this name for security,
+    # we use a average-quality PRG since this is all we need
+    my $suffix = join('', (0..9,'A'..'Z','a'..'z')[rand 62, rand 62, rand 62,
+						   rand 62, rand 62, rand 62]);
+    $reportpath = File::Spec->catfile($tmpdir,".spamassassin${$}${suffix}tmp");
+
+    # instead, we require O_EXCL|O_CREAT to guarantee us proper
+    # ownership of our file, read the open(2) man page
+    if (mkdir $reportpath, 0700) {
+      $tmppath = $reportpath;
+      last;
+    }
+
+    if ($!{EEXIST}) {
+      # it is acceptable if $reportpath already exists, try another
+      next;
+    }
+    
+    # error, maybe "out of quota" or "too many open files" (bug 4017)
+    warn "util: secure_tmpdir failed to create file '$reportpath': $!\n";
+  }
+
+  umask $umask;
+
+  warn "util: secure_tmpdir failed to create a directory, giving up" if (!$tmppath);
+
+  return $tmppath;
+}
+
+
 ###########################################################################
 
 sub uri_to_domain {
