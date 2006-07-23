@@ -40,13 +40,20 @@ describe DIGEST_MULTIPLE	Message hits more than one network digest check
 tflags DIGEST_MULTIPLE		net
 #reuse DIGEST_MULTIPLE
 
-# ---------------------------------------------------------------------------
-# Other DNS tests
+###########################################################################
+
+ifplugin Mail::SpamAssassin::Plugin::DNSEval
 
 header NO_DNS_FOR_FROM		eval:check_dns_sender()
 describe NO_DNS_FOR_FROM	Envelope sender has no MX or A DNS records
 tflags NO_DNS_FOR_FROM		net
 #reuse NO_DNS_FOR_FROM
+
+endif
+
+###########################################################################
+
+ifplugin Mail::SpamAssassin::Plugin::HeaderEval
 
 # this variant uses a DNS reverse lookup.  so now we can use a version
 # of this test without a net connection (ROUND_THE_WORLD_LOCAL)
@@ -54,3 +61,5 @@ header ROUND_THE_WORLD		eval:check_for_round_the_world_received_revdns()
 describe ROUND_THE_WORLD	Received: says mail sent around the world (DNS)
 tflags ROUND_THE_WORLD		net
 #reuse ROUND_THE_WORLD
+
+endif

@@ -18,3 +18,15 @@ loadplugin Mail::SpamAssassin::Plugin::HTTPSMismatch
 # URIDetail - test URIs using detailed URI information
 #
 loadplugin Mail::SpamAssassin::Plugin::URIDetail
+
+# Plugins which used to be EvalTests.pm
+# broken out into separate plugins
+loadplugin Mail::SpamAssassin::Plugin::Bayes
+loadplugin Mail::SpamAssassin::Plugin::BodyEval
+loadplugin Mail::SpamAssassin::Plugin::DNSEval
+loadplugin Mail::SpamAssassin::Plugin::HTMLEval
+loadplugin Mail::SpamAssassin::Plugin::HeaderEval
+loadplugin Mail::SpamAssassin::Plugin::MIMEEval
+loadplugin Mail::SpamAssassin::Plugin::RelayEval
+loadplugin Mail::SpamAssassin::Plugin::URIEval
+loadplugin Mail::SpamAssassin::Plugin::WLBLEval

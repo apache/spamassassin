@@ -28,6 +28,76 @@ require_version @@VERSION@@
 #
 # please sort these by eval type then name
 
+meta HTML_SHORT_LINK_IMG_1	__HTML_LENGTH_0000_1024 && __HTML_LINK_IMAGE
+meta HTML_SHORT_LINK_IMG_2	__HTML_LENGTH_1024_1536 && __HTML_LINK_IMAGE
+meta HTML_SHORT_LINK_IMG_3	__HTML_LENGTH_1536_2048 && __HTML_LINK_IMAGE
+describe HTML_SHORT_LINK_IMG_1	HTML is very short with a linked image
+describe HTML_SHORT_LINK_IMG_2	HTML is very short with a linked image
+describe HTML_SHORT_LINK_IMG_3	HTML is very short with a linked image
+
+meta HTML_SHORT_COMMENT		(__HTML_LENGTH_512 && __COMMENT_EXISTS)
+describe HTML_SHORT_COMMENT	HTML is very short with HTML comments
+
+meta HTML_SHORT_CENTER		(__HTML_LENGTH_384 && __TAG_EXISTS_CENTER)
+describe HTML_SHORT_CENTER	HTML is very short with CENTER tag
+
+meta HTML_TITLE_LONG		__HTML_TITLE_120 && !__MIME_ATTACHMENT
+describe HTML_TITLE_LONG	HTML title is very long
+
+meta HTML_TITLE_SUBJ_DIFF	__HTML_TITLE_SUBJ_DIFF && !__MIME_ATTACHMENT
+
+meta HTML_CHARSET_FARAWAY	(__HTML_CHARSET_FARAWAY && __HIGHBITS)
+describe HTML_CHARSET_FARAWAY	A foreign language charset used in HTML markup
+tflags HTML_CHARSET_FARAWAY	userconf
+
+meta HTML_MIME_NO_HTML_TAG	MIME_HTML_ONLY && !__TAG_EXISTS_HTML
+describe HTML_MIME_NO_HTML_TAG	HTML-only message, but there is no HTML tag
+
+meta HTML_MISSING_CTYPE		(!__MIME_HTML && HTML_MESSAGE)
+describe HTML_MISSING_CTYPE	Message is HTML without HTML Content-Type
+
+###########################################################################
+# rawbody HTML tests
+
+rawbody HIDE_WIN_STATUS		/<[^>]+onMouseOver=[^>]+window\.status=/i
+describe HIDE_WIN_STATUS	Javascript to hide URLs in browser
+
+rawbody __OBFUSCATING_COMMENT_A	/\w(?:<![^>]*>)+\w/
+rawbody __OBFUSCATING_COMMENT_B	/[^\s>](?:<![^>]*>)+[^\s<]/
+meta OBFUSCATING_COMMENT	((__OBFUSCATING_COMMENT_A && HTML_MESSAGE) || (__OBFUSCATING_COMMENT_B && MIME_HTML_ONLY))
+describe OBFUSCATING_COMMENT	HTML comments which obfuscate text
+
+# spams that are assembled from a Javascript array
+# look for the XOR op
+rawbody __JS_FROMCHARCODE       /String\.fromCharCode\s*\(\s*\S+\s*\[\s*\S+\s*\]\s*\^/
+rawbody __JS_DOCWRITE           /document\.write/
+meta JS_FROMCHARCODE            (__JS_FROMCHARCODE && __JS_DOCWRITE)
+describe JS_FROMCHARCODE        Document is built from a Javascript charcode array
+
+# A-Z, a-z, 0-9
+rawbody ENTITY_DEC_ALPHANUM	/\&\#0*(?:4[89]|5[0-7]|6[5-9][78]\d|9[0789]|1[01]\d|12[012])\;/
+describe ENTITY_DEC_ALPHANUM	HTML contains needlessly encoded characters
+
+# ! $ % ' ( ) , - . / : ; = ? @ _
+# a good possible rule that may resurface
+#rawbody ENTITY_DEC_OTHER	/\&\#0*(?:3[3679]|4[014567]|5[89]|6[134]|95)\;/
+#describe ENTITY_DEC_OTHER	HTML contains needlessly encoded punctuation
+
+# thanks to Bob Menschel for this one; bug 4116
+rawbody   HTML_EHTML2         m'</html></html>'i
+describe  HTML_EHTML2         HTML has doubled end HTML tag
+
+# bug 3070
+rawbody HTML_TINY_FONT	/\<.*font\-size\:[ \"]*[01][^0-9]+.*\>/i
+describe HTML_TINY_FONT	body contains 1 or 0-point font
+
+body __HIGHBITS                     /(?:[\x80-\xff].?){4}/
+# note: __HIGHBITS is used by HTML_CHARSET_FARAWAY
+
+###########################################################################
+
+ifplugin Mail::SpamAssassin::Plugin::HTMLEval
+
 # HTML control test, HTML spam rules should all have better S/O than this
 body HTML_MESSAGE		eval:html_test('html')
 describe HTML_MESSAGE		HTML included in message
@@ -263,96 +333,41 @@ body __HTML_LINK_IMAGE		eval:html_text_match('anchor', '<img>')
 body __HTML_LENGTH_0000_1024	eval:html_range('length', '0', '1024')
 body __HTML_LENGTH_1024_1536	eval:html_range('length', '1024', '1536')
 body __HTML_LENGTH_1536_2048	eval:html_range('length', '1536', '2048')
-meta HTML_SHORT_LINK_IMG_1	__HTML_LENGTH_0000_1024 && __HTML_LINK_IMAGE
-meta HTML_SHORT_LINK_IMG_2	__HTML_LENGTH_1024_1536 && __HTML_LINK_IMAGE
-meta HTML_SHORT_LINK_IMG_3	__HTML_LENGTH_1536_2048 && __HTML_LINK_IMAGE
-describe HTML_SHORT_LINK_IMG_1	HTML is very short with a linked image
-describe HTML_SHORT_LINK_IMG_2	HTML is very short with a linked image
-describe HTML_SHORT_LINK_IMG_3	HTML is very short with a linked image
 
 body HTML_SHORT_LENGTH		eval:html_eval('length', '< 170')
 describe HTML_SHORT_LENGTH	HTML is extremely short
 
 body __HTML_LENGTH_512		eval:html_eval('length', '< 512')
 body __COMMENT_EXISTS		eval:html_text_match('comment', '<!.*?>')
-meta HTML_SHORT_COMMENT		(__HTML_LENGTH_512 && __COMMENT_EXISTS)
-describe HTML_SHORT_COMMENT	HTML is very short with HTML comments
 
 body __HTML_LENGTH_384		eval:html_eval('length', '< 384')
 body __TAG_EXISTS_CENTER	eval:html_tag_exists('center')
-meta HTML_SHORT_CENTER		(__HTML_LENGTH_384 && __TAG_EXISTS_CENTER)
-describe HTML_SHORT_CENTER	HTML is very short with CENTER tag
 
 body HTML_TITLE_EMPTY		eval:html_text_not_match('title', '(?s)\S')
 describe HTML_TITLE_EMPTY	HTML title contains no text
 
-# __MIME_ATTACHMENT also used in 20_meta_tests.cf
-body __MIME_ATTACHMENT		eval:check_for_mime('mime_attachment')
-
 body __HTML_TITLE_120		eval:html_text_match('title', '.{120}')
-meta HTML_TITLE_LONG		__HTML_TITLE_120 && !__MIME_ATTACHMENT
-describe HTML_TITLE_LONG	HTML title is very long
 
 body __HTML_TITLE_SUBJ_DIFF	eval:html_title_subject_ratio('3.5')
-meta HTML_TITLE_SUBJ_DIFF	__HTML_TITLE_SUBJ_DIFF && !__MIME_ATTACHMENT
 
 body HTML_TITLE_UNTITLED	eval:html_text_match('title', '(?i)(?:untitled|new page \d+)')
 describe HTML_TITLE_UNTITLED	HTML title contains "Untitled"
 
-###########################################################################
-# meta tests
-
 body __HTML_CHARSET_FARAWAY	eval:html_charset_faraway()
-meta HTML_CHARSET_FARAWAY	(__HTML_CHARSET_FARAWAY && __HIGHBITS)
-describe HTML_CHARSET_FARAWAY	A foreign language charset used in HTML markup
-tflags HTML_CHARSET_FARAWAY	userconf
-
-meta HTML_MIME_NO_HTML_TAG	MIME_HTML_ONLY && !__TAG_EXISTS_HTML
-describe HTML_MIME_NO_HTML_TAG	HTML-only message, but there is no HTML tag
-
-meta HTML_MISSING_CTYPE		(!__MIME_HTML && HTML_MESSAGE)
-describe HTML_MISSING_CTYPE	Message is HTML without HTML Content-Type
-
-###########################################################################
-# rawbody HTML tests
-
-rawbody HIDE_WIN_STATUS		/<[^>]+onMouseOver=[^>]+window\.status=/i
-describe HIDE_WIN_STATUS	Javascript to hide URLs in browser
-
-rawbody __OBFUSCATING_COMMENT_A	/\w(?:<![^>]*>)+\w/
-rawbody __OBFUSCATING_COMMENT_B	/[^\s>](?:<![^>]*>)+[^\s<]/
-meta OBFUSCATING_COMMENT	((__OBFUSCATING_COMMENT_A && HTML_MESSAGE) || (__OBFUSCATING_COMMENT_B && MIME_HTML_ONLY))
-describe OBFUSCATING_COMMENT	HTML comments which obfuscate text
-
-# spams that are assembled from a Javascript array
-# look for the XOR op
-rawbody __JS_FROMCHARCODE       /String\.fromCharCode\s*\(\s*\S+\s*\[\s*\S+\s*\]\s*\^/
-rawbody __JS_DOCWRITE           /document\.write/
-meta JS_FROMCHARCODE            (__JS_FROMCHARCODE && __JS_DOCWRITE)
-describe JS_FROMCHARCODE        Document is built from a Javascript charcode array
-
-# A-Z, a-z, 0-9
-rawbody ENTITY_DEC_ALPHANUM	/\&\#0*(?:4[89]|5[0-7]|6[5-9][78]\d|9[0789]|1[01]\d|12[012])\;/
-describe ENTITY_DEC_ALPHANUM	HTML contains needlessly encoded characters
-
-# ! $ % ' ( ) , - . / : ; = ? @ _
-# a good possible rule that may resurface
-#rawbody ENTITY_DEC_OTHER	/\&\#0*(?:3[3679]|4[014567]|5[89]|6[134]|95)\;/
-#describe ENTITY_DEC_OTHER	HTML contains needlessly encoded punctuation
-
-# thanks to Bob Menschel for this one; bug 4116
-rawbody   HTML_EHTML2         m'</html></html>'i
-describe  HTML_EHTML2         HTML has doubled end HTML tag
-
-# bug 3070
-rawbody HTML_TINY_FONT	/\<.*font\-size\:[ \"]*[01][^0-9]+.*\>/i
-describe HTML_TINY_FONT	body contains 1 or 0-point font
-
-body __HIGHBITS                     /(?:[\x80-\xff].?){4}/
-# note: __HIGHBITS is used by HTML_CHARSET_FARAWAY
 
 body HTML_IFRAME_SRC	eval:check_iframe_src()
 describe HTML_IFRAME_SRC	Message has HTML IFRAME tag with SRC URI
 
 body URI_HTML_ONLY	eval:check_html_uri_only()
 describe URI_HTML_ONLY	URIs only found in HTML part of multipart/alternative message
+
+endif
+
+###########################################################################
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEEval
+
+# __MIME_ATTACHMENT also used in 20_meta_tests.cf
+body __MIME_ATTACHMENT		eval:check_for_mime('mime_attachment')
+
+endif
