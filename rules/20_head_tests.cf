@@ -24,4 +24,10 @@
 
 require_version @@VERSION@@
 
+###########################################################################
+
+ifplugin Mail::SpamAssassin::Plugin::HeaderEval
+
 header __ENV_AND_HDR_FROM_MATCH	eval:check_for_matching_env_and_hdr_from()
+
+endif

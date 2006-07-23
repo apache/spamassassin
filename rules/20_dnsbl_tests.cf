@@ -24,6 +24,10 @@
 
 require_version @@VERSION@@
 
+###########################################################################
+
+ifplugin Mail::SpamAssassin::Plugin::DNSEval
+
 # See the Mail::SpamAssassin::Conf manual page for details of how to use
 # check_rbl().
 
@@ -333,3 +337,5 @@ tflags HABEAS_CHECKED		net nice
 # header HABEAS_CHECKED		eval:check_rbl_accreditor('accredit-firsttrusted', 'sa-accredit.habeas.com.', '127\.\d+\.\d+\.[6789]\d', 'habeas')
 # describe HABEAS_CHECKED		Habeas Checked
 # tflags HABEAS_CHECKED		net nice
+
+endif

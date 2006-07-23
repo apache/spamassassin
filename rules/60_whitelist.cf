@@ -28,6 +28,8 @@
 # user slip-up could result in scribbling side-effects in the bayes
 # db as a result -- which is hard to remedy.
 
+ifplugin Mail::SpamAssassin::Plugin::WLBLEval
+
 header USER_IN_BLACKLIST	eval:check_from_in_blacklist()
 describe USER_IN_BLACKLIST	From: address is in the user's black-list
 tflags USER_IN_BLACKLIST	userconf noautolearn
@@ -102,3 +104,4 @@ def_whitelist_from_rcvd  *@*.nsi-direct.com                     e-dialog.com
 def_whitelist_from_rcvd  *@warehouse.com                        warehouse.com
 def_whitelist_from_rcvd  *@*.efax.com                           efax.com
 
+endif
