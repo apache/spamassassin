@@ -1171,6 +1171,7 @@ sub compile_now {
   my $mail = $self->parse(\@testmsg, 1);
   my $status = Mail::SpamAssassin::PerMsgStatus->new($self, $mail,
                         { disable_auto_learning => 1 } );
+
   # We want to turn off the bayes rules for this test msg
   my $use_bayes_rules_value = $self->{conf}->{use_bayes_rules};
   $self->{conf}->{use_bayes_rules} = 0;

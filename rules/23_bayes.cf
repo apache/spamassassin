@@ -26,6 +26,8 @@ require_version @@VERSION@@
 
 ###########################################################################
 
+ifplugin Mail::SpamAssassin::Plugin::Bayes
+
 body BAYES_00		eval:check_bayes('0.00', '0.01')
 body BAYES_05		eval:check_bayes('0.01', '0.05')
 body BAYES_20		eval:check_bayes('0.05', '0.20')
@@ -59,3 +61,5 @@ describe BAYES_60	Bayesian spam probability is 60 to 80%
 describe BAYES_80	Bayesian spam probability is 80 to 95%
 describe BAYES_95	Bayesian spam probability is 95 to 99%
 describe BAYES_99	Bayesian spam probability is 99 to 100%
+
+endif

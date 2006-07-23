@@ -52,7 +52,6 @@ use strict;
 use warnings;
 
 use Mail::SpamAssassin::Constants qw(:sa);
-use Mail::SpamAssassin::EvalTests;
 use Mail::SpamAssassin::AsyncLoop;
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Util;
@@ -3265,6 +3264,105 @@ sub delete_fulltext_tmpfile {
     unlink $self->{fulltext_tmpfile};
     $self->{fulltext_tmpfile} = undef;
   }
+}
+
+###########################################################################
+
+sub all_from_addrs {
+  my ($self) = @_;
+
+  if (exists $self->{all_from_addrs}) { return @{$self->{all_from_addrs}}; }
+
+  my @addrs;
+
+  # Resent- headers take priority, if present. see bug 672
+  # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=672
+  my $resent = $self->get('Resent-From');
+  if (defined $resent && $resent =~ /\S/) {
+    @addrs = $self->{main}->find_all_addrs_in_line ($resent);
+
+  }
+  else {
+    # bug 2292: Used to use find_all_addrs_in_line() with the same
+    # headers, but the would catch addresses in comments which caused
+    # FNs for things like whitelist_from.  Since all of these are From
+    # headers, there should only be 1 address in each anyway, so use the
+    # :addr code...
+    # bug 3366: some addresses come in as 'foo@bar...', which is invalid.
+    # so deal with the multiple periods.
+    @addrs = grep { defined($_) && length($_) > 0 } map { tr/././s; $_; }
+        ($self->get('From:addr'),		# std
+         $self->get('Envelope-Sender:addr'),	# qmail: new-inject(1)
+         $self->get('Resent-Sender:addr'),	# procmailrc manpage
+         $self->get('X-Envelope-From:addr'),	# procmailrc manpage
+         $self->get('EnvelopeFrom:addr'));	# SMTP envelope
+    # http://www.cs.tut.fi/~jkorpela/headers.html is useful here
+  }
+
+  # Remove duplicate addresses
+  my %addrs = map { $_ => 1 } @addrs;
+  @addrs = keys %addrs;
+
+  dbg("eval: all '*From' addrs: " . join(" ", @addrs));
+  $self->{all_from_addrs} = \@addrs;
+  return @addrs;
+}
+
+sub all_to_addrs {
+  my ($self) = @_;
+
+  if (exists $self->{all_to_addrs}) { return @{$self->{all_to_addrs}}; }
+
+  my @addrs;
+
+  # Resent- headers take priority, if present. see bug 672
+  # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=672
+  my $resent = $self->get('Resent-To') . $self->get('Resent-Cc');
+  if (defined $resent && $resent =~ /\S/) {
+    @addrs = $self->{main}->find_all_addrs_in_line (
+  	 $self->get('Resent-To') .             # std, rfc822
+  	 $self->get('Resent-Cc'));             # std, rfc822
+
+  } else {
+    # OK, a fetchmail trick: try to find the recipient address from
+    # the most recent 3 Received lines.  This is required for sendmail,
+    # since it does not add a helpful header like exim, qmail
+    # or Postfix do.
+    #
+    my $rcvd = $self->get('Received');
+    $rcvd =~ s/\n[ \t]+/ /gs;
+    $rcvd =~ s/\n+/\n/gs;
+
+    my @rcvdlines = split(/\n/, $rcvd, 4); pop @rcvdlines; # forget last one
+    my @rcvdaddrs = ();
+    foreach my $line (@rcvdlines) {
+      if ($line =~ / for (\S+\@\S+);/) { push (@rcvdaddrs, $1); }
+    }
+
+    @addrs = $self->{main}->find_all_addrs_in_line (
+	 join(" ", @rcvdaddrs)."\n" .
+         $self->get('To') .			# std 
+  	 $self->get('Apparently-To') .		# sendmail, from envelope
+  	 $self->get('Delivered-To') .		# Postfix, poss qmail
+  	 $self->get('Envelope-Recipients') .	# qmail: new-inject(1)
+  	 $self->get('Apparently-Resent-To') .	# procmailrc manpage
+  	 $self->get('X-Envelope-To') .		# procmailrc manpage
+  	 $self->get('Envelope-To') .		# exim
+	 $self->get('X-Delivered-To') .		# procmail quick start
+	 $self->get('X-Original-To') .		# procmail quick start
+	 $self->get('X-Rcpt-To') .		# procmail quick start
+	 $self->get('X-Real-To') .		# procmail quick start
+	 $self->get('Cc'));			# std
+    # those are taken from various sources; thanks to Nancy McGough, who
+    # noted some in <http://www.ii.com/internet/robots/procmail/qs/#envelope>
+  }
+
+  dbg("eval: all '*To' addrs: " . join(" ", @addrs));
+  $self->{all_to_addrs} = \@addrs;
+  return @addrs;
+
+# http://www.cs.tut.fi/~jkorpela/headers.html is useful here, also
+# http://www.exim.org/pipermail/exim-users/Week-of-Mon-20001009/021672.html
 }
 
 ###########################################################################
