@@ -23,7 +23,7 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::HTML;
 use Mail::SpamAssassin::Util;
 
-plan tests => 82;
+plan tests => 83;
 
 ##############################################
 
