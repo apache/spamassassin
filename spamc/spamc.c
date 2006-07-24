@@ -238,7 +238,7 @@ read_args(int argc, char **argv,
        { "pipe-to", required_argument, 0, 'e' },
        { "help", no_argument, 0, 'h' },
        { "version", no_argument, 0, 'V' },
-       { 0, 0, 0, 0} // last element _must_ be all zeroes
+       { 0, 0, 0, 0} /* last element _must_ be all zeroes */
     };
     
     while ((opt = spamc_getopt_long(argc, argv, opts, longoptions, 
