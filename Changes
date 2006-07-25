@@ -1,4 +1,144 @@
 ------------------------------------------------------------------------
+r425532 | felicity | 2006-07-25 21:55:54 +0000 (Tue, 25 Jul 2006) | 1 line
+
+bug 5006: deal properly with redirection obfuscation and non-standard ports
+------------------------------------------------------------------------
+r425491 | dos | 2006-07-25 19:29:27 +0000 (Tue, 25 Jul 2006) | 1 line
+
+bug 3979: better handling of quoted text when stripping email addresses
+------------------------------------------------------------------------
+r425085 | felicity | 2006-07-24 15:12:12 +0000 (Mon, 24 Jul 2006) | 1 line
+
+bug 4941: previously if the first sa-update run failed, SA would be left seeing a existing local state dir with no rules, so change things around to minimize the risk.  also, allow pre files in updates to be used, and use File::Spec->catfile() instead of assuming / as dir separator, etc.
+------------------------------------------------------------------------
+r424340 | felicity | 2006-07-21 14:48:21 +0000 (Fri, 21 Jul 2006) | 1 line
+
+bug 4997: due to bugs in earlier versions, increase sa-update's requirements for Archive::Tar to v1.23 and IO::Zlib to v1.04
+------------------------------------------------------------------------
+r423528 | felicity | 2006-07-19 17:11:38 +0000 (Wed, 19 Jul 2006) | 1 line
+
+modify the Conf POD regarding escaping the # in configs
+------------------------------------------------------------------------
+r423495 | felicity | 2006-07-19 15:30:43 +0000 (Wed, 19 Jul 2006) | 1 line
+
+bug 4997: update INSTALL doc to specify minimum versions of IO::Zlib and Archive::Tar
+------------------------------------------------------------------------
+r423299 | felicity | 2006-07-19 00:05:52 +0000 (Wed, 19 Jul 2006) | 1 line
+
+bug 4690: spamassassin --lint implies -x (don't create user_prefs file)
+------------------------------------------------------------------------
+r423255 | felicity | 2006-07-18 21:15:29 +0000 (Tue, 18 Jul 2006) | 1 line
+
+bug 4991: 'spamc -y' would return the entire message on error (connection failure, etc.)  just print a blank line instead.
+------------------------------------------------------------------------
+r423021 | jm | 2006-07-18 09:20:14 +0000 (Tue, 18 Jul 2006) | 1 line
+
+bug 4966: fix major BSMTP bug, which rendered SA unusable with exim4 when BSMTP is used.   fix thanks to anomie
+------------------------------------------------------------------------
+r422962 | felicity | 2006-07-18 04:36:13 +0000 (Tue, 18 Jul 2006) | 1 line
+
+removing excess space
+------------------------------------------------------------------------
+r422590 | felicity | 2006-07-17 01:21:36 +0000 (Mon, 17 Jul 2006) | 1 line
+
+bug 4899: windows doesn't handle single quotes around filenames
+------------------------------------------------------------------------
+r422279 | jm | 2006-07-15 19:29:21 +0000 (Sat, 15 Jul 2006) | 1 line
+
+bug 4958: sa-update does not recognise gpg.exe on windows; fixed
+------------------------------------------------------------------------
+r422056 | dos | 2006-07-14 21:27:42 +0000 (Fri, 14 Jul 2006) | 1 line
+
+bug 4980: support Postfix 2.3 auth headers
+------------------------------------------------------------------------
+r422038 | dos | 2006-07-14 20:47:37 +0000 (Fri, 14 Jul 2006) | 1 line
+
+provide debug info about missing/disabled meta dependencies
+------------------------------------------------------------------------
+r421293 | jm | 2006-07-12 15:39:50 +0000 (Wed, 12 Jul 2006) | 1 line
+
+bug 4896: misspellings fixed in POD docs
+------------------------------------------------------------------------
+r421292 | jm | 2006-07-12 15:31:24 +0000 (Wed, 12 Jul 2006) | 1 line
+
+bug 4908 (trivial) fix: ensure LC=C descriptions are used so that the GTUBE description can be matched
+------------------------------------------------------------------------
+r421209 | jm | 2006-07-12 09:48:51 +0000 (Wed, 12 Jul 2006) | 1 line
+
+bug 4953: trivial fix to remove unused refs to Carp.pm and Config.pm, thanks to Radoslaw Zielinski
+------------------------------------------------------------------------
+r421000 | dos | 2006-07-11 21:50:37 +0000 (Tue, 11 Jul 2006) | 1 line
+
+bug 4978: fudge out of range times in parse_rfc822_date() to get usable date
+------------------------------------------------------------------------
+r420942 | felicity | 2006-07-11 18:13:47 +0000 (Tue, 11 Jul 2006) | 1 line
+
+promote new eval rule into 3.1.4.  leaving as the default score of 1.0.
+------------------------------------------------------------------------
+r420383 | felicity | 2006-07-10 00:38:59 +0000 (Mon, 10 Jul 2006) | 1 line
+
+bug 4968: allow % as a valid character in file paths
+------------------------------------------------------------------------
+r420381 | felicity | 2006-07-10 00:33:22 +0000 (Mon, 10 Jul 2006) | 1 line
+
+bug 4935: fix issue where auto-whitelist db lock file gets the wrong set of permissions
+------------------------------------------------------------------------
+r420378 | felicity | 2006-07-10 00:22:15 +0000 (Mon, 10 Jul 2006) | 1 line
+
+bug 4488: deal with potential memory leak via M::SA::finish() due to circular reference between Bayes and BayesStore objects.
+------------------------------------------------------------------------
+r420376 | felicity | 2006-07-10 00:11:51 +0000 (Mon, 10 Jul 2006) | 1 line
+
+bug 4862: sa-update should replace @@VAR@@ macros for update files, such that report_contact will be set appropriately after updates
+------------------------------------------------------------------------
+r420375 | felicity | 2006-07-10 00:05:11 +0000 (Mon, 10 Jul 2006) | 1 line
+
+bug 4930: work around issue where 'spamassassin -e' stopped functioning due to fix for bug 3754
+------------------------------------------------------------------------
+r420374 | felicity | 2006-07-09 23:58:00 +0000 (Sun, 09 Jul 2006) | 1 line
+
+bug 4969: change the recursive nature of Message::Node::find_parts() such that recursive == true keeps the same behavior, but recursive == false willl cause the current part and any children to be checked but no recursion beyond that
+------------------------------------------------------------------------
+r419648 | felicity | 2006-07-06 18:41:32 +0000 (Thu, 06 Jul 2006) | 1 line
+
+bug 4973: fix PerMsgStatus POD so that set_tag and get_tag are visible
+------------------------------------------------------------------------
+r418174 | felicity | 2006-06-30 03:29:09 +0000 (Fri, 30 Jun 2006) | 1 line
+
+bug 4924: initialize tag data for DCCB, DCCR, PYZOR, RBL, and BAYESTC*
+------------------------------------------------------------------------
+r418171 | felicity | 2006-06-30 03:09:04 +0000 (Fri, 30 Jun 2006) | 1 line
+
+bug 4943: parse Norton AntiVirus Gateway received headers
+------------------------------------------------------------------------
+r418170 | felicity | 2006-06-30 03:07:45 +0000 (Fri, 30 Jun 2006) | 1 line
+
+bug 4902: make certain TextCat plugin options which previously required code changes to be changed via config
+------------------------------------------------------------------------
+r418169 | felicity | 2006-06-30 03:04:22 +0000 (Fri, 30 Jun 2006) | 1 line
+
+bug 4825: fix issue where Mail::SpamAssassin::Client::ping always returns 0 (false)
+------------------------------------------------------------------------
+r418168 | felicity | 2006-06-30 03:01:37 +0000 (Fri, 30 Jun 2006) | 1 line
+
+bug 4921: localize spamd rc script messages for redhat distros
+------------------------------------------------------------------------
+r418130 | felicity | 2006-06-29 20:27:52 +0000 (Thu, 29 Jun 2006) | 1 line
+
+remove references to bugzilla.spamassassin.org, replace with issues.apache.org/SpamAssassin, as well as standardize a bit on 'bug #' as opposed to BZ links for comment sections about a fix, etc.
+------------------------------------------------------------------------
+r416865 | felicity | 2006-06-24 06:23:08 +0000 (Sat, 24 Jun 2006) | 1 line
+
+bug 4954: add in missing test into MANIFEST
+------------------------------------------------------------------------
+r411830 | felicity | 2006-06-05 15:43:36 +0000 (Mon, 05 Jun 2006) | 1 line
+
+3.1.4 devel cycle started
+------------------------------------------------------------------------
+r411828 | felicity | 2006-06-05 15:42:40 +0000 (Mon, 05 Jun 2006) | 1 line
+
+preparing release 3.1.3
+------------------------------------------------------------------------
 r411821 | felicity | 2006-06-05 15:35:40 +0000 (Mon, 05 Jun 2006) | 1 line
 
 bug 4926: given a certain set of parameters to spamd and a specially formatted input message, users could cause spamd to execute arbitrary commands as spamd user
