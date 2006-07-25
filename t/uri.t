@@ -23,7 +23,7 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::HTML;
 use Mail::SpamAssassin::Util;
 
-plan tests => 82;
+plan tests => 84;
 
 ##############################################
 
@@ -189,6 +189,22 @@ ok(try_canon([
    'http://www.nate.com/r/DM03/neverp4yretail.com/bam/?man=mic49',
    'http://neverp4yretail.com/bam/?man=mic49',
    'neverp4yretail.com/bam/?man=mic49',
+   ]));
+
+ok(try_canon([
+   'http://www.google.com/pagead/iclk?sa=l&ai=Br3ycNQz5Q-fXBJGSiQLU0eDSAueHkArnhtWZAu-FmQWgjlkQAxgFKAg4AEDKEUiFOVD-4r2f-P____8BoAGyqor_A8gBAZUCCapCCqkCxU7NLQH0sz4&num=5&adurl=http://1092229727:9999/https-www.paypal.com/webscrr/index.php'
+   ], [
+   'http://1092229727:9999/https-www.paypal.com/webscrr/index.php',
+   'http://65.26.26.95:9999/https-www.paypal.com/webscrr/index.php',
+   'http://www.google.com/pagead/iclk?sa=l&ai=Br3ycNQz5Q-fXBJGSiQLU0eDSAueHkArnhtWZAu-FmQWgjlkQAxgFKAg4AEDKEUiFOVD-4r2f-P____8BoAGyqor_A8gBAZUCCapCCqkCxU7NLQH0sz4&num=5&adurl=http://1092229727:9999/https-www.paypal.com/webscrr/index.php',
+   ]));
+
+ok(try_canon([
+   'http://www.google.com/pagead/iclk?sa=l&ai=Br3ycNQz5Q-fXBJGSiQLU0eDSAueHkArnhtWZAu-FmQWgjlkQAxgFKAg4AEDKEUiFOVD-4r2f-P____8BoAGyqor_A8gBAZUCCapCCqkCxU7NLQH0sz4&num=5&adurl=http://1092229727:/https-www.paypal.com/webscrr/index.php'
+   ], [
+   'http://1092229727:/https-www.paypal.com/webscrr/index.php',
+   'http://65.26.26.95:/https-www.paypal.com/webscrr/index.php',
+   'http://www.google.com/pagead/iclk?sa=l&ai=Br3ycNQz5Q-fXBJGSiQLU0eDSAueHkArnhtWZAu-FmQWgjlkQAxgFKAg4AEDKEUiFOVD-4r2f-P____8BoAGyqor_A8gBAZUCCapCCqkCxU7NLQH0sz4&num=5&adurl=http://1092229727:/https-www.paypal.com/webscrr/index.php',
    ]));
 
 ##############################################
