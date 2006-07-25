@@ -1085,7 +1085,7 @@ sub uri_list_canonify {
     }
 
     # deal with wierd hostname parts, remove user/pass, etc.
-    if ($nuri =~ m{^(https?://)([^/]+?)((?::\d+)?\/.*)?$}i) {
+    if ($nuri =~ m{^(https?://)([^/]+?)((?::\d*)?\/.*)?$}i) {
       my($proto, $host, $rest) = ($1,$2,$3);
 
       # not required
