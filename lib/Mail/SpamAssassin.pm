@@ -95,7 +95,7 @@ use vars qw{
 };
 
 $VERSION = "3.001004";      # update after release (same format as perl $])
-$IS_DEVEL_BUILD = 1;        # change for release versions
+#$IS_DEVEL_BUILD = 1;        # change for release versions
 
 @ISA = qw();
 
