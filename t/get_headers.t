@@ -21,7 +21,7 @@ use SATest; sa_t_init("get_headers");
 
 use Mail::SpamAssassin;
 
-plan tests => 10;
+plan tests => 11;
 
 ##############################################
 
@@ -80,7 +80,7 @@ ok(try('To5:addr', 'jm@foo'));
 ok(try('To6:addr', 'jm@foo'));
 ok(try('To7:addr', 'jm@foo'));
 ok(try('To8:addr', 'jm@foo'));
-#ok(try('To9:addr', 'jm@foo'));
+ok(try('To9:addr', 'jm@foo'));
 ok(try('To10:addr', '"Some User"@foo'));
 ok(try('To11:addr', '"Some User"@foo'));
 
