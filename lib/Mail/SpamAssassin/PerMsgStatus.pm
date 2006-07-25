@@ -1555,10 +1555,13 @@ sub _get {
       # Foo Blah <jm@foo>
       # "Foo Blah" <jm@foo>
       # "'Foo Blah'" <jm@foo>
+      # "_$B!z8=6b$=$N>l$GEv$?$j!*!zEv_(B_$B$?$k!*!)$/$8!z7|>^%\%s%P!<!z_(B" <jm@foo>  (bug 3979)
       #
       # strip out the (comments)
       $result =~ s/\s*\(.*?\)//g;
-      # "Foo Blah" <jm@xxx> or <jm@xxx>
+      # strip out the "quoted text"
+      $result =~ s/(?<!<)"[^"]*"(?!@)//g;
+      # Foo Blah <jm@xxx> or <jm@xxx>
       $result =~ s/^[^<]*?<(.*?)>.*$/$1/;
       # multiple addresses on one line? remove all but first
       $result =~ s/,.*$//;
