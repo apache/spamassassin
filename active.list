@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-jm cthielen daf parkerm theo wtogami zmi
+# with results from: bb-doc bb-jm bb-zmi cthielen daf parkerm theo wtogami zmi
 
 # good enough
 ADVANCE_FEE_3
@@ -45,6 +45,9 @@ BAYES_95
 
 # tflags learn
 BAYES_99
+
+# good enough
+BODY_ENHANCEMENT2
 
 # good enough
 CUM_SHOT
@@ -138,6 +141,9 @@ DRUG_DOSAGE
 
 # good enough
 DRUG_ED_GENERIC
+
+# good enough
+DRUG_ED_ONLINE
 
 # good enough
 DRUG_ED_SILD
@@ -302,9 +308,6 @@ FROM_ALL_NUMS
 FROM_BLANK_NAME
 
 # good enough
-FROM_DOMAIN_NOVOWEL
-
-# good enough
 FROM_ENDS_IN_NUMS
 
 # good enough
@@ -426,6 +429,9 @@ HS_INDEX_PARAM
 
 # good enough
 HS_MEETUP_FOR_SEX
+
+# good enough
+HS_PHARMA_1
 
 # good enough
 HS_SUBJ_ONLINE_PHARMACEUTICAL
@@ -591,6 +597,9 @@ MSGID_YAHOO_CAPS
 
 # good enough
 MULTIPART_ALT_NON_TEXT
+
+# good enough
+NOT_ADVISOR
 
 # tflags net
 NO_DNS_FOR_FROM
@@ -959,12 +968,6 @@ TVD_FUZZY_PHARMACEUTICAL
 TVD_FUZZY_SYMBOL
 
 # good enough
-TVD_FW_GRAPHIC_NAME_LONG
-
-# good enough
-TVD_FW_GRAPHIC_NAME_MID
-
-# good enough
 TVD_FW_MESG1
 
 # good enough
@@ -1082,13 +1085,22 @@ FORGED_OUTLOOK_HTML
 FORGED_OUTLOOK_TAGS
 
 # good enough
-HS_PHARMA_1
+HELO_IPNNN_COM
 
 # good enough
 RATWARE_MS_HASH
 
 # good enough
 RATWARE_OUTLOOK_NONAME
+
+# good enough
+TVD_FW_GRAPHIC_ID1
+
+# good enough
+TVD_FW_GRAPHIC_ID2
+
+# good enough
+TVD_FW_MESG2
 
 # good enough
 UNCLAIMED_MONEY
