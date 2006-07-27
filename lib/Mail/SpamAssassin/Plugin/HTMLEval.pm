@@ -17,6 +17,7 @@
 package Mail::SpamAssassin::Plugin::HTMLEval;
 
 use Mail::SpamAssassin::Plugin;
+use Mail::SpamAssassin::Locales;
 use strict;
 use warnings;
 use bytes;

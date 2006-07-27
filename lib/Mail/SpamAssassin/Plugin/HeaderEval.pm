@@ -17,6 +17,7 @@
 package Mail::SpamAssassin::Plugin::HeaderEval;
 
 use Mail::SpamAssassin::Plugin;
+use Mail::SpamAssassin::Locales;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Constants qw(:sa :ip);
 
