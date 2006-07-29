@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-jm bb-zmi cthielen daf parkerm theo wtogami zmi
+# with results from: bb-doc bb-jm bb-zmi cthielen daf parkerm theo wtogami
 
 # good enough
 ADVANCE_FEE_3
@@ -134,10 +134,10 @@ DRUGS_HDIA
 DRUGS_MANYKINDS
 
 # good enough
-DRUGS_SLEEP_EREC
+DRUGS_MUSCLE
 
 # good enough
-DRUG_DOSAGE
+DRUGS_SLEEP_EREC
 
 # good enough
 DRUG_ED_GENERIC
@@ -308,10 +308,16 @@ FROM_ALL_NUMS
 FROM_BLANK_NAME
 
 # good enough
+FROM_DOMAIN_NOVOWEL
+
+# good enough
 FROM_ENDS_IN_NUMS
 
 # good enough
 FROM_HAS_MIXED_NUMS
+
+# good enough
+FROM_HAS_ULINE_NUMS
 
 # good enough
 FROM_ILLEGAL_CHARS
@@ -414,9 +420,6 @@ HELO_DYNAMIC_IPADDR2
 
 # good enough
 HELO_DYNAMIC_SPLIT_IP
-
-# good enough
-HELO_IPNNN_COM
 
 # good enough
 HS_EXTRA
@@ -539,6 +542,9 @@ MIME_BAD_ISO_CHARSET
 MIME_BASE64_BLANKS
 
 # good enough
+MIME_BASE64_NO_NAME
+
+# good enough
 MIME_BASE64_TEXT
 
 # good enough
@@ -597,9 +603,6 @@ MSGID_YAHOO_CAPS
 
 # good enough
 MULTIPART_ALT_NON_TEXT
-
-# good enough
-NOT_ADVISOR
 
 # tflags net
 NO_DNS_FOR_FROM
@@ -857,6 +860,9 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
+SPOOF_COM2COM
+
+# good enough
 STOCK_ALERT
 
 # good enough
@@ -887,6 +893,9 @@ SUBJECT_IN_WHITELIST
 SUBJECT_NEEDS_ENCODING
 
 # good enough
+SUBJECT_NOVOWEL
+
+# good enough
 SUBJECT_SEXUAL
 
 # good enough
@@ -897,9 +906,6 @@ SUBJ_ILLEGAL_CHARS
 
 # good enough
 SUBJ_RE_NUM
-
-# good enough
-SUBJ_YOUR_FAMILY
 
 # good enough
 SUB_HELLO
@@ -968,10 +974,10 @@ TVD_FUZZY_PHARMACEUTICAL
 TVD_FUZZY_SYMBOL
 
 # good enough
-TVD_FW_MESG1
+TVD_FW_GRAPHIC_ID1
 
 # good enough
-TVD_FW_MESG2
+TVD_FW_MESG1
 
 # good enough
 TVD_HEAD_KERNEL
@@ -1091,22 +1097,25 @@ FORGED_OUTLOOK_TAGS
 FUZZY_STOCK
 
 # good enough
+KAM_STOCKTIP9
+
+# good enough
 RATWARE_MS_HASH
 
 # good enough
 RATWARE_OUTLOOK_NONAME
 
 # good enough
-TVD_FW_GRAPHIC_NAME_LONG
-
-# good enough
-TVD_FW_GRAPHIC_NAME_MID
+TVD_FINGER_02
 
 # good enough
 UNCLAIMED_MONEY
 
 # good enough
 UNCLOSED_BRACKET
+
+# good enough
+UNIQUE_WORDS
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1149,6 +1158,9 @@ URIBL_SC_SURBL
 
 # tflags net
 URIBL_WS_SURBL
+
+# good enough
+URI_4YOU
 
 # good enough
 URI_L_PHP
