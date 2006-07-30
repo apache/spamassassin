@@ -22,6 +22,7 @@ rm -rf $fulldir/dist
 mkdir $fulldir/dist
 tar cf - \
         --exclude=CVS --exclude='.#*'  \
+        --exclude=.svn \
         --exclude='logs' --exclude='*.tar.gz' --exclude='*.zip' \
         --exclude='*.log' --exclude='*.o' \
         --exclude='o' --exclude='out' \
