@@ -240,12 +240,12 @@ SPAMASSASSIN RELEASE PROCEDURE
         cd /www/spamassassin.apache.org
         webmake -F
 
-- and check it in to SVN (see bug 4998 for reasons why).  Note that
-  you may need to resolve conflicts and ensure the contents of 'full'
+- and check it in to SVN (see bug 4998 for reasons why).  Note that you
+  may need to resolve conflicts and ensure the contents of 'full/3.1.x'
   are all added successfully:
 
         svn up
-        svn add full
+        svn add full/3.1.x
         svn commit -m "added new release"
 
 - upload to CPAN at http://pause.cpan.org/
