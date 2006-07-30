@@ -237,7 +237,16 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - update the 'dist' tree in the SpamAssassin website:
 
+        cd /www/spamassassin.apache.org
+        svn up
+        svn delete full/3.1.x
+        svn commit -m "removing old dist tree"
+
+        cd [checkedoutdir]
         build/update_website_docs
+
+        cd /www/spamassassin.apache.org
+        svn add full/3.1.x
 
 - and check the entire website into SVN (see bug 4998 for reasons why).
   Note that you may need to resolve conflicts and ensure the contents of
