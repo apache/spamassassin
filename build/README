@@ -235,6 +235,18 @@ SPAMASSASSIN RELEASE PROCEDURE
         cd /www/spamassassin.apache.org
         webmake -F
 
+- update the 'dist' tree in the SpamAssassin website:
+
+        build/update_website_docs
+
+- and check the entire website into SVN (see bug 4998 for reasons why).
+  Note that you may need to resolve conflicts and ensure the contents of
+  'full/3.1.x' are all added successfully:
+
+        svn up
+        svn add full/3.1.x
+        svn commit -m "added new release"
+
 - upload to CPAN at http://pause.cpan.org/
 
   ( https://pause.perl.org/pause/authenquery?ACTION=add_uri )
