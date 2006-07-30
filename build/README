@@ -240,6 +240,10 @@ SPAMASSASSIN RELEASE PROCEDURE
         cd /www/spamassassin.apache.org
         webmake -F
 
+- and check it in to SVN (see bug 4998 for reasons why):
+
+        svn commit -m "added new release"
+
 - upload to CPAN at http://pause.cpan.org/
 
   ( https://pause.perl.org/pause/authenquery?ACTION=add_uri )
