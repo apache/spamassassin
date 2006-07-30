@@ -240,9 +240,13 @@ SPAMASSASSIN RELEASE PROCEDURE
         cd /www/spamassassin.apache.org
         webmake -F
 
-- and check it in to SVN (see bug 4998 for reasons why).  Note that you
-  may need to resolve conflicts and ensure the contents of 'full/3.1.x'
-  are all added successfully:
+- update the 'dist' tree in the SpamAssassin website:
+
+        build/update_website_docs
+
+- and check the entire website into SVN (see bug 4998 for reasons why).
+  Note that you may need to resolve conflicts and ensure the contents of
+  'full/3.1.x' are all added successfully:
 
         svn up
         svn add full/3.1.x
