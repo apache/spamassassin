@@ -44,7 +44,7 @@ else {
 
 my $submitters = '';
 if ($doc =~ m{ <td\sclass=daterevtd><b>Viewing</b></td>.*?
-                <mcsubmitters>(.*?)</mcsubmitters> }sx)
+                <mcsubmitters>\s*(.*?)\s*</mcsubmitters> }sx)
 {
   $submitters = $1;
 }
@@ -127,8 +127,8 @@ print "# active ruleset list, automatically generated from $cgi_url\n";
 print "# with results from: $submitters\n";
 
 my @spcs = ($submitters =~ /\s+/g);
-if (scalar @spcs < 1) {
-  die "not generating results; less than 2 submitter results available!\n";
+if (scalar @spcs < 2) {
+  die "not generating results; less than 3 submitter results available!\n";
 }
 
 foreach my $plistkey (sort keys %$plist) {
