@@ -11,28 +11,29 @@ if [ -z "$PERL" ]; then
   fi
 fi
 
-find . -name '.#*' -print | xargs rm -f # delete old CVS files
+fulldir=$WEBDIR/full/$vers
+[ -d $fulldir ] || mkdir -p $fulldir
 
-[ -d $WEBDIR/full/$vers ] || mkdir -p $WEBDIR/full/$vers
 $PERL Makefile.PL PERL=$PERL < /dev/null
-make; make text_html_doc 
+make
+make text_html_doc || exit 1
 
-rm -rf $WEBDIR/full/dist
-mkdir $WEBDIR/full/dist
-tar cf - --exclude=CVS --exclude='.#*'  \
-         --exclude='logs' --exclude='*.tar.gz' --exclude='*.zip' \
-         --exclude='*.log' --exclude='*.o' \
-         --exclude='o' --exclude='out' \
-         --exclude='tst' \
-         --exclude='blib' --exclude='Mail-SpamAssassin-*' \
-         . | ( cd $WEBDIR/full/dist ; tar xf - )
+rm -rf $fulldir/dist
+mkdir $fulldir/dist
+tar cf - \
+        --exclude=CVS --exclude='.#*'  \
+        --exclude='logs' --exclude='*.tar.gz' --exclude='*.zip' \
+        --exclude='*.log' --exclude='*.o' \
+        --exclude='o' --exclude='out' \
+        --exclude='tst' \
+        --exclude='blib' --exclude='Mail-SpamAssassin-*' \
+        . | ( cd $fulldir/dist ; tar xf - )
         
-rm -rf $WEBDIR/full/$vers/dist
-mv $WEBDIR/full/dist $WEBDIR/full/$vers/dist
-
-( cd $WEBDIR/full/$vers/dist;
-  tar cf docbak doc;
-  make clean distclean;
-  tar xvf docbak ; rm -f docbak
+(
+  cd $fulldir/dist
+  tar cf docbak doc
+  make clean distclean
+  tar xvf docbak
+  rm -f docbak
 )
 
