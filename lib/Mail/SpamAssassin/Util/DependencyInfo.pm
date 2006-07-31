@@ -279,3 +279,5 @@ sub try_module {
 
   print "\n\n".$desc."\n\n";
 }
+
+1;
