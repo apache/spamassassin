@@ -54,7 +54,7 @@ foreach (qw/
   $VALID_TLDS{$_} = 1;
 }
 
-# to resort a line, pump all of same TLD into:
+# to resort this, pump the whole list through:
 #  perl -e '$/=undef; $_=<>; foreach(split) { ($a,$b) = split(/\./, $_, 2); push @{$t{$b}}, $_; } foreach (sort keys %t) { print "  ",join(" ", sort @{$t{$_}}),"\n" }'
 #
 # http://www.neustar.us/policies/docs/rfc_1480.txt
