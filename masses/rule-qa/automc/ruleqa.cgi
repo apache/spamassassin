@@ -1,15 +1,9 @@
-#!/usr/bin/perl
-my $automcdir = "/home/jm/ftp/spamassassin/masses/rule-qa/automc";
+#!/local/perl586/bin/perl
+my $automcdir = "/home/automc/svn/spamassassin/masses/rule-qa/automc";
 
-###!/local/perl586/bin/perl
-##my $automcdir = "/home/automc/svn/spamassassin/masses/rule-qa/automc";
+###!/usr/bin/perl
+##my $automcdir = "/home/jm/ftp/spamassassin/masses/rule-qa/automc";
 
-use CGI;
-use Template;
-use Date::Manip;
-use XML::Simple;
-use URI::Escape;
-use POSIX qw();
 use strict;
 use warnings;
 use bytes;
@@ -42,6 +36,12 @@ exit;
 # ---------------------------------------------------------------------------
 
 package Mail::SpamAssassin::CGI::RuleQaApp;
+use CGI;
+use Template;
+use Date::Manip;
+use XML::Simple;
+use URI::Escape;
+use POSIX qw();
 
 # daterevs -- e.g. "20060429/r239832-r" -- are aligned to just before
 # the time of day when the mass-check tagging occurs; that's 0850 GMT,
@@ -605,12 +605,17 @@ sub date_in_direction {
   if ($origdaterev && $origdaterev =~ /^(\d+)[\/-](r\d+-\S+)$/) {
     $orig = "$1-$2";
   } else {
-    $orig = $self->{datarevs}[-1];      # the most recent
+    $orig = $self->{daterevs}->[-1];      # the most recent
+  }
+
+  if (!$orig) {
+    die "no daterev found for $origdaterev, with these options: ".
+               join(' ', @{$self->{daterevs}});
   }
 
   my $cur;
   for my $i (0 .. scalar(@{$self->{daterevs}})) {
-    if ($self->{datarevs}[$i] eq $orig) {
+    if ($self->{daterevs}->[$i] eq $orig) {
       $cur = $i; last;
     }
   }
@@ -621,15 +626,15 @@ sub date_in_direction {
   my $new;
   if ($dir < 0) {
     if ($cur+$dir >= 0) {
-      $new = $self->{datarevs}[$cur+$dir];
+      $new = $self->{daterevs}->[$cur+$dir];
     }
   }
   elsif ($dir == 0) {
-    $new = $self->{datarevs}[$cur];
+    $new = $self->{daterevs}->[$cur];
   }
   else {
     if ($cur+$dir <= scalar(@{$self->{daterevs}})-1) {
-      $new = $self->{datarevs}[$cur+$dir];
+      $new = $self->{daterevs}->[$cur+$dir];
     }
   }
 
