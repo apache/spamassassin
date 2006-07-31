@@ -1,28 +1,24 @@
-#!/local/perl586/bin/perl -w
-my $automcdir = "/home/automc/svn/spamassassin/masses/rule-qa/automc";
+#!/usr/bin/perl
+my $automcdir = "/home/jm/ftp/spamassassin/masses/rule-qa/automc";
 
-###!/usr/bin/perl -w
-##my $automcdir = "/home/jm/ftp/spamassassin/masses/rule-qa/automc";
-
-# open (O, ">/tmp/xx");print O "foo"; close O;
+###!/local/perl586/bin/perl
+##my $automcdir = "/home/automc/svn/spamassassin/masses/rule-qa/automc";
 
 use CGI;
 use Template;
 use Date::Manip;
 use XML::Simple;
 use URI::Escape;
-
+use POSIX qw();
 use strict;
+use warnings;
 use bytes;
-use POSIX qw(strftime);
 
-my $myperl = $^X;
+my $self = Mail::SpamAssassin::CGI::RuleQaApp->new();
 
-open (CF, "<$automcdir/config");
-my %conf; while(<CF>) { /^(\S+)=(\S+)/ and $conf{$1} = $2; }
-close CF;
+my $PERL_INTERP = $^X;
 
-our %freqs_filenames = (
+our %FREQS_FILENAMES = (
     'DETAILS.age' => 'set 0, broken down by message age in weeks',
     'DETAILS.all' => 'set 0, broken down by contributor',
     'DETAILS.new' => 'set 0, in aggregate',
@@ -36,157 +32,223 @@ our %freqs_filenames = (
     'OVERLAP.new' => 'set 0, overlaps between rules',
 );
 
+$self->ui_parse_url_base();
+$self->ui_get_url_switches();
+$self->ui_get_daterev();
+$self->ui_get_rules();
+$self->show_view();
+exit;
+
+# ---------------------------------------------------------------------------
+
+package Mail::SpamAssassin::CGI::RuleQaApp;
+
 # daterevs -- e.g. "20060429/r239832-r" -- are aligned to just before
 # the time of day when the mass-check tagging occurs; that's 0850 GMT,
 # so align the daterev to 0800 GMT.
 #
 use constant DATEREV_ADJ => - (8 * 60 * 60);
 
-my $q = new CGI;
+my $FREQS_LINE_TEMPLATE;
+my $FREQS_EXTRA_TEMPLATE;
+our %AUTOMC_CONF;
 
-my $ttk = Template->new;
-set_freqs_templates();
+our @ISA = qw();
 
-my $cgi_url;
-my @cgi_params;
-my %cgi_params = ();
-precache_params();
+sub new {
+  my $class = shift;
+  $class = ref($class) || $class;
+  my $self = { };
 
-my $id_counter = 0;
-my $include_embedded_freqs_xml = 1;
+  $self->{q} = CGI->new();
+  $self->{ttk} = Template->new();
+
+  $self->{id_counter} = 0;
+  $self->{include_embedded_freqs_xml} = 1;
+  $self->{cgi_param_order} = [ ];
+  $self->{cgi_params} = { };
+
+  bless ($self, $class);
+
+  # some global configuration
+  $self->set_freqs_templates();
+  $self->read_automc_global_conf();
+
+  $self->precache_params();
+
+  return $self;
+}
 
 # ---------------------------------------------------------------------------
+
+sub read_automc_global_conf {
+  my ($self) = @_;
+
+  open (CF, "<$automcdir/config") or return;
+  while(<CF>) { /^(\S+)=(\S+)/ and $AUTOMC_CONF{$1} = $2; }
+  close CF;
+}
+
+# ---------------------------------------------------------------------------
+
+sub ui_parse_url_base {
+  my ($self) = @_;
 
 # Allow path info to become CGI-ish parameters.
 # the two parts of path info double as (a) daterev, (b) rulename,
 # (c) "s_detail=1".
 # CGI parameters "daterev", "rule", "s_detail" override them though
 #
-my $url_abs = $q->url(-absolute=>1);
-my $url_with_path = $q->url(-absolute=>1, -path_info=>1);
+  $self->{url_abs} = $self->{q}->url(-absolute=>1);
+  $self->{url_with_path} = $self->{q}->url(-absolute=>1, -path_info=>1);
 
 # if we have a valid, full URL (non-cgi use), use that instead of
 # the "path_info" one, since CGI.pm will unhelpfully remove duplicate
 # slashes.  this screws up "/FOO" rule grep searches.   Also,
-# fix $url_abs to be correct for the "entire website is web app" case,
+# fix $self->{url_abs} to be correct for the "entire website is web app" case,
 # as CGI.pm gets that wrong, too!
 
-if ($url_abs =~ m,^/\d,) {
-  $url_with_path = $url_abs;
-  $url_abs = "/";
-} else {
-  $url_with_path =~ s,^${url_abs},,;
-}
+  if ($self->{url_abs} =~ m,^/\d,) {
+    $self->{url_with_path} = $self->{url_abs};
+    $self->{url_abs} = "/";
+  } else {
+    $self->{url_with_path} =~ s,^\Q$self->{url_abs}\E,,;
+  }
 
-if ($url_with_path =~ s,^/*([^/]+),,) { add_cgi_path_param("daterev", $1); }
-if ($url_with_path =~ s,^/(/?[^/]+),,) { add_cgi_path_param("rule", $1); }
-if ($url_with_path =~ s,^/detail,,) { add_cgi_path_param("s_detail", "1"); }
+  if ($self->{url_with_path} =~ s,^/*([^/]+),,) { $self->add_cgi_path_param("daterev", $1); }
+  if ($self->{url_with_path} =~ s,^/(/?[^/]+),,) { $self->add_cgi_path_param("rule", $1); }
+  if ($self->{url_with_path} =~ s,^/detail,,) { $self->add_cgi_path_param("s_detail", "1"); }
 
 # cgi_url: used in hrefs from the generated document
-$cgi_url = $url_abs;
-$cgi_url =~ s,/ruleqa/ruleqa$,/ruleqa,s;
-$cgi_url ||= '/';
+  $self->{cgi_url} = $self->{url_abs};
+  $self->{cgi_url} =~ s,/ruleqa/ruleqa$,/ruleqa,s;
+  $self->{cgi_url} ||= '/';
+}
 
 # ---------------------------------------------------------------------------
 
-my %s = ();
+sub ui_get_url_switches {
+  my ($self) = @_;
+
+  $self->{s} = { };
+
 # selection of what will be displayed.
-$s{defcorpus} = get_url_switch('s_defcorpus', 1);
-$s{html} = get_url_switch('s_html', 0);
-$s{net} = get_url_switch('s_net', 0);
-$s{zero} = get_url_switch('s_zero', 1);
+  $self->{s}{defcorpus} = $self->get_url_switch('s_defcorpus', 1);
+  $self->{s}{html} = $self->get_url_switch('s_html', 0);
+  $self->{s}{net} = $self->get_url_switch('s_net', 0);
+  $self->{s}{zero} = $self->get_url_switch('s_zero', 1);
 
-$s{new} = get_url_switch('s_new', 1);
-$s{detail} = get_url_switch('s_detail', 0);
-$s{g_over_time} = get_url_switch('s_g_over_time', 0);
+  $self->{s}{new} = $self->get_url_switch('s_new', 1);
+  $self->{s}{detail} = $self->get_url_switch('s_detail', 0);
+  $self->{s}{g_over_time} = $self->get_url_switch('s_g_over_time', 0);
 
-$s{xml} = get_url_switch('xml', 0);
-$include_embedded_freqs_xml = $s{xml};
+  $self->{s}{xml} = $self->get_url_switch('xml', 0);
+  $self->{include_embedded_freqs_xml} = $self->{s}{xml};
 
 # note: age, new, overlap are all now synonyms for detail ;)
-if ($s{age} || $s{overlap} || $s{detail}) {
-  $s{age} = 1;
-  $s{all} = 1;
-  $s{new} = 1;
-  $s{overlap} = 1;
-  $s{scoremap} = 1;
-  $s{zero} = 1;
-}
+  if ($self->{s}{age} || $self->{s}{overlap} || $self->{s}{detail}) {
+    $self->{s}{age} = 1;
+    $self->{s}{all} = 1;
+    $self->{s}{new} = 1;
+    $self->{s}{overlap} = 1;
+    $self->{s}{scoremap} = 1;
+    $self->{s}{zero} = 1;
+  }
 
-if (!grep { $_ } values %s) {
-  $s{defcorpus} = 1;      # set the defaults
-  $s{new} = 1;
+  if (!grep { $_ } values %{$self->{s}}) {
+    $self->{s}{defcorpus} = 1;      # set the defaults
+    $self->{s}{new} = 1;
+  }
 }
 
 sub get_url_switch {
-  my ($name, $defval) = @_;
-  my $val = $q->param($name);
+  my ($self, $name, $defval) = @_;
+  my $val = $self->{q}->param($name);
   if (!defined $val) { return $defval; }
   return ($val) ? 1 : 0;
 }
 
-# when and what
-my $daterev = $q->param('daterev') || '';
-# all known date/revision combos.  warning: could get slow in future
-my @daterevs = get_all_daterevs();
+# ---------------------------------------------------------------------------
 
-# sanitise daterev string
-if (defined $daterev) {
-  if ($daterev eq 'last-night') {
-    $daterev = get_last_night_daterev();
-    $q->param('daterev', $daterev);                # make it absolute
-  }
-  else {
-    $daterev =~ /(\d+)[\/-](r\d+)-(\S+)/; undef $daterev;
-    if ($2) {
-      $daterev = "$1-$2-$3";
-    } else {
-      $daterev = undef;
+sub ui_get_daterev {
+  my ($self) = @_;
+
+  # when and what
+  $self->{daterev} = $self->{q}->param('daterev') || '';
+
+  # all known date/revision combos.  warning: could get slow in future
+  @{$self->{daterevs}} = $self->get_all_daterevs();
+
+  # sanitise daterev string
+  if (defined $self->{daterev}) {
+    if ($self->{daterev} eq 'last-night') {
+      $self->{daterev} = $self->get_last_night_daterev();
+      $self->{q}->param('daterev', $self->{daterev});  # make it absolute
+    }
+    else {
+      $self->{daterev} =~ /(\d+)[\/-](r\d+)-(\S+)/; undef $self->{daterev};
+      if ($2) {
+        $self->{daterev} = "$1-$2-$3";
+      } else {
+        $self->{daterev} = undef;
+      }
     }
   }
+
+  # turn possibly-empty $self->{daterev} into a real date/rev combo (that exists)
+  $self->{daterev} = $self->date_in_direction($self->{daterev}, 0);
 }
 
-# turn possibly-empty $daterev into a real date/rev combo (that exists)
-$daterev = date_in_direction($daterev, 0);
+# ---------------------------------------------------------------------------
 
-# which rules?
-my $rule = $q->param('rule') || '';
-my $rules_all = 0;
-my $rules_grep = 0;
-my $nicerule = $rule;
-if (!$nicerule) { $rules_all++; $nicerule = 'all rules'; }
-if ($rule =~ /^\//) { $rules_grep++; $nicerule = 'regexp '.$rule; }
+sub ui_get_rules {
+  my ($self) = @_;
 
-my $datadir;
-my %freqs_head = ();
-my %freqs_data = ();
-my %freqs_ordr = ();
-my $line_counter = 0;
+  # which rules?
+  $self->{rule} = $self->{q}->param('rule') || '';
+  $self->{rules_all} = 0;
+  $self->{rules_grep} = 0;
+  $self->{nicerule} = $self->{rule};
+  if (!$self->{nicerule}) {
+    $self->{rules_all}++; $self->{nicerule} = 'all rules';
+  }
+  if ($self->{rule} =~ /^\//) {
+    $self->{rules_grep}++; $self->{nicerule} = 'regexp '.$self->{rule};
+  }
+
+  $self->{freqs_head} = { };
+  $self->{freqs_data} = { };
+  $self->{freqs_ordr} = { };
+  $self->{line_counter} = 0;
+}
 
 # ---------------------------------------------------------------------------
 # supported views
 
-my $graph = $q->param('graph');
-if ($graph) {
-  if ($graph eq 'over_time') { graph_over_time(); }
-  else { die "graph '$graph' unknown"; }
+sub show_view {
+  my ($self) = @_;
+
+  my $graph = $self->{q}->param('graph');
+  if ($graph) {
+    if ($graph eq 'over_time') { $self->graph_over_time(); }
+    else { die "graph '$graph' unknown"; }
+  }
+  elsif ($self->{q}->param('longdatelist')) {
+    print $self->{q}->header();
+    $self->show_daterev_selector_page();
+  }
+  else {
+    print $self->{q}->header();
+    $self->show_default_view();
+  }
 }
-elsif ($q->param('longdatelist')) {
-  print $q->header();
-  show_daterev_selector_page();
-}
-else {
-  print $q->header();
-  show_default_view();
-}
-exit;
 
 # ---------------------------------------------------------------------------
 
 sub show_default_header {
-my $title = shift;
+  my ($self, $title) = @_;
 
-my $hdr = q{<html><head>
+  my $hdr = q{<html><head>
 
   <title>}.$title.q{</title>
 
@@ -323,198 +385,200 @@ my $hdr = q{<html><head>
 
   </head><body>
 
-};
-return $hdr;
+  };
+  return $hdr;
 }
 
 sub show_default_view {
-my $title;
-if ($s{detail}) {
-  $title = "Rule QA: details for $nicerule (in $daterev)";
-} else {
-  $title = "Rule QA: overview of all rules (in $daterev)";
-}
-print show_default_header($title);
+  my ($self) = @_;
 
-my $tmpl = q{
+  my $title;
+  if ($self->{s}{detail}) {
+    $title = "Rule QA: details for $self->{nicerule} (in $self->{daterev})";
+  } else {
+    $title = "Rule QA: overview of all rules (in $self->{daterev})";
+  }
+  print $self->show_default_header($title);
 
-<div class=updateform>
-<form action="!THISURL!" method=GET>
-  <table style="padding-left: 0px" class=datetable>
+  my $tmpl = q{
 
-      <tr>
-       <th> Mass-Check </th>
-       <th> Date </th>
-       <th> MC-Rev </th>
-       <th> Commit </th>
-       <th> Rev </th>
-       <th> Author </th>
-      </tr>
+  <div class=updateform>
+  <form action="!THISURL!" method=GET>
+    <table style="padding-left: 0px" class=datetable>
 
-           <tr class=daterevtr><td class=daterevtd><b>Earlier</b></td>
-       !daylinkneg2!
-      </tr><tr class=daterevtr><td class=daterevtd></td>
-       !daylinkneg1!
-      </tr><tr class=daterevtr><td class=daterevtd><b>Viewing</b></td>
-       !todaytext!
-      </tr><tr class=daterevtr><td class=daterevtd></td>
-       !daylinkpls1!
-      </tr><tr class=daterevtr><td class=daterevtd><b>Later</b></td>
-       !daylinkpls2!
-      </tr>
+        <tr>
+        <th> Mass-Check </th>
+        <th> Date </th>
+        <th> MC-Rev </th>
+        <th> Commit </th>
+        <th> Rev </th>
+        <th> Author </th>
+        </tr>
+
+            <tr class=daterevtr><td class=daterevtd><b>Earlier</b></td>
+        !daylinkneg2!
+        </tr><tr class=daterevtr><td class=daterevtd></td>
+        !daylinkneg1!
+        </tr><tr class=daterevtr><td class=daterevtd><b>Viewing</b></td>
+        !todaytext!
+        </tr><tr class=daterevtr><td class=daterevtd></td>
+        !daylinkpls1!
+        </tr><tr class=daterevtr><td class=daterevtd><b>Later</b></td>
+        !daylinkpls2!
+        </tr>
+    </table>
+
+  <table width=100%>
+  <tr>
+  <td width=90%>
+    Date/Rev to display (UTC timezone):
+    <input type=textfield name=daterev value="!daterev!">
+  </td>
+  <td width=10%><div align=right>
+    <a href="!longdatelist!">(List&nbsp;All)</a><br/>
+  </div></td>
+  </tr>
   </table>
 
-<table width=100%>
-<tr>
-<td width=90%>
-  Date/Rev to display (UTC timezone):
-  <input type=textfield name=daterev value="!daterev!">
-</td>
-<td width=10%><div align=right>
-  <a href="!longdatelist!">(List&nbsp;All)</a><br/>
-</div></td>
-</tr>
-</table>
+    <br/>
 
-  <br/>
+    <h4> Which Corpus? </h4>
+    <input type=checkbox name=s_defcorpus !s_defcorpus!> Show default non-net ruleset and corpus, set 0<br/>
+    <input type=checkbox name=s_net !s_net!> Show frequencies from network tests, set 1<br/>
+    <input type=checkbox name=s_html !s_html!> Show frequencies for mails containing HTML only, set 0<br/>
+    <br/>
 
-  <h4> Which Corpus? </h4>
-  <input type=checkbox name=s_defcorpus !s_defcorpus!> Show default non-net ruleset and corpus, set 0<br/>
-  <input type=checkbox name=s_net !s_net!> Show frequencies from network tests, set 1<br/>
-  <input type=checkbox name=s_html !s_html!> Show frequencies for mails containing HTML only, set 0<br/>
-  <br/>
+    <h4> Which Rules?</h4>
+    Show only these rules (space separated, or regexp with '/' prefix):<br/>
+    <input type=textfield size=60 name=rule value="!rule!"><br/>
+    <br/>
+    <input type=checkbox name=s_zero !s_zero!> Display rules with no hits<br/>
+    <br/>
+    <input type=hidden name=s_detail value="!s_detail!" />
 
-  <h4> Which Rules?</h4>
-  Show only these rules (space separated, or regexp with '/' prefix):<br/>
-  <input type=textfield size=60 name=rule value="!rule!"><br/>
-  <br/>
-  <input type=checkbox name=s_zero !s_zero!> Display rules with no hits<br/>
-  <br/>
-  <input type=hidden name=s_detail value="!s_detail!" />
-
-  <input type=submit name=g value="Change"><br/>
-</form>
-</div>
-
-};
-
-my $days = {
-  neg3 => -3,
-  neg2 => -2,
-  neg1 => -1,
-  pls1 => 1,
-  pls2 => 2,
-  pls3 => 3
-};
-
-my ($key, $daycount);
-while (($key, $daycount) = each %{$days}) {
-  my $dr = date_in_direction($daterev, $daycount);
-  my $drtext = $dr;
-
-  if (!$dr) {
-    $tmpl =~ s,!daylink${key}!,
-
-       <td colspan=6 class=daterevtd>
-         <em>(no logs available)</em>
-       </td>
-
-    ,gs;
-  }
-  else {
-    $dr = gen_switch_url("daterev", $dr);
-    my $drtext = get_daterev_description($drtext);
-    $drtext =~ s/!drhref!/$dr/gs;
-
-    $tmpl =~ s,!daylink${key}!,
-       $drtext
-    ,gs;
-  }
-}
-
-$daterev = date_in_direction($daterev, 0);
-{
-  my $todaytext = get_daterev_description($daterev);
-  my $dr = gen_switch_url("daterev", $daterev);
-  $todaytext =~ s/!drhref!/$dr/gs;
-  $tmpl =~ s/!todaytext!/$todaytext/gs;
-}
-
-
-my $dranchor = "r".$daterev; $dranchor =~ s/[^A-Za-z0-9]/_/gs;
-my $ldlurl = gen_switch_url("longdatelist", 1)."#".$dranchor;
-
-$tmpl =~ s/!longdatelist!/$ldlurl/gs;
-$tmpl =~ s/!THISURL!/$cgi_url/gs;
-$tmpl =~ s/!daterev!/$daterev/gs;
-$tmpl =~ s/!rule!/$rule/gs;
-foreach my $opt (keys %s) {
-  if ($s{$opt}) {
-    $tmpl =~ s/!s_$opt!/checked /gs;
-  } else {
-    $tmpl =~ s/!s_$opt!/ /gs;
-  }
-}
-
-print $tmpl;
-
-if (!$s{detail}) {
-
-  print qq{
-
-    <p class=intro> <strong>Instructions</strong>: click
-    the rule name to view details of a particular rule. </p>
+    <input type=submit name=g value="Change"><br/>
+  </form>
+  </div>
 
   };
-}
 
-show_all_sets_for_daterev($daterev, $daterev);
+  my $days = {
+    neg3 => -3,
+    neg2 => -2,
+    neg1 => -1,
+    pls1 => 1,
+    pls2 => 2,
+    pls3 => 3
+  };
 
-# don't show "graph" link unless only a single rule is being displayed
-if ($s{detail} && !($rules_all || $rules_grep))
-{
+  my ($key, $daycount);
+  while (($key, $daycount) = each %{$days}) {
+    my $dr = $self->date_in_direction($self->{daterev}, $daycount);
+    my $drtext = $dr;
+
+    if (!$dr) {
+      $tmpl =~ s,!daylink${key}!,
+
+        <td colspan=6 class=daterevtd>
+          <em>(no logs available)</em>
+        </td>
+
+      ,gs;
+    }
+    else {
+      $dr = $self->gen_switch_url("daterev", $dr);
+      my $drtext = $self->get_daterev_description($drtext);
+      $drtext =~ s/!drhref!/$dr/gs;
+
+      $tmpl =~ s,!daylink${key}!,
+        $drtext
+      ,gs;
+    }
+  }
+
+  $self->{daterev} = $self->date_in_direction($self->{daterev}, 0);
   {
-    my $graph_on = qq{
+    my $todaytext = $self->get_daterev_description($self->{daterev});
+    my $dr = $self->gen_switch_url("daterev", $self->{daterev});
+    $todaytext =~ s/!drhref!/$dr/gs;
+    $tmpl =~ s/!todaytext!/$todaytext/gs;
+  }
 
-      <p><a id="over_time_anchor" 
-        href="}.gen_switch_url("s_g_over_time", "0").qq{#over_time_anchor"
-        >Hide Graph</a></p>
-      <img src="}.gen_switch_url("graph", "over_time").qq{" 
-        width=800 height=815 />
 
-    };
+  my $dranchor = "r".$self->{daterev}; $dranchor =~ s/[^A-Za-z0-9]/_/gs;
+  my $ldlurl = $self->gen_switch_url("longdatelist", 1)."#".$dranchor;
 
-    my $graph_off = qq{
+  $tmpl =~ s/!longdatelist!/$ldlurl/gs;
+  $tmpl =~ s/!THISURL!/$self->{cgi_url}/gs;
+  $tmpl =~ s/!daterev!/$self->{daterev}/gs;
+  $tmpl =~ s/!rule!/$self->{rule}/gs;
+  foreach my $opt (keys %{$self->{s}}) {
+    if ($self->{s}{$opt}) {
+      $tmpl =~ s/!s_$opt!/checked /gs;
+    } else {
+      $tmpl =~ s/!s_$opt!/ /gs;
+    }
+  }
 
-      <p><a id="over_time_anchor" 
-        href="}.gen_switch_url("s_g_over_time", "1").qq{#over_time_anchor"
-        >Show Graph</a></p>
+  print $tmpl;
 
-    };
+  if (!$self->{s}{detail}) {
 
     print qq{
 
-      <h3 class=graph_title>Graph, hit-rate over time</h3>
-      }.($s{g_over_time} ? $graph_on : $graph_off).qq{
-
-      </ul>
+      <p class=intro> <strong>Instructions</strong>: click
+      the rule name to view details of a particular rule. </p>
 
     };
   }
 
-  my @parms =get_params_except(qw(
-          rule s_age s_overlap s_all s_detail
-        ));
-  my $url_back = assemble_url(@parms);
+  $self->show_all_sets_for_daterev($self->{daterev}, $self->{daterev});
+
+# don't show "graph" link unless only a single rule is being displayed
+  if ($self->{s}{detail} && !($self->{rules_all} || $self->{rules_grep}))
+  {
+    {
+      my $graph_on = qq{
+
+        <p><a id="over_time_anchor" 
+          href="}.$self->gen_switch_url("s_g_over_time", "0").qq{#over_time_anchor"
+          >Hide Graph</a></p>
+        <img src="}.$self->gen_switch_url("graph", "over_time").qq{" 
+          width=800 height=815 />
+
+      };
+
+      my $graph_off = qq{
+
+        <p><a id="over_time_anchor" 
+          href="}.$self->gen_switch_url("s_g_over_time", "1").qq{#over_time_anchor"
+          >Show Graph</a></p>
+
+      };
+
+      print qq{
+
+        <h3 class=graph_title>Graph, hit-rate over time</h3>
+        }.($self->{s}{g_over_time} ? $graph_on : $graph_off).qq{
+
+        </ul>
+
+      };
+    }
+
+    my @parms = $self->get_params_except(qw(
+            rule s_age s_overlap s_all s_detail
+          ));
+    my $url_back = $self->assemble_url(@parms);
+
+    print qq{
+
+      <p><a href="$url_back">&lt; Back</a> to overview.</p>
+
+    };
+  }
 
   print qq{
-
-    <p><a href="$url_back">&lt; Back</a> to overview.</p>
-
-  };
-}
-
-print qq{
 
   <p>Note: the freqs tables are sortable.  Click on the headers to resort them
   by that column.  <a
@@ -524,52 +588,52 @@ print qq{
 
   };
 
-exit;
-
 }
 
 sub get_all_daterevs {
+  my ($self) = @_;
+
   return sort map {
       s/^.*\/(\d+)\/(r\d+-\S+)$/$1-$2/; $_;
-    } grep { /\/\d+\/r\d+-\S+$/ && -d $_ } (<$conf{html}/2*/r*>);
+    } grep { /\/\d+\/r\d+-\S+$/ && -d $_ } (<$AUTOMC_CONF{html}/2*/r*>);
 }
 
 sub date_in_direction {
-  my ($origdaterev, $dir) = @_;
+  my ($self, $origdaterev, $dir) = @_;
 
   my $orig;
   if ($origdaterev && $origdaterev =~ /^(\d+)[\/-](r\d+-\S+)$/) {
     $orig = "$1-$2";
   } else {
-    $orig = $daterevs[-1];      # the most recent
+    $orig = $self->{datarevs}[-1];      # the most recent
   }
 
   my $cur;
-  for my $i (0 .. scalar(@daterevs)) {
-    if ($daterevs[$i] eq $orig) {
+  for my $i (0 .. scalar(@{$self->{daterevs}})) {
+    if ($self->{datarevs}[$i] eq $orig) {
       $cur = $i; last;
     }
   }
 
   # if it's not in the list, $cur should be the last entry
-  if (!defined $cur) { $cur = scalar(@daterevs)-1; }
+  if (!defined $cur) { $cur = scalar(@{$self->{daterevs}})-1; }
 
   my $new;
   if ($dir < 0) {
     if ($cur+$dir >= 0) {
-      $new = $daterevs[$cur+$dir];
+      $new = $self->{datarevs}[$cur+$dir];
     }
   }
   elsif ($dir == 0) {
-    $new = $daterevs[$cur];
+    $new = $self->{datarevs}[$cur];
   }
   else {
-    if ($cur+$dir <= scalar(@daterevs)-1) {
-      $new = $daterevs[$cur+$dir];
+    if ($cur+$dir <= scalar(@{$self->{daterevs}})-1) {
+      $new = $self->{datarevs}[$cur+$dir];
     }
   }
 
-  if ($new && -d get_datadir_for_daterev($new)) {
+  if ($new && -d $self->get_datadir_for_daterev($new)) {
     return $new;
   }
 
@@ -577,14 +641,16 @@ sub date_in_direction {
 }
 
 sub get_last_night_daterev {
+  my ($self) = @_;
+
   # don't use a daterev after (now - 12 hours); that's too recent
   # to be "last night", for purposes of rule-update generation.
 
-  my $notafter = strftime "%Y%m%d",
+  my $notafter = POSIX::strftime "%Y%m%d",
         gmtime ((time + DATEREV_ADJ) - (12*60*60));
 
-  foreach my $dr (reverse @daterevs) {
-    my $t = get_daterev_description($dr);
+  foreach my $dr (reverse @{$self->{daterevs}}) {
+    my $t = $self->get_daterev_description($dr);
     next unless $t;
     if ($t =~ /<span class="date">(.+?)<\/span>/) {
       next if ($1+0 > $notafter);
@@ -597,39 +663,41 @@ sub get_last_night_daterev {
 }
 
 sub show_all_sets_for_daterev {
-  my ($path, $strdate) = @_;
+  my ($self, $path, $strdate) = @_;
 
   $strdate = "mass-check date/rev: $path";
 
-  $datadir = get_datadir_for_daterev($path);
+  $self->{datadir} = $self->get_datadir_for_daterev($path);
 
-  $s{defcorpus} and showfreqset('DETAILS', $strdate);
-  $s{html} and showfreqset('HTML', $strdate);
-  $s{net} and showfreqset('NET', $strdate);
+  $self->{s}{defcorpus} and $self->showfreqset('DETAILS', $strdate);
+  $self->{s}{html} and $self->showfreqset('HTML', $strdate);
+  $self->{s}{net} and $self->showfreqset('NET', $strdate);
 
   # special case: we only build this for one set, as it's quite slow
   # to generate
-  $s{scoremap} and showfreqsubset("SCOREMAP.new", $strdate);
-  $s{overlap} and showfreqsubset("OVERLAP.new", $strdate);
+  $self->{s}{scoremap} and $self->showfreqsubset("SCOREMAP.new", $strdate);
+  $self->{s}{overlap} and $self->showfreqsubset("OVERLAP.new", $strdate);
 }
 
 ###########################################################################
 
 sub graph_over_time {
-  $datadir = get_datadir_for_daterev($daterev);
+  my ($self) = @_;
+
+  $self->{datadir} = $self->get_datadir_for_daterev($self->{daterev});
 
   # logs are named e.g.
   # /home/automc/corpus/html/20051028/r328993/LOGS.all-ham-mc-fast.log.gz
 
   # untaint
-  $rule =~ /([_0-9a-zA-Z]+)/; my $saferule = $1;
-  $datadir =~ /([-\.\,_0-9a-zA-Z\/]+)/; my $safedatadir = $1;
+  $self->{rule} =~ /([_0-9a-zA-Z]+)/; my $saferule = $1;
+  $self->{datadir} =~ /([-\.\,_0-9a-zA-Z\/]+)/; my $safedatadir = $1;
 
   # outright block possibly-hostile stuff here:
   # no "../" path traversal
   die "forbidden: $safedatadir .." if ($safedatadir =~ /\.\./);
 
-  exec ("$myperl $automcdir/../rule-hits-over-time ".
+  exec ("$PERL_INTERP $automcdir/../rule-hits-over-time ".
         "--cgi --scale_period=200 --rule='$saferule' ".
         "--ignore_older=180 ".
         "$safedatadir/LOGS.*.log.gz");
@@ -640,26 +708,26 @@ sub graph_over_time {
 ###########################################################################
 
 sub showfreqset {
-  my ($type, $strdate) = @_;
-  $s{new} and showfreqsubset("$type.new", $strdate);
-  $s{age} and showfreqsubset("$type.age", $strdate);
-  $s{all} and showfreqsubset("$type.all", $strdate);
+  my ($self, $type, $strdate) = @_;
+  $self->{s}{new} and $self->showfreqsubset("$type.new", $strdate);
+  $self->{s}{age} and $self->showfreqsubset("$type.age", $strdate);
+  $self->{s}{all} and $self->showfreqsubset("$type.all", $strdate);
 }
 
 sub showfreqsubset {
-  my ($filename, $strdate) = @_;
-  read_freqs_file($filename);
+  my ($self, $filename, $strdate) = @_;
+  $self->read_freqs_file($filename);
 
   if ($filename eq 'DETAILS.new') {
     # report which sets we used
-    summarise_head($freqs_head{$filename}, $filename, $strdate, $rule);
+    $self->summarise_head($self->{freqs_head}{$filename}, $filename, $strdate, $self->{rule});
   }
 
-  get_freqs_for_rule($filename, $strdate, $rule);
+  $self->get_freqs_for_rule($filename, $strdate, $self->{rule});
 }
 
 sub summarise_head {
-  my ($head, $filename, $strdate, $rule) = @_;
+  my ($self, $head, $filename, $strdate, $rule) = @_;
 
   my @mcfiles = ();
   if ($head =~ /^# ham results used for \S+ \S+ \S+: (.*)$/m) {
@@ -680,17 +748,17 @@ sub summarise_head {
 }
 
 sub read_freqs_file {
-  my ($key) = @_;
+  my ($self, $key) = @_;
 
-  my $file = $datadir.$key;
+  my $file = $self->{datadir}.$key;
   if (!open (IN, "<$file")) {
     warn "cannot read $file";
     return;
   }
 
-  $freqs_head{$key}=<IN>;
-  $freqs_data{$key} = { };
-  $freqs_ordr{$key} = [ ];
+  $self->{freqs_head}{$key}=<IN>;
+  $self->{freqs_data}{$key} = { };
+  $self->{freqs_ordr}{$key} = [ ];
   my $lastrule;
 
   my $subset_is_user = 0;
@@ -700,16 +768,16 @@ sub read_freqs_file {
 
   while (<IN>) {
     if (/(?: \(all messages| results used|OVERALL\%|<mclogmd|was at r\d+)/) {
-      $freqs_head{$key} .= $_;
+      $self->{freqs_head}{$key} .= $_;
     }
     elsif (/MSEC/) {
       next;	# just ignored for now
     }
     elsif (/\s+scoremap (.*)$/) {
-      $freqs_data{$key}{$lastrule}{scoremap} .= $_;
+      $self->{freqs_data}{$key}{$lastrule}{scoremap} .= $_;
     }
     elsif (/\s+overlap (.*)$/) {
-      $freqs_data{$key}{$lastrule}{overlap} .= $_;
+      $self->{freqs_data}{$key}{$lastrule}{overlap} .= $_;
     }
     elsif (/ ([\+\-])? *(\S+?)(\:\S+)?\s*$/) {
       my $promochar = $1;
@@ -729,9 +797,9 @@ sub read_freqs_file {
       }
 
       my @vals = split;
-      if (!exists $freqs_data{$key}{$lastrule}) {
-        push (@{$freqs_ordr{$key}}, $lastrule);
-        $freqs_data{$key}{$lastrule} = {
+      if (!exists $self->{freqs_data}{$key}{$lastrule}) {
+        push (@{$self->{freqs_ordr}{$key}}, $lastrule);
+        $self->{freqs_data}{$key}{$lastrule} = {
           lines => [ ]
         };
       }
@@ -748,7 +816,7 @@ sub read_freqs_file {
         age => ($subset_is_age ? $subset : undef),
         promotable => $promo ? '1' : '0',
       };
-      push @{$freqs_data{$key}{$lastrule}{lines}}, $line;
+      push @{$self->{freqs_data}{$key}{$lastrule}{lines}}, $line;
     }
     elsif (!/\S/) {
       # silently ignore empty lines
@@ -760,14 +828,11 @@ sub read_freqs_file {
   close IN;
 }
 
-my $FREQS_LINE_TEMPLATE;
-my $FREQS_EXTRA_TEMPLATE;
-
 sub get_freqs_for_rule {
-  my ($key, $strdate, $ruleslist) = @_;
+  my ($self, $key, $strdate, $ruleslist) = @_;
 
-  my $desc = $freqs_filenames{$key};
-  my $file = $datadir.$key;
+  my $desc = $FREQS_FILENAMES{$key};
+  my $file = $self->{datadir}.$key;
 
   my $titleplink = "$key.$strdate"; $titleplink =~ s/[^A-Za-z0-9]+/_/gs;
   my $comment = qq{
@@ -778,8 +843,8 @@ sub get_freqs_for_rule {
 
   };
 
-  my $heads = sub_freqs_head_line($freqs_head{$key});
-  my $header_context = extract_freqs_head_info($freqs_head{$key});
+  my $heads = $self->sub_freqs_head_line($self->{freqs_head}{$key});
+  my $header_context = $self->extract_freqs_head_info($self->{freqs_head}{$key});
 
   my $headers_id = $key; $headers_id =~ s/[^A-Za-z0-9]/_/gs;
 
@@ -819,35 +884,35 @@ sub get_freqs_for_rule {
   my @rules = split (' ', $ruleslist);
   if (scalar @rules == 0) { @rules = (''); }
 
-  if ($include_embedded_freqs_xml == 0) {
+  if ($self->{include_embedded_freqs_xml} == 0) {
     $FREQS_LINE_TEMPLATE =~ s/<!--\s+<rule>.*?-->//gs;
   }
 
   foreach my $rule (@rules) {
-    if ($rule && defined $freqs_data{$key}{$rule}) {
-      $comment .= rule_anchor($key,$rule);
-      $comment .= output_freqs_data_line($freqs_data{$key}{$rule},
+    if ($rule && defined $self->{freqs_data}{$key}{$rule}) {
+      $comment .= $self->rule_anchor($key,$rule);
+      $comment .= $self->output_freqs_data_line($self->{freqs_data}{$key}{$rule},
                 $header_context);
     }
-    elsif ($rules_all) {
+    elsif ($self->{rules_all}) {
       # all rules please...
-      foreach my $r (@{$freqs_ordr{$key}}) {
-        $comment .= rule_anchor($key,$r);
-        $comment .= output_freqs_data_line($freqs_data{$key}{$r},
+      foreach my $r (@{$self->{freqs_ordr}{$key}}) {
+        $comment .= $self->rule_anchor($key,$r);
+        $comment .= $self->output_freqs_data_line($self->{freqs_data}{$key}{$r},
                 $header_context);
       }
     }
-    elsif ($rules_grep && $rule =~ /^\/(.*)$/) {
+    elsif ($self->{rules_grep} && $rule =~ /^\/(.*)$/) {
       my $regexp = $1;
-      foreach my $r (@{$freqs_ordr{$key}}) {
+      foreach my $r (@{$self->{freqs_ordr}{$key}}) {
         next unless ($r =~/${regexp}/i);
-        $comment .= rule_anchor($key,$r);
-        $comment .= output_freqs_data_line($freqs_data{$key}{$r},
+        $comment .= $self->rule_anchor($key,$r);
+        $comment .= $self->output_freqs_data_line($self->{freqs_data}{$key}{$r},
                 $header_context);
       }
     }
     else {
-      $comment .= rule_anchor($key,$rule);
+      $comment .= $self->rule_anchor($key,$rule);
       $comment .= "
       <tr><td colspan=9>
         (no data found)
@@ -861,18 +926,20 @@ sub get_freqs_for_rule {
 }
 
 sub rule_anchor {
-  my ($key, $rule) = @_;
+  my ($self, $key, $rule) = @_;
   return "<a name='".uri_escape($key."_".$rule)."'></a>".
             "<a name='$rule'></a>";
 }
 
 sub sub_freqs_head_line {
-  my ($str) = @_;
+  my ($self, $str) = @_;
   $str = "<em><tt>".($str || '')."</tt></em><br/>";
   return $str;
 }
 
 sub set_freqs_templates {
+  my ($self) = @_;
+
   $FREQS_LINE_TEMPLATE = qq{
 
   <tr class=freqsline_promo[% PROMO %]>
@@ -905,6 +972,8 @@ sub set_freqs_templates {
 }
 
 sub extract_freqs_head_info {
+  my ($self) = @_;
+
   my $headstr = shift;
   my $ctx = { };
 
@@ -930,7 +999,7 @@ sub extract_freqs_head_info {
 }
 
 sub create_spampc_detail {
-  my ($percent, $isspam, $ctx, $line) = @_;
+  my ($self, $percent, $isspam, $ctx, $line) = @_;
 
   # optimization: no need to look anything up if it's 0.0000%
   if ($percent == 0.0) { return qq{ 0\&nbsp;messages }; }
@@ -955,12 +1024,12 @@ sub create_spampc_detail {
 }
 
 sub output_freqs_data_line {
-  my ($obj, $header_context) = @_;
+  my ($self, $obj, $header_context) = @_;
 
   # normal freqs lines, with optional subselector after rule name
   my $out = '';
   foreach my $line (@{$obj->{lines}}) {
-    if (!$s{zero}) {
+    if (!$self->{s}{zero}) {
       my $ov = $line->{spampc} + $line->{hampc};
       if (!$ov || $ov !~ /^\s*\d/ || $ov+0 == 0) {
         next;       # skip this line, it's a 0-hitter
@@ -968,8 +1037,8 @@ sub output_freqs_data_line {
     }
 
     my $detailurl = '';
-    if (!$s{detail}) {	# not already in "detail" mode
-      $detailurl = create_detail_url($line->{name});
+    if (!$self->{s}{detail}) {	# not already in "detail" mode
+      $detailurl = $self->create_detail_url($line->{name});
     }
 
     my $score = $line->{score};
@@ -977,27 +1046,27 @@ sub output_freqs_data_line {
       $score = '(n/a)';
     }
 
-    $ttk->process(\$FREQS_LINE_TEMPLATE, {
+    $self->{ttk}->process(\$FREQS_LINE_TEMPLATE, {
         RULEDETAIL => $detailurl,
         MSECS => $line->{msecs},
         SPAMPC => $line->{spampc},
         HAMPC => $line->{hampc},
-        SPAMPCDETAIL => create_spampc_detail($line->{spampc}, 1,
+        SPAMPCDETAIL => $self->create_spampc_detail($line->{spampc}, 1,
                  $header_context, $line),
-        HAMPCDETAIL => create_spampc_detail($line->{hampc}, 0,
+        HAMPCDETAIL => $self->create_spampc_detail($line->{hampc}, 0,
                  $header_context, $line),
         SO => $line->{so},
         RANK => $line->{rank},
         SCORE => $score,
         NAME => $line->{name},
-        NAMEREF => create_detail_url($line->{name}),
-        NAMEREFENCD => uri_encode(create_detail_url($line->{name})),
+        NAMEREF => $self->create_detail_url($line->{name}),
+        NAMEREFENCD => uri_escape($self->create_detail_url($line->{name})),
         USERNAME => $line->{username} || '',
         AGE => $line->{age} || '',
         PROMO => $line->{promotable},
-    }, \$out) or die $ttk->error();
+    }, \$out) or die $self->{ttk}->error();
 
-    $line_counter++;
+    $self->{line_counter}++;
   }
 
   # add scoremap using the FREQS_EXTRA_TEMPLATE if it's present
@@ -1005,9 +1074,9 @@ sub output_freqs_data_line {
     my $ovl = $obj->{scoremap} || '';
     #   scoremap spam: 16  12.11%  777 ****
 
-    $ttk->process(\$FREQS_EXTRA_TEMPLATE, {
+    $self->{ttk}->process(\$FREQS_EXTRA_TEMPLATE, {
         EXTRA => $ovl,
-    }, \$out) or die $ttk->error();
+    }, \$out) or die $self->{ttk}->error();
   }
 
   # add overlap using the FREQS_EXTRA_TEMPLATE if it's present
@@ -1022,43 +1091,43 @@ sub output_freqs_data_line {
         $str;
       /gem;
 
-    $ttk->process(\$FREQS_EXTRA_TEMPLATE, {
+    $self->{ttk}->process(\$FREQS_EXTRA_TEMPLATE, {
         EXTRA => $ovl,
-    }, \$out) or die $ttk->error();
+    }, \$out) or die $self->{ttk}->error();
   }
 
   return $out;
 }
 
 sub create_detail_url {
-  my ($rulename) = @_;
+  my ($self, $rulename) = @_;
   my @parms = (
-        get_params_except(qw(
+         $self->get_params_except(qw(
           rule s_age s_overlap s_all s_detail daterev
         )), 
-        "daterev=".$daterev, "rule=".uri_escape($rulename), "s_detail=1",
+        "daterev=".$self->{daterev}, "rule=".uri_escape($rulename), "s_detail=1",
       );
-  return assemble_url(@parms);
+  return $self->assemble_url(@parms);
 }
 
 sub gen_rule_link {
-  my ($rule, $linktext) = @_;
-  return "<a href='".create_detail_url($rule)."'>$linktext</a>";
+  my ($self, $rule, $linktext) = @_;
+  return "<a href='".$self->create_detail_url($rule)."'>$linktext</a>";
 }
 
 sub gen_switch_url {
-  my ($switch, $newval) = @_;
+  my ($self, $switch, $newval) = @_;
 
-  my @parms = get_params_except($switch);
+  my @parms =  $self->get_params_except($switch);
   $newval ||= '';
   if (!defined $switch) { warn "switch '$switch'='$newval' undef value"; }
   # if (!defined $newval) { warn "newval '$switch'='$newval' undef value"; }
-  push (@parms, "$switch=$newval");
-  return assemble_url(@parms);
+  push (@parms, $switch."=".$newval);
+  return $self->assemble_url(@parms);
 }
 
 sub assemble_url {
-  my @orig = @_;
+  my ($self, @orig) = @_;
 
   # e.g. http://buildbot.spamassassin.org/ruleqa?
   #     daterev=20060120-r370897-b&rule=T_PH_SEC&s_detail=1
@@ -1084,7 +1153,7 @@ sub assemble_url {
   # ensure "/FOO" rule greps are encoded as "%2FFOO"
   $path{rule} =~ s,^/,\%2F,;
 
-  my $url = $cgi_url.
+  my $url = $self->{cgi_url}.
         ($path{daterev}  ? '/'.$path{daterev} : '').
         ($path{rule}     ? '/'.$path{rule}    : '').
         ($path{s_detail} ? '/detail'          : '').
@@ -1104,50 +1173,51 @@ sub assemble_url {
 }
 
 sub precache_params {
-  use URI::Escape;
+  my ($self) = @_;
 
-  @cgi_params = $q->param();
-  foreach my $k (@cgi_params) {
+  @{$self->{cgi_param_order}} = $self->{q}->param();
+  foreach my $k (@{$self->{cgi_param_order}}) {
     next unless defined ($k);
-    my $v = $q->param($k);
+    my $v = $self->{q}->param($k);
     if (!defined $v) { $v = ''; }
-    $cgi_params{$k} = "$k=".uri_escape($v);
+    $self->{cgi_params}{$k} = "$k=".uri_escape($v);
   }
 }
 
 sub add_cgi_path_param {
-  my ($k, $v) = @_;
-  if (!defined $cgi_params{$k}) {
-    $cgi_params{$k} = "$k=$v";
-    push (@cgi_params, $k);
+  my ($self, $k, $v) = @_;
+  if (!defined $self->{cgi_params}{$k}) {
+    $self->{cgi_params}{$k} = "$k=$v";
+    push (@{$self->{cgi_param_order}}, $k);
   }
-  $q->param(-name=>$k, -value=>$v);
+  $self->{q}->param(-name=>$k, -value=>$v);
 }
 
 sub get_params_except {
-  my @excepts = @_;
+  my ($self, @excepts) = @_;
 
   my @str = ();
-  foreach my $p (@cgi_params) {
+  foreach my $p (@{$self->{cgi_param_order}}) {
     foreach my $skip (@excepts) {
-      goto nextnext if ($skip eq $p || $cgi_params{$p} =~ /^\Q$skip\E=/);
+      goto nextnext if
+            ($skip eq $p || $self->{cgi_params}{$p} =~ /^\Q$skip\E=/);
     }
-    push (@str, $cgi_params{$p});
+    push (@str, $self->{cgi_params}{$p});
 nextnext: ;
   }
   @str;
 }
 
 sub get_datadir_for_daterev {
-  my $npath = shift;
+  my ($self, $npath) = @_;
   $npath =~ s/-/\//;
-  return $conf{html}."/".$npath."/";
+  return $AUTOMC_CONF{html}."/".$npath."/";
 }
 
 sub get_daterev_description {
-  my ($dr) = @_;
-  my $fname = get_datadir_for_daterev($dr)."/info.xml";
-  my $fastfname = get_datadir_for_daterev($dr)."/fastinfo.xml";
+  my ($self, $dr) = @_;
+  my $fname = $self->get_datadir_for_daterev($dr)."/info.xml";
+  my $fastfname = $self->get_datadir_for_daterev($dr)."/fastinfo.xml";
 
   my $dranchor = "r".$dr; $dranchor =~ s/[^A-Za-z0-9]/_/gs;
 
@@ -1188,7 +1258,7 @@ sub get_daterev_description {
         if (ref $fastinfo->{mclogmds} && $fastinfo->{mclogmds}->{mclogmd}) {
           foreach my $f (@{$fastinfo->{mclogmds}->{mclogmd}}) {
             my $started = $f->{mcstartdate};
-            my $subtime = strftime "%Y%m%dT%H%M%SZ", gmtime $f->{mtime};
+            my $subtime = POSIX::strftime "%Y%m%dT%H%M%SZ", gmtime $f->{mtime};
 
             $all .= qq{
             
@@ -1202,7 +1272,7 @@ sub get_daterev_description {
           }
         }
 
-        my $id = "mclogmds_".($id_counter++);
+        my $id = "mclogmds_".($self->{id_counter}++);
         $mds_as_text = qq{
           <div id='$id' class='mclogmds' style='display: none'>
             <p class=headclosep align=right><a
@@ -1278,19 +1348,21 @@ sub get_daterev_description {
 }
 
 sub show_daterev_selector_page {
+  my ($self) = @_;
+
   my $title = "Rule QA: all recent mass-check results";
-  print show_default_header($title);
+  print $self->show_default_header($title);
 
   my @drs_net = ();
   my @drs_nightly = ();
   my @drs_preflight = ();
 
-  foreach my $dr (@daterevs) {
+  foreach my $dr (@{$self->{daterevs}}) {
     next unless $dr;
 
     my $obj = {
         dr => $dr,
-        text => get_daterev_description($dr) || ''
+        text => $self->get_daterev_description($dr) || ''
       };
 
     # now match against the microformat data in the HTML, to select
@@ -1314,31 +1386,26 @@ sub show_daterev_selector_page {
   print qq{
     <h3> Network Mass-Checks </h3>
     <br/> <a href='#net' name=net>#</a>
-  }.  gen_daterev_table(@drs_net);
+  }.  $self->gen_daterev_table(@drs_net);
 
   print qq{
     <h3> Nightly Mass-Checks </h3>
     <br/> <a href='#nightly' name=nightly>#</a>
-  }.  gen_daterev_table(@drs_nightly);
+  }.  $self->gen_daterev_table(@drs_nightly);
 
   print qq{
     <h3> Preflight Mass-Checks </h3>
     <br/> <a href='#preflight' name=preflight>#</a>
-  }.  gen_daterev_table(@drs_preflight);
-}
-
-sub uri_encode {
-  my ($str) = @_;
-  return uri_escape($str);
+  }.  $self->gen_daterev_table(@drs_preflight);
 }
 
 sub gen_daterev_table {
-  my @list = @_;
+  my ($self, @list) = @_;
 
-  my @parms =get_params_except(qw(
+  my @parms = $self->get_params_except(qw(
           daterev longdatelist
         ));
-  my $url_back = assemble_url(@parms);
+  my $url_back = $self->assemble_url(@parms);
 
   my $str = qq{
 
@@ -1357,7 +1424,7 @@ sub gen_daterev_table {
     }. join(' ', map {
       my $dr = $_->{dr};
       my $text = $_->{text};
-      my $drhref = assemble_url("daterev=".$dr, @parms);
+      my $drhref = $self->assemble_url("daterev=".$dr, @parms);
       $text =~ s/!drhref!/$drhref/gs;
       qq{
 
