@@ -487,7 +487,7 @@ sub show_default_view {
     }
     else {
       $dr = $self->gen_switch_url("daterev", $dr);
-      my $drtext = $self->get_daterev_description($drtext);
+      my $drtext = $self->get_daterev_masscheck_description($drtext);
       $drtext =~ s/!drhref!/$dr/gs;
 
       $tmpl =~ s,!daylink${key}!,
@@ -498,7 +498,7 @@ sub show_default_view {
 
   $self->{daterev} = $self->date_in_direction($self->{daterev}, 0);
   {
-    my $todaytext = $self->get_daterev_description($self->{daterev});
+    my $todaytext = $self->get_daterev_masscheck_description($self->{daterev});
     my $dr = $self->gen_switch_url("daterev", $self->{daterev});
     $todaytext =~ s/!drhref!/$dr/gs;
     $tmpl =~ s/!todaytext!/$todaytext/gs;
@@ -593,6 +593,8 @@ sub show_default_view {
 sub get_all_daterevs {
   my ($self) = @_;
 
+  die "no directory set in automc config for 'html'" unless $AUTOMC_CONF{html};
+
   return sort map {
       s/^.*\/(\d+)\/(r\d+-\S+)$/$1-$2/; $_;
     } grep { /\/\d+\/r\d+-\S+$/ && -d $_ } (<$AUTOMC_CONF{html}/2*/r*>);
@@ -655,14 +657,11 @@ sub get_last_night_daterev {
         gmtime ((time + DATEREV_ADJ) - (12*60*60));
 
   foreach my $dr (reverse @{$self->{daterevs}}) {
-    my $t = $self->get_daterev_description($dr);
+    my $t = $self->get_daterev_metadata($dr);
     next unless $t;
-    if ($t =~ /<span class="date">(.+?)<\/span>/) {
-      next if ($1+0 > $notafter);
-    }
-    if ($t =~ / tag=n /) {
-      return $dr;
-    }
+
+    next if ($t->{date} + 0 > $notafter);
+    return $dr if ($t->{tag} eq 'n');
   }
   return undef;
 }
@@ -1219,137 +1218,256 @@ sub get_datadir_for_daterev {
   return $AUTOMC_CONF{html}."/".$npath."/";
 }
 
-sub get_daterev_description {
+sub get_daterev_metadata {
   my ($self, $dr) = @_;
+
+  if ($self->{daterev_metadata}->{$dr}) {
+    return $self->{daterev_metadata}->{$dr};
+  }
+
+  my $meta = $self->{daterev_metadata}->{$dr} = { };
+
+  $meta->{daterev} = $dr;
+
+  my $dranchor = "r".$dr; $dranchor =~ s/[^A-Za-z0-9]/_/gs;
+  $meta->{dranchor} = $dranchor;
+
   my $fname = $self->get_datadir_for_daterev($dr)."/info.xml";
   my $fastfname = $self->get_datadir_for_daterev($dr)."/fastinfo.xml";
 
-  my $dranchor = "r".$dr; $dranchor =~ s/[^A-Za-z0-9]/_/gs;
-
-  my $txt;
-  if (-f $fname) {
+  if (-f $fname && -f $fastfname) {
     eval {
       my $info = XMLin($fname);
       my $fastinfo = XMLin($fastfname);
       # use Data::Dumper; print Dumper $info;
 
+      my $mds_as_text;
+      if ($fastinfo->{mclogmds}) {
+        $mds_as_text = $self->get_mds_as_text($fastinfo->{mclogmds});
+      }
+
       my $cdate = $info->{checkin_date};
       $cdate =~ s/T(\S+)\.\d+Z$/ $1/;
-
-      my $net = $fastinfo->{includes_net} ? "[net]" : "";
 
       my $drtitle = ($info->{msg} ? $info->{msg} : '');
       $drtitle =~ s/[\"\'\&\>\<]/ /gs;
       $drtitle =~ s/\s+/ /gs;
       $drtitle =~ s/^(.{0,160}).*$/$1/gs;
 
-      my $mds_as_text = '';
-      if ($fastinfo->{mclogmds}) {
-        # 'mclogmd' => [
-        #    {
-        #      'daterev' => '20060430/r398298-n',
-        #      'mcstartdate' => '20060430T122405Z',
-        #      'mtime' => '1146404744',
-        #      'rev' => '398298',
-        #      'file' => 'ham-cthielen.log',
-        #      'fsize' => '3036336'
-        #    }, [...]
+      $meta->{rev} = $fastinfo->{rev};
+      $meta->{cdate} = $cdate;
+      $meta->{drtitle} = $drtitle;
+      $meta->{mds_as_text} = $mds_as_text || '';
+      $meta->{includes_net} = $fastinfo->{includes_net};
+      $meta->{date} = $fastinfo->{date};
+      $meta->{submitters} = $fastinfo->{submitters};
+      $meta->{author} = $info->{author};
+      $meta->{tag} = $info->{tag};
 
-        # $mds_as_text = XMLout($fastinfo->{mclogmds});
-
-        # use Data::Dumper; $mds_as_text = Dumper($fastinfo->{mclogmds});
-
-        my $all = '';
-        if (ref $fastinfo->{mclogmds} && $fastinfo->{mclogmds}->{mclogmd}) {
-          foreach my $f (@{$fastinfo->{mclogmds}->{mclogmd}}) {
-            my $started = $f->{mcstartdate};
-            my $subtime = POSIX::strftime "%Y%m%dT%H%M%SZ", gmtime $f->{mtime};
-
-            $all .= qq{
-            
-              <p> <b>$f->{file}</b>:<br />
-                  started:&nbsp;$started;<br />
-                  submitted:&nbsp;$subtime;<br />
-                  size: $f->{fsize} bytes
-              </p>
-
-            };
-          }
-        }
-
-        my $id = "mclogmds_".($self->{id_counter}++);
-        $mds_as_text = qq{
-          <div id='$id' class='mclogmds' style='display: none'>
-            <p class=headclosep align=right><a
-                href="javascript:hide_header('$id')">[-]</a></p>
-
-            $all
-          </div> <a href="javascript:show_header('$id')">[+]</a>
-        };
+      my $type;
+      if ($meta->{tag} eq 'b') {
+        $type = 'preflight';
+      } elsif ($meta->{includes_net}) {
+        $type = 'net';
+      } else {
+        $type = 'nightly';
       }
+      $meta->{type} = $type;
 
-      $txt = qq{
-
-          <td class=daterevtd>
-            <a name="$dranchor" title="$drtitle"
-                href="!drhref!"><span class="date">$fastinfo->{date}</span></a>
-          </td>
-          <td class=daterevtd>
-            <a title="$drtitle" href="!drhref!">$fastinfo->{rev}</a>
-          </td>
-          <td class=daterevtd>
-            <a title="$drtitle" href="!drhref!">$cdate</a>
-          </td>
-          <td class=daterevtd>
-            <a title="$drtitle" href="!drhref!">$info->{checkin_rev}</a>
-          </td>
-          <td class=daterevtd>
-            <em><mcauthor>$info->{author}</mcauthor></em>
-            <em><mcwasnet>$net</mcwasnet></em>
-          </td>
-          <!-- tag=$fastinfo->{tag} -->
-
-        </tr>
-        <tr class=daterevdesc>
-
-          <td></td>
-          <td class=daterevtd colspan=4>
-              <em>($drtitle)</em>
-          </td>
-          <td class=daterevtd colspan=1>
-              <em><mcsubmitters>$fastinfo->{submitters}</mcsubmitters></em>
-              $mds_as_text
-          </td>
-
-      };
     };
 
     if ($@) {
       warn "daterev info.xml: $@";
+    } else {
+      return $meta;
     }
-
-    if ($txt) { return $txt; }
   }
 
-  # if that failed, just use the daterev itself.
+  # if that failed, just use the info that can be gleaned from the
+  # daterev itself.
+
   $dr =~ /^(\d+)-r(\d+)-(\S+)$/;
   my $date = $1;
   my $rev = $2;
   my $tag = $3;
   my $drtitle = "(no info)";
 
-  $txt = qq{
+  {
+      $meta->{rev} = $rev;
+      $meta->{cdate} = $date;
+      $meta->{drtitle} = '(no info available yet)';
+      $meta->{mds_as_text} = "";
+      $meta->{includes_net} = 0;
+      $meta->{date} = $date;
+      $meta->{submitters} = "";
+      $meta->{author} = "nobody";
+      $meta->{tag} = $tag;
+      $meta->{type} = 'preflight';  # default
+  }
 
-        <td class=daterevtd>
-       <a title="$drtitle" href="!drhref!">$date</a></td>
-        <td class=daterevtd>
-       <a title="$drtitle" href="!drhref!">$rev</a></td>
-        <td class=daterevtd colspan=3>
-       <a title="$drtitle" href="!drhref!">(no info on this commit yet)</a></td>
+  return $meta;
+}
+
+sub get_mds_as_text {
+  my ($self, $mclogmds) = @_;
+
+  # 'mclogmd' => [
+  #    {
+  #      'daterev' => '20060430/r398298-n',
+  #      'mcstartdate' => '20060430T122405Z',
+  #      'mtime' => '1146404744',
+  #      'rev' => '398298',
+  #      'file' => 'ham-cthielen.log',
+  #      'fsize' => '3036336'
+  #    }, [...]
+
+  # $mds_as_text = XMLout($mclogmds);   # debug, as XML
+
+  # use Data::Dumper; $mds_as_text = Dumper($mclogmds); # debug, as perl data
+
+  my $all = '';
+  if (ref $mclogmds && $mclogmds->{mclogmd}) {
+    foreach my $f (@{$mclogmds->{mclogmd}}) {
+      my $started = $f->{mcstartdate};
+      my $subtime = POSIX::strftime "%Y%m%dT%H%M%SZ", gmtime $f->{mtime};
+
+      $all .= qq{
+      
+        <p> <b>$f->{file}</b>:<br />
+            started:&nbsp;$started;<br />
+            submitted:&nbsp;$subtime;<br />
+            size: $f->{fsize} bytes
+        </p>
+
+      };
+    }
+  }
+
+  my $id = "mclogmds_".($self->{id_counter}++);
+
+  return qq{
+
+    <div id='$id' class='mclogmds' style='display: none'>
+      <p class=headclosep align=right><a
+          href="javascript:hide_header('$id')">[-]</a></p>
+
+      $all
+    </div> <a href="javascript:show_header('$id')">[+]</a>
 
   };
+}
 
-  return $txt;
+sub get_daterev_code_description {
+  my ($self, $dr) = @_;
+  my $meta = $self->get_daterev_metadata($dr);
+  return qq{
+
+    <td class="daterevtd">
+    <span class="daterev_code_description">
+      <a title="$meta->{author}: $meta->{drtitle} ($meta->{cdate})"
+          href="!drhref!">$meta->{rev}</a>
+    </span>
+    </td>
+
+  };
+}
+
+sub get_daterev_masscheck_description {
+  my ($self, $dr) = @_;
+  my $meta = $self->get_daterev_metadata($dr);
+  my $net = $meta->{includes_net} ? "[net]" : "";
+
+  return qq{
+  
+    <td class="daterevtd">
+    <span class="daterev_masscheck_description">
+      <p>
+        <a name="$meta->{dranchor}"
+          href="!drhref!"><strong><span class="mctype">$meta->{type}</span>,
+            on <span class="date">$meta->{date}</span>
+          </strong></a>
+      </p>
+      <p>
+        <em><span class="mcsubmitters">$meta->{submitters}</span></em>
+        $meta->{mds_as_text}
+        <em><span class="mcwasnet">$net</span></em>
+      </p>
+      <!-- <span class="mcauthor">$meta->{author}</span> -->
+      <!-- tag=$meta->{tag} -->
+    </span>
+    </td>
+
+  };
+}
+
+sub get_daterev_html_table {
+  my ($self, $daterev_list) = @_;
+
+  my $rows = { };
+  foreach my $dr (@{$daterev_list}) {
+    next unless $dr;
+    my $meta = $self->get_daterev_metadata($dr);
+
+    my $colidx;
+    my $type = $meta->{type};
+    if ($type eq 'preflight') {
+      $colidx = 0;
+    } elsif ($type eq 'net') {
+      $colidx = 2;
+    } else {
+      $colidx = 1;
+    }
+
+    # use the commit-date, rather than the mass-check date
+    $rows->{$meta->{cdate}} ||= [ ];
+    $rows->{$meta->{cdate}}->[$colidx] = $meta;
+  }
+
+  my @html = ();
+  foreach my $rowdate (sort keys %{$rows}) {
+    my $row = $rows->{$rowdate};
+    push @html, qq{
+
+            <tr class=daterevtr>
+
+      };
+    foreach my $col (0 .. 2) {
+      my $meta = $row->[$col];
+
+      if ($meta) {
+        push @html, $self->gen_daterev_html_table_td($meta);
+      }
+      else {
+        push @html, qq{
+
+                <td class='daterevtd'></td>
+
+          };
+      }
+    }
+    push @html, qq{
+
+            </tr>
+
+      };
+  }
+
+  return join '', @html;
+}
+
+sub gen_daterev_html_table_td {
+  my ($self, $meta) = @_;
+
+  my $dr = $meta->{daterev};
+  my @parms = $self->get_params_except(qw(
+          daterev longdatelist
+        ));
+  my $drhref = $self->assemble_url("daterev=".$dr, @parms);
+
+  my $text = $self->get_daterev_masscheck_description($dr) || '';
+  $text =~ s/!drhref!/$drhref/gs;
+
+  return $text;
 }
 
 sub show_daterev_selector_page {
@@ -1358,95 +1476,30 @@ sub show_daterev_selector_page {
   my $title = "Rule QA: all recent mass-check results";
   print $self->show_default_header($title);
 
-  my @drs_net = ();
-  my @drs_nightly = ();
-  my @drs_preflight = ();
+  my $max_listings = 300;
 
-  foreach my $dr (@{$self->{daterevs}}) {
-    next unless $dr;
-
-    my $obj = {
-        dr => $dr,
-        text => $self->get_daterev_description($dr) || ''
-      };
-
-    # now match against the microformat data in the HTML, to select
-    # the desired subsets of certain types
-    if ($obj->{text} =~ / tag=b /) {
-      push @drs_preflight, $obj;
-    }
-    elsif ($obj->{text} =~ /<mcwasnet>\s*.net/) {
-      push @drs_net, $obj;
-    }
-    else {
-      push @drs_nightly, $obj;
-    }
+  my @drs = @{$self->{daterevs}};
+  if (scalar @drs > $max_listings) {
+    splice @drs, 0, -$max_listings;
   }
 
-  # remove all but the most recent 100.  (TODO: need a "full" view?)
-  if (scalar @drs_net > 100)       { splice(@drs_net, 0, -100); }
-  if (scalar @drs_preflight > 100) { splice(@drs_preflight, 0, -100); }
-  if (scalar @drs_nightly > 100)   { splice(@drs_nightly, 0, -100); }
-
   print qq{
-    <h3> Network Mass-Checks </h3>
+
+    <h3> All Mass-Checks </h3>
     <br/> <a href='#net' name=net>#</a>
-  }.  $self->gen_daterev_table(@drs_net);
 
-  print qq{
-    <h3> Nightly Mass-Checks </h3>
-    <br/> <a href='#nightly' name=nightly>#</a>
-  }.  $self->gen_daterev_table(@drs_nightly);
+    <div class=updateform>
+      <table style="padding-left: 0px" class=datetable>
+      <tr>
+      <th> Commit </th>
+      <th> Preflight Mass-Checks </th>
+      <th> Nightly Mass-Checks </th>
+      <th> Network Mass-Checks </th>
+      </tr>
 
-  print qq{
-    <h3> Preflight Mass-Checks </h3>
-    <br/> <a href='#preflight' name=preflight>#</a>
-  }.  $self->gen_daterev_table(@drs_preflight);
+  }.  $self->get_daterev_html_table(\@drs);
 }
 
-sub gen_daterev_table {
-  my ($self, @list) = @_;
-
-  my @parms = $self->get_params_except(qw(
-          daterev longdatelist
-        ));
-  my $url_back = $self->assemble_url(@parms);
-
-  my $str = qq{
-
-      <br clear=all />
-      <div class=updateform>
-       <table style="padding-left: 0px" class=datetable>
-       <tr>
-       <th> </th>
-        <th> Date </th>
-        <th> MC-Rev </th>
-        <th> Prior Commit </th>
-        <th> Rev </th>
-        <th> Author </th>
-       </tr>
-
-    }. join(' ', map {
-      my $dr = $_->{dr};
-      my $text = $_->{text};
-      my $drhref = $self->assemble_url("daterev=".$dr, @parms);
-      $text =~ s/!drhref!/$drhref/gs;
-      qq{
-
-       <tr class=daterevtr><td></td>
-
-      }.$text.qq{
-
-       </tr>
-
-      };
-    } reverse @list). qq{
-
-      </table></div>
-
-    };
-}
-  
 =cut
 
 to install, add this line to httpd.conf:
