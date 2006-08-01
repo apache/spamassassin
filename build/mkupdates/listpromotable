@@ -44,7 +44,7 @@ else {
 
 my $submitters = '';
 if ($doc =~ m{ <td\sclass=daterevtd><b>Viewing</b></td>.*?
-                <mcsubmitters>\s*(.*?)\s*</mcsubmitters> }sx)
+                <span\s+class="mcsubmitters">\s*(.*?)\s*</span> }sx)
 {
   $submitters = $1;
 }
