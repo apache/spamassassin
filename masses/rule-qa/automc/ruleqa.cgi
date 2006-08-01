@@ -41,6 +41,7 @@ use Template;
 use Date::Manip;
 use XML::Simple;
 use URI::Escape;
+use Time::Local;
 use POSIX qw();
 
 # daterevs -- e.g. "20060429/r239832-r" -- are aligned to just before
@@ -322,12 +323,27 @@ sub show_default_header {
       padding: 1px 3px 1px 5px;
     }
 
+    td.daterevcommittd {
+      font-size: 75%;
+      padding: 1px 3px 1px 5px;
+      background: #ffc;
+    }
+
+    div.commitmsgdiv {
+      font-size: 50%;
+      overflow: auto;
+    }
+
+    td.daterevtdempty {
+      background: #eec;
+    }
+
     tr.daterevtr {
       background: #fff;
     }
 
     tr.daterevdesc {
-      background: #f0e0a0;
+      background: #fea;
     }
 
 
@@ -451,60 +467,35 @@ sub show_default_view {
 
   };
 
-  my $days = {
-    neg3 => -3,
-    neg2 => -2,
-    neg1 => -1,
-    pls1 => 1,
-    pls2 => 2,
-    pls3 => 3
-  };
-
   my @drs = ();
-  my ($key, $daycount);
-  while (($key, $daycount) = each %{$days}) {
-    my $dr = $self->date_in_direction($self->{daterev}, $daycount);
-    if ($dr) { push @drs, $dr; }
-  }
-
-  $tmpl =~ s,!daylinkstable!,
-          $self->get_daterev_html_table(\@drs);
-        ,ges;
-
-  if (0) {
-    {
-    my $dr = $self->{daterev};
-    my $drtext = $dr;
-
-    if (!$dr) {
-      $tmpl =~ s,!daylink${key}!,
-
-        <td colspan=6 class=daterevtd>
-          <em>(no logs available)</em>
-        </td>
-
-      ,gs;
-    }
-    else {
-      $dr = $self->gen_switch_url("daterev", $dr);
-      my $drtext = $self->get_daterev_masscheck_description($drtext);
-      $drtext =~ s/!drhref!/$dr/gs;
-
-      $tmpl =~ s,!daylink${key}!,
-        $drtext
-      ,gs;
-    }
-  }
-
-  $self->{daterev} = $self->date_in_direction($self->{daterev}, 0);
   {
-    my $todaytext = $self->get_daterev_masscheck_description($self->{daterev});
-    my $dr = $self->gen_switch_url("daterev", $self->{daterev});
-    $todaytext =~ s/!drhref!/$dr/gs;
-    $tmpl =~ s/!todaytext!/$todaytext/gs;
-  }
+    my $origdr = $self->{daterev} || $self->{daterevs}->[-1];
+    $origdr =~ /^(\d+)[\/-]/;
+    my $date = $1;
+
+    my $dr_after = date_offset($date, -1);
+    my $dr_before = date_offset($date, 1);
+
+    foreach my $dr (@{$self->{daterevs}}) {
+      next unless ($dr =~ /^(\d+)[\/-]/);
+      my $date = $1;
+      next unless ($date >= $dr_after);
+      next unless ($date <= $dr_before);
+      push @drs, $dr;
+    }
   }
 
+sub date_offset {
+  my ($yyyymmdd, $offset_days) = @_;
+  $yyyymmdd =~ /^(....)(..)(..)$/;
+  my $time = timegm(0,0,0,$3,$2-1,$1);
+  $time += (24 * 60 * 60) * $offset_days;
+  return POSIX::strftime "%Y%m%d", gmtime $time;
+}
+
+  $tmpl =~ s{!daylinkstable!}{
+          $self->get_daterev_html_table(\@drs, 0, 0);
+        }ges;
 
   my $dranchor = "r".$self->{daterev}; $dranchor =~ s/[^A-Za-z0-9]/_/gs;
   my $ldlurl = $self->gen_switch_url("longdatelist", 1)."#".$dranchor;
@@ -1220,7 +1211,7 @@ sub get_datadir_for_daterev {
 }
 
 sub get_daterev_metadata {
-  my ($self, $dr) = @_;
+  my ($self, $dr, $ignore_logmds) = @_;
 
   if ($self->{daterev_metadata}->{$dr}) {
     return $self->{daterev_metadata}->{$dr};
@@ -1236,6 +1227,11 @@ sub get_daterev_metadata {
   my $fname = $self->get_datadir_for_daterev($dr)."/info.xml";
   my $fastfname = $self->get_datadir_for_daterev($dr)."/fastinfo.xml";
 
+  $dr =~ /^(\d+)-r(\d+)-(\S+)$/;
+  my $date = $1;
+  my $rev = $2;
+  my $tag = $3;
+
   if (-f $fname && -f $fastfname) {
     eval {
       my $info = XMLin($fname);
@@ -1243,7 +1239,7 @@ sub get_daterev_metadata {
       # use Data::Dumper; print Dumper $info;
 
       my $mds_as_text;
-      if ($fastinfo->{mclogmds}) {
+      if ($fastinfo->{mclogmds} && !$ignore_logmds) {
         $mds_as_text = $self->get_mds_as_text($fastinfo->{mclogmds});
       }
 
@@ -1255,7 +1251,11 @@ sub get_daterev_metadata {
       $drtitle =~ s/\s+/ /gs;
       $drtitle =~ s/^(.{0,160}).*$/$1/gs;
 
-      $meta->{rev} = $fastinfo->{rev};
+      if ($rev ne $fastinfo->{rev}) {
+	warn "dr and fastinfo disagree: ($rev ne $fastinfo->{rev})";
+      }
+
+      $meta->{rev} = $rev;
       $meta->{cdate} = $cdate;
       $meta->{drtitle} = $drtitle;
       $meta->{mds_as_text} = $mds_as_text || '';
@@ -1263,10 +1263,10 @@ sub get_daterev_metadata {
       $meta->{date} = $fastinfo->{date};
       $meta->{submitters} = $fastinfo->{submitters};
       $meta->{author} = $info->{author};
-      $meta->{tag} = $info->{tag};
+      $meta->{tag} = $tag;
 
       my $type;
-      if ($meta->{tag} eq 'b') {
+      if ($meta->{tag} && $meta->{tag} eq 'b') {
         $type = 'preflight';
       } elsif ($meta->{includes_net}) {
         $type = 'net';
@@ -1286,11 +1286,6 @@ sub get_daterev_metadata {
 
   # if that failed, just use the info that can be gleaned from the
   # daterev itself.
-
-  $dr =~ /^(\d+)-r(\d+)-(\S+)$/;
-  my $date = $1;
-  my $rev = $2;
-  my $tag = $3;
   my $drtitle = "(no info)";
 
   {
@@ -1348,25 +1343,32 @@ sub get_mds_as_text {
 
   return qq{
 
+    <a href="javascript:show_header('$id')">[+]</a>
     <div id='$id' class='mclogmds' style='display: none'>
       <p class=headclosep align=right><a
           href="javascript:hide_header('$id')">[-]</a></p>
 
       $all
-    </div> <a href="javascript:show_header('$id')">[+]</a>
+    </div>
 
   };
 }
 
 sub get_daterev_code_description {
-  my ($self, $dr) = @_;
-  my $meta = $self->get_daterev_metadata($dr);
+  my ($self, $dr, $ignore_logmds) = @_;
+  my $meta = $self->get_daterev_metadata($dr, $ignore_logmds);
+
   return qq{
 
-    <td class="daterevtd">
+    <td class="daterevcommittd" width='30%'>
     <span class="daterev_code_description">
-      <a title="$meta->{author}: $meta->{drtitle} ($meta->{cdate})"
-          href="!drhref!">$meta->{rev}</a>
+      <p>
+	<a title="$meta->{author}: $meta->{drtitle} ($meta->{cdate})"
+          href="!drhref!"><strong>$meta->{rev}</strong>: $meta->{cdate}</a>
+      </p>
+      <p><div class='commitmsgdiv'>
+	$meta->{author}: $meta->{drtitle}
+      </div></p>
     </span>
     </td>
 
@@ -1374,13 +1376,13 @@ sub get_daterev_code_description {
 }
 
 sub get_daterev_masscheck_description {
-  my ($self, $dr) = @_;
-  my $meta = $self->get_daterev_metadata($dr);
+  my ($self, $dr, $ignore_logmds) = @_;
+  my $meta = $self->get_daterev_metadata($dr, $ignore_logmds);
   my $net = $meta->{includes_net} ? "[net]" : "";
 
   return qq{
   
-    <td class="daterevtd">
+    <td class="daterevtd" width='20%'>
     <span class="daterev_masscheck_description">
       <p>
         <a name="$meta->{dranchor}"
@@ -1390,9 +1392,9 @@ sub get_daterev_masscheck_description {
       </p>
       <p>
         <em><span class="mcsubmitters">$meta->{submitters}</span></em>
-        $meta->{mds_as_text}
-        <em><span class="mcwasnet">$net</span></em>
+        $meta->{mds_as_text}</x>
       </p>
+      <!-- <span class="mcwasnet">$net</span> -->
       <!-- <span class="mcauthor">$meta->{author}</span> -->
       <!-- tag=$meta->{tag} -->
     </span>
@@ -1402,12 +1404,12 @@ sub get_daterev_masscheck_description {
 }
 
 sub get_daterev_html_table {
-  my ($self, $daterev_list) = @_;
+  my ($self, $daterev_list, $ignore_logmds, $reverse) = @_;
 
   my $rows = { };
   foreach my $dr (@{$daterev_list}) {
     next unless $dr;
-    my $meta = $self->get_daterev_metadata($dr);
+    my $meta = $self->get_daterev_metadata($dr, $ignore_logmds);
 
     my $colidx;
     my $type = $meta->{type};
@@ -1424,24 +1426,38 @@ sub get_daterev_html_table {
     $rows->{$meta->{cdate}}->[$colidx] = $meta;
   }
 
+  my @rowkeys = sort keys %{$rows};
+  if ($reverse) { @rowkeys = reverse @rowkeys; }
+
   my @html = ();
-  foreach my $rowdate (sort keys %{$rows}) {
+  foreach my $rowdate (@rowkeys) {
     my $row = $rows->{$rowdate};
+
+    my $meta;
+    foreach my $col (0 .. 2) {
+      if ($row->[$col]) {
+	$meta = $row->[$col];
+	last;
+      }
+    }
+
+    next unless $meta;		# no entries in the row
+
     push @html, qq{
 
             <tr class=daterevtr>
 
-      };
-    foreach my $col (0 .. 2) {
-      my $meta = $row->[$col];
+      }, $self->gen_daterev_html_commit_td($meta, $ignore_logmds);
 
+    foreach my $col (0 .. 2) {
+      $meta = $row->[$col];
       if ($meta) {
-        push @html, $self->gen_daterev_html_table_td($meta);
+        push @html, $self->gen_daterev_html_table_td($meta, $ignore_logmds);
       }
       else {
         push @html, qq{
 
-                <td class='daterevtd'></td>
+                <td class='daterevtdempty' width='20%'></td>
 
           };
       }
@@ -1456,8 +1472,8 @@ sub get_daterev_html_table {
   return join '', @html;
 }
 
-sub gen_daterev_html_table_td {
-  my ($self, $meta) = @_;
+sub gen_daterev_html_commit_td {
+  my ($self, $meta, $ignore_logmds) = @_;
 
   my $dr = $meta->{daterev};
   my @parms = $self->get_params_except(qw(
@@ -1465,7 +1481,22 @@ sub gen_daterev_html_table_td {
         ));
   my $drhref = $self->assemble_url("daterev=".$dr, @parms);
 
-  my $text = $self->get_daterev_masscheck_description($dr) || '';
+  my $text = $self->get_daterev_code_description($dr, $ignore_logmds) || '';
+  $text =~ s/!drhref!/$drhref/gs;
+
+  return $text;
+}
+
+sub gen_daterev_html_table_td {
+  my ($self, $meta, $ignore_logmds) = @_;
+
+  my $dr = $meta->{daterev};
+  my @parms = $self->get_params_except(qw(
+          daterev longdatelist
+        ));
+  my $drhref = $self->assemble_url("daterev=".$dr, @parms);
+
+  my $text = $self->get_daterev_masscheck_description($dr, $ignore_logmds) || '';
   $text =~ s/!drhref!/$drhref/gs;
 
   return $text;
@@ -1478,7 +1509,6 @@ sub show_daterev_selector_page {
   print $self->show_default_header($title);
 
   my $max_listings = 300;
-
   my @drs = @{$self->{daterevs}};
   if (scalar @drs > $max_listings) {
     splice @drs, 0, -$max_listings;
@@ -1498,7 +1528,7 @@ sub show_daterev_selector_page {
       <th> Network Mass-Checks </th>
       </tr>
 
-  }.  $self->get_daterev_html_table(\@drs);
+  }.  $self->get_daterev_html_table(\@drs, 1, 1);
 }
 
 =cut
