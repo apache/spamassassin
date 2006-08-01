@@ -403,29 +403,18 @@ sub show_default_view {
   my $tmpl = q{
 
   <div class=updateform>
-  <form action="!THISURL!" method=GET>
+  <form action="!THISURL!" method="GET">
     <table style="padding-left: 0px" class=datetable>
 
         <tr>
-        <th> Mass-Check </th>
-        <th> Date </th>
-        <th> MC-Rev </th>
         <th> Commit </th>
-        <th> Rev </th>
-        <th> Author </th>
+        <th> Preflight Mass-Checks </th>
+        <th> Nightly Mass-Checks </th>
+        <th> Network Mass-Checks </th>
         </tr>
 
-            <tr class=daterevtr><td class=daterevtd><b>Earlier</b></td>
-        !daylinkneg2!
-        </tr><tr class=daterevtr><td class=daterevtd></td>
-        !daylinkneg1!
-        </tr><tr class=daterevtr><td class=daterevtd><b>Viewing</b></td>
-        !todaytext!
-        </tr><tr class=daterevtr><td class=daterevtd></td>
-        !daylinkpls1!
-        </tr><tr class=daterevtr><td class=daterevtd><b>Later</b></td>
-        !daylinkpls2!
-        </tr>
+        !daylinkstable!
+
     </table>
 
   <table width=100%>
@@ -471,9 +460,20 @@ sub show_default_view {
     pls3 => 3
   };
 
+  my @drs = ();
   my ($key, $daycount);
   while (($key, $daycount) = each %{$days}) {
     my $dr = $self->date_in_direction($self->{daterev}, $daycount);
+    if ($dr) { push @drs, $dr; }
+  }
+
+  $tmpl =~ s,!daylinkstable!,
+          $self->get_daterev_html_table(\@drs);
+        ,ges;
+
+  if (0) {
+    {
+    my $dr = $self->{daterev};
     my $drtext = $dr;
 
     if (!$dr) {
@@ -502,6 +502,7 @@ sub show_default_view {
     my $dr = $self->gen_switch_url("daterev", $self->{daterev});
     $todaytext =~ s/!drhref!/$dr/gs;
     $tmpl =~ s/!todaytext!/$todaytext/gs;
+  }
   }
 
 
