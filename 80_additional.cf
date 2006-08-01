@@ -187,11 +187,18 @@ describe TVD_FLOAT_GENERAL	Message contains HTML style indicating spam
 
 # 2006/07/11
 # 0.750   0.9111   0.0000    1.000   0.84    1.00  MULTIPART_ALT_NON_TEXT
-# requires the find_parts() behavior from 3.1.4+
+# requires the find_parts() behavior and EvalTest from 3.1.4+
 if ( version > 3.001003 )
 body MULTIPART_ALT_NON_TEXT	eval:check_ma_non_text()
 score MULTIPART_ALT_NON_TEXT	2.0
 endif
+
+# 2006/08/01
+# hasn't passed the general nightly mass-check yet, but we need a stop-gap
+# for now...  this version got rid of all of my FPs.
+# 1.359   1.5951   0.0000    1.000   1.00    0.01  T_TVD_FW_GRAPHIC_ID3
+uri __TVD_INT_CID /^cid:/i
+meta TVD_FW_GRAPHIC_ID3 __TVD_OUTLOOK_IMG && __TVD_INT_CID && !__UNUSABLE_MSGID && ! (__OE_MSGID_2 || __IMS_MSGID )
 
 ###########################################################################
 # ReplaceTags rules
@@ -254,7 +261,8 @@ mimeheader TVD_FW_GRAPHIC_ID1		Content-Id =~ /<[0-9a-f]{12}(?:\$[0-9a-f]{8}){2}\
 mimeheader TVD_FW_GRAPHIC_ID2		Content-Id =~ /<(?:[0-9A-F]{8}\.){3}[0-9A-F]{8}/
 mimeheader TVD_FW_GRAPHIC_NAME_LONG	Content-Type =~ /\bname="[a-z]{8,}\.gif/
 mimeheader TVD_FW_GRAPHIC_NAME_MID	Content-Type =~ /\bname="[a-z]{6,7}\.gif/
-mimeheader __GIF_ATTACH Content-Type =~ /^image\/gif\b/i
+mimeheader __GIF_ATTACH			Content-Type =~ /^image\/gif\b/i
+mimeheader __TVD_OUTLOOK_IMG		Content-Id =~ /<image\d+\.(?:gif|jpe?g|png)\@/
 endif
 
 
@@ -319,4 +327,5 @@ score TVD_SPACED_SUBJECT_WORD	2.0
 score TVD_SPACED_WORDS		2.2
 score TVD_PH_SUBJ_URGENT	2.0
 score TVD_FLOAT_GENERAL		2.0
+score T_TVD_FW_GRAPHIC_ID3	2.0
 # </gen:mutable>
