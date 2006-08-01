@@ -59,6 +59,7 @@ case "$1" in
         ;;
   restart)
         $0 stop
+	sleep 3
         $0 start
         ;;
   condrestart)
