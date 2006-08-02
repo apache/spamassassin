@@ -37,6 +37,7 @@ exit;
 
 package Mail::SpamAssassin::CGI::RuleQaApp;
 use CGI;
+use CGI::Carp 'fatalsToBrowser';
 use Template;
 use Date::Manip;
 use XML::Simple;
@@ -316,7 +317,7 @@ sub show_default_header {
     tr.freqsline_promo0 td a { color: #999; }
 
     a.mcloghref {
-      color: #ccc;
+      color: #999;
       font-size: 50%;
     }
 
@@ -715,27 +716,37 @@ sub graph_over_time {
 sub show_mclog {
   my ($self, $name) = @_;
 
+  print "Content-Type: text/plain\r\n\r\n";
+
   $self->{datadir} = $self->get_datadir_for_daterev($self->{daterev});
 
   # logs are named e.g.
   # /home/automc/corpus/html/20051028/r328993/LOGS.all-ham-mc-fast.log.gz
 
   # untaint
+  $name =~ /^([-\.a-zA-Z0-9]+)/; my $safename = $1;
   $self->{rule} =~ /([_0-9a-zA-Z]+)/; my $saferule = $1;
   $self->{datadir} =~ /([-\.\,_0-9a-zA-Z\/]+)/; my $safedatadir = $1;
-  $name =~ /([\.-a-zA-Z0-9]+)/; my $safename = $1;
 
   # outright block possibly-hostile stuff here:
   # no "../" path traversal
   die "forbidden: $safedatadir .." if ($safedatadir =~ /\.\./);
   die "forbidden: $safename .." if ($safename =~ /\.\./);
 
-  open (GZ, "gunzip -cd < ".
-        "$safedatadir/LOGS.all-$safename.log.gz |")
-        or die "cannot gunzip '$safedatadir/LOGS.all-$safename.log.gz'";
+  my $gzfile = "$safedatadir/LOGS.all-$safename.log.gz";
+  if (!-f $gzfile) {
+    print "cannot open $gzfile\n";
+    die "cannot open $gzfile";
+  }
 
+  open (GZ, "gunzip -cd < $gzfile |")
+        or die "cannot gunzip '$gzfile'";
   while (<GZ>) {
     /^[\.Y]\s+\S+\s+\S+\s+(?:\S*,|)\Q$saferule\E[, ]/ or next;
+
+    # sanitise privacy-relevant stuff
+    s/,mid=<.*>,/,mid=<REMOVED_BY_RULEQA>,/gs;
+
     print;
   }
 
@@ -1071,12 +1082,12 @@ sub create_mclog_link {
 
   my $href = $self->assemble_url(
             "mclog=".(($isspam ? "spam" : "ham")."-".$who),
-            "rule=".$line->{rule},
-            $self->get_params_except(qw( mclog rule )));
+            "rule=".$line->{name},
+            $self->get_params_except(qw( mclog rule s_detail )));
 
   return qq{
 
-    <br /><a href='$href' class='mcloghref'>[log]</a> 
+     <br /><a href='$href' class='mcloghref'>[logs]</a>
 
   };
 }
@@ -1148,7 +1159,7 @@ sub output_freqs_data_line {
     $ovl =~ s/^(\s+overlap\s+(?:ham|spam):\s+\d+% )(\S.+?)$/
         my $str = "$1";
         foreach my $rule (split(' ', $2)) {
-          $str .= gen_rule_link($rule,$rule)." ";
+          $str .= $self->gen_rule_link($rule,$rule)." ";
         }
         $str;
       /gem;
@@ -1596,6 +1607,7 @@ sub show_daterev_selector_page {
 
   }.  $self->get_daterev_html_table(\@drs, 1, 1);
 }
+
 
 =cut
 
