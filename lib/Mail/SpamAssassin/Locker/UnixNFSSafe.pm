@@ -158,7 +158,8 @@ sub safe_unlock {
   close LTMP; unlink $lock_tmp;
 
   # 2. If the ctime hasn't been modified, unlink the file and return. If the
-  # lock has expired, sleep the usual random interval before returning. If we # didn't sleep, there could be a race if the caller immediately tries to
+  # lock has expired, sleep the usual random interval before returning. If we
+  # didn't sleep, there could be a race if the caller immediately tries to
   # relock the file.
 
   my $lock_ctime = $self->{lock_ctimes}->{$path};
