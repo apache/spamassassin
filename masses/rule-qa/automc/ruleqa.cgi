@@ -229,6 +229,10 @@ sub ui_get_rules {
 sub show_view {
   my ($self) = @_;
 
+  if ($self->{q}->param('mclog')) {
+    $self->show_mclog($self->{q}->param('mclog'));
+  }
+
   my $graph = $self->{q}->param('graph');
   if ($graph) {
     if ($graph eq 'over_time') { $self->graph_over_time(); }
@@ -310,6 +314,11 @@ sub show_default_header {
       color: #999;
     }
     tr.freqsline_promo0 td a { color: #999; }
+
+    a.mcloghref {
+      color: #ccc;
+      font-size: 50%;
+    }
 
     h3 {
       border: 1px solid;
@@ -703,6 +712,39 @@ sub graph_over_time {
 
 ###########################################################################
 
+sub show_mclog {
+  my ($self, $name) = @_;
+
+  $self->{datadir} = $self->get_datadir_for_daterev($self->{daterev});
+
+  # logs are named e.g.
+  # /home/automc/corpus/html/20051028/r328993/LOGS.all-ham-mc-fast.log.gz
+
+  # untaint
+  $self->{rule} =~ /([_0-9a-zA-Z]+)/; my $saferule = $1;
+  $self->{datadir} =~ /([-\.\,_0-9a-zA-Z\/]+)/; my $safedatadir = $1;
+  $name =~ /([\.-a-zA-Z0-9]+)/; my $safename = $1;
+
+  # outright block possibly-hostile stuff here:
+  # no "../" path traversal
+  die "forbidden: $safedatadir .." if ($safedatadir =~ /\.\./);
+  die "forbidden: $safename .." if ($safename =~ /\.\./);
+
+  open (GZ, "gunzip -cd < ".
+        "$safedatadir/LOGS.all-$safename.log.gz |")
+        or die "cannot gunzip '$safedatadir/LOGS.all-$safename.log.gz'";
+
+  while (<GZ>) {
+    /^[\.Y]\s+\S+\s+\S+\s+(?:\S*,|)\Q$saferule\E[, ]/ or next;
+    print;
+  }
+
+  close GZ;
+  exit;
+}
+
+###########################################################################
+
 sub showfreqset {
   my ($self, $type, $strdate) = @_;
   $self->{s}{new} and $self->showfreqsubset("$type.new", $strdate);
@@ -716,7 +758,8 @@ sub showfreqsubset {
 
   if ($filename eq 'DETAILS.new') {
     # report which sets we used
-    $self->summarise_head($self->{freqs_head}{$filename}, $filename, $strdate, $self->{rule});
+    $self->summarise_head($self->{freqs_head}{$filename},
+                    $filename, $strdate, $self->{rule});
   }
 
   $self->get_freqs_for_rule($filename, $strdate, $self->{rule});
@@ -852,9 +895,6 @@ sub get_freqs_for_rule {
     <pre class=head>$heads</pre>
     </div>
 
-  };
-
-  $comment .= qq{
     <br clear="all"/>
     <p class=showfreqslink><a
       href="javascript:show_header('$headers_id')">(source details)</a>
@@ -940,8 +980,8 @@ sub set_freqs_templates {
 
   <tr class=freqsline_promo[% PROMO %]>
     <td>[% MSECS %]</td>
-    <td><a class=ftd>[% SPAMPC %]<span>[% SPAMPCDETAIL %]</span></a>
-    <td><a class=ftd>[% HAMPC %]<span>[% HAMPCDETAIL %]</span></a>
+    <td><a class=ftd>[% SPAMPC %]<span>[% SPAMPCDETAIL %]</span></a>[% SPAMLOGLINK %]
+    <td><a class=ftd>[% HAMPC %]<span>[% HAMPCDETAIL %]</span></a>[% HAMLOGLINK %]
     <td>[% SO %]</td>
     <td>[% RANK %]</td>
     <td>[% SCORE %]</td>
@@ -965,12 +1005,12 @@ sub set_freqs_templates {
 
   $FREQS_LINE_TEMPLATE =~ s/^\s+//gm;
   $FREQS_EXTRA_TEMPLATE =~ s/^\s+//gm;
+
+  $FREQS_LINE_TEMPLATE =~ s/\s+/ /gs;       # no <pre> stuff in this, shrink it
 }
 
 sub extract_freqs_head_info {
-  my ($self) = @_;
-
-  my $headstr = shift;
+  my ($self, $headstr) = @_;
   my $ctx = { };
 
   # extract the "real" numbers of mails for particular classes, for
@@ -1019,6 +1059,28 @@ sub create_spampc_detail {
   };
 }
 
+sub create_mclog_link {
+  my ($self, $percent, $isspam, $ctx, $line) = @_;
+
+  # optimization: no need to look anything up if it's 0.0000%
+  return '' if ($percent == 0.0);
+
+  # also, does nothing unless there's a username
+  my $who = $line->{username};
+  return '' unless $who;
+
+  my $href = $self->assemble_url(
+            "mclog=".(($isspam ? "spam" : "ham")."-".$who),
+            "rule=".$line->{rule},
+            $self->get_params_except(qw( mclog rule )));
+
+  return qq{
+
+    <br /><a href='$href' class='mcloghref'>[log]</a> 
+
+  };
+}
+
 sub output_freqs_data_line {
   my ($self, $obj, $header_context) = @_;
 
@@ -1047,10 +1109,14 @@ sub output_freqs_data_line {
         MSECS => $line->{msecs},
         SPAMPC => $line->{spampc},
         HAMPC => $line->{hampc},
-        SPAMPCDETAIL => $self->create_spampc_detail($line->{spampc}, 1,
-                 $header_context, $line),
-        HAMPCDETAIL => $self->create_spampc_detail($line->{hampc}, 0,
-                 $header_context, $line),
+        SPAMPCDETAIL => $self->create_spampc_detail(
+                        $line->{spampc}, 1, $header_context, $line),
+        HAMPCDETAIL => $self->create_spampc_detail(
+                        $line->{hampc}, 0, $header_context, $line),
+        SPAMLOGLINK => $self->create_mclog_link(
+                        $line->{spampc}, 1, $header_context, $line),
+        HAMLOGLINK => $self->create_mclog_link(
+                        $line->{hampc}, 0, $header_context, $line),
         SO => $line->{so},
         RANK => $line->{rank},
         SCORE => $score,
