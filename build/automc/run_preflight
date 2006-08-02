@@ -40,10 +40,12 @@ chdir "masses" or die;
 
 unlink ("ham.log", "spam.log");
 
-# just the sandbox rules, sandbox plugins, and the timing plugin
+# just the sandbox rules, sandbox plugins, the timing plugin,
+# and the default system-wide plugins (so DNS evals can work)
 #
 system ("rm -rf tstrules");
 run "mkdir tstrules";
+run "cp ../rules/*.pre tstrules";
 run "cp ../rules/*.pm tstrules";
 run "cp plugins/*.* tstrules";
 
