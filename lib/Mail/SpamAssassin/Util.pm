@@ -418,17 +418,6 @@ sub parse_rfc822_date {
 
   $hh ||= 0; $mm ||= 0; $ss ||= 0; $dd ||= 0; $mmm ||= 0; $yyyy ||= 0;
 
-  # Time::Local (v1.10 at least) throws warnings when the dates cause
-  # a 32-bit overflow.  So force a min/max for year.
-  if ($yyyy > 2037) {
-    dbg("util: year after supported range, forcing year to 2037: $date");
-    $yyyy = 2037;
-  }
-  elsif ($yyyy < 1970) {
-    dbg("util: year before supported range, forcing year to 1970: $date");
-    $yyyy = 1971;
-  }
-
   # Fudge invalid times so that we get a usable date.
   if ($ss > 59) { 
     dbg("util: second after supported range, forcing second to 59: $date");  
@@ -443,6 +432,34 @@ sub parse_rfc822_date {
   if ($hh > 23) { 
     dbg("util: hour after supported range, forcing hour to 23: $date"); 
     $hh = 23;
+  }
+
+  my $max_dd = 31;
+  if ($mmm == 4 || $mmm == 6 || $mmm == 9 || $mmm == 11) {
+    $max_dd = 30;
+  }
+  elsif ($mmm == 2) {
+    $max_dd = (!($yyyy % 4) && (($yyyy % 100) || !($yyyy % 400))) ? 29 : 28;
+  }
+  if ($dd > $max_dd) {
+    dbg("util: day is too high, incrementing date to next valid date: $date");
+    $dd = 1;
+    $mmm++;
+    if ($mmm > 12) {
+      $mmm = 1;
+      $yyyy++;
+    }
+  }
+
+  # Time::Local (v1.10 at least) throws warnings when the dates cause
+  # a 32-bit overflow.  So force a min/max for year.
+  if ($yyyy > 2037) {
+    dbg("util: year after supported range, forcing year to 2037: $date");
+    $yyyy = 2037;
+  }
+  elsif ($yyyy < 1970) {
+    dbg("util: year before supported range, forcing year to 1970: $date");
+    $yyyy = 1971;
   }
 
   my $time;
