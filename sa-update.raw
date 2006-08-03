@@ -686,11 +686,11 @@ ENDOFVALIDATIONERR
     # blown away the old ruleset.
     dbg("channel: point of no return for existing $UPDDir");
 
-    # clean out the previous channel files
-    if (! unlink $PREFile ) {
+    # clean out the previous channel files, if they exist
+    if (-f $PREFile && ! unlink $PREFile ) {
       warn("channel: attempt to rm channel pre file failed, attempting to continue anyway");
     }
-    if (! unlink $CFFile ) {
+    if (-f $CFFile && ! unlink $CFFile ) {
       warn("channel: attempt to rm channel cf file failed, attempting to continue anyway");
     }
     if (!clean_update_dir($UPDDir)) {
