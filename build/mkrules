@@ -22,7 +22,7 @@
 # http://wiki.apache.org/spamassassin/RulesProjPromotion 
 
 sub usage {
-  die "mkrules/run [--src srcdir] [--out outputdir]\n";
+  die "build/mkrules [--src srcdir] [--out outputdir]\n";
 }
 
 my $RULE_KEYWORDS_RE = qr{
@@ -46,6 +46,7 @@ use vars qw(
     @opt_srcs $opt_out $opt_sandboxout $opt_manifest
     $opt_manifestskip $opt_listpromotable $opt_active
     $opt_activeout $opt_inactiveout $default_file_header
+    $opt_rulemetadata
 );
 GetOptions("src=s" => \@opt_srcs,
     "out=s",
@@ -55,6 +56,7 @@ GetOptions("src=s" => \@opt_srcs,
     "active=s",
     "manifest=s",
     "manifestskip=s",
+    "rulemetadata=s",
   );
 
 if (!@opt_srcs) {
@@ -659,6 +661,8 @@ sub compile_output_files {
     fix_up_rule_dependencies($rule);
   }
 
+  my $rulemd = '';
+
   # output the known rules that are not meta subrules.
   foreach my $rule (@rulenames) {
     next if ($rule =~ /^__/);
@@ -667,6 +671,7 @@ sub compile_output_files {
     my $text    = $rules->{$rule}->{output_text};
     next unless defined ($text);
 
+    $rulemd .= get_rulemetadata_string($rule);
     $output_file_text->{$pubfile} .= "##{ $rule\n".
                             $text.
                             "##} ".$rule."\n\n";
@@ -678,6 +683,7 @@ sub compile_output_files {
     my $pubfile = $rules->{$rule}->{output_file};
     my $text    = $rules->{$rule}->{output_text};
     next unless defined ($text);
+    $rulemd .= get_rulemetadata_string($rule);
     $output_file_text->{$pubfile} .= $text;
   }
 
@@ -693,6 +699,33 @@ sub compile_output_files {
     # and get them lint-checked!
     $files_to_lint->{$file} = 1;
   }
+
+  if ($opt_rulemetadata) {
+    open (RULEMD, ">".$opt_rulemetadata)
+            or die "cannot write rulemd to $opt_rulemetadata";
+    print RULEMD "<rulemds>", $rulemd, "</rulemds>\n";
+    close RULEMD or die "cannot close rulemd to $opt_rulemetadata";
+  }
+}
+
+sub get_rulemetadata_string {
+  my ($rule) = @_;
+
+  return '' unless ($opt_rulemetadata);
+  return '' unless ($rules->{$rule}->{found_definition});
+
+  my $mod = 0;
+  my $srcfile = $rules->{$rule}->{srcfile};
+  my @s = stat $srcfile;
+  if (@s) {
+    $mod = $s[9];
+  }
+
+  return "<rulemetadata>".
+            "<name>$rule</name>".
+            "<src>$srcfile</src>".
+            "<srcmtime>$mod</srcmtime>".
+          "</rulemetadata>\n";
 }
 
 sub fix_up_rule_dependencies {

@@ -194,6 +194,9 @@ sub locate {
     else {
       print "$corpusdir/$file: rev=$daterev time=$time{$file} (set 0)\n";
     }
+
+    # TODO: complete this work
+    # get_rulemetadata_for_revision($daterev, $revision{$file});
   }
 }
 
@@ -489,5 +492,30 @@ sub log_metadata_xml {
 
   $str =~ s/\s+/ /gs;  # on a single line please
   return '<mclogmds>'.$str.'</mclogmds>';
+}
+
+sub create_rulemetadata_dir {
+  my $rev = shift;
+  my $dir = "$opt{html}/rulemetadata/$rev";
+  if (!-d $dir) {
+    my $prevu = umask 0;
+    mkpath([$dir], 0, oct($opt{html_mode})) or warn "failed to mkdir $dir";
+    umask $prevu;
+  }
+  return $dir;
+}
+
+sub get_rulemetadata_for_revision {
+  my ($daterev, $rev) = @_;
+
+  my $dir = create_rulemetadata_dir($rev);
+
+  my $cmd = "./rule-qa/get-rulemetadata-for-revision ".
+                    "--rev=$rev --outputdir='$dir'";
+
+  system($cmd);
+  if ($? >> 8 != 0) {
+    warn "'$cmd' failed";
+  }
 }
 
