@@ -195,8 +195,7 @@ sub locate {
       print "$corpusdir/$file: rev=$daterev time=$time{$file} (set 0)\n";
     }
 
-    # TODO: complete this work
-    # get_rulemetadata_for_revision($daterev, $revision{$file});
+    get_rulemetadata_for_revision($daterev, $revision{$file});
   }
 }
 
