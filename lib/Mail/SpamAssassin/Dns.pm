@@ -206,7 +206,7 @@ sub dnsbl_hit {
   }
 
   if (!defined $self->{tests_already_hit}->{$rule}) {
-    $self->got_hit($rule, "RBL: ");
+    $self->got_hit($rule, "RBL: ", ruletype => "dnsbl");
   }
 }
 
@@ -247,7 +247,7 @@ sub process_dnsbl_result {
       ++$self->{sender_host_fail} == 2)
   {
     for my $rule (@{$rules}) {
-      $self->got_hit($rule, "DNS: ");
+      $self->got_hit($rule, "DNS: ", ruletype => "dns");
     }
   }
 
@@ -308,7 +308,7 @@ sub process_dnsbl_set {
       my $untainted = $1;
       $subtest = $untainted;
 
-      $self->got_hit($rule, "SenderBase: ") if !$undef && eval $subtest;
+      $self->got_hit($rule, "SenderBase: ", ruletype => "dnsbl") if !$undef && eval $subtest;
     }
     # bitmask
     elsif ($subtest =~ /^\d+$/) {

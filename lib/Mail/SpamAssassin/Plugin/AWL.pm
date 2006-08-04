@@ -380,11 +380,7 @@ sub check_from_in_auto_whitelist {
       }
 
       if ($delta != 0) {
-	# We have to use the private _handle_hit method here because we want
-	# to pass in a dynamically generated score.  Perhaps we should extend
-	# handle_hit or add a handle_dynamic_hit method to help here.
-	$pms->_handle_hit("AWL", $delta, "AWL: ",
-			  $pms->{conf}->{descriptions}->{AWL});
+	$pms->got_hit("AWL", "AWL: ", ruletype => 'eval', score => $delta);
       }
 
       $whitelist->finish();
