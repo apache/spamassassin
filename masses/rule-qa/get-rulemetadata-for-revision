@@ -79,10 +79,12 @@ sub svn_and_build {
 
   # note: copies .svn dir from the existing SVN checkout;
   # that way, the path and credentials are preserved, just the
-  # revision number changes.
+  # revision number changes.  In fact, copy the lot; minimize
+  # the amount of work that has to be done to "svn up" to the
+  # correct revision, hopefully.
   my $cmd;
   $cmd = "cd $tmpdir; ".
-        "cp -pr $conf{tree}/.svn .svn; ".
+        "cp -pr $conf{tree}/. .; ".
         "svn update --non-interactive -r$opt_rev < /dev/null";
 
   print "[$cmd]\n";
@@ -90,8 +92,7 @@ sub svn_and_build {
   if ($? >> 8 != 0) { die "'$cmd' failed"; }
 
   $cmd = "cd $tmpdir; ".
-        "perl Makefile.PL MKRULES_SWITCHES=--rulemetadata < /dev/null; ".
-        "make; ".
+        # "perl Makefile.PL < /dev/null; make; ".
         "perl build/mkrules --src rulesrc --out rules ".
                 "--rulemetadata=rules/rulemetadata.xml";
 
@@ -102,7 +103,7 @@ sub svn_and_build {
 
 sub copy_md {
   my $outfile = shift;
-  my $infile = "rules/rulemetadata.xml";
+  my $infile = "$tmpdir/rules/rulemetadata.xml";
   if (!-f $infile) {
     die "no $infile!";
   }
