@@ -88,6 +88,7 @@ lib/Mail/SpamAssassin/Plugin/Razor2.pm
 lib/Mail/SpamAssassin/Plugin/RelayCountry.pm
 lib/Mail/SpamAssassin/Plugin/RelayEval.pm
 lib/Mail/SpamAssassin/Plugin/ReplaceTags.pm
+lib/Mail/SpamAssassin/Plugin/Shortcircuit.pm
 lib/Mail/SpamAssassin/Plugin/SPF.pm
 lib/Mail/SpamAssassin/Plugin/SpamCop.pm
 lib/Mail/SpamAssassin/Plugin/Test.pm
@@ -454,6 +455,7 @@ rules/25_spf.cf
 rules/25_textcat.cf
 rules/25_uribl.cf
 rules/60_awl.cf
+rules/60_shortcircuit.cf
 rules/60_whitelist.cf
 rules/60_whitelist_dkim.cf
 rules/60_whitelist_spf.cf
@@ -491,4 +493,5 @@ t/data/nice/dkim/Nowsp_03
 t/data/nice/dkim/Simple_02
 t/dkim.t
 t/uribl.t
+t/shortcircuit.t
 t/spamc_y.t

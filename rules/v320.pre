@@ -19,6 +19,10 @@ loadplugin Mail::SpamAssassin::Plugin::HTTPSMismatch
 #
 loadplugin Mail::SpamAssassin::Plugin::URIDetail
 
+# Shortcircuit - stop evaluation early if high-accuracy rules fire
+# 
+# loadplugin Mail::SpamAssassin::Plugin::Shortcircuit
+
 # Plugins which used to be EvalTests.pm
 # broken out into separate plugins
 loadplugin Mail::SpamAssassin::Plugin::Bayes
@@ -30,3 +34,4 @@ loadplugin Mail::SpamAssassin::Plugin::MIMEEval
 loadplugin Mail::SpamAssassin::Plugin::RelayEval
 loadplugin Mail::SpamAssassin::Plugin::URIEval
 loadplugin Mail::SpamAssassin::Plugin::WLBLEval
+
