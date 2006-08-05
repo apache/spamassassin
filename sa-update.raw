@@ -1106,7 +1106,7 @@ sub import_default_keyring {
     return;
   }
 
-  dbg("gpg: importing default keyring to '".$opt{gpghomedir});
+  dbg("gpg: importing default keyring to ".$opt{gpghomedir});
   unless (-d $opt{gpghomedir}) {
     # use 0700 to avoid "unsafe permissions" warning
     mkpath([$opt{'gpghomedir'}], 0, 0700) or die "cannot mkpath $opt{gpghomedir}: $!";
