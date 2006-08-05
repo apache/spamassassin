@@ -279,6 +279,13 @@ if ($GPG_ENABLED || $opt{'import'}) {
 
   if ($GPGPath = Mail::SpamAssassin::Util::find_executable_in_env_path($GPGPath)) {
     dbg("gpg: found $GPGPath");
+
+    # bug 5030: if GPGPath has a space, put it in quotes
+    if ($GPGPath =~ / /) {
+      $GPGPath =~ s/"/\\"/g;
+      $GPGPath = qq/"$GPGPath"/;
+      dbg("gpg: path changed to $GPGPath");
+    }
   }
   else {
     die "error: gpg required but not found!\n";
