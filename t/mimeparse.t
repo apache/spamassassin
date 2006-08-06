@@ -110,7 +110,7 @@ foreach my $k ( sort keys %files ) {
   close(INP);
 
   my $res = join("\n",$mail->content_summary());
-# print "---\n$res\n---\n";
+#  print "---$k---\n---\n$res\n---\n";
   ok( $res eq shift @{$files{$k}} );
   if ( @{$files{$k}} ) {
     my @parts = $mail->find_parts(qr/./,1);
@@ -128,6 +128,7 @@ foreach my $k ( sort keys %files ) {
 	  $res = Digest::SHA1::sha1_hex($parts[0]->decode());
 	}
 #	print ">> ",$parts[0]->{'type'}," = $res\n";
+#	print ">> ",$parts[0]->{'type'}," expected $_\n";
         $res = $res eq $_;
       }
       ok ( $res );
