@@ -108,30 +108,20 @@ sub find_parts {
     $depth = 1;
   }
   
-  return $self->_find_parts($re, $onlyleaves, $depth);
-}
-
-# We have 2 functions in find_parts() to optimize out the penalty of
-# $onlyleaves, $re, and $recursive over and over again.
-#
-sub _find_parts {
-  my ($self, $re, $onlyleaves, $depth) = @_;
   my @ret = ();
+  my @search = ( $self );
 
-  # If this object matches, mark it for return.
-  my $amialeaf = $self->is_leaf();
+  while (my $part = shift @search) {
+    # If this object matches, mark it for return.
+    my $amialeaf = $part->is_leaf();
 
-  if ( $self->{'type'} =~ /$re/ && (!$onlyleaves || $amialeaf) ) {
-    push(@ret, $self);
-  }
+    if ( $part->{'type'} =~ /$re/ && (!$onlyleaves || $amialeaf) ) {
+      push(@ret, $part);
+    }
   
-  if ( !$amialeaf && (!defined $depth || $depth > 0)) {
-    $depth-- if defined $depth;
-
-    # This object is a subtree root.  Search all children.
-    foreach my $parts ( @{$self->{'body_parts'}} ) {
-      # Add the recursive results to our results
-      push(@ret, $parts->_find_parts($re, $onlyleaves, $depth));
+    if ( !$amialeaf && (!defined $depth || $depth > 0)) {
+      $depth-- if defined $depth;
+      unshift(@search, @{$part->{'body_parts'}});
     }
   }
 
@@ -667,24 +657,23 @@ Clean up the object so that it can be destroyed.
 sub finish {
   my ($self) = @_;
 
-  # Clean up ourself
-  undef $self->{'headers'};
-  undef $self->{'raw_headers'};
-  undef $self->{'header_order'};
-  undef $self->{'raw'};
-  undef $self->{'decoded'};
-  undef $self->{'rendered'};
-  undef $self->{'visible_rendered'};
-  undef $self->{'invisible_rendered'};
-  undef $self->{'type'};
-  undef $self->{'rendered_type'};
-
-  # Clean up our kids
-  if (exists $self->{'body_parts'}) {
-    while ( my $part = shift @{$self->{'body_parts'}} ) {
-      $part->finish();
+  foreach my $part ( $self->find_parts(qr/./) ) {
+    foreach (
+      'headers',
+      'raw_headers',
+      'header_order',
+      'raw',
+      'decoded',
+      'rendered',
+      'visible_rendered',
+      'invisible_rendered',
+      'type',
+      'rendered_type',
+      'body_parts',
+    ) {
+      undef $part->{$_};
+      delete $part->{$_};
     }
-    undef $self->{'body_parts'};
   }
 }
 
