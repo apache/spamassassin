@@ -79,9 +79,6 @@ tree is not going to be used.  This is handy, for instance, when running
 C<spamassassin -d>, which only needs the pristine header and body which
 is always handled when the object is created.
 
-C<subparse> specifies how many MIME recursion levels should be parsed.
-Defaults to 20.
-
 =cut
 
 # month mappings (ripped from Util.pm)
@@ -113,11 +110,6 @@ sub new {
   $self->{metadata} = Mail::SpamAssassin::Message::Metadata->new($self);
 
   # Ok, go ahead and do the message "parsing"
-
-  # Specifies whether or not to parse message/rfc822 parts into its own tree.
-  # If the # > 0, it'll subparse, otherwise it won't.  By default, do one
-  # level deep.
-  $self->{subparse} = defined $opts->{'subparse'} ? $opts->{'subparse'} : 20;
 
   # protect it from abuse ...
   local $_;
@@ -287,59 +279,30 @@ sub new {
     }
   }
 
+  # Figure out the boundary
+  my ($boundary);
+  ($self->{'type'}, $boundary) = Mail::SpamAssassin::Util::parse_content_type($self->header('content-type'));
+  dbg("message: main message type: ".$self->{'type'});
+
+  # parse queue, simple array of parts to parse:
+  # 0: part object, already in the tree
+  # 1: boundary used to focus body parsing
+  # 2: message content
+  #
+  $self->{'parse_queue'} = [ [ $self, $boundary, \@message ] ];
+
   # If the message does need to get parsed, save off a copy of the body
   # in a format we can easily parse later so we don't have to rip from
   # pristine_body ...  If we do want to parse now, go ahead and do so ...
   #
   if ($parsenow) {
-    $self->_do_parse(\@message);
-  }
-  else {
-    $self->{'toparse'} = \@message;
+    $self->parse_body();
   }
 
   $self;
 }
 
 # ---------------------------------------------------------------------------
-
-=item _do_parse()
-
-Non-Public function which will initiate a MIME part parse (generates
-a tree) of the current message.  Typically called by find_parts()
-as necessary.
-
-=cut
-
-sub _do_parse {
-  my($self, $array) = @_;
-
-  # We can either be passed the array to parse, or we may have find it
-  # in the object data ...
-  my $toparse;
-  if (defined $array) {
-    $toparse = $array;
-  }
-  elsif (exists $self->{'toparse'}) {
-    $toparse = $self->{'toparse'};
-    delete $self->{'toparse'};
-  }
-
-  # If we're called when we don't need to be, then just go ahead and return.
-  return if (!defined $toparse);
-
-  dbg("message: ---- MIME PARSER START ----");
-
-  # Figure out the boundary
-  my ($boundary);
-  ($self->{'type'}, $boundary) = Mail::SpamAssassin::Util::parse_content_type($self->header('content-type'));
-  dbg("message: main message type: ".$self->{'type'});
-
-  # Make the tree
-  $self->parse_body( $self, $self, $boundary, $toparse, 1 );
-
-  dbg("message: ---- MIME PARSER END ----");
-}
 
 =item find_parts()
 
@@ -356,7 +319,7 @@ sub find_parts {
   my $self = shift;
 
   # ok, we need to do the parsing now...
-  $self->_do_parse() if (exists $self->{'toparse'});
+  $self->parse_body() if (exists $self->{'parse_queue'});
 
   # and pass through to the Message::Node version of the method
   return $self->SUPER::find_parts(@_);
@@ -598,32 +561,27 @@ doesn't have a root node which points at the actual root node ...)
 =cut
 
 sub parse_body {
-  my($self, $msg, $_msg, $boundary, $body, $initial) = @_;
+  my($self) = @_;
 
-  # Figure out the simple content-type, or set it to text/plain
-  my $type = $_msg->header('Content-Type') || 'text/plain; charset=us-ascii';
+  dbg("message: ---- MIME PARSER START ----");
 
-  # multipart sections are required to have a boundary set ...  If this
-  # one doesn't, assume it's malformed and send it to be parsed as a
-  # non-multipart section
-  #
-  if ( $type =~ /^multipart\//i && defined $boundary && ($msg->{subparse} > 0)) {
-    # Treat an initial multipart parse differently.  This will keep the tree:
-    # obj(multipart->[ part1, part2 ]) instead of
-    # obj(obj(multipart ...))
+  while (my $toparse = shift @{$self->{'parse_queue'}}) {
+    # multipart sections are required to have a boundary set ...  If this
+    # one doesn't, assume it's malformed and send it to be parsed as a
+    # non-multipart section
     #
-    if ( $initial ) {
-      $self->_parse_multipart( $msg, $_msg, $boundary, $body );
+    if ( $toparse->[0]->{'type'} =~ /^multipart\//i && defined $toparse->[1] ) {
+      $self->_parse_multipart($toparse);
     }
     else {
-      $self->_parse_multipart( $_msg, $_msg, $boundary, $body );
-      $msg->add_body_part( $_msg );
+      # If it's not multipart, go ahead and just deal with it.
+      $self->_parse_normal($toparse);
     }
   }
-  else {
-    # If it's not multipart, go ahead and just deal with it.
-    $self->_parse_normal( $msg, $_msg, $boundary, $body );
-  }
+
+  dbg("message: ---- MIME PARSER END ----");
+
+  delete $self->{'parse_queue'};
 }
 
 =item _parse_multipart()
@@ -634,8 +592,9 @@ to generate the tree.
 =cut
 
 sub _parse_multipart {
-  my($self, $msg, $_msg, $boundary, $body) = @_;
+  my($self, $toparse) = @_;
 
+  my ($msg, $boundary, $body) = @{$toparse};
   dbg("message: parsing multipart, got boundary: ".(defined $boundary ? $boundary : ''));
 
   # NOTE: The MIME boundary REs here are very specific to be mostly RFC 1521
@@ -664,7 +623,7 @@ sub _parse_multipart {
   }
 
   # prepare a new tree node
-  my $part_msg = Mail::SpamAssassin::Message::Node->new({ subparse=>$msg->{subparse}-1, normalize=>$msg->{normalize} });
+  my $part_msg = Mail::SpamAssassin::Message::Node->new({ normalize=>$self->{normalize} });
   my $in_body = 0;
   my $header;
   my $part_array;
@@ -698,7 +657,8 @@ sub _parse_multipart {
       ($part_msg->{'type'}, $p_boundary) = Mail::SpamAssassin::Util::parse_content_type($part_msg->header('content-type'));
       $p_boundary ||= $boundary;
       dbg("message: found part of type ".$part_msg->{'type'}.", boundary: ".(defined $p_boundary ? $p_boundary : ''));
-      $self->parse_body( $msg, $part_msg, $p_boundary, $part_array, 0 );
+      push(@{$self->{'parse_queue'}}, [ $part_msg, $p_boundary, $part_array ]);
+      $msg->add_body_part($part_msg);
 
       # rfc 1521 says /^--boundary--$/, some MUAs may just require /^--boundary--/
       # but this causes problems with horizontal lines when the boundary is
@@ -711,7 +671,7 @@ sub _parse_multipart {
 
       # make sure we start with a new clean node
       $in_body  = 0;
-      $part_msg = Mail::SpamAssassin::Message::Node->new({ subparse=>$msg->{subparse}-1, normalize=>$msg->{normalize} });
+      $part_msg = Mail::SpamAssassin::Message::Node->new({ normalize=>$self->{normalize} });
       undef $part_array;
       undef $header;
 
@@ -772,79 +732,58 @@ Generate a leaf node and add it to the parent.
 =cut
 
 sub _parse_normal {
-  my ($self, $msg, $part_msg, $boundary, $body) = @_;
+  my($self, $toparse) = @_;
+
+  my ($msg, $boundary, $body) = @{$toparse};
 
   dbg("message: parsing normal part");
 
   # 0: content-type, 1: boundary, 2: charset, 3: filename
-  my @ct = Mail::SpamAssassin::Util::parse_content_type($part_msg->header('content-type'));
-  $part_msg->{'type'} = $ct[0];
-  $part_msg->{'charset'} = $ct[2];
+  my @ct = Mail::SpamAssassin::Util::parse_content_type($msg->header('content-type'));
 
   # multipart sections are required to have a boundary set ...  If this
   # one doesn't, assume it's malformed and revert to text/plain
-  $part_msg->{'type'} = 'text/plain' if ( $part_msg->{'type'} =~ /^multipart\//i && !defined $boundary );
+  $msg->{'type'} = ($ct[0] !~ m@^multipart/@i || defined $boundary ) ? $ct[0] : 'text/plain';
+  $msg->{'charset'} = $ct[2];
+
 
   # attempt to figure out a name for this attachment if there is one ...
-  my $disp = $part_msg->header('content-disposition') || '';
+  my $disp = $msg->header('content-disposition') || '';
   if ($disp =~ /name="?([^\";]+)"?/i) {
-    $part_msg->{'name'} = $1;
+    $msg->{'name'} = $1;
   }
   elsif ($ct[3]) {
-    $part_msg->{'name'} = $ct[3];
+    $msg->{'name'} = $ct[3];
   }
 
-  $part_msg->{'raw'} = $body;
-  $part_msg->{'boundary'} = $boundary;
+  $msg->{'raw'} = $body;
+  $msg->{'boundary'} = $boundary;
 
   # If this part is a message/* part, and the parent isn't also a
   # message/* part (ie: the main part) go ahead and parse into a tree.
-  if ($part_msg->{'type'} =~ /^message\b/i && ($msg->{subparse} > 0)) {
+  if ($msg->{'type'} =~ /^message\b/i) {
     # Get the part ready...
-    my $message = $part_msg->decode();
+    my $message = $msg->decode();
 
     if ($message) {
       my $msg_obj = Mail::SpamAssassin::Message->new({
       	message		=>	$message,
 	parsenow	=>	1,
-	subparse	=>	$msg->{subparse}-1,
-	normalize	=>	$msg->{normalize},
+	normalize	=>	$self->{normalize},
 	});
 
-      # main message is a message/* part ...
-      if ($msg == $part_msg) {
-        $msg->add_body_part($msg_obj);
-      }
-      else {
-        # Add the new part as a child to the parent
-        # NOTE: if the message only has this one part, we'll be recursive so delete
-        # the body_parts list appropriately.
-        $msg->add_body_part($part_msg);
-
-        $part_msg->add_body_part($msg_obj);
-      }
+      $msg->add_body_part($msg_obj);
 
       return;
     }
   }
-  else {
-    # leaves don't need the subparse value, so get rid of it
-    delete $part_msg->{subparse};
-  }
-
-  # Add the new part as a child to the parent
-  # NOTE: if the message only has this one part, we'll be recursive so delete
-  # the body_parts list appropriately.
-  $msg->add_body_part($part_msg);
 
   # now that we've added the leaf node, let's go ahead and kill
   # body_parts (used for sub-trees).  there's no point for a leaf to have it,
   # and if the main and child parts are the same, we'll end up being recursive,
   # and well, let's avoid that. ;)
   #
-  # BTW: please leave this after add_body_parts() since it'll add it back.
-  #
-  delete $part_msg->{body_parts};
+  delete $msg->{body_parts};
 }
 
 # ---------------------------------------------------------------------------
