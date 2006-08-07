@@ -55,15 +55,11 @@ sub new {
   my $self = {
     headers		=> {},
     raw_headers		=> {},
-    body_parts		=> [],
     header_order	=> []
   };
 
   # deal with any parameters
   my($opts) = @_;
-  if (defined $opts->{'subparse'}) {
-    $self->{subparse} = $opts->{'subparse'};
-  }
   $self->{normalize} = $opts->{'normalize'} || 0;
 
   bless($self,$class);
