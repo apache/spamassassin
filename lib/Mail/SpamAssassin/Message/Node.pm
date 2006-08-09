@@ -448,32 +448,27 @@ Note: This function requires that the message be parsed first!
 
 # return an array with scalars describing mime parts
 sub content_summary {
-  my($self, $recurse) = @_;
+  my($self) = @_;
 
-  # go recursive the first time through
-  $recurse = 1 unless ( defined $recurse );
+  my @ret = ( [ $self->{'type'} ] );
+  my @search = ( );
 
-  # If this object matches, mark it for return.
-  if ( exists $self->{'body_parts'} ) {
-    my @ret = ();
-
-    # This object is a subtree root.  Search all children.
-    foreach my $parts ( @{$self->{'body_parts'}} ) {
-      # Add the recursive results to our results
-      my @p = $parts->content_summary(0);
-      if ( $recurse ) {
-        push(@ret, join(",", @p));
-      }
-      else {
-        push(@ret, @p);
-      }
+  if (exists $self->{'body_parts'}) {
+    my $count = @{$self->{'body_parts'}};
+    for(my $i=0; $i<$count; $i++) {
+      push(@search, [ $i+1, $self->{'body_parts'}->[$i] ]);
     }
+  }
 
-    return($self->{'type'}, @ret);
+  while(my $part = shift @search) {
+    my($index, $part) = @{$part};
+    push(@{$ret[$index]}, $part->{'type'});
+    if (exists $part->{'body_parts'}) {
+      unshift(@search, map { [ $index, $_ ] } @{$part->{'body_parts'}});
+    }
   }
-  else {
-    return $self->{'type'};
-  }
+
+  return map { join(",", @{$_}) } @ret;
 }
 
 =item delete_header()
