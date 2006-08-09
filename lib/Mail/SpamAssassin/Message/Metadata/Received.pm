@@ -1075,6 +1075,11 @@ sub parse_received_line {
   # (8.12.11/8.12.11/Submit) id iBADHRP6011034; Fri, 10 Dec 2004 13:17:27 GMT
   if (/^from localhost \(localhost \[\[UNIX: localhost\]\]\) by /) { return; }
 
+  # header produced by command line /usr/bin/sendmail -t -f username@example.com
+  # Received: (from username@localhost) by home.example.com
+  # (8.12.11/8.12.11/Submit) id iBADHRP6011034; Fri, 10 Dec 2004 13:17:27 GMT
+  if (/^\(from \S+\@localhost\) by \S+ /) { return; }
+
   # Received: Message by Barricade wilhelm.eyp.ee with ESMTP id h1I7hGU06122 for <spamassassin-talk@lists.sourceforge.net>; Tue, 18 Feb 2003 09:43:16 +0200
   if (/^Message by /) {
     return;	# whatever
