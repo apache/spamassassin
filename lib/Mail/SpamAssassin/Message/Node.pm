@@ -55,15 +55,11 @@ sub new {
   my $self = {
     headers		=> {},
     raw_headers		=> {},
-    body_parts		=> [],
     header_order	=> []
   };
 
   # deal with any parameters
   my($opts) = @_;
-  if (defined $opts->{'subparse'}) {
-    $self->{subparse} = $opts->{'subparse'};
-  }
   $self->{normalize} = $opts->{'normalize'} || 0;
 
   bless($self,$class);
@@ -93,7 +89,8 @@ only look at the part and any direct children of the part.
 
 # Used to find any MIME parts whose simple content-type matches a given regexp
 # Searches it's own and any children parts.  Returns an array of MIME
-# objects which match.
+# objects which match.  Our callers may expect the default behavior which is a
+# depth-first array of parts.
 #
 sub find_parts {
   my ($self, $re, $onlyleaves, $recursive) = @_;
@@ -108,30 +105,20 @@ sub find_parts {
     $depth = 1;
   }
   
-  return $self->_find_parts($re, $onlyleaves, $depth);
-}
-
-# We have 2 functions in find_parts() to optimize out the penalty of
-# $onlyleaves, $re, and $recursive over and over again.
-#
-sub _find_parts {
-  my ($self, $re, $onlyleaves, $depth) = @_;
   my @ret = ();
+  my @search = ( $self );
 
-  # If this object matches, mark it for return.
-  my $amialeaf = $self->is_leaf();
+  while (my $part = shift @search) {
+    # If this object matches, mark it for return.
+    my $amialeaf = $part->is_leaf();
 
-  if ( $self->{'type'} =~ /$re/ && (!$onlyleaves || $amialeaf) ) {
-    push(@ret, $self);
-  }
+    if ( $part->{'type'} =~ /$re/ && (!$onlyleaves || $amialeaf) ) {
+      push(@ret, $part);
+    }
   
-  if ( !$amialeaf && (!defined $depth || $depth > 0)) {
-    $depth-- if defined $depth;
-
-    # This object is a subtree root.  Search all children.
-    foreach my $parts ( @{$self->{'body_parts'}} ) {
-      # Add the recursive results to our results
-      push(@ret, $parts->_find_parts($re, $onlyleaves, $depth));
+    if ( !$amialeaf && (!defined $depth || $depth > 0)) {
+      $depth-- if defined $depth;
+      unshift(@search, @{$part->{'body_parts'}});
     }
   }
 
@@ -462,32 +449,27 @@ Note: This function requires that the message be parsed first!
 
 # return an array with scalars describing mime parts
 sub content_summary {
-  my($self, $recurse) = @_;
+  my($self) = @_;
 
-  # go recursive the first time through
-  $recurse = 1 unless ( defined $recurse );
+  my @ret = ( [ $self->{'type'} ] );
+  my @search = ( );
 
-  # If this object matches, mark it for return.
-  if ( exists $self->{'body_parts'} ) {
-    my @ret = ();
-
-    # This object is a subtree root.  Search all children.
-    foreach my $parts ( @{$self->{'body_parts'}} ) {
-      # Add the recursive results to our results
-      my @p = $parts->content_summary(0);
-      if ( $recurse ) {
-        push(@ret, join(",", @p));
-      }
-      else {
-        push(@ret, @p);
-      }
+  if (exists $self->{'body_parts'}) {
+    my $count = @{$self->{'body_parts'}};
+    for(my $i=0; $i<$count; $i++) {
+      push(@search, [ $i+1, $self->{'body_parts'}->[$i] ]);
     }
+  }
 
-    return($self->{'type'}, @ret);
+  while(my $part = shift @search) {
+    my($index, $part) = @{$part};
+    push(@{$ret[$index]}, $part->{'type'});
+    if (exists $part->{'body_parts'}) {
+      unshift(@search, map { [ $index, $_ ] } @{$part->{'body_parts'}});
+    }
   }
-  else {
-    return $self->{'type'};
-  }
+
+  return map { join(",", @{$_}) } @ret;
 }
 
 =item delete_header()
@@ -667,24 +649,23 @@ Clean up the object so that it can be destroyed.
 sub finish {
   my ($self) = @_;
 
-  # Clean up ourself
-  undef $self->{'headers'};
-  undef $self->{'raw_headers'};
-  undef $self->{'header_order'};
-  undef $self->{'raw'};
-  undef $self->{'decoded'};
-  undef $self->{'rendered'};
-  undef $self->{'visible_rendered'};
-  undef $self->{'invisible_rendered'};
-  undef $self->{'type'};
-  undef $self->{'rendered_type'};
-
-  # Clean up our kids
-  if (exists $self->{'body_parts'}) {
-    while ( my $part = shift @{$self->{'body_parts'}} ) {
-      $part->finish();
+  foreach my $part ( $self->find_parts(qr/./) ) {
+    foreach (
+      'headers',
+      'raw_headers',
+      'header_order',
+      'raw',
+      'decoded',
+      'rendered',
+      'visible_rendered',
+      'invisible_rendered',
+      'type',
+      'rendered_type',
+      'body_parts',
+    ) {
+      undef $part->{$_};
+      delete $part->{$_};
     }
-    undef $self->{'body_parts'};
   }
 }
 
