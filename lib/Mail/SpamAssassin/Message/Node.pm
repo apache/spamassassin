@@ -89,7 +89,8 @@ only look at the part and any direct children of the part.
 
 # Used to find any MIME parts whose simple content-type matches a given regexp
 # Searches it's own and any children parts.  Returns an array of MIME
-# objects which match.
+# objects which match.  Our callers may expect the default behavior which is a
+# depth-first array of parts.
 #
 sub find_parts {
   my ($self, $re, $onlyleaves, $recursive) = @_;

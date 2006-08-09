@@ -572,6 +572,9 @@ doesn't have a root node which points at the actual root node ...)
 sub parse_body {
   my($self) = @_;
 
+  # This shouldn't happen, but just in case, abort.
+  return unless (exists $self->{'parse_queue'});
+
   dbg("message: ---- MIME PARSER START ----");
 
   while (my $toparse = shift @{$self->{'parse_queue'}}) {
@@ -590,6 +593,10 @@ sub parse_body {
         # Get the part ready...
         my $message = $toparse->[0]->decode();
 
+	# Ok, so this part is still semi-recursive, since M::SA::Message calls
+	# M::SA::Message, but we don't subparse the new message, and pull a
+	# sneaky "steal our child's queue" maneuver to deal with it on our own
+	# time.
         if ($message) {
           my $msg_obj = Mail::SpamAssassin::Message->new({
       	    message		=>	$message,
@@ -598,10 +605,12 @@ sub parse_body {
 	    subparse	=>	$toparse->[3]-1,
 	    });
 
+	  # Add the new message to the current node
           $toparse->[0]->add_body_part($msg_obj);
 
-	  # now this is sneaky ... take the sub-message's parse_queue and add
-	  # it to ours and we'll handle the sub-message in our normal loop. :)
+	  # now this is the sneaky bit ... steal the sub-message's parse_queue
+	  # and add it to ours.  then we'll handle the sub-message in our
+	  # normal loop and get all the glory.  muhaha.  :)
 	  push(@{$self->{'parse_queue'}}, @{$msg_obj->{'parse_queue'}});
 	  delete $msg_obj->{'parse_queue'};
         }
@@ -611,6 +620,7 @@ sub parse_body {
 
   dbg("message: ---- MIME PARSER END ----");
 
+  # we're done parsing, so remove the queue variable
   delete $self->{'parse_queue'};
 }
 
@@ -694,6 +704,10 @@ sub _parse_multipart {
       ($part_msg->{'type'}, $p_boundary) = Mail::SpamAssassin::Util::parse_content_type($part_msg->header('content-type'));
       $p_boundary ||= $boundary;
       dbg("message: found part of type ".$part_msg->{'type'}.", boundary: ".(defined $p_boundary ? $p_boundary : ''));
+
+      # we've created a new node object, so add it to the queue along with the
+      # text that belongs to that part, then add the new part to the current
+      # node to create the tree.
       push(@{$self->{'parse_queue'}}, [ $part_msg, $p_boundary, $part_array, $subparse ]);
       $msg->add_body_part($part_msg);
 
