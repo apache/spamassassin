@@ -65,7 +65,6 @@ Regular expressions should be delimited by slashes.
 package Mail::SpamAssassin::Plugin::URIDetail;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
-use Data::Dumper;
 
 use strict;
 use warnings;
