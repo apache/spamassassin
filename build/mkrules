@@ -743,6 +743,12 @@ sub fix_up_rule_dependencies {
       # same pubfile
       my $rule2 = $1;
       next unless ($rules->{$rule2} && $rules->{$rule2}->{output_text});
+
+      # don't do this if the subrule would be moved *out* of the
+      # active file!
+      my $pubfile2 = $rules->{$rule2}->{output_file};
+      next if ($pubfile2 && $pubfile2 =~ /\Q$opt_activeout\E/);
+
       $rules->{$rule2}->{output_file} = $pubfile;
     }
   }
