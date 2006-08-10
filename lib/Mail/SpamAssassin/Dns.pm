@@ -25,7 +25,6 @@ use Mail::SpamAssassin::AsyncLoop;
 use Mail::SpamAssassin::Constants qw(:ip);
 use File::Spec;
 use IO::Socket;
-use IPC::Open2;
 use POSIX ":sys_wait_h";
 
 use strict;
