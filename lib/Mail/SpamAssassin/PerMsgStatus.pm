@@ -1921,7 +1921,6 @@ sub do_body_tests {
   while (my($rulename, $pat) = each %{$self->{conf}{body_tests}->{$priority}}) {
     $evalstr .= '
       if ($scoresptr->{q{'.$rulename.'}}) {
-        # call procedurally as it is faster.
         '.$rulename.'_body_test($self,@_);
         '.$self->ran_rule_plugin_code($rulename, "body").'
       }
@@ -2335,7 +2334,7 @@ sub do_body_uri_tests {
   while (my($rulename, $pat) = each %{$self->{conf}{uri_tests}->{$priority}}) {
     $evalstr .= '
       if ($scoresptr->{q{'.$rulename.'}}) {
-        '.$rulename.'_uri_test($self, @_); # call procedurally for speed
+        '.$rulename.'_uri_test($self, @_);
         '.$self->ran_rule_plugin_code($rulename, "uri").'
       }
     ';
@@ -2426,7 +2425,7 @@ sub do_rawbody_tests {
   while (my($rulename, $pat) = each %{$self->{conf}{rawbody_tests}->{$priority}}) {
     $evalstr .= '
       if ($scoresptr->{q{'.$rulename.'}}) {
-         '.$rulename.'_rawbody_test($self, @_); # call procedurally for speed
+         '.$rulename.'_rawbody_test($self, @_);
          '.$self->ran_rule_plugin_code($rulename, "rawbody").'
       }
     ';
