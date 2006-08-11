@@ -218,6 +218,9 @@ sub ui_get_rules {
     $self->{rules_grep}++; $self->{nicerule} = 'regexp '.$self->{rule};
   }
 
+  $self->{srcpath} = $self->{q}->param('srcpath') || '';
+  $self->{mtime} = $self->{q}->param('mtime') || '';
+
   $self->{freqs_head} = { };
   $self->{freqs_data} = { };
   $self->{freqs_ordr} = { };
@@ -250,6 +253,8 @@ sub show_view {
   }
   else {
     print $self->{q}->header();
+
+    # $self->get_rule_metadata(428771);
     $self->show_default_view();
   }
 }
@@ -342,6 +347,10 @@ sub show_default_header {
       font-size: 75%;
       padding: 1px 3px 1px 5px;
       background: #ffc;
+    }
+
+    td.mcviewing {
+      background: #7f9;
     }
 
     div.commitmsgdiv {
@@ -451,7 +460,8 @@ sub show_default_view {
   <table width=100%>
   <tr>
   <td width=90%>
-    Date/Rev to display (UTC timezone):
+    <a href="http://wiki.apache.org/spamassassin/DateRev">DateRev</a>
+    to display (UTC timezone):
     <input type=textfield name=daterev value="!daterev!">
   </td>
   <td width=10%><div align=right>
@@ -473,11 +483,19 @@ sub show_default_view {
     Show only these rules (space separated, or regexp with '/' prefix):<br/>
     <input type=textfield size=60 name=rule value="!rule!"><br/>
     <br/>
+    Show only rules from this part of the source tree:<br/>
+    <input type=textfield size=60 name=srcpath value="!srcpath!"><br/>
+    <br/>
     <input type=checkbox name=s_zero !s_zero!> Display rules with no hits<br/>
     <br/>
     <input type=hidden name=s_detail value="!s_detail!" />
 
     <input type=submit name=g value="Change"><br/>
+
+<p>
+    Show only rules modified in
+    <a href='!mtime=1!'>last day</a>, <a href='!mtime=7!'>last week</a>
+</p>
   </form>
   </div>
 
@@ -521,7 +539,11 @@ sub show_default_view {
   $tmpl =~ s/!shortdatelist!/$sdlurl/gs;
   $tmpl =~ s/!THISURL!/$self->{cgi_url}/gs;
   $tmpl =~ s/!daterev!/$self->{daterev}/gs;
+  $tmpl =~ s/!mtime=(.*?)!/
+               $self->gen_switch_url("mtime", $1);
+       /eg;
   $tmpl =~ s/!rule!/$self->{rule}/gs;
+  $tmpl =~ s/!srcpath!/$self->{srcpath}/gs;
   foreach my $opt (keys %{$self->{s}}) {
     if ($self->{s}{$opt}) {
       $tmpl =~ s/!s_$opt!/checked /gs;
@@ -722,9 +744,8 @@ sub graph_over_time {
   exec ("$PERL_INTERP $automcdir/../rule-hits-over-time ".
         "--cgi --scale_period=200 --rule='$saferule' ".
         "--ignore_older=180 ".
-        "$safedatadir/LOGS.*.log.gz");
-
-  die "exec failed";
+        "$safedatadir/LOGS.*.log.gz")
+    or die "exec failed";
 }
 
 ###########################################################################
@@ -946,6 +967,28 @@ sub get_freqs_for_rule {
   $ruleslist ||= '';
   my @rules = split (' ', $ruleslist);
   if (scalar @rules == 0) { @rules = (''); }
+
+  my $srcpath = $self->{srcpath};
+  my $mtime = $self->{mtime};
+  if ($srcpath) {
+    my $rev = $self->get_rev_for_daterev($self->{daterev});
+    my $md = $self->get_rule_metadata($rev);
+
+    if ($srcpath) {    # bug 4984
+      @rules = grep {
+           !$md->{$_} or !$md->{$_}->{src}
+             or ($md->{$_}->{src} =~ /\Q$srcpath\E/);
+         } @rules;
+    }
+
+    if ($mtime) {      # bug 4985
+      my $target = time - ($mtime * 24 * 60 * 60);
+      @rules = grep {
+           !$md->{$_} or !$md->{$_}->{srcmtime}
+             or ($md->{$_}->{srcmtime} >= $target);
+         } @rules;
+    }
+  }
 
   if ($self->{include_embedded_freqs_xml} == 0) {
     $FREQS_LINE_TEMPLATE =~ s/<!--\s+<rule>.*?-->//gs;
@@ -1215,6 +1258,13 @@ sub gen_switch_url {
   return $self->assemble_url(@parms);
 }
 
+sub get_rev_for_daterev {
+  my ($self, $daterev) = @_;
+  # '20060120-r370897-b'
+  $daterev =~ /-r(\d+)-/ or return undef;
+  return $1;
+}
+
 sub assemble_url {
   my ($self, @orig) = @_;
 
@@ -1476,25 +1526,27 @@ sub get_daterev_masscheck_description {
   my $isvishtml = '';
   my $isvisclass = '';
   if ($self->{daterev} eq $dr) {
-    $isvishtml = '<p><b>(Viewing)</b></p>';
-    $isvisclass = 'class="mcviewing"';
+    $isvishtml = '<b>(Viewing)</b>';
+    $isvisclass = 'mcviewing';
   }
 
   return qq{
-  
-    <td class="daterevtd" width='20%'>
-    <span class="daterev_masscheck_description" $isvisclass>
+
+    <td class="daterevtd $isvisclass" width='20%'>
+    <span class="daterev_masscheck_description $isvisclass">
       <p>
         <a name="$meta->{dranchor}"
-          href="!drhref!"><strong><span class="mctype">$meta->{type}</span>,
-            on <span class="date">$meta->{date}</span>
-          </strong></a>
-      </p> $isvishtml <p>
+          href="!drhref!"><strong>
+            <span class="dr">$dr</span>
+          </strong></a> $isvishtml
+      </p><p>
         <em><span class="mcsubmitters">$meta->{submitters}</span></em>
         $meta->{mds_as_text}</x>
       </p>
+      <!-- <span class="mctype">$meta->{type}</span> -->
       <!-- <span class="mcwasnet">$net</span> -->
       <!-- <span class="mcauthor">$meta->{author}</span> -->
+      <!-- <span class="date">$meta->{date}</span> -->
       <!-- tag=$meta->{tag} -->
     </span>
     </td>
@@ -1520,7 +1572,7 @@ sub get_daterev_html_table {
       $colidx = 1;
     }
 
-    # use the commit-date, rather than the mass-check date
+    # use the commit-date, rather than the mass-check date as the row key
     $rows->{$meta->{cdate}} ||= [ ];
     $rows->{$meta->{cdate}}->[$colidx] = $meta;
   }
@@ -1629,6 +1681,42 @@ sub show_daterev_selector_page {
   }.  $self->get_daterev_html_table(\@drs, 1, 1);
 }
 
+
+sub get_rule_metadata {
+  my ($self, $rev) = @_;
+
+  if ($self->{rule_metadata}->{$rev}) {
+    return $self->{rule_metadata}->{$rev};
+  }
+
+  my $meta = $self->{rule_metadata}->{$rev} = { };
+  $meta->{rev} = $rev;
+
+  my $fname = $AUTOMC_CONF{html}."/rulemetadata/$rev/rulemetadata.xml";
+  if (-f $fname) {
+    eval {
+      my $md = XMLin($fname);
+      # use Data::Dumper; print Dumper $md;
+      $meta->{rulemds} = $md->{rulemetadata};
+
+      # '__CTYPE_HTML' => {
+      # 'srcmtime' => '1154348696',
+      # 'src' => 'rulesrc/core/20_ratware.cf'
+      # },
+
+    };
+
+    if ($@) {
+      warn "rev rulemetadata.xml: $@";
+    } else {
+      return $meta;
+    }
+  }
+
+  # if that failed, just return empty
+  $meta->{rulemds} = {};
+  return $meta;
+}
 
 =cut
 
