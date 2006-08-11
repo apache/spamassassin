@@ -243,6 +243,11 @@ sub show_view {
     print $self->{q}->header();
     $self->show_daterev_selector_page();
   }
+  elsif ($self->{q}->param('shortdatelist')) {
+    $self->{s_shortdatelist} = 1;
+    print $self->{q}->header();
+    $self->show_default_view();
+  }
   else {
     print $self->{q}->header();
     $self->show_default_view();
@@ -450,6 +455,7 @@ sub show_default_view {
     <input type=textfield name=daterev value="!daterev!">
   </td>
   <td width=10%><div align=right>
+    <a href="!shortdatelist!">(List&nbsp;Nearby)</a><br/>
     <a href="!longdatelist!">(List&nbsp;All)</a><br/>
   </div></td>
   </tr>
@@ -483,25 +489,25 @@ sub show_default_view {
     $origdr =~ /^(\d+)[\/-]/;
     my $date = $1;
 
-    my $dr_after = date_offset($date, -1);
-    my $dr_before = date_offset($date, 1);
+    # include *just* the current day
+    my $dr_after = $date;
+    my $dr_before = $date;
+
+    # unless 'shortdatelist' is set; in that case, +/- 2 days
+    if ($self->{s_shortdatelist}) {
+      $dr_after = date_offset($date, -2);
+      $dr_before = date_offset($date, 2);
+    }
 
     foreach my $dr (@{$self->{daterevs}}) {
       next unless ($dr =~ /^(\d+)[\/-]/);
       my $date = $1;
+
       next unless ($date >= $dr_after);
       next unless ($date <= $dr_before);
       push @drs, $dr;
     }
   }
-
-sub date_offset {
-  my ($yyyymmdd, $offset_days) = @_;
-  $yyyymmdd =~ /^(....)(..)(..)$/;
-  my $time = timegm(0,0,0,$3,$2-1,$1);
-  $time += (24 * 60 * 60) * $offset_days;
-  return POSIX::strftime "%Y%m%d", gmtime $time;
-}
 
   $tmpl =~ s{!daylinkstable!}{
           $self->get_daterev_html_table(\@drs, 0, 0);
@@ -509,8 +515,10 @@ sub date_offset {
 
   my $dranchor = "r".$self->{daterev}; $dranchor =~ s/[^A-Za-z0-9]/_/gs;
   my $ldlurl = $self->gen_switch_url("longdatelist", 1)."#".$dranchor;
+  my $sdlurl = $self->gen_switch_url("shortdatelist", 1)."#".$dranchor;
 
   $tmpl =~ s/!longdatelist!/$ldlurl/gs;
+  $tmpl =~ s/!shortdatelist!/$sdlurl/gs;
   $tmpl =~ s/!THISURL!/$self->{cgi_url}/gs;
   $tmpl =~ s/!daterev!/$self->{daterev}/gs;
   $tmpl =~ s/!rule!/$self->{rule}/gs;
@@ -590,6 +598,14 @@ sub date_offset {
 
   };
 
+}
+
+sub date_offset {
+  my ($yyyymmdd, $offset_days) = @_;
+  $yyyymmdd =~ /^(....)(..)(..)$/;
+  my $time = timegm(0,0,0,$3,$2-1,$1);
+  $time += (24 * 60 * 60) * $offset_days;
+  return POSIX::strftime "%Y%m%d", gmtime $time;
 }
 
 sub get_all_daterevs {
@@ -1457,17 +1473,23 @@ sub get_daterev_masscheck_description {
   my $meta = $self->get_daterev_metadata($dr, $ignore_logmds);
   my $net = $meta->{includes_net} ? "[net]" : "";
 
+  my $isvishtml = '';
+  my $isvisclass = '';
+  if ($self->{daterev} eq $dr) {
+    $isvishtml = '<p><b>(Viewing)</b></p>';
+    $isvisclass = 'class="mcviewing"';
+  }
+
   return qq{
   
     <td class="daterevtd" width='20%'>
-    <span class="daterev_masscheck_description">
+    <span class="daterev_masscheck_description" $isvisclass>
       <p>
         <a name="$meta->{dranchor}"
           href="!drhref!"><strong><span class="mctype">$meta->{type}</span>,
             on <span class="date">$meta->{date}</span>
           </strong></a>
-      </p>
-      <p>
+      </p> $isvishtml <p>
         <em><span class="mcsubmitters">$meta->{submitters}</span></em>
         $meta->{mds_as_text}</x>
       </p>
@@ -1554,7 +1576,7 @@ sub gen_daterev_html_commit_td {
 
   my $dr = $meta->{daterev};
   my @parms = $self->get_params_except(qw(
-          daterev longdatelist
+          daterev longdatelist shortdatelist
         ));
   my $drhref = $self->assemble_url("daterev=".$dr, @parms);
 
@@ -1569,13 +1591,12 @@ sub gen_daterev_html_table_td {
 
   my $dr = $meta->{daterev};
   my @parms = $self->get_params_except(qw(
-          daterev longdatelist
+          daterev longdatelist shortdatelist
         ));
   my $drhref = $self->assemble_url("daterev=".$dr, @parms);
 
   my $text = $self->get_daterev_masscheck_description($dr, $ignore_logmds) || '';
   $text =~ s/!drhref!/$drhref/gs;
-
   return $text;
 }
 
