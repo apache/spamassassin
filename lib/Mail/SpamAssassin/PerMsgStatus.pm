@@ -1699,11 +1699,23 @@ sub get {
 sub start_rules_plugin_code {
   my ($self, $ruletype) = @_;
 
-  return '' unless $self->{main}->have_plugin("start_rules");
+  my $evalstr = '
 
-  return '
-    $self->{main}->call_plugins ("start_rules", { permsgstatus => $self, ruletype => \''.$ruletype.'\' });
+      # start_rules_plugin_code '.$ruletype.'
+      my $scoresptr = $self->{conf}->{scores};
+
   ';
+
+  if ($self->{main}->have_plugin("start_rules")) {
+    $evalstr .= '
+
+      $self->{main}->call_plugins ("start_rules", { permsgstatus => $self, ruletype
+=> \''.$ruletype.'\' });
+
+    ';
+  }
+
+  return $evalstr;
 }
 
 sub hit_rule_plugin_code {
@@ -1833,7 +1845,7 @@ sub do_head_tests {
     $evalstr .= ' $hval = $self->get(q#'.$hdrname.'#, q#'.$def.'#);';
     foreach my $rulename (@{$v}) {
       $evalstr .= '
-      if ($self->{conf}->{scores}->{q#'.$rulename.'#}) {
+      if ($scoresptr->{q#'.$rulename.'#}) {
          '.$rulename.'_head_test($self, $hval); # no need for OO calling here (its faster this way)
          '.$self->ran_rule_plugin_code($rulename, "header").'
       }
@@ -1908,7 +1920,7 @@ sub do_body_tests {
 
   while (my($rulename, $pat) = each %{$self->{conf}{body_tests}->{$priority}}) {
     $evalstr .= '
-      if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
+      if ($scoresptr->{q{'.$rulename.'}}) {
         # call procedurally as it is faster.
         '.$rulename.'_body_test($self,@_);
         '.$self->ran_rule_plugin_code($rulename, "body").'
@@ -1923,8 +1935,8 @@ sub do_body_tests {
     sub '.$rulename.'_body_test {
            my $self = shift;
            foreach (@_) {
-             '.$self->hash_line_for_rule($rulename).'
              pos = 0;
+             '.$self->hash_line_for_rule($rulename).'
              while ('.$pat.'g) { 
                 $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body"); 
                 '. $self->hit_rule_plugin_code($rulename, "body", "return") . '
@@ -2322,10 +2334,9 @@ sub do_body_uri_tests {
 
   while (my($rulename, $pat) = each %{$self->{conf}{uri_tests}->{$priority}}) {
     $evalstr .= '
-      if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
+      if ($scoresptr->{q{'.$rulename.'}}) {
         '.$rulename.'_uri_test($self, @_); # call procedurally for speed
         '.$self->ran_rule_plugin_code($rulename, "uri").'
-
       }
     ';
 
@@ -2337,8 +2348,8 @@ sub do_body_uri_tests {
     sub '.$rulename.'_uri_test {
        my $self = shift;
        foreach (@_) {
-         '.$self->hash_line_for_rule($rulename).'
          pos = 0;
+         '.$self->hash_line_for_rule($rulename).'
          while ('.$pat.'g) { 
             $self->got_hit(q{'.$rulename.'}, "URI: ", ruletype => "uri");
             '. $self->hit_rule_plugin_code($rulename, "uri", "return") .'
@@ -2414,7 +2425,7 @@ sub do_rawbody_tests {
 
   while (my($rulename, $pat) = each %{$self->{conf}{rawbody_tests}->{$priority}}) {
     $evalstr .= '
-      if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
+      if ($scoresptr->{q{'.$rulename.'}}) {
          '.$rulename.'_rawbody_test($self, @_); # call procedurally for speed
          '.$self->ran_rule_plugin_code($rulename, "rawbody").'
       }
@@ -2428,8 +2439,8 @@ sub do_rawbody_tests {
     sub '.$rulename.'_rawbody_test {
        my $self = shift;
        foreach (@_) {
-         '.$self->hash_line_for_rule($rulename).'
          pos = 0;
+         '.$self->hash_line_for_rule($rulename).'
          while ('.$pat.'g) { 
             $self->got_hit(q{'.$rulename.'}, "RAW: ", ruletype => "rawbody");
             '. $self->hit_rule_plugin_code($rulename, "rawbody", "return") . '
@@ -2505,9 +2516,9 @@ sub do_full_tests {
 
   while (my($rulename, $pat) = each %{$self->{conf}{full_tests}->{$priority}}) {
     $evalstr .= '
-      if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
-        '.$self->hash_line_for_rule($rulename).'
+      if ($scoresptr->{q{'.$rulename.'}}) {
         pos $$fullmsgref = 0;
+        '.$self->hash_line_for_rule($rulename).'
         while ($$fullmsgref =~ '.$pat.'g) {
           $self->got_hit(q{'.$rulename.'}, "FULL: ", ruletype => "full");
           '. $self->hit_rule_plugin_code($rulename, "full", "last") . '
