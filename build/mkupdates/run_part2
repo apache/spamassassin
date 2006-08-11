@@ -73,8 +73,8 @@ rm rules/70_sandbox.cf rules/70_inactive.cf
 
 # remove new features, unsupported in existing code in the field
 # (TODO: need a better way to exclude files that require new features
-# like this; judicious use of "ifplugin" may help)
-rm rules/60_shortcircuit.cf
+# like this; judicious use of "ifplugin" helps)
+# rm rules/60_somerandomfeature.cf
 
 # and ensure the ruleset lints!
 ./spamassassin --lint                    || exit $?
