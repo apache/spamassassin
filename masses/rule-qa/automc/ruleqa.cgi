@@ -483,7 +483,7 @@ sub show_default_view {
     Show only these rules (space separated, or regexp with '/' prefix):<br/>
     <input type=textfield size=60 name=rule value="!rule!"><br/>
     <br/>
-    Show only rules from this part of the source tree:<br/>
+    Show only rules from files whose paths contain this string:<br/>
     <input type=textfield size=60 name=srcpath value="!srcpath!"><br/>
     <br/>
     <input type=checkbox name=s_zero !s_zero!> Display rules with no hits<br/>
@@ -493,7 +493,7 @@ sub show_default_view {
     <input type=submit name=g value="Change"><br/>
 
 <p>
-    Show only rules modified in
+    Show only rules from files modified in the
     <a href='!mtime=1!'>last day</a>, <a href='!mtime=7!'>last week</a>
 </p>
   </form>
@@ -966,26 +966,41 @@ sub get_freqs_for_rule {
 
   $ruleslist ||= '';
   my @rules = split (' ', $ruleslist);
-  if (scalar @rules == 0) { @rules = (''); }
+
+  if ($self->{rules_all}) {
+    push @rules, @{$self->{freqs_ordr}{$key}};
+  }
+  elsif ($self->{rules_grep} && $ruleslist =~ /^\/(.*)$/) {
+    my $regexp = $1;
+    foreach my $r (@{$self->{freqs_ordr}{$key}}) {
+      next unless ($r =~/${regexp}/i);
+      push @rules, $r;
+    }
+  }
 
   my $srcpath = $self->{srcpath};
   my $mtime = $self->{mtime};
-  if ($srcpath) {
+  if ($srcpath || $mtime) {
     my $rev = $self->get_rev_for_daterev($self->{daterev});
     my $md = $self->get_rule_metadata($rev);
+    $md = $md->{rulemds};
+
+    # use Data::Dumper; print Dumper $md;
 
     if ($srcpath) {    # bug 4984
       @rules = grep {
-           !$md->{$_} or !$md->{$_}->{src}
-             or ($md->{$_}->{src} =~ /\Q$srcpath\E/);
+           # !$md->{$_} or !$md->{$_}->{src} or
+          $md->{$_}->{src} and
+             ($md->{$_}->{src} =~ /\Q$srcpath\E/);
          } @rules;
     }
 
     if ($mtime) {      # bug 4985
       my $target = time - ($mtime * 24 * 60 * 60);
       @rules = grep {
-           !$md->{$_} or !$md->{$_}->{srcmtime}
-             or ($md->{$_}->{srcmtime} >= $target);
+           # !$md->{$_} or !$md->{$_}->{srcmtime} or
+          $md->{$_}->{srcmtime} and
+             ($md->{$_}->{srcmtime} >= $target);
          } @rules;
     }
   }
@@ -999,23 +1014,6 @@ sub get_freqs_for_rule {
       $comment .= $self->rule_anchor($key,$rule);
       $comment .= $self->output_freqs_data_line($self->{freqs_data}{$key}{$rule},
                 $header_context);
-    }
-    elsif ($self->{rules_all}) {
-      # all rules please...
-      foreach my $r (@{$self->{freqs_ordr}{$key}}) {
-        $comment .= $self->rule_anchor($key,$r);
-        $comment .= $self->output_freqs_data_line($self->{freqs_data}{$key}{$r},
-                $header_context);
-      }
-    }
-    elsif ($self->{rules_grep} && $rule =~ /^\/(.*)$/) {
-      my $regexp = $1;
-      foreach my $r (@{$self->{freqs_ordr}{$key}}) {
-        next unless ($r =~/${regexp}/i);
-        $comment .= $self->rule_anchor($key,$r);
-        $comment .= $self->output_freqs_data_line($self->{freqs_data}{$key}{$r},
-                $header_context);
-      }
     }
     else {
       $comment .= $self->rule_anchor($key,$rule);
