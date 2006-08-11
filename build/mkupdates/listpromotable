@@ -8,7 +8,7 @@ use LWP::Simple;
 use URI::Escape;
 use Data::Dumper;
 
-my $FROM_CACHE; # $FROM_CACHE = 1;
+my $FROM_CACHE; if (@ARGV && $ARGV[0] eq '--fromcache') { $FROM_CACHE = 1; }
 my $MAKE_CACHE; $MAKE_CACHE = 1;        # turn this on by default, no harm
 
 # we allow promotion of rules that are "ifplugin" one of these
@@ -42,11 +42,28 @@ else {
 
 ###########################################################################
 
+# the HTML looks like:
+# 
+#   <span class="daterev_masscheck_description" class="mcviewing">
+#   ...
+#   <em><span class="mcsubmitters"> ....... </span></em>
+#   ...
+#   </span>
+#
+# in other words, the machine-parseable metadata is embedded in the HTML
+# as a microformat.
+
 my $submitters = '';
-if ($doc =~ m{ <td\sclass=daterevtd><b>Viewing</b></td>.*?
-                <span\s+class="mcsubmitters">\s*(.*?)\s*</span> }sx)
+if ($doc =~ m{
+        <span\s+class="daterev_masscheck_description\smcviewing"
+        .{0,400}
+        <span\s+class="mcsubmitters">\s*(.*?)\s*</span>
+      }sx)
 {
   $submitters = $1;
+}
+else {
+  die "failed to find 'mcviewing' and 'mcsubmitters' microformats from $cgi_url";
 }
 
 ###########################################################################
