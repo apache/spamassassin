@@ -22,6 +22,9 @@ use File::Copy;
 use Time::ParseDate;
 use Cwd;
 
+my $perl = $^X;
+my $EARLIEST_REV = 428771;             # before this, mkrules won't work
+
 use vars qw(
     $opt_outputdir
     $opt_rev
@@ -41,6 +44,11 @@ my %conf;
 configure();
 if (already_cached()) {
   print "rule metadata already cached: $outfile\n";
+  exit;
+}
+
+if ($opt_rev < $EARLIEST_REV) {
+  print "rule metadata cannot be generated, too early: $outfile\n";
   exit;
 }
 
@@ -92,8 +100,8 @@ sub svn_and_build {
   if ($? >> 8 != 0) { die "'$cmd' failed"; }
 
   $cmd = "cd $tmpdir; ".
-        # "perl Makefile.PL < /dev/null; make; ".
-        "perl build/mkrules --src rulesrc --out rules ".
+        # "$perl Makefile.PL < /dev/null; make; ".
+        "$perl build/mkrules --src rulesrc --out rules ".
                 "--rulemetadata=rules/rulemetadata.xml";
 
   print "[$cmd]\n";

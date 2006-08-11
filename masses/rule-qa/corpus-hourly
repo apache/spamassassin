@@ -509,7 +509,8 @@ sub get_rulemetadata_for_revision {
 
   my $dir = create_rulemetadata_dir($rev);
 
-  my $cmd = "./rule-qa/get-rulemetadata-for-revision ".
+  chdir $opt{tree} or die "cannot chdir $opt{tree}";
+  my $cmd = "./masses/rule-qa/get-rulemetadata-for-revision ".
                     "--rev=$rev --outputdir='$dir'";
 
   system($cmd);
