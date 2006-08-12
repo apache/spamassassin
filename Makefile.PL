@@ -678,10 +678,10 @@ sub _set_macro_LOCALSTATEDIR {
 
   # Set the default, depending on the corresponding full PREFIX
   set_macro($macro,
-    ($rprefix =~ m{^$})                ? ''         :
-    ($rprefix =~ m{^/usr(/local)?/?$}) ? '/var/lib' :
-    ($rprefix =~ m{^/opt(/|$)})        ? '/var/opt' :
-    macro_ref("${repository}PREFIX") . '/var'
+    ($rprefix =~ m{^$})                ? ''                      :
+    ($rprefix =~ m{^/usr(/local)?/?$}) ? '/var/lib/spamassassin' :
+    ($rprefix =~ m{^/opt(/|$)})        ? '/var/opt/spamassassin' :
+    macro_ref("${repository}PREFIX") . '/var/spamassassin'
   );
 }
 

@@ -123,7 +123,7 @@ $HOME_URL = "http://spamassassin.apache.org/";
 @default_rules_path = (
   './rules',              # REMOVEFORINST
   '../rules',             # REMOVEFORINST
-  '__local_state_dir__/spamassassin/__version__',
+  '__local_state_dir__/__version__',
   '__local_state_dir__',
   '__def_rules_dir__',
   '__prefix__/share/spamassassin',
