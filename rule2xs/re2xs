@@ -1,0 +1,388 @@
+#!/usr/bin/perl -w
+
+use ExtUtils::MakeMaker qw(prompt);
+use File::Copy;
+use Getopt::Long;
+
+use constant MAX_RULES => 60;
+
+our $NAME = "My::FastRE";
+our $FORCE;
+
+sub usage {
+	print "Usage:
+$0 [OPTIONS] file
+
+Options:
+	-n, --name N    : Name of the module
+	-h, --help      : This page
+	-f, --force     : run even if module dir exists
+\n";
+	exit();
+}
+
+GetOptions(
+	"name|n=s" => \$NAME,
+	"help|h"   => \&usage,
+	"force|f"  => \$FORCE,
+	);
+
+usage() unless @ARGV;
+our $FILE = shift @ARGV;
+-e $FILE || die "No such file: $FILE";
+
+if ($NAME eq "My::FastRE") {
+	$NAME = prompt("Module name?", $NAME);
+}
+
+our $PATH = $NAME;
+$PATH =~ s/::/-/g;
+our $PMFILE = $NAME;
+$PMFILE =~ s/.*:://;
+$PMFILE .= ".pm";
+our $XSFILE = $PMFILE;
+$XSFILE =~ s/\.pm$/.xs/;
+
+open(my $fh, "sort $FILE |") || die "open($FILE): $!";
+mkdir $PATH or (!$FORCE and die "mkdir($PATH): $!");
+chdir $PATH;
+
+my $numscans = 0;
+my (@dot_star, @dot_plus);
+
+while (!eof($fh)) {
+	$numscans++;
+	
+	open(my $re, ">scanner${numscans}.re") || die "open(>scanner{$numscans}.re): $!";
+	
+	print $re <<EOT;
+#define NULL            ((char*) 0)
+#define YYCTYPE         char
+#define YYCURSOR        p
+#define YYLIMIT         p
+#define YYMARKER        q
+#define YYFILL(n)
+EOT
+
+	print $re <<EOT;
+char *scan${numscans}(char *p){
+char *q;
+/*!re2c
+EOT
+
+	my $line = 0;
+	while (<$fh>) {
+		next if /^#/;
+		my ($regexp, $reason) = /^(.*):(.*)$/;
+		if ($regexp =~ /^\.\*/) {
+			push @dot_star, "$regexp:$reason";
+			next;
+		}
+		elsif ($regexp =~ /^\.\+/) {
+			push @dot_plus, "$regexp:$reason";
+			next;
+		}
+		print $re "\t", fixup_re($regexp), "               {return \"$reason\";}\n";
+		last if $line++ == MAX_RULES;
+	}
+	
+	print $re <<EOT;
+	[\\000-\\377]				{ return NULL; }
+*/
+}
+EOT
+
+	#last if $numscans == 2;
+}
+
+while (@dot_star) {
+	$numscans++;
+
+	open(my $re, ">scanner${numscans}.re") || die "open(>scanner{$numscans}.re): $!";
+	
+	print $re <<EOT;
+#define NULL            ((char*) 0)
+#define YYCTYPE         char
+#define YYCURSOR        p
+#define YYLIMIT         p
+#define YYMARKER        q
+#define YYFILL(n)
+EOT
+
+	print $re <<EOT;
+char *scan${numscans}(char *p){
+char *q;
+start:
+/*!re2c
+EOT
+
+	my $line = 0;
+	while ($_ = shift @dot_star) {
+		my ($regexp, $reason) = /^(.*):(.*)$/;
+		$regexp =~ s/^\.\*//;
+		print $re "\t", fixup_re($regexp), "               {return \"$reason\";}\n";
+		last if $line++ == MAX_RULES;
+	}
+	
+	print $re <<EOT;
+	[\\001-\\377]		{ goto start; }
+	[\\000]				{return NULL; }
+*/
+}
+EOT
+}
+
+while (@dot_plus) {
+	$numscans++;
+
+	open(my $re, ">scanner${numscans}.re") || die "open(>scanner{$numscans}.re): $!";
+	
+	print $re <<EOT;
+#define NULL            ((char*) 0)
+#define YYCTYPE         char
+#define YYCURSOR        p
+#define YYLIMIT         p
+#define YYMARKER        q
+#define YYFILL(n)
+EOT
+
+	print $re <<EOT;
+char *scan${numscans}(char *p){
+char *q;
+p++;
+start:
+/*!re2c
+EOT
+	
+	my $line = 0;
+	while ($_ = shift @dot_plus) {
+		my ($regexp, $reason) = /^(.*):(.*)$/;
+		$regexp =~ s/^\.\+//;
+		print $re "\t", fixup_re($regexp), "               {return \"$reason\";}\n";
+		last if $line++ == MAX_RULES;
+	}
+	
+	print $re <<EOT;
+	[\\001-\\377]		{ goto start; }
+	[\\000]				{return NULL; }
+*/
+
+}
+EOT
+}
+
+open(my $re, ">scanner.c") || die "open(>scanner.c): $!";
+	
+for (1..$numscans) {
+	print $re "char *scan$_(char *);\n";
+}
+
+print $re <<EOT;
+#define NULL            ((char*) 0)
+char *scan(char *p){
+int i;
+char *match;
+EOT
+
+for (1..$numscans) {
+	print $re "if (match = scan$_(p)) return match;\n";
+}
+
+print $re <<EOT;
+return NULL;
+}
+EOT
+
+close($re);
+
+print "Running re2c...\n";
+for (1..$numscans) {
+	print "$_ / $numscans ";
+	system("time re2c -i -b -o scanner$_.c scanner$_.re");
+}
+
+open(FILE, ">Makefile.PL") || die "write Makefile.PL: $!";
+print FILE <<"EOT";
+use ExtUtils::MakeMaker;
+
+WriteMakefile(
+    'NAME' => '$NAME',
+    'VERSION_FROM' => '$PMFILE',
+    'OBJECT' => '\$(O_FILES)',
+    'OPTIMIZE' => '-O2',
+    'ABSTRACT_FROM' => '$PMFILE',
+    'AUTHOR' => 'A. N. Author <author\@example.com>',
+);
+EOT
+
+open(FILE, ">MANIFEST.SKIP") || die "write MANIFEST.SKIP: $!";
+print FILE <<'EOT';
+CVS/.*
+\.bak$
+\.sw[a-z]$
+\.tar$
+\.tgz$
+\.tar\.gz$
+\.o$
+\.xsi$
+\.bs$
+output/.*
+^.#
+^mess/
+^sqlite/
+^output/
+^tmp/
+^blib/
+^Makefile$
+^Makefile\.[a-z]+$
+^pm_to_blib$
+~$
+EOT
+
+open(FILE, ">scanner.h") || die "write scanner.h: $!";
+print FILE <<EOT;
+/* scanner.h */
+
+char *scan(char *);
+
+EOT
+
+open(FILE, ">$XSFILE") || die "write $XSFILE: $!";
+print FILE <<"EOT";
+#include "EXTERN.h"
+#include "perl.h"
+#include "XSUB.h"
+#include "scanner.h"
+
+MODULE = $NAME  PACKAGE = $NAME
+
+PROTOTYPES: DISABLE
+
+char *
+scan(char *p);
+
+EOT
+
+open(FILE, ">$PMFILE") || die "write $PMFILE: $!";
+print FILE <<"EOT";
+
+package $NAME;
+
+use strict;
+use vars qw(\$VERSION \@ISA \@EXPORT_OK);
+
+use DynaLoader ();
+use Exporter ();
+
+BEGIN {
+\$VERSION = '1.0';
+\@ISA = qw(Exporter DynaLoader);
+\@EXPORT_OK = qw(scan);
+
+bootstrap $NAME \$VERSION;
+}
+
+1;
+__END__
+
+=head1 NAME
+
+$NAME - Efficient string matching for regexps found in $FILE
+
+=head1 SYNOPSIS
+
+  use $NAME;
+  
+  ...
+  my \$match = ${NAME}::scan(\$string);
+
+=head1 DESCRIPTION
+
+This module is created by re2xs which uses re2c to create an XS library
+capable of scanning through a bunch of regular expressions as defined
+in F<$FILE>.
+
+That's all for now. Enjoy.
+
+=cut
+EOT
+
+sub fixup_re {
+	my $re = shift;
+	
+	# print "FIXUP: $re\n";
+	
+	my $output = "";
+	my $TOK = qr([\{\(\[\|\\\)\.\+\*]);
+	
+	my $STATE;
+	while ($re =~ /\G(.*?)($TOK)/gc) {
+		my $pre = $1;
+		my $tok = $2;
+		
+		if (length($pre)) {
+			$output .= "\"$pre\"";
+		}
+		if ($tok eq "(") {
+			# Grouping
+			if ($re =~ /\G(.*?)\)/gc) {
+				$output .= "( " . fixup_re($1) . " )";
+			}
+			else {
+				die "re: $re doesn't have group closing bracket";
+			}
+		}
+		elsif ($tok eq "|") {
+			$output .= " | ";
+		}
+		elsif ($tok eq "[") {
+			# chars
+			if ($re =~ /\G(.*?)\]/gc) {
+				$output .= "[$1]";
+			}
+			else {
+				die "re: $re doesn't have character class closing bracket";
+			}
+		}
+		elsif ($tok eq '{') {
+			if ($re =~ /\G(.*?)\}/gc) {
+				$output .= "{$1}";
+			}
+			else {
+				die "re: $re doesn't have quantifier closing bracket";
+			}
+		}
+		elsif ($tok eq '.') {
+			$output .= '.';
+		}
+		elsif ($tok eq '*') {
+			$output .= '* ';
+		}
+		elsif ($tok eq '+') {
+			$output .= '+ ';
+		}
+		elsif ($tok eq '\\') {
+			$re =~ /\G(.)/gc or die "\\ at end of string!";
+			my $esc = $1;
+			if ($esc !~ /^[\.\-\+\*_]$/) {
+				die "Unsupported escape: \\$esc";
+			}
+			$output .= "\"$esc\"";
+		}
+		else {
+			print "PRE: $pre\nTOK: $tok\n";
+		}
+	}
+	
+	if (!defined(pos($re))) {
+		# no matches
+		$output .= "\"$re\"";
+	}
+	elsif (pos($re) <= length($re)) {
+		$output .= fixup_re(substr($re, pos($re)));
+	}
+	
+	$output =~ s/""//g; # strip empty strings, or turn "abc""def" -> "abcdef"
+	# print "OUTPUT: $output\n";
+	return $output;
+}
