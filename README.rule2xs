@@ -1,0 +1,63 @@
+
+***** BEWARE: HACKS ***** 
+
+(I'm making a mess here, so stuff may not work very well.  be warned. --j.)
+
+Basically, Matt Sergeant published "re2xs", a fantastic script which takes perl
+regexps, generates source for re2c(1), then runs it to generate a full Perl XS
+module which can match those patterns at blisteringly fast speeds:
+
+  I managed to match 10k regexps against 10k strings in 0.3s with it, which I
+  think is fairly good.
+
+(see http://use.perl.org/~Matts/journal/30597 .)
+
+http://re2c.org/ has more info on re2c -- it's a parser generator, using its
+own subset of regular expression language.   Most of the hard work that re2xs
+puts in, is in attempt to convert perl regexps (like the SpamAssassin ruleset),
+to this language, and sensibly give up where that is not possible.
+
+
+Anyway, here's where I am right now:
+
+$ perl Makefile.PL < /dev/null
+...
+$ make
+...
+$ ./spamassassin --lint
+            [generates "re.in" file! ugh, TODO]
+$ cd rule2xs
+$ rm -rf TST
+$ ./re2xs --name TST ../re.in
+skipped: \: : Unsupported escape: \: at ./re2xs line 403, <$fh> line 45.
+Running re2c...
+1 / 2 0.68user 0.00system 0:01.16elapsed 59%CPU (0avgtext+0avgdata 0maxresident)k
+0inputs+0outputs (1major+627minor)pagefaults 0swaps
+2 / 2 0.12user 0.00system 0:00.22elapsed 58%CPU (0avgtext+0avgdata 0maxresident)k
+0inputs+0outputs (0major+541minor)pagefaults 0swaps
+
+$ cd TST
+MANIFEST.SKIP  TST.pm  scanner1.c   scanner2.c
+Makefile.PL    TST.xs  scanner1.re  scanner2.re
+
+$ perl Makefile.PL
+Writing Makefile for TST
+
+$ make
+cp TST.pm blib/lib/TST.pm
+/usr/bin/perl /usr/share/perl/5.8/ExtUtils/xsubpp  -typemap /usr/share/perl/5.8/ExtUtils/typemap  TST.xs > TST.xsc && mv TST.xsc TST.c
+cc -c   -D_REENTRANT -D_GNU_SOURCE -DTHREADS_HAVE_PIDS -DDEBIAN -fno-strict-aliasing -pipe -I/usr/local/include -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O2   -DVERSION=\"1.0\" -DXS_VERSION=\"1.0\" -fPIC "-I/usr/lib/perl/5.8/CORE"   TST.c
+cc -c   -D_REENTRANT -D_GNU_SOURCE -DTHREADS_HAVE_PIDS -DDEBIAN -fno-strict-aliasing -pipe -I/usr/local/include -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O2   -DVERSION=\"1.0\" -DXS_VERSION=\"1.0\" -fPIC "-I/usr/lib/perl/5.8/CORE"   scanner1.c
+cc -c   -D_REENTRANT -D_GNU_SOURCE -DTHREADS_HAVE_PIDS -DDEBIAN -fno-strict-aliasing -pipe -I/usr/local/include -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O2   -DVERSION=\"1.0\" -DXS_VERSION=\"1.0\" -fPIC "-I/usr/lib/perl/5.8/CORE"   scanner2.c
+Running Mkbootstrap for TST ()
+chmod 644 TST.bs
+rm -f blib/arch/auto/TST/TST.so
+LD_RUN_PATH="" cc  -shared -L/usr/local/lib TST.o scanner1.o scanner2.o  -o blib/arch/auto/TST/TST.so
+chmod 755 blib/arch/auto/TST/TST.so
+cp TST.bs blib/arch/auto/TST/TST.bs
+chmod 644 blib/arch/auto/TST/TST.bs
+Manifying blib/man3/TST.3pm
+
+$ perl ../test.pl blah blah viagra honest cooperation free preview
+JMD VIA_GAP_GRA __FRAUD_XVW FREE_PREVIEW FIN_FREE __DRUGS_ERECTILE_V VIA_GAP_GRA
+
