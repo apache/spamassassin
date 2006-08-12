@@ -124,6 +124,7 @@ $HOME_URL = "http://spamassassin.apache.org/";
   './rules',              # REMOVEFORINST
   '../rules',             # REMOVEFORINST
   '__local_state_dir__/spamassassin/__version__',
+  '__local_state_dir__',
   '__def_rules_dir__',
   '__prefix__/share/spamassassin',
   '/usr/local/share/spamassassin',
@@ -256,7 +257,37 @@ effective UID under UNIX).
 
 If none of C<rules_filename>, C<site_rules_filename>, C<userprefs_filename>, or
 C<config_text> is set, the C<Mail::SpamAssassin> module will search for the
-configuration files in the usual installed locations.
+configuration files in the usual installed locations using the below variable
+definitions which can be passed in.
+
+=over 4
+
+=item PREFIX
+
+Used as the root for certain directory paths such as:
+
+  '__prefix__/etc/mail/spamassassin'
+  '__prefix__/etc/spamassassin'
+
+Defaults to "@@PREFIX@@".
+
+=item DEF_RULES_DIR
+
+Location where the default rules are installed.  Defaults to
+"@@DEF_RULES_DIR@@".
+
+=item LOCAL_RULES_DIR
+
+Location where the local site rules are installed.  Defaults to
+"@@LOCAL_RULES_DIR@@".
+
+=item LOCAL_STATE_DIR
+
+Location of the local state directory, mainly used for installing updates via
+C<sa-update>.  Defaults to "@@LOCAL_STATE_DIR@@".
+
+=back
+
 
 =cut
 
@@ -281,8 +312,12 @@ sub new {
   dbg("generic: SpamAssassin version " . Version());
 
   # if the libs are installed in an alternate location, and the caller
-  # didn't set PREFIX, we should have an estimated guess ready ...
-  $self->{PREFIX} ||= '@@PREFIX@@';  # substituted at 'make' time
+  # didn't set PREFIX, we should have an estimated guess ready, values
+  # substituted at 'make' time
+  $self->{PREFIX}		||= '@@PREFIX@@';
+  $self->{DEF_RULES_DIR}	||= '@@DEF_RULES_DIR@@';
+  $self->{LOCAL_RULES_DIR}	||= '@@LOCAL_RULES_DIR@@';
+  $self->{LOCAL_STATE_DIR}	||= '@@LOCAL_STATE_DIR@@';
 
   $self->{conf} ||= new Mail::SpamAssassin::Conf ($self);
   $self->{plugins} = Mail::SpamAssassin::PluginHandler->new ($self);
@@ -1843,6 +1878,7 @@ E<lt>http://wiki.apache.org/spamassassin/E<gt> for more information.
 Mail::SpamAssassin::Conf(3)
 Mail::SpamAssassin::PerMsgStatus(3)
 spamassassin(1)
+sa-update(1)
 
 =head1 BUGS
 

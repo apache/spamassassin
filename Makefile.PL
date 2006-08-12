@@ -188,7 +188,12 @@ my %makefile = (
 
     'PMLIBDIRS' => [ 'lib' ],
 
-    'PM_FILTER' => '$(PREPROCESS) -Mconditional -Mvars -DVERSION="$(VERSION)" -DPREFIX="$(I_PREFIX)"',
+    'PM_FILTER' => '$(PREPROCESS) -Mconditional -Mvars -DVERSION="$(VERSION)" \
+    	-DPREFIX="$(I_PREFIX)" \
+	-DDEF_RULES_DIR="$(I_DATADIR)" \
+	-DLOCAL_RULES_DIR="$(I_CONFDIR)" \
+	-DLOCAL_STATE_DIR="$(I_LOCALSTATEDIR)" \
+	',
 
     'macro' => {
         DATAFILES => $datafiles,
