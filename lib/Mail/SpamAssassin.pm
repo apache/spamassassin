@@ -124,7 +124,6 @@ $HOME_URL = "http://spamassassin.apache.org/";
   './rules',              # REMOVEFORINST
   '../rules',             # REMOVEFORINST
   '__local_state_dir__/__version__',
-  '__local_state_dir__',
   '__def_rules_dir__',
   '__prefix__/share/spamassassin',
   '/usr/local/share/spamassassin',
