@@ -1434,6 +1434,40 @@ sub trap_sigalrm_fully {
 
 ###########################################################################
 
+# Removes any normal perl-style regexp delimiters at
+# the start and end, and modifiers at the end (if present).
+# If modifiers are found, they are inserted into the pattern using
+# the /(?i)/ idiom.
+
+sub regexp_remove_delimiters {
+  my ($re) = @_;
+
+  my $mods = '';
+  if ($re =~ s/^m{//) {
+    $re =~ s/}([a-z]*)$//; $mods = $1;
+  }
+  elsif ($re =~ s/^m\(//) {
+    $re =~ s/\)([a-z]*)$//; $mods = $1;
+  }
+  elsif ($re =~ s/^m<//) {
+    $re =~ s/>([a-z]*)$//; $mods = $1;
+  }
+  elsif ($re =~ s/^m(\W)//) {
+    $re =~ s/\Q$1\E([a-z]*)$//; $mods = $1;
+  }
+  elsif ($re =~ s/^\/(.*)\/([a-z]*)$/$1/) {
+    $mods = $2;
+  }
+
+  if ($mods) {
+    $re = "(?".$mods.")".$re;
+  }
+
+  return $re;
+}
+
+###########################################################################
+
 sub get_my_locales {
   my ($ok_locales) = @_;
 
