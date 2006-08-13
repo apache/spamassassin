@@ -8,7 +8,7 @@ use File::Copy;
 use File::Path;
 use Getopt::Long;
 
-use constant MAX_RULES => 100;
+use constant MAX_RULES => 60;
 
 our $NAME;
 our $FORCE;
@@ -374,16 +374,17 @@ sub fixup_re {
   # print "FIXUP: $re\n";
   
   my $output = "";
-  my $TOK = qr([\{\^\$\"\(\[\|\\\)\.\+\*]);
+  my $TOK = qr([\{\^\$\"\(\)\[\|\\\.\+\*]);
   
   my $STATE;
   while ($re =~ /\G(.*?)($TOK)/gc) {
     my $pre = $1;
     my $tok = $2;
-    
+
     if (length($pre)) {
       $output .= "\"$pre\"";
     }
+
     if ($tok eq "(") {
       # Grouping
       my $origpos = pos $re;
@@ -402,6 +403,9 @@ sub fixup_re {
     }
     elsif ($tok eq "|") {
       $output .= " | ";
+    }
+    elsif ($tok eq ")") {
+      $output .= " ) ";
     }
     elsif ($tok eq "[") {
       # chars
@@ -530,9 +534,12 @@ sub find_balanced_group {
   if (!defined(pos($re))) {
     $output .= $re;
   }
+  elsif (pos($re) <= length($re)) {
+    $output .= substr($re, pos($re));
+  }
 
   # we hit end-of-string; in other words, it was a balanced re anyway
-  # warn "JMD balanced $re => $output";
-  return $output;
+  # warn "JMD fully balanced $re";
+  return $re;
 }
 
