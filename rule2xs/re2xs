@@ -386,8 +386,15 @@ sub fixup_re {
     }
     if ($tok eq "(") {
       # Grouping
-      if ($re =~ /\G(.*?)\)/gc) {
-        $output .= "( " . fixup_re($1) . " )";
+      my $origpos = pos $re;
+      if ($re =~ /\G(.*)\)/gc) {
+        # trim that down, if necessary, to just the matching
+        # (...) substring.
+        my $subre = find_balanced_group($1);
+        $output .= "( " . fixup_re($subre) . " )";
+        # reset m//g offset to the end of that group, so that
+        # the next token is taken from the right place
+        pos $re = $origpos + length($subre) + 1;
       }
       else {
         die "re: $re doesn't have group closing bracket";
@@ -465,5 +472,67 @@ sub handle_fixup_error {
   if ($strat) {
     warn "skipped: $regexp: $strat";
   }
+}
+
+sub find_balanced_group {
+  my ($re) = @_;
+
+  # $re could be:
+  #
+  #   foo
+  #   foo|bar|baz
+  #   foo(aa|bb|cc)|bar|baz
+  #   foo(aa|(bb|cc|ddd))|bar(e|f)
+  #
+  # or, due to inefficient regexp parsing above:
+  #
+  #   foo) totally_unrelated_text (next_grouping => "foo"
+  #
+  # all we have to do here is ensure that we correctly pick out
+  # the balanced group.
+
+  my $output = "";
+  my $TOK = qr([\(\\\)]);
+  my $level = 0;
+  
+  my $STATE;
+  while ($re =~ /\G(.*?)($TOK)/gc) {
+    my $pre = $1;
+    my $tok = $2;
+
+    if (length($pre)) {
+      $output .= $pre;
+    }
+
+    if ($tok eq "(") {
+      $output .= $tok;
+      $level++;
+    }
+    elsif ($tok eq ")") {
+      $level--;
+      if ($level < 0) {
+        # we found the matching close-bracket; stop searching here
+        # warn "JMD partial $re => $output";
+        return $output;
+      }
+      $output .= $tok;
+    }
+    elsif ($tok eq '\\') {
+      $re =~ /\G(.)/gc or die "\\ at end of string!";
+      my $esc = $1;
+      $output .= $tok.$esc;
+    }
+    else {
+      $output .= $tok;
+    }
+  }
+
+  if (!defined(pos($re))) {
+    $output .= $re;
+  }
+
+  # we hit end-of-string; in other words, it was a balanced re anyway
+  # warn "JMD balanced $re => $output";
+  return $output;
 }
 
