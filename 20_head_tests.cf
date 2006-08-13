@@ -134,7 +134,7 @@ describe MSGID_OUTLOOK_INVALID	Message-Id is fake (in Outlook Express format)
 
 # catches a few spams missed by MSGID_OUTLOOK_INVALID
 header __HAS_OUTLOOK_IN_MAILER	X-Mailer =~ /\bMSCRM\b|Microsoft (?:CDO|Outlook|Office Outlook)\b/
-meta MSGID_DOLLARS		(__OUTLOOK_DOLLARS_MSGID && !__HAS_OUTLOOK_IN_MAILER && !__UNUSABLE_MSGID)
+meta MSGID_DOLLARS		(__OE_MSGID_2 && !__HAS_OUTLOOK_IN_MAILER && !__UNUSABLE_MSGID)
 describe MSGID_DOLLARS		Message-Id has pattern used in spam
 
 # negative lookahead exempts this MUA from circa 1997-2000 
