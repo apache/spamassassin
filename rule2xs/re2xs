@@ -8,7 +8,7 @@ use File::Copy;
 use File::Path;
 use Getopt::Long;
 
-use constant MAX_RULES => 200;
+use constant MAX_RULES => 100;
 
 our $NAME;
 our $FORCE;
@@ -214,7 +214,15 @@ EOT
 print "Running re2c...\n";
 for (1..$numscans) {
   print "$_ / $numscans ";
-  system("time re2c -i -b -o scanner$_.c scanner$_.re");
+
+  my $cmd = "time re2c -i -b -o scanner$_.c scanner$_.re";
+  system $cmd;
+
+  # this must be fatal; it can result in corrupt output modules missing
+  # scannerN() functions
+  if ($? >> 8 != 0) {
+    die "'$cmd' failed, dying";
+  }
 }
 
 open(FILE, ">Makefile.PL") || die "write Makefile.PL: $!";
@@ -426,7 +434,7 @@ sub fixup_re {
       $re =~ /\G(.)/gc or die "\\ at end of string!";
       my $esc = $1;
       if ($esc !~ /^
-                [\.\@\$\(\)\/\-\+\*\!_]
+                [\.\@\$\(\)\/\-\+\*\^\?\!_]
                 $/x)
       {
         die "Unsupported escape: \\$esc";

@@ -134,69 +134,89 @@ sub run_body_hack {
   my $conf = $scanner->{conf};
   return unless $conf->{zoom_ruletypes_available}->{$ruletype};
 
-  # create a new ref to a hash copy of {zoom_disable_basic_regexp_rule};
-  # this will be given to the $scanner object below after our scan
-  my $skiprulesptr = \%{$conf->{zoom_disable_basic_regexp_rule}};
+  $scanner->{skip_body_rules} = $conf->{zoom_disable_basic_regexp_rule};
+
   dbg("zoom: run_body_hack for $ruletype start");
 
   my $scoresptr = $conf->{scores};
   my $modname = "Mail::SpamAssassin::CompiledRegexps::".$ruletype;
 
-  foreach my $line (@{$params->{lines}}) {
-
-    # TODO: make rules case-sensitive, this lc operation is probably
-    # expensive!
-
+  {
     no strict "refs";
-    my $results = &{$modname.'::scan'}(lc $line);
-    use strict "refs";
+    foreach my $line (@{$params->{lines}})
+    {
+      # unfortunately, calling lc() here seems to be the fastest
+      # way to support this and still work with UTF-8 ok
+      my $results = &{$modname.'::scan'}(lc $line);
+      my %alreadydone = ();
 
-    foreach my $rulename (@{$results}) {
-      next unless $scoresptr->{$rulename};
-      dbg("zoom: re2c form of $rulename fired");
-      # allow the rule to be run as a body rule, if the re2c form hit
-      $skiprulesptr->{$rulename} = 0;
+      foreach my $rulename (@{$results})
+      {
+        # only try each rule once per line
+        next if exists $alreadydone{$rulename};
+        $alreadydone{$rulename} = undef;
+
+        # ignore 0-scored rules, of course
+        next unless $scoresptr->{$rulename};
+
+        # dbg("zoom: base found for $rulename");
+
+        # run the real regexp -- on this line alone
+        &{'Mail::SpamAssassin::PerMsgStatus::'.$rulename.'_one_line_body_test'}
+                    ($scanner, $line);
+      }
     }
+    use strict "refs";
   }
 
   dbg("zoom: run_body_hack for $ruletype done");
-  $scanner->{skip_body_rules} = $skiprulesptr;
 }
 
 ###########################################################################
 
 sub extract_all {
   my ($self, $conf, $rules, $ruletype) = @_;
-  my $yes = 0;
-  my $no = 0;
   my @good_bases = ();
   my @failed = ();
+  my $yes = 0;
+  my $no = 0;
 
   dbg("zoom: base extraction start for type $ruletype");
 
   $conf->{env_regexp_dump_file} =~ /^(.*)$/;
   my $dumpfile = $1;
 
+  # attempt to find good "base strings" (simplified regexp subsets) for each
+  # regexp.  We try looking at the regexp from both ends, since there
+  # may be a good long string of text at the end of the rule.
+
+  # require this many chars in a base string, for it to be viable
+  my $min_chars = 4;
+
   foreach my $name (keys %{$rules}) {
     my $rule = $rules->{$name};
-    my $orig = $rule;
 
     my $base  = $self->extract_base($rule, 0);
     my $base2 = $self->extract_base($rule, 1);
-    if ($base2 && (!$base || (length $base2 > length $base))) {
+
+    my $len   = $base  ? $self->count_regexp_statements($base) : 0;
+    my $len2  = $base2 ? $self->count_regexp_statements($base2) : 0;
+
+    if ($base2 && (!$base || ($len2 > $len))) {
       $base = $base2;
+      $len = $len2;
     }
 
-    if (length $base < 3) { $base = undef; }
+    if (!$base || $len < $min_chars) { $base = undef; }
 
     if ($base) {
-      # dbg("zoom: YES <base>$base</base> <origrule>$orig</origrule>");
-      push @good_bases, { base => $base, orig => $orig, name => $name };
+      # dbg("zoom: YES <base>$base</base> <origrule>$rule</origrule>");
+      push @good_bases, { base => $base, orig => $rule, name => $name };
       $yes++;
     }
     else {
-      dbg("zoom: NO $orig");
-      push @failed, { orig => $orig };
+      dbg("zoom: NO $rule");
+      push @failed, { orig => $rule };
       $no++;
     }
   }
@@ -215,7 +235,6 @@ sub extract_all {
   open (OUT, ">$dumpfile") or die "cannot write to $dumpfile!";
   print OUT "name $ruletype\n";
 
-  my %newbases = ();
   foreach my $set1 (@good_bases) {
     my $base1 = $set1->{base};
     my $orig1 = $set1->{orig};
@@ -225,6 +244,8 @@ sub extract_all {
 
     foreach my $set2 (@good_bases) {
       next if ($set1 == $set2);
+      next if ($set1->{name} =~ /\b\Q$set2->{name}\E\b/);
+      next if ($set2->{name} =~ /\b\Q$set1->{name}\E\b/);
 
       my $base2 = $set2->{base};
       next if ($base2 eq '');
@@ -233,6 +254,13 @@ sub extract_all {
 
       $set1->{name} .= " ".$set2->{name};
 
+      if ($base1 eq $base2) {
+        # an exact duplicate!  kill the latter entirely
+        $set2->{name} = '';
+        $set2->{base} = '';
+      }
+      # otherwise, base2 is just a subset of base1
+
       # dbg("zoom: subsuming '$base2' into '$base1': $set1->{name}");
     }
   }
@@ -240,13 +268,14 @@ sub extract_all {
   foreach my $set (@good_bases) {
     my $base = $set->{base};
     my $key  = $set->{name};
+    next unless $base;
     print OUT "r $base:$key\n";
   }
   close OUT or die "close failed on $dumpfile!";
 
-  # TODO: run re2xs
+  # TODO: run re2xs automatically here
 
-  dbg ("zoom: base extraction complete for $ruletype: yes=$yes no=$no");
+  warn ("zoom: base extraction complete for $ruletype: yes=$yes no=$no\n");
 }
 
 ###########################################################################
@@ -263,24 +292,27 @@ sub extract_base {
   my $is_reversed = shift;
 
   my $orig = $rule;
-
   $rule = Mail::SpamAssassin::Util::regexp_remove_delimiters($rule);
 
-  # remove those mods, keep for later
+  # remove the regexp modifiers, keep for later
   my $mods = '';
   if ($rule =~ s/^(\(?[a-z]*\))//) { $mods = $1; }
 
   # now: simplify aspects of the regexp.  Bear in mind that we can
   # simplify as long as we cause the regexp to become more general;
   # more hits is OK, since false positives will be discarded afterwards
-  # anyway.
+  # anyway.  Simplification that causes the regexp to *not* hit
+  # stuff that the "real" rule would hit, however, is a bad thing.
 
-  # treat all rules as lowercase for purposes of term extraction
-  $rule = lc $rule;
-  $mods =~ s/i//;
+  # treat all rules as lowercase for purposes of term extraction?
+  my $output_casei = 1;
+  if ($output_casei) {
+    $rule = lc $rule;
+    $mods =~ s/i//;
 
-  # always case-i: /A(?i:ct) N(?i:ow)/ => /Act Now/
-  $rule =~ s/(?<!\\)\(\?i\:(.*?)\)/$1/gs;
+    # always case-i: /A(?i:ct) N(?i:ow)/ => /Act Now/
+    $rule =~ s/(?<!\\)\(\?i\:(.*?)\)/$1/gs;
+  }
 
   # remove /m and /s modifiers
   $mods =~ s/m//;
@@ -295,7 +327,7 @@ sub extract_base {
   # truncation regexp below is pretty simple-minded, that's ok.
   if ($is_reversed) {
     $rule = join ('', reverse (split '', $rule));
-    $rule =~ s/(.)\\/\\$1/gs;
+    $rule = de_reverse_multi_char_regexp_statements($rule);
   }
 
   # truncate the pattern at the first unhandleable metacharacter
@@ -303,34 +335,87 @@ sub extract_base {
   $rule =~ s/(?<!\\)(?:
               \^|
               \$|
-              \.|
               \(|
               \)|
-              .\?|
-              \+|
-              \*|
               \:|
-              \{|
-              \}|
-              \\\w|
-              \]|
-              \[
+              \\\w
             ).*$//gsx;
 
   if ($is_reversed) {
-    # de-reverse back into correct order!
-    $rule =~ s/\\(.)/$1\\/gs;
     $rule = join ('', reverse (split '', $rule));
+    $rule = de_reverse_multi_char_regexp_statements($rule);
   }
 
-  # return for things we know we can't handle
+  # kill quantifiers right at the start of the string
+  $rule =~ s/^(?:
+              \.?[\*\?\+] |
+              \.?\{?[^\{]*\} |
+              [^\(]*\) |
+              [^\[]*\]
+            )+//gsx;
+
+  # return for things we know we can't handle:
   if ($rule =~ /\|/) {
     # /time to refinance|refinanc\w{1,3}\b.{0,16}\bnow\b/i
     return;
   }
 
+  # lookaheads that are just too far for the re2c parser
+  # r your .{0,40}account .{0,40}security
+  if ($rule =~ /\.\{(\d+),?(\d+?)\}/ and ($1+$2 > 20)) {
+    return;
+  }
+
+  # re2xs doesn't like escaped brackets
+  if ($rule =~ /\\:/) {
+    return;
+  }
+
   # finally, reassemble a usable regexp
   $rule = $mods . $rule;
+
+  return $rule;
+}
+
+sub count_regexp_statements {
+  my $self = shift;
+  my $rule = shift;
+
+  # collapse various common metachar sequences into 1 char,
+  # or their shortest form
+  $rule =~ s/(?<!\\)(?:
+            \[.+?\][\?\*]|
+            \{.+?\}[\?\*]
+          )//gs;
+
+  $rule =~ s/\[.+?\]/R/gs;
+  $rule =~ s/\{.+?\}/Q/gs;
+  $rule =~ s/.\?//gs;
+  $rule =~ s/.\*//gs;
+
+  return length $rule;
+}
+
+sub de_reverse_multi_char_regexp_statements {
+  my $rule = shift;
+
+  # fix:
+  #    "S\" => "\S"
+  #    "+S\" => "\S+"
+  #    "}41,2{S\" => "\S{2,14}"
+  #    "?}41,2{S\" => "\S{2,14}?"
+
+  $rule =~ s/
+        (
+          \? |
+        )
+        (
+          \}(?:\d*\,)?\d*\{ |
+          \* |
+          \+ |
+          \? |
+        )
+        (.)\\/\\$3$2$1/gsx;
 
   return $rule;
 }
