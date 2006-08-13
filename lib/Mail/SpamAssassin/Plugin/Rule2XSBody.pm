@@ -105,10 +105,22 @@ sub check_all {
   }
 
   if ($found) {
+    # report how many of the zoomed rules could be used; when this
+    # figure gets low, it's a good indication that the rule2xs
+    # module needs to be regenerated and rebuilt.
+
+    my $totalhasrules = scalar keys %{$hasrules};
+    my $pc_zoomed   = ($found / ($totalhasrules || .001)) * 100;
+
+    dbg("zoom: $found compiled rules are available for type $ruletype; ".
+        "$pc_zoomed\% were usable");
+
     $conf->{zoom_ruletypes_available} ||= { };
     $conf->{zoom_ruletypes_available}->{$ruletype} = 1;
-    dbg("zoom: $found compiled rules are available for type $ruletype");
+    return 1;
   }
+
+  return 0;
 }
 
 sub run_body_hack {
