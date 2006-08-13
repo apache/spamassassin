@@ -213,9 +213,10 @@ EOT
 
 print "Running re2c...\n";
 for (1..$numscans) {
-  print "$_ / $numscans ";
+  print "$_ / $numscans\n";
 
   my $cmd = "time re2c -i -b -o scanner$_.c scanner$_.re";
+  print "$cmd\n";
   system $cmd;
 
   # this must be fatal; it can result in corrupt output modules missing
