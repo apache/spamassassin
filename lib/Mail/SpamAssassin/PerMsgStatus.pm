@@ -1956,6 +1956,17 @@ sub do_body_tests {
              }
            }
     }
+
+
+    sub '.$rulename.'_one_line_body_test {
+             pos $_[1] = 0;
+             '.$self->hash_line_for_rule($rulename).'
+             while ($_[1] =~ '.$pat.'g) { 
+                my $self = $_[0];
+                $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body"); 
+                '.$self->hit_rule_plugin_code($rulename, "body", "return") . '
+             }
+    }
     ';
   }
 
