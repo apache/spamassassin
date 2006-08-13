@@ -1,0 +1,21 @@
+#!/bin/sh -x
+
+sudo true
+
+date
+RULE_REGEXP_DUMP_FILE=re.in ./spamassassin --lint || exit 1
+
+date
+(
+cd rule2xs
+./re2xs --force ../re.in || exit 1
+)
+
+date
+(
+cd rule2xs/Mail-SpamAssassin-CompiledRegexps-body_0
+perl Makefile.PL || exit 1
+make || exit 1
+date
+sudo make install || exit 1
+)

@@ -1697,7 +1697,7 @@ sub get {
 ###########################################################################
 
 sub start_rules_plugin_code {
-  my ($self, $ruletype) = @_;
+  my ($self, $ruletype, $pri) = @_;
 
   my $evalstr = '
 
@@ -1710,7 +1710,7 @@ sub start_rules_plugin_code {
     $evalstr .= '
 
       $self->{main}->call_plugins ("start_rules", { permsgstatus => $self, ruletype
-=> \''.$ruletype.'\' });
+=> \''.$ruletype.'\', priority => $pri });
 
     ';
   }
@@ -1799,7 +1799,7 @@ sub do_head_tests {
     return;
   }
 
-  my $evalstr = $self->start_rules_plugin_code("header");
+  my $evalstr = $self->start_rules_plugin_code("header", $priority);
   my $evalstr2 = '';
 
   # hash to hold the rules, "header\tdefault value" => rulename
@@ -1915,12 +1915,26 @@ sub do_body_tests {
   }
 
   # build up the eval string...
-  my $evalstr = $self->start_rules_plugin_code("body");
+  my $evalstr = $self->start_rules_plugin_code("body", $priority);
   my $evalstr2 = '';
+
+
+  $evalstr .= '
+
+        $self->{main}->call_plugins("run_body_hack", {
+                permsgstatus => $self, ruletype => "body",
+                priority => '.$priority.', lines => \@_
+              });
+        my $disabled = $self->{skip_body_rules};
+
+  ';
+
+
 
   while (my($rulename, $pat) = each %{$self->{conf}{body_tests}->{$priority}}) {
     $evalstr .= '
-      if ($scoresptr->{q{'.$rulename.'}}) {
+      if (!$disabled->{q{'.$rulename.'}} && $scoresptr->{q{'.$rulename.'}})
+      {
         '.$rulename.'_body_test($self,@_);
         '.$self->ran_rule_plugin_code($rulename, "body").'
       }
@@ -2328,7 +2342,7 @@ sub do_body_uri_tests {
   }
 
   # otherwise build up the eval string...
-  my $evalstr = $self->start_rules_plugin_code("uri");
+  my $evalstr = $self->start_rules_plugin_code("uri", $priority);
   my $evalstr2 = '';
 
   while (my($rulename, $pat) = each %{$self->{conf}{uri_tests}->{$priority}}) {
@@ -2419,7 +2433,7 @@ sub do_rawbody_tests {
   }
 
   # build up the eval string...
-  my $evalstr = $self->start_rules_plugin_code("rawbody");
+  my $evalstr = $self->start_rules_plugin_code("rawbody", $priority);
   my $evalstr2 = '';
 
   while (my($rulename, $pat) = each %{$self->{conf}{rawbody_tests}->{$priority}}) {
@@ -2511,7 +2525,7 @@ sub do_full_tests {
   }
 
   # build up the eval string...
-  my $evalstr = $self->start_rules_plugin_code("full");
+  my $evalstr = $self->start_rules_plugin_code("full", $priority);
 
   while (my($rulename, $pat) = each %{$self->{conf}{full_tests}->{$priority}}) {
     $evalstr .= '
@@ -2870,7 +2884,7 @@ $evalstr .= q{ my $function; };
     if ($have_start_rules) {
       $evalstr .= '
         $self->{main}->call_plugins("start_rules", {
-                permsgstatus => $self, ruletype => "eval"
+                permsgstatus => $self, ruletype => "eval", priority => $priority
               });
       ';
     }
