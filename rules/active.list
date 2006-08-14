@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-jm bb-zmi cthielen daf dos parkerm theo wtogami
+# with results from: bb-doc bb-jm bb-zmi cthielen daf parkerm theo wtogami zmi
 
 # good enough
 ADVANCE_FEE_3
@@ -18,6 +18,18 @@ BAD_ENC_HEADER
 
 # good enough
 BANG_OPRAH
+
+# good enough
+BASE64_LENGTH_78
+
+# good enough
+BASE64_LENGTH_79
+
+# good enough
+BASE64_LENGTH_80
+
+# good enough
+BASE64_LENGTH_90
 
 # tflags learn
 BAYES_00
@@ -47,12 +59,6 @@ BAYES_95
 BAYES_99
 
 # good enough
-BODY_ENHANCEMENT2
-
-# good enough
-CONFIRMED_FORGED
-
-# good enough
 CUM_SHOT
 
 # good enough
@@ -78,6 +84,27 @@ DATE_IN_PAST_96_XX
 
 # good enough
 DATE_SPAMWARE_Y2K
+
+# good enough
+DC_GIF_MULTI_LARGO
+
+# good enough
+DC_GIF_UNO_LARGO
+
+# good enough
+DC_IMAGE_SPAM_HTML
+
+# good enough
+DC_IMAGE_SPAM_TEXT
+
+# good enough
+DC_IMG_HTML_RATIO
+
+# good enough
+DC_IMG_TEXT_RATIO
+
+# good enough
+DC_PNG_UNO_LARGO
 
 # good enough
 DEAR_WINNER
@@ -308,16 +335,10 @@ FROM_ALL_NUMS
 FROM_BLANK_NAME
 
 # good enough
-FROM_DOMAIN_NOVOWEL
-
-# good enough
 FROM_ENDS_IN_NUMS
 
 # good enough
 FROM_HAS_MIXED_NUMS
-
-# good enough
-FROM_HAS_ULINE_NUMS
 
 # good enough
 FROM_ILLEGAL_CHARS
@@ -473,9 +494,6 @@ INVALID_MSGID
 INVALID_TZ_CST
 
 # good enough
-INVALID_TZ_GMT
-
-# good enough
 INVESTMENT_ADVICE
 
 # good enough
@@ -542,9 +560,6 @@ MIME_BAD_ISO_CHARSET
 MIME_BASE64_BLANKS
 
 # good enough
-MIME_BASE64_NO_NAME
-
-# good enough
 MIME_BASE64_TEXT
 
 # good enough
@@ -567,6 +582,9 @@ MIME_HTML_MOSTLY
 
 # good enough
 MISSING_MIMEOLE
+
+# good enough
+MISSING_MIME_HB_SEP
 
 # good enough
 MORE_SEX
@@ -603,6 +621,9 @@ MSGID_YAHOO_CAPS
 
 # good enough
 MULTIPART_ALT_NON_TEXT
+
+# good enough
+NOT_ADVISOR
 
 # tflags net
 NO_DNS_FOR_FROM
@@ -659,7 +680,13 @@ RATWARE_GECKO_BUILD
 RATWARE_HASH_2
 
 # good enough
+RATWARE_HASH_2_BUG2108
+
+# good enough
 RATWARE_HASH_2_V2
+
+# good enough
+RATWARE_HASH_2_V2_BUG2108
 
 # good enough
 RATWARE_MOZ_MALFORMED
@@ -860,9 +887,6 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
-SPOOF_COM2COM
-
-# good enough
 SPOOF_COM2OTH
 
 # good enough
@@ -893,10 +917,10 @@ SUBJECT_IN_WHITELIST
 SUBJECT_NEEDS_ENCODING
 
 # good enough
-SUBJECT_NOVOWEL
+SUBJECT_SEXUAL
 
 # good enough
-SUBJECT_SEXUAL
+SUBJ_AS_SEEN
 
 # good enough
 SUBJ_ILLEGAL_CHARS
@@ -974,10 +998,10 @@ TVD_FUZZY_PHARMACEUTICAL
 TVD_FUZZY_SYMBOL
 
 # good enough
-TVD_FW_GRAPHIC_NAME_LONG
+TVD_FW_GRAPHIC_ID3
 
 # good enough
-TVD_FW_GRAPHIC_NAME_MID
+TVD_FW_GRAPHIC_ID3_2
 
 # good enough
 TVD_FW_MESG1
@@ -990,9 +1014,6 @@ TVD_INCREASE_SIZE
 
 # good enough
 TVD_LINK_SAVE
-
-# good enough
-TVD_LONG_WORD5
 
 # good enough
 TVD_NOT_SATISFIED
@@ -1085,40 +1106,10 @@ TVD_VISIT_PHARMA
 TVD_VIS_HIDDEN
 
 # good enough
-BASE64_LENGTH_78
+DOS_STOCK_O_PRICE
 
 # good enough
-BASE64_LENGTH_79
-
-# good enough
-BASE64_LENGTH_80
-
-# good enough
-BASE64_LENGTH_90
-
-# good enough
-DC_GIF_MULTI_LARGO
-
-# good enough
-DC_GIF_UNO_LARGO
-
-# good enough
-DC_IMAGE_SPAM_HTML
-
-# good enough
-DC_IMAGE_SPAM_TEXT
-
-# good enough
-DC_IMG_HTML_RATIO
-
-# good enough
-DC_IMG_TEXT_RATIO
-
-# good enough
-DC_PNG_UNO_LARGO
-
-# good enough
-DOS_YOUR_PLACE
+FB_OBFU_URI_COM
 
 # good enough
 FORGED_IMS_HTML
@@ -1133,13 +1124,7 @@ FORGED_OUTLOOK_HTML
 FORGED_OUTLOOK_TAGS
 
 # good enough
-KAM_STOCKTIP9
-
-# good enough
-RATWARE_HASH_2_BUG2108
-
-# good enough
-RATWARE_HASH_2_V2_BUG2108
+HELO_IPNNN_COM
 
 # good enough
 RATWARE_MS_HASH
@@ -1148,19 +1133,16 @@ RATWARE_MS_HASH
 RATWARE_OUTLOOK_NONAME
 
 # good enough
-TVD_FW_GRAPHIC_ID3
+TVD_FW_GRAPHIC_ID1
 
 # good enough
-TVD_FW_GRAPHIC_ID3_2
+TVD_FW_GRAPHIC_ID2
 
 # good enough
 UNCLAIMED_MONEY
 
 # good enough
 UNCLOSED_BRACKET
-
-# good enough
-UNIQUE_WORDS
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1173,6 +1155,9 @@ UPPERCASE_50_75
 
 # good enough
 UPPERCASE_75_100
+
+# good enough
+URG_BIZ
 
 # tflags net
 URIBL_AB_SURBL
@@ -1203,9 +1188,6 @@ URIBL_SC_SURBL
 
 # tflags net
 URIBL_WS_SURBL
-
-# good enough
-URI_4YOU
 
 # good enough
 URI_L_PHP
