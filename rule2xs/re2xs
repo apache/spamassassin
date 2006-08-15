@@ -222,7 +222,9 @@ for (1..$numscans) {
   # this must be fatal; it can result in corrupt output modules missing
   # scannerN() functions
   if ($? >> 8 != 0) {
-    die "'$cmd' failed, dying";
+    my $cwd = `pwd`; chop $cwd;
+    die "'$cmd' failed, dying!\n".
+        "see $cwd/scanner$_.re\n";
   }
 }
 
@@ -374,7 +376,7 @@ sub fixup_re {
   # print "FIXUP: $re\n";
   
   my $output = "";
-  my $TOK = qr([\{\^\$\"\(\)\[\|\\\.\+\*]);
+  my $TOK = qr([\{\^\$\"\(\)\[\|\\\.\+\*\?]);
   
   my $STATE;
   while ($re =~ /\G(.*?)($TOK)/gc) {
@@ -432,6 +434,9 @@ sub fixup_re {
     }
     elsif ($tok eq '*') {
       $output .= '* ';
+    }
+    elsif ($tok eq '?') {
+      $output .= '? ';
     }
     elsif ($tok eq '+') {
       $output .= '+ ';
