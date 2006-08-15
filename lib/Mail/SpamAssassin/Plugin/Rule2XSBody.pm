@@ -296,7 +296,14 @@ sub extract_base {
 
   # remove the regexp modifiers, keep for later
   my $mods = '';
-  if ($rule =~ s/^(\(?[a-z]*\))//) { $mods = $1; }
+  while ($rule =~ s/^\(\?([a-z]*)\)//) { $mods .= $1; }
+
+  # modifier removal
+  while ($rule =~ s/^\(\?-([a-z]*)\)//) {
+    foreach my $modchar (split '', $mods) {
+      $mods =~ s/$modchar//g;
+    }
+  }
 
   # now: simplify aspects of the regexp.  Bear in mind that we can
   # simplify as long as we cause the regexp to become more general;
@@ -312,14 +319,36 @@ sub extract_base {
 
     # always case-i: /A(?i:ct) N(?i:ow)/ => /Act Now/
     $rule =~ s/(?<!\\)\(\?i\:(.*?)\)/$1/gs;
+
+    # always case-i: /A(?-i:ct)/ => /Act/
+    $rule =~ s/(?<!\\)\(\?-i\:(.*?)\)/$1/gs;
+
+    # remove (?i)
+    $rule =~ s/\(\?i\)//gs;
   }
 
   # remove /m and /s modifiers
   $mods =~ s/m//;
   $mods =~ s/s//;
 
+  # remove (^|\b)'s
+  # T_KAM_STOCKTIP23 /(EXTREME INNOVATIONS|(^|\b)EXTI($|\b))/is
+  $rule =~ s/\(\^\|\\b\)//gs;
+  $rule =~ s/\(\$\|\\b\)//gs;
+  $rule =~ s/\(\\b\|\^\)//gs;
+  $rule =~ s/\(\\b\|\$\)//gs;
+
   # remove \b's
   $rule =~ s/\\b//gs;
+
+  # remove the "?=" trick
+  # (?=[dehklnswxy])(horny|nasty|hot|wild|young|....etc...)
+  $rule =~ s/\(\?\=\[[^\]]+\]\)//gs;
+
+  # if there are anchors, give up; we can't get much 
+  # faster than these anyway
+  return if $rule =~ /^\(?(?:\^|\\A)/;
+  return if $rule =~ /(?:\$|\\Z)\)?$/;
 
   # here's the trick; we can use the truncate regexp below simply by
   # reversing the string and taking care to fix "\z" 2-char escapes.
@@ -330,15 +359,26 @@ sub extract_base {
     $rule = de_reverse_multi_char_regexp_statements($rule);
   }
 
+  my $keep_alternations = 1;    # /(foo|bar|baz)/
+  my $keep_quantifiers = 0;     # /foo.*bar/ or /foo*bar/
+
   # truncate the pattern at the first unhandleable metacharacter
   # or range
   $rule =~ s/(?<!\\)(?:
-              \^|
-              \$|
+              \(\?\!|
+              \\[abce-rt-vx-z]|
+              \\[ABCE-RT-VX-Z]
+            ).*$//gsx;
+
+  $keep_quantifiers or $rule =~ s/(?<!\\)(?:
+              \*|
+              \+|
+              \{
+            ).*$//gsx;
+
+  $keep_alternations or $rule =~ s/(?<!\\)(?:
               \(|
-              \)|
-              \:|
-              \\\w
+              \)
             ).*$//gsx;
 
   if ($is_reversed) {
@@ -346,18 +386,92 @@ sub extract_base {
     $rule = de_reverse_multi_char_regexp_statements($rule);
   }
 
-  # kill quantifiers right at the start of the string
+  # drop this one, after the reversing
+  $rule =~ s/\(\?\!.*$//gsx;
+
+  # simplify (?:..) to (..)
+  $rule =~ s/\(\?:/\(/g;
+
+  # simplify (..)? and (..|) to (..|z{0})
+  # this wierd construct is to work around an re2c bug; (..|) doesn't
+  # do what it should
+  $rule =~ s/\((.*?)\)\?/\($1\|z{0}\)/gs;
+  $rule =~ s/\((.*?)\|\)/\($1\|z{0}\)/gs;
+  $rule =~ s/\(\|(.*?)\)/\($1\|z{0}\)/gs;
+
+  # re2xs doesn't like escaped brackets
+  $rule =~ s/\\:.*//g;
+
+  # replace \s, \d, \S with char classes that (nearly) match them
+  # TODO: \w, \W need to know about utf-8, ugh
+
+  # [a-f\s]
+  $rule =~ s/(\[[^\]]*)\\s([^\]]*\])/$1 \\t\\n$2/gs;
+  # [a-f\S]: we can't support this, cut the string here
+  $rule =~ s/(\[[^\]]*)\\S([^\]]*\]).*//gs;
+  $rule =~ s/(\[[^\]]*)\\d([^\]]*\])/${1}0-9$2/gs;
+  $rule =~ s/(\[[^\]]*)\\D([^\]]*\]).*//gs;
+  $rule =~ s/(\[[^\]]*)\\w([^\]]*\])/${1}a-z0-9$2/gs;
+  $rule =~ s/(\[[^\]]*)\\W([^\]]*\]).*//gs;
+
+  # \s, etc. outside of existing char class blocks
+  $rule =~ s/\\S/[^ \\t\\n]/gs;
+  $rule =~ s/\\s/[ \\t\\n]/gs;
+  $rule =~ s/\\S/[^ \\t\\n]/gs;
+  $rule =~ s/\\d/[0-9]/gs;
+  $rule =~ s/\\D/[^0-9]/gs;
+  $rule =~ s/\\w/[_a-z0-9]/gs;
+  $rule =~ s/\\W/[^_a-z0-9]/gs;
+
+  # exit early if the pattern starts with a class
+  # r ([a-z0-9]+\*[,[ \t\n]]+){2}:TVD_BODY_END_STAR
+  if ($rule =~ /^\((?:
+              \.?[\*\?\+] |
+              \.?\{?[^\{]*\} |
+              [^\(]*\) |
+              \[?[^\[]*\]
+            )/sx)
+  {
+    return;
+  }
+
+  # kill quantifiers right at the start of the string.
+  # this (a) reduces algorithmic complexity of the produced code,
+  # and (b) can also improve overall speed as a side-effect of (a)
   $rule =~ s/^(?:
               \.?[\*\?\+] |
               \.?\{?[^\{]*\} |
               [^\(]*\) |
-              [^\[]*\]
+              \[?[^\[]*\]
             )+//gsx;
 
-  # return for things we know we can't handle:
-  if ($rule =~ /\|/) {
-    # /time to refinance|refinanc\w{1,3}\b.{0,16}\bnow\b/i
-    return;
+  # return for things we know we can't handle.
+  if (!$keep_alternations) {
+    if ($rule =~ /\|/) {
+      # /time to refinance|refinanc\w{1,3}\b.{0,16}\bnow\b/i
+      return;
+    }
+  }
+
+  {
+    # count (...braces...) to ensure the numbers match up
+    my @c = ($rule =~ /(?<!\\)\(/g); my $brace_i = scalar @c;
+       @c = ($rule =~ /(?<!\\)\)/g); my $brace_o = scalar @c;
+    if ($brace_i != $brace_o) { return; }
+  }
+
+  # do the same for [charclasses]
+  {
+    my @c = ($rule =~ /(?<!\\)\[/g); my $brace_i = scalar @c;
+       @c = ($rule =~ /(?<!\\)\]/g); my $brace_o = scalar @c;
+    if ($brace_i != $brace_o) { return; }
+  }
+
+  # and {quantifiers}
+  {
+    my @c = ($rule =~ /(?<!\\)\{/g); my $brace_i = scalar @c;
+       @c = ($rule =~ /(?<!\\)\}/g); my $brace_o = scalar @c;
+    if ($brace_i != $brace_o) { return; }
   }
 
   # lookaheads that are just too far for the re2c parser
@@ -372,6 +486,9 @@ sub extract_base {
   }
 
   # finally, reassemble a usable regexp
+  if ($mods ne '') {
+    $mods = "(?$mods)";
+  }
   $rule = $mods . $rule;
 
   return $rule;
