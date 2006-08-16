@@ -95,6 +95,11 @@ sub check_all {
     my $rule = $rules->{$name};
     next unless ($hasrules->{$name} && $hasrules->{$name} eq $rule);
 
+    # ignore rules marked for ReplaceTags work!
+    # TODO: we should be able to order the 'finish_parsing_end'
+    # plugin calls to do this.
+    next if ($conf->{rules_to_replace}{$rule});
+
     # we have the rule, and its regexp matches.  zero out the body
     # rule, so that the module can do the work instead
 
@@ -385,8 +390,9 @@ sub extract_base {
     $rule = de_reverse_multi_char_regexp_statements($rule);
   }
 
-  my $keep_alternations = 1;    # /(foo|bar|baz)/
-  my $keep_quantifiers = 0;     # /foo.*bar/ or /foo*bar/
+  my $keep_alternations = 0;    # /(foo|bar|baz)/
+  my $keep_quantifiers = 0;     # /foo.*bar/ or /foo*bar/ or /foooo?bar/
+  my $keep_classes = 0;         # /fo[opqr]bar/
 
   # truncate the pattern at the first unhandleable metacharacter
   # or range
@@ -396,9 +402,17 @@ sub extract_base {
               \\[ABCE-RT-VX-Z]
             ).*$//gsx;
 
+  $keep_classes or $rule =~ s/(?<!\\)(?:
+              \\\w|
+              \.|
+              \[|
+              \]
+            ).*$//gsx;
+
   $keep_quantifiers or $rule =~ s/(?<!\\)(?:
               \*|
               \+|
+              \?|
               \{
             ).*$//gsx;
 
@@ -422,8 +436,9 @@ sub extract_base {
   $rule =~ s/\((.*?)\|\)/\($1\|z{0}\)/gs;
   $rule =~ s/\(\|(.*?)\)/\($1\|z{0}\)/gs;
 
-  # re2xs doesn't like escaped brackets
-  $rule =~ s/\\:.*//g;
+  # re2xs doesn't like escaped brackets;
+  # brackets in general, in fact
+  $rule =~ s/\:.*//g;
 
   # replace \s, \d, \S with char classes that (nearly) match them
   # TODO: \w, \W need to know about utf-8, ugh
