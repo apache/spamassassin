@@ -268,6 +268,23 @@ print $re <<"EOT";
 #include "perl.h"
 #include "XSUB.h"
 
+/* split single-space-separated result string */
+static void
+split_and_add (AV *results, char *match)
+{
+    char *wordstart, *cp;
+
+    for (cp = wordstart = match; *cp != (unsigned char) 0; cp++) {
+      if (*cp == ' ') {
+        av_push(results,
+            newSVpvn_share(wordstart, cp-wordstart, (U32)0));
+        wordstart = cp + 1;
+      }
+    }
+    av_push(results,
+            newSVpvn_share(wordstart, cp-wordstart, (U32)0));
+}
+
 MODULE = $NAME  PACKAGE = $NAME
 
 PROTOTYPES: DISABLE
@@ -279,7 +296,6 @@ scan(psv)
   PREINIT:
         int i;
         char *match;
-        char *matchsplit;
         unsigned char *cursor;
         unsigned char *pstart;
         unsigned char *pend;
@@ -301,14 +317,7 @@ for (1..$numscans) {
         cursor = pstart;
         while (cursor < pend) {
           while (match = ${funcname} (\&cursor)) {
-            while ((matchsplit = strchr (match, ' ')) != NULL) {
-              /* split space-separated result string */
-              av_push(results,
-                  newSVpvn_share(match, matchsplit-match, (U32)0));
-              match = matchsplit+1;
-            }
-            av_push(results,
-                  newSVpvn_share(match, strlen(match), (U32)0));
+            split_and_add(results, match);
           }
         }
 EOT
@@ -319,6 +328,7 @@ print $re <<EOT;
         RETVAL = newRV((SV *) results);
     OUTPUT:
         RETVAL
+
 EOT
 
 close($re);
@@ -433,12 +443,18 @@ sub fixup_re {
       $output .= '"\\';     # reversed later to form \"
     }
     elsif ($tok eq '*') {
+      # /guaranteed*/ => "guarantee" "d"* , not "guaranteed"*
+      $output =~ s/(.)\"\s*$/\" \"$1\"/;
       $output .= '* ';
     }
     elsif ($tok eq '?') {
+      # /guaranteed?/ => "guarantee" "d"? , not "guaranteed"?
+      $output =~ s/(.)\"\s*$/\" \"$1\"/;
       $output .= '? ';
     }
     elsif ($tok eq '+') {
+      # /guaranteed+/ => "guarantee" "d"+ , not "guaranteed"+
+      $output =~ s/(.)\"\s*$/\" \"$1\"/;
       $output .= '+ ';
     }
     elsif ($tok eq "^") {
