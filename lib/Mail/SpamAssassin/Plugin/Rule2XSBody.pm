@@ -148,8 +148,8 @@ sub run_body_hack {
       # unfortunately, calling lc() here seems to be the fastest
       # way to support this and still work with UTF-8 ok
       my $results = &{$modname.'::scan'}(lc $line);
-      my %alreadydone = ();
 
+      my %alreadydone = ();
       foreach my $rulename (@{$results})
       {
         # only try each rule once per line
@@ -159,7 +159,7 @@ sub run_body_hack {
         # ignore 0-scored rules, of course
         next unless $scoresptr->{$rulename};
 
-        # dbg("zoom: base found for $rulename");
+        dbg("zoom: base found for $rulename: $line");
 
         # run the real regexp -- on this line alone
         &{'Mail::SpamAssassin::PerMsgStatus::'.$rulename.'_one_line_body_test'}
@@ -231,6 +231,28 @@ sub extract_all {
   # entirely subsumed (e.g. "food" =~ "foo" / "ood"), then they will be
   # returned as two hits, correctly.  So we only have to be smart about the
   # full-subsumption case; overlapping is taken care of for us, by re2c.
+  #
+  # TODO: there's a bug here.  Since the code in extract_base() has been
+  # modified to support more complex regexps, we can no longer simply assume
+  # that if pattern A is not contained in pattern B, that means that pattern B
+  # doesn't subsume it.  Consider, for example, A="foo*bar" and
+  # B="morefobarry"; A is indeed subsumed by B, but we won't be able to test
+  # that without running the A RE match itself somehow against B.
+  # same issue remains with:
+  #
+  #   "foo?bar" / "fobar"
+  #   "fo(?:o|oo|)bar" / "fobar"
+  #   "fo(?:o|oo)?bar" / "fobar"
+  #   "fo(?:o*|baz)bar" / "fobar"
+  #   "(?:fo(?:o*|baz)bar|blargh)" / "fobar"
+  #
+  # it's worse with this:
+  #
+  #   "fo(?:o|oo|)bar" / "foo*bar"
+  #
+  # basically, this is impossible to compute without reimplementing most of
+  # re2c, and it appears the re2c developers don't plan to offer this:
+  # https://sourceforge.net/tracker/index.php?func=detail&aid=1540845&group_id=96864&atid=616203
 
   open (OUT, ">$dumpfile") or die "cannot write to $dumpfile!";
   print OUT "name $ruletype\n";
@@ -239,6 +261,7 @@ sub extract_all {
     my $base1 = $set1->{base};
     my $orig1 = $set1->{orig};
     my $key1  = $set1->{name};
+    next if ($base1 eq '' or $key1 eq '');
 
     print OUT "orig $key1 $orig1\n";
 
@@ -350,6 +373,9 @@ sub extract_base {
   return if $rule =~ /^\(?(?:\^|\\A)/;
   return if $rule =~ /(?:\$|\\Z)\)?$/;
 
+  # simplify (?:..) to (..)
+  $rule =~ s/\(\?:/\(/g;
+
   # here's the trick; we can use the truncate regexp below simply by
   # reversing the string and taking care to fix "\z" 2-char escapes.
   # TODO: this breaks stuff like "\s+" or "\S{4,12}", but since the
@@ -389,9 +415,6 @@ sub extract_base {
   # drop this one, after the reversing
   $rule =~ s/\(\?\!.*$//gsx;
 
-  # simplify (?:..) to (..)
-  $rule =~ s/\(\?:/\(/g;
-
   # simplify (..)? and (..|) to (..|z{0})
   # this wierd construct is to work around an re2c bug; (..|) doesn't
   # do what it should
@@ -423,27 +446,49 @@ sub extract_base {
   $rule =~ s/\\w/[_a-z0-9]/gs;
   $rule =~ s/\\W/[^_a-z0-9]/gs;
 
-  # exit early if the pattern starts with a class
-  # r ([a-z0-9]+\*[,[ \t\n]]+){2}:TVD_BODY_END_STAR
-  if ($rule =~ /^\((?:
+  # loop here, to catch __DRUGS_SLEEP1:
+  # 0,3}([ \t\n]|z{0})
+  while (1) 
+  {
+    my $startrule = $rule;
+
+    # exit early if the pattern starts with a class in a group;
+    # we can't reliably kill these
+    # r ([a-z0-9]+\*[,[ \t\n]]+){2}:TVD_BODY_END_STAR
+    if ($rule =~ /^\((?:
               \.?[\*\?\+] |
               \.?\{?[^\{]*\} |
               [^\(]*\) |
-              \[?[^\[]*\]
+              \[ |
+              [^\[]*\]
             )/sx)
-  {
-    return;
-  }
+    {
+      return;
+    }
 
-  # kill quantifiers right at the start of the string.
-  # this (a) reduces algorithmic complexity of the produced code,
-  # and (b) can also improve overall speed as a side-effect of (a)
-  $rule =~ s/^(?:
+    # kill quantifiers right at the start of the string.
+    # this (a) reduces algorithmic complexity of the produced code,
+    # and (b) can also improve overall speed as a side-effect of (a)
+    $rule =~ s/^(?:
               \.?[\*\?\+] |
               \.?\{?[^\{]*\} |
               [^\(]*\) |
               \[?[^\[]*\]
             )+//gsx;
+
+    # kill quantifiers right at the end of the string, too;
+    # they can hide hits if they overlap with other patterns
+    0 and $rule =~ s/(?:
+              \.[\*\?\+] |
+              \.\{?[^\{]*\} |
+              \. |
+              \([^\)]* |
+              \[[^\[]*\]?
+            )+$//gsx;
+
+    last if $startrule eq $rule;
+  }
+
 
   # return for things we know we can't handle.
   if (!$keep_alternations) {
@@ -502,7 +547,8 @@ sub count_regexp_statements {
   # or their shortest form
   $rule =~ s/(?<!\\)(?:
             \[.+?\][\?\*]|
-            \{.+?\}[\?\*]
+            \{0\}\?|
+            \{.+?\}\?
           )//gs;
 
   $rule =~ s/\[.+?\]/R/gs;
