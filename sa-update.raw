@@ -687,113 +687,165 @@ ENDOFVALIDATIONERR
 
   dbg("channel: lint check succeeded, extracting archive to $UPDDir...");
 
-  if (-d $UPDDir) {
-    # ok that worked, too late to stop now!   At this stage, if there are
-    # errors, we have to attempt to carry on regardless, since we've already
-    # blown away the old ruleset.
-    dbg("channel: point of no return for existing $UPDDir");
+  my @totry = (
+    {
+      'try' => sub {
+        if (-d $UPDDir) {
+          # ok that worked, too late to stop now!   At this stage, if there are
+          # errors, we have to attempt to carry on regardless, since we've already
+          # blown away the old ruleset.
+          dbg("channel: point of no return for existing $UPDDir");
 
-    # clean out the previous channel files, if they exist
-    if (-f $PREFile && ! unlink $PREFile ) {
-      warn("channel: attempt to rm channel pre file failed, attempting to continue anyway");
-    }
-    if (-f $CFFile && ! unlink $CFFile ) {
-      warn("channel: attempt to rm channel cf file failed, attempting to continue anyway");
-    }
-    if (!clean_update_dir($UPDDir)) {
-      warn("channel: attempt to rm channel directory failed, attempting to continue anyway");
+          # clean out the previous channel files, if they exist
+          if (-f $PREFile && ! unlink $PREFile ) {
+            warn("channel: attempt to rm channel pre file failed, attempting to continue anyway");
+          }
+          if (-f $CFFile && ! unlink $CFFile ) {
+            warn("channel: attempt to rm channel cf file failed, attempting to continue anyway");
+          }
+          if (!clean_update_dir($UPDDir)) {
+            warn("channel: attempt to rm channel directory failed, attempting to continue anyway");
+          }
+        }
+        else {
+          # create the dir, if it doesn't exist
+          dbg("channel: creating $UPDDir");
+          if (!mkpath([$UPDDir], 0, 0777)) {
+            warn "channel: can't create channel directory $UPDDir: $!\n";
+	    return 0;
+          }
+
+          # ok, that test worked.  it's now likely that the .cf's will
+          # similarly be ok to rename, too.   Too late to stop from here on
+          dbg("channel: point of no return for new $UPDDir");
+        }
+
+	return 1;
+      },
+
+      'rollback' => sub {
+	dbg("channel: attempting to remove the channel and update directories");
+
+        # bug 4941: try to get rid of the empty directories to avoid leaving SA
+        # with no rules.
+        rmdir $UPDDir;
+        rmdir $opt{'updatedir'};
+      },
+    },
+
+    {
+      'try' => sub {
+        # extract the files again for the last time
+        if (!taint_safe_archive_extract($UPDDir, $content_file)) {
+          channel_failed("channel: archive extraction failed");
+	  return 0;
+        }
+
+	return 1;
+      },
+
+      'rollback' => sub {
+	dbg("channel: attempting to clean out the channel update directory");
+
+        # bug 4941: try to get rid of the empty directories to avoid leaving SA
+        # with no rules.
+        if (!clean_update_dir($UPDDir)) {
+          warn "channel: attempt to clean up failed extraction also failed!\n";
+        }
+      },
+    },
+
+    {
+      'try' => sub {
+        # Write out the mirby file, not fatal if it doesn't work
+        dbg("channel: creating MIRRORED.BY file");
+        if (open(MBY, ">$mirby_path")) {
+          print MBY $mirby;
+          close(MBY);
+        }
+        else {
+          warn "error: can't write new MIRRORED.BY file: $!\n";
+        }
+
+	return 1;
+      },
+
+      'rollback' => sub {
+      },
+    },
+
+    {
+      'try' => sub {
+        # the last step is to create the .cf and .pre files to include the
+        # channel files
+        my @CF = ();
+        my @PRE = ();
+
+        dbg("channel: creating update cf/pre files");
+
+        # Put in whatever metadata we need
+        push(@CF, "# UPDATE version $newV\n");
+
+
+        # Find all of the cf and pre files
+        unless (opendir(DIR, $UPDDir)) {
+          die "fatal: can't access $UPDDir: $!\n";
+        }
+        while(my $file = readdir(DIR)) {
+          $file =~ /^(.+)$/;       # untaint
+          $file = $1;
+          my $path = File::Spec->catfile($UPDDir, $file);
+          next unless (-f $path);   # shouldn't ever happen
+
+          if ($file =~ /\.cf$/) {
+            push(@CF, "include $nicechannel/$file\n");
+          }
+          elsif ($file =~ /\.pre$/) {
+            push(@PRE, "include $nicechannel/$file\n");
+          }
+          else {
+            next;
+          }
+
+          dbg("channel: adding $file");
+        }
+        closedir(DIR);
+
+        # Finally, write out the files to include the update files
+        if (!write_channel_file($PREFile, \@PRE)) {
+          channel_failed("channel: writing of $PREFile failed");
+          return 0;
+        }
+        if (!write_channel_file($CFFile, \@CF)) {
+          channel_failed("channel: writing of $CFFile failed");
+          return 0;
+        }
+
+        $exit = 0;            # "exit 0" means an update occurred
+        dbg("channel: update complete");
+
+	return 1;
+      },
+
+      'rollback' => sub {
+      },
+    },
+
+  );
+
+  my $error;
+  for(my $elem = 0; $elem <= $#totry; $elem++) {
+    if (!&{$totry[$elem]->{'try'}}()) {
+      $error = $elem;
+      last;
     }
   }
-  else {
-    # create the dir, if it doesn't exist
-    dbg("channel: creating $UPDDir");
-    if (!mkpath([$UPDDir], 0, 0777)) {
-      # bug 4941: try to get rid of the empty directories to avoid leaving SA
-      # with no rules.
-      rmdir $UPDDir;
-      rmdir $opt{'updatedir'};
-      die "fatal: can't create $UPDDir: $!\n";
+  if (defined $error) {
+    dbg("channel: channel failed, attempting rollback");
+    for(my $elem = $error; $elem >= 0; $elem--) {
+      &{$totry[$elem]->{'rollback'}}();
     }
-
-    # ok, that test worked.  it's now likely that the .cf's will
-    # similarly be ok to rename, too.   Too late to stop from here on
-    dbg("channel: point of no return for new $UPDDir");
   }
-
-  # extract the files again for the last time
-  if (!taint_safe_archive_extract($UPDDir, $content_file)) {
-    channel_failed("channel: archive extraction failed");
-
-    # bug 4941: try to get rid of the empty directories to avoid leaving SA
-    # with no rules.
-    if (!clean_update_dir($UPDDir)) {
-      warn "channel: attempt to clean up failed extraction also failed!\n";
-    }
-    else {
-      rmdir $UPDDir;
-      rmdir $opt{'updatedir'};
-    }
-
-    next;
-  }
-
-  # Write out the mirby file, not fatal if it doesn't work
-  dbg("channel: creating MIRRORED.BY file");
-  if (open(MBY, ">$mirby_path")) {
-    print MBY $mirby;
-    close(MBY);
-  }
-  else {
-    warn "error: can't write new MIRRORED.BY file: $!\n";
-  }
-
-  # the last step is to create the .cf and .pre files to include the
-  # channel files
-  my @CF = ();
-  my @PRE = ();
-
-  dbg("channel: creating update cf/pre files");
-
-  # Put in whatever metadata we need
-  push(@CF, "# UPDATE version $newV\n");
-
-  # Find all of the cf and pre files
-  unless (opendir(DIR, $UPDDir)) {
-    die "fatal: can't access $UPDDir: $!\n";
-  }
-  while(my $file = readdir(DIR)) {
-    $file =~ /^(.+)$/;       # untaint
-    $file = $1;
-    my $path = File::Spec->catfile($UPDDir, $file);
-    next unless (-f $path);   # shouldn't ever happen
-
-    if ($file =~ /\.cf$/) {
-      push(@CF, "include $nicechannel/$file\n");
-    }
-    elsif ($file =~ /\.pre$/) {
-      push(@PRE, "include $nicechannel/$file\n");
-    }
-    else {
-      next;
-    }
-
-    dbg("channel: adding $file");
-  }
-  closedir(DIR);
-
-  # Finally, write out the files to include the update files
-  if (!write_channel_file($PREFile, \@PRE)) {
-    channel_failed("channel: writing of $PREFile failed");
-    next;
-  }
-  if (!write_channel_file($CFFile, \@CF)) {
-    channel_failed("channel: writing of $CFFile failed");
-    next;
-  }
-
-  $exit = 0;            # "exit 0" means an update occurred
-
-  dbg("channel: update complete");
 }
 
 ##############################################################################
