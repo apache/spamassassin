@@ -1364,12 +1364,13 @@ sub finish {
 	  permsgstatus => $self
 	});
 
-  foreach(keys %{$self}) {
-    # TODO: we should not be explicitly deleting every key here,
-    # just the ones that need it.  This is surprisingly slow
-    # (in the top 10 measured with Devel::SmallProf)
-    delete $self->{$_};
-  }
+  # explicitly delete just the members that may cause circular
+  # refs, instead of deleting everything; this is a lot more
+  # efficient
+  delete $self->{main};
+  delete $self->{msg};
+  delete $self->{conf};
+  delete $self->{async};
 }
 
 sub finish_tests {
