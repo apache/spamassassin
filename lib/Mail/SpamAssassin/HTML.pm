@@ -751,8 +751,9 @@ sub display_text {
   }
   push @{ $self->{text} }, $text;
   while (my ($k, $v) = each %display) {
-    $self->{"text_$k"} ||= '';
-    vec($self->{"text_$k"}, $#{$self->{text}}, 1) = $v;
+    my $textvar = "text_".$k;
+    if (!exists $self->{$textvar}) { $self->{$textvar} = ''; }
+    vec($self->{$textvar}, $#{$self->{text}}, 1) = $v;
   }
 }
 
