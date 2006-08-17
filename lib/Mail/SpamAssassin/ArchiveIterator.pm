@@ -918,7 +918,8 @@ sub scan_directory {
   @files = grep { -f } map { "$folder/$_" } @files;
 
   if (!@files) {
-    warn "archive-iterator: readdir found no mail in '$folder' directory\n";
+    # this is not a problem; no need to warn about it
+    # warn "archive-iterator: readdir found no mail in '$folder' directory\n";
     return;
   }
 
