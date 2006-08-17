@@ -365,11 +365,6 @@ sub parse_received_line {
   local ($_) = shift;
 
   s/\s+/ /gs;
-
-  # impose a max length of 8192 chars; that's enough for a non-attack
-  # Received header, and is RFC-std too iirc
-  if (length > 8192) { substr ($_, 8192) = ''; }
-
   my $ip = '';
   my $helo = '';
   my $rdns = '';
@@ -400,40 +395,34 @@ sub parse_received_line {
     $id = $1;
   }
 
-  my $start_from;
-  if (s/^from //) {
-    $start_from = 1;
+  # try to catch authenticated message identifier
+  #
+  # with ESMTPA, ESMTPSA, LMTPA, LMTPSA should cover RFC 3848 compliant MTAs
+  # with ASMTP (Authenticated SMTP) is used by Earthlink, Exim 4.34, and others
+  # with HTTP should only be authenticated webmail sessions
+  if (/ by .*? with (ESMTPA|ESMTPSA|LMTPA|LMTPSA|ASMTP|HTTP)\;? /i) {
+    $auth = $1;
+  }
+  # Courier v0.47 and possibly others
+  elsif (/^from .*?(?:\]\)|\)\])\s+\(AUTH: (LOGIN|PLAIN|DIGEST-MD5|CRAM-MD5) \S+(?:, .*?)?\)\s+by\s+/) {
+    $auth = $1;
+  }
+  # Sendmail, MDaemon, some webmail servers, and others
+  elsif (/^from .*?(?:\]\)|\)\]) .*?\(.*?authenticated.*?\).*? by/) {
+    $auth = 'Sendmail';
+  }
+  # Critical Path Messaging Server
+  elsif (/\) by .+ \(\d{1,2}\.\d\.\d{3}(?:\.\d{1,3})?\) \(authenticated as .+\) id /) {
+    $auth = 'CriticalPath';
+  }
+  # Postfix 2.3 and later with "smtpd_sasl_authenticated_header yes"
+  elsif (/\)\s+\(Authenticated sender:\s+\S+\)\s+by\s+\S+\s+\(Postfix\)\s+with\s+/) {
+    $auth = 'Postfix';
   }
 
-  if ($start_from) {
-    # try to catch authenticated message identifier
-    #
-    # with ESMTPA, ESMTPSA, LMTPA, LMTPSA should cover RFC 3848 compliant MTAs
-    # with ASMTP (Authenticated SMTP) is used by Earthlink, Exim 4.34, and others
-    # with HTTP should only be authenticated webmail sessions.
-    # All appear on lines starting with "from ".
-    if (/ with (ESMTPA|ESMTPSA|LMTPA|LMTPSA|ASMTP|HTTP)\;? /i) {
-      $auth = $1;
-    }
-    # Courier v0.47 and possibly others
-    elsif (/(?:\]\)|\)\])\s+\(AUTH: (LOGIN|PLAIN|DIGEST-MD5|CRAM-MD5) \S+(?:, .*?)?\)\s+by\s+/) {
-      $auth = $1;
-    }
-    # Sendmail, MDaemon, some webmail servers, and others
-    elsif (/(?:\]\)|\)\]) .*?\(.*?authenticated.*?\).*? by/) {
-      $auth = 'Sendmail';
-    }
-    # Critical Path Messaging Server
-    elsif (/\) by .+ \(\d{1,2}\.\d\.\d{3}(?:\.\d{1,3})?\) \(authenticated as .+\) id /) {
-      $auth = 'CriticalPath';
-    }
-    # Postfix 2.3 and later with "smtpd_sasl_authenticated_header yes"
-    elsif (/\)\s+\(Authenticated sender:\s+\S+\)\s+by\s+\S+\s+\(Postfix\)\s+with\s+/) {
-      $auth = 'Postfix';
-    }
-
+  if (/^from /) {
     # try to catch enveloper senders
-    if (/(?=[re])(?:return-path:? |envelope-(?:sender|from)[ =])(\S+)\b/i) {
+    if (/(?:return-path:? |envelope-(?:sender|from)[ =])(\S+)\b/i) {
       $envfrom = $1;
     }
 
@@ -458,13 +447,13 @@ sub parse_received_line {
       # Received: from tthompson ([217.35.105.172] unverified) by
       # mail.neosinteractive.com with Microsoft SMTPSVC(5.0.2195.5329);
       # Tue, 11 Mar 2003 13:23:01 +0000
-      if (/^(\S+) \(\[(${IP_ADDRESS})\][^\)]{0,40}\) by (\S+) with Microsoft SMTPSVC/) {
+      if (/^from (\S+) \(\[(${IP_ADDRESS})\][^\)]{0,40}\) by (\S+) with Microsoft SMTPSVC/) {
         $helo = $1; $ip = $2; $by = $3; goto enough;
       }
 
       # Received: from mail pickup service by mail1.insuranceiq.com with
       # Microsoft SMTPSVC; Thu, 13 Feb 2003 19:05:39 -0500
-      if (/^mail pickup service by (\S+) with Microsoft SMTPSVC;/) {
+      if (/^from mail pickup service by (\S+) with Microsoft SMTPSVC;/) {
         return;
       }
     }
@@ -472,7 +461,7 @@ sub parse_received_line {
     if (/\[XMail /) { # bug 3791, bug 4053
       # Received: from list.brainbuzz.com (63.146.189.86:23198) by mx1.yourtech.net with [XMail 1.20 ESMTP Server] id <S72E> for <jason@ellingson.org.spamassassin.org> from <bounce-cscommunity-11965901@list.cramsession.com.spamassassin.org>; Sat, 18 Sep 2004 23:17:54 -0500
       # Received: from list.brainbuzz.com (63.146.189.86:23198) by mx1.yourtech.net (209.32.147.34:25) with [XMail 1.20 ESMTP Server] id <S72E> for <jason@ellingson.org.spamassassin.org> from <bounce-cscommunity-11965901@list.cramsession.com.spamassassin.org>; Sat, 18 Sep 2004 23:17:54 -0500
-      if (/^(\S+) \((\[?${IP_ADDRESS}\]?)(?::\d+|)\) by (\S+)(?: \(\S+\)|) with \[XMail/)
+      if (/^from (\S+) \((\[?${IP_ADDRESS}\]?)(?::\d+|)\) by (\S+)(?: \(\S+\)|) with \[XMail/)
       {
 	$helo = $1; $ip = $2; $by = $3;
         / id <(\S+)> / and $id = $1;
@@ -488,7 +477,7 @@ sub parse_received_line {
 
       # Received: from [61.174.163.26] (helo=host) by sc8-sf-list1.sourceforge.net with smtp (Exim 3.31-VA-mm2 #1 (Debian)) id 18t2z0-0001NX-00 for <razor-users@lists.sourceforge.net>; Wed, 12 Mar 2003 01:57:10 -0800
       # Received: from [218.19.142.229] (helo=hotmail.com ident=yiuhyotp) by yzordderrex with smtp (Exim 3.35 #1 (Debian)) id 194BE5-0005Zh-00; Sat, 12 Apr 2003 03:58:53 +0100
-      if (/^\[(${IP_ADDRESS})\] \((.*?)\) by (\S+) /) {
+      if (/^from \[(${IP_ADDRESS})\] \((.*?)\) by (\S+) /) {
 	$ip = $1; my $sub = $2; $by = $3;
 	$sub =~ s/helo=(\S+)// and $helo = $1;
 	$sub =~ s/ident=(\S*)// and $ident = $1;
@@ -501,7 +490,7 @@ sub parse_received_line {
       # Received: from mail.ssccbelen.edu.pe ([216.244.149.154]) by yzordderrex
       # with esmtp (Exim 3.35 #1 (Debian)) id 18tqiz-000702-00 for
       # <jm@example.com>; Fri, 14 Mar 2003 15:03:57 +0000
-      if (/^(\S+) \(\[(${IP_ADDRESS})\](.*?)\) by (\S+) /) {
+      if (/^from (\S+) \(\[(${IP_ADDRESS})\](.*?)\) by (\S+) /) {
         $rdns=$1; $ip = $2; my $sub = $3; $by = $4;
         $sub =~ s/helo=(\S+)// and $helo = $1;
         $sub =~ s/ident=(\S*)// and $ident = $1;
@@ -511,7 +500,7 @@ sub parse_received_line {
       # Received: from boggle.ihug.co.nz [203.109.252.209] by grunt6.ihug.co.nz
       # with esmtp (Exim 3.35 #1 (Debian)) id 18SWRe-0006X6-00; Sun, 29 Dec 
       # 2002 18:57:06 +1300
-      if (/^(\S+) \[(${IP_ADDRESS})\](:\d+)? by (\S+) /) {
+      if (/^from (\S+) \[(${IP_ADDRESS})\](:\d+)? by (\S+) /) {
 	$rdns= $1; $ip = $2; $helo = $1; $by = $4; goto enough;
       }
 
@@ -520,7 +509,7 @@ sub parse_received_line {
       # Received: from helene8.i.pinwand.net (helene.cats.ms) [10.0.8.6.13219]
       # (mail) by lisbeth.i.pinwand.net with esmtp (Exim 3.35 #1 (Debian)) id
       # 1CO5y7-0001vC-00; Sun, 31 Oct 2004 04:01:23 +0100
-      if (/^(\S+) /) {
+      if (/^from (\S+) /) {
         $rdns= $1;      # assume this is the rDNS, not HELO.  is this appropriate?
       }
       if (/ \((\S+)\) /) {
@@ -543,7 +532,7 @@ sub parse_received_line {
     # by webmail.ukonline.net (IMP) with HTTP
     # for <anarchyintheuk@localhost>; Sun, 11 Apr 2004 00:31:07 +0100
     if (/\bwith HTTP\b/ &&        # more efficient split up this way
-        /^(${IP_ADDRESS}) \(\[${IP_ADDRESS}\]\) by (\S+)/)
+        /^from (${IP_ADDRESS}) \(\[${IP_ADDRESS}\]\) by (\S+)/)
     {
       # some smarty-pants decided to fake a numeric HELO for HTTP
       # no rDNS for this format?
@@ -553,25 +542,25 @@ sub parse_received_line {
     # Received: from ns.elcanto.co.kr (66.161.246.58 [66.161.246.58]) by
     # mail.ssccbelen.edu.pe with SMTP (Microsoft Exchange Internet Mail Service
     # Version 5.5.1960.3) id G69TW478; Thu, 13 Mar 2003 14:01:10 -0500
-    if (/^(\S+) \((\S+) \[(${IP_ADDRESS})\]\) by (\S+) with \S+ \(/) {
+    if (/^from (\S+) \((\S+) \[(${IP_ADDRESS})\]\) by (\S+) with \S+ \(/) {
       $mta_looked_up_dns = 1;
       $rdns = $2; $ip = $3; $helo = $1; $by = $4; goto enough;
     }
 
     # from mail2.detr.gsi.gov.uk ([51.64.35.18] helo=ahvfw.dtlr.gsi.gov.uk) by mail4.gsi.gov.uk with smtp id 190K1R-0000me-00 for spamassassin-talk-admin@lists.sourceforge.net; Tue, 01 Apr 2003 12:33:46 +0100
-    if (/^(\S+) \(\[(${IP_ADDRESS})\] helo=(\S+)\) by (\S+) with /) {
+    if (/^from (\S+) \(\[(${IP_ADDRESS})\] helo=(\S+)\) by (\S+) with /) {
       $rdns = $1; $ip = $2; $helo = $3; $by = $4;
       goto enough;
     }
 
     # from 12-211-5-69.client.attbi.com (<unknown.domain>[12.211.5.69]) by rwcrmhc53.attbi.com (rwcrmhc53) with SMTP id <2002112823351305300akl1ue>; Thu, 28 Nov 2002 23:35:13 +0000
-    if (/^(\S+) \(<unknown\S*>\[(${IP_ADDRESS})\]\) by (\S+) /) {
+    if (/^from (\S+) \(<unknown\S*>\[(${IP_ADDRESS})\]\) by (\S+) /) {
       $helo = $1; $ip = $2; $by = $3;
       goto enough;
     }
 
     # from attbi.com (h000502e08144.ne.client2.attbi.com[24.128.27.103]) by rwcrmhc53.attbi.com (rwcrmhc53) with SMTP id <20030222193438053008f7tee>; Sat, 22 Feb 2003 19:34:39 +0000
-    if (/^(\S+) \((\S+\.\S+)\[(${IP_ADDRESS})\]\) by (\S+) /) {
+    if (/^from (\S+) \((\S+\.\S+)\[(${IP_ADDRESS})\]\) by (\S+) /) {
       $mta_looked_up_dns = 1;
       $helo = $1; $rdns = $2; $ip = $3; $by = $4;
       goto enough;
@@ -581,7 +570,7 @@ sub parse_received_line {
       # Received: from localhost (unknown [127.0.0.1])
       # by cabbage.jmason.org (Postfix) with ESMTP id A96E18BD97
       # for <jm@localhost>; Thu, 13 Mar 2003 15:23:15 -0500 (EST)
-      if ( /^(\S+) \((\S+) \[(${IP_ADDRESS})\]\) by (\S+) / ) {
+      if ( /^from (\S+) \((\S+) \[(${IP_ADDRESS})\]\) by (\S+) / ) {
 	$mta_looked_up_dns = 1;
 	$helo = $1; $rdns = $2; $ip = $3; $by = $4;
 	if ($rdns eq 'unknown') { $rdns = ''; }
@@ -592,7 +581,7 @@ sub parse_received_line {
       # by puzzle.pobox.com (Postfix) with SMTP id 9029AFB732;
       # Sat,  8 Nov 2003 17:57:46 -0500 (EST)
       # (Pobox.com version: reported in bug 2745)
-      if ( /^(\S+) \((\S+)\[(${IP_ADDRESS})\]\) by (\S+) / ) {
+      if ( /^from (\S+) \((\S+)\[(${IP_ADDRESS})\]\) by (\S+) / ) {
 	$mta_looked_up_dns = 1;
 	$helo = $1; $rdns = $2; $ip = $3; $by = $4;
 	if ($rdns eq 'unknown') { $rdns = ''; }
@@ -604,7 +593,7 @@ sub parse_received_line {
     #      resulting in a messed-up interpretation. We have to skip sendmail tests
     #      if we find evidence that this is a qmail-ldap header.
     #
-    unless (/ by \S+ \(qmail-\S+\) with /) {
+    unless (/^from .* by \S+ \(qmail-\S+\) with /) {
       #
       # sendmail:
       # Received: from mail1.insuranceiq.com (host66.insuranceiq.com [65.217.159.66] (may be forged)) by dogma.slashnull.org (8.11.6/8.11.6) with ESMTP id h2F0c2x31856 for <jm@jmason.org>; Sat, 15 Mar 2003 00:38:03 GMT
@@ -612,7 +601,7 @@ sub parse_received_line {
       # Received: from ran-out.mx.develooper.com (IDENT:qmailr@one.develooper.com [64.81.84.115]) by dogma.slashnull.org (8.11.6/8.11.6) with SMTP id h381Vvf19860 for <jm-cpan@jmason.org>; Tue, 8 Apr 2003 02:31:57 +0100
       # from rev.net (natpool62.rev.net [63.148.93.62] (may be forged)) (authenticated) by mail.rev.net (8.11.4/8.11.4) with ESMTP id h0KKa7d32306 for <spamassassin-talk@lists.sourceforge.net>
       #
-      if (/^(\S+) \((\S+) \[(${IP_ADDRESS})\].{0,99}\) by (\S+) \(/) {
+      if (/^from (\S+) \((\S+) \[(${IP_ADDRESS})\].*\) by (\S+) \(/) {
         $mta_looked_up_dns = 1;
         $helo = $1; $rdns = $2; $ip = $3; $by = $4;
         $rdns =~ s/^IDENT:([^\@]*)\@// and $ident = $1; # remove IDENT lookups
@@ -622,7 +611,7 @@ sub parse_received_line {
     }
 
     # Received: from 4wtgRl (kgbxn@[211.244.147.115]) by dogma.slashnull.org (8.11.6/8.11.6) with SMTP id h8BBsUJ18848; Thu, 11 Sep 2003 12:54:31 +0100
-    if (/^(\S+) \((\S*)\@\[(${IP_ADDRESS})\].*\) by (\S+) \(/) {
+    if (/^from (\S+) \((\S*)\@\[(${IP_ADDRESS})\].*\) by (\S+) \(/) {
       $mta_looked_up_dns = 1;	# this one does.  there just wasn't one
       $helo = $1; $ip = $3; $by = $4;
       $ident = $2;
@@ -633,14 +622,14 @@ sub parse_received_line {
     # Wed, 24 Jul 2002 16:36:44 GMT
     if (/by (\S+\.hotmail\.msn\.com) /) {
       $by = $1;
-      /^(\S+) / and $ip = $1;
+      /^from (\S+) / and $ip = $1;
       goto enough;
     }
 
     # Received: from x71-x56-x24-5.webspeed.dk (HELO niels) (69.96.3.15) by la.mx.develooper.com (qpsmtpd/0.27-dev) with SMTP; Fri, 02 Jan 2004 19:26:52 -0800
     # Received: from sc8-sf-sshgate.sourceforge.net (HELO sc8-sf-netmisc.sourceforge.net) (66.35.250.220) by la.mx.develooper.com (qpsmtpd/0.27-dev) with ESMTP; Fri, 02 Jan 2004 14:44:41 -0800
     # Received: from mx10.topofferz.net (HELO ) (69.6.60.10) by blazing.arsecandle.org with SMTP; 3 Mar 2004 20:34:38 -0000
-    if (/^(\S+) \((?:HELO|EHLO) (\S*)\) \((${IP_ADDRESS})\) by (\S+) \(qpsmtpd\/(\S+)\) with (ESMTP|SMTP)/) {
+    if (/^from (\S+) \((?:HELO|EHLO) (\S*)\) \((${IP_ADDRESS})\) by (\S+) \(qpsmtpd\/(\S+)\) with (ESMTP|SMTP)/) {
       $rdns = $1; $helo = $2; $ip = $3; $by = $4; goto enough;
     }
 
@@ -650,7 +639,7 @@ sub parse_received_line {
     #
     # Received: from imo-m01.mx.aol.com ([64.12.136.4]) by eagle.glenraven.com
     # via smtpd (for [198.85.87.98]) with SMTP; Wed, 08 Oct 2003 16:25:37 -0400
-    if (/^(\S+) \(\[(${IP_ADDRESS})\]\) by (\S+) via smtpd \(for \S+\) with SMTP\(/) {
+    if (/^from (\S+) \(\[(${IP_ADDRESS})\]\) by (\S+) via smtpd \(for \S+\) with SMTP\(/) {
       $helo = $1; $ip = $2; $by = $3; goto enough;
     }
 
@@ -684,18 +673,18 @@ sub parse_received_line {
     #
     # bug 4813: make sure that the line doesn't have " id " after the
     # protocol since that's a sendmail line and not qmail ...
-    if (/^\S+( \((?:HELO|EHLO) \S*\))? \((\S+\@)?\[?${IP_ADDRESS}\]?\)( \(envelope-sender <\S+>\))? by \S+( \(.+\))* with (.* )?(SMTP|QMQP)(?! id )/ ) {
-       if (/^(\S+) \((?:HELO|EHLO) ([^ \(\)]*)\) \((\S*)\@\[?(${IP_ADDRESS})\]?\)( \(envelope-sender <\S+>\))? by (\S+)/) {
+    if (/^from \S+( \((?:HELO|EHLO) \S*\))? \((\S+\@)?\[?${IP_ADDRESS}\]?\)( \(envelope-sender <\S+>\))? by \S+( \(.+\))* with (.* )?(SMTP|QMQP)(?! id )/ ) {
+       if (/^from (\S+) \((?:HELO|EHLO) ([^ \(\)]*)\) \((\S*)\@\[?(${IP_ADDRESS})\]?\)( \(envelope-sender <\S+>\))? by (\S+)/) {
          $rdns = $1; $helo = $2; $ident = $3; $ip = $4; $by = $6;
        }
-       elsif (/^(\S+) \((?:HELO|EHLO) ([^ \(\)]*)\) \(\[?(${IP_ADDRESS})\]?\)( \(envelope-sender <\S+>\))? by (\S+)/) {
+       elsif (/^from (\S+) \((?:HELO|EHLO) ([^ \(\)]*)\) \(\[?(${IP_ADDRESS})\]?\)( \(envelope-sender <\S+>\))? by (\S+)/) {
          $rdns = $1; $helo = $2; $ip = $3; $by = $5;
        }
-       elsif (/^(\S+) \((\S*)\@\[?(${IP_ADDRESS})\]?\)( \(envelope-sender <\S+>\))? by (\S+)/) {
+       elsif (/^from (\S+) \((\S*)\@\[?(${IP_ADDRESS})\]?\)( \(envelope-sender <\S+>\))? by (\S+)/) {
 	 # note: absence of HELO means that it matched rDNS in qmail-land
          $helo = $rdns = $1; $ident = $2; $ip = $3; $by = $5;
        }
-       elsif (/^(\S+) \(\[?(${IP_ADDRESS})\]?\)( \(envelope-sender <\S+>\))? by (\S+)/) {
+       elsif (/^from (\S+) \(\[?(${IP_ADDRESS})\]?\)( \(envelope-sender <\S+>\))? by (\S+)/) {
          $helo = $rdns = $1; $ip = $2; $by = $4;
        }
        # qmail doesn't perform rDNS requests by itself, but is usually called
@@ -716,28 +705,28 @@ sub parse_received_line {
     
     # Received: from [193.220.176.134] by web40310.mail.yahoo.com via HTTP;
     # Wed, 12 Feb 2003 14:22:21 PST
-    if (/HTTP\;/ && /^\[(${IP_ADDRESS})\] by (\S+) via HTTP\;/) {
+    if (/^from \[(${IP_ADDRESS})\] by (\S+) via HTTP\;/) {
       $ip = $1; $by = $2; goto enough;
     }
 
     # Received: from 192.168.5.158 ( [192.168.5.158]) as user jason@localhost by mail.reusch.net with HTTP; Mon, 8 Jul 2002 23:24:56 -0400
-    if (/^(\S+) \( \[(${IP_ADDRESS})\]\).*? by (\S+) /) {
+    if (/^from (\S+) \( \[(${IP_ADDRESS})\]\).*? by (\S+) /) {
       # TODO: is $1 helo?
       $ip = $2; $by = $3; goto enough;
     }
 
     # Received: from (64.52.135.194 [64.52.135.194]) by mail.unearthed.com with ESMTP id BQB0hUH2 Thu, 20 Feb 2003 16:13:20 -0700 (PST)
-    if (/^\((\S+) \[(${IP_ADDRESS})\]\) by (\S+) /) {
+    if (/^from \((\S+) \[(${IP_ADDRESS})\]\) by (\S+) /) {
       $helo = $1; $ip = $2; $by = $3; goto enough;
     }
 
     # Received: from [65.167.180.251] by relent.cedata.com (MessageWall 1.1.0) with SMTP; 20 Feb 2003 23:57:15 -0000
-    if (/^\[(${IP_ADDRESS})\] by (\S+) /) {
+    if (/^from \[(${IP_ADDRESS})\] by (\S+) /) {
       $ip = $1; $by = $2; goto enough;
     }
 
     # Received: from acecomms [202.83.84.95] by mailscan.acenet.net.au [202.83.84.27] with SMTP (MDaemon.PRO.v5.0.6.R) for <spamassassin-talk@lists.sourceforge.net>; Fri, 21 Feb 2003 09:32:27 +1000
-    if (/^(\S+) \[(${IP_ADDRESS})\] by (\S+) \[(\S+)\] with /) {
+    if (/^from (\S+) \[(${IP_ADDRESS})\] by (\S+) \[(\S+)\] with /) {
       $mta_looked_up_dns = 1;
       $helo = $1; $ip = $2;
       $by = $4; # use the IP addr for "by", more useful?
@@ -747,7 +736,7 @@ sub parse_received_line {
     # Received: from mail.sxptt.zj.cn ([218.0.185.24]) by dogma.slashnull.org
     # (8.11.6/8.11.6) with ESMTP id h2FH0Zx11330 for <webmaster@efi.ie>;
     # Sat, 15 Mar 2003 17:00:41 GMT
-    if (/^(\S+) \(\[(${IP_ADDRESS})\]\) by (\S+) \(/) { # sendmail
+    if (/^from (\S+) \(\[(${IP_ADDRESS})\]\) by (\S+) \(/) { # sendmail
       $mta_looked_up_dns = 1;
       $helo = $1; $ip = $2; $by = $3; goto enough;
     }
@@ -756,7 +745,7 @@ sub parse_received_line {
     # Received: from Agni (localhost [::ffff:127.0.0.1]) (TLS: TLSv1/SSLv3, 168bits,DES-CBC3-SHA) by agni.forevermore.net with esmtp; Mon, 28 Oct 2002 14:48:52 -0800
     # Received: from gandalf ([4.37.75.131]) (authenticated bits=0) by herald.cc.purdue.edu (8.12.5/8.12.5/herald) with ESMTP id g9JLefrm028228 for <spamassassin-talk@lists.sourceforge.net>; Sat, 19 Oct 2002 16:40:41 -0500 (EST)
     # Received: from bushinternet.com (softdnserr [::ffff:61.99.99.67]) by mail.cs.helsinki.fi with esmtp; Fri, 22 Aug 2003 12:25:41 +0300
-    if (/^(\S+) \((\S+) \[(${IP_ADDRESS})\]\).*? by (\S+) /) { # sendmail
+    if (/^from (\S+) \((\S+) \[(${IP_ADDRESS})\]\).*? by (\S+) /) { # sendmail
       if ($2 eq 'softdnserr') {
         $mta_looked_up_dns = 0; # bug 2326: couriertcpd
       } else {
@@ -765,7 +754,7 @@ sub parse_received_line {
       $helo = $1; $ip = $3; $by = $4; goto enough;
     }
 
-    if (/^(\S+) \(\[(${IP_ADDRESS})\]\).*? by (\S+) /) {
+    if (/^from (\S+) \(\[(${IP_ADDRESS})\]\).*? by (\S+) /) {
       $mta_looked_up_dns = 1;
       $helo = $1; $ip = $2; $by = $3; goto enough;
     }
@@ -774,7 +763,7 @@ sub parse_received_line {
     # (authenticated bits=0) by slate.dublin.wbtsystems.com (8.12.6/8.12.6)
     # with ESMTP id g9MFWcvb068860 for <jm@jmason.org>;
     # Tue, 22 Oct 2002 16:32:39 +0100 (IST)
-    if (/^(\S+) \((\S+) \[(${IP_ADDRESS})\]\)(?: \(authenticated bits=\d+\))? by (\S+) \(/) { # sendmail
+    if (/^from (\S+) \((\S+) \[(${IP_ADDRESS})\]\)(?: \(authenticated bits=\d+\))? by (\S+) \(/) { # sendmail
       $mta_looked_up_dns = 1;
       $helo = $1; $rdns = $2; $ip = $3; $by = $4; goto enough;
     }
@@ -782,7 +771,7 @@ sub parse_received_line {
     # Received: from cabbage.jmason.org [127.0.0.1]
     # by localhost with IMAP (fetchmail-5.9.0)
     # for jm@localhost (single-drop); Thu, 13 Mar 2003 20:39:56 -0800 (PST)
-    if (/fetchmail/ && /^(\S+) (?:\[(${IP_ADDRESS})\] )?by (\S+) with \S+ \(fetchmail/) {
+    if (/^from (\S+) (?:\[(${IP_ADDRESS})\] )?by (\S+) with \S+ \(fetchmail/) {
       $self->found_pop_fetcher_sig();
       return;		# skip fetchmail handovers
     }
@@ -791,7 +780,7 @@ sub parse_received_line {
     # http://issues.apache.org/SpamAssassin/show_bug.cgi?id=2744#c14 :
     # Received: from unknown (HELO feux01a-isp) (213.199.4.210) by totor.bouissou.net with SMTP; 1 Nov 2003 07:05:19 -0000 
     # Received: from adsl-207-213-27-129.dsl.lsan03.pacbell.net (HELO merlin.net.au) (Owner50@207.213.27.129) by totor.bouissou.net with SMTP; 10 Nov 2003 06:30:34 -0000 
-    if (/^(\S+) \((?:HELO|EHLO) ([^\)]*)\) \((\S*@)?\[?(${IP_ADDRESS})\]?\).* by (\S+) /)
+    if (/^from (\S+) \((?:HELO|EHLO) ([^\)]*)\) \((\S*@)?\[?(${IP_ADDRESS})\]?\).* by (\S+) /)
     {
       $mta_looked_up_dns = 1;
       $rdns = $1; $helo = $2; $ident = (defined $3) ? $3 : '';
@@ -801,7 +790,7 @@ sub parse_received_line {
     }
 
     # Received: from x1-6-00-04-bd-d2-e0-a3.k317.webspeed.dk (benelli@80.167.158.170) by totor.bouissou.net with SMTP; 5 Nov 2003 23:18:42 -0000
-    if (/^(\S+) \((\S*@)?\[?(${IP_ADDRESS})\]?\).* by (\S+) /)
+    if (/^from (\S+) \((\S*@)?\[?(${IP_ADDRESS})\]?\).* by (\S+) /)
     {
       $mta_looked_up_dns = 1;
       # bug 2744 notes that if HELO == rDNS, qmail drops it.
@@ -813,7 +802,7 @@ sub parse_received_line {
 
     # Received: from [129.24.215.125] by ws1-7.us4.outblaze.com with http for
     # _bushisevil_@mail.com; Thu, 13 Feb 2003 15:59:28 -0500
-    if (/with http/ && /^\[(${IP_ADDRESS})\] by (\S+) with http for /) {
+    if (/^from \[(${IP_ADDRESS})\] by (\S+) with http for /) {
       $ip = $1; $by = $2; goto enough;
     }
 
@@ -821,54 +810,52 @@ sub parse_received_line {
     # by stark.dyndns.tv with POP3 (fetchmail-5.9.7)
     # for stark@localhost (single-drop); Tue, 18 Feb 2003 10:43:09 -0500 (EST)
     # by po11.mit.edu (Cyrus v2.1.5) with LMTP; Tue, 18 Feb 2003 09:49:46 -0500
-    if (/with POP3/ && /^(\S+) \[(${IP_ADDRESS})\] by (\S+) with POP3 /) {
+    if (/^from (\S+) \[(${IP_ADDRESS})\] by (\S+) with POP3 /) {
       $rdns = $1; $ip = $2; $by = $3; goto enough;
     }
 
-    if (/ via smap /) {
-      # Received: from snake.corp.yahoo.com(216.145.52.229) by x.x.org via smap (V1.3)
-      # id xma093673; Wed, 26 Mar 03 20:43:24 -0600
-      if (/^(\S+)\((${IP_ADDRESS})\) by (\S+) via smap /) {
-	$mta_looked_up_dns = 1;
-	$rdns = $1; $ip = $2; $by = $3; goto enough;
-      }
+    # Received: from snake.corp.yahoo.com(216.145.52.229) by x.x.org via smap (V1.3)
+    # id xma093673; Wed, 26 Mar 03 20:43:24 -0600
+    if (/^from (\S+)\((${IP_ADDRESS})\) by (\S+) via smap /) {
+      $mta_looked_up_dns = 1;
+      $rdns = $1; $ip = $2; $by = $3; goto enough;
+    }
 
-      # Received: from smtp.greyware.com(208.14.208.51, HELO smtp.sff.net) by x.x.org via smap (V1.3)
-      # id xma002908; Fri, 27 Feb 04 14:16:56 -0800
-      if (/^(\S+)\((${IP_ADDRESS}), (?:HELO|EHLO) (\S*)\) by (\S+) via smap /) {
-	$mta_looked_up_dns = 1;
-	$rdns = $1; $ip = $2; $helo = $3; $by = $4; goto enough;
-      }
+    # Received: from smtp.greyware.com(208.14.208.51, HELO smtp.sff.net) by x.x.org via smap (V1.3)
+    # id xma002908; Fri, 27 Feb 04 14:16:56 -0800
+    if (/^from (\S+)\((${IP_ADDRESS}), (?:HELO|EHLO) (\S*)\) by (\S+) via smap /) {
+      $mta_looked_up_dns = 1;
+      $rdns = $1; $ip = $2; $helo = $3; $by = $4; goto enough;
     }
 
     # Received: from [192.168.0.71] by web01-nyc.clicvu.com (Post.Office MTA
     # v3.5.3 release 223 ID# 0-64039U1000L100S0V35) with SMTP id com for
     # <x@x.org>; Tue, 25 Mar 2003 11:42:04 -0500
-    if (/Post\.Office/ && /^\[(${IP_ADDRESS})\] by (\S+) \(Post/) {
+    if (/^from \[(${IP_ADDRESS})\] by (\S+) \(Post/) {
       $ip = $1; $by = $2; goto enough;
     }
 
     # Received: from [127.0.0.1] by euphoria (ArGoSoft Mail Server 
     # Freeware, Version 1.8 (1.8.2.5)); Sat, 8 Feb 2003 09:45:32 +0200
-    if (/ArGoSoft/ && /^\[(${IP_ADDRESS})\] by (\S+) \(ArGoSoft/) {
+    if (/^from \[(${IP_ADDRESS})\] by (\S+) \(ArGoSoft/) {
       $ip = $1; $by = $2; goto enough;
     }
 
     # Received: from 157.54.8.23 by inet-vrs-05.redmond.corp.microsoft.com
     # (InterScan E-Mail VirusWall NT); Thu, 06 Mar 2003 12:02:35 -0800
-    if (/InterScan/ && /^(${IP_ADDRESS}) by (\S+) \(InterScan/) {
+    if (/^from (${IP_ADDRESS}) by (\S+) \(InterScan/) {
       $ip = $1; $by = $2; goto enough;
     }
 
     # Received: from faerber.muc.de by slarti.muc.de with BSMTP (rsmtp-qm-ot 0.4)
     # for asrg@ietf.org; 7 Mar 2003 21:10:38 -0000
-    if (/ with BSMTP/) {
+    if (/^from (\S+) by (\S+) with BSMTP/) {
       return;	# BSMTP != a TCP/IP handover, ignore it
     }
 
     # Received: from spike (spike.ig.co.uk [193.32.60.32]) by mail.ig.co.uk with
     # SMTP id h27CrCD03362 for <asrg@ietf.org>; Fri, 7 Mar 2003 12:53:12 GMT
-    if (/^(\S+) \((\S+) \[(${IP_ADDRESS})\]\) by (\S+) with /) {
+    if (/^from (\S+) \((\S+) \[(${IP_ADDRESS})\]\) by (\S+) with /) {
       $mta_looked_up_dns = 1;
       $helo = $1; $rdns = $2; $ip = $3; $by = $4; goto enough;
     }
@@ -876,7 +863,7 @@ sub parse_received_line {
     # Received: from customer254-217.iplannetworks.net (HELO AGAMENON) 
     # (baldusi@200.69.254.217 with plain) by smtp.mail.vip.sc5.yahoo.com with
     # SMTP; 11 Mar 2003 21:03:28 -0000
-    if (/^(\S+) \((?:HELO|EHLO) (\S*)\) \((\S+).*?\) by (\S+) with /) {
+    if (/^from (\S+) \((?:HELO|EHLO) (\S*)\) \((\S+).*?\) by (\S+) with /) {
       $mta_looked_up_dns = 1;
       $rdns = $1; $helo = $2; $ip = $3; $by = $4;
       $ip =~ s/([^\@]*)\@//g and $ident = $1;	# remove IDENT lookups
@@ -887,37 +874,37 @@ sub parse_received_line {
     # id 18tOsg-0008FX-00; Thu, 13 Mar 2003 09:20:06 +0000
     # Received: from andrew by trinity.supernews.net with local (Exim 4.12)
     # id 18xeL6-000Dn1-00; Tue, 25 Mar 2003 02:39:00 +0000
-    if (/^\S+ by \S+ with local/) { return; }
+    if (/^from (\S+) by (\S+) with local/) { return; }
 
     # Received: from [192.168.1.104] (account nazgul HELO [192.168.1.104])
     # by somewhere.com (CommuniGate Pro SMTP 3.5.7) with ESMTP-TLS id 2088434;
     # Fri, 07 Mar 2003 13:05:06 -0500
-    if (/^\[(${IP_ADDRESS})\] \(account \S+ (?:HELO|EHLO) (\S*)\) by (\S+) \(/) {
+    if (/^from \[(${IP_ADDRESS})\] \(account \S+ (?:HELO|EHLO) (\S*)\) by (\S+) \(/) {
       $ip = $1; $helo = $2; $by = $3; goto enough;
     }
 
     # Received: from ([10.0.0.6]) by mail0.ciphertrust.com with ESMTP ; Thu,
     # 13 Mar 2003 06:26:21 -0500 (EST)
-    if (/^\(\[(${IP_ADDRESS})\]\) by (\S+) with /) {
+    if (/^from \(\[(${IP_ADDRESS})\]\) by (\S+) with /) {
       $ip = $1; $by = $2;
     }
 
     # Received: from ironport.com (10.1.1.5) by a50.ironport.com with ESMTP; 01 Apr 2003 12:00:51 -0800
     # Received: from dyn-81-166-39-132.ppp.tiscali.fr (81.166.39.132) by cpmail.dk.tiscali.com (6.7.018)
-    if (/^([^\d]\S+) \((${IP_ADDRESS})\) by (\S+) /) {
+    if (/^from ([^\d]\S+) \((${IP_ADDRESS})\) by (\S+) /) {
       $helo = $1; $ip = $2; $by = $3; goto enough;
     }
 
     # Received: from scv3.apple.com (scv3.apple.com) by mailgate2.apple.com (Content Technologies SMTPRS 4.2.1) with ESMTP id <T61095998e1118164e13f8@mailgate2.apple.com>; Mon, 17 Mar 2003 17:04:54 -0800
     # bug 4704: Only let this match Content Technologies so it stops breaking things that come after it by matching first
-    if (/ \(Content Technologies / && /^(\S+) \((\S+)\) by (\S+) /) {
+    if (/^from (\S+) \((\S+)\) by (\S+) \(Content Technologies /) {
       return;		# useless without the $ip anyway!
       #$helo = $1; $rdns = $2; $by = $3; goto enough;
     }
 
     # Received: from 01al10015010057.ad.bls.com ([90.152.5.141] [90.152.5.141])
     # by aismtp3g.bls.com with ESMTP; Mon, 10 Mar 2003 11:10:41 -0500
-    if (/^(\S+) \(\[(\S+)\] \[(\S+)\]\) by (\S+) with /) {
+    if (/^from (\S+) \(\[(\S+)\] \[(\S+)\]\) by (\S+) with /) {
       # not sure what $3 is ;)
       $helo = $1; $ip = $2; $by = $4;
       goto enough;
@@ -925,7 +912,7 @@ sub parse_received_line {
 
     # Received: from 206.47.0.153 by dm3cn8.bell.ca with ESMTP (Tumbleweed MMS
     # SMTP Relay (MMS v5.0)); Mon, 24 Mar 2003 19:49:48 -0500
-    if (/^(${IP_ADDRESS}) by (\S+) with /) {
+    if (/^from (${IP_ADDRESS}) by (\S+) with /) {
       $ip = $1; $by = $2;
       goto enough;
     }
@@ -933,47 +920,47 @@ sub parse_received_line {
     # Received: from pobox.com (h005018086b3b.ne.client2.attbi.com[66.31.45.164])
     # by rwcrmhc53.attbi.com (rwcrmhc53) with SMTP id <2003031302165605300suph7e>;
     # Thu, 13 Mar 2003 02:16:56 +0000
-    if (/^(\S+) \((\S+)\[(${IP_ADDRESS})\]\) by (\S+) /) {
+    if (/^from (\S+) \((\S+)\[(${IP_ADDRESS})\]\) by (\S+) /) {
       $mta_looked_up_dns = 1;
       $helo = $1; $rdns = $2; $ip = $3; $by = $4; goto enough;
     }
 
     # Received: from [10.128.128.81]:50999 (HELO dfintra.f-secure.com) by fsav4im2 ([10.128.128.74]:25) (F-Secure Anti-Virus for Internet Mail 6.0.34 Release) with SMTP; Tue, 5 Mar 2002 14:11:53 -0000
-    if (/^\[(${IP_ADDRESS})\]\S+ \((?:HELO|EHLO) (\S*)\) by (\S+) /) {
+    if (/^from \[(${IP_ADDRESS})\]\S+ \((?:HELO|EHLO) (\S*)\) by (\S+) /) {
       $ip = $1; $helo = $2; $by = $3; goto enough;
     }
 
     # Received: from 62.180.7.250 (HELO daisy) by smtp.altavista.de (209.228.22.152) with SMTP; 19 Sep 2002 17:03:17 +0000
-    if (/^(${IP_ADDRESS}) \((?:HELO|EHLO) (\S*)\) by (\S+) /) {
+    if (/^from (${IP_ADDRESS}) \((?:HELO|EHLO) (\S*)\) by (\S+) /) {
       $ip = $1; $helo = $2; $by = $3; goto enough;
     }
 
     # Received: from oemcomputer [63.232.189.195] by highstream.net (SMTPD32-7.07) id A4CE7F2A0028; Sat, 01 Feb 2003 21:39:10 -0500
-    if (/^(\S+) \[(${IP_ADDRESS})\] by (\S+) /) {
+    if (/^from (\S+) \[(${IP_ADDRESS})\] by (\S+) /) {
       $helo = $1; $ip = $2; $by = $3; goto enough;
     }
 
     # from nodnsquery(192.100.64.12) by herbivore.monmouth.edu via csmap (V4.1) id srcAAAyHaywy
-    if (/^(\S+)\((${IP_ADDRESS})\) by (\S+) /) {
+    if (/^from (\S+)\((${IP_ADDRESS})\) by (\S+) /) {
       $rdns = $1; $ip = $2; $by = $3; goto enough;
     }
 
     # Received: from [192.168.0.13] by <server> (MailGate 3.5.172) with SMTP;
     # Tue, 1 Apr 2003 15:04:55 +0100
-    if (/ \(MailGate / && /^\[(${IP_ADDRESS})\] by (\S+) /) {
+    if (/^from \[(${IP_ADDRESS})\] by (\S+) \(MailGate /) {
       $ip = $1; $by = $2; goto enough;
     }
 
     # Received: from jmason.org (unverified [195.218.107.131]) by ni-mail1.dna.utvinternet.net <B0014212518@ni-mail1.dna.utvinternet.net>; Tue, 11 Feb 2003 12:18:12 +0000
-    if (/^(\S+) \(unverified \[(${IP_ADDRESS})\]\) by (\S+) /) {
+    if (/^from (\S+) \(unverified \[(${IP_ADDRESS})\]\) by (\S+) /) {
       $helo = $1; $ip = $2; $by = $3; goto enough;
     }
 
     # # from 165.228.131.11 (proxying for 139.130.20.189) (SquirrelMail authenticated user jmmail) by jmason.org with HTTP
-    # if (/^(\S+) \(proxying for (${IP_ADDRESS})\) \([A-Za-z][^\)]+\) by (\S+) with /) {
+    # if (/^from (\S+) \(proxying for (${IP_ADDRESS})\) \([A-Za-z][^\)]+\) by (\S+) with /) {
     # $ip = $2; $by = $3; goto enough;
     # }
-    if (/^(${IP_ADDRESS}) \([A-Za-z][^\)]+\) by (\S+) with /) {
+    if (/^from (${IP_ADDRESS}) \([A-Za-z][^\)]+\) by (\S+) with /) {
       $ip = $1; $by = $2; goto enough;
     }
 
@@ -984,7 +971,7 @@ sub parse_received_line {
     #  id 0MKpdM-1CkRpr14PF-000608; Fri, 31 Dec 2004 19:49:15 +0100
     # Received: from [218.19.142.229] (helo=hotmail.com ident=yiuhyotp)
     #   by yzordderrex with smtp (Exim 3.35 #1 (Debian)) id 194BE5-0005Zh-00; Sat, 12 Apr 2003 03:58:53 +0100
-    if (/^\[(${IP_ADDRESS})\] \(([^\)]+)\) by (\S+) /) {
+    if (/^from \[(${IP_ADDRESS})\] \(([^\)]+)\) by (\S+) /) {
       $ip = $1; my $sub = $2; $by = $3;
       $sub =~ s/helo=(\S+)// and $helo = $1;
       $sub =~ s/ident=(\S*)// and $ident = $1;
@@ -992,7 +979,7 @@ sub parse_received_line {
     }
 
     # Received: from mtsbp606.email-info.net (?dXqpg3b0hiH9faI2OxLT94P/YKDD3rQ1?@64.253.199.166) by kde.informatik.uni-kl.de with SMTP; 30 Apr 2003 15:06:29
-    if (/^(\S+) \((?:\S+\@)?(${IP_ADDRESS})\) by (\S+) with /) {
+    if (/^from (\S+) \((?:\S+\@)?(${IP_ADDRESS})\) by (\S+) with /) {
       $rdns = $1; $ip = $2; $by = $3; goto enough;
     }
 
@@ -1001,7 +988,7 @@ sub parse_received_line {
     #  by st.tahina.priv.at, id smtpdEDUB8h; Sun Nov 13 14:50:12 2005
     # Received: from pl027.nas934.d-osaka.nttpc.ne.jp(61.197.82.27), claiming to be "foo.woas.net" via SMTP
     #  by st.tahina.priv.at, id smtpd1PBsZT; Sun Nov 13 15:38:52 2005
-    if (/^(\S+)\((${IP_ADDRESS})\)(?:, claiming to be "(\S+)")? via \S+ by (\S+),/) {
+    if (/^from (\S+)\((${IP_ADDRESS})\)(?:, claiming to be "(\S+)")? via \S+ by (\S+),/) {
       $rdns = $1; $ip = $2; $helo = (defined $3) ? $3 : ''; $by = $4;
       if ($1 ne 'UNKNOWN') {
 	$mta_looked_up_dns = 1;
@@ -1028,7 +1015,7 @@ sub parse_received_line {
   # Received: (from localhost [24.180.47.240])
   #  by host.name (NAVGW 2.5.2.12) with SMTP id M2006060503484615455
   #  for <user@domain.co.uk>; Mon, 05 Jun 2006 03:48:47 +0100
-  if (/ \(NAVGW / && /^\(from (\S*) \[(${IP_ADDRESS})\]\) by (\S+) \(NAVGW .*?\) with /) {
+  if (/^\(from (\S*) \[(${IP_ADDRESS})\]\) by (\S+) \(NAVGW .*?\) with /) {
     $helo = $1; $ip = $2; $by = $3;
     goto enough;
   }
@@ -1049,45 +1036,45 @@ sub parse_received_line {
   # raptor.research.att.com (SGI-8.9.3/8.8.7) with ESMTP id KAA14788 
   # for <asrg@example.com>; Fri, 7 Mar 2003 10:37:56 -0500 (EST)
   # make this localhost-specific, so we know it's safe to ignore
-  if (/^\S+ \(\S+\@${LOCALHOST}\) by \S+ \(/) { return; }
+  if (/^from \S+ \(\S+\@${LOCALHOST}\) by \S+ \(/) { return; }
 
   # from paul (helo=felix) by felix.peema.org with local-esmtp (Exim 4.43)
   # id 1Ccq0j-0002k2-Lk; Fri, 10 Dec 2004 19:01:01 +0000
   # Exim doco says this is local submission, cf switch -oMr
-  if (/^\S+ \S+ by \S+ with local-e?smtp /) { return; }
+  if (/^from \S+ \S+ by \S+ with local-e?smtp /) { return; }
 
   # from 127.0.0.1 (AVG SMTP 7.0.299 [265.6.8]); Wed, 05 Jan 2005 15:06:48
   # -0800
-  if (/^127\.0\.0\.1 \(AVG SMTP \S+ \[\S+\]\); /) { return; }
+  if (/^from 127\.0\.0\.1 \(AVG SMTP \S+ \[\S+\]\); /) { return; }
 
   # from qmail-scanner-general-admin@lists.sourceforge.net by alpha by uid 7791 with qmail-scanner-1.14 (spamassassin: 2.41. Clear:SA:0(-4.1/5.0):. Processed in 0.209512 secs)
-  if (/^\S+\@\S+ by \S+ by uid \S+ /) { return; }
+  if (/^from \S+\@\S+ by \S+ by uid \S+ /) { return; }
 
   # Received: from DSmith1204@aol.com by imo-m09.mx.aol.com (mail_out_v34.13.) id 7.53.208064a0 (4394); Sat, 11 Jan 2003 23:24:31 -0500 (EST)
-  if (/^\S+\@\S+ by \S+ /) { return; }
+  if (/^from \S+\@\S+ by \S+ /) { return; }
 
   # Received: from Unknown/Local ([?.?.?.?]) by mailcity.com; Fri, 17 Jan 2003 15:23:29 -0000
-  if (/^Unknown\/Local \(/) { return; }
+  if (/^from Unknown\/Local \(/) { return; }
 
   # Received: from localhost (mailnull@localhost) by x.org (8.12.6/8.9.3) 
   # with SMTP id h2R2iivG093740; Wed, 26 Mar 2003 20:44:44 -0600 
   # (CST) (envelope-from x@x.org)
   # Received: from localhost (localhost [127.0.0.1]) (uid 500) by mail with local; Tue, 07 Jan 2003 11:40:47 -0600
-  if (/^${LOCALHOST} \((?:\S+\@)?${LOCALHOST}[\)\[]/) { return; }
+  if (/^from ${LOCALHOST} \((?:\S+\@)?${LOCALHOST}[\)\[]/) { return; }
 
   # Received: from olgisoft.com (127.0.0.1) by 127.0.0.1 (EzMTS MTSSmtp
   # 1.55d5) ; Thu, 20 Mar 03 10:06:43 +0100 for <asrg@ietf.org>
-  if (/^\S+ \((?:\S+\@)?${LOCALHOST}\) /) { return; }
+  if (/^from \S+ \((?:\S+\@)?${LOCALHOST}\) /) { return; }
 
   # Received: from casper.ghostscript.com (raph@casper [127.0.0.1]) h148aux8016336verify=FAIL); Tue, 4 Feb 2003 00:36:56 -0800
-  if (/^(\S+) \(\S+\@\S+ \[${LOCALHOST}\]\) /) { return; }
+  if (/^from (\S+) \(\S+\@\S+ \[${LOCALHOST}\]\) /) { return; }
 
   # Received: from (AUTH: e40a9cea) by vqx.net with esmtp (courier-0.40) for <asrg@ietf.org>; Mon, 03 Mar 2003 14:49:28 +0000
-  if (/^\(AUTH: (\S+)\) by (\S+) with /) { return; }
+  if (/^from \(AUTH: (\S+)\) by (\S+) with /) { return; }
 
   # from localhost (localhost [[UNIX: localhost]]) by home.barryodonovan.com
   # (8.12.11/8.12.11/Submit) id iBADHRP6011034; Fri, 10 Dec 2004 13:17:27 GMT
-  if (/^localhost \(localhost \[\[UNIX: localhost\]\]\) by /) { return; }
+  if (/^from localhost \(localhost \[\[UNIX: localhost\]\]\) by /) { return; }
 
   # header produced by command line /usr/bin/sendmail -t -f username@example.com
   # Received: (from username@localhost) by home.example.com
@@ -1105,10 +1092,10 @@ sub parse_received_line {
 
   # Internal Amazon traffic
   # Received: from dc-mail-3102.iad3.amazon.com by mail-store-2001.amazon.com with ESMTP (peer crosscheck: dc-mail-3102.iad3.amazon.com)
-  if (/^\S+\.amazon\.com by \S+\.amazon\.com with ESMTP \(peer crosscheck: /) { return; }
+  if (/^from \S+\.amazon\.com by \S+\.amazon\.com with ESMTP \(peer crosscheck: /) { return; }
 
   # Received: from GWGC6-MTA by gc6.jefferson.co.us with Novell_GroupWise; Tue, 30 Nov 2004 10:09:15 -0700
-  if (/^[^\.]+ by \S+ with Novell_GroupWise; /) { return; }
+  if (/^from [^\.]+ by \S+ with Novell_GroupWise; /) { return; }
 
   # Received: from no.name.available by [165.224.43.143] via smtpd (for [165.224.216.89]) with ESMTP; Fri, 28 Jan 2005 13:06:39 -0500
   # Received: from no.name.available by [165.224.216.88] via smtpd (for lists.sourceforge.net [66.35.250.206]) with ESMTP; Fri, 28 Jan 2005 15:42:30 -0500
@@ -1116,13 +1103,13 @@ sub parse_received_line {
   # outside the firewall.  We can only ignore the handover since we don't have
   # enough info in those headers; however, from googling, it appears that
   # all samples are cases where the handover is safely ignored.
-  if (/^no\.name\.available by \S+ via smtpd \(for /) { return; }
+  if (/^from no\.name\.available by \S+ via smtpd \(for /) { return; }
 
   # from 156.56.111.196 by blazing.arsecandle.org (envelope-from <gentoo-announce-return-530-rod=arsecandle.org@lists.gentoo.org>, uid 502) with qmail-scanner-1.24 (clamdscan: 0.80/594. f-prot: 4.4.2/3.14.11. Clear:RC:0(156.56.111.196):. Processed in 0.288806 secs); 06 Feb 2005 21:11:38 -0000
   # these are safe to ignore.  the previous handover line has the full
   # details of the handover described here, it's just qmail-scanner
   # logging a little more.
-  if (/^\S+ by \S+ \(.{0,100}\) with qmail-scanner/) {
+  if (/^from \S+ by \S+ \(.{0,100}\) with qmail-scanner/) {
     $envfrom =~ s/^\s*<*//gs; $envfrom =~ s/>*\s*$//gs;
     $envfrom =~ s/[\s\0\#\[\]\(\)\<\>\|]/!/gs;
     $self->{qmail_scanner_env_from} = $envfrom; # hack!
@@ -1139,17 +1126,17 @@ sub parse_received_line {
   # Received: from CATHY.IJS.SI by CATHY.IJS.SI (PMDF V4.3-10 #8779) id <01KTSSR50NSW001MXN@CATHY.IJS.SI>; Fri, 21 Mar 2003 20:50:56 +0100
   # Received: from MATT_LINUX by hippo.star.co.uk via smtpd (for mail.webnote.net [193.120.211.219]) with SMTP; 3 Jul 2002 15:43:50 UT
   # Received: from cp-its-ieg01.mail.saic.com by cpmx.mail.saic.com for me@jmason.org; Tue, 23 Jul 2002 14:09:10 -0700
-  if (/^\S+ by \S+ (?:with|via|for|\()/) { goto unparseable; }
+  if (/^from \S+ by \S+ (?:with|via|for|\()/) { goto unparseable; }
   
   # Received: from virtual-access.org by bolero.conactive.com ; Thu, 20 Feb 2003 23:32:58 +0100
-  if (/^(\S+) by (\S+) *\;/) {
+  if (/^from (\S+) by (\S+) *\;/) {
     goto unparseable;	# can't trust this
   }
 
   # ------------------------------------------------------------------------
   # FALL-THROUGH: OK, let's try some general patterns
   if (/\bhelo=([-A-Za-z0-9\.]+)[^-A-Za-z0-9\.]/) { $helo = $1; }
-  elsif (/^(\S+)[^-A-Za-z0-9\.]/) { $helo = $1; }
+  elsif (/^from (\S+)[^-A-Za-z0-9\.]/) { $helo = $1; }
   if (/\[(${IP_ADDRESS})\]/) { $ip = $1; }
   if (/ by (\S+)[^-A-Za-z0-9\;\.]/) { $by = $1; }
   if ($ip && $by) { goto enough; }
