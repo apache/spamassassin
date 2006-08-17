@@ -98,7 +98,7 @@ sub check_all {
     # ignore rules marked for ReplaceTags work!
     # TODO: we should be able to order the 'finish_parsing_end'
     # plugin calls to do this.
-    next if ($conf->{rules_to_replace}{$rule});
+    next if ($conf->{rules_to_replace}->{$name});
 
     # we have the rule, and its regexp matches.  zero out the body
     # rule, so that the module can do the work instead
@@ -143,6 +143,8 @@ sub run_body_hack {
 
   dbg("zoom: run_body_hack for $ruletype start");
 
+  my $do_dbg = (would_log('dbg', 'zoom') > 1);
+
   my $scoresptr = $conf->{scores};
   my $modname = "Mail::SpamAssassin::CompiledRegexps::".$ruletype;
 
@@ -164,7 +166,9 @@ sub run_body_hack {
         # ignore 0-scored rules, of course
         next unless $scoresptr->{$rulename};
 
-        dbg("zoom: base found for $rulename: $line");
+        if ($do_dbg) {
+	  dbg("zoom: base found for $rulename: $line");
+        }
 
         # run the real regexp -- on this line alone
         &{'Mail::SpamAssassin::PerMsgStatus::'.$rulename.'_one_line_body_test'}
@@ -200,6 +204,9 @@ sub extract_all {
 
   foreach my $name (keys %{$rules}) {
     my $rule = $rules->{$name};
+
+    # ignore ReplaceTags rules
+    next if ($conf->{rules_to_replace}->{$name});
 
     my $base  = $self->extract_base($rule, 0);
     my $base2 = $self->extract_base($rule, 1);
@@ -410,10 +417,10 @@ sub extract_base {
             ).*$//gsx;
 
   $keep_quantifiers or $rule =~ s/(?<!\\)(?:
-              \*|
-              \+|
-              \?|
-              \{
+              .\*|	# remove the quantified char, too
+              .\+|
+              .\?|
+              .\{
             ).*$//gsx;
 
   $keep_alternations or $rule =~ s/(?<!\\)(?:
@@ -429,12 +436,17 @@ sub extract_base {
   # drop this one, after the reversing
   $rule =~ s/\(\?\!.*$//gsx;
 
+  # still problematic; kill all "x?" statements
+  $rule =~ s/.\?.*$//gsx;
+
   # simplify (..)? and (..|) to (..|z{0})
   # this wierd construct is to work around an re2c bug; (..|) doesn't
   # do what it should
-  $rule =~ s/\((.*?)\)\?/\($1\|z{0}\)/gs;
-  $rule =~ s/\((.*?)\|\)/\($1\|z{0}\)/gs;
-  $rule =~ s/\(\|(.*?)\)/\($1\|z{0}\)/gs;
+  if ($keep_alternations) {
+    $rule =~ s/\((.*?)\)\?/\($1\|z{0}\)/gs;
+    $rule =~ s/\((.*?)\|\)/\($1\|z{0}\)/gs;
+    $rule =~ s/\(\|(.*?)\)/\($1\|z{0}\)/gs;
+  }
 
   # re2xs doesn't like escaped brackets;
   # brackets in general, in fact
@@ -593,7 +605,7 @@ sub de_reverse_multi_char_regexp_statements {
           \+ |
           \? |
         )
-        (.)\\/\\$3$2$1/gsx;
+        (.)(\\?)/$4$3$2$1/gsx;
 
   return $rule;
 }
