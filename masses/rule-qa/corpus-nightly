@@ -4,21 +4,32 @@
 
 . $HOME/.corpus
 
+RSYNC_PASSWORD=$password 
+export RSYNC_PASSWORD
+
 renice 10 -p $$
+
+# use $PERL from env if unset
+if [ "x${PERL:-}" = x ] ; then
+  PERL=perl
+fi
 
 set -x
 set -e
-export RSYNC_PASSWORD=$password
-export TIME="%e,%U,%S"
-export TZ=UTC
 
-# ensure we're running after 0900 UTC
-if date | egrep -q '^... ... .. (08|10):'; then
-	exit
-fi
+# ensure we're running after 0900 UTC; complex due to daylight savings.
+# If we're running in the 08xx UTC hour-space, sleep for 1 hour; when
+# we wake, we will be in 09xx.
+(
+  TIME="%e,%U,%S"; TZ=UTC; export TIME TZ
+  if date | egrep '^... ... .. 08:'; then
+    date; echo "sleeping for 1 hour to compensate for DST"
+    sleep 3600 ; date 
+  fi
+)
 
 # day of week
-if date | egrep -q '^Sat' || [ "$1" = "net" ]; then
+if date | egrep '^Sat' || [ "$1" = "net" ]; then
 	net="net-"
 else
 	net=""
@@ -29,10 +40,14 @@ cd $tree
 
 # find current revision
 rm -f weekly-versions.txt nightly-versions.txt
-if ! wget --tries=120 --wait=30 http://rsync.spamassassin.org/weekly-versions.txt http://rsync.spamassassin.org/nightly-versions.txt; then
+if ! wget --tries=120 --wait=30 \
+    http://rsync.spamassassin.org/weekly-versions.txt \
+    http://rsync.spamassassin.org/nightly-versions.txt
+then
 	echo "wget failed" 1>&2
 	exit 0
 fi
+
 if [ -n "$net" ]; then
 	revision=$(tail -1 weekly-versions.txt|awk '{print $2}')
 else
@@ -43,12 +58,25 @@ fi
 set +e
 retry=0
 while true; do
-	killall -TERM svn
-	sleep 10
-	killall -KILL svn
-	if svn update -r $revision; then
+        rm -rf rules    # causing trouble for some reason
+        rm -rf rulesrc/sandbox
+
+	if svn update -r $revision < /dev/null && \
+            svn update -r $revision rulesrc < /dev/null
+        then
 		break;
 	fi
+
+	pkill -TERM svn
+	sleep 10
+	pkill -KILL svn
+
+	if svn update -r $revision < /dev/null && \
+            svn update -r $revision rulesrc < /dev/null
+        then
+		break;
+	fi
+
 	if [ $retry -eq 120 ]; then
 		echo "svn update failed" 1>&2
 		exit 1
@@ -58,12 +86,20 @@ while true; do
 done
 set -e
 
+# build
+$PERL Makefile.PL < /dev/null
+make
+
+# call ext command, if required
+if [ "x${pre_mass_check_command:-}" != x ] ; then
+  $pre_mass_check_command
+fi
+
 # run test
 cd masses
 rm -f spamassassin/auto*
 rm -f spamassassin/bayes*
 rm -f razor-agent.log
-date > test.start
 if [ -n "$net" ]; then
 	prefs=$prefs_weekly
 	opts=$opts_weekly
@@ -76,9 +112,15 @@ if [ -n "$prefs" -a -f "$prefs" ]; then
 else
 	rm -f spamassassin/user_prefs
 fi
-./mass-check $opts
+
+date | tee test.start
+
+$PERL mass-check $opts
+
+date | tee test.end
+
 uptime
-date > test.end
+ls -l spam.log ham.log
 
 # results name
 mv spam.log spam-$net$username.log
@@ -88,7 +130,10 @@ mv ham.log ham-$net$username.log
 set +e
 retry=0
 while true; do
-	if rsync -CPcvuzb --timeout=120 spam-$net$username.log ham-$net$username.log $username@rsync.spamassassin.org::corpus/; then
+	if rsync -Pcvuzb --timeout=120 \
+            spam-$net$username.log ham-$net$username.log \
+            $username@rsync.spamassassin.org::corpus/
+        then
 		break;
 	fi
 	if [ $retry -eq 120 ]; then
