@@ -3,7 +3,7 @@
 use strict;
 sub run;
 
-my $BYMAILCF = '/home/bbmass/bymail/latest.cf';
+my $BYMAILCF = '/home/bbmass-stable/bymail/latest.cf';
 
 
 my $perl = $^X;
@@ -104,8 +104,8 @@ run "/local/bbmasstools/masschroot $perl ".
     "--noisy --deencap='petuniapress.com' ".
     "--cachedir=/tmpfs/aicache ".
     $mass_check_args{$slavename}." ".
-    "ham:detect:/home/bbmass/rawcor/*/ham/* ".
-    "spam:detect:/home/bbmass/rawcor/*/spam/*";
+    "ham:detect:/home/bbmass-stable/rawcor/*/ham/* ".
+    "spam:detect:/home/bbmass-stable/rawcor/*/spam/*";
 
     # TODO: add --after="6 months ago"?
 

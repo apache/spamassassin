@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 . /etc/profile
-cd /home/automc/svn/spamassassin/masses/rule-qa/automc ; . config
+cd /home/automc-stable/svn/spamassassin/masses/rule-qa/automc ; . config
 
 date=date ; [ -x /opt/sfw/bin/gdate ] && date=gdate
 egrep=egrep ; [ -x /usr/sfw/bin/gegrep ] && egrep=gegrep

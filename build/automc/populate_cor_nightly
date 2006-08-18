@@ -6,11 +6,13 @@
 use strict;
 use warnings;
 
-my $SADIR="/home/automc/svn/spamassassin";
+exit 0;		# done by other automc user
+
+my $SADIR="/home/automc-stable/svn/spamassassin";
 
 # both of these must be writable
-my $TGTS_DIR = "/home/bbmass/mc-nightly";
-my $RAWCOR_DIR = "/home/bbmass/rawcor";
+my $TGTS_DIR = "/home/bbmass-stable/mc-nightly";
+my $RAWCOR_DIR = "/home/bbmass-stable/rawcor";
 
 if (!-d $TGTS_DIR) {
   mkdir ($TGTS_DIR) or die "cannot create $TGTS_DIR";
