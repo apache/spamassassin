@@ -132,7 +132,7 @@ retry=0
 while true; do
 	if rsync -Pcvuzb --timeout=120 \
             spam-$net$username.log ham-$net$username.log \
-            $username@rsync.spamassassin.org::corpus/
+            $username@rsync.spamassassin.org::stable-corpus/
         then
 		break;
 	fi
