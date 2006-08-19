@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-jm bb-zmi cthielen daf parkerm theo wtogami zmi
+# with results from: bb-doc bb-jm bb-zmi cthielen daf parkerm theo wtogami
 
 # good enough
 ADVANCE_FEE_3
@@ -170,16 +170,10 @@ DRUGS_MANYKINDS
 DRUGS_SLEEP_EREC
 
 # good enough
-DRUG_DOSAGE
-
-# good enough
 DRUG_ED_GENERIC
 
 # good enough
 DRUG_ED_ONLINE
-
-# good enough
-DRUG_ED_SILD
 
 # good enough
 EARN_PER_WEEK
@@ -221,9 +215,6 @@ FAKE_OUTBLAZE_RCVD
 FB_CIALIS_LEO3
 
 # good enough
-FB_OBFU_URI_COM
-
-# good enough
 FB_SAVE_LEO
 
 # good enough
@@ -261,6 +252,9 @@ FH_RCVD_WITHSMTPFOR
 
 # good enough
 FM_CLAIM_IPOD
+
+# good enough
+FM_CUSTOMLOGODSGNc
 
 # good enough
 FORGED_AOL_TAGS
@@ -341,10 +335,16 @@ FROM_ALL_NUMS
 FROM_BLANK_NAME
 
 # good enough
+FROM_DOMAIN_NOVOWEL
+
+# good enough
 FROM_ENDS_IN_NUMS
 
 # good enough
 FROM_HAS_MIXED_NUMS
+
+# good enough
+FROM_HAS_ULINE_NUMS
 
 # good enough
 FROM_ILLEGAL_CHARS
@@ -449,9 +449,6 @@ HELO_DYNAMIC_IPADDR2
 HELO_DYNAMIC_SPLIT_IP
 
 # good enough
-HELO_IPNNN_COM
-
-# good enough
 HS_EXTRA
 
 # good enough
@@ -501,6 +498,9 @@ INVALID_MSGID
 
 # good enough
 INVALID_TZ_CST
+
+# good enough
+INVALID_TZ_GMT
 
 # good enough
 INVESTMENT_ADVICE
@@ -569,6 +569,9 @@ MIME_BAD_ISO_CHARSET
 MIME_BASE64_BLANKS
 
 # good enough
+MIME_BASE64_NO_NAME
+
+# good enough
 MIME_BASE64_TEXT
 
 # good enough
@@ -628,9 +631,6 @@ MSGID_YAHOO_CAPS
 # good enough
 MULTIPART_ALT_NON_TEXT
 
-# good enough
-NOT_ADVISOR
-
 # tflags net
 NO_DNS_FOR_FROM
 
@@ -666,9 +666,6 @@ PLING_QUERY
 
 # good enough
 PORN_15
-
-# good enough
-PORN_URL_SEX
 
 # good enough
 PREST_NON_ACCREDITED
@@ -929,10 +926,10 @@ SUBJECT_IN_WHITELIST
 SUBJECT_NEEDS_ENCODING
 
 # good enough
-SUBJECT_SEXUAL
+SUBJECT_NOVOWEL
 
 # good enough
-SUBJ_AS_SEEN
+SUBJECT_SEXUAL
 
 # good enough
 SUBJ_ILLEGAL_CHARS
@@ -1106,16 +1103,10 @@ TVD_SUBJ_WIPE_DEBT
 TVD_UA_FOSTERING
 
 # good enough
-TVD_UNDER_VALUED
-
-# good enough
 TVD_VISIT_PHARMA
 
 # good enough
 TVD_VIS_HIDDEN
-
-# good enough
-FM_CUSTOMLOGODSGNc
 
 # good enough
 FORGED_IMS_HTML
@@ -1130,22 +1121,31 @@ FORGED_OUTLOOK_HTML
 FORGED_OUTLOOK_TAGS
 
 # good enough
+MID_OUTLOOK_ZZZNN
+
+# good enough
 RATWARE_MS_HASH
 
 # good enough
 RATWARE_OUTLOOK_NONAME
 
 # good enough
-TVD_FW_GRAPHIC_ID1
+TVD_FW_GRAPHIC_NAME_LONG
 
 # good enough
-TVD_FW_GRAPHIC_ID2
+TVD_FW_GRAPHIC_NAME_MID
+
+# good enough
+TVD_LONG_WORD5
 
 # good enough
 UNCLAIMED_MONEY
 
 # good enough
 UNCLOSED_BRACKET
+
+# good enough
+UNIQUE_WORDS
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1158,9 +1158,6 @@ UPPERCASE_50_75
 
 # good enough
 UPPERCASE_75_100
-
-# good enough
-URG_BIZ
 
 # tflags net
 URIBL_AB_SURBL
@@ -1191,6 +1188,9 @@ URIBL_SC_SURBL
 
 # tflags net
 URIBL_WS_SURBL
+
+# good enough
+URI_4YOU
 
 # good enough
 URI_L_PHP
