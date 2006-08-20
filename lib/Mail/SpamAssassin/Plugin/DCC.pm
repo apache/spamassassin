@@ -637,7 +637,7 @@ sub dccproc_lookup {
 sub plugin_report {
   my ($self, $options) = @_;
 
-  return if $self->{options}->{dont_report_to_dcc};
+  return if $options->{report}->{options}->{dont_report_to_dcc};
   $self->get_dcc_interface();
   return if $self->{dcc_disabled};
 
