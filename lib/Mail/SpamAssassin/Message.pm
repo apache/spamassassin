@@ -862,6 +862,10 @@ sub get_rendered_body_text_array {
   for(my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
     my $p = $parts[$pt];
 
+    # bug 4843: skip text/calendar parts since they're usually an attachment
+    # and not displayed
+    next if ($p->{'type'} eq 'text/calendar');
+
     # put a blank line between parts ...
     $text .= "\n" if ( $text );
 
@@ -922,6 +926,10 @@ sub get_visible_rendered_body_text_array {
   for(my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
     my $p = $parts[$pt];
 
+    # bug 4843: skip text/calendar parts since they're usually an attachment
+    # and not displayed
+    next if ($p->{'type'} eq 'text/calendar');
+
     # put a blank line between parts ...
     $text .= "\n" if ( $text );
 
@@ -976,6 +984,10 @@ sub get_invisible_rendered_body_text_array {
   for(my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
     my $p = $parts[$pt];
 
+    # bug 4843: skip text/calendar parts since they're usually an attachment
+    # and not displayed
+    next if ($p->{'type'} eq 'text/calendar');
+
     # put a blank line between parts ...
     $text .= "\n" if ( $text );
 
@@ -1019,6 +1031,10 @@ sub get_decoded_body_text_array {
 
   # Go through each part
   for(my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
+    # bug 4843: skip text/calendar parts since they're usually an attachment
+    # and not displayed
+    next if ($parts[$pt]->{'type'} eq 'text/calendar');
+
     push(@{$self->{text_decoded}}, "\n") if ( @{$self->{text_decoded}} );
     push(@{$self->{text_decoded}}, split_into_array_of_short_lines($parts[$pt]->decode()));
   }
