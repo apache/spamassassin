@@ -23,7 +23,7 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::HTML;
 use Mail::SpamAssassin::Util;
 
-plan tests => 84;
+plan tests => 88;
 
 ##############################################
 
@@ -206,6 +206,35 @@ ok(try_canon([
    'http://65.26.26.95:/https-www.paypal.com/webscrr/index.php',
    'http://www.google.com/pagead/iclk?sa=l&ai=Br3ycNQz5Q-fXBJGSiQLU0eDSAueHkArnhtWZAu-FmQWgjlkQAxgFKAg4AEDKEUiFOVD-4r2f-P____8BoAGyqor_A8gBAZUCCapCCqkCxU7NLQH0sz4&num=5&adurl=http://1092229727:/https-www.paypal.com/webscrr/index.php',
    ]));
+
+ok(try_canon([
+   'http://89.0x00000000000000000000068.0000000000000000000000160.0x00000000000011'
+   ], [
+   'http://89.0x00000000000000000000068.0000000000000000000000160.0x00000000000011',
+   'http://89.104.112.17',
+   ]));
+
+ok(try_canon([
+   'http://0x000000059.104.00000000000160.0x00011'
+   ], [
+   'http://0x000000059.104.00000000000160.0x00011',
+   'http://89.104.112.17',
+   ]));
+
+ok(try_canon([
+   'http://089.104.0160.0x11',
+   ], [
+   'http://089.104.0160.0x11',
+   'http://89.104.112.17',
+   ]));
+
+ok(try_canon([
+   'http://0x7f000001',
+   ], [
+   'http://0x7f000001',
+   'http://127.0.0.1',
+   ]));
+
 
 ##############################################
 
