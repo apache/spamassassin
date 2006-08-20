@@ -161,7 +161,7 @@ sub plugin_report {
 
   return unless $self->{spamcop_available};
 
-  if (!$self->{options}->{dont_report_to_spamcop}) {
+  if (!$options->{report}->{options}->{dont_report_to_spamcop}) {
     if ($self->spamcop_report($options)) {
       $options->{report}->{report_available} = 1;
       info("reporter: spam reported to SpamCop");
