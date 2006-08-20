@@ -335,7 +335,7 @@ sub plugin_report {
   return unless $self->{pyzor_available};
   return unless $self->{main}->{conf}->{use_pyzor};
 
-  if (!$self->{options}->{dont_report_to_pyzor} && $self->is_pyzor_available())
+  if (!$options->{report}->{options}->{dont_report_to_pyzor} && $self->is_pyzor_available())
   {
     # use temporary file: open2() is unreliable due to buffering under spamd
     my $tmpf = $options->{report}->create_fulltext_tmpfile($options->{text});
