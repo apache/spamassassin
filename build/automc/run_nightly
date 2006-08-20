@@ -49,19 +49,8 @@ for user in $nightly_users ; do
 
     # use bash to work around Solaris breakage
     nice bash $dir/svn/masses/rule-qa/corpus-nightly
-  )
+
+  ) 2>&1 | tee "$dir/corpus-nightly.log"
 
 done
-
-# cycle the logfiles; keep 6 (3 days worth I think)
-# (
-  # cd /var/www/buildbot.spamassassin.org/bbmass
-  # rm nightly_masschecks_6.txt
-  # mv nightly_masschecks_5.txt  nightly_masschecks_6.txt
-  # mv nightly_masschecks_4.txt  nightly_masschecks_5.txt
-  # mv nightly_masschecks_3.txt  nightly_masschecks_4.txt
-  # mv nightly_masschecks_2.txt  nightly_masschecks_3.txt
-  # mv nightly_masschecks_1.txt  nightly_masschecks_2.txt
-  # mv nightly_masschecks.txt    nightly_masschecks_1.txt
-# )
 
