@@ -1127,11 +1127,22 @@ sub uri_list_canonify {
 
       ########################
 
-      # deal with 'http://213.172.0x1f.13/', decode encoded octets
-      if ($host =~ /^([0-9a-fx]*\.)([0-9a-fx]*\.)([0-9a-fx]*\.)([0-9a-fx]*)$/ix) {
-        my (@chunk) = ($1,$2,$3,$4);
-        for my $octet (0 .. 3) {
-          $chunk[$octet] =~ s/^0x([0-9a-f][0-9a-f])/sprintf "%d",hex($1)/gei;
+      # deal with hosts which are IPs
+      # also handle things like:
+      # http://89.0x00000000000000000000068.0000000000000000000000160.0x00000000000011
+      #    both hex (0x) and oct (0+) encoded octets, etc.
+
+      if ($host =~ /^
+        ((?:0x[0-9a-f]{2,}|\d+)\.)
+	((?:0x[0-9a-f]{2,}|\d+)\.)
+	((?:0x[0-9a-f]{2,}|\d+)\.)
+	(0x[0-9a-f]{2,}|\d+)
+	$/ix) {
+        my @chunk = ($1,$2,$3,$4);
+        foreach my $octet (@chunk) {
+          $octet =~ s/^0x0*([0-9a-f][0-9a-f])/sprintf "%d",hex($1)/gei;
+          $octet =~ s/^0+([1-3][0-7]{0,2}|[4-7][0-7]?)\b/sprintf "%d",oct($1)/ge;
+	  $octet =~ s/^0+//;
         }
         push(@nuris, join ('', $proto, @chunk, $rest));
       }
