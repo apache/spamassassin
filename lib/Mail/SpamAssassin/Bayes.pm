@@ -469,7 +469,7 @@ sub tokenize_headers {
   my %parsed = ();
 
   my %user_ignore;
-  $user_ignore{$_} = 1 for @{$self->{main}->{conf}->{bayes_ignore_headers}};
+  $user_ignore{lc $_} = 1 for @{$self->{main}->{conf}->{bayes_ignore_headers}};
 
   # get headers in array context
   my @hdrs;
@@ -498,7 +498,7 @@ sub tokenize_headers {
 
     # remove user-specified headers here, after Received, in case they
     # want to ignore that too
-    next if exists $user_ignore{$hdr};
+    next if exists $user_ignore{lc $hdr};
 
     # Prep the header value
     $val ||= '';
