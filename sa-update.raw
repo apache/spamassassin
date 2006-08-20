@@ -259,6 +259,7 @@ if (defined $opt{'gpgkeyfile'}) {
 
   dbg("gpg: reading in gpgfile ".$opt{'gpgkeyfile'});
   while(my $key = <GPG>) {
+    next if ($key =~ /^#/);  # explicitly skip comments
     unless (is_valid_gpg_key_id($key)) {
       dbg("gpg: invalid key id $key");
       next;
@@ -321,6 +322,7 @@ if (defined $opt{'channelfile'}) {
   dbg("channel: reading in channelfile ".$opt{'channelfile'});
   @channels = ();
   while(my $chan = <CHAN>) {
+    next if ($chan =~ /^#/);  # explicitly skip comments
     chomp $chan;
     $chan = lc $chan;
     dbg("channel: adding $chan");
