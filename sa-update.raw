@@ -211,7 +211,7 @@ if (defined $opt{'updatedir'}) {
   $opt{'updatedir'} = Mail::SpamAssassin::Util::untaint_file_path($opt{'updatedir'});
 }
 else {
-  $opt{'updatedir'} = $SA->sed_path('__local_state_dir__/spamassassin/__version__');
+  $opt{'updatedir'} = $SA->sed_path('__local_state_dir__/__version__');
 }
 
 dbg("generic: sa-update version $VERSION");
