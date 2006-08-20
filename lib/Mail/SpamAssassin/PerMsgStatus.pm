@@ -917,7 +917,7 @@ sub rewrite_no_report_safe {
 	# The tag should be a comment for this header ...
 	$tag = "($tag)" if ($hdr =~ /^(?:From|To)$/);
 
-        s/^([^:]+:[ \t]*)(?:\Q${tag}\E )?/$1${tag} /i;
+        s/^([^:]+:)[ \t]*(?:\Q${tag}\E )?/$1 ${tag} /i;
       }
 
       $addition = 'headers_spam';
