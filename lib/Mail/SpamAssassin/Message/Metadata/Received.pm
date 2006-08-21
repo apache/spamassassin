@@ -55,9 +55,6 @@ use Mail::SpamAssassin::Constants qw(:ip);
 sub parse_received_headers {
   my ($self, $permsgstatus, $msg) = @_;
 
-  $self->{dns_pms} = $permsgstatus;
-  $self->{is_dns_available} = $self->{dns_pms}->is_dns_available();
-
   $self->{relays_trusted} = [ ];
   $self->{num_relays_trusted} = 0;
   $self->{relays_trusted_str} = '';
@@ -79,7 +76,6 @@ sub parse_received_headers {
   # now figure out what relays are trusted...
   my $trusted = $permsgstatus->{main}->{conf}->{trusted_networks};
   my $internal = $permsgstatus->{main}->{conf}->{internal_networks};
-  my $first_by;
   my $in_trusted = 1;
   my $in_internal = 1;
 
@@ -178,13 +174,6 @@ sub parse_received_headers {
     if ($in_trusted && !$did_user_specify_trust) {
       my $inferred_as_trusted = 0;
 
-      # do we know what the IP addresses of the "by" host in the first
-      # header is?  If not, set them from this header, since it's the
-      # first one.  NOTE: this is a ref to an array, NOT a string.
-      if (!defined $first_by && $self->{is_dns_available}) {
-	$first_by = [ $self->lookup_all_ips ($relay->{by}) ];
-      }
-
       # if the 'from' IP addr is in a reserved net range, it's not on
       # the public internet.
       if ($relay->{ip_private}) {
@@ -199,57 +188,8 @@ sub parse_received_headers {
 	$inferred_as_trusted = 1;
       }
 
-      # can we use DNS?  If not, we cannot use this algorithm, as we
-      # cannot lookup hostnames. :(
       # Consider the first relay trusted, and all others untrusted.
-      if (!$self->{is_dns_available}) {
-	dbg("received-header: cannot use DNS, do not trust any hosts from here on");
-      }
-
-      # if the 'from' IP addr shares the same class B mask (/16) as
-      # the first relay found in the message, it's still on the
-      # user's network.
-      elsif (Mail::SpamAssassin::Util::ips_match_in_16_mask
-					([ $relay->{ip} ], $first_by))
-      {
-	dbg("received-header: 'from' ".$relay->{ip}." is near to first 'by'");
-	$inferred_as_trusted = 1;
-      }
-
-      # if *all* of the IP addrs for the 'by' host are in a reserved net range,
-      # it's not on the public internet.  Note that we should still stop if
-      # only *some* of the IPs are reserved; this can happen for multi-homed
-      # gateway hosts.  For example
-      #
-      #   PRIVATE NET    A          B    INTERNET
-      #     scanner <---> gateway_MX <---> internet
-      #
-      # Interface A would be on a reserved net, but B would have a "public" IP
-      # address.  Same can happen if the scanner runs on the gateway-MX, since
-      # lookup_all_ips() will return [ public_IP_addr, 127.0.0.1 ] as the list
-      # of addresses, and 127.0.0.1 is a "reserved" address. (bug 2113)
-
-      else {
-	my @ips = $self->lookup_all_ips ($relay->{by});
-	my $found_non_rsvd = 0;
-	my $found_rsvd = 0;
-	foreach my $ip (@ips) {
-	  next if ($ip =~ /^${LOCALHOST}$/o);
-
-	  if ($ip !~ /${IP_PRIVATE}/o) {
-	    dbg("received-header: 'by' ".$relay->{by}." has public IP $ip");
-	    $found_non_rsvd = 1;
-	  } else {
-	    dbg("received-header: 'by' ".$relay->{by}." has private IP $ip");
-	    $found_rsvd = 1;
-	  }
-	}
-
-	if ($found_rsvd && !$found_non_rsvd) {
-	  dbg("received-header: 'by' ".$relay->{by}." has no public IPs");
-	  $inferred_as_trusted = 1;
-	}
-      }
+      dbg("received-header: cannot use DNS, do not trust any hosts from here on");
 
       if (!$inferred_as_trusted) { $in_trusted = 0; }
     }
@@ -291,9 +231,6 @@ sub parse_received_headers {
   $self->{relays_external_str} = join(' ', map { $_->{as_string} }
                     @{$self->{relays_external}});
 
-  # drop the temp PerMsgStatus object
-  delete $self->{dns_pms};
-
   # OK, we've now split the relay list into trusted and untrusted.
 
   # add the stringified representation to the message object, so Bayes
@@ -329,33 +266,6 @@ sub parse_received_headers {
   dbg("metadata: X-Spam-Relays-Untrusted: ".$self->{relays_untrusted_str});
   dbg("metadata: X-Spam-Relays-Internal: ".$self->{relays_internal_str});
   dbg("metadata: X-Spam-Relays-External: ".$self->{relays_external_str});
-}
-
-sub lookup_all_ips {
-  my ($self, $hostname) = @_;
-
-  # cannot use gethostbyname without DNS :(
-  if (!$self->{is_dns_available}) {
-    return ();
-  }
-  
-  my @addrs = $self->{dns_pms}->lookup_a ($hostname);
-
-  # bug 2324: this fails if the user has an /etc/hosts entry for that
-  # hostname; force a DNS lookup by appending a dot, but only if there's
-  # a domain in the hostname (ie. it really is likely to be in external DNS).
-  # use both sets of addrs, as the /etc/hosts data is usable anyway for
-  # internal relaying.
-  # NOW OFF: we now force DNS use through Net::DNS
-
-  my @ips = ();
-  my %seenaddr = ();
-  foreach my $addr (@addrs) {
-    next if ($seenaddr{$addr});
-    $seenaddr{$addr} = 1;
-    push (@ips, $addr);
-  }
-  return @ips;
 }
 
 # ---------------------------------------------------------------------------
@@ -1213,34 +1123,18 @@ enough:
     auth => $auth
   };
 
-  # perform rDNS check if MTA has not done it for us.
-  #
-  # TODO: do this for untrusted headers anyway; if it mismatches it
-  # could be a spamsign.  Probably better done later after we've
-  # moved the "trusted" ones out of the way.  In fact, this op
-  # here may be movable too; no need to lookup trusted IPs all the time.
-  #
   if ($rdns eq '') {
-    if (!$self->{is_dns_available}) {
-      if ($mta_looked_up_dns) {
-	# we know the MTA always does lookups, so this means the host
-	# really has no rDNS (rather than that the MTA didn't bother
-	# looking it up for us).
-	$relay->{no_reverse_dns} = 1;
-	$rdns = '';
-      } else {
-	$relay->{rdns_not_in_headers} = 1;
-      }
-
+    if ($mta_looked_up_dns) {
+      # we know the MTA always does lookups, so this means the host
+      # really has no rDNS (rather than that the MTA didn't bother
+      # looking it up for us).
+      $relay->{no_reverse_dns} = 1;
+      $rdns = '';
     } else {
-      $rdns = $self->{dns_pms}->lookup_ptr ($ip);
-
-      if (!$rdns) {
-	$relay->{no_reverse_dns} = 1;
-	$rdns = '';
-      }
+      $relay->{rdns_not_in_headers} = 1;
     }
   }
+
   $relay->{rdns} = $rdns;
   $relay->{lc_rdns} = lc $rdns;
 
