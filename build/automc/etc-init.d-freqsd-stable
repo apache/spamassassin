@@ -28,8 +28,8 @@ stop() {
     cd /home/automc-stable/svn/spamassassin
     su automc-stable -c "./build/automc/freqsd -pidfile /home/automc-stable/freqsd/pid -kill"
 
-    sleep 1
-    pkill -15 -f automc/freqsd            # just in case
+    # sleep 1
+    # pkill -15 -f automc/freqsd            # just in case
     sleep 1
     pkill -15 -u automc-stable
 }
