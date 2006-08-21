@@ -20,16 +20,22 @@
 use strict;
 use FindBin;
 use Getopt::Std;
-getopts("fm:M:X:l:L:pxhc:at:s:io");
+getopts("fm:M:X:l:L:pxhc:at:s:ioTSdP");
 
 use vars qw {
   $opt_f $opt_m $opt_M $opt_X $opt_p $opt_x $opt_h $opt_l $opt_L $opt_c
-  $opt_a $opt_t $opt_s $opt_i $sorting $opt_o 
+  $opt_a $opt_t $opt_s $opt_i $sorting $opt_o $opt_T $opt_S $opt_X
+  $opt_d $opt_P
 };
+
+# as per http://wiki.apache.org/spamassassin/RulesProjPromotion, for -P
+my $promote_so_min      = 0.95;
+my $promote_hitrate_min = 0.02;
+my $promote_fprate_max  = 1.00;
 
 sub usage {
   die "hit-frequencies [-c rules dir] [-f] [-m RE] [-M RE] [-X RE] [-l LC]
-                [-s SC] [-a] [-p] [-x] [-i] [-o] [spam log] [ham log]
+          [-s SC] [-a] [-p] [-x] [-i] [-T] [-S] [-o] [-d] [spam log] [ham log]
 
     -c p   use p as the rules directory
     -f     falses. count only false-negative or false-positive matches
@@ -44,7 +50,11 @@ sub usage {
     -x     extended output, with S/O ratio and scores
     -s SC  which scoreset to use
     -i     use IG (information gain) for ranking
+    -T     display rule times. implies -x, -p
     -o     display hit overlaps against all other rules
+    -S     display score-map of hits
+    -P     flag which rules pass the promotion criteria
+    -d     XML output.  conflicts with -x, -p
 
     options -l and -L are mutually exclusive.
 
@@ -57,9 +67,14 @@ sub usage {
 }
 
 usage() if($opt_h || ($opt_l && $opt_L));
+usage() if($opt_d && ($opt_x || $opt_p));
 
 if ($opt_p) {
   $opt_x = 1;
+}
+
+if ($opt_d) {
+  $opt_x = $opt_p = 1;
 }
 
 $opt_s = 0 if ( !defined $opt_s );
@@ -67,6 +82,7 @@ $opt_s = 0 if ( !defined $opt_s );
 my $cffile = $opt_c || "$FindBin::Bin/../rules";
 
 # "our" so that the require'd file can overwrite them
+my $rules_pl_unparseable;
 our %rules = ();
 our %scores = ();
 
@@ -75,16 +91,24 @@ my %freq_spam = ();
 my %freq_ham = ();
 my %hmap_spam = ();
 my %hmap_ham = ();
+my %scoremap_spam = ();
+my %scoremap_ham = ();
 my %freq = ();
 my $num_spam = 0;
 my $num_ham = 0;
 my %ranking = ();
 my $ok_lang = '';
 
+my %rule_times = ();
+
 readscores($cffile);
 
 $ok_lang = lc ($opt_l || $opt_L || '');
 if ($ok_lang eq 'all') { $ok_lang = '.'; }
+
+if ($opt_t && $rules_pl_unparseable) {
+  die "-t requires rules.pl to be parseable";
+}
 
 foreach my $key (keys %rules) {
 
@@ -111,26 +135,64 @@ my $hdr_ham = $num_ham;
 
 my $sorting = $opt_i ? "IG" : "RANK";
 
-if ($opt_p) {
-  if ($opt_f) {
-    printf "%7s %7s %7s  %6s  %6s  %6s  %s\n",
-  	"OVERALL%", "FNEG%", "FPOS%", "S/O", $sorting, "SCORE", "NAME";
-  } else {
-    printf "%7s %7s  %7s  %6s  %6s  %6s  %s\n",
-  	"OVERALL%", "SPAM%", "HAM%", "S/O", $sorting, "SCORE", "NAME";
-  }
+if ($opt_d) {
+  $hdr_all ||= 0.00001;     # avoid div by 0 in the next 2 statements
+  $hdr_spam = ($num_spam / $hdr_all) * 100.0;
+  $hdr_ham = ($num_ham / $hdr_all) * 100.0;
+  $opt_P = 1;
+
+  print qq{
+
+    <freqs>
+      <allmessages>
+        <count class='spam'>$num_spam</count>
+        <count class='ham'>$num_spam</count>
+        <pc class='spam'>$hdr_spam</pc>
+        <pc class='ham'>$hdr_spam</pc>
+      </allmessages>
+
+  };
+
+}
+elsif ($opt_p) {
+  printf "%7s  %7s  %7s  %6s  %6s  %6s  %s\n",
+  	"MSECS", $opt_f?"FNEG%":"SPAM%", $opt_f?"FPO%":"HAM%",
+        "S/O", $sorting, "SCORE", "NAME";
+
+  printf "%7d  %7d  %7d  %7.3f %6.2f  %6.2f  (all messages)\n",
+  	0, $hdr_spam, $hdr_ham,
+        soratio ($num_spam,$num_ham), 0, 0;
+
+  $hdr_all ||= 0.00001;     # avoid div by 0 in the next 2 statements
+  $hdr_spam = ($num_spam / $hdr_all) * 100.0;
+  $hdr_ham = ($num_ham / $hdr_all) * 100.0;
+  $hdr_all = 100.0;             # this is obvious
+
+  printf "%7.5f  %7.4f  %7.4f  %7.3f %6.2f  %6.2f  (all messages as %%)\n",
+  	0, $hdr_spam, $hdr_ham,
+        soratio ($num_spam,$num_ham), 0, 0;
+
+}
+elsif ($opt_p) {
+  printf "%8s %7s  %7s  %6s  %6s  %6s  %s\n",
+  	"OVERALL%", $opt_f?"FNEG%":"SPAM%", $opt_f?"FPO%":"HAM%",
+        "S/O", $sorting, "SCORE", "NAME";
+
   printf "%7d  %7d  %7d  %7.3f %6.2f  %6.2f  (all messages)\n",
   	$hdr_all, $hdr_spam, $hdr_ham,
         soratio ($num_spam,$num_ham), 0, 0;
 
+  $hdr_all ||= 0.00001;     # avoid div by 0 in the next 2 statements
   $hdr_spam = ($num_spam / $hdr_all) * 100.0;
   $hdr_ham = ($num_ham / $hdr_all) * 100.0;
   $hdr_all = 100.0;             # this is obvious
+
   printf "%7.3f  %7.4f  %7.4f  %7.3f %6.2f  %6.2f  (all messages as %%)\n",
   	$hdr_all, $hdr_spam, $hdr_ham,
         soratio ($num_spam,$num_ham), 0, 0;
 
-} elsif ($opt_x) {
+}
+elsif ($opt_x) {
   printf "%7s %7s  %7s  %6s  %6s %6s  %s\n",
   	"OVERALL%", "SPAM%", "HAM%", "S/O", $sorting, "SCORE", "NAME";
   printf "%7d  %7d  %7d  %7.3f %6.2f %6.2f  (all messages)\n",
@@ -152,6 +214,7 @@ my $rank_lo = 9999999;
 # variables for wanted/unwanted RANK
 my %wanted;
 my %unwanted;
+my %isnice;
 my %wranks;
 my %uranks;
 
@@ -161,16 +224,27 @@ $freq{$_}++ for keys %freq_spam;
 
 my $test;
 foreach $test (keys %freq) {
-  next unless (exists $rules{$test});           # only valid tests
-  next if (!$opt_a && $rules{$test}->{issubrule});
+  my $parsed_rules_entry = $rules{$test};
+
+  # do not require 'tmp/rules.pl' to have been built from the
+  # exact same ruleset version; this assumption screws up nightly
+  # mass-check reports if they are generated with a different SVN rev
+  # next unless (exists $rules{$test});
+
+  next if (!$opt_a && $test =~ /^__/);
 
   next if $done{$test}; $done{$test} = 1;
   push (@tests, $test);
 
   my $isnice = 0;
-  if ($rules{$test}->{tflags} && $rules{$test}->{tflags} =~ /\bnice\b/) {
-    $isnice = 1;
+  if ($parsed_rules_entry) {
+    if ($parsed_rules_entry->{tflags} &&
+            $parsed_rules_entry->{tflags} =~ /\bnice\b/)
+    {
+      $isnice = 1;
+    }
   }
+  $isnice{$test} = $isnice;
 
   my $fs = $freq_spam{$test}; $fs ||= 0;
   my $fn = $freq_ham{$test}; $fn ||= 0;
@@ -290,28 +364,45 @@ if (! $opt_i) {
   }
 }
 
+if ($opt_T) {
+  read_timings();
+}
+
 foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
-  next unless (exists $rules{$test});           # only valid tests
-  next if (!$opt_a && $rules{$test}->{issubrule});
+  my $parsed_rules_entry = $rules{$test};
+
+  # do not require 'tmp/rules.pl' to have been built from the
+  # exact same ruleset version; this assumption screws up nightly
+  # mass-check reports if they are generated with a different SVN rev
+  # next unless (exists $rules{$test});
+  
+  next if (!$opt_a && $test =~ /^__/);
 
   my $fs = $freq_spam{$test}; $fs ||= 0;
   my $fn = $freq_ham{$test}; $fn ||= 0;
   my $fa = $fs+$fn;
+  my $num_fs = $fs;
+  my $num_fn = $fn;
+  my $num_fa = $fa;
+
+  my $tflags = '';
+  if ($parsed_rules_entry) {
+    $tflags = $parsed_rules_entry->{tflags};
+  }
 
   # match certain tests
   next if ($opt_m && $test !~ m/$opt_m/);
   # match tflags
-  next if ($opt_t && (!$rules{$test}->{tflags} ||
-		      $rules{$test}->{tflags} !~ /$opt_t/));
+  next if ($opt_t && (!$tflags || $tflags !~ /$opt_t/));
 
-  if (!$opt_a && !$opt_t && $rules{$test}->{tflags}) {
+  if (!$opt_a && !$opt_t && $tflags) {
     # not net tests
-    next if ($rules{$test}->{tflags} =~ /\bnet\b/ && ($opt_s % 2 == 0));
+    next if ($tflags =~ /\bnet\b/ && ($opt_s % 2 == 0));
 
     # not userconf
     # Jul 13 2005 jm: removed.  this blocks SPF_PASS from showing up!
     # why should userconf rules not be visible in freqs output?
-    # next if ($rules{$test}->{tflags} =~ /\buserconf\b/);
+    # next if ($tflags =~ /\buserconf\b/);
   }
 
   # adjust based on corpora sizes (and cvt to % while we're at it)
@@ -321,7 +412,8 @@ foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
   if ($opt_f && $fsadj == 0 && $fnadj == 0) { next; }
 
   if ($opt_p) {
-    $fa = ($fa / ($num_spam + $num_ham)) * 100.0;
+    my $denom = ($num_spam + $num_ham) || 0.000001; # avoid / by 0
+    $fa = ($fa / $denom) * 100.0;
     $fs = $fsadj;
     $fn = $fnadj;
   }
@@ -331,24 +423,130 @@ foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
     $soratio{$test} = soratio ($fsadj, $fnadj);
   }
 
-  if ($opt_p) {
-    printf "%7.3f  %7.4f  %7.4f  %7.3f %6.2f  %6.2f  %s\n",
-  	$fa, $fs, $fn, $soratio, $ranking{$test}, $scores{$test}||0, $test;
+  my $promotable;
+  if ($opt_P) {
+    $promotable = 1;
+
+    if ($isnice{$test}) {
+      if (($soratio{$test} > (1.0 - $promote_so_min))
+          || ($fn < $promote_hitrate_min)
+          || ($fs >= $promote_fprate_max))
+      {
+        $promotable = 0;
+      }
+    } else {
+      if (($soratio{$test} < $promote_so_min)
+          || ($fs < $promote_hitrate_min)
+          || ($fn >= $promote_fprate_max))
+      {
+        $promotable = 0;
+      }
+    }
+  }
+  my $promotable_str = $opt_P ? ($promotable ? '+ ' : '- ') : '';
+
+  if ($opt_d) {
+    print qq{
+      <rule>
+        <time>}.($rule_times{$test}||0).qq{</time>
+        <count class='all'>$num_fa</count>
+        <count class='spam'>$num_fs</count>
+        <count class='ham'>$num_fn</count>
+        <pc class='all'>}.sprintf("%.5f", $fa).qq{</pc>
+        <pc class='spam'>}.sprintf("%.5f", $fs).qq{</pc>
+        <pc class='ham'>}.sprintf("%.5f", $fn).qq{</pc>
+        <so>}.sprintf("%.8f", $soratio).qq{</so>
+        <rank>}.sprintf("%.8f", $ranking{$test}).qq{</rank>
+        <score set='$opt_s'>}.($scores{$test}||0).qq{</score>
+        <promotable>$promotable</promotable>
+        <test>$test</test>
+    };
+
+  } elsif ($opt_T) {
+    printf "%7.5f  %7.4f  %7.4f  %7.3f %6.2f  %6.2f  %s%s\n",
+  	$rule_times{$test}||0, $fs, $fn, $soratio, $ranking{$test},
+        $scores{$test}||0,
+        $promotable_str, $test;
+
+  } elsif ($opt_p) {
+    printf "%7.3f  %7.4f  %7.4f  %7.3f %6.2f  %6.2f  %s%s\n",
+  	$fa, $fs, $fn, $soratio, $ranking{$test}, $scores{$test}||0,
+        $promotable_str, $test;
 
   } elsif ($opt_x) {
-    printf "%7d  %7d  %7d  %7.3f %6.2f %6.2f  %s\n",
-  	$fa, $fs, $fn, $soratio, $ranking{$test}, $scores{$test}||0, $test;
+    printf "%7d  %7d  %7d  %7.3f %6.2f %6.2f  %s%s\n",
+  	$fa, $fs, $fn, $soratio, $ranking{$test}, $scores{$test}||0,
+        $promotable_str, $test;
 
   } else {
     printf "%10d  %10d  %10d  %s\n", $fa, $fs, $fn, $test;
   }
 
+  if ($opt_S) {
+    _print_scoremap("ham", $scoremap_ham{$test});
+    _print_scoremap("spam", $scoremap_spam{$test});
+  }
+
   if ($opt_o) {
     compute_overlaps_for_rule($test);
   }
+
+  if ($opt_d) {
+    print qq{ </rule> };
+  }
+}
+
+if ($opt_d) {
+  print qq{
+    </freqs>
+  };
 }
 exit;
 
+
+sub _print_scoremap {
+  my ($name, $smap) = @_;
+
+  if ($opt_d) {
+    print qq{ <scoremap class='$name'> };
+  }
+
+  $smap ||= { };
+  my @scores = (sort { $a <=> $b } keys %{$smap});
+
+  my $total = 0;
+  foreach my $score (@scores) {
+    $total += $smap->{$score};
+  }
+
+  foreach my $score (@scores) {
+    my $num = $smap->{$score};
+    my $pc = sprintf("%.4f", ($num / ($total||0.0001)) * 100);
+
+    if ($opt_d) {
+      print qq{
+        <si score='$score' pc='$pc' count='$num' /> };
+
+    }
+    else {
+      printf "  scoremap %4s: %2d %6.2f%% %4d %s\n",
+          $name, $score, $pc, $num, _scoremap_graph($pc);
+
+    }
+  }
+
+  if ($opt_d) {
+    print qq{ </scoremap> };
+
+  } else {
+    print "\n";
+  }
+}
+
+sub _scoremap_graph {
+  my ($pc) = @_;
+  return '*' x ($pc * (40/100));
+}
 
 
 sub readlogs {
@@ -360,7 +558,9 @@ sub readlogs {
 
     my $isspam = ($file eq $spam);
     my $caught;
+    my $restofline;
     my $rules;
+    my $score;
 
     # this is very speed-sensitive code.  remove all possible
     # conditionals using an eval('..').
@@ -381,9 +581,19 @@ sub readlogs {
 
     # note: doing the match with a regexp shaves off no less than
     # 7 opcodes. nice!
+
+    # the additional split() is for this case:
+    # ".  -20 /path  time=1112116980,scantime=0,format=f,reuse=no"
+    # in other words, no hits.  split(' ') cannot deal with this
+    # correctly, seeing (".", "-20", "/path", "time=...etc").  Work
+    # around this by using a literal / / regexp split to discard
+    # the csv stuff we don't want out of the rest of the line.
+
+
     $evalstr .= '
-        ($caught, undef, undef, $rules) = split(\' \', $_, 5);
-        next unless ($caught =~ /^[Y\.]$/ && $rules);
+        ($caught, $score, $restofline) = split(\' \', $_, 3);
+        next unless ($caught =~ /^[Y\.]$/ && $restofline);
+        (undef, $rules) = split(/ /, $restofline, 3);
     ';
 
     if ($opt_f) {
@@ -392,7 +602,14 @@ sub readlogs {
       ';
     }
 
+    if ($opt_S) {
+      $evalstr .= '
+        $score = int $score;
+      ';
+    }
+
     my $hmapstr = '';
+    my $smapstr = '';
     if ($isspam) {
       if ($opt_o) {
         $hmapstr = '
@@ -403,11 +620,15 @@ sub readlogs {
         ';
       }
 
+      if ($opt_S) {
+        $smapstr = ' $scoremap_spam{$r}{$score}++; ';
+      }
+
       $evalstr .= '
         $num_spam++;
         foreach my $r (split(/,/, $rules)) {
           $freq_spam{$r}++;
-          '.$hmapstr.'
+          '.$hmapstr.$smapstr.'
         }
       ';
     } else {
@@ -420,11 +641,15 @@ sub readlogs {
         ';
       }
 
+      if ($opt_S) {
+        $smapstr = ' $scoremap_ham{$r}{$score}++; ';
+      }
+
       $evalstr .= '
         $num_ham++;
         foreach my $r (split(/,/, $rules)) {
           $freq_ham{$r}++;
-          '.$hmapstr.'
+          '.$hmapstr.$smapstr.'
         }
       ';
     }
@@ -484,13 +709,29 @@ sub compute_overlaps_for_rule {
 sub _print_overlap_ratios {
   my ($r1, $hash, $type) = @_;
 
+  if ($opt_d) {
+    print qq{ <overlap class='$type'> };
+  }
+
   foreach my $full (sort { $b <=> $a } keys %$hash) {
     my $ratio = $full * 100;
 
     last if ($ratio < 30);     # 30% cutoff
     my $rules = _prettify_overlap_rules($r1, $hash->{$full});
     next if ($rules eq '');
-    printf "  overlap %s: %3d%% %s\n", $type, $ratio, $rules;
+
+    if ($opt_d) {
+      print qq{
+        <overlaprules ratio='$ratio'>$rules</overlaprules>
+      };
+
+    } else {
+      printf "  overlap %s: %3d%% %s\n", $type, $ratio, $rules;
+    }
+  }
+
+  if ($opt_d) {
+    print qq{ </overlap };
   }
 }
 
@@ -499,7 +740,7 @@ sub _prettify_overlap_rules {
   my $str = shift;
 
   my @rules = sort split(' ', $str);
-  if ($rules{$rule}->{type} eq 'meta') {
+  if ($rules{$rule} && $rules{$rule}->{type} eq 'meta') {
     # ignore meta-subrules that match the rule they make up.
     # TODO: this is simplistic; it doesn't look to see if those subrules
     # are in turn meta rules with further subrules that should be ignored.
@@ -553,7 +794,10 @@ sub readscores {
   };
   if ($@) {
     warn "tmp/rules.pl is unparseable: $@";
-    # but carry on
+    $rules_pl_unparseable = 1;
+    # but carry on anyway (for most uses)
+  } else {
+    $rules_pl_unparseable = 0;
   }
 }
 
@@ -568,5 +812,25 @@ sub soratio {
   } else {
       return 0.5;		# no results -> not effective
   }
+}
+
+sub read_timings {
+  if (!open (IN, "<timing.log")) {
+    warn "hit-frequencies: cannot read 'timing.log', timings will be 0";
+    return;
+  }
+  my $ver = <IN>;
+  if ($ver !~ /^v1/) {
+    warn "hit-frequencies: unknown version in 'timing.log', timings will be 0";
+    close IN;
+    return;
+  }
+  while (<IN>) {
+    if (/^T\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/) {
+      my ($name, $duration, $max, $runs) = ($1,$2,$3,$4);
+      $rule_times{$name} = ($duration / ($runs||0.00001)) * 1000;
+    }
+  }
+  close IN;
 }
 
