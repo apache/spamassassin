@@ -509,7 +509,11 @@ sub get_rulemetadata_for_revision {
 
   my $dir = create_rulemetadata_dir($rev);
 
-  chdir $opt{tree} or die "cannot chdir $opt{tree}";
+  # argh.  this is silly; ~bbmass/.corpus specifies "$PWD" in its
+  # "tree" path, so we have to ensure we're in the 'masses' dir
+  # for this to work!
+  chdir "$opt{tree}/masses" or die "cannot chdir $opt{tree}/masses";
+
   my $cmd = "$opt{tree}/masses/rule-qa/get-rulemetadata-for-revision ".
                     "--rev=$rev --outputdir='$dir'";
 
