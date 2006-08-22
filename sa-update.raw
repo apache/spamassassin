@@ -259,7 +259,13 @@ if (defined $opt{'gpgkeyfile'}) {
 
   dbg("gpg: reading in gpgfile ".$opt{'gpgkeyfile'});
   while(my $key = <GPG>) {
-    next if ($key =~ /^#/);  # explicitly skip comments
+    chomp $key;
+
+    $key =~ s/#.*$//;   # remove comments
+    $key =~ s/^\s+//;   # remove leading whitespace
+    $key =~ s/\s+$//;   # remove tailing whitespace
+    next unless ($key); # skip empty lines
+
     unless (is_valid_gpg_key_id($key)) {
       dbg("gpg: invalid key id $key");
       next;
@@ -329,8 +335,13 @@ if (defined $opt{'channelfile'}) {
   dbg("channel: reading in channelfile ".$opt{'channelfile'});
   @channels = ();
   while(my $chan = <CHAN>) {
-    next if ($chan =~ /^#/);  # explicitly skip comments
     chomp $chan;
+
+    $chan =~ s/#.*$//;   # remove comments
+    $chan =~ s/^\s+//;   # remove leading whitespace
+    $chan =~ s/\s+$//;   # remove tailing whitespace
+    next unless ($chan); # skip empty lines
+
     $chan = lc $chan;
     dbg("channel: adding $chan");
     push(@channels, $chan);
@@ -344,7 +355,9 @@ for(my $ind = 0; $ind < @channels; $ind++) {
     $channels[$ind] = $1;
   }
   else {
+    dbg("channel: skipping invalid channel: $channels[$ind]");
     splice @channels, $ind, 1;
+    $ind--; # the next element takes the place of the deleted one
   }
 }
 
@@ -460,7 +473,12 @@ foreach my $channel (@channels) {
   my %mirrors = ();
   my @mirrors = split(/^/, $mirby);
   while(my $mirror = shift @mirrors) {
-    next if ($mirror =~ /^#/);  # explicitly skip comments
+    chomp $mirror;
+
+    $mirror =~ s/#.*$//;   # remove comments
+    $mirror =~ s/^\s+//;   # remove leading whitespace
+    $mirror =~ s/\s+$//;   # remove tailing whitespace
+    next unless ($mirror); # skip empty lines
 
     # We only support HTTP right now
     if ($mirror !~ m@^http://@i) {
@@ -468,7 +486,6 @@ foreach my $channel (@channels) {
       next;
     }
 
-    chomp $mirror;
     my @data;
 
     dbg("channel: found mirror $mirror");
