@@ -304,7 +304,7 @@ sub run {
   }
 
   # non-forking model (generally sa-learn), everything in a single process
-  if ($self->{opt_j} < 2) {
+  if ($self->{opt_j} == 0) {
     my $messages;
 
     # message-array
