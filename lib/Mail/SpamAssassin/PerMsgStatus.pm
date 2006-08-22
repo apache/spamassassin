@@ -2851,6 +2851,10 @@ $evalstr .= q{ my $function; };
     }
 
     my ($function, @args) = @{$test};
+    if (!$function) {
+      warn "rules: error: no function defined for $rulename";
+      next;
+    }
 
     $evalstr .= '
       $rulename = q#'.$rulename.'#;
@@ -2950,6 +2954,11 @@ sub handle_eval_rule_errors {
 
 sub register_plugin_eval_glue {
   my ($self, $function) = @_;
+
+  if (!$function) {
+    warn "rules: empty function name";
+    return;
+  }
 
   # return if it's not an eval_plugin function
   return if (!exists $self->{conf}->{eval_plugins}->{$function});
