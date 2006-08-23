@@ -1573,10 +1573,13 @@ int transport_setup(struct transport *tp, int flags)
         return EX_OK;
 #endif
     case TRANSPORT_LOCALHOST:
-        /* getaddrinfo(NULL) will look up the loopback address */
-        if ((origerr = getaddrinfo(NULL, port, &hints, &res)) != 0) {
+        /* getaddrinfo(NULL) will look up the loopback address.
+         * bug 5057: unfortunately, it's the IPv6 loopback address on
+         * linux!  Be explicit, and force IPv4 using "127.0.0.1".
+         */
+        if ((origerr = getaddrinfo("127.0.0.1", port, &hints, &res)) != 0) {
             libspamc_log(flags, LOG_ERR, 
-                  "getaddrinfo(NULL) failed: %s",
+                  "getaddrinfo(127.0.0.1) failed: %s",
                   gai_strerror(origerr));
             return EX_OSERR;
         }
