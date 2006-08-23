@@ -87,9 +87,6 @@ while true; do
 done
 set -e
 
-# TEMPORARY: until bug 5060 is voted on
-patch -p0 < /home/automc-stable/bug5060.patch
-
 # build
 $PERL Makefile.PL < /dev/null
 make
