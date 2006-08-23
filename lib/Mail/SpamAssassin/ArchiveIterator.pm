@@ -23,8 +23,6 @@ use strict;
 use warnings;
 use bytes;
 
-use IO::Select;
-use IO::Socket;
 use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::Logger;
@@ -48,7 +46,6 @@ Mail::SpamAssassin::ArchiveIterator - find and process messages one at a time
 
   my $iter = new Mail::SpamAssassin::ArchiveIterator(
     { 
-      'opt_j'     => 0,
       'opt_n'     => 1,
       'opt_all'   => 1,
       'opt_cache' => 1,
@@ -95,31 +92,6 @@ optional unless otherwise noted.
 Typically messages over 250k are skipped by ArchiveIterator.  Use this option
 to keep from skipping messages based on size.
 
-=item opt_j (required)
-
-Specifies how many messages should be run at the same time, as well as the
-method with which to scan for the messages.
-
-If the value is 0, the list of messages to process will be kept in memory,
-and only 1 message at a time will be processed by the wanted subroutine.
-Restarting is not allowed.
-
-If the value is 1, the list of messages to process will be kept in a
-temporary file, and only 1 message at a time will be processed by the
-wanted subroutine.  Restarting is not allowed.
-
-If the value is 2 or higher, the list of messages to process will be kept
-in a temporary file, and the process will split into a parent/child mode.
-The option value number of children will be forked off and each child
-will process messages via the wanted subroutine in parallel.  Restarting
-is allowed.
-
-B<NOTE:> For C<opt_j> >= 1, an extra child process will be created to
-determine the list of messages, sort the list, everything as appropriate.
-This will keep the list in memory (possibly multiple copies) before
-writing the final list to a temporary file which will be used for
-processing.  The list generation child will exit, freeing up the memory.
-
 =item opt_n
 
 ArchiveIterator is typically used to simulate ham and spam moving through
@@ -127,12 +99,6 @@ SpamAssassin.  By default, the list of messages is sorted by received date so
 that the mails can be passed through in order.  If opt_n is true, the sorting
 will not occur.  This is useful if you don't care about the order of the
 messages.
-
-=item opt_restart
-
-If set to a positive integer value, children processes (see opt_j w/ value 2
-or higher above) will restart after the option value number of messages, in
-total, have been processed.
 
 =item opt_head
 
@@ -303,151 +269,15 @@ sub run {
     return 0;
   }
 
-  # non-forking model (generally sa-learn), everything in a single process
-  if ($self->{opt_j} == 0) {
-    my $messages;
+  my $messages;
 
-    # message-array
-    ($MESSAGES, $messages) = $self->message_array(\@targets);
+  # message-array
+  ($MESSAGES, $messages) = $self->message_array(\@targets);
 
-    while (my $message = shift @{$messages}) {
-      my($class, undef, $date, undef, $result) = $self->run_message($message);
-      &{$self->{result_sub}}($class, $result, $date) if $result;
-    }
+  while (my $message = shift @{$messages}) {
+    my($class, undef, $date, undef, $result) = $self->run_message($message);
+    &{$self->{result_sub}}($class, $result, $date) if $result;
   }
-  # forking model (generally mass-check), avoid extended memory usage
-  else {
-    my $tmpf;
-    ($tmpf, $self->{messageh}) = Mail::SpamAssassin::Util::secure_tmpfile()
-      or die 'archive-iterator: failed to create temp file';
-    unlink $tmpf or die "archive-iterator: unlink '$tmpf': $!";
-    undef $tmpf;
-
-    # forked child process scans messages
-    if ($tmpf = fork()) {
-      # parent
-      waitpid($tmpf, 0);
-    }
-    elsif (defined $tmpf) {
-      # child
-      $self->message_array(\@targets, $self->{messageh});
-      exit;
-    }
-    else {
-      die "archive-iterator: cannot fork: $!";
-    }
-
-    # we now have a temporary file with the messages to process
-    # in theory, our file pointer is at the start of the file, but make sure.
-    # NOTE: do this here, not in message_array, since that will only affect
-    # the child.
-    seek($self->{messageh}, 0, 0);
-    $MESSAGES = $self->next_message();
-
-    if (!$MESSAGES) {
-      die "archive-iterator: no messages to process\n";
-    }
-    # only do 1 process, message list in a temp file, no restarting
-    if ($self->{opt_j} == 1 && !defined $self->{opt_restart}) {
-      my $message;
-      my $messages;
-      my $total_count = 0;
-
-      while (($MESSAGES > $total_count) && ($message = $self->next_message())) {
-        my($class, undef, $date, undef, $result) = $self->run_message($message);
-        &{$self->{result_sub}}($class, $result, $date) if $result;
-	$total_count++;
-      }
-    }
-    # more than one process or one process with restarts
-    else {
-      my $select = IO::Select->new();
-
-      my $total_count = 0;
-      my $needs_restart = 0;
-      my @child = ();
-      my @pid = ();
-      my $messages;
-
-      # start children processes
-      $self->start_children($self->{opt_j}, \@child, \@pid, $select);
-
-      # feed childen, make them work for it, repeat
-      while ($select->count()) {
-        foreach my $socket ($select->can_read()) {
-	  my $line = $self->read_line($socket);
-
-          # some error happened during the read!
-          if (!defined $line) {
-            $needs_restart = 1;
-            warn "archive-iterator: readline failed, attempting to recover\n";
-            $select->remove($socket);
-          }
-	  elsif ($line =~ /^([^\0]+)\0RESULT (.+)$/s) {
-	    my $result = $1;
-	    my ($date,$class,$type) = index_unpack($2);
-	    #warn ">> RESULT: $class, $type, $date\n";
-
-	    if (defined $self->{opt_restart} && ($total_count % $self->{opt_restart}) == 0) {
-	      $needs_restart = 1;
-	    }
-
-	    # if messages remain, and we don't need to restart, send message
-	    if (($MESSAGES > $total_count) && !$needs_restart) {
-	      $self->send_line($socket, $self->next_message());
-	      $total_count++;
-	      #warn ">> recv: $MESSAGES $total_count\n";
-	    }
-	    else {
-	      # stop listening on this child since we're done with it
-	      #warn ">> removeresult: $needs_restart $MESSAGES $total_count\n";
-	      $select->remove($socket);
-	    }
-
-	    # deal with the result we received
-	    if ($result) {
-	      &{$self->{result_sub}}($class, $result, $date);
-	    }
-	  }
-	  elsif ($line eq "START") {
-	    if ($MESSAGES > $total_count) {
-	      # we still have messages, send one to child
-	      $self->send_line($socket, $self->next_message());
-	      $total_count++;
-	      #warn ">> new: $MESSAGES $total_count\n";
-	    }
-	    else {
-	      # no more messages, so stop listening on this child
-	      #warn ">> removestart: $needs_restart $MESSAGES $total_count\n";
-	      $select->remove($socket);
-	    }
-	  }
-        }
-
-        #warn ">> out of loop, $MESSAGES $total_count $needs_restart ".$select->count()."\n";
-
-        # If there are still messages to process, and we need to restart
-        # the children, and all of the children are idle, let's go ahead.
-        if ($needs_restart && $select->count == 0 && $MESSAGES > $total_count)
-	{
-	  $needs_restart = 0;
-
-	  #warn "debug: needs restart, $MESSAGES total, $total_count done\n";
-	  $self->reap_children($self->{opt_j}, \@child, \@pid);
-	  @child=();
-	  @pid=();
-	  $self->start_children($self->{opt_j}, \@child, \@pid, $select);
-        }
-      }
-
-      # reap children
-      $self->reap_children($self->{opt_j}, \@child, \@pid);
-    }
-
-    # close tempfile so it will be unlinked
-    close($self->{messageh});
-  }
-
   return ! $self->{access_problem};
 }
 
@@ -573,98 +403,6 @@ sub run_mbx {
   }
 
   return($class, $format, $date, $where, &{$self->{wanted_sub}}($class, $where, $date, \@msg, $format));
-}
-
-############################################################################
-
-## figure out the next message to process, used when opt_j >= 1
-
-sub next_message {
-  my ($self) = @_;
-  my $line = $self->read_line($self->{messageh});
-  return $line;
-}
-
-############################################################################
-
-## children processors, start and process, used when opt_j > 1
-
-sub start_children {
-  my ($self, $count, $child, $pid, $socket) = @_;
-
-  my $io = IO::Socket->new();
-  my $parent;
-
-  # create children
-  for (my $i = 0; $i < $count; $i++) {
-    ($child->[$i],$parent) = $io->socketpair(AF_UNIX,SOCK_STREAM,PF_UNSPEC)
-	or die "archive-iterator: socketpair failed: $!";
-    if ($pid->[$i] = fork) {
-      close $parent;
-
-      # disable caching for parent<->child relations
-      my ($old) = select($child->[$i]);
-      $|++;
-      select($old);
-
-      $socket->add($child->[$i]);
-      #warn "debug: starting new child $i (pid ",$pid->[$i],")\n";
-      next;
-    }
-    elsif (defined $pid->[$i]) {
-      my $result;
-      my $line;
-
-      close $self->{messageh} if defined $self->{messageh};
-
-      close $child->[$i];
-      select($parent);
-      $| = 1;	# print to parent by default, turn off buffering
-      $self->send_line($parent,"START");
-      while ($line = $self->read_line($parent)) {
-	if ($line eq "exit") {
-	  close $parent;
-	  exit;
-	}
-
-	my($class, $format, $date, $where, $result) = $self->run_message($line);
-	$result ||= '';
-
-	# If determine_receive_date is not set, the original input date
-	# wasn't calculated, but run_message would have done so, so reset
-	# the packed version if possible ...  use defined for date since
-	# it could == 0.
-        if (!$self->{determine_receive_date} && $class && $format && defined $date && $where) {
-	  $line = index_pack($date, $class, $format, $where);
-        }
-
-	$self->send_line($parent,"$result\0RESULT $line");
-      }
-      exit;
-    }
-    else {
-      die "archive-iterator: cannot fork: $!";
-    }
-  }
-}
-
-## handling killing off the children
-
-sub reap_children {
-  my ($self, $count, $socket, $pid) = @_;
-
-  # If the child died, sending it the exit will generate a SIGPIPE, but we
-  # don't really care since the readline will go undef (which is fine),
-  # then we do the waitpid which will finish it off.  So we end up in the
-  # right state, in theory.
-  local $SIG{'PIPE'} = 'IGNORE';
-
-  for (my $i = 0; $i < $count; $i++) {
-    #warn "debug: killing child $i (pid ",$pid->[$i],")\n";
-    $self->send_line($socket->[$i],"exit"); # tell the child to die.
-    close $socket->[$i];
-    waitpid($pid->[$i], 0); # wait for the signal ...
-  }
 }
 
 ############################################################################
