@@ -275,7 +275,7 @@ sub run {
   ($MESSAGES, $messages) = $self->message_array(\@targets);
 
   # go ahead and run through all of the messages specified
-  return _run($messages);
+  return $self->_run($messages);
 }
 
 sub _run {
