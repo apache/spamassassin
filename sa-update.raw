@@ -351,6 +351,7 @@ if (defined $opt{'channelfile'}) {
 
 # untaint the channel listing
 for(my $ind = 0; $ind < @channels; $ind++) {
+  local ($1); # bug 5061: prevent random taint flagging of $1
   if ($channels[$ind] =~ /^([a-zA-Z0-9._-]+)$/) {
     $channels[$ind] = $1;
   }
