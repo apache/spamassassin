@@ -96,6 +96,8 @@ $opt_inactiveout ||= "70_inactive.cf";
 # source files that need compilation, and their targets
 my $needs_compile = { };
 my $current_src;
+my $newest_src_mtime = 0;
+my $newest_out_mtime = 0;
 
 my $default_file_header = join('', <DATA>);
 
@@ -109,6 +111,20 @@ foreach my $src (@opt_srcs) {
           wanted => \&wanted,
           no_chdir => 1
         }, $src);
+}
+
+# get mtimes of output files; we can be sure that all
+# output is under the "opt_out" dir, so recurse there
+File::Find::find ({
+        wanted => \&out_wanted,
+        no_chdir => 1
+      }, $opt_out);
+
+if ($newest_src_mtime && $newest_out_mtime
+    && $newest_src_mtime < $newest_out_mtime)
+{
+  print "mkrules: no rules updated\n";
+  exit 0;
 }
 
 my $rules = { };
@@ -214,12 +230,28 @@ sub wanted {
   my $t;
   $t = "$opt_out/$filename";
 
+  my @st = stat $path;
+  if ($st[9] && $st[9] > $newest_src_mtime) {
+    $newest_src_mtime = $st[9];
+  }
+
   $needs_compile->{$f} = {
           f => $f,
           t => $t,
           dir => $dir,
           filename => $filename
         };
+}
+
+sub out_wanted {
+  my $path = $File::Find::name;
+  return unless (-f $path);
+  return unless ($path =~ /\.cf$/i);
+
+  my @st = stat $path;
+  if ($st[9] && $st[9] > $newest_out_mtime) {
+    $newest_out_mtime = $st[9];
+  }
 }
 
 # compile all the source files found by the wanted() sub, in sorted
