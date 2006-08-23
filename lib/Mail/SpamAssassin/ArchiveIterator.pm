@@ -271,8 +271,15 @@ sub run {
 
   my $messages;
 
-  # message-array
+  # scan the targets and get the number and list of messages
   ($MESSAGES, $messages) = $self->message_array(\@targets);
+
+  # go ahead and run through all of the messages specified
+  return _run($messages);
+}
+
+sub _run {
+  my ($self, $messages) = @_;
 
   while (my $message = shift @{$messages}) {
     my($class, undef, $date, undef, $result) = $self->run_message($message);

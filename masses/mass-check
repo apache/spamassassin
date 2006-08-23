@@ -313,7 +313,9 @@ $iter->set_functions(\&wanted, \&result);
 
 # If opt_j isn't given, just use the normal AI code ...
 if ($opt_j == 0) {
-  $iter->run(@targets);
+  my $messages;
+  ($total_messages, $messages) = $iter->message_array(\@targets);
+  $iter->_run($messages);
 }
 else {
   my $tmpf;
@@ -341,9 +343,9 @@ else {
   # NOTE: do this here, not in message_array, since that will only affect
   # the child.
   seek($tmpfd, 0, 0);
-  $Mail::SpamAssassin::ArchiveIterator::MESSAGES = $iter->read_line($tmpfd);
+  $total_messages = $iter->read_line($tmpfd);
 
-  if (!$Mail::SpamAssassin::ArchiveIterator::MESSAGES) {
+  if (!$total_messages) {
     die "archive-iterator: no messages to process\n";
   }
   # only do 1 process, message list in a temp file, no restarting
@@ -352,7 +354,7 @@ else {
     my $messages;
     my $total_count = 0;
 
-    while (($Mail::SpamAssassin::ArchiveIterator::MESSAGES > $total_count) && ($message = $iter->read_line($tmpfd))) {
+    while (($total_messages > $total_count) && ($message = $iter->read_line($tmpfd))) {
       my($class, undef, $date, undef, $result) = $iter->run_message($message);
       result($class, $result, $date) if $result;
       $total_count++;
@@ -392,14 +394,14 @@ else {
 	  }
 
 	  # if messages remain, and we don't need to restart, send message
-	  if (($Mail::SpamAssassin::ArchiveIterator::MESSAGES > $total_count) && !$needs_restart) {
+	  if (($total_messages > $total_count) && !$needs_restart) {
 	    $iter->send_line($socket, $iter->read_line($tmpfd));
 	    $total_count++;
-	    #warn ">> recv: $MESSAGES $total_count\n";
+	    #warn ">> recv: $total_messages $total_count\n";
 	  }
 	  else {
 	    # stop listening on this child since we're done with it
-	    #warn ">> removeresult: $needs_restart $MESSAGES $total_count\n";
+	    #warn ">> removeresult: $needs_restart $total_messages $total_count\n";
 	    $select->remove($socket);
 	  }
 
@@ -409,29 +411,28 @@ else {
 	  }
 	}
 	elsif ($line eq "START") {
-	  if ($Mail::SpamAssassin::ArchiveIterator::MESSAGES > $total_count) {
+	  if ($total_messages > $total_count) {
 	    # we still have messages, send one to child
 	    $iter->send_line($socket, $iter->read_line($tmpfd));
 	    $total_count++;
-	    #warn ">> new: $MESSAGES $total_count\n";
+	    #warn ">> new: $total_messages $total_count\n";
 	  }
 	  else {
 	    # no more messages, so stop listening on this child
-	    #warn ">> removestart: $needs_restart $MESSAGES $total_count\n";
+	    #warn ">> removestart: $needs_restart $total_messages $total_count\n";
 	    $select->remove($socket);
 	  }
 	}
       }
 
-      #warn ">> out of loop, $MESSAGES $total_count $needs_restart ".$select->count()."\n";
+      #warn ">> out of loop, $total_messages $total_count $needs_restart ".$select->count()."\n";
 
       # If there are still messages to process, and we need to restart
       # the children, and all of the children are idle, let's go ahead.
-      if ($needs_restart && $select->count == 0 &&
-      $Mail::SpamAssassin::ArchiveIterator::MESSAGES > $total_count) {
+      if ($needs_restart && $select->count == 0 && $total_messages > $total_count) {
 	$needs_restart = 0;
 
-	#warn "debug: needs restart, $MESSAGES total, $total_count done\n";
+	#warn "debug: needs restart, $total_messages total, $total_count done\n";
 	reap_children($opt_j, \@child, \@pid);
 	@child=();
 	@pid=();
@@ -484,9 +485,6 @@ sub init_results {
   $showdots_active = $opt_showdots;
 
   if ($opt_progress) {
-    # make it a local variable for now
-    $total_messages = $Mail::SpamAssassin::ArchiveIterator::MESSAGES;
-
     # round up since 100% will be caught at end already
     $statusevery = int($total_messages / $updates + 1);
 
