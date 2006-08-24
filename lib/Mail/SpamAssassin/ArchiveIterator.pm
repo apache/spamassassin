@@ -212,8 +212,8 @@ reporting.  For more information, see I<new()> above.
 
 sub set_functions {
   my ($self, $wanted, $result) = @_;
-  $self->{wanted_sub} = $wanted;
-  $self->{result_sub} = $result;
+  $self->{wanted_sub} = $wanted if defined $wanted;
+  $self->{result_sub} = $result if defined $result;
 }
 
 ###########################################################################

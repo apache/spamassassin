@@ -95,8 +95,8 @@ use vars qw($opt_c $opt_p $opt_f $opt_j $opt_n $opt_o $opt_all $opt_bayes
 	    $opt_spamlog $opt_tail $opt_rules $opt_restart $opt_loguris
 	    $opt_logmem $opt_after $opt_before $opt_rewrite $opt_deencap
 	    $opt_learn $opt_reuse $opt_lint $opt_cache $opt_noisy
-	    $total_messages $statusevery $opt_cachedir
-	    %reuse %orig_conf %reuse_conf $reuse_rules_loaded_p);
+	    $total_messages $statusevery $opt_cachedir $opt_server $opt_client
+	    $tmpfd %reuse %orig_conf %reuse_conf $reuse_rules_loaded_p);
 
 use FindBin;
 use lib "$FindBin::Bin/../lib";
@@ -130,7 +130,7 @@ GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug:s",
 	   "progress", "rewrite:s", "showdots", "spamlog=s", "tail=i",
 	   "rules=s", "restart=i", "after=s", "before=s", "loguris",
 	   "deencap=s", "logmem", "learn=i", "reuse", "lint", "cache",
-           "cachedir=s", "noisy",
+           "cachedir=s", "noisy", "server", "client=s",
 	   "dir" => sub { $opt_format = "dir"; },
 	   "file" => sub { $opt_format = "file"; },
 	   "mbox" => sub { $opt_format = "mbox"; },
@@ -152,15 +152,6 @@ if ($opt_noisy) {
   $opt_progress = 1;        # implies --progress
 }
 
-# test messages for the mass-check
-my @targets;
-if ($opt_f) {
-  open(F, $opt_f) || die "cannot read target $opt_f: $!";
-  push(@targets, map { chomp; $_ } <F>);
-  close(F);
-}
-usage(1) if !@targets;
-
 $opt_debug ||= 'all' if defined $opt_debug;
 
 my $user_prefs = "$opt_p/user_prefs";
@@ -170,7 +161,6 @@ my $user_prefs = "$opt_p/user_prefs";
 # but since it's probably not expecting that, and we don't want
 # strange things happening, create a local object.
 if ($opt_lint) {
-
   my $spamlint = new Mail::SpamAssassin ({
     'debug'              			=> $opt_debug,
     'rules_filename'     			=> $opt_c,
@@ -187,12 +177,22 @@ if ($opt_lint) {
     LOCAL_RULES_DIR      			=> '',
   });
 
-
   $spamlint->debug_diagnostics();
   my $res = $spamlint->lint_rules();
   $spamlint->finish();
   warn "lint: $res issues detected, please rerun with debug enabled for more information\n" if ($res);
   exit 1 if $res;
+}
+
+# test messages for the mass-check
+my @targets;
+if (!$opt_server && !$opt_client) {
+  if ($opt_f) {
+    open(F, $opt_f) || die "cannot read target $opt_f: $!";
+    push(@targets, map { chomp; $_ } <F>);
+    close(F);
+  }
+  usage(1) if !@targets;
 }
 
 $spamtest = new Mail::SpamAssassin ({
@@ -217,7 +217,6 @@ $spamtest->read_scoreonly_config("$FindBin::Bin/mass-check.cf");
 # generated user_prefs
 if ($opt_reuse) {
   # copy current prefs if it exists
-
   $spamtest->copy_config(undef, \%orig_conf);
 
   # zeroed scores to mass_prefs
@@ -263,91 +262,79 @@ my $showdots_active = ($opt_showdots || $opt_noisy);
 my $showdots_counter = 0;
 my $showdots_every = ($opt_showdots ? 1 : 20);
 
-# Deal with --rewrite
-if (defined $opt_rewrite) {
-  my $rewrite = ($opt_rewrite ? $opt_rewrite : "/tmp/out");
-  open(REWRITE, "> $rewrite") || die "open of $rewrite failed: $!";
-}
-
-# Deal with --before and --after
-foreach my $time ($opt_before, $opt_after) {
-  if ($time && $time =~ /^-\d+$/) {
-    $time = time + $time;
-  }
-  elsif ($time && $time !~ /^-?\d+$/) {
-    if (HAS_TIME_PARSEDATE) {
-      $time = Time::ParseDate::parsedate($time, GMT => 1, PREFER_PAST => 1);
-    }
-    else { 
-      die "You need Time::ParseDate if you use either the --before or --after option.";
-    }
-  }
-}
-
-if ($opt_before && $opt_after && $opt_after >= $opt_before) {
-  die "--before ($opt_before) <= --after ($opt_after) -- conflict!";
-}
-
-my $iter = new Mail::SpamAssassin::ArchiveIterator({
-	'opt_n' => $opt_n,
+my $AIopts = {
 	'opt_all' => $opt_all,
-	'opt_head' => $opt_head,
-	'opt_tail' => $opt_tail,
-	'opt_cache' => $opt_cache,
-	'opt_cachedir' => $opt_cachedir,
-	'opt_after' => $opt_after,
-	'opt_before' => $opt_before,
-        'scan_progress_sub' => \&scan_progress_cb
-});
+	};
 
-if ($opt_progress) {
-  status('starting scan stage');
+if (!$opt_client) {
+  # Deal with --rewrite
+  if (defined $opt_rewrite) {
+    my $rewrite = ($opt_rewrite ? $opt_rewrite : "/tmp/out");
+    open(REWRITE, "> $rewrite") || die "open of $rewrite failed: $!";
+  }
+
+  # Deal with --before and --after
+  foreach my $time ($opt_before, $opt_after) {
+    if ($time && $time =~ /^-\d+$/) {
+      $time = time + $time;
+    }
+    elsif ($time && $time !~ /^-?\d+$/) {
+      if (HAS_TIME_PARSEDATE) {
+        $time = Time::ParseDate::parsedate($time, GMT => 1, PREFER_PAST => 1);
+      }
+      else { 
+        die "You need Time::ParseDate if you use either the --before or --after option.";
+      }
+    }
+  }
+
+  if ($opt_before && $opt_after && $opt_after >= $opt_before) {
+    die "--before ($opt_before) <= --after ($opt_after) -- conflict!";
+  }
+
+  # ArchiveIterator options for non-client mode
+  $AIopts->{'opt_n'} = $opt_n;
+  $AIopts->{'opt_head'} = $opt_head;
+  $AIopts->{'opt_tail'} = $opt_tail;
+  $AIopts->{'opt_cache'} = $opt_cache;
+  $AIopts->{'opt_cachedir'} = $opt_cachedir;
+  $AIopts->{'opt_after'} = $opt_after;
+  $AIopts->{'opt_before'} = $opt_before;
+  $AIopts->{'scan_progress_sub'} = \&showdots_blip;
+}
+else {
+  # ArchiveIterator options for client mode -- tends to be simple
+  $AIopts->{'opt_n'} = 1;
+
+  # Clients don't show progress ...
+  undef $opt_progress;
 }
 
-sub scan_progress_cb {
-  showdots_blip();
-}
+my $iter = new Mail::SpamAssassin::ArchiveIterator($AIopts);
+$iter->set_functions(\&wanted);
 
-my $tmpfd;
-$iter->set_functions(\&wanted, \&result);
+my $messages;
+
+if (!$opt_client) {
+  $iter->set_functions(undef, \&result);
+
+  if ($opt_progress) {
+    status('starting scan stage');
+  }
+
+  if ($opt_server || $opt_j) {
+    fork_scan_targets(\@targets, $iter);
+  }
+  else {
+    ($total_messages, $messages) = $iter->message_array(\@targets);
+  }
+}
 
 # If opt_j isn't given, just use the normal AI code ...
 if ($opt_j == 0) {
-  my $messages;
-  ($total_messages, $messages) = $iter->message_array(\@targets);
   $iter->_run($messages);
 }
 else {
-  my $tmpf;
-  ($tmpf, $tmpfd) = Mail::SpamAssassin::Util::secure_tmpfile()
-    or die 'archive-iterator: failed to create temp file';
-  unlink $tmpf or die "archive-iterator: unlink '$tmpf': $!";
-  undef $tmpf;
-
-  # forked child process scans messages
-  if ($tmpf = fork()) {
-    # parent
-    waitpid($tmpf, 0);
-  }
-  elsif (defined $tmpf) {
-    # child
-    $iter->message_array(\@targets, $tmpfd);
-    exit;
-  }
-  else {
-    die "archive-iterator: cannot fork: $!";
-  }
-
-  # we now have a temporary file with the messages to process
-  # in theory, our file pointer is at the start of the file, but make sure.
-  # NOTE: do this here, not in message_array, since that will only affect
-  # the child.
-  seek($tmpfd, 0, 0);
-  $total_messages = $iter->read_line($tmpfd);
-
-  if (!$total_messages) {
-    die "archive-iterator: no messages to process\n";
-  }
   # only do 1 process, message list in a temp file, no restarting
   if ($opt_j == 1 && !defined $opt_restart) {
     my $message;
@@ -975,4 +962,38 @@ sub reap_children {
   }
 }
 
+sub fork_scan_targets {
+  my $targets = shift;
+  my $iter = shift;
 
+  my $tmpf;
+  ($tmpf, $tmpfd) = Mail::SpamAssassin::Util::secure_tmpfile()
+    or die 'archive-iterator: failed to create temp file';
+  unlink $tmpf or die "archive-iterator: unlink '$tmpf': $!";
+  undef $tmpf;
+
+  # forked child process scans messages
+  if ($tmpf = fork()) {
+    # parent
+    waitpid($tmpf, 0);
+  }
+  elsif (defined $tmpf) {
+    # child
+    $iter->message_array($targets, $tmpfd);
+    exit;
+  }
+  else {
+    die "archive-iterator: cannot fork: $!";
+  }
+
+  # we now have a temporary file with the messages to process
+  # in theory, our file pointer is at the start of the file, but make sure.
+  # NOTE: do this here, not in message_array, since that will only affect
+  # the child.
+  seek($tmpfd, 0, 0);
+  $total_messages = $iter->read_line($tmpfd);
+
+  if (!$total_messages) {
+    die "archive-iterator: no messages to process\n";
+  }
+}
