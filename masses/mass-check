@@ -328,6 +328,54 @@ if (!$opt_client) {
   else {
     ($total_messages, $messages) = $iter->message_array(\@targets);
   }
+
+  if ($opt_progress) {
+    status("completed scan stage, $total_messages messages");
+  }
+}
+
+if ($opt_server) {
+  my $serv_socket = IO::Socket::INET->new(LocalPort => 8080,
+    Proto => 'tcp',
+    Listen => 5,
+    Reuse => 1);
+
+  die "Could not create socket: $!\n" unless $serv_socket;
+
+  if ($opt_progress) {
+    status('server ready for connections');
+  }
+
+  my $select = IO::Select->new( $serv_socket );
+
+  while ($select->count()) {
+    foreach my $socket ($select->can_read()) {
+      if ($socket == $serv_socket) {
+        $select->add($serv_socket->accept);
+      }
+      else {
+	my $line = $socket->getline();
+
+        print $socket join("\r\n",
+          "HTTP/1.0 200 OK",
+          "Content-type: text/html",
+          "",
+          "Your IP Address: ".$socket->peerhost,
+	  "There are $total_messages messages ready",
+          "");
+      
+        $select->remove($socket);
+	$socket->close;
+	$select->remove($serv_socket) if ($line =~ /^quit/i);
+      }
+    }
+  }
+
+  exit;
+}
+
+if ($opt_progress) {
+  status('starting run stage');
 }
 
 # If opt_j isn't given, just use the normal AI code ...
@@ -477,9 +525,6 @@ sub init_results {
 
     # if $messages < $updates, just give a status line per msg.
     $statusevery ||= 1;
-
-    status("completed scan stage, $total_messages messages");
-    status('starting run stage');
   }
 
   if ($opt_o) {
