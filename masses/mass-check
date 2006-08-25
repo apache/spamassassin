@@ -311,11 +311,16 @@ else {
 }
 
 my $iter = new Mail::SpamAssassin::ArchiveIterator($AIopts);
-$iter->set_functions(\&wanted);
 
 my $messages;
 
 if (!$opt_client) {
+  if (!$opt_server) {
+    $iter->set_functions(\&wanted);
+  }
+  else {
+    $iter->set_functions(\&wanted_server);
+  }
   $iter->set_functions(undef, \&result);
 
   if ($opt_progress) {
@@ -334,6 +339,11 @@ if (!$opt_client) {
   }
 }
 
+sub wanted_server {
+  my ($class, $id, $time, $dataref, $format) = @_;
+  return $dataref;
+}
+
 if ($opt_server) {
   my $serv_socket = IO::Socket::INET->new(LocalPort => 8080,
     Proto => 'tcp',
@@ -348,21 +358,68 @@ if ($opt_server) {
 
   my $select = IO::Select->new( $serv_socket );
 
+  my $sent_messages = 1;
   while ($select->count()) {
     foreach my $socket ($select->can_read()) {
       if ($socket == $serv_socket) {
         $select->add($serv_socket->accept);
       }
       else {
-	my $line = $socket->getline();
+	my %headers = ();
+	my %postdata = ();
+	my $postdata = '';
 
-        print $socket join("\r\n",
-          "HTTP/1.0 200 OK",
-          "Content-type: text/html",
-          "",
-          "Your IP Address: ".$socket->peerhost,
-	  "There are $total_messages messages ready",
-          "");
+	# read in the request
+	# read in headers, "key: value"
+	my $line = $socket->getline();
+	$line =~ s/\r\n$//;
+	my ($type) = $line =~ /^([a-zA-Z]+)/;
+
+	# we don't really care about the request right now
+	do {
+	  $line = $socket->getline();
+	  last unless defined $line;
+	  $line =~ s/\r\n$//;
+
+	  my ($k,$v) = split(/:\s*/, $line, 2);
+	  $headers{lc $k} = $v;
+	} while ($line !~ /^$/);
+
+	if ($headers{'content-length'}) {
+	  $socket->read($postdata, $headers{'content-length'});
+          %postdata = map {
+	    my($k,$v) = split(/=/, $_, 2);
+	    $k =~ s/\%([0-9a-fA-F]{2})/sprintf "%c", hex($1)/e;
+	    $v =~ s/\%([0-9a-fA-F]{2})/sprintf "%c", hex($1)/e;
+            $k => $v;
+	  } split(/\&/, $postdata);
+	}
+
+        if (1|| uc $type eq 'POST') {
+          my @results = $iter->run_message($iter->read_line($tmpfd));
+  #return($class, $format, $date, $where, &{$self->{wanted_sub}}($class, $where, $date, \@msg, $format));
+          # for error, "501 Not Implemented"
+	  #  Content-Encoding: gzip
+          print $socket join("\r\n",
+            "HTTP/1.0 200 OK",
+            "Content-type: text/plain",
+	    "Pragma: no-cache",
+	    "Server: mass-check/0.0",
+            "\r\n"),join("\n",
+            "Your IP Address: ".$socket->peerhost,
+	    "There are $total_messages messages, and ".($total_messages-$sent_messages++)." left",
+	    $results[0],
+	    $results[1],
+	    $results[2],
+	    $results[3],
+	    ""),
+	    @{$results[4]};
+        }
+	else {
+	  print $socket join("\r\n",
+	    "HTTP/1.0 501 Not Implemented",
+	    "");
+	}
       
         $select->remove($socket);
 	$socket->close;
@@ -442,7 +499,12 @@ else {
 
 	  # deal with the result we received
 	  if ($result) {
-	    result($class, $result, $date);
+	    if ($opt_client) {
+	      result_client($class, $result, $date);
+	    }
+	    else {
+	      result($class, $result, $date);
+	    }
 	  }
 	}
 	elsif ($line eq "START") {
@@ -975,7 +1037,7 @@ sub start_children {
 	# the packed version if possible ...  use defined for date since
 	# it could == 0.
         if (!$iter->{determine_receive_date} && $class && $format && defined $date && $where) {
-	  $line = index_pack($date, $class, $format, $where);
+	  $line = Mail::SpamAssassin::ArchiveIterator::index_pack($date, $class, $format, $where);
         }
 
 	$iter->send_line($parent,"$result\0RESULT $line");
