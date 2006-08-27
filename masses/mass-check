@@ -1,4 +1,7 @@
 #!/usr/bin/perl -w
+use strict;
+eval { use IO::Zlib 1.04; };
+
 #
 # <@LICENSE>
 # Licensed to the Apache Software Foundation (ASF) under one or more
@@ -20,7 +23,7 @@
 sub usage {
   my $status = shift;
 
-  my $out = $status ? STDERR : STDOUT;
+  my $out = $status ? \*STDERR : \*STDOUT;
   print $out <<EOF;
 usage: mass-check [options] target ...
  
@@ -96,6 +99,7 @@ use vars qw($opt_c $opt_p $opt_f $opt_j $opt_n $opt_o $opt_all $opt_bayes
 	    $opt_logmem $opt_after $opt_before $opt_rewrite $opt_deencap
 	    $opt_learn $opt_reuse $opt_lint $opt_cache $opt_noisy
 	    $total_messages $statusevery $opt_cachedir $opt_server $opt_client
+	    $opt_server_max $opt_server_timeout
 	    $tmpfd %reuse %orig_conf %reuse_conf $reuse_rules_loaded_p);
 
 use FindBin;
@@ -123,6 +127,8 @@ $opt_hamlog = "ham.log";
 $opt_spamlog = "spam.log";
 $opt_learn = 0;
 $reuse_rules_loaded_p = 0;
+$opt_server_max = 1000;
+$opt_server_timeout = 300;
 
 my @ORIG_ARGV = @ARGV;
 GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug:s",
@@ -130,7 +136,9 @@ GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug:s",
 	   "progress", "rewrite:s", "showdots", "spamlog=s", "tail=i",
 	   "rules=s", "restart=i", "after=s", "before=s", "loguris",
 	   "deencap=s", "logmem", "learn=i", "reuse", "lint", "cache",
-           "cachedir=s", "noisy", "server", "client=s",
+           "cachedir=s", "noisy",
+	   "server", "server_max=i", "server_timeout=i",
+	   "client=s",
 	   "dir" => sub { $opt_format = "dir"; },
 	   "file" => sub { $opt_format = "file"; },
 	   "mbox" => sub { $opt_format = "mbox"; },
@@ -195,7 +203,7 @@ if (!$opt_server && !$opt_client) {
   usage(1) if !@targets;
 }
 
-$spamtest = new Mail::SpamAssassin ({
+my $spamtest = new Mail::SpamAssassin ({
   'debug'              			=> $opt_debug,
   'rules_filename'     			=> $opt_c,
   'userprefs_filename' 			=> $user_prefs,
@@ -356,7 +364,16 @@ if ($opt_server) {
     status('server ready for connections');
   }
 
+  my $timestamps = {};
+  my $msgsout = { 'curnum' => 0 };
+
   my $select = IO::Select->new( $serv_socket );
+
+  my($respath, $resfd) = Mail::SpamAssassin::Util::secure_tmpfile();
+  die 'archive-iterator: failed to create temp file' unless $respath;
+
+  # TVD: remove later
+  close($resfd); unlink $respath;
 
   my $sent_messages = 1;
   while ($select->count()) {
@@ -365,57 +382,58 @@ if ($opt_server) {
         $select->add($serv_socket->accept);
       }
       else {
-	my %headers = ();
-	my %postdata = ();
-	my $postdata = '';
+	my($type, $URI, $headers, $postdata) = handle_http_request($socket);
 
-	# read in the request
-	# read in headers, "key: value"
-	my $line = $socket->getline();
-	$line =~ s/\r\n$//;
-	my ($type) = $line =~ /^([a-zA-Z]+)/;
-
-	# we don't really care about the request right now
-	do {
-	  $line = $socket->getline();
-	  last unless defined $line;
-	  $line =~ s/\r\n$//;
-
-	  my ($k,$v) = split(/:\s*/, $line, 2);
-	  $headers{lc $k} = $v;
-	} while ($line !~ /^$/);
-
-	if ($headers{'content-length'}) {
-	  $socket->read($postdata, $headers{'content-length'});
-          %postdata = map {
-	    my($k,$v) = split(/=/, $_, 2);
-	    $k =~ s/\%([0-9a-fA-F]{2})/sprintf "%c", hex($1)/e;
-	    $v =~ s/\%([0-9a-fA-F]{2})/sprintf "%c", hex($1)/e;
-            $k => $v;
-	  } split(/\&/, $postdata);
-	}
-
-        if (1|| uc $type eq 'POST') {
-          my @results = $iter->run_message($iter->read_line($tmpfd));
-  #return($class, $format, $date, $where, &{$self->{wanted_sub}}($class, $where, $date, \@msg, $format));
-          # for error, "501 Not Implemented"
-	  #  Content-Encoding: gzip
+	if ($type eq 'GET') {
           print $socket join("\r\n",
             "HTTP/1.0 200 OK",
             "Content-type: text/plain",
 	    "Pragma: no-cache",
 	    "Server: mass-check/0.0",
             "\r\n"),join("\n",
-            "Your IP Address: ".$socket->peerhost,
-	    "There are $total_messages messages, and ".($total_messages-$sent_messages++)." left",
-	    $results[0],
-	    $results[1],
-	    $results[2],
-	    $results[3],
-	    ""),
-	    @{$results[4]};
-        }
+            "Your GET request came from IP Address: ".$socket->peerhost,
+	    "");
+	}
+        elsif ($type eq 'POST') {
+	  handle_post_results($postdata, $resfd);
+
+	  my $messages = '';
+	  if ($postdata->{'max_messages'}) {
+	    my $msgnum = $postdata->{'max_messages'};
+	    $msgnum = $opt_server_max if ($msgnum > $opt_server_max);
+	    $messages = generate_messages($msgnum, $timestamps, $msgsout);
+	  }
+
+          if ($messages && open(MSG, $messages)) {
+	    binmode(MSG);
+	    local $/ = undef;
+
+	    #  Content-Encoding: gzip
+            print $socket join("\r\n",
+              "HTTP/1.0 200 OK",
+              "Content-type: application/octet-stream",
+	      "Pragma: no-cache",
+	      "Server: mass-check/0.0",
+	      "Content-Length: ".(-s $messages),
+              "\r\n"),
+	      <MSG>;
+
+	    close(MSG);
+	    unlink $messages;
+          }
+	  else {
+            print $socket join("\r\n",
+              "HTTP/1.0 200 OK",
+              "Content-type: text/plain",
+	      "Pragma: no-cache",
+	      "Server: mass-check/0.0",
+              "\r\n"),join("\n",
+                "Your POST request (sans max_messages) came from IP Address: ".$socket->peerhost,
+	        "");
+	  }
+	}
 	else {
+          # for error, "501 Not Implemented"
 	  print $socket join("\r\n",
 	    "HTTP/1.0 501 Not Implemented",
 	    "");
@@ -423,10 +441,17 @@ if ($opt_server) {
       
         $select->remove($socket);
 	$socket->close;
-	$select->remove($serv_socket) if ($line =~ /^quit/i);
       }
     }
+
+    deal_with_results($timestamps, $msgsout, $resfd);
+
+    # drop the listener when ready
+    #	$select->remove($serv_socket) if ($line =~ /^quit/i);
   }
+
+  close($resfd);
+  unlink $respath;
 
   exit;
 }
@@ -717,7 +742,7 @@ sub wanted {
     if (defined $spam) {
       my $result = ($spam ? "spam" : "ham");
       my $status = $spamtest->learn($ma, undef, $spam, 0);
-      $learned = $status->did_learn();
+      my $learned = $status->did_learn();
       $result = "undef" if !defined $learned;
       push(@extra, "learn=".$result);
     }
@@ -1074,8 +1099,9 @@ sub fork_scan_targets {
   my $iter = shift;
 
   my $tmpf;
-  ($tmpf, $tmpfd) = Mail::SpamAssassin::Util::secure_tmpfile()
-    or die 'archive-iterator: failed to create temp file';
+  ($tmpf, $tmpfd) = Mail::SpamAssassin::Util::secure_tmpfile();
+  die 'archive-iterator: failed to create temp file' unless $tmpf;
+
   unlink $tmpf or die "archive-iterator: unlink '$tmpf': $!";
   undef $tmpf;
 
@@ -1103,4 +1129,133 @@ sub fork_scan_targets {
   if (!$total_messages) {
     die "archive-iterator: no messages to process\n";
   }
+}
+
+sub handle_http_request {
+  my $socket = shift;
+
+  my $headers = {};
+  my $postdata = {};
+
+  # read in the request
+  # read in headers, "key: value"
+  my $line = $socket->getline();
+  $line =~ s/\r\n$//;
+  my ($type, $URI, $VERS) = $line =~ /^([a-zA-Z]+)\s+(\S+)(?:\s*(\S+))/;
+  unless ($type && $URI && $VERS) {
+    $type ||= '';
+    $URI  ||= '';
+
+    return ($type, $URI, $headers, $postdata);
+  }
+
+  $type = uc $type;
+
+  # we don't really care about the request right now
+  do {
+    $line = $socket->getline();
+    last unless defined $line;
+    $line =~ s/\r\n$//;
+
+    if ($line) {
+      my ($k,$v) = split(/:\s*/, $line, 2);
+      $headers->{lc $k} = $v;
+    }
+  } while ($line !~ /^$/);
+
+  if ($type eq 'POST' && $headers->{'content-length'}) {
+    my $pd;
+    $socket->read($pd, $headers->{'content-length'});
+    $pd =~ s/[\r\n]+$//;
+
+    %{$postdata} = map {
+      my($k,$v) = split(/=/, $_, 2);
+      $k =~ s/\%([0-9a-fA-F]{2})/sprintf "%c", hex($1)/e;
+      $v =~ s/\%([0-9a-fA-F]{2})/sprintf "%c", hex($1)/e;
+      $k => $v;
+    } split(/\&/, $pd);
+  }
+
+  return($type, $URI, $headers, $postdata);
+}
+
+sub generate_messages {
+  my($msgs, $timestamps, $msgsout) = @_;
+
+  my @tosend = ();
+
+  # Find out if any of the messages we sent out before need to be sent out
+  # again because we haven't seen a response yet.
+  my $tooold = time - $opt_server_timeout;
+  foreach (keys %{$timestamps}) {
+    next if ($_ > $tooold);
+    my $wanted = $msgs - @tosend;
+
+    if (@{$timestamps->{$_}} > $wanted) {
+      # there are more entries in the timestamp than we want
+      push(@tosend, splice @{$timestamps->{$_}}, 0, $wanted);
+    }
+    else {
+      # we're going to take all of this timestamp's entries
+      push(@tosend, @{$timestamps->{$_}});
+      delete $timestamps->{$_};
+    }
+
+    last if (@tosend == $msgs);
+  }
+
+  if ($tmpfd) {
+    while (@tosend < $msgs) {
+      my $msg = $iter->read_line($tmpfd);
+
+      # no more messages from the temp file, close it out
+      unless ($msg) {
+        delete $msgsout->{'curnum'};
+	close $tmpfd;
+	undef $tmpfd;
+	last;
+      }
+
+      my $num = $msgsout->{'curnum'}++;
+      $msgsout->{$num}->{'data'} = $msg;
+      push(@tosend, $num);
+    }
+  }
+
+  # ok, at this point, @tosend ought to have a list of numbers, pointers into
+  # %{$msgsout}.  turn that into a tar file.
+  return '' unless @tosend;
+
+  my($gzpath, $gzfd) = Mail::SpamAssassin::Util::secure_tmpfile();
+  die "Can't make tempfile, exiting" unless $gzpath;
+  close($gzfd);
+
+  $gzfd = IO::Zlib->new($gzpath, 'wb') || die "Can't create temp gzip file: $!";
+
+  # Generate an archive in the temp file
+  foreach my $num (@tosend) {
+    my $msg = ($iter->run_message($msgsout->{$num}->{'data'}))[4];
+    $iter->send_line($gzfd, join('', @{$msg}));
+  }
+
+  $gzfd->close;
+
+  #return($class, $format, $date, $where, &{$self->{wanted_sub}}($class, $where, $date, \@msg, $format));
+
+  # update timestamp entries
+  my $ts = time;
+  foreach (@tosend) {
+    $msgsout->{$_}->{'timestamp'} = $ts;
+  }
+  $timestamps->{$ts} = \@tosend;
+
+  return $gzpath;
+}
+
+sub handle_post_results {
+  my($postdata, $resfd) = @_;
+}
+
+sub deal_with_results {
+  my($timestamps, $msgsout, $resfd) = @_;
 }
