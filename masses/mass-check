@@ -365,15 +365,10 @@ if ($opt_server) {
   }
 
   my $timestamps = {};
+  my %reshash = ();
   my $msgsout = { 'curnum' => 0 };
 
   my $select = IO::Select->new( $serv_socket );
-
-  my($respath, $resfd) = Mail::SpamAssassin::Util::secure_tmpfile();
-  die 'archive-iterator: failed to create temp file' unless $respath;
-
-  # TVD: remove later
-  close($resfd); unlink $respath;
 
   my $sent_messages = 1;
   while ($select->count()) {
@@ -395,7 +390,7 @@ if ($opt_server) {
 	    "");
 	}
         elsif ($type eq 'POST') {
-	  handle_post_results($postdata, $resfd);
+	  handle_post_results($postdata, \%reshash);
 
 	  my $messages = '';
 	  if ($postdata->{'max_messages'}) {
@@ -444,14 +439,12 @@ if ($opt_server) {
       }
     }
 
-    deal_with_results($timestamps, $msgsout, $resfd);
+    deal_with_results($timestamps, $msgsout, \%reshash);
 
     # drop the listener when ready
-    #	$select->remove($serv_socket) if ($line =~ /^quit/i);
+    # we're not awaiting responses and we've exhausted the input file
+    $select->remove($serv_socket) if (!keys %{$msgsout} && !defined $tmpfd);
   }
-
-  close($resfd);
-  unlink $respath;
 
   exit;
 }
@@ -1234,13 +1227,18 @@ sub generate_messages {
 
   # Generate an archive in the temp file
   foreach my $num (@tosend) {
-    my $msg = ($iter->run_message($msgsout->{$num}->{'data'}))[4];
+    my $data = $msgsout->{$num}->{'data'};
+
+    my $msg = ($iter->run_message($data))[4];
+
+    my @d = Mail::SpamAssassin::ArchiveIterator::index_unpack($data);
+    $d[$#d] = $num;
+
+    $iter->send_line($gzfd, Mail::SpamAssassin::ArchiveIterator::index_pack(@d));
     $iter->send_line($gzfd, join('', @{$msg}));
   }
 
   $gzfd->close;
-
-  #return($class, $format, $date, $where, &{$self->{wanted_sub}}($class, $where, $date, \@msg, $format));
 
   # update timestamp entries
   my $ts = time;
@@ -1252,10 +1250,50 @@ sub generate_messages {
   return $gzpath;
 }
 
+# we've gotten results posted, setup a hash cache to batch deal with all the
+# clients later on
 sub handle_post_results {
-  my($postdata, $resfd) = @_;
+  my($postdata, $reshash) = @_;
+
+  while( my($k,$v) = each %{$postdata} ) {
+    next if ($k !~ /^\d$/);
+    $reshash->{$k} = $v;
+  }
 }
 
+# we've read in from all of the clients which connected, so clean up msgsout
+# and timestamp hashes
 sub deal_with_results {
-  my($timestamps, $msgsout, $resfd) = @_;
+  my($timestamps, $msgsout, $reshash) = @_;
+
+  my %timestamps = ();
+
+  # $msgsout->{num}->{data|timestamp}
+  # $timestamp{num} = [ msgout_nums ... ]
+  # $reshash{num} = result_string
+
+  while( my($k,$v) = each %{$reshash} ) {
+    my $data = $msgsout->{$k}->{'data'};
+    my @d = Mail::SpamAssassin::ArchiveIterator::index_unpack($data);
+
+    # the client had a fake filename, so replace the name
+    $v =~ s/ \S+\d+ / $d[3] /;
+
+    # go ahead and do the result
+    &{$iter->{result_sub}}($d[1], $v, $d[0]);
+
+    # prep to get rid of the cached entries
+    $timestamps{$msgsout->{$k}->{'timestamp'}}->{$k} = 1;
+    delete $msgsout->{$k};
+  }
+
+  while ( my($k,$v) = each %timestamps ) {
+    my @temp = grep(!exists $v->{$_}, @{$timestamps->{$k}});
+    if (@temp) {
+      $timestamps->{$k} = \@temp;
+    }
+    else {
+      delete $timestamps->{$k};
+    }
+  }
 }
