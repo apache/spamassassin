@@ -90,6 +90,8 @@ sub check_all {
     return 0;
   }
 
+  $conf->{skip_body_rules} = { };
+
   my $found = 0;
   foreach my $name (keys %{$rules}) {
     my $rule = $rules->{$name};
@@ -105,7 +107,7 @@ sub check_all {
 
     # TODO: need a cleaner way to do this.  I expect when rule types
     # are implementable in plugins, I can do it that way
-    $conf->{zoom_disable_basic_regexp_rule}->{$name} = 1;
+    $conf->{skip_body_rules}->{$name} = 1;
     $found++;
   }
 
@@ -139,8 +141,6 @@ sub run_body_hack {
   my $conf = $scanner->{conf};
   return unless $conf->{zoom_ruletypes_available}->{$ruletype};
 
-  $scanner->{skip_body_rules} = $conf->{zoom_disable_basic_regexp_rule};
-
   dbg("zoom: run_body_hack for $ruletype start");
 
   my $do_dbg = (would_log('dbg', 'zoom') > 1);
@@ -166,9 +166,9 @@ sub run_body_hack {
         # ignore 0-scored rules, of course
         next unless $scoresptr->{$rulename};
 
-        if ($do_dbg) {
-	  dbg("zoom: base found for $rulename: $line");
-        }
+	# if ($do_dbg) {
+	# dbg("zoom: base found for $rulename: $line");
+	# }
 
         # run the real regexp -- on this line alone
         &{'Mail::SpamAssassin::PerMsgStatus::'.$rulename.'_one_line_body_test'}

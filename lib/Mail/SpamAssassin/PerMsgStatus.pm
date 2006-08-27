@@ -1925,20 +1925,21 @@ sub do_body_tests {
                 permsgstatus => $self, ruletype => "body",
                 priority => '.$priority.', lines => \@_
               });
-        my $disabled = $self->{skip_body_rules};
 
   ';
 
-
-
   while (my($rulename, $pat) = each %{$self->{conf}{body_tests}->{$priority}}) {
-    $evalstr .= '
-      if (!$disabled->{q{'.$rulename.'}} && $scoresptr->{q{'.$rulename.'}})
-      {
-        '.$rulename.'_body_test($self,@_);
-        '.$self->ran_rule_plugin_code($rulename, "body").'
-      }
-    ';
+
+    if (!$self->{conf}{skip_body_rules}{$rulename}) {
+
+      $evalstr .= '
+	if ($scoresptr->{q{'.$rulename.'}}) {
+	  '.$rulename.'_body_test($self,@_);
+	  '.$self->ran_rule_plugin_code($rulename, "body").'
+	}
+      ';
+
+    }
 
     if ($doing_user_rules) {
       next if (!$self->is_user_rule_sub ($rulename.'_body_test'));
@@ -1957,14 +1958,13 @@ sub do_body_tests {
            }
     }
 
-
     sub '.$rulename.'_one_line_body_test {
              pos $_[1] = 0;
              '.$self->hash_line_for_rule($rulename).'
              while ($_[1] =~ '.$pat.'g) { 
                 my $self = $_[0];
                 $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body"); 
-                '.$self->hit_rule_plugin_code($rulename, "re2xs-body", "return").'
+                '.$self->hit_rule_plugin_code($rulename,"one-line-body","return").'
              }
     }
     ';
