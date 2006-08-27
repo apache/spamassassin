@@ -877,7 +877,7 @@ sub first_available_module {
 
 ###########################################################################
 
-=item my ($filehandle, $filepath) = secure_tmpfile();
+=item my ($filepath, $filehandle) = secure_tmpfile();
 
 Generates a filename for a temporary file, opens it exclusively and
 securely, and returns a filehandle to the open file (opened O_RDWR).
