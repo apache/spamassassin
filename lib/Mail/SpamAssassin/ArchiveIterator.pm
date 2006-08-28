@@ -414,44 +414,12 @@ sub run_mbx {
 
 ############################################################################
 
-# four bytes in network/vax format (little endian) as length of message
-# the rest is the actual message
-
-sub read_line {
-  my($self, $fd) = @_;
-  my($length,$msg);
-
-  # read in the 4 byte length and unpack
-  sysread($fd, $length, 4);
-  $length = unpack("V", $length);
-#  warn "<< $$ $length\n";
-  return unless $length;
-
-  # read in the rest of the single message
-  sysread($fd, $msg, $length);
-#  warn "<< $$ $msg\n";
-  return $msg;
-}
-
-sub send_line {
-  my $self = shift;
-  my $fd = shift;
-
-  foreach ( @_ ) {
-    my $length = pack("V", length $_);
-#    warn ">> $$ ".length($_)." $_\n";
-    syswrite($fd, $length . $_);
-  }
-}
-
-############################################################################
-
 ## FUNCTIONS BELOW THIS POINT ARE FOR FINDING THE MESSAGES TO RUN AGAINST
 
 ############################################################################
 
 sub message_array {
-  my ($self, $targets, $fh) = @_;
+  my ($self, $targets) = @_;
 
   foreach my $target (@${targets}) {
     if (!defined $target) {
@@ -573,12 +541,6 @@ sub message_array {
   }
   if ($self->{opt_head} < 0) {
     splice(@messages, -$self->{opt_head});
-  }
-
-  # Dump out the messages to the temp file if we're using one
-  if (defined $fh) {
-    $self->send_line($fh, scalar(@messages), @messages);
-    return;
   }
 
   return scalar(@messages), \@messages;
