@@ -2645,7 +2645,6 @@ sub run_eval_tests {
 sub register_plugin_eval_glue {
   my ($self, $pluginobj, $function) = @_;
 
-  dbg("plugin: registering glue method for $function ($pluginobj)");
   my $evalstr = <<"ENDOFEVAL";
 {
     package Mail::SpamAssassin::PerMsgStatus;
