@@ -1206,8 +1206,8 @@ sub clean_update_dir {
   my $dir = shift;
 
   unless (opendir(DIR, $dir)) {
-    warn "error: can't readdir $dir: $!\n";
-    dbg("generic: attempt to readdir ($dir) failed");
+    warn "error: can't opendir $dir: $!\n";
+    dbg("generic: attempt to opendir ($dir) failed");
     return;
   }
   while(my $file = readdir(DIR)) {
