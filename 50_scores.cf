@@ -690,6 +690,14 @@ score USER_IN_DEF_DKIM_WL -7.500
 score ENV_AND_HDR_DKIM_MATCH -7.500
 endif # Mail::SpamAssassin::Plugin::DKIM
 
+if (version > 3.001004)
+ifplugin Mail::SpamAssassin::Plugin::DomainKeys
+score USER_IN_DK_WHITELIST -100.000
+score USER_IN_DEF_DK_WL -7.500
+score ENV_AND_HDR_DK_MATCH -7.500
+endif # Mail::SpamAssassin::Plugin::DomainKeys
+endif # if (version > 3.001004)
+
 ifplugin Mail::SpamAssassin::Plugin::SPF
 score USER_IN_SPF_WHITELIST -100.000
 score USER_IN_DEF_SPF_WL -7.500
