@@ -451,7 +451,7 @@ if ($opt_server) {
 	  if ($postdata->{'max_messages'}) {
 	    my $msgnum = $postdata->{'max_messages'};
 	    $msgnum = $opt_cs_max if ($msgnum > $opt_cs_max);
-	    $messages = generate_messages($msgnum, $timestamps, $msgsout);
+	    $messages = generate_messages($msgnum, $timestamps, $msgsout, $postdata->{'paths_only'});
 	  }
 
 #print ">> sending messages\n";
@@ -470,6 +470,13 @@ if ($opt_server) {
 	    close(MSG);
 	    unlink $messages;
           }
+	  elsif (!keys %{$msgsout} && !defined $tmpfd) {
+	    http_response($socket, "200 OK", {
+              "Content-type" => "text/plain",
+	      "Finished" => 1,
+	      },
+	      'We are all done');
+	  }
 	  else {
 	    http_response($socket, "200 OK", {
               "Content-type" => "text/plain",
@@ -487,8 +494,8 @@ if ($opt_server) {
       }
     }
 
-print "msgs waiting: ".join(" ", keys %{$msgsout})."\n";
-print "tmpfd defined? ".(defined $tmpfd ? "yes" : "no")."\n";
+#print "msgs waiting: ".join(" ", keys %{$msgsout})."\n";
+#print "tmpfd defined? ".(defined $tmpfd ? "yes" : "no")."\n";
 
     # drop the listener when ready
     # we're not awaiting responses and we've exhausted the input file
@@ -512,8 +519,12 @@ if ($opt_client) {
   # figure out max messages
   my $msgnum = 100;
 
-  my $tmpdir = Mail::SpamAssassin::Util::secure_tmpdir();
-  die "Can't create tempdir" unless $tmpdir;
+  my $tmpdir;
+
+  if (!$opt_cs_paths_only) {
+    $tmpdir = Mail::SpamAssassin::Util::secure_tmpdir();
+    die "Can't create tempdir" unless $tmpdir;
+  }
 
   while (1) {
     # if the number of messages to request is too much, bring it down
@@ -559,6 +570,7 @@ print "Got no response, waiting $opt_cs_timeout seconds\n";
 print "Got response: $result\n";
 
       %postdata = ();
+      %real = ();
       $spam_count = $ham_count = 0;
 
       # we got a result, so do things with it!
@@ -593,17 +605,28 @@ print ">> total of $total_messages messages\n";
 #print "read in index $index\n";
 	last unless defined $index;
 #print "output message $num\n";
-	if (open(OUT, ">$tmpdir/$num")) {
-	  print OUT read_line($gzfd);
-	  close(OUT);
+	if (!$opt_cs_paths_only) {
+	  my $msg = read_line($gzfd);
+	  last unless defined $msg;
 
-	  my @d = Mail::SpamAssassin::ArchiveIterator::index_unpack($index);
-	  $real{"$tmpdir/$num"} = \@d;
-          send_line($tmpfd,
-	    Mail::SpamAssassin::ArchiveIterator::index_pack($d[0], $d[1], 'f', "$tmpdir/$num"));
+	  if (open(OUT, ">$tmpdir/$num")) {
+	    print OUT $msg;
+	    close(OUT);
+
+	    my @d = Mail::SpamAssassin::ArchiveIterator::index_unpack($index);
+	    $real{"$tmpdir/$num"} = \@d;
+            send_line($tmpfd,
+	      Mail::SpamAssassin::ArchiveIterator::index_pack($d[0], $d[1], 'f', "$tmpdir/$num"));
+	  }
+	  else {
+	    warn "Can't create/write $tmpdir/$num: $!";
+	  }
 	}
 	else {
-	  warn "Can't create/write $tmpdir/$num: $!";
+	  # need to relate message number and path
+	  my @d = Mail::SpamAssassin::ArchiveIterator::index_unpack($index);
+	  $real{$d[3]} = $num;
+	  send_line($tmpfd, $index);
 	}
 #print "wrote mess $num\n";
       }
@@ -628,14 +651,18 @@ print "ended run\n";
       if ($time_end == $time_start) {
         $time_end++;
       }
+print "ran $msgnum messages in ".($time_end-$time_start)." seconds\n";
       $msgnum = int($msgnum * $opt_cs_timeout / ($time_end-$time_start)) || 1;
 print "now requesting $msgnum messages\n";
     }
   }
 
   close $tmpfd;
-  clean_dir($tmpdir);
-  rmdir $tmpdir;
+
+  if ($tmpdir) {
+    clean_dir($tmpdir);
+    rmdir $tmpdir;
+  }
   exit;
 }
 
@@ -741,12 +768,15 @@ sub wanted {
 
   if ($opt_client) {
 #    warn ">>> $id\n";
-    #use Data::Dumper;
-    #print Dumper($real{$id});
-    $origid=$id;
-    $origid =~ s/^.+?(\d+)$/$1/;
-    $format = $real{$id}->[2];
-    $id = $real{$id}->[3];
+    if ($opt_cs_paths_only) {
+      $origid = $real{$id};
+    }
+    else {
+      $origid=$id;
+      $origid =~ s/^.+?(\d+)$/$1/;
+      $format = $real{$id}->[2];
+      $id = $real{$id}->[3];
+    }
   }
 
   memory_track_start() if ($opt_logmem);
@@ -1243,7 +1273,7 @@ sub handle_http_request {
 }
 
 sub generate_messages {
-  my($msgs, $timestamps, $msgsout) = @_;
+  my($msgs, $timestamps, $msgsout, $paths_only) = @_;
 
   my @tosend = ();
 
@@ -1300,16 +1330,19 @@ sub generate_messages {
 
   # Generate an archive in the temp file
   foreach my $num (@tosend) {
-    my $data = $msgsout->{$num}->{'data'};
-    my $msg = ($iter->run_message($data))[4];
-
     # Archive format, gzip compressed file w/ 3 parts per message:
     # 1- server message number in text format
     # 2- server index string, binary packed format
     # 3- message content
     send_line($gzfd, $num);
+
+    my $data = $msgsout->{$num}->{'data'};
     send_line($gzfd, $data);
-    send_line($gzfd, join('', @{$msg}));
+
+    if (!$paths_only) {
+      my $msg = ($iter->run_message($data))[4];
+      send_line($gzfd, join('', @{$msg}));
+    }
   }
 
   $gzfd->close;
@@ -1342,7 +1375,7 @@ sub handle_post_results {
     # if we've been waiting for this result, process it, otherwise throw it on
     # the ground.  multiple clients could have been given the same messages to
     # process, and we take whatever the first responder sends us.
-print "received result for $k\n";
+#print "received result for $k\n";
     if (exists $msgsout->{$k}) {
       my @d = Mail::SpamAssassin::ArchiveIterator::index_unpack($msgsout->{$k}->{'data'});
 
@@ -1357,7 +1390,7 @@ print "received result for $k\n";
 
   # if we got any results, clean out the results from the timestamp arrays
   while ( my($k,$v) = each %timestamps ) {
-print "dealing with timestamp $k\n";
+#print "dealing with timestamp $k\n";
     my @temp = grep(!exists $v->{$_}, @{$timestamps->{$k}});
 
     # if there are results left for a specific timestamp, update the array
@@ -1520,6 +1553,8 @@ sub http_make_request {
       $headers{lc $k} = $v;
     }
   } while ($line !~ /^$/);
+
+  return if ($headers{'finished'});
 
   my $gzpath = '';
   if ($headers{'content-length'}) {
