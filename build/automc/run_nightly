@@ -16,9 +16,11 @@ nightly_users="
 nightly_trees="/home/bbmass/mc-nightly"
 
 
-# ensure we're running after 0900 UTC; complex due to daylight savings.
-# If we're running in the 08xx UTC hour-space, sleep for 1 hour; when
-# we wake, we will be in 09xx.
+# Ensure we're running after 0900 UTC; complex due to daylight savings. If
+# we're running in the 08xx UTC hour-space, sleep for 1 hour; when we wake, we
+# will be in 09xx.  By doing it this way, we'll work both for (a) mass-checks
+# set to run from cron at 09xx (cron doesn't understand DST/UTC issues) and (b)
+# mass-checks starting at other times that != 09xx.
 (
   TIME="%e,%U,%S"; TZ=UTC; export TIME TZ
   if date | egrep '^... ... .. 08:'; then
