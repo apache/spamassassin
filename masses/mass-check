@@ -99,7 +99,7 @@ use vars qw($opt_c $opt_p $opt_f $opt_j $opt_n $opt_o $opt_all $opt_bayes
 	    $opt_logmem $opt_after $opt_before $opt_rewrite $opt_deencap
 	    $opt_learn $opt_reuse $opt_lint $opt_cache $opt_noisy
 	    $total_messages $statusevery $opt_cachedir
-	    $opt_client $opt_cs_max $opt_cs_timeout
+	    $opt_client $opt_cs_max $opt_cs_timeout $opt_cs_paths_only
 	    $opt_server %postdata %real
 	    $tmpfd %reuse %orig_conf %reuse_conf $reuse_rules_loaded_p);
 
@@ -136,7 +136,7 @@ GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug:s",
 	   "rules=s", "restart=i", "after=s", "before=s", "loguris",
 	   "deencap=s", "logmem", "learn=i", "reuse", "lint", "cache",
            "cachedir=s", "noisy",
-	   "server", "cs_max=i", "cs_timeout=i",
+	   "server", "cs_max=i", "cs_timeout=i", "cs_paths_only",
 	   "client=s",
 	   "dir" => sub { $opt_format = "dir"; },
 	   "file" => sub { $opt_format = "file"; },
@@ -486,6 +486,9 @@ if ($opt_server) {
       }
     }
 
+print "msgs waiting: ".join(" ", keys %{$msgsout})."\n";
+print "tmpfd defined? ".(defined $tmpfd ? "yes" : "no")."\n";
+
     # drop the listener when ready
     # we're not awaiting responses and we've exhausted the input file
     $select->remove($serv_socket) if (!keys %{$msgsout} && !defined $tmpfd);
@@ -517,6 +520,7 @@ if ($opt_client) {
 
     # prep the POST request
     $postdata{'max_messages'} = $msgnum;
+    $postdata{'paths_only'} = 1 if ($opt_cs_paths_only);
 
     my $POSTDATA = join('&', map { post_encode($_) . '=' . post_encode($postdata{$_}) } keys %postdata);
 
@@ -576,7 +580,7 @@ print ">> cleandir\n";
 print ">> writing out files\n";
 
       # number of messages
-      $total_messages = read_line($gzfd);
+      $msgnum = $total_messages = read_line($gzfd);
 
 print ">> total of $total_messages messages\n";
 
@@ -1327,13 +1331,13 @@ sub handle_post_results {
   # $postdata{num} = result_string
 
   while( my($k,$v) = each %{$postdata} ) {
-    next if ($k !~ /^\d$/);
+    next if ($k !~ /^\d+$/);
 
     # if we've been waiting for this result, process it, otherwise throw it on
     # the ground.  multiple clients could have been given the same messages to
     # process, and we take whatever the first responder sends us.
+print "received result for $k\n";
     if (exists $msgsout->{$k}) {
-      # the client had a fake filename, so replace the name
       my @d = Mail::SpamAssassin::ArchiveIterator::index_unpack($msgsout->{$k}->{'data'});
 
       # go ahead and do the result
@@ -1347,6 +1351,7 @@ sub handle_post_results {
 
   # if we got any results, clean out the results from the timestamp arrays
   while ( my($k,$v) = each %timestamps ) {
+print "dealing with timestamp $k\n";
     my @temp = grep(!exists $v->{$_}, @{$timestamps->{$k}});
 
     # if there are results left for a specific timestamp, update the array
