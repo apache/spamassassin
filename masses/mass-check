@@ -1233,8 +1233,8 @@ sub handle_http_request {
 
     %{$postdata} = map {
       my($k,$v) = split(/=/, $_, 2);
-      $k =~ s/\%([0-9a-fA-F]{2})/sprintf "%c", hex($1)/e;
-      $v =~ s/\%([0-9a-fA-F]{2})/sprintf "%c", hex($1)/e;
+      $k =~ s/\%([0-9a-fA-F]{2})/sprintf "%c", hex($1)/eg;
+      $v =~ s/\%([0-9a-fA-F]{2})/sprintf "%c", hex($1)/eg;
       $k => $v;
     } split(/\&/, $pd);
   }
