@@ -100,7 +100,7 @@ use vars qw($opt_c $opt_p $opt_f $opt_j $opt_n $opt_o $opt_all $opt_bayes
 	    $opt_learn $opt_reuse $opt_lint $opt_cache $opt_noisy
 	    $total_messages $statusevery $opt_cachedir
 	    $opt_client $opt_cs_max $opt_cs_timeout
-	    $opt_server
+	    $opt_server %postdata %real
 	    $tmpfd %reuse %orig_conf %reuse_conf $reuse_rules_loaded_p);
 
 use FindBin;
@@ -321,15 +321,18 @@ my $iter = new Mail::SpamAssassin::ArchiveIterator($AIopts);
 
 my $messages;
 
-if (!$opt_client) {
-  if (!$opt_server) {
-    $iter->set_functions(\&wanted);
-  }
-  else {
-    $iter->set_functions(\&wanted_server);
-  }
-  $iter->set_functions(undef, \&result);
+# setup the AI functions
+if ($opt_client) {
+  $iter->set_functions(\&wanted, \&result_client);
+}
+elsif ($opt_server) {
+  $iter->set_functions(\&wanted_server, \&result);
+}
+else {
+  $iter->set_functions(\&wanted, \&result);
+}
 
+if (!$opt_client) {
   if ($opt_progress) {
     status('starting scan stage');
   }
@@ -385,6 +388,26 @@ sub wanted_server {
   return $dataref;
 }
 
+sub result_client {
+  my ($class, $result, $time) = @_;
+
+  if ($class eq "s") {
+    $spam_count++;
+  }
+  elsif ($class eq "h") {
+    $ham_count++;
+  }
+
+  $total_count++;
+
+  if ($opt_progress) {
+    progress($time);
+  }
+
+  $result =~ s/^(\d+)\s+//m;
+  $postdata{$1} = $result;
+}
+
 if ($opt_server) {
   $opt_cs_max ||= 1000;
   $opt_cs_timeout ||= 60 * 5;
@@ -430,7 +453,7 @@ if ($opt_server) {
 	    $messages = generate_messages($msgnum, $timestamps, $msgsout);
 	  }
 
-print ">> sending messages\n";
+#print ">> sending messages\n";
 
           if ($messages && open(MSG, $messages)) {
 	    binmode(MSG);
@@ -485,8 +508,6 @@ if ($opt_client) {
   # figure out max messages
   my $msgnum = 100;
 
-  my %postdata = ();
-  
   my $tmpdir = Mail::SpamAssassin::Util::secure_tmpdir();
   die "Can't create tempdir" unless $tmpdir;
 
@@ -528,7 +549,13 @@ print "Got no response, waiting $opt_cs_timeout seconds\n";
       sleep $opt_cs_timeout;
     }
     else {
+      my $time_start = time;
+
 print "Got response: $result\n";
+
+      %postdata = ();
+      $spam_count = $ham_count = 0;
+
       # we got a result, so do things with it!
       my $gzfd = IO::Zlib->new($result, "rb");
       die "Can't open temp result file: $!" unless $gzfd;
@@ -536,6 +563,7 @@ print "Got response: $result\n";
       # used for the temp queue file
       my $tmppath;
       ($tmppath, $tmpfd) = Mail::SpamAssassin::Util::secure_tmpfile();
+print ">> $tmppath\n";
       die "Can't make tempfile, exiting" unless $tmppath;
 
 print ">> cleandir\n";
@@ -545,49 +573,61 @@ print ">> cleandir\n";
       # 1- server message number in text format
       # 2- server index string, binary packed format
       # 3- message content
-      my %real = ();
 print ">> writing out files\n";
-      do {
+
+      # number of messages
+      $total_messages = read_line($gzfd);
+
+print ">> total of $total_messages messages\n";
+
+      for(my $i = 0 ; $i < $total_messages; $i++ ) {
         my $num = read_line($gzfd);
 	last unless defined $num;
-print "read in message $num\n";
+#print "read in message $num\n";
         my $index = read_line($gzfd);
+#print "read in index $index\n";
 	last unless defined $index;
-print "output message $num\n";
+#print "output message $num\n";
 	if (open(OUT, ">$tmpdir/$num")) {
 	  print OUT read_line($gzfd);
 	  close(OUT);
 
 	  my @d = Mail::SpamAssassin::ArchiveIterator::index_unpack($index);
-	  $real{$num} = \@d;
+	  $real{"$tmpdir/$num"} = \@d;
           send_line($tmpfd,
-	    Mail::SpamAssassin::ArchiveIterator::index_unpack($d[0], $d[1], 'f', "$tmpdir/$num"));
+	    Mail::SpamAssassin::ArchiveIterator::index_pack($d[0], $d[1], 'f', "$tmpdir/$num"));
 	}
 	else {
 	  warn "Can't create/write $tmpdir/$num: $!";
 	}
-print "wrote mess $num\n";
-      } while (!$gzfd->eof);
+#print "wrote mess $num\n";
+      }
+
+print "exited loop\n";
 
       $gzfd->close;
-      exit;
       unlink $result;
 
-      my $time_start = time;
-      # generate temp file w/ messages to run through
-      # create temp directory with file format messages
+print "beginning run\n";
+
+      # we're about to start running, so go back to the start of the file
+      seek $tmpfd, 0, 0;
 
       run_through_messages();
-      # marshall up results
 
-      my $time_end = time;
+      unlink $tmppath;
 
+print "ended run\n";
       # figure out new max messages, try keeping ~cs_timeout between runs
-      $msgnum = int($msgnum * ($time_end-$time_start) / $opt_cs_timeout);
+      my $time_end = time;
+      $msgnum = int($msgnum * $opt_cs_timeout / ($time_end-$time_start)) || 1;
+print "now requesting $msgnum messages\n";
     }
   }
 
   close $tmpfd;
+  clean_dir($tmpdir);
+  rmdir $tmpdir;
   exit;
 }
 
@@ -688,6 +728,17 @@ sub result {
 sub wanted {
   my ($class, $id, $time, $dataref, $format) = @_;
   my $out;
+
+  my $origid=$id;
+  $origid =~ s/^.+?(\d+)$/$1/;
+
+  if ($opt_client) {
+    warn ">>> $id\n";
+    #use Data::Dumper;
+    #print Dumper($real{$id});
+    $format = $real{$id}->[2];
+    $id = $real{$id}->[3];
+  }
 
   memory_track_start() if ($opt_logmem);
 
@@ -855,6 +906,10 @@ sub wanted {
   }
 
   $id =~ s/\s/_/g;
+
+  if ($origid) {
+    $out .= "$origid ";
+  }
 
   $out .= sprintf("%s %2d %s %s %s\n", $yorn, $score, $id, $tests, $extra);
 
@@ -1230,6 +1285,9 @@ sub generate_messages {
 
   $gzfd = IO::Zlib->new($gzpath, 'wb') || die "Can't create temp gzip file: $!";
 
+  # first line is number of messages
+  send_line($gzfd, scalar @tosend);
+
   # Generate an archive in the temp file
   foreach my $num (@tosend) {
     my $data = $msgsout->{$num}->{'data'};
@@ -1310,8 +1368,17 @@ sub run_through_messages {
     my $total_count = 0;
 
     while (($total_messages > $total_count) && ($message = read_line($tmpfd))) {
+#print ">>> $message\n";
       my($class, undef, $date, undef, $result) = $iter->run_message($message);
-      result($class, $result, $date) if $result;
+      if ($result) {
+        if ($opt_client) {
+          result_client($class, $result, $date);
+        }
+        else {
+          result($class, $result, $date);
+        }
+#print ">>> $result\n";
+      }
       $total_count++;
     }
   }
@@ -1500,26 +1567,14 @@ sub read_line {
   my($length,$msg);
 
   # read in the 4 byte length and unpack
-#  if (ref $fd eq 'GLOB') {
-#    sysread($fd, $length, 4) || return;
-#  }
-#  elsif (ref $fd ne '') {
-    $fd->read($length, 4) || return;
-#  }
+  $fd->read($length, 4) || return;
 
   $length = unpack("V", $length);
-#  warn "<< $$ $length\n";
   return unless $length;
 
   # read in the rest of the single message
-#  if (ref $fd eq 'GLOB') {
-#    sysread($fd, $msg, $length) || return;
-#  }
-#  elsif (ref $fd ne '') {
-    $fd->read($msg, $length) || return;
-#  }
+  $fd->read($msg, $length) || return;
 
-#  warn "<< $$ $msg\n";
   return $msg;
 }
 
@@ -1528,12 +1583,6 @@ sub send_line {
 
   foreach ( @_ ) {
     my $length = pack("V", length $_);
-#    warn ">> $$ ".length($_)." $_\n";
-#    if (ref $fd eq 'GLOB') {
-#      syswrite($fd, $length . $_);
-#    }
-#    elsif (ref $fd ne '') {
       $fd->print($length.$_);
-#    }
   }
 }
