@@ -404,6 +404,7 @@ sub result_client {
     progress($time);
   }
 
+#  print ">>>> $result\n";
   $result =~ s/^(\d+)\s+//m;
   $postdata{$1} = $result;
 }
@@ -624,6 +625,9 @@ print "beginning run\n";
 print "ended run\n";
       # figure out new max messages, try keeping ~cs_timeout between runs
       my $time_end = time;
+      if ($time_end == $time_start) {
+        $time_end++;
+      }
       $msgnum = int($msgnum * $opt_cs_timeout / ($time_end-$time_start)) || 1;
 print "now requesting $msgnum messages\n";
     }
@@ -731,15 +735,16 @@ sub result {
 
 sub wanted {
   my ($class, $id, $time, $dataref, $format) = @_;
-  my $out;
+  my $out = '';
 
-  my $origid=$id;
-  $origid =~ s/^.+?(\d+)$/$1/;
+  my $origid;
 
   if ($opt_client) {
-    warn ">>> $id\n";
+#    warn ">>> $id\n";
     #use Data::Dumper;
     #print Dumper($real{$id});
+    $origid=$id;
+    $origid =~ s/^.+?(\d+)$/$1/;
     $format = $real{$id}->[2];
     $id = $real{$id}->[3];
   }
@@ -911,8 +916,8 @@ sub wanted {
 
   $id =~ s/\s/_/g;
 
-  if ($origid) {
-    $out .= "$origid ";
+  if (defined $origid) {
+    $out = "$origid ";
   }
 
   $out .= sprintf("%s %2d %s %s %s\n", $yorn, $score, $id, $tests, $extra);
@@ -942,6 +947,7 @@ sub wanted {
   undef $status;
 
   showdots_blip();
+#  print ">>>> out = $out\n";
   return $out;
 }
 
