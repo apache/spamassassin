@@ -1,8 +1,10 @@
 #!/usr/bin/perl
 
 my ($l1, $l2, @diffargs);
+@diffargs = ();
+
 foreach my $arg (@ARGV) {
-  if (/^-/) {
+  if ($arg =~ /^-/) {
     push @diffargs, $arg;
   } elsif (defined $l1) {
     $l2 = $arg;
