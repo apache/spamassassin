@@ -332,29 +332,28 @@ else {
   $iter->set_functions(\&wanted, \&result);
 }
 
+# normal mode as well as a server do scan mode and get a temp file
 if (!$opt_client) {
-  if ($opt_progress) {
-    status('starting scan stage');
-  }
+  status('starting scan stage') if ($opt_progress);
 
+  # Make a temp file and delete it
   my $tmpf;
   ($tmpf, $tmpfd) = Mail::SpamAssassin::Util::secure_tmpfile();
   die 'archive-iterator: failed to create temp file' unless $tmpf;
-
   unlink $tmpf or die "archive-iterator: unlink '$tmpf': $!";
-  undef $tmpf;
 
+  # having opt_j or server mode means do scan in a separate process
   if ($opt_server || $opt_j) {
-    # forked child process scans messages
     if ($tmpf = fork()) {
       # parent
       waitpid($tmpf, 0);
     }
     elsif (defined $tmpf) {
-      # child
+      # child -- process using message_array
       my($num, $messages) = $iter->message_array(\@targets);
 
-      # Dump out the messages to the temp file if we're using one
+      # Dump out the number of messages and the message index info to
+      # the temp file
       send_line($tmpfd, $num, @{$messages});
 
       exit;
@@ -364,324 +363,44 @@ if (!$opt_client) {
     }
   }
   else {
-    $iter->message_array(\@targets, $tmpfd);
+    # we get here if opt_j == 0, so scan in this process
+    my($num, $messages) = $iter->message_array(\@targets);
+
+    # Dump out the number of messages and the message index info to
+    # the temp file
+    send_line($tmpfd, $num, @{$messages});
   }
 
   # we now have a temporary file with the messages to process
-  # in theory, our file pointer is at the start of the file, but make sure.
-  # NOTE: do this here, not in message_array, since that will only affect
-  # the child.
   seek($tmpfd, 0, 0);
+  # the first line is the number of messages
   $total_messages = read_line($tmpfd);
 
   if (!$total_messages) {
     die "archive-iterator: no messages to process\n";
   }
 
-  if ($opt_progress) {
-    status("completed scan stage, $total_messages messages");
-  }
-}
-
-sub wanted_server {
-  my ($class, $id, $time, $dataref, $format) = @_;
-  return $dataref;
-}
-
-sub result_client {
-  my ($class, $result, $time) = @_;
-
-  if ($class eq "s") {
-    $spam_count++;
-  }
-  elsif ($class eq "h") {
-    $ham_count++;
-  }
-
-  $total_count++;
-
-  if ($opt_progress) {
-    progress($time);
-  }
-
-#  print ">>>> $result\n";
-  $result =~ s/^(\d+)\s+//m;
-  $postdata{$1} = $result;
-}
-
-if ($opt_server) {
-  $opt_cs_max ||= 1000;
-  $opt_cs_timeout ||= 60 * 5;
-
-  my $serv_socket = IO::Socket::INET->new(LocalPort => 8080,
-    Proto => 'tcp',
-    Listen => 5,
-    Reuse => 1);
-
-  die "Could not create socket: $!\n" unless $serv_socket;
-
-  if ($opt_progress) {
-    status('server ready for connections');
-  }
-
-  my $timestamps = {};
-  my $msgsout = { 'curnum' => 0 };
-
-  my $select = IO::Select->new( $serv_socket );
-
-  my $sent_messages = 1;
-  while ($select->count()) {
-    foreach my $socket ($select->can_read()) {
-      if ($socket == $serv_socket) {
-        $select->add($serv_socket->accept);
-      }
-      else {
-	my($type, $URI, $headers, $postdata) = handle_http_request($socket);
-
-	if ($type eq 'GET') {
-	  http_response($socket, "200 OK", {
-	      'Content-type' => 'text/plain',
-	    },
-	    "Your GET request came from IP Address: ".$socket->peerhost."\n");
-	}
-        elsif ($type eq 'POST') {
-	  handle_post_results($postdata, $timestamps, $msgsout);
-
-	  my $messages = '';
-	  if ($postdata->{'max_messages'}) {
-	    my $msgnum = $postdata->{'max_messages'};
-	    $msgnum = $opt_cs_max if ($msgnum > $opt_cs_max);
-	    $messages = generate_messages($msgnum, $timestamps, $msgsout, $postdata->{'paths_only'});
-	  }
-
-#print ">> sending messages\n";
-
-          if ($messages && open(MSG, $messages)) {
-	    binmode(MSG);
-	    local $/ = undef;
-
-	    #  Content-Encoding: gzip
-	    http_response($socket, "200 OK", {
-              "Content-type" => "application/octet-stream",
-	      "Content-Length" => (-s $messages),
-	      },
-	      scalar <MSG>);
-
-	    close(MSG);
-	    unlink $messages;
-          }
-	  elsif (!keys %{$msgsout} && !defined $tmpfd) {
-	    http_response($socket, "200 OK", {
-              "Content-type" => "text/plain",
-	      "Finished" => 1,
-	      },
-	      'We are all done');
-	  }
-	  else {
-	    http_response($socket, "200 OK", {
-              "Content-type" => "text/plain",
-	      },
-              "Your POST request (sans max_messages) came from IP Address: ".$socket->peerhost."\n");
-	  }
-	}
-	else {
-          # for error, "501 Not Implemented"
-	  http_response($socket, '501 Not Implemented', {}, '');
-	}
-      
-        $select->remove($socket);
-	$socket->close;
-      }
-    }
-
-#print "msgs waiting: ".join(" ", keys %{$msgsout})."\n";
-#print "tmpfd defined? ".(defined $tmpfd ? "yes" : "no")."\n";
-
-    # drop the listener when ready
-    # we're not awaiting responses and we've exhausted the input file
-    $select->remove($serv_socket) if (!keys %{$msgsout} && !defined $tmpfd);
-  }
-
-  exit;
+  status("completed scan stage, $total_messages messages") if ($opt_progress);
 }
 
 if ($opt_client) {
-  $opt_cs_max ||= 1000;
-  $opt_cs_timeout ||= 60 * 2;
+  client_mode();
+}
+else {
+  status('starting run stage') if ($opt_progress);
 
-  $opt_client =~ /^http:\/\/([^\/]+)(\/.*)?/;
-  my($host, $uri) = ($1,$2);
-  my ($http_host) = split(/:/, $host);
-
-  die "No host found in opt_client" unless $host;
-  $uri ||= "/";
-
-  # figure out max messages
-  my $msgnum = 100;
-
-  my $tmpdir;
-
-  if (!$opt_cs_paths_only) {
-    $tmpdir = Mail::SpamAssassin::Util::secure_tmpdir();
-    die "Can't create tempdir" unless $tmpdir;
+  if ($opt_server) {
+    server_mode();
+  }
+  else {
+    run_through_messages();
   }
 
-  while (1) {
-    # if the number of messages to request is too much, bring it down
-    $msgnum = $opt_cs_max if ($msgnum > $opt_cs_max);
-
-    # prep the POST request
-    $postdata{'max_messages'} = $msgnum;
-    $postdata{'paths_only'} = 1 if ($opt_cs_paths_only);
-
-    my $POSTDATA = join('&', map { post_encode($_) . '=' . post_encode($postdata{$_}) } keys %postdata);
-
-    # connect to server
-    my $socket = IO::Socket::INET->new($host);
-
-    # last if connection fails
-    last unless ($socket);
-
-    # make request, include and drop results if there are any
-    my $result = http_make_request($socket, 'POST', $uri, {
-      'Host'		=> $http_host,
-      'Content-Type'	=> 'application/x-www-form-urlencoded',
-      'Content-Length'	=> length($POSTDATA),
-      },
-      $POSTDATA
-    );
-    %postdata = ();
-    undef $POSTDATA;
-
-    # If we got messages to run through, go ahead and do it.
-    # otherwise, just sleep for the timeout length and try again
-    if (!defined $result) {
-      # we got an error?!?  abort!
-      last;
-    }
-    elsif (!$result) {
-      # sleep for client_timeout seconds and try the request again
-print "Got no response, waiting $opt_cs_timeout seconds\n";
-      sleep $opt_cs_timeout;
-    }
-    else {
-      my $time_start = time;
-
-print "Got response: $result\n";
-
-      %postdata = ();
-      %real = ();
-      $spam_count = $ham_count = 0;
-
-      # we got a result, so do things with it!
-      my $gzfd = IO::Zlib->new($result, "rb");
-      die "Can't open temp result file: $!" unless $gzfd;
-
-      # used for the temp queue file
-      my $tmppath;
-      ($tmppath, $tmpfd) = Mail::SpamAssassin::Util::secure_tmpfile();
-print ">> $tmppath\n";
-      die "Can't make tempfile, exiting" unless $tmppath;
-
-print ">> cleandir\n";
-      clean_dir($tmpdir);
-
-      # Archive format, gzip compressed file w/ 3 parts per message:
-      # 1- server message number in text format
-      # 2- server index string, binary packed format
-      # 3- message content
-print ">> writing out files\n";
-
-      # number of messages
-      $msgnum = $total_messages = read_line($gzfd);
-
-print ">> total of $total_messages messages\n";
-
-      for(my $i = 0 ; $i < $total_messages; $i++ ) {
-        my $num = read_line($gzfd);
-	last unless defined $num;
-#print "read in message $num\n";
-        my $index = read_line($gzfd);
-#print "read in index $index\n";
-	last unless defined $index;
-#print "output message $num\n";
-	if (!$opt_cs_paths_only) {
-	  my $msg = read_line($gzfd);
-	  last unless defined $msg;
-
-	  if (open(OUT, ">$tmpdir/$num")) {
-	    print OUT $msg;
-	    close(OUT);
-
-	    my @d = Mail::SpamAssassin::ArchiveIterator::index_unpack($index);
-	    $real{"$tmpdir/$num"} = \@d;
-            send_line($tmpfd,
-	      Mail::SpamAssassin::ArchiveIterator::index_pack($d[0], $d[1], 'f', "$tmpdir/$num"));
-	  }
-	  else {
-	    warn "Can't create/write $tmpdir/$num: $!";
-	  }
-	}
-	else {
-	  # need to relate message number and path
-	  my @d = Mail::SpamAssassin::ArchiveIterator::index_unpack($index);
-	  $real{$d[3]} = $num;
-	  send_line($tmpfd, $index);
-	}
-#print "wrote mess $num\n";
-      }
-
-print "exited loop\n";
-
-      $gzfd->close;
-      unlink $result;
-
-print "beginning run\n";
-
-      # we're about to start running, so go back to the start of the file
-      seek $tmpfd, 0, 0;
-
-      run_through_messages();
-
-      unlink $tmppath;
-
-print "ended run\n";
-      # figure out new max messages, try keeping ~cs_timeout between runs
-      my $time_end = time;
-      if ($time_end == $time_start) {
-        $time_end++;
-      }
-print "ran $msgnum messages in ".($time_end-$time_start)." seconds\n";
-      $msgnum = int($msgnum * $opt_cs_timeout / ($time_end-$time_start)) || 1;
-print "now requesting $msgnum messages\n";
-    }
-  }
-
-  close $tmpfd;
-
-  if ($tmpdir) {
-    clean_dir($tmpdir);
-    rmdir $tmpdir;
-  }
-  exit;
+  status('completed run stage') if ($opt_progress);
 }
 
-## OK, at this point we're not in client/server mode, so just do a single run
-## and be done.
-
-if ($opt_progress) {
-  status('starting run stage');
-}
-
-run_through_messages();
-
-# close tempfile so it will be unlinked
+# Even though we're about to exit, let's clean up after ourselves
 close($tmpfd);
-
-if ($opt_progress) {
-  status('completed run stage');
-}
-
 showdots_finish();
 
 if (defined $opt_rewrite) {
@@ -764,14 +483,19 @@ sub wanted {
   my ($class, $id, $time, $dataref, $format) = @_;
   my $out = '';
 
+  # if origid is defined, it'll be the message number from server mode
   my $origid;
 
+  # client mode is a little crazy because we need to kluge around the fact
+  # that the information needed to do the run is different than the
+  # information that goes into the results.
   if ($opt_client) {
-#    warn ">>> $id\n";
     if ($opt_cs_paths_only) {
       $origid = $real{$id};
     }
     else {
+      # if we're a non-paths_only client, change the format and id to the real
+      # version, make sure to remember the server's message number
       $origid=$id;
       $origid =~ s/^.+?(\d+)$/$1/;
       $format = $real{$id}->[2];
@@ -781,6 +505,7 @@ sub wanted {
 
   memory_track_start() if ($opt_logmem);
 
+  # parse the message, and force it to complete
   my $ma = $spamtest->parse($dataref, 1);
 
   # remove SpamAssassin markup, if present and the mail was spam
@@ -1630,5 +1355,288 @@ sub send_line {
   foreach ( @_ ) {
     my $length = pack("V", length $_);
       $fd->print($length.$_);
+  }
+}
+
+
+sub server_mode {
+  $opt_cs_max ||= 1000;
+  $opt_cs_timeout ||= 60 * 5;
+
+  my $serv_socket = IO::Socket::INET->new(LocalPort => 8080,
+    Proto => 'tcp',
+    Listen => 5,
+    Reuse => 1);
+
+  die "Could not create socket: $!\n" unless $serv_socket;
+
+  if ($opt_progress) {
+    status('server ready for connections');
+  }
+
+  my $timestamps = {};
+  my $msgsout = { 'curnum' => 0 };
+
+  my $select = IO::Select->new( $serv_socket );
+
+  my $sent_messages = 1;
+  while ($select->count()) {
+    foreach my $socket ($select->can_read()) {
+      if ($socket == $serv_socket) {
+        $select->add($serv_socket->accept);
+      }
+      else {
+	my($type, $URI, $headers, $postdata) = handle_http_request($socket);
+
+	if ($type eq 'GET') {
+	  http_response($socket, "200 OK", {
+	      'Content-type' => 'text/plain',
+	    },
+	    "Your GET request came from IP Address: ".$socket->peerhost."\n");
+	}
+        elsif ($type eq 'POST') {
+	  handle_post_results($postdata, $timestamps, $msgsout);
+
+	  my $messages = '';
+	  if ($postdata->{'max_messages'}) {
+	    my $msgnum = $postdata->{'max_messages'};
+	    $msgnum = $opt_cs_max if ($msgnum > $opt_cs_max);
+	    $messages = generate_messages($msgnum, $timestamps, $msgsout, $postdata->{'paths_only'});
+	  }
+
+#print ">> sending messages\n";
+
+          if ($messages && open(MSG, $messages)) {
+	    binmode(MSG);
+	    local $/ = undef;
+
+	    #  Content-Encoding: gzip
+	    http_response($socket, "200 OK", {
+              "Content-type" => "application/octet-stream",
+	      "Content-Length" => (-s $messages),
+	      },
+	      scalar <MSG>);
+
+	    close(MSG);
+	    unlink $messages;
+          }
+	  elsif (!keys %{$msgsout} && !defined $tmpfd) {
+	    http_response($socket, "200 OK", {
+              "Content-type" => "text/plain",
+	      "Finished" => 1,
+	      },
+	      'We are all done');
+	  }
+	  else {
+	    http_response($socket, "200 OK", {
+              "Content-type" => "text/plain",
+	      },
+              "Your POST request (sans max_messages) came from IP Address: ".$socket->peerhost."\n");
+	  }
+	}
+	else {
+          # for error, "501 Not Implemented"
+	  http_response($socket, '501 Not Implemented', {}, '');
+	}
+      
+        $select->remove($socket);
+	$socket->close;
+      }
+    }
+
+#print "msgs waiting: ".join(" ", keys %{$msgsout})."\n";
+#print "tmpfd defined? ".(defined $tmpfd ? "yes" : "no")."\n";
+
+    # drop the listener when ready
+    # we're not awaiting responses and we've exhausted the input file
+    $select->remove($serv_socket) if (!keys %{$msgsout} && !defined $tmpfd);
+  }
+}
+
+sub client_mode {
+  $opt_cs_max ||= 1000;
+  $opt_cs_timeout ||= 60 * 2;
+
+  $opt_client =~ /^http:\/\/([^\/]+)(\/.*)?/;
+  my($host, $uri) = ($1,$2);
+  my ($http_host) = split(/:/, $host);
+
+  die "No host found in opt_client" unless $host;
+  $uri ||= "/";
+
+  # figure out max messages
+  my $msgnum = 100;
+
+  my $tmpdir;
+
+  if (!$opt_cs_paths_only) {
+    $tmpdir = Mail::SpamAssassin::Util::secure_tmpdir();
+    die "Can't create tempdir" unless $tmpdir;
+  }
+
+  while (1) {
+    # if the number of messages to request is too much, bring it down
+    $msgnum = $opt_cs_max if ($msgnum > $opt_cs_max);
+
+    # prep the POST request
+    $postdata{'max_messages'} = $msgnum;
+    $postdata{'paths_only'} = 1 if ($opt_cs_paths_only);
+
+    my $POSTDATA = join('&', map { post_encode($_) . '=' . post_encode($postdata{$_}) } keys %postdata);
+
+    # connect to server
+    my $socket = IO::Socket::INET->new($host);
+
+    # last if connection fails
+    last unless ($socket);
+
+    # make request, include and drop results if there are any
+    my $result = http_make_request($socket, 'POST', $uri, {
+      'Host'		=> $http_host,
+      'Content-Type'	=> 'application/x-www-form-urlencoded',
+      'Content-Length'	=> length($POSTDATA),
+      },
+      $POSTDATA
+    );
+    %postdata = ();
+    undef $POSTDATA;
+
+    # If we got messages to run through, go ahead and do it.
+    # otherwise, just sleep for the timeout length and try again
+    if (!defined $result) {
+      # we got an error?!?  abort!
+      last;
+    }
+    elsif (!$result) {
+      # sleep for client_timeout seconds and try the request again
+print "Got no response, waiting $opt_cs_timeout seconds\n";
+      sleep $opt_cs_timeout;
+    }
+    else {
+      my $time_start = time;
+
+print "Got response: $result\n";
+
+      %postdata = ();
+      %real = ();
+      $total_count = $spam_count = $ham_count = 0;
+
+      # we got a result, so do things with it!
+      my $gzfd = IO::Zlib->new($result, "rb");
+      die "Can't open temp result file: $!" unless $gzfd;
+
+      # used for the temp queue file
+      my $tmppath;
+      ($tmppath, $tmpfd) = Mail::SpamAssassin::Util::secure_tmpfile();
+print ">> $tmppath\n";
+      die "Can't make tempfile, exiting" unless $tmppath;
+
+      clean_dir($tmpdir) if ($tmpdir);
+
+      # Archive format, gzip compressed file w/ 3 parts per message:
+      # 1- server message number in text format
+      # 2- server index string, binary packed format
+      # 3- message content
+print ">> writing out files\n";
+
+      # number of messages
+      $msgnum = $total_messages = read_line($gzfd);
+
+print ">> total of $total_messages messages\n";
+
+      for(my $i = 0 ; $i < $total_messages; $i++ ) {
+        my $num = read_line($gzfd);
+	last unless defined $num;
+#print "read in message $num\n";
+        my $index = read_line($gzfd);
+#print "read in index $index\n";
+	last unless defined $index;
+#print "output message $num\n";
+	if (!$opt_cs_paths_only) {
+	  my $msg = read_line($gzfd);
+	  last unless defined $msg;
+
+	  if (open(OUT, ">$tmpdir/$num")) {
+	    print OUT $msg;
+	    close(OUT);
+
+	    my @d = Mail::SpamAssassin::ArchiveIterator::index_unpack($index);
+	    $real{"$tmpdir/$num"} = \@d;
+            send_line($tmpfd,
+	      Mail::SpamAssassin::ArchiveIterator::index_pack($d[0], $d[1], 'f', "$tmpdir/$num"));
+	  }
+	  else {
+	    warn "Can't create/write $tmpdir/$num: $!";
+	  }
+	}
+	else {
+	  # need to relate message number and path
+	  my @d = Mail::SpamAssassin::ArchiveIterator::index_unpack($index);
+	  $real{$d[3]} = $num;
+	  send_line($tmpfd, $index);
+	}
+#print "wrote mess $num\n";
+      }
+
+print "exited loop\n";
+
+      $gzfd->close;
+      unlink $result;
+
+print "beginning run\n";
+
+      # we're about to start running, so go back to the start of the file
+      seek $tmpfd, 0, 0;
+
+      run_through_messages();
+
+      unlink $tmppath;
+
+print "ended run\n";
+      # figure out new max messages, try keeping ~cs_timeout between runs
+      my $time_end = time;
+      if ($time_end == $time_start) {
+        $time_end++;
+      }
+print "ran $msgnum messages in ".($time_end-$time_start)." seconds\n";
+      $msgnum = int($msgnum * $opt_cs_timeout / ($time_end-$time_start)) || 1;
+print "now requesting $msgnum messages\n";
+    }
+  }
+
+  close $tmpfd;
+
+  if ($tmpdir) {
+    clean_dir($tmpdir);
+    rmdir $tmpdir;
+  }
+}
+
+sub wanted_server {
+  my ($class, $id, $time, $dataref, $format) = @_;
+  return $dataref;
+}
+
+sub result_client {
+  my ($class, $result, $time) = @_;
+
+  if ($class eq "s") {
+    $spam_count++;
+  }
+  elsif ($class eq "h") {
+    $ham_count++;
+  }
+
+  $total_count++;
+
+  if ($opt_progress) {
+    progress($time);
+  }
+
+  if ($result =~ s/^(\d+)\s+//m) {
+    $postdata{$1} = $result;
+  }
+  else {
+    warn ">> result is not in the correct format: $result\n";
   }
 }
