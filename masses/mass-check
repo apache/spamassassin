@@ -400,7 +400,7 @@ else {
 }
 
 # Even though we're about to exit, let's clean up after ourselves
-close($tmpfd);
+close($tmpfd) if ($tmpfd);
 showdots_finish();
 
 if (defined $opt_rewrite) {
