@@ -83,7 +83,7 @@ sub new {
     'subtest_names_hit' => [ ],
     'spamd_result_log_items' => [ ],
     'tests_already_hit' => { },
-    'hdr_cache'         => { },
+    'c'                 => { },
     'rule_errors'       => 0,
     'disable_auto_learning' => 0,
     'auto_learn_status' => undef,
@@ -247,7 +247,7 @@ sub check {
 
   # now that we've finished checking the mail, clear out this cache
   # to avoid unforeseen side-effects.
-  $self->{hdr_cache} = { };
+  $self->{c} = { };
 
   # Round the score to 3 decimal places to avoid rounding issues
   # We assume required_score to be properly rounded already.
