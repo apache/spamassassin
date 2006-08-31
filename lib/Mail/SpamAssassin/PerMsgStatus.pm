@@ -1955,26 +1955,49 @@ sub do_body_tests {
 
   while (my($rulename, $pat) = each %{$self->{conf}{body_tests}->{$priority}})
   {
+    my $sub;
+    if ($self->{conf}->{tflags}->{$rulename} =~ /\bmultiple\b/)
+    {
+      # support multiple matches
+      $loopid++;
+      $sub = '
+      body_'.$loopid.': foreach my $l (@_) {
+	pos $l = 0;
+	'.$self->hash_line_for_rule($rulename).'
+	while ($l =~ '.$pat.'g) { 
+	  $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body"); 
+	  '. $self->hit_rule_plugin_code($rulename, "body",
+				    "last body_".$loopid) . '
+	}
+      }
+      ';
+    }
+    else {
+      # omitting the "pos" call, "body_loopid" label, use of while()
+      # instead of if() etc., shaves off 8 perl OPs.
+      $sub = '
+      foreach my $l (@_) {
+	'.$self->hash_line_for_rule($rulename).'
+	if ($l =~ '.$pat.') { 
+	  $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body"); 
+	  '. $self->hit_rule_plugin_code($rulename, "body", "last") .'
+	}
+      }
+      ';
+    }
+
     if ($use_rule_subs) {
       $evalstr .= '
 	if ($scoresptr->{q{'.$rulename.'}}) {
 	  '.$rulename.'_body_test($self,@_); 
+	  '.$self->ran_rule_plugin_code($rulename, "body").'
 	}
       ';
     }
     else {
-      $loopid++;
       $evalstr .= '
 	if ($scoresptr->{q{'.$rulename.'}}) {
-	  body_'.$loopid.': foreach my $l (@_) {
-	    pos $l = 0;
-	    '.$self->hash_line_for_rule($rulename).'
-	    while ($l =~ '.$pat.'g) { 
-	      $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body"); 
-	      '. $self->hit_rule_plugin_code($rulename, "body",
-					"last body_".$loopid) . '
-	    }
-	  }
+	  '.$sub.'
 	  '.$self->ran_rule_plugin_code($rulename, "body").'
 	}
       ';
@@ -1986,17 +2009,7 @@ sub do_body_tests {
 
     if ($use_rule_subs) {
       $evalstr2 .= '
-      sub '.$rulename.'_body_test {
-           my $self = shift;
-           foreach (@_) {
-             pos = 0;
-             '.$self->hash_line_for_rule($rulename).'
-             while ('.$pat.'g) { 
-                $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body"); 
-                '. $self->hit_rule_plugin_code($rulename, "body", "return") . '
-             }
-           }
-      }
+	sub '.$rulename.'_body_test { my $self = shift; '.$sub.' }
       ';
     }
   }
@@ -2391,6 +2404,33 @@ sub do_body_uri_tests {
   my $loopid = 0;
 
   while (my($rulename, $pat) = each %{$self->{conf}{uri_tests}->{$priority}}) {
+    my $sub;
+    if ($self->{conf}->{tflags}->{$rulename} =~ /\bmultiple\b/)
+    {
+      $loopid++;
+      $sub = '
+      uri_'.$loopid.': foreach my $l (@_) {
+	pos $l = 0;
+	'.$self->hash_line_for_rule($rulename).'
+	while ($l =~ '.$pat.'g) { 
+	   $self->got_hit(q{'.$rulename.'}, "URI: ", ruletype => "uri");
+	   '. $self->hit_rule_plugin_code($rulename, "uri",
+				    "last uri_".$loopid) . '
+	}
+      }
+      ';
+    } else {
+      $sub = '
+      foreach my $l (@_) {
+	'.$self->hash_line_for_rule($rulename).'
+	if ($l =~ '.$pat.') { 
+	   $self->got_hit(q{'.$rulename.'}, "URI: ", ruletype => "uri");
+	   '. $self->hit_rule_plugin_code($rulename, "uri", "last") .'
+	}
+      }
+      ';
+    }
+
     if ($use_rule_subs) {
       $evalstr .= '
 	if ($scoresptr->{q{'.$rulename.'}}) {
@@ -2400,18 +2440,9 @@ sub do_body_uri_tests {
       ';
     }
     else {
-      $loopid++;
       $evalstr .= '
 	if ($scoresptr->{q{'.$rulename.'}}) {
-	  uri_'.$loopid.': foreach my $l (@_) {
-	    pos $l = 0;
-	    '.$self->hash_line_for_rule($rulename).'
-	    while ($l =~ '.$pat.'g) { 
-	       $self->got_hit(q{'.$rulename.'}, "URI: ", ruletype => "uri");
-	       '. $self->hit_rule_plugin_code($rulename, "uri",
-					"last uri_".$loopid) . '
-	    }
-	  }
+	  '.$sub.'
 	  '.$self->ran_rule_plugin_code($rulename, "uri").'
 	}
       ';
@@ -2423,17 +2454,7 @@ sub do_body_uri_tests {
 
     if ($use_rule_subs) {
       $evalstr2 .= '
-      sub '.$rulename.'_uri_test {
-        my $self = shift;
-        foreach (@_) {
-          pos = 0;
-          '.$self->hash_line_for_rule($rulename).'
-          while ('.$pat.'g) { 
-             $self->got_hit(q{'.$rulename.'}, "URI: ", ruletype => "uri");
-             '. $self->hit_rule_plugin_code($rulename, "uri", "return") .'
-          }
-        }
-      }
+        sub '.$rulename.'_uri_test { my $self = shift; '.$sub.' }
       ';
     }
   }
@@ -2506,6 +2527,35 @@ sub do_rawbody_tests {
   my $loopid = 0;
 
   while (my($rulename, $pat) = each %{$self->{conf}{rawbody_tests}->{$priority}}) {
+    my $sub;
+    if ($self->{conf}->{tflags}->{$rulename} =~ /\bmultiple\b/)
+    {
+      # support multiple matches
+      $loopid++;
+      $sub = '
+      rawbody_'.$loopid.': foreach my $l (@_) {
+	pos $l = 0;
+	'.$self->hash_line_for_rule($rulename).'
+	while ($l =~ '.$pat.'g) { 
+	   $self->got_hit(q{'.$rulename.'}, "RAW: ", ruletype => "rawbody");
+	   '. $self->hit_rule_plugin_code($rulename, "rawbody",
+				    "last rawbody_".$loopid) . '
+	}
+      }
+      ';
+    }
+    else {
+      $sub = '
+      foreach my $l (@_) {
+	'.$self->hash_line_for_rule($rulename).'
+	if ($l =~ '.$pat.') { 
+	   $self->got_hit(q{'.$rulename.'}, "RAW: ", ruletype => "rawbody");
+	   '. $self->hit_rule_plugin_code($rulename, "rawbody", "last") . '
+	}
+      }
+      ';
+    }
+
     if ($use_rule_subs) {
       $evalstr .= '
 	if ($scoresptr->{q{'.$rulename.'}}) {
@@ -2515,18 +2565,9 @@ sub do_rawbody_tests {
       ';
     }
     else {
-      $loopid++;
       $evalstr .= '
 	if ($scoresptr->{q{'.$rulename.'}}) {
-	  rawbody_'.$loopid.': foreach my $l (@_) {
-	    pos $l = 0;
-	    '.$self->hash_line_for_rule($rulename).'
-	    while ($l =~ '.$pat.'g) { 
-	       $self->got_hit(q{'.$rulename.'}, "RAW: ", ruletype => "rawbody");
-	       '. $self->hit_rule_plugin_code($rulename, "rawbody",
-					"last rawbody_".$loopid) . '
-	    }
-	  }
+	  '.$sub.'
 	  '.$self->ran_rule_plugin_code($rulename, "rawbody").'
 	}
       ';
@@ -2538,17 +2579,7 @@ sub do_rawbody_tests {
 
     if ($use_rule_subs) {
       $evalstr2 .= '
-      sub '.$rulename.'_rawbody_test {
-        my $self = shift;
-        foreach (@_) {
-          pos = 0;
-          '.$self->hash_line_for_rule($rulename).'
-          while ('.$pat.'g) { 
-             $self->got_hit(q{'.$rulename.'}, "RAW: ", ruletype => "rawbody");
-             '. $self->hit_rule_plugin_code($rulename, "rawbody", "return") . '
-          }
-        }
-      }
+	sub '.$rulename.'_rawbody_test { my $self = shift; '.$sub.' }
       ';
     }
   }
