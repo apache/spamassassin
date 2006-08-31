@@ -351,6 +351,7 @@ if (defined $opt{'channelfile'}) {
 
 # untaint the channel listing
 for(my $ind = 0; $ind < @channels; $ind++) {
+  local ($1); # bug 5061: prevent random taint flagging of $1
   if ($channels[$ind] =~ /^([a-zA-Z0-9._-]+)$/) {
     $channels[$ind] = $1;
   }
@@ -1290,6 +1291,8 @@ Options:
   --gpg and --nogpg		Use (or do not use) GPG to verify updates
   				(--gpg is assumed by use of the above
 				--gpgkey and --gpgkeyfile options)
+  --import file			Import GPG key(s) from file into sa-update's
+				keyring. Use multiple times for multiple files
 
   -D, --debug [area=n,...]	Print debugging messages
   -V, --version			Print version
@@ -1356,7 +1359,9 @@ prevents third parties from manipulating the files on a mirror, for instance,
 and signing with their own key.
 
 By default, sa-update trusts key id C<265FA05B>, which is the standard
-SpamAssassin release key.  Use this option to add more trusted keys.
+SpamAssassin release key.  Use this option to trust additional keys.  See the
+B<--import> option for how to add keys to sa-update's keyring.  For sa-update
+to use a key it must be in sa-update's keyring and trusted.
 
 For multiple keys, use the option multiple times.  i.e.:
 
@@ -1376,6 +1381,20 @@ Specify a directory path to use as a storage area for the C<sa-update> GPG
 keyring.  By default, this is
 
         @@LOCAL_RULES_DIR@@/sa-update-keys
+
+=item B<--import>
+
+Use to import GPG key(s) from a file into the sa-update keyring which is
+located in the directory specified by B<--gpghomedir>.  Before using channels
+from third party sources, you should use this option to import the GPG key(s)
+used by those channels.  You must still use the B<--gpgkey> or B<--gpgkeyfile>
+options above to get sa-update to trust imported keys.
+
+To import multiple keys, use the option multiple times.  i.e.:
+
+	sa-update --import channel1-GPG.KEY --import channel2-GPG.KEY
+
+Note: use of this option automatically enables GPG verification.
 
 =item B<-D> [I<area,...>], B<--debug> [I<area,...>]
 

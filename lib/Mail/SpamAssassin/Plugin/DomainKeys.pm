@@ -61,6 +61,8 @@ sub new {
   $self->register_eval_rule ("check_domainkeys_signsome");
   $self->register_eval_rule ("check_domainkeys_testing");
   $self->register_eval_rule ("check_domainkeys_signall");
+  $self->register_eval_rule ("check_for_dk_whitelist_from");
+  $self->register_eval_rule ("check_for_def_dk_whitelist_from");
 
   $self->set_config($mailsaobject->{conf});
 
@@ -88,6 +90,86 @@ scanning continues without the DomainKeys result.
     setting => 'domainkeys_timeout',
     default => 5,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
+  });
+
+=item whitelist_from_dk add@ress.com [signing domain name]
+
+Use this to supplement the whitelist_from addresses with a check to make sure
+the message has been signed by a DomainKeys signature that can be verified
+against the From: domain's DomainKeys public key.
+
+In order to support signing domain names that differ from the address domain
+name, only one whitelist entry is allowed per line, exactly like
+C<whitelist_from_rcvd>.  Multiple C<whitelist_from_dk> lines are allowed.  
+File-glob style meta characters are allowed for the From: address, just like
+with C<whitelist_from_rcvd>.  The optional signing domain name parameter must
+match from the right-most side, also like in C<whitelist_from_rcvd>.
+
+If no signing domain name parameter is specified the domain of the address
+parameter specified will be used instead.
+
+The From: address is obtained from a signed part of the message (ie. the
+"From:" header), not from envelope data that is possible to forge.
+
+Since this whitelist requires a DomainKeys check to be made, network tests must
+be enabled.
+
+Examples:
+
+  whitelist_from_dk joe@example.com
+  whitelist_from_dk *@corp.example.com
+
+  whitelist_from_dk bob@it.example.net  example.net
+  whitelist_from_dk *@eng.example.net   example.net
+
+=item def_whitelist_from_dk add@ress.com [signing domain name]
+
+Same as C<whitelist_from_dk>, but used for the default whitelist entries
+in the SpamAssassin distribution.  The whitelist score is lower, because
+these are often targets for spammer spoofing.
+
+=cut
+
+  push (@cmds, {
+    setting => 'whitelist_from_dk',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      unless (defined $value && $value !~ /^$/) {
+	return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
+      unless ($value =~ /^(\S+)(?:\s+(\S+))?$/) {
+	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+      my $address = $1;
+      my $signer = (defined $2 ? $2 : $1);
+
+      unless (defined $2) {
+	$signer =~ s/^.*@(.*)$/$1/;
+      }
+      $self->{parser}->add_to_addrlist_rcvd ('whitelist_from_dk',
+						$address, $signer);
+    }
+  });
+
+  push (@cmds, {
+    setting => 'def_whitelist_from_dk',,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      unless (defined $value && $value !~ /^$/) {
+	return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
+      unless ($value =~ /^(\S+)(?:\s+(\S+))?$/) {
+	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+      my $address = $1;
+      my $signer = (defined $2 ? $2 : $1);
+
+      unless (defined $2) {
+	$signer =~ s/^.*@(.*)$/$1/;
+      }
+      $self->{parser}->add_to_addrlist_rcvd ('def_whitelist_from_dk',
+						$address, $signer);
+    }
   });
 
   $conf->{parser}->register_commands(\@cmds);
@@ -133,7 +215,19 @@ sub check_domainkeys_signall {
   return $scan->{domainkeys_signall};
 }
 
+sub check_for_dk_whitelist_from {
+  my ($self, $scan) = @_;
+  $self->_check_dk_whitelist($scan, 0) unless $scan->{dk_whitelist_from_checked};
+  $scan->{dk_whitelist_from};
+}
 
+sub check_for_def_dk_whitelist_from {
+  my ($self, $scan) = @_;
+  $self->_check_dk_whitelist($scan, 1) unless $scan->{def_dk_whitelist_from_checked};
+  $scan->{def_dk_whitelist_from};
+}
+
+# ---------------------------------------------------------------------------
 
 sub _check_domainkeys {
   my ($self, $scan) = @_;
@@ -166,6 +260,22 @@ sub _check_domainkeys {
     dbg("dk: no sender domain");
     return;
   }
+
+  # get the sender address for whitelist checks
+  if (defined $message->sender()) {
+    $scan->{dk_address} = @{$message->sender()}[1];
+    dbg("dk: sender: $scan->{dk_address}");
+  } elsif (defined $message->from()) {
+    $scan->{dk_address} ||= @{$message->from()}[1];
+    dbg("dk: from: $scan->{dk_address}");
+  } else {
+    dbg("dk: could not determine sender: or from: identity");
+  }
+
+  # get the signing domain name for whitelist checks
+  $scan->{dk_signing_domain} = $self->_dkmsg_signing_domain($scan, $message);
+  dbg("dk: signing domain name: ".
+    ($scan->{dk_signing_domain} ? $scan->{dk_signing_domain} : "not found"));
 
   my $timeout = $scan->{conf}->{domainkeys_timeout};
 
@@ -245,6 +355,24 @@ sub _dkmsg_hdr {
   }
 }
 
+# get the DK signing domain name from the Mail::DomainKeys::Message object
+sub _dkmsg_signing_domain {
+  my ($self, $scan, $message) = @_;
+  # try to use the signature() API if it exists (post-0.80)
+  if ($message->can("signature")) {
+    if (!$message->signed) {
+      return undef;
+    }
+    return $message->signature->domain;
+  } else {
+    # otherwise parse it ourself
+    if ($scan->{msg}->get_header("DomainKey-Signature") =~ /d=(\S+);/) {
+      return $1;
+    }
+    return undef;
+  }
+}
+
 sub sanitize_header_for_dk {
   my ($self, $ref) = @_;
 
@@ -310,6 +438,102 @@ sub sanitize_header_for_dk {
   # $$ref =~ s/^\n//gs; $$ref =~ s/\n$//gs;
   $$ref =~ s/!nl;/\n/gs;
   $$ref =~ s/!ex;/!/gs;
+}
+
+sub _check_dk_whitelist {
+  my ($self, $scan, $default) = @_;
+
+  return unless $scan->is_dns_available();
+
+  # trigger a DK check so we can get address/signer info
+  # if verification failed only continue if we want the debug info
+  unless ($self->check_domainkeys_verified($scan)) {
+    unless (would_log("dbg", "dk")) {
+      return;
+    }
+  }
+
+  unless ($scan->{dk_address}) {
+    dbg("dk: ". ($default ? "def_" : "") ."whitelist_from_dk: could not find sender or from address");
+    return;
+  }
+  unless ($scan->{dk_signing_domain}) {
+    dbg("dk: ". ($default ? "def_" : "") ."whitelist_from_dk: could not find signing domain name");
+    return;
+  }
+
+  if ($default) {
+    $scan->{def_dk_whitelist_from_checked} = 1;
+    $scan->{def_dk_whitelist_from} = 0;
+
+    # copied and butchered from the code for whitelist_from_rcvd in Evaltests.pm
+    ONE: foreach my $white_addr (keys %{$scan->{conf}->{def_whitelist_from_dk}}) {
+      my $regexp = qr/$scan->{conf}->{def_whitelist_from_dk}->{$white_addr}{re}/i;
+      foreach my $domain (@{$scan->{conf}->{def_whitelist_from_dk}->{$white_addr}{domain}}) {
+        if ($scan->{dk_address} =~ $regexp) {
+	  if ($scan->{dk_signing_domain} =~ /(?:^|\.)\Q${domain}\E$/i) {
+	    dbg("dk: address: $scan->{dk_address} matches def_whitelist_from_dk ".
+		"$scan->{conf}->{def_whitelist_from_dk}->{$white_addr}{re} ${domain}");
+	    $scan->{def_dk_whitelist_from} = 1;
+	    last ONE;
+	  }
+	}
+      }
+    }
+  } else {
+    $scan->{dk_whitelist_from_checked} = 1;
+    $scan->{dk_whitelist_from} = 0;
+
+    # copied and butchered from the code for whitelist_from_rcvd in Evaltests.pm
+    ONE: foreach my $white_addr (keys %{$scan->{conf}->{whitelist_from_dk}}) {
+      my $regexp = qr/$scan->{conf}->{whitelist_from_dk}->{$white_addr}{re}/i;
+      foreach my $domain (@{$scan->{conf}->{whitelist_from_dk}->{$white_addr}{domain}}) {
+        if ($scan->{dk_address} =~ $regexp) {
+	  if ($scan->{dk_signing_domain} =~ /(?:^|\.)\Q${domain}\E$/i) {
+	    dbg("dk: address: $scan->{dk_address} matches whitelist_from_dk ".
+		"$scan->{conf}->{whitelist_from_dk}->{$white_addr}{re} ${domain}");
+	    $scan->{dk_whitelist_from} = 1;
+	    last ONE;
+	  }
+	}
+      }
+    }
+  }
+
+  # if the message doesn't pass DK validation, it can't pass a DK whitelist
+  if ($default) {
+    if ($scan->{def_dk_whitelist_from}) {
+      if ($self->check_domainkeys_verified($scan)) {
+	dbg("dk: address: $scan->{dk_address} signing domain name: ".
+	  "$scan->{dk_signing_domain} is in user's DEF_WHITELIST_FROM_DK and ".
+	  "passed DK verification");
+      } else {
+	dbg("dk: address: $scan->{dk_address} signing domain name: ".
+	  "$scan->{dk_signing_domain} is in user's DEF_WHITELIST_FROM_DK but ".
+	  "failed DK verification");
+	$scan->{def_dk_whitelist_from} = 0;
+      }
+    } else {
+      dbg("dk: address: $scan->{dk_address} signing domain name: ".
+	  "$scan->{dk_signing_domain} is not in user's DEF_WHITELIST_FROM_DK");
+    }
+  } else {
+    if ($scan->{dk_whitelist_from}) {
+      if ($self->check_domainkeys_verified($scan)) {
+	dbg("dk: address: $scan->{dk_address} signing domain name: ".
+	  "$scan->{dk_signing_domain} is in user's WHITELIST_FROM_DK and ".
+	  "passed DK verification");
+      } else {
+	dbg("dk: address: $scan->{dk_address} signing domain name: ".
+	  "$scan->{dk_signing_domain} is in user's WHITELIST_FROM_DK but ".
+	  "failed DK verification");
+	$scan->{dk_whitelist_from} = 0;
+      }
+    } else {
+      dbg("dk: address: $scan->{dk_address} signing domain name: ".
+	  "$scan->{dk_signing_domain} is not in user's WHITELIST_FROM_DK");
+    }
+  }
 }
 
 1;

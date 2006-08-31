@@ -83,13 +83,14 @@ sub new {
     'subtest_names_hit' => [ ],
     'spamd_result_log_items' => [ ],
     'tests_already_hit' => { },
-    'hdr_cache'         => { },
+    'c'                 => { },
     'rule_errors'       => 0,
     'disable_auto_learning' => 0,
     'auto_learn_status' => undef,
     'conf'              => $main->{conf},
     'async'             => Mail::SpamAssassin::AsyncLoop->new($main)
   };
+  #$self->{main}->{use_rule_subs} = 1;
 
   if (defined $opts && $opts->{disable_auto_learning}) {
     $self->{disable_auto_learning} = 1;
@@ -246,7 +247,7 @@ sub check {
 
   # now that we've finished checking the mail, clear out this cache
   # to avoid unforeseen side-effects.
-  $self->{hdr_cache} = { };
+  $self->{c} = { };
 
   # Round the score to 3 decimal places to avoid rounding issues
   # We assume required_score to be properly rounded already.
@@ -1801,11 +1802,14 @@ sub do_head_tests {
     return;
   }
 
+  my $use_rule_subs = $self->{main}->{use_rule_subs};
+
   my $evalstr = $self->start_rules_plugin_code("header");
   my $evalstr2 = '';
 
   # hash to hold the rules, "header\tdefault value" => rulename
   my %ordered = ();
+  my %testcode = ();
 
   while (my($rulename, $rule) = each %{$self->{conf}{head_tests}->{$priority}}) {
     my $def = '';
@@ -1829,16 +1833,22 @@ sub do_head_tests {
       next if (!$self->is_user_rule_sub ($rulename.'_head_test'));
     }
 
-    $evalstr2 .= '
-      sub '.$rulename.'_head_test {
-        my($self,$text) = @_;
-        '.$self->hash_line_for_rule($rulename).'
-        while ($text '.$testtype.'~ '.$pat.'g) {
-          $self->got_hit(q#'.$rulename.'#, "", ruletype => "header");
-          '. $self->hit_rule_plugin_code($rulename, "header", "last") . '
-        }
-      }';
-
+    if ($use_rule_subs) {
+      $evalstr2 .= '
+	sub '.$rulename.'_head_test {
+	  my($self,$text) = @_;
+	  '.$self->hash_line_for_rule($rulename).'
+	  while ($text '.$testtype.'~ '.$pat.'g) {
+	    $self->got_hit(q#'.$rulename.'#, "", ruletype => "header");
+	    '. $self->hit_rule_plugin_code($rulename, "header", "last") . '
+	  }
+	}
+      ';
+    }
+    else {
+      # store for use below
+      $testcode{$rulename} = $testtype.'~ '.$pat.'g';
+    }
   }
 
   # setup the function to run the rules
@@ -1846,12 +1856,29 @@ sub do_head_tests {
     my($hdrname, $def) = split(/\t/, $k, 2);
     $evalstr .= ' $hval = $self->get(q#'.$hdrname.'#, q#'.$def.'#);';
     foreach my $rulename (@{$v}) {
-      $evalstr .= '
-      if ($scoresptr->{q#'.$rulename.'#}) {
-         '.$rulename.'_head_test($self, $hval); # no need for OO calling here (its faster this way)
-         '.$self->ran_rule_plugin_code($rulename, "header").'
+      if ($use_rule_subs) {
+	$evalstr .= '
+	  if ($scoresptr->{q#'.$rulename.'#}) {
+	     '.$rulename.'_head_test($self, $hval);
+	     '.$self->ran_rule_plugin_code($rulename, "header").'
+	  }
+	';
       }
-      ';
+      else {
+        my $testcode = $testcode{$rulename};
+
+	$evalstr .= '
+	  if ($scoresptr->{q#'.$rulename.'#}) {
+	    pos $hval = 0;
+	    '.$self->hash_line_for_rule($rulename).'
+	    while ($hval '.$testcode.') {
+	      $self->got_hit(q#'.$rulename.'#, "", ruletype => "header");
+	      '.$self->hit_rule_plugin_code($rulename, "header", "last").'
+	    }
+	    '.$self->ran_rule_plugin_code($rulename, "header").'
+	  }
+	';
+      }
     }
   }
 
@@ -1916,35 +1943,75 @@ sub do_body_tests {
     return;
   }
 
+  # caller can set this member of the Mail::SpamAssassin object to
+  # override this; useful for profiling rule runtimes, although I think
+  # the HitFreqsRuleTiming.pm plugin is probably better nowadays anyway
+  my $use_rule_subs = $self->{main}->{use_rule_subs};
+
   # build up the eval string...
   my $evalstr = $self->start_rules_plugin_code("body");
   my $evalstr2 = '';
+  my $loopid = 0;
 
-  while (my($rulename, $pat) = each %{$self->{conf}{body_tests}->{$priority}}) {
-    $evalstr .= '
-      if ($scoresptr->{q{'.$rulename.'}}) {
-        '.$rulename.'_body_test($self,@_);
-        '.$self->ran_rule_plugin_code($rulename, "body").'
+  while (my($rulename, $pat) = each %{$self->{conf}{body_tests}->{$priority}})
+  {
+    my $sub;
+    if ($self->{conf}->{tflags}->{$rulename} =~ /\bmultiple\b/)
+    {
+      # support multiple matches
+      $loopid++;
+      $sub = '
+      body_'.$loopid.': foreach my $l (@_) {
+	pos $l = 0;
+	'.$self->hash_line_for_rule($rulename).'
+	while ($l =~ '.$pat.'g) { 
+	  $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body"); 
+	  '. $self->hit_rule_plugin_code($rulename, "body",
+				    "last body_".$loopid) . '
+	}
       }
-    ';
+      ';
+    }
+    else {
+      # omitting the "pos" call, "body_loopid" label, use of while()
+      # instead of if() etc., shaves off 8 perl OPs.
+      $sub = '
+      foreach my $l (@_) {
+	'.$self->hash_line_for_rule($rulename).'
+	if ($l =~ '.$pat.') { 
+	  $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body"); 
+	  '. $self->hit_rule_plugin_code($rulename, "body", "last") .'
+	}
+      }
+      ';
+    }
+
+    if ($use_rule_subs) {
+      $evalstr .= '
+	if ($scoresptr->{q{'.$rulename.'}}) {
+	  '.$rulename.'_body_test($self,@_); 
+	  '.$self->ran_rule_plugin_code($rulename, "body").'
+	}
+      ';
+    }
+    else {
+      $evalstr .= '
+	if ($scoresptr->{q{'.$rulename.'}}) {
+	  '.$sub.'
+	  '.$self->ran_rule_plugin_code($rulename, "body").'
+	}
+      ';
+    }
 
     if ($doing_user_rules) {
       next if (!$self->is_user_rule_sub ($rulename.'_body_test'));
     }
 
-    $evalstr2 .= '
-    sub '.$rulename.'_body_test {
-           my $self = shift;
-           foreach (@_) {
-             pos = 0;
-             '.$self->hash_line_for_rule($rulename).'
-             while ('.$pat.'g) { 
-                $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body"); 
-                '. $self->hit_rule_plugin_code($rulename, "body", "return") . '
-             }
-           }
+    if ($use_rule_subs) {
+      $evalstr2 .= '
+	sub '.$rulename.'_body_test { my $self = shift; '.$sub.' }
+      ';
     }
-    ';
   }
 
   # clear out a previous version of this fn, if already defined
@@ -2329,35 +2396,67 @@ sub do_body_uri_tests {
     return;
   }
 
+  my $use_rule_subs = $self->{main}->{use_rule_subs};
+
   # otherwise build up the eval string...
   my $evalstr = $self->start_rules_plugin_code("uri");
   my $evalstr2 = '';
+  my $loopid = 0;
 
   while (my($rulename, $pat) = each %{$self->{conf}{uri_tests}->{$priority}}) {
-    $evalstr .= '
-      if ($scoresptr->{q{'.$rulename.'}}) {
-        '.$rulename.'_uri_test($self, @_);
-        '.$self->ran_rule_plugin_code($rulename, "uri").'
+    my $sub;
+    if ($self->{conf}->{tflags}->{$rulename} =~ /\bmultiple\b/)
+    {
+      $loopid++;
+      $sub = '
+      uri_'.$loopid.': foreach my $l (@_) {
+	pos $l = 0;
+	'.$self->hash_line_for_rule($rulename).'
+	while ($l =~ '.$pat.'g) { 
+	   $self->got_hit(q{'.$rulename.'}, "URI: ", ruletype => "uri");
+	   '. $self->hit_rule_plugin_code($rulename, "uri",
+				    "last uri_".$loopid) . '
+	}
       }
-    ';
+      ';
+    } else {
+      $sub = '
+      foreach my $l (@_) {
+	'.$self->hash_line_for_rule($rulename).'
+	if ($l =~ '.$pat.') { 
+	   $self->got_hit(q{'.$rulename.'}, "URI: ", ruletype => "uri");
+	   '. $self->hit_rule_plugin_code($rulename, "uri", "last") .'
+	}
+      }
+      ';
+    }
+
+    if ($use_rule_subs) {
+      $evalstr .= '
+	if ($scoresptr->{q{'.$rulename.'}}) {
+	  '.$rulename.'_uri_test($self, @_);
+	  '.$self->ran_rule_plugin_code($rulename, "uri").'
+	}
+      ';
+    }
+    else {
+      $evalstr .= '
+	if ($scoresptr->{q{'.$rulename.'}}) {
+	  '.$sub.'
+	  '.$self->ran_rule_plugin_code($rulename, "uri").'
+	}
+      ';
+    }
 
     if ($doing_user_rules) {
       next if (!$self->is_user_rule_sub ($rulename.'_uri_test'));
     }
 
-    $evalstr2 .= '
-    sub '.$rulename.'_uri_test {
-       my $self = shift;
-       foreach (@_) {
-         pos = 0;
-         '.$self->hash_line_for_rule($rulename).'
-         while ('.$pat.'g) { 
-            $self->got_hit(q{'.$rulename.'}, "URI: ", ruletype => "uri");
-            '. $self->hit_rule_plugin_code($rulename, "uri", "return") .'
-         }
-       }
+    if ($use_rule_subs) {
+      $evalstr2 .= '
+        sub '.$rulename.'_uri_test { my $self = shift; '.$sub.' }
+      ';
     }
-    ';
   }
 
   # clear out a previous version of this fn, if already defined
@@ -2420,35 +2519,69 @@ sub do_rawbody_tests {
     return;
   }
 
+  my $use_rule_subs = $self->{main}->{use_rule_subs};
+
   # build up the eval string...
   my $evalstr = $self->start_rules_plugin_code("rawbody");
   my $evalstr2 = '';
+  my $loopid = 0;
 
   while (my($rulename, $pat) = each %{$self->{conf}{rawbody_tests}->{$priority}}) {
-    $evalstr .= '
-      if ($scoresptr->{q{'.$rulename.'}}) {
-         '.$rulename.'_rawbody_test($self, @_);
-         '.$self->ran_rule_plugin_code($rulename, "rawbody").'
+    my $sub;
+    if ($self->{conf}->{tflags}->{$rulename} =~ /\bmultiple\b/)
+    {
+      # support multiple matches
+      $loopid++;
+      $sub = '
+      rawbody_'.$loopid.': foreach my $l (@_) {
+	pos $l = 0;
+	'.$self->hash_line_for_rule($rulename).'
+	while ($l =~ '.$pat.'g) { 
+	   $self->got_hit(q{'.$rulename.'}, "RAW: ", ruletype => "rawbody");
+	   '. $self->hit_rule_plugin_code($rulename, "rawbody",
+				    "last rawbody_".$loopid) . '
+	}
       }
-    ';
+      ';
+    }
+    else {
+      $sub = '
+      foreach my $l (@_) {
+	'.$self->hash_line_for_rule($rulename).'
+	if ($l =~ '.$pat.') { 
+	   $self->got_hit(q{'.$rulename.'}, "RAW: ", ruletype => "rawbody");
+	   '. $self->hit_rule_plugin_code($rulename, "rawbody", "last") . '
+	}
+      }
+      ';
+    }
+
+    if ($use_rule_subs) {
+      $evalstr .= '
+	if ($scoresptr->{q{'.$rulename.'}}) {
+	   '.$rulename.'_rawbody_test($self, @_);
+	   '.$self->ran_rule_plugin_code($rulename, "rawbody").'
+	}
+      ';
+    }
+    else {
+      $evalstr .= '
+	if ($scoresptr->{q{'.$rulename.'}}) {
+	  '.$sub.'
+	  '.$self->ran_rule_plugin_code($rulename, "rawbody").'
+	}
+      ';
+    }
 
     if ($doing_user_rules) {
       next if (!$self->is_user_rule_sub ($rulename.'_rawbody_test'));
     }
 
-    $evalstr2 .= '
-    sub '.$rulename.'_rawbody_test {
-       my $self = shift;
-       foreach (@_) {
-         pos = 0;
-         '.$self->hash_line_for_rule($rulename).'
-         while ('.$pat.'g) { 
-            $self->got_hit(q{'.$rulename.'}, "RAW: ", ruletype => "rawbody");
-            '. $self->hit_rule_plugin_code($rulename, "rawbody", "return") . '
-         }
-       }
+    if ($use_rule_subs) {
+      $evalstr2 .= '
+	sub '.$rulename.'_rawbody_test { my $self = shift; '.$sub.' }
+      ';
     }
-    ';
   }
 
   # clear out a previous version of this fn, if already defined

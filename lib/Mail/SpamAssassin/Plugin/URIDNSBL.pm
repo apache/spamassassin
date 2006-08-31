@@ -76,10 +76,9 @@ name of the rule to be used, C<rhsbl_zone> is the zone to look up domain names
 in, and C<lookuptype> is the type of lookup (B<TXT> or B<A>).
 
 C<subtest> is the sub-test to run against the returned data.  The sub-test may
-either be an IPv4 dotted address for RHSBLs that return multiple A records, a
+either be an IPv4 dotted address for RHSBLs that return multiple A records or a
 non-negative decimal number to specify a bitmask for RHSBLs that return a
-single A record containing a bitmask of results, or (if none of the preceding
-options seem to fit) a regular expression.
+single A record containing a bitmask of results.
 
 Note that, as with C<urirhsbl>, you must also define a body-eval rule calling
 C<check_uridnsbl()> to use this.
@@ -345,7 +344,7 @@ sub set_config {
     setting => 'urirhssub',
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      if ($value =~ /^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)$/) {
+      if ($value =~ /^(\S+)\s+(\S+)\s+(\S+)\s+(\d{1,10}|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/) {
         my $rulename = $1;
         my $zone = $2;
         my $type = $3;
@@ -596,15 +595,9 @@ sub complete_dnsbl_lookup {
         }
         # bitmask
         elsif ($subtest =~ /^\d+$/) {
-          if ($rdatastr =~ m/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/ &&
-              Mail::SpamAssassin::Util::my_inet_aton($rdatastr) & $subtest)
+	  if ($rdatastr =~ m/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/ &&
+	      Mail::SpamAssassin::Util::my_inet_aton($rdatastr) & $subtest)
           {
-            $self->got_dnsbl_hit($scanstate, $ent, $rdatastr, $dom, $subrulename);
-          }
-        }
-        # regular expression
-        else {
-          if ($rdatastr =~ /${subtest}/) {
             $self->got_dnsbl_hit($scanstate, $ent, $rdatastr, $dom, $subrulename);
           }
         }

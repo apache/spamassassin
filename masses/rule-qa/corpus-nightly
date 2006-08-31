@@ -62,15 +62,24 @@ while true; do
         rm -rf rules    # causing trouble for some reason
         rm -rf rulesrc/sandbox
 
+        # argh svn, messiness
+        svn cleanup < /dev/null
+
 	if svn update -r $revision < /dev/null && \
             svn update -r $revision rulesrc < /dev/null
         then
 		break;
 	fi
 
-	pkill -TERM svn
-	sleep 10
-	pkill -KILL svn
+        # TODO: if that failed, we should be just using
+        # a brand new "svn checkout" and forget about the incremental
+        # update niceties
+
+        # OFF: this is extremely antisocial when multiple
+        # corpus-nightly scripts run simultaneously on one CPU!
+	# pkill -TERM svn
+	# sleep 10
+	# pkill -KILL svn
 
 	if svn update -r $revision < /dev/null && \
             svn update -r $revision rulesrc < /dev/null
