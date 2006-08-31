@@ -90,8 +90,7 @@ my $promolist;
   die "unreadable active" unless (-f $opt_active);
 
 $opt_sandboxout  ||= "70_sandbox.cf";
-$opt_activeout   ||= "72_active.cf";
-$opt_inactiveout ||= "70_inactive.cf";
+$opt_activeout   ||= "72_active.cf"; $opt_inactiveout ||= "70_inactive.cf";
 
 # source files that need compilation, and their targets
 my $needs_compile = { };
@@ -115,17 +114,17 @@ foreach my $src (@opt_srcs) {
 
 # get mtimes of output files; we can be sure that all
 # output is under the "opt_out" dir, so recurse there
-File::Find::find ({
-        wanted => \&out_wanted,
-        no_chdir => 1
-      }, $opt_out);
-
-if ($newest_src_mtime && $newest_out_mtime
-    && $newest_src_mtime < $newest_out_mtime)
-{
-  print "mkrules: no rules updated\n";
-  exit 0;
-}
+#File::Find::find ({
+#        wanted => \&out_wanted,
+#        no_chdir => 1
+#      }, $opt_out);
+#
+#if ($newest_src_mtime && $newest_out_mtime
+#    && $newest_src_mtime < $newest_out_mtime)
+#{
+#  print "mkrules: no rules updated\n";
+#  exit 0;
+#}
 
 my $rules = { };
 
