@@ -1,6 +1,5 @@
 #!/usr/bin/perl -w
 use strict;
-eval { use IO::Zlib 1.04; };
 
 #
 # <@LICENSE>
@@ -26,7 +25,7 @@ sub usage {
   my $out = $status ? \*STDERR : \*STDOUT;
   print $out <<EOF;
 usage: mass-check [options] target ...
- 
+
   -c=file       set configuration/rules directory
   -p=dir        set user-prefs directory
   -f=file       read list of targets from <file>
@@ -45,7 +44,26 @@ usage: mass-check [options] target ...
                 were encapsulated by servers matching the regexp RE
                 (default = extract all SpamAssassin-encapsulated mails)
   --lint        check rules for syntax before running
- 
+
+  client/server mode options
+  --server host:port
+                use server mode, running on the given hostname and port
+  --client http://host:port/
+  		use client mode, connecting to the given hostname and port
+  --cs_max N
+  		at most, only ever request (client)/give out (server) a
+		maximum of N messages (defaults to 1000)
+  --cs_timeout N
+  		in client mode, try to connect to the server every N seconds
+		defaults to 300
+		in server mode, timeout messages after N seconds
+		defaults to 60
+  --cs_paths_only
+		only used in client mode.  when making requests of the
+		server, only ask for paths to the messages and not the
+		messages themselves.  useful when the client and server
+		have the same paths to the corpus data.
+
   log options
   -o            write all logs to stdout
   --loghits     log the text hit for patterns (useful for debugging)
@@ -53,7 +71,7 @@ usage: mass-check [options] target ...
   --logmem	log the memory delta (only on Linux)
   --hamlog=log  use <log> as ham log ('ham.log' is default)
   --spamlog=log use <log> as spam log ('spam.log' is default)
- 
+
   message selection options
   -n            no date sorting or spam/ham interleaving
   --cache	use cache information when selecting messages
@@ -65,7 +83,7 @@ usage: mass-check [options] target ...
   --all         don't skip big messages
   --head=N      only check first N ham and N spam (N messages if -n used)
   --tail=N      only check last N ham and N spam (N messages if -n used)
- 
+
   simple target options (implies -o and no ham/spam classification)
   --dir         subsequent targets are directories
   --file        subsequent targets are files in RFC 822 format
@@ -100,12 +118,11 @@ use vars qw($opt_c $opt_p $opt_f $opt_j $opt_n $opt_o $opt_all $opt_bayes
 	    $opt_learn $opt_reuse $opt_lint $opt_cache $opt_noisy
 	    $total_messages $statusevery $opt_cachedir
 	    $opt_client $opt_cs_max $opt_cs_timeout $opt_cs_paths_only
-	    $opt_server %postdata %real
+	    $opt_server %postdata %real $svn_revision
 	    $tmpfd %reuse %orig_conf %reuse_conf $reuse_rules_loaded_p);
 
 use FindBin;
 use lib "$FindBin::Bin/../lib";
-use lib "$FindBin::Bin/tmp";
 eval "use bytes";
 use IO::Select;
 use IO::Socket;
@@ -117,6 +134,7 @@ use File::Spec;
 use Getopt::Long;
 use POSIX qw(strftime);
 use constant HAS_TIME_PARSEDATE => eval { require Time::ParseDate; };
+use constant HAS_IO_ZLIB => eval { require IO::Zlib; };
 use Config; 
 
 # default settings
@@ -136,7 +154,7 @@ GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug:s",
 	   "rules=s", "restart=i", "after=s", "before=s", "loguris",
 	   "deencap=s", "logmem", "learn=i", "reuse", "lint", "cache",
            "cachedir=s", "noisy",
-	   "server", "cs_max=i", "cs_timeout=i", "cs_paths_only",
+	   "server=s", "cs_max=i", "cs_timeout=i", "cs_paths_only",
 	   "client=s",
 	   "dir" => sub { $opt_format = "dir"; },
 	   "file" => sub { $opt_format = "file"; },
@@ -145,15 +163,23 @@ GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug:s",
 	   "help" => sub { usage(0); },
 	   '<>' => \&target) or usage(1);
 
-# rules.pl is for the --reuse option, score set doesn't matter
-if ($opt_reuse && ! -f "$FindBin::Bin/tmp/rules.pl") {
-  # some people specify paths relatively, whereas this needs an absolute path,
-  # so "do the right thing"(tm).
-  my $abs_opt_c = File::Spec->rel2abs($opt_c);
-  system("cd $FindBin::Bin; perl parse-rules-for-masses -d $abs_opt_c");
+# We need IO::Zlib for client-server mode!
+if ( ($opt_client || $opt_server) && ! HAS_IO_ZLIB ) {
+  die "IO::Zlib required for client/server mode!\n";
 }
 
-require "rules.pl" if $opt_reuse;
+# rules.pl is for the --reuse option, score set doesn't matter
+if ($opt_reuse) {
+  my $rules_path = "$FindBin::Bin/tmp/rules.pl";
+  if (! -f $rules_path) {
+    # some people specify paths relatively, whereas this needs an absolute path,
+    # so "do the right thing"(tm).
+    my $abs_opt_c = File::Spec->rel2abs($opt_c);
+    system("cd $FindBin::Bin; perl parse-rules-for-masses -d $abs_opt_c");
+  }
+
+  require $rules_path;
+}
 
 if ($opt_noisy) {
   $opt_progress = 1;        # implies --progress
@@ -178,8 +204,8 @@ if ($opt_lint) {
     'dont_copy_prefs'   			=> 1,
     'local_tests_only'   			=> $opt_net ? 0 : 1,
     'only_these_rules'   			=> $opt_rules,
-    'ignore_safety_expire_timeout'	=> 1,
-    PREFIX				=> '',
+    'ignore_safety_expire_timeout'		=> 1,
+    PREFIX					=> '',
     DEF_RULES_DIR        			=> $opt_c,
     LOCAL_RULES_DIR      			=> '',
   });
@@ -248,13 +274,13 @@ chomp $who;
 chomp $where;
 chomp $when;
 chomp $host;
-my $revision = get_current_svn_revision();
+$svn_revision = get_current_svn_revision();
 my $cmdline = join(' ',@ORIG_ARGV); $cmdline =~ s/\s+/ /gs;
 my $isowhen = strftime("%Y%m%dT%H%M%SZ", gmtime(time)); # better
 
 my $log_header = "# mass-check results from $who\@$where, on $when\n" .
 		 "# M:SA version ".$spamtest->Version()."\n" .
-		 "# SVN revision: $revision\n" .
+		 "# SVN revision: $svn_revision\n" .
                  "# Date: $isowhen\n" .
 		 "# Perl version: $] on $Config{archname}\n" .
                  "# Switches: '$cmdline'\n";
@@ -317,9 +343,10 @@ else {
   undef $opt_progress;
 }
 
-my $iter = new Mail::SpamAssassin::ArchiveIterator($AIopts);
+###########################################################################
+## SCAN MODE
 
-my $messages;
+my $iter = new Mail::SpamAssassin::ArchiveIterator($AIopts);
 
 # setup the AI functions
 if ($opt_client) {
@@ -332,6 +359,8 @@ else {
   $iter->set_functions(\&wanted, \&result);
 }
 
+my $messages;
+
 # normal mode as well as a server do scan mode and get a temp file
 if (!$opt_client) {
   status('starting scan stage') if ($opt_progress);
@@ -339,8 +368,8 @@ if (!$opt_client) {
   # Make a temp file and delete it
   my $tmpf;
   ($tmpf, $tmpfd) = Mail::SpamAssassin::Util::secure_tmpfile();
-  die 'archive-iterator: failed to create temp file' unless $tmpf;
-  unlink $tmpf or die "archive-iterator: unlink '$tmpf': $!";
+  die 'mass-check: failed to create temp file' unless $tmpf;
+  unlink $tmpf or die "mass-check: unlink '$tmpf': $!";
 
   # having opt_j or server mode means do scan in a separate process
   if ($opt_server || $opt_j) {
@@ -359,7 +388,7 @@ if (!$opt_client) {
       exit;
     }
     else {
-      die "archive-iterator: cannot fork: $!";
+      die "mass-check: cannot fork: $!";
     }
   }
   else {
@@ -377,11 +406,14 @@ if (!$opt_client) {
   $total_messages = read_line($tmpfd);
 
   if (!$total_messages) {
-    die "archive-iterator: no messages to process\n";
+    die "mass-check: no messages to process\n";
   }
 
   status("completed scan stage, $total_messages messages") if ($opt_progress);
 }
+
+###########################################################################
+## RUN MODE
 
 if ($opt_client) {
   client_mode();
@@ -460,7 +492,7 @@ sub result {
   my ($class, $result, $time) = @_;
 
   # don't open results files until we get here to avoid overwriting files
-  &init_results if !$init_results;
+  init_results() if !$init_results;
 
   if ($class eq "s") {
     if ($opt_o) { print STDOUT $result; } else { print SPAM $result; }
@@ -472,7 +504,6 @@ sub result {
   }
 
   $total_count++;
-#warn ">> result: $total_count $class $time\n";
 
   if ($opt_progress) {
     progress($time);
@@ -491,6 +522,7 @@ sub wanted {
   # information that goes into the results.
   if ($opt_client) {
     if ($opt_cs_paths_only) {
+      # the server message number
       $origid = $real{$id};
     }
     else {
@@ -671,6 +703,8 @@ sub wanted {
 
   $id =~ s/\s/_/g;
 
+  # if we have an origid set, it'll be the server mode's message number, so
+  # attach it to our result appropriately.
   if (defined $origid) {
     $out = "$origid ";
   }
@@ -824,7 +858,7 @@ sub memory_track_finish {
       }
     }
   }
-  $str;
+  return $str;
 }
 
 sub get_current_svn_revision {
@@ -878,7 +912,7 @@ sub start_children {
   # create children
   for (my $i = 0; $i < $count; $i++) {
     ($child->[$i],$parent) = $io->socketpair(AF_UNIX,SOCK_STREAM,PF_UNSPEC)
-	or die "archive-iterator: socketpair failed: $!";
+	or die "mass-check: socketpair failed: $!";
     if ($pid->[$i] = fork) {
       close $parent;
 
@@ -923,7 +957,7 @@ sub start_children {
       exit;
     }
     else {
-      die "archive-iterator: cannot fork: $!";
+      die "mass-check: cannot fork: $!";
     }
   }
 }
@@ -947,14 +981,15 @@ sub reap_children {
   }
 }
 
+# in server mode, this gets called to read in the HTTP request from a given
+# socket, then return the information the client sent to us.
 sub handle_http_request {
   my $socket = shift;
 
   my $headers = {};
   my $postdata = {};
 
-  # read in the request
-  # read in headers, "key: value"
+  # read in the request (POST / HTTP/1.0)
   my $line = $socket->getline();
   $line ||= '';
   $line =~ s/\r\n$//;
@@ -969,7 +1004,7 @@ sub handle_http_request {
 
   $type = uc $type;
 
-  # we don't really care about the request right now
+  # read in headers, "key: value" up to a blank line
   do {
     $line = $socket->getline();
     last unless defined $line;
@@ -981,15 +1016,21 @@ sub handle_http_request {
     }
   } while ($line !~ /^$/);
 
+  # if this is a POST request w/ content-length, there'll be a payload, deal
+  # with it.
   if ($type eq 'POST' && $headers->{'content-length'}) {
     my $pd;
     $socket->read($pd, $headers->{'content-length'});
-    $pd =~ s/[\r\n]+$//;
+    $pd =~ s/[\r\n]+$//; # a hack for manual requests/telnet/etc
 
+    # key1=value1&key2=value2...
     %{$postdata} = map {
       my($k,$v) = split(/=/, $_, 2);
+
+      # we need to decode the key and value
       $k =~ s/\%([0-9a-fA-F]{2})/sprintf "%c", hex($1)/eg;
       $v =~ s/\%([0-9a-fA-F]{2})/sprintf "%c", hex($1)/eg;
+
       $k => $v;
     } split(/\&/, $pd);
   }
@@ -997,31 +1038,59 @@ sub handle_http_request {
   return($type, $URI, $headers, $postdata);
 }
 
+# in server mode, generate a gzip compressed data stream with the messages and
+# return the path to the compressed file which the server will read and pass
+# to the client.
+#
+# Input:
+#  - Number of messages to generate (scalar)
+#  - Hash of Arrays of outstanding requests (reference to hash of array refs)
+#     timestamp# -> [ num1, num2, ... ]
+#     Used to quickly find outstanding/timed out messages to send to client.
+#  - Hash of outstanding messages and associated data (ref to hash of hash refs)
+#     num1 -> { data => 'binary data from scan mode', timestamp => timestamp# }
+#     Used later on to specify the timestamp entry to remove the entry from.
+#  - Paths only?  If true, just include the original message data in the gzip
+#    file.  Otherwise, include the message data.  Useful if the client has the
+#    corpus available via the same paths as originally specified.
+#
+# Returns: scalar path to gzip file
+#
 sub generate_messages {
   my($msgs, $timestamps, $msgsout, $paths_only) = @_;
 
+  # Hold the message numbers we'll be sending out
   my @tosend = ();
 
   # Find out if any of the messages we sent out before need to be sent out
-  # again because we haven't seen a response yet.
+  # again because we haven't seen a response within the timeout.
   my $tooold = time - $opt_cs_timeout;
-  foreach (keys %{$timestamps}) {
-    next if ($_ > $tooold);
+  foreach (sort { $a <=> $b } keys %{$timestamps}) {
+    # since we're going in numeric order, if the current entry is newer than
+    # the timeout value, the rest will be too, so stop looking.
+    last if ($_ > $tooold);
+
+    # how many messages do we still need to fulfill the request?
     my $wanted = $msgs - @tosend;
 
     if (@{$timestamps->{$_}} > $wanted) {
-      # there are more entries in the timestamp than we want
+      # there are more entries in the timestamp list than we want, so just
+      # grab that many off the list.
       push(@tosend, splice @{$timestamps->{$_}}, 0, $wanted);
     }
     else {
-      # we're going to take all of this timestamp's entries
+      # there are just enough, or not enough entries on the timestamp list to
+      # satisfy our request, so take them all and we'll loop around.
       push(@tosend, @{$timestamps->{$_}});
       delete $timestamps->{$_};
     }
 
+    # Ok, we have enough messages so we can stop now.
     last if (@tosend == $msgs);
   }
 
+  # if we still have the temp file with the input messages open, we'll fillup
+  # out message output queue with messages from there.
   if ($tmpfd) {
     while (@tosend < $msgs) {
       my $msg = read_line($tmpfd);
@@ -1034,6 +1103,8 @@ sub generate_messages {
 	last;
       }
 
+      # we got a result, so assign it a number (curnum) and store the data
+      # appropriately, then add the new number to the queue.
       my $num = $msgsout->{'curnum'}++;
       $msgsout->{$num}->{'data'} = $msg;
       push(@tosend, $num);
@@ -1050,23 +1121,24 @@ sub generate_messages {
 
   $gzfd = IO::Zlib->new($gzpath, 'wb') || die "Can't create temp gzip file: $!";
 
-  # first line is number of messages
-  send_line($gzfd, scalar @tosend);
+  # first line is the number of messages included in the file
+  send_line($gzfd, scalar @tosend) || die "mass-check: error when writing to gz temp file\n";
 
   # Generate an archive in the temp file
   foreach my $num (@tosend) {
     # Archive format, gzip compressed file w/ 3 parts per message:
     # 1- server message number in text format
     # 2- server index string, binary packed format
-    # 3- message content
-    send_line($gzfd, $num);
+    # 3- message content -- unless paths_only
+    send_line($gzfd, $num) || die "mass-check: error when writing to gz temp file\n";
 
     my $data = $msgsout->{$num}->{'data'};
-    send_line($gzfd, $data);
+    send_line($gzfd, $data) || die "mass-check: error when writing to gz temp file\n";
 
     if (!$paths_only) {
       my $msg = ($iter->run_message($data))[4];
-      send_line($gzfd, join('', @{$msg}));
+      send_line($gzfd, join('', @{$msg})) ||
+        die "mass-check: error when writing to gz temp file\n";
     }
   }
 
@@ -1077,6 +1149,9 @@ sub generate_messages {
   foreach (@tosend) {
     $msgsout->{$_}->{'timestamp'} = $ts;
   }
+
+  # conveniently, this list should be the only thing sent out w/ this
+  # timestamp, so just set the reference appropriately. :)
   $timestamps->{$ts} = \@tosend;
 
   return $gzpath;
@@ -1095,12 +1170,14 @@ sub handle_post_results {
   # $postdata{num} = result_string
 
   while( my($k,$v) = each %{$postdata} ) {
+    # message run results will be \d+ => log entry
     next if ($k !~ /^\d+$/);
 
     # if we've been waiting for this result, process it, otherwise throw it on
     # the ground.  multiple clients could have been given the same messages to
     # process, and we take whatever the first responder sends us.
     if (exists $msgsout->{$k}) {
+      # the result_sub will need parts of the message data, so get it ready
       my @d = Mail::SpamAssassin::ArchiveIterator::index_unpack($msgsout->{$k}->{'data'});
 
       # go ahead and do the result
@@ -1114,10 +1191,11 @@ sub handle_post_results {
 
   # if we got any results, clean out the results from the timestamp arrays
   while ( my($k,$v) = each %timestamps ) {
+    # trim out the result list from the timestamp sent list
     my @temp = grep(!exists $v->{$_}, @{$timestamps->{$k}});
 
     # if there are results left for a specific timestamp, update the array
-    # pointer.  otherwise, delete the timestamp entry.
+    # pointer.  otherwise, delete the timestamp entry since it's empty.
     if (@temp) {
       $timestamps->{$k} = \@temp;
     }
@@ -1127,8 +1205,11 @@ sub handle_post_results {
   }
 }
 
+# This function reads from $tmpfd and processes the message as appropriate wrt
+# $opt_j, $opt_restart, etc.
+#
 sub run_through_messages {
-  # only do 1 process, message list in a temp file, no restarting
+  # do everything in one process
   if ($opt_j <= 1 && !defined $opt_restart) {
     my $message;
     my $messages;
@@ -1137,12 +1218,7 @@ sub run_through_messages {
     while (($total_messages > $total_count) && ($message = read_line($tmpfd))) {
       my($class, undef, $date, undef, $result) = $iter->run_message($message);
       if ($result) {
-        if ($opt_client) {
-          result_client($class, $result, $date);
-        }
-        else {
-          result($class, $result, $date);
-        }
+        &{$iter->{result_sub}}($class, $result, $date);
       }
       $total_count++;
     }
@@ -1168,7 +1244,7 @@ sub run_through_messages {
         # some error happened during the read!
         if (!defined $line) {
           $needs_restart = 1;
-          warn "archive-iterator: readline failed, attempting to recover\n";
+          warn "mass-check: readline failed, attempting to recover\n";
           $select->remove($socket);
         }
         elsif ($line =~ /^([^\0]+)\0RESULT (.+)$/s) {
@@ -1194,12 +1270,7 @@ sub run_through_messages {
 
 	  # deal with the result we received
 	  if ($result) {
-	    if ($opt_client) {
-	      result_client($class, $result, $date);
-	    }
-	    else {
-	      result($class, $result, $date);
-	    }
+	    &{$iter->{result_sub}}($class, $result, $date);
 	  }
         }
         elsif ($line eq "START") {
@@ -1237,29 +1308,33 @@ sub run_through_messages {
   }
 }
 
+# send an HTTP response to a socket based on the input result, headers, and
+# data values.
 sub http_response {
   my($socket, $result, $headers, $data) = @_;
 
   print $socket
     "HTTP/1.0 $result\r\n",
     "Pragma: no-cache\r\n",
-    "Server: mass-check/0.0\r\n",
+    "Server: mass-check/$svn_revision\r\n",
     map { "$_: ".$headers->{$_}."\r\n" } keys %{$headers};
   print $socket "\r\n";
   print $socket $data;
 }
 
+# the client needs to make a request to the server on a given socket.
 sub http_make_request {
   my($socket, $type, $uri, $headers, $data) = @_;
 
   print $socket
     "$type $uri HTTP/1.0\r\n",
-    "User-Agent: mass-check/0.0\r\n",
+    "User-Agent: mass-check/$svn_revision\r\n",
     map { "$_: ".$headers->{$_}."\r\n" } keys %{$headers};
   print $socket "\r\n";
   print $socket $data;
 
-  my $line = $socket->getline();
+  # parse the response that the server sends us
+  my $line = $socket->getline() || '';
   my(undef, $code, $string) = split(/\s+/, $line, 3);
   return unless $code == 200;
 
@@ -1275,6 +1350,8 @@ sub http_make_request {
     }
   } while ($line !~ /^$/);
 
+  # the server has sent us notification that it's going to exit, so let's
+  # follow suit.
   return 'finished' if ($headers{'finished'});
 
   my $gzpath = '';
@@ -1284,7 +1361,7 @@ sub http_make_request {
     die "Can't make tempfile, exiting" unless $gzpath;
 
     my $rd;
-    $socket->read($rd, $headers{'content-length'});
+    $socket->read($rd, $headers{'content-length'}) || die "mass-check: error reading in data from server\n";
     print $gzfd $rd;
     close $gzfd;
   }
@@ -1301,6 +1378,7 @@ sub post_encode {
   return $string;
 }
 
+# remove all of the files in a given directory, non-recursive
 sub clean_dir {
   my $dir = shift;
 
@@ -1350,20 +1428,28 @@ sub send_line {
   my $fd = shift;
   foreach ( @_ ) {
     my $length = pack("V", length $_);
-    $fd->print($length.$_);
+    $fd->print($length.$_) || return 0;
   }
+
+  return 1;
 }
 
 ############################################################################
 
+# this is the function that implemented server mode.  basically, sit and wait
+# for connections to come in.  when a client sends in a request, deal with any
+# results that the client sent, then generate a response and send it back,
+# and then go back to waiting.  lather, rinse, repeat.
 sub server_mode {
   $opt_cs_max ||= 1000;
   $opt_cs_timeout ||= 60 * 5;
 
-  my $serv_socket = IO::Socket::INET->new(LocalPort => 8080,
+  my $serv_socket = IO::Socket::INET->new(
+    LocalAddr => $opt_server,
     Proto => 'tcp',
     Listen => 5,
-    Reuse => 1);
+    ReuseAddr => 1,
+  );
 
   die "Could not create socket: $!\n" unless $serv_socket;
 
@@ -1371,20 +1457,27 @@ sub server_mode {
     status('server ready for connections');
   }
 
+  # Setup out "what messages have been sent out" hashes
   my $timestamps = {};
   my $msgsout = { 'curnum' => 0 };
 
+  # Generate an IO::Select object and put the server socket on the queue
   my $select = IO::Select->new( $serv_socket );
 
-  my $sent_messages = 1;
+  # We'll keep looping while there's something to pay attention to
   while ($select->count()) {
+    # Sit and block until there's something for us to read from
     foreach my $socket ($select->can_read()) {
       if ($socket == $serv_socket) {
+        # it's the server socket, go ahead and accept the connection and add
+	# it to the queue.
         $select->add($serv_socket->accept);
       }
       else {
+	# it's some client, so deal with the request
 	my($type, $URI, $headers, $postdata) = handle_http_request($socket);
 
+	# we don't do GET, so just send something back
 	if ($type eq 'GET') {
 	  http_response($socket, "200 OK", {
 	      'Content-type' => 'text/plain',
@@ -1392,19 +1485,27 @@ sub server_mode {
 	    "Your GET request came from IP Address: ".$socket->peerhost."\n");
 	}
         elsif ($type eq 'POST') {
+	  # ooh, POST.  deal with any results that the client sent
 	  handle_post_results($postdata, $timestamps, $msgsout);
 
+          # based on the number of messages that the client requested,
+	  # generate a gzip file with the appropriate data in it
 	  my $messages = '';
 	  if ($postdata->{'max_messages'}) {
 	    my $msgnum = $postdata->{'max_messages'};
-	    $msgnum = $opt_cs_max if ($msgnum > $opt_cs_max);
+	    if ($msgnum > $opt_cs_max || $msgnum < 1) {
+	      $msgnum = $opt_cs_max;
+	    }
 	    $messages = generate_messages($msgnum, $timestamps, $msgsout, $postdata->{'paths_only'});
 	  }
 
+          # $messages will contain the path to the gzip file if there are
+	  # messages to send out.
           if ($messages && open(MSG, $messages)) {
 	    binmode(MSG);
-	    local $/ = undef;
+	    local $/ = undef;  # go go slurp mode
 
+	    # send the response
 	    http_response($socket, "200 OK", {
 	      'Content-Type' => 'application/x-gzip',
 	      'Content-Encoding' => 'x-gzip',
@@ -1413,9 +1514,13 @@ sub server_mode {
 	      scalar <MSG>);
 
 	    close(MSG);
+
+	    # we don't need the file anymore, so get rid of it
 	    unlink $messages;
           }
 	  elsif (!keys %{$msgsout} && !defined $tmpfd) {
+	    # we have no more outstanding messages and our original queue of
+	    # messages to process is empty, so tell the client to exit.
 	    http_response($socket, "200 OK", {
               "Content-type" => "text/plain",
 	      "Finished" => 1,
@@ -1423,6 +1528,7 @@ sub server_mode {
 	      'We are all done');
 	  }
 	  else {
+	    # when in doubt, treat this like a GET
 	    http_response($socket, "200 OK", {
               "Content-type" => "text/plain",
 	      },
@@ -1434,6 +1540,7 @@ sub server_mode {
 	  http_response($socket, '501 Not Implemented', {}, '');
 	}
       
+	# ok, we don't do keepalive, so get rid of the socket
         $select->remove($socket);
 	$socket->close;
       }
@@ -1442,12 +1549,17 @@ sub server_mode {
 #print "msgs waiting: ".join(" ", keys %{$msgsout})."\n";
 #print "tmpfd defined? ".(defined $tmpfd ? "yes" : "no")."\n";
 
-    # drop the listener when ready
-    # we're not awaiting responses and we've exhausted the input file
+    # we're not awaiting responses and we've exhausted the input file, so
+    # drop the server socket. :)
     $select->remove($serv_socket) if (!keys %{$msgsout} && !defined $tmpfd);
   }
 }
 
+# this is the function that implements client mode.  generally, in a loop:
+#  make a request of the server for some max number of messages, and send our
+#  results back at the same time.  based on the results of that request, put
+#  messages into a temp dir and process them.  prep the results and loop.
+#  lather, rinse, repeat.
 sub client_mode {
   $opt_cs_max ||= 1000;
   $opt_cs_timeout ||= 60 * 2;
@@ -1459,16 +1571,19 @@ sub client_mode {
   die "No host found in opt_client" unless $host;
   $uri ||= "/";
 
-  # figure out max messages
-  my $msgnum = 100;
+  # use this to track how many messages we ought to be requesting
+  my $msgnum = $opt_cs_max;
 
   my $tmpdir;
 
+  # if we're not doing paths_only, create a temp dir where we'll put the
+  # incoming messages to process.
   if (!$opt_cs_paths_only) {
     $tmpdir = Mail::SpamAssassin::Util::secure_tmpdir();
     die "Can't create tempdir" unless $tmpdir;
   }
 
+  # keep going until something stops us.
   while (1) {
     # if the number of messages to request is too much, bring it down
     $msgnum = $opt_cs_max if ($msgnum > $opt_cs_max);
@@ -1477,6 +1592,7 @@ sub client_mode {
     $postdata{'max_messages'} = $msgnum;
     $postdata{'paths_only'} = 1 if ($opt_cs_paths_only);
 
+    # the actual POST data string
     my $POSTDATA = join('&', map { post_encode($_) . '=' . post_encode($postdata{$_}) } keys %postdata);
 
     # connect to server
@@ -1487,7 +1603,7 @@ sub client_mode {
 
     print "Requesting $msgnum messages from server\n";
 
-    # make request, include and drop results if there are any
+    # make request, include and then drop results if there are any
     my $result = http_make_request($socket, 'POST', $uri, {
       'Host'		=> $http_host,
       'Content-Type'	=> 'application/x-www-form-urlencoded',
@@ -1498,7 +1614,7 @@ sub client_mode {
     %postdata = ();
     undef $POSTDATA;
 
-    # If we got messages to run through, go ahead and do it.
+    # If we received messages to run through, go ahead and do it.
     # otherwise, just sleep for the timeout length and try again
     if (!defined $result) {
       # we got an error?!?  abort!
@@ -1510,13 +1626,17 @@ sub client_mode {
       last;
     }
     elsif ($result eq '') {
+      # no messages means the server may give us more work down the road.
       # sleep for client_timeout seconds and try the request again
       print "Received no messages from server, waiting $opt_cs_timeout seconds\n";
       sleep $opt_cs_timeout;
     }
     else {
+      # we got messages, so deal with them.
       my $time_start = time;
 
+      # postdata will hold our results, real will hold the original message
+      # data from the server's scan mode.
       %postdata = ();
       %real = ();
       $total_count = $spam_count = $ham_count = 0;
@@ -1529,19 +1649,22 @@ sub client_mode {
       my $tmppath;
       ($tmppath, $tmpfd) = Mail::SpamAssassin::Util::secure_tmpfile();
       die "Can't make tempfile, exiting" unless $tmppath;
+      unlink $tmppath;
 
+      # if we have a temp directory, clean it out for this run
       clean_dir($tmpdir) if ($tmpdir);
 
       # Archive format, gzip compressed file w/ 3 parts per message:
       # 1- server message number in text format
       # 2- server index string, binary packed format
-      # 3- message content
+      # 3- message content, if not doing paths_only
 
       # number of messages
-      $msgnum = $total_messages = read_line($gzfd);
+      $msgnum = $total_messages = read_line($gzfd) || die "mass-check: error reading from gzip message file\n";
 
       print "Received $total_messages messages from the server\n";
 
+      # loop through and prep all of the messages the server sent
       for(my $i = 0 ; $i < $total_messages; $i++ ) {
         my $num = read_line($gzfd);
 	last unless defined $num;
@@ -1554,24 +1677,32 @@ sub client_mode {
 	  my $msg = read_line($gzfd);
 	  last unless defined $msg;
 
+	  # it's going to be a dir of file formatted messages
 	  if (open(OUT, ">$tmpdir/$num")) {
 	    print OUT $msg;
 	    close(OUT);
 
+	    # this is a little tricky -- we need to process the files in the
+	    # path and format we've created, but the original data is needed
+	    # to create a proper result later, so deal with that here.
 	    my @d = Mail::SpamAssassin::ArchiveIterator::index_unpack($index);
 	    $real{"$tmpdir/$num"} = \@d;
             send_line($tmpfd,
-	      Mail::SpamAssassin::ArchiveIterator::index_pack($d[0], $d[1], 'f', "$tmpdir/$num"));
+	      Mail::SpamAssassin::ArchiveIterator::index_pack($d[0], $d[1], 'f', "$tmpdir/$num")) ||
+	        die "mass-check: error writing out temp file in client mode\n";
 	  }
 	  else {
 	    warn "Can't create/write $tmpdir/$num: $!";
 	  }
 	}
 	else {
-	  # need to relate message number and path
+	  # in paths_only mode, there's no kluging between formats since we're
+	  # reading the same corpus, however we do still need to track server
+	  # message number to message data so our results will be useable.
 	  my @d = Mail::SpamAssassin::ArchiveIterator::index_unpack($index);
 	  $real{$d[3]} = $num;
-	  send_line($tmpfd, $index);
+	  send_line($tmpfd, $index) ||
+	        die "mass-check: error writing out temp file in client mode\n";
 	}
       }
 
@@ -1585,10 +1716,14 @@ sub client_mode {
 
       run_through_messages();
 
-      unlink $tmppath;
+      # we're done with the temp file -- bye bye
+      close($tmpfd);
 
       # figure out new max messages, try keeping ~cs_timeout between runs
       my $time_end = time;
+
+      # if we only requested a small number of messages, it may take <1s to
+      # run through them, so fake it and say it took 1s.
       if ($time_end == $time_start) {
         $time_end++;
       }
@@ -1598,8 +1733,7 @@ sub client_mode {
     }
   }
 
-  close $tmpfd;
-
+  # if we were using a temp dir, clean it out and then remove it
   if ($tmpdir) {
     clean_dir($tmpdir);
     rmdir $tmpdir;
@@ -1608,11 +1742,14 @@ sub client_mode {
 
 ############################################################################
 
+# in server mode, just return the ref to the message data
 sub wanted_server {
   my ($class, $id, $time, $dataref, $format) = @_;
   return $dataref;
 }
 
+# very similar to result() except the result has the message number at the
+# front, so strip it off and then set the POST data appropriately.
 sub result_client {
   my ($class, $result, $time) = @_;
 
