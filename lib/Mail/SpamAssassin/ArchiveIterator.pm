@@ -36,9 +36,10 @@ use constant BIG_LINES => BIG_BYTES/65;	# 65 bytes/line is a good approximation
 use vars qw {
   $MESSAGES
   $AICache
+  @ISA
 };
 
-my @ISA = qw($MESSAGES);
+@ISA = qw();
 
 =head1 NAME
 
@@ -383,10 +384,10 @@ sub run {
             warn "archive-iterator: readline failed, attempting to recover\n";
             $select->remove($socket);
           }
-	  elsif ($line =~ /^([^\0]+)\0RESULT (.+)$/s) {
+	  elsif ($line =~ /^([^\0]*)\0RESULT (.+)$/s) {
 	    my $result = $1;
 	    my ($date,$class,$type) = index_unpack($2);
-	    #warn ">> RESULT: $class, $type, $date\n";
+	    dbg "architer: >> RESULT: $class, $type, $date\n";
 
 	    if (defined $self->{opt_restart} && ($total_count % $self->{opt_restart}) == 0) {
 	      $needs_restart = 1;
@@ -396,11 +397,11 @@ sub run {
 	    if (($MESSAGES > $total_count) && !$needs_restart) {
 	      $self->send_line($socket, $self->next_message());
 	      $total_count++;
-	      #warn ">> recv: $MESSAGES $total_count\n";
+	      dbg "architer: >> recv: $MESSAGES $total_count\n";
 	    }
 	    else {
 	      # stop listening on this child since we're done with it
-	      #warn ">> removeresult: $needs_restart $MESSAGES $total_count\n";
+	      dbg "architer: >> removeresult: $needs_restart $MESSAGES $total_count\n";
 	      $select->remove($socket);
 	    }
 
@@ -414,17 +415,22 @@ sub run {
 	      # we still have messages, send one to child
 	      $self->send_line($socket, $self->next_message());
 	      $total_count++;
-	      #warn ">> new: $MESSAGES $total_count\n";
+	      dbg "architer: >> new: $MESSAGES $total_count\n";
 	    }
 	    else {
 	      # no more messages, so stop listening on this child
-	      #warn ">> removestart: $needs_restart $MESSAGES $total_count\n";
+	      dbg "architer: >> removestart: $needs_restart $MESSAGES $total_count\n";
 	      $select->remove($socket);
 	    }
 	  }
+          else {
+            $needs_restart = 1;
+            warn "archive-iterator: bad line from readline: $line\n";
+            $select->remove($socket);
+          }
         }
 
-        #warn ">> out of loop, $MESSAGES $total_count $needs_restart ".$select->count()."\n";
+        dbg "architer: >> out of loop, $MESSAGES $total_count $needs_restart ".$select->count()."\n";
 
         # If there are still messages to process, and we need to restart
         # the children, and all of the children are idle, let's go ahead.
@@ -432,7 +438,7 @@ sub run {
 	{
 	  $needs_restart = 0;
 
-	  #warn "debug: needs restart, $MESSAGES total, $total_count done\n";
+	  dbg "architer: debug: needs restart, $MESSAGES total, $total_count done\n";
 	  $self->reap_children($self->{opt_j}, \@child, \@pid);
 	  @child=();
 	  @pid=();
@@ -608,7 +614,7 @@ sub start_children {
       select($old);
 
       $socket->add($child->[$i]);
-      #warn "debug: starting new child $i (pid ",$pid->[$i],")\n";
+      dbg "architer: debug: starting new child $i (pid ".$pid->[$i].")\n";
       next;
     }
     elsif (defined $pid->[$i]) {
@@ -660,7 +666,7 @@ sub reap_children {
   local $SIG{'PIPE'} = 'IGNORE';
 
   for (my $i = 0; $i < $count; $i++) {
-    #warn "debug: killing child $i (pid ",$pid->[$i],")\n";
+    dbg "architer: debug: killing child $i (pid ".$pid->[$i].")\n";
     $self->send_line($socket->[$i],"exit"); # tell the child to die.
     close $socket->[$i];
     waitpid($pid->[$i], 0); # wait for the signal ...
@@ -677,14 +683,15 @@ sub read_line {
   my($length,$msg);
 
   # read in the 4 byte length and unpack
+  dbg "architer: << read_line\n";
   sysread($fd, $length, 4);
   $length = unpack("V", $length);
-#  warn "<< $$ $length\n";
+  dbg "architer: << $$ $length\n";
   return unless $length;
 
   # read in the rest of the single message
   sysread($fd, $msg, $length);
-#  warn "<< $$ $msg\n";
+  dbg "architer: << $$ $msg\n";
   return $msg;
 }
 
@@ -694,7 +701,7 @@ sub send_line {
 
   foreach ( @_ ) {
     my $length = pack("V", length $_);
-#    warn ">> $$ ".length($_)." $_\n";
+    dbg "architer: >> $$ ".length($_)." $_\n";
     syswrite($fd, $length . $_);
   }
 }
