@@ -1242,7 +1242,7 @@ sub create_cache {
 }
 
 sub aidbg {
-  if (would_log("architer") == 2) {
+  if (would_log("dbg", "architer") == 2) {
     dbg (@_);
   }
 }
