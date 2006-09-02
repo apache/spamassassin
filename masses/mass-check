@@ -1100,7 +1100,6 @@ sub handle_post_results {
     # if we've been waiting for this result, process it, otherwise throw it on
     # the ground.  multiple clients could have been given the same messages to
     # process, and we take whatever the first responder sends us.
-#print "received result for $k\n";
     if (exists $msgsout->{$k}) {
       my @d = Mail::SpamAssassin::ArchiveIterator::index_unpack($msgsout->{$k}->{'data'});
 
@@ -1115,7 +1114,6 @@ sub handle_post_results {
 
   # if we got any results, clean out the results from the timestamp arrays
   while ( my($k,$v) = each %timestamps ) {
-#print "dealing with timestamp $k\n";
     my @temp = grep(!exists $v->{$_}, @{$timestamps->{$k}});
 
     # if there are results left for a specific timestamp, update the array
@@ -1137,7 +1135,6 @@ sub run_through_messages {
     my $total_count = 0;
 
     while (($total_messages > $total_count) && ($message = read_line($tmpfd))) {
-#print ">>> $message\n";
       my($class, undef, $date, undef, $result) = $iter->run_message($message);
       if ($result) {
         if ($opt_client) {
@@ -1146,7 +1143,6 @@ sub run_through_messages {
         else {
           result($class, $result, $date);
         }
-#print ">>> $result\n";
       }
       $total_count++;
     }
@@ -1279,7 +1275,7 @@ sub http_make_request {
     }
   } while ($line !~ /^$/);
 
-  return if ($headers{'finished'});
+  return 'finished' if ($headers{'finished'});
 
   my $gzpath = '';
   if ($headers{'content-length'}) {
@@ -1297,10 +1293,11 @@ sub http_make_request {
   return $gzpath;
 }
 
-# Be conservative -- anything that's non-alphanumeric, encode!
+# Be conservative -- encode most things.
+# we could encode spaces to plusses, then decode that later, but...
 sub post_encode {
   my $string = shift;
-  $string =~  s/(\W)/sprintf "%%%02x",unpack("C",$1)/egx;
+  $string =~  s/([^a-zA-Z0-9_,.\/\\-])/sprintf "%%%02x",unpack("C",$1)/egx;
   return $string;
 }
 
@@ -1351,13 +1348,13 @@ sub read_line {
 
 sub send_line {
   my $fd = shift;
-
   foreach ( @_ ) {
     my $length = pack("V", length $_);
-      $fd->print($length.$_);
+    $fd->print($length.$_);
   }
 }
 
+############################################################################
 
 sub server_mode {
   $opt_cs_max ||= 1000;
@@ -1404,15 +1401,13 @@ sub server_mode {
 	    $messages = generate_messages($msgnum, $timestamps, $msgsout, $postdata->{'paths_only'});
 	  }
 
-#print ">> sending messages\n";
-
           if ($messages && open(MSG, $messages)) {
 	    binmode(MSG);
 	    local $/ = undef;
 
-	    #  Content-Encoding: gzip
 	    http_response($socket, "200 OK", {
-              "Content-type" => "application/octet-stream",
+	      'Content-Type' => 'application/x-gzip',
+	      'Content-Encoding' => 'x-gzip',
 	      "Content-Length" => (-s $messages),
 	      },
 	      scalar <MSG>);
@@ -1490,6 +1485,8 @@ sub client_mode {
     # last if connection fails
     last unless ($socket);
 
+    print "Requesting $msgnum messages from server\n";
+
     # make request, include and drop results if there are any
     my $result = http_make_request($socket, 'POST', $uri, {
       'Host'		=> $http_host,
@@ -1507,15 +1504,18 @@ sub client_mode {
       # we got an error?!?  abort!
       last;
     }
-    elsif (!$result) {
+    elsif ($result eq 'finished') {
+      # the server said that we're done
+      print "Server states that there is no more work, exiting.\n";
+      last;
+    }
+    elsif ($result eq '') {
       # sleep for client_timeout seconds and try the request again
-print "Got no response, waiting $opt_cs_timeout seconds\n";
+      print "Received no messages from server, waiting $opt_cs_timeout seconds\n";
       sleep $opt_cs_timeout;
     }
     else {
       my $time_start = time;
-
-print "Got response: $result\n";
 
       %postdata = ();
       %real = ();
@@ -1528,7 +1528,6 @@ print "Got response: $result\n";
       # used for the temp queue file
       my $tmppath;
       ($tmppath, $tmpfd) = Mail::SpamAssassin::Util::secure_tmpfile();
-print ">> $tmppath\n";
       die "Can't make tempfile, exiting" unless $tmppath;
 
       clean_dir($tmpdir) if ($tmpdir);
@@ -1537,21 +1536,20 @@ print ">> $tmppath\n";
       # 1- server message number in text format
       # 2- server index string, binary packed format
       # 3- message content
-print ">> writing out files\n";
 
       # number of messages
       $msgnum = $total_messages = read_line($gzfd);
 
-print ">> total of $total_messages messages\n";
+      print "Received $total_messages messages from the server\n";
 
       for(my $i = 0 ; $i < $total_messages; $i++ ) {
         my $num = read_line($gzfd);
 	last unless defined $num;
-#print "read in message $num\n";
+
         my $index = read_line($gzfd);
-#print "read in index $index\n";
 	last unless defined $index;
-#print "output message $num\n";
+
+	# if we're doing paths_only, there'll be no message content
 	if (!$opt_cs_paths_only) {
 	  my $msg = read_line($gzfd);
 	  last unless defined $msg;
@@ -1575,15 +1573,12 @@ print ">> total of $total_messages messages\n";
 	  $real{$d[3]} = $num;
 	  send_line($tmpfd, $index);
 	}
-#print "wrote mess $num\n";
       }
-
-print "exited loop\n";
 
       $gzfd->close;
       unlink $result;
 
-print "beginning run\n";
+      print "Starting run\n";
 
       # we're about to start running, so go back to the start of the file
       seek $tmpfd, 0, 0;
@@ -1592,15 +1587,14 @@ print "beginning run\n";
 
       unlink $tmppath;
 
-print "ended run\n";
       # figure out new max messages, try keeping ~cs_timeout between runs
       my $time_end = time;
       if ($time_end == $time_start) {
         $time_end++;
       }
-print "ran $msgnum messages in ".($time_end-$time_start)." seconds\n";
+
+      print "Completed run in ".($time_end-$time_start)." seconds\n";
       $msgnum = int($msgnum * $opt_cs_timeout / ($time_end-$time_start)) || 1;
-print "now requesting $msgnum messages\n";
     }
   }
 
@@ -1611,6 +1605,8 @@ print "now requesting $msgnum messages\n";
     rmdir $tmpdir;
   }
 }
+
+############################################################################
 
 sub wanted_server {
   my ($class, $id, $time, $dataref, $format) = @_;
@@ -1637,6 +1633,6 @@ sub result_client {
     $postdata{$1} = $result;
   }
   else {
-    warn ">> result is not in the correct format: $result\n";
+    warn ">> WTH!?  result is not in the correct format: $result\n";
   }
 }
