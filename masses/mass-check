@@ -457,8 +457,6 @@ sub target  {
 ###########################################################################
 
 sub init_results {
-  my $no_output = shift;
-
   $init_results = 1;
 
   showdots_finish();
@@ -474,7 +472,7 @@ sub init_results {
     $statusevery ||= 1;
   }
 
-  return if $no_output;
+  return if $opt_client;
 
   if ($opt_o) {
     autoflush STDOUT 1;
@@ -1784,7 +1782,7 @@ sub result_client {
   my ($class, $result, $time) = @_;
 
   # don't open results files until we get here to avoid overwriting files
-  init_results(1) if !$init_results;
+  init_results() if !$init_results;
 
   if ($class eq "s") {
     $spam_count++;
