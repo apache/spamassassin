@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("mkrules");
-use Test; BEGIN { plan tests => 85 };
+use Test; BEGIN { plan tests => 86 };
 use File::Path;
 
 # ---------------------------------------------------------------------------
@@ -101,7 +101,8 @@ write_file("$tdir/rulesrc/sandbox/foo/20_foo.cf", [
 
 ok (mkrun ("--src $tdir/rulesrc --out $tdir/rules --manifest $tdir/MANIFEST --manifestskip $tdir/MANIFEST.SKIP --active $tdir/rules/active.list 2>&1", \&patterns_run_cb));
 checkfile("$tdir/rules/70_sandbox.cf", \&patterns_run_cb);
-ok (! -f "$tdir/rules/72_active.cf");
+ok (-f "$tdir/rules/72_active.cf");
+ok (-s "$tdir/rules/72_active.cf" == 0);
 ok ok_all_patterns();
 save_tdir();
 
