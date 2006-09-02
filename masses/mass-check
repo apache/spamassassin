@@ -338,9 +338,6 @@ if (!$opt_client) {
 else {
   # ArchiveIterator options for client mode -- tends to be simple
   $AIopts->{'opt_n'} = 1;
-
-  # Clients don't show progress ...
-  undef $opt_progress;
 }
 
 ###########################################################################
@@ -460,6 +457,10 @@ sub target  {
 ###########################################################################
 
 sub init_results {
+  my $no_output = shift;
+
+  $init_results = 1;
+
   showdots_finish();
 
   # now, showdots only happens if --showdots was used
@@ -473,6 +474,8 @@ sub init_results {
     $statusevery ||= 1;
   }
 
+  return if $no_output;
+
   if ($opt_o) {
     autoflush STDOUT 1;
     print STDOUT $log_header;
@@ -485,7 +488,6 @@ sub init_results {
     print HAM $log_header;
     print SPAM $log_header;
   }
-  $init_results = 1;
 }
 
 sub result {
@@ -1154,6 +1156,10 @@ sub generate_messages {
   # timestamp, so just set the reference appropriately. :)
   $timestamps->{$ts} = \@tosend;
 
+  if ($opt_noisy) {
+    print "generated ".scalar(@tosend)." messages\n";
+  }
+
   return $gzpath;
 }
 
@@ -1479,6 +1485,10 @@ sub server_mode {
 
 	# we don't do GET, so just send something back
 	if ($type eq 'GET') {
+	  if ($opt_noisy) {
+	    print "GET request from ".$socket->peerhost."\n";
+	  }
+
 	  http_response($socket, "200 OK", {
 	      'Content-type' => 'text/plain',
 	    },
@@ -1488,6 +1498,10 @@ sub server_mode {
 	  # ooh, POST.  deal with any results that the client sent
 	  handle_post_results($postdata, $timestamps, $msgsout);
 
+	  if ($opt_noisy) {
+	    print "POST request from ".$socket->peerhost."\n";
+	  }
+
           # based on the number of messages that the client requested,
 	  # generate a gzip file with the appropriate data in it
 	  my $messages = '';
@@ -1496,6 +1510,11 @@ sub server_mode {
 	    if ($msgnum > $opt_cs_max || $msgnum < 1) {
 	      $msgnum = $opt_cs_max;
 	    }
+
+	    if ($opt_noisy) {
+	      print "client requested ".$postdata->{'max_messages'}." messages\n";
+	    }
+
 	    $messages = generate_messages($msgnum, $timestamps, $msgsout, $postdata->{'paths_only'});
 	  }
 
@@ -1545,6 +1564,11 @@ sub server_mode {
 	$socket->close;
       }
     }
+
+    if ($opt_noisy) {
+      print scalar(keys %{$msgsout})." messages outstanding\n";
+    }
+
 
 #print "msgs waiting: ".join(" ", keys %{$msgsout})."\n";
 #print "tmpfd defined? ".(defined $tmpfd ? "yes" : "no")."\n";
@@ -1601,7 +1625,7 @@ sub client_mode {
     # last if connection fails
     last unless ($socket);
 
-    print "Requesting $msgnum messages from server\n";
+    print "Requesting $msgnum messages from server\n" if ($opt_noisy);
 
     # make request, include and then drop results if there are any
     my $result = http_make_request($socket, 'POST', $uri, {
@@ -1622,13 +1646,13 @@ sub client_mode {
     }
     elsif ($result eq 'finished') {
       # the server said that we're done
-      print "Server states that there is no more work, exiting.\n";
+      print "Server states that there is no more work, exiting.\n" if ($opt_noisy);
       last;
     }
     elsif ($result eq '') {
       # no messages means the server may give us more work down the road.
       # sleep for client_timeout seconds and try the request again
-      print "Received no messages from server, waiting $opt_cs_timeout seconds\n";
+      print "Received no messages from server, waiting $opt_cs_timeout seconds\n" if ($opt_noisy);
       sleep $opt_cs_timeout;
     }
     else {
@@ -1639,7 +1663,7 @@ sub client_mode {
       # data from the server's scan mode.
       %postdata = ();
       %real = ();
-      $total_count = $spam_count = $ham_count = 0;
+      $init_results = $total_count = $spam_count = $ham_count = 0;
 
       # we got a result, so do things with it!
       my $gzfd = IO::Zlib->new($result, "rb");
@@ -1662,7 +1686,7 @@ sub client_mode {
       # number of messages
       $msgnum = $total_messages = read_line($gzfd) || die "mass-check: error reading from gzip message file\n";
 
-      print "Received $total_messages messages from the server\n";
+      status("server gave us $total_messages messages") if ($opt_progress);
 
       # loop through and prep all of the messages the server sent
       for(my $i = 0 ; $i < $total_messages; $i++ ) {
@@ -1709,7 +1733,9 @@ sub client_mode {
       $gzfd->close;
       unlink $result;
 
-      print "Starting run\n";
+      if ($opt_progress) {
+        status('starting run stage');
+      }
 
       # we're about to start running, so go back to the start of the file
       seek $tmpfd, 0, 0;
@@ -1728,7 +1754,11 @@ sub client_mode {
         $time_end++;
       }
 
-      print "Completed run in ".($time_end-$time_start)." seconds\n";
+      if ($opt_progress) {
+        status('completed run stage');
+      }
+
+      print "Completed run in ".($time_end-$time_start)." seconds\n" if ($opt_noisy);
       $msgnum = int($msgnum * $opt_cs_timeout / ($time_end-$time_start)) || 1;
     }
   }
@@ -1752,6 +1782,9 @@ sub wanted_server {
 # front, so strip it off and then set the POST data appropriately.
 sub result_client {
   my ($class, $result, $time) = @_;
+
+  # don't open results files until we get here to avoid overwriting files
+  init_results(1) if !$init_results;
 
   if ($class eq "s") {
     $spam_count++;
