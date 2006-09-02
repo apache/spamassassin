@@ -174,7 +174,13 @@ sub lint_output_files {
     my $text = join("\n", "file start $file", $output_file_text->{$file}, "file end $file");
     if (lint_rule_text($text) != 0) {
       warn "\nERROR: LINT FAILED, suppressing output: $file\n\n";
-      delete $output_file_text->{$file};
+
+      # don't suppress entirely, otherwise 'make distcheck'/'disttest'
+      # will fail since the MANIFEST-listed output files will be 
+      # empty.
+
+      # delete $output_file_text->{$file};
+      $output_file_text->{$file} = '';
     }
   }
 }
@@ -805,6 +811,10 @@ sub write_output_files {
     }
     else {
       print "$pubfile: no rules promoted\n";
+
+      # create an empty file anyway to satisfy MANIFEST
+      open (OUT, ">".$pubfile) or die "cannot write to output file '$pubfile'";
+      close OUT or die "cannot close output file '$pubfile'";
     }
   }
 }
