@@ -668,6 +668,10 @@ sub wanted {
     push(@extra, "reuse=no");
   }
 
+  if ($opt_client) {
+    push(@extra, "host=$where");
+  }
+
   my $yorn;
   my $score;
   my $tests;
