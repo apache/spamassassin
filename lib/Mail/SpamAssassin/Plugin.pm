@@ -752,7 +752,7 @@ Called when the C<Mail::SpamAssassin> object is destroyed.
 
 sub finish {
   my ($self) = @_;
-  delete $self->{main};
+  %{$self} = ();
 }
 
 =head1 HELPER APIS

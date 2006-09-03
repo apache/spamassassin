@@ -501,10 +501,7 @@ Clean up for destruction.
 sub finish {
   my ($self) = @_;
   $self->finish_socket();
-  if (!$self->{no_resolver}) {
-    delete $self->{res};
-  }
-  delete $self->{main};
+  %{$self} = ();
 }
 
 ###########################################################################

@@ -516,15 +516,10 @@ sub finish {
 
   # Clean ourself up
   $self->finish_metadata();
-  undef $self->{pristine_headers};
-  undef $self->{pristine_body};
-  delete $self->{pristine_headers};
-  delete $self->{pristine_body};
-  delete $self->{text_decoded};
-  delete $self->{text_rendered};
 
-  # Destroy the tree ...
-  $self->SUPER::finish();
+  # wipe out all of our pointers and such -- since our tree is one-way, wiping
+  # out body_parts here will wipe out the rest of the tree.
+  %{$self} = ();
 }
 
 # ---------------------------------------------------------------------------

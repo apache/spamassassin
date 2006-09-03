@@ -177,10 +177,7 @@ Finish with the object.
 
 sub finish {
   my $self = shift;
-  delete $self->{main};
-  delete $self->{msg};
-  delete $self->{conf};
-  delete $self->{bayes_scanner};
+  %{$self} = ();
 }
 
 ###########################################################################

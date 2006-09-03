@@ -3016,8 +3016,7 @@ sub clone {
 
 sub finish {
   my ($self) = @_;
-  delete $self->{parser};
-  delete $self->{main};
+  %{$self} = ();
 }
 
 ###########################################################################
