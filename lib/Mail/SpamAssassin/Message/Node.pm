@@ -641,36 +641,5 @@ sub get_all_headers {
 
 # ---------------------------------------------------------------------------
 
-=item finish()
-
-Clean up the object so that it can be destroyed.
-
-=cut
-
-sub finish {
-  my ($self) = @_;
-
-  foreach my $part ( $self->find_parts(qr/./) ) {
-    foreach (
-      'headers',
-      'raw_headers',
-      'header_order',
-      'raw',
-      'decoded',
-      'rendered',
-      'visible_rendered',
-      'invisible_rendered',
-      'type',
-      'rendered_type',
-      'body_parts',
-    ) {
-      undef $part->{$_};
-      delete $part->{$_};
-    }
-  }
-}
-
-# ---------------------------------------------------------------------------
-
 1;
 __END__

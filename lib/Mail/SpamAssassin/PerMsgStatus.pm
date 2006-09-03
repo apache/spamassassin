@@ -1365,14 +1365,10 @@ sub finish {
 	  permsgstatus => $self
 	});
 
-  # explicitly delete just the members that may cause circular
-  # refs, instead of deleting everything; this is a lot more
-  # efficient
-  delete $self->{main};
-  delete $self->{msg};
-  delete $self->{conf};
-  delete $self->{async};
-  delete $self->{resolver};
+  # Delete out all of the members of $self.  This will remove any direct
+  # circular references and let the memory get reclaimed while also being more
+  # efficient than a foreach() loop over the keys.
+  %{$self} = ();
 }
 
 sub finish_tests {

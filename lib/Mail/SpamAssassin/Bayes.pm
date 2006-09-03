@@ -263,7 +263,7 @@ sub finish {
   # use Carp qw(cluck); cluck "stack trace at untie";
 
   $self->{store}->untie_db();
-  delete $self->{store};
+  %{$self} = ();
 }
 
 sub sa_die { Mail::SpamAssassin::sa_die(@_); }

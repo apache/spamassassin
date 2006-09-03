@@ -86,8 +86,7 @@ sub extract {
 
 sub finish {
   my ($self) = @_;
-  delete $self->{msg};
-  delete $self->{strings};
+  %{$self} = ();
 }
 
 1;
