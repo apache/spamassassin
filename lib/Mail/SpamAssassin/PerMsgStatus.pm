@@ -1372,6 +1372,7 @@ sub finish {
   delete $self->{msg};
   delete $self->{conf};
   delete $self->{async};
+  delete $self->{resolver};
 }
 
 sub finish_tests {
