@@ -34,9 +34,10 @@ use constant BIG_LINES => BIG_BYTES/65;	# 65 bytes/line is a good approximation
 use vars qw {
   $MESSAGES
   $AICache
+  @ISA
 };
 
-my @ISA = qw($MESSAGES);
+@ISA = qw();
 
 =head1 NAME
 

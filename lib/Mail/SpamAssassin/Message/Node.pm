@@ -261,7 +261,7 @@ sub raw {
 =item decode()
 
 If necessary, decode the part text as base64 or quoted-printable.
-The decoded text will be returned as a scalar.  An optional length
+The decoded text will be returned as a scalar string.  An optional length
 parameter can be passed in which limits how much decoded data is returned.
 If the scalar isn't needed, call with "0" as a parameter.
 

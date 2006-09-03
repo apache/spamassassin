@@ -19,6 +19,8 @@ use strict;
 # limitations under the License.
 # </@LICENSE>
 
+sub aidbg;
+
 sub usage {
   my $status = shift;
 
@@ -922,7 +924,7 @@ sub start_children {
       select($old);
 
       $socket->add($child->[$i]);
-      #warn "debug: starting new child $i (pid ",$pid->[$i],")\n";
+      aidbg "mass-check: starting new child $i (pid ".$pid->[$i].")\n";
       next;
     }
     elsif (defined $pid->[$i]) {
@@ -974,7 +976,7 @@ sub reap_children {
   local $SIG{'PIPE'} = 'IGNORE';
 
   for (my $i = 0; $i < $count; $i++) {
-    #warn "debug: killing child $i (pid ",$pid->[$i],")\n";
+    aidbg "mass-check: killing child $i (pid ",$pid->[$i],")\n";
     send_line($socket->[$i],"exit"); # tell the child to die.
     close $socket->[$i];
     waitpid($pid->[$i], 0); # wait for the signal ...
@@ -1251,10 +1253,10 @@ sub run_through_messages {
           warn "mass-check: readline failed, attempting to recover\n";
           $select->remove($socket);
         }
-        elsif ($line =~ /^([^\0]+)\0RESULT (.+)$/s) {
+        elsif ($line =~ /^([^\0]*)\0RESULT (.+)$/s) {
 	  my $result = $1;
 	  my ($date,$class,$type) = Mail::SpamAssassin::ArchiveIterator::index_unpack($2);
-	  #warn ">> RESULT: $class, $type, $date\n";
+	  aidbg "mass-check: $class, $type, $date\n";
 
 	  if (defined $opt_restart && ($total_count % $opt_restart) == 0) {
 	    $needs_restart = 1;
@@ -1264,11 +1266,11 @@ sub run_through_messages {
 	  if (($total_messages > $total_count) && !$needs_restart) {
 	    send_line($socket, read_line($tmpfd));
 	    $total_count++;
-	    #warn ">> recv: $total_messages $total_count\n";
+	    aidbg "mass-check: $total_messages $total_count\n";
 	  }
 	  else {
 	    # stop listening on this child since we're done with it
-	    #warn ">> removeresult: $needs_restart $total_messages $total_count\n";
+	    aidbg "mass-check: $needs_restart $total_messages $total_count\n";
 	    $select->remove($socket);
 	  }
 
@@ -1282,24 +1284,29 @@ sub run_through_messages {
 	    # we still have messages, send one to child
 	    send_line($socket, read_line($tmpfd));
 	    $total_count++;
-	    #warn ">> new: $total_messages $total_count\n";
+	    aidbg "mass-check: $total_messages $total_count\n";
 	  }
 	  else {
 	    # no more messages, so stop listening on this child
-	    #warn ">> removestart: $needs_restart $total_messages $total_count\n";
+	    aidbg "mass-check: $needs_restart $total_messages $total_count\n";
 	    $select->remove($socket);
 	  }
         }
+        else {
+          $needs_restart = 1;
+          warn "mass-check: bad line from readline: $line\n";
+          $select->remove($socket);
+        }
       }
 
-      #warn ">> out of loop, $total_messages $total_count $needs_restart ".$select->count()."\n";
+      aidbg "mass-check: out of loop, $total_messages $total_count $needs_restart ".$select->count()."\n";
 
       # If there are still messages to process, and we need to restart
       # the children, and all of the children are idle, let's go ahead.
       if ($needs_restart && $select->count == 0 && $total_messages > $total_count) {
         $needs_restart = 0;
 
-        #warn "debug: needs restart, $total_messages total, $total_count done\n";
+        aidbg "mass-check: needs restart, $total_messages total, $total_count done\n";
         reap_children($opt_j, \@child, \@pid);
         @child=();
         @pid=();
@@ -1802,5 +1809,11 @@ sub result_client {
   }
   else {
     warn ">> WTH!?  result is not in the correct format: $result\n";
+  }
+}
+
+sub aidbg {
+  if (would_log("dbg", "mass-check") == 2) {
+    dbg (@_);
   }
 }
