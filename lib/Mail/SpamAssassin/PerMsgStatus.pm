@@ -2242,7 +2242,7 @@ sub get_uri_detail_list {
       }
     }
 
-    if (would_log('dbg', 'uri')) {
+    if (would_log('dbg', 'uri') == 2) {
       dbg("uri: html uri found, $uri");
       foreach my $nuri (@tmp) {
         dbg("uri: cleaned html uri, $nuri");
@@ -2275,7 +2275,7 @@ sub get_uri_detail_list {
       }
     }
 
-    if (would_log('dbg', 'uri')) {
+    if (would_log('dbg', 'uri') == 2) {
       dbg("uri: parsed uri found, $uri");
       foreach my $nuri (@uris) {
         dbg("uri: cleaned parsed uri, $nuri");
