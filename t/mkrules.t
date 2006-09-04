@@ -2,11 +2,11 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("mkrules");
-use Test; BEGIN { plan tests => 86 };
+use Test; BEGIN { plan tests => 96 };
 use File::Path;
 
 # ---------------------------------------------------------------------------
-# script runs, even with nothing to do
+print " script runs, even with nothing to do\n\n";
 
 my $tdir = "log/mkrules_t";
 rmtree([ $tdir ]);
@@ -22,7 +22,7 @@ ok ok_all_patterns();
 save_tdir();
 
 # ---------------------------------------------------------------------------
-# promotion of an active rule
+print " promotion of an active rule\n\n";
 
 %patterns = (
   '72_active.cf: WARNING: not listed in manifest file' => manif_found,
@@ -50,7 +50,7 @@ ok ok_all_patterns();
 save_tdir();
 
 # ---------------------------------------------------------------------------
-# non-promotion of an inactive rule
+print " non-promotion of an inactive rule\n\n";
 
 %patterns = (
   '70_sandbox.cf: WARNING: not listed in manifest file' => manif_found,
@@ -78,7 +78,7 @@ ok ok_all_patterns();
 save_tdir();
 
 # ---------------------------------------------------------------------------
-# non-promotion of a broken rule
+print " non-promotion of a broken rule\n\n";
 
 %patterns = (
   '70_sandbox.cf: WARNING: not listed in manifest file' => manif_found,
@@ -107,7 +107,7 @@ ok ok_all_patterns();
 save_tdir();
 
 # ---------------------------------------------------------------------------
-# promotion of an active meta rule
+print " promotion of an active meta rule\n\n";
 
 %patterns = (
   '70_sandbox.cf: WARNING: not listed in manifest file' => manif_found,
@@ -138,7 +138,7 @@ ok ok_all_patterns();
 save_tdir();
 
 # ---------------------------------------------------------------------------
-# inactive meta rule
+print " inactive meta rule\n\n";
 
 %patterns = (
   '70_sandbox.cf: WARNING: not listed in manifest file' => manif_found,
@@ -169,7 +169,7 @@ ok ok_all_patterns();
 save_tdir();
 
 # ---------------------------------------------------------------------------
-# active plugin
+print " active plugin in sandbox\n\n";
 
 %patterns = (
   '70_sandbox.cf: WARNING: not listed in manifest file' => manif_found,
@@ -205,6 +205,49 @@ write_file("$tdir/rulesrc/sandbox/foo/plugin.pm", [
 ]);
 
 ok (mkrun ("--src $tdir/rulesrc --out $tdir/rules --manifest $tdir/MANIFEST --manifestskip $tdir/MANIFEST.SKIP --active $tdir/rules/active.list 2>&1", \&patterns_run_cb));
+# checkfile("$tdir/rules/72_active.cf", \&patterns_run_cb);
+checkfile("$tdir/rules/70_sandbox.cf", \&patterns_run_cb);
+ok (-f "$tdir/rules/plugin.pm");
+ok ok_all_patterns();
+save_tdir();
+
+# ---------------------------------------------------------------------------
+print " active plugin in core\n\n";
+
+%patterns = (
+  '70_sandbox.cf: WARNING: not listed in manifest file' => manif_found,
+  "loadplugin Good plugin.pm" => loadplugin_found,
+  "body GOOD eval:check_foo()"   => rule_line_1,
+  "describe GOOD desc_found"  => rule_line_2,
+  "ifplugin Good" => if1,
+  "endif" => endif_found,
+);
+%anti_patterns = (
+  "describe T_GOOD desc_found"  => rule_line_2,
+);
+
+mkpath ([ "$tdir/rulesrc/core", "$tdir/rules", ]);
+
+write_file("$tdir/MANIFEST", [ "rulesrc/core/20_foo.cf\n", "rulesrc/core/plugin.pm\n" ]);
+write_file("$tdir/MANIFEST.SKIP", [ "foo2\n" ]);
+write_file("$tdir/rules/active.list", [ "GOOD\n" ]);
+write_file("$tdir/rulesrc/core/20_foo.cf", [
+    "loadplugin Good plugin.pm\n",
+    "ifplugin Good\n",
+    "body GOOD eval:check_foo()\n",
+    "describe GOOD desc_found\n",
+    "endif\n",
+]);
+write_file("$tdir/rulesrc/core/plugin.pm", [
+    'package Good;',
+    'use Mail::SpamAssassin::Plugin; our @ISA = qw(Mail::SpamAssassin::Plugin);',
+    'sub new { my ($class, $m) = @_; $class = ref($class) || $class;',
+    'my $self = bless $class->SUPER::new($m), $class;',
+    '$self->register_eval_rule("check_foo"); return $self; }',
+    'sub check_foo { my ($self, $pms) = @_; return 1; }',
+]);
+
+ok (mkrun ("--src $tdir/rulesrc --out $tdir/rules --manifest $tdir/MANIFEST --manifestskip $tdir/MANIFEST.SKIP --active $tdir/rules/active.list 2>&1", \&patterns_run_cb));
 checkfile("$tdir/rules/72_active.cf", \&patterns_run_cb);
 # checkfile("$tdir/rules/70_sandbox.cf", \&patterns_run_cb);
 ok (-f "$tdir/rules/plugin.pm");
@@ -212,7 +255,7 @@ ok ok_all_patterns();
 save_tdir();
 
 # ---------------------------------------------------------------------------
-# inactive plugin
+print " inactive plugin\n\n";
 
 %patterns = (
   '70_sandbox.cf: WARNING: not listed in manifest file' => manif_found,
@@ -257,7 +300,7 @@ save_tdir();
 
 
 # ---------------------------------------------------------------------------
-# inactive plugin in non-sandbox
+print " inactive plugin in non-sandbox\n\n";
 
 %patterns = (
   '70_inactive.cf: WARNING: not listed in manifest file' => manif_found,
@@ -302,7 +345,7 @@ ok ok_all_patterns();
 save_tdir();
 
 # ---------------------------------------------------------------------------
-# active plugin, but the .pm file is AWOL
+print " active plugin, but the .pm file is AWOL\n\n";
 
 %patterns = (
   "body GOOD eval:check_foo()"   => rule_line_1,
@@ -336,7 +379,7 @@ ok ok_all_patterns();
 save_tdir();
 
 # ---------------------------------------------------------------------------
-# active plugin, but the .pm file is not in MANIFEST
+print " active plugin, but the .pm file is not in MANIFEST\n\n";
 
 %patterns = (
   "body GOOD eval:check_foo()"   => rule_line_1,
@@ -371,8 +414,8 @@ write_file("$tdir/rulesrc/sandbox/foo/plugin.pm", [
 ]);
 
 ok (mkrun ("--src $tdir/rulesrc --out $tdir/rules --manifest $tdir/MANIFEST --manifestskip $tdir/MANIFEST.SKIP --active $tdir/rules/active.list 2>&1", \&patterns_run_cb));
-checkfile("$tdir/rules/72_active.cf", \&patterns_run_cb);
-# checkfile("$tdir/rules/70_sandbox.cf", \&patterns_run_cb);
+# checkfile("$tdir/rules/72_active.cf", \&patterns_run_cb);
+checkfile("$tdir/rules/70_sandbox.cf", \&patterns_run_cb);
 ok (-f "$tdir/rules/plugin.pm");
 ok ok_all_patterns();
 save_tdir();
@@ -413,7 +456,7 @@ sub mkrun {
 
 sub save_tdir {
   rmtree("$tdir.${Test::ntest}");
-  system("cp -pr $tdir $tdir.${Test::ntest}");
+  system("mv $tdir $tdir.${Test::ntest}");
   if ($? >> 8 == 0) {
     print "\ttest output tree copied to $tdir.${Test::ntest}\n";
   }
