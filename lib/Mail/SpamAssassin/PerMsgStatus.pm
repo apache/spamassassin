@@ -2792,7 +2792,18 @@ sub do_meta_tests {
           info("rules: meta test $rulename has undefined dependency '$token'");
         }
         elsif ($conf->{scores}->{$token} == 0) {
-          info("rules: meta test $rulename has dependency '$token' with a zero score");
+          my $dowarn = 1;
+
+          # there are some cases where this is expected; don't warn
+          # in those cases.
+          if ((($self->{conf}->get_score_set()) & 1) == 0 &&
+              $conf->{tflags}->{$token} && 
+              $conf->{tflags}->{$token} =~ /\bnet\b/)
+          {
+            $dowarn = 0;    # bug 5040: net rules in a non-net scoreset
+          }
+
+          $dowarn and info("rules: meta test $rulename has dependency '$token' with a zero score");
         }
 
         # If the token is another meta rule, add it as a dependency
