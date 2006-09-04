@@ -639,6 +639,9 @@ sub get_all_headers {
   return wantarray ? @lines : join ('', @lines);
 }
 
+# legacy public API; now a no-op.
+sub finish { }
+
 # ---------------------------------------------------------------------------
 
 1;
