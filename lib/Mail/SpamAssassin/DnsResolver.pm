@@ -428,7 +428,9 @@ sub poll_responses {
 
 =item $res->bgabort()
 
-Call this to release pending requests from memory when aborting backgrounded requests
+Call this to release pending requests from memory, when aborting backgrounded
+requests, or when the scan is complete.
+C<Mail::SpamAssassin::PerMsgStatus::check> calls this before returning.
 
 =cut
 

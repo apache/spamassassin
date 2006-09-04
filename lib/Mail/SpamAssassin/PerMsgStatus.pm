@@ -260,6 +260,7 @@ sub check {
   dbg("check: subtests=".$self->get_names_of_subtests_hit());
   $self->{is_spam} = $self->is_spam();
 
+  $self->{main}->{resolver}->bgabort();
   $self->{main}->call_plugins ("check_end", { permsgstatus => $self });
 
   1;
