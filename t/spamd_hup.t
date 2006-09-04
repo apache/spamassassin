@@ -69,7 +69,7 @@ sub get_pid {
       chomp $npid;
       close(PID);
     } else {
-      print "Could not open pid file ${pid_file}: $!\n";
+      die "Could not open pid file ${pid_file}: $!\n";
     }
   #} until ($npid != $opid or $timeout == 0);
   return $npid;
