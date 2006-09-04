@@ -451,12 +451,24 @@ sub rule_file_compile {
     elsif (/^loadplugin\s*(\S+)\b/) {
       my $name = 'loadplugin_'.$1;
 
+      unless ($rules->{$name}) {
+        $rules->{$name} = rule_entry_create();
+        $rules->{$name}->{issandbox} = $issandbox;
+        $rules->{$name}->{iscommand} = 1;
+      }
+
       if (/^loadplugin\s*\S+\s+(\S+)/) {
         my $fname = $1;
         my $fpath = dirname($f)."/".$fname;
+
         if (!-f $fpath) {
           warn "$f: WARNING: plugin code file '$fpath' not found, line ignored: $orig";
           next;
+        }
+
+        if ($fpath =~ /sandbox/i) {
+          # Since this is a sandbox plugin, force its output to the sandbox area.
+          $rules->{$name}->{sandbox_plugin} = 1;
         }
 
         # If a 'loadplugin' line is found, and the plugin .pm is not listed in
@@ -476,12 +488,6 @@ sub rule_file_compile {
           warn "$f: WARNING: '$opt_out/$fname' not listed in manifest file, making 'tryplugin': $orig";
           $orig =~ s/^\s*loadplugin\b/tryplugin/;
         }
-      }
-
-      unless ($rules->{$name}) {
-        $rules->{$name} = rule_entry_create();
-        $rules->{$name}->{issandbox} = $issandbox;
-        $rules->{$name}->{iscommand} = 1;
       }
 
       $rules->{$name}->{text} .= $orig;
@@ -571,29 +577,41 @@ sub copy_to_output_buffers {
       $is_active++;
     }
 
-    $output_files->{$pubfile} = {
-      header => $default_file_header
-    };
-
     # fix up any rule renamings we were supposed to do
     sed_renamed_rule_names(\$text);
 
     my $cond = $rules->{$name}->{cond};
-    if ($cond) {
-      $rules->{$name}->{output_text} = "\n".$cond.$text."endif\n";
+    my $pluginclass = $rules->{$name}->{ifplugin};
+    if ($cond)
+    {
+      my $ifplugin_text_name = "loadplugin_".($pluginclass || "");
 
-      # also, if the rule is active, ensure its "loadplugin" line
-      # is copied to the active output file, too
-      my $pluginclass = $rules->{$name}->{ifplugin};
-      if ($is_active && $pluginclass) {
-        my $ifplugin_text_name = "loadplugin_".$pluginclass;
+      if ($pluginclass && $rules->{$ifplugin_text_name})
+      {
+        # if the plugin is a sandbox plugin, ensure it's not
+        # sent to the active file
+        if ($rules->{$ifplugin_text_name}->{sandbox_plugin}) {
+          $pubfile = $opt_out.'/'.$opt_sandboxout;
+          $is_active = 0;
+        }
+
+        # either way, ensure the "loadplugin" line, if there is one,
+        # goes to the same file
         $rules->{$ifplugin_text_name}->{output_file} = $pubfile;
       }
+
+      $rules->{$name}->{output_text} = "\n".$cond.$text."endif\n";
 
     } else {
       $rules->{$name}->{output_text} = $text;
     }
+
+    # note the target file
     $rules->{$name}->{output_file} = $pubfile;
+
+    $output_files->{$pubfile} = {
+      header => $default_file_header
+    };
 
     if ($is_active) {
       $copied_active++;
