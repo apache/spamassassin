@@ -271,6 +271,12 @@ sub decode {
   my($self, $bytes) = @_;
 
   if ( !exists $self->{'decoded'} ) {
+    # Someone is looking for a decoded part where there is no raw data
+    # (multipart or subparsed message, etc.)  Just return undef.
+    if (!exists $self->{'raw'}) {
+      return undef;
+    }
+
     my $encoding = lc $self->header('content-transfer-encoding') || '';
 
     if ( $encoding eq 'quoted-printable' ) {

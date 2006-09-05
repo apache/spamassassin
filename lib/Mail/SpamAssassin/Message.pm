@@ -586,30 +586,35 @@ sub parse_body {
       $self->_parse_normal($toparse);
 
       if ($toparse->[0]->{'type'} =~ /^message\b/i && ($toparse->[3] > 0)) {
-        # Get the part ready...
-        my $message = $toparse->[0]->decode();
+        # Just decode the part, but we don't care about the result here.
+        $toparse->[0]->decode(0);
 
 	# Ok, so this part is still semi-recursive, since M::SA::Message calls
 	# M::SA::Message, but we don't subparse the new message, and pull a
 	# sneaky "steal our child's queue" maneuver to deal with it on our own
-	# time.
-        if ($message) {
-          my $msg_obj = Mail::SpamAssassin::Message->new({
-      	    message		=>	$message,
-	    parsenow	=>	0,
-	    normalize	=>	$self->{normalize},
-	    subparse	=>	$toparse->[3]-1,
-	    });
+	# time.  Reference the decoded array directly since it's faster.
+	# 
+        my $msg_obj = Mail::SpamAssassin::Message->new({
+    	  message	=>	$toparse->[0]->{'decoded'},
+	  parsenow	=>	0,
+	  normalize	=>	$self->{normalize},
+	  subparse	=>	$toparse->[3]-1,
+	  });
 
-	  # Add the new message to the current node
-          $toparse->[0]->add_body_part($msg_obj);
+	# Add the new message to the current node
+        $toparse->[0]->add_body_part($msg_obj);
 
-	  # now this is the sneaky bit ... steal the sub-message's parse_queue
-	  # and add it to ours.  then we'll handle the sub-message in our
-	  # normal loop and get all the glory.  muhaha.  :)
-	  push(@{$self->{'parse_queue'}}, @{$msg_obj->{'parse_queue'}});
-	  delete $msg_obj->{'parse_queue'};
-        }
+	# now this is the sneaky bit ... steal the sub-message's parse_queue
+	# and add it to ours.  then we'll handle the sub-message in our
+	# normal loop and get all the glory.  muhaha.  :)
+	push(@{$self->{'parse_queue'}}, @{$msg_obj->{'parse_queue'}});
+	delete $msg_obj->{'parse_queue'};
+
+	# Ok, we've subparsed, so go ahead and remove the raw and decoded
+	# data because we won't need them anymore (the tree under this part
+	# will have that data)
+	delete $toparse->[0]->{'raw'};
+	delete $toparse->[0]->{'decoded'};
       }
     }
   }
