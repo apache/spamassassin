@@ -411,8 +411,7 @@ sub ping {
   close $remote;
 
   my ($version, $resp_code, $resp_msg) = $self->_parse_response_line($line);
-
-  return 0 unless ($resp_msg =~ /^PONG/);
+  return 0 unless ($resp_msg eq 'PONG');
 
   return 1;
 }
@@ -472,6 +471,7 @@ with the response line.
 sub _parse_response_line {
   my ($self, $line) = @_;
 
+  $line =~ s/\r?\n$//;
   return split(/\s+/, $line, 3);
 }
 
