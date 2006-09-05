@@ -381,17 +381,20 @@ or whatever the original type was), and the rendered text.
 sub rendered {
   my ($self) = @_;
 
-  # We don't render anything except text
-  return(undef,undef) unless ( $self->{'type'} =~ /^text\b/i );
-
   if (!exists $self->{rendered}) {
+    # We only know how to render text/plain and text/html ...
+    # Note: for bug 4843, make sure to skip text/calendar parts
+    # we also want to skip things like text/x-vcard
+    # text/x-aol is ignored here, but looks like text/html ...
+    return(undef,undef) unless ( $self->{'type'} =~ /^text\/(?:plain|html)$/i );
+
     my $text = $self->_normalize($self->decode(), $self->{charset});
     my $raw = length($text);
 
     # render text/html always, or any other text|text/plain part as text/html
     # based on a heuristic which simulates a certain common mail client
-    if ($raw > 0 && ($self->{'type'} =~ m@^text/html\b@i ||
-		     ($self->{'type'} =~ m@^text(?:$|/plain)@i &&
+    if ($raw > 0 && ($self->{'type'} =~ m@^text/html$@i ||
+		     ($self->{'type'} =~ m@^text/plain$@i &&
 		      _html_render(substr($text, 0, 23)))))
     {
       $self->{rendered_type} = 'text/html';
@@ -416,8 +419,16 @@ sub rendered {
     }
     else {
       $self->{rendered_type} = $self->{type};
-      $self->{rendered} = $self->{visible_rendered} = $text;
+      $self->{rendered} = $text;
     }
+  }
+
+  # If these weren't set by anything else, go ahead and set them now...
+  if (!exists $self->{'visible_rendered'}) {
+    $self->{'visible_rendered'} = $self->{'rendered'};
+  }
+  if (!exists $self->{'invisible_rendered'}) {
+    $self->{'invisible_rendered'} = '';
   }
 
   return ($self->{rendered_type}, $self->{rendered});

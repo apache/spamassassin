@@ -133,6 +133,7 @@ sub _multipart_alternative_difference {
     foreach my $text (@txt) {
       # we only care about the rendered version of the part
       my ($type, $rnd) = $text->rendered();
+      next unless defined $type;
 
       # parse the rendered text into tokens.  assume they are whitespace
       # separated, and ignore anything that doesn't have a word-character
