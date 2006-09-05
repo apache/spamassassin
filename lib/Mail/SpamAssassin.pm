@@ -396,6 +396,12 @@ sub parse {
   my($self, $message, $parsenow) = @_;
   $self->init(1);
   my $msg = Mail::SpamAssassin::Message->new({message=>$message, parsenow=>$parsenow, normalize=>$self->{conf}->{normalize_charset}});
+
+  # bug 5069: The goal here is to get rendering plugins to do things
+  # like OCR, convert doc and pdf to text, etc, though it could be anything
+  # that wants to process the message after it's been parsed.
+  $self->call_plugins("post_message_parse", { message => $msg });
+
   return $msg;
 }
 

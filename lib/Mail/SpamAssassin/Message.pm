@@ -821,7 +821,7 @@ sub get_rendered_body_text_array {
   $self->{text_rendered} = [];
 
   # Find all parts which are leaves
-  my @parts = $self->find_parts(qr/^(?:text|message)\b/i,1);
+  my @parts = $self->find_parts(qr/./,1);
   return $self->{text_rendered} unless @parts;
 
   # the html metadata may have already been set, so let's not bother if it's
@@ -832,10 +832,6 @@ sub get_rendered_body_text_array {
   my $text = $self->get_header ('subject') || "\n";
   for(my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
     my $p = $parts[$pt];
-
-    # bug 4843: skip text/calendar parts since they're usually an attachment
-    # and not displayed
-    next if ($p->{'type'} eq 'text/calendar');
 
     # put a blank line between parts ...
     $text .= "\n";
@@ -852,9 +848,6 @@ sub get_rendered_body_text_array {
       if ($html_needs_setting && $type eq 'text/html') {
         $self->{metadata}->{html} = $p->{html_results};
       }
-    }
-    else {
-      $text .= $p->decode();
     }
   }
 
@@ -885,7 +878,7 @@ sub get_visible_rendered_body_text_array {
   $self->{text_visible_rendered} = [];
 
   # Find all parts which are leaves
-  my @parts = $self->find_parts(qr/^(?:text|message)\b/i,1);
+  my @parts = $self->find_parts(qr/./,1);
   return $self->{text_visible_rendered} unless @parts;
 
   # the html metadata may have already been set, so let's not bother if it's
@@ -896,10 +889,6 @@ sub get_visible_rendered_body_text_array {
   my $text = $self->get_header ('subject') || "\n";
   for(my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
     my $p = $parts[$pt];
-
-    # bug 4843: skip text/calendar parts since they're usually an attachment
-    # and not displayed
-    next if ($p->{'type'} eq 'text/calendar');
 
     # put a blank line between parts ...
     $text .= "\n";
@@ -916,9 +905,6 @@ sub get_visible_rendered_body_text_array {
       if ($html_needs_setting && $type eq 'text/html') {
         $self->{metadata}->{html} = $p->{html_results};
       }
-    }
-    else {
-      $text .= $p->decode();
     }
   }
 
@@ -943,7 +929,7 @@ sub get_invisible_rendered_body_text_array {
   $self->{text_invisible_rendered} = [];
 
   # Find all parts which are leaves
-  my @parts = $self->find_parts(qr/^(?:text|message)\b/i,1);
+  my @parts = $self->find_parts(qr/./,1);
   return $self->{text_invisible_rendered} unless @parts;
 
   # the html metadata may have already been set, so let's not bother if it's
@@ -954,10 +940,6 @@ sub get_invisible_rendered_body_text_array {
   my $text = '';
   for(my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
     my $p = $parts[$pt];
-
-    # bug 4843: skip text/calendar parts since they're usually an attachment
-    # and not displayed
-    next if ($p->{'type'} eq 'text/calendar');
 
     # put a blank line between parts ...
     $text .= "\n" if ( $text );
