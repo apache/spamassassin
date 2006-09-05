@@ -430,6 +430,9 @@ sub rendered {
   if (!exists $self->{'invisible_rendered'}) {
     $self->{'invisible_rendered'} = '';
   }
+  if (!exists $self->{'rendered_type'}) {
+    $self->{'rendered_type'} = 'text/plain';
+  }
 
   return ($self->{rendered_type}, $self->{rendered});
 }
