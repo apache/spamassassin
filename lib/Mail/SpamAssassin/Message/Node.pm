@@ -419,22 +419,30 @@ sub rendered {
     }
     else {
       $self->{rendered_type} = $self->{type};
-      $self->{rendered} = $text;
+      $self->{rendered} = $self->{'visible_rendered'} = $text;
+      $self->{'invisible_rendered'} = '';
     }
   }
 
-  # If these weren't set by anything else, go ahead and set them now...
-  if (!exists $self->{'visible_rendered'}) {
-    $self->{'visible_rendered'} = $self->{'rendered'};
-  }
-  if (!exists $self->{'invisible_rendered'}) {
-    $self->{'invisible_rendered'} = '';
-  }
-  if (!exists $self->{'rendered_type'}) {
-    $self->{'rendered_type'} = 'text/plain';
-  }
-
   return ($self->{rendered_type}, $self->{rendered});
+}
+
+=item set_rendered($text, $type)
+
+Set the rendered text and type for the given part.  If type is not
+specified, and text is a defined value, a default of 'text/plain' is used.
+This can be used, for instance, to render non-text parts using plugins.
+
+=cut
+
+sub set_rendered {
+  my ($self, $text, $type) = @_;
+
+  $type = 'text/plain' if (!defined $type && defined $text);
+
+  $self->{'rendered_type'} = $type;
+  $self->{'rendered'} = $self->{'visible_rendered'} = $text;
+  $self->{'invisible_rendered'} = defined $text ? '' : undef;
 }
 
 =item visible_rendered()
