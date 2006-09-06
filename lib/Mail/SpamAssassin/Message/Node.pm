@@ -255,7 +255,22 @@ Return a reference to the the raw array.  Treat this as READ ONLY.
 =cut
 
 sub raw {
-  return $_[0]->{'raw'};
+  my $self = shift;
+
+  # Ok, if we're called we are expected to return an array.
+  # so if it's a file reference, read in the message into an array...
+  #
+  # NOTE: that "ref undef" works, so don't bother checking for a defined var
+  # first.
+  if (ref $self->{'raw'} eq 'GLOB') {
+    my @array;
+    my $fd = $self->{'raw'};
+    seek $fd, 0, 0;
+    @array = <$fd>;
+    return \@array;
+  }
+
+  return $self->{'raw'};
 }
 
 =item decode()
@@ -277,13 +292,26 @@ sub decode {
       return undef;
     }
 
+    my $raw;
+
+    # if the part is held in a temp file, read it into the scalar
+    if (ref $self->{'raw'} eq 'GLOB') {
+      my $fd = $self->{'raw'};
+      seek $fd, 0, 0;
+      local $/ = undef;
+      $raw = <$fd>;
+    }
+    else {
+      # create a new scalar from the raw array in memory
+      $raw = join('', @{$self->{'raw'}});
+    }
+
     my $encoding = lc $self->header('content-transfer-encoding') || '';
 
     if ( $encoding eq 'quoted-printable' ) {
       dbg("message: decoding quoted-printable");
-      $self->{'decoded'} = [
-        map { s/\r\n/\n/; $_; } split ( /^/m, Mail::SpamAssassin::Util::qp_decode( join ( "", @{$self->{'raw'}} ) ) )
-	];
+      $self->{'decoded'} = Mail::SpamAssassin::Util::qp_decode($raw);
+      $self->{'decoded'} =~ s/\r\n/\n/g;
     }
     elsif ( $encoding eq 'base64' ) {
       dbg("message: decoding base64");
@@ -291,16 +319,16 @@ sub decode {
       # if it's not defined or is 0, do the whole thing, otherwise only decode
       # a portion
       if ($bytes) {
-        return Mail::SpamAssassin::Util::base64_decode(join("", @{$self->{'raw'}}), $bytes);
+        return Mail::SpamAssassin::Util::base64_decode($raw, $bytes);
       }
       else {
         # Generate the decoded output
-        $self->{'decoded'} = [ Mail::SpamAssassin::Util::base64_decode(join("", @{$self->{'raw'}})) ];
+        $self->{'decoded'} = Mail::SpamAssassin::Util::base64_decode($raw);
       }
 
       # If it's a type text or message, split it into an array of lines
       if ( $self->{'type'} =~ m@^(?:text|message)\b/@i ) {
-        $self->{'decoded'} = [ map { s/\r\n/\n/; $_; } split(/^/m, $self->{'decoded'}->[0]) ];
+        $self->{'decoded'} =~ s/\r\n/\n/g;
       }
     }
     else {
@@ -311,17 +339,17 @@ sub decode {
       else {
         dbg("message: no encoding detected");
       }
-      $self->{'decoded'} = $self->{'raw'};
+      $self->{'decoded'} = $raw;
     }
   }
 
   if ( !defined $bytes || $bytes ) {
-    my $tmp = join("", @{$self->{'decoded'}});
     if ( !defined $bytes ) {
-      return $tmp;
+      # force a copy
+      return '' . $self->{'decoded'};
     }
     else {
-      return substr($tmp, 0, $bytes);
+      return substr($self->{'decoded'}, 0, $bytes);
     }
   }
 }

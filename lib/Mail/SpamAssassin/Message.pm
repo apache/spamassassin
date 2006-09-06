@@ -807,8 +807,31 @@ sub _parse_normal {
     $msg->{'name'} = $ct[3];
   }
 
-  $msg->{'raw'} = $body;
   $msg->{'boundary'} = $boundary;
+
+  # If the part type is not one that we're likely to want to use, go
+  # ahead and write the part data out to a temp file -- why keep sucking
+  # up RAM with something we're not going to use?
+  #
+  if ($msg->{'type'} !~ m@^(?:text/(?:plain|html)$|message\b)@) {
+    my $filepath;
+    ($filepath, $msg->{'raw'}) = Mail::SpamAssassin::Util::secure_tmpfile();
+
+    if ($filepath) {
+      # The temp file was created, let's try to delete it now
+      if (!unlink $filepath) {
+        # We couldn't delete the file, so abort trying to make the temp file.
+        close($msg->{'raw'});
+	unlink $filepath; # try again with the file closed
+      }
+      $msg->{'raw'}->print(@{$body});
+    }
+  }
+
+  # if the part didn't get a temp file, go ahead and store the data in memory
+  if (!exists $msg->{'raw'}) {
+    $msg->{'raw'} = $body;
+  }
 }
 
 # ---------------------------------------------------------------------------
