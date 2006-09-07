@@ -983,6 +983,7 @@ sub is_delimited_regexp_valid {
   my ($self, $name, $re) = @_;
 
   if (!$re || $re !~ /^\s*m?(\W).*(?:\1|>|}|\)|\])[a-z]*\s*$/) {
+    $re ||= '';
     $self->lint_warn("config: invalid regexp for rule $name: $re: missing or invalid delimiters\n", $name);
     return 0;
   }
