@@ -122,6 +122,8 @@
 #define SPAMC_REMOVE_LOCAL       4
 #define SPAMC_REMOVE_REMOTE      8
 
+#define SPAMC_MAX_MESSAGE_LEN     (256 * 1024 * 1024)     /* see bug 4928 */
+
 /* Aug 14, 2002 bj: A struct for storing a message-in-progress */
 typedef enum
 {

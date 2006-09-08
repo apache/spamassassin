@@ -420,6 +420,12 @@ read_args(int argc, char **argv,
         }
     }
 
+    if (*max_size > SPAMC_MAX_MESSAGE_LEN) {
+        libspamc_log(flags, LOG_ERR, "-s parameter is beyond max of %d",
+                        SPAMC_MAX_MESSAGE_LEN);
+        ret = EX_USAGE;
+    }
+
     /* learning action has to block some parameters */
     if (flags & SPAMC_LEARN) {
         if (flags & SPAMC_CHECK_ONLY) {
