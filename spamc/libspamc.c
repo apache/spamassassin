@@ -1010,9 +1010,9 @@ int message_filter(struct transport *tp, const char *username,
 	strcat(buf + len, "\r\n");
 	len += strlen(buf + len);
       }
-      if ((m->msg_len > 9999999) || ((len + 27) >= (bufsiz - len))) {
+      if ((m->msg_len > SPAMC_MAX_MESSAGE_LEN) || ((len + 27) >= (bufsiz - len))) {
 	_use_msg_for_out(m);
-	return EX_OSERR;
+	return EX_DATAERR;
       }
       len += sprintf(buf + len, "Content-length: %d\r\n\r\n", (int) m->msg_len);
     }
@@ -1337,9 +1337,9 @@ int message_tell(struct transport *tp, const char *username, int flags,
 	strcat(buf + len, "\r\n");
 	len += strlen(buf + len);
     }
-    if ((m->msg_len > 9999999) || ((len + 27) >= (bufsiz - len))) {
+    if ((m->msg_len > SPAMC_MAX_MESSAGE_LEN) || ((len + 27) >= (bufsiz - len))) {
 	_use_msg_for_out(m);
-	return EX_OSERR;
+	return EX_DATAERR;
     }
     len += sprintf(buf + len, "Content-length: %d\r\n\r\n", (int) m->msg_len);
 
