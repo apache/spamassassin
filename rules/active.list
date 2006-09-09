@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-jm bb-zmi cthielen daf parkerm theo wtogami zmi
+# with results from: bb-doc bb-jm bb-zmi cthielen daf parkerm theo wtogami
 
 # good enough
 ADVANCE_FEE_3
@@ -15,6 +15,9 @@ AWL
 
 # good enough
 AXB_FAKETZ
+
+# good enough
+BAD_ENC_HEADER
 
 # good enough
 BANG_OPRAH
@@ -182,9 +185,6 @@ DRUGS_MANYKINDS
 DRUGS_SLEEP_EREC
 
 # good enough
-DRUG_DOSAGE
-
-# good enough
 DRUG_ED_GENERIC
 
 # good enough
@@ -201,9 +201,6 @@ EMPTY_MESSAGE
 
 # good enough
 EM_ROLEX
-
-# good enough
-ENGLISH_UCE_SUBJECT
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
@@ -350,10 +347,16 @@ FROM_ALL_NUMS
 FROM_BLANK_NAME
 
 # good enough
+FROM_DOMAIN_NOVOWEL
+
+# good enough
 FROM_ENDS_IN_NUMS
 
 # good enough
 FROM_HAS_MIXED_NUMS
+
+# good enough
+FROM_HAS_ULINE_NUMS
 
 # good enough
 FROM_ILLEGAL_CHARS
@@ -428,9 +431,6 @@ HEAD_ILLEGAL_CHARS
 HELO_DYNAMIC_CHELLO_NL
 
 # good enough
-HELO_DYNAMIC_DHCP
-
-# good enough
 HELO_DYNAMIC_DIALIN
 
 # good enough
@@ -482,13 +482,13 @@ HTTP_EXCESSIVE_ESCAPES
 INFO_TLD
 
 # good enough
-INTERRUPTUS
-
-# good enough
 INVALID_DATE
 
 # good enough
 INVALID_TZ_CST
+
+# good enough
+INVALID_TZ_GMT
 
 # good enough
 INVESTMENT_ADVICE
@@ -587,9 +587,6 @@ MISSING_MIMEOLE
 MORE_SEX
 
 # good enough
-MPART_ALT_DIFF
-
-# good enough
 MSGID_DOLLARS_RANDOM
 
 # good enough
@@ -612,9 +609,6 @@ MSGID_YAHOO_CAPS
 
 # good enough
 MULTIPART_ALT_NON_TEXT
-
-# good enough
-NOT_ADVISOR
 
 # tflags net
 NO_DNS_FOR_FROM
@@ -872,6 +866,9 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
+SPOOF_COM2COM
+
+# good enough
 SPOOF_COM2OTH
 
 # good enough
@@ -903,6 +900,9 @@ SUBJECT_IN_WHITELIST
 
 # good enough
 SUBJECT_NEEDS_ENCODING
+
+# good enough
+SUBJECT_NOVOWEL
 
 # good enough
 SUBJECT_SEXUAL
@@ -1049,6 +1049,9 @@ TVD_SINGLE_SPAN_DIV
 TVD_SPACED_SUBJECT_WORD3
 
 # good enough
+TVD_SPACED_SUBJECT_WORD5
+
+# good enough
 TVD_SPACED_WORDS
 
 # good enough
@@ -1076,12 +1079,6 @@ TVD_SUBJ_WIPE_DEBT
 TVD_UA_FOSTERING
 
 # good enough
-TVD_UNDER_VALUED
-
-# good enough
-TVD_VISIT_PHARMA
-
-# good enough
 TVD_VIS_HIDDEN
 
 # good enough
@@ -1103,25 +1100,19 @@ RATWARE_MS_HASH
 RATWARE_OUTLOOK_NONAME
 
 # good enough
-TVD_ENHANCE
+TVD_FW_GRAPHIC_ID1
 
 # good enough
-TVD_FW_GRAPHIC_ID2
-
-# good enough
-TVD_FW_GRAPHIC_NAME_LONG
-
-# good enough
-TVD_FW_GRAPHIC_NAME_MID
-
-# good enough
-TVD_SPACED_SUBJECT_WORD5
+TVD_LONG_WORD5
 
 # good enough
 UNCLAIMED_MONEY
 
 # good enough
 UNCLOSED_BRACKET
+
+# good enough
+UNIQUE_WORDS
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1164,6 +1155,9 @@ URIBL_SC_SURBL
 
 # tflags net
 URIBL_WS_SURBL
+
+# good enough
+URI_4YOU
 
 # good enough
 URI_L_PHP
@@ -1221,6 +1215,9 @@ X_LIBRARY
 
 # good enough
 X_MESSAGE_INFO
+
+# good enough
+X_MSMAIL_PRIORITY_HIGH
 
 # good enough
 X_ORIG_IP_NOT_IPV4
