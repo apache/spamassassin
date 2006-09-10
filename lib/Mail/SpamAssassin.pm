@@ -213,6 +213,11 @@ from files, read them in yourself and set this instead.  As a result, this will
 override the settings for C<rules_filename>, C<site_rules_filename>,
 and C<userprefs_filename>.
 
+=item post_config_text
+
+Similar to C<config_text>, this text is placed after config_text to allow an
+override of config files.
+
 =item force_ipv4
 
 If set to 1, DNS tests will not attempt to use IPv6. Use if the existing tests
@@ -1369,8 +1374,6 @@ sub init {
   if (!defined $self->{config_text}) {
     $self->{config_text} = '';
 
-    my $fname;
-
     # read a file called "init.pre" in site rules dir *before* all others;
     # even the system config.
     my $siterules = $self->{site_rules_filename};
@@ -1393,25 +1396,23 @@ sub init {
       warn "config: could not find sys rules directory\n";
     }
 
-    $fname = $sysrules;
-    if ($fname) {
-      $self->{config_text} .= $self->read_cf ($fname, 'default rules dir');
+    if ($sysrules) {
+      $self->{config_text} .= $self->read_cf ($sysrules, 'default rules dir');
     }
 
     if (!$self->{languages_filename}) {
       $self->{languages_filename} = $self->find_rule_support_file("languages");
     }
 
-    $fname = $siterules;
-    if ($fname) {
-      $self->{config_text} .= $self->read_cf ($fname, 'site rules dir');
+    if ($siterules) {
+      $self->{config_text} .= $self->read_cf ($siterules, 'site rules dir');
     }
 
     if ( $use_user_pref != 0 ) {
       $self->get_and_create_userstate_dir();
 
       # user prefs file
-      $fname = $self->{userprefs_filename};
+      my $fname = $self->{userprefs_filename};
       $fname ||= $self->first_existing_path (@default_userprefs_path);
 
       if (!$self->{dont_copy_prefs}) {
@@ -1427,6 +1428,8 @@ sub init {
       $self->{config_text} .= $self->read_cf ($fname, 'user prefs file');
     }
   }
+
+  $self->{config_text} .= $self->{post_config_text} if ($self->{post_config_text});
 
   if ($self->{config_text} !~ /\S/) {
     warn "config: no configuration text or files found! please check your setup\n";
