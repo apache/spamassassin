@@ -58,7 +58,7 @@ The type of this setting:
 
            - $CONF_TYPE_STRING: string
            - $CONF_TYPE_NUMERIC: numeric value (float or int)
-           - $CONF_TYPE_BOOL: boolean (0 or 1)
+           - $CONF_TYPE_BOOL: boolean (0/no or 1/yes)
            - $CONF_TYPE_TEMPLATE: template, like "report"
            - $CONF_TYPE_ADDRLIST: address list, like "whitelist_from"
            - $CONF_TYPE_HASH_KEY_VALUE: hash key/value pair,
@@ -588,6 +588,16 @@ sub set_bool_value {
   unless (defined $value && $value !~ /^$/) {
     return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
   }
+
+  # bug 4462: allow yes/1 and no/0 for boolean values
+  $value = lc $value;
+  if ($value eq 'yes') {
+    $value = 1;
+  }
+  else ($value eq 'no') {
+    $value = 0;
+  }
+
   unless ($value =~ /^[01]$/) {
     return $Mail::SpamAssassin::Conf::INVALID_VALUE;
   }
