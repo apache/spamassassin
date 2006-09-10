@@ -816,8 +816,18 @@ minimum limit on file descriptors be raised to at least 256 for safety.
     default => 'test',
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      if ($value !~ /^(yes|no|test|test:\s+.+)$/) { return $INVALID_VALUE; }
-      $self->{dns_available} = ($1 or "test");
+      if ($value =~ /^test(?::\s+.+)?$/) {
+        $self->{dns_available} = $value;
+      }
+      elsif ($value =~ /^(?:yes|1)$/) {
+        $self->{dns_available} = 'yes';
+      }
+      elsif ($value =~ /^(?:no|0)$/) {
+        $self->{dns_available} = 'no';
+      }
+      else {
+        return $INVALID_VALUE;
+      }
     }
   });
 
