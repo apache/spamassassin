@@ -650,9 +650,6 @@ sub html_tests {
   if ($tag eq "img" && exists $self->{inside}{a} && $self->{inside}{a} > 0) {
     $self->{uri}->{$self->{anchor_last}}->{anchor_text}->[-1] .= "<img>\n";
     $self->{anchor}->[-1] .= "<img>\n";
-    if ($self->{anchor_last} =~ /\.(?:pl|cgi|php|asp|jsp|cfm)\b/i) {
-      $self->put_results(anchor_image_bug => 1);
-    }
   }
 
   if ($tag eq "img" && exists $attr->{width} && exists $attr->{height}) {
@@ -675,12 +672,6 @@ sub html_tests {
     if ($width > 0 && $height > 0) {
       $area = $width * $height;
       $self->{image_area} += $area;
-    }
-    # this is intended to match any width and height if they're specified
-    if (exists $attr->{src} &&
-	$attr->{src} =~ /\.(?:pl|cgi|php|asp|jsp|cfm)\b/i)
-    {
-      $self->put_results(web_bugs => 1);
     }
   }
   if ($tag eq "form" && exists $attr->{action}) {

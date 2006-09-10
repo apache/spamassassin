@@ -222,9 +222,6 @@ describe HTML_IMAGE_RATIO_04	HTML has a low ratio of text to image area
 describe HTML_IMAGE_RATIO_06	HTML has a low ratio of text to image area
 describe HTML_IMAGE_RATIO_08	HTML has a low ratio of text to image area
 
-body HTML_LINK_IMAGE_BUG	eval:html_test('anchor_image_bug')
-describe HTML_LINK_IMAGE_BUG	HTML link plus image plus web bug
-
 body HTML_LINK_PUSH_HERE	eval:html_text_match('anchor', '(?i)(?:push|go|cl[1l]ck)\s*(?:here|this)')
 describe HTML_LINK_PUSH_HERE	HTML link text says "push here" or similar
 
@@ -266,9 +263,6 @@ body HTML_ATTR_BAD		eval:html_range('attr_bad','0.75','1.0')
 describe HTML_ATTR_BAD		HTML has many bad attributes in tags
 body HTML_ATTR_UNIQUE		eval:html_range('attr_unique_bad','0.5','1.0')
 describe HTML_ATTR_UNIQUE	HTML appears to have random attributes in tags
-
-body HTML_WEB_BUGS		eval:html_test('web_bugs')
-describe HTML_WEB_BUGS		Image tag intended to identify you
 
 body HTML_TAG_BALANCE_BODY	eval:html_tag_balance('body', '!= 0')
 describe HTML_TAG_BALANCE_BODY	HTML has unbalanced "body" tags
