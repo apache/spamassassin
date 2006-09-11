@@ -594,7 +594,7 @@ sub set_bool_value {
   if ($value eq 'yes') {
     $value = 1;
   }
-  else ($value eq 'no') {
+  elsif ($value eq 'no') {
     $value = 0;
   }
 
