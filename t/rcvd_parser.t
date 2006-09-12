@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rcvd_parser");
-use Test; BEGIN { plan tests => 50 };
+use Test; BEGIN { plan tests => 53 };
 
 
 use strict;
@@ -107,6 +107,39 @@ q{
 } => q{
 
 [ ip=61.31.138.57 rdns= helo=0 by=nccdi.com ident= envfrom= id= auth= ]
+
+},
+q{
+
+Received: from ([192.168.1.205:50387] helo=i6.prod.democracyinaction.com)
+        by m12.prod.democracyinaction.com (ecelerity 2.1.1.3 r(11743)) with ESMTP
+        id 80/0A-02454-4DCB6054 for <example@vandinter.org>; Tue, 12 Sep 2006 09:57:40 -0400
+
+} => q{
+
+[ ip=192.168.1.205 rdns= helo=i6.prod.democracyinaction.com by=m12.prod.democracyinaction.com ident= envfrom= id=80/0A-02454-4DCB6054 auth= ]
+
+},
+q{
+
+Received: from [127.0.0.1] ([127.0.0.1:50024])
+        by bm1-13.ed10.com (ecelerity 2.1.1.8 r(12431)) with ECSTREAM
+        id 10/BD-03444-F4DB6054 for <example@vandinter.org>; Tue, 12 Sep 2006 09:59:43 -0400
+
+} => q{
+
+[ ip=127.0.0.1 rdns= helo= by=bm1-13.ed10.com ident= envfrom= id=10/BD-03444-F4DB6054 auth= ]
+
+},
+q{
+
+Received: from ([67.91.233.27:53798] helo=eclectic.kluge.net)
+        by idunn.apache.osuosl.org (ecelerity 2.1 r(10620)) with ESMTP
+        id 5A/F0-04030-76FF6054 for <dev@spamassassin.apache.org>; Tue, 12 Sep 2006 11:41:44 -0700
+
+} => q{
+
+[ ip=67.91.233.27 rdns= helo=eclectic.kluge.net by=idunn.apache.osuosl.org ident= envfrom= id=5A/F0-04030-76FF6054 auth= ]
 
 },
 q{
