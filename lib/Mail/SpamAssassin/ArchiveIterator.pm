@@ -849,7 +849,7 @@ sub scan_mbx {
 	  }
 
           $self->bump_scan_progress();
-	  $info->{"$file.$offset"} = Mail::SpamAssassin::Util::receive_date($header);
+	  $info->{$offset} = Mail::SpamAssassin::Util::receive_date($header);
 
 	  # go onto the next message
 	  seek(INPUT, $offset + $size, 0);
