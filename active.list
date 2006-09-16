@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-jm bb-zmi cthielen daf parkerm theo zmi
+# with results from: bb-doc bb-jm bb-zmi cthielen daf parkerm
 
 # good enough
 ADVANCE_FEE_3
@@ -15,6 +15,9 @@ AWL
 
 # good enough
 AXB_FAKETZ
+
+# good enough
+BAD_ENC_HEADER
 
 # good enough
 BANG_OPRAH
@@ -350,10 +353,16 @@ FROM_ALL_NUMS
 FROM_BLANK_NAME
 
 # good enough
+FROM_DOMAIN_NOVOWEL
+
+# good enough
 FROM_ENDS_IN_NUMS
 
 # good enough
 FROM_HAS_MIXED_NUMS
+
+# good enough
+FROM_HAS_ULINE_NUMS
 
 # good enough
 FROM_ILLEGAL_CHARS
@@ -485,6 +494,9 @@ INVALID_DATE
 INVALID_TZ_CST
 
 # good enough
+INVALID_TZ_GMT
+
+# good enough
 INVESTMENT_ADVICE
 
 # good enough
@@ -578,9 +590,6 @@ MISSING_MIMEOLE
 MORE_SEX
 
 # good enough
-MPART_ALT_DIFF
-
-# good enough
 MSGID_DOLLARS_RANDOM
 
 # good enough
@@ -603,9 +612,6 @@ MSGID_YAHOO_CAPS
 
 # good enough
 MULTIPART_ALT_NON_TEXT
-
-# good enough
-NOT_ADVISOR
 
 # tflags net
 NO_DNS_FOR_FROM
@@ -866,6 +872,9 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
+SPOOF_COM2COM
+
+# good enough
 SPOOF_COM2OTH
 
 # good enough
@@ -897,6 +906,9 @@ SUBJECT_IN_WHITELIST
 
 # good enough
 SUBJECT_NEEDS_ENCODING
+
+# good enough
+SUBJECT_NOVOWEL
 
 # good enough
 SUBJECT_SEXUAL
@@ -1079,9 +1091,6 @@ TVD_SUBJ_WIPE_DEBT
 TVD_UA_FOSTERING
 
 # good enough
-TVD_UNDER_VALUED
-
-# good enough
 TVD_VIS_HIDDEN
 
 # good enough
@@ -1103,19 +1112,25 @@ RATWARE_MS_HASH
 RATWARE_OUTLOOK_NONAME
 
 # good enough
-TVD_FW_GRAPHIC_NAME_LONG
+TVD_FW_GRAPHIC_ID1
 
 # good enough
-TVD_FW_GRAPHIC_NAME_MID
+TVD_LONG_WORD5
 
 # good enough
-TVD_VISIT_PHARMA
+TVD_PH_SEC
+
+# good enough
+TVD_SUBJ_FINGER_04
 
 # good enough
 UNCLAIMED_MONEY
 
 # good enough
 UNCLOSED_BRACKET
+
+# good enough
+UNIQUE_WORDS
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1158,6 +1173,9 @@ URIBL_SC_SURBL
 
 # tflags net
 URIBL_WS_SURBL
+
+# good enough
+URI_4YOU
 
 # good enough
 URI_L_PHP
