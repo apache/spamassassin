@@ -331,6 +331,9 @@ sub parse_received_line {
   # Received: Message by Barricade wilhelm.eyp.ee with ESMTP id h1I7hGU06122 for <spamassassin-talk@lists.sourceforge.net>; Tue, 18 Feb 2003 09:43:16 +0200
   return 0 if (!/^\(?from /i);
 
+  # we need an IP address, so if we don't see one in there, don't bother wasting time.
+  return 0 if (!/${IP_ADDRESS}/);
+
   # from www-data by wwwmail.documenta.de (Exim 4.50) with local for <example@vandinter.org> id 1GFbZc-0006QV-L8; Tue, 22 Aug 2006 21:06:04 +0200
   # from server.yourhostingaccount.com with local  for example@vandinter.org  id 1GDtdl-0002GU-QE (8710); Thu, 17 Aug 2006 21:59:17 -0400
   return 0 if /\bwith local for\b/;
