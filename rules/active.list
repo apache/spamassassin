@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-jm bb-zmi cthielen daf parkerm
+# with results from: net-bb-doc net-bb-jm net-bb-zmi net-cthielen net-daf net-parkerm net-theo
 
 # good enough
 ADVANCE_FEE_3
@@ -15,9 +15,6 @@ AWL
 
 # good enough
 AXB_FAKETZ
-
-# good enough
-BAD_ENC_HEADER
 
 # good enough
 BANG_OPRAH
@@ -62,13 +59,22 @@ BAYES_95
 BAYES_99
 
 # good enough
+BILL_1618
+
+# good enough
 BROKEN_RATWARE_BOM
+
+# good enough
+CONFIRMED_FORGED
 
 # good enough
 CUM_SHOT
 
 # good enough
 DATE_IN_FUTURE_03_06
+
+# good enough
+DATE_IN_FUTURE_06_12
 
 # good enough
 DATE_IN_FUTURE_12_24
@@ -119,7 +125,7 @@ DEAR_WINNER
 DIGEST_MULTIPLE
 
 # good enough
-DISGUISE_PORN_MUNDANE
+DISGUISE_PORN
 
 # tflags net
 DNS_FROM_AHBL_RHSBL
@@ -176,6 +182,9 @@ DRUGS_DIET
 DRUGS_DIET_OBFU
 
 # good enough
+DRUGS_ERECTILE
+
+# good enough
 DRUGS_ERECTILE_OBFU
 
 # good enough
@@ -197,9 +206,6 @@ DRUG_ED_GENERIC
 DRUG_ED_ONLINE
 
 # good enough
-DRUG_ED_SILD
-
-# good enough
 EARN_PER_WEEK
 
 # good enough
@@ -212,6 +218,9 @@ EM_ROLEX
 ENV_AND_HDR_SPF_MATCH
 
 # good enough
+EXCUSE_23
+
+# good enough
 EXCUSE_24
 
 # good enough
@@ -219,6 +228,9 @@ EXCUSE_4
 
 # good enough
 EXTRA_MPART_TYPE
+
+# good enough
+FAKE_HELO_EXCITE
 
 # good enough
 FAKE_HELO_LYCOS
@@ -269,9 +281,6 @@ FH_FROM_HOODIA
 FH_FROM_TO_PERC
 
 # good enough
-FH_HELO_GMAILSMTP
-
-# good enough
 FH_RCVD_WITHSMTPFOR
 
 # good enough
@@ -279,9 +288,6 @@ FM_CUSTOMLOGODSGNc
 
 # good enough
 FORGED_AOL_TAGS
-
-# good enough
-FORGED_HOTMAIL_RCVD
 
 # good enough
 FORGED_IMS_HTML
@@ -368,16 +374,19 @@ FROM_HAS_ULINE_NUMS
 FROM_ILLEGAL_CHARS
 
 # good enough
+FROM_LOCAL_DIGITS
+
+# good enough
+FROM_LOCAL_HEX
+
+# good enough
 FROM_LOCAL_NOVOWEL
 
 # good enough
-FROM_NO_LOWER
-
-# good enough
-FROM_NO_USER
-
-# good enough
 FROM_OFFERS
+
+# good enough
+FROM_STARTS_WITH_NUMS
 
 # good enough
 FS_START_DOYOU2
@@ -453,6 +462,9 @@ HELO_DYNAMIC_IPADDR2
 
 # good enough
 HELO_DYNAMIC_SPLIT_IP
+
+# good enough
+HG_HORMONE
 
 # good enough
 HS_FORGED_OE_FW
@@ -578,16 +590,16 @@ MIME_BOUND_DIGITS_15
 MIME_BOUND_MANY_HEX
 
 # good enough
-MIME_BOUND_RKFINDY
-
-# good enough
-MIME_HTML_MOSTLY
+MIME_HTML_ONLY_MULTI
 
 # good enough
 MISSING_MIMEOLE
 
 # good enough
 MORE_SEX
+
+# good enough
+MPART_ALT_DIFF
 
 # good enough
 MSGID_DOLLARS_RANDOM
@@ -613,6 +625,9 @@ MSGID_YAHOO_CAPS
 # good enough
 MULTIPART_ALT_NON_TEXT
 
+# good enough
+NOT_ADVISOR
+
 # tflags net
 NO_DNS_FOR_FROM
 
@@ -635,13 +650,7 @@ NULL_IN_BODY
 NUMERIC_HTTP_ADDR
 
 # good enough
-ORG_MIME_TOOLS
-
-# good enough
 PERCENT_RANDOM
-
-# good enough
-PORN_15
 
 # good enough
 PREST_NON_ACCREDITED
@@ -815,6 +824,9 @@ RCVD_LSO_SND
 RCVD_NUMERIC_HELO
 
 # good enough
+REFINANCE_YOUR_HOME
+
+# good enough
 REMOVE_BEFORE_LINK
 
 # good enough
@@ -914,6 +926,9 @@ SUBJECT_NOVOWEL
 SUBJECT_SEXUAL
 
 # good enough
+SUBJ_BUY
+
+# good enough
 SUBJ_ILLEGAL_CHARS
 
 # good enough
@@ -932,9 +947,6 @@ TO_MALFORMED
 TO_NO_USER
 
 # good enough
-TRACKER_ID
-
-# good enough
 TT_MSGID_TRUNC
 
 # good enough
@@ -944,9 +956,6 @@ TVD_ACT_193
 TVD_APP_LOAN
 
 # good enough
-TVD_BODY_END_STAR
-
-# good enough
 TVD_DEAR_HOMEOWNER
 
 # good enough
@@ -954,9 +963,6 @@ TVD_DOLLARS_US
 
 # good enough
 TVD_EB_PHISH
-
-# good enough
-TVD_FINGER_01
 
 # good enough
 TVD_FINGER_02
@@ -1004,6 +1010,9 @@ TVD_INCREASE_SIZE
 TVD_LINK_SAVE
 
 # good enough
+TVD_LONG_WORD5
+
+# good enough
 TVD_NOT_SATISFIED
 
 # good enough
@@ -1016,16 +1025,7 @@ TVD_PH_FR5
 TVD_PH_REC
 
 # good enough
-TVD_PH_SUBJ_ACCOUNTS_POST
-
-# good enough
-TVD_PH_SUBJ_META
-
-# good enough
-TVD_PH_SUBJ_META_ALL
-
-# good enough
-TVD_PH_SUBJ_SEC_MEASURES
+TVD_PH_SEC
 
 # good enough
 TVD_PH_SUBJ_UPDATE
@@ -1041,9 +1041,6 @@ TVD_QUAL_MEDS
 
 # good enough
 TVD_RATWARE_CB
-
-# good enough
-TVD_RATWARE_CB_2
 
 # good enough
 TVD_RATWARE_MSGID_01
@@ -1082,6 +1079,9 @@ TVD_SUBJ_END_STAR
 TVD_SUBJ_FINGER_03
 
 # good enough
+TVD_SUBJ_FINGER_04
+
+# good enough
 TVD_SUBJ_OWE
 
 # good enough
@@ -1092,6 +1092,12 @@ TVD_UA_FOSTERING
 
 # good enough
 TVD_VIS_HIDDEN
+
+# tflags net
+DNS_FROM_DOB
+
+# tflags net
+DNS_FROM_OPENWHOIS
 
 # good enough
 FORGED_IMS_HTML
@@ -1111,17 +1117,131 @@ RATWARE_MS_HASH
 # good enough
 RATWARE_OUTLOOK_NONAME
 
-# good enough
-TVD_FW_GRAPHIC_ID1
+# tflags net
+RCVD_IN_DOB
+
+# tflags net
+RCVD_IN_DSBL
+
+# tflags net
+RCVD_IN_IADB_DOPTIN
+
+# tflags net
+RCVD_IN_IADB_DOPTIN_GT50
+
+# tflags net
+RCVD_IN_IADB_DOPTIN_LT50
+
+# tflags net
+RCVD_IN_IADB_EDDB
+
+# tflags net
+RCVD_IN_IADB_EPIA
+
+# tflags net
+RCVD_IN_IADB_LISTED
+
+# tflags net
+RCVD_IN_IADB_ML_DOPTIN
+
+# tflags net
+RCVD_IN_IADB_OPTIN
+
+# tflags net
+RCVD_IN_IADB_OPTIN_GT50
+
+# tflags net
+RCVD_IN_IADB_OPTIN_LT50
+
+# tflags net
+RCVD_IN_IADB_RDNS
+
+# tflags net
+RCVD_IN_IADB_SENDERID
+
+# tflags net
+RCVD_IN_IADB_SPF
+
+# tflags net
+RCVD_IN_NJABL_DUL
+
+# tflags net
+RCVD_IN_SORBS_DUL
+
+# tflags net
+RCVD_IN_WHOIS_INVALID
+
+# tflags net
+RCVD_IN_XBL
 
 # good enough
-TVD_LONG_WORD5
+TVD_APPROVED
 
 # good enough
-TVD_PH_SEC
+TVD_FW_GRAPHIC_NAME_LONG
 
 # good enough
-TVD_SUBJ_FINGER_04
+TVD_FW_GRAPHIC_NAME_MID
+
+# good enough
+TVD_SUBJ_ACC_NUM
+
+# tflags net
+URIBL_RHS_DOB
+
+# tflags net
+WHOIS_AITPRIV
+
+# tflags net
+WHOIS_CONTACTPRIV
+
+# tflags net
+WHOIS_DMNBYPROXY
+
+# tflags net
+WHOIS_GKGPROXY
+
+# tflags net
+WHOIS_MONIKER_PRIV
+
+# tflags net
+WHOIS_MYPRIVREG
+
+# tflags net
+WHOIS_NAMEKING
+
+# tflags net
+WHOIS_NETSOLPR
+
+# tflags net
+WHOIS_NOLDC
+
+# tflags net
+WHOIS_PRIVACYPOST
+
+# tflags net
+WHOIS_PRIVPROT
+
+# tflags net
+WHOIS_REGISTERFLY
+
+# tflags net
+WHOIS_SECINFOSERV
+
+# tflags net
+WHOIS_SECUREWHOIS
+
+# tflags net
+WHOIS_SPAMFREE
+
+# tflags net
+WHOIS_UNLISTED
+
+# tflags net
+WHOIS_WHOISGUARD
+
+# tflags net
+WHOIS_WHOISPROT
 
 # good enough
 UNCLAIMED_MONEY
@@ -1189,6 +1309,9 @@ URI_NO_WWW_BIZ_CGI
 # good enough
 URI_NO_WWW_INFO_CGI
 
+# good enough
+URI_UNSUBSCRIBE
+
 # tflags userconf
 USER_IN_ALL_SPAM_TO
 
@@ -1248,6 +1371,9 @@ ZMIde_EBAYJOBSURI
 
 # good enough
 ZMIde_SEXUALEXPL1
+
+# tflags net
+__RCVD_IN_DOB
 
 # tflags net
 __RCVD_IN_IADB
