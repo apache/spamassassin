@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: cthielen parkerm theo zmi
+# with results from: bb-doc bb-jm bb-zmi cthielen daf parkerm theo zmi
 
 # good enough
 ADVANCE_FEE_3
@@ -68,9 +68,6 @@ CUM_SHOT
 DATE_IN_FUTURE_03_06
 
 # good enough
-DATE_IN_FUTURE_06_12
-
-# good enough
 DATE_IN_FUTURE_12_24
 
 # good enough
@@ -90,9 +87,6 @@ DATE_IN_PAST_96_XX
 
 # good enough
 DATE_SPAMWARE_Y2K
-
-# good enough
-DAV_NON_HOTMAIL
 
 # good enough
 DC_GIF_MULTI_LARGO
@@ -120,9 +114,6 @@ DEAR_WINNER
 
 # tflags net
 DIGEST_MULTIPLE
-
-# good enough
-DISGUISE_PORN
 
 # good enough
 DISGUISE_PORN_MUNDANE
@@ -176,6 +167,15 @@ DRUGS_ANXIETY_EREC
 DRUGS_ANXIETY_OBFU
 
 # good enough
+DRUGS_DIET
+
+# good enough
+DRUGS_DIET_OBFU
+
+# good enough
+DRUGS_ERECTILE
+
+# good enough
 DRUGS_ERECTILE_OBFU
 
 # good enough
@@ -197,6 +197,9 @@ DRUG_ED_GENERIC
 DRUG_ED_ONLINE
 
 # good enough
+DRUG_ED_SILD
+
+# good enough
 EMPTY_MESSAGE
 
 # good enough
@@ -206,10 +209,13 @@ EM_ROLEX
 ENV_AND_HDR_SPF_MATCH
 
 # good enough
-EXCUSE_23
+EXCUSE_24
 
 # good enough
 EXCUSE_4
+
+# good enough
+EXTRA_MPART_TYPE
 
 # good enough
 FAKE_HELO_LYCOS
@@ -323,6 +329,9 @@ FORGED_OUTLOOK_TAGS
 FORGED_QUALCOMM_TAGS
 
 # good enough
+FORGED_TELESP_RCVD
+
+# good enough
 FORGED_THEBAT_HTML
 
 # good enough
@@ -336,6 +345,9 @@ FROM_ALL_NUMS
 
 # good enough
 FROM_BLANK_NAME
+
+# good enough
+FROM_DOMAIN_NOVOWEL
 
 # good enough
 FROM_ENDS_IN_NUMS
@@ -354,6 +366,9 @@ FROM_NO_LOWER
 
 # good enough
 FROM_NO_USER
+
+# good enough
+FROM_OFFERS
 
 # good enough
 FS_START_DOYOU2
@@ -464,13 +479,13 @@ HTTP_EXCESSIVE_ESCAPES
 INFO_TLD
 
 # good enough
-INTERRUPTUS
-
-# good enough
 INVALID_DATE
 
 # good enough
 INVALID_TZ_CST
+
+# good enough
+INVESTMENT_ADVICE
 
 # good enough
 JM_LC_MID
@@ -557,16 +572,13 @@ MIME_BOUND_RKFINDY
 MIME_HTML_MOSTLY
 
 # good enough
-MISSING_DATE
-
-# good enough
 MISSING_MIMEOLE
 
 # good enough
-MISSING_SUBJECT
+MORE_SEX
 
 # good enough
-MORE_SEX
+MPART_ALT_DIFF
 
 # good enough
 MSGID_DOLLARS_RANDOM
@@ -592,6 +604,9 @@ MSGID_YAHOO_CAPS
 # good enough
 MULTIPART_ALT_NON_TEXT
 
+# good enough
+NOT_ADVISOR
+
 # tflags net
 NO_DNS_FOR_FROM
 
@@ -600,6 +615,9 @@ NO_PRESCRIPTION
 
 # good enough
 NO_RDNS_DOTCOM_HELO
+
+# tflags userconf
+NO_RECEIVED
 
 # tflags userconf
 NO_RELAYS
@@ -611,10 +629,10 @@ NULL_IN_BODY
 NUMERIC_HTTP_ADDR
 
 # good enough
-ORG_MIME_TOOLS
+PERCENT_RANDOM
 
 # good enough
-PERCENT_RANDOM
+PORN_15
 
 # good enough
 PREST_NON_ACCREDITED
@@ -638,6 +656,9 @@ RATWARE_HASH_2
 RATWARE_HASH_2_BUG2108
 
 # good enough
+RATWARE_HASH_2_V2
+
+# good enough
 RATWARE_MOZ_MALFORMED
 
 # good enough
@@ -657,6 +678,9 @@ RATWARE_RCVD_AT
 
 # good enough
 RATWARE_RCVD_PF
+
+# good enough
+RATWARE_ZERO_TZ
 
 # tflags net
 RAZOR2_CF_RANGE_51_100
@@ -779,6 +803,9 @@ RCVD_LSO_SND
 RCVD_NUMERIC_HELO
 
 # good enough
+REMOVE_BEFORE_LINK
+
+# good enough
 REPLICA_WATCH
 
 # good enough
@@ -837,9 +864,6 @@ SPOOF_COM2OTH
 
 # good enough
 SPOOF_NET2COM
-
-# good enough
-SPOOF_OURI
 
 # good enough
 STOCK_ALERT
@@ -1049,6 +1073,9 @@ TVD_UA_FOSTERING
 TVD_VIS_HIDDEN
 
 # good enough
+FB_OBFU_URI_COM
+
+# good enough
 FORGED_IMS_HTML
 
 # good enough
@@ -1061,25 +1088,28 @@ FORGED_OUTLOOK_HTML
 FORGED_OUTLOOK_TAGS
 
 # good enough
+RATWARE_HASH_2_V2_BUG2108
+
+# good enough
 RATWARE_MS_HASH
 
 # good enough
 RATWARE_OUTLOOK_NONAME
 
 # good enough
-TVD_FW_GRAPHIC_NAME_LONG
+TVD_FW_GRAPHIC_ID1
 
 # good enough
-TVD_FW_GRAPHIC_NAME_MID
+TVD_FW_GRAPHIC_ID2
+
+# good enough
+URI_L_PHP
 
 # good enough
 UNCLAIMED_MONEY
 
 # good enough
 UNCLOSED_BRACKET
-
-# good enough
-UNDISC_RECIPS
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1125,6 +1155,12 @@ URIBL_WS_SURBL
 
 # good enough
 URI_NOVOWEL
+
+# good enough
+URI_NO_WWW_BIZ_CGI
+
+# good enough
+URI_NO_WWW_INFO_CGI
 
 # tflags userconf
 USER_IN_ALL_SPAM_TO
