@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-jm bb-zmi cthielen daf parkerm theo zmi
+# with results from: bb-doc bb-jm bb-zmi cthielen daf parkerm theo
 
 # good enough
 ADVANCE_FEE_3
@@ -15,6 +15,9 @@ AWL
 
 # good enough
 AXB_FAKETZ
+
+# good enough
+BAD_ENC_HEADER
 
 # good enough
 BANG_OPRAH
@@ -173,9 +176,6 @@ DRUGS_DIET
 DRUGS_DIET_OBFU
 
 # good enough
-DRUGS_ERECTILE
-
-# good enough
 DRUGS_ERECTILE_OBFU
 
 # good enough
@@ -236,6 +236,9 @@ FAKE_OUTBLAZE_RCVD
 FB_CIALIS_LEO3
 
 # good enough
+FB_OBFU_URI_COM
+
+# good enough
 FB_SAVE_LEO
 
 # good enough
@@ -285,9 +288,6 @@ FORGED_IMS_TAGS
 
 # good enough
 FORGED_MSGID_AOL
-
-# good enough
-FORGED_MSGID_EXCITE
 
 # good enough
 FORGED_MSGID_HOTMAIL
@@ -356,13 +356,13 @@ FROM_ENDS_IN_NUMS
 FROM_HAS_MIXED_NUMS
 
 # good enough
+FROM_HAS_ULINE_NUMS
+
+# good enough
 FROM_ILLEGAL_CHARS
 
 # good enough
 FROM_LOCAL_NOVOWEL
-
-# good enough
-FROM_NO_LOWER
 
 # good enough
 FROM_NO_USER
@@ -485,6 +485,9 @@ INVALID_DATE
 INVALID_TZ_CST
 
 # good enough
+INVALID_TZ_GMT
+
+# good enough
 INVESTMENT_ADVICE
 
 # good enough
@@ -578,9 +581,6 @@ MISSING_MIMEOLE
 MORE_SEX
 
 # good enough
-MPART_ALT_DIFF
-
-# good enough
 MSGID_DOLLARS_RANDOM
 
 # good enough
@@ -659,6 +659,9 @@ RATWARE_HASH_2_BUG2108
 RATWARE_HASH_2_V2
 
 # good enough
+RATWARE_HASH_2_V2_BUG2108
+
+# good enough
 RATWARE_MOZ_MALFORMED
 
 # good enough
@@ -678,9 +681,6 @@ RATWARE_RCVD_AT
 
 # good enough
 RATWARE_RCVD_PF
-
-# good enough
-RATWARE_ZERO_TZ
 
 # tflags net
 RAZOR2_CF_RANGE_51_100
@@ -803,9 +803,6 @@ RCVD_LSO_SND
 RCVD_NUMERIC_HELO
 
 # good enough
-REMOVE_BEFORE_LINK
-
-# good enough
 REPLICA_WATCH
 
 # good enough
@@ -860,6 +857,9 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
+SPOOF_COM2COM
+
+# good enough
 SPOOF_COM2OTH
 
 # good enough
@@ -878,9 +878,6 @@ SUBJECT_DRUG_GAP_L
 SUBJECT_DRUG_GAP_S
 
 # good enough
-SUBJECT_DRUG_GAP_VA
-
-# good enough
 SUBJECT_DRUG_GAP_X
 
 # tflags userconf
@@ -891,6 +888,9 @@ SUBJECT_IN_WHITELIST
 
 # good enough
 SUBJECT_NEEDS_ENCODING
+
+# good enough
+SUBJECT_NOVOWEL
 
 # good enough
 SUBJECT_SEXUAL
@@ -975,9 +975,6 @@ TVD_HEAD_KERNEL
 
 # good enough
 TVD_INCREASE_SIZE
-
-# good enough
-TVD_LINK_SAVE
 
 # good enough
 TVD_NOT_SATISFIED
@@ -1073,9 +1070,6 @@ TVD_UA_FOSTERING
 TVD_VIS_HIDDEN
 
 # good enough
-FB_OBFU_URI_COM
-
-# good enough
 FORGED_IMS_HTML
 
 # good enough
@@ -1088,28 +1082,31 @@ FORGED_OUTLOOK_HTML
 FORGED_OUTLOOK_TAGS
 
 # good enough
-RATWARE_HASH_2_V2_BUG2108
-
-# good enough
 RATWARE_MS_HASH
 
 # good enough
 RATWARE_OUTLOOK_NONAME
 
 # good enough
-TVD_FW_GRAPHIC_ID1
+TVD_FW_GRAPHIC_NAME_LONG
 
 # good enough
-TVD_FW_GRAPHIC_ID2
+TVD_FW_GRAPHIC_NAME_MID
 
 # good enough
-URI_L_PHP
+TVD_LONG_WORD5
+
+# good enough
+TVD_PH_SEC
 
 # good enough
 UNCLAIMED_MONEY
 
 # good enough
 UNCLOSED_BRACKET
+
+# good enough
+UNIQUE_WORDS
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1152,6 +1149,12 @@ URIBL_SC_SURBL
 
 # tflags net
 URIBL_WS_SURBL
+
+# good enough
+URI_4YOU
+
+# good enough
+URI_L_PHP
 
 # good enough
 URI_NOVOWEL
