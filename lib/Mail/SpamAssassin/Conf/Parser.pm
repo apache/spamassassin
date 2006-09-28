@@ -240,6 +240,7 @@ sub parse {
     local ($1);         # bug 3838: prevent random taint flagging of $1
 
     $line =~ s/(?<!\\)#.*$//; # remove comments
+    $line =~ s/\\#/#/g; # hash chars are escaped, so unescape them
     $line =~ s/^\s+//;  # remove leading whitespace
     $line =~ s/\s+$//;  # remove tailing whitespace
     next unless($line); # skip empty lines
