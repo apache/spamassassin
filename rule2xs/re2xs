@@ -101,6 +101,8 @@ EOT
     }
 
     my ($regexp, $reason) = /^r (.*):(.*)$/;
+    die "no 'r REGEXP:REASON' in $_" unless defined $regexp;
+
     if ($regexp =~ /^\.\*/) {
       push @dot_star, "$regexp:$reason";
       next;
