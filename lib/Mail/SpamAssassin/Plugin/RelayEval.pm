@@ -102,11 +102,10 @@ sub check_for_illegal_ip {
   foreach my $rcvd ( @{$pms->{relays_untrusted}} ) {
     # (note this might miss some hits if the Received.pm skips any invalid IPs)
     foreach my $check ( $rcvd->{ip}, $rcvd->{by} ) {
-      return 0 if ($check eq '127.0.0.1');
-      return 1 if ($check =~ /^(?:
-    	(?:
-	[01257]|127|22[3-9]|23[0-9]|24[0-9]|25[0-5])\.\d+\.\d+\.\d+
-	)$/x);
+      next if ($check eq '127.0.0.1');
+      return 1 if ($check =~ /^
+    	(?:[01257]|127|22[3-9]|23[0-9]|24[0-9]|25[0-5])\.\d+\.\d+\.\d+
+	$/x);
     }
   }
   return 0;
