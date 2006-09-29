@@ -41,20 +41,18 @@ sub new {
 sub finish_parsing_end {
   my ($self, $params) = @_;
   my $conf = $params->{conf};
-  $self->run_test_set ($conf, $conf->{body_tests}, 'body');
+  $self->setup_test_set ($conf, $conf->{body_tests}, 'body');
 }
 
-sub run_test_set {
+sub setup_test_set {
   my ($self, $conf, $test_set, $ruletype) = @_;
   foreach my $pri (keys %{$test_set}) {
     my $nicepri = $pri; $nicepri =~ s/-/neg/g;
-    $self->check_all($conf, $test_set->{$pri}, $ruletype.'_'.$nicepri);
+    $self->setup_test_set_pri($conf, $test_set->{$pri}, $ruletype.'_'.$nicepri);
   }
 }
 
-###########################################################################
-
-sub check_all {
+sub setup_test_set_pri {
   my ($self, $conf, $rules, $ruletype) = @_;
 
   my $modname = "Mail::SpamAssassin::CompiledRegexps::".$ruletype;
@@ -105,6 +103,8 @@ sub check_all {
   return 0;
 }
 
+###########################################################################
+
 sub run_body_hack {
   my ($self, $params) = @_;
 
@@ -141,6 +141,10 @@ sub run_body_hack {
         # ignore 0-scored rules, of course
         next unless $scoresptr->{$rulename};
 
+        # TODO: it would be very useful to provide an optional
+        # means of instrumenting the ruleset, so that we can
+        # find out when the base matched but the full RE didn't.
+
 	# if ($do_dbg) {
 	# dbg("zoom: base found for $rulename: $line");
 	# }
@@ -155,5 +159,7 @@ sub run_body_hack {
 
   dbg("zoom: run_body_hack for $ruletype done");
 }
+
+###########################################################################
 
 1;

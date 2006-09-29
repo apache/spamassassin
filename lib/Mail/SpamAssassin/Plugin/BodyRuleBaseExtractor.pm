@@ -21,7 +21,7 @@ Mail::SpamAssassin::Plugin::BodyRuleBaseExtractor - extract "bases" from body ru
 =head1 SYNOPSIS
 
 This is a work-in-progress plugin to extract "base" strings from SpamAssassin
-'body' rules, suitable for use in Rule2XsBody rules.
+'body' rules, suitable for use in Rule2XSBody rules.
 
 =cut
 
@@ -44,6 +44,8 @@ my $BASES_MUST_BE_CASE_I = 1;
 my $BASES_CAN_USE_ALTERNATIONS = 0;    # /(foo|bar|baz)/
 my $BASES_CAN_USE_QUANTIFIERS = 0;     # /foo.*bar/ or /foo*bar/ or /foooo?bar/
 my $BASES_CAN_USE_CHAR_CLASSES = 0;    # /fo[opqr]bar/
+
+###########################################################################
 
 sub new {
   my $class = shift;
@@ -205,8 +207,6 @@ sub extract_all {
     print OUT "r $base:$key\n";
   }
   close OUT or die "close failed on $dumpfile!";
-
-  # TODO: run re2xs automatically here
 
   warn ("zoom: base extraction complete for $ruletype: yes=$yes no=$no\n");
 }
