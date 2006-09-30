@@ -795,13 +795,15 @@ sub _get_date_header_time {
 
   my $time;
   # a Resent-Date: header takes precedence over any Date: header
-  for my $header ('Resent-Date', 'Date') {
-    my $date = $pms->get($header);
-    if (defined($date) && length($date)) {
-      chomp($date);
-      $time = Mail::SpamAssassin::Util::parse_rfc822_date($date);
+  DATE: for my $header ('Resent-Date', 'Date') {
+    my @dates = $pms->{msg}->get_header($header);
+    for my $date (@dates) {
+      if (defined($date) && length($date)) {
+        chomp($date);
+        $time = Mail::SpamAssassin::Util::parse_rfc822_date($date);
+      }
+      last DATE if defined($time);
     }
-    last if defined($time);
   }
   if (defined($time)) {
     $pms->{date_header_time} = $time;
