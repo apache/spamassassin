@@ -134,8 +134,8 @@ sub set_exiting_flag {
 sub child_error_kill {
   my ($self, $pid, $sock) = @_;
 
-  warn "prefork: killing failed child $pid ".
-            ($sock ? "fd=".$sock->fileno : "");
+  warn "prefork: killing failed child $pid fd=".
+    ((defined $sock && defined $sock->fileno) ? $sock->fileno : "undefined");
 
   # close the socket and remove the child from our list
   $self->set_child_state ($pid, PFSTATE_KILLED);
@@ -148,7 +148,7 @@ sub child_error_kill {
     $sock->close;
   }
 
-  warn "prefork: killed child $pid";
+  warn "prefork: killed child $pid\n";
 }
 
 sub set_child_state {
