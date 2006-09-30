@@ -265,7 +265,7 @@ use constant HARVEST_DNSBL_PRIORITY => 500;
 
 # regular expression that matches message separators in The University of
 # Washington's MBX mailbox format
-use constant MBX_SEPARATOR => qr/([\s|\d]\d-[a-zA-Z]{3}-\d{4}\s\d{2}:\d{2}:\d{2}.*),(\d+);([\da-f]{12})-(\w{8})/;
+use constant MBX_SEPARATOR => qr/^([\s|\d]\d-[a-zA-Z]{3}-\d{4}\s\d{2}:\d{2}:\d{2}.*),(\d+);([\da-f]{12})-(\w{8})\r?$/;
 # $1 = datestamp (str)
 # $2 = size of message in bytes (int)
 # $3 = message status - binary (hex)
