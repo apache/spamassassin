@@ -473,6 +473,14 @@ sub parse_received_line {
       }
     }
 
+    if (/ecelerity /) {
+      if (/^from \(\[(${IP_ADDRESS}):\d+\] helo=(\S+)\) by (\S+) /) {
+        $ip = $1; $helo = $2; $by = $3;
+        / id (\S+) / and $id = $1;
+        goto enough;
+      }
+    }
+
     if (/Exim/) {
       # one of the HUGE number of Exim formats :(
       # This must be scriptable.  (update: it is. cf bug 3950, 3582)
