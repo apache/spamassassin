@@ -135,6 +135,7 @@ sub process {
   print $remote "$EOL";
 
   my $line = <$remote>;
+  return undef unless (defined $line);
 
   my ($version, $resp_code, $resp_msg) = $self->_parse_response_line($line);
 
@@ -242,6 +243,7 @@ sub learn {
   print $remote "$EOL";
 
   my $line = <$remote>;
+  return undef unless (defined $line);
 
   my ($version, $resp_code, $resp_msg) = $self->_parse_response_line($line);
 
@@ -305,6 +307,7 @@ sub report {
   print $remote "$EOL";
 
   my $line = <$remote>;
+  return undef unless (defined $line);
 
   my ($version, $resp_code, $resp_msg) = $self->_parse_response_line($line);
 
@@ -361,6 +364,7 @@ sub revoke {
   print $remote "$EOL";
 
   my $line = <$remote>;
+  return undef unless (defined $line);
 
   my ($version, $resp_code, $resp_msg) = $self->_parse_response_line($line);
 
@@ -409,6 +413,7 @@ sub ping {
 
   my $line = <$remote>;
   close $remote;
+  return undef unless (defined $line);
 
   my ($version, $resp_code, $resp_msg) = $self->_parse_response_line($line);
   return 0 unless ($resp_msg eq 'PONG');
