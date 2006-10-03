@@ -236,6 +236,9 @@ if (Mail::SpamAssassin::Util::am_running_on_windows()) {
   binmode(STDOUT);
 }
 
+# bug 5048: --lint should not cause network accesses
+if ($opt{'lint'}) { $opt{'local'} = 1; }
+
 # create the tester factory
 my $spamtest = new Mail::SpamAssassin(
   {

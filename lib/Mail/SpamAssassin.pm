@@ -1278,6 +1278,10 @@ sub lint_rules {
 
   $self->{dont_copy_prefs} = $olddcp;       # revert back to previous
 
+  # bug 5048: override settings to ensure a faster lint
+  $self->{'conf'}->{'use_auto_whitelist'} = 0;
+  $self->{'conf'}->{'bayes_auto_learn'} = 0;
+
   my $mail = $self->parse(\@testmsg, 1);
   my $status = Mail::SpamAssassin::PerMsgStatus->new($self, $mail,
                         { disable_auto_learning => 1 } );
