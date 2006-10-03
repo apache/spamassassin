@@ -316,7 +316,7 @@ sub _check_spf {
     return 0;
   }
 
-  $result ||= 'softfail';
+  $result ||= 'timeout';	# bug 5077
   $comment ||= '';
   $comment =~ s/\s+/ /gs;	# no newlines please
 
