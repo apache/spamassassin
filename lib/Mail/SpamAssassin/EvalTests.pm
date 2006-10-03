@@ -587,9 +587,14 @@ sub check_for_forged_juno_received_headers {
         && $rcvd !~ / cookie\.(?:juno|untd)\.com /) { return 1; }
     if($xmailer !~ /Juno /) { return 1; }
   } else {
-    if($rcvd !~ /from.*\bmail\.com.*\[$IP_ADDRESS\].*by/) { return 1; }
+    if($rcvd =~ /from.*\bmail\.com.*\[$IP_ADDRESS\].*by/) {
+      if($xmailer !~ /\bmail\.com/) { return 1; }
+    } elsif($rcvd =~ /from (webmail\S+\.untd\.com) \(\1 \[$IP_ADDRESS\]\) by/) {
+      if($xmailer !~ /^Webmail Version \d/) { return 1; }
+    } else {
+      return 1;
+    }
     if($xorig !~ /$IP_ADDRESS/) { return 1; }
-    if($xmailer !~ /\bmail\.com/) { return 1; }
   }
 
   return 0;   
