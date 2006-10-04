@@ -1,0 +1,99 @@
+dn: o=stooges
+objectClass: top
+objectClass: organization
+o: stooges
+description: The Three Stooges
+
+dn: cn=StoogeAdmin,o=stooges
+objectClass: organizationalRole
+cn: StoogeAdmin
+description: LDAP Directory Administrator
+
+dn: ou=MemberGroupA,o=stooges
+ou: MemberGroupA
+objectClass: top
+objectClass: organizationalUnit
+description: Members of MemberGroupA
+
+dn: ou=MemberGroupB,o=stooges
+ou: MemberGroupB
+objectClass: top
+objectClass: organizationalUnit
+description: Members of MemberGroupB
+
+dn: cn=Larry Anderson,ou=MemberGroupA,o=stooges
+ou: MemberGroupA
+o: stooges
+cn: Larry Anderson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+mail: LAnderson@isp.com
+givenname: Larry
+sn: Anderson
+uid: larry
+homePostalAddress: 15 Cherry Ln.$Plano TX 78888
+postalAddress: 15 Fitzhugh Ave.
+l: Dallas
+st: TX
+postalcode: 76888
+telephoneNumber: (800)555-1212
+homePhone: 800-555-1313
+facsimileTelephoneNumber: 800-555-1414
+userPassword: larrysecret
+title: Account Executive
+
+dn: cn=Moe Anderson,ou=MemberGroupA,o=stooges
+ou: MemberGroupA
+o: stooges
+cn: Moe Anderson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+mail: MAnderson@isp.com
+givenname: Moe
+sn: Anderson
+uid: moe
+initials: Bob
+homePostalAddress: 16 Cherry Ln.$Plano TX 78888
+postalAddress: 15 Fitzhugh Ave.
+l: Dallas
+st: TX
+postalcode: 76888
+pager: 800-555-1319
+homePhone: 800-555-1313
+telephoneNumber: (800)555-1213
+mobile: 800-555-1318
+title: Manager of Product Development
+facsimileTelephoneNumber: 800-555-3318
+manager: cn=Larry Anderson,ou=MemberGroupA,o=stooges
+userPassword: moesecret
+
+dn: cn=Curley Anderson,ou=MemberGroupB,o=stooges
+ou: MemberGroupB
+o: stooges
+cn: Curley Anderson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+mail: CAnderson@isp.com
+givenname: Curley
+sn: Anderson
+uid: curley
+initials: Joe
+homePostalAddress: 14 Cherry Ln.$Plano TX 78888
+postalAddress: 15 Fitzhugh Ave.
+spamassassin: add_header all Foo LDAP read
+l: Dallas
+st: TX
+postalcode: 76888
+pager: 800-555-1319
+homePhone: 800-555-1313
+telephoneNumber: (800)555-1214
+mobile: 800-555-1318
+title: Developemnt Engineer
+facsimileTelephoneNumber: 800-555-3318
+userPassword: curleysecret

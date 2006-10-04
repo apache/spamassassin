@@ -1,0 +1,54 @@
+#!/bin/sh
+
+# set variables
+SERVICE=spamassassin
+NAME=spamd
+DEFAULTS=/etc/default/$SERVICE
+DAEMON=/usr/bin/$NAME
+PIDFILE=/var/run/$NAME.pid
+INITFILE=/etc/init.d/$SERVICE
+
+# set default spamd configuration
+# change these in /etc/default/$SERVICE instead of here
+OPTIONS="-c -m5 -H"
+ENABLED=0
+
+# source defaults
+test -f $DEFAULTS && . $DEFAULTS
+
+# exit if we have nothing to do
+test -x $DAEMON -a "$ENABLED" != "0" || exit 0
+
+PATH=$PATH:/usr/bin:/usr/local/bin
+
+# see how we were called
+case "$1" in
+    start)
+	echo -n "Starting: $SERVICE"
+	start-stop-daemon --start --quiet --pidfile $PIDFILE --name $NAME --startas $DAEMON -- $OPTIONS -d -r $PIDFILE
+	echo "."
+    ;;
+    stop)
+	echo -n "Stopping: $SERVICE"
+	start-stop-daemon --stop --quiet --pidfile $PIDFILE --name $NAME
+	echo "."
+    ;;
+    reload|force-reload)
+	echo -n "Reloading: $SERVICE"
+	start-stop-daemon --stop --quiet --pidfile $PIDFILE --name $NAME --signal HUP
+	echo "."
+    ;;
+    restart)
+	echo -n "Restarting: $SERVICE"
+	start-stop-daemon --stop --quiet --pidfile $PIDFILE --name $NAME
+	start-stop-daemon --start --quiet --pidfile $PIDFILE --name $NAME --startas $DAEMON -- $OPTIONS -d -r $PIDFILE
+	echo "."
+    ;;
+
+    *)
+	echo "Usage: $INITFILE {start|stop|reload|restart|force-reload}" >&2
+	exit 1
+    ;;
+esac
+
+exit 0

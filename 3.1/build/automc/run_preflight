@@ -1,0 +1,128 @@
+#!/usr/bin/perl -w
+
+use strict;
+sub run;
+
+my $BYMAILCF = '/home/bbmass-stable/bymail/latest.cf';
+
+
+my $perl = $^X;
+if (!$perl) {
+  die "no perl path found in ARGV!";
+}
+
+my $slavename;
+
+$|=1;
+my $pwd = `pwd`;
+$pwd =~ /slaves\/([-_A-Za-z0-9]+)\//; if ($1) {
+  $slavename = $1;
+} else {
+  die "cannot work out slavename!  $pwd";
+}
+
+my %mass_check_args = (
+
+  'mc-fast' =>      '--tail=1000',
+  'mc-med' =>       '--tail=6000  --head=5000',
+  'mc-slow' =>      '--tail=16000 --head=10000',
+  'mc-slower' =>    '--tail=36000 --head=20000',
+
+);
+
+# super-nice please!
+#
+system ("renice +19 $$");
+
+# cd to masses
+#
+chdir "masses" or die;
+
+unlink ("ham.log", "spam.log");
+
+# just the sandbox rules, sandbox plugins, the timing plugin,
+# and the default system-wide plugins (so DNS evals can work)
+#
+system ("rm -rf tstrules");
+run "mkdir tstrules";
+run "cp ../rules/*.pre tstrules";
+run "cp ../rules/*.pm tstrules";
+run "cp plugins/*.* tstrules";
+
+# don't just copy; instead, transcribe while dropping score and describe lines
+# (to avoid '[26260] warn: config: warning: score set for non-existent rule
+# HTML_SHORT_LENGTH').
+## run "cp ../rules/70_sandbox.cf tstrules";
+open IN, "<../rules/70_sandbox.cf" or die "cannot read ../rules/sandbox.cf";
+open OUT, ">tstrules/70_sandbox.cf" or die "cannot write tstrules/70_sandbox.cf";
+
+while (<IN>) {
+  s/^\s+//;
+  next if /^(?:
+    score|
+    describe|
+    lang
+    )/x;
+
+  print OUT;
+}
+
+close IN or die "close failed!";
+close OUT or die "close failed!";
+
+# well, ok just those, and anything that's been mailed-in
+# 
+if (-f 'mailed.cf') {
+  run "cp mailed.cf tstrules/70_mailed.cf";
+}
+
+run "ls -l tstrules";
+
+# lint those rule files, and abort if they fail; this is a sanity check
+# now that we have mailed-in rules used in this mass-check
+#
+if (run ("../spamassassin --lint -x -C tstrules", 1) != 0) {
+  warn "*** lint failed; exiting without mass-check! ***\n\n";
+  warn "Deleting 'mailed.cf', if it exists.\n"; unlink $BYMAILCF;
+  warn "Rule files:\n"; system ("cat tstrules/*.cf");
+  die "lint failure";
+} else {
+  print "lint passed.\n";
+}
+
+# notes on this mass-check command:
+#
+# this is run in a chroot jail, just in case there's hostile rule code in
+# there. 
+# de-encapsulate 'report_safe' messages from petuniapress.com.
+# produce lots of noisy output to stop the buildbot from timing out on
+# mass-checks of large corpora.
+# store AICache data in /tmpfs/aicache.
+
+run "/local/bbmasstools/masschroot $perl ".
+    "mass-check -c=tstrules --cache -j=1 ".
+    "--noisy --deencap='petuniapress.com' ".
+    "--cachedir=/tmpfs/aicache ".
+    $mass_check_args{$slavename}." ".
+    "ham:detect:/home/bbmass-stable/rawcor/*/ham/* ".
+    "spam:detect:/home/bbmass-stable/rawcor/*/spam/*";
+
+    # TODO: add --after="6 months ago"?
+
+exit;
+
+# ---------------------------------------------------------------------------
+
+sub run {
+  my ($cmd, $ignoreexit) = @_;
+
+  print "[$cmd]\n";
+  system ($cmd);
+
+  if (!$ignoreexit) {
+    die "command '$cmd' failed with status $?" if (($? >> 8) != 0);
+  } else {
+    return ($? >> 8);
+  }
+}
+

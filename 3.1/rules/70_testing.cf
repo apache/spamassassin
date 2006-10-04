@@ -1,0 +1,45 @@
+# SpamAssassin rules file: rules under test, $Rev$
+#
+# This file is a placeholder for rules "under probation", i.e. checked into
+# SVN for testing. It should not be distributed; if the rules have good
+# stats after a mass-check or two, then fold them into the distributed
+# rules files.
+#
+# I suggest adding a prefix to rules in this file, "T_" -- this
+# helps identify probationary rules in test output.
+#
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+#
+########################################################################
+
+##body T_HTML_IFRAME_SRC	eval:check_iframe_src()
+##describe T_HTML_IFRAME_SRC	Message has HTML IFRAME tag with SRC URI
+##
+### These phrases seem to occur a lot in phishing...
+##body T_PH_SEC		/\byour .{0,40}account .{0,40}security/i
+##describe T_PH_SEC	Message has a phrase standard for phishing mails
+##body T_PH_REC		/\byour .{0,40}account .{0,40}record/i
+##describe T_PH_REC	Message has a phrase standard for phishing mails
+##
+### tvd- works well for me in testing, let's see how well it works for others
+###  0.331   0.3763   0.0000    1.000   0.50    0.01  T_EB_PHISH
+###  0.292   0.3326   0.0000    1.000   0.25    0.01  T_PP_PHISH
+##header __FROM_PAYPAL	From:addr =~ /\@paypal\.com$/i
+##header __FROM_EBAY	From:addr =~ /\@ebay\.com$/i
+##meta T_PP_PHISH	__FROM_PAYPAL && NORMAL_HTTP_TO_IP
+##meta T_EB_PHISH	__FROM_EBAY && NORMAL_HTTP_TO_IP

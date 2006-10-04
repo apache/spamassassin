@@ -1,0 +1,35 @@
+#!/usr/bin/perl
+#
+# create "targets" files for the mass-check corpora on the zone
+# TODO: mass-check should be smart enough to work this out itself
+
+use strict;
+use warnings;
+
+exit 0;		# done by other automc user
+
+my $SADIR="/home/automc-stable/svn/spamassassin";
+
+# both of these must be writable
+my $TGTS_DIR = "/home/bbmass-stable/mc-nightly";
+my $RAWCOR_DIR = "/home/bbmass-stable/rawcor";
+
+if (!-d $TGTS_DIR) {
+  mkdir ($TGTS_DIR) or die "cannot create $TGTS_DIR";
+}
+
+chdir $RAWCOR_DIR or die "cd $RAWCOR_DIR failed";
+foreach my $submitter (<*>) {
+  next unless (-d $submitter);
+
+  $submitter =~ s,[^A-Za-z0-9],,gs;
+
+  open (OUT, ">$TGTS_DIR/targets.$submitter")
+    or warn "cannot write to $TGTS_DIR/targets.$submitter";
+
+  print OUT "ham:detect:$RAWCOR_DIR/$submitter/ham/*\n",
+            "spam:detect:$RAWCOR_DIR/$submitter/spam/*\n";
+
+  close OUT or die "write failed";
+}
+
