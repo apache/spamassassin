@@ -1,4 +1,92 @@
 ------------------------------------------------------------------------
+r452712 | dos | 2006-10-04 03:56:06 +0000 (Wed, 04 Oct 2006) | 1 line
+
+bug 5044: include local site config in sa-update lint checks
+------------------------------------------------------------------------
+r452679 | dos | 2006-10-03 23:44:17 +0000 (Tue, 03 Oct 2006) | 1 line
+
+bug 5048: --lint should not use network rules or AWL
+------------------------------------------------------------------------
+r452678 | dos | 2006-10-03 23:41:03 +0000 (Tue, 03 Oct 2006) | 1 line
+
+bug 5081: sometimes, SIGHUPing spamd would leave one child process still alive due to a race in the SIGHUP handler and the preforking code.  fixed
+------------------------------------------------------------------------
+r452676 | dos | 2006-10-03 23:39:20 +0000 (Tue, 03 Oct 2006) | 1 line
+
+bug 5040: if in no-net scoreset, don't warn about net rules being zero-score dependencies of meta rules
+------------------------------------------------------------------------
+r452675 | dos | 2006-10-03 23:21:32 +0000 (Tue, 03 Oct 2006) | 1 line
+
+bug 5105: M::SA::Client doesn't always catch failed connection to spamd, fixed
+------------------------------------------------------------------------
+r452671 | dos | 2006-10-03 23:00:14 +0000 (Tue, 03 Oct 2006) | 1 line
+
+bug 5094: check for unit'd value used in AntiVirus.pm
+------------------------------------------------------------------------
+r452669 | dos | 2006-10-03 22:58:44 +0000 (Tue, 03 Oct 2006) | 1 line
+
+bug 5089: enable adding headers with single digit zero value
+------------------------------------------------------------------------
+r452668 | dos | 2006-10-03 22:57:43 +0000 (Tue, 03 Oct 2006) | 1 line
+
+bug 5077: fix false SPF_SOFTFAIL's when SPF queries timeout
+------------------------------------------------------------------------
+r452667 | dos | 2006-10-03 22:56:23 +0000 (Tue, 03 Oct 2006) | 1 line
+
+bug 5080: fix bug in update RCVD_ILLEGAL_IP evaltest to properly deal with 127/8 fix
+------------------------------------------------------------------------
+r452666 | dos | 2006-10-03 22:55:05 +0000 (Tue, 03 Oct 2006) | 1 line
+
+bug 5111: fix FORGED_JUNO_RCVD FP on webmail from untd.com's own systems
+------------------------------------------------------------------------
+r452654 | dos | 2006-10-03 22:06:34 +0000 (Tue, 03 Oct 2006) | 1 line
+
+bug 4940: _get_date_header_time() should try dates one at a time not all dates joined together
+------------------------------------------------------------------------
+r452120 | dos | 2006-10-02 17:00:56 +0000 (Mon, 02 Oct 2006) | 1 line
+
+bug 5098: add support for ecelerity Received headers, thanks to Joe Schaefer <joe+gmane at sunstarsys.com>
+------------------------------------------------------------------------
+r451666 | dos | 2006-09-30 21:05:43 +0000 (Sat, 30 Sep 2006) | 1 line
+
+bug 4975: (trivial) avoid use of unit'd value in prefork warning message
+------------------------------------------------------------------------
+r451554 | dos | 2006-09-30 06:52:00 +0000 (Sat, 30 Sep 2006) | 1 line
+
+bug 4418: remove no longer useful HTML_WEB_BUGS and HTML_LINK_IMAGE_BUG rules
+------------------------------------------------------------------------
+r451553 | dos | 2006-09-30 06:41:19 +0000 (Sat, 30 Sep 2006) | 1 line
+
+bug 5101: fix bug in mbx code introduced in a backport of 3.2 AICache code
+------------------------------------------------------------------------
+r451281 | jm | 2006-09-29 13:15:47 +0000 (Fri, 29 Sep 2006) | 1 line
+
+try to work around horribleness when checking in the entire built tree for the website update procedure
+------------------------------------------------------------------------
+r450961 | dos | 2006-09-28 18:28:34 +0000 (Thu, 28 Sep 2006) | 1 line
+
+bug 5076: unescape hash characters in the config
+------------------------------------------------------------------------
+r449898 | dos | 2006-09-26 04:28:21 +0000 (Tue, 26 Sep 2006) | 1 line
+
+bah! forgot to remove no longer used hash
+------------------------------------------------------------------------
+r449895 | dos | 2006-09-26 04:24:20 +0000 (Tue, 26 Sep 2006) | 1 line
+
+add my nagios plugin for monitoring spamd to contrib/
+------------------------------------------------------------------------
+r438346 | felicity | 2006-08-30 04:13:47 +0000 (Wed, 30 Aug 2006) | 1 line
+
+3.1.6 devel cycle started
+------------------------------------------------------------------------
+r438102 | jm | 2006-08-29 15:30:36 +0000 (Tue, 29 Aug 2006) | 1 line
+
+backport rule-qa svn-bug workaround, also trigger a new build
+------------------------------------------------------------------------
+r438093 | felicity | 2006-08-29 15:18:34 +0000 (Tue, 29 Aug 2006) | 1 line
+
+prepping to release 3.1.5
+------------------------------------------------------------------------
 r437949 | dos | 2006-08-29 04:12:09 +0000 (Tue, 29 Aug 2006) | 1 line
 
 bug 4823: clarify M::SA::Plugin documentation
