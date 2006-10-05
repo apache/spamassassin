@@ -1,5 +1,5 @@
 # the version in the tar name
-%define real_version 3.1.6
+%define real_version 3.1.7
 # the display version number
 %define version %{real_version}
 
