@@ -85,7 +85,8 @@ If you want to use SpamAssassin site-wide:
 
   - take a look at the notes on the Wiki website, currently at
     <http://wiki.apache.org/spamassassin/UsingSiteWide>.  You will probably
-    want to use 'spamd' (see below).
+    want to use 'spamd' (see below).   You may want to investigate the
+    new Apache mod_perl module, in the 'spamd-apache2' directory, too.
 
   - *PLEASE* let your users know you've installed it, and how to turn it
     off!   This is our #1 tech support query, and the users are usually
@@ -181,6 +182,15 @@ Other Installation Notes
     large volumes of mail through SpamAssassin without having to
     fork/exec a perl interpreter for each message. Take a look in the
     'spamd' and 'spamc' directories for more details.
+
+
+  - The distribution also includes 'spamd-apache2', a mod_perl module
+    allowing the Apache HTTP server to be used as a platform for a
+    daemonized SpamAssassin, in an upwardly-compatible fashion from
+    'spamd'.  If you don't require some of the spamd features it does not
+    implement (such as switching UIDs to read per-user configuration from
+    user home directories), this may be much faster than spamd.  Take a
+    look at the 'spamd-apache2' directory for details.
 
 
   - spamc can now be built as a shared library for use with milters or

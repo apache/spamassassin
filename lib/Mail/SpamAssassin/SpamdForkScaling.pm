@@ -1,11 +1,12 @@
 # spamd prefork scaling, using an Apache-based algorithm
 #
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
 # 
 #     http://www.apache.org/licenses/LICENSE-2.0
 # 
@@ -121,11 +122,20 @@ sub child_exited {
   $self->compute_lowest_child_pid();
 }
 
+# this is called by SIGTERM and SIGHUP handlers, to ensure that new
+# kids aren't added while the main code is killing the old ones
+# and planning to exit.
+#
+sub set_exiting_flag {
+  my ($self) = @_;
+  $self->{am_exiting} = 1;
+}
+
 sub child_error_kill {
   my ($self, $pid, $sock) = @_;
 
-  warn "prefork: killing failed child $pid ".
-            ($sock ? "fd=".$sock->fileno : "");
+  warn "prefork: killing failed child $pid fd=".
+    ((defined $sock && defined $sock->fileno) ? $sock->fileno : "undefined");
 
   # close the socket and remove the child from our list
   $self->set_child_state ($pid, PFSTATE_KILLED);
@@ -138,7 +148,7 @@ sub child_error_kill {
     $sock->close;
   }
 
-  warn "prefork: killed child $pid";
+  warn "prefork: killed child $pid\n";
 }
 
 sub set_child_state {
@@ -650,6 +660,9 @@ retry_write:
 
 sub adapt_num_children {
   my ($self) = @_;
+
+  # don't start up new kids while main is working at killing the old ones
+  return if $self->{am_exiting};
 
   my $kids = $self->{kids};
   my $statestr = '';

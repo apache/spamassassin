@@ -1,8 +1,10 @@
 #!/usr/bin/perl
 
 my ($l1, $l2, @diffargs);
+@diffargs = ();
+
 foreach my $arg (@ARGV) {
-  if (/^-/) {
+  if ($arg =~ /^-/) {
     push @diffargs, $arg;
   } elsif (defined $l1) {
     $l2 = $arg;
@@ -24,12 +26,21 @@ sub fixfile {
   open (IN, "<$inf") or die "cannot open $inf";
   open (OUT, ">$outf") or die "cannot open $outf";
   while (<IN>) {
-    s/\bscantime=\d+/scantime=N/gs;     # frequently different
-    s/\bAWL\b//gs;      # kill AWL hits
-    s/ ,/ /gs;
-    s/, / /gs;
-    s/,,/,/gs;
-    print OUT;
+    if (!/^([\.Y]\s+\S+\s+\S+)\s+(\S+)\s+(.+)/) {
+      print OUT;
+      next;
+    }
+
+    my ($scorepath, $rules, $meta) = ($1,$2,$3);
+    my @rules = split(/,/, $rules);
+    @rules = sort grep {
+        $_ !~ /^AWL$/
+    } @rules;
+    $rules = join(',', @rules);
+
+    $meta =~ s/\bscantime=\d+/scantime=N/gs;     # frequently different
+
+    print OUT "$scorepath $rules $meta\n";
   }
   close IN;
   close OUT;

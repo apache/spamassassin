@@ -1,9 +1,10 @@
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
 # 
 #     http://www.apache.org/licenses/LICENSE-2.0
 # 
@@ -815,8 +816,18 @@ minimum limit on file descriptors be raised to at least 256 for safety.
     default => 'test',
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      if ($value !~ /^(yes|no|test|test:\s+.+)$/) { return $INVALID_VALUE; }
-      $self->{dns_available} = ($1 or "test");
+      if ($value =~ /^test(?::\s+.+)?$/) {
+        $self->{dns_available} = $value;
+      }
+      elsif ($value =~ /^(?:yes|1)$/) {
+        $self->{dns_available} = 'yes';
+      }
+      elsif ($value =~ /^(?:no|0)$/) {
+        $self->{dns_available} = 'no';
+      }
+      else {
+        return $INVALID_VALUE;
+      }
     }
   });
 
@@ -3015,8 +3026,7 @@ sub clone {
 
 sub finish {
   my ($self) = @_;
-  delete $self->{parser};
-  delete $self->{main};
+  %{$self} = ();
 }
 
 ###########################################################################

@@ -1,9 +1,10 @@
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
 # 
 #     http://www.apache.org/licenses/LICENSE-2.0
 # 
@@ -101,12 +102,10 @@ sub check_for_illegal_ip {
   foreach my $rcvd ( @{$pms->{relays_untrusted}} ) {
     # (note this might miss some hits if the Received.pm skips any invalid IPs)
     foreach my $check ( $rcvd->{ip}, $rcvd->{by} ) {
-      return 1 if ($check =~ /^(?:
-    	(?:[01257]|22[3-9]|23[0-9]|24[0-9]|25[0-5])\.\d+\.\d+\.\d+|
-	127\.[1-9]\.\d+\.\d+|
-	127\.0\.[1-9]\.\d+|
-	127\.0\.0\.(?:\d\d+|[2-9])
-	)$/x);
+      next if ($check eq '127.0.0.1');
+      return 1 if ($check =~ /^
+    	(?:[01257]|127|22[3-9]|23[0-9]|24[0-9]|25[0-5])\.\d+\.\d+\.\d+
+	$/x);
     }
   }
   return 0;

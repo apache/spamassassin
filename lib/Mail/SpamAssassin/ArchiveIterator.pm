@@ -1,11 +1,12 @@
 # iterate over mail archives, calling a function on each message.
 #
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
 # 
 #     http://www.apache.org/licenses/LICENSE-2.0
 # 
@@ -22,8 +23,6 @@ use strict;
 use warnings;
 use bytes;
 
-use IO::Select;
-use IO::Socket;
 use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::Logger;
@@ -35,9 +34,10 @@ use constant BIG_LINES => BIG_BYTES/65;	# 65 bytes/line is a good approximation
 use vars qw {
   $MESSAGES
   $AICache
+  @ISA
 };
 
-my @ISA = qw($MESSAGES);
+@ISA = qw();
 
 =head1 NAME
 
@@ -47,7 +47,6 @@ Mail::SpamAssassin::ArchiveIterator - find and process messages one at a time
 
   my $iter = new Mail::SpamAssassin::ArchiveIterator(
     { 
-      'opt_j'     => 0,
       'opt_n'     => 1,
       'opt_all'   => 1,
       'opt_cache' => 1,
@@ -94,31 +93,6 @@ optional unless otherwise noted.
 Typically messages over 250k are skipped by ArchiveIterator.  Use this option
 to keep from skipping messages based on size.
 
-=item opt_j (required)
-
-Specifies how many messages should be run at the same time, as well as the
-method with which to scan for the messages.
-
-If the value is 0, the list of messages to process will be kept in memory,
-and only 1 message at a time will be processed by the wanted subroutine.
-Restarting is not allowed.
-
-If the value is 1, the list of messages to process will be kept in a
-temporary file, and only 1 message at a time will be processed by the
-wanted subroutine.  Restarting is not allowed.
-
-If the value is 2 or higher, the list of messages to process will be kept
-in a temporary file, and the process will split into a parent/child mode.
-The option value number of children will be forked off and each child
-will process messages via the wanted subroutine in parallel.  Restarting
-is allowed.
-
-B<NOTE:> For C<opt_j> >= 1, an extra child process will be created to
-determine the list of messages, sort the list, everything as appropriate.
-This will keep the list in memory (possibly multiple copies) before
-writing the final list to a temporary file which will be used for
-processing.  The list generation child will exit, freeing up the memory.
-
 =item opt_n
 
 ArchiveIterator is typically used to simulate ham and spam moving through
@@ -126,12 +100,6 @@ SpamAssassin.  By default, the list of messages is sorted by received date so
 that the mails can be passed through in order.  If opt_n is true, the sorting
 will not occur.  This is useful if you don't care about the order of the
 messages.
-
-=item opt_restart
-
-If set to a positive integer value, children processes (see opt_j w/ value 2
-or higher above) will restart after the option value number of messages, in
-total, have been processed.
 
 =item opt_head
 
@@ -245,8 +213,8 @@ reporting.  For more information, see I<new()> above.
 
 sub set_functions {
   my ($self, $wanted, $result) = @_;
-  $self->{wanted_sub} = $wanted;
-  $self->{result_sub} = $result;
+  $self->{wanted_sub} = $wanted if defined $wanted;
+  $self->{result_sub} = $result if defined $result;
 }
 
 ###########################################################################
@@ -302,151 +270,22 @@ sub run {
     return 0;
   }
 
-  # non-forking model (generally sa-learn), everything in a single process
-  if ($self->{opt_j} < 2) {
-    my $messages;
+  my $messages;
 
-    # message-array
-    ($MESSAGES, $messages) = $self->message_array(\@targets);
+  # scan the targets and get the number and list of messages
+  ($MESSAGES, $messages) = $self->message_array(\@targets);
 
-    while (my $message = shift @{$messages}) {
-      my($class, undef, $date, undef, $result) = $self->run_message($message);
-      &{$self->{result_sub}}($class, $result, $date) if $result;
-    }
+  # go ahead and run through all of the messages specified
+  return $self->_run($messages);
+}
+
+sub _run {
+  my ($self, $messages) = @_;
+
+  while (my $message = shift @{$messages}) {
+    my($class, undef, $date, undef, $result) = $self->run_message($message);
+    &{$self->{result_sub}}($class, $result, $date) if $result;
   }
-  # forking model (generally mass-check), avoid extended memory usage
-  else {
-    my $tmpf;
-    ($tmpf, $self->{messageh}) = Mail::SpamAssassin::Util::secure_tmpfile()
-      or die 'archive-iterator: failed to create temp file';
-    unlink $tmpf or die "archive-iterator: unlink '$tmpf': $!";
-    undef $tmpf;
-
-    # forked child process scans messages
-    if ($tmpf = fork()) {
-      # parent
-      waitpid($tmpf, 0);
-    }
-    elsif (defined $tmpf) {
-      # child
-      $self->message_array(\@targets, $self->{messageh});
-      exit;
-    }
-    else {
-      die "archive-iterator: cannot fork: $!";
-    }
-
-    # we now have a temporary file with the messages to process
-    # in theory, our file pointer is at the start of the file, but make sure.
-    # NOTE: do this here, not in message_array, since that will only affect
-    # the child.
-    seek($self->{messageh}, 0, 0);
-    $MESSAGES = $self->next_message();
-
-    if (!$MESSAGES) {
-      die "archive-iterator: no messages to process\n";
-    }
-    # only do 1 process, message list in a temp file, no restarting
-    if ($self->{opt_j} == 1 && !defined $self->{opt_restart}) {
-      my $message;
-      my $messages;
-      my $total_count = 0;
-
-      while (($MESSAGES > $total_count) && ($message = $self->next_message())) {
-        my($class, undef, $date, undef, $result) = $self->run_message($message);
-        &{$self->{result_sub}}($class, $result, $date) if $result;
-	$total_count++;
-      }
-    }
-    # more than one process or one process with restarts
-    else {
-      my $select = IO::Select->new();
-
-      my $total_count = 0;
-      my $needs_restart = 0;
-      my @child = ();
-      my @pid = ();
-      my $messages;
-
-      # start children processes
-      $self->start_children($self->{opt_j}, \@child, \@pid, $select);
-
-      # feed childen, make them work for it, repeat
-      while ($select->count()) {
-        foreach my $socket ($select->can_read()) {
-	  my $line = $self->read_line($socket);
-
-          # some error happened during the read!
-          if (!defined $line) {
-            $needs_restart = 1;
-            warn "archive-iterator: readline failed, attempting to recover\n";
-            $select->remove($socket);
-          }
-	  elsif ($line =~ /^([^\0]+)\0RESULT (.+)$/s) {
-	    my $result = $1;
-	    my ($date,$class,$type) = index_unpack($2);
-	    #warn ">> RESULT: $class, $type, $date\n";
-
-	    if (defined $self->{opt_restart} && ($total_count % $self->{opt_restart}) == 0) {
-	      $needs_restart = 1;
-	    }
-
-	    # if messages remain, and we don't need to restart, send message
-	    if (($MESSAGES > $total_count) && !$needs_restart) {
-	      $self->send_line($socket, $self->next_message());
-	      $total_count++;
-	      #warn ">> recv: $MESSAGES $total_count\n";
-	    }
-	    else {
-	      # stop listening on this child since we're done with it
-	      #warn ">> removeresult: $needs_restart $MESSAGES $total_count\n";
-	      $select->remove($socket);
-	    }
-
-	    # deal with the result we received
-	    if ($result) {
-	      &{$self->{result_sub}}($class, $result, $date);
-	    }
-	  }
-	  elsif ($line eq "START") {
-	    if ($MESSAGES > $total_count) {
-	      # we still have messages, send one to child
-	      $self->send_line($socket, $self->next_message());
-	      $total_count++;
-	      #warn ">> new: $MESSAGES $total_count\n";
-	    }
-	    else {
-	      # no more messages, so stop listening on this child
-	      #warn ">> removestart: $needs_restart $MESSAGES $total_count\n";
-	      $select->remove($socket);
-	    }
-	  }
-        }
-
-        #warn ">> out of loop, $MESSAGES $total_count $needs_restart ".$select->count()."\n";
-
-        # If there are still messages to process, and we need to restart
-        # the children, and all of the children are idle, let's go ahead.
-        if ($needs_restart && $select->count == 0 && $MESSAGES > $total_count)
-	{
-	  $needs_restart = 0;
-
-	  #warn "debug: needs restart, $MESSAGES total, $total_count done\n";
-	  $self->reap_children($self->{opt_j}, \@child, \@pid);
-	  @child=();
-	  @pid=();
-	  $self->start_children($self->{opt_j}, \@child, \@pid, $select);
-        }
-      }
-
-      # reap children
-      $self->reap_children($self->{opt_j}, \@child, \@pid);
-    }
-
-    # close tempfile so it will be unlinked
-    close($self->{messageh});
-  }
-
   return ! $self->{access_problem};
 }
 
@@ -576,136 +415,12 @@ sub run_mbx {
 
 ############################################################################
 
-## figure out the next message to process, used when opt_j >= 1
-
-sub next_message {
-  my ($self) = @_;
-  my $line = $self->read_line($self->{messageh});
-  return $line;
-}
-
-############################################################################
-
-## children processors, start and process, used when opt_j > 1
-
-sub start_children {
-  my ($self, $count, $child, $pid, $socket) = @_;
-
-  my $io = IO::Socket->new();
-  my $parent;
-
-  # create children
-  for (my $i = 0; $i < $count; $i++) {
-    ($child->[$i],$parent) = $io->socketpair(AF_UNIX,SOCK_STREAM,PF_UNSPEC)
-	or die "archive-iterator: socketpair failed: $!";
-    if ($pid->[$i] = fork) {
-      close $parent;
-
-      # disable caching for parent<->child relations
-      my ($old) = select($child->[$i]);
-      $|++;
-      select($old);
-
-      $socket->add($child->[$i]);
-      #warn "debug: starting new child $i (pid ",$pid->[$i],")\n";
-      next;
-    }
-    elsif (defined $pid->[$i]) {
-      my $result;
-      my $line;
-
-      close $self->{messageh} if defined $self->{messageh};
-
-      close $child->[$i];
-      select($parent);
-      $| = 1;	# print to parent by default, turn off buffering
-      $self->send_line($parent,"START");
-      while ($line = $self->read_line($parent)) {
-	if ($line eq "exit") {
-	  close $parent;
-	  exit;
-	}
-
-	my($class, $format, $date, $where, $result) = $self->run_message($line);
-	$result ||= '';
-
-	# If determine_receive_date is not set, the original input date
-	# wasn't calculated, but run_message would have done so, so reset
-	# the packed version if possible ...  use defined for date since
-	# it could == 0.
-        if (!$self->{determine_receive_date} && $class && $format && defined $date && $where) {
-	  $line = index_pack($date, $class, $format, $where);
-        }
-
-	$self->send_line($parent,"$result\0RESULT $line");
-      }
-      exit;
-    }
-    else {
-      die "archive-iterator: cannot fork: $!";
-    }
-  }
-}
-
-## handling killing off the children
-
-sub reap_children {
-  my ($self, $count, $socket, $pid) = @_;
-
-  # If the child died, sending it the exit will generate a SIGPIPE, but we
-  # don't really care since the readline will go undef (which is fine),
-  # then we do the waitpid which will finish it off.  So we end up in the
-  # right state, in theory.
-  local $SIG{'PIPE'} = 'IGNORE';
-
-  for (my $i = 0; $i < $count; $i++) {
-    #warn "debug: killing child $i (pid ",$pid->[$i],")\n";
-    $self->send_line($socket->[$i],"exit"); # tell the child to die.
-    close $socket->[$i];
-    waitpid($pid->[$i], 0); # wait for the signal ...
-  }
-}
-
-############################################################################
-
-# four bytes in network/vax format (little endian) as length of message
-# the rest is the actual message
-
-sub read_line {
-  my($self, $fd) = @_;
-  my($length,$msg);
-
-  # read in the 4 byte length and unpack
-  sysread($fd, $length, 4);
-  $length = unpack("V", $length);
-#  warn "<< $$ $length\n";
-  return unless $length;
-
-  # read in the rest of the single message
-  sysread($fd, $msg, $length);
-#  warn "<< $$ $msg\n";
-  return $msg;
-}
-
-sub send_line {
-  my $self = shift;
-  my $fd = shift;
-
-  foreach ( @_ ) {
-    my $length = pack("V", length $_);
-#    warn ">> $$ ".length($_)." $_\n";
-    syswrite($fd, $length . $_);
-  }
-}
-
-############################################################################
-
 ## FUNCTIONS BELOW THIS POINT ARE FOR FINDING THE MESSAGES TO RUN AGAINST
 
 ############################################################################
 
 sub message_array {
-  my ($self, $targets, $fh) = @_;
+  my ($self, $targets) = @_;
 
   foreach my $target (@${targets}) {
     if (!defined $target) {
@@ -829,12 +544,6 @@ sub message_array {
     splice(@messages, -$self->{opt_head});
   }
 
-  # Dump out the messages to the temp file if we're using one
-  if (defined $fh) {
-    $self->send_line($fh, scalar(@messages), @messages);
-    return;
-  }
-
   return scalar(@messages), \@messages;
 }
 
@@ -917,7 +626,8 @@ sub scan_directory {
   @files = grep { -f } map { "$folder/$_" } @files;
 
   if (!@files) {
-    warn "archive-iterator: readdir found no mail in '$folder' directory\n";
+    # this is not a problem; no need to warn about it
+    # warn "archive-iterator: readdir found no mail in '$folder' directory\n";
     return;
   }
 
@@ -1139,7 +849,7 @@ sub scan_mbx {
 	  }
 
           $self->bump_scan_progress();
-	  $info->{"$file.$offset"} = Mail::SpamAssassin::Util::receive_date($header);
+	  $info->{$offset} = Mail::SpamAssassin::Util::receive_date($header);
 
 	  # go onto the next message
 	  seek(INPUT, $offset + $size, 0);

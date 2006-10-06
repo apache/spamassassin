@@ -54,11 +54,28 @@ if ($opt_rev < $EARLIEST_REV) {
 
 print "creating rule metadata file: $outfile\n";
 my $tmpdir = "/tmp/rulemd.$$";
-svn_and_build();
-copy_md($outfile);
-system ("rm -rf $tmpdir");
+
+$SIG{TERM} = $SIG{INT} = sub {
+  cleanup_tmpdir(); die "killed";
+};
+
+eval {
+  svn_and_build();
+  copy_md($outfile);
+};
+if ($@) {
+  my $err = $@;
+  cleanup_tmpdir();
+  die $err;
+}
+
+cleanup_tmpdir();
 exit;
 
+
+sub cleanup_tmpdir {
+  system ("rm -rf $tmpdir");
+}
 
 
 sub configure {

@@ -1,9 +1,10 @@
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
 # 
 #     http://www.apache.org/licenses/LICENSE-2.0
 # 
@@ -57,7 +58,7 @@ The type of this setting:
 
            - $CONF_TYPE_STRING: string
            - $CONF_TYPE_NUMERIC: numeric value (float or int)
-           - $CONF_TYPE_BOOL: boolean (0 or 1)
+           - $CONF_TYPE_BOOL: boolean (0/no or 1/yes)
            - $CONF_TYPE_TEMPLATE: template, like "report"
            - $CONF_TYPE_ADDRLIST: address list, like "whitelist_from"
            - $CONF_TYPE_HASH_KEY_VALUE: hash key/value pair,
@@ -240,6 +241,7 @@ sub parse {
     local ($1);         # bug 3838: prevent random taint flagging of $1
 
     $line =~ s/(?<!\\)#.*$//; # remove comments
+    $line =~ s/\\#/#/g; # hash chars are escaped, so unescape them
     $line =~ s/^\s+//;  # remove leading whitespace
     $line =~ s/\s+$//;  # remove tailing whitespace
     next unless($line); # skip empty lines
@@ -586,6 +588,16 @@ sub set_bool_value {
   unless (defined $value && $value !~ /^$/) {
     return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
   }
+
+  # bug 4462: allow yes/1 and no/0 for boolean values
+  $value = lc $value;
+  if ($value eq 'yes') {
+    $value = 1;
+  }
+  elsif ($value eq 'no') {
+    $value = 0;
+  }
+
   unless ($value =~ /^[01]$/) {
     return $Mail::SpamAssassin::Conf::INVALID_VALUE;
   }
@@ -981,6 +993,7 @@ sub is_delimited_regexp_valid {
   my ($self, $name, $re) = @_;
 
   if (!$re || $re !~ /^\s*m?(\W).*(?:\1|>|}|\)|\])[a-z]*\s*$/) {
+    $re ||= '';
     $self->lint_warn("config: invalid regexp for rule $name: $re: missing or invalid delimiters\n", $name);
     return 0;
   }

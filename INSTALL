@@ -354,6 +354,22 @@ version is too low for them to be used.
     charsets and convert them into Unicode, you will need to install
     this module.
 
+
+  - Apache::Test (from CPAN)
+
+    If you plan to run the Apache2 version of spamd in the
+    "spamd-apache2" directory, you will need to install this
+    module.
+
+
+  - Apache 2 and mod_perl
+
+    If you plan to run the Apache2 version of spamd in the "spamd-apache2"
+    directory, you will need to ensure these are installed.
+
+    Ubuntu: sudo apt-get install apache2 libapache2-mod-perl2
+
+
 What Next?
 ----------
 

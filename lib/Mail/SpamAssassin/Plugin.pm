@@ -1,9 +1,10 @@
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
 # 
 #     http://www.apache.org/licenses/LICENSE-2.0
 # 
@@ -755,7 +756,7 @@ Called when the C<Mail::SpamAssassin> object is destroyed.
 
 sub finish {
   my ($self) = @_;
-  delete $self->{main};
+  %{$self} = ();
 }
 
 =head1 HELPER APIS
@@ -835,13 +836,13 @@ Note that eval rules are passed the following arguments:
 
 =over 4
 
-=item The plugin object itself
+=item - The plugin object itself
 
-=item The C<Mail::SpamAssassin::PerMsgStatus> object calling the rule
+=item - The C<Mail::SpamAssassin::PerMsgStatus> object calling the rule
 
-=item standard arguments for the rule type in use
+=item - standard arguments for the rule type in use
 
-=item any and all arguments as specified in the configuration file
+=item - any and all arguments as specified in the configuration file
 
 =back
 
@@ -872,13 +873,13 @@ Different rule types receive different information by default:
 
 =over 4
 
-=item header tests, no extra arguments
+=item - header tests: no extra arguments
 
-=item body tests, fully rendered message as array reference
+=item - body tests: fully rendered message as array reference
 
-=item rawbody tests, fully decoded message as array reference
+=item - rawbody tests: fully decoded message as array reference
 
-=item full tests, pristine message as scalar reference
+=item - full tests: pristine message as scalar reference
 
 =back
 

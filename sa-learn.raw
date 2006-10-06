@@ -1,10 +1,11 @@
 #!/usr/bin/perl -w -T
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
 # 
 #     http://www.apache.org/licenses/LICENSE-2.0
 # 
@@ -194,6 +195,27 @@ if ( defined $opt{'old_format'} ) {
   }
 }
 
+my $post_config = '';
+
+# kluge to support old check_bayes_db operation
+# bug 3799: init() will go r/o with the configured DB, and then dbpath needs
+# to override.  Just access the dbpath version via post_config_text.
+if ( defined $bayes_override_path ) {
+  # Add a default prefix if the path is a directory
+  if ( -d $bayes_override_path ) {
+    $bayes_override_path = File::Spec->catfile( $bayes_override_path, 'bayes' );
+  }
+
+  $post_config .= "bayes_path $bayes_override_path\n";
+}
+
+# These options require bayes_scanner, which requires "use_bayes 1", but
+# that's not necessary for these commands.
+if (defined $opt{'dump'} || defined $opt{'import'} || defined $opt{'clear'} ||
+    defined $opt{'backup'} || defined $opt{'restore'}) {
+  $post_config .= "use_bayes 1\n";
+}
+
 # create the tester factory
 $spamtest = new Mail::SpamAssassin(
   {
@@ -207,6 +229,7 @@ $spamtest = new Mail::SpamAssassin(
     PREFIX              => $PREFIX,
     DEF_RULES_DIR       => $DEF_RULES_DIR,
     LOCAL_RULES_DIR     => $LOCAL_RULES_DIR,
+    post_config_text	=> $post_config,
   }
 );
 
@@ -215,20 +238,6 @@ $spamtest->init(1);
 if (Mail::SpamAssassin::Util::am_running_on_windows()) {
   binmode(STDIN);       # bug 4363
   binmode(STDOUT);
-}
-
-# kluge to support old check_bayes_db operation
-if ( defined $bayes_override_path ) {
-
-  # Add a default prefix if the path is a directory
-  if ( -d $bayes_override_path ) {
-    $bayes_override_path = File::Spec->catfile( $bayes_override_path, 'bayes' );
-  }
-
-  # init() above ties to the db r/o and leaves it that way
-  # so we need to untie before dumping (it'll reopen)
-  $spamtest->finish_learner();
-  $spamtest->{conf}->{bayes_path} = $bayes_override_path;
 }
 
 if ( defined $opt{'dump'} ) {

@@ -3,11 +3,12 @@
 # TODO! we need to reimplement parts of the RESERVED regexp!
 
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
 # 
 #     http://www.apache.org/licenses/LICENSE-2.0
 # 
@@ -264,7 +265,7 @@ use constant HARVEST_DNSBL_PRIORITY =>  500;
 
 # regular expression that matches message separators in The University of
 # Washington's MBX mailbox format
-use constant MBX_SEPARATOR => qr/([\s|\d]\d-[a-zA-Z]{3}-\d{4}\s\d{2}:\d{2}:\d{2}.*),(\d+);([\da-f]{12})-(\w{8})/;
+use constant MBX_SEPARATOR => qr/^([\s|\d]\d-[a-zA-Z]{3}-\d{4}\s\d{2}:\d{2}:\d{2}.*),(\d+);([\da-f]{12})-(\w{8})\r?$/;
 # $1 = datestamp (str)
 # $2 = size of message in bytes (int)
 # $3 = message status - binary (hex)

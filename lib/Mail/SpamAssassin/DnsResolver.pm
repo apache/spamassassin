@@ -1,9 +1,10 @@
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
 # 
 #     http://www.apache.org/licenses/LICENSE-2.0
 # 
@@ -427,7 +428,9 @@ sub poll_responses {
 
 =item $res->bgabort()
 
-Call this to release pending requests from memory when aborting backgrounded requests
+Call this to release pending requests from memory, when aborting backgrounded
+requests, or when the scan is complete.
+C<Mail::SpamAssassin::PerMsgStatus::check> calls this before returning.
 
 =cut
 
@@ -500,10 +503,7 @@ Clean up for destruction.
 sub finish {
   my ($self) = @_;
   $self->finish_socket();
-  if (!$self->{no_resolver}) {
-    delete $self->{res};
-  }
-  delete $self->{main};
+  %{$self} = ();
 }
 
 ###########################################################################

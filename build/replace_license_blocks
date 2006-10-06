@@ -1,4 +1,4 @@
-#!/usr/bin/perl -i.bak
+#!/usr/bin/perl -i
 #
 # build/replace_license_blocks file ...
 #
@@ -10,6 +10,12 @@
 #     * <@LICENSE>
 #
 # will result in all lines of the license text being prefixed with "    * ".
+#
+# do something like the following:
+# - create a "newlicense" file with the license text as appropriate
+# - run something like:
+#   grep -rl @LICENSE * | egrep -v 'replace_license_blocks|\.svn' | xargs build/replace_license_blocks
+#
 
 # read the new license text; die if not available
 open (IN, "<newlicense") or die "cannot read 'newlicense'";
@@ -43,9 +49,14 @@ while (<>) {
 
 sub license_with_prefix {
   my $prefix = shift;
+
+  # if the prefix is "/*" replace with " *"
+  my $orig = $prefix;
+  $prefix =~ s@^(\s*)/\*(.*)$@$1 *$2@;
+
   my $text = $license; $text =~ s/^/$prefix/gm;
 
-  return $prefix."<\@LICENSE>\n".
+  return $orig."<\@LICENSE>\n".
     $text.
     $prefix."</\@LICENSE>\n";
 }

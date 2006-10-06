@@ -1,9 +1,10 @@
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
 # 
 #     http://www.apache.org/licenses/LICENSE-2.0
 # 
@@ -75,10 +76,9 @@ name of the rule to be used, C<rhsbl_zone> is the zone to look up domain names
 in, and C<lookuptype> is the type of lookup (B<TXT> or B<A>).
 
 C<subtest> is the sub-test to run against the returned data.  The sub-test may
-either be an IPv4 dotted address for RHSBLs that return multiple A records, a
+either be an IPv4 dotted address for RHSBLs that return multiple A records or a
 non-negative decimal number to specify a bitmask for RHSBLs that return a
-single A record containing a bitmask of results, or (if none of the preceding
-options seem to fit) a regular expression.
+single A record containing a bitmask of results.
 
 Note that, as with C<urirhsbl>, you must also define a body-eval rule calling
 C<check_uridnsbl()> to use this.
@@ -161,30 +161,24 @@ sub parsed_metadata {
     return;
   }
 
-  $self->{scanner} = $scanner;
-  my $scanstate = $scanner->{uribl_scanstate} = {
-    self => $self,
-    scanner => $scanner,
-    activerules => { },
-    hits => { }
-  };
+  $scanner->{'uridnsbl_activerules'} = { };
+  $scanner->{'uridnsbl_hits'} = { };
+  $scanner->{'uridnsbl_seen_domain'} = { };
 
   # only hit DNSBLs for active rules (defined and score != 0)
-  $scanstate->{active_rules_rhsbl} = { };
-  $scanstate->{active_rules_revipbl} = { };
+  $scanner->{'uridnsbl_active_rules_rhsbl'} = { };
+  $scanner->{'uridnsbl_active_rules_revipbl'} = { };
+
   foreach my $rulename (keys %{$scanner->{conf}->{uridnsbls}}) {
     next unless ($scanner->{conf}->is_rule_active('body_evals',$rulename));
 
-    my $rulecf = $scanstate->{scanner}->{conf}->{uridnsbls}->{$rulename};
+    my $rulecf = $scanner->{conf}->{uridnsbls}->{$rulename};
     if ($rulecf->{is_rhsbl}) {
-      $scanstate->{active_rules_rhsbl}->{$rulename} = 1;
+      $scanner->{uridnsbl_active_rules_rhsbl}->{$rulename} = 1;
     } else {
-      $scanstate->{active_rules_revipbl}->{$rulename} = 1;
+      $scanner->{uridnsbl_active_rules_revipbl}->{$rulename} = 1;
     }
   }
-
-  $self->setup ($scanstate);
-
 
   # get all domains in message
 
@@ -247,7 +241,8 @@ sub parsed_metadata {
   # at this point, @uri_ordered is an ordered array of uri hashes
 
   my %domlist = ();
-  while (keys %domlist < $scanner->{main}->{conf}->{uridnsbl_max_domains} && @uri_ordered) {
+  my $umd = $scanner->{main}->{conf}->{uridnsbl_max_domains};
+  while (keys %domlist < $umd && @uri_ordered) {
     my $array = shift @uri_ordered;
     next unless $array;
 
@@ -256,7 +251,7 @@ sub parsed_metadata {
     next unless @domains;
 
     # the new domains are all useful, just add them in
-    if (keys(%domlist) + @domains <= $scanner->{main}->{conf}->{uridnsbl_max_domains}) {
+    if (keys(%domlist) + @domains <= $umd) {
       foreach (@domains) {
         $domlist{$_} = 1;
       }
@@ -264,7 +259,7 @@ sub parsed_metadata {
     else {
       # trim down to a limited number - pick randomly
       my $i;
-      while (@domains && keys %domlist < $scanner->{main}->{conf}->{uridnsbl_max_domains}) {
+      while (@domains && keys %domlist < $umd) {
         my $r = int rand (scalar @domains);
         $domlist{splice (@domains, $r, 1)} = 1;
       }
@@ -274,7 +269,7 @@ sub parsed_metadata {
   # and query
   dbg("uridnsbl: domains to query: ".join(' ',keys %domlist));
   foreach my $dom (keys %domlist) {
-    $self->query_domain ($scanstate, $dom);
+    $self->query_domain ($scanner, $dom);
   }
 
   return 1;
@@ -344,7 +339,7 @@ sub set_config {
     setting => 'urirhssub',
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      if ($value =~ /^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)$/) {
+      if ($value =~ /^(\S+)\s+(\S+)\s+(\S+)\s+(\d{1,10}|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/) {
         my $rulename = $1;
         my $zone = $2;
         my $type = $3;
@@ -386,22 +381,15 @@ sub set_config {
 
 # ---------------------------------------------------------------------------
 
-sub setup {
-  my ($self, $scanstate) = @_;
-  $scanstate->{seen_domain} = { };
-}
-
-# ---------------------------------------------------------------------------
-
 sub query_domain {
-  my ($self, $scanstate, $dom) = @_;
+  my ($self, $scanner, $dom) = @_;
 
   #warn "uridnsbl: domain $dom\n";
   #return;
 
   $dom = lc $dom;
-  return if $scanstate->{seen_domain}->{$dom};
-  $scanstate->{seen_domain}->{$dom} = 1;
+  return if $scanner->{uridnsbl_seen_domain}->{$dom};
+  $scanner->{uridnsbl_seen_domain}->{$dom} = 1;
   $self->log_dns_result("querying domain $dom");
 
   my $obj = {
@@ -415,7 +403,7 @@ sub query_domain {
     my $IP_PRIVATE = IP_PRIVATE;
     # only look up the IP if it is public and valid
     if ($dom =~ /^$IPV4_ADDRESS$/ && $dom !~ /^$IP_PRIVATE$/) {
-      $self->lookup_dnsbl_for_ip($scanstate, $obj, $dom);
+      $self->lookup_dnsbl_for_ip($scanner, $obj, $dom);
       # and check the IP in RHSBLs too
       if ($dom =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) {
 	$dom = "$4.$3.$2.$1";
@@ -429,46 +417,46 @@ sub query_domain {
 
   if ($single_dnsbl) {
     # look up the domain in the RHSBL subset
-    my $cf = $scanstate->{active_rules_rhsbl};
+    my $cf = $scanner->{uridnsbl_active_rules_rhsbl};
     foreach my $rulename (keys %{$cf}) {
-      my $rulecf = $scanstate->{scanner}->{conf}->{uridnsbls}->{$rulename};
-      $self->lookup_single_dnsbl($scanstate, $obj, $rulename,
+      my $rulecf = $scanner->{conf}->{uridnsbls}->{$rulename};
+      $self->lookup_single_dnsbl($scanner, $obj, $rulename,
 				 $dom, $rulecf->{zone}, $rulecf->{type});
 
       # see comment below
-      $scanstate->{scanner}->register_async_rule_start($rulename);
+      $scanner->register_async_rule_start($rulename);
     }
 
     # perform NS, A lookups to look up the domain in the non-RHSBL subset
     if ($dom !~ /^\d+\.\d+\.\d+\.\d+$/) {
-      $self->lookup_domain_ns($scanstate, $obj, $dom);
+      $self->lookup_domain_ns($scanner, $obj, $dom);
     }
   }
 
   # note that these rules are now underway.   important: unless the
   # rule hits, in the current design, these will not be considered
   # "finished" until harvest_dnsbl_queries() completes
-  my $cf = $scanstate->{active_rules_revipbl};
+  my $cf = $scanner->{uridnsbl_active_rules_revipbl};
   foreach my $rulename (keys %{$cf}) {
-    $scanstate->{scanner}->register_async_rule_start($rulename);
+    $scanner->register_async_rule_start($rulename);
   }
 }
 
 # ---------------------------------------------------------------------------
 
 sub lookup_domain_ns {
-  my ($self, $scanstate, $obj, $dom) = @_;
+  my ($self, $scanner, $obj, $dom) = @_;
 
   my $key = "NS:".$dom;
-  return if $scanstate->{scanner}->{async}->get_lookup($key);
+  return if $scanner->{async}->get_lookup($key);
 
   # dig $dom ns
-  my $ent = $self->start_lookup ($scanstate, 'NS', $self->res_bgsend($scanstate, $dom, 'NS'), $key);
+  my $ent = $self->start_lookup ($scanner, 'NS', $self->res_bgsend($scanner, $dom, 'NS'), $key);
   $ent->{obj} = $obj;
 }
 
 sub complete_ns_lookup {
-  my ($self, $scanstate, $ent, $dom) = @_;
+  my ($self, $scanner, $ent, $dom) = @_;
 
   my $packet = $ent->{response_packet};
   my @answer = $packet->answer;
@@ -488,11 +476,11 @@ sub complete_ns_lookup {
 	$nsmatch =~ s/\.$//;
 	# only look up the IP if it is public and valid
 	if ($nsmatch =~ /^$IPV4_ADDRESS$/ && $nsmatch !~ /^$IP_PRIVATE$/) {
-	  $self->lookup_dnsbl_for_ip($scanstate, $ent->{obj}, $nsmatch);
+	  $self->lookup_dnsbl_for_ip($scanner, $ent->{obj}, $nsmatch);
 	}
       }
       else {
-	$self->lookup_a_record($scanstate, $ent->{obj}, $nsmatch);
+	$self->lookup_a_record($scanner, $ent->{obj}, $nsmatch);
       }
     }
   }
@@ -501,25 +489,25 @@ sub complete_ns_lookup {
 # ---------------------------------------------------------------------------
 
 sub lookup_a_record {
-  my ($self, $scanstate, $obj, $hname) = @_;
+  my ($self, $scanner, $obj, $hname) = @_;
 
   my $key = "A:".$hname;
-  return if $scanstate->{scanner}->{async}->get_lookup($key);
+  return if $scanner->{async}->get_lookup($key);
 
   # dig $hname a
-  my $ent = $self->start_lookup ($scanstate, 'A', $self->res_bgsend($scanstate, $hname, 'A'), $key);
+  my $ent = $self->start_lookup ($scanner, 'A', $self->res_bgsend($scanner, $hname, 'A'), $key);
   $ent->{obj} = $obj;
 }
 
 sub complete_a_lookup {
-  my ($self, $scanstate, $ent, $hname) = @_;
+  my ($self, $scanner, $ent, $hname) = @_;
 
   foreach my $rr ($ent->{response_packet}->answer) {
     my $str = $rr->string;
     $self->log_dns_result ("A for NS $hname: $str");
 
     if ($str =~ /IN\s+A\s+(\S+)/) {
-      $self->lookup_dnsbl_for_ip($scanstate, $ent->{obj}, $1);
+      $self->lookup_dnsbl_for_ip($scanner, $ent->{obj}, $1);
     }
   }
 }
@@ -527,39 +515,38 @@ sub complete_a_lookup {
 # ---------------------------------------------------------------------------
 
 sub lookup_dnsbl_for_ip {
-  my ($self, $scanstate, $obj, $ip) = @_;
+  my ($self, $scanner, $obj, $ip) = @_;
 
   $ip =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/;
   my $revip = "$4.$3.$2.$1";
 
-  my $cf = $scanstate->{active_rules_revipbl};
+  my $cf = $scanner->{uridnsbl_active_rules_revipbl};
   foreach my $rulename (keys %{$cf}) {
-    my $rulecf = $scanstate->{scanner}->{conf}->{uridnsbls}->{$rulename};
-    $self->lookup_single_dnsbl($scanstate, $obj, $rulename,
+    my $rulecf = $scanner->{conf}->{uridnsbls}->{$rulename};
+    $self->lookup_single_dnsbl($scanner, $obj, $rulename,
 			       $revip, $rulecf->{zone}, $rulecf->{type});
   }
 }
 
 sub lookup_single_dnsbl {
-  my ($self, $scanstate, $obj, $rulename, $lookupstr, $dnsbl, $qtype) = @_;
+  my ($self, $scanner, $obj, $rulename, $lookupstr, $dnsbl, $qtype) = @_;
 
   my $key = "DNSBL:".$dnsbl.":".$lookupstr;
-  return if $scanstate->{scanner}->{async}->get_lookup($key);
+  return if $scanner->{async}->get_lookup($key);
   my $item = $lookupstr.".".$dnsbl;
 
   # dig $ip txt
-  my $ent = $self->start_lookup ($scanstate, 'DNSBL',
-        $self->res_bgsend($scanstate, $item, $qtype), $key);
+  my $ent = $self->start_lookup ($scanner, 'DNSBL',
+        $self->res_bgsend($scanner, $item, $qtype), $key);
   $ent->{obj} = $obj;
   $ent->{rulename} = $rulename;
   $ent->{zone} = $dnsbl;
 }
 
 sub complete_dnsbl_lookup {
-  my ($self, $scanstate, $ent, $dnsblip) = @_;
+  my ($self, $scanner, $ent, $dnsblip) = @_;
 
-  my $scan = $scanstate->{scanner};
-  my $conf = $scan->{conf};
+  my $conf = $scanner->{conf};
   my @subtests = ();
   my $rulename = $ent->{rulename};
   my $rulecf = $conf->{uridnsbls}->{$rulename};
@@ -583,7 +570,7 @@ sub complete_dnsbl_lookup {
             $packet->header->id." rr=".$rr->string);
 	next;
       }
-      $self->got_dnsbl_hit($scanstate, $ent, $rdatastr, $dom, $rulename);
+      $self->got_dnsbl_hit($scanner, $ent, $rdatastr, $dom, $rulename);
     }
     else {
       foreach my $subtest (keys (%{$uridnsbl_subs}))
@@ -591,20 +578,14 @@ sub complete_dnsbl_lookup {
         my $subrulename = $uridnsbl_subs->{$subtest}->{rulename};
 
         if ($subtest eq $rdatastr) {
-          $self->got_dnsbl_hit($scanstate, $ent, $rdatastr, $dom, $subrulename);
+          $self->got_dnsbl_hit($scanner, $ent, $rdatastr, $dom, $subrulename);
         }
         # bitmask
         elsif ($subtest =~ /^\d+$/) {
-          if ($rdatastr =~ m/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/ &&
-              Mail::SpamAssassin::Util::my_inet_aton($rdatastr) & $subtest)
+	  if ($rdatastr =~ m/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/ &&
+	      Mail::SpamAssassin::Util::my_inet_aton($rdatastr) & $subtest)
           {
-            $self->got_dnsbl_hit($scanstate, $ent, $rdatastr, $dom, $subrulename);
-          }
-        }
-        # regular expression
-        else {
-          if ($rdatastr =~ /${subtest}/) {
-            $self->got_dnsbl_hit($scanstate, $ent, $rdatastr, $dom, $subrulename);
+            $self->got_dnsbl_hit($scanner, $ent, $rdatastr, $dom, $subrulename);
           }
         }
       }
@@ -613,35 +594,34 @@ sub complete_dnsbl_lookup {
 }
 
 sub got_dnsbl_hit {
-  my ($self, $scanstate, $ent, $str, $dom, $rulename) = @_;
+  my ($self, $scanner, $ent, $str, $dom, $rulename) = @_;
 
   $str =~ s/\s+/  /gs;	# long whitespace => short
   dbg("uridnsbl: domain \"$dom\" listed ($rulename): $str");
 
-  if (!defined $scanstate->{hits}->{$rulename}) {
-    $scanstate->{hits}->{$rulename} = { };
+  if (!defined $scanner->{uridnsbl_hits}->{$rulename}) {
+    $scanner->{uridnsbl_hits}->{$rulename} = { };
   };
-  $scanstate->{hits}->{$rulename}->{$dom} = 1;
+  $scanner->{uridnsbl_hits}->{$rulename}->{$dom} = 1;
 
-  my $scan = $scanstate->{scanner};
-  if ($scanstate->{active_rules_revipbl}->{$rulename}
-    || $scanstate->{active_rules_rhsbl}->{$rulename})
+  if ($scanner->{uridnsbl_active_rules_revipbl}->{$rulename}
+    || $scanner->{uridnsbl_active_rules_rhsbl}->{$rulename})
   {
     # TODO: this needs to handle multiple domain hits per rule
-    $scan->clear_test_state();
-    my $uris = join (' ', keys %{$scanstate->{hits}->{$rulename}});
-    $scan->test_log ("URIs: $uris");
-    $scan->got_hit ($rulename, "");
+    $scanner->clear_test_state();
+    my $uris = join (' ', keys %{$scanner->{uridnsbl_hits}->{$rulename}});
+    $scanner->test_log ("URIs: $uris");
+    $scanner->got_hit ($rulename, "");
 
     # note that this rule has completed (since it got at least 1 hit)
-    $scanstate->{scanner}->register_async_rule_finish($rulename);
+    $scanner->register_async_rule_finish($rulename);
   }
 }
 
 # ---------------------------------------------------------------------------
 
 sub start_lookup {
-  my ($self, $scanstate, $type, $id, $key) = @_;
+  my ($self, $scanner, $type, $id, $key) = @_;
 
   my $ent = {
     key => $key,
@@ -649,27 +629,27 @@ sub start_lookup {
     id => $id,
     completed_callback => sub {
       my $ent = shift;
-      $self->completed_lookup_callback ($scanstate, $ent);
+      $self->completed_lookup_callback ($scanner, $ent);
     }
   };
-  $scanstate->{scanner}->{async}->start_lookup($ent);
+  $scanner->{async}->start_lookup($ent);
   return $ent;
 }
 
 sub completed_lookup_callback {
-  my ($self, $scanstate, $ent) = @_;
+  my ($self, $scanner, $ent) = @_;
   my $type = $ent->{type};
   my $key = $ent->{key};
   $key =~ /:(\S+?)$/; my $val = $1;
 
   if ($type eq 'URI-NS') {
-    $self->complete_ns_lookup ($scanstate, $ent, $val);
+    $self->complete_ns_lookup ($scanner, $ent, $val);
   }
   elsif ($type eq 'URI-A') {
-    $self->complete_a_lookup ($scanstate, $ent, $val);
+    $self->complete_a_lookup ($scanner, $ent, $val);
   }
   elsif ($type eq 'URI-DNSBL') {
-    $self->complete_dnsbl_lookup ($scanstate, $ent, $val);
+    $self->complete_dnsbl_lookup ($scanner, $ent, $val);
     my $totalsecs = (time - $ent->{obj}->{querystart});
     dbg("uridnsbl: query for ".$ent->{obj}->{dom}." took ".
               $totalsecs." seconds to look up ($val)");
@@ -679,12 +659,12 @@ sub completed_lookup_callback {
 # ---------------------------------------------------------------------------
 
 sub res_bgsend {
-  my ($self, $scanstate, $host, $type) = @_;
+  my ($self, $scanner, $host, $type) = @_;
 
   return $self->{main}->{resolver}->bgsend($host, $type, undef, sub {
         my $pkt = shift;
         my $id = shift;
-        $scanstate->{scanner}->{async}->set_response_packet($id, $pkt);
+        $scanner->{async}->set_response_packet($id, $pkt);
       });
 }
 
