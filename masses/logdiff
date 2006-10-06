@@ -1,0 +1,36 @@
+#!/usr/bin/perl
+
+my ($l1, $l2, @diffargs);
+foreach my $arg (@ARGV) {
+  if (/^-/) {
+    push @diffargs, $arg;
+  } elsif (defined $l1) {
+    $l2 = $arg;
+  } else {
+    $l1 = $arg;
+  }
+}
+
+my $tmp1 = "/tmp/logdiff.$$.1";
+my $tmp2 = "/tmp/logdiff.$$.2";
+fixfile($l1, $tmp1);
+fixfile($l2, $tmp2);
+
+exec "diff", @diffargs, $tmp1, $tmp2;
+
+sub fixfile {
+  my $inf = shift;
+  my $outf = shift;
+  open (IN, "<$inf") or die "cannot open $inf";
+  open (OUT, ">$outf") or die "cannot open $outf";
+  while (<IN>) {
+    s/\bscantime=\d+/scantime=N/gs;     # frequently different
+    s/\bAWL\b//gs;      # kill AWL hits
+    s/ ,/ /gs;
+    s/, / /gs;
+    s/,,/,/gs;
+    print OUT;
+  }
+  close IN;
+  close OUT;
+}
