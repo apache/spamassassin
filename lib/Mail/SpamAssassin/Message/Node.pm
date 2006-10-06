@@ -1,9 +1,10 @@
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
 # 
 #     http://www.apache.org/licenses/LICENSE-2.0
 # 
@@ -254,13 +255,28 @@ Return a reference to the the raw array.  Treat this as READ ONLY.
 =cut
 
 sub raw {
-  return $_[0]->{'raw'};
+  my $self = shift;
+
+  # Ok, if we're called we are expected to return an array.
+  # so if it's a file reference, read in the message into an array...
+  #
+  # NOTE: that "ref undef" works, so don't bother checking for a defined var
+  # first.
+  if (ref $self->{'raw'} eq 'GLOB') {
+    my @array;
+    my $fd = $self->{'raw'};
+    seek $fd, 0, 0;
+    @array = <$fd>;
+    return \@array;
+  }
+
+  return $self->{'raw'};
 }
 
 =item decode()
 
 If necessary, decode the part text as base64 or quoted-printable.
-The decoded text will be returned as a scalar.  An optional length
+The decoded text will be returned as a scalar string.  An optional length
 parameter can be passed in which limits how much decoded data is returned.
 If the scalar isn't needed, call with "0" as a parameter.
 
@@ -270,13 +286,32 @@ sub decode {
   my($self, $bytes) = @_;
 
   if ( !exists $self->{'decoded'} ) {
+    # Someone is looking for a decoded part where there is no raw data
+    # (multipart or subparsed message, etc.)  Just return undef.
+    if (!exists $self->{'raw'}) {
+      return undef;
+    }
+
+    my $raw;
+
+    # if the part is held in a temp file, read it into the scalar
+    if (ref $self->{'raw'} eq 'GLOB') {
+      my $fd = $self->{'raw'};
+      seek $fd, 0, 0;
+      local $/ = undef;
+      $raw = <$fd>;
+    }
+    else {
+      # create a new scalar from the raw array in memory
+      $raw = join('', @{$self->{'raw'}});
+    }
+
     my $encoding = lc $self->header('content-transfer-encoding') || '';
 
     if ( $encoding eq 'quoted-printable' ) {
       dbg("message: decoding quoted-printable");
-      $self->{'decoded'} = [
-        map { s/\r\n/\n/; $_; } split ( /^/m, Mail::SpamAssassin::Util::qp_decode( join ( "", @{$self->{'raw'}} ) ) )
-	];
+      $self->{'decoded'} = Mail::SpamAssassin::Util::qp_decode($raw);
+      $self->{'decoded'} =~ s/\r\n/\n/g;
     }
     elsif ( $encoding eq 'base64' ) {
       dbg("message: decoding base64");
@@ -284,16 +319,16 @@ sub decode {
       # if it's not defined or is 0, do the whole thing, otherwise only decode
       # a portion
       if ($bytes) {
-        return Mail::SpamAssassin::Util::base64_decode(join("", @{$self->{'raw'}}), $bytes);
+        return Mail::SpamAssassin::Util::base64_decode($raw, $bytes);
       }
       else {
         # Generate the decoded output
-        $self->{'decoded'} = [ Mail::SpamAssassin::Util::base64_decode(join("", @{$self->{'raw'}})) ];
+        $self->{'decoded'} = Mail::SpamAssassin::Util::base64_decode($raw);
       }
 
       # If it's a type text or message, split it into an array of lines
       if ( $self->{'type'} =~ m@^(?:text|message)\b/@i ) {
-        $self->{'decoded'} = [ map { s/\r\n/\n/; $_; } split(/^/m, $self->{'decoded'}->[0]) ];
+        $self->{'decoded'} =~ s/\r\n/\n/g;
       }
     }
     else {
@@ -304,17 +339,17 @@ sub decode {
       else {
         dbg("message: no encoding detected");
       }
-      $self->{'decoded'} = $self->{'raw'};
+      $self->{'decoded'} = $raw;
     }
   }
 
   if ( !defined $bytes || $bytes ) {
-    my $tmp = join("", @{$self->{'decoded'}});
     if ( !defined $bytes ) {
-      return $tmp;
+      # force a copy
+      return '' . $self->{'decoded'};
     }
     else {
-      return substr($tmp, 0, $bytes);
+      return substr($self->{'decoded'}, 0, $bytes);
     }
   }
 }
@@ -374,17 +409,20 @@ or whatever the original type was), and the rendered text.
 sub rendered {
   my ($self) = @_;
 
-  # We don't render anything except text
-  return(undef,undef) unless ( $self->{'type'} =~ /^text\b/i );
-
   if (!exists $self->{rendered}) {
+    # We only know how to render text/plain and text/html ...
+    # Note: for bug 4843, make sure to skip text/calendar parts
+    # we also want to skip things like text/x-vcard
+    # text/x-aol is ignored here, but looks like text/html ...
+    return(undef,undef) unless ( $self->{'type'} =~ /^text\/(?:plain|html)$/i );
+
     my $text = $self->_normalize($self->decode(), $self->{charset});
     my $raw = length($text);
 
     # render text/html always, or any other text|text/plain part as text/html
     # based on a heuristic which simulates a certain common mail client
-    if ($raw > 0 && ($self->{'type'} =~ m@^text/html\b@i ||
-		     ($self->{'type'} =~ m@^text(?:$|/plain)@i &&
+    if ($raw > 0 && ($self->{'type'} =~ m@^text/html$@i ||
+		     ($self->{'type'} =~ m@^text/plain$@i &&
 		      _html_render(substr($text, 0, 23)))))
     {
       $self->{rendered_type} = 'text/html';
@@ -409,11 +447,30 @@ sub rendered {
     }
     else {
       $self->{rendered_type} = $self->{type};
-      $self->{rendered} = $self->{visible_rendered} = $text;
+      $self->{rendered} = $self->{'visible_rendered'} = $text;
+      $self->{'invisible_rendered'} = '';
     }
   }
 
   return ($self->{rendered_type}, $self->{rendered});
+}
+
+=item set_rendered($text, $type)
+
+Set the rendered text and type for the given part.  If type is not
+specified, and text is a defined value, a default of 'text/plain' is used.
+This can be used, for instance, to render non-text parts using plugins.
+
+=cut
+
+sub set_rendered {
+  my ($self, $text, $type) = @_;
+
+  $type = 'text/plain' if (!defined $type && defined $text);
+
+  $self->{'rendered_type'} = $type;
+  $self->{'rendered'} = $self->{'visible_rendered'} = $text;
+  $self->{'invisible_rendered'} = defined $text ? '' : undef;
 }
 
 =item visible_rendered()
@@ -638,36 +695,8 @@ sub get_all_headers {
   return wantarray ? @lines : join ('', @lines);
 }
 
-# ---------------------------------------------------------------------------
-
-=item finish()
-
-Clean up the object so that it can be destroyed.
-
-=cut
-
-sub finish {
-  my ($self) = @_;
-
-  foreach my $part ( $self->find_parts(qr/./) ) {
-    foreach (
-      'headers',
-      'raw_headers',
-      'header_order',
-      'raw',
-      'decoded',
-      'rendered',
-      'visible_rendered',
-      'invisible_rendered',
-      'type',
-      'rendered_type',
-      'body_parts',
-    ) {
-      undef $part->{$_};
-      delete $part->{$_};
-    }
-  }
-}
+# legacy public API; now a no-op.
+sub finish { }
 
 # ---------------------------------------------------------------------------
 

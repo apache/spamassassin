@@ -1,9 +1,10 @@
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
 # 
 #     http://www.apache.org/licenses/LICENSE-2.0
 # 
@@ -548,9 +549,14 @@ sub check_for_forged_juno_received_headers {
         && $rcvd !~ / cookie\.(?:juno|untd)\.com /) { return 1; }
     if($xmailer !~ /Juno /) { return 1; }
   } else {
-    if($rcvd !~ /from.*\bmail\.com.*\[$IP_ADDRESS\].*by/) { return 1; }
+    if($rcvd =~ /from.*\bmail\.com.*\[$IP_ADDRESS\].*by/) {
+      if($xmailer !~ /\bmail\.com/) { return 1; }
+    } elsif($rcvd =~ /from (webmail\S+\.untd\.com) \(\1 \[$IP_ADDRESS\]\) by/) {
+      if($xmailer !~ /^Webmail Version \d/) { return 1; }
+    } else {
+      return 1;
+    }
     if($xorig !~ /$IP_ADDRESS/) { return 1; }
-    if($xmailer !~ /\bmail\.com/) { return 1; }
   }
 
   return 0;   
@@ -789,13 +795,15 @@ sub _get_date_header_time {
 
   my $time;
   # a Resent-Date: header takes precedence over any Date: header
-  for my $header ('Resent-Date', 'Date') {
-    my $date = $pms->get($header);
-    if (defined($date) && length($date)) {
-      chomp($date);
-      $time = Mail::SpamAssassin::Util::parse_rfc822_date($date);
+  DATE: for my $header ('Resent-Date', 'Date') {
+    my @dates = $pms->{msg}->get_header($header);
+    for my $date (@dates) {
+      if (defined($date) && length($date)) {
+        chomp($date);
+        $time = Mail::SpamAssassin::Util::parse_rfc822_date($date);
+      }
+      last DATE if defined($time);
     }
-    last if defined($time);
   }
   if (defined($time)) {
     $pms->{date_header_time} = $time;

@@ -1,13 +1,14 @@
 #!/usr/bin/perl -w -T
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+# 
 #     http://www.apache.org/licenses/LICENSE-2.0
-#
+# 
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -672,12 +673,12 @@ if ( $opt{'socketpath'} ) {
     my $gid = -1;
     if ($owner) {
       my ($login,$pass,$puid,$pgid) = getpwnam($owner)
-                            or die "spamd: $owner not in passwd database\n";
+                           or die "spamd: $owner not in passwd database\n";
       $uid = $puid;
     }
     if ($group) {
       my ($name,$pass,$ggid,$members) = getgrnam($group)
-                            or die "spamd: $group not in group database\n";
+                           or die "spamd: $group not in group database\n";
       $gid = $ggid;
     }
     if (!chown $uid, $gid, $path) {
@@ -703,7 +704,7 @@ elsif ( $opt{'ssl'} ) {
   );
   dbg("spamd: creating SSL socket:\n" . join("\n", map { " $_:  " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket));
   $server = new IO::Socket::SSL(%socket)
-         || die "spamd: could not create SSL socket on $addr:$port: $!\n";
+       || die "spamd: could not create SSL socket on $addr:$port: $!\n";
 }
 else {
   my %socket = (
@@ -716,7 +717,7 @@ else {
   );
   dbg("spamd: creating INET socket:\n" . join("\n", map { " $_: " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket));
   $server = new_io_socket_inetx(%socket)
-         || die "spamd: could not create INET socket on $addr:$port: $!\n";
+       || die "spamd: could not create INET socket on $addr:$port: $!\n";
 }
 
 if ( defined $opt{'pidfile'} ) {
@@ -890,6 +891,12 @@ sub spawn {
   else {
     ## CHILD
 
+    # Reset signal handling to default settings, and unblock.
+    # These lines must be as soon as possible after the fork (bug 4304)
+    setup_child_sig_handlers();
+    sigprocmask( POSIX::SIG_UNBLOCK(), $sigset )
+      or die "spamd: cannot unblock SIGINT/SIGCHLD for fork: $!\n";
+
     $spamtest->call_plugins("spamd_child_init");
 
     # support non-root use
@@ -925,13 +932,6 @@ sub spawn {
         die "spamd: setuid to uid $uuid failed\n";
       }
     }
-
-    # Reset signal handling to default settings.
-    setup_child_sig_handlers();
-
-    # unblock signals
-    sigprocmask( POSIX::SIG_UNBLOCK(), $sigset )
-      or die "spamd: cannot unblock SIGINT/SIGCHLD for fork: $!\n";
 
     # set process name where supported
     # this will help make it clear via process listing which is child/parent
@@ -2032,6 +2032,9 @@ sub kill_handler {
   }
 
   $SIG{CHLD} = 'DEFAULT';    # we're going to kill our children
+  if ($scaling) {
+    $scaling->set_exiting_flag(); # don't start new ones
+  }
   kill 'INT' => keys %children;
   exit 0;
 }
@@ -2074,6 +2077,10 @@ sub restart_handler {
   info("spamd: server hit by SIG$sig, restarting");
 
   $SIG{CHLD} = 'DEFAULT';    # we're going to kill our children
+  if ($scaling) {
+    $scaling->set_exiting_flag(); # don't start new ones
+  }
+
   foreach (keys %children) {
     kill 'INT' => $_;
     my $pid = waitpid($_, 0);
@@ -2538,15 +2545,15 @@ diagnostic output on bayes, learn, and dns, use:
 Higher priority informational messages that are suitable for logging in normal
 circumstances are available with an area of "info".
 
-=item B< --ipv4only>, B<--ipv4-only>, B<--ipv4>
-
-Do not use IPv6 for DNS tests. Use if the existing tests
-for IPv6 availablity produce incorrect results or crashes.
-
 For more information about which areas (also known as channels) are available,
 please see the documentation at:
 
 	C<http://wiki.apache.org/spamassassin/DebugChannels>
+
+=item B< --ipv4only>, B<--ipv4-only>, B<--ipv4>
+
+Do not use IPv6 for DNS tests. Use if the existing tests
+for IPv6 availablity produce incorrect results or crashes.
 
 =item B<-L>, B<--local>
 

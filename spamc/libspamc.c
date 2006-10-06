@@ -1,9 +1,10 @@
 /* <@LICENSE>
- * Copyright 2004 Apache Software Foundation
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to you under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at:
  * 
  *     http://www.apache.org/licenses/LICENSE-2.0
  * 
@@ -1009,9 +1010,9 @@ int message_filter(struct transport *tp, const char *username,
 	strcat(buf + len, "\r\n");
 	len += strlen(buf + len);
       }
-      if ((m->msg_len > 9999999) || ((len + 27) >= (bufsiz - len))) {
+      if ((m->msg_len > SPAMC_MAX_MESSAGE_LEN) || ((len + 27) >= (bufsiz - len))) {
 	_use_msg_for_out(m);
-	return EX_OSERR;
+	return EX_DATAERR;
       }
       len += sprintf(buf + len, "Content-length: %d\r\n\r\n", (int) m->msg_len);
     }
@@ -1336,9 +1337,9 @@ int message_tell(struct transport *tp, const char *username, int flags,
 	strcat(buf + len, "\r\n");
 	len += strlen(buf + len);
     }
-    if ((m->msg_len > 9999999) || ((len + 27) >= (bufsiz - len))) {
+    if ((m->msg_len > SPAMC_MAX_MESSAGE_LEN) || ((len + 27) >= (bufsiz - len))) {
 	_use_msg_for_out(m);
-	return EX_OSERR;
+	return EX_DATAERR;
     }
     len += sprintf(buf + len, "Content-length: %d\r\n\r\n", (int) m->msg_len);
 
@@ -1572,10 +1573,13 @@ int transport_setup(struct transport *tp, int flags)
         return EX_OK;
 #endif
     case TRANSPORT_LOCALHOST:
-        /* getaddrinfo(NULL) will look up the loopback address */
-        if ((origerr = getaddrinfo(NULL, port, &hints, &res)) != 0) {
+        /* getaddrinfo(NULL) will look up the loopback address.
+         * bug 5057: unfortunately, it's the IPv6 loopback address on
+         * linux!  Be explicit, and force IPv4 using "127.0.0.1".
+         */
+        if ((origerr = getaddrinfo("127.0.0.1", port, &hints, &res)) != 0) {
             libspamc_log(flags, LOG_ERR, 
-                  "getaddrinfo(NULL) failed: %s",
+                  "getaddrinfo(127.0.0.1) failed: %s",
                   gai_strerror(origerr));
             return EX_OSERR;
         }

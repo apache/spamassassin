@@ -3,14 +3,15 @@
 # build/mkrules -- compile the SpamAssassin rules into installable form
 #
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+# 
 #     http://www.apache.org/licenses/LICENSE-2.0
-#
+# 
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -95,6 +96,8 @@ $opt_inactiveout ||= "70_inactive.cf";
 # source files that need compilation, and their targets
 my $needs_compile = { };
 my $current_src;
+my $newest_src_mtime = 0;
+my $newest_out_mtime = 0;
 
 my $default_file_header = join('', <DATA>);
 
@@ -109,6 +112,20 @@ foreach my $src (@opt_srcs) {
           no_chdir => 1
         }, $src);
 }
+
+# get mtimes of output files; we can be sure that all
+# output is under the "opt_out" dir, so recurse there
+#File::Find::find ({
+#        wanted => \&out_wanted,
+#        no_chdir => 1
+#      }, $opt_out);
+
+#if ($newest_src_mtime && $newest_out_mtime
+#    && $newest_src_mtime < $newest_out_mtime)
+#{
+#  print "mkrules: no rules updated\n";
+#  exit 0;
+#}
 
 my $rules = { };
 
@@ -157,7 +174,13 @@ sub lint_output_files {
     my $text = join("\n", "file start $file", $output_file_text->{$file}, "file end $file");
     if (lint_rule_text($text) != 0) {
       warn "\nERROR: LINT FAILED, suppressing output: $file\n\n";
-      delete $output_file_text->{$file};
+
+      # don't suppress entirely, otherwise 'make distcheck'/'disttest'
+      # will fail since the MANIFEST-listed output files will be 
+      # empty.
+
+      # delete $output_file_text->{$file};
+      $output_file_text->{$file} = '';
     }
   }
 }
@@ -213,12 +236,28 @@ sub wanted {
   my $t;
   $t = "$opt_out/$filename";
 
+  my @st = stat $path;
+  if ($st[9] && $st[9] > $newest_src_mtime) {
+    $newest_src_mtime = $st[9];
+  }
+
   $needs_compile->{$f} = {
           f => $f,
           t => $t,
           dir => $dir,
           filename => $filename
         };
+}
+
+sub out_wanted {
+  my $path = $File::Find::name;
+  return unless (-f $path);
+  return unless ($path =~ /\.cf$/i);
+
+  my @st = stat $path;
+  if ($st[9] && $st[9] > $newest_out_mtime) {
+    $newest_out_mtime = $st[9];
+  }
 }
 
 # compile all the source files found by the wanted() sub, in sorted
@@ -412,12 +451,24 @@ sub rule_file_compile {
     elsif (/^loadplugin\s*(\S+)\b/) {
       my $name = 'loadplugin_'.$1;
 
+      unless ($rules->{$name}) {
+        $rules->{$name} = rule_entry_create();
+        $rules->{$name}->{issandbox} = $issandbox;
+        $rules->{$name}->{iscommand} = 1;
+      }
+
       if (/^loadplugin\s*\S+\s+(\S+)/) {
         my $fname = $1;
         my $fpath = dirname($f)."/".$fname;
+
         if (!-f $fpath) {
           warn "$f: WARNING: plugin code file '$fpath' not found, line ignored: $orig";
           next;
+        }
+
+        if ($fpath =~ /sandbox/i) {
+          # Since this is a sandbox plugin, force its output to the sandbox area.
+          $rules->{$name}->{sandbox_plugin} = 1;
         }
 
         # If a 'loadplugin' line is found, and the plugin .pm is not listed in
@@ -437,12 +488,6 @@ sub rule_file_compile {
           warn "$f: WARNING: '$opt_out/$fname' not listed in manifest file, making 'tryplugin': $orig";
           $orig =~ s/^\s*loadplugin\b/tryplugin/;
         }
-      }
-
-      unless ($rules->{$name}) {
-        $rules->{$name} = rule_entry_create();
-        $rules->{$name}->{issandbox} = $issandbox;
-        $rules->{$name}->{iscommand} = 1;
       }
 
       $rules->{$name}->{text} .= $orig;
@@ -532,29 +577,41 @@ sub copy_to_output_buffers {
       $is_active++;
     }
 
-    $output_files->{$pubfile} = {
-      header => $default_file_header
-    };
-
     # fix up any rule renamings we were supposed to do
     sed_renamed_rule_names(\$text);
 
     my $cond = $rules->{$name}->{cond};
-    if ($cond) {
-      $rules->{$name}->{output_text} = "\n".$cond.$text."endif\n";
+    my $pluginclass = $rules->{$name}->{ifplugin};
+    if ($cond)
+    {
+      my $ifplugin_text_name = "loadplugin_".($pluginclass || "");
 
-      # also, if the rule is active, ensure its "loadplugin" line
-      # is copied to the active output file, too
-      my $pluginclass = $rules->{$name}->{ifplugin};
-      if ($is_active && $pluginclass) {
-        my $ifplugin_text_name = "loadplugin_".$pluginclass;
+      if ($pluginclass && $rules->{$ifplugin_text_name})
+      {
+        # if the plugin is a sandbox plugin, ensure it's not
+        # sent to the active file
+        if ($rules->{$ifplugin_text_name}->{sandbox_plugin}) {
+          $pubfile = $opt_out.'/'.$opt_sandboxout;
+          $is_active = 0;
+        }
+
+        # either way, ensure the "loadplugin" line, if there is one,
+        # goes to the same file
         $rules->{$ifplugin_text_name}->{output_file} = $pubfile;
       }
+
+      $rules->{$name}->{output_text} = "\n".$cond.$text."endif\n";
 
     } else {
       $rules->{$name}->{output_text} = $text;
     }
+
+    # note the target file
     $rules->{$name}->{output_file} = $pubfile;
+
+    $output_files->{$pubfile} = {
+      header => $default_file_header
+    };
 
     if ($is_active) {
       $copied_active++;
@@ -772,6 +829,10 @@ sub write_output_files {
     }
     else {
       print "$pubfile: no rules promoted\n";
+
+      # create an empty file anyway to satisfy MANIFEST
+      open (OUT, ">".$pubfile) or die "cannot write to output file '$pubfile'";
+      close OUT or die "cannot close output file '$pubfile'";
     }
   }
 }
@@ -883,14 +944,15 @@ __DATA__
 # See 'perldoc Mail::SpamAssassin::Conf' for details.
 #
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+# 
 #     http://www.apache.org/licenses/LICENSE-2.0
-#
+# 
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.

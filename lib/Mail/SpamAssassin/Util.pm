@@ -1,9 +1,10 @@
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
 # 
 #     http://www.apache.org/licenses/LICENSE-2.0
 # 
@@ -793,16 +794,23 @@ sub parse_content_type {
   # Get the actual MIME type out ...
   # Note: the header content may not be whitespace unfolded, so make sure the
   # REs do /s when appropriate.
+  # correct:
+  # Content-type: text/plain; charset=us-ascii
+  # missing a semi-colon, CT shouldn't have whitespace anyway:
+  # Content-type: text/plain charset=us-ascii
   #
-  $ct =~ s/^\s+//;			# strip leading whitespace
-  $ct =~ s/;.*$//s;			# strip everything after first ';'
-  $ct =~ s@^([^/]+(?:/[^/]*)?).*$@$1@s;	# only something/something ...
+  $ct =~ s/^\s+//;				# strip leading whitespace
+  $ct =~ s/;.*$//s;				# strip everything after first ';'
+  $ct =~ s@^([^/]+(?:/[^/\s]*)?).*$@$1@s;	# only something/something ...
   # strip inappropriate chars
   $ct =~ tr/\000-\040\177-\377\042\050\051\054\056\072-\077\100\133-\135//d;
   $ct = lc $ct;
 
   # bug 4298: If at this point we don't have a content-type, assume text/plain
-  $ct ||= "text/plain";
+  # also, if the content-type is simply "text" or "text/", assume text/plain
+  if (!$ct || $ct =~ /^text\/?$/) {
+    $ct = "text/plain";
+  }
 
   # Now that the header has been parsed, return the requested information.
   # In scalar context, just the MIME type, in array context the
@@ -876,7 +884,7 @@ sub first_available_module {
 
 ###########################################################################
 
-=item my ($filehandle, $filepath) = secure_tmpfile();
+=item my ($filepath, $filehandle) = secure_tmpfile();
 
 Generates a filename for a temporary file, opens it exclusively and
 securely, and returns a filehandle to the open file (opened O_RDWR).

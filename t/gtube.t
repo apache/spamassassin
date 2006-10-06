@@ -22,7 +22,7 @@ tstprefs ("
         endif
 ");
 
-$ENV{'LC_ALL'} = 'C';             # a cheat, but we match the description
+$ENV{'LANGUAGE'} = $ENV{'LC_ALL'} = 'C';             # a cheat, but we match the description
 
 ok (sarun ("-L -t < data/spam/gtube.eml", \&patterns_run_cb));
 ok_all_patterns();

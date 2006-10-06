@@ -2,6 +2,7 @@
 
 # settings are located in $HOME/.corpus
 
+echo "Using corpus-nightly settings from $HOME/.corpus"
 . $HOME/.corpus
 
 RSYNC_PASSWORD=$password 
@@ -67,22 +68,25 @@ while true; do
 		break;
 	fi
 
-	pkill -TERM svn
-	sleep 10
-	pkill -KILL svn
+        # if that failed, get aggressive about getting a full
+        # checkout, regardless of what may have been here already;
+        # delete most of the checkout to do so, and just use "svn co"
+        # instead of "svn up".
 
-	if svn update -r $revision < /dev/null && \
-            svn update -r $revision rulesrc < /dev/null
-        then
-		break;
-	fi
+        rm -rf rules lib build rulesrc spamd spamc
+        svn cleanup < /dev/null
+        svn co --non-interactive `svnpath` .
 
-	if [ $retry -eq 120 ]; then
-		echo "svn update failed" 1>&2
+        # just 10 times; our SVN repo shouldn't be *that* unreliable!
+	if [ $retry -eq 20 ]; then
+		echo "svn update/co failed" 1>&2
 		exit 1
 	fi
+
 	retry=$(( $retry + 1 ))
-	sleep 20
+
+        # longer and longer between retries
+	sleep `expr 20 '*' $retry`
 done
 set -e
 

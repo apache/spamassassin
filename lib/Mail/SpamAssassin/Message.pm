@@ -1,9 +1,10 @@
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
 # 
 #     http://www.apache.org/licenses/LICENSE-2.0
 # 
@@ -515,15 +516,10 @@ sub finish {
 
   # Clean ourself up
   $self->finish_metadata();
-  undef $self->{pristine_headers};
-  undef $self->{pristine_body};
-  delete $self->{pristine_headers};
-  delete $self->{pristine_body};
-  delete $self->{text_decoded};
-  delete $self->{text_rendered};
 
-  # Destroy the tree ...
-  $self->SUPER::finish();
+  # wipe out all of our pointers and such -- since our tree is one-way, wiping
+  # out body_parts here will wipe out the rest of the tree.
+  %{$self} = ();
 }
 
 # ---------------------------------------------------------------------------
@@ -590,30 +586,35 @@ sub parse_body {
       $self->_parse_normal($toparse);
 
       if ($toparse->[0]->{'type'} =~ /^message\b/i && ($toparse->[3] > 0)) {
-        # Get the part ready...
-        my $message = $toparse->[0]->decode();
+        # Just decode the part, but we don't care about the result here.
+        $toparse->[0]->decode(0);
 
 	# Ok, so this part is still semi-recursive, since M::SA::Message calls
 	# M::SA::Message, but we don't subparse the new message, and pull a
 	# sneaky "steal our child's queue" maneuver to deal with it on our own
-	# time.
-        if ($message) {
-          my $msg_obj = Mail::SpamAssassin::Message->new({
-      	    message		=>	$message,
-	    parsenow	=>	0,
-	    normalize	=>	$self->{normalize},
-	    subparse	=>	$toparse->[3]-1,
-	    });
+	# time.  Reference the decoded array directly since it's faster.
+	# 
+        my $msg_obj = Mail::SpamAssassin::Message->new({
+    	  message	=>	$toparse->[0]->{'decoded'},
+	  parsenow	=>	0,
+	  normalize	=>	$self->{normalize},
+	  subparse	=>	$toparse->[3]-1,
+	  });
 
-	  # Add the new message to the current node
-          $toparse->[0]->add_body_part($msg_obj);
+	# Add the new message to the current node
+        $toparse->[0]->add_body_part($msg_obj);
 
-	  # now this is the sneaky bit ... steal the sub-message's parse_queue
-	  # and add it to ours.  then we'll handle the sub-message in our
-	  # normal loop and get all the glory.  muhaha.  :)
-	  push(@{$self->{'parse_queue'}}, @{$msg_obj->{'parse_queue'}});
-	  delete $msg_obj->{'parse_queue'};
-        }
+	# now this is the sneaky bit ... steal the sub-message's parse_queue
+	# and add it to ours.  then we'll handle the sub-message in our
+	# normal loop and get all the glory.  muhaha.  :)
+	push(@{$self->{'parse_queue'}}, @{$msg_obj->{'parse_queue'}});
+	delete $msg_obj->{'parse_queue'};
+
+	# Ok, we've subparsed, so go ahead and remove the raw and decoded
+	# data because we won't need them anymore (the tree under this part
+	# will have that data)
+	delete $toparse->[0]->{'raw'};
+	delete $toparse->[0]->{'decoded'};
       }
     }
   }
@@ -806,8 +807,31 @@ sub _parse_normal {
     $msg->{'name'} = $ct[3];
   }
 
-  $msg->{'raw'} = $body;
   $msg->{'boundary'} = $boundary;
+
+  # If the part type is not one that we're likely to want to use, go
+  # ahead and write the part data out to a temp file -- why keep sucking
+  # up RAM with something we're not going to use?
+  #
+  if ($msg->{'type'} !~ m@^(?:text/(?:plain|html)$|message\b)@) {
+    my $filepath;
+    ($filepath, $msg->{'raw'}) = Mail::SpamAssassin::Util::secure_tmpfile();
+
+    if ($filepath) {
+      # The temp file was created, let's try to delete it now
+      if (!unlink $filepath) {
+        # We couldn't delete the file, so abort trying to make the temp file.
+        close($msg->{'raw'});
+	unlink $filepath; # try again with the file closed
+      }
+      $msg->{'raw'}->print(@{$body});
+    }
+  }
+
+  # if the part didn't get a temp file, go ahead and store the data in memory
+  if (!exists $msg->{'raw'}) {
+    $msg->{'raw'} = $body;
+  }
 }
 
 # ---------------------------------------------------------------------------
@@ -820,7 +844,7 @@ sub get_rendered_body_text_array {
   $self->{text_rendered} = [];
 
   # Find all parts which are leaves
-  my @parts = $self->find_parts(qr/^(?:text|message)\b/i,1);
+  my @parts = $self->find_parts(qr/./,1);
   return $self->{text_rendered} unless @parts;
 
   # the html metadata may have already been set, so let's not bother if it's
@@ -847,9 +871,6 @@ sub get_rendered_body_text_array {
       if ($html_needs_setting && $type eq 'text/html') {
         $self->{metadata}->{html} = $p->{html_results};
       }
-    }
-    else {
-      $text .= $p->decode();
     }
   }
 
@@ -880,7 +901,7 @@ sub get_visible_rendered_body_text_array {
   $self->{text_visible_rendered} = [];
 
   # Find all parts which are leaves
-  my @parts = $self->find_parts(qr/^(?:text|message)\b/i,1);
+  my @parts = $self->find_parts(qr/./,1);
   return $self->{text_visible_rendered} unless @parts;
 
   # the html metadata may have already been set, so let's not bother if it's
@@ -908,9 +929,6 @@ sub get_visible_rendered_body_text_array {
         $self->{metadata}->{html} = $p->{html_results};
       }
     }
-    else {
-      $text .= $p->decode();
-    }
   }
 
   # whitespace handling (warning: small changes have large effects!)
@@ -934,7 +952,7 @@ sub get_invisible_rendered_body_text_array {
   $self->{text_invisible_rendered} = [];
 
   # Find all parts which are leaves
-  my @parts = $self->find_parts(qr/^(?:text|message)\b/i,1);
+  my @parts = $self->find_parts(qr/./,1);
   return $self->{text_invisible_rendered} unless @parts;
 
   # the html metadata may have already been set, so let's not bother if it's
@@ -989,6 +1007,10 @@ sub get_decoded_body_text_array {
 
   # Go through each part
   for(my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
+    # bug 4843: skip text/calendar parts since they're usually an attachment
+    # and not displayed
+    next if ($parts[$pt]->{'type'} eq 'text/calendar');
+
     push(@{$self->{text_decoded}}, "\n") if ( @{$self->{text_decoded}} );
     push(@{$self->{text_decoded}}, $parts[$pt]->decode());
   }

@@ -1,9 +1,10 @@
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
 # 
 #     http://www.apache.org/licenses/LICENSE-2.0
 # 
@@ -132,6 +133,7 @@ sub _multipart_alternative_difference {
     foreach my $text (@txt) {
       # we only care about the rendered version of the part
       my ($type, $rnd) = $text->rendered();
+      next unless defined $type;
 
       # parse the rendered text into tokens.  assume they are whitespace
       # separated, and ignore anything that doesn't have a word-character

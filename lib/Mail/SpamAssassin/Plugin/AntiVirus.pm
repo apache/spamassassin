@@ -1,9 +1,10 @@
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
 # 
 #     http://www.apache.org/licenses/LICENSE-2.0
 # 
@@ -106,7 +107,7 @@ sub _check_attachments {
       # file extension indicates an executable
       $pms->{antivirus_microsoft_exe} = 1;
     }
-    elsif ($cte =~ /base64/ &&
+    elsif ($cte =~ /base64/ && defined $p->raw()->[0] &&
 	   $p->raw()->[0] =~ /^TV[opqr].A..[AB].[AQgw][A-H].A/)
     {
       # base64-encoded executable

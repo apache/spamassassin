@@ -1,9 +1,10 @@
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
 # 
 #     http://www.apache.org/licenses/LICENSE-2.0
 # 
@@ -212,6 +213,11 @@ from files, read them in yourself and set this instead.  As a result, this will
 override the settings for C<rules_filename>, C<site_rules_filename>,
 and C<userprefs_filename>.
 
+=item post_config_text
+
+Similar to C<config_text>, this text is placed after config_text to allow an
+override of config files.
+
 =item force_ipv4
 
 If set to 1, DNS tests will not attempt to use IPv6. Use if the existing tests
@@ -395,6 +401,12 @@ sub parse {
   my($self, $message, $parsenow) = @_;
   $self->init(1);
   my $msg = Mail::SpamAssassin::Message->new({message=>$message, parsenow=>$parsenow, normalize=>$self->{conf}->{normalize_charset}});
+
+  # bug 5069: The goal here is to get rendering plugins to do things
+  # like OCR, convert doc and pdf to text, etc, though it could be anything
+  # that wants to process the message after it's been parsed.
+  $self->call_plugins("post_message_parse", { message => $msg });
+
   return $msg;
 }
 
@@ -1291,6 +1303,10 @@ sub lint_rules {
 
   $self->{dont_copy_prefs} = $olddcp;       # revert back to previous
 
+  # bug 5048: override settings to ensure a faster lint
+  $self->{'conf'}->{'use_auto_whitelist'} = 0;
+  $self->{'conf'}->{'bayes_auto_learn'} = 0;
+
   my $mail = $self->parse(\@testmsg, 1);
   my $status = Mail::SpamAssassin::PerMsgStatus->new($self, $mail,
                         { disable_auto_learning => 1 } );
@@ -1327,9 +1343,7 @@ sub finish {
 
   $self->{resolver}->finish();
 
-  foreach(keys %{$self}) {
-    delete $self->{$_};
-  }
+  %{$self} = ();
 }
 
 ###########################################################################
@@ -1360,8 +1374,6 @@ sub init {
   if (!defined $self->{config_text}) {
     $self->{config_text} = '';
 
-    my $fname;
-
     # read a file called "init.pre" in site rules dir *before* all others;
     # even the system config.
     my $siterules = $self->{site_rules_filename};
@@ -1384,25 +1396,23 @@ sub init {
       warn "config: could not find sys rules directory\n";
     }
 
-    $fname = $sysrules;
-    if ($fname) {
-      $self->{config_text} .= $self->read_cf ($fname, 'default rules dir');
+    if ($sysrules) {
+      $self->{config_text} .= $self->read_cf ($sysrules, 'default rules dir');
     }
 
     if (!$self->{languages_filename}) {
       $self->{languages_filename} = $self->find_rule_support_file("languages");
     }
 
-    $fname = $siterules;
-    if ($fname) {
-      $self->{config_text} .= $self->read_cf ($fname, 'site rules dir');
+    if ($siterules) {
+      $self->{config_text} .= $self->read_cf ($siterules, 'site rules dir');
     }
 
     if ( $use_user_pref != 0 ) {
       $self->get_and_create_userstate_dir();
 
       # user prefs file
-      $fname = $self->{userprefs_filename};
+      my $fname = $self->{userprefs_filename};
       $fname ||= $self->first_existing_path (@default_userprefs_path);
 
       if (!$self->{dont_copy_prefs}) {
@@ -1418,6 +1428,8 @@ sub init {
       $self->{config_text} .= $self->read_cf ($fname, 'user prefs file');
     }
   }
+
+  $self->{config_text} .= $self->{post_config_text} if ($self->{post_config_text});
 
   if ($self->{config_text} !~ /\S/) {
     warn "config: no configuration text or files found! please check your setup\n";

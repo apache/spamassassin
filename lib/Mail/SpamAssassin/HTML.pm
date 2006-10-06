@@ -1,9 +1,10 @@
 # <@LICENSE>
-# Copyright 2004 Apache Software Foundation
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
 # 
 #     http://www.apache.org/licenses/LICENSE-2.0
 # 
@@ -649,9 +650,6 @@ sub html_tests {
   if ($tag eq "img" && exists $self->{inside}{a} && $self->{inside}{a} > 0) {
     $self->{uri}->{$self->{anchor_last}}->{anchor_text}->[-1] .= "<img>\n";
     $self->{anchor}->[-1] .= "<img>\n";
-    if ($self->{anchor_last} =~ /\.(?:pl|cgi|php|asp|jsp|cfm)\b/i) {
-      $self->put_results(anchor_image_bug => 1);
-    }
   }
 
   if ($tag eq "img" && exists $attr->{width} && exists $attr->{height}) {
@@ -674,12 +672,6 @@ sub html_tests {
     if ($width > 0 && $height > 0) {
       $area = $width * $height;
       $self->{image_area} += $area;
-    }
-    # this is intended to match any width and height if they're specified
-    if (exists $attr->{src} &&
-	$attr->{src} =~ /\.(?:pl|cgi|php|asp|jsp|cfm)\b/i)
-    {
-      $self->put_results(web_bugs => 1);
     }
   }
   if ($tag eq "form" && exists $attr->{action}) {
@@ -750,8 +742,9 @@ sub display_text {
   }
   push @{ $self->{text} }, $text;
   while (my ($k, $v) = each %display) {
-    $self->{"text_$k"} ||= '';
-    vec($self->{"text_$k"}, $#{$self->{text}}, 1) = $v;
+    my $textvar = "text_".$k;
+    if (!exists $self->{$textvar}) { $self->{$textvar} = ''; }
+    vec($self->{$textvar}, $#{$self->{text}}, 1) = $v;
   }
 }
 
