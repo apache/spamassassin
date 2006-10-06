@@ -62,31 +62,42 @@ sub new {
 sub finish_parsing_end {
   my ($self, $params) = @_;
   my $conf = $params->{conf};
+  $self->extract_bases($conf);
+}
+
+sub extract_bases {
+  my ($self, $conf) = @_;
 
   # TODO: need a better way to do this rather than using an env
   # var as a back channel
   my $rawf = $ENV{'RULE_REGEXP_DUMP_FILE'};
-  return unless $rawf;
+  my $f;
 
-  $rawf =~ /^(.*)$/;
-  my $f = $1;       # untaint; allow anything here, it's from %ENV and safe
+  if ($rawf) {
+    $rawf =~ /^(.*)$/;
+    $f = $1;       # untaint; allow anything here, it's from %ENV and safe
+  }
 
-  $self->extract_bases_for_set ($f, $conf, $conf->{body_tests}, 'body');
+  $self->extract_set($f, $conf, $conf->{body_tests}, 'body');
 }
 
-sub extract_bases_for_set {
+sub extract_set {
   my ($self, $dumpfile, $conf, $test_set, $ruletype) = @_;
 
   foreach my $pri (keys %{$test_set}) {
     my $nicepri = $pri; $nicepri =~ s/-/neg/g;
-    $self->extract_all($dumpfile, $conf, $test_set->{$pri}, $ruletype.'_'.$nicepri);
+    $self->extract_set_pri($conf, $test_set->{$pri}, $ruletype.'_'.$nicepri);
+
+    if ($dumpfile) {
+      $self->dump_base_strings($dumpfile, $conf, $ruletype.'_'.$nicepri);
+    }
   }
 }
 
 ###########################################################################
 
-sub extract_all {
-  my ($self, $dumpfile, $conf, $rules, $ruletype) = @_;
+sub extract_set_pri {
+  my ($self, $conf, $rules, $ruletype) = @_;
 
   my @good_bases = ();
   my @failed = ();
@@ -106,6 +117,7 @@ sub extract_all {
     my $rule = $rules->{$name};
 
     # ignore ReplaceTags rules
+    # TODO: need cleaner way to do this
     next if ($conf->{rules_to_replace}->{$name});
 
     my $base  = $self->extract_base($rule, 0);
@@ -166,8 +178,8 @@ sub extract_all {
   # re2c, and it appears the re2c developers don't plan to offer this:
   # https://sourceforge.net/tracker/index.php?func=detail&aid=1540845&group_id=96864&atid=616203
 
-  open (OUT, ">$dumpfile") or die "cannot write to $dumpfile!";
-  print OUT "name $ruletype\n";
+  $conf->{base_orig}->{$ruletype} = { };
+  $conf->{base_string}->{$ruletype} = { };
 
   foreach my $set1 (@good_bases) {
     my $base1 = $set1->{base};
@@ -175,7 +187,7 @@ sub extract_all {
     my $key1  = $set1->{name};
     next if ($base1 eq '' or $key1 eq '');
 
-    print OUT "orig $key1 $orig1\n";
+    $conf->{base_orig}->{$ruletype}->{$key1} = $orig1;
 
     foreach my $set2 (@good_bases) {
       next if ($set1 == $set2);
@@ -204,11 +216,30 @@ sub extract_all {
     my $base = $set->{base};
     my $key  = $set->{name};
     next unless $base;
-    print OUT "r $base:$key\n";
+    $conf->{base_string}->{$ruletype}->{$base} = $key;
+  }
+
+  warn ("zoom: base extraction complete for $ruletype: yes=$yes no=$no\n");
+}
+
+###########################################################################
+
+sub dump_base_strings {
+  my ($self, $dumpfile, $conf, $ruletype) = @_;
+
+  open (OUT, ">$dumpfile") or die "cannot write to $dumpfile!";
+  print OUT "name $ruletype\n";
+
+  foreach my $key1 (sort keys %{$conf->{base_orig}->{$ruletype}}) {
+    print OUT "orig $key1 $conf->{base_orig}->{$ruletype}->{$key1}\n";
+  }
+
+  foreach my $key (sort keys %{$conf->{base_string}->{$ruletype}}) {
+    print OUT "r $key:$conf->{base_string}->{$ruletype}->{$key}\n";
   }
   close OUT or die "close failed on $dumpfile!";
 
-  warn ("zoom: base extraction complete for $ruletype: yes=$yes no=$no\n");
+  warn ("zoom: bases written to '$dumpfile'\n");
 }
 
 ###########################################################################
@@ -256,6 +287,10 @@ sub extract_base {
 
     # remove (?i)
     $rule =~ s/\(\?i\)//gs;
+  }
+  else {
+    return if $rule =~ /\(\?i\)/;
+    return if $mods =~ /i/;
   }
 
   # remove /m and /s modifiers
