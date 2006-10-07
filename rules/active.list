@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-jm bb-zmi cthielen daf dos parkerm theo zmi
+# with results from: bb-doc bb-jm bb-zmi cthielen daf parkerm theo
 
 # good enough
 ADVANCE_FEE_3
@@ -15,6 +15,9 @@ AWL
 
 # good enough
 AXB_FAKETZ
+
+# good enough
+BAD_ENC_HEADER
 
 # good enough
 BANG_OPRAH
@@ -60,9 +63,6 @@ BAYES_99
 
 # good enough
 BROKEN_RATWARE_BOM
-
-# good enough
-CONFIRMED_FORGED
 
 # good enough
 CUM_SHOT
@@ -293,9 +293,6 @@ FORGED_IMS_TAGS
 FORGED_MSGID_AOL
 
 # good enough
-FORGED_MSGID_EXCITE
-
-# good enough
 FORGED_MSGID_HOTMAIL
 
 # good enough
@@ -312,9 +309,6 @@ FORGED_MUA_EUDORA
 
 # good enough
 FORGED_MUA_IMS
-
-# good enough
-FORGED_MUA_MOZILLA
 
 # good enough
 FORGED_MUA_OIMO
@@ -345,9 +339,6 @@ FORGED_YAHOO_RCVD
 
 # good enough
 FREE_PORN
-
-# good enough
-FREE_QUOTE_INSTANT
 
 # good enough
 FROM_ALL_NUMS
@@ -497,6 +488,9 @@ INVALID_DATE
 INVALID_TZ_CST
 
 # good enough
+INVALID_TZ_GMT
+
+# good enough
 INVESTMENT_ADVICE
 
 # good enough
@@ -570,6 +564,9 @@ MIME_BOUND_DIGITS_15
 
 # good enough
 MIME_BOUND_MANY_HEX
+
+# good enough
+MIME_BOUND_RKFINDY
 
 # good enough
 MISSING_MIMEOLE
@@ -684,9 +681,6 @@ RATWARE_RCVD_AT
 
 # good enough
 RATWARE_RCVD_PF
-
-# good enough
-RATWARE_ZERO_TZ
 
 # tflags net
 RAZOR2_CF_RANGE_51_100
@@ -863,10 +857,10 @@ SPF_PASS
 SPF_SOFTFAIL
 
 # good enough
-SPOOF_COM2OTH
+SPOOF_COM2COM
 
 # good enough
-SPOOF_NET2COM
+SPOOF_COM2OTH
 
 # good enough
 STOCK_ALERT
@@ -881,9 +875,6 @@ SUBJECT_DRUG_GAP_L
 SUBJECT_DRUG_GAP_S
 
 # good enough
-SUBJECT_DRUG_GAP_VA
-
-# good enough
 SUBJECT_DRUG_GAP_X
 
 # tflags userconf
@@ -894,6 +885,9 @@ SUBJECT_IN_WHITELIST
 
 # good enough
 SUBJECT_NEEDS_ENCODING
+
+# good enough
+SUBJECT_NOVOWEL
 
 # good enough
 SUBJECT_SEXUAL
@@ -947,9 +941,6 @@ TVD_FUZZY_FINANCE
 TVD_FUZZY_FIXED_RATE
 
 # good enough
-TVD_FUZZY_MICROCAP
-
-# good enough
 TVD_FUZZY_PHARMACEUTICAL
 
 # good enough
@@ -960,6 +951,12 @@ TVD_FW_GRAPHIC_ID3
 
 # good enough
 TVD_FW_GRAPHIC_ID3_2
+
+# good enough
+TVD_FW_GRAPHIC_NAME_LONG
+
+# good enough
+TVD_FW_GRAPHIC_NAME_MID
 
 # good enough
 TVD_FW_MESG1
@@ -987,9 +984,6 @@ TVD_PH_FR5
 
 # good enough
 TVD_PH_REC
-
-# good enough
-TVD_PH_SUBJ_ACCOUNTS_POST
 
 # good enough
 TVD_PH_SUBJ_META
@@ -1088,16 +1082,16 @@ RATWARE_MS_HASH
 RATWARE_OUTLOOK_NONAME
 
 # good enough
-TVD_FW_GRAPHIC_ID1
-
-# good enough
-TVD_FW_GRAPHIC_ID2
+TVD_LONG_WORD5
 
 # good enough
 UNCLAIMED_MONEY
 
 # good enough
 UNCLOSED_BRACKET
+
+# good enough
+UNIQUE_WORDS
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1142,13 +1136,13 @@ URIBL_SC_SURBL
 URIBL_WS_SURBL
 
 # good enough
+URI_4YOU
+
+# good enough
 URI_L_PHP
 
 # good enough
 URI_NOVOWEL
-
-# good enough
-URI_NO_WWW_BIZ_CGI
 
 # good enough
 URI_NO_WWW_INFO_CGI
