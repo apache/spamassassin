@@ -362,19 +362,6 @@ for(my $ind = 0; $ind < @channels; $ind++) {
   }
 }
 
-# --lint check the current site config before we download any updates so that
-# a site with a broken config, with sa-update in a cron job, doesn't hammer
-# the update servers continously downloading and then aborting the update when
-# the lint check of the update (with the site config included) fails.
-# Wait until now to do it since nothing above depends on a successful --lint.
-
-if (!lint_check_dir(File::Spec->catfile($opt{'updatedir'}, "doesnotexist"))) {
-  warn "error: lint check of current site config failed, cannot continue\n";
-  dbg("diag: local site config must successfully lint before doing updates, ".
-	"exiting with code 2");
-  exit 2;
-}
-
 my $res = Net::DNS::Resolver->new();
 
 my $ua = LWP::UserAgent->new();
@@ -1252,6 +1239,7 @@ sub lint_check_dir {
   # "config" or otherwise be more terse. :(
   my $spamtest = new Mail::SpamAssassin( {
     rules_filename      => $dir,
+    site_rules_filename => File::Spec->catfile($dir, "doesnotexist"),
     userprefs_filename  => File::Spec->catfile($dir, "doesnotexist"),
 
     local_tests_only    => 1,
@@ -1438,8 +1426,6 @@ An exit code of C<0> means an update was available, and was downloaded and
 installed successfully.
 
 An exit code of C<1> means no fresh updates were available.
-
-An exit code of C<2> means that a lint check of the current site config failed.
 
 An exit code of C<4> or higher, indicates that errors occurred while
 attempting to download and extract updates.
