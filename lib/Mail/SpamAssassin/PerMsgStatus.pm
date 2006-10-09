@@ -2069,6 +2069,10 @@ sub do_body_tests {
 }
 EOT
 
+  # if (0) {
+  # warn("body eval code for pri $priority:\n".$evalstr."\nend of body eval code");
+  # }
+
   # and run it.
   eval $evalstr;
   if ($@) {
