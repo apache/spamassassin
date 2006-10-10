@@ -281,13 +281,26 @@ SPAMASSASSIN RELEASE PROCEDURE
 
         https://pause.perl.org/pause/authenquery?ACTION=add_uri
 
+  (Note that recently, PAUSE has started indexing sub-modules under
+  Mail::SpamAssassin::, and it can't deal with our multi-maintainer
+  setup.  You may receive mail indicating that "indexing failed" after
+  the upload; as long as the main Mail::SpamAssassin module was indexed
+  correctly, this is fine.  However, it would help if you could visit
+
+        https://pause.perl.org/pause/authenquery?ACTION=share_perms
+
+  select 3.1 ("Make someone else co-maintainer"), and ensure that the
+  other releasers (JMASON, DOS, FELICITY, others?) all have permissions as
+  'co-maintainer' on the full set of your listed modules in the
+  "Mail::SpamAssassin::" namespace.
+
 - announce on the users, dev, and announce mailing lists using the
   previously-prepared release announcement.
 
-- Before doing the next step, run through the Changes file, and write up a
-  quick summary of the important changes in human-readable format.  This
-  should be less than 600 chars to fit into Freshmeat's format, and
-  to be easily understandable.
+- Before doing the next step, run through the release summary mail, and
+  write up a really short summary of the important changes in
+  human-readable format.  This should be less than 600 chars to fit into
+  Freshmeat's format, and to be easily understandable.
 
 - announce to Freshmeat at http://freshmeat.net/:
 
