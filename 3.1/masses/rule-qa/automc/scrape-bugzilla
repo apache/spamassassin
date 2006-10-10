@@ -1,0 +1,429 @@
+#!/usr/bin/perl -w
+
+our $BZ_URI = 'http://issues.apache.org/SpamAssassin';
+
+our $ALLOWED_NEEDSMCERS = qr/^
+        jm\@jmason\.org
+        |quinlan\@pathname\.com
+        |felicity\@kluge\.net
+        |parkerm\@pobox\.com
+        |duncf\@debian\.org
+        |spamassassin-contrib\@msquadrat\.de
+        |sidney\@sidney\.com
+        |(?:bob|robert)\@menschel\.net
+    $/ix;
+
+use URI::Escape;
+use XML::Simple;
+use Storable;
+use Digest::SHA1 qw(sha1_base64);
+use strict;
+use bytes;
+
+my $grep_re;
+if (defined $ARGV[0]) {
+  $grep_re = $ARGV[0];
+}
+
+open (CF, "<config");
+my %conf; while(<CF>) { /^(\S+)=(\S+)/ and $conf{$1} = $2; }
+close CF;
+
+use WWW::Mechanize;
+my $mech = WWW::Mechanize->new( autocheck => 1);
+# use WWW::Mechanize::Cached;
+# my $mech = WWW::Mechanize::Cached->new( autocheck => 1);
+
+my %outputs = (
+  allbugs => [ ],
+  messages => { },
+  rule_renames => { }
+);
+
+sub mywarn;
+
+open (RULES, ">70_scraped.cf") or die "cannot write to output file";
+print RULES "# SpamAssassin rules file: bugzilla-scraped needs-mc rules\n\n";
+
+open (COMMIT, ">".$conf{MCTMP}."/commit.msg") or die "cannot write to output file";
+print COMMIT "auto-mass-checks:\n\n";
+
+main();
+
+close RULES;
+close COMMIT;
+exit;
+
+sub main {
+  get_bug_list();
+
+  store \%outputs, $conf{MCTMP}."/outputs.str";
+}
+
+sub get_bug_list {
+  $mech->get (
+  
+$BZ_URI.'/buglist.cgi?long_desc_type=allwordssubstr&long_desc=NEEDSMC&bug_file_loc_type=allwordssubstr&bug_status=NEW&bug_status=ASSIGNED&bug_status=REOPENED'
+
+    );
+
+  my @buglinks = $mech->find_all_links(url_regex => qr/show_bug\.cgi\?id=\d+/);
+  print "found ".scalar(@buglinks)." bugs...\n";
+
+  foreach my $bugurl (@buglinks) {
+    my $url = $bugurl->url_abs;
+
+    if (defined $grep_re) {
+      print "testing '$url' against grep regexp\n";
+      next unless $url =~ /${grep_re}/o;
+    }
+
+    $url =~ s/show_bug\.cgi/xml\.cgi/;  # use XML output
+
+    my $bugnum = 0;
+    $url =~ /id=(\d+)/ and $bugnum = $1;
+    next unless $bugnum;
+
+    my $resp = $mech->get($url);
+
+    if ($resp) {
+      do_bug($mech, $resp, $bugnum);
+    } else {
+      warn "get failed!\n";
+    }
+  }
+}
+
+use HTML::Entities ();
+sub fixup_bugzilla_xml {
+  # BZ XML leaves some stuff unencoded - invalid XML!
+  my $in = shift;
+  return HTML::Entities::encode_numeric($in, "\200-\377");
+}
+
+sub do_bug {
+  my ($mech, $resp, $bugnum) = @_;
+  my $page = $mech->content();
+
+  $page = fixup_bugzilla_xml ($page);
+
+  my $xml;
+  eval {
+    $xml = XMLin($page);
+  };
+  if ($@) {
+    warn "invalid XML? see stdout for document $@\n";
+    print $page; die;
+  }
+
+  my $ctx = {
+    bugnum => $bugnum,
+    cmts_by_num => { },
+    cmts => [ ],
+    rulenames => [ ],
+    default_needsmc_start => 0
+  };
+
+  # parse all the comments
+  my $count = 0;
+  foreach my $cmt (@{$xml->{bug}->{long_desc}}) {
+    $cmt->{cmtnum} = $count;
+    $ctx->{cmts_by_num}->{$count} = $cmt;
+    push @{$ctx->{cmts}}, $cmt;
+    $count++;
+  }
+  foreach my $cmt (@{$xml->{bug}->{long_desc}}) {
+    process_comment_for_needsmc($ctx, $cmt);
+  }
+  # foreach my $cmt (@{$xml->{bug}->{long_desc}}) {
+  # process_comment_for_done($ctx, $cmt);
+  # }
+
+  # now mark all the ones that need mass-checking
+  my @trigger_cmts = ();
+  foreach my $cmt (@{$ctx->{cmts}}) {
+    if ($cmt->{has_needsmc}) {
+      my $i = $cmt->{needsmc_start};
+      if ($i == 0) {
+        $i = $ctx->{default_needsmc_start};
+      }
+      for (; $i <= $cmt->{needsmc_end}; $i++) {
+        my $mccmt = $ctx->{cmts_by_num}->{$i};
+        if ($mccmt) {
+          $mccmt->{needsmc} = 1;
+        }
+      }
+      push @trigger_cmts, $cmt->{cmtnum};
+    }
+  }
+
+  # use Data::Dumper; warn "JMD ".Dumper($ctx);
+  my $bug = $ctx->{bugnum};
+
+  # and extract the code
+  my $rulecf = '';
+  my $foundrules = 0;
+  $ctx->{rules_seen_in_bug} = { };
+  foreach my $cmt (@{$ctx->{cmts}}) {
+    next unless ($cmt->{needsmc});
+    my $cmtnum = $cmt->{cmtnum};
+
+    my $rules = $cmt->{mcrules};
+    next unless $rules;
+
+    $rules =~ s/\n$//s;
+    next unless ($rules =~ /\S/);
+
+    if (!validate_rule_code($rules)) {
+      mywarn "bug $bug cmt $cmtnum: ignored, lint failed\n";
+      push (@{$outputs{allbugs}}, $bug);
+      $outputs{$bug} = { };
+      $outputs{$bug}{rulenames} = $ctx->{rulenames};
+      $outputs{$bug}{trigger_cmts} = \@trigger_cmts;
+      # but don't add it to anything else!
+      next;
+    }
+
+    $rules = fixup_rule_code ($ctx, $rules, $bug, $cmtnum);
+    $rulecf .= "## MC: bug $bug cmt $cmtnum: start\n"
+            .$rules."\n"
+            ."## MC: bug $bug cmt $cmtnum: end\n\n";
+    $foundrules++;
+  }
+
+  if (!$foundrules) {
+    mywarn "bug $ctx->{bugnum}: no usable needs-mc rules found\n";
+    return;
+  }
+
+  print COMMIT "bug $bug: ";
+  add_rule_code ($ctx, $rulecf);
+
+  push (@{$outputs{allbugs}}, $bug);
+  $outputs{$bug} = { };
+  $outputs{$bug}{rulenames} = $ctx->{rulenames};
+  $outputs{$bug}{trigger_cmts} = \@trigger_cmts;
+  print "\n\n";
+}
+
+sub validate_rule_code {
+  my ($code) = @_;
+
+  my $prefs = "$conf{MCTMP}/prefs.cf";
+  my $conf = "$conf{MCTMP}/testrule.cf";
+  open (OUT, ">$prefs"); close OUT;
+  open (OUT, ">$conf"); print OUT $code."\n"; close OUT;
+
+  system ("cd $conf{SADIR}; ./spamassassin -C $conf -p $prefs --lint");
+  return ($? >> 8 == 0);
+}
+
+sub fixup_rule_code {
+  my ($ctx, $cf, $bug, $cmtnum) = @_;
+
+  my @oldnames = ();
+  my @newnames = ();
+  my %done = ();
+
+  my @rulenames = ($cf =~ /^(?<!\#)\S+\s+([A-Z0-9_]+)\b/gim);
+  foreach my $n (@rulenames) {
+    next if (exists $done{$n}); undef $done{$n};
+
+    next if ($n eq 'MC');   # a glitch, from the comments
+
+    my $newname = $n;
+    my $rnd;
+
+    if (0)          # use randomness?
+    {
+      # use part of base64(bug.cmtnum) instead of "random" values,
+      # so it doesn't keep changing every night
+      $rnd = sha1_base64("$bug.$cmtnum");
+      $rnd =~ /(...)$/;   # last 3 base64-its
+      $rnd = $1;
+    }
+    else {
+      $rnd = "b${bug}_c${cmtnum}";      # the verbose version
+    }
+
+    # ensure it's unique; we only need to add randomness if we have already
+    # seen a rule by that name
+    # OFF: could be a revision of a system rule.
+    # if (exists $ctx->{rules_seen_in_bug}{$newname}) { $newname .= "_".$rnd; }
+    # undef $ctx->{rules_seen_in_bug}{$newname};
+    $newname .= "_".$rnd;
+
+    if ($newname !~ /^__/) {
+      # ensure it has an "T_MC_" prefix (non-subrules only)
+      if ($newname !~ /^T_MC_/) {
+        $newname =~ s/^T_//;    # remove optional "T_"
+        $newname =~ s/^/T_MC_/;
+      }
+    }
+
+    $outputs{rule_renames}{$newname} = "rule $n bug $bug cmt $cmtnum";
+    $cf =~ s/\b${n}\b/${newname}/gs;
+    push (@newnames, $newname);
+    push (@oldnames, $n);
+  }
+
+  $ctx->{rulenames} ||= [ ];
+  push (@{$ctx->{rulenames}}, @newnames);
+  return $cf;
+}
+
+sub add_rule_code {
+  my ($ctx, $cf) = @_;
+  print COMMIT join(' ', @{$ctx->{rulenames}}), "\n";
+  print RULES $cf;
+}
+
+sub process_comment_for_needsmc {
+  my ($ctx, $cmt) = @_;
+
+  my $text = decode_xml_text ($cmt->{thetext});
+  if ($text =~ /NEEDSMC/) {
+    if ($cmt->{who} !~ $ALLOWED_NEEDSMCERS) {
+      needsmc_not_permitted($ctx, $cmt);
+    }
+    else {
+      $cmt->{has_needsmc} = 1;
+      if ($text =~ /NEEDSMC\s+(\d+)-(\d+)/) {
+        $cmt->{needsmc_start} = $1;
+        $cmt->{needsmc_end} = $2;
+      }
+      elsif ($text =~ /NEEDSMC\s+(\d+)/) {
+        $cmt->{needsmc_start} = $1;
+        $cmt->{needsmc_end} = $cmt->{cmtnum};
+      }
+      else {
+        $cmt->{needsmc_start} = $ctx->{default_needsmc_start};
+        $cmt->{needsmc_end} = $cmt->{cmtnum};
+      }
+      print "bug $ctx->{bugnum} cmt $cmt->{cmtnum}: needs-mc by $cmt->{who} from $cmt->{needsmc_start} to $cmt->{needsmc_end}\n";
+    }
+  }
+  elsif ($text =~ /\# DONEMC (\d+)/)
+  {
+    my $done = $1;
+    $cmt->{needsmc_done} = $done;
+    my $mccmt = $ctx->{cmts_by_num}->{$done};
+
+    # note that future "NEEDMC"s start from after that comment's
+    # NEEDMC end number
+    $ctx->{default_needsmc_start} =
+            ($mccmt->{needsmc_end}||$mccmt->{prior_needsmc_end}) + 1;
+
+    # delete the "needsmc" flag from that comment object.  save
+    # a copy of the start/end values in case we have multiple DONEMC
+    # comments later
+    $mccmt->{prior_needsmc_start} = $mccmt->{needsmc_start};
+    $mccmt->{prior_needsmc_end} = $mccmt->{needsmc_end};
+    delete $mccmt->{needsmc_start};
+    delete $mccmt->{needsmc_end};
+    $mccmt->{has_needsmc} = 0;
+
+    print "bug $ctx->{bugnum} cmt $cmt->{cmtnum}: needs-mc on $done already done\n";
+  }
+
+  if ($text =~ /^Created an attachment \(id=(\d+)\)/)
+  {
+    my $att = get_rules_from_attachment($ctx, $cmt, $1);
+    read_cmt_rules_from_text($ctx, $cmt, $att);
+  }
+  elsif ($text =~ /{{{/) #}}}
+  {
+    # remove all text bits -- outside of {{{ ... }}} markers
+    $text =~ s/^.*?{{{//s; #}}} #{{{
+    $text =~ s/}}}.*?$//s; #{{{
+    $text =~ s/}}}.*?{{{//gs; #}}}
+    $text .= "\n";
+    print "bug $ctx->{bugnum} cmt $cmt->{cmtnum}: rules in marked block\n";
+    read_cmt_rules_from_text($ctx, $cmt, $text);
+  }
+  else {
+    # just infer it...
+    read_cmt_rules_from_text($ctx, $cmt, $text);
+  }
+}
+
+sub decode_xml_text {
+  my $text = shift;
+  $text =~ s/&lt;/</gs;
+  $text =~ s/&gt;/>/gs;
+  $text =~ s/&quot;/"/gs;
+  $text =~ s/&amp;/\&/gs;
+  $text;
+}
+
+sub needsmc_not_permitted {
+  my ($ctx, $cmt) = @_;
+
+  mywarn "bug $ctx->{bugnum} cmt $cmt->{cmtnum}: needs-mc not permitted for $cmt->{who}\n";
+}
+
+sub mywarn {
+  my ($log) = @_;
+  warn $log;
+  if ($log =~ /^bug (\d+)/) {
+    $outputs{messages}{$1} ||= '';
+    $outputs{messages}{$1} .= $log;
+  }
+}
+
+sub read_cmt_rules_from_text {
+  my ($ctx, $cmt, $text) = @_;
+
+  $cmt->{mcrules} ||= '';
+  my $seenrules = 0;
+  my $lastwasrule = 0;
+  foreach my $line (split(/^/m, $text)) {
+    $line =~ s/(?<!\\)#.*$//;# remove comments
+    $line =~ s/^\s+//;  # remove leading whitespace
+    $line =~ s/\s+$//;  # remove tailing whitespace
+
+    if ($line =~ 
+/^\s*(header|urirhsbl|uribl|rawbody|body|full|meta|uri|score|describe|tflags)\s+(\S+)\s+(.*)$/
+      )
+    {
+      my $type = $1;
+      my $name = $2;
+      my $code = $3;
+
+      # ignore describe lines, they can cause lint failures
+      next if ($type =~ /^describe$/i);
+
+      $cmt->{mcrules} .= "$type $name $code\n";
+      $lastwasrule = 1;
+      if (!$seenrules) {
+        print "bug $ctx->{bugnum} cmt $cmt->{cmtnum}: rules inline\n";
+        $seenrules++;
+      }
+    }
+    else {
+      if ($line =~ /\S/) {
+        if ($lastwasrule) {
+          # assume it's a continuation of the last line
+          chomp ($cmt->{mcrules});
+          $cmt->{mcrules} .= "$line\n";
+        }
+      }
+      else {
+        $lastwasrule = 0;
+      }
+    }
+  }
+
+  if ($cmt->{mcrules} =~ /\S/) {
+    my $ruletext = $cmt->{mcrules};
+    $ruletext =~ s/^/>> /gm;
+    print "bug $ctx->{bugnum} cmt $cmt->{cmtnum}: code: \n".$ruletext;
+  }
+}
+
+sub get_rules_from_attachment {
+  my ($ctx, $cmt, $id) = @_;
+  $mech->get ( $BZ_URI.'/attachment.cgi?id='.$id ); 
+  return $mech->content();
+}
+

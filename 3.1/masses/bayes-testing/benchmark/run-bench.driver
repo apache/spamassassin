@@ -1,0 +1,124 @@
+#!/bin/bash
+
+TESTNAME=$1
+RESULTSPATH=$2
+TIME=time
+PROGNAME=`which $0`
+DIRNAME=`dirname $PROGNAME`
+
+
+CORPUS=$DIRNAME/corpus
+HELPERPATH=$DIRNAME/helper/$TESTNAME
+TESTSPATH=$DIRNAME/tests/$TESTNAME
+
+USERPREFS=$RESULTSPATH/user_prefs
+SITECONFIG=$RESULTSPATH/site
+CONFIGPATH=$RESULTSPATH/share
+DBPATH=$RESULTSPATH/dbdir
+
+# Uncomment this variable if you want to override the system wide configpath
+#CONFIGPATHVALUE=--configpath=$CONFIGPATH
+
+
+$HELPERPATH/setup $RESULTSPATH
+
+$HELPERPATH/cleardb $RESULTSPATH
+
+echo "[Running sa-learn --ham on hambucket1.mbox]"
+$TIME /usr/bin/sa-learn $CONFIGPATHVALUE -p $USERPREFS --siteconfigpath=$SITECONFIG --dbpath $DBPATH --ham --mbox $CORPUS/hambucket1.mbox
+
+$HELPERPATH/dbsize $RESULTSPATH
+
+echo "[Running sa-learn --spam on spambucket1.mbox]"
+$TIME /usr/bin/sa-learn $CONFIGPATHVALUE -p $USERPREFS --siteconfigpath=$SITECONFIG --dbpath $DBPATH --spam --mbox $CORPUS/spambucket1.mbox
+
+$HELPERPATH/dbsize $RESULTSPATH
+
+echo "[Dumping Bayes Magic Tokens]"
+/usr/bin/sa-learn $CONFIGPATHVALUE -p $USERPREFS --siteconfigpath=$SITECONFIG --dbpath $DBPATH --dump magic
+
+echo "[Backing Up Bayes Tokens]"
+/usr/bin/sa-learn $CONFIGPATHVALUE -p $USERPREFS --siteconfigpath=$SITECONFIG --dbpath $DBPATH --backup > $RESULTSPATH/backup1.txt
+
+echo "[Removing old spamd.log file]"
+rm $RESULTSPATH/spamd.log
+
+echo "[Starting up spamd]"
+/usr/bin/spamd -d -L $CONFIGPATHVALUE --siteconfigpath=$SITECONFIG -x --syslog=$RESULTSPATH/spamd.log --socketpath=/tmp/spamd.sock --pidfile=$RESULTSPATH/spamd.pid
+
+echo "[Sleeping a little to make sure spamd starts up]"
+sleep 10
+
+echo "[Running Bucket 2]"
+date
+#$TIME $DIRNAME/runmbox.pl $CORPUS/hambucket2.mbox $CORPUS/spambucket2.mbox
+$TIME $DIRNAME/runmulti.pl $CORPUS/hambucket2.mbox $CORPUS/spambucket2.mbox
+date
+
+$HELPERPATH/dbsize $RESULTSPATH
+
+echo "[Dumping Bayes Magic Tokens]"
+/usr/bin/sa-learn $CONFIGPATHVALUE -p $USERPREFS --siteconfigpath=$SITECONFIG --dbpath $DBPATH --dump magic
+
+echo "[Running Bayes sync]"
+$TIME /usr/bin/sa-learn $CONFIGPATHVALUE -p $USERPREFS --siteconfigpath=$SITECONFIG --dbpath $DBPATH --sync
+
+$HELPERPATH/dbsize $RESULTSPATH
+
+echo "[Dumping Bayes Magic Tokens]"
+/usr/bin/sa-learn $CONFIGPATHVALUE -p $USERPREFS --siteconfigpath=$SITECONFIG --dbpath $DBPATH --dump magic
+
+echo "[Backing Up Bayes Tokens]"
+/usr/bin/sa-learn $CONFIGPATHVALUE -p $USERPREFS --siteconfigpath=$SITECONFIG --dbpath $DBPATH --backup > $RESULTSPATH/backup2.txt
+
+echo "[Running Bayes force-expire]"
+$TIME /usr/bin/sa-learn -D $CONFIGPATHVALUE -p $USERPREFS --siteconfigpath=$SITECONFIG --dbpath $DBPATH --force-expire
+
+$HELPERPATH/dbsize $RESULTSPATH
+
+echo "[Dumping Bayes Magic Tokens]"
+/usr/bin/sa-learn $CONFIGPATHVALUE -p $USERPREFS --siteconfigpath=$SITECONFIG --dbpath $DBPATH --dump magic
+
+echo "[Backing Up Bayes Tokens]"
+/usr/bin/sa-learn $CONFIGPATHVALUE -p $USERPREFS --siteconfigpath=$SITECONFIG --dbpath $DBPATH --backup > $RESULTSPATH/backup3.txt
+
+echo "[Running sa-learn --forget on hamforget1.mbox]"
+$TIME /usr/bin/sa-learn $CONFIGPATHVALUE -p $USERPREFS --siteconfigpath=$SITECONFIG --dbpath $DBPATH --forget --mbox $CORPUS/hamforget1.mbox
+
+$HELPERPATH/dbsize $RESULTSPATH
+
+echo "[Running sa-learn --forget on spamforget1.mbox]"
+$TIME /usr/bin/sa-learn $CONFIGPATHVALUE -p $USERPREFS --siteconfigpath=$SITECONFIG --dbpath $DBPATH --forget --mbox $CORPUS/spamforget1.mbox
+
+$HELPERPATH/dbsize $RESULTSPATH
+
+echo "[Dumping Bayes Magic Tokens]"
+/usr/bin/sa-learn $CONFIGPATHVALUE -p $USERPREFS --siteconfigpath=$SITECONFIG --dbpath $DBPATH --dump magic
+
+echo "[Backing Up Bayes Tokens]"
+/usr/bin/sa-learn $CONFIGPATHVALUE -p $USERPREFS --siteconfigpath=$SITECONFIG --dbpath $DBPATH --backup > $RESULTSPATH/backup4.txt
+
+echo "[Running spamassassin on hambucket3.mbox]"
+$TIME /usr/bin/spamassassin -L $CONFIGPATHVALUE -p $USERPREFS --siteconfigpath=$SITECONFIG --mbox $CORPUS/hambucket3.mbox > /dev/null
+
+echo "[Running spamassassin on spambucket3.mbox]"
+$TIME /usr/bin/spamassassin -L $CONFIGPATHVALUE -p $USERPREFS --siteconfigpath=$SITECONFIG --mbox $CORPUS/spambucket3.mbox > /dev/null
+
+$HELPERPATH/dbsize $RESULTSPATH
+
+echo "[Dumping Bayes Magic Tokens]"
+/usr/bin/sa-learn $CONFIGPATHVALUE -p $USERPREFS --siteconfigpath=$SITECONFIG --dbpath $DBPATH --dump magic
+
+echo "[Running Bayes sync]"
+$TIME /usr/bin/sa-learn $CONFIGPATHVALUE -p $USERPREFS --siteconfigpath=$SITECONFIG --dbpath $DBPATH --sync
+
+$HELPERPATH/dbsize $RESULTSPATH
+
+echo "[Dumping Bayes Magic Tokens]"
+/usr/bin/sa-learn $CONFIGPATHVALUE -p $USERPREFS --siteconfigpath=$SITECONFIG --dbpath $DBPATH --dump magic
+
+echo "[Backing Up Bayes Tokens]"
+/usr/bin/sa-learn $CONFIGPATHVALUE -p $USERPREFS --siteconfigpath=$SITECONFIG --dbpath $DBPATH --backup > $RESULTSPATH/backup5.txt
+
+echo "[Killing spamd]"
+kill `cat $RESULTSPATH/spamd.pid`

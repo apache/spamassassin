@@ -1,0 +1,51 @@
+# Rules used in the test suite.  This allows us to change the
+# main ruleset without breaking the test suite.
+
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+
+
+
+header TEST_NOREALNAME  From =~ /^["\s]*\<?\S+\@\S+\>?\s*$/
+describe TEST_NOREALNAME From: does not include a real name
+score TEST_NOREALNAME 5
+
+header TEST_ENDSNUMS    From:addr =~ /\D\d{8,}\@/i
+describe TEST_ENDSNUMS  From: ends in many numbers
+score TEST_ENDSNUMS 5
+
+header TEST_FORGED_YAHOO_RCVD   eval:check_for_forged_yahoo_received_headers()
+describe TEST_FORGED_YAHOO_RCVD 'From' yahoo.com does not match 'Received' headers
+score TEST_FORGED_YAHOO_RCVD 5
+
+uri TEST_NORMAL_HTTP_TO_IP m{^https?://\d+\.\d+\.\d+\.\d+}i
+describe TEST_NORMAL_HTTP_TO_IP      Uses a dotted-decimal IP address in URL
+score TEST_NORMAL_HTTP_TO_IP  5
+
+body TEST_EXCUSE_12        /this (?:e?-?mail|message) (?:(?:has )?reached|was sent to) you in error/i
+describe TEST_EXCUSE_12    Nobody's perfect
+score TEST_EXCUSE_12       5
+
+body TEST_EXCUSE_4         /To Be Removed,? Please/i
+describe TEST_EXCUSE_4     Claims you can be removed from the list
+score TEST_EXCUSE_4        5
+
+header TEST_INVALID_DATE   Date !~ /^\s*(?:(?i:Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s+)?[0-3\s]?[0-9]\s+(?i:Jan|Feb|Ma[ry]|Apr|Ju[nl]|Aug|Sep|Oct|Nov|Dec)\s+(?:[12][901])?[0-9]{2}\s+[0-2]?[0-9](?:\:[0-5][0-9]){1,2}\s+(?:[AP]M\s+)?(?:[+-][0-9]{4}|UT|[A-Z]{2,3}T)(?:\s+\(.*\))?\s*$/ [if-unset: Wed, 31 Jul 2002 16:41:57 +0200]
+describe TEST_INVALID_DATE Invalid Date: header (not RFC 2822)
+score TEST_INVALID_DATE    5
+
+

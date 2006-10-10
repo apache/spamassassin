@@ -1,0 +1,10 @@
+#!/bin/sh
+
+BBMHOME=/home/bbmass-stable
+
+# clean up our temporary dir
+cd $BBMHOME/tmp
+find . -mtime +7 | sort -r > o
+xargs rm -f < o
+xargs rmdir < o
+

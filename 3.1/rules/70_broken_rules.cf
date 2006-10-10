@@ -1,0 +1,85 @@
+# SpamAssassin rules file: broken rules
+#
+# This file isn't installed with SpamAssassin. Rules which appear broken
+# but might be worth another try are moved onto this pile. Normally every
+# line in this file should be commented out.
+#
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+#
+###########################################################################
+
+# inactive advance_fee rulese, keep around for later testing
+
+#body __FRAUD_ZFL	/(?:international|luckyday|overseas stake|promo|world) lott(?:o|ery)/i
+#body __FRAUD_GVI	/(?:may i first|to) introduce my ?self/i
+#body __FRAUD_QEU	/(?:negotiate|reasonable|acc?or?ding|certain|agg?ree).{1,20}percentage/i
+#body __FRAUD_LVH	/\b(?:(?:former|ex-? ?)president|(?:former|formal|past|was (?:also )?the) (?:[a-z]+ )?(?:president|royal|chairman|finance minister|minister|director|chief of|head of)|ex-military head of state)\b/i
+#body __FRAUD_YTM	/\b(?:(?:funds|money|monies) moved|transfer(?:r?ing)?)\b[^.]{0,99}\b(?:abroad|out of (?:(?:the|our) )?country)\b/i
+#body __FRAUD_WOM	/\b(?:(?:of|the) late mrs?|(?:son|daughter|wife) of late|late (?:father|husband)s?)\b/i
+#body __FRAUD_JOW	/\b(?:INVESTMENT|CONFIDENTIAL|PROPOSITION|PARTNERSHIP|URGENT(?:LY)?|TRANSACTION|BUSS?INESS|ASSISTANCE)\b/
+#body __FRAUD_IWJ	/\b(?:International\b.{1,15}\bLottery|lottery\b.{1,15}\binternational)\b/i
+#body __FRAUD_OEJ	/\b(?:MRS?|MISS)\.? [A-Z]+\b/
+#body __FRAUD_YFW	/\b(?:You may be sur?prised to receive this letter from me|this (?:letter|mail) (?:(?:may|will) come to you as|will be) a sur?prise)\b/i
+#body __FRAUD_TXN	/\b(?:[1-5][0-9](?:\.[0-9])? ?(?:[%]|percent)|percentage (?:of the total|for your?|you wish|you want)|your comm?iss?ion for|comm?iss?ion for your|your share,? as (?:a |the )?(?:compensation|commiss?ion|remunerr?ation)|y?our share of the (?:funds?|monies)|owner of the account ?,? will be compensated|you\b[^.]{0,99}\bentitled\b[^.]{0,99}\b(?:share|part)\b[^.]{0,99}\b(?:money|monies|funds)|tell(?:ing)? (?:us|me)\b[^.]{0,99}\byou (?:would )?(?:want|wish|require)\b|remunerr?ation for your (?:services?|assistance)\b)/i
+#body __FRAUD_LBO	/\b(?:absolute(?:ly)?|strictest|stric[tk]ly|urgent(?:ly)?|utterly|utmost|highly|very|extremely|extraordinarily)\b[^.]{0,99}\b(?:private|privacy|confidence|secre(?:cy|t)|confidential(?:l?y|ity)?)\b/i
+#body __FRAUD_NMV	/\b(?:ass?ylum|exiled?|refugee|imprison(?:ed)?)\b/i
+#body __FRAUD_KLM	/\b(?:bank|securit(?:y|ies)|funds?|monies|inherr?itt?(?:ed|ance))\b/i
+#body __FRAUD_LTQ	/\b(?:charit(?:y|ies)|orphanages?|widows?|church(?:es)?)\b/i
+#body __FRAUD_CUC	/\b(?:confiscat(?:ed?|ing)|(?:funds?|accounts?|assets)\b[^.]{0,99}\b(?:frozen|seized))\b/i
+#body __FRAUD_NRF	/\b(?:family|father|husband|relatives?)\b/i
+#body __FRAUD_NNO	/\b(?:financial|confiden(?:tial|ce)|safe|mutual|secret|success|risk-?free|details|business).{1,30}\btransaction\b/i
+#body __FRAUD_SRS	/\b(?:god|(?:our|the) lord|jesus|allah)\b/i
+#body __FRAUD_KPV	/\b(?:health|sickness|illness|heart attack)\b/i
+#body __FRAUD_DSY	/\b(?:huge|enormous) (?:cash deposit|amount of money\b[^.]{0,99}\bdeposit(?:ed)?)\b/i
+#body __FRAUD_EDA	/\b(?:into|in|to) your account\b/i
+#body __FRAUD_CHN	/\b(?:ministry|departe?ment) of\b/i
+#body __FRAUD_KKR	/\b(?:next of kin|beneficiar(?:y|ies))\b/i
+#body __FRAUD_MFI	/\b(?:nigerian?|liberian?|south african?|ivory coast|c[oÅÙ]te d['Å¥]? ?ivoire|kuwaiti?|sierra[- ]leone|zimbabwe(?:an)?|angolan?|congo|benin|cotonou|west african?|zambian?|u\.a\.e)\b/i
+#body __FRAUD_NHU	/\b(?:over-? *seas?|off-? *shore)\b/i
+#body __FRAUD_UWU	/\b(?:transparent honesty|your transparency|confidence in you|(?:reliable|reputable|trust-? *worthy) (?:person|individual)|you are (?:reliable|reputable|trust-? *worthy))/i
+#body __FRAUD_TJT	/\b(?:united states dollars|u\.? ?s\.? dollars|north american dollars)\b/i
+#body __FRAUD_ZTN	/\ball funds will be returned\b/i
+#body __FRAUD_OMN	/\bass?ylum\b/i
+#body __FRAUD_OQY	/\bassistance (?:in|with) (?:this |the )?(?:transaction|transfer(?:r?ing)?)\b/i
+#body __FRAUD_GTV	/\bbarrister/i     # No ending \b to catch e.g. "barristerpeter@foo"
+#body __FRAUD_QQS	/\bbefore (?:his|the) death\b/i
+#body __FRAUD_ULR	/\bben[ei]ficiary\b/i
+#body __FRAUD_HOA	/\bdeceased\b/i
+#body __FRAUD_ICM	/\bexecution of (?:this |the )transaction\b/i
+#body __FRAUD_WYF	/\bforeign(?:er?)\b/i
+#body __FRAUD_PMJ	/\bfrom the\b[^.]{0,99}\bsecurity company\b/i
+#body __FRAUD_NKS	/\blate .{0,15}(?:father|wife|husband|general|president|daughter|son|minister).{0,20}(?:wealthy|treasure|deposit|money|left|property|known|\$|US)/i
+#body __FRAUD_GIV	/\bmodalit(?:ies|y)\b/i
+#body __FRAUD_CQY	/\bmutual (?:cooperation|benefi(?:ts|cial)|(?:golden )?opportunity)\b/i
+#body __FRAUD_GIM	/\bnext of kin\b/i
+#body __FRAUD_VUS	/\bnumbered time\b/i
+#body __FRAUD_LYJ	/\bsolicit(?:ing)? (?:for )?(?:your )?(?:confiden|assist)/i
+#body __FRAUD_ZJT	/\bsum of ?(?:million|US|\$)|\b(?:deposit|left|huge|discovered|abandoned).{0,15} sum of/i
+#body __FRAUD_PYA	/\btop secret\b/i
+#body __FRAUD_RQV	/\bunclaimed\b/i
+#body __FRAUD_AGA	/\burgent and(?: very)? (?:profitable|confidential) business propos(?:al|ition)/i
+#body __FRAUD_VEH	/\burgent\b[^.]{0,99}\b(?:business|assistance|proposal)/i
+#body __FRAUD_DIR	/\d+%.{0,15}\)? (?:of (?:the total|this|the) (?:amount|sum|money)|for you|for my investment|for (?:us|me)|.{0,15}\bfor your expenses)\b/i
+#body __FRAUD_UMA	/as a minister/i
+#body __FRAUD_WKA	/bequest/i
+#body __FRAUD_USU	/charity organization/i
+#body __FRAUD_PXQ	/percentage.{1,10}(?:indicat|previous|involved)/i
+#body __FRAUD_MJL	/prize award dept/i
+#body __FRAUD_ZEM	/reliable person/i
+#body __FRAUD_WRU	/you are.{0,8}winner/i
+#body __FRAUD_EEX	/youre? country/i
