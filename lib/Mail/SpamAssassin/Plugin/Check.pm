@@ -69,14 +69,14 @@ sub check_main {
     next unless ($pms->{conf}->{priorities}->{$priority} > 0);
 
     # if shortcircuiting is hit, we skip all other priorities...
-    last if $pms->have_shortcircuited();
+    last if $self->shortcircuited_p();
 
     dbg("check: running tests for priority: $priority");
 
     # only harvest the dnsbl queries once priority HARVEST_DNSBL_PRIORITY
     # has been reached and then only run once
     if ($priority >= HARVEST_DNSBL_PRIORITY && $needs_dnsbl_harvest_p
-	&& !$pms->have_shortcircuited()) {
+	&& !$self->shortcircuited_p($pms)) {
       # harvest the DNS results
       $pms->harvest_dnsbl_queries();
       $needs_dnsbl_harvest_p = 0;
@@ -111,7 +111,7 @@ sub check_main {
   # sanity check, it is possible that no rules >= HARVEST_DNSBL_PRIORITY ran so the harvest
   # may not have run yet.  Check, and if so, go ahead and harvest here.
   if ($needs_dnsbl_harvest_p) {
-    if (!$pms->have_shortcircuited()) {
+    if (!$self->shortcircuited_p($pms)) {
       # harvest the DNS results
       $pms->harvest_dnsbl_queries();
     }
@@ -181,7 +181,7 @@ sub do_meta_tests {
   local ($_);
   
   # XXX - why not just make the plugin call?
-  return if $pms->have_shortcircuited();
+  return if $self->shortcircuited_p($pms);
 
   dbg("rules: running meta tests; score so far=" . $pms->{score} );
   my $conf = $pms->{conf};
@@ -363,7 +363,7 @@ sub do_head_tests {
   local ($_);
 
   # XXX - why not just do the plugin call?
-  return if $pms->have_shortcircuited();
+  return if $self->shortcircuited_p($pms);
 
   # note: we do this only once for all head pattern tests.  Only
   # eval tests need to use stuff in here.
@@ -514,7 +514,7 @@ sub do_body_tests {
   local ($_);
 
   # XXX - why not just make the plugin call directly?
-  return if $pms->have_shortcircuited();
+  return if $self->shortcircuited_p($pms);
 
   dbg("rules: running body-text per-line regexp tests; score so far=".$pms->{score});
 
@@ -649,7 +649,7 @@ sub do_body_uri_tests {
   local ($_);
 
   # XXX - why not just do the direct plugin call?
-  return if $pms->have_shortcircuited();
+  return if $self->shortcircuited_p($pms);
 
   dbg("uri: running uri tests; score so far=".$pms->{score});
 
@@ -778,7 +778,7 @@ sub do_rawbody_tests {
   local ($_);
 
   # XXX - why not just do the plugin call here??
-  return if $pms->have_shortcircuited();
+  return if $self->shortcircuited_p($pms);
 
   dbg("rules: running raw-body-text per-line regexp tests; score so far=".$pms->{score});
 
@@ -908,7 +908,7 @@ sub do_full_tests {
   local ($_);
   
   # XXX - why not just do the plugin call directly?
-  return if $pms->have_shortcircuited();
+  return if $self->shortcircuited_p($pms);
 
   dbg("rules: running full-text regexp tests; score so far=".$pms->{score});
 
@@ -1017,7 +1017,7 @@ sub run_eval_tests {
   local ($_);
   
   # XXX - why not just call the plugin directly?
-  return if $pms->have_shortcircuited();
+  return if $self->shortcircuited_p($pms);
 
   my $doing_user_rules = $self->{conf}->{user_rules_to_compile}->{$testtype};
 
@@ -1181,6 +1181,13 @@ EOT
 }
 
 # Helper Functions
+
+# NOTE: don't call this have_shortcircuited since it creates a nasty recursion loop
+sub shortcircuited_p {
+  my ($self, $pms) = @_;
+  return 1 if $self->{main}->call_plugins("have_shortcircuited", { permsgstatus => $pms
+								 });
+}
 
 sub hash_line_for_rule {
   my ($self, $pms, $rulename) = @_;
