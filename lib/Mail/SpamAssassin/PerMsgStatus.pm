@@ -3052,8 +3052,6 @@ EOT
 
   eval $evalstr;
 
-  push (@TEMPORARY_METHODS, $methodname);
-
   if ($@) {
     warn "rules: failed to compile eval tests, skipping some: $@\n";
     $self->{rule_errors}++;
