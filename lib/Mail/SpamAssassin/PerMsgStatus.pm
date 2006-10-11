@@ -1966,16 +1966,6 @@ ENDOFEVAL
 
 ###########################################################################
 
-sub have_shortcircuited
-{
-  my ($self) = @_;
-  return 1 if $self->{main}->call_plugins ("have_shortcircuited", {
-        permsgstatus => $self
-      });
-}
-
-###########################################################################
-
 # note: only eval tests should store state in $self->{test_log_msgs};
 # pattern tests do not.
 #
@@ -2100,8 +2090,6 @@ new addition in SpamAssassin 3.2.0.
 
 sub got_hit {
   my ($self, $rule, $area, %params) = @_;
-
-  return if $self->have_shortcircuited();
 
   # ensure that rule values always result in an *increase* of
   # $self->{tests_already_hit}->{$rule}:
