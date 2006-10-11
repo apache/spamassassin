@@ -1450,28 +1450,42 @@ sub trap_sigalrm_fully {
 sub regexp_remove_delimiters {
   my ($re) = @_;
 
-  my $mods = '';
-  if ($re =~ s/^m{//) {
-    $re =~ s/}([a-z]*)$//; $mods = $1;
+  my $delim;
+  if (!defined $re || $re eq '') {
+    warn "cannot remove delimiters from null regexp";
+    return undef;   # invalid
   }
-  elsif ($re =~ s/^m\(//) {
-    $re =~ s/\)([a-z]*)$//; $mods = $1;
+  elsif ($re =~ s/^m{//) {              # m{foo/bar}
+    $delim = '}';
   }
-  elsif ($re =~ s/^m<//) {
-    $re =~ s/>([a-z]*)$//; $mods = $1;
+  elsif ($re =~ s/^m\(//) {             # m(foo/bar)
+    $delim = ')';
   }
-  elsif ($re =~ s/^m(\W)//) {
-    $re =~ s/\Q$1\E([a-z]*)$//; $mods = $1;
+  elsif ($re =~ s/^m<//) {              # m<foo/bar>
+    $delim = '>';
   }
-  elsif ($re =~ s/^\/(.*)\/([a-z]*)$/$1/) {
-    $mods = $2;
+  elsif ($re =~ s/^m(\W)//) {           # m#foo/bar#
+    $delim = $1;
+  } else {                              # /foo\/bar/ or !foo/bar!
+    $re =~ s/^(\W)//; $delim = $1;
   }
 
+  $re =~ s/\Q${delim}\E([imsx]*)$// or warn "unbalanced re: $re";
+
+  my $mods = $1;
   if ($mods) {
     $re = "(?".$mods.")".$re;
   }
 
   return $re;
+}
+
+# turn "/foobar/i" into qr/(?i)foobar/
+
+sub make_qr {
+  my ($re) = @_;
+  $re = regexp_remove_delimiters($re);
+  return qr/$re/;
 }
 
 ###########################################################################
