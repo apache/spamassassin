@@ -329,23 +329,9 @@ APIs on that object, too.  See C<Mail::SpamAssassin::PerMsgStatus> perldoc.
 
 =back
 
-=item $plugin->extract_metadata ( { options ... } )
+=item $plugin->check_main ( { options ... } )
 
-Signals that a message is being mined for metadata.  Some plugins may wish
-to add their own metadata as well.
-
-=over 4
-
-=item msg
-
-The C<Mail::SpamAssassin::Message> object for this message.
-
-=back
-
-=item $plugin->parsed_metadata ( { options ... } )
-
-Signals that a message's metadata has been parsed, and can now be
-accessed by the plugin.
+Signals that a message should be checked.
 
 =over 4
 
@@ -387,6 +373,59 @@ The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
 Called after auto-learning may (or may not) have taken place.  If you
 wish to perform additional learning, whether or not auto-learning
 happens, this is the place to do it.
+
+=over 4
+
+=item permsgstatus
+
+The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
+
+=back
+
+=item $plugin->check_end ( { options ... } )
+
+Signals that a message check operation has just finished, and the
+results are about to be returned to the caller.
+
+=over 4
+
+=item permsgstatus
+
+The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
+The current score, names of rules that hit, etc. can be retrieved
+using the public APIs on this object.
+
+=back
+
+=item $plugin->finish_tests ( { options ... } )
+
+Called via SpamAssassin::finish and should clear up any tests that a plugin
+has added to the namespace.
+
+=over 4
+
+=item conf
+
+The C<Mail::SpamAssassin::Conf> object on which the configuration
+data should be stored.
+
+=item $plugin->extract_metadata ( { options ... } )
+
+Signals that a message is being mined for metadata.  Some plugins may wish
+to add their own metadata as well.
+
+=over 4
+
+=item msg
+
+The C<Mail::SpamAssassin::Message> object for this message.
+
+=back
+
+=item $plugin->parsed_metadata ( { options ... } )
+
+Signals that a message's metadata has been parsed, and can now be
+accessed by the plugin.
 
 =over 4
 
@@ -454,21 +493,6 @@ The type of the rule that was tested.
 =item rulename
 
 The name of the rule that was tested.
-
-=back
-
-=item $plugin->check_end ( { options ... } )
-
-Signals that a message check operation has just finished, and the
-results are about to be returned to the caller.
-
-=over 4
-
-=item permsgstatus
-
-The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
-The current score, names of rules that hit, etc. can be retrieved
-using the public APIs on this object.
 
 =back
 
