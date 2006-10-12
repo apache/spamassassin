@@ -356,6 +356,11 @@ sub gen_class {
       $flags .= " -c '$opt{rules_dir}'";
     }
 
+    # are we analyzing --net mass-check logs?  if so, use scoreset 1
+    if (join(" ", @ham) =~ /-net-/) {
+      $flags .= " -s 1" if $class eq "NET";
+    }
+
     if ($age eq "all") {
       my %spam;
       my %ham;
