@@ -413,9 +413,13 @@ sub rule_file_compile {
       my $val = $3;
 
       my $origname = $name;
-      if ($issandbox) {
-        $name = sandbox_rule_name_avoid_collisions($name, $f);
-      }
+
+      # note: if we call sandbox_rule_name_avoid_collisions(), it'll
+      # rename to 'T_RULENAME' -- which is exactly what we're trying
+      # to avoid in 'publish RULENAME' lines!  so don't call it here.
+      # if ($issandbox) {
+      # $name = sandbox_rule_name_avoid_collisions($name, $f);
+      # }
 
       if (!$rules->{$name}) { $rules->{$name} = rule_entry_create(); }
       $rules->{$name}->{origname} = $origname;
@@ -423,7 +427,7 @@ sub rule_file_compile {
       if ($command eq 'publish') {
         # the 'publish' command defaults to "1", unless it explicitly
         # is set to "0".  iow: publish RULE_NAME [(0 | 1)]  [default: 1]
-        if (!defined $val) { $val = '1'; }
+        if (!defined $val || $val eq '') { $val = '1'; }
       }
       elsif ($command eq 'pubfile') {
         if (!filename_in_manifest($opt_out.'/'.$val)) {
@@ -433,6 +437,12 @@ sub rule_file_compile {
       }
 
       $rules->{$name}->{$command} = $val;
+
+      # if we see "publish NAMEOFRULE", that means the rule is
+      # considered active
+      if ($rules->{$name}->{publish}) {
+        $rules->{$name}->{forceactive} = 1;
+      }
     }
     elsif (/^
         (if|ifplugin)
@@ -632,6 +642,9 @@ sub pubfile_for_rule {
     $pubfile = $rules->{$name}->{pubfile};
     if ($pubfile) {
       $pubfile = $opt_out.'/'.$pubfile;
+    } else {
+      # "publish NAMEOFRULE" => send it to active
+      $pubfile = $opt_out.'/'.$opt_activeout;
     }
   }
 
@@ -856,6 +869,7 @@ sub sandbox_rule_name_avoid_collisions {
 
   return $rule if $opt_listpromotable;
   return $rule if $active_rules->{$rule};
+  return $rule if $rules->{$rule}->{forceactive};
 
   if ($rule !~ /^(?:T_|__)/) {
     $new = "T_".$rule;
