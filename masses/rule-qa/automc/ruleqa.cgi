@@ -1121,7 +1121,7 @@ sub create_spampc_detail {
   }
 
   my $outof = ($isspam ? $obj->{nspam} : $obj->{nham});
-  my $count = int (($percent/100.0) * $outof);
+  my $count = int ((($percent/100.0) * $outof) + 0.99); # round up
   return qq{
     $count\&nbsp;of\&nbsp;$outof\&nbsp;messages
   };
