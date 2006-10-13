@@ -514,6 +514,14 @@ sub rule_file_compile {
       /^\s*(\S+)/ and $name = $1;
       $name =~ s/\s+/ /gs;
 
+      my $forceactive = 1;
+
+      # always send 'test' lines to the sandbox
+      if (/^test\s*/) {
+        $issandbox = 1;
+        $forceactive = 0;
+      }
+
       my $cond;
       if ($current_conditional) {
         $name = $current_conditional; $name =~ s/\s+/ /gs;
@@ -529,7 +537,7 @@ sub rule_file_compile {
       }
       $rules->{$name}->{cond} ||= $cond;
       $rules->{$name}->{issandbox} = $issandbox;
-      $rules->{$name}->{forceactive} = 1;
+      $rules->{$name}->{forceactive} = $forceactive;
       $rules->{$name}->{iscommand} = 1;
 
       # warn "unknown line in rules file '$f', saving to default: $orig";
