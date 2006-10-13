@@ -515,11 +515,13 @@ sub rule_file_compile {
       $name =~ s/\s+/ /gs;
 
       my $forceactive = 1;
-
-      # always send 'test' lines to the sandbox
+      
+      # always send 'test' lines to the sandbox or inactive files
       if (/^test\s*/) {
-        $issandbox = 1;
         $forceactive = 0;
+
+        $name = $_;   # ensure we don't drag rules with us though!
+        $name =~ s/\s+/ /gs;
       }
 
       my $cond;
@@ -538,6 +540,7 @@ sub rule_file_compile {
       $rules->{$name}->{cond} ||= $cond;
       $rules->{$name}->{issandbox} = $issandbox;
       $rules->{$name}->{forceactive} = $forceactive;
+      # $rules->{$name}->{forceactive} = 1;
       $rules->{$name}->{iscommand} = 1;
 
       # warn "unknown line in rules file '$f', saving to default: $orig";
