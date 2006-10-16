@@ -598,9 +598,6 @@ sub copy_to_output_buffers {
       $is_active++;
     }
 
-    # fix up any rule renamings we were supposed to do
-    sed_renamed_rule_names(\$text);
-
     my $cond = $rules->{$name}->{cond};
     my $pluginclass = $rules->{$name}->{ifplugin};
     if ($cond)
@@ -823,7 +820,11 @@ sub fix_up_rule_dependencies {
       # force that subrule (if it exists) to output in the
       # same pubfile
       my $rule2 = $1;
-      next unless ($rules->{$rule2} && $rules->{$rule2}->{output_text});
+
+      # deal with rules that changed name from "FOO" to "T_FOO"
+      sed_renamed_rule_names(\$rule2);
+      
+      next unless ($rules->{$rule2} && $rules->{$rule2}->{output_file});
 
       # don't do this if the subrule would be moved *out* of the
       # active file!
@@ -845,9 +846,11 @@ sub write_output_files {
       warn "$pubfile: WARNING: not listed in manifest file\n";
     }
 
-    if ($output_file_text->{$pubfile}) {
+    my $text = $output_file_text->{$pubfile};
+    if ($text) {
       open (OUT, ">".$pubfile) or die "cannot write to output file '$pubfile'";
-      print OUT $output_file_text->{$pubfile};
+      sed_renamed_rule_names(\$text);
+      print OUT $text;
       close OUT or die "cannot close output file '$pubfile'";
       # print "$pubfile: written\n";        # too noisy
     }
@@ -954,7 +957,6 @@ sub filename_in_manifest {
   my ($fname) = @_;
   return 1 if ($file_manifest->{$fname});
   foreach my $skipre (@{$file_manifest_skip}) {
-    # warn "JMD $skipre $fname";
     return 1 if ($fname =~ $skipre);
   }
   return 0;
