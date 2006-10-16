@@ -665,7 +665,7 @@ sub scan_file {
 
   $self->bump_scan_progress();
 
-  my @s = stat($file);
+  my @s = stat($mail);
   return unless $self->message_is_useful_by_file_modtime($s[9]);
 
   if (!$self->{determine_receive_date}) {
