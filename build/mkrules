@@ -161,6 +161,7 @@ my $COMMENTS = '!comments!';
 my $ALWAYS_PUBLISH = '!always_publish!';
 
 read_all_rules($needs_compile);
+read_rules_from_output_dir();
 compile_output_files();
 lint_output_files();
 write_output_files();
@@ -574,6 +575,54 @@ sub rule_file_compile {
   }
 }
 
+# this is only run if we're generating rulemetadata!
+sub read_rules_from_output_dir {
+  return unless ($opt_rulemetadata);
+
+  foreach my $file (<$opt_out/*.cf>) {
+    next unless ($file =~ /\d\d_\S+\.cf$/);
+    next if ($file =~ /\/\Q$opt_activeout\E/);
+    next if ($file =~ /\/\Q$opt_sandboxout\E/);
+    next if ($file =~ /\/\Q$opt_inactiveout\E/);
+    read_output_file($file);
+  }
+}
+
+sub read_output_file {
+  my ($file) = @_;
+  open (IN, "<$file") or warn "cannot read $file";
+  while (<IN>) {
+    my $orig = $_;
+
+    s/^#reuse/reuse/;   # TODO - dirty hack.  we need to fix this to just be
+    # a keyword which the engine ignores, this is absurd! 
+
+    s/#.*$//g; s/^\s+//; s/\s+$//;
+
+    # drop comments/blank lines from output
+    next if (/^$/);
+
+    # save "lang" declarations
+    my $lang = '';
+    if (s/^lang\s+(\S+)\s+//) {
+      $lang = $1;
+    }
+
+    # right now, we only read tflags from output files
+    if (/^tflags\s+(\S+)\s+(.*)$/) {
+      my $name = $1;
+      my $val = $2;
+      $val =~ s/\s+/ /gs;
+      if ($rules->{$name}->{tflags}) {
+        $rules->{$name}->{tflags} .= ' '.$val;
+      } else {
+        $rules->{$name}->{tflags} = $val;
+      }
+    }
+  }
+  close IN;
+}
+
 sub copy_to_output_buffers {
   my ($rule_order, $issandbox, $f, $filename) = @_;
 
@@ -799,14 +848,20 @@ sub get_rulemetadata_string {
   my ($rule) = @_;
 
   return '' unless ($opt_rulemetadata);
-  return '' unless ($rules->{$rule}->{found_definition});
 
   my $mod = 0;
-  my $srcfile = $rules->{$rule}->{srcfile};
-  my @s = stat $srcfile;
-  if (@s) {
-    $mod = $s[9];
+  my $srcfile = '';
+
+  if ($rules->{$rule}->{found_definition}) {
+    $srcfile = $rules->{$rule}->{srcfile} || '';
+    if ($srcfile) {
+      my @s = stat $srcfile;
+      if (@s) {
+        $mod = $s[9];
+      }
+    }
   }
+
   my $tf = $rules->{$rule}->{tflags} || '';
 
   return "<rulemetadata>".
