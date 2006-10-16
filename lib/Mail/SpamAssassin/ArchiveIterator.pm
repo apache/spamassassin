@@ -569,7 +569,7 @@ sub mail_open {
 
 ############################################################################
 
-sub message_is_useful_by_date  {
+sub message_is_useful_by_date {
   my ($self, $date) = @_;
 
   return 0 unless $date;	# undef or 0 date = unusable
@@ -579,11 +579,29 @@ sub message_is_useful_by_date  {
     return 1;
   }
   elsif (!$self->{opt_before}) {
-    # Just case about after
+    # Just care about after
     return $date > $self->{opt_after};
   }
   else {
     return (($date < $self->{opt_before}) && ($date > $self->{opt_after}));
+  }
+}
+
+# additional check, based solely on a file's mod timestamp.  we cannot
+# make assumptions about --before, since the file may have been "touch"ed
+# since the last message was appended; but we can assume that too-old
+# files cannot contain messages newer than their modtime.
+sub message_is_useful_by_file_modtime {
+  my ($self, $date) = @_;
+
+  # better safe than sorry, if date is undef; let other stuff catch errors
+  return 1 unless $date;
+
+  if ($self->{opt_after}) {
+    return ($date > $self->{opt_after});
+  }
+  else {
+    return 1;       # --after not in use
   }
 }
 
@@ -646,13 +664,16 @@ sub scan_file {
   my ($self, $class, $mail) = @_;
 
   $self->bump_scan_progress();
+
+  my @s = stat($file);
+  return unless $self->message_is_useful_by_file_modtime($s[9]);
+
   if (!$self->{determine_receive_date}) {
     push(@{$self->{$class}}, index_pack(AI_TIME_UNKNOWN, $class, "f", $mail));
     return;
   }
 
   my $date;
-
   unless (defined $AICache and $date = $AICache->check($mail)) {
     my $header;
     if (!mail_open($mail)) {
@@ -705,6 +726,9 @@ sub scan_mailbox {
       $self->{access_problem} = 1;
       next;
     }
+
+    my @s = stat($file);
+    next unless $self->message_is_useful_by_file_modtime($s[9]);
 
     my $info = {};
     my $count;
@@ -807,6 +831,9 @@ sub scan_mbx {
       $self->{access_problem} = 1;
       next;
     }
+
+    my @s = stat($file);
+    next unless $self->message_is_useful_by_file_modtime($s[9]);
 
     my $info = {};
     my $count;
