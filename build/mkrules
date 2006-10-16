@@ -391,10 +391,19 @@ sub rule_file_compile {
       {
         $rules->{$name}->{found_definition} = 1;
       }
-      # userconf rules are always published in "active"
-      elsif (($type eq 'tflags') && ($val =~ /\buserconf\b/))
-      {
-        $rules->{$name}->{forceactive} = 1;
+      elsif ($type eq 'tflags') {
+        # userconf rules are always published in "active"
+        if ($val =~ /\buserconf\b/) {
+          $rules->{$name}->{forceactive} = 1;
+        }
+
+        # record for rulemetadata code
+        $val =~ s/\s+/ /gs;
+        if ($rules->{$name}->{tflags}) {
+          $rules->{$name}->{tflags} .= ' '.$val;
+        } else {
+          $rules->{$name}->{tflags} = $val;
+        }
       }
 
       $current_comments = '';
@@ -798,11 +807,13 @@ sub get_rulemetadata_string {
   if (@s) {
     $mod = $s[9];
   }
+  my $tf = $rules->{$rule}->{tflags} || '';
 
   return "<rulemetadata>".
             "<name>$rule</name>".
             "<src>$srcfile</src>".
             "<srcmtime>$mod</srcmtime>".
+            "<tf>$tf</tf>".
           "</rulemetadata>\n";
 }
 

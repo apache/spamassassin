@@ -199,6 +199,8 @@ sub ui_get_daterev {
 
   # turn possibly-empty $self->{daterev} into a real date/rev combo (that exists)
   $self->{daterev} = $self->date_in_direction($self->{daterev}, 0);
+
+  $self->{daterev_md} = $self->get_daterev_metadata($self->{daterev});
 }
 
 # ---------------------------------------------------------------------------
@@ -980,6 +982,8 @@ sub get_freqs_for_rule {
 
   my $srcpath = $self->{srcpath};
   my $mtime = $self->{mtime};
+  my $no_net_rules = (!$self->{daterev_md}->{includes_net});
+
   if ($srcpath || $mtime) {
     my $rev = $self->get_rev_for_daterev($self->{daterev});
     my $md = $self->get_rule_metadata($rev);
@@ -1001,6 +1005,13 @@ sub get_freqs_for_rule {
            # !$md->{$_} or !$md->{$_}->{srcmtime} or
           $md->{$_}->{srcmtime} and
              ($md->{$_}->{srcmtime} >= $target);
+         } @rules;
+    }
+
+    if ($no_net_rules) {    # bug 5047
+      @rules = grep {
+          !$md->{$_}->{tf} or
+             ($md->{$_}->{tf} !~ /\bnet\b/);
          } @rules;
     }
   }
