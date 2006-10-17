@@ -852,10 +852,10 @@ sub _get_received_header_times {
     foreach $rcvd (@local) {
       if ($rcvd =~ m/(\s.?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+)/) {
 	my $date = $1;
-	dbg("eval: trying Received fetchmail header date for real time: $date");
+        dbg2("eval: trying Received fetchmail header date for real time: $date");
 	my $time = Mail::SpamAssassin::Util::parse_rfc822_date($date);
 	if (defined($time) && (time() >= $time)) {
-	  dbg("eval: time_t from date=$time, rcvd=$date");
+          dbg2("eval: time_t from date=$time, rcvd=$date");
 	  push @fetchmail_times, $time;
 	}
       }
@@ -872,10 +872,10 @@ sub _get_received_header_times {
   foreach $rcvd (@received) {
     if ($rcvd =~ m/(\s.?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+)/) {
       my $date = $1;
-      dbg("eval: trying Received header date for real time: $date");
+      dbg2("eval: trying Received header date for real time: $date");
       my $time = Mail::SpamAssassin::Util::parse_rfc822_date($date);
       if (defined($time)) {
-	dbg("eval: time_t from date=$time, rcvd=$date");
+        dbg2("eval: time_t from date=$time, rcvd=$date");
 	push @header_times, $time;
       }
     }
@@ -1127,6 +1127,15 @@ sub check_ratware_envelope_from {
   }
 
   return 0;
+}
+
+###########################################################################
+
+# support eval-test verbose debugs using "-Deval"
+sub dbg2 {
+  if (would_log('dbg', 'eval') == 2) {
+    dbg(@_);
+  }
 }
 
 1;

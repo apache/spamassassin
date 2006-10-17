@@ -162,7 +162,7 @@ sub check_for_rdns_helo_mismatch {	# T_FAKE_HELO_*
       if ($pms->is_dns_available()) {
 	my $vrdns = $pms->lookup_ptr ($relay->{ip});
 	if (defined $vrdns && $vrdns ne $claimed) {
-	  dbg("eval: rdns/helo mismatch: helo=$relay->{helo} ".	
+	  dbg2("eval: rdns/helo mismatch: helo=$relay->{helo} ".	
 		"claimed-rdns=$claimed true-rdns=$vrdns");
 	  return 1;
 	  # TODO: instead, we should set a flag and check it later for
@@ -182,7 +182,7 @@ sub check_for_rdns_helo_mismatch {	# T_FAKE_HELO_*
       }
 
       # otherwise there *is* a mismatch
-      dbg("eval: rdns/helo mismatch: helo=$relay->{helo} rdns=$claimed");
+      dbg2("eval: rdns/helo mismatch: helo=$relay->{helo} rdns=$claimed");
       return 1;
     }
   }
@@ -351,7 +351,7 @@ sub _check_received_helos {
 
       # ok, let's catch the case where there's *no* reverse DNS there either
       if ($no_rdns) {
-	dbg("eval: Received: no rDNS for dotcom HELO: from=$from_host HELO=$helo_host");
+	dbg2("eval: Received: no rDNS for dotcom HELO: from=$from_host HELO=$helo_host");
 	$pms->{no_rdns_dotcom_helo} = 1;
       }
     }
@@ -433,7 +433,7 @@ sub _check_for_forged_received {
     my $hlo = $helo[$i];
     my $by = $by[$i];
 
-    dbg("eval: forged-HELO: from=".(defined $frm ? $frm : "(undef)").
+    dbg2("eval: forged-HELO: from=".(defined $frm ? $frm : "(undef)").
 			" helo=".(defined $hlo ? $hlo : "(undef)").
 			" by=".(defined $by ? $by : "(undef)"));
 
@@ -447,7 +447,7 @@ sub _check_for_forged_received {
 		&& $frm =~ /^\w+(?:[\w.-]+\.)+\w+$/
 		&& $frm ne $hlo && !helo_forgery_whitelisted($frm, $hlo))
     {
-      dbg("eval: forged-HELO: mismatch on HELO: '$hlo' != '$frm'");
+      dbg2("eval: forged-HELO: mismatch on HELO: '$hlo' != '$frm'");
       $pms->{mismatch_helo}++;
     }
 
@@ -466,7 +466,7 @@ sub _check_for_forged_received {
 		$hclassb ne $fclassb &&
 		!($hlo =~ /$IP_PRIVATE/o))
 	{
-	  dbg("eval: forged-HELO: massive mismatch on IP-addr HELO: '$hlo' != '$fip'");
+	  dbg2("eval: forged-HELO: massive mismatch on IP-addr HELO: '$hlo' != '$fip'");
 	  $pms->{mismatch_ip_helo}++;
 	}
       }
@@ -477,9 +477,18 @@ sub _check_for_forged_received {
 		&& $prev =~ /^\w+(?:[\w.-]+\.)+\w+$/
 		&& $by ne $prev && !helo_forgery_whitelisted($by, $prev))
     {
-      dbg("eval: forged-HELO: mismatch on from: '$prev' != '$by'");
+      dbg2("eval: forged-HELO: mismatch on from: '$prev' != '$by'");
       $pms->{mismatch_from}++;
     }
+  }
+}
+
+###########################################################################
+
+# support eval-test verbose debugs using "-Deval"
+sub dbg2 {
+  if (would_log('dbg', 'eval') == 2) {
+    dbg(@_);
   }
 }
 
