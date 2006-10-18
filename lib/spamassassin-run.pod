@@ -44,6 +44,7 @@ Options:
                                    Set user preferences file
  --siteconfigpath=path             Path for site configs
                                    (def: /etc/mail/spamassassin)
+ --cf='config line'                Additional line of configuration
  -x, --nocreate-prefs              Don't create user preferences file
  -e, --exit-code                   Exit with a non-zero exit code if the
                                    tested message was spam
@@ -237,6 +238,15 @@ Ignore the default directories (usually C</usr/share/spamassassin> or similar).
 
 Use the specified path for locating site-specific configuration files.  Ignore
 the default directories (usually C</etc/mail/spamassassin> or similar).
+
+=item B<--cf='config line'>
+
+Add additional lines of configuration directly from the command-line, parsed
+after the configuration files are read.   Multiple B<--cf> arguments can be
+used, and each will be considered a separate line of configuration.  For
+example:
+
+        spamassassin -t --cf="body NEWRULE /text/" --cf="score NEWRULE 3.0"
 
 =item B<-p> I<prefs>, B<--prefspath>=I<prefs>, B<--prefs-file>=I<prefs>
 
