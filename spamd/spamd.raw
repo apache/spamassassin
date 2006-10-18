@@ -170,6 +170,7 @@ my %opt = (
   'min-children'  => 1,         # min kids to have running
   'min-spare'     => 1,         # min kids that must be spare
   'max-spare'     => 2,         # max kids that should be spare
+  'cf'            => [],        # extra config lines
 );
 
 
@@ -236,6 +237,7 @@ GetOptions(
   'setuid-with-ldap'         => \$opt{'setuid-with-ldap'},
   'setuid-with-sql'          => \$opt{'setuid-with-sql'},
   'siteconfigpath=s'         => \$opt{'siteconfigpath'},
+  'cf=s'                     => \@{$opt{'cf'}},
   'socketgroup=s'            => \$opt{'socketgroup'},
   'socketmode=s'             => \$opt{'socketmode'},
   'socketowner=s'            => \$opt{'socketowner'},
@@ -731,6 +733,7 @@ my $spamtest = Mail::SpamAssassin->new(
     dont_copy_prefs      => $dontcopy,
     rules_filename       => ( $opt{'configpath'} || 0 ),
     site_rules_filename  => ( $opt{'siteconfigpath'} || 0 ),
+    post_config_text     => join("\n", @{$opt{'cf'}})."\n",
     force_ipv4           => ( $opt{'force_ipv4'} || 0 ),
     local_tests_only     => ( $opt{'local'} || 0 ),
     debug                => ( $opt{'debug'} || 0 ),
@@ -2216,6 +2219,7 @@ Options:
  -c, --create-prefs                 Create user preferences files
  -C path, --configpath=path         Path for default config files
  --siteconfigpath=path              Path for site configs
+ --cf='config line'                 Additional line of configuration
  -d, --daemonize                    Daemonize
  -h, --help                         Print usage message.
  -i [ipaddr], --listen-ip=ipaddr    Listen on the IP ipaddr
@@ -2319,6 +2323,12 @@ Ignore the default directories (usually C</usr/share/spamassassin> or similar).
 
 Use the specified path for locating site-specific configuration files.  Ignore
 the default directories (usually C</etc/mail/spamassassin> or similar).
+
+=item B<--cf='config line'>
+
+Add additional lines of configuration directly from the command-line, parsed
+after the configuration files are read.   Multiple B<--cf> arguments can be
+used, and each will be considered a separate line of configuration.
 
 =item B<-d>, B<--daemonize>
 
