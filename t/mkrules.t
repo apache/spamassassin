@@ -427,7 +427,7 @@ print "meta rule depends on unpromoted subrule in lexically-earlier file\n\n";
 %patterns = (
   "header T_GOOD_SUB"   => rule_line_1,
   "header T_BAD_SUB"   => rule_line_2,
-  "meta GOOD (T_GOOD_SUB && !T_BAD_SUB)" => meta
+  "meta GOOD (T_GOOD_SUB && !T_BAD_SUB)" => meta_found
 );
 %anti_patterns = (
 );
