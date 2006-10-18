@@ -46,8 +46,10 @@ individually as a separate string.
 
 Header names are considered case-insensitive.
 
-The header values are normally cleaned up a little. Append C<:raw> to the
-header name to retrieve the raw, undecoded value instead.
+The header values are normally cleaned up a little; for example, whitespace
+around the newline character in "folded" headers will be replaced with a single
+space.  Append C<:raw> to the header name to retrieve the raw, undecoded value,
+including pristine whitespace, instead.
 
 =back
 
@@ -168,7 +170,12 @@ sub eval_hook_called {
   }
 
   foreach my $p ($scanner->{msg}->find_parts(qr/./)) {
-    my $val = $p->get_header($hdr, $getraw);
+    my $val;
+    if ($getraw) {
+      $val = $p->raw_header($hdr);
+    } else {
+      $val = $p->get_header($hdr);
+    }
     $val ||= $if_unset;
 
     if ($val =~ ${pattern}) {
