@@ -170,7 +170,11 @@ sub header {
       $self->{'raw_headers'}->{$key} = [];
     }
 
-    push @{ $self->{'headers'}->{$key} },     $self->_decode_header($raw_value);
+    my $dec_value = $raw_value;
+    $dec_value =~ s/\n[ \t]+/ /gs;
+    $dec_value =~ s/\s*$//s;
+    push @{ $self->{'headers'}->{$key} },     $self->_decode_header($dec_value);
+
     push @{ $self->{'raw_headers'}->{$key} }, $raw_value;
 
     return $self->{'headers'}->{$key}->[-1];
