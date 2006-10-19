@@ -488,7 +488,7 @@ sub message_array {
     }
   }
 
-  my @messages;
+  my $messages;
   if ($self->{opt_n}) {
     # OPT_N == 1 means don't bother sorting on message receive date
 
@@ -502,8 +502,10 @@ sub message_array {
       splice(@{$self->{h}}, min ($self->{opt_head}, scalar @{$self->{h}}));
     }
 
-    @messages = ( @{$self->{s}}, @{$self->{h}} );
+    # for ease of memory, we'll play with pointers
+    $messages = $self->{s};
     undef $self->{s};
+    push(@{$messages}, @{$self->{h}});
     undef $self->{h};
   }
   else {
@@ -529,22 +531,22 @@ sub message_array {
     if (@s && @h) {
       my $ratio = @s / @h;
       while (@s && @h) {
-	push @messages, (@s / @h > $ratio) ? (shift @s) : (shift @h);
+	push @{$messages}, (@s / @h > $ratio) ? (shift @s) : (shift @h);
       }
     }
     # push the rest onto the end
-    push @messages, @s, @h;
+    push @{$messages}, @s, @h;
   }
 
   # head or tail < 0 means crop the total list, negate the value appropriately
   if ($self->{opt_tail} < 0) {
-    splice(@messages, 0, $self->{opt_tail});
+    splice(@{$messages}, 0, $self->{opt_tail});
   }
   if ($self->{opt_head} < 0) {
-    splice(@messages, -$self->{opt_head});
+    splice(@{$messages}, -$self->{opt_head});
   }
 
-  return scalar(@messages), \@messages;
+  return scalar(@{$messages}), $messages;
 }
 
 sub mail_open {
