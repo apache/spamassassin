@@ -7,7 +7,8 @@ my $svn_checkins_root = "http://svn.apache.org/repos/asf/spamassassin/";
 # we won't provide who-checked-in and commit-message details for changes
 # older than this.  Note, this is not in rev number terms; it's an
 # absolute count of revisions.
-my $svn_log_limit = 500;
+# update: alternatively, since the zone's SVN is too old (!), use a date.
+# my $svn_log_limit = 500;
 
 my $full_rebuild = 0;
 if ($ARGV[0] && $ARGV[0] =~ /^-f/) {
@@ -164,7 +165,12 @@ sub get_datadir_for_daterev {
 
 sub get_svn_log {
   print "getting svn log... (".time.")\n";
-  if (open (IN, "svn log --limit $svn_log_limit --xml $svn_checkins_root |")) {
+
+  my $limitdate = strftime ("%Y-%m-%d", localtime time-(24*60*60*30*12));
+
+  if (open (IN, "svn log -r 'HEAD:{$limitdate}' --xml $svn_checkins_root |"))
+  # if (open (IN, "svn log --limit $svn_log_limit --xml $svn_checkins_root |"))
+  {
     eval {
       my $xml = join('', <IN>);
       $svn_log = XMLin($xml);
