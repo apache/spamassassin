@@ -4,6 +4,11 @@ my $automcdir = "/home/automc/svn/spamassassin/masses/rule-qa/automc";
 # need this to ensure that 'svn log' will include ALL changes
 my $svn_checkins_root = "http://svn.apache.org/repos/asf/spamassassin/";
 
+# we won't provide who-checked-in and commit-message details for changes
+# older than this.  Note, this is not in rev number terms; it's an
+# absolute count of revisions.
+my $svn_log_limit = 500;
+
 my $full_rebuild = 0;
 if ($ARGV[0] && $ARGV[0] =~ /^-f/) {
   $full_rebuild = 1;
@@ -159,7 +164,7 @@ sub get_datadir_for_daterev {
 
 sub get_svn_log {
   print "getting svn log... (".time.")\n";
-  if (open (IN, "svn log --xml $svn_checkins_root |")) {
+  if (open (IN, "svn log --limit $svn_log_limit --xml $svn_checkins_root |")) {
     eval {
       my $xml = join('', <IN>);
       $svn_log = XMLin($xml);
