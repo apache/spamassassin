@@ -158,7 +158,7 @@ sub get_datadir_for_daterev {
 }
 
 sub get_svn_log {
-  print "getting svn log...\n";
+  print "getting svn log... (".time.")\n";
   if (open (IN, "svn log --xml $svn_checkins_root |")) {
     eval {
       my $xml = join('', <IN>);
@@ -172,7 +172,7 @@ sub get_svn_log {
   if (!$svn_log) {
     die "no svn log --xml";
   }
-  print "got ".(scalar @{$svn_log->{logentry}})." log entries\n";
+  print "got ".(scalar @{$svn_log->{logentry}})." log entries (".time.")\n";
 
   # use Data::Dumper; print Dumper($svn_log); die;
 }
