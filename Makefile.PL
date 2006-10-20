@@ -245,28 +245,6 @@ my %makefile = (
 
         'rules/*.pm',
 
-        # at one stage, these were copied from rulesrc into the rules
-        # build dir, or were in SVN in this dir, but this no longer
-        # is the case.  Ensure they get cleaned on "make clean".
-        'rules/20_advance_fee.cf',
-        'rules/20_compensate.cf',
-        'rules/20_drugs.cf',
-        'rules/20_fake_helo_tests.cf',
-        'rules/20_phrases.cf',
-        'rules/20_porn.cf',
-        'rules/20_ratware.cf',
-        'rules/20_uri_tests.cf',
-        'rules/25_body_tests_es.cf',
-        'rules/25_body_tests_pl.cf',
-        'rules/30_text_de.cf',
-        'rules/30_text_fr.cf',
-        'rules/30_text_it.cf',
-        'rules/30_text_nl.cf',
-        'rules/30_text_pl.cf',
-        'rules/30_text_pt_br.cf',
-        'rules/50_scores.cf',
-        'rules/70_broken_rules.cf',
-
         # don't remove these. they are built from 'rulesrc' in SVN, but
         # in a distribution tarball, they're not
         # 'rules/70_inactive.cf',
@@ -1141,7 +1119,7 @@ spamd/spamd: spamd/spamd.raw
 	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@
 
 build_rules: 
-	$(PERL) build/mkrules --src rulesrc --out rules --manifest MANIFEST --manifestskip MANIFEST.SKIP
+	[ ! -d rulesrc ] || $(PERL) build/mkrules --src rulesrc --out rules --manifest MANIFEST --manifestskip MANIFEST.SKIP
 
 SPAMC_MAKEFILE  = spamc/Makefile
 MAKE_SPAMC      = $(MAKE) -f $(SPAMC_MAKEFILE)
