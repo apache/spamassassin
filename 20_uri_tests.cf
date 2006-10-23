@@ -117,3 +117,6 @@ uri HIGH_CODEPAGE_URI	/^https?:\/\/[^\/]*\&\#(?:\d{4,}|[3456789]\d\d);/i
 
 ###########################################################################
 
+uri NORMAL_HTTP_TO_IP          m{^https?://\d+\.\d+\.\d+\.\d+}i
+describe NORMAL_HTTP_TO_IP     Uses a dotted-decimal IP address in URL
+
