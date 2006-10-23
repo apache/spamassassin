@@ -50,7 +50,6 @@ sub new {
   $self->register_eval_rule("check_for_forged_eudoramail_received_headers");
   $self->register_eval_rule("check_for_forged_yahoo_received_headers");
   $self->register_eval_rule("check_for_forged_juno_received_headers");
-  $self->register_eval_rule("check_for_from_to_same");
   $self->register_eval_rule("check_for_matching_env_and_hdr_from");
   $self->register_eval_rule("sorted_recipients");
   $self->register_eval_rule("similar_recipients");
@@ -560,29 +559,6 @@ sub check_for_forged_juno_received_headers {
   }
 
   return 0;   
-}
-
-# From and To have same address, but are not exactly the same and
-# neither contains intermediate spaces.
-sub check_for_from_to_same {
-  my ($self, $pms) = @_;
-
-  my $hdr_from = $pms->get('From');
-  my $hdr_to = $pms->get('To');
-  return 0 if (!length($hdr_from) || !length($hdr_to) ||
-	       $hdr_from eq $hdr_to);
-
-  my $addr_from = $pms->get('From:addr');
-  my $addr_to = $pms->get('To:addr');
-  # BUG: From:addr and To:addr sometimes contain whitespace
-  $addr_from =~ s/\s+//g;
-  $addr_to =~ s/\s+//g;
-  return 0 if (!length($addr_from) || !length($addr_to) ||
-	       $addr_from ne $addr_to);
-
-  if ($hdr_from =~ /^\s*\S+\s*$/ && $hdr_to =~ /^\s*\S+\s*$/) {
-    return 1;
-  }
 }
 
 sub check_for_matching_env_and_hdr_from {
