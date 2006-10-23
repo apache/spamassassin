@@ -73,11 +73,7 @@ lang nl describe FAKE_HELO_EMAIL_COM             Host HELO komt niet overeen met
 lang nl describe FAKE_HELO_EXCITE                Host HELO komt niet overeen met rDNS: excite.com
 lang nl describe FAKE_HELO_LYCOS                 Host HELO komt niet overeen met rDNS: lycos.com
 lang nl describe FAKE_HELO_YAHOO_CA              Host HELO komt niet overeen met rDNS: yahoo.ca
-lang nl describe FROM_ENDS_IN_NUMS               Van: eindigt in nummers
 lang nl describe FROM_STARTS_WITH_NUMS           Van: begint met nummers
-lang nl describe FROM_HAS_MIXED_NUMS             Van: bevat zowel nummers als letters
-lang nl describe ADDR_NUMS_AT_BIGSITE            Gebruikt een adres met veel nummer bij een grote internet provider
-lang nl describe FROM_ALL_NUMS                   Van: een adres dat bestaat uit enkel nummers (geen telefoonnummer)
 lang nl describe FROM_OFFERS                     Van: adres is van "at iets-aangeboden"
 lang nl describe FROM_NO_USER                    Van: heeft geen lokaal deel voor het @-tje
 lang nl describe FAKED_UNDISC_RECIPS             Namaak Aan "Undisclosed-Recipients"
@@ -114,13 +110,9 @@ lang nl describe NO_DNS_FOR_FROM                 Domein in Van heeft geen MX of 
 lang nl describe RCVD_NUMERIC_HELO               Received: bevat een numerieke HELO
 lang nl describe RCVD_DOUBLE_IP_SPAM             Buld email vingerafdruk (dubbel IP) gevonden
 lang nl describe RCVD_DOUBLE_IP_LOOSE            Received: door en van lijken op IP adressen
-lang nl describe FORGED_AOL_RCVD                 Received vervalst, bevat een valse AOL relay
 lang nl describe FORGED_TELESP_RCVD              Bevat een vervalde hostnaam voor een DSL IP in Brazilie
-lang nl describe FORGED_HOTMAIL_RCVD             vervalste hotmail.com 'Received:' header gevonden
 lang nl describe FORGED_HOTMAIL_RCVD2            hotmail.com 'Van' adres, maar geen 'Received:'
-lang nl describe FORGED_EUDORAMAIL_RCVD          vervalste eudoramail.com 'Received:' header gevonden
 lang nl describe FORGED_YAHOO_RCVD               'Van' yahoo.com Komt niet overeen met 'Received' headers
-lang nl describe FORGED_JUNO_RCVD                'Van' juno.com komt niet overeen met 'Received' headers
 lang nl describe FORGED_GW05_RCVD                vervalste 'by gw05' 'Received:' header found
 lang nl describe CONFIRMED_FORGED                Received headers zijn vervalst
 lang nl describe MULTI_FORGED                    Received headers wijzen op meerdere vervalsingen
@@ -148,7 +140,6 @@ lang nl describe TO_MALFORMED                    Aan: foutief opgesteld adres
 lang nl describe MIME_HEADER_CTYPE_ONLY          'Content-Type' gevonden zonder de benodigde MIME headers
 lang nl describe WITH_LC_SMTP                    Received regel bevat een spam merkteken (lowercase smtp)
 lang nl describe SUBJ_BUY                        Onderwerp: begint met 'Buy(ing)'
-lang nl describe FROM_HAS_ULINE_NUMS             Van: bevat een liggend streepje en nummers en letters
 lang nl describe RCVD_AM_PM                      Received headers vervalst (AM/PM)
 lang nl describe HEADER_COUNT_CTYPE              Meerdere Content-Type headers gevonden
 lang nl describe NO_RDNS_DOTCOM_HELO             Host HELO'd als een grote internet provider ISP, maar heeft geen rDNS
@@ -258,7 +249,6 @@ lang nl describe RATWARE_HASH_DASH               Bevat een hashbuster in Send-Sa
 lang nl describe RATWARE_NETIP                   Bulk email signatuur (netIP) gevonden
 lang nl describe RATWARE_GECKO_BUILD             Bulk email signatuur (vervalste Gecko) gevonden
 lang nl describe NUMERIC_HTTP_ADDR               Gebruikt een numeriek IP adres in een URL
-lang nl describe NORMAL_HTTP_TO_IP               Gebruikt een "dotted-decimal" IP adres in een URL
 lang nl describe HTTP_ESCAPED_HOST               Gebruikt %-escapes in de hostname van een URL
 lang nl describe HTTP_EXCESSIVE_ESCAPES          Volkomen overbodige %-escapes in een URL
 lang nl describe IP_LINK_PLUS                    "Dotted-decimal" IP address gevolgd door CGI
