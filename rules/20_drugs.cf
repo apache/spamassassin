@@ -195,8 +195,7 @@ body __DRUGS_PAIN12	/\besgic plus\b/i
 #Darvon - a prescription narcotic
 body __DRUGS_PAIN13	/\bD[_\W]?[a4\xE0-\xE6@][_\W]?r[_\W]?v[_\W]?[o0\xF2-\xF6][_\W]?n\b/i
 body __DRUGS_PAIN14  /N[o0\xF2-\xF6]rc[o0\xF2-\xF6]/i
-meta DRUGS_PAIN (__DRUGS_PAIN1 || __DRUGS_PAIN2 || __DRUGS_PAIN3 || __DRUGS_PAIN4 ||__DRUGS_PAIN5 ||__DRUGS_PAIN6 ||__DRUGS_PAIN7 ||__DRUGS_PAIN8 || __DRUGS_PAIN9 || __DRUGS_PAIN10|| __DRUGS_PAIN11 || __DRUGS_PAIN12 || __DRUGS_PAIN13 ||__DRUGS_PAIN14)
-describe DRUGS_PAIN 	Refers to a pain relief drug
+meta __DRUGS_PAIN (__DRUGS_PAIN1 || __DRUGS_PAIN2 || __DRUGS_PAIN3 || __DRUGS_PAIN4 ||__DRUGS_PAIN5 ||__DRUGS_PAIN6 ||__DRUGS_PAIN7 ||__DRUGS_PAIN8 || __DRUGS_PAIN9 || __DRUGS_PAIN10|| __DRUGS_PAIN11 || __DRUGS_PAIN12 || __DRUGS_PAIN13 ||__DRUGS_PAIN14)
 #sleep aids
 #ativan and lorazepam already under anxiety
 #Ambien, brand of zolpidem tartrate
@@ -208,8 +207,7 @@ body __DRUGS_SLEEP3	/\b_{0,3}R[_\W]?[e3\xE8-\xEB][_\W]?s[_\W]?t[_\W]?[o0\xF2-\xF
 #Halcion, brand of triazolam
 body __DRUGS_SLEEP4	/\b_{0,3}H[_\W]?[a4\xE0-\xE6@][_\W]?l[_\W]?c[_\W]?i[_\W]?[o0\xF2-\xF6][_\W]?n_{0,3}\b/i
 
-meta DRUGS_SLEEP (__DRUGS_SLEEP1 || __DRUGS_SLEEP2 || __DRUGS_SLEEP3 ||__DRUGS_SLEEP4)
-describe DRUGS_SLEEP 	Refers to a sleep aid drug
+meta __DRUGS_SLEEP (__DRUGS_SLEEP1 || __DRUGS_SLEEP2 || __DRUGS_SLEEP3 ||__DRUGS_SLEEP4)
 
 #muscle relaxants
 #soma
@@ -259,13 +257,13 @@ describe DRUGS_SMEAR1	Two or more drugs crammed together into one word
 #mentioned in the same email, except an online pharmacy ad.
 meta DRUGS_ANXIETY_EREC (DRUGS_ERECTILE && DRUGS_ANXIETY)
 describe DRUGS_ANXIETY_EREC 	Refers to both an erectile and an anxiety drug
-meta DRUGS_SLEEP_EREC	(DRUGS_ERECTILE && DRUGS_SLEEP)
+meta DRUGS_SLEEP_EREC	(DRUGS_ERECTILE && __DRUGS_SLEEP)
 describe DRUGS_SLEEP_EREC 	Refers to both an erectile and a sleep aid drug
 
 # note: some 3 item combos are "normal" ie: a patient might legitimately
 # be prescribed depression, anxiety and sleep aid drugs all at once.
 # however, I know of no "normal" 4-item combinations.
-meta DRUGS_MANYKINDS	(DRUGS_ERECTILE + DRUGS_DIET + DRUGS_PAIN + DRUGS_SLEEP + DRUGS_MUSCLE + DRUGS_ANXIETY > 3)
+meta DRUGS_MANYKINDS	(DRUGS_ERECTILE + DRUGS_DIET + __DRUGS_PAIN + __DRUGS_SLEEP + DRUGS_MUSCLE + DRUGS_ANXIETY > 3)
 describe DRUGS_MANYKINDS 	Refers to at least four kinds of drugs
 
 ########################################################################

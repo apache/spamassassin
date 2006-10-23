@@ -37,9 +37,6 @@ redirector_pattern      m'^https?:/*(?:[^/]+\.)?emf\d\.com/r\.cfm.*?&r=(.*)'i
 uri NUMERIC_HTTP_ADDR		/^https?\:\/\/\d{7}/is
 describe NUMERIC_HTTP_ADDR	Uses a numeric IP address in URL
 
-uri NORMAL_HTTP_TO_IP		m{^https?://\d+\.\d+\.\d+\.\d+}i
-describe NORMAL_HTTP_TO_IP	Uses a dotted-decimal IP address in URL
- 	
 # Theo sez:
 # Have gotten FPs off this, and whitespace can't be in the host, so...
 # %    Visit my homepage: http://i.like.foo.com %
