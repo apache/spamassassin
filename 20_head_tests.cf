@@ -34,34 +34,19 @@ describe FRAGMENTED_MESSAGE	Partial message
 
 ###########################################################################
 
-
 header FROM_BLANK_NAME		From =~ /(?:\s|^)"" <\S+>/i
 describe FROM_BLANK_NAME	From: contains empty name
 
 ###########################################################################
 # numeric address rules, these are written to avoid overlap with each other
 
-header FROM_ENDS_IN_NUMS	From:addr =~ /\D\d{8,}\@/i
-describe FROM_ENDS_IN_NUMS	From: ends in many numbers
+header __FROM_ENDS_IN_NUMS	From:addr =~ /\D\d{8,}\@/i
 
 header FROM_STARTS_WITH_NUMS	From:addr =~ /^\d{6,}\S+\@/i
 describe FROM_STARTS_WITH_NUMS	From: starts with many numbers
 
-# note: anchored for speed
-header FROM_HAS_MIXED_NUMS	From:addr =~ /^[a-z]+\d+[a-z]+\d+[a-z]+\w*\@/i
-describe FROM_HAS_MIXED_NUMS	From: contains numbers mixed in with letters
-
-header FROM_HAS_ULINE_NUMS	From =~ /_\S?(?:[a-z]+\w*?\d+|\d+\w*?[a-z]+)\w*\@/i
-describe FROM_HAS_ULINE_NUMS	From: contains an underline and numbers/letters
-
 # don't match US/Canada phone numbers: 10 digits optionally preceded by a "1"
-header FROM_ALL_NUMS		From:addr =~ /^(?:\d{1,9}|[02-9]\d{10}|\d{12,})@/
-describe FROM_ALL_NUMS		From numeric address (except US/Canada phones)
-
-# faked addresses tend to come from big public sites, but avoid overlap
-header __ADDR_NUMS_AT_BIGSITE	ALL =~ /^(?:To|From|Cc|Reply-To):\s{0,20}<?\S{0,20}\d{5,}\S{0,20}\@(?:bigfoot|email|excite|hotmail|juno|msn|yahoo)\.(?:com|net|org)/mi
-meta ADDR_NUMS_AT_BIGSITE	__ADDR_NUMS_AT_BIGSITE && !FROM_ENDS_IN_NUMS && !FROM_STARTS_WITH_NUMS && !FROM_HAS_MIXED_NUMS && !FROM_ALL_NUMS
-describe ADDR_NUMS_AT_BIGSITE	Has an address with lots of numbers at a big ISP
+header __FROM_ALL_NUMS		From:addr =~ /^(?:\d{1,9}|[02-9]\d{10}|\d{12,})@/
 
 ###########################################################################
 
@@ -265,10 +250,10 @@ header FORGED_TELESP_RCVD	Received =~ /\.(?!br).. \(\d+-\d+-\d+-\d+\.dsl\.telesp
 describe FORGED_TELESP_RCVD	Contains forged hostname for a DSL IP in Brazil
 
 # forgery meta-rules: more reliable than their inputs
-meta CONFIRMED_FORGED		(__FORGED_RCVD_TRAIL && (FORGED_AOL_RCVD || FORGED_HOTMAIL_RCVD || FORGED_EUDORAMAIL_RCVD || FORGED_YAHOO_RCVD || FORGED_JUNO_RCVD || FORGED_GW05_RCVD))
+meta CONFIRMED_FORGED		(__FORGED_RCVD_TRAIL && (__FORGED_AOL_RCVD || __FORGED_HOTMAIL_RCVD || __FORGED_EUDORAMAIL_RCVD || FORGED_YAHOO_RCVD || __FORGED_JUNO_RCVD || FORGED_GW05_RCVD))
 describe CONFIRMED_FORGED	Received headers are forged
 
-meta MULTI_FORGED		((FORGED_AOL_RCVD + FORGED_HOTMAIL_RCVD + FORGED_EUDORAMAIL_RCVD + FORGED_YAHOO_RCVD + FORGED_JUNO_RCVD + FORGED_GW05_RCVD) > 1)
+meta MULTI_FORGED		((__FORGED_AOL_RCVD + __FORGED_HOTMAIL_RCVD + __FORGED_EUDORAMAIL_RCVD + FORGED_YAHOO_RCVD + __FORGED_JUNO_RCVD + FORGED_GW05_RCVD) > 1)
 describe MULTI_FORGED		Received headers indicate multiple forgeries
 
 header NONEXISTENT_CHARSET	Content-Type =~ /charset=.?DEFAULT/
@@ -428,8 +413,7 @@ describe BAD_ENC_HEADER		Message has bad MIME encoding in the header
 
 ifplugin Mail::SpamAssassin::Plugin::HeaderEval
 
-header FORGED_AOL_RCVD	        eval:check_for_fake_aol_relay_in_rcvd()
-describe FORGED_AOL_RCVD	Received forged, contains fake AOL relays
+header __FORGED_AOL_RCVD	        eval:check_for_fake_aol_relay_in_rcvd()
 
 header CHARSET_FARAWAY_HEADER	eval:check_for_faraway_charset_in_headers()
 describe CHARSET_FARAWAY_HEADER	A foreign language charset used in headers
@@ -453,21 +437,18 @@ describe HEAD_ILLEGAL_CHARS	Headers have too many raw illegal characters
     ###################################################################
 
 # a forged Hotmail message; host HELO'd as hotmail.com, but it wasn't
-header FORGED_HOTMAIL_RCVD	eval:check_for_forged_hotmail_received_headers()
-describe FORGED_HOTMAIL_RCVD	Forged hotmail.com 'Received:' header found
+header __FORGED_HOTMAIL_RCVD	eval:check_for_forged_hotmail_received_headers()
 
 # this, by comparison is more common: from was @hotmail.com, but it wasn't
 header FORGED_HOTMAIL_RCVD2	eval:check_for_no_hotmail_received_headers()
 describe FORGED_HOTMAIL_RCVD2 hotmail.com 'From' address, but no 'Received:'
 
-header FORGED_EUDORAMAIL_RCVD	eval:check_for_forged_eudoramail_received_headers()
-describe FORGED_EUDORAMAIL_RCVD	Forged eudoramail.com 'Received:' header found
+header __FORGED_EUDORAMAIL_RCVD	eval:check_for_forged_eudoramail_received_headers()
 
 header FORGED_YAHOO_RCVD	eval:check_for_forged_yahoo_received_headers()
 describe FORGED_YAHOO_RCVD	'From' yahoo.com does not match 'Received' headers
 
-header FORGED_JUNO_RCVD		eval:check_for_forged_juno_received_headers()
-describe FORGED_JUNO_RCVD	'From' juno.com does not match 'Received' headers
+header __FORGED_JUNO_RCVD		eval:check_for_forged_juno_received_headers()
 
 header FORGED_GW05_RCVD		eval:check_for_forged_gw05_received_headers()
 describe FORGED_GW05_RCVD	Forged 'by gw05' 'Received:' header found

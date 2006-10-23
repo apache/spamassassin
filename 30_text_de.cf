@@ -126,8 +126,6 @@ lang de describe DRUGS_ERECTILE Erwähnt ein Medikament gegen Erektionsstörungen
 lang de describe DRUGS_ERECTILE_OBFU Erwähnt (getarnt) Medikamente gegen Erektionsstörungen
 lang de describe DRUGS_DIET Erwähnt Diätmedikament
 lang de describe DRUGS_DIET_OBFU Erwähnt (getarnt) Diätmedikament
-lang de describe DRUGS_PAIN Erwähnt Schmerzmedikament
-lang de describe DRUGS_SLEEP Erwähnt Schlafmittel
 lang de describe DRUGS_MUSCLE Erwähnt Muskelentspannungsmittel
 lang de describe DRUGS_ANXIETY Erwähnt Medikament gegen Angstneurosen
 lang de describe DRUGS_ANXIETY_OBFU Erwähnt (getarnt) Medikament gegen Angstneurosen
@@ -157,11 +155,7 @@ lang de describe HELO_DYNAMIC_VTR HELO-Rechnername verdächtig (VTR)
 lang de describe HELO_DYNAMIC_CHELLO_NO HELO-Rechnername verdächtig (Chello.no)
 lang de describe HELO_DYNAMIC_CHELLO_NL HELO-Rechnername verdächtig (Chello.nl)
 lang de describe HELO_DYNAMIC_HOME_NL HELO-Rechnername verdächtig (Home.nl)
-lang de describe FROM_ENDS_IN_NUMS Absenderadresse endet mit Ziffern im Benutzernamen
 lang de describe FROM_STARTS_WITH_NUMS Absenderadresse beginnt mit Ziffern im Benutzernamen
-lang de describe FROM_HAS_MIXED_NUMS Absendeadresse enthält Mischung aus Ziffern/Buchstaben
-lang de describe ADDR_NUMS_AT_BIGSITE Adresse enthält viele Ziffern im Benutzernamen (bekannte Provider)
-lang de describe FROM_ALL_NUMS Adresse enthält nur Ziffern im Benutzernamen
 lang de describe FROM_OFFERS Absenderadresse enthält "@...offers"
 lang de describe FROM_NO_USER Adressteil vor dem @-Zeichen fehlt im Absender
 lang de describe FAKED_UNDISC_RECIPS "To: Undisclosed-Recipients" ist gefälscht
@@ -206,13 +200,9 @@ lang de describe RCVD_NUMERIC_HELO "Received"-Kopfzeilen enthalten numerische HE
 lang de describe RCVD_ILLEGAL_IP "Received"-Kopfzeilen enthalten ungültige IP-Adresse
 lang de describe RCVD_DOUBLE_IP_SPAM Kennzeichen von Spam-Software (doppelte IP-Adresse)
 lang de describe RCVD_DOUBLE_IP_LOOSE Empfänger/Sender in Kopfzeilen sehen aus wie IP-Adressen
-lang de describe FORGED_AOL_RCVD Gefälschte "Received"-Kopfzeile (falsche Mailrechner von AOL)
 lang de describe FORGED_TELESP_RCVD Gefälschte Rechnernamen eines brasilianischen DSL-Providers
-lang de describe FORGED_HOTMAIL_RCVD Gefälschte "Received"-Kopfzeile von Hotmail gefunden
 lang de describe FORGED_HOTMAIL_RCVD2 Absendeadresse von hotmail.com, aber keine passende "Received"-Zeile
-lang de describe FORGED_EUDORAMAIL_RCVD Gefälschte "Received"-Kopfzeile von eudoramail.com gefunden
 lang de describe FORGED_YAHOO_RCVD Gefälschte "Received"-Kopfzeile von yahoo.com gefunden
-lang de describe FORGED_JUNO_RCVD Absender juno.com passt nicht zu "Received"-Kopfzeilen
 lang de describe FORGED_GW05_RCVD Gefälschte "Received"-Kopfzeile gefunden ("by gw05")
 lang de describe CONFIRMED_FORGED Gefälschte "Received"-Kopfzeilen
 lang de describe MULTI_FORGED Mehrfach gefälschte "Received"-Kopfzeilen
@@ -244,7 +234,6 @@ lang de describe TO_MALFORMED Format der Zieladresse inkorrekt
 lang de describe MIME_HEADER_CTYPE_ONLY Kopfzeile "Content-Type" ohne MIME-Kopfzeilen gefunden
 lang de describe WITH_LC_SMTP Kopfzeilen mit "smtp" in Kleinschreibung
 lang de describe SUBJ_BUY Betreff dreht sich ums Kaufen ("buy...")
-lang de describe FROM_HAS_ULINE_NUMS Benutzername des Absenders enthält Unterstrich und Ziffern/Buchstaben
 lang de describe RCVD_AM_PM Gefälschte "Received"-Kopfzeilen (AM/PM Zeitangabe)
 lang de describe HEADER_COUNT_CTYPE Kopfzeile "Content-Type" mehrfach vorhanden
 lang de describe NO_RDNS_DOTCOM_HELO HELO-Identifikation als großer Provider, aber rDNS-Name inkorrekt
@@ -283,7 +272,6 @@ lang de describe HTML_NONELEMENT_30_40 30-40% der HTML-Elemente entsprechen nich
 lang de describe HTML_NONELEMENT_40_50 40-50% der HTML-Elemente entsprechen nicht dem Standard
 lang de describe HTML_NONELEMENT_60_70 60-70% der HTML-Elemente entsprechen nicht dem Standard
 lang de describe HTML_NONELEMENT_80_90 80-90% der HTML-Elemente entsprechen nicht dem Standard
-lang de describe HTML_SHORT_LENGTH Sehr, sehr kleiner HTML-Teil
 lang de describe HTML_SHORT_CENTER Wenig HTML mit "center"-Element
 lang de describe HTML_CHARSET_FARAWAY Fremdsprachlicher Zeichensatz für HTML benutzt
 lang de describe HTML_MIME_NO_HTML_TAG Nachricht besteht nur aus HTML, hat aber kein "html"-Element
@@ -379,7 +367,6 @@ lang de describe X_MESSAGE_INFO Kopfzeile "X-Message-Info"
 lang de describe RATWARE_RCVD_PF Gefälschte "Received"-Kopfzeile von Postfix
 lang de describe RATWARE_RCVD_AT "Received"-Kopfzeile mit @-Zeichen
 lang de describe NUMERIC_HTTP_ADDR Benutzt eine einzige Zahl als IP-Adresse in einem Hyperlink
-lang de describe NORMAL_HTTP_TO_IP Benutzt eine IP-Adresse (a.b.c.d) in einem Hyperlink
 lang de describe HTTP_ESCAPED_HOST Benutzt %-Kodierung innerhalb des Hyperlinks
 lang de describe HTTP_EXCESSIVE_ESCAPES Überflüssige %-Kodierung in Webadresse
 lang de describe IP_LINK_PLUS IP-Adresse (a.b.c.d) gefolgt von CGI-Programm
