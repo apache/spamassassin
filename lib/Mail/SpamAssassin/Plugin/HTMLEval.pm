@@ -49,7 +49,6 @@ sub new {
   $self->register_eval_rule("html_text_not_match");
   $self->register_eval_rule("html_range");
   $self->register_eval_rule("check_iframe_src");
-  $self->register_eval_rule("check_html_uri_only");
 
   return $self;
 }
@@ -197,24 +196,6 @@ sub check_iframe_src {
   }
 
   return 0;
-}
-
-sub check_html_uri_only {
-  my ($self, $pms) = @_;
-
-  # Find out if there are any multipart/alternative parts in the message
-  my @ma = $pms->{msg}->find_parts(qr@^multipart/alternative\b@i);
-
-  # If there are no multipart/alternative sections, skip this test.
-  return if (!@ma);
-
-  # At this point, we're not actually checking the alternates, just the entire
-  # message.
-  foreach my $v ( values %{$pms->{html}->{uri_detail}} ) {
-    return 0 if (exists $v->{types}->{parsed});
-  }
-
-  return 1;
 }
 
 1;
