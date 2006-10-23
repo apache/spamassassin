@@ -224,7 +224,7 @@ lang pl body PL_PROSIMY_O_SKLADANIE	/pros.{0,20}sk.ada.{0,30} na /i
 lang pl describe PL_PROSIMY_O_SKLADANIE	Tresc zawiera 'Prosimy o skladanie na...'
 lang pl score PL_PROSIMY_O_SKLADANIE	1.0
 
-lang pl body PL_REKLAMA                 /reklama (bez)?p.atna/i
+lang pl body PL_REKLAMA                 /reklama (?:bez)?p.atna/i
 lang pl describe PL_REKLAMA             Tresc zawiera 'reklama (bez)platna'
 lang pl score PL_REKLAMA                2.0
 
@@ -248,7 +248,7 @@ lang pl body PL_SWOICH_ZNAJOMYCH        /swoich znajomych i przyjaci.{2,6}/i
 lang pl describe PL_SWOICH_ZNAJOMYCH    Tresc zawiera 'swoich znajomych i przyjaciol'
 lang pl score PL_SWOICH_ZNAJOMYCH       0.4
 
-lang pl body PL_DODATKOWO               /dodatkowo dosta(j|ni)esz/i
+lang pl body PL_DODATKOWO               /dodatkowo dosta(?:j|ni)esz/i
 lang pl describe PL_DODATKOWO           Tresc zawiera 'dodatkowo dosta(j|ni)esz'
 lang pl score PL_DODATKOWO              0.6
 
