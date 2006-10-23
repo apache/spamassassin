@@ -38,7 +38,6 @@ sub new {
   bless ($self, $class);
 
   # the important bit!
-  $self->register_eval_rule("check_domain_ratio");
   $self->register_eval_rule("check_for_http_redirector");
   $self->register_eval_rule("check_https_ip_mismatch");
 
@@ -46,16 +45,6 @@ sub new {
 }
 
 ###########################################################################
-
-sub check_domain_ratio {
-  my ($self, $pms, $body, $ratio) = @_;
-  my $length = (length(join('', @{$body})) || 1);
-  if (!defined $pms->{uri_domain_count}) {
-    $pms->get_uri_list();
-  }
-  return 0 if !defined $pms->{uri_domain_count};
-  return (($pms->{uri_domain_count} / $length) > $ratio);
-}
 
 sub check_for_http_redirector {
   my ($self, $pms) = @_;
