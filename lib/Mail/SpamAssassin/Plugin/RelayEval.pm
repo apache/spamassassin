@@ -51,7 +51,6 @@ sub new {
   $self->register_eval_rule("check_for_forged_received_ip_helo");
   $self->register_eval_rule("helo_ip_mismatch");
   $self->register_eval_rule("check_for_no_rdns_dotcom_helo");
-  $self->register_eval_rule("message_id_from_mta");
 
   return $self;
 }
@@ -356,21 +355,6 @@ sub _check_received_helos {
     }
   }
 } # _check_received_helos()
-
-# Message-ID for untrusted message was added by a trusted relay
-sub message_id_from_mta {
-  my ($self, $pms) = @_;
-
-  my $id = $pms->get('MESSAGEID');
-
-  if ($id && $pms->{num_relays_untrusted} > 0) {
-    for my $rcvd (@{$pms->{relays_untrusted}}[0], @{$pms->{relays_trusted}})
-    {
-      return 1 if $rcvd->{id} && (index(lc($id), lc($rcvd->{id})) != -1);
-    }
-  }
-  return 0;
-}
 
 # FORGED_RCVD_TRAIL
 sub check_for_forged_received_trail {
