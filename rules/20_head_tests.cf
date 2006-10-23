@@ -31,6 +31,11 @@ require_version @@VERSION@@
 # unsurprisingly this hits 0/0 right now.
 header FRAGMENTED_MESSAGE	Content-Type =~ /\bmessage\/partial/i
 describe FRAGMENTED_MESSAGE	Partial message
+tflags FRAGMENTED_MESSAGE       userconf
+
+# this is also mostly-theoretical, so allow 0 hits
+header HEAD_LONG                eval:check_msg_parse_flags('truncated_header')
+tflags HEAD_LONG                userconf
 
 ###########################################################################
 
