@@ -48,7 +48,6 @@ sub new {
   $self->register_eval_rule("check_for_sender_no_reverse");
   $self->register_eval_rule("check_for_from_domain_in_received_headers");
   $self->register_eval_rule("check_for_forged_received_trail");
-  $self->register_eval_rule("check_for_forged_received_helo");
   $self->register_eval_rule("check_for_forged_received_ip_helo");
   $self->register_eval_rule("helo_ip_mismatch");
   $self->register_eval_rule("check_for_no_rdns_dotcom_helo");
@@ -380,13 +379,6 @@ sub check_for_forged_received_trail {
   return ($pms->{mismatch_from} > 1);
 }
 
-# FORGED_RCVD_HELO
-sub check_for_forged_received_helo {
-  my ($self, $pms) = @_;
-  $self->_check_for_forged_received($pms) unless exists $pms->{mismatch_helo};
-  return ($pms->{mismatch_helo} > 0);
-}
-
 # FORGED_RCVD_IP_HELO
 sub check_for_forged_received_ip_helo {
   my ($self, $pms) = @_;
@@ -398,7 +390,6 @@ sub _check_for_forged_received {
   my ($self, $pms) = @_;
 
   $pms->{mismatch_from} = 0;
-  $pms->{mismatch_helo} = 0;
   $pms->{mismatch_ip_helo} = 0;
 
   my $IP_PRIVATE = IP_PRIVATE;
@@ -441,15 +432,6 @@ sub _check_for_forged_received {
     # a separate rule for that anyway.
 
     next unless ($by =~ /^\w+(?:[\w.-]+\.)+\w+$/);
-
-    if (defined($hlo) && defined($frm)
-		&& $hlo =~ /^\w+(?:[\w.-]+\.)+\w+$/
-		&& $frm =~ /^\w+(?:[\w.-]+\.)+\w+$/
-		&& $frm ne $hlo && !helo_forgery_whitelisted($frm, $hlo))
-    {
-      dbg2("eval: forged-HELO: mismatch on HELO: '$hlo' != '$frm'");
-      $pms->{mismatch_helo}++;
-    }
 
     my $fip = $fromip[$i];
 
