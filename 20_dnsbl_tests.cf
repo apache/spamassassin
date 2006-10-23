@@ -172,9 +172,9 @@ describe DNS_FROM_RFC_POST	Envelope sender in postmaster.rfc-ignorant.org
 tflags DNS_FROM_RFC_POST	net
 #reuse DNS_FROM_RFC_POST
 
-header DNS_FROM_RFC_ABUSE	eval:check_rbl_sub('rfci_envfrom', '127.0.0.4')
-describe DNS_FROM_RFC_ABUSE	Envelope sender in abuse.rfc-ignorant.org
-tflags DNS_FROM_RFC_ABUSE	net
+header DNS_FROM_RFC_ABUSE       eval:check_rbl_sub('rfci_envfrom', '127.0.0.4')
+describe DNS_FROM_RFC_ABUSE     Envelope sender in whois.rfc-ignorant.org
+tflags DNS_FROM_RFC_ABUSE       net
 #reuse DNS_FROM_RFC_ABUSE
 
 header DNS_FROM_RFC_WHOIS	eval:check_rbl_sub('rfci_envfrom', '127.0.0.5')

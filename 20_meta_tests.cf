@@ -35,19 +35,10 @@ require_version @@VERSION@@
 
 body __ISO_2022_JP_DELIM	/\e\$B/
 
-header __MANY_EXCLS             Subject =~ /![^!]+!/
-header __PLING_PLING            Subject =~ /!!!/
-
-meta MANY_EXCLAMATIONS          (!__ISO_2022_JP_DELIM && __MANY_EXCLS)
-describe MANY_EXCLAMATIONS      Subject has many exclamations
-meta UPPERCASE_25_50            (!__ISO_2022_JP_DELIM && __UPPERCASE_25_50)
-describe UPPERCASE_25_50        message body is 25-50% uppercase
 meta UPPERCASE_50_75            (!__ISO_2022_JP_DELIM && __UPPERCASE_50_75)
 describe UPPERCASE_50_75        message body is 50-75% uppercase
 meta UPPERCASE_75_100           (!__ISO_2022_JP_DELIM && __UPPERCASE_75_100)
 describe UPPERCASE_75_100       message body is 75-100% uppercase
-meta PLING_PLING                (!__ISO_2022_JP_DELIM && __PLING_PLING)
-describe PLING_PLING            Subject has lots of exclamation marks
 
 header __SANE_MSGID		MESSAGEID =~ /^<[^<>\\ \t\n\r\x0b\x80-\xff]+\@[^<>\\ \t\n\r\x0b\x80-\xff]+>\s*$/m
 header __HAS_MSGID		MESSAGEID =~ /\S/

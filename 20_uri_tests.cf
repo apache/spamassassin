@@ -46,10 +46,6 @@ describe NORMAL_HTTP_TO_IP	Uses a dotted-decimal IP address in URL
 uri HTTP_ESCAPED_HOST           /^https?\:\/\/[^\/\s\?\']*%[0-9a-fA-F][0-9a-fA-F]/
 describe HTTP_ESCAPED_HOST	Uses %-escapes inside a URL's hostname
 
-# note: do not match \r or \n
-uri HTTP_CTRL_CHARS_HOST	/^https?\:\/\/[^\/\s]*[\x00-\x08\x0b\x0c\x0e-\x1f]/
-describe HTTP_CTRL_CHARS_HOST	Uses control sequences inside a URL hostname
-
 # look for URI with escaped 0-9, A-Z, or a-z characters (all other safe
 # characters have been well-tested, but are sometimes unnecessarily escaped
 # in nonspam; requiring "http" or "https" also reduces false positives).
@@ -60,34 +56,11 @@ describe HTTP_EXCESSIVE_ESCAPES	Completely unnecessary %-escapes inside a URL
 uri IP_LINK_PLUS	m{^https?://\d+\.\d+\.\d+\.\d+.{0,20}(?:cgi|click|ads|id=)}i
 describe IP_LINK_PLUS	Dotted-decimal IP address followed by CGI
 
-uri REMOVE_PAGE			/^https?:\/\/[^\/]+\/.*?remove/
-describe REMOVE_PAGE		URL of page called "remove"
- 	
-uri MAILTO_TO_SPAM_ADDR		/^mailto:[a-z]+\d{2,}\@/is
-describe MAILTO_TO_SPAM_ADDR	Includes a link to a likely spammer email
- 	
-uri MAILTO_TO_REMOVE		/^mailto:.*?remove/is
-describe MAILTO_TO_REMOVE	Includes a 'remove' email address
-
 # allow ports 80 and 443 which are http and https, respectively
 # we don't want to hit http://www.cnn.com:USArticle1840@www.liquidshirts.com/
 # though, which actually doesn't have a weird port in it.
 uri WEIRD_PORT			m{https?://[^/\s]+?:\d+(?<!:80)(?<!:443)(?<!:8080)(?:/|\s|$)}
 describe WEIRD_PORT		Uses non-standard port number for HTTP
-
-# looks for a (maybe empty) username and (optional) password in an url
-uri USERPASS                    m{^https?://[^/\s]*?(?::[^/\s]+?)?\@}
-describe USERPASS               URL contains username and (optional) password
-
-uri URI_IS_POUND		m{\#$}
-describe URI_IS_POUND		Filename is just a '\#'; probably a JS trick
-
-uri BARGAIN_URL			/bargain([sz]|-\S+)?\.(?:com|biz)/
-describe BARGAIN_URL		Includes a link to a likely spammer domain
-
-# these are somewhat loose, but results are good
-uri BIZ_TLD  			/\.biz(?::\d+)?(?:\/|$)/i
-describe BIZ_TLD		Contains an URL in the BIZ top-level domain    
 
 uri INFO_TLD  			/\.info(?::\d+)?(?:\/|$)/i
 describe INFO_TLD		Contains an URL in the INFO top-level domain    
@@ -105,24 +78,10 @@ describe YAHOO_RD_REDIR		Has Yahoo Redirect URI
 uri YAHOO_DRS_REDIR		m{^https?://drs\.yahoo\.com/}i
 describe YAHOO_DRS_REDIR	Has Yahoo Redirect URI
 
-uri URI_OFFERS			m/offer([sz]|-\S+)?\.(?:com|bi?z)/i
-describe URI_OFFERS		Message has link to company offers
-
-uri URI_4YOU			m@^(?:https?://|mailto:)[^\/]*4you@i
-describe URI_4YOU		Message has URI 4you
-
-# 0 nonspam hits, hundreds of spam hits.  Serious problems there
-uri TERRA_ES			/terra\.es\//i
-describe TERRA_ES		Contains URI to a document hosted at 'terra.es'
-
 # "www" hidden as "%77%77%77", "ww%77", etc.
 # note: *not* anchored to start of string, to catch use of redirectors
 uri HTTP_77			/http:\/\/.{0,2}\%77/
 describe HTTP_77		Contains an URL-encoded hostname (HTTP77)
-
-# affiliateid, aff_id, aff_sub_id etc.
-uri URI_AFFILIATE		/aff\w+id=/i
-describe URI_AFFILIATE		Contains a URI with an affiliate ID code
 
 # a.com.b.c
 uri SPOOF_COM2OTH	m{^https?://(?:\w+\.)+?com\.(?:\w+\.){2}}i
@@ -135,13 +94,6 @@ describe SPOOF_COM2COM 	URI contains ".com" in middle and end
 # a.net.b.com
 uri SPOOF_NET2COM	m{^https?://(?:\w+\.)+?(?:net|org)\.(?:\w+\.)+?com}i
 describe SPOOF_NET2COM 	URI contains ".net" or ".org", then ".com"
-
-# CDNs (Akamai (edgesuite), Speedera, and NYUD, so far) do this, so skip them
-uri SPOOF_OURI		m{^https?://(?:[a-z0-9_-]+?\.){2,}(?:com|net|org|biz|info|edu|www)(?!\.(?:\w+\.)?(?:edgesuite|nyud|speedera)\.net)(?:\.[a-z0-9_%-]+?){2,}(?:(?::|%3a)\d+)?}i
-describe SPOOF_OURI	URI has items in odd places
-
-uri URI_DIGITS		m%^https?://[^/?]*\b\d{6,}\b%i
-describe URI_DIGITS	URI hostname has long digit sequence
 
 uri URI_HEX		m%^https?://[^/?]*\b[0-9a-f]{6,}\b%i
 describe URI_HEX	URI hostname has long hexadecimal sequence
@@ -162,26 +114,9 @@ describe URI_NO_WWW_INFO_CGI	CGI in .info TLD other than third-level "www"
 uri URI_NO_WWW_BIZ_CGI	/^(?:https?:\/\/)?[^\/]+(?<!\/www)\.[^.]{7,}\.biz\/(?=\S{15,})\S*\?/i
 describe URI_NO_WWW_BIZ_CGI	CGI in .biz TLD other than third-level "www"
 
-uri URI_NO_WWW_ANY_CGI	/^(?:https?:\/\/)?[^\/]+(?<!\/www)\.[^.]{3,}\.[^.]{3,}\.(?!biz|info)[a-z]{2,4}\/\?\S{14}/i
-describe URI_NO_WWW_ANY_CGI	CGI with long hostname other fourth-level "www"
-
-uri URI_SCHEME_MIXED_CASE	/^(?![a-z]{3,6}:|[A-Z]{3,6})[A-Za-z]{3,6}:\//
-describe URI_SCHEME_MIXED_CASE	URI scheme has mixed uppercase and lowercase
-
-# bug 678
-uri DOMAIN_4U2			/[\@\.]\S{0,20}(?:[^0-9][42](?:yo)?u|for-*you)(?:[.-]\S{1,20})?\.(?:net|com|org|info)\b/
-describe DOMAIN_4U2		Domain name containing a "4u" variant
-
 # possible IDN spoofing attack: http://www.shmoo.com/idn/homograph.txt
 # not expecting any hits on this (yet)
 uri HIGH_CODEPAGE_URI	/^https?:\/\/[^\/]*\&\#(?:\d{4,}|[3456789]\d\d);/i
 
 ###########################################################################
 
-ifplugin Mail::SpamAssassin::Plugin::URIEval
-
-# really a URI rule
-header URI_REDIRECTOR		eval:check_for_http_redirector()
-describe URI_REDIRECTOR		Message has HTTP redirector URI
-
-endif

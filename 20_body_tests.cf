@@ -76,15 +76,11 @@ body __LONGWORDS_C	/\b(?:[a-z]{5,}[\s\.]+){10}/
 meta LONGWORDS		(__LONGWORDS_A + __LONGWORDS_B + __LONGWORDS_C > 1)
 describe LONGWORDS	Long string of long words
 
-rawbody INTERRUPTUS           /(?:[a-zA-Z0-9]<[\/ ]{0,2}?(?!br)(?!p)(?!sup)(?!li)(?!b)(?!i)(?!option)(?!a (?:href|name))(?:\b|!--)[^>]{0,64}?>[a-zA-Z0-9].{0,64}){3}/i
-describe INTERRUPTUS          Message looks to contain HTML-interrupted text
 
 ###########################################################################
 
 ifplugin Mail::SpamAssassin::Plugin::BodyEval
 
-body UNIQUE_WORDS	eval:check_unique_words('0.946', '3.1')
-describe UNIQUE_WORDS	Message body has many words used only once
 
 # This rule uses a simple algorithm to determine if the text and html
 # parts of an multipart/alternative message are different.
@@ -94,12 +90,8 @@ describe MPART_ALT_DIFF	HTML and text parts are different
 body MPART_ALT_DIFF_COUNT	eval:multipart_alternative_difference_count('3', '1')
 describe MPART_ALT_DIFF_COUNT	HTML and text parts are different
 
-body BLANK_LINES_70_80	eval:check_blank_line_ratio('70','80','4')
 body BLANK_LINES_80_90	eval:check_blank_line_ratio('80','90','4')
-body BLANK_LINES_90_100	eval:check_blank_line_ratio('90','100','4')
-describe BLANK_LINES_70_80  Message body has 70-80% blank lines
 describe BLANK_LINES_80_90  Message body has 80-90% blank lines
-describe BLANK_LINES_90_100 Message body has 90-100% blank lines
 
 # it's the ratio of spaces to non-spaces in each paragraph.  apparently
 # messages where generally there are lots of spaces mean the message is spam.
@@ -132,14 +124,10 @@ describe __MIME_QP		Includes a quoted-printable attachment
 rawbody MIME_BASE64_BLANKS	eval:check_for_mime('mime_base64_blanks')
 describe MIME_BASE64_BLANKS	Extra blank lines in base64 encoding
 
-rawbody MIME_BASE64_NO_NAME	eval:check_for_mime('mime_base64_no_name')
-describe MIME_BASE64_NO_NAME	base64 attachment does not have a file name
 
 rawbody MIME_BASE64_TEXT	eval:check_for_mime('mime_base64_encoded_text')
 describe MIME_BASE64_TEXT	Message text disguised using base64 encoding
 
-rawbody  MIME_MISSING_BOUNDARY	eval:check_for_mime('mime_missing_boundary')
-describe MIME_MISSING_BOUNDARY	MIME section missing boundary
 
 body MISSING_MIME_HB_SEP	eval:check_msg_parse_flags('missing_mime_head_body_separator')
 describe MISSING_MIME_HB_SEP	Missing blank line between MIME header and body
@@ -165,8 +153,6 @@ endif
 
 ifplugin Mail::SpamAssassin::Plugin::URIEval
 
-body DOMAIN_RATIO	eval:check_domain_ratio('0.022')
-describe DOMAIN_RATIO	Message body mentions many internet domains
 
 body HTTPS_IP_MISMATCH	eval:check_https_ip_mismatch()
 describe HTTPS_IP_MISMATCH	IP to HTTPS link found in HTML
