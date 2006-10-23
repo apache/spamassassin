@@ -34,8 +34,6 @@ describe FRAGMENTED_MESSAGE	Partial message
 
 ###########################################################################
 
-header NO_REAL_NAME		From =~ /^["\s]*\<?\S+\@\S+\>?\s*$/
-describe NO_REAL_NAME		From: does not include a real name
 
 header FROM_BLANK_NAME		From =~ /(?:\s|^)"" <\S+>/i
 describe FROM_BLANK_NAME	From: contains empty name
@@ -73,23 +71,6 @@ describe FROM_OFFERS		From address is "at something-offers"
 header FROM_NO_USER		From =~ /(?:^\@|<\@| \@[^\)<]*$|<>)/ [if-unset: unset@unset.unset]
 describe FROM_NO_USER		From: has no local-part before @ sign
 
-header TO_NO_USER		To =~ /(?:^\@|<\@| \@[^\)<]*$|<>)/ [if-unset: unset@unset.unset]
-describe TO_NO_USER		To: has no local-part before @ sign
-
-header TO_EMPTY			To =~ /^\s*$/ [if-unset: UNSET]
-describe TO_EMPTY		To: is empty
-
-header REPLY_TO_EMPTY		Reply-To =~ /^\s*$/ [if-unset: UNSET]
-describe REPLY_TO_EMPTY		Reply-To: is empty
-
-header TO_ADDRESS_EQ_REAL	To =~ /^\s*"([^"@]+\@[^"@]+)"\s+<\1>\s*$/i
-describe TO_ADDRESS_EQ_REAL	To: repeats address as real name
-
-# NOTE: this is what 100% valid undisclosed-recipients mails look like.
-# If this gets a high score, that's a bug!
-header UNDISC_RECIPS		To =~ /^undisclosed-recipients?:\s*;$/
-describe UNDISC_RECIPS		Valid-looking To "undisclosed-recipients"
-
 # also 100% valid
 header FAKED_UNDISC_RECIPS	To =~ /undisclosed[_ ]*recipient(?:s[^:]|[^s])/i
 describe FAKED_UNDISC_RECIPS	Faked To "Undisclosed-Recipients"
@@ -97,8 +78,6 @@ describe FAKED_UNDISC_RECIPS	Faked To "Undisclosed-Recipients"
 header PLING_QUERY		Subject =~ /\?.*!|!.*\?/
 describe PLING_QUERY		Subject has exclamation mark and question mark
 
-header SUBJ_HAS_SPACES		Subject =~ /(?:\s{6}|\t\s|\s\t)\S/
-describe SUBJ_HAS_SPACES	Subject contains lots of white space
 
 header MSGID_SPAM_99X9XX99	MESSAGEID =~ /^<\d\d\d\d\d\d[a-z]\d[a-z][a-z]\d\d\$[a-z][a-z][a-z]\d\d\d\d\d\$\d\d\d\d\d\d\d\d\@/
 describe MSGID_SPAM_99X9XX99	Spam tool Message-Id: (99x9xx99 variant)
@@ -112,16 +91,9 @@ describe MSGID_SPAM_CAPS	Spam tool Message-Id: (caps variant)
 header MSGID_SPAM_LETTERS	Message-Id =~ /<[a-z]{5,}\@(\S+\.)+\S+>/
 describe MSGID_SPAM_LETTERS	Spam tool Message-Id: (letters variant)
 
-header MSGID_SPAM_ZEROES	MESSAGEID =~ /<0000[0-9a-f]{8}\$0000[0-9a-f]{4}\$0000[0-9a-f]{4}\@/
-describe MSGID_SPAM_ZEROES	Spam tool Message-Id: (12-zeroes variant)
 
 header MSGID_NO_HOST            MESSAGEID =~ /\@>(?:$|\s)/m
 describe MSGID_NO_HOST 		Message-Id has no hostname
-
-# catches a few spams missed by MSGID_OUTLOOK_INVALID
-header __HAS_OUTLOOK_IN_MAILER	X-Mailer =~ /\bMSCRM\b|Microsoft (?:CDO|Outlook|Office Outlook)\b/
-meta MSGID_DOLLARS		(__OE_MSGID_2 && !__HAS_OUTLOOK_IN_MAILER && !__UNUSABLE_MSGID)
-describe MSGID_DOLLARS		Message-Id has pattern used in spam
 
 # negative lookahead exempts this MUA from circa 1997-2000 
 # X-Mailer: Microsoft Outlook Express 4.71.1712.3
@@ -217,8 +189,6 @@ describe INVALID_TZ_CST		Invalid date in header (wrong CST timezone)
 header INVALID_TZ_EST		ALL =~ /[+-]\d\d[30]0(?<!-0500|-0300|\+1000|\+1100)\s+(?:\bEST\b|\(EST\))/
 describe INVALID_TZ_EST		Invalid date in header (wrong EST timezone)
 
-header INVALID_TZ_GMT		ALL =~ /[+-]\d\d[30]0(?<![+-]0000)\s+(?:\b(?:GMT|UTC)\b(?![\w+-])|\((?:GMT|UTC)\))/
-describe INVALID_TZ_GMT		Invalid date in header (wrong GMT/UTC timezone)
 
 ###########################################################################
 # MIME encoding with spam characteristics
@@ -227,24 +197,16 @@ header __SUBJECT_NEEDS_MIME	Subject =~ /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]/
 header __SUBJECT_ENCODED_QP	Subject:raw =~ /=\?\S+\?Q\?/i
 header __SUBJECT_ENCODED_B64	Subject:raw =~ /=\?\S+\?B\?/i
 
-meta SUBJECT_EXCESS_QP		__SUBJECT_ENCODED_QP && !__SUBJECT_NEEDS_MIME
-describe SUBJECT_EXCESS_QP	Subject: quoted-printable encoded unnecessarily
 
-meta SUBJECT_EXCESS_BASE64	__SUBJECT_ENCODED_B64 && !__SUBJECT_NEEDS_MIME
-describe SUBJECT_EXCESS_BASE64	Subject: base64 encoded encoded unnecessarily
 
 header __FROM_NEEDS_MIME	From =~ /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]/
 header __FROM_ENCODED_QP	From:raw =~ /=\?\S+\?Q\?/i
 header __FROM_ENCODED_B64	From:raw =~ /=\?\S+\?B\?/i
 
-meta FROM_EXCESS_QP		__FROM_ENCODED_QP && !__FROM_NEEDS_MIME
-describe FROM_EXCESS_QP		From: quoted-printable encoded unnecessarily
 
 meta FROM_EXCESS_BASE64		__FROM_ENCODED_B64 && !__FROM_NEEDS_MIME
 describe FROM_EXCESS_BASE64	From: base64 encoded unnecessarily
 
-header SUBJECT_ENCODED_TWICE	Subject:raw =~ /=\?\S+\?[BQ]\?.*=\?\S+\?[BQ]\?/i
-describe SUBJECT_ENCODED_TWICE	Subject: MIME encoded twice
 
 ###########################################################################
 # ADV tags in various languages
@@ -287,11 +249,6 @@ describe KOREAN_UCE_SUBJECT	Subject: contains Korean unsolicited email tag
 
 ###########################################################################
 
-# no legit mailer claims that their mailserver has no name
-# overlaps with RCVD_DOUBLE_IP*, but let's see how it is scored
-header RCVD_BY_IP	Received =~ /\bby\s+\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b/
-describe RCVD_BY_IP	Received by mail server with no name
-
 # two reliable signatures
 header __DOUBLE_IP_SPAM_1	Received =~ /from \[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\] by \d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} with/
 header __DOUBLE_IP_SPAM_2	Received =~ /from\s+\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+by\s+\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3};/
@@ -317,11 +274,7 @@ describe MULTI_FORGED		Received headers indicate multiple forgeries
 header NONEXISTENT_CHARSET	Content-Type =~ /charset=.?DEFAULT/
 describe NONEXISTENT_CHARSET	Character set doesn't exist
 
-header X_PRIORITY_HIGH		X-Priority =~ /^1/
-describe X_PRIORITY_HIGH	Sent with 'X-Priority' set to high
 
-header X_MSMAIL_PRIORITY_HIGH	X-Msmail-Priority =~ /^High/
-describe X_MSMAIL_PRIORITY_HIGH	Sent with 'X-Msmail-Priority' set to high
 
 header MISSING_DATE             Date =~ /^UNSET$/ [if-unset: UNSET]
 describe MISSING_DATE           Missing Date: header
@@ -354,13 +307,6 @@ describe PREVENT_NONDELIVERY	Message has Prevent-NonDelivery-Report header
 header X_IP			exists:X-IP
 describe X_IP			Message has X-IP header
 
-header X_LIBRARY		exists:X-Library
-describe X_LIBRARY		Message has X-Library header
-
-# this rule is case-sensitive
-header X_MESSAGE_FLAG_ODD	ALL =~ /^X-Message-flag:/m
-describe X_MESSAGE_FLAG_ODD	Message has X-Message-flag header (odd case)
-
 header   __HAS_MIMEOLE          exists:X-MimeOLE
 header   __HAS_MSMAIL_PRI       exists:X-MSMail-Priority
 header   __HAS_SQUIRRELMAIL_IN_MAILER	X-Mailer =~ /SquirrelMail\b/
@@ -371,35 +317,17 @@ header __HAS_X_MAILER		exists:X-Mailer
 
 header __IS_EXCH		X-MimeOLE =~ /Produced By Microsoft Exchange V/
 
-header __HAS_X_PRIORITY 	exists:X-Priority
-header __USER_AGENT             exists:User-Agent
-header __X_NEWSREADER		exists:X-Newsreader
-meta PRIORITY_NO_NAME		((__HAS_X_PRIORITY && __HAS_MSMAIL_PRI) && !__HAS_X_MAILER && !__IS_EXCH && !__USER_AGENT && !__X_NEWSREADER)
-describe PRIORITY_NO_NAME	Message has priority, but no user agent name
-
 header SUBJ_AS_SEEN		Subject =~ /\bAs Seen/i
 describe SUBJ_AS_SEEN		Subject contains "As Seen"
 
 header SUBJ_DOLLARS             Subject =~ /^\$[0-9.,]+\b/
 describe SUBJ_DOLLARS           Subject starts with dollar amount
 
-header SUBJ_FOR_ONLY 		Subject =~ /For Only/i
-describe SUBJ_FOR_ONLY 		Subject contains "For Only"
 
-header SUBJ_FREE_CAP		Subject =~ /FREE|F.R.E.E\b/
-describe SUBJ_FREE_CAP		Subject contains "FREE" in CAPS
 
-header SUB_FREE_OFFER           Subject =~ /^fre{2,}\b/i
-describe SUB_FREE_OFFER         Subject starts with "Free"
 
-header SUBJ_GUARANTEED          Subject =~ /^guaranteed|(?-i:GUARANTEE)/i
-describe SUBJ_GUARANTEED        Subject GUARANTEED
 
-header SUB_HELLO                Subject =~ /^hello\b/i
-describe SUB_HELLO              Subject starts with "Hello"
 
-header SUBJ_LIFE_INSURANCE	Subject =~ /life\s+insurance/i
-describe SUBJ_LIFE_INSURANCE	Subject includes "life insurance"
 
 header SUBJ_YOUR_DEBT		Subject =~ /Your (?:Bills|Debt|Credit)/i
 describe SUBJ_YOUR_DEBT		Subject contains "Your Bills" or similar
@@ -407,8 +335,6 @@ describe SUBJ_YOUR_DEBT		Subject contains "Your Bills" or similar
 header SUBJ_YOUR_FAMILY		Subject =~ /Your Family/i
 describe SUBJ_YOUR_FAMILY	Subject contains "Your Family"
 
-header SUBJ_YOUR_OWN		Subject =~ /Your Own/i
-describe SUBJ_YOUR_OWN		Subject contains "Your Own"
 
 # the real services never HELO as 'foo.com', instead 'mail.foo.com' or
 # something like that.  Note: be careful when expanding this... legit dotcom
@@ -438,22 +364,10 @@ header __NEXTPART_ALL		Content-Type =~ /NextPart/
 header __NEXTPART_NORMAL	Content-Type =~ /="(?:----_?=_)?NextPart_[\dA-F]{3}(_[\dA-F]{3,8})?_[\dA-F]{8}\.[\dA-F]{8}"/
 meta MIME_BOUND_NEXTPART	(__NEXTPART_ALL && !__NEXTPART_NORMAL)
 describe MIME_BOUND_NEXTPART	Spam tool pattern in MIME boundary
-header MIME_BOUND_RKFINDY       Content-Type =~ /boundary=\"=_NextPart_2rfkindysadvnqw3nerasdf\"/
-describe MIME_BOUND_RKFINDY     Spam tool pattern in MIME boundary (rfkindy)
 
 # note: the first alternation is anchored for speed
 header TO_MALFORMED             To !~ /(?:^|[^\S"])(?:(?:\"[^\"]+\"|\S+)\@\S+\.\S+|^\s*.+:\s*;|^\s*\"[^\"]+\":\s*;|^\s*\([^\)]*\)\s*$|<\S+(?:\!\S+){1,}>|^\s*$)/ [if-unset: unset@unset.unset]
 describe TO_MALFORMED           To: has a malformed address
-
-header ADDR_FREE              From =~ /\b(?-i:F)ree(?-i:[ A-Z]).*</i
-describe ADDR_FREE            From Address contains FREE
-
-# common spam-dropping: To: C:\VICTIMS.txt@yourmx.org
-header TO_TXT			To =~ /\.txt[\'\"]?\@/i
-describe TO_TXT			Sent to a text file
-
-header CHINA_HEADER             ALL =~ /\@china\.com/i
-describe CHINA_HEADER           Involves 'china.com'
 
 header __CD                     exists:Content-Disposition
 header __CT                     exists:Content-Type
@@ -466,8 +380,6 @@ describe MIME_HEADER_CTYPE_ONLY 'Content-Type' found without required MIME heade
 header WITH_LC_SMTP		Received =~ /\swith\ssmtp;\s/
 describe WITH_LC_SMTP		Received line contains spam-sign (lowercase smtp)
 
-header FROM_NO_LOWER		From:addr !~ /[a-z]/ [if-unset: x@example.com]
-describe FROM_NO_LOWER		From address has no lower-case characters
 
 header SUBJ_BUY                 Subject =~ /^buy/i
 describe SUBJ_BUY               Subject line starts with Buy or Buying
@@ -478,22 +390,9 @@ describe RCVD_AM_PM		Received headers forged (AM/PM)
 
 header __USER_AGENT_MSN             X-Mailer =~ /^MSN Explorer /
 
-header X_ORIG_IP_NOT_IPV4	X-Originating-IP !~ /\[?(?:\d{1,3}\.){3}\d{1,3}\]?/ [if-unset: 0.0.0.0]
-describe X_ORIG_IP_NOT_IPV4	X-Originating-IP doesn't look like IPv4 address
-
-# match the format of a legit X-Auth-Warning header, and hit on fake ones
-# normal: "e4e.oac.uci.edu: foo owned process doing -bs"
-# fake: "bzgrdag, upaeqehv"
-header X_AUTH_WARN_FAKED	X-Authentication-Warning !~ /(?:set sender to \S{2,80} using -f|owned process doing -bs|claimed to be|didn.t use HELO protocol)/ [if-unset: host.example.com: foo owned process doing -bs]
-describe X_AUTH_WARN_FAKED	X-Authentication-Warning header looks faked
-
 # host no longer exists according to administrator
 header FAKE_OUTBLAZE_RCVD	Received =~ /\.mr\.outblaze\.com/
 describe FAKE_OUTBLAZE_RCVD	Received header contains faked 'mr.outblaze.com'
-
-# domains never longer used for email, confirmed by administrator
-header FROM_NONSENDING_DOMAIN	From:addr =~ /\@(?:altavista\.com|eudora\.com)$/i
-describe FROM_NONSENDING_DOMAIN	Message is from domain that never sends email
 
 header SUBJ_2_NUM_PARENS        Subject =~ /^\(\d+\).*\(\d+\)\s*$/
 describe SUBJ_2_NUM_PARENS      Subject contains common spam sign (2 numbers)
@@ -502,28 +401,11 @@ describe SUBJ_2_NUM_PARENS      Subject contains common spam sign (2 numbers)
 header UNCLOSED_BRACKET		ALL =~ /\[\d+\r?\n/s
 describe UNCLOSED_BRACKET	Headers contain an unclosed bracket
 
-# some header rules
-header ORG_MIME_TOOLS		Organization =~ /MIME-tools/
-describe ORG_MIME_TOOLS		Organization is MIME-tools
-
-header X_MIME_AUTOCONVERTED	X-MIME-Autoconverted =~ /Yes/
-describe X_MIME_AUTOCONVERTED	Message has X-MIME-Autoconverted "Yes" header
-
-header __HOTMAIL_RCVD		Received =~/\bhotmail\.com\b/
-header __HOTMAIL_SMTPSVC	Received =~ /\bwith Microsoft SMTPSVC;/
-header __HOTMAIL_OIP		X-Originating-IP =~ /\[(\d{1,3}\.){3}\d{1,3}\]/
-header __RECEIVED_DAV		Received =~ /\bwith DAV;/
-meta DAV_NON_HOTMAIL		__RECEIVED_DAV && !(__HOTMAIL_RCVD && __HOTMAIL_SMTPSVC && __HOTMAIL_OIP)
-describe DAV_NON_HOTMAIL	Message sent using DAV, but not via Hotmail
-
 header FROM_DOMAIN_NOVOWEL	From =~ /\@\S*[bcdfghjklmnpqrstvwxz]{7}/i
 describe FROM_DOMAIN_NOVOWEL	From: domain has series of non-vowel letters
 
 header FROM_LOCAL_NOVOWEL	From =~ /[bcdfghjklmnpqrstvwxz]{7}\S*\@/i
 describe FROM_LOCAL_NOVOWEL	From: localpart has series of non-vowel letters
-
-header SUBJECT_NOVOWEL		Subject =~ /[bcdfghjklmnpqrstvwxz]{8}/i
-describe SUBJECT_NOVOWEL	Subject: has long non-vowel letter sequence
 
 header FROM_LOCAL_HEX		From =~ /[0-9a-f]{11}\S*\@/i
 describe FROM_LOCAL_HEX		From: localpart has long hexadecimal sequence
@@ -531,18 +413,10 @@ describe FROM_LOCAL_HEX		From: localpart has long hexadecimal sequence
 header FROM_LOCAL_DIGITS	From =~ /\d{11}\S*\@/i
 describe FROM_LOCAL_DIGITS	From: localpart has long digit sequence
 
-header X_MAILER_SPAM		X-Mailer !~ m{[A-Z0-9./]} [if-unset: Foo 1.0]
-describe X_MAILER_SPAM		X-Mailer: header is bulk email fingerprint
-
 header __TOCC_EXISTS		exists:ToCc
-meta TO_CC_NONE			!__TOCC_EXISTS
-describe TO_CC_NONE		No To: or Cc: header
 
 header X_PRIORITY_CC		ALL =~ /\nX-Priority:[^\n]{0,80}\nCc:/si
 describe X_PRIORITY_CC		Cc: after X-Priority: (bulk email fingerprint)
-
-header    SUBJ_CONSONANTS       Subject =~ /\b[bcghjklmnpqrstvwxz]{6,20}\b/
-describe  SUBJ_CONSONANTS       Subject contains consecutive consonants in "word"
 
 # catch non-RFC2047 compliant messages
 # Apple Mail has a bug where headers will have whitespace around the encoded
@@ -598,8 +472,6 @@ describe FORGED_JUNO_RCVD	'From' juno.com does not match 'Received' headers
 header FORGED_GW05_RCVD		eval:check_for_forged_gw05_received_headers()
 describe FORGED_GW05_RCVD	Forged 'by gw05' 'Received:' header found
 
-header FROM_AND_TO_SAME		eval:check_for_from_to_same()
-describe FROM_AND_TO_SAME	From and To are the same, but not exactly
 
 header SORTED_RECIPS		eval:sorted_recipients()
 describe SORTED_RECIPS		Recipient list is sorted by address
@@ -628,8 +500,6 @@ describe DATE_IN_PAST_12_24	Date: is 12 to 24 hours before Received: date
 header DATE_IN_PAST_24_48	eval:check_for_shifted_date('-48', '-24')
 describe DATE_IN_PAST_24_48	Date: is 24 to 48 hours before Received: date
 
-header DATE_IN_PAST_48_96	eval:check_for_shifted_date('-96', '-48')
-describe DATE_IN_PAST_48_96	Date: is 48 to 96 hours before Received: date
 
 header DATE_IN_PAST_96_XX	eval:check_for_shifted_date('undef', '-96')
 describe DATE_IN_PAST_96_XX	Date: is 96 hours or more before Received: date
@@ -658,8 +528,6 @@ describe UNRESOLVED_TEMPLATE	Headers contain an unresolved template
 header SUBJ_ALL_CAPS		eval:subject_is_all_caps()
 describe SUBJ_ALL_CAPS		Subject is all capitals
 
-header ADDRESS_IN_SUBJECT	eval:check_for_to_in_subject('address')
-describe ADDRESS_IN_SUBJECT	To: address appears in Subject
 
 header LOCALPART_IN_SUBJECT	eval:check_for_to_in_subject('user')
 describe LOCALPART_IN_SUBJECT	Local part of To: address appears in Subject
@@ -676,8 +544,6 @@ endif
 
 ifplugin Mail::SpamAssassin::Plugin::MIMEEval
 
-header HEAD_LONG		eval:check_msg_parse_flags('truncated_header')
-describe HEAD_LONG		Message headers are very long
 
 header MISSING_HB_SEP		eval:check_msg_parse_flags('missing_head_body_separator')
 describe MISSING_HB_SEP		Missing blank line between message header and body
@@ -692,11 +558,7 @@ header UNPARSEABLE_RELAY        eval:check_relays_unparseable()
 tflags UNPARSEABLE_RELAY        userconf
 describe UNPARSEABLE_RELAY      Informational: message has unparseable relay lines
 
-header MSGID_FROM_MTA_ID	eval:message_id_from_mta()
-describe MSGID_FROM_MTA_ID	Message-Id for external message added locally
 
-header FORGED_RCVD_HELO		eval:check_for_forged_received_helo()
-describe FORGED_RCVD_HELO	Received: contains a forged HELO
 
 header RCVD_HELO_IP_MISMATCH	eval:helo_ip_mismatch()
 describe RCVD_HELO_IP_MISMATCH	Received: HELO and IP do not match, but should

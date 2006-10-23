@@ -28,14 +28,6 @@
 
 header RATWARE_EGROUPS		X-Mailer =~ /eGroups Message Poster/
 describe RATWARE_EGROUPS	Bulk email fingerprint (eGroups) found
-header RATWARE_JPFREE		X-Mailer =~ /jpfree Group Mail Express/
-describe RATWARE_JPFREE		Bulk email fingerprint (jpfree) found
-
-# fixed per bug 2108 to avoid LKML poster
-header RATWARE_HASH_2           X-Mailer =~ /^(?!gregkh_patchbomb)[A-Za-z0-9_]{16,}$/
-header RATWARE_HASH_2_V2        X-Mailer =~ /^(?!gregkh_patchbomb)[A-Za-z0-9_]{14,}$/
-describe RATWARE_HASH_2         Bulk email fingerprint (hash 2) found
-describe RATWARE_HASH_2_V2      Bulk email fingerprint (hash 2 v2) found 
 
 # Note that the tests which look at the "ALL" pseudoheader are slower than
 # the specific header.
@@ -284,11 +276,7 @@ describe RATWARE_RCVD_AT	Bulk email fingerprint (Received @) found
 meta RATWARE_OUTLOOK_NONAME	__MSGID_DOLLARS_OK && !__HAS_X_MAILER
 describe RATWARE_OUTLOOK_NONAME	Bulk email fingerprint (Outlook no name) found
 
-header MSGID_RATWARE1		Message-Id =~ /<[A-Z]+\$[^\$]+\$.+@/
-describe MSGID_RATWARE1		Bulk email fingerprint found
 
-header RATWARE_BOUND_PIECE	Content-Type =~ /boundary=\"?--Piece/
-describe RATWARE_BOUND_PIECE	Bulk email fingerprint (piece boundary) found
 
 header __MIMEOLE_MS		X-MIMEOLE =~ /^Produced By Microsoft MimeOLE/
 meta RATWARE_MS_HASH 		__MSGID_DOLLARS_OK && !__MIMEOLE_MS
