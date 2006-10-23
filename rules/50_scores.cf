@@ -469,6 +469,7 @@ score GTUBE 1000.000
 score FRAGMENTED_MESSAGE 2.5
 score HIGH_CODEPAGE_URI 2.5
 score MISSING_HB_SEP 2.5
+score HEAD_LONG 2.5
 
 # make the Bayes scores unmutable (as discussed in bug 4505)
 ifplugin Mail::SpamAssassin::Plugin::Bayes

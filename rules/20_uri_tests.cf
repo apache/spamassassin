@@ -25,6 +25,13 @@
 
 require_version @@VERSION@@
 
+# possible IDN spoofing attack: http://www.shmoo.com/idn/homograph.txt
+# not expecting any hits on this (yet)
+uri HIGH_CODEPAGE_URI	       /^https?:\/\/[^\/]*\&\#(?:\d{4,}|[3456789]\d\d);/i
+tflags HIGH_CODEPAGE_URI       userconf
+
+###########################################################################
+
 # Redirector URI patterns
 redirector_pattern	/^http:\/\/chkpt\.zdnet\.com\/chkpt\/\w+\/(.*)$/i
 redirector_pattern	/^http:\/\/www(?:\d+)?\.nate\.com\/r\/\w+\/(.*)$/i
@@ -110,10 +117,6 @@ describe URI_NO_WWW_INFO_CGI	CGI in .info TLD other than third-level "www"
 
 uri URI_NO_WWW_BIZ_CGI	/^(?:https?:\/\/)?[^\/]+(?<!\/www)\.[^.]{7,}\.biz\/(?=\S{15,})\S*\?/i
 describe URI_NO_WWW_BIZ_CGI	CGI in .biz TLD other than third-level "www"
-
-# possible IDN spoofing attack: http://www.shmoo.com/idn/homograph.txt
-# not expecting any hits on this (yet)
-uri HIGH_CODEPAGE_URI	/^https?:\/\/[^\/]*\&\#(?:\d{4,}|[3456789]\d\d);/i
 
 ###########################################################################
 
