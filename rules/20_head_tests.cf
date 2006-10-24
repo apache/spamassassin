@@ -215,7 +215,9 @@ header JAPANESE_UCE_SUBJECT     Subject =~ /\e\$B.*(?:L\$>5Bz|EE;R%a!<%k)(?:8x|9
 describe JAPANESE_UCE_SUBJECT	Subject contains a Japanese UCE tag
 
 # check body for "shou nin daku kou koku" UCE tag (bug 4021)
-body JAPANESE_UCE_BODY          /\e\$B.*(?:L\$>5Bz|EE;R%a!<%k)(?:8x|9-)9p/
+body __JAPANESE_UCE_BODY        /(?:L\$>5Bz|EE;R%a!<%k)(?:8x|9-)9p/
+
+meta JAPANESE_UCE_BODY (__ISO_2022_JP_DELIM && __JAPANESE_UCE_BODY)
 describe JAPANESE_UCE_BODY      Body contains Japanese UCE tag
 
 # quinlan: "advertisement" in Russian KOI8-R
