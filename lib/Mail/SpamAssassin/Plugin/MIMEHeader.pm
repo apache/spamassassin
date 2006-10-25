@@ -131,6 +131,7 @@ sub set_config {
 
       $self->{parser}->add_test($rulename, $evalfn."()",
                 $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+
       my $evalcode = '
         sub Mail::SpamAssassin::Plugin::MIMEHeader::'.$evalfn.' {
           $_[0]->eval_hook_called($_[1], q{'.$rulename.'});
@@ -144,6 +145,9 @@ sub set_config {
       }
 
       $pluginobj->register_eval_rule($evalfn);
+
+      $pluginobj->register_generated_rule_method(
+        'Mail::SpamAssassin::Plugin::MIMEHeader::'.$evalfn);
     }
   });
 
