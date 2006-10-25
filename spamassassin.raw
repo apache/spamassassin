@@ -152,7 +152,7 @@ if ($Mail::SpamAssassin::VERSION ne '@@VERSION@@' && '@@VERSION@@' ne "\@\@VERSI
 # - create user preference files
 # - have ArchiveIterator detect the input message format (file vs dir)
 #
-my %opt = ( 'create-prefs' => 1, 'format' => 'detect' );
+my %opt = ( 'create-prefs' => 1, 'format' => 'detect', cf => [] );
 
 my $doing_whitelist_operation = 0;
 my $count                     = 0;
@@ -174,6 +174,7 @@ GetOptions(
   'add-to-whitelist|W'                      => \$opt{'add-to-whitelist'},
   'configpath|config-file|config-dir|c|C=s' => \$opt{'configpath'},
   'create-prefs!'                           => \$opt{'create-prefs'},
+  'cf=s'                                    => \@{$opt{'cf'}},
   'debug|D:s'                               => \$opt{'debug'},
   'error-code|exit-code|e:i'                => \$opt{'error-code'},
   'help|h|?'                                => \$opt{'help'},
@@ -250,6 +251,7 @@ my $spamtest = new Mail::SpamAssassin(
     local_tests_only    => $opt{'local'},
     debug               => $opt{'debug'},
     dont_copy_prefs     => ( $opt{'create-prefs'} ? 0 : 1 ),
+    post_config_text    => join("\n", @{$opt{'cf'}})."\n",
     PREFIX              => $PREFIX,
     DEF_RULES_DIR       => $DEF_RULES_DIR,
     LOCAL_RULES_DIR     => $LOCAL_RULES_DIR,

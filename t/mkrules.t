@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("mkrules");
-use Test; BEGIN { plan tests => 96 };
+use Test; BEGIN { plan tests => 101 };
 use File::Path;
 
 # ---------------------------------------------------------------------------
@@ -417,6 +417,36 @@ ok (mkrun ("--src $tdir/rulesrc --out $tdir/rules --manifest $tdir/MANIFEST --ma
 # checkfile("$tdir/rules/72_active.cf", \&patterns_run_cb);
 checkfile("$tdir/rules/70_sandbox.cf", \&patterns_run_cb);
 ok (-f "$tdir/rules/plugin.pm");
+ok ok_all_patterns();
+save_tdir();
+
+# ---------------------------------------------------------------------------
+print "meta rule depends on unpromoted subrule in lexically-earlier file\n\n";
+# (see mail from Sidney of Oct 16 2006, rules HS_INDEX_PARAM and HS_PHARMA_1)
+
+%patterns = (
+  "header T_GOOD_SUB"   => rule_line_1,
+  "header T_BAD_SUB"   => rule_line_2,
+  "meta GOOD (T_GOOD_SUB && !T_BAD_SUB)" => meta_found
+);
+%anti_patterns = (
+);
+
+rmtree([ $tdir ]); mkpath ([ "$tdir/rulesrc/sandbox/foo", "$tdir/rules" ]);
+
+write_file("$tdir/MANIFEST", [ "rules/72_active.cf\n" ]);
+write_file("$tdir/MANIFEST.SKIP", [ ]);
+write_file("$tdir/rules/active.list", [ "GOOD\n" ]);
+write_file("$tdir/rulesrc/sandbox/foo/20_aaa.cf", [
+    "meta GOOD (GOOD_SUB && !BAD_SUB)\n",
+]);
+write_file("$tdir/rulesrc/sandbox/foo/20_bbb.cf", [
+    "header GOOD_SUB Foo =~ /good/\n",
+    "header BAD_SUB Foo =~ /bad/\n",
+]);
+
+ok (mkrun ("--src $tdir/rulesrc --out $tdir/rules --manifest $tdir/MANIFEST --manifestskip $tdir/MANIFEST.SKIP --active $tdir/rules/active.list 2>&1", \&patterns_run_cb));
+checkfile("$tdir/rules/72_active.cf", \&patterns_run_cb);
 ok ok_all_patterns();
 save_tdir();
 

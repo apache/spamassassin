@@ -17,9 +17,10 @@ fi
 
 AC_PROG_CC
 
-if test "x$GCC" = "xyes" ; then
-  CFLAGS="-Wall -Wextra -Wdeclaration-after-statement $CFLAGS"
-fi
+# off: breaks gcc 3.3.x!  doh
+# if test "x$GCC" = "xyes" ; then
+# CFLAGS="-Wall -Wextra -Wdeclaration-after-statement $CFLAGS"
+# fi
 
 AC_EXEEXT
 

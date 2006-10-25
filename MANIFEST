@@ -1,4 +1,3 @@
-BUGS
 CREDITS
 Changes
 INSTALL
@@ -10,7 +9,6 @@ Makefile.PL
 NOTICE
 PACKAGING
 README
-STATUS
 TRADEMARK
 UPGRADE
 USAGE
@@ -269,6 +267,7 @@ t/body_mod.t
 t/cidrs.t
 t/config.dist
 t/config_errs.t
+t/config_text.t
 t/cpp_comments_in_spamc.t
 t/data/01_test_rules.cf
 t/data/etc/hello.txt
@@ -368,6 +367,7 @@ t/dcc.t
 t/debug.t
 t/desc_wrap.t
 t/dnsbl.t
+t/dnsbl_sc_meta.t
 t/get_headers.t
 t/gtube.t
 t/hashcash.t
@@ -481,6 +481,24 @@ rules/25_replace.cf
 rules/25_spf.cf
 rules/25_textcat.cf
 rules/25_uribl.cf
+rules/20_advance_fee.cf
+rules/20_body_tests.cf
+rules/20_compensate.cf
+rules/20_drugs.cf
+rules/20_fake_helo_tests.cf
+rules/20_meta_tests.cf
+rules/20_phrases.cf
+rules/20_porn.cf
+rules/20_ratware.cf
+rules/20_uri_tests.cf
+rules/25_body_tests_pl.cf
+rules/30_text_de.cf
+rules/30_text_fr.cf
+rules/30_text_it.cf
+rules/30_text_nl.cf
+rules/30_text_pl.cf
+rules/30_text_pt_br.cf
+rules/50_scores.cf
 rules/60_awl.cf
 rules/60_shortcircuit.cf
 rules/60_whitelist.cf
@@ -488,7 +506,6 @@ rules/60_whitelist_dk.cf
 rules/60_whitelist_dkim.cf
 rules/60_whitelist_spf.cf
 rules/60_whitelist_subject.cf
-rules/70_sandbox.cf
 rules/72_active.cf
 rules/STATISTICS-set0.txt
 rules/STATISTICS-set1.txt
@@ -504,7 +521,6 @@ rules/v310.pre
 rules/v312.pre
 rules/v320.pre
 rules/active.list
-rules/70_inactive.cf
 t/mkrules.t
 t/trust_path.t
 t/data/nice/dkim/AddedVtag_07

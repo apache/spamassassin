@@ -1374,44 +1374,6 @@ sub finish {
 
 sub finish_tests {
   my ($conf) = @_;
-
-  foreach my $priority (keys %{$conf->{priorities}}) {
-    # clean up priority value so it can be used in a subroutine name
-    my $clean_priority;
-    ($clean_priority = $priority) =~ s/-/neg/;
-
-    if (defined &{'_head_tests_'.$clean_priority}) {
-      undef &{'_head_tests_'.$clean_priority};
-    }
-    foreach my $rulename (keys %{$conf->{head_tests}->{$priority}}) {
-      undef &{$rulename.'_head_test'};
-    }
-    if (defined &{'_body_tests_'.$clean_priority}) {
-      undef &{'_body_tests_'.$clean_priority};
-    }
-    foreach my $rulename (keys %{$conf->{body_tests}->{$priority}}) {
-      undef &{$rulename.'_body_test'};
-    }
-    if (defined &{'_body_uri_tests_'.$clean_priority}) {
-      undef &{'_body_uri_tests_'.$clean_priority};
-    }
-    foreach my $rulename (keys %{$conf->{uri_tests}->{$priority}}) {
-      undef &{$rulename.'_uri_test'};
-    }
-    if (defined &{'_rawbody_tests_'.$clean_priority}) {
-      undef &{'_rawbody_tests_'.$clean_priority};
-    }
-    foreach my $rulename (keys %{$conf->{rawbody_tests}->{$priority}}) {
-      undef &{$rulename.'_rawbody_test'};
-    }
-    if (defined &{'_full_tests_'.$clean_priority}) {
-      undef &{'_full_tests_'.$clean_priority};
-    }
-    if (defined &{'_meta_tests_'.$clean_priority}) {
-      undef &{'_meta_tests_'.$clean_priority};
-    }
-  }
-
   foreach my $method (@TEMPORARY_METHODS) {
     if (defined &{$method}) {
       undef &{$method};
@@ -1842,6 +1804,7 @@ sub do_head_tests {
 	  }
 	}
       ';
+      push (@TEMPORARY_METHODS, $rulename.'_head_test');
     }
     else {
       # store for use below
@@ -1911,8 +1874,10 @@ EOT
     $self->{rule_errors}++;
   }
   else {
+    my $method = '_head_tests_'.$clean_priority;
+    push @TEMPORARY_METHODS, $method;
     no strict "refs";
-    &{'Mail::SpamAssassin::PerMsgStatus::_head_tests_'.$clean_priority}($self);
+    &{$method}($self);
     use strict "refs";
   }
 }
@@ -2039,6 +2004,7 @@ sub do_body_tests {
       $evalstr2 .= '
 	sub '.$rulename.'_body_test { my $self = shift; '.$sub.' }
       ';
+      push (@TEMPORARY_METHODS, $rulename.'_body_test');
     }
 
     $evalstr2 .= '
@@ -2080,8 +2046,10 @@ EOT
     $self->{rule_errors}++;
   }
   else {
+    my $method = '_body_tests_'.$clean_priority;
+    push @TEMPORARY_METHODS, $method;
     no strict "refs";
-    &{'Mail::SpamAssassin::PerMsgStatus::_body_tests_'.$clean_priority}($self, @$textary);
+    &{$method}($self,@$textary);
     use strict "refs";
   }
 }
@@ -2492,6 +2460,7 @@ sub do_body_uri_tests {
       $evalstr2 .= '
         sub '.$rulename.'_uri_test { my $self = shift; '.$sub.' }
       ';
+      push (@TEMPORARY_METHODS, $rulename.'_uri_test');
     }
   }
 
@@ -2525,8 +2494,10 @@ EOT
     $self->{rule_errors}++;
   }
   else {
+    my $method = '_body_uri_tests_'.$clean_priority;
+    push @TEMPORARY_METHODS, $method;
     no strict "refs";
-    &{'Mail::SpamAssassin::PerMsgStatus::_body_uri_tests_'.$clean_priority}($self, @uris);
+    &{$method}($self, @uris);
     use strict "refs";
   }
 }
@@ -2617,6 +2588,7 @@ sub do_rawbody_tests {
       $evalstr2 .= '
 	sub '.$rulename.'_rawbody_test { my $self = shift; '.$sub.' }
       ';
+      push (@TEMPORARY_METHODS, $rulename.'_rawbody_test');
     }
   }
 
@@ -2650,8 +2622,10 @@ EOT
     $self->{rule_errors}++;
   }
   else {
+    my $method = '_rawbody_tests_'.$clean_priority;
+    push @TEMPORARY_METHODS, $method;
     no strict "refs";
-    &{'Mail::SpamAssassin::PerMsgStatus::_rawbody_tests_'.$clean_priority}($self, @$textary);
+    &{$method}($self, @$textary);
     use strict "refs";
   }
 }
@@ -2724,8 +2698,10 @@ EOT
     warn "rules: failed to compile full tests, skipping:\n" . "\t($@)\n";
     $self->{rule_errors}++;
   } else {
+    my $method = '_full_tests_'.$clean_priority;
+    push @TEMPORARY_METHODS, $method;
     no strict "refs";
-    &{'Mail::SpamAssassin::PerMsgStatus::_full_tests_'.$clean_priority}($self, $fullmsgref);
+    &{$method}($self, $fullmsgref);
     use strict "refs";
   }
 }
@@ -2939,8 +2915,10 @@ EOT
     $self->{rule_errors}++;
   }
   else {
+    my $method = '_meta_tests_'.$clean_priority;
+    push @TEMPORARY_METHODS, $method;
     no strict "refs";
-    &{'Mail::SpamAssassin::PerMsgStatus::_meta_tests_'.$clean_priority}($self);
+    &{$method}($self);
     use strict "refs";
   }
 }    # do_meta_tests()
@@ -3112,13 +3090,12 @@ EOT
 
   eval $evalstr;
 
-  push (@TEMPORARY_METHODS, $methodname);
-
   if ($@) {
     warn "rules: failed to compile eval tests, skipping some: $@\n";
     $self->{rule_errors}++;
   }
   else {
+    push (@TEMPORARY_METHODS, $methodname);
     no strict "refs";
     &{'Mail::SpamAssassin::PerMsgStatus::'.$methodname}($self,@extraevalargs);
     use strict "refs";

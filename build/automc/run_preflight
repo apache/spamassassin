@@ -90,16 +90,18 @@ close PREFS or die "cannot create 'spamassassin/user_prefs' file: $! $@";
 # produce lots of noisy output to stop the buildbot from timing out on
 # mass-checks of large corpora.
 # store AICache data in /tmpfs/aicache.
+# ignore mails older than 6 months (use the nightly runs for those corpora,
+# it's too slow to mass-check them here).
 
 run "/local/bbmasstools/masschroot $perl ".
     "mass-check -c=tstrules --cache -j=1 ".
     "--noisy --deencap='petuniapress.com' ".
     "--cachedir=/tmpfs/aicache ".
+    "--after='6 months ago' ".
     $mass_check_args{$slavename}." ".
     "ham:detect:/home/bbmass/rawcor/*/ham/* ".
     "spam:detect:/home/bbmass/rawcor/*/spam/*";
 
-    # TODO: add --after="6 months ago"?
 
 exit;
 

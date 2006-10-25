@@ -779,6 +779,30 @@ sub register_eval_rule {
   $self->{main}->{conf}->register_eval_rule ($self, $nameofsub);
 }
 
+=item $plugin->register_generated_rule_method ($nameofsub)
+
+In certain circumstances, plugins may find it useful to compile
+perl functions from the ruleset, on the fly.  It is important to
+remove these once the C<Mail::SpamAssassin> object is deleted,
+however, and this API allows this.
+
+Once the method C<$nameofsub> has been generated, call this API
+with the name of the method (including full package scope).
+This indicates that it's a temporary piece of generated code,
+built from the SpamAssassin ruleset, and when 
+C<Mail::SpamAssassin::finish()> is called, the method will
+be destroyed.
+
+This API was added in SpamAssassin 3.2.0.
+
+=cut
+
+sub register_generated_rule_method {
+  my ($self, $nameofsub) = @_;
+  push @Mail::SpamAssassin::PerMsgStatus::TEMPORARY_METHODS,
+        $nameofsub;
+}
+
 =item $plugin->inhibit_further_callbacks()
 
 Tells the plugin handler to inhibit calling into other plugins in the plugin
@@ -885,6 +909,23 @@ Different rule types receive different information by default:
 
 The configuration file arguments will be passed in after the standard
 arguments.
+
+=head1 BACKWARDS COMPATIBILITY
+
+Note that if you write a plugin and need to determine if a particular
+helper method is supported on C<Mail::SpamAssassin::Plugin>, you
+can do this:
+
+    if ($self->can("name_of_method")) {
+      eval {
+        $self->name_of_method();        # etc.
+      }
+    } else {
+      # take fallback action
+    }
+
+The same applies for the public APIs on objects of other types, such as
+C<Mail::SpamAssassin::PerMsgStatus>.
 
 =head1 SEE ALSO
 

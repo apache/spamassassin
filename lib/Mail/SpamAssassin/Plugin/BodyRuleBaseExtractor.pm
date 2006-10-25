@@ -44,6 +44,7 @@ my $BASES_MUST_BE_CASE_I = 1;
 my $BASES_CAN_USE_ALTERNATIONS = 0;    # /(foo|bar|baz)/
 my $BASES_CAN_USE_QUANTIFIERS = 0;     # /foo.*bar/ or /foo*bar/ or /foooo?bar/
 my $BASES_CAN_USE_CHAR_CLASSES = 0;    # /fo[opqr]bar/
+my $SPLIT_OUT_ALTERNATIONS = 1;        # /(foo|bar|baz)/ => ["foo", "bar", "baz"]
 
 ###########################################################################
 
@@ -54,6 +55,7 @@ sub new {
   my $self = $class->SUPER::new($mailsaobject);
   bless ($self, $class);
 
+  # $self->test();
   return $self;
 }
 
@@ -75,7 +77,10 @@ sub extract_bases {
 
   if ($rawf) {
     $rawf =~ /^(.*)$/;
-    $f = $1;       # untaint; allow anything here, it's from %ENV and safe
+    $f = $1;        # untaint; allow anything here, it's from %ENV and safe
+  }
+  else {
+    return;         # TODO: comment this for Rabin-Karp
   }
 
   $self->extract_set($f, $conf, $conf->{body_tests}, 'body');
@@ -120,22 +125,50 @@ sub extract_set_pri {
     # TODO: need cleaner way to do this
     next if ($conf->{rules_to_replace}->{$name});
 
-    my $base  = $self->extract_base($rule, 0);
-    my $base2 = $self->extract_base($rule, 1);
+    my @bases1 = ();
+    my @bases2 = ();
+    eval {  # catch die()s
+      @bases1 = $self->extract_hints($rule, 0);
+    };
+    eval {
+      @bases2 = $self->extract_hints($rule, 1);
+    };
 
-    my $len   = $base  ? $self->count_regexp_statements($base) : 0;
-    my $len2  = $base2 ? $self->count_regexp_statements($base2) : 0;
-
-    if ($base2 && (!$base || ($len2 > $len))) {
-      $base = $base2;
-      $len = $len2;
+    # if any of the extracted hints in a set are too short, the entire
+    # set is invalid; this is because each set of N hints represents just
+    # 1 regexp.
+    my $minlen1;
+    foreach my $str (@bases1) {
+      my $len = length $str;
+      if ($len < $min_chars) { $minlen1 = undef; @bases1 = (); last; }
+      elsif (!defined($minlen1) || $len < $minlen1) { $minlen1 = $len; }
+    }
+    my $minlen2;
+    foreach my $str (@bases2) {
+      my $len = length $str;
+      if ($len < $min_chars) { $minlen2 = undef; @bases2 = (); last; }
+      elsif (!defined($minlen2) || $len < $minlen2) { $minlen2 = $len; }
     }
 
-    if (!$base || $len < $min_chars) { $base = undef; }
+    if (defined $minlen1 && !defined $minlen2) {
+      # keep using @bases1
+    }
+    elsif (!defined $minlen1 && defined $minlen2) {
+      # change to using @bases2
+      @bases1 = @bases2;
+    }
+    elsif (defined $minlen1 && defined $minlen2) {
+      # both are valid; use the end with the longer hints
+      if ($minlen2 > $minlen1) {
+        @bases1 = @bases2;
+      }
+    }
 
-    if ($base) {
+    if ($minlen1 && @bases1) {
       # dbg("zoom: YES <base>$base</base> <origrule>$rule</origrule>");
-      push @good_bases, { base => $base, orig => $rule, name => $name };
+      foreach my $base (@bases1) {
+        push @good_bases, { base => $base, orig => $rule, name => $name };
+      }
       $yes++;
     }
     else {
@@ -156,7 +189,7 @@ sub extract_set_pri {
   # returned as two hits, correctly.  So we only have to be smart about the
   # full-subsumption case; overlapping is taken care of for us, by re2c.
   #
-  # TODO: there's a bug here.  Since the code in extract_base() has been
+  # TODO: there's a bug here.  Since the code in extract_hints() has been
   # modified to support more complex regexps, we can no longer simply assume
   # that if pattern A is not contained in pattern B, that means that pattern B
   # doesn't subsume it.  Consider, for example, A="foo*bar" and
@@ -250,7 +283,7 @@ sub dump_base_strings {
 # /time to refinance|refinanc\w{1,3}\b.{0,16}\bnow\b/i
 #     => should understand alternations; tricky
 
-sub extract_base {
+sub extract_hints {
   my $self = shift;
   my $rule = shift;
   my $is_reversed = shift;
@@ -289,8 +322,8 @@ sub extract_base {
     $rule =~ s/\(\?i\)//gs;
   }
   else {
-    return if $rule =~ /\(\?i\)/;
-    return if $mods =~ /i/;
+    die "case-i" if $rule =~ /\(\?i\)/;
+    die "case-i" if $mods =~ /i/;
   }
 
   # remove /m and /s modifiers
@@ -313,8 +346,8 @@ sub extract_base {
 
   # if there are anchors, give up; we can't get much 
   # faster than these anyway
-  return if $rule =~ /^\(?(?:\^|\\A)/;
-  return if $rule =~ /(?:\$|\\Z)\)?$/;
+  die "anchors" if $rule =~ /^\(?(?:\^|\\A)/;
+  die "anchors" if $rule =~ /(?:\$|\\Z)\)?$/;
 
   # simplify (?:..) to (..)
   $rule =~ s/\(\?:/\(/g;
@@ -350,7 +383,8 @@ sub extract_base {
               .\{
             ).*$//gsx;
 
-  $BASES_CAN_USE_ALTERNATIONS or $rule =~ s/(?<!\\)(?:
+  ($BASES_CAN_USE_ALTERNATIONS||$SPLIT_OUT_ALTERNATIONS) or
+            $rule =~ s/(?<!\\)(?:
               \(|
               \)
             ).*$//gsx;
@@ -417,7 +451,7 @@ sub extract_base {
               [^\[]*\]
             )/sx)
     {
-      return;
+      die "pattern starts with a class in a group";
     }
 
     # kill quantifiers right at the start of the string.
@@ -445,10 +479,10 @@ sub extract_base {
 
 
   # return for things we know we can't handle.
-  if (!$BASES_CAN_USE_ALTERNATIONS) {
+  if (!($BASES_CAN_USE_ALTERNATIONS||$SPLIT_OUT_ALTERNATIONS)) {
     if ($rule =~ /\|/) {
       # /time to refinance|refinanc\w{1,3}\b.{0,16}\bnow\b/i
-      return;
+      die "alternations";
     }
   }
 
@@ -456,41 +490,50 @@ sub extract_base {
     # count (...braces...) to ensure the numbers match up
     my @c = ($rule =~ /(?<!\\)\(/g); my $brace_i = scalar @c;
        @c = ($rule =~ /(?<!\\)\)/g); my $brace_o = scalar @c;
-    if ($brace_i != $brace_o) { return; }
+    if ($brace_i != $brace_o) { die "brace mismatch"; }
   }
 
   # do the same for [charclasses]
   {
     my @c = ($rule =~ /(?<!\\)\[/g); my $brace_i = scalar @c;
        @c = ($rule =~ /(?<!\\)\]/g); my $brace_o = scalar @c;
-    if ($brace_i != $brace_o) { return; }
+    if ($brace_i != $brace_o) { die "charclass mismatch"; }
   }
 
   # and {quantifiers}
   {
     my @c = ($rule =~ /(?<!\\)\{/g); my $brace_i = scalar @c;
        @c = ($rule =~ /(?<!\\)\}/g); my $brace_o = scalar @c;
-    if ($brace_i != $brace_o) { return; }
+    if ($brace_i != $brace_o) { die "quantifier mismatch"; }
   }
 
   # lookaheads that are just too far for the re2c parser
   # r your .{0,40}account .{0,40}security
   if ($rule =~ /\.\{(\d+),?(\d+?)\}/ and ($1+$2 > 20)) {
-    return;
+    die "too far lookahead";
   }
 
   # re2xs doesn't like escaped brackets
   if ($rule =~ /\\:/) {
-    return;
+    die "escaped bracket";
   }
 
-  # finally, reassemble a usable regexp
+  my @rules;
+  if ($SPLIT_OUT_ALTERNATIONS && $rule =~ /\|/) {
+    @rules = $self->split_alt($rule);
+  }
+  else {
+    @rules = ($rule);
+  }
+
+  # finally, reassemble a usable regexp / set of regexps
   if ($mods ne '') {
     $mods = "(?$mods)";
   }
-  $rule = $mods . $rule;
 
-  return $rule;
+  return map {
+    $mods.$_;
+  } @rules;
 }
 
 sub count_regexp_statements {
@@ -536,5 +579,114 @@ sub de_reverse_multi_char_regexp_statements {
 
   return $rule;
 }
+
+###########################################################################
+
+sub split_alt {
+  my ($self, $re) = @_;
+
+  # warn "JMD in $re";
+  # use "($re)" instead of "$re" to handle /foo|baz/ -- implied group
+  my @res = $self->_split_alt_recurse(0, '('.$re.')');
+  # warn "JMD out ".join('/ /', @res);
+  return @res;
+}
+
+sub _split_alt_recurse {
+  my ($self, $depth, $re) = @_;
+
+  $depth++;
+  "die recursed too far in alternation splitting" if ($depth > 5);
+
+  # trim unnecessary group markers, e.g. /f(oo)/ => /foo/
+  $re =~ s/\(([^\(\)\|]*)\)/$1/gs;
+
+  # identify the smallest nested (...|...) scope
+  $re =~ m{
+      ^(.*)
+      (?<!\\)\(([^\(\)]*?\|[^\(\)]*?)\)
+      (.*)$
+    }xs;
+
+  my $pre  = $1;
+  my $alts = $2;
+  my $post = $3;
+
+  if (!defined $post) {
+    $re =~ s/\(([^\(\)\|]*)\)/$1/gs;
+    return ($re);       # didn't match; no groups
+  }
+
+  # and expand it
+  my @out = ();
+  foreach my $str (split (/(?<!\\)\|/, $alts)) {
+    $str = $pre.$str.$post;
+    # are there unresolved groups left?
+    if ($str =~ /(?<!\\)[\(\|\)]/) {
+      push @out, $self->_split_alt_recurse($depth, $str);
+    } else {
+      push @out, $str;
+    }
+  }
+
+  { # uniq
+    my %u=(); @out = grep {defined} map {
+      if (exists $u{$_}) { undef; } else { $u{$_}=undef;$_; }
+    } @out; undef %u;
+  }
+
+  return @out;
+}
+
+###########################################################################
+
+sub test {
+  my ($self) = @_;
+
+  $self->test_split_alt("foo", "/foo/");
+  $self->test_split_alt("(foo)", "/foo/");
+  $self->test_split_alt("foo(bar)baz", "/foobarbaz/");
+  $self->test_split_alt("(foo|bar)", "/foo/ /bar/");
+  $self->test_split_alt("foo|bar", "/foo/ /bar/");
+  $self->test_split_alt("foo (bar|baz) argh", "/foo bar argh/ /foo baz argh/");
+  $self->test_split_alt("foo (bar|baz|bl(arg|at)) cough", "/foo bar cough/ /foo baz cough/ /foo blarg cough/ /foo blat cough/");
+  $self->test_split_alt("(s(otc|tco)k)", "/sotck/ /stcok/");
+  exit;
+}
+
+sub test_split_alt {
+  my ($self, $in, $out) = @_;
+
+  my @got = $self->split_alt($in);
+  $out =~ s/^\///;
+  $out =~ s/\/$//;
+  my @want = split(/\/ \//, $out);
+
+  my $failed = 0;
+  if (scalar @want != scalar @got) {
+    warn "FAIL: results count don't match";
+    $failed++;
+  }
+  else {
+    my %got = map { $_ => 1 } @got;
+    foreach my $w (@want) {
+      if (!$got{$w}) {
+        warn "FAIL: '$w' not found";
+        $failed++;
+      }
+    }
+  }
+
+  if ($failed) {
+    print "want: /".join('/ /', @want)."/\n";
+    print "got:  /".join('/ /', @got)."/\n";
+    return 0;
+  } else {
+    print "ok\n";
+    return 1;
+  }
+}
+
+###########################################################################
 
 1;
