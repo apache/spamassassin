@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-jm bb-zmi cthielen daf dos parkerm theo
+# with results from: cthielen daf parkerm zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -54,6 +54,9 @@ BAYES_99
 
 # good enough
 BROKEN_RATWARE_BOM
+
+# good enough
+CTYPE_1SPACE_GIF
 
 # good enough
 DC_GIF_MULTI_LARGO
@@ -140,6 +143,9 @@ FB_THOUS_PERSONAL
 FB_VALIUM_LEO2
 
 # good enough
+FB_VIAGRA_LEO2
+
+# good enough
 FB_VIAGRA_LEO3
 
 # good enough
@@ -161,10 +167,22 @@ FH_RCVD_WITHSMTPFOR
 FM_CUSTOMLOGODSGNc
 
 # good enough
+FS_START_DOYOU
+
+# good enough
 FS_START_DOYOU2
 
 # good enough
 FUZZY_MERIDIA
+
+# good enough
+FUZZY_SPRM
+
+# good enough
+FUZZY_STOCK
+
+# good enough
+FU_HOODIA
 
 # good enough
 GEO_QUERY_STRING
@@ -205,11 +223,23 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
+# tflags userconf
+HEAD_LONG
+
 # good enough
-HS_FORGED_OE_FW
+HS_EXTRA
 
 # good enough
 HS_GETMEOFF
+
+# good enough
+HS_INDEX_PARAM
+
+# good enough
+HS_MEETUP_FOR_SEX
+
+# good enough
+HS_NO_FLOWERS
 
 # good enough
 HS_PHARMA_1
@@ -217,11 +247,11 @@ HS_PHARMA_1
 # good enough
 HS_SUBJ_ONLINE_PHARMACEUTICAL
 
+# good enough
+HS_SYNDICATE_P2
+
 # tflags userconf
 HTML_CHARSET_FARAWAY
-
-# good enough
-HTTPS_HTTP_MISMATCH
 
 # good enough
 JM_RCVD_QMAILV1
@@ -236,7 +266,13 @@ KAM_STOCKTIP12
 KAM_STOCKTIP15
 
 # good enough
+KAM_STOCKTIP2
+
+# good enough
 KAM_STOCKTIP21
+
+# good enough
+KAM_STOCKTIP3
 
 # good enough
 KAM_STOCKTIP6
@@ -253,11 +289,11 @@ MID_MJW_STOX
 # good enough
 MID_OUTLOOK_ZZZNN
 
+# tflags userconf
+MISSING_HB_SEP
+
 # tflags net
 NO_DNS_FOR_FROM
-
-# tflags userconf
-NO_RECEIVED
 
 # tflags userconf
 NO_RELAYS
@@ -428,19 +464,25 @@ TVD_ACT_193
 TVD_APP_LOAN
 
 # good enough
-TVD_DEAR_HOMEOWNER
+TVD_BODY_END_STAR
 
 # good enough
-TVD_DOLLARS_US
+TVD_DEAR_HOMEOWNER
 
 # good enough
 TVD_EB_PHISH
 
 # good enough
-TVD_FINGER_02
+TVD_ENHANCE
+
+# good enough
+TVD_FINGER_01
 
 # good enough
 TVD_FLOAT_GENERAL
+
+# good enough
+TVD_FROM_1
 
 # good enough
 TVD_FUZZY_DEGREE
@@ -452,19 +494,28 @@ TVD_FUZZY_FINANCE
 TVD_FUZZY_FIXED_RATE
 
 # good enough
+TVD_FUZZY_MICROCAP
+
+# good enough
 TVD_FUZZY_PHARMACEUTICAL
+
+# good enough
+TVD_FUZZY_SECURITIES
 
 # good enough
 TVD_FUZZY_SYMBOL
 
 # good enough
-TVD_FW_GRAPHIC_ID3
+TVD_FW_GRAPHIC_ID1
 
 # good enough
-TVD_FW_GRAPHIC_ID3_2
+TVD_FW_GRAPHIC_ID2
 
 # good enough
 TVD_FW_MESG1
+
+# good enough
+TVD_FW_MESG2
 
 # good enough
 TVD_GET_STOCK
@@ -479,16 +530,13 @@ TVD_INCREASE_SIZE
 TVD_NOT_SATISFIED
 
 # good enough
+TVD_PH_BODY_META
+
+# good enough
 TVD_PH_FR5
 
 # good enough
 TVD_PH_REC
-
-# good enough
-TVD_PH_SUBJ_META
-
-# good enough
-TVD_PH_SUBJ_META_ALL
 
 # good enough
 TVD_PH_SUBJ_UPDATE
@@ -497,13 +545,13 @@ TVD_PH_SUBJ_UPDATE
 TVD_PH_SUBJ_URGENT
 
 # good enough
-TVD_PP_PHISH
-
-# good enough
 TVD_QUAL_MEDS
 
 # good enough
 TVD_RATWARE_CB
+
+# good enough
+TVD_RATWARE_CB_2
 
 # good enough
 TVD_RATWARE_MSGID_01
@@ -522,6 +570,9 @@ TVD_SPACED_SUBJECT_WORD3
 
 # good enough
 TVD_SPACED_SUBJECT_WORD5
+
+# good enough
+TVD_SPACED_WORDS
 
 # good enough
 TVD_STOCK1
@@ -548,40 +599,37 @@ TVD_SUBJ_WIPE_DEBT
 TVD_UA_FOSTERING
 
 # good enough
-TVD_VISIT_PHARMA
+TVD_UNDER_VALUED
 
 # good enough
 TVD_VIS_HIDDEN
 
 # good enough
-DOS_DOUBLE_SOTCK
+DOS_TO_READ_STOCK
+
+# good enough
+DRUGS_STOCK_MIMEOLE
+
+# good enough
+DRUGS_STOCK_MIMEOLE2
+
+# good enough
+FB_CIALIS_LEO2
 
 # good enough
 FH_DATE_IS_19XX
 
 # good enough
-RCVD_LSO_SND
+FR_WWW_DOMAIN_23SUBDIR
 
 # good enough
-TVD_FW_GRAPHIC_NAME_LONG
+KAM_STOCKTIP20
 
 # good enough
-TVD_FW_GRAPHIC_NAME_MID
-
-# good enough
-TVD_LONG_WORD5
-
-# good enough
-TVD_PH_7
-
-# good enough
-TVD_PH_SUBJ_ACCOUNTS_POST
+TVD_LINK_SAVE
 
 # good enough
 TVD_PH_SUBJ_SEC_MEASURES
-
-# good enough
-TVD_SUBJ_FINGER_04
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -650,10 +698,31 @@ USER_IN_WHITELIST_TO
 VERTICAL_DRUGS_1
 
 # good enough
+VERTICAL_WORDS_1
+
+# good enough
 ZMIde_EBAYJOBSURI
 
 # good enough
+ZMIde_GIRLSRCH1
+
+# good enough
+ZMIde_GIRLSRCH2
+
+# good enough
+ZMIde_LOVEGALX1
+
+# good enough
+ZMIde_LOVEGALX2
+
+# good enough
+ZMIde_LOVEGALXURI
+
+# good enough
 ZMIde_SEXUALEXPL1
+
+# good enough
+ZMIde_URIPORNWEB
 
 # tflags net
 __RCVD_IN_IADB
