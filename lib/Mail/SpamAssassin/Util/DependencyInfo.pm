@@ -40,6 +40,18 @@ my @MODULES = (
   'desc' => 'HTML is used for an ever-increasing amount of email so this dependency
   is unavoidable.  Run "perldoc -q html" for additional information.',
 },
+{
+  module => 'Net::DNS',
+  version => ($^O =~ /^(mswin|dos|os2)/oi ? '0.46' : '0.34'),
+  desc => 'Used for all DNS-based tests (SBL, XBL, SpamCop, DSBL, etc.),
+  perform MX checks, and is also used when manually reporting spam to
+  SpamCop.
+
+  You need to make sure the Net::DNS version is sufficiently up-to-date:
+
+  - version 0.34 or higher on Unix systems
+  - version 0.46 or higher on Windows systems',
+},
 );
 
 my @OPTIONAL_MODULES = (
@@ -55,20 +67,6 @@ my @OPTIONAL_MODULES = (
   desc => 'Used to store data on-disk, for the Bayes-style logic and
   auto-whitelist.  *Much* more efficient than the other standard Perl
   database packages.  Strongly recommended.',
-},
-{
-  module => 'Net::DNS',
-  version => ($^O =~ /^(mswin|dos|os2)/oi ? '0.46' : '0.34'),
-  desc => 'Used for all DNS-based tests (SBL, XBL, SpamCop, DSBL, etc.),
-  perform MX checks, and is also used when manually reporting spam to
-  SpamCop.  Recommended.
-
-  If this is installed and you are using network tests of any variety
-  (which is the default), then you need to make sure the Net::DNS
-  version is sufficiently up-to-date:
-
-  - version 0.34 or higher on Unix systems
-  - version 0.46 or higher on Windows systems',
 },
 {
   module => 'Net::SMTP',
