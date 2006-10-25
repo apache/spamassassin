@@ -1,4 +1,3 @@
-
 SPAMASSASSIN DEVELOPMENT SNAPSHOT PROCEDURE
 ===========================================
 
@@ -39,6 +38,14 @@ SPAMASSASSIN RELEASE PROCEDURE
 - ensure your PATH is correct, with the right perl FIRST in the path:
 
     PATH=$HOME/sabuildtools/perl584/bin:$HOME/sabuildtools/bin:$PATH
+
+- Run "svn status" to ensure you're building/releasing from a pristine
+  checkout:
+
+    svn status
+
+  (It should return no text; any files marked "M" have been locally
+  modified, and should be "svn revert"ed before you continue.)
 
 - edit lib/Mail/SpamAssassin.pm and comment the $IS_DEVEL_BUILD
   line.   Ensure the correct version number is present in $VERSION
@@ -86,15 +93,15 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - Check in the updated Changes file.
 
-    svn commit -m "preparing to release X.Y.Z" Changes
+    svn commit -m "preparing to release X.Y.Z"
 
 - SVN tag the release files.  This is done using "svn copy".
   For a maintainance release (x.y.1, x.y.2):
 
     repo=https://svn.apache.org/repos/asf/spamassassin
-    svn copy -m "creating tag for release 3.0.1" \
-	$repo/branches/3.0 \
-	$repo/tags/spamassassin_release_3_0_1
+    svn copy -m "creating tag for release 3.1.7" \
+	$repo/branches/3.1 \
+	$repo/tags/spamassassin_release_3_1_7
 
   For a trunk release (x.y.0):
 
@@ -113,6 +120,10 @@ SPAMASSASSIN RELEASE PROCEDURE
   This will do a completely server-side tagging (which is the same as
   a branch really) of whatever the latest branch revision to be the new
   base of the tag release.
+
+  Note that if you have to re-run this command later to fix a broken
+  release in progress, you need to "svn delete" the previous copy of the
+  tag, otherwise it'll create a subdirectory instead of overwriting.
 
 - run "make distcheck" to ensure all files are included in the
   distribution that should be, and to ensure all files that are listed
@@ -136,25 +147,43 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - test the tar.gz and zip files!  redo until they work!! ;)
 
-- Propose a release, and post the URL and md5sums/sha1sums to the
-  dev list.  Once you've got 2 committer +1's, in addition to your own,
-  carry on:
+- Write the release announcement mail!  This is a simple matter of copying
+  the previous release's announcement, updating the version numbers and
+  links, fixing the MD5 and SHA1 checksums in this mail, and summarising
+  the important changes from the Changes file.
+
+    cp build/announcements/3.1.7.txt build/announcements/3.1.8.txt
+    svn add !$
+    vi !$
+
+- (for any rc, prerelease, or full release) Place the tarballs in a
+  discreet location (discreet means not linked from downloads, but
+  included in the vote mail) and request a vote on the development mailing
+  list to make the release.  Post the URL, md5sums/sha1sums, and proposed
+  release announcement mail.  
+  
+  Three +1 votes are required to make the release official.  The release
+  manager (that's you) may vote as well.  Once there are three or more +1
+  votes, you may proceed.
+
+- (for a full release) You need 3 +1's from PMC members.
 
 - SVN commit the release files, including 'Changes':
 
 	svn commit -m "X.Y.Z RELEASED"
 
-- Now, start the new development codebase.  For minor updates of a 2.x
-  tree (e.g. 2.x1, 2.x2), you don't need to branch; for major updates
-  (2.x0) you should use a new development branch, off the trunk.
+- [X.Y.0 RELEASES ONLY]: Now, start the new development codebase.  For
+  minor updates of a 2.x tree (e.g. 2.x.1, 2.x.2), you don't need to
+  branch; for major updates (2.x.0) you need to create a new development
+  branch, off the trunk.
 
     repo=https://svn.apache.org/repos/asf/spamassassin
-    svn copy $repo/tags/spamassassin_release_3_0_0 \
-           $repo/branches/b3_0_0
+    svn copy $repo/tags/spamassassin_release_3_1_0 \
+           $repo/branches/b3_1_0
 
   "trunk" is SVN's concept of head.  Typically, our branches are named
-  for their minor version number.  In the example above, b3_0_0 is the
-  branch for the stable 3.0.x releases.
+  for their minor version number.  In the example above, b3_1_0 is the
+  branch for the stable 3.1.x releases.
 
 - In the new development codeline, edit lib/Mail/SpamAssassin.pm, bump the
   $VERSION line to the correct version, and uncomment the $IS_DEVEL_BUILD
@@ -168,15 +197,6 @@ SPAMASSASSIN RELEASE PROCEDURE
         svn commit -m "X.Y.N devel cycle started"
 
 	(where X.Y.N is the new version number)
-
-- (for any rc, prerelease, or full release) Place the tarballs in a
-  discreet location (discreet means not linked from downloads, but
-  included in the vote mail) and request a vote on the development
-  mailing list to make the release, three +1 votes are required to make
-  the release official.  The release manager (that's you) may vote as
-  well.  Once there are three or more +1 votes, you may proceed.
-
-- (for a full release) You need 3 +1's from PMC members.
 
 - !WARNING! After the next step, the version number will be considered
   "burned". The number is locked for this particular code.  The same
@@ -240,44 +260,66 @@ SPAMASSASSIN RELEASE PROCEDURE
         cd /www/spamassassin.apache.org
         webmake -F
 
-- update the 'dist' tree in the SpamAssassin website:
+- update the 'doc' tree in the SpamAssassin website:
 
         cd /www/spamassassin.apache.org
         svn up
         svn delete --force full/3.1.x
-        svn commit -m "removing old dist tree"
+        svn commit -m "removing old doc tree from website" full
 
         cd [checkedoutdir]
         build/update_website_docs
 
         cd /www/spamassassin.apache.org
         svn add full/3.1.x
-        svn commit -m "updating new dist tree" full
-        
+        svn commit -m "updating new doc tree on website" full
+
 - and check the entire website into SVN (see bug 4998 for reasons why).
   Note that you may need to resolve conflicts and ensure the contents of
   'full/3.1.x' are all added successfully:
 
-        svn commit -m "added new release"
+        svn up
+        svn commit -m "added new release to website"
 
-- upload to CPAN at http://pause.cpan.org/
+- update the tag used to point to "current release":
 
-  ( https://pause.perl.org/pause/authenquery?ACTION=add_uri )
+    repo=https://svn.apache.org/repos/asf/spamassassin
+    svn delete -m "updating for new release" \
+	$repo/tags/spamassassin_current_release_3.1.x
+    svn copy -m "updating for new release" \
+	$repo/tags/spamassassin_release_3_1_7 \
+	$repo/tags/spamassassin_current_release_3.1.x
 
-- Before doing the next step, run through the Changes file, and write up a
-  quick summary of the important changes in human-readable format.  This
-  should be less than 600 chars to fit into Freshmeat's format, and
-  to be easily understandable.
+- upload release tarball to CPAN at http://pause.cpan.org/:
 
-- announce to Freshmeat at http://freshmeat.net/
+        https://pause.perl.org/pause/authenquery?ACTION=add_uri
 
-  ( http://freshmeat.net/add-release/14876/ may work )
+  (Note that recently, PAUSE has started indexing sub-modules under
+  Mail::SpamAssassin::, and it can't deal with our multi-maintainer
+  setup.  You may receive mail indicating that "indexing failed" after
+  the upload; as long as the main Mail::SpamAssassin module was indexed
+  correctly, this is fine.  However, it would help if you could visit
 
-- announce on SpamAssassin-Users, SpamAssassin-Dev, and
-  SpamAssassin-Announce.  Be sure to include the MD5 checksums in this
-  mail, so paranoid folks can check the tarball's integrity.
+        https://pause.perl.org/pause/authenquery?ACTION=share_perms
 
-- Approve the posting to SpamAssassin-Announce (the list admins will get a
+  select 3.1 ("Make someone else co-maintainer"), and ensure that the
+  other releasers (JMASON, DOS, FELICITY, others?) all have permissions as
+  'co-maintainer' on the full set of your listed modules in the
+  "Mail::SpamAssassin::" namespace.
+
+- announce on the users, dev, and announce mailing lists using the
+  previously-prepared release announcement.
+
+- Before doing the next step, run through the release summary mail, and
+  write up a really short summary of the important changes in
+  human-readable format.  This should be less than 600 chars to fit into
+  Freshmeat's format, and to be easily understandable.
+
+- announce to Freshmeat at http://freshmeat.net/:
+
+        http://freshmeat.net/add-release/14876/
+
+- Approve the posting to the announce list (the list admins will get a
   mail indicating how to do this.)
 
 // vim:tw=74:

@@ -488,7 +488,7 @@ sub message_array {
     }
   }
 
-  my @messages;
+  my $messages;
   if ($self->{opt_n}) {
     # OPT_N == 1 means don't bother sorting on message receive date
 
@@ -502,8 +502,10 @@ sub message_array {
       splice(@{$self->{h}}, min ($self->{opt_head}, scalar @{$self->{h}}));
     }
 
-    @messages = ( @{$self->{s}}, @{$self->{h}} );
+    # for ease of memory, we'll play with pointers
+    $messages = $self->{s};
     undef $self->{s};
+    push(@{$messages}, @{$self->{h}});
     undef $self->{h};
   }
   else {
@@ -529,22 +531,22 @@ sub message_array {
     if (@s && @h) {
       my $ratio = @s / @h;
       while (@s && @h) {
-	push @messages, (@s / @h > $ratio) ? (shift @s) : (shift @h);
+	push @{$messages}, (@s / @h > $ratio) ? (shift @s) : (shift @h);
       }
     }
     # push the rest onto the end
-    push @messages, @s, @h;
+    push @{$messages}, @s, @h;
   }
 
   # head or tail < 0 means crop the total list, negate the value appropriately
   if ($self->{opt_tail} < 0) {
-    splice(@messages, 0, $self->{opt_tail});
+    splice(@{$messages}, 0, $self->{opt_tail});
   }
   if ($self->{opt_head} < 0) {
-    splice(@messages, -$self->{opt_head});
+    splice(@{$messages}, -$self->{opt_head});
   }
 
-  return scalar(@messages), \@messages;
+  return scalar(@{$messages}), $messages;
 }
 
 sub mail_open {
@@ -569,7 +571,7 @@ sub mail_open {
 
 ############################################################################
 
-sub message_is_useful_by_date  {
+sub message_is_useful_by_date {
   my ($self, $date) = @_;
 
   return 0 unless $date;	# undef or 0 date = unusable
@@ -579,11 +581,29 @@ sub message_is_useful_by_date  {
     return 1;
   }
   elsif (!$self->{opt_before}) {
-    # Just case about after
+    # Just care about after
     return $date > $self->{opt_after};
   }
   else {
     return (($date < $self->{opt_before}) && ($date > $self->{opt_after}));
+  }
+}
+
+# additional check, based solely on a file's mod timestamp.  we cannot
+# make assumptions about --before, since the file may have been "touch"ed
+# since the last message was appended; but we can assume that too-old
+# files cannot contain messages newer than their modtime.
+sub message_is_useful_by_file_modtime {
+  my ($self, $date) = @_;
+
+  # better safe than sorry, if date is undef; let other stuff catch errors
+  return 1 unless $date;
+
+  if ($self->{opt_after}) {
+    return ($date > $self->{opt_after});
+  }
+  else {
+    return 1;       # --after not in use
   }
 }
 
@@ -646,13 +666,16 @@ sub scan_file {
   my ($self, $class, $mail) = @_;
 
   $self->bump_scan_progress();
+
+  my @s = stat($mail);
+  return unless $self->message_is_useful_by_file_modtime($s[9]);
+
   if (!$self->{determine_receive_date}) {
     push(@{$self->{$class}}, index_pack(AI_TIME_UNKNOWN, $class, "f", $mail));
     return;
   }
 
   my $date;
-
   unless (defined $AICache and $date = $AICache->check($mail)) {
     my $header;
     if (!mail_open($mail)) {
@@ -705,6 +728,9 @@ sub scan_mailbox {
       $self->{access_problem} = 1;
       next;
     }
+
+    my @s = stat($file);
+    next unless $self->message_is_useful_by_file_modtime($s[9]);
 
     my $info = {};
     my $count;
@@ -807,6 +833,9 @@ sub scan_mbx {
       $self->{access_problem} = 1;
       next;
     }
+
+    my @s = stat($file);
+    next unless $self->message_is_useful_by_file_modtime($s[9]);
 
     my $info = {};
     my $count;

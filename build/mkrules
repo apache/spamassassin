@@ -161,6 +161,7 @@ my $COMMENTS = '!comments!';
 my $ALWAYS_PUBLISH = '!always_publish!';
 
 read_all_rules($needs_compile);
+read_rules_from_output_dir();
 compile_output_files();
 lint_output_files();
 write_output_files();
@@ -391,10 +392,19 @@ sub rule_file_compile {
       {
         $rules->{$name}->{found_definition} = 1;
       }
-      # userconf rules are always published in "active"
-      elsif (($type eq 'tflags') && ($val =~ /\buserconf\b/))
-      {
-        $rules->{$name}->{forceactive} = 1;
+      elsif ($type eq 'tflags') {
+        # userconf rules are always published in "active"
+        if ($val =~ /\buserconf\b/) {
+          $rules->{$name}->{forceactive} = 1;
+        }
+
+        # record for rulemetadata code
+        $val =~ s/\s+/ /gs;
+        if ($rules->{$name}->{tflags}) {
+          $rules->{$name}->{tflags} .= ' '.$val;
+        } else {
+          $rules->{$name}->{tflags} = $val;
+        }
       }
 
       $current_comments = '';
@@ -413,9 +423,13 @@ sub rule_file_compile {
       my $val = $3;
 
       my $origname = $name;
-      if ($issandbox) {
-        $name = sandbox_rule_name_avoid_collisions($name, $f);
-      }
+
+      # note: if we call sandbox_rule_name_avoid_collisions(), it'll
+      # rename to 'T_RULENAME' -- which is exactly what we're trying
+      # to avoid in 'publish RULENAME' lines!  so don't call it here.
+      # if ($issandbox) {
+      # $name = sandbox_rule_name_avoid_collisions($name, $f);
+      # }
 
       if (!$rules->{$name}) { $rules->{$name} = rule_entry_create(); }
       $rules->{$name}->{origname} = $origname;
@@ -423,7 +437,7 @@ sub rule_file_compile {
       if ($command eq 'publish') {
         # the 'publish' command defaults to "1", unless it explicitly
         # is set to "0".  iow: publish RULE_NAME [(0 | 1)]  [default: 1]
-        if (!defined $val) { $val = '1'; }
+        if (!defined $val || $val eq '') { $val = '1'; }
       }
       elsif ($command eq 'pubfile') {
         if (!filename_in_manifest($opt_out.'/'.$val)) {
@@ -433,6 +447,12 @@ sub rule_file_compile {
       }
 
       $rules->{$name}->{$command} = $val;
+
+      # if we see "publish NAMEOFRULE", that means the rule is
+      # considered active
+      if ($rules->{$name}->{publish}) {
+        $rules->{$name}->{forceactive} = 1;
+      }
     }
     elsif (/^
         (if|ifplugin)
@@ -504,6 +524,16 @@ sub rule_file_compile {
       /^\s*(\S+)/ and $name = $1;
       $name =~ s/\s+/ /gs;
 
+      my $forceactive = 1;
+      
+      # always send 'test' lines to the sandbox or inactive files
+      if (/^test\s*/) {
+        $forceactive = 0;
+
+        $name = $_;   # ensure we don't drag rules with us though!
+        $name =~ s/\s+/ /gs;
+      }
+
       my $cond;
       if ($current_conditional) {
         $name = $current_conditional; $name =~ s/\s+/ /gs;
@@ -519,7 +549,8 @@ sub rule_file_compile {
       }
       $rules->{$name}->{cond} ||= $cond;
       $rules->{$name}->{issandbox} = $issandbox;
-      $rules->{$name}->{forceactive} = 1;
+      $rules->{$name}->{forceactive} = $forceactive;
+      # $rules->{$name}->{forceactive} = 1;
       $rules->{$name}->{iscommand} = 1;
 
       # warn "unknown line in rules file '$f', saving to default: $orig";
@@ -542,6 +573,54 @@ sub rule_file_compile {
   foreach my $name (@$rule_order) {
     $seen_rules->{$name} = 1;
   }
+}
+
+# this is only run if we're generating rulemetadata!
+sub read_rules_from_output_dir {
+  return unless ($opt_rulemetadata);
+
+  foreach my $file (<$opt_out/*.cf>) {
+    next unless ($file =~ /\d\d_\S+\.cf$/);
+    next if ($file =~ /\/\Q$opt_activeout\E/);
+    next if ($file =~ /\/\Q$opt_sandboxout\E/);
+    next if ($file =~ /\/\Q$opt_inactiveout\E/);
+    read_output_file($file);
+  }
+}
+
+sub read_output_file {
+  my ($file) = @_;
+  open (IN, "<$file") or warn "cannot read $file";
+  while (<IN>) {
+    my $orig = $_;
+
+    s/^#reuse/reuse/;   # TODO - dirty hack.  we need to fix this to just be
+    # a keyword which the engine ignores, this is absurd! 
+
+    s/#.*$//g; s/^\s+//; s/\s+$//;
+
+    # drop comments/blank lines from output
+    next if (/^$/);
+
+    # save "lang" declarations
+    my $lang = '';
+    if (s/^lang\s+(\S+)\s+//) {
+      $lang = $1;
+    }
+
+    # right now, we only read tflags from output files
+    if (/^tflags\s+(\S+)\s+(.*)$/) {
+      my $name = $1;
+      my $val = $2;
+      $val =~ s/\s+/ /gs;
+      if ($rules->{$name}->{tflags}) {
+        $rules->{$name}->{tflags} .= ' '.$val;
+      } else {
+        $rules->{$name}->{tflags} = $val;
+      }
+    }
+  }
+  close IN;
 }
 
 sub copy_to_output_buffers {
@@ -576,9 +655,6 @@ sub copy_to_output_buffers {
     if ($pubfile =~ /${opt_activeout}$/) {
       $is_active++;
     }
-
-    # fix up any rule renamings we were supposed to do
-    sed_renamed_rule_names(\$text);
 
     my $cond = $rules->{$name}->{cond};
     my $pluginclass = $rules->{$name}->{ifplugin};
@@ -632,6 +708,9 @@ sub pubfile_for_rule {
     $pubfile = $rules->{$name}->{pubfile};
     if ($pubfile) {
       $pubfile = $opt_out.'/'.$pubfile;
+    } else {
+      # "publish NAMEOFRULE" => send it to active
+      $pubfile = $opt_out.'/'.$opt_activeout;
     }
   }
 
@@ -769,19 +848,27 @@ sub get_rulemetadata_string {
   my ($rule) = @_;
 
   return '' unless ($opt_rulemetadata);
-  return '' unless ($rules->{$rule}->{found_definition});
 
   my $mod = 0;
-  my $srcfile = $rules->{$rule}->{srcfile};
-  my @s = stat $srcfile;
-  if (@s) {
-    $mod = $s[9];
+  my $srcfile = '';
+
+  if ($rules->{$rule}->{found_definition}) {
+    $srcfile = $rules->{$rule}->{srcfile} || '';
+    if ($srcfile) {
+      my @s = stat $srcfile;
+      if (@s) {
+        $mod = $s[9];
+      }
+    }
   }
+
+  my $tf = $rules->{$rule}->{tflags} || '';
 
   return "<rulemetadata>".
             "<name>$rule</name>".
             "<src>$srcfile</src>".
             "<srcmtime>$mod</srcmtime>".
+            "<tf>$tf</tf>".
           "</rulemetadata>\n";
 }
 
@@ -799,7 +886,11 @@ sub fix_up_rule_dependencies {
       # force that subrule (if it exists) to output in the
       # same pubfile
       my $rule2 = $1;
-      next unless ($rules->{$rule2} && $rules->{$rule2}->{output_text});
+
+      # deal with rules that changed name from "FOO" to "T_FOO"
+      sed_renamed_rule_names(\$rule2);
+      
+      next unless ($rules->{$rule2} && $rules->{$rule2}->{output_file});
 
       # don't do this if the subrule would be moved *out* of the
       # active file!
@@ -821,9 +912,11 @@ sub write_output_files {
       warn "$pubfile: WARNING: not listed in manifest file\n";
     }
 
-    if ($output_file_text->{$pubfile}) {
+    my $text = $output_file_text->{$pubfile};
+    if ($text) {
       open (OUT, ">".$pubfile) or die "cannot write to output file '$pubfile'";
-      print OUT $output_file_text->{$pubfile};
+      sed_renamed_rule_names(\$text);
+      print OUT $text;
       close OUT or die "cannot close output file '$pubfile'";
       # print "$pubfile: written\n";        # too noisy
     }
@@ -856,6 +949,7 @@ sub sandbox_rule_name_avoid_collisions {
 
   return $rule if $opt_listpromotable;
   return $rule if $active_rules->{$rule};
+  return $rule if $rules->{$rule}->{forceactive};
 
   if ($rule !~ /^(?:T_|__)/) {
     $new = "T_".$rule;
@@ -929,7 +1023,6 @@ sub filename_in_manifest {
   my ($fname) = @_;
   return 1 if ($file_manifest->{$fname});
   foreach my $skipre (@{$file_manifest_skip}) {
-    # warn "JMD $skipre $fname";
     return 1 if ($fname =~ $skipre);
   }
   return 0;
