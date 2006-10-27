@@ -663,7 +663,7 @@ key.  Instead, it was signed with the following keys:
 Perhaps you need to import the channel's GPG key?  For example:
 
     wget http://spamassassin.apache.org/updates/GPG.KEY
-    gpg --import GPG.KEY
+    sa-update --import GPG.KEY
 
 ENDOFVALIDATIONERR
 
