@@ -273,6 +273,12 @@ my %makefile = (
     'NO_META' => 1,
 );
 
+# rules/72_active.cf is built from "rulesrc", but *must* exist before
+# WriteMakefile() is called due to shortcomings in MakeMaker.
+my @FILES_THAT_MUST_EXIST = qw(
+        rules/72_active.cf
+    );
+
 # That META.yml stuff was introduced with Perl 6.06_03, see
 # <http://archive.develooper.com/makemaker@perl.org/msg00922.html>
 # <http://archive.develooper.com/makemaker@perl.org/msg00984.html>
@@ -378,6 +384,10 @@ if (Mail::SpamAssassin::Util::DependencyInfo::long_diagnostics() != 0) {
   exit 1;
 }
 
+foreach my $file (@FILES_THAT_MUST_EXIST) {
+  open (TOUCH, ">>$file") or die "cannot touch '$file'";
+  close TOUCH;
+}
 
 #######################################################################
 
