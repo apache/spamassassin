@@ -1736,7 +1736,6 @@ sub hash_line_for_rule {
 
 sub do_head_tests {
   my ($self, $priority) = @_;
-  local ($_);
 
   return if $self->have_shortcircuited();
 
@@ -1884,14 +1883,14 @@ EOT
 
 sub do_body_tests {
   my ($self, $priority, $textary) = @_;
-  local ($_);
     
   return if $self->have_shortcircuited();
 
   dbg("rules: running body-text per-line regexp tests; score so far=".$self->{score});
 
+  my $conf = $self->{conf};
   my $doing_user_rules = 
-    $self->{conf}->{user_rules_to_compile}->{$Mail::SpamAssassin::Conf::TYPE_BODY_TESTS};
+    $conf->{user_rules_to_compile}->{$Mail::SpamAssassin::Conf::TYPE_BODY_TESTS};
 
   # clean up priority value so it can be used in a subroutine name
   my $clean_priority;
@@ -1925,12 +1924,17 @@ sub do_body_tests {
 
   ';
 
-  while (my($rulename, $pat) = each %{$self->{conf}{body_tests}->{$priority}})
+  while (my($rulename, $pat) = each %{$conf->{body_tests}->{$priority}})
   {
     my $sub;
     my $sub_one_line;
 
-    if ($self->{conf}->{tflags}->{$rulename} =~ /\bmultiple\b/)
+    my $need_one_line;
+    if ($conf->{generate_body_one_line_sub}->{$rulename}) {
+      $need_one_line = 1;
+    }
+
+    if ($conf->{tflags}->{$rulename} =~ /\bmultiple\b/)
     {
       # support multiple matches
       $loopid++;
@@ -1945,7 +1949,9 @@ sub do_body_tests {
 	}
       }
       ';
-      $sub_one_line = '
+
+      if ($need_one_line) {
+	$sub_one_line = '
 	pos $_[1] = 0;
 	'.$self->hash_line_for_rule($rulename).'
 	while ($_[1] =~ '.$pat.'g) { 
@@ -1953,7 +1959,8 @@ sub do_body_tests {
 	  $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body"); 
 	  '. $self->hit_rule_plugin_code($rulename, "body", "return") . '
 	}
-      ';
+	';
+      }
     }
     else {
       # omitting the "pos" call, "body_loopid" label, use of while()
@@ -1967,17 +1974,20 @@ sub do_body_tests {
 	}
       }
       ';
-      $sub_one_line = '
+
+      if ($need_one_line) {
+	$sub_one_line = '
 	'.$self->hash_line_for_rule($rulename).'
 	if ($_[1] =~ '.$pat.') { 
           my $self = $_[0];
 	  $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body"); 
 	  '. $self->hit_rule_plugin_code($rulename, "body", "return") . '
 	}
-      ';
+	';
+      }
     }
 
-    if (!$self->{conf}{skip_body_rules}{$rulename}) {
+    if (!$conf->{skip_body_rules}->{$rulename}) {
       if ($use_rule_subs) {
         $evalstr .= '
           if ($scoresptr->{q{'.$rulename.'}}) {
@@ -2007,9 +2017,11 @@ sub do_body_tests {
       push (@TEMPORARY_METHODS, $rulename.'_body_test');
     }
 
-    $evalstr2 .= '
-        sub '.$rulename.'_one_line_body_test { '.$sub_one_line.' }
-    ';
+    if ($need_one_line) {
+      $evalstr2 .= '
+	  sub '.$rulename.'_one_line_body_test { '.$sub_one_line.' }
+      ';
+    }
     push (@TEMPORARY_METHODS, $rulename.'_one_line_body_test');
   }
 
@@ -2036,9 +2048,7 @@ sub do_body_tests {
 }
 EOT
 
-  # if (0) {
   # warn("body eval code for pri $priority:\n".$evalstr."\nend of body eval code");
-  # }
 
   # and run it.
   eval $evalstr;
@@ -2379,7 +2389,6 @@ sub _get_parsed_uri_list {
 
 sub do_body_uri_tests {
   my ($self, $priority, @uris) = @_;
-  local ($_);
 
   return if $self->have_shortcircuited();
   
@@ -2505,7 +2514,6 @@ EOT
 
 sub do_rawbody_tests {
   my ($self, $priority, $textary) = @_;
-  local ($_);
 
   return if $self->have_shortcircuited();
 
@@ -2633,7 +2641,6 @@ EOT
 
 sub do_full_tests {
   my ($self, $priority, $fullmsgref) = @_;
-  local ($_);
     
   return if $self->have_shortcircuited();
   
@@ -2744,7 +2751,6 @@ sub do_full_eval_tests {
 
 sub do_meta_tests {
   my ($self, $priority) = @_;
-  local ($_);
     
   return if $self->have_shortcircuited();
 
@@ -2951,17 +2957,17 @@ sub ensure_rules_are_complete {
 
 sub run_eval_tests {
   my ($self, $testtype, $evalhash, $prepend2desc, $priority, @extraevalargs) = @_;
-  local ($_);
 
   return if $self->have_shortcircuited();
 
-  my $doing_user_rules = $self->{conf}->{user_rules_to_compile}->{$testtype};
+  my $conf = $self->{conf};
+  my $doing_user_rules = $conf->{user_rules_to_compile}->{$testtype};
 
   # clean up priority value so it can be used in a subroutine name
   my $clean_priority;
   ($clean_priority = $priority) =~ s/-/neg/;
 
-  my $scoreset = $self->{conf}->get_score_set();
+  my $scoreset = $conf->get_score_set();
 
   my $methodname = '_eval_tests'.
                         '_type'.$testtype .
@@ -2980,7 +2986,8 @@ sub run_eval_tests {
   }
 
   # look these up once in advance to save repeated lookups in loop below
-  my $tflagsref = $self->{conf}->{tflags};
+  my $tflagsref = $conf->{tflags};
+  my $eval_pluginsref = $conf->{eval_plugins};
   my $have_start_rules = $self->{main}->have_plugin("start_rules");
   my $have_ran_rule = $self->{main}->have_plugin("ran_rule");
 
@@ -3021,7 +3028,7 @@ $evalstr .= q{ my $function; };
     ';
 
     # only need to set current_rule_name for plugin evals
-    if ($self->{conf}->{eval_plugins}->{$function}) {
+    if ($eval_pluginsref->{$function}) {
       # let plugins get the name of the rule that is currently being run,
       # and ensure their eval functions exist
       $evalstr .= '
@@ -3113,17 +3120,17 @@ sub handle_eval_rule_errors {
 sub register_plugin_eval_glue {
   my ($self, $function) = @_;
 
-  if (!$function) {
-    warn "rules: empty function name";
-    return;
-  }
-
   # return if it's not an eval_plugin function
   return if (!exists $self->{conf}->{eval_plugins}->{$function});
 
   # return if it's been registered already
   return if ($self->can ($function) &&
         defined &{'Mail::SpamAssassin::PerMsgStatus::'.$function});
+
+  if (!$function) {
+    warn "rules: empty function name";
+    return;
+  }
 
   my $evalstr = <<"ENDOFEVAL";
 {
@@ -3153,7 +3160,6 @@ ENDOFEVAL
 
 sub run_rbl_eval_tests {
   my ($self, $evalhash) = @_;
-  local ($_);
 
   if ($self->{main}->{local_tests_only}) {
     dbg("rules: local tests only, ignoring RBL eval");
