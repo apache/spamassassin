@@ -63,7 +63,8 @@ sub setup_test_set_pri {
     return 0;
   }
 
-  $conf->{skip_body_rules} = { };
+  $conf->{skip_body_rules}   ||= { };
+  $conf->{need_one_line_sub} ||= { };
 
   my $found = 0;
   foreach my $name (keys %{$rules}) {
@@ -81,6 +82,11 @@ sub setup_test_set_pri {
     # TODO: need a cleaner way to do this.  I expect when rule types
     # are implementable in plugins, I can do it that way
     $conf->{skip_body_rules}->{$name} = 1;
+
+    # ensure that the one-liner version of the function call is
+    # created, though
+    $conf->{generate_body_one_line_sub}->{$name} = 1;
+
     $found++;
   }
 
@@ -149,9 +155,17 @@ sub run_body_hack {
 	# dbg("zoom: base found for $rulename: $line");
 	# }
 
-        # run the real regexp -- on this line alone
-        &{'Mail::SpamAssassin::PerMsgStatus::'.$rulename.'_one_line_body_test'}
-                    ($scanner, $line);
+	my $fn = 'Mail::SpamAssassin::PerMsgStatus::'.
+				$rulename.'_one_line_body_test';
+
+        # run the real regexp -- on this line alone.
+	# don't try this unless the fn exists; this can happen if the
+	# installed compiled-rules file contains details of rules
+	# that are not in our current ruleset (e.g. gets out of
+	# sync, or was compiled with extra rulesets installed)
+	if (defined &{$fn}) {
+	  &{$fn} ($scanner, $line);
+	}
       }
     }
     use strict "refs";
