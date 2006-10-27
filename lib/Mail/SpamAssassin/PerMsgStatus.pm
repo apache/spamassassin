@@ -2010,6 +2010,7 @@ sub do_body_tests {
     $evalstr2 .= '
         sub '.$rulename.'_one_line_body_test { '.$sub_one_line.' }
     ';
+    push (@TEMPORARY_METHODS, $rulename.'_one_line_body_test');
   }
 
   # clear out a previous version of this fn, if already defined
