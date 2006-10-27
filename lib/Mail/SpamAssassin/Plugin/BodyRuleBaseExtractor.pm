@@ -55,7 +55,7 @@ sub new {
   my $self = $class->SUPER::new($mailsaobject);
   bless ($self, $class);
 
-  # $self->test();
+  # $self->test(); exit;
   return $self;
 }
 
@@ -130,9 +130,11 @@ sub extract_set_pri {
     eval {  # catch die()s
       @bases1 = $self->extract_hints($rule, 0);
     };
+    $@ and dbg("giving up on that direction: $@");
     eval {
       @bases2 = $self->extract_hints($rule, 1);
     };
+    $@ and dbg("giving up on that direction: $@");
 
     # if any of the extracted hints in a set are too short, the entire
     # set is invalid; this is because each set of N hints represents just
@@ -376,6 +378,14 @@ sub extract_hints {
               \]
             ).*$//gsx;
 
+  if ($BASES_CAN_USE_ALTERNATIONS||$SPLIT_OUT_ALTERNATIONS) {
+    # /foo (bar)? baz/ simplify to /foo (bar|) baz/
+    $rule =~ s/(?<!\\)(\([^\(\)]*)\)\?/$1\|\)/gs;
+
+    # /foo bar? baz/ simplify to /foo ba(r|) baz/
+    $rule =~ s/(?<!\\)(.)\?/($1\|\)/gs;
+  }
+
   $BASES_CAN_USE_QUANTIFIERS or $rule =~ s/(?<!\\)(?:
               .\*|	# remove the quantified char, too
               .\+|
@@ -434,7 +444,7 @@ sub extract_hints {
   $rule =~ s/\\w/[_a-z0-9]/gs;
   $rule =~ s/\\W/[^_a-z0-9]/gs;
 
-  # loop here, to catch __DRUGS_SLEEP1:
+  # {loop here, to catch __DRUGS_SLEEP1:
   # 0,3}([ \t\n]|z{0})
   while (1) 
   {
@@ -446,7 +456,6 @@ sub extract_hints {
     if ($rule =~ /^\((?:
               \.?[\*\?\+] |
               \.?\{?[^\{]*\} |
-              [^\(]*\) |
               \[ |
               [^\[]*\]
             )/sx)
@@ -477,7 +486,6 @@ sub extract_hints {
     last if $startrule eq $rule;
   }
 
-
   # return for things we know we can't handle.
   if (!($BASES_CAN_USE_ALTERNATIONS||$SPLIT_OUT_ALTERNATIONS)) {
     if ($rule =~ /\|/) {
@@ -485,6 +493,7 @@ sub extract_hints {
       die "alternations";
     }
   }
+
 
   {
     # count (...braces...) to ensure the numbers match up
@@ -601,7 +610,7 @@ sub _split_alt_recurse {
   # trim unnecessary group markers, e.g. /f(oo)/ => /foo/
   $re =~ s/\(([^\(\)\|]*)\)/$1/gs;
 
-  # identify the smallest nested (...|...) scope
+  # identify the deepest-nested (...|...) scope
   $re =~ m{
       ^(.*)
       (?<!\\)\(([^\(\)]*?\|[^\(\)]*?)\)
@@ -619,7 +628,10 @@ sub _split_alt_recurse {
 
   # and expand it
   my @out = ();
-  foreach my $str (split (/(?<!\\)\|/, $alts)) {
+
+  # the 999999 actually does have an effect; otherwise '(foo|)' is
+  # split as ('foo') instead of ('foo', '') for some reason
+  foreach my $str (split (/(?<!\\)\|/, $alts, 999999)) {
     $str = $pre.$str.$post;
     # are there unresolved groups left?
     if ($str =~ /(?<!\\)[\(\|\)]/) {
@@ -646,12 +658,14 @@ sub test {
   $self->test_split_alt("foo", "/foo/");
   $self->test_split_alt("(foo)", "/foo/");
   $self->test_split_alt("foo(bar)baz", "/foobarbaz/");
+  $self->test_split_alt("x(foo|)", "/xfoo/ /x/");
+  $self->test_split_alt("fo(o|)", "/foo/ /fo/");
   $self->test_split_alt("(foo|bar)", "/foo/ /bar/");
   $self->test_split_alt("foo|bar", "/foo/ /bar/");
   $self->test_split_alt("foo (bar|baz) argh", "/foo bar argh/ /foo baz argh/");
   $self->test_split_alt("foo (bar|baz|bl(arg|at)) cough", "/foo bar cough/ /foo baz cough/ /foo blarg cough/ /foo blat cough/");
   $self->test_split_alt("(s(otc|tco)k)", "/sotck/ /stcok/");
-  exit;
+  $self->test_split_alt("(business partner(s|ship|)|silent partner(s|ship|))", "/business partners/ /silent partners/ /business partnership/ /silent partnership/ /business partner/ /silent partner/");
 }
 
 sub test_split_alt {
