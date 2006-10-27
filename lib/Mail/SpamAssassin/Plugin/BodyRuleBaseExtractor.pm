@@ -354,6 +354,15 @@ sub extract_hints {
   # simplify (?:..) to (..)
   $rule =~ s/\(\?:/\(/g;
 
+  # this must be before reversing
+  if ($BASES_CAN_USE_ALTERNATIONS||$SPLIT_OUT_ALTERNATIONS) {
+    # /foo (bar)? baz/ simplify to /foo (bar|) baz/
+    $rule =~ s/(?<!\\)(\([^\(\)]*)\)\?/$1\|\)/gs;
+
+    # /foo bar? baz/ simplify to /foo ba(r|) baz/
+    $rule =~ s/(?<!\\)(.)\?/($1\|\)/gs;
+  }
+
   # here's the trick; we can use the truncate regexp below simply by
   # reversing the string and taking care to fix "\z" 2-char escapes.
   # TODO: this breaks stuff like "\s+" or "\S{4,12}", but since the
@@ -377,14 +386,6 @@ sub extract_hints {
               \[|
               \]
             ).*$//gsx;
-
-  if ($BASES_CAN_USE_ALTERNATIONS||$SPLIT_OUT_ALTERNATIONS) {
-    # /foo (bar)? baz/ simplify to /foo (bar|) baz/
-    $rule =~ s/(?<!\\)(\([^\(\)]*)\)\?/$1\|\)/gs;
-
-    # /foo bar? baz/ simplify to /foo ba(r|) baz/
-    $rule =~ s/(?<!\\)(.)\?/($1\|\)/gs;
-  }
 
   $BASES_CAN_USE_QUANTIFIERS or $rule =~ s/(?<!\\)(?:
               .\*|	# remove the quantified char, too
@@ -605,7 +606,7 @@ sub _split_alt_recurse {
   my ($self, $depth, $re) = @_;
 
   $depth++;
-  "die recursed too far in alternation splitting" if ($depth > 5);
+  "die recursed too far in alternation splitting" if ($depth > 3);
 
   # trim unnecessary group markers, e.g. /f(oo)/ => /foo/
   $re =~ s/\(([^\(\)\|]*)\)/$1/gs;
