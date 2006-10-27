@@ -1957,7 +1957,7 @@ sub do_body_tests {
 	while ($_[1] =~ '.$pat.'g) { 
           my $self = $_[0];
 	  $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body"); 
-	  '. $self->hit_rule_plugin_code($rulename, "body", "return") . '
+	  '. $self->hit_rule_plugin_code($rulename, "body", "return 1") . '
 	}
 	';
       }
@@ -1981,7 +1981,7 @@ sub do_body_tests {
 	if ($_[1] =~ '.$pat.') { 
           my $self = $_[0];
 	  $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body"); 
-	  '. $self->hit_rule_plugin_code($rulename, "body", "return") . '
+	  '. $self->hit_rule_plugin_code($rulename, "body", "return 1") . '
 	}
 	';
       }
@@ -3346,6 +3346,7 @@ sub got_hit {
             $area,
             $params{ruletype},
             ($self->{conf}->{descriptions}->{$rule} || $rule));
+  return 1;
 }
 
 ###########################################################################

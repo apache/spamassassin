@@ -147,11 +147,6 @@ sub run_body_hack {
         # ignore 0-scored rules, of course
         next unless $scoresptr->{$rulename};
 
-        # TODO: it would be very useful to provide an optional
-        # means of instrumenting the ruleset, so that we can
-        # find out when the base matched but the full RE didn't.
-
-	# if ($do_dbg) {
 	# dbg("zoom: base found for $rulename: $line");
 	# }
 
@@ -164,7 +159,9 @@ sub run_body_hack {
 	# that are not in our current ruleset (e.g. gets out of
 	# sync, or was compiled with extra rulesets installed)
 	if (defined &{$fn}) {
-	  &{$fn} ($scanner, $line);
+	  if (!&{$fn} ($scanner, $line) && $do_dbg) {
+	    $self->{rule2xs_misses}->{$rulename}++;
+	  }
 	}
       }
     }
@@ -172,6 +169,18 @@ sub run_body_hack {
   }
 
   dbg("zoom: run_body_hack for $ruletype done");
+}
+
+sub finish {
+  my ($self) = @_;
+
+  my $do_dbg = (would_log('dbg', 'zoom') > 1);
+  return unless $do_dbg;
+
+  my $miss = $self->{rule2xs_misses};
+  foreach my $r (sort { $miss->{$a} <=> $miss->{$b} } keys %{$miss}) {
+    dbg "zoom: ".$miss->{$r}." misses for rule2xs rule $r\n";
+  }
 }
 
 ###########################################################################
