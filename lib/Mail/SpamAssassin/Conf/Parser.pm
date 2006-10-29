@@ -932,7 +932,9 @@ sub add_test {
   }
   $conf->{priority}->{$name} ||= 0;
   $conf->{source_file}->{$name} = $self->{currentfile};
-  $conf->{if_stack}->{$name} = $self->get_if_stack_as_string();
+
+  # this no longer seems to be needed!
+  # $conf->{if_stack}->{$name} = $self->get_if_stack_as_string();
 
   if ($self->{scoresonly}) {
     $conf->{user_rules_to_compile}->{$type} = 1;

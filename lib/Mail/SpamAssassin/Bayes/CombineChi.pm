@@ -41,7 +41,7 @@ our $FW_X_CONSTANT = 0.538;
 # the use of "s") of an original assumed expectation ... relative to how
 # strongly we want to consider our actual collected data."  Low 's' means
 # trust collected data more strongly.
-our $FW_S_CONSTANT = 0.100;
+our $FW_S_CONSTANT = 0.030;
 
 # (s . x) for the f(w) equation.
 our $FW_S_DOT_X = ($FW_X_CONSTANT * $FW_S_CONSTANT);

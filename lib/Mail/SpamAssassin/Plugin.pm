@@ -402,6 +402,13 @@ using the public APIs on this object.
 Called via SpamAssassin::finish and should clear up any tests that a plugin
 has added to the namespace.
 
+In certain circumstances, plugins may find it useful to compile
+perl functions from the ruleset, on the fly.  It is important to
+remove these once the C<Mail::SpamAssassin> object is deleted,
+however, and this API allows this.
+
+Each plugin is responsible for its own generated perl functions.
+
 =over 4
 
 =item conf
@@ -905,6 +912,23 @@ Different rule types receive different information by default:
 
 The configuration file arguments will be passed in after the standard
 arguments.
+
+=head1 BACKWARDS COMPATIBILITY
+
+Note that if you write a plugin and need to determine if a particular
+helper method is supported on C<Mail::SpamAssassin::Plugin>, you
+can do this:
+
+    if ($self->can("name_of_method")) {
+      eval {
+        $self->name_of_method();        # etc.
+      }
+    } else {
+      # take fallback action
+    }
+
+The same applies for the public APIs on objects of other types, such as
+C<Mail::SpamAssassin::PerMsgStatus>.
 
 =head1 SEE ALSO
 

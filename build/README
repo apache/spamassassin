@@ -121,6 +121,10 @@ SPAMASSASSIN RELEASE PROCEDURE
   a branch really) of whatever the latest branch revision to be the new
   base of the tag release.
 
+  Note that if you have to re-run this command later to fix a broken
+  release in progress, you need to "svn delete" the previous copy of the
+  tag, otherwise it'll create a subdirectory instead of overwriting.
+
 - run "make distcheck" to ensure all files are included in the
   distribution that should be, and to ensure all files that are listed
   in the MANIFEST also exist in SVN.
@@ -256,19 +260,19 @@ SPAMASSASSIN RELEASE PROCEDURE
         cd /www/spamassassin.apache.org
         webmake -F
 
-- update the 'dist' tree in the SpamAssassin website:
+- update the 'doc' tree in the SpamAssassin website:
 
         cd /www/spamassassin.apache.org
         svn up
         svn delete --force full/3.1.x
-        svn commit -m "removing old dist tree from website" full
+        svn commit -m "removing old doc tree from website" full
 
         cd [checkedoutdir]
         build/update_website_docs
 
         cd /www/spamassassin.apache.org
         svn add full/3.1.x
-        svn commit -m "updating new dist tree on website" full
+        svn commit -m "updating new doc tree on website" full
 
 - and check the entire website into SVN (see bug 4998 for reasons why).
   Note that you may need to resolve conflicts and ensure the contents of
@@ -276,6 +280,15 @@ SPAMASSASSIN RELEASE PROCEDURE
 
         svn up
         svn commit -m "added new release to website"
+
+- update the tag used to point to "current release":
+
+    repo=https://svn.apache.org/repos/asf/spamassassin
+    svn delete -m "updating for new release" \
+	$repo/tags/spamassassin_current_release_3.1.x
+    svn copy -m "updating for new release" \
+	$repo/tags/spamassassin_release_3_1_7 \
+	$repo/tags/spamassassin_current_release_3.1.x
 
 - upload release tarball to CPAN at http://pause.cpan.org/:
 

@@ -205,7 +205,7 @@ sub dnsbl_hit {
     $self->{already_logged}->{$log} = 1;
   }
 
-  if (!defined $self->{tests_already_hit}->{$rule}) {
+  if (!$self->{tests_already_hit}->{$rule}) {
     $self->got_hit($rule, "RBL: ", ruletype => "dnsbl");
   }
 }
@@ -277,7 +277,7 @@ sub process_dnsbl_set {
 
   my $rdatastr = $answer->rdatastr;
   while (my ($subtest, $rule) = each %{ $self->{dnspost}->{$set} }) {
-    next if defined $self->{tests_already_hit}->{$rule};
+    next if $self->{tests_already_hit}->{$rule};
 
     # exact substr (usually IP address)
     if ($subtest eq $rdatastr) {

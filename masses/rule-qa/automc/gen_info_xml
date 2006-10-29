@@ -4,6 +4,12 @@ my $automcdir = "/home/automc/svn/spamassassin/masses/rule-qa/automc";
 # need this to ensure that 'svn log' will include ALL changes
 my $svn_checkins_root = "http://svn.apache.org/repos/asf/spamassassin/";
 
+# we won't provide who-checked-in and commit-message details for changes
+# older than this.  Note, this is not in rev number terms; it's an
+# absolute count of revisions.
+# update: alternatively, since the zone's SVN is too old (!), use a date.
+# my $svn_log_limit = 500;
+
 my $full_rebuild = 0;
 if ($ARGV[0] && $ARGV[0] =~ /^-f/) {
   $full_rebuild = 1;
@@ -158,8 +164,13 @@ sub get_datadir_for_daterev {
 }
 
 sub get_svn_log {
-  print "getting svn log...\n";
-  if (open (IN, "svn log --xml $svn_checkins_root |")) {
+  print "getting svn log... (".time.")\n";
+
+  my $limitdate = strftime ("%Y-%m-%d", localtime time-(24*60*60*30*12));
+
+  if (open (IN, "svn log -r 'HEAD:{$limitdate}' --xml $svn_checkins_root |"))
+  # if (open (IN, "svn log --limit $svn_log_limit --xml $svn_checkins_root |"))
+  {
     eval {
       my $xml = join('', <IN>);
       $svn_log = XMLin($xml);
@@ -172,7 +183,7 @@ sub get_svn_log {
   if (!$svn_log) {
     die "no svn log --xml";
   }
-  print "got ".(scalar @{$svn_log->{logentry}})." log entries\n";
+  print "got ".(scalar @{$svn_log->{logentry}})." log entries (".time.")\n";
 
   # use Data::Dumper; print Dumper($svn_log); die;
 }

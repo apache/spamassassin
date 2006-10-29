@@ -42,6 +42,7 @@ $status = $sa->check($mail);
 
 $result = 0;
 foreach (@{$status->{test_names_hit}}) {
+  print "test hit: $_\n";
   $result++ if ($_ eq 'MISSING_HB_SEP' || $_ eq 'X_MESSAGE_INFO');
 }
 

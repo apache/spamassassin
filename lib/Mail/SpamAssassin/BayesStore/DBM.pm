@@ -590,7 +590,7 @@ sub untie_db {
     my $db_var = 'db_'.$dbname;
 
     if (exists $self->{$db_var}) {
-      dbg("bayes: untie-ing $db_var");
+      # dbg("bayes: untie-ing $db_var");
       untie %{$self->{$db_var}};
       delete $self->{$db_var};
     }
@@ -1515,7 +1515,7 @@ sub clear_database {
     my $db_var = 'db_'.$dbname;
 
     if (exists $self->{$db_var}) {
-      dbg("bayes: untie-ing $db_var");
+      # dbg("bayes: untie-ing $db_var");
       untie %{$self->{$db_var}};
       delete $self->{$db_var};
     }
