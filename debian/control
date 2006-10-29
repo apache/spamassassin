@@ -7,8 +7,8 @@ Standards-Version: 3.5.1
 
 Package: spamassassin
 Architecture: any
-Depends: ${perl:Depends}, ${shlibs:Depends}, libdigest-sha1-perl, libhtml-parser-perl (>= 3.24), libstorable-perl | perl (>= 5.8.0)
-Recommends: libnet-dns-perl, libmail-spf-query-perl
+Depends: ${perl:Depends}, ${shlibs:Depends}, libdigest-sha1-perl, libhtml-parser-perl (>= 3.24), libnet-dns-perl | perl (>= 5.8.0)
+Recommends: libmail-spf-query-perl
 Suggests: razor (>= 2.40), pyzor, libtime-hires-perl
 Provides: spamassassin, spamc
 Description:  Spam detector and markup engine

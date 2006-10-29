@@ -85,7 +85,8 @@ use Mail::SpamAssassin::Util::Progress;
 %opt = (
   'force-expire' => 0,
   'use-ignores'  => 0,
-  'nosync'    => 0,
+  'nosync'       => 0,
+  'cf'           => []
 );
 
 Getopt::Long::Configure(
@@ -104,6 +105,7 @@ GetOptions(
   'configpath|config-file|config-dir|c|C=s' => \$opt{'configpath'},
   'prefspath|prefs-file|p=s'                => \$opt{'prefspath'},
   'siteconfigpath=s'                        => \$opt{'siteconfigpath'},
+  'cf=s'                                    => \@{$opt{'cf'}},
 
   'folders|f=s'          => \$opt{'folders'},
   'force-expire|expire'  => \$opt{'force-expire'},
@@ -215,6 +217,8 @@ if (defined $opt{'dump'} || defined $opt{'import'} || defined $opt{'clear'} ||
     defined $opt{'backup'} || defined $opt{'restore'}) {
   $post_config .= "use_bayes 1\n";
 }
+
+$post_config .= join("\n", @{$opt{'cf'}})."\n";
 
 # create the tester factory
 $spamtest = new Mail::SpamAssassin(
@@ -585,6 +589,7 @@ Options:
  -C path, --configpath=path, --config-file=path   Path to standard configuration dir
  -p prefs, --prefspath=file, --prefs-file=file    Set user preferences file
  --siteconfigpath=path             Path for site configs (def: /etc/mail/spamassassin)
+ --cf='config line'                Additional line of configuration
  -D, --debug-level                 Print debugging messages
  -V, --version                     Print version
  -h, --help                        Print usage message
@@ -738,6 +743,12 @@ Ignore the default directories (usually C</usr/share/spamassassin> or similar).
 
 Use the specified path for locating site-specific configuration files.  Ignore
 the default directories (usually C</etc/mail/spamassassin> or similar).
+
+=item B<--cf='config line'>
+
+Add additional lines of configuration directly from the command-line, parsed
+after the configuration files are read.   Multiple B<--cf> arguments can be
+used, and each will be considered a separate line of configuration.
 
 =item B<-p> I<prefs>, B<--prefspath>=I<prefs>, B<--prefs-file>=I<prefs>
 

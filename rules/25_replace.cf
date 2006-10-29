@@ -104,9 +104,6 @@ body FUZZY_BILLION	/(?!billion)<B><I><L><L><I><O><N>/i
 describe FUZZY_BILLION	Attempt to obfuscate words in spam
 replace_rules FUZZY_BILLION
 
-body FUZZY_CELEBREX	/<inter W1><post P2>(?!celebrex)<C><E><L><E><B><R><E><X>/i
-describe FUZZY_CELEBREX	Attempt to obfuscate words in spam
-replace_rules FUZZY_CELEBREX
 
 body FUZZY_CPILL	/(?!ciali[sz])<C><I><A><L><I><S>/i
 describe FUZZY_CPILL	Attempt to obfuscate words in spam
@@ -120,9 +117,6 @@ body FUZZY_ERECT	/<inter W2><post P3>(?!erection)<E><R><E><C><T><I><O><N>/i
 describe FUZZY_ERECT	Attempt to obfuscate words in spam
 replace_rules FUZZY_ERECT
 
-body FUZZY_FOLLOW	/(?!follow)<F><O><L><L><O><W>/i
-describe FUZZY_FOLLOW	Attempt to obfuscate words in spam
-replace_rules FUZZY_FOLLOW
 
 body FUZZY_GUARANTEE	/<inter W1><post P2>(?!guarantee)<G><U><A><R><A><N><T><E><E>/i
 describe FUZZY_GUARANTEE	Attempt to obfuscate words in spam
@@ -132,9 +126,6 @@ body FUZZY_MEDICATION	/<inter W1><post P2>(?!medication)<M><E><D><I><C><A><T><I>
 describe FUZZY_MEDICATION	Attempt to obfuscate words in spam
 replace_rules FUZZY_MEDICATION
 
-body FUZZY_MILF		/<inter SP>(?!milf)\b<M><I><L><F>/i
-describe FUZZY_MILF	Attempt to obfuscate words in spam
-replace_rules FUZZY_MILF
 
 body FUZZY_MILLION	/(?!million)<M><I><L><L><I><O><N>/i
 describe FUZZY_MILLION	Attempt to obfuscate words in spam
@@ -164,9 +155,6 @@ body FUZZY_PHENT	/<inter W1><post P2>(?!phentermine)<P><H><E><N><T><E><R><M><I><
 describe FUZZY_PHENT	Attempt to obfuscate words in spam
 replace_rules FUZZY_PHENT
 
-body FUZZY_PLEASE	/(?!please)<P><L><E><A><S><E>/i
-describe FUZZY_PLEASE	Attempt to obfuscate words in spam
-replace_rules FUZZY_PLEASE
 
 body FUZZY_PRESCRIPT	/<inter W2><post P2>(?!prescription)<P><R><E><S><C><R><I><P><T><I><O><N>/i
 describe FUZZY_PRESCRIPT	Attempt to obfuscate words in spam
@@ -197,17 +185,11 @@ body FUZZY_THOUSANDS	/(?!thousands)<T><H><O><U><S><A><N><D><S>/i
 describe FUZZY_THOUSANDS	Attempt to obfuscate words in spam
 replace_rules FUZZY_THOUSANDS
 
-body FUZZY_TRAMADOL	/<inter W1><post P2>(?!tramadol)<T><R><A><M><A><D><O><L>/i
-describe FUZZY_TRAMADOL	Attempt to obfuscate words in spam
-replace_rules FUZZY_TRAMADOL
 
 body FUZZY_VLIUM	/<inter W1><post P2>(?!valium)<V><A><L><I><U><M>/i
 describe FUZZY_VLIUM	Attempt to obfuscate words in spam
 replace_rules FUZZY_VLIUM
 
-body FUZZY_VICODIN	/<inter W1><post P2>(?!vicodin)<V><I><C><O><D><I><N>/i
-describe FUZZY_VICODIN	Attempt to obfuscate words in spam
-replace_rules FUZZY_VICODIN
 
 body FUZZY_VIOXX	/<inter W1><post P2>(?!vioxx)<V><I><O><X><X>/i
 describe FUZZY_VIOXX	Attempt to obfuscate words in spam

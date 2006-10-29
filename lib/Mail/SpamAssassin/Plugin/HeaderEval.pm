@@ -50,7 +50,6 @@ sub new {
   $self->register_eval_rule("check_for_forged_eudoramail_received_headers");
   $self->register_eval_rule("check_for_forged_yahoo_received_headers");
   $self->register_eval_rule("check_for_forged_juno_received_headers");
-  $self->register_eval_rule("check_for_from_to_same");
   $self->register_eval_rule("check_for_matching_env_and_hdr_from");
   $self->register_eval_rule("sorted_recipients");
   $self->register_eval_rule("similar_recipients");
@@ -562,29 +561,6 @@ sub check_for_forged_juno_received_headers {
   return 0;   
 }
 
-# From and To have same address, but are not exactly the same and
-# neither contains intermediate spaces.
-sub check_for_from_to_same {
-  my ($self, $pms) = @_;
-
-  my $hdr_from = $pms->get('From');
-  my $hdr_to = $pms->get('To');
-  return 0 if (!length($hdr_from) || !length($hdr_to) ||
-	       $hdr_from eq $hdr_to);
-
-  my $addr_from = $pms->get('From:addr');
-  my $addr_to = $pms->get('To:addr');
-  # BUG: From:addr and To:addr sometimes contain whitespace
-  $addr_from =~ s/\s+//g;
-  $addr_to =~ s/\s+//g;
-  return 0 if (!length($addr_from) || !length($addr_to) ||
-	       $addr_from ne $addr_to);
-
-  if ($hdr_from =~ /^\s*\S+\s*$/ && $hdr_to =~ /^\s*\S+\s*$/) {
-    return 1;
-  }
-}
-
 sub check_for_matching_env_and_hdr_from {
   my ($self, $pms) =@_;
   # two blank headers match so don't bother checking
@@ -852,10 +828,10 @@ sub _get_received_header_times {
     foreach $rcvd (@local) {
       if ($rcvd =~ m/(\s.?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+)/) {
 	my $date = $1;
-	dbg("eval: trying Received fetchmail header date for real time: $date");
+        dbg2("eval: trying Received fetchmail header date for real time: $date");
 	my $time = Mail::SpamAssassin::Util::parse_rfc822_date($date);
 	if (defined($time) && (time() >= $time)) {
-	  dbg("eval: time_t from date=$time, rcvd=$date");
+          dbg2("eval: time_t from date=$time, rcvd=$date");
 	  push @fetchmail_times, $time;
 	}
       }
@@ -872,10 +848,10 @@ sub _get_received_header_times {
   foreach $rcvd (@received) {
     if ($rcvd =~ m/(\s.?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+)/) {
       my $date = $1;
-      dbg("eval: trying Received header date for real time: $date");
+      dbg2("eval: trying Received header date for real time: $date");
       my $time = Mail::SpamAssassin::Util::parse_rfc822_date($date);
       if (defined($time)) {
-	dbg("eval: time_t from date=$time, rcvd=$date");
+        dbg2("eval: time_t from date=$time, rcvd=$date");
 	push @header_times, $time;
       }
     }
@@ -1127,6 +1103,15 @@ sub check_ratware_envelope_from {
   }
 
   return 0;
+}
+
+###########################################################################
+
+# support eval-test verbose debugs using "-Deval"
+sub dbg2 {
+  if (would_log('dbg', 'eval') == 2) {
+    dbg(@_);
+  }
 }
 
 1;

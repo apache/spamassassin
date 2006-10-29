@@ -731,7 +731,7 @@ sub _parse_multipart {
     }
 
     if (!$in_body) {
-      s/\s+$//;
+      # s/\s+$//;   # bug 5127: don't clean this up (yet)
       if (m/^[\041-\071\073-\176]+:/) {
         if ($header) {
           my ( $key, $value ) = split ( /:\s*/, $header, 2 );
@@ -741,7 +741,7 @@ sub _parse_multipart {
 	next;
       }
       elsif (/^[ \t]/) {
-        $_ =~ s/^\s*//;
+        # $_ =~ s/^\s*//;   # bug 5127, again
         $header .= $_;
 	next;
       }

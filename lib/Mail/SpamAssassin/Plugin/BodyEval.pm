@@ -39,43 +39,12 @@ sub new {
   bless ($self, $class);
 
   # the important bit!
-  $self->register_eval_rule("check_unique_words");
   $self->register_eval_rule("multipart_alternative_difference");
   $self->register_eval_rule("multipart_alternative_difference_count");
   $self->register_eval_rule("check_blank_line_ratio");
   $self->register_eval_rule("tvd_vertical_words");
 
   return $self;
-}
-
-sub check_unique_words {
-  my ($self, $pms, $body, $m, $b) = @_;
-
-  if (!defined $pms->{unique_words_repeat}) {
-    $pms->{unique_words_repeat} = 0;
-    $pms->{unique_words_unique} = 0;
-    my %count;
-    for (@$body) {
-      # copy to avoid changing @$body
-      my $line = $_;
-      # from tokenize_line in Bayes.pm
-      $line =~ tr/-A-Za-z0-9,\@\*\!_'"\$.\241-\377 / /cs;
-      $line =~ s/(\w)(\.{3,6})(\w)/$1 $2 $3/gs;
-      $line =~ s/(\w)(\-{2,6})(\w)/$1 $2 $3/gs;
-      $line =~ s/(?:^|\.\s+)([A-Z])([^A-Z]+)(?:\s|$)/ ' '.(lc $1).$2.' '/ge;
-      for my $token (split(' ', $line)) {
-        $count{$token}++;
-      }
-    }
-    $pms->{unique_words_unique} = scalar grep { $_ == 1 } values(%count);
-    $pms->{unique_words_repeat} = scalar keys(%count) - $pms->{unique_words_unique};
-  }
-
-  # y = mx+b where y is number of unique words needed
-  my $unique = $pms->{unique_words_unique};
-  my $repeat = $pms->{unique_words_repeat};
-  my $y = ($unique + $repeat) * $m + $b;
-  return ($unique > $y);
 }
 
 sub multipart_alternative_difference {

@@ -159,10 +159,6 @@ sub _check_mime_header {
     $pms->{mime_base64_encoded_text} = 1;
   }
 
-  if ($cte =~ /base64/ && !$name) {
-    $pms->{mime_base64_no_name} = 1;
-  }
-
   if ($charset =~ /iso-\S+-\S+\b/i &&
       $charset !~ /iso-(?:8859-\d{1,2}|2022-(?:jp|kr))\b/)
   {
@@ -231,7 +227,6 @@ sub _check_attachments {
   $pms->{mime_base64_encoded_text} = 0;
   # $pms->{mime_base64_illegal} = 0;
   # $pms->{mime_base64_latin} = 0;
-  $pms->{mime_base64_no_name} = 0;
   $pms->{mime_body_html_count} = 0;
   $pms->{mime_body_text_count} = 0;
   $pms->{mime_faraway_charset} = 0;

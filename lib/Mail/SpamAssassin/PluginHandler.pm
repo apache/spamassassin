@@ -138,7 +138,7 @@ sub register_plugin {
   my ($self, $plugin) = @_;
   $plugin->{main} = $self->{main};
   push (@{$self->{plugins}}, $plugin);
-  dbg("plugin: registered $plugin");
+  # dbg("plugin: registered $plugin");
 
   # invalidate cache entries for any configuration-time hooks, in case
   # one has already been built; this plugin may implement that hook!
