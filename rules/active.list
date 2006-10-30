@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: net-bb-doc net-bb-jm net-bb-zmi net-cthielen net-parkerm
+# with results from: bb-doc bb-jm bb-zmi cthielen daf dos zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -86,9 +86,6 @@ DIGEST_MULTIPLE
 DNS_FROM_AHBL_RHSBL
 
 # tflags net
-DNS_FROM_OPENWHOIS
-
-# tflags net
 DNS_FROM_RFC_BOGUSMX
 
 # tflags net
@@ -96,9 +93,6 @@ DNS_FROM_RFC_DSN
 
 # tflags net
 DNS_FROM_SECURITYSAGE
-
-# good enough
-DOS_LET_GO_JOB
 
 # good enough
 DOS_MORTGAGE
@@ -120,9 +114,6 @@ DRUGS_HDIA
 
 # good enough
 DRUGS_STOCK_MIMEOLE
-
-# tflags userconf
-ENV_AND_HDR_SPF_MATCH
 
 # good enough
 FB_CIALIS_LEO3
@@ -149,10 +140,22 @@ FH_FROM_TO_PERC
 FM_CUSTOMLOGODSGNc
 
 # good enough
+FS_START_DOYOU
+
+# good enough
 FS_START_DOYOU2
 
 # good enough
 FUZZY_MERIDIA
+
+# good enough
+FUZZY_SPRM
+
+# good enough
+FUZZY_STOCK
+
+# good enough
+FU_HOODIA
 
 # good enough
 GEO_QUERY_STRING
@@ -197,16 +200,31 @@ HASHCASH_HIGH
 HEAD_LONG
 
 # good enough
+HS_EXTRA
+
+# good enough
 HS_FORGED_OE_FW
 
 # good enough
 HS_GETMEOFF
 
 # good enough
+HS_INDEX_PARAM
+
+# good enough
+HS_MEETUP_FOR_SEX
+
+# good enough
+HS_NO_FLOWERS
+
+# good enough
 HS_PHARMA_1
 
 # good enough
 HS_SUBJ_ONLINE_PHARMACEUTICAL
+
+# good enough
+HS_SYNDICATE_P2
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -221,25 +239,19 @@ JM_RCVD_QMAILV1
 KAM_STOCKOTC
 
 # good enough
-KAM_STOCKTIP12
-
-# good enough
 KAM_STOCKTIP15
 
 # good enough
 KAM_STOCKTIP21
 
 # good enough
+KAM_STOCKTIP5
+
+# good enough
 KAM_STOCKTIP6
 
 # good enough
-KAM_STOCKTIP8
-
-# good enough
 MID_DEGREES
-
-# good enough
-MID_MJW_STOX
 
 # good enough
 MID_START_001C
@@ -297,27 +309,6 @@ RCVD_IN_BSP_TRUSTED
 
 # tflags net
 RCVD_IN_DSBL
-
-# tflags net
-RCVD_IN_IADB_EDDB
-
-# tflags net
-RCVD_IN_IADB_EPIA
-
-# tflags net
-RCVD_IN_IADB_LISTED
-
-# tflags net
-RCVD_IN_IADB_OPTIN
-
-# tflags net
-RCVD_IN_IADB_OPTIN_GT50
-
-# tflags net
-RCVD_IN_IADB_SENDERID
-
-# tflags net
-RCVD_IN_IADB_SPF
 
 # tflags net
 RCVD_IN_IADB_VOUCHED
@@ -455,10 +446,10 @@ TVD_DOLLARS_US
 TVD_EB_PHISH
 
 # good enough
-TVD_FINGER_02
+TVD_FLOAT_GENERAL
 
 # good enough
-TVD_FLOAT_GENERAL
+TVD_FROM_1
 
 # good enough
 TVD_FUZZY_DEGREE
@@ -470,7 +461,13 @@ TVD_FUZZY_FINANCE
 TVD_FUZZY_FIXED_RATE
 
 # good enough
+TVD_FUZZY_MICROCAP
+
+# good enough
 TVD_FUZZY_PHARMACEUTICAL
+
+# good enough
+TVD_FUZZY_SECURITIES
 
 # good enough
 TVD_FUZZY_SYMBOL
@@ -480,6 +477,12 @@ TVD_FW_GRAPHIC_ID3
 
 # good enough
 TVD_FW_GRAPHIC_ID3_2
+
+# good enough
+TVD_FW_MESG1
+
+# good enough
+TVD_FW_MESG2
 
 # good enough
 TVD_GET_STOCK
@@ -494,13 +497,13 @@ TVD_INCREASE_SIZE
 TVD_PH_7
 
 # good enough
+TVD_PH_BODY_META
+
+# good enough
 TVD_PH_FR5
 
 # good enough
 TVD_PH_REC
-
-# good enough
-TVD_PH_SEC
 
 # good enough
 TVD_PH_SUBJ_UPDATE
@@ -530,9 +533,6 @@ TVD_RATWARE_MSGID_02
 TVD_SECTION
 
 # good enough
-TVD_SINGLE_SPAN_DIV
-
-# good enough
 TVD_SPACED_SUBJECT_WORD3
 
 # good enough
@@ -548,15 +548,6 @@ TVD_SUBJ_ACC_NUM
 TVD_SUBJ_APPR_LOAN
 
 # good enough
-TVD_SUBJ_END_STAR
-
-# good enough
-TVD_SUBJ_FINGER_03
-
-# good enough
-TVD_SUBJ_FINGER_04
-
-# good enough
 TVD_SUBJ_OWE
 
 # good enough
@@ -564,6 +555,9 @@ TVD_SUBJ_WIPE_DEBT
 
 # good enough
 TVD_UA_FOSTERING
+
+# good enough
+TVD_UNDER_VALUED
 
 # good enough
 TVD_VISIT_PHARMA
@@ -575,10 +569,7 @@ TVD_VIS_HIDDEN
 CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
-CTYPE_1SPACE_GIF
-
-# good enough
-CTYPE_ONETAB_GIF
+CTYPE_8SPACE_GIF
 
 # tflags net
 DNS_FROM_DOB
@@ -587,37 +578,10 @@ DNS_FROM_DOB
 DNS_FROM_OPENWHOIS
 
 # good enough
-FH_RCVD_WITHSMTPFOR
+FM_CLAIM_IPOD
 
 # good enough
-FS_START_DOYOU
-
-# good enough
-FUZZY_SPRM
-
-# good enough
-FUZZY_STOCK
-
-# good enough
-FU_HOODIA
-
-# good enough
-HS_EXTRA
-
-# good enough
-HS_INDEX_PARAM
-
-# good enough
-HS_MEETUP_FOR_SEX
-
-# good enough
-HS_NO_FLOWERS
-
-# good enough
-HS_SYNDICATE_P2
-
-# good enough
-KAM_STOCKTIP5
+KAM_STOCKTIP3
 
 # tflags net
 RCVD_IN_DOB
@@ -722,49 +686,31 @@ RCVD_IN_WHOIS_INVALID
 RCVD_IN_XBL
 
 # good enough
-TVD_BODY_END_STAR
+TVD_APPROVED
 
 # good enough
-TVD_ENHANCE
+TVD_FW_GRAPHIC_NAME_LONG
 
 # good enough
-TVD_FROM_1
+TVD_FW_GRAPHIC_NAME_MID
 
 # good enough
-TVD_FUZZY_MICROCAP
+TVD_HEAD_EDITION
 
 # good enough
-TVD_FUZZY_SECURITIES
+TVD_HEAD_USR
 
 # good enough
-TVD_FW_GRAPHIC_ID1
+TVD_NOT_SATISFIED
 
 # good enough
-TVD_FW_GRAPHIC_ID2
+TVD_PH_SUBJ_META
 
 # good enough
-TVD_FW_MESG1
-
-# good enough
-TVD_FW_MESG2
-
-# good enough
-TVD_LONG_WORD5
-
-# good enough
-TVD_PH_BODY_META
-
-# good enough
-TVD_UNDER_VALUED
+TVD_PH_SUBJ_META_ALL
 
 # tflags net
 URIBL_RHS_DOB
-
-# good enough
-VERTICAL_WORDS_1
-
-# good enough
-VERTICAL_WORDS_2
 
 # tflags net
 WHOIS_AITPRIV
@@ -866,16 +812,10 @@ WHOIS_UNLISTED
 WHOIS_WHOISPROT
 
 # good enough
-ZMIde_LOVEGALX1
+ZMIde_GIRLSRCH1
 
 # good enough
-ZMIde_LOVEGALX2
-
-# good enough
-ZMIde_LOVEGALXURI
-
-# good enough
-ZMIde_URIPORNWEB
+ZMIde_GIRLSRCH2
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -923,9 +863,6 @@ USER_IN_BLACKLIST
 USER_IN_BLACKLIST_TO
 
 # tflags userconf
-USER_IN_DEF_SPF_WL
-
-# tflags userconf
 USER_IN_DEF_WHITELIST
 
 # tflags userconf
@@ -940,38 +877,14 @@ USER_IN_WHITELIST_TO
 # good enough
 VERTICAL_DRUGS_1
 
+# good enough
+VERTICAL_WORDS_1
+
 # tflags net
 WHOIS_1AND1PR
 
 # tflags net
-WHOIS_AITPRIV
-
-# tflags net
-WHOIS_CONTACTPRIV
-
-# tflags net
-WHOIS_DMNBYPROXY
-
-# tflags net
-WHOIS_GKGPROXY
-
-# tflags net
-WHOIS_MONIKER_PRIV
-
-# tflags net
-WHOIS_MYPRIVREG
-
-# tflags net
 WHOIS_NAMEKING
-
-# tflags net
-WHOIS_NETSOLPR
-
-# tflags net
-WHOIS_NOLDC
-
-# tflags net
-WHOIS_PRIVACYPOST
 
 # tflags net
 WHOIS_PRIVPROT
@@ -980,37 +893,25 @@ WHOIS_PRIVPROT
 WHOIS_REGISTERFLY
 
 # tflags net
-WHOIS_SECINFOSERV
-
-# tflags net
 WHOIS_SECUREWHOIS
-
-# tflags net
-WHOIS_SPAMFREE
-
-# tflags net
-WHOIS_UNLISTED
 
 # tflags net
 WHOIS_WHOISGUARD
 
-# tflags net
-WHOIS_WHOISPROT
+# good enough
+ZMIde_LOVEGALX1
 
 # good enough
-ZMIde_EBAYJOBSURI
+ZMIde_LOVEGALX2
+
+# good enough
+ZMIde_LOVEGALXURI
 
 # good enough
 ZMIde_SEXUALEXPL1
 
-# tflags net
-__DNS_FROM_RFC_ABUSE
-
-# tflags net
-__DNS_FROM_RFC_POST
-
-# tflags net
-__DNS_FROM_RFC_WHOIS
+# good enough
+ZMIde_URIPORNWEB
 
 # tflags net
 __RCVD_IN_DOB
