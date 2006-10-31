@@ -11,6 +11,9 @@
 #
 ###########################################################################
 
+# Check - Provides main check functionality
+loadplugin Mail::SpamAssassin::Plugin::Check
+
 # HTTPSMismatch - find URI mismatches between href and anchor text
 #
 loadplugin Mail::SpamAssassin::Plugin::HTTPSMismatch
