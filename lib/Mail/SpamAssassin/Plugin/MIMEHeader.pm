@@ -64,8 +64,10 @@ use strict;
 use warnings;
 use bytes;
 
-use vars qw(@ISA);
+use vars qw(@ISA @TEMPORARY_METHODS);
 @ISA = qw(Mail::SpamAssassin::Plugin);
+
+@TEMPORARY_METHODS = (); 
 
 # ---------------------------------------------------------------------------
 
@@ -146,8 +148,7 @@ sub set_config {
 
       $pluginobj->register_eval_rule($evalfn);
 
-      $pluginobj->register_generated_rule_method(
-        'Mail::SpamAssassin::Plugin::MIMEHeader::'.$evalfn);
+      push @TEMPORARY_METHODS, "Mail::SpamAssassin::Plugin::MIMEHeader::${evalfn}";
     }
   });
 
@@ -188,6 +189,17 @@ sub eval_hook_called {
   }
 
   return ($negated ? 1 : 0);
+}
+
+# ---------------------------------------------------------------------------
+
+sub finish_tests {
+  my ($self, $params) = @_;
+
+  foreach my $method (@TEMPORARY_METHODS) {
+    undef &{$method};
+  }
+  @TEMPORARY_METHODS = ();      # clear for next time
 }
 
 # ---------------------------------------------------------------------------
