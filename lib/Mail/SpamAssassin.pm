@@ -1332,7 +1332,9 @@ method is called.
 sub finish {
   my ($self) = @_;
 
-  Mail::SpamAssassin::PerMsgStatus::finish_tests($self->{conf});
+  $self->call_plugins("finish_tests", { conf => $self->{conf},
+                                        main => $self });
+
   $self->{conf}->finish(); delete $self->{conf};
   $self->{plugins}->finish(); delete $self->{plugins};
 
