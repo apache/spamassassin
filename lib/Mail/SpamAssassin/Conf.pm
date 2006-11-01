@@ -1511,6 +1511,13 @@ some mailing list software moves the real 'Message-Id' to 'Resent-Message-Id'
 or 'X-Message-Id', then uses its own one in the 'Message-Id' header.  The value
 returned for this symbol is the text from all 3 headers, separated by newlines.
 
+=item C<X-Spam-Relays-Untrusted>, C<X-Spam-Relays-Trusted>,
+C<X-Spam-Relays-Internal> and C<X-Spam-Relays-External> represent a portable,
+pre-parsed representation of the message's network path, as recorded in the
+Received headers, divided into 'trusted' vs 'untrusted' and 'internal' vs
+'external' sets.  See C<http://wiki.apache.org/spamassassin/TrustedRelays> for
+more details.
+
 =back
 
 C<op> is either C<=~> (contains regular expression) or C<!~> (does not contain
@@ -2457,10 +2464,14 @@ optional, and the default is shown below.
  _DATE_            rfc-2822 date of scan
  _STARS(*)_        one "*" (use any character) for each full score point
                    (note: limited to 50 'stars')
- _RELAYSTRUSTED_   relays used and deemed to be trusted
- _RELAYSUNTRUSTED_ relays used that can not be trusted
- _RELAYSINTERNAL_  relays used and deemed to be internal
- _RELAYSEXTERNAL_  relays used and deemed to be external
+ _RELAYSTRUSTED_   relays used and deemed to be trusted (see the 
+                   'X-Spam-Relays-Trusted' pseudo-header)
+ _RELAYSUNTRUSTED_ relays used that can not be trusted (see the 
+                   'X-Spam-Relays-Untrusted' pseudo-header)
+ _RELAYSINTERNAL_  relays used and deemed to be internal (see the 
+                   'X-Spam-Relays-Internal' pseudo-header)
+ _RELAYSEXTERNAL_  relays used and deemed to be external (see the 
+                   'X-Spam-Relays-External' pseudo-header)
  _AUTOLEARN_       autolearn status ("ham", "no", "spam", "disabled",
                    "failed", "unavailable")
  _TESTS(,)_        tests hit separated by "," (or other separator)
