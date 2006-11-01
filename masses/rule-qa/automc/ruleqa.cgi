@@ -52,6 +52,7 @@ use POSIX qw();
 use constant DATEREV_ADJ => - (8 * 60 * 60);
 
 my $FREQS_LINE_TEMPLATE;
+my $FREQS_LINE_TEXT_TEMPLATE;
 my $FREQS_EXTRA_TEMPLATE;
 our %AUTOMC_CONF;
 
@@ -950,8 +951,15 @@ sub get_freqs_for_rule {
     <pre class=head>$heads</pre>
     </div>
 
+    <div id="txt_$headers_id" class=headdiv style='display: none'>
+    <p class=headclosep align=right><a
+          href="javascript:hide_header('txt_$headers_id')">[close]</a></p>
+    <pre class=head><<<TEXTS>>></pre>
+    </div>
+
     <br clear="all"/>
     <p class=showfreqslink><a
+      href="javascript:show_header('txt_$headers_id')">(pasteable)</a><a
       href="javascript:show_header('$headers_id')">(source details)</a>
       <a name='$titleplink' href='#$titleplink' class=title_permalink>(#)</a>
     </p>
@@ -1033,10 +1041,15 @@ sub get_freqs_for_rule {
     $FREQS_LINE_TEMPLATE =~ s/<!--\s+<rule>.*?-->//gs;
   }
 
+  my $texts = '';
   foreach my $rule (@rules) {
     if ($rule && defined $self->{freqs_data}{$key}{$rule}) {
       $comment .= $self->rule_anchor($key,$rule);
       $comment .= $self->output_freqs_data_line($self->{freqs_data}{$key}{$rule},
+                \$FREQS_LINE_TEMPLATE,
+                $header_context);
+      $texts .= $self->output_freqs_data_line($self->{freqs_data}{$key}{$rule},
+                \$FREQS_LINE_TEXT_TEMPLATE,
                 $header_context);
     }
     else {
@@ -1046,8 +1059,12 @@ sub get_freqs_for_rule {
         (no data found)
       </td></tr>
       ";
+      $texts .= " (no data found) ";
     }
   }
+
+  # insert the text into that template
+  $comment =~ s/<<<TEXTS>>>/$texts/gs;
   
   print $comment;
   print "</table>";
@@ -1085,6 +1102,11 @@ sub set_freqs_templates {
     -->
   </tr>
 
+  };
+
+  $FREQS_LINE_TEXT_TEMPLATE = qq{
+    [% USE format %][% fmt = format('%7s') %]
+    [% fmt(MSECS) %]  [% fmt(SPAMPC) %]  [% fmt(HAMPC) %]  [% fmt(SO) %]  [% fmt(SCORE) %]  [% NAME %]  [% USERNAME %]  [% AGE %]
   };
 
   $FREQS_EXTRA_TEMPLATE = qq{
@@ -1174,7 +1196,7 @@ sub create_mclog_link {
 }
 
 sub output_freqs_data_line {
-  my ($self, $obj, $header_context) = @_;
+  my ($self, $obj, $template, $header_context) = @_;
 
   # normal freqs lines, with optional subselector after rule name
   my $out = '';
@@ -1196,7 +1218,7 @@ sub output_freqs_data_line {
       $score = '(n/a)';
     }
 
-    $self->{ttk}->process(\$FREQS_LINE_TEMPLATE, {
+    $self->{ttk}->process($template, {
         RULEDETAIL => $detailurl,
         MSECS => $line->{msecs},
         SPAMPC => $line->{spampc},
