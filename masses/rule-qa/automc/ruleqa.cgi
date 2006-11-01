@@ -1059,7 +1059,7 @@ sub get_freqs_for_rule {
         (no data found)
       </td></tr>
       ";
-      $texts .= " (no data found) ";
+      $texts .= "(no data found)\n";
     }
   }
 
