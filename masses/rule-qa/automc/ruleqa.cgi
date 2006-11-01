@@ -969,6 +969,14 @@ sub get_freqs_for_rule {
   $ruleslist ||= '';
   my @rules = split (' ', $ruleslist);
 
+  if (ref $self->{freqs_ordr}{$key} ne 'ARRAY') {
+    print qq(
+      <h3 class=freqs_title>$desc</h3>
+      <i>($key not found in freqs_ordr hash, skipped)</>
+    );
+    return;
+  }
+
   if ($self->{rules_all}) {
     push @rules, @{$self->{freqs_ordr}{$key}};
   }
