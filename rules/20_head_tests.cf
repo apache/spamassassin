@@ -137,7 +137,11 @@ describe FORGED_MSGID_YAHOO	Message-ID is forged, (yahoo.com)
 
 header __MSGID_BEFORE_RECEIVED	ALL =~ /\nMessage-Id:.*\nReceived:/si
 header __MSGID_BEFORE_OKAY	Message-Id =~ /\@[a-z0-9.-]+\.(?:yahoo|wanadoo)(?:\.[a-z]{2,3}){1,2}>/
-meta MSGID_FROM_MTA_HEADER	(__MSGID_BEFORE_RECEIVED && !__MSGID_BEFORE_OKAY)
+
+# bug 4342: thanks Bob
+header   __FROM_HOTMAIL_COM     From =~ /\@hotmail\.com\b/i
+
+meta MSGID_FROM_MTA_HEADER	(__MSGID_BEFORE_RECEIVED && !__MSGID_BEFORE_OKAY && !__FROM_HOTMAIL_COM)
 describe MSGID_FROM_MTA_HEADER	Message-Id was added by a relay
 
 header MSGID_FROM_MTA_HOTMAIL	Message-Id =~ /<MC\d{1,2}-F{1,2}\w{21,22}\@\S*hotmail\.com>/
