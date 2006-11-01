@@ -716,7 +716,7 @@ sub _print_overlap_ratios {
   foreach my $full (sort { $b <=> $a } keys %$hash) {
     my $ratio = $full * 100;
 
-    last if ($ratio < 30);     # 30% cutoff
+    last if ($ratio < 20);     # 20% cutoff
     my $rules = _prettify_overlap_rules($r1, $hash->{$full});
     next if ($rules eq '');
 
