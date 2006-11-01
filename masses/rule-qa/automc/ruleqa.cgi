@@ -475,11 +475,16 @@ sub show_default_view {
 
     <br/>
 
+<!-- 
+
+    (This has been pretty much superceded by the --net mass-checks)
+
     <h4> Which Corpus? </h4>
     <input type=checkbox name=s_defcorpus !s_defcorpus!> Show default non-net ruleset and corpus, set 0<br/>
     <input type=checkbox name=s_net !s_net!> Show frequencies from network tests, set 1<br/>
     <input type=checkbox name=s_html !s_html!> Show frequencies for mails containing HTML only, set 0<br/>
     <br/>
+-->
 
     <h4> Which Rules?</h4>
     Show only these rules (space separated, or regexp with '/' prefix):<br/>
@@ -488,9 +493,9 @@ sub show_default_view {
     Show only rules from files whose paths contain this string:<br/>
     <input type=textfield size=60 name=srcpath value="!srcpath!"><br/>
     <br/>
-    <input type=checkbox name=s_zero !s_zero!> Display rules with no hits<br/>
+    <input type=checkbox name=s_zero !s_zero!> Show rules with zero hits<br/>
+    <input type=checkbox name=s_detail !s_detail!> Display full details: message age in weeks, contributor, score-map, overlap, graphs<br/>
     <br/>
-    <input type=hidden name=s_detail value="!s_detail!" />
 
     <input type=submit name=g value="Change"><br/>
 
