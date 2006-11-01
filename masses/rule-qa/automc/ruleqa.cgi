@@ -494,7 +494,7 @@ sub show_default_view {
     <input type=textfield size=60 name=srcpath value="!srcpath!"><br/>
     <br/>
     <input type=checkbox name=s_zero !s_zero!> Show rules with zero hits<br/>
-    <input type=checkbox name=s_detail !s_detail!> Display full details: message age in weeks, contributor, score-map, overlap, graphs<br/>
+    <input type=checkbox name=s_detail !s_detail!> Display full details: message age in weeks, by contributor, as score-map, overlaps with other rules, freshness graphs<br/>
     <br/>
 
     <input type=submit name=g value="Change"><br/>
