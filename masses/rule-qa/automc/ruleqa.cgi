@@ -1104,10 +1104,12 @@ sub set_freqs_templates {
 
   };
 
-  $FREQS_LINE_TEXT_TEMPLATE = qq{
-    [% USE format %][% fmt = format('%7s') %]
-    [% fmt(MSECS) %]  [% fmt(SPAMPC) %]  [% fmt(HAMPC) %]  [% fmt(SO) %]  [% fmt(SCORE) %]  [% NAME %]  [% USERNAME %]  [% AGE %]
-  };
+  $FREQS_LINE_TEXT_TEMPLATE =
+       qq{[% USE format %][% fmt = format('%7s') %]}.
+       qq{[% fmt(MSECS) %]  [% fmt(SPAMPC) %]  [% fmt(HAMPC) %]  }.
+       qq{[% fmt(SO) %]  [% fmt(RANK) %]  [% fmt(SCORE) %]  }.
+       qq{[% NAME %]  [% USERNAME %]  [% AGE %] }.
+       "\n";
 
   $FREQS_EXTRA_TEMPLATE = qq{
 
