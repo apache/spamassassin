@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-jm bb-zmi cthielen daf dos theo zmi
+# with results from: bb-doc bb-jm bb-zmi cthielen daf parkerm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -55,6 +55,15 @@ BAYES_99
 # good enough
 BROKEN_RATWARE_BOM
 
+# tflags userconf
+CHARSET_FARAWAY
+
+# tflags userconf
+CHARSET_FARAWAY_HEADER
+
+# tflags userconf
+CORRUPT_FROM_LINE_IN_HDRS
+
 # good enough
 CTYPE_ONETAB_GIF
 
@@ -87,6 +96,12 @@ DIGEST_MULTIPLE
 
 # tflags net
 DNS_FROM_AHBL_RHSBL
+
+# tflags net
+DNS_FROM_DOB
+
+# tflags net
+DNS_FROM_OPENWHOIS
 
 # tflags net
 DNS_FROM_RFC_BOGUSMX
@@ -124,6 +139,9 @@ DRUGS_HDIA
 # good enough
 DRUGS_STOCK_MIMEOLE
 
+# tflags userconf
+ENV_AND_HDR_SPF_MATCH
+
 # good enough
 FB_CIALIS_LEO3
 
@@ -151,6 +169,9 @@ FH_FROM_TO_PERC
 # good enough
 FM_CUSTOMLOGODSGNc
 
+# tflags userconf
+FRAGMENTED_MESSAGE
+
 # good enough
 FS_START_DOYOU2
 
@@ -162,6 +183,9 @@ GEO_QUERY_STRING
 
 # good enough
 GMD_FAKETZ
+
+# tflags userconf
+GTUBE
 
 # tflags net
 HABEAS_ACCREDITED_COI
@@ -198,6 +222,9 @@ HASHCASH_HIGH
 
 # tflags userconf
 HEAD_LONG
+
+# tflags userconf
+HIGH_CODEPAGE_URI
 
 # good enough
 HS_FORGED_OE_FW
@@ -246,6 +273,9 @@ MID_MJW_STOX
 
 # good enough
 MID_START_001C
+
+# tflags userconf
+MIME_CHARSET_FARAWAY
 
 # tflags userconf
 MISSING_HB_SEP
@@ -299,7 +329,91 @@ RCVD_IN_BSP_OTHER
 RCVD_IN_BSP_TRUSTED
 
 # tflags net
+RCVD_IN_DOB
+
+# tflags net
 RCVD_IN_DSBL
+
+# tflags net
+RCVD_IN_IADB_DK
+
+# tflags net
+RCVD_IN_IADB_DOPTIN
+
+# tflags net
+RCVD_IN_IADB_DOPTIN_GT50
+
+# tflags net
+RCVD_IN_IADB_DOPTIN_LT50
+
+# tflags net
+RCVD_IN_IADB_EDDB
+
+# tflags net
+RCVD_IN_IADB_EPIA
+
+# tflags net
+RCVD_IN_IADB_GOODMAIL
+
+# tflags net
+RCVD_IN_IADB_LISTED
+
+# tflags net
+RCVD_IN_IADB_LOOSE
+
+# tflags net
+RCVD_IN_IADB_MI_CPEAR
+
+# tflags net
+RCVD_IN_IADB_MI_CPR_30
+
+# tflags net
+RCVD_IN_IADB_MI_CPR_MAT
+
+# tflags net
+RCVD_IN_IADB_ML_DOPTIN
+
+# tflags net
+RCVD_IN_IADB_NOCONTROL
+
+# tflags net
+RCVD_IN_IADB_OOO
+
+# tflags net
+RCVD_IN_IADB_OPTIN
+
+# tflags net
+RCVD_IN_IADB_OPTIN_GT50
+
+# tflags net
+RCVD_IN_IADB_OPTIN_LT50
+
+# tflags net
+RCVD_IN_IADB_OPTOUTONLY
+
+# tflags net
+RCVD_IN_IADB_RDNS
+
+# tflags net
+RCVD_IN_IADB_SENDERID
+
+# tflags net
+RCVD_IN_IADB_SPF
+
+# tflags net
+RCVD_IN_IADB_UNVERIFIED_1
+
+# tflags net
+RCVD_IN_IADB_UNVERIFIED_2
+
+# tflags net
+RCVD_IN_IADB_UT_CPEAR
+
+# tflags net
+RCVD_IN_IADB_UT_CPR_30
+
+# tflags net
+RCVD_IN_IADB_UT_CPR_MAT
 
 # tflags net
 RCVD_IN_IADB_VOUCHED
@@ -488,9 +602,6 @@ TVD_PH_FR5
 TVD_PH_REC
 
 # good enough
-TVD_PH_SUBJ_ACCOUNTS_POST
-
-# good enough
 TVD_PH_SUBJ_META_ALL
 
 # good enough
@@ -559,104 +670,26 @@ TVD_VISIT_PHARMA
 # good enough
 TVD_VIS_HIDDEN
 
-# tflags userconf
-CORRUPT_FROM_LINE_IN_HDRS
+# good enough
+CTYPE_1SPACE_GIF
 
 # good enough
-CTYPE_8SPACE_GIF
+FB_SAVE_LEO
 
-# tflags net
-DNS_FROM_DOB
+# good enough
+FB_THOUS_PERSONAL
 
-# tflags net
-DNS_FROM_OPENWHOIS
+# good enough
+FB_YOURSELF_MASTER
 
-# tflags net
-RCVD_IN_DOB
+# good enough
+KAM_STOCKTIP12
+
+# good enough
+MID_14DIGITS_HEX
 
 # tflags net
 RCVD_IN_DSBL
-
-# tflags net
-RCVD_IN_IADB_DK
-
-# tflags net
-RCVD_IN_IADB_DOPTIN
-
-# tflags net
-RCVD_IN_IADB_DOPTIN_GT50
-
-# tflags net
-RCVD_IN_IADB_DOPTIN_LT50
-
-# tflags net
-RCVD_IN_IADB_EDDB
-
-# tflags net
-RCVD_IN_IADB_EPIA
-
-# tflags net
-RCVD_IN_IADB_GOODMAIL
-
-# tflags net
-RCVD_IN_IADB_LISTED
-
-# tflags net
-RCVD_IN_IADB_LOOSE
-
-# tflags net
-RCVD_IN_IADB_MI_CPEAR
-
-# tflags net
-RCVD_IN_IADB_MI_CPR_30
-
-# tflags net
-RCVD_IN_IADB_MI_CPR_MAT
-
-# tflags net
-RCVD_IN_IADB_ML_DOPTIN
-
-# tflags net
-RCVD_IN_IADB_NOCONTROL
-
-# tflags net
-RCVD_IN_IADB_OOO
-
-# tflags net
-RCVD_IN_IADB_OPTIN
-
-# tflags net
-RCVD_IN_IADB_OPTIN_GT50
-
-# tflags net
-RCVD_IN_IADB_OPTIN_LT50
-
-# tflags net
-RCVD_IN_IADB_OPTOUTONLY
-
-# tflags net
-RCVD_IN_IADB_RDNS
-
-# tflags net
-RCVD_IN_IADB_SENDERID
-
-# tflags net
-RCVD_IN_IADB_SPF
-
-# tflags net
-RCVD_IN_IADB_UNVERIFIED_1
-
-# tflags net
-RCVD_IN_IADB_UNVERIFIED_2
-
-# tflags net
-RCVD_IN_IADB_UT_CPEAR
-
-# tflags net
-RCVD_IN_IADB_UT_CPR_30
-
-# tflags net
-RCVD_IN_IADB_UT_CPR_MAT
 
 # tflags net
 RCVD_IN_MAPS_DUL
@@ -674,13 +707,109 @@ RCVD_IN_WHOIS_INVALID
 RCVD_IN_XBL
 
 # good enough
-TVD_FW_GRAPHIC_NAME_LONG
+RDNS_INDICATOR_DYN
 
 # good enough
-TVD_FW_GRAPHIC_NAME_MID
+RDNS_INDICATOR_RES
+
+# good enough
+RDNS_INDICATOR_TYPE2
+
+# good enough
+TVD_FUZZY_FIXED_RATE
+
+# good enough
+TVD_FW_GRAPHIC_ID1
+
+# good enough
+TVD_FW_GRAPHIC_ID2
+
+# good enough
+TVD_FW_MESG1
+
+# good enough
+TVD_PH_SUBJ_META
+
+# good enough
+TVD_RATWARE_MSGID_01
+
+# good enough
+TVD_SUBJ_FINGER_03
+
+# good enough
+ZMIde_EBAYJOBSURI
+
+# tflags userconf
+UNPARSEABLE_RELAY
+
+# tflags net
+URIBL_AB_SURBL
+
+# tflags net
+URIBL_BLACK
+
+# tflags net
+URIBL_GREY
+
+# tflags net
+URIBL_JP_SURBL
+
+# tflags net
+URIBL_OB_SURBL
+
+# tflags net
+URIBL_PH_SURBL
+
+# tflags net
+URIBL_RED
 
 # tflags net
 URIBL_RHS_DOB
+
+# tflags net
+URIBL_SBL
+
+# tflags net
+URIBL_SC_SURBL
+
+# tflags net
+URIBL_WS_SURBL
+
+# good enough
+URI_L_PHP
+
+# tflags userconf
+USER_IN_ALL_SPAM_TO
+
+# tflags userconf
+USER_IN_BLACKLIST
+
+# tflags userconf
+USER_IN_BLACKLIST_TO
+
+# tflags userconf
+USER_IN_DEF_SPF_WL
+
+# tflags userconf
+USER_IN_DEF_WHITELIST
+
+# tflags userconf
+USER_IN_MORE_SPAM_TO
+
+# tflags userconf
+USER_IN_SPF_WHITELIST
+
+# tflags userconf
+USER_IN_WHITELIST
+
+# tflags userconf
+USER_IN_WHITELIST_TO
+
+# good enough
+VERTICAL_DRUGS_1
+
+# tflags net
+WHOIS_1AND1PR
 
 # tflags net
 WHOIS_AITPRIV
@@ -737,6 +866,9 @@ WHOIS_MONIKER_PRIV
 WHOIS_MYPRIVREG
 
 # tflags net
+WHOIS_NAMEKING
+
+# tflags net
 WHOIS_NAMESECURE
 
 # tflags net
@@ -758,7 +890,13 @@ WHOIS_PRIVACYPOST
 WHOIS_PRIVDOMAIN
 
 # tflags net
+WHOIS_PRIVPROT
+
+# tflags net
 WHOIS_REGISTER4LESS
+
+# tflags net
+WHOIS_REGISTERFLY
 
 # tflags net
 WHOIS_REGTEK
@@ -770,6 +908,9 @@ WHOIS_SAFENAMES
 WHOIS_SECINFOSERV
 
 # tflags net
+WHOIS_SECUREWHOIS
+
+# tflags net
 WHOIS_SPAMFREE
 
 # tflags net
@@ -779,88 +920,22 @@ WHOIS_SRSPLUS
 WHOIS_UNLISTED
 
 # tflags net
-WHOIS_WHOISPROT
-
-# tflags userconf
-UNPARSEABLE_RELAY
-
-# tflags net
-URIBL_AB_SURBL
-
-# tflags net
-URIBL_BLACK
-
-# tflags net
-URIBL_GREY
-
-# tflags net
-URIBL_JP_SURBL
-
-# tflags net
-URIBL_OB_SURBL
-
-# tflags net
-URIBL_PH_SURBL
-
-# tflags net
-URIBL_RED
-
-# tflags net
-URIBL_SBL
-
-# tflags net
-URIBL_SC_SURBL
-
-# tflags net
-URIBL_WS_SURBL
-
-# good enough
-URI_L_PHP
-
-# tflags userconf
-USER_IN_ALL_SPAM_TO
-
-# tflags userconf
-USER_IN_BLACKLIST
-
-# tflags userconf
-USER_IN_BLACKLIST_TO
-
-# tflags userconf
-USER_IN_DEF_WHITELIST
-
-# tflags userconf
-USER_IN_MORE_SPAM_TO
-
-# tflags userconf
-USER_IN_WHITELIST
-
-# tflags userconf
-USER_IN_WHITELIST_TO
-
-# good enough
-VERTICAL_DRUGS_1
-
-# tflags net
-WHOIS_1AND1PR
-
-# tflags net
-WHOIS_NAMEKING
-
-# tflags net
-WHOIS_PRIVPROT
-
-# tflags net
-WHOIS_REGISTERFLY
-
-# tflags net
-WHOIS_SECUREWHOIS
-
-# tflags net
 WHOIS_WHOISGUARD
+
+# tflags net
+WHOIS_WHOISPROT
 
 # good enough
 ZMIde_SEXUALEXPL1
+
+# tflags net
+__DNS_FROM_RFC_ABUSE
+
+# tflags net
+__DNS_FROM_RFC_POST
+
+# tflags net
+__DNS_FROM_RFC_WHOIS
 
 # tflags net
 __RCVD_IN_DOB
