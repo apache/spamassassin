@@ -282,9 +282,6 @@ mimeheader __PART_CID_STOCK_LESS    Content-ID =~ /^<00[a-f0-9]{10}\$[a-f0-9]{8}
 meta PART_CID_STOCK_LESS (__PART_STOCK_IMG&&__PART_CID_STOCK_LESS)
 describe PART_CID_STOCK_LESS Has a spammy image attachment (by Content-ID, more specific)
 
-mimeheader CTYPE_1SPACE_GIF Content-Type:raw =~ /image\/gif;\n name=\".+?\"\s*$/s
-describe CTYPE_1SPACE_GIF   Stock spam image part 'Content-Type' found
-
 endif # Mail::SpamAssassin::Plugin::MIMEHeader
 
 header RCVD_FORGED_WROTE    Received =~ /from \d\S+\d \(HELO [a-z]\S+\) by \S+ with esmtp \([A-Z0-9]/s
