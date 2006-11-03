@@ -244,6 +244,7 @@ GetOptions(
   'socketpath=s'             => \$opt{'socketpath'},
   'sql-config!'              => \$opt{'sql-config'},
   'ssl'                      => \$opt{'ssl'},
+  'ssl-port=s'               => \$opt{'ssl-port'},
   'syslog-socket=s'          => \$opt{'syslog-socket'},
   'syslog|s=s'               => \$opt{'syslog'},
   'timeout-tcp|T=i'          => \$opt{'timeout-tcp'},
@@ -311,20 +312,39 @@ foreach my $opt (
   ) if ( $opt{$opt} );
 }
 
-# sanity checking on parameters: if --socketpath is used, it means that we're using
-# UNIX domain sockets, none of the IP params are allowed. The code would probably
-# work ok if we didn't check it, but it's better if we detect the error and report
-# it lest the admin find surprises.
+# sanity checking on parameters: if --socketpath is used, and --port or
+# --ssl-port is NOT specified, it means that we're using UNIX domain sockets,
+# none of the IP params are allowed. The code would probably work ok if we
+# didn't check it, but it's better if we detect the error and report it lest
+# the admin find surprises.
+
+my $listen_unix = 1;
+my $listen_inet = 1;
+my $listen_ssl  = 1;
+if (!defined $opt{'socketpath'}) {
+  $listen_unix = 0;
+} else {
+  $listen_inet = $listen_ssl = 0;
+}
+if (defined $opt{'ssl'} && !defined $opt{'ssl-port'}) {
+  $listen_inet = 0;
+}
 
 if (
-  defined $opt{'socketpath'}
-  and ( ( @{ $opt{'allowed-ip'} } > 0 )
-    or defined $opt{'ssl'}
+  ( @{ $opt{'allowed-ip'} } > 0 )
     or defined $opt{'auth-ident'}
-    or defined $opt{'port'} )
+    or defined $opt{'port'}
   )
 {
-  print_usage_and_exit("ERROR: --socketpath mutually exclusive with --allowed-ip/--ssl/--port params");
+  $listen_inet = 1;
+}
+
+if (
+    defined $opt{'ssl'}
+    or defined $opt{'ssl-port'}
+  )
+{
+  $listen_ssl = 1;
 }
 
 if (
@@ -549,13 +569,9 @@ if ( defined $ENV{'HOME'} ) {
 
 # Do whitelist later in tmp dir. Side effect: this will be done as -u user.
 
-my ( $port, $addr, $proto );
-my ($listeninfo);              # just for reporting
+my ( $sslport, $inetport, $addr, $proto );
 
-if ( defined $opt{'socketpath'} ) {
-  $listeninfo = "UNIX domain socket " . $opt{'socketpath'};
-}
-else {
+if ( $listen_inet || $listen_ssl ) {
   $proto = getprotobyname('tcp') or die "getprotobyname(tcp): $!";
 
   $addr = $opt{'listen-ip'};
@@ -571,15 +587,36 @@ else {
   else {
     $addr = '127.0.0.1';
   }
+}
 
-  $port = $opt{'port'} || 783;
-  if ($port !~ /^(\d+)$/ ) {
-    $port = ( getservbyname($port, 'tcp') )[2];
-    die "spamd: invalid port: $opt{'port'}\n" unless $port;
+my @listeninfo = ();
+
+if ( $listen_unix ) {
+  push @listeninfo, "UNIX domain socket " . $opt{'socketpath'};
+}
+
+if ( $listen_ssl ) {
+  $sslport = $opt{'ssl-port'} || $opt{'port'} || 783;
+  if ($sslport !~ /^(\d+)$/ ) {
+    $sslport = ( getservbyname($sslport, 'tcp') )[2];
+    die "spamd: invalid ssl-port: $opt{'port'}\n" unless $sslport;
   }
 
-  $listeninfo = "port $port/tcp";
+  push @listeninfo, "SSL port $sslport/tcp";
 }
+
+if ( $listen_inet ) {
+  $inetport = $opt{'port'} || 783;
+  if ($inetport !~ /^(\d+)$/ ) {
+    $inetport = ( getservbyname($inetport, 'tcp') )[2];
+    die "spamd: invalid port: $opt{'port'}\n" unless $inetport;
+  }
+
+  push @listeninfo, "port $inetport/tcp";
+}
+
+# just for reporting at startup
+my $listeninfo = join ', ', @listeninfo;
 
 my $backchannel = Mail::SpamAssassin::SubProcBackChannel->new();
 my $scaling;
@@ -604,9 +641,13 @@ if (!$opt{'round-robin'})
       });
 }
 
-# Be a well-behaved daemon
-my $server;
-if ( $opt{'socketpath'} ) {
+my ( $server_inet, $server_unix, $server_ssl );
+my ( $fd_inet, $fd_unix, $fd_ssl );
+my $have_multiple_server_socks;
+my $server_select_mask;
+
+# Create the sockets
+if ( $listen_unix ) {
   my $path = $opt{'socketpath'};
 
   #---------------------------------------------------------------------
@@ -642,15 +683,15 @@ if ( $opt{'socketpath'} ) {
     Listen => SOMAXCONN,
   );
   dbg("spamd: creating UNIX socket:\n" . join("\n", map { " $_: " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket));
-  $server = IO::Socket::UNIX->new(%socket);
+  $server_unix = IO::Socket::UNIX->new(%socket);
   
   # sanity check!  cf. bug 3490
-  if (not $server or not -S $path) {
-    unless ($server) {
+  if (not $server_unix or not -S $path) {
+    unless ($server_unix) {
       dbg "spamd: socket path might have been truncated due to system limits\n";
       die "spamd: could not create UNIX socket on $path: $!\n";
     }
-    my $hostpath = $server->hostpath();
+    my $hostpath = $server_unix->hostpath();
     if ($hostpath ne $path) {
       warn "spamd: socket path was truncated at position " . length($hostpath) . "\n";
       warn "spamd: leaving stale socket at $hostpath\n" if -S $hostpath;
@@ -692,10 +733,11 @@ if ( $opt{'socketpath'} ) {
     die "spamd: could not chmod $path to $mode: $!";
   }
 }
-elsif ( $opt{'ssl'} ) {
+
+if ( $listen_ssl ) {
   my %socket = (
     LocalAddr       => $addr,
-    LocalPort       => $port,
+    LocalPort       => $sslport,
     Proto           => $proto,
     Type            => SOCK_STREAM,
     ReuseAddr       => 1,
@@ -705,22 +747,26 @@ elsif ( $opt{'ssl'} ) {
     SSL_cert_file   => $opt{'server-cert'}
   );
   dbg("spamd: creating SSL socket:\n" . join("\n", map { " $_:  " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket));
-  $server = new IO::Socket::SSL(%socket)
-       || die "spamd: could not create SSL socket on $addr:$port: $!\n";
+  $server_ssl = new IO::Socket::SSL(%socket)
+       || die "spamd: could not create SSL socket on $addr:$sslport: $!\n";
 }
-else {
+
+if ( $listen_inet ) {
   my %socket = (
     LocalAddr => $addr,
-    LocalPort => $port,
+    LocalPort => $inetport,
     Proto     => $proto,
     Type      => SOCK_STREAM,
     ReuseAddr => 1,
     Listen    => SOMAXCONN
   );
   dbg("spamd: creating INET socket:\n" . join("\n", map { " $_: " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket));
-  $server = new_io_socket_inetx(%socket)
-       || die "spamd: could not create INET socket on $addr:$port: $!\n";
+  $server_inet = new_io_socket_inetx(%socket)
+       || die "spamd: could not create INET socket on $addr:$inetport: $!\n";
 }
+
+# for select() purposes: make a map of the server socket FDs
+map_server_sockets();
 
 if ( defined $opt{'pidfile'} ) {
   $opt{'pidfile'} =
@@ -793,10 +839,6 @@ setup_parent_sig_handlers();
 my $current_msgid = "(none)";
 $SIG{USR2} = \&backtrace_handler;
 
-my $select_mask = '';
-vec($select_mask, $server->fileno, 1) = 1;
-$backchannel->set_selector(\$select_mask);
-
 # log server started, but processes watching the log to wait for connect
 # should wait until they see the pid, after signal handlers are in place
 # FIXME: two calls are one too much
@@ -826,7 +868,7 @@ for ( 1 .. $childlimit ) {
 }
 
 if ($scaling) {
-  $scaling->set_server_fh($server);
+  $scaling->set_server_fh($server_inet, $server_unix, $server_ssl);
 }
 
 while (1) {
@@ -1020,8 +1062,37 @@ sub spawn {
   }
 }
 
+sub accept_from_any_server_socket {
+
+  my $fdvec = $server_select_mask;
+
+  if ($have_multiple_server_socks) {
+    # determine which of our server FDs is ready using select().
+    # We only need to do this if we have more than one server
+    # socket supported, since otherwise there can only be one socket
+    # with a client waiting.
+    # (TODO: we could extend the prefork protocol to pass this data)
+    my $nfound = select($fdvec, undef, undef, 0.1);
+    die "oops? accept_a_conn: no fds ready" unless $nfound;
+  }
+
+  if ($fd_inet && vec $fdvec, $fd_inet, 1) {
+    $client = $server_inet->accept;
+  }
+  elsif ($fd_unix && vec $fdvec, $fd_unix, 1) {
+    $client = $server_unix->accept;
+  }
+  elsif ($fd_ssl && vec $fdvec, $fd_ssl, 1) {
+    $client = $server_ssl->accept;
+  }
+  else {
+    die "accept_a_conn: no fds ready by vec: $fdvec";
+  }
+  return $client;
+}
+
 sub accept_a_conn {
-  $client = $server->accept();
+  $client = accept_from_any_server_socket();
 
   if ($scaling) {
     $scaling->update_child_status_busy();
@@ -2023,7 +2094,9 @@ sub setup_child_sig_handlers {
 sub kill_handler {
   my ($sig) = @_;
   info("spamd: server killed by SIG$sig, shutting down");
-  $server->close;
+  $server_inet and $server_inet->close;
+  $server_unix and $server_unix->close;
+  $server_ssl  and $server_ssl->close;
 
   if (defined($opt{'pidfile'})) {
     unlink($opt{'pidfile'}) || warn "spamd: cannot unlink $opt{'pidfile'}: $!\n";
@@ -2094,16 +2167,25 @@ sub restart_handler {
   }
   %children = ();
 
-  unless ( $server->eof ) {
-    $server->shutdown(2);
-    $server->close;
+  unless ( !$server_inet || $server_inet->eof ) {
+    $server_inet->shutdown(2);
+    $server_inet->close;
+    info("spamd: server INET socket closed");
+  }
 
-    # the UNIX domain socket
+  unless ( !$server_unix || $server_unix->eof ) {
+    $server_unix->shutdown(2);
+    $server_unix->close;
     if (defined($opt{'socketpath'})) {
       unlink($opt{'socketpath'}) || warn "spamd: cannot unlink $opt{'socketpath'}: $!\n";
     }
+    info("spamd: server UNIX socket closed");
+  }
 
-    info("spamd: server socket closed");
+  unless ( !$server_ssl || $server_ssl->eof ) {
+    $server_ssl->shutdown(2);
+    $server_ssl->close;
+    info("spamd: server SSL socket closed");
   }
   $got_sighup = 1;
 }
@@ -2203,6 +2285,26 @@ sub preload_modules_with_tmp_homedir {
   }
 }
 
+sub map_server_sockets {
+  $fd_inet = $server_inet ? $server_inet->fileno : undef;
+  $fd_unix = $server_unix ? $server_unix->fileno : undef;
+  $fd_ssl  = $server_ssl  ? $server_ssl->fileno  : undef;
+
+  $server_select_mask = '';
+  $server_inet and vec($server_select_mask, $fd_inet, 1) = 1;
+  $server_unix and vec($server_select_mask, $fd_unix, 1) = 1;
+  $server_ssl  and vec($server_select_mask, $fd_ssl,  1) = 1;
+
+  my $back_selector = $server_select_mask;
+  $backchannel->set_selector(\$back_selector);
+
+  # and set a boolean indicating whether or not we have > 1 server socket
+  $have_multiple_server_socks =
+      ((defined $fd_inet ? 1 : 0) +
+      (defined $fd_unix ? 1 : 0) +
+      (defined $fd_ssl  ? 1 : 0)) > 1;
+}
+
 __DATA__
 
 =head1 NAME
@@ -2257,6 +2359,7 @@ Options:
  -P, --paranoid                     Die upon user errors
  -H [dir], --helper-home-dir[=dir]  Specify a different HOME directory
  --ssl                              Run an SSL server
+ --ssl-port port                    Listen on port for SSL connections
  --server-key keyfile               Specify an SSL keyfile
  --server-cert certfile             Specify an SSL certificate
  --socketpath=path                  Listen on given UNIX domain socket
@@ -2348,6 +2451,13 @@ will make spamd listen on the first address that name resolves to.
 =item B<-p> I<port>, B<--port>=I<port>
 
 Optionally specifies the port number for the server to listen on (default: 783).
+
+If the B<--ssl> switch is used, and B<--ssl-port> is not supplied, then this
+port will be used to accept SSL connections instead of unencrypted connections.
+If the B<--ssl> switch is used, and B<--ssl-port> is set, then unencrypted
+connections will be accepted on the B<--port> at the same time as encrypted
+connections are accepted at B<--ssl-port>.
+
 
 =item B<-q>, B<--sql-config>
 
@@ -2654,6 +2764,18 @@ home directory instead.
 Accept only SSL connections.  The B<IO::Socket::SSL> perl module must be
 installed.
 
+If the B<--ssl> switch is used, and B<--ssl-port> is not supplied, then
+B<--port> port will be used to accept SSL connections instead of unencrypted
+connections.  If the B<--ssl> switch is used, and B<--ssl-port> is set, then
+unencrypted connections will be accepted on the B<--port>, at the same time as
+encrypted connections are accepted at B<--ssl-port>.
+
+=item B<--ssl-port>=I<port>
+
+Optionally specifies the port number for the server to listen on for
+SSL connections (default: whatever --port uses).  See B<--ssl> for
+more details.
+
 =item B<--server-key> I<keyfile>
 
 Specify the SSL key file to use for SSL connections.
@@ -2671,6 +2793,10 @@ have a bug regarding paths of over 100 bytes or so (SpamAssassin bug 4380).  If
 you see a 'could not find newly-created UNIX socket' error message, and the
 path appears truncated, this may be the cause.  Try using a shorter path
 to the socket.
+
+By default, use of B<--socketpath> will inhibit SSL connections and unencrypted
+TCP connections.  To enable them, specify B<--port> and/or B<--ssl-port>
+explicitly.
 
 =item B<--socketowner> I<name>
 
