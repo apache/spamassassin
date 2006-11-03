@@ -187,9 +187,16 @@ sub compute_lowest_child_pid {
 ###########################################################################
 
 sub set_server_fh {
-  my ($self, $fh) = @_;
-  $self->{server_fh} = $fh;
-  $self->{server_fileno} = $fh->fileno();
+  my ($self, @fhs) = @_;
+
+  $self->{server_fh} = [];
+  $self->{server_fileno} = [];
+
+  foreach my $fh (@fhs) {
+    next unless defined $fh;
+    push @{$self->{server_fh}}, $fh;
+    push @{$self->{server_fileno}}, $fh->fileno();
+  }
 }
 
 sub main_server_poll {
@@ -199,7 +206,7 @@ sub main_server_poll {
   if ($self->{overloaded}) {
     # don't select on the server fh -- we already KNOW that's ready,
     # since we're overloaded
-    vec($rin, $self->{server_fileno}, 1) = 0;
+    $self->vec_all(\$rin, $self->{server_fileno}, 0);
   }
 
   my ($rout, $eout, $nfound, $timeleft, $selerr);
@@ -265,7 +272,7 @@ sub main_server_poll {
 
   # errors on the handle?
   # return them immediately, they may be from a SIGHUP restart signal
-  if (vec ($eout, $self->{server_fileno}, 1)) {
+  if ($self->vec_all(\$eout, $self->{server_fileno})) {
     warn "prefork: select returned error on server filehandle: $selerr $!\n";
     return;
   }
@@ -283,7 +290,7 @@ sub main_server_poll {
   }
 
   # were the kids ready, or did we get signal?
-  if (vec ($rout, $self->{server_fileno}, 1)) {
+  if ($self->vec_all(\$rout, $self->{server_fileno})) {
     # dbg("prefork: server fh ready");
     # the server socket: new connection from a client
     if (!$self->order_idle_child_to_accept()) {
@@ -765,6 +772,20 @@ sub need_to_del_server {
   kill 'INT' => $pid;
 
   dbg("prefork: adjust: decreasing, too many idle children ($num_idle > $self->{max_idle}), killed $pid");
+}
+
+sub vec_all {
+  my ($self, $bitsref, $fhs, $value) = @_;
+  my $ret = 0;
+  foreach my $fh (@{$fhs}) {
+    next unless defined $fh;
+    if (defined $value) {
+      vec($$bitsref, $fh, 1) = $value;
+    } else {
+      $ret |= vec($$bitsref, $fh, 1);
+    }
+  }
+  return $ret;
 }
 
 1;
