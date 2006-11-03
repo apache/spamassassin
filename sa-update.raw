@@ -146,6 +146,7 @@ GetOptions(
   'debug|D:s'                           => \$opt{'debug'},
   'version|V'                           => \$opt{'version'},
   'help|h|?'                            => \$opt{'help'},
+  'checkonly'                           => \$opt{'checkonly'},
 
   # allow multiple of these on the commandline
   'gpgkey=s'				=> $opt{'gpgkey'},
@@ -440,6 +441,13 @@ foreach my $channel (@channels) {
   if ($currentV >= $newV) {
     dbg("channel: current version is $currentV, new version is $newV, skipping channel");
     next;
+  }
+
+  # If we are only checking for update availability, exit now
+  if ( defined $opt{'checkonly'} ) {            
+    dbg("channel: update available and in checkonly mode, exiting now");
+    $exit = 0;
+    last;
   }
 
   # Read in the MIRRORED.BY file if it exists
@@ -1283,6 +1291,8 @@ Options:
   				Use multiple times for multiple channels
   --channelfile file		Retrieve updates from the channels in the file
 
+  --checkonly		        Check for update availability, do not install
+
 
   --gpgkey key			Trust the key id to sign releases
   				Use multiple times for multiple keys
@@ -1333,6 +1343,11 @@ multiple times, once per channel.  i.e.:
 Similar to the B<--channel> option, except specify the additional channels in a
 file instead of on the commandline.  This is extremely useful when there are a
 lot of additional channels.
+
+=item B<--checkonly>
+
+Only check if an update is available, don't actually download and install it.
+The exit code will be C<0> or C<1> as described below.
 
 =item B<--gpg>, B<--nogpg>
 
@@ -1423,7 +1438,7 @@ Print sa-update version and exit.
 =head1 EXIT CODES
 
 An exit code of C<0> means an update was available, and was downloaded and
-installed successfully.
+installed successfully if --checkonly was not specified.
 
 An exit code of C<1> means no fresh updates were available.
 
