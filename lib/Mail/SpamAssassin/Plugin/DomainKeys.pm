@@ -29,9 +29,13 @@ Signature:
 
 Policy:
    Note that DK policy record is only fetched if DK_VERIFIED is false
-   to save signing domain from unnecessary DNS queries;
-   as recommended by draft-delany-domainkeys-base (SHOULD)!
-   Rules DK_POLICY_* will return false when DK_VERIFIED is true.
+   to save signing domain from unnecessary DNS queries,
+   as recommended (SHOULD) by draft-delany-domainkeys-base.
+   Rules DK_POLICY_* should preferably not be relied upon when DK_VERIFIED
+   is true, although they will return false in current implementation
+   when a policy record is not fetched, except for DK_POLICY_TESTING,
+   which is true if t=y appears in a public key record OR in a policy
+   record (when available).
  header DK_POLICY_TESTING        eval:check_domainkeys_testing()
  header DK_POLICY_SIGNSOME       eval:check_domainkeys_signsome()
  header DK_POLICY_SIGNALL        eval:check_domainkeys_signall()
@@ -260,7 +264,7 @@ sub _check_domainkeys {
   dbg("dk: signature: $dksighdr")  if defined $dksighdr;
 
   $self->sanitize_header_for_dk(\$header)
-    if defined($dksighdr) && !grep {/^h=/i} split(/[ \t]*;[ \t]*/,$dksighdr);
+    if defined $dksighdr && $dksighdr !~ /(?:^|;)[ \t]*h=/;  # case sensitive
 
   my $message = Mail::DomainKeys::Message->load(HeadString => $header,
 						 BodyReference => $body);
@@ -333,6 +337,10 @@ sub _dk_lookup_trapped {
       $scan->{domainkeys_verified} = 1;
     }
   }
+  # testing flag in signature
+  if ($message->testing()) {
+    $scan->{domainkeys_testing} = 1;
+  }
   my $policy;
   if (!$scan->{domainkeys_verified}) {
     # Recipient systems SHOULD not retrieve a policy TXT record
@@ -350,8 +358,8 @@ sub _dk_lookup_trapped {
     $scan->{domainkeys_signsome} = 1;
   }
 
-  # domain or key testing
-  if ($message->testing() || $policy->testing()) {
+  # testing flag in policy
+  if ($policy->testing()) {
     $scan->{domainkeys_testing} = 1;
   }
 
@@ -394,7 +402,8 @@ sub _dkmsg_signing_domain {
     return $message->signature->domain;
   } else {
     # otherwise parse it ourself
-    if ($scan->{msg}->get_header("DomainKey-Signature") =~ /d=([^;\s]+)/) {
+    if ($scan->{msg}->get_header("DomainKey-Signature") =~
+        /(?: ^|; ) [ \t]* d= [ \t]* ([^;]*?) [ \t]* (?: ;|$ )/x) {
       return $1;
     }
     return undef;
