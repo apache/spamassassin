@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-jm bb-zmi cthielen daf parkerm theo zmi
+# with results from: bb-doc bb-jm bb-zmi cthielen daf dos parkerm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -149,10 +149,19 @@ FB_CIALIS_LEO3
 FB_OBFU_URI_COM
 
 # good enough
+FB_SAVE_LEO
+
+# good enough
+FB_THOUS_PERSONAL
+
+# good enough
 FB_VALIUM_LEO2
 
 # good enough
 FB_VIAGRA_LEO3
+
+# good enough
+FB_YOURSELF_MASTER
 
 # good enough
 FH_DATE_IS_19XX
@@ -254,6 +263,9 @@ JM_RCVD_QMAILV1
 KAM_STOCKOTC
 
 # good enough
+KAM_STOCKTIP12
+
+# good enough
 KAM_STOCKTIP15
 
 # good enough
@@ -264,6 +276,9 @@ KAM_STOCKTIP6
 
 # good enough
 KAM_STOCKTIP8
+
+# good enough
+MID_14DIGITS_HEX
 
 # good enough
 MID_DEGREES
@@ -569,6 +584,9 @@ TVD_FUZZY_DEGREE
 TVD_FUZZY_FINANCE
 
 # good enough
+TVD_FUZZY_FIXED_RATE
+
+# good enough
 TVD_FUZZY_MICROCAP
 
 # good enough
@@ -582,6 +600,9 @@ TVD_FW_GRAPHIC_ID3
 
 # good enough
 TVD_FW_GRAPHIC_ID3_2
+
+# good enough
+TVD_FW_MESG1
 
 # good enough
 TVD_HEAD_KERNEL
@@ -600,6 +621,9 @@ TVD_PH_FR5
 
 # good enough
 TVD_PH_REC
+
+# good enough
+TVD_PH_SUBJ_META
 
 # good enough
 TVD_PH_SUBJ_META_ALL
@@ -624,6 +648,9 @@ TVD_RATWARE_CB
 
 # good enough
 TVD_RATWARE_CB_2
+
+# good enough
+TVD_RATWARE_MSGID_01
 
 # good enough
 TVD_RATWARE_MSGID_02
@@ -653,6 +680,9 @@ TVD_SUBJ_APPR_LOAN
 TVD_SUBJ_END_STAR
 
 # good enough
+TVD_SUBJ_FINGER_03
+
+# good enough
 TVD_SUBJ_FINGER_04
 
 # good enough
@@ -671,22 +701,10 @@ TVD_VISIT_PHARMA
 TVD_VIS_HIDDEN
 
 # good enough
-CTYPE_1SPACE_GIF
+CTYPE_8SPACE_GIF
 
 # good enough
-FB_SAVE_LEO
-
-# good enough
-FB_THOUS_PERSONAL
-
-# good enough
-FB_YOURSELF_MASTER
-
-# good enough
-KAM_STOCKTIP12
-
-# good enough
-MID_14DIGITS_HEX
+HELO_NO_DOMAIN
 
 # tflags net
 RCVD_IN_DSBL
@@ -707,37 +725,10 @@ RCVD_IN_WHOIS_INVALID
 RCVD_IN_XBL
 
 # good enough
-RDNS_INDICATOR_DYN
+TVD_FW_GRAPHIC_NAME_LONG
 
 # good enough
-RDNS_INDICATOR_RES
-
-# good enough
-RDNS_INDICATOR_TYPE2
-
-# good enough
-TVD_FUZZY_FIXED_RATE
-
-# good enough
-TVD_FW_GRAPHIC_ID1
-
-# good enough
-TVD_FW_GRAPHIC_ID2
-
-# good enough
-TVD_FW_MESG1
-
-# good enough
-TVD_PH_SUBJ_META
-
-# good enough
-TVD_RATWARE_MSGID_01
-
-# good enough
-TVD_SUBJ_FINGER_03
-
-# good enough
-ZMIde_EBAYJOBSURI
+TVD_FW_GRAPHIC_NAME_MID
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -924,6 +915,9 @@ WHOIS_WHOISGUARD
 
 # tflags net
 WHOIS_WHOISPROT
+
+# good enough
+ZMIde_EBAYJOBSURI
 
 # good enough
 ZMIde_SEXUALEXPL1
