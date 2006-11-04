@@ -613,7 +613,13 @@ sub parse_body {
 	# Ok, we've subparsed, so go ahead and remove the raw and decoded
 	# data because we won't need them anymore (the tree under this part
 	# will have that data)
+	if (ref $toparse->[0]->{'raw'} eq 'GLOB') {
+	  # Make sure we close it if it's a temp file -- Bug 5166
+	  close ($toparse->[0]->{'raw'});
+	}
+
 	delete $toparse->[0]->{'raw'};
+	  
 	delete $toparse->[0]->{'decoded'};
       }
     }
