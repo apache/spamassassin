@@ -320,11 +320,11 @@ foreach my $opt (
 
 my $listen_unix = 1;
 my $listen_inet = 1;
-my $listen_ssl  = 1;
+my $listen_ssl  = 0;
 if (!defined $opt{'socketpath'}) {
   $listen_unix = 0;
 } else {
-  $listen_inet = $listen_ssl = 0;
+  $listen_inet = 0;
 }
 if (defined $opt{'ssl'} && !defined $opt{'ssl-port'}) {
   $listen_inet = 0;
@@ -340,8 +340,9 @@ if (
 }
 
 if (
-    defined $opt{'ssl'}
-    or defined $opt{'ssl-port'}
+    (defined $opt{'ssl'}
+    or defined $opt{'ssl-port'})
+    and !defined $opt{'socketpath'}
   )
 {
   $listen_ssl = 1;
@@ -381,7 +382,7 @@ if ( $opt{'auth-ident'} ) {
 # Check for server certs
 $opt{'server-key'}  ||= "$LOCAL_RULES_DIR/certs/server-key.pem";
 $opt{'server-cert'} ||= "$LOCAL_RULES_DIR/certs/server-cert.pem";
-if ( $opt{'ssl'} ) {
+if ( $listen_ssl ) {
   eval { require IO::Socket::SSL };
   die "spamd: SSL encryption requested, but IO::Socket::SSL is unavailable\n"
     if ($@);
@@ -1106,7 +1107,7 @@ sub accept_a_conn {
     if ( $! == &Errno::EINTR ) {
       return 0;
     }
-    elsif ( $! == 0 && $opt{'ssl'} ) {
+    elsif ( $! == 0 && $listen_ssl ) {
       warn("spamd: SSL failure: " . &IO::Socket::SSL::errstr());
       return 0;
     }
