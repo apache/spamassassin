@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-jm bb-zmi cthielen daf dos parkerm theo
+# with results from: net-bb-doc net-bb-jm net-bb-zmi net-cthielen net-parkerm net-theo
 
 # tflags userconf
 ALL_TRUSTED
@@ -149,9 +149,6 @@ FB_CIALIS_LEO3
 FB_OBFU_URI_COM
 
 # good enough
-FB_SAVE_LEO
-
-# good enough
 FB_VALIUM_LEO2
 
 # good enough
@@ -223,6 +220,9 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
+# good enough
+HDR_ORDER_FTSDMCXXXX
+
 # tflags userconf
 HEAD_LONG
 
@@ -246,9 +246,6 @@ HS_SUBJ_ONLINE_PHARMACEUTICAL
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
-
-# good enough
-HTTPS_HTTP_MISMATCH
 
 # good enough
 JM_RCVD_QMAILV1
@@ -578,9 +575,6 @@ TVD_FUZZY_DEGREE
 TVD_FUZZY_FINANCE
 
 # good enough
-TVD_FUZZY_FIXED_RATE
-
-# good enough
 TVD_FUZZY_PHARMACEUTICAL
 
 # good enough
@@ -611,15 +605,6 @@ TVD_PH_FR5
 TVD_PH_REC
 
 # good enough
-TVD_PH_SUBJ_META
-
-# good enough
-TVD_PH_SUBJ_META_ALL
-
-# good enough
-TVD_PH_SUBJ_SEC_MEASURES
-
-# good enough
 TVD_PH_SUBJ_UPDATE
 
 # good enough
@@ -636,9 +621,6 @@ TVD_RATWARE_CB
 
 # good enough
 TVD_RATWARE_CB_2
-
-# good enough
-TVD_RATWARE_MSGID_01
 
 # good enough
 TVD_RATWARE_MSGID_02
@@ -665,19 +647,10 @@ TVD_SUBJ_ACC_NUM
 TVD_SUBJ_APPR_LOAN
 
 # good enough
-TVD_SUBJ_END_STAR
-
-# good enough
 TVD_SUBJ_FINGER_03
 
 # good enough
 TVD_SUBJ_FINGER_04
-
-# good enough
-TVD_SUBJ_OWE
-
-# good enough
-TVD_SUBJ_WIPE_DEBT
 
 # good enough
 TVD_UA_FOSTERING
@@ -689,10 +662,55 @@ TVD_VISIT_PHARMA
 TVD_VIS_HIDDEN
 
 # good enough
-CTYPE_1SPACE_GIF
+CTYPE_8SPACE_GIF
 
 # good enough
-HDR_ORDER_FTSDMCXXXX
+HDR_ORDER_FTSDMCXXXX_2
+
+# good enough
+HS_DRUG_DOLLAR_1
+
+# good enough
+HS_DRUG_DOLLAR_2
+
+# good enough
+HS_DRUG_DOLLAR_3
+
+# good enough
+HS_DRUG_DOLLAR_MANY
+
+# good enough
+HS_MEETUP_FOR_SEX
+
+# good enough
+KAM_STOCKTIP4
+
+# good enough
+NODOM_AND_DYNRDNS
+
+# good enough
+NODOM_AND_DYNRDNS2
+
+# good enough
+NODOM_AND_DYNRDNS3
+
+# good enough
+NODOM_AND_DYNRDNS4
+
+# good enough
+NODOM_AND_DYNRDNS5
+
+# good enough
+NODOM_AND_DYNRDNS6
+
+# good enough
+NODOM_AND_DYNRDNS7
+
+# good enough
+NODOM_AND_DYNRDNS8
+
+# good enough
+NODOM_AND_DYNRDNS9
 
 # tflags net
 RCVD_IN_DSBL
@@ -713,10 +731,16 @@ RCVD_IN_WHOIS_INVALID
 RCVD_IN_XBL
 
 # good enough
-TVD_FW_GRAPHIC_ID1
+TVD_FW_GRAPHIC_NAME_LONG
 
 # good enough
-TVD_FW_GRAPHIC_ID2
+TVD_FW_GRAPHIC_NAME_MID
+
+# good enough
+TVD_LINK_SAVE
+
+# good enough
+ZMIvirSobY_SUB39
 
 # tflags userconf
 UNPARSEABLE_RELAY
