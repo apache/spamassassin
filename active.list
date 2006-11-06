@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: net-bb-doc net-bb-jm net-bb-zmi net-cthielen net-parkerm net-theo
+# with results from: bb-doc bb-jm bb-zmi cthielen daf dos parkerm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -223,6 +223,9 @@ HASHCASH_HIGH
 # good enough
 HDR_ORDER_FTSDMCXXXX
 
+# good enough
+HDR_ORDER_FTSDMCXXXX_2
+
 # tflags userconf
 HEAD_LONG
 
@@ -237,6 +240,9 @@ HS_FORGED_OE_FW
 
 # good enough
 HS_GETMEOFF
+
+# good enough
+HS_MEETUP_FOR_SEX
 
 # good enough
 HS_PHARMA_1
@@ -263,6 +269,9 @@ KAM_STOCKTIP15
 KAM_STOCKTIP21
 
 # good enough
+KAM_STOCKTIP4
+
+# good enough
 KAM_STOCKTIP6
 
 # good enough
@@ -285,6 +294,33 @@ MIME_CHARSET_FARAWAY
 
 # tflags userconf
 MISSING_HB_SEP
+
+# good enough
+NODOM_AND_DYNRDNS
+
+# good enough
+NODOM_AND_DYNRDNS2
+
+# good enough
+NODOM_AND_DYNRDNS3
+
+# good enough
+NODOM_AND_DYNRDNS4
+
+# good enough
+NODOM_AND_DYNRDNS5
+
+# good enough
+NODOM_AND_DYNRDNS6
+
+# good enough
+NODOM_AND_DYNRDNS7
+
+# good enough
+NODOM_AND_DYNRDNS8
+
+# good enough
+NODOM_AND_DYNRDNS9
 
 # tflags net
 NO_DNS_FOR_FROM
@@ -593,6 +629,9 @@ TVD_HEAD_KERNEL
 TVD_INCREASE_SIZE
 
 # good enough
+TVD_LINK_SAVE
+
+# good enough
 TVD_NOT_SATISFIED
 
 # good enough
@@ -662,55 +701,13 @@ TVD_VISIT_PHARMA
 TVD_VIS_HIDDEN
 
 # good enough
-CTYPE_8SPACE_GIF
+CTYPE_1SPACE_GIF
 
 # good enough
-HDR_ORDER_FTSDMCXXXX_2
+FB_SAVE_LEO
 
 # good enough
-HS_DRUG_DOLLAR_1
-
-# good enough
-HS_DRUG_DOLLAR_2
-
-# good enough
-HS_DRUG_DOLLAR_3
-
-# good enough
-HS_DRUG_DOLLAR_MANY
-
-# good enough
-HS_MEETUP_FOR_SEX
-
-# good enough
-KAM_STOCKTIP4
-
-# good enough
-NODOM_AND_DYNRDNS
-
-# good enough
-NODOM_AND_DYNRDNS2
-
-# good enough
-NODOM_AND_DYNRDNS3
-
-# good enough
-NODOM_AND_DYNRDNS4
-
-# good enough
-NODOM_AND_DYNRDNS5
-
-# good enough
-NODOM_AND_DYNRDNS6
-
-# good enough
-NODOM_AND_DYNRDNS7
-
-# good enough
-NODOM_AND_DYNRDNS8
-
-# good enough
-NODOM_AND_DYNRDNS9
+HTTPS_HTTP_MISMATCH
 
 # tflags net
 RCVD_IN_DSBL
@@ -731,16 +728,37 @@ RCVD_IN_WHOIS_INVALID
 RCVD_IN_XBL
 
 # good enough
-TVD_FW_GRAPHIC_NAME_LONG
+TVD_FUZZY_FIXED_RATE
 
 # good enough
-TVD_FW_GRAPHIC_NAME_MID
+TVD_FUZZY_MICROCAP
 
 # good enough
-TVD_LINK_SAVE
+TVD_FW_GRAPHIC_ID1
 
 # good enough
-ZMIvirSobY_SUB39
+TVD_FW_GRAPHIC_ID2
+
+# good enough
+TVD_PH_SUBJ_META
+
+# good enough
+TVD_PH_SUBJ_META_ALL
+
+# good enough
+TVD_PH_SUBJ_SEC_MEASURES
+
+# good enough
+TVD_RATWARE_MSGID_01
+
+# good enough
+TVD_SUBJ_END_STAR
+
+# good enough
+TVD_SUBJ_OWE
+
+# good enough
+TVD_SUBJ_WIPE_DEBT
 
 # tflags userconf
 UNPARSEABLE_RELAY
