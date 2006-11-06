@@ -340,9 +340,8 @@ if (
 }
 
 if (
-    (defined $opt{'ssl'}
-    or defined $opt{'ssl-port'})
-    and !defined $opt{'socketpath'}
+    defined $opt{'ssl'}
+    or defined $opt{'ssl-port'}
   )
 {
   $listen_ssl = 1;
