@@ -44,11 +44,21 @@ sub finish_parsing_end {
   my ($self, $params) = @_;
   my $conf = $params->{conf};
 
-  my $basextor = Mail::SpamAssassin::Plugin::BodyRuleBaseExtractor->new(
-            $self->{main});
+  my $main = $self->{main};
+  $main->{base_extract} = 1;
+  $main->{bases_must_be_casei} = 1;
+  $main->{bases_can_use_alternations} = 0; # /(foo|bar|baz)/
+  $main->{bases_can_use_quantifiers} = 0; # /foo.*bar/ or /foo*bar/ or /foooo?bar/
+  $main->{bases_can_use_char_classes} = 0; # /fo[opqr]bar/
+  $main->{bases_split_out_alternations} = 1; # /(foo|bar|baz)/ => ["foo", "bar", "baz"]
+
+  my $basextor = Mail::SpamAssassin::Plugin::BodyRuleBaseExtractor->new
+			($self->{main});
   $basextor->extract_bases($conf);
 
-  $conf->{skip_body_rules} = { };
+  $conf->{skip_body_rules}   ||= { };
+  $conf->{need_one_line_sub} ||= { };
+
   $self->setup_test_set ($conf, $conf->{body_tests}, 'body');
 }
 
@@ -69,7 +79,18 @@ sub setup_test_set_pri {
     my @rules = split(' ', $conf->{base_string}->{$ruletype}->{$base});
     RabinKarpAccel::add_bitvec($conf->{$ruletype}->{rkhashes}, lc $base, [ @rules ]);
     foreach my $rule (@rules) {
+      # ignore rules marked for ReplaceTags work!
+      # TODO: we should be able to order the 'finish_parsing_end'
+      # plugin calls to do this.
+      next if ($conf->{rules_to_replace}->{$rule});
+
+      # TODO: need a cleaner way to do this.  I expect when rule types
+      # are implementable in plugins, I can do it that way
       $conf->{skip_body_rules}->{$rule} = 1;
+
+      # ensure that the one-liner version of the function call is
+      # created, though
+      $conf->{generate_body_one_line_sub}->{$rule} = 1;
     }
   }
 }
@@ -116,17 +137,21 @@ sub run_body_hack {
         # ignore 0-scored rules, of course
 	next unless $scoresptr->{$rulename};
 
-        # TODO: it would be very useful to provide an optional
-        # means of instrumenting the ruleset, so that we can
-        # find out when the base matched but the full RE didn't.
+        # dbg("zoom: base found for $rulename: $line");
 
-	# if ($do_dbg) {
-	# dbg("zoom: base found for $rulename: $line");
-	# }
+        my $fn = 'Mail::SpamAssassin::PerMsgStatus::'.
+                                $rulename.'_one_line_body_test';
 
-        # run the real regexp -- on this line alone
-        &{'Mail::SpamAssassin::PerMsgStatus::'.$rulename.'_one_line_body_test'}
-                    ($scanner, $line);
+        # run the real regexp -- on this line alone.
+        # don't try this unless the fn exists; this can happen if the
+        # installed compiled-rules file contains details of rules
+        # that are not in our current ruleset (e.g. gets out of
+        # sync, or was compiled with extra rulesets installed)
+        # if (defined &{$fn}) {
+          if (!&{$fn} ($scanner, $line) && $do_dbg) {
+            $self->{rule2xs_misses}->{$rulename}++;
+          }
+        # }
       }
     }
     use strict "refs";
