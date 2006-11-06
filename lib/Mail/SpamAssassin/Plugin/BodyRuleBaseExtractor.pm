@@ -20,8 +20,8 @@ Mail::SpamAssassin::Plugin::BodyRuleBaseExtractor - extract "bases" from body ru
 
 =head1 SYNOPSIS
 
-This is a work-in-progress plugin to extract "base" strings from SpamAssassin
-'body' rules, suitable for use in Rule2XSBody rules.
+This is a plugin to extract "base" strings from SpamAssassin 'body' rules,
+suitable for use in Rule2XSBody rules or other parallel matching algorithms.
 
 =cut
 
@@ -37,14 +37,17 @@ use bytes;
 use vars qw(@ISA);
 @ISA = qw(Mail::SpamAssassin::Plugin);
 
-# a few settings that control what kind of bases are output:
+# a few settings that control what kind of bases are output.
 
 # treat all rules as lowercase for purposes of term extraction?
-my $BASES_MUST_BE_CASE_I = 1;
-my $BASES_CAN_USE_ALTERNATIONS = 0;    # /(foo|bar|baz)/
-my $BASES_CAN_USE_QUANTIFIERS = 0;     # /foo.*bar/ or /foo*bar/ or /foooo?bar/
-my $BASES_CAN_USE_CHAR_CLASSES = 0;    # /fo[opqr]bar/
-my $SPLIT_OUT_ALTERNATIONS = 1;        # /(foo|bar|baz)/ => ["foo", "bar", "baz"]
+# $main->{bases_must_be_casei} = 1;
+# $main->{bases_can_use_alternations} = 0; # /(foo|bar|baz)/
+# $main->{bases_can_use_quantifiers} = 0; # /foo.*bar/ or /foo*bar/ or /foooo?bar/
+# $main->{bases_can_use_char_classes} = 0; # /fo[opqr]bar/
+# $main->{bases_split_out_alternations} = 1; # /(foo|bar|baz)/ => ["foo", "bar", "baz"]
+
+# TODO: it would be nice to have a clean API to pass such settings
+# through to plugins instead of hanging them off $main
 
 ###########################################################################
 
@@ -70,32 +73,20 @@ sub finish_parsing_end {
 sub extract_bases {
   my ($self, $conf) = @_;
 
-  # TODO: need a better way to do this rather than using an env
-  # var as a back channel
-  my $rawf = $ENV{'RULE_REGEXP_DUMP_FILE'};
-  my $f;
-
-  if ($rawf) {
-    $rawf =~ /^(.*)$/;
-    $f = $1;        # untaint; allow anything here, it's from %ENV and safe
-  }
-  else {
+  my $main = $conf->{main};
+  if (!$main->{base_extract}) {
     return;         # TODO: comment this for Rabin-Karp
   }
 
-  $self->extract_set($f, $conf, $conf->{body_tests}, 'body');
+  $self->extract_set($conf, $conf->{body_tests}, 'body');
 }
 
 sub extract_set {
-  my ($self, $dumpfile, $conf, $test_set, $ruletype) = @_;
+  my ($self, $conf, $test_set, $ruletype) = @_;
 
   foreach my $pri (keys %{$test_set}) {
     my $nicepri = $pri; $nicepri =~ s/-/neg/g;
     $self->extract_set_pri($conf, $test_set->{$pri}, $ruletype.'_'.$nicepri);
-
-    if ($dumpfile) {
-      $self->dump_base_strings($dumpfile, $conf, $ruletype.'_'.$nicepri);
-    }
   }
 }
 
@@ -108,6 +99,8 @@ sub extract_set_pri {
   my @failed = ();
   my $yes = 0;
   my $no = 0;
+
+  $self->{main} = $conf->{main};	# for use in extract_hints()
 
   dbg("zoom: base extraction start for type $ruletype");
 
@@ -254,27 +247,7 @@ sub extract_set_pri {
     $conf->{base_string}->{$ruletype}->{$base} = $key;
   }
 
-  warn ("zoom: base extraction complete for $ruletype: yes=$yes no=$no\n");
-}
-
-###########################################################################
-
-sub dump_base_strings {
-  my ($self, $dumpfile, $conf, $ruletype) = @_;
-
-  open (OUT, ">$dumpfile") or die "cannot write to $dumpfile!";
-  print OUT "name $ruletype\n";
-
-  foreach my $key1 (sort keys %{$conf->{base_orig}->{$ruletype}}) {
-    print OUT "orig $key1 $conf->{base_orig}->{$ruletype}->{$key1}\n";
-  }
-
-  foreach my $key (sort keys %{$conf->{base_string}->{$ruletype}}) {
-    print OUT "r $key:$conf->{base_string}->{$ruletype}->{$key}\n";
-  }
-  close OUT or die "close failed on $dumpfile!";
-
-  warn ("zoom: bases written to '$dumpfile'\n");
+  info ("zoom: base extraction complete for $ruletype: yes=$yes no=$no\n");
 }
 
 ###########################################################################
@@ -290,6 +263,7 @@ sub extract_hints {
   my $rule = shift;
   my $is_reversed = shift;
 
+  my $main = $self->{main};
   my $orig = $rule;
   $rule = Mail::SpamAssassin::Util::regexp_remove_delimiters($rule);
 
@@ -310,7 +284,7 @@ sub extract_hints {
   # anyway.  Simplification that causes the regexp to *not* hit
   # stuff that the "real" rule would hit, however, is a bad thing.
 
-  if ($BASES_MUST_BE_CASE_I) {
+  if ($main->{bases_must_be_casei}) {
     $rule = lc $rule;
     $mods =~ s/i//;
 
@@ -355,7 +329,8 @@ sub extract_hints {
   $rule =~ s/\(\?:/\(/g;
 
   # this must be before reversing
-  if ($BASES_CAN_USE_ALTERNATIONS||$SPLIT_OUT_ALTERNATIONS) {
+  if ($main->{bases_can_use_alternations}||$main->{bases_split_out_alternations})
+  {
     # /foo (bar)? baz/ simplify to /foo (bar|) baz/
     $rule =~ s/(?<!\\)(\([^\(\)]*)\)\?/$1\|\)/gs;
 
@@ -380,21 +355,21 @@ sub extract_hints {
               \\[ABCE-RT-VX-Z]
             ).*$//gsx;
 
-  $BASES_CAN_USE_CHAR_CLASSES or $rule =~ s/(?<!\\)(?:
+  $main->{bases_can_use_char_classes} or $rule =~ s/(?<!\\)(?:
               \\\w|
               \.|
               \[|
               \]
             ).*$//gsx;
 
-  $BASES_CAN_USE_QUANTIFIERS or $rule =~ s/(?<!\\)(?:
+  $main->{bases_can_use_quantifiers} or $rule =~ s/(?<!\\)(?:
               .\*|	# remove the quantified char, too
               .\+|
               .\?|
               .\{
             ).*$//gsx;
 
-  ($BASES_CAN_USE_ALTERNATIONS||$SPLIT_OUT_ALTERNATIONS) or
+  ($main->{bases_can_use_alternations}||$main->{bases_split_out_alternations}) or
             $rule =~ s/(?<!\\)(?:
               \(|
               \)
@@ -414,7 +389,7 @@ sub extract_hints {
   # simplify (..)? and (..|) to (..|z{0})
   # this wierd construct is to work around an re2c bug; (..|) doesn't
   # do what it should
-  if ($BASES_CAN_USE_ALTERNATIONS) {
+  if ($main->{bases_can_use_alternations}) {
     $rule =~ s/\((.*?)\)\?/\($1\|z{0}\)/gs;
     $rule =~ s/\((.*?)\|\)/\($1\|z{0}\)/gs;
     $rule =~ s/\(\|(.*?)\)/\($1\|z{0}\)/gs;
@@ -488,7 +463,7 @@ sub extract_hints {
   }
 
   # return for things we know we can't handle.
-  if (!($BASES_CAN_USE_ALTERNATIONS||$SPLIT_OUT_ALTERNATIONS)) {
+  if (!($main->{bases_can_use_alternations}||$main->{bases_split_out_alternations})) {
     if ($rule =~ /\|/) {
       # /time to refinance|refinanc\w{1,3}\b.{0,16}\bnow\b/i
       die "alternations";
@@ -529,7 +504,7 @@ sub extract_hints {
   }
 
   my @rules;
-  if ($SPLIT_OUT_ALTERNATIONS && $rule =~ /\|/) {
+  if ($main->{bases_split_out_alternations} && $rule =~ /\|/) {
     @rules = $self->split_alt($rule);
   }
   else {

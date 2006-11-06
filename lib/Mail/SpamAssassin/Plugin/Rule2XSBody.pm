@@ -14,6 +14,24 @@
 # limitations under the License.
 # </@LICENSE>
 
+=head1 NAME
+
+Mail::SpamAssassin::Plugin::Rule2XSBody - speed up SpamAssassin by compiling regexps
+
+=head1 SYNOPSIS
+
+  loadplugin     Mail::SpamAssassin::Plugin::Rule2XSBody
+
+=head1 DESCRIPTION
+
+This plugin will use native-code object files representing the ruleset,
+in order to provide significant speedups in rule evaluation.
+
+Note that C<sa-compile> must be run in advance, in order to compile the
+ruleset using C<re2c> and the C compiler.
+
+=cut
+
 package Mail::SpamAssassin::Plugin::Rule2XSBody;
 
 use Mail::SpamAssassin::Plugin;
@@ -41,6 +59,12 @@ sub new {
 sub finish_parsing_end {
   my ($self, $params) = @_;
   my $conf = $params->{conf};
+
+  my $instdir = $conf->{main}->sed_path
+			('__local_state_dir__/compiled/__version__');
+  push @INC, $instdir, "$instdir/auto";
+  dbg "zoom: loading compiled ruleset from $instdir";
+
   $self->setup_test_set ($conf, $conf->{body_tests}, 'body');
 }
 
@@ -97,9 +121,10 @@ sub setup_test_set_pri {
 
     my $totalhasrules = scalar keys %{$hasrules};
     my $pc_zoomed   = ($found / ($totalhasrules || .001)) * 100;
+    $pc_zoomed   = int($pc_zoomed * 1000) / 1000;
 
-    dbg("zoom: $found compiled rules are available for type $ruletype; ".
-        "$pc_zoomed\% were usable");
+    dbg("zoom: $found compiled rules are available for type $ruletype out ".
+        "of $totalhasrules ($pc_zoomed\%)");
 
     $conf->{zoom_ruletypes_available} ||= { };
     $conf->{zoom_ruletypes_available}->{$ruletype} = 1;
