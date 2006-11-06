@@ -289,7 +289,8 @@ Location where the local site rules are installed.  Defaults to
 =item LOCAL_STATE_DIR
 
 Location of the local state directory, mainly used for installing updates via
-C<sa-update>.  Defaults to "@@LOCAL_STATE_DIR@@".
+C<sa-update> and compiling rulesets to native code.  Defaults to
+"@@LOCAL_STATE_DIR@@".
 
 =back
 

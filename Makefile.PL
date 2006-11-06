@@ -167,6 +167,7 @@ my %makefile = (
       'spamassassin.raw' => 'spamassassin',
       'sa-learn.raw'     => 'sa-learn',
       'sa-update.raw'    => 'sa-update',
+      'sa-compile.raw'    => 'sa-compile',
       'spamc/spamc.c'    => 'spamc/spamc$(EXE_EXT)',
       'spamd/spamd.raw'  => 'spamd/spamd',
     },
@@ -180,6 +181,7 @@ my %makefile = (
         'lib/spamassassin-run.pod' => '$(INST_MAN1DIR)/spamassassin-run.$(MAN1EXT)',
         'sa-learn'         => '$(INST_MAN1DIR)/sa-learn.$(MAN1EXT)',
         'sa-update'        => '$(INST_MAN1DIR)/sa-update.$(MAN1EXT)',
+        'sa-compile'       => '$(INST_MAN1DIR)/sa-compile.$(MAN1EXT)',
         'spamc/spamc.pod'  => '$(INST_MAN1DIR)/spamc.$(MAN1EXT)',
         'spamd/spamd'      => '$(INST_MAN1DIR)/spamd.$(MAN1EXT)',
     },
@@ -223,7 +225,7 @@ my %makefile = (
     },
 
     'clean' => { FILES => join(' ' =>
-        'sa-learn', 'sa-update', 'spamassassin',
+        'sa-learn', 'sa-update', 'spamassassin', 'sa-compile',
         
         'spamd/spamd',
 
@@ -1116,6 +1118,9 @@ sa-learn: sa-learn.raw
 
 sa-update: sa-update.raw build_rules
 	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -isa-update.raw -osa-update
+
+sa-compile: sa-compile.raw
+	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -isa-compile.raw -osa-compile
 
 spamd/spamd: spamd/spamd.raw
 	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@
