@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-jm bb-zmi cthielen daf dos parkerm theo zmi
+# with results from: bb-doc bb-jm bb-zmi cthielen parkerm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -149,6 +149,9 @@ FB_CIALIS_LEO3
 FB_OBFU_URI_COM
 
 # good enough
+FB_SAVE_LEO
+
+# good enough
 FB_VALIUM_LEO2
 
 # good enough
@@ -223,14 +226,8 @@ HASHCASH_HIGH
 # good enough
 HDR_ORDER_FTSDMCXXXX
 
-# good enough
-HDR_ORDER_FTSDMCXXXX_2
-
 # tflags userconf
 HEAD_LONG
-
-# good enough
-HELO_NO_DOMAIN
 
 # tflags userconf
 HIGH_CODEPAGE_URI
@@ -252,6 +249,9 @@ HS_SUBJ_ONLINE_PHARMACEUTICAL
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
+
+# good enough
+HTTPS_HTTP_MISMATCH
 
 # good enough
 JM_RCVD_QMAILV1
@@ -294,33 +294,6 @@ MIME_CHARSET_FARAWAY
 
 # tflags userconf
 MISSING_HB_SEP
-
-# good enough
-NODOM_AND_DYNRDNS
-
-# good enough
-NODOM_AND_DYNRDNS2
-
-# good enough
-NODOM_AND_DYNRDNS3
-
-# good enough
-NODOM_AND_DYNRDNS4
-
-# good enough
-NODOM_AND_DYNRDNS5
-
-# good enough
-NODOM_AND_DYNRDNS6
-
-# good enough
-NODOM_AND_DYNRDNS7
-
-# good enough
-NODOM_AND_DYNRDNS8
-
-# good enough
-NODOM_AND_DYNRDNS9
 
 # tflags net
 NO_DNS_FOR_FROM
@@ -611,6 +584,12 @@ TVD_FUZZY_DEGREE
 TVD_FUZZY_FINANCE
 
 # good enough
+TVD_FUZZY_FIXED_RATE
+
+# good enough
+TVD_FUZZY_MICROCAP
+
+# good enough
 TVD_FUZZY_PHARMACEUTICAL
 
 # good enough
@@ -642,6 +621,15 @@ TVD_PH_FR5
 
 # good enough
 TVD_PH_REC
+
+# good enough
+TVD_PH_SUBJ_META
+
+# good enough
+TVD_PH_SUBJ_META_ALL
+
+# good enough
+TVD_PH_SUBJ_SEC_MEASURES
 
 # good enough
 TVD_PH_SUBJ_UPDATE
@@ -686,10 +674,19 @@ TVD_SUBJ_ACC_NUM
 TVD_SUBJ_APPR_LOAN
 
 # good enough
+TVD_SUBJ_END_STAR
+
+# good enough
 TVD_SUBJ_FINGER_03
 
 # good enough
 TVD_SUBJ_FINGER_04
+
+# good enough
+TVD_SUBJ_OWE
+
+# good enough
+TVD_SUBJ_WIPE_DEBT
 
 # good enough
 TVD_UA_FOSTERING
@@ -701,13 +698,13 @@ TVD_VISIT_PHARMA
 TVD_VIS_HIDDEN
 
 # good enough
-CTYPE_1SPACE_GIF
+CTYPE_8SPACE_GIF
 
 # good enough
-FB_SAVE_LEO
+HS_DRUG_DOLLAR_1
 
 # good enough
-HTTPS_HTTP_MISMATCH
+HS_DRUG_DOLLAR_3
 
 # tflags net
 RCVD_IN_DSBL
@@ -728,37 +725,10 @@ RCVD_IN_WHOIS_INVALID
 RCVD_IN_XBL
 
 # good enough
-TVD_FUZZY_FIXED_RATE
+TVD_FW_GRAPHIC_NAME_LONG
 
 # good enough
-TVD_FUZZY_MICROCAP
-
-# good enough
-TVD_FW_GRAPHIC_ID1
-
-# good enough
-TVD_FW_GRAPHIC_ID2
-
-# good enough
-TVD_PH_SUBJ_META
-
-# good enough
-TVD_PH_SUBJ_META_ALL
-
-# good enough
-TVD_PH_SUBJ_SEC_MEASURES
-
-# good enough
-TVD_RATWARE_MSGID_01
-
-# good enough
-TVD_SUBJ_END_STAR
-
-# good enough
-TVD_SUBJ_OWE
-
-# good enough
-TVD_SUBJ_WIPE_DEBT
+TVD_FW_GRAPHIC_NAME_MID
 
 # tflags userconf
 UNPARSEABLE_RELAY
