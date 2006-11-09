@@ -101,7 +101,8 @@ sub safe_lock {
     my $now = ($#stat < 11 ? undef : $stat[10]);
     @stat = lstat($lock_file);
     my $lock_age = ($#stat < 11 ? undef : $stat[10]);
-    if (defined($lock_age) && ($now - $lock_age) > LOCK_MAX_AGE) {
+    if (defined($lock_age) && defined($now) && ($now - $lock_age) > LOCK_MAX_AGE)
+    {
       # we got a stale lock, break it
       dbg("locker: safe_lock: breaking stale $lock_file: age=" .
 	  (defined $lock_age ? $lock_age : "undef") . " now=$now");
