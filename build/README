@@ -281,6 +281,14 @@ SPAMASSASSIN RELEASE PROCEDURE
         svn up
         svn commit -m "added new release to website"
 
+- Release a new rules update matching the released code:
+
+    ssh spamassassin.zones.apache.org
+    sudo -u updatesd \
+        /home/updatesd/svn/spamassassin/build/mkupdates/run_nightly
+    sudo -u updatesd \
+        /home/updatesd/svn/spamassassin/build/mkupdates/run_part2
+
 - update the tag used to point to "current release":
 
     repo=https://svn.apache.org/repos/asf/spamassassin
