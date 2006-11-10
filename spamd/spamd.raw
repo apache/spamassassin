@@ -326,9 +326,6 @@ if (!defined $opt{'socketpath'}) {
 } else {
   $listen_inet = 0;
 }
-if (defined $opt{'ssl'} && !defined $opt{'ssl-port'}) {
-  $listen_inet = 0;
-}
 
 if (
   ( @{ $opt{'allowed-ip'} } > 0 )
@@ -345,6 +342,9 @@ if (
   )
 {
   $listen_ssl = 1;
+  if (!defined $opt{'ssl-port'}) {
+    $listen_inet = 0;
+  }
 }
 
 if (
