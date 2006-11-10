@@ -308,9 +308,14 @@ score OUTLOOK_3416      2.0
 score RCVD_MAIL_COM         3.0
 score DRUGS_STOCK_MIMEOLE   2.0
 score RCVD_FORGED_WROTE     2.8
+# </gen:mutable>
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+# <gen:mutable>
 score PART_CID_STOCK_LESS    2.0
 score PART_CID_STOCK     2.0
 # </gen:mutable>
+endif # Mail::SpamAssassin::Plugin::MIMEHeader
 
 ###########################################################################
 # SCORES
