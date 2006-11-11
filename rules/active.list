@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-jm bb-zmi cthielen dos parkerm theo zmi
+# with results from: bb-doc bb-jm bb-zmi cthielen daf dos parkerm theo
 
 # tflags userconf
 ALL_TRUSTED
@@ -65,7 +65,7 @@ CHARSET_FARAWAY_HEADER
 CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
-CTYPE_1SPACE_GIF
+CTYPE_8SPACE_GIF
 
 # good enough
 CTYPE_ONETAB_GIF
@@ -238,6 +238,15 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
+# good enough
+HDR_ORDER_FTSDMCXX
+
+# good enough
+HDR_ORDER_FTSDMCXX2
+
+# good enough
+HDR_ORDER_FTSDMCXX3
+
 # tflags userconf
 HEAD_LONG
 
@@ -245,16 +254,22 @@ HEAD_LONG
 HIGH_CODEPAGE_URI
 
 # good enough
+HS_DRUG_DOLLAR_1
+
+# good enough
+HS_DRUG_DOLLAR_2
+
+# good enough
 HS_DRUG_DOLLAR_3
+
+# good enough
+HS_DRUG_DOLLAR_MANY
 
 # good enough
 HS_FORGED_OE_FW
 
 # good enough
 HS_GETMEOFF
-
-# good enough
-HS_MEETUP_FOR_SEX
 
 # good enough
 HS_PHARMA_1
@@ -300,9 +315,6 @@ MID_DEGREES
 
 # good enough
 MID_MJW_STOX
-
-# good enough
-MID_START_001C
 
 # tflags userconf
 MIME_CHARSET_FARAWAY
@@ -602,28 +614,22 @@ TVD_FUZZY_DEGREE
 TVD_FUZZY_FINANCE
 
 # good enough
-TVD_FUZZY_FIXED_RATE
-
-# good enough
-TVD_FUZZY_MICROCAP
-
-# good enough
 TVD_FUZZY_PHARMACEUTICAL
 
 # good enough
 TVD_FUZZY_SYMBOL
 
 # good enough
-TVD_FW_GRAPHIC_ID1
-
-# good enough
-TVD_FW_GRAPHIC_ID2
-
-# good enough
 TVD_FW_GRAPHIC_ID3
 
 # good enough
 TVD_FW_GRAPHIC_ID3_2
+
+# good enough
+TVD_FW_GRAPHIC_NAME_LONG
+
+# good enough
+TVD_FW_GRAPHIC_NAME_MID
 
 # good enough
 TVD_HEAD_KERNEL
@@ -648,9 +654,6 @@ TVD_PH_REC
 
 # good enough
 TVD_PH_SUBJ_META
-
-# good enough
-TVD_PH_SUBJ_META_ALL
 
 # good enough
 TVD_PH_SUBJ_SEC_MEASURES
@@ -725,37 +728,10 @@ TVD_VIS_HIDDEN
 AXB_XTHIDX_CHAIN
 
 # good enough
-HDR_ORDER_FTSDMCXX
-
-# good enough
-HDR_ORDER_FTSDMCXX2
-
-# good enough
-HDR_ORDER_FTSDMCXX3
-
-# good enough
-HS_DRUG_DOLLAR_1
-
-# good enough
-HS_DRUG_DOLLAR_2
-
-# good enough
-HS_DRUG_DOLLAR_MANY
-
-# good enough
 IMG_AND_HEAD
 
 # good enough
-MOLE_26000000
-
-# good enough
-MOLE_28001106
-
-# good enough
-MOLE_2800150
-
-# good enough
-MOLE_29002180
+PART_STOCK_IMG2
 
 # good enough
 PART_STOCK_IMG3
@@ -789,6 +765,9 @@ RCVD_IN_WHOIS_INVALID
 
 # tflags net
 RCVD_IN_XBL
+
+# good enough
+TVD_RATWARE_MSGID_01
 
 # good enough
 XMAILER_MIMEOLE_OL_015D5
@@ -881,13 +860,7 @@ XMAILER_MIMEOLE_OL_681AD
 XMAILER_MIMEOLE_OL_72641
 
 # good enough
-XMAILER_MIMEOLE_OL_72660
-
-# good enough
 XMAILER_MIMEOLE_OL_7533E
-
-# good enough
-XMAILER_MIMEOLE_OL_7F4F5
 
 # good enough
 XMAILER_MIMEOLE_OL_812FF
@@ -984,87 +957,6 @@ XMAILER_MIMEOLE_OL_F8BA4
 
 # good enough
 XMAILER_MIMEOLE_OL_FF5C8
-
-# good enough
-XM_OL_0000
-
-# good enough
-XM_OL_1106
-
-# good enough
-XM_OL_1158
-
-# good enough
-XM_OL_17123
-
-# good enough
-XM_OL_21064
-
-# good enough
-XM_OL_2180
-
-# good enough
-XM_OL_22448
-
-# good enough
-XM_OL_2462
-
-# good enough
-XM_OL_2663
-
-# good enough
-XM_OL_27302
-
-# good enough
-XM_OL_28001081
-
-# good enough
-XM_OL_28001441
-
-# good enough
-XM_OL_28001478
-
-# good enough
-XM_OL_29002180
-
-# good enough
-XM_OL_29196600
-
-# good enough
-XM_OL_29196700
-
-# good enough
-XM_OL_31103
-
-# good enough
-XM_OL_3155
-
-# good enough
-XM_OL_33381
-
-# good enough
-XM_OL_4115
-
-# good enough
-XM_OL_41332400
-
-# good enough
-XM_OL_4522
-
-# good enough
-XM_OL_4682
-
-# good enough
-XM_OL_48071700
-
-# good enough
-XM_OL_48072300
-
-# good enough
-XM_OL_49271200
-
-# good enough
-XM_OL_49631700
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1251,6 +1143,39 @@ WHOIS_WHOISGUARD
 
 # tflags net
 WHOIS_WHOISPROT
+
+# good enough
+XM_OL_21064
+
+# good enough
+XM_OL_28001441
+
+# good enough
+XM_OL_29002180
+
+# good enough
+XM_OL_29196600
+
+# good enough
+XM_OL_29196700
+
+# good enough
+XM_OL_4115
+
+# good enough
+XM_OL_41332400
+
+# good enough
+XM_OL_4682
+
+# good enough
+XM_OL_48071700
+
+# good enough
+XM_OL_48072300
+
+# good enough
+XM_OL_49631700
 
 # good enough
 ZMIde_EBAYJOBSURI
