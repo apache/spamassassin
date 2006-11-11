@@ -210,8 +210,7 @@ sub new {
     else {
       # Ok, there's a header here, let's go ahead and add it in.
       if ($header) {
-        # Yes, the /s is needed to match \n too.
-        my ($key, $value) = split (/:\s*(?=.)/s, $header, 2);
+        my ($key, $value) = split (/:/s, $header, 2);
 
         # If it's not a valid header (aka: not in the form "foo: bar"), skip it.
         if (defined $value) {
