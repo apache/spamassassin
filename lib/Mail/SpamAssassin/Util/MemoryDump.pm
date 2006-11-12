@@ -79,8 +79,8 @@ sub census_arena {
   # we are now in a subprocess
   open (DUMP, ">$name") or warn "cannot write to $name";
 
-  my ($package, $filename, $line, $subroutine, $hasargs,
-        $wantarray, $evaltext, $is_require, $hints, $bitmask) = caller(1);
+  my ($x, $y, $c, $subroutine, $d) = caller(2);
+  my ($e, $filename, $line, $f) = caller(1);
   print DUMP "${subroutine}()\n";
   print DUMP "$filename line: $line\n";
 
@@ -161,15 +161,20 @@ sub dump_obj {
 
   open (DUMP, ">$name") or warn "cannot write to $name";
 
-  my ($package, $filename, $line, $subroutine, $hasargs,
-        $wantarray, $evaltext, $is_require, $hints, $bitmask) = caller(1);
+  my ($x, $y, $c, $subroutine, $d) = caller(2);
+  my ($e, $filename, $line, $f) = caller(1);
   print DUMP "${subroutine}()\n";
   print DUMP "$filename line: $line\n";
 
   print DUMP "MEMDEBUG_dump_obj:\n";
 
   eval {
-    print DUMP Dumper($obj);
+    use Data::Dumper;
+    $Data::Dumper::Purity = 0;
+    $Data::Dumper::Terse = 1;
+    my $dump = Dumper($obj);
+    $dump =~ s/ {8}/  /gs;
+    print DUMP $dump;
   };
   ($@) and warn "dump: ".$@;
 
@@ -183,9 +188,7 @@ sub new_dump_filename {
   my $type = shift;
   if (!-d "dumps") { mkdir("dumps", 0777); }
 
-  my ($package, $filename, $line, $subroutine, $hasargs,
-        $wantarray, $evaltext, $is_require, $hints, $bitmask) = caller(2);
-
+  my ($e, $filename, $line, $f) = caller(2);
   $filename =~ s/^.*[\/\\]//gs;
   $filename =~ s/[^A-Za-z0-9\.]/_/gs;
 
