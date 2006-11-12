@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-jm bb-zmi cthielen daf dos parkerm theo
+# with results from: net-bb-doc net-bb-jm net-bb-zmi net-cthielen net-daf net-parkerm
 
 # tflags userconf
 ALL_TRUSTED
@@ -65,9 +65,6 @@ CHARSET_FARAWAY_HEADER
 CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
-CTYPE_8SPACE_GIF
-
-# good enough
 CTYPE_ONETAB_GIF
 
 # good enough
@@ -116,19 +113,10 @@ DNS_FROM_RFC_DSN
 DNS_FROM_SECURITYSAGE
 
 # good enough
-DOS_DOUBLE_SOTCK
-
-# good enough
-DOS_LET_GO_JOB
-
-# good enough
 DOS_MORTGAGE
 
 # good enough
 DOS_STOCK_O_PRICE
-
-# good enough
-DOS_TO_READ_STOCK
 
 # good enough
 DOS_TWO_MIS_STOCK
@@ -164,16 +152,10 @@ FB_CIALIS_LEO3
 FB_OBFU_URI_COM
 
 # good enough
-FB_SAVE_LEO
-
-# good enough
 FB_VALIUM_LEO2
 
 # good enough
 FB_VIAGRA_LEO3
-
-# good enough
-FH_DATE_IS_19XX
 
 # good enough
 FH_DATE_PAST_20XX
@@ -284,6 +266,9 @@ HTML_CHARSET_FARAWAY
 HTTPS_HTTP_MISMATCH
 
 # good enough
+IMG_AND_HEAD
+
+# good enough
 JM_RCVD_QMAILV1
 
 # good enough
@@ -342,6 +327,24 @@ PART_CID_STOCK
 
 # good enough
 PART_CID_STOCK_LESS
+
+# good enough
+PART_STOCK_IMG2
+
+# good enough
+PART_STOCK_IMG3
+
+# good enough
+PART_STOCK_IMG4
+
+# good enough
+PART_STOCK_IMG5
+
+# good enough
+PART_STOCK_IMG6
+
+# good enough
+PART_STOCK_IMG7
 
 # tflags net
 PYZOR_CHECK
@@ -530,13 +533,7 @@ RCVD_IN_WHOIS_INVALID
 RCVD_IN_XBL
 
 # good enough
-RCVD_LSO_SND
-
-# good enough
 RCVD_MAIL_COM
-
-# good enough
-RDNS_DYNAMIC
 
 # tflags net
 ROUND_THE_WORLD
@@ -626,19 +623,10 @@ TVD_FW_GRAPHIC_ID3
 TVD_FW_GRAPHIC_ID3_2
 
 # good enough
-TVD_FW_GRAPHIC_NAME_LONG
-
-# good enough
-TVD_FW_GRAPHIC_NAME_MID
-
-# good enough
 TVD_HEAD_KERNEL
 
 # good enough
 TVD_INCREASE_SIZE
-
-# good enough
-TVD_LINK_SAVE
 
 # good enough
 TVD_NOT_SATISFIED
@@ -651,12 +639,6 @@ TVD_PH_FR5
 
 # good enough
 TVD_PH_REC
-
-# good enough
-TVD_PH_SUBJ_META
-
-# good enough
-TVD_PH_SUBJ_SEC_MEASURES
 
 # good enough
 TVD_PH_SUBJ_UPDATE
@@ -675,6 +657,9 @@ TVD_RATWARE_CB
 
 # good enough
 TVD_RATWARE_CB_2
+
+# good enough
+TVD_RATWARE_MSGID_01
 
 # good enough
 TVD_RATWARE_MSGID_02
@@ -707,9 +692,6 @@ TVD_SUBJ_END_STAR
 TVD_SUBJ_FINGER_03
 
 # good enough
-TVD_SUBJ_FINGER_04
-
-# good enough
 TVD_SUBJ_OWE
 
 # good enough
@@ -725,28 +707,31 @@ TVD_VISIT_PHARMA
 TVD_VIS_HIDDEN
 
 # good enough
-AXB_XTHIDX_CHAIN
+CTYPE_1SPACE_GIF
 
 # good enough
-IMG_AND_HEAD
+FH_RCVD_WITHSMTPFOR
 
 # good enough
-PART_STOCK_IMG2
+FS_START_DOYOU
 
 # good enough
-PART_STOCK_IMG3
+FUZZY_SPRM
 
 # good enough
-PART_STOCK_IMG4
+FUZZY_STOCK
 
 # good enough
-PART_STOCK_IMG5
+FU_HOODIA
 
 # good enough
-PART_STOCK_IMG6
+HS_EXTRA
 
 # good enough
-PART_STOCK_IMG7
+HS_INDEX_PARAM
+
+# good enough
+HS_MEETUP_FOR_SEX
 
 # tflags net
 RCVD_IN_DSBL
@@ -767,196 +752,64 @@ RCVD_IN_WHOIS_INVALID
 RCVD_IN_XBL
 
 # good enough
-TVD_RATWARE_MSGID_01
+TT_OBSCURED_VALIUM
 
 # good enough
-XMAILER_MIMEOLE_OL_015D5
+TVD_APPROVED
 
 # good enough
-XMAILER_MIMEOLE_OL_07794
+TVD_BODY_END_STAR
 
 # good enough
-XMAILER_MIMEOLE_OL_09BB4
+TVD_FROM_1
 
 # good enough
-XMAILER_MIMEOLE_OL_12589
+TVD_FUZZY_FIXED_RATE
 
 # good enough
-XMAILER_MIMEOLE_OL_1ECD5
+TVD_FUZZY_MICROCAP
 
 # good enough
-XMAILER_MIMEOLE_OL_20C99
+TVD_FUZZY_SECURITIES
 
 # good enough
-XMAILER_MIMEOLE_OL_20CC2
+TVD_FW_GRAPHIC_ID1
 
 # good enough
-XMAILER_MIMEOLE_OL_22B61
+TVD_FW_GRAPHIC_ID2
 
 # good enough
-XMAILER_MIMEOLE_OL_25340
+TVD_FW_MESG1
 
 # good enough
-XMAILER_MIMEOLE_OL_2B374
+TVD_FW_MESG2
 
 # good enough
-XMAILER_MIMEOLE_OL_32D97
+TVD_GET_STOCK
 
 # good enough
-XMAILER_MIMEOLE_OL_3857F
+TVD_PH_BODY_META
 
 # good enough
-XMAILER_MIMEOLE_OL_3AC1D
+TVD_PH_SEC
 
 # good enough
-XMAILER_MIMEOLE_OL_3D61D
+TVD_UNDER_VALUED
 
 # good enough
-XMAILER_MIMEOLE_OL_465CD
+VERTICAL_WORDS_2
 
 # good enough
-XMAILER_MIMEOLE_OL_4B815
+ZMIde_LOVEGALX1
 
 # good enough
-XMAILER_MIMEOLE_OL_4BF4C
+ZMIde_LOVEGALX2
 
 # good enough
-XMAILER_MIMEOLE_OL_4EEDB
+ZMIde_LOVEGALXURI
 
 # good enough
-XMAILER_MIMEOLE_OL_4F240
-
-# good enough
-XMAILER_MIMEOLE_OL_56DF6
-
-# good enough
-XMAILER_MIMEOLE_OL_58CB5
-
-# good enough
-XMAILER_MIMEOLE_OL_5B79A
-
-# good enough
-XMAILER_MIMEOLE_OL_5E7ED
-
-# good enough
-XMAILER_MIMEOLE_OL_5EDD4
-
-# good enough
-XMAILER_MIMEOLE_OL_60256
-
-# good enough
-XMAILER_MIMEOLE_OL_61ABB
-
-# good enough
-XMAILER_MIMEOLE_OL_62E6A
-
-# good enough
-XMAILER_MIMEOLE_OL_6554A
-
-# good enough
-XMAILER_MIMEOLE_OL_681AD
-
-# good enough
-XMAILER_MIMEOLE_OL_72641
-
-# good enough
-XMAILER_MIMEOLE_OL_7533E
-
-# good enough
-XMAILER_MIMEOLE_OL_812FF
-
-# good enough
-XMAILER_MIMEOLE_OL_83BF7
-
-# good enough
-XMAILER_MIMEOLE_OL_8627E
-
-# good enough
-XMAILER_MIMEOLE_OL_8E893
-
-# good enough
-XMAILER_MIMEOLE_OL_91287
-
-# good enough
-XMAILER_MIMEOLE_OL_95A76
-
-# good enough
-XMAILER_MIMEOLE_OL_9B607
-
-# good enough
-XMAILER_MIMEOLE_OL_9B90B
-
-# good enough
-XMAILER_MIMEOLE_OL_A50F8
-
-# good enough
-XMAILER_MIMEOLE_OL_A842E
-
-# good enough
-XMAILER_MIMEOLE_OL_AA207
-
-# good enough
-XMAILER_MIMEOLE_OL_ADFF7
-
-# good enough
-XMAILER_MIMEOLE_OL_B30D1
-
-# good enough
-XMAILER_MIMEOLE_OL_B4A6F
-
-# good enough
-XMAILER_MIMEOLE_OL_B4B40
-
-# good enough
-XMAILER_MIMEOLE_OL_B9B11
-
-# good enough
-XMAILER_MIMEOLE_OL_BC7E6
-
-# good enough
-XMAILER_MIMEOLE_OL_C65FA
-
-# good enough
-XMAILER_MIMEOLE_OL_C7C33
-
-# good enough
-XMAILER_MIMEOLE_OL_C9068
-
-# good enough
-XMAILER_MIMEOLE_OL_CAC8F
-
-# good enough
-XMAILER_MIMEOLE_OL_CE8A4
-
-# good enough
-XMAILER_MIMEOLE_OL_CF0C0
-
-# good enough
-XMAILER_MIMEOLE_OL_D03AB
-
-# good enough
-XMAILER_MIMEOLE_OL_DC995
-
-# good enough
-XMAILER_MIMEOLE_OL_EF20B
-
-# good enough
-XMAILER_MIMEOLE_OL_EF222
-
-# good enough
-XMAILER_MIMEOLE_OL_F3B05
-
-# good enough
-XMAILER_MIMEOLE_OL_F475E
-
-# good enough
-XMAILER_MIMEOLE_OL_F6D01
-
-# good enough
-XMAILER_MIMEOLE_OL_F8BA4
-
-# good enough
-XMAILER_MIMEOLE_OL_FF5C8
+ZMIde_URIPORNWEB
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1023,9 +876,6 @@ USER_IN_WHITELIST
 
 # tflags userconf
 USER_IN_WHITELIST_TO
-
-# good enough
-VERTICAL_DRUGS_1
 
 # tflags net
 WHOIS_1AND1PR
@@ -1145,6 +995,165 @@ WHOIS_WHOISGUARD
 WHOIS_WHOISPROT
 
 # good enough
+XMAILER_MIMEOLE_OL_015D5
+
+# good enough
+XMAILER_MIMEOLE_OL_07794
+
+# good enough
+XMAILER_MIMEOLE_OL_12589
+
+# good enough
+XMAILER_MIMEOLE_OL_1ECD5
+
+# good enough
+XMAILER_MIMEOLE_OL_20C99
+
+# good enough
+XMAILER_MIMEOLE_OL_20CC2
+
+# good enough
+XMAILER_MIMEOLE_OL_22B61
+
+# good enough
+XMAILER_MIMEOLE_OL_25340
+
+# good enough
+XMAILER_MIMEOLE_OL_2B374
+
+# good enough
+XMAILER_MIMEOLE_OL_3857F
+
+# good enough
+XMAILER_MIMEOLE_OL_3AC1D
+
+# good enough
+XMAILER_MIMEOLE_OL_3D61D
+
+# good enough
+XMAILER_MIMEOLE_OL_465CD
+
+# good enough
+XMAILER_MIMEOLE_OL_4B815
+
+# good enough
+XMAILER_MIMEOLE_OL_4BF4C
+
+# good enough
+XMAILER_MIMEOLE_OL_4EEDB
+
+# good enough
+XMAILER_MIMEOLE_OL_4F240
+
+# good enough
+XMAILER_MIMEOLE_OL_58CB5
+
+# good enough
+XMAILER_MIMEOLE_OL_5B79A
+
+# good enough
+XMAILER_MIMEOLE_OL_5E7ED
+
+# good enough
+XMAILER_MIMEOLE_OL_5EDD4
+
+# good enough
+XMAILER_MIMEOLE_OL_60256
+
+# good enough
+XMAILER_MIMEOLE_OL_62E6A
+
+# good enough
+XMAILER_MIMEOLE_OL_6554A
+
+# good enough
+XMAILER_MIMEOLE_OL_681AD
+
+# good enough
+XMAILER_MIMEOLE_OL_72641
+
+# good enough
+XMAILER_MIMEOLE_OL_812FF
+
+# good enough
+XMAILER_MIMEOLE_OL_83BF7
+
+# good enough
+XMAILER_MIMEOLE_OL_8627E
+
+# good enough
+XMAILER_MIMEOLE_OL_8E893
+
+# good enough
+XMAILER_MIMEOLE_OL_91287
+
+# good enough
+XMAILER_MIMEOLE_OL_9B607
+
+# good enough
+XMAILER_MIMEOLE_OL_9B90B
+
+# good enough
+XMAILER_MIMEOLE_OL_A50F8
+
+# good enough
+XMAILER_MIMEOLE_OL_A842E
+
+# good enough
+XMAILER_MIMEOLE_OL_ADFF7
+
+# good enough
+XMAILER_MIMEOLE_OL_B30D1
+
+# good enough
+XMAILER_MIMEOLE_OL_B4B40
+
+# good enough
+XMAILER_MIMEOLE_OL_B9B11
+
+# good enough
+XMAILER_MIMEOLE_OL_BC7E6
+
+# good enough
+XMAILER_MIMEOLE_OL_C65FA
+
+# good enough
+XMAILER_MIMEOLE_OL_C7C33
+
+# good enough
+XMAILER_MIMEOLE_OL_C9068
+
+# good enough
+XMAILER_MIMEOLE_OL_CAC8F
+
+# good enough
+XMAILER_MIMEOLE_OL_CE8A4
+
+# good enough
+XMAILER_MIMEOLE_OL_CF0C0
+
+# good enough
+XMAILER_MIMEOLE_OL_D03AB
+
+# good enough
+XMAILER_MIMEOLE_OL_EF20B
+
+# good enough
+XMAILER_MIMEOLE_OL_EF222
+
+# good enough
+XMAILER_MIMEOLE_OL_F3B05
+
+# good enough
+XMAILER_MIMEOLE_OL_F475E
+
+# good enough
+XMAILER_MIMEOLE_OL_F6D01
+
+# good enough
+XMAILER_MIMEOLE_OL_FF5C8
+
+# good enough
 XM_OL_21064
 
 # good enough
@@ -1173,9 +1182,6 @@ XM_OL_48071700
 
 # good enough
 XM_OL_48072300
-
-# good enough
-XM_OL_49631700
 
 # good enough
 ZMIde_EBAYJOBSURI
