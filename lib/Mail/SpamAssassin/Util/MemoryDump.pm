@@ -3,11 +3,11 @@
 # Normally not "use"d by any code, purely for manual debugging.
 # To use, pepper code with this:
 #
-#    use Mail::SpamAssassin::Util::MemoryDump; MEMDEBUG();
+# use Mail::SpamAssassin::Util::MemoryDump; Mail::SpamAssassin::Util::MemoryDump::MEMDEBUG();
 #
 # or:
 #
-#    use Mail::SpamAssassin::Util::MemoryDump; MEMDEBUG_dump_obj();
+# use Mail::SpamAssassin::Util::MemoryDump; Mail::SpamAssassin::Util::MemoryDump::MEMDEBUG_dump_obj();
 #
 # and run script with MEMDEBUG=1 set in the environment;
 # "MEMDEBUG=1 spamassassin -Lt", for example.
