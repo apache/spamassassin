@@ -109,6 +109,7 @@ my $mailsa = Mail::SpamAssassin->new({
     local_tests_only => 1,
     dont_copy_prefs => 1,
     config_tree_recurse => 1,
+    keep_config_parsing_metadata => 1,
     # debug => 1,
 });
 
