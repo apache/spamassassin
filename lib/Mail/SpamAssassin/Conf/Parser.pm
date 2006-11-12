@@ -191,8 +191,12 @@ sub build_command_luts {
     # next, its priority (used to ensure frequently-used params
     # are parsed first)
     my $cmdname = $cmd->{command} || $cmd->{setting};
-    foreach my $name ($cmdname, @{$cmd->{aliases}}) {
-      $self->{command_luts}->{$set}->{$name} = $cmd;
+    $self->{command_luts}->{$set}->{$cmdname} = $cmd;
+
+    if ($cmd->{aliases} && scalar @{$cmd->{aliases}} > 0) {
+      foreach my $name (@{$cmd->{aliases}}) {
+        $self->{command_luts}->{$set}->{$name} = $cmd;
+      }
     }
   }
 }
