@@ -318,6 +318,7 @@ sub do_meta_tests {
   no strict "subs";
   undef &{"${package_name}::_meta_tests_${clean_priority}"};
   use strict "subs";
+  $self->free_ruleset_source($pms, 'meta', $priority);
 
   return unless ($evalstr);
 
@@ -473,6 +474,7 @@ sub do_head_tests {
   no strict "subs";
   undef &{"${package_name}::_head_tests_${clean_priority}"};
   use strict "subs";
+  $self->free_ruleset_source($pms, 'head', $priority);
 
   return unless ($evalstr);
 
@@ -609,6 +611,7 @@ sub do_body_tests {
 
   # clear out a previous version of this fn
   undef &{"${package_name}::_body_tests_${clean_priority}"};
+  $self->free_ruleset_source($pms, 'body', $priority);
 
   return unless ($evalstr);
 
@@ -738,6 +741,7 @@ sub do_body_uri_tests {
 
   # clear out a previous version of this fn
   undef &{"${package_name}::_body_uri_tests_${clean_priority}"};
+  $self->free_ruleset_source($pms, 'uri', $priority);
 
   return unless ($evalstr);
 
@@ -868,6 +872,7 @@ sub do_rawbody_tests {
 
   # clear out a previous version of this fn
   undef &{"${package_name}::_rawbody_tests_${clean_priority}"};
+  $self->free_ruleset_source($pms, 'rawbody', $priority);
 
   return unless ($evalstr);
 
@@ -948,6 +953,7 @@ sub do_full_tests {
   }
 
   undef &{"${package_name}::_full_tests_${clean_priority}"};
+  $self->free_ruleset_source($pms, 'full', $priority);
 
   return unless ($evalstr);
 
@@ -1143,6 +1149,9 @@ sub run_eval_tests {
     ';
   }
 
+  %{$evalhash} = ();
+  $self->free_ruleset_source($pms, 'eval', $priority);
+
   # nothing done in the loop, that means no rules 
   return unless ($evalstr);
  
@@ -1268,6 +1277,19 @@ sub ran_rule_plugin_code {
   return '
     $self->{main}->call_plugins ("ran_rule", { permsgstatus => $self, rulename => \''.$rulename.'\', ruletype => \''.$ruletype.'\' });
   ';
+}
+
+sub free_ruleset_source {
+  my ($self, $pms, $type, $pri) = @_;
+
+  # we can't do this, if we may need to recompile them again later
+  return if $pms->{conf}->{allow_user_rules};
+
+  # remove now-compiled rulesets
+  if (exists $pms->{conf}->{$type.'_tests'}->{$pri}) {
+    dbg "freeing ruleset source of type $type";
+    delete $pms->{conf}->{$type.'_tests'}->{$pri};
+  }
 }
 
 1;

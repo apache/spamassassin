@@ -2893,6 +2893,17 @@ sub finish_parsing {
 
 ###########################################################################
 
+sub get_description_for_rule {
+  my ($self, $rule) = @_;
+  if ($self->{descriptions_str} =~ /^\Q${rule}\E:(.*?)$/m) {
+    return $1;
+  } else {
+    return;
+  }
+}
+
+###########################################################################
+
 sub maybe_header_only {
   my($self,$rulename) = @_;
   my $type = $self->{test_types}->{$rulename};
@@ -3031,6 +3042,15 @@ sub clone {
   delete $dest->{sed_path_cache};
 
   return 1;
+}
+
+###########################################################################
+
+sub free_uncompiled_rule_source {
+  my ($self) = @_;
+  delete $self->{if_stack};
+  delete $self->{source_file};
+  delete $self->{meta_dependencies};
 }
 
 ###########################################################################

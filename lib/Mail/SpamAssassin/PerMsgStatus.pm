@@ -2114,7 +2114,7 @@ sub got_hit {
             $params{score} || $self->{conf}->{scores}->{$rule},
             $area,
             $params{ruletype},
-            ($self->{conf}->{descriptions}->{$rule} || $rule));
+            $self->{conf}->get_description_for_rule($rule) || $rule);
 }
 
 ###########################################################################

@@ -663,6 +663,7 @@ sub finish_parsing {
 
   $self->trace_meta_dependencies();
   $self->fix_priorities();
+  $self->compact_descriptions();
 
   dbg("conf: finish parsing");
 
@@ -750,8 +751,11 @@ sub finish_parsing {
   # named this way just in case we ever want a "finish_parsing_start"
   $conf->{main}->call_plugins("finish_parsing_end", { conf => $conf });
 
-  delete $conf->{tests};                # free it up
-  delete $conf->{priority};             # free it up
+  # free up stuff we no longer need
+  delete $conf->{tests};
+  delete $conf->{priority};
+  delete $conf->{test_types};
+  # delete $conf->{tflags};
 }
 
 sub trace_meta_dependencies {
@@ -831,6 +835,24 @@ sub fix_priorities {
       }
     }
   }
+}
+
+# compact the {descriptions} hash into a single string; by using
+# a string, quite a lot of RAM is freed up in exchange for slightly
+# slower lookup time
+sub compact_descriptions {
+  my ($self) = @_;
+  my $conf = $self->{conf};
+
+  my $descs = '';
+  my ($k, $v);
+  while (($k, $v) = each %{$conf->{descriptions}})
+  {
+    $descs .= "$k:$v\n";
+  }
+
+  delete $conf->{descriptions};
+  $conf->{descriptions_str} = $descs;
 }
 
 ###########################################################################

@@ -430,7 +430,6 @@ C<finish()> method on the status objects when you're done with them.
 
 sub check {
   my ($self, $mail_obj) = @_;
-  local ($_);
 
   $self->init(1);
   my $msg = Mail::SpamAssassin::PerMsgStatus->new($self, $mail_obj);
@@ -1227,6 +1226,8 @@ sub compile_now {
   $mail->finish();
   $self->finish_learner();
 
+  $self->{conf}->free_uncompiled_rule_source();
+
   # load SQL modules now as well
   my $dsn = $self->{conf}->{user_scores_dsn};
   if ($dsn ne '') {
@@ -1399,7 +1400,7 @@ sub init {
     }
 
     if ($sysrules) {
-      $self->{config_text} .= $self->read_cf ($sysrules, 'default rules dir');
+      $self->{config_text} .= $self->read_cf($sysrules, 'default rules dir');
     }
 
     if (!$self->{languages_filename}) {
@@ -1407,7 +1408,7 @@ sub init {
     }
 
     if ($siterules) {
-      $self->{config_text} .= $self->read_cf ($siterules, 'site rules dir');
+      $self->{config_text} .= $self->read_cf($siterules, 'site rules dir');
     }
 
     if ( $use_user_pref != 0 ) {
@@ -1427,7 +1428,7 @@ sub init {
         }
       }
 
-      $self->{config_text} .= $self->read_cf ($fname, 'user prefs file');
+      $self->{config_text} .= $self->read_cf($fname, 'user prefs file');
     }
   }
 
