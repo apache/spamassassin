@@ -3048,9 +3048,12 @@ sub clone {
 
 sub free_uncompiled_rule_source {
   my ($self) = @_;
-  delete $self->{if_stack};
-  delete $self->{source_file};
-  delete $self->{meta_dependencies};
+
+  if (!$self->{main}->{keep_config_parsing_metadata}) {
+    delete $self->{if_stack};
+    delete $self->{source_file};
+    delete $self->{meta_dependencies};
+  }
 }
 
 ###########################################################################

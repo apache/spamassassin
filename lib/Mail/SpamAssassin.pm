@@ -296,6 +296,8 @@ C<sa-update>.  Defaults to "@@LOCAL_STATE_DIR@@".
 
 =cut
 
+  # undocumented: keep_config_parsing_metadata: used by build/mkrules
+
 sub new {
   my $class = shift;
   $class = ref($class) || $class;

@@ -437,6 +437,8 @@ failed_line:
     $self->lint_warn($msg, undef, $is_error);
   }
 
+  delete $self->{if_stack};
+
   $self->lint_check();
   $self->set_default_scores();
 
@@ -759,7 +761,6 @@ sub finish_parsing {
   delete $conf->{tests};
   delete $conf->{priority};
   delete $conf->{test_types};
-  # delete $conf->{tflags};
 }
 
 sub trace_meta_dependencies {
@@ -775,11 +776,6 @@ sub trace_meta_dependencies {
     my $alreadydone = { };
     $self->_meta_deps_recurse($conf, $name, $name, $deps, $alreadydone);
     $conf->{meta_dependencies}->{$name} = $deps;
-
-    # this is too noisy
-    # if (scalar @$deps > 0) {
-    # dbg("rules: meta dependencies: $name => ".join(' ', @$deps));
-    # }
   }
 }
 
@@ -959,8 +955,9 @@ sub add_test {
   $conf->{priority}->{$name} ||= 0;
   $conf->{source_file}->{$name} = $self->{currentfile};
 
-  # this no longer seems to be needed!
-  # $conf->{if_stack}->{$name} = $self->get_if_stack_as_string();
+  if ($self->{main}->{keep_config_parsing_metadata}) {
+    $conf->{if_stack}->{$name} = $self->get_if_stack_as_string();
+  }
 
   if ($self->{scoresonly}) {
     $conf->{user_rules_to_compile}->{$type} = 1;
