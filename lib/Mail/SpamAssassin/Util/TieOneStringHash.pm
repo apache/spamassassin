@@ -57,6 +57,9 @@ sub STORE {
   if (ref $v) {
     croak "oops! only simple scalars can be stored in a TieOneStringHash";
   }
+  if (!defined $k) {
+    croak "oops! TieOneStringHash requires defined keys";
+  }
 
   if ($$store !~ s{\n\Q$k\E\000.*?\000\n}
                   {\n$k\000$v\000\n}xgs)
@@ -70,7 +73,7 @@ sub FETCH {
   my ($store, $k) = @_;
   if ($$store =~ m{\n\Q$k\E\000(.*?)\000\n}xs)
   {
-    return $1;
+    return $1 eq $UNDEF_VALUE ? undef : $1;
   }
   return;
 }
@@ -89,7 +92,7 @@ sub DELETE {
   if ($$store =~ s{\n\Q$k\E\000(.*?)\000\n}
                   {}xgs)
   {
-    return $1;
+    return $1 eq $UNDEF_VALUE ? undef : $1;
   }
   return;
 }
