@@ -669,7 +669,6 @@ sub finish_parsing {
 
   $self->trace_meta_dependencies();
   $self->fix_priorities();
-  $self->compact_descriptions();
 
   dbg("conf: finish parsing");
 
@@ -835,24 +834,6 @@ sub fix_priorities {
       }
     }
   }
-}
-
-# compact the {descriptions} hash into a single string; by using
-# a string, quite a lot of RAM is freed up in exchange for slightly
-# slower lookup time
-sub compact_descriptions {
-  my ($self) = @_;
-  my $conf = $self->{conf};
-
-  my $descs = '';
-  my ($k, $v);
-  while (($k, $v) = each %{$conf->{descriptions}})
-  {
-    $descs .= "$k:$v\n";
-  }
-
-  delete $conf->{descriptions};
-  $conf->{descriptions_str} = $descs;
 }
 
 ###########################################################################
