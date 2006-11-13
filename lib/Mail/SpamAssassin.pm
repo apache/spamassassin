@@ -296,7 +296,9 @@ C<sa-update>.  Defaults to "@@LOCAL_STATE_DIR@@".
 
 =cut
 
-  # undocumented: keep_config_parsing_metadata: used by build/mkrules
+# undocumented ctor settings: 
+#
+# - keep_config_parsing_metadata: used by build/listpromotable, default 0
 
 sub new {
   my $class = shift;
