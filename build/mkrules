@@ -93,6 +93,7 @@ $opt_activeout   ||= "72_active.cf";
 
 # source files that need compilation, and their targets
 my $needs_compile = { };
+my $found_output = { };
 my $current_src;
 my $newest_src_mtime = 0;
 my $newest_out_mtime = 0;
@@ -118,12 +119,22 @@ File::Find::find ({
         no_chdir => 1
       }, $opt_out);
 
+# we must rebuild if a compiled .pm is missing, too
+my $found_all_pm_files = 1;
+foreach my $f (keys %{$needs_compile}) {
+  next unless ($f =~ /\.pm$/i);
+  if (!exists $found_output->{basename $f}) {
+    $found_all_pm_files = 0;
+  }
+}
+
 # check mtimes, and also require that the two required output files
 # really do exist
 if ($newest_src_mtime && $newest_out_mtime
     && $newest_src_mtime < $newest_out_mtime
     && -f $opt_out.'/'.$opt_sandboxout
-    && -f $opt_out.'/'.$opt_activeout)
+    && -f $opt_out.'/'.$opt_activeout
+    && $found_all_pm_files)
 {
   print "mkrules: no rules updated\n";
   exit 0;
@@ -258,11 +269,21 @@ sub src_wanted {
 sub out_wanted {
   my $path = $File::Find::name;
   return unless (-f $path);
-  return unless ($path =~ /\.cf$/i);
+  return if ($path =~ /\.svn/);
+  return unless ($path =~ /\.(?:cf|pm)$/i);
 
   my @st = stat $path;
   if ($st[9] && $st[9] > $newest_out_mtime) {
     $newest_out_mtime = $st[9];
+  }
+
+  my $dir = $path;
+  $dir =~ s/^${current_src}[\/\\\:]//s;
+  $dir =~ s/([^\/\\\:]+)$//;
+  my $filename = $1;
+
+  if ($path =~ /\.pm$/i) {
+    $found_output->{$filename} = 1;
   }
 }
 
