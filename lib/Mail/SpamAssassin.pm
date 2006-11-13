@@ -438,6 +438,7 @@ sub check {
   $self->init(1);
   my $msg = Mail::SpamAssassin::PerMsgStatus->new($self, $mail_obj);
   $msg->check();
+# use Mail::SpamAssassin::Util::MemoryDump; Mail::SpamAssassin::Util::MemoryDump::MEMDEBUG(); use Mail::SpamAssassin::Util::MemoryDump; Mail::SpamAssassin::Util::MemoryDump::MEMDEBUG_dump_obj($msg); Mail::SpamAssassin::Util::MemoryDump::MEMDEBUG_dump_obj($self);
   $msg;
 }
 

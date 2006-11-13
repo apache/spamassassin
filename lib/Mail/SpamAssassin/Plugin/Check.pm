@@ -203,7 +203,7 @@ sub do_meta_tests {
     return;
   }
 
-  my (%rule_deps, %setup_rules, %meta, $rulename);
+  my (%rule_deps, %meta, $rulename);
   my $evalstr = '';
 
   # Get the list of meta tests
@@ -232,8 +232,10 @@ sub do_meta_tests {
         $meta{$rulename} .= "$token ";
       }
       else {
-        $meta{$rulename} .= "\$h->{'$token'} ";
-        $setup_rules{$token}=1;
+        # the " || 0" formulation is to avoid "use of uninitialized value"
+        # warnings; this is better than adding a 0 to a hash for every
+        # rule referred to in a meta...
+        $meta{$rulename} .= "(\$h->{'$token'} || 0) ";
       
         if (!exists $conf->{scores}->{$token}) {
           info("rules: meta test $rulename has undefined dependency '$token'");
@@ -244,8 +246,8 @@ sub do_meta_tests {
           # there are some cases where this is expected; don't warn
           # in those cases.
           if ((($conf->get_score_set()) & 1) == 0 &&
-              $conf->{tflags}->{$token} && 
-              $conf->{tflags}->{$token} =~ /\bnet\b/) {
+              ($conf->{tflags}->{$token}||'') =~ /\bnet\b/)
+          {
             $dowarn = 0;    # bug 5040: net rules in a non-net scoreset
           }
 
@@ -258,9 +260,6 @@ sub do_meta_tests {
       }
     }
   }
-
-  # avoid "undefined" warnings by providing a default value for needed rules
-  $evalstr .= join("\n", (map { "\$h->{'$_'} ||= 0;" } keys %setup_rules), "");
 
   # Sort by length of dependencies list.  It's more likely we'll get
   # the dependencies worked out this way.
@@ -283,8 +282,8 @@ sub do_meta_tests {
       # If we depend on network tests, call ensure_rules_are_complete()
       # to block until they are
       my $alldeps = join ' ', grep {
-              $tflags->{$_} =~ /\bnet\b/
-            } @{ $conf->{meta_dependencies}->{ $metas[$i] } };
+              ($tflags->{$_}||'') =~ /\bnet\b/
+            } split (' ', $conf->{meta_dependencies}->{ $metas[$i] } );
 
       if ($alldeps ne '') {
         $evalstr .= '  $pms->ensure_rules_are_complete(q{'.$metas[$i].'}, qw{'.$alldeps.'});';
@@ -550,7 +549,7 @@ sub do_body_tests {
 
   while (my($rulename, $pat) = each %{$pms->{conf}{body_tests}->{$priority}}) {
     my $sub;
-    if ($pms->{conf}->{tflags}->{$rulename} =~ /\bmultiple\b/)
+    if (($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
       {
       # support multiple matches
       $loopid++;
@@ -683,7 +682,7 @@ sub do_body_uri_tests {
 
   while (my($rulename, $pat) = each %{$pms->{conf}{uri_tests}->{$priority}}) {
     my $sub;
-    if ($pms->{conf}->{tflags}->{$rulename} =~ /\bmultiple\b/) {
+    if (($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmultiple\b/) {
       $loopid++;
       $sub = '
       uri_'.$loopid.': foreach my $l (@_) {
@@ -813,7 +812,7 @@ sub do_rawbody_tests {
 
   while (my($rulename, $pat) = each %{$pms->{conf}{rawbody_tests}->{$priority}}) {
     my $sub;
-    if ($pms->{conf}->{tflags}->{$rulename} =~ /\bmultiple\b/)
+    if (($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
       {
       # support multiple matches
       $loopid++;
@@ -1260,7 +1259,7 @@ sub hit_rule_plugin_code {
   # if we're not running "tflags multiple", break out of the matching
   # loop this way
   my $multiple_code = '';
-  if ($pms->{conf}->{tflags}->{$rulename} !~ /\bmultiple\b/) {
+  if (($pms->{conf}->{tflags}->{$rulename}||'') !~ /\bmultiple\b/) {
     $multiple_code = $loop_break_directive.';';
   }
 
