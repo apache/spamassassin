@@ -536,7 +536,7 @@ sub set_default_scores {
       # T_ rules (in a testing probationary period) get low, low scores
       my $set_score = ($k =~/^T_/) ? 0.01 : 1.0;
 
-      $set_score = -$set_score if ( $conf->{tflags}->{$k} =~ /\bnice\b/ );
+      $set_score = -$set_score if ( ($conf->{tflags}->{$k}||'') =~ /\bnice\b/ );
       for my $index (0..3) {
         $conf->{scoreset}->[$index]->{$k} = $set_score;
       }
@@ -774,7 +774,7 @@ sub trace_meta_dependencies {
     my $deps = [ ];
     my $alreadydone = { };
     $self->_meta_deps_recurse($conf, $name, $name, $deps, $alreadydone);
-    $conf->{meta_dependencies}->{$name} = $deps;
+    $conf->{meta_dependencies}->{$name} = join (' ', @{$deps});
   }
 }
 
@@ -826,7 +826,7 @@ sub fix_priorities {
     next unless (defined $deps);
 
     my $basepri = $pri->{$rule};
-    foreach my $dep (@$deps) {
+    foreach my $dep (split ' ', $deps) {
       my $deppri = $pri->{$dep};
       if ($deppri > $basepri) {
         dbg("rules: $rule (pri $basepri) requires $dep (pri $deppri): fixed");
@@ -926,7 +926,6 @@ sub add_test {
 
   $conf->{tests}->{$name} = $text;
   $conf->{test_types}->{$name} = $type;
-  $conf->{tflags}->{$name} ||= '';
   if ($type == $Mail::SpamAssassin::Conf::TYPE_META_TESTS) {
     $conf->{priority}->{$name} ||= 500;
   }
