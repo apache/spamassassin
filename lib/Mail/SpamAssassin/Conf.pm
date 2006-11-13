@@ -74,6 +74,7 @@ use Mail::SpamAssassin::NetSet;
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::Conf::Parser;
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Util::TieOneStringHash;
 use File::Spec;
 
 use strict;
@@ -2594,13 +2595,17 @@ sub new {
   $self->{plugins_loaded} = { };
 
   $self->{tests} = { };
-  $self->{descriptions} = { };
   $self->{test_types} = { };
   $self->{scoreset} = [ {}, {}, {}, {} ];
   $self->{scoreset_current} = 0;
   $self->set_score_set (0);
   $self->{tflags} = { };
   $self->{source_file} = { };
+
+  # keep descriptions in a slow but space-efficient single-string
+  # data structure
+  tie %{$self->{descriptions}}, 'Mail::SpamAssassin::Util::TieOneStringHash'
+    or warn "tie failed";
 
   # after parsing, tests are refiled into these hashes for each test type.
   # this allows e.g. a full-text test to be rewritten as a body test in
@@ -2895,11 +2900,7 @@ sub finish_parsing {
 
 sub get_description_for_rule {
   my ($self, $rule) = @_;
-  if ($self->{descriptions_str} =~ /^\Q${rule}\E:(.*?)$/m) {
-    return $1;
-  } else {
-    return;
-  }
+  return $self->{descriptions}->{$rule};
 }
 
 ###########################################################################
@@ -3060,6 +3061,7 @@ sub free_uncompiled_rule_source {
 
 sub finish {
   my ($self) = @_;
+  untie %{$self->{descriptions}};
   %{$self} = ();
 }
 
