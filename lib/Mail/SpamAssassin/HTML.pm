@@ -52,14 +52,6 @@ my %tricks = map {; $_ => 1 }
   #   blink ilayer multicol noembed nolayer spacer wbr
 ;
 
-# attributes
-my %attributes = map {; $_ => 1 }
-  # HTML 4.01 deprecated, loose DTD, frameset DTD
-  qw( abbr accept-charset accept accesskey action align alink alt archive axis background bgcolor border cellpadding cellspacing char charoff charset checked cite class classid clear code codebase codetype color cols colspan compact content coords data datetime declare defer dir disabled enctype face for frame frameborder headers height href hreflang hspace http-equiv id ismap label lang language link longdesc marginheight marginwidth maxlength media method multiple name nohref noresize noshade nowrap object onblur onchange onclick ondblclick onfocus onkeydown onkeypress onkeyup onload onmousedown onmousemove onmouseout onmouseover onmouseup onreset onselect onsubmit onunload profile prompt readonly rel rev rows rowspan rules scheme scope scrolling selected shape size span src standby start style summary tabindex target text title type usemap valign value valuetype version vlink vspace width ),
-  # attributes: additional attributes we accept
-  qw( family wrap / ),
-;
-
 # elements that change text style
 my %elements_text_style = map {; $_ => 1 }
   qw( body font table tr th td big small basefont marquee span ),
@@ -145,7 +137,6 @@ sub html_end {
 
   # final results scalars
   $self->put_results(image_area => $self->{image_area});
-  $self->put_results(max_shouting => $self->{max_shouting});
   $self->put_results(length => $self->{length});
   $self->put_results(min_size => $self->{min_size});
   $self->put_results(max_size => $self->{max_size});
@@ -178,13 +169,6 @@ sub html_end {
   if (exists $self->{tags} && exists $self->{obfuscation}) {
     $self->put_results(obfuscation_ratio =>
 		       $self->{obfuscation} / $self->{tags});
-  }
-  if (exists $self->{attr_bad} && exists $self->{attr_all}) {
-    $self->put_results(attr_bad => $self->{attr_bad} / $self->{attr_all});
-  }
-  if (exists $self->{attr_unique_bad} && exists $self->{attr_unique_all}) {
-    $self->put_results(attr_unique_bad =>
-		       $self->{attr_unique_bad} / $self->{attr_unique_all});
   }
 }
 
@@ -230,7 +214,6 @@ sub parse {
   my ($self, $text) = @_;
 
   $self->{image_area} = 0;
-  $self->{max_shouting} = 0;
   $self->{title_index} = -1;
   $self->{max_size} = 3;	# start at default size
   $self->{min_size} = 3;	# start at default size
@@ -289,17 +272,6 @@ sub html_tag {
   }
 
   return if $maybe_namespace;
-
-  # check attributes
-  for my $name (keys %$attr) {
-    if (!exists $attributes{$name}) {
-      $self->{attr_bad}++;
-      $self->{attr_unique_bad}++ if !exists $self->{"attr_seen_$name"};
-    }
-    $self->{attr_all}++;
-    $self->{attr_unique_all}++ if !exists $self->{"attr_seen_$name"};
-    $self->{"attr_seen_$name"} = 1;
-  }
 
   # ignore non-elements
   if (exists $elements{$tag} || exists $tricks{$tag}) {
@@ -560,7 +532,6 @@ sub html_font_invisible {
 
   # invisibility
   if (substr($fg,-6) eq substr($bg,-6)) {
-    $self->put_results(font_invisible => 1);
     return 1;
   }
   # near-invisibility
@@ -609,42 +580,9 @@ sub html_font_invisible {
 sub html_tests {
   my ($self, $tag, $attr, $num) = @_;
 
-  # HTML shouting
-  if ($tag =~ /^(?:b|i|u|strong|em|big|center|h[1-6])$/) {
-    my $level = 0;
-    for my $shout (qw( b i u strong em big center h1 h2 h3 h4 h5 h6 )) {
-      next unless exists $self->{inside}{$shout};
-      $level += $self->{inside}{$shout};
-    }
-    $self->{max_shouting} = $level if $level > $self->{max_shouting};
-  }      
-  if ($tag =~ /^(?:a|body|div|input|form|td|layer|area|img)$/i) {
-    for my $key (keys %$attr) {
-      if ($key =~ /\bon(?:contextmenu|load|resize|submit|unload)\b/i &&
-	  $attr->{$key})
-      {
-	$self->put_results(html_event_unsafe => 1);
-      }
-    }
-  }
-  if ($tag eq "font" && exists $attr->{size}) {
-    my $size = $attr->{size};
-    $self->put_results(tiny_font => 1) if (($size =~ /^\s*(\d+)/ && $1 <= 1) ||
-					   ($size =~ /\-(\d+)/ && $1 >= 3));
-    $self->put_results(big_font => 1) if (($size =~ /^\s*(\d+)/ && $1 > 3) ||
-					  ($size =~ /\+(\d+)/ && $1 >= 1));
-  }
   if ($tag eq "font" && exists $attr->{face}) {
-    if ($attr->{face} =~ /[A-Z]{3}/ && $attr->{face} !~ /M[ST][A-Z]|ITC/) {
-      $self->put_results(font_face_caps => 1);
-    }
     if ($attr->{face} !~ /^[a-z][a-z -]*[a-z](?:,\s*[a-z][a-z -]*[a-z])*$/i) {
       $self->put_results(font_face_bad => 1);
-    }
-  }
-  if (exists $attr->{style}) {
-    if ($attr->{style} =~ /font(?:-size)?:\s*(\d+(?:\.\d*)?|\.\d+)(p[tx])/i) {
-      $self->examine_text_style($1, $2);
     }
   }
   if ($tag eq "img" && exists $self->{inside}{a} && $self->{inside}{a} > 0) {
@@ -702,15 +640,6 @@ sub html_tests {
   }
 }
 
-sub examine_text_style {
-  my ($self, $size, $type) = @_;
-  $type = lc $type;
-  $self->put_results(tiny_font => 1) if ($type eq "pt" && $size < 4);
-  $self->put_results(tiny_font => 1) if ($type eq "px" && $size < 4);
-  $self->put_results(big_font => 1) if ($type eq "pt" && $size > 14);
-  $self->put_results(big_font => 1) if ($type eq "px" && $size > 18);
-}
-
 sub display_text {
   my $self = shift;
   my $text = shift;
@@ -755,16 +684,9 @@ sub html_text {
   if (exists $self->{inside}{script} && $self->{inside}{script} > 0)
   {
     push @{ $self->{script} }, $text;
-    if ($text =~ /\bon(?:blur|contextmenu|focus|load|resize|submit|unload)\b/i)
-    {
-      $self->put_results(html_event_unsafe => 1);
-    }
     return;
   }
   if (exists $self->{inside}{style} && $self->{inside}{style} > 0) {
-    if ($text =~ /font(?:-size)?:\s*(\d+(?:\.\d*)?|\.\d+)(p[tx])/i) {
-      $self->examine_text_style($1, $2);
-    }
     return;
   }
 
@@ -781,8 +703,6 @@ sub html_text {
   my $invisible_for_bayes = 0;
   if ($text =~ /[^ \t\n\r\f\x0b\xa0]/) {
     $invisible_for_bayes = $self->html_font_invisible($text);
-    $self->put_results(text_after_body => 1) if $self->{closed_body};
-    $self->put_results(text_after_html => 1) if $self->{closed_html};
   }
 
   if (exists $self->{text}->[-1]) {
@@ -817,21 +737,6 @@ sub html_comment {
   my ($self, $text) = @_;
 
   push @{ $self->{comment} }, $text;
-
-  if (exists $self->{inside}{script} && $self->{inside}{script} > 0)
-  {
-    if ($text =~ /\bon(?:blur|contextmenu|focus|load|resize|submit|unload)\b/i)
-    {
-      $self->put_results(html_event_unsafe => 1);
-    }
-    return;
-  }
-  if (exists $self->{inside}{style} && $self->{inside}{style} > 0) {
-    if ($text =~ /font(?:-size)?:\s*(\d+(?:\.\d*)?|\.\d+)(p[tx])/i) {
-      $self->examine_text_style($1, $2);
-    }
-    return;
-  }
 }
 
 sub html_declaration {
@@ -839,7 +744,6 @@ sub html_declaration {
 
   if ($text =~ /^<!doctype/i) {
     my $tag = "!doctype";
-
     $self->{elements}++;
     $self->{tags}++;
     $self->{inside}{$tag} = 0;
