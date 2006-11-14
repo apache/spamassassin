@@ -8,7 +8,7 @@ use Test; BEGIN { plan tests => 1 };
 
 %patterns = (
 
-q{ X-Spam-Status: No, }, 'didnt_hang_at_least',
+q{ X-Spam-Status: }, 'didnt_hang_at_least',
 
 );
 
