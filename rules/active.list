@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-jm bb-zmi cthielen daf dos parkerm zmi
+# with results from: bb-doc bb-jm bb-zmi cthielen daf dos parkerm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -9,6 +9,9 @@ AWL
 
 # good enough
 AXB_FAKETZ
+
+# good enough
+AXB_XMID_OEGOESNULL
 
 # good enough
 AXB_XR_STULDAP
@@ -116,6 +119,9 @@ DNS_FROM_SECURITYSAGE
 DOS_MORTGAGE
 
 # good enough
+DOS_TO_READ_STOCK
+
+# good enough
 DOS_YOUR_PLACE
 
 # good enough
@@ -140,6 +146,9 @@ FB_CIALIS_LEO3
 FB_OBFU_URI_COM
 
 # good enough
+FB_SAVE_LEO
+
+# good enough
 FB_VALIUM_LEO2
 
 # good enough
@@ -155,31 +164,16 @@ FH_FROM_HOODIA
 FH_FROM_TO_PERC
 
 # good enough
-FH_RCVD_WITHSMTPFOR
-
-# good enough
 FM_CUSTOMLOGODSGNc
 
 # tflags userconf
 FRAGMENTED_MESSAGE
 
 # good enough
-FS_START_DOYOU
-
-# good enough
 FS_START_DOYOU2
 
 # good enough
 FUZZY_MERIDIA
-
-# good enough
-FUZZY_SPRM
-
-# good enough
-FUZZY_STOCK
-
-# good enough
-FU_HOODIA
 
 # good enough
 GEO_QUERY_STRING
@@ -189,6 +183,15 @@ GMD_FAKETZ
 
 # tflags userconf
 GTUBE
+
+# tflags net
+HABEAS_ACCREDITED_COI
+
+# tflags net
+HABEAS_ACCREDITED_SOI
+
+# tflags net
+HABEAS_CHECKED
 
 # tflags userconf
 HASHCASH_20
@@ -236,16 +239,10 @@ HS_DRUG_DOLLAR_3
 HS_DRUG_DOLLAR_MANY
 
 # good enough
-HS_EXTRA
-
-# good enough
 HS_FORGED_OE_FW
 
 # good enough
 HS_GETMEOFF
-
-# good enough
-HS_INDEX_PARAM
 
 # good enough
 HS_MEETUP_FOR_SEX
@@ -337,11 +334,32 @@ PART_STOCK_IMG6
 # good enough
 PART_STOCK_IMG7
 
+# tflags net
+PYZOR_CHECK
+
+# tflags net
+RAZOR2_CF_RANGE_51_100
+
+# tflags net
+RAZOR2_CF_RANGE_E4_51_100
+
+# tflags net
+RAZOR2_CF_RANGE_E8_51_100
+
+# tflags net
+RAZOR2_CHECK
+
 # good enough
 RCVD_FORGED_WROTE
 
 # tflags net
 RCVD_IN_BL_SPAMCOP_NET
+
+# tflags net
+RCVD_IN_BSP_OTHER
+
+# tflags net
+RCVD_IN_BSP_TRUSTED
 
 # tflags net
 RCVD_IN_DOB
@@ -434,6 +452,18 @@ RCVD_IN_IADB_UT_CPR_MAT
 RCVD_IN_IADB_VOUCHED
 
 # tflags net
+RCVD_IN_MAPS_DUL
+
+# tflags net
+RCVD_IN_MAPS_NML
+
+# tflags net
+RCVD_IN_MAPS_RBL
+
+# tflags net
+RCVD_IN_MAPS_RSS
+
+# tflags net
 RCVD_IN_NJABL_CGI
 
 # tflags net
@@ -482,6 +512,9 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_WHOIS_BOGONS
 
 # tflags net
+RCVD_IN_WHOIS_HIJACKED
+
+# tflags net
 RCVD_IN_WHOIS_INVALID
 
 # tflags net
@@ -497,10 +530,28 @@ ROUND_THE_WORLD
 SHORT_HELO_AND_INLINE_IMAGE
 
 # tflags net
+SPF_FAIL
+
+# tflags net
+SPF_HELO_FAIL
+
+# tflags net
+SPF_HELO_NEUTRAL
+
+# tflags net
 SPF_HELO_PASS
 
 # tflags net
+SPF_HELO_SOFTFAIL
+
+# tflags net
+SPF_NEUTRAL
+
+# tflags net
 SPF_PASS
+
+# tflags net
+SPF_SOFTFAIL
 
 # tflags userconf
 SUBJECT_IN_BLACKLIST
@@ -524,13 +575,7 @@ TT_OBSCURED_VIAGRA
 TVD_ACT_193
 
 # good enough
-TVD_APPROVED
-
-# good enough
 TVD_APP_LOAN
-
-# good enough
-TVD_BODY_END_STAR
 
 # good enough
 TVD_DEAR_HOMEOWNER
@@ -542,25 +587,16 @@ TVD_EB_PHISH
 TVD_FLOAT_GENERAL
 
 # good enough
-TVD_FROM_1
-
-# good enough
 TVD_FUZZY_DEGREE
 
 # good enough
 TVD_FUZZY_FINANCE
 
 # good enough
-TVD_FUZZY_FIXED_RATE
-
-# good enough
 TVD_FUZZY_MICROCAP
 
 # good enough
 TVD_FUZZY_PHARMACEUTICAL
-
-# good enough
-TVD_FUZZY_SECURITIES
 
 # good enough
 TVD_FUZZY_SYMBOL
@@ -570,12 +606,6 @@ TVD_FW_GRAPHIC_ID3
 
 # good enough
 TVD_FW_GRAPHIC_ID3_2
-
-# good enough
-TVD_FW_MESG1
-
-# good enough
-TVD_FW_MESG2
 
 # good enough
 TVD_HEAD_KERNEL
@@ -590,13 +620,16 @@ TVD_NOT_SATISFIED
 TVD_PH_7
 
 # good enough
-TVD_PH_BODY_META
-
-# good enough
-TVD_PH_FR5
-
-# good enough
 TVD_PH_REC
+
+# good enough
+TVD_PH_SUBJ_ACCOUNTS_POST
+
+# good enough
+TVD_PH_SUBJ_META
+
+# good enough
+TVD_PH_SUBJ_META_ALL
 
 # good enough
 TVD_PH_SUBJ_UPDATE
@@ -650,37 +683,49 @@ TVD_SUBJ_FINGER_03
 TVD_UA_FOSTERING
 
 # good enough
-TVD_UNDER_VALUED
-
-# good enough
 TVD_VISIT_PHARMA
 
 # good enough
 TVD_VIS_HIDDEN
 
 # good enough
-AXB_XMID_OEGOESNULL
+CTYPE_1SPACE_GIF
 
 # good enough
-CTYPE_8SPACE_GIF
+DC_IMAGE001_GIF
 
 # good enough
-DOS_TO_READ_STOCK
+DOS_DOUBLE_SOTCK
 
 # good enough
-FB_SAVE_LEO
+DOS_LET_GO_JOB
 
 # good enough
-FB_THOUS_PERSONAL
+DOS_STOCK_O_PRICE
 
 # good enough
-FB_YOURSELF_MASTER
+DOS_TWO_MIS_STOCK
 
 # good enough
-KAM_STOCKTIP2
+DYN_RDNS_SHORT_HELO_FROM
+
+# good enough
+DYN_RDNS_SHORT_HELO_MIMEOLE
+
+# good enough
+FH_DATE_IS_19XX
+
+# good enough
+KAM_STOCKTIP4
+
+# good enough
+PART_STOCK_IMG2
 
 # tflags net
 RCVD_IN_DSBL
+
+# tflags net
+RCVD_IN_MAPS_DUL
 
 # tflags net
 RCVD_IN_NJABL_DUL
@@ -695,40 +740,142 @@ RCVD_IN_WHOIS_INVALID
 RCVD_IN_XBL
 
 # good enough
-TVD_FW_GRAPHIC_NAME_LONG
+RCVD_LSO_SND
 
 # good enough
-TVD_FW_GRAPHIC_NAME_MID
+RDNS_DYNAMIC
 
 # good enough
-TVD_PH_SUBJ_ACCOUNTS_POST
+TVD_DOLLARS_US
 
 # good enough
-TVD_PH_SUBJ_META
+TVD_FINGER_02
 
 # good enough
-TVD_PH_SUBJ_META_ALL
+TVD_FW_GRAPHIC_ID1
 
 # good enough
-TVD_SPACED_WORDS
+TVD_FW_GRAPHIC_ID2
 
 # good enough
-VERTICAL_DRUGS_1
+TVD_LINK_SAVE
 
 # good enough
-XMAILER_MIMEOLE_OL_32D97
+TVD_PH_SUBJ_SEC_MEASURES
 
 # good enough
-XMAILER_MIMEOLE_OL_72660
+TVD_SPACED_SUBJECT_WORD5
+
+# good enough
+TVD_SUBJ_FINGER_04
+
+# good enough
+TVD_SUBJ_OWE
+
+# good enough
+TVD_SUBJ_WIPE_DEBT
+
+# good enough
+XMAILER_MIMEOLE_OL_09BB4
+
+# good enough
+XMAILER_MIMEOLE_OL_20C99
+
+# good enough
+XMAILER_MIMEOLE_OL_3D61D
+
+# good enough
+XMAILER_MIMEOLE_OL_4B815
+
+# good enough
+XMAILER_MIMEOLE_OL_56DF6
+
+# good enough
+XMAILER_MIMEOLE_OL_58CB5
+
+# good enough
+XMAILER_MIMEOLE_OL_61ABB
+
+# good enough
+XMAILER_MIMEOLE_OL_62E6A
+
+# good enough
+XMAILER_MIMEOLE_OL_7533E
+
+# good enough
+XMAILER_MIMEOLE_OL_83BF7
+
+# good enough
+XMAILER_MIMEOLE_OL_91287
+
+# good enough
+XMAILER_MIMEOLE_OL_95A76
+
+# good enough
+XMAILER_MIMEOLE_OL_9B607
+
+# good enough
+XMAILER_MIMEOLE_OL_AA207
+
+# good enough
+XMAILER_MIMEOLE_OL_BC7E6
+
+# good enough
+XMAILER_MIMEOLE_OL_CAC8F
+
+# good enough
+XMAILER_MIMEOLE_OL_CE8A4
+
+# good enough
+XMAILER_MIMEOLE_OL_F3B05
+
+# good enough
+XMAILER_MIMEOLE_OL_F8BA4
+
+# good enough
+XM_OL_21064
+
+# good enough
+XM_OL_48072300
+
+# good enough
+XM_OL_49631700
 
 # tflags userconf
 UNPARSEABLE_RELAY
+
+# tflags net
+URIBL_AB_SURBL
+
+# tflags net
+URIBL_BLACK
+
+# tflags net
+URIBL_GREY
+
+# tflags net
+URIBL_JP_SURBL
+
+# tflags net
+URIBL_OB_SURBL
+
+# tflags net
+URIBL_PH_SURBL
 
 # tflags net
 URIBL_RED
 
 # tflags net
 URIBL_RHS_DOB
+
+# tflags net
+URIBL_SBL
+
+# tflags net
+URIBL_SC_SURBL
+
+# tflags net
+URIBL_WS_SURBL
 
 # good enough
 URI_L_PHP
@@ -759,6 +906,9 @@ USER_IN_WHITELIST
 
 # tflags userconf
 USER_IN_WHITELIST_TO
+
+# good enough
+VERTICAL_DRUGS_1
 
 # tflags net
 WHOIS_1AND1PR
@@ -902,6 +1052,9 @@ XMAILER_MIMEOLE_OL_25340
 XMAILER_MIMEOLE_OL_2B374
 
 # good enough
+XMAILER_MIMEOLE_OL_32D97
+
+# good enough
 XMAILER_MIMEOLE_OL_3857F
 
 # good enough
@@ -939,6 +1092,9 @@ XMAILER_MIMEOLE_OL_681AD
 
 # good enough
 XMAILER_MIMEOLE_OL_72641
+
+# good enough
+XMAILER_MIMEOLE_OL_72660
 
 # good enough
 XMAILER_MIMEOLE_OL_812FF
@@ -1028,19 +1184,7 @@ XM_OL_48071700
 ZMIde_EBAYJOBSURI
 
 # good enough
-ZMIde_LOVEGALX1
-
-# good enough
-ZMIde_LOVEGALX2
-
-# good enough
-ZMIde_LOVEGALXURI
-
-# good enough
 ZMIde_SEXUALEXPL1
-
-# good enough
-ZMIde_URIPORNWEB
 
 # tflags net
 __DNS_FROM_RFC_ABUSE
