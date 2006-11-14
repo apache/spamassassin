@@ -388,6 +388,8 @@ sub do_head_tests {
     return;
   }
 
+  my $conf = $pms->{conf};
+  my $tflags = $conf->{tflags};
   my $use_rule_subs = $self->{main}->{use_rule_subs};
 
   my $evalstr = $self->start_rules_plugin_code("header");
@@ -397,7 +399,7 @@ sub do_head_tests {
   my %ordered = ();
   my %testcode = ();
 
-  while (my($rulename, $rule) = each %{$pms->{conf}{head_tests}->{$priority}}) {
+  while (my($rulename, $rule) = each %{$conf->{head_tests}->{$priority}}) {
     my $def = '';
     my ($hdrname, $testtype, $pat) =
         $rule =~ /^\s*(\S+)\s*(\=|\!)\~\s*(\S.*?\S)\s*$/;
@@ -454,13 +456,23 @@ sub do_head_tests {
       else {
         my $testcode = $testcode{$rulename};
 
+        my $posline = '';
+        my $ifwhile = 'if';
+        my $hitdone = '';
+        if (($tflags->{$rulename}||'') =~ /\bmultiple\b/)
+        {
+          $posline = 'pos $hval = 0;';
+          $ifwhile = 'while';
+          $hitdone = 'last';
+        }
+
         $evalstr .= '
           if ($scoresptr->{q#'.$rulename.'#}) {
-            pos $hval = 0;
+            '.$posline.'
             '.$self->hash_line_for_rule($pms, $rulename).'
-            while ($hval '.$testcode.') {
+            '.$ifwhile.' ($hval '.$testcode.') {
               $self->got_hit(q#'.$rulename.'#, "", ruletype => "header");
-              '.$self->hit_rule_plugin_code($pms, $rulename, "header", "last").'
+              '.$self->hit_rule_plugin_code($pms, $rulename, "header", $hitdone).'
             }
             '.$self->ran_rule_plugin_code($pms, $rulename, "header").'
           }
@@ -550,7 +562,7 @@ sub do_body_tests {
   while (my($rulename, $pat) = each %{$pms->{conf}{body_tests}->{$priority}}) {
     my $sub;
     if (($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
-      {
+    {
       # support multiple matches
       $loopid++;
       $sub = '
@@ -813,7 +825,7 @@ sub do_rawbody_tests {
   while (my($rulename, $pat) = each %{$pms->{conf}{rawbody_tests}->{$priority}}) {
     my $sub;
     if (($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
-      {
+    {
       # support multiple matches
       $loopid++;
       $sub = '
