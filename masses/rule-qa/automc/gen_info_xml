@@ -42,10 +42,12 @@ foreach my $dr (@daterevs) {
   my $fastinfo = get_fastinfo($dr, $drdir);
   if (!defined $fastinfo) { next; }
 
-  open (OUT, ">$drdir/fastinfo.xml") or die "cannot write $drdir/fastinfo.xml";
-  print OUT $fastinfo;
-  close OUT or die "failed to write to $drdir/fastinfo.xml";
-  chmod 0666, "$drdir/fastinfo.xml"; # or warn "failed to chmod $drdir/fastinfo.xml";
+  if (!-e "$drdir/fastinfo.xml" || -s "$drdir/fastinfo.xml" == 0) {
+    open (OUT, ">$drdir/fastinfo.xml") or die "cannot write $drdir/fastinfo.xml";
+    print OUT $fastinfo;
+    close OUT or die "failed to write to $drdir/fastinfo.xml";
+    chmod 0666, "$drdir/fastinfo.xml"; # or warn "failed to chmod $drdir/fastinfo.xml";
+  }
 
   # this one is only built if it doesn't already exist, because
   # it's quite expensive to build
@@ -54,12 +56,14 @@ foreach my $dr (@daterevs) {
     next;
   }
 
-  print "$drdir/info.xml: creating...\n";
-  my $info = get_info($dr, $drdir);
-  open (OUT, ">$drdir/info.xml") or die "cannot write $drdir/info.xml";
-  print OUT $info;
-  close OUT or die "failed to write to $drdir/info.xml";
-  chmod 0666, "$drdir/info.xml"; # or warn "failed to chmod $drdir/info.xml";
+  if (!-e "$drdir/info.xml" || -s "$drdir/info.xml" == 0) {
+    print "$drdir/info.xml: creating...\n";
+    my $info = get_info($dr, $drdir);
+    open (OUT, ">$drdir/info.xml") or die "cannot write $drdir/info.xml";
+    print OUT $info;
+    close OUT or die "failed to write to $drdir/info.xml";
+    chmod 0666, "$drdir/info.xml"; # or warn "failed to chmod $drdir/info.xml";
+  }
 }
 
 sub get_info {
