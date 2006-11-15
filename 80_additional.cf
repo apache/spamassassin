@@ -271,15 +271,15 @@ endif
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
 
 mimeheader __PART_STOCK_CID Content-ID =~ /^<[a-f0-9]{12}\$[a-f0-9]{8}\$[a-f0-9]{8}\@[^\s\.]+>$/
-mimeheader __PART_STOCK_IMG Content-Type =~ /image\/(?:gif|jpeg|png)/
+mimeheader __ANY_IMAGE_ATTACH Content-Type =~ /image\/(?:gif|jpeg|png)/
 mimeheader __PART_STOCK_CL Content-Location =~ /./
 mimeheader __PART_STOCK_CD_F Content-Disposition =~ /filename/
 
-meta PART_CID_STOCK      (__PART_STOCK_IMG&&__PART_STOCK_CID&&!__PART_STOCK_CL&&!__PART_STOCK_CD_F)
+meta PART_CID_STOCK      (__ANY_IMAGE_ATTACH&&__PART_STOCK_CID&&!__PART_STOCK_CL&&!__PART_STOCK_CD_F)
 describe PART_CID_STOCK  Has a spammy image attachment (by Content-ID)
 
 mimeheader __PART_CID_STOCK_LESS    Content-ID =~ /^<00[a-f0-9]{10}\$[a-f0-9]{8}\$[a-f0-9]{8}\@[A-Za-z]+>$/
-meta PART_CID_STOCK_LESS (__PART_STOCK_IMG&&__PART_CID_STOCK_LESS)
+meta PART_CID_STOCK_LESS (__ANY_IMAGE_ATTACH&&__PART_CID_STOCK_LESS)
 describe PART_CID_STOCK_LESS Has a spammy image attachment (by Content-ID, more specific)
 
 endif # Mail::SpamAssassin::Plugin::MIMEHeader
@@ -302,12 +302,46 @@ describe OUTLOOK_3416   Claims to be sent by an unusual build of Outlook (3416)
 # this seems to appear with a faked 'Microsoft Office Outlook' X-Mailer
 header MID_14DIGITS_HEX     Message-ID =~ /^<[0-9]{14}\.[A-F0-9]{10}\@[0-9A-Z]/
 
+meta STOCK_IMG_HDR_FROM  (__ANY_IMAGE_ATTACH&&__ENV_AND_HDR_FROM_MATCH&&TVD_FW_GRAPHIC_ID1&&__HTML_IMG_ONLY)
+describe STOCK_IMG_HDR_FROM Stock spam image part, with distinctive From line
+
+meta STOCK_IMG_HTML  (__ANY_IMAGE_ATTACH&&__ENV_AND_HDR_FROM_MATCH&&__PART_STOCK_CID&&__HTML_IMG_ONLY)
+describe STOCK_IMG_HTML   Stock spam image part, with distinctive HTML
+
+meta STOCK_IMG_OUTLOOK  (__ANY_IMAGE_ATTACH&&__ENV_AND_HDR_FROM_MATCH&&__HAS_OUTLOOK_IN_MAILER_NEW&&__HTML_LENGTH_1536_2048)
+describe STOCK_IMG_OUTLOOK  Stock spam image part, with Outlook-like features
+
+# Spammy X-Mailer version strings; no longer seen in ham, due to MS'
+# auto-updates, but still appearing in plenty of spam template text
+header __XM_OL_29196700    X-Mailer =~ /^Microsoft Outlook Express 5.00.2919.6700$/
+header __XM_OL_41332400    X-Mailer =~ /^Microsoft Outlook Express 5.50.4133.2400$/
+header __XM_OL_48071700    X-Mailer =~ /^Microsoft Outlook Express 5.50.4807.1700$/
+header __XM_OL_28001441    X-Mailer =~ /^Microsoft Outlook Express 6.00.2800.1441$/
+header __XM_OL_29196600    X-Mailer =~ /^Microsoft Outlook Express 5.00.2919.6600$/
+header __XM_OL_49631700    X-Mailer =~ /^Microsoft Outlook Express 5.50.4963.1700$/
+header __XM_OL_48072300    X-Mailer =~ /^Microsoft Outlook Express 5.50.4807.2300$/
+header __XM_OL_28004682    X-Mailer =~ /^Microsoft Outlook Express 6.00.2800.4682$/
+header __XM_OL_10_0_4115    X-Mailer =~ /^Microsoft Outlook, Build 10.0.4115$/
+header __XM_OL_4_72_2106_4  X-Mailer =~ /^Microsoft Outlook Express 4.72.2106.4$/
+meta SPAMMY_XMAILER (__XM_OL_29196700||__XM_OL_41332400||__XM_OL_48071700||__XM_OL_28001441||__XM_OL_29196600||__XM_OL_49631700||__XM_OL_48072300||__XM_OL_28004682||__XM_OL_10_0_4115||__XM_OL_4_72_2106_4)
+describe SPAMMY_XMAILER X-Mailer string is common in spam and not in ham
+
+header __HELO_NO_DOMAIN   X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[^\.]+ /
+
+meta SHORT_HELO_AND_INLINE_IMAGE     (__HELO_NO_DOMAIN && __ANY_IMAGE_ATTACH)
+describe SHORT_HELO_AND_INLINE_IMAGE    Short HELO string, with inline image
+
 # <gen:mutable>
 score MID_14DIGITS_HEX     2.8
 score OUTLOOK_3416      2.0
 score RCVD_MAIL_COM         3.0
 score DRUGS_STOCK_MIMEOLE   2.0
 score RCVD_FORGED_WROTE     2.8
+score STOCK_IMG_HDR_FROM 1.0
+score STOCK_IMG_HTML   1.0
+score STOCK_IMG_OUTLOOK  1.0
+score SPAMMY_XMAILER 1.0
+score SHORT_HELO_AND_INLINE_IMAGE 1.0
 # </gen:mutable>
 
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
