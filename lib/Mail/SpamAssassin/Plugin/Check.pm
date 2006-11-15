@@ -146,7 +146,6 @@ sub finish_tests {
 sub run_rbl_eval_tests {
   my ($self, $pms) = @_;
   my ($rulename, $pat, @args);
-  local ($_);
 
   # XXX - possible speed up, moving this check out of the subroutine into Check->new()
   if ($self->{main}->{local_tests_only}) {
@@ -177,7 +176,6 @@ sub run_rbl_eval_tests {
 
 sub do_meta_tests {
   my ($self, $pms, $priority) = @_;
-  local ($_);
   
   # XXX - why not just make the plugin call?
   return if $self->shortcircuited_p($pms);
@@ -392,7 +390,7 @@ sub do_head_tests {
   my $tflags = $conf->{tflags};
   my $use_rule_subs = $self->{main}->{use_rule_subs};
 
-  my $evalstr = $self->start_rules_plugin_code("header");
+  my $evalstr = $self->start_rules_plugin_code("header", $priority);
   my $evalstr2 = '';
 
   # hash to hold the rules, "header\tdefault value" => rulename
@@ -429,7 +427,7 @@ sub do_head_tests {
 	    while ($text '.$testtype.'~ '.$pat.'g) {
             $self->got_hit(q#'.$rulename.'#, "", ruletype => "header");
             '. $self->hit_rule_plugin_code($pms, $rulename, "header", "last") . '
-			 }
+            }
         }
       ';
       push (@TEMPORARY_METHODS, $rulename.'_head_test');
@@ -525,15 +523,15 @@ EOT
 
 sub do_body_tests {
   my ($self, $pms, $priority, $textary) = @_;
-  local ($_);
 
   # XXX - why not just make the plugin call directly?
   return if $self->shortcircuited_p($pms);
 
   dbg("rules: running body-text per-line regexp tests; score so far=".$pms->{score});
 
+  my $conf = $self->{conf};
   my $doing_user_rules = 
-    $pms->{conf}->{user_rules_to_compile}->{$Mail::SpamAssassin::Conf::TYPE_BODY_TESTS};
+    $conf->{user_rules_to_compile}->{$Mail::SpamAssassin::Conf::TYPE_BODY_TESTS};
 
   # clean up priority value so it can be used in a subroutine name
   my $clean_priority;
@@ -557,7 +555,7 @@ sub do_body_tests {
   my $use_rule_subs = $self->{main}->{use_rule_subs};
 
   # build up the eval string...
-  my $evalstr = $self->start_rules_plugin_code("body");
+  my $evalstr = $self->start_rules_plugin_code("body", $priority);
   my $evalstr2 = '';
   my $loopid = 0;
 
@@ -661,7 +659,6 @@ EOT
 
 sub do_body_uri_tests {
   my ($self, $pms, $priority, @uris) = @_;
-  local ($_);
 
   # XXX - why not just do the direct plugin call?
   return if $self->shortcircuited_p($pms);
@@ -690,7 +687,7 @@ sub do_body_uri_tests {
   my $use_rule_subs = $self->{main}->{use_rule_subs};
 
   # otherwise build up the eval string...
-  my $evalstr = $self->start_rules_plugin_code("uri");
+  my $evalstr = $self->start_rules_plugin_code("uri", $priority);
   my $evalstr2 = '';
   my $loopid = 0;
 
@@ -791,7 +788,6 @@ EOT
 
 sub do_rawbody_tests {
   my ($self, $pms, $priority, $textary) = @_;
-  local ($_);
 
   # XXX - why not just do the plugin call here??
   return if $self->shortcircuited_p($pms);
@@ -820,7 +816,7 @@ sub do_rawbody_tests {
   my $use_rule_subs = $self->{main}->{use_rule_subs};
 
   # build up the eval string...
-  my $evalstr = $self->start_rules_plugin_code("rawbody");
+  my $evalstr = $self->start_rules_plugin_code("rawbody", $priority);
   my $evalstr2 = '';
   my $loopid = 0;
 
@@ -922,8 +918,7 @@ EOT
 
 sub do_full_tests {
   my ($self, $pms, $priority, $fullmsgref) = @_;
-  local ($_);
-  
+
   # XXX - why not just do the plugin call directly?
   return if $self->shortcircuited_p($pms);
 
@@ -949,7 +944,7 @@ sub do_full_tests {
   }
 
   # build up the eval string...
-  my $evalstr = $self->start_rules_plugin_code("full");
+  my $evalstr = $self->start_rules_plugin_code("full", $priority);
 
   while (my($rulename, $pat) = each %{$pms->{conf}{full_tests}->{$priority}}) {
     $evalstr .= '
@@ -1032,18 +1027,18 @@ sub do_full_eval_tests {
 
 sub run_eval_tests {
   my ($self, $pms, $testtype, $evalhash, $prepend2desc, $priority, @extraevalargs) = @_;
-  local ($_);
   
   # XXX - why not just call the plugin directly?
   return if $self->shortcircuited_p($pms);
 
-  my $doing_user_rules = $self->{conf}->{user_rules_to_compile}->{$testtype};
+  my $conf = $pms->{conf};
+  my $doing_user_rules = $conf->{user_rules_to_compile}->{$testtype};
 
   # clean up priority value so it can be used in a subroutine name 
   my $clean_priority;
   ($clean_priority = $priority) =~ s/-/neg/;
 
-  my $scoreset = $pms->{conf}->get_score_set();
+  my $scoreset = $conf->get_score_set();
 
   my $package_name = __PACKAGE__;
 
@@ -1063,7 +1058,8 @@ sub run_eval_tests {
   }
 
   # look these up once in advance to save repeated lookups in loop below
-  my $tflagsref = $pms->{conf}->{tflags};
+  my $tflagsref = $conf->{tflags};
+  my $eval_pluginsref = $conf->{eval_plugins};
   my $have_start_rules = $self->{main}->have_plugin("start_rules");
   my $have_ran_rule = $self->{main}->have_plugin("ran_rule");
 
@@ -1103,7 +1099,7 @@ sub run_eval_tests {
     ';
  
     # only need to set current_rule_name for plugin evals
-    if ($pms->{conf}->{eval_plugins}->{$function}) {
+    if ($eval_pluginsref->{$function}) {
       # let plugins get the name of the rule that is currently being run,
       # and ensure their eval functions exist
       $evalstr .= '
@@ -1121,7 +1117,7 @@ sub run_eval_tests {
       $evalstr .= '
 
         $self->{main}->call_plugins("start_rules", {
-                permsgstatus => $self, ruletype => "eval"
+                permsgstatus => $self, ruletype => "eval", priority => $priority
               });
 
       ';
@@ -1225,7 +1221,7 @@ sub is_user_rule_sub {
 }
 
 sub start_rules_plugin_code {
-  my ($self, $ruletype) = @_;
+  my ($self, $ruletype, $pri) = @_;
 
   my $evalstr = '
 
@@ -1238,7 +1234,8 @@ sub start_rules_plugin_code {
     $evalstr .= '
 
       $self->{main}->call_plugins ("start_rules", { permsgstatus => $self,
-                                                    ruletype => \''.$ruletype.'\' });
+                                                    ruletype => \''.$ruletype.'\',
+                                                    priority => $pri });
 
     ';
   }

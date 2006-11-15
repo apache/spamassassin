@@ -1893,7 +1893,6 @@ sub _get_parsed_uri_list {
   return @{$self->{parsed_uri_list}};
 }
 
-
 ###########################################################################
 
 sub ensure_rules_are_complete {
@@ -2115,6 +2114,7 @@ sub got_hit {
             $area,
             $params{ruletype},
             $self->{conf}->get_description_for_rule($rule) || $rule);
+  return 1;
 }
 
 ###########################################################################
