@@ -474,7 +474,7 @@ sub do_head_tests {
               $self->got_hit(q#'.$rulename.'#, "", ruletype => "header");
               '.$self->hit_rule_plugin_code($pms, $rulename, "header", $hitdone).'
             }
-            '.$self->ran_rule_plugin_code($pms, $rulename, "header").'
+            '.$self->ran_rule_plugin_code($rulename, "header").'
           }
         ';
       }
