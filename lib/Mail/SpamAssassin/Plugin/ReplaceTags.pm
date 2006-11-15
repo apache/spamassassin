@@ -78,15 +78,16 @@ sub finish_parsing_end {
 
   dbg("replacetags: replacing tags");
 
-  my $start = $opts->{conf}->{replace_start};
-  my $end = $opts->{conf}->{replace_end};
+  my $conf = $opts->{conf};
+  my $start = $conf->{replace_start};
+  my $end = $conf->{replace_end};
 
   # this is the version-specific code
   for my $type (qw|body_tests rawbody_tests head_tests full_tests uri_tests|) {
-    for my $priority (keys %{$opts->{conf}->{$type}}) {
-      while (my ($rule, $re) = each %{$opts->{conf}->{$type}->{$priority}}) {
+    for my $priority (keys %{$conf->{$type}}) {
+      while (my ($rule, $re) = each %{$conf->{$type}->{$priority}}) {
 	# skip if not listed by replace_rules
-	next unless $opts->{conf}->{rules_to_replace}{$rule};
+	next unless $conf->{rules_to_replace}{$rule};
 
 	if (would_log('dbg', 'replacetags') > 1) {
 	  dbg("replacetags: replacing $rule: $re");
@@ -112,19 +113,19 @@ sub finish_parsing_end {
 	my @re = split(/(<.+?>)/, $re);
 
 	if ($pre_name) {
-	  my $pre = $opts->{conf}->{replace_pre}->{$pre_name};
+	  my $pre = $conf->{replace_pre}->{$pre_name};
 	  if ($pre) {
 	    @re = map { s|($start.+?$end)|$pre$1|; $_; } @re;
 	  }
         }
 	if ($post_name) {
-	  my $post = $opts->{conf}->{replace_post}->{$post_name};
+	  my $post = $conf->{replace_post}->{$post_name};
 	  if ($post) {
 	    @re = map { s|($start.+?$end)|$1$post|g; $_; } @re;
 	  }
 	}
 	if ($inter_name) {
-	  my $inter = $opts->{conf}->{replace_inter}->{$inter_name};
+	  my $inter = $conf->{replace_inter}->{$inter_name};
 	  if ($inter) {
 	    @re = map { s|^$|$inter|; $_; } @re;
 	  }
@@ -134,7 +135,7 @@ sub finish_parsing_end {
 	    my $tag_name = $1;
 	    # if the tag exists, replace it with the corresponding phrase
 	    if ($tag_name) {
-	      my $replacement = $opts->{conf}->{replace_tag}->{$tag_name};
+	      my $replacement = $conf->{replace_tag}->{$tag_name};
 	      if ($replacement) {
 		$re[$i] =~ s|$start$tag_name$end|$replacement|g;
 	      }
@@ -145,13 +146,18 @@ sub finish_parsing_end {
         $re = join('', @re);
 
 	# do the actual replacement
-	$opts->{conf}->{$type}->{$priority}->{$rule} = $re;
+	$conf->{$type}->{$priority}->{$rule} = $re;
 
 	if (would_log('dbg', 'replacetags') > 1) {
 	  dbg("replacetags: replaced $rule: $re");
 	}
       }
     }
+  }
+
+  # free this up, if possible
+  if (!$conf->{allow_user_rules}) {
+    delete $conf->{rules_to_replace};
   }
 
   dbg("replacetags: done replacing tags");

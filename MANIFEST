@@ -74,6 +74,7 @@ lib/Mail/SpamAssassin/Plugin/AntiVirus.pm
 lib/Mail/SpamAssassin/Plugin/AutoLearnThreshold.pm
 lib/Mail/SpamAssassin/Plugin/Bayes.pm
 lib/Mail/SpamAssassin/Plugin/BodyEval.pm
+lib/Mail/SpamAssassin/Plugin/Check.pm
 lib/Mail/SpamAssassin/Plugin/DCC.pm
 lib/Mail/SpamAssassin/Plugin/DKIM.pm
 lib/Mail/SpamAssassin/Plugin/DNSEval.pm
@@ -109,6 +110,7 @@ lib/Mail/SpamAssassin/Util.pm
 lib/Mail/SpamAssassin/Util/DependencyInfo.pm
 lib/Mail/SpamAssassin/Util/Progress.pm
 lib/Mail/SpamAssassin/Util/RegistrarBoundaries.pm
+lib/Mail/SpamAssassin/Util/TieOneStringHash.pm
 lib/spamassassin-run.pod
 masses/CORPUS_POLICY
 masses/CORPUS_SUBMIT
@@ -544,3 +546,4 @@ lib/Mail/SpamAssassin/Plugin/Rule2XSBody.pm
 t/spamd_kill_restart.t
 t/spamd_kill_restart_rr.t
 t/re_base_extraction.t
+t/spamd_unix_and_tcp.t

@@ -74,6 +74,7 @@ use Mail::SpamAssassin::NetSet;
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::Conf::Parser;
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Util::TieOneStringHash;
 use File::Spec;
 
 use strict;
@@ -1511,6 +1512,13 @@ some mailing list software moves the real 'Message-Id' to 'Resent-Message-Id'
 or 'X-Message-Id', then uses its own one in the 'Message-Id' header.  The value
 returned for this symbol is the text from all 3 headers, separated by newlines.
 
+=item C<X-Spam-Relays-Untrusted>, C<X-Spam-Relays-Trusted>,
+C<X-Spam-Relays-Internal> and C<X-Spam-Relays-External> represent a portable,
+pre-parsed representation of the message's network path, as recorded in the
+Received headers, divided into 'trusted' vs 'untrusted' and 'internal' vs
+'external' sets.  See C<http://wiki.apache.org/spamassassin/TrustedRelays> for
+more details.
+
 =back
 
 C<op> is either C<=~> (contains regular expression) or C<!~> (does not contain
@@ -2457,10 +2465,14 @@ optional, and the default is shown below.
  _DATE_            rfc-2822 date of scan
  _STARS(*)_        one "*" (use any character) for each full score point
                    (note: limited to 50 'stars')
- _RELAYSTRUSTED_   relays used and deemed to be trusted
- _RELAYSUNTRUSTED_ relays used that can not be trusted
- _RELAYSINTERNAL_  relays used and deemed to be internal
- _RELAYSEXTERNAL_  relays used and deemed to be external
+ _RELAYSTRUSTED_   relays used and deemed to be trusted (see the 
+                   'X-Spam-Relays-Trusted' pseudo-header)
+ _RELAYSUNTRUSTED_ relays used that can not be trusted (see the 
+                   'X-Spam-Relays-Untrusted' pseudo-header)
+ _RELAYSINTERNAL_  relays used and deemed to be internal (see the 
+                   'X-Spam-Relays-Internal' pseudo-header)
+ _RELAYSEXTERNAL_  relays used and deemed to be external (see the 
+                   'X-Spam-Relays-External' pseudo-header)
  _AUTOLEARN_       autolearn status ("ham", "no", "spam", "disabled",
                    "failed", "unavailable")
  _TESTS(,)_        tests hit separated by "," (or other separator)
@@ -2583,13 +2595,17 @@ sub new {
   $self->{plugins_loaded} = { };
 
   $self->{tests} = { };
-  $self->{descriptions} = { };
   $self->{test_types} = { };
   $self->{scoreset} = [ {}, {}, {}, {} ];
   $self->{scoreset_current} = 0;
   $self->set_score_set (0);
   $self->{tflags} = { };
   $self->{source_file} = { };
+
+  # keep descriptions in a slow but space-efficient single-string
+  # data structure
+  tie %{$self->{descriptions}}, 'Mail::SpamAssassin::Util::TieOneStringHash'
+    or warn "tie failed";
 
   # after parsing, tests are refiled into these hashes for each test type.
   # this allows e.g. a full-text test to be rewritten as a body test in
@@ -2882,6 +2898,13 @@ sub finish_parsing {
 
 ###########################################################################
 
+sub get_description_for_rule {
+  my ($self, $rule) = @_;
+  return $self->{descriptions}->{$rule};
+}
+
+###########################################################################
+
 sub maybe_header_only {
   my($self,$rulename) = @_;
   my $type = $self->{test_types}->{$rulename};
@@ -3024,8 +3047,23 @@ sub clone {
 
 ###########################################################################
 
+sub free_uncompiled_rule_source {
+  my ($self) = @_;
+
+  if (!$self->{main}->{keep_config_parsing_metadata} &&
+        !$self->{allow_user_rules})
+  {
+    delete $self->{if_stack};
+    delete $self->{source_file};
+    delete $self->{meta_dependencies};
+  }
+}
+
+###########################################################################
+
 sub finish {
   my ($self) = @_;
+  untie %{$self->{descriptions}};
   %{$self} = ();
 }
 

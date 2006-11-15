@@ -139,6 +139,8 @@ tflags RCVD_IN_SORBS_DUL	net
 #
 # Spamhaus XBL contains both the Abuseat CBL (cbl.abuseat.org) and Blitzed
 # OPM (opm.blitzed.org) lists so it's not necessary to query those as well.
+# TODO: replace with ZEN from rulesrc/sandbox/jm/20_zen.cf.  For now,
+# allow both to run for 1 weekend to verify sanity of results...
 
 header __RCVD_IN_SBL_XBL	eval:check_rbl('sblxbl', 'sbl-xbl.spamhaus.org.')
 describe __RCVD_IN_SBL_XBL	Received via a relay in Spamhaus SBL+XBL
@@ -167,25 +169,23 @@ describe DNS_FROM_RFC_DSN	Envelope sender in dsn.rfc-ignorant.org
 tflags DNS_FROM_RFC_DSN		net
 #reuse DNS_FROM_RFC_DSN
 
-header DNS_FROM_RFC_POST	eval:check_rbl_sub('rfci_envfrom', '127.0.0.3')
-describe DNS_FROM_RFC_POST	Envelope sender in postmaster.rfc-ignorant.org
-tflags DNS_FROM_RFC_POST	net
-#reuse DNS_FROM_RFC_POST
-
-header DNS_FROM_RFC_ABUSE       eval:check_rbl_sub('rfci_envfrom', '127.0.0.4')
-describe DNS_FROM_RFC_ABUSE     Envelope sender in whois.rfc-ignorant.org
-tflags DNS_FROM_RFC_ABUSE       net
-#reuse DNS_FROM_RFC_ABUSE
-
-header DNS_FROM_RFC_WHOIS	eval:check_rbl_sub('rfci_envfrom', '127.0.0.5')
-describe DNS_FROM_RFC_WHOIS	Envelope sender in whois.rfc-ignorant.org
-tflags DNS_FROM_RFC_WHOIS	net
-#reuse DNS_FROM_RFC_WHOIS
-
 header DNS_FROM_RFC_BOGUSMX	eval:check_rbl_sub('rfci_envfrom', '127.0.0.8')
 describe DNS_FROM_RFC_BOGUSMX	Envelope sender in bogusmx.rfc-ignorant.org
 tflags DNS_FROM_RFC_BOGUSMX	net
 #reuse DNS_FROM_RFC_BOGUSMX
+
+# bug 4628: these rules are too unreliable to assign scores to
+header __DNS_FROM_RFC_POST      eval:check_rbl_sub('rfci_envfrom', '127.0.0.3')
+tflags __DNS_FROM_RFC_POST      net
+#reuse __DNS_FROM_RFC_POST DNS_FROM_RFC_POST
+
+header __DNS_FROM_RFC_ABUSE     eval:check_rbl_sub('rfci_envfrom', '127.0.0.4')
+tflags __DNS_FROM_RFC_ABUSE     net
+#reuse __DNS_FROM_RFC_ABUSE DNS_FROM_RFC_ABUSE
+
+header __DNS_FROM_RFC_WHOIS     eval:check_rbl_sub('rfci_envfrom', '127.0.0.5')
+tflags __DNS_FROM_RFC_WHOIS     net
+#reuse __DNS_FROM_RFC_WHOIS DNS_FROM_RFC_WHOIS
 
 # ---------------------------------------------------------------------------
 # CompleteWhois blacklists

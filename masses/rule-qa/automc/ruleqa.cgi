@@ -52,6 +52,7 @@ use POSIX qw();
 use constant DATEREV_ADJ => - (8 * 60 * 60);
 
 my $FREQS_LINE_TEMPLATE;
+my $FREQS_LINE_TEXT_TEMPLATE;
 my $FREQS_EXTRA_TEMPLATE;
 our %AUTOMC_CONF;
 
@@ -475,11 +476,16 @@ sub show_default_view {
 
     <br/>
 
+<!-- 
+
+    (This has been pretty much superceded by the --net mass-checks)
+
     <h4> Which Corpus? </h4>
     <input type=checkbox name=s_defcorpus !s_defcorpus!> Show default non-net ruleset and corpus, set 0<br/>
     <input type=checkbox name=s_net !s_net!> Show frequencies from network tests, set 1<br/>
     <input type=checkbox name=s_html !s_html!> Show frequencies for mails containing HTML only, set 0<br/>
     <br/>
+-->
 
     <h4> Which Rules?</h4>
     Show only these rules (space separated, or regexp with '/' prefix):<br/>
@@ -488,9 +494,9 @@ sub show_default_view {
     Show only rules from files whose paths contain this string:<br/>
     <input type=textfield size=60 name=srcpath value="!srcpath!"><br/>
     <br/>
-    <input type=checkbox name=s_zero !s_zero!> Display rules with no hits<br/>
+    <input type=checkbox name=s_zero !s_zero!> Show rules with zero hits<br/>
+    <input type=checkbox name=s_detail !s_detail!> Display full details: message age in weeks, by contributor, as score-map, overlaps with other rules, freshness graphs<br/>
     <br/>
-    <input type=hidden name=s_detail value="!s_detail!" />
 
     <input type=submit name=g value="Change"><br/>
 
@@ -945,8 +951,15 @@ sub get_freqs_for_rule {
     <pre class=head>$heads</pre>
     </div>
 
+    <div id="txt_$headers_id" class=headdiv style='display: none'>
+    <p class=headclosep align=right><a
+          href="javascript:hide_header('txt_$headers_id')">[close]</a></p>
+    <pre class=head><<<TEXTS>>></pre>
+    </div>
+
     <br clear="all"/>
     <p class=showfreqslink><a
+      href="javascript:show_header('txt_$headers_id')">(pasteable)</a><a
       href="javascript:show_header('$headers_id')">(source details)</a>
       <a name='$titleplink' href='#$titleplink' class=title_permalink>(#)</a>
     </p>
@@ -968,6 +981,14 @@ sub get_freqs_for_rule {
 
   $ruleslist ||= '';
   my @rules = split (' ', $ruleslist);
+
+  if (ref $self->{freqs_ordr}{$key} ne 'ARRAY') {
+    print qq(
+      <h3 class=freqs_title>$desc</h3>
+      <table><p><i>('$key' not yet available)</i></p></table>
+    );
+    return;
+  }
 
   if ($self->{rules_all}) {
     push @rules, @{$self->{freqs_ordr}{$key}};
@@ -1020,10 +1041,15 @@ sub get_freqs_for_rule {
     $FREQS_LINE_TEMPLATE =~ s/<!--\s+<rule>.*?-->//gs;
   }
 
+  my $texts = '';
   foreach my $rule (@rules) {
     if ($rule && defined $self->{freqs_data}{$key}{$rule}) {
       $comment .= $self->rule_anchor($key,$rule);
       $comment .= $self->output_freqs_data_line($self->{freqs_data}{$key}{$rule},
+                \$FREQS_LINE_TEMPLATE,
+                $header_context);
+      $texts .= $self->output_freqs_data_line($self->{freqs_data}{$key}{$rule},
+                \$FREQS_LINE_TEXT_TEMPLATE,
                 $header_context);
     }
     else {
@@ -1033,8 +1059,12 @@ sub get_freqs_for_rule {
         (no data found)
       </td></tr>
       ";
+      $texts .= "(no data found)\n";
     }
   }
+
+  # insert the text into that template
+  $comment =~ s/<<<TEXTS>>>/$texts/gs;
   
   print $comment;
   print "</table>";
@@ -1073,6 +1103,13 @@ sub set_freqs_templates {
   </tr>
 
   };
+
+  $FREQS_LINE_TEXT_TEMPLATE =
+       qq{[% USE format %][% fmt = format('%7s') %][% fm6 = format('%6s') %]}.
+       qq{[% fmt(MSECS) %]  [% fmt(SPAMPC) %]  [% fmt(HAMPC) %]  }.
+       qq{[% fm6(SO) %]  [% fm6(RANK) %]  [% fm6(SCORE) %]  }.
+       qq{[% NAME %] [% USERNAME %] [% AGE %] }.
+       "\n";
 
   $FREQS_EXTRA_TEMPLATE = qq{
 
@@ -1161,7 +1198,7 @@ sub create_mclog_link {
 }
 
 sub output_freqs_data_line {
-  my ($self, $obj, $header_context) = @_;
+  my ($self, $obj, $template, $header_context) = @_;
 
   # normal freqs lines, with optional subselector after rule name
   my $out = '';
@@ -1183,7 +1220,7 @@ sub output_freqs_data_line {
       $score = '(n/a)';
     }
 
-    $self->{ttk}->process(\$FREQS_LINE_TEMPLATE, {
+    $self->{ttk}->process($template, {
         RULEDETAIL => $detailurl,
         MSECS => $line->{msecs},
         SPAMPC => $line->{spampc},

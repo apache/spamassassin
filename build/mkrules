@@ -46,14 +46,13 @@ use Mail::SpamAssassin;
 use vars qw(
     @opt_srcs $opt_out $opt_sandboxout $opt_manifest
     $opt_manifestskip $opt_listpromotable $opt_active
-    $opt_activeout $opt_inactiveout $default_file_header
+    $opt_activeout $default_file_header
     $opt_rulemetadata
 );
 GetOptions("src=s" => \@opt_srcs,
     "out=s",
     "sandboxout=s",
     "activeout=s",
-    "inactiveout=s",
     "active=s",
     "manifest=s",
     "manifestskip=s",
@@ -91,10 +90,10 @@ my $promolist;
 
 $opt_sandboxout  ||= "70_sandbox.cf";
 $opt_activeout   ||= "72_active.cf";
-$opt_inactiveout ||= "70_inactive.cf";
 
 # source files that need compilation, and their targets
 my $needs_compile = { };
+my $found_output = { };
 my $current_src;
 my $newest_src_mtime = 0;
 my $newest_out_mtime = 0;
@@ -108,24 +107,38 @@ foreach my $src (@opt_srcs) {
   }
   $current_src = $src;
   File::Find::find ({
-          wanted => \&wanted,
+          wanted => \&src_wanted,
           no_chdir => 1
         }, $src);
 }
 
 # get mtimes of output files; we can be sure that all
 # output is under the "opt_out" dir, so recurse there
-#File::Find::find ({
-#        wanted => \&out_wanted,
-#        no_chdir => 1
-#      }, $opt_out);
+File::Find::find ({
+        wanted => \&out_wanted,
+        no_chdir => 1
+      }, $opt_out);
 
-#if ($newest_src_mtime && $newest_out_mtime
-#    && $newest_src_mtime < $newest_out_mtime)
-#{
-#  print "mkrules: no rules updated\n";
-#  exit 0;
-#}
+# we must rebuild if a compiled .pm is missing, too
+my $found_all_pm_files = 1;
+foreach my $f (keys %{$needs_compile}) {
+  next unless ($f =~ /\.pm$/i);
+  if (!exists $found_output->{basename $f}) {
+    $found_all_pm_files = 0;
+  }
+}
+
+# check mtimes, and also require that the two required output files
+# really do exist
+if ($newest_src_mtime && $newest_out_mtime
+    && $newest_src_mtime < $newest_out_mtime
+    && -f $opt_out.'/'.$opt_sandboxout
+    && -f $opt_out.'/'.$opt_activeout
+    && $found_all_pm_files)
+{
+  print "mkrules: no rules updated\n";
+  exit 0;
+}
 
 my $rules = { };
 
@@ -216,9 +229,17 @@ sub lint_rule_text {
   return $errors;       # 0 means good
 }
 
-sub wanted {
+sub src_wanted {
   my $path = $File::Find::name;
-  # only files
+
+  # record stat times of directories, too, to catch file additions/removals
+  # in the source tree
+  my @st = stat $path;
+  if ($st[9] && $st[9] > $newest_src_mtime) {
+    $newest_src_mtime = $st[9];
+  }
+
+  # only files from now on, though
   return if (!-f $path);
   
   # limit what will be copied from sandboxes
@@ -237,11 +258,6 @@ sub wanted {
   my $t;
   $t = "$opt_out/$filename";
 
-  my @st = stat $path;
-  if ($st[9] && $st[9] > $newest_src_mtime) {
-    $newest_src_mtime = $st[9];
-  }
-
   $needs_compile->{$f} = {
           f => $f,
           t => $t,
@@ -253,15 +269,25 @@ sub wanted {
 sub out_wanted {
   my $path = $File::Find::name;
   return unless (-f $path);
-  return unless ($path =~ /\.cf$/i);
+  return if ($path =~ /\.svn/);
+  return unless ($path =~ /\.(?:cf|pm)$/i);
 
   my @st = stat $path;
   if ($st[9] && $st[9] > $newest_out_mtime) {
     $newest_out_mtime = $st[9];
   }
+
+  my $dir = $path;
+  $dir =~ s/^${current_src}[\/\\\:]//s;
+  $dir =~ s/([^\/\\\:]+)$//;
+  my $filename = $1;
+
+  if ($path =~ /\.pm$/i) {
+    $found_output->{$filename} = 1;
+  }
 }
 
-# compile all the source files found by the wanted() sub, in sorted
+# compile all the source files found by the src_wanted() sub, in sorted
 # order so that the order of precedence makes sense.
 sub read_all_rules {
   my ($sources) = @_;
@@ -269,11 +295,11 @@ sub read_all_rules {
   # deal with the perl modules first, so that later linting w/ loadplugin will
   # work appropriately.
   foreach my $f (sort {
-    my ($ae) = $a =~ /\.(cf|pm)$/;
-    my ($be) = $b =~ /\.(cf|pm)$/;
-    return $be cmp $ae || $a cmp $b;
-    } keys %$sources) {
-
+                  my ($ae) = $a =~ /\.(cf|pm)$/;
+                  my ($be) = $b =~ /\.(cf|pm)$/;
+                  return $be cmp $ae || $a cmp $b;
+                } keys %$sources)
+  {
     my $entry = $needs_compile->{$f};
     my $t = $entry->{t};
 
@@ -526,7 +552,7 @@ sub rule_file_compile {
 
       my $forceactive = 1;
       
-      # always send 'test' lines to the sandbox or inactive files
+      # always send 'test' lines to the sandbox files
       if (/^test\s*/) {
         $forceactive = 0;
 
@@ -581,9 +607,8 @@ sub read_rules_from_output_dir {
 
   foreach my $file (<$opt_out/*.cf>) {
     next unless ($file =~ /\d\d_\S+\.cf$/);
-    next if ($file =~ /\/\Q$opt_activeout\E/);
-    next if ($file =~ /\/\Q$opt_sandboxout\E/);
-    next if ($file =~ /\/\Q$opt_inactiveout\E/);
+    next if (pubfile_is_activeout($file));
+    next if (pubfile_is_sandboxout($file));
     read_output_file($file);
   }
 }
@@ -652,7 +677,7 @@ sub copy_to_output_buffers {
     my $srcfile = $rules->{$name}->{srcfile};
     my $pubfile = pubfile_for_rule($rules, $name);
     my $is_active = 0;
-    if ($pubfile =~ /${opt_activeout}$/) {
+    if (pubfile_is_activeout($pubfile)) {
       $is_active++;
     }
 
@@ -705,13 +730,8 @@ sub pubfile_for_rule {
 
   my $pubfile;
   if ($rules->{$name}->{publish}) {
-    $pubfile = $rules->{$name}->{pubfile};
-    if ($pubfile) {
-      $pubfile = $opt_out.'/'.$pubfile;
-    } else {
-      # "publish NAMEOFRULE" => send it to active
-      $pubfile = $opt_out.'/'.$opt_activeout;
-    }
+    # "publish NAMEOFRULE" => send it to active
+    $pubfile = $opt_out.'/'.$opt_activeout;
   }
 
   # default: "70_sandbox.cf" or "72_active.cf"
@@ -727,7 +747,8 @@ sub pubfile_for_rule {
       $pubfile = $opt_out.'/'.$opt_sandboxout;
     }
     else {
-      $pubfile = $opt_out.'/'.$opt_inactiveout;
+      warn "oops? inactive rule, non-sandbox, shouldn't be possible anymore";
+      $pubfile = $opt_out.'/'.$opt_sandboxout;
     }
   }
   return $pubfile;
@@ -759,7 +780,7 @@ sub compile_output_files {
   foreach my $file (keys %$output_files) {
     $output_file_text->{$file} = $output_files->{$file}->{header};
 
-    if ($always && $file =~ /\Q$opt_activeout\E$/) {
+    if ($always && pubfile_is_activeout($file)) {
       $output_file_text->{$file} .= $always;
     }
   }
@@ -793,7 +814,7 @@ sub compile_output_files {
   # always be likewise promoted into the active set, overriding the prev step.
   foreach my $rule (@rulenames) {
     my $pubfile = $rules->{$rule}->{output_file};
-    next unless ($pubfile && $pubfile =~ /\Q$opt_activeout\E/);
+    next unless ($pubfile && pubfile_is_activeout($pubfile));
     fix_up_rule_dependencies($rule);
   }
 
@@ -825,13 +846,6 @@ sub compile_output_files {
 
   # finally, finish off all output files
   foreach my $file (keys %$output_files) {
-    # do we have any end-of-file comments?  if so, add it
-    # off: results in comments being duplicated many times
-    # my $cmts = $rules->{$COMMENTS}->{text};
-    # if ($cmts) {
-      # $output_file_text->{$pubfile} .= $cmts;
-    # }
-
     # and get them lint-checked!
     $files_to_lint->{$file} = 1;
   }
@@ -875,7 +889,6 @@ sub get_rulemetadata_string {
 sub fix_up_rule_dependencies {
   my $rule = shift;
 
-  # next if ($rule =~ /^__/);
   my $pubfile = $rules->{$rule}->{output_file};
   my $text    = $rules->{$rule}->{output_text};
   return unless $text;
@@ -895,11 +908,21 @@ sub fix_up_rule_dependencies {
       # don't do this if the subrule would be moved *out* of the
       # active file!
       my $pubfile2 = $rules->{$rule2}->{output_file};
-      next if ($pubfile2 && $pubfile2 =~ /\Q$opt_activeout\E/);
+      next if (pubfile_is_activeout($pubfile2));
 
       $rules->{$rule2}->{output_file} = $pubfile;
     }
   }
+}
+
+sub pubfile_is_activeout {
+  return 1 if ($_[0] && $_[0] =~ /\b\Q$opt_activeout\E$/);
+  return 0;
+}
+
+sub pubfile_is_sandboxout {
+  return 1 if ($_[0] && $_[0] =~ /\b\Q$opt_sandboxout\E$/);
+  return 0;
 }
 
 sub write_output_files {

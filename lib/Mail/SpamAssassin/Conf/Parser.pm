@@ -191,8 +191,12 @@ sub build_command_luts {
     # next, its priority (used to ensure frequently-used params
     # are parsed first)
     my $cmdname = $cmd->{command} || $cmd->{setting};
-    foreach my $name ($cmdname, @{$cmd->{aliases}}) {
-      $self->{command_luts}->{$set}->{$name} = $cmd;
+    $self->{command_luts}->{$set}->{$cmdname} = $cmd;
+
+    if ($cmd->{aliases} && scalar @{$cmd->{aliases}} > 0) {
+      foreach my $name (@{$cmd->{aliases}}) {
+        $self->{command_luts}->{$set}->{$name} = $cmd;
+      }
     }
   }
 }
@@ -433,6 +437,8 @@ failed_line:
     $self->lint_warn($msg, undef, $is_error);
   }
 
+  delete $self->{if_stack};
+
   $self->lint_check();
   $self->set_default_scores();
 
@@ -530,7 +536,7 @@ sub set_default_scores {
       # T_ rules (in a testing probationary period) get low, low scores
       my $set_score = ($k =~/^T_/) ? 0.01 : 1.0;
 
-      $set_score = -$set_score if ( $conf->{tflags}->{$k} =~ /\bnice\b/ );
+      $set_score = -$set_score if ( ($conf->{tflags}->{$k}||'') =~ /\bnice\b/ );
       for my $index (0..3) {
         $conf->{scoreset}->[$index]->{$k} = $set_score;
       }
@@ -750,8 +756,10 @@ sub finish_parsing {
   # named this way just in case we ever want a "finish_parsing_start"
   $conf->{main}->call_plugins("finish_parsing_end", { conf => $conf });
 
-  delete $conf->{tests};                # free it up
-  delete $conf->{priority};             # free it up
+  # free up stuff we no longer need
+  delete $conf->{tests};
+  delete $conf->{priority};
+  delete $conf->{test_types};
 }
 
 sub trace_meta_dependencies {
@@ -766,12 +774,7 @@ sub trace_meta_dependencies {
     my $deps = [ ];
     my $alreadydone = { };
     $self->_meta_deps_recurse($conf, $name, $name, $deps, $alreadydone);
-    $conf->{meta_dependencies}->{$name} = $deps;
-
-    # this is too noisy
-    # if (scalar @$deps > 0) {
-    # dbg("rules: meta dependencies: $name => ".join(' ', @$deps));
-    # }
+    $conf->{meta_dependencies}->{$name} = join (' ', @{$deps});
   }
 }
 
@@ -823,7 +826,7 @@ sub fix_priorities {
     next unless (defined $deps);
 
     my $basepri = $pri->{$rule};
-    foreach my $dep (@$deps) {
+    foreach my $dep (split ' ', $deps) {
       my $deppri = $pri->{$dep};
       if ($deppri > $basepri) {
         dbg("rules: $rule (pri $basepri) requires $dep (pri $deppri): fixed");
@@ -923,7 +926,6 @@ sub add_test {
 
   $conf->{tests}->{$name} = $text;
   $conf->{test_types}->{$name} = $type;
-  $conf->{tflags}->{$name} ||= '';
   if ($type == $Mail::SpamAssassin::Conf::TYPE_META_TESTS) {
     $conf->{priority}->{$name} ||= 500;
   }
@@ -933,8 +935,9 @@ sub add_test {
   $conf->{priority}->{$name} ||= 0;
   $conf->{source_file}->{$name} = $self->{currentfile};
 
-  # this no longer seems to be needed!
-  # $conf->{if_stack}->{$name} = $self->get_if_stack_as_string();
+  if ($self->{main}->{keep_config_parsing_metadata}) {
+    $conf->{if_stack}->{$name} = $self->get_if_stack_as_string();
+  }
 
   if ($self->{scoresonly}) {
     $conf->{user_rules_to_compile}->{$type} = 1;

@@ -232,7 +232,6 @@ sub new {
     'conf'		=> $main->{conf},
     ## 'log_raw_counts'	=> 0, # see compute_prob_for_token()
     'use_ignores'       => 1,
-    'tz'		=> Mail::SpamAssassin::Util::local_tz(),
   };
   bless ($self, $class);
 

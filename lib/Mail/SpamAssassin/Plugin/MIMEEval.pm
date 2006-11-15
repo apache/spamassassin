@@ -55,6 +55,7 @@ sub new {
 sub are_more_high_bits_set {
   my ($self, $str) = @_;
 
+  # TODO: I suspect a tr// trick may be faster here
   my $numhis = () = ($str =~ /[\200-\377]/g);
   my $numlos = length($str) - $numhis;
 
@@ -81,7 +82,7 @@ sub check_for_faraway_charset {
     # number of 8-bit chars in the body text first.
 
     $body = join("\n", @$body);
-    if ($pms->are_more_high_bits_set ($body)) {
+    if ($self->are_more_high_bits_set ($body)) {
       return 1;
     }
   }
