@@ -436,7 +436,7 @@ sub do_head_tests {
     }
     else {
       # store for use below
-      $testcode{$rulename} = $testtype.'~ '.$pat.'g';
+      $testcode{$rulename} = $testtype.'~ '.$pat;
     }
   }
 
@@ -459,18 +459,20 @@ sub do_head_tests {
         my $posline = '';
         my $ifwhile = 'if';
         my $hitdone = '';
+        my $matchg = '';
         if (($tflags->{$rulename}||'') =~ /\bmultiple\b/)
         {
           $posline = 'pos $hval = 0;';
           $ifwhile = 'while';
           $hitdone = 'last';
+          $matchg = 'g';
         }
 
         $evalstr .= '
           if ($scoresptr->{q#'.$rulename.'#}) {
             '.$posline.'
             '.$self->hash_line_for_rule($pms, $rulename).'
-            '.$ifwhile.' ($hval '.$testcode.') {
+            '.$ifwhile.' ($hval '.$testcode.$matchg.') {
               $self->got_hit(q#'.$rulename.'#, "", ruletype => "header");
               '.$self->hit_rule_plugin_code($pms, $rulename, "header", $hitdone).'
             }
