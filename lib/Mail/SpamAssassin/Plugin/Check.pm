@@ -559,9 +559,9 @@ sub do_body_tests {
   my $evalstr2 = '';
   my $loopid = 0;
 
-  while (my($rulename, $pat) = each %{$conf->{body_tests}->{$priority}}) {
+  while (my($rulename, $pat) = each %{$pms->{conf}{body_tests}->{$priority}}) {
     my $sub;
-    if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
+    if (($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
     {
       # support multiple matches
       $loopid++;
