@@ -736,6 +736,8 @@ sub wanted {
     }
   }
 
+# use Mail::SpamAssassin::Util::MemoryDump; Mail::SpamAssassin::Util::MemoryDump::MEMDEBUG(); use Mail::SpamAssassin::Util::MemoryDump; Mail::SpamAssassin::Util::MemoryDump::MEMDEBUG_dump_obj($status); #JMD
+
   if (defined $status) { $status->finish(); }
   $ma->finish();
   undef $ma;		# clean 'em up
