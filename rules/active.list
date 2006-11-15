@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-jm bb-zmi cthielen daf dos parkerm theo zmi
+# with results from: bb-doc bb-jm bb-zmi cthielen dos parkerm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -68,7 +68,7 @@ CHARSET_FARAWAY_HEADER
 CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
-CTYPE_ONETAB_GIF
+CTYPE_8SPACE_GIF
 
 # good enough
 DC_GIF_MULTI_LARGO
@@ -144,9 +144,6 @@ FB_CIALIS_LEO3
 
 # good enough
 FB_OBFU_URI_COM
-
-# good enough
-FB_SAVE_LEO
 
 # good enough
 FB_VALIUM_LEO2
@@ -260,9 +257,6 @@ HTML_CHARSET_FARAWAY
 HTTPS_HTTP_MISMATCH
 
 # good enough
-IMG_AND_HEAD
-
-# good enough
 JM_RCVD_QMAILV1
 
 # good enough
@@ -318,21 +312,6 @@ PART_CID_STOCK
 
 # good enough
 PART_CID_STOCK_LESS
-
-# good enough
-PART_STOCK_IMG3
-
-# good enough
-PART_STOCK_IMG4
-
-# good enough
-PART_STOCK_IMG5
-
-# good enough
-PART_STOCK_IMG6
-
-# good enough
-PART_STOCK_IMG7
 
 # tflags net
 PYZOR_CHECK
@@ -593,7 +572,7 @@ TVD_FUZZY_DEGREE
 TVD_FUZZY_FINANCE
 
 # good enough
-TVD_FUZZY_MICROCAP
+TVD_FUZZY_FIXED_RATE
 
 # good enough
 TVD_FUZZY_PHARMACEUTICAL
@@ -606,6 +585,12 @@ TVD_FW_GRAPHIC_ID3
 
 # good enough
 TVD_FW_GRAPHIC_ID3_2
+
+# good enough
+TVD_FW_GRAPHIC_NAME_LONG
+
+# good enough
+TVD_FW_GRAPHIC_NAME_MID
 
 # good enough
 TVD_HEAD_KERNEL
@@ -621,9 +606,6 @@ TVD_PH_7
 
 # good enough
 TVD_PH_REC
-
-# good enough
-TVD_PH_SUBJ_ACCOUNTS_POST
 
 # good enough
 TVD_PH_SUBJ_META
@@ -648,9 +630,6 @@ TVD_RATWARE_CB
 
 # good enough
 TVD_RATWARE_CB_2
-
-# good enough
-TVD_RATWARE_MSGID_01
 
 # good enough
 TVD_RATWARE_MSGID_02
@@ -689,9 +668,6 @@ TVD_VISIT_PHARMA
 TVD_VIS_HIDDEN
 
 # good enough
-CTYPE_1SPACE_GIF
-
-# good enough
 DC_IMAGE001_GIF
 
 # good enough
@@ -707,19 +683,19 @@ DOS_STOCK_O_PRICE
 DOS_TWO_MIS_STOCK
 
 # good enough
-DYN_RDNS_SHORT_HELO_FROM
-
-# good enough
-DYN_RDNS_SHORT_HELO_MIMEOLE
-
-# good enough
 FH_DATE_IS_19XX
 
 # good enough
-KAM_STOCKTIP4
+HS_BODY_UPLOADED_SOFTWARE
 
 # good enough
-PART_STOCK_IMG2
+HS_SUBJ_NEW_SOFTWARE
+
+# good enough
+HS_UPLOADED_SOFTWARE
+
+# good enough
+KAM_STOCKTIP4
 
 # tflags net
 RCVD_IN_DSBL
@@ -746,16 +722,13 @@ RCVD_LSO_SND
 RDNS_DYNAMIC
 
 # good enough
+SB_GIF_AND_NO_URIS
+
+# good enough
 TVD_DOLLARS_US
 
 # good enough
 TVD_FINGER_02
-
-# good enough
-TVD_FW_GRAPHIC_ID1
-
-# good enough
-TVD_FW_GRAPHIC_ID2
 
 # good enough
 TVD_LINK_SAVE
@@ -818,6 +791,9 @@ XMAILER_MIMEOLE_OL_9B607
 XMAILER_MIMEOLE_OL_AA207
 
 # good enough
+XMAILER_MIMEOLE_OL_B4A6F
+
+# good enough
 XMAILER_MIMEOLE_OL_BC7E6
 
 # good enough
@@ -831,9 +807,6 @@ XMAILER_MIMEOLE_OL_F3B05
 
 # good enough
 XMAILER_MIMEOLE_OL_F8BA4
-
-# good enough
-XM_OL_21064
 
 # good enough
 XM_OL_48072300
@@ -1094,9 +1067,6 @@ XMAILER_MIMEOLE_OL_681AD
 XMAILER_MIMEOLE_OL_72641
 
 # good enough
-XMAILER_MIMEOLE_OL_72660
-
-# good enough
 XMAILER_MIMEOLE_OL_812FF
 
 # good enough
@@ -1160,22 +1130,13 @@ XMAILER_MIMEOLE_OL_FF5C8
 XM_OL_28001441
 
 # good enough
-XM_OL_29002180
-
-# good enough
 XM_OL_29196600
 
 # good enough
 XM_OL_29196700
 
 # good enough
-XM_OL_4115
-
-# good enough
 XM_OL_41332400
-
-# good enough
-XM_OL_4682
 
 # good enough
 XM_OL_48071700
