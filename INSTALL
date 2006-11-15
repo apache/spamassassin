@@ -207,6 +207,17 @@ installed:
     Debian: apt-get install libhtml-parser-perl
     Gentoo: emerge dev-perl/HTML-Parser
 
+  - Net::DNS (from CPAN)
+
+    Used for all DNS-based tests (SBL, XBL, SpamCop, DSBL, etc.),
+    perform MX checks, used when manually reporting spam to SpamCop,
+    and used by sa-update to gather version information.
+
+    You need to make sure the Net::DNS version is sufficiently up-to-date:
+
+      - version 0.34 or higher on Unix systems
+      - version 0.46 or higher on Windows systems
+
 
 Optional Modules
 ----------------
@@ -235,20 +246,6 @@ version is too low for them to be used.
     There seems to be a bug in libdb 4.1.25, which is
     distributed by default on some versions of Linux.  See
     http://wiki.apache.org/spamassassin/DbFileSleepBug for details.
-
-
-  - Net::DNS (from CPAN)
-
-    Used for all DNS-based tests (SBL, XBL, SpamCop, DSBL, etc.),
-    perform MX checks, used when manually reporting spam to SpamCop,
-    and used by sa-update to gather version information.  Recommended.
-
-    If this is installed and you are using network tests of any variety
-    (which is the default), then you need to make sure the Net::DNS
-    version is sufficiently up-to-date:
-
-      - version 0.34 or higher on Unix systems
-      - version 0.46 or higher on Windows systems
 
 
   - Net::SMTP (from CPAN)

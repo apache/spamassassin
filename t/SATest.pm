@@ -449,6 +449,12 @@ sub start_spamd {
         # Yes, DO retry on this error. I'm getting test failures otherwise
         # /Address already in use/ and $retries = 0;
 	/server pid: (\d+)/ and $spamd_pid = $1;
+
+        if (/ERROR/) {
+          warn "spamd error! $_";
+          $retries = 0; last;
+        }
+
 	$spamdlog .= $_;
       }
       close IN;

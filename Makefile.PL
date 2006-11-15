@@ -210,6 +210,7 @@ my %makefile = (
         'Pod::Usage'    => 1.10,          # all versions prior to this do seem to be buggy
         'HTML::Parser'  => 3.43,          # the HTML code is based on this parser, older versions have utf-8 bugs
         'Text::Wrap'    => 98.112902,     # this version is shipped with 5.005_03, the oldest version known to work
+        'Net::DNS'      => (RUNNING_ON_WINDOWS ? 0.46 : 0.34), # bugs in older revs
         'Sys::Hostname' => 0,
         'Time::Local'   => 0,
         'Errno'         => 0,
@@ -273,6 +274,12 @@ my %makefile = (
     # Don't add META.yml to the MANIFEST for god's sake!
     'NO_META' => 1,
 );
+
+# rules/72_active.cf is built from "rulesrc", but *must* exist before
+# WriteMakefile() is called due to shortcomings in MakeMaker.
+my @FILES_THAT_MUST_EXIST = qw(
+        rules/72_active.cf
+    );
 
 # That META.yml stuff was introduced with Perl 6.06_03, see
 # <http://archive.develooper.com/makemaker@perl.org/msg00922.html>
@@ -379,6 +386,10 @@ if (Mail::SpamAssassin::Util::DependencyInfo::long_diagnostics() != 0) {
   exit 1;
 }
 
+foreach my $file (@FILES_THAT_MUST_EXIST) {
+  open (TOUCH, ">>$file") or die "cannot touch '$file'";
+  close TOUCH;
+}
 
 #######################################################################
 
@@ -1126,7 +1137,6 @@ spamd/spamd: spamd/spamd.raw
 	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@
 
 build_rules: 
-	-rm rules/70_inactive.cf
 	[ ! -d rulesrc ] || $(PERL) build/mkrules --src rulesrc --out rules --manifest MANIFEST --manifestskip MANIFEST.SKIP
 
 SPAMC_MAKEFILE  = spamc/Makefile

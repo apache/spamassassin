@@ -64,8 +64,8 @@ mail.
 %package -n perl-Mail-SpamAssassin
 Summary:        %{pdir}::%{pnam} -- SpamAssassin e-mail filter Perl modules
 Summary(pl):    %{pdir}::%{pnam} -- modu³y Perla filtru poczty SpamAssassin
-Requires: perl >= 5.6.1 perl(HTML::Parser) perl(Digest::SHA1)
-BuildRequires: perl >= 5.6.1 perl(HTML::Parser) perl(Digest::SHA1)
+Requires: perl >= 5.6.1 perl(HTML::Parser) perl(Digest::SHA1) perl(Net::DNS)
+BuildRequires: perl >= 5.6.1 perl(HTML::Parser) perl(Digest::SHA1) perl(Net::DNS)
 Group:          Development/Libraries
 
 %description -n perl-Mail-SpamAssassin

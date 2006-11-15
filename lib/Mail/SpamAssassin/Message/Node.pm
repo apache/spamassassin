@@ -56,7 +56,8 @@ sub new {
   my $self = {
     headers		=> {},
     raw_headers		=> {},
-    header_order	=> []
+    header_order	=> [],
+    type                => ""
   };
 
   # deal with any parameters
@@ -173,6 +174,7 @@ sub header {
     my $dec_value = $raw_value;
     $dec_value =~ s/\n[ \t]+/ /gs;
     $dec_value =~ s/\s*$//s;
+    $dec_value =~ s/^\s*//s;
     push @{ $self->{'headers'}->{$key} },     $self->_decode_header($dec_value);
 
     push @{ $self->{'raw_headers'}->{$key} }, $raw_value;

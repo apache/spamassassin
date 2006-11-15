@@ -741,13 +741,6 @@ sub wanted {
   undef $ma;		# clean 'em up
   undef $status;
 
-  # uncomment these lines to get a Data::Dumper dump of the Mail::SpamAssassin
-  # module, written to a file after each message is scanned.  This is a
-  # great way to find memory leaks...
-  ## use Data::Dumper;
-  ## open (D, ">dump.$$.$total_count"); print D Dumper($spamtest); close D;
-  ## warn "wrote memory dump: dump.$$.$total_count";
-
   showdots_blip();
 #  print ">>>> out = $out\n";
   return $out;

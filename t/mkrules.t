@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("mkrules");
-use Test; BEGIN { plan tests => 101 };
+use Test; BEGIN { plan tests => 81 };
 use File::Path;
 
 # ---------------------------------------------------------------------------
@@ -212,49 +212,6 @@ ok ok_all_patterns();
 save_tdir();
 
 # ---------------------------------------------------------------------------
-print " active plugin in core\n\n";
-
-%patterns = (
-  '70_sandbox.cf: WARNING: not listed in manifest file' => manif_found,
-  "loadplugin Good plugin.pm" => loadplugin_found,
-  "body GOOD eval:check_foo()"   => rule_line_1,
-  "describe GOOD desc_found"  => rule_line_2,
-  "ifplugin Good" => if1,
-  "endif" => endif_found,
-);
-%anti_patterns = (
-  "describe T_GOOD desc_found"  => rule_line_2,
-);
-
-mkpath ([ "$tdir/rulesrc/core", "$tdir/rules", ]);
-
-write_file("$tdir/MANIFEST", [ "rulesrc/core/20_foo.cf\n", "rulesrc/core/plugin.pm\n" ]);
-write_file("$tdir/MANIFEST.SKIP", [ "foo2\n" ]);
-write_file("$tdir/rules/active.list", [ "GOOD\n" ]);
-write_file("$tdir/rulesrc/core/20_foo.cf", [
-    "loadplugin Good plugin.pm\n",
-    "ifplugin Good\n",
-    "body GOOD eval:check_foo()\n",
-    "describe GOOD desc_found\n",
-    "endif\n",
-]);
-write_file("$tdir/rulesrc/core/plugin.pm", [
-    'package Good;',
-    'use Mail::SpamAssassin::Plugin; our @ISA = qw(Mail::SpamAssassin::Plugin);',
-    'sub new { my ($class, $m) = @_; $class = ref($class) || $class;',
-    'my $self = bless $class->SUPER::new($m), $class;',
-    '$self->register_eval_rule("check_foo"); return $self; }',
-    'sub check_foo { my ($self, $pms) = @_; return 1; }',
-]);
-
-ok (mkrun ("--src $tdir/rulesrc --out $tdir/rules --manifest $tdir/MANIFEST --manifestskip $tdir/MANIFEST.SKIP --active $tdir/rules/active.list 2>&1", \&patterns_run_cb));
-checkfile("$tdir/rules/72_active.cf", \&patterns_run_cb);
-# checkfile("$tdir/rules/70_sandbox.cf", \&patterns_run_cb);
-ok (-f "$tdir/rules/plugin.pm");
-ok ok_all_patterns();
-save_tdir();
-
-# ---------------------------------------------------------------------------
 print " inactive plugin\n\n";
 
 %patterns = (
@@ -298,51 +255,6 @@ ok (-f "$tdir/rules/plugin.pm");
 ok ok_all_patterns();
 save_tdir();
 
-
-# ---------------------------------------------------------------------------
-print " inactive plugin in non-sandbox\n\n";
-
-%patterns = (
-  '70_inactive.cf: WARNING: not listed in manifest file' => manif_found,
-  "loadplugin Good plugin.pm" => loadplugin_found,
-  "ifplugin Good" => if1,
-  "body GOOD eval:check_foo()" => rule_line_1,
-  "describe GOOD desc_found" => rule_line_2,
-  "endif" => endif_found,
-);
-%anti_patterns = (
-  "describe T_GOOD desc_found"  => rule_line_2,
-);
-
-rmtree([ $tdir ]);
-mkpath ([ "$tdir/rulesrc/core", "$tdir/rules" ]);
-
-write_file("$tdir/MANIFEST", [ "rulesrc/sandbox/foo/20_foo.cf\n", "rulesrc/sandbox/foo/plugin.pm\n" ]);
-write_file("$tdir/MANIFEST.SKIP", [ "foo2\n" ]);
-write_file("$tdir/rules/active.list", [ "NOT_GOOD\n" ]);
-write_file("$tdir/rulesrc/core/20_foo.cf", [
-    "loadplugin Good plugin.pm\n",
-    "ifplugin Good\n",
-    "body GOOD eval:check_foo()\n",
-    "describe GOOD desc_found\n",
-    "endif\n",
-]);
-write_file("$tdir/rulesrc/core/plugin.pm", [
-    'package Good;',
-    'use Mail::SpamAssassin::Plugin; our @ISA = qw(Mail::SpamAssassin::Plugin);',
-    'sub new { my ($class, $m) = @_; $class = ref($class) || $class;',
-    'my $self = bless $class->SUPER::new($m), $class;',
-    '$self->register_eval_rule("check_foo"); return $self; }',
-    'sub check_foo { my ($self, $pms) = @_; return 1; }',
-]);
-
-ok (mkrun ("--src $tdir/rulesrc --out $tdir/rules --manifest $tdir/MANIFEST --manifestskip $tdir/MANIFEST.SKIP --active $tdir/rules/active.list 2>&1", \&patterns_run_cb));
-# checkfile("$tdir/rules/70_sandbox.cf", \&patterns_run_cb);
-# checkfile("$tdir/rules/72_active.cf", \&patterns_run_cb);
-checkfile("$tdir/rules/70_inactive.cf", \&patterns_run_cb);
-ok (-f "$tdir/rules/plugin.pm");
-ok ok_all_patterns();
-save_tdir();
 
 # ---------------------------------------------------------------------------
 print " active plugin, but the .pm file is AWOL\n\n";

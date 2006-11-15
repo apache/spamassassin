@@ -210,8 +210,7 @@ sub new {
     else {
       # Ok, there's a header here, let's go ahead and add it in.
       if ($header) {
-        # Yes, the /s is needed to match \n too.
-        my ($key, $value) = split (/:\s*(?=.)/s, $header, 2);
+        my ($key, $value) = split (/:/s, $header, 2);
 
         # If it's not a valid header (aka: not in the form "foo: bar"), skip it.
         if (defined $value) {
@@ -613,7 +612,13 @@ sub parse_body {
 	# Ok, we've subparsed, so go ahead and remove the raw and decoded
 	# data because we won't need them anymore (the tree under this part
 	# will have that data)
+	if (ref $toparse->[0]->{'raw'} eq 'GLOB') {
+	  # Make sure we close it if it's a temp file -- Bug 5166
+	  close ($toparse->[0]->{'raw'});
+	}
+
 	delete $toparse->[0]->{'raw'};
+	  
 	delete $toparse->[0]->{'decoded'};
       }
     }
