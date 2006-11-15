@@ -1931,17 +1931,17 @@ sub handle_eval_rule_errors {
 sub register_plugin_eval_glue {
   my ($self, $function) = @_;
 
+  if (!$function) {
+    warn "rules: empty function name";
+    return;
+  }
+
   # return if it's not an eval_plugin function
   return if (!exists $self->{conf}->{eval_plugins}->{$function});
 
   # return if it's been registered already
   return if ($self->can ($function) &&
         defined &{'Mail::SpamAssassin::PerMsgStatus::'.$function});
-
-  if (!$function) {
-    warn "rules: empty function name";
-    return;
-  }
 
   my $evalstr = <<"ENDOFEVAL";
 {

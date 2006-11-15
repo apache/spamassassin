@@ -474,7 +474,7 @@ sub do_head_tests {
               $self->got_hit(q#'.$rulename.'#, "", ruletype => "header");
               '.$self->hit_rule_plugin_code($pms, $rulename, "header", $hitdone).'
             }
-            '.$self->ran_rule_plugin_code($pms, $rulename, "header").'
+            '.$self->ran_rule_plugin_code($rulename, "header").'
           }
         ';
       }
@@ -568,16 +568,13 @@ sub do_body_tests {
 
   ';
 
-  while (my($rulename, $pat) = each %{$conf->{body_tests}->{$priority}}) {
+  while (my($rulename, $pat) = each %{$pms->{conf}{body_tests}->{$priority}}) {
     my $sub;
     my $sub_one_line;
 
-    my $need_one_line;
-    if ($conf->{generate_body_one_line_sub}->{$rulename}) {
-      $need_one_line = 1;
-    }
+    my $need_one_line = ($conf->{generate_body_one_line_sub}->{$rulename});
 
-    if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
+    if (($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
     {
       # support multiple matches
       $loopid++;
@@ -596,11 +593,12 @@ sub do_body_tests {
       if ($need_one_line) {
         $sub_one_line = '
         pos $_[1] = 0;
-        '.$self->hash_line_for_rule($rulename).'
+        '.$self->hash_line_for_rule($pms, $rulename).'
         while ($_[1] =~ '.$pat.'g) {
           my $self = $_[0];
           $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body");
-          '. $self->hit_rule_plugin_code($rulename, "body", "return 1") . '
+          '. $self->hit_rule_plugin_code($pms, $rulename, "body",
+                                        "return 1") . '
         }
         ';
       }
@@ -621,11 +619,11 @@ sub do_body_tests {
 
       if ($need_one_line) {
         $sub_one_line = '
-        '.$self->hash_line_for_rule($rulename).'
+        '.$self->hash_line_for_rule($pms, $rulename).'
         if ($_[1] =~ '.$pat.') {
           my $self = $_[0];
           $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body");
-          '. $self->hit_rule_plugin_code($rulename, "body", "return 1") . '
+          '. $self->hit_rule_plugin_code($pms, $rulename, "body", "return 1") . '
         }
         ';
       }
