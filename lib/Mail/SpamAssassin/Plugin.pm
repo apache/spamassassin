@@ -456,6 +456,10 @@ The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
 
 The type of the rules about to be performed.
 
+=item priority
+
+The priority level of the rules about to be performed.
+
 =back
 
 =item $plugin->hit_rule ( { options ... } )

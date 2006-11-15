@@ -109,7 +109,7 @@ sub set_config {
 
       return unless $self->{parser}->is_delimited_regexp_valid($rulename, $pattern);
 
-      $pattern = $pluginobj->make_qr($pattern);
+      $pattern = Mail::SpamAssassin::Util::make_qr($pattern);
       return $Mail::SpamAssassin::Conf::INVALID_VALUE unless $pattern;
 
       $self->{mimeheader_tests}->{$rulename} = {
@@ -200,30 +200,6 @@ sub finish_tests {
     undef &{$method};
   }
   @TEMPORARY_METHODS = ();      # clear for next time
-}
-
-# ---------------------------------------------------------------------------
-
-# turn "/foobar/i" into qr/(?i)foobar/
-sub make_qr {
-  my ($self, $pattern) = @_;
-
-  my $re_delim;
-  if ($pattern =~ s/^m(\W)//) {     # m!foo/bar!
-    $re_delim = $1;
-  } else {                          # /foo\/bar/ or !foo/bar!
-    $pattern =~ s/^(\W)//; $re_delim = $1;
-  }
-  if (!$re_delim) {
-    return;
-  }
-
-  $pattern =~ s/${re_delim}([imsx]*)$//;
-
-  my $mods = $1;
-  if ($mods) { $pattern = "(?".$mods.")".$pattern; }
-
-  return qr/$pattern/;
 }
 
 # ---------------------------------------------------------------------------
