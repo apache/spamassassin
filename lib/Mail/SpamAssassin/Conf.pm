@@ -3050,7 +3050,9 @@ sub clone {
 sub free_uncompiled_rule_source {
   my ($self) = @_;
 
-  if (!$self->{main}->{keep_config_parsing_metadata}) {
+  if (!$self->{main}->{keep_config_parsing_metadata} &&
+        !$self->{allow_user_rules})
+  {
     delete $self->{if_stack};
     delete $self->{source_file};
     delete $self->{meta_dependencies};
