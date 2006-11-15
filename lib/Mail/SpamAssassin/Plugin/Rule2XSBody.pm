@@ -175,7 +175,7 @@ sub run_body_hack {
 	# dbg("zoom: base found for $rulename: $line");
 	# }
 
-	my $fn = 'Mail::SpamAssassin::PerMsgStatus::'.
+	my $fn = 'Mail::SpamAssassin::Plugin::Check::'.
 				$rulename.'_one_line_body_test';
 
         # run the real regexp -- on this line alone.
