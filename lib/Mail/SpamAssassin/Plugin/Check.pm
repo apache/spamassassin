@@ -568,11 +568,11 @@ sub do_body_tests {
 
   ';
 
-  while (my($rulename, $pat) = each %{$pms->{conf}{body_tests}->{$priority}}) {
+  while (my($rulename, $pat) = each %{$pms->{conf}->{body_tests}->{$priority}}) {
     my $sub;
     my $sub_one_line;
 
-    my $need_one_line = ($conf->{generate_body_one_line_sub}->{$rulename});
+    my $need_one_line = ($pms->{conf}->{generate_body_one_line_sub}->{$rulename});
 
     if (($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
     {
