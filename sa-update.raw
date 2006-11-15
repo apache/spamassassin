@@ -445,9 +445,9 @@ foreach my $channel (@channels) {
 
   # If we are only checking for update availability, exit now
   if ( defined $opt{'checkonly'} ) {            
-    dbg("channel: update available and in checkonly mode, exiting now");
+    dbg("channel: $channel: update available, not downloading in checkonly mode");
     $exit = 0;
-    last;
+    next;
   }
 
   # Read in the MIRRORED.BY file if it exists
@@ -1286,14 +1286,10 @@ Options:
   --updatedir path		Directory to place updates, defaults to the
 				SpamAssassin site rules directory (def:
 				/var/lib/spamassassin/<version>)
-
   --channel channel		Retrieve updates from this channel
   				Use multiple times for multiple channels
   --channelfile file		Retrieve updates from the channels in the file
-
   --checkonly		        Check for update availability, do not install
-
-
   --gpgkey key			Trust the key id to sign releases
   				Use multiple times for multiple keys
   --gpgkeyfile file		Trust the key ids in the file to sign releases
@@ -1303,7 +1299,6 @@ Options:
 				--gpgkey and --gpgkeyfile options)
   --import file			Import GPG key(s) from file into sa-update's
 				keyring. Use multiple times for multiple files
-
   -D, --debug [area=n,...]	Print debugging messages
   -V, --version			Print version
   -h, --help			Print usage message
