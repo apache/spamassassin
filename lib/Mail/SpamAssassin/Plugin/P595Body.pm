@@ -75,7 +75,7 @@ sub setup_test_set {
 sub setup_test_set_pri {
   my ($self, $conf, $rules, $ruletype) = @_;
 
-  my $nbuckets = 1;
+  my $nbuckets = 5;
   my $all_alternates = [];
   my $all_trie_rules = [];
   foreach my $base (keys %{$conf->{base_string}->{$ruletype}}) {
@@ -85,7 +85,7 @@ sub setup_test_set_pri {
 
     my $buck = 0;
     if ($base =~ /^(.)/) {
-      $buck = ord($1) % 5;
+      $buck = ord($1) % $nbuckets;
     }
     $all_alternates->[$buck] ||= [];
     $all_trie_rules->[$buck] ||= [];
