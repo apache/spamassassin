@@ -74,9 +74,7 @@ sub extract_bases {
   my ($self, $conf) = @_;
 
   my $main = $conf->{main};
-  if (!$main->{base_extract}) {
-    return;         # TODO: comment this for Rabin-Karp
-  }
+  if (!$main->{base_extract}) { return; }
 
   $self->extract_set($conf, $conf->{body_tests}, 'body');
 }
@@ -313,6 +311,9 @@ sub extract_hints {
   $rule =~ s/\(\\b\|\^\)//gs;
   $rule =~ s/\(\\b\|\$\)//gs;
 
+  # remove (?!credit)
+  $rule =~ s/\(\?\![^\)]+\)//gs;
+
   # remove \b's
   $rule =~ s/\\b//gs;
 
@@ -386,13 +387,18 @@ sub extract_hints {
   # still problematic; kill all "x?" statements
   $rule =~ s/.\?.*$//gsx;
 
-  # simplify (..)? and (..|) to (..|z{0})
-  # this wierd construct is to work around an re2c bug; (..|) doesn't
-  # do what it should
   if ($main->{bases_can_use_alternations}) {
-    $rule =~ s/\((.*?)\)\?/\($1\|z{0}\)/gs;
-    $rule =~ s/\((.*?)\|\)/\($1\|z{0}\)/gs;
-    $rule =~ s/\(\|(.*?)\)/\($1\|z{0}\)/gs;
+    $rule =~ s/\((.*?)\)\?/\($1\|\)/gs;
+    $rule =~ s/\((.*?)\|\)/\($1\|\)/gs;
+    $rule =~ s/\(\|(.*?)\)/\($1\|\)/gs;
+
+    # simplify (..)? and (..|) to (..|z{0}); this wierd construct is to work
+    # around an re2c bug; (..|) doesn't do what it should. off for now; re2c's
+    # alt support isn't actually usable anyway due to bugs with how it handles
+    # overlapping patterns.
+    #$rule =~ s/\((.*?)\)\?/\($1\|z{0}\)/gs;
+    #$rule =~ s/\((.*?)\|\)/\($1\|z{0}\)/gs;
+    #$rule =~ s/\(\|(.*?)\)/\($1\|z{0}\)/gs;
   }
 
   # re2xs doesn't like escaped brackets;
@@ -475,21 +481,21 @@ sub extract_hints {
     # count (...braces...) to ensure the numbers match up
     my @c = ($rule =~ /(?<!\\)\(/g); my $brace_i = scalar @c;
        @c = ($rule =~ /(?<!\\)\)/g); my $brace_o = scalar @c;
-    if ($brace_i != $brace_o) { die "brace mismatch"; }
+    if ($brace_i != $brace_o) { die "brace mismatch in '$rule'"; }
   }
 
   # do the same for [charclasses]
   {
     my @c = ($rule =~ /(?<!\\)\[/g); my $brace_i = scalar @c;
        @c = ($rule =~ /(?<!\\)\]/g); my $brace_o = scalar @c;
-    if ($brace_i != $brace_o) { die "charclass mismatch"; }
+    if ($brace_i != $brace_o) { die "charclass mismatch in '$rule'"; }
   }
 
   # and {quantifiers}
   {
     my @c = ($rule =~ /(?<!\\)\{/g); my $brace_i = scalar @c;
        @c = ($rule =~ /(?<!\\)\}/g); my $brace_o = scalar @c;
-    if ($brace_i != $brace_o) { die "quantifier mismatch"; }
+    if ($brace_i != $brace_o) { die "quantifier mismatch in '$rule'"; }
   }
 
   # lookaheads that are just too far for the re2c parser

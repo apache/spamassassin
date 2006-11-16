@@ -13,7 +13,7 @@ BEGIN {
   if (-e 't/test_dir') { chdir 't'; } 
   if (-e 'test_dir') { unshift(@INC, '../blib/lib'); }
 
-  plan tests => 20;
+  plan tests => 25;
 
 };
 use lib '../lib';
@@ -27,7 +27,9 @@ try_extraction ('
     body TEST3 /foody? bar/
     body TEST4 /A(?i:ct) N(?i:ow)/
     body TEST5 /time to refinance|refinanc\w{1,3}\b.{0,16}\bnow\b/i
-    # body TEST6 /(?:Current|Target)(?: Price)?:\s+\$(?:O\.|\d\.O)/
+    body TEST6 /(?:Current|Target)(?: Price)?:\s+\$(?:O\.|\d\.O)/
+    body TEST7 /(?!credit)[ck\xc7\xe7@]\W?r\W?[e3\xc8\xc9\xca\xcb\xe8\xe9\xea\xeb\xa4]\W?[d\xd0]\W?[il|!1y?\xcc\xcd\xce\xcf\xec\xed\xee\xef]\W?t/i
+
 
 ', {
     base_extract => 1,
@@ -49,7 +51,15 @@ try_extraction ('
     'foody bar:TEST3 TEST2',
     'refinanc:TEST5',
     'time to refinance:TEST5',
+    'target:TEST6',
+    'target price:TEST6',
+    'current:TEST6',
+    'current price:TEST6',
 
+], [
+
+    # we do not want to see these
+    '!credit:TEST7'
 
 ]);
 
