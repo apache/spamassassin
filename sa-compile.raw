@@ -56,6 +56,7 @@ use Mail::SpamAssassin;
 use Getopt::Long;
 use File::Copy;
 use File::Path;
+use Pod::Usage;
 
 use vars qw( %opt );
 Mail::SpamAssassin::Util::clean_path_in_taint_mode();
@@ -87,6 +88,21 @@ if ( defined $opt{'help'} ) {
 if ( defined $opt{'version'} ) {
   print "SpamAssassin version " . Mail::SpamAssassin::Version() . "\n";
   exit 0;
+}
+
+sub usage {
+  my ( $exitval, $message ) = @_;
+  $exitval ||= 64;
+
+  if ($exitval == 0) {
+    print_version();
+    print("\n");
+  }
+  pod2usage(
+    -verbose => 0,
+    -message => $message,
+    -exitval => $exitval,
+  );
 }
 
 # set debug areas, if any specified (only useful for command-line tools)
@@ -513,7 +529,7 @@ EOT
   close($re);
 
   open(FILE, ">$PMFILE") || die "write $PMFILE: $!";
-  print FILE <<"EOT";
+  my $str =<<"EOT";
 
 package $modname;
 
@@ -537,18 +553,18 @@ bootstrap $modname \$VERSION;
 1;
 __END__
 
-=head1 NAME
+fnord=head1 NAME
 
 $modname - Efficient string matching for regexps found in $FILE
 
-=head1 SYNOPSIS
+fnord=head1 SYNOPSIS
 
   use $modname;
   
   ...
   my \$match = ${modname}::scan(\$string);
 
-=head1 DESCRIPTION
+fnord=head1 DESCRIPTION
 
 This module was created by SpamAssassin with the aid of re2xs, which uses re2c
 to create an XS library capable of scanning through a bunch of regular
@@ -558,6 +574,9 @@ See C<sa-compile> for more details.
 
 =cut
 EOT
+
+$str =~ s/^fnord=/=/gs;
+  print FILE $str;
 
 }
 
