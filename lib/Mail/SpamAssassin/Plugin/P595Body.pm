@@ -45,11 +45,11 @@ sub finish_parsing_end {
 
   my $main = $self->{main};
   $main->{base_extract} = 1;
-  $main->{bases_must_be_casei} = 0;
+  $main->{bases_must_be_casei} = 1;
   $main->{bases_can_use_alternations} = 0; # /(foo|bar|baz)/
   $main->{bases_can_use_quantifiers} = 0; # /foo.*bar/ or /foo*bar/ or /foooo?bar/
   $main->{bases_can_use_char_classes} = 0; # /fo[opqr]bar/
-  $main->{bases_split_out_alternations} = 0; # /(foo|bar|baz)/ => ["foo", "bar", "baz"]
+  $main->{bases_split_out_alternations} = 1; # /(foo|bar|baz)/ => ["foo", "bar", "baz"]
 
   my $ext_start = time;
   my $basextor = Mail::SpamAssassin::Plugin::BodyRuleBaseExtractor->new
@@ -75,26 +75,13 @@ sub setup_test_set {
 sub setup_test_set_pri {
   my ($self, $conf, $rules, $ruletype) = @_;
 
-  my $nbuckets = 5;
-  my $all_alternates = [];
-  my $all_trie_rules = [];
-  foreach my $base (keys %{$conf->{base_string}->{$ruletype}}) {
-
-    # can't use named captures with perl 5.9.5's trie support (yet)
-    # push @namedcaptures, "(?<".$self->{id}.">$base)";
-
-    my $buck = 0;
-    if ($base =~ /^(.)/) {
-      $buck = ord($1) % $nbuckets;
-    }
-    $all_alternates->[$buck] ||= [];
-    $all_trie_rules->[$buck] ||= [];
-    my $alternates = $all_alternates->[$buck];
-    my $trie_rules = $all_trie_rules->[$buck];
-
+  my $alternates = [];
+  my $trie_rules = {};
+  foreach my $base (keys %{$conf->{base_string}->{$ruletype}})
+  {
     push @{$alternates}, $base;
     my @rules = split(' ', $conf->{base_string}->{$ruletype}->{$base});
-    push @{$trie_rules}, @rules;
+    $trie_rules->{$base} = \@rules;
 
     foreach my $rule (@rules) {
       # ignore rules marked for ReplaceTags work!
@@ -112,20 +99,21 @@ sub setup_test_set_pri {
     }
   }
 
-  foreach my $buck (0 .. ($nbuckets-1)) {
-    my $alternates = $all_alternates->[$buck];
-    my $trie_rules = $all_trie_rules->[$buck];
-    next unless ($alternates && $trie_rules);
+  my $sub = '
+    sub {
+        our @matched = ();
+        $_[0] =~ m#('.join('|', @{$alternates}).')(?{
+            push @matched, $1;
+          })(*FAIL)#i;
+        return @matched;
+      }
+  ';
+  # warn "JMD $sub";
 
-    my $sub = '
-      sub { return ($_[0] =~ m#(?:'.join('|', @{$alternates}).')#); }
-    ';
+  $conf->{$ruletype}->{trie_re_sub} = eval $sub;
+  if ($@) { warn "trie sub compilation failed: $@"; }
 
-    $conf->{$ruletype}->{trie_re_sub}->[$buck] = eval $sub;
-    if ($@) { warn "trie sub compilation failed: $@"; }
-
-    $conf->{$ruletype}->{trie_rules}->[$buck] = $trie_rules;
-  }
+  $conf->{$ruletype}->{trie_rules} = $trie_rules;
 }
 
 ###########################################################################
@@ -143,7 +131,7 @@ sub run_body_hack {
 
   my $trie_re_sub = $conf->{$ruletype}->{trie_re_sub};
   my $trie_rules = $conf->{$ruletype}->{trie_rules};
-  if (!$trie_re_sub || !$trie_re_sub->[0] || !$trie_rules)
+  if (!$trie_re_sub || !$trie_rules)
   {
     dbg("zoom: run_body_hack for $ruletype skipped, no rules");
     return;
@@ -151,7 +139,6 @@ sub run_body_hack {
 
   my $do_dbg = (would_log('dbg', 'zoom') > 1);
   my $scoresptr = $conf->{scores};
-  my $nbuckets = 5;
 
   dbg("zoom: run_body_hack for $ruletype start");
 
@@ -159,12 +146,13 @@ sub run_body_hack {
     no strict "refs";
     foreach my $line (@{$params->{lines}})
     {
-      foreach my $buck (0 .. ($nbuckets-1)) {
-        my $sub = $trie_re_sub->[$buck];
-        next unless ($sub && $sub->($line));
+      my $sub = $trie_re_sub;
+      my @caught = $sub->($line);
+      next unless (scalar @caught > 0);
 
-        my %alreadydone = ();
-        foreach my $rulename (@{$trie_rules->[$buck]})
+      my %alreadydone = ();
+      foreach my $caught (@caught) {
+        foreach my $rulename (@{$trie_rules->{$caught}})
         {
           # only try each rule once per line
           next if exists $alreadydone{$rulename};
