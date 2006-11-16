@@ -1117,7 +1117,9 @@ sub run_eval_tests {
       $evalstr .= '
 
         $self->{main}->call_plugins("start_rules", {
-                permsgstatus => $self, ruletype => "eval", priority => $priority
+                permsgstatus => $self,
+                ruletype => "eval",
+                priority => '.$priority.'
               });
 
       ';
@@ -1235,7 +1237,7 @@ sub start_rules_plugin_code {
 
       $self->{main}->call_plugins ("start_rules", { permsgstatus => $self,
                                                     ruletype => \''.$ruletype.'\',
-                                                    priority => $pri });
+                                                    priority => '.$pri.' });
 
     ';
   }
