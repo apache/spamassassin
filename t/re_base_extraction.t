@@ -16,6 +16,7 @@ BEGIN {
   plan tests => 20;
 
 };
+use lib '../lib';
 
 try_extraction ('
     body FOO /foo bar/
@@ -26,6 +27,7 @@ try_extraction ('
     body TEST3 /foody? bar/
     body TEST4 /A(?i:ct) N(?i:ow)/
     body TEST5 /time to refinance|refinanc\w{1,3}\b.{0,16}\bnow\b/i
+    # body TEST6 /(?:Current|Target)(?: Price)?:\s+\$(?:O\.|\d\.O)/
 
 ', {
     base_extract => 1,
@@ -87,12 +89,13 @@ sub try_extraction {
     site_rules_filename => "log/test_default.cf",
     userprefs_filename  => "log/userprefs.cf",
     local_tests_only    => 1,
-    debug             => 0,
+    debug             => 1,
     dont_copy_prefs   => 1,
   });
   ok($sa);
 
   # remove all rules and plugins; we want just our stuff
+  unlink(<log/test_rules_copy/*.pre>);
   unlink(<log/test_rules_copy/*.pm>);
   unlink(<log/test_rules_copy/*.cf>);
 
