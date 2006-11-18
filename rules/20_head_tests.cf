@@ -33,11 +33,6 @@ header FRAGMENTED_MESSAGE	Content-Type =~ /\bmessage\/partial/i
 describe FRAGMENTED_MESSAGE	Partial message
 tflags FRAGMENTED_MESSAGE       userconf
 
-# this is also mostly-theoretical, so allow 0 hits
-header HEAD_LONG                eval:check_msg_parse_flags('truncated_header')
-describe HEAD_LONG              Message headers are very long
-tflags HEAD_LONG                userconf
-
 ###########################################################################
 
 header FROM_BLANK_NAME		From =~ /(?:\s|^)"" <\S+>/i
@@ -536,6 +531,11 @@ endif
 ###########################################################################
 
 ifplugin Mail::SpamAssassin::Plugin::MIMEEval
+
+# this is also mostly-theoretical, so allow 0 hits
+header HEAD_LONG                eval:check_msg_parse_flags('truncated_header')
+describe HEAD_LONG              Message headers are very long
+tflags HEAD_LONG                userconf
 
 header MISSING_HB_SEP		eval:check_msg_parse_flags('missing_head_body_separator')
 describe MISSING_HB_SEP		Missing blank line between message header and body
