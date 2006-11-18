@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-jm bb-zmi cthielen daf dos parkerm theo zmi
+# with results from: bb-doc bb-jm bb-zmi cthielen daf dos jm parkerm theo
 
 # tflags userconf
 ALL_TRUSTED
@@ -196,6 +196,9 @@ FUZZY_MERIDIA
 # good enough
 GEO_QUERY_STRING
 
+# good enough
+GMD_FAKETZ
+
 # tflags userconf
 GTUBE
 
@@ -232,12 +235,6 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
-# good enough
-HDR_ORDER_FTSDMCXX
-
-# good enough
-HDR_ORDER_FTSDMCXX3
-
 # tflags userconf
 HEAD_LONG
 
@@ -266,9 +263,6 @@ HS_FORGED_OE_FW
 HS_GETMEOFF
 
 # good enough
-HS_MEETUP_FOR_SEX
-
-# good enough
 HS_PHARMA_1
 
 # good enough
@@ -294,9 +288,6 @@ KAM_STOCKOTC
 
 # good enough
 KAM_STOCKTIP12
-
-# good enough
-KAM_STOCKTIP15
 
 # good enough
 KAM_STOCKTIP21
@@ -342,6 +333,9 @@ NO_RELAYS
 
 # good enough
 NULL_IN_BODY
+
+# good enough
+OUTLOOK_3416
 
 # good enough
 PART_CID_STOCK
@@ -550,6 +544,9 @@ ROUND_THE_WORLD
 # good enough
 SHORT_HELO_AND_INLINE_IMAGE
 
+# good enough
+SPAMMY_XMAILER
+
 # tflags net
 SPF_FAIL
 
@@ -620,6 +617,9 @@ TVD_DOLLARS_US
 TVD_EB_PHISH
 
 # good enough
+TVD_FINGER_02
+
+# good enough
 TVD_FLOAT_GENERAL
 
 # good enough
@@ -627,9 +627,6 @@ TVD_FUZZY_DEGREE
 
 # good enough
 TVD_FUZZY_FINANCE
-
-# good enough
-TVD_FUZZY_MICROCAP
 
 # good enough
 TVD_FUZZY_PHARMACEUTICAL
@@ -666,9 +663,6 @@ TVD_PH_SUBJ_ACCOUNTS_POST
 
 # good enough
 TVD_PH_SUBJ_META
-
-# good enough
-TVD_PH_SUBJ_META_ALL
 
 # good enough
 TVD_PH_SUBJ_SEC_MEASURES
@@ -725,9 +719,6 @@ TVD_SUBJ_END_STAR
 TVD_SUBJ_FINGER_03
 
 # good enough
-TVD_SUBJ_FINGER_04
-
-# good enough
 TVD_SUBJ_OWE
 
 # good enough
@@ -743,16 +734,10 @@ TVD_VISIT_PHARMA
 TVD_VIS_HIDDEN
 
 # good enough
-CTYPE_8SPACE_GIF
+CTYPE_1SPACE_GIF
 
 # good enough
-GMD_FAKETZ
-
-# good enough
-HDR_ORDER_FTSDMCXX2
-
-# good enough
-OUTLOOK_3416
+L_SPAM_TOOL_13
 
 # tflags net
 RCVD_IN_DSBL
@@ -773,37 +758,25 @@ RCVD_IN_WHOIS_INVALID
 RCVD_IN_XBL
 
 # good enough
-SPAMMY_XMAILER
+SB_GIF_AND_NO_URIS
 
 # good enough
-TVD_FINGER_02
+TVD_FW_GRAPHIC_ID1
 
 # good enough
-TVD_FW_GRAPHIC_NAME_LONG
+TVD_FW_GRAPHIC_ID2
 
 # good enough
-TVD_FW_GRAPHIC_NAME_MID
+TVD_RCVD_IP
 
 # good enough
-XMAILER_MIMEOLE_OL_4BF4C
+TVD_RCVD_IP4
 
 # good enough
-XMAILER_MIMEOLE_OL_5EDD4
+TVD_RCVD_SINGLE
 
 # good enough
-XMAILER_MIMEOLE_OL_8E893
-
-# good enough
-XMAILER_MIMEOLE_OL_CAC8F
-
-# good enough
-XMAILER_MIMEOLE_OL_D03AB
-
-# good enough
-XMAILER_MIMEOLE_OL_F475E
-
-# good enough
-XMAILER_MIMEOLE_OL_F8BA4
+TVD_RCVD_SPACE_BRACKET
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -870,9 +843,6 @@ USER_IN_WHITELIST
 
 # tflags userconf
 USER_IN_WHITELIST_TO
-
-# good enough
-VERTICAL_DRUGS_1
 
 # tflags net
 WHOIS_1AND1PR
@@ -1040,6 +1010,9 @@ XMAILER_MIMEOLE_OL_465CD
 XMAILER_MIMEOLE_OL_4B815
 
 # good enough
+XMAILER_MIMEOLE_OL_4BF4C
+
+# good enough
 XMAILER_MIMEOLE_OL_4EEDB
 
 # good enough
@@ -1056,6 +1029,9 @@ XMAILER_MIMEOLE_OL_5B79A
 
 # good enough
 XMAILER_MIMEOLE_OL_5E7ED
+
+# good enough
+XMAILER_MIMEOLE_OL_5EDD4
 
 # good enough
 XMAILER_MIMEOLE_OL_60256
@@ -1086,6 +1062,9 @@ XMAILER_MIMEOLE_OL_83BF7
 
 # good enough
 XMAILER_MIMEOLE_OL_8627E
+
+# good enough
+XMAILER_MIMEOLE_OL_8E893
 
 # good enough
 XMAILER_MIMEOLE_OL_91287
@@ -1127,10 +1106,16 @@ XMAILER_MIMEOLE_OL_C7C33
 XMAILER_MIMEOLE_OL_C9068
 
 # good enough
+XMAILER_MIMEOLE_OL_CAC8F
+
+# good enough
 XMAILER_MIMEOLE_OL_CE8A4
 
 # good enough
 XMAILER_MIMEOLE_OL_CF0C0
+
+# good enough
+XMAILER_MIMEOLE_OL_D03AB
 
 # good enough
 XMAILER_MIMEOLE_OL_EF20B
@@ -1142,7 +1127,13 @@ XMAILER_MIMEOLE_OL_EF222
 XMAILER_MIMEOLE_OL_F3B05
 
 # good enough
+XMAILER_MIMEOLE_OL_F475E
+
+# good enough
 XMAILER_MIMEOLE_OL_F6D01
+
+# good enough
+XMAILER_MIMEOLE_OL_F8BA4
 
 # good enough
 XMAILER_MIMEOLE_OL_FF5C8
