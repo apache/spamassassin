@@ -410,10 +410,6 @@ endif
 
 ifplugin Mail::SpamAssassin::Plugin::HeaderEval
 # <gen:mutable>
-
-# ok_locales
-score CHARSET_FARAWAY_HEADER 3.200
-
 score DATE_IN_FUTURE_03_06 2.061 2.007 2.275 1.961
 score DATE_IN_FUTURE_06_12 1.680 1.498 1.883 1.668
 score DATE_IN_FUTURE_12_24 2.320 2.316 2.775 2.767
@@ -444,16 +440,16 @@ score SUBJ_ILLEGAL_CHARS 3.360 3.360 3.978 4.279
 score SUSPICIOUS_RECIPS 2.240 0.849 2.267 1.757
 score UNRESOLVED_TEMPLATE 1.520 0.687 1.923 1.324
 # </gen:mutable>
+
+# ok_locales
+score CHARSET_FARAWAY_HEADER 3.200
+
 endif
 
 ###########################################################################
 
 ifplugin Mail::SpamAssassin::Plugin::MIMEEval
 # <gen:mutable>
-
-# ok_locales
-score CHARSET_FARAWAY 3.200
-
 score MIME_BAD_ISO_CHARSET 3.360 3.360 3.885 4.185
 score MIME_BASE64_BLANKS 0.001 0.001 0.184 0.224
 score MIME_BASE64_TEXT 2.048 1.522 2.749 1.885
@@ -462,6 +458,9 @@ score MIME_HTML_ONLY 0.414 0.001 0.389 0.001
 score MIME_QP_LONG_LINE 0.159 0.001 0.234 0.001
 score MISSING_MIME_HB_SEP 0.001
 # </gen:mutable>
+
+# ok_locales
+score CHARSET_FARAWAY 3.200
 
 # we dare you
 score HEAD_LONG 2.5
