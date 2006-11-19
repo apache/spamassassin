@@ -302,11 +302,15 @@ describe OUTLOOK_3416   Claims to be sent by an unusual build of Outlook (3416)
 # this seems to appear with a faked 'Microsoft Office Outlook' X-Mailer
 header MID_14DIGITS_HEX     Message-ID =~ /^<[0-9]{14}\.[A-F0-9]{10}\@[0-9A-Z]/
 
+meta         __HTML_IMG_ONLY                 ( HTML_IMAGE_ONLY_04 || HTML_IMAGE_ONLY_08 || HTML_IMAGE_ONLY_12 || HTML_IMAGE_ONLY_16 || HTML_IMAGE_ONLY_20 || HTML_IMAGE_ONLY_24 || HTML_IMAGE_ONLY_28 )
+
 meta STOCK_IMG_HDR_FROM  (__ANY_IMAGE_ATTACH&&__ENV_AND_HDR_FROM_MATCH&&TVD_FW_GRAPHIC_ID1&&__HTML_IMG_ONLY)
 describe STOCK_IMG_HDR_FROM Stock spam image part, with distinctive From line
 
 meta STOCK_IMG_HTML  (__ANY_IMAGE_ATTACH&&__ENV_AND_HDR_FROM_MATCH&&__PART_STOCK_CID&&__HTML_IMG_ONLY)
 describe STOCK_IMG_HTML   Stock spam image part, with distinctive HTML
+
+header __HAS_OUTLOOK_IN_MAILER_NEW   X-Mailer =~ /\bMSCRM\b|Microsoft (?:CDO|Outlook|Office Outlook)\b/
 
 meta STOCK_IMG_OUTLOOK  (__ANY_IMAGE_ATTACH&&__ENV_AND_HDR_FROM_MATCH&&__HAS_OUTLOOK_IN_MAILER_NEW&&__HTML_LENGTH_1536_2048)
 describe STOCK_IMG_OUTLOOK  Stock spam image part, with Outlook-like features
