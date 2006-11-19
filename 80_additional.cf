@@ -335,6 +335,12 @@ header __HELO_NO_DOMAIN   X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[^\.]+ /
 meta SHORT_HELO_AND_INLINE_IMAGE     (__HELO_NO_DOMAIN && __ANY_IMAGE_ATTACH)
 describe SHORT_HELO_AND_INLINE_IMAGE    Short HELO string, with inline image
 
+# "Tora" spam
+header __MAILER_OL_6626 X-Mailer =~ /^Microsoft Outlook, Build 10\.0\.6626$/
+header __MOLE_2962  X-MimeOLE =~ /^Produced\ By\ Microsoft\ MimeOLE\ V6\.00\.2900\.2962$/
+header __NAKED_TO   To =~ /^[^\s<>]+\@[^\s<>]+$/
+meta JM_TORA_XM     (__MAILER_OL_6626 && __MOLE_2962 && __NAKED_TO)
+
 # <gen:mutable>
 score MID_14DIGITS_HEX     2.8
 score OUTLOOK_3416      2.0
@@ -346,6 +352,7 @@ score STOCK_IMG_HTML   1.0
 score STOCK_IMG_OUTLOOK  1.0
 score SPAMMY_XMAILER 1.0
 score SHORT_HELO_AND_INLINE_IMAGE 1.0
+score JM_TORA_XM     2.5
 # </gen:mutable>
 
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
