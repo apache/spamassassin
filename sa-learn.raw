@@ -617,6 +617,9 @@ versa, simply rerun this command with the correct classification, and the
 mistake will be corrected.  SpamAssassin will automatically 'forget' the
 previous indications.
 
+Users of C<spamd> who wish to perform training remotely, over a network,
+should investigate the C<spamc -L> switch.
+
 =head1 OPTIONS
 
 =over 4
