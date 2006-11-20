@@ -46,6 +46,7 @@ usage: mass-check [options] target ...
                 were encapsulated by servers matching the regexp RE
                 (default = extract all SpamAssassin-encapsulated mails)
   --lint        check rules for syntax before running
+  --cf='config line'  Additional line of configuration
 
   client/server mode options
   --server host:port
@@ -117,7 +118,7 @@ use vars qw($opt_c $opt_p $opt_f $opt_j $opt_n $opt_o $opt_all $opt_bayes
 	    $opt_mid $opt_net $opt_nosort $opt_progress $opt_showdots
 	    $opt_spamlog $opt_tail $opt_rules $opt_restart $opt_loguris
 	    $opt_logmem $opt_after $opt_before $opt_rewrite $opt_deencap
-	    $opt_learn $opt_reuse $opt_lint $opt_cache $opt_noisy
+	    $opt_learn $opt_reuse $opt_lint $opt_cache $opt_noisy $opt_cf
 	    $total_messages $statusevery $opt_cachedir
 	    $opt_client $opt_cs_max $opt_cs_timeout $opt_cs_paths_only
 	    $opt_server %postdata %real $svn_revision
@@ -148,6 +149,7 @@ $opt_hamlog = "ham.log";
 $opt_spamlog = "spam.log";
 $opt_learn = 0;
 $reuse_rules_loaded_p = 0;
+$opt_cf = [];
 
 my @ORIG_ARGV = @ARGV;
 GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug:s",
@@ -158,6 +160,7 @@ GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug:s",
            "cachedir=s", "noisy",
 	   "server=s", "cs_max=i", "cs_timeout=i", "cs_paths_only",
 	   "client=s",
+           'cf=s' => \@{$opt_cf},
 	   "dir" => sub { $opt_format = "dir"; },
 	   "file" => sub { $opt_format = "file"; },
 	   "mbox" => sub { $opt_format = "mbox"; },
@@ -207,6 +210,7 @@ if ($opt_lint) {
     'local_tests_only'   			=> $opt_net ? 0 : 1,
     'only_these_rules'   			=> $opt_rules,
     'ignore_safety_expire_timeout'		=> 1,
+    'post_config_text'                          => join("\n", @{$opt_cf})."\n",
     PREFIX					=> '',
     DEF_RULES_DIR        			=> $opt_c,
     LOCAL_RULES_DIR      			=> '',
@@ -241,6 +245,7 @@ my $spamtest = new Mail::SpamAssassin ({
   'local_tests_only'   			=> $opt_net ? 0 : 1,
   'only_these_rules'   			=> $opt_rules,
   'ignore_safety_expire_timeout'	=> 1,
+  'post_config_text'                    => join("\n", @{$opt_cf})."\n",
   PREFIX				=> '',
   DEF_RULES_DIR        			=> $opt_c,
   LOCAL_RULES_DIR      			=> '',
