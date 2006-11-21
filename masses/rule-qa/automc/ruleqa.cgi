@@ -479,14 +479,14 @@ sub show_default_view {
     to display (UTC timezone):
     <input type=textfield name=daterev value="!daterev!">
     <br/>
-    Just 'YYYYMMDD' to select a nightly mass-check by date, or
-    just use these links:
+    (Select a recent nightly mass-check by date:
     <a href='!daterev=last-night!'>last-night</a>,
-    <a href='!daterev=today!'>today</a>.
+    <a href='!daterev=today!'>today</a>, or
+    enter 'YYYYMMDD' for a specific date.)
   </td>
   <td width=10%><div align=right>
-    <a href="!shortdatelist!">(List&nbsp;Nearby)</a><br/>
-    <a href="!longdatelist!">(List&nbsp;All)</a><br/>
+    <a href="!shortdatelist!">(Daterevs&nbsp;Nearby)</a><br/>
+    <a href="!longdatelist!">(Full&nbsp;List)</a><br/>
   </div></td>
   </tr>
   </table>
