@@ -184,8 +184,20 @@ sub ui_get_daterev {
 
   # sanitise daterev string
   if (defined $self->{daterev}) {
+
+    # all of these ignore "b" preflight mass-checks, btw
     if ($self->{daterev} eq 'last-night') {
       $self->{daterev} = $self->get_last_night_daterev();
+      $self->{q}->param('daterev', $self->{daterev});  # make it absolute
+    }
+    elsif ($self->{daterev} eq 'today') {
+      $self->{daterev} = $self->get_daterev_by_date(
+            POSIX::strftime "%Y%m%d", gmtime ((time + DATEREV_ADJ)));
+      $self->{q}->param('daterev', $self->{daterev});  # make it absolute
+    }
+    elsif ($self->{daterev} =~ /^(20\d\d[01]\d\d\d)$/) {
+      # a date
+      $self->{daterev} = $self->get_daterev_by_date($1);
       $self->{q}->param('daterev', $self->{daterev});  # make it absolute
     }
     else {
@@ -466,6 +478,11 @@ sub show_default_view {
     <a href="http://wiki.apache.org/spamassassin/DateRev">DateRev</a>
     to display (UTC timezone):
     <input type=textfield name=daterev value="!daterev!">
+    <br/>
+    Just 'YYYYMMDD' to select a nightly mass-check by date, or
+    just use these links:
+    <a href='!daterev=last-night!'>last-night</a>,
+    <a href='!daterev=today!'>today</a>.
   </td>
   <td width=10%><div align=right>
     <a href="!shortdatelist!">(List&nbsp;Nearby)</a><br/>
@@ -703,6 +720,11 @@ sub get_last_night_daterev {
 
   my $notafter = POSIX::strftime "%Y%m%d",
         gmtime ((time + DATEREV_ADJ) - (12*60*60));
+  return $self->get_daterev_by_date($notafter);
+}
+
+sub get_daterev_by_date {
+  my ($self, $notafter) = @_;
 
   foreach my $dr (reverse @{$self->{daterevs}}) {
     my $t = $self->get_daterev_metadata($dr);
