@@ -385,6 +385,11 @@ sub show_default_header {
       background: #fea;
     }
 
+    div.ui_label {
+      font-size: 75%;
+      color: #444;
+    }
+
 
     /* Sortable tables, see http://www.kryogenix.org/code/browser/sorttable/ */
     table.sortable a.sortheader {
@@ -475,16 +480,20 @@ sub show_default_view {
   <table width=100%>
   <tr>
   <td width=90%>
+  <div class='ui_label'>
     <a href="http://wiki.apache.org/spamassassin/DateRev">DateRev</a>
     to display (UTC timezone):
+  </div>
     <input type=textfield name=daterev value="!daterev!">
     <br/>
+  <div class='ui_label'>
     (Select a recent nightly mass-check by date:
     <a href='!daterev=last-night!'>last-night</a>,
     <a href='!daterev=today!'>today</a>, or
     enter 'YYYYMMDD' for a specific date.)
+  </div>
   </td>
-  <td width=10%><div align=right>
+  <td width=10%><div align=right class='ui_label'>
     <a href="!shortdatelist!">(Daterevs&nbsp;Nearby)</a><br/>
     <a href="!longdatelist!">(Full&nbsp;List)</a><br/>
   </div></td>
@@ -505,21 +514,31 @@ sub show_default_view {
 -->
 
     <h4> Which Rules?</h4>
+  <div class='ui_label'>
     Show only these rules (space separated, or regexp with '/' prefix):<br/>
+  </div>
     <input type=textfield size=60 name=rule value="!rule!"><br/>
     <br/>
+  <div class='ui_label'>
     Show only rules from files whose paths contain this string:<br/>
+  </div>
     <input type=textfield size=60 name=srcpath value="!srcpath!"><br/>
     <br/>
-    <input type=checkbox name=s_zero !s_zero!> Show rules with zero hits<br/>
-    <input type=checkbox name=s_detail !s_detail!> Display full details: message age in weeks, by contributor, as score-map, overlaps with other rules, freshness graphs<br/>
+    <input type=checkbox name=s_zero !s_zero!> <div class='ui_label'>
+    Show rules with zero hits<br/>
+  </div>
+    <input type=checkbox name=s_detail !s_detail!> <div class='ui_label'>
+    Display full details: message age in weeks, by contributor, as score-map, overlaps with other rules, freshness graphs<br/>
+  </div>
     <br/>
 
     <input type=submit name=g value="Change"><br/>
 
 <p>
+  <div class='ui_label'>
     Show only rules from files modified in the
     <a href='!mtime=1!'>last day</a>, <a href='!mtime=7!'>last week</a>
+  </div>
 </p>
   </form>
   </div>
