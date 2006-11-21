@@ -567,6 +567,9 @@ sub show_default_view {
   $tmpl =~ s/!mtime=(.*?)!/
                $self->gen_switch_url("mtime", $1);
        /eg;
+  $tmpl =~ s/!daterev=(.*?)!/
+               $self->gen_switch_url("daterev", $1);
+       /eg;
   $tmpl =~ s/!rule!/$self->{rule}/gs;
   $tmpl =~ s/!srcpath!/$self->{srcpath}/gs;
   foreach my $opt (keys %{$self->{s}}) {
