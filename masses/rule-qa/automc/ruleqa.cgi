@@ -369,7 +369,7 @@ sub show_default_header {
     }
 
     div.commitmsgdiv {
-      font-size: 50%;
+      font-size: 75%;
       overflow: auto;
     }
 
@@ -387,7 +387,11 @@ sub show_default_header {
 
     div.ui_label {
       font-size: 75%;
-      color: #444;
+      color: #676;
+    }
+    label.ui_label {
+      font-size: 75%;
+      color: #676;
     }
 
 
@@ -482,19 +486,18 @@ sub show_default_view {
   <td width=90%>
   <div class='ui_label'>
     <a href="http://wiki.apache.org/spamassassin/DateRev">DateRev</a>
-    to display (UTC timezone):
-  </div>
-    <input type=textfield name=daterev value="!daterev!">
+    to display (UTC timezone):</div><input
+            type='textfield' name='daterev' value="!daterev!">
     <br/>
   <div class='ui_label'>
     (Select a recent nightly mass-check by date:
     <a href='!daterev=last-night!'>last-night</a>,
     <a href='!daterev=today!'>today</a>, or
-    enter 'YYYYMMDD' for a specific date.)
+    enter 'YYYYMMDD' in the DateRev text field for a specific date.)
   </div>
   </td>
   <td width=10%><div align=right class='ui_label'>
-    <a href="!shortdatelist!">(Daterevs&nbsp;Nearby)</a><br/>
+    <a href="!shortdatelist!">(Nearby&nbsp;List)</a><br/>
     <a href="!longdatelist!">(Full&nbsp;List)</a><br/>
   </div></td>
   </tr>
@@ -507,9 +510,9 @@ sub show_default_view {
     (This has been pretty much superceded by the --net mass-checks)
 
     <h4> Which Corpus? </h4>
-    <input type=checkbox name=s_defcorpus !s_defcorpus!> Show default non-net ruleset and corpus, set 0<br/>
-    <input type=checkbox name=s_net !s_net!> Show frequencies from network tests, set 1<br/>
-    <input type=checkbox name=s_html !s_html!> Show frequencies for mails containing HTML only, set 0<br/>
+    <input type='checkbox' name='s_defcorpus' !s_defcorpus!> Show default non-net ruleset and corpus, set 0<br/>
+    <input type='checkbox' name='s_net' !s_net!> Show frequencies from network tests, set 1<br/>
+    <input type='checkbox' name='s_html' !s_html!> Show frequencies for mails containing HTML only, set 0<br/>
     <br/>
 -->
 
@@ -517,22 +520,20 @@ sub show_default_view {
   <div class='ui_label'>
     Show only these rules (space separated, or regexp with '/' prefix):<br/>
   </div>
-    <input type=textfield size=60 name=rule value="!rule!"><br/>
+    <input type='textfield' size='60' name='rule' value="!rule!"><br/>
     <br/>
   <div class='ui_label'>
     Show only rules from files whose paths contain this string:<br/>
   </div>
-    <input type=textfield size=60 name=srcpath value="!srcpath!"><br/>
+    <input type='textfield' size='60' name='srcpath' value="!srcpath!"><br/>
     <br/>
-    <input type=checkbox name=s_zero !s_zero!> <div class='ui_label'>
-    Show rules with zero hits<br/>
-  </div>
-    <input type=checkbox name=s_detail !s_detail!> <div class='ui_label'>
-    Display full details: message age in weeks, by contributor, as score-map, overlaps with other rules, freshness graphs<br/>
-  </div>
+    <input type='checkbox' name='s_zero' id='s_zero' !s_zero!><label
+        for='s_zero' class='ui_label'>Show rules with zero hits
+        </label><br/>
+    <input type='checkbox' name='s_detail' id='s_detail' !s_detail!><label
+        for='s_detail' class='ui_label'>Display full details: message age in weeks, by contributor, as score-map, overlaps with other rules, freshness graphs
+        </label><br/>
     <br/>
-
-    <input type=submit name=g value="Change"><br/>
 
 <p>
   <div class='ui_label'>
@@ -540,6 +541,8 @@ sub show_default_view {
     <a href='!mtime=1!'>last day</a>, <a href='!mtime=7!'>last week</a>
   </div>
 </p>
+
+    <div align='right'><input type='submit' name='g' value="Change"></div>
   </form>
   </div>
 
@@ -1757,7 +1760,7 @@ sub show_daterev_selector_page {
   print qq{
 
     <h3> All Mass-Checks </h3>
-    <br/> <a href='#net' name=net>#</a>
+    <br/> <a href='#net' name='net'>#</a>
 
     <div class=updateform>
       <table style="padding-left: 0px" class=datetable>
