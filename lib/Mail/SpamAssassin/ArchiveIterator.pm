@@ -106,6 +106,13 @@ messages.
 Only use the first N ham and N spam (or if the value is -N, only use the first
 N total messages regardless of class).
 
+This setting can be specified separately for ham and spam target classes.
+If multiple targets for one class are specified with different
+options, the last target's options will be used.
+
+If the value is negative, and multiple targets are specified with different
+options, the last spam target's setting will be used.
+
 =item opt_tail
 
 Only use the last N ham and N spam (or if the value is -N, only use the last
@@ -115,11 +122,20 @@ If both C<opt_head> and C<opt_tail> are specified, then the C<opt_head> value
 specifies a subset of the C<opt_tail> selection to use; in other words, the
 C<opt_tail> splice is applied first.
 
+This setting can be specified separately for ham and spam target classes.
+If multiple targets for one class are specified with different
+options, the last target's options will be used.
+
+If the value is negative, and multiple targets are specified with different
+options, the last spam target's setting will be used.
+
 =item opt_scanprob
 
 Randomly select messages to scan, with a probability of N, where N ranges
 from 0.0 (no messages scanned) to 1.0 (all messages scanned).  Default
 is 1.0.
+
+This setting can be specified separately for each target.
 
 =item opt_before
 
@@ -127,10 +143,14 @@ Only use messages which are received after the given time_t value.
 Negative values are an offset from the current time, e.g. -86400 =
 last 24 hours; or as parsed by Time::ParseDate (e.g. '-6 months')
 
+This setting can be specified separately for each target.
+
 =item opt_after
 
 Same as opt_before, except the messages are only used if after the given
 time_t value.
+
+This setting can be specified separately for each target.
 
 =item opt_want_date
 
@@ -142,7 +162,8 @@ hit.
 =item opt_cache
 
 Set to 0 (default) if you don't want to use cached information to help speed
-up ArchiveIterator.  Set to 1 to enable.
+up ArchiveIterator.  Set to 1 to enable.  This setting requires C<opt_cachedir>
+also be set.
 
 =item opt_cachedir
 
@@ -189,12 +210,6 @@ sub new {
   if (!defined $self) { $self = { }; }
   bless ($self, $class);
 
-  $self->{opt_head} = 0 unless (defined $self->{opt_head});
-  $self->{opt_tail} = 0 unless (defined $self->{opt_tail});
-  $self->{opt_scanprob} = 1.0 unless (defined $self->{opt_scanprob});
-  $self->{opt_want_date} = 1 unless (defined $self->{opt_want_date});
-  $self->{opt_cache} = 0 unless (defined $self->{opt_cache});
-
   # If any of these options are set, we need to figure out the message's
   # receive date at scan time.  opt_n == 0, opt_after, opt_before
   $self->{determine_receive_date} = !$self->{opt_n} ||
@@ -233,8 +248,13 @@ configured wanted subroutine.  Files which have a name ending in C<.gz> or
 C<.bz2> will be properly uncompressed via call to C<gzip -dc> and C<bzip2 -dc>
 respectively.
 
-The target_paths array is expected to be one element per path in the following
-format: class:format:raw_location
+The target_paths array is expected to be either one element per path in the
+following format: C<class:format:raw_location>, or a hash reference containing
+key-value option pairs and a 'target' key with a value in that format.
+
+The key-value option pairs that can be used are: opt_head, opt_tail,
+opt_scanprob, opt_after, opt_before.  See the constructor method's
+documentation for more information on their effects.
 
 run() returns 0 if there was an error (can't open a file, etc,) and 1 if there
 were no errors.
@@ -426,13 +446,28 @@ sub run_mbx {
 
 ############################################################################
 
+# TODO: this needs POD since mass-check uses it?
 sub message_array {
   my ($self, $targets) = @_;
+
+  my %class_opts = ();
 
   foreach my $target (@${targets}) {
     if (!defined $target) {
       warn "archive-iterator: invalid (undef) value in target list";
       next;
+    }
+
+    my %opts = ();
+    if (ref $target eq 'HASH') {
+      # e.g. { target => $target, opt_foo => 1, opt_bar => 0.4 ... }
+      foreach my $k (keys %{$target}) {
+        next unless ($k =~ /^opt_/);
+        my $v = $target->{$k};
+        next unless defined $v;
+        $opts{$k} = $v;
+      }
+      $target = $target->{target};
     }
 
     my ($class, $format, $rawloc) = split(/:/, $target, 3);
@@ -450,6 +485,15 @@ sub message_array {
 
     # use ham by default, things like "spamassassin" can't specify the type
     $class = substr($class, 0, 1) || 'h';
+
+    # keep a copy of the most recent message-selection options for
+    # each class
+    $class_opts{$class} = \%opts;
+
+    foreach my $k (keys %opts) {
+      $self->{$k} = $opts{$k};
+    }
+    $self->set_default_message_selection_opts();
 
     my @locations = $self->fix_globs($rawloc);
 
@@ -495,19 +539,12 @@ sub message_array {
     }
   }
 
+  $self->top_and_tail_messages($self->{h}, $class_opts{h});
+  $self->top_and_tail_messages($self->{s}, $class_opts{s});
+
   my $messages;
   if ($self->{opt_n}) {
     # OPT_N == 1 means don't bother sorting on message receive date
-
-    # head or tail > 0 means crop each list
-    if ($self->{opt_tail} > 0) {
-      splice(@{$self->{s}}, 0, -$self->{opt_tail});
-      splice(@{$self->{h}}, 0, -$self->{opt_tail});
-    }
-    if ($self->{opt_head} > 0) {
-      splice(@{$self->{s}}, min ($self->{opt_head}, scalar @{$self->{s}}));
-      splice(@{$self->{h}}, min ($self->{opt_head}, scalar @{$self->{h}}));
-    }
 
     # for ease of memory, we'll play with pointers
     $messages = $self->{s};
@@ -519,20 +556,10 @@ sub message_array {
     # OPT_N == 0 means sort on message receive date
 
     # Sort the spam and ham groups by date
-    my @s = sort { $a cmp $b } @{$self->{s}};
+    my @s = @{$self->{s}};
     undef $self->{s};
-    my @h = sort { $a cmp $b } @{$self->{h}};
+    my @h = @{$self->{h}};
     undef $self->{h};
-
-    # head or tail > 0 means crop each list
-    if ($self->{opt_tail} > 0) {
-      splice(@s, 0, -$self->{opt_tail});
-      splice(@h, 0, -$self->{opt_tail});
-    }
-    if ($self->{opt_head} > 0) {
-      splice(@s, min ($self->{opt_head}, scalar @s));
-      splice(@h, min ($self->{opt_head}, scalar @h));
-    }
 
     # interleave ordered spam and ham
     if (@s && @h) {
@@ -576,6 +603,52 @@ sub mail_open {
   return 1;
 }
 
+sub set_default_message_selection_opts {
+  my ($self) = @_;
+  $self->{opt_head} = 0 unless (defined $self->{opt_head});
+  $self->{opt_tail} = 0 unless (defined $self->{opt_tail});
+  $self->{opt_scanprob} = 1.0 unless (defined $self->{opt_scanprob});
+  $self->{opt_want_date} = 1 unless (defined $self->{opt_want_date});
+  $self->{opt_cache} = 0 unless (defined $self->{opt_cache});
+}
+
+sub top_and_tail_messages {
+  my ($self, $ary, $opts) = @_;
+
+  foreach my $k (keys %{$opts}) {
+    $self->{$k} = $opts->{$k};
+  }
+  $self->set_default_message_selection_opts();
+
+  if ($self->{opt_n}) {
+    # OPT_N == 1 means don't bother sorting on message receive date
+
+    # head or tail > 0 means crop each list
+    if ($self->{opt_tail} > 0) {
+      splice(@{$ary}, 0, -$self->{opt_tail});
+    }
+    if ($self->{opt_head} > 0) {
+      splice(@{$ary}, min ($self->{opt_head}, scalar @{$ary}));
+    }
+  }
+  else {
+    # OPT_N == 0 means sort on message receive date
+
+    # Sort the spam and ham groups by date
+    my @s = sort { $a cmp $b } @{$ary};
+
+    # head or tail > 0 means crop each list
+    if ($self->{opt_tail} > 0) {
+      splice(@s, 0, -$self->{opt_tail});
+    }
+    if ($self->{opt_head} > 0) {
+      splice(@s, min ($self->{opt_head}, scalar @s));
+    }
+
+    @{$ary} = @s;
+  }
+}
+
 ############################################################################
 
 sub message_is_useful_by_date {
@@ -616,7 +689,7 @@ sub message_is_useful_by_file_modtime {
 
 sub scanprob_says_scan {
   my ($self) = @_;
-  if ($self->{opt_scanprob} < 1.0) {
+  if (defined $self->{opt_scanprob} && $self->{opt_scanprob} < 1.0) {
     if ( int( rand( 1 / $self->{opt_scanprob} ) ) != 0 ) {
       return 0;
     }
