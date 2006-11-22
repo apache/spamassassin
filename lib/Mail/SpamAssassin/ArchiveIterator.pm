@@ -115,6 +115,12 @@ If both C<opt_head> and C<opt_tail> are specified, then the C<opt_head> value
 specifies a subset of the C<opt_tail> selection to use; in other words, the
 C<opt_tail> splice is applied first.
 
+=item opt_scanprob
+
+Randomly select messages to scan, with a probability of N, where N ranges
+from 0.0 (no messages scanned) to 1.0 (all messages scanned).  Default
+is 1.0.
+
 =item opt_before
 
 Only use messages which are received after the given time_t value.
@@ -185,6 +191,7 @@ sub new {
 
   $self->{opt_head} = 0 unless (defined $self->{opt_head});
   $self->{opt_tail} = 0 unless (defined $self->{opt_tail});
+  $self->{opt_scanprob} = 1.0 unless (defined $self->{opt_scanprob});
   $self->{opt_want_date} = 1 unless (defined $self->{opt_want_date});
   $self->{opt_cache} = 0 unless (defined $self->{opt_cache});
 
@@ -607,6 +614,16 @@ sub message_is_useful_by_file_modtime {
   }
 }
 
+sub scanprob_says_scan {
+  my ($self) = @_;
+  if ($self->{opt_scanprob} < 1.0) {
+    if ( int( rand( 1 / $self->{opt_scanprob} ) ) != 0 ) {
+      return 0;
+    }
+  }
+  return 1;
+}
+
 ############################################################################
 
 # 0 850852128			atime
@@ -694,6 +711,7 @@ sub scan_file {
   }
 
   return if !$self->message_is_useful_by_date($date);
+  return if !$self->scanprob_says_scan();
   push(@{$self->{$class}}, index_pack($date, $class, "f", $mail));
 }
 
@@ -791,6 +809,7 @@ sub scan_mailbox {
       if ($self->{determine_receive_date}) {
         next if !$self->message_is_useful_by_date($v);
       }
+      next if !$self->scanprob_says_scan();
 
       push(@{$self->{$class}}, index_pack($v, $class, "m", "$file.$k"));
     }
@@ -898,6 +917,7 @@ sub scan_mbx {
       if ($self->{determine_receive_date}) {
         next if !$self->message_is_useful_by_date($v);
       }
+      next if !$self->scanprob_says_scan();
 
       push(@{$self->{$class}}, index_pack($v, $class, "b", "$file.$k"));
     }

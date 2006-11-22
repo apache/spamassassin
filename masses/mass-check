@@ -86,6 +86,7 @@ usage: mass-check [options] target ...
   --all         don't skip big messages
   --head=N      only check first N ham and N spam (N messages if -n used)
   --tail=N      only check last N ham and N spam (N messages if -n used)
+  --scanprob=N  probability of scanning a message, range 0.0 - 1.0 (default: 1.0)
 
   simple target options (implies -o and no ham/spam classification)
   --dir         subsequent targets are directories
@@ -119,7 +120,7 @@ use vars qw($opt_c $opt_p $opt_f $opt_j $opt_n $opt_o $opt_all $opt_bayes
 	    $opt_spamlog $opt_tail $opt_rules $opt_restart $opt_loguris
 	    $opt_logmem $opt_after $opt_before $opt_rewrite $opt_deencap
 	    $opt_learn $opt_reuse $opt_lint $opt_cache $opt_noisy $opt_cf
-	    $total_messages $statusevery $opt_cachedir
+	    $total_messages $statusevery $opt_cachedir $opt_scanprob
 	    $opt_client $opt_cs_max $opt_cs_timeout $opt_cs_paths_only
 	    $opt_server %postdata %real $svn_revision
 	    $tmpfd %reuse %orig_conf %reuse_conf $reuse_rules_loaded_p);
@@ -157,7 +158,7 @@ GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug:s",
 	   "progress", "rewrite:s", "showdots", "spamlog=s", "tail=i",
 	   "rules=s", "restart=i", "after=s", "before=s", "loguris",
 	   "deencap=s", "logmem", "learn=i", "reuse", "lint", "cache",
-           "cachedir=s", "noisy",
+           "cachedir=s", "noisy", "scanprob=f",
 	   "server=s", "cs_max=i", "cs_timeout=i", "cs_paths_only",
 	   "client=s",
            'cf=s' => \@{$opt_cf},
@@ -336,11 +337,17 @@ if (!$opt_client) {
   $AIopts->{'opt_n'} = $opt_n;
   $AIopts->{'opt_head'} = $opt_head;
   $AIopts->{'opt_tail'} = $opt_tail;
+  $AIopts->{'opt_scanprob'} = $opt_scanprob;
   $AIopts->{'opt_cache'} = $opt_cache;
   $AIopts->{'opt_cachedir'} = $opt_cachedir;
   $AIopts->{'opt_after'} = $opt_after;
   $AIopts->{'opt_before'} = $opt_before;
   $AIopts->{'scan_progress_sub'} = \&showdots_blip;
+
+  # ensure that scanprob stuff is predictable and reproducable
+  if (defined $opt_scanprob && $opt_scanprob < 1.0) {
+    srand(1);
+  }
 }
 else {
   # ArchiveIterator options for client mode -- tends to be simple
