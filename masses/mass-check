@@ -79,14 +79,18 @@ usage: mass-check [options] target ...
   -n            no date sorting or spam/ham interleaving
   --cache	use cache information when selecting messages
   --cachedir=dir write cache info for --cache in this directory tree
+  --all         don't skip big messages
+
+  message selection options, can be specified for each target
   --after=N     only test mails received after time_t N (negative values
                 are an offset from current time, e.g. -86400 = last day)
                 or after date as parsed by Time::ParseDate (e.g. '-6 months')
   --before=N    same as --after, except received times are before time_t N
-  --all         don't skip big messages
+  --scanprob=N  probability of scanning a message, range 0.0 - 1.0 (default: 1.0)
+
+  message selection options, can be specified for each target class
   --head=N      only check first N ham and N spam (N messages if -n used)
   --tail=N      only check last N ham and N spam (N messages if -n used)
-  --scanprob=N  probability of scanning a message, range 0.0 - 1.0 (default: 1.0)
 
   simple target options (implies -o and no ham/spam classification)
   --dir         subsequent targets are directories
@@ -459,12 +463,23 @@ exit(!($ham_count || $spam_count));
 
 sub target  {
   my ($target) = @_;
+
+  # message-selection options; these can now be specified separately
+  # for each target
+  my %selopts = (
+    opt_head => $opt_head,
+    opt_tail => $opt_tail,
+    opt_scanprob => $opt_scanprob,
+    opt_after => $opt_after,
+    opt_before => $opt_before
+  );
+
   if (!defined($opt_format)) {
-    push(@targets, $target);
+    push(@targets, { %selopts, target => $target });
   }
   else {
     $opt_o = 1;
-    push(@targets, "spam:$opt_format:$target");
+    push(@targets, { %selopts, target => "spam:$opt_format:$target" });
   }
 }
 
