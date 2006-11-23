@@ -136,12 +136,6 @@ sub ui_get_url_switches {
   $self->{s} = { };
 
 # selection of what will be displayed.
-  $self->{s}{defcorpus} = $self->get_url_switch('s_defcorpus', 1);
-  $self->{s}{html} = $self->get_url_switch('s_html', 0);
-  $self->{s}{net} = $self->get_url_switch('s_net', 0);
-  $self->{s}{zero} = $self->get_url_switch('s_zero', 1);
-
-  $self->{s}{new} = $self->get_url_switch('s_new', 1);
   $self->{s}{detail} = $self->get_url_switch('s_detail', 0);
   $self->{s}{g_over_time} = $self->get_url_switch('s_g_over_time', 0);
 
@@ -155,11 +149,9 @@ sub ui_get_url_switches {
     $self->{s}{new} = 1;
     $self->{s}{overlap} = 1;
     $self->{s}{scoremap} = 1;
-    $self->{s}{zero} = 1;
   }
 
   if (!grep { $_ } values %{$self->{s}}) {
-    $self->{s}{defcorpus} = 1;      # set the defaults
     $self->{s}{new} = 1;
   }
 }
@@ -505,17 +497,6 @@ sub show_default_view {
 
     <br/>
 
-<!-- 
-
-    (This has been pretty much superceded by the --net mass-checks)
-
-    <h4> Which Corpus? </h4>
-    <input type='checkbox' name='s_defcorpus' !s_defcorpus!> Show default non-net ruleset and corpus, set 0<br/>
-    <input type='checkbox' name='s_net' !s_net!> Show frequencies from network tests, set 1<br/>
-    <input type='checkbox' name='s_html' !s_html!> Show frequencies for mails containing HTML only, set 0<br/>
-    <br/>
--->
-
     <h4> Which Rules?</h4>
   <div class='ui_label'>
     Show only these rules (space separated, or regexp with '/' prefix):<br/>
@@ -527,9 +508,6 @@ sub show_default_view {
   </div>
     <input type='textfield' size='60' name='srcpath' value="!srcpath!"><br/>
     <br/>
-    <input type='checkbox' name='s_zero' id='s_zero' !s_zero!><label
-        for='s_zero' class='ui_label'>Show rules with zero hits
-        </label><br/>
     <input type='checkbox' name='s_detail' id='s_detail' !s_detail!><label
         for='s_detail' class='ui_label'>Display full details: message age in weeks, by contributor, as score-map, overlaps with other rules, freshness graphs
         </label><br/>
@@ -767,10 +745,6 @@ sub show_all_sets_for_daterev {
   $strdate = "mass-check date/rev: $path";
 
   $self->{datadir} = $self->get_datadir_for_daterev($path);
-
-  $self->{s}{defcorpus} and $self->showfreqset('DETAILS', $strdate);
-  $self->{s}{html} and $self->showfreqset('HTML', $strdate);
-  $self->{s}{net} and $self->showfreqset('NET', $strdate);
 
   # special case: we only build this for one set, as it's quite slow
   # to generate
@@ -1250,12 +1224,6 @@ sub output_freqs_data_line {
   # normal freqs lines, with optional subselector after rule name
   my $out = '';
   foreach my $line (@{$obj->{lines}}) {
-    if (!$self->{s}{zero}) {
-      my $ov = $line->{spampc} + $line->{hampc};
-      if (!$ov || $ov !~ /^\s*\d/ || $ov+0 == 0) {
-        next;       # skip this line, it's a 0-hitter
-      }
-    }
 
     my $detailurl = '';
     if (!$self->{s}{detail}) {	# not already in "detail" mode
