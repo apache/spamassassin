@@ -274,7 +274,7 @@ sub show_default_header {
   my $hdr = q{<html><head>
   <title>}.$title.q{</title>
 
-  <style type="text/css" media="all">@import url( ruleqa.css );</style>
+  <link href="/ruleqa.css" rel="stylesheet" type="text/css">
   <script src="http://ruleqa.spamassassin.org/sorttable.js"></script>
   <script type="text/javascript"><!--
 
