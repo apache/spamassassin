@@ -272,172 +272,17 @@ sub show_default_header {
   my ($self, $title) = @_;
 
   my $hdr = q{<html><head>
-
   <title>}.$title.q{</title>
 
-  <style type="text/css" media="all">
-
-    body {
-      padding: 1em 1em 1em 1em;
-    }
-    pre.freqs {
-      font-family: monospace;
-      font-size: 14px;
-      border: 1px dashed #ddb;
-      margin: 0em -0.5em 0em -0.5em;
-      padding: 10px 20px 10px 20px;
-    }
-    div.updateform {
-      border: 3px solid #aaa;
-      background: #eec;
-      margin: 0em 0em 1em 0em;
-      padding: 0em 1em 0em 2em;
-    }
-
-    p.showfreqslink {
-      color: #999;
-      font-size: 50%;
-      text-align: right;
-      margin: 0px 0px 0px 0px;
-      border: 0px 0px 0px 0px;
-    }
-    p.showfreqslink a { color: #999; }
-
-    div.headdiv {
-      border: 1px solid;
-      background: #f0f8c0;
-      margin: 0px 0px 0px 20px;
-    }
-    p.headclosep {
-      margin: 0px 0px 0px 0px;
-      border: 0px 0px 0px 0px;
-    }
-    pre.head {
-      margin-left: 10px;
-    }
-    
-    table.freqs {
-      border: 1px dashed #ddb;
-      background: #fff;
-      padding: 10px 5px 10px 5px;
-    }
-
-    tr.freqsline_promo1 td {
-      text-align: right;
-      padding: 0.1em 0.2em 0.1em 0.2em;
-    }
-    tr.freqsline_promo0 td {
-      text-align: right;
-      padding: 0.1em 0.2em 0.1em 0.2em;
-      color: #999;
-    }
-    tr.freqsline_promo0 td a { color: #999; }
-
-    a.mcloghref {
-      color: #999;
-      font-size: 50%;
-    }
-
-    h3 {
-      border: 1px solid;
-      padding: 10px 20px 10px 20px;
-      margin: 20px -20px -10px -20px;
-      background: #fe8;
-    }
-
-    td.daterevtd {
-      font-size: 75%;
-      padding: 1px 3px 1px 5px;
-    }
-
-    td.daterevcommittd {
-      font-size: 75%;
-      padding: 1px 3px 1px 5px;
-      background: #ffc;
-    }
-
-    td.mcviewing {
-      background: #7f9;
-    }
-
-    div.commitmsgdiv {
-      font-size: 75%;
-      overflow: auto;
-    }
-
-    td.daterevtdempty {
-      background: #eec;
-    }
-
-    tr.daterevtr {
-      background: #fff;
-    }
-
-    tr.daterevdesc {
-      background: #fea;
-    }
-
-    div.ui_label {
-      font-size: 75%;
-      color: #676;
-    }
-    label.ui_label {
-      font-size: 75%;
-      color: #676;
-    }
-
-
-    /* Sortable tables, see http://www.kryogenix.org/code/browser/sorttable/ */
-    table.sortable a.sortheader {
-       background: #ddd;
-       color:#666;
-       font-weight: bold;
-       text-decoration: none;
-       display: block;
-    }
-    tr.freqsheader {
-       background: #ddd;
-    }
-    table.sortable span.sortarrow {
-       color: black;
-       text-decoration: none;
-    }
-
-
-    /* mouseover data for the freqs spam% and ham% figures using CSS2.
-     * see: http://www.meyerweb.com/eric/css/edge/popups/demo.html
-     */
-    table tr td a.ftd {
-      position: relative;
-      /* relative positioning so that the span will be
-       * "absolute" positioned relative to this block */
-    }
-    table tr td a.ftd span {
-      display: none;
-    }
-    table tr td a.ftd:hover span {
-      display: block;
-      position: absolute; top: 1em; left: 0.5em;
-      padding: 5px 20px 5px 20px; margin: 10px; z-index: 100;
-      border: 1px dashed;
-      background: #ffc;
-    }
-
-
-  </style>
-
+  <style type="text/css" media="all">@import url( ruleqa.css );</style>
+  <script src="http://ruleqa.spamassassin.org/sorttable.js"></script>
   <script type="text/javascript"><!--
 
-    function hide_header(id) {
-      document.getElementById(id).style.display = "none";
-    }
-    function show_header(id) {
-      document.getElementById(id).style.display = "block";
-    }
+    function hide_header(id) {document.getElementById(id).style.display="none";}
+    function show_header(id) {document.getElementById(id).style.display="block";}
 
     //-->
   </script>
-  <script src="http://ruleqa.spamassassin.org/sorttable.js"></script>
 
   </head><body>
 
@@ -458,9 +303,9 @@ sub show_default_view {
 
   my $tmpl = q{
 
-  <div class=updateform>
+  <div class='updateform'>
   <form action="!THISURL!" method="GET">
-    <table style="padding-left: 0px" class=datetable>
+    <table style="padding-left: 0px" class='datetable'>
 
         <tr>
         <th> Commit </th>
@@ -473,9 +318,9 @@ sub show_default_view {
 
     </table>
 
-  <table width=100%>
+  <table width='100%'>
   <tr>
-  <td width=90%>
+  <td width='90%'>
   <div class='ui_label'>
     <a href="http://wiki.apache.org/spamassassin/DateRev">DateRev</a>
     to display (UTC timezone):</div><input
@@ -488,7 +333,7 @@ sub show_default_view {
     enter 'YYYYMMDD' in the DateRev text field for a specific date.)
   </div>
   </td>
-  <td width=10%><div align=right class='ui_label'>
+  <td width='10%'><div align='right' class='ui_label'>
     <a href="!shortdatelist!">(Nearby&nbsp;List)</a><br/>
     <a href="!longdatelist!">(Full&nbsp;List)</a><br/>
   </div></td>
@@ -586,7 +431,7 @@ sub show_default_view {
 
     print qq{
 
-      <p class=intro> <strong>Instructions</strong>: click
+      <p class='intro'> <strong>Instructions</strong>: click
       the rule name to view details of a particular rule. </p>
 
     };
@@ -604,7 +449,7 @@ sub show_default_view {
           href="}.$self->gen_switch_url("s_g_over_time", "0").qq{#overtime"
           >Hide Graph</a></p>
         <img src="}.$self->gen_switch_url("graph", "over_time").qq{" 
-          width=800 height=815 />
+          width='800' height='815' />
 
       };
 
@@ -618,7 +463,7 @@ sub show_default_view {
 
       print qq{
 
-        <h3 class=graph_title>Graph, hit-rate over time</h3>
+        <h3 class='graph_title'>Graph, hit-rate over time</h3>
         }.($self->{s}{g_over_time} ? $graph_on : $graph_off).qq{
 
         </ul>
@@ -968,7 +813,7 @@ sub get_freqs_for_rule {
   my $comment = qq{
   
     <!-- freqs start $key -->
-    <h3 class=freqs_title>$desc</h3>
+    <h3 class='freqs_title'>$desc</h3>
     <!-- <h4>$strdate</h4> -->
 
   };
@@ -980,28 +825,28 @@ sub get_freqs_for_rule {
 
   $comment .= qq{ 
     
-    <div id="$headers_id" class=headdiv style='display: none'>
-    <p class=headclosep align=right><a
+    <div id="$headers_id" class='headdiv' style='display: none'>
+    <p class='headclosep' align='right'><a
           href="javascript:hide_header('$headers_id')">[close]</a></p>
-    <pre class=head>$heads</pre>
+    <pre class='head'>$heads</pre>
     </div>
 
-    <div id="txt_$headers_id" class=headdiv style='display: none'>
-    <p class=headclosep align=right><a
+    <div id="txt_$headers_id" class='headdiv' style='display: none'>
+    <p class='headclosep' align='right'><a
           href="javascript:hide_header('txt_$headers_id')">[close]</a></p>
-    <pre class=head><<<TEXTS>>></pre>
+    <pre class='head'><<<TEXTS>>></pre>
     </div>
 
     <br clear="all"/>
-    <p class=showfreqslink><a
-      href="javascript:show_header('txt_$headers_id')">(pasteable)</a><a
+    <p class='showfreqslink'><a
+      href="javascript:show_header('txt_$headers_id')">(pasteable)</a> <a
       href="javascript:show_header('$headers_id')">(source details)</a>
-      <a name='$titleplinknew' href='$titleplinkhref' class=title_permalink>(#)</a>
+      <a name='$titleplinknew' href='$titleplinkhref' class='title_permalink'>(#)</a>
       <a name='$titleplinkold'><!-- backwards compat --></a>
     </p>
 
-    <table class=sortable id='freqs_${headers_id}' class=freqs>
-      <tr class=freqshead>
+    <table class='sortable' id='freqs_${headers_id}' class='freqs'>
+      <tr class='freqshead'>
       <th>MSECS</th>
       <th>SPAM%</th>
       <th>HAM%</th>
@@ -1020,7 +865,7 @@ sub get_freqs_for_rule {
 
   if (ref $self->{freqs_ordr}{$key} ne 'ARRAY') {
     print qq(
-      <h3 class=freqs_title>$desc</h3>
+      <h3 class='freqs_title'>$desc</h3>
       <table><p><i>('$key' not yet available)</i></p></table>
     );
     return;
@@ -1123,10 +968,10 @@ sub set_freqs_templates {
 
   $FREQS_LINE_TEMPLATE = qq{
 
-  <tr class=freqsline_promo[% PROMO %]>
+  <tr class='freqsline_promo[% PROMO %]'>
     <td>[% MSECS %]</td>
-    <td><a class=ftd>[% SPAMPC %]<span>[% SPAMPCDETAIL %]</span></a>[% SPAMLOGLINK %]
-    <td><a class=ftd>[% HAMPC %]<span>[% HAMPCDETAIL %]</span></a>[% HAMLOGLINK %]
+    <td><a class='ftd'>[% SPAMPC %]<span>[% SPAMPCDETAIL %]</span></a>[% SPAMLOGLINK %]
+    <td><a class='ftd'>[% HAMPC %]<span>[% HAMPCDETAIL %]</span></a>[% HAMLOGLINK %]
     <td>[% SO %]</td>
     <td>[% RANK %]</td>
     <td>[% SCORE %]</td>
@@ -1149,8 +994,8 @@ sub set_freqs_templates {
 
   $FREQS_EXTRA_TEMPLATE = qq{
 
-  <tr class=freqsextra>
-    <td colspan=7><pre class=perruleextra>[% EXTRA %]</pre></td>
+  <tr class='freqsextra'>
+    <td colspan=7><pre class='perruleextra'>[% EXTRA %]</pre></td>
   </tr>
 
   };
@@ -1573,7 +1418,7 @@ sub get_mds_as_text {
 
     <a href="javascript:show_header('$id')">[+]</a>
     <div id='$id' class='mclogmds' style='display: none'>
-      <p class=headclosep align=right><a
+      <p class='headclosep' align='right'><a
           href="javascript:hide_header('$id')">[-]</a></p>
 
       $all
@@ -1681,7 +1526,7 @@ sub get_daterev_html_table {
 
     push @html, qq{
 
-            <tr class=daterevtr>
+            <tr class='daterevtr'>
 
       }, $self->gen_daterev_html_commit_td($meta, $ignore_logmds);
 
@@ -1754,8 +1599,8 @@ sub show_daterev_selector_page {
     <h3> All Mass-Checks </h3>
     <br/> <a href='#net' name='net'>#</a>
 
-    <div class=updateform>
-      <table style="padding-left: 0px" class=datetable>
+    <div class='updateform'>
+      <table style="padding-left: 0px" class='datetable'>
       <tr>
       <th> Commit </th>
       <th> Preflight Mass-Checks </th>
