@@ -952,8 +952,12 @@ sub get_freqs_for_rule {
   my $desc = $FREQS_FILENAMES{$key};
   my $file = $self->{datadir}.$key;
 
-  my $titleplinkold = "$key.$strdate"; $titleplinkold =~ s/[^A-Za-z0-9]+/_/gs;
-  my $titleplinknew = $key; $titleplinknew =~ s/[^A-Za-z0-9]+/_/gs;
+  my $titleplinkold = "$key.$strdate";
+  $titleplinkold =~ s/[^A-Za-z0-9]+/_/gs;
+
+  my $titleplinknew = "t".$key;
+  $titleplinknew =~ s/[^A-Za-z0-9]+/_/gs;
+  $titleplinknew =~ s/^tDETAILS_//;
 
   my $titleplinkhref = $self->gen_this_url()."#".$titleplinknew;
 
