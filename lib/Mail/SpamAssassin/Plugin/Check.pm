@@ -357,7 +357,6 @@ EOT
 
 sub do_head_tests {
   my ($self, $pms, $priority) = @_;
-  local ($_);
 
   # XXX - why not just do the plugin call?
   return if $self->shortcircuited_p($pms);
