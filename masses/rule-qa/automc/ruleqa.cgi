@@ -1344,10 +1344,13 @@ sub assemble_url {
     if (!$p) { next; }
     elsif ($p =~ /^keywords=$/) { next; }
     elsif ($p =~ /^g=Change$/) { next; }
+    # default values that can be omitted
+    elsif ($p =~ /^srcpath=$/) { next; }
+    elsif ($p =~ /^mtime=$/) { next; }
     # the ones we can put in the path
     elsif ($p =~ /^rule=(.*)$/) { $path{rule} = $1; }
     elsif ($p =~ /^daterev=(.*)$/) { $path{daterev} = $1; }
-    elsif ($p =~ /^s_detail=1$/) { $path{s_detail} = 1; }
+    elsif ($p =~ /^s_detail=(?:1|on)$/) { $path{s_detail} = 1; }
     # and all the rest
     else { push (@parms, $p); }
   }
