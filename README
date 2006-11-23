@@ -216,6 +216,22 @@ The files themselves are then looked for in these paths:
         '/usr/share/spamassassin/user_prefs.template'
 
 
+In addition, the "Distributed Configuration Files" location is overridden
+by a "Local State Directory", used to store an updated copy of the
+ruleset:
+
+  __prefix__    __local_state_dir__
+  -------------------------------------------------------------------------
+  /usr          /var/lib/spamassassin/__version__
+  /usr/local    /var/lib/spamassassin/__version__
+  /opt/$DIR     /var/opt/spamassassin/__version__
+  $DIR          $DIR/var/spamassassin/__version__
+
+This is normally written to by the "sa-update" script.  "__version__" is
+replaced by a representation of the version number, so that multiple
+versions of SpamAssassin will not interfere with each other's rulesets.
+
+
 After installation, try "perldoc Mail::SpamAssassin::Conf" to see what
 can be set. Common first-time tweaks include:
 
