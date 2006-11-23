@@ -600,8 +600,8 @@ sub show_default_view {
     {
       my $graph_on = qq{
 
-        <p><a id="over_time_anchor" 
-          href="}.$self->gen_switch_url("s_g_over_time", "0").qq{#over_time_anchor"
+        <p><a id="over_time_anchor"></a><a id="overtime" 
+          href="}.$self->gen_switch_url("s_g_over_time", "0").qq{#overtime"
           >Hide Graph</a></p>
         <img src="}.$self->gen_switch_url("graph", "over_time").qq{" 
           width=800 height=815 />
@@ -610,8 +610,8 @@ sub show_default_view {
 
       my $graph_off = qq{
 
-        <p><a id="over_time_anchor" 
-          href="}.$self->gen_switch_url("s_g_over_time", "1").qq{#over_time_anchor"
+        <p><a id="over_time_anchor"></a><a id="overtime" 
+          href="}.$self->gen_switch_url("s_g_over_time", "1").qq{#overtime"
           >Show Graph</a></p>
 
       };
@@ -633,16 +633,20 @@ sub show_default_view {
 
     print qq{
 
+      <div class='ui_label'>
       <p><a href="$url_back">&lt; Back</a> to overview.</p>
+      </div>
 
     };
   }
 
   print qq{
 
-  <p>Note: the freqs tables are sortable.  Click on the headers to resort them
-  by that column.  <a
-  href="http://www.kryogenix.org/code/browser/sorttable/">(thanks!)</a></p>
+      <div class='ui_label'>
+      <p>Note: the freqs tables are sortable.  Click on the headers to resort them
+      by that column.  <a
+      href="http://www.kryogenix.org/code/browser/sorttable/">(thanks!)</a></p>
+      </div>
 
   </body></html>
 
