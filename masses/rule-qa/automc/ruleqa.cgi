@@ -952,7 +952,11 @@ sub get_freqs_for_rule {
   my $desc = $FREQS_FILENAMES{$key};
   my $file = $self->{datadir}.$key;
 
-  my $titleplink = "$key.$strdate"; $titleplink =~ s/[^A-Za-z0-9]+/_/gs;
+  my $titleplinkold = "$key.$strdate"; $titleplinkold =~ s/[^A-Za-z0-9]+/_/gs;
+  my $titleplinknew = $key; $titleplinknew =~ s/[^A-Za-z0-9]+/_/gs;
+
+  my $titleplinkhref = $self->gen_this_url()."#".$titleplinknew;
+
   my $comment = qq{
   
     <!-- freqs start $key -->
@@ -984,7 +988,8 @@ sub get_freqs_for_rule {
     <p class=showfreqslink><a
       href="javascript:show_header('txt_$headers_id')">(pasteable)</a><a
       href="javascript:show_header('$headers_id')">(source details)</a>
-      <a name='$titleplink' href='#$titleplink' class=title_permalink>(#)</a>
+      <a name='$titleplinknew' href='$titleplinkhref' class=title_permalink>(#)</a>
+      <a name='$titleplinkold'><!-- backwards compat --></a>
     </p>
 
     <table class=sortable id='freqs_${headers_id}' class=freqs>
@@ -1318,6 +1323,12 @@ sub gen_switch_url {
   if (!defined $switch) { warn "switch '$switch'='$newval' undef value"; }
   # if (!defined $newval) { warn "newval '$switch'='$newval' undef value"; }
   push (@parms, $switch."=".$newval);
+  return $self->assemble_url(@parms);
+}
+
+sub gen_this_url {
+  my ($self) = @_;
+  my @parms =  $self->get_params_except("__nonexistent__");
   return $self->assemble_url(@parms);
 }
 
