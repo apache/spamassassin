@@ -746,6 +746,8 @@ sub show_all_sets_for_daterev {
 
   $self->{datadir} = $self->get_datadir_for_daterev($path);
 
+  $self->showfreqset('DETAILS', $strdate);
+
   # special case: we only build this for one set, as it's quite slow
   # to generate
   $self->{s}{scoremap} and $self->showfreqsubset("SCOREMAP.new", $strdate);
