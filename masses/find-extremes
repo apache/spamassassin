@@ -348,7 +348,7 @@ sub readlogs {
 
 
 sub readscores {
-  system ("./parse-rules-for-masses") and
+  system ("../build/parse-rules-for-masses") and
    die "Couldn't do parse-rules-for-masses: $?; stopped";
   require "./tmp/rules.pl";
 }

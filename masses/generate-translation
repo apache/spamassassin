@@ -82,7 +82,7 @@ print_translation();
 sub read_rules {
   my ($cffile) = @_;
 
-  system("$FindBin::Bin/parse-rules-for-masses -d \"$cffile\"")
+  system("$FindBin::Bin/../build/parse-rules-for-masses -d \"$cffile\"")
       and die "unable to parse rules\n";
   require "$FindBin::Bin/tmp/rules.pl"
       or die "unable to read tmp/rules.pl\n";
