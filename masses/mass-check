@@ -185,7 +185,7 @@ if ($opt_reuse) {
     # some people specify paths relatively, whereas this needs an absolute path,
     # so "do the right thing"(tm).
     my $abs_opt_c = File::Spec->rel2abs($opt_c);
-    system("cd $FindBin::Bin; perl parse-rules-for-masses -d $abs_opt_c");
+    system("cd $FindBin::Bin; perl ../build/parse-rules-for-masses -d $abs_opt_c");
   }
 
   require $rules_path;

@@ -786,7 +786,7 @@ sub _hmap_to_overlap_ratio {
 
 sub readscores {
   my($cffile) = @_;
-  if (system ("$FindBin::Bin/parse-rules-for-masses -d \"$cffile\" -s $opt_s")) {
+  if (system ("$FindBin::Bin/../build/parse-rules-for-masses -d \"$cffile\" -s $opt_s")) {
     warn "parse-rules-for-masses failed!";
   }
   eval {
