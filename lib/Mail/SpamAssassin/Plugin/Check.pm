@@ -40,6 +40,8 @@ sub new {
   return $self;
 }
 
+###########################################################################
+
 sub check_main {
   my ($self, $args) = @_;
 
@@ -68,14 +70,17 @@ sub check_main {
     next unless ($pms->{conf}->{priorities}->{$priority} > 0);
 
     # if shortcircuiting is hit, we skip all other priorities...
-    last if $self->shortcircuited_p();
+    last if $self->{main}->call_plugins("have_shortcircuited", { permsgstatus => $pms });
 
     dbg("check: running tests for priority: $priority");
 
     # only harvest the dnsbl queries once priority HARVEST_DNSBL_PRIORITY
     # has been reached and then only run once
-    if ($priority >= HARVEST_DNSBL_PRIORITY && $needs_dnsbl_harvest_p
-	&& !$self->shortcircuited_p($pms)) {
+    if ($priority >= HARVEST_DNSBL_PRIORITY
+        && $needs_dnsbl_harvest_p
+        && !$self->{main}->call_plugins("have_shortcircuited",
+                                        { permsgstatus => $pms }))
+    {
       # harvest the DNS results
       $pms->harvest_dnsbl_queries();
       $needs_dnsbl_harvest_p = 0;
@@ -91,7 +96,7 @@ sub check_main {
     $self->do_head_eval_tests($pms, $priority);
 
     $self->do_body_tests($pms, $priority, $decoded);
-    $self->do_body_uri_tests($pms, $priority, @uris);
+    $self->do_uri_tests($pms, $priority, @uris);
     $self->do_body_eval_tests($pms, $priority, $decoded);
   
     $self->do_rawbody_tests($pms, $priority, $bodytext);
@@ -110,7 +115,9 @@ sub check_main {
   # sanity check, it is possible that no rules >= HARVEST_DNSBL_PRIORITY ran so the harvest
   # may not have run yet.  Check, and if so, go ahead and harvest here.
   if ($needs_dnsbl_harvest_p) {
-    if (!$self->shortcircuited_p($pms)) {
+    if (!$self->{main}->call_plugins("have_shortcircuited",
+                                        { permsgstatus => $pms }))
+    {
       # harvest the DNS results
       $pms->harvest_dnsbl_queries();
     }
@@ -143,6 +150,8 @@ sub finish_tests {
   @TEMPORARY_METHODS = ();      # clear for next time
 }
 
+###########################################################################
+
 sub run_rbl_eval_tests {
   my ($self, $pms) = @_;
   my ($rulename, $pat, @args);
@@ -174,42 +183,125 @@ sub run_rbl_eval_tests {
   }
 }
 
-sub do_meta_tests {
-  my ($self, $pms, $priority) = @_;
-  
-  # XXX - why not just make the plugin call?
-  return if $self->shortcircuited_p($pms);
+###########################################################################
 
-  dbg("rules: running meta tests; score so far=" . $pms->{score} );
+sub run_generic_tests {
+  my ($self, $pms, $priority, %opts) = @_;
+
+  return if $self->{main}->call_plugins("have_shortcircuited",
+                                        { permsgstatus => $pms });
+
+  my $ruletype = $opts{type};
+  dbg("rules: running ".$ruletype." tests; score so far=".$pms->{score});
+  $pms->{test_log_msgs} = ();        # clear test state
+
   my $conf = $pms->{conf};
-
-  my $doing_user_rules = 
-    $conf->{user_rules_to_compile}->{$Mail::SpamAssassin::Conf::TYPE_META_TESTS};
+  my $doing_user_rules = $conf->{user_rules_to_compile}->{$opts{consttype}};
 
   # clean up priority value so it can be used in a subroutine name
   my $clean_priority;
   ($clean_priority = $priority) =~ s/-/neg/;
-
   my $package_name = __PACKAGE__;
+  my $methodname = $package_name."::_".$ruletype."_tests_".$clean_priority;
 
-  # speedup code provided by Matt Sergeant
-  if (defined &{"${package_name}::_meta_tests_${clean_priority}"}
-       && !$doing_user_rules) {
+  if (defined &{$methodname} && !$doing_user_rules) {
+run_compiled_method:
     no strict "refs";
-    &{"${package_name}::_meta_tests_${clean_priority}"}($pms);
+    $methodname->($pms, @{$opts{args}});
     use strict "refs";
     return;
   }
 
+  # build up the eval string...
+  $self->{evalstr} = $self->start_rules_plugin_code($ruletype, $priority);
+  $self->{evalstr2} = '';
+
+  # use %nopts for named parameter-passing; it's more friendly to future-proof
+  # subclassing, since new parameters can be added without breaking third-party
+  # subclassed implementations of this plugin.
+  my %nopts = (
+    ruletype => $ruletype,
+    doing_user_rules => $doing_user_rules,
+    priority => $priority,
+    clean_priority => $clean_priority
+  );
+
+  if (defined $opts{pre_loop_body}) {
+    $opts{pre_loop_body}->($self, $pms, $conf, %nopts);
+  }
+  while (my($rulename, $test) = each %{$opts{testhash}->{$priority}}) {
+    $opts{loop_body}->($self, $pms, $conf, $rulename, $test, %nopts);
+  }
+  if (defined $opts{post_loop_body}) {
+    $opts{post_loop_body}->($self, $pms, $conf, %nopts);
+  }
+
+  # clear out a previous version of this fn
+  undef &{$methodname};
+  $self->free_ruleset_source($pms, $ruletype, $priority);
+
+  my $evalstr = $self->{evalstr};
+
+  # generate the loop that goes through each line...
+  $evalstr = <<"EOT";
+  {
+    package $package_name;
+
+    $self->{evalstr2}
+
+    sub $methodname {
+      my \$self = shift;
+      $evalstr;
+    }
+
+    1;
+  }
+EOT
+
+  delete $self->{evalstr};
+  delete $self->{evalstr2}; # free up some RAM before we eval()
+
+  ## dbg ("rules: eval code to compile: $evalstr");
+  eval $evalstr;
+  if ($@) {
+    warn("rules: failed to compile $ruletype tests, skipping:\n\t($@)\n");
+    $pms->{rule_errors}++;
+  }
+  else {
+    goto run_compiled_method;
+  }
+}
+
+sub add_evalstr {
+  my ($self, $str) = @_;
+  $self->{evalstr} .= $str;
+}
+
+sub add_evalstr2 {
+  my ($self, $str) = @_;
+  $self->{evalstr2} .= $str;
+}
+
+sub add_temporary_method {
+  my ($self, $methodname, $methodbody) = @_;
+  $self->add_evalstr2 (' sub '.$methodname.' { '.$methodbody.' } ');
+  push (@TEMPORARY_METHODS, $methodname);
+}
+
+###########################################################################
+
+sub do_meta_tests {
+  my ($self, $pms, $priority) = @_;
   my (%rule_deps, %meta, $rulename);
-  my $evalstr = '';
 
-  # Get the list of meta tests
-  my @metas = keys %{$conf->{meta_tests}->{$priority}};
-
-  # Go through each rule and figure out what we need to do
-  foreach $rulename (@metas) {
-    my $rule = $conf->{meta_tests}->{$priority}->{$rulename};
+  $self->run_generic_tests ($pms, $priority,
+    consttype => $Mail::SpamAssassin::Conf::TYPE_META_TESTS,
+    type => 'meta',
+    testhash => $pms->{conf}->{meta_tests},
+    args => [ ],
+    loop_body => sub
+  {
+    my ($self, $pms, $conf, $rulename, $rule, %opts) = @_;
     my $token;
 
     # Lex the rule into tokens using a rather simple RE method ...
@@ -254,149 +346,97 @@ sub do_meta_tests {
 
         # If the token is another meta rule, add it as a dependency
         push (@{ $rule_deps{$rulename} }, $token)
-          if (exists $conf->{meta_tests}->{$priority}->{$token});
+          if (exists $conf->{meta_tests}->{$opts{priority}}->{$token});
       }
     }
-  }
+  },
+    pre_loop_body => sub
+  {
+    my ($self, $pms, $conf, %opts) = @_;
+    $self->add_evalstr ('
+      my $r;
+      my $h = $self->{tests_already_hit};
+    ');
+  },
+    post_loop_body => sub
+  {
+    my ($self, $pms, $conf, %opts) = @_;
 
-  # Sort by length of dependencies list.  It's more likely we'll get
-  # the dependencies worked out this way.
-  @metas = sort { @{ $rule_deps{$a} } <=> @{ $rule_deps{$b} } } @metas;
+    # Sort by length of dependencies list.  It's more likely we'll get
+    # the dependencies worked out this way.
+    my @metas = sort { @{ $rule_deps{$a} } <=> @{ $rule_deps{$b} } }
+                keys %{$conf->{meta_tests}->{$opts{priority}}};
 
-  my $count;
-  my $tflags = $conf->{tflags};
+    my $count;
+    my $tflags = $conf->{tflags};
 
-  # Now go ahead and setup the eval string
-  do {
-    $count = $#metas;
+    # Now go ahead and setup the eval string
+    do {
+      $count = $#metas;
+      my %metas = map { $_ => 1 } @metas; # keep a small cache for fast lookups
+
+      # Go through each meta rule we haven't done yet
+      for (my $i = 0 ; $i <= $#metas ; $i++) {
+
+        # If we depend on meta rules that haven't run yet, skip it
+        next if (grep( $metas{$_}, @{ $rule_deps{ $metas[$i] } }));
+
+        # If we depend on network tests, call ensure_rules_are_complete()
+        # to block until they are
+        my $alldeps = join ' ', grep {
+                ($tflags->{$_}||'') =~ /\bnet\b/
+              } split (' ', $conf->{meta_dependencies}->{ $metas[$i] } );
+
+        if ($alldeps ne '') {
+          $self->add_evalstr ('
+            $self->ensure_rules_are_complete(q{'.$metas[$i].'}, qw{'.$alldeps.'});
+          ');
+        }
+
+        # Add this meta rule to the eval line
+        $self->add_evalstr ('
+          $r = '.$meta{$metas[$i]}.';
+          if ($r) { $self->got_hit(q#'.$metas[$i].'#, "", ruletype => "meta", value => $r); }
+        ');
+
+        splice @metas, $i--, 1;    # remove this rule from our list
+      }
+    } while ($#metas != $count && $#metas > -1); # run until we can't go anymore
+
+    # If there are any rules left, we can't solve the dependencies so complain
     my %metas = map { $_ => 1 } @metas; # keep a small cache for fast lookups
-
-    # Go through each meta rule we haven't done yet
-    for (my $i = 0 ; $i <= $#metas ; $i++) {
-
-      # If we depend on meta rules that haven't run yet, skip it
-      next if (grep( $metas{$_}, @{ $rule_deps{ $metas[$i] } }));
-
-      # If we depend on network tests, call ensure_rules_are_complete()
-      # to block until they are
-      my $alldeps = join ' ', grep {
-              ($tflags->{$_}||'') =~ /\bnet\b/
-            } split (' ', $conf->{meta_dependencies}->{ $metas[$i] } );
-
-      if ($alldeps ne '') {
-        $evalstr .= '  $pms->ensure_rules_are_complete(q{'.$metas[$i].'}, qw{'.$alldeps.'});';
+    foreach $rulename (@metas) {
+      $pms->{rule_errors}++; # flag to --lint that there was an error ...
+      my $msg =
+          "rules: excluding meta test $rulename, unsolved meta dependencies: " .
+              join(", ", grep($metas{$_}, @{ $rule_deps{$rulename} }));
+      if ($self->{main}->{lint_rules}) {
+        warn $msg."\n";
       }
-
-      # Add this meta rule to the eval line
-      $evalstr .= '
-        $r = '.$meta{$metas[$i]}.';
-        if ($r) { $pms->got_hit(q#'.$metas[$i].'#, "", ruletype => "meta", value => $r); }
-      ';
-
-      splice @metas, $i--, 1;    # remove this rule from our list
-    }
-  } while ($#metas != $count && $#metas > -1); # run until we can't go anymore
-
-  # If there are any rules left, we can't solve the dependencies so complain
-  my %metas = map { $_ => 1 } @metas; # keep a small cache for fast lookups
-  foreach $rulename (@metas) {
-    $pms->{rule_errors}++; # flag to --lint that there was an error ...
-    my $msg =
-	"rules: excluding meta test $rulename, unsolved meta dependencies: " .
-	    join(", ", grep($metas{$_}, @{ $rule_deps{$rulename} }));
-    if ($self->{main}->{lint_rules}) {
-      warn $msg."\n";
-    }
-    else {
-      info($msg);
+      else {
+        info($msg);
+      }
     }
   }
-
-  no strict "subs";
-  undef &{"${package_name}::_meta_tests_${clean_priority}"};
-  use strict "subs";
-  $self->free_ruleset_source($pms, 'meta', $priority);
-
-  return unless ($evalstr);
-
-  # setup the environment for meta tests
-  $evalstr = <<"EOT";
-{
-    package $package_name;
-
-    sub _meta_tests_$clean_priority {
-        # note: cannot set \$^W here on perl 5.6.1 at least, it
-        # crashes meta tests.
-
-        my (\$pms) = \@_;
-	my \$r;
-
-        my \$h = \$pms->{tests_already_hit};
-
-        $evalstr;
-    }
-
-    1;
+  );
 }
-EOT
 
-  eval $evalstr;
-
-  if ($@) {
-    warn "rules: failed to run meta tests, skipping some: $@\n";
-    $pms->{rule_errors}++;
-  }
-  else {
-    my $method = "${package_name}::_meta_tests_${clean_priority}";
-    push @TEMPORARY_METHODS, $method;
-    no strict "refs";
-    &{$method}($pms);
-    use strict "refs";
-  }
-}    # do_meta_tests()
+###########################################################################
 
 sub do_head_tests {
   my ($self, $pms, $priority) = @_;
-
-  # XXX - why not just do the plugin call?
-  return if $self->shortcircuited_p($pms);
-
-  # note: we do this only once for all head pattern tests.  Only
-  # eval tests need to use stuff in here.
-  $pms->{test_log_msgs} = ();        # clear test state
-
-  dbg("rules: running header regexp tests; score so far=".$pms->{score});
-
-  my $doing_user_rules = 
-    $pms->{conf}->{user_rules_to_compile}->{$Mail::SpamAssassin::Conf::TYPE_HEAD_TESTS};
-
-  # clean up priority value so it can be used in a subroutine name
-  my $clean_priority;
-  ($clean_priority = $priority) =~ s/-/neg/;
-
-  my $package_name = __PACKAGE__;
-
-  # speedup code provided by Matt Sergeant
-  if (defined &{"${package_name}::_head_tests_${clean_priority}"}
-      && !$doing_user_rules) {
-    no strict "refs";
-    &{"${package_name}::_head_tests_${clean_priority}"}($pms);
-    use strict "refs";
-    return;
-  }
-
-  my $conf = $pms->{conf};
-  my $tflags = $conf->{tflags};
-  my $use_rule_subs = $self->{main}->{use_rule_subs};
-
-  my $evalstr = $self->start_rules_plugin_code("header", $priority);
-  my $evalstr2 = '';
-
   # hash to hold the rules, "header\tdefault value" => rulename
   my %ordered = ();
   my %testcode = ();
 
-  while (my($rulename, $rule) = each %{$conf->{head_tests}->{$priority}}) {
+  $self->run_generic_tests ($pms, $priority,
+    consttype => $Mail::SpamAssassin::Conf::TYPE_HEAD_TESTS,
+    type => 'head',
+    testhash => $pms->{conf}->{head_tests},
+    args => [ ],
+    loop_body => sub
+  {
+    my ($self, $pms, $conf, $rulename, $rule, %opts) = @_;
     my $def = '';
     my ($hdrname, $testtype, $pat) =
         $rule =~ /^\s*(\S+)\s*(\=|\!)\~\s*(\S.*?\S)\s*$/;
@@ -414,58 +454,68 @@ sub do_head_tests {
 
     push(@{$ordered{"$hdrname\t$def"}}, $rulename);
 
-    if ($doing_user_rules) {
-      next if (!$self->is_user_rule_sub ($rulename.'_head_test'));
-    }
+    next if ($opts{doing_user_rules} &&
+            !$self->is_user_rule_sub($rulename.'_head_test'));
 
-    if ($use_rule_subs) {
-      $evalstr2 .= '
-        sub '.$rulename.'_head_test {
+    # caller can set this member of the Mail::SpamAssassin object to
+    # override this; useful for profiling rule runtimes, although I think
+    # the HitFreqsRuleTiming.pm plugin is probably better nowadays anyway
+      if ($self->{main}->{use_rule_subs}) {
+      $self->add_temporary_method ($rulename.'_head_test', '{
           my($self,$text) = @_;
           '.$self->hash_line_for_rule($pms, $rulename).'
 	    while ($text '.$testtype.'~ '.$pat.'g) {
             $self->got_hit(q#'.$rulename.'#, "", ruletype => "header");
             '. $self->hit_rule_plugin_code($pms, $rulename, "header", "last") . '
             }
-        }
-      ';
-      push (@TEMPORARY_METHODS, $rulename.'_head_test');
+        }');
     }
     else {
       # store for use below
       $testcode{$rulename} = $testtype.'~ '.$pat;
     }
-  }
-
-  # setup the function to run the rules
-  while(my($k,$v) = each %ordered) {
-    my($hdrname, $def) = split(/\t/, $k, 2);
-    $evalstr .= ' $hval = $self->get(q#'.$hdrname.'#, q#'.$def.'#);';
-    foreach my $rulename (@{$v}) {
-      if ($use_rule_subs) {
-        $evalstr .= '
-          if ($scoresptr->{q#'.$rulename.'#}) {
-             '.$rulename.'_head_test($self, $hval);
-             '.$self->ran_rule_plugin_code($rulename, "header").'
-          }
-        ';
-      }
-      else {
-        my $testcode = $testcode{$rulename};
-
-        my $posline = '';
-        my $ifwhile = 'if';
-        my $hitdone = '';
-        my $matchg = '';
-        if (($tflags->{$rulename}||'') =~ /\bmultiple\b/)
-        {
-          $posline = 'pos $hval = 0;';
-          $ifwhile = 'while';
-          $hitdone = 'last';
-          $matchg = 'g';
+  },
+    pre_loop_body => sub
+  {
+    my ($self, $pms, $conf, %opts) = @_;
+    $self->add_evalstr ('
+      my $hval;
+    ');
+  },
+    post_loop_body => sub
+  {
+    my ($self, $pms, $conf, %opts) = @_;
+    # setup the function to run the rules
+    while(my($k,$v) = each %ordered) {
+      my($hdrname, $def) = split(/\t/, $k, 2);
+      $self->add_evalstr ('
+        $hval = $self->get(q#'.$hdrname.'#, q#'.$def.'#);
+      ');
+      foreach my $rulename (@{$v}) {
+        if ($self->{main}->{use_rule_subs}) {
+          $self->add_evalstr ('
+            if ($scoresptr->{q#'.$rulename.'#}) {
+              '.$rulename.'_head_test($self, $hval);
+              '.$self->ran_rule_plugin_code($rulename, "header").'
+            }
+          ');
         }
+        else {
+          my $testcode = $testcode{$rulename};
 
-        $evalstr .= '
+          my $posline = '';
+          my $ifwhile = 'if';
+          my $hitdone = '';
+          my $matchg = '';
+          if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
+          {
+            $posline = 'pos $hval = 0;';
+            $ifwhile = 'while';
+            $hitdone = 'last';
+            $matchg = 'g';
+          }
+
+          $self->add_evalstr ('
           if ($scoresptr->{q#'.$rulename.'#}) {
             '.$posline.'
             '.$self->hash_line_for_rule($pms, $rulename).'
@@ -475,92 +525,30 @@ sub do_head_tests {
             }
             '.$self->ran_rule_plugin_code($rulename, "header").'
           }
-        ';
+          ');
+        }
       }
     }
   }
-
-  # clear out a previous version of this fn, if already defined
-  no strict "subs";
-  undef &{"${package_name}::_head_tests_${clean_priority}"};
-  use strict "subs";
-  $self->free_ruleset_source($pms, 'head', $priority);
-
-  return unless ($evalstr);
-
-  $evalstr = <<"EOT";
-{
-    package $package_name;
-
-    $evalstr2
-
-    sub _head_tests_$clean_priority {
-        my (\$self) = \@_;
-        my \$hval;
-
-        $evalstr;
-    }
-
-    1;
+  );
 }
-EOT
 
-  eval $evalstr;
-
-  if ($@) {
-    warn "rules: failed to run header tests, skipping some: $@\n";
-    $pms->{rule_errors}++;
-  }
-  else {
-    my $method = "${package_name}::_head_tests_${clean_priority}";
-    push @TEMPORARY_METHODS, $method;
-    no strict "refs";
-    &{$method}($pms);
-    use strict "refs";
-  }
-}
+###########################################################################
 
 sub do_body_tests {
   my ($self, $pms, $priority, $textary) = @_;
-
-  # XXX - why not just make the plugin call directly?
-  return if $self->shortcircuited_p($pms);
-
-  dbg("rules: running body-text per-line regexp tests; score so far=".$pms->{score});
-
-  my $conf = $self->{conf};
-  my $doing_user_rules = 
-    $conf->{user_rules_to_compile}->{$Mail::SpamAssassin::Conf::TYPE_BODY_TESTS};
-
-  # clean up priority value so it can be used in a subroutine name
-  my $clean_priority;
-  ($clean_priority = $priority) =~ s/-/neg/;
-
-  my $package_name = __PACKAGE__;
-
-  $pms->{test_log_msgs} = ();        # clear test state
-
-  if (defined &{"${package_name}::_body_tests_${clean_priority}"}
-       && !$doing_user_rules) {
-    no strict "refs";
-    &{"${package_name}::_body_tests_${clean_priority}"}($pms, @$textary);
-    use strict "refs";
-    return;
-  }
-
-  # caller can set this member of the Mail::SpamAssassin object to
-  # override this; useful for profiling rule runtimes, although I think
-  # the HitFreqsRuleTiming.pm plugin is probably better nowadays anyway
-  my $use_rule_subs = $self->{main}->{use_rule_subs};
-
-  # build up the eval string...
-  my $evalstr = $self->start_rules_plugin_code("body", $priority);
-  my $evalstr2 = '';
   my $loopid = 0;
 
-  while (my($rulename, $pat) = each %{$pms->{conf}{body_tests}->{$priority}}) {
+  $self->run_generic_tests ($pms, $priority,
+    consttype => $Mail::SpamAssassin::Conf::TYPE_BODY_TESTS,
+    type => 'body',
+    testhash => $pms->{conf}->{body_tests},
+    args => [ @$textary ],
+    loop_body => sub
+  {
+    my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
     my $sub;
-    if (($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
+    if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
     {
       # support multiple matches
       $loopid++;
@@ -570,7 +558,7 @@ sub do_body_tests {
         '.$self->hash_line_for_rule($pms, $rulename).'
         while ($l =~ '.$pat.'g) { 
           $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body"); 
-          '. $self->hit_rule_plugin_code($pms, $rulename, "body",
+          '. $self->hit_rule_plugin_code($pms, $rulename, 'body',
 					 "last body_".$loopid) . '
         }
       }
@@ -590,109 +578,49 @@ sub do_body_tests {
       ';
     }
 
-    if ($use_rule_subs) {
-      $evalstr .= '
+    if ($self->{main}->{use_rule_subs}) {
+      $self->add_evalstr ('
         if ($scoresptr->{q{'.$rulename.'}}) {
           '.$rulename.'_body_test($self,@_); 
           '.$self->ran_rule_plugin_code($rulename, "body").'
         }
-      ';
+      ');
     }
     else {
-      $evalstr .= '
+      $self->add_evalstr ('
         if ($scoresptr->{q{'.$rulename.'}}) {
           '.$sub.'
           '.$self->ran_rule_plugin_code($rulename, "body").'
         }
-      ';
+      ');
     }
 
-    if ($doing_user_rules) {
-      next if (!$self->is_user_rule_sub ($rulename.'_body_test'));
-    }
+    next if ($opts{doing_user_rules} &&
+            !$self->is_user_rule_sub($rulename.'_body_test'));
 
-    if ($use_rule_subs) {
-      $evalstr2 .= '
-        sub '.$rulename.'_body_test { my $self = shift; '.$sub.' }
-      ';
-      push (@TEMPORARY_METHODS, $rulename.'_body_test');
+    if ($self->{main}->{use_rule_subs}) {
+      $self->add_temporary_method ($rulename.'_body_test',
+        '{ my $self = shift; '.$sub.' }');
     }
   }
-
-  # clear out a previous version of this fn
-  undef &{"${package_name}::_body_tests_${clean_priority}"};
-  $self->free_ruleset_source($pms, 'body', $priority);
-
-  return unless ($evalstr);
-
-  # generate the loop that goes through each line...
-  $evalstr = <<"EOT";
-{
-  package $package_name;
-
-  $evalstr2
-
-  sub _body_tests_$clean_priority {
-    my \$self = shift;
-
-    $evalstr;
-  }
-
-  1;
-}
-EOT
-
-  eval $evalstr;
-
-  if ($@) {
-    warn("rules: failed to compile body tests, skipping:\n" . "\t($@)\n");
-    $pms->{rule_errors}++;
-  }
-  else {
-    my $method = "${package_name}::_body_tests_${clean_priority}";
-    no strict "refs";
-    &{$method}($pms, @$textary);
-    use strict "refs";
-  }
+  );
 }
 
-sub do_body_uri_tests {
+###########################################################################
+
+sub do_uri_tests {
   my ($self, $pms, $priority, @uris) = @_;
-
-  # XXX - why not just do the direct plugin call?
-  return if $self->shortcircuited_p($pms);
-
-  dbg("uri: running uri tests; score so far=".$pms->{score});
-
-  my $doing_user_rules = 
-    $pms->{conf}->{user_rules_to_compile}->{$Mail::SpamAssassin::Conf::TYPE_URI_TESTS};
-
-  # clean up priority value so it can be used in a subroutine name
-  my $clean_priority;
-  ($clean_priority = $priority) =~ s/-/neg/;
-
-  my $package_name = __PACKAGE__;
-
-  $pms->{test_log_msgs} = ();        # clear test state
-
-  if (defined &{"${package_name}::_body_uri_tests_${clean_priority}"}
-      && !$doing_user_rules) {
-    no strict "refs";
-    &{"${package_name}::_body_uri_tests_${clean_priority}"}($pms, @uris);
-    use strict "refs";
-    return;
-  }
-
-  my $use_rule_subs = $self->{main}->{use_rule_subs};
-
-  # otherwise build up the eval string...
-  my $evalstr = $self->start_rules_plugin_code("uri", $priority);
-  my $evalstr2 = '';
   my $loopid = 0;
-
-  while (my($rulename, $pat) = each %{$pms->{conf}{uri_tests}->{$priority}}) {
+  $self->run_generic_tests ($pms, $priority,
+    consttype => $Mail::SpamAssassin::Conf::TYPE_URI_TESTS,
+    type => 'uri',
+    testhash => $pms->{conf}->{uri_tests},
+    args => [ @uris ],
+    loop_body => sub
+  {
+    my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
     my $sub;
-    if (($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmultiple\b/) {
+    if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/) {
       $loopid++;
       $sub = '
       uri_'.$loopid.': foreach my $l (@_) {
@@ -717,109 +645,47 @@ sub do_body_uri_tests {
       ';
     }
 
-    if ($use_rule_subs) {
-      # XXX - why isn't it _body_uri_test??
-      $evalstr .= '
+    if ($self->{main}->{use_rule_subs}) {
+      $self->add_evalstr ('
         if ($scoresptr->{q{'.$rulename.'}}) {
           '.$rulename.'_uri_test($self, @_);
           '.$self->ran_rule_plugin_code($rulename, "uri").'
         }
-      ';
+      ');
     }
     else {
-      $evalstr .= '
+      $self->add_evalstr ('
         if ($scoresptr->{q{'.$rulename.'}}) {
           '.$sub.'
           '.$self->ran_rule_plugin_code($rulename, "uri").'
         }
-      ';
+      ');
     }
 
-    if ($doing_user_rules) {
-      next if (!$self->is_user_rule_sub($rulename.'_uri_test'));
-    }
+    next if ($opts{doing_user_rules} &&
+            !$self->is_user_rule_sub($rulename.'_uri_test'));
 
-    if ($use_rule_subs) {
-      # XXX - why isn't it _body_uri_test??
-      $evalstr2 .= '
-        sub '.$rulename.'_uri_test { my $self = shift; '.$sub.' }
-      ';
-      push (@TEMPORARY_METHODS, $rulename.'_uri_test');
+    if ($self->{main}->{use_rule_subs}) {
+      $self->add_temporary_method ($rulename.'_uri_test',
+        '{ my $self = shift; '.$sub.' }');
     }
   }
-
-  # clear out a previous version of this fn
-  undef &{"${package_name}::_body_uri_tests_${clean_priority}"};
-  $self->free_ruleset_source($pms, 'uri', $priority);
-
-  return unless ($evalstr);
-
-  # generate the loop that goes through each line...
-  $evalstr = <<"EOT";
-{
-  package $package_name;
-
-  $evalstr2
-
-  sub _body_uri_tests_$clean_priority {
-    my \$self = shift;
-    $evalstr;
-  }
-
-  1;
+  );
 }
-EOT
 
-  eval $evalstr;
-
-  if ($@) {
-    warn("rules: failed to compile URI tests, skipping:\n" . "\t($@)\n");
-    $pms->{rule_errors}++;
-  }
-  else {
-    my $method = "${package_name}::_body_uri_tests_${clean_priority}";
-    push @TEMPORARY_METHODS, $method;
-    no strict "refs";
-    &{$method}($pms, @uris);
-    use strict "refs";
-  }
-}
+###########################################################################
 
 sub do_rawbody_tests {
   my ($self, $pms, $priority, $textary) = @_;
-
-  # XXX - why not just do the plugin call here??
-  return if $self->shortcircuited_p($pms);
-
-  dbg("rules: running raw-body-text per-line regexp tests; score so far=".$pms->{score});
-
-  my $doing_user_rules = 
-    $pms->{conf}->{user_rules_to_compile}->{$Mail::SpamAssassin::Conf::TYPE_RAWBODY_TESTS};
-
-  # clean up priority value so it can be used in a subroutine name
-  my $clean_priority;
-  ($clean_priority = $priority) =~ s/-/neg/;
-
-  my $package_name = __PACKAGE__;
-
-  $pms->{test_log_msgs} = ();        # clear test state
-  dbg("rules: in middle of raw-body-text");
-  if (defined &{"${package_name}::_rawbody_tests_${clean_priority}"}
-      && !$doing_user_rules) {
-    no strict "refs";
-    &{"${package_name}::_rawbody_tests_${clean_priority}"}($pms, @$textary);
-    use strict "refs";
-    return;
-  }
-
-  my $use_rule_subs = $self->{main}->{use_rule_subs};
-
-  # build up the eval string...
-  my $evalstr = $self->start_rules_plugin_code("rawbody", $priority);
-  my $evalstr2 = '';
   my $loopid = 0;
-
-  while (my($rulename, $pat) = each %{$pms->{conf}{rawbody_tests}->{$priority}}) {
+  $self->run_generic_tests ($pms, $priority,
+    consttype => $Mail::SpamAssassin::Conf::TYPE_RAWBODY_TESTS,
+    type => 'rawbody',
+    testhash => $pms->{conf}->{rawbody_tests},
+    args => [ @$textary ],
+    loop_body => sub
+  {
+    my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
     my $sub;
     if (($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
     {
@@ -849,104 +715,55 @@ sub do_rawbody_tests {
       ';
     }
 
-    if ($use_rule_subs) {
-      $evalstr .= '
+    if ($self->{main}->{use_rule_subs}) {
+      $self->add_evalstr ('
         if ($scoresptr->{q{'.$rulename.'}}) {
            '.$rulename.'_rawbody_test($self, @_);
            '.$self->ran_rule_plugin_code($rulename, "rawbody").'
         }
-      ';
+      ');
     }
     else {
-      $evalstr .= '
+      $self->add_evalstr ('
         if ($scoresptr->{q{'.$rulename.'}}) {
           '.$sub.'
           '.$self->ran_rule_plugin_code($rulename, "rawbody").'
         }
-      ';
+      ');
     }
 
-    if ($doing_user_rules) {
-      next if (!$self->is_user_rule_sub($rulename.'_rawbody_test'));
-    }
+    next if ($opts{doing_user_rules} &&
+            !$self->is_user_rule_sub($rulename.'_rawbody_test'));
 
-    if ($use_rule_subs) {
-      $evalstr2 .= '
-        sub '.$rulename.'_rawbody_test { my $self = shift; '.$sub.' }
-      ';
-      push (@TEMPORARY_METHODS, $rulename.'_rawbody_test');
+    if ($self->{main}->{use_rule_subs}) {
+      $self->add_temporary_method ($rulename.'_rawbody_test',
+        '{ my $self = shift; '.$sub.' }');
     }
   }
-
-  # clear out a previous version of this fn
-  undef &{"${package_name}::_rawbody_tests_${clean_priority}"};
-  $self->free_ruleset_source($pms, 'rawbody', $priority);
-
-  return unless ($evalstr);
-
-  # generate the loop that goes through each line...
-  $evalstr = <<"EOT";
-{
-  package $package_name;
-
-  $evalstr2
-
-  sub _rawbody_tests_$clean_priority {
-    my \$self = shift;
-    $evalstr;
-  }
-
-  1;
+  );
 }
-EOT
 
-  eval $evalstr;
-
-  if ($@) {
-    warn("rules: failed to compile body tests, skipping:\n" . "\t($@)\n");
-    $pms->{rule_errors}++;
-  }
-  else {
-    my $method = "${package_name}::_rawbody_tests_${clean_priority}";
-    push @TEMPORARY_METHODS, $method;
-    no strict "refs";
-    &{$method}($pms, @$textary);
-    use strict "refs";
-  }
-}
+###########################################################################
 
 sub do_full_tests {
   my ($self, $pms, $priority, $fullmsgref) = @_;
-
-  # XXX - why not just do the plugin call directly?
-  return if $self->shortcircuited_p($pms);
-
-  dbg("rules: running full-text regexp tests; score so far=".$pms->{score});
-
-  my $doing_user_rules = 
-    $pms->{conf}->{user_rules_to_compile}->{$Mail::SpamAssassin::Conf::TYPE_FULL_TESTS};
-
-  # clean up priority value so it can be used in a subroutine name
-  my $clean_priority;
-  ($clean_priority = $priority) =~ s/-/neg/;
-
-  my $package_name = __PACKAGE__;
-
-  $pms->{test_log_msgs} = ();        # clear test state
-
-  if (defined &{"${package_name}::_full_tests_${clean_priority}"}
-      && !$doing_user_rules) {
-    no strict "refs";
-    &{"${package_name}::_full_tests_${clean_priority}"}($pms, $fullmsgref);
-    use strict "refs";
-    return;
-  }
-
-  # build up the eval string...
-  my $evalstr = $self->start_rules_plugin_code("full", $priority);
-
-  while (my($rulename, $pat) = each %{$pms->{conf}{full_tests}->{$priority}}) {
-    $evalstr .= '
+  my $loopid = 0;
+  $self->run_generic_tests ($pms, $priority,
+    consttype => $Mail::SpamAssassin::Conf::TYPE_FULL_TESTS,
+    type => 'full',
+    testhash => $pms->{conf}->{full_tests},
+    args => [ $fullmsgref ],
+    pre_loop_body => sub
+  {
+    my ($self, $pms, $conf, %opts) = @_;
+    $self->add_evalstr ('
+      my $fullmsgref = shift;
+    ');
+  },
+                loop_body => sub
+  {
+    my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
+    $self->add_evalstr ('
       if ($scoresptr->{q{'.$rulename.'}}) {
         pos $$fullmsgref = 0;
         '.$self->hash_line_for_rule($pms, $rulename).'
@@ -956,42 +773,12 @@ sub do_full_tests {
         }
         '.$self->ran_rule_plugin_code($rulename, "full").'
       }
-    ';
+    ');
   }
-
-  undef &{"${package_name}::_full_tests_${clean_priority}"};
-  $self->free_ruleset_source($pms, 'full', $priority);
-
-  return unless ($evalstr);
-
-  # and compile it.
-  $evalstr = <<"EOT";
-  {
-    package $package_name;
-
-    sub _full_tests_$clean_priority {
-        my (\$self, \$fullmsgref) = \@_;
-        study \$\$fullmsgref;
-        $evalstr
-    }
-
-    1;
-  }
-EOT
-
-  eval $evalstr;
-
-  if ($@) {
-    warn "rules: failed to compile full tests, skipping:\n" . "\t($@)\n";
-    $pms->{rule_errors}++;
-  } else {
-    my $method = "${package_name}::_full_tests_${clean_priority}";
-    push @TEMPORARY_METHODS, $method;
-    no strict "refs";
-    &{$method}($pms, $fullmsgref);
-    use strict "refs";
-  }
+  );
 }
+
+###########################################################################
 
 sub do_head_eval_tests {
   my ($self, $pms, $priority) = @_;
@@ -1027,8 +814,8 @@ sub do_full_eval_tests {
 sub run_eval_tests {
   my ($self, $pms, $testtype, $evalhash, $prepend2desc, $priority, @extraevalargs) = @_;
   
-  # XXX - why not just call the plugin directly?
-  return if $self->shortcircuited_p($pms);
+  return if $self->{main}->call_plugins("have_shortcircuited",
+                                        { permsgstatus => $pms });
 
   my $conf = $pms->{conf};
   my $doing_user_rules = $conf->{user_rules_to_compile}->{$testtype};
@@ -1049,7 +836,8 @@ sub run_eval_tests {
   # Some of the rules are scoreset specific, so we need additional
   # subroutines to handle those
   if (defined &{"${package_name}::${methodname}"}
-      && !$doing_user_rules) {
+      && !$doing_user_rules)
+  {
     no strict "refs";
     &{"${package_name}::${methodname}"}($pms,@extraevalargs);
     use strict "refs";
@@ -1198,14 +986,8 @@ EOT
   }
 }
 
+###########################################################################
 # Helper Functions
-
-# NOTE: don't call this have_shortcircuited since it creates a nasty recursion loop
-sub shortcircuited_p {
-  my ($self, $pms) = @_;
-  return 1 if $self->{main}->call_plugins("have_shortcircuited", { permsgstatus => $pms
-								 });
-}
 
 sub hash_line_for_rule {
   my ($self, $pms, $rulename) = @_;
@@ -1226,7 +1008,7 @@ sub start_rules_plugin_code {
 
   my $evalstr = '
 
-      # start_rules_plugin_code '.$ruletype.'
+      # start_rules_plugin_code '.$ruletype.' '.$pri.'
       my $scoresptr = $self->{conf}->{scores};
 
   ';
@@ -1302,5 +1084,7 @@ sub free_ruleset_source {
     delete $pms->{conf}->{$type.'_tests'}->{$pri};
   }
 }
+
+###########################################################################
 
 1;
