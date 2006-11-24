@@ -67,7 +67,7 @@ my %soratio = ();
 my %is_nice = ();
 
 if (!defined $argcffile) { $argcffile = "../rules"; }
-system ("./parse-rules-for-masses -d \"$argcffile\" -s $scoreset") and die;
+system ("../build/parse-rules-for-masses -d \"$argcffile\" -s $scoreset") and die;
 if (-e "tmp/rules.pl") {
   # Note, the spaces need to stay in front of the require to work around a RPM 4.1 problem
   require "./tmp/rules.pl";

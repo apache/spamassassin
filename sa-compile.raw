@@ -137,7 +137,7 @@ $spamtest->{bases_must_be_casei} = 1;
 $spamtest->{bases_can_use_alternations} = 0;
 $spamtest->{bases_can_use_quantifiers} = 0;
 $spamtest->{bases_can_use_char_classes} = 0;
-$spamtest->{bases_split_out_alternations} = 0;
+$spamtest->{bases_split_out_alternations} = 1;
 
 $spamtest->init(1);
 

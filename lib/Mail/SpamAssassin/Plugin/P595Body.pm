@@ -68,15 +68,20 @@ sub setup_test_set {
   my ($self, $conf, $test_set, $ruletype) = @_;
   foreach my $pri (keys %{$test_set}) {
     my $nicepri = $pri; $nicepri =~ s/-/neg/g;
-    $self->setup_test_set_pri($conf, $test_set->{$pri}, $ruletype.'_'.$nicepri);
+    $self->setup_test_set_pri($conf, $test_set->{$pri}, $ruletype.'_'.$nicepri, $pri);
   }
 }
 
 sub setup_test_set_pri {
-  my ($self, $conf, $rules, $ruletype) = @_;
+  my ($self, $conf, $rules, $ruletype, $pri) = @_;
 
   my $alternates = [];
   my $trie_rules = {};
+
+  # while (my ($rule, $pat) = each %{$pms->{conf}->{body_tests}->{$priority}}) {
+  # push @{$alternates}, $pat;
+  # }
+
   foreach my $base (keys %{$conf->{base_string}->{$ruletype}})
   {
     push @{$alternates}, $base;

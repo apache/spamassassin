@@ -34,6 +34,8 @@ use strict;
 use warnings;
 use bytes;
 
+use re qw(regmust);     # added in blead, 2006-11-16
+
 use vars qw(@ISA);
 @ISA = qw(Mail::SpamAssassin::Plugin);
 
@@ -107,7 +109,7 @@ sub extract_set_pri {
   # may be a good long string of text at the end of the rule.
 
   # require this many chars in a base string, for it to be viable
-  my $min_chars = 4;
+  my $min_chars = 3;
 
   foreach my $name (keys %{$rules}) {
     my $rule = $rules->{$name};
@@ -116,16 +118,31 @@ sub extract_set_pri {
     # TODO: need cleaner way to do this
     next if ($conf->{rules_to_replace}->{$name});
 
-    my @bases1 = ();
-    my @bases2 = ();
-    eval {  # catch die()s
-      @bases1 = $self->extract_hints($rule, 0);
-    };
-    $@ and dbg("giving up on that direction: $@");
-    eval {
-      @bases2 = $self->extract_hints($rule, 1);
-    };
-    $@ and dbg("giving up on that direction: $@");
+    my ($qr, $mods) = $self->simplify_and_qr_regexp($rule);
+    my ($anchored, $floating) = regmust(qr/$qr/);
+    my @bases1 = (quotemeta $anchored);
+    my @bases2 = (quotemeta $floating);
+    # my @bases1 = ();
+    # my @bases2 = ();
+
+    my $len1 = 0;
+    my $len2 = 0;
+    if ($anchored) { $len1 = length($anchored); }
+    if ($floating) { $len2 = length($floating); }
+
+    # fall back to using our own code, since the regexp is too
+    # complex (probably alternations involved).
+    if ((!$anchored || $len1 < $min_chars) && (!$floating || $len2 < $min_chars))
+    {
+      eval {  # catch die()s
+        @bases1 = $self->extract_hints($qr, $mods, 0);
+      };
+      $@ and dbg("giving up on that direction: $@");
+      eval {  # catch die()s
+        @bases2 = $self->extract_hints($qr, $mods, 1);
+      };
+      $@ and dbg("giving up on that direction: $@");
+    }
 
     # if any of the extracted hints in a set are too short, the entire
     # set is invalid; this is because each set of N hints represents just
@@ -154,6 +171,7 @@ sub extract_set_pri {
       # both are valid; use the end with the longer hints
       if ($minlen2 > $minlen1) {
         @bases1 = @bases2;
+        $minlen1 = $minlen2;
       }
     }
 
@@ -256,13 +274,11 @@ sub extract_set_pri {
 # /time to refinance|refinanc\w{1,3}\b.{0,16}\bnow\b/i
 #     => should understand alternations; tricky
 
-sub extract_hints {
+sub simplify_and_qr_regexp {
   my $self = shift;
   my $rule = shift;
-  my $is_reversed = shift;
 
   my $main = $self->{main};
-  my $orig = $rule;
   $rule = Mail::SpamAssassin::Util::regexp_remove_delimiters($rule);
 
   # remove the regexp modifiers, keep for later
@@ -320,6 +336,17 @@ sub extract_hints {
   # remove the "?=" trick
   # (?=[dehklnswxy])(horny|nasty|hot|wild|young|....etc...)
   $rule =~ s/\(\?\=\[[^\]]+\]\)//gs;
+  ($rule, $mods);
+}
+
+sub extract_hints {
+  my $self = shift;
+  my $rule = shift;
+  my $mods = shift;
+  my $is_reversed = shift;
+
+  my $main = $self->{main};
+  my $orig = $rule;
 
   # if there are anchors, give up; we can't get much 
   # faster than these anyway

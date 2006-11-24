@@ -18,8 +18,8 @@ perceptron: perceptron.o
 perceptron.o: tmp/rules.pl tmp/tests.h tmp/scores.h
 	$(CC) $(CFLAGS) -c -o perceptron.o perceptron.c
 
-tmp/rules.pl: tmp/.created parse-rules-for-masses
-	perl parse-rules-for-masses -d $(RULES) -s $(SCORESET)
+tmp/rules.pl: tmp/.created ../build/parse-rules-for-masses
+	perl ../build/parse-rules-for-masses -d $(RULES) -s $(SCORESET)
 
 tmp/tests.h: tmp/.created tmp/ranges.data logs-to-c
 	perl logs-to-c --cffile=$(RULES) --scoreset=$(SCORESET)

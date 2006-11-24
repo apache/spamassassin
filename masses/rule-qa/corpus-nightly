@@ -37,7 +37,14 @@ else
 fi
 
 # enter tree
-cd $tree
+if [ -d $tree ] ; then 
+  cd $tree
+else
+  echo "$tree does not exist yet. you need to check it out first" 1>&2
+  exit 2
+fi
+
+[ -d $tmp ] || mkdir -p $tmp
 
 # find current revision
 rm -f weekly-versions.txt nightly-versions.txt
@@ -56,6 +63,7 @@ else
 fi
 
 # update
+# TODO: replace all this with rsync, it's much safer ;)
 set +e
 retry=0
 while true; do
@@ -104,6 +112,8 @@ cd masses
 rm -f spamassassin/auto*
 rm -f spamassassin/bayes*
 rm -f razor-agent.log
+[ -d spamassassin ] || mkdir spamassassin
+
 if [ -n "$net" ]; then
 	prefs=$prefs_weekly
 	opts=$opts_weekly

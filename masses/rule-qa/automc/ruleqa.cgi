@@ -136,12 +136,6 @@ sub ui_get_url_switches {
   $self->{s} = { };
 
 # selection of what will be displayed.
-  $self->{s}{defcorpus} = $self->get_url_switch('s_defcorpus', 1);
-  $self->{s}{html} = $self->get_url_switch('s_html', 0);
-  $self->{s}{net} = $self->get_url_switch('s_net', 0);
-  $self->{s}{zero} = $self->get_url_switch('s_zero', 1);
-
-  $self->{s}{new} = $self->get_url_switch('s_new', 1);
   $self->{s}{detail} = $self->get_url_switch('s_detail', 0);
   $self->{s}{g_over_time} = $self->get_url_switch('s_g_over_time', 0);
 
@@ -155,11 +149,9 @@ sub ui_get_url_switches {
     $self->{s}{new} = 1;
     $self->{s}{overlap} = 1;
     $self->{s}{scoremap} = 1;
-    $self->{s}{zero} = 1;
   }
 
   if (!grep { $_ } values %{$self->{s}}) {
-    $self->{s}{defcorpus} = 1;      # set the defaults
     $self->{s}{new} = 1;
   }
 }
@@ -184,8 +176,20 @@ sub ui_get_daterev {
 
   # sanitise daterev string
   if (defined $self->{daterev}) {
+
+    # all of these ignore "b" preflight mass-checks, btw
     if ($self->{daterev} eq 'last-night') {
       $self->{daterev} = $self->get_last_night_daterev();
+      $self->{q}->param('daterev', $self->{daterev});  # make it absolute
+    }
+    elsif ($self->{daterev} eq 'today') {
+      $self->{daterev} = $self->get_daterev_by_date(
+            POSIX::strftime "%Y%m%d", gmtime ((time + DATEREV_ADJ)));
+      $self->{q}->param('daterev', $self->{daterev});  # make it absolute
+    }
+    elsif ($self->{daterev} =~ /^(20\d\d[01]\d\d\d)$/) {
+      # a date
+      $self->{daterev} = $self->get_daterev_by_date($1);
       $self->{q}->param('daterev', $self->{daterev});  # make it absolute
     }
     else {
@@ -268,163 +272,17 @@ sub show_default_header {
   my ($self, $title) = @_;
 
   my $hdr = q{<html><head>
-
   <title>}.$title.q{</title>
 
-  <style type="text/css" media="all">
-
-    body {
-      padding: 1em 1em 1em 1em;
-    }
-    pre.freqs {
-      font-family: monospace;
-      font-size: 14px;
-      border: 1px dashed #ddb;
-      margin: 0em -0.5em 0em -0.5em;
-      padding: 10px 20px 10px 20px;
-    }
-    div.updateform {
-      border: 3px solid #aaa;
-      background: #eec;
-      margin: 0em 0em 1em 0em;
-      padding: 0em 1em 0em 2em;
-    }
-
-    p.showfreqslink {
-      color: #999;
-      font-size: 50%;
-      text-align: right;
-      margin: 0px 0px 0px 0px;
-      border: 0px 0px 0px 0px;
-    }
-    p.showfreqslink a { color: #999; }
-
-    div.headdiv {
-      border: 1px solid;
-      background: #f0f8c0;
-      margin: 0px 0px 0px 20px;
-    }
-    p.headclosep {
-      margin: 0px 0px 0px 0px;
-      border: 0px 0px 0px 0px;
-    }
-    pre.head {
-      margin-left: 10px;
-    }
-    
-    table.freqs {
-      border: 1px dashed #ddb;
-      background: #fff;
-      padding: 10px 5px 10px 5px;
-    }
-
-    tr.freqsline_promo1 td {
-      text-align: right;
-      padding: 0.1em 0.2em 0.1em 0.2em;
-    }
-    tr.freqsline_promo0 td {
-      text-align: right;
-      padding: 0.1em 0.2em 0.1em 0.2em;
-      color: #999;
-    }
-    tr.freqsline_promo0 td a { color: #999; }
-
-    a.mcloghref {
-      color: #999;
-      font-size: 50%;
-    }
-
-    h3 {
-      border: 1px solid;
-      padding: 10px 20px 10px 20px;
-      margin: 20px -20px -10px -20px;
-      background: #fe8;
-    }
-
-    td.daterevtd {
-      font-size: 75%;
-      padding: 1px 3px 1px 5px;
-    }
-
-    td.daterevcommittd {
-      font-size: 75%;
-      padding: 1px 3px 1px 5px;
-      background: #ffc;
-    }
-
-    td.mcviewing {
-      background: #7f9;
-    }
-
-    div.commitmsgdiv {
-      font-size: 50%;
-      overflow: auto;
-    }
-
-    td.daterevtdempty {
-      background: #eec;
-    }
-
-    tr.daterevtr {
-      background: #fff;
-    }
-
-    tr.daterevdesc {
-      background: #fea;
-    }
-
-
-    /* Sortable tables, see http://www.kryogenix.org/code/browser/sorttable/ */
-    table.sortable a.sortheader {
-       background: #ddd;
-       color:#666;
-       font-weight: bold;
-       text-decoration: none;
-       display: block;
-    }
-    tr.freqsheader {
-       background: #ddd;
-    }
-    table.sortable span.sortarrow {
-       color: black;
-       text-decoration: none;
-    }
-
-
-    /* mouseover data for the freqs spam% and ham% figures using CSS2.
-     * see: http://www.meyerweb.com/eric/css/edge/popups/demo.html
-     */
-    table tr td a.ftd {
-      position: relative;
-      /* relative positioning so that the span will be
-       * "absolute" positioned relative to this block */
-    }
-    table tr td a.ftd span {
-      display: none;
-    }
-    table tr td a.ftd:hover span {
-      display: block;
-      position: absolute; top: 1em; left: 0.5em;
-      padding: 5px 20px 5px 20px; margin: 10px; z-index: 100;
-      border: 1px dashed;
-      background: #ffc;
-    }
-
-
-  </style>
-
+  <link href="/ruleqa.css" rel="stylesheet" type="text/css">
+  <script src="http://ruleqa.spamassassin.org/sorttable.js"></script>
   <script type="text/javascript"><!--
 
-    function hide_header(id) {
-      document.getElementById(id).style.display = "none";
-    }
-    function show_header(id) {
-      document.getElementById(id).style.display = "block";
-    }
+    function hide_header(id) {document.getElementById(id).style.display="none";}
+    function show_header(id) {document.getElementById(id).style.display="block";}
 
     //-->
   </script>
-  <script src="http://ruleqa.spamassassin.org/sorttable.js"></script>
 
   </head><body>
 
@@ -445,9 +303,9 @@ sub show_default_view {
 
   my $tmpl = q{
 
-  <div class=updateform>
+  <div class='updateform'>
   <form action="!THISURL!" method="GET">
-    <table style="padding-left: 0px" class=datetable>
+    <table style="padding-left: 0px" class='datetable'>
 
         <tr>
         <th> Commit </th>
@@ -460,50 +318,54 @@ sub show_default_view {
 
     </table>
 
-  <table width=100%>
+  <table width='100%'>
   <tr>
-  <td width=90%>
+  <td width='90%'>
+  <div class='ui_label'>
     <a href="http://wiki.apache.org/spamassassin/DateRev">DateRev</a>
-    to display (UTC timezone):
-    <input type=textfield name=daterev value="!daterev!">
+    to display (UTC timezone):</div><input
+            type='textfield' name='daterev' value="!daterev!">
+    <br/>
+  <div class='ui_label'>
+    (Select a recent nightly mass-check by date:
+    <a href='!daterev=last-night!'>last-night</a>,
+    <a href='!daterev=today!'>today</a>, or
+    enter 'YYYYMMDD' in the DateRev text field for a specific date.)
+  </div>
   </td>
-  <td width=10%><div align=right>
-    <a href="!shortdatelist!">(List&nbsp;Nearby)</a><br/>
-    <a href="!longdatelist!">(List&nbsp;All)</a><br/>
+  <td width='10%'><div align='right' class='ui_label'>
+    <a href="!shortdatelist!">(Nearby&nbsp;List)</a><br/>
+    <a href="!longdatelist!">(Full&nbsp;List)</a><br/>
   </div></td>
   </tr>
   </table>
 
     <br/>
 
-<!-- 
-
-    (This has been pretty much superceded by the --net mass-checks)
-
-    <h4> Which Corpus? </h4>
-    <input type=checkbox name=s_defcorpus !s_defcorpus!> Show default non-net ruleset and corpus, set 0<br/>
-    <input type=checkbox name=s_net !s_net!> Show frequencies from network tests, set 1<br/>
-    <input type=checkbox name=s_html !s_html!> Show frequencies for mails containing HTML only, set 0<br/>
-    <br/>
--->
-
     <h4> Which Rules?</h4>
+  <div class='ui_label'>
     Show only these rules (space separated, or regexp with '/' prefix):<br/>
-    <input type=textfield size=60 name=rule value="!rule!"><br/>
+  </div>
+    <input type='textfield' size='60' name='rule' value="!rule!"><br/>
     <br/>
+  <div class='ui_label'>
     Show only rules from files whose paths contain this string:<br/>
-    <input type=textfield size=60 name=srcpath value="!srcpath!"><br/>
+  </div>
+    <input type='textfield' size='60' name='srcpath' value="!srcpath!"><br/>
     <br/>
-    <input type=checkbox name=s_zero !s_zero!> Show rules with zero hits<br/>
-    <input type=checkbox name=s_detail !s_detail!> Display full details: message age in weeks, by contributor, as score-map, overlaps with other rules, freshness graphs<br/>
+    <input type='checkbox' name='s_detail' id='s_detail' !s_detail!><label
+        for='s_detail' class='ui_label'>Display full details: message age in weeks, by contributor, as score-map, overlaps with other rules, freshness graphs
+        </label><br/>
     <br/>
-
-    <input type=submit name=g value="Change"><br/>
 
 <p>
+  <div class='ui_label'>
     Show only rules from files modified in the
     <a href='!mtime=1!'>last day</a>, <a href='!mtime=7!'>last week</a>
+  </div>
 </p>
+
+    <div align='right'><input type='submit' name='g' value="Change"></div>
   </form>
   </div>
 
@@ -550,6 +412,9 @@ sub show_default_view {
   $tmpl =~ s/!mtime=(.*?)!/
                $self->gen_switch_url("mtime", $1);
        /eg;
+  $tmpl =~ s/!daterev=(.*?)!/
+               $self->gen_switch_url("daterev", $1);
+       /eg;
   $tmpl =~ s/!rule!/$self->{rule}/gs;
   $tmpl =~ s/!srcpath!/$self->{srcpath}/gs;
   foreach my $opt (keys %{$self->{s}}) {
@@ -566,7 +431,7 @@ sub show_default_view {
 
     print qq{
 
-      <p class=intro> <strong>Instructions</strong>: click
+      <p class='intro'> <strong>Instructions</strong>: click
       the rule name to view details of a particular rule. </p>
 
     };
@@ -580,25 +445,25 @@ sub show_default_view {
     {
       my $graph_on = qq{
 
-        <p><a id="over_time_anchor" 
-          href="}.$self->gen_switch_url("s_g_over_time", "0").qq{#over_time_anchor"
+        <p><a id="over_time_anchor"></a><a id="overtime" 
+          href="}.$self->gen_switch_url("s_g_over_time", "0").qq{#overtime"
           >Hide Graph</a></p>
         <img src="}.$self->gen_switch_url("graph", "over_time").qq{" 
-          width=800 height=815 />
+          width='800' height='815' />
 
       };
 
       my $graph_off = qq{
 
-        <p><a id="over_time_anchor" 
-          href="}.$self->gen_switch_url("s_g_over_time", "1").qq{#over_time_anchor"
+        <p><a id="over_time_anchor"></a><a id="overtime" 
+          href="}.$self->gen_switch_url("s_g_over_time", "1").qq{#overtime"
           >Show Graph</a></p>
 
       };
 
       print qq{
 
-        <h3 class=graph_title>Graph, hit-rate over time</h3>
+        <h3 class='graph_title'>Graph, hit-rate over time</h3>
         }.($self->{s}{g_over_time} ? $graph_on : $graph_off).qq{
 
         </ul>
@@ -613,16 +478,20 @@ sub show_default_view {
 
     print qq{
 
+      <div class='ui_label'>
       <p><a href="$url_back">&lt; Back</a> to overview.</p>
+      </div>
 
     };
   }
 
   print qq{
 
-  <p>Note: the freqs tables are sortable.  Click on the headers to resort them
-  by that column.  <a
-  href="http://www.kryogenix.org/code/browser/sorttable/">(thanks!)</a></p>
+      <div class='ui_label'>
+      <p>Note: the freqs tables are sortable.  Click on the headers to resort them
+      by that column.  <a
+      href="http://www.kryogenix.org/code/browser/sorttable/">(thanks!)</a></p>
+      </div>
 
   </body></html>
 
@@ -703,6 +572,11 @@ sub get_last_night_daterev {
 
   my $notafter = POSIX::strftime "%Y%m%d",
         gmtime ((time + DATEREV_ADJ) - (12*60*60));
+  return $self->get_daterev_by_date($notafter);
+}
+
+sub get_daterev_by_date {
+  my ($self, $notafter) = @_;
 
   foreach my $dr (reverse @{$self->{daterevs}}) {
     my $t = $self->get_daterev_metadata($dr);
@@ -721,9 +595,7 @@ sub show_all_sets_for_daterev {
 
   $self->{datadir} = $self->get_datadir_for_daterev($path);
 
-  $self->{s}{defcorpus} and $self->showfreqset('DETAILS', $strdate);
-  $self->{s}{html} and $self->showfreqset('HTML', $strdate);
-  $self->{s}{net} and $self->showfreqset('NET', $strdate);
+  $self->showfreqset('DETAILS', $strdate);
 
   # special case: we only build this for one set, as it's quite slow
   # to generate
@@ -929,11 +801,19 @@ sub get_freqs_for_rule {
   my $desc = $FREQS_FILENAMES{$key};
   my $file = $self->{datadir}.$key;
 
-  my $titleplink = "$key.$strdate"; $titleplink =~ s/[^A-Za-z0-9]+/_/gs;
+  my $titleplinkold = "$key.$strdate";
+  $titleplinkold =~ s/[^A-Za-z0-9]+/_/gs;
+
+  my $titleplinknew = "t".$key;
+  $titleplinknew =~ s/[^A-Za-z0-9]+/_/gs;
+  $titleplinknew =~ s/^tDETAILS_//;
+
+  my $titleplinkhref = $self->gen_this_url()."#".$titleplinknew;
+
   my $comment = qq{
   
     <!-- freqs start $key -->
-    <h3 class=freqs_title>$desc</h3>
+    <h3 class='freqs_title'>$desc</h3>
     <!-- <h4>$strdate</h4> -->
 
   };
@@ -945,27 +825,28 @@ sub get_freqs_for_rule {
 
   $comment .= qq{ 
     
-    <div id="$headers_id" class=headdiv style='display: none'>
-    <p class=headclosep align=right><a
+    <div id="$headers_id" class='headdiv' style='display: none'>
+    <p class='headclosep' align='right'><a
           href="javascript:hide_header('$headers_id')">[close]</a></p>
-    <pre class=head>$heads</pre>
+    <pre class='head'>$heads</pre>
     </div>
 
-    <div id="txt_$headers_id" class=headdiv style='display: none'>
-    <p class=headclosep align=right><a
+    <div id="txt_$headers_id" class='headdiv' style='display: none'>
+    <p class='headclosep' align='right'><a
           href="javascript:hide_header('txt_$headers_id')">[close]</a></p>
-    <pre class=head><<<TEXTS>>></pre>
+    <pre class='head'><<<TEXTS>>></pre>
     </div>
 
     <br clear="all"/>
-    <p class=showfreqslink><a
-      href="javascript:show_header('txt_$headers_id')">(pasteable)</a><a
+    <p class='showfreqslink'><a
+      href="javascript:show_header('txt_$headers_id')">(pasteable)</a> <a
       href="javascript:show_header('$headers_id')">(source details)</a>
-      <a name='$titleplink' href='#$titleplink' class=title_permalink>(#)</a>
+      <a name='$titleplinknew' href='$titleplinkhref' class='title_permalink'>(#)</a>
+      <a name='$titleplinkold'><!-- backwards compat --></a>
     </p>
 
-    <table class=sortable id='freqs_${headers_id}' class=freqs>
-      <tr class=freqshead>
+    <table class='sortable' id='freqs_${headers_id}' class='freqs'>
+      <tr class='freqshead'>
       <th>MSECS</th>
       <th>SPAM%</th>
       <th>HAM%</th>
@@ -984,7 +865,7 @@ sub get_freqs_for_rule {
 
   if (ref $self->{freqs_ordr}{$key} ne 'ARRAY') {
     print qq(
-      <h3 class=freqs_title>$desc</h3>
+      <h3 class='freqs_title'>$desc</h3>
       <table><p><i>('$key' not yet available)</i></p></table>
     );
     return;
@@ -1087,10 +968,10 @@ sub set_freqs_templates {
 
   $FREQS_LINE_TEMPLATE = qq{
 
-  <tr class=freqsline_promo[% PROMO %]>
+  <tr class='freqsline_promo[% PROMO %]'>
     <td>[% MSECS %]</td>
-    <td><a class=ftd>[% SPAMPC %]<span>[% SPAMPCDETAIL %]</span></a>[% SPAMLOGLINK %]
-    <td><a class=ftd>[% HAMPC %]<span>[% HAMPCDETAIL %]</span></a>[% HAMLOGLINK %]
+    <td><a class='ftd'>[% SPAMPC %]<span>[% SPAMPCDETAIL %]</span></a>[% SPAMLOGLINK %]
+    <td><a class='ftd'>[% HAMPC %]<span>[% HAMPCDETAIL %]</span></a>[% HAMLOGLINK %]
     <td>[% SO %]</td>
     <td>[% RANK %]</td>
     <td>[% SCORE %]</td>
@@ -1113,8 +994,8 @@ sub set_freqs_templates {
 
   $FREQS_EXTRA_TEMPLATE = qq{
 
-  <tr class=freqsextra>
-    <td colspan=7><pre class=perruleextra>[% EXTRA %]</pre></td>
+  <tr class='freqsextra'>
+    <td colspan=7><pre class='perruleextra'>[% EXTRA %]</pre></td>
   </tr>
 
   };
@@ -1203,12 +1084,6 @@ sub output_freqs_data_line {
   # normal freqs lines, with optional subselector after rule name
   my $out = '';
   foreach my $line (@{$obj->{lines}}) {
-    if (!$self->{s}{zero}) {
-      my $ov = $line->{spampc} + $line->{hampc};
-      if (!$ov || $ov !~ /^\s*\d/ || $ov+0 == 0) {
-        next;       # skip this line, it's a 0-hitter
-      }
-    }
 
     my $detailurl = '';
     if (!$self->{s}{detail}) {	# not already in "detail" mode
@@ -1304,6 +1179,12 @@ sub gen_switch_url {
   return $self->assemble_url(@parms);
 }
 
+sub gen_this_url {
+  my ($self) = @_;
+  my @parms =  $self->get_params_except("__nonexistent__");
+  return $self->assemble_url(@parms);
+}
+
 sub get_rev_for_daterev {
   my ($self, $daterev) = @_;
   # '20060120-r370897-b'
@@ -1327,10 +1208,13 @@ sub assemble_url {
     if (!$p) { next; }
     elsif ($p =~ /^keywords=$/) { next; }
     elsif ($p =~ /^g=Change$/) { next; }
+    # default values that can be omitted
+    elsif ($p =~ /^srcpath=$/) { next; }
+    elsif ($p =~ /^mtime=$/) { next; }
     # the ones we can put in the path
     elsif ($p =~ /^rule=(.*)$/) { $path{rule} = $1; }
     elsif ($p =~ /^daterev=(.*)$/) { $path{daterev} = $1; }
-    elsif ($p =~ /^s_detail=1$/) { $path{s_detail} = 1; }
+    elsif ($p =~ /^s_detail=(?:1|on)$/) { $path{s_detail} = 1; }
     # and all the rest
     else { push (@parms, $p); }
   }
@@ -1534,7 +1418,7 @@ sub get_mds_as_text {
 
     <a href="javascript:show_header('$id')">[+]</a>
     <div id='$id' class='mclogmds' style='display: none'>
-      <p class=headclosep align=right><a
+      <p class='headclosep' align='right'><a
           href="javascript:hide_header('$id')">[-]</a></p>
 
       $all
@@ -1642,7 +1526,7 @@ sub get_daterev_html_table {
 
     push @html, qq{
 
-            <tr class=daterevtr>
+            <tr class='daterevtr'>
 
       }, $self->gen_daterev_html_commit_td($meta, $ignore_logmds);
 
@@ -1713,10 +1597,10 @@ sub show_daterev_selector_page {
   print qq{
 
     <h3> All Mass-Checks </h3>
-    <br/> <a href='#net' name=net>#</a>
+    <br/> <a href='#net' name='net'>#</a>
 
-    <div class=updateform>
-      <table style="padding-left: 0px" class=datetable>
+    <div class='updateform'>
+      <table style="padding-left: 0px" class='datetable'>
       <tr>
       <th> Commit </th>
       <th> Preflight Mass-Checks </th>

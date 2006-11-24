@@ -81,22 +81,16 @@ rm rules/70_sandbox.cf rules/70_inactive.cf
 
 make install                             || exit $?
 
-presdir=$tmpdir/etc/mail/spamassassin
 rulesdir=$tmpdir/share/spamassassin
 
 (
   cd $rulesdir 
 
-  # include ".pre" files for the default distro plugins, like
-  # Mail::SpamAssassin::Plugin::BodyEval, Mail::SpamAssassin::Plugin::Bayes
-  # etc. (bug 5171)
-  cp -p $presdir/*.pre .
-
   # Use this to include plugin .pm files:
-  # tar cvf - *.cf *.pm *.pre            || exit $?
+  # tar cvf - *.cf *.pm                  || exit $?
 
   # or this, to ban code from the updates:
-  tar cvf - *.cf *.pre                   || exit $?
+  tar cvf - *.cf                         || exit $?
 
 ) | gzip -9 > $tmpdir/update.tgz         || exit $?
 
