@@ -20,6 +20,7 @@ use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use RabinKarpAccel;
 use Mail::SpamAssassin::Plugin::BodyRuleBaseExtractor;
+use Mail::SpamAssassin::Plugin::OneLineBodyRuleType;
 
 use strict;
 use warnings;
@@ -34,7 +35,7 @@ sub new {
   $class = ref($class) || $class;
   my $self = $class->SUPER::new($mailsaobject);
   bless ($self, $class);
-
+  $self->{one_line_body} = Mail::SpamAssassin::Plugin::OneLineBodyRuleType->new();
   return $self;
 }
 
@@ -97,7 +98,20 @@ sub setup_test_set_pri {
 
 ###########################################################################
 
-sub run_body_hack {
+# delegate these to the OneLineBodyRuleType object
+sub check_start {
+  my ($self, $params) = @_;
+  $self->{one_line_body}->check_start($params);
+}
+
+sub check_rules_at_priority {
+  my ($self, $params) = @_;
+  $self->{one_line_body}->check_rules_at_priority($params);
+}
+
+###########################################################################
+
+sub run_body_fast_scan {
   my ($self, $params) = @_;
 
   return unless ($params->{ruletype} eq 'body');
@@ -111,14 +125,14 @@ sub run_body_hack {
   my $rkhashes = $conf->{$ruletype}->{rkhashes};
   if (!$rkhashes || (scalar keys %{$conf->{$ruletype}->{rkhashes}} <= 0))
   {
-    dbg("zoom: run_body_hack for $ruletype skipped, no rules");
+    dbg("zoom: run_body_fast_scan for $ruletype skipped, no rules");
     return;
   }
 
   my $do_dbg = (would_log('dbg', 'zoom') > 1);
   my $scoresptr = $conf->{scores};
 
-  dbg("zoom: run_body_hack for $ruletype start");
+  dbg("zoom: run_body_fast_scan for $ruletype start");
 
   {
     no strict "refs";
@@ -157,7 +171,7 @@ sub run_body_hack {
     use strict "refs";
   }
 
-  dbg("zoom: run_body_hack for $ruletype done");
+  dbg("zoom: run_body_fast_scan for $ruletype done");
 }
 
 ###########################################################################

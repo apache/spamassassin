@@ -19,6 +19,7 @@ package Mail::SpamAssassin::Plugin::P595Body;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Plugin::BodyRuleBaseExtractor;
+use Mail::SpamAssassin::Plugin::OneLineBodyRuleType;
 
 use strict;
 use warnings;
@@ -33,6 +34,8 @@ sub new {
   $class = ref($class) || $class;
   my $self = $class->SUPER::new($mailsaobject);
   bless ($self, $class);
+
+  $self->{one_line_body} = Mail::SpamAssassin::Plugin::OneLineBodyRuleType->new();
 
   return $self;
 }
@@ -123,7 +126,20 @@ sub setup_test_set_pri {
 
 ###########################################################################
 
-sub run_body_hack {
+# delegate these to the OneLineBodyRuleType object
+sub check_start {
+  my ($self, $params) = @_;
+  $self->{one_line_body}->check_start($params);
+}
+
+sub check_rules_at_priority {
+  my ($self, $params) = @_;
+  $self->{one_line_body}->check_rules_at_priority($params);
+}
+
+###########################################################################
+
+sub run_body_fast_scan {
   my ($self, $params) = @_;
 
   return unless ($params->{ruletype} eq 'body');
@@ -138,14 +154,14 @@ sub run_body_hack {
   my $trie_rules = $conf->{$ruletype}->{trie_rules};
   if (!$trie_re_sub || !$trie_rules)
   {
-    dbg("zoom: run_body_hack for $ruletype skipped, no rules");
+    dbg("zoom: run_body_fast_scan for $ruletype skipped, no rules");
     return;
   }
 
   my $do_dbg = (would_log('dbg', 'zoom') > 1);
   my $scoresptr = $conf->{scores};
 
-  dbg("zoom: run_body_hack for $ruletype start");
+  dbg("zoom: run_body_fast_scan for $ruletype start");
 
   {
     no strict "refs";
@@ -168,6 +184,9 @@ sub run_body_hack {
 
           # dbg("zoom: base found for $rulename: $line");
 
+          # TODO: ick, this shouldn't have to use this package name. A good
+          # solution would be for compiled rule methods to live in their own
+          # namespace anyway; Mail::SpamAssassin::CompiledRules or something
           my $fn = 'Mail::SpamAssassin::Plugin::Check::'.
                                   $rulename.'_one_line_body_test';
 
@@ -181,7 +200,7 @@ sub run_body_hack {
     use strict "refs";
   }
 
-  dbg("zoom: run_body_hack for $ruletype done");
+  dbg("zoom: run_body_fast_scan for $ruletype done");
 }
 
 sub finish {

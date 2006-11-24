@@ -91,6 +91,10 @@ sub check_main {
       $pms->{resolver}->finish_socket() if $pms->{resolver};
     }
 
+    # allow other, plugin-defined rule types to be called here
+    $self->{main}->call_plugins ("check_rules_at_priority", 
+        { permsgstatus => $pms, priority => $priority, checkobj => $self });
+
     # do head tests
     $self->do_head_tests($pms, $priority);
     $self->do_head_eval_tests($pms, $priority);
@@ -548,9 +552,6 @@ sub do_body_tests {
   {
     my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
     my $sub;
-    my $sub_one_line;
-
-    my $need_one_line = ($pms->{conf}->{generate_body_one_line_sub}->{$rulename});
 
     if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
     {
@@ -568,19 +569,6 @@ sub do_body_tests {
       }
       ';
 
-      if ($need_one_line) {
-        $sub_one_line = '
-        pos $_[1] = 0;
-        '.$self->hash_line_for_rule($pms, $rulename).'
-        while ($_[1] =~ '.$pat.'g) {
-          my $self = $_[0];
-          $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body");
-          '. $self->hit_rule_plugin_code($pms, $rulename, "body",
-                                        "return 1") . '
-        }
-        ';
-      }
-
     }
     else {
       # omitting the "pos" call, "body_loopid" label, use of while()
@@ -594,17 +582,6 @@ sub do_body_tests {
         }
       }
       ';
-
-      if ($need_one_line) {
-        $sub_one_line = '
-        '.$self->hash_line_for_rule($pms, $rulename).'
-        if ($_[1] =~ '.$pat.') {
-          my $self = $_[0];
-          $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body");
-          '. $self->hit_rule_plugin_code($pms, $rulename, "body", "return 1") . '
-        }
-        ';
-      }
 
     }
 
@@ -632,23 +609,6 @@ sub do_body_tests {
       $self->add_temporary_method ($rulename.'_body_test',
         '{ my $self = shift; '.$sub.' }');
     }
-
-    if ($need_one_line) {
-      $self->add_temporary_method ($rulename.'_one_line_body_test',
-        '{ my $self = shift; '.$sub_one_line.' }');
-    }
-  }
-    pre_loop_body => sub
-  {
-    my ($self, $pms, $conf, %opts) = @_;
-    $self->add_evalstr ('
- 
-      $self->{main}->call_plugins("run_body_hack", {
-              permsgstatus => $self, ruletype => "body",
-              priority => '.$opts{priority}.', lines => \@_
-            });
-
-    ');
   });
 }
 
