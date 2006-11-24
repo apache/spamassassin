@@ -160,11 +160,13 @@ my @ORIG_ARGV = @ARGV;
 GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug:s",
 	   "hamlog=s", "head=i", "loghits", "mh", "mid", "ms", "net",
 	   "progress", "rewrite:s", "showdots", "spamlog=s", "tail=i",
-	   "rules=s", "restart=i", "after=s", "before=s", "loguris",
+	   "rules=s", "restart=i", "loguris",
 	   "deencap=s", "logmem", "learn=i", "reuse", "lint", "cache",
            "cachedir=s", "noisy", "scanprob=f",
 	   "server=s", "cs_max=i", "cs_timeout=i", "cs_paths_only",
 	   "client=s",
+	   "before=s" => \&deal_with_before_after,
+	   "after=s" => \&deal_with_before_after,
            'cf=s' => \@{$opt_cf},
 	   "dir" => sub { $opt_format = "dir"; },
 	   "file" => sub { $opt_format = "file"; },
@@ -316,25 +318,6 @@ if (!$opt_client) {
   if (defined $opt_rewrite) {
     my $rewrite = ($opt_rewrite ? $opt_rewrite : "/tmp/out");
     open(REWRITE, "> $rewrite") || die "open of $rewrite failed: $!";
-  }
-
-  # Deal with --before and --after
-  foreach my $time ($opt_before, $opt_after) {
-    if ($time && $time =~ /^-\d+$/) {
-      $time = time + $time;
-    }
-    elsif ($time && $time !~ /^-?\d+$/) {
-      if (HAS_TIME_PARSEDATE) {
-        $time = Time::ParseDate::parsedate($time, GMT => 1, PREFER_PAST => 1);
-      }
-      else { 
-        die "You need Time::ParseDate if you use either the --before or --after option.";
-      }
-    }
-  }
-
-  if ($opt_before && $opt_after && $opt_after >= $opt_before) {
-    die "--before ($opt_before) <= --after ($opt_after) -- conflict!";
   }
 
   # ArchiveIterator options for non-client mode
@@ -1857,5 +1840,32 @@ sub result_client {
 sub aidbg {
   if (would_log("dbg", "mass-check") == 2) {
     dbg (@_);
+  }
+}
+
+sub deal_with_before_after {
+  my($which, $time) = @_;
+
+  if ($time && $time =~ /^-\d+$/) {
+    $time = time + $time;
+  }
+  elsif ($time && $time !~ /^-?\d+$/) {
+    if (HAS_TIME_PARSEDATE) {
+      $time = Time::ParseDate::parsedate($time, GMT => 1, PREFER_PAST => 1);
+    }
+    else { 
+      die "You need Time::ParseDate if you use either the --before or --after option.";
+    }
+  }
+  
+  if ($which eq 'before') {
+    $opt_before = $time;
+  }
+  else {
+    $opt_after = $time;
+  }
+
+  if ($opt_before && $opt_after && $opt_after >= $opt_before) {
+    die "--before ($opt_before) <= --after ($opt_after) -- conflict!";
   }
 }
