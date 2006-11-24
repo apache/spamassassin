@@ -205,8 +205,8 @@ sub run_generic_tests {
   my $methodname = $package_name."::_".$ruletype."_tests_".$clean_priority;
 
   if (defined &{$methodname} && !$doing_user_rules) {
-run_compiled_method:
     no strict "refs";
+run_compiled_method:
     $methodname->($pms, @{$opts{args}});
     use strict "refs";
     return;
