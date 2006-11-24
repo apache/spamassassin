@@ -81,7 +81,7 @@ exit;
 
 
 sub read_rules {
-  system ("./parse-rules-for-masses -s $scoreset") and die;
+  system ("../build/parse-rules-for-masses -s $scoreset") and die;
   if (-e "tmp/rules.pl") {
     # note: the spaces need to stay in front of the require to work around
     # a RPM 4.1 problem

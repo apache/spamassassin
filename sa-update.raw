@@ -383,6 +383,9 @@ my $exit = 1;
 # Use a temporary directory for all update channels
 my $UPDTmp;
 
+# we only need to lint the site pre files once
+my $site_pre_linted = 0;
+
 # Go ahead and loop through all of the channels
 foreach my $channel (@channels) {
   dbg("channel: attempting channel $channel");
@@ -448,6 +451,30 @@ foreach my $channel (@channels) {
     dbg("channel: $channel: update available, not downloading in checkonly mode");
     $exit = 0;
     next;
+  }
+
+  # we need a directory we control that we can use to aviod loading any rules
+  # when we lint the site pre files, we might as well use the channel temp dir
+  dbg("channel: preparing temp directory for new channel");
+  if (!$UPDTmp) {
+    $UPDTmp = Mail::SpamAssassin::Util::secure_tmpdir();
+    dbg("generic: update tmp directory $UPDTmp");
+  }
+  elsif (!clean_update_dir($UPDTmp)) {
+    die "channel: attempt to clean update dir failed, aborting";
+  }
+
+  # lint the site pre files (that will be used when lint checking the channel)
+  # before downloading the channel update
+  unless ($site_pre_linted) {
+    dbg("generic: lint checking site pre files once before attempting channel updates");
+    unless (lint_check_dir(File::Spec->catfile($UPDTmp, "doesnotexist"))) {
+      dbg("generic: lint of site pre files failed, cannot continue"); 
+      $exit = 2;
+      last;
+    }
+    dbg("generic: lint check of site pre files succeeded, continuing with channel updates");
+    $site_pre_linted = 1;
   }
 
   # Read in the MIRRORED.BY file if it exists
@@ -691,15 +718,6 @@ ENDOFVALIDATIONERR
 
   # OK, we're all validated at this point, install the new version
   dbg("channel: file verification passed, testing update");
-
-  dbg("channel: preparing temp directory for new channel");
-  if (!$UPDTmp) {
-    $UPDTmp = Mail::SpamAssassin::Util::secure_tmpdir();
-    dbg("generic: update tmp directory $UPDTmp");
-  }
-  elsif (!clean_update_dir($UPDTmp)) {
-    die "channel: attempt to clean update dir failed, aborting";
-  }
 
   dbg("channel: extracting archive");
   if (!taint_safe_archive_extract($UPDTmp, $content_file)) {
@@ -1246,17 +1264,18 @@ sub lint_check_dir {
   # Logger setup), we can't change the debug level here to only include
   # "config" or otherwise be more terse. :(
   my $spamtest = new Mail::SpamAssassin( {
-    rules_filename      => $dir,
-    site_rules_filename => File::Spec->catfile($dir, "doesnotexist"),
-    userprefs_filename  => File::Spec->catfile($dir, "doesnotexist"),
+    rules_filename       => $dir,
+    site_rules_filename  => $LOCAL_RULES_DIR,
+    ignore_site_cf_files => 1,
+    userprefs_filename   => File::Spec->catfile($dir, "doesnotexist"),
 
-    local_tests_only    => 1,
-    dont_copy_prefs     => 1,
+    local_tests_only     => 1,
+    dont_copy_prefs      => 1,
 
-    PREFIX              => $PREFIX,
-    DEF_RULES_DIR       => $DEF_RULES_DIR,
-    LOCAL_RULES_DIR     => $LOCAL_RULES_DIR,
-    LOCAL_STATE_DIR     => $LOCAL_STATE_DIR,
+    PREFIX               => $PREFIX,
+    DEF_RULES_DIR        => $DEF_RULES_DIR,
+    LOCAL_RULES_DIR      => $LOCAL_RULES_DIR,
+    LOCAL_STATE_DIR      => $LOCAL_STATE_DIR,
   });
 
   # need to kluge disabling bayes since it may try to expire the DB, and
@@ -1436,6 +1455,10 @@ An exit code of C<0> means an update was available, and was downloaded and
 installed successfully if --checkonly was not specified.
 
 An exit code of C<1> means no fresh updates were available.
+
+An exit code of C<2> means that at least one update is available but that a
+lint check of the site pre files failed.  The site pre files must pass a lint
+check before any updates are attempted.
 
 An exit code of C<4> or higher, indicates that errors occurred while
 attempting to download and extract updates.

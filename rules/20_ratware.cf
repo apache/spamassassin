@@ -273,13 +273,15 @@ describe RATWARE_RCVD_PF	Bulk email fingerprint (Received PF) found
 header RATWARE_RCVD_AT		Received =~ / by \S+\@\S+ with Microsoft SMTPSVC/
 describe RATWARE_RCVD_AT	Bulk email fingerprint (Received @) found
 
-meta RATWARE_OUTLOOK_NONAME	__MSGID_DOLLARS_OK && !__HAS_X_MAILER
+header __RCVD_WITH_EXCHANGE	Received =~ /with Microsoft Exchange Server/
+
+meta RATWARE_OUTLOOK_NONAME	__MSGID_DOLLARS_OK && !__HAS_X_MAILER && !__RCVD_WITH_EXCHANGE
 describe RATWARE_OUTLOOK_NONAME	Bulk email fingerprint (Outlook no name) found
 
 
 
 header __MIMEOLE_MS		X-MIMEOLE =~ /^Produced By Microsoft MimeOLE/
-meta RATWARE_MS_HASH 		__MSGID_DOLLARS_OK && !__MIMEOLE_MS
+meta RATWARE_MS_HASH 		__MSGID_DOLLARS_OK && !__MIMEOLE_MS && !__RCVD_WITH_EXCHANGE
 describe RATWARE_MS_HASH	Bulk email fingerprint (msgid ms hash) found
 
 ###########################################################################

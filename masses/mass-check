@@ -46,6 +46,7 @@ usage: mass-check [options] target ...
                 were encapsulated by servers matching the regexp RE
                 (default = extract all SpamAssassin-encapsulated mails)
   --lint        check rules for syntax before running
+  --cf='config line'  Additional line of configuration
 
   client/server mode options
   --server host:port
@@ -78,11 +79,16 @@ usage: mass-check [options] target ...
   -n            no date sorting or spam/ham interleaving
   --cache	use cache information when selecting messages
   --cachedir=dir write cache info for --cache in this directory tree
+  --all         don't skip big messages
+
+  message selection options, can be specified for each target
   --after=N     only test mails received after time_t N (negative values
                 are an offset from current time, e.g. -86400 = last day)
                 or after date as parsed by Time::ParseDate (e.g. '-6 months')
   --before=N    same as --after, except received times are before time_t N
-  --all         don't skip big messages
+  --scanprob=N  probability of scanning a message, range 0.0 - 1.0 (default: 1.0)
+
+  message selection options, can be specified for each target class
   --head=N      only check first N ham and N spam (N messages if -n used)
   --tail=N      only check last N ham and N spam (N messages if -n used)
 
@@ -117,8 +123,8 @@ use vars qw($opt_c $opt_p $opt_f $opt_j $opt_n $opt_o $opt_all $opt_bayes
 	    $opt_mid $opt_net $opt_nosort $opt_progress $opt_showdots
 	    $opt_spamlog $opt_tail $opt_rules $opt_restart $opt_loguris
 	    $opt_logmem $opt_after $opt_before $opt_rewrite $opt_deencap
-	    $opt_learn $opt_reuse $opt_lint $opt_cache $opt_noisy
-	    $total_messages $statusevery $opt_cachedir
+	    $opt_learn $opt_reuse $opt_lint $opt_cache $opt_noisy $opt_cf
+	    $total_messages $statusevery $opt_cachedir $opt_scanprob
 	    $opt_client $opt_cs_max $opt_cs_timeout $opt_cs_paths_only
 	    $opt_server %postdata %real $svn_revision
 	    $tmpfd %reuse %orig_conf %reuse_conf $reuse_rules_loaded_p);
@@ -148,16 +154,20 @@ $opt_hamlog = "ham.log";
 $opt_spamlog = "spam.log";
 $opt_learn = 0;
 $reuse_rules_loaded_p = 0;
+$opt_cf = [];
 
 my @ORIG_ARGV = @ARGV;
 GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug:s",
 	   "hamlog=s", "head=i", "loghits", "mh", "mid", "ms", "net",
 	   "progress", "rewrite:s", "showdots", "spamlog=s", "tail=i",
-	   "rules=s", "restart=i", "after=s", "before=s", "loguris",
+	   "rules=s", "restart=i", "loguris",
 	   "deencap=s", "logmem", "learn=i", "reuse", "lint", "cache",
-           "cachedir=s", "noisy",
+           "cachedir=s", "noisy", "scanprob=f",
 	   "server=s", "cs_max=i", "cs_timeout=i", "cs_paths_only",
 	   "client=s",
+	   "before=s" => \&deal_with_before_after,
+	   "after=s" => \&deal_with_before_after,
+           'cf=s' => \@{$opt_cf},
 	   "dir" => sub { $opt_format = "dir"; },
 	   "file" => sub { $opt_format = "file"; },
 	   "mbox" => sub { $opt_format = "mbox"; },
@@ -177,7 +187,7 @@ if ($opt_reuse) {
     # some people specify paths relatively, whereas this needs an absolute path,
     # so "do the right thing"(tm).
     my $abs_opt_c = File::Spec->rel2abs($opt_c);
-    system("cd $FindBin::Bin; perl parse-rules-for-masses -d $abs_opt_c");
+    system("cd $FindBin::Bin; perl ../build/parse-rules-for-masses -d $abs_opt_c");
   }
 
   require $rules_path;
@@ -207,6 +217,7 @@ if ($opt_lint) {
     'local_tests_only'   			=> $opt_net ? 0 : 1,
     'only_these_rules'   			=> $opt_rules,
     'ignore_safety_expire_timeout'		=> 1,
+    'post_config_text'                          => join("\n", @{$opt_cf})."\n",
     PREFIX					=> '',
     DEF_RULES_DIR        			=> $opt_c,
     LOCAL_RULES_DIR      			=> '',
@@ -241,6 +252,7 @@ my $spamtest = new Mail::SpamAssassin ({
   'local_tests_only'   			=> $opt_net ? 0 : 1,
   'only_these_rules'   			=> $opt_rules,
   'ignore_safety_expire_timeout'	=> 1,
+  'post_config_text'                    => join("\n", @{$opt_cf})."\n",
   PREFIX				=> '',
   DEF_RULES_DIR        			=> $opt_c,
   LOCAL_RULES_DIR      			=> '',
@@ -308,34 +320,21 @@ if (!$opt_client) {
     open(REWRITE, "> $rewrite") || die "open of $rewrite failed: $!";
   }
 
-  # Deal with --before and --after
-  foreach my $time ($opt_before, $opt_after) {
-    if ($time && $time =~ /^-\d+$/) {
-      $time = time + $time;
-    }
-    elsif ($time && $time !~ /^-?\d+$/) {
-      if (HAS_TIME_PARSEDATE) {
-        $time = Time::ParseDate::parsedate($time, GMT => 1, PREFER_PAST => 1);
-      }
-      else { 
-        die "You need Time::ParseDate if you use either the --before or --after option.";
-      }
-    }
-  }
-
-  if ($opt_before && $opt_after && $opt_after >= $opt_before) {
-    die "--before ($opt_before) <= --after ($opt_after) -- conflict!";
-  }
-
   # ArchiveIterator options for non-client mode
   $AIopts->{'opt_n'} = $opt_n;
   $AIopts->{'opt_head'} = $opt_head;
   $AIopts->{'opt_tail'} = $opt_tail;
+  $AIopts->{'opt_scanprob'} = $opt_scanprob;
   $AIopts->{'opt_cache'} = $opt_cache;
   $AIopts->{'opt_cachedir'} = $opt_cachedir;
   $AIopts->{'opt_after'} = $opt_after;
   $AIopts->{'opt_before'} = $opt_before;
   $AIopts->{'scan_progress_sub'} = \&showdots_blip;
+
+  # ensure that scanprob stuff is predictable and reproducable
+  if (defined $opt_scanprob && $opt_scanprob < 1.0) {
+    srand(1);
+  }
 }
 else {
   # ArchiveIterator options for client mode -- tends to be simple
@@ -447,12 +446,23 @@ exit(!($ham_count || $spam_count));
 
 sub target  {
   my ($target) = @_;
+
+  # message-selection options; these can now be specified separately
+  # for each target
+  my %selopts = (
+    opt_head => $opt_head,
+    opt_tail => $opt_tail,
+    opt_scanprob => $opt_scanprob,
+    opt_after => $opt_after,
+    opt_before => $opt_before
+  );
+
   if (!defined($opt_format)) {
-    push(@targets, $target);
+    push(@targets, { %selopts, target => $target });
   }
   else {
     $opt_o = 1;
-    push(@targets, "spam:$opt_format:$target");
+    push(@targets, { %selopts, target => "spam:$opt_format:$target" });
   }
 }
 
@@ -735,6 +745,8 @@ sub wanted {
       $out .= "# $log\n";
     }
   }
+
+# use Mail::SpamAssassin::Util::MemoryDump; Mail::SpamAssassin::Util::MemoryDump::MEMDEBUG(); use Mail::SpamAssassin::Util::MemoryDump; Mail::SpamAssassin::Util::MemoryDump::MEMDEBUG_dump_obj($status); #JMD
 
   if (defined $status) { $status->finish(); }
   $ma->finish();
@@ -1828,5 +1840,32 @@ sub result_client {
 sub aidbg {
   if (would_log("dbg", "mass-check") == 2) {
     dbg (@_);
+  }
+}
+
+sub deal_with_before_after {
+  my($which, $time) = @_;
+
+  if ($time && $time =~ /^-\d+$/) {
+    $time = time + $time;
+  }
+  elsif ($time && $time !~ /^-?\d+$/) {
+    if (HAS_TIME_PARSEDATE) {
+      $time = Time::ParseDate::parsedate($time, GMT => 1, PREFER_PAST => 1);
+    }
+    else { 
+      die "You need Time::ParseDate if you use either the --before or --after option.";
+    }
+  }
+  
+  if ($which eq 'before') {
+    $opt_before = $time;
+  }
+  else {
+    $opt_after = $time;
+  }
+
+  if ($opt_before && $opt_after && $opt_after >= $opt_before) {
+    die "--before ($opt_before) <= --after ($opt_after) -- conflict!";
   }
 }

@@ -236,6 +236,12 @@ found in the SpamAssassin B<rules> directory.
 If set to 1, no tests that require internet access will be performed. (default:
 0)
 
+=item ignore_site_cf_files
+
+If set to 1, any rule files found in the C<site_rules_filename> directory will
+be ignored.  *.pre files (used for loading plugins) found in the
+C<site_rules_filename> directory will still be used. (default: 0)
+
 =item dont_copy_prefs
 
 If set to 1, the user preferences file will not be created if it doesn't
@@ -1412,7 +1418,7 @@ sub init {
       $self->{languages_filename} = $self->find_rule_support_file("languages");
     }
 
-    if ($siterules) {
+    if ($siterules && !$self->{ignore_site_cf_files}) {
       $self->{config_text} .= $self->read_cf($siterules, 'site rules dir');
     }
 

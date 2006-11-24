@@ -122,7 +122,7 @@ sub readlogs {
 
 sub readscores {
   warn "Reading scores from \"$opt_cffile\"...\n";
-  system ("./parse-rules-for-masses -d \"$opt_cffile\" -s $opt_scoreset") and die;
+  system ("../build/parse-rules-for-masses -d \"$opt_cffile\" -s $opt_scoreset") and die;
   require "./tmp/rules.pl";
   %allrules = %rules;           # ensure it stays global
 }
