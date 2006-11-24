@@ -48,7 +48,6 @@ sub check_start {
   my $test_set = $conf->{body_tests};
   foreach my $pri (keys %{$test_set})
   {
-    my $nicepri = $pri; $nicepri =~ s/-/neg/g;
     foreach my $rulename (keys %{$test_set->{$pri}})
     {
       if ($conf->{generate_body_one_line_sub}->{$rulename}) {
