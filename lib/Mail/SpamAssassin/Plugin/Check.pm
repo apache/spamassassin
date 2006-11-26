@@ -874,7 +874,11 @@ sub run_eval_tests {
       }
     }
  
-    my ($function, @args) = @{$test};
+    my ($function, $argstr) = ($test,'');
+    if ($test =~ s/^([^,]+)(,.*)$//gs) {
+      ($function, $argstr) = ($1,$2);
+    }
+
     if (!$function) {
       warn "rules: error: no function defined for $rulename";
       next;
@@ -912,12 +916,6 @@ sub run_eval_tests {
       ';
     }
  
-# TODO: Conf.pm should do this to save on arrayrefs
-    my $argstr = '';
-    if (scalar @args > 0) {
-      $argstr = ',' . join (', ', map { "q#".$_."#" } @args);
-    }
-
     $evalstr .= '
 
       eval {

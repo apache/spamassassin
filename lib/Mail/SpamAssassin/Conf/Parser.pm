@@ -679,43 +679,32 @@ sub finish_parsing {
 
     # eval type handling
     if (($type & 1) == 1) {
-      my @args;
       if (my ($function, $args) = ($text =~ m/(.*?)\s*\((.*?)\)\s*$/)) {
-	if ($args) {
-	  # bug 4419: Parse quoted strings, unquoted alphanumerics/floats and
-	  # both unquoted IPv4 and IPv6 addresses.  s// is used so that we can
-	  # determine whether or not we successfully parsed ALL arguments.
-	  while ($args =~ s/^\s*(?:['"](.*?)['"]|([\d\.:A-Za-z]+?))\s*(?:,\s*|$)//) {
-	    if (defined $1) {
-	      push @args, $1;
-	    }
-	    else {
-	      push @args, $2;
-	    }
-	  }
-	}
-        unshift(@args, $function);
-	if ($args) {
-          $self->lint_warn("syntax error (unparsable argument: $args) for eval function: $name: $text", $name);
-	}
+        my ($packed, $argsref) =
+                $self->pack_eval_method($function, $args, $name, $text);
+
+        if (!$packed) {
+          # we've already warned about this
+        }
         elsif ($type == $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS) {
-          $conf->{body_evals}->{$priority}->{$name} = \@args;
+          $conf->{body_evals}->{$priority}->{$name} = $packed;
         }
         elsif ($type == $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS) {
-          $conf->{head_evals}->{$priority}->{$name} = \@args;
+          $conf->{head_evals}->{$priority}->{$name} = $packed;
         }
         elsif ($type == $Mail::SpamAssassin::Conf::TYPE_RBL_EVALS) {
           # We don't do priorities for $Mail::SpamAssassin::Conf::TYPE_RBL_EVALS
-          $conf->{rbl_evals}->{$name} = \@args;
+          # we also use the arrayref instead of the packed string
+          $conf->{rbl_evals}->{$name} = [ $function, @$argsref ];
         }
         elsif ($type == $Mail::SpamAssassin::Conf::TYPE_RAWBODY_EVALS) {
-          $conf->{rawbody_evals}->{$priority}->{$name} = \@args;
+          $conf->{rawbody_evals}->{$priority}->{$name} = $packed;
         }
         elsif ($type == $Mail::SpamAssassin::Conf::TYPE_FULL_EVALS) {
-          $conf->{full_evals}->{$priority}->{$name} = \@args;
+          $conf->{full_evals}->{$priority}->{$name} = $packed;
         }
         #elsif ($type == $Mail::SpamAssassin::Conf::TYPE_URI_EVALS) {
-        #  $conf->{uri_evals}->{$priority}->{$name} = \@args;
+        #  $conf->{uri_evals}->{$priority}->{$name} = $packed;
         #}
         else {
           $self->lint_warn("unknown type $type for $name: $text", $name);
@@ -834,6 +823,40 @@ sub fix_priorities {
       }
     }
   }
+}
+
+sub pack_eval_method {
+  my ($self, $function, $args, $name, $text) = @_;
+
+  my @args;
+  if ($args) {
+    # bug 4419: Parse quoted strings, unquoted alphanumerics/floats and
+    # both unquoted IPv4 and IPv6 addresses.  s// is used so that we can
+    # determine whether or not we successfully parsed ALL arguments.
+    while ($args =~ s/^\s*(?:['"](.*?)['"]|([\d\.:A-Za-z]+?))\s*(?:,\s*|$)//) {
+      if (defined $1) {
+        push @args, $1;
+      }
+      else {
+        push @args, $2;
+      }
+    }
+  }
+
+  if ($args) {
+    $self->lint_warn("syntax error (unparsable argument: $args) for eval function: $name: $text", $name);
+    return;
+  }
+
+  my $argstr = $function;
+  $argstr =~ s/\s+//gs;
+
+  if (scalar @args > 0) {
+    $argstr .= ',' . join (', ', map {
+            s/\#/[HASH]/gs; "q#".$_."#" 
+          } @args);
+  }
+  return ($argstr, \@args);
 }
 
 ###########################################################################
