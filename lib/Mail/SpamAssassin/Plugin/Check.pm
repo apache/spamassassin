@@ -813,7 +813,7 @@ sub do_full_eval_tests {
 
 sub run_eval_tests {
   my ($self, $pms, $testtype, $evalhash, $prepend2desc, $priority, @extraevalargs) = @_;
-  
+ 
   return if $self->{main}->call_plugins("have_shortcircuited",
                                         { permsgstatus => $pms });
 
@@ -912,6 +912,7 @@ sub run_eval_tests {
       ';
     }
  
+# TODO: Conf.pm should do this to save on arrayrefs
     my $argstr = '';
     if (scalar @args > 0) {
       $argstr = ',' . join (', ', map { "q#".$_."#" } @args);
@@ -947,8 +948,7 @@ sub run_eval_tests {
     ';
   }
 
-  %{$evalhash} = ();
-  $self->free_ruleset_source($pms, 'eval', $priority);
+  # don't free the eval ruleset here -- we need it in the compiled code!
 
   # nothing done in the loop, that means no rules 
   return unless ($evalstr);
