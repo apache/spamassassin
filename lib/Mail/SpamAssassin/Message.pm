@@ -542,8 +542,8 @@ sub finish {
 
     # if there are children nodes, add them to the queue of nodes to clean up
     if (exists $part->{'body_parts'}) {
-      push(@toclean, @{$self->{'body_parts'}});
-      delete $self->{'body_parts'};
+      push(@toclean, @{$part->{'body_parts'}});
+      delete $part->{'body_parts'};
     }
   }
 }
