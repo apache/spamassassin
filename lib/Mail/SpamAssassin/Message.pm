@@ -516,22 +516,34 @@ sub finish {
   # Clean ourself up
   $self->finish_metadata();
 
-  my @toclean = ( $self );
-  while (my $part = shift @toclean) {
-    undef $part->{'headers'};
-    undef $part->{'raw_headers'};
-    undef $part->{'header_order'};
-    undef $part->{'raw'};
-    undef $part->{'decoded'};
-    undef $part->{'rendered'};
-    undef $part->{'visible_rendered'};
-    undef $part->{'invisible_rendered'};
-    undef $part->{'type'};
-    undef $part->{'rendered_type'};
+  # These will only be in the root Message node
+  delete $self->{'mime_boundary_state'};
+  delete $self->{'mbox_sep'};
+  delete $self->{'normalize'};
+  delete $self->{'pristine_body'};
+  delete $self->{'pristine_headers'};
+  delete $self->{'line_ending'};
+  delete $self->{'missing_head_body_separator'};
 
+  my @toclean = ( $self );
+
+  # Go ahead and clean up all of the Message::Node parts
+  while (my $part = shift @toclean) {
+    delete $part->{'headers'};
+    delete $part->{'raw_headers'};
+    delete $part->{'header_order'};
+    delete $part->{'raw'};
+    delete $part->{'decoded'};
+    delete $part->{'rendered'};
+    delete $part->{'visible_rendered'};
+    delete $part->{'invisible_rendered'};
+    delete $part->{'type'};
+    delete $part->{'rendered_type'};
+
+    # if there are children nodes, add them to the queue of nodes to clean up
     if (exists $part->{'body_parts'}) {
       push(@toclean, @{$self->{'body_parts'}});
-      undef $self->{'body_parts'};
+      delete $self->{'body_parts'};
     }
   }
 }
