@@ -516,9 +516,24 @@ sub finish {
   # Clean ourself up
   $self->finish_metadata();
 
-  # wipe out all of our pointers and such -- since our tree is one-way, wiping
-  # out body_parts here will wipe out the rest of the tree.
-  %{$self} = ();
+  my @toclean = ( $self );
+  while (my $part = shift @toclean) {
+    undef $part->{'headers'};
+    undef $part->{'raw_headers'};
+    undef $part->{'header_order'};
+    undef $part->{'raw'};
+    undef $part->{'decoded'};
+    undef $part->{'rendered'};
+    undef $part->{'visible_rendered'};
+    undef $part->{'invisible_rendered'};
+    undef $part->{'type'};
+    undef $part->{'rendered_type'};
+
+    if (exists $part->{'body_parts'}) {
+      push(@toclean, @{$self->{'body_parts'}});
+      undef $self->{'body_parts'};
+    }
+  }
 }
 
 # ---------------------------------------------------------------------------
