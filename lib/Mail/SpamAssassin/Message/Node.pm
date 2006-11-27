@@ -265,6 +265,8 @@ sub raw {
 
   # Ok, if we're called we are expected to return an array.
   # so if it's a file reference, read in the message into an array...
+  # and since we're already sucking up the extra RAM to load it back in, store
+  # the reference.
   #
   # NOTE: that "ref undef" works, so don't bother checking for a defined var
   # first.
@@ -273,7 +275,8 @@ sub raw {
     my $fd = $self->{'raw'};
     seek $fd, 0, 0;
     @array = <$fd>;
-    return \@array;
+    close $fd;
+    $self->{'raw'} = \@array;
   }
 
   return $self->{'raw'};
