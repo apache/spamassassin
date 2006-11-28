@@ -138,7 +138,7 @@ sub read_submitters {
   open (IN, "<$fname") or warn "cannot read $fname";
   while (<IN>) {
     # spam results used for 329933 DETAILS all: spam-mc-fast.log spam-foo.log
-    if (/^# spam results used for \S+ \S+ \S+: (.*)$/) {
+    if (/^# spam results used for .+?: (.*)$/) {
       my $sub = $1;
       $sub =~ s/\bspam-/ /gs;
       $sub =~ s/\.log\b/ /gs;
