@@ -38,7 +38,7 @@ foreach my $dr (@daterevs) {
   my $drdir = get_datadir_for_daterev($dr);
 
   # this one is always rebuilt.
-  # print "$drdir/fastinfo.xml: creating...\n";
+  print "$drdir/fastinfo.xml: creating...\n";
   my $fastinfo = get_fastinfo($dr, $drdir);
   if (!defined $fastinfo) { next; }
 
