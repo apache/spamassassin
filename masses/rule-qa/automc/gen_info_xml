@@ -146,6 +146,7 @@ sub read_submitters {
       $sub =~ s/^ //gs;
       $sub =~ s/ $//gs;
       $info->{submitters} = $sub;
+      warn "JMD $_ => $sub";
     }
     if (/^#\s*(<mclogmds>.*<\/mclogmds>)/) {
       $info->{mclogmds} = XMLin($1); # incorporate raw XML
