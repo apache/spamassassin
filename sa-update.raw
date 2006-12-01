@@ -783,6 +783,7 @@ ENDOFVALIDATIONERR
     die "fatal: can't access $UPDDir: $!\n";
   }
   while(my $file = readdir(DIR)) {
+    local ($1);	# avoid random taint flagging of $1
     $file =~ /^(.+)$/;       # untaint
     $file = $1;
     my $path = File::Spec->catfile($UPDDir, $file);
