@@ -1238,6 +1238,7 @@ sub clean_update_dir {
     return;
   }
   while(my $file = readdir(DIR)) {
+    local ($1); # bug 5216: prevent random taint flagging of $1
     $file =~ /^(.+)$/;       # untaint
     $file = $1;
 
