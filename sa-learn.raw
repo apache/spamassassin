@@ -406,7 +406,6 @@ eval {
 
   my $iter = new Mail::SpamAssassin::ArchiveIterator(
     {
-      'opt_j'   => 0,
       'opt_n'   => 1,
       'opt_all' => 0,       # skip messages over 250k
     }
