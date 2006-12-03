@@ -149,6 +149,8 @@ use Config;
 $opt_c = "$FindBin::Bin/../rules";
 $opt_p = "$FindBin::Bin/spamassassin";
 $opt_j = 1;
+$opt_head = 0;
+$opt_tail = 0;
 $opt_net = 0;
 $opt_hamlog = "ham.log";
 $opt_spamlog = "spam.log";
@@ -321,9 +323,6 @@ if (!$opt_client) {
   }
 
   # ArchiveIterator options for non-client mode
-  $AIopts->{'opt_n'} = $opt_n;
-  $AIopts->{'opt_head'} = $opt_head;
-  $AIopts->{'opt_tail'} = $opt_tail;
   $AIopts->{'opt_scanprob'} = $opt_scanprob;
   $AIopts->{'opt_cache'} = $opt_cache;
   $AIopts->{'opt_cachedir'} = $opt_cachedir;
@@ -338,7 +337,7 @@ if (!$opt_client) {
 }
 else {
   # ArchiveIterator options for client mode -- tends to be simple
-  $AIopts->{'opt_n'} = 1;
+  $opt_n = 1;
 }
 
 ###########################################################################
@@ -377,12 +376,7 @@ if (!$opt_client) {
     }
     elsif (defined $tmpf) {
       # child -- process using message_array
-      my($num, $messages) = $iter->message_array(\@targets);
-
-      # Dump out the number of messages and the message index info to
-      # the temp file
-      send_line($tmpfd, $num, @{$messages});
-
+      generate_queue(\@targets, $tmpfd);
       exit;
     }
     else {
@@ -391,11 +385,7 @@ if (!$opt_client) {
   }
   else {
     # we get here if opt_j == 0, so scan in this process
-    my($num, $messages) = $iter->message_array(\@targets);
-
-    # Dump out the number of messages and the message index info to
-    # the temp file
-    send_line($tmpfd, $num, @{$messages});
+    generate_queue(\@targets, $tmpfd);
   }
 
   # we now have a temporary file with the messages to process
@@ -450,8 +440,6 @@ sub target  {
   # message-selection options; these can now be specified separately
   # for each target
   my %selopts = (
-    opt_head => $opt_head,
-    opt_tail => $opt_tail,
     opt_scanprob => $opt_scanprob,
     opt_after => $opt_after,
     opt_before => $opt_before
@@ -1868,4 +1856,100 @@ sub deal_with_before_after {
   if ($opt_before && $opt_after && $opt_after >= $opt_before) {
     die "--before ($opt_before) <= --after ($opt_after) -- conflict!";
   }
+}
+
+sub generate_queue {
+  my ($targets, $tmpfd) = @_;
+
+  # scan the targets and get the number and list of messages
+  $iter->scan_targets($targets,
+    sub {
+      my($self, $date, $class, $format, $mail) = @_;
+      push(@{$self->{$class}}, Mail::SpamAssassin::ArchiveIterator::index_pack($date, $class, $format, $mail));
+    }
+  );
+
+  # deal with opt_head and opt_tail
+  top_and_tail_messages($iter->{h});
+  top_and_tail_messages($iter->{s});
+
+  my $messages;
+  if ($opt_n) {
+    # OPT_N == 1 means don't bother sorting on message receive date
+
+    # for ease of memory, we'll play with pointers
+    $messages = $iter->{s};
+    undef $iter->{s};
+    push(@{$messages}, @{$iter->{h}});
+    undef $iter->{h};
+  }
+  else {
+    # OPT_N == 0 means sort on message receive date
+
+    # Sort the spam and ham groups by date
+    my @s = @{$iter->{s}};
+    undef $iter->{s};
+    my @h = @{$iter->{h}};
+    undef $iter->{h};
+
+    # interleave ordered spam and ham
+    if (@s && @h) {
+      my $ratio = @s / @h;
+      while (@s && @h) {
+	push @{$messages}, (@s / @h > $ratio) ? (shift @s) : (shift @h);
+      }
+    }
+    # push the rest onto the end
+    push @{$messages}, @s, @h;
+  }
+
+  # head or tail < 0 means crop the total list, negate the value appropriately
+  if ($opt_tail < 0) {
+    splice(@{$messages}, 0, $opt_tail);
+  }
+  if ($opt_head < 0) {
+    splice(@{$messages}, -$opt_head);
+  }
+
+  my $num = $Mail::SpamAssassin::ArchiveIterator::MESSAGES = scalar(@{$messages});
+
+  # Dump out the number of messages and the message index info to
+  # the temp file
+  send_line($tmpfd, $num, @{$messages});
+}
+
+sub top_and_tail_messages {
+  my ($ary) = @_;
+
+  if ($opt_n) {
+    # OPT_N == 1 means don't bother sorting on message receive date
+
+    # head or tail > 0 means crop each list
+    if ($opt_tail > 0) {
+      splice(@{$ary}, 0, -$opt_tail);
+    }
+    if ($opt_head > 0) {
+      splice(@{$ary}, min ($opt_head, scalar @{$ary}));
+    }
+  }
+  else {
+    # OPT_N == 0 means sort on message receive date
+
+    # Sort the spam and ham groups by date
+    my @s = sort { $a cmp $b } @{$ary};
+
+    # head or tail > 0 means crop each list
+    if ($opt_tail > 0) {
+      splice(@s, 0, -$opt_tail);
+    }
+    if ($opt_head > 0) {
+      splice(@s, min ($opt_head, scalar @s));
+    }
+
+    @{$ary} = @s;
+  }
+}
+
+sub min {
+  return ($_[0] < $_[1] ? $_[0] : $_[1]);
 }
