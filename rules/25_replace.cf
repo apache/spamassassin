@@ -75,7 +75,7 @@ replace_rules SUBJECT_FUZZY_MEDS
 header __SUBJECT_FUZZY_VPILL	Subject =~ /<inter W2><post P3>(?!viagra)<V><I><A><G><R><A>/i
 replace_rules __SUBJECT_FUZZY_VPILL
 meta SUBJECT_FUZZY_VPILL	__SUBJECT_FUZZY_VPILL && !FUZZY_VPILL
-describe SUBJECT_FUZZY_MEDS	Attempt to obfuscate words in Subject:
+describe SUBJECT_FUZZY_VPILL	Attempt to obfuscate words in Subject:
 
 header SUBJECT_FUZZY_CHEAP	Subject =~ /<inter W2><post P3>\b(?!cheap)<C><H><E><A><P>(?:\b|<E>)/i
 describe SUBJECT_FUZZY_CHEAP	Attempt to obfuscate words in Subject:
