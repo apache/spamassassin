@@ -329,6 +329,7 @@ if (!$opt_client) {
   $AIopts->{'opt_after'} = $opt_after;
   $AIopts->{'opt_before'} = $opt_before;
   $AIopts->{'scan_progress_sub'} = \&showdots_blip;
+  $AIopts->{'opt_want_date'} = ! $opt_n;
 
   # ensure that scanprob stuff is predictable and reproducable
   if (defined $opt_scanprob && $opt_scanprob < 1.0) {
@@ -338,6 +339,7 @@ if (!$opt_client) {
 else {
   # ArchiveIterator options for client mode -- tends to be simple
   $opt_n = 1;
+  $AIopts->{'opt_want_date'} = 0;
 }
 
 ###########################################################################
