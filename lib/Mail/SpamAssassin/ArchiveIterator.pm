@@ -238,17 +238,20 @@ files are individual messages, C<file> a file with a single message,
 C<mbox> an mbox formatted file, or C<mbx> for an mbx formatted directory.
 
 C<detect> can also be used.  This assumes C<mbox> for any file whose path
-contains the pattern C</\.mbox/i>, C<file> for STDIN and anything that is
-not a directory, or C<directory> otherwise.
+contains the pattern C</\.mbox/i>, C<file> anything that is not a
+directory, or C<directory> otherwise.
 
 =item raw_location
 
-Path to file or directory.  Can be "-" for STDIN.  File globbing is allowed
-using the standard csh-style globbing (see C<perldoc -f glob>).  C<~> at the
-front of the value will be replaced by the C<HOME> environment variable.
-Escaped whitespace is protected as well.
+Path to file or directory.  File globbing is allowed using the
+standard csh-style globbing (see C<perldoc -f glob>).  C<~> at the
+front of the value will be replaced by the C<HOME> environment
+variable.  Escaped whitespace is protected as well.
 
 B<NOTE:> C<~user> is not allowed.
+
+B<NOTE 2:> C<-> is not allowed as a raw location.  To have
+ArchiveIterator deal with STDIN, generate a temp file.
 
 =back
 
@@ -459,6 +462,11 @@ sub scan_targets {
       next;
     }
 
+    if ($rawloc eq '-') {
+      warn 'archive-iterator: raw location "-" is not supported';
+      next;
+    }
+
     # use ham by default, things like "spamassassin" can't specify the type
     $class = substr($class, 0, 1) || 'h';
 
@@ -482,8 +490,7 @@ sub scan_targets {
           # filename indicates mbox
           $format = 'mbox';
         } 
-	elsif ($location eq '-' || !(-d $location)) {
-	  # stdin is considered a file if not passed as mbox
+	elsif (!(-d $location)) {
           $format = 'file';
 	}
 	else {
@@ -687,7 +694,7 @@ sub scan_mailbox {
   my ($self, $class, $folder, $bkfunc) = @_;
   my @files;
 
-  if ($folder ne '-' && -d $folder) {
+  if (-d $folder) {
     # passed a directory of mboxes
     $folder =~ s/\/\s*$//; #Remove trailing slash, if there
     if (!opendir(DIR, $folder)) {
@@ -792,7 +799,7 @@ sub scan_mbx {
   my ($self, $class, $folder, $bkfunc) = @_;
   my (@files, $fp);
 
-  if ($folder ne '-' && -d $folder) {
+  if (-d $folder) {
     # got passed a directory full of mbx folders.
     $folder =~ s/\/\s*$//; # remove trailing slash, if there is one
     if (!opendir(DIR, $folder)) {
