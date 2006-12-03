@@ -16,10 +16,10 @@ fi
 ) > /dev/null 2>&1
 
 gen_fp_fn_report () {
-  ./logs-to-c \
+  ./fp-fn-statistics \
     --spam=spam-test.log \
     --ham=ham-test.log \
-    --threshold $1 --count --scoreset=$SCORESET | \
+    --threshold $1 --scoreset=$SCORESET | \
     sed -e 's/^Reading.*//' -e '/^$/d'
 }
 

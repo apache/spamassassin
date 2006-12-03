@@ -81,9 +81,9 @@ else
 
 # This needs to have 50_scores.cf in place first ...
 echo "[gen test results]"
-./logs-to-c --spam=spam-test.log \
+./fp-fn-statistics --spam=spam-test.log \
 	--ham=ham-test.log \
-	--count --cffile=../rules --scoreset=$SCORESET | tee $LOGDIR/test
+	--cffile=../rules --scoreset=$SCORESET | tee $LOGDIR/test
 
 echo "[STATISTICS file generation]"
 ./mk-baseline-results $SCORESET | tee $LOGDIR/statistics

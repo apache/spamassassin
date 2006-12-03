@@ -18,58 +18,35 @@
 # </@LICENSE>
 
 use Getopt::Long;
-use vars qw($opt_cffile $opt_count $opt_lambda $opt_threshold
-	    $opt_spam $opt_ham $opt_fplog $opt_fnlog);
+use strict;
+use vars qw($opt_cffile $opt_spam $opt_ham $opt_scoreset);
 
 $opt_cffile = "../rules";
-$opt_count = 0;
-$opt_threshold = 5;
 $opt_spam = 'spam.log';
 $opt_ham = 'ham.log';
 $opt_scoreset = 0;
 
-GetOptions("cffile=s", "count", "lambda=f", "threshold=f", "spam=s",
-	   "ham=s", "scoreset=i", "fplog=s", "fnlog=s");
+GetOptions("cffile=s", "spam=s", "ham=s", "scoreset=i");
 
-# If desired, report false positives and false negatives for analysis
-if (defined $opt_fnlog) { open (FNLOG, ">$opt_fnlog"); }
-if (defined $opt_fplog) { open (FPLOG, ">$opt_fplog"); }
-
-my $nybias = 10;
-
-# lambda value for TCR equation, representing the cost of of an FP vs. the
-# cost of a FN.  Some example values are: 1 = tagged only, 9 = mailed back
-# to sender asking for token, 999 = blocking or deleting a message.
-#
-# We roughly aim for a value representing "moved to infrequently-read folder".
-
-my $lambda = 50;
-if ($opt_lambda) { $lambda = $opt_lambda; }
-
-my $msgline;
 my $is_spam = '';		# vec aligned with @tests_hit
 my @tests_hit = ();
 my %mutable_tests = ();
 
-use vars qw(%rules %allrules);
+use vars qw(%rules %allrules %scores);
+
+my (%ignored_rule, %range_lo, %range_hi);
+my %rule_to_index;
 
 readscores();
 
 print "Reading per-message hit stat logs and scores...\n";
 my ($num_tests, $num_spam, $num_ham);
-my ($ga_yy, $ga_ny, $ga_yn, $ga_nn, $yyscore, $ynscore, $nyscore, $nnscore);
 
 read_ranges();
 readlogs();
 
-if ($opt_count) {
-  $nybias = $nybias*($num_spam / $num_ham);
-  evaluate();
-}
-else {
-  print "Writing logs and current scores as C code...\n";
-  writescores_c();
-}
+print "Writing logs and current scores as C code...\n";
+writescores_c();
 
 # show memory usage before we exit
 # print "Running \"ps aux\"...\n";
@@ -108,42 +85,6 @@ sub thaw_tests {
   return map { $short_to_long[$_] } unpack("w*", $_[0]);
 }
 
-# arguments are $isspam, $count, \@tests
-sub log_line_count {
-  my $score = 0;
-  $score += $scores{$_} for @{$_[2]};
-
-  if ($_[0]) {
-    $num_spam++;
-    if ($score >= $opt_threshold) {
-      $ga_yy++;
-      $yyscore += $score;
-    }
-    else {
-      $ga_yn++;
-      $ynscore += $score;
-      if (defined $opt_fnlog) {
-	print FNLOG $msgline;
-      }
-    }
-  }
-  else {
-    $num_ham++;
-    if ($score >= $opt_threshold) {
-      #print STDERR "FP: $id\n";
-      $ga_ny++;
-      $nyscore += $score;
-      if (defined $opt_fplog) {
-	print FPLOG $msgline;
-      }
-    }
-    else {
-      $ga_nn++;
-      $nnscore += $score;
-    }
-  }
-}
-
 # arguments are $isspam, $count, \@tests;
 sub log_line_code {
   $tests_hit[$_[1]] = freeze_tests($_[2]);
@@ -159,16 +100,10 @@ sub log_line_code {
 }
 
 sub readlogs {
+  my $msgline;
+
   my $count = 0;
   $num_spam = $num_ham = 0;
-
-  if ($opt_count) {
-    $ga_yy = $ga_ny = $ga_yn = $ga_nn = 0;
-    $yyscore = $ynscore = $nyscore = $nnscore = 0.0;
-  }
-
-  # set handler for log lines
-  my $log_line = $opt_count ? \&log_line_count : \&log_line_code;
 
   foreach my $file ($opt_spam, $opt_ham) {
     open (IN, "<$file") || die "Could not open file '$file': $!";
@@ -188,7 +123,7 @@ sub readlogs {
 	split(/,/, $rules);
 
       # run handler
-      $log_line->($isspam, $count, \@tests);
+      log_line_code($isspam, $count, \@tests);
 
       # increment line
       $count++;
@@ -214,11 +149,11 @@ sub writescores_c {
     # jm: now, score-ranges-from-freqs has tflags to work from, so
     # it will always list all mutable tests.
 
-  @index_to_rule = sort {($ignored_rule{$a} <=> $ignored_rule{$b}) ||
+  my @index_to_rule = sort {($ignored_rule{$a} <=> $ignored_rule{$b}) ||
 			  ($mutable_tests{$b} <=> $mutable_tests{$a}) ||
 			   ($a cmp $b)} (keys %scores);
   my $max_hits_per_msg = 0;
-  for ($file = 0; $file < $num_tests; $file++) {
+  for (my $file = 0; $file < $num_tests; $file++) {
     my(@hits) =
      grep {(! $ignored_rule{$_}) && $mutable_tests{$_}} (thaw_tests($tests_hit[$file]));
     if ((scalar(@hits)+1) > $max_hits_per_msg) {
@@ -415,8 +350,6 @@ sub read_ranges {
     }
 
     $ignored_rule{$t} = 0;
-    $index_to_rule[$count] = $t;
-    $count++;
 
     if (!$mut) {
       $mutable_tests{$t} = 0;
@@ -428,7 +361,7 @@ sub read_ranges {
       $mutable_tests{$t} = 1;
     }
     unless ($mutable_tests{$t} || $scores{$t}) {
-      warn "ignoring '$t': immutable and score == 0\n";
+#      warn "ignoring '$t': immutable and score == 0\n";
       $ignored_rule{$t} = 1;
     }
   }
@@ -456,8 +389,6 @@ sub read_ranges {
         $ignored_rule{$t} = 1;
       }
     }
-    $index_to_rule[$count] = $t;
-    $count++;
   }
   foreach my $t (keys %range_lo) {
     next if ($ignored_rule{$t});
@@ -495,39 +426,6 @@ sub read_ranges {
   }
 }
 
-sub evaluate {
-   printf ("\n# SUMMARY for threshold %3.1f:\n", $opt_threshold);
-   printf "# Correctly non-spam: %6d  %4.2f%%\n",
-       $ga_nn, ($ga_nn /  $num_ham) * 100.0;
-   printf "# Correctly spam:     %6d  %4.2f%%\n",
-       $ga_yy, ($ga_yy /  $num_spam) * 100.0;
-   printf "# False positives:    %6d  %4.2f%%\n",
-       $ga_ny, ($ga_ny /  $num_ham) * 100.0;
-   printf "# False negatives:    %6d  %4.2f%%\n",
-       $ga_yn, ($ga_yn /  $num_spam) * 100.0;
-
-  # convert to the TCR metrics used in the published lit
-  my $nspamspam = $ga_yy;
-  my $nspamlegit = $ga_yn;
-  my $nlegitspam = $ga_ny;
-  my $nlegitlegit = $ga_yn;
-  my $nlegit = $num_ham;
-  my $nspam = $num_spam;
-
-  my $werr = ($lambda * $nlegitspam + $nspamlegit)
-                  / ($lambda * $nlegit + $nspam);
-
-  my $werr_base = $nspam
-                  / ($lambda * $nlegit + $nspam);
-
-  $werr ||= 0.000001;     # avoid / by 0
-  my $tcr = $werr_base / $werr;
-
-  my $sr = ($nspamspam / $nspam) * 100.0;
-  my $sp = ($nspamspam / ($nspamspam + $nlegitspam)) * 100.0;
-  printf "# TCR(l=%s): %3.6f  SpamRecall: %3.3f%%  SpamPrec: %3.3f%%\n",
-    $lambda, $tcr, $sr, $sp;
-}
 
 __DATA__
 
