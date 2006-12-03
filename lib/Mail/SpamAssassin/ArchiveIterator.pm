@@ -176,8 +176,8 @@ sub new {
   bless ($self, $class);
 
   # If any of these options are set, we need to figure out the message's
-  # receive date at scan time.  opt_n == 0, opt_after, opt_before
-  $self->{determine_receive_date} = !$self->{opt_n} ||
+  # receive date at scan time.  opt_after, opt_before, or opt_want_date
+  $self->{determine_receive_date} = 
   	defined $self->{opt_after} || defined $self->{opt_before} ||
         $self->{opt_want_date};
 
@@ -547,13 +547,14 @@ sub set_default_message_selection_opts {
 sub message_is_useful_by_date {
   my ($self, $date) = @_;
 
-  return 0 unless $date;	# undef or 0 date = unusable
-
   if (!$self->{opt_after} && !$self->{opt_before}) {
     # Not using the feature
     return 1;
   }
-  elsif (!$self->{opt_before}) {
+
+  return 0 unless $date;	# undef or 0 date = unusable
+
+  if (!$self->{opt_before}) {
     # Just care about after
     return $date > $self->{opt_after};
   }
