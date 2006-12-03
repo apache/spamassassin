@@ -190,6 +190,7 @@ print_usage(void)
     usg("  -h, --help          Print this help message and exit.\n");
     usg("  -V, --version       Print spamc version and exit.\n");
     usg("  -K                  Keepalive check of spamd.\n");
+    usg("  -z                  Compress mail message sent to spamd.\n");
     usg("  -f                  (Now default, ignored.)\n");
 
     usg("\n");
@@ -208,9 +209,9 @@ read_args(int argc, char **argv,
           struct transport *ptrn)
 {
 #ifndef _WIN32
-    const char *opts = "-BcrRd:e:fyp:t:s:u:L:C:xSHU:ElhVKF:";
+    const char *opts = "-BcrRd:e:fyp:t:s:u:L:C:xzSHU:ElhVKF:";
 #else
-    const char *opts = "-BcrRd:fyp:t:s:u:L:C:xSHElhVKF:";
+    const char *opts = "-BcrRd:fyp:t:s:u:L:C:xzSHElhVKF:";
 #endif
     int opt;
     int ret = EX_OK;
@@ -239,6 +240,7 @@ read_args(int argc, char **argv,
        { "pipe-to", required_argument, 0, 'e' },
        { "help", no_argument, 0, 'h' },
        { "version", no_argument, 0, 'V' },
+       { "compress", no_argument, 0, 'z' },
        { 0, 0, 0, 0} /* last element _must_ be all zeroes */
     };
     
@@ -416,6 +418,11 @@ read_args(int argc, char **argv,
             {
                 print_version();
                 return(EX_TEMPFAIL);
+            }
+            case 'z':
+            {
+                flags |= SPAMC_USE_ZLIB;
+                break;
             }
         }
     }

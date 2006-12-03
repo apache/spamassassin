@@ -122,6 +122,13 @@ my @OPTIONAL_MODULES = (
   compatibile spamc.)',
 },
 {
+  module => 'Compress::Zlib',
+  version => '0.00',
+  desc => 'If you wish to use the optional zlib compression for communication
+  between spamc and spamd (the -z option to spamc), you need to install
+  this module.',
+},
+{
   module => 'Time::HiRes',
   version => '0.00',
   desc => 'If this module is installed, the processing times are logged/reported

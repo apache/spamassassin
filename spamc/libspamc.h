@@ -112,6 +112,9 @@
 /* Oct 21, 2005 sidney: added ping test */
 #define SPAMC_PING      (1<<19)
 
+/* Nov 30, 2006 jm: add -z, zlib support */
+#define SPAMC_USE_ZLIB	(1<<18)
+
 
 #define SPAMC_MESSAGE_CLASS_SPAM 1
 #define SPAMC_MESSAGE_CLASS_HAM  2
