@@ -704,7 +704,6 @@ endif # Mail::SpamAssassin::Plugin::AntiVirus
 # to detect messages that hit ANY_BOUNCE_MESSAGE, and filter them aside
 # as spurious bounces.
 # 
-score MY_SERVERS_FOUND   -0.001
 score BOUNCE_MESSAGE     0.1
 score CRBOUNCE_MESSAGE   0.1
 score VBOUNCE_MESSAGE    0.1
