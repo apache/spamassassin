@@ -38,3 +38,7 @@ loadplugin Mail::SpamAssassin::Plugin::RelayEval
 loadplugin Mail::SpamAssassin::Plugin::URIEval
 loadplugin Mail::SpamAssassin::Plugin::WLBLEval
 
+# VBounce - anti-bounce-message rules, see rules/20_vbounce.cf
+#
+loadplugin Mail::SpamAssassin::Plugin::VBounce
+
