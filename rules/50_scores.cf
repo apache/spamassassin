@@ -698,3 +698,15 @@ ifplugin Mail::SpamAssassin::Plugin::AntiVirus
 score MICROSOFT_EXECUTABLE 0.100
 score MIME_SUSPECT_NAME 0.100
 endif # Mail::SpamAssassin::Plugin::AntiVirus
+
+# VBounce - anti-bounce message ruleset.  All of these are informational,
+# and should not be scored as antispam rules; instead the user needs
+# to detect messages that hit ANY_BOUNCE_MESSAGE, and filter them aside
+# as spurious bounces.
+# 
+score MY_SERVERS_FOUND   -0.001
+score BOUNCE_MESSAGE     0.1
+score CRBOUNCE_MESSAGE   0.1
+score VBOUNCE_MESSAGE    0.1
+score ANY_BOUNCE_MESSAGE 0.1
+
