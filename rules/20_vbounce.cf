@@ -25,8 +25,8 @@
 ###########################################################################
 #
 # If you use this, set up procmail or your mail app to spot the
-# "BOUNCE_MESSAGE", "CRBOUNCE_MESSAGE" or "VBOUNCE_MESSAGE" rule hits in the
-# X-Spam-Status line, and move messages that match that to a 'vbounce' folder.
+# "ANY_BOUNCE_MESSAGE" rule hits in the X-Spam-Status line, and move
+# messages that match that to a 'vbounce' folder.
 #
 # You should also add 'whitelist_bounce_relays' lines, describing the names of
 # your own outgoing mail relays, like so:
@@ -34,7 +34,8 @@
 #   whitelist_bounce_relays       dogma.boxhost.net
 #
 # This is used to 'rescue' legitimate bounce messages that were generated in
-# response to mail you really *did* send.  See 'perldoc VBounce.pm' for more
+# response to mail you really *did* send.  If you don't do this, the
+# "BOUNCE_MESSAGE" rule will not fire.  See 'perldoc VBounce.pm' for more
 # details.
 #
 # This ruleset is substantially based on
@@ -57,7 +58,6 @@ score MY_SERVERS_FOUND        -0.001
 
 body __HAVE_BOUNCE_RELAYS     eval:have_any_bounce_relays()
 tflags __HAVE_BOUNCE_RELAYS   nice
-score __HAVE_BOUNCE_RELAYS    -0.001
 
 endif
 
@@ -127,7 +127,6 @@ header __BOUNCE_INTERSCAN   From =~ /\bInterscan MSS Notification\b/
 meta BOUNCE_MESSAGE         __HAVE_BOUNCE_RELAYS && (!MY_SERVERS_FOUND && (__BOUNCE_FROM_DAEMON || __BOUNCE_RPATH_NULL || __BOUNCE_RPATH_MD || __BOUNCE_AUTO_GENERATED || __BOUNCE_Y_AUTOGEN || __BOUNCE_SYMANTEC || __BOUNCE_X_ERR_STAT || __BOUNCE_RETURNED || __BOUNCE_MAILDELFAIL || __BOUNCE_MSGDELFAIL || __BOUNCE_ESMTP || __BOUNCE_OOO_1 || __BOUNCE_OOO_2 || __BOUNCE_NEVER_SEE || __BOUNCE_NONWORKING || __BOUNCE_UNDELIVERABLE || __BOUNCE_UNDELIVERABLE_ML || __BOUNCE_NOTDEL || __BOUNCE_CTYPE || __BOUNCE_DEL_FAIL || __BOUNCE_ADDR_ERR || __BOUNCE_NO_VAL || __BOUNCE_DATA_FORMAT || __BOUNCE_COULD_NOT || __BOUNCE_UNDEL_MSG || __BOUNCE_OOO_H1 || __BOUNCE_OOO_H2 || __BOUNCE_OOO_H3 || __BOUNCE_RPATH_ERRMAIL || __BOUNCE_OOO_3 || __BOUNCE_INTERSCAN || __BOUNCE_ETRUST || __BOUNCE_AUTO_RESPONSE || __BOUNCE_AUTO_RESPOND))
 
 describe BOUNCE_MESSAGE     MTA bounce message
-score    BOUNCE_MESSAGE     0.1
 
 # ---------------------------------------------------------------------------
 # Challenge/Response bounces
@@ -174,7 +173,6 @@ header __CRBOUNCE_UNVERIF   Subject =~ /^Unverified email to /
 meta CRBOUNCE_MESSAGE       !MY_SERVERS_FOUND && (__CRBOUNCE_UOL || __CRBOUNCE_VERIF || __CRBOUNCE_RP || __CRBOUNCE_VANQ || __CRBOUNCE_HEADER || __CRBOUNCE_QURB || __CRBOUNCE_0SPAM || __CRBOUNCE_GETRESP || __CRBOUNCE_TMDA || __CRBOUNCE_ASK || __CRBOUNCE_EXI || __CRBOUNCE_PREC_SPAM || __CRBOUNCE_SZ || __CRBOUNCE_SPAMLION || __CRBOUNCE_MIB || __CRBOUNCE_SI || __CRBOUNCE_UNVERIF || __CRBOUNCE_RP_2)
 
 describe CRBOUNCE_MESSAGE   Challenge-response bounce message
-score    CRBOUNCE_MESSAGE   0.1
 
 # ---------------------------------------------------------------------------
 # "Virus found in your mail" bounces
@@ -278,7 +276,6 @@ header __VBOUNCE_PT_BLOCKED   Subject =~ /^\*\*\*\s*Mensagem Bloqueada/i
 meta VBOUNCE_MESSAGE        !MY_SERVERS_FOUND && (__VBOUNCE_MSGLABS || __VBOUNCE_EXIM || __VBOUNCE_GUIN || __VBOUNCE_CISCO || __VBOUNCE_SMTP || __VBOUNCE_AOL || __VBOUNCE_DUTCH || __VBOUNCE_MAILMARSHAL || __VBOUNCE_MAILMARSHAL2 || __VBOUNCE_NAVFAIL || __VBOUNCE_REJECTED || __VBOUNCE_NAV || __VBOUNCE_MELDING || __VBOUNCE_VALERT || __VBOUNCE_REJ_FILT || __VBOUNCE_YOUSENT || __VBOUNCE_MAILSWEEP || __VBOUNCE_SCREENSAVER || __VBOUNCE_DISALLOWED || __VBOUNCE_FROMPT || __VBOUNCE_WARNING || __VBOUNCE_DETECTED || __VBOUNCE_AUTOMATIC || __VBOUNCE_INTERSCAN || __VBOUNCE_VIOLATION || __VBOUNCE_ALERT || __VBOUNCE_NAV2 || __VBOUNCE_NAV3 || __VBOUNCE_INTERSCAN2 || __VBOUNCE_INTERSCAN3 || __VBOUNCE_ANTIGEN || __VBOUNCE_LUTHER || __VBOUNCE_AMAVISD || __VBOUNCE_AMAVISD2 || __VBOUNCE_SCANMAIL || __VBOUNCE_DOMINO1 || __VBOUNCE_DOMINO2 || __VBOUNCE_RAV || __VBOUNCE_GSHIELD || __VBOUNCE_ATTACHMENT0 || __VBOUNCE_AVREPORT0 || __VBOUNCE_SENDER || __VBOUNCE_MAILSWEEP2 || __VBOUNCE_MAILSWEEP3 || __VBOUNCE_CLICKBANK || __VBOUNCE_FORBIDDEN || __VBOUNCE_MMS || __VBOUNCE_QUOTED_EXE || __VBOUNCE_MAJORDOMO_HELP || __VBOUNCE_AV_RESULTS || __VBOUNCE_EMVD || __VBOUNCE_UNDELIV || __VBOUNCE_BANNED_MAT || __VBOUNCE_NAV_DETECT || __VBOUNCE_DEL_WARN || __VBOUNCE_MIME_INFO || __VBOUNCE_EMAIL_REJ || __VBOUNCE_CONT_VIOL || __VBOUNCE_SYM_AVF || __VBOUNCE_SYM_EMP || __VBOUNCE_ATT_QUAR || __VBOUNCE_SECURIQ || __VBOUNCE_VIR_FOUND || __VBOUNCE_EMANAGER || __VBOUNCE_JMAIL || __VBOUNCE_GWAVA || __VBOUNCE_PT_BLOCKED || __VBOUNCE_INFLEX)
 
 describe VBOUNCE_MESSAGE    Virus-scanner bounce message
-score    VBOUNCE_MESSAGE    0.1
 
 # ---------------------------------------------------------------------------
 
@@ -286,17 +283,4 @@ score    VBOUNCE_MESSAGE    0.1
 
 meta     ANY_BOUNCE_MESSAGE (CRBOUNCE_MESSAGE||BOUNCE_MESSAGE||VBOUNCE_MESSAGE)
 describe ANY_BOUNCE_MESSAGE Message is some kind of bounce message
-score    ANY_BOUNCE_MESSAGE 0.1
-
-# ---------------------------------------------------------------------------
-
-# ensure these aren't published in rule-updates as general antispam rules;
-# this is required, since it appears we're now at the stage where they
-# *do* appear to correlate strongly :(
-# http://ruleqa.spamassassin.org/20060405-r391250-n/BOUNCE_MESSAGE
-#
-tflags   CRBOUNCE_MESSAGE   nopublish
-tflags   BOUNCE_MESSAGE     nopublish
-tflags   VBOUNCE_MESSAGE    nopublish
-tflags   ANY_BOUNCE_MESSAGE nopublish
 
