@@ -949,7 +949,7 @@ sub start_children {
 	  exit;
 	}
 
-	my($class, $format, $date, $where, $result) = $iter->run_message($line);
+	my($class, $format, $date, $where, $result) = $iter->_run_message($line);
 	$result ||= '';
 
 	# If determine_receive_date is not set, the original input date
@@ -957,7 +957,7 @@ sub start_children {
 	# the packed version if possible ...  use defined for date since
 	# it could == 0.
         if (!$iter->{determine_receive_date} && $class && $format && defined $date && $where) {
-	  $line = Mail::SpamAssassin::ArchiveIterator::index_pack($date, $class, $format, $where);
+	  $line = Mail::SpamAssassin::ArchiveIterator::_index_pack($date, $class, $format, $where);
         }
 
 	send_line($parent,"$result\0RESULT $line");
@@ -1144,7 +1144,7 @@ sub generate_messages {
     send_line($gzfd, $data) || die "mass-check: error when writing to gz temp file\n";
 
     if (!$paths_only) {
-      my $msg = ($iter->run_message($data))[4];
+      my $msg = ($iter->_run_message($data))[4];
       send_line($gzfd, join('', @{$msg})) ||
         die "mass-check: error when writing to gz temp file\n";
     }
@@ -1190,7 +1190,7 @@ sub handle_post_results {
     # process, and we take whatever the first responder sends us.
     if (exists $msgsout->{$k}) {
       # the result_sub will need parts of the message data, so get it ready
-      my @d = Mail::SpamAssassin::ArchiveIterator::index_unpack($msgsout->{$k}->{'data'});
+      my @d = Mail::SpamAssassin::ArchiveIterator::_index_unpack($msgsout->{$k}->{'data'});
 
       # go ahead and do the result
       &{$iter->{result_sub}}($d[1], $v, $d[0]);
@@ -1228,7 +1228,7 @@ sub run_through_messages {
     my $total_count = 0;
 
     while (($total_messages > $total_count) && ($message = read_line($tmpfd))) {
-      my($class, undef, $date, undef, $result) = $iter->run_message($message);
+      my($class, undef, $date, undef, $result) = $iter->_run_message($message);
       if ($result) {
         &{$iter->{result_sub}}($class, $result, $date);
       }
@@ -1261,7 +1261,7 @@ sub run_through_messages {
         }
         elsif ($line =~ /^([^\0]*)\0RESULT (.+)$/s) {
 	  my $result = $1;
-	  my ($date,$class,$type) = Mail::SpamAssassin::ArchiveIterator::index_unpack($2);
+	  my ($date,$class,$type) = Mail::SpamAssassin::ArchiveIterator::_index_unpack($2);
 	  aidbg "mass-check: $class, $type, $date\n";
 
 	  if (defined $opt_restart && ($total_count % $opt_restart) == 0) {
@@ -1729,10 +1729,10 @@ sub client_mode {
 	    # this is a little tricky -- we need to process the files in the
 	    # path and format we've created, but the original data is needed
 	    # to create a proper result later, so deal with that here.
-	    my @d = Mail::SpamAssassin::ArchiveIterator::index_unpack($index);
+	    my @d = Mail::SpamAssassin::ArchiveIterator::_index_unpack($index);
 	    $real{"$tmpdir/$num"} = \@d;
             send_line($tmpfd,
-	      Mail::SpamAssassin::ArchiveIterator::index_pack($d[0], $d[1], 'f', "$tmpdir/$num")) ||
+	      Mail::SpamAssassin::ArchiveIterator::_index_pack($d[0], $d[1], 'f', "$tmpdir/$num")) ||
 	        die "mass-check: error writing out temp file in client mode\n";
 	  }
 	  else {
@@ -1743,7 +1743,7 @@ sub client_mode {
 	  # in paths_only mode, there's no kluging between formats since we're
 	  # reading the same corpus, however we do still need to track server
 	  # message number to message data so our results will be useable.
-	  my @d = Mail::SpamAssassin::ArchiveIterator::index_unpack($index);
+	  my @d = Mail::SpamAssassin::ArchiveIterator::_index_unpack($index);
 	  $real{$d[3]} = $num;
 	  send_line($tmpfd, $index) ||
 	        die "mass-check: error writing out temp file in client mode\n";
@@ -1864,10 +1864,10 @@ sub generate_queue {
   my ($targets, $tmpfd) = @_;
 
   # scan the targets and get the number and list of messages
-  $iter->scan_targets($targets,
+  $iter->_scan_targets($targets,
     sub {
       my($self, $date, $class, $format, $mail) = @_;
-      push(@{$self->{$class}}, Mail::SpamAssassin::ArchiveIterator::index_pack($date, $class, $format, $mail));
+      push(@{$self->{$class}}, Mail::SpamAssassin::ArchiveIterator::_index_pack($date, $class, $format, $mail));
     }
   );
 
