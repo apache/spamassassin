@@ -48,7 +48,6 @@ Mail::SpamAssassin::ArchiveIterator - find and process messages one at a time
 
   my $iter = new Mail::SpamAssassin::ArchiveIterator(
     { 
-      'opt_n'     => 1,
       'opt_all'   => 1,
       'opt_cache' => 1,
     }
