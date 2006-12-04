@@ -318,7 +318,7 @@ sub do_meta_tests {
     foreach $token (@tokens) {
 
       # Numbers can't be rule names
-      if ($token =~ /^(?:\W+|\d+)$/) {
+      if ($token =~ /^(?:\W+|[+-]?\d+(?:\.\d+)?)$/) {
         $meta{$rulename} .= "$token ";
       }
       else {

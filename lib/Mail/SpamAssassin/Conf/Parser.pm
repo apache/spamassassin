@@ -785,7 +785,7 @@ sub _meta_deps_recurse {
   # Go through each token in the meta rule
   foreach my $token (@tokens) {
     # has to be an alpha+numeric token
-    next if ($token =~ /^(?:\W+|\d+)$/);
+    next if ($token =~ /^(?:\W+|[+-]?\d+(?:\.\d+)?)$/);
     # and has to be a rule name
     next unless exists $conf->{tests}->{$token};
 
