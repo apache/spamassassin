@@ -665,7 +665,7 @@ sub _scan_file {
   if ($self->{determine_receive_date}) {
     unless (defined $AICache and $date = $AICache->check($mail)) {
       my $header;
-      if (!mail_open($mail)) {
+      if (!_mail_open($mail)) {
         $self->{access_problem} = 1;
         return;
       }
@@ -736,7 +736,7 @@ sub _scan_mailbox {
     }
 
     unless ($count) {
-      if (!mail_open($file)) {
+      if (!_mail_open($file)) {
         $self->{access_problem} = 1;
 	next;
       }
@@ -842,7 +842,7 @@ sub _scan_mbx {
     }
 
     unless ($count) {
-      if (!mail_open($file)) {
+      if (!_mail_open($file)) {
 	$self->{access_problem} = 1;
         next;
       }
