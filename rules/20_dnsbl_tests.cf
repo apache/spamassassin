@@ -135,27 +135,25 @@ tflags RCVD_IN_SORBS_DUL	net
 #reuse RCVD_IN_SORBS_DUL
 
 # ---------------------------------------------------------------------------
-# Spamhaus SBL+XBL
+# Spamhaus SBL+XBL, now called Zen
 #
 # Spamhaus XBL contains both the Abuseat CBL (cbl.abuseat.org) and Blitzed
 # OPM (opm.blitzed.org) lists so it's not necessary to query those as well.
-# TODO: replace with ZEN from rulesrc/sandbox/jm/20_zen.cf.  For now,
-# allow both to run for 1 weekend to verify sanity of results...
 
-header __RCVD_IN_SBL_XBL	eval:check_rbl('sblxbl', 'sbl-xbl.spamhaus.org.')
-describe __RCVD_IN_SBL_XBL	Received via a relay in Spamhaus SBL+XBL
-tflags __RCVD_IN_SBL_XBL	net
+header __RCVD_IN_ZEN            eval:check_rbl('zen', 'zen.spamhaus.org.')
+describe __RCVD_IN_ZEN          Received via a relay in Spamhaus Zen
+tflags __RCVD_IN_ZEN            net
 
 # SBL is the Spamhaus Block List: http://www.spamhaus.org/sbl/
-header RCVD_IN_SBL		eval:check_rbl_sub('sblxbl', '127.0.0.2')
-describe RCVD_IN_SBL		Received via a relay in Spamhaus SBL
-tflags RCVD_IN_SBL		net
+header RCVD_IN_SBL              eval:check_rbl_sub('zen', '127.0.0.2')
+describe RCVD_IN_SBL            Received via a relay in Spamhaus SBL
+tflags RCVD_IN_SBL              net
 #reuse RCVD_IN_SBL
 
 # XBL is the Exploits Block List: http://www.spamhaus.org/xbl/
-header RCVD_IN_XBL		eval:check_rbl('sblxbl-notfirsthop', 'sbl-xbl.spamhaus.org.', '127.0.0.[456]')
-describe RCVD_IN_XBL		Received via a relay in Spamhaus XBL
-tflags RCVD_IN_XBL		net
+header RCVD_IN_XBL              eval:check_rbl('zen-notfirsthop', 'zen.spamhaus.org.', '127.0.0.[45678]')
+describe RCVD_IN_XBL            Received via a relay in Spamhaus XBL
+tflags RCVD_IN_XBL              net
 #reuse RCVD_IN_XBL
 
 # ---------------------------------------------------------------------------
