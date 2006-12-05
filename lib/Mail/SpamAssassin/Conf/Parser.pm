@@ -455,7 +455,7 @@ sub handle_conditional {
   my $eval = '';
   my $bad = 0;
   foreach my $token (@tokens) {
-    if ($token =~ /^(?:\W+|[+-]?\d+(?:\.\d+)?)$/) {
+    if ($token =~ /^(\W+|[+-]?\d+(?:\.\d+)?)$/) {
       $eval .= $1." ";          # note: untaints!
     }
     elsif ($token eq 'plugin') {
