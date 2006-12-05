@@ -94,6 +94,19 @@ sub check_for_numeric_helo {
   return 0;
 }
 
+sub check_for_illegal_ip3 {
+  my ($self, $pms) = @_;
+
+  foreach my $rcvd ( @{$pms->{relays_untrusted}} ) {
+    # (note this might miss some hits if the Received.pm skips any invalid IPs)
+    foreach my $check ( $rcvd->{ip}, $rcvd->{by} ) {
+      return 1 if ($check =~ /^
+    	(?:[01257]|(?!127.0.0.)127|22[3-9]|23[0-9]|24[0-9]|25[0-5])\.\d+\.\d+\.\d+
+	$/x);
+    }
+  }
+  return 0;
+}
 sub check_for_illegal_ip2 {
   my ($self, $pms) = @_;
 
