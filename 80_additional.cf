@@ -284,7 +284,7 @@ describe PART_CID_STOCK_LESS Has a spammy image attachment (by Content-ID, more 
 
 endif # Mail::SpamAssassin::Plugin::MIMEHeader
 
-header RCVD_FORGED_WROTE    Received =~ /from [0-9.]+ \(HELO \S+[a-z]+\) by (\S+) with esmtp \(\S+\s\S+\) id \S{6}-\S{6}-\S\S for \S+@\1;/s
+header RCVD_FORGED_WROTE    Received =~ / by \S+ with esmtp \([^a-z ]{6,} [^a-z ]{3,}\) id/
 describe RCVD_FORGED_WROTE  Forged 'Received' header found ('wrote:' spam)
 
 header __MIMEOLE_1106   X-MimeOLE =~ /^Produced By Microsoft MimeOLE V6.00.2800.1106$/
