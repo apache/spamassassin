@@ -2358,10 +2358,10 @@ relative to the current configuration file or user preferences file.
 
 =item if (conditional perl expression)
 
-Used to support conditional interpretation of the configuration file. Lines
-between this and a corresponding C<endif> line, will be ignored unless the
-conditional expression evaluates as true (in the perl sense; that is, defined
-and non-0).
+Used to support conditional interpretation of the configuration
+file. Lines between this and a corresponding C<else> or C<endif> line,
+will be ignored unless the conditional expression evaluates as true
+(in the perl sense; that is, defined and non-0).
 
 The conditional accepts a limited subset of perl for security -- just enough to
 perform basic arithmetic comparisons.  The following input is accepted:
@@ -2409,6 +2409,13 @@ For example:
 =item ifplugin PluginModuleName
 
 An alias for C<if plugin(PluginModuleName)>.
+
+=item else
+
+Used to support conditional interpretation of the configuration
+file. Lines between this and a corresponding C<endif> line,
+will be ignored unless the conditional expression evaluates as false
+(in the perl sense; that is, not defined and 0).
 
 =item require_version n.nnnnnn
 

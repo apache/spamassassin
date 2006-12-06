@@ -324,6 +324,7 @@ sub parse {
     }
 
     if ($key eq 'else') {
+      # TODO: if/else/else won't get flagged here :(
       if (!@if_stack) {
         $parse_error = "config: found else without matching conditional";
         goto failed_line;
