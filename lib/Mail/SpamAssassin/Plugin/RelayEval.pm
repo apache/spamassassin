@@ -41,6 +41,8 @@ sub new {
   # the important bit!
   $self->register_eval_rule("check_for_numeric_helo");
   $self->register_eval_rule("check_for_illegal_ip");
+  $self->register_eval_rule("check_for_illegal_ip2");
+  $self->register_eval_rule("check_for_illegal_ip3");
   $self->register_eval_rule("check_for_rdns_helo_mismatch");
   $self->register_eval_rule("check_all_trusted");
   $self->register_eval_rule("check_no_relays");
