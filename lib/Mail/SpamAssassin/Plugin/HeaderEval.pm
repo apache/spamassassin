@@ -498,9 +498,13 @@ sub check_for_forged_yahoo_received_headers {
 
   # bug 3740: ignore bounces from Yahoo!.   only honoured if the
   # correct rDNS shows up in the trusted relay list, or first untrusted relay
-  if ($from eq 'MAILER-DAEMON@yahoo.com' &&
-      ($pms->{relays_trusted_str} =~ / rdns=\S+\.yahoo\.com /
-        || $pms->{relays_untrusted_str} =~ /^[^\]]+ rdns=\S+\.yahoo\.com /))
+  #
+  # bug 4528: [ ip=68.142.202.54 rdns=mta122.mail.mud.yahoo.com 
+  # helo=mta122.mail.mud.yahoo.com by=eclectic.kluge.net ident=
+  # envfrom= intl=0 id=49F2EAF13B auth= ]
+  #
+  if ($pms->{relays_trusted_str} =~ / rdns=\S+\.yahoo\.com /
+        || $pms->{relays_untrusted_str} =~ /^[^\]]+ rdns=\S+\.yahoo\.com /)
             { return 0; }
 
   if ($rcvd =~ /by web\S+\.mail\S*\.yahoo\.com via HTTP/) { return 0; }
