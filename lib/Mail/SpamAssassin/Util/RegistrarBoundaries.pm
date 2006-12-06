@@ -1,4 +1,5 @@
 # The (extremely complex) rules for domain delegation.
+# Note that really, this should be called "RegistryBoundaries"; see bug 4605
 
 # <@LICENSE>
 # Licensed to the Apache Software Foundation (ASF) under one or more
@@ -203,7 +204,7 @@ foreach (qw/
 =item ($hostname, $domain) = split_domain ($fqdn)
 
 Cut a fully-qualified hostname into the hostname part and the domain
-part, splitting at the DNS registrar boundary.
+part, splitting at the DNS registry boundary.
 
 Examples:
 

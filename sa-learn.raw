@@ -380,35 +380,49 @@ eval {
     close(F);
   }
 
-  # add leftover args as targets
-  foreach (@ARGV) { target($_); }
+  ###########################################################################
+  # Deal with the target listing, and STDIN -> tempfile
 
-  #No arguments means they want stdin:
-  if ( $#targets < 0 ) {
-    target('-');
+  my $tempfile; # will be defined if stdin -> tempfile
+  push(@targets, @ARGV);
+  @targets = ('-') unless @targets;
+
+  for(my $elem = 0; $elem <= $#targets; $elem++) {
+    # ArchiveIterator doesn't really like STDIN, so if "-" is specified
+    # as a target, make it a temp file instead.
+    if ( $targets[$elem] =~ /(?:^|:)-$/ ) {
+      if (defined $tempfile) {
+        # uh-oh, stdin specified multiple times?
+        warn "skipping extra stdin target (".$targets[$elem].")\n";
+        splice @targets, $elem, 1;
+        $elem--; # go back to this element again
+        next;
+      }
+      else {
+        my $handle;
+
+        local $/ = undef;    # go into slurp mode
+        ( $tempfile, $handle ) = Mail::SpamAssassin::Util::secure_tmpfile();
+        print {$handle} <STDIN>;
+        close $handle;
+
+        # re-aim the targets at the tempfile instead of STDIN
+        $targets[$elem] =~ s/-$/$tempfile/;
+      }
+    }
+
+    # make sure the target list is in the normal AI format
+    if ($targets[$elem] !~ /^[^:]*:[a-z]+:/) {
+      $targets[$elem] = target($targets[$elem]);
+    }
   }
 
-  # mbox and mbx doesn't deal with STDIN, so make a temp file if they want STDIN.
-  # do it here since they may specify "-" on the commandline
-  #
-  my $tempfile;
-  if ( $targets[0] =~ /:mbo?x:-$/ ) {
-    my $handle;
-
-    local $/ = undef;    # go into slurp mode
-    ( $tempfile, $handle ) = Mail::SpamAssassin::Util::secure_tmpfile();
-    print {$handle} <STDIN>;
-    close $handle;
-
-    # re-aim the targets at the tempfile instead of STDIN
-    $targets[0] =~ s/:-$/:$tempfile/;
-  }
+  ###########################################################################
 
   my $iter = new Mail::SpamAssassin::ArchiveIterator(
     {
-      'opt_j'   => 0,
-      'opt_n'   => 1,
       'opt_all' => 0,       # skip messages over 250k
+      'opt_want_date' => 0,
     }
   );
 

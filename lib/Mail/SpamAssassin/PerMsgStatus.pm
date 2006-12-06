@@ -222,10 +222,11 @@ sub learn {
 
   eval {
     my $learnstatus = $self->{main}->learn ($self->{msg}, undef, $isspam, 0);
-    $learnstatus->finish();
     if ($learnstatus->did_learn()) {
       $self->{auto_learn_status} = $isspam ? "spam" : "ham";
     }
+    # This must wait until the did_learn call.
+    $learnstatus->finish();
     $self->{main}->finish_learner();        # for now
 
     if (exists $self->{main}->{bayes_scanner}) {

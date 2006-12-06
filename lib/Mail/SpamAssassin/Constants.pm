@@ -286,7 +286,7 @@ use constant MAX_HEADER_LENGTH => 65536;
 # used for meta rules and "if" conditionals in Conf::Parser
 use constant ARITH_EXPRESSION_LEXER => qr/(?:
         [\-\+\d\.]+|                            # A Number
-        \w[\w\:]+|                              # Rule or Class Name
+        \w[\w\:]*|                              # Rule or Class Name
         [\(\)]|                                 # Parens
         \|\||                                   # Boolean OR
         \&\&|                                   # Boolean AND
