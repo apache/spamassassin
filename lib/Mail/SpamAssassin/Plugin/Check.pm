@@ -322,7 +322,7 @@ sub do_meta_tests {
     foreach $token (@tokens) {
 
       # Numbers can't be rule names
-      if ($token =~ /^(?:\W+|\d+)$/) {
+      if ($token =~ /^(?:\W+|[+-]?\d+(?:\.\d+)?)$/) {
         $meta{$rulename} .= "$token ";
       }
       else {
@@ -552,7 +552,6 @@ sub do_body_tests {
   {
     my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
     my $sub;
-
     if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
     {
       # support multiple matches
@@ -568,7 +567,6 @@ sub do_body_tests {
         }
       }
       ';
-
     }
     else {
       # omitting the "pos" call, "body_loopid" label, use of while()
@@ -582,7 +580,6 @@ sub do_body_tests {
         }
       }
       ';
-
     }
 
     if ($self->{main}->{use_rule_subs}) {
@@ -609,7 +606,8 @@ sub do_body_tests {
       $self->add_temporary_method ($rulename.'_body_test',
         '{ my $self = shift; '.$sub.' }');
     }
-  });
+  }
+  );
 }
 
 ###########################################################################
@@ -819,7 +817,7 @@ sub do_full_eval_tests {
 
 sub run_eval_tests {
   my ($self, $pms, $testtype, $evalhash, $prepend2desc, $priority, @extraevalargs) = @_;
-  
+ 
   return if $self->{main}->call_plugins("have_shortcircuited",
                                         { permsgstatus => $pms });
 
@@ -880,7 +878,11 @@ sub run_eval_tests {
       }
     }
  
-    my ($function, @args) = @{$test};
+    my ($function, $argstr) = ($test,'');
+    if ($test =~ s/^([^,]+)(,.*)$//gs) {
+      ($function, $argstr) = ($1,$2);
+    }
+
     if (!$function) {
       warn "rules: error: no function defined for $rulename";
       next;
@@ -918,11 +920,6 @@ sub run_eval_tests {
       ';
     }
  
-    my $argstr = '';
-    if (scalar @args > 0) {
-      $argstr = ',' . join (', ', map { "q#".$_."#" } @args);
-    }
-
     $evalstr .= '
 
       eval {
@@ -953,8 +950,7 @@ sub run_eval_tests {
     ';
   }
 
-  %{$evalhash} = ();
-  $self->free_ruleset_source($pms, 'eval', $priority);
+  # don't free the eval ruleset here -- we need it in the compiled code!
 
   # nothing done in the loop, that means no rules 
   return unless ($evalstr);

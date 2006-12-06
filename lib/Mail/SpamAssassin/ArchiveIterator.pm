@@ -34,6 +34,7 @@ use constant BIG_LINES => BIG_BYTES/65;	# 65 bytes/line is a good approximation
 use vars qw {
   $MESSAGES
   $AICache
+  %class_opts
   @ISA
 };
 
@@ -47,7 +48,6 @@ Mail::SpamAssassin::ArchiveIterator - find and process messages one at a time
 
   my $iter = new Mail::SpamAssassin::ArchiveIterator(
     { 
-      'opt_n'     => 1,
       'opt_all'   => 1,
       'opt_cache' => 1,
     }
@@ -92,42 +92,6 @@ optional unless otherwise noted.
 
 Typically messages over 250k are skipped by ArchiveIterator.  Use this option
 to keep from skipping messages based on size.
-
-=item opt_n
-
-ArchiveIterator is typically used to simulate ham and spam moving through
-SpamAssassin.  By default, the list of messages is sorted by received date so
-that the mails can be passed through in order.  If opt_n is true, the sorting
-will not occur.  This is useful if you don't care about the order of the
-messages.
-
-=item opt_head
-
-Only use the first N ham and N spam (or if the value is -N, only use the first
-N total messages regardless of class).
-
-This setting can be specified separately for ham and spam target classes.
-If multiple targets for one class are specified with different
-options, the last target's options will be used.
-
-If the value is negative, and multiple targets are specified with different
-options, the last spam target's setting will be used.
-
-=item opt_tail
-
-Only use the last N ham and N spam (or if the value is -N, only use the last
-N total messages regardless of class).
-
-If both C<opt_head> and C<opt_tail> are specified, then the C<opt_head> value
-specifies a subset of the C<opt_tail> selection to use; in other words, the
-C<opt_tail> splice is applied first.
-
-This setting can be specified separately for ham and spam target classes.
-If multiple targets for one class are specified with different
-options, the last target's options will be used.
-
-If the value is negative, and multiple targets are specified with different
-options, the last spam target's setting will be used.
 
 =item opt_scanprob
 
@@ -211,8 +175,8 @@ sub new {
   bless ($self, $class);
 
   # If any of these options are set, we need to figure out the message's
-  # receive date at scan time.  opt_n == 0, opt_after, opt_before
-  $self->{determine_receive_date} = !$self->{opt_n} ||
+  # receive date at scan time.  opt_after, opt_before, or opt_want_date
+  $self->{determine_receive_date} = 
   	defined $self->{opt_after} || defined $self->{opt_before} ||
         $self->{opt_want_date};
 
@@ -252,9 +216,9 @@ The target_paths array is expected to be either one element per path in the
 following format: C<class:format:raw_location>, or a hash reference containing
 key-value option pairs and a 'target' key with a value in that format.
 
-The key-value option pairs that can be used are: opt_head, opt_tail,
-opt_scanprob, opt_after, opt_before.  See the constructor method's
-documentation for more information on their effects.
+The key-value option pairs that can be used are: opt_scanprob, opt_after,
+opt_before.  See the constructor method's documentation for more information
+on their effects.
 
 run() returns 0 if there was an error (can't open a file, etc,) and 1 if there
 were no errors.
@@ -273,17 +237,20 @@ files are individual messages, C<file> a file with a single message,
 C<mbox> an mbox formatted file, or C<mbx> for an mbx formatted directory.
 
 C<detect> can also be used.  This assumes C<mbox> for any file whose path
-contains the pattern C</\.mbox/i>, C<file> for STDIN and anything that is
-not a directory, or C<directory> otherwise.
+contains the pattern C</\.mbox/i>, C<file> anything that is not a
+directory, or C<directory> otherwise.
 
 =item raw_location
 
-Path to file or directory.  Can be "-" for STDIN.  File globbing is allowed
-using the standard csh-style globbing (see C<perldoc -f glob>).  C<~> at the
-front of the value will be replaced by the C<HOME> environment variable.
-Escaped whitespace is protected as well.
+Path to file or directory.  File globbing is allowed using the
+standard csh-style globbing (see C<perldoc -f glob>).  C<~> at the
+front of the value will be replaced by the C<HOME> environment
+variable.  Escaped whitespace is protected as well.
 
 B<NOTE:> C<~user> is not allowed.
+
+B<NOTE 2:> C<-> is not allowed as a raw location.  To have
+ArchiveIterator deal with STDIN, generate a temp file.
 
 =back
 
@@ -297,10 +264,22 @@ sub run {
     return 0;
   }
 
-  my $messages;
-
   # scan the targets and get the number and list of messages
-  ($MESSAGES, $messages) = $self->message_array(\@targets);
+  $self->_scan_targets(\@targets,
+    sub {
+      my($self, $date, $class, $format, $mail) = @_;
+      push(@{$self->{$class}}, _index_pack($date, $class, $format, $mail));
+    }
+  );
+
+  my $messages;
+  # for ease of memory, we'll play with pointers
+  $messages = $self->{s};
+  undef $self->{s};
+  push(@{$messages}, @{$self->{h}});
+  undef $self->{h};
+
+  $MESSAGES = scalar(@{$messages});
 
   # go ahead and run through all of the messages specified
   return $self->_run($messages);
@@ -310,7 +289,7 @@ sub _run {
   my ($self, $messages) = @_;
 
   while (my $message = shift @{$messages}) {
-    my($class, undef, $date, undef, $result) = $self->run_message($message);
+    my($class, undef, $date, undef, $result) = $self->_run_message($message);
     &{$self->{result_sub}}($class, $result, $date) if $result;
   }
   return ! $self->{access_problem};
@@ -320,26 +299,26 @@ sub _run {
 
 ## run_message and related functions to process a single message
 
-sub run_message {
+sub _run_message {
   my ($self, $msg) = @_;
 
-  my ($date, $class, $format, $mail) = index_unpack($msg);
+  my ($date, $class, $format, $mail) = _index_unpack($msg);
 
   if ($format eq 'f') {
-    return $self->run_file($class, $format, $mail, $date);
+    return $self->_run_file($class, $format, $mail, $date);
   }
   elsif ($format eq 'm') {
-    return $self->run_mailbox($class, $format, $mail, $date);
+    return $self->_run_mailbox($class, $format, $mail, $date);
   }
   elsif ($format eq 'b') {
-    return $self->run_mbx($class, $format, $mail, $date);
+    return $self->_run_mbx($class, $format, $mail, $date);
   }
 }
 
-sub run_file {
+sub _run_file {
   my ($self, $class, $format, $where, $date) = @_;
 
-  if (!mail_open($where)) {
+  if (!_mail_open($where)) {
     $self->{access_problem} = 1;
     return;
   }
@@ -367,13 +346,13 @@ sub run_file {
   return($class, $format, $date, $where, &{$self->{wanted_sub}}($class, $where, $date, \@msg, $format));
 }
 
-sub run_mailbox {
+sub _run_mailbox {
   my ($self, $class, $format, $where, $date) = @_;
 
   my ($file, $offset) = ($where =~ m/(.*)\.(\d+)$/);
   my @msg;
   my $header;
-  if (!mail_open($file)) {
+  if (!_mail_open($file)) {
     $self->{access_problem} = 1;
     return;
   }
@@ -402,14 +381,14 @@ sub run_mailbox {
   return($class, $format, $date, $where, &{$self->{wanted_sub}}($class, $where, $date, \@msg, $format));
 }
 
-sub run_mbx {
+sub _run_mbx {
   my ($self, $class, $format, $where, $date) = @_;
 
   my ($file, $offset) = ($where =~ m/(.*)\.(\d+)$/);
   my @msg;
   my $header;
 
-  if (!mail_open($file)) {
+  if (!_mail_open($file)) {
     $self->{access_problem} = 1;
     return;
   }
@@ -446,11 +425,10 @@ sub run_mbx {
 
 ############################################################################
 
-# TODO: this needs POD since mass-check uses it?
-sub message_array {
-  my ($self, $targets) = @_;
+sub _scan_targets {
+  my ($self, $targets, $bkfunc) = @_;
 
-  my %class_opts = ();
+  %class_opts = ();
 
   foreach my $target (@${targets}) {
     if (!defined $target) {
@@ -483,6 +461,11 @@ sub message_array {
       next;
     }
 
+    if ($rawloc eq '-') {
+      warn 'archive-iterator: raw location "-" is not supported';
+      next;
+    }
+
     # use ham by default, things like "spamassassin" can't specify the type
     $class = substr($class, 0, 1) || 'h';
 
@@ -493,9 +476,9 @@ sub message_array {
     foreach my $k (keys %opts) {
       $self->{$k} = $opts{$k};
     }
-    $self->set_default_message_selection_opts();
+    $self->_set_default_message_selection_opts();
 
-    my @locations = $self->fix_globs($rawloc);
+    my @locations = $self->_fix_globs($rawloc);
 
     foreach my $location (@locations) {
       my $method;
@@ -504,86 +487,41 @@ sub message_array {
 	# detect the format
         if (!-d $location && $location =~ /\.mbox/i) {
           # filename indicates mbox
-          $method = \&scan_mailbox;
+          $format = 'mbox';
         } 
-	elsif ($location eq '-' || !(-d $location)) {
-	  # stdin is considered a file if not passed as mbox
-          $method = \&scan_file;
+	elsif (!(-d $location)) {
+          $format = 'file';
 	}
 	else {
 	  # it's a directory
-	  $method = \&scan_directory;
-	}
-      }
-      else {
-	if ($format eq "dir") {
-	  $method = \&scan_directory;
-	}
-	elsif ($format eq "file") {
-	  $method = \&scan_file;
-	}
-	elsif ($format eq "mbox") {
-	  $method = \&scan_mailbox;
-        }
-	elsif ($format eq "mbx") {
-	  $method = \&scan_mbx;
+	  $format = 'dir';
 	}
       }
 
-      if(defined($method)) {
-	&{$method}($self, $class, $location);
+      if ($format eq 'dir') {
+        $method = \&_scan_directory;
+      }
+      elsif ($format eq 'mbox') {
+        $method = \&_scan_mailbox;
+      }
+      elsif ($format eq 'file') {
+        $method = \&_scan_file;
+      }
+      elsif ($format eq 'mbx') {
+        $method = \&_scan_mbx;
       }
       else {
 	warn "archive-iterator: format $format unknown!";
+        next;
       }
+
+      # call the appropriate method
+      &{$method}($self, $class, $location, $bkfunc);
     }
   }
-
-  $self->top_and_tail_messages($self->{h}, $class_opts{h});
-  $self->top_and_tail_messages($self->{s}, $class_opts{s});
-
-  my $messages;
-  if ($self->{opt_n}) {
-    # OPT_N == 1 means don't bother sorting on message receive date
-
-    # for ease of memory, we'll play with pointers
-    $messages = $self->{s};
-    undef $self->{s};
-    push(@{$messages}, @{$self->{h}});
-    undef $self->{h};
-  }
-  else {
-    # OPT_N == 0 means sort on message receive date
-
-    # Sort the spam and ham groups by date
-    my @s = @{$self->{s}};
-    undef $self->{s};
-    my @h = @{$self->{h}};
-    undef $self->{h};
-
-    # interleave ordered spam and ham
-    if (@s && @h) {
-      my $ratio = @s / @h;
-      while (@s && @h) {
-	push @{$messages}, (@s / @h > $ratio) ? (shift @s) : (shift @h);
-      }
-    }
-    # push the rest onto the end
-    push @{$messages}, @s, @h;
-  }
-
-  # head or tail < 0 means crop the total list, negate the value appropriately
-  if ($self->{opt_tail} < 0) {
-    splice(@{$messages}, 0, $self->{opt_tail});
-  }
-  if ($self->{opt_head} < 0) {
-    splice(@{$messages}, -$self->{opt_head});
-  }
-
-  return scalar(@{$messages}), $messages;
 }
 
-sub mail_open {
+sub _mail_open {
   my ($file) = @_;
 
   my $expr;
@@ -603,64 +541,26 @@ sub mail_open {
   return 1;
 }
 
-sub set_default_message_selection_opts {
+sub _set_default_message_selection_opts {
   my ($self) = @_;
-  $self->{opt_head} = 0 unless (defined $self->{opt_head});
-  $self->{opt_tail} = 0 unless (defined $self->{opt_tail});
   $self->{opt_scanprob} = 1.0 unless (defined $self->{opt_scanprob});
   $self->{opt_want_date} = 1 unless (defined $self->{opt_want_date});
   $self->{opt_cache} = 0 unless (defined $self->{opt_cache});
 }
 
-sub top_and_tail_messages {
-  my ($self, $ary, $opts) = @_;
-
-  foreach my $k (keys %{$opts}) {
-    $self->{$k} = $opts->{$k};
-  }
-  $self->set_default_message_selection_opts();
-
-  if ($self->{opt_n}) {
-    # OPT_N == 1 means don't bother sorting on message receive date
-
-    # head or tail > 0 means crop each list
-    if ($self->{opt_tail} > 0) {
-      splice(@{$ary}, 0, -$self->{opt_tail});
-    }
-    if ($self->{opt_head} > 0) {
-      splice(@{$ary}, min ($self->{opt_head}, scalar @{$ary}));
-    }
-  }
-  else {
-    # OPT_N == 0 means sort on message receive date
-
-    # Sort the spam and ham groups by date
-    my @s = sort { $a cmp $b } @{$ary};
-
-    # head or tail > 0 means crop each list
-    if ($self->{opt_tail} > 0) {
-      splice(@s, 0, -$self->{opt_tail});
-    }
-    if ($self->{opt_head} > 0) {
-      splice(@s, min ($self->{opt_head}, scalar @s));
-    }
-
-    @{$ary} = @s;
-  }
-}
-
 ############################################################################
 
-sub message_is_useful_by_date {
+sub _message_is_useful_by_date {
   my ($self, $date) = @_;
-
-  return 0 unless $date;	# undef or 0 date = unusable
 
   if (!$self->{opt_after} && !$self->{opt_before}) {
     # Not using the feature
     return 1;
   }
-  elsif (!$self->{opt_before}) {
+
+  return 0 unless $date;	# undef or 0 date = unusable
+
+  if (!$self->{opt_before}) {
     # Just care about after
     return $date > $self->{opt_after};
   }
@@ -673,7 +573,7 @@ sub message_is_useful_by_date {
 # make assumptions about --before, since the file may have been "touch"ed
 # since the last message was appended; but we can assume that too-old
 # files cannot contain messages newer than their modtime.
-sub message_is_useful_by_file_modtime {
+sub _message_is_useful_by_file_modtime {
   my ($self, $date) = @_;
 
   # better safe than sorry, if date is undef; let other stuff catch errors
@@ -687,7 +587,7 @@ sub message_is_useful_by_file_modtime {
   }
 }
 
-sub scanprob_says_scan {
+sub _scanprob_says_scan {
   my ($self) = @_;
   if (defined $self->{opt_scanprob} && $self->{opt_scanprob} < 1.0) {
     if ( int( rand( 1 / $self->{opt_scanprob} ) ) != 0 ) {
@@ -706,18 +606,18 @@ sub scanprob_says_scan {
 
 # put the date in first, big-endian packed format
 # this format lets cmp easily sort by date, then class, format, and path.
-sub index_pack {
+sub _index_pack {
   return pack("NAAA*", @_);
 }
 
-sub index_unpack {
+sub _index_unpack {
   return unpack("NAAA*", $_[0]);
 }
 
 ############################################################################
 
-sub scan_directory {
-  my ($self, $class, $folder) = @_;
+sub _scan_directory {
+  my ($self, $class, $folder, $bkfunc) = @_;
 
   my @files;
 
@@ -741,10 +641,10 @@ sub scan_directory {
     return;
   }
 
-  $self->create_cache('dir', $folder);
+  $self->_create_cache('dir', $folder);
 
   foreach my $mail (@files) {
-    $self->scan_file($class, $mail);
+    $self->_scan_file($class, $mail, $bkfunc);
   }
 
   if (defined $AICache) {
@@ -752,47 +652,48 @@ sub scan_directory {
   }
 }
 
-sub scan_file {
-  my ($self, $class, $mail) = @_;
+sub _scan_file {
+  my ($self, $class, $mail, $bkfunc) = @_;
 
-  $self->bump_scan_progress();
+  $self->_bump_scan_progress();
 
   my @s = stat($mail);
-  return unless $self->message_is_useful_by_file_modtime($s[9]);
+  return unless $self->_message_is_useful_by_file_modtime($s[9]);
 
-  if (!$self->{determine_receive_date}) {
-    push(@{$self->{$class}}, index_pack(AI_TIME_UNKNOWN, $class, "f", $mail));
-    return;
+  my $date = AI_TIME_UNKNOWN;
+
+  if ($self->{determine_receive_date}) {
+    unless (defined $AICache and $date = $AICache->check($mail)) {
+      my $header;
+      if (!_mail_open($mail)) {
+        $self->{access_problem} = 1;
+        return;
+      }
+      while (<INPUT>) {
+        last if /^\s*$/;
+        $header .= $_;
+      }
+      close(INPUT);
+      $date = Mail::SpamAssassin::Util::receive_date($header);
+      if (defined $AICache) {
+        $AICache->update($mail, $date);
+      }
+    }
+
+    return if !$self->_message_is_useful_by_date($date);
+    return if !$self->_scanprob_says_scan();
   }
 
-  my $date;
-  unless (defined $AICache and $date = $AICache->check($mail)) {
-    my $header;
-    if (!mail_open($mail)) {
-      $self->{access_problem} = 1;
-      return;
-    }
-    while (<INPUT>) {
-      last if /^\s*$/;
-      $header .= $_;
-    }
-    close(INPUT);
-    $date = Mail::SpamAssassin::Util::receive_date($header);
-    if (defined $AICache) {
-      $AICache->update($mail, $date);
-    }
-  }
+  &{$bkfunc}($self, $date, $class, 'f', $mail);
 
-  return if !$self->message_is_useful_by_date($date);
-  return if !$self->scanprob_says_scan();
-  push(@{$self->{$class}}, index_pack($date, $class, "f", $mail));
+  return;
 }
 
-sub scan_mailbox {
-  my ($self, $class, $folder) = @_;
+sub _scan_mailbox {
+  my ($self, $class, $folder, $bkfunc) = @_;
   my @files;
 
-  if ($folder ne '-' && -d $folder) {
+  if (-d $folder) {
     # passed a directory of mboxes
     $folder =~ s/\/\s*$//; #Remove trailing slash, if there
     if (!opendir(DIR, $folder)) {
@@ -813,7 +714,7 @@ sub scan_mailbox {
   }
 
   foreach my $file (@files) {
-    $self->bump_scan_progress();
+    $self->_bump_scan_progress();
     if ($file =~ /\.(?:gz|bz2)$/) {
       warn "archive-iterator: compressed mbox folders are not supported at this time\n";
       $self->{access_problem} = 1;
@@ -821,12 +722,12 @@ sub scan_mailbox {
     }
 
     my @s = stat($file);
-    next unless $self->message_is_useful_by_file_modtime($s[9]);
+    next unless $self->_message_is_useful_by_file_modtime($s[9]);
 
     my $info = {};
     my $count;
 
-    $self->create_cache('mbox', $file);
+    $self->_create_cache('mbox', $file);
 
     if ($self->{opt_cache}) {
       if ($count = $AICache->count()) {
@@ -835,7 +736,7 @@ sub scan_mailbox {
     }
 
     unless ($count) {
-      if (!mail_open($file)) {
+      if (!_mail_open($file)) {
         $self->{access_problem} = 1;
 	next;
       }
@@ -867,7 +768,7 @@ sub scan_mailbox {
 	  $where = tell INPUT;
         }
         if ($header) {
-          $self->bump_scan_progress();
+          $self->_bump_scan_progress();
 	  $info->{$offset} = Mail::SpamAssassin::Util::receive_date($header);
 	}
       }
@@ -880,11 +781,11 @@ sub scan_mailbox {
       }
 
       if ($self->{determine_receive_date}) {
-        next if !$self->message_is_useful_by_date($v);
+        next if !$self->_message_is_useful_by_date($v);
       }
-      next if !$self->scanprob_says_scan();
+      next if !$self->_scanprob_says_scan();
 
-      push(@{$self->{$class}}, index_pack($v, $class, "m", "$file.$k"));
+      &{$bkfunc}($self, $v, $class, 'm', "$file.$k");
     }
 
     if (defined $AICache) {
@@ -893,11 +794,11 @@ sub scan_mailbox {
   }
 }
 
-sub scan_mbx {
-  my ($self, $class, $folder) = @_;
+sub _scan_mbx {
+  my ($self, $class, $folder, $bkfunc) = @_;
   my (@files, $fp);
 
-  if ($folder ne '-' && -d $folder) {
+  if (-d $folder) {
     # got passed a directory full of mbx folders.
     $folder =~ s/\/\s*$//; # remove trailing slash, if there is one
     if (!opendir(DIR, $folder)) {
@@ -918,7 +819,7 @@ sub scan_mbx {
   }
 
   foreach my $file (@files) {
-    $self->bump_scan_progress();
+    $self->_bump_scan_progress();
 
     if ($folder =~ /\.(?:gz|bz2)$/) {
       warn "archive-iterator: compressed mbx folders are not supported at this time\n";
@@ -927,12 +828,12 @@ sub scan_mbx {
     }
 
     my @s = stat($file);
-    next unless $self->message_is_useful_by_file_modtime($s[9]);
+    next unless $self->_message_is_useful_by_file_modtime($s[9]);
 
     my $info = {};
     my $count;
 
-    $self->create_cache('mbx', $file);
+    $self->_create_cache('mbx', $file);
 
     if ($self->{opt_cache}) {
       if ($count = $AICache->count()) {
@@ -941,7 +842,7 @@ sub scan_mbx {
     }
 
     unless ($count) {
-      if (!mail_open($file)) {
+      if (!_mail_open($file)) {
 	$self->{access_problem} = 1;
         next;
       }
@@ -969,7 +870,7 @@ sub scan_mbx {
 	    $header .= $_;
 	  }
 
-          $self->bump_scan_progress();
+          $self->_bump_scan_progress();
 	  $info->{$offset} = Mail::SpamAssassin::Util::receive_date($header);
 
 	  # go onto the next message
@@ -988,11 +889,11 @@ sub scan_mbx {
       }
 
       if ($self->{determine_receive_date}) {
-        next if !$self->message_is_useful_by_date($v);
+        next if !$self->_message_is_useful_by_date($v);
       }
-      next if !$self->scanprob_says_scan();
+      next if !$self->_scanprob_says_scan();
 
-      push(@{$self->{$class}}, index_pack($v, $class, "b", "$file.$k"));
+      &{$bkfunc}($self, $v, $class, 'b', "$file.$k");
     }
 
     if (defined $AICache) {
@@ -1003,7 +904,7 @@ sub scan_mbx {
 
 ############################################################################
 
-sub bump_scan_progress {
+sub _bump_scan_progress {
   my ($self) = @_;
   if (exists $self->{scan_progress_sub}) {
     return unless ($self->{scan_progress_counter}++ % 50 == 0);
@@ -1016,7 +917,7 @@ sub bump_scan_progress {
 {
   my $home;
 
-  sub fix_globs {
+  sub _fix_globs {
     my ($self, $path) = @_;
 
     unless (defined $home) {
@@ -1046,11 +947,7 @@ sub bump_scan_progress {
   }
 }
 
-sub min {
-  return ($_[0] < $_[1] ? $_[0] : $_[1]);
-}
-
-sub create_cache {
+sub _create_cache {
   my ($self, $type, $path) = @_;
 
   if ($self->{opt_cache}) {

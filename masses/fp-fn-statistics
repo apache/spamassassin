@@ -1,3 +1,181 @@
-#!/bin/sh
+#!/usr/bin/perl -w
+#
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
 
-exec ./logs-to-c --count $*
+use Getopt::Long;
+use strict;
+
+use vars qw($opt_cffile $opt_lambda $opt_threshold $opt_scoreset
+	    $opt_spam $opt_ham $opt_fplog $opt_fnlog);
+
+$opt_cffile = "../rules";
+$opt_threshold = 5;
+$opt_spam = 'spam.log';
+$opt_ham = 'ham.log';
+$opt_scoreset = 0;
+
+GetOptions("cffile=s", "lambda=f", "threshold=f", "spam=s",
+	   "ham=s", "scoreset=i", "fplog=s", "fnlog=s");
+
+# If desired, report false positives and false negatives for analysis
+if (defined $opt_fnlog) { open (FNLOG, ">$opt_fnlog"); }
+if (defined $opt_fplog) { open (FPLOG, ">$opt_fplog"); }
+
+# lambda value for TCR equation, representing the cost of of an FP vs. the
+# cost of a FN.  Some example values are: 1 = tagged only, 9 = mailed back
+# to sender asking for token, 999 = blocking or deleting a message.
+#
+# We roughly aim for a value representing "moved to infrequently-read folder".
+
+my $lambda = 50;
+if ($opt_lambda) { $lambda = $opt_lambda; }
+
+use vars qw(%scores %allrules %rules);
+
+readscores();
+
+print "Reading per-message hit stat logs and scores...\n";
+my ($num_spam, $num_ham);
+my ($ga_yy, $ga_ny, $ga_yn, $ga_nn, $yyscore, $ynscore, $nyscore, $nnscore);
+
+readlogs();
+
+evaluate();
+
+# show memory usage before we exit
+# print "Running \"ps aux\"...\n";
+# open(PS, "ps aux|");
+# while(<PS>) {
+# print if $. == 1 || /\b$$\b/;
+# }
+# close(PS);
+
+exit 0;
+
+# arguments are $isspam, $count, \@tests, $msgline;
+sub log_line_count {
+  my $score = 0;
+  $score += $scores{$_} for @{$_[2]};
+
+  if ($_[0]) {
+    $num_spam++;
+    if ($score >= $opt_threshold) {
+      $ga_yy++;
+      $yyscore += $score;
+    }
+    else {
+      $ga_yn++;
+      $ynscore += $score;
+      if (defined $opt_fnlog) {
+	print FNLOG $_[3];
+      }
+    }
+  }
+  else {
+    $num_ham++;
+    if ($score >= $opt_threshold) {
+      #print STDERR "FP: $id\n";
+      $ga_ny++;
+      $nyscore += $score;
+      if (defined $opt_fplog) {
+	print FPLOG $_[3];
+      }
+    }
+    else {
+      $ga_nn++;
+      $nnscore += $score;
+    }
+  }
+}
+
+sub readlogs {
+  my $msgline;
+  my $count = 0;
+  $num_spam = $num_ham = 0;
+
+  $ga_yy = $ga_ny = $ga_yn = $ga_nn = 0;
+  $yyscore = $ynscore = $nyscore = $nnscore = 0.0;
+
+  foreach my $file ($opt_spam, $opt_ham) {
+    open (IN, "<$file") || die "Could not open file '$file': $!";
+
+    my $isspam = ($file eq $opt_spam);
+    my $caught;			# 1st parameter of log line
+    my $rules;			# 4th parameter of log line
+
+    while (defined($msgline = <IN>)) {
+      ($caught, undef, undef, $rules) = split(' ', $msgline);
+
+      # only take lines starting with Y or .
+      next unless ($caught eq 'Y' || $caught eq '.') && $rules;
+
+      # get tests, but ignore unknown tests and subrules
+      my @tests = grep { defined $scores{$_} && !$allrules{$_}->{issubrule} }
+	split(/,/, $rules);
+
+      # run handler
+      log_line_count($isspam, $count, \@tests, $msgline);
+
+      # increment line
+      $count++;
+    }
+    close IN;
+  }
+}
+
+sub readscores {
+  print "Reading scores from \"$opt_cffile\"...\n";
+  system ("../build/parse-rules-for-masses -d \"$opt_cffile\" -s $opt_scoreset") and die;
+  require "./tmp/rules.pl";
+  %allrules = %rules;           # ensure it stays global
+}
+
+sub evaluate {
+   printf ("\n# SUMMARY for threshold %3.1f:\n", $opt_threshold);
+   printf "# Correctly non-spam: %6d  %4.2f%%\n",
+       $ga_nn, ($ga_nn /  $num_ham) * 100.0;
+   printf "# Correctly spam:     %6d  %4.2f%%\n",
+       $ga_yy, ($ga_yy /  $num_spam) * 100.0;
+   printf "# False positives:    %6d  %4.2f%%\n",
+       $ga_ny, ($ga_ny /  $num_ham) * 100.0;
+   printf "# False negatives:    %6d  %4.2f%%\n",
+       $ga_yn, ($ga_yn /  $num_spam) * 100.0;
+
+  # convert to the TCR metrics used in the published lit
+  my $nspamspam = $ga_yy;
+  my $nspamlegit = $ga_yn;
+  my $nlegitspam = $ga_ny;
+  my $nlegitlegit = $ga_yn;
+  my $nlegit = $num_ham;
+  my $nspam = $num_spam;
+
+  my $werr = ($lambda * $nlegitspam + $nspamlegit)
+                  / ($lambda * $nlegit + $nspam);
+
+  my $werr_base = $nspam
+                  / ($lambda * $nlegit + $nspam);
+
+  $werr ||= 0.000001;     # avoid / by 0
+  my $tcr = $werr_base / $werr;
+
+  my $sr = ($nspamspam / $nspam) * 100.0;
+  my $sp = ($nspamspam / ($nspamspam + $nlegitspam)) * 100.0;
+  printf "# TCR(l=%s): %3.6f  SpamRecall: %3.3f%%  SpamPrec: %3.3f%%\n",
+    $lambda, $tcr, $sr, $sp;
+}
+

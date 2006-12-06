@@ -42,7 +42,8 @@ foreach my $dr (@daterevs) {
   my $fastinfo = get_fastinfo($dr, $drdir);
   if (!defined $fastinfo) { next; }
 
-  if (!-e "$drdir/fastinfo.xml" || -s "$drdir/fastinfo.xml" == 0) {
+# always rewrite
+  {
     open (OUT, ">$drdir/fastinfo.xml") or die "cannot write $drdir/fastinfo.xml";
     print OUT $fastinfo;
     close OUT or die "failed to write to $drdir/fastinfo.xml";
@@ -138,7 +139,7 @@ sub read_submitters {
   open (IN, "<$fname") or warn "cannot read $fname";
   while (<IN>) {
     # spam results used for 329933 DETAILS all: spam-mc-fast.log spam-foo.log
-    if (/^# spam results used for \S+ \S+ \S+: (.*)$/) {
+    if (/^# spam results used for .+?: (.*)$/) {
       my $sub = $1;
       $sub =~ s/\bspam-/ /gs;
       $sub =~ s/\.log\b/ /gs;
