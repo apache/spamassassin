@@ -575,7 +575,7 @@ See C<sa-compile> for more details.
 =cut
 EOT
 
-$str =~ s/^fnord=/=/gs;
+  $str =~ s/^fnord=/=/gm;
   print FILE $str;
 
 }
