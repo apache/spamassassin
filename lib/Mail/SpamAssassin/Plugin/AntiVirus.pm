@@ -93,7 +93,7 @@ sub _check_attachments {
   $pms->{antivirus_suspect_name} = 0;
 
   # MICROSOFT_EXECUTABLE triggered here
-  foreach my $p ($pms->{msg}->find_parts(qr/^(application|text)\b/)) {
+  foreach my $p ($pms->{msg}->find_parts(qr/./, 1)) {
     my ($ctype, $boundary, $charset, $name) =
       Mail::SpamAssassin::Util::parse_content_type($p->get_header('content-type'));
 
