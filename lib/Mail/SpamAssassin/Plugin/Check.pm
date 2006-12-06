@@ -91,6 +91,10 @@ sub check_main {
       $pms->{resolver}->finish_socket() if $pms->{resolver};
     }
 
+    # allow other, plugin-defined rule types to be called here
+    $self->{main}->call_plugins ("check_rules_at_priority",
+        { permsgstatus => $pms, priority => $priority, checkobj => $self });
+
     # do head tests
     $self->do_head_tests($pms, $priority);
     $self->do_head_eval_tests($pms, $priority);
