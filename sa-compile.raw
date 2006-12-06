@@ -666,8 +666,8 @@ sub fixup_re {
     elsif ($tok eq '\\') {
       $re =~ /\G(.)/gc or die "\\ at end of string!";
       my $esc = $1;
-      if ($esc !~ /^
-                [\.\@\$\(\)\/\-\+\*\^\?\!_]
+      if ($esc =~ /^
+                [\"]
                 $/x)
       {
         die "Unsupported escape: \\$esc";

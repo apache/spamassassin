@@ -119,11 +119,13 @@ sub extract_set_pri {
     next if ($conf->{rules_to_replace}->{$name});
 
     my ($qr, $mods) = $self->simplify_and_qr_regexp($rule);
-    my ($anchored, $floating) = regmust(qr/$qr/);
-    my @bases1 = (quotemeta $anchored);
-    my @bases2 = (quotemeta $floating);
-    # my @bases1 = ();
-    # my @bases2 = ();
+    my ($anchored, $floating, @bases1, @bases2);
+
+    eval {
+      ($anchored, $floating) = regmust(qr/$qr/);
+      @bases1 = (quotemeta $anchored);
+      @bases2 = (quotemeta $floating);
+    };
 
     my $len1 = 0;
     my $len2 = 0;

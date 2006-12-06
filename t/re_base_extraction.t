@@ -3,7 +3,7 @@
 # Test regular expression base-string extraction in
 # Mail::SpamAssassin::Plugin::BodyRuleBaseExtractor
 
-use lib '.'; use lib 't';
+use lib '.'; use lib 't'; use lib '../lib';
 use SATest; sa_t_init("re_base_extraction");
 use Test;
 use strict;
@@ -13,7 +13,7 @@ BEGIN {
   if (-e 't/test_dir') { chdir 't'; } 
   if (-e 'test_dir') { unshift(@INC, '../blib/lib'); }
 
-  plan tests => 25;
+  plan tests => 28;
 
 };
 use lib '../lib';
@@ -23,6 +23,8 @@ try_extraction ('
     body EXCUSE_REMOVE /to be removed from.{0,20}(?:mailings|offers)/i
     body KAM_STOCKTIP15 /(?:Nano Superlattice Technology|NSLT)/is
     body TEST1 /foo(?:ish)? bar/
+    body TEST1A /fo(?:oish|o) bar/
+    body TEST1B /fo(?:oish|o)? bar/
     body TEST2 /foody* bar/
     body TEST3 /foody? bar/
     body TEST4 /A(?i:ct) N(?i:ow)/
@@ -40,11 +42,12 @@ try_extraction ('
     bases_split_out_alternations => 1
 }, [
 
-    'foo bar:TEST1 FOO',
+    'fo bar:TEST1B',
+    'foo bar:TEST1 TEST1B TEST1A FOO',
     'to be removed from:EXCUSE_REMOVE',
     'nslt:KAM_STOCKTIP15',
     'nano superlattice technology:KAM_STOCKTIP15',
-    'fooish bar:TEST1',
+    'fooish bar:TEST1 TEST1B TEST1A',
     'act now:TEST4',
     'food:TEST2',
     'food bar:TEST3 TEST2',
@@ -67,7 +70,11 @@ try_extraction ('
     body FOO /foo bar/
     body EXCUSE_REMOVE /to be removed from.{0,20}(?:mailings|offers)/i
     body KAM_STOCKTIP15 /(?:Nano Superlattice Technology|NSLT)/is
-    body TEST1 /foo(?:ish)? bar/
+
+    # this should not result in a match on "foo bar" since we are not
+    # splitting alts in this test
+    body TEST1 /fo(?:oish|o)? bar/
+    body TEST2 /fo(?:oish|o) bar/
 
 ', {
     base_extract => 1,
@@ -83,8 +90,10 @@ try_extraction ('
 ],[
 
     'foo bar:FOO TEST1',
+    'foo bar:FOO TEST2',
     'nano superlattice technology:KAM_STOCKTIP15',
-    'fooish bar:TEST1'
+    'fooish bar:TEST1',
+    'fooish bar:TEST2'
 
 ]);
 ###########################################################################
