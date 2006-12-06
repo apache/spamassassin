@@ -324,6 +324,11 @@ sub parse {
     }
 
     if ($key eq 'else') {
+      if (!@if_stack) {
+        $parse_error = "config: found else without matching conditional";
+        goto failed_line;
+      }
+
       $skip_parsing = !$skip_parsing;
       next;
     }
@@ -331,6 +336,11 @@ sub parse {
     # and the endif statement:
     if ($key eq 'endif') {
       my $lastcond = pop @if_stack;
+      if (!defined $lastcond) {
+        $parse_error = "config: found endif without matching conditional";
+        goto failed_line;
+      }
+
       $skip_parsing = $lastcond->{skip_parsing};
       next;
     }
