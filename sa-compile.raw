@@ -1,0 +1,878 @@
+#!/usr/bin/perl -w -T
+
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+
+my $PREFIX          = '@@PREFIX@@';             # substituted at 'make' time
+my $DEF_RULES_DIR   = '@@DEF_RULES_DIR@@';      # substituted at 'make' time
+my $LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';    # substituted at 'make' time
+my $LOCAL_STATE_DIR = '@@LOCAL_STATE_DIR@@';    # substituted at 'make' time
+use lib '@@INSTALLSITELIB@@';                   # substituted at 'make' time
+
+use File::Spec;
+
+BEGIN {
+  my @bin = File::Spec->splitpath($0);
+  my $bin = ($bin[0] ? File::Spec->catpath(@bin[0..1]) : $bin[1])
+            || File::Spec->curdir;
+
+  if (-e $bin.'/lib/Mail/SpamAssassin.pm'
+        || !-e '@@INSTALLSITELIB@@/Mail/SpamAssassin.pm')
+  {
+    if ( $bin eq '../' && -e '../blib/lib/Mail/SpamAssassin.pm' ) {
+      unshift(@INC, '../blib/lib');
+    }
+    else {
+      foreach (qw(lib ../lib/site_perl
+                  ../lib/spamassassin ../share/spamassassin/lib))
+      {
+        my $dir = File::Spec->catdir($bin, split('/', $_));
+        if(-f File::Spec->catfile($dir, "Mail", "SpamAssassin.pm")) {
+          unshift(@INC, $dir); last;
+        }
+      }
+    }
+  }
+}
+
+use strict;
+use warnings;
+
+use Mail::SpamAssassin;
+use Getopt::Long;
+use File::Copy;
+use File::Path;
+use Pod::Usage;
+
+use vars qw( %opt );
+Mail::SpamAssassin::Util::clean_path_in_taint_mode();
+Mail::SpamAssassin::Util::untaint_var( \%ENV );
+
+##############################################################################
+
+Getopt::Long::Configure(
+  qw(bundling no_getopt_compat
+    permute no_auto_abbrev no_ignore_case)
+);
+
+GetOptions(
+  'list'		=> \$opt{'list'},
+
+  'configpath|config-file|config-dir|c|C=s' => \$opt{'configpath'},
+  'prefspath|prefs-file|p=s'                => \$opt{'prefspath'},
+  'siteconfigpath=s'                        => \$opt{'siteconfigpath'},
+  'cf=s'                                    => \@{$opt{'cf'}},
+  'debug-level|D:s' => \$opt{'debug'},
+  'help|h|?'        => \$opt{'help'},
+  'version|V'       => \$opt{'version'},
+  )
+  or usage( 0, "Unknown option!" );
+
+if ( defined $opt{'help'} ) {
+  usage( 0, "For more information read the manual page" );
+}
+if ( defined $opt{'version'} ) {
+  print "SpamAssassin version " . Mail::SpamAssassin::Version() . "\n";
+  exit 0;
+}
+
+sub usage {
+  my ( $exitval, $message ) = @_;
+  $exitval ||= 64;
+
+  if ($exitval == 0) {
+    print_version();
+    print("\n");
+  }
+  pod2usage(
+    -verbose => 0,
+    -message => $message,
+    -exitval => $exitval,
+  );
+}
+
+# set debug areas, if any specified (only useful for command-line tools)
+if (defined $opt{'debug'}) {
+  $opt{'debug'} ||= 'all';
+}
+
+# ensure the body-rule base extractor plugin is loaded, we use that
+my $post_config = q(
+  loadplugin Mail::SpamAssassin::Plugin::BodyRuleBaseExtractor
+).join("\n", @{$opt{'cf'}})."\n";
+
+my $spamtest = new Mail::SpamAssassin(
+  {
+    rules_filename      => $opt{'configpath'},
+    site_rules_filename => $opt{'siteconfigpath'},
+    userprefs_filename  => $opt{'prefspath'},
+    debug               => $opt{'debug'},
+    local_tests_only    => 1,
+    dont_copy_prefs     => 1,
+    PREFIX              => $PREFIX,
+    DEF_RULES_DIR       => $DEF_RULES_DIR,
+    LOCAL_RULES_DIR     => $LOCAL_RULES_DIR,
+    LOCAL_STATE_DIR     => $LOCAL_STATE_DIR,
+    post_config_text    => $post_config,
+  }
+);
+
+# appropriate settings for rule2xs usage
+$spamtest->{base_extract} = 1;
+$spamtest->{bases_must_be_casei} = 1;
+$spamtest->{bases_can_use_alternations} = 0;
+$spamtest->{bases_can_use_quantifiers} = 0;
+$spamtest->{bases_can_use_char_classes} = 0;
+$spamtest->{bases_split_out_alternations} = 1;
+
+$spamtest->init(1);
+
+# this actually extracts the base rules in the plugin, as a side-effect
+my $res = $spamtest->lint_rules();
+
+if ($res) {
+  die "not compiling; 'spamassassin --lint' check failed!\n";
+}
+
+if ( defined $opt{'list'} ) {
+  print dump_base_strings();
+}
+else {
+  compile_base_strings();
+}
+
+$spamtest->finish();
+exit;
+
+##############################################################################
+
+sub dump_base_strings {
+  my $conf = $spamtest->{conf};
+
+  my $s = '';
+  foreach my $ruletype (sort keys %{$conf->{base_orig}}) {
+    $s .= "name $ruletype\n";
+
+    foreach my $key1 (sort keys %{$conf->{base_orig}->{$ruletype}}) {
+      $s .= "orig $key1 $conf->{base_orig}->{$ruletype}->{$key1}\n";
+    }
+
+    foreach my $key (sort keys %{$conf->{base_string}->{$ruletype}}) {
+      $s .= "r $key:$conf->{base_string}->{$ruletype}->{$key}\n";
+    }
+  }
+  return $s;
+}
+
+##############################################################################
+
+sub compile_base_strings {
+  my $dirpath = Mail::SpamAssassin::Util::secure_tmpdir();
+  die "secure_tmpdir failed" unless $dirpath && -w $dirpath;
+
+  open OUT, ">$dirpath/bases.in"
+	or die "cannot write to $dirpath/bases.in";
+  print OUT dump_base_strings();
+  close OUT or die "cannot write to $dirpath/bases.in";
+
+  chdir $dirpath; print "cd $dirpath\n";
+  rule2xs("bases.in");
+
+  my $instdir = $spamtest->sed_path('__local_state_dir__/compiled/__version__');
+
+  run(get_perl()." Makefile.PL ".
+	"PREFIX=$dirpath/ignored INSTALLSITEARCH=$instdir");
+
+  run("make install");	# into $instdir
+}
+
+sub run {
+  my @cmd = @_;
+  print join(' ',@cmd)."\n";
+  system(@cmd);
+  ($?>>8 != 0) and die "command failed!";
+}
+
+sub get_perl {
+  my $perl;
+  if ($^X =~ m|^/|) {
+    $perl = $^X;
+  } else {
+    use Config;
+    $perl = $Config{perlpath};
+    $perl =~ s|/[^/]*$|/$^X|;
+  }
+  $perl =~ /^(.*)$/;
+  return $1;
+}
+
+##############################################################################
+
+use constant MAX_RULES_PER_C_FILE => 200;
+
+sub rule2xs {
+  my $modname;
+  my $force = 1;
+  my $FILE = shift;
+
+  open(my $fh, "sort $FILE |") || die "open($FILE): $!";
+# read ruleset name from the first line in the file
+  my $ruleset_name;
+  $_ = <$fh>;
+  if (/^name\s+(\S+)/) {
+    $ruleset_name = $1;
+  }
+
+  if (!$modname) {
+    $modname = "Mail::SpamAssassin::CompiledRegexps::$ruleset_name";
+  }
+
+  our $PATH = $modname;
+  $PATH =~ s/::/-/g;
+  our $PMFILE = $modname;
+  $PMFILE =~ s/.*:://;
+  $PMFILE .= ".pm";
+  our $XSFILE = $PMFILE;
+  $XSFILE =~ s/\.pm$/.xs/;
+
+  $force and rmtree $PATH;
+  mkdir $PATH or (!$force and die "mkdir($PATH): $!");
+  chdir $PATH; print "cd $PATH\n";
+
+  my $cprefix = $modname; $cprefix =~ s/[^A-ZA-z0-9]+/_/gs;
+
+  my $numscans = 0;
+  my (@dot_star, @dot_plus);
+
+  my $has_rules = '';
+
+  while (!eof($fh)) {
+    $numscans++;
+
+    open(my $re, ">scanner${numscans}.re") || die "open(>scanner{$numscans}.re): $!";
+
+    print $re <<EOT;
+#define NULL            ((char*) 0)
+#define YYCTYPE         unsigned char
+#define YYCURSOR        *p
+#define YYLIMIT         *p
+#define YYMARKER        q
+#define YYFILL(n)
+EOT
+
+    print $re <<EOT;
+char *${cprefix}_scan${numscans}(unsigned char **p){
+unsigned char *q;
+/*!re2c
+EOT
+
+    my $line = 0;
+    while (<$fh>) {
+      next if /^#/;
+
+      if (/^orig\s+(\S+)\s+(.*)$/) {
+	my $name = $1;
+	my $regexp = $2;
+	$name =~ s/#/[hash]/gs;
+	$regexp =~ s/#/[hash]/gs;
+	$has_rules .= "  q#$name# => q#$regexp#,\n";
+	next;
+      }
+
+      my ($regexp, $reason) = /^r (.*):(.*)$/;
+      die "no 'r REGEXP:REASON' in $_" unless defined $regexp;
+
+      if ($regexp =~ /^\.\*/) {
+	push @dot_star, "$regexp:$reason";
+	next;
+      }
+      elsif ($regexp =~ /^\.\+/) {
+	push @dot_plus, "$regexp:$reason";
+	next;
+      }
+      eval {
+	print $re "\t", fixup_re($regexp), "            {return \"$reason\";}\n";
+	$line++;
+      };
+      $@ and handle_fixup_error($@, $regexp, $reason);
+      last if $line == MAX_RULES_PER_C_FILE;
+    }
+
+    print $re <<EOT;
+  [\\000-\\377]        { return NULL; }
+*/
+}
+EOT
+
+    #last if $numscans == 2;
+  }
+
+  while (@dot_star) {
+    $numscans++;
+
+    open(my $re, ">scanner${numscans}.re") || 
+	die "open(>scanner{$numscans}.re): $!";
+
+    print $re <<EOT;
+#define NULL            ((char*) 0)
+#define YYCTYPE         unsigned char
+#define YYCURSOR        *p
+#define YYLIMIT         *p
+#define YYMARKER        q
+#define YYFILL(n)
+EOT
+
+    print $re <<EOT;
+char *${cprefix}_scan${numscans}(unsigned char **p){
+unsigned char *q;
+start:
+/*!re2c
+EOT
+
+    my $line = 0;
+    while ($_ = shift @dot_star) {
+      my ($regexp, $reason) = /^(.*):(.*)$/;
+      $regexp =~ s/^\.\*//;
+      eval {
+	print $re "\t", fixup_re($regexp), "             {return \"$reason\";}\n";
+	$line++;
+      };
+      $@ and handle_fixup_error($@, $regexp, $reason);
+      last if $line == MAX_RULES_PER_C_FILE;
+    }
+    
+    print $re <<EOT;
+  [\\001-\\377]    { goto start; }
+  [\\000]        {return NULL; }
+*/
+}
+EOT
+  }
+
+  while (@dot_plus) {
+    $numscans++;
+
+    open(my $re, ">scanner${numscans}.re") || 
+	die "open(>scanner{$numscans}.re): $!";
+    
+    print $re <<EOT;
+#define NULL            ((char*) 0)
+#define YYCTYPE         unsigned char
+#define YYCURSOR        *p
+#define YYLIMIT         *p
+#define YYMARKER        q
+#define YYFILL(n)
+EOT
+
+    print $re <<EOT;
+char *${cprefix}_scan${numscans}(unsigned char **p){
+unsigned char *q;
+p++;
+start:
+/*!re2c
+EOT
+    
+    my $line = 0;
+    while ($_ = shift @dot_plus) {
+      my ($regexp, $reason) = /^(.*):(.*)$/;
+      $regexp =~ s/^\.\+//;
+
+      eval {
+	print $re "\t", fixup_re($regexp), "             {return \"$reason\";}\n";
+	$line++;
+      };
+      $@ and handle_fixup_error($@, $regexp, $reason);
+      last if $line == MAX_RULES_PER_C_FILE;
+    }
+    
+    print $re <<EOT;
+  [\\001-\\377]    { goto start; }
+  [\\000]        {return NULL; }
+*/
+
+}
+EOT
+  }
+
+  for (1..$numscans) {
+    # print "[re2c for block $_ / $numscans]\n";
+
+    my $cmd = "re2c -i -b -o scanner$_.c scanner$_.re";
+    run($cmd);
+
+    # this must be fatal; it can result in corrupt output modules missing
+    # scannerN() functions
+    if ($? >> 8 != 0) {
+      my $cwd = `pwd`; chop $cwd;
+      die "'$cmd' failed, dying!\n".
+	  "see $cwd/scanner$_.re\n";
+    }
+  }
+
+  open(FILE, ">Makefile.PL") || die "write Makefile.PL: $!";
+  print FILE <<"EOT";
+    use ExtUtils::MakeMaker;
+
+    WriteMakefile(
+	'NAME' => '$modname',
+	'VERSION_FROM' => '$PMFILE',
+	'ABSTRACT_FROM' => '$PMFILE',
+	'OBJECT' => '\$(O_FILES)',
+	'OPTIMIZE' => '-O2',
+	'AUTHOR' => 'A. U. Tomated <automated\@example.com>',
+    );
+EOT
+
+  open(FILE, ">MANIFEST.SKIP") || die "write MANIFEST.SKIP: $!";
+  print FILE <<'EOT';
+CVS/.*
+\.bak$
+\.sw[a-z]$
+\.tar$
+\.tgz$
+\.tar\.gz$
+\.o$
+\.xsi$
+\.bs$
+^.#
+^tmp/
+^blib/
+^Makefile$
+^Makefile\.[a-z]+$
+^pm_to_blib$
+~$
+EOT
+
+  open(my $re, ">$XSFILE") || die "write $XSFILE: $!";
+  print $re <<"EOT";
+#include "EXTERN.h"
+#include "perl.h"
+#include "XSUB.h"
+
+  /* split single-space-separated result string */
+  static void
+  split_and_add (AV *results, char *match)
+  {
+      char *wordstart, *cp;
+
+      for (cp = wordstart = match; *cp != (unsigned char) 0; cp++) {
+	if (*cp == ' ') {
+	  av_push(results,
+	      newSVpvn_share(wordstart, cp-wordstart, (U32)0));
+	  wordstart = cp + 1;
+	}
+      }
+      av_push(results,
+	      newSVpvn_share(wordstart, cp-wordstart, (U32)0));
+  }
+
+MODULE = $modname  PACKAGE = $modname
+
+PROTOTYPES: DISABLE
+
+SV *
+scan(psv)
+	SV* psv
+
+  PREINIT:
+	int i;
+	char *match;
+	unsigned char *cursor;
+	unsigned char *pstart;
+	unsigned char *pend;
+	STRLEN plen;
+	AV *results;
+
+  CODE:
+	pstart = (unsigned char *) SvPVutf8(psv, plen);
+	pend = pstart + plen;
+	results = (AV *) sv_2mortal((SV *) newAV());
+EOT
+
+  for (1..$numscans) {
+    my $funcname = $cprefix."_scan".$_;
+
+    print $re <<EOT;
+	  extern char *${funcname} (unsigned char **);
+
+	  cursor = pstart;
+	  while (cursor < pend) {
+	    while (match = ${funcname} (\&cursor)) {
+	      split_and_add(results, match);
+	    }
+	  }
+EOT
+
+  }
+
+  print $re <<EOT;
+	  RETVAL = newRV((SV *) results);
+      OUTPUT:
+	  RETVAL
+
+EOT
+
+  close($re);
+
+  open(FILE, ">$PMFILE") || die "write $PMFILE: $!";
+  my $str =<<"EOT";
+
+package $modname;
+
+use strict;
+use vars qw(\$VERSION \@ISA \@EXPORT_OK);
+
+use DynaLoader ();
+
+BEGIN {
+\$VERSION = '1.0';
+\@ISA = qw(DynaLoader);
+\@EXPORT_OK = qw();
+
+our \$HAS_RULES = {
+  $has_rules
+};
+
+bootstrap $modname \$VERSION;
+}
+
+1;
+__END__
+
+fnord=head1 NAME
+
+$modname - Efficient string matching for regexps found in $FILE
+
+fnord=head1 SYNOPSIS
+
+  use $modname;
+  
+  ...
+  my \$match = ${modname}::scan(\$string);
+
+fnord=head1 DESCRIPTION
+
+This module was created by SpamAssassin with the aid of re2xs, which uses re2c
+to create an XS library capable of scanning through a bunch of regular
+expressions as defined in F<$FILE>.
+
+See C<sa-compile> for more details.
+
+=cut
+EOT
+
+  $str =~ s/^fnord=/=/gm;
+  print FILE $str;
+
+}
+
+sub fixup_re {
+  my $re = shift;
+  
+  # print "FIXUP: $re\n";
+  
+  my $output = "";
+  my $TOK = qr([\{\^\$\"\(\)\[\|\\\.\+\*\?]);
+  
+  my $STATE;
+  while ($re =~ /\G(.*?)($TOK)/gc) {
+    my $pre = $1;
+    my $tok = $2;
+
+    if (length($pre)) {
+      $output .= "\"$pre\"";
+    }
+
+    if ($tok eq "(") {
+      # Grouping
+      my $origpos = pos $re;
+      if ($re =~ /\G(.*)\)/gc) {
+        # trim that down, if necessary, to just the matching
+        # (...) substring.
+        my $subre = find_balanced_group($1);
+        $output .= "( " . fixup_re($subre) . " )";
+        # reset m//g offset to the end of that group, so that
+        # the next token is taken from the right place
+        pos $re = $origpos + length($subre) + 1;
+      }
+      else {
+        die "re: $re doesn't have group closing bracket";
+      }
+    }
+    elsif ($tok eq "|") {
+      $output .= " | ";
+    }
+    elsif ($tok eq ")") {
+      $output .= " ) ";
+    }
+    elsif ($tok eq "[") {
+      # chars
+      if ($re =~ /\G(.*?)\]/gc) {
+        $output .= "[$1]";
+      }
+      else {
+        die "re: $re doesn't have character class closing bracket";
+      }
+    }
+    elsif ($tok eq '{') {
+      if ($re =~ /\G(.*?)\}/gc) {
+        $output .= "{$1}";
+      }
+      else {
+        die "re: $re doesn't have quantifier closing bracket";
+      }
+    }
+    elsif ($tok eq '.') {
+      $output .= '.';
+    }
+    elsif ($tok eq '"') {
+      $output .= '"\\';     # reversed later to form \"
+    }
+    elsif ($tok eq '*') {
+      # /guaranteed*/ => "guarantee" "d"* , not "guaranteed"*
+      $output =~ s/(.)\"\s*$/\" \"$1\"/;
+      $output .= '* ';
+    }
+    elsif ($tok eq '?') {
+      # /guaranteed?/ => "guarantee" "d"? , not "guaranteed"?
+      $output =~ s/(.)\"\s*$/\" \"$1\"/;
+      $output .= '? ';
+    }
+    elsif ($tok eq '+') {
+      # /guaranteed+/ => "guarantee" "d"+ , not "guaranteed"+
+      $output =~ s/(.)\"\s*$/\" \"$1\"/;
+      $output .= '+ ';
+    }
+    elsif ($tok eq "^") {
+      die "Unsupported anchor: \\$tok";
+    }
+    elsif ($tok eq "\$") {
+      die "Unsupported anchor: \\$tok";
+    }
+    elsif ($tok eq '\\') {
+      $re =~ /\G(.)/gc or die "\\ at end of string!";
+      my $esc = $1;
+      if ($esc =~ /^
+                [\"]
+                $/x)
+      {
+        die "Unsupported escape: \\$esc";
+      }
+      $output .= "\"$esc\"";
+    }
+    else {
+      print "PRE: $pre\nTOK: $tok\n";
+    }
+  }
+  
+  if (!defined(pos($re))) {
+    # no matches
+    $output .= "\"$re\"";
+  }
+  elsif (pos($re) <= length($re)) {
+    $output .= fixup_re(substr($re, pos($re)));
+  }
+  
+  $output =~ s/""//g; # strip empty strings, or turn "abc""def" -> "abcdef"
+  # print "OUTPUT: $output\n";
+  return $output;
+}
+
+sub handle_fixup_error {
+  my ($strat, $regexp, $reason) = @_;
+  if ($strat) {
+    warn "skipped: $regexp: $strat";
+  }
+}
+
+sub find_balanced_group {
+  my ($re) = @_;
+
+  # $re could be:
+  #
+  #   foo
+  #   foo|bar|baz
+  #   foo(aa|bb|cc)|bar|baz
+  #   foo(aa|(bb|cc|ddd))|bar(e|f)
+  #
+  # or, due to inefficient regexp parsing above:
+  #
+  #   foo) totally_unrelated_text (next_grouping => "foo"
+  #
+  # all we have to do here is ensure that we correctly pick out
+  # the balanced group.
+
+  my $output = "";
+  my $TOK = qr([\(\\\)]);
+  my $level = 0;
+  
+  my $STATE;
+  while ($re =~ /\G(.*?)($TOK)/gc) {
+    my $pre = $1;
+    my $tok = $2;
+
+    if (length($pre)) {
+      $output .= $pre;
+    }
+
+    if ($tok eq "(") {
+      $output .= $tok;
+      $level++;
+    }
+    elsif ($tok eq ")") {
+      $level--;
+      if ($level < 0) {
+        # we found the matching close-bracket; stop searching here
+        # warn "JMD partial $re => $output";
+        return $output;
+      }
+      $output .= $tok;
+    }
+    elsif ($tok eq '\\') {
+      $re =~ /\G(.)/gc or die "\\ at end of string!";
+      my $esc = $1;
+      $output .= $tok.$esc;
+    }
+    else {
+      $output .= $tok;
+    }
+  }
+
+  if (!defined(pos($re))) {
+    $output .= $re;
+  }
+  elsif (pos($re) <= length($re)) {
+    $output .= substr($re, pos($re));
+  }
+
+  # we hit end-of-string; in other words, it was a balanced re anyway
+  # warn "JMD fully balanced $re";
+  return $re;
+}
+
+##############################################################################
+
+=cut
+
+=head1 NAME
+
+sa-compile - compile SpamAssassin ruleset into native code
+
+=head1 SYNOPSIS
+
+B<sa-compile> [options]
+
+Options:
+
+  --list                        Output base string list to STDOUT
+
+  -C path, --configpath=path, --config-file=path   Path to standard configuration dir
+  -p prefs, --prefspath=file, --prefs-file=file    Set user preferences file
+  --siteconfigpath=path         Path for site configs (def: /etc/mail/spamassassin)
+  --cf='config line'            Additional line of configuration
+
+  -D, --debug [area=n,...]	Print debugging messages
+  -V, --version			Print version
+  -h, --help			Print usage message
+
+=head1 DESCRIPTION
+
+sa-compile uses C<re2c> to compile the SpamAssassin ruleset into C code in a
+Perl XS module, and from there into native object code.  This will then be used
+by the C<Mail::SpamAssassin::Plugin::Rule2XSBody> plugin to speed up
+SpamAssassin's operation, where possible.
+
+This requires C<re2c> (see C<http://re2c.org/>), and the C compiler used to
+build Perl XS modules, be installed.
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<--list>
+
+Output the extracted base strings to STDOUT, instead of generating
+the C extension code.
+
+=item B<-C> I<path>, B<--configpath>=I<path>, B<--config-file>=I<path>
+
+Use the specified path for locating the distributed configuration files.
+Ignore the default directories (usually C</usr/share/spamassassin> or similar).
+
+=item B<--siteconfigpath>=I<path>
+
+Use the specified path for locating site-specific configuration files.  Ignore
+the default directories (usually C</etc/mail/spamassassin> or similar).
+
+=item B<--cf='config line'>
+
+Add additional lines of configuration directly from the command-line, parsed
+after the configuration files are read.   Multiple B<--cf> arguments can be
+used, and each will be considered a separate line of configuration.
+
+=item B<-p> I<prefs>, B<--prefspath>=I<prefs>, B<--prefs-file>=I<prefs>
+
+Read user score preferences from I<prefs> (usually
+C<$HOME/.spamassassin/user_prefs>) .
+
+=item B<-D> [I<area,...>], B<--debug> [I<area,...>]
+
+Produce debugging output.  If no areas are listed, all debugging information is
+printed.  Diagnostic output can also be enabled for each area individually;
+I<area> is the area of the code to instrument.
+
+For more information about which areas (also known as channels) are available,
+please see the documentation at:
+
+	C<http://wiki.apache.org/spamassassin/DebugChannels>
+
+=item B<-h>, B<--help>
+
+Print help message and exit.
+
+=item B<-V>, B<--version>
+
+Print sa-compile version and exit.
+
+=back
+
+=head1 SEE ALSO
+
+Mail::SpamAssassin(3)
+spamassassin(1)
+spamd(1)
+
+=head1 PREREQUESITES
+
+C<Mail::SpamAssassin>
+C<re2c>
+
+=head1 BUGS
+
+See <http://issues.apache.org/SpamAssassin/>
+
+=head1 AUTHORS
+
+The Apache SpamAssassin(tm) Project <http://spamassassin.apache.org/>
+
+=head1 COPYRIGHT
+
+SpamAssassin is distributed under the Apache License, Version 2.0, as
+described in the file C<LICENSE> included with the distribution.
+
+=cut
+

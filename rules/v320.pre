@@ -42,3 +42,12 @@ loadplugin Mail::SpamAssassin::Plugin::WLBLEval
 #
 loadplugin Mail::SpamAssassin::Plugin::VBounce
 
+# Rule2XSBody - speedup by compilation of ruleset to native code
+loadplugin Mail::SpamAssassin::Plugin::Rule2XSBody
+
+# RabinKarpBody - EXPERIMENTAL speedup plugin, requires RabinKarpAccel module
+# loadplugin Mail::SpamAssassin::Plugin::RabinKarpBody
+
+# P595Body - EXPERIMENTAL speedup plugin, using bleadperl RE optimizations
+# loadplugin Mail::SpamAssassin::Plugin::P595Body
+
