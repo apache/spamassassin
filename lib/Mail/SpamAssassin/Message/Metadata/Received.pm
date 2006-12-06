@@ -381,7 +381,7 @@ sub parse_received_line {
     $auth = $1;
   }
   # Sendmail, MDaemon, some webmail servers, and others
-  elsif (/^from .*?(?:\]\)|\)\]) .*?\(.*?authenticated.*?\).*? by/) {
+  elsif (/^from .*?(?:\](?: \([^)]*\))?\)|\)\]) .*?\(.*?authenticated.*?\).*? by/) {
     $auth = 'Sendmail';
   }
   # Critical Path Messaging Server
