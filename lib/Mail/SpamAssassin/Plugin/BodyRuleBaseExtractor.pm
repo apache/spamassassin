@@ -121,11 +121,13 @@ sub extract_set_pri {
     my ($qr, $mods) = $self->simplify_and_qr_regexp($rule);
     my ($anchored, $floating, @bases1, @bases2);
 
-    eval {
-      ($anchored, $floating) = regmust(qr/$qr/);
-      @bases1 = (quotemeta $anchored);
-      @bases2 = (quotemeta $floating);
-    };
+    # don't use this; it results in differing behaviour for 5.9.5
+    # vs 5.[68].*, which we want to avoid.
+    #eval {
+      # ($anchored, $floating) = regmust(qr/$qr/);
+      # @bases1 = (quotemeta $anchored);
+      # @bases2 = (quotemeta $floating);
+    #};
 
     my $len1 = 0;
     my $len2 = 0;
