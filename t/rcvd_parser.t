@@ -343,6 +343,9 @@ my %data = (
 
   'from dsl-082-082-143-115.arcor-ip.net (dsl-082-083-139-045.arcor-ip.net [82.83.139.45]) (authenticated bits=0) by postman.arcor.de (8.13.0.PreAlpha4/8.13.0.PreAlpha4) with ESMTP id i2U75jD1003350 for <linux-thinkpad@linux-thinkpad.org>; Tue, 30 Mar 2004 09:05:45 +0200 (MEST)' =>
   '[ ip=82.83.139.45 rdns=dsl-082-083-139-045.arcor-ip.net helo=dsl-082-082-143-115.arcor-ip.net by=postman.arcor.de ident= envfrom= id=i2U75jD1003350 auth=Sendmail ]',
+
+  'from MARISELA (dsl-189-149-70-163.prod-infinitum.com.mx [189.149.70.163] (may be forged)) (authenticated bits=0) by mail.legosoft.com.mx (8.13.8/8.13.8) with ESMTP id kB3G26P6019032 for <rberber@cactus-soft.dyndns.org>; Sun, 3 Dec 2006 10:02:16 -0600 (CST)' =>
+  '[ ip=189.149.70.163 rdns=dsl-189-149-70-163.prod-infinitum.com.mx helo=MARISELA by=mail.legosoft.com.mx ident= envfrom= id=kB3G26P6019032 auth=Sendmail ]',
   
   'from p5483b7c0.dip.t-dialin.net ([84.131.183.192] helo=192.168.1.23) by moonflower.de with asmtp (TLS-1.0:RSA_ARCFOUR_MD5:16) (Exim 4.34) id 1CIoQP-0006SN-GV for linux-thinkpad@linux-thinkpad.org; Sat, 16 Oct 2004 15:16:47 +0200' =>
   '[ ip=84.131.183.192 rdns=p5483b7c0.dip.t-dialin.net helo=192.168.1.23 by=moonflower.de ident= envfrom= id=1CIoQP-0006SN-GV auth=asmtp ]',
