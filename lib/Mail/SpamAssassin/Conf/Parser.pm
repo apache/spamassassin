@@ -323,6 +323,11 @@ sub parse {
       next;
     }
 
+    if ($key eq 'else') {
+      $skip_parsing = !$skip_parsing;
+      next;
+    }
+
     # and the endif statement:
     if ($key eq 'endif') {
       my $lastcond = pop @if_stack;
