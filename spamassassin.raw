@@ -85,7 +85,8 @@ BEGIN {
   # redirect __WARN__ and __DIE__, but NOT until after the
   # Mail::SpamAssassin::Logger class has been parsed.
   $SIG{__WARN__} = sub {
-    log_message("warn", $_[0]);
+    # see http://use.perl.org/comments.pl?mode=flat&sid=33872 for $^S
+    log_message("warn", $_[0]) unless $^S;
   };
 };
 

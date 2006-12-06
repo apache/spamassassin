@@ -112,10 +112,11 @@ BEGIN {
   Time::HiRes->import(qw(time)) unless $@;
   # redirect __WARN__ and __DIE__
   $SIG{__WARN__} = sub {
-    log_message("warn", $_[0]);
+    # see http://use.perl.org/comments.pl?mode=flat&sid=33872 for $^S
+    log_message("warn", $_[0]) unless $^S;
   };
   $SIG{__DIE__} = sub {
-    log_message("error", $_[0]) if $_[0] !~ /\bin eval\b/;
+    log_message("error", $_[0]) unless $^S;
   };
 }
 
