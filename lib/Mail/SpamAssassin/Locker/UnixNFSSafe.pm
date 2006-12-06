@@ -92,7 +92,7 @@ sub safe_lock {
     }
     # link _may_ return false even if the link _is_ created
     @stat = lstat($lock_tmp);
-    if ($stat[3] > 1) {
+    if (defined $stat[3] && $stat[3] > 1) {
       dbg("locker: safe_lock: link to $lock_file: stat ok");
       $is_locked = 1;
       last;
