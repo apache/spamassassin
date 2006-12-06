@@ -111,11 +111,13 @@ BEGIN {
   eval { require Time::HiRes };
   Time::HiRes->import(qw(time)) unless $@;
   # redirect __WARN__ and __DIE__
+  # do not trap warnings here based on eval scope; evals are very
+  # common throughout.  die()s can be trapped though.
   $SIG{__WARN__} = sub {
-    # see http://use.perl.org/comments.pl?mode=flat&sid=33872 for $^S
-    log_message("warn", $_[0]) unless $^S;
+    log_message("warn", $_[0]);
   };
   $SIG{__DIE__} = sub {
+    # see http://use.perl.org/comments.pl?mode=flat&sid=33872 for $^S
     log_message("error", $_[0]) unless $^S;
   };
 }

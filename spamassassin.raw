@@ -82,11 +82,12 @@ use Mail::SpamAssassin::Util::Progress;
 use Mail::SpamAssassin::Logger qw(log_message);
 
 BEGIN {
-  # redirect __WARN__ and __DIE__, but NOT until after the
+  # redirect __WARN__, but NOT until after the
   # Mail::SpamAssassin::Logger class has been parsed.
+  # do not trap warnings here based on eval scope; evals are very
+  # common throughout.  die()s can be trapped in future though.
   $SIG{__WARN__} = sub {
-    # see http://use.perl.org/comments.pl?mode=flat&sid=33872 for $^S
-    log_message("warn", $_[0]) unless $^S;
+    log_message("warn", $_[0]);
   };
 };
 
