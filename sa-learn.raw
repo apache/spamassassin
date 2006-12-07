@@ -120,7 +120,7 @@ GetOptions(
   'randseed=i'  => \$opt{'randseed'},
   'stopafter=i' => \$opt{'stopafter'},
 
-  'debug-level|D:s' => \$opt{'debug'},
+  'debug|debug-level|D:s' => \$opt{'debug'},
   'help|h|?'        => \$opt{'help'},
   'version|V'       => \$opt{'version'},
 
@@ -604,7 +604,7 @@ Options:
  -p prefs, --prefspath=file, --prefs-file=file    Set user preferences file
  --siteconfigpath=path             Path for site configs (def: /etc/mail/spamassassin)
  --cf='config line'                Additional line of configuration
- -D, --debug-level                 Print debugging messages
+ -D, --debug [area=n,...]          Print debugging messages
  -V, --version                     Print version
  -h, --help                        Print usage message
 
@@ -777,7 +777,7 @@ Prints a progress bar (to STDERR) showing the current progress.  In the case
 where no valid terminal is found this option will behave very much like the
 --showdots option.
 
-=item B<-D>, B<--debug-level>
+=item B<-D> [I<area,...>], B<--debug> [I<area,...>]
 
 Produce debugging output. If no areas are listed, all debugging information is
 printed. Diagnostic output can also be enabled for each area individually;
@@ -785,6 +785,11 @@ I<area> is the area of the code to instrument. For example, to produce
 diagnostic output on bayes, learn, and dns, use:
 
         spamassassin -D bayes,learn,dns
+
+For more information about which areas (also known as channels) are available,
+please see the documentation at:
+
+        C<http://wiki.apache.org/spamassassin/DebugChannels>
 
 Higher priority informational messages that are suitable for logging in normal
 circumstances are available with an area of "info".

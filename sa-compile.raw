@@ -76,7 +76,7 @@ GetOptions(
   'prefspath|prefs-file|p=s'                => \$opt{'prefspath'},
   'siteconfigpath=s'                        => \$opt{'siteconfigpath'},
   'cf=s'                                    => \@{$opt{'cf'}},
-  'debug-level|D:s' => \$opt{'debug'},
+  'debug|D:s'       => \$opt{'debug'},
   'help|h|?'        => \$opt{'help'},
   'version|V'       => \$opt{'version'},
   )
