@@ -63,8 +63,8 @@ tstlocalrules (q{
   meta FOO1 (FOO2 && FOO3)
   meta FOO2 (1)
   meta FOO3 (FOO4 && FOO5)
-  meta FOO4 (1)
-  meta FOO5 (1)
+  meta FOO4 (2)
+  meta FOO5 (3)
   priority FOO5 -23
   priority FOO1 -28
 
