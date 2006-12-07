@@ -34,8 +34,6 @@ use strict;
 use warnings;
 use bytes;
 
-use re qw(regmust);     # added in blead, 2006-11-16
-
 use vars qw(@ISA);
 @ISA = qw(Mail::SpamAssassin::Plugin);
 
@@ -121,9 +119,10 @@ sub extract_set_pri {
     my ($qr, $mods) = $self->simplify_and_qr_regexp($rule);
     my ($anchored, $floating, @bases1, @bases2);
 
-    # don't use this; it results in differing behaviour for 5.9.5
+    # don't use this for now; it results in differing behaviour for 5.9.5
     # vs 5.[68].*, which we want to avoid.
     #eval {
+      # use re qw(regmust);     # added in blead, 2006-11-16
       # ($anchored, $floating) = regmust(qr/$qr/);
       # @bases1 = (quotemeta $anchored);
       # @bases2 = (quotemeta $floating);
