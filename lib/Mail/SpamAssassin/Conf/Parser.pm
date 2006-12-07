@@ -685,6 +685,7 @@ sub finish_parsing {
 
   $self->trace_meta_dependencies();
   $self->fix_priorities();
+  $self->find_dup_rules();          # must be after fix_priorities()
 
   dbg("conf: finish parsing");
 
@@ -838,6 +839,51 @@ sub fix_priorities {
         $pri->{$dep} = $basepri;
       }
     }
+  }
+}
+
+sub find_dup_rules {
+  my ($self) = @_;
+  my $conf = $self->{conf};
+
+  my %names_for_text = ();
+  my %dups = ();
+  while (my ($name, $text) = each %{$conf->{tests}}) {
+    my $type = $conf->{test_types}->{$name};
+    # ensure similar, but differently-typed, rules are not marked as dups
+    $text = "$type\t$text";      
+
+    if (defined $names_for_text{$text}) {
+      $names_for_text{$text} .= " ".$name;
+      $dups{$text} = 1;     # found (at least) one
+    } else {
+      $names_for_text{$text} = $name;
+    }
+  }
+
+  foreach my $text (keys %dups) {
+    my $first;
+    my $first_pri;
+    my @names = sort {$a cmp $b} split(' ', $names_for_text{$text});
+    foreach my $name (@names) {
+      my $priority = $conf->{priority}->{$name} || 0;
+
+      if (!defined $first || $priority < $first_pri) {
+        $first_pri = $priority;
+        $first = $name;
+      }
+    }
+    # $first is now the earliest-occurring rule. mark others as dups
+
+    my @dups = ();
+    foreach my $name (@names) {
+      next if $name eq $first;
+      push @dups, $name;
+      delete $conf->{tests}->{$name};
+    }
+
+    dbg("rules: $first has duplicates: ".join(' ', @dups));
+    $conf->{duplicate_rules}->{$first} = \@dups;
   }
 }
 

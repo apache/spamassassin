@@ -2115,6 +2115,15 @@ sub got_hit {
             $area,
             $params{ruletype},
             $self->{conf}->get_description_for_rule($rule) || $rule);
+
+  # take care of duplicate rules, too (bug 5206)
+  my $dups = $self->{conf}->{duplicate_rules}->{$rule};
+  if ($dups && @{$dups}) {
+    foreach my $dup (@{$dups}) {
+      $self->got_hit($dup, $area, %params);
+    }
+  }
+
   return 1;
 }
 

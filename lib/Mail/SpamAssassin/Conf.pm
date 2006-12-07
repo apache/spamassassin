@@ -2629,6 +2629,7 @@ sub new {
   $self->{rawbody_evals} = { };
   $self->{meta_tests} = { };
   $self->{eval_plugins} = { };
+  $self->{duplicate_rules} = { };
 
   # testing stuff
   $self->{regression_tests} = { };
