@@ -151,9 +151,8 @@ sub ui_get_url_switches {
     $self->{s}{scoremap} = 1;
   }
 
-  if (!grep { $_ } values %{$self->{s}}) {
-    $self->{s}{new} = 1;
-  }
+  # always show "new" set, though
+  $self->{s}{new} = 1;
 }
 
 sub get_url_switch {
@@ -436,6 +435,16 @@ sub show_default_view {
 
     };
   }
+
+  # debug: log the chosen sets parameters etc.
+  print "<!-- ",
+               "{s}{new} = $self->{s}{new}\n",
+               "{s}{age} = $self->{s}{age}\n",
+               "{s}{all} = $self->{s}{all}\n",
+               "{s}{overlap} = $self->{s}{overlap}\n",
+               "{s}{scoremap} = $self->{s}{scoremap}\n",
+               "{s}{xml} = $self->{s}{xml}\n",
+       "-->\n";
 
   $self->show_all_sets_for_daterev($self->{daterev}, $self->{daterev});
 
