@@ -256,8 +256,8 @@ sub _check_dkim {
   }
 
   # headers, line-by-line with \r\n endings, as per Mail::DKIM API
-  foreach my $line (split(/\n/s, $header)) {
-    $line =~ s/\r?$/\r\n/s;         # ensure \r\n ending
+  foreach my $line (split(/\r?\n/s, $header)) {  # split lines, deleting endings and final empty line
+    $line =~ s/$/\r\n/s;  # add back a standard \r\n ending
     $message->PRINT($line);
   }
   $message->PRINT("\r\n");
