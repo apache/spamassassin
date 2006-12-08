@@ -64,7 +64,7 @@ if ($doc =~ m{
   $submitters = $1;
 }
 else {
-  die "failed to find 'mcviewing' and 'mcsubmitters' microformats from $cgi_url";
+  loghtml_die("failed to find 'mcviewing' and 'mcsubmitters' microformats");
 }
 
 ###########################################################################
@@ -92,7 +92,11 @@ while ($doc =~ m!<rule>(.*?)</rule>!xg) {
 }
 
 if (!scalar keys %$plist) {
-  die "no rules found?\nURL: $url\ngot:\n$doc\n";
+  loghtml_die("no rules found?");
+}
+
+sub loghtml_die {
+  die "$_[0]\nURL: $url\ngot:\n$doc\n";
 }
 
 ###########################################################################
@@ -203,7 +207,7 @@ foreach my $plistkey (sort keys %$plist) {
   # that require a plugin we won't have
   my $skip = 0;
   my $ifs = $mailsa->{conf}->{if_stack}->{$name};
-  while ($ifs =~ /plugin\s*\((.+?)\)/g) {
+  while ($ifs && $ifs =~ /plugin\s*\((.+?)\)/g) {
     my $pkg = $1;
     # grep out the ones we *do* have, and do use in "ifplugin"
     # lines in "rulesrc", here...
