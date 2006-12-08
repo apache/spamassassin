@@ -900,7 +900,7 @@ sub parse_received_line {
     # Received: from ([10.0.0.6]) by mail0.ciphertrust.com with ESMTP ; Thu,
     # 13 Mar 2003 06:26:21 -0500 (EST)
     if (/^\(\[(${IP_ADDRESS})\]\) by (\S+) with /) {
-      $ip = $1; $by = $2;
+      $ip = $1; $by = $2; goto enough;
     }
 
     # Received: from ironport.com (10.1.1.5) by a50.ironport.com with ESMTP; 01 Apr 2003 12:00:51 -0800
