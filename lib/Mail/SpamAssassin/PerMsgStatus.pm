@@ -1745,7 +1745,15 @@ sub get_uri_detail_list {
   $self->{uri_domain_count} = 0;
 
   # do this so we're sure metadata->html is setup
-  my @parsed = $self->_get_parsed_uri_list();
+  my %parsed = map { $_ => 'parsed' } $self->_get_parsed_uri_list();
+
+  # Look for the domain in DK/DKIM headers
+  my $dk = $self->get('DomainKey-Signature');
+  if ($dk =~ /\bd\s*=\s*([^;]+)/) {
+    my $dom = $1;
+    $dom =~ s/\s+//g;
+    $parsed{$dom} = 'domainkeys';
+  }
 
   # get URIs from HTML parsing
   # use the metadata version since $self->{html} may not be setup
@@ -1781,14 +1789,19 @@ sub get_uri_detail_list {
   }
 
   # canonify the text parsed URIs
-  foreach my $uri ( @parsed ) {
-    $detail->{$uri}->{types}->{parsed} = 1;
+  while (my($uri, $type) = each %parsed) {
+    $detail->{$uri}->{types}->{$type} = 1;
     my $info = $detail->{$uri};
 
     my @uris = ();
     
     if (!exists $info->{cleaned}) {
-      @uris = Mail::SpamAssassin::Util::uri_list_canonify($redirector_patterns, $uri);
+      if ($type eq 'parsed') {
+        @uris = Mail::SpamAssassin::Util::uri_list_canonify($redirector_patterns, $uri);
+      }
+      else {
+        @uris = ( $uri );
+      }
       $info->{cleaned} = \@uris;
 
       foreach (@uris) {
@@ -1801,7 +1814,7 @@ sub get_uri_detail_list {
     }
 
     if (would_log('dbg', 'uri') == 2) {
-      dbg("uri: parsed uri found, $uri");
+      dbg("uri: parsed uri found of type $type, $uri");
       foreach my $nuri (@uris) {
         dbg("uri: cleaned parsed uri, $nuri");
       }
