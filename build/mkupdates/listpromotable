@@ -25,8 +25,9 @@ my $cgi_url = "http://ruleqa.spamassassin.org/";
 my $doc;
 my $cache = 'ruleqa.cache';
 
+my $url;
 if (!$FROM_CACHE || !-f $cache) {
-  my $url = $cgi_url."last-night?xml=1";
+  $url = $cgi_url."last-night?xml=1";
   $doc = get ($url);
   if (!$doc) {
     die "HTTP get failed: $doc\n";
@@ -91,7 +92,7 @@ while ($doc =~ m!<rule>(.*?)</rule>!xg) {
 }
 
 if (!scalar keys %$plist) {
-  die "no rules found?\n$doc\n";
+  die "no rules found?\nURL: $url\ngot:\n$doc\n";
 }
 
 ###########################################################################
