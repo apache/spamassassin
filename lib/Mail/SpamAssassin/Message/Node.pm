@@ -56,8 +56,7 @@ sub new {
   my $self = {
     headers		=> {},
     raw_headers		=> {},
-    header_order	=> [],
-    type                => ""
+    header_order	=> []
   };
 
   # deal with any parameters
