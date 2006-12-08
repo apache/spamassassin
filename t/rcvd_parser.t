@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rcvd_parser");
-use Test; BEGIN { plan tests => 123 };
+use Test; BEGIN { plan tests => 126 };
 use strict;
 
 # format is:
@@ -223,6 +223,15 @@ my %data = (
 
   'from imo-m01.mx.aol.com ([64.12.136.4] verified) by xxx.com (CommuniGate Pro SMTP 4.1.8) with ESMTP id 875522 for yyy@xxx.com; Tue, 03 Feb 2004 08:37:38 -0800' =>
   '[ ip=64.12.136.4 rdns= helo=imo-m01.mx.aol.com by=xxx.com ident= envfrom= id=875522 auth= ]',
+
+  'from [65.17.198.50] (HELO 123greetings.info) by mail.wcg.org (CommuniGate Pro SMTP 5.1.3) with SMTP id 19467966 for xxxx@wcg.org; Fri, 08 Dec 2006 08:40:46 -0800' =>
+  '[ ip=65.17.198.50 rdns= helo=123greetings.info by=mail.wcg.org ident= envfrom= id=19467966 auth= ]',
+
+  'from [128.114.2.223] (account user@example.edu HELO [10.10.10.10]) by silver.ucsc.edu (CommuniGate Pro SMTP 4.3.7) with ESMTPSA id 88402416 for user@example.edu; Mon, 04 Dec 2006 13:15:07 -0800' =>
+  '[ ip=128.114.2.223 rdns= helo=!10.10.10.10! by=silver.ucsc.edu ident= envfrom= id=88402416 auth=ESMTPSA ]',
+
+  'from [128.114.2.223] (account user@example.edu) by tin.ucsc.edu (CommuniGate Pro WebUser 4.3.7) with HTTP id 109780632 for user@example.edu; Tue, 05 Dec 2006 11:17:51 -0800' =>
+  '[ ip=128.114.2.223 rdns= helo= by=tin.ucsc.edu ident= envfrom= id=109780632 auth=HTTP ]',
 
   'from bigass1.example.com ([66.199.2.3]) by slim1.example.com with esmtp; Tue, 06 Jan 2004 23:56:09 +0000' =>
   '[ ip=66.199.2.3 rdns= helo=bigass1.example.com by=slim1.example.com ident= envfrom= id= auth= ]',
