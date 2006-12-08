@@ -893,7 +893,7 @@ sub parse_received_line {
     # Received: from [192.168.1.104] (account nazgul HELO [192.168.1.104])
     # by somewhere.com (CommuniGate Pro SMTP 3.5.7) with ESMTP-TLS id 2088434;
     # Fri, 07 Mar 2003 13:05:06 -0500
-    if (/^\[(${IP_ADDRESS})\] \(account \S+ (?:HELO|EHLO) (\S*)\) by (\S+) \(/) {
+    if (/^\[(${IP_ADDRESS})\] \((?:account \S+ )?(?:HELO|EHLO) (\S*)\) by (\S+) \(/) {
       $ip = $1; $helo = $2; $by = $3; goto enough;
     }
 
