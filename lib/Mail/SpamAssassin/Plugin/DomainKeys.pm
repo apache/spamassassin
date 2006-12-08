@@ -23,7 +23,26 @@ Mail::SpamAssassin::Plugin::DomainKeys - perform DomainKeys verification tests
 
  loadplugin Mail::SpamAssassin::Plugin::DomainKeys [/path/to/DomainKeys.pm]
 
- full DOMAINKEY_DOMAIN eval:check_domainkeys_verified()
+Signature:
+ header DK_SIGNED                eval:check_domainkeys_signed()
+ header DK_VERIFIED              eval:check_domainkeys_verified()
+
+Policy:
+   Note that DK policy record is only fetched if DK_VERIFIED is false
+   to save signing domain from unnecessary DNS queries,
+   as recommended (SHOULD) by draft-delany-domainkeys-base.
+   Rules DK_POLICY_* should preferably not be relied upon when DK_VERIFIED
+   is true, although they will return false in current implementation
+   when a policy record is not fetched, except for DK_POLICY_TESTING,
+   which is true if t=y appears in a public key record OR in a policy
+   record (when available).
+ header DK_POLICY_TESTING        eval:check_domainkeys_testing()
+ header DK_POLICY_SIGNSOME       eval:check_domainkeys_signsome()
+ header DK_POLICY_SIGNALL        eval:check_domainkeys_signall()
+
+Whitelisting based on verified signature:
+ header USER_IN_DK_WHITELIST     eval:check_for_dk_whitelist_from()
+ header USER_IN_DEF_DK_WL        eval:check_for_def_dk_whitelist_from()
 
 =head1 DESCRIPTION
 
@@ -241,8 +260,11 @@ sub _check_domainkeys {
 
   my $header = $scan->{msg}->get_pristine_header();
   my $body = $scan->{msg}->get_body();
+  my $dksighdr = $scan->{msg}->get_header("DomainKey-Signature");
+  dbg("dk: signature: $dksighdr")  if defined $dksighdr;
 
-  $self->sanitize_header_for_dk(\$header);
+  $self->sanitize_header_for_dk(\$header)
+    if defined $dksighdr && $dksighdr !~ /(?:^|;)[ \t]*h=/;  # case sensitive
 
   my $message = Mail::DomainKeys::Message->load(HeadString => $header,
 						 BodyReference => $body);
@@ -315,20 +337,30 @@ sub _dk_lookup_trapped {
       $scan->{domainkeys_verified} = 1;
     }
   }
-
-  my $policy = Mail::DomainKeys::Policy->fetch(Protocol => 'dns',
-					       Domain => $domain);
-
+  # testing flag in signature
+  if ($message->testing()) {
+    $scan->{domainkeys_testing} = 1;
+    dbg("dk: testing flag found in signature");
+  }
+  my $policy;
+  if (!$scan->{domainkeys_verified}) {
+    # Recipient systems SHOULD not retrieve a policy TXT record
+    # for email that successfully verifies.
+    $policy = Mail::DomainKeys::Policy->fetch(Protocol => 'dns',
+					      Domain => $domain);
+    my($fetched_policy) = $policy ? $policy->as_string : 'NONE';
+    $fetched_policy = ''  if !defined $fetched_policy;
+    dbg ("dk: fetched policy for domain $domain: $fetched_policy");
+  }
   return unless $policy;
-  dbg ("dk: fetched policy");
 
   # not signed and domain doesn't sign all
   if ($policy->signsome()) {
     $scan->{domainkeys_signsome} = 1;
   }
 
-  # domain or key testing
-  if ($message->testing() || $policy->testing()) {
+  # testing flag in policy
+  if ($policy->testing()) {
     $scan->{domainkeys_testing} = 1;
   }
 
@@ -346,10 +378,15 @@ sub _dkmsg_hdr {
   my ($self, $message) = @_;
   # try to use the signature() API if it exists (post-0.80)
   if ($message->can("signature")) {
+    my($sts,$msg);
     if (!$message->signed) {
-      return "no signature";
+      $sts = "no signature";
+    } else {
+      $sts = $message->signature->status;
+      $msg = $message->signature->errorstr;
     }
-    return $message->signature->status;
+    dbg("dk: $sts" . (defined $msg ? " ($msg)" : ''));
+    return $sts;
   } else {
     return $message->header->value;
   }
@@ -366,7 +403,8 @@ sub _dkmsg_signing_domain {
     return $message->signature->domain;
   } else {
     # otherwise parse it ourself
-    if ($scan->{msg}->get_header("DomainKey-Signature") =~ /d=(\S+);/) {
+    if ($scan->{msg}->get_header("DomainKey-Signature") =~
+        /(?: ^|; ) [ \t]* d= [ \t]* ([^;]*?) [ \t]* (?: ;|$ )/x) {
       return $1;
     }
     return undef;
@@ -376,6 +414,7 @@ sub _dkmsg_signing_domain {
 sub sanitize_header_for_dk {
   my ($self, $ref) = @_;
 
+  dbg("dk: sanitizing header, no \"h\" tag in signature");
   # remove folding, in a HTML-escape data-preserving style, so we can
   # strip headers easily
   $$ref =~ s/!/!ex;/gs;
