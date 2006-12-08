@@ -855,7 +855,7 @@ sub find_dup_rules {
 
     if (defined $names_for_text{$text}) {
       $names_for_text{$text} .= " ".$name;
-      $dups{$text} = 1;     # found (at least) one
+      $dups{$text} = undef;     # found (at least) one
     } else {
       $names_for_text{$text} = $name;
     }
