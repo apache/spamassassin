@@ -17,27 +17,104 @@
 # limitations under the License.
 # </@LICENSE>
 
+=head1 NAME
+
+rewrite-cf-with-new-scores - Rewrite SpamAssassin scores file with new
+scores.
+
+=head1 SYNOPSIS
+
+rewrite-cf-with-new-scores [options]
+
+  Options
+  --old-scores=file    Read file containing the old SpamAssassin scores
+  --new-scores=file    Read file containing the new SpamAssassin scores
+  -s,--scoreset n      Rewrite scoreset n
+  --output=file        Output rewritten score file to file
+
+ Note: these options can be shortened (i.e. --old, --new, --out) as
+ long as they are unambiguous.
+
+=head1 DESCRIPTION
+
+B<rewrite-cf-with-new-scores> is a tool to update the sitewide scores
+file with the newly generated scores. Since SpamAssassin has four
+different scoresets, which each need to be generated separately, this
+tool is used to only change the correct scoreset.
+
+By default, the old scores are read from F<../rules/50_scores.cf> and
+the new ones from F<perceptron.scores>. The output will be
+F<50_scores.cf> by default.
+
+If no options are given, the script will look for command line options
+in the following order: scoreset, old-scores, new-scores. In this
+case, output will go to B<STDOUT>.
+
+The rules directory needs to be used to make sure scores are given for
+the right tests. Rules not found in the rules directory will not be
+given scores in the output.
+
+=head1 BUGS
+
+Please report bugs to http://bugzilla.spamassassin.org/
+
+=head1 SEE ALSO
+
+L<mass-check(1)>, L<Mail::SpamAssassin::Masses(3)>, L<perceptron(1)>
+
+=cut
+
 use strict;
+use warnings;
+
+use Getopt::Long qw(:config auto_help);
+use Pod::Usage;
+
+use vars qw($opt_old $opt_new $opt_scoreset $opt_out);
+
+GetOptions("old-scores=s" => \$opt_old,
+	   "new-scores=s" => \$opt_new,
+	   "s|scoreset=i" => \$opt_scoreset,
+	   "output=s" => \$opt_out);
+
+# Backwards compatibility mode
+
+if (!defined($opt_old) &&
+    !defined($opt_new) &&
+    !defined($opt_scoreset) &&
+    !defined($opt_out)) {
+
+  ($opt_scoreset, $opt_old, $opt_new) = @ARGV;
+  $opt_out = "-"; #STDOUT
+
+}
+
+if (!defined $opt_scoreset) {
+  $opt_scoreset = 0;
+}
+
+$opt_new ||= "perceptron.scores";
+$opt_old ||= "../rules/50_scores.cf";
+$opt_out ||= "50_scores.cf";
 
 my $NUM_SCORESETS = 4;
-
 my $ZERO_MINISCULE_SCORES =     1;
 my $MINISCULE_THRESHOLD =       0.1;      # points
 
 my $UNZERO_META_PREDICATES =    1;
+
+if ($opt_scoreset < 0 || $opt_scoreset >= $NUM_SCORESETS) {
+  pod2usage("scoreset $opt_scoreset out of range 0 - " . ($NUM_SCORESETS-1));
+}
+
+# Open output
+open(OUT, ">$opt_out");
 
 # scores are broken into three regions:
 # 1. "pre" (stuff before generated mutable scores)
 # 2. "gen" (first generated mutable scores section)
 # 3. "end" (stuff after generated mutable scores)
 # 4. "gen2" (any later generated mutable scores sections)
-
-# options
-my ($scoreset, $oldscores, $newscores) = @ARGV;
-$scoreset = int($scoreset) if defined $scoreset;
-if (!defined $newscores || $scoreset < 0 || $scoreset >= $NUM_SCORESETS ) {
-  die "usage: rewrite-cf-with-new-scores scoreset oldscores.cf newscores.cf\n";
-}
 
 # variables filled-out in read_rules()
 our %rules;			# rules data
@@ -74,14 +151,14 @@ if ($UNZERO_META_PREDICATES) {
 $end = sub_gen2($end);
 
 # write stuff out
-print $pre;
+print OUT $pre;
 print_gen();
-print $end;
+print OUT $end;
 exit;
 
 
 sub read_rules {
-  system ("../build/parse-rules-for-masses -s $scoreset") and die;
+  system ("../build/parse-rules-for-masses -s $opt_scoreset") and die;
   if (-e "tmp/rules.pl") {
     # note: the spaces need to stay in front of the require to work around
     # a RPM 4.1 problem
@@ -93,7 +170,7 @@ sub read_rules {
 }
 
 sub read_gascores {
-  open (STDIN, "<$newscores") or die "cannot open $newscores";
+  open (STDIN, "<$opt_new") or die "cannot open $opt_new";
   while (<STDIN>) {
     next unless /^score\s+(\S+)\s+(-?\d+(?:\.\d+)?)/;
     my $name = $1;
@@ -122,7 +199,7 @@ sub read_gascores {
 }
 
 sub read_oldscores {
-  open (IN, "<$oldscores") or die "cannot open $oldscores";
+  open (IN, "<$opt_old") or die "cannot open $opt_old";
 
   # state of things
   my $where = "pre";		# region of original scores file that we're in
@@ -183,7 +260,7 @@ sub readline_gen {
   my $comment;
   if ($line =~ s/\s*#\s*(.*)//) {
     $comment = $1;
-    $comment =~ s/ n=$scoreset//;
+    $comment =~ s/ n=$opt_scoreset//;
   }
   if ($line =~ /^\s*score\s+(\S+)\s/) {
     my (undef, $name, @scores) = split(' ', $line);
@@ -201,7 +278,7 @@ sub readline_gen2 {
   my $comment;
   if ($line =~ s/\s*#\s*(.*)//) {
     $comment = $1;
-    $comment =~ s/ n=$scoreset//;
+    $comment =~ s/ n=$opt_scoreset//;
   }
   if ($line =~ /^\s*score\s+(\S+)\s/) {
     my (undef, $name, @scores) = split(' ', $line);
@@ -241,17 +318,17 @@ sub build_new_scores {
     
     # set appropriate scoreset value
     if (defined $gascores{$name}) {
-      $scores[$scoreset] = $gascores{$name};
+      $scores[$opt_scoreset] = $gascores{$name};
       delete $oldscores{$name};
     }
     else {
       # zero for current scoreset if there was no new score;
       # when the perceptron does this for mutable rules, it means
       # that score had a new score of 0
-      $scores[$scoreset] = 0;
+      $scores[$opt_scoreset] = 0;
 
       if (defined $oldscores{$name}) {
-	$comment .= " n=$scoreset";
+	$comment .= " n=$opt_scoreset";
 	#warn "$name has no GA score, but had a score before\n";
       }
     }
@@ -281,12 +358,12 @@ sub new_score_line {
 }
 
 sub print_gen {
-  print "\n";
+  print OUT "\n";
   foreach my $name (@gen_order) {
     next if ($gen2{$name});       # will do that separately
-    print new_score_line($name), "\n";
+    print OUT new_score_line($name), "\n";
   }
-  print "\n";
+  print OUT "\n";
 }
 
 sub sub_gen2 {
@@ -351,8 +428,8 @@ sub fixup_miniscule_scores {
 
   foreach my $name (@gen_order) {
     my @scores = @{$gen_lines{$name}{scores}};
-    if (abs($scores[$scoreset]) < $MINISCULE_THRESHOLD) {
-      $scores[$scoreset] = 0;
+    if (abs($scores[$opt_scoreset]) < $MINISCULE_THRESHOLD) {
+      $scores[$opt_scoreset] = 0;
       $num_fixed++;
     }
     @{$gen_lines{$name}{scores}} = @scores;
@@ -395,11 +472,11 @@ sub fixup_meta_predicates {
               $rules{$depend}->{tflags} =~ /\b(?:net|learn)\b/);
 
       # if dependency has a non-zero score, it'll run
-      my $depscore = $gen_lines{$depend}{scores}[$scoreset];
+      my $depscore = $gen_lines{$depend}{scores}[$opt_scoreset];
       next if (defined $depscore && $depscore != 0);
 
       warn "dep failure: $name depends on $depend with 0 score; fixing at non-0\n";
-      $gen_lines{$depend}{scores}[$scoreset] = 0.001;
+      $gen_lines{$depend}{scores}[$opt_scoreset] = 0.001;
     }
   }
 }
