@@ -1,13 +1,5 @@
 #!/usr/bin/perl -w
 
-# mboxget - get a message from a mailbox or maildir, from mass-check output
-#
-# usage: mboxget [-noannotate] [mass-check-mbox-or-file-id ...]
-#
-# example:
-#
-#   grep SUBJECT_FREQ spam.log | ./mboxget | grep Subject:
-#
 # <@LICENSE>
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -26,19 +18,71 @@
 # </@LICENSE>
 
 use strict;
+use warnings;
+
+sub mywarn;
+
+use Getopt::Long qw(:config bundling auto_help);
+use Pod::Usage;
+use vars qw($opt_noannotate $opt_h);
+GetOptions("noannotate" => \$opt_noannotate,
+	   "h|headers" => \$opt_h
+	  );
+
+=head1 NAME
+
+mboxget - Extract a message from an mbox (or other mail file)
+
+=head1 SYNOPSIS
+
+ mboxget [options] <target> ...
+
+ Options:
+  -h, --headers       Display only message headers
+  --noannotate        Do not add X-Mass-Check-Id header with message path
+
+=head1 DESCRIPTION
+
+B<mboxget> extracts and displays the messages specified on the command
+line and on STDIN. Messages are expected to be listed as
+<path_to_file>.<offeset> or simply <path_to_file>. Multiple messages
+can be specified, in which case, each message will be output. This
+script is very useful in combination with mass-check logs and
+mboxes. Targets given on STDIN may be in B<mass-check> format, and may
+even be preceeded by a filename and a colon (like the output of
+B<grep> would provide)
+
+Use the B<-h> option to just output headers.
+
+By default an X-Mass-Check-Id header is added to make it easier to
+find a message. Use B<--noannotate> to disable this.
+
+=head1 EXAMPLES
+
+To show spam messages that hit the rule BAYES_99
+
+grep BAYES_99 masses.log | mboxget
+
+To show the message indicated by "/path/to/my/mbox.1234"
+
+mboxget /path/to/my/mbox.1234
+
+To find the Subject lines of all spam messages that hit SUBJ_AS_SEEN
+
+grep SUBJ_AS_SEEN spam.log | mboxget -h | grep ^Subject:
+
+=cut
+
+
 
 my $prog = $0;
 $prog =~ s@.*/@@;
 
-sub mywarn;
-
-use Getopt::Long;
-use vars qw($opt_noannotate);
-GetOptions("noannotate");
-
 my $annotate = ($opt_noannotate ? 0 : 1);
 
-my @inputs = @ARGV;
+foreach (@ARGV) {
+  handle_input($_);
+}
 
 while (<>) {
   s/^[^\s:]+://;  # filenames, from "grep foo *"
@@ -53,6 +97,7 @@ while (<>) {
     handle_input($_);
   }
 }
+
 exit;
 
 sub handle_input {
@@ -93,6 +138,9 @@ sub handle_input {
     }
     else {
       $past = 1;
+    }
+    if ($opt_h) {
+      last if /^$/;
     }
     push (@msg, $_);
   }
