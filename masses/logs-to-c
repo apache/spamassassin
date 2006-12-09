@@ -321,7 +321,7 @@ int tests_count[$num_nondup];
 
 sub read_ranges {
   if (!-f 'tmp/ranges.data') {
-    system ("make tmp/ranges.data");
+    system ("make tmp/ranges.data SCORESET=$opt_scoreset");
   }
 
   # read ranges, and mutableness, from ranges.data.
