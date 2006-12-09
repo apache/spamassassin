@@ -87,7 +87,7 @@ sub handle_input {
   my $past = 0;
   my @msg = ();
   while (<INPUT>) {
-    if ($past && $offset) {
+    if ($past && defined($offset)) {
       # only do this for mboxes
       last if substr($_,0,5) eq "From ";
     }
