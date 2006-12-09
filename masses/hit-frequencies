@@ -18,56 +18,145 @@
 # </@LICENSE>
 
 use strict;
+use warnings;
+
 use FindBin;
-use Getopt::Std;
-getopts("fm:M:X:l:L:pxhc:at:s:ioTSdP");
+use Getopt::Long qw(:config bundling auto_help);
+use Pod::Usage;
 
 use vars qw {
-  $opt_f $opt_m $opt_M $opt_X $opt_p $opt_x $opt_h $opt_l $opt_L $opt_c
-  $opt_a $opt_t $opt_s $opt_i $sorting $opt_o $opt_T $opt_S $opt_X
-  $opt_d $opt_P
+  $opt_c $opt_s $opt_f $opt_a $opt_p $opt_x $opt_m $opt_t $opt_M
+  $opt_X $opt_L $opt_l $opt_i $opt_T $opt_o $opt_S $opt_P $opt_d
+  $sorting
 };
 
-# as per http://wiki.apache.org/spamassassin/RulesProjPromotion, for -P
-my $promote_so_min      = 0.95;
-my $promote_hitrate_min = 0.02;
-my $promote_fprate_max  = 1.00;
+GetOptions("c|cffile=s@" => \$opt_c,
+	   "s|scoreset=i" => \$opt_s, # ,, pacify stupid emacs cperl mode
+	   "f|falses" => \$opt_f,
+	   "a|all" => \$opt_a,
+	   "p|percentages" => \$opt_p,
+	   "x|extended" => \$opt_x,
+	   "m|matchrules=s" => \$opt_m,
+	   "t|tflags=s" => \$opt_t,
+	   "M|matchlogs=s" => \$opt_M,
+	   "X|excludelogs=s" => \$opt_X,
+	   "L|onlylanguage=s" => \$opt_L,
+	   "l|alsolanguage=s" => \$opt_l,
+	   "i|ig" => \$opt_i,
+	   "T|times" => \$opt_T,
+	   "o|overlaps" => \$opt_o,
+	   "S|scoremap" => \$opt_S,
+	   "P|promotion" => \$opt_P,
+	   "d|xml" => \$opt_d
+	  );
 
-sub usage {
-  die "hit-frequencies [-c rules dir] [-f] [-m RE] [-M RE] [-X RE] [-l LC]
-          [-s SC] [-a] [-p] [-x] [-i] [-T] [-S] [-o] [-d] [spam log] [ham log]
+=head1 NAME
 
-    -c p   use p as the rules directory
-    -f     falses. count only false-negative or false-positive matches
-    -m RE  print rules matching regular expression
-    -t RE  print rules with tflags matching regular expression
-    -M RE  only consider log entries matching regular expression
-    -X RE  don't consider log entries matching regular expression
-    -l LC  also print language specific rules for lang code LC (or 'all')
-    -L LC  only print language specific rules for lang code LC (or 'all')
-    -a     display all tests
-    -p     percentages. implies -x
-    -x     extended output, with S/O ratio and scores
-    -s SC  which scoreset to use
-    -i     use IG (information gain) for ranking
-    -T     display rule times. implies -x, -p
-    -o     display hit overlaps against all other rules
-    -S     display score-map of hits
-    -P     flag which rules pass the promotion criteria
-    -d     XML output.  conflicts with -x, -p
+hit-frequencies - Display statistics about tests hit by a mass-check run
 
-    options -l and -L are mutually exclusive.
+=head1 SYNOPSIS
 
-    options -M and -X are *not* mutually exclusive.
+hit-frequencies [options] <spam-log> <ham-log>
 
-    if either the spam or and ham logs are unspecified, the defaults
-    are \"spam.log\" and \"ham.log\" in the cwd.
+ Options:
+    -c,--cffile=path	  Use path as the rules directory
+    -s,--scoreset=n	  Use scoreset n
+    -f,--falses  	  Count only false-positives/false-negatives
+    -a,--all		  Report all tests (including subrules)
+    -p,--percentages	  Report percentages instead of raw hits (implies -x)
+    -x,--extended	  "Extended" output, include RANK, S/O and SCORE
+    -m,--matchrules=re    Print rules matching the regular expression
+    -t,--tflags=re	  Print only rules with tflags matching the regular expression
+    -M,--matchlogs=re     Consider only logs matching the regular expression
+    -X,--excludelogs=re	  Exclude logs matching this regular expression
+    -L,--onlylanguage=lc  Only print language specific tests for specified lang code (try 'all')
+    -l,--alsolanguage=lc  Also print language specific tests for specified lang code (try 'all')
+    -i,--ig               Use IG (information gain) for ranking
+    -T,--times            Display rule times (implies -x, -p)
+    -o,--overlaps         Display hit overlaps against all other rules
+    -S,--scoremap         Display score-map of hits
+    -P,--promotion        Flag rules that meet the promotion criteria
+    -d,--XML              XML output (conflicts with -x, -p)
 
-";
+=head1 DESCRIPTION
+
+B<hit-frequencies> will read the mass-check logs F<spam.log> and
+F<ham.log> or the logs given on the command line. The output will
+contain a summary of the number of ham and spam messages and detailed
+statistics for each rule. The output will include the following
+columns:
+
+=over 4
+
+=item OVERALL
+
+Number of times (or percentage with B<-p>) the rule hit on
+all messages (spam or ham).
+
+=item SPAM
+
+Number of times (or percentage with B<-p>) the rule hit on
+spam messages.
+
+=item HAM
+
+Number of times (or percentage with B<-p>) the rule hit on
+ham messages.
+
+=item FPOS
+
+=item FNEG
+
+Shown only with B<-f>, these refer to the number of times (or
+percentage) the rule hit on messages that were found to be false
+positives or false negatives.
+
+=item S/O
+
+Shown only with B<-x> or B<-p>, this is the number of spam hits
+divided by total number of hits (C<S/O> refers to spam divided by
+overall).
+
+=item RANK
+
+Shown only with B<-x> or B<-p>, and when B<-i> is not used, this is a
+measure that attempts to indicate how I<good> or I<useful> a test
+is. The higher it is, the better the test.
+
+=item IG
+
+Shown only with B<-i>, this is another measure that attempts to
+indicate how I<useful> a test is.
+
+=item SCORE
+
+Shown only with B<-x> or B<-p>, this is the current score assigned to
+the rule.
+
+=item NAME
+
+This is the rule's name.
+
+=back
+
+=head1 BUGS
+
+Please report bugs to http://bugzilla.spamassassin.org/
+
+=head1 SEE ALSO
+
+L<mass-check(1)>, L<perceptron(1)>
+
+=cut
+if ($opt_l && $opt_L) {
+  pod2usage("-L/--alsolanguage and -l/--onlylanguage are mutually exclusive");
 }
 
-usage() if($opt_h || ($opt_l && $opt_L));
-usage() if($opt_d && ($opt_x || $opt_p));
+if ($opt_d && ($opt_x || $opt_p)) {
+  pod2usage("-d/--xml conflicts with -x/--extended and -p/--percentages");
+}
+
+$opt_s = 0 if ( !defined $opt_s );
 
 if ($opt_p) {
   $opt_x = 1;
@@ -77,7 +166,12 @@ if ($opt_d || $opt_T) {
   $opt_x = $opt_p = 1;
 }
 
-$opt_s = 0 if ( !defined $opt_s );
+
+# as per http://wiki.apache.org/spamassassin/RulesProjPromotion, for -P
+my $promote_so_min      = 0.95;
+my $promote_hitrate_min = 0.02;
+my $promote_fprate_max  = 1.00;
+
 
 my $cffile = $opt_c || "$FindBin::Bin/../rules";
 
@@ -201,7 +295,8 @@ elsif ($opt_x) {
 
 } else {
   printf "%10s  %10s  %10s  %s\n",
-  	"OVERALL", $opt_f?"FNEG":"SPAM", $opt_f?"FPOS":"HAM", "NAME";
+  	"OVERALL", $opt_f?"FNEG":"SPAM", $opt_f?"FPO":"HAM",
+	  "NAME";
   printf "%10d  %10d  %10d  (all messages)\n",
   	$hdr_all, $hdr_spam, $hdr_ham;
 }
