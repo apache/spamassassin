@@ -194,14 +194,14 @@ elsif ($opt_p) {
 }
 elsif ($opt_x) {
   printf "%7s %7s  %7s  %6s  %6s %6s  %s\n",
-  	"OVERALL%", "SPAM%", "HAM%", "S/O", $sorting, "SCORE", "NAME";
+  	"OVERALL%", $opt_f?"FNEG%":"SPAM%", $opt_f?"FPOS%":"HAM%", "S/O", $sorting, "SCORE", "NAME";
   printf "%7d  %7d  %7d  %7.3f %6.2f %6.2f  (all messages)\n",
   	$hdr_all, $hdr_spam, $hdr_ham,
         soratio ($num_spam,$num_ham), 0, 0;
 
 } else {
   printf "%10s  %10s  %10s  %s\n",
-  	"OVERALL", "SPAM", "HAM", "NAME";
+  	"OVERALL", $opt_f?"FNEG":"SPAM", $opt_f?"FPOS":"HAM", "NAME";
   printf "%10d  %10d  %10d  (all messages)\n",
   	$hdr_all, $hdr_spam, $hdr_ham;
 }
