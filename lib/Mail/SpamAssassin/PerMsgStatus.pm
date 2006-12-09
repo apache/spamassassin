@@ -1748,12 +1748,11 @@ sub get_uri_detail_list {
   my %parsed = map { $_ => 'parsed' } $self->_get_parsed_uri_list();
 
   # Look for the domain in DK/DKIM headers
-  foreach my $dk ( $self->get('DomainKey-Signature'), $self->get('DKIM-Signature') ) {
-    if ($dk =~ /\bd\s*=\s*([^;]+)/) {
-      my $dom = $1;
-      $dom =~ s/\s+//g;
-      $parsed{$dom} = 'domainkeys';
-    }
+  my $dk = join(" ", $self->get('DomainKey-Signature'), $self->get('DKIM-Signature'));
+  while ($dk =~ /\bd\s*=\s*([^;]+)/g) {
+    my $dom = $1;
+    $dom =~ s/\s+//g;
+    $parsed{$dom} = 'domainkeys';
   }
 
   # get URIs from HTML parsing
