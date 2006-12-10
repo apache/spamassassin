@@ -455,7 +455,7 @@ static int _try_to_connect_tcp(const struct transport *tp, int *sockptr)
                       family, host, port, numloops + 1, MAX_CONNECT_RETRIES);
 #endif
 
-            status = connect(mysock, res->ai_addr, res->ai_addrlen);
+            status = timeout_connect(mysock, res->ai_addr, res->ai_addrlen);
 
             if (status != 0) {
                   origerr = spamc_get_errno();
