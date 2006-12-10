@@ -40,6 +40,10 @@
 #include <netdb.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+/* some platforms (Cygwin) don't implement getaddrinfo */
+#ifdef EAI_AGAIN
+#define SPAMC_HAS_ADDRINFO 1
+#endif
 #endif
 
 #if (defined(_WIN32) || !defined(_SYSEXITS_H))
@@ -207,7 +211,11 @@ struct transport
 
     unsigned short port;	/* for TCP sockets              */
 
+#ifdef SPAMC_HAS_ADDRINFO
     struct addrinfo *hosts[TRANSPORT_MAX_HOSTS];
+#else
+    struct in_addr hosts[TRANSPORT_MAX_HOSTS];
+#endif
     int nhosts;
     int flags;
 };
