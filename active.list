@@ -1,8 +1,11 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-jm bb-zmi cthielen daf dos jm parkerm theo
+# with results from: net-bb-doc net-bb-jm net-bb-zmi net-cthielen net-daf net-jm net-parkerm
 
 # tflags userconf
 ALL_TRUSTED
+
+# good enough
+APOSTROPHE_FROM
 
 # tflags userconf
 AWL
@@ -11,10 +14,25 @@ AWL
 AXB_FAKETZ
 
 # good enough
+AXB_XMID_1212
+
+# good enough
+AXB_XMID_1510
+
+# good enough
 AXB_XMID_OEGOESNULL
 
 # good enough
 AXB_XR_STULDAP
+
+# good enough
+BANKING_LAWS
+
+# good enough
+BASE64_LENGTH_78_79
+
+# good enough
+BASE64_LENGTH_79_INF
 
 # tflags learn
 BAYES_00
@@ -52,11 +70,53 @@ CHARSET_FARAWAY
 # tflags userconf
 CHARSET_FARAWAY_HEADER
 
+# good enough
+COMMON_BASE64_01
+
+# good enough
+COMMON_BASE64_02
+
+# good enough
+COMMON_BASE64_03
+
+# good enough
+COMMON_BASE64_04
+
+# good enough
+COMMON_BASE64_05
+
+# good enough
+COMMON_BASE64_06
+
+# good enough
+COMMON_BASE64_07
+
+# good enough
+COMMON_BASE64_08
+
+# good enough
+COMMON_BASE64_09
+
+# good enough
+COMMON_BASE64_10
+
+# good enough
+COMMON_BASE64_11
+
+# good enough
+COMMON_BASE64_12
+
+# good enough
+COMMON_BASE64_13
+
 # tflags userconf
 CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
 CTYPE_001C_A
+
+# good enough
+CURR_PRICE
 
 # good enough
 DC_GIF_MULTI_LARGO
@@ -107,9 +167,6 @@ DNS_FROM_SECURITYSAGE
 DOS_DOUBLE_SOTCK
 
 # good enough
-DOS_LET_GO_JOB
-
-# good enough
 DOS_STOCK_O_PRICE
 
 # good enough
@@ -138,6 +195,15 @@ DYN_RDNS_SHORT_HELO_IMAGE
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
+
+# good enough
+EXTRA_MPART_TYPE2
+
+# good enough
+EXTRA_MPART_TYPE3
+
+# good enough
+FAKE_REPLY_C
 
 # good enough
 FB_CIALIS_LEO3
@@ -217,6 +283,9 @@ HDR_ORDER_FTSDMCXX_001C
 # good enough
 HDR_ORDER_FTSDMCXX_BAT
 
+# good enough
+HEADER_COUNT_SUBJECT
+
 # tflags userconf
 HEAD_LONG
 
@@ -228,9 +297,6 @@ HS_BODY_UPLOADED_SOFTWARE
 
 # good enough
 HS_DRUG_DOLLAR_1
-
-# good enough
-HS_DRUG_DOLLAR_2
 
 # good enough
 HS_DRUG_DOLLAR_3
@@ -266,22 +332,19 @@ JM_TORA_XM
 KAM_STOCKOTC
 
 # good enough
-KAM_STOCKTIP12
-
-# good enough
 KAM_STOCKTIP15
 
 # good enough
 KAM_STOCKTIP21
 
 # good enough
-KAM_STOCKTIP4
+KAM_STOCKTIP26
 
 # good enough
 KAM_STOCKTIP6
 
 # good enough
-KAM_STOCKTIP8
+LONG_TERM_TARGET
 
 # good enough
 L_SPAM_TOOL_13
@@ -304,6 +367,12 @@ MISSING_HB_SEP
 # good enough
 MOLE_28001106
 
+# good enough
+MSOE_MID_WRONG_CASE
+
+# good enough
+MSOE_MID_WRONG_CASE2
+
 # tflags net
 NO_DNS_FOR_FROM
 
@@ -315,6 +384,9 @@ NO_RELAYS
 
 # good enough
 NULL_IN_BODY
+
+# good enough
+OE_MULTIPART_RELATED
 
 # good enough
 OUTLOOK_3416
@@ -343,6 +415,15 @@ RAZOR2_CHECK
 # good enough
 RCVD_FORGED_WROTE
 
+# good enough
+RCVD_FORGED_WROTE2
+
+# good enough
+RCVD_ILLEGAL_IP2
+
+# good enough
+RCVD_ILLEGAL_IP3
+
 # tflags net
 RCVD_IN_BL_SPAMCOP_NET
 
@@ -351,6 +432,15 @@ RCVD_IN_BSP_OTHER
 
 # tflags net
 RCVD_IN_BSP_TRUSTED
+
+# tflags net
+RCVD_IN_DNSWL_HI
+
+# tflags net
+RCVD_IN_DNSWL_LOW
+
+# tflags net
+RCVD_IN_DNSWL_MED
 
 # tflags net
 RCVD_IN_DOB
@@ -517,9 +607,6 @@ RCVD_LSO_SND
 # good enough
 RCVD_MAIL_COM
 
-# good enough
-RDNS_DYNAMIC
-
 # tflags net
 ROUND_THE_WORLD
 
@@ -527,7 +614,13 @@ ROUND_THE_WORLD
 SB_GIF_AND_NO_URIS
 
 # good enough
+SHORT_AND_LOG_TARGETS
+
+# good enough
 SHORT_HELO_AND_INLINE_IMAGE
+
+# good enough
+SHORT_TERM_TARGET
 
 # good enough
 SPAMMY_XMAILER
@@ -567,6 +660,24 @@ STOCK_IMG_HTML
 
 # good enough
 STOCK_IMG_OUTLOOK
+
+# good enough
+STOCK_SUBJECT
+
+# good enough
+STOCK_WATCH_THIS_1
+
+# good enough
+STOCK_WATCH_THIS_2
+
+# good enough
+STOCK_WATCH_THIS_3
+
+# good enough
+STOCK_WATCH_THIS_4
+
+# good enough
+STOX_REPLY_TYPE
 
 # tflags userconf
 SUBJECT_IN_BLACKLIST
@@ -611,9 +722,6 @@ TVD_FUZZY_DEGREE
 TVD_FUZZY_FINANCE
 
 # good enough
-TVD_FUZZY_PHARMACEUTICAL
-
-# good enough
 TVD_FUZZY_SYMBOL
 
 # good enough
@@ -623,13 +731,7 @@ TVD_FW_GRAPHIC_ID3
 TVD_FW_GRAPHIC_ID3_2
 
 # good enough
-TVD_HEAD_KERNEL
-
-# good enough
 TVD_INCREASE_SIZE
-
-# good enough
-TVD_LINK_SAVE
 
 # good enough
 TVD_NOT_SATISFIED
@@ -639,9 +741,6 @@ TVD_PH_7
 
 # good enough
 TVD_PH_REC
-
-# good enough
-TVD_PH_SUBJ_ACCOUNTS_POST
 
 # good enough
 TVD_PH_SUBJ_META
@@ -671,13 +770,10 @@ TVD_RATWARE_CB_2
 TVD_RATWARE_MSGID_02
 
 # good enough
-TVD_RCVD_IP
-
-# good enough
-TVD_RCVD_IP4
-
-# good enough
 TVD_RCVD_SINGLE
+
+# good enough
+TVD_RCVD_SPACE_BRACKET
 
 # good enough
 TVD_SECTION
@@ -695,13 +791,16 @@ TVD_SPACED_SUBJECT_WORD5
 TVD_STOCK1
 
 # good enough
+TVD_STOCK_02
+
+# good enough
+TVD_STOCK_03
+
+# good enough
 TVD_SUBJ_ACC_NUM
 
 # good enough
 TVD_SUBJ_APPR_LOAN
-
-# good enough
-TVD_SUBJ_FINGER_03
 
 # good enough
 TVD_UA_FOSTERING
@@ -713,109 +812,49 @@ TVD_VISIT_PHARMA
 TVD_VIS_HIDDEN
 
 # good enough
-APOSTROPHE_FROM
+CTYPE_001C_B
 
 # good enough
-AXB_XMID_1212
+CTYPE_1SPACE_GIF
 
 # good enough
-AXB_XMID_1510
+DOS_MORTGAGE
 
 # good enough
-BANKING_LAWS
+FAKE_REPLY_A1
 
 # good enough
-BASE64_LENGTH_78_79
+FB_SAVE_LEO
 
 # good enough
-BASE64_LENGTH_79_INF
+FS_START_DOYOU
 
 # good enough
-COMMON_BASE64_01
+FUZZY_SPRM
 
 # good enough
-COMMON_BASE64_02
+FUZZY_STOCK
 
 # good enough
-COMMON_BASE64_03
+HS_FORGED_OE_FW
 
 # good enough
-COMMON_BASE64_04
+HS_INDEX_PARAM
 
 # good enough
-COMMON_BASE64_05
+HS_MEETUP_FOR_SEX
 
 # good enough
-COMMON_BASE64_06
+HS_NO_FLOWERS
 
 # good enough
-COMMON_BASE64_07
+HS_PHARMA_1
 
 # good enough
-COMMON_BASE64_08
+HS_SUBJ_ONLINE_PHARMACEUTICAL
 
 # good enough
-COMMON_BASE64_09
-
-# good enough
-COMMON_BASE64_10
-
-# good enough
-COMMON_BASE64_11
-
-# good enough
-COMMON_BASE64_12
-
-# good enough
-COMMON_BASE64_13
-
-# good enough
-CTYPE_8SPACE_GIF
-
-# good enough
-CURR_PRICE
-
-# good enough
-EXTRA_MPART_TYPE2
-
-# good enough
-EXTRA_MPART_TYPE3
-
-# good enough
-FAKE_REPLY_C
-
-# good enough
-FU_HOODIA
-
-# good enough
-HEADER_COUNT_SUBJECT
-
-# good enough
-KAM_STOCKTIP26
-
-# good enough
-LONG_TERM_TARGET
-
-# good enough
-LOOPHOLE_1
-
-# good enough
-MSOE_MID_WRONG_CASE
-
-# good enough
-MSOE_MID_WRONG_CASE2
-
-# good enough
-OE_MULTIPART_RELATED
-
-# good enough
-RCVD_FORGED_WROTE2
-
-# good enough
-RCVD_ILLEGAL_IP2
-
-# good enough
-RCVD_ILLEGAL_IP3
+KAM_STOCKSYM2
 
 # tflags net
 RCVD_IN_DNSWL_HI
@@ -848,49 +887,106 @@ RCVD_IN_WHOIS_INVALID
 RCVD_IN_XBL
 
 # good enough
-SHORT_AND_LOG_TARGETS
+STOX_AND_PRICE
 
 # good enough
-SHORT_TERM_TARGET
+TVD_APPROVED
 
 # good enough
-STOCK_SUBJECT
+TVD_DOLLARS_US
 
 # good enough
-STOCK_WATCH_THIS_1
+TVD_FROM_1
 
 # good enough
-STOCK_WATCH_THIS_2
+TVD_FUZZY_MICROCAP
 
 # good enough
-STOCK_WATCH_THIS_3
+TVD_FUZZY_SECURITIES
 
 # good enough
-STOCK_WATCH_THIS_4
+TVD_FW_GRAPHIC_ID1
 
 # good enough
-STOX_REPLY_TYPE
+TVD_FW_GRAPHIC_ID2
 
 # good enough
-TT_OBSCURED_VALIUM
+TVD_FW_MESG2
 
 # good enough
-TVD_FW_GRAPHIC_NAME_LONG
+TVD_GET_STOCK
 
 # good enough
-TVD_FW_GRAPHIC_NAME_MID
+TVD_PH_BODY_META
 
 # good enough
-TVD_RCVD_SPACE_BRACKET
+TVD_PH_FR5
 
 # good enough
-TVD_STOCK_02
+TVD_SUBJ_OWE
 
 # good enough
-TVD_STOCK_03
+TVD_SUBJ_WIPE_DEBT
 
 # good enough
-TVD_SUBJ_FINGER_04
+TVD_UNDER_VALUED
+
+# tflags net
+URIBL_COMPLETEWHOIS
+
+# tflags net
+URIBL_L1SPEWS
+
+# tflags net
+URIBL_L2SPEWS
+
+# tflags net
+URIBL_RHS_ABUSE
+
+# tflags net
+URIBL_RHS_AHBL
+
+# tflags net
+URIBL_RHS_BOGUSMX
+
+# tflags net
+URIBL_RHS_DSN
+
+# tflags net
+URIBL_RHS_POST
+
+# tflags net
+URIBL_RHS_TLD_WHOIS
+
+# tflags net
+URIBL_RHS_URIBL_BLACK
+
+# tflags net
+URIBL_RHS_URIBL_GREY
+
+# tflags net
+URIBL_RHS_WHOIS
+
+# good enough
+URIBL_SBL_COMWHOIS
+
+# good enough
+URIBL_SBL_SPEWSL1
+
+# tflags net
+URIBL_XS_SURBL
+
+# good enough
+URI_L_PHP
+
+# good enough
+XMAILER_MIMEOLE_OL_2B374
+
+# good enough
+XMAILER_MIMEOLE_OL_9B607
+
+# good enough
+XMAILER_MIMEOLE_OL_CE8A4
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1085,9 +1181,6 @@ XMAILER_MIMEOLE_OL_09BB4
 XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
-XMAILER_MIMEOLE_OL_20C99
-
-# good enough
 XMAILER_MIMEOLE_OL_20CC2
 
 # good enough
@@ -1097,16 +1190,10 @@ XMAILER_MIMEOLE_OL_22B61
 XMAILER_MIMEOLE_OL_25340
 
 # good enough
-XMAILER_MIMEOLE_OL_32D97
-
-# good enough
 XMAILER_MIMEOLE_OL_3857F
 
 # good enough
 XMAILER_MIMEOLE_OL_3AC1D
-
-# good enough
-XMAILER_MIMEOLE_OL_3D61D
 
 # good enough
 XMAILER_MIMEOLE_OL_465CD
