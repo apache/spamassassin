@@ -882,7 +882,7 @@ sub find_dup_rules {
       delete $conf->{tests}->{$name};
     }
 
-    dbg("rules: $first has duplicates: ".join(' ', @dups));
+    dbg("rules: $first merged duplicates: ".join(' ', @dups));
     $conf->{duplicate_rules}->{$first} = \@dups;
   }
 }
