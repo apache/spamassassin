@@ -73,6 +73,8 @@ Several hosts can be specified if separated by commas.
 If I<host> resolves to multiple addresses, then spamc will fail-over to the 
 other addresses, if the first one cannot be connected to.  It will first try
 all addresses of one host before it tries the next one in the list.
+Note that this fail-over behaviour is incompatible with B<-x>; if that
+switch is used, fail-over will not occur.
 
 =item B<-e> I<command> I<[args]>, B<--pipe-to> I<command> I<[args]>
 
@@ -194,6 +196,8 @@ an additional line will be included noting this, like so:
 Disables the 'safe fallback' error-recovery method, which passes through the
 unaltered message if an error occurs.  Instead, exit with an error code, and
 let the MTA queue up the mails for a retry later.  See also L<"EXIT CODES">.
+
+This also disables the TCP fail-over behaviour from B<-d>.
 
 =item B<-y>, B<--tests>
 
