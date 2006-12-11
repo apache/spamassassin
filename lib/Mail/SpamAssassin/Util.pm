@@ -513,7 +513,16 @@ sub wrap {
   # There's a die() in there which "shouldn't happen", but better be
   # paranoid.  We'll return the unwrapped string if anything went wrong.
   my $text = $_[0] || "";
+
+  # Text::Wrap produces spurious warnings:
+  # [23409] warn: (?:(?<=[\s,]))* matches null string many times in regex; marked by <-- HERE in m/\G(?:(?<=[\s,]))* <-- HERE \Z/ at /usr/local/perl594/lib/5.9.4/Text/Wrap.pm line 46.
+  # trap and ignore them.  Why do so many of the core modules do this
+  # kind of crap? :(  use a $SIG{__WARN__} to trap it.
+
   eval {
+    local $SIG{__WARN__} = sub {
+      ($_[0] =~ /matches null string many times/) or CORE::warn(@_);
+    };
     $text = Text::Wrap::wrap($_[2] || "", $_[1] || "", $text);
   };
   return $text;
