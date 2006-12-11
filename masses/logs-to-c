@@ -17,7 +17,44 @@
 # limitations under the License.
 # </@LICENSE>
 
-use Getopt::Long;
+=head1 NAME
+
+logs-to-c - Convert a mass-check log into perceptron format
+
+=head1 SYNOPSIS
+
+logs-to-c [options]
+
+ Options:
+    -c,--cffile=path	  Use path as the rules directory
+    -s,--scoreset=n	  Use scoreset n
+    --spam=file           Location of spam mass-check log
+    --ham=file            Location of ham mass-check log
+
+=head1 DESCRIPTION
+
+B<logs-to-c> will read the mass-check logs F<spam.log> and F<ham.log>
+or as specified by the B<--spam> and B<--ham> options, and convert it
+into the format needed by the perceptron. This is a format that is
+simple for the perceptron to parse, but is not very readable to
+humans.
+
+By default, output will be put in the directory ./tmp/ unless another
+directory is specified by the B<--outputdir> option. (Note: at the
+current time, this must be /tmp/ in order for the perceptron to
+compile properly.)
+
+=head1 BUGS
+
+Please report bugs to http://bugzilla.spamassassin.org/
+
+=head1 SEE ALSO
+
+L<mass-check(1)>, L<perceptron(1)>
+
+=cut
+
+use Getopt::Long qw(:config auto_help bundling);
 use strict;
 use vars qw($opt_cffile $opt_spam $opt_ham $opt_scoreset);
 
