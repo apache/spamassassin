@@ -89,16 +89,32 @@ Whether to use Pyzor, if it is available.
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL
   });
 
-=item pyzor_timeout n		(default: 5)
+=item pyzor_timeout n		(default: 3.5)
 
 How many seconds you wait for Pyzor to complete, before scanning continues
 without the Pyzor results.
+
+You can configure Pyzor to have its own per-server timeout.  Set this
+plugin's timeout with that in mind.  This plugin's timeout is a maximum
+ceiling.  If Pyzor takes longer than this to complete its communication
+with all servers, no results are used by SpamAssassin.
+
+Pyzor servers do not yet synchronize their servers, so it can be
+beneficial to check and report to more than one.  See the pyzor-users
+mailing list for alternate servers that are not published via
+'pyzor discover'.
+
+If you are using multiple Pyzor servers, a good rule of thumb would be to
+set the SpamAssassin plugin's timeout to be the same or just a bit more
+than the per-server Pyzor timeout (e.g., 3.5 and 2 for two Pyzor servers).
+If more than one of your Pyzor servers is always timing out, consider
+removing one of them.
 
 =cut
 
   push (@cmds, {
     setting => 'pyzor_timeout',
-    default => 5,
+    default => 3.5,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
   });
 
@@ -302,16 +318,18 @@ sub pyzor_lookup {
     return 0;
   }
 
-  # this regexp is intended to be a little bit forgiving
-  if ($response[0] =~ /^\S+\t.*?\t(\d+)\t(\d+)\s*$/) {
-    $pyzor_whitelisted = $2+0;
-    if ($pyzor_whitelisted == 0) {
-      $pyzor_count = $1+0;
+  foreach my $one_response (@response) {
+    # this regexp is intended to be a little bit forgiving
+    if ($one_response =~ /^\S+\t.*?\t(\d+)\t(\d+)\s*$/) {
+      # until pyzor servers can sync their DBs,
+      # sum counts obtained from all servers
+      $pyzor_whitelisted += $2+0;
+      $pyzor_count += $1+0;
     }
-  }
-  else {
-    # warn on failures to parse
-    dbg("pyzor: failure to parse response \"$response[0]\"");
+    else {
+      # warn on failures to parse
+      dbg("pyzor: failure to parse response \"$one_response\"");
+    }
   }
 
   if ($pyzor_whitelisted) {
