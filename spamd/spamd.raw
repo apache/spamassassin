@@ -2320,55 +2320,55 @@ spamd [options]
 
 Options:
 
- -l, --allow-tell                   Allow learning/reporting
- -c, --create-prefs                 Create user preferences files
- -C path, --configpath=path         Path for default config files
- --siteconfigpath=path              Path for site configs
- --cf='config line'                 Additional line of configuration
- -d, --daemonize                    Daemonize
- -h, --help                         Print usage message.
- -i [ipaddr], --listen-ip=ipaddr    Listen on the IP ipaddr
- --ipv4only, --ipv4-only, --ipv4    Disable attempted use of ipv6 for DNS
- -p port, --port=port               Listen on specified port
- -m num, --max-children=num         Allow maximum num children
- --min-children=num                 Allow minimum num children
- --min-spare=num                    Lower limit for number of spare children
- --max-spare=num                    Upper limit for number of spare children
- --max-conn-per-child=num	    Maximum connections accepted by child 
-                                    before it is respawned
- --round-robin                      Use traditional prefork algorithm
- --timeout-tcp=secs                 Connection timeout for client headers
- --timeout-child=secs               Connection timeout for message checks
- -q, --sql-config                   Enable SQL config (only useful with -x)
- -Q, --setuid-with-sql              Enable SQL config (only useful with -x,
-                                    enables use of -H)
- --ldap-config                      Enable LDAP config (only useful with -x)
- --setuid-with-ldap                 Enable LDAP config (only useful with -x,
-                                    enables use of -H)
- --virtual-config-dir=dir           Enable pattern based Virtual configs
-                                    (needs -x)
- -r pidfile, --pidfile              Write the process id to pidfile
- -s facility, --syslog=facility     Specify the syslog facility
- --syslog-socket=type               How to connect to syslogd
- -u username, --username=username   Run as username
- -g groupname, --groupname=groupname Run as groupname
- -v, --vpopmail                     Enable vpopmail config
- -x, --nouser-config                Disable user config files
- --auth-ident                       Use ident to authenticate spamc user
- --ident-timeout=timeout            Timeout for ident connections
- -A host,..., --allowed-ips=..,..   Limit ip addresses which can connect
- -D, --debug[=areas]                Print debugging messages (for areas)
- -L, --local                        Use local tests only (no DNS)
- -P, --paranoid                     Die upon user errors
+ -l, --allow-tell                  Allow learning/reporting
+ -c, --create-prefs                Create user preferences files
+ -C path, --configpath=path        Path for default config files
+ --siteconfigpath=path             Path for site configs
+ --cf='config line'                Additional line of configuration
+ -d, --daemonize                   Daemonize
+ -h, --help                        Print usage message.
+ -i [ipaddr], --listen-ip=ipaddr   Listen on the IP ipaddr
+ --ipv4only, --ipv4-only, --ipv4   Disable attempted use of ipv6 for DNS
+ -p port, --port=port              Listen on specified port
+ -m num, --max-children=num        Allow maximum num children
+ --min-children=num                Allow minimum num children
+ --min-spare=num                Lower limit for number of spare children
+ --max-spare=num                Upper limit for number of spare children
+ --max-conn-per-child=num	   Maximum connections accepted by child 
+                                   before it is respawned
+ --round-robin                     Use traditional prefork algorithm
+ --timeout-tcp=secs                Connection timeout for client headers
+ --timeout-child=secs              Connection timeout for message checks
+ -q, --sql-config                  Enable SQL config (needs -x)
+ -Q, --setuid-with-sql             Enable SQL config (needs -x,
+                                   enables use of -H)
+ --ldap-config                     Enable LDAP config (needs -x)
+ --setuid-with-ldap                Enable LDAP config (needs -x,
+                                   enables use of -H)
+ --virtual-config-dir=dir          Enable pattern based Virtual configs
+                                   (needs -x)
+ -r pidfile, --pidfile             Write the process id to pidfile
+ -s facility, --syslog=facility    Specify the syslog facility
+ --syslog-socket=type              How to connect to syslogd
+ -u username, --username=username  Run as username
+ -g groupname, --groupname=groupname  Run as groupname
+ -v, --vpopmail                    Enable vpopmail config
+ -x, --nouser-config               Disable user config files
+ --auth-ident                      Use ident to authenticate spamc user
+ --ident-timeout=timeout           Timeout for ident connections
+ -A host,..., --allowed-ips=..,..  Limit ip addresses which can connect
+ -D, --debug[=areas]               Print debugging messages (for areas)
+ -L, --local                       Use local tests only (no DNS)
+ -P, --paranoid                    Die upon user errors
  -H [dir], --helper-home-dir[=dir]  Specify a different HOME directory
- --ssl                              Run an SSL server
- --ssl-port port                    Listen on port for SSL connections
- --server-key keyfile               Specify an SSL keyfile
- --server-cert certfile             Specify an SSL certificate
- --socketpath=path                  Listen on given UNIX domain socket
- --socketowner=name                 Set UNIX domain socket file's owner
- --socketgroup=name                 Set UNIX domain socket file's group
- --socketmode=mode                  Set UNIX domain socket file's mode
+ --ssl                             Run an SSL server
+ --ssl-port port                   Listen on port for SSL connections
+ --server-key keyfile              Specify an SSL keyfile
+ --server-cert certfile            Specify an SSL certificate
+ --socketpath=path                 Listen on given UNIX domain socket
+ --socketowner=name                Set UNIX domain socket file's owner
+ --socketgroup=name                Set UNIX domain socket file's group
+ --socketmode=mode                 Set UNIX domain socket file's mode
 
 =head1 DESCRIPTION
 
