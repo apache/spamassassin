@@ -19,8 +19,8 @@ $ENV{'LANGUAGE'} = $ENV{'LC_ALL'} = 'C';             # a cheat, but we need the 
   q{ META3 }     => '',
   q{ ran body rule FOO1 ======> got hit } => '',
   q{ ran header rule HDR1 ======> got hit } => '',
-  q{ rules: FOO1 has duplicates: FOO2 } => '',
-  q{ rules: HDR1 has duplicates: HDR2 } => '',
+  q{ rules: FOO1 merged duplicates: FOO2 } => '',
+  q{ rules: HDR1 merged duplicates: HDR2 } => '',
 
 );
 
