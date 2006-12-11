@@ -545,41 +545,45 @@ B<sa-learn> [options] --dump [ all | data | magic ]
 
 Options:
 
- --ham                             Learn messages as ham (non-spam)
- --spam                            Learn messages as spam
- --forget                          Forget a message
- --use-ignores                     Use bayes_ignore_from and bayes_ignore_to
- --sync                            Syncronize the database and the journal if needed
- --force-expire                    Force a database sync and expiry run
- --dbpath <path>                   Allows commandline override (in bayes_path form)
-                                   for where to read the Bayes DB from
- --dump [all|data|magic]           Display the contents of the Bayes database
-                                   Takes optional argument for what to display
-  --regexp <re>                    For dump only, specifies which tokens to
-                                   dump based on a regular expression.
- -f file, --folders=file           Read list of files/directories from file
- --dir                             Ignored; historical compatibility
- --file                            Ignored; historical compatibility
- --mbox                            Input sources are in mbox format
- --mbx                             Input sources are in mbx format
- --showdots                        Show progress using dots
- --progress                        Show progress using progress bar
- --no-sync                         Skip synchronizing the database and journal
-                                   after learning
- -L, --local                       Operate locally, no network accesses
- --import                          Migrate data from older version/non DB_File
-                                   based databases
- --clear                           Wipe out existing database
- --backup                          Backup, to STDOUT, existing database
- --restore <filename>              Restore a database from filename
-
- -u username, --username=username  Override username taken from the runtime environment
- -C path, --configpath=path, --config-file=path   Path to standard configuration dir
- -p prefs, --prefspath=file, --prefs-file=file    Set user preferences file
- --siteconfigpath=path             Path for site configs (def: /etc/mail/spamassassin)
- -D, --debug-level                 Print debugging messages
- -V, --version                     Print version
- -h, --help                        Print usage message
+ --ham                 Learn messages as ham (non-spam)
+ --spam                Learn messages as spam
+ --forget              Forget a message
+ --use-ignores         Use bayes_ignore_from and bayes_ignore_to
+ --sync                Syncronize the database and the journal if needed
+ --force-expire        Force a database sync and expiry run
+ --dbpath <path>       Allows commandline override (in bayes_path form)
+                       for where to read the Bayes DB from
+ --dump [all|data|magic]  Display the contents of the Bayes database
+                          Takes optional argument for what to display
+  --regexp <re>        For dump only, specifies which tokens to dump
+                       based on a regular expression.
+ -f file, --folders=file  Read list of files/directories from file
+ --dir                 Ignored; historical compatibility
+ --file                Ignored; historical compatibility
+ --mbox                Input sources are in mbox format
+ --mbx                 Input sources are in mbx format
+ --showdots            Show progress using dots
+ --progress            Show progress using progress bar
+ --no-sync             Skip synchronizing the database and journal after
+                       learning
+ -L, --local           Operate locally, no network accesses
+ --import              Migrate data from older version/non DB_File based
+                       databases
+ --clear               Wipe out existing database
+ --backup              Backup, to STDOUT, existing database
+ --restore <filename>  Restore a database from filename
+ -u username, --username=username
+                       Override username taken from the runtime
+                       environment
+ -C path, --configpath=path, --config-file=path
+                       Path to standard configuration dir
+ -p prefs, --prefspath=file, --prefs-file=file
+                       Set user preferences file
+ --siteconfigpath=path Path for site configs
+                       (default: /etc/mail/spamassassin)
+ -D, --debug-level     Print debugging messages
+ -V, --version         Print version
+ -h, --help            Print usage message
 
 =head1 DESCRIPTION
 
