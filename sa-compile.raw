@@ -71,6 +71,7 @@ Getopt::Long::Configure(
 
 GetOptions(
   'list'		=> \$opt{'list'},
+  'keep-tmps'		=> \$opt{'keep-tmps'},
 
   'configpath|config-file|config-dir|c|C=s' => \$opt{'configpath'},
   'prefspath|prefs-file|p=s'                => \$opt{'prefspath'},
@@ -140,6 +141,7 @@ $spamtest->{bases_can_use_char_classes} = 0;
 $spamtest->{bases_split_out_alternations} = 1;
 
 $spamtest->init(1);
+my $conf = $spamtest->{conf};
 
 # this actually extracts the base rules in the plugin, as a side-effect
 my $res = $spamtest->lint_rules();
@@ -149,7 +151,9 @@ if ($res) {
 }
 
 if ( defined $opt{'list'} ) {
-  print dump_base_strings();
+  foreach my $ruletype (sort keys %{$conf->{base_orig}}) {
+    print dump_base_strings($ruletype);
+  }
 }
 else {
   compile_base_strings();
@@ -161,19 +165,16 @@ exit;
 ##############################################################################
 
 sub dump_base_strings {
-  my $conf = $spamtest->{conf};
+  my ($ruletype) = @_;
 
-  my $s = '';
-  foreach my $ruletype (sort keys %{$conf->{base_orig}}) {
-    $s .= "name $ruletype\n";
+  my $s = "name $ruletype\n";
 
-    foreach my $key1 (sort keys %{$conf->{base_orig}->{$ruletype}}) {
-      $s .= "orig $key1 $conf->{base_orig}->{$ruletype}->{$key1}\n";
-    }
+  foreach my $key1 (sort keys %{$conf->{base_orig}->{$ruletype}}) {
+    $s .= "orig $key1 $conf->{base_orig}->{$ruletype}->{$key1}\n";
+  }
 
-    foreach my $key (sort keys %{$conf->{base_string}->{$ruletype}}) {
-      $s .= "r $key:$conf->{base_string}->{$ruletype}->{$key}\n";
-    }
+  foreach my $key (sort keys %{$conf->{base_string}->{$ruletype}}) {
+    $s .= "r $key:$conf->{base_string}->{$ruletype}->{$key}\n";
   }
   return $s;
 }
@@ -184,20 +185,30 @@ sub compile_base_strings {
   my $dirpath = Mail::SpamAssassin::Util::secure_tmpdir();
   die "secure_tmpdir failed" unless $dirpath && -w $dirpath;
 
-  open OUT, ">$dirpath/bases.in"
-	or die "cannot write to $dirpath/bases.in";
-  print OUT dump_base_strings();
-  close OUT or die "cannot write to $dirpath/bases.in";
+  foreach my $ruletype (sort keys %{$conf->{base_orig}})
+  {
+    open OUT, ">$dirpath/bases.in"
+          or die "cannot write to $dirpath/bases.in";
+    print OUT dump_base_strings($ruletype);
+    close OUT or die "cannot write to $dirpath/bases.in";
 
-  chdir $dirpath; print "cd $dirpath\n";
-  rule2xs("bases.in");
+    chdir $dirpath; print "cd $dirpath\n";
+    rule2xs("bases.in");
 
-  my $instdir = $spamtest->sed_path('__local_state_dir__/compiled/__version__');
+    my $instdir = $spamtest->sed_path('__local_state_dir__/compiled/__version__');
 
-  run(get_perl()." Makefile.PL ".
-	"PREFIX=$dirpath/ignored INSTALLSITEARCH=$instdir");
+    run(get_perl()." Makefile.PL ".
+          "PREFIX=$dirpath/ignored INSTALLSITEARCH=$instdir");
 
-  run("make install");	# into $instdir
+    run("make install");	# into $instdir
+  }
+
+  if (!$opt{'keep-tmps'}) {
+    run("rm -rf $dirpath");       # cleanup
+  }
+  else {
+    print "temporary dir left due to --keep-tmps: $dirpath\n";
+  }
 }
 
 sub run {
@@ -779,6 +790,7 @@ B<sa-compile> [options]
 Options:
 
   --list                        Output base string list to STDOUT
+  --keep-tmps                   Keep temporary files instead of deleting
 
   -C path, --configpath=path, --config-file=path   Path to standard configuration dir
   -p prefs, --prefspath=file, --prefs-file=file    Set user preferences file
@@ -807,6 +819,11 @@ build Perl XS modules, be installed.
 
 Output the extracted base strings to STDOUT, instead of generating
 the C extension code.
+
+=item B<--keep-tmps>
+
+Keep temporary files after the script completes, instead of
+deleting them.
 
 =item B<-C> I<path>, B<--configpath>=I<path>, B<--config-file>=I<path>
 
