@@ -261,7 +261,7 @@ sub extract_set_pri {
 
   foreach my $set (@good_bases) {
     my $base = $set->{base};
-    my $key  = $set->{name};
+    my $key  = join ' ', sort split (' ', $set->{name});
     next unless $base;
     $conf->{base_string}->{$ruletype}->{$base} = $key;
   }
