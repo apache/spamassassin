@@ -131,6 +131,10 @@ and then:
 
 psql -U <username> -f bayes_pg.sql <databasename>
 
+(If you are using older versions of PostgreSQL, such as version 7.4.x, you may
+need to patch this.  See
+http://issues.apache.org/SpamAssassin/show_bug.cgi?id=4653 )
+
 From a security viewpoint, it is wise to grant the minimum privileges
 needed to the user on the bayes tables.  These grants largely depend
 on your system policies but here are some example grants to get you
