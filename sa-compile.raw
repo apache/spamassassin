@@ -430,6 +430,7 @@ EOT
     if ($? >> 8 != 0) {
       my $cwd = `pwd`; chop $cwd;
       die "'$cmd' failed, dying!\n".
+          "Have you got a sufficiently-recent version of re2c?\n".
 	  "see $cwd/scanner$_.re\n";
     }
   }
@@ -806,10 +807,10 @@ Options:
 sa-compile uses C<re2c> to compile the SpamAssassin ruleset into C code in a
 Perl XS module, and from there into native object code.  This will then be used
 by the C<Mail::SpamAssassin::Plugin::Rule2XSBody> plugin to speed up
-SpamAssassin's operation, where possible.
+SpamAssassin's operation, where possible, and when that plugin is loaded.
 
-This requires C<re2c> (see C<http://re2c.org/>), and the C compiler used to
-build Perl XS modules, be installed.
+This requires C<re2c> version 0.10.x (see C<http://re2c.org/>), and the C
+compiler used to build Perl XS modules, be installed.
 
 =head1 OPTIONS
 
