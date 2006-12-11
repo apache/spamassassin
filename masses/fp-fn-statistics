@@ -17,6 +17,46 @@
 # limitations under the License.
 # </@LICENSE>
 
+=head1 NAME
+
+fp-fn-statistics - Display statistics about the quality of scores
+
+=head1 SYNOPSIS
+
+fp-fn-statistics [options]
+
+  Options: 
+    -c,--cffile=path	  Use path as the rules directory
+    -s,--scoreset=n	  Use scoreset n
+    -t,--threshold=n      Use a spam/ham threshold of n (default: 5)
+    --lambda=n            Use a lambda value of n
+    --spam=file           Location of mass-check spam log (spam.log)
+    --ham=file            Location of mass-check ham log (ham.log)
+    --fplog=file          File to which false positive logs should be saved
+    --fnlog=file          File to which false negative logs should be saved
+
+=head1 DESCRIPTION
+
+B<fp-fn-statistics> first calculates the score each message from a
+masses.log would have under a new set of scores. It then aggregates
+the number of messages correctly and incorrectly found as spam and
+ham, and their average scores.
+
+In addition, B<fp-fn-statistics> determines the "Total Cost Ratio" as
+a result of the false positives and negatives mentioned above. This
+calculation takes into the value of lambda, which represents the cost
+of recovering a false positive, where 1 indicates a message is tagged
+only, 9 means the message is mailed back to sender asking for a token
+(TMDA style) and 999 means a message is delted. The default, 5,
+represents the message being moved to an infrequently read folder.
+
+B<fp-fn-statistics> can also save false positive and false negatives
+logs to a file for future analysis. If this is all you're doing, it
+could be accomplished a lot quicker with B<grep>, but why not reinvent
+the wheel?
+
+=cut
+
 use Getopt::Long;
 use strict;
 
@@ -29,8 +69,15 @@ $opt_spam = 'spam.log';
 $opt_ham = 'ham.log';
 $opt_scoreset = 0;
 
-GetOptions("cffile=s", "lambda=f", "threshold=f", "spam=s",
-	   "ham=s", "scoreset=i", "fplog=s", "fnlog=s");
+GetOptions("c|cffile=s" => \$opt_cffile,
+	   "lambda=f" => \$opt_lambda,
+	   "t|threshold=f" => \$opt_threshold,
+	   "spam=s" => \$opt_spam,
+	   "ham=s" => \$opt_ham,
+	   "s|scoreset=i" => \$opt_scoreset,
+	   "fplog=s" => \$opt_fplog,
+	   "fnlog=s" => \$opt_fnlog
+	  );
 
 # If desired, report false positives and false negatives for analysis
 if (defined $opt_fnlog) { open (FNLOG, ">$opt_fnlog"); }
