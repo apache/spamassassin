@@ -83,7 +83,6 @@ foreach(qw/
   co.ck edu.ck gov.ck net.ck org.ck
   ac.cn ah.cn bj.cn com.cn cq.cn edu.cn gd.cn gov.cn gs.cn gx.cn gz.cn hb.cn he.cn hi.cn hk.cn hl.cn hn.cn jl.cn js.cn ln.cn mo.cn net.cn nm.cn nx.cn org.cn qh.cn sc.cn sh.cn sn.cn sx.cn tj.cn tw.cn xj.cn xz.cn yn.cn zj.cn
   arts.co com.co edu.co firm.co gov.co info.co int.co mil.co nom.co org.co rec.co store.co web.co
-  lkd.co.im plc.co.im
   au.com br.com cn.com de.com eu.com gb.com hu.com no.com qc.com ru.com sa.com se.com uk.com us.com uy.com za.com
   ac.cr co.cr ed.cr fi.cr go.cr or.cr sa.cr
   com.cu net.cu org.cu
@@ -246,9 +245,10 @@ sub split_domain {
 	# demon.co.uk
 	# esc.edu.ar
 	# [^\.]+\.${US_STATES}\.us
-	if ($domparts[2] eq 'uk' || $domparts[2] eq 'ar') {
+	if ($domparts[2] eq 'uk' || $domparts[2] eq 'ar' || $domparts[2] eq 'im') {
 	  my $temp = join('.', @domparts);
-	  last if ($temp eq 'demon.co.uk' || $temp eq 'esc.edu.ar');
+	  last if ($temp eq 'demon.co.uk' || $temp eq 'esc.edu.ar' ||
+	  	   $temp eq 'lkd.co.im' || $temp eq 'plc.co.im');
 	}
 	elsif ($domparts[2] eq 'us') {
           last if ($US_STATES{$domparts[1]});
