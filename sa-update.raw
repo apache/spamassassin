@@ -1233,25 +1233,25 @@ B<sa-update> [options]
 
 Options:
 
-  --updatedir path		Directory to place updates, defaults to the
-				SpamAssassin site rules directory (def:
-				/var/lib/spamassassin/<version>)
-  --channel channel		Retrieve updates from this channel
-  				Use multiple times for multiple channels
-  --channelfile file		Retrieve updates from the channels in the file
-  --checkonly		        Check for update availability, do not install
-  --gpgkey key			Trust the key id to sign releases
-  				Use multiple times for multiple keys
-  --gpgkeyfile file		Trust the key ids in the file to sign releases
-  --gpghomedir path             Store the GPG keyring in this directory
-  --gpg and --nogpg		Use (or do not use) GPG to verify updates
-  				(--gpg is assumed by use of the above
-				--gpgkey and --gpgkeyfile options)
-  --import file			Import GPG key(s) from file into sa-update's
-				keyring. Use multiple times for multiple files
-  -D, --debug [area=n,...]	Print debugging messages
-  -V, --version			Print version
-  -h, --help			Print usage message
+  --updatedir path        Directory to place updates, defaults to the
+                          SpamAssassin site rules directory
+                          (default: /var/lib/spamassassin/<version>)
+  --channel channel       Retrieve updates from this channel
+                          Use multiple times for multiple channels
+  --channelfile file      Retrieve updates from the channels in the file
+  --checkonly             Check for update availability, do not install
+  --gpgkey key            Trust the key id to sign releases
+                          Use multiple times for multiple keys
+  --gpgkeyfile file       Trust the key ids in the file to sign releases
+  --gpghomedir path       Store the GPG keyring in this directory
+  --gpg and --nogpg       Use (or do not use) GPG to verify updates
+                          (--gpg is assumed by use of the above
+                          --gpgkey and --gpgkeyfile options)
+  --import file           Import GPG key(s) from file into sa-update's
+                          keyring. Use multiple times for multiple files
+  -D, --debug [area=n,...]  Print debugging messages
+  -V, --version           Print version
+  -h, --help              Print usage message
 
 =head1 DESCRIPTION
 
