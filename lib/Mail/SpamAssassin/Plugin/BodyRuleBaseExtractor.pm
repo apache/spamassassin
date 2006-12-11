@@ -357,10 +357,12 @@ sub extract_hints {
   die "anchors" if $rule =~ /(?:\$|\\Z)\)?$/;
 
   # simplify (?:..) to (..)
-  $rule =~ s/\(\?:/\(/g;
+  $main->{bases_allow_noncapture_groups} or
+            $rule =~ s/\(\?:/\(/g;
 
   # this must be before reversing
-  if ($main->{bases_can_use_alternations}||$main->{bases_split_out_alternations})
+  if (($main->{bases_can_use_alternations}||$main->{bases_split_out_alternations})
+            && !$main->{bases_can_use_quantifiers})
   {
     # /foo (bar)? baz/ simplify to /foo (bar|) baz/
     $rule =~ s/(?<!\\)(\([^\(\)]*)\)\?/$1\|\)/gs;
