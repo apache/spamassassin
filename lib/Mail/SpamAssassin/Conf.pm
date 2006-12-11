@@ -2010,6 +2010,59 @@ general running of SpamAssassin.
     }
   });
 
+=item util_rb_tld tld1 tld2 ...
+
+This option allows the addition of new TLDs to the RegistrarBoundaries code.
+Updates to the list usually happen when new versions of SpamAssassin are
+released, but sometimes it's necessary to add in new TLDs faster than a
+release can occur.  TLDs include things like com, net, org, etc.
+
+=cut
+
+  push (@cmds, {
+    setting => 'util_rb_tld',
+    is_admin => 1,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      unless (defined $value && $value !~ /^$/) {
+	return $MISSING_REQUIRED_VALUE;
+      }
+      unless ($value =~ /^[a-zA-Z]+(?:\s+[a-zA-Z]+)*$/) {
+	return $INVALID_VALUE;
+      }
+      foreach (split(/\s+/, $value)) {
+        $Mail::SpamAssassin::Util::RegistrarBoundaries::VALID_TLDS{lc $_} = 1;
+      }
+    }
+  });
+
+=item util_rb_2tld 2tld-1.tld 2tld-2.tld ...
+
+This option allows the addition of new 2nd-level TLDs (2TLD) to the
+RegistrarBoundaries code.  Updates to the list usually happen when new
+versions of SpamAssassin are released, but sometimes it's necessary to add in
+new 2TLDs faster than a release can occur.  2TLDs include things like co.uk,
+fed.us, etc.
+
+=cut
+
+  push (@cmds, {
+    setting => 'util_rb_2tld',
+    is_admin => 1,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      unless (defined $value && $value !~ /^$/) {
+	return $MISSING_REQUIRED_VALUE;
+      }
+      unless ($value =~ /^[^\s.]+\.[^\s.]+(?:\s+[^\s.]+\.[^\s.]+)*$/) {
+	return $INVALID_VALUE;
+      }
+      foreach (split(/\s+/, $value)) {
+        $Mail::SpamAssassin::Util::RegistrarBoundaries::TWO_LEVEL_DOMAINS{lc $_} = 1;
+      }
+    }
+  });
+
 =item bayes_path /path/filename	(default: ~/.spamassassin/bayes)
 
 This is the directory and filename for Bayes databases.  Several databases
