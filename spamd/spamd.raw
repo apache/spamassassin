@@ -846,6 +846,13 @@ sub spawn {
   else {
     ## CHILD
 
+    # Reset signal handling to default settings.
+    setup_child_sig_handlers();
+
+    # unblock signals
+    sigprocmask( POSIX::SIG_UNBLOCK(), $sigset )
+      or die "spamd: cannot unblock SIGINT/SIGCHLD for fork: $!\n";
+
     $spamtest->call_plugins("spamd_child_init");
 
     # support non-root use
@@ -884,13 +891,6 @@ sub spawn {
         die "spamd: setuid to uid $uuid failed\n";
       }
     }
-
-    # Reset signal handling to default settings.
-    setup_child_sig_handlers();
-
-    # unblock signals
-    sigprocmask( POSIX::SIG_UNBLOCK(), $sigset )
-      or die "spamd: cannot unblock SIGINT/SIGCHLD for fork: $!\n";
 
     # set process name where supported
     # this will help make it clear via process listing which is child/parent
