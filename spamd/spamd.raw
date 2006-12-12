@@ -592,35 +592,6 @@ if ( $listen_inet || $listen_ssl ) {
   }
 }
 
-my @listeninfo = ();
-
-if ( $listen_unix ) {
-  push @listeninfo, "UNIX domain socket " . $opt{'socketpath'};
-}
-
-if ( $listen_ssl ) {
-  $sslport = $opt{'ssl-port'} || $opt{'port'} || 783;
-  if ($sslport !~ /^(\d+)$/ ) {
-    $sslport = ( getservbyname($sslport, 'tcp') )[2];
-    die "spamd: invalid ssl-port: $opt{'port'}\n" unless $sslport;
-  }
-
-  push @listeninfo, "SSL port $sslport/tcp";
-}
-
-if ( $listen_inet ) {
-  $inetport = $opt{'port'} || 783;
-  if ($inetport !~ /^(\d+)$/ ) {
-    $inetport = ( getservbyname($inetport, 'tcp') )[2];
-    die "spamd: invalid port: $opt{'port'}\n" unless $inetport;
-  }
-
-  push @listeninfo, "port $inetport/tcp";
-}
-
-# just for reporting at startup
-my $listeninfo = join ', ', @listeninfo;
-
 my $backchannel = Mail::SpamAssassin::SubProcBackChannel->new();
 my $scaling;
 if (!$opt{'round-robin'})
@@ -644,16 +615,87 @@ if (!$opt{'round-robin'})
       });
 }
 
+# ---------------------------------------------------------------------------
+
+my $listeninfo = compose_listen_info_string();
+
+sub compose_listen_info_string {
+  my @listeninfo = ();
+
+  if ( $listen_unix ) {
+    push @listeninfo, "UNIX domain socket " . $opt{'socketpath'};
+  }
+
+  if ( $listen_ssl ) {
+    $sslport = $opt{'ssl-port'} || $opt{'port'} || 783;
+    if ($sslport !~ /^(\d+)$/ ) {
+      $sslport = ( getservbyname($sslport, 'tcp') )[2];
+      die "spamd: invalid ssl-port: $opt{'port'}\n" unless $sslport;
+    }
+
+    push @listeninfo, "SSL port $sslport/tcp";
+  }
+
+  if ( $listen_inet ) {
+    $inetport = $opt{'port'} || 783;
+    if ($inetport !~ /^(\d+)$/ ) {
+      $inetport = ( getservbyname($inetport, 'tcp') )[2];
+      die "spamd: invalid port: $opt{'port'}\n" unless $inetport;
+    }
+
+    push @listeninfo, "port $inetport/tcp";
+  }
+
+  # just for reporting at startup
+  $listeninfo = join ', ', @listeninfo;
+}
+
+# ---------------------------------------------------------------------------
+# Server (listening) socket setup for the various supported types
+
 my ( $server_inet, $server_unix, $server_ssl );
 my ( $fd_inet, $fd_unix, $fd_ssl );
 my $have_multiple_server_socks;
 my $server_select_mask;
 
-# Create the sockets
+# abstract out the setup-retry code
 if ( $listen_unix ) {
+  server_sock_setup(sub { server_sock_setup_unix(); });
+}
+if ( $listen_ssl ) {
+  server_sock_setup(sub { server_sock_setup_ssl(); });
+}
+if ( $listen_inet ) {
+  server_sock_setup(sub { server_sock_setup_inet(); });
+}
+
+sub server_sock_setup {
+  my $sub = shift;
+
+  # retry 3 times to bind to the listening socket; 3 seconds delay,
+  # max, but should allow a little time for any existing shutting-down
+  # server to complete shutdown
+  for my $retry (1 .. 3) {
+    if ($retry > 1) { sleep 1; }
+
+    eval { $sub->(); };
+    last unless ($@);       # success => break
+
+    if ($retry == 3) {
+      die $@;               # this is fatal
+    } else {
+      warn "server socket setup failed, retry $retry: $@";
+      # but retry
+    }
+  }
+}
+
+# ---------------------------------------------------------------------------
+
+# Create the sockets
+sub server_sock_setup_unix {
   my $path = $opt{'socketpath'};
 
-  #---------------------------------------------------------------------
   # see if the socket is in use: if we connect to the current socket, it
   # means that spamd is already running, so we have to bail on our own.
   # Yes, there is a window here: best we can do for now. There is almost
@@ -737,7 +779,7 @@ if ( $listen_unix ) {
   }
 }
 
-if ( $listen_ssl ) {
+sub server_sock_setup_ssl {
   my %socket = (
     LocalAddr       => $addr,
     LocalPort       => $sslport,
@@ -754,7 +796,7 @@ if ( $listen_ssl ) {
        || die "spamd: could not create SSL socket on $addr:$sslport: $!\n";
 }
 
-if ( $listen_inet ) {
+sub server_sock_setup_inet {
   my %socket = (
     LocalAddr => $addr,
     LocalPort => $inetport,
@@ -767,6 +809,8 @@ if ( $listen_inet ) {
   $server_inet = new_io_socket_inetx(%socket)
        || die "spamd: could not create INET socket on $addr:$inetport: $!\n";
 }
+
+# ---------------------------------------------------------------------------
 
 # for select() purposes: make a map of the server socket FDs
 map_server_sockets();
