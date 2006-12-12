@@ -4,7 +4,7 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_hup");
 use constant TEST_ENABLED => !$SKIP_SPAMD_TESTS && !$RUNNING_ON_WINDOWS;
 
-use Test; BEGIN { plan tests => (TEST_ENABLED? 100 : 0) };
+use Test; BEGIN { plan tests => (TEST_ENABLED? 90 : 0) };
 
 use File::Spec;
 
