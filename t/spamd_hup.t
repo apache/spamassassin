@@ -27,7 +27,6 @@ for $retry (0 .. 9) {
   ok ($pid1 != 0 and kill ('HUP', $pid1));
 
   sleep 1;      # time for signal to be received
-  ok (!-e $pid_file) or warn "$pid_file is there 1 sec after SIGHUP";
 
   print "Waiting for spamd at pid $pid1 to restart...\n";
   # note that the wait period increases the longer it takes,
