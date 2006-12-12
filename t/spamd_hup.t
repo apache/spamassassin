@@ -4,7 +4,7 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_hup");
 use constant TEST_ENABLED => !$SKIP_SPAMD_TESTS && !$RUNNING_ON_WINDOWS;
 
-use Test; BEGIN { plan tests => (TEST_ENABLED? 80 : 0) };
+use Test; BEGIN { plan tests => (TEST_ENABLED? 100 : 0) };
 
 use File::Spec;
 
@@ -23,11 +23,15 @@ sleep 1;
 for $retry (0 .. 9) {
   ok ($pid1 = get_pid());
   print "HUPing spamd at pid $pid1, loop try $retry...\n";
+  ok (-e $pid_file) or warn "$pid_file is not there before SIGHUP";
   ok ($pid1 != 0 and kill ('HUP', $pid1));
 
+  sleep 1;      # time for signal to be received
+  ok (!-e $pid_file) or warn "$pid_file is there 1 sec after SIGHUP";
+
   print "Waiting for spamd at pid $pid1 to restart...\n";
-# note that the wait period increases the longer it takes,
-# 20 retries works out to a total of 60 seconds
+  # note that the wait period increases the longer it takes,
+  # 20 retries works out to a total of 60 seconds
   my $timeout = 20;
   my $wait = 0;
   do {
@@ -38,7 +42,7 @@ for $retry (0 .. 9) {
 
   ok ($pid2 = get_pid($pid1));
   print "Looking for new spamd at pid $pid2...\n";
-#ok ($pid2 != $pid1);
+  #ok ($pid2 != $pid1);
   ok ($pid2 != 0 and kill (0, $pid2));
 
   print "Checking GTUBE...\n";
