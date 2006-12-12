@@ -56,6 +56,7 @@ for ($i = 0; $i < 1999; $i++) {
   system ($pkill, "-f", "spamd child");
 }
 
+sleep 1;        # give it time to start a new one
 clear_pattern_counters();
 ok (spamcrun ("< data/spam/001", \&patterns_run_cb));
 ok_all_patterns();
