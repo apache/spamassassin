@@ -43,6 +43,13 @@ SpamAssassin is configured using traditional UNIX-style configuration files,
 loaded from the C</usr/share/spamassassin> and C</etc/mail/spamassassin>
 directories.
 
+The following web page lists the most important configuration settings
+used to configure SpamAssassin; novices are encouraged to read it first:
+
+  http://wiki.apache.org/spamassassin/ImportantInitialConfigItems
+
+=head1 FILE FORMAT
+
 The C<#> character starts a comment, which continues until end of line.
 B<NOTE:> if the C<#> character is to be used as part of a rule or
 configuration option, it must be escaped with a backslash.  i.e.: C<\#>
