@@ -1693,6 +1693,9 @@ int transport_setup(struct transport *tp, int flags)
                       "getaddrinfo(%s) failed: %s",
                       hostname, gai_strerror(origerr));
                 switch (origerr) { 
+#ifndef EAI_ADDRFAMILY
+ #define EAI_ADDRFAMILY 1
+#endif
                 case EAI_AGAIN:
                     errbits |= 1;
                     break;
@@ -1705,6 +1708,9 @@ int transport_setup(struct transport *tp, int flags)
                 case EAI_NODATA: /*address exists, but no data*/
                 case EAI_MEMORY: /*out of memory*/
                 case EAI_FAIL: /*name server returned permanent error*/
+#ifndef EAI_SYSTEM
+ #define EAI_SYSTEM    11
+#endif
                 case EAI_SYSTEM: /*system error, check errno*/
                     errbits |= 2;
                     break;
