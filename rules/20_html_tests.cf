@@ -142,7 +142,13 @@ describe HTML_IMAGE_ONLY_32	HTML: images with 2800-3200 bytes of words
 
 # HTML_IMAGE_RATIO - more image area than text (ratio)
 body HTML_IMAGE_RATIO_02	eval:html_image_ratio('0.000','0.002')
-describe HTML_IMAGE_RATIO_02	HTML has a low ratio of text to image area
+body HTML_IMAGE_RATIO_04        eval:html_image_ratio('0.002','0.004')
+body HTML_IMAGE_RATIO_06        eval:html_image_ratio('0.004','0.006')
+body HTML_IMAGE_RATIO_08        eval:html_image_ratio('0.006','0.008')
+describe HTML_IMAGE_RATIO_02    HTML has a low ratio of text to image area
+describe HTML_IMAGE_RATIO_04    HTML has a low ratio of text to image area
+describe HTML_IMAGE_RATIO_06    HTML has a low ratio of text to image area
+describe HTML_IMAGE_RATIO_08    HTML has a low ratio of text to image area
 
 # HTML obfuscation
 body HTML_OBFUSCATE_05_10	eval:html_range('obfuscation_ratio','.05','.1')
