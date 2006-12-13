@@ -357,6 +357,8 @@ sub bgsend {
   my ($self, $host, $type, $class, $cb) = @_;
   return if $self->{no_resolver};
 
+  $self->{send_timed_out} = 0;
+
   my $pkt = $self->new_dns_packet($host, $type, $class);
 
   $self->connect_sock_if_reqd();
@@ -470,10 +472,32 @@ sub send {
 
     while (($now < $deadline) && (!defined($answerpkt))) {
       $self->poll_responses(1);
+      last if defined $answerpkt;
       $now = time;
     }
+    $self->{send_timed_out} = 1 unless ($now < $deadline);
   }
   return $answerpkt;
+}
+
+###########################################################################
+
+=item $res->errorstring()
+
+Little more than a stub for callers expecting this from C<Net::DNS::Resolver>.
+
+If called immediately after a call to $res->send this will return
+C<query timed out> if the $res->send DNS query timed out.  Otherwise 
+C<unknown error or no error> will be returned.
+
+No other errors are reported.
+
+=cut
+
+sub errorstring {
+  my ($self) = @_;
+  return 'query timed out' if $self->{send_timed_out};
+  return 'unknown error or no error';
 }
 
 ###########################################################################

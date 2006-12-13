@@ -53,8 +53,6 @@ sub new {
   my $self = $class->SUPER::new($mailsaobject);
   bless ($self, $class);
 
-  my $conf = $mailsaobject->{conf};
-
   $self->register_eval_rule ("check_for_spf_pass");
   $self->register_eval_rule ("check_for_spf_neutral");
   $self->register_eval_rule ("check_for_spf_fail");
@@ -133,6 +131,44 @@ these are often targets for spammer spoofing.
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST
   });
 
+=back
+
+=head1 ADMINISTRATOR OPTIONS
+
+=over 4
+
+=item do_not_use_mail_spf (0|1)		(default: 0)
+
+By default the plugin will try to use the Mail::SPF module for SPF checks if
+it can be loaded.  If Mail::SPF cannot be used the plugin will fall back to
+using the legacy Mail::SPF::Query module if it can be loaded.
+
+Use this option to stop the plugin from using Mail::SPF and cause it to try to
+use Mail::SPF::Query instead.
+
+=cut
+
+  push(@cmds, {
+    setting => 'do_not_use_mail_spf',
+    is_admin => 1,
+    default => 0,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
+  });
+
+=item do_not_use_mail_spq_query (0|1)	(default: 0)
+
+As above, but instead stop the plugin from trying to use Mail::SPF::Query and
+cause it to only try to use Mail::SPF.
+
+=cut
+
+  push(@cmds, {
+    setting => 'do_not_use_mail_spf_query',
+    is_admin => 1,
+    default => 0,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
+  });
+
   $conf->{parser}->register_commands(\@cmds);
 }
 
@@ -146,9 +182,6 @@ sub check_for_spf_pass {
 sub check_for_spf_neutral {
   my ($self, $scanner) = @_;
   $self->_check_spf ($scanner, 0) unless $scanner->{spf_checked};
-  if ($scanner->{spf_failure_comment}) {
-    $scanner->test_log ($scanner->{spf_failure_comment});
-  }
   $scanner->{spf_neutral};
 }
 
@@ -164,9 +197,6 @@ sub check_for_spf_fail {
 sub check_for_spf_softfail {
   my ($self, $scanner) = @_;
   $self->_check_spf ($scanner, 0) unless $scanner->{spf_checked};
-  if ($scanner->{spf_failure_comment}) {
-    $scanner->test_log ($scanner->{spf_failure_comment});
-  }
   $scanner->{spf_softfail};
 }
 
@@ -179,9 +209,6 @@ sub check_for_spf_helo_pass {
 sub check_for_spf_helo_neutral {
   my ($self, $scanner) = @_;
   $self->_check_spf ($scanner, 1) unless $scanner->{spf_helo_checked};
-  if ($scanner->{spf_helo_failure_comment}) {
-    $scanner->test_log ($scanner->{spf_helo_failure_comment});
-  }
   $scanner->{spf_helo_neutral};
 }
 
@@ -197,9 +224,6 @@ sub check_for_spf_helo_fail {
 sub check_for_spf_helo_softfail {
   my ($self, $scanner) = @_;
   $self->_check_spf ($scanner, 1) unless $scanner->{spf_helo_checked};
-  if ($scanner->{spf_helo_failure_comment}) {
-    $scanner->test_log ($scanner->{spf_helo_failure_comment});
-  }
   $scanner->{spf_helo_softfail};
 }
 
@@ -219,6 +243,56 @@ sub _check_spf {
   my ($self, $scanner, $ishelo) = @_;
 
   return unless $scanner->is_dns_available();
+  return if $self->{no_spf_module};
+
+  # select the SPF module we're going to use
+  unless (defined $self->{has_mail_spf}) {
+    eval {
+      die("Mail::SPF disabled by admin setting\n") if $scanner->{conf}->{do_not_use_mail_spf};
+
+      require Mail::SPF;
+      if (!defined $Mail::SPF::VERSION || $Mail::SPF::VERSION < 2.001) {
+	die "Mail::SPF 2.001 or later required, this is ".
+	  (defined $Mail::SPF::VERSION ? $Mail::SPF::VERSION : 'unknown')."\n";
+      }
+      # Mail::SPF::Server can be re-used, and we get to use our own resolver object!
+      $self->{spf_server} = Mail::SPF::Server->new(
+				hostname     => $scanner->get_tag('HOSTNAME'),
+				dns_resolver => $self->{main}->{resolver} );
+    };
+
+    unless ($@) {
+      dbg("spf: using Mail::SPF for SPF checks");
+      $self->{has_mail_spf} = 1;
+    } else {
+      # strip the @INC paths... users are going to see it and think there's a problem even though
+      # we're going to fall back to Mail::SPF::Query (which will display the same paths if it fails)
+      $@ =~ s#^Can't locate Mail/SPFd.pm in \@INC .*#Can't locate Mail/SPFd.pm#;
+      dbg("spf: cannot load Mail::SPF module or create Mail::SPF::Server object: $@");
+      dbg("spf: attempting to use legacy Mail::SPF::Query module instead");
+
+      eval {
+	die("Mail::SPF::Query disabled by admin setting\n") if $scanner->{conf}->{do_not_use_mail_spf_query};
+
+	require Mail::SPF::Query;
+	if (!defined $Mail::SPF::Query::VERSION || $Mail::SPF::Query::VERSION < 1.996) {
+	  die "Mail::SPF::Query 1.996 or later required, this is ".
+	    (defined $Mail::SPF::Query::VERSION ? $Mail::SPF::Query::VERSION : 'unknown')."\n";
+	}
+      };
+
+      unless ($@) {
+	dbg("spf: using Mail::SPF::Query for SPF checks");
+	$self->{has_mail_spf} = 0;
+      } else {
+	dbg("spf: cannot load Mail::SPF::Query module: $@");
+	dbg("spf: one of Mail::SPF or Mail::SPF::Query is required for SPF checks, SPF checks disabled");
+	$self->{no_spf_module} = 1;
+	return;
+      }
+    }
+  }
+
 
   # skip SPF checks if the A/MX records are nonexistent for the From
   # domain, anyway, to avoid crappy messages from slowing us down
@@ -249,21 +323,29 @@ sub _check_spf {
     return;
   }
 
-  my $ip = $lasthop->{ip};
-  my $helo = $lasthop->{helo};
+  my $ip = $lasthop->{ip};	# always present
+  my $helo = $lasthop->{helo};	# could be missing
   $scanner->{sender} = '' unless $scanner->{sender_got};
 
   if ($ishelo) {
+    unless ($helo) {
+      dbg("spf: cannot check HELO, HELO value unknown");
+      return;
+    }
     dbg("spf: checking HELO (helo=$helo, ip=$ip)");
-
   } else {
     $self->_get_sender($scanner) unless $scanner->{sender_got};
+
+    # TODO: we're supposed to use the helo domain as the sender identity (for
+    # mfrom checks) if the sender is the null sender, however determining that
+    # it's the null sender, and not just a failure to get the envelope isn't
+    # exactly trivial... so for now we'll just skip the check
 
     if (!$scanner->{sender}) {
       # we already dbg'd that we couldn't get an Envelope-From and can't do SPF
       return;
     }
-    dbg("spf: checking EnvelopeFrom (helo=$helo, ip=$ip, envfrom=$scanner->{sender})");
+    dbg("spf: checking EnvelopeFrom (helo=".($helo ? $helo : '').", ip=$ip, envfrom=$scanner->{sender})");
   }
 
   # this test could probably stand to be more strict, but try to test
@@ -272,43 +354,88 @@ sub _check_spf {
     dbg("spf: cannot check HELO of '$helo', skipping");
     return;
   }
-  if (!$helo) {
-    dbg("spf: cannot get HELO, cannot use SPF");
-    return;
-  }
 
-  if ($scanner->server_failed_to_respond_for_domain($helo)) {
+  if ($helo && $scanner->server_failed_to_respond_for_domain($helo)) {
     dbg("spf: we had a previous timeout on '$helo', skipping");
     return;
   }
 
-  my $query;
-  eval {
-    require Mail::SPF::Query;
-    if (!defined $Mail::SPF::Query::VERSION || $Mail::SPF::Query::VERSION < 1.996) {
-      die "spf: Mail::SPF::Query 1.996 or later required, this is $Mail::SPF::Query::VERSION\n";
+
+  my ($result, $comment, $text, $err);
+
+  # use Mail::SPF if it was available, otherwise use the legacy Mail::SPF::Query
+  if ($self->{has_mail_spf}) {
+
+    # TODO: currently we won't get to here for a mfrom check with a null sender
+    my $identity = $ishelo ? $helo : ($scanner->{sender}); # || $helo);
+
+    unless ($identity) {
+      dbg("spf: cannot determine ".($ishelo ? 'helo' : 'mfrom').
+	  " identity, skipping ".($ishelo ? 'helo' : 'mfrom')." SPF check");
+      return;
     }
-    $query = Mail::SPF::Query->new (ip => $ip,
+    $helo ||= 'unknown';  # only used for macro expansion in the mfrom explanation
+
+    my $request;
+    eval {
+      $request = Mail::SPF::Request->new( scope         => $ishelo ? 'helo' : 'mfrom',
+					  identity      => $identity,
+					  ip_address    => $ip,
+					  helo_identity => $helo );
+    };
+
+    if ($@) {
+      dbg("spf: cannot create Mail::SPF::Request object");
+      return;
+    }
+
+    my $timeout = $scanner->{conf}->{spf_timeout};
+
+    my $timer = Mail::SpamAssassin::Timeout->new({ secs => $timeout });
+    $err = $timer->run_and_catch(sub {
+
+      my $query = $self->{spf_server}->process($request);
+
+      $result = $query->code;
+      $comment = $query->authority_explanation if $query->can("authority_explanation");
+      $text = $query->text;
+
+    });
+
+
+  } else {
+
+    if (!$helo) {
+      dbg("spf: cannot get HELO, cannot use Mail::SPF::Query, consider installing Mail::SPF");
+      return;
+    }
+
+    # TODO: if we start doing checks on the null sender using the helo domain
+    # be sure to fix this so that it uses the correct sender identity
+    my $query;
+    eval {
+      $query = Mail::SPF::Query->new (ip => $ip,
 				    sender => $scanner->{sender},
 				    helo => $helo,
 				    debug => 0,
 				    trusted => 0);
-  };
+    };
 
-  if ($@) {
-    dbg("spf: cannot load or create Mail::SPF::Query module: $@");
-    return;
-  }
+    if ($@) {
+      dbg("spf: cannot create Mail::SPF::Query object: $@");
+      return;
+    }
 
-  my ($result, $comment);
-  my $timeout = $scanner->{conf}->{spf_timeout};
+    my $timeout = $scanner->{conf}->{spf_timeout};
 
-  my $timer = Mail::SpamAssassin::Timeout->new({ secs => $timeout });
-  my $err = $timer->run_and_catch(sub {
+    my $timer = Mail::SpamAssassin::Timeout->new({ secs => $timeout });
+    $err = $timer->run_and_catch(sub {
 
-    ($result, $comment) = $query->result();
+      ($result, $comment) = $query->result();
 
-  });
+    });
+
+  } # end of differences between Mail::SPF and Mail::SPF::Query
 
   if ($err) {
     chomp $err;
@@ -316,9 +443,12 @@ sub _check_spf {
     return 0;
   }
 
+
   $result ||= 'timeout';	# bug 5077
   $comment ||= '';
   $comment =~ s/\s+/ /gs;	# no newlines please
+  $text ||= '';
+  $text =~ s/\s+/ /gs;		# no newlines please
 
   if ($ishelo) {
     if ($result eq 'pass') { $scanner->{spf_helo_pass} = 1; }
@@ -326,7 +456,7 @@ sub _check_spf {
     elsif ($result eq 'fail') { $scanner->{spf_helo_fail} = 1; }
     elsif ($result eq 'softfail') { $scanner->{spf_helo_softfail} = 1; }
 
-    if ($result eq 'neutral' || $result eq 'fail' || $result eq 'softfail') {
+    if ($result eq 'fail') {	# RFC 4408 6.2
       $scanner->{spf_helo_failure_comment} = "SPF failed: $comment";
     }
   } else {
@@ -335,12 +465,12 @@ sub _check_spf {
     elsif ($result eq 'fail') { $scanner->{spf_fail} = 1; }
     elsif ($result eq 'softfail') { $scanner->{spf_softfail} = 1; }
 
-    if ($result eq 'neutral' || $result eq 'fail' || $result eq 'softfail') {
+    if ($result eq 'fail') {	# RCF 4408 6.2
       $scanner->{spf_failure_comment} = "SPF failed: $comment";
     }
   }
 
-  dbg("spf: query for $scanner->{sender}/$ip/$helo: result: $result, comment: $comment");
+  dbg("spf: query for $scanner->{sender}/$ip/$helo: result: $result, comment: $comment, text: $text");
 }
 
 sub _get_relay {
@@ -392,9 +522,17 @@ sub _check_spf_whitelist {
   my ($self, $scanner) = @_;
 
   return unless $scanner->is_dns_available();
+  return if ($self->{no_spf_module});
 
   $scanner->{spf_whitelist_from_checked} = 1;
   $scanner->{spf_whitelist_from} = 0;
+
+  # if we've already checked for an SPF PASS and didn't get it don't waste time
+  # checking to see if the sender address is in the spf whitelist
+  if ($scanner->{spf_checked} && !$scanner->{spf_pass}) {
+    dbg("spf: whitelist_from_spf: already checked spf and didn't get pass, skipping whitelist check");
+    return;
+  }
 
   $self->_get_sender($scanner) unless $scanner->{sender_got};
 
@@ -432,9 +570,17 @@ sub _check_def_spf_whitelist {
   my ($self, $scanner) = @_;
 
   return unless $scanner->is_dns_available();
+  return if ($self->{no_spf_module});
 
   $scanner->{def_spf_whitelist_from_checked} = 1;
   $scanner->{def_spf_whitelist_from} = 0;
+
+  # if we've already checked for an SPF PASS and didn't get it don't waste time
+  # checking to see if the sender address is in the spf whitelist
+  if ($scanner->{spf_checked} && !$scanner->{spf_pass}) {
+    dbg("spf: def_spf_whitelist_from: already checked spf and didn't get pass, skipping whitelist check");
+    return;
+  }
 
   $self->_get_sender($scanner) unless $scanner->{sender_got};
 
