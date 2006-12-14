@@ -4,7 +4,7 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_kill_restart");
 use constant TEST_ENABLED => !$SKIP_SPAMD_TESTS && !$RUNNING_ON_WINDOWS;
 
-use Test; BEGIN { plan tests => (TEST_ENABLED? 63 : 0) };
+use Test; BEGIN { plan tests => (TEST_ENABLED? 73 : 0) };
 
 use File::Spec;
 
@@ -52,7 +52,7 @@ for $retry (0 .. 9) {
   dbgprint "Waiting for spamd at pid $pid1 to restart...\n";
 # note that the wait period increases the longer it takes,
 # 20 retries works out to a total of 60 seconds
-  my $timeout = 20;
+  $timeout = 20;
   my $wait = 0;
   do {
     sleep (int($wait++ / 4) + 1) if $timeout > 0;
