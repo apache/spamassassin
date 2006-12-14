@@ -27,6 +27,19 @@ for $retry (0 .. 9) {
   dbgprint "killing spamd at pid $pid1, loop try $retry...\n";
   ok ($pid1 != 0 and kill ('INT', $pid1));
 
+# ensure we wait for the exit to happen; under load, we could
+# still be waiting at this point for the spamd to receive the
+# signal
+
+  dbgprint "Waiting for spamd at pid $pid1 to exit...\n";
+  my $timeout = 20;
+  do {
+    # no increase in the timeout here
+    sleep (1) if $timeout > 0;
+    $timeout--;
+  } while(-e $pid_file && $timeout);
+  ok (!-e $pid_file);
+
 # override these so the old logs are still visible and the new
 # spamd will be started even though stop_spamd() was not called
   $spamd_pid = 0;
@@ -84,3 +97,4 @@ sub get_pid {
   #} until ($npid != $opid or $timeout == 0);
   return $npid;
 }
+
