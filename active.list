@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-jm bb-zmi cthielen daf dos jm parkerm theo zmi
+# with results from: bb-doc bb-jm bb-zmi cthielen daf jm parkerm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -116,6 +116,9 @@ CORRUPT_FROM_LINE_IN_HDRS
 CTYPE_001C_A
 
 # good enough
+CTYPE_1SPACE_GIF
+
+# good enough
 CURR_PRICE
 
 # good enough
@@ -215,6 +218,9 @@ FH_DATE_IS_19XX
 FH_DATE_PAST_20XX
 
 # good enough
+FH_FROM_HOODIA
+
+# good enough
 FH_FROM_TO_PERC
 
 # tflags userconf
@@ -225,6 +231,9 @@ FS_START_DOYOU2
 
 # good enough
 FUZZY_MERIDIA
+
+# good enough
+FU_HOODIA
 
 # good enough
 GEO_QUERY_STRING
@@ -659,6 +668,9 @@ STOCK_IMG_HTML
 STOCK_IMG_OUTLOOK
 
 # good enough
+STOCK_SUBJECT
+
+# good enough
 STOCK_WATCH_THIS_1
 
 # good enough
@@ -713,7 +725,22 @@ TVD_FINGER_02
 TVD_FLOAT_GENERAL
 
 # good enough
+TVD_FUZZY_DEGREE
+
+# good enough
 TVD_FUZZY_FINANCE
+
+# good enough
+TVD_FUZZY_PHARMACEUTICAL
+
+# good enough
+TVD_FUZZY_SYMBOL
+
+# good enough
+TVD_FW_GRAPHIC_ID1
+
+# good enough
+TVD_FW_GRAPHIC_ID2
 
 # good enough
 TVD_FW_GRAPHIC_ID3
@@ -735,9 +762,6 @@ TVD_NOT_SATISFIED
 
 # good enough
 TVD_PH_REC
-
-# good enough
-TVD_PH_SUBJ_ACCOUNTS_POST
 
 # good enough
 TVD_PH_SUBJ_META
@@ -821,19 +845,19 @@ TVD_VISIT_PHARMA
 TVD_VIS_HIDDEN
 
 # good enough
-CTYPE_8SPACE_GIF
+DOS_MORTGAGE
 
 # good enough
-DOS_MORTGAGE
+FAKE_REPLY_A1
 
 # good enough
 HS_FORGED_OE_FW
 
 # good enough
-HS_INDEX_PARAM
+HS_MEETUP_FOR_SEX
 
 # good enough
-HS_MEETUP_FOR_SEX
+RCVD_BAD_ID
 
 # tflags net
 RCVD_IN_DNSWL_HI
@@ -869,10 +893,7 @@ RCVD_IN_XBL
 TVD_FUZZY_MICROCAP
 
 # good enough
-TVD_FW_GRAPHIC_NAME_LONG
-
-# good enough
-TVD_FW_GRAPHIC_NAME_MID
+TVD_PH_FR5
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1073,6 +1094,9 @@ XMAILER_MIMEOLE_OL_1ECD5
 XMAILER_MIMEOLE_OL_20C99
 
 # good enough
+XMAILER_MIMEOLE_OL_20CC2
+
+# good enough
 XMAILER_MIMEOLE_OL_22B61
 
 # good enough
@@ -1116,6 +1140,9 @@ XMAILER_MIMEOLE_OL_5E7ED
 
 # good enough
 XMAILER_MIMEOLE_OL_5EDD4
+
+# good enough
+XMAILER_MIMEOLE_OL_62E6A
 
 # good enough
 XMAILER_MIMEOLE_OL_6554A
