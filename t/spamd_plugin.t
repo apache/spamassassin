@@ -31,21 +31,21 @@ start_spamd("-D -L --socketpath=$sockpath");
 );
 ok (spamcrun ("-U $sockpath < data/spam/001", \&patterns_run_cb));
 
-checkfile("spamd_plugin-spamd.err", \&patterns_run_cb);
+checkfile($spamd_stderr, \&patterns_run_cb);
 ok_all_patterns();
 
 %patterns = (
   q{ called myTestPlugin, round 2 }, 'called2'
 );
 ok (spamcrun ("-U $sockpath < data/nice/001", \&patterns_run_cb));
-checkfile("spamd_plugin-spamd.err", \&patterns_run_cb);
+checkfile($spamd_stderr, \&patterns_run_cb);
 ok_all_patterns();
 
 %patterns = (
   q{ called myTestPlugin, round 3 }, 'called3'
 );
 ok (spamcrun ("-U $sockpath < data/nice/001", \&patterns_run_cb));
-checkfile("spamd_plugin-spamd.err", \&patterns_run_cb);
+checkfile($spamd_stderr, \&patterns_run_cb);
 ok_all_patterns();
 
 stop_spamd();

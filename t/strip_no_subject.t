@@ -20,9 +20,9 @@ tstprefs ("
 
 # create report_safe 1 and -t output
 sarun ("-L -t < $INPUT");
-if (move("log/$testname.${Test::ntest}", $MUNGED)) {
+if (move("log/d.$testname/${Test::ntest}", $MUNGED)) {
   sarun ("-d < $MUNGED");
-  ok(!compare_text($INPUT,"log/$testname.${Test::ntest}"));
+  ok(!compare_text($INPUT,"log/d.$testname/${Test::ntest}"));
 }
 else {
   warn "move failed: $!\n";
@@ -37,9 +37,9 @@ tstprefs ("
 
 # create report_safe 2 output
 sarun ("-L < $INPUT");
-if (move("log/$testname.${Test::ntest}", $MUNGED)) {
+if (move("log/d.$testname/${Test::ntest}", $MUNGED)) {
   sarun ("-d < $MUNGED");
-  ok(!compare_text($INPUT,"log/$testname.${Test::ntest}"));
+  ok(!compare_text($INPUT,"log/d.$testname/${Test::ntest}"));
 }
 else {
   warn "move failed: $!\n";
@@ -54,9 +54,9 @@ tstprefs ("
 
 # create report_safe 0 output
 sarun ("-L < $INPUT");
-if (move("log/$testname.${Test::ntest}", $MUNGED)) {
+if (move("log/d.$testname/${Test::ntest}", $MUNGED)) {
   sarun ("-d < $MUNGED");
-  ok(!compare_text($INPUT,"log/$testname.${Test::ntest}"));
+  ok(!compare_text($INPUT,"log/d.$testname/${Test::ntest}"));
 }
 else {
   warn "move failed: $!\n";
@@ -65,4 +65,4 @@ else {
 
 # Work directly on regular message, as though it was not spam
 sarun ("-d < $INPUT");
-ok(!compare_text($INPUT,"log/$testname.${Test::ntest}"));
+ok(!compare_text($INPUT,"log/d.$testname/${Test::ntest}"));

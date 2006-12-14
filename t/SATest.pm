@@ -243,10 +243,11 @@ sub sarun {
   my $scrargs = "$scr $args";
   $scrargs =~ s!/!\\!g if ($^O =~ /^MS(DOS|Win)/i);
   print ("\t$scrargs\n");
-  system ("$scrargs > log/$testname.${Test::ntest} $post_redir");
+  (-d "log/d.$testname") or mkdir ("log/d.$testname", 0755);
+  system ("$scrargs > log/d.$testname/${Test::ntest} $post_redir");
   $sa_exitcode = ($?>>8);
   if ($sa_exitcode != 0) { return undef; }
-  &checkfile ("$testname.${Test::ntest}", $read_sub) if (defined $read_sub);
+  &checkfile ("d.$testname/${Test::ntest}", $read_sub) if (defined $read_sub);
   1;
 }
 
@@ -277,10 +278,11 @@ sub salearnrun {
   my $salearnargs = "$salearn $args";
   $salearnargs =~ s!/!\\!g if ($^O =~ /^MS(DOS|Win)/i);
   print ("\t$salearnargs\n");
-  system ("$salearnargs > log/$testname.${Test::ntest}");
+  (-d "log/d.$testname") or mkdir ("log/d.$testname", 0755);
+  system ("$salearnargs > log/d.$testname/${Test::ntest}");
   $salearn_exitcode = ($?>>8);
   if ($salearn_exitcode != 0) { return undef; }
-  &checkfile ("$testname.${Test::ntest}", $read_sub) if (defined $read_sub);
+  &checkfile ("d.$testname/${Test::ntest}", $read_sub) if (defined $read_sub);
   1;
 }
 
@@ -316,10 +318,11 @@ sub spamcrun {
   $spamcargs =~ s!/!\\!g if ($^O =~ /^MS(DOS|Win)/i);
 
   print ("\t$spamcargs\n");
+  (-d "log/d.$testname") or mkdir ("log/d.$testname", 0755);
   if ($capture_stderr) {
-    system ("$spamcargs > log/$testname.out 2>&1");
+    system ("$spamcargs > log/d.$testname/out.${Test::ntest} 2>&1");
   } else {
-    system ("$spamcargs > log/$testname.out");
+    system ("$spamcargs > log/d.$testname/out.${Test::ntest}");
   }
 
   $sa_exitcode = ($?>>8);
@@ -327,7 +330,7 @@ sub spamcrun {
 
   %found = ();
   %found_anti = ();
-  &checkfile ("$testname.out", $read_sub) if (defined $read_sub);
+  &checkfile ("d.$testname/out.${Test::ntest}", $read_sub) if (defined $read_sub);
 
   ($sa_exitcode == 0);
 }
@@ -352,7 +355,8 @@ sub spamcrun_background {
   $spamcargs =~ s!/!\\!g if ($^O =~ /^MS(DOS|Win)/i);
 
   print ("\t$spamcargs &\n");
-  system ("$spamcargs > log/$testname.bg &") and return 0;
+  (-d "log/d.$testname") or mkdir ("log/d.$testname", 0755);
+  system ("$spamcargs > log/d.$testname/bg.${Test::ntest} &") and return 0;
 
   1;
 }
@@ -369,6 +373,7 @@ sub sdrun {
   1;
 }
 
+# out: $spamd_stderr
 sub start_spamd {
 
   return if $SKIP_SPAMD_TESTS;
@@ -412,9 +417,11 @@ sub start_spamd {
     warn "oops! SATest.pm: a test prefs file was created, but spamd isn't reading it\n";
   }
 
-  my $spamd_stdout = "log/$testname-spamd.out";
-  my $spamd_stderr = "log/$testname-spamd.err";
-  my $spamd_stdlog = "log/$testname-spamd.log";
+  (-d "log/d.$testname") or mkdir ("log/d.$testname", 0755);
+  my $spamd_stdout = "log/d.$testname/spamd.out.${Test::ntest}";
+     $spamd_stderr = "log/d.$testname/spamd.err.${Test::ntest}";    #  global
+  my $spamd_stdlog = "log/d.$testname/spamd.log.${Test::ntest}";
+
   my $spamd_forker = $ENV{'SPAMD_FORKER'}   ?
                        $ENV{'SPAMD_FORKER'} :
                      $RUNNING_ON_WINDOWS    ?

@@ -43,7 +43,6 @@ for $retry (0 .. 9) {
 # override these so the old logs are still visible and the new
 # spamd will be started even though stop_spamd() was not called
   $spamd_pid = 0;
-  $testname = "spamd_kill_restart_retry_".$retry;
 
   dbgprint "starting new spamd, loop try $retry...\n";
   start_spamd("-D -L -r ${pid_file}");
