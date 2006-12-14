@@ -73,6 +73,9 @@ sub parse_received_headers {
 
   $self->{num_relays_unparseable} = 0;
 
+  $self->{last_trusted_relay_index} = -1;	# last counting from the top,
+  $self->{last_internal_relay_index} = -1;	# first in time
+
   # now figure out what relays are trusted...
   my $trusted = $permsgstatus->{main}->{conf}->{trusted_networks};
   my $internal = $permsgstatus->{main}->{conf}->{internal_networks};
@@ -117,7 +120,11 @@ sub parse_received_headers {
     }
 
     # undefined or 0 means there's no result, so goto the next header
-    next unless $relay;
+    unless ($relay) {
+      $self->{last_trusted_relay_index}++ if $in_trusted;
+      $self->{last_internal_relay_index}++ if $in_internal;
+      next;
+    }
 
     # hack for qmail-scanner, as described above; add in the saved
     # metadata
@@ -216,6 +223,7 @@ sub parse_received_headers {
     if ($in_trusted) {
       push (@{$self->{relays_trusted}}, $relay);
       $self->{allow_fetchmail_markers} = 1;
+      $self->{last_trusted_relay_index}++;
     } else {
       push (@{$self->{relays_untrusted}}, $relay);
       $self->{allow_fetchmail_markers} = 0;
@@ -223,6 +231,7 @@ sub parse_received_headers {
 
     if ($in_internal) {
       push (@{$self->{relays_internal}}, $relay);
+      $self->{last_internal_relay_index}++;
     } else {
       push (@{$self->{relays_external}}, $relay);
     }

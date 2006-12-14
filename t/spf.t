@@ -21,7 +21,7 @@ use constant DO_RUN     => TEST_ENABLED && (HAS_SPFQUERY || HAS_MAILSPF) &&
 BEGIN {
 
   # some tests are run once for each SPF module, others are only run once
-  plan tests => (DO_RUN ? (HAS_SPFQUERY && HAS_MAILSPF ? 90 : (HAS_SPFQUERY ? 46 : 46)) : 0);
+  plan tests => (DO_RUN ? (HAS_SPFQUERY && HAS_MAILSPF ? 98 : (HAS_SPFQUERY ? 54 : 54)) : 0);
 
 };
 
@@ -390,5 +390,91 @@ tstprefs("");
 );
 
 sarun ("-t < data/nice/spf1", \&patterns_run_cb);
+ok_all_patterns();
+
+
+# test usage of Received-SPF headers added by internal relays
+# the Received-SPF headers shouldn't be used in this test
+
+tstprefs("
+  clear_trusted_networks
+  clear_internal_networks
+  trusted_networks 65.214.43.158
+  internal_networks 65.214.43.158
+  always_trust_envelope_sender 1
+");
+
+%anti_patterns = ();
+%patterns = (
+  q{ SPF_HELO_PASS }, 'helo_pass',
+  q{ SPF_PASS }, 'pass',
+);
+
+sarun ("-t < data/nice/spf3-received-spf", \&patterns_run_cb);
+ok_all_patterns();
+
+
+# test usage of Received-SPF headers added by internal relays
+# the Received-SPF headers shouldn't be used in this test
+
+tstprefs("
+  clear_trusted_networks
+  clear_internal_networks
+  trusted_networks 65.214.43.158 64.142.3.173
+  internal_networks 65.214.43.158 64.142.3.173
+  always_trust_envelope_sender 1
+  ignore_received_spf_header 1
+");
+
+%anti_patterns = ();
+%patterns = (
+  q{ SPF_HELO_FAIL }, 'helo_fail_ignore_header',
+  q{ SPF_FAIL }, 'fail_ignore_header',
+);
+
+sarun ("-t < data/nice/spf3-received-spf", \&patterns_run_cb);
+ok_all_patterns();
+
+
+# test usage of Received-SPF headers added by internal relays
+# the bottom 2 Received-SPF headers should be used in this test
+
+tstprefs("
+  clear_trusted_networks
+  clear_internal_networks
+  trusted_networks 65.214.43.158 64.142.3.173
+  internal_networks 65.214.43.158 64.142.3.173
+  always_trust_envelope_sender 1
+");
+
+%anti_patterns = ();
+%patterns = (
+  q{ SPF_HELO_SOFTFAIL }, 'helo_softfail_from_header',
+  q{ SPF_NEUTRAL }, 'neutral_from_header',
+);
+
+sarun ("-t < data/nice/spf3-received-spf", \&patterns_run_cb);
+ok_all_patterns();
+
+
+# test usage of Received-SPF headers added by internal relays
+# the top 2 Received-SPF headers should be used in this test
+
+tstprefs("
+  clear_trusted_networks
+  clear_internal_networks
+  trusted_networks 65.214.43.158 64.142.3.173
+  internal_networks 65.214.43.158 64.142.3.173
+  use_newest_received_spf_header 1
+  always_trust_envelope_sender 1
+");
+
+%anti_patterns = ();
+%patterns = (
+  q{ SPF_HELO_SOFTFAIL }, 'helo_softfail_from_header',
+  q{ SPF_FAIL }, 'fail_from_header',
+);
+
+sarun ("-t < data/nice/spf3-received-spf", \&patterns_run_cb);
 ok_all_patterns();
 
