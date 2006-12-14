@@ -1324,7 +1324,8 @@ sub extract_message_metadata {
 	relays_untrusted relays_untrusted_str num_relays_untrusted
 	relays_internal relays_internal_str num_relays_internal
 	relays_external relays_external_str num_relays_external
-        num_relays_unparseable
+	num_relays_unparseable last_trusted_relay_index
+	last_internal_relay_index
 	))
   {
     $self->{$item} = $self->{msg}->{metadata}->{$item};
@@ -1416,6 +1417,21 @@ There are several special pseudo-headers that can be specified:
 
 =item C<ALL> can be used to mean the text of all the message's headers.
 
+=item C<ALL-TRUSTED> can be used to mean the text of all the message's headers
+that could only have been added by trusted relays.
+
+=item C<ALL-INTERNAL> can be used to mean the text of all the message's headers
+that could only have been added by internal relays.
+
+=item C<ALL-UNTRUSTED> can be used to mean the text of all the message's
+headers that may have been added by untrusted relays.  To make this
+pseudo-header more useful for header rules the 'Received' header that was added
+by the last trusted relay is included, even though it can be trusted.
+
+=item C<ALL-EXTERNAL> can be used to mean the text of all the message's headers
+that may have been added by external relays.  Like C<ALL-UNTRUSTED> the
+'Received' header added by the last internal relay is included.
+
 =item C<ToCc> can be used to mean the contents of both the 'To' and 'Cc'
 headers.
 
@@ -1457,6 +1473,36 @@ sub _get {
   # ALL: entire raw headers
   if ($request eq 'ALL') {
     $result = $self->{msg}->get_all_headers(1);
+  }
+  # ALL-TRUSTED: entire trusted raw headers
+  elsif ($request eq 'ALL-TRUSTED') {
+    # if we didn't find any trusted relays, none of the headers are trusted
+    return if $self->{last_trusted_relay_index} == -1;
+    $result = $self->{msg}->get_all_headers(1, 0, undef,
+					$self->{last_trusted_relay_index}+1);
+  }
+  # ALL-INTERNAL: entire internal raw headers
+  elsif ($request eq 'ALL-INTERNAL') { 
+    # if we didn't find any internal relays, none of the headers are internal
+    return if $self->{last_internal_relay_index} == -1;
+    $result = $self->{msg}->get_all_headers(1, 0, undef,
+					$self->{last_internal_relay_index}+1);
+  }
+  # ALL-UNTRUSTED: entire untrusted raw headers
+  elsif ($request eq 'ALL-UNTRUSTED') {
+    # if we didn't find any trusted relays get all the headers, otherwise get
+    # all the headers after the last trusted relay
+    my $start_index = ($self->{last_trusted_relay_index} == -1 ? undef :
+			$self->{last_trusted_relay_index} + 1);
+    $result = $self->{msg}->get_all_headers(1, 0, $start_index);
+  }
+  # ALL-EXTERNAL: entire external raw headers
+  elsif ($request eq 'ALL-EXTERNAL') {
+    # if we didn't find any internal relays get all the headers, otherwise get
+    # all the headers after the last internal relay
+    my $start_index = ($self->{last_internal_relay_index} == -1 ? undef :
+			$self->{last_internal_relay_index} + 1);
+    $result = $self->{msg}->get_all_headers(1, 0, $start_index);
   }
   # EnvelopeFrom: the SMTP MAIL FROM: address
   elsif ($request eq 'EnvelopeFrom') {

@@ -169,6 +169,51 @@ cause it to only try to use Mail::SPF.
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
   });
 
+=item ignore_received_spf_header (0|1)	(default: 0)
+
+By default, to avoid unnecessary DNS lookups, the plugin will try to use the
+SPF results found in any C<Received-SPF> headers it finds in the message that
+could only have been added by an internal relay.
+
+Set this option to 1 to ignore any C<Received-SPF> headers present and to have
+the plugin perform the SPF check itself.
+
+Note that unless the plugin finds an C<identity=helo>, or some unsupported
+identity, it will assume that the result is a mfrom SPF check result.  The
+only identities supported are C<mfrom>, C<mailfrom> and C<helo>.
+
+=cut
+
+  push(@cmds, {
+    setting => 'ignore_received_spf_header',
+    is_admin => 1,
+    default => 0,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
+  });
+
+=item use_newest_received_spf_header (0|1)	(default: 0)
+
+By default, when using C<Received-SPF> headers, the plugin will attempt to use
+the oldest (bottom most) C<Received-SPF> headers, that were added by internal
+relays, that it can parse results from since they are the most likely to be
+accurate.  This is done so that if you have an incoming mail setup where one
+of your primary MXes doesn't know about a secondary MX (or your MXes don't
+know about some sort of forwarding relay that SA considers trusted+internal)
+but SA is aware of the actual domain boundary (internal_networks setting) SA
+will use the results that are most accurate.
+
+Use this option to start with the newest (top most) C<Received-SPF> headers,
+working downwards until results are successfully parsed.
+
+=cut
+
+  push(@cmds, {
+    setting => 'use_newest_received_spf_header',
+    is_admin => 1,
+    default => 0,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
+  });
+
   $conf->{parser}->register_commands(\@cmds);
 }
 
@@ -242,6 +287,100 @@ sub check_for_def_spf_whitelist_from {
 sub _check_spf {
   my ($self, $scanner, $ishelo) = @_;
 
+  # we can re-use results from any *INTERNAL* Received-SPF header in the message...
+  # we can't use results from trusted but external hosts since (i) spf checks are
+  # supposed to be done "on the domain boundary", (ii) even if an external header 
+  # has a result that matches what we would get, the check was probably done on a
+  # different envelope (like the apache.org list servers checking the ORCPT and
+  # then using a new envelope to send the mail from the list) and (iii) if the
+  # checks are being done right and the envelope isn't being changed it's 99%
+  # likely that the trusted+external host really should be defined as part of your
+  # internal network
+  if ($scanner->{conf}->{ignore_received_spf_header}) {
+    dbg("spf: ignoring any Received-SPF headers from internal hosts, by admin setting");
+  } elsif ($scanner->{checked_for_received_spf_header}) {
+    dbg("spf: already checked for Received-SPF headers, proceeding with DNS based checks");
+  } else {
+    $scanner->{checked_for_received_spf_header} = 1;
+    dbg("spf: checking to see if the message has a Received-SPF header that we can use");
+    # if we didn't find any internal relays, none of the headers are internal
+    my @internal_hdrs;
+    unless ($scanner->{last_internal_relay_index} == -1) {	# -1 means there are none
+      @internal_hdrs = $scanner->{msg}->get_all_headers(1, 0, undef,
+					$scanner->{last_internal_relay_index}+1);
+      unless ($scanner->{conf}->{use_newest_received_spf_header}) {
+	@internal_hdrs = reverse(@internal_hdrs);
+      } else {
+	dbg("spf: starting with the newest Received-SPF headers first");
+      }
+    }
+    # look for the LAST (earliest in time) header, it'll be the most accurate
+    foreach my $hdr (@internal_hdrs) {
+      if ($hdr =~ /^received-spf: /i) {
+	dbg("spf: found a Received-SPF header added by an internal host: $hdr");
+
+	# old version:
+	# Received-SPF: pass (herse.apache.org: domain of spamassassin@dostech.ca
+	# 	designates 69.61.78.188 as permitted sender)
+
+	# new version:
+	# Received-SPF: pass (dostech.ca: 69.61.78.188 is authorized to use
+	# 	'spamassassin@dostech.ca' in 'mfrom' identity (mechanism 'mx' matched))
+	# 	receiver=FC5-VPC; identity=mfrom; envelope-from="spamassassin@dostech.ca";
+	# 	helo=smtp.dostech.net; client-ip=69.61.78.188
+
+	# Received-SPF: pass (dostech.ca: 69.61.78.188 is authorized to use 'dostech.ca'
+	# 	in 'helo' identity (mechanism 'mx' matched)) receiver=FC5-VPC; identity=helo;
+	# 	helo=dostech.ca; client-ip=69.61.78.188
+
+	# http://www.openspf.org/RFC_4408#header-field
+	# wtf - for some reason something is sticking an extra space between the header name and field value
+	if ($hdr =~ /^received-spf:\s+(pass|neutral|(?:soft)?fail|none) (?:.* identity=(helo|m(?:ail)?from); )?/i) {
+	  my $result = lc($1);
+
+	  my $identity = '';	# we assume it's a mfrom check if we can't tell otherwise
+	  if (defined $2) {
+	    $identity = lc($2);
+	    if ($identity eq 'mfrom' || $identity eq 'mailfrom') {
+	      next if $scanner->{spf_checked};
+	      $identity = '';
+	    } elsif ($identity eq 'helo') {
+	      next if $scanner->{spf_helo_checked};
+	      $identity = 'helo_';
+	    } else {
+	      dbg("spf: found unknown identity value, cannot use: $identity");
+	      next;	# try the next Received-SPF header, if any
+	    }
+	  } else {
+	    next if $scanner->{spf_checked};
+	  }
+
+	  # we'd set these if we actually did the check
+	  $scanner->{"spf_${identity}checked"} = 1;
+	  $scanner->{"spf_${identity}pass"} = 0;
+	  $scanner->{"spf_${identity}neutral"} = 0;
+	  $scanner->{"spf_${identity}fail"} = 0;
+	  $scanner->{"spf_${identity}softfail"} = 0;
+	  $scanner->{"spf_${identity}failure_comment"} = undef;
+
+	  # and the result
+	  $scanner->{"spf_${identity}${result}"} = 1;
+	  dbg("spf: re-using ".($identity ? 'helo' : 'mfrom')." result from Received-SPF header: $result");
+
+	  # if we've got *both* the mfrom and helo results we're done
+	  return if ($scanner->{spf_checked} && $scanner->{spf_helo_checked});
+
+	} else {
+	  dbg("spf: could not parse result from existing Received-SPF header");
+	}
+      }
+    }
+    # we can return if we've found the one we're being asked to get
+    return if ( ($ishelo && $scanner->{spf_helo_checked}) ||
+		(!$ishelo && $scanner->{spf_checked}) );
+  }
+
+  # abort if dns or an spf module isn't available
   return unless $scanner->is_dns_available();
   return if $self->{no_spf_module};
 
@@ -350,7 +489,7 @@ sub _check_spf {
 
   # this test could probably stand to be more strict, but try to test
   # any invalid HELO hostname formats with a header rule
-  if ($ishelo && ($helo =~ /^\d+\.\d+\.\d+\.\d+$/ || $helo =~ /^[^.]+$/)) {
+  if ($ishelo && ($helo =~ /^[\[!]?\d+\.\d+\.\d+\.\d+[\]!]?$/ || $helo =~ /^[^.]+$/)) {
     dbg("spf: cannot check HELO of '$helo', skipping");
     return;
   }
