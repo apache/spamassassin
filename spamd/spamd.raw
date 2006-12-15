@@ -1520,8 +1520,12 @@ sub check {
   my $score = $status->get_score();
   my $tests = join(",", sort(grep(length,$status->get_names_of_tests_hit())));
 
-  info(sprintf("spamd: result: %s %2d - %s %s", $yorn, $score,
-	       $tests, join(",", @extra)));
+  my $log = sprintf("spamd: result: %s %2d - %s %s", $yorn, $score,
+	       $tests, join(",", @extra));
+  info($log);
+
+  # bug 3808: log scan results to any listening plugins, too
+  $spamtest->call_plugins("log_scan_result", { result => $log });
 
   $status->finish();    # added by jm to allow GC'ing
   $mail->finish();

@@ -770,6 +770,20 @@ Address you wish to remove.
 
 Called when a new child starts up under spamd.
 
+=item $plugin->log_scan_result ( { options ... } )
+
+Called when spamd has completed scanning a message.  Currently,
+only spamd calls this API.
+
+=over 4
+
+=item result
+
+The C<'result: ...'> line for this scan.  Format is as described
+at B<http://wiki.apache.org/spamassassin/SpamdSyslogFormat>.
+
+=back
+
 =item $plugin->spamd_child_post_connection_close ()
 
 Called when child returns from handling a connection.
