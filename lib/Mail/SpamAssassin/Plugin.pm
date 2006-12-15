@@ -834,6 +834,30 @@ sub register_generated_rule_method {
         $nameofsub;
 }
 
+=item $plugin->register_method_priority($methodname, $priority)
+
+Indicate that the method named C<$methodname> on the current object
+has a callback priority of C<$priority>.
+
+This is used by the plugin handler to determine the relative order of
+callbacks; plugins with lower-numbered priorities are called before plugins
+with higher-numbered priorities.  Each method can have a different priority
+value.  The default value is C<0>.  The ordering of callbacks to methods with
+equal priority is undefined.
+
+Typically, you only need to worry about this if you need to ensure your
+plugin's method is called before another plugin's implementation of that
+method.  It should be called from your plugin's constructor.
+
+This API was added in SpamAssassin 3.2.0.
+
+=cut
+
+sub register_method_priority {
+  my ($self, $methname, $pri) = @_;
+  $self->{method_priority}->{$methname} = $pri;
+}
+
 =item $plugin->inhibit_further_callbacks()
 
 Tells the plugin handler to inhibit calling into other plugins in the plugin
