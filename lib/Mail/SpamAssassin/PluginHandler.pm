@@ -155,15 +155,26 @@ sub have_callback {
   # have we set up the cache entry for this callback type?
   if (!exists $self->{cbs}->{$subname}) {
     # nope.  run through all registered plugins and see which ones
-    # implement this type of callback
-    my @subs = ();
+    # implement this type of callback.  sort by priority
+
+    my %subsbypri = ();
     foreach my $plugin (@{$self->{plugins}}) {
       my $methodref = $plugin->can ($subname);
       if (defined $methodref) {
-        push (@subs, [ $plugin, $methodref ]);
-        dbg("plugin: ${plugin} implements '$subname'");
+        my $pri = $plugin->{method_priority}->{$subname} || 0;
+
+        $subsbypri{$pri} ||= [];
+        push (@{$subsbypri{$pri}}, [ $plugin, $methodref ]);
+
+        dbg("plugin: ${plugin} implements '$subname', priority $pri");
       }
     }
+
+    my @subs = ();
+    foreach my $pri (sort { $a <=> $b } keys %subsbypri) {
+      push @subs, @{$subsbypri{$pri}};
+    }
+
     $self->{cbs}->{$subname} = \@subs;
   }
 
