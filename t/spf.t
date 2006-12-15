@@ -454,11 +454,7 @@ tstprefs("
 );
 
 sarun ("-t < data/nice/spf3-received-spf", \&patterns_run_cb);
-if (!HAS_MAILSPF) {
-  skip_all_patterns("this test requires Mail::SPF module");
-} else {
-  ok_all_patterns();
-}
+ok_all_patterns();
 
 
 # test usage of Received-SPF headers added by internal relays
@@ -481,9 +477,5 @@ tstprefs("
 
 sarun ("-t < data/nice/spf3-received-spf", \&patterns_run_cb);
 
-if (!HAS_MAILSPF) {
-  skip_all_patterns("this test requires Mail::SPF module");
-} else {
-  ok_all_patterns();
-}
+ok_all_patterns();
 
