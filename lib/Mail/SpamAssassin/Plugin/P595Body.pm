@@ -37,6 +37,10 @@ sub new {
 
   $self->{one_line_body} = Mail::SpamAssassin::Plugin::OneLineBodyRuleType->new();
 
+  if ($] < 5.009005) {
+    die "this plugin requires perl 5.9.5 or later";
+  }
+
   return $self;
 }
 
@@ -47,23 +51,8 @@ sub finish_parsing_end {
   my $conf = $params->{conf};
 
   my $main = $self->{main};
-  $main->{base_extract} = 1;
-  $main->{bases_must_be_casei} = 1;
-  $main->{bases_can_use_alternations} = 0; # /(foo|bar|baz)/
-  $main->{bases_can_use_quantifiers} = 0; # /foo.*bar/ or /foo*bar/ or /foooo?bar/
-  $main->{bases_can_use_char_classes} = 0; # /fo[opqr]bar/
-  $main->{bases_split_out_alternations} = 1; # /(foo|bar|baz)/ => ["foo", "bar", "baz"]
-
-  my $ext_start = time;
-  my $basextor = Mail::SpamAssassin::Plugin::BodyRuleBaseExtractor->new
-			($self->{main});
-  $basextor->extract_bases($conf);
-  my $ext_dur = time - $ext_start;
-  warn "base extraction took $ext_dur seconds\n";
 
   $conf->{skip_body_rules}   ||= { };
-  $conf->{need_one_line_sub} ||= { };
-
   $self->setup_test_set ($conf, $conf->{body_tests}, 'body');
 }
 
@@ -71,7 +60,8 @@ sub setup_test_set {
   my ($self, $conf, $test_set, $ruletype) = @_;
   foreach my $pri (keys %{$test_set}) {
     my $nicepri = $pri; $nicepri =~ s/-/neg/g;
-    $self->setup_test_set_pri($conf, $test_set->{$pri}, $ruletype.'_'.$nicepri, $pri);
+    $self->setup_test_set_pri($conf, $test_set->{$pri},
+                    $ruletype.'_'.$nicepri, $pri);
   }
 }
 
@@ -79,49 +69,36 @@ sub setup_test_set_pri {
   my ($self, $conf, $rules, $ruletype, $pri) = @_;
 
   my $alternates = [];
-  my $trie_rules = {};
+  while (my ($rule, $pat) = each %{$conf->{body_tests}->{$pri}}) {
+    $pat = Mail::SpamAssassin::Util::regexp_remove_delimiters($pat);
 
-  # while (my ($rule, $pat) = each %{$pms->{conf}->{body_tests}->{$priority}}) {
-  # push @{$alternates}, $pat;
-  # }
+    # ignore rules marked for ReplaceTags work!
+    next if ($conf->{rules_to_replace}->{$rule});
 
-  foreach my $base (keys %{$conf->{base_string}->{$ruletype}})
-  {
-    push @{$alternates}, $base;
-    my @rules = split(' ', $conf->{base_string}->{$ruletype}->{$base});
-    $trie_rules->{$base} = \@rules;
+    # use the REGMARK feature:
+    # see http://taint.org/2006/11/16/154546a.html#comment-1011
+    #
+    push @{$alternates}, "$pat(*:$rule)";
 
-    foreach my $rule (@rules) {
-      # ignore rules marked for ReplaceTags work!
-      # TODO: we should be able to order the 'finish_parsing_end'
-      # plugin calls to do this.
-      next if ($conf->{rules_to_replace}->{$rule});
-
-      # TODO: need a cleaner way to do this.  I expect when rule types
-      # are implementable in plugins, I can do it that way
-      $conf->{skip_body_rules}->{$rule} = 1;
-
-      # ensure that the one-liner version of the function call is
-      # created, though
-      $conf->{generate_body_one_line_sub}->{$rule} = 1;
-    }
+    # TODO: need a cleaner way to do this.  I expect when rule types
+    # are implementable in plugins, I can do it that way
+    $conf->{skip_body_rules}->{$rule} = 1;
   }
 
   my $sub = '
     sub {
+        our $REGMARK;
         our @matched = ();
         $_[0] =~ m#('.join('|', @{$alternates}).')(?{
-            push @matched, $1;
-          })(*FAIL)#i;
+            push @matched, $REGMARK;
+          })(*FAIL)#;
         return @matched;
       }
   ';
   # warn "JMD $sub";
 
   $conf->{$ruletype}->{trie_re_sub} = eval $sub;
-  if ($@) { warn "trie sub compilation failed: $@"; }
-
-  $conf->{$ruletype}->{trie_rules} = $trie_rules;
+  if ($@) { warn "REGMARK sub compilation failed: $@"; }
 }
 
 ###########################################################################
@@ -151,8 +128,7 @@ sub run_body_fast_scan {
   my $conf = $scanner->{conf};
 
   my $trie_re_sub = $conf->{$ruletype}->{trie_re_sub};
-  my $trie_rules = $conf->{$ruletype}->{trie_rules};
-  if (!$trie_re_sub || !$trie_rules)
+  if (!$trie_re_sub)
   {
     dbg("zoom: run_body_fast_scan for $ruletype skipped, no rules");
     return;
@@ -167,13 +143,11 @@ sub run_body_fast_scan {
     no strict "refs";
     foreach my $line (@{$params->{lines}})
     {
-      my $sub = $trie_re_sub;
-      my @caught = $sub->($line);
+      my @caught = $trie_re_sub->($line);
       next unless (scalar @caught > 0);
 
       my %alreadydone = ();
-      foreach my $caught (@caught) {
-        foreach my $rulename (@{$trie_rules->{$caught}})
+      foreach my $rulename (@caught) {
         {
           # only try each rule once per line
           next if exists $alreadydone{$rulename};
@@ -182,18 +156,7 @@ sub run_body_fast_scan {
           # ignore 0-scored rules, of course
           next unless $scoresptr->{$rulename};
 
-          # dbg("zoom: base found for $rulename: $line");
-
-          # TODO: ick, this shouldn't have to use this package name. A good
-          # solution would be for compiled rule methods to live in their own
-          # namespace anyway; Mail::SpamAssassin::CompiledRules or something
-          my $fn = 'Mail::SpamAssassin::Plugin::Check::'.
-                                  $rulename.'_one_line_body_test';
-
-          # run the real regexp -- on this line alone.
-          if (!&{$fn} ($scanner, $line) && $do_dbg) {
-            $self->{rule2xs_misses}->{$rulename}++;
-          }
+          $scanner->got_hit($rulename, "BODY: ", ruletype => "p595_body");
         }
       }
     }
