@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-jm bb-zmi cthielen daf jm parkerm theo
+# with results from: net-bb-doc net-bb-jm net-bb-zmi net-cthielen net-daf net-jm net-parkerm
 
 # tflags userconf
 ALL_TRUSTED
@@ -12,9 +12,6 @@ AWL
 
 # good enough
 AXB_FAKETZ
-
-# good enough
-AXB_XMID_1212
 
 # good enough
 AXB_XMID_1510
@@ -230,9 +227,6 @@ FS_START_DOYOU2
 FUZZY_MERIDIA
 
 # good enough
-FU_HOODIA
-
-# good enough
 GEO_QUERY_STRING
 
 # good enough
@@ -326,13 +320,7 @@ JM_ATTACHEMENT
 JM_RCVD_QMAILV1
 
 # good enough
-JM_TORA_XM
-
-# good enough
 KAM_STOCKOTC
-
-# good enough
-KAM_STOCKTIP12
 
 # good enough
 KAM_STOCKTIP15
@@ -342,9 +330,6 @@ KAM_STOCKTIP21
 
 # good enough
 KAM_STOCKTIP26
-
-# good enough
-KAM_STOCKTIP4
 
 # good enough
 KAM_STOCKTIP6
@@ -444,6 +429,15 @@ RCVD_IN_BSP_OTHER
 
 # tflags net
 RCVD_IN_BSP_TRUSTED
+
+# tflags net
+RCVD_IN_DNSWL_HI
+
+# tflags net
+RCVD_IN_DNSWL_LOW
+
+# tflags net
+RCVD_IN_DNSWL_MED
 
 # tflags net
 RCVD_IN_DOB
@@ -607,9 +601,6 @@ RCVD_IN_XBL
 # good enough
 RCVD_MAIL_COM
 
-# good enough
-RDNS_DYNAMIC
-
 # tflags net
 ROUND_THE_WORLD
 
@@ -628,29 +619,11 @@ SHORT_TERM_TARGET
 # good enough
 SPAMMY_XMAILER
 
-# tflags net
-SPF_FAIL
-
-# tflags net
-SPF_HELO_FAIL
-
-# tflags net
-SPF_HELO_NEUTRAL
-
-# tflags net
+# tflags userconf
 SPF_HELO_PASS
 
-# tflags net
-SPF_HELO_SOFTFAIL
-
-# tflags net
-SPF_NEUTRAL
-
-# tflags net
+# tflags userconf
 SPF_PASS
-
-# tflags net
-SPF_SOFTFAIL
 
 # good enough
 STOCK_IMG_CTYPE
@@ -681,6 +654,9 @@ STOCK_WATCH_THIS_4
 
 # good enough
 STOX_AND_PRICE
+
+# good enough
+STOX_REPLY_TYPE
 
 # tflags userconf
 SUBJECT_IN_BLACKLIST
@@ -737,13 +713,10 @@ TVD_HEAD_KERNEL
 TVD_INCREASE_SIZE
 
 # good enough
-TVD_LINK_SAVE
-
-# good enough
 TVD_NOT_SATISFIED
 
 # good enough
-TVD_PH_FR5
+TVD_PH_7
 
 # good enough
 TVD_PH_REC
@@ -773,13 +746,13 @@ TVD_RATWARE_CB_2
 TVD_RATWARE_MSGID_02
 
 # good enough
-TVD_RCVD_IP
-
-# good enough
 TVD_RCVD_IP4
 
 # good enough
 TVD_RCVD_SINGLE
+
+# good enough
+TVD_RCVD_SPACE_BRACKET
 
 # good enough
 TVD_SECTION
@@ -809,9 +782,6 @@ TVD_SUBJ_ACC_NUM
 TVD_SUBJ_APPR_LOAN
 
 # good enough
-TVD_SUBJ_FINGER_03
-
-# good enough
 TVD_SUBJ_OWE
 
 # good enough
@@ -827,7 +797,37 @@ TVD_VISIT_PHARMA
 TVD_VIS_HIDDEN
 
 # good enough
-CTYPE_1SPACE_GIF
+CTYPE_001C_B
+
+# good enough
+CTYPE_8SPACE_GIF
+
+# good enough
+DOS_STOCK_O_PRICE
+
+# good enough
+DOS_TWO_MIS_STOCK
+
+# good enough
+FAKE_REPLY_A1
+
+# good enough
+FS_START_DOYOU
+
+# good enough
+FUZZY_SPRM
+
+# good enough
+FUZZY_STOCK
+
+# good enough
+HS_INDEX_PARAM
+
+# good enough
+HS_MEETUP_FOR_SEX
+
+# good enough
+KAM_STOCKSYM2
 
 # tflags net
 RCVD_IN_DNSWL_HI
@@ -860,19 +860,109 @@ RCVD_IN_WHOIS_INVALID
 RCVD_IN_XBL
 
 # good enough
-STOX_REPLY_TYPE
+TVD_APPROVED
 
 # good enough
-TVD_FW_GRAPHIC_ID1
+TVD_DOLLARS_US
 
 # good enough
-TVD_FW_GRAPHIC_ID2
+TVD_FROM_1
 
 # good enough
-TVD_PH_7
+TVD_FUZZY_DEGREE
 
 # good enough
-TVD_RCVD_SPACE_BRACKET
+TVD_FUZZY_MICROCAP
+
+# good enough
+TVD_FUZZY_SECURITIES
+
+# good enough
+TVD_FUZZY_SYMBOL
+
+# good enough
+TVD_FW_GRAPHIC_NAME_LONG
+
+# good enough
+TVD_FW_GRAPHIC_NAME_MID
+
+# good enough
+TVD_FW_MESG2
+
+# good enough
+TVD_GET_STOCK
+
+# good enough
+TVD_PH_BODY_META
+
+# good enough
+TVD_SUBJ_END_STAR
+
+# good enough
+TVD_UNDER_VALUED
+
+# tflags net
+URIBL_COMPLETEWHOIS
+
+# tflags net
+URIBL_L1SPEWS
+
+# tflags net
+URIBL_L2SPEWS
+
+# tflags net
+URIBL_RHS_ABUSE
+
+# tflags net
+URIBL_RHS_AHBL
+
+# tflags net
+URIBL_RHS_BOGUSMX
+
+# tflags net
+URIBL_RHS_DSN
+
+# good enough
+URIBL_RHS_NOSTDMAIL
+
+# tflags net
+URIBL_RHS_POST
+
+# tflags net
+URIBL_RHS_TLD_WHOIS
+
+# tflags net
+URIBL_RHS_URIBL_BLACK
+
+# tflags net
+URIBL_RHS_URIBL_GREY
+
+# tflags net
+URIBL_RHS_WHOIS
+
+# good enough
+URIBL_SBL_COMWHOIS
+
+# good enough
+URIBL_SBL_SPEWSL1
+
+# tflags net
+URIBL_XS_SURBL
+
+# good enough
+URI_L_PHP
+
+# good enough
+XMAILER_MIMEOLE_OL_2B374
+
+# good enough
+XMAILER_MIMEOLE_OL_60256
+
+# good enough
+XMAILER_MIMEOLE_OL_62E6A
+
+# good enough
+XMAILER_MIMEOLE_OL_9B607
 
 # tflags userconf
 UNPARSEABLE_RELAY
