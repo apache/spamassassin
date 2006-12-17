@@ -1476,33 +1476,28 @@ sub _get {
   }
   # ALL-TRUSTED: entire trusted raw headers
   elsif ($request eq 'ALL-TRUSTED') {
-    # if we didn't find any trusted relays, none of the headers are trusted
-    return if $self->{last_trusted_relay_index} == -1;
-    $result = $self->{msg}->get_all_headers(1, 0, undef,
-					$self->{last_trusted_relay_index}+1);
+    # '+1' since we added the received header even though it's not considered
+    # trusted, so we know that those headers can be trusted too
+    return $self->get_all_hdrs_in_rcvd_index_range(
+			undef, $self->{last_trusted_relay_index}+1);
   }
   # ALL-INTERNAL: entire internal raw headers
-  elsif ($request eq 'ALL-INTERNAL') { 
-    # if we didn't find any internal relays, none of the headers are internal
-    return if $self->{last_internal_relay_index} == -1;
-    $result = $self->{msg}->get_all_headers(1, 0, undef,
-					$self->{last_internal_relay_index}+1);
+  elsif ($request eq 'ALL-INTERNAL') {
+    # '+1' for the same reason as in ALL-TRUSTED above
+    return $self->get_all_hdrs_in_rcvd_index_range(
+			undef,	$self->{last_internal_relay_index}+1);
   }
   # ALL-UNTRUSTED: entire untrusted raw headers
   elsif ($request eq 'ALL-UNTRUSTED') {
-    # if we didn't find any trusted relays get all the headers, otherwise get
-    # all the headers after the last trusted relay
-    my $start_index = ($self->{last_trusted_relay_index} == -1 ? undef :
-			$self->{last_trusted_relay_index} + 1);
-    $result = $self->{msg}->get_all_headers(1, 0, $start_index);
+    # '+1' for the same reason as in ALL-TRUSTED above
+    return $self->get_all_hdrs_in_rcvd_index_range(
+			$self->{last_trusted_relay_index}+1, undef);
   }
   # ALL-EXTERNAL: entire external raw headers
   elsif ($request eq 'ALL-EXTERNAL') {
-    # if we didn't find any internal relays get all the headers, otherwise get
-    # all the headers after the last internal relay
-    my $start_index = ($self->{last_internal_relay_index} == -1 ? undef :
-			$self->{last_internal_relay_index} + 1);
-    $result = $self->{msg}->get_all_headers(1, 0, $start_index);
+    # '+1' for the same reason as in ALL-TRUSTED above
+    return $self->get_all_hdrs_in_rcvd_index_range(
+			$self->{last_internal_relay_index}+1, undef);
   }
   # EnvelopeFrom: the SMTP MAIL FROM: address
   elsif ($request eq 'EnvelopeFrom') {
@@ -2305,6 +2300,50 @@ ok:
   $envf =~ s/^<*//gs;                # remove <
   $envf =~ s/>*\s*$//gs;        # remove >, whitespace, newlines
   return $envf;
+}
+
+###########################################################################
+
+# helper for get(ALL-*).  get() caches its results, so don't call this
+# directly unless you need a range of headers not covered by the ALL-*
+# psuedo-headers!
+
+# Get all the headers found between an index range of received headers, the
+# index doesn't care if we could parse the received headers or not.
+# Use undef for the $start_rcvd or $end_rcvd numbers to start/end with the
+# first/last header in the message, otherwise indicate the index number you
+# want to start/end at.  Set $include_start_rcvd or $include_end_rcvd to 0 to
+# indicate you don't want to include the received header found at the start or
+# end indexes... basically toggles between [s,e], [s,e), (s,e], (s,e).
+sub get_all_hdrs_in_rcvd_index_range {
+  my ($self, $start_rcvd, $end_rcvd, $include_start_rcvd, $include_end_rcvd) = @_;
+
+  # prevent bad input causing us to return the first header found
+  return if (defined $end_rcvd && $end_rcvd < 0);
+
+  $include_start_rcvd = 1 unless defined $include_start_rcvd;
+  $include_end_rcvd = 1 unless defined $include_end_rcvd;
+
+  my $cur_rcvd_index = -1;  # none found yet
+  my $result = '';
+  foreach my $hdr (split("\n", $self->get('ALL'))) {
+    if ($hdr =~ /^received: /i) {
+      $cur_rcvd_index++;
+      next if (defined $start_rcvd && !$include_start_rcvd &&
+		$start_rcvd == $cur_rcvd_index);
+      last if (defined $end_rcvd && !$include_end_rcvd &&
+		$end_rcvd == $cur_rcvd_index);
+    }
+    if ((!defined $start_rcvd || $start_rcvd <= $cur_rcvd_index) &&
+	(!defined $end_rcvd || $cur_rcvd_index < $end_rcvd)) {
+      $result .= $hdr."\n";
+    }
+    elsif (defined $end_rcvd && $cur_rcvd_index == $end_rcvd) {
+      $result .= $hdr."\n";
+      last;
+    }
+  }
+  return ($result eq '' ? undef : $result);
 }
 
 ###########################################################################

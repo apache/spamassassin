@@ -652,14 +652,6 @@ will be unfolded.  The first parameter (optional) is whether or not to
 return the raw headers, and the second parameter (optional) is whether
 or not to include the mbox separator.
 
-The third and fourth parameters (optional) define the first and last
-values, respectively, of an index range of Received headers.  Both of
-the Received headers specified by the indexes and the headers found
-between these Received headers will be returned, in order.  Use undef
-as the first index value to start at the first header (possibly before
-the first Received header).  Use undef as the last index value to end
-at the last header (probably after the last received header).
-
 If get_all_header() is called in an array context, an array will be
 returned with each header entry in a different element.  In a scalar
 context, the headers are returned in a single scalar.
@@ -668,30 +660,17 @@ context, the headers are returned in a single scalar.
 
 # build it and it will not bomb
 sub get_all_headers {
-  my ($self, $raw, $include_mbox, $start_rcvd_index, $end_rcvd_index) = @_;
+  my ($self, $raw, $include_mbox) = @_;
   $raw ||= 0;
   $include_mbox ||= 0;
-  $start_rcvd_index = -1 unless defined $start_rcvd_index;
 
   my @lines = ();
 
   # precalculate destination positions based on order of appearance
   my $i = 0;
-  my $lines_skipped = 0;
-  my $cur_rcvd_index = -1;
   my %locations;
-
   for my $k (@{$self->{header_order}}) {
-    last if (defined $end_rcvd_index && $end_rcvd_index <= $cur_rcvd_index);
-    my $name = lc($k);
-    $cur_rcvd_index++ if ($name eq 'received');
-    if ($cur_rcvd_index < $start_rcvd_index) {
-      push(@{$locations{$name}}, -1); # indicate we skipped the header
-      $lines_skipped++;
-      $i++;
-      next;
-    }
-    push(@{$locations{$name}}, $i++);
+    push(@{$locations{lc($k)}}, $i++);
   }
 
   # process headers in order of first appearance
@@ -702,10 +681,8 @@ sub get_all_headers {
   {
     # get all same-name headers and poke into correct position
     my $positions = $locations{$name};
-    INSTANCE: for my $contents ($self->get_header($name, $raw)) {
+    for my $contents ($self->get_header($name, $raw)) {
       my $position = shift @{$positions};
-      last INSTANCE unless defined $position;
-      next if $position == -1; # any headers we skipped above
       $size += length($name) + length($contents) + 2;
       if ($size > MAX_HEADER_LENGTH) {
 	$self->{'truncated_header'} = 1;
@@ -714,9 +691,6 @@ sub get_all_headers {
       $lines[$position] = $self->{header_order}->[$position] . ": $contents";
     }
   }
-
-  # remove these, they'll be undefined if we skipped over them
-  splice @lines, 0, $lines_skipped if $lines_skipped;
 
   # skip undefined lines if we truncated
   @lines = grep { defined $_ } @lines if $self->{'truncated_header'};
