@@ -657,9 +657,6 @@ sub _get_sender {
 sub _check_spf_whitelist {
   my ($self, $scanner) = @_;
 
-  return unless $scanner->is_dns_available();
-  return if ($self->{no_spf_module});
-
   $scanner->{spf_whitelist_from_checked} = 1;
   $scanner->{spf_whitelist_from} = 0;
 
@@ -704,9 +701,6 @@ sub _check_spf_whitelist {
 
 sub _check_def_spf_whitelist {
   my ($self, $scanner) = @_;
-
-  return unless $scanner->is_dns_available();
-  return if ($self->{no_spf_module});
 
   $scanner->{def_spf_whitelist_from_checked} = 1;
   $scanner->{def_spf_whitelist_from} = 0;
