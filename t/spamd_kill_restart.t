@@ -16,7 +16,7 @@ my $pid_file = "log/spamd.pid";
 
 my($pid1, $pid2);
 
-sub dbgprint { print STDERR "[".time()."] ".$_[0]; }
+sub dbgprint { print STDOUT "[".time()."] ".$_[0]; }
 
 dbgprint "Starting spamd...\n";
 start_spamd("-L -r ${pid_file}");
