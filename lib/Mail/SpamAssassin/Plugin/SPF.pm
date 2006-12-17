@@ -303,18 +303,15 @@ sub _check_spf {
   } else {
     $scanner->{checked_for_received_spf_header} = 1;
     dbg("spf: checking to see if the message has a Received-SPF header that we can use");
-    # if we didn't find any internal relays, none of the headers are internal
-    my @internal_hdrs;
-    unless ($scanner->{last_internal_relay_index} == -1) {	# -1 means there are none
-      @internal_hdrs = $scanner->{msg}->get_all_headers(1, 0, undef,
-					$scanner->{last_internal_relay_index}+1);
-      unless ($scanner->{conf}->{use_newest_received_spf_header}) {
-	@internal_hdrs = reverse(@internal_hdrs);
-      } else {
-	dbg("spf: starting with the newest Received-SPF headers first");
-      }
+
+    my @internal_hdrs = split("\n", $scanner->get('ALL-INTERNAL'));
+    unless ($scanner->{conf}->{use_newest_received_spf_header}) {
+      # look for the LAST (earliest in time) header, it'll be the most accurate
+      @internal_hdrs = reverse(@internal_hdrs);
+    } else {
+      dbg("spf: starting with the newest Received-SPF headers first");
     }
-    # look for the LAST (earliest in time) header, it'll be the most accurate
+
     foreach my $hdr (@internal_hdrs) {
       if ($hdr =~ /^received-spf: /i) {
 	dbg("spf: found a Received-SPF header added by an internal host: $hdr");
