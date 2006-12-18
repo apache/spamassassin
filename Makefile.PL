@@ -1116,10 +1116,10 @@ FIXVARS		= -Mvars \
 		  -DCONTACT_ADDRESS="$(CONTACT_ADDRESS)"
 
 FIXBANG		= -Msharpbang \
+                  -Mconditional \
 		  -DPERL_BIN="$(PERL_BIN)" \
 		  -DPERL_WARN="$(PERL_WARN)" \
 		  -DPERL_TAINT="$(PERL_TAINT)"
-
 
 spamassassin: spamassassin.raw
 	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@

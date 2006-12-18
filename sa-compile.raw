@@ -25,29 +25,32 @@ use lib '@@INSTALLSITELIB@@';                   # substituted at 'make' time
 
 use File::Spec;
 
-BEGIN {
+BEGIN {                          # see comments in "spamassassin.raw" for doco
   my @bin = File::Spec->splitpath($0);
   my $bin = ($bin[0] ? File::Spec->catpath(@bin[0..1]) : $bin[1])
             || File::Spec->curdir;
 
   if (-e $bin.'/lib/Mail/SpamAssassin.pm'
-        || !-e '@@INSTALLSITELIB@@/Mail/SpamAssassin.pm')
+        || !-e '@@INSTALLSITELIB@@/Mail/SpamAssassin.pm' )
   {
-    if ( $bin eq '../' && -e '../blib/lib/Mail/SpamAssassin.pm' ) {
-      unshift(@INC, '../blib/lib');
-    }
-    else {
-      foreach (qw(lib ../lib/site_perl
-                  ../lib/spamassassin ../share/spamassassin/lib))
+    my $searchrelative;
+    $searchrelative = 1;    # disabled during "make install": REMOVEFORINST
+    if ($searchrelative && $bin eq '../' && -e '../blib/lib/Mail/SpamAssassin.pm')
+    {
+      unshift ( @INC, '../blib/lib' );
+    } else {
+      foreach ( qw(lib ../lib/site_perl
+                ../lib/spamassassin ../share/spamassassin/lib))
       {
-        my $dir = File::Spec->catdir($bin, split('/', $_));
-        if(-f File::Spec->catfile($dir, "Mail", "SpamAssassin.pm")) {
-          unshift(@INC, $dir); last;
-        }
+        my $dir = File::Spec->catdir( $bin, split ( '/', $_ ) );
+        if ( -f File::Spec->catfile( $dir, "Mail", "SpamAssassin.pm" ) )
+        { unshift ( @INC, $dir ); last; }
       }
     }
   }
 }
+
+
 
 use strict;
 use warnings;

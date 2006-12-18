@@ -36,37 +36,26 @@ my $LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';  # substituted at 'make' time
 
 use lib '@@INSTALLSITELIB@@';                # substituted at 'make' time
 
-BEGIN {
-  # Locate locally installed SA libraries *without* using FindBin, which generates
-  # warnings and causes more trouble than its worth.  We don't need to be too
-  # smart about this BTW.
+BEGIN {                          # see comments in "spamassassin.raw" for doco
   my @bin = File::Spec->splitpath($0);
-  my $bin = ($bin[0] ? File::Spec->catpath(@bin[0..1]) : $bin[1])  # /home/jm/foo -> /home/jm
-            || File::Spec->curdir;                                 # foo          -> .
+  my $bin = ($bin[0] ? File::Spec->catpath(@bin[0..1]) : $bin[1])
+            || File::Spec->curdir;
 
-  # check to make sure it wasn't just installed in the normal way.
-  # note that ./lib/Mail/SpamAssassin.pm takes precedence, for
-  # building SpamAssassin on a machine where an old version is installed.
   if (-e $bin.'/lib/Mail/SpamAssassin.pm'
-        || !-e '@@INSTALLSITELIB@@/Mail/SpamAssassin.pm')
+        || !-e '@@INSTALLSITELIB@@/Mail/SpamAssassin.pm' )
   {
-    # Firstly, are we running "make test" in the "t" dir?  the test files
-    # *need* to use 'blib', so that 'use bytes' is removed for pre-5.6 perls
-    # beforehand by the preproc.  However, ./spamassassin does not, as the
-    # preproc will have stripped out the "use rule files from cwd" code from
-    # Mail::SpamAssassin.  So we want to use blib just for the t scripts.
-    if ( $bin eq '../' && -e '../blib/lib/Mail/SpamAssassin.pm' ) {
-      unshift(@INC, '../blib/lib');
-    }
-    else {
-      # These are common paths where the SA libs might be found.
-      foreach (qw(lib ../lib/site_perl
-                  ../lib/spamassassin ../share/spamassassin/lib))
+    my $searchrelative;
+    $searchrelative = 1;    # disabled during "make install": REMOVEFORINST
+    if ($searchrelative && $bin eq '../' && -e '../blib/lib/Mail/SpamAssassin.pm')
+    {
+      unshift ( @INC, '../blib/lib' );
+    } else {
+      foreach ( qw(lib ../lib/site_perl
+                ../lib/spamassassin ../share/spamassassin/lib))
       {
-        my $dir = File::Spec->catdir($bin, split('/', $_));
-        if(-f File::Spec->catfile($dir, "Mail", "SpamAssassin.pm")) {
-          unshift(@INC, $dir); last;
-        }
+        my $dir = File::Spec->catdir( $bin, split ( '/', $_ ) );
+        if ( -f File::Spec->catfile( $dir, "Mail", "SpamAssassin.pm" ) )
+        { unshift ( @INC, $dir ); last; }
       }
     }
   }

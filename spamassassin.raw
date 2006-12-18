@@ -44,31 +44,29 @@ BEGIN {
   # check to make sure it wasn't just installed in the normal way.
   # note that ./lib/Mail/SpamAssassin.pm takes precedence, for
   # building SpamAssassin on a machine where an old version is installed.
-  if ( -e $bin . '/lib/Mail/SpamAssassin.pm'
-    || !-e '@@INSTALLSITELIB@@/Mail/SpamAssassin.pm' )
+  if (-e $bin.'/lib/Mail/SpamAssassin.pm'
+        || !-e '@@INSTALLSITELIB@@/Mail/SpamAssassin.pm' )
   {
+    my $searchrelative;
+    $searchrelative = 1;    # disabled during "make install": REMOVEFORINST
 
     # Firstly, are we running "make test" in the "t" dir?  the test files
     # *need* to use 'blib', so that 'use bytes' is removed for pre-5.6 perls
     # beforehand by the preproc.  However, ./spamassassin does not, as the
     # preproc will have stripped out the "use rule files from cwd" code from
     # Mail::SpamAssassin.  So we want to use blib just for the t scripts.
-    if ( $bin eq '../' && -e '../blib/lib/Mail/SpamAssassin.pm' ) {
+    # This is disabled during the "make install" process.
+    if ($searchrelative && $bin eq '../' && -e '../blib/lib/Mail/SpamAssassin.pm')
+    {
       unshift ( @INC, '../blib/lib' );
-    }
-    else {
-
+    } else {
       # These are common paths where the SA libs might be found.
-      foreach (
-        qw(lib ../lib/site_perl
-        ../lib/spamassassin ../share/spamassassin/lib)
-        )
+      foreach ( qw(lib ../lib/site_perl
+                ../lib/spamassassin ../share/spamassassin/lib))
       {
         my $dir = File::Spec->catdir( $bin, split ( '/', $_ ) );
-        if ( -f File::Spec->catfile( $dir, "Mail", "SpamAssassin.pm" ) ) {
-          unshift ( @INC, $dir );
-          last;
-        }
+        if ( -f File::Spec->catfile( $dir, "Mail", "SpamAssassin.pm" ) )
+        { unshift ( @INC, $dir ); last; }
       }
     }
   }
