@@ -46,15 +46,15 @@ sub sa_t_init {
   $perl_cmd .= " -w" if !defined($ENV{'TEST_PERL_WARN'})  or $ENV{'TEST_PERL_WARN'}  ne 'no';
 
   $scr = $ENV{'SCRIPT'};
-  $scr ||= "$perl_cmd ../spamassassin";
+  $scr ||= "$perl_cmd ../spamassassin.raw";
 
-  $spamd = "$perl_cmd ../spamd/spamd";
+  $spamd = "$perl_cmd ../spamd/spamd.raw";
 
   $spamc = $ENV{'SPAMC_SCRIPT'};
   $spamc ||= "../spamc/spamc";
 
   $salearn = $ENV{'SALEARN_SCRIPT'};
-  $salearn ||= "$perl_cmd ../sa-learn";
+  $salearn ||= "$perl_cmd ../sa-learn.raw";
 
   $spamdhost = $ENV{'SPAMD_HOST'};
   $spamdhost ||= "localhost";
