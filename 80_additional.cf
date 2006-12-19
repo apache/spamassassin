@@ -72,14 +72,6 @@ header __FROM_EBAY		From:addr =~ /\@ebay\.com$/i
 meta TVD_EB_PHISH		__FROM_EBAY && NORMAL_HTTP_TO_IP
 
 # 2006/03/13
-# 0.297   0.3750   0.0000    1.000   0.72    1.00  TVD_FW_MESG2
-# 0.196   0.2479   0.0000    1.000   0.68    1.00  TVD_FW_MESG1
-# 2006/04/08 - updated MESG1 to meta, loosened up the RE
-body __TVD_FW_MESG /^-+ Original Message -+ From: (?:\w+ )+To: \S+ (?:Sent|Date):.{1,60}Subject:/
-meta TVD_FW_MESG1 __TVD_FW_MESG && __GIF_ATTACH
-body TVD_FW_MESG2		/^-- Best Regards, \w+ \w+\s+mailto:/
-
-# 2006/03/13
 # 0.091   0.1144   0.0011    0.990   0.61    1.00  TVD_HEAD_EDITION
 header TVD_HEAD_EDITION		exists:X-Edition
 
@@ -367,8 +359,8 @@ endif # Mail::SpamAssassin::Plugin::MIMEHeader
 
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader 
 # <gen:mutable>
-score TVD_FW_GRAPHIC_ID1		2.8
-score TVD_FW_GRAPHIC_ID2		2.2
+score TVD_FW_GRAPHIC_ID1		2.1
+score TVD_FW_GRAPHIC_ID2		2.1
 score TVD_FW_GRAPHIC_NAME_LONG		1.8
 score TVD_FW_GRAPHIC_NAME_MID		1.2
 # </gen:mutable>
@@ -399,8 +391,6 @@ score TVD_SUBJ_WIPE_DEBT	2.0
 score TVD_UNDER_VALUED		1.8
 score VERTICAL_DRUGS_1		2.2
 score TVD_SECTION		2.5
-score TVD_FW_MESG1		2.0
-score TVD_FW_MESG2		2.0
 score TVD_HEAD_EDITION		1.0
 score TVD_HEAD_USR		1.0
 score TVD_INCREASE_SIZE		2.2
