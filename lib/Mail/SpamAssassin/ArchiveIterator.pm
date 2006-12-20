@@ -483,35 +483,38 @@ sub _scan_targets {
     foreach my $location (@locations) {
       my $method;
 
+      # for this location only; 'detect' means they can differ for each location
+      my $thisformat = $format;     
+
       if ($format eq 'detect') {
 	# detect the format
         if (!-d $location && $location =~ /\.mbox/i) {
           # filename indicates mbox
-          $format = 'mbox';
+          $thisformat = 'mbox';
         } 
 	elsif (!(-d $location)) {
-          $format = 'file';
+          $thisformat = 'file';
 	}
 	else {
 	  # it's a directory
-	  $format = 'dir';
+	  $thisformat = 'dir';
 	}
       }
 
-      if ($format eq 'dir') {
+      if ($thisformat eq 'dir') {
         $method = \&_scan_directory;
       }
-      elsif ($format eq 'mbox') {
+      elsif ($thisformat eq 'mbox') {
         $method = \&_scan_mailbox;
       }
-      elsif ($format eq 'file') {
+      elsif ($thisformat eq 'file') {
         $method = \&_scan_file;
       }
-      elsif ($format eq 'mbx') {
+      elsif ($thisformat eq 'mbx') {
         $method = \&_scan_mbx;
       }
       else {
-	warn "archive-iterator: format $format unknown!";
+	warn "archive-iterator: format $thisformat (from $format) unknown!";
         next;
       }
 
