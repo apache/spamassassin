@@ -634,7 +634,7 @@ sub wanted {
     push(@extra, "time=".$time);
   }
   if ($status && defined $status->{bayes_score}) {
-    push(@extra, "bayes=".$status->{bayes_score});
+    push(@extra, "bayes=".sprintf("%06f", $status->{bayes_score}));
   }
   if ($opt_mid) {
     my $mid = $ma->get_header("Message-Id");
