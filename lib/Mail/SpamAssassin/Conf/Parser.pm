@@ -443,10 +443,10 @@ failed_line:
       if ($migrated_keys{$key}) {
         # this key was moved into a plugin; non-fatal for lint
         $is_error = 0;
-        $msg = "config: failed to parse, now a plugin, skipping: $line";
+        $msg = "config: failed to parse, now a plugin, skipping, in \"$self->{currentfile}\": $line";
       } else {
         # a real syntax error; this is fatal for --lint
-        $msg = "config: failed to parse line, skipping: $line";
+        $msg = "config: failed to parse line, skipping, in \"$self->{currentfile}\": $line";
       }
     }
 
@@ -491,7 +491,7 @@ sub handle_conditional {
   }
 
   if ($bad) {
-    $self->lint_warn("bad 'if' line", undef);
+    $self->lint_warn("bad 'if' line, in \"$self->{currentfile}\"", undef);
     return -1;
   }
 
