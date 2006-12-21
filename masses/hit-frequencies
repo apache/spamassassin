@@ -720,11 +720,11 @@ sub readlogs {
       }
 
       $evalstr .= '
-        $num_spam++;
         foreach my $r (split(/,/, $rules)) {
           $freq_spam{$r}++;
           '.$hmapstr.$smapstr.'
         }
+        $num_spam++;
       ';
     } else {
       if ($opt_o) {
@@ -741,11 +741,11 @@ sub readlogs {
       }
 
       $evalstr .= '
-        $num_ham++;
         foreach my $r (split(/,/, $rules)) {
           $freq_ham{$r}++;
           '.$hmapstr.$smapstr.'
         }
+        $num_ham++;
       ';
     }
     $evalstr .= '
@@ -774,20 +774,22 @@ sub compute_overlaps_for_rule {
   foreach my $r2 (keys %hmap_spam) {
     next if $r1 eq $r2;
 
-    my $ratio = _hmap_to_overlap_ratio ($r1, $r2,
+    my ($ratio, $a1ina2, $a2ina1) = _hmap_to_overlap_ratio ($r1, $r2,
             $hmap_spam{$r1}, $hmap_spam{$r2}, $freq_spam{$r1}, $freq_spam{$r2});
+    $a1ina2 = int $a1ina2;
+    $a2ina1 = int $a2ina1;
     
     if (exists $overlaps_spam{$ratio}) {
-      $overlaps_spam{$ratio} .= " ".$r2;
+      $overlaps_spam{$ratio} .= " ".$r2."[$a1ina2/$a2ina1]";
     } else {
-      $overlaps_spam{$ratio} = $r2;
+      $overlaps_spam{$ratio} = $r2."[$a1ina2/$a2ina1]";
     }
   }
   my %overlaps_ham = ();
   foreach my $r2 (keys %hmap_ham) {
     next if $r1 eq $r2;
 
-    my $ratio = _hmap_to_overlap_ratio ($r1, $r2,
+    my ($ratio, $a1ina2, $a2ina1) = _hmap_to_overlap_ratio ($r1, $r2,
             $hmap_ham{$r1}, $hmap_ham{$r2}, $freq_ham{$r1}, $freq_ham{$r2});
     
     if (exists $overlaps_ham{$ratio}) {
@@ -815,13 +817,18 @@ sub _print_overlap_ratios {
     my $rules = _prettify_overlap_rules($r1, $hash->{$full});
     next if ($rules eq '');
 
-    if ($opt_d) {
-      print qq{
-        <overlaprules ratio='$ratio'>$rules</overlaprules>
-      };
+    foreach my $line (split(' ', $rules)) {
+      $line =~ s{(\S+?)\[(\d+)\/(\d+)\]}
+            {$1\n\t\t[$2% of $1 hits have $r1, $3% of $r1 hits have $1]}gs;
 
-    } else {
-      printf "  overlap %s: %3d%% %s\n", $type, $ratio, $rules;
+      if ($opt_d) {
+        print qq{
+          <overlaprules ratio='$ratio'>$line</overlaprules>
+        };
+
+      } else {
+        printf "  overlap %s: %3d%% %s\n", $type, $ratio, $line;
+      }
     }
   }
 
@@ -846,7 +853,9 @@ sub _prettify_overlap_rules {
       $code !~ /\b\Q$_\E\b/;
     } @rules;
   }
-  return join (' ', @rules);
+
+  my $s = join (' ', @rules);
+  return $s;
 }
 
 sub _hmap_to_overlap_ratio {
@@ -860,7 +869,8 @@ sub _hmap_to_overlap_ratio {
     return 0;
   }
 
-  #my $i; for ($i = 0; $i < length($hmap1)*8; $i++) { print vec($hmap1,$i,1); } print "\n"; for ($i = 0; $i < length($hmap2)*8; $i++) { print vec($hmap2,$i,1); } print "\n";
+  # my $i; for ($i = 0; $i < length($hmap1)*8; $i++) { print vec($hmap1,$i,1); } print "\n"; for ($i = 0; $i < length($hmap2)*8; $i++) { print vec($hmap2,$i,1); } print "\n";
+
   # ah, nifty.  this could have been very slow, but with perl's support
   # for bitstring ops, we get C speed.  yay!
   my $both_bits = $hmap1 | $hmap2;
@@ -875,7 +885,14 @@ sub _hmap_to_overlap_ratio {
     return 0;
   }
 
-  return ($both_count - $diff_count) / $both_count;
+  # also count bits in each, so we can show when one is fully subsumed
+  # by another
+  my $a1 = unpack("%32b*", $hmap1);
+  my $a2 = unpack("%32b*", $hmap2);
+  my $a1_in_a2 = (($a1 > $a2 ? $a2 : $a1) / ($a2 || 0.0001))*100;
+  my $a2_in_a1 = (($a2 > $a1 ? $a1 : $a2) / ($a1 || 0.0001))*100;
+
+  return (($both_count - $diff_count) / $both_count, $a1_in_a2, $a2_in_a1);
 }
 
 
