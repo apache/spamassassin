@@ -136,6 +136,7 @@ GetOptions(
   'version|V'                           => \$opt{'version'},
   'help|h|?'                            => \$opt{'help'},
   'checkonly'                           => \$opt{'checkonly'},
+  'allowplugins'                        => \$opt{'allowplugins'},
 
   # allow multiple of these on the commandline
   'gpgkey=s'				=> $opt{'gpgkey'},
@@ -970,9 +971,16 @@ sub taint_safe_archive_extract {
     if (open OUT, ">".$outfname) {
       my $content = $tar->get_content($file);
 
-      # replace macros in the update files if it's a .pre or .cf
       if ($outfname =~ /\.(?:pre|cf)$/) {
+        # replace macros in the update files if it's a .pre or .cf
         $content =~ s/\@\@([^\@]+)\@\@/$MACRO_VALUES{$1} || "\@\@$1\@\@"/ge;
+
+        # also, if --allowplugins is not specified, comment out
+        # all loadplugin or tryplugin lines
+        if ( !$opt{'allowplugins'} ) {
+          $content =~ s{^(\s*(?:load|try)plugin)\b}
+            {#(commented by sa-update, no --allowplugins switch specified)# $1}gmx;
+        }
       }
 
       print OUT $content;
@@ -1300,6 +1308,7 @@ Options:
                           Use multiple times for multiple channels
   --channelfile file      Retrieve updates from the channels in the file
   --checkonly             Check for update availability, do not install
+  --allowplugins          Allow updates to load plugin code
   --gpgkey key            Trust the key id to sign releases
                           Use multiple times for multiple keys
   --gpgkeyfile file       Trust the key ids in the file to sign releases
@@ -1353,6 +1362,12 @@ lot of additional channels.
 
 Only check if an update is available, don't actually download and install it.
 The exit code will be C<0> or C<1> as described below.
+
+=item B<--allowplugins>
+
+Allow downloaded updates to activate plugins.  The default is not to
+activate plugins; any C<loadplugin> or C<tryplugin> lines will be commented
+in the downloaded update rules files.
 
 =item B<--gpg>, B<--nogpg>
 
