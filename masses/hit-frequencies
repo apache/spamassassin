@@ -752,6 +752,7 @@ sub readlogs {
       }
     ';
 
+    # warn "JMD $evalstr";
     eval $evalstr;
 
     if ($@) {
@@ -878,7 +879,7 @@ sub _hmap_to_overlap_ratio {
   if ($hmap1 !~ /[^\000]/ && $hmap2 !~ /[^\000]/) {
     # no hits on either!  this would normally give a 100% hitrate match,
     # but that's misleading -- so hide it by giving it a 0% overlap
-    return 0;
+    return (0,0,0);
   }
 
   # my $i; for ($i = 0; $i < length($hmap1)*8; $i++) { print vec($hmap1,$i,1); } print "\n"; for ($i = 0; $i < length($hmap2)*8; $i++) { print vec($hmap2,$i,1); } print "\n";
@@ -894,7 +895,7 @@ sub _hmap_to_overlap_ratio {
 
   if ($both_count == 0) {
     warn "oops! no hits on either but didn't get caught in RE";
-    return 0;
+    return (0,0,0);
   }
 
   # also count bits in each, so we can show when one is fully subsumed
