@@ -793,9 +793,9 @@ sub compute_overlaps_for_rule {
             $hmap_ham{$r1}, $hmap_ham{$r2}, $freq_ham{$r1}, $freq_ham{$r2});
     
     if (exists $overlaps_ham{$ratio}) {
-      $overlaps_ham{$ratio} .= " ".$r2;
+      $overlaps_ham{$ratio} .= " ".$r2."[$a1ina2/$a2ina1]";
     } else {
-      $overlaps_ham{$ratio} = $r2;
+      $overlaps_ham{$ratio} = $r2."[$a1ina2/$a2ina1]";
     }
   }
 
