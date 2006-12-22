@@ -779,10 +779,11 @@ sub compute_overlaps_for_rule {
   foreach my $r2 (keys %hmap_spam) {
     next if $r1 eq $r2;
 
-    my ($ratio, $a1ina2, $a2ina1) = _hmap_to_overlap_ratio ($r1, $r2,
-            $hmap_spam{$r1}, $hmap_spam{$r2}, $freq_spam{$r1}, $freq_spam{$r2});
-    $a1ina2 = int $a1ina2;
-    $a2ina1 = int $a2ina1;
+    # require that both rules have at least 1 hit
+    next unless ($freq_spam{$r1} && $freq_spam{$r2});
+
+    my ($a1ina2, $a2ina1) = _hmap_to_overlap_ratio ($r1, $r2,
+                                    $hmap_spam{$r1}, $hmap_spam{$r2});
     
     if (exists $overlaps_spam1{$a1ina2})
     { $overlaps_spam1{$a1ina2} .= " ".$r2; }
@@ -796,10 +797,11 @@ sub compute_overlaps_for_rule {
   foreach my $r2 (keys %hmap_ham) {
     next if $r1 eq $r2;
 
-    my ($ratio, $a1ina2, $a2ina1) = _hmap_to_overlap_ratio ($r1, $r2,
-            $hmap_ham{$r1}, $hmap_ham{$r2}, $freq_ham{$r1}, $freq_ham{$r2});
-    $a1ina2 = int $a1ina2;
-    $a2ina1 = int $a2ina1;
+    # require that both rules have at least 1 hit
+    next unless ($freq_ham{$r1} && $freq_ham{$r2});
+
+    my ($a1ina2, $a2ina1) = _hmap_to_overlap_ratio ($r1, $r2,
+                                    $hmap_ham{$r1}, $hmap_ham{$r2});
     
     if (exists $overlaps_ham1{$a1ina2})
     { $overlaps_ham1{$a1ina2} .= " ".$r2; }
@@ -872,41 +874,33 @@ sub _prettify_overlap_rules {
 }
 
 sub _hmap_to_overlap_ratio {
-  my ($r1, $r2, $hmap1, $hmap2, $freq1, $freq2) = @_;
+  my ($r1, $r2, $hmap1, $hmap2) = @_;
 
   $hmap1 ||= '';
   $hmap2 ||= '';
-  if ($hmap1 !~ /[^\000]/ && $hmap2 !~ /[^\000]/) {
-    # no hits on either!  this would normally give a 100% hitrate match,
-    # but that's misleading -- so hide it by giving it a 0% overlap
-    return (0,0,0);
+  if ($hmap1 !~ /[^\000]/ || $hmap2 !~ /[^\000]/) {
+    # no hits on either! this would normally give a 100% hitrate match,
+    # but that's misleading -- so hide it by giving it a 0% overlap.
+    #
+    # also, ignore cases where there are no hits on *one* of the rules,
+    # while there are hits on the other -- after all, if one rule doesn't
+    # have a single hit, it cannot overlap.
+    #
+    return (0,0);
   }
 
   # my $i; for ($i = 0; $i < length($hmap1)*8; $i++) { print vec($hmap1,$i,1); } print "\n"; for ($i = 0; $i < length($hmap2)*8; $i++) { print vec($hmap2,$i,1); } print "\n";
 
-  # ah, nifty.  this could have been very slow, but with perl's support
-  # for bitstring ops, we get C speed.  yay!
-  my $both_bits = $hmap1 | $hmap2;
-  my $diff_bits = $hmap1 ^ $hmap2;
-
-  # now, count the set bits in both bitstrings. thank you unpack()!
-  my $both_count = unpack("%32b*", $both_bits);
-  my $diff_count = unpack("%32b*", $diff_bits);
-
-  if ($both_count == 0) {
-    warn "oops! no hits on either but didn't get caught in RE";
-    return (0,0,0);
-  }
-
-  # also count bits in each, so we can show when one is fully subsumed
-  # by another
+  # count bits in each, so we can show when one is fully subsumed by another
+  # with perl's support for bitstring ops, we get C speed here, nice!
   my $a1 = unpack("%32b*", $hmap1);
   my $a2 = unpack("%32b*", $hmap2);
-  my $a1_and_a2 = unpack("%32b*", $hmap1 & $hmap2);
-  my $a1_in_a2 = ($a1_and_a2 / ($a2 || 0.0001))*100;
-  my $a2_in_a1 = ($a1_and_a2 / ($a1 || 0.0001))*100;
+  my $a1_and_a2 = unpack("%32b*", ($hmap1 & $hmap2));
 
-  return (($both_count - $diff_count) / $both_count, $a1_in_a2, $a2_in_a1);
+  my $a1_in_a2 = int (($a1_and_a2 / ($a2 || 0.0001))*100);
+  my $a2_in_a1 = int (($a1_and_a2 / ($a1 || 0.0001))*100);
+
+  return ($a1_in_a2, $a2_in_a1);
 }
 
 
