@@ -58,9 +58,9 @@ usage: mass-check [options] target ...
 		maximum of N messages (defaults to 1000)
   --cs_timeout N
   		in client mode, try to connect to the server every N seconds
-		defaults to 300
+		defaults to 120
 		in server mode, timeout messages after N seconds
-		defaults to 60
+		defaults to 300
   --cs_paths_only
 		only used in client mode.  when making requests of the
 		server, only ask for paths to the messages and not the
@@ -161,7 +161,7 @@ $opt_cf = [];
 my @ORIG_ARGV = @ARGV;
 GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug:s",
 	   "hamlog=s", "head=i", "loghits", "mh", "mid", "ms", "net",
-	   "progress", "rewrite:s", "showdots", "spamlog=s", "tail=i",
+	   "progress!", "rewrite:s", "showdots", "spamlog=s", "tail=i",
 	   "rules=s", "restart=i", "loguris",
 	   "deencap=s", "logmem", "learn=i", "reuse", "lint", "cache",
            "cachedir=s", "noisy", "scanprob=f",
