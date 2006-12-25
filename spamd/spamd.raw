@@ -844,6 +844,10 @@ my $spamtest = Mail::SpamAssassin->new(
   }
 );
 
+$spamtest->init_learner({
+  opportunistic_expire_check_only => 1,
+});
+
 # if $clients_per_child == 1, there's no point in copying configs around
 unless ($clients_per_child > 1) {
   # unset $copy_config_p so we don't bother trying to copy things back
@@ -1409,7 +1413,9 @@ sub check {
   }
 
   # Go ahead and check the message
-  my $status = $spamtest->check($mail);
+  $spamtest->init(1);
+  my $status = Mail::SpamAssassin::PerMsgStatus->new($spamtest, $mail);
+  $status->check();
 
   my $msg_score     = sprintf( "%.1f", $status->get_score );
   my $msg_threshold = sprintf( "%.1f", $status->get_required_score );
@@ -1527,6 +1533,16 @@ sub check {
 
   # bug 3808: log scan results to any listening plugins, too
   $spamtest->call_plugins("log_scan_result", { result => $log });
+
+  # bug 3466: handle the bayes expiry bits after the results were returned to
+  # the client.  keeps clients from timing out.  if bayes_expiry_due is set,
+  # then the opportunistic check has already checked.  go ahead and do another
+  # sync/expire run.
+  if ($status->{'bayes_expiry_due'}) {
+    dbg("spamd: bayes expiry was marked as due, running post-check");
+    $spamtest->rebuild_learner_caches();
+    $spamtest->finish_learner();
+  }
 
   $status->finish();    # added by jm to allow GC'ing
   $mail->finish();
