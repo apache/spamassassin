@@ -43,6 +43,7 @@ sub new {
   $self->register_eval_rule("multipart_alternative_difference_count");
   $self->register_eval_rule("check_blank_line_ratio");
   $self->register_eval_rule("tvd_vertical_words");
+  $self->register_eval_rule("check_stock_info");
 
   return $self;
 }
@@ -213,5 +214,61 @@ sub tvd_vertical_words {
 
   return 1 if ($pms->{tvd_vertical_words} >= $min && $pms->{tvd_vertical_words} < $max);
 }
+
+sub check_stock_info {
+  my ($self, $pms, $fulltext, $min) = @_;
+
+  $self->_check_stock_info($pms) unless (exists $pms->{stock_info});
+
+  if ($min == 0 || $pms->{stock_info} >= $min) {
+      return 1;
+  }
+  return 0;
+}
+
+sub _check_stock_info {
+  my ($self, $pms) = @_;
+  $pms->{stock_info} = 0;
+
+  # Find all multipart/alternative parts in the message
+  my @parts = $pms->{msg}->find_parts(qr@^text/plain$@i);
+  return if (!@parts);
+
+  # Go through each of the multipart parts
+  my %hits = ();
+  my $part = $parts[0];
+  my ($type, $rnd) = $part->rendered();
+  return unless $type;
+
+  foreach ( $rnd =~ /^\s*([^:\n]{3,30})\s*:\s*\S/mg ) {
+    my $str = lc $_;
+    $str =~ tr/a-z//cd;
+    #$str =~ s/([a-z])0([a-z])/$1o$2/g;
+
+    if ($str =~ /(
+      ^trad(?:e|ing)date|
+      company(?:name)?|
+      s\w?(?:t\w?o\w?c\w?k|y\w?m(?:\w?b\w?o\w?l)?)|
+      t(?:arget|icker)|
+      (?:opening|current)p(?:rice)?|
+      p(?:rojected|osition)|
+      expectations|
+      weeks?high|
+      marketperformance|
+      (?:year|week|month|day|price)(?:target|estimates?)|
+      sector|
+      r(?:ecommendation|ating)
+    )$/x) {
+      $hits{$1}++;
+      dbg("eval: stock info hit: $1");
+    }
+  }
+
+  $pms->{stock_info} = scalar keys %hits;
+  dbg("eval: stock info total: ".$pms->{stock_info});
+
+  return;
+}
+
 
 1;
