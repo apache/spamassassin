@@ -41,8 +41,6 @@ sub new {
   # the important bit!
   $self->register_eval_rule("check_for_numeric_helo");
   $self->register_eval_rule("check_for_illegal_ip");
-  $self->register_eval_rule("check_for_illegal_ip2");
-  $self->register_eval_rule("check_for_illegal_ip3");
   $self->register_eval_rule("check_for_rdns_helo_mismatch");
   $self->register_eval_rule("check_all_trusted");
   $self->register_eval_rule("check_no_relays");
@@ -96,20 +94,7 @@ sub check_for_numeric_helo {
   return 0;
 }
 
-sub check_for_illegal_ip3 {
-  my ($self, $pms) = @_;
-
-  foreach my $rcvd ( @{$pms->{relays_untrusted}} ) {
-    # (note this might miss some hits if the Received.pm skips any invalid IPs)
-    foreach my $check ( $rcvd->{ip}, $rcvd->{by} ) {
-      return 1 if ($check =~ /^
-    	(?:[01257]|(?!127.0.0.)127|22[3-9]|23[0-9]|24[0-9]|25[0-5])\.\d+\.\d+\.\d+
-	$/x);
-    }
-  }
-  return 0;
-}
-sub check_for_illegal_ip2 {
+sub check_for_illegal_ip {
   my ($self, $pms) = @_;
 
   foreach my $rcvd ( @{$pms->{relays_untrusted}} ) {
@@ -117,20 +102,6 @@ sub check_for_illegal_ip2 {
     foreach my $check ( $rcvd->{ip}, $rcvd->{by} ) {
       return 1 if ($check =~ /^
     	(?:[01257]|(?!127.0.0.)127|22[3-9]|2[3-9]\d|[12]\d{3,}|[3-9]\d\d+)\.\d+\.\d+\.\d+
-	$/x);
-    }
-  }
-  return 0;
-}
-sub check_for_illegal_ip {
-  my ($self, $pms) = @_;
-
-  foreach my $rcvd ( @{$pms->{relays_untrusted}} ) {
-    # (note this might miss some hits if the Received.pm skips any invalid IPs)
-    foreach my $check ( $rcvd->{ip}, $rcvd->{by} ) {
-      next if ($check eq '127.0.0.1');
-      return 1 if ($check =~ /^
-    	(?:[01257]|127|22[3-9]|23[0-9]|24[0-9]|25[0-5])\.\d+\.\d+\.\d+
 	$/x);
     }
   }
