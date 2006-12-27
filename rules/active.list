@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-fredt bb-jm bb-zmi cthielen daf jm theo zmi
+# with results from: bb-doc cthielen daf jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -97,9 +97,6 @@ DC_IMG_TEXT_RATIO
 # good enough
 DC_PNG_UNO_LARGO
 
-# good enough
-DEAR_WINNER
-
 # tflags net
 DIGEST_MULTIPLE
 
@@ -155,12 +152,6 @@ ENV_AND_HDR_SPF_MATCH
 FAKE_REPLY_C
 
 # good enough
-FB_THOUS_PERSONAL
-
-# good enough
-FB_YOURSELF_MASTER
-
-# good enough
 FH_DATE_IS_19XX
 
 # good enough
@@ -171,9 +162,6 @@ FH_FROM_HOODIA
 
 # good enough
 FH_FROM_TO_PERC
-
-# good enough
-FH_HELO_GMAILSMTP
 
 # tflags userconf
 FRAGMENTED_MESSAGE
@@ -263,9 +251,6 @@ HS_FORGED_OE_FW
 HS_GETMEOFF
 
 # good enough
-HS_MEETUP_FOR_SEX
-
-# good enough
 HS_PHARMA_1
 
 # good enough
@@ -294,9 +279,6 @@ KAM_STOCKOTC
 
 # good enough
 KAM_STOCKTIP15
-
-# good enough
-KAM_STOCKTIP20
 
 # good enough
 KAM_STOCKTIP21
@@ -596,21 +578,6 @@ STOCK_IMG_OUTLOOK
 STOCK_PRICES
 
 # good enough
-STOCK_SUBJECT
-
-# good enough
-STOCK_WATCH_THIS_1
-
-# good enough
-STOCK_WATCH_THIS_2
-
-# good enough
-STOCK_WATCH_THIS_3
-
-# good enough
-STOCK_WATCH_THIS_4
-
-# good enough
 STOX_AND_PRICE
 
 # tflags userconf
@@ -644,9 +611,6 @@ TVD_APP_LOAN
 TVD_DEAR_HOMEOWNER
 
 # good enough
-TVD_DOLLARS_US
-
-# good enough
 TVD_EB_PHISH
 
 # good enough
@@ -674,9 +638,6 @@ TVD_FW_GRAPHIC_ID3
 TVD_FW_GRAPHIC_ID3_2
 
 # good enough
-TVD_HEAD_KERNEL
-
-# good enough
 TVD_INCREASE_SIZE
 
 # good enough
@@ -690,9 +651,6 @@ TVD_PH_REC
 
 # good enough
 TVD_PH_SUBJ_UPDATE
-
-# good enough
-TVD_PH_SUBJ_URGENT
 
 # good enough
 TVD_PP_PHISH
@@ -752,7 +710,16 @@ TVD_VISIT_PHARMA
 TVD_VIS_HIDDEN
 
 # good enough
-CTYPE_1SPACE_GIF
+CTYPE_8SPACE_GIF
+
+# good enough
+FAKE_REPLY_A1
+
+# good enough
+FB_OBFU_URI_COM
+
+# good enough
+KAM_STOCKTIP8
 
 # tflags net
 RCVD_IN_DNSWL_HI
@@ -785,10 +752,19 @@ RCVD_IN_WHOIS_INVALID
 RCVD_IN_XBL
 
 # good enough
-TVD_FW_GRAPHIC_ID1
+TVD_FW_GRAPHIC_NAME_LONG
 
 # good enough
-TVD_FW_GRAPHIC_ID2
+TVD_FW_GRAPHIC_NAME_MID
+
+# good enough
+TVD_PH_SUBJ_SEC_MEASURES
+
+# good enough
+XMAILER_MIMEOLE_OL_20CC2
+
+# good enough
+XMAILER_MIMEOLE_OL_F8BA4
 
 # tflags userconf
 UNPARSEABLE_RELAY
