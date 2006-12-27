@@ -1145,13 +1145,14 @@ sub output_freqs_data_line {
   if ($obj->{overlap}) {
     my $ovl = $obj->{overlap} || '';
 
-    $ovl =~ s/^(\s+overlap\s+(?:ham|spam):\s+\d+% )(\S.+?)$/
+    $ovl =~ s{^(\s+overlap\s+(?:ham|spam):\s+\d+% )(\S.+?)$}{
         my $str = "$1";
         foreach my $rule (split(' ', $2)) {
+          next if ($rule =~ /^[a-z]{1,6}$/);    # "of", "hits" etc.
           $str .= $self->gen_rule_link($rule,$rule)." ";
         }
         $str;
-      /gem;
+      }gem;
 
     $self->{ttk}->process(\$FREQS_EXTRA_TEMPLATE, {
         EXTRA => $ovl,
