@@ -9,6 +9,8 @@ use Test;
 use strict;
 use warnings;
 
+my $debug = 0;
+
 BEGIN { 
   if (-e 't/test_dir') { chdir 't'; } 
   if (-e 'test_dir') { unshift(@INC, '../blib/lib'); }
@@ -108,7 +110,7 @@ sub try_extraction {
     site_rules_filename => "log/test_default.cf",
     userprefs_filename  => "log/userprefs.cf",
     local_tests_only    => 1,
-    debug             => 1,
+    debug             => $debug,
     dont_copy_prefs   => 1,
   });
   ok($sa);
@@ -120,6 +122,7 @@ sub try_extraction {
 
   open (OUT, ">log/test_rules_copy/00_test.cf") or die "failed to write rule";
   print OUT "
+    use_bayes 0     # disable bayes loading
     loadplugin Mail::SpamAssassin::Plugin::BodyRuleBaseExtractor
     ".$rules;
   close OUT;
