@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc cthielen daf jm theo zmi
+# with results from: bb-doc daf jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -152,6 +152,9 @@ ENV_AND_HDR_SPF_MATCH
 FAKE_REPLY_C
 
 # good enough
+FB_OBFU_URI_COM
+
+# good enough
 FH_DATE_IS_19XX
 
 # good enough
@@ -291,6 +294,9 @@ KAM_STOCKTIP4
 
 # good enough
 KAM_STOCKTIP6
+
+# good enough
+KAM_STOCKTIP8
 
 # good enough
 LONG_TERM_PRICE
@@ -605,9 +611,6 @@ TT_OBSCURED_VIAGRA
 TVD_ACT_193
 
 # good enough
-TVD_APP_LOAN
-
-# good enough
 TVD_DEAR_HOMEOWNER
 
 # good enough
@@ -710,16 +713,7 @@ TVD_VISIT_PHARMA
 TVD_VIS_HIDDEN
 
 # good enough
-CTYPE_8SPACE_GIF
-
-# good enough
-FAKE_REPLY_A1
-
-# good enough
-FB_OBFU_URI_COM
-
-# good enough
-KAM_STOCKTIP8
+CTYPE_1SPACE_GIF
 
 # tflags net
 RCVD_IN_DNSWL_HI
@@ -752,19 +746,13 @@ RCVD_IN_WHOIS_INVALID
 RCVD_IN_XBL
 
 # good enough
-TVD_FW_GRAPHIC_NAME_LONG
+TVD_FW_GRAPHIC_ID1
 
 # good enough
-TVD_FW_GRAPHIC_NAME_MID
+TVD_FW_GRAPHIC_ID2
 
 # good enough
-TVD_PH_SUBJ_SEC_MEASURES
-
-# good enough
-XMAILER_MIMEOLE_OL_20CC2
-
-# good enough
-XMAILER_MIMEOLE_OL_F8BA4
+XMAILER_MIMEOLE_OL_5EDD4
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -965,6 +953,9 @@ XMAILER_MIMEOLE_OL_1ECD5
 XMAILER_MIMEOLE_OL_20C99
 
 # good enough
+XMAILER_MIMEOLE_OL_20CC2
+
+# good enough
 XMAILER_MIMEOLE_OL_22B61
 
 # good enough
@@ -1089,6 +1080,9 @@ XMAILER_MIMEOLE_OL_F475E
 
 # good enough
 XMAILER_MIMEOLE_OL_F6D01
+
+# good enough
+XMAILER_MIMEOLE_OL_F8BA4
 
 # good enough
 XMAILER_MIMEOLE_OL_FF5C8
