@@ -786,12 +786,12 @@ sub compute_overlaps_for_rule {
                                     $hmap_spam{$r1}, $hmap_spam{$r2});
     
     if (exists $overlaps_spam1{$a1ina2})
-    { $overlaps_spam1{$a1ina2} .= " ".$r2; }
-    else { $overlaps_spam1{$a1ina2} = $r2; }
+    { $overlaps_spam1{$a1ina2} .= " ".$r2."[$a2ina1]"; }
+    else { $overlaps_spam1{$a1ina2} = $r2."[$a2ina1]"; }
 
     if (exists $overlaps_spam2{$a2ina1})
-    { $overlaps_spam2{$a2ina1} .= " ".$r2; }
-    else { $overlaps_spam2{$a2ina1} = $r2; }
+    { $overlaps_spam2{$a2ina1} .= " ".$r2."[$a2ina1]"; }
+    else { $overlaps_spam2{$a2ina1} = $r2."[$a2ina1]"; }
   }
 
   foreach my $r2 (keys %hmap_ham) {
@@ -804,45 +804,46 @@ sub compute_overlaps_for_rule {
                                     $hmap_ham{$r1}, $hmap_ham{$r2});
     
     if (exists $overlaps_ham1{$a1ina2})
-    { $overlaps_ham1{$a1ina2} .= " ".$r2; }
-    else { $overlaps_ham1{$a1ina2} = $r2; }
+    { $overlaps_ham1{$a1ina2} .= " ".$r2."[$a2ina1]"; }
+    else { $overlaps_ham1{$a1ina2} = $r2."[$a2ina1]"; }
 
     if (exists $overlaps_ham2{$a2ina1})
-    { $overlaps_ham2{$a2ina1} .= " ".$r2; }
-    else { $overlaps_ham2{$a2ina1} = $r2; }
+    { $overlaps_ham2{$a2ina1} .= " ".$r2."[$a1ina2]"; }
+    else { $overlaps_ham2{$a2ina1} = $r2."[$a1ina2]"; }
   }
 
-  _print_overlap_ratios($r1, \%overlaps_spam1, "spam", 1);
-  _print_overlap_ratios($r1, \%overlaps_spam2, "spam", 2);
-  _print_overlap_ratios($r1, \%overlaps_ham1, " ham", 1);
-  _print_overlap_ratios($r1, \%overlaps_ham2, " ham", 2);
+  _print_overlap_ratios($r1, \%overlaps_spam1, \%overlaps_spam2, "spam");
+  _print_overlap_ratios($r1, \%overlaps_ham1, \%overlaps_ham2, "ham");
 }
 
 sub _print_overlap_ratios {
-  my ($r1, $hash, $type, $dir) = @_;
+  my ($r1, $hash1, $hash2, $type) = @_;
 
   if ($opt_d) {
-    print qq{ <overlap class='$type' dir='$dir'> };
+    print qq{ <overlap class='$type'> };
   }
 
-  foreach my $ratio (sort { $b <=> $a } keys %$hash) {
+  foreach my $ratio (sort { $b <=> $a } keys %$hash1) {
     last if ($ratio < 20);     # 20% cutoff
-    my $rules = _prettify_overlap_rules($r1, $hash->{$ratio});
+    my $rules = _prettify_overlap_rules($r1, $hash1->{$ratio});
     next if ($rules eq '');
 
     foreach my $r2 (split(' ', $rules)) {
-      my ($d1, $d2);
-      if ($dir == 1) { $d1 = $r1; $d2 = $r2; }
-      if ($dir == 2) { $d1 = $r2; $d2 = $r1; }
+      $r2 =~ s/\[(.*?)\]$//;
+      my $reverse_ratio = $1;
 
       if ($opt_d) {
         print qq{
-          <overlaprules ratio='$ratio'><r1>$d2</r1><r2>$d1</r2></overlaprules>
+          <overlappair>
+            <overlaprules ratio='$ratio'><r1>$r2</r1><r2>$r1</r2></overlaprules>
+            <overlaprules ratio='$reverse_ratio'><r1>$r1</r1><r2>$r2</r2></overlaprules>
+          </overlappair>
         };
 
       } else {
-        printf "  overlap %s: %3d%% of %s hits also hit %s\n",
-                    $type, $ratio, $d2, $d1;
+        printf "  overlap %4s: %3d%% of %s hits also hit %s; %3d%% of %s hits also hit %s\n",
+                    $type, $ratio, $r2, $r1,
+                    $reverse_ratio, $r1, $r2;
       }
     }
   }
@@ -865,6 +866,7 @@ sub _prettify_overlap_rules {
 
     my $code = $rules{$rule}->{code};
     @rules = grep {
+      s/\[.*\]$//;
       $code !~ /\b\Q$_\E\b/;
     } @rules;
   }
