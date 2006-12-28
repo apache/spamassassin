@@ -292,7 +292,7 @@ header OUTLOOK_3416     X-Mailer =~ /^Microsoft Outlook, Build 10\.0\.3416$/
 describe OUTLOOK_3416   Claims to be sent by an unusual build of Outlook (3416)
 
 # this seems to appear with a faked 'Microsoft Office Outlook' X-Mailer
-header MID_14DIGITS_HEX     Message-ID =~ /^<[0-9]{14}\.[A-F0-9]{10}\@[0-9A-Z]/
+header MID_14DIGITS_HEX     Message-ID =~ /^<[0-9]{14}\.[A-F0-9]{10}\@[0-9A-Z]+$/
 
 meta         __HTML_IMG_ONLY                 ( HTML_IMAGE_ONLY_04 || HTML_IMAGE_ONLY_08 || HTML_IMAGE_ONLY_12 || HTML_IMAGE_ONLY_16 || HTML_IMAGE_ONLY_20 || HTML_IMAGE_ONLY_24 || HTML_IMAGE_ONLY_28 )
 
