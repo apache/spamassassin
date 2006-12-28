@@ -621,6 +621,7 @@ sub is_dns_available {
   }
 
   return $IS_DNS_AVAILABLE if (defined $IS_DNS_AVAILABLE);
+  $LAST_DNS_CHECK = time();
 
   $IS_DNS_AVAILABLE = 0;
   if ($dnsopt eq "no") {
@@ -673,7 +674,6 @@ sub is_dns_available {
   # but only uses the first in a background query like we use.
   # Try the different nameservers here in case the first one is not woorking
   
-  $LAST_DNS_CHECK = time();
   my @nameservers = $self->{resolver}->nameservers();
   dbg("dns: testing resolver nameservers: ".join(", ", @nameservers));
   my $ns;
