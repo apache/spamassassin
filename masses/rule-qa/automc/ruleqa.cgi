@@ -111,7 +111,7 @@ sub ui_parse_url_base {
 # fix $self->{url_abs} to be correct for the "entire website is web app" case,
 # as CGI.pm gets that wrong, too!
 
-  if ($self->{url_abs} =~ m,^/\d,) {
+  if ($self->{url_abs} =~ m,^/(?:20\d|last-night|today),) {
     $self->{url_with_path} = $self->{url_abs};
     $self->{url_abs} = "/";
   } else {
