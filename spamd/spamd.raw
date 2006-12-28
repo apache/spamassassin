@@ -945,12 +945,16 @@ while (1) {
     Mail::SpamAssassin::Logger::close_log();
     chdir($ORIG_CWD)
       || die "spamd: restart failed: chdir failed: ${ORIG_CWD}: $!\n";
-    exec( $ORIG_ARG0, @ORIG_ARGV );
+
+    # ensure we re-run spamd using the right perl interpreter, and
+    # with the right switches (taint mode and warnings) (bug 5255)
+    my $perl = Mail::SpamAssassin::Util::untaint_var($^X);
+    my @execs = ( $perl, "-T", "-w", $ORIG_ARG0, @ORIG_ARGV );
+    warn "spamd: restarting using '" . join (' ', @execs) . "'\n";
+    exec @execs;
 
     # should not get past that...
-    die "spamd: restart failed: exec failed: "
-      . join ( ' ', $ORIG_ARG0, @ORIG_ARGV )
-      . ": $!\n";
+    die "spamd: restart failed: exec failed: " . join (' ', @execs) . ": $!\n";
   }
 
   for (my $i = keys %children; $i < $childlimit; $i++) {
