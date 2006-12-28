@@ -61,7 +61,6 @@ use Time::Local;
 use Sys::Hostname (); # don't import hostname() into this namespace!
 use Fcntl;
 use POSIX (); # don't import anything unless we ask explicitly!
-use Text::Wrap ();
 use Errno qw(EEXIST);
 
 ###########################################################################
@@ -500,54 +499,77 @@ sub time_to_rfc822_date {
 
 ###########################################################################
 
-# This is a wrapper for the Text::Wrap::wrap routine which makes its usage
-# a bit safer.  It accepts values for almost all options which can be set
+# This used to be a wrapper for Text::Wrap.  Now we do basically the same
+# function as Text::Wrap::wrap().  See bug 5056 and 2165 for more information
+# about why things aren't using that function anymore.
+#
+# It accepts values for almost all options which can be set
 # in Text::Wrap.   All parameters are optional (leaving away the first one 
 # probably doesn't make too much sense though), either a missing or a false
-# value will fall back to the default.  Note that the parameter order and
-# default values aren't always the isame as in Text::Wrap itself.
+# value will fall back to the default.
 # 
 # The parameters are:
-#  1st:  The string to wrap.  Only one string is allowed (unlike the original
-#        wrap() routine).  (default: "")
+#  1st:  The string to wrap.  Only one string is allowed.
+#                                             (default: "")
 #  2nd:  The prefix to be put in front of all lines except the first one. 
-#        (default: "")
-#  3rd:  The prefix for the first line.  (default:  "")
+#                                             (default: "")
+#  3rd:  The prefix for the first line.       (default:  "")
 #  4th:  The number of columns available (no line will be longer than this
-#        parameter minus one).  See $Text::Wrap::columns.  (default:  77)
-#  5th:  Enable or disable overflow mode.  A false value is 'overflow', a
-#        true one 'wrap'; see $Text::Wrap::huge.  (default: 0)
-#  6th:  The sequence/expression to wrap at.  See $Text::Wrap::break
-#        (default: '\s');
-#  7th:  The string to join the lines again.  See $Text::Wrap::separator.
-#        (default: "\n")
-#  8th:  All tabs (except any in the prefix strings) are first replaced
-#        with 8 spaces.  This parameter controls if any 8-space sequence 
-#        is replaced with tabs again later.  See $Text::Wrap::unexpand but
-#        note that we use a different default value.  (default: 0)
+#        unless overflow is set below).       (default:  77)
+#  5th:  Enable or disable overflow mode.     (default: 0)
+#  6th:  The sequence/expression to wrap at.  (default: '\s');
+#  7th:  The string to join the lines again.  (default: "\n")
 
 sub wrap {
-  local($Text::Wrap::columns)   = $_[3] || 77;
-  local($Text::Wrap::huge)      = $_[4] ? 'overflow' : 'wrap';
-  local($Text::Wrap::break)     = $_[5] || '\s';
-  local($Text::Wrap::separator) = $_[6] || "\n";
-  local($Text::Wrap::unexpand)  = $_[7] || 0;
-  # There's a die() in there which "shouldn't happen", but better be
-  # paranoid.  We'll return the unwrapped string if anything went wrong.
-  my $text = $_[0] || "";
+  my $string   = shift || '';
+  my $prefix   = shift || '';
+  my $first    = shift || '';
+  my $length   = shift || 77;
+  my $overflow = shift || 0;
+  my $break    = shift || qr/\s/;
+  my $sep      = "\n";
 
-  # Text::Wrap produces spurious warnings:
-  # [23409] warn: (?:(?<=[\s,]))* matches null string many times in regex; marked by <-- HERE in m/\G(?:(?<=[\s,]))* <-- HERE \Z/ at /usr/local/perl594/lib/5.9.4/Text/Wrap.pm line 46.
-  # trap and ignore them.  Why do so many of the core modules do this
-  # kind of crap? :(  use a $SIG{__WARN__} to trap it.
+  # go ahead and break apart the string, keeping the break chars
+  my @arr = split(/($break)/, $string);
 
-  eval {
-    local $SIG{__WARN__} = sub {
-      ($_[0] =~ /matches null string many times/) or CORE::warn(@_);
-    };
-    $text = Text::Wrap::wrap($_[2] || "", $_[1] || "", $text);
-  };
-  return $text;
+  # tack the first prefix line at the start
+  splice @arr, 0, 0, $first;
+
+  # go ahead and make up the lines in the array
+  my $pos = 0;
+  while ($#arr > $pos) {
+    my $len = length $arr[$pos];
+
+    # if we don't want to have lines > $length (overflow==0), we
+    # need to verify what will happen with the next line.  if we don't
+    # care if a single line goes longer, don't care about the next
+    # line.
+    if ($overflow == 0) {
+      $len += length $arr[$pos+1];
+    }
+
+    if ($len <= $length) {
+      # if the length determined above is within bounds, go ahead and
+      # merge the next line with the current one
+      $arr[$pos] .= splice @arr, $pos+1, 1;
+    }
+    else {
+      # ok, the current line is the right length, but there's more text!
+      # prep the current line and then go onto the next one
+
+      # strip any trailing whitespace from the next line that's ready
+      $arr[0] =~ s/\s+$//;
+
+      # go to the next line
+      $pos++;
+
+      # put the appropriate prefix at the front of the line
+      splice @arr, $pos, 0, $prefix;
+    }
+  }
+
+  # go ahead and return the wrapped text, with the separator in between
+  return join($sep, @arr);
 }
 
 ###########################################################################
