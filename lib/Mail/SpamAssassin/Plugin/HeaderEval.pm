@@ -398,7 +398,7 @@ sub check_for_msn_groups_headers {
     return 0 unless $pms->get('Message-Id') =~ /^<\S+\@$server>/;
   } else {
     return 0 unless $pms->get('Message-Id') =~ /^<$listname-\S+\@groups\.msn\.com>/;
-    return 0 unless $pms->get('EnvelopeFrom') =~ /$listname-bounce\@groups\.msn\.com/;
+    return 0 unless $pms->get('EnvelopeFrom:addr') =~ /$listname-bounce\@groups\.msn\.com/;
   }
   return 1;
 
@@ -1092,7 +1092,7 @@ sub check_ratware_envelope_from {
   my ($self, $pms) = @_;
 
   my $to = $pms->get('To:addr');
-  my $from = $pms->get('EnvelopeFrom');
+  my $from = $pms->get('EnvelopeFrom:addr');
 
   return 0 unless ($to && $from);
   return 0 if ($from =~ /^SRS\d=/);

@@ -643,7 +643,7 @@ sub _get_sender {
     # from the Return-Path, X-Envelope-From, or whatever header.
     # it's better to get it from Received though, as that is updated
     # hop-by-hop.
-    $sender = $scanner->get ("EnvelopeFrom");
+    $sender = $scanner->get ("EnvelopeFrom:addr");
   }
 
   if (!$sender) {
