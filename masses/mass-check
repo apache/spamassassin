@@ -234,7 +234,7 @@ if ($opt_lint) {
 
 # test messages for the mass-check
 my @targets;
-if (!$opt_server && !$opt_client) {
+if (!$opt_client) {
   if ($opt_f) {
     open(F, $opt_f) || die "cannot read target $opt_f: $!";
     push(@targets, map { chomp; $_ } <F>);
