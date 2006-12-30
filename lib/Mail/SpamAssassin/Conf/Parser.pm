@@ -1196,10 +1196,13 @@ sub remove_from_addrlist_rcvd {
 sub fix_path_relative_to_current_file {
   my ($self, $path) = @_;
 
+  # the path may be specified as "~/foo", so deal with that
+  $path = $self->{conf}->{main}->sed_path($path);
+
   if (!File::Spec->file_name_is_absolute ($path)) {
     my ($vol, $dirs, $file) = File::Spec->splitpath ($self->{currentfile});
     $path = File::Spec->catpath ($vol, $dirs, $path);
-    dbg("plugin: fixed relative path: $path");
+    dbg("config: fixed relative path: $path");
   }
   return $path;
 }
