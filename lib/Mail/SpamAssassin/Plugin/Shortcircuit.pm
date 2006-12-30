@@ -251,6 +251,9 @@ sub hit_rule {
     dbg("shortcircuit: s/c $sctype due to $rule, using score of $score");
   }
 
+  # bug 5256: if we short-circuit, don't do auto-learning
+  $scan->{disable_auto_learning} = 1;
+
   # I don't think we really need to do these...
   # undef $scan->{test_names_hit};       # reset rule hits
   # $scan->{score}                = 0;   # reset score
