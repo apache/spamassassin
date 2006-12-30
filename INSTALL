@@ -218,6 +218,25 @@ installed:
       - version 0.34 or higher on Unix systems
       - version 0.46 or higher on Windows systems
 
+  - LWP (aka libwww-perl) (from CPAN)
+
+    This set of modules will include both the LWP::UserAgent and
+    HTTP::Date modules, used by sa-update to retrieve update archives.
+
+  - HTTP::Date (from CPAN)
+
+    Used by sa-update to deal with certain Date requests.
+
+  - IO::Zlib (from CPAN)
+
+    Used by sa-update to uncompress update archives.
+    Version 1.04 or later is required.
+
+  - Archive::Tar (from CPAN)
+
+    Used by sa-update to expand update archives.
+    Version 1.23 or later is required.
+
 
 Optional Modules
 ----------------
@@ -330,23 +349,6 @@ version is too low for them to be used.
     user configuration data, Bayes storage, or other storage, you will need
     to have these installed; both the basic DBI module and the driver for
     your database.
-
-
-  - LWP (from CPAN)
-
-    Used by sa-update to retrieve update archives.
-
-
-  - IO::Zlib (from CPAN)
-
-    Used by sa-update to uncompress update archives.
-    Version 1.04 or later is required.
-
-
-  - Archive::Tar (from CPAN)
-
-    Used by sa-update to expand update archives.
-    Version 1.23 or later is required.
 
 
   - Encode::Detect (from CPAN)
