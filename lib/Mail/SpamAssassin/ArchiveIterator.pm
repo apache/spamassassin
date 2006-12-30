@@ -535,12 +535,17 @@ sub _mail_open {
     $expr = "bzip2 -cd $file |";
   }
   else {
-    $expr = "$file";
+    $expr = $file;
   }
+
   if (!open (INPUT, $expr)) {
     warn "archive-iterator: unable to open $file: $!\n";
     return 0;
   }
+
+  # bug 5249: mail could have 8-bit data, need this on some platforms
+  binmode INPUT;
+
   return 1;
 }
 
