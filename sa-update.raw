@@ -73,12 +73,11 @@ BEGIN {                          # see comments in "spamassassin.raw" for doco
 }
 
 # These are the non-standard required modules
-# Use the evals to avoid the annoying RPM requirement check
-eval { use Net::DNS; };
-eval { use LWP::UserAgent; };
-eval { use HTTP::Date qw(time2str); };
-eval { use Archive::Tar 1.23; };
-eval { use IO::Zlib 1.04; };
+use Net::DNS;
+use LWP::UserAgent;
+use HTTP::Date qw(time2str);
+use Archive::Tar 1.23;
+use IO::Zlib 1.04;
 
 # These should already be available
 use Mail::SpamAssassin;
