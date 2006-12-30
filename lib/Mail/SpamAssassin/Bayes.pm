@@ -381,19 +381,10 @@ sub tokenize_line {
 
     # but extend the stop-list. These are squarely in the gray
     # area, and it just slows us down to record them.
+    # See http://wiki.apache.org/spamassassin/BayesStopList for more info.
+    #
     next if $len < 3 ||
-	($token =~ /^(?:a(?:nd|ny|ble|ll|re)|
-		m(?:uch|ost|ade|ore|ail|ake|ailing|any|ailto)|
-		t(?:his|he|ime|hrough|hat)|
-		w(?:hy|here|ork|orld|ith|ithout|eb)|
-		f(?:rom|or|ew)| e(?:ach|ven|mail)|
-		o(?:ne|ff|nly|wn|ut)| n(?:ow|ot|eed)|
-		s(?:uch|ame)| l(?:ook|ike|ong)|
-		y(?:ou|our|ou're)|
-		The|has|have|into|using|http|see|It's|it's|
-		number|just|both|come|years|right|know|already|
-		people|place|first|because|
-		And|give|year|information|can)$/x);
+	($token =~ /^(?:a(?:ble|l(?:ready|l)|n[dy]|re)|b(?:ecause|oth)|c(?:an|ome)|e(?:ach|mail|ven)|f(?:ew|irst|or|rom)|give|h(?:a(?:ve|s)|ttp)|i(?:n(?:formation|to)|t\'s)|just|know|l(?:ike|o(?:ng|ok))|m(?:a(?:de|il(?:(?:ing|to))?|ke|ny)|o(?:re|st)|uch)|n(?:eed|o[tw]|umber)|o(?:ff|n(?:ly|e)|ut|wn)|p(?:eople|lace)|right|s(?:ame|ee|uch)|t(?:h(?:at|is|rough|e)|ime)|using|w(?:eb|h(?:ere|y)|ith(?:out)?|or(?:ld|k))|y(?:ears?|ou(?:(?:\'re|r))?))$/i);
 
     # are we in the body?  If so, apply some body-specific breakouts
     if ($region == 1 || $region == 2) {
