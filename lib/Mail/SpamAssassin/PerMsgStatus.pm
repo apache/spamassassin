@@ -2221,7 +2221,7 @@ sub get_envelope_from {
   # Rely on the 'envelope-sender-header' header if the user has configured one.
   # Assume that because they have configured it, their MTA will always add it.
   # This will prevent us falling through and picking up inappropriate headers.
-  if (exists $self->{conf}->{envelope_sender_header}) {
+  if (defined $self->{conf}->{envelope_sender_header}) {
     # make sure we get the most recent copy - there can be only one EnvelopeSender.
     $envf = $self->get($self->{conf}->{envelope_sender_header}.":addr");
     goto ok if defined $envf && ($envf =~ /\@/ || $envf =~ /^<>$/);
