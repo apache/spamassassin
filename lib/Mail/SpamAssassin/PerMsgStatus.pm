@@ -2218,6 +2218,26 @@ sub get_envelope_from {
 
   my $envf;
 
+  # Rely on the 'envelope-sender-header' header if the user has configured one.
+  # Assume that because they have configured it, their MTA will always add it.
+  # This will prevent us falling through and picking up inappropriate headers.
+  if (exists $self->{conf}->{envelope_sender_header}) {
+    # make sure we get the most recent copy - there can be only one EnvelopeSender.
+    $envf = $self->get($self->{conf}->{envelope_sender_header}.":addr");
+    goto ok if defined $envf && ($envf =~ /\@/ || $envf =~ /^<>$/);
+    # Warn them if it's configured, but not there or not usable.
+    if (defined $envf) {
+      chomp $envf;
+      warn("message: envelope_sender_header '$envf' is not an FQDN - ignoring");
+    } else {
+      warn("message: envelope_sender_header '".$self->{conf}->{envelope_sender_header}."' not found in message");
+    }
+    # Couldn't get envelope-sender using the configured header.
+    return undef;
+  }
+
+  # User hasn't given us a header to trust, so try to guess the sender.
+
   # use the "envelope-sender" string found in the Received headers,
   # if possible... use the last untrusted header, in case there's
   # trusted headers.
@@ -2230,17 +2250,11 @@ sub get_envelope_from {
 
   if (defined $lasthop) {
     $envf = $lasthop->{envfrom};
+    # TODO FIXME: Received.pm puts both null senders and absence-of-sender
+    # into the relays array as '', so we can't distinguish them :(
     if ($envf && ($envf =~ /\@/)) {
       goto ok;
     }
-  }
-
-  # Use the 'envelope-sender-header' header that the user has specified.
-  # We assume this is correct, *even* if the fetchmail/X-Sender screwup
-  # appears.
-  $envf = $self->{conf}->{envelope_sender_header};
-  if ((defined $envf) && ($envf = $self->get($envf)) && ($envf =~ /\@/)) {
-    goto ok;
   }
 
   # WARNING: a lot of list software adds an X-Sender for the original env-from
@@ -2266,6 +2280,7 @@ sub get_envelope_from {
     # a *new* Envelope-from.  check
     if ($self->get ("ALL") =~ /(?:^|\n)Received:\s.*\nX-Envelope-From:\s/s) {
       dbg("message: X-Envelope-From header found after 1 or more Received lines, cannot trust envelope-from");
+      return undef;
     } else {
       goto ok;
     }
