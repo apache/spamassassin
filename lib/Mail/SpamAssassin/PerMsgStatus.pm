@@ -1991,6 +1991,10 @@ sub register_plugin_eval_glue {
     return;
   }
 
+  # only need to call this once per fn
+  return if (exists $self->{register_plugin_eval_glue}->{$function});
+  $self->{register_plugin_eval_glue}->{$function} = undef;
+
   # return if it's not an eval_plugin function
   return if (!exists $self->{conf}->{eval_plugins}->{$function});
 
