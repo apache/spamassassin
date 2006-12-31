@@ -277,9 +277,11 @@ sub html_tag {
   if (exists $elements{$tag} || exists $tricks{$tag}) {
     text_style(@_) if exists $elements_text_style{$tag};
 
+    # bug 5009: things like <p> and </p> both need dealing with
+    html_whitespace(@_) if exists $elements_whitespace{$tag};
+
     # start tags
     if ($num == 1) {
-      html_whitespace(@_) if exists $elements_whitespace{$tag};
       html_uri(@_) if exists $elements_uri{$tag};
       html_tests(@_);
     }
