@@ -116,6 +116,11 @@
 /* Oct 21, 2005 sidney: added ping test */
 #define SPAMC_PING      (1<<19)
 
+/* Jan 1, 2007 sidney: added SSL protocol versions */
+/* no flags means use default of SSL_v23 */
+/* Set both flags to specify TSL_v1 */
+#define SPAMC_SSLV2 (1<<18)
+#define SPAMC_SSLV3 (1<<17)
 
 #define SPAMC_MESSAGE_CLASS_SPAM 1
 #define SPAMC_MESSAGE_CLASS_HAM  2
