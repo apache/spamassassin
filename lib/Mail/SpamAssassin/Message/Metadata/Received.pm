@@ -82,19 +82,19 @@ sub parse_received_headers {
   my $in_trusted = 1;
   my $in_internal = 1;
 
-  if ($trusted->get_num_nets() > 0 && $internal->get_num_nets() > 0) {
+  if ($trusted->get_num_nets() > 1 && $internal->get_num_nets() > 1) {
     # good; we can use both reliably.
   }
-  elsif ($trusted->get_num_nets() <= 0 && $internal->get_num_nets() > 0) {
+  elsif ($trusted->get_num_nets() <= 1 && $internal->get_num_nets() > 1) {
     $trusted = $internal;	# use 'internal' for 'trusted'
   }
-  elsif ($trusted->get_num_nets() > 0 && $internal->get_num_nets() <= 0) {
+  elsif ($trusted->get_num_nets() > 1 && $internal->get_num_nets() <= 1) {
     # use 'trusted' for 'internal'; compatibility with SpamAssassin 2.60
     $internal = $trusted;
   }
 
-  my $did_user_specify_trust = ($trusted->get_num_nets() > 0);
-  my $did_user_specify_internal = ($internal->get_num_nets() > 0);
+  my $did_user_specify_trust = ($trusted->get_num_nets() > 1);
+  my $did_user_specify_internal = ($internal->get_num_nets() > 1);
 
   my $IP_PRIVATE = IP_PRIVATE;
   my $LOCALHOST = LOCALHOST;
@@ -146,8 +146,11 @@ sub parse_received_headers {
       }
     } else {
       # if the user didn't specify it, assume we immediately transition
-      # to the external network (the internet) once we leave this host.
-      $in_internal = 0;
+      # to the external network (the internet) once we leave the
+      # (default) internal IP list (127/8).
+      if (!$internal->contains_ip ($relay->{ip})) {
+        $in_internal = 0;
+      }
     }
 
     # note: you can't be in internal networks, but not be in a trusted 
