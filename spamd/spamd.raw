@@ -2440,6 +2440,7 @@ Options:
  -H [dir], --helper-home-dir[=dir]  Specify a different HOME directory
  --ssl                             Run an SSL server
  --ssl-port port                   Listen on port for SSL connections
+ --ssl-version sslversion          Specify SSL protocol version to use
  --server-key keyfile              Specify an SSL keyfile
  --server-cert certfile            Specify an SSL certificate
  --socketpath=path                 Listen on given UNIX domain socket
@@ -2841,8 +2842,8 @@ home directory instead.
 
 =item B<--ssl>
 
-Accept only SSL connections.  The B<IO::Socket::SSL> perl module must be
-installed.
+Accept only SSL connections on the associated port.
+The B<IO::Socket::SSL> perl module must be installed.
 
 If the B<--ssl> switch is used, and B<--ssl-port> is not supplied, then
 B<--port> port will be used to accept SSL connections instead of unencrypted
@@ -2855,6 +2856,15 @@ encrypted connections are accepted at B<--ssl-port>.
 Optionally specifies the port number for the server to listen on for
 SSL connections (default: whatever --port uses).  See B<--ssl> for
 more details.
+
+=item B<--ssl-version>=I<sslversion>
+
+Specify the SSL protocol version to use, one of
+B<sslv2>, B<sslv3>, B<tlsv1>, or B<sslv23>.
+The default, B<sslv23>, is the most flexible, accepting a SSLv2 or higher
+hello handshake, then negotiating use of SSLv3 or TLSv1 protocol if the client
+can accept it.
+Specifying B<--ssl-version> implies B<--ssl>.
 
 =item B<--server-key> I<keyfile>
 
