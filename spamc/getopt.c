@@ -193,6 +193,7 @@ spamc_getopt_long(int argc, char * const argv[],
    char *bp, *opt = NULL;
    int i;
 
+   spamc_optarg = NULL; /* clear any left over state from previous option */
    if(spamc_optreset)
       spamc_optreset = optchr = dash = 0;
    if(spamc_optind >= argc) {
@@ -223,7 +224,7 @@ spamc_getopt_long(int argc, char * const argv[],
       if(cp[1] == ':') {
          /* requires an argument */
          if(!argv[spamc_optind] || (argv[spamc_optind][0] == '-') || 
-               (spamc_optind == argc)) {
+               (spamc_optind >= argc)) {
             return(optiserr(argc, argv, spamc_optind-1, optstring, optchr, OPTERRARG));
          }
          spamc_optarg = argv[spamc_optind++];
@@ -251,7 +252,7 @@ spamc_getopt_long(int argc, char * const argv[],
          if((strcmp(longopt+2, longopts[i].name)) == 0) {
             *longindex = i;
             if(longopts[i].has_arg == required_argument) {
-               if(((!argv[spamc_optind]) || (argv[spamc_optind][0] == '-')) && 
+               if(((spamc_optind >= argc) || (!argv[spamc_optind]) || (argv[spamc_optind][0] == '-')) && 
                    (opt == NULL))
                   return(longoptiserr(argc, argv, spamc_optind-1, OPTERRARG));
                if(opt != NULL) {
@@ -260,7 +261,7 @@ spamc_getopt_long(int argc, char * const argv[],
                   spamc_optarg = argv[spamc_optind++];
                }
             } else if(longopts[i].has_arg == optional_argument) {
-               if(((argv[spamc_optind]) && (argv[spamc_optind][0] != '-')) || 
+               if(((spamc_optind < argc) && (argv[spamc_optind]) && (argv[spamc_optind][0] != '-')) || 
                      (opt != NULL)) {
                   if(opt != NULL) {
                      spamc_optarg = opt;
@@ -268,8 +269,6 @@ spamc_getopt_long(int argc, char * const argv[],
                      spamc_optarg = argv[spamc_optind++];
                   }
                }
-            } else {
-               spamc_optarg = NULL;
             }
             if(longopts[i].flag == NULL) {
                return(longopts[i].val);
