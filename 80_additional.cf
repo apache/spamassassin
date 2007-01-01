@@ -252,6 +252,11 @@ meta JM_TORA_XM     (__MAILER_OL_6626 && __MOLE_2962 && __NAKED_TO)
 header TVD_RCVD_SPACE_BRACKET Received =~ /\(\[(?!UNIX:)[^\[\]]*\s/
 describe TVD_RCVD_SPACE_BRACKET Received header has a spammy looking section
 
+header HEADER_COUNT_SUBJECT	eval:check_header_count_range('Subject','2','999')
+describe HEADER_COUNT_SUBJECT   Multiple Subject headers found
+
+header TVD_ENVFROM_APOST        EnvelopeFrom =~ /\'/
+
 
 ###########################################################################
 # ReplaceTags rules
@@ -404,4 +409,6 @@ score STOCK_IMG_OUTLOOK			1.0
 score SPAMMY_XMAILER			1.0
 score SHORT_HELO_AND_INLINE_IMAGE	1.0
 score JM_TORA_XM			2.5
+score HEADER_COUNT_SUBJECT		1.0
+score TVD_ENVFROM_APOST			2.3
 # </gen:mutable>
