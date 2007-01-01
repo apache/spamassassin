@@ -73,15 +73,34 @@ sub add_cidr {
     }
 
     $bits = 32 if (!defined $bits);
-
-    next if ($self->is_net_declared($ip, $bits, $exclude, 0));
-
     my $mask = 0xFFffFFff ^ ((2 ** (32-$bits)) - 1);
+    my $ipaton = (Mail::SpamAssassin::Util::my_inet_aton($ip) & $mask);
+
+    # if this is the _exact_ opposite of an existing entry, then replace that
+    # original entry with a no-op. (Don't just remove it, since the number of
+    # entries found is used to determine if any were specified.)
+    foreach my $i (0 .. (scalar @{$self->{nets}} - 1)) {
+      my $ent = $self->{nets}->[$i];
+
+      if (defined $ent->{ip}
+        && $ipaton == $ent->{ip}
+        && $mask == $ent->{mask}
+        && $exclude == ($ent->{exclude} ? 0 : 1))
+      {
+        splice @{$self->{nets}}, $i, 1, {
+          mask    => undef,
+          exclude => undef,
+          ip      => undef,
+          as_string => "REMOVED"
+        };
+        next;
+      }
+    }
 
     push @{$self->{nets}}, {
       mask    => $mask,
       exclude => $exclude,
-      ip      => (Mail::SpamAssassin::Util::my_inet_aton($ip) & $mask),
+      ip      => $ipaton,
       as_string => $_
     };
     $numadded++;
@@ -102,12 +121,18 @@ sub _nets_contains_network {
 
   return 0 unless (defined $self->{nets});
 
+  # a defined net always contains the 'REMOVED' one
+  if (!defined $network && !defined $mask) {
+    return 1;
+  }
+
   $exclude = 0 if (!defined $exclude);
   $quiet = 0 if (!defined $quiet);
   $declared = 0 if (!defined $declared);
 
   foreach my $net (@{$self->{nets}}) {
     # a net can not be contained by a (smaller) net with a larger mask
+    next if (!defined $net->{ip});
     next if ($net->{mask} > $mask);
 
     # check to see if the new network is contained by the old network
@@ -144,7 +169,9 @@ sub contains_ip {
 
   $ip = Mail::SpamAssassin::Util::my_inet_aton($ip);
   foreach my $net (@{$self->{nets}}) {
-    return !$net->{exclude} if (($ip & $net->{mask}) == $net->{ip});
+    if (defined $net->{ip} && ($ip & $net->{mask}) == $net->{ip}) {
+      return !$net->{exclude};
+    }
   }
   0;
 }
