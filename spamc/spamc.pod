@@ -157,10 +157,14 @@ The maximum message size is 256 MB.
 The size is specified in bytes, as a positive integer greater than 0.
 For example, B<-s 500000>. 
 
-=item B<-S>, B<--ssl>
+=item B<-S>, B<--ssl>, B<--ssl>=I<sslversion>
 
 If spamc was built with support for SSL, encrypt data to and from the
 spamd process with SSL; spamd must support SSL as well.
+I<sslversion> specifies the SSL protocol version to use, one of
+C<sslv2>, C<sslv3>, C<tlsv1>, or C<sslv23>. The default, C<sslv23>, causes
+spamc to use a SSLv2 hello handshake then negotiate use of SSLv3 or TLSv1
+protocol if the spamd server can accept it.
 
 =item B<-t> I<timeout>, B<--timeout>=I<timeout>
 
