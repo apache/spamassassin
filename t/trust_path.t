@@ -18,12 +18,121 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("trust_path");
-use Test; BEGIN { plan tests => 24 };
+use Test; BEGIN { plan tests => 45 };
 
 
 use strict;
 
 my @data = (
+
+# ---------------------------------------------------------------------------
+
+# 127/8 implicitly trusted as default
+q{
+
+  Received: from sender.net (127.0.1.2) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+
+} => q{
+
+Trusted: [ ip=127.0.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= ]
+Untrusted: 
+
+},
+
+# ---------------------------------------------------------------------------
+
+# 127/8 explicitly trusted
+q{
+
+  trusted_networks 127/8
+  Received: from sender.net (127.0.1.2) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+
+} => q{
+
+Trusted: [ ip=127.0.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= ]
+Untrusted: 
+
+},
+
+# 127/8 explicitly trusted along with others
+q{
+
+  trusted_networks 127/8 1.2.2.1
+  Received: from sender.net (127.0.1.2) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+
+} => q{
+
+Trusted: [ ip=127.0.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= ]
+Untrusted: 
+
+},
+
+# ---------------------------------------------------------------------------
+
+# 127/8 explicitly untrusted
+q{
+
+  trusted_networks 1.2/16 !127/8
+  internal_networks 1.2/16 !127/8
+  Received: from sender.net (127.0.1.2) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+
+} => q{
+
+Trusted:
+Untrusted: [ ip=127.0.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=0 id= auth= ]
+
+},
+
+# ---------------------------------------------------------------------------
+
+# 127/8 implicitly trusted
+q{
+
+  trusted_networks 1.2/16
+  Received: from sender.net (127.0.1.2) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+
+} => q{
+
+Trusted: [ ip=127.0.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= ]
+Untrusted: 
+
+},
+
+# ---------------------------------------------------------------------------
+
+# trusted, then not
+q{
+
+  trusted_networks 1.2/16 !1.2/16
+  Received: from sender.net (1.2.3.2) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+
+} => q{
+
+Trusted:
+Untrusted: [ ip=1.2.3.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=0 id= auth= ]
+
+},
+
+# ---------------------------------------------------------------------------
+
+q{
+
+  trusted_networks 1.2/16
+  Received: from sender.net (1.1.1.2) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+
+} => q{
+
+Trusted:
+Untrusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=0 id= auth= ]
+
+},
 
 # ---------------------------------------------------------------------------
 
@@ -181,10 +290,12 @@ while (1) {
             "clear_trusted_networks\n".
             "clear_internal_networks\n";
 
-  $hdrs =~ s/^\s*(trusted_networks\s+[^\n]*)//gs;
-  if ($1) { $conf .= $1."\n"; }
-  $hdrs =~ s/^\s*(internal_networks\s+[^\n]*)//gs;
-  if ($1) { $conf .= $1."\n"; }
+  if ($hdrs =~ s/^\s*(trusted_networks\s+[^\n]*)//gs) {
+    $conf .= $1."\n";
+  }
+  if ($hdrs =~ s/^\s*(internal_networks\s+[^\n]*)//gs) {
+    if ($1) { $conf .= $1."\n"; }
+  }
 
   tstprefs ($conf);
 
@@ -228,7 +339,7 @@ while (1) {
     print "expected: $expected\n";
     print "got     : $relays\n\n";
 
-    die "dying on first test failure";
+    # die "dying on first test failure";
   }
 
   $status->finish();

@@ -635,6 +635,11 @@ This operates additively, so a C<trusted_networks> line after another one
 will result in all those networks becoming trusted.  To clear out the
 existing entries, use C<clear_trusted_networks>.
 
+The loopback C<127/8> network (127.*.*.*) is always trusted, unless explicitly
+rendered untrusted using
+
+    trusted_networks !127/8
+
 If C<trusted_networks> is not set and C<internal_networks> is, the value
 of C<internal_networks> will be used for this parameter.
 
@@ -687,7 +692,7 @@ Empty the list of trusted networks.
     setting => 'clear_trusted_networks',
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      $self->{trusted_networks} = Mail::SpamAssassin::NetSet->new();
+      $self->{trusted_networks} = $self->new_netset();
     }
   });
 
@@ -715,6 +720,11 @@ SpamAssassin is running will be considered external.
 Every entry in C<internal_networks> must appear in C<trusted_networks>; in
 other words, C<internal_networks> is always a subset of the trusted set.
 
+The loopback C<127/8> network (127.*.*.*) is always internal, unless explicitly
+rendered external using something like
+
+    internal_networks !127/8
+
 =cut
 
   push (@cmds, {
@@ -740,7 +750,7 @@ Empty the list of internal networks.
     setting => 'clear_internal_networks',
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      $self->{internal_networks} = Mail::SpamAssassin::NetSet->new();
+      $self->{internal_networks} = $self->new_netset();
     }
   });
 
@@ -2713,8 +2723,8 @@ sub new {
   $self->{more_spam_to} = { };
   $self->{all_spam_to} = { };
 
-  $self->{trusted_networks} = Mail::SpamAssassin::NetSet->new();
-  $self->{internal_networks} = Mail::SpamAssassin::NetSet->new();
+  $self->{trusted_networks} = $self->new_netset();
+  $self->{internal_networks} = $self->new_netset();
 
   # Make sure we add in X-Spam-Checker-Version
   $self->{headers_spam}->{"Checker-Version"} =
@@ -3125,6 +3135,13 @@ sub free_uncompiled_rule_source {
     delete $self->{source_file};
     delete $self->{meta_dependencies};
   }
+}
+
+sub new_netset {
+  my ($self) = @_;
+  my $set = Mail::SpamAssassin::NetSet->new();
+  $set->add_cidr ('127/8');
+  return $set;
 }
 
 ###########################################################################
