@@ -192,90 +192,6 @@ endif
 uri __TVD_INT_CID /^cid:/i
 meta TVD_FW_GRAPHIC_ID3 __TVD_OUTLOOK_IMG && __TVD_INT_CID && !__UNUSABLE_MSGID && ! (__OE_MSGID_2 || __IMS_MSGID )
 
-###########################################################################
-# ReplaceTags rules
-
-ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-
-# 2006/03/13
-# 0.123   0.1549   0.0000    1.000   0.64    1.00  FUZZY_MERIDIA
-body FUZZY_MERIDIA		/<inter W3><post P2>\b(?!meridia)<M><E><R><I><D><I><A>\b/i
-replace_rules FUZZY_MERIDIA
-
-# 2006/03/13
-# 0.239   0.3022   0.0000    1.000   0.70    1.00  TVD_FUZZY_FINANCE
-body TVD_FUZZY_FINANCE		/(?!finance)<F><I><N><A><N><C><E>/i
-replace_rules TVD_FUZZY_FINANCE
-
-# 2006/03/13
-# 0.134   0.1687   0.0000    1.000   0.65    1.00  TVD_FUZZY_FIXED_RATE
-body TVD_FUZZY_FIXED_RATE	/<inter W2><post P2>(?!fixed rate)<F><I><X><E><D>\s+<R><A><T><E>/i
-replace_rules TVD_FUZZY_FIXED_RATE
-
-# 2006/03/13
-# 0.368   0.4640   0.0000    1.000   0.75    1.00  TVD_FUZZY_MICROCAP
-body TVD_FUZZY_MICROCAP		/<inter W2><post P2>(?!microcap)(?!micro-cap)<M><I><C><R><O>-?<C><A><P>/i
-replace_rules TVD_FUZZY_MICROCAP
-
-# 2006/03/13
-# 0.133   0.1676   0.0000    1.000   0.64    1.00  TVD_FUZZY_PHARMACEUTICAL
-body TVD_FUZZY_PHARMACEUTICAL	/<inter W2><post P2>(?!pharmaceutical)<P><H><A><R><M><A><C><E><U><T><I><C><A><L>/i
-replace_rules TVD_FUZZY_PHARMACEUTICAL
-
-# 2006/03/13
-# 2.028   2.5563   0.0154    0.994   0.88    1.00  TVD_FUZZY_SECURITIES
-body TVD_FUZZY_SECURITIES	/<inter W2><post P2>(?!securities)<S><E><C><U><R><I><T><I><E><S>/i
-replace_rules TVD_FUZZY_SECURITIES
-
-# 2006/03/13
-# 1.692   2.1330   0.0121    0.994   0.87    1.00  TVD_FUZZY_SYMBOL
-body TVD_FUZZY_SYMBOL		/<inter W2><post P2>(?!symbol)<S><Y><M><B><O><L>/i
-replace_rules TVD_FUZZY_SYMBOL
-
-# 2006/04/09
-# 0.110   0.1348   0.0000    1.000   0.61    0.01  TVD_FUZZY_DEGREE
-body TVD_FUZZY_DEGREE	/<inter W1><post P1>\b(?!degree)<D><E><G><R><E><E>\b/i
-replace_rules TVD_FUZZY_DEGREE
-
-endif
-
-
-###########################################################################
-# MIMEHeader Rules
-
-# 2006/03/13
-# 3.303   4.1687   0.0044    0.999   0.93    1.00  TVD_FW_GRAPHIC_ID1
-# 0.326   0.4114   0.0000    1.000   0.73    1.00  TVD_FW_GRAPHIC_ID2
-# 1.049   1.3238   0.0022    0.998   0.85    0.01  TVD_FW_GRAPHIC_NAME_LONG
-# 0.421   0.5304   0.0033    0.994   0.76    0.01  TVD_FW_GRAPHIC_NAME_MID
-ifplugin Mail::SpamAssassin::Plugin::MIMEHeader 
-mimeheader TVD_FW_GRAPHIC_ID1		Content-Id =~ /<[0-9a-f]{12}(?:\$[0-9a-f]{8}){2}\@/
-mimeheader TVD_FW_GRAPHIC_ID2		Content-Id =~ /<(?:[0-9A-F]{8}\.){3}[0-9A-F]{8}/
-mimeheader TVD_FW_GRAPHIC_NAME_LONG	Content-Type =~ /\bname="[a-z]{8,}\.gif/
-mimeheader TVD_FW_GRAPHIC_NAME_MID	Content-Type =~ /\bname="[a-z]{6,7}\.gif/
-mimeheader __GIF_ATTACH			Content-Type =~ /^image\/gif\b/i
-mimeheader __TVD_OUTLOOK_IMG		Content-Id =~ /<image\d+\.(?:gif|jpe?g|png)\@/
-endif
-
-###########################################################################
-
-# backports from rulesrc/sandbox/jm/20_basic.cf
-ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
-
-mimeheader __PART_STOCK_CID Content-ID =~ /^<[a-f0-9]{12}\$[a-f0-9]{8}\$[a-f0-9]{8}\@[^\s\.]+>$/
-mimeheader __ANY_IMAGE_ATTACH Content-Type =~ /image\/(?:gif|jpeg|png)/
-mimeheader __PART_STOCK_CL Content-Location =~ /./
-mimeheader __PART_STOCK_CD_F Content-Disposition =~ /filename/
-
-meta PART_CID_STOCK      (__ANY_IMAGE_ATTACH&&__PART_STOCK_CID&&!__PART_STOCK_CL&&!__PART_STOCK_CD_F)
-describe PART_CID_STOCK  Has a spammy image attachment (by Content-ID)
-
-mimeheader __PART_CID_STOCK_LESS    Content-ID =~ /^<00[a-f0-9]{10}\$[a-f0-9]{8}\$[a-f0-9]{8}\@[A-Za-z]+>$/
-meta PART_CID_STOCK_LESS (__ANY_IMAGE_ATTACH&&__PART_CID_STOCK_LESS)
-describe PART_CID_STOCK_LESS Has a spammy image attachment (by Content-ID, more specific)
-
-endif # Mail::SpamAssassin::Plugin::MIMEHeader
-
 header RCVD_FORGED_WROTE    Received =~ / by \S+ with esmtp \([^a-z ]{6,} [^a-z ]{3,}\) id/
 describe RCVD_FORGED_WROTE  Forged 'Received' header found ('wrote:' spam)
 
@@ -333,32 +249,94 @@ header __MOLE_2962  X-MimeOLE =~ /^Produced\ By\ Microsoft\ MimeOLE\ V6\.00\.290
 header __NAKED_TO   To =~ /^[^\s<>]+\@[^\s<>]+$/
 meta JM_TORA_XM     (__MAILER_OL_6626 && __MOLE_2962 && __NAKED_TO)
 
-# <gen:mutable>
-score MID_14DIGITS_HEX     2.8
-score OUTLOOK_3416      2.0
-score RCVD_MAIL_COM         3.0
-score DRUGS_STOCK_MIMEOLE   2.0
-score RCVD_FORGED_WROTE     2.8
-score STOCK_IMG_HDR_FROM 1.0
-score STOCK_IMG_HTML   1.0
-score STOCK_IMG_OUTLOOK  1.0
-score SPAMMY_XMAILER 1.0
-score SHORT_HELO_AND_INLINE_IMAGE 1.0
-score JM_TORA_XM     2.5
-# </gen:mutable>
+header TVD_RCVD_SPACE_BRACKET Received =~ /\(\[(?!UNIX:)[^\[\]]*\s/
+describe TVD_RCVD_SPACE_BRACKET Received header has a spammy looking section
 
-ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
-# <gen:mutable>
-score PART_CID_STOCK_LESS    1.0
-score PART_CID_STOCK     1.0
-# </gen:mutable>
+
+###########################################################################
+# ReplaceTags rules
+
+ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
+
+# 2006/03/13
+# 0.123   0.1549   0.0000    1.000   0.64    1.00  FUZZY_MERIDIA
+body FUZZY_MERIDIA		/<inter W3><post P2>\b(?!meridia)<M><E><R><I><D><I><A>\b/i
+replace_rules FUZZY_MERIDIA
+
+# 2006/03/13
+# 0.239   0.3022   0.0000    1.000   0.70    1.00  TVD_FUZZY_FINANCE
+body TVD_FUZZY_FINANCE		/(?!finance)<F><I><N><A><N><C><E>/i
+replace_rules TVD_FUZZY_FINANCE
+
+# 2006/03/13
+# 0.134   0.1687   0.0000    1.000   0.65    1.00  TVD_FUZZY_FIXED_RATE
+body TVD_FUZZY_FIXED_RATE	/<inter W2><post P2>(?!fixed rate)<F><I><X><E><D>\s+<R><A><T><E>/i
+replace_rules TVD_FUZZY_FIXED_RATE
+
+# 2006/03/13
+# 0.368   0.4640   0.0000    1.000   0.75    1.00  TVD_FUZZY_MICROCAP
+body TVD_FUZZY_MICROCAP		/<inter W2><post P2>(?!microcap)(?!micro-cap)<M><I><C><R><O>-?<C><A><P>/i
+replace_rules TVD_FUZZY_MICROCAP
+
+# 2006/03/13
+# 0.133   0.1676   0.0000    1.000   0.64    1.00  TVD_FUZZY_PHARMACEUTICAL
+body TVD_FUZZY_PHARMACEUTICAL	/<inter W2><post P2>(?!pharmaceutical)<P><H><A><R><M><A><C><E><U><T><I><C><A><L>/i
+replace_rules TVD_FUZZY_PHARMACEUTICAL
+
+# 2006/03/13
+# 2.028   2.5563   0.0154    0.994   0.88    1.00  TVD_FUZZY_SECURITIES
+body TVD_FUZZY_SECURITIES	/<inter W2><post P2>(?!securities)<S><E><C><U><R><I><T><I><E><S>/i
+replace_rules TVD_FUZZY_SECURITIES
+
+# 2006/03/13
+# 1.692   2.1330   0.0121    0.994   0.87    1.00  TVD_FUZZY_SYMBOL
+body TVD_FUZZY_SYMBOL		/<inter W2><post P2>(?!symbol)<S><Y><M><B><O><L>/i
+replace_rules TVD_FUZZY_SYMBOL
+
+# 2006/04/09
+# 0.110   0.1348   0.0000    1.000   0.61    0.01  TVD_FUZZY_DEGREE
+body TVD_FUZZY_DEGREE	/<inter W1><post P1>\b(?!degree)<D><E><G><R><E><E>\b/i
+replace_rules TVD_FUZZY_DEGREE
+
+endif
+
+###########################################################################
+# MIMEHeader Rules
+
+# 2006/03/13
+# 3.303   4.1687   0.0044    0.999   0.93    1.00  TVD_FW_GRAPHIC_ID1
+# 0.326   0.4114   0.0000    1.000   0.73    1.00  TVD_FW_GRAPHIC_ID2
+# 1.049   1.3238   0.0022    0.998   0.85    0.01  TVD_FW_GRAPHIC_NAME_LONG
+# 0.421   0.5304   0.0033    0.994   0.76    0.01  TVD_FW_GRAPHIC_NAME_MID
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader 
+mimeheader TVD_FW_GRAPHIC_ID1		Content-Id =~ /<[0-9a-f]{12}(?:\$[0-9a-f]{8}){2}\@/
+mimeheader TVD_FW_GRAPHIC_ID2		Content-Id =~ /<(?:[0-9A-F]{8}\.){3}[0-9A-F]{8}/
+mimeheader TVD_FW_GRAPHIC_NAME_LONG	Content-Type =~ /\bname="[a-z]{8,}\.gif/
+mimeheader TVD_FW_GRAPHIC_NAME_MID	Content-Type =~ /\bname="[a-z]{6,7}\.gif/
+mimeheader __GIF_ATTACH			Content-Type =~ /^image\/gif\b/i
+mimeheader __TVD_OUTLOOK_IMG		Content-Id =~ /<image\d+\.(?:gif|jpe?g|png)\@/
+
+mimeheader __PART_STOCK_CID Content-ID =~ /^<[a-f0-9]{12}\$[a-f0-9]{8}\$[a-f0-9]{8}\@[^\s\.]+>$/
+mimeheader __ANY_IMAGE_ATTACH Content-Type =~ /image\/(?:gif|jpeg|png)/
+mimeheader __PART_STOCK_CL Content-Location =~ /./
+mimeheader __PART_STOCK_CD_F Content-Disposition =~ /filename/
+
+meta PART_CID_STOCK      (__ANY_IMAGE_ATTACH&&__PART_STOCK_CID&&!__PART_STOCK_CL&&!__PART_STOCK_CD_F)
+describe PART_CID_STOCK  Has a spammy image attachment (by Content-ID)
+
+mimeheader __PART_CID_STOCK_LESS    Content-ID =~ /^<00[a-f0-9]{10}\$[a-f0-9]{8}\$[a-f0-9]{8}\@[A-Za-z]+>$/
+meta PART_CID_STOCK_LESS (__ANY_IMAGE_ATTACH&&__PART_CID_STOCK_LESS)
+describe PART_CID_STOCK_LESS Has a spammy image attachment (by Content-ID, more specific)
+
 endif # Mail::SpamAssassin::Plugin::MIMEHeader
 
 ###########################################################################
 # SCORES
 
-ifplugin Mail::SpamAssassin::Plugin::MIMEHeader 
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
 # <gen:mutable>
+score PART_CID_STOCK_LESS		1.0
+score PART_CID_STOCK			1.0
 score TVD_FW_GRAPHIC_ID1		2.1
 score TVD_FW_GRAPHIC_ID2		2.1
 score TVD_FW_GRAPHIC_NAME_LONG		1.8
@@ -368,50 +346,62 @@ endif
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 # <gen:mutable>
-score TVD_FUZZY_FINANCE		2.0
-score TVD_FUZZY_FIXED_RATE	2.0
-score TVD_FUZZY_MICROCAP	2.2
-score TVD_FUZZY_PHARMACEUTICAL	2.0
-score TVD_FUZZY_SECURITIES	1.8
-score TVD_FUZZY_SYMBOL		1.8
-score FUZZY_MERIDIA		2.0
-score TVD_FUZZY_DEGREE		2.0
+score TVD_FUZZY_FINANCE			2.0
+score TVD_FUZZY_FIXED_RATE		2.0
+score TVD_FUZZY_MICROCAP		2.2
+score TVD_FUZZY_PHARMACEUTICAL		2.0
+score TVD_FUZZY_SECURITIES		1.8
+score TVD_FUZZY_SYMBOL			1.8
+score FUZZY_MERIDIA			2.0
+score TVD_FUZZY_DEGREE			2.0
 # </gen:mutable>
 endif
 
 # <gen:mutable>
-score NULL_IN_BODY		2.2
-score HS_EXTRA			1.2
-score DEAR_WINNER		2.0
-score DRUGS_HDIA		2.0
-score TVD_SUBJ_ACC_NUM		1.8
-score TVD_SUBJ_APPR_LOAN	2.0
-score TVD_SUBJ_OWE		2.4
-score TVD_SUBJ_WIPE_DEBT	2.0
-score TVD_UNDER_VALUED		1.8
-score VERTICAL_DRUGS_1		2.2
-score TVD_SECTION		2.5
-score TVD_HEAD_EDITION		1.0
-score TVD_HEAD_USR		1.0
-score TVD_INCREASE_SIZE		2.2
-score TVD_NOT_SATISFIED		2.0
-score HS_GETMEOFF		2.0
+score NULL_IN_BODY			2.2
+score HS_EXTRA				1.2
+score DEAR_WINNER			2.0
+score DRUGS_HDIA			2.0
+score TVD_SUBJ_ACC_NUM			1.8
+score TVD_SUBJ_APPR_LOAN		2.0
+score TVD_SUBJ_OWE			2.4
+score TVD_SUBJ_WIPE_DEBT		2.0
+score TVD_UNDER_VALUED			1.8
+score VERTICAL_DRUGS_1			2.2
+score TVD_SECTION			2.5
+score TVD_HEAD_EDITION			1.0
+score TVD_HEAD_USR			1.0
+score TVD_INCREASE_SIZE			2.2
+score TVD_NOT_SATISFIED			2.0
+score HS_GETMEOFF			2.0
 score HS_SUBJ_ONLINE_PHARMACEUTICAL	2.0
-score KAM_STOCKOTC		1.0
-score SUBJ_RE_NUM		1.2
-score TVD_ACT_193		2.0
-score TVD_DEAR_HOMEOWNER	2.0
-score TVD_DOLLARS_US		1.2
-score TVD_EB_PHISH		2.0
-score TVD_SINGLE_SPAN_DIV	1.8
-score TVD_UA_FOSTERING		2.0
-score TVD_FINGER_01		2.0
-score TVD_SUBJ_FINGER_03	2.0
-score TVD_STOCK1		2.4
-score TVD_VIS_HIDDEN		2.4
-score TVD_SPACED_SUBJECT_WORD	2.0
-score TVD_SPACED_WORDS		2.2
-score TVD_PH_SUBJ_URGENT	2.0
-score TVD_FLOAT_GENERAL		2.0
-score TVD_FW_GRAPHIC_ID3	2.0
+score KAM_STOCKOTC			1.0
+score SUBJ_RE_NUM			1.2
+score TVD_ACT_193			2.0
+score TVD_DEAR_HOMEOWNER		2.0
+score TVD_DOLLARS_US			1.2
+score TVD_EB_PHISH			2.0
+score TVD_SINGLE_SPAN_DIV		1.8
+score TVD_UA_FOSTERING			2.0
+score TVD_FINGER_01			2.0
+score TVD_SUBJ_FINGER_03		2.0
+score TVD_STOCK1			2.4
+score TVD_VIS_HIDDEN			2.4
+score TVD_SPACED_SUBJECT_WORD		2.0
+score TVD_SPACED_WORDS			2.2
+score TVD_PH_SUBJ_URGENT		2.0
+score TVD_FLOAT_GENERAL			2.0
+score TVD_FW_GRAPHIC_ID3		2.0
+score TVD_RCVD_SPACE_BRACKET		1.2
+score MID_14DIGITS_HEX			2.8
+score OUTLOOK_3416			2.0
+score RCVD_MAIL_COM			3.0
+score DRUGS_STOCK_MIMEOLE		2.0
+score RCVD_FORGED_WROTE			2.8
+score STOCK_IMG_HDR_FROM		1.0
+score STOCK_IMG_HTML			1.0
+score STOCK_IMG_OUTLOOK			1.0
+score SPAMMY_XMAILER			1.0
+score SHORT_HELO_AND_INLINE_IMAGE	1.0
+score JM_TORA_XM			2.5
 # </gen:mutable>
