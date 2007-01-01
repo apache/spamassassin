@@ -46,6 +46,7 @@ sub new {
   $self->register_eval_rule("check_for_faraway_charset");
   $self->register_eval_rule("check_for_uppercase");
   $self->register_eval_rule("check_ma_non_text");
+  $self->register_eval_rule("check_base64_length");
 
   return $self;
 }
@@ -464,6 +465,46 @@ sub check_ma_non_text {
   }
   
   return 0;
+}
+
+sub check_base64_length {
+  my $self = shift;
+  my $pms = shift;
+  shift; # body array, unnecessary
+  my $min = shift;
+  my $max = shift;
+
+  if (!defined $pms->{base64_length}) {
+    $pms->{base64_length} = $self->_check_base64_length($pms->{msg});
+  }
+
+  return 0 if (defined $max && $pms->{base64_length} > $max);
+  return $pms->{base64_length} >= $min;
+}
+
+sub _check_base64_length {
+  my $self = shift;
+  my $msg = shift;
+
+  my $result = 0;
+
+  foreach my $p ($msg->find_parts(qr@.@, 1)) {
+    my $ctype=
+      Mail::SpamAssassin::Util::parse_content_type($p->get_header('content-type'));
+
+    # FPs from Google Calendar invites, etc.
+    # perhaps just limit to test, and image?
+    next if ($ctype eq 'application/ics');
+
+    my $cte = lc $p->get_header('content-transfer-encoding') || '';
+    next if ($cte !~ /^base64$/);
+    foreach my $l ( @{$p->raw()} ) {
+      my $len = length $l;
+      $result = $len if ($len > $result);
+    }
+  }
+  
+  return $result;
 }
 
 1;
