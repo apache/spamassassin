@@ -249,6 +249,7 @@ GetOptions(
   'sql-config!'              => \$opt{'sql-config'},
   'ssl'                      => \$opt{'ssl'},
   'ssl-port=s'               => \$opt{'ssl-port'},
+  'ssl-version=s'            => \$opt{'ssl-version'},
   'syslog-socket=s'          => \$opt{'syslog-socket'},
   'syslog|s=s'               => \$opt{'syslog'},
   'timeout-tcp|T=i'          => \$opt{'timeout-tcp'},
@@ -343,6 +344,7 @@ if (
 if (
     defined $opt{'ssl'}
     or defined $opt{'ssl-port'}
+    or defined $opt{'ssl-version'}
   )
 {
   $listen_ssl = 1;
@@ -573,7 +575,7 @@ if ( defined $ENV{'HOME'} ) {
 
 # Do whitelist later in tmp dir. Side effect: this will be done as -u user.
 
-my ( $sslport, $inetport, $addr, $proto );
+my ( $sslport, $sslversion, $inetport, $addr, $proto );
 
 if ( $listen_inet || $listen_ssl ) {
   $proto = getprotobyname('tcp') or die "getprotobyname(tcp): $!";
@@ -633,8 +635,13 @@ sub compose_listen_info_string {
       $sslport = ( getservbyname($sslport, 'tcp') )[2];
       die "spamd: invalid ssl-port: $opt{'port'}\n" unless $sslport;
     }
+    $sslversion = $opt{'ssl-version'} || 'sslv23';
+    if ($sslversion !~ /^(?:sslv([23]|23)|(tlsv1))$/) {
+      die "spamd: invalid ssl-version: $opt{'ssl-version'}\n";
+    }
 
     push @listeninfo, "SSL port $sslport/tcp";
+    push @listeninfo, "SSL version $sslversion";
   }
 
   if ( $listen_inet ) {
@@ -788,6 +795,7 @@ sub server_sock_setup_ssl {
     Type            => SOCK_STREAM,
     ReuseAddr       => 1,
     Listen          => SOMAXCONN,
+    SSL_version     => $sslversion,
     SSL_verify_mode => 0x00,
     SSL_key_file    => $opt{'server-key'},
     SSL_cert_file   => $opt{'server-cert'}

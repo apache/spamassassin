@@ -220,7 +220,7 @@ read_args(int argc, char **argv,
        { "dest" , required_argument, 0, 'd' },
        { "randomize", no_argument, 0, 'H' },
        { "port", required_argument, 0, 'p' },
-       { "ssl", no_argument, 0, 'S' },
+       { "ssl", optional_argument, 0, 'S' },
        { "socket", required_argument, 0, 'U' },
        { "config", required_argument, 0, 'F' },
        { "timeout", required_argument, 0, 't' },
@@ -333,6 +333,22 @@ read_args(int argc, char **argv,
             case 'S':
             {
                 flags |= SPAMC_USE_SSL;
+		if (!spamc_optarg || (strcmp(spamc_optarg,"sslv23") == 0)) {
+		  /* this is the default */
+		}
+	        else if (strcmp(spamc_optarg,"sslv2") == 0) {
+		  flags |= SPAMC_SSLV2;
+		}
+		else if (strcmp(spamc_optarg,"sslv3") == 0) {
+		  flags |= SPAMC_SSLV3;
+		}
+		else if (strcmp(spamc_optarg,"tlsv1") == 0) {
+		  flags |= (SPAMC_SSLV2 | SPAMC_SSLV3);
+		}
+		else {
+		    libspamc_log(flags, LOG_ERR, "Please specifiy a legal ssl version (%s)", spamc_optarg);
+		    ret = EX_USAGE;
+		}
                 break;
             }
 #endif
