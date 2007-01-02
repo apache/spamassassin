@@ -1079,7 +1079,6 @@ sub free_ruleset_source {
 
   # remove now-compiled rulesets
   if (exists $pms->{conf}->{$type.'_tests'}->{$pri}) {
-    dbg "freeing ruleset source of type $type";
     delete $pms->{conf}->{$type.'_tests'}->{$pri};
   }
 }
