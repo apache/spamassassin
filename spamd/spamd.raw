@@ -1455,24 +1455,24 @@ sub check {
     my $msg_resp_length = length($msg_resp);
     if ( $version >= 1.3 )    # Spamc protocol 1.3 means multi hdrs are OK
     {
-      syswrite( $client, "SPAMD/1.1 $resphash{$resp} $resp\r\n" .
+      syswrite_full_buffer( $client, "SPAMD/1.1 $resphash{$resp} $resp\r\n" .
         "Content-length: $msg_resp_length\r\n" . $spamhdr . "\r\n\r\n" .
         $msg_resp );
     }
     elsif (
       $version >= 1.2 )    # Spamc protocol 1.2 means it accepts content-length
     {
-      syswrite( $client, "SPAMD/1.1 $resphash{$resp} $resp\r\n" .
+      syswrite_full_buffer( $client, "SPAMD/1.1 $resphash{$resp} $resp\r\n" .
         "Content-length: $msg_resp_length\r\n\r\n" . $msg_resp );
     }
     else                   # Earlier than 1.2 didn't accept content-length
     {
-      syswrite( $client, "SPAMD/1.0 $resphash{$resp} $resp\r\n" . $msg_resp );
+      syswrite_full_buffer( $client, "SPAMD/1.0 $resphash{$resp} $resp\r\n" . $msg_resp );
     }
   }
   else                     # $method eq 'CHECK' et al
   {
-    syswrite( $client, "SPAMD/1.1 $resphash{$resp} $resp\r\n" );
+    syswrite_full_buffer( $client, "SPAMD/1.1 $resphash{$resp} $resp\r\n" );
 
     if ( $method eq "CHECK" ) {
       syswrite( $client, "$spamhdr\r\n\r\n" );
@@ -1500,12 +1500,12 @@ sub check {
       if ( $version >= 1.3 )    # Spamc protocol > 1.2 means multi hdrs are OK
       {
         my $msg_resp_length = length($msg_resp);
-        syswrite( $client,
+        syswrite_full_buffer( $client,
                   "Content-length: $msg_resp_length\r\n" . 
                   $spamhdr . "\r\n\r\n" . $msg_resp );
       }
       else {
-        syswrite( $client, $spamhdr . "\r\n\r\n" . $msg_resp );
+        syswrite_full_buffer( $client, $spamhdr . "\r\n\r\n" . $msg_resp );
       }
     }
   }
@@ -2363,6 +2363,41 @@ sub preload_modules_with_tmp_homedir {
     $err ||= "do something: $!";
     warn "spamd: failed to remove $tmphome: could not $err\n";
   }
+}
+
+# Keep calling syswrite until the entire buffer is written out
+# Retry if EAGAIN/EWOULDBLOCK or when partial buffer is written
+# Limit the number of retries to keep the execution time bounded
+sub syswrite_full_buffer {
+  my ($sock, $buf, $numretries) = @_;
+  $numretries ||= 10;       # default 10 retries
+  my $length = length($buf);
+  my $written = 0;
+  my $try = 0;
+
+  while (($try < $numretries) && ($length > $written)) {
+      my $nbytes = syswrite($sock, $buf, $length - $written, $written);
+      if (!defined $nbytes) {
+	  unless ((exists &Errno::EAGAIN && $! == &Errno::EAGAIN)
+		  || (exists &Errno::EWOULDBLOCK && $! == &Errno::EWOULDBLOCK))
+	  {
+	      # an error that wasn't non-blocking I/O-related.  that's serious
+	      return undef;
+	  }
+	  # errcode says to try again
+      }
+      else {
+
+	  if ($nbytes == 0) {
+	      return $written;  # return early if no error but nothing was written
+	  }
+
+	  $written += $nbytes;
+      }
+      $try++;
+  }
+
+  return $written;      # it's complete, we can return
 }
 
 sub map_server_sockets {
