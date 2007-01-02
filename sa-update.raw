@@ -416,7 +416,9 @@ foreach my $channel (@channels) {
 
   my $newV;
   my $dnsV = do_txt_query($DNSQ);
-  if (defined $dnsV && $dnsV =~ /^(\d+)/) {
+  # allow any 0-9 A-Z a-z - _ set, as long as it starts with a number.
+  # the idea is to allow "491592_v32x", for example
+  if (defined $dnsV && $dnsV =~ /^(\d[-_\dA-Za-z]+)/) {
     $newV = $1 if (!defined $newV || $1 > $newV);
     dbg("dns: $DNSQ => $dnsV, parsed as $1");
   }
