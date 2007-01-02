@@ -59,13 +59,16 @@ use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::Logger;
 
 use vars qw{
-  @ISA @TEMPORARY_METHODS
+  @ISA @TEMPORARY_METHODS %TEMPORARY_EVAL_GLUE_METHODS
 };
 
 @ISA = qw();
 
 # methods defined by the compiled ruleset; deleted in finish_tests()
 @TEMPORARY_METHODS = ();
+
+# methods defined by register_plugin_eval_glue(); deleted in finish_tests()
+%TEMPORARY_EVAL_GLUE_METHODS = ();
 
 ###########################################################################
 
@@ -1295,6 +1298,7 @@ sub finish_tests {
     }
   }
   @TEMPORARY_METHODS = ();      # clear for next time
+  %TEMPORARY_EVAL_GLUE_METHODS = ();
 }
 
 
@@ -1991,9 +1995,9 @@ sub register_plugin_eval_glue {
     return;
   }
 
-  # only need to call this once per fn
-  return if (exists $self->{register_plugin_eval_glue}->{$function});
-  $self->{register_plugin_eval_glue}->{$function} = undef;
+  # only need to call this once per fn (globally)
+  return if exists $TEMPORARY_EVAL_GLUE_METHODS{$function};
+  $TEMPORARY_EVAL_GLUE_METHODS{$function} = undef;
 
   # return if it's not an eval_plugin function
   return if (!exists $self->{conf}->{eval_plugins}->{$function});
