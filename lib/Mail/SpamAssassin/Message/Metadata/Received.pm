@@ -343,9 +343,6 @@ sub parse_received_line {
   # Received: Message by Barricade wilhelm.eyp.ee with ESMTP id h1I7hGU06122 for <spamassassin-talk@lists.sourceforge.net>; Tue, 18 Feb 2003 09:43:16 +0200
   return 0 if (!/^\(?from /i);
 
-  # we need an IP address, so if we don't see one in there, don't bother wasting time.
-  return 0 if (!/${IP_ADDRESS}/);
-
   # from www-data by wwwmail.documenta.de (Exim 4.50) with local for <example@vandinter.org> id 1GFbZc-0006QV-L8; Tue, 22 Aug 2006 21:06:04 +0200
   # from server.yourhostingaccount.com with local  for example@vandinter.org  id 1GDtdl-0002GU-QE (8710); Thu, 17 Aug 2006 21:59:17 -0400
   return 0 if /\bwith local for\b/;
@@ -385,7 +382,7 @@ sub parse_received_line {
   # with ESMTPA, ESMTPSA, LMTPA, LMTPSA should cover RFC 3848 compliant MTAs
   # with ASMTP (Authenticated SMTP) is used by Earthlink, Exim 4.34, and others
   # with HTTP should only be authenticated webmail sessions
-  if (/ by .*? with (ESMTPA|ESMTPSA|LMTPA|LMTPSA|ASMTP|HTTP)(?: |$)/i) {
+  if (/ by / && / with (ESMTPA|ESMTPSA|LMTPA|LMTPSA|ASMTP|HTTP)(?: |$)/i) {
     $auth = $1;
   }
   # Courier v0.47 and possibly others
@@ -393,11 +390,11 @@ sub parse_received_line {
     $auth = $1;
   }
   # Sendmail, MDaemon, some webmail servers, and others
-  elsif (/^from .*?(?:\](?: \([^)]*\))?\)|\)\]) .*?\(.*?authenticated.*?\).*? by/) {
+  elsif (/authenticated/ && /^from .*?(?:\](?: \([^)]*\))?\)|\)\]) .*?\(.*?authenticated.*?\).*? by/) {
     $auth = 'Sendmail';
   }
   # Critical Path Messaging Server
-  elsif (/\) by .+ \(\d{1,2}\.\d\.\d{3}(?:\.\d{1,3})?\) \(authenticated as .+\) id /) {
+  elsif (/ \(authenticated as /&&/\) by .+ \(\d{1,2}\.\d\.\d{3}(?:\.\d{1,3})?\) \(authenticated as .+\) id /) {
     $auth = 'CriticalPath';
   }
   # Postfix 2.3 and later with "smtpd_sasl_authenticated_header yes"
@@ -582,7 +579,7 @@ sub parse_received_line {
     #      resulting in a messed-up interpretation. We have to skip sendmail tests
     #      if we find evidence that this is a qmail-ldap header.
     #
-    unless (/^.* by \S+ \(qmail-\S+\) with /) {
+    unless (/ by \S+ \(qmail-\S+\) with /) {
       #
       # sendmail:
       # Received: from mail1.insuranceiq.com (host66.insuranceiq.com [65.217.159.66] (may be forged)) by dogma.slashnull.org (8.11.6/8.11.6) with ESMTP id h2F0c2x31856 for <jm@jmason.org>; Sat, 15 Mar 2003 00:38:03 GMT
@@ -726,7 +723,7 @@ sub parse_received_line {
     
     # Received: from [193.220.176.134] by web40310.mail.yahoo.com via HTTP;
     # Wed, 12 Feb 2003 14:22:21 PST
-    if (/^\[(${IP_ADDRESS})\] by (\S+) via HTTP$/) {
+    if (/ via HTTP$/&&/^\[(${IP_ADDRESS})\] by (\S+) via HTTP$/) {
       $ip = $1; $by = $2; goto enough;
     }
 
@@ -802,7 +799,7 @@ sub parse_received_line {
     # Received: from cabbage.jmason.org [127.0.0.1]
     # by localhost with IMAP (fetchmail-5.9.0)
     # for jm@localhost (single-drop); Thu, 13 Mar 2003 20:39:56 -0800 (PST)
-    if (/^(\S+) (?:\[(${IP_ADDRESS})\] )?by (\S+) with \S+ \(fetchmail/) {
+    if (/fetchmail/&&/^(\S+) (?:\[(${IP_ADDRESS})\] )?by (\S+) with \S+ \(fetchmail/) {
       $self->found_pop_fetcher_sig();
       return 0;		# skip fetchmail handovers
     }
@@ -833,7 +830,7 @@ sub parse_received_line {
 
     # Received: from [129.24.215.125] by ws1-7.us4.outblaze.com with http for
     # _bushisevil_@mail.com; Thu, 13 Feb 2003 15:59:28 -0500
-    if (/^\[(${IP_ADDRESS})\] by (\S+) with http for /) {
+    if (/ with http for /&&/^\[(${IP_ADDRESS})\] by (\S+) with http for /) {
       $ip = $1; $by = $2; goto enough;
     }
 
@@ -841,13 +838,13 @@ sub parse_received_line {
     # by stark.dyndns.tv with POP3 (fetchmail-5.9.7)
     # for stark@localhost (single-drop); Tue, 18 Feb 2003 10:43:09 -0500 (EST)
     # by po11.mit.edu (Cyrus v2.1.5) with LMTP; Tue, 18 Feb 2003 09:49:46 -0500
-    if (/^(\S+) \[(${IP_ADDRESS})\] by (\S+) with POP3 /) {
+    if (/ with POP3 /&&/^(\S+) \[(${IP_ADDRESS})\] by (\S+) with POP3 /) {
       $rdns = $1; $ip = $2; $by = $3; goto enough;
     }
 
     # Received: from snake.corp.yahoo.com(216.145.52.229) by x.x.org via smap (V1.3)
     # id xma093673; Wed, 26 Mar 03 20:43:24 -0600
-    if (/^(\S+)\((${IP_ADDRESS})\) by (\S+) via smap /) {
+    if (/ via smap /&&/^(\S+)\((${IP_ADDRESS})\) by (\S+) via smap /) {
       $mta_looked_up_dns = 1;
       $rdns = $1; $ip = $2; $by = $3; goto enough;
     }
@@ -862,13 +859,13 @@ sub parse_received_line {
     # Received: from [192.168.0.71] by web01-nyc.clicvu.com (Post.Office MTA
     # v3.5.3 release 223 ID# 0-64039U1000L100S0V35) with SMTP id com for
     # <x@x.org>; Tue, 25 Mar 2003 11:42:04 -0500
-    if (/^\[(${IP_ADDRESS})\] by (\S+) \(Post/) {
+    if (/ \(Post/&&/^\[(${IP_ADDRESS})\] by (\S+) \(Post/) {
       $ip = $1; $by = $2; goto enough;
     }
 
     # Received: from [127.0.0.1] by euphoria (ArGoSoft Mail Server 
     # Freeware, Version 1.8 (1.8.2.5)); Sat, 8 Feb 2003 09:45:32 +0200
-    if (/^\[(${IP_ADDRESS})\] by (\S+) \(ArGoSoft/) {
+    if (/ \(ArGoSoft/&&/^\[(${IP_ADDRESS})\] by (\S+) \(ArGoSoft/) {
       $ip = $1; $by = $2; goto enough;
     }
 
@@ -881,7 +878,7 @@ sub parse_received_line {
 
     # Received: from faerber.muc.de by slarti.muc.de with BSMTP (rsmtp-qm-ot 0.4)
     # for asrg@ietf.org; 7 Mar 2003 21:10:38 -0000
-    if (/^\S+ by \S+ with BSMTP/) {
+    if (/ with BSMTP/&&/^\S+ by \S+ with BSMTP/) {
       return 0;	# BSMTP != a TCP/IP handover, ignore it
     }
 
