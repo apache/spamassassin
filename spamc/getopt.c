@@ -191,7 +191,7 @@ spamc_getopt_long(int argc, char * const argv[],
    static int dash = 0;
    char *cp, *longopt;
    char *bp, *opt = NULL;
-   int i;
+   int i, longoptlen;;
 
    spamc_optarg = NULL; /* clear any left over state from previous option */
    if(spamc_optreset)
@@ -241,15 +241,16 @@ spamc_getopt_long(int argc, char * const argv[],
       longopt = argv[spamc_optind++];
       if(longopt[2] == ':')
          return(longoptiserr(argc, argv, spamc_optind, OPTERRCOLON));
+      longoptlen = strlen(longopt) - 2;
       if((bp = strchr(longopt, '='))) {
          opt = strdup(bp+1);
-         longopt[(strlen(longopt)-strlen(bp))] = '\0';
+         longoptlen -= strlen(bp);
       }
 
       for(i=1; ; i++) {
          if((longopts[i].name == NULL) || (longopts[i].name == 0))
             return(longoptiserr(argc, argv, spamc_optind-1, OPTERRNF));
-         if((strcmp(longopt+2, longopts[i].name)) == 0) {
+         if((memcmp(longopt+2, longopts[i].name, longoptlen)) == 0) {
             *longindex = i;
             if(longopts[i].has_arg == required_argument) {
                if(((spamc_optind >= argc) || (!argv[spamc_optind]) || (argv[spamc_optind][0] == '-')) && 
