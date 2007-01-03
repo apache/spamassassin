@@ -136,10 +136,6 @@ if [ "$svnrev" -lt 1 ] ; then
   exit 5
 fi
 
-# scope for this version line: 491592 => 491592_v32x to avoid collisions
-# with other versions' update-building scripts
-svnrev="${svnrev}_v32x"
-
 # TODO: if we were maintaining multiple versions, these would be
 # copied into a path specific to the version
 
