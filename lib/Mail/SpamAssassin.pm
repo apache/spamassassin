@@ -674,12 +674,18 @@ sub signal_user_changed {
 
   if (defined $opts && $opts->{username}) {
     $self->{username} = $opts->{username};
+  } else {
+    undef $self->{username};
   }
   if (defined $opts && $opts->{user_dir}) {
     $self->{user_dir} = $opts->{user_dir};
+  } else {
+    undef $self->{user_dir};
   }
   if (defined $opts && $opts->{userstate_dir}) {
     $self->{userstate_dir} = $opts->{userstate_dir};
+  } else {
+    undef $self->{userstate_dir};
   }
 
   # reopen bayes dbs for this user
@@ -1532,13 +1538,16 @@ sub read_cf_file {
 }
 
 sub get_and_create_userstate_dir {
-  my ($self) = @_;
+  my ($self, $dir) = @_;
 
   my $fname;
 
   # If vpopmail is enabled then set fname to virtual homedir
-  # precedence: userstate_dir, derive from user_dir, system default
-  if (defined $self->{userstate_dir}) {
+  # precedence: dir, userstate_dir, derive from user_dir, system default
+  if (defined $dir) {
+    $fname = File::Spec->catdir ($dir, ".spamassassin");
+  }
+  elsif (defined $self->{userstate_dir}) {
     $fname = $self->{userstate_dir};
   }
   elsif (defined $self->{user_dir}) {
@@ -1602,15 +1611,15 @@ sub create_default_prefs {
     return(0);
   }
 
-  if ($userdir && $userdir ne $self->{user_dir}) {
-    warn "config: oops! user_dirs don't match! '$userdir' vs '$self->{user_dir}'\n";
-  }
+#  if ($userdir && $userdir ne $self->{user_dir}) {
+#    warn "config: hooray! user_dirs don't match! '$userdir' vs '$self->{user_dir}'\n";
+#  }
 
   if (!-f $fname)
   {
     # Pass on the value of $userdir for virtual users in vpopmail
     # otherwise it is empty and the user's normal homedir is used
-    $self->get_and_create_userstate_dir();
+    $self->get_and_create_userstate_dir($userdir);
 
     # copy in the default one for later editing
     my $defprefs = $self->first_existing_path (@Mail::SpamAssassin::default_prefs_path);

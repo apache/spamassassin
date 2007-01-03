@@ -1966,7 +1966,7 @@ sub handle_user {
 
   }
   else {
-    create_default_cf_if_needed( $cf_file, $username );
+    create_default_cf_if_needed( $cf_file, $username, $dir );
     $spamtest->read_scoreonly_config($cf_file);
     $spamtest->signal_user_changed(
       {
