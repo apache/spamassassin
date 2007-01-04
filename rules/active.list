@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-fredt bb-jm bb-zmi cthielen daf jm theo zmi
+# with results from: bb-doc bb-fredt bb-jm bb-zmi daf jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -74,9 +74,6 @@ CORRUPT_FROM_LINE_IN_HDRS
 CTYPE_001C_A
 
 # good enough
-CTYPE_8SPACE_GIF
-
-# good enough
 CURR_PRICE
 
 # good enough
@@ -105,6 +102,9 @@ DEAR_WINNER
 
 # tflags net
 DIGEST_MULTIPLE
+
+# good enough
+DIV_CENTER_A_HREF
 
 # tflags net
 DNS_FROM_AHBL_RHSBL
@@ -257,16 +257,10 @@ FB_NOT_PHONE_NUM1
 FB_NOT_PHONE_NUM3
 
 # good enough
-FB_NOT_SEXUAL
-
-# good enough
 FB_NO_MORE_MAIL
 
 # good enough
 FB_NO_SCRIP_NEEDED
-
-# good enough
-FB_NUMYO
 
 # good enough
 FB_ODD_SPACED_MONEY
@@ -548,10 +542,10 @@ FRT_PENIS1
 FRT_REFINANCE1
 
 # good enough
-FRT_ROLEX
+FRT_SEXUAL
 
 # good enough
-FRT_SEXUAL
+FRT_SOMA
 
 # good enough
 FRT_STRONG1
@@ -1127,6 +1121,9 @@ TVD_APP_LOAN
 TVD_DEAR_HOMEOWNER
 
 # good enough
+TVD_DOLLARS_US
+
+# good enough
 TVD_EB_PHISH
 
 # good enough
@@ -1152,12 +1149,6 @@ TVD_FW_GRAPHIC_ID3
 
 # good enough
 TVD_FW_GRAPHIC_ID3_2
-
-# good enough
-TVD_FW_GRAPHIC_NAME_LONG
-
-# good enough
-TVD_FW_GRAPHIC_NAME_MID
 
 # good enough
 TVD_INCREASE_SIZE
@@ -1223,19 +1214,46 @@ TVD_SUBJ_OWE
 TVD_SUBJ_WIPE_DEBT
 
 # good enough
-TVD_UA_FOSTERING
-
-# good enough
 TVD_VISIT_PHARMA
 
 # good enough
 TVD_VIS_HIDDEN
 
 # good enough
-DIV_CENTER_A_HREF
+CTYPE_1SPACE_GIF
 
 # good enough
-FRT_SOMA
+FB_GET_MEDS
+
+# good enough
+FM_FAKE_HELO_HOTMAIL
+
+# good enough
+FM_SUBJ_APPROVE
+
+# good enough
+HELO_ADMIN
+
+# good enough
+HELO_FRIEND
+
+# good enough
+HELO_LH_HOME
+
+# good enough
+HELO_LH_LD
+
+# good enough
+HELO_NODOT
+
+# good enough
+HELO_OEM
+
+# good enough
+HELO_PC
+
+# good enough
+KAM_STOCKTIP8
 
 # tflags net
 RCVD_IN_DNSWL_HI
@@ -1268,7 +1286,16 @@ RCVD_IN_WHOIS_INVALID
 RCVD_IN_XBL
 
 # good enough
-TVD_DOLLARS_US
+TVD_FW_GRAPHIC_ID1
+
+# good enough
+TVD_FW_GRAPHIC_ID2
+
+# good enough
+TVD_PH_SUBJ_ACCOUNTS_POST
+
+# good enough
+TVD_PH_SUBJ_META
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1590,9 +1617,6 @@ XMAILER_MIMEOLE_OL_F475E
 
 # good enough
 XMAILER_MIMEOLE_OL_F6D01
-
-# good enough
-XMAILER_MIMEOLE_OL_F8BA4
 
 # good enough
 XMAILER_MIMEOLE_OL_FF5C8
