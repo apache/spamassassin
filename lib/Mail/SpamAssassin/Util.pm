@@ -533,10 +533,11 @@ sub wrap {
   my @arr = split(/($break)/, $string);
 
   # tack the first prefix line at the start
-  splice @arr, 0, 0, $first;
+  splice @arr, 0, 0, $first if $first;
 
   # go ahead and make up the lines in the array
   my $pos = 0;
+  my $pos_mod = 0;
   while ($#arr > $pos) {
     my $len = length $arr[$pos];
 
@@ -544,7 +545,8 @@ sub wrap {
     # need to verify what will happen with the next line.  if we don't
     # care if a single line goes longer, don't care about the next
     # line.
-    if ($overflow == 0) {
+    # we also want this to be true for the first entry on the line
+    if ($pos_mod != 0 && $overflow == 0) {
       $len += length $arr[$pos+1];
     }
 
@@ -552,16 +554,18 @@ sub wrap {
       # if the length determined above is within bounds, go ahead and
       # merge the next line with the current one
       $arr[$pos] .= splice @arr, $pos+1, 1;
+      $pos_mod = 1;
     }
     else {
       # ok, the current line is the right length, but there's more text!
       # prep the current line and then go onto the next one
 
       # strip any trailing whitespace from the next line that's ready
-      $arr[0] =~ s/\s+$//;
+      $arr[$pos] =~ s/\s+$//;
 
-      # go to the next line
+      # go to the next line and reset pos_mod
       $pos++;
+      $pos_mod = 0;
 
       # put the appropriate prefix at the front of the line
       splice @arr, $pos, 0, $prefix;
