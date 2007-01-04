@@ -934,7 +934,7 @@ sub lint_trusted_networks {
   # check that all internal_networks are listed in trusted_networks
   # too.
 
-  if ($ni->get_num_nets() > 1 && $nt->get_num_nets() > 1) {
+  if ($ni->get_num_nets() > 0 && $nt->get_num_nets() > 0) {
     my $replace_nets;
     my @valid_ni = ();
 
