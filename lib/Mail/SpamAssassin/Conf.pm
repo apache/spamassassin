@@ -623,13 +623,13 @@ the single IP address specified is used, as if the mask was C</32>.
 If a network or host address is prefaced by a C<!> the network or host will be
 excluded (or included) in a first listed match fashion.
 
+Note: 127/8 is always included in trusted_networks, regardless of your config.
+
 Examples:
 
-    trusted_networks 192.168/16 127/8		# all in 192.168.*.* and 127.*.*.*
-    trusted_networks 212.17.35.15		# just that host
-    trusted_networks 127.			# all in 127.*.*.*
-    trusted_networks !10.0.1.5 10.0.1/24	# all in 10.0.1.* but not 10.0.1.5
-    trusted_networks 10.0.1/24 !10.0.1.5	# all in 10.0.1.* including 10.0.1.5
+   trusted_networks 192.168/16            # all in 192.168.*.*
+   trusted_networks 212.17.35.15          # just that host
+   trusted_networks !10.0.1.5 10.0.1/24   # all in 10.0.1.* but not 10.0.1.5
 
 This operates additively, so a C<trusted_networks> line after another one
 will result in all those networks becoming trusted.  To clear out the
@@ -674,6 +674,7 @@ then it's trusted
       foreach my $net (split (/\s+/, $value)) {
         $self->{trusted_networks}->add_cidr ($net);
       }
+      $self->{trusted_networks_configured} = 1;
     }
   });
 
@@ -687,7 +688,8 @@ Empty the list of trusted networks.
     setting => 'clear_trusted_networks',
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      $self->{trusted_networks} = Mail::SpamAssassin::NetSet->new();
+      $self->{trusted_networks} = $self->new_netset();
+      $self->{trusted_networks_configured} = 0;
     }
   });
 
@@ -715,6 +717,8 @@ SpamAssassin is running will be considered external.
 Every entry in C<internal_networks> must appear in C<trusted_networks>; in
 other words, C<internal_networks> is always a subset of the trusted set.
 
+Note: 127/8 is always included in internal_networks, regardless of your config.
+
 =cut
 
   push (@cmds, {
@@ -727,6 +731,7 @@ other words, C<internal_networks> is always a subset of the trusted set.
       foreach my $net (split (/\s+/, $value)) {
         $self->{internal_networks}->add_cidr ($net);
       }
+      $self->{internal_networks_configured} = 1;
     }
   });
 
@@ -740,7 +745,8 @@ Empty the list of internal networks.
     setting => 'clear_internal_networks',
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      $self->{internal_networks} = Mail::SpamAssassin::NetSet->new();
+      $self->{internal_networks} = $self->new_netset();
+      $self->{internal_networks_configured} = 0;
     }
   });
 
@@ -2719,8 +2725,10 @@ sub new {
   $self->{more_spam_to} = { };
   $self->{all_spam_to} = { };
 
-  $self->{trusted_networks} = Mail::SpamAssassin::NetSet->new();
-  $self->{internal_networks} = Mail::SpamAssassin::NetSet->new();
+  $self->{trusted_networks} = $self->new_netset();
+  $self->{internal_networks} = $self->new_netset();
+  $self->{trusted_networks_configured} = 0;
+  $self->{internal_networks_configured} = 0;
 
   # Make sure we add in X-Spam-Checker-Version
   $self->{headers_spam}->{"Checker-Version"} =
@@ -3131,6 +3139,13 @@ sub free_uncompiled_rule_source {
     delete $self->{source_file};
     delete $self->{meta_dependencies};
   }
+}
+
+sub new_netset {
+  my ($self) = @_;
+  my $set = Mail::SpamAssassin::NetSet->new();
+  $set->add_cidr ('127/8');
+  return $set;
 }
 
 ###########################################################################

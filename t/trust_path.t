@@ -18,12 +18,137 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("trust_path");
-use Test; BEGIN { plan tests => 24 };
+use Test; BEGIN { plan tests => 51 };
 
 
 use strict;
 
 my @data = (
+
+# ---------------------------------------------------------------------------
+
+# 127/8 implicitly trusted as default
+q{
+
+  Received: from sender.net (127.0.1.2) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+
+} => q{
+
+Trusted: [ ip=127.0.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= ]
+Untrusted: 
+
+},
+
+# ---------------------------------------------------------------------------
+
+# 127/8 explicitly trusted
+q{
+
+  trusted_networks 127/8
+  Received: from sender.net (127.0.1.2) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+
+} => q{
+
+Trusted: [ ip=127.0.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= ]
+Untrusted: 
+
+},
+
+# 127/8 explicitly trusted along with others
+q{
+
+  trusted_networks 127/8 1.2.2.1
+  Received: from sender.net (127.0.1.2) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+
+} => q{
+
+Trusted: [ ip=127.0.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= ]
+Untrusted: 
+
+},
+
+# ---------------------------------------------------------------------------
+
+# 127/8 explicitly untrusted
+q{
+
+  trusted_networks 1.2/16 !127/8
+  internal_networks 1.2/16 !127/8
+  Received: from sender.net (127.0.1.2) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+
+} => q{
+
+Trusted: [ ip=127.0.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= ]
+Untrusted: 
+
+},
+
+# ---------------------------------------------------------------------------
+
+# 127/8 implicitly trusted
+q{
+
+  trusted_networks 1.2/16
+  Received: from sender.net (127.0.1.2) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+
+} => q{
+
+Trusted: [ ip=127.0.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= ]
+Untrusted: 
+
+},
+
+# ---------------------------------------------------------------------------
+
+# 10/8 implicitly trusted by auto-detection
+# note: it should also be internal!
+q{
+
+  Received: from sender.net (10.0.1.2) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+
+} => q{
+
+Trusted: [ ip=10.0.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= ]
+Untrusted: 
+
+},
+
+# ---------------------------------------------------------------------------
+
+# trusted, then not (which is trusted, we do first match wins)
+q{
+
+  trusted_networks 1.2/16 !1.2/16
+  Received: from sender.net (1.2.3.2) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+
+} => q{
+
+Trusted: [ ip=1.2.3.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= ]
+Untrusted:
+
+},
+
+# ---------------------------------------------------------------------------
+
+q{
+
+  trusted_networks 1.2/16
+  Received: from sender.net (1.1.1.2) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+
+} => q{
+
+Trusted:
+Untrusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=0 id= auth= ]
+
+},
 
 # ---------------------------------------------------------------------------
 
@@ -92,8 +217,8 @@ Untrusted:
 # ---------------------------------------------------------------------------
 
 # this should be a lint error; internal_networks is not a subset of trusted.
-# note: "intl=1" in expected, because the error means that the internal_networks
-# line is ignored and the default setting is intl==trusted.
+# note: "intl=0" is expected; even though the internal_networks config is
+# invalid it was still defined by the user, so we do not use trusted for internal
 q{
 
   trusted_networks 1.1/16
@@ -104,7 +229,7 @@ q{
 } => q{
 
 Lint-Error
-Trusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= ]
+Trusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=0 id= auth= ]
 Untrusted:
 
 },
@@ -112,6 +237,8 @@ Untrusted:
 # ---------------------------------------------------------------------------
 
 # this should be a lint error; internal_networks is not a subset of trusted.
+# note: "intl=0" is expected; even though the internal_networks config is
+# invalid it was still defined by the user, so we do not use trusted for internal
 q{
 
   trusted_networks 1.1.1/24
@@ -122,7 +249,7 @@ q{
 } => q{
 
 Lint-Error
-Trusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= ]
+Trusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=0 id= auth= ]
 Untrusted:
 
 },
@@ -130,8 +257,8 @@ Untrusted:
 # ---------------------------------------------------------------------------
 
 # this should be a lint error; internal_networks is not a subset of trusted.
-# note: "intl=1" in expected, because the error means that the internal_networks
-# line is ignored and the default setting is intl==trusted.
+# note: "intl=0" is expected; even though the internal_networks config is
+# invalid it was still defined by the user, so we do not use trusted for internal
 q{
 
   trusted_networks !1.1.1.1 1.1/16
@@ -142,6 +269,23 @@ q{
 } => q{
 
 Lint-Error
+Trusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=0 id= auth= ]
+Untrusted:
+
+},
+
+# ---------------------------------------------------------------------------
+
+# this should be a lint error; you can't exclude a network after you've already
+# included it (TODO: it is currently not a lint error, netset just warns about it)
+q{
+
+  trusted_networks 1/8 !1.1.1.2
+  Received: from sender.net (1.1.1.2) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+
+} => q{
+
 Trusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= ]
 Untrusted:
 
@@ -181,10 +325,12 @@ while (1) {
             "clear_trusted_networks\n".
             "clear_internal_networks\n";
 
-  $hdrs =~ s/^\s*(trusted_networks\s+[^\n]*)//gs;
-  if ($1) { $conf .= $1."\n"; }
-  $hdrs =~ s/^\s*(internal_networks\s+[^\n]*)//gs;
-  if ($1) { $conf .= $1."\n"; }
+  if ($hdrs =~ s/^\s*(trusted_networks\s+[^\n]*)//gs) {
+    $conf .= $1."\n";
+  }
+  if ($hdrs =~ s/^\s*(internal_networks\s+[^\n]*)//gs) {
+    if ($1) { $conf .= $1."\n"; }
+  }
 
   tstprefs ($conf);
 
@@ -228,7 +374,7 @@ while (1) {
     print "expected: $expected\n";
     print "got     : $relays\n\n";
 
-    die "dying on first test failure";
+    # die "dying on first test failure";
   }
 
   $status->finish();

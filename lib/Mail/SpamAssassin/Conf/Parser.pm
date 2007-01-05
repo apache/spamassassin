@@ -934,7 +934,7 @@ sub lint_trusted_networks {
   # check that all internal_networks are listed in trusted_networks
   # too.
 
-  if ($ni->get_num_nets() > 0 && $nt->get_num_nets() > 0) {
+  if ($conf->{trusted_networks_configured} && $conf->{internal_networks_configured}) {
     my $replace_nets;
     my @valid_ni = ();
 
