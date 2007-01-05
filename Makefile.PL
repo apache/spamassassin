@@ -194,8 +194,7 @@ my %makefile = (
     	-DPREFIX="$(I_PREFIX)" \
 	-DDEF_RULES_DIR="$(I_DATADIR)" \
 	-DLOCAL_RULES_DIR="$(I_CONFDIR)" \
-	-DLOCAL_STATE_DIR="$(I_LOCALSTATEDIR)" \
-	',
+	-DLOCAL_STATE_DIR="$(I_LOCALSTATEDIR)"',
 
     'macro' => {
         DATAFILES => $datafiles,
