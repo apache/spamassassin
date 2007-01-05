@@ -2540,6 +2540,12 @@ optional, and the default is shown below.
                    'X-Spam-Relays-Internal' pseudo-header)
  _RELAYSEXTERNAL_  relays used and deemed to be external (see the 
                    'X-Spam-Relays-External' pseudo-header)
+ _LASTEXTERNALIP_  IP address of client in the external-to-internal
+                   SMTP handover
+ _LASTEXTERNALRDNS_ reverse-DNS of client in the external-to-internal
+                   SMTP handover
+ _LASTEXTERNALHELO_ HELO string used by client in the external-to-internal
+                   SMTP handover
  _AUTOLEARN_       autolearn status ("ham", "no", "spam", "disabled",
                    "failed", "unavailable")
  _TESTS(,)_        tests hit separated by "," (or other separator)

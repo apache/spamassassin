@@ -1166,6 +1166,21 @@ sub _get_tag {
 	      "127.0.0.1";
 	    },
 
+            LASTEXTERNALIP => sub {
+              my $lasthop = $self->{relays_external}->[0];
+              return $lasthop ? $lasthop->{ip} : '';
+            },
+
+            LASTEXTERNALRDNS => sub {
+              my $lasthop = $self->{relays_external}->[0];
+              return $lasthop ? $lasthop->{rdns} : '';
+            },
+
+            LASTEXTERNALHELO => sub {
+              my $lasthop = $self->{relays_external}->[0];
+              return $lasthop ? $lasthop->{helo} : '';
+            },
+
             CONTACTADDRESS => sub { $self->{conf}->{report_contact}; },
 
             BAYES => sub {
