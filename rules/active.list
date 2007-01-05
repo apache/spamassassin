@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-fredt bb-jm bb-zmi daf jm theo zmi
+# with results from: bb-doc bb-fredt bb-jm bb-zmi cthielen daf jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -213,6 +213,9 @@ FB_GAPPY_ADDRESS
 
 # good enough
 FB_GET_LAID
+
+# good enough
+FB_GET_MEDS
 
 # good enough
 FB_GVR
@@ -512,6 +515,9 @@ FM_SEX_HELODDDD
 FM_SEX_HOSTDDDD
 
 # good enough
+FM_SUBJ_APPROVE
+
+# good enough
 FM_TRUE_LOV_ALL_N
 
 # good enough
@@ -734,7 +740,28 @@ HEADER_COUNT_SUBJECT
 HEAD_LONG
 
 # good enough
+HELO_ADMIN
+
+# good enough
+HELO_FRIEND
+
+# good enough
+HELO_LH_HOME
+
+# good enough
+HELO_LH_LD
+
+# good enough
 HELO_LOCALHOST
+
+# good enough
+HELO_NODOT
+
+# good enough
+HELO_OEM
+
+# good enough
+HELO_PC
 
 # tflags userconf
 HIGH_CODEPAGE_URI
@@ -804,6 +831,9 @@ KAM_STOCKTIP4
 
 # good enough
 KAM_STOCKTIP6
+
+# good enough
+KAM_STOCKTIP8
 
 # good enough
 LONG_TERM_PRICE
@@ -1121,9 +1151,6 @@ TVD_APP_LOAN
 TVD_DEAR_HOMEOWNER
 
 # good enough
-TVD_DOLLARS_US
-
-# good enough
 TVD_EB_PHISH
 
 # good enough
@@ -1163,7 +1190,7 @@ TVD_NOT_SATISFIED
 TVD_PH_REC
 
 # good enough
-TVD_PH_SUBJ_URGENT
+TVD_PH_SUBJ_ACCOUNTS_POST
 
 # good enough
 TVD_PP_PHISH
@@ -1220,40 +1247,10 @@ TVD_VISIT_PHARMA
 TVD_VIS_HIDDEN
 
 # good enough
-CTYPE_1SPACE_GIF
+CTYPE_8SPACE_GIF
 
 # good enough
-FB_GET_MEDS
-
-# good enough
-FM_FAKE_HELO_HOTMAIL
-
-# good enough
-FM_SUBJ_APPROVE
-
-# good enough
-HELO_ADMIN
-
-# good enough
-HELO_FRIEND
-
-# good enough
-HELO_LH_HOME
-
-# good enough
-HELO_LH_LD
-
-# good enough
-HELO_NODOT
-
-# good enough
-HELO_OEM
-
-# good enough
-HELO_PC
-
-# good enough
-KAM_STOCKTIP8
+FRT_DOLLAR
 
 # tflags net
 RCVD_IN_DNSWL_HI
@@ -1286,16 +1283,10 @@ RCVD_IN_WHOIS_INVALID
 RCVD_IN_XBL
 
 # good enough
-TVD_FW_GRAPHIC_ID1
+TVD_FW_GRAPHIC_NAME_LONG
 
 # good enough
-TVD_FW_GRAPHIC_ID2
-
-# good enough
-TVD_PH_SUBJ_ACCOUNTS_POST
-
-# good enough
-TVD_PH_SUBJ_META
+TVD_FW_GRAPHIC_NAME_MID
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1599,9 +1590,6 @@ XMAILER_MIMEOLE_OL_CAC8F
 
 # good enough
 XMAILER_MIMEOLE_OL_CF0C0
-
-# good enough
-XMAILER_MIMEOLE_OL_D03AB
 
 # good enough
 XMAILER_MIMEOLE_OL_EF20B
