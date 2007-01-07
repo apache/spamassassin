@@ -62,6 +62,7 @@ sub new {
   $self->register_eval_rule("check_for_to_in_subject");
   $self->register_eval_rule("check_outlook_message_id");
   $self->register_eval_rule("check_messageid_not_usable");
+  $self->register_eval_rule("check_messageid_not_usable2");
   $self->register_eval_rule("check_header_count_range");
   $self->register_eval_rule("check_unresolved_template");
   $self->register_eval_rule("check_ratware_name_id");
@@ -1046,6 +1047,27 @@ sub check_messageid_not_usable {
 
   # too old; older versions of clients used different formats
   return 1 if ($self->received_within_months($pms, '6','undef'));
+
+  return 0;
+}
+
+sub check_messageid_not_usable2 {
+  my ($self, $pms) = @_;
+  local ($_);
+
+  # Lyris eats message-ids.  also some ezmlm, I think :(
+  $_ = $pms->get("List-Unsubscribe");
+  return 1 if (/<mailto:(?:leave-\S+|\S+-unsubscribe)\@\S+>$/);
+
+  # ezmlm again
+  if($self->gated_through_received_hdr_remover($pms)) { return 1; }
+
+  # Allen notes this as 'Wacky sendmail version?'
+  $_ = $pms->get("Received");
+  return 1 if /\/CWT\/DCE\)/;
+
+  # Apr  2 2003 jm: iPlanet rewrites lots of stuff, including Message-IDs
+  return 1 if /iPlanet Messaging Server/;
 
   return 0;
 }
