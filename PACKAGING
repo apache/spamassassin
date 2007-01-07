@@ -307,7 +307,9 @@ success:
    	export PERL5LIB="/tmp/ExtUtils-MakeMaker-6.16/lib:$PERL5LIB"
 
 4. Now build SpamAssassin. As long as the PERL5LIB variable is set, the
-   updated ExtUtils::MakeMaker is used.
+   updated ExtUtils::MakeMaker is used.  (SpamAssassin will use PERL5LIB
+   during building, but the built scripts ignore it due to taint-mode
+   security features.)
 
 
 Obsolete Variables

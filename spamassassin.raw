@@ -739,6 +739,10 @@ The B<spamassassin> command is part of the B<Mail::SpamAssassin> Perl module.
 Install this as a normal Perl module, using C<perl -MCPAN -e shell>, or by
 hand.
 
+Note that it is not possible to use the C<PERL5LIB> environment variable
+to affect where SpamAssassin finds its perl modules, due to limitations
+imposed by perl's "taint" security checks.
+
 For further details on how to install, please read the C<INSTALL> file
 from the SpamAssassin distribution.
 
