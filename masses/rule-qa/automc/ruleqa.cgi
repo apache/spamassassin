@@ -1148,7 +1148,7 @@ sub output_freqs_data_line {
     $ovl =~ s{^(\s+overlap\s+(?:ham|spam):\s+\d+% )(\S.+?)$}{
         my $str = "$1";
         foreach my $rule (split(' ', $2)) {
-          if ($rule =~ /^[a-z]{1,6}$/) {    # "of", "hits" etc.
+          if ($rule =~ /^(?:[a-z]{1,6}|\d+\%)$/) {    # "of", "hits" etc.
             $str .= $rule." ";
           } else {
             $str .= $self->gen_rule_link($rule,$rule)." ";
