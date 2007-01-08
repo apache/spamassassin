@@ -148,6 +148,8 @@ sub print_version {
   printf("  running on Perl %s\n", join(".", map { $_||=0; $_*1 } ($] =~ /(\d)\.(\d{3})(\d{3})?/)));
   eval { require IO::Socket::SSL; };
   printf("  with SSL support (%s %s)\n", "IO::Socket::SSL", $IO::Socket::SSL::VERSION) unless ($@);
+  eval { require Compress::Zlib; };
+  printf("  with zlib support (%s %s)\n", "Compress::Zlib", $Compress::Zlib::VERSION) unless ($@);
 }
 
 sub print_usage_and_exit {
@@ -1328,15 +1330,29 @@ sub handle_setuid_to_user {
 }
 
 sub parse_body {
-  my ($client, $expected_length) = @_;
+  my ($client, $expected_length, $compress_zlib) = @_;
 
   my @msglines;
-  my $actual_length = 0;
+  my $actual_length;
 
-  while (defined($_ = $client->getline())) {
-    $actual_length += length($_);
-    push(@msglines, $_);    
-    last if (defined $expected_length && $actual_length >= $expected_length);
+  if ($compress_zlib && !defined($expected_length)) {
+    service_unavailable_error("Compress requires Content-length header");
+    return;
+  }
+
+  if ($compress_zlib) {
+    $actual_length = zlib_inflate_read($client, $expected_length, \@msglines);
+    if ($actual_length < 0) { return; }
+    $expected_length = $actual_length;
+  }
+  else {
+    @msglines = ();
+    $actual_length = 0;
+    while (defined($_ = $client->getline())) {
+      $actual_length += length($_);
+      push(@msglines, $_);    
+      last if (defined $expected_length && $actual_length >= $expected_length);
+    }
   }
   
   # Now parse *only* the message headers; the MIME tree won't be generated 
@@ -1344,6 +1360,54 @@ sub parse_body {
   my $mail = $spamtest->parse(\@msglines, 0);
 
   return ($mail, $actual_length);
+}
+
+sub zlib_inflate_read {
+  my ($client, $expected_length, $msglinesref) = @_;
+  my $out;
+  my $actual_length;
+
+  eval {
+    require Compress::Zlib;
+    my ($zlib, $status) = Compress::Zlib::inflateInit();
+    if (!$zlib) { die "inflateInit failed: $status"; }
+
+    my $red = 0;
+    my $buf;
+
+    # TODO: inflate in smaller buffers instead of at EOF
+    while (1) {
+      my $numbytes = $client->read($buf, (1024 * 64) + $red, $red);
+      if (!defined $numbytes) {
+        die "read of zlib data failed: $!";
+        return -1;
+      }
+      last if $numbytes == 0;
+      $red += $numbytes;
+    }
+
+    if ($red > $expected_length) {
+      warn "hmm, zlib read $red > expected_length $expected_length";
+      substr ($buf, $expected_length) = '';
+    }
+
+    ($out, $status) = $zlib->inflate($buf);
+    if ($status != Compress::Zlib::Z_STREAM_END()) {
+      die "failed to find end of zlib stream";
+    }
+  };
+
+  if ($@) { 
+    service_unavailable_error("zlib: $@");
+    return -1;
+  }
+
+  $actual_length = length($out);
+
+  # TODO: split during inflate, too
+  # note that this preserves line endings
+  @{$msglinesref} = map { s/$/\n/gs; $_; } split(/\n/, $out);
+  return $actual_length;
 }
 
 sub parse_msgids {
@@ -1371,6 +1435,7 @@ sub check {
   my ( $method, $version, $start_time, $remote_hostname, $remote_hostaddr ) = @_;
   local ($_);
   my $expected_length;
+  my $compress_zlib;
 
   # used to ensure we don't accidentally fork (bug 4370)
   my $starting_self_pid = $$;
@@ -1384,6 +1449,7 @@ sub check {
     return 0 unless (parse_headers($hdrs, $client));
 
     $expected_length = $hdrs->{expected_length};
+    $compress_zlib = $hdrs->{compress_zlib};
   }
 
   handle_setuid_to_user if ($setuid_to_user && $> == 0);
@@ -1402,7 +1468,13 @@ sub check {
   my $resp = "EX_OK";
 
   # generate mail object from input
-  my ($mail, $actual_length) = parse_body($client, $expected_length);
+  my ($mail, $actual_length) = parse_body($client, $expected_length,
+                $compress_zlib);
+  return 0 unless defined($mail);       # error
+
+  if ($compress_zlib) {
+    $expected_length = $actual_length;  # previously it was the gzipped length
+  }
 
   # attempt to fetch the message ids
   my ($msgid, $rmsgid) = parse_msgids($mail);
@@ -1571,13 +1643,13 @@ sub check {
 sub dotell {
   my ($method, $version, $start_time, $remote_hostname, $remote_hostaddr) = @_;
   local ($_);
-  my $expected_length;
 
   my $hdrs = {};
 
   return 0 unless (parse_headers($hdrs, $client));
 
-  $expected_length = $hdrs->{expected_length};
+  my $expected_length = $hdrs->{expected_length};
+  my $compress_zlib = $hdrs->{compress_zlib};
 
   if (!$opt{tell}) {
     service_unavailable_error("TELL commands have not been enabled.");
@@ -1610,7 +1682,13 @@ sub dotell {
   my $resp = "EX_OK";
 
   # generate mail object from input
-  my ($mail, $actual_length) = parse_body($client, $expected_length);
+  my ($mail, $actual_length) = parse_body($client, $expected_length,
+                $compress_zlib);
+  return 0 unless defined($mail);       # error
+
+  if ($compress_zlib) {
+    $expected_length = $actual_length;  # previously it was the gzipped length
+  }
 
   if ( $mail->get_header("X-Spam-Checker-Version") ) {
     my $new_mail = $spamtest->parse($spamtest->remove_spamassassin_markup($mail), 1);
@@ -1729,6 +1807,9 @@ sub parse_headers {
     elsif ($header eq 'Remove') {
       return 0 unless &got_remove_header($hdrs, $header, $value);
     }
+    elsif ($header eq 'Compress') {
+      return 0 unless &got_compress_header($hdrs, $header, $value);
+    }
   }
 
   # avoid too-many-headers DOS attack
@@ -1846,6 +1927,25 @@ sub got_remove_header {
 
   if ($value =~ /remote/i) {
     $hdrs->{remove_remote} = 1;
+  }
+
+  return 1;
+}
+
+sub got_compress_header {
+  my ($hdrs, $header, $value) = @_;
+
+  if ($value =~ /zlib/i) {
+    eval { require Compress::Zlib; };
+    if ($@) {
+      protocol_error("(compression not supported, Compress::Zlib not installed)");
+      return 0;
+    }
+    $hdrs->{compress_zlib} = 1;
+  }
+  else {
+    protocol_error("(compression type not supported)");
+    return 0;
   }
 
   return 1;

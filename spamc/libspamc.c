@@ -57,6 +57,9 @@
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
+#ifdef HAVE_ZLIB_H
+#include <zlib.h>
+#endif
 
 /* FIXME: Make this configurable */
 #define MAX_CONNECT_RETRIES 3
@@ -990,6 +993,61 @@ _handle_spamd_header(struct message *m, int flags, char *buf, int len,
     return EX_OK;
 }
 
+static int
+_zlib_compress (char *m_msg, int m_msg_len,
+        unsigned char **zlib_buf, int *zlib_bufsiz)
+{
+    int rc;
+    int len, totallen;
+
+#ifndef HAVE_LIBZ
+
+    UNUSED_VARIABLE(rc);
+    UNUSED_VARIABLE(len);
+    UNUSED_VARIABLE(totallen);
+    libspamc_log(flags, LOG_ERR, "spamc not built with zlib support");
+    return EX_SOFTWARE;
+
+#else
+
+    /* worst-case, according to http://www.zlib.org/zlib_tech.html ;
+      * same as input, plus 5 bytes per 16k, plus 6 bytes.  this should
+      * be plenty */
+    *zlib_bufsiz = (int) (m_msg_len * 1.0005) + 1024;
+    *zlib_buf = (unsigned char *) malloc (*zlib_bufsiz);
+    if (*zlib_buf == NULL) {
+        return EX_OSERR;
+    }
+
+    z_stream strm;
+    strm.zalloc = Z_NULL;
+    strm.zfree = Z_NULL;
+    strm.opaque = Z_NULL;
+    rc = deflateInit(&strm, 3);
+    if (rc != Z_OK) {
+        return EX_OSERR;
+    }
+
+    strm.avail_in = m_msg_len;
+    strm.next_in = (unsigned char *) m_msg;
+    strm.avail_out = *zlib_bufsiz;
+    strm.next_out = (unsigned char *) *zlib_buf;
+
+    totallen = 0;
+    do {
+        rc = deflate(&strm, Z_FINISH);
+        assert(rc != Z_STREAM_ERROR);
+        len = (size_t) (*zlib_bufsiz - strm.avail_out);
+        strm.next_out += len;
+        totallen += len;
+    } while (strm.avail_out == 0);
+
+    *zlib_bufsiz = totallen;
+    return EX_OK;
+
+#endif
+}
+
 int message_filter(struct transport *tp, const char *username,
                    int flags, struct message *m)
 {
@@ -1006,9 +1064,18 @@ int message_filter(struct transport *tp, const char *username,
     SSL_CTX *ctx = NULL;
     SSL *ssl = NULL;
     SSL_METHOD *meth;
+    char zlib_on = 0;
+    unsigned char *zlib_buf = NULL;
+    int zlib_bufsiz = 0;
+    unsigned char *towrite_buf;
+    int towrite_len;
 
     assert(tp != NULL);
     assert(m != NULL);
+
+    if ((flags & SPAMC_USE_ZLIB) != 0) {
+      zlib_on = 1;
+    }
 
     if (flags & SPAMC_USE_SSL) {
 #ifdef SPAMC_SSL
@@ -1065,6 +1132,17 @@ int message_filter(struct transport *tp, const char *username,
     strcat(buf, "\r\n");
     len = strlen(buf);
 
+    towrite_buf = (unsigned char *) m->msg;
+    towrite_len = (int) m->msg_len;
+    if (zlib_on) {
+        if (_zlib_compress(m->msg, m->msg_len, &zlib_buf, &zlib_bufsiz) != EX_OK)
+        {
+            return EX_OSERR;
+        }
+        towrite_buf = zlib_buf;
+        towrite_len = zlib_bufsiz;
+    }
+
     if (!(flags & SPAMC_PING)) {
       if (username != NULL) {
 	if (strlen(username) + 8 >= (bufsiz - len)) {
@@ -1076,11 +1154,14 @@ int message_filter(struct transport *tp, const char *username,
 	strcat(buf + len, "\r\n");
 	len += strlen(buf + len);
       }
+      if (zlib_on) {
+	len += snprintf(buf + len, 8192-len, "Compress: zlib\r\n");
+      }
       if ((m->msg_len > SPAMC_MAX_MESSAGE_LEN) || ((len + 27) >= (bufsiz - len))) {
 	_use_msg_for_out(m);
 	return EX_DATAERR;
       }
-      len += sprintf(buf + len, "Content-length: %d\r\n\r\n", (int) m->msg_len);
+      len += snprintf(buf + len, 8192-len, "Content-length: %d\r\n\r\n", (int) towrite_len);
     }
 
     libspamc_timeout = m->timeout;
@@ -1107,12 +1188,12 @@ int message_filter(struct transport *tp, const char *username,
     if (flags & SPAMC_USE_SSL) {
 #ifdef SPAMC_SSL
 	SSL_write(ssl, buf, len);
-	SSL_write(ssl, m->msg, m->msg_len);
+	SSL_write(ssl, towrite_buf, towrite_len);
 #endif
     }
     else {
 	full_write(sock, 0, buf, len);
-	full_write(sock, 0, m->msg, m->msg_len);
+	full_write(sock, 0, towrite_buf, towrite_len);
 	shutdown(sock, SHUT_WR);
     }
 

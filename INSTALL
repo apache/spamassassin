@@ -312,6 +312,14 @@ version is too low for them to be used.
     compatibile spamc.)
 
 
+  - Compress::Zlib (from CPAN)
+
+    If you wish to use the optional zlib compression for communication
+    between spamc and spamd (the -z option to spamc), useful for
+    long-distance use of spamc over the internet, you need to install
+    this module.
+
+
   - Time::HiRes (from CPAN)
 
     If this module is installed, the processing times are logged/reported

@@ -122,6 +122,9 @@
 #define SPAMC_SSLV2 (1<<18)
 #define SPAMC_SSLV3 (1<<17)
 
+/* Nov 30, 2006 jm: add -z, zlib support */
+#define SPAMC_USE_ZLIB        (1<<16)
+
 #define SPAMC_MESSAGE_CLASS_SPAM 1
 #define SPAMC_MESSAGE_CLASS_HAM  2
 
