@@ -1,8 +1,23 @@
 #!/usr/bin/perl
 
+BEGIN {
+  if (-e 't/test_dir') { # if we are running "t/rule_tests.t", kluge around ...
+    chdir 't';
+  }
+
+  if (-e 'test_dir') {            # running from test directory, not ..
+    unshift(@INC, '../blib/lib');
+    unshift(@INC, '../lib');
+  }
+}
+
 use lib '.'; use lib 't';
 use SATest; sa_t_init("tainted_msg");
-use Test; BEGIN { plan tests => 8 };
+
+use Mail::SpamAssassin::Util;
+use constant AM_TAINTED => Mail::SpamAssassin::Util::am_running_in_taint_mode();
+
+use Test; BEGIN { plan tests => AM_TAINTED ? 8 : 0 };
 
 # ---------------------------------------------------------------------------
 
