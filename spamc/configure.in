@@ -29,7 +29,7 @@ dnl ----------------------------------------------------------------------
 AC_HEADER_STDC
 AC_CHECK_HEADERS(sys/time.h syslog.h unistd.h errno.h sys/errno.h)
 AC_CHECK_HEADERS(time.h sysexits.h sys/socket.h netdb.h netinet/in.h)
-AC_CHECK_HEADERS(pwd.h signal.h openssl/crypto.h)
+AC_CHECK_HEADERS(pwd.h signal.h openssl/crypto.h zlib.h)
 dnl AC_CHECK_HEADERS(getopt.h)
 
 AC_C_CONST
@@ -75,6 +75,7 @@ You may try using 'configure --disable-ssl'.])
 fi
 AC_CHECK_LIB(inet, connect)
 AC_CHECK_LIB(nsl, t_accept)
+AC_CHECK_LIB(z, deflate)
 AC_CHECK_LIB(dl, dlopen)
 
 AC_CHECK_FUNCS(socket strdup strtod strtol snprintf shutdown)

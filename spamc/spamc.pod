@@ -212,6 +212,14 @@ by commas.
 
 Perform a keep-alive check of spamd, instead of a full message check.
 
+=item B<-z>
+
+Use gzip compression to compress the mail message sent to C<spamd>. This is
+useful for long-distance use of spamc over the internet. Note that this relies
+on C<zlib> being installed on the C<spamc> client side, and the
+C<Compress::Zlib> perl module on the server side; an error will be returned
+otherwise.
+
 =back
 
 =head1 CONFIGURATION FILE
