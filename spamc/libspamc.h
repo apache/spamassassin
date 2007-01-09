@@ -226,6 +226,10 @@ struct transport
 #endif
     int nhosts;
     int flags;
+
+    /* added in SpamAssassin 3.2.0 */
+    int connect_retries;
+    int retry_sleep;
 };
 
 extern void transport_init(struct transport *tp);

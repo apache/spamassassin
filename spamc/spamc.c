@@ -153,6 +153,11 @@ print_usage(void)
     usg("  -t, --timeout timeout\n"
         "                      Timeout in seconds for communications to\n"
         "                      spamd. [default: 600]\n");
+    usg("  --connect-retries retries\n"
+        "                      Try connecting to spamd this many times\n"
+        "                      [default: 3]\n");
+    usg("  --retry-sleep sleep Sleep for this time between attempts to\n"
+        "                      connect to spamd, in seconds [default: 1]\n");
     usg("  -s, --max-size size Specify maximum message size, in bytes.\n"
         "                      [default: 500k]\n");
     usg("  -u, --username username\n"
@@ -209,9 +214,9 @@ read_args(int argc, char **argv,
           struct transport *ptrn)
 {
 #ifndef _WIN32
-    const char *opts = "-BcrRd:e:fyp:t:s:u:L:C:xzSHU:ElhVKF:";
+    const char *opts = "-BcrRd:e:fyp:t:s:u:L:C:xzSHU:ElhVKF:0:1:";
 #else
-    const char *opts = "-BcrRd:fyp:t:s:u:L:C:xzSHElhVKF:";
+    const char *opts = "-BcrRd:fyp:t:s:u:L:C:xzSHElhVKF:0:1:";
 #endif
     int opt;
     int ret = EX_OK;
@@ -225,6 +230,8 @@ read_args(int argc, char **argv,
        { "socket", required_argument, 0, 'U' },
        { "config", required_argument, 0, 'F' },
        { "timeout", required_argument, 0, 't' },
+       { "connect-retries", required_argument, 0, 0 },
+       { "retry-sleep", required_argument, 0, 1 },
        { "max-size", required_argument, 0, 's' },
        { "username", required_argument, 0, 'u' },
        { "learntype", required_argument, 0, 'L' },
@@ -438,6 +445,16 @@ read_args(int argc, char **argv,
             case 'z':
             {
                 flags |= SPAMC_USE_ZLIB;
+                break;
+            }
+            case 0:
+            {
+                ptrn->connect_retries = atoi(spamc_optarg);
+                break;
+            }
+            case 1:
+            {
+                ptrn->retry_sleep = atoi(spamc_optarg);
                 break;
             }
         }
