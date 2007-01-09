@@ -498,6 +498,7 @@ endif
 ifplugin Mail::SpamAssassin::Plugin::URIEval
 # <gen:mutable>
 score HTTPS_IP_MISMATCH 1.920 1.920 2.220 2.400
+# </gen:mutable>
 endif
 
 ###########################################################################
@@ -515,15 +516,15 @@ score HIGH_CODEPAGE_URI 2.5
 
 # make the Bayes scores unmutable (as discussed in bug 4505)
 ifplugin Mail::SpamAssassin::Plugin::Bayes
-score BAYES_00 0.0001 0.0001 -2.312 -2.599
-score BAYES_05 0.0001 0.0001 -1.110 -1.110
-score BAYES_20 0.0001 0.0001 -0.740 -0.740
-score BAYES_40 0.0001 0.0001 -0.185 -0.185
-score BAYES_50 0.0001 0.0001 0.001 0.001
-score BAYES_60 0.0001 0.0001 1.0 1.0
-score BAYES_80 0.0001 0.0001 2.0 2.0
-score BAYES_95 0.0001 0.0001 3.0 3.0
-score BAYES_99 0.0001 0.0001 3.5 3.5
+score BAYES_00 0 0 -2.312 -2.599
+score BAYES_05 0 0 -1.110 -1.110
+score BAYES_20 0 0 -0.740 -0.740
+score BAYES_40 0 0 -0.185 -0.185
+score BAYES_50 0 0 0.001 0.001
+score BAYES_60 0 0 1.0 1.0
+score BAYES_80 0 0 2.0 2.0
+score BAYES_95 0 0 3.0 3.0
+score BAYES_99 0 0 3.5 3.5
 endif
 
 # Informational rules about Received header parsing
@@ -572,7 +573,7 @@ endif # Mail::SpamAssassin::Plugin::SPF
 # DKIM
 ifplugin Mail::SpamAssassin::Plugin::DKIM
 score DKIM_POLICY_SIGNALL 0.001
-score DKIM_POLICY_SIGNSOME 0
+score DKIM_POLICY_SIGNSOME 0.001
 score DKIM_POLICY_TESTING 0.001
 score DKIM_SIGNED 0.001
 score DKIM_VERIFIED -0.001
