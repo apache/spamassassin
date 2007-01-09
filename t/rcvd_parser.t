@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rcvd_parser");
-use Test; BEGIN { plan tests => 126 };
+use Test; BEGIN { plan tests => 128 };
 use strict;
 
 # format is:
@@ -321,7 +321,7 @@ my %data = (
   '[ ip=66.92.76.133 rdns=dsl092-076-133.bos1.dsl.speakeasy.net helo=pendaran.arborius.net by=sc8-sf-mx1.sourceforge.net ident= envfrom= id=1CIlfc-0003Pa-8W auth= ]',
 
   'from gilmore.ael.be ([158.64.60.71]) by castlerea.stdlib.net with esmtp (TLSv1:DES-CBC3-SHA:168) (Exim 4.41) id 1CIusZ-00049K-45 for e-voting@lists.stdlib.net; Sat, 16 Oct 2004 21:10:16 +0100' =>
-  '[ ip=158.64.60.71 rdns=gilmore.ael.be helo= by=castlerea.stdlib.net ident= envfrom= id=1CIusZ-00049K-45 auth= ]',
+  '[ ip=158.64.60.71 rdns=gilmore.ael.be helo=gilmore.ael.be by=castlerea.stdlib.net ident= envfrom= id=1CIusZ-00049K-45 auth= ]',
 
   'from rubel.csumb.edu (rubel.csumb.edu [198.189.237.214]) (using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits)) (No client certificate requested) by sf1.isc.org (Postfix) with ESMTP id 23587284EE for <bind-users@isc.org>; Sat, 16 Oct 2004 23:32:19 +0000 (UTC) (envelope-from snort@csumb.edu)' =>
   '[ ip=198.189.237.214 rdns=rubel.csumb.edu helo=rubel.csumb.edu by=sf1.isc.org ident= envfrom=snort@csumb.edu id=23587284EE auth= ]',
@@ -406,6 +406,12 @@ my %data = (
 
   'from av0001.technodiva.com (localhost [127.0.0.1])by  localhost.technodiva.com (Postfix) with ESMTP id 846CF2117for  <proftp-user@lists.sourceforge.net>; Mon,  7 Aug 2006 17:48:07 +0200 (MEST)' =>
   '[ ip=127.0.0.1 rdns=localhost helo=av0001.technodiva.com by=localhost.technodiva.com ident= envfrom= id=846CF2117for auth= ]',
+
+  'from server040.webpack.hosteurope.de ([80.237.130.48]:52313) by vps832469583.serverpool.info with esmtps (TLS-1.0:DHE_RSA_3DES_EDE_CBC_SHA:24) (Exim 4.50) id 1GzVLs-0002Oz-7b for axel@axelcity.de; Wed, 27 Dec 2006 10:45:49 +0100' =>
+  '[ ip=80.237.130.48 rdns=server040.webpack.hosteurope.de helo=server040.webpack.hosteurope.de by=vps832469583.serverpool.info ident= envfrom= intl=0 id=1GzVLs-0002Oz-7b auth= ]',
+
+  'from gate.jakob.de ([217.145.101.130]:60178 helo=gate2.jakob.de) by vps832469583.serverpool.info (envelope-from <support@verleihshop.de>) with esmtps (TLS-1.0:DHE_RSA_3DES_EDE_CBC_SHA:24) (Exim 4.50) id 1H3KFP-0005pI-08 for dvd@axelcity.de; Sat, 06 Jan 2007 23:42:55 +0100' =>
+  '[ ip=217.145.101.130 rdns=gate.jakob.de helo=gate2.jakob.de by=vps832469583.serverpool.info ident= envfrom=support@verleihshop.de intl=0 id=1H3KFP-0005pI-08 auth= ]',
 
 );
 

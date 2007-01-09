@@ -505,8 +505,12 @@ sub parse_received_line {
       # Received: from mail.ssccbelen.edu.pe ([216.244.149.154]) by yzordderrex
       # with esmtp (Exim 3.35 #1 (Debian)) id 18tqiz-000702-00 for
       # <jm@example.com>; Fri, 14 Mar 2003 15:03:57 +0000
+      # Received: from server040.webpack.hosteurope.de ([80.237.130.48]:52313)
+      # by vps832469583.serverpool.info with esmtps
+      # (TLS-1.0:DHE_RSA_3DES_EDE_CBC_SHA:24) (Exim 4.50) id 1GzVLs-0002Oz-7b...
       if (/^(\S+) \(\[(${IP_ADDRESS})\](.*?)\) by (\S+) /) {
         $rdns=$1; $ip = $2; my $sub = $3; $by = $4;
+        $helo=$rdns;     # default, apparently: bug 5112
         $sub =~ s/helo=(\S+)// and $helo = $1;
         $sub =~ s/ident=(\S*)// and $ident = $1;
         goto enough;
