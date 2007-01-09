@@ -995,7 +995,7 @@ _handle_spamd_header(struct message *m, int flags, char *buf, int len,
 
 static int
 _zlib_compress (char *m_msg, int m_msg_len,
-        unsigned char **zlib_buf, int *zlib_bufsiz)
+        unsigned char **zlib_buf, int *zlib_bufsiz, int flags)
 {
     int rc;
     int len, totallen;
@@ -1135,7 +1135,7 @@ int message_filter(struct transport *tp, const char *username,
     towrite_buf = (unsigned char *) m->msg;
     towrite_len = (int) m->msg_len;
     if (zlib_on) {
-        if (_zlib_compress(m->msg, m->msg_len, &zlib_buf, &zlib_bufsiz) != EX_OK)
+        if (_zlib_compress(m->msg, m->msg_len, &zlib_buf, &zlib_bufsiz, flags) != EX_OK)
         {
             return EX_OSERR;
         }
