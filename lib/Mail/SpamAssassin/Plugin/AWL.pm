@@ -338,7 +338,7 @@ sub check_from_in_auto_whitelist {
 
     foreach my $test (@{$pms->{test_names_hit}}) {
       # ignore tests with 0 score in this scoreset,
-      # or if the test is a learning or userconf test
+      # or if the test is marked as "noautolearn"
       next if ($scores->{$test} == 0);
       next if (exists $tflags->{$test} && $tflags->{$test} =~ /\bnoautolearn\b/);
 
