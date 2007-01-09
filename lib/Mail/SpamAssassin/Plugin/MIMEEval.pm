@@ -155,7 +155,7 @@ sub _check_mime_header {
 
   if ($ctype =~ /^text/ &&
       $cte =~ /base64/ &&
-      $charset !~ /utf-8/ &&
+      $charset !~ /(?:utf-8|big5)/ &&   # big5 due to bug 4687
       !($cd && $cd =~ /^(?:attachment|inline)/))
   {
     $pms->{mime_base64_encoded_text} = 1;
