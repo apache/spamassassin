@@ -19,6 +19,8 @@ use constant AM_TAINTED => Mail::SpamAssassin::Util::am_running_in_taint_mode();
 
 use Test; BEGIN { plan tests => AM_TAINTED ? 8 : 0 };
 
+exit unless AM_TAINTED;
+
 # ---------------------------------------------------------------------------
 
 %patterns = (
