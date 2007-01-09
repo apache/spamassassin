@@ -61,10 +61,6 @@
 #include <zlib.h>
 #endif
 
-/* FIXME: Make this configurable */
-#define MAX_CONNECT_RETRIES 3
-#define CONNECT_RETRY_SLEEP 1
-
 /* RedHat 5.2 doesn't define Shutdown 2nd Parameter Constants */
 /* KAM 12-4-01 */
 /* SJF 2003/04/25 - now test for macros directly */
@@ -442,11 +438,23 @@ static int _try_to_connect_tcp(const struct transport *tp, int *sockptr)
     char host[SPAMC_MAXHOST-1]; /* hostname, for logging */
     char port[SPAMC_MAXSERV-1]; /* port, for logging */
 
+    int connect_retries, retry_sleep;
+
     assert(tp != 0);
     assert(sockptr != 0);
     assert(tp->nhosts > 0);
 
-    for (numloops = 0; numloops < MAX_CONNECT_RETRIES; numloops++) {
+    // default values
+    retry_sleep = tp->retry_sleep;
+    connect_retries = tp->connect_retries;
+    if (connect_retries == 0) {
+      connect_retries = 3;
+    }
+    if (retry_sleep == 0) {
+      retry_sleep = 1;
+    }
+
+    for (numloops = 0; numloops < connect_retries; numloops++) {
         const int hostix = numloops % tp->nhosts;
         int status, mysock;
 
@@ -485,7 +493,7 @@ static int _try_to_connect_tcp(const struct transport *tp, int *sockptr)
 #ifdef DO_CONNECT_DEBUG_SYSLOGS
             libspamc_log(tp->flags, CONNECT_DEBUG_LEVEL,
               "dbg: connect(%s) to spamd (host %s, port %s) (try #%d of %d)",
-                      family, host, port, numloops + 1, MAX_CONNECT_RETRIES);
+                      family, host, port, numloops + 1, connect_retries);
 #endif
 
             status = timeout_connect(mysock, res->ai_addr, res->ai_addrlen);
@@ -506,7 +514,7 @@ static int _try_to_connect_tcp(const struct transport *tp, int *sockptr)
 #ifdef DO_CONNECT_DEBUG_SYSLOGS
 	    libspamc_log(tp->flags, LOG_DEBUG,
 			 "dbg: connect(AF_INET) to spamd at %s (try #%d of %d)",
-			 ipaddr, numloops + 1, MAX_CONNECT_RETRIES);
+			 ipaddr, numloops + 1, connect_retries);
 #endif
 	    
 	    status =
@@ -521,11 +529,11 @@ static int _try_to_connect_tcp(const struct transport *tp, int *sockptr)
 #ifndef _WIN32
                   libspamc_log(tp->flags, LOG_ERR,
                       "connect to spamd on %s failed, retrying (#%d of %d): %s",
-                      host, numloops+1, MAX_CONNECT_RETRIES, strerror(origerr));
+                      host, numloops+1, connect_retries, strerror(origerr));
 #else
                   libspamc_log(tp->flags, LOG_ERR,
                       "connect to spamd on %s failed, retrying (#%d of %d): %d",
-                      host, numloops+1, MAX_CONNECT_RETRIES, origerr);
+                      host, numloops+1, connect_retries, origerr);
 #endif
 
             } else {
@@ -541,7 +549,7 @@ static int _try_to_connect_tcp(const struct transport *tp, int *sockptr)
             res = res->ai_next;
         }
 #endif
-        sleep(CONNECT_RETRY_SLEEP);
+        sleep(retry_sleep);
     } /* for(numloops...) */
 
 #ifdef SPAMC_HAS_ADDRINFO
@@ -552,7 +560,7 @@ static int _try_to_connect_tcp(const struct transport *tp, int *sockptr)
 
     libspamc_log(tp->flags, LOG_ERR,
               "connection attempt to spamd aborted after %d retries",
-              MAX_CONNECT_RETRIES);
+              connect_retries);
 
     return _translate_connect_errno(origerr);
 }
