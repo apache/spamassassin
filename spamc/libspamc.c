@@ -16,6 +16,13 @@
  * </@LICENSE>
  */
 
+/* 
+  Compile with extra warnings -- gcc only, not suitable for use as default:
+
+  gcc -Wextra -Wdeclaration-after-statement -Wall -g -O2 spamc/spamc.c \
+  spamc/getopt.c spamc/libspamc.c spamc/utils.c -o spamc/spamc -ldl -lz
+ */
+
 #include "config.h"
 #include "libspamc.h"
 #include "utils.h"
@@ -1017,6 +1024,9 @@ _zlib_compress (char *m_msg, int m_msg_len,
     return EX_SOFTWARE;
 
 #else
+    z_stream strm;
+
+    UNUSED_VARIABLE(flags);
 
     /* worst-case, according to http://www.zlib.org/zlib_tech.html ;
       * same as input, plus 5 bytes per 16k, plus 6 bytes.  this should
@@ -1027,7 +1037,6 @@ _zlib_compress (char *m_msg, int m_msg_len,
         return EX_OSERR;
     }
 
-    z_stream strm;
     strm.zalloc = Z_NULL;
     strm.zfree = Z_NULL;
     strm.opaque = Z_NULL;
