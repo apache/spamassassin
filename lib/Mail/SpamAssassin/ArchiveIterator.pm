@@ -527,18 +527,27 @@ sub _scan_targets {
 sub _mail_open {
   my ($file) = @_;
 
-  my $expr;
+  # bug 5288: the "magic" version of open will strip leading and trailing
+  # whitespace from the expression.  switch to the three-argument version
+  # of open which does not strip whitespace.  see "perldoc -f open" and
+  # "perldoc perlipc" for more information.
+
+  # Assume that the file by default is just a plain file
+  my @expr = ( $file );
+  my $mode = '<';
+
+  # Handle different types of compressed files
   if ($file =~ /\.gz$/) {
-    $expr = "gunzip -cd $file |";
+    $mode = '-|';
+    unshift @expr, 'gunzip', '-cd';
   }
   elsif ($file =~ /\.bz2$/) {
-    $expr = "bzip2 -cd $file |";
-  }
-  else {
-    $expr = $file;
+    $mode = '-|';
+    unshift @expr, 'bzip2', '-cd';
   }
 
-  if (!open (INPUT, $expr)) {
+  # Go ahead and try to open the file
+  if (!open (INPUT, $mode, @expr)) {
     warn "archive-iterator: unable to open $file: $!\n";
     return 0;
   }
