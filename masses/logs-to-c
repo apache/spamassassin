@@ -117,20 +117,6 @@ sub thaw_tests {
   return map { $short_to_long[$_] } unpack("w*", $_[0]);
 }
 
-# arguments are $isspam, $count, \@tests;
-sub log_line_code {
-  $tests_hit[$_[1]] = freeze_tests($_[2]);
-
-  if ($_[0]) {
-    $num_spam++;
-    vec($is_spam, $_[1], 1) = 1;
-  }
-  else {
-    $num_ham++;
-    vec($is_spam, $_[1], 1) = 0;
-  }
-}
-
 sub readlogs {
   my $msgline;
 
@@ -143,22 +129,44 @@ sub readlogs {
     my $isspam = ($file eq $opt_spam);
     my $caught;			# 1st parameter of log line
     my $rules;			# 4th parameter of log line
+    my $restofline;             # intermediate parse buffer
 
     while (defined($msgline = <IN>)) {
-      ($caught, undef, undef, $rules) = split(' ', $msgline);
+      # faster log-reading code from hit-frequencies.
+      # the additional split() is for this case:
+      # ".  -20 /path  time=1112116980,scantime=0,format=f,reuse=no"
+      # in other words, no hits.  split(' ') cannot deal with this
+      # correctly, seeing (".", "-20", "/path", "time=...etc").  Work
+      # around this by using a literal / / regexp split to discard
+      # the csv stuff we don't want out of the rest of the line.
 
-      # only take lines starting with Y or .
-      next unless ($caught eq 'Y' || $caught eq '.') && $rules;
+      ($caught, undef, $restofline) = split(' ', $msgline, 3);
+      next unless ($caught =~ /^[Y\.]$/ && $restofline);
+      (undef, $rules) = split(/ /, $restofline, 3);
 
       # get tests, but ignore unknown tests and subrules
       my @tests = grep { defined $scores{$_} && !$allrules{$_}->{issubrule} }
 	split(/,/, $rules);
 
-      # run handler
-      log_line_code($isspam, $count, \@tests);
+      if ($isspam) {
+        $num_spam++;
+        vec($is_spam, $count, 1) = 1;
+      }
+      else {
+        $num_ham++;
+        vec($is_spam, $count, 1) = 0;
+      }
 
-      # increment line
-      $count++;
+      # inlined for speed.
+      # ORIGINAL: $tests_hit[$count] = freeze_tests(\@tests);
+      $tests_hit[$count] = pack("w*", map
+                  {
+                    $long_to_short{$_} || new_short($_);
+                  } @tests);
+
+      # TODO: benchmark using foreach(), map() is often slower
+
+      $count++;                  # increment line
     }
     close IN;
   }
