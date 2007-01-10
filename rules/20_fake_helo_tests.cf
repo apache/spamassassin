@@ -84,8 +84,6 @@ header HELO_DYNAMIC_HCC   X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S*\d+[^\d\s]
 describe HELO_DYNAMIC_HCC Relay HELO'd using suspicious hostname (HCC)
 
 # h0002a5d76857.ne.client2.attbi.com [65.96.12.59]
-header HELO_DYNAMIC_ATTBI  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+\d+\S+\.client2\.attbi\.com[^\]]+ auth= /i
-describe HELO_DYNAMIC_ATTBI Relay HELO'd using suspicious hostname (ATTBI.com)
 
 # CPE0004e2372711-CM000a73666706.cpe.net.cable.rogers.com
 # CPE00e0184f0eba-CM014490118324.cpe.net.cable.rogers.com [24.43.109.140]
@@ -106,8 +104,6 @@ header HELO_DYNAMIC_SPLIT_IP X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\d+\.\S+\d
 describe HELO_DYNAMIC_SPLIT_IP Relay HELO'd using suspicious hostname (Split IP)
 
 # YahooBB219173000034.bbtec.net [219.173.0.34]
-header HELO_DYNAMIC_YAHOOBB X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=YahooBB[^\]]+ auth= /i
-describe HELO_DYNAMIC_YAHOOBB Relay HELO'd using suspicious hostname (YahooBB)
 
 header HELO_DYNAMIC_IPADDR2 X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\d+[^\d\s]\d+[^\d\s]\d+[^\d\s]\d+[^\d\s][^\.]*\.\S+\.\S+[^\]]+ auth= /i
 describe HELO_DYNAMIC_IPADDR2 Relay HELO'd using suspicious hostname (IP addr 2)
@@ -116,17 +112,11 @@ describe HELO_DYNAMIC_IPADDR2 Relay HELO'd using suspicious hostname (IP addr 2)
 # h53n2fls32o828.telia.com
 # h116n2fls32o1111.telia.com
 # h29n1fls306o1003.telia.com
-header HELO_DYNAMIC_TELIA X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=h\d+n\d+fls\S+\.telia\.com[^\]]+ auth= /i
-describe HELO_DYNAMIC_TELIA Relay HELO'd using suspicious hostname (Telia)
 
 # CM-vina5-168-207.cm.vtr.net [200.104.168.207]
 # CM-anto1-98-153.cm.vtr.net [200.104.98.153]
-header HELO_DYNAMIC_VTR X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=cm-[a-z]+\d+-\d+-\d+\.cm\.vtr[^\]]+ auth= /i
-describe HELO_DYNAMIC_VTR Relay HELO'd using suspicious hostname (VTR)
 
 # ec9z5l.cm.chello.no
-header HELO_DYNAMIC_CHELLO_NO  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+\.cm\.chello\.no[^\]]+ auth= /i
-describe HELO_DYNAMIC_CHELLO_NO Relay HELO'd using suspicious hostname (Chello.no)
 
 # g225174.upc-g.chello.nl
 # a151145.upc-a.chello.nl

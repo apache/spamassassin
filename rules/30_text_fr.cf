@@ -88,7 +88,6 @@ lang fr describe BILLION_DOLLARS        Evoque des millions ou milliards de doll
 lang fr describe BLANK_LINES_80_90	Le corps du message a 80 à 90% de lignes vides
 lang fr describe CHARSET_FARAWAY	Message utilisant un jeu de caractères exotique
 lang fr describe CHARSET_FARAWAY_HEADER	En-tête utilisant un jeu de caractères exotique
-lang fr describe CLICK_BELOW_CAPS	Demande de cliquer ci-dessous (majuscules)
 lang fr describe CONFIRMED_FORGED	Les en-têtes "Received:" ont été falsifiés
 lang fr describe CUM_SHOT               Pornographie probable, "gros plans d'éjaculations"
 lang fr describe DATE_IN_PAST_03_06	Date: est 3 à 6 heures avant la date de l'en-tête Received:
@@ -110,7 +109,6 @@ lang fr describe DIET_1			Spam proposant une perte de poids
 lang fr describe EMAIL_ROT13		Corps contient une adresse mail encodée en ROT13
 lang fr describe EXCUSE_REMOVE		Explique comment être retiré des listes de mailing (soi-disant...)
 lang fr describe EXCUSE_4		Prétend que vous pouvez vous faire supprimer de leur liste
-lang fr describe EXCUSE_6		Prétend que vous pouvez vous faire supprimer de leur liste
 lang fr describe EXCUSE_24		Prétend que vous avez demandé à recevoir cette publicité
 lang fr describe EXTRA_MPART_TYPE	En-tête "Content-type:...type=" surnuméraire
 lang fr describe FAKE_HELO_EMAIL_COM	Le HELO ne correspond pas au rDNS: email.com
@@ -121,11 +119,9 @@ lang fr describe FAKE_HELO_MSN		Le HELO ne correspond pas au rDNS: msn.com
 lang fr describe FAKE_HELO_YAHOO_CA	Le HELO ne correspond pas au rDNS: yahoo.ca
 lang fr describe FAKE_HELO_YAHOO_CA	Le HELO ne correspond pas au rDNS: yahoo.ca
 lang fr describe FAKE_HELO_YAHOO_CA	Le HELO ne correspond pas au rDNS: yahoo.ca
-lang fr describe FAKED_UNDISC_RECIPS	Mention 'Undisclosed-Recipients:' falsifiée dans le "To:"
 lang fr describe FIN_FREE 		Parle de "liberté financière" (Financial Freedom)
 lang fr describe FORGED_HOTMAIL_RCVD2	From hotmail.com, mais sans "Received:"
 lang fr describe FORGED_AOL_TAGS	AOL n'envoie pas de HTML dans ce format
-lang fr describe FORGED_GW05_RCVD	Contient l'en-tête falsifié Received: by gw05
 lang fr describe FORGED_IMS_HTML	IMS n'envoie pas de messages en HTML seul
 lang fr describe FORGED_IMS_TAGS	IMS n'envoie pas de HTML dans ce format
 lang fr describe FORGED_MUA_AOL_FROM	Mail falsifié prétendant venir d'AOL (selon From)
@@ -188,12 +184,10 @@ lang fr describe LIVE_PORN              Pornographie probable: porno en direct-l
 lang fr describe SUBJECT_DIET            Le sujet parle de perte de poids
 lang fr describe LOW_PRICE              Contient "Lowest Price" (le prix le plus bas)
 lang fr describe MARKETING_PARTNERS	Prétend que vous vous êtes enregistré auprès d'un "partenaire" quelconque
-lang fr describe MICRO_CAP_WARNING	Formule d'avertissement de la SEC à propos des investissements dans le micro-capital
 lang fr describe MILLION_USD 		Phrase clé d'escroquerie nigérienne (millions of dollars)
 lang fr describe __MIME_BASE64		Inclut un attachement en BASE64
 lang fr describe MIME_BASE64_BLANKS	Ligne blanches surnuméraires dans l'encodage BASE64
 lang fr describe MIME_BASE64_TEXT	Texte du message camouflé par encodage en BASE64
-lang fr describe MIME_BOUND_DIGITS_7	Motif caractéristique d'outil de spam dans les délimiteurs MIME
 lang fr describe MIME_BOUND_MANY_HEX	Motif caractéristique d'outil de spam dans les délimiteurs MIME
 lang fr describe MIME_CHARSET_FARAWAY	Jeu de caractères MIME exotique
 lang fr describe MIME_HEADER_CTYPE_ONLY En-tête "Content-Type" présent sans les en-têtes MIME requis
@@ -205,21 +199,14 @@ lang fr describe MIME_QP_LONG_LINE	Ligne quoted-printable de plus de 76 caractèr
 lang fr describe MISSING_HEADERS	Le message ne comporte pas l'en-tête To:
 lang fr describe MISSING_MIMEOLE	Possède un en-tête X-MSMail-Priority, mais pas de X-MimeOLE
 lang fr describe MONEY_BACK		Vous garantit un "remboursement si insatisfait" (en anglais)
-lang fr describe MORTGAGE_BEST		Informations sur des prêts (mortgage)
-lang fr describe MORTGAGE_PITCH		Ressemble à une offre de prêt (mortgage)
-lang fr describe MORTGAGE_RATES		Parle de taux d'emprunts (mortage rates)
 lang fr describe MSGID_FROM_MTA_HEADER	Message-ID ajouté par un relais
-lang fr describe MSGID_FROM_MTA_HOTMAIL	Message-ID ajouté par un relais hotmail.com
-lang fr describe MSGID_NO_HOST 		le Message-ID ne comporte pas le nom de l'hôte
 lang fr describe MSGID_OUTLOOK_INVALID	Message-ID falsifié (fortmat Outlook Express)
-lang fr describe MSGID_SPAM_99X9XX99	Message-ID d'outil de spam: (variante 99x9xx99)
 lang fr describe MULTI_FORGED		les en-têtes "Received" montrent de nombreuses falsifications
 lang fr describe NA_DOLLARS		Parle d'un million de dollars "nord-américains"
 lang fr describe NONEXISTENT_CHARSET	Message rédigé dans un jeu de caractères inexistant
 lang fr describe NOT_ADVISOR		Contient "Not registered investment advisor"
 lang fr describe NO_DNS_FOR_FROM	Adresse From: inconnue en DNS (pas d'enregistrement MX)
 lang fr describe NO_MEDICAL		Contient "No Medical Exams" (sans examen médical)
-lang fr describe NO_OBLIGATION		Affirme qu'il s'agit d'une offre sans obligation de votre part
 lang fr describe NO_RDNS_DOTCOM_HELO	HELO de F.A.I. important, mais pas de rDNS
 lang fr describe NUMERIC_HTTP_ADDR	Utilise une adresse IP, sans points, dans une URL
 lang fr describe OBFUSCATING_COMMENT	Commentaires HTML inutiles destinés à camoufler le texte
@@ -232,8 +219,6 @@ lang fr describe PREST_NON_ACCREDITED	Fait référence a une "prestigieuse univers
 lang fr describe RATWARE_EGROUPS	Trace de logiciel de mailing en masse (eGroups) dans les en-têtes
 lang fr describe RATWARE_HASH_DASH	Contient un "hashbuster" au format Send-Safe
 lang fr describe RATWARE_OE_MALFORMED	En-tête X-Mailer indique No de version Outlook Express malformé
-lang fr describe RATWARE_RCVD_LC_ESMTP	Trace de logiciel de spam ('esmtp' Received)
-lang fr describe RATWARE_STORM_URI	Trace de logiciel de spam (StormPost)
 lang fr describe RCVD_AM_PM		En-tête Received: falsifié (AM/PM)
 lang fr describe RCVD_FAKE_HELO_DOTCOM  En-tête Received contient nom d'hôte falsifié dans le HELO
 lang fr describe RCVD_IN_BL_SPAMCOP_NET	Relais listé dans http://spamcop.net/bl.shtml
@@ -262,8 +247,6 @@ lang fr describe RCVD_IN_SORBS_ZOMBIE	SORBS: Envoyé depuis un réseau IP piraté
 lang fr describe RCVD_NUMERIC_HELO	Received: contient un HELO numérique
 lang fr describe REFINANCE_NOW          Offre de refinancement immobilier
 lang fr describe REFINANCE_YOUR_HOME	Offre de refinancement immobilier
-lang fr describe RESISTANCE_IS_FUTILE	Affirme que vous ne pouvez pas être retiré de la liste d'envoi
-lang fr describe RISK_FREE		Propose une offre "sans aucun risque" (en anglais)
 lang fr describe ROUND_THE_WORLD	Les en-têtes Received: montrent que ce message a fait le tour du monde
 lang fr describe ROUND_THE_WORLD_LOCAL	En-têtes Received: donnent l'impression que le message a fait le tour du monde
 lang fr describe SORTED_RECIPS		La liste des destinataires est triée par ordre alphabétique
@@ -278,7 +261,6 @@ lang fr describe SUBJ_YOUR_DEBT		Le sujet contient "Your Bills" (vos factures) o
 lang fr describe SUBJ_YOUR_FAMILY	Le sujet contient "Your Family" (votre famille)
 lang fr describe SUSPICIOUS_RECIPS	L'en-tête To: contient plus de dix fois le même nom de domaine
 lang fr describe TO_MALFORMED		L'en-tête To: contient une adresse mal formée
-lang fr describe TO_RECIP_MARKER        Le champ To: contient un marqueur "recipient"
 lang fr describe TRACKER_ID		Contient un numéro permettant de vous identifier
 lang fr describe UNCLAIMED_MONEY        Argent non réclamé: Chacun sait que c'est courant ;-)
 lang fr describe UPPERCASE_50_75	Message composé de 50 à 75% de majuscules
@@ -295,9 +277,7 @@ lang fr describe US_DOLLARS_3           Escroq. nigérienne, version modifiée, ph
 lang fr describe DRUG_ED_ONLINE          Vente de Viagra par correspondance
 lang fr describe WEIRD_PORT		Lien HTTP vers un numéro de port non standard
 lang fr describe WEIRD_QUOTING		Utilisation étrange de symboles de citations
-lang fr describe WE_HONOR_ALL		Prétend honorer toutes les demandes de retrait de la liste
 lang fr describe WITH_LC_SMTP		Une ligne Received: contient un signe de spam ("smtp" en minuscules)
-lang fr describe YOU_CAN_SEARCH		Vous propose des renseignements sur n'importe qui
 
 ifplugin Mail::SpamAssassin::Plugin::AntiVirus
 lang fr describe MIME_SUSPECT_NAME    	Le nom du fichier joint MIME semble suspect (virus ?)

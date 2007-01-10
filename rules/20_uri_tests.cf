@@ -105,8 +105,6 @@ describe URI_NOVOWEL	URI hostname has long non-vowel sequence
 uri URI_UNSUBSCRIBE		/\b(?:gone|opened|out)\.php/i
 describe URI_UNSUBSCRIBE	URI contains suspicious unsubscribe link
 
-uri URI_UPPER_LOWER		m{(?i:https?)://([A-Z][a-z]+\.){2,}[A-Za-z\d-]+\.[a-z]{2,4}(?:[?/]|$)}
-describe URI_UPPER_LOWER	URI contains capitalized hostname parts ("Abcde")
 
 # bug 3896: URIs in various TLDs, other than 3rd level www
 uri URI_NO_WWW_INFO_CGI	/^(?:https?:\/\/)?[^\/]+(?<!\/www)\.[^.]{7,}\.info\/(?=\S{15,})\S*\?/i

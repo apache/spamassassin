@@ -116,7 +116,6 @@ lang de describe DRUG_ED_CAPS Erwähnt Medikament gegen Erektionsstörung
 lang de describe DRUG_ED_SILD Chemische Bezeichnung eines Medikaments gegen Erektionsstörungen
 lang de describe DRUG_ED_GENERIC Viagra als billiges Nachahmerpräparat
 lang de describe DRUG_ED_ONLINE Schnelle Lieferung von Viagra
-lang de describe DEEP_DISC_MEDS Medikament zu Rabattpreisen 
 lang de describe ONLINE_PHARMACY Internetapotheke
 lang de describe VIA_GAP_GRA Versucht das Wort 'viagra' zu tarnen
 lang de describe DRUGS_ERECTILE Erwähnt ein Medikament gegen Erektionsstörungen
@@ -140,34 +139,24 @@ lang de describe FAKE_HELO_MAIL_COM_DOM HELO-Rechnername verdächtig (mail.com)
 lang de describe HELO_DYNAMIC_IPADDR HELO-Rechnername verdächtig (IP-Adresse 1)
 lang de describe HELO_DYNAMIC_DHCP HELO-Rechnername verdächtig (DHCP)
 lang de describe HELO_DYNAMIC_HCC HELO-Rechnername verdächtig (HCC)
-lang de describe HELO_DYNAMIC_ATTBI HELO-Rechnername verdächtig (ATTBI.com)
 lang de describe HELO_DYNAMIC_ROGERS HELO-Rechnername verdächtig (Rogers)
 lang de describe HELO_DYNAMIC_DIALIN HELO-Rechnername verdächtig (T-Dialin)
 lang de describe HELO_DYNAMIC_HEXIP HELO-Rechnername verdächtig (Hexadezimale IP-Adresse)
 lang de describe HELO_DYNAMIC_SPLIT_IP HELO-Rechnername verdächtig (getrennte IP-Adresse)
-lang de describe HELO_DYNAMIC_YAHOOBB HELO-Rechnername verdächtig (YahooBB)
 lang de describe HELO_DYNAMIC_IPADDR2 HELO-Rechnername verdächtig (IP-Adresse 2)
-lang de describe HELO_DYNAMIC_TELIA HELO-Rechnername verdächtig (Telia)
-lang de describe HELO_DYNAMIC_VTR HELO-Rechnername verdächtig (VTR)
-lang de describe HELO_DYNAMIC_CHELLO_NO HELO-Rechnername verdächtig (Chello.no)
 lang de describe HELO_DYNAMIC_CHELLO_NL HELO-Rechnername verdächtig (Chello.nl)
 lang de describe HELO_DYNAMIC_HOME_NL HELO-Rechnername verdächtig (Home.nl)
 lang de describe FROM_STARTS_WITH_NUMS Absenderadresse beginnt mit Ziffern im Benutzernamen
 lang de describe FROM_OFFERS Absenderadresse enthält "@...offers"
 lang de describe FROM_NO_USER Adressteil vor dem @-Zeichen fehlt im Absender
-lang de describe FAKED_UNDISC_RECIPS "To: Undisclosed-Recipients" ist gefälscht
 lang de describe PLING_QUERY Betreff enthält Ausrufe- und Fragezeichen
 lang de describe SUBJ_ALL_CAPS Betreff enthält nur Großbuchstaben
-lang de describe MSGID_SPAM_99X9XX99 Kopfzeile "Message-ID" von Spam-Software erzeugt (99x9xx99)
-lang de describe MSGID_SPAM_ALPHA_NUM Kopfzeile "Message-ID" von Spam-Software erzeugt (alphanumerisch)
 lang de describe MSGID_SPAM_CAPS Kopfzeile "Message-ID" von Spam-Software erzeugt (Großbuchstaben)
 lang de describe MSGID_SPAM_LETTERS Kopfzeile "Message-ID" von Spam-Software erzeugt (Buchstaben)
-lang de describe MSGID_NO_HOST Rechnername fehlt in Kopfzeile "Message-ID"
 lang de describe MSGID_OUTLOOK_INVALID Gefälschte Kopfzeile "Message-ID" im Format von Outlook Express
 lang de describe MSGID_RANDY Muster in Kopfzeile "Message-ID" typisch für Spam
 lang de describe MSGID_YAHOO_CAPS Kopfzeile "Message-ID" enthält GROSSBUCHSTABEN@yahoo.com
 lang de describe MSGID_FROM_MTA_HEADER Kopfzeile "Message-ID" von fremdem Senderechner hinzugefügt
-lang de describe MSGID_FROM_MTA_HOTMAIL Kopfzeile "Message-ID" von hotmail.com Senderechner hinzugefügt
 lang de describe DATE_SPAMWARE_Y2K Datumskopfzeile hat ungewöhnliches Format
 lang de describe INVALID_DATE Datumskopfzeile nicht standardkonform zu RFC 2822
 lang de describe INVALID_DATE_TZ_ABSURD Ungültiges Datum, diese Zeitzone existiert nicht
@@ -200,7 +189,6 @@ lang de describe RCVD_DOUBLE_IP_LOOSE Empfänger/Sender in Kopfzeilen sehen aus w
 lang de describe FORGED_TELESP_RCVD Gefälschte Rechnernamen eines brasilianischen DSL-Providers
 lang de describe FORGED_HOTMAIL_RCVD2 Absendeadresse von hotmail.com, aber keine passende "Received"-Zeile
 lang de describe FORGED_YAHOO_RCVD Gefälschte "Received"-Kopfzeile von yahoo.com gefunden
-lang de describe FORGED_GW05_RCVD Gefälschte "Received"-Kopfzeile gefunden ("by gw05")
 lang de describe CONFIRMED_FORGED Gefälschte "Received"-Kopfzeilen
 lang de describe MULTI_FORGED Mehrfach gefälschte "Received"-Kopfzeilen
 lang de describe NONEXISTENT_CHARSET Den angegebenen Zeichensatz gibt es nicht
@@ -221,9 +209,7 @@ lang de describe SUBJ_YOUR_FAMILY Betreff enthält "Your Family"
 lang de describe RCVD_FAKE_HELO_DOTCOM "Received"-Kopfzeilen enthalten gefälschten HELO-Rechnernamen
 lang de describe SUBJECT_DIET Betreff dreht sich um Gewichtsabnahme
 lang de describe EXTRA_MPART_TYPE Unnötige Parameter in "Content-Type"-Kopfzeile ("...type=")
-lang de describe TO_RECIP_MARKER Empfängerzeile enthält "recipient"-Markierung
 lang de describe MIME_BOUND_DD_DIGITS Bestimmtes Muster von Spam-Software in MIME-Begrenzung
-lang de describe MIME_BOUND_DIGITS_7 Bestimmtes Muster von Spam-Software in MIME-Begrenzung
 lang de describe MIME_BOUND_DIGITS_15 Bestimmtes Muster von Spam-Software in MIME-Begrenzung
 lang de describe MIME_BOUND_MANY_HEX Bestimmtes Muster von Spam-Software in MIME-Begrenzung
 lang de describe TO_MALFORMED Format der Zieladresse inkorrekt
@@ -234,7 +220,6 @@ lang de describe RCVD_AM_PM Gefälschte "Received"-Kopfzeilen (AM/PM Zeitangabe)
 lang de describe HEADER_COUNT_CTYPE Kopfzeile "Content-Type" mehrfach vorhanden
 lang de describe NO_RDNS_DOTCOM_HELO HELO-Identifikation als großer Provider, aber rDNS-Name inkorrekt
 lang de describe FAKE_OUTBLAZE_RCVD "mr.outblaze.com" in "Received"-Kopfzeile ist gefälscht
-lang de describe SUBJ_2_NUM_PARENS Betreff mit typischen Kennzeichen von Spam (2 Zahlen)
 lang de describe HTML_MESSAGE Nachricht enthält HTML
 lang de describe HTML_COMMENT_SHORT HTML-Kommentar ist sehr kurz
 lang de describe HTML_COMMENT_SAVED_URL Nachricht ist eine gespeicherte Webseite
@@ -282,43 +267,31 @@ lang de describe UPPERCASE_50_75 Nachrichtentext besteht zu 50-75% aus Großbuchs
 lang de describe UPPERCASE_75_100 Nachrichtentext besteht zu 75-100% aus Großbuchstaben
 lang de describe INVALID_MSGID "Message-ID"-Zeile ist ungültig gemäß RFC-2822
 lang de describe FORGED_MUA_MOZILLA Gefälschte E-Mail gibt vor vom Mailprogramm Mozilla zu kommen
-lang de describe CLICK_BELOW_CAPS Aufforderung zum Mausklick in Großbuchstaben
 lang de describe GUARANTEED_100_PERCENT Zu 100% garantiert...
 lang de describe DEAR_FRIEND Anonyme Anrede ("dear friend")
 lang de describe DEAR_SOMETHING Anonyme Anrede ("dear ...")
 lang de describe BILLION_DOLLARS Erwähnt sehr große Geldbeträge
 lang de describe EXCUSE_4 Behauptet, man könne sich von der Adressliste entfernen lassen
-lang de describe EXCUSE_6 Behauptet, man könne sich von der Adressliste entfernen lassen
 lang de describe EXCUSE_24 Angeblich haben möchten Sie diese Werbung bekommen
 lang de describe EXCUSE_REMOVE Beschreibt, wie Sie diese Nachrichten wieder loswerden
 lang de describe STRONG_BUY Erwähnt eine starke Kaufempfehlung (von Aktien?)
-lang de describe WE_HONOR_ALL Behauptet, Aufforderungen zur Entfernung von der Liste zu folgen
 lang de describe STOCK_ALERT Bietet eine Benachrichtigung über Aktienwerte an
-lang de describe MICRO_CAP_WARNING Warnung vor Billigaktien gemäß US-Börsenaufsichtsbestimmungen
 lang de describe NOT_ADVISOR Dreht sich um einen nicht registrierten Investmentberater
 lang de describe PREST_NON_ACCREDITED Kaufen Sie Studienabschlüsse obskurer Universitäten
 lang de describe BODY_ENHANCEMENT Informationen zur Penis-/Brustvergrößerung
 lang de describe BODY_ENHANCEMENT2 Informationen zur Penis-/Brustvergrößerung
 lang de describe IMPOTENCE Beseitigt Impotenz
-lang de describe MORTGAGE_BEST Informationen über Hypothekendarlehen
-lang de describe MORTGAGE_PITCH Preist Hypothekendarlehen an
-lang de describe MORTGAGE_RATES Informationen über Hypothekendarlehen
 lang de describe NA_DOLLARS Handelt von einer Million Dollar aus den US oder Kanada
 lang de describe US_DOLLARS_3 Erwähnt Millonen von Dollar
 lang de describe MILLION_USD Erwähnt Millonen von Dollar
-lang de describe RESISTANCE_IS_FUTILE Widerstand gegen diesen Spam ist zwecklos...
 lang de describe URG_BIZ Dringende Geschäfte
 lang de describe MONEY_BACK Mit Geld-zurück Garantie
-lang de describe NO_OBLIGATION Völlig ohne Verpflichtung
-lang de describe RISK_FREE Ganz ohne Risiko
 lang de describe FREE_QUOTE_INSTANT Kostenlos ein schnelles Preisangebot, ohne Verpflichtung
 lang de describe BAD_CREDIT Erwähnt geplatzte Kredite oder Kreditwürdigkeit
 lang de describe REFINANCE_YOUR_HOME Dreht sich um Baufinanzierung
 lang de describe REFINANCE_NOW Dreht sich um Baufinanzierung
 lang de describe NO_MEDICAL Keine medizinischen Examen nötig
-lang de describe YOU_CAN_SEARCH Sie können sich nach jedermann erkundigen
 lang de describe DIET_1 Reduzieren Sie Ihr Gewicht
-lang de describe DIET_2 Verlieren Sie Gewicht
 lang de describe FIN_FREE Finanzielle Unabhängigkeit
 lang de describe FORWARD_LOOKING Enthält Formulierungen aus Aktienprospekten
 lang de describe HG_HORMONE Erwähnt menschliche Wachstumshormone
@@ -337,8 +310,6 @@ lang de describe CUM_SHOT Eventuell Pornowerbung: "cum shot"
 lang de describe LIVE_PORN Eventuell Pornowerbung: Seien Sie live dabei
 lang de describe SUBJECT_SEXUAL Betreff weist auf sexuellen Nachrichtentext hin
 lang de describe RATWARE_EGROUPS Nachrichtenstruktur weist auf Spam-Software hin (eGroups)
-lang de describe RATWARE_STORM_URI Nachrichtenstruktur weist auf Spam-Software hin ("StormPost")
-lang de describe RATWARE_RCVD_LC_ESMTP Nachrichtenstruktur weist auf Spam-Software hin ("esmtp" in Kleinbuchstaben)
 lang de describe RATWARE_OE_MALFORMED Kopfzeilen enthalten gefälschte Hinweise auf Outlook Express
 lang de describe RATWARE_MOZ_MALFORMED Kopfzeilen enthalten gefälschte Hinweise auf Mozilla
 lang de describe FORGED_MUA_IMS E-Mail täuscht E-Mail-Software Exchange vor
@@ -356,12 +327,8 @@ lang de describe FORGED_AOL_TAGS E-Mail-Programm von AOL verwendet diese Art HTM
 lang de describe FORGED_IMS_TAGS Exchange verwendet diese Art HTML nicht
 lang de describe FORGED_OUTLOOK_TAGS Outlook verwendet diese HTML-Markierung nicht
 lang de describe RATWARE_HASH_DASH Enthält Abwehrmaßnahme gegen Anti-Spam-Software ("hashbuster")
-lang de describe RATWARE_NETIP Spamhinweise gefunden (netIP)
 lang de describe RATWARE_GECKO_BUILD Kopfzeilen enthalten gefälschte Hinweise auf Mozilla/Gecko
-lang de describe HDR_ORDER_MTSRIX Reihenfolge von Kopfzeilen deutet auf Spam (MTSRIX)
-lang de describe HDR_ORDER_TRIMRS Reihenfolge von Kopfzeilen deutet auf Spam (TRIMRS)
 lang de describe RATWARE_ZERO_TZ Seltsame Zeitzone (+0000)
-lang de describe RCVD_BONUS_SPC_DATE Zusätzliche Leerzeichen im Datum
 lang de describe X_MESSAGE_INFO Kopfzeile "X-Message-Info"
 lang de describe RATWARE_RCVD_PF Gefälschte "Received"-Kopfzeile von Postfix
 lang de describe RATWARE_RCVD_AT "Received"-Kopfzeile mit @-Zeichen
