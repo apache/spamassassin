@@ -39,8 +39,6 @@ describe REMOVE_BEFORE_LINK	Removal phrase right before a link
 # CLICK rules
 # note HTML_LINK_CLICK* rules in HTML parser section
 
-body CLICK_BELOW_CAPS		/CLICK\s.{0,30}(?:HERE|BELOW)/s
-describe CLICK_BELOW_CAPS	Asks you to click below (in capital letters)
 
 body GUARANTEED_100_PERCENT	/100% GUARANTEED/i
 describe GUARANTEED_100_PERCENT	One hundred percent guaranteed
@@ -56,8 +54,6 @@ describe EXCUSE_4		Claims you can be removed from the list
 
 # strange pattern because otherwise it matches the std. majordomo line
 # pls note the comment above. DO NOT just put "to" in the first group!
-body EXCUSE_6			/\b(?:wish to|click to) remove yourself/i
-describe EXCUSE_6		Claims you can be removed from the list
 
 body EXCUSE_24			/you(?:'ve|'re| have| are)? receiv(?:e|ed|ing) this (?:advertisement|offer|special|recurring|paid).{0,16}\b(?:by either|because)/i
 describe EXCUSE_24		Claims you wanted this ad
@@ -68,13 +64,9 @@ describe EXCUSE_REMOVE		Talks about how to be removed from mailings
 body STRONG_BUY			/strong buy/i
 describe STRONG_BUY		Tells you about a strong buy
 
-body WE_HONOR_ALL		/\b(?:honou?r|respect)(?: all)? remov(?:e|al) requests?\b/i
-describe WE_HONOR_ALL		Claims to honor removal requests
 
 body STOCK_ALERT		/\bstock alert/i
 describe STOCK_ALERT		Offers a alert about a stock
-body MICRO_CAP_WARNING		/Investing in micro-cap securities is highly speculative/i
-describe MICRO_CAP_WARNING	SEC-mandated penny-stock warning
 body NOT_ADVISOR		/not a registered investment advisor/i
 describe NOT_ADVISOR		Not registered investment advisor
 
@@ -91,14 +83,8 @@ describe BODY_ENHANCEMENT2	Information on getting larger body parts
 body     IMPOTENCE              /\b(?:impotence (?:problem|cure|solution)|Premature Ejaculation|erectile dysfunction)/i
 describe IMPOTENCE              Impotence cure
 
-body MORTGAGE_BEST		/\b(?:low(?:est|er)?|free|second|rate|best|refinanc(?:e|ing)|online|instant) mortgage/i
-describe MORTGAGE_BEST		Information on mortgages
 
-body MORTGAGE_PITCH		/mortgage (?:rates?|quotes?|approv(?:al|ed)|payment|interest|loans?|app(?:\b|lication))/i
-describe MORTGAGE_PITCH		Looks like mortgage pitch
 
-body MORTGAGE_RATES		/Mortgage rates/i
-describe MORTGAGE_RATES		Information on mortgage rates
 
 body NA_DOLLARS			/\b(?:\d{1,3})?Million\b.{0,40}\b(?:Canadian Dollar?s?|US\$|U\.? ?S\.? Dollar)/i
 describe NA_DOLLARS		Talks about a million North American dollars
@@ -110,8 +96,6 @@ body MILLION_USD              	/Million\b.{0,40}\b(?:United States? Dollars?|USD
 describe MILLION_USD 		Talks about millions of dollars
 
 
-body RESISTANCE_IS_FUTILE	/Replying to this email will not unsubscribe you./i
-describe RESISTANCE_IS_FUTILE	Resistance to this spam is futile
 
 body URG_BIZ			/urgent.{0,16}(?:assistance|business|buy|confidential|notice|proposal|reply|request|response)/i
 describe URG_BIZ		Contains urgent matter
@@ -121,11 +105,7 @@ describe URG_BIZ		Contains urgent matter
 body     MONEY_BACK             /money back guarantee/i
 describe MONEY_BACK             Money back guarantee
 
-body     NO_OBLIGATION          /no obligation/i
-describe NO_OBLIGATION          There is no obligation
 
-body     RISK_FREE              /\b(?:risk[ -]free|no[ -]risk)/i
-describe RISK_FREE              Risk free.  Suuurreeee....
 
 body FREE_QUOTE_INSTANT		/free.{0,12}(?:(?:instant|express|online|no.?obligation).{0,4})+.{0,32}\bquote/i
 describe FREE_QUOTE_INSTANT	Free express or no-obligation quote
@@ -143,15 +123,11 @@ describe REFINANCE_NOW          Home refinancing
 body NO_MEDICAL		        /\bno medical exam/i
 describe NO_MEDICAL		No Medical Exams
 
-body YOU_CAN_SEARCH		/you can search for anyone/i
-describe YOU_CAN_SEARCH		You can search for anyone
 
 # seems like we vastly reduce FPs on this one with a small change or two
 body DIET_1             /\b(?:(?:without|no) (?:exercis(?:e(?! price)|ing)|dieting)|weight.?loss|(?:extra|lose|lost|losing).{0,10}(?:pounds|weight|inches|lbs)|burn.{1,10}fat)\b/i
 describe DIET_1		Lose Weight Spam
 
-body DIET_2		/\blo+se.{1,10}\d+.{1,3}(?:lb|pound|kg|kilo)/i
-describe DIET_2		Describes weight loss
 
 body FIN_FREE		        /\bfinancial(?:ly)? free/i
 describe FIN_FREE 		Freedom of a financial nature

@@ -32,12 +32,8 @@ describe RATWARE_EGROUPS	Bulk email fingerprint (eGroups) found
 # Note that the tests which look at the "ALL" pseudoheader are slower than
 # the specific header.
 # 100% overlap with X-Stormpost-To: header, but seems wise to leave it in
-uri RATWARE_STORM_URI		m{^http://\S{1,100}/sp/t\.pl\?id=\d+:\d+}i
-describe RATWARE_STORM_URI	Bulk email fingerprint (StormPost) found
 header RATWARE_OE_MALFORMED	X-Mailer =~ /^Microsoft Outlook Express \d(?:\.\d+){3} \w+$/
 describe RATWARE_OE_MALFORMED	X-Mailer has malformed Outlook Express version
-header RATWARE_RCVD_LC_ESMTP	Received =~ /^from (?:(?:unknown|\d+\.\d+\.\d+\.\d+) \(\S+\)|\[\d+\.\d+\.\d+\.\d+\]) by \S+ with (?:esmtp|local|smtp); /m
-describe RATWARE_RCVD_LC_ESMTP	Bulk email fingerprint ('esmtp' Received) found
 header RATWARE_MOZ_MALFORMED	User-Agent =~ /Mozilla\/5\.0\d\d/
 describe RATWARE_MOZ_MALFORMED	Bulk email fingerprint (Mozilla malformed) found
 
@@ -203,8 +199,6 @@ rawbody RATWARE_HASH_DASH	/[a-z\d]-[a-z\d]{16}-[a-z\d]{1,16}(?-i:l)\d/i
 describe RATWARE_HASH_DASH	Contains a hashbuster in Send-Safe format
 
 # spammer tool, sometimes has "netIP with HTTP;" in Received: header
-header RATWARE_NETIP		Content-Type =~ /boundary="--ALT--[A-Z]{4}\d/
-describe RATWARE_NETIP		Bulk email fingerprint (netIP) found
 
 # this is really badly faked.  Also the spammer who uses "25250101"
 # for the build is a total hippie.
@@ -214,10 +208,6 @@ describe RATWARE_GECKO_BUILD	Bulk email fingerprint (Gecko faked) found
 ########################################################################
 # Most ratware uses message templates I would guess.
 # Here's two popular ones...
-header HDR_ORDER_MTSRIX		ALL =~ /\nMessage-ID: <\S+@\S+>\nTo: [^\n]+ <\S+>\nSubject: [^\n]+\nReferences: <\S+@\S+>\nIn-Reply-To: <\S+@\S+>\nX-Mailer: /
-describe HDR_ORDER_MTSRIX	Headers are in order found in spam (MTSRIX)
-header HDR_ORDER_TRIMRS		ALL =~ /\nTo: [^\n]+\nReferences: <\S+@\S+>\nIn-Reply-To: <\S+@\S+>\nMessage-ID: <\S+@\S+>\nReply-To: [^\n]+\nSender: /
-describe HDR_ORDER_TRIMRS	Headers are in order found in spam (TRIMRS)
 
 ########################################################################
 # This ratware always uses a +0000 TZ in the Date header, and has a multiplicity
@@ -256,8 +246,6 @@ header __RATWARE_0_TZ_DATE	Date =~ / \+0000$/
 meta RATWARE_ZERO_TZ   		(__RATWARE_0_TZ_DATE && __CTYPE_HTML && (__0_TZ_1 || __0_TZ_2 || __0_TZ_3 || __0_TZ_4 || __0_TZ_5 || __0_TZ_6 || __0_TZ_7))
 describe RATWARE_ZERO_TZ	Bulk email fingerprint (+0000) found
 
-header RCVD_BONUS_SPC_DATE	Received =~ /with SMTP;  \d\d \S\S\S /
-describe RCVD_BONUS_SPC_DATE	Bulk email fingerprint (bonus space) found
 
 header X_MESSAGE_INFO		exists:X-Message-Info
 describe X_MESSAGE_INFO		Bulk email fingerprint (X-Message-Info) found

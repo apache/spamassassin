@@ -58,18 +58,12 @@ header FROM_NO_USER		From =~ /(?:^\@|<\@| \@[^\)<]*$|<>)/ [if-unset: unset@unset
 describe FROM_NO_USER		From: has no local-part before @ sign
 
 # also 100% valid
-header FAKED_UNDISC_RECIPS	To =~ /undisclosed[_ ]*recipient(?:s[^:]|[^s])/i
-describe FAKED_UNDISC_RECIPS	Faked To "Undisclosed-Recipients"
 
 header PLING_QUERY		Subject =~ /\?.*!|!.*\?/
 describe PLING_QUERY		Subject has exclamation mark and question mark
 
 
-header MSGID_SPAM_99X9XX99	MESSAGEID =~ /^<\d\d\d\d\d\d[a-z]\d[a-z][a-z]\d\d\$[a-z][a-z][a-z]\d\d\d\d\d\$\d\d\d\d\d\d\d\d\@/
-describe MSGID_SPAM_99X9XX99	Spam tool Message-Id: (99x9xx99 variant)
 
-header MSGID_SPAM_ALPHA_NUM	MESSAGEID =~ /<[A-Z]{7}-000[0-9]{10}\@[a-z]*>/
-describe MSGID_SPAM_ALPHA_NUM	Spam tool Message-Id: (alpha-numeric variant)
 
 header MSGID_SPAM_CAPS		Message-ID =~ /^\s*<?[A-Z]+\@(?!(?:mailcity|whowhere)\.com)/
 describe MSGID_SPAM_CAPS	Spam tool Message-Id: (caps variant)
@@ -78,8 +72,6 @@ header MSGID_SPAM_LETTERS	Message-Id =~ /<[a-z]{5,}\@(\S+\.)+\S+>/
 describe MSGID_SPAM_LETTERS	Spam tool Message-Id: (letters variant)
 
 
-header MSGID_NO_HOST            MESSAGEID =~ /\@>(?:$|\s)/m
-describe MSGID_NO_HOST 		Message-Id has no hostname
 
 # negative lookahead exempts this MUA from circa 1997-2000 
 # X-Mailer: Microsoft Outlook Express 4.71.1712.3
@@ -139,11 +131,7 @@ header   __FROM_HOTMAIL_COM     From =~ /\@hotmail\.com\b/i
 meta MSGID_FROM_MTA_HEADER	(__MSGID_BEFORE_RECEIVED && !__MSGID_BEFORE_OKAY && !__FROM_HOTMAIL_COM)
 describe MSGID_FROM_MTA_HEADER	Message-Id was added by a relay
 
-header MSGID_FROM_MTA_HOTMAIL	Message-Id =~ /<MC\d{1,2}-F{1,2}\w{21,22}\@\S*hotmail\.com>/
-describe MSGID_FROM_MTA_HOTMAIL	Message-Id was added by a hotmail.com relay
 
-header MSGID_LONG		MESSAGEID =~ /<.{160,}>|<.{140,}\@|\@.{55,}>/m
-describe MSGID_LONG		Message-ID is unusually long
 
 header MSGID_SHORT		MESSAGEID =~ /^.{1,15}$|<.{0,4}\@/m
 describe MSGID_SHORT		Message-ID is unusually short
@@ -257,10 +245,10 @@ header FORGED_TELESP_RCVD	Received =~ /\.(?!br).. \(\d+-\d+-\d+-\d+\.dsl\.telesp
 describe FORGED_TELESP_RCVD	Contains forged hostname for a DSL IP in Brazil
 
 # forgery meta-rules: more reliable than their inputs
-meta CONFIRMED_FORGED		(__FORGED_RCVD_TRAIL && (__FORGED_AOL_RCVD || __FORGED_HOTMAIL_RCVD || __FORGED_EUDORAMAIL_RCVD || FORGED_YAHOO_RCVD || __FORGED_JUNO_RCVD || FORGED_GW05_RCVD))
+meta CONFIRMED_FORGED		(__FORGED_RCVD_TRAIL && (__FORGED_AOL_RCVD || __FORGED_HOTMAIL_RCVD || __FORGED_EUDORAMAIL_RCVD || FORGED_YAHOO_RCVD || __FORGED_JUNO_RCVD))
 describe CONFIRMED_FORGED	Received headers are forged
 
-meta MULTI_FORGED		((__FORGED_AOL_RCVD + __FORGED_HOTMAIL_RCVD + __FORGED_EUDORAMAIL_RCVD + FORGED_YAHOO_RCVD + __FORGED_JUNO_RCVD + FORGED_GW05_RCVD) > 1)
+meta MULTI_FORGED		((__FORGED_AOL_RCVD + __FORGED_HOTMAIL_RCVD + __FORGED_EUDORAMAIL_RCVD + FORGED_YAHOO_RCVD + __FORGED_JUNO_RCVD) > 1)
 describe MULTI_FORGED		Received headers indicate multiple forgeries
 
 header NONEXISTENT_CHARSET	Content-Type =~ /charset=.?DEFAULT/
@@ -340,14 +328,10 @@ describe SUBJECT_DIET		Subject talks about losing pounds
 header EXTRA_MPART_TYPE         Content-Type =~ /(?:\s*multipart\/)?.* type=/i
 describe EXTRA_MPART_TYPE       Header has extraneous Content-type:...type= entry
 
-header TO_RECIP_MARKER          To =~ /\#recipient\#/
-describe TO_RECIP_MARKER        To header contains 'recipient' marker
 
 # MIME boundary tests; spam tools use distinctive patterns.
 header MIME_BOUND_DD_DIGITS	Content-Type =~ /boundary=\"--\d+\"/
 describe MIME_BOUND_DD_DIGITS	Spam tool pattern in MIME boundary
-header MIME_BOUND_DIGITS_7	Content-Type =~ /boundary=\d{9}\.\d{13}/
-describe MIME_BOUND_DIGITS_7	Spam tool pattern in MIME boundary
 header MIME_BOUND_DIGITS_15	Content-Type =~ /boundary=\"\d{15,}\"/
 describe MIME_BOUND_DIGITS_15	Spam tool pattern in MIME boundary
 header MIME_BOUND_MANY_HEX	Content-Type =~ /boundary="[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}"/
@@ -382,8 +366,6 @@ header __USER_AGENT_MSN             X-Mailer =~ /^MSN Explorer /
 header FAKE_OUTBLAZE_RCVD	Received =~ /\.mr\.outblaze\.com/
 describe FAKE_OUTBLAZE_RCVD	Received header contains faked 'mr.outblaze.com'
 
-header SUBJ_2_NUM_PARENS        Subject =~ /^\(\d+\).*\(\d+\)\s*$/
-describe SUBJ_2_NUM_PARENS      Subject contains common spam sign (2 numbers)
 
 # thanks to David Ritz for passing this on; ready for post-3.0.0
 header UNCLOSED_BRACKET		ALL =~ /\[\d+\r?\n/s
@@ -453,8 +435,6 @@ describe FORGED_YAHOO_RCVD	'From' yahoo.com does not match 'Received' headers
 
 header __FORGED_JUNO_RCVD		eval:check_for_forged_juno_received_headers()
 
-header FORGED_GW05_RCVD		eval:check_for_forged_gw05_received_headers()
-describe FORGED_GW05_RCVD	Forged 'by gw05' 'Received:' header found
 
 
 header SORTED_RECIPS		eval:sorted_recipients()

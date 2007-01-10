@@ -75,17 +75,12 @@ lang nl describe FAKE_HELO_YAHOO_CA              Host HELO komt niet overeen met
 lang nl describe FROM_STARTS_WITH_NUMS           Van: begint met nummers
 lang nl describe FROM_OFFERS                     Van: adres is van "at iets-aangeboden"
 lang nl describe FROM_NO_USER                    Van: heeft geen lokaal deel voor het @-tje
-lang nl describe FAKED_UNDISC_RECIPS             Namaak Aan "Undisclosed-Recipients"
 lang nl describe PLING_QUERY                     Onderwerp heeft een uitroepteken en een vraagteken
 lang nl describe SUBJ_ALL_CAPS                   Onderwerp bevat alleen hoofdletters
-lang nl describe MSGID_SPAM_99X9XX99             Spam tool Message-Id: (99x9xx99 variant)
-lang nl describe MSGID_SPAM_ALPHA_NUM            Spam tool Message-Id: (alpha-numeric variant)
 lang nl describe MSGID_SPAM_LETTERS              Spam tool Message-Id: (letters variant)
-lang nl describe MSGID_NO_HOST                   Message-Id bevat geen hostnaam
 lang nl describe MSGID_OUTLOOK_INVALID           Message-Id is nep (in Outlook Express formaat)
 lang nl describe MSGID_RANDY                     Message-Id bevat een patroon dat wordt gebruikt in SPAM
 lang nl describe MSGID_FROM_MTA_HEADER           Message-Id was door een relay toegevoegd
-lang nl describe MSGID_FROM_MTA_HOTMAIL          Message-Id was door een hotmail.com relay toegevoegd
 lang nl describe DATE_SPAMWARE_Y2K               Datum heeft een vreemde Y2K opmaak
 lang nl describe INVALID_DATE                    Ongeldige Date: header (niet RFC 2822)
 lang nl describe INVALID_DATE_TZ_ABSURD          Ongeldige Date: header (tijdzone bestaat niet)
@@ -112,7 +107,6 @@ lang nl describe RCVD_DOUBLE_IP_LOOSE            Received: door en van lijken op
 lang nl describe FORGED_TELESP_RCVD              Bevat een vervalde hostnaam voor een DSL IP in Brazilie
 lang nl describe FORGED_HOTMAIL_RCVD2            hotmail.com 'Van' adres, maar geen 'Received:'
 lang nl describe FORGED_YAHOO_RCVD               'Van' yahoo.com Komt niet overeen met 'Received' headers
-lang nl describe FORGED_GW05_RCVD                vervalste 'by gw05' 'Received:' header found
 lang nl describe CONFIRMED_FORGED                Received headers zijn vervalst
 lang nl describe MULTI_FORGED                    Received headers wijzen op meerdere vervalsingen
 lang nl describe NONEXISTENT_CHARSET             Karakterset bestaat niet
@@ -130,8 +124,6 @@ lang nl describe SUBJ_YOUR_DEBT                  Onderwerp bevat "Your Bills" of
 lang nl describe SUBJ_YOUR_FAMILY                Onderwerp bevat  "Your Family"
 lang nl describe RCVD_FAKE_HELO_DOTCOM           Received bevat een vervalde HELO hostnaam
 lang nl describe EXTRA_MPART_TYPE                Header heeft een overbodige Content-type:...type= 
-lang nl describe TO_RECIP_MARKER                 To header bevat 'ontvanger' marker
-lang nl describe MIME_BOUND_DIGITS_7             Spam tool patroon in MIME grens
 lang nl describe MIME_BOUND_DIGITS_15            Spam tool patroon in MIME grens
 lang nl describe MIME_BOUND_MANY_HEX             Spam tool patroon in MIME grens
 lang nl describe TO_MALFORMED                    Aan: foutief opgesteld adres
@@ -178,40 +170,29 @@ lang nl describe UPPERCASE_50_75                 Bericht tekst bestaat voor 50-7
 lang nl describe UPPERCASE_75_100                Bericht tekst bestaat voor 75-100% uit hoofdletters
 lang nl describe INVALID_MSGID                   Message-Id is ongeldig, volgens RFC 2822
 lang nl describe FORGED_MUA_MOZILLA              Vervalste mail die afkomstig zou zijn van Mozilla
-lang nl describe CLICK_BELOW_CAPS                Vraagt om op de onderstaande link te klikken (in hoofdletters)
 lang nl describe GUARANTEED_100_PERCENT          100% gegarandeerd
 lang nl describe DEAR_FRIEND                     Beste vriend, klinkt niet erg bekend...
 lang nl describe DEAR_SOMETHING                  Bevat 'Dear (iets)'
 lang nl describe BILLION_DOLLARS                 Spreekt van heeel veel geld
 lang nl describe EXCUSE_4                        Claimt dat je van de lijst verwijderd kan worden
-lang nl describe EXCUSE_6                        Claimt dat je van de lijst verwijderd kan worden
 lang nl describe EXCUSE_24                       Claimt dat je om deze advertentie hebt gevraagd
 lang nl describe EXCUSE_REMOVE                   Heeft het over hoe je verwijderd kan worden van de lijst
 lang nl describe STRONG_BUY                      Vertelt je over een goede aankoop
-lang nl describe WE_HONOR_ALL                    Claimt verwijder-verzoeken in te willigen
 lang nl describe STOCK_ALERT                     Biedt aan je aandelen in de gaten te houden
-lang nl describe MICRO_CAP_WARNING               SEC-aanbevolen waarschuwing over dubbeltjes-aandelen
 lang nl describe NOT_ADVISOR                     Geen geregistreerde beleggings adviseur
 lang nl describe PREST_NON_ACCREDITED            'Prestigieuze "Non-Accredited" Universiteiten'
 lang nl describe BODY_ENHANCEMENT                Informatie over het vergroten van lichaamsdelen
 lang nl describe BODY_ENHANCEMENT2               Informatie over het vergroten van lichaamsdelen
 lang nl describe IMPOTENCE                       Medicijn voor impotentie
-lang nl describe MORTGAGE_BEST                   Informatie over hypotheken
-lang nl describe MORTGAGE_PITCH                  Ziet eruit als een hypotheek verkooppraatje
-lang nl describe MORTGAGE_RATES                  Informatie over hypotheek rente/tarieven
 lang nl describe NA_DOLLARS                      Praat over een miljoen Noord-Amerikaanse dollars
 lang nl describe US_DOLLARS_3                    Vermeldt miljoenen $ ($NN,NNN,NNN.NN)
 lang nl describe MILLION_USD                     Heeft het over miljoenen dollars
-lang nl describe RESISTANCE_IS_FUTILE            Verzet tegen deze spam is zinloos
 lang nl describe MONEY_BACK                      Niet-goed-geld-terug garantie
-lang nl describe NO_OBLIGATION                   Geen verplichtingen
-lang nl describe RISK_FREE                       Risico vrij.... ja, ja!
 lang nl describe FREE_QUOTE_INSTANT              Gratis offerte
 lang nl describe BAD_CREDIT                      Los al uw leningen op
 lang nl describe REFINANCE_YOUR_HOME             Hyphoteek oversluiten
 lang nl describe REFINANCE_NOW                   Hyphoteek oversluiten
 lang nl describe NO_MEDICAL                      Geen medische keuring
-lang nl describe YOU_CAN_SEARCH                  Je kan nu iedereen opzoeken
 lang nl describe FORWARD_LOOKING                 Aandelen waarschuwing
 lang nl describe HG_HORMONE                      Heeft het over groeihormomen
 lang nl describe ONE_TIME                        Eenmalige afzettingspraktijk
@@ -224,14 +205,11 @@ lang nl describe OBSCURED_EMAIL                  Bevat een rot13ed adres
 lang nl describe BANG_OPRAH                      Iets met Oprah!
 lang nl describe ACT_NOW_CAPS                    Heeft het in hoofdletters over "nu in actie komen"
 lang nl describe BANG_GUAR                  ...gegaranderd!
-lang nl describe DEEP_DISC_MEDS                  Medicijnen met fikse korting
 lang nl describe FREE_PORN                       Dikke kans op porno - Gratis Porno
 lang nl describe CUM_SHOT                        Dikke kans op porno - Kwakjes
 lang nl describe LIVE_PORN                       Dikke kans op porno - Rechtstreekse Porno uitzending
 lang nl describe RATWARE_EGROUPS                 Bulk email kenmerk (eGroups) gevonden
-lang nl describe RATWARE_STORM_URI               Bulk email kenmerk (StormPost) gevonden
 lang nl describe RATWARE_OE_MALFORMED            X-Mailer bevat misvormde Outlook Express versie
-lang nl describe RATWARE_RCVD_LC_ESMTP           Bulk email kenmerk ('esmtp' Received) gevonden
 lang nl describe FORGED_MUA_IMS                  Vals mailtje, pretendeert afkomstig te zijn van IMS
 lang nl describe FORGED_MUA_OUTLOOK              Vals mailtje, pretendeert afkomstig te zijn van MS Outlook
 lang nl describe FORGED_MUA_OIMO                 Vals mailtje, pretendeert afkomstig te zijn van MS Outlook IMO
@@ -247,7 +225,6 @@ lang nl describe FORGED_AOL_TAGS                 AOL email programma's versturen
 lang nl describe FORGED_IMS_TAGS                 IMS email programma's versturen geen HTML zoals deze
 lang nl describe FORGED_OUTLOOK_TAGS             Outlook verstuurt geen HTML zoals deze
 lang nl describe RATWARE_HASH_DASH               Bevat een hashbuster in Send-Safe opmaak
-lang nl describe RATWARE_NETIP                   Bulk email signatuur (netIP) gevonden
 lang nl describe RATWARE_GECKO_BUILD             Bulk email signatuur (vervalste Gecko) gevonden
 lang nl describe NUMERIC_HTTP_ADDR               Gebruikt een numeriek IP adres in een URL
 lang nl describe HTTP_ESCAPED_HOST               Gebruikt %-escapes in de hostname van een URL

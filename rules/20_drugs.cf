@@ -73,8 +73,6 @@ describe DRUG_ED_GENERIC	Mentions Generic Viagra
 
 body DRUG_ED_ONLINE		/\bviagra .{0,25}(?:express|online|overnight)/i
 describe DRUG_ED_ONLINE		Fast Viagra Delivery 
-body DEEP_DISC_MEDS		/\bdeep discount med(?:s|ications)\b/i
-describe DEEP_DISC_MEDS		Deep discount medications
 
 body ONLINE_PHARMACY		/\bonline pharmacy|\b(?:drugs|medications) online/i
 describe ONLINE_PHARMACY	Online Pharmacy
