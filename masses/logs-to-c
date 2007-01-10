@@ -382,6 +382,12 @@ sub read_ranges {
       $mutable_tests{$t} = 0;
       next;
     }
+    if ($t =~ /^T_/) {
+      # warn "ignoring '$t': is T_ test rule\n";    # no need to warn
+      $ignored_rule{$t} = 1;
+      $mutable_tests{$t} = 0;
+      next;
+    }
     if (($range_lo{$t} == $range_hi{$t}) && (! $range_lo{$t})) {
       warn "ignoring '$t': score and range == 0\n";
       $ignored_rule{$t} = 1;
