@@ -76,6 +76,7 @@ sub readrules {
     my %rulesfound = ();
     my %langs = ();
     foreach $file (sort @files) {
+      $scores_mutable = 1;      # always start off mutable in each file
       if ($skip_test_rules) {
 	next if ($file =~ /70_/);
       }
@@ -139,6 +140,7 @@ sub readrules {
 	  }
           $rules->{$name}->{score} = $score;
           $rules->{$name}->{mutable} = $scores_mutable;
+
         } elsif (/^reuse\s+(.*)$/) {
 	  my ($new, @old) = split(' ', $1);
 	  push @old, $new;
