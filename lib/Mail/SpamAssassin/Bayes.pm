@@ -688,7 +688,7 @@ sub learn {
     my $PMS = new Mail::SpamAssassin::PerMsgStatus $self->{main}, $msg;
     my $ignore = $self->ignore_message($PMS);
     $PMS->finish();
-    return if $ignore;
+    return 0 if $ignore;
   }
 
   my $msgdata = $self->get_body_from_msg ($msg);
