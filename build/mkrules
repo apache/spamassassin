@@ -202,12 +202,18 @@ sub lint_output_files {
 sub lint_rule_text {
   my ($text) = @_;
 
+  # ensure we turn off slow/optional stuff for linting!
+  my $pretext = q{
+    use_bayes 0
+    use_awl 0
+  };
+
   my $mailsa = Mail::SpamAssassin->new({
       rules_filename => "./rules",
       # debug => 1,
       local_tests_only => 1,
       dont_copy_prefs => 1,
-      config_text => $text
+      config_text => $pretext.$text
   });
 
   my $errors = 0;
