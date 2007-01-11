@@ -205,7 +205,6 @@ sub lint_rule_text {
   # ensure we turn off slow/optional stuff for linting!
   my $pretext = q{
     use_bayes 0
-    use_awl 0
   };
 
   my $mailsa = Mail::SpamAssassin->new({
