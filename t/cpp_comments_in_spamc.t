@@ -18,7 +18,8 @@ foreach my $f (<../spamc/*.c>, <../spamc/*.h>) {
   $str =~ s{".*?"}{}gs;         # quoted strings
 
   if ($str =~ m{(.{0,99}//.{0,99})}s) {
-    warn "found C-style comment: '$1'";
+    warn "found C-style comment: '$1' in $f";
+    $ok = 0;
   }
 }
 
