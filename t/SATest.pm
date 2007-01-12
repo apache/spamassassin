@@ -30,6 +30,12 @@ BEGIN {
 sub sa_t_init {
   my $tname = shift;
 
+  # optimisation -- don't setup spamd test parameters unless we're
+  # called "spamd_something" or "spamc_foo"
+  if ($tname !~ /spam[cd]/) {
+    $NO_SPAMD_REQUIRED = 1;
+  }
+
   if ($config{PERL_PATH}) {
     $perl_path = $config{PERL_PATH};
   }
@@ -82,15 +88,17 @@ sub sa_t_init {
 
   read_config();
 
-  $NO_SPAMC_EXE = ($RUNNING_ON_WINDOWS &&
+  if (!$NO_SPAMD_REQUIRED) {
+    $NO_SPAMC_EXE = ($RUNNING_ON_WINDOWS &&
                    !$ENV{'SPAMC_SCRIPT'} &&
                    !(-e "../spamc/spamc.exe"));
-  $SKIP_SPAMC_TESTS = ($NO_SPAMC_EXE ||
+    $SKIP_SPAMC_TESTS = ($NO_SPAMC_EXE ||
                        ($RUNNING_ON_WINDOWS && !$ENV{'SPAMD_HOST'})); 
-  $SSL_AVAILABLE = ((!$SKIP_SPAMC_TESTS) &&  # no SSL test if no spamc
+    $SSL_AVAILABLE = ((!$SKIP_SPAMC_TESTS) &&  # no SSL test if no spamc
                     (!$SKIP_SPAMD_TESTS) &&  # or if no local spamd
                     (`$spamc -V` =~ /with SSL support/) &&
                     (`$spamd --version` =~ /with SSL support/));
+  }
   # do not remove prior test results!
   # rmtree ("log");
 
@@ -143,6 +151,8 @@ sub sa_t_init {
 # a port number between 32768 and 65535; used to allow multiple test
 # suite runs on the same machine simultaneously
 sub probably_unused_spamd_port {
+  return 0 if $NO_SPAMD_REQUIRED;
+
   my $port;
   my @nstat = ();
   if (open(NSTAT, "netstat -a -n 2>&1 |")) {
@@ -375,7 +385,7 @@ sub sdrun {
 
 # out: $spamd_stderr
 sub start_spamd {
-
+  die "NO_SPAMD_REQUIRED in start_spamd! oops" if $NO_SPAMD_REQUIRED;
   return if $SKIP_SPAMD_TESTS;
 
   my $spamd_extra_args = shift;
@@ -480,6 +490,7 @@ sub start_spamd {
 }
 
 sub stop_spamd {
+  die "NO_SPAMD_REQUIRED in stop_spamd! oops" if $NO_SPAMD_REQUIRED;
   return 0 if ( defined($spamd_already_killed) || $SKIP_SPAMD_TESTS);
 
   $spamd_pid ||= 0;
