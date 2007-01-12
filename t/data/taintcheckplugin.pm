@@ -43,10 +43,8 @@ sub check_post_learn {
   # print "tainted get_all_metadata found\n"
   # if (is_tainted($m->get_all_metadata()));
 
-  # TODO!
-  # print "tainted get_pristine_header found\n"
-  # if (is_tainted($m->get_pristine_header("Subject")));
-
+  print "tainted get_pristine_header found\n"
+    if (is_tainted($m->get_pristine_header("Subject")));
   print "tainted get_pristine found\n"
     if (is_tainted($m->get_pristine()));
   print "tainted get_pristine_body found\n"
