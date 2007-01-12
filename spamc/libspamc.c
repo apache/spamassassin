@@ -451,7 +451,7 @@ static int _try_to_connect_tcp(const struct transport *tp, int *sockptr)
     assert(sockptr != 0);
     assert(tp->nhosts > 0);
 
-    // default values
+    /* default values */
     retry_sleep = tp->retry_sleep;
     connect_retries = tp->connect_retries;
     if (connect_retries == 0) {
