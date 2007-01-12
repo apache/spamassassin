@@ -361,7 +361,14 @@ sub get_pristine_header {
   return $self->{pristine_headers} unless $hdr;
   my(@ret) = $self->{pristine_headers} =~ /^\Q$hdr\E:[ \t]+(.*?\n(?![ \t]))/smgi;
   if (@ret) {
-    return wantarray ? @ret : $ret[-1];
+    # ensure the response retains taintedness (bug 5283)
+    if (wantarray) {
+      return map {
+                Mail::SpamAssassin::Util::taint_var($_);
+              } @ret;
+    } else {
+      return Mail::SpamAssassin::Util::taint_var($ret[-1]);
+    }
   }
   else {
     return $self->get_header($hdr);

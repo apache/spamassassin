@@ -284,6 +284,19 @@ sub untaint_var {
 
 ###########################################################################
 
+sub taint_var {
+  my ($v) = @_;
+  return $v unless defined $v;      # can't taint "undef"
+
+  # $^X is apparently "always tainted".  We can use this to render
+  # a string tainted as follows:
+  $v .= $^X; $v =~ s/${^X}$//;
+
+  return $v;
+}
+
+###########################################################################
+
 # timezone mappings: in case of conflicts, use RFC 2822, then most
 # common and least conflicting mapping
 my %TZ = (

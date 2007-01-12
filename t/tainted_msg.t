@@ -11,13 +11,13 @@ BEGIN {
   }
 }
 
+$NO_SPAMD_REQUIRED=1;
 use lib '.'; use lib 't';
 use SATest; sa_t_init("tainted_msg");
 
-use Mail::SpamAssassin::Util;
-use constant AM_TAINTED => Mail::SpamAssassin::Util::am_running_in_taint_mode();
+use constant AM_TAINTED => (!defined($ENV{'TEST_PERL_TAINT'}) or $ENV{'TEST_PERL_TAINT'} ne 'no');
 
-use Test; BEGIN { plan tests => AM_TAINTED ? 8 : 0 };
+use Test; BEGIN { plan tests => AM_TAINTED ? 9 : 0 };
 
 exit unless AM_TAINTED;
 
@@ -28,6 +28,7 @@ exit unless AM_TAINTED;
   q{ tainted get_header found } => '',
   q{ tainted get_pristine found } => '',
   q{ tainted get_pristine_body found } => '',
+  q{ tainted get_pristine_header found } => '',
   q{ tainted get_body found } => '',
   q{ tainted get_visible_rendered_body_text_array found } => '',
   q{ tainted get_decoded_body_text_array found } => '',
@@ -39,6 +40,8 @@ exit unless AM_TAINTED;
 tstlocalrules ("
     loadplugin myTestPlugin ../../data/taintcheckplugin.pm
 ");
+
+$ENV{'PATH'} = '/bin:/usr/bin';
 
 ok (sarun ("-L -t < data/spam/gtube.eml", \&patterns_run_cb));
 ok_all_patterns();
