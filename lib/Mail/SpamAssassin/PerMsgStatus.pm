@@ -1737,7 +1737,7 @@ sub get_uri_list {
   }
 
   my @uris = ();
-  $self->{redirect_num} = 0;
+  # $self->{redirect_num} = 0;
 
   # get URIs from HTML parsing
   while(my($uri, $info) = each %{ $self->get_uri_detail_list() }) {
@@ -1746,9 +1746,9 @@ sub get_uri_list {
         push(@uris, $_);
 
         # count redirection attempts and log it
-        if (my @http = m{\b(https?:/{0,2})}gi) {
-          $self->{redirect_num} = $#http if ($#http > $self->{redirect_num});
-        }
+        # if (my @http = m{\b(https?:/{0,2})}gi) {
+        # $self->{redirect_num} = $#http if ($#http > $self->{redirect_num});
+        # }
       }
     }
   }
