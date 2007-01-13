@@ -17,7 +17,7 @@ use SATest; sa_t_init("tainted_msg");
 
 use constant AM_TAINTED => (!defined($ENV{'TEST_PERL_TAINT'}) or $ENV{'TEST_PERL_TAINT'} ne 'no');
 
-use Test; BEGIN { plan tests => 0 && AM_TAINTED ? 9 : 0 };
+use Test; BEGIN { plan tests => AM_TAINTED ? 9 : 0 };
 
 exit unless AM_TAINTED;
 
