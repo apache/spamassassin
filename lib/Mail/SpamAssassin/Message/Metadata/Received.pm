@@ -152,82 +152,63 @@ sub parse_received_headers {
 # 
 # "mypublicnet" = first public "by" address
 # 
-# 1. Ignore all Received line where the "from" IP is in mypublicnet/16
+# 1. Trust all Received line where the "from" IP is in mypublicnet/16
 #    regardless of where they appear.  (The goal is to remove any relay
 #    steps that involve your network, relying on /16 is good enough since
 #    anything on your /16 is you or at worst involves your ISP.)
 # 
-# 2. Ignore all Received lines that contain local (127) or private (10.1,
-#    etc.) IP addresses anywhere, whether "from" or "by".  (The goal
+# 2. Trust all Received lines that contain local (127) or private (10.1,
+#    etc.) IP addresses anywhere, whether "from" or "by".
 # 
-# 3. The first Received line that you don't ignore is the one that
+# 3. The first Received line that you don't trust is the one that
 #    contains the "by" of your trusted relay and the "from" of the first
 #    untrusted relay (which is used for bondedsender testing and so on).
 
-    if ($in_trusted && !($did_user_specify_trust || $did_user_specify_internal)) {
-      my $inferred_as_trusted = 0;
+    if ($in_trusted) {
+      unless ($did_user_specify_trust || $did_user_specify_internal) {
+	my $inferred_as_trusted = 0;
 
-      # if the 'from' IP addr is in a reserved net range, it's not on
-      # the public internet.
-      if ($relay->{ip_private}) {
-	dbg("received-header: 'from' ".$relay->{ip}." has private IP");
-	$inferred_as_trusted = 1;
+	# if the 'from' IP addr is in a reserved net range, it's not on
+	# the public internet.
+	if ($relay->{ip_private}) {
+	  dbg("received-header: 'from' ".$relay->{ip}." has private IP");
+	  $inferred_as_trusted = 1;
+	}
+
+	# if we find authentication tokens in the received header we can extend
+	# the trust boundary to that host
+	if ($relay->{auth}) {
+	  dbg("received-header: authentication method ".$relay->{auth});
+	  $inferred_as_trusted = 1;
+	}
+
+	# if the user didn't specify any trusted/internal config, everything
+	# we assume as trusted is also internal, just like we'd do if they
+	# specified trusted but not any internal networks or vice versa
+	if (!$inferred_as_trusted) {
+	  dbg("received-header: do not trust any hosts from here on");
+	  $in_trusted = 0;
+	  $in_internal = 0;
+	}
+
+      } else {
+	# trusted_networks matches?
+	if (!$relay->{auth} && !$trusted->contains_ip($relay->{ip})) {
+	  $in_trusted = 0;
+	  $in_internal = 0;	# save checking immediately below
+	}
+	# internal_networks matches?
+	if ($in_internal && !$relay->{auth} && !$internal->contains_ip($relay->{ip})) {
+	  $in_internal = 0;
+	}
       }
-
-      # if we find authentication tokens in the received header we can extend
-      # the trust boundary to that host
-      if ($relay->{auth}) {
-	dbg("received-header: authentication method ".$relay->{auth});
-	$inferred_as_trusted = 1;
-      }
-
-      # Consider the first relay trusted, and all others untrusted.
-      dbg("received-header: cannot use DNS, do not trust any hosts from here on");
-
-      if (!$inferred_as_trusted) { $in_trusted = 0; }
-    }
-
-
-    # trusted_networks matches?
-    # if they didn't specify trusted, but did specify internal, we use the
-    # internal config for trusted, so check for either being specified
-    if ($in_trusted && ($did_user_specify_trust || $did_user_specify_internal) &&
-	!$relay->{auth} && !$trusted->contains_ip ($relay->{ip}))
-    {
-      $in_trusted = 0;		# we're in deep water now
-    }
-
-    # internal_networks matches?
-    # if they didn't specify internal, but did specify trusted, we use the
-    # trusted config for internal, so check for either being specified
-    if ($did_user_specify_internal || $did_user_specify_trust) {
-      if (!$relay->{auth} && !$internal->contains_ip ($relay->{ip})) {
-	$in_internal = 0;
-      }
-    } else {
-      # if the user didn't specify any trusted/internal config, everything
-      # we assume as trusted is also internal, just like we'd do if they
-      # specified trusted but not any internal networks
-      $in_internal = $in_trusted;
-    }
-
-    # note: you can't be in internal networks, but not be in a trusted 
-    # net. (bug 4760)
-    # dos: I don't think this can even happen any more, since we copy internal
-    # to trusted above (if trusted isn't configured and internal is)
-    if ($in_internal && !$in_trusted) {
-      $in_trusted = 1;
     }
 
     dbg("received-header: relay ".$relay->{ip}.
 	" trusted? ".($in_trusted ? "yes" : "no").
 	" internal? ".($in_internal ? "yes" : "no"));
 
-    if ($in_internal) {
-      $relay->{internal} = 1;
-    } else {
-      $relay->{internal} = 0;
-    }
+    $relay->{internal} = $in_internal;
 
     # be sure to mark up the as_string version for users too
     $relay->{as_string} =~ s/ intl=\d / intl=$relay->{internal} /;
