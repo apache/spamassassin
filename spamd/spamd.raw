@@ -1775,6 +1775,8 @@ sub dotell {
 sub parse_headers {
   my ($hdrs, $client) = @_;
 
+  my $got_user_header;
+
   # max 255 headers
   for my $hcount ( 0 .. 255 ) {
     my $line = $client->getline;
@@ -1784,7 +1786,14 @@ sub parse_headers {
       return 0;
     }
     $line =~ s/\r\n$//;
-    return 1 unless ($line);
+
+    if (!length $line) {    # end of headers
+      if (!$got_user_header && $opt{'auth-ident'}) {
+        service_unavailable_error('User header required');
+        return 0;
+      }
+      return 1;
+    }
 
     my ($header, $value) = split (/:\s*/, $line, 2);
     unless (defined $value) {
@@ -1793,19 +1802,20 @@ sub parse_headers {
     }
 
     if ($header eq 'Content-length') {
-      return 0 unless &got_clen_header($hdrs, $header, $value);
+      return 0 unless got_clen_header($hdrs, $header, $value);
     }
     elsif ($header eq 'User') {
-      return 0 unless &got_user_header($hdrs, $header, $value);
+      return 0 unless got_user_header($hdrs, $header, $value);
+      $got_user_header++;
     }
     elsif ($header eq 'Message-class') {
-      return 0 unless &got_message_class_header($hdrs, $header, $value);
+      return 0 unless got_message_class_header($hdrs, $header, $value);
     }
     elsif ($header eq 'Set') {
-      return 0 unless &got_set_header($hdrs, $header, $value);
+      return 0 unless got_set_header($hdrs, $header, $value);
     }
     elsif ($header eq 'Remove') {
-      return 0 unless &got_remove_header($hdrs, $header, $value);
+      return 0 unless got_remove_header($hdrs, $header, $value);
     }
     elsif ($header eq 'Compress') {
       return 0 unless &got_compress_header($hdrs, $header, $value);
