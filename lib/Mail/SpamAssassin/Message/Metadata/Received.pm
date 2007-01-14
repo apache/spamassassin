@@ -198,7 +198,7 @@ sub parse_received_headers {
 	  $in_internal = 0;	# save checking immediately below
 	}
 	# internal_networks matches?
-	if ($in_internal && !$relay->{auth} && !$internal->contains_ip($relay->{ip})) {
+	elsif ($in_internal && !$relay->{auth} && !$internal->contains_ip($relay->{ip})) {
 	  $in_internal = 0;
 	}
       }
