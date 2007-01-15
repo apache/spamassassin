@@ -17,6 +17,11 @@ sub check_end {
   my $array = $opts->{permsgstatus}->get_decoded_stripped_body_text_array();
   my $str = join (' ', @$array);
   $str =~ s/\s+/ /gs;
+
+  # ignore the M:SpamAssassin:compile() test message
+  return if ($str =~ 
+        /I need to make this message body somewhat long so TextCat preloads/);
+
   print STDOUT "text: $str\n";
 }
 
