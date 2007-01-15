@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: net-bb-doc net-bb-fredt net-bb-jm net-bb-zmi net-cthielen net-jm net-theo
+# with results from: bb-doc bb-fredt bb-jm bb-zmi cthielen daf dos jm theo
 
 # tflags userconf
 ALL_TRUSTED
@@ -182,6 +182,9 @@ FB_FORWARD_LOOK
 FB_GAPPY_ADDRESS
 
 # good enough
+FB_GET_MEDS
+
+# good enough
 FB_HEY_BRO_COMMA
 
 # good enough
@@ -207,9 +210,6 @@ FB_LETTERS_21B
 
 # good enough
 FB_LOWER_PAYM
-
-# good enough
-FB_NO_MORE_MAIL
 
 # good enough
 FB_NO_SCRIP_NEEDED
@@ -479,9 +479,6 @@ FR_3TAG_3TAG
 FR_ALMOST_VIAG2
 
 # good enough
-FR_CANTSEETEXT
-
-# good enough
 FR_MIDER
 
 # good enough
@@ -495,6 +492,9 @@ FS_EJACULA
 
 # good enough
 FS_ERECTION
+
+# good enough
+FS_HUGECOCK
 
 # good enough
 FS_LARGE_PERCENT2
@@ -676,6 +676,9 @@ L_SPAM_TOOL_13
 # good enough
 MID_DEGREES
 
+# good enough
+MIME_BOUND_EQ_REL
+
 # tflags userconf
 MIME_CHARSET_FARAWAY
 
@@ -741,15 +744,6 @@ RCVD_IN_BSP_OTHER
 
 # tflags net
 RCVD_IN_BSP_TRUSTED
-
-# tflags net
-RCVD_IN_DNSWL_HI
-
-# tflags net
-RCVD_IN_DNSWL_LOW
-
-# tflags net
-RCVD_IN_DNSWL_MED
 
 # tflags net
 RCVD_IN_DOB
@@ -870,9 +864,6 @@ RCVD_IN_NJABL_RELAY
 
 # tflags net
 RCVD_IN_NJABL_SPAM
-
-# tflags net
-RCVD_IN_PBL
 
 # tflags net
 RCVD_IN_SBL
@@ -1004,9 +995,6 @@ TVD_FUZZY_PHARMACEUTICAL
 TVD_INCREASE_SIZE
 
 # good enough
-TVD_PH_7
-
-# good enough
 TVD_PH_REC
 
 # good enough
@@ -1031,13 +1019,7 @@ TVD_RCVD_IP4
 TVD_RCVD_SINGLE
 
 # good enough
-TVD_RCVD_SPACE_BRACKET
-
-# good enough
 TVD_SECTION
-
-# good enough
-TVD_SINGLE_SPAN_DIV
 
 # good enough
 TVD_SPACED_SUBJECT_WORD3
@@ -1064,100 +1046,145 @@ TVD_VISIT_PHARMA
 TVD_VIS_HIDDEN
 
 # good enough
-CTYPE_001C_B
+BROKEN_RATWARE_BOM
 
 # good enough
-CTYPE_8SPACE_GIF
+CTYPE_1SPACE_GIF
 
 # good enough
-DOS_MORTGAGE
+DEAR_WINNER
 
 # good enough
-FB_EXPLOSIVE
+DOS_TO_READ_STOCK
 
 # good enough
-FB_FUNNY_WEIGHT
+DOS_YOUR_PLACE
 
 # good enough
-FB_GET_MEDS
+FB_ANUI
 
 # good enough
-FB_LIMITED_TIME
+FB_B0NUS
 
 # good enough
-FB_MAKE_MONEY
+FB_CAN_LONGER
 
 # good enough
-FB_NOT_SEXUAL
+FB_EXTRA_INCHES
 
 # good enough
-FB_NO_MORE_HTTP
+FB_FHARMACY
 
 # good enough
-FB_NUMYO2
+FB_FREE888
 
 # good enough
-FB_PIPENEWSLETTER
+FB_GVR
 
 # good enough
-FB_REWARDS_GATE
+FB_MAGIC_TAB
 
 # good enough
-FB_THIS_ADVERT
+FB_MORE_SIZE
 
 # good enough
-FF_LEO_FLOAT_RIGHT
+FB_NOT_PHONE_NUM1
 
 # good enough
-FH_FROM_GET_NAME
+FB_NOT_PHONE_NUM3
 
 # good enough
-FH_FROM_RND_1
+FB_ONIINE
 
 # good enough
-FH_HAS_XID
+FB_RE_FI
 
 # good enough
-FRT_BIGGERMEM1
+FB_ROLLER_IS_T
 
 # good enough
-FRT_GUARANTEE1
+FB_SSEX
 
 # good enough
-FRT_INVESTOR
+FB_STRONGER_EJ
 
 # good enough
-FRT_OPPORTUN2
+FB_SYMBLO
 
 # good enough
-FRT_PAYMENT
+FB_UNLOCK_YOUR_G
 
 # good enough
-FRT_PRICE
+FB_UNRESOLV_PROV
 
 # good enough
-FS_HUGECOCK
+FB_YOUR_WOMAN
 
 # good enough
-FS_REFI
+FH_HAS_XAIMC
 
 # good enough
-FS_SPERMAX
+FH_HOST_EQ_D_D_D_DB
 
 # good enough
-FS_START_TEEN
+FH_RE_NEW_DDD
 
 # good enough
-FUZZY_SPRM
+FM_IS_IT_OUR_ACCOUNT
 
 # good enough
-HS_INDEX_PARAM
+FM_TRUE_LOV_ALL_N
 
 # good enough
-HS_MEETUP_FOR_SEX
+FRT_MEETING
 
 # good enough
-MIME_BOUND_EQ_REL
+FS_DOLLAR_BONUS
+
+# good enough
+FS_MORE_CONFIDENT
+
+# good enough
+FS_NEW_SOFT_UPLOAD
+
+# good enough
+FS_TIP_DDD
+
+# good enough
+FU_END_ET
+
+# good enough
+FU_URI_TRACKER_T
+
+# good enough
+HS_BODY_UPLOADED_SOFTWARE
+
+# good enough
+HS_DRUG_DOLLAR_1
+
+# good enough
+HS_DRUG_DOLLAR_2
+
+# good enough
+HS_DRUG_DOLLAR_3
+
+# good enough
+HS_DRUG_DOLLAR_MANY
+
+# good enough
+HS_SUBJ_NEW_SOFTWARE
+
+# good enough
+HS_UPLOADED_SOFTWARE
+
+# good enough
+JM_ATTACHEMENT
+
+# good enough
+JM_TORA_XM
+
+# good enough
+KAM_STOCKTIP4
 
 # tflags net
 RCVD_IN_DNSWL_HI
@@ -1181,9 +1208,6 @@ RCVD_IN_NJABL_DUL
 RCVD_IN_PBL
 
 # tflags net
-RCVD_IN_PBL_NFH
-
-# tflags net
 RCVD_IN_SORBS_DUL
 
 # tflags net
@@ -1193,70 +1217,31 @@ RCVD_IN_WHOIS_INVALID
 RCVD_IN_XBL
 
 # good enough
-TVD_APPROVED
+TT_OBSCURED_VALIUM
 
 # good enough
-TVD_FUZZY_FIXED_RATE
+TVD_FUZZY_FINANCE
 
 # good enough
-TVD_FUZZY_SYMBOL
+TVD_FW_GRAPHIC_ID1
 
 # good enough
-TVD_FW_GRAPHIC_NAME_LONG
+TVD_FW_GRAPHIC_ID2
 
 # good enough
-TVD_FW_GRAPHIC_NAME_MID
+TVD_LINK_SAVE
 
 # good enough
-TVD_HEAD_KERNEL
+TVD_NOT_SATISFIED
 
 # good enough
-TVD_PH_SUBJ_URGENT
-
-# tflags net
-URIBL_COMPLETEWHOIS
-
-# tflags net
-URIBL_L1SPEWS
-
-# tflags net
-URIBL_L2SPEWS
-
-# tflags net
-URIBL_RHS_ABUSE
-
-# tflags net
-URIBL_RHS_AHBL
-
-# tflags net
-URIBL_RHS_BOGUSMX
-
-# tflags net
-URIBL_RHS_DSN
-
-# tflags net
-URIBL_RHS_POST
-
-# tflags net
-URIBL_RHS_TLD_WHOIS
-
-# tflags net
-URIBL_RHS_URIBL_BLACK
-
-# tflags net
-URIBL_RHS_URIBL_GREY
-
-# tflags net
-URIBL_RHS_WHOIS
+TVD_PH_SUBJ_ACCOUNTS_POST
 
 # good enough
-URIBL_SBL_COMWHOIS
+TVD_RATWARE_CB_2
 
 # good enough
-URIBL_SBL_SPEWSL1
-
-# tflags net
-URIBL_XS_SURBL
+XMAILER_MIMEOLE_OL_465CD
 
 # tflags userconf
 UNPARSEABLE_RELAY
