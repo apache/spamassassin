@@ -257,6 +257,9 @@ describe HEADER_COUNT_SUBJECT   Multiple Subject headers found
 
 header TVD_ENVFROM_APOST        EnvelopeFrom =~ /\'/
 
+body YOUR_CRD_RATING        /Your cr[d\.]* (?:scor|rat)ing doesn.t matter/
+
+header MIME_BOUND_EQ_REL    Content-Type =~ /boundary="=====================_\d+==\.REL"/s
 
 ###########################################################################
 # ReplaceTags rules
