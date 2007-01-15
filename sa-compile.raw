@@ -74,6 +74,7 @@ Getopt::Long::Configure(
 
 GetOptions(
   'list'		=> \$opt{'list'},
+  'sudo'		=> \$opt{'sudo'},
   'keep-tmps'		=> \$opt{'keep-tmps'},
 
   'configpath|config-file|config-dir|c|C=s' => \$opt{'configpath'},
@@ -135,7 +136,7 @@ my $spamtest = new Mail::SpamAssassin(
   }
 );
 
-# appropriate settings for rule2xs usage
+# appropriate BodyRuleBaseExtractor settings for rule2xs usage
 $spamtest->{base_extract} = 1;
 $spamtest->{bases_must_be_casei} = 1;
 $spamtest->{bases_can_use_alternations} = 0;
@@ -143,14 +144,18 @@ $spamtest->{bases_can_use_quantifiers} = 0;
 $spamtest->{bases_can_use_char_classes} = 0;
 $spamtest->{bases_split_out_alternations} = 1;
 
+my $installdir = $spamtest->sed_path('__local_state_dir__/compiled/__version__');
+if (!-w $installdir) {
+  die "sa-compile: cannot write to $installdir, aborting\n";
+}
+
 $spamtest->init(1);
 my $conf = $spamtest->{conf};
 
 # this actually extracts the base rules in the plugin, as a side-effect
 my $res = $spamtest->lint_rules();
-
 if ($res) {
-  die "not compiling; 'spamassassin --lint' check failed!\n";
+  die "sa-compile: not compiling; 'spamassassin --lint' check failed!\n";
 }
 
 if ( defined $opt{'list'} ) {
@@ -198,12 +203,12 @@ sub compile_base_strings {
     chdir $dirpath; print "cd $dirpath\n";
     rule2xs("bases.in");
 
-    my $instdir = $spamtest->sed_path('__local_state_dir__/compiled/__version__');
-
     run(get_perl()." Makefile.PL ".
-          "PREFIX=$dirpath/ignored INSTALLSITEARCH=$instdir");
+          "PREFIX=$dirpath/ignored INSTALLSITEARCH=$installdir");
 
-    run("make install");	# into $instdir
+    my $sudo = '';
+    $opt{sudo} and $sudo = 'sudo ';
+    run($sudo."make install");	# into $installdir
   }
 
   if (!$opt{'keep-tmps'}) {
@@ -794,6 +799,7 @@ B<sa-compile> [options]
 Options:
 
   --list                        Output base string list to STDOUT
+  --sudo                        Use 'sudo' for privilege escalation
   --keep-tmps                   Keep temporary files instead of deleting
   -C path, --configpath=path, --config-file=path
                                 Path to standard configuration dir
@@ -824,6 +830,11 @@ compiler used to build Perl XS modules, be installed.
 
 Output the extracted base strings to STDOUT, instead of generating
 the C extension code.
+
+=item B<--sudo>
+
+Use C<sudo(8)> to run code as 'root' when writing files to the compiled-rules
+storage area (which is C<@@LOCAL_STATE_DIR@@/compiled/@@VERSION@@> by default).
 
 =item B<--keep-tmps>
 
