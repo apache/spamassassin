@@ -136,34 +136,7 @@ sub parse_received_headers {
       $self->make_relay_as_string($relay);
     }
 
-# OK, infer the trusted/untrusted handover, if we don't have real info.
-# Here's the algorithm used (taken from Dan's mail):
-# 
-# Talking with Scott Banister (this was his idea) and Andrew Flury at
-# IronPort, we came up with an alternate and easier algorithm that doesn't
-# involve trees and we think should be good enough most of the time
-# whenever trusted IP headers is not set.  It also has the nice property
-# of being very easy to implement, but it should, of course, be tested
-# out.
-# 
-# "first" = top Received line in the message
-# 
-# "public" = not a local or private IP address
-# 
-# "mypublicnet" = first public "by" address
-# 
-# 1. Trust all Received line where the "from" IP is in mypublicnet/16
-#    regardless of where they appear.  (The goal is to remove any relay
-#    steps that involve your network, relying on /16 is good enough since
-#    anything on your /16 is you or at worst involves your ISP.)
-# 
-# 2. Trust all Received lines that contain local (127) or private (10.1,
-#    etc.) IP addresses anywhere, whether "from" or "by".
-# 
-# 3. The first Received line that you don't trust is the one that
-#    contains the "by" of your trusted relay and the "from" of the first
-#    untrusted relay (which is used for bondedsender testing and so on).
-
+    # OK, infer the trusted/untrusted handover, if we don't have real info.
     if ($in_trusted) {
       unless ($did_user_specify_trust || $did_user_specify_internal) {
 	my $inferred_as_trusted = 0;

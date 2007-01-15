@@ -609,6 +609,8 @@ operated by spammers, open relays, or open proxies.  A trusted host could
 conceivably relay spam, but will not originate it, and will not forge header
 data. DNS blacklist checks will never query for hosts on these networks. 
 
+See C<http://wiki.apache.org/spamassassin/TrustPath> for more information.
+
 MXes for your domain(s) and internal relays should B<also> be specified using
 the C<internal_networks> setting. When there are 'trusted' hosts that
 are not MXes or internal relays for your domain(s) they should B<only> be
@@ -638,27 +640,24 @@ existing entries, use C<clear_trusted_networks>.
 If C<trusted_networks> is not set and C<internal_networks> is, the value
 of C<internal_networks> will be used for this parameter.
 
-If you're running with DNS checks enabled, SpamAssassin includes code to
-infer your trusted networks on the fly, so this may not be necessary.
-(Thanks to Scott Banister and Andrew Flury for the inspiration for this
-algorithm.)  This inference works as follows:
+If neither C<trusted_networks> or C<internal_networks> is set, a basic
+inference algorithm is applied.  This works as follows:
 
 =over 4
 
 =item *
 
-if the 'from' IP address is on the same /16 network as the top Received
-line's 'by' host, it's trusted
-
-=item *
-
-if the address of the 'from' host is in a private network range,
+If the 'from' host has an IP address in a private (RFC 1918) network range,
 then it's trusted
 
 =item *
 
-if any addresses of the 'by' host is in a private network range,
-then it's trusted
+If there are authentication tokens in the received header, and
+the previous host was trusted, then this host is also trusted
+
+=item *
+
+Otherwise this host, and all further hosts, are consider untrusted.
 
 =back
 
