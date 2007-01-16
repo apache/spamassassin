@@ -187,22 +187,6 @@ processes running or sleeping, and many other amavis and sendmail processes
 active, the total memory used was around 350MB, plus about 200MB on swap.'
 
 
-Shared Library
---------------
-
-spamc can now be used as libspamc.so; simply run "make spamd/libspamc.so" at
-the top level.  Thanks to Liam Widdowson <liam@inodes.org> for this patch.
-
-
-SSL Support
------------
-
-If you have the OpenSSL headers and libraries installed, you can build an
-SSL-enabled version of spamc or the spamc shared library by running "make
-spamd/sslspamc" or "make spamd/libsslspamc.so".  Thanks to Nate
-<nate@cs.wisc.edu> for this patch.
-
-
 Bugs
 ----
 
