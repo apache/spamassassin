@@ -126,7 +126,7 @@ describe RCVD_IN_SORBS_ZOMBIE	SORBS: sender is on a hijacked network
 tflags RCVD_IN_SORBS_ZOMBIE	net
 #reuse RCVD_IN_SORBS_ZOMBIE
 
-header RCVD_IN_SORBS_DUL	eval:check_rbl('sorbs-notfirsthop', 'dnsbl.sorbs.net.', '127.0.0.10')
+header RCVD_IN_SORBS_DUL	eval:check_rbl('sorbs-lastexternal', 'dnsbl.sorbs.net.', '127.0.0.10')
 describe RCVD_IN_SORBS_DUL	SORBS: sent directly from dynamic IP address
 tflags RCVD_IN_SORBS_DUL	net
 #reuse RCVD_IN_SORBS_DUL
@@ -202,7 +202,7 @@ header RCVD_IN_WHOIS_HIJACKED	eval:check_rbl_sub('whois', '127.0.0.3')
 describe RCVD_IN_WHOIS_HIJACKED	CompleteWhois: sender on hijacked IP block
 tflags RCVD_IN_WHOIS_HIJACKED	net
 
-header RCVD_IN_WHOIS_INVALID	eval:check_rbl('whois-notfirsthop', 'combined-HIB.dnsiplists.completewhois.com.', '127.0.0.4')
+header RCVD_IN_WHOIS_INVALID	eval:check_rbl('whois-lastexternal', 'combined-HIB.dnsiplists.completewhois.com.', '127.0.0.4')
 describe RCVD_IN_WHOIS_INVALID	CompleteWhois: sender on invalid IP block
 tflags RCVD_IN_WHOIS_INVALID	net
 #reuse RCVD_IN_WHOIS_INVALID	RCVD_IN_RFC_IPWHOIS
@@ -218,7 +218,7 @@ tflags RCVD_IN_WHOIS_INVALID	net
 # transfers: yes - rsync and http, see http://dsbl.org/usage
 # pay-to-use: no
 # delist: automated/distributed
-header RCVD_IN_DSBL		eval:check_rbl_txt('dsbl-notfirsthop', 'list.dsbl.org.', '(?i:dsbl)')
+header RCVD_IN_DSBL		eval:check_rbl_txt('dsbl-lastexternal', 'list.dsbl.org.', '(?i:dsbl)')
 describe RCVD_IN_DSBL		Received via a relay in list.dsbl.org
 tflags RCVD_IN_DSBL		net
 #reuse RCVD_IN_DSBL
@@ -252,7 +252,7 @@ header RCVD_IN_MAPS_RBL		eval:check_rbl('rbl', 'blackholes.mail-abuse.org.')
 describe RCVD_IN_MAPS_RBL	Relay in RBL, http://www.mail-abuse.org/rbl/
 tflags RCVD_IN_MAPS_RBL		net
 
-header RCVD_IN_MAPS_DUL		eval:check_rbl('dialup-notfirsthop', 'dialups.mail-abuse.org.')
+header RCVD_IN_MAPS_DUL		eval:check_rbl('dialup-lastexternal', 'dialups.mail-abuse.org.')
 describe RCVD_IN_MAPS_DUL	Relay in DUL, http://www.mail-abuse.org/dul/
 tflags RCVD_IN_MAPS_DUL		net
 
@@ -268,7 +268,7 @@ tflags RCVD_IN_MAPS_NML		net
 # "header" lines, not the "describe" or "tflags" lines) and uncomment the
 # below lines
 #header RCVD_IN_MAPS_RBL	eval:check_rbl('rblplus', 'rbl-plus.mail-abuse.org.', '1')
-#header RCVD_IN_MAPS_DUL	eval:check_rbl('rblplus-notfirsthop', 'rbl-plus.mail-abuse.org.', '2')
+#header RCVD_IN_MAPS_DUL	eval:check_rbl('rblplus-lastexternal', 'rbl-plus.mail-abuse.org.', '2')
 #header RCVD_IN_MAPS_RSS	eval:check_rbl_sub('rblplus', '4')
 #header RCVD_IN_MAPS_OPS	eval:check_rbl_sub('rblplus', '8')
 #describe RCVD_IN_MAPS_OPS	Relay in OPS, http://www.mail-abuse.org/ops/
