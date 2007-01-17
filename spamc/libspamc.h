@@ -125,6 +125,9 @@
 /* Nov 30, 2006 jm: add -z, zlib support */
 #define SPAMC_USE_ZLIB        (1<<16)
 
+/* Jan 16, 2007 jm: get markup headers from spamd */
+#define SPAMC_HEADERS         (1<<15)
+
 #define SPAMC_MESSAGE_CLASS_SPAM 1
 #define SPAMC_MESSAGE_CLASS_HAM  2
 

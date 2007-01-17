@@ -139,7 +139,7 @@ static const int EXPANSION_ALLOWANCE = 16384;
  */
 
 /* Set the protocol version that this spamc speaks */
-static const char *PROTOCOL_VERSION = "SPAMC/1.3";
+static const char *PROTOCOL_VERSION = "SPAMC/1.4";
 
 /* "private" part of struct message.
  * we use this instead of the struct message directly, so that we
@@ -148,6 +148,7 @@ static const char *PROTOCOL_VERSION = "SPAMC/1.3";
 struct libspamc_private_message
 {
     int flags;			/* copied from "flags" arg to message_read() */
+    int alloced_size;           /* allocated space for the "out" buffer */
 };
 
 int libspamc_timeout = 0;
@@ -730,6 +731,7 @@ int message_read(int fd, int flags, struct message *m)
 	return EX_OSERR;
     }
     m->priv->flags = flags;
+    m->priv->alloced_size = 0;
 
     if (flags & SPAMC_PING) {
       _clear_message(m);
@@ -1065,6 +1067,55 @@ _zlib_compress (char *m_msg, int m_msg_len,
 #endif
 }
 
+int
+_append_original_body (struct message *m, int flags)
+{
+    char *cp, *cpend, *bodystart;
+    int bodylen, outspaceleft, towrite;
+
+    /* at this stage, m->out now contains the rewritten headers.
+     * find and append the raw message's body, up to m->priv->alloced_size
+     * bytes.
+     */
+
+#define CRNLCRNL        "\r\n\r\n"
+#define CRNLCRNL_LEN    4
+#define NLNL            "\n\n"
+#define NLNL_LEN        2
+
+    cpend = m->raw + m->raw_len;
+    bodystart = NULL;
+
+    for (cp = m->raw; cp < cpend; cp++) {
+        if (*cp == '\r' && cpend - cp >= CRNLCRNL_LEN && 
+                            !strncmp(cp, CRNLCRNL, CRNLCRNL_LEN))
+        {
+            bodystart = cp + CRNLCRNL_LEN;
+            break;
+        }
+        else if (*cp == '\n' && cpend - cp >= NLNL_LEN && 
+                           !strncmp(cp, NLNL, NLNL_LEN))
+        {
+            bodystart = cp + NLNL_LEN;
+            break;
+        }
+    }
+
+    if (bodystart == NULL) {
+        libspamc_log(flags, LOG_ERR, "failed to find end-of-headers");
+        return EX_SOFTWARE;
+    }
+
+    bodylen = cpend - bodystart;
+    outspaceleft = (m->priv->alloced_size-1) - m->out_len;
+    towrite = (bodylen < outspaceleft ? bodylen : outspaceleft);
+
+    /* copy in the body; careful not to overflow */
+    strncpy (m->out + m->out_len, bodystart, towrite);
+    m->out_len += towrite;
+    return EX_OK;
+}
+
 int message_filter(struct transport *tp, const char *username,
                    int flags, struct message *m)
 {
@@ -1118,7 +1169,8 @@ int message_filter(struct transport *tp, const char *username,
     }
 
     m->is_spam = EX_TOOBIG;
-    if ((m->outbuf = malloc(m->max_len + EXPANSION_ALLOWANCE + 1)) == NULL) {
+    m->priv->alloced_size = m->max_len + EXPANSION_ALLOWANCE + 1;
+    if ((m->outbuf = malloc(m->priv->alloced_size)) == NULL) {
 	failureval = EX_OSERR;
 	goto failure;
     }
@@ -1136,6 +1188,8 @@ int message_filter(struct transport *tp, const char *username,
 	strcpy(buf, "SYMBOLS ");
     else if (flags & SPAMC_PING)
 	strcpy(buf, "PING ");
+    else if (flags & SPAMC_HEADERS)
+	strcpy(buf, "HEADERS ");
     else
 	strcpy(buf, "PROCESS ");
 
@@ -1293,20 +1347,17 @@ int message_filter(struct transport *tp, const char *username,
 
 	if (flags & SPAMC_USE_SSL) {
 	    len = full_read_ssl(ssl, (unsigned char *) m->out + m->out_len,
-				m->max_len + EXPANSION_ALLOWANCE + 1 -
-				m->out_len,
-				m->max_len + EXPANSION_ALLOWANCE + 1 -
-				m->out_len);
+				m->priv->alloced_size - m->out_len,
+				m->priv->alloced_size - m->out_len);
 	}
 	else {
 	    len = full_read(sock, 0, m->out + m->out_len,
-			    m->max_len + EXPANSION_ALLOWANCE + 1 - m->out_len,
-			    m->max_len + EXPANSION_ALLOWANCE + 1 -
-			    m->out_len);
+			    m->priv->alloced_size - m->out_len,
+			    m->priv->alloced_size - m->out_len);
 	}
 
 
-	if (len + m->out_len > m->max_len + EXPANSION_ALLOWANCE) {
+	if (len + m->out_len > (m->priv->alloced_size-1)) {
 	    failureval = EX_TOOBIG;
 	    goto failure;
 	}
@@ -1326,6 +1377,12 @@ int message_filter(struct transport *tp, const char *username,
 	goto failure;
     }
 
+    if (flags & SPAMC_HEADERS) {
+        if (_append_original_body(m, flags) != EX_OK) {
+            goto failure;
+        }
+    }
+
     return EX_OK;
 
   failure:
@@ -1343,7 +1400,6 @@ int message_filter(struct transport *tp, const char *username,
     }
     return failureval;
 }
-
 
 int message_process(struct transport *trans, char *username, int max_size,
 		    int in_fd, int out_fd, const int flags)
@@ -1426,7 +1482,8 @@ int message_tell(struct transport *tp, const char *username, int flags,
     }
 
     m->is_spam = EX_TOOBIG;
-    if ((m->outbuf = malloc(m->max_len + EXPANSION_ALLOWANCE + 1)) == NULL) {
+    m->priv->alloced_size = m->max_len + EXPANSION_ALLOWANCE + 1;
+    if ((m->outbuf = malloc(m->priv->alloced_size)) == NULL) {
 	failureval = EX_OSERR;
 	goto failure;
     }
