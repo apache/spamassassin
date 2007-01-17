@@ -182,6 +182,7 @@ print_usage(void)
     usg("  -r, --full-spam     Print full report for messages identified as\n"
         "                      spam.\n");
     usg("  -R, --full          Print full report for all messages.\n");
+    usg("  --headers           Rewrite only the message headers.\n");
     usg("  -E, --exitcode      Filter as normal, and set an exit code.\n");
 
     usg("  -x, --no-safe-fallback\n"
@@ -214,9 +215,9 @@ read_args(int argc, char **argv,
           struct transport *ptrn)
 {
 #ifndef _WIN32
-    const char *opts = "-BcrRd:e:fyp:t:s:u:L:C:xzSHU:ElhVKF:0:1:";
+    const char *opts = "-BcrRd:e:fyp:t:s:u:L:C:xzSHU:ElhVKF:0:1:2";
 #else
-    const char *opts = "-BcrRd:fyp:t:s:u:L:C:xzSHElhVKF:0:1:";
+    const char *opts = "-BcrRd:fyp:t:s:u:L:C:xzSHElhVKF:0:1:2";
 #endif
     int opt;
     int ret = EX_OK;
@@ -241,6 +242,7 @@ read_args(int argc, char **argv,
        { "tests", no_argument, 0, 'y' },
        { "full-spam", no_argument, 0, 'r' },
        { "full", no_argument, 0, 'R' },
+       { "headers", no_argument, 0, 2 },
        { "exitcode", no_argument, 0, 'E' },
        { "no-safe-fallback", no_argument, 0, 'x' },
        { "log-to-stderr", no_argument, 0, 'l' },
@@ -457,6 +459,11 @@ read_args(int argc, char **argv,
                 ptrn->retry_sleep = atoi(spamc_optarg);
                 break;
             }
+            case 2:
+            {
+                flags |= SPAMC_HEADERS;
+                break;
+            }
         }
     }
 
@@ -473,7 +480,7 @@ read_args(int argc, char **argv,
 	    ret = EX_USAGE;
 	}
         if (flags & SPAMC_PING) {
-	    libspamc_log(flags, LOG_ERR, "Learning excludes ping");
+            libspamc_log(flags, LOG_ERR, "Learning excludes ping");
 	    ret = EX_USAGE;
 	}
 	if (flags & SPAMC_REPORT_IFSPAM) {

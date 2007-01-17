@@ -229,6 +229,17 @@ on C<zlib> being installed on the C<spamc> client side, and the
 C<Compress::Zlib> perl module on the server side; an error will be returned
 otherwise.
 
+=item B<--headers>
+
+Perform a scan, but instead of allowing any part of the message (header and
+body) to be rewritten, limit rewriting to only the message headers. This is
+much more efficient in bandwidth usage, since the response message transmitted
+back from the spamd server will not include the body.
+
+Note that this only makes sense if you are using C<report_safe 0> in the
+scanning configuration on the remote end; with C<report_safe 1>, it is
+likely to result in corrupt messages.
+
 =back
 
 =head1 CONFIGURATION FILE
