@@ -22,7 +22,7 @@ exit if $NO_SPAMC_EXE;
 );
 
 start_spamd("-L --cf='report_safe 0'");
-ok (spamcrun ("-A < data/spam/009", \&patterns_run_cb));
+ok (spamcrun ("--headers < data/spam/009", \&patterns_run_cb));
 ok_all_patterns();
 stop_spamd();
 
