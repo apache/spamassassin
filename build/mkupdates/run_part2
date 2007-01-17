@@ -129,9 +129,18 @@ tagver=3.2.x
 tagstamp=`perl -e 'use POSIX qw(strftime); print strftime "%Y%m%d%H%M%S", localtime time;'`
 tagurl=https://svn.apache.org/repos/asf/spamassassin/tags/sa-update_${tagver}_${tagstamp}
 
-svn copy . $tagurl
-(svn info --non-interactive $tagurl || svn info $tagurl ) < /dev/null \
-                > $tmpdir/svn 2>&1 || exit $?
+svn up
+svn copy -m 'promotions validated' . $tagurl < /dev/null
+
+# for svn 1.3:
+# (svn info --non-interactive $tagurl || svn info $tagurl ) < /dev/null \
+                # > $tmpdir/svn 2>&1 || exit $?
+
+# for crappy zone svn, 1.2:
+( 
+  rm -rf tmpcheckout
+  svn co $tagurl tmpcheckout && svn info tmpcheckout
+) < /dev/null > $tmpdir/svn 2>&1 || exit $?
 
 svnrev=`(grep 'Last Changed Rev: ' $tmpdir/svn || exit 1) | \
         sed -e 's/^.*: //'`
