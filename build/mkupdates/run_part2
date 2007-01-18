@@ -140,6 +140,7 @@ svn copy -m 'promotions validated' . $tagurl < /dev/null
 ( 
   rm -rf tmpcheckout
   svn co $tagurl tmpcheckout && svn info tmpcheckout
+  rm -rf tmpcheckout
 ) < /dev/null > $tmpdir/svn 2>&1 || exit $?
 
 svnrev=`(grep 'Last Changed Rev: ' $tmpdir/svn || exit 1) | \
