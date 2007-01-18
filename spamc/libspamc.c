@@ -1865,13 +1865,15 @@ int transport_setup(struct transport *tp, int flags)
                 case EAI_NONAME: /*node or service unknown*/
                 case EAI_SERVICE: /*service not available*/
 /* work around Cygwin IPv6 patch - err codes not defined in Windows aren't in patch */
-#if  !defined(__CYGWIN__) || defined(EAI_ADDRFAMILY)
+#ifdef HAVE_EAI_ADDRFAMILY
                 case EAI_ADDRFAMILY: /*no addresses in requested family*/
 #endif
-#if  !defined(__CYGWIN__) || defined(EAI_SYSTEM)
+#ifdef HAVE_EAI_SYSTEM
                 case EAI_SYSTEM: /*system error, check errno*/
 #endif
+#ifdef HAVE_EAI_NODATA
                 case EAI_NODATA: /*address exists, but no data*/
+#endif
                 case EAI_MEMORY: /*out of memory*/
                 case EAI_FAIL: /*name server returned permanent error*/
                     errbits |= 2;
