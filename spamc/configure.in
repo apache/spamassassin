@@ -1,5 +1,10 @@
 AC_PREREQ(2.50)
 
+dnl Autoconf. ick.
+dnl Here's how to rebuild the "configure" script from this source file:
+dnl
+dnl   cd spamc; autoconf; autoheader
+
 AC_INIT
 
 AC_ARG_ENABLE(ssl,
