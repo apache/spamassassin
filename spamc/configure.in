@@ -150,6 +150,46 @@ if test $haveexmax = yes ; then
   AC_DEFINE(HAVE_EX__MAX)
 fi
 
+dnl ----------------------------------------------------------------------
+
+AC_CACHE_CHECK([for EAI_ADDRFAMILY],
+        haveitem, [
+                AC_TRY_COMPILE([#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>],
+                        [int foo = EAI_ADDRFAMILY; return 0;],
+                                        [haveitem=yes],
+                                        [haveitem=no]),
+        ])
+if test $haveitem = yes ; then
+  AC_DEFINE(HAVE_EAI_ADDRFAMILY, 1, [Define if EAI_ADDRFAMILY is valid.])
+fi
+
+AC_CACHE_CHECK([for EAI_SYSTEM],
+        haveitem, [
+                AC_TRY_COMPILE([#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>],
+                        [int foo = EAI_SYSTEM; return 0;],
+                                        [haveitem=yes],
+                                        [haveitem=no]),
+        ])
+if test $haveitem = yes ; then
+  AC_DEFINE(HAVE_EAI_SYSTEM, 1, [Define if EAI_SYSTEM is valid.])
+fi
+
+AC_CACHE_CHECK([for EAI_NODATA],
+        haveitem, [
+                AC_TRY_COMPILE([#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>],
+                        [int foo = EAI_NODATA; return 0;],
+                                        [haveitem=yes],
+                                        [haveitem=no]),
+        ])
+if test $haveitem = yes ; then
+  AC_DEFINE(HAVE_EAI_NODATA, 1, [Define if EAI_NODATA is valid.])
+fi
 
 dnl ----------------------------------------------------------------------
 
