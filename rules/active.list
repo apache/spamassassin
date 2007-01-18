@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-fredt bb-jm bb-zmi cthielen daf dos jm theo
+# with results from: bb-doc bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -72,6 +72,9 @@ CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
 CTYPE_001C_A
+
+# good enough
+CTYPE_1SPACE_GIF
 
 # good enough
 CURR_PRICE
@@ -206,6 +209,9 @@ FB_GAPPY_ADDRESS
 FB_GET_MEDS
 
 # good enough
+FB_GVR
+
+# good enough
 FB_HEY_BRO_COMMA
 
 # good enough
@@ -261,6 +267,9 @@ FB_PIPEDOLLAR
 
 # good enough
 FB_PIPE_ILLION
+
+# good enough
+FB_PROLONGED_HARD
 
 # good enough
 FB_QUALITY_REPLICA
@@ -743,6 +752,9 @@ HS_FORGED_OE_FW
 HS_GETMEOFF
 
 # good enough
+HS_MEETUP_FOR_SEX
+
+# good enough
 HS_PHARMA_1
 
 # good enough
@@ -1118,6 +1130,12 @@ TVD_FUZZY_PHARMACEUTICAL
 TVD_FUZZY_SYMBOL
 
 # good enough
+TVD_FW_GRAPHIC_ID1
+
+# good enough
+TVD_FW_GRAPHIC_ID2
+
+# good enough
 TVD_INCREASE_SIZE
 
 # good enough
@@ -1131,6 +1149,9 @@ TVD_PH_REC
 
 # good enough
 TVD_PH_SUBJ_ACCOUNTS_POST
+
+# good enough
+TVD_PH_SUBJ_URGENT
 
 # good enough
 TVD_PP_PHISH
@@ -1184,19 +1205,13 @@ TVD_VISIT_PHARMA
 TVD_VIS_HIDDEN
 
 # good enough
-CTYPE_8SPACE_GIF
-
-# good enough
 DOS_STOCK_BAT2
 
 # good enough
 FB_NOT_SCHOOL
 
 # good enough
-FH_HAS_XID
-
-# good enough
-FRT_SOMA
+FRT_OPPORTUN2
 
 # good enough
 FS_HUGECOCK
@@ -1227,27 +1242,6 @@ RCVD_IN_WHOIS_INVALID
 
 # tflags net
 RCVD_IN_XBL
-
-# good enough
-STOX_REPLY_TYPE
-
-# good enough
-TVD_FW_GRAPHIC_ID3
-
-# good enough
-TVD_FW_GRAPHIC_ID3_2
-
-# good enough
-TVD_FW_GRAPHIC_NAME_LONG
-
-# good enough
-TVD_FW_GRAPHIC_NAME_MID
-
-# good enough
-TVD_RCVD_SPACE_BRACKET
-
-# good enough
-TVD_SINGLE_SPAN_DIV
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1551,6 +1545,9 @@ XMAILER_MIMEOLE_OL_CAC8F
 
 # good enough
 XMAILER_MIMEOLE_OL_CF0C0
+
+# good enough
+XMAILER_MIMEOLE_OL_D03AB
 
 # good enough
 XMAILER_MIMEOLE_OL_EF20B
