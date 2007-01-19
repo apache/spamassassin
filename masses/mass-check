@@ -583,6 +583,15 @@ sub wanted {
     }
   }
 
+  # plugin hook to cause us to skip messages
+  my $skip = $spamtest->call_plugins("mass_check_skip_message", {
+        class => $class,
+        'time' => $time,
+        'id' => $id,
+        msg => $ma
+      });
+  return if $skip;
+
   # log-uris support
   my $status;
   my @uris;
