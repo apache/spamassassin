@@ -85,10 +85,11 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   - For releases on the trunk (e.g. a .0 release):
 
-      TZ=UTC svn log -r HEAD:46030 --non-interactive > Changes
+      TZ=UTC svn log -r HEAD:233108 --non-interactive > Changes
 
-    r46030 was the start of the 3.1.0 work (created 3.0 branch); replace
-    with the correct rev number for the point you want to start at
+    r233108 was the start of 3.2.0, just after the 3.1.0 branch was
+    created; r46030 was the start of the 3.1.0 work (created 3.0 branch);
+    replace with the correct rev number for the point you want to start at
     if different.
 
 - Check in the updated Changes file.
@@ -113,9 +114,9 @@ SPAMASSASSIN RELEASE PROCEDURE
   For a trunk pre-release (x.y.0-preZ):
 
     repo=https://svn.apache.org/repos/asf/spamassassin
-    svn copy -m "creating tag for release 3.1.0-pre2" \
-	$repo/branches/3.1 \
-	$repo/tags/spamassassin_release_3_1_0_pre_2
+    svn copy -m "creating tag for release 3.2.0-pre2" \
+	$repo/trunk \
+	$repo/tags/spamassassin_release_3_2_0_pre_2
 
   This will do a completely server-side tagging (which is the same as
   a branch really) of whatever the latest branch revision to be the new
