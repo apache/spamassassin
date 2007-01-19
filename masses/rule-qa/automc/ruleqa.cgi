@@ -182,8 +182,7 @@ sub ui_get_daterev {
       $self->{q}->param('daterev', $self->{daterev});  # make it absolute
     }
     elsif ($self->{daterev} eq 'last-preflight') {
-      $self->{daterev} = $self->date_in_direction('', 0);
-      $self->{q}->param('daterev', $self->{daterev});  # make it absolute
+      $self->{daterev} = undef;
     }
     elsif ($self->{daterev} eq 'today') {
       $self->{daterev} = $self->get_daterev_by_date(
@@ -195,17 +194,16 @@ sub ui_get_daterev {
       $self->{daterev} = $self->get_daterev_by_date($1);
       $self->{q}->param('daterev', $self->{daterev});  # make it absolute
     }
-    else {
-      if ($self->{daterev} =~ /(\d+)[\/-](r\d+)-(\S+)/ && $2) {
-        $self->{daterev} = "$1-$2-$3";
-      } else {
-        $self->{daterev} = undef;
-      }
+    elsif ($self->{daterev} =~ /(\d+)[\/-](r\d+)-(\S+)/ && $2) {
+      $self->{daterev} = "$1-$2-$3";
+    } else {
+      # default: last-night's
+      $self->{daterev} = $self->get_last_night_daterev();
     }
   }
 
   # turn possibly-empty $self->{daterev} into a real date/rev combo (that exists)
-  $self->{daterev} = $self->get_last_night_daterev();
+  $self->{daterev} = $self->date_in_direction($self->{daterev}, 0);
 
   $self->{daterev_md} = $self->get_daterev_metadata($self->{daterev});
 }
