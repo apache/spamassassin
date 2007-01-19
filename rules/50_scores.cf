@@ -676,3 +676,11 @@ score CRBOUNCE_MESSAGE   0.1
 score VBOUNCE_MESSAGE    0.1
 score ANY_BOUNCE_MESSAGE 0.1
 
+# It's still quite common for non-spam senders to send mail from hosts with
+# no rDNS, or "dynamic-looking" rDNS.  Lock these down to low values;
+# some sites can increase them as a matter of local policy, and they
+# make great fodder for meta rules, too.
+#
+score RDNS_NONE             0.1
+score RDNS_DYNAMIC          0.1
+
