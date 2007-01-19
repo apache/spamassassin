@@ -1368,9 +1368,34 @@ sub extract_message_metadata {
 
 ###########################################################################
 
+=item $status->get_decoded_body_text_array ()
+
+Returns the message body, with B<base64> or B<quoted-printable> encodings
+decoded, and non-text parts or non-inline attachments stripped.
+
+It is returned as an array of strings, with each string representing
+one newline-separated line of the body.
+
+=cut
+
 sub get_decoded_body_text_array {
   return $_[0]->{msg}->get_decoded_body_text_array();
 }
+
+=item $status->get_decoded_stripped_body_text_array ()
+
+Returns the message body, decoded (as described in
+get_decoded_body_text_array()), with HTML rendered, and with whitespace
+normalized.
+
+It will always render text/html, and will use a heuristic to determine if other
+text/* parts should be considered text/html.
+
+It is returned as an array of strings, with each string representing one
+'paragraph'.  Paragraphs, in plain-text mails, are double-newline-separated
+blocks of multi-line text.
+
+=cut
 
 sub get_decoded_stripped_body_text_array {
   return $_[0]->{msg}->get_rendered_body_text_array();
