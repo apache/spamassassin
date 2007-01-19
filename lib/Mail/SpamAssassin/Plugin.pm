@@ -557,6 +557,24 @@ The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
 
 =back
 
+
+=item $plugin->have_shortcircuited ( { options ... } )
+
+Has the current scan operation 'short-circuited'?  In other words, can
+further scanning be skipped, since the message is already definitively
+classified as either spam or ham?
+
+Plugins should return C<0> to indicate that scanning should continue,
+or C<1> to indicate that short-circuiting has taken effect.
+
+=over 4
+
+=item permsgstatus
+
+The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
+
+=back
+
 =item $plugin->bayes_learn ( { options ... } )
 
 Called at the end of a bayes learn operation.
