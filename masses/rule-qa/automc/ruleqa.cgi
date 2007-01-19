@@ -111,7 +111,7 @@ sub ui_parse_url_base {
 # fix $self->{url_abs} to be correct for the "entire website is web app" case,
 # as CGI.pm gets that wrong, too!
 
-  if ($self->{url_abs} =~ m,^/(?:20\d|last-night|today),) {
+  if ($self->{url_abs} =~ m,^/(?:20\d|last-preflight|last-night|today),) {
     $self->{url_with_path} = $self->{url_abs};
     $self->{url_abs} = "/";
   } else {
@@ -181,6 +181,10 @@ sub ui_get_daterev {
       $self->{daterev} = $self->get_last_night_daterev();
       $self->{q}->param('daterev', $self->{daterev});  # make it absolute
     }
+    elsif ($self->{daterev} eq 'last-preflight') {
+      $self->{daterev} = $self->date_in_direction('', 0);
+      $self->{q}->param('daterev', $self->{daterev});  # make it absolute
+    }
     elsif ($self->{daterev} eq 'today') {
       $self->{daterev} = $self->get_daterev_by_date(
             POSIX::strftime "%Y%m%d", gmtime ((time + DATEREV_ADJ)));
@@ -192,8 +196,7 @@ sub ui_get_daterev {
       $self->{q}->param('daterev', $self->{daterev});  # make it absolute
     }
     else {
-      $self->{daterev} =~ /(\d+)[\/-](r\d+)-(\S+)/; undef $self->{daterev};
-      if ($2) {
+      if ($self->{daterev} =~ /(\d+)[\/-](r\d+)-(\S+)/ && $2) {
         $self->{daterev} = "$1-$2-$3";
       } else {
         $self->{daterev} = undef;
@@ -202,7 +205,7 @@ sub ui_get_daterev {
   }
 
   # turn possibly-empty $self->{daterev} into a real date/rev combo (that exists)
-  $self->{daterev} = $self->date_in_direction($self->{daterev}, 0);
+  $self->{daterev} = $self->get_last_night_daterev();
 
   $self->{daterev_md} = $self->get_daterev_metadata($self->{daterev});
 }
@@ -329,7 +332,9 @@ sub show_default_view {
     (Select a recent nightly mass-check by date:
     <a href='!daterev=last-night!'>last-night</a>,
     <a href='!daterev=today!'>today</a>, or
-    enter 'YYYYMMDD' in the DateRev text field for a specific date.)
+    enter 'YYYYMMDD' in the DateRev text field for a specific date;
+    or <a href='!daterev=last-preflight!'>last-preflight</a> for
+    the most recent 'preflight' mass-check.)
   </div>
   </td>
   <td width='10%'><div align='right' class='ui_label'>
