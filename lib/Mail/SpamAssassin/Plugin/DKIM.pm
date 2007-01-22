@@ -55,9 +55,7 @@ use warnings;
 use bytes;
 
 # Have to do this so that RPM doesn't find these as required perl modules.
-# Crypt::OpenSSL::Bignum included here, since Mail::DKIM loads it in some
-# situations at runtime and spews messy errors if it's not there.
-BEGIN { require Mail::DKIM; require Mail::DKIM::Verifier; require Crypt::OpenSSL::Bignum; }
+BEGIN { require Mail::DKIM; require Mail::DKIM::Verifier; }
 
 use vars qw(@ISA);
 @ISA = qw(Mail::SpamAssassin::Plugin);
