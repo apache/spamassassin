@@ -244,26 +244,17 @@ sub _check_dkim {
   $scan->{dkim_testing} = 0;
   $scan->{dkim_signall} = 0;
 
-  my $header = $scan->{msg}->get_pristine_header();
-  my $body = $scan->{msg}->get_body();
-
   my $message = Mail::DKIM::Verifier->new_object();
   if (!$message) {
     dbg("dkim: cannot create Mail::DKIM::Verifier");
     return;
   }
 
-  # headers, line-by-line with \r\n endings, as per Mail::DKIM API
-  foreach my $line (split(/\r?\n/s, $header)) {  # split lines, deleting endings and final empty line
-    $line =~ s/$/\r\n/s;  # add back a standard \r\n ending
-    $message->PRINT($line);
-  }
-  $message->PRINT("\r\n");
-
-  # body, line-by-line with \r\n endings.
+  # feed content of message into verifier, using \r\n endings,
+  # required by Mail::DKIM API (see bug 5300)
   eval {
-    foreach my $line (@{$body}) {
-      $line =~ s/\r?\n$/\r\n/s;       # ensure \r\n ending
+    foreach my $line (split(/\n/s, $scan->{msg}->get_pristine)) {
+      $line =~ s/\r?$/\r\n/s;       # ensure \r\n ending
       $message->PRINT($line);
     }
   };
