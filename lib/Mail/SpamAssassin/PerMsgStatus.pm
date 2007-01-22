@@ -620,9 +620,16 @@ sub rewrite_mail {
     $msg .= $self->rewrite_no_report_safe();
   }
 
-  # Make the line endings appropriate for the situation
+  # Make the line endings (in the header only) appropriate for the situation.
+  # bug 5250: don't rewrite the body, since it'll corrupt 8bit data
   if ($self->{msg}->{line_ending} ne "\n") {
-    $msg =~ s/\r?\n/$self->{msg}->{line_ending}/g;
+    $msg =~ /^(.*?)\r?\n\r?\n(.*)$/s;
+    my $msghead = $1;
+    my $msgbody = $2;
+    $msghead =~ s/\r?\n/$self->{msg}->{line_ending}/gs;
+    $msg = $msghead.
+            $self->{msg}->{line_ending}.$self->{msg}->{line_ending}.
+            $msgbody;
   }
 
   return $msg;
@@ -764,6 +771,13 @@ sub rewrite_report_safe {
 
   my $description = $self->{conf}->{'encapsulated_content_description'};
 
+  # create an additional randomised token to represent the original
+  # mail (temporarily) in the new message as we construct it
+  my $orig_token = "__ORIGINAL_".$boundary;
+  while ($newmsg =~ /\Q$orig_token\E/) {
+    $orig_token .= "/".sprintf("%08X",int(rand(2 ** 32)));
+  }
+
   # Note: the message should end in blank line since mbox format wants
   # blank line at end and messages may be concatenated!  In addition, the
   # x-spam-type parameter is fixed since we will use it later to recognize
@@ -787,11 +801,20 @@ Content-Description: $description
 Content-Disposition: $disposition
 Content-Transfer-Encoding: 8bit
 
-$original
+$orig_token
 --$boundary--
 
 EOM
   
+  # now fix line endings in there...
+  if ($self->{msg}->{line_ending} ne "\n") {
+    $newmsg =~ s/\r?\n/$self->{msg}->{line_ending}/gs;
+  }
+
+  # and replace the token with the _real_ original mail (with its
+  # original newlines preserved intact)
+  $newmsg =~ s/\Q$orig_token\E/${original}/gs;
+
   return $newmsg;
 }
 
