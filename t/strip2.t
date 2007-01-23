@@ -10,6 +10,8 @@ use File::Copy;
 use File::Compare qw(compare_text);
 
 my @files = qw(
+	data/nice/crlf-endings
+	data/nice/no_body
 	data/spam/002
 	data/spam/004
 	data/spam/011
@@ -20,7 +22,7 @@ my @files = qw(
 	);
 my $input;
 
-plan tests => 8 + 10 * @files;
+plan tests => 98;
 
 # Make sure all the files can do "report_safe 0" and "report_safe 1"
 foreach $input (@files) {
