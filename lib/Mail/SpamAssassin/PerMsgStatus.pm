@@ -620,19 +620,18 @@ sub rewrite_mail {
     $msg .= $self->rewrite_no_report_safe();
   }
 
-  # Make the line endings (in the header only) appropriate for the situation.
-  # bug 5250: don't rewrite the body, since it'll corrupt 8bit data
-  if ($self->{msg}->{line_ending} ne "\n") {
-    $msg =~ /^(.*?)\r?\n\r?\n(.*)$/s;
-    my $msghead = $1;
-    my $msgbody = $2;
-    $msghead =~ s/\r?\n/$self->{msg}->{line_ending}/gs;
-    $msg = $msghead.
-            $self->{msg}->{line_ending}.$self->{msg}->{line_ending}.
-            $msgbody;
-  }
-
   return $msg;
+}
+
+# Make the line endings in the passed string reference appropriate
+# for the original mail.   Callers must note bug 5250: don't rewrite
+# the message body, since that will corrupt 8bit attachments/MIME parts.
+#
+sub _fixup_report_line_endings {
+  my ($self, $strref) = @_;
+  if ($self->{msg}->{line_ending} ne "\n") {
+    $$strref =~ s/\r?\n/$self->{msg}->{line_ending}/gs;
+  }
 }
 
 # rewrite the message in report_safe mode
@@ -771,13 +770,6 @@ sub rewrite_report_safe {
 
   my $description = $self->{conf}->{'encapsulated_content_description'};
 
-  # create an additional randomised token to represent the original
-  # mail (temporarily) in the new message as we construct it
-  my $orig_token = "__ORIGINAL_".$boundary;
-  while ($newmsg =~ /\Q$orig_token\E/) {
-    $orig_token .= "/".sprintf("%08X",int(rand(2 ** 32)));
-  }
-
   # Note: the message should end in blank line since mbox format wants
   # blank line at end and messages may be concatenated!  In addition, the
   # x-spam-type parameter is fixed since we will use it later to recognize
@@ -801,19 +793,15 @@ Content-Description: $description
 Content-Disposition: $disposition
 Content-Transfer-Encoding: 8bit
 
-$orig_token
---$boundary--
-
 EOM
-  
-  # now fix line endings in there...
-  if ($self->{msg}->{line_ending} ne "\n") {
-    $newmsg =~ s/\r?\n/$self->{msg}->{line_ending}/gs;
-  }
 
-  # and replace the token with the _real_ original mail (with its
-  # original newlines preserved intact)
-  $newmsg =~ s/\Q$orig_token\E/${original}/gs;
+  my $newmsgtrailer = "\n--$boundary--\n\n";
+
+  # now fix line endings in both headers, report_safe body parts,
+  # and new MIME boundaries and structure
+  $self->_fixup_report_line_endings(\$newmsg);
+  $self->_fixup_report_line_endings(\$newmsgtrailer);
+  $newmsg .= $original.$newmsgtrailer;
 
   return $newmsg;
 }
@@ -909,8 +897,11 @@ sub rewrite_no_report_safe {
     $new_hdrs_pre .= "X-Spam-$header: $line\n";
   }
 
-  return $new_hdrs_pre.$new_hdrs_post.$separator.
-            $self->{msg}->get_pristine_body();
+  # fix up line endings appropriately
+  my $newmsg = $new_hdrs_pre.$new_hdrs_post.$separator;
+  $self->_fixup_report_line_endings(\$newmsg);
+
+  return $newmsg.$self->{msg}->get_pristine_body();
 }
 
 sub qp_encode_header {
