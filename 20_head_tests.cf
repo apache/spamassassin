@@ -254,7 +254,8 @@ describe MULTI_FORGED		Received headers indicate multiple forgeries
 header NONEXISTENT_CHARSET	Content-Type =~ /charset=.?DEFAULT/
 describe NONEXISTENT_CHARSET	Character set doesn't exist
 
-
+header MISSING_MID              Message-Id =~ /^UNSET$/ [if-unset: UNSET]
+describe MISSING_MID            Missing Message-Id: header
 
 header MISSING_DATE             Date =~ /^UNSET$/ [if-unset: UNSET]
 describe MISSING_DATE           Missing Date: header
