@@ -494,6 +494,9 @@ endif
 # Informational rules about Received header parsing
 score NO_RECEIVED -0.001
 
+# Informational rule, typically means corrupt corpus/input
+score NO_HEADERS_MESSAGE 0.001
+
 # ok_locales
 score HTML_CHARSET_FARAWAY 0.500
 score MIME_CHARSET_FARAWAY 2.450
