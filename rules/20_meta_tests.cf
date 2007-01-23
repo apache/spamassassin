@@ -61,6 +61,9 @@ body __NONEMPTY_BODY	/\S/
 meta EMPTY_MESSAGE	!__MIME_ATTACHMENT && !__NONEMPTY_BODY
 describe EMPTY_MESSAGE	Message appears to have no textual parts and no Subject: text
 
+meta NO_HEADERS_MESSAGE (MISSING_DATE && MISSING_HEADERS && NO_RECEIVED && NO_RELAYS && MISSING_MID)
+describe NO_HEADERS_MESSAGE Message appears to be missing most RFC-822 headers
+
 ###########################################################################
 
 ifplugin Mail::SpamAssassin::Plugin::MIMEEval
