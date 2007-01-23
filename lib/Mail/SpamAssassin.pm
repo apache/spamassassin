@@ -921,6 +921,10 @@ as the report, or X-Spam-Status headers) stripped.
 
 Note that the B<$mail> object is not modified.
 
+Warning: if the input message in B<$mail> contains a mixture of CR-LF
+(Windows-style) and LF (UNIX-style) line endings, it will be "canonicalized"
+to use one or the other consistently throughout.
+
 =cut
 
 sub remove_spamassassin_markup {
@@ -1053,6 +1057,11 @@ sub remove_spamassassin_markup {
   $hdrs = "\n".$hdrs;   # simplifies regexp below
   1 while $hdrs =~ s/\nX-Spam-.*\n/\n/g;
   $hdrs =~ s/^\n//;
+
+  # re-add DOS line endings
+  if ($mail_obj->{line_ending} ne "\n") {
+    $hdrs =~ s/\r?\n/$mail_obj->{line_ending}/gs;
+  }
 
   # Put the whole thing back together ...
   return join ('', $mbox, $hdrs, $body);
