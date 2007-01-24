@@ -7,7 +7,7 @@ use Test;
 use constant num_tests => 21;
 
 use constant TEST_ENABLED => conf_bool('run_net_tests');
-use constant HAS_MODULES => eval { require Mail::DKIM; require Mail::DKIM::Verifier; require Crypt::OpenSSL::Bignum; };
+use constant HAS_MODULES => eval { require Mail::DKIM; require Mail::DKIM::Verifier; };
 # use constant IS_LINUX   => $^O eq 'linux';
 # use constant IS_WINDOWS => ($^O =~ /^(mswin|dos|os2)/oi);
 # use constant AM_ROOT    => $< == 0;
