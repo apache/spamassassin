@@ -79,24 +79,31 @@ sub parse_received_headers {
   # now figure out what relays are trusted...
   my $trusted = $permsgstatus->{main}->{conf}->{trusted_networks};
   my $internal = $permsgstatus->{main}->{conf}->{internal_networks};
+  my $msa = $permsgstatus->{main}->{conf}->{msa_networks};
   my $did_user_specify_trust = $permsgstatus->{main}->{conf}->{trusted_networks_configured};
   my $did_user_specify_internal = $permsgstatus->{main}->{conf}->{internal_networks_configured};
   my $in_trusted = 1;
   my $in_internal = 1;
+  my $found_msa = 0;
 
-  if ($did_user_specify_trust && !$did_user_specify_internal) {
-    # use 'trusted' for 'internal'; compatibility with SpamAssassin 2.60
-    $internal = $trusted;
-    dbg('conf: internal_networks not configured, using trusted_networks '.
-	'configuration for internal_networks; if you really want '.
-	'internal_networks to only contain the required 127/8 add '.
-	"'internal_networks !0/0' to your configuration");
-  } elsif (!$did_user_specify_trust && $did_user_specify_internal) {
-    # this is required, we only check that internal_networks are in
-    # trusted_networks if trusted_networks were defined
-    $trusted = $internal;
-    dbg('conf: trusted_networks not configured, using internal_networks '.
-	'configuration for trusted_networks');
+  unless ($did_user_specify_trust && $did_user_specify_internal) {
+    if (!$did_user_specify_trust && !$did_user_specify_internal) {
+      dbg('conf: trusted_networks are not configured; it is recommended that '.
+	  'you configure trusted_networks manually');
+    } elsif (!$did_user_specify_internal) {
+      # use 'trusted' for 'internal'; compatibility with SpamAssassin 2.60
+      $internal = $trusted;
+      dbg('conf: internal_networks not configured, using trusted_networks '.
+	  'configuration for internal_networks; if you really want '.
+	  'internal_networks to only contain the required 127/8 add '.
+	  "'internal_networks !0/0' to your configuration");
+    } else {
+      # use 'internal' for 'trusted'; I don't know why we let people define
+      # internal without trusted, but we do... and we rely on trusted being set
+      $trusted = $internal;
+      dbg('conf: trusted_networks not configured, using internal_networks '.
+	  'configuration for trusted_networks');
+    }
   }
 
   my $IP_PRIVATE = IP_PRIVATE;
@@ -136,9 +143,11 @@ sub parse_received_headers {
       $self->make_relay_as_string($relay);
     }
 
-    # OK, infer the trusted/untrusted handover, if we don't have real info.
-    if ($in_trusted) {
+    # relay status only changes when we're still in the trusted portion of the
+    # relays and we haven't yet found an MSA
+    if ($in_trusted && !$found_msa) {
       unless ($did_user_specify_trust || $did_user_specify_internal) {
+        # OK, infer the trusted/untrusted handover, we don't have real info
 	my $inferred_as_trusted = 0;
 
 	# if the 'from' IP addr is in a reserved net range, it's not on
@@ -168,23 +177,35 @@ sub parse_received_headers {
 	# trusted_networks matches?
 	if (!$relay->{auth} && !$trusted->contains_ip($relay->{ip})) {
 	  $in_trusted = 0;
-	  $in_internal = 0;	# save checking immediately below
-	}
-	# internal_networks matches?
-	elsif ($in_internal && !$relay->{auth} && !$internal->contains_ip($relay->{ip})) {
-	  $in_internal = 0;
+	  $in_internal = 0;	# if it's not trusted it's not internal
+	} else {
+	  # internal_networks matches?
+	  if ($in_internal && !$relay->{auth} && !$internal->contains_ip($relay->{ip})) {
+	    $in_internal = 0;
+	  }
+	  # msa_networks matches?
+	  if ($msa->contains_ip($relay->{ip})) {
+	    dbg('received-header: found MSA relay, remaining relays will be'.
+		' considered trusted: '.($in_trusted ? 'yes' : 'no').
+		' internal: '.($in_internal ? 'yes' : 'no'));
+	    $found_msa = 1;
+	    $relay->{msa} = 1;
+	  }
 	}
       }
     }
 
     dbg("received-header: relay ".$relay->{ip}.
 	" trusted? ".($in_trusted ? "yes" : "no").
-	" internal? ".($in_internal ? "yes" : "no"));
+	" internal? ".($in_internal ? "yes" : "no").
+	" msa? ".($relay->{msa} ? "yes" : "no"));
 
     $relay->{internal} = $in_internal;
+    $relay->{msa} ||= 0;
 
     # be sure to mark up the as_string version for users too
     $relay->{as_string} =~ s/ intl=\d / intl=$relay->{internal} /;
+    $relay->{as_string} =~ s/ msa=\d / msa=$relay->{msa} /;
 
     if ($in_trusted) {
       push (@{$self->{relays_trusted}}, $relay);
@@ -1229,7 +1250,7 @@ sub make_relay_as_string {
   # of entries must be preserved, so that regexps that assume that
   # e.g. "ip" comes before "helo" will still work.
   #
-  my $asstr = "[ ip=$relay->{ip} rdns=$relay->{rdns} helo=$relay->{helo} by=$relay->{by} ident=$relay->{ident} envfrom=$relay->{envfrom} intl=0 id=$relay->{id} auth=$relay->{auth} ]";
+  my $asstr = "[ ip=$relay->{ip} rdns=$relay->{rdns} helo=$relay->{helo} by=$relay->{by} ident=$relay->{ident} envfrom=$relay->{envfrom} intl=0 id=$relay->{id} auth=$relay->{auth} msa=0 ]";
   dbg("received-header: parsed as $asstr");
   $relay->{as_string} = $asstr;
 }

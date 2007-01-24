@@ -749,6 +749,64 @@ Empty the list of internal networks.
     }
   });
 
+=item msa_networks ip.add.re.ss[/mask] ...   (default: none)
+
+The networks or hosts are acting as MSAs in your setup.  B<MSA> means
+that the relay hosts on these networks accept mail from your own users
+and authenticates them appropriately.  These relays will never accept
+mail from hosts that aren't authenticated in some way.  Examples of
+authentication include, IP lists, SMTP AUTH, POP-before-SMTP, etc.
+
+All relays found in the message headers after the MSA relay will take
+on the same trusted and internal classifcations as the MSA relay itself,
+as defined by your I<trusted_networks> and I<internal_networks> configuration.
+
+For example, if the MSA relay is trusted and internal so will all of the
+relays that precede it.
+
+When using msa_networks to identify an MSA it is recommended that you treat
+that MSA as both trusted and internal.  When an MSA is not included in
+msa_networks you should treat the MSA as trusted but not internal, however
+if the MSA is also acting as an MX or intermediate relay you must always
+treat it as both trusted and internal and ensure that the MSA includes
+visible auth tokens in its Received header to identify submission clients.
+
+B<Warning:> Never include an MSA that also acts as an MX (or is also an
+intermediate relay for an MX) or otherwise accepts mail from
+non-authenticated users in msa_networks.  Doing so will result in unknown
+external relays being trusted.
+
+=cut
+
+  push (@cmds, {
+    setting => 'msa_networks',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      unless (defined $value && $value !~ /^$/) {
+	return $MISSING_REQUIRED_VALUE;
+      }
+      foreach my $net (split (/\s+/, $value)) {
+        $self->{msa_networks}->add_cidr ($net);
+      }
+      $self->{msa_networks_configured} = 1;
+    }
+  });
+
+=item clear_msa_networks
+
+Empty the list of msa networks.
+
+=cut
+
+  push (@cmds, {
+    setting => 'clear_msa_networks',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      $self->{msa_networks} = Mail::SpamAssassin::NetSet->new(); # not new_netset
+      $self->{msa_networks_configured} = 0;
+    }
+  });
+
 =item always_trust_envelope_sender ( 0 | 1 )   (default: 0)
 
 Trust the envelope sender even if the message has been passed through one or
@@ -2726,6 +2784,7 @@ sub new {
 
   $self->{trusted_networks} = $self->new_netset();
   $self->{internal_networks} = $self->new_netset();
+  $self->{msa_networks} = Mail::SpamAssassin::NetSet->new(); # not new_netset
   $self->{trusted_networks_configured} = 0;
   $self->{internal_networks_configured} = 0;
 

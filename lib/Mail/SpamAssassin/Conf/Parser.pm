@@ -927,35 +927,48 @@ sub lint_trusted_networks {
   my ($self) = @_;
   my $conf = $self->{conf};
 
-  my $nt = $conf->{trusted_networks};
-  my $ni = $conf->{internal_networks};
-
   # validate trusted_networks and internal_networks, bug 4760.
   # check that all internal_networks are listed in trusted_networks
-  # too.
+  # too.  do the same for msa_networks, but check msa_networks against
+  # internal_networks if trusted_networks aren't defined
 
-  if ($conf->{trusted_networks_configured} && $conf->{internal_networks_configured}) {
+  my ($nt, $matching_against);
+  if ($conf->{trusted_networks_configured}) {
+    $nt = $conf->{trusted_networks};
+    $matching_against = 'trusted_networks';
+  } elsif ($conf->{internal_networks_configured}) {
+    $nt = $conf->{internal_networks};
+    $matching_against = 'internal_networks';
+  } else {
+    return;
+  }
+
+  foreach my $net_type ('internal_networks', 'msa_networks') {
+    next unless $conf->{"${net_type}_configured"};
+    next if $net_type eq $matching_against;
+
     my $replace_nets;
-    my @valid_ni = ();
+    my @valid_net_list = ();
+    my $net_list = $conf->{$net_type};
 
-    foreach my $net (@{$ni->{nets}}) {
+    foreach my $net (@{$net_list->{nets}}) {
       # don't check to see if an excluded network is included - that's senseless
       if (!$net->{exclude} && !$nt->contains_net($net)) {
-        my $msg = "trusted_networks doesn't contain internal_networks entry '".
-                ($net->{as_string})."'";
+        my $msg = "$matching_against doesn't contain $net_type entry '".
+                  ($net->{as_string})."'";
 
         $self->lint_warn($msg, undef);      # complain
         $replace_nets = 1;  # and omit it from the new internal set
       }
       else {
-        push @valid_ni, $net;
+        push @valid_net_list, $net;
       }
     }
 
     if ($replace_nets) {
       # something was invalid. replace the old nets list with a fixed version
       # (which may be empty)
-      $ni->{nets} = \@valid_ni;
+      $net_list->{nets} = \@valid_net_list;
     }
   }
 }
