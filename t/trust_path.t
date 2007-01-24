@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("trust_path");
-use Test; BEGIN { plan tests => 51 };
+use Test; BEGIN { plan tests => 63 };
 
 
 use strict;
@@ -35,7 +35,7 @@ q{
 
 } => q{
 
-Trusted: [ ip=127.0.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= ]
+Trusted: [ ip=127.0.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= msa=0 ]
 Untrusted: 
 
 },
@@ -51,7 +51,7 @@ q{
 
 } => q{
 
-Trusted: [ ip=127.0.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= ]
+Trusted: [ ip=127.0.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= msa=0 ]
 Untrusted: 
 
 },
@@ -65,7 +65,7 @@ q{
 
 } => q{
 
-Trusted: [ ip=127.0.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= ]
+Trusted: [ ip=127.0.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= msa=0 ]
 Untrusted: 
 
 },
@@ -82,7 +82,7 @@ q{
 
 } => q{
 
-Trusted: [ ip=127.0.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= ]
+Trusted: [ ip=127.0.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= msa=0 ]
 Untrusted: 
 
 },
@@ -98,7 +98,7 @@ q{
 
 } => q{
 
-Trusted: [ ip=127.0.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= ]
+Trusted: [ ip=127.0.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= msa=0 ]
 Untrusted: 
 
 },
@@ -114,7 +114,7 @@ q{
 
 } => q{
 
-Trusted: [ ip=10.0.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= ]
+Trusted: [ ip=10.0.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= msa=0 ]
 Untrusted: 
 
 },
@@ -130,7 +130,7 @@ q{
 
 } => q{
 
-Trusted: [ ip=1.2.3.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= ]
+Trusted: [ ip=1.2.3.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= msa=0 ]
 Untrusted:
 
 },
@@ -146,7 +146,7 @@ q{
 } => q{
 
 Trusted:
-Untrusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=0 id= auth= ]
+Untrusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=0 id= auth= msa=0 ]
 
 },
 
@@ -160,7 +160,7 @@ q{
 
 } => q{
 
-Trusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= ]
+Trusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= msa=0 ]
 Untrusted:
 
 },
@@ -176,7 +176,7 @@ q{
 
 } => q{
 
-Trusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= ]
+Trusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= msa=0 ]
 Untrusted:
 
 },
@@ -193,7 +193,7 @@ q{
 
 } => q{
 
-Trusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= ]
+Trusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= msa=0 ]
 Untrusted:
 
 },
@@ -209,7 +209,7 @@ q{
 
 } => q{
 
-Trusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=0 id= auth= ]
+Trusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=0 id= auth= msa=0 ]
 Untrusted:
 
 },
@@ -229,7 +229,7 @@ q{
 } => q{
 
 Lint-Error
-Trusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=0 id= auth= ]
+Trusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=0 id= auth= msa=0 ]
 Untrusted:
 
 },
@@ -249,7 +249,7 @@ q{
 } => q{
 
 Lint-Error
-Trusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=0 id= auth= ]
+Trusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=0 id= auth= msa=0 ]
 Untrusted:
 
 },
@@ -269,7 +269,7 @@ q{
 } => q{
 
 Lint-Error
-Trusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=0 id= auth= ]
+Trusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=0 id= auth= msa=0 ]
 Untrusted:
 
 },
@@ -286,7 +286,7 @@ q{
 
 } => q{
 
-Trusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= ]
+Trusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= msa=0 ]
 Untrusted:
 
 },
@@ -303,8 +303,94 @@ q{
 
 } => q{
 
-Trusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= ]
+Trusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= msa=0 ]
 Untrusted:
+
+},
+
+# ---------------------------------------------------------------------------
+
+# test msa_networks functionality, MSA trusted+internal
+q{
+
+  trusted_networks 1.1/16
+  msa_networks 1.1.1.2
+  Received: from sender.net (1.1.1.1) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+  Received: from sender.net (1.1.1.2) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+  Received: from sender.net (5.5.5.5) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+
+} => q{
+
+Trusted: [ ip=1.1.1.1 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= msa=0 ] [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= msa=1 ] [ ip=5.5.5.5 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= msa=0 ]
+Untrusted:
+
+},
+
+# ---------------------------------------------------------------------------
+
+# test msa_networks functionality, MSA trusted
+q{
+
+  trusted_networks 1.1/16
+  internal_networks !1.1.1.2 1.1/16
+  msa_networks 1.1.1.2
+  Received: from sender.net (1.1.1.1) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+  Received: from sender.net (1.1.1.2) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+  Received: from sender.net (5.5.5.5) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+
+} => q{
+
+Trusted: [ ip=1.1.1.1 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= msa=0 ] [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=0 id= auth= msa=1 ] [ ip=5.5.5.5 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=0 id= auth= msa=0 ]
+Untrusted:
+
+},
+
+# ---------------------------------------------------------------------------
+
+# test msa_networks functionality, 5.5.5.5 outside of trust boundary
+q{
+
+  trusted_networks !1.1.1.2 1.1/16 5.5.5.5
+  msa_networks 5.5.5.5
+  Received: from sender.net (1.1.1.1) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+  Received: from sender.net (1.1.1.2) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+  Received: from sender.net (5.5.5.5) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+
+} => q{
+
+Trusted: [ ip=1.1.1.1 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= msa=0 ]
+Untrusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=0 id= auth= msa=0 ] [ ip=5.5.5.5 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=0 id= auth= msa=0 ]
+
+},
+
+# ---------------------------------------------------------------------------
+
+# test msa_networks functionality, 5.5.5.5 not trusted, so cannot be an MSA
+q{
+
+  trusted_networks 1.1/16
+  msa_networks 5.5.5.5
+  Received: from sender.net (1.1.1.1) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+  Received: from sender.net (1.1.1.2) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+  Received: from sender.net (5.5.5.5) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+
+} => q{
+
+Lint-Error
+Trusted: [ ip=1.1.1.1 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= msa=0 ] [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= msa=0 ]
+Untrusted: [ ip=5.5.5.5 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=0 id= auth= msa=0 ]
 
 },
 
@@ -331,6 +417,9 @@ while (1) {
   if ($hdrs =~ s/^\s*(internal_networks\s+[^\n]*)//gs) {
     if ($1) { $conf .= $1."\n"; }
   }
+  if ($hdrs =~ s/^\s*(msa_networks\s+[^\n]*)//gs) {
+    if ($1) { $conf .= $1."\n"; }
+  }
 
   tstprefs ($conf);
 
@@ -350,7 +439,7 @@ while (1) {
   }
 
   my $msg = $hdrs."\n\n[no body]\n";
-  $msg =~ s/^\s+//gs;
+  $msg =~ s/^\s+Received: /Received: /gm;
   my $status = $sa->check_message_text ($msg);
   my $result = $status->rewrite_mail();
 
