@@ -23,7 +23,7 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::HTML;
 use Mail::SpamAssassin::Util;
 
-plan tests => 88;
+plan tests => 89;
 
 ##############################################
 
@@ -219,6 +219,13 @@ ok(try_canon([
    ], [
    'http://0x000000059.104.00000000000160.0x00011',
    'http://89.104.112.17',
+   ]));
+
+ok(try_canon([
+   'http://0xdd.0x6.0xf.0x8a/ws/eBayISAPI.dll',
+   ], [
+   'http://0xdd.0x6.0xf.0x8a/ws/eBayISAPI.dll',
+   'http://221.6.15.138/ws/eBayISAPI.dll',
    ]));
 
 ok(try_canon([

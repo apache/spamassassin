@@ -1210,14 +1210,15 @@ sub uri_list_canonify {
       #    both hex (0x) and oct (0+) encoded octets, etc.
 
       if ($host =~ /^
-        ((?:0x[0-9a-f]{2,}|\d+)\.)
-	((?:0x[0-9a-f]{2,}|\d+)\.)
-	((?:0x[0-9a-f]{2,}|\d+)\.)
-	(0x[0-9a-f]{2,}|\d+)
-	$/ix) {
+                    ((?:0x[0-9a-f]+|\d+)\.)
+                    ((?:0x[0-9a-f]+|\d+)\.)
+                    ((?:0x[0-9a-f]+|\d+)\.)
+                    (0x[0-9a-f]+|\d+)
+                    $/ix)
+      {
         my @chunk = ($1,$2,$3,$4);
         foreach my $octet (@chunk) {
-          $octet =~ s/^0x0*([0-9a-f][0-9a-f])/sprintf "%d",hex($1)/gei;
+          $octet =~ s/^0x([0-9a-f]+)/sprintf "%d",hex($1)/gei;
           $octet =~ s/^0+([1-3][0-7]{0,2}|[4-7][0-7]?)\b/sprintf "%d",oct($1)/ge;
 	  $octet =~ s/^0+//;
         }
