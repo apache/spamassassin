@@ -21,7 +21,7 @@ use constant DO_RUN     => TEST_ENABLED && (HAS_SPFQUERY || HAS_MAILSPF) &&
 BEGIN {
 
   # some tests are run once for each SPF module, others are only run once
-  plan tests => (DO_RUN ? (HAS_SPFQUERY && HAS_MAILSPF ? 98 : (HAS_SPFQUERY ? 54 : 54)) : 0);
+  plan tests => (DO_RUN ? (HAS_SPFQUERY && HAS_MAILSPF ? 106 : (HAS_SPFQUERY ? 58 : 58)) : 0);
 
 };
 
@@ -376,6 +376,25 @@ for $disable_an_spf_module ('do_not_use_mail_spf 1', 'do_not_use_mail_spf_query 
   # clear these out before we loop
   %anti_patterns = ();
   %patterns = ();
+
+
+  # 45-48: same as test 37-40 with whitelist_auth added
+
+  tstprefs("
+    whitelist_auth newsalerts-noreply\@dnsbltest.spamassassin.org
+    def_whitelist_auth *\@dnsbltest.spamassassin.org
+    $disable_an_spf_module
+  ");
+
+  %patterns = (
+    q{ SPF_HELO_PASS }, 'helo_pass',
+    q{ SPF_PASS }, 'pass',
+    q{ USER_IN_SPF_WHITELIST }, 'spf_whitelist',
+    q{ USER_IN_DEF_SPF_WL }, 'default_spf_whitelist',
+  );
+
+  sarun ("-t < data/nice/spf1", \&patterns_run_cb);
+  ok_all_patterns();
 
 } # for each SPF module
 

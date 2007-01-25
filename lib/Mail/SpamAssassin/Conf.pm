@@ -266,6 +266,67 @@ it from running.
     }
   });
 
+# TODO: this should go into 'WHITELIST AND BLACKLIST OPTIONS' when
+# bug 5304 is fixed
+
+=item whitelist_auth add@ress.com
+
+Used to specify addresses which send mail that is often tagged (incorrectly) as
+spam.  This is different from C<whitelist_from> and C<whitelist_from_rcvd> in
+that it first verifies that the message was sent by an authorized sender for
+the address, before whitelisting.
+
+Authorization is performed using one of the installed sender-authorization
+schemes: SPF (using C<Mail::SpamAssassin::Plugins::SPF>), Domain Keys (using
+C<Mail::SpamAssassin::Plugins::DomainKeys>), or DKIM (using
+C<Mail::SpamAssassin::Plugins::DKIM>).  Note that those plugins must be active,
+and working, for this to operate.
+
+Using C<whitelist_auth> is roughly equivalent to specifying duplicate
+C<whitelist_from_spf>, C<whitelist_from_dk>, and C<whitelist_from_dkim> lines
+for each of the addresses specified.
+
+e.g.
+
+  whitelist_auth joe@example.com fred@example.com
+  whitelist_auth *@example.com
+
+=item def_whitelist_auth add@ress.com
+
+Same as C<whitelist_auth>, but used for the default whitelist entries
+in the SpamAssassin distribution.  The whitelist score is lower, because
+these are often targets for spammer spoofing.
+
+=cut
+
+  push (@cmds, {
+    setting => 'whitelist_auth',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST
+  });
+
+  push (@cmds, {
+    setting => 'def_whitelist_auth',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST
+  });
+
+=item unwhitelist_auth add@ress.com
+
+Used to override a C<whitelist_auth> entry. The specified email address has to
+match exactly the address previously used in a C<whitelist_auth> line.
+
+e.g.
+
+  unwhitelist_auth joe@example.com fred@example.com
+  unwhitelist_auth *@example.com
+
+=cut
+
+  push (@cmds, {
+    command => 'unwhitelist_auth',
+    setting => 'whitelist_auth',
+    code => \&Mail::SpamAssassin::Conf::Parser::remove_addrlist_value
+  });
+
 =back
 
 =head2 BASIC MESSAGE TAGGING OPTIONS
@@ -2773,6 +2834,7 @@ sub new {
   $self->{bayes_ignore_from} = { };
   $self->{bayes_ignore_to} = { };
 
+  $self->{whitelist_auth} = { };
   $self->{whitelist_from} = { };
   $self->{whitelist_allows_relays} = { };
   $self->{blacklist_from} = { };

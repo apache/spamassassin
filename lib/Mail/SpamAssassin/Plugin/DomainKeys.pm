@@ -171,7 +171,7 @@ these are often targets for spammer spoofing.
   });
 
   push (@cmds, {
-    setting => 'def_whitelist_from_dk',,
+    setting => 'def_whitelist_from_dk',
     code => sub {
       my ($self, $key, $value, $line) = @_;
       unless (defined $value && $value !~ /^$/) {
@@ -502,39 +502,21 @@ sub _check_dk_whitelist {
 
   if ($default) {
     $scan->{def_dk_whitelist_from_checked} = 1;
-    $scan->{def_dk_whitelist_from} = 0;
+    $scan->{def_dk_whitelist_from} =
+                    $self->_wlcheck_domain($scan,'def_whitelist_from_dk');
 
-    # copied and butchered from the code for whitelist_from_rcvd in Evaltests.pm
-    ONE: foreach my $white_addr (keys %{$scan->{conf}->{def_whitelist_from_dk}}) {
-      my $regexp = qr/$scan->{conf}->{def_whitelist_from_dk}->{$white_addr}{re}/i;
-      foreach my $domain (@{$scan->{conf}->{def_whitelist_from_dk}->{$white_addr}{domain}}) {
-        if ($scan->{dk_address} =~ $regexp) {
-	  if ($scan->{dk_signing_domain} =~ /(?:^|\.)\Q${domain}\E$/i) {
-	    dbg("dk: address: $scan->{dk_address} matches def_whitelist_from_dk ".
-		"$scan->{conf}->{def_whitelist_from_dk}->{$white_addr}{re} ${domain}");
-	    $scan->{def_dk_whitelist_from} = 1;
-	    last ONE;
-	  }
-	}
-      }
+    if (!$scan->{def_dk_whitelist_from}) {
+      $scan->{def_dk_whitelist_from} =
+                    $self->_wlcheck_no_domain($scan,'def_whitelist_auth');
     }
   } else {
     $scan->{dk_whitelist_from_checked} = 1;
-    $scan->{dk_whitelist_from} = 0;
-
-    # copied and butchered from the code for whitelist_from_rcvd in Evaltests.pm
-    ONE: foreach my $white_addr (keys %{$scan->{conf}->{whitelist_from_dk}}) {
-      my $regexp = qr/$scan->{conf}->{whitelist_from_dk}->{$white_addr}{re}/i;
-      foreach my $domain (@{$scan->{conf}->{whitelist_from_dk}->{$white_addr}{domain}}) {
-        if ($scan->{dk_address} =~ $regexp) {
-	  if ($scan->{dk_signing_domain} =~ /(?:^|\.)\Q${domain}\E$/i) {
-	    dbg("dk: address: $scan->{dk_address} matches whitelist_from_dk ".
-		"$scan->{conf}->{whitelist_from_dk}->{$white_addr}{re} ${domain}");
-	    $scan->{dk_whitelist_from} = 1;
-	    last ONE;
-	  }
-	}
-      }
+    $scan->{dk_whitelist_from} =
+                    $self->_wlcheck_domain($scan,'whitelist_from_dk');
+    
+    if (!$scan->{dk_whitelist_from}) {
+      $scan->{dk_whitelist_from} =
+                    $self->_wlcheck_no_domain($scan,'whitelist_auth');
     }
   }
 
@@ -572,6 +554,45 @@ sub _check_dk_whitelist {
 	  "$scan->{dk_signing_domain} is not in user's WHITELIST_FROM_DK");
     }
   }
+}
+
+sub _wlcheck_domain {
+  my ($self, $scan, $wl) = @_;
+
+  foreach my $white_addr (keys %{$scan->{conf}->{$wl}}) {
+    my $re = qr/$scan->{conf}->{$wl}->{$white_addr}{re}/i;
+    foreach my $domain (@{$scan->{conf}->{$wl}->{$white_addr}{domain}}) {
+      $self->_wlcheck_one_dom($scan, $wl, $white_addr, $domain, $re) and return 1;
+    }
+  }
+  return 0;
+}
+
+sub _wlcheck_one_dom {
+  my ($self, $scan, $wl, $white_addr, $domain, $re) = @_;
+
+  if ($scan->{dk_address} =~ $re) {
+    if ($scan->{dk_signing_domain} =~ /(?:^|\.)\Q${domain}\E$/i) {
+      dbg("dk: address: $scan->{dk_address} matches $wl $re $domain");
+      return 1;
+    }
+  }
+  return 0;
+}
+
+
+# use a traditional whitelist_from-style addrlist, and infer the
+# domain from each address on the fly.  Note: don't pre-parse and
+# store the domains; that's inefficient memory-wise and only saves 1 m//
+sub _wlcheck_no_domain {
+  my ($self, $scan, $wl) = @_;
+
+  foreach my $white_addr (keys %{$scan->{conf}->{$wl}}) {
+    my $domain = ($white_addr =~ /\@(.*?)$/) ? $1 : $white_addr;
+    my $re = $scan->{conf}->{$wl}->{$white_addr};
+    $self->_wlcheck_one_dom($scan, $wl, $white_addr, $domain, $re) and return 1;
+  }
+  return 0;
 }
 
 1;
