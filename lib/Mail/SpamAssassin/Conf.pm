@@ -3478,7 +3478,7 @@ sub clone {
 
   # keys that should can be copied using a ->clone() method, in ->clone()
   my @CLONABLE_KEYS = qw(
-    internal_networks trusted_networks 
+    internal_networks trusted_networks msa_networks 
   );
 
   my %done = ();
