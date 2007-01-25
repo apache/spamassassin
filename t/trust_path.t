@@ -18,10 +18,17 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("trust_path");
-use Test; BEGIN { plan tests => 63 };
-
+use Test; BEGIN { plan tests => 69 };
+use IO::File;
 
 use strict;
+
+# make a _copy_ of the STDERR file descriptor
+# (so we can restore it after redirecting it)
+open(OLDERR, ">&STDERR") || die "Cannot copy STDERR file handle";
+
+# quiet "used only once" warnings
+1 if *OLDERR;
 
 my @data = (
 
@@ -51,6 +58,7 @@ q{
 
 } => q{
 
+Netset-Warn
 Trusted: [ ip=127.0.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= msa=0 ]
 Untrusted: 
 
@@ -65,6 +73,7 @@ q{
 
 } => q{
 
+Netset-Warn
 Trusted: [ ip=127.0.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= msa=0 ]
 Untrusted: 
 
@@ -72,7 +81,7 @@ Untrusted:
 
 # ---------------------------------------------------------------------------
 
-# 127/8 explicitly untrusted
+# 127/8 explicitly untrusted -- which is not possible to do
 q{
 
   trusted_networks 1.2/16 !127/8
@@ -82,6 +91,7 @@ q{
 
 } => q{
 
+Netset-Warn
 Trusted: [ ip=127.0.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= msa=0 ]
 Untrusted: 
 
@@ -130,6 +140,7 @@ q{
 
 } => q{
 
+Netset-Warn
 Trusted: [ ip=1.2.3.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= msa=0 ]
 Untrusted:
 
@@ -286,6 +297,7 @@ q{
 
 } => q{
 
+Netset-Warn
 Trusted: [ ip=1.1.1.2 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= msa=0 ]
 Untrusted:
 
@@ -396,6 +408,40 @@ Untrusted: [ ip=5.5.5.5 rdns=sender.net helo=sender.net by=receiver.net ident= e
 
 # ---------------------------------------------------------------------------
 
+# test to make sure netset is detecting overlap correctly when using short CIDR notations
+q{
+
+  trusted_networks 1/8 !1/8
+  Received: from sender.net (1.1.1.1) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+
+} => q{
+
+Netset-Warn
+Trusted: [ ip=1.1.1.1 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=1 id= auth= msa=0 ]
+Untrusted:
+
+},
+
+# ---------------------------------------------------------------------------
+
+# test to make sure netset is detecting overlap correctly when using short CIDR notations
+q{
+
+  trusted_networks !1/8 1/8
+  Received: from sender.net (1.1.1.1) by receiver.net
+              with SMTP; 10 Nov 2005 00:00:00 -0000
+
+} => q{
+
+Netset-Warn
+Trusted:
+Untrusted: [ ip=1.1.1.1 rdns=sender.net helo=sender.net by=receiver.net ident= envfrom= intl=0 id= auth= msa=0 ]
+
+},
+
+# ---------------------------------------------------------------------------
+
 );
 
 
@@ -423,16 +469,27 @@ while (1) {
 
   tstprefs ($conf);
 
+  my $netset_warn = 0;
+  my $fh;
+  if ($expected =~ s/^\s*Netset-Warn\s*//) {    
+    # create a file descriptior for logging STDERR
+    # (we do not want warnings for regexps we know are invalid)
+    $fh = IO::File->new_tmpfile();
+    open(STDERR, ">&".fileno($fh)) || die "Cannot create LOGERR temp file";
+    $netset_warn = 1;
+    print "[netset warning expected here...]\n";
+  }
+
   my $sa = create_saobj({ userprefs_filename => "log/tst.cf" });
   ok($sa);
 
   $sa->{lint_callback} = sub {
     my %opts = @_;
-    print "lint warning: $opts{msg}\n";
+    print "lint error: $opts{msg}\n";
   };
 
   if ($expected =~ s/^\s*Lint-Error\s*//) {
-    print "[lint warning expected here...]\n";
+    print "[lint error expected here...]\n";
     ok ($sa->lint_rules() != 0) or $test_failure=1;
   } else {
     ok ($sa->lint_rules() == 0) or $test_failure=1;
@@ -444,6 +501,28 @@ while (1) {
   my $result = $status->rewrite_mail();
 
   # warn "JMD $result";
+
+  if ($netset_warn) {
+    open(STDERR, ">&=OLDERR") || die "Cannot reopen STDERR";
+
+    seek($fh, 0, 0);
+    my $error = do {
+      local $/;
+      <$fh>;
+    };
+    close $fh;
+
+    $test_failure=1;
+    for (split(/^/m, $error)) {
+      if (/^netset: /) {
+	$test_failure=0;
+	print "netset warn: $_";
+      } else {
+	warn $_;
+      }
+    }
+  }
+
   $result =~ s/\n[ \t]+/ /gs;
   $result =~ /(?:\n|^)X-Spam-Trusted: ([^\n]*)\n/s;
   my $relays_t = $1;
