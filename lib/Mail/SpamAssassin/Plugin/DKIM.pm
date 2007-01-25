@@ -366,39 +366,21 @@ sub _check_dkim_whitelist {
 
   if ($default) {
     $scanner->{def_dkim_whitelist_from_checked} = 1;
-    $scanner->{def_dkim_whitelist_from} = 0;
+    $scanner->{def_dkim_whitelist_from} =
+                    $self->_wlcheck_domain($scanner,'def_whitelist_from_dk');
 
-    # copied and butchered from the code for whitelist_from_rcvd in Evaltests.pm
-    ONE: foreach my $white_addr (keys %{$scanner->{conf}->{def_whitelist_from_dkim}}) {
-      my $regexp = qr/$scanner->{conf}->{def_whitelist_from_dkim}->{$white_addr}{re}/i;
-      foreach my $domain (@{$scanner->{conf}->{def_whitelist_from_dkim}->{$white_addr}{domain}}) {
-        if ($scanner->{dkim_address} =~ $regexp) {
-	  if ($scanner->{dkim_identity} =~ /(?:^|\.|(?:@(?!@)|(?=@)))\Q${domain}\E$/i) {
-	    dbg("dkim: address: $scanner->{dkim_address} matches def_whitelist_from_dkim ".
-		"$scanner->{conf}->{def_whitelist_from_dkim}->{$white_addr}{re} ${domain}");
-	    $scanner->{def_dkim_whitelist_from} = 1;
-	    last ONE;
-	  }
-	}
-      }
+    if (!$scanner->{def_dkim_whitelist_from}) {
+      $scanner->{def_dkim_whitelist_from} =
+                    $self->_wlcheck_no_domain($scanner,'def_whitelist_auth');
     }
   } else {
     $scanner->{dkim_whitelist_from_checked} = 1;
-    $scanner->{dkim_whitelist_from} = 0;
+    $scanner->{dkim_whitelist_from} =
+                    $self->_wlcheck_domain($scanner,'whitelist_from_dk');
 
-    # copied and butchered from the code for whitelist_from_rcvd in Evaltests.pm
-    ONE: foreach my $white_addr (keys %{$scanner->{conf}->{whitelist_from_dkim}}) {
-      my $regexp = qr/$scanner->{conf}->{whitelist_from_dkim}->{$white_addr}{re}/i;
-      foreach my $domain (@{$scanner->{conf}->{whitelist_from_dkim}->{$white_addr}{domain}}) {
-        if ($scanner->{dkim_address} =~ $regexp) {
-	  if ($scanner->{dkim_identity} =~ /(?:^|\.|(?:@(?!@)|(?=@)))\Q${domain}\E$/i) {
-	    dbg("dkim: address: $scanner->{dkim_address} matches whitelist_from_dkim ".
-		"$scanner->{conf}->{whitelist_from_dkim}->{$white_addr}{re} ${domain}");
-	    $scanner->{dkim_whitelist_from} = 1;
-	    last ONE;
-	  }
-	}
-      }
+    if (!$scanner->{dkim_whitelist_from}) {
+      $scanner->{dkim_whitelist_from} =
+                    $self->_wlcheck_no_domain($scanner,'whitelist_auth');
     }
   }
 
@@ -406,11 +388,11 @@ sub _check_dkim_whitelist {
   if ($default) {
     if ($scanner->{def_dkim_whitelist_from}) {
       if ($self->check_dkim_verified($scanner)) {
-	dbg("dkim: address: $scanner->{dkim_address} identity: ".
-	  "$scanner->{dkim_identity} is in user's DEF_WHITELIST_FROM_DKIM and ".
-	  "passed DKIM verification");
+        dbg("dkim: address: $scanner->{dkim_address} identity: ".
+          "$scanner->{dkim_identity} is in user's DEF_WHITELIST_FROM_DKIM and ".
+          "passed DKIM verification");
       } else {
-	dbg("dkim: address: $scanner->{dkim_address} identity: ".
+        dbg("dkim: address: $scanner->{dkim_address} identity: ".
 	  "$scanner->{dkim_identity} is in user's DEF_WHITELIST_FROM_DKIM but ".
 	  "failed DKIM verification");
 	$scanner->{def_dkim_whitelist_from} = 0;
@@ -436,6 +418,45 @@ sub _check_dkim_whitelist {
 	  "$scanner->{dkim_identity} is not in user's WHITELIST_FROM_DKIM");
     }
   }
+}
+
+
+sub _wlcheck_domain {
+  my ($self, $scan, $wl) = @_;
+
+  foreach my $white_addr (keys %{$scan->{conf}->{$wl}}) {
+    my $re = qr/$scan->{conf}->{$wl}->{$white_addr}{re}/i;
+    foreach my $domain (@{$scan->{conf}->{$wl}->{$white_addr}{domain}}) {
+      $self->_wlcheck_one_dom($scan, $wl, $white_addr, $domain, $re) and return 1;
+    }
+  }
+  return 0;
+}
+
+sub _wlcheck_one_dom {
+  my ($self, $scan, $wl, $white_addr, $domain, $re) = @_;
+  if ($scan->{dkim_address} =~ $re) {
+    if ($scan->{dkim_identity} =~ /(?:^|\.|(?:@(?!@)|(?=@)))\Q${domain}\E$/i)
+    {
+      dbg("dkim: address: $scan->{dkim_address} matches $wl $re $domain");
+      return 1;
+    }
+  }
+  return 0;
+}
+
+# use a traditional whitelist_from-style addrlist, and infer the
+# domain from each address on the fly.  Note: don't pre-parse and
+# store the domains; that's inefficient memory-wise and only saves 1 m//
+sub _wlcheck_no_domain {
+  my ($self, $scan, $wl) = @_;
+
+  foreach my $white_addr (keys %{$scan->{conf}->{$wl}}) {
+    my $domain = ($white_addr =~ /\@(.*?)$/) ? $1 : $white_addr;
+    my $re = $scan->{conf}->{$wl}->{$white_addr};
+    $self->_wlcheck_one_dom($scan, $wl, $white_addr, $domain, $re) and return 1;
+  }
+  return 0;
 }
 
 1;

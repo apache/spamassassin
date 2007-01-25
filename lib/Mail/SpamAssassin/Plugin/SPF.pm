@@ -674,16 +674,9 @@ sub _check_spf_whitelist {
     return;
   }
 
-  if (defined ($scanner->{conf}->{whitelist_from_spf}->{$scanner->{sender}})) {
-    $scanner->{spf_whitelist_from} = 1;
-  } else {
-    study $scanner->{sender};
-    foreach my $regexp (values %{$scanner->{conf}->{whitelist_from_spf}}) {
-      if ($scanner->{sender} =~ qr/$regexp/i) {
-        $scanner->{spf_whitelist_from} = 1;
-        last;
-      }
-    }
+  $scanner->{spf_whitelist_from} = $self->_wlcheck($scanner,'whitelist_from_spf');
+  if (!$scanner->{spf_whitelist_from}) {
+    $scanner->{spf_whitelist_from} = $self->_wlcheck($scanner, 'whitelist_auth');
   }
 
   # if the message doesn't pass SPF validation, it can't pass an SPF whitelist
@@ -719,16 +712,9 @@ sub _check_def_spf_whitelist {
     return;
   }
 
-  if (defined ($scanner->{conf}->{def_whitelist_from_spf}->{$scanner->{sender}})) {
-    $scanner->{def_spf_whitelist_from} = 1;
-  } else {
-    study $scanner->{sender};
-    foreach my $regexp (values %{$scanner->{conf}->{def_whitelist_from_spf}}) {
-      if ($scanner->{sender} =~ qr/$regexp/i) {
-        $scanner->{def_spf_whitelist_from} = 1;
-        last;
-      }
-    }
+  $scanner->{def_spf_whitelist_from} = $self->_wlcheck($scanner,'def_whitelist_from_spf');
+  if (!$scanner->{def_spf_whitelist_from}) {
+    $scanner->{def_spf_whitelist_from} = $self->_wlcheck($scanner, 'def_whitelist_auth');
   }
 
   # if the message doesn't pass SPF validation, it can't pass an SPF whitelist
@@ -742,6 +728,21 @@ sub _check_def_spf_whitelist {
   } else {
     dbg("spf: def_whitelist_from_spf: $scanner->{sender} is not in DEF_WHITELIST_FROM_SPF");
   }
+}
+
+sub _wlcheck {
+  my ($self, $scanner, $param) = @_;
+  if (defined ($scanner->{conf}->{$param}->{$scanner->{sender}})) {
+    return 1;
+  } else {
+    study $scanner->{sender};
+    foreach my $regexp (values %{$scanner->{conf}->{$param}}) {
+      if ($scanner->{sender} =~ qr/$regexp/i) {
+        return 1;
+      }
+    }
+  }
+  return 0;
 }
 
 ###########################################################################
