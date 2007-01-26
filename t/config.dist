@@ -51,3 +51,9 @@ run_spamd_prefork_stress_test=n
 # TODO: we need a better way to test this.
 run_rule_name_tests=n
 
+# ---------------------------------------------------------------------------
+
+# This test requires the Devel::SawAmpersand CPAN module, and may also fail
+# depending on changes in the third-party modules we import.
+run_saw_ampersand_test=n
+
