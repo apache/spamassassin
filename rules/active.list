@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-fredt bb-jm bb-zmi cthielen daf dos theo
+# with results from: bb-doc bb-fredt bb-jm bb-zmi daf dos theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -128,6 +128,9 @@ DNS_FROM_SECURITYSAGE
 DOS_STOCK_BAT
 
 # good enough
+DOS_URI_ASTERISK
+
+# good enough
 DOS_YOUR_PLACE
 
 # good enough
@@ -225,9 +228,6 @@ FB_MORE_SIZE
 
 # good enough
 FB_NOT_PHONE_NUM1
-
-# good enough
-FB_NOT_PHONE_NUM3
 
 # good enough
 FB_NOT_SCHOOL
@@ -498,6 +498,9 @@ FRT_ROLEX
 
 # good enough
 FRT_SEXUAL
+
+# good enough
+FRT_SOMA
 
 # good enough
 FRT_STRONG1
@@ -833,6 +836,12 @@ RCVD_IN_BSP_OTHER
 RCVD_IN_BSP_TRUSTED
 
 # tflags net
+RCVD_IN_DNSWL_LOW
+
+# tflags net
+RCVD_IN_DNSWL_MED
+
+# tflags net
 RCVD_IN_DOB
 
 # tflags net
@@ -1082,6 +1091,9 @@ TVD_FUZZY_PHARMACEUTICAL
 TVD_FUZZY_SYMBOL
 
 # good enough
+TVD_FW_GRAPHIC_ID1
+
+# good enough
 TVD_INCREASE_SIZE
 
 # good enough
@@ -1092,6 +1104,9 @@ TVD_PH_REC
 
 # good enough
 TVD_PH_SUBJ_ACCOUNTS_POST
+
+# good enough
+TVD_PH_SUBJ_UPDATE
 
 # good enough
 TVD_PH_SUBJ_URGENT
@@ -1151,13 +1166,37 @@ TVD_VISIT_PHARMA
 TVD_VIS_HIDDEN
 
 # good enough
-CTYPE_8SPACE_GIF
+CTYPE_1SPACE_GIF
 
 # good enough
-DOS_URI_ASTERISK
+FB_FAKE_NUMS4
 
 # good enough
-FRT_SOMA
+FB_GET_MEDS
+
+# good enough
+FB_GVR
+
+# good enough
+FB_ONIINE
+
+# good enough
+FM_FAKE_HELO_HOTMAIL
+
+# good enough
+FM_SUBJ_APPROVE
+
+# good enough
+FS_REFI
+
+# good enough
+FS_START_LOSE
+
+# good enough
+HS_MEETUP_FOR_SEX
+
+# good enough
+HTTPS_HTTP_MISMATCH
 
 # tflags net
 RCVD_IN_DNSWL_HI
@@ -1187,31 +1226,55 @@ RCVD_IN_WHOIS_INVALID
 RCVD_IN_XBL
 
 # good enough
-STOX_REPLY_TYPE
+TVD_FW_GRAPHIC_ID1
 
 # good enough
-TVD_FW_GRAPHIC_ID3
+TVD_FW_GRAPHIC_ID2
 
 # good enough
-TVD_FW_GRAPHIC_ID3_2
+TVD_PH_SUBJ_ACCOUNTS_PRE
 
 # good enough
-TVD_FW_GRAPHIC_NAME_LONG
+TVD_PH_SUBJ_META_ALL
 
 # good enough
-TVD_FW_GRAPHIC_NAME_MID
+TVD_SILLY_URI_OBFU2
 
-# good enough
-TVD_PH_7
+# tflags net
+URIBL_COMPLETEWHOIS
 
-# good enough
-TVD_PH_SUBJ_UPDATE
+# tflags net
+URIBL_L1SPEWS
 
-# good enough
-TVD_RCVD_SPACE_BRACKET
+# tflags net
+URIBL_L2SPEWS
 
-# good enough
-TVD_SINGLE_SPAN_DIV
+# tflags net
+URIBL_RHS_ABUSE
+
+# tflags net
+URIBL_RHS_AHBL
+
+# tflags net
+URIBL_RHS_BOGUSMX
+
+# tflags net
+URIBL_RHS_DSN
+
+# tflags net
+URIBL_RHS_POST
+
+# tflags net
+URIBL_RHS_TLD_WHOIS
+
+# tflags net
+URIBL_RHS_URIBL_BLACK
+
+# tflags net
+URIBL_RHS_URIBL_GREY
+
+# tflags net
+URIBL_RHS_WHOIS
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1515,9 +1578,6 @@ XMAILER_MIMEOLE_OL_CAC8F
 
 # good enough
 XMAILER_MIMEOLE_OL_CF0C0
-
-# good enough
-XMAILER_MIMEOLE_OL_D03AB
 
 # good enough
 XMAILER_MIMEOLE_OL_EF20B
