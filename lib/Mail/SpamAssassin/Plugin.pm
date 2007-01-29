@@ -331,7 +331,8 @@ APIs on that object, too.  See C<Mail::SpamAssassin::PerMsgStatus> perldoc.
 
 =item $plugin->check_main ( { options ... } )
 
-Signals that a message should be checked.
+Signals that a message should be checked.  Note that implementations of
+this hook should return C<1>.
 
 =over 4
 

@@ -142,7 +142,7 @@ sub check_main {
   $pms->learn();
   $self->{main}->call_plugins ("check_post_learn", { permsgstatus => $pms });
 
-  return;
+  return 1;
 }
 
 sub finish_tests {
