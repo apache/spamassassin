@@ -204,6 +204,7 @@ sub lint_rule_text {
 
   # ensure we turn off slow/optional stuff for linting!
   my $pretext = q{
+    loadplugin Mail::SpamAssassin::Plugin::Check
     use_bayes 0
   };
 
