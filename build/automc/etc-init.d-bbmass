@@ -14,15 +14,18 @@
 . /etc/profile
 
 PATH=$PATH:/sbin:/usr/sbin:/usr/local/bin:/usr/sfw/bin:/opt/sfw/bin:/opt/SUNWspro/bin:/opt/subversion-1.1.4/bin:/usr/apache2/bin:/local/bin
-export PATH
+
+PATH=/local/bbmass-buildbot-live/bin:$PATH
+PYTHONPATH=/local/bbmass-buildbot-live/lib/python
+export PATH PYTHONPATH
 
 prog=bbmass
 runall () {
-    buildbot $1 /home/buildbot/bots/bbmass
-    nice buildbot $1 /home/bbmass/slaves/mc-fast
-    nice buildbot $1 /home/bbmass/slaves/mc-med
-    nice buildbot $1 /home/bbmass/slaves/mc-slow
-    nice buildbot $1 /home/bbmass/slaves/mc-slower
+    su buildbot -c "buildbot $1 /home/buildbot/bots/bbmass"
+    nice su bbmass -c "buildbot $1 /home/bbmass/slaves/mc-fast"
+    nice su bbmass -c "buildbot $1 /home/bbmass/slaves/mc-med"
+    nice su bbmass -c "buildbot $1 /home/bbmass/slaves/mc-slow"
+    nice su bbmass -c "buildbot $1 /home/bbmass/slaves/mc-slower"
 }
 
 start() {
