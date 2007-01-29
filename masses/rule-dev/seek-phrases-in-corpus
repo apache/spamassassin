@@ -95,6 +95,7 @@ my $re = $opt{grep};
 # don't grep the ham set!
 run("cd $sadir/masses && ".
     "./mass-check --cf='loadplugin Dumptext plugins/Dumptext.pm' ".
+    " --cf='loadplugin Mail::SpamAssassin::Plugin::Check' ".
     " --cf='loadplugin GrepRenderedBody plugins/GrepRenderedBody.pm' ".
     " -n -o --showdots -c=/dev/null ".
     " $mcargs_h > $tmpdir/w.h");
@@ -102,6 +103,7 @@ run("cd $sadir/masses && ".
 # *do* grep the spam, though
 run("cd $sadir/masses && ".
     "./mass-check --cf='loadplugin Dumptext plugins/Dumptext.pm' ".
+    " --cf='loadplugin Mail::SpamAssassin::Plugin::Check' ".
     " --cf='loadplugin GrepRenderedBody plugins/GrepRenderedBody.pm' ".
     ($re ? " --cf='grep $re' " : "").
     " -n -o --showdots -c=/dev/null ".
