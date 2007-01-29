@@ -257,6 +257,8 @@ describe HEADER_COUNT_SUBJECT   Multiple Subject headers found
 
 header TVD_ENVFROM_APOST        EnvelopeFrom =~ /\'/
 
+body TVD_SILLY_URI_OBFU		m!https?://[a-z0-9-]+\.[a-z0-9-]*[^a-z0-9.:/\s"'\@?\)>-]+[a-z0-9.-]*[a-z]{3}(?:\s|$)!i
+
 body YOUR_CRD_RATING        /Your cr[d\.]* (?:scor|rat)ing doesn.t matter/
 
 header MIME_BOUND_EQ_REL    Content-Type =~ /boundary="=====================_\d+==\.REL"/s
@@ -366,6 +368,7 @@ score TVD_FUZZY_DEGREE			2.0
 endif
 
 # <gen:mutable>
+score TVD_SILLY_URI_OBFU		2.4
 score NULL_IN_BODY			2.2
 score HS_EXTRA				1.2
 score DEAR_WINNER			2.0
