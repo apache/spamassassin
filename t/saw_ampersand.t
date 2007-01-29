@@ -28,7 +28,7 @@ our $RUN_THIS_TEST;
 
 BEGIN {
   $RUN_THIS_TEST = conf_bool('run_saw_ampersand_test');
-  plan tests => (!$RUN_THIS_TEST ? 0 : 37) 
+  plan tests => (!$RUN_THIS_TEST ? 0 : 41) 
 };
 
 print "NOTE: this test requires 'run_saw_ampersand_test' set to 'y'.\n";
@@ -99,7 +99,24 @@ $plugins .= q{
   loadplugin Mail::SpamAssassin::Plugin::Razor2
 };
 write_plugin_pre($plugins);
-tryone (0, "");
+tryone (0, "
+score RAZOR2_CHECK 0
+score RAZOR2_CF_RANGE_51_100 0
+score RAZOR2_CF_RANGE_E4_51_100 0
+score RAZOR2_CF_RANGE_E8_51_100 0
+");
+
+print "\ntrying net with Razor2 rule plugins\n";
+$plugins .= q{
+  loadplugin Mail::SpamAssassin::Plugin::Razor2
+};
+write_plugin_pre($plugins);
+tryone (0, "
+score RAZOR2_CHECK 1
+score RAZOR2_CF_RANGE_51_100 1
+score RAZOR2_CF_RANGE_E4_51_100 1
+score RAZOR2_CF_RANGE_E8_51_100 1
+");
 
 print "\ntrying net with DK rule plugins\n";
 $plugins .= q{
