@@ -123,6 +123,7 @@ sub try_extraction {
   open (OUT, ">log/test_rules_copy/00_test.cf") or die "failed to write rule";
   print OUT "
     use_bayes 0     # disable bayes loading
+    loadplugin Mail::SpamAssassin::Plugin::Check
     loadplugin Mail::SpamAssassin::Plugin::BodyRuleBaseExtractor
     ".$rules;
   close OUT;
