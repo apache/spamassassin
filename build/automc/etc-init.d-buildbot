@@ -7,14 +7,17 @@
 
 . /etc/profile
 
-PATH=$PATH:/sbin:/usr/sbin:/usr/local/bin:/usr/sfw/bin:/opt/sfw/bin:/opt/SUNWspro/bin:/opt/subversion-1.1.4/bin:/usr/apache2/bin:/local/bin
+PATH=/local/buildbot-live/bin:$PATH:/sbin:/usr/sbin:/usr/local/bin:/usr/sfw/bin:/opt/sfw/bin:/opt/SUNWspro/bin:/opt/subversion-1.1.4/bin:/usr/apache2/bin:/local/bin
 export PATH
+
+PYTHONPATH=/local/buildbot-live/lib/python
+export PYTHONPATH
 
 prog=buildbot
 runall () {
-    buildbot $1 /home/buildbot/bots/sa
-    nice buildbot $1 /home/buildbot/slaves/zone-sol10
-    nice buildbot $1 /home/buildbot/slaves/sol10-perl561
+    su buildbot -c "buildbot $1 /home/buildbot/bots/sa"
+    nice su buildbot -c "buildbot $1 /home/buildbot/slaves/zone-sol10"
+    nice su buildbot -c "buildbot $1 /home/buildbot/slaves/sol10-perl561"
 }
 
 start() {
