@@ -135,6 +135,20 @@ my @OPTIONAL_MODULES = (
   more precisely in spamd.',
 },
 {
+  module => 'Mail::DomainKeys',
+  version => '0.00',
+  desc => 'If this module is installed, and you enable the DomainKeys plugin,
+  SpamAssassin will perform Domain Key lookups when Domain Key
+  information is present in the message headers.'
+},
+{
+  module => 'Mail::DKIM',
+  version => '0.00',
+  desc => 'If this module is installed, and you enable the DKIM plugin,
+  SpamAssassin will perform DKIM lookups when a DKIM-Signature header is
+  present in the message headers.'
+},
+{
   module => 'DBI',
   version => '0.00',
   desc => 'If you intend to use SpamAssassin with an SQL database backend for
