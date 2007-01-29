@@ -155,9 +155,14 @@ sub check {
     $self->{conf}->set_score_set ($set|2);
   }
 
-  # The primary check functionality occurs via a plugin call.  For more information please
-  # see: Mail::SpamAssassin::Plugin::Check
+  # The primary check functionality occurs via a plugin call.  For more
+  # information, please see: Mail::SpamAssassin::Plugin::Check
   $self->{main}->call_plugins ("check_main", { permsgstatus => $self });
+
+  # did anything happen?  if not, this is fatal
+  if (!$self->{score} && !$self->{main}->have_plugin("check_main")) {
+    die "check: no loaded plugin implements 'check_main': cannot scan!";
+  }
 
   # delete temporary storage and memory allocation used during checking
   $self->delete_fulltext_tmpfile();
