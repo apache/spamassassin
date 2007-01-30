@@ -23,18 +23,6 @@ runall () {
 }
 
 start() {
-    echo "Mounting tmpfs: "
-    [ -d /export/home/bbmass/tmpfs ] || mkdir -p /export/home/bbmass/tmpfs
-    mount -F tmpfs swap /export/home/bbmass/tmpfs
-    rm -f /tmpfs
-    ln -s /export/home/bbmass/tmpfs /tmpfs
-
-    chmod 1777 /export/home/bbmass/tmpfs
-    mkdir /tmpfs/aicache
-    chmod 1777 /tmpfs/aicache
-
-    echo "Done."
-
     echo "Starting $prog: " 
     runall start
     RETVAL=$?
@@ -46,9 +34,6 @@ stop() {
     runall stop
     RETVAL=$?
     return $RETVAL
-
-    umount /export/home/bbmass/tmpfs
-    chmod 0700 /export/home/bbmass/tmpfs
 }
 
 case "$1" in
