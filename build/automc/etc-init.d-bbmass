@@ -3,7 +3,7 @@
 # to create a new slave:
 #
 # PASSWORD=[whatever]
-# buildbot slave /home/buildbot/slaves/slave-name buildbot.spamassassin.org:9989 slave-name $PASSWORD
+# buildbot slave /export/home/buildbot/slaves/slave-name buildbot.spamassassin.org:9989 slave-name $PASSWORD
 
 # to use a real tmpfs, add this to /etc/vfstab:
 #
@@ -21,11 +21,11 @@ export PATH PYTHONPATH
 
 prog=bbmass
 runall () {
-    su buildbot -c "buildbot $1 /home/buildbot/bots/bbmass"
-    nice su bbmass -c "buildbot $1 /home/bbmass/slaves/mc-fast"
-    nice su bbmass -c "buildbot $1 /home/bbmass/slaves/mc-med"
-    nice su bbmass -c "buildbot $1 /home/bbmass/slaves/mc-slow"
-    nice su bbmass -c "buildbot $1 /home/bbmass/slaves/mc-slower"
+    su buildbot -c "buildbot $1 /export/home/buildbot/bots/bbmass"
+    nice su bbmass -c "buildbot $1 /export/home/bbmass/slaves/mc-fast"
+    nice su bbmass -c "buildbot $1 /export/home/bbmass/slaves/mc-med"
+    nice su bbmass -c "buildbot $1 /export/home/bbmass/slaves/mc-slow"
+    nice su bbmass -c "buildbot $1 /export/home/bbmass/slaves/mc-slower"
 }
 
 start() {

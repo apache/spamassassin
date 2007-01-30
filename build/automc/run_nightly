@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # driver for nightly mass-checks on the zone. run from cron as:
-# 10 9,10 * * * /home/automc/svn/spamassassin/build/automc/run_nightly > /var/www/buildbot.spamassassin.org/bbmass/nightly_masschecks.txt 2>&1
+# 10 9,10 * * * /export/home/automc/svn/spamassassin/build/automc/run_nightly > /var/www/buildbot.spamassassin.org/bbmass/nightly_masschecks.txt 2>&1
 #
 # details: http://wiki.apache.org/spamassassin/NightlyMassCheck
 
@@ -14,7 +14,7 @@ nightly_users="
 "
 
 # and where the $HOMEs are:
-nightly_trees="/home/bbmass/mc-nightly"
+nightly_trees="/export/home/bbmass/mc-nightly"
 
 
 # Ensure we're running after 0900 UTC; complex due to daylight savings. If
@@ -31,7 +31,7 @@ nightly_trees="/home/bbmass/mc-nightly"
 )
 
 # create the targets files:
-/home/automc/svn/spamassassin/build/automc/populate_cor_nightly
+/export/home/automc/svn/spamassassin/build/automc/populate_cor_nightly
 
 echo "run_nightly starting at" ; date
 
