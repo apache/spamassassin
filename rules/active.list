@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-fredt bb-jm bb-zmi daf dos theo zmi
+# with results from: bb-doc bb-fredt bb-jm daf dos theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -188,6 +188,9 @@ FB_EXTRA_INCHES
 FB_FAKE_NUMBERS
 
 # good enough
+FB_FAKE_NUMS4
+
+# good enough
 FB_FHARMACY
 
 # good enough
@@ -195,6 +198,12 @@ FB_FORWARD_LOOK
 
 # good enough
 FB_GAPPY_ADDRESS
+
+# good enough
+FB_GET_MEDS
+
+# good enough
+FB_GVR
 
 # good enough
 FB_HEY_BRO_COMMA
@@ -278,9 +287,6 @@ FB_SPUR_M
 FB_STOCK_EXPLODE
 
 # good enough
-FB_SYMBLO
-
-# good enough
 FB_THOUS_PERSONAL
 
 # good enough
@@ -324,9 +330,6 @@ FH_FROM_HOODIA
 
 # good enough
 FH_HAS_XAIMC
-
-# good enough
-FH_HAS_XID
 
 # good enough
 FH_HELO_ALMOST_IP
@@ -398,6 +401,9 @@ FM_DOESNT_SAY_STOCK
 FM_FAKE_53COM_SPOOF
 
 # good enough
+FM_FAKE_HELO_HOTMAIL
+
+# good enough
 FM_FAKE_HELO_VERIZON
 
 # good enough
@@ -452,6 +458,9 @@ FM_SEX_HELODDDD
 FM_SEX_HOSTDDDD
 
 # good enough
+FM_SUBJ_APPROVE
+
+# good enough
 FM_TRUE_LOV_ALL_N
 
 # good enough
@@ -477,9 +486,6 @@ FRT_GUARANTEE1
 
 # good enough
 FRT_LEVITRA
-
-# good enough
-FRT_MEETING
 
 # good enough
 FRT_OFFER2
@@ -576,6 +582,9 @@ FS_PHARMASUB2
 
 # good enough
 FS_RAMROD
+
+# good enough
+FS_REFI
 
 # good enough
 FS_REPLICA
@@ -731,6 +740,9 @@ HS_UPLOADED_SOFTWARE
 HTML_CHARSET_FARAWAY
 
 # good enough
+HTTPS_HTTP_MISMATCH
+
+# good enough
 JM_RCVD_QMAILV1
 
 # good enough
@@ -834,12 +846,6 @@ RCVD_IN_BSP_OTHER
 
 # tflags net
 RCVD_IN_BSP_TRUSTED
-
-# tflags net
-RCVD_IN_DNSWL_LOW
-
-# tflags net
-RCVD_IN_DNSWL_MED
 
 # tflags net
 RCVD_IN_DOB
@@ -1091,9 +1097,6 @@ TVD_FUZZY_PHARMACEUTICAL
 TVD_FUZZY_SYMBOL
 
 # good enough
-TVD_FW_GRAPHIC_ID1
-
-# good enough
 TVD_INCREASE_SIZE
 
 # good enough
@@ -1104,6 +1107,12 @@ TVD_PH_REC
 
 # good enough
 TVD_PH_SUBJ_ACCOUNTS_POST
+
+# good enough
+TVD_PH_SUBJ_ACCOUNTS_PRE
+
+# good enough
+TVD_PH_SUBJ_META_ALL
 
 # good enough
 TVD_PH_SUBJ_UPDATE
@@ -1166,37 +1175,10 @@ TVD_VISIT_PHARMA
 TVD_VIS_HIDDEN
 
 # good enough
-CTYPE_1SPACE_GIF
+CTYPE_8SPACE_GIF
 
 # good enough
-FB_FAKE_NUMS4
-
-# good enough
-FB_GET_MEDS
-
-# good enough
-FB_GVR
-
-# good enough
-FB_ONIINE
-
-# good enough
-FM_FAKE_HELO_HOTMAIL
-
-# good enough
-FM_SUBJ_APPROVE
-
-# good enough
-FS_REFI
-
-# good enough
-FS_START_LOSE
-
-# good enough
-HS_MEETUP_FOR_SEX
-
-# good enough
-HTTPS_HTTP_MISMATCH
+FH_FROM_RND_1
 
 # tflags net
 RCVD_IN_DNSWL_HI
@@ -1226,55 +1208,10 @@ RCVD_IN_WHOIS_INVALID
 RCVD_IN_XBL
 
 # good enough
-TVD_FW_GRAPHIC_ID1
+TVD_FW_GRAPHIC_NAME_LONG
 
 # good enough
-TVD_FW_GRAPHIC_ID2
-
-# good enough
-TVD_PH_SUBJ_ACCOUNTS_PRE
-
-# good enough
-TVD_PH_SUBJ_META_ALL
-
-# good enough
-TVD_SILLY_URI_OBFU2
-
-# tflags net
-URIBL_COMPLETEWHOIS
-
-# tflags net
-URIBL_L1SPEWS
-
-# tflags net
-URIBL_L2SPEWS
-
-# tflags net
-URIBL_RHS_ABUSE
-
-# tflags net
-URIBL_RHS_AHBL
-
-# tflags net
-URIBL_RHS_BOGUSMX
-
-# tflags net
-URIBL_RHS_DSN
-
-# tflags net
-URIBL_RHS_POST
-
-# tflags net
-URIBL_RHS_TLD_WHOIS
-
-# tflags net
-URIBL_RHS_URIBL_BLACK
-
-# tflags net
-URIBL_RHS_URIBL_GREY
-
-# tflags net
-URIBL_RHS_WHOIS
+TVD_FW_GRAPHIC_NAME_MID
 
 # tflags userconf
 UNPARSEABLE_RELAY
