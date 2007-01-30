@@ -45,6 +45,9 @@ unlink ("ham.log", "spam.log");
 system ("rm -rf tstrules");
 run "mkdir tstrules";
 
+system ("mkdir /tmpfs/aicache");
+system ("chmod 1777 /tmpfs/aicache");
+
 run "cp ../rules/*.* tstrules";
 run "cp plugins/*.* tstrules";
 
