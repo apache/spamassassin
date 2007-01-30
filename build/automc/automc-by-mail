@@ -17,7 +17,7 @@ my $ALLOWED_MAIL_PEOPLE = qr/^(?:
 	)/isx;
 
 # where the files are saved
-my $OUT_DIR = "/home/bbmass/bymail";
+my $OUT_DIR = "/export/home/bbmass/bymail";
 
 # URL used to trigger the buildbot to build
 my $BB_URL = 'http://buildbot.spamassassin.org/preflight/__SLAVE__'.

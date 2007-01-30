@@ -10,14 +10,14 @@ prog=freqsd
 start() {
     echo "Starting $prog: " 
 
-    cd /home/automc/svn/spamassassin
-    rm /home/automc/freqsd/log
+    cd /export/home/automc/svn/spamassassin
+    rm /export/home/automc/freqsd/log
 
-    HOME=/home/automc
+    HOME=/export/home/automc
     export HOME
 
-    su automc -c "./build/automc/freqsd -pidfile /home/automc/freqsd/pid" \
-	> /home/automc/freqsd/log 2>&1 \
+    su automc -c "./build/automc/freqsd -pidfile /export/home/automc/freqsd/pid" \
+	> /export/home/automc/freqsd/log 2>&1 \
 	< /dev/null &
 
     echo
@@ -25,8 +25,8 @@ start() {
 }
 
 stop() {
-    cd /home/automc/svn/spamassassin
-    su automc -c "./build/automc/freqsd -pidfile /home/automc/freqsd/pid -kill"
+    cd /export/home/automc/svn/spamassassin
+    su automc -c "./build/automc/freqsd -pidfile /export/home/automc/freqsd/pid -kill"
 
     # sleep 1
     # pkill -15 -f automc/freqsd            # just in case

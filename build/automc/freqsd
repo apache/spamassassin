@@ -20,9 +20,9 @@ GetOptions(
     "kill" => \$opt_kill,
 );
 
-my $dq_fast = IPC::DirQueue->new({ dir => "/home/automc/freqsd/dq_fast" });
-my $dq_slow = IPC::DirQueue->new({ dir => "/home/automc/freqsd/dq_slow" });
-$pidfile ||= "/home/automc/freqsd/pid";
+my $dq_fast = IPC::DirQueue->new({ dir => "/export/home/automc/freqsd/dq_fast" });
+my $dq_slow = IPC::DirQueue->new({ dir => "/export/home/automc/freqsd/dq_slow" });
+$pidfile ||= "/export/home/automc/freqsd/pid";
 
 umask(002);
 

@@ -3,7 +3,7 @@
 # to create a new slave:
 #
 # PASSWORD=[whatever]
-# buildbot slave /home/buildbot/slaves/slave-name buildbot.spamassassin.org:9988 slave-name $PASSWORD
+# buildbot slave /export/home/buildbot/slaves/slave-name buildbot.spamassassin.org:9988 slave-name $PASSWORD
 
 . /etc/profile
 
@@ -15,9 +15,9 @@ export PYTHONPATH
 
 prog=buildbot
 runall () {
-    su buildbot -c "buildbot $1 /home/buildbot/bots/sa"
-    nice su buildbot -c "buildbot $1 /home/buildbot/slaves/zone-sol10"
-    nice su buildbot -c "buildbot $1 /home/buildbot/slaves/sol10-perl561"
+    su buildbot -c "buildbot $1 /export/home/buildbot/bots/sa"
+    nice su buildbot -c "buildbot $1 /export/home/buildbot/slaves/zone-sol10"
+    nice su buildbot -c "buildbot $1 /export/home/buildbot/slaves/sol10-perl561"
 }
 
 start() {
