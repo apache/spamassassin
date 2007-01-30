@@ -1626,7 +1626,8 @@ sub client_mode {
   $uri ||= "/";
 
   # use this to track how many messages we ought to be requesting
-  my $msgnum = $opt_cs_max;
+  # start at 100 to get warmed up
+  my $msgnum = $opt_cs_max > 100 ? 100 : $opt_cs_max;
 
   my $tmpdir;
 
