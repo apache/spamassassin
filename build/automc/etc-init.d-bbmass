@@ -28,7 +28,11 @@ start() {
     mount -F tmpfs swap /export/home/bbmass/tmpfs
     rm -f /tmpfs
     ln -s /export/home/bbmass/tmpfs /tmpfs
+
     chmod 1777 /export/home/bbmass/tmpfs
+    mkdir /tmpfs/aicache
+    chmod 1777 /tmpfs/aicache
+
     echo "Done."
 
     echo "Starting $prog: " 
