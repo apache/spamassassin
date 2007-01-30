@@ -5,12 +5,6 @@
 # PASSWORD=[whatever]
 # buildbot slave /export/home/buildbot/slaves/slave-name buildbot.spamassassin.org:9989 slave-name $PASSWORD
 
-# to use a real tmpfs, add this to /etc/vfstab:
-#
-# swap            -               /export/home/bbmass/tmpfs       tmpfs - no      -
-#
-# this is now off; the disk I/O speeds have improved, it's no longer necessary.
-
 . /etc/profile
 
 PATH=$PATH:/sbin:/usr/sbin:/usr/local/bin:/usr/sfw/bin:/opt/sfw/bin:/opt/SUNWspro/bin:/opt/subversion-1.1.4/bin:/usr/apache2/bin:/local/bin
@@ -29,11 +23,13 @@ runall () {
 }
 
 start() {
-    # echo "Mounting tmpfs: "
-    # mount /export/home/bbmass/tmpfs
-    # echo "Done."
-
+    echo "Mounting tmpfs: "
+    [ -d /export/home/bbmass/tmpfs ] || mkdir -p /export/home/bbmass/tmpfs
+    mount -F tmpfs swap /export/home/bbmass/tmpfs
+    rm -f /tmpfs
+    ln -s /export/home/bbmass/tmpfs /tmpfs
     chmod 1777 /export/home/bbmass/tmpfs
+    echo "Done."
 
     echo "Starting $prog: " 
     runall start
@@ -47,7 +43,8 @@ stop() {
     RETVAL=$?
     return $RETVAL
 
-    # umount /export/home/bbmass/tmpfs
+    umount /export/home/bbmass/tmpfs
+    chmod 0 /export/home/bbmass/tmpfs
 }
 
 case "$1" in

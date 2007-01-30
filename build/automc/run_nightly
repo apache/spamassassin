@@ -41,6 +41,9 @@ for user in $nightly_users ; do
 
   echo "Starting corpus-nightly for $user ($dir)"
 
+  [ -d /tmpfs/aicache ] || mkdir /tmpfs/aicache
+  chmod 1777 /tmpfs/aicache
+
   (
     HOME=$dir
 
