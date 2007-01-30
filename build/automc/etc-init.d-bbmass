@@ -44,7 +44,7 @@ stop() {
     return $RETVAL
 
     umount /export/home/bbmass/tmpfs
-    chmod 0 /export/home/bbmass/tmpfs
+    chmod 0700 /export/home/bbmass/tmpfs
 }
 
 case "$1" in
