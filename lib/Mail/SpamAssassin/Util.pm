@@ -943,7 +943,8 @@ If it cannot open a file after 20 tries, it returns C<undef>.
 
 # thanks to http://www2.picante.com:81/~gtaylor/autobuse/ for this code
 sub secure_tmpfile {
-  my $tmpdir = Mail::SpamAssassin::Util::untaint_file_path(File::Spec->tmpdir());
+  my $tmpdir = Mail::SpamAssassin::Util::untaint_file_path(
+                $ENV{'TMPDIR'} || File::Spec->tmpdir());
 
   if (!$tmpdir) {
     # Note: we would prefer to keep this fatal, as not being able to
