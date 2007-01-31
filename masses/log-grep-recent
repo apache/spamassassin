@@ -68,6 +68,6 @@ warn "Month distribution:\n\n";
 my $cumul = 0;
 foreach my $m (sort { $a <=> $b } keys %buckets) {
   $cumul += $buckets{$m};
-  warn sprintf ("%8d  %8d  %3d months old\n", $cumul, $buckets{$m}, $m);
+  warn sprintf ("%8d  %8d  %2d-%d months old\n", $cumul, $buckets{$m}, $m, $m+1);
 }
 
