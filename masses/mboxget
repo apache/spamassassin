@@ -24,14 +24,15 @@ sub mywarn;
 
 use Getopt::Long qw(:config bundling auto_help);
 use Pod::Usage;
-use vars qw($opt_noannotate $opt_h);
+use vars qw($opt_noannotate $opt_h $opt_ids);
 GetOptions("noannotate" => \$opt_noannotate,
+           "ids" => \$opt_ids,
 	   "h|headers" => \$opt_h
 	  );
 
 =head1 NAME
 
-mboxget - Extract a message from an mbox (or other mail file)
+mboxget - Extract message(s) from an mbox (or other mail file)
 
 =head1 SYNOPSIS
 
@@ -39,6 +40,7 @@ mboxget - Extract a message from an mbox (or other mail file)
 
  Options:
   -h, --headers       Display only message headers
+  --ids               List only the IDs, do not generate an mbox
   --noannotate        Do not add X-Mass-Check-Id header with message path
 
 =head1 DESCRIPTION
@@ -71,6 +73,10 @@ To find the Subject lines of all spam messages that hit SUBJ_AS_SEEN
 
 grep SUBJ_AS_SEEN spam.log | mboxget -h | grep ^Subject:
 
+To get the ids or paths of messages that hit SUBJ_AS_SEEN
+
+grep SUBJ_AS_SEEN spam.log | mboxget --ids
+
 =cut
 
 
@@ -102,6 +108,12 @@ exit;
 
 sub handle_input {
   my $where = shift;
+
+  if ($opt_ids) {
+    print "$where\n";
+    return;
+  }
+
   my ($file, $offset);
 
   if (-f $where) {
