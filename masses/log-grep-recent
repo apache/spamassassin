@@ -64,10 +64,16 @@ while (<>) {
   }
 }
 
+my $numtotal = 0;
+foreach my $m (keys %buckets) {
+  $numtotal += $buckets{$m};
+}
+
 warn "Month distribution:\n\n";
 my $cumul = 0;
 foreach my $m (sort { $a <=> $b } keys %buckets) {
   $cumul += $buckets{$m};
-  warn sprintf ("%8d  %8d  %2d-%d months old\n", $cumul, $buckets{$m}, $m, $m+1);
+  warn sprintf ("%8d (%3d%%)  %8d  %2d-%d months old\n",
+            $cumul, int($cumul / ($numtotal||0.001)), $buckets{$m}, $m, $m+1);
 }
 
