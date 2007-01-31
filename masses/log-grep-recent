@@ -74,6 +74,7 @@ my $cumul = 0;
 foreach my $m (sort { $a <=> $b } keys %buckets) {
   $cumul += $buckets{$m};
   warn sprintf ("%8d (%3d%%)  %8d  %2d-%d months old\n",
-            $cumul, int($cumul / ($numtotal||0.001)), $buckets{$m}, $m, $m+1);
+            $cumul, int(($cumul / ($numtotal||0.001)) * 100),
+            $buckets{$m}, $m, $m+1);
 }
 
