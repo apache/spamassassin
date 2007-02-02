@@ -109,7 +109,7 @@ run("cd $sadir/masses && ".
     " -n -o --showdots -c=/dev/null ".
     " $mcargs_s > $tmpdir/w.s");
 
-run("perl -w $sadir/masses/rule-dev/phrase-extract-in-log ".
+run("perl -w $sadir/masses/rule-dev/seek-phrases-in-log ".
         "$tmpdir/w.h $tmpdir/w.s > $tmpdir/result");
 
 run("cat $tmpdir/result");
