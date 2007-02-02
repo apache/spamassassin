@@ -25,12 +25,14 @@ phrase-extract-in-log - extract good-looking rule phrases from a text-dump mc lo
 
 # ---------------------------------------------------------------------------
 
+my $MAX_TEXT_IN_MESSAGE = 32678;        # bytes of message text examined
+
+my $REQUIRE_PERCENT_SPAM_HITS = 0.5;    # % hitrate reqd to list
+
+# ---------------------------------------------------------------------------
+
 use warnings;
 use strict;
-
-my $MAX_TEXT_IN_MESSAGE = 32678;        # bytes of message examined
-
-my $REQUIRE_PERCENT_SPAM_HITS = 1;      # 1% hitrate reqd
 
 my $fh = shift @ARGV;
 my $fs = shift @ARGV;
@@ -41,23 +43,21 @@ my %sym2word = ('' => '');
 my $sym_acc = 'a';      # symbols are represented using IDs from this counter
 my $msgcount = 0;
 
-my @t_spam = ();
-my @t_ham = ();
-my %spam = ();
-my %ham = ();
-my $stot = 0;
-my $htot = 0;
-my %set_hit = ();
+my @text_string = ();
+my %ngram_count = ();
+my %msg_subset_hit = ();
 
-open IN, "<$fh" or die "cannot open ham log $fh";
+warn "reading $fs...\n";
+open IN, "<$fs" or die "cannot open spam log $fs";
 while (<IN>) {
-  /^text: (.*)$/ and proc_text($1, \@t_ham, \%ham, \$htot);
+  /^text: (.*)$/ and proc_text(1, $1);
 }
 close IN;
 
-open IN, "<$fs" or die "cannot open spam log $fs";
+warn "reading $fh...\n";
+open IN, "<$fh" or die "cannot open ham log $fh";
 while (<IN>) {
-  /^text: (.*)$/ and proc_text($1, \@t_spam, \%spam, \$stot);
+  /^text: (.*)$/ and proc_text(0, $1);
 }
 close IN;
 
@@ -66,12 +66,16 @@ exit;
 
 
 sub proc_text {
-  my ($text, $tary, $target, $ttotref) = @_;
+  my ($adding, $text) = @_;
 
   if (length($text) > $MAX_TEXT_IN_MESSAGE) {
     $text = substr $text, 0, $MAX_TEXT_IN_MESSAGE;      # chop!
   }
-  push @{$tary}, $text;
+
+  # we only need to save spam samples in memory, ignore ham samples
+  if ($adding) {
+    push @text_string, $text;
+  }
 
   my $cp = pack "l", $msgcount;
   $msgcount++;
@@ -99,54 +103,57 @@ sub proc_text {
   }
 
   foreach my $tok (keys %tokens) {
-    $target->{$tok}++;
-    $set_hit{$tok} .= $cp;          # the message subset hit by this tok
+    if ($adding) {
+      # incr the counter for this token
+      $ngram_count{$tok}++;
+      $msg_subset_hit{$tok} .= $cp;    # the message subset hit by this tok
+
+    } else {
+      # we're not tracking hits; we're killing false positives. 
+      # as soon as a single FP appears, kill all record of that token,
+      # it cannot be used
+      delete $ngram_count{$tok};
+      delete $msg_subset_hit{$tok};
+    }
   }
-  $$ttotref++;
 }
 
 sub summarise {
-  foreach my $id (keys %spam) {
-    $set_hit{$id} = unpack("%32C*", $set_hit{$id}); # hash
-  }
-  # note: we don't care about stuff that appears only in ham
+  warn "summarizing...\n";
 
-  $htot ||= 0.000001;
-  $stot ||= 0.000001;
+  # hash all msg_subset_hit lists; we don't need the full data, so this
+  # saves space
+  foreach my $id (keys %msg_subset_hit) {
+    $msg_subset_hit{$id} = unpack("%32C*", $msg_subset_hit{$id});
+  }
+
+  # note: we don't care about stuff that hits *any* ham at all
+  my $msg_count_spam = scalar @text_string;
+  $msg_count_spam ||= 0.000001;
 
   my %all_patterns_for_set = ();
-  my %so = ();
 
-  foreach my $id (keys %spam) {
-    my $ham = ($ham{$id} || 0) / $htot;
-    my $spam = ($spam{$id} || 0) / $stot;
-    my $t = $ham + $spam || 0.000001;
-    my $so = $spam / $t;
-
+  foreach my $id (keys %ngram_count) {
+    my $count = $ngram_count{$id};
     my $bad;
-    # only collapse sets for 1.0 S/O rules
-    if ($so != 1.0) {
-      $bad++;
-    }
-    # and must occur more than once!
-    elsif ($spam{$id} <= 1) {
+
+    # must occur more than once!
+    if ($count <= 1) {
       $bad++;
     }
     # require N% spam hits
-    elsif (($spam{$id}*100) / $stot < $REQUIRE_PERCENT_SPAM_HITS) {
+    elsif (($count*100) / $msg_count_spam < $REQUIRE_PERCENT_SPAM_HITS) {
       $bad++;
     }
 
     if ($bad) {
       # we don't need to remember anything about this pattern after here
-      delete $ham{$id};
-      delete $spam{$id};
-      delete $set_hit{$id};
+      delete $ngram_count{$id};
+      delete $msg_subset_hit{$id};
       next;
     }
 
-    $so{$id} = $so;       # since we only list 1.0 S/Os, this is irrelevant
-    my $set = $set_hit{$id};
+    my $set = $msg_subset_hit{$id};
     $all_patterns_for_set{$set} ||= [];
     push @{$all_patterns_for_set{$set}}, decode_sym2words($id);
   }
@@ -155,12 +162,10 @@ sub summarise {
 
   printf ("%6s  %6s  %6s   %s\n", "RATIO", "SPAM%", "HAM%", "DATA");
   foreach my $id (sort {
-                      # $so{$a} <=> $so{$b} ||
-                      $spam{$a} <=> $spam{$b}
-                      # || $ham{$b} <=> $ham{$a}
-                  } keys %so)
+                      $ngram_count{$a} <=> $ngram_count{$b}
+                  } keys %ngram_count)
   {
-    my $set = $set_hit{$id};
+    my $set = $msg_subset_hit{$id};
     next if $done_set{$set}; $done_set{$set}++;
 
     # we now have several patterns.  see if we can expand them sideways
@@ -170,8 +175,7 @@ sub summarise {
     # my $pats = collapse_pats_basic($all_patterns_for_set{$set});
 
     printf "%6.3f  %6.3f  %6.3f  %s\n",
-        $so{$id}, ($spam{$id}*100) / $stot, (($ham{$id}||0)*100) / $htot,
-        $pats;
+        1.0, ($ngram_count{$id}*100) / $msg_count_spam, 0, $pats;
   }
 }
 
@@ -203,7 +207,7 @@ sub collapse_pats {
     # warn "JMD $pat";
     $pat =~ s/^\s+//;
 
-    my @hits = grep /\Q$pat\E/, @t_spam;
+    my @hits = grep /\Q$pat\E/, @text_string;
     if (scalar @hits == 0) {
       warn "supposed pattern /$pat/ is 0-hitter";
       push @ret, "[*]$pat";
@@ -235,7 +239,7 @@ sub collapse_pats {
 
       # give up if there are a differing number of hits for the new pat
       my $newpat = $found.$pat;
-      if (scalar (grep /\Q$newpat\E/, @t_spam) != scalar @hits) { last; }
+      if (scalar (grep /\Q$newpat\E/, @text_string) != scalar @hits) { last; }
 
       $pat = $newpat;     # and carry on
     }
@@ -249,7 +253,7 @@ sub collapse_pats {
       }
 
       my $newpat = $pat.$1;
-      if (scalar (grep /\Q$newpat\E/, @t_spam) != scalar @hits) { last; }
+      if (scalar (grep /\Q$newpat\E/, @text_string) != scalar @hits) { last; }
 
       $pat = $newpat;     # and carry on
     }

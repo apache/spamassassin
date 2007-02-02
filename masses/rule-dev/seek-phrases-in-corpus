@@ -71,11 +71,11 @@ GetOptions(
   'grep=s'       => \$opt{grep},
 ) or die "see perldoc for usage";
 
-my $mcargs = join(' ', @ARGV);
+my $mcargs = ' '.join(' ', @ARGV).' ';
 
 # extract just the ham or spam targets
-my $mcargs_h = $mcargs; $mcargs_h =~ s/\bspam:\S+\b//gs;
-my $mcargs_s = $mcargs; $mcargs_s =~ s/\bham:\S+\b//gs;
+my $mcargs_h = $mcargs; $mcargs_h =~ s/ spam:\S+ //gs;
+my $mcargs_s = $mcargs; $mcargs_s =~ s/ ham:\S+ //gs;
 
 if ($mcargs_h !~ /\bham:/) {
   die "seek-phrases-in-corpus: no 'ham:type:path' corpus specifier found!\n";
