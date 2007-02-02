@@ -145,7 +145,7 @@ $spamtest->{bases_can_use_char_classes} = 0;
 $spamtest->{bases_split_out_alternations} = 1;
 
 my $installdir = $spamtest->sed_path('__local_state_dir__/compiled/__version__');
-if (!-w $installdir) {
+if (!-w $installdir && !defined $opt{'list'}) {
   die "sa-compile: cannot write to $installdir, aborting\n";
 }
 
