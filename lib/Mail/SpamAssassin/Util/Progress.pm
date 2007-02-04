@@ -150,17 +150,19 @@ sub init_bar {
   }
 
   # only viable on Unix based OS, so exclude windows, etc here
-  if (!defined($term_size) && $^O !~ /^(mswin|dos|os2)/oi) {
-    my $data = `stty -a`;
-    if ($data =~ /columns (\d+)/) {
-      $term_size = $1;
+  if ($^O !~ /^(mswin|dos|os2)/i) {
+    if (!defined $term_size) {
+      my $data = `stty -a`;
+      if (defined $data && $data =~ /columns (\d+)/) {
+        $term_size = $1;
+      }
     }
-  }
-  # only viable on Unix based OS, so exclude windows, etc here
-  if (!defined($term_size) && $^O !~ /^(mswin|dos|os2)/oi) {
-    my $data = `tput cols`;
-    if ($data =~ /^(\d+)/) {
-      $term_size = $1;
+
+    if (!defined $term_size) {
+      my $data = `tput cols`;
+      if (defined $data && $data =~ /^(\d+)/) {
+        $term_size = $1;
+      }
     }
   }
 
