@@ -357,6 +357,7 @@ sub parse_received_line {
   }
 
   if (/\bhelo=([-A-Za-z0-9\.]+)(?:[^-A-Za-z0-9\.]|$)/) { $helo = $1; }
+  elsif (/\b(?:HELO|EHLO) ([-A-Za-z0-9\.]+)(?:[^-A-Za-z0-9\.]|$)/) { $helo = $1; }
   if (/ by (\S+)(?:[^-A-Za-z0-9\;\.]|$)/) { $by = $1; }
 
 # ---------------------------------------------------------------------------
@@ -635,7 +636,12 @@ sub parse_received_line {
     # Received: from x71-x56-x24-5.webspeed.dk (HELO niels) (69.96.3.15) by la.mx.develooper.com (qpsmtpd/0.27-dev) with SMTP; Fri, 02 Jan 2004 19:26:52 -0800
     # Received: from sc8-sf-sshgate.sourceforge.net (HELO sc8-sf-netmisc.sourceforge.net) (66.35.250.220) by la.mx.develooper.com (qpsmtpd/0.27-dev) with ESMTP; Fri, 02 Jan 2004 14:44:41 -0800
     # Received: from mx10.topofferz.net (HELO ) (69.6.60.10) by blazing.arsecandle.org with SMTP; 3 Mar 2004 20:34:38 -0000
-    if (/^(\S+) \((?:HELO|EHLO) (\S*)\) \((${IP_ADDRESS})\) by (\S+) \(qpsmtpd\/(\S+)\) with (ESMTP|SMTP)/) {
+    if (/^(\S+) \((?:HELO|EHLO) (\S*)\) \((${IP_ADDRESS})\) by (\S+) \(qpsmtpd\/\S+\) with (?:ESMTP|SMTP)/) {
+      $rdns = $1; $helo = $2; $ip = $3; $by = $4; goto enough;
+    }
+
+    # from dslb-082-083-045-064.pools.arcor-ip.net (EHLO homepc) [82.83.45.64] by mail.gmx.net (mp010) with SMTP; 03 Feb 2007 13:13:47 +0100
+    if (/^(\S+) \((?:HELO|EHLO) (\S*)\) \[(${IP_ADDRESS})\] by (\S+) \([^\)]+\) with (?:ESMTP|SMTP)/) {
       $rdns = $1; $helo = $2; $ip = $3; $by = $4; goto enough;
     }
 
