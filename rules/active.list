@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-fredt bb-jm bb-zmi daf dos
+# with results from: bb-doc bb-fredt bb-jm bb-zmi daf dos zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -228,9 +228,6 @@ FB_LOWER_PAYM
 
 # good enough
 FB_MAKE_MONEY
-
-# good enough
-FB_NO_MORE_HTTP
 
 # good enough
 FB_NO_MORE_MAIL
@@ -938,6 +935,15 @@ RCVD_IN_BSP_OTHER
 RCVD_IN_BSP_TRUSTED
 
 # tflags net
+RCVD_IN_DNSWL_HI
+
+# tflags net
+RCVD_IN_DNSWL_LOW
+
+# tflags net
+RCVD_IN_DNSWL_MED
+
+# tflags net
 RCVD_IN_DOB
 
 # tflags net
@@ -1286,46 +1292,31 @@ TVD_VISIT_PHARMA
 TVD_VIS_HIDDEN
 
 # good enough
-CTYPE_001C_B
+CTYPE_8SPACE_GIF
 
 # good enough
-CTYPE_1SPACE_GIF
+FB_PROLONGED_HARD
 
 # good enough
-DC_GIF_MULTI_LARGO
+FRT_ESTABLISH2
 
 # good enough
-DC_IMAGE001_GIF
+FRT_GUARANTEE1
 
 # good enough
-DC_PNG_UNO_LARGO
+FRT_ROLEX
 
 # good enough
-FB_TIRED_OF_YOUR
+FS_GET_LAID
 
 # good enough
-FF_LEO_FLOAT_RIGHT
+FS_REPLICA
 
 # good enough
-FPMAP0
+HS_EXTRA
 
 # good enough
-FRT_CLICK
-
-# good enough
-FRT_CONTACT
-
-# good enough
-FRT_PHARMAC
-
-# good enough
-FRT_SOMA
-
-# good enough
-FRT_SOMA2
-
-# good enough
-FR_PORN_NOT_URL
+HS_NO_FLOWERS
 
 # tflags net
 RCVD_IN_DNSWL_HI
@@ -1355,28 +1346,46 @@ RCVD_IN_WHOIS_INVALID
 RCVD_IN_XBL
 
 # good enough
-TVD_FW_GRAPHIC_ID1
+TVD_FW_GRAPHIC_NAME_LONG
 
 # good enough
-TVD_FW_GRAPHIC_ID2
+TVD_FW_GRAPHIC_NAME_MID
 
 # good enough
-TVD_FW_GRAPHIC_ID3
+TVD_SILLY_URI_OBFU
 
 # good enough
-TVD_FW_GRAPHIC_ID3_2
+TVD_SUBJ_WIPE_DEBT
 
-# good enough
-TVD_PH_7
+# tflags net
+URIBL_COMPLETEWHOIS
 
-# good enough
-TVD_RCVD_SPACE_BRACKET
+# tflags net
+URIBL_RHS_ABUSE
 
-# good enough
-TVD_SINGLE_SPAN_DIV
+# tflags net
+URIBL_RHS_AHBL
 
-# good enough
-XMAILER_MIMEOLE_OL_7533E
+# tflags net
+URIBL_RHS_BOGUSMX
+
+# tflags net
+URIBL_RHS_DSN
+
+# tflags net
+URIBL_RHS_POST
+
+# tflags net
+URIBL_RHS_TLD_WHOIS
+
+# tflags net
+URIBL_RHS_URIBL_BLACK
+
+# tflags net
+URIBL_RHS_WHOIS
+
+# tflags net
+URIBL_XS_SURBL
 
 # tflags userconf
 UNPARSEABLE_RELAY
