@@ -454,7 +454,7 @@ sub handle_conditional {
   my $eval = '';
   my $bad = 0;
   foreach my $token (@tokens) {
-    if ($token =~ /^(\W+|[\-\+\d\.]+)$/) {
+    if ($token =~ /^(\W+|[+-]?\d+(?:\.\d+)?)$/) {
       $eval .= $1." ";          # note: untaints!
     }
     elsif ($token eq 'plugin') {
@@ -895,7 +895,7 @@ sub is_meta_valid {
   # Go through each token in the meta rule
   foreach my $token (@tokens) {
     # Numbers can't be rule names
-    if ($token =~ /^(?:\W+|\d+)$/) {
+    if ($token =~ /^(?:\W+|[+-]?\d+(?:\.\d+)?)$/) {
       $meta .= "$token ";
     }
     # Zero will probably cause more errors
