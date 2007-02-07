@@ -977,7 +977,7 @@ sub taint_safe_archive_extract {
         # also, if --allowplugins is not specified, comment out
         # all loadplugin or tryplugin lines
         if ( !$opt{'allowplugins'} ) {
-          $content =~ s{^\s*((?:load|try)plugin|bayes_store_module)\b}
+          $content =~ s{^\s*((?:load|try)plugin|bayes_store_module|auto_whitelist_factory)\b}
             {#(commented by sa-update, no --allowplugins switch specified)# $1}gmx;
         }
       }
