@@ -164,7 +164,9 @@ sub readrules {
 
     if (!defined $rules->{$rule}->{score}) {
       my $def = 1.0;
-      if ($rule =~ /^T_/) { $def = 0.01; }
+      if ($rule =~ /^T_/) {
+        $def = 0.01;
+      }
 
       if ($rules->{$rule}->{tflags} =~ /nice/) {
         $rules->{$rule}->{score} = -$def;
@@ -175,6 +177,12 @@ sub readrules {
       # if a rule didn't have a score specified, assume it's
       # mutable
       $rules->{$rule}->{mutable} = 1;
+
+      # although T_ test rules are clamped to 0.01.  this works well
+      # for release mass-checks, at least
+      if ($rule =~ /^T_/) {
+        $rules->{$rule}->{mutable} = 0;
+      }
     }
   }
 }
