@@ -23,17 +23,15 @@
 #
 ###########################################################################
 
-loadplugin Mail::SpamAssassin::Plugin::ImageInfo ImageInfo.pm
-
 ifplugin Mail::SpamAssassin::Plugin::ImageInfo
 
-# you can match by image name
-body		DC_IMAGE001_GIF		eval:image_named('image001.gif')
-describe	DC_IMAGE001_GIF		Contains image named image001.gif
+## # you can match by image name
+## body		DC_IMAGE001_GIF		eval:image_named('image001.gif')
+## describe	DC_IMAGE001_GIF		Contains image named image001.gif
 
-# you can do exact image size matches 
-body	 	DC_GIF_264_127  	eval:image_size_exact('gif','264','127')
-describe 	DC_GIF_264_127  	Found 264x127 pixel gif, possible pillz
+## # you can do exact image size matches 
+## body	 	DC_GIF_264_127  	eval:image_size_exact('gif','264','127')
+## describe 	DC_GIF_264_127  	Found 264x127 pixel gif, possible pillz
 
 # you can do image to text, or image to html ratios 
 rawbody		DC_IMG_HTML_RATIO	eval:image_to_text_ratio('all', '0.000', '0.015')
@@ -86,14 +84,14 @@ body		__PNG_AREA_180K		eval:pixel_coverage('png','180000','475000')
 meta	 	DC_GIF_UNO_LARGO	( __GIF_ATTACH_1 && __GIF_AREA_180K )
 describe 	DC_GIF_UNO_LARGO  	Message contains a single large inline gif
 
-meta		DC_GIF_MULTI_LARGO 	( __GIF_ATTACH_2P && __GIF_AREA_180K )
-describe	DC_GIF_MULTI_LARGO  	Message has 2+ inline gif covering lots of area
+## meta		DC_GIF_MULTI_LARGO 	( __GIF_ATTACH_2P && __GIF_AREA_180K )
+## describe	DC_GIF_MULTI_LARGO  	Message has 2+ inline gif covering lots of area
 
 meta	 	DC_PNG_UNO_LARGO	( __PNG_ATTACH_1 && __PNG_AREA_180K )
 describe 	DC_PNG_UNO_LARGO	Message contains a single large inline gif
 
-meta	 	DC_PNG_MULTI_LARGO 	( __PNG_ATTACH_2P && __PNG_AREA_180K )
-describe	DC_PNG_MULTI_LARGO  	Message has 2+ inline png covering lots of area
+## meta	 	DC_PNG_MULTI_LARGO 	( __PNG_ATTACH_2P && __PNG_AREA_180K )
+## describe	DC_PNG_MULTI_LARGO  	Message has 2+ inline png covering lots of area
 
 # meta	 	DC_JPEG_UNO_LARGO 	( __JPEG_ATTACH_1 && __JPEG_AREA_180K )
 # describe	DC_JPEG_UNO_LARGO  	Message hash single large inline jpeg
