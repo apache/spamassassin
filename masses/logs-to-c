@@ -330,7 +330,9 @@ int tests_count[$num_nondup];
       if ($test eq '') { next; }
 
       if ($ignored_rule{$test}) {
-        warn "ignored rule $test got a hit in $file!\n";
+        # this is not a log-worthy event anymore, since we have a lot
+        # of T_ test rules that are ignored during perceptron runs
+        # warn "ignored rule $test got a hit in $file!\n";
         next;
       }
 
@@ -340,12 +342,12 @@ int tests_count[$num_nondup];
       }
 
       if ($mutable_tests{$test}) {
-      $num_tests_hit++;
-      $out .= "t".$rule_to_index{$test}."\n";
+        $num_tests_hit++;
+        $out .= "t".$rule_to_index{$test}."\n";
 
-      if ($num_tests_hit >= $max_hits_per_msg) {
-	die "Need to increase \$max_hits_per_msg";
-      }
+        if ($num_tests_hit >= $max_hits_per_msg) {
+          die "Need to increase \$max_hits_per_msg";
+        }
       } else {
 	$base_score += $scores{$test};
       }
