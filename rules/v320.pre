@@ -12,6 +12,7 @@
 ###########################################################################
 
 # Check - Provides main check functionality
+#
 loadplugin Mail::SpamAssassin::Plugin::Check
 
 # HTTPSMismatch - find URI mismatches between href and anchor text
@@ -50,4 +51,8 @@ loadplugin Mail::SpamAssassin::Plugin::VBounce
 # requires additional configuration, see plugin's POD docs
 #
 # loadplugin Mail::SpamAssassin::Plugin::ASN
+
+# ImageInfo - rules to match metadata of image attachments
+#
+loadplugin Mail::SpamAssassin::Plugin::ImageInfo
 
