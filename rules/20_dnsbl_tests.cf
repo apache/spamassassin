@@ -157,7 +157,7 @@ tflags RCVD_IN_XBL              net
 header RCVD_IN_PBL              eval:check_rbl('zen-lastexternal', 'zen.spamhaus.org.', '127.0.0.1[01]')
 describe RCVD_IN_PBL            Received via a relay in Spamhaus PBL
 tflags RCVD_IN_PBL              net
-#reuse RCVD_IN_PBL
+#reuse RCVD_IN_PBL T_RCVD_IN_PBL_WITH_NJABL_DUL RCVD_IN_NJABL_DUL
 
 # ---------------------------------------------------------------------------
 # RFC-Ignorant blacklists (both name and IP based)
