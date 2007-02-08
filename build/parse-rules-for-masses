@@ -183,6 +183,10 @@ sub readrules {
       if ($rule =~ /^T_/) {
         $rules->{$rule}->{mutable} = 0;
       }
+      elsif ($rule eq 'AWL') {      # ignore entirely
+        $rules->{$rule}->{mutable} = 0;
+        $rules->{$rule}->{score} = 0;
+      }
     }
   }
 }
