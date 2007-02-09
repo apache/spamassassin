@@ -349,6 +349,8 @@ score DNS_FROM_RFC_DSN 0.001 2.872 0.001 2.597
 score DNS_FROM_SECURITYSAGE 0.001 2.001 0.001 1.513
 
 score NO_DNS_FOR_FROM 0.001 2.603 0.001 3.200
+
+score RCVD_IN_WHOIS_HIJACKED 0 1.0 0 1.0
 # </gen:mutable>
 
 # Bonded Sender: http://www.bondedsender.com/ 
@@ -359,9 +361,6 @@ score RCVD_IN_BSP_TRUSTED 0 -4.3 0 -4.3
 score HABEAS_ACCREDITED_COI 0 -8.0 0 -8.0
 score HABEAS_ACCREDITED_SOI 0 -4.3 0 -4.3
 score HABEAS_CHECKED 0 -0.2 0 -0.2
-
-# CompleteWhois: http://www.completewhois.com/
-score RCVD_IN_WHOIS_HIJACKED 0 1.0 0 1.0
 
 # MAPS
 # MAPS is a commercial service.  If you pay for these, assign a score
