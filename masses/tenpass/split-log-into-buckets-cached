@@ -50,7 +50,7 @@ foreach my $out (@outs) {
   my $last = $numbuckets + $out->{c};
   for ( ; $numbuckets < $last; $numbuckets++) {
     # exploit the auto-syncing semantics of >>
-    open ($buckets{$numbuckets}, ">>".$out->{out});
+    open ($buckets{$numbuckets}, ">>".$out->{out}.".tmp");
   }
 }
 
@@ -64,5 +64,8 @@ close IN;
 
 foreach my $i (1 .. $numbuckets) {
   close $buckets{$i};
+}
+foreach my $out (@outs) {
+  rename $out->{out}.".tmp", $out->{out};
 }
 
