@@ -35,17 +35,13 @@ mkdir $LOGDIR
 echo "[Generating 90/10 split ham]"
 mkdir $LOGDIR/NSBASE $LOGDIR/SPBASE
 cd $LOGDIR/NSBASE
-../../tenpass/split-log-into-buckets-random 10 < ../../ORIG/ham-$NAME.log > /dev/null
-cat split-[1-9].log > ham.log
-rm -f split-[1-9].log
-mv split-10.log ham-test.log
+../../tenpass/split-log-into-buckets-cached \
+    9:ham.log 1:ham-test.log ../../ORIG/ham-$NAME.log
 
 echo "[Generating 90/10 split spam]"
 cd ../SPBASE
-../../tenpass/split-log-into-buckets-random 10 < ../../ORIG/spam-$NAME.log > /dev/null
-cat split-[1-9].log > spam.log
-rm -f split-[1-9].log
-mv split-10.log spam-test.log
+../../tenpass/split-log-into-buckets-cached \
+    9:spam.log 1:spam-test.log ../../ORIG/spam-$NAME.log
 cd ../..
 
 echo "[Setting up for gen run]"
