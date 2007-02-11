@@ -6,6 +6,8 @@
 NAME="set$SCORESET"
 LOGDIR="gen-$NAME-$HAM_PREFERENCE-$THRESHOLD-$EPOCHS"
 
+[ -d gen-cache ] || mkdir gen-cache     # a cache, woo
+
 if [ "$NOTE" != "" ]; then
 	LOGDIR="$LOGDIR-$NOTE"
 fi
@@ -30,19 +32,21 @@ make clean >/dev/null
 
 # Create a directory to organize the logs with this group of settings
 mkdir $LOGDIR
+mkdir $LOGDIR/NSBASE $LOGDIR/SPBASE
 
 # Generate 90/10 split logs
+# keep the *-split*.logs in cwd so it's cacheable
 echo "[Generating 90/10 split ham]"
-mkdir $LOGDIR/NSBASE $LOGDIR/SPBASE
-cd $LOGDIR/NSBASE
-../../tenpass/split-log-into-buckets-cached \
-    9:ham.log 1:ham-test.log ../../ORIG/ham-$NAME.log
+tenpass/split-log-into-buckets-cached \
+    9:gen-cache/ham-split9.log 1:gen-cache/ham-split1.log ORIG/ham-$NAME.log
+cp -p gen-cache/ham-split9.log $LOGDIR/NSBASE/ham.log
+cp -p gen-cache/ham-split1.log $LOGDIR/NSBASE/ham-test.log
 
 echo "[Generating 90/10 split spam]"
-cd ../SPBASE
-../../tenpass/split-log-into-buckets-cached \
-    9:spam.log 1:spam-test.log ../../ORIG/spam-$NAME.log
-cd ../..
+tenpass/split-log-into-buckets-cached \
+    9:gen-cache/spam-split9.log 1:gen-cache/spam-split1.log ORIG/spam-$NAME.log
+cp -p gen-cache/spam-split9.log $LOGDIR/NSBASE/spam.log
+cp -p gen-cache/spam-split1.log $LOGDIR/NSBASE/spam-test.log
 
 echo "[Setting up for gen run]"
 # Ok, setup for a run
