@@ -42,6 +42,7 @@ foreach my $out (@outs) {
 
 if ($rebuild == 0) {
   print "Existing outputs are up-to-date\n";
+  exit;
 }
 
 my %buckets = ();
