@@ -58,7 +58,8 @@ srand (1);      # explicitly static seed, for reproducability
 
 open (IN, "<$input") or die "cannot open $input";
 while (<IN>) {
-  select $buckets{1+int(rand()*$numbuckets)}; print $_;
+  select $buckets{1+int(rand()*$numbuckets)}; $| = 1;
+  print $_;
 }
 close IN;
 
