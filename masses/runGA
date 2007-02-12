@@ -75,6 +75,8 @@ echo "[gen run end]"
 svn revert ../rules/50_scores.cf
 ./rewrite-cf-with-new-scores $SCORESET ../rules/50_scores.cf $LOGDIR/scores > /tmp/runGA.$$
 mv /tmp/runGA.$$ ../rules/50_scores.cf
+cp ../rules/50_scores.cf $LOGDIR/50_scores.cf
+
 ./fp-fn-statistics --ham ham-test.log --spam spam-test.log --scoreset $SCORESET --fnlog $LOGDIR/false_negatives --fplog $LOGDIR/false_positives > $LOGDIR/test
 
 else
