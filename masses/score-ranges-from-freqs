@@ -127,8 +127,12 @@ while (<>) {
     $mutable_tests{$test} = 0;
   }
   elsif ($rules{$test}->{score} == 0) {
-    print "rule $test: immutable since score is 0\n";
-    $mutable_tests{$test} = 0;
+    # this causes trouble, since rewrite-with-new-scores has a tendency
+    # to "simplify" scores down to 0.  comment, since real zero-scored rules
+    # that were scored zero when the mass-check ran, will also have no hits
+    # and the 'less than 0.01%' case below takes care of that.
+    # print "rule $test: immutable since score is 0\n";
+    # $mutable_tests{$test} = 0;
   }
 
   if ($tflags =~ m/\bnice\b/i) {
