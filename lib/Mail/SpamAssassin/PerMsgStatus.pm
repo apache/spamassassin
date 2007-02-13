@@ -2009,6 +2009,7 @@ sub get_uri_detail_list {
   # get URIs from HTML parsing
   # use the metadata version since $self->{html} may not be setup
   my $detail = $self->{msg}->{metadata}->{html}->{uri_detail} || { };
+  $self->{'uri_truncated'} = 1 if $self->{msg}->{metadata}->{html}->{uri_truncated};
 
   # don't keep dereferencing ...
   my $redirector_patterns = $self->{conf}->{redirector_patterns};
@@ -2143,6 +2144,14 @@ sub _get_parsed_uri_list {
 
         #warn("uri: got URI: $uri\n");
         push @uris, $uri;
+      }
+    }
+
+    # Make sure all the URIs are nice and short
+    foreach my $uri ( @uris ) {
+      if (length $uri > MAX_URI_LENGTH) {
+        $self->{'uri_truncated'} = 1;
+        $uri = substr $uri, 0, MAX_URI_LENGTH;
       }
     }
 

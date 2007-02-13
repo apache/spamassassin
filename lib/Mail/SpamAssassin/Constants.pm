@@ -38,6 +38,7 @@ use base qw( Exporter );
 	META_TEST_MIN_PRIORITY HARVEST_DNSBL_PRIORITY MBX_SEPARATOR
 	MAX_BODY_LINE_LENGTH MAX_HEADER_KEY_LENGTH MAX_HEADER_VALUE_LENGTH
 	MAX_HEADER_LENGTH ARITH_EXPRESSION_LEXER AI_TIME_UNKNOWN
+	MAX_URI_LENGTH
 );
 
 %EXPORT_TAGS = (
@@ -282,6 +283,9 @@ use constant MAX_HEADER_KEY_LENGTH => 256;
 use constant MAX_HEADER_VALUE_LENGTH => 8192;
 # maximum byte length of entire header
 use constant MAX_HEADER_LENGTH => 65536;
+
+# maximum byte length of any given URI
+use constant MAX_URI_LENGTH => 1024;
 
 # used for meta rules and "if" conditionals in Conf::Parser
 use constant ARITH_EXPRESSION_LEXER => qr/(?:

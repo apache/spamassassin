@@ -3167,4 +3167,9 @@ sub check_ma_non_text {
   return 0;
 }
 
+sub check_uri_truncated {
+  my $self = shift;
+  return $self->{'uri_truncated'};
+}
+ 
 1;
