@@ -57,6 +57,7 @@ $scoreset = 0 if ( !defined $scoreset );
 
 my $rules = { };
 my $reuse = { };
+$rules->{_scoreset} = $scoreset;
 readrules(@rulesdirs);
 
 my $scores = { };
