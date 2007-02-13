@@ -148,3 +148,6 @@ rawbody INTERRUPTUS           /(?:[a-zA-Z0-9]<[\/ ]{0,2}?(?!br)(?!p)(?!sup)(?!li
 describe INTERRUPTUS          Message looks to contain HTML-interrupted text
 
 body MULTIPART_ALT_NON_TEXT     eval:check_ma_non_text()
+
+body URI_TRUNCATED	eval:check_uri_truncated()
+describe URI_TRUNCATED	Message contained a URI which was truncated

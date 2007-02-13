@@ -26,6 +26,7 @@ package Mail::SpamAssassin::HTML;
 
 use HTML::Parser 3.24 ();
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Constants qw(:sa);
 
 use vars qw($re_loose $re_strict $re_other @ISA @EXPORT @EXPORT_OK);
 
@@ -143,6 +144,7 @@ sub html_end {
   $self->put_results(anchor => $self->{anchor});
 
   $self->put_results(uri_detail => $self->{uri});
+  $self->put_results(uri_truncated => $self->{uri_truncated});
 
   # final results scalars
   $self->put_results(image_area => $self->{image_area});
@@ -359,9 +361,7 @@ sub html_whitespace {
 sub push_uri {
   my ($self, $type, $uri) = @_;
 
-  # URIs don't have leading/trailing whitespace ...
-  $uri =~ s/^\s+//;
-  $uri =~ s/\s+$//;
+  $uri = $self->canon_uri($uri);
 
   my $target = target_uri($self->{base_href} || "", $uri);
 
@@ -369,6 +369,22 @@ sub push_uri {
   if (length $uri) {
     $self->{uri}->{$uri}->{types}->{$type} = 1;
   }
+}
+
+sub canon_uri {
+  my ($self, $uri) = @_;
+
+  # URIs don't have leading/trailing whitespace ...
+  $uri =~ s/^\s+//;
+  $uri =~ s/\s+$//;
+
+  # Make sure all the URIs are nice and short
+  if (length $uri > MAX_URI_LENGTH) {
+    $self->{'uri_truncated'} = 1;
+    $uri = substr $uri, 0, MAX_URI_LENGTH;
+  }
+
+  return $uri;
 }
 
 sub html_uri {
@@ -397,6 +413,8 @@ sub html_uri {
   }
   elsif ($tag eq "base") {
     if (my $uri = $attr->{href}) {
+      $uri = $self->canon_uri($uri);
+
       # use <BASE HREF="URI"> to turn relative links into absolute links
 
       # even if it is a base URI, handle like a normal URI as well
@@ -690,7 +708,7 @@ sub html_tests {
 
   # special text delimiters - <a> and <title>
   if ($tag eq "a") {
-    $self->{anchor_last} = (exists $attr->{href} ? $attr->{href} : "");
+    $self->{anchor_last} = (exists $attr->{href} ? $self->canon_uri($attr->{href}) : "");
     push(@{$self->{uri}->{$self->{anchor_last}}->{anchor_text}}, '');
     push(@{$self->{anchor}}, '');
   }
