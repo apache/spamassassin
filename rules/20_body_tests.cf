@@ -153,8 +153,10 @@ endif
 
 ifplugin Mail::SpamAssassin::Plugin::URIEval
 
-
 body HTTPS_IP_MISMATCH	eval:check_https_ip_mismatch()
 describe HTTPS_IP_MISMATCH	IP to HTTPS link found in HTML
+
+body URI_TRUNCATED	eval:check_uri_truncated()
+describe URI_TRUNCATED	Message contained a URI which was truncated
 
 endif

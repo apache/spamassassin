@@ -40,6 +40,7 @@ sub new {
   # the important bit!
   $self->register_eval_rule("check_for_http_redirector");
   $self->register_eval_rule("check_https_ip_mismatch");
+  $self->register_eval_rule("check_uri_truncated");
 
   return $self;
 }
@@ -80,6 +81,14 @@ sub check_https_ip_mismatch {
   }
 
   return 0;
+}
+
+###########################################################################
+
+# is there a better way to do this?
+sub check_uri_truncated {
+  my ($self, $pms) = @_;
+  return $pms->{'uri_truncated'};
 }
 
 1;
