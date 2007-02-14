@@ -62,6 +62,7 @@ readrules(@rulesdirs);
 
 my $scores = { };
 foreach my $key (keys %{$rules}) {
+  next if $key eq '_scoreset';
   $scores->{$key} = $rules->{$key}->{score};
 }
 
@@ -158,6 +159,7 @@ sub readrules {
   }
 
   foreach my $rule (keys %{$rules}) {
+    next if ($rule eq '_scoreset');
     if (!defined $rules->{$rule}->{type}) {
       delete $rules->{$rule};   # no rule definition -> no rule
       next;
