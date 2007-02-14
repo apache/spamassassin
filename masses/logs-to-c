@@ -419,11 +419,23 @@ sub read_ranges {
 
   # catch up on the ones missed; seems to be userconf or 0-hitters mostly.
   foreach my $t (sort keys %allrules) {
+    next if ($t eq '_scoreset');
     next if (exists($range_lo{$t}));
+
     if ($allrules{$t}->{issubrule}) {
       if (!$ignored_rule{$t}) {
         # warn "ignoring '$t': is sub-rule\n";  # no need to warn here
         $ignored_rule{$t} = 1;
+      }
+      $mutable_tests{$t} = 0;
+      next;
+    }
+    if ($t =~ /^T_/) {
+      if (!$ignored_rule{$t}) {
+        # warn "ignoring '$t': is test rule\n";  # no need to warn here
+        $ignored_rule{$t} = 1;
+	$range_lo{$t} = 0.01;    # clamp to insignificant range
+	$range_hi{$t} = 0.01;
       }
       $mutable_tests{$t} = 0;
       next;

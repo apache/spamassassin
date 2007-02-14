@@ -98,7 +98,7 @@ $opt_old ||= "../rules/50_scores.cf";
 $opt_out ||= "50_scores.cf";
 
 my $NUM_SCORESETS = 4;
-my $ZERO_MINISCULE_SCORES =     1;
+my $ZERO_MINISCULE_SCORES =     0;
 my $MINISCULE_THRESHOLD =       0.01;      # points
 
 my $UNZERO_META_PREDICATES =    1;
@@ -443,6 +443,8 @@ sub fixup_meta_predicates {
 
   while (my ($name, $info) = each %rules)
   {
+    next if ($name eq '_scoreset');
+
     my $type = $info->{type} || "unknown";
     # look at meta rules that are not disabled
     next unless ($type eq "meta" && ($name =~ /^__/ || $info->{score} != 0));
