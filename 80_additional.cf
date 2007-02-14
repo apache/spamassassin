@@ -263,6 +263,12 @@ body YOUR_CRD_RATING        /Your cr[d\.]* (?:scor|rat)ing doesn.t matter/
 
 header MIME_BOUND_EQ_REL    Content-Type =~ /boundary="=====================_\d+==\.REL"/s
 
+if version > 3.001007
+body URI_TRUNCATED     eval:check_uri_truncated()
+describe URI_TRUNCATED Message contained a URI which was truncated
+score URI_TRUNCATED 0.001
+endif
+
 ###########################################################################
 # ReplaceTags rules
 
