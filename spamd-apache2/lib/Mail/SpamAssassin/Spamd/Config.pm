@@ -95,24 +95,25 @@ sub new {
       allowed-ips|A=s@                round-robin!
       allow-tell|l                    server-cert=s
       auth-ident                      server-key=s
-      configpath|C=s                  setuid-with-ldap
-      create-prefs|c!                 setuid-with-sql|Q
-      daemonize|d!                    siteconfigpath=s
-      debug|D:s                       socketgroup=s
-      groupname|g=s                   socketmode=s
-      help|h                          socketowner=s
-      ident-timeout=f                 socketpath=s
-      ldap-config!                    sql-config|q!
-      listen-ip|ip-address|i:s@       ssl
-      local|L!                        syslog-socket=s
-      max-children|m=i                syslog|s=s
-      max-conn-per-child=i            timeout-child|t=i
-      max-spare=i                     timeout-tcp|T=i
-      min-children=i                  user-config!
-      min-spare=i                     username|u=s
-      paranoid|P!                     version|V
-      pidfile|r=s                     virtual-config-dir=s
-      port|p=s                        vpopmail|v!
+      cf=s@                           setuid-with-ldap
+      configpath|C=s                  setuid-with-sql|Q
+      create-prefs|c!                 siteconfigpath=s
+      daemonize|d!                    socketgroup=s
+      debug|D:s                       socketmode=s
+      groupname|g=s                   socketowner=s
+      help|h                          socketpath=s
+      ident-timeout=f                 sql-config|q!
+      ldap-config!                    ssl
+      listen-ip|ip-address|i:s@       syslog-socket=s
+      local|L!                        syslog|s=s
+      max-children|m=i                timeout-child|t=i
+      max-conn-per-child=i            timeout-tcp|T=i
+      max-spare=i                     user-config!
+      min-children=i                  username|u=s
+      min-spare=i                     version|V
+      paranoid|P!                     virtual-config-dir=s
+      pidfile|r=s                     vpopmail|v!
+      port|p=s
 
       home_dir_for_helpers|helper-home-dir|H:s
       PREFIX=s
