@@ -1,0 +1,120 @@
+To: Spamassassin Users List <users@spamassassin.apache.org>,
+	Spamassassin Devel List <dev@spamassassin.apache.org>,
+	Spamassassin Announcements List <announce@spamassassin.apache.org>
+Subject: ANNOUNCE: Apache SpamAssassin 3.1.8 available!
+
+Apache SpamAssassin 3.1.8 is now available!  This is a maintenance
+release of the 3.1.x branch.
+
+Downloads are available from:
+   http://spamassassin.apache.org/downloads.cgi?update=200702131500
+
+The release file will also be available via CPAN in the near future.
+
+md5sum of archive files:
+  e8184a9a4ff11da5bd20b294cfeac7ac  Mail-SpamAssassin-3.1.8.tar.bz2
+  20a3a6b651a89dcc70634715ca833996  Mail-SpamAssassin-3.1.8.tar.gz
+  c81ef93066e60353032c21991e3c9ae2  Mail-SpamAssassin-3.1.8.zip
+
+sha1sum of archive files:
+  0d092c4de6e6df66f1d0fb0ca8589147ee4096cb  Mail-SpamAssassin-3.1.8.tar.bz2
+  08f81f72d8a783887cf815dfc55ea38e3582b966  Mail-SpamAssassin-3.1.8.tar.gz
+  f172c47a896c3c78aacf21f2af99088bd53363d0  Mail-SpamAssassin-3.1.8.zip
+
+
+The release files also have a .asc accompanying them.  The file serves
+as an external GPG signature for the given release file.  The signing
+key is available via the wwwkeys.pgp.net key server, as well as
+http://spamassassin.apache.org/released/GPG-SIGNING-KEY
+
+The key information is:
+
+pub  1024D/265FA05B 2003-06-09 SpamAssassin Signing Key <release@spamassassin.org>
+      Key fingerprint = 26C9 00A4 6DD4 0CD5 AD24  F6D7 DEE0 1987 265F A05B
+
+3.1.8 is a major bug-fix release, including the following issues:
+
+- bug 5318: set a maximum internal length for URIs
+- bug 5240: disable perl module usage in update channels unless
+  --allowplugins is specified
+- bug 5288: files with names starting/ending in whitespace weren't usable
+- bug 5056: remove Text::Wrap related code due to upstream issues
+- bug 5145: update spamassassin and sa-learn to better deal with STDIN
+- bug 5140 and 5179: improvements and bug fixes related to DomainKeys
+  and DKIM support
+- several updates for Received header parsing
+- several documentation updates and random taint-variable related issues
+
+A more detailed change log can be read here:
+
+  http://svn.apache.org/repos/asf/spamassassin/branches/3.1/Changes
+
+-- 
+Randomly Selected Tagline:
+You will soon learn the secrets of butterflies.
+ Their stark, unrelenting malice will drive you gibberingly insane.
+ (from The Onion's weekly horoscope for Gemini)
+
+From felicity@apache.org Wed Feb 14 15:38:18 2007
+From: Theo Van Dinter <felicity@apache.org>
+To: Spamassassin Users List <users@spamassassin.apache.org>,
+	Spamassassin Devel List <dev@spamassassin.apache.org>,
+	Spamassassin Announcements List <announce@spamassassin.apache.org>
+Subject: ANNOUNCE: Apache SpamAssassin 3.1.8 available!
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+X-Mutt-Fcc: =sent-mail-2007-02
+Status: RO
+X-Mutt-PGP: S<0x45D60F57>
+Content-Length: 2320
+Lines: 54
+
+Apache SpamAssassin 3.1.8 is now available!  This is a maintenance and
+security release of the 3.1.x branch.  It is highly recommended that
+people upgrade to this version.
+
+Downloads are available from:
+   http://spamassassin.apache.org/downloads.cgi?update=200702131100
+
+The release file will also be available via CPAN in the near future.
+
+md5sum of archive files:
+  e8184a9a4ff11da5bd20b294cfeac7ac  Mail-SpamAssassin-3.1.8.tar.bz2
+  20a3a6b651a89dcc70634715ca833996  Mail-SpamAssassin-3.1.8.tar.gz
+  c81ef93066e60353032c21991e3c9ae2  Mail-SpamAssassin-3.1.8.zip
+
+sha1sum of archive files:
+  0d092c4de6e6df66f1d0fb0ca8589147ee4096cb  Mail-SpamAssassin-3.1.8.tar.bz2
+  08f81f72d8a783887cf815dfc55ea38e3582b966  Mail-SpamAssassin-3.1.8.tar.gz
+  f172c47a896c3c78aacf21f2af99088bd53363d0  Mail-SpamAssassin-3.1.8.zip
+
+
+The release files also have a .asc accompanying them.  The file serves
+as an external GPG signature for the given release file.  The signing
+key is available via the wwwkeys.pgp.net key server, as well as
+http://spamassassin.apache.org/released/GPG-SIGNING-KEY
+
+The key information is:
+
+pub  1024D/265FA05B 2003-06-09 SpamAssassin Signing Key <release@spamassassin.org>
+      Key fingerprint = 26C9 00A4 6DD4 0CD5 AD24  F6D7 DEE0 1987 265F A05B
+
+3.1.8 is a major bug-fix release, including a potential DoS.  The major
+highlights are:
+
+- bug 5318: fix for CVE-2007-0451: possible DoS due to incredibly
+  long URIs found in the message content.
+- bug 5240: disable perl module usage in update channels unless
+  --allowplugins is specified
+- bug 5288: files with names starting/ending in whitespace weren't usable
+- bug 5056: remove Text::Wrap related code due to upstream issues
+- bug 5145: update spamassassin and sa-learn to better deal with STDIN
+- bug 5140 and 5179: improvements and bug fixes related to DomainKeys
+  and DKIM support
+- several updates for Received header parsing
+- several documentation updates and random taint-variable related issues
+
+A more detailed change log can be read here:
+
+  http://svn.apache.org/repos/asf/spamassassin/branches/3.1/Changes
