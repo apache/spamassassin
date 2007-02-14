@@ -88,6 +88,7 @@ $opt->{pidfile} ||= '/var/run/apache-spamd.pid'    # reasonable default
   if -w '/var/run/' && -x _ && !-e '/var/run/apache-spamd.pid';
 die "ERROR: --pidfile is mandatory\n"    # this seems ugly, but has advantages
   unless $opt->{pidfile};                # we won't be able to stop otherwise
+$opt->{pidfile} = File::Spec->rel2abs($opt->{pidfile});
 if (-d $opt->{pidfile}) {
 	die "ERROR: can't write pid, '$opt->{pidfile}' directory not writable\n"
 	  unless -x _ && -w _;
