@@ -108,6 +108,8 @@ sub generate_translation {
   # try to generate new translation
   my $count = 0;
   for my $name (sort keys %rules) {
+    next if ($name eq '_scoreset');
+
     my $lang_name = $name;
     my $lang_describe = '';
     if ($rules{$name}->{lang}) {

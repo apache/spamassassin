@@ -72,6 +72,7 @@ $ok_lang = lc ($opt_l || $opt_L || '');
 if ($ok_lang eq 'all') { $ok_lang = '.'; }
 
 foreach my $key (keys %rules) {
+  next if ($key eq '_scoreset');
 
   if ( ($opt_L && !$rules{$key}->{lang}) ||
        ($rules{$key}->{lang} &&
