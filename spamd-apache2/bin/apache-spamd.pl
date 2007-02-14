@@ -218,6 +218,7 @@ if ($opt->{k} !~ /stop|graceful/) {
 	push @directives, map qq(SANew $_ "$opt->{$_}"), grep defined $opt->{$_},
 	  qw(PREFIX DEF_RULES_DIR LOCAL_RULES_DIR LOCAL_STATE_DIR);
 	push @directives, 'SANew paranoid 1' if $opt->{paranoid};
+	push @directives, qq(SAConfigLine "$_") for @{ $opt->{cf} };
 
 	my @users;
 	push @users, 'local' if $opt->{'user-config'};

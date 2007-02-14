@@ -204,6 +204,19 @@ push @directives, {    # inherited
   errmsg       => 'SALocale xx_XX',
 };
 
+=item C<SAConfigLine "config line">
+
+Equivalent of the C<--cf> option for spamassassin / spamd / sa-learn.
+
+=cut
+
+push @directives, {    # inherited
+  name         => 'SAConfigLine',
+  args_how     => Apache2::Const::TAKE1,
+  req_override => Apache2::Const::RSRC_CONF,
+  errmsg       => 'SAConfigLine "body NEWRULE /text/"',
+};
+
   Apache2::Module::add(__PACKAGE__, \@directives);
 }
 
@@ -283,6 +296,14 @@ sub SALocale {
     if $parms->server->is_virtual;
   my $srv_cfg = Apache2::Module::get_config($self, $parms->server);
   $srv_cfg->{sa_locale} = $arg;
+}
+
+
+sub SAConfigLine {
+  my ($self, $parms, $arg) = @_;
+  my $srv_cfg = Apache2::Module::get_config($self, $parms->server);
+  $srv_cfg->{post_config_text} .=
+    ( $srv_cfg->{post_config_text} ? "\n" : '' ) . $arg;
 }
 
 
