@@ -111,9 +111,22 @@ sub check_whitelist_bounce_relays {
     }
   }
 
-  # now check any "message/anything" attachment MIME parts, too
-  foreach my $p ($pms->{msg}->find_parts(qr/^message\//, 1)) {
-    my $line = $p->decode();
+  # now check any "message/anything" attachment MIME parts, too.
+  # don't use the more efficient find_parts() method until bug 5331 is
+  # fixed, otherwise we'll miss some messages due to their MIME structure
+  
+  my $pristine = $pms->{msg}->get_pristine();
+  # skip past the headers
+  my $foundnlnl = 0;
+  foreach my $line ($pristine =~ /^(.*)$/gm) {
+    if ($line =~ /^$/) {
+      $foundnlnl = 1; last;
+    }
+  }
+  return 0 unless $foundnlnl;
+
+  # and now through the pristine body
+  foreach my $line ($pristine =~ /^(.*)$/gm) {
     next unless $line && ($line =~ /Received: /);
     while ($line =~ / (\S+\.\S+) /g) {
       return 1 if $self->_relay_is_in_whitelist_bounce_relays($pms, $1);
