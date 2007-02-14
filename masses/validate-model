@@ -3,6 +3,8 @@
 # set SCORESET
 . config
 
+LEARN_RATE="${LEARN_RATE:-2.0}"
+
 RUNS=10
 PASSES="1 2 3 4 5 6 7 8 9 10"
 
@@ -104,7 +106,7 @@ for PASS in $PASSES; do
 	echo "[pass $PASS start]"
 	pwd
 	date
-	./perceptron -p $HAM_PREFERENCE -t $THRESHOLD -e $EPOCHS
+	./perceptron -p $HAM_PREFERENCE -t $THRESHOLD -e $EPOCHS -l $LEARN_RATE
 	mv perceptron.scores $LOGDIR/scores.$PASS
 	echo "[pass $PASS end]"
 	) | tee -a $LOGDIR/log

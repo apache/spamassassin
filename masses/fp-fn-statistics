@@ -96,7 +96,7 @@ use vars qw(%scores %allrules %rules);
 
 readscores();
 
-die "wrong scoreset in tmp/rules.pl" unless $rules->{_scoreset} == $opt_scoreset;
+die "wrong scoreset in tmp/rules.pl" unless $allrules{_scoreset} == $opt_scoreset;
 
 print "Reading per-message hit stat logs and scores...\n";
 my ($num_spam, $num_ham);
@@ -189,8 +189,8 @@ sub readlogs {
 
 sub readscores {
   print "Reading scores from \"$opt_cffile\"...\n";
-  system ("../build/parse-rules-for-masses -d \"$opt_cffile\" -s $opt_scoreset") and die;
-  require "./tmp/rules_$opt_scoreset.pl";
+  system ("../build/parse-rules-for-masses -o tmp/rules_$opt_scoreset.pl -d \"$opt_cffile\" -s $opt_scoreset") and die;
+  require "tmp/rules_$opt_scoreset.pl";
   %allrules = %rules;           # ensure it stays global
 }
 
