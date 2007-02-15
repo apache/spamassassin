@@ -252,9 +252,11 @@ sub _check_dkim {
 
   # feed content of message into verifier, using \r\n endings,
   # required by Mail::DKIM API (see bug 5300)
+  # note: bug 5179 comment 28: perl does silly things unless we use \015\012
+  # instead of \r\n
   eval {
     foreach my $line (split(/\n/s, $scan->{msg}->get_pristine)) {
-      $line =~ s/\r?$/\r\n/s;       # ensure \r\n ending
+      $line =~ s/\r?$/\015\012/s;       # ensure \015\012 ending
       $message->PRINT($line);
     }
   };
