@@ -171,10 +171,23 @@ sub readrules {
         $def = 0.01;
       }
 
-      if ($rules->{$rule}->{tflags} =~ /nice/) {
+      my $tflags = $rules->{$rule}->{tflags};
+      if ($tflags =~ /\bnice\b/) {
         $rules->{$rule}->{score} = -$def;
       } else {
         $rules->{$rule}->{score} = $def;
+      }
+
+      # ignore net rules in set 0 or set 2
+      if ($tflags =~ /\bnet\b/ && ($scoreset & 1) == 0) {
+        $rules->{$rule}->{mutable} = 0;
+        $rules->{$rule}->{score} = 0;
+      }
+
+      # ignore bayes rules in set 0 or set 2
+      if ($tflags =~ /\bbayes\b/ && ($scoreset & 2) == 0) {
+        $rules->{$rule}->{mutable} = 0;
+        $rules->{$rule}->{score} = 0;
       }
 
       # if a rule didn't have a score specified, assume it's
