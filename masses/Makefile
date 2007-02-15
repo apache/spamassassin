@@ -12,7 +12,7 @@ RULES=          ../rules
 
 #### Should be no need to modify below this line
 
-all: badrules perceptron
+all: perceptron
 
 perceptron: perceptron.o
 	$(CC) -o perceptron perceptron.o $(LDFLAGS)
@@ -20,8 +20,9 @@ perceptron: perceptron.o
 perceptron.o: tmp/rules.pl tmp/tests.h tmp/scores.h
 	$(CC) $(CFLAGS) -c -o perceptron.o perceptron.c
 
-evolve:
-	$(CC) $(CFLAGS) -DWL=2 -DOPTIMIZE -L $(PGAPACK)/lib/sun4 -I $(PGAPACK)/include craig-evolve.c -o evolve -lpgaO $(LDFLAGS)
+garescorer: tmp/rules.pl tmp/tests.h tmp/scores.h
+	$(CC) $(CFLAGS) -DWL=2 -DOPTIMIZE -L $(PGAPACK)/lib/sun4 \
+          -I $(PGAPACK)/include garescorer.c -o garescorer -lpgaO $(LDFLAGS)
 
 tmp/rules.pl: tmp/.created ../build/parse-rules-for-masses
 	perl ../build/parse-rules-for-masses -d $(RULES) -s $(SCORESET)
@@ -45,5 +46,6 @@ tmp/.created:
 	touch tmp/.created
 
 clean:
-	rm -rf *.o perceptron tmp freqs badrules perceptron.scores evolve
+	rm -rf *.o perceptron tmp freqs badrules \
+          perceptron.scores garescorer garescorer.scores
 

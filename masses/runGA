@@ -41,7 +41,7 @@ echo "[Doing a scoreset $SCORESET score-generation run]"
 echo "[Cleaning up]"
 rm -rf spam-test.log ham-test.log spam.log ham.log \
 	NSBASE SPBASE tmp make.output freqs perceptron.scores \
-	$LOGDIR craig-evolve.scores
+	$LOGDIR garescorer.scores
 make clean
 
 # Generate 90/10 split logs
@@ -70,7 +70,7 @@ numcpus=`cpucount 2>/dev/null || egrep -c '^processor\b' /proc/cpuinfo 2>/dev/nu
 
 echo "[Generating GA]"
 # Generate GA with full logs
-make -j $numcpus SCORESET=$SCORESET evolve > $LOGDIR/make.output 2>&1
+make -j $numcpus SCORESET=$SCORESET garescorer > $LOGDIR/make.output 2>&1
 cp freqs $LOGDIR/freqs
 
 echo "[config]"
@@ -80,9 +80,9 @@ pwd
 date
 
 # misuse EPOCHS as pop size
-./evolve -b $HAM_PREFERENCE -s $EPOCHS -t $THRESHOLD
+./garescorer -b $HAM_PREFERENCE -s $EPOCHS -t $THRESHOLD
 
-mv craig-evolve.scores $LOGDIR/scores
+mv garescorer.scores $LOGDIR/scores
 echo "[gen run end]"
 
 svn revert ../rules/50_scores.cf
