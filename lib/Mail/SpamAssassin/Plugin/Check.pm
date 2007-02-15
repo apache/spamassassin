@@ -870,7 +870,7 @@ sub run_eval_tests {
         next if (($scoreset & 1) == 0);
       }
       # If the rule is a bayes rule, and we are in a non-bayes scoreset, skip it.
-      if ($tflagsref->{$rulename} =~ /\bbayes\b/) {
+      if ($tflagsref->{$rulename} =~ /\blearn\b/) {
         next if (($scoreset & 2) == 0);
       }
     }
