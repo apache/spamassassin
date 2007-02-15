@@ -2,6 +2,8 @@ CC=		gcc
 CFLAGS=		-g -O2 -Wall 
 LDFLAGS=	-lm
 
+PGAPACK=	/local/pgapack-1.0.0.1
+
 # What rule scoreset are we using?
 include config
 
@@ -17,6 +19,9 @@ perceptron: perceptron.o
 
 perceptron.o: tmp/rules.pl tmp/tests.h tmp/scores.h
 	$(CC) $(CFLAGS) -c -o perceptron.o perceptron.c
+
+evolve:
+	$(CC) $(CFLAGS) -DWL=2 -DOPTIMIZE -L $(PGAPACK)/lib/sun4 -I $(PGAPACK)/include craig-evolve.c -o evolve -lpgaO $(LDFLAGS)
 
 tmp/rules.pl: tmp/.created ../build/parse-rules-for-masses
 	perl ../build/parse-rules-for-masses -d $(RULES) -s $(SCORESET)
@@ -40,4 +45,5 @@ tmp/.created:
 	touch tmp/.created
 
 clean:
-	rm -rf *.o perceptron tmp freqs badrules perceptron.scores
+	rm -rf *.o perceptron tmp freqs badrules perceptron.scores evolve
+
