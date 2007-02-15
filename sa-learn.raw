@@ -402,7 +402,10 @@ eval {
 
     # make sure the target list is in the normal AI format
     if ($targets[$elem] !~ /^[^:]*:[a-z]+:/) {
-      $targets[$elem] = target($targets[$elem]);
+      my $item = splice @targets, $elem, 1;
+      target($item); # add back to the list
+      $elem--; # go back to this element again
+      next;
     }
   }
 
