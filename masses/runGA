@@ -3,8 +3,10 @@
 # set SCORESET
 . config
 
+LEARN_RATE="${LEARN_RATE:-2.0}"
+
 NAME="set$SCORESET"
-LOGDIR="gen-$NAME-$HAM_PREFERENCE-$THRESHOLD-$EPOCHS"
+LOGDIR="gen-$NAME-$HAM_PREFERENCE-$THRESHOLD-$EPOCHS-ga"
 
 [ -d gen-cache ] || mkdir gen-cache     # a cache, woo
 
@@ -17,9 +19,21 @@ if [ ! -f "ORIG/ham-$NAME.log" -o ! -f "ORIG/spam-$NAME.log" ]; then
 	exit 1
 fi
 
-if [ "x$1" = "x" ]; then
+# Create a directory to organize the logs with this group of settings
+mkdir $LOGDIR
+mkdir $LOGDIR/NSBASE $LOGDIR/SPBASE
+
+(
+
+set -x	# trace commands to the log
+
 # This should be in here instead.  Prevents testing.
 svn revert ../rules/50_scores.cf
+
+# fix all scores to non-zero (avoid a possible bug, not quite sure)
+perl -pi.bak \
+  -e 's/[ \t]/ /gs; s/ 0$/ 3/; s/ 0 / 3 /g; s/ 0 / 3 /g' \
+  ../rules/50_scores.cf
 
 echo "[Doing a scoreset $SCORESET score-generation run]"
 
@@ -27,12 +41,8 @@ echo "[Doing a scoreset $SCORESET score-generation run]"
 echo "[Cleaning up]"
 rm -rf spam-test.log ham-test.log spam.log ham.log \
 	NSBASE SPBASE tmp make.output freqs perceptron.scores \
-	$LOGDIR
-make clean >/dev/null
-
-# Create a directory to organize the logs with this group of settings
-mkdir $LOGDIR
-mkdir $LOGDIR/NSBASE $LOGDIR/SPBASE
+	$LOGDIR craig-evolve.scores
+make clean
 
 # Generate 90/10 split logs
 # keep the *-split*.logs in cwd so it's cacheable
@@ -58,21 +68,23 @@ ln -s $LOGDIR/NSBASE/ham-test.log .
 # try to find number of processors
 numcpus=`cpucount 2>/dev/null || egrep -c '^processor\b' /proc/cpuinfo 2>/dev/null || echo 1`
 
-echo "[Generating perceptron]"
-# Generate perceptron with full logs
-make -j $numcpus SCORESET=$SCORESET > $LOGDIR/make.output 2>&1
+echo "[Generating GA]"
+# Generate GA with full logs
+make -j $numcpus SCORESET=$SCORESET evolve > $LOGDIR/make.output 2>&1
 cp freqs $LOGDIR/freqs
 
-(
 echo "[config]"
 cat config
 echo "[gen run start]"
 pwd
 date
-./perceptron -p $HAM_PREFERENCE -t $THRESHOLD -e $EPOCHS
-mv perceptron.scores $LOGDIR/scores
+
+# misuse EPOCHS as pop size
+./evolve -b $HAM_PREFERENCE -s $EPOCHS -t $THRESHOLD
+
+mv craig-evolve.scores $LOGDIR/scores
 echo "[gen run end]"
-) | tee $LOGDIR/log
+
 svn revert ../rules/50_scores.cf
 ./rewrite-cf-with-new-scores $SCORESET ../rules/50_scores.cf $LOGDIR/scores > /tmp/runGA.$$
 mv /tmp/runGA.$$ ../rules/50_scores.cf
@@ -90,6 +102,7 @@ echo "[gen test results]"
 
 echo "[STATISTICS file generation]"
 ./mk-baseline-results $SCORESET | tee $LOGDIR/statistics
-fi
+
+) | tee $LOGDIR/log
 
 exit 0
