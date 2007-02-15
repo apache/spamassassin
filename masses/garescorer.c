@@ -997,7 +997,7 @@ void showSummary(PGAContext *ctx)
       FILE *scores_file = NULL;
       (void)evaluate(ctx, genome, PGA_OLDPOP);
       PGAGetEvaluation(ctx, genome, PGA_OLDPOP);
-      scores_file = fopen("craig-evolve.scores","w");
+      scores_file = fopen("garescorer.scores","w");
       WriteString(ctx, scores_file, genome, PGA_OLDPOP);
       fclose(scores_file);
 #ifdef USE_VARIABLE_MUTATIONS
