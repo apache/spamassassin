@@ -61,6 +61,7 @@ loadplugin Mail::SpamAssassin::Plugin::WhiteListSubject
 # DomainKeys - perform DomainKeys verification
 #
 # External modules required for use, see INSTALL for more information.
+# Note that this may be redundant if you also plan to use the DKIM plugin.
 #
 #loadplugin Mail::SpamAssassin::Plugin::DomainKeys
 
