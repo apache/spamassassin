@@ -36,6 +36,9 @@ draft specs:
 It requires the C<Mail::DKIM> CPAN module to operate. Many thanks to Jason Long
 for that module.
 
+Note that if C<Mail::DKIM> version 0.20 or later is installed, this plugin will
+also perform Domain Key lookups on DomainKey-Signature headers.
+
 =head1 SEE ALSO
 
 C<Mail::DKIM>, C<Mail::SpamAssassin::Plugin>

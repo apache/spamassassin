@@ -48,6 +48,10 @@ Whitelisting based on verified signature:
 
 This is the DomainKeys plugin and it needs lots more documentation.
 
+Note that if the C<Mail::SpamAssassin::Plugin::DKIM> plugin is installed with
+C<Mail::DKIM> version 0.20 or later, that plugin will also perform Domain Key
+lookups on DomainKey-Signature headers, in which case this plugin is redundant.
+
 =cut
 
 package Mail::SpamAssassin::Plugin::DomainKeys;
