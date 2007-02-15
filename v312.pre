@@ -17,6 +17,9 @@
 # DKIM - perform DKIM verification
 #
 # Mail::DKIM module required for use, see INSTALL for more information.
+# 
+# Note that if C<Mail::DKIM> version 0.20 or later is installed, this
+# renders the DomainKeys plugin redundant.
 #
 #loadplugin Mail::SpamAssassin::Plugin::DKIM
 
