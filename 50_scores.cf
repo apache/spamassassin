@@ -853,6 +853,9 @@ endif
 # Informational rules about Received header parsing
 score NO_RECEIVED -0.001
 
+# Informational rule, URI parsing encountered an overlong URI
+score URI_TRUNCATED 0.001
+
 # Informational rule, typically means corrupt corpus/input
 score NO_HEADERS_MESSAGE 0.001
 
