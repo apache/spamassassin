@@ -564,6 +564,7 @@ int adapt(PGAContext *ctx, int p, int pop, int done_eval, int threshold,
       }
     }
 
+    new_evaluation = old_evaluation;  /* avoid a warning */
     while (1) {
       changed = 0;
       for (i = 0; i < num_mutable; i++) {
