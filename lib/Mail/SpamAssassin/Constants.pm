@@ -284,7 +284,7 @@ use constant MAX_HEADER_VALUE_LENGTH => 8192;
 use constant MAX_HEADER_LENGTH => 65536;
 
 # maximum byte length of any given URI
-use constant MAX_URI_LENGTH => 1024;
+use constant MAX_URI_LENGTH => 8192;
 
 # used for meta rules and "if" conditionals in Conf::Parser
 use constant ARITH_EXPRESSION_LEXER => qr/(?:
