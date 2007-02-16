@@ -19,21 +19,27 @@ if [ ! -f "ORIG/ham-$NAME.log" -o ! -f "ORIG/spam-$NAME.log" ]; then
 	exit 1
 fi
 
-# Create a directory to organize the logs with this group of settings
-mkdir $LOGDIR
-mkdir $LOGDIR/NSBASE $LOGDIR/SPBASE
+if [ "x$1" = "x" ]; then
 
-(
+(	# log this
 
 set -x	# trace commands to the log
+
+# Create a directory to organize the logs with this group of settings
+mkdir -p $LOGDIR $LOGDIR/NSBASE $LOGDIR/SPBASE
+
+if ! [ -d $LOGDIR ] ; then
+  echo "Failed to mkdir $LOGDIR, dying" 1>&2
+  exit 1
+fi
 
 # This should be in here instead.  Prevents testing.
 svn revert ../rules/50_scores.cf
 
 # fix all scores to non-zero (avoid a possible bug, not quite sure)
-perl -pi.bak \
-  -e 's/[ \t]/ /gs; s/ 0$/ 3/; s/ 0 / 3 /g; s/ 0 / 3 /g' \
-  ../rules/50_scores.cf
+./enable-all-evolved-rules < ../rules/50_scores.cf \
+	> ../rules/50_scores.cf.new || exit 1
+mv ../rules/50_scores.cf.new ../rules/50_scores.cf
 
 echo "[Doing a scoreset $SCORESET score-generation run]"
 
@@ -41,7 +47,7 @@ echo "[Doing a scoreset $SCORESET score-generation run]"
 echo "[Cleaning up]"
 rm -rf spam-test.log ham-test.log spam.log ham.log \
 	NSBASE SPBASE tmp make.output freqs perceptron.scores \
-	$LOGDIR garescorer.scores
+	garescorer.scores
 make clean
 
 # Generate 90/10 split logs
@@ -92,6 +98,8 @@ cp ../rules/50_scores.cf $LOGDIR/50_scores.cf
 
 ./fp-fn-statistics --ham ham-test.log --spam spam-test.log --scoreset $SCORESET --fnlog $LOGDIR/false_negatives --fplog $LOGDIR/false_positives > $LOGDIR/test
 
+) | tee $LOGDIR/log
+
 else
 
 # This needs to have 50_scores.cf in place first ...
@@ -103,6 +111,6 @@ echo "[gen test results]"
 echo "[STATISTICS file generation]"
 ./mk-baseline-results $SCORESET | tee $LOGDIR/statistics
 
-) | tee $LOGDIR/log
+fi
 
 exit 0
