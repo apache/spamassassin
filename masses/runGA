@@ -34,12 +34,17 @@ if ! [ -d $LOGDIR ] ; then
 fi
 
 # This should be in here instead.  Prevents testing.
-svn revert ../rules/50_scores.cf
+# svn revert ../rules/50_scores.cf
+
+rm -rf tmprules
+cp -r ../rules tmprules
+
+cp tmprules/50_scores.cf orig_scores.cf
 
 # fix all scores to non-zero (avoid a possible bug, not quite sure)
-./enable-all-evolved-rules < ../rules/50_scores.cf \
-	> ../rules/50_scores.cf.new || exit 1
-mv ../rules/50_scores.cf.new ../rules/50_scores.cf
+./enable-all-evolved-rules < tmprules/50_scores.cf \
+	> tmprules/50_scores.cf.new || exit 1
+mv tmprules/50_scores.cf.new tmprules/50_scores.cf
 
 echo "[Doing a scoreset $SCORESET score-generation run]"
 
@@ -88,15 +93,21 @@ date
 # misuse EPOCHS as pop size
 ./garescorer -b $HAM_PREFERENCE -s $EPOCHS -t $THRESHOLD
 
+# POST-GA COMMANDS:
+
 mv garescorer.scores $LOGDIR/scores
 echo "[gen run end]"
 
-svn revert ../rules/50_scores.cf
-./rewrite-cf-with-new-scores $SCORESET ../rules/50_scores.cf $LOGDIR/scores > /tmp/runGA.$$
-mv /tmp/runGA.$$ ../rules/50_scores.cf
-cp ../rules/50_scores.cf $LOGDIR/50_scores.cf
+cp orig_scores.cf tmprules/50_scores.cf
+./rewrite-cf-with-new-scores $SCORESET tmprules/50_scores.cf \
+	$LOGDIR/scores > tmprules/50_newscores.cf
+mv tmprules/50_newscores.cf tmprules/50_scores.cf
+cp tmprules/50_scores.cf $LOGDIR/50_scores.cf
 
-./fp-fn-statistics --ham ham-test.log --spam spam-test.log --scoreset $SCORESET --fnlog $LOGDIR/false_negatives --fplog $LOGDIR/false_positives > $LOGDIR/test
+./fp-fn-statistics --ham ham-test.log --spam spam-test.log --scoreset $SCORESET \
+  --fnlog $LOGDIR/false_negatives --fplog $LOGDIR/false_positives > $LOGDIR/test
+
+# END OF POST-GA COMMANDS
 
 ) | tee $LOGDIR/log
 
