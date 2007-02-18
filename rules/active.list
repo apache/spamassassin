@@ -1,11 +1,32 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-fredt bb-jm bb-zmi cthielen daf jm theo wtogami
+# with results from: net-bb-doc net-cthielen net-daf net-jm net-theo
 
 # tflags userconf
 ALL_TRUSTED
 
+# good enough
+APOSTROPHE_FROM
+
 # tflags userconf
 AWL
+
+# good enough
+AXB_XMID_1212
+
+# good enough
+AXB_XMID_1510
+
+# good enough
+AXB_XMID_OEGOESNULL
+
+# good enough
+AXB_XR_STULDAP
+
+# good enough
+BASE64_LENGTH_78_79
+
+# good enough
+BASE64_LENGTH_79_INF
 
 # tflags learn
 BAYES_00
@@ -34,6 +55,9 @@ BAYES_95
 # tflags learn
 BAYES_99
 
+# good enough
+BROKEN_RATWARE_BOM
+
 # tflags userconf
 CHARSET_FARAWAY
 
@@ -43,8 +67,26 @@ CHARSET_FARAWAY_HEADER
 # tflags userconf
 CORRUPT_FROM_LINE_IN_HDRS
 
+# good enough
+CTYPE_001C_A
+
+# good enough
+CTYPE_001C_B
+
+# good enough
+CURR_PRICE
+
+# good enough
+DEAR_HOMEOWNER
+
+# good enough
+DEAR_WINNER
+
 # tflags net
 DIGEST_MULTIPLE
+
+# good enough
+DIV_CENTER_A_HREF
 
 # tflags net
 DNS_FROM_AHBL_RHSBL
@@ -68,10 +110,16 @@ DNS_FROM_SECURITYSAGE
 DOS_FIX_MY_URI
 
 # good enough
+DOS_LET_GO_JOB
+
+# good enough
 DOS_STOCK_BAT
 
 # good enough
 DOS_URI_ASTERISK
+
+# good enough
+DRUGS_HDIA
 
 # good enough
 DRUGS_STOCK_MIMEOLE
@@ -92,34 +140,100 @@ DYN_RDNS_SHORT_HELO_IMAGE
 ENV_AND_HDR_SPF_MATCH
 
 # good enough
+FAKE_REPLY_C
+
+# good enough
+FB_ANA_TRIM
+
+# good enough
 FB_BILLI0N
 
 # good enough
-FB_EMAIL_HIER
+FB_CIALIS_LEO3
 
 # good enough
 FB_FAKE_NUMBERS
 
 # good enough
+FB_HG_H_CAP
+
+# good enough
+FB_HOMELOAN
+
+# good enough
+FB_INCREASE_YOUR
+
+# good enough
 FB_L0AN
+
+# good enough
+FB_LOWER_PAYM
 
 # good enough
 FB_NUMYO2
 
 # good enough
+FB_ODD_SPACED_MONEY
+
+# good enough
 FB_PIPE_ILLION
+
+# good enough
+FB_QUALITY_REPLICA
+
+# good enough
+FB_REPLIC_CAP
+
+# good enough
+FB_SOFTTABS
+
+# good enough
+FB_SPACED_FREE
 
 # good enough
 FB_SPUR_M
 
 # good enough
-FH_HELO_GMAILSMTP
+FB_YOUR_REFI
+
+# good enough
+FH_FAKE_RCVD_LINE
+
+# good enough
+FH_HELO_ALMOST_IP
+
+# good enough
+FH_HELO_ENDS_DOT
+
+# good enough
+FH_HELO_EQ_610HEX
+
+# good enough
+FH_HELO_EQ_CHARTER
+
+# good enough
+FH_HELO_EQ_D_D_D_D
+
+# good enough
+FH_HOST_ALMOST_IP
+
+# good enough
+FH_HOST_EQ_DYNAMICIP
+
+# good enough
+FH_HOST_EQ_VERIZON_P
 
 # good enough
 FH_MSGID_000000
 
 # good enough
-FH_MSGID_01C70XXX
+FH_MSGID_01C67
+
+# good enough
+FH_MSGID_XXBLAH
+
+# good enough
+FM_DDDD_TIMES_2
 
 # good enough
 FM_DOESNT_SAY_STOCK
@@ -132,9 +246,6 @@ FM_FAKE_HELO_VERIZON
 
 # good enough
 FM_FRM_RN_L_BRACK
-
-# good enough
-FM_IS_IT_OUR_ACCOUNT
 
 # good enough
 FM_LIKE_STOCKS
@@ -152,37 +263,52 @@ FM_MORTGAGE6PLUS
 FM_MULTI_LUX_GIFTS
 
 # good enough
+FM_RATSIGN_1106
+
+# good enough
 FM_RE_HELLO_SPAM
 
 # good enough
 FM_ROLEX_ADS
 
 # good enough
-FM_SCHOOLING
-
-# good enough
-FM_SCHOOL_DIPLOMA
-
-# good enough
 FM_SCHOOL_TYPES
+
+# good enough
+FM_SEX_HELODDDD
 
 # good enough
 FM_SEX_HOSTDDDD
 
 # good enough
-FM_SUBJ_APPROVE
+FM_VEGAS_CASINO
 
 # good enough
 FM_VIAGRA_SPAM1114
 
+# good enough
+FM_XMAIL_F_OUT
+
 # tflags userconf
 FRAGMENTED_MESSAGE
+
+# good enough
+FRT_ADOBE2
+
+# good enough
+FRT_DISCOUNT
 
 # good enough
 FRT_LEVITRA
 
 # good enough
 FRT_OFFER2
+
+# good enough
+FRT_OPPORTUN2
+
+# good enough
+FRT_PENIS1
 
 # good enough
 FRT_PRICE
@@ -194,16 +320,61 @@ FRT_REFINANCE1
 FRT_SOMA
 
 # good enough
+FRT_STRONG1
+
+# good enough
+FRT_STRONG2
+
+# good enough
+FRT_SYMBOL
+
+# good enough
+FRT_VALIUM1
+
+# good enough
+FRT_VALIUM2
+
+# good enough
+FRT_WEIGHT2
+
+# good enough
+FR_ALMOST_VIAG2
+
+# good enough
+FR_MIDER
+
+# good enough
 FS_LOW_RATES
+
+# good enough
+FS_OBFU_PRMCY
 
 # good enough
 FS_PERSCRIPTION
 
 # good enough
+FS_PHARMASUB2
+
+# good enough
+FS_REPLICA
+
+# good enough
+FS_REPLICAWATCH
+
+# good enough
 FS_RE_APPROV
 
 # good enough
+FS_START_LOSE
+
+# good enough
+FUZZY_MERIDIA
+
+# good enough
 FU_LONG_QUERY3
+
+# good enough
+FU_MIDER
 
 # good enough
 FU_UKGEOCITIES
@@ -256,11 +427,23 @@ HEADER_COUNT_SUBJECT
 # tflags userconf
 HEAD_LONG
 
-# tflags userconf
-HIGH_CODEPAGE_URI
+# good enough
+HELO_FRIEND
 
 # good enough
-HS_FORGED_OE_FW
+HELO_LH_HOME
+
+# good enough
+HELO_LH_LD
+
+# good enough
+HELO_LOCALHOST
+
+# good enough
+HELO_OEM
+
+# tflags userconf
+HIGH_CODEPAGE_URI
 
 # good enough
 HS_PHARMA_1
@@ -272,16 +455,40 @@ HS_SUBJ_ONLINE_PHARMACEUTICAL
 HTML_CHARSET_FARAWAY
 
 # good enough
-KAM_STOCKTIP21
+JM_RCVD_QMAILV1
+
+# good enough
+JM_TORA_XM
+
+# good enough
+KAM_STOCKOTC
 
 # good enough
 KAM_STOCKTIP6
+
+# good enough
+LONG_TERM_PRICE
+
+# good enough
+LOTTERY_1
+
+# good enough
+L_SPAM_TOOL_13
+
+# good enough
+MID_DEGREES
+
+# good enough
+MIME_BOUND_EQ_REL
 
 # tflags userconf
 MIME_CHARSET_FARAWAY
 
 # tflags userconf
 MISSING_HB_SEP
+
+# good enough
+MSOE_MID_WRONG_CASE
 
 # tflags net
 NO_DNS_FOR_FROM
@@ -291,6 +498,12 @@ NO_RECEIVED
 
 # tflags userconf
 NO_RELAYS
+
+# good enough
+NULL_IN_BODY
+
+# good enough
+OUTLOOK_3416
 
 # good enough
 PART_CID_STOCK
@@ -313,6 +526,15 @@ RAZOR2_CF_RANGE_E8_51_100
 # tflags net
 RAZOR2_CHECK
 
+# good enough
+RCVD_BAD_ID
+
+# good enough
+RCVD_FORGED_WROTE
+
+# good enough
+RCVD_FORGED_WROTE2
+
 # tflags net
 RCVD_IN_BL_SPAMCOP_NET
 
@@ -321,6 +543,15 @@ RCVD_IN_BSP_OTHER
 
 # tflags net
 RCVD_IN_BSP_TRUSTED
+
+# tflags net
+RCVD_IN_DNSWL_HI
+
+# tflags net
+RCVD_IN_DNSWL_LOW
+
+# tflags net
+RCVD_IN_DNSWL_MED
 
 # tflags net
 RCVD_IN_DOB
@@ -485,7 +716,13 @@ RCVD_IN_XBL
 ROUND_THE_WORLD
 
 # good enough
+SB_GIF_AND_NO_URIS
+
+# good enough
 SHORT_HELO_AND_INLINE_IMAGE
+
+# good enough
+SHORT_TERM_PRICE
 
 # good enough
 SPAMMY_XMAILER
@@ -508,6 +745,15 @@ STOCK_IMG_HTML
 # good enough
 STOCK_IMG_OUTLOOK
 
+# good enough
+STOCK_PRICES
+
+# good enough
+STOX_AND_PRICE
+
+# good enough
+STOX_REPLY_TYPE
+
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
@@ -518,10 +764,31 @@ SUBJECT_IN_WHITELIST
 SUBJ_RE_NUM
 
 # good enough
-TT_OBSCURED_VALIUM
+TT_MSGID_TRUNC
 
 # good enough
 TT_OBSCURED_VIAGRA
+
+# good enough
+TVD_ACT_193
+
+# good enough
+TVD_APPROVED
+
+# good enough
+TVD_DEAR_HOMEOWNER
+
+# good enough
+TVD_EB_PHISH
+
+# good enough
+TVD_ENVFROM_APOST
+
+# good enough
+TVD_FINGER_02
+
+# good enough
+TVD_FLOAT_GENERAL
 
 # good enough
 TVD_FUZZY_DEGREE
@@ -530,10 +797,46 @@ TVD_FUZZY_DEGREE
 TVD_FUZZY_FINANCE
 
 # good enough
+TVD_FUZZY_SYMBOL
+
+# good enough
 TVD_INCREASE_SIZE
 
 # good enough
+TVD_PP_PHISH
+
+# good enough
+TVD_QUAL_MEDS
+
+# good enough
+TVD_RATWARE_CB
+
+# good enough
+TVD_RATWARE_MSGID_02
+
+# good enough
+TVD_RCVD_IP4
+
+# good enough
+TVD_RCVD_SINGLE
+
+# good enough
+TVD_RCVD_SPACE_BRACKET
+
+# good enough
+TVD_SECTION
+
+# good enough
 TVD_SILLY_URI_OBFU
+
+# good enough
+TVD_SINGLE_SPAN_DIV
+
+# good enough
+TVD_SPACED_SUBJECT_WORD3
+
+# good enough
+TVD_STOCK1
 
 # good enough
 TVD_SUBJ_ACC_NUM
@@ -542,262 +845,220 @@ TVD_SUBJ_ACC_NUM
 TVD_SUBJ_FINGER_03
 
 # good enough
-APOSTROPHE_FROM
+TVD_SUBJ_OWE
 
 # good enough
-AXB_XMID_1212
+TVD_SUBJ_WIPE_DEBT
 
 # good enough
-AXB_XMID_1510
+TVD_VISIT_PHARMA
 
 # good enough
-AXB_XMID_OEGOESNULL
+TVD_VIS_HIDDEN
 
 # good enough
-AXB_XR_STULDAP
+CTYPE_1SPACE_GIF
 
 # good enough
-BASE64_LENGTH_78_79
+DOS_MORTGAGE
 
 # good enough
-BASE64_LENGTH_79_INF
+FAKE_REPLY_A1
 
 # good enough
-BROKEN_RATWARE_BOM
+FB_ADD_INCHES
 
 # good enough
-CTYPE_001C_A
+FB_ALMOST_SEX
 
 # good enough
-CTYPE_001C_B
+FB_C0MPANY
 
 # good enough
-CTYPE_8SPACE_GIF
+FB_CASINO
 
 # good enough
-CURR_PRICE
+FB_DOUBLE_0WORDS
 
 # good enough
-DEAR_HOMEOWNER
+FB_FAKE_NUMS4
 
 # good enough
-DEAR_WINNER
+FB_FORWARD_LOOK
 
 # good enough
-DIV_CENTER_A_HREF
+FB_GAPPY_ADDRESS
 
 # good enough
-DOS_LET_GO_JOB
+FB_GET_MEDS
 
 # good enough
-DRUGS_HDIA
+FB_HEY_BRO_COMMA
 
 # good enough
-FAKE_REPLY_C
+FB_IMPRESS_GIRL
 
 # good enough
-FB_ANA_TRIM
+FB_INDEPEND_RWD
 
 # good enough
-FB_CIALIS_LEO3
+FB_LETTERS_21B
 
 # good enough
-FB_HG_H_CAP
+FB_NO_SCRIP_NEEDED
 
 # good enough
-FB_HOMELOAN
+FB_PIPEDOLLAR
 
 # good enough
-FB_INCREASE_YOUR
+FB_REF_CODE_SPACE
 
 # good enough
-FB_LOWER_PAYM
+FB_REM_PART
 
 # good enough
-FB_ODD_SPACED_MONEY
+FB_ROLX
 
 # good enough
-FB_QUALITY_REPLICA
+FB_SPACEY_ZIP
 
 # good enough
-FB_REPLIC_CAP
+FB_STOCK_EXPLODE
 
 # good enough
-FB_SOFTTABS
+FB_THIS_ADVERT
 
 # good enough
-FB_SPACED_FREE
+FB_TO_STOP_DISTRO
 
 # good enough
-FB_YOUR_REFI
+FB_ULTRA_ALLURE
 
 # good enough
-FH_FAKE_RCVD_LINE
+FB_YOURSELF_MASTER
 
 # good enough
-FH_HELO_ALMOST_IP
+FF_LEO_FLOAT_RIGHT
 
 # good enough
-FH_HELO_ENDS_DOT
+FH_BAD_OEV1441
 
 # good enough
-FH_HELO_EQ_610HEX
+FH_DATE_IS_19XX
 
 # good enough
-FH_HELO_EQ_CHARTER
+FH_DATE_PAST_20XX
 
 # good enough
-FH_HELO_EQ_D_D_D_D
+FH_FROMEML_NOTLD
 
 # good enough
-FH_HOST_ALMOST_IP
+FH_FROM_GET_NAME
 
 # good enough
-FH_HOST_EQ_DYNAMICIP
+FH_FROM_GIVEAWAY
 
 # good enough
-FH_HOST_EQ_VERIZON_P
+FH_HAS_XID
 
 # good enough
-FH_MSGID_01C67
+FH_HOST_EQ_PACBELL_D
 
 # good enough
-FH_MSGID_XXBLAH
+FH_MSGID_REPLACE
 
 # good enough
-FM_DDDD_TIMES_2
+FH_MSGID_XXX
 
 # good enough
-FM_RATSIGN_1106
+FH_RCVD_FROM_2_WDS
 
 # good enough
-FM_SEX_HELODDDD
+FH_XMAIL_REPLACE
 
 # good enough
-FM_VEGAS_CASINO
+FRT_BIGGERMEM1
 
 # good enough
-FM_XMAIL_F_OUT
+FRT_DOLLAR
 
 # good enough
-FRT_ADOBE2
+FRT_FUCK1
 
 # good enough
-FRT_DISCOUNT
+FRT_FUCK2
 
 # good enough
-FRT_OPPORTUN2
+FRT_GUARANTEE1
 
 # good enough
-FRT_PENIS1
+FRT_INVESTOR
 
 # good enough
-FRT_STRONG1
+FRT_PAYMENT
 
 # good enough
-FRT_STRONG2
+FRT_ROLEX
 
 # good enough
-FRT_SYMBOL
+FRT_SEXUAL
 
 # good enough
-FRT_VALIUM1
+FRT_SOMA2
 
 # good enough
-FRT_VALIUM2
+FRT_XANAX1
 
 # good enough
-FRT_WEIGHT2
+FRT_XANAX2
 
 # good enough
-FR_ALMOST_VIAG2
+FR_3TAG_3TAG
 
 # good enough
-FR_MIDER
+FR_CANTSEETEXT
 
 # good enough
-FS_OBFU_PRMCY
+FS_AT_NO_COST
 
 # good enough
-FS_PHARMASUB2
+FS_COSTARICA
 
 # good enough
-FS_REPLICA
+FS_EJACULA
 
 # good enough
-FS_REPLICAWATCH
+FS_ERECTION
 
 # good enough
-FS_START_LOSE
+FS_LARGE_PERCENT2
 
 # good enough
-FUZZY_MERIDIA
+FS_NEW_XXX
 
 # good enough
-FU_MIDER
+FS_NO_SCRIP
 
 # good enough
-GEO_QUERY_STRING
+FS_REFI
 
 # good enough
-HELO_FRIEND
+FS_START_DOYOU2
 
 # good enough
-HELO_LH_HOME
+FS_TEEN_BAD
 
 # good enough
-HELO_LH_LD
+FS_WILL_HELP
 
 # good enough
-HELO_LOCALHOST
+FS_WITH_SMALL
 
 # good enough
-HELO_OEM
+FU_ENDS_NUMS_DOTS_CLK
 
 # good enough
-JM_RCVD_QMAILV1
-
-# good enough
-JM_TORA_XM
-
-# good enough
-KAM_STOCKOTC
-
-# good enough
-KAM_STOCKTIP15
-
-# good enough
-LONG_TERM_PRICE
-
-# good enough
-LOTTERY_1
-
-# good enough
-L_SPAM_TOOL_13
-
-# good enough
-MID_DEGREES
-
-# good enough
-MIME_BOUND_EQ_REL
-
-# good enough
-MSOE_MID_WRONG_CASE
-
-# good enough
-NULL_IN_BODY
-
-# good enough
-OUTLOOK_3416
-
-# good enough
-RCVD_BAD_ID
-
-# good enough
-RCVD_FORGED_WROTE
-
-# good enough
-RCVD_FORGED_WROTE2
+HS_GETMEOFF
 
 # tflags net
 RCVD_IN_DNSWL_HI
@@ -827,250 +1088,67 @@ RCVD_IN_WHOIS_INVALID
 RCVD_IN_XBL
 
 # good enough
-SB_GIF_AND_NO_URIS
+RCVD_MAIL_COM
 
 # good enough
-SHORT_TERM_PRICE
+SUBJECT_NEEDS_ENCODING
 
 # good enough
-STOCK_PRICES
+TVD_FUZZY_FIXED_RATE
 
 # good enough
-STOX_AND_PRICE
+TVD_FUZZY_MICROCAP
 
 # good enough
-STOX_REPLY_TYPE
+TVD_FW_GRAPHIC_ID1
 
 # good enough
-TT_MSGID_TRUNC
+TVD_FW_GRAPHIC_ID2
 
 # good enough
-TVD_ACT_193
+TVD_GET_STOCK
 
 # good enough
-TVD_APPROVED
+TVD_PH_REC
 
 # good enough
-TVD_DEAR_HOMEOWNER
+TVD_SPACED_SUBJECT_WORD5
 
-# good enough
-TVD_EB_PHISH
-
-# good enough
-TVD_ENVFROM_APOST
-
-# good enough
-TVD_FINGER_02
-
-# good enough
-TVD_FLOAT_GENERAL
-
-# good enough
-TVD_FUZZY_SYMBOL
-
-# good enough
-TVD_FW_GRAPHIC_NAME_LONG
-
-# good enough
-TVD_FW_GRAPHIC_NAME_MID
-
-# good enough
-TVD_PH_SUBJ_ACCOUNTS_POST
-
-# good enough
-TVD_PH_SUBJ_URGENT
-
-# good enough
-TVD_PP_PHISH
-
-# good enough
-TVD_QUAL_MEDS
-
-# good enough
-TVD_RATWARE_CB
-
-# good enough
-TVD_RATWARE_MSGID_02
-
-# good enough
-TVD_RCVD_IP
-
-# good enough
-TVD_RCVD_IP4
-
-# good enough
-TVD_RCVD_SINGLE
-
-# good enough
-TVD_RCVD_SPACE_BRACKET
-
-# good enough
-TVD_SECTION
-
-# good enough
-TVD_SINGLE_SPAN_DIV
-
-# good enough
-TVD_SPACED_SUBJECT_WORD3
-
-# good enough
-TVD_STOCK1
-
-# good enough
-TVD_SUBJ_OWE
-
-# good enough
-TVD_SUBJ_WIPE_DEBT
-
-# good enough
-TVD_VISIT_PHARMA
-
-# good enough
-TVD_VIS_HIDDEN
-
-# good enough
-URI_L_PHP
-
-# good enough
-XMAILER_MIMEOLE_OL_015D5
-
-# good enough
-XMAILER_MIMEOLE_OL_07794
-
-# good enough
-XMAILER_MIMEOLE_OL_09BB4
-
-# good enough
-XMAILER_MIMEOLE_OL_1ECD5
-
-# good enough
-XMAILER_MIMEOLE_OL_20C99
-
-# good enough
-XMAILER_MIMEOLE_OL_22B61
-
-# good enough
-XMAILER_MIMEOLE_OL_25340
-
-# good enough
-XMAILER_MIMEOLE_OL_32D97
-
-# good enough
-XMAILER_MIMEOLE_OL_3857F
-
-# good enough
-XMAILER_MIMEOLE_OL_3AC1D
-
-# good enough
-XMAILER_MIMEOLE_OL_3D61D
-
-# good enough
-XMAILER_MIMEOLE_OL_465CD
-
-# good enough
-XMAILER_MIMEOLE_OL_4B815
-
-# good enough
-XMAILER_MIMEOLE_OL_4BF4C
-
-# good enough
-XMAILER_MIMEOLE_OL_4EEDB
-
-# good enough
-XMAILER_MIMEOLE_OL_4F240
-
-# good enough
-XMAILER_MIMEOLE_OL_58CB5
-
-# good enough
-XMAILER_MIMEOLE_OL_5B79A
-
-# good enough
-XMAILER_MIMEOLE_OL_5E7ED
-
-# good enough
-XMAILER_MIMEOLE_OL_6554A
-
-# good enough
-XMAILER_MIMEOLE_OL_72641
-
-# good enough
-XMAILER_MIMEOLE_OL_7533E
-
-# good enough
-XMAILER_MIMEOLE_OL_812FF
-
-# good enough
-XMAILER_MIMEOLE_OL_83BF7
+# tflags net
+URIBL_COMPLETEWHOIS
 
-# good enough
-XMAILER_MIMEOLE_OL_8627E
-
-# good enough
-XMAILER_MIMEOLE_OL_8E893
-
-# good enough
-XMAILER_MIMEOLE_OL_91287
-
-# good enough
-XMAILER_MIMEOLE_OL_9B90B
-
-# good enough
-XMAILER_MIMEOLE_OL_A50F8
-
-# good enough
-XMAILER_MIMEOLE_OL_A842E
-
-# good enough
-XMAILER_MIMEOLE_OL_ADFF7
-
-# good enough
-XMAILER_MIMEOLE_OL_B30D1
-
-# good enough
-XMAILER_MIMEOLE_OL_B4B40
+# tflags net
+URIBL_RHS_ABUSE
 
-# good enough
-XMAILER_MIMEOLE_OL_B9B11
-
-# good enough
-XMAILER_MIMEOLE_OL_BC7E6
-
-# good enough
-XMAILER_MIMEOLE_OL_C65FA
-
-# good enough
-XMAILER_MIMEOLE_OL_C7C33
-
-# good enough
-XMAILER_MIMEOLE_OL_C9068
+# tflags net
+URIBL_RHS_AHBL
 
-# good enough
-XMAILER_MIMEOLE_OL_CAC8F
+# tflags net
+URIBL_RHS_BOGUSMX
 
-# good enough
-XMAILER_MIMEOLE_OL_CF0C0
+# tflags net
+URIBL_RHS_DSN
 
-# good enough
-XMAILER_MIMEOLE_OL_EF20B
+# tflags net
+URIBL_RHS_POST
 
-# good enough
-XMAILER_MIMEOLE_OL_F3B05
+# tflags net
+URIBL_RHS_TLD_WHOIS
 
-# good enough
-XMAILER_MIMEOLE_OL_F475E
+# tflags net
+URIBL_RHS_URIBL_BLACK
 
-# good enough
-XMAILER_MIMEOLE_OL_F6D01
+# tflags net
+URIBL_RHS_URIBL_GREY
 
-# good enough
-XMAILER_MIMEOLE_OL_FF5C8
+# tflags net
+URIBL_RHS_WHOIS
 
-# good enough
-X_LIBRARY
+# tflags net
+URIBL_XS_SURBL
 
 # good enough
-YOUR_CRD_RATING
+XMAILER_MIMEOLE_OL_D03AB
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1107,6 +1185,9 @@ URIBL_SC_SURBL
 
 # tflags net
 URIBL_WS_SURBL
+
+# good enough
+URI_L_PHP
 
 # tflags userconf
 USER_IN_ALL_SPAM_TO
@@ -1251,6 +1332,141 @@ WHOIS_WHOISGUARD
 
 # tflags net
 WHOIS_WHOISPROT
+
+# good enough
+XMAILER_MIMEOLE_OL_015D5
+
+# good enough
+XMAILER_MIMEOLE_OL_07794
+
+# good enough
+XMAILER_MIMEOLE_OL_09BB4
+
+# good enough
+XMAILER_MIMEOLE_OL_1ECD5
+
+# good enough
+XMAILER_MIMEOLE_OL_20C99
+
+# good enough
+XMAILER_MIMEOLE_OL_22B61
+
+# good enough
+XMAILER_MIMEOLE_OL_25340
+
+# good enough
+XMAILER_MIMEOLE_OL_32D97
+
+# good enough
+XMAILER_MIMEOLE_OL_3857F
+
+# good enough
+XMAILER_MIMEOLE_OL_3AC1D
+
+# good enough
+XMAILER_MIMEOLE_OL_3D61D
+
+# good enough
+XMAILER_MIMEOLE_OL_465CD
+
+# good enough
+XMAILER_MIMEOLE_OL_4B815
+
+# good enough
+XMAILER_MIMEOLE_OL_4BF4C
+
+# good enough
+XMAILER_MIMEOLE_OL_4EEDB
+
+# good enough
+XMAILER_MIMEOLE_OL_4F240
+
+# good enough
+XMAILER_MIMEOLE_OL_58CB5
+
+# good enough
+XMAILER_MIMEOLE_OL_5B79A
+
+# good enough
+XMAILER_MIMEOLE_OL_5E7ED
+
+# good enough
+XMAILER_MIMEOLE_OL_6554A
+
+# good enough
+XMAILER_MIMEOLE_OL_72641
+
+# good enough
+XMAILER_MIMEOLE_OL_7533E
+
+# good enough
+XMAILER_MIMEOLE_OL_812FF
+
+# good enough
+XMAILER_MIMEOLE_OL_83BF7
+
+# good enough
+XMAILER_MIMEOLE_OL_8627E
+
+# good enough
+XMAILER_MIMEOLE_OL_8E893
+
+# good enough
+XMAILER_MIMEOLE_OL_91287
+
+# good enough
+XMAILER_MIMEOLE_OL_9B90B
+
+# good enough
+XMAILER_MIMEOLE_OL_A50F8
+
+# good enough
+XMAILER_MIMEOLE_OL_A842E
+
+# good enough
+XMAILER_MIMEOLE_OL_ADFF7
+
+# good enough
+XMAILER_MIMEOLE_OL_B30D1
+
+# good enough
+XMAILER_MIMEOLE_OL_B4B40
+
+# good enough
+XMAILER_MIMEOLE_OL_B9B11
+
+# good enough
+XMAILER_MIMEOLE_OL_BC7E6
+
+# good enough
+XMAILER_MIMEOLE_OL_C65FA
+
+# good enough
+XMAILER_MIMEOLE_OL_CAC8F
+
+# good enough
+XMAILER_MIMEOLE_OL_CF0C0
+
+# good enough
+XMAILER_MIMEOLE_OL_EF20B
+
+# good enough
+XMAILER_MIMEOLE_OL_F3B05
+
+# good enough
+XMAILER_MIMEOLE_OL_F475E
+
+# good enough
+XMAILER_MIMEOLE_OL_F6D01
+
+# good enough
+XMAILER_MIMEOLE_OL_FF5C8
+
+# good enough
+X_LIBRARY
+
+# good enough
+YOUR_CRD_RATING
 
 # tflags net
 __DNS_FROM_RFC_ABUSE
