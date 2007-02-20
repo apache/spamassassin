@@ -54,6 +54,7 @@ for (my $scoreset = 0; $scoreset < 4; $scoreset++) {
   }
 
   while (my ($name, $info) = each %rules) {
+    next if ($name eq '_scoreset');
     my $type = $info->{type} || "unknown";
     # look at meta rules that are not disabled
     if ($type eq "meta" && ($name =~ /^__/ || $info->{score} != 0)) {
