@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-fredt bb-jm bb-zmi cthielen daf dos jm theo wtogami zmi
+# with results from: bb-doc bb-fredt bb-jm bb-zmi daf dos jm theo wtogami zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -54,9 +54,6 @@ BAYES_95
 
 # tflags learn
 BAYES_99
-
-# good enough
-BROKEN_RATWARE_BOM
 
 # tflags userconf
 CHARSET_FARAWAY
@@ -572,6 +569,9 @@ HELO_OEM
 HIGH_CODEPAGE_URI
 
 # good enough
+HS_INDEX_PARAM
+
+# good enough
 HS_PHARMA_1
 
 # good enough
@@ -970,9 +970,6 @@ TVD_VISIT_PHARMA
 # good enough
 TVD_VIS_HIDDEN
 
-# good enough
-HS_INDEX_PARAM
-
 # tflags net
 RCVD_IN_DNSWL_HI
 
@@ -999,9 +996,6 @@ RCVD_IN_WHOIS_INVALID
 
 # tflags net
 RCVD_IN_XBL
-
-# good enough
-TVD_FW_GRAPHIC_ID1
 
 # tflags userconf
 UNPARSEABLE_RELAY
