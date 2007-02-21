@@ -132,7 +132,7 @@ else
       --scoreset $SCORESET --cffile=../rules | tee $LOGDIR/test
 
   echo "[STATISTICS file generation for set $SCORESET]"
-  perl ./mk-baseline-results $SCORESET | tee $LOGDIR/statistics
+  bash ./mk-baseline-results $SCORESET | tee $LOGDIR/statistics
 
   cp $LOGDIR/statistics ../rules/STATISTICS-set${SCORESET}.txt
   ls -l ../rules/STATISTICS-set${SCORESET}.txt
