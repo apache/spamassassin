@@ -8,6 +8,11 @@ LEARN_RATE="${LEARN_RATE:-2.0}"
 NAME="set$SCORESET"
 LOGDIR="gen-$NAME-$HAM_PREFERENCE-$THRESHOLD-$EPOCHS-ga"
 
+# ensure sandbox T_ rules aren't used in the GA and don't appear in output
+KILL_SANDBOX_RULES=y
+
+###########################################################################
+
 [ -d gen-cache ] || mkdir gen-cache     # a cache, woo
 
 if [ "$NOTE" != "" ]; then
@@ -45,6 +50,8 @@ cp tmprules/50_scores.cf orig_scores.cf
 ./enable-all-evolved-rules < tmprules/50_scores.cf \
 	> tmprules/50_scores.cf.new || exit 1
 mv tmprules/50_scores.cf.new tmprules/50_scores.cf
+
+[ $KILL_SANDBOX_RULES = y ] && rm tmprules/70_sandbox.cf
 
 echo "[Doing a scoreset $SCORESET score-generation run]"
 
@@ -99,13 +106,15 @@ mv garescorer.scores $LOGDIR/scores
 echo "[gen run end]"
 
 cp orig_scores.cf tmprules/50_scores.cf
-./rewrite-cf-with-new-scores $SCORESET tmprules/50_scores.cf \
+perl ./rewrite-cf-with-new-scores $SCORESET tmprules/50_scores.cf \
 	$LOGDIR/scores > tmprules/50_newscores.cf
 mv tmprules/50_newscores.cf tmprules/50_scores.cf
 cp tmprules/50_scores.cf $LOGDIR/50_scores.cf
 
-./fp-fn-statistics --ham ham-test.log --spam spam-test.log --scoreset $SCORESET \
-  --fnlog $LOGDIR/false_negatives --fplog $LOGDIR/false_positives > $LOGDIR/test
+perl ./fp-fn-statistics --ham ham-test.log --spam spam-test.log \
+    --scoreset $SCORESET --cffile=tmprules \
+    --fnlog $LOGDIR/false_negatives --fplog $LOGDIR/false_positives \
+    > $LOGDIR/test
 
 # END OF POST-GA COMMANDS
 
@@ -113,14 +122,20 @@ cp tmprules/50_scores.cf $LOGDIR/50_scores.cf
 
 else
 
-# This needs to have 50_scores.cf in place first ...
-echo "[gen test results]"
-./fp-fn-statistics --spam=spam-test.log \
-	--ham=ham-test.log \
-	--cffile=../rules --scoreset=$SCORESET | tee $LOGDIR/test
+# Statistics generation, once everyone likes the scores
 
-echo "[STATISTICS file generation]"
-./mk-baseline-results $SCORESET | tee $LOGDIR/statistics
+  [ $KILL_SANDBOX_RULES = y ] && rm ../rules/70_sandbox.cf
+
+  # This needs to have ../rules/50_scores.cf in place first ...
+  echo "[gen test results for set $SCORESET]"
+  perl ./fp-fn-statistics --ham ham-test.log --spam spam-test.log \
+      --scoreset $SCORESET --cffile=../rules | tee $LOGDIR/test
+
+  echo "[STATISTICS file generation for set $SCORESET]"
+  perl ./mk-baseline-results $SCORESET | tee $LOGDIR/statistics
+
+  cp $LOGDIR/statistics ../rules/STATISTICS-set${SCORESET}.txt
+  ls -l ../rules/STATISTICS-set${SCORESET}.txt
 
 fi
 
