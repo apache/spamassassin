@@ -294,8 +294,8 @@ set of headers:
 	X-Envelope-From
 	From
 
-In addition, the "envelope sender" data, taken from the SMTP envelope
-data where this is available, is looked up.
+In addition, the "envelope sender" data, taken from the SMTP envelope data
+where this is available, is looked up.  See C<envelope_sender_header>.
 
 e.g.
 
@@ -1159,7 +1159,7 @@ Empty the list of msa networks.
 =item always_trust_envelope_sender ( 0 | 1 )   (default: 0)
 
 Trust the envelope sender even if the message has been passed through one or
-more trusted relays.
+more trusted relays.  See also C<envelope_sender_header>.
 
 =cut
 
@@ -1621,7 +1621,7 @@ SpamAssassin will attempt to use these, if some heuristics (such as the header
 placement in the message, or the absence of fetchmail signatures) appear to
 indicate that they are safe to use.  However, it may choose the wrong headers
 in some mailserver configurations.  (More discussion of this can be found
-in bug 2142 in the SpamAssassin BugZilla.)
+in bug 2142 and bug 4747 in the SpamAssassin BugZilla.)
 
 To avoid this heuristic failure, the C<envelope_sender_header> setting may be
 helpful.  Name the header that your MTA adds to messages containing the address
@@ -1632,12 +1632,14 @@ and end of the email address in the right-hand side, as in the SMTP
 transaction, these will be stripped.
 
 If the header is not found in a message, or if it's value does not contain an
-C<@> sign, SpamAssassin will fall back to its default heuristics.
+C<@> sign, SpamAssassin will issue a warning in the logs and fall back to its
+default heuristics.
 
 (Note for MTA developers: we would prefer if the use of a single header be
 avoided in future, since that precludes 'downstream' spam scanning.
 C<http://wiki.apache.org/spamassassin/EnvelopeSenderInReceived> details a
-better proposal using the Received headers.)
+better proposal, storing the envelope sender at each hop in the C<Received>
+header.)
 
 example:
 
@@ -1924,7 +1926,8 @@ headers.
 
 =item C<EnvelopeFrom> is the address used in the 'MAIL FROM:' phase of the SMTP
 transaction that delivered this message, if this data has been made available
-by the SMTP server.
+by the SMTP server.  See C<envelope_sender_header> for more information
+on how to set this.
 
 =item C<MESSAGEID> is a symbol meaning all Message-Id's found in the message;
 some mailing list software moves the real 'Message-Id' to 'Resent-Message-Id'
