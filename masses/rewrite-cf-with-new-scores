@@ -107,6 +107,7 @@ my $ZERO_MINISCULE_SCORES =     0;
 my $MINISCULE_THRESHOLD =       0.01;      # points
 
 my $UNZERO_META_PREDICATES =    1;
+my $IGNORE_ZEROED_TEST_RULES =  1;
 
 if ($opt_scoreset < 0 || $opt_scoreset >= $NUM_SCORESETS) {
   pod2usage("scoreset $opt_scoreset out of range 0 - " . ($NUM_SCORESETS-1));
@@ -348,6 +349,8 @@ sub build_new_scores {
       delete $oldscores{$name};
     }
     elsif ($range_zeroed_rules{$name}) {
+      if ($IGNORE_ZEROED_TEST_RULES && $name =~ /^T_/) { next; }
+
       # zeroed pre-evolver, by score-ranges-from-freqs
       $scores[$opt_scoreset] = 0;
 
