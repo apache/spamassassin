@@ -189,8 +189,11 @@ sub readlogs {
 
 sub readscores {
   print "Reading scores from \"$opt_cffile\"...\n";
-  system ("../build/parse-rules-for-masses -o tmp/rules_$opt_scoreset.pl -d \"$opt_cffile\" -s $opt_scoreset") and die;
-  require "tmp/rules_$opt_scoreset.pl";
+  my $cmd = "../build/parse-rules-for-masses -o tmp/rules_$$.pl -d \"$opt_cffile\" -s $opt_scoreset";
+  warn "[$cmd]\n";
+  system ($cmd) and die;
+  require "tmp/rules_$$.pl";
+  unlink "tmp/rules_$$.pl";
   %allrules = %rules;           # ensure it stays global
 }
 
