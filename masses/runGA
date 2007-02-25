@@ -109,8 +109,12 @@ mv garescorer.scores $LOGDIR/scores
 echo "[gen run end]"
 
 cp orig_scores.cf tmprules/50_scores.cf
-perl ./rewrite-cf-with-new-scores $SCORESET tmprules/50_scores.cf \
-	$LOGDIR/scores > tmprules/50_newscores.cf
+perl ./rewrite-cf-with-new-scores --scoreset $SCORESET \
+        --old-scores tmprules/50_scores.cf \
+	--new-scores $LOGDIR/scores \
+        --cffile tmprules \
+        > tmprules/50_newscores.cf
+
 mv tmprules/50_newscores.cf tmprules/50_scores.cf
 cp tmprules/50_scores.cf $LOGDIR/50_scores.cf
 

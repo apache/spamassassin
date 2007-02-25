@@ -909,18 +909,24 @@ sub _hmap_to_overlap_ratio {
 
 sub readscores {
   my($cffile) = @_;
-  if (system ("$FindBin::Bin/../build/parse-rules-for-masses -d \"$cffile\" -s $opt_s")) {
+  my $tmpf = "tmp/rules$$.pl";
+  if (system (
+      "$FindBin::Bin/../build/parse-rules-for-masses -d \"$cffile\" -s $opt_s -o $tmpf"
+    ))
+  {
     warn "parse-rules-for-masses failed!";
   }
   eval {
-    require "./tmp/rules.pl";
+    require "./$tmpf";
   };
   if ($@) {
-    warn "tmp/rules.pl is unparseable: $@";
+    warn "$tmpf is unparseable: $@";
     $rules_pl_unparseable = 1;
-    # but carry on anyway (for most uses)
+    # carry on anyway (for most uses); leave the tmp file behind for
+    # possible debugging
   } else {
     $rules_pl_unparseable = 0;
+    unlink $tmpf;
   }
 }
 

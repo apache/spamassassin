@@ -70,10 +70,11 @@ use warnings;
 use Getopt::Long qw(:config auto_help);
 use Pod::Usage;
 
-use vars qw($opt_old $opt_new $opt_scoreset $opt_out);
+use vars qw($opt_old $opt_new $opt_scoreset $opt_out $opt_cffile);
 
 GetOptions("old-scores=s" => \$opt_old,
 	   "new-scores=s" => \$opt_new,
+	   "cffile=s" => \$opt_cffile,
 	   "s|scoreset=i" => \$opt_scoreset,
 	   "output=s" => \$opt_out);
 
@@ -85,10 +86,14 @@ if (!defined($opt_old) &&
     !defined($opt_out)) {
 
   ($opt_scoreset, $opt_old, $opt_new) = @ARGV;
-  $opt_out = "-"; #STDOUT
-
 }
 
+if (!defined $opt_out) {
+  $opt_out = "-"; #STDOUT
+}
+if (!defined $opt_cffile) {
+  $opt_cffile = '../rules';
+}
 if (!defined $opt_scoreset) {
   $opt_scoreset = 0;
 }
@@ -122,6 +127,9 @@ our %rules;			# rules data
 # variables filled-out in read_gascores()
 my %gascores = ();		# generated scores
 
+# variables filled-out in read_ranges_data()
+my %range_zeroed_rules = ();	# zeroed by score-ranges-from-freqs
+
 # variables filled-out in read_oldscores()
 my $pre = '';			# stuff before first "gen" section
 my $end = '';			# stuff after first "gen" section
@@ -138,6 +146,27 @@ my %gen_lines = ();
 read_rules();
 read_gascores();
 read_oldscores();
+# TODO: read_ranges.data
+read_ranges_data();
+
+sub read_ranges_data {
+  # used to pick up rules zeroed by score-ranges-from-freqs, e.g.
+  # "ignoring 'FM_MORTGAGE6PLUS': score and range == 0"
+  # which results in:
+  # tmp/ranges.data:0.000 0.000 0 FM_MORTGAGE6PLUS
+
+  open (IN, "<tmp/ranges.data")
+        or die "cannot read tmp/ranges.data";
+  while (<IN>) {
+    /^(\S+) (\S+) (\S+) (\S+)/ or next;
+    my ($min, $max, $mutable, $name) = ($1,$2,$3,$4);
+
+    if ($min == 0 && $max == 0 && $mutable == 0) {
+      $range_zeroed_rules{$name} = 1;
+    }
+  }
+  close IN;
+}
 
 build_new_scores();
 
@@ -158,15 +187,11 @@ exit;
 
 
 sub read_rules {
-  system ("../build/parse-rules-for-masses -s $opt_scoreset") and die;
-  if (-e "tmp/rules.pl") {
-    # note: the spaces need to stay in front of the require to work around
-    # a RPM 4.1 problem
-    require "./tmp/rules.pl";
-  }
-  else {
-    die "parse-rules-for-masses had no error but no tmp/rules.pl";
-  }
+  my $tmpf = "tmp/rules$$.pl";
+  system "../build/parse-rules-for-masses ".
+        "-d \"$opt_cffile\" -s $opt_scoreset -o $tmpf" and die;
+  require $tmpf;
+  unlink $tmpf;
 }
 
 sub read_gascores {
@@ -297,6 +322,7 @@ sub build_new_scores {
   my %gen;				# rules to be printed in "gen" region
   $gen{$_} = 1 for keys %gascores;	# scores for this set from GA
   $gen{$_} = 1 for keys %oldscores;	# original scores in "gen" region
+  $gen{$_} = 1 for keys %range_zeroed_rules;    # zeroed by range script
 
   # remove fixed scores
   for (keys %fixed) {
@@ -320,6 +346,14 @@ sub build_new_scores {
     if (defined $gascores{$name}) {
       $scores[$opt_scoreset] = $gascores{$name};
       delete $oldscores{$name};
+    }
+    elsif ($range_zeroed_rules{$name}) {
+      # zeroed pre-evolver, by score-ranges-from-freqs
+      $scores[$opt_scoreset] = 0;
+
+      if (defined $oldscores{$name}) {
+	$comment .= " n=$opt_scoreset";
+      }
     }
     else {
       # zero for current scoreset if there was no new score;

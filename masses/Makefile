@@ -17,15 +17,16 @@ all: perceptron
 perceptron: perceptron.o
 	$(CC) -o perceptron perceptron.o $(LDFLAGS)
 
-perceptron.o: tmp/rules.pl tmp/tests.h tmp/scores.h
+perceptron.o: tmp/rules_${SCORESET}.pl tmp/tests.h tmp/scores.h
 	$(CC) $(CFLAGS) -c -o perceptron.o perceptron.c
 
-garescorer: tmp/rules.pl tmp/tests.h tmp/scores.h
+garescorer: tmp/rules_${SCORESET}.pl tmp/tests.h tmp/scores.h
 	$(CC) $(CFLAGS) -DWL=2 -DOPTIMIZE -L $(PGAPACK)/lib/sun4 \
           -I $(PGAPACK)/include garescorer.c -o garescorer -lpgaO $(LDFLAGS)
 
-tmp/rules.pl: tmp/.created ../build/parse-rules-for-masses
-	perl ../build/parse-rules-for-masses -d $(RULES) -s $(SCORESET)
+tmp/rules_${SCORESET}.pl: tmp/.created ../build/parse-rules-for-masses
+	perl ../build/parse-rules-for-masses -d $(RULES) -s $(SCORESET) \
+            -o tmp/rules_${SCORESET}.pl
 
 tmp/tests.h: tmp/.created tmp/ranges.data logs-to-c
 	perl logs-to-c --cffile=$(RULES) --scoreset=$(SCORESET)
