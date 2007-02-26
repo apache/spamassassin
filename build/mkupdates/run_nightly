@@ -7,10 +7,9 @@ set -x
 
 cd /home/updatesd/svn/spamassassin
 
+. /etc/profile
 PERL=/local/perl586/bin/perl
-PATH=$PATH:/usr/sfw/bin:/opt/sfw/bin:/opt/SUNWspro/bin:/usr/X/bin:/usr/ucb:/usr/sbin:/usr/ccs/bin:/opt/subversion-1.1.4/bin:/usr/apache2/bin:/local/bin
-
-export PERL PATH
+export PERL 
 
 # Will this script be updated?  If so, re-run it after updating.
 FLAG=NO

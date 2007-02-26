@@ -13,10 +13,9 @@ set -x
 cd /home/updatesd/svn/spamassassin
 
 
+. /etc/profile
 PERL=/local/perl586/bin/perl
-PATH=/local/gnupg-1.4.2/bin:$PATH:/usr/sfw/bin:/opt/sfw/bin:/opt/SUNWspro/bin:/usr/X/bin:/usr/ucb:/usr/sbin:/usr/ccs/bin:/opt/subversion-1.1.4/bin:/usr/apache2/bin:/local/bin
-
-export PERL PATH
+export PERL
 
 # directory where "counter", "soa_line.tmpl", "soa_line" live.
 # it's assumed that the *real* zone $INCLUDEs files from this dir.
