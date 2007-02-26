@@ -294,7 +294,7 @@ use constant ARITH_EXPRESSION_LEXER => qr/(?:
         \|\||                                   # Boolean OR
         \&\&|                                   # Boolean AND
         \^|                                     # Boolean XOR
-        !|                                      # Boolean NOT
+        !(?!=)|                                 # Boolean NOT
         >=?|                                    # GT or EQ
         <=?|                                    # LT or EQ
         ==|                                     # EQ
