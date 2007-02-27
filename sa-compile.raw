@@ -146,6 +146,7 @@ $spamtest->{bases_split_out_alternations} = 1;
 
 my $installdir = $spamtest->sed_path('__local_state_dir__/compiled/__version__');
 if ((!defined $opt{'list'})
+        && !$opt{'sudo'}
         && -d $installdir && !-w $installdir)
 {
   die "sa-compile: cannot write to $installdir, aborting\n";
