@@ -606,7 +606,7 @@ EOT
 sub fixup_re {
   my $re = shift;
   
-  print "FIXUP: $re\n";
+  # print "FIXUP: $re\n";
   
   my $output = "";
   my $TOK = qr([\[\"\\\.]);
