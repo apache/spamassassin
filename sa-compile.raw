@@ -196,6 +196,9 @@ sub compile_base_strings {
   my $dirpath = Mail::SpamAssassin::Util::secure_tmpdir();
   die "secure_tmpdir failed" unless $dirpath && -w $dirpath;
 
+  my $sudo = '';
+  $opt{sudo} and $sudo = 'sudo ';
+
   foreach my $ruletype (sort keys %{$conf->{base_orig}})
   {
     open OUT, ">$dirpath/bases.in"
@@ -209,13 +212,11 @@ sub compile_base_strings {
     run(get_perl()." Makefile.PL ".
           "PREFIX=$dirpath/ignored INSTALLSITEARCH=$installdir");
 
-    my $sudo = '';
-    $opt{sudo} and $sudo = 'sudo ';
     run($sudo."make install");	# into $installdir
   }
 
   if (!$opt{'keep-tmps'}) {
-    run("rm -rf $dirpath");       # cleanup
+    run($sudo."rm -rf $dirpath");       # cleanup
   }
   else {
     print "temporary dir left due to --keep-tmps: $dirpath\n";
