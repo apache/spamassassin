@@ -3,6 +3,8 @@ CFLAGS=		-g -O2 -Wall
 LDFLAGS=	-lm
 
 PGAPACK=	/local/pgapack-1.0.0.1
+PGAPACKLIBDIR=  $(PGAPACK)/lib/linux    # linux
+# PGAPACKLIBDIR=  $(PGAPACK)/lib/sun4     # solaris
 
 # What rule scoreset are we using?
 include config
@@ -20,8 +22,8 @@ perceptron: perceptron.o
 perceptron.o: tmp/rules_${SCORESET}.pl tmp/tests.h tmp/scores.h
 	$(CC) $(CFLAGS) -c -o perceptron.o perceptron.c
 
-garescorer: tmp/rules_${SCORESET}.pl tmp/tests.h tmp/scores.h
-	$(CC) $(CFLAGS) -DWL=2 -DOPTIMIZE -L $(PGAPACK)/lib/sun4 \
+garescorer: tmp/rules_${SCORESET}.pl tmp/tests.h tmp/scores.h garescorer.c
+	$(CC) $(CFLAGS) -DWL=2 -DOPTIMIZE -L $(PGAPACKLIBDIR) \
           -I $(PGAPACK)/include garescorer.c -o garescorer -lpgaO $(LDFLAGS)
 
 tmp/rules_${SCORESET}.pl: tmp/.created ../build/parse-rules-for-masses
