@@ -272,10 +272,13 @@ it from running.
 
 =item whitelist_from add@ress.com
 
-Used to specify addresses which send mail that is often tagged (incorrectly) as
-spam. If you want to whitelist your own domain, be aware that spammers will
-often impersonate the domain of the recipient.  The recommended solution is to
-instead use C<whitelist_from_rcvd> as explained below.
+Used to whitelist sender addresses which send mail that is often tagged
+(incorrectly) as spam.
+
+Use of this setting is not recommended, since it blindly trusts the message,
+which is routinely and easily forged by spammers and phish senders. The
+recommended solution is to instead use C<whitelist_auth> or other authenticated
+whitelisting methods, or C<whitelist_from_rcvd>.
 
 Whitelist and blacklist addresses are now file-glob-style patterns, so
 C<friend@somewhere.com>, C<*@isp.com>, or C<*.domain.net> will all work.
