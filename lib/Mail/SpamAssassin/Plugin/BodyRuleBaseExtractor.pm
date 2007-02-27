@@ -334,7 +334,7 @@ sub simplify_and_qr_regexp {
   $rule =~ s/\(\?\![^\)]+\)//gs;
 
   # remove \b's
-  $rule =~ s/\\b//gs;
+  $rule =~ s/(?<!\\)\\b//gs;
 
   # remove the "?=" trick
   # (?=[dehklnswxy])(horny|nasty|hot|wild|young|....etc...)
@@ -496,6 +496,9 @@ sub extract_hints {
               \([^\)]* |
               \[[^\[]*\]?
             )+$//gsx;
+
+    # kill a trailing backslash; it's probably a failed de-escaping
+    $rule =~ s/(?<!\\)\\$//;
 
     last if $startrule eq $rule;
   }
