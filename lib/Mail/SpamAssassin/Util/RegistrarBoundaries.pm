@@ -52,6 +52,7 @@ foreach (qw/
   eu
   jobs travel
   xxx
+  mobi
   /) { 
   $VALID_TLDS{$_} = 1;
 }
