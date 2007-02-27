@@ -40,32 +40,32 @@ Results on test corpora at various alternative thresholds:
 # TCR(l=50): 0.035568  SpamRecall: 100.000%  SpamPrec: 64.008%
 
 # SUMMARY for threshold 0.0:
-# Correctly non-spam:  13425  19.87%
+# Correctly non-spam:  13414  19.86%
 # Correctly spam:     118692  99.67%
-# False positives:     54125  80.13%
+# False positives:     54136  80.14%
 # False negatives:       391  0.33%
-# TCR(l=50): 0.043997  SpamRecall: 99.672%  SpamPrec: 68.681%
+# TCR(l=50): 0.043988  SpamRecall: 99.672%  SpamPrec: 68.676%
 
 # SUMMARY for threshold 1.0:
-# Correctly non-spam:  58024  85.90%
+# Correctly non-spam:  58023  85.90%
 # Correctly spam:     116678  97.98%
-# False positives:      9526  14.10%
+# False positives:      9527  14.10%
 # False negatives:      2405  2.02%
-# TCR(l=50): 0.248761  SpamRecall: 97.980%  SpamPrec: 92.452%
+# TCR(l=50): 0.248735  SpamRecall: 97.980%  SpamPrec: 92.451%
 
 # SUMMARY for threshold 2.0:
-# Correctly non-spam:  58957  87.28%
+# Correctly non-spam:  58956  87.28%
 # Correctly spam:     116524  97.85%
-# False positives:      8593  12.72%
+# False positives:      8594  12.72%
 # False negatives:      2559  2.15%
-# TCR(l=50): 0.275522  SpamRecall: 97.851%  SpamPrec: 93.132%
+# TCR(l=50): 0.275490  SpamRecall: 97.851%  SpamPrec: 93.131%
 
 # SUMMARY for threshold 3.0:
-# Correctly non-spam:  65211  96.54%
+# Correctly non-spam:  65210  96.54%
 # Correctly spam:     113863  95.62%
-# False positives:      2339  3.46%
+# False positives:      2340  3.46%
 # False negatives:      5220  4.38%
-# TCR(l=50): 0.974732  SpamRecall: 95.617%  SpamPrec: 97.987%
+# TCR(l=50): 0.974333  SpamRecall: 95.617%  SpamPrec: 97.986%
 
 # SUMMARY for threshold 4.0:
 # Correctly non-spam:  66357  98.23%
@@ -938,7 +938,7 @@ Rule file versions for which these results apply:
 -rw-rw-r--   1 jm       other       2062 Feb  9 15:34 20_porn.cf
 -rw-rw-r--   1 jm       other      15877 Feb  9 15:34 20_ratware.cf
 -rw-rw-r--   1 jm       other       5480 Feb  9 15:34 20_uri_tests.cf
--rw-rw-r--   1 jm       other      17876 Feb  9 15:34 20_vbounce.cf
+-rw-rw-r--   1 jm       other      18015 Feb 25 16:39 20_vbounce.cf
 -rw-rw-r--   1 jm       other       2576 Feb  9 15:34 23_bayes.cf
 -rw-rw-r--   1 jm       other       1544 Feb  9 15:34 25_accessdb.cf
 -rw-rw-r--   1 jm       other       1536 Feb  9 15:34 25_antivirus.cf
@@ -958,7 +958,7 @@ Rule file versions for which these results apply:
 -rw-rw-r--   1 jm       other      22510 Feb  9 15:34 30_text_nl.cf
 -rw-rw-r--   1 jm       other      19402 Feb  9 15:34 30_text_pl.cf
 -rw-rw-r--   1 jm       other       2883 Feb  9 15:34 30_text_pt_br.cf
--rw-rw-r--   1 jm       other      47454 Feb 25 15:34 50_scores.cf
+-rw-r--r--   1 jm       other      48922 Feb 27 14:56 50_scores.cf
 -rw-rw-r--   1 jm       other       1304 Feb  9 15:34 60_awl.cf
 -rw-rw-r--   1 jm       other       2775 Feb  9 15:34 60_shortcircuit.cf
 -rw-rw-r--   1 jm       other       5147 Feb  9 15:34 60_whitelist.cf
@@ -966,6 +966,6 @@ Rule file versions for which these results apply:
 -rw-rw-r--   1 jm       other       2558 Feb  9 15:34 60_whitelist_dkim.cf
 -rw-rw-r--   1 jm       other       3584 Feb  9 15:34 60_whitelist_spf.cf
 -rw-rw-r--   1 jm       other       1914 Feb  9 15:34 60_whitelist_subject.cf
--rw-rw-r--   1 jm       other     102973 Feb 25 13:20 72_active.cf
+-rw-r--r--   1 jm       other     102017 Feb 27 14:56 72_active.cf
 -rw-rw-r--   1 jm       other       1208 Feb  9 15:34 local.cf
 -rw-rw-r--   1 jm       other       2762 Feb  9 15:34 regression_tests.cf
