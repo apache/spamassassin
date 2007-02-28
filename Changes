@@ -1,4 +1,806 @@
 ------------------------------------------------------------------------
+r512705 | jm | 2007-02-28 11:18:29 +0000 (Wed, 28 Feb 2007) | 1 line
+
+STATISTICS files should include the full freqs report, on the entire training log set, not the 1/10th test set
+------------------------------------------------------------------------
+r512496 | jm | 2007-02-27 23:40:40 +0000 (Tue, 27 Feb 2007) | 1 line
+
+oops, another point where sudo is required
+------------------------------------------------------------------------
+r512495 | jm | 2007-02-27 23:39:38 +0000 (Tue, 27 Feb 2007) | 1 line
+
+comment debugging noise
+------------------------------------------------------------------------
+r512494 | jm | 2007-02-27 23:38:30 +0000 (Tue, 27 Feb 2007) | 1 line
+
+--sudo means skip the writable check
+------------------------------------------------------------------------
+r512482 | jm | 2007-02-27 23:17:02 +0000 (Tue, 27 Feb 2007) | 1 line
+
+fix BodyRuleBaseExtractor and sa-compile to deal correctly with the SARE rulesets, which use backslashes in (previously untested) ways compared to the testing so far
+------------------------------------------------------------------------
+r512364 | hstern | 2007-02-27 19:09:30 +0000 (Tue, 27 Feb 2007) | 2 lines
+
+Added .mobi to list of valid TLDs.
+
+------------------------------------------------------------------------
+r512321 | jm | 2007-02-27 16:58:28 +0000 (Tue, 27 Feb 2007) | 1 line
+
+rebuilt STATS files for new scores
+------------------------------------------------------------------------
+r512267 | jm | 2007-02-27 14:56:39 +0000 (Tue, 27 Feb 2007) | 1 line
+
+fix meta.t failures in new scoresets
+------------------------------------------------------------------------
+r512265 | jm | 2007-02-27 14:44:00 +0000 (Tue, 27 Feb 2007) | 1 line
+
+bug 5270: redo scoresets 1 and 3, due to RCVD_IN_PBL omission in previous runs
+------------------------------------------------------------------------
+r512262 | jm | 2007-02-27 14:14:16 +0000 (Tue, 27 Feb 2007) | 1 line
+
+more portability-friendly makefile; LIBDIR has to be update between solaris and linux.  also, fix deps for garescorer binary
+------------------------------------------------------------------------
+r512239 | jm | 2007-02-27 12:49:01 +0000 (Tue, 27 Feb 2007) | 1 line
+
+discourage use of whitelist_from; the doco was not clear about this
+------------------------------------------------------------------------
+r511876 | felicity | 2007-02-26 16:22:53 +0000 (Mon, 26 Feb 2007) | 1 line
+
+bug 5353: don't let boolean not match when neq is supposed to ...
+------------------------------------------------------------------------
+r511862 | jm | 2007-02-26 15:46:29 +0000 (Mon, 26 Feb 2007) | 1 line
+
+fix PATH settings on the zone to include the correct version of subversion
+------------------------------------------------------------------------
+r511648 | jm | 2007-02-25 22:53:58 +0000 (Sun, 25 Feb 2007) | 1 line
+
+bug 5340: sa-compile was complaining about being unable to write to the compiled-rules dir, incorrectly.  fix
+------------------------------------------------------------------------
+r511548 | jm | 2007-02-25 16:42:57 +0000 (Sun, 25 Feb 2007) | 1 line
+
+duh, stupid typo in a scores line
+------------------------------------------------------------------------
+r511547 | jm | 2007-02-25 16:39:22 +0000 (Sun, 25 Feb 2007) | 1 line
+
+ignore T_ rules with a zero score in rewrite
+------------------------------------------------------------------------
+r511543 | jm | 2007-02-25 16:34:02 +0000 (Sun, 25 Feb 2007) | 1 line
+
+add additional virus-bounce pattern to VBounce ruleset
+------------------------------------------------------------------------
+r511540 | jm | 2007-02-25 16:27:03 +0000 (Sun, 25 Feb 2007) | 1 line
+
+bug 5270: updated STATISTICS files and scores
+------------------------------------------------------------------------
+r511517 | jm | 2007-02-25 14:43:59 +0000 (Sun, 25 Feb 2007) | 1 line
+
+more tmp files; use '-svn' instead of '-cvs' for version strings; filter out T_ rules in STATISTICS files; current 50_scores.cf
+------------------------------------------------------------------------
+r511505 | jm | 2007-02-25 13:17:32 +0000 (Sun, 25 Feb 2007) | 1 line
+
+bug 5270: correctly track scores zeroed in score-ranges-from-freqs, so that they are output as 0 post-rescoring.  also, just use unique temp files instead of tmp/rules.pl
+------------------------------------------------------------------------
+r511470 | jm | 2007-02-25 08:50:02 +0000 (Sun, 25 Feb 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r511346 | jm | 2007-02-24 21:09:00 +0000 (Sat, 24 Feb 2007) | 1 line
+
+bug 5257: set autolearn thresholds to be more conservative for learning mails as ham, due to anecdotal reports of problems
+------------------------------------------------------------------------
+r511345 | jm | 2007-02-24 21:08:38 +0000 (Sat, 24 Feb 2007) | 1 line
+
+bug 4747: update documentation to match current EnvelopeFrom behaviour
+------------------------------------------------------------------------
+r511240 | jm | 2007-02-24 08:50:02 +0000 (Sat, 24 Feb 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r510873 | jm | 2007-02-23 08:50:01 +0000 (Fri, 23 Feb 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r510442 | jm | 2007-02-22 08:50:02 +0000 (Thu, 22 Feb 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r510008 | jm | 2007-02-21 13:38:54 +0000 (Wed, 21 Feb 2007) | 1 line
+
+we should use the saved test log when generating stats, instead of assuming what's currently in spam-test.log is still usable
+------------------------------------------------------------------------
+r510005 | jm | 2007-02-21 13:33:11 +0000 (Wed, 21 Feb 2007) | 1 line
+
+oops, that's a sh script
+------------------------------------------------------------------------
+r510001 | jm | 2007-02-21 13:25:45 +0000 (Wed, 21 Feb 2007) | 1 line
+
+update stats-generation part of the script, to automate more of the hard work
+------------------------------------------------------------------------
+r509993 | jm | 2007-02-21 13:05:06 +0000 (Wed, 21 Feb 2007) | 1 line
+
+update MANIFEST
+------------------------------------------------------------------------
+r509988 | jm | 2007-02-21 12:54:19 +0000 (Wed, 21 Feb 2007) | 1 line
+
+bug 5270: add new helper script to ensure that rules listed in an active.list file are always published in future, since they now have evolved scores
+------------------------------------------------------------------------
+r509987 | jm | 2007-02-21 12:51:47 +0000 (Wed, 21 Feb 2007) | 1 line
+
+make some of the imageinfo rules into meta subrules, in order to fix t/meta.t problems caused by new GA-evolved scores
+------------------------------------------------------------------------
+r509941 | jm | 2007-02-21 08:50:01 +0000 (Wed, 21 Feb 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r509710 | jm | 2007-02-20 19:05:42 +0000 (Tue, 20 Feb 2007) | 1 line
+
+update to match build/parse-rules-for-masses
+------------------------------------------------------------------------
+r509555 | jm | 2007-02-20 13:35:10 +0000 (Tue, 20 Feb 2007) | 1 line
+
+should run preflight mass-checks anyway even if lint checks fail for that set of rules files
+------------------------------------------------------------------------
+r509465 | jm | 2007-02-20 08:50:02 +0000 (Tue, 20 Feb 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r509134 | jm | 2007-02-19 08:50:02 +0000 (Mon, 19 Feb 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r508887 | jm | 2007-02-18 08:50:02 +0000 (Sun, 18 Feb 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r508786 | jm | 2007-02-17 18:02:15 +0000 (Sat, 17 Feb 2007) | 1 line
+
+try to remove the requirement of single-threaded use of ../rules/50_scores.cf in runGA script; update configs to what was used in bug 5270
+------------------------------------------------------------------------
+r508785 | jm | 2007-02-17 18:01:16 +0000 (Sat, 17 Feb 2007) | 1 line
+
+bug 5270: GA scores for set 3
+------------------------------------------------------------------------
+r508737 | jm | 2007-02-17 08:50:01 +0000 (Sat, 17 Feb 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r508709 | felicity | 2007-02-17 05:01:42 +0000 (Sat, 17 Feb 2007) | 1 line
+
+bug 5337: change the start order for redhat such that spamd starts before the MTA
+------------------------------------------------------------------------
+r508679 | jm | 2007-02-17 01:35:11 +0000 (Sat, 17 Feb 2007) | 1 line
+
+set 1 scores re-run with GA
+------------------------------------------------------------------------
+r508499 | jm | 2007-02-16 17:18:14 +0000 (Fri, 16 Feb 2007) | 1 line
+
+avoid a 'may be used uninitialized' warning
+------------------------------------------------------------------------
+r508378 | jm | 2007-02-16 12:21:03 +0000 (Fri, 16 Feb 2007) | 1 line
+
+bug 5270: new scores for scoreset 0.  also updates to runGA script
+------------------------------------------------------------------------
+r508376 | jm | 2007-02-16 12:02:37 +0000 (Fri, 16 Feb 2007) | 1 line
+
+bug 5318: forgot score for this informational rule
+------------------------------------------------------------------------
+r508375 | jm | 2007-02-16 12:01:00 +0000 (Fri, 16 Feb 2007) | 1 line
+
+increase URI length limit to 8k as discussed in bug 5318 comment 30
+------------------------------------------------------------------------
+r508349 | jm | 2007-02-16 08:50:01 +0000 (Fri, 16 Feb 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r508108 | felicity | 2007-02-15 19:48:39 +0000 (Thu, 15 Feb 2007) | 1 line
+
+bug 5336: properly handle non-AI formatted targets, such as when no initial target is given
+------------------------------------------------------------------------
+r508081 | jm | 2007-02-15 19:07:18 +0000 (Thu, 15 Feb 2007) | 1 line
+
+bug 5330: document that Mail::DKIM 0.20 will perform DomainKeys lookups automatically, as well as DKIM ones
+------------------------------------------------------------------------
+r508076 | jm | 2007-02-15 18:59:01 +0000 (Thu, 15 Feb 2007) | 1 line
+
+bug 5179: perl does silly things with \r\n line endings on non-UNIX platforms.  use \015\012 instead
+------------------------------------------------------------------------
+r507951 | jm | 2007-02-15 15:06:58 +0000 (Thu, 15 Feb 2007) | 1 line
+
+ensure rule-parsing inherently knows about bayes/net scoresets
+------------------------------------------------------------------------
+r507950 | jm | 2007-02-15 15:06:06 +0000 (Thu, 15 Feb 2007) | 1 line
+
+typo; the tflag for BAYES rules is 'learn', not 'bayes'
+------------------------------------------------------------------------
+r507903 | jm | 2007-02-15 11:44:18 +0000 (Thu, 15 Feb 2007) | 1 line
+
+rename 'evolve' to 'garescorer' for clarity, to differentiate from perceptron or future alternative score-evolving systems
+------------------------------------------------------------------------
+r507901 | jm | 2007-02-15 11:40:13 +0000 (Thu, 15 Feb 2007) | 1 line
+
+fork copy of runGA script which uses the perceptron, rather than the GA
+------------------------------------------------------------------------
+r507900 | jm | 2007-02-15 11:39:50 +0000 (Thu, 15 Feb 2007) | 1 line
+
+reinstate GA evolver code from r6318, due to issues with perceptron
+------------------------------------------------------------------------
+r507897 | jm | 2007-02-15 11:36:38 +0000 (Thu, 15 Feb 2007) | 1 line
+
+reinstate GA evolver code from r6318, due to issues with perceptron
+------------------------------------------------------------------------
+r507884 | jm | 2007-02-15 10:51:03 +0000 (Thu, 15 Feb 2007) | 1 line
+
+bug 5270: 3.2.0 rescoring.  this set of scores is for set 2
+------------------------------------------------------------------------
+r507856 | jm | 2007-02-15 08:50:04 +0000 (Thu, 15 Feb 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r507708 | jm | 2007-02-14 21:57:01 +0000 (Wed, 14 Feb 2007) | 1 line
+
+stop zeroing scores; it seems to kill accuracy of the GA FP%/FN% computation compared to fp-fn-statistics. also, don't include T_ rules in the input files generated by logs-to-c. finally, support the LEARN_RATE var in validate-model
+------------------------------------------------------------------------
+r507674 | jm | 2007-02-14 20:09:41 +0000 (Wed, 14 Feb 2007) | 1 line
+
+skip new '_scoreset' key where parse-rules-for-masses is used
+------------------------------------------------------------------------
+r507673 | jm | 2007-02-14 20:09:29 +0000 (Wed, 14 Feb 2007) | 1 line
+
+skip new '_scoreset' key where parse-rules-for-masses is used
+------------------------------------------------------------------------
+r507645 | jm | 2007-02-14 18:04:44 +0000 (Wed, 14 Feb 2007) | 1 line
+
+oops.  sorry Theo, my bad; fix die()s when running parse-rules-for-masses during nightly mass-check run
+------------------------------------------------------------------------
+r507521 | jm | 2007-02-14 13:06:37 +0000 (Wed, 14 Feb 2007) | 1 line
+
+fix reported problem with VBounce plugin, caused by bug 5331; certain MIME structures are unparseable using Message::find_parts(), so just use the slower but more reliable full message rendering instead
+------------------------------------------------------------------------
+r507505 | jm | 2007-02-14 12:16:11 +0000 (Wed, 14 Feb 2007) | 1 line
+
+bug 5328: always use an absolute path for the apache-spamd PidFile setting, thanks to Radoslaw Zielinski
+------------------------------------------------------------------------
+r507503 | jm | 2007-02-14 12:14:52 +0000 (Wed, 14 Feb 2007) | 1 line
+
+bug 4329: support --cf 'config line' option in apache-spamd, thanks to Radoslaw Zielinski
+------------------------------------------------------------------------
+r507439 | jm | 2007-02-14 08:50:03 +0000 (Wed, 14 Feb 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r507306 | jm | 2007-02-13 23:46:02 +0000 (Tue, 13 Feb 2007) | 1 line
+
+gratuitous paranoia; use a separate rules.pl file for each scoreset, and record the ruleset's scoreset in that file
+------------------------------------------------------------------------
+r507102 | felicity | 2007-02-13 17:05:27 +0000 (Tue, 13 Feb 2007) | 1 line
+
+bug 5318: set a maximum internal length for URIs
+------------------------------------------------------------------------
+r506913 | jm | 2007-02-13 08:50:04 +0000 (Tue, 13 Feb 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r506604 | jm | 2007-02-12 19:44:11 +0000 (Mon, 12 Feb 2007) | 1 line
+
+better scores for scoreset 1
+------------------------------------------------------------------------
+r506581 | jm | 2007-02-12 19:05:34 +0000 (Mon, 12 Feb 2007) | 1 line
+
+more fixes for masses scripts; tenpass/split-log-into-buckets-cached needed to exit if the cached version was up to date; score-ranges-from-freqs should not mark 0-scored rules as immutable, unless they also had no hits, since the score could have been reset to 0 after the mass-check; and runGA could save disk by using ln instead of cp, and should save the freqs file used
+------------------------------------------------------------------------
+r506554 | jm | 2007-02-12 17:56:18 +0000 (Mon, 12 Feb 2007) | 1 line
+
+turn off caching
+------------------------------------------------------------------------
+r506546 | jm | 2007-02-12 17:42:14 +0000 (Mon, 12 Feb 2007) | 1 line
+
+tell us what is going on
+------------------------------------------------------------------------
+r506435 | jm | 2007-02-12 12:54:02 +0000 (Mon, 12 Feb 2007) | 1 line
+
+ensure the gen-foo dir contains a copy of the full scores file
+------------------------------------------------------------------------
+r506376 | jm | 2007-02-12 08:50:03 +0000 (Mon, 12 Feb 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r506073 | jm | 2007-02-11 17:25:42 +0000 (Sun, 11 Feb 2007) | 1 line
+
+improve caching
+------------------------------------------------------------------------
+r506071 | jm | 2007-02-11 17:18:36 +0000 (Sun, 11 Feb 2007) | 1 line
+
+use tmp files
+------------------------------------------------------------------------
+r506070 | jm | 2007-02-11 17:14:35 +0000 (Sun, 11 Feb 2007) | 1 line
+
+add new log-splitting script which caches the results
+------------------------------------------------------------------------
+r505940 | jm | 2007-02-11 12:42:42 +0000 (Sun, 11 Feb 2007) | 1 line
+
+set 2 scores
+------------------------------------------------------------------------
+r505863 | jm | 2007-02-11 08:50:02 +0000 (Sun, 11 Feb 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r505660 | jm | 2007-02-10 08:50:02 +0000 (Sat, 10 Feb 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r505437 | jm | 2007-02-09 19:29:56 +0000 (Fri, 09 Feb 2007) | 1 line
+
+scores for set 3.  these may need tuning
+------------------------------------------------------------------------
+r505327 | jm | 2007-02-09 15:36:36 +0000 (Fri, 09 Feb 2007) | 1 line
+
+oops, checked into the wrong place before.  fix; RCVD_IN_WHOIS_HIJACKED should be a mutable score
+------------------------------------------------------------------------
+r505216 | jm | 2007-02-09 08:50:05 +0000 (Fri, 09 Feb 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r505029 | jm | 2007-02-08 20:34:18 +0000 (Thu, 08 Feb 2007) | 1 line
+
+always ignore AWL in perceptron
+------------------------------------------------------------------------
+r505000 | jm | 2007-02-08 18:47:21 +0000 (Thu, 08 Feb 2007) | 1 line
+
+correct scores for URIBL_RED and URIBL_GREY; neither should be mutable, and scores should be lower going by current contents of http://www.uribl.com/
+------------------------------------------------------------------------
+r504994 | jm | 2007-02-08 18:29:17 +0000 (Thu, 08 Feb 2007) | 1 line
+
+masses: ensure that T_ rules are clamped to a score of 0.01 for perceptron runs, since they're only for testing
+------------------------------------------------------------------------
+r504983 | jm | 2007-02-08 18:01:15 +0000 (Thu, 08 Feb 2007) | 1 line
+
+comment now-obsolete 'ignored rule test got a hit in file' warning in masses
+------------------------------------------------------------------------
+r504908 | jm | 2007-02-08 14:27:55 +0000 (Thu, 08 Feb 2007) | 1 line
+
+bug 5285: reuse NJABL_DUL Dynablock hits as input for RCVD_IN_PBL during the perceptron run
+------------------------------------------------------------------------
+r504893 | jm | 2007-02-08 13:46:22 +0000 (Thu, 08 Feb 2007) | 1 line
+
+bug 5271: more ImageInfo integration; update CREDITS to note that it was contributed by Dallas E. Engelken (thanks Dallas); add loadplugin line to MANIFEST; and comment out the rules that didn't reach quality levels in the ruleqa system (were still sandbox rules)
+------------------------------------------------------------------------
+r504890 | jm | 2007-02-08 13:42:56 +0000 (Thu, 08 Feb 2007) | 1 line
+
+bug 5271: more ImageInfo integration; update CREDITS to note that it was contributed by Dallas E. Engelken (thanks Dallas), add loadplugin line to MANIFEST
+------------------------------------------------------------------------
+r504888 | jm | 2007-02-08 13:39:33 +0000 (Thu, 08 Feb 2007) | 1 line
+
+bug 4271: move ImageInfo into 3.2.0 core ruleset
+------------------------------------------------------------------------
+r504823 | jm | 2007-02-08 08:50:02 +0000 (Thu, 08 Feb 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r504605 | felicity | 2007-02-07 16:18:09 +0000 (Wed, 07 Feb 2007) | 1 line
+
+bug 5240: also disable auto_whitelist_factory in updates
+------------------------------------------------------------------------
+r504463 | jm | 2007-02-07 08:50:02 +0000 (Wed, 07 Feb 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r504039 | jm | 2007-02-06 08:50:04 +0000 (Tue, 06 Feb 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r503963 | felicity | 2007-02-06 02:45:08 +0000 (Tue, 06 Feb 2007) | 1 line
+
+bug 5240: also disable bayes_store_module without --allowplugins
+------------------------------------------------------------------------
+r503590 | jm | 2007-02-05 08:50:04 +0000 (Mon, 05 Feb 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r503495 | jm | 2007-02-04 21:59:33 +0000 (Sun, 04 Feb 2007) | 1 line
+
+bug 4576: handle mail.gmx.net-style qmail headers
+------------------------------------------------------------------------
+r503494 | jm | 2007-02-04 21:49:12 +0000 (Sun, 04 Feb 2007) | 1 line
+
+rename rule-discovery script in MANIFEST.SKIP, too
+------------------------------------------------------------------------
+r503181 | jm | 2007-02-03 08:50:02 +0000 (Sat, 03 Feb 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r502688 | jm | 2007-02-02 18:32:48 +0000 (Fri, 02 Feb 2007) | 1 line
+
+rename badly-named 'phrase-extract-in-log' script to be more consistent with its companion
+------------------------------------------------------------------------
+r502687 | jm | 2007-02-02 18:31:20 +0000 (Fri, 02 Feb 2007) | 1 line
+
+reduce RAM usage in rule-seeker script; there's no need to track ham hits at all, just kill any potential rules as soon as a single ham is hit (and free up its memory)
+------------------------------------------------------------------------
+r502686 | jm | 2007-02-02 18:30:02 +0000 (Fri, 02 Feb 2007) | 1 line
+
+sa-compile --list doesn't need write privs to /var/lib/spamassassin
+------------------------------------------------------------------------
+r502535 | jm | 2007-02-02 08:50:02 +0000 (Fri, 02 Feb 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r502161 | jm | 2007-02-01 08:50:05 +0000 (Thu, 01 Feb 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r502116 | felicity | 2007-02-01 04:15:39 +0000 (Thu, 01 Feb 2007) | 1 line
+
+bug 5261: only try to match terminal size w/ regexp if variable is defined
+------------------------------------------------------------------------
+r501888 | jm | 2007-01-31 16:30:47 +0000 (Wed, 31 Jan 2007) | 1 line
+
+oops.  scale to 0-100, not 0-1
+------------------------------------------------------------------------
+r501885 | jm | 2007-01-31 16:29:07 +0000 (Wed, 31 Jan 2007) | 1 line
+
+add a percentage
+------------------------------------------------------------------------
+r501881 | jm | 2007-01-31 16:27:30 +0000 (Wed, 31 Jan 2007) | 1 line
+
+a little bit clearer output
+------------------------------------------------------------------------
+r501877 | jm | 2007-01-31 16:17:26 +0000 (Wed, 31 Jan 2007) | 1 line
+
+add a script to cut a log file up based on the age of the messages it describes
+------------------------------------------------------------------------
+r501866 | jm | 2007-01-31 15:55:31 +0000 (Wed, 31 Jan 2007) | 1 line
+
+this should be checked in
+------------------------------------------------------------------------
+r501832 | jm | 2007-01-31 13:08:43 +0000 (Wed, 31 Jan 2007) | 1 line
+
+add --ids switch to mboxget; just lists the ids, similar to awk '{print $3}'
+------------------------------------------------------------------------
+r501594 | jm | 2007-01-30 21:57:46 +0000 (Tue, 30 Jan 2007) | 1 line
+
+use /tmpfs for temporary files on the zone, in nightly and preflight mass-checks
+------------------------------------------------------------------------
+r501592 | jm | 2007-01-30 21:55:45 +0000 (Tue, 30 Jan 2007) | 1 line
+
+File::Spec was too paranoid; it ignores TMPDIR entirely if taint mode is active, hence we never used TMPDIR at all.  fix
+------------------------------------------------------------------------
+r501546 | jm | 2007-01-30 20:33:31 +0000 (Tue, 30 Jan 2007) | 1 line
+
+split tmpfs stuff into its own init script
+------------------------------------------------------------------------
+r501545 | jm | 2007-01-30 20:31:39 +0000 (Tue, 30 Jan 2007) | 1 line
+
+use buildbot scheduler to stagger mass-check startup times, to avoid peak load
+------------------------------------------------------------------------
+r501539 | jm | 2007-01-30 20:23:24 +0000 (Tue, 30 Jan 2007) | 1 line
+
+makes more sense to just do the mkdir once
+------------------------------------------------------------------------
+r501537 | jm | 2007-01-30 20:21:22 +0000 (Tue, 30 Jan 2007) | 1 line
+
+perhaps chmod 0 is a bit too much
+------------------------------------------------------------------------
+r501535 | jm | 2007-01-30 20:15:46 +0000 (Tue, 30 Jan 2007) | 1 line
+
+reinstate wide use of /tmpfs, a memory-backed filesystem, to store the mass-check cache data.  This should help reduce I/O load on the zone
+------------------------------------------------------------------------
+r501519 | jm | 2007-01-30 18:57:55 +0000 (Tue, 30 Jan 2007) | 1 line
+
+robots nein danke
+------------------------------------------------------------------------
+r501447 | jm | 2007-01-30 16:27:18 +0000 (Tue, 30 Jan 2007) | 1 line
+
+add some files from /etc -- bits from /etc/passwd, and the contents of /etc/rsyncd.conf -- for safe keeping
+------------------------------------------------------------------------
+r501427 | jm | 2007-01-30 15:56:04 +0000 (Tue, 30 Jan 2007) | 1 line
+
+replace use of /home with /export/home directly -- apparently it is better for zone I/O
+------------------------------------------------------------------------
+r501426 | jm | 2007-01-30 15:53:45 +0000 (Tue, 30 Jan 2007) | 1 line
+
+replace use of /home with /export/home directly -- apparently it is better for zone I/O
+------------------------------------------------------------------------
+r501348 | jm | 2007-01-30 08:50:44 +0000 (Tue, 30 Jan 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r501246 | felicity | 2007-01-30 00:12:53 +0000 (Tue, 30 Jan 2007) | 1 line
+
+mass-check in client mode should start by requesting a small amount of work and then adapt from there, not the opposite.
+------------------------------------------------------------------------
+r501231 | jm | 2007-01-29 23:27:38 +0000 (Mon, 29 Jan 2007) | 1 line
+
+another place where Check is needed
+------------------------------------------------------------------------
+r501224 | jm | 2007-01-29 23:11:43 +0000 (Mon, 29 Jan 2007) | 1 line
+
+another bit of code that wasn't loading Check
+------------------------------------------------------------------------
+r501219 | jm | 2007-01-29 23:01:29 +0000 (Mon, 29 Jan 2007) | 1 line
+
+more efficient 'check_main'-implementation-required; change check_main API to return 1, and only if it returns undef (as it does when unimplemented), perform the have_plugin() call
+------------------------------------------------------------------------
+r501214 | jm | 2007-01-29 22:42:44 +0000 (Mon, 29 Jan 2007) | 1 line
+
+oops.  abbreviated lint test run in mkrules doesn't load any .pre files, so (a) didn't do half of the linting and (b) died with the new check_main-implementor-required rule from bug 5311. fix
+------------------------------------------------------------------------
+r501210 | jm | 2007-01-29 22:39:30 +0000 (Mon, 29 Jan 2007) | 1 line
+
+bug 5308: also list Mail::DKIM and Mail::DomainKeys version information in the --lint --debug 'diag:' output
+------------------------------------------------------------------------
+r501209 | jm | 2007-01-29 22:37:19 +0000 (Mon, 29 Jan 2007) | 1 line
+
+remove redundant Mail::DKIM listing -- it was listed twice
+------------------------------------------------------------------------
+r501207 | jm | 2007-01-29 22:33:23 +0000 (Mon, 29 Jan 2007) | 1 line
+
+prettify: sort the MANIFEST file
+------------------------------------------------------------------------
+r501206 | jm | 2007-01-29 22:32:31 +0000 (Mon, 29 Jan 2007) | 1 line
+
+bug 5311: die() if no plugin implements 'check_main' and the check() API is called, otherwise it's reasonably easy to wind up with a non-scanning scanner.  also, add a test
+------------------------------------------------------------------------
+r501204 | jm | 2007-01-29 22:32:18 +0000 (Mon, 29 Jan 2007) | 1 line
+
+bug 5311: die() if no plugin implements 'check_main' and the check() API is called, otherwise it's reasonably easy to wind up with a non-scanning scanner.  also, add a test
+------------------------------------------------------------------------
+r501198 | jm | 2007-01-29 22:15:46 +0000 (Mon, 29 Jan 2007) | 1 line
+
+bug 5312: document Razor slowdown bug
+------------------------------------------------------------------------
+r501196 | jm | 2007-01-29 22:11:38 +0000 (Mon, 29 Jan 2007) | 1 line
+
+check razor plugin with scores == 0, too
+------------------------------------------------------------------------
+r501075 | jm | 2007-01-29 15:03:20 +0000 (Mon, 29 Jan 2007) | 1 line
+
+I lied
+------------------------------------------------------------------------
+r501073 | jm | 2007-01-29 14:56:29 +0000 (Mon, 29 Jan 2007) | 1 line
+
+ok, really just one more test build
+------------------------------------------------------------------------
+r501072 | jm | 2007-01-29 14:54:23 +0000 (Mon, 29 Jan 2007) | 1 line
+
+trigger just one more test build
+------------------------------------------------------------------------
+r501071 | jm | 2007-01-29 14:53:22 +0000 (Mon, 29 Jan 2007) | 1 line
+
+yep, that worked
+------------------------------------------------------------------------
+r501070 | jm | 2007-01-29 14:51:00 +0000 (Mon, 29 Jan 2007) | 1 line
+
+trigger a build
+------------------------------------------------------------------------
+r501069 | jm | 2007-01-29 14:46:33 +0000 (Mon, 29 Jan 2007) | 1 line
+
+try to get builds triggering again
+------------------------------------------------------------------------
+r501067 | jm | 2007-01-29 14:42:08 +0000 (Mon, 29 Jan 2007) | 1 line
+
+upgraded Buildbot on the zone to 0.7.5; these are the config file changes that were required due to its lack of decent backwards compatibility, grr
+------------------------------------------------------------------------
+r501060 | jm | 2007-01-29 14:22:54 +0000 (Mon, 29 Jan 2007) | 1 line
+
+might as well include the release announcement in each tarball
+------------------------------------------------------------------------
+r500973 | jm | 2007-01-29 08:50:03 +0000 (Mon, 29 Jan 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r500504 | jm | 2007-01-27 08:50:03 +0000 (Sat, 27 Jan 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r500235 | jm | 2007-01-26 13:20:01 +0000 (Fri, 26 Jan 2007) | 1 line
+
+add new Devel::SawAmpersand-based test, which detects use of the dollar-ampersand perlvar -- this slows down every regexp match performed in the perl interpreter afterwards, so is better avoided in SpamAssassin.  test is SVN-only and requires editing t/config to run
+------------------------------------------------------------------------
+r500184 | jm | 2007-01-26 08:50:03 +0000 (Fri, 26 Jan 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r500052 | dos | 2007-01-25 23:26:59 +0000 (Thu, 25 Jan 2007) | 1 line
+
+bug 5305: add msa_networks to the list of config items with their own clone method
+------------------------------------------------------------------------
+r500015 | felicity | 2007-01-25 22:12:53 +0000 (Thu, 25 Jan 2007) | 3 lines
+
+Add in my samailoffset script which can be used to retrieve messages from a
+corpus, mostly for use with mass-check logs.
+
+------------------------------------------------------------------------
+r499778 | jm | 2007-01-25 13:03:52 +0000 (Thu, 25 Jan 2007) | 1 line
+
+bug 5304: move documentation for whitelist_from, whitelist_from_rcvd, unwhitelist_from, def_whitelist_from_rcvd, whitelist_allows_relays, unwhitelist_from_rcvd, blacklist_from, unblacklist_from, whitelist_to, more_spam_to, all_spam_to, and blacklist_to, back to Conf.pm from Mail/SpamAssassin/Plugin/WLBLEval.pm -- since they are basic config settings, frequently used by endusers and documentation needs to be easily accessible.
+------------------------------------------------------------------------
+r499774 | jm | 2007-01-25 12:58:08 +0000 (Thu, 25 Jan 2007) | 1 line
+
+bug 5295: add 'whitelist_auth', to whitelist addresses that send mail using sender-authorization systems like SPF, Domain Keys, and DKIM
+------------------------------------------------------------------------
+r499702 | jm | 2007-01-25 08:50:03 +0000 (Thu, 25 Jan 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r499691 | dos | 2007-01-25 07:22:38 +0000 (Thu, 25 Jan 2007) | 9 lines
+
+- fix weak validation regexes in netset that caused
+  "trusted_networks 10/8 !10/8" to be accepted as valid input
+  (only complete dot-quads were being checked for duplication)
+
+- redirect STDERR in t/trust_path.t when expecting netset to
+  warn about bad trusted/internal/msa networks config; also cause the tests
+  to fail if the expected warnings aren't triggered
+
+
+------------------------------------------------------------------------
+r499613 | dos | 2007-01-24 23:25:25 +0000 (Wed, 24 Jan 2007) | 36 lines
+
+bug 5305: implement msa_networks for detecting MSAs and extending trust accordingly
+
+	  If a host acts solely as an MSA (and not a combined MX/MSA and/or
+	  intermediate relay) we can rely on it to take care of making sure
+	  its clients pass some sort of auth check, and thus are trusted
+	  (trusted in the sense of SAs trusted_networks).
+
+	  Similar functionality exists now so long as the MSA included an
+	  auth token in its Received header which is supported by SA.
+
+	  msa_networks supports identifying clients of MSAs that don't include
+	  any sort of visibile auth token, such as older versions of Postfix
+	  and whatever it is that gmx.net is using (probably old Postfix).
+
+	  Supporting MSAs without visible auth tokens (which includes new
+	  versions of Postfix which has visible auth tokens disabled by
+	  default) also satisfies the vocal minority who are super paranoid
+	  (for some unknown reason) about others knowing that a client passed
+	  some sort of auth check before relaying mail.
+
+
+	  Usage notes:
+
+	  If your MSA acts solely as an MSA, put the MSA in all three of
+	  trusted_networks, internal_networks, msa_networks.
+
+	  If your MSA is also acting as an MX server never, NEVER, include it
+	  in msa_networks since you'll end up trusting everyone who submits
+	  mail to the MX server.
+
+	  If your MSA is also acting as an intermidiate relay that may
+	  receive mail that was submitted to an MX server never, NEVER, include
+	  it in msa_networks since you'll end up trusting everyone who submits
+	  mail to the MX server.
+
+
+------------------------------------------------------------------------
+r499552 | jm | 2007-01-24 19:54:21 +0000 (Wed, 24 Jan 2007) | 1 line
+
+don't need Crypt::OpenSSL::BigNum for this test
+------------------------------------------------------------------------
+r499388 | jm | 2007-01-24 13:00:50 +0000 (Wed, 24 Jan 2007) | 1 line
+
+bug 5268: support single-digit hexadecimal numbers in the host part of URIs
+------------------------------------------------------------------------
+r499314 | jm | 2007-01-24 08:49:15 +0000 (Wed, 24 Jan 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r499154 | jm | 2007-01-23 22:07:14 +0000 (Tue, 23 Jan 2007) | 1 line
+
+found some vbounce misses in traps; add rules
+------------------------------------------------------------------------
+r499101 | jm | 2007-01-23 19:16:04 +0000 (Tue, 23 Jan 2007) | 1 line
+
+add NO_HEADERS_MESSAGE, rule to detect corrupt corpora
+------------------------------------------------------------------------
+r499099 | jm | 2007-01-23 19:14:30 +0000 (Tue, 23 Jan 2007) | 1 line
+
+add the test that uses those two new test files
+------------------------------------------------------------------------
+r499097 | jm | 2007-01-23 18:42:57 +0000 (Tue, 23 Jan 2007) | 1 line
+
+oops, forgot 2 new test files
+------------------------------------------------------------------------
+r499074 | maddoc | 2007-01-23 16:50:20 +0000 (Tue, 23 Jan 2007) | 1 line
+
+Updated 3.2.0.txt
+------------------------------------------------------------------------
+r499012 | jm | 2007-01-23 13:08:29 +0000 (Tue, 23 Jan 2007) | 1 line
+
+remove_spamassassin_markup() / spamassassin -d was broken with CR-LF line endings; it replaced them with LF.  fix, and add test case to strip2.t to prevent future regression.  Also, add a test case for markup (and removal) on a message with no body
+------------------------------------------------------------------------
+r499009 | jm | 2007-01-23 12:50:44 +0000 (Tue, 23 Jan 2007) | 1 line
+
+bug 5250: previous fix didn't deal with messages with no header/body separator; also, this way is more efficient, by pushing the header-line-ending encoding nearer to point of insertion in the rewrite_report_safe() and rewrite_no_report_safe() methods
+------------------------------------------------------------------------
+r499007 | jm | 2007-01-23 12:48:34 +0000 (Tue, 23 Jan 2007) | 1 line
+
+File::Compare actually *creates* nonexistent files, so some error conditions causing strip2.t test failure were masked in a very confusing way.  fix
+------------------------------------------------------------------------
+r498959 | jm | 2007-01-23 08:49:15 +0000 (Tue, 23 Jan 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r498825 | jm | 2007-01-22 22:05:21 +0000 (Mon, 22 Jan 2007) | 1 line
+
+bug 5250: in rewrite_mail(), messages would have all line endings rewritten -- even inside 8bit binary parts.  fix
+------------------------------------------------------------------------
+r498777 | jm | 2007-01-22 20:11:40 +0000 (Mon, 22 Jan 2007) | 1 line
+
+add the 3.2.0 announcement text -- match the scheme we've been using in 3.1.x
+------------------------------------------------------------------------
+r498650 | jm | 2007-01-22 15:29:12 +0000 (Mon, 22 Jan 2007) | 1 line
+
+bug 5300: DKIM signature verification would fail to verify if a message contained DOS-style line endings.  fix from Jason Long <jlong at messiah.edu>
+------------------------------------------------------------------------
+r498626 | jm | 2007-01-22 14:42:25 +0000 (Mon, 22 Jan 2007) | 1 line
+
+bug 5298: Mail::DKIM 0.18 apparently no longer needs Crypt::OpenSSL::Bignum, so remove it from the requires list in our plugin and let Mail::DKIM sort it out internally
+------------------------------------------------------------------------
+r498602 | jm | 2007-01-22 13:05:45 +0000 (Mon, 22 Jan 2007) | 1 line
+
+no need to distribute those hack scripts
+------------------------------------------------------------------------
+r498601 | jm | 2007-01-22 13:04:40 +0000 (Mon, 22 Jan 2007) | 1 line
+
+add a hack-in-progress to SVN; seek-phrases-in-corpus. Given a small corpus of spam, and a corpus of ham, seek out common phrases that appear only in the spam and would make good phrase rules, using a (simple but relatively memory-efficient) BLAST-style algorithm.
+------------------------------------------------------------------------
+r498595 | jm | 2007-01-22 12:31:32 +0000 (Mon, 22 Jan 2007) | 1 line
+
+bug 4770: re-apply Mail::SpamAssassin::Plugin::ASN patch, now that licensing is sorted.  exposes ASN data as a Bayes token and the _ASNCIDR_ and _ASN_ header-rewriting tags.  thanks to Matthias Leisi <matthias /at/ leisi.net>
+------------------------------------------------------------------------
+r498559 | jm | 2007-01-22 08:49:16 +0000 (Mon, 22 Jan 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r498256 | jm | 2007-01-21 08:49:16 +0000 (Sun, 21 Jan 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r498092 | jm | 2007-01-20 08:49:17 +0000 (Sat, 20 Jan 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r497910 | felicity | 2007-01-19 19:12:52 +0000 (Fri, 19 Jan 2007) | 1 line
+
+fix email address for the pmc tfor people to request submission accounts
+------------------------------------------------------------------------
+r497857 | jm | 2007-01-19 16:10:58 +0000 (Fri, 19 Jan 2007) | 1 line
+
+um, try that again
+------------------------------------------------------------------------
+r497855 | jm | 2007-01-19 16:03:09 +0000 (Fri, 19 Jan 2007) | 1 line
+
+change ruleqa default to show last-night's rules, not the most recent preflight mass-check
+------------------------------------------------------------------------
+r497852 | jm | 2007-01-19 15:55:59 +0000 (Fri, 19 Jan 2007) | 1 line
+
+move 20_dynrdns.cf from sandbox into main ruleset, so RDNS_DYNAMIC and RDNS_NONE are core rules; lock their scores to an informational 0.1, however, since they still have a high ham hit-rate alone
+------------------------------------------------------------------------
+r497851 | jm | 2007-01-19 15:53:19 +0000 (Fri, 19 Jan 2007) | 1 line
+
+update some build procedure notes for 3.2.0
+------------------------------------------------------------------------
+r497816 | jm | 2007-01-19 13:53:45 +0000 (Fri, 19 Jan 2007) | 1 line
+
+add 'mass_check_skip_message' plugin hook to mass-check, allowing plugins to cause mass-check to ignore some messages; add 'GrepRenderedBody.pm' mass-check plugin, which allows callers to 'grep' messages for mass-check by regexps matched against the rendered message body
+------------------------------------------------------------------------
+r497792 | jm | 2007-01-19 12:41:35 +0000 (Fri, 19 Jan 2007) | 1 line
+
+public APIs for accessing the decoded or rendered body arrays are undocumented; fix this.  TODO: should we keep those PerMsgStatus APIs private, and document the ones on Message.pm instead?
+------------------------------------------------------------------------
+r497791 | jm | 2007-01-19 12:29:25 +0000 (Fri, 19 Jan 2007) | 1 line
+
+hmm.  we'd forgotten to document the 'have_shortcircuited' plugin hook; I wonder if we can hook up some greppy magic in the test suite to catch this kind of omission in future
+------------------------------------------------------------------------
+r497743 | jm | 2007-01-19 08:49:17 +0000 (Fri, 19 Jan 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r497475 | jm | 2007-01-18 16:04:59 +0000 (Thu, 18 Jan 2007) | 1 line
+
+preparing to release 3.2.0-pre1 PRERELEASE
+------------------------------------------------------------------------
 r497472 | jm | 2007-01-18 15:59:39 +0000 (Thu, 18 Jan 2007) | 1 line
 
 preparing to release 3.2.0-pre1 PRERELEASE
