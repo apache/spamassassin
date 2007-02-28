@@ -40,7 +40,7 @@ echo "and the 'score' field should be ignored.)"
 echo
 # don't just use "freqs", it's often out of date w.r.t. scores
 # remove T_ test rules from the logs
-perl hit-frequencies -x -p -s $SCORESET spam-test.log ham-test.log \
+perl hit-frequencies -x -p -s $SCORESET spam.log ham.log \
 	| egrep -v '  T_'
 
 version=`( cd .. ; ./build/get_version )`
