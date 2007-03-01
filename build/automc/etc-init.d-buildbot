@@ -7,8 +7,9 @@
 
 . /etc/profile
 
+HOME=/home/buildbot
 PYTHONPATH=/local/buildbot-live/lib/python
-export PYTHONPATH
+export PYTHONPATH HOME
 
 prog=buildbot
 runall () {

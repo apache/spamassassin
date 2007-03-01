@@ -1,8 +1,10 @@
 #!/bin/sh
 
 . /etc/profile
-
 prog=freqsd
+
+HOME=/home/automc
+export HOME
 
 start() {
     echo "Starting $prog: " 
