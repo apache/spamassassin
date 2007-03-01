@@ -7,9 +7,10 @@
 
 . /etc/profile
 
+HOME=/home/bbmass
 PATH=/local/bbmass-buildbot-live/bin:$PATH
 PYTHONPATH=/local/bbmass-buildbot-live/lib/python
-export PATH PYTHONPATH
+export PATH PYTHONPATH HOME
 
 prog=bbmass
 runall () {
