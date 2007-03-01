@@ -4,8 +4,8 @@
 
 TZ=UTC; export TZ
 DIR=$HOME/versions/cvshead
-SVN=/opt/subversion-1.1.4/bin/svn
-SVNVERS=/opt/subversion-1.1.4/bin/svnversion
+SVN=/opt/subversion-current/bin/svn
+SVNVERS=/opt/subversion-current/bin/svnversion
 
 if [ ! -d $DIR ]; then
   echo "Whaaaa?!?  No directory?" >&2
