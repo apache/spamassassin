@@ -869,6 +869,12 @@ unless ($clients_per_child > 1) {
 
 $opt{'daemonize'} and daemonize();
 
+# bug 3443: setup signal handlers before the kids since we may have to
+# kill them...  make sure this happens before setting up the pidfile to
+# avoid a race condition.
+my $got_sighup;
+setup_parent_sig_handlers();
+
 # should be done post-daemonize such that any files created by this
 # process are written with the right ownership and everything.
 preload_modules_with_tmp_homedir();
@@ -890,12 +896,6 @@ if ($copy_config_p) {
   $spamtest->copy_config(undef, \%conf_backup) ||
     die "spamd: error returned from copy_config\n";
 }
-
-# bug 3443: setup signal handlers before the kids since we may have to
-# kill them...  make sure this happens before setting up the pidfile to
-# avoid a race condition.
-my $got_sighup;
-setup_parent_sig_handlers();
 
 # bonus: SIGUSR2 to dump a stack trace.  this is never reset
 my $current_msgid = "(none)";
