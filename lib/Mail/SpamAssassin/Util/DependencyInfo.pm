@@ -75,10 +75,18 @@ my @OPTIONAL_MODULES = (
   desc => 'Used when manually reporting spam to SpamCop with "spamassassin -r".',
 },
 {
+  module => 'Mail::SPF',
+  version => '0.00',
+  desc => 'Used to check DNS Sender Policy Framework (SPF) records to fight email
+  address forgery and make it easier to identify spams.  (This is preferred
+  over Mail::SPF::Query.)',
+},
+{
   module => 'Mail::SPF::Query',
   version => '0.00',
   desc => 'Used to check DNS Sender Policy Framework (SPF) records to fight email
-  address forgery and make it easier to identify spams.',
+  address forgery and make it easier to identify spams.  (Mail::SPF is
+  preferred instead of this module.)',
 },
 {
   module => 'IP::Country::Fast',
