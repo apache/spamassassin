@@ -61,6 +61,8 @@ while (<IN>) {
 }
 close IN;
 
+%word2sym = ();     # free this, no longer needed
+
 summarise();
 exit;
 
