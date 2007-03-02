@@ -590,7 +590,10 @@ sub wanted {
         'id' => $id,
         msg => $ma
       });
-  return if $skip;
+  if ($skip) {
+    $ma->finish();
+    return;
+  }
 
   # log-uris support
   my $status;
