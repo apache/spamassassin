@@ -124,7 +124,7 @@ sub do_one_line_body_tests {
     my ($self, $pms, $conf, %opts) = @_;
     $self->add_evalstr ('
  
-      my $bodytext = $self->get_decoded_body_text_array();
+      my $bodytext = $self->get_decoded_stripped_body_text_array();
       $self->{main}->call_plugins("run_body_fast_scan", {
               permsgstatus => $self, ruletype => "body",
               priority => '.$opts{priority}.', lines => $bodytext
