@@ -50,8 +50,6 @@ BEGIN {                          # see comments in "spamassassin.raw" for doco
   }
 }
 
-
-
 use strict;
 use warnings;
 
@@ -64,6 +62,12 @@ use Pod::Usage;
 use vars qw( %opt );
 Mail::SpamAssassin::Util::clean_path_in_taint_mode();
 Mail::SpamAssassin::Util::untaint_var( \%ENV );
+
+##############################################################################
+
+# testing purposes only
+my $fixup_re_test;
+#$fixup_re_test = 1; fixup_re("please do not resend your original message."); die;
 
 ##############################################################################
 
@@ -196,8 +200,7 @@ sub compile_base_strings {
   my $dirpath = Mail::SpamAssassin::Util::secure_tmpdir();
   die "secure_tmpdir failed" unless $dirpath && -w $dirpath;
 
-  my $sudo = '';
-  $opt{sudo} and $sudo = 'sudo ';
+  my $sudo = ($opt{sudo} ? 'sudo ' : '');
 
   foreach my $ruletype (sort keys %{$conf->{base_orig}})
   {
@@ -212,6 +215,7 @@ sub compile_base_strings {
     run(get_perl()." Makefile.PL ".
           "PREFIX=$dirpath/ignored INSTALLSITEARCH=$installdir");
 
+    run("make");
     run($sudo."make install");	# into $installdir
   }
 
@@ -575,7 +579,7 @@ bootstrap $modname \$VERSION;
 }
 
 1;
-__END__
+fnord__END__
 
 fnord=head1 NAME
 
@@ -596,10 +600,10 @@ expressions as defined in F<$FILE>.
 
 See C<sa-compile> for more details.
 
-=cut
+fnord=cut
 EOT
 
-  $str =~ s/^fnord=/=/gm;
+  $str =~ s/^fnord//gm;
   print FILE $str;
 
 }
@@ -607,10 +611,10 @@ EOT
 sub fixup_re {
   my $re = shift;
   
-  # print "FIXUP: $re\n";
+  $fixup_re_test and print "INPUT: /$re/\n";
   
   my $output = "";
-  my $TOK = qr([\[\"\\\.]);
+  my $TOK = qr([\[\"\\]);
 
   my $STATE;
   while ($re =~ /\G(.*?)($TOK)/gc) {
@@ -662,7 +666,7 @@ sub fixup_re {
   $output =~ s/(?<!\\)""$/"/;
   $output =~ s/(?<!\\)""//g; # strip empty strings, or turn "abc""def" -> "abcdef"
 
-  # print "OUTPUT: $output\n";
+  $fixup_re_test and print "OUTPUT: $output\n";
   return $output;
 }
 
