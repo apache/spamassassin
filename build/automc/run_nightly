@@ -36,6 +36,7 @@ nightly_trees="/export/home/bbmass/mc-nightly"
 /export/home/automc/svn/spamassassin/build/automc/populate_cor_nightly
 
 echo "run_nightly starting at" ; date
+realhome=/export/home/bbmass
 
 # and run each mass-check using "corpus-nightly"
 for user in $nightly_users ; do
@@ -45,6 +46,11 @@ for user in $nightly_users ; do
 
   (
     HOME=$dir
+
+    # ensure we use the user-wide SVN permissions and server identities,
+    # otherwise we won't be able to perform noninteractive SVN ops
+    rm -rf $dir/.subversion 
+    ln -s $realhome/.subversion $dir/.subversion 
 
     # oh Solaris, you really suck
     PERL=/local/perl586/bin/perl
