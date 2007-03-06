@@ -6,7 +6,10 @@ sub run;
 my $BYMAILCF = '/export/home/bbmass/bymail/latest.cf';
 
 
-my $perl = $^X;
+# Mar  6 2007 jm: use the "Cool Tools" Solaris-optimized perl
+my $perl = '/usr/local/bin/perl';
+# my $perl = $^X;
+
 if (!$perl) {
   die "no perl path found in ARGV!";
 }
