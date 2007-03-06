@@ -147,14 +147,16 @@ my @OPTIONAL_MODULES = (
   version => '0.00',
   desc => 'If this module is installed, and you enable the DomainKeys plugin,
   SpamAssassin will perform Domain Key lookups when Domain Key
-  information is present in the message headers.'
+  information is present in the message headers.  (Note that new versions
+  of Mail::DKIM render this module superfluous.)'
 },
 {
   module => 'Mail::DKIM',
   version => '0.00',
   desc => 'If this module is installed, and you enable the DKIM plugin,
-  SpamAssassin will perform DKIM lookups when a DKIM-Signature header is
-  present in the message headers.'
+  SpamAssassin will perform DKIM lookups when a DKIM-Signature
+  header is present in the message headers.  (New versions of this module
+  support both Domain Keys and DKIM, rendering Mail::DomainKeys obsolete.)'
 },
 {
   module => 'DBI',
