@@ -27,11 +27,10 @@ Mail::SpamAssassin::Plugin::DKIM - perform DKIM verification tests
 
 =head1 DESCRIPTION
 
-This SpamAssassin plugin implements DKIM lookups, as described by the current
-draft specs:
-
-  http://mipassoc.org/dkim/specs/draft-allman-dkim-base-01.txt
-  http://mipassoc.org/mass/specs/draft-allman-dkim-base-00-10dc.html
+This SpamAssassin plugin implements DKIM lookups as described by the current
+draft specs: draft-ietf-dkim-base-10, as well as DomainKeys lookups, as
+described in draft-delany-domainkeys-base-06, thanks to the support for both
+types of signatures by newer versions of module Mail::DKIM (0.22 or later).
 
 It requires the C<Mail::DKIM> CPAN module to operate. Many thanks to Jason Long
 for that module.
@@ -195,32 +194,40 @@ these are often targets for spammer spoofing.
 
 sub check_dkim_signed {
   my ($self, $scan) = @_;
-  $self->_check_dkim($scan) unless $scan->{dkim_checked};
+  $self->_check_dkim_signature($scan) unless $scan->{dkim_checked_signature};
   return $scan->{dkim_signed};
 }
 
 sub check_dkim_verified {
   my ($self, $scan) = @_;
-  $self->_check_dkim($scan) unless $scan->{dkim_checked};
+  $self->_check_dkim_signature($scan) unless $scan->{dkim_checked_signature};
   return $scan->{dkim_verified};
 }
 
 sub check_dkim_signsome {
   my ($self, $scan) = @_;
-  $self->_check_dkim($scan) unless $scan->{dkim_checked};
+  $self->_check_dkim_policy($scan) unless $scan->{dkim_checked_policy};
   return $scan->{dkim_signsome};
-}
-
-sub check_dkim_testing {
-  my ($self, $scan) = @_;
-  $self->_check_dkim($scan) unless $scan->{dkim_checked};
-  return $scan->{dkim_testing};
 }
 
 sub check_dkim_signall {
   my ($self, $scan) = @_;
-  $self->_check_dkim($scan) unless $scan->{dkim_checked};
+  $self->_check_dkim_policy($scan) unless $scan->{dkim_checked_policy};
   return $scan->{dkim_signall};
+}
+
+# public key carries a testing flag, or fetched policy carries a testing flag
+sub check_dkim_testing {
+  my ($self, $scan) = @_;
+  my $result = 0;
+  $self->_check_dkim_signature($scan) unless $scan->{dkim_checked_signature};
+  if ($scan->{dkim_key_testing}) {
+    $result = 1;
+  } else {
+    $self->_check_dkim_policy($scan) unless $scan->{dkim_checked_policy};
+    $result = 1  if $scan->{dkim_policy_testing};
+  }
+  return $result;
 }
 
 sub check_for_dkim_whitelist_from {
@@ -237,26 +244,25 @@ sub check_for_def_dkim_whitelist_from {
 
 # ---------------------------------------------------------------------------
 
-sub _check_dkim {
+sub _check_dkim_signature {
   my ($self, $scan) = @_;
 
-  $scan->{dkim_checked} = 1;
+  $scan->{dkim_checked_signature} = 1;
   $scan->{dkim_signed} = 0;
   $scan->{dkim_verified} = 0;
-  $scan->{dkim_signsome} = 0;
-  $scan->{dkim_testing} = 0;
-  $scan->{dkim_signall} = 0;
+  $scan->{dkim_key_testing} = 0;
 
   my $message = Mail::DKIM::Verifier->new_object();
   if (!$message) {
     dbg("dkim: cannot create Mail::DKIM::Verifier");
     return;
   }
+  $scan->{dkim_object} = $message;
 
   # feed content of message into verifier, using \r\n endings,
   # required by Mail::DKIM API (see bug 5300)
-  # note: bug 5179 comment 28: perl does silly things unless we use \015\012
-  # instead of \r\n
+  # note: bug 5179 comment 28: perl does silly things on non-Unix platforms
+  # unless we use \015\012 instead of \r\n
   eval {
     foreach my $line (split(/\n/s, $scan->{msg}->get_pristine)) {
       $line =~ s/\r?$/\015\012/s;       # ensure \015\012 ending
@@ -274,47 +280,30 @@ sub _check_dkim {
   my $timer = Mail::SpamAssassin::Timeout->new({ secs => $timeout });
   my $err = $timer->run_and_catch(sub {
 
-    dbg("dkim: performing lookup");
+    dbg("dkim: performing public key lookup and signature verification");
     $message->CLOSE();      # the action happens here
 
     $scan->{dkim_address} = ($message->message_originator ? $message->message_originator->address() : '');
-    $scan->{dkim_identity} = ($message->signature ? $message->signature->identity() : '');
-
     dbg("dkim: originator address: ".($scan->{dkim_address} ? $scan->{dkim_address} : 'none'));
-    dbg("dkim: signature identity: ".($scan->{dkim_identity} ? $scan->{dkim_identity} : 'none'));
+
+    $scan->{dkim_identity} = '';
+    if ($message->signature) {
+      # i=  Identity of the user or agent (e.g., a mailing list manager) on
+      #     behalf of which this message is signed (dkim-quoted-printable;
+      #     OPTIONAL, default is an empty local-part followed by an "@"
+      #     followed by the domain from the "d=" tag).
+      $scan->{dkim_identity} = $message->signature->identity();
+      if ($scan->{dkim_identity} eq '') {
+        $scan->{dkim_identity} = '@' . $message->signature->domain();
+      }
+      dbg("dkim: signature identity: ".$scan->{dkim_identity});
+    }
 
     my $result = $message->result();
     my $detail = $message->result_detail();
-    dbg("dkim: result: $detail");
+    dbg("dkim: signature verification result: $detail");
 
-    my $policy;
-    if ($message->message_originator && $message->message_originator->host) {
-      # both of these must be populated for DKIM to look up the policy
-      $policy = $message->fetch_author_policy();
-    }
-
-    if ($policy) {
-      # TODO - required? (for $policy_result, see perldoc Mail::DKIM::Policy)
-      my $policy_result = $policy->apply($message);
-      dbg("dkim: policy result $policy_result: ".$policy->as_string());
-
-      # extract the flags we expose, from the policy
-      my $pol_o = $policy->policy();
-      if ($pol_o eq '~') {
-        $scan->{dkim_signsome} = 1;
-      }
-      elsif ($pol_o eq '-') {
-        $scan->{dkim_signall} = 1;
-      }
-      if ($policy->testing()) {
-        $scan->{dkim_testing} = 1;
-      }
-    }
-    else {
-      dbg("dkim: policy: none");
-    }
-
-    # and now extract the actual lookup results
+    # extract the actual lookup results
     if ($result eq 'pass') {
       $scan->{dkim_signed} = 1;
       $scan->{dkim_verified} = 1;
@@ -326,24 +315,85 @@ sub _check_dkim {
       # no-op, this is the default state
     }
     elsif ($result eq 'invalid') {
-      # 'Returned if no valid DKIM-Signature headers were found, but there is
-      # at least one invalid DKIM-Signature header. For a reason why a DKIM-
-      # Signature header found in the message was invalid, see
-      # $dkim->{signature_reject_reason}.'
-      warn("dkim: invalid DKIM-Signature: $detail");
+      # Returned if no valid DKIM-Signature headers were found,
+      # but there is at least one invalid DKIM-Signature header.
+      dbg("dkim: invalid DKIM-Signature: $detail");
     }
 
   });
 
   if ($timer->timed_out()) {
-    dbg("dkim: lookup timed out after $timeout seconds");
-    return 0;
-  }
-
-  if ($err) {
+    dbg("dkim: public key lookup timed out after $timeout seconds");
+  } elsif ($err) {
     chomp $err;
-    warn("dkim: lookup failed: $err\n");
-    return 0;
+    dbg("dkim: public key lookup failed: $err");
+  }
+}
+
+sub _check_dkim_policy {
+  my ($self, $scan) = @_;
+
+  $scan->{dkim_checked_policy} = 1;
+  $scan->{dkim_signsome} = 0;
+  $scan->{dkim_signall} = 0;
+  $scan->{dkim_policy_testing} = 0;
+
+  # must check the message first to obtain signer, domain, and verif. status
+  $self->_check_dkim_signature($scan) unless $scan->{dkim_checked_signature};
+  my $message = $scan->{dkim_object};
+
+  if (!$message) {
+    dbg("dkim: policy: dkim object not available (programming error?)");
+  } elsif (!$scan->is_dns_available()) {
+    dbg("dkim: policy: not retrieved, no DNS resolving available");
+  } elsif ($scan->{dkim_verified}) {  # no need to fetch policy when verifies
+    # draft-allman-dkim-ssp-02: If the message contains a valid Originator
+    # Signature, no Sender Signing Practices check need be performed:
+    # the Verifier SHOULD NOT look up the Sender Signing Practices
+    # and the message SHOULD be considered non-Suspicious.
+
+    dbg("dkim: policy: not retrieved, signature does verify");
+
+  } else {
+    my $timeout = $scan->{conf}->{dkim_timeout};
+    my $timer = Mail::SpamAssassin::Timeout->new({ secs => $timeout });
+    my $err = $timer->run_and_catch(sub {
+
+      dbg("dkim: policy: performing lookup");
+
+      my $policy;
+      eval { $policy = $message->fetch_author_policy };
+      if ($@ ne '') {
+        # fetching or parsing a policy may throw an error, ignore such policy
+        chomp($@); dbg("dkim: policy: fetch or parse failed: $@");
+        undef $policy;
+      }
+      if (!$policy) {
+        dbg("dkim: policy: none");
+      } else {
+        my $policy_result = $policy->apply($message);
+        dbg("dkim: policy result $policy_result: ".$policy->as_string());
+
+        # extract the flags we expose, from the policy
+        my $pol_o = $policy->policy();
+        if ($pol_o eq '~') {
+          $scan->{dkim_signsome} = 1;
+        }
+        elsif ($pol_o eq '-') {
+          $scan->{dkim_signall} = 1;
+        }
+        if ($policy->testing()) {
+          $scan->{dkim_policy_testing} = 1;
+        }
+      }
+    });
+
+    if ($timer->timed_out()) {
+      dbg("dkim: lookup timed out after $timeout seconds");
+    } elsif ($err) {
+      chomp $err;
+      dbg("dkim: lookup failed: $err");
+    }
   }
 }
 
@@ -352,7 +402,7 @@ sub _check_dkim_whitelist {
 
   return unless $scanner->is_dns_available();
 
-  # trigger an DKIM check so we can get address/identity info
+  # trigger a DKIM check so we can get address/identity info,
   # if verification failed only continue if we want the debug info
   unless ($self->check_dkim_verified($scanner)) {
     unless (would_log("dbg", "dkim")) {
@@ -372,7 +422,7 @@ sub _check_dkim_whitelist {
   if ($default) {
     $scanner->{def_dkim_whitelist_from_checked} = 1;
     $scanner->{def_dkim_whitelist_from} =
-                    $self->_wlcheck_domain($scanner,'def_whitelist_from_dk');
+                    $self->_wlcheck_domain($scanner,'def_whitelist_from_dkim');
 
     if (!$scanner->{def_dkim_whitelist_from}) {
       $scanner->{def_dkim_whitelist_from} =
@@ -381,7 +431,7 @@ sub _check_dkim_whitelist {
   } else {
     $scanner->{dkim_whitelist_from_checked} = 1;
     $scanner->{dkim_whitelist_from} =
-                    $self->_wlcheck_domain($scanner,'whitelist_from_dk');
+                    $self->_wlcheck_domain($scanner,'whitelist_from_dkim');
 
     if (!$scanner->{dkim_whitelist_from}) {
       $scanner->{dkim_whitelist_from} =
