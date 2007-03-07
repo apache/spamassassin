@@ -1,3 +1,19 @@
+Note for Users Upgrading to SpamAssassin 3.2.0
+-----------------------------------------------
+
+- The "127/8" network, including 127.0.0.1, is now always implicitly part of
+  "trusted_networks" and "internal_networks".  It's impossible to remove these
+  from the trusted/internal sets, since if you cannot trust the host where
+  SpamAssassin is running, you cannot trust SpamAssassin itself.  If you
+  previously had "trusted_networks" and "internal_networks" lines listing those
+  hosts, you should now remove them, otherwise a minor (non-lint-error) warning
+  will be output.
+
+- For ISPs -- version 3.2.0 now includes a new way to specify Mail Submission
+  Agents, relay hosts which accept mail from your own users and authenticates
+  them appropriately.  See the Mail::SpamAssassin::Conf manual page for the
+  "msa_networks" setting.
+
 Note for Users Upgrading to SpamAssassin 3.1.0
 -----------------------------------------------
 
