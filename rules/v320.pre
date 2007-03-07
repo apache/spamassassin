@@ -47,8 +47,9 @@ loadplugin Mail::SpamAssassin::Plugin::VBounce
 #
 # loadplugin Mail::SpamAssassin::Plugin::Rule2XSBody
 
-# ASN - look up the Autonomous System Number of connecting IP
-# requires additional configuration, see plugin's POD docs
+# ASN - Look up the Autonomous System Number of the connecting IP
+# and create a header containing ASN data for bayes tokenization.
+# See plugin's POD docs for usage info.
 #
 # loadplugin Mail::SpamAssassin::Plugin::ASN
 

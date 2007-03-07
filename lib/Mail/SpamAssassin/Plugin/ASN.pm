@@ -25,8 +25,9 @@ Mail::SpamAssassin::Plugin::ASN - SpamAssassin plugin to look up the Autonomous 
 
 =head1 SYNOPSIS
 
-	loadplugin	Mail::SpamAssassin::Plugin::ASN
-	header		ASN_LOOKUP	eval:asn_lookup('asn.routeviews.org', 2)
+ loadplugin Mail::SpamAssassin::Plugin::ASN
+
+ header ASN_LOOKUP eval:asn_lookup('asn.routeviews.org', 2)
 
 =head1 DESCRIPTION
 
@@ -40,45 +41,54 @@ zone (see C<ftp://ftp.routeviews.org/dnszones/>).
 =head1 TEMPLATE TAGS
 
 This plugin adds two tags, C<_ASN_> and C<_ASNCIDR_>, which can be
-used in places where such tags can usually be used.
+used in places where such tags can usually be used.  For example:
 
-	add_header all ASN _ASN_ _ASNCIDR_
+ add_header all ASN _ASN_ _ASNCIDR_
 
-may add something like
+may add something like:
 
-	X-Spam-ASN: AS24940 213.239.192.0/18
+ X-Spam-ASN: AS24940 213.239.192.0/18
 
 where "AS24940" is the ASN and "213.239.192.0/18" is the route
 announced by that ASN where the connecting IP address came from. If
 the AS announces multiple networks (more/less specific), they will
-all be added to the C<_ASNCIDR_> tag, separated by spaces, eg
+all be added to the C<_ASNCIDR_> tag, separated by spaces, eg:
 
-	X-Spam-ASN: AS1680 89.138.0.0/15 89.139.0.0/16 
+ X-Spam-ASN: AS1680 89.138.0.0/15 89.139.0.0/16 
 
 =head1 CONFIGURATION
 
-This plugin has no user-serviceable parts or configurations. The
-standard loading sequence is as follows:
+The standard ruleset contains a configuration that will add a header
+containing ASN data to scanned messages.  The bayes tokenizer will use the
+added header for bayes calculations, and thus affect which BAYES_* rule will
+trigger for a particular message.
 
-	loadplugin	Mail::SpamAssassin::Plugin::ASN
+B<Note> that in most cases you should not score on the ASN data directly.
+Bayes learning will probably trigger on the _ASNCIDR_ tag, but probably not
+very well on the _ASN_ tag alone.
 
-	ifplugin	Mail::SpamAssassin::Plugin::ASN
-	header		ASN_LOOKUP eval:asn_lookup('asn.routeviews.org', 2)
-	add_header	all ASN _ASN_ _ASNCIDR_
-	endif
-
-B<Note> that you should not score on this rule - it is merely
-informational. Bayes learning will probably trigger on the _ASNCIDR_
-tag, but probably not very well on the _ASN_ tag alone.
-
-B<Note> that the zone to lookup the ASN in must be given as the
-first parameter to the asn_lookup eval function. This is especially 
+B<Note> that the zone to lookup the ASN data in must be given as the
+first parameter to the asn_lookup eval function.  This is especially 
 important if you use a locally mirrored zone.
 
-B<Note> the second parameter to asn_lookup is the number of queries
-to start. This should not be set to somewhere between 2 and 5 but
-may depend on your local nameserver configuration. If you run a
-local mirror, setting this to 1 should probably be enough.
+B<Note> the second parameter to asn_lookup is the number of queries to start.
+This should be set to somewhere between 2 and 5 but may depend on your local
+nameserver configuration.  If you run a local mirror, setting this to 1 should
+probably be enough.
+
+=head1 SEE ALSO
+
+http://www.routeviews.org/ - all data regarding routing, ASNs etc
+
+http://issues.apache.org/SpamAssassin/show_bug.cgi?id=4770 -
+SpamAssassin Issue #4770 concerning this plugin
+
+=head1 STATUS
+
+Experimental - Dec. 18, 2006
+
+No in-depth analysis of the usefulness of bayes tokenization of ASN data has
+been performed.
 
 =cut
 
@@ -200,18 +210,3 @@ sub check_tick {
 }
 
 1;
-
-=head1 SEE ALSO
-
-http://www.routeviews.org/ - all data regarding routing, ASNs etc;
-http://issues.apache.org/SpamAssassin/show_bug.cgi?id=4770 -
-SpamAssassin Issue #4770 concerning this plugin
-
-=head1 AUTHOR
-
-Matthias Leisi <matthias@leisi.net>, http://matthias.leisi.net/
-
-=head1 VERSION
-
-Experimental - Dec. 18, 2006
-
