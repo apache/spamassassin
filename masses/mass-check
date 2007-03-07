@@ -130,7 +130,13 @@ use vars qw($opt_c $opt_p $opt_f $opt_j $opt_n $opt_o $opt_all $opt_bayes
 	    $tmpfd %reuse %orig_conf %reuse_conf $reuse_rules_loaded_p);
 
 use FindBin;
+
+# use "blib" so that we can use e.g. @@LOCAL_STATE_DIR@@; "lib" doesn't
+# have that stuff substituted :(  use lib too, though, as a backup,
+# since some users might be running mass-check without "make" first
 use lib "$FindBin::Bin/../lib";
+use lib "$FindBin::Bin/../blib/lib";
+
 eval "use bytes";
 use IO::Select;
 use IO::Socket;
@@ -222,6 +228,8 @@ if ($opt_lint) {
     'post_config_text'                          => join("\n", @{$opt_cf})."\n",
     PREFIX					=> '',
     DEF_RULES_DIR        			=> $opt_c,
+    # TODO: it would be nicer for mass-check to not have to specify
+    # this, or to use the same compiler as spamassassin, sa-update etc.
     LOCAL_RULES_DIR      			=> '',
   });
 
