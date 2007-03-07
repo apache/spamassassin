@@ -15,10 +15,105 @@ BEGIN {
   if (-e 't/test_dir') { chdir 't'; } 
   if (-e 'test_dir') { unshift(@INC, '../blib/lib'); }
 
-  plan tests => 28;
+  plan tests => 51;
 
 };
 use lib '../lib';
+
+# TODO: fails with perl 5.9.5 due to trie
+# try_extraction (' body __SARE_FRAUD_BADTHINGS /(?:(?:political crisis|poisoned (?:to death )?by))/i
+# body __SARE_FRAUD_BADTHINGS /(?:all funds will be returned|ass?ylum|assassinate|(?:auto|boat|car|plane|train).{1,7}(?:crash|accident|disaster|wreck)|before they both died|brutal acts|cancer|coup attempt|disease|due to the current|\bexile\b|\bfled|\bflee\b|have been frozen|impeach|\bkilled|land dispute|murder|over-invoice|political crisis|poisoned (?:to death )?by|relocate|since the demise|\bslay\b)/i
+# 
+# ', {
+    # base_extract => 1,
+    # bases_must_be_casei => 1,
+    # bases_can_use_alternations => 0,
+    # bases_can_use_quantifiers => 0,
+    # bases_can_use_char_classes => 0,
+    # bases_split_out_alternations => 1
+# }, [ 'accident:__SARE_FRAUD_BADTHINGS', ], [ ]);
+
+try_extraction ('
+    body FOO /(?:Viagra|Valium|Xanax|Soma|Cialis){2}/i
+
+', {
+    base_extract => 1,
+    bases_must_be_casei => 1,
+    bases_can_use_alternations => 0,
+    bases_can_use_quantifiers => 0,
+    bases_can_use_char_classes => 0,
+    bases_split_out_alternations => 1
+}, [
+
+  'cialis:FOO',
+  'soma:FOO',
+  'valium:FOO',
+  'viagra:FOO',
+  'xanax:FOO'
+
+], [ ]);
+
+try_extraction ('
+    body FOO /\brecords (?:[a-z_,-]+ )+?(?:feature|(?:a|re)ward)/i
+
+', {
+    base_extract => 1,
+    bases_must_be_casei => 1,
+    bases_can_use_alternations => 0,
+    bases_can_use_quantifiers => 0,
+    bases_can_use_char_classes => 0,
+    bases_split_out_alternations => 1
+}, [
+
+    'records :FOO'
+
+], [ ]);
+
+try_extraction ('
+    body EXCUSE_REMOVE /to .{0,20}(?:mailings|offers)/i
+    body TEST2 /foody* bar/
+    body TEST1A /fo(?:oish|o) bar/
+
+
+', {
+    base_extract => 1,
+    bases_must_be_casei => 1,
+    bases_can_use_alternations => 0,
+    bases_can_use_quantifiers => 0,
+    bases_can_use_char_classes => 0,
+    bases_split_out_alternations => 1
+}, [
+
+
+    'foo bar:TEST1A',
+    'food:TEST2',
+    'fooish bar:TEST1A',
+    'mailings:EXCUSE_REMOVE',
+    'offers:EXCUSE_REMOVE',
+
+], [ ]);
+
+try_extraction ('
+    body EXCUSE_REMOVE /to .{0,20}(?:mail(ings|food)|o(ffer|blarg)s)/i
+    body TEST2 /foody* bar/
+
+
+', {
+    base_extract => 1,
+    bases_must_be_casei => 1,
+    bases_can_use_alternations => 0,
+    bases_can_use_quantifiers => 0,
+    bases_can_use_char_classes => 0,
+    bases_split_out_alternations => 1
+}, [
+
+    'food:TEST2',
+    'mailfood:EXCUSE_REMOVE TEST2',
+    'mailings:EXCUSE_REMOVE',
+    'oblargs:EXCUSE_REMOVE',
+    'offers:EXCUSE_REMOVE',
+
+], [ ]);
 
 try_extraction ('
     body FOO /foo bar/
@@ -55,11 +150,10 @@ try_extraction ('
     'food bar:TEST2 TEST3',
     'foody bar:TEST2 TEST3',
     'refinanc:TEST5',
-    'time to refinance:TEST5',
-    'target:TEST6',
-    'target price:TEST6',
-    'current:TEST6',
-    'current price:TEST6',
+    'target::TEST6',
+    'target price::TEST6',
+    'current::TEST6',
+    'current price::TEST6',
 
 ], [
 
@@ -75,8 +169,8 @@ try_extraction ('
 
     # this should not result in a match on "foo bar" since we are not
     # splitting alts in this test
-    body TEST1 /fo(?:oish|o)? bar/
-    body TEST2 /fo(?:oish|o) bar/
+    body TEST1 /fo(?:oish|o)? b(a|b)r/
+    body TEST2 /fo(?:oish|o) b(a|b)r/
 
 ', {
     base_extract => 1,
@@ -98,6 +192,70 @@ try_extraction ('
     'fooish bar:TEST2'
 
 ]);
+
+#TODO: fails with perl 5.9.5
+# try_extraction ('
+# 
+#     body __SARE_FRAUD_BADTHINGS /(?:all funds will be returned|ass?ylum|assassinate|(?:auto|boat|car|plane|train).{1,7}(?:crash|accident|disaster|wreck)|before they both died|brutal acts|cancer|coup attempt|disease|due to the current|\bexile\b|\bfled|\bflee\b|have been frozen|impeach|\bkilled|land dispute|murder|over-invoice|political crisis|poisoned (?:to death )?by|relocate|since the demise|\bslay\b)/i
+# 
+#     body __FRAUD_PTS /\b(?:ass?ass?inat(?:ed|ion)|murder(?:e?d)?|kill(?:ed|ing)\b[^.]{0,99}\b(?:war veterans|rebels?))\b/i
+# 
+# 
+# ', {
+#     base_extract => 1,
+#     bases_must_be_casei => 1,
+#     bases_can_use_alternations => 0,
+#     bases_can_use_quantifiers => 0,
+#     bases_can_use_char_classes => 0,
+#     bases_split_out_alternations => 1
+# }, [
+# 
+#   'accident:__SARE_FRAUD_BADTHINGS',
+#   'all funds will be returned:__SARE_FRAUD_BADTHINGS',
+#   'asasinated:__FRAUD_PTS',
+#   'asasination:__FRAUD_PTS',
+#   'asassinated:__FRAUD_PTS',
+#   'asassination:__FRAUD_PTS',
+#   'assasinated:__FRAUD_PTS',
+#   'assasination:__FRAUD_PTS',
+#   'assassinate:__SARE_FRAUD_BADTHINGS',
+#   'assassinated:__FRAUD_PTS __SARE_FRAUD_BADTHINGS',
+#   'assassination:__FRAUD_PTS',
+#   'assylum:__SARE_FRAUD_BADTHINGS',
+#   'asylum:__SARE_FRAUD_BADTHINGS',
+#   'before they both died:__SARE_FRAUD_BADTHINGS',
+#   'brutal acts:__SARE_FRAUD_BADTHINGS',
+#   'cancer:__SARE_FRAUD_BADTHINGS',
+#   'coup attempt:__SARE_FRAUD_BADTHINGS',
+#   'crash:__SARE_FRAUD_BADTHINGS',
+#   'disaster:__SARE_FRAUD_BADTHINGS',
+#   'disease:__SARE_FRAUD_BADTHINGS',
+#   'due to the current:__SARE_FRAUD_BADTHINGS',
+#   'exile:__SARE_FRAUD_BADTHINGS',
+#   'fled:__SARE_FRAUD_BADTHINGS',
+#   'flee:__SARE_FRAUD_BADTHINGS',
+#   'have been frozen:__SARE_FRAUD_BADTHINGS',
+#   'impeach:__SARE_FRAUD_BADTHINGS',
+#   'killed:__FRAUD_PTS __SARE_FRAUD_BADTHINGS',
+#   'killing:__FRAUD_PTS',
+#   'land dispute:__SARE_FRAUD_BADTHINGS',
+#   'murder:__SARE_FRAUD_BADTHINGS',
+#   'murderd:__FRAUD_PTS __SARE_FRAUD_BADTHINGS',
+#   'murdered:__FRAUD_PTS __SARE_FRAUD_BADTHINGS',
+#   'over-invoice:__SARE_FRAUD_BADTHINGS',
+#   'plane:__SARE_FRAUD_BADTHINGS',
+#   'poisoned by:__SARE_FRAUD_BADTHINGS',
+#   'poisoned to death by:__SARE_FRAUD_BADTHINGS',
+#   'political crisis:__SARE_FRAUD_BADTHINGS',
+#   'relocate:__SARE_FRAUD_BADTHINGS',
+#   'since the demise:__SARE_FRAUD_BADTHINGS',
+#   'slay:__SARE_FRAUD_BADTHINGS',
+#   'train:__SARE_FRAUD_BADTHINGS',
+#   'war veterans:__FRAUD_PTS',
+#   'wreck:__SARE_FRAUD_BADTHINGS',
+# 
+# ], [ ]);
+
 ###########################################################################
 
 use Mail::SpamAssassin;

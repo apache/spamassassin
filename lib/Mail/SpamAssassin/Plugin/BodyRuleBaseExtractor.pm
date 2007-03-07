@@ -37,6 +37,8 @@ use bytes;
 use vars qw(@ISA);
 @ISA = qw(Mail::SpamAssassin::Plugin);
 
+use constant DEBUG_RE_PARSING => 0;     # noisy!
+
 # a few settings that control what kind of bases are output.
 
 # treat all rules as lowercase for purposes of term extraction?
@@ -117,70 +119,39 @@ sub extract_set_pri {
     next if ($conf->{rules_to_replace}->{$name});
 
     my ($qr, $mods) = $self->simplify_and_qr_regexp($rule);
-    my ($anchored, $floating, @bases1, @bases2);
 
-    # don't use this for now; it results in differing behaviour for 5.9.5
-    # vs 5.[68].*, which we want to avoid.
-    #eval {
-      # use re qw(regmust);     # added in blead, 2006-11-16
-      # ($anchored, $floating) = regmust(qr/$qr/);
-      # @bases1 = (quotemeta $anchored);
-      # @bases2 = (quotemeta $floating);
-    #};
-
-    my $len1 = 0;
-    my $len2 = 0;
-    if ($anchored) { $len1 = length($anchored); }
-    if ($floating) { $len2 = length($floating); }
-
-    # fall back to using our own code, since the regexp is too
-    # complex (probably alternations involved).
-    if ((!$anchored || $len1 < $min_chars) && (!$floating || $len2 < $min_chars))
-    {
-      eval {  # catch die()s
-        @bases1 = $self->extract_hints($qr, $mods, 0);
-      };
-      $@ and dbg("giving up on that direction: $@");
-      eval {  # catch die()s
-        @bases2 = $self->extract_hints($qr, $mods, 1);
-      };
-      $@ and dbg("giving up on that direction: $@");
-    }
+    my @bases;
+    eval {  # catch die()s
+      @bases = $self->extract_hints($rule, $qr, $mods);
+    };
+    $@ and dbg("giving up on regexp: $@");
 
     # if any of the extracted hints in a set are too short, the entire
     # set is invalid; this is because each set of N hints represents just
     # 1 regexp.
-    my $minlen1;
-    foreach my $str (@bases1) {
+    my $minlen;
+    foreach my $str (@bases) {
       my $len = length $str;
-      if ($len < $min_chars) { $minlen1 = undef; @bases1 = (); last; }
-      elsif (!defined($minlen1) || $len < $minlen1) { $minlen1 = $len; }
-    }
-    my $minlen2;
-    foreach my $str (@bases2) {
-      my $len = length $str;
-      if ($len < $min_chars) { $minlen2 = undef; @bases2 = (); last; }
-      elsif (!defined($minlen2) || $len < $minlen2) { $minlen2 = $len; }
+      if ($len < $min_chars) { $minlen = undef; @bases = (); last; }
+      elsif (!defined($minlen) || $len < $minlen) { $minlen = $len; }
     }
 
-    if (defined $minlen1 && !defined $minlen2) {
-      # keep using @bases1
-    }
-    elsif (!defined $minlen1 && defined $minlen2) {
-      # change to using @bases2
-      @bases1 = @bases2;
-    }
-    elsif (defined $minlen1 && defined $minlen2) {
-      # both are valid; use the end with the longer hints
-      if ($minlen2 > $minlen1) {
-        @bases1 = @bases2;
-        $minlen1 = $minlen2;
-      }
-    }
-
-    if ($minlen1 && @bases1) {
+    if ($minlen && @bases) {
       # dbg("zoom: YES <base>$base</base> <origrule>$rule</origrule>");
-      foreach my $base (@bases1) {
+
+      # figure out if we have e.g. ["foo", "foob", "foobar"]; in this
+      # case, we only need to track ["foo"].
+      my %subsumed = ();
+      foreach my $base1 (@bases) {
+        foreach my $base2 (@bases) {
+          if ($base1 ne $base2 && $base1 =~ /\Q$base2\E/) {
+            $subsumed{$base1} = 1; # base2 is inside base1; discard the longer
+          }
+        }
+      }
+
+      foreach my $base (@bases) {
+        next if $subsumed{$base};
         push @good_bases, { base => $base, orig => $rule, name => $name };
       }
       $yes++;
@@ -191,6 +162,8 @@ sub extract_set_pri {
       $no++;
     }
   }
+
+  dbg ("zoom: extracted $yes bases, skipped $no");
 
   # NOTE: re2c will attempt to provide the longest pattern that matched; e.g.
   # ("food" =~ "foo" / "food") will return "food".  So therefore if a pattern
@@ -238,10 +211,22 @@ sub extract_set_pri {
 
     foreach my $set2 (@good_bases) {
       next if ($set1 == $set2);
+
+      # clobber exact dups; this can happen if a regexp outputs the 
+      # same base string multiple times
+      if ($set1->{name} eq $set2->{name} &&
+          $set1->{base} eq $set2->{base} &&
+          $set1->{orig} eq $set2->{orig})
+      {
+        $set2->{name} = '';       # clobber
+        $set2->{base} = '';
+      }
+
       next if ($set1->{name} =~ /\b\Q$set2->{name}\E\b/);
       next if ($set2->{name} =~ /\b\Q$set1->{name}\E\b/);
 
       my $base2 = $set2->{base};
+
       next if ($base2 eq '');
       next if (length $base1 < length $base2);
       next if ($base1 !~ /\Q$base2\E/);
@@ -261,8 +246,8 @@ sub extract_set_pri {
 
   foreach my $set (@good_bases) {
     my $base = $set->{base};
-    my $key  = join ' ', sort split (' ', $set->{name});
     next unless $base;
+    my $key  = join ' ', sort split (' ', $set->{name});
     $conf->{base_string}->{$ruletype}->{$base} = $key;
   }
 
@@ -344,9 +329,9 @@ sub simplify_and_qr_regexp {
 
 sub extract_hints {
   my $self = shift;
+  my $rawrule = shift;
   my $rule = shift;
   my $mods = shift;
-  my $is_reversed = shift;
 
   my $main = $self->{main};
   my $orig = $rule;
@@ -354,317 +339,374 @@ sub extract_hints {
   # if there are anchors, give up; we can't get much 
   # faster than these anyway
   die "anchors" if $rule =~ /^\(?(?:\^|\\A)/;
-  die "anchors" if $rule =~ /(?:\$|\\Z)\)?$/;
+
+  # die "anchors" if $rule =~ /(?:\$|\\Z)\)?$/;
+  # just remove end-of-string anchors; they're slow so could gain
+  # from our speedup
+  $rule =~ s/(?<!\\)(?:\$|\\Z)\)?$//;
 
   # simplify (?:..) to (..)
   $main->{bases_allow_noncapture_groups} or
             $rule =~ s/\(\?:/\(/g;
 
-  # this must be before reversing
-  if (($main->{bases_can_use_alternations}||$main->{bases_split_out_alternations})
-            && !$main->{bases_can_use_quantifiers})
-  {
-    # /foo (bar)? baz/ simplify to /foo (bar|) baz/
-    $rule =~ s/(?<!\\)(\([^\(\)]*)\)\?/$1\|\)/gs;
+  # simplify some grouping arrangements so they're easier for us to parse
+  # (foo)? => (foo|)
+  $rule =~ s/\((.*?)\)\?/\($1\|\)/gs;
+  # r? => (r|)
+  $rule =~ s/(?<!\\)(\w)\?/\($1\|\)/gs;
 
-    # /foo bar? baz/ simplify to /foo ba(r|) baz/
-    $rule =~ s/(?<!\\)(.)\?/($1\|\)/gs;
-  }
+  my ($tmpf, $tmpfh) = Mail::SpamAssassin::Util::secure_tmpfile();
 
-  # here's the trick; we can use the truncate regexp below simply by
-  # reversing the string and taking care to fix "\z" 2-char escapes.
-  # TODO: this breaks stuff like "\s+" or "\S{4,12}", but since the
-  # truncation regexp below is pretty simple-minded, that's ok.
-  if ($is_reversed) {
-    $rule = join ('', reverse (split '', $rule));
-    $rule = de_reverse_multi_char_regexp_statements($rule);
-  }
-
-  # truncate the pattern at the first unhandleable metacharacter
-  # or range
-  $rule =~ s/(?<!\\)(?:
-              \(\?\!|
-              \\[abce-rt-vx-z]|
-              \\[ABCE-RT-VX-Z]
-            ).*$//gsx;
-
-  $main->{bases_can_use_char_classes} or $rule =~ s/(?<!\\)(?:
-              \\\w|
-              \.|
-              \[|
-              \]
-            ).*$//gsx;
-
-  $main->{bases_can_use_quantifiers} or $rule =~ s/(?<!\\)(?:
-              .\*|	# remove the quantified char, too
-              .\+|
-              .\?|
-              .\{
-            ).*$//gsx;
-
-  ($main->{bases_can_use_alternations}||$main->{bases_split_out_alternations}) or
-            $rule =~ s/(?<!\\)(?:
-              \(|
-              \)
-            ).*$//gsx;
-
-  if ($is_reversed) {
-    $rule = join ('', reverse (split '', $rule));
-    $rule = de_reverse_multi_char_regexp_statements($rule);
-  }
-
-  # drop this one, after the reversing
-  $rule =~ s/\(\?\!.*$//gsx;
-
-  # still problematic; kill all "x?" statements
-  $rule =~ s/.\?.*$//gsx;
-
-  if ($main->{bases_can_use_alternations}) {
-    $rule =~ s/\((.*?)\)\?/\($1\|\)/gs;
-    $rule =~ s/\((.*?)\|\)/\($1\|\)/gs;
-    $rule =~ s/\(\|(.*?)\)/\($1\|\)/gs;
-
-    # simplify (..)? and (..|) to (..|z{0}); this wierd construct is to work
-    # around an re2c bug; (..|) doesn't do what it should. off for now; re2c's
-    # alt support isn't actually usable anyway due to bugs with how it handles
-    # overlapping patterns.
-    #$rule =~ s/\((.*?)\)\?/\($1\|z{0}\)/gs;
-    #$rule =~ s/\((.*?)\|\)/\($1\|z{0}\)/gs;
-    #$rule =~ s/\(\|(.*?)\)/\($1\|z{0}\)/gs;
-  }
-
-  # re2xs doesn't like escaped brackets;
-  # brackets in general, in fact
-  $rule =~ s/\:.*//g;
-
-  # replace \s, \d, \S with char classes that (nearly) match them
-  # TODO: \w, \W need to know about utf-8, ugh
-
-  # [a-f\s]
-  $rule =~ s/(\[[^\]]*)\\s([^\]]*\])/$1 \\t\\n$2/gs;
-  # [a-f\S]: we can't support this, cut the string here
-  $rule =~ s/(\[[^\]]*)\\S([^\]]*\]).*//gs;
-  $rule =~ s/(\[[^\]]*)\\d([^\]]*\])/${1}0-9$2/gs;
-  $rule =~ s/(\[[^\]]*)\\D([^\]]*\]).*//gs;
-  $rule =~ s/(\[[^\]]*)\\w([^\]]*\])/${1}a-z0-9$2/gs;
-  $rule =~ s/(\[[^\]]*)\\W([^\]]*\]).*//gs;
-
-  # \s, etc. outside of existing char class blocks
-  $rule =~ s/\\S/[^ \\t\\n]/gs;
-  $rule =~ s/\\s/[ \\t\\n]/gs;
-  $rule =~ s/\\S/[^ \\t\\n]/gs;
-  $rule =~ s/\\d/[0-9]/gs;
-  $rule =~ s/\\D/[^0-9]/gs;
-  $rule =~ s/\\w/[_a-z0-9]/gs;
-  $rule =~ s/\\W/[^_a-z0-9]/gs;
-
-  # {loop here, to catch __DRUGS_SLEEP1:
-  # 0,3}([ \t\n]|z{0})
-  while (1) 
-  {
-    my $startrule = $rule;
-
-    # exit early if the pattern starts with a class in a group;
-    # we can't reliably kill these
-    # r ([a-z0-9]+\*[,[ \t\n]]+){2}:TVD_BODY_END_STAR
-    if ($rule =~ /^\((?:
-              \.?[\*\?\+] |
-              \.?\{?[^\{]*\} |
-              \[ |
-              [^\[]*\]
-            )/sx)
-    {
-      die "pattern starts with a class in a group";
+  # attempt to find a safe regexp delimiter...
+  # TODO: would prob be easier to just read this from $rawrule
+  my $quos = "/"; if ($rule =~ m/\Q${quos}\E/) {
+    $quos = "#"; if ($rule =~ m/\Q${quos}\E/) {
+      $quos = "'"; if ($rule =~ m/\Q${quos}\E/) {
+        $quos = "@"; if ($rule =~ m/\Q${quos}\E/) {
+          $quos = "*"; if ($rule =~ m/\Q${quos}\E/) {
+            $quos = "!";
+          }
+        }
+      }
     }
-
-    # kill quantifiers right at the start of the string.
-    # this (a) reduces algorithmic complexity of the produced code,
-    # and (b) can also improve overall speed as a side-effect of (a)
-    $rule =~ s/^(?:
-              \.?[\*\?\+] |
-              \.?\{?[^\{]*\} |
-              [^\(]*\) |
-              \[?[^\[]*\]
-            )+//gsx;
-
-    # kill quantifiers right at the end of the string, too;
-    # they can hide hits if they overlap with other patterns
-    0 and $rule =~ s/(?:
-              \.[\*\?\+] |
-              \.\{?[^\{]*\} |
-              \. |
-              \([^\)]* |
-              \[[^\[]*\]?
-            )+$//gsx;
-
-    # kill a trailing backslash; it's probably a failed de-escaping
-    $rule =~ s/(?<!\\)\\$//;
-
-    last if $startrule eq $rule;
   }
+  print $tmpfh "m".$quos.$rule.$quos.$mods;
+  close $tmpfh or die "cannot write to $tmpf";
 
-  # return for things we know we can't handle.
-  if (!($main->{bases_can_use_alternations}||$main->{bases_split_out_alternations})) {
-    if ($rule =~ /\|/) {
-      # /time to refinance|refinanc\w{1,3}\b.{0,16}\bnow\b/i
-      die "alternations";
+  my $perl = $self->get_perl();
+  open (IN, "$perl -c -Mre=debug $tmpf 2>&1 |") or die "cannot run $perl";
+  my $fullstr = join('', <IN>);
+  close IN;
+  unlink $tmpf;
+
+  # now parse the -Mre=debug output.
+  # perl 5.10 format
+  $fullstr =~ s/^.*\nFinal program:\n//gs;
+  # perl 5.6/5.8 format
+  $fullstr =~ s/^(?:.*\n|)size \d[^\n]*\n//gs;
+  $fullstr =~ s/^(?:.*\n|)first at \d[^\n]*\n//gs;
+  # common to all
+  $fullstr =~ s/\nOffsets:.*$//gs;
+
+  # clean up every other line that doesn't start with a space
+  $fullstr =~ s/^\S.*$//gm;
+
+  if ($fullstr !~ /((?:\s[^\n]+\n)+)/m) {
+    die "failed to parse Mre=debug output: $fullstr m".$quos.$rule.$quos.$mods." $rawrule";
+  }
+  my $opsstr = $1;
+
+  # what's left looks like this:
+  #    1: EXACTF <v>(3)
+  #    3: ANYOF[1ILil](14)
+  #   14: EXACTF <a>(16)
+  #   16: CURLY {2,7}(29)
+  #   18:   ANYOF[A-Za-z](0)
+  #   29: SPACE(30)
+  #   30: EXACTF <http://>(33)
+  #   33: END(0)
+  #
+  DEBUG_RE_PARSING and warn "Mre=debug output: $opsstr";
+
+  my @ops = ();
+  foreach my $op (split(/\n/s, $opsstr)) {
+    next unless $op;
+    if ($op =~ /^\s+\d+: (\s*)([A-Z]\w+)\b(.*)(?:\(\d+\))?$/) {
+      push @ops, [ $1, $2, $3 ];
+    }
+    elsif ($op =~ /^      (\s*)(<.*>)\s*(?:\(\d+\))?$/) {
+      #    5:   TRIE-EXACT[am](21)
+      #         <am> (21)
+      #         <might> (12)
+      push @ops, [ $1, '_moretrie', $2 ];
+    }
+    else {
+      warn "cannot parse '$op': $opsstr";
+      next;
     }
   }
 
-
-  {
-    # count (...braces...) to ensure the numbers match up
-    my @c = ($rule =~ /(?<!\\)\(/g); my $brace_i = scalar @c;
-       @c = ($rule =~ /(?<!\\)\)/g); my $brace_o = scalar @c;
-    if ($brace_i != $brace_o) { die "brace mismatch in '$rule'"; }
+  # unroll the branches; returns a list of versions.
+  # e.g. /foo(bar|baz)argh/ => [ "foobarargh", "foobazargh" ]
+  my @unrolled;
+  if ($main->{bases_split_out_alternations}) {
+    @unrolled = $self->unroll_branches(0, \@ops);
+  } else {
+    @unrolled = ( \@ops );
   }
 
-  # do the same for [charclasses]
-  {
-    my @c = ($rule =~ /(?<!\\)\[/g); my $brace_i = scalar @c;
-       @c = ($rule =~ /(?<!\\)\]/g); my $brace_o = scalar @c;
-    if ($brace_i != $brace_o) { die "charclass mismatch in '$rule'"; }
+  # now find the longest DFA-friendly string in each unrolled version
+  my @longests = ();
+  foreach my $opsarray (@unrolled) {
+    my $longestexact = '';
+    my $buf = '';
+
+    # use a closure to keep the code succinct
+    my $add_candidate = sub {
+      if (length $buf > length $longestexact) { $longestexact = $buf; }
+      $buf = '';
+    };
+
+    my $prevop;
+    foreach my $op (@{$opsarray}) {
+      my ($spcs, $item, $args) = @{$op};
+
+      next if ($item eq 'NOTHING');
+
+      # EXACT == case-sensitive
+      # EXACTF == case-i
+      # we can do both, since we canonicalize to lc.
+      if (!$spcs && $item =~ /^EXACT/ && $args =~ /<(.*)>/)
+      {
+        $buf .= $1;
+        if (length $1 >= 60 && $buf =~ s/\.\.\.$//) {
+          # perl 5.8.x truncates with a "..." here!  cut and stop
+          $add_candidate->();
+        }
+      }
+      # _moretrie == a TRIE-EXACT entry
+      elsif (!$spcs && $item =~ /^_moretrie/ && $args =~ /<(.*)>/)
+      {
+        $buf .= $1;
+        if (length $1 >= 60 && $buf =~ s/\.\.\.$//) {
+          # perl 5.8.x truncates with a "..." here!  cut and stop
+          $add_candidate->();
+        }
+      }
+      # /(?:foo|bar|baz){2}/ results in a CURLYX beforehand
+      elsif ($item =~ /^EXACT/ &&
+          $prevop && !$prevop->[0] && $prevop->[1] =~ /^CURLYX/ &&
+                    $prevop->[2] =~ /\{(\d+),/ && $1 >= 1 &&
+          $args =~ /<(.*)>/)
+      {
+        $buf .= $1;
+        if (length $1 >= 60 && $buf =~ s/\.\.\.$//) {
+          # perl 5.8.x truncates with a "..." here!  cut and stop
+          $add_candidate->();
+        }
+      }
+      # CURLYX, for perl >= 5.9.5
+      elsif ($item =~ /^_moretrie/ &&
+          $prevop && !$prevop->[0] && $prevop->[1] =~ /^CURLYX/ &&
+                    $prevop->[2] =~ /\{(\d+),/ && $1 >= 1 &&
+          $args =~ /<(.*)>/)
+      {
+        $buf .= $1;
+        if (length $1 >= 60 && $buf =~ s/\.\.\.$//) {
+          # perl 5.8.x truncates with a "..." here!  cut and stop
+          $add_candidate->();
+        }
+      }
+      else {
+        # not an /^EXACT/; clear the buffer
+        $add_candidate->();
+      }
+      $prevop = $op;
+    }
+    $add_candidate->();
+
+    if (!$longestexact) {
+      die "no long-enough string found in $rawrule";
+      # all unrolled versions must have a long string, otherwise
+      # we cannot reliably match all variants of the rule
+    } else {
+      push @longests, lc $longestexact;
+    }
   }
 
-  # and {quantifiers}
-  {
-    my @c = ($rule =~ /(?<!\\)\{/g); my $brace_i = scalar @c;
-       @c = ($rule =~ /(?<!\\)\}/g); my $brace_o = scalar @c;
-    if ($brace_i != $brace_o) { die "quantifier mismatch in '$rule'"; }
-  }
-
-  # lookaheads that are just too far for the re2c parser
-  # r your .{0,40}account .{0,40}security
-  if ($rule =~ /\.\{(\d+),?(\d+?)\}/ and ($1+$2 > 20)) {
-    die "too far lookahead";
-  }
-
-  # re2xs doesn't like escaped brackets
-  if ($rule =~ /\\:/) {
-    die "escaped bracket";
-  }
-
-  my @rules;
-  if ($main->{bases_split_out_alternations} && $rule =~ /\|/) {
-    @rules = $self->split_alt($rule);
-  }
-  else {
-    @rules = ($rule);
-  }
-
-  # finally, reassemble a usable regexp / set of regexps
-  if ($mods ne '') {
-    $mods = "(?$mods)";
-  }
-
-  return map {
-    $mods.$_;
-  } @rules;
-}
-
-sub count_regexp_statements {
-  my $self = shift;
-  my $rule = shift;
-
-  # collapse various common metachar sequences into 1 char,
-  # or their shortest form
-  $rule =~ s/(?<!\\)(?:
-            \[.+?\][\?\*]|
-            \{0\}\?|
-            \{.+?\}\?
-          )//gs;
-
-  $rule =~ s/\[.+?\]/R/gs;
-  $rule =~ s/\{.+?\}/Q/gs;
-  $rule =~ s/.\?//gs;
-  $rule =~ s/.\*//gs;
-
-  return length $rule;
-}
-
-sub de_reverse_multi_char_regexp_statements {
-  my $rule = shift;
-
-  # fix:
-  #    "S\" => "\S"
-  #    "+S\" => "\S+"
-  #    "}41,2{S\" => "\S{2,14}"
-  #    "?}41,2{S\" => "\S{2,14}?"
-
-  $rule =~ s/
-        (
-          \? |
-        )
-        (
-          \}(?:\d*\,)?\d*\{ |
-          \* |
-          \+ |
-          \? |
-        )
-        (.)(\\?)/$4$3$2$1/gsx;
-
-  return $rule;
+  return @longests;
 }
 
 ###########################################################################
 
-sub split_alt {
-  my ($self, $re) = @_;
+sub unroll_branches {
+  my ($self, $depth, $opslist) = @_;
 
-  # warn "JMD in $re";
-  # use "($re)" instead of "$re" to handle /foo|baz/ -- implied group
-  my @res = $self->_split_alt_recurse(0, '('.$re.')');
-  # warn "JMD out ".join('/ /', @res);
-  return @res;
-}
+  die "too deep" if ($depth++ > 5);
 
-sub _split_alt_recurse {
-  my ($self, $depth, $re) = @_;
+  my @ops = (@{$opslist});      # copy
+  my @pre_branch_ops = ();
+  my $branch_spcs;
+  my $trie_spcs;
+  my $open_spcs;
 
-  $depth++;
-  "die recursed too far in alternation splitting" if ($depth > 3);
+# our input looks something like this 2-level structure:
+#  1: BOUND(2)
+#  2: EXACT <Dear >(5)
+#  5: BRANCH(9)
+#  6:   EXACT <IT>(8)
+#  8:   NALNUM(24)
+#  9: BRANCH(23)
+# 10:   EXACT <Int>(12)
+# 12:   BRANCH(14)
+# 13:     NOTHING(21)
+# 14:   BRANCH(17)
+# 15:     EXACT <a>(21)
+# 17:   BRANCH(20)
+# 18:     EXACT <er>(21)
+# 20:   TAIL(21)
+# 21:   EXACT <net>(24)
+# 23: TAIL(24)
+# 24: EXACT < shop>(27)
+# 27: END(0)
+#
+# or:
+#
+#  1: OPEN1(3)
+#  3:   BRANCH(6)
+#  4:     EXACT <v>(9)
+#  6:   BRANCH(9)
+#  7:     EXACT <\\/>(9)
+#  9: CLOSE1(11)
+# 11: CURLY {2,5}(14)
+# 13:   REG_ANY(0)
+# 14: EXACT < g r a >(17)
+# 17: ANYOF[a-z](28)
+# 28: END(0)
+#
+# or:
+#
+#  1: EXACT <i >(3)
+#  3: OPEN1(5)
+#  5:   TRIE-EXACT[am](21)
+#       <am> (21)
+#       <might> (12)
+# 12:     OPEN2(14)
+# 14:       TRIE-EXACT[ ](19)
+#           < be>
+#           <>
+# 19:     CLOSE2(21)
+# 21: CLOSE1(23)
+# 23: EXACT < c>(25)
 
-  # trim unnecessary group markers, e.g. /f(oo)/ => /foo/
-  $re =~ s/\(([^\(\)\|]*)\)/$1/gs;
+  # iterate until we start a branch set. using
+  # /dkjfksl(foo|bar(baz|argh)boo)gab/ as an example, we're at "dkj..."
+  while (1) {
+    my $op = shift @ops;
+    last unless defined $op;
 
-  # identify the deepest-nested (...|...) scope
-  $re =~ m{
-      ^(.*)
-      (?<!\\)\(([^\(\)]*?\|[^\(\)]*?)\)
-      (.*)$
-    }xs;
+    my ($spcs, $item, $args) = @{$op};
+    DEBUG_RE_PARSING and warn "pre: [$spcs] $item $args";
 
-  my $pre  = $1;
-  my $alts = $2;
-  my $post = $3;
+    if ($item =~ /^OPEN/) {
+      $open_spcs = $spcs;
+      next;         # next will be a BRANCH or TRIE
 
-  if (!defined $post) {
-    $re =~ s/\(([^\(\)\|]*)\)/$1/gs;
-    return ($re);       # didn't match; no groups
-  }
+    } elsif ($item =~ /^TRIE/) {
+      $trie_spcs = $spcs;
+      last;
 
-  # and expand it
-  my @out = ();
+    } elsif ($item =~ /^BRANCH/) {
+      $branch_spcs = $spcs;
+      last;
 
-  # the 999999 actually does have an effect; otherwise '(foo|)' is
-  # split as ('foo') instead of ('foo', '') for some reason
-  foreach my $str (split (/(?<!\\)\|/, $alts, 999999)) {
-    $str = $pre.$str.$post;
-    # are there unresolved groups left?
-    if ($str =~ /(?<!\\)[\(\|\)]/) {
-      push @out, $self->_split_alt_recurse($depth, $str);
-    } else {
-      push @out, $str;
+    } elsif ($item =~ /^EXACT/ && defined $open_spcs) {
+      # perl 5.9.5 does this; f(o|oish) => OPEN, EXACT, TRIE-EXACT
+      push @pre_branch_ops, [ $open_spcs, $item, $args ];
+      next;
+
+    } elsif (defined $open_spcs) {
+      # OPEN not followed immediately by BRANCH, EXACT or TRIE-EXACT:
+      # just ignore this OPEN block entirely
+      undef $open_spcs;
+
+    }
+
+    else {
+      push @pre_branch_ops, $op;
     }
   }
 
-  { # uniq
-    my %u=(); @out = grep {defined} map {
-      if (exists $u{$_}) { undef; } else { $u{$_}=undef;$_; }
-    } @out; undef %u;
+  # no branches found?  we're done unrolling on this one!
+  if (scalar @ops == 0) {
+    return [ @pre_branch_ops ];
   }
 
-  return @out;
+  # otherwise we're at the start of a new branch set
+  # /(foo|bar(baz|argh)boo)gab/
+  my @alts = ();
+  my @in_this_branch = ();
+
+  while (1) {
+    my $op = shift @ops;
+    last unless defined $op;
+    my ($spcs, $item, $args) = @{$op};
+    DEBUG_RE_PARSING and warn "in:  [$spcs] $item $args";
+
+    if (defined $branch_spcs && $branch_spcs eq $spcs && $item =~ /^BRANCH/) {  # alt
+      push @alts, [ @pre_branch_ops, @in_this_branch ];
+      @in_this_branch = ();
+      next;
+    }
+    elsif (defined $branch_spcs && $branch_spcs eq $spcs && $item eq 'TAIL') { # end
+      push @alts, [ @pre_branch_ops, @in_this_branch ];
+      undef $branch_spcs;
+      last;
+    }
+    elsif (defined $trie_spcs && $trie_spcs eq $spcs && $item eq '_moretrie') {
+      if (scalar @in_this_branch > 0) {
+        push @alts, [ @pre_branch_ops, @in_this_branch ];
+      }
+      @in_this_branch = ( [ $open_spcs, $item, $args ] );
+      next;
+    }
+    elsif (defined $open_spcs && $open_spcs eq $spcs && $item =~ /^CLOSE/) {   # end
+      push @alts, [ @pre_branch_ops, @in_this_branch ];
+      undef $branch_spcs;
+      undef $open_spcs;
+      undef $trie_spcs;
+      last;
+    }
+    elsif ($item eq 'END') {  # of string
+      push @alts, [ @pre_branch_ops, @in_this_branch ];
+      undef $branch_spcs;
+      undef $open_spcs;
+      undef $trie_spcs;
+      last;
+    }
+    else {
+      # note that we ignore ops at a deeper $spcs level entirely (until later!)
+
+      # fix the space-level to match the opening brace
+      if (defined $open_spcs) {
+        $spcs = $open_spcs;
+        # } elsif (defined $trie_spcs) {
+        # $spcs = $trie_spcs;
+      } else {
+        $spcs = $branch_spcs;;
+      }
+      push @in_this_branch, [ $spcs, $item, $args ];
+    }
+  }
+
+  if (defined $branch_spcs) {
+    die "fell off end of string with a branch open: '$branch_spcs'";
+  }
+
+  # we're now after the branch set: /gab/
+  # @alts looks like [ /dkjfkslfoo/ , /dkjfkslbar(baz|argh)boo/ ]
+  foreach my $alt (@alts) {
+    push @{$alt}, @ops;     # add all remaining ops to each one
+    # note that this could include more branches; we don't care, since
+    # those can be handled by recursing
+  }
+
+  # ok, parsed the entire ops list
+  # @alts looks like [ /dkjfkslfoogab/ , /dkjfkslbar(baz|argh)boogab/ ]
+
+  if (DEBUG_RE_PARSING) {
+    print "unrolled: "; foreach my $alt (@alts) { foreach my $o (@{$alt}) { print "{$o->[0]/$o->[1]/$o->[2]} "; } print "\n"; }
+  }
+
+  # now recurse, to unroll the remaining branches (if any exist)
+  my @rets = ();
+  foreach my $alt (@alts) {
+    push @rets, $self->unroll_branches($depth, $alt);
+  }
+
+  # print "unrolled post-recurse: "; foreach my $alt (@rets) { foreach my $o (@{$alt}) { print "{$o->[0]/$o->[1]/$o->[2]} "; } print "\n"; }
+
+  return @rets;
 }
 
 ###########################################################################
@@ -716,6 +758,30 @@ sub test_split_alt {
     print "ok\n";
     return 1;
   }
+}
+
+###########################################################################
+
+sub get_perl {
+  my ($self) = @_;
+  my $perl;
+
+  # allow user override of the perl interpreter to use when
+  # extracting base strings.
+  # TODO: expose this via sa-compile command-line option
+  my $fromconf = $self->{main}->{conf}->{re_parser_perl};
+
+  if ($fromconf) {
+    $perl = $fromconf;
+  } elsif ($^X =~ m|^/|) {
+    $perl = $^X;
+  } else {
+    use Config;
+    $perl = $Config{perlpath};
+    $perl =~ s|/[^/]*$|/$^X|;
+  }
+  $perl =~ /^(.*)$/;
+  return $1;
 }
 
 ###########################################################################

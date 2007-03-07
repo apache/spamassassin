@@ -63,7 +63,7 @@ sub finish_parsing_end {
 
   my $instdir = $conf->{main}->sed_path
 			('__local_state_dir__/compiled/__version__');
-  push @INC, $instdir, "$instdir/auto";
+  unshift @INC, $instdir, "$instdir/auto";
   dbg "zoom: loading compiled ruleset from $instdir";
 
   $self->setup_test_set ($conf, $conf->{body_tests}, 'body');
@@ -81,12 +81,22 @@ sub setup_test_set_pri {
   my ($self, $conf, $rules, $ruletype) = @_;
 
   my $modname = "Mail::SpamAssassin::CompiledRegexps::".$ruletype;
+  my $modpath = "Mail/SpamAssassin/CompiledRegexps/".$ruletype.".pm";
   my $hasrules;
 
   if (!eval qq{ use $modname; \$hasrules = \$${modname}::HAS_RULES; 1; }) {
     # the module isn't available, so no rules will be either
+    dbg "zoom: no compiled ruleset found for $modname";
     return 0;
   }
+
+  # track down the "real" file we're using
+  my $file;
+  foreach my $dir (@INC) {
+    my $try = $dir."/".$modpath;
+    if (-f $try && -r $try) { $file = $try; last; }
+  }
+  dbg "zoom: using compiled ruleset in $file for $modname";
 
   $conf->{skip_body_rules}   ||= { };
   $conf->{need_one_line_sub} ||= { };
@@ -94,12 +104,26 @@ sub setup_test_set_pri {
   my $found = 0;
   foreach my $name (keys %{$rules}) {
     my $rule = $rules->{$name};
-    next unless ($hasrules->{$name} && $hasrules->{$name} eq $rule);
+    my $comprule = $hasrules->{$name};
+    $rule =~ s/\#/\[hash\]/gs;
+
+    if (!$comprule) { 
+      # this is pretty common, based on rule complexity; don't warn
+      # dbg "zoom: skipping rule $name, not in compiled ruleset";
+      next;
+    }
+    if ($comprule ne $rule) {
+      dbg "zoom: skipping rule $name, code differs in compiled ruleset";
+      next;
+    }
 
     # ignore rules marked for ReplaceTags work!
     # TODO: we should be able to order the 'finish_parsing_end'
     # plugin calls to do this.
-    next if ($conf->{rules_to_replace}->{$name});
+    if ($conf->{rules_to_replace}->{$name}) {
+      dbg "zoom: skipping rule $name, ReplaceTags";
+      next;
+    }
 
     # we have the rule, and its regexp matches.  zero out the body
     # rule, so that the module can do the work instead
@@ -111,7 +135,6 @@ sub setup_test_set_pri {
     # ensure that the one-liner version of the function call is
     # created, though
     $conf->{generate_body_one_line_sub}->{$name} = 1;
-
     $found++;
   }
 
@@ -127,9 +150,15 @@ sub setup_test_set_pri {
     dbg("zoom: $found compiled rules are available for type $ruletype out ".
         "of $totalhasrules ($pc_zoomed\%)");
 
+    # TODO: issue a warning for low counts?
+    # TODO: inhibit rule2xs scanning entirely for low counts?
+
     $conf->{zoom_ruletypes_available} ||= { };
     $conf->{zoom_ruletypes_available}->{$ruletype} = 1;
     return 1;
+  }
+  else {
+    dbg("zoom: no usable compiled rules for type $ruletype");
   }
 
   return 0;
