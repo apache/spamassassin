@@ -67,6 +67,7 @@ Mail::SpamAssassin::Util::untaint_var( \%ENV );
 
 # testing purposes only
 my $fixup_re_test;
+#$fixup_re_test = 1; fixup_re("[link]"); die;
 #$fixup_re_test = 1; fixup_re("please do not resend your original message."); die;
 
 ##############################################################################
@@ -308,6 +309,7 @@ unsigned char *q;
 EOT
 
     my $line = 0;
+    my $rulecount = 0;
     while (<$fh>) {
       next if /^#/;
 
@@ -317,20 +319,21 @@ EOT
 	$name =~ s/#/[hash]/gs;
 	$regexp =~ s/#/[hash]/gs;
 	$has_rules .= "  q#$name# => q#$regexp#,\n";
+        $rulecount++;
 	next;
       }
 
       my ($regexp, $reason) = /^r (.*):(.*)$/;
       die "no 'r REGEXP:REASON' in $_" unless defined $regexp;
 
-      if ($regexp =~ /^\.\*/) {
-	push @dot_star, "$regexp:$reason";
-	next;
-      }
-      elsif ($regexp =~ /^\.\+/) {
-	push @dot_plus, "$regexp:$reason";
-	next;
-      }
+      # if ($regexp =~ /^\.\*/) {
+      # push @dot_star, "$regexp:$reason";
+      # next;
+      # }
+      # elsif ($regexp =~ /^\.\+/) {
+      # push @dot_plus, "$regexp:$reason";
+      # next;
+      # }
       eval {
 	print $re "\t", fixup_re($regexp), "            {return \"$reason\";}\n";
 	$line++;
@@ -614,7 +617,7 @@ sub fixup_re {
   $fixup_re_test and print "INPUT: /$re/\n";
   
   my $output = "";
-  my $TOK = qr([\[\"\\]);
+  my $TOK = qr([\"\\]);
 
   my $STATE;
   while ($re =~ /\G(.*?)($TOK)/gc) {
@@ -625,19 +628,7 @@ sub fixup_re {
       $output .= "\"$pre\"";
     }
 
-    if ($tok eq "[") {
-      # chars
-      if ($re =~ /\G(.*?)\]/gc) {
-        $output .= "[$1]";
-      }
-      else {
-        die "re: $re doesn't have character class closing bracket";
-      }
-    }
-    elsif ($tok eq '.') {
-      $output .= '.';
-    }
-    elsif ($tok eq '"') {
+    if ($tok eq '"') {
       $output .= '"\\""';
     }
     elsif ($tok eq '\\') {
