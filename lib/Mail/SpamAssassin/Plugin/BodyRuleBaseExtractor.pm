@@ -420,7 +420,7 @@ sub extract_hints {
       #         <might> (12)
       push @ops, [ $1, '_moretrie', $2 ];
     }
-    elsif ($ops =~ /^ at .+ line \d+$/) {
+    elsif ($op =~ /^ at .+ line \d+$/) {
       next; # ' at /local/perl561/lib/5.6.1/i86pc-solaris/re.pm line 109': 
     }
     else {
