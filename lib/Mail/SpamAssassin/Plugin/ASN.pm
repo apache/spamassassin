@@ -103,110 +103,110 @@ use Mail::SpamAssassin::Dns;
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 sub new {
-	my ($class, $mailsa) = @_;
-	$class = ref($class) || $class;
-	my $self = $class->SUPER::new($mailsa);
-	bless ($self, $class);
-	
-	$self->register_eval_rule("asn_lookup");
+  my ($class, $mailsa) = @_;
+  $class = ref($class) || $class;
+  my $self = $class->SUPER::new($mailsa);
+  bless ($self, $class);
+  
+  $self->register_eval_rule("asn_lookup");
 
-	return $self;
+  return $self;
 }
 
 sub asn_lookup {
-	my ($self, $scanner, $zone, $num_lookups) = @_;
-	if (!$scanner->is_dns_available()) {
-		$self->{dns_not_available} = 1;
-		return;
-	}
+  my ($self, $scanner, $zone, $num_lookups) = @_;
+  if (!$scanner->is_dns_available()) {
+    $self->{dns_not_available} = 1;
+    return;
+  }
 
-	# Default to empty strings; otherwise, the tags will be left as _ASN_
-	# and _ASNCIDR_ which may confuse bayes learning, I suppose.
-	$scanner->{tag_data}->{ASN} = '';
-	$scanner->{tag_data}->{ASNCIDR} = '';
+  # Default to empty strings; otherwise, the tags will be left as _ASN_
+  # and _ASNCIDR_ which may confuse bayes learning, I suppose.
+  $scanner->{tag_data}->{ASN} = '';
+  $scanner->{tag_data}->{ASNCIDR} = '';
 
-	# We need to grab this here since the check_tick event does not
-	# get *our* name, but the name of whatever rule is currently
-	# being worked on.
-	$scanner->{myname} = $scanner->get_current_eval_rule_name();
+  # We need to grab this here since the check_tick event does not
+  # get *our* name, but the name of whatever rule is currently
+  # being worked on.
+  $scanner->{myname} = $scanner->get_current_eval_rule_name();
 
-	my $ip = '';
-	foreach my $relay (@{$scanner->{relays_untrusted}}) {
-		if ($relay->{ip_private}) {
-			dbg("ASN: skipping untrusted relay $relay->{ip}, it's private");
-		} else {
-			$ip = $relay->{ip};
-			last;
-		}
-	}
-	
-	if ($ip eq '') {
-		dbg("ASN: $scanner->{myname}: No IP address from relays_external");
-		return;
-	} else {
-		dbg("ASN: $scanner->{myname}: external IP address $ip");
-	}
-	
-	my $lookup = '';
-	if ($ip =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) {
-		$lookup = "$4.$3.$2.$1.$zone";
-	}
-	
-	if ($lookup eq '') {
-		dbg("ASN: $scanner->{myname}: $ip does not look like an IP address");
-		return;
-	} else {
-		dbg("ASN: $scanner->{myname}: will look up $lookup");
-	}
+  my $ip = '';
+  foreach my $relay (@{$scanner->{relays_untrusted}}) {
+    if ($relay->{ip_private}) {
+      dbg("ASN: skipping untrusted relay $relay->{ip}, it's private");
+    } else {
+      $ip = $relay->{ip};
+      last;
+    }
+  }
+  
+  if ($ip eq '') {
+    dbg("ASN: $scanner->{myname}: No IP address from relays_external");
+    return;
+  } else {
+    dbg("ASN: $scanner->{myname}: external IP address $ip");
+  }
+  
+  my $lookup = '';
+  if ($ip =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) {
+    $lookup = "$4.$3.$2.$1.$zone";
+  }
+  
+  if ($lookup eq '') {
+    dbg("ASN: $scanner->{myname}: $ip does not look like an IP address");
+    return;
+  } else {
+    dbg("ASN: $scanner->{myname}: will look up $lookup");
+  }
 
-	# DNS magic - start the lookup and have the Net::DNS package
-	# store the result in our own structure
-	for (my $i = 0; $i < $num_lookups; $i++) {
-		$scanner->{main}->{resolver}->bgsend($lookup, 'TXT', undef, sub {
-			my $pkt = shift;
-			my $id = shift;
-			$scanner->{asnlookup} = $pkt;
-		});
-	}
-	
-	return;
+  # DNS magic - start the lookup and have the Net::DNS package
+  # store the result in our own structure
+  for (my $i = 0; $i < $num_lookups; $i++) {
+    $scanner->{main}->{resolver}->bgsend($lookup, 'TXT', undef, sub {
+      my $pkt = shift;
+      my $id = shift;
+      $scanner->{asnlookup} = $pkt;
+    });
+  }
+  
+  return;
 }
 
 sub check_tick {
-	my ($self, $opts) = @_;
+  my ($self, $opts) = @_;
 
-	return if ($self->{dns_not_available});
+  return if ($self->{dns_not_available});
 
-	my $pms = $opts->{permsgstatus};
+  my $pms = $opts->{permsgstatus};
 
-	# This will be defined if Net::DNS had something to deliver (see
-	# ->bgsend() in sub asn_lookup() above)
-	if ($pms->{asnlookup}) {
-	
-		# The regular Net::DNS dance around RRs; make sure to delete
-		# the asnlookup structure, otherwise we would re-do on each
-		# call of check_tick
-		my $packet = delete $pms->{asnlookup};
-		my @answer = $packet->answer;
-		foreach my $rr (@answer) {
-			dbg("ASN: $pms->{myname}: lookup result packet: " . $rr->string);
-			if ($rr->type eq 'TXT') {
-				my @items = split(/ /, $rr->txtdata);
-				$pms->{tag_data}->{ASN} = sprintf('AS%s', $items[0]);
-				my $c = sprintf('%s/%s ', $items[1], $items[2]);
-				if (!($pms->{tag_data}->{ASNCIDR} =~ /$c/)) {
-					$pms->{tag_data}->{ASNCIDR} .= $c;
-				}
-				
-				# We are calling the internal _handle_hit because we want the
-				# score to be zero, but still show it up in the report
-				# 20061217 - disabled,will give score anyway :/
-				# $pms->_handle_hit($pms->{myname}, 0.001, sprintf('AS%s %s/%s', @items));
-			}
-		}
-	}
+  # This will be defined if Net::DNS had something to deliver (see
+  # ->bgsend() in sub asn_lookup() above)
+  if ($pms->{asnlookup}) {
+  
+    # The regular Net::DNS dance around RRs; make sure to delete
+    # the asnlookup structure, otherwise we would re-do on each
+    # call of check_tick
+    my $packet = delete $pms->{asnlookup};
+    my @answer = $packet->answer;
+    foreach my $rr (@answer) {
+      dbg("ASN: $pms->{myname}: lookup result packet: " . $rr->string);
+      if ($rr->type eq 'TXT') {
+        my @items = split(/ /, $rr->txtdata);
+        $pms->{tag_data}->{ASN} = sprintf('AS%s', $items[0]);
+        my $c = sprintf('%s/%s ', $items[1], $items[2]);
+        if (!($pms->{tag_data}->{ASNCIDR} =~ /$c/)) {
+          $pms->{tag_data}->{ASNCIDR} .= $c;
+        }
+        
+        # We are calling the internal _handle_hit because we want the
+        # score to be zero, but still show it up in the report
+        # 20061217 - disabled,will give score anyway :/
+        # $pms->_handle_hit($pms->{myname}, 0.001, sprintf('AS%s %s/%s', @items));
+      }
+    }
+  }
 
-	return;
+  return;
 }
 
 1;
