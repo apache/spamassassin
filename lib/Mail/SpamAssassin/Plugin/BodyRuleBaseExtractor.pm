@@ -222,6 +222,7 @@ sub extract_set_pri {
         $set2->{base} = '';
       }
 
+      # skip if either already contains the other rule's name
       next if ($set1->{name} =~ /\b\Q$set2->{name}\E\b/);
       next if ($set2->{name} =~ /\b\Q$set1->{name}\E\b/);
 
@@ -233,21 +234,37 @@ sub extract_set_pri {
 
       $set1->{name} .= " ".$set2->{name};
 
-      if ($base1 eq $base2) {
-        # an exact duplicate!  kill the latter entirely
-        $set2->{name} = '';
-        $set2->{base} = '';
-      }
-      # otherwise, base2 is just a subset of base1
-
+      # base2 is just a subset of base1
       # dbg("zoom: subsuming '$base2' into '$base1': $set1->{name}");
     }
   }
 
+  # we can still have duplicate cases; __FRAUD_PTS and __SARE_FRAUD_BADTHINGS
+  # both contain "killed" for example, pointing at different rules, which
+  # the above search hasn't found.  Collapse them here with a hash
+  my %bases = ();
   foreach my $set (@good_bases) {
     my $base = $set->{base};
     next unless $base;
-    my $key  = join ' ', sort split (' ', $set->{name});
+    if (defined $bases{$base}) {
+      $bases{$base} .= " ".$set->{name};
+    } else {
+      $bases{$base} = $set->{name};
+    }
+  }
+
+  foreach my $base (keys %bases) {
+    # uniq the list, since there are probably dup rules listed
+    my @list = split (' ', $bases{$base});
+    my @uniqed;
+
+    {
+      my %u=(); @uniqed = grep {defined} map {
+        if (exists $u{$_}) { undef; } else { $u{$_}=undef;$_; }
+      } @list; undef %u;
+    }
+
+    my $key  = join ' ', sort @uniqed;
     $conf->{base_string}->{$ruletype}->{$base} = $key;
   }
 
