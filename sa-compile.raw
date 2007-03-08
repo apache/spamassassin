@@ -205,13 +205,16 @@ sub compile_base_strings {
 
   foreach my $ruletype (sort keys %{$conf->{base_orig}})
   {
-    open OUT, ">$dirpath/bases.in"
-          or die "cannot write to $dirpath/bases.in";
+    my $basespath = "bases_$ruletype.in";
+    $basespath =~ s/[^A-Za-z0-9_\.]/_/gs;
+
+    open OUT, ">$dirpath/$basespath"
+          or die "cannot write to $dirpath/$basespath";
     print OUT dump_base_strings($ruletype);
-    close OUT or die "cannot write to $dirpath/bases.in";
+    close OUT or die "cannot write to $dirpath/$basespath";
 
     chdir $dirpath; print "cd $dirpath\n";
-    rule2xs("bases.in");
+    rule2xs($basespath);
 
     run(get_perl()." Makefile.PL ".
           "PREFIX=$dirpath/ignored INSTALLSITEARCH=$installdir");
@@ -221,6 +224,7 @@ sub compile_base_strings {
   }
 
   if (!$opt{'keep-tmps'}) {
+    chdir '/'; print "cd /\n";      # saves trouble on MacOS, possibly
     run($sudo."rm -rf $dirpath");       # cleanup
   }
   else {
@@ -284,8 +288,6 @@ sub rule2xs {
   my $cprefix = $modname; $cprefix =~ s/[^A-ZA-z0-9]+/_/gs;
 
   my $numscans = 0;
-  my (@dot_star, @dot_plus);
-
   my $has_rules = '';
 
   while (!eof($fh)) {
@@ -326,14 +328,6 @@ EOT
       my ($regexp, $reason) = /^r (.*):(.*)$/;
       die "no 'r REGEXP:REASON' in $_" unless defined $regexp;
 
-      # if ($regexp =~ /^\.\*/) {
-      # push @dot_star, "$regexp:$reason";
-      # next;
-      # }
-      # elsif ($regexp =~ /^\.\+/) {
-      # push @dot_plus, "$regexp:$reason";
-      # next;
-      # }
       eval {
 	print $re "\t", fixup_re($regexp), "            {return \"$reason\";}\n";
 	$line++;
@@ -348,99 +342,9 @@ EOT
 }
 EOT
 
-    #last if $numscans == 2;
-  }
-
-  while (@dot_star) {
-    $numscans++;
-
-    open(my $re, ">scanner${numscans}.re") || 
-	die "open(>scanner{$numscans}.re): $!";
-
-    print $re <<EOT;
-#define NULL            ((char*) 0)
-#define YYCTYPE         unsigned char
-#define YYCURSOR        *p
-#define YYLIMIT         *p
-#define YYMARKER        q
-#define YYFILL(n)
-EOT
-
-    print $re <<EOT;
-char *${cprefix}_scan${numscans}(unsigned char **p){
-unsigned char *q;
-start:
-/*!re2c
-EOT
-
-    my $line = 0;
-    while ($_ = shift @dot_star) {
-      my ($regexp, $reason) = /^(.*):(.*)$/;
-      $regexp =~ s/^\.\*//;
-      eval {
-	print $re "\t", fixup_re($regexp), "             {return \"$reason\";}\n";
-	$line++;
-      };
-      $@ and handle_fixup_error($@, $regexp, $reason);
-      last if $line == MAX_RULES_PER_C_FILE;
-    }
-    
-    print $re <<EOT;
-  [\\001-\\377]    { goto start; }
-  [\\000]        {return NULL; }
-*/
-}
-EOT
-  }
-
-  while (@dot_plus) {
-    $numscans++;
-
-    open(my $re, ">scanner${numscans}.re") || 
-	die "open(>scanner{$numscans}.re): $!";
-    
-    print $re <<EOT;
-#define NULL            ((char*) 0)
-#define YYCTYPE         unsigned char
-#define YYCURSOR        *p
-#define YYLIMIT         *p
-#define YYMARKER        q
-#define YYFILL(n)
-EOT
-
-    print $re <<EOT;
-char *${cprefix}_scan${numscans}(unsigned char **p){
-unsigned char *q;
-p++;
-start:
-/*!re2c
-EOT
-    
-    my $line = 0;
-    while ($_ = shift @dot_plus) {
-      my ($regexp, $reason) = /^(.*):(.*)$/;
-      $regexp =~ s/^\.\+//;
-
-      eval {
-	print $re "\t", fixup_re($regexp), "             {return \"$reason\";}\n";
-	$line++;
-      };
-      $@ and handle_fixup_error($@, $regexp, $reason);
-      last if $line == MAX_RULES_PER_C_FILE;
-    }
-    
-    print $re <<EOT;
-  [\\001-\\377]    { goto start; }
-  [\\000]        {return NULL; }
-*/
-
-}
-EOT
   }
 
   for (1..$numscans) {
-    # print "[re2c for block $_ / $numscans]\n";
-
     my $cmd = "re2c -i -b -o scanner$_.c scanner$_.re";
     run($cmd);
 
