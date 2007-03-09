@@ -431,6 +431,17 @@ sub extract_hints {
     if ($op =~ /^\s+\d+: (\s*)([A-Z]\w+)\b(.*)(?:\(\d+\))?$/) {
       push @ops, [ $1, $2, $3 ];
     }
+    elsif ($op =~ /^      (\s*)<(.*)>\.\.\.\s*$/) {
+      #    5:   TRIE-EXACT[im](44)
+      #         <message contained attachments that have been blocked by guin>...
+      my $spcs = $1;
+      # we could use the entire length here, but it's easier to trim to
+      # the length of a perl 5.8.x/5.6.x EXACT* string; that way our test
+      # suite results will match, since the sa-update --list extraction will
+      # be the same for all versions.  (The "..." trailer is important btw)
+      my $str = substr ($2, 0, 55);
+      push @ops, [ $spcs, '_moretrie', "<$str...>" ];
+    }
     elsif ($op =~ /^      (\s*)(<.*>)\s*(?:\(\d+\))?$/) {
       #    5:   TRIE-EXACT[am](21)
       #         <am> (21)
@@ -479,7 +490,7 @@ sub extract_hints {
       if (!$spcs && $item =~ /^EXACT/ && $args =~ /<(.*)>/)
       {
         $buf .= $1;
-        if (length $1 >= 60 && $buf =~ s/\.\.\.$//) {
+        if (length $1 >= 55 && $buf =~ s/\.\.\.$//) {
           # perl 5.8.x truncates with a "..." here!  cut and stop
           $add_candidate->();
         }
@@ -488,7 +499,7 @@ sub extract_hints {
       elsif (!$spcs && $item =~ /^_moretrie/ && $args =~ /<(.*)>/)
       {
         $buf .= $1;
-        if (length $1 >= 60 && $buf =~ s/\.\.\.$//) {
+        if (length $1 >= 55 && $buf =~ s/\.\.\.$//) {
           # perl 5.8.x truncates with a "..." here!  cut and stop
           $add_candidate->();
         }
@@ -500,7 +511,7 @@ sub extract_hints {
           $args =~ /<(.*)>/)
       {
         $buf .= $1;
-        if (length $1 >= 60 && $buf =~ s/\.\.\.$//) {
+        if (length $1 >= 55 && $buf =~ s/\.\.\.$//) {
           # perl 5.8.x truncates with a "..." here!  cut and stop
           $add_candidate->();
         }
@@ -534,6 +545,7 @@ sub extract_hints {
     }
   }
 
+  DEBUG_RE_PARSING and warn "longest base strings: /".join("/", @longests)."/";
   return @longests;
 }
 
@@ -599,8 +611,24 @@ sub unroll_branches {
 # 21: CLOSE1(23)
 # 23: EXACT < c>(25)
 
+  DEBUG_RE_PARSING and warn "starting parse";
+
+  # this happens for /foo|bar/ instead of /(?:foo|bar)/ ; transform
+  # it into the latter.  bit of a kludge to do this before the loop, but hey.
+  # note that it doesn't fix the CLOSE1/END ordering to be correct
+  if (scalar @ops > 1 && $ops[0]->[1] =~ /^BRANCH/) {
+    my @newops = ([ "", "OPEN1", "" ]);
+    foreach my $op (@ops) {
+      push @newops, [ "  ".$op->[0], $op->[1], $op->[2] ];
+    }
+    push @newops, [ "", "CLOSE1", "" ];
+    @ops = @newops;
+  }
+
   # iterate until we start a branch set. using
   # /dkjfksl(foo|bar(baz|argh)boo)gab/ as an example, we're at "dkj..."
+  # just hitting an OPEN is not enough; wait until we see a TRIE-EXACT
+  # or a BRANCH, *then* unroll the most recent OPEN set.
   while (1) {
     my $op = shift @ops;
     last unless defined $op;
@@ -627,12 +655,10 @@ sub unroll_branches {
 
     } elsif (defined $open_spcs) {
       # OPEN not followed immediately by BRANCH, EXACT or TRIE-EXACT:
-      # just ignore this OPEN block entirely
+      # ignore this OPEN block entirely and don't try to unroll it
       undef $open_spcs;
 
-    }
-
-    else {
+    } else {
       push @pre_branch_ops, $op;
     }
   }
@@ -647,6 +673,14 @@ sub unroll_branches {
   my @alts = ();
   my @in_this_branch = ();
 
+  DEBUG_RE_PARSING and warn "entering branch: ".
+        "open='".(defined $open_spcs ? $open_spcs : 'undef')."' ".
+        "branch='".(defined $branch_spcs ? $branch_spcs : 'undef')."' ".
+        "trie='".(defined $trie_spcs ? $trie_spcs : 'undef')."'";
+
+  # indentation level to remove from "normal" ops (using a s///)
+  my $open_sub_spcs = ($branch_spcs ? $branch_spcs : "")."  ";
+  my $trie_sub_spcs = "";
   while (1) {
     my $op = shift @ops;
     last unless defined $op;
@@ -656,18 +690,25 @@ sub unroll_branches {
     if (defined $branch_spcs && $branch_spcs eq $spcs && $item =~ /^BRANCH/) {  # alt
       push @alts, [ @pre_branch_ops, @in_this_branch ];
       @in_this_branch = ();
+      $open_sub_spcs = $branch_spcs."  ";
+      $trie_sub_spcs = "";
       next;
     }
     elsif (defined $branch_spcs && $branch_spcs eq $spcs && $item eq 'TAIL') { # end
       push @alts, [ @pre_branch_ops, @in_this_branch ];
       undef $branch_spcs;
+      $open_sub_spcs = "";
+      $trie_sub_spcs = "";
       last;
     }
     elsif (defined $trie_spcs && $trie_spcs eq $spcs && $item eq '_moretrie') {
       if (scalar @in_this_branch > 0) {
         push @alts, [ @pre_branch_ops, @in_this_branch ];
       }
+      # use $open_spcs instead of $trie_spcs (which is 2 spcs further indented)
       @in_this_branch = ( [ $open_spcs, $item, $args ] );
+      $open_sub_spcs = ($branch_spcs ? $branch_spcs : "")."  ";
+      $trie_sub_spcs = "  ";
       next;
     }
     elsif (defined $open_spcs && $open_spcs eq $spcs && $item =~ /^CLOSE/) {   # end
@@ -675,6 +716,8 @@ sub unroll_branches {
       undef $branch_spcs;
       undef $open_spcs;
       undef $trie_spcs;
+      $open_sub_spcs = "";
+      $trie_sub_spcs = "";
       last;
     }
     elsif ($item eq 'END') {  # of string
@@ -682,20 +725,19 @@ sub unroll_branches {
       undef $branch_spcs;
       undef $open_spcs;
       undef $trie_spcs;
+      $open_sub_spcs = "";
+      $trie_sub_spcs = "";
       last;
     }
     else {
-      # note that we ignore ops at a deeper $spcs level entirely (until later!)
-
-      # fix the space-level to match the opening brace
-      if (defined $open_spcs) {
-        $spcs = $open_spcs;
-        # } elsif (defined $trie_spcs) {
-        # $spcs = $trie_spcs;
-      } else {
-        $spcs = $branch_spcs;;
+      if ($open_sub_spcs) {
+        # deindent the space-level to match the opening brace
+        $spcs =~ s/^$open_sub_spcs//;
+        # tries also add one more indent level in
+        $spcs =~ s/^$trie_sub_spcs//;
       }
       push @in_this_branch, [ $spcs, $item, $args ];
+      # note that we ignore ops at a deeper $spcs level entirely (until later!)
     }
   }
 
@@ -707,7 +749,7 @@ sub unroll_branches {
   # @alts looks like [ /dkjfkslfoo/ , /dkjfkslbar(baz|argh)boo/ ]
   foreach my $alt (@alts) {
     push @{$alt}, @ops;     # add all remaining ops to each one
-    # note that this could include more branches; we don't care, since
+    # note that this could include more (?:...); we don't care, since
     # those can be handled by recursing
   }
 
@@ -715,7 +757,7 @@ sub unroll_branches {
   # @alts looks like [ /dkjfkslfoogab/ , /dkjfkslbar(baz|argh)boogab/ ]
 
   if (DEBUG_RE_PARSING) {
-    print "unrolled: "; foreach my $alt (@alts) { foreach my $o (@{$alt}) { print "{$o->[0]/$o->[1]/$o->[2]} "; } print "\n"; }
+    print "unrolled: "; foreach my $alt (@alts) { foreach my $o (@{$alt}) { print "{/$o->[0]/$o->[1]/$o->[2]} "; } print "\n"; }
   }
 
   # now recurse, to unroll the remaining branches (if any exist)
@@ -724,7 +766,9 @@ sub unroll_branches {
     push @rets, $self->unroll_branches($depth, $alt);
   }
 
-  # print "unrolled post-recurse: "; foreach my $alt (@rets) { foreach my $o (@{$alt}) { print "{$o->[0]/$o->[1]/$o->[2]} "; } print "\n"; }
+  if (DEBUG_RE_PARSING) {
+    print "unrolled post-recurse: "; foreach my $alt (@rets) { foreach my $o (@{$alt}) { print "{/$o->[0]/$o->[1]/$o->[2]} "; } print "\n"; }
+  }
 
   return @rets;
 }
