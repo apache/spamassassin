@@ -103,6 +103,7 @@ sub extract_set_pri {
   $self->{main} = $conf->{main};	# for use in extract_hints()
 
   dbg("zoom: base extraction start for type $ruletype");
+  my $start = time;
 
   # attempt to find good "base strings" (simplified regexp subsets) for each
   # regexp.  We try looking at the regexp from both ends, since there
@@ -268,7 +269,9 @@ sub extract_set_pri {
     $conf->{base_string}->{$ruletype}->{$base} = $key;
   }
 
-  info ("zoom: base extraction complete for $ruletype: yes=$yes no=$no\n");
+  my $elapsed = time - $start;
+  info ("zoom: base extraction for $ruletype: ".
+            "yes=$yes, no=$no, took $elapsed seconds\n");
 }
 
 ###########################################################################
