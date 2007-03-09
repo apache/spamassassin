@@ -10,28 +10,165 @@ use strict;
 use warnings;
 
 my $debug = 0;
+my $running_perl56 = ($] < 5.007);
 
 BEGIN { 
   if (-e 't/test_dir') { chdir 't'; } 
   if (-e 'test_dir') { unshift(@INC, '../blib/lib'); }
 
-  plan tests => 51;
+  plan tests => 112;
 
 };
 use lib '../lib';
 
-# TODO: fails with perl 5.9.5 due to trie
-# try_extraction (' body __SARE_FRAUD_BADTHINGS /(?:(?:political crisis|poisoned (?:to death )?by))/i
-# body __SARE_FRAUD_BADTHINGS /(?:all funds will be returned|ass?ylum|assassinate|(?:auto|boat|car|plane|train).{1,7}(?:crash|accident|disaster|wreck)|before they both died|brutal acts|cancer|coup attempt|disease|due to the current|\bexile\b|\bfled|\bflee\b|have been frozen|impeach|\bkilled|land dispute|murder|over-invoice|political crisis|poisoned (?:to death )?by|relocate|since the demise|\bslay\b)/i
-# 
-# ', {
-    # base_extract => 1,
-    # bases_must_be_casei => 1,
-    # bases_can_use_alternations => 0,
-    # bases_can_use_quantifiers => 0,
-    # bases_can_use_char_classes => 0,
-    # bases_split_out_alternations => 1
-# }, [ 'accident:__SARE_FRAUD_BADTHINGS', ], [ ]);
+# ---------------------------------------------------------------------------
+
+1 and try_extraction ('
+
+  body FOO /(?:(?:bbbb)|dddd (?:eeee )?by|aaaa)/i
+
+', {
+    base_extract => 1,
+    bases_must_be_casei => 1,
+    bases_can_use_alternations => 0,
+    bases_can_use_quantifiers => 0,
+    bases_can_use_char_classes => 0,
+    bases_split_out_alternations => 1
+}, [
+
+  'bbbb:FOO',
+  'dddd by:FOO',
+  'dddd eeee by:FOO',
+  'aaaa:FOO'
+
+], [ ]);
+
+# ---------------------------------------------------------------------------
+
+1 and try_extraction ('
+    body TEST5 /time to refinance|refinanc\w{1,3}\b.{0,16}\bnow\b/i
+
+', {
+    base_extract => 1,
+    bases_must_be_casei => 1,
+    bases_can_use_alternations => 0,
+    bases_can_use_quantifiers => 0,
+    bases_can_use_char_classes => 0,
+    bases_split_out_alternations => 1
+}, [
+    'refinanc:TEST5',
+], [ ]);
+
+# ---------------------------------------------------------------------------
+
+1 and try_extraction ('
+    body TEST2 /foody* bar/
+    body TEST3 /foody? bar/
+
+
+', {
+    base_extract => 1,
+    bases_must_be_casei => 1,
+    bases_can_use_alternations => 0,
+    bases_can_use_quantifiers => 0,
+    bases_can_use_char_classes => 0,
+    bases_split_out_alternations => 1
+}, [
+
+    'food:TEST2',
+    'food bar:TEST2 TEST3',
+    'foody bar:TEST2 TEST3',
+
+], [ ]);
+
+# ---------------------------------------------------------------------------
+
+1 and try_extraction ('
+
+  body __SARE_FRAUD_BADTHINGS /(?:all funds will be returned|ass?ylum|assassinate|(?:auto|boat|car|plane|train).{1,7}(?:crash|accident|disaster|wreck)|before they both died|brutal acts|cancer|coup attempt|disease|due to the current|\bexile\b|\bfled|\bflee\b|have been frozen|impeach|\bkilled|land dispute|murder|over-invoice|political crisis|poisoned (?:to death )?by|relocate|since the demise|\bslay\b)/i
+
+  body __FRAUD_PTS /\b(?:ass?ass?inat(?:ed|ion)|murder(?:e?d)?|kill(?:ed|ing)\b[^.]{0,99}\b(?:war veterans|rebels?))\b/i
+
+', {
+    base_extract => 1,
+    bases_must_be_casei => 1,
+    bases_can_use_alternations => 0,
+    bases_can_use_quantifiers => 0,
+    bases_can_use_char_classes => 0,
+    bases_split_out_alternations => 1
+}, [
+
+  'accident:__SARE_FRAUD_BADTHINGS',
+  'all funds will be returned:__SARE_FRAUD_BADTHINGS',
+  'asasinated:__FRAUD_PTS',
+  'asasination:__FRAUD_PTS',
+  'asassinated:__FRAUD_PTS',
+  'asassination:__FRAUD_PTS',
+  'assasinated:__FRAUD_PTS',
+  'assasination:__FRAUD_PTS',
+  'assassinate:__SARE_FRAUD_BADTHINGS',
+  'assassinated:__FRAUD_PTS __SARE_FRAUD_BADTHINGS',
+  'assassination:__FRAUD_PTS',
+  'assylum:__SARE_FRAUD_BADTHINGS',
+  'asylum:__SARE_FRAUD_BADTHINGS',
+  'before they both died:__SARE_FRAUD_BADTHINGS',
+  'brutal acts:__SARE_FRAUD_BADTHINGS',
+  'cancer:__SARE_FRAUD_BADTHINGS',
+  'coup attempt:__SARE_FRAUD_BADTHINGS',
+  'crash:__SARE_FRAUD_BADTHINGS',
+  'disaster:__SARE_FRAUD_BADTHINGS',
+  'disease:__SARE_FRAUD_BADTHINGS',
+  'due to the current:__SARE_FRAUD_BADTHINGS',
+  'exile:__SARE_FRAUD_BADTHINGS',
+  'fled:__SARE_FRAUD_BADTHINGS',
+  'flee:__SARE_FRAUD_BADTHINGS',
+  'have been frozen:__SARE_FRAUD_BADTHINGS',
+  'impeach:__SARE_FRAUD_BADTHINGS',
+  'killed:__FRAUD_PTS __SARE_FRAUD_BADTHINGS',
+  'killing:__FRAUD_PTS',
+  'land dispute:__SARE_FRAUD_BADTHINGS',
+  'murder:__FRAUD_PTS __SARE_FRAUD_BADTHINGS',
+  'over-invoice:__SARE_FRAUD_BADTHINGS',
+  'plane:__SARE_FRAUD_BADTHINGS',
+  'poisoned by:__SARE_FRAUD_BADTHINGS',
+  'poisoned to death by:__SARE_FRAUD_BADTHINGS',
+  'political crisis:__SARE_FRAUD_BADTHINGS',
+  'relocate:__SARE_FRAUD_BADTHINGS',
+  'since the demise:__SARE_FRAUD_BADTHINGS',
+  'slay:__SARE_FRAUD_BADTHINGS',
+  'train:__SARE_FRAUD_BADTHINGS',
+  'war veterans:__FRAUD_PTS',
+  'wreck:__SARE_FRAUD_BADTHINGS',
+
+], [ ]);
+
+# ---------------------------------------------------------------------------
+# skip this one for perl 5.6.*; it does not truncate the long strings in the
+# same place as 5.8.* and 5.9.*, although they still work fine
+
+($running_perl56) and ok(1);
+($running_perl56) and ok(1);
+($running_perl56) and ok(1);
+($running_perl56) and ok(1);
+(!$running_perl56) and try_extraction ('
+
+  body VIRUS_WARNING345                /(This message contained attachments that have been blocked by Guinevere|This is an automatic message from the Guinevere Internet Antivirus Scanner)\./
+
+', {
+    base_extract => 1,
+    bases_must_be_casei => 1,
+    bases_can_use_alternations => 0,
+    bases_can_use_quantifiers => 0,
+    bases_can_use_char_classes => 0,
+    bases_split_out_alternations => 1
+}, [
+
+  'this is an automatic message from the guinevere internet ant:VIRUS_WARNING345',
+  'this message contained attachments that have been blocked by:VIRUS_WARNING345'
+
+], [ ]);
+
+# ---------------------------------------------------------------------------
 
 try_extraction ('
     body FOO /(?:Viagra|Valium|Xanax|Soma|Cialis){2}/i
@@ -53,6 +190,8 @@ try_extraction ('
 
 ], [ ]);
 
+# ---------------------------------------------------------------------------
+
 try_extraction ('
     body FOO /\brecords (?:[a-z_,-]+ )+?(?:feature|(?:a|re)ward)/i
 
@@ -68,6 +207,8 @@ try_extraction ('
     'records :FOO'
 
 ], [ ]);
+
+# ---------------------------------------------------------------------------
 
 try_extraction ('
     body EXCUSE_REMOVE /to .{0,20}(?:mailings|offers)/i
@@ -93,6 +234,8 @@ try_extraction ('
 
 ], [ ]);
 
+# ---------------------------------------------------------------------------
+
 try_extraction ('
     body EXCUSE_REMOVE /to .{0,20}(?:mail(ings|food)|o(ffer|blarg)s)/i
     body TEST2 /foody* bar/
@@ -114,6 +257,8 @@ try_extraction ('
     'offers:EXCUSE_REMOVE',
 
 ], [ ]);
+
+# ---------------------------------------------------------------------------
 
 try_extraction ('
     body FOO /foo bar/
@@ -162,6 +307,8 @@ try_extraction ('
 
 ]);
 
+# ---------------------------------------------------------------------------
+
 try_extraction ('
     body FOO /foo bar/
     body EXCUSE_REMOVE /to be removed from.{0,20}(?:mailings|offers)/i
@@ -193,70 +340,7 @@ try_extraction ('
 
 ]);
 
-#TODO: fails with perl 5.9.5
-# try_extraction ('
-# 
-#     body __SARE_FRAUD_BADTHINGS /(?:all funds will be returned|ass?ylum|assassinate|(?:auto|boat|car|plane|train).{1,7}(?:crash|accident|disaster|wreck)|before they both died|brutal acts|cancer|coup attempt|disease|due to the current|\bexile\b|\bfled|\bflee\b|have been frozen|impeach|\bkilled|land dispute|murder|over-invoice|political crisis|poisoned (?:to death )?by|relocate|since the demise|\bslay\b)/i
-# 
-#     body __FRAUD_PTS /\b(?:ass?ass?inat(?:ed|ion)|murder(?:e?d)?|kill(?:ed|ing)\b[^.]{0,99}\b(?:war veterans|rebels?))\b/i
-# 
-# 
-# ', {
-#     base_extract => 1,
-#     bases_must_be_casei => 1,
-#     bases_can_use_alternations => 0,
-#     bases_can_use_quantifiers => 0,
-#     bases_can_use_char_classes => 0,
-#     bases_split_out_alternations => 1
-# }, [
-# 
-#   'accident:__SARE_FRAUD_BADTHINGS',
-#   'all funds will be returned:__SARE_FRAUD_BADTHINGS',
-#   'asasinated:__FRAUD_PTS',
-#   'asasination:__FRAUD_PTS',
-#   'asassinated:__FRAUD_PTS',
-#   'asassination:__FRAUD_PTS',
-#   'assasinated:__FRAUD_PTS',
-#   'assasination:__FRAUD_PTS',
-#   'assassinate:__SARE_FRAUD_BADTHINGS',
-#   'assassinated:__FRAUD_PTS __SARE_FRAUD_BADTHINGS',
-#   'assassination:__FRAUD_PTS',
-#   'assylum:__SARE_FRAUD_BADTHINGS',
-#   'asylum:__SARE_FRAUD_BADTHINGS',
-#   'before they both died:__SARE_FRAUD_BADTHINGS',
-#   'brutal acts:__SARE_FRAUD_BADTHINGS',
-#   'cancer:__SARE_FRAUD_BADTHINGS',
-#   'coup attempt:__SARE_FRAUD_BADTHINGS',
-#   'crash:__SARE_FRAUD_BADTHINGS',
-#   'disaster:__SARE_FRAUD_BADTHINGS',
-#   'disease:__SARE_FRAUD_BADTHINGS',
-#   'due to the current:__SARE_FRAUD_BADTHINGS',
-#   'exile:__SARE_FRAUD_BADTHINGS',
-#   'fled:__SARE_FRAUD_BADTHINGS',
-#   'flee:__SARE_FRAUD_BADTHINGS',
-#   'have been frozen:__SARE_FRAUD_BADTHINGS',
-#   'impeach:__SARE_FRAUD_BADTHINGS',
-#   'killed:__FRAUD_PTS __SARE_FRAUD_BADTHINGS',
-#   'killing:__FRAUD_PTS',
-#   'land dispute:__SARE_FRAUD_BADTHINGS',
-#   'murder:__SARE_FRAUD_BADTHINGS',
-#   'murderd:__FRAUD_PTS __SARE_FRAUD_BADTHINGS',
-#   'murdered:__FRAUD_PTS __SARE_FRAUD_BADTHINGS',
-#   'over-invoice:__SARE_FRAUD_BADTHINGS',
-#   'plane:__SARE_FRAUD_BADTHINGS',
-#   'poisoned by:__SARE_FRAUD_BADTHINGS',
-#   'poisoned to death by:__SARE_FRAUD_BADTHINGS',
-#   'political crisis:__SARE_FRAUD_BADTHINGS',
-#   'relocate:__SARE_FRAUD_BADTHINGS',
-#   'since the demise:__SARE_FRAUD_BADTHINGS',
-#   'slay:__SARE_FRAUD_BADTHINGS',
-#   'train:__SARE_FRAUD_BADTHINGS',
-#   'war veterans:__FRAUD_PTS',
-#   'wreck:__SARE_FRAUD_BADTHINGS',
-# 
-# ], [ ]);
-
-###########################################################################
+#############################################################################
 
 use Mail::SpamAssassin;
 
