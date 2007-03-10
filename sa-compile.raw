@@ -121,6 +121,9 @@ if (defined $opt{'debug'}) {
   $opt{'debug'} ||= 'all';
 }
 
+# at least info
+$opt{'debug'} ||= 'info';
+
 # ensure the body-rule base extractor plugin is loaded, we use that
 my $post_config = q(
   loadplugin Mail::SpamAssassin::Plugin::BodyRuleBaseExtractor
