@@ -58,6 +58,7 @@ use Getopt::Long;
 use File::Copy;
 use File::Path;
 use Pod::Usage;
+use Data::Dumper;
 
 use vars qw( %opt );
 Mail::SpamAssassin::Util::clean_path_in_taint_mode();
@@ -201,6 +202,20 @@ sub dump_base_strings {
 
 ##############################################################################
 
+sub dump_as_perl {
+  my ($ruletype) = @_;
+
+  my %todump = (
+    name => $ruletype,
+    base_orig => $conf->{base_orig}->{$ruletype},
+    base_string => $conf->{base_string}->{$ruletype}
+  );
+  my $s = Data::Dumper->Dump([ \%todump ], [qw(bases)]);
+  return $s;
+}
+
+##############################################################################
+
 sub compile_base_strings {
   my $dirpath = Mail::SpamAssassin::Util::secure_tmpdir();
   die "secure_tmpdir failed" unless $dirpath && -w $dirpath;
@@ -209,13 +224,16 @@ sub compile_base_strings {
 
   foreach my $ruletype (sort keys %{$conf->{base_orig}})
   {
+    # create the bases.in file
+
     my $basespath = "bases_$ruletype.in";
     $basespath =~ s/[^A-Za-z0-9_\.]/_/gs;
-
     open OUT, ">$dirpath/$basespath"
           or die "cannot write to $dirpath/$basespath";
     print OUT dump_base_strings($ruletype);
     close OUT or die "cannot write to $dirpath/$basespath";
+
+    # compile it...
 
     chdir $dirpath; print "cd $dirpath\n";
     rule2xs($basespath);
@@ -225,6 +243,17 @@ sub compile_base_strings {
 
     run("make");
     run($sudo."make install");	# into $installdir
+
+    # and generate the bases.pl file, for perl consumers
+
+    my $plpath = "bases_$ruletype.pl";
+    $plpath =~ s/[^A-Za-z0-9_\.]/_/gs;
+    open OUT, ">$dirpath/$plpath"
+          or die "cannot write to $dirpath/$plpath";
+    print OUT dump_as_perl($ruletype);
+    close OUT or die "cannot write to $dirpath/$plpath";
+
+    run($sudo."cp $dirpath/$plpath $installdir/$plpath");
   }
 
   if (!$opt{'keep-tmps'}) {
@@ -608,10 +637,13 @@ Options:
 
 =head1 DESCRIPTION
 
-sa-compile uses C<re2c> to compile the SpamAssassin ruleset into C code in a
-Perl XS module, and from there into native object code.  This will then be used
+sa-compile uses C<re2c> to compile the SpamAssassin ruleset. This is then used
 by the C<Mail::SpamAssassin::Plugin::Rule2XSBody> plugin to speed up
 SpamAssassin's operation, where possible, and when that plugin is loaded.
+
+C<re2c> can match strings much faster than perl code, by constructing a DFA to
+match many simple strings in parallel, and compiling that to native object
+code.  Not all SpamAssassin rules are amenable to this conversion, however.
 
 This requires C<re2c> version 0.10.x (see C<http://re2c.org/>), and the C
 compiler used to build Perl XS modules, be installed.
