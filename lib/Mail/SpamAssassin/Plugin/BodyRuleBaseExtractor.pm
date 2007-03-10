@@ -29,6 +29,7 @@ package Mail::SpamAssassin::Plugin::BodyRuleBaseExtractor;
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Util::Progress;
 
 use strict;
 use warnings;
@@ -60,6 +61,8 @@ sub new {
   my $self = $class->SUPER::new($mailsaobject);
   bless ($self, $class);
 
+  $self->{show_progress} = 1;           # default
+
   # $self->test(); exit;
   return $self;
 }
@@ -78,6 +81,7 @@ sub extract_bases {
   my $main = $conf->{main};
   if (!$main->{base_extract}) { return; }
 
+  info("base extraction starting.  this can take a while...");
   $self->extract_set($conf, $conf->{body_tests}, 'body');
 }
 
@@ -100,20 +104,28 @@ sub extract_set_pri {
   my $yes = 0;
   my $no = 0;
 
-  $self->{main} = $conf->{main};	# for use in extract_hints()
-
-  dbg("zoom: base extraction start for type $ruletype");
   my $start = time;
+  $self->{main} = $conf->{main};	# for use in extract_hints()
+  info ("extracting from rules of type $ruletype");
 
   # attempt to find good "base strings" (simplified regexp subsets) for each
   # regexp.  We try looking at the regexp from both ends, since there
   # may be a good long string of text at the end of the rule.
 
-  # require this many chars in a base string, for it to be viable
+  # require this many chars in a base string for it to be viable
   my $min_chars = 3;
+
+  my $count = 0;
+  my $progress;
+
+  $self->{show_progress} and $progress = Mail::SpamAssassin::Util::Progress->new({
+                total => scalar keys %{$rules},
+                itemtype => 'rules',
+              });
 
   foreach my $name (keys %{$rules}) {
     my $rule = $rules->{$name};
+    $self->{show_progress} and $progress->update(++$count);
 
     # ignore ReplaceTags rules
     # TODO: need cleaner way to do this
@@ -164,7 +176,11 @@ sub extract_set_pri {
     }
   }
 
-  dbg ("zoom: extracted $yes bases, skipped $no");
+  $self->{show_progress} and $progress->final();
+
+  dbg ("$ruletype: found ".(scalar @good_bases).
+        " usable base strings in ".
+        "$yes rules, skipped $no rules");
 
   # NOTE: re2c will attempt to provide the longest pattern that matched; e.g.
   # ("food" =~ "foo" / "food") will return "food".  So therefore if a pattern
@@ -202,38 +218,47 @@ sub extract_set_pri {
   $conf->{base_orig}->{$ruletype} = { };
   $conf->{base_string}->{$ruletype} = { };
 
+  $count = 0;
+  $self->{show_progress} and $progress = Mail::SpamAssassin::Util::Progress->new({
+                total => scalar @good_bases,
+                itemtype => 'bases',
+              });
+
   foreach my $set1 (@good_bases) {
+    $self->{show_progress} and $progress->update(++$count);
+
     my $base1 = $set1->{base};
     my $orig1 = $set1->{orig};
-    my $key1  = $set1->{name};
-    next if ($base1 eq '' or $key1 eq '');
+    my $name1 = $set1->{name};
+    next if ($base1 eq '' or $name1 eq '');
 
-    $conf->{base_orig}->{$ruletype}->{$key1} = $orig1;
+    $conf->{base_orig}->{$ruletype}->{$name1} = $orig1;
 
     foreach my $set2 (@good_bases) {
       next if ($set1 == $set2);
 
+      my $base2 = $set2->{base};
+      my $name2 = $set2->{name};
+
       # clobber exact dups; this can happen if a regexp outputs the 
       # same base string multiple times
-      if ($set1->{name} eq $set2->{name} &&
-          $set1->{base} eq $set2->{base} &&
-          $set1->{orig} eq $set2->{orig})
+      if ($orig1 eq $set2->{orig} &&
+          $base1 eq $base2 &&
+          $name1 eq $name2)
       {
         $set2->{name} = '';       # clobber
         $set2->{base} = '';
       }
 
       # skip if either already contains the other rule's name
-      next if ($set1->{name} =~ /\b\Q$set2->{name}\E\b/);
-      next if ($set2->{name} =~ /\b\Q$set1->{name}\E\b/);
-
-      my $base2 = $set2->{base};
+      next if ($name1 =~ /\b\Q$name2\E\b/);
+      next if ($name2 =~ /\b\Q$name1\E\b/);
 
       next if ($base2 eq '');
       next if (length $base1 < length $base2);
       next if ($base1 !~ /\Q$base2\E/);
 
-      $set1->{name} .= " ".$set2->{name};
+      $set1->{name} .= " ".$name2;
 
       # base2 is just a subset of base1
       # dbg("zoom: subsuming '$base2' into '$base1': $set1->{name}");
@@ -268,10 +293,12 @@ sub extract_set_pri {
     my $key  = join ' ', sort @uniqed;
     $conf->{base_string}->{$ruletype}->{$base} = $key;
   }
+  $self->{show_progress} and $progress->final();
 
   my $elapsed = time - $start;
-  info ("zoom: base extraction for $ruletype: ".
-            "yes=$yes, no=$no, took $elapsed seconds\n");
+  info ("$ruletype: ".
+            (scalar keys %{$conf->{base_string}->{$ruletype}}).
+            " base strings extracted in $elapsed seconds\n");
 }
 
 ###########################################################################
