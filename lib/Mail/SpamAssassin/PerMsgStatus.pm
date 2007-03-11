@@ -2230,16 +2230,17 @@ sub got_hit {
   # $self->{tests_already_hit}->{$rule}:
   my $value = $params{value}; if (!$value || $value <= 0) { $value = 1; }
 
-  # default ruletype, if not specified:
-  $params{ruletype} ||= 'unknown';
-
   my $already_hit = $self->{tests_already_hit}->{$rule} || 0;
-  $self->{tests_already_hit}->{$rule} = $already_hit + $value;
 
   # only allow each test to be scored once per mail, once we
   # get into this method ('tflags multiple' rules must be dealt
   # with in callers to this method)
   return if ($already_hit);
+
+  $self->{tests_already_hit}->{$rule} = $already_hit + $value;
+
+  # default ruletype, if not specified:
+  $params{ruletype} ||= 'unknown';
 
   $self->_handle_hit($rule,
             $params{score} || $self->{conf}->{scores}->{$rule},
