@@ -68,6 +68,7 @@ Mail::SpamAssassin::Util::untaint_var( \%ENV );
 
 # testing purposes only
 my $fixup_re_test;
+#$fixup_re_test = 1; fixup_re("\\x{1b}\$b"); die;
 #$fixup_re_test = 1; fixup_re("\\33\$b"); die;
 #$fixup_re_test = 1; fixup_re("[link]"); die;
 #$fixup_re_test = 1; fixup_re("please do not resend your original message."); die;
@@ -569,10 +570,12 @@ sub fixup_re {
       $output .= '"\\""';
     }
     elsif ($tok eq '\\') {
-      $re =~ /\G(\d+|.)/gc or die "\\ at end of string!";
+      $re =~ /\G(x\{[^\}]+\}|\d+|.)/gc or die "\\ at end of string!";
       my $esc = $1;
       if ($esc eq '"') {
         $output .= '"\\""';
+      } elsif ($esc =~ /^x\{(\S+)\}$/) {
+        $output .= '"'.chr(hex($1)).'"';
       } elsif ($esc =~ /^\d+/) {
         $output .= '"'.chr(oct($esc)).'"';
       } else {
