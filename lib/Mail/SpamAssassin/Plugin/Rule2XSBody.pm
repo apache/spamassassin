@@ -28,7 +28,8 @@ This plugin will use native-code object files representing the ruleset,
 in order to provide significant speedups in rule evaluation.
 
 Note that C<sa-compile> must be run in advance, in order to compile the
-ruleset using C<re2c> and the C compiler.
+ruleset using C<re2c> and the C compiler.  See the C<sa-compile>
+documentation for more details.
 
 =cut
 
