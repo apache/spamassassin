@@ -850,8 +850,10 @@ sub find_dup_rules {
   my %dups = ();
   while (my ($name, $text) = each %{$conf->{tests}}) {
     my $type = $conf->{test_types}->{$name};
-    # ensure similar, but differently-typed, rules are not marked as dups
-    $text = "$type\t$text";      
+    my $tf = ($conf->{tflags}->{$name}||''); $tf =~ s/\s+/ /gs;
+    # ensure similar, but differently-typed, rules are not marked as dups;
+    # take tflags into account too due to "tflags multiple"
+    $text = "$type\t$text\t$tf";
 
     if (defined $names_for_text{$text}) {
       $names_for_text{$text} .= " ".$name;

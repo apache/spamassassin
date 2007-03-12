@@ -2232,10 +2232,10 @@ sub got_hit {
 
   my $already_hit = $self->{tests_already_hit}->{$rule} || 0;
 
-  # only allow each test to be scored once per mail, once we
-  # get into this method ('tflags multiple' rules must be dealt
-  # with in callers to this method)
-  return if ($already_hit);
+  # don't count hits multiple times, unless 'tflags multiple' is on
+  if ($already_hit && ($self->{conf}->{tflags}->{$rule}||'') !~ /\bmultiple\b/) {
+    return;
+  }
 
   $self->{tests_already_hit}->{$rule} = $already_hit + $value;
 
