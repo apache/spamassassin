@@ -43,15 +43,15 @@ body BAYES_80		eval:check_bayes('0.80', '0.95')
 body BAYES_95		eval:check_bayes('0.95', '0.99')
 body BAYES_99		eval:check_bayes('0.99', '1.00')
 
-tflags BAYES_00		nice learn bayes
-tflags BAYES_05		nice learn bayes
-tflags BAYES_20		nice learn bayes
-tflags BAYES_40		nice learn bayes
-tflags BAYES_50		learn bayes
-tflags BAYES_60		learn bayes
-tflags BAYES_80		learn bayes
-tflags BAYES_95		learn bayes
-tflags BAYES_99		learn bayes
+tflags BAYES_00		nice learn
+tflags BAYES_05		nice learn
+tflags BAYES_20		nice learn
+tflags BAYES_40		nice learn
+tflags BAYES_50		learn
+tflags BAYES_60		learn
+tflags BAYES_80		learn
+tflags BAYES_95		learn
+tflags BAYES_99		learn
 
 describe BAYES_00	Bayesian spam probability is 0 to 1%
 describe BAYES_05	Bayesian spam probability is 1 to 5%

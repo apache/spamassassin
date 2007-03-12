@@ -186,7 +186,7 @@ sub readrules {
     }
 
     # ignore bayes rules in set 0 or set 2
-    if ($tflags =~ /\bbayes\b/ && ($scoreset & 2) == 0) {
+    if ($tflags =~ /\blearn\b/ && ($scoreset & 2) == 0) {
       $rules->{$rule}->{mutable} = 0;
       $rules->{$rule}->{score} = 0;
     }
