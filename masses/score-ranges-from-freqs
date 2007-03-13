@@ -111,11 +111,11 @@ while (<>) {
     print "rule $test: immutable due to 'userconf'\n";
     $mutable_tests{$test} = 0;
   }
-  elsif ( ($scoreset % 2) == 0 && $tflags =~ /\bnet\b/ ) {
+  elsif ( ($scoreset & 1) == 0 && $tflags =~ /\bnet\b/ ) {
     print "rule $test: immutable due to 'net'\n";
     $mutable_tests{$test} = 0;
   }
-  elsif ( ($scoreset % 2) == 1 && $tflags =~ /\blearn\b/ ) {
+  elsif ( ($scoreset & 2) == 0 && $tflags =~ /\blearn\b/ ) {
     print "rule $test: immutable due to 'learn'\n";
     $mutable_tests{$test} = 0;
   }
