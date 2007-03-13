@@ -12,6 +12,10 @@ use warnings;
 my $debug = 0;
 my $running_perl56 = ($] < 5.007);
 
+# perl 5.6.1 on Solaris fails all tests here if PERL_DL_NONLAZY=1
+# but works fine if it is =0.  ho hum
+$ENV{'PERL_DL_NONLAZY'} = 0;
+
 BEGIN { 
   if (-e 't/test_dir') { chdir 't'; } 
   if (-e 'test_dir') { unshift(@INC, '../blib/lib'); }
