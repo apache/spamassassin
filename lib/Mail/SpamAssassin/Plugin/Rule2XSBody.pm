@@ -148,8 +148,8 @@ sub setup_test_set_pri {
     my $pc_zoomed   = ($found / ($totalhasrules || .001)) * 100;
     $pc_zoomed   = int($pc_zoomed * 1000) / 1000;
 
-    dbg("zoom: $found compiled rules are available for type $ruletype out ".
-        "of $totalhasrules ($pc_zoomed\%)");
+    info("zoom: able to use $found/$totalhasrules '$ruletype' compiled ".
+        "rules ($pc_zoomed\%)");
 
     # TODO: issue a warning for low counts?
     # TODO: inhibit rule2xs scanning entirely for low counts?
