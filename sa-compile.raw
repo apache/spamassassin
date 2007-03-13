@@ -336,6 +336,10 @@ sub rule2xs {
 #define YYLIMIT         *p
 #define YYMARKER        q
 #define YYFILL(n)
+
+/* backtrack to return other, semi-overlapped tokens; e.g.
+   allow "abcdef" to return both "abc" and "cde" as tokens */
+#define RET(x)          { YYCURSOR = YYMARKER; return (x); }
 EOT
 
     print $re <<EOT;
@@ -363,7 +367,7 @@ EOT
       die "no 'r REGEXP:REASON' in $_" unless defined $regexp;
 
       eval {
-	print $re "\t", fixup_re($regexp), "            {return \"$reason\";}\n";
+	print $re "\t", fixup_re($regexp), "            {RET(\"$reason\");}\n";
 	$line++;
       };
       $@ and handle_fixup_error($@, $regexp, $reason);
