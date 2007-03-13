@@ -77,7 +77,7 @@ default.
 =item term [optional]
 
 The module will attempt to determine if a valid terminal exists on the
-filehandle.  This item allows you to override that value.
+STDIN filehandle.  This item allows you to override that value.
 
 =back
 
@@ -100,7 +100,7 @@ sub new {
 
   bless ($self, $class);
 
-  $self->{term} = $args->{term} || -t $self->{fh};
+  $self->{term} = $args->{term} || (-t STDIN);
 
   $self->init_bar(); # this will give us the initial progress bar
   
