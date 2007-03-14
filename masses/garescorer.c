@@ -58,6 +58,7 @@ double evaluate_inner();
 
 double threshold = 5.0;
 double nybias = 10.0;
+double fptarget = -1.0;   /* -1 means unused */
 int save_every_n_generations = 50;
 int no_change_val = 300;
 int pop_size = 50;
@@ -109,6 +110,7 @@ void usage()
      "  -e num_epochs = number of epochs (generations) to run (30000 default)\n"
      "  -r replace = number of individuals to replace each generation (20 recommended)\n"
      "  -b nybias = bias towards false negatives (10.0 default)\n"
+     "  -f fptarget = target FP percentage (alt fitness function, off by default)\n"
      "  -t threshold = threshold for spam/nonspam decision (5 default)\n"
      "\n"
      "  -C = just count hits and exit, no evolution\n\n");
@@ -178,10 +180,14 @@ int main(int argc, char **argv) {
     MPI_Init(&argc, &argv);
 #endif
 
-    while ((arg = getopt (argc, argv, "b:r:s:e:t:C")) != -1) {
+    while ((arg = getopt (argc, argv, "b:r:s:e:t:f:C")) != -1) {
       switch (arg) {
         case 'b':
           nybias = atof(optarg);
+          break;
+
+        case 'f':
+          fptarget = atof(optarg);
           break;
 
          case 't':
@@ -419,6 +425,7 @@ double evaluate(PGAContext *ctx, int p, int pop)
 /* So can figure out how would evaluate without above - Allen */
 
 double evaluate_inner() {
+  double dist_from_target_fp_rate_multiplier;
   double ynweight,nyweight;
 
   /* just count how far they were from the threshold, in each case */
@@ -434,8 +441,27 @@ double evaluate_inner() {
     weight_balance = 0;
 #endif
 
-  return  ynweight +            /* all FNs' points from threshold */
-	  nyweight*nybias;      /* all FPs' points from threshold */
+  if (fptarget >= 0.0) {
+    /* abs((FP rate as percentage) - (target FP rate)) */
+    dist_from_target_fp_rate_multiplier =
+              fabs(((ga_ny / (float) num_ham) * 100.0) - fptarget);
+
+    /* now ensure it's >= 1.0 and a large multiplier */
+    dist_from_target_fp_rate_multiplier =
+              (dist_from_target_fp_rate_multiplier * 10) + 1.0;
+
+    /* criteria, in order of priority: FP/FN rate, in number of messages;
+    * distance from target FP rate; then the distance of FP and FN scores
+    * from the threshold (as the least important criterion) */
+
+    return    ((100 * (ga_yn + ga_ny)) * dist_from_target_fp_rate_multiplier)
+              + (ynweight + nyweight*nybias);
+
+  } else {
+
+    return  ynweight +            /* all FNs' points from threshold */
+            nyweight*nybias;      /* all FPs' points from threshold */
+  }
 }
 
 #ifdef LAMARK

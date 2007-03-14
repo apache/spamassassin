@@ -1,11 +1,13 @@
 #!/bin/sh
 
+# TODO: add FPRATE instead of HAM_PREFERENCE
 # set SCORESET
 . config
 
 LEARN_RATE="${LEARN_RATE:-2.0}"
 
 NAME="set$SCORESET"
+# TODO: add $FPRATE instead of HAM_PREFERENCE
 LOGDIR="gen-$NAME-$HAM_PREFERENCE-$THRESHOLD-$EPOCHS-ga"
 
 # ensure sandbox T_ rules aren't used in the GA and don't appear in output
@@ -100,8 +102,8 @@ echo "[gen run start]"
 pwd
 date
 
-# misuse EPOCHS as pop size
-./garescorer -b $HAM_PREFERENCE -s $EPOCHS -t $THRESHOLD
+# TODO: use -f $FPRATE instead of -b $HAM_PREFERENCE
+./garescorer -b $HAM_PREFERENCE -e $EPOCHS -t $THRESHOLD
 
 # POST-GA COMMANDS:
 
