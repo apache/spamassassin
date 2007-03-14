@@ -4,7 +4,7 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_hup");
 use constant TEST_ENABLED => !$SKIP_SPAMD_TESTS && !$RUNNING_ON_WINDOWS;
 
-use Test; BEGIN { plan tests => (TEST_ENABLED? 90 : 0) };
+use Test; BEGIN { plan tests => (TEST_ENABLED? 110 : 0) };
 
 use File::Spec;
 
@@ -24,6 +24,7 @@ for $retry (0 .. 9) {
   ok ($pid1 = get_pid());
   print "[".time."] HUPing spamd at pid $pid1, loop try $retry...\n";
   ok (-e $pid_file) or warn "$pid_file is not there before SIGHUP";
+  ok (!-z $pid_file) or warn "$pid_file is empty before SIGHUP";
 
   my $lastmod = (-M $pid_file);
   ok ($pid1 != 0 and kill ('HUP', $pid1));
@@ -33,26 +34,31 @@ for $retry (0 .. 9) {
   # load we could have missed the unlink, exec, create part.
 
   print "[".time."] Waiting for PID file to change...\n";
-  my $timeout = 20;
-  my $wait = 0;
-  my $newlastmod;
-  do {
-    sleep (int($wait++ / 4) + 1) if $timeout > 0;
-    $timeout--;
-    $newlastmod = (-M $pid_file);
-  } while((-e $pid_file) && defined($newlastmod) &&
-                $newlastmod == $lastmod && $timeout);
+  {
+    my $timeout = 20;
+    my $wait = 0;
+    my $newlastmod;
+    do {
+      sleep (int($wait++ / 4) + 1) if $timeout > 0;
+      $timeout--;
+      $newlastmod = (-M $pid_file);
+    } while((-e $pid_file) && defined($newlastmod) &&
+                  $newlastmod == $lastmod && $timeout);
+  }
 
   print "[".time."] Waiting for spamd at pid $pid1 to restart...\n";
   # note that the wait period increases the longer it takes,
   # 20 retries works out to a total of 60 seconds
-  my $timeout = 20;
-  my $wait = 0;
-  do {
-    sleep (int($wait++ / 4) + 1) if $timeout > 0;
-    $timeout--;
-  } while(!-e $pid_file && $timeout);
-  ok (-e $pid_file);
+  {
+    my $timeout = 20;
+    my $wait = 0;
+    do {
+      sleep (int($wait++ / 4) + 1) if $timeout > 0;
+      $timeout--;
+    } while((!-e $pid_file || -z $pid_file) && $timeout);
+  }
+  ok (-e $pid_file) or warn "$pid_file does not exist post restart";
+  ok (!-z $pid_file) or warn "$pid_file is empty post restart";
 
   ok ($pid2 = get_pid($pid1));
   print "[".time."] Looking for new spamd at pid $pid2...\n";
