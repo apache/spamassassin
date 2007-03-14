@@ -764,7 +764,6 @@ sub wait_for_file_to_change_or_disappear {
 
   $action->();
 
-  my $timeout = 20;
   my $wait = 0;
   my $newlastmod;
   do {
@@ -780,7 +779,6 @@ sub wait_for_file_to_appear {
 
   # note that the wait period increases the longer it takes,
   # 20 retries works out to a total of 60 seconds
-  my $timeout = 20;
   my $wait = 0;
   do {
     sleep (int($wait++ / 4) + 1) if $timeout > 0;
