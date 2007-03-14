@@ -16,19 +16,34 @@ my $pid_file = "log/spamd.pid";
 
 my($pid1, $pid2);
 
-print "Starting spamd...\n";
+print "[".time."] Starting spamd...\n";
 start_spamd("-L -r ${pid_file}");
 sleep 1;
 
 for $retry (0 .. 9) {
   ok ($pid1 = get_pid());
-  print "HUPing spamd at pid $pid1, loop try $retry...\n";
+  print "[".time."] HUPing spamd at pid $pid1, loop try $retry...\n";
   ok (-e $pid_file) or warn "$pid_file is not there before SIGHUP";
+
+  my $lastmod = (-M $pid_file);
   ok ($pid1 != 0 and kill ('HUP', $pid1));
 
-  sleep 1;      # time for signal to be received
+  # now, wait for the PID file to change or disappear; the real order
+  # is [SIGHUP, unlink, exec, create] but due to race conditions under
+  # load we could have missed the unlink, exec, create part.
 
-  print "Waiting for spamd at pid $pid1 to restart...\n";
+  print "[".time."] Waiting for PID file to change...\n";
+  my $timeout = 20;
+  my $wait = 0;
+  my $newlastmod;
+  do {
+    sleep (int($wait++ / 4) + 1) if $timeout > 0;
+    $timeout--;
+    $newlastmod = (-M $pid_file);
+  } while((-e $pid_file) && defined($newlastmod) &&
+                $newlastmod == $lastmod && $timeout);
+
+  print "[".time."] Waiting for spamd at pid $pid1 to restart...\n";
   # note that the wait period increases the longer it takes,
   # 20 retries works out to a total of 60 seconds
   my $timeout = 20;
@@ -40,11 +55,14 @@ for $retry (0 .. 9) {
   ok (-e $pid_file);
 
   ok ($pid2 = get_pid($pid1));
-  print "Looking for new spamd at pid $pid2...\n";
-  #ok ($pid2 != $pid1);
+  print "[".time."] Looking for new spamd at pid $pid2...\n";
+  #ok ($pid2 != $pid1);     # no longer guaranteed with SIGHUP
   ok ($pid2 != 0 and kill (0, $pid2));
 
-  print "Checking GTUBE...\n";
+  print "[".time."] A little time to settle...\n";
+  sleep 2;
+
+  print "[".time."] Checking GTUBE...\n";
   %patterns = (
     q{ X-Spam-Flag: YES } => 'flag',
     q{ GTUBE }            => 'gtube',
@@ -56,24 +74,43 @@ for $retry (0 .. 9) {
 }
 
 
-print "Stopping spamd...\n";
+print "[".time."] Stopping spamd...\n";
 stop_spamd;
 
 
 sub get_pid {
   my($opid, $npid) = (@_, 0, 0);
-  #my $timeout = 5;
-  #do {
-  #  sleep 1;
-  #  $timeout--;
 
-    if (open (PID, "< ${pid_file}")) {
-      $npid = <PID>;
-      chomp $npid;
-      close(PID);
-    } else {
-      die "Could not open pid file ${pid_file}: $!\n";
+  my $retries = 5;
+  do {
+    if ($retries != 5) {
+      sleep 1;
+      warn "retrying read of pidfile $pid_file, due to short/nonexistent read: ".
+            "retry $retries";
     }
-  #} until ($npid != $opid or $timeout == 0);
+    $retries--;
+
+    if (!open (PID, "<".$pid_file)) {
+      warn "Could not open pid file ${pid_file}: $!\n";     # and retry
+      next;
+    }
+
+    $npid = <PID>;
+    if (defined $npid) { chomp $npid; }
+    close(PID);
+
+    if (!$npid || $npid < 1) {
+      warn "failed to read anything sensible from $pid_file, retrying read";
+      $npid = 0;
+      next;
+    }
+    if (!kill (0, $npid)) {
+      warn "failed to kill -0 $npid, retrying read";
+      $npid = 0;
+    }
+
+  } until ($npid > 1 or $retries == 0);
+
   return $npid;
 }
+
