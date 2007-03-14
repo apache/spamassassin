@@ -757,4 +757,74 @@ sub cleanup_safe_tmpdir {
   }
 }
 
+sub wait_for_file_to_change_or_disappear {
+  my ($f, $timeout, $action) = @_;
+
+  my $lastmod = (-M $f);
+
+  $action->();
+
+  my $timeout = 20;
+  my $wait = 0;
+  my $newlastmod;
+  do {
+    sleep (int($wait++ / 4) + 1) if $timeout > 0;
+    $timeout--;
+    $newlastmod = (-M $f);
+  } while((-e $f) && defined($newlastmod) &&
+                $newlastmod == $lastmod && $timeout);
+}
+
+sub wait_for_file_to_appear {
+  my ($f, $timeout) = @_;
+
+  # note that the wait period increases the longer it takes,
+  # 20 retries works out to a total of 60 seconds
+  my $timeout = 20;
+  my $wait = 0;
+  do {
+    sleep (int($wait++ / 4) + 1) if $timeout > 0;
+    $timeout--;
+  } while((!-e $f || -z $f) && $timeout);
+}
+
+sub read_from_pidfile {
+  my $f = shift;
+  my $npid = 0;
+  my $retries = 5;
+
+  do {
+    if ($retries != 5) {
+      sleep 1;
+      warn "retrying read of pidfile $f, due to short/nonexistent read: ".
+            "retry $retries";
+    }
+    $retries--;
+
+    if (!open (PID, "<".$f)) {
+      warn "Could not open pid file ${f}: $!\n";     # and retry
+      next;
+    }
+
+    $npid = <PID>;
+    if (defined $npid) { chomp $npid; }
+    close(PID);
+
+    if (!$npid || $npid < 1) {
+      warn "failed to read anything sensible from $f, retrying read";
+      $npid = 0;
+      next;
+    }
+    if (!kill (0, $npid)) {
+      warn "failed to kill -0 $npid, retrying read";
+      $npid = 0;
+    }
+
+  } until ($npid > 1 or $retries == 0);
+
+  return $npid;
+}
+
+sub dbgprint { print STDOUT "[".time()."] ".$_[0]; }
+
 1;
