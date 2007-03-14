@@ -441,11 +441,12 @@ sub start_spamd {
                        $spamd_forker,
                        qq{SATest.pl},
                        qq{-Mredirect},
-                       qq{-o${spamd_stdout}},
                        qq{-O${spamd_stderr}},
+                       qq{-o${spamd_stdout}},
                        qq{--},
                        @spamd_args,
                        $spamd_extra_args,
+                       qq{-s ${spamd_stderr}.timestamped},
                        qq{&},
                     );
   unlink ($spamd_stdout, $spamd_stderr, $spamd_stdlog);
