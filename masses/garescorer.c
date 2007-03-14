@@ -17,10 +17,6 @@
 extern int num_spam, num_ham;	/* in tmp/tests.h */
 
 
-/* Craig's log(score) evaluator, not as aggressive against FPs I think.
- */
-/* #define USE_LOG_SCORE_EVALUATION */
-
 /* Use score ranges derived from hit-frequencies S/O ratio,
  * and numbers of mails hit.
  */
@@ -62,9 +58,11 @@ double evaluate_inner();
 
 double threshold = 5.0;
 double nybias = 10.0;
-/* const int exhaustive_eval = 1; */
-
+int save_every_n_generations = 50;
 int no_change_val = 300;
+int pop_size = 50;
+int replace_num = 33;
+int maxiter = 30000;
 
 #ifdef USE_VARIABLE_MUTATIONS
 double mutation_rate = 0.03;
@@ -96,11 +94,6 @@ const double crossover_rate = 0.5;
 const double crossover_rate = 0.65;
 #endif
 
-int pop_size = 50;
-int replace_num = 33;
-
-const int maxiter = 30000;
-
 int justCount = 0;
 
 void usage()
@@ -113,6 +106,7 @@ void usage()
   printf("usage: evolve [-s size] [args]\n"
      "\n"
      "  -s size = population size (50 recommended)\n"
+     "  -e num_epochs = number of epochs (generations) to run (30000 default)\n"
      "  -r replace = number of individuals to replace each generation (20 recommended)\n"
      "  -b nybias = bias towards false negatives (10.0 default)\n"
      "  -t threshold = threshold for spam/nonspam decision (5 default)\n"
@@ -184,7 +178,7 @@ int main(int argc, char **argv) {
     MPI_Init(&argc, &argv);
 #endif
 
-    while ((arg = getopt (argc, argv, "b:r:s:t:C")) != -1) {
+    while ((arg = getopt (argc, argv, "b:r:s:e:t:C")) != -1) {
       switch (arg) {
         case 'b':
           nybias = atof(optarg);
@@ -196,6 +190,10 @@ int main(int argc, char **argv) {
 
         case 's':
           pop_size = atoi(optarg);
+          break;
+
+        case 'e':
+          maxiter = atoi(optarg);
           break;
 
 	case 'r':
@@ -422,11 +420,6 @@ double evaluate(PGAContext *ctx, int p, int pop)
 
 double evaluate_inner() {
   double ynweight,nyweight;
-#if defined(USE_LOG_SCORE_EVALUATION) && defined(LAMARK)
-  double yn_balance, ny_balance;
-#endif
-
-#ifndef USE_LOG_SCORE_EVALUATION
 
   /* just count how far they were from the threshold, in each case */
   ynweight = (ga_yn * threshold) - ynscore;
@@ -443,33 +436,6 @@ double evaluate_inner() {
 
   return  ynweight +            /* all FNs' points from threshold */
 	  nyweight*nybias;      /* all FPs' points from threshold */
-
-#else
-  /* Craig's: use log(score).
-   *
-   * off for now, let's see how the more aggressive FP-reducing algo
-   * above works
-   */
-  if(nyscore>3) nyweight = log(nyscore); else nyweight = 0;
-  if(ynscore>3) ynweight = log(ynscore); else ynweight = 0;
-
-#ifdef LAMARK
-  yn_balance = (double)ga_yn + ynweight;
-  ny_balance = ((double)ga_ny + nyweight)*nybias;
-
-  if (yn_balance > ny_balance)
-    weight_balance = -1;
-  else if (yn_balance < ny_balance)
-    weight_balance = 1;
-  else
-    weight_balance = 0;
-#endif
-
-  return  /*min false-neg*/(double)ga_yn +
-	  /*weighted min false-pos*/((double)ga_ny)*nybias +
-	  /*min score(false-pos)*/nyweight*nybias +
-	  /*max score(false-neg)*/-ynweight;
-#endif
 }
 
 #ifdef LAMARK
@@ -923,23 +889,23 @@ void dump(FILE *fp)
 {
    fprintf (fp,"\n# SUMMARY for threshold %3.1f:\n", threshold);
   fprintf (fp,
-	   "# Correctly non-spam: %6d  %4.2f%%  (%4.2f%% of non-spam corpus)\n",
+	   "# Correctly non-spam: %6d  %4.3f%%  (%4.3f%% of non-spam corpus)\n",
 	   ga_nn,
        (ga_nn / (float) num_tests) * 100.0,
        (ga_nn / (float) num_ham) * 100.0);
   fprintf (fp,
-	   "# Correctly spam:     %6d  %4.2f%%  (%4.2f%% of spam corpus)\n",
+	   "# Correctly spam:     %6d  %4.3f%%  (%4.3f%% of spam corpus)\n",
 	   ga_yy,
        (ga_yy / (float) num_tests) * 100.0,
        (ga_yy / (float) num_spam) * 100.0);
   fprintf (fp,
-	   "# False positives:    %6d  %4.2f%%  (%4.2f%% of nonspam, %6.0f weighted)\n",
+	   "# False positives:    %6d  %4.3f%%  (%4.3f%% of nonspam, %6.0f weighted)\n",
 	   ga_ny,
        (ga_ny / (float) num_tests) * 100.0,
        (ga_ny / (float) num_ham) * 100.0,
        nyscore*nybias);
   fprintf (fp,
-	   "# False negatives:    %6d  %4.2f%%  (%4.2f%% of spam, %6.0f weighted)\n",
+	   "# False negatives:    %6d  %4.3f%%  (%4.3f%% of spam, %6.0f weighted)\n",
 	   ga_yn,
        (ga_yn / (float) num_tests) * 100.0,
        (ga_yn / (float) num_spam) * 100.0,
@@ -992,7 +958,7 @@ void showSummary(PGAContext *ctx)
   if(0 == rank)
   {
 #endif
-    if(0 == PGAGetGAIterValue(ctx) % 300)
+    if(0 == PGAGetGAIterValue(ctx) % save_every_n_generations)
     {
       int genome = PGAGetBestIndex(ctx,PGA_OLDPOP);
       FILE *scores_file = NULL;
@@ -1005,9 +971,11 @@ void showSummary(PGAContext *ctx)
       if (! justCount) {
 	printf("\nPop size, replacement: %d %d\n",
 	       pop_size, replace_num);
+        /*
 	printf("\nMutations (rate, good, bad, var, num): %3.7f %d %d %d %d\n",
 	       mutation_rate, num_better_same, num_worse, var_mutated,
 	       num_mutated);
+        */
 	var_mutated = 0;
 	num_mutated = 0;
 	if (! iters_same_passed) {
