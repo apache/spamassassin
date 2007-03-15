@@ -16,6 +16,8 @@ my $running_perl56 = ($] < 5.007);
 # but works fine if it is =0.  ho hum
 $ENV{'PERL_DL_NONLAZY'} = 0;
 
+close STDIN;    # inhibits noise from sa-compile
+
 BEGIN { 
   if (-e 't/test_dir') { chdir 't'; } 
   if (-e 'test_dir') { unshift(@INC, '../blib/lib'); }
