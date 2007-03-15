@@ -985,20 +985,17 @@ sub bayes_report_make_list {
 
   return "Tokens not available." unless defined $info;
 
-  my %formats =
-    ( short => '$t',
+  my %formats = (
+      short => '$t',
       Short => 'Token: \"$t\"',
       compact => '$p-$D--$t',
       Compact => 'Probability $p -declassification distance $D (\"+\" means > 9) --token: \"$t\"',
       medium => '$p-$D-$N--$t',
       long => '$p-$d--${h}h-${s}s--${a}d--$t',
       Long => 'Probability $p -declassification distance $D --in ${h} ham messages -and ${s} spam messages --$a} days old--token:\"$t\"'
-                );
+    );
 
-  my $allow_user_defined = 0;
-  my $raw_fmt =   !$fmt_arg ? '$p-$D--$t'
-                : $allow_user_defined && $fmt_arg =~ m/^\"([^"]+)\"/ ? $1
-                : $formats{$fmt_arg};
+  my $raw_fmt = (!$fmt_arg ? '$p-$D--$t' : $formats{$fmt_arg});
 
   return "Invalid format, must be one of: ".join(",",keys %formats)
     unless defined $raw_fmt;
