@@ -316,7 +316,7 @@ sub decode {
     if ( $encoding eq 'quoted-printable' ) {
       dbg("message: decoding quoted-printable");
       $self->{'decoded'} = Mail::SpamAssassin::Util::qp_decode($raw);
-      $self->{'decoded'} =~ s/\r\n/\n/g;
+      $self->{'decoded'} =~ s/\015\012/\012/gs;
     }
     elsif ( $encoding eq 'base64' ) {
       dbg("message: decoding base64");
@@ -333,7 +333,7 @@ sub decode {
 
       # If it's a type text or message, split it into an array of lines
       if ( $self->{'type'} =~ m@^(?:text|message)\b/@i ) {
-        $self->{'decoded'} =~ s/\r\n/\n/g;
+        $self->{'decoded'} =~ s/\015\012/\012/gs;
       }
     }
     else {
@@ -584,7 +584,7 @@ sub _decode_header {
 
   # deal with folding and cream the newlines and such
   $header =~ s/\n[ \t]+/\n /g;
-  $header =~ s/\r?\n//g;
+  $header =~ s/\015?\012//gs;
 
   # multiple encoded sections must ignore the interim whitespace.
   # to avoid possible FPs with (\s+(?==\?))?, look for the whole RE
@@ -628,7 +628,7 @@ sub get_header {
   my @hdrs;
   if ( $raw ) {
     if (@hdrs = $self->raw_header($hdr)) {
-      @hdrs = map { s/\r?\n\s+/ /g; $_; } @hdrs;
+      @hdrs = map { s/\015?\012\s+/ /gs; $_; } @hdrs;
     }
   }
   else {

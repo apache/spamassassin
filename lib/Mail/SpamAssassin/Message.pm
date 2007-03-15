@@ -182,8 +182,8 @@ sub new {
   # bug 4363
   # Check to see if we should do CRLF instead of just LF
   # For now, just check the first header and do whatever it does
-  if (@message && $message[0] =~ /\r\n/) {
-    $self->{line_ending} = "\r\n";
+  if (@message && $message[0] =~ /\015\012/) {
+    $self->{line_ending} = "\015\012";
     dbg("message: line ending changed to CRLF");
   }
 
@@ -265,7 +265,7 @@ sub new {
   my $start;
   # iterate over lines in reverse order
   for (my $cnt=$#message; $cnt>=0; $cnt--) {
-    $message[$cnt] =~ s/\r\n/\n/;
+    $message[$cnt] =~ s/\015\012/\012/;
 
     # line is blank
     if ($message[$cnt] !~ /\S/) {
