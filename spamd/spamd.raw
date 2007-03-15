@@ -1527,8 +1527,8 @@ sub check {
     my $msg_resp        = $status->rewrite_mail();
 
     if ($method eq 'HEADERS') {
-      # just the headers; delete everything after first \r\n\r\n
-      $msg_resp =~ s/(\r?\n\r?\n).*$/$1/gs;
+      # just the headers; delete everything after first \015\012\015\012
+      $msg_resp =~ s/(\015?\012\015?\012).*$/$1/gs;
     }
 
     my $msg_resp_length = length($msg_resp);

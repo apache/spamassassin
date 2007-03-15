@@ -333,7 +333,7 @@ sub _run_file {
   my $header;
   while (<INPUT>) {
     push(@msg, $_);
-    if (!defined $header && /^\s*$/) {
+    if (!defined $header && /^\015?$/) {
       $header = $#msg;
     }
   }
@@ -687,7 +687,7 @@ sub _scan_file {
         return;
       }
       while (<INPUT>) {
-        last if /^\s*$/;
+        last if /^\015?$/s;
         $header .= $_;
       }
       close(INPUT);
@@ -768,7 +768,7 @@ sub _scan_mailbox {
         my $header = $first;	# remember first line
         while (<INPUT>) {
 	  if ($in_header) {
-	    if (/^$/) {
+            if (/^\015?$/s) {
 	      $in_header = 0;
 	    }
 	    else {
@@ -883,7 +883,7 @@ sub _scan_mbx {
 	  # gather up the headers...
 	  my $header = '';
 	  while (<INPUT>) {
-	    last if (/^\s*$/);
+            last if (/^\015?$/s);
 	    $header .= $_;
 	  }
 
