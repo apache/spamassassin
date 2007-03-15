@@ -827,13 +827,19 @@ ENDOFVALIDATIONERR
         unless (opendir(DIR, $UPDDir)) {
           die "fatal: can't access $UPDDir: $!\n";
         }
+
+        my @files = ();
         while(my $file = readdir(DIR)) {
 	  local ($1);	# avoid random taint flagging of $1
           $file =~ /^(.+)$/;       # untaint
           $file = $1;
           my $path = File::Spec->catfile($UPDDir, $file);
           next unless (-f $path);   # shouldn't ever happen
+          push(@files, $file);
+        }
 
+        # bug 5371: ensure files are sorted
+        foreach my $file ( sort @files ) {
           if ($file =~ /\.cf$/) {
             push(@CF, "include $nicechannel/$file\n");
           }
