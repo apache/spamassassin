@@ -159,6 +159,10 @@ sub parsed_metadata {
   if (!$scanner->is_dns_available()) {
     $self->{dns_not_available} = 1;
     return;
+  } else {
+    # due to re-testing dns may become available after being unavailable
+    # DOS: I don't think dns_not_available is even used anymore
+    $self->{dns_not_available} = 0;
   }
 
   $scanner->{'uridnsbl_activerules'} = { };

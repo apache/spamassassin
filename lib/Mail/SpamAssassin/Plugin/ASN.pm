@@ -118,6 +118,9 @@ sub asn_lookup {
   if (!$scanner->is_dns_available()) {
     $self->{dns_not_available} = 1;
     return;
+  } else {
+    # due to re-testing dns may become available after being unavailable
+    $self->{dns_not_available} = 0;
   }
 
   # Default to empty strings; otherwise, the tags will be left as _ASN_
