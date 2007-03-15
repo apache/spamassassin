@@ -17,6 +17,7 @@ my $WHITELIST = qr/^
     |\S+_template
     |clear_trusted_networks
     |clear_internal_networks
+    |clear_msa_networks
     |clear_headers
     |descriptions
     |test
