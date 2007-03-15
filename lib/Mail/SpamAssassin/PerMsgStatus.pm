@@ -1022,7 +1022,7 @@ sub bayes_report_make_list {
     my $n = $s + $h;
     my ($c,$o) = $prob < 0.5 ? ($h,$s) : ($s,$h);
     my ($D,$S,$H,$C,$O,$N) = map &$digit($_), ($d,$s,$h,$c,$o,$n);
-    eval $fmt;
+    eval $fmt;  ## no critic
   } @{$info}[0..$amt-1];
 }
 
@@ -1294,7 +1294,7 @@ sub _get_tag {
   }
   # known valid tags that might not get defined in some circumstances
   elsif ($tag !~ /^(?:BAYESTC(?:|LEARNED|SPAMMY|HAMMY)|RBL)$/) {
-    return undef;
+    return;
   }
   $data = "" unless defined $data;
   return $data;
@@ -2088,7 +2088,7 @@ sub register_plugin_eval_glue {
 	1;
 }
 ENDOFEVAL
-  eval $evalstr;
+  eval $evalstr;    ## no critic
 
   if ($@) {
     warn "rules: failed to run header tests, skipping some: $@\n";
@@ -2311,7 +2311,7 @@ sub get_envelope_from {
       warn("message: envelope_sender_header '".$self->{conf}->{envelope_sender_header}."' not found in message");
     }
     # Couldn't get envelope-sender using the configured header.
-    return undef;
+    return;
   }
 
   # User hasn't given us a header to trust, so try to guess the sender.
@@ -2347,7 +2347,7 @@ sub get_envelope_from {
     my $rcvd = join (' ', $self->get ("Received"));
     if ($rcvd =~ /\(fetchmail/) {
       dbg("message: X-Sender and fetchmail signatures found, cannot trust envelope-from");
-      return undef;
+      return;
     }
   }
 
@@ -2358,7 +2358,7 @@ sub get_envelope_from {
     # a *new* Envelope-from.  check
     if ($self->get ("ALL") =~ /(?:^|\n)Received:\s.*\nX-Envelope-From:\s/s) {
       dbg("message: X-Envelope-From header found after 1 or more Received lines, cannot trust envelope-from");
-      return undef;
+      return;
     } else {
       goto ok;
     }
@@ -2387,7 +2387,7 @@ sub get_envelope_from {
   }
 
   # give up.
-  return undef;
+  return;
 
 ok:
   $envf =~ s/^<*//gs;                # remove <
@@ -2514,6 +2514,7 @@ sub all_from_addrs {
     # :addr code...
     # bug 3366: some addresses come in as 'foo@bar...', which is invalid.
     # so deal with the multiple periods.
+    ## no critic
     @addrs = grep { defined($_) && length($_) > 0 } map { tr/././s; $_; }
         ($self->get('From:addr'),		# std
          $self->get('Envelope-Sender:addr'),	# qmail: new-inject(1)
