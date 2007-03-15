@@ -455,7 +455,8 @@ while (1) {
   my $conf = "add_header all Untrusted _RELAYSUNTRUSTED_\n".
             "add_header all Trusted _RELAYSTRUSTED_\n".
             "clear_trusted_networks\n".
-            "clear_internal_networks\n";
+            "clear_internal_networks\n".
+            "clear_msa_networks\n";
 
   if ($hdrs =~ s/^\s*(trusted_networks\s+[^\n]*)//gs) {
     $conf .= $1."\n";
