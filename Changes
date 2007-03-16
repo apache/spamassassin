@@ -1,4 +1,357 @@
 ------------------------------------------------------------------------
+r518982 | jm | 2007-03-16 14:09:14 +0000 (Fri, 16 Mar 2007) | 1 line
+
+bug 5338: check Config{installsiteman1dir} and Config{installvendorman1dir} as well as Config{installman1dir}, otherwise we can wind up not installing many of the important man pages when we should do so
+------------------------------------------------------------------------
+r518980 | jm | 2007-03-16 14:08:24 +0000 (Fri, 16 Mar 2007) | 1 line
+
+fix indent in INSTALL docs
+------------------------------------------------------------------------
+r518890 | jm | 2007-03-16 08:50:02 +0000 (Fri, 16 Mar 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r518740 | jm | 2007-03-15 19:46:38 +0000 (Thu, 15 Mar 2007) | 1 line
+
+inhibit noise from sa-compile
+------------------------------------------------------------------------
+r518736 | jm | 2007-03-15 19:32:15 +0000 (Thu, 15 Mar 2007) | 1 line
+
+remove some vestigial code for user-defined HAMMYTOKENS/SPAMMYTOKENS formats, which was (a) a disabled code path and (b) would have been a security hole if it was enabled
+------------------------------------------------------------------------
+r518664 | dos | 2007-03-15 15:34:08 +0000 (Thu, 15 Mar 2007) | 1 line
+
+prevent plugins from permanently disabling their dns tests, dns may become available again with re-testing of dns availability
+------------------------------------------------------------------------
+r518631 | jm | 2007-03-15 14:05:34 +0000 (Thu, 15 Mar 2007) | 1 line
+
+bug 5344: binmode() causes 'CR NL' ('\r\n') to be read as 'NL' ('\n').  fix this by using the octal escape sequences: \015\012, instead, in the core spots where we access user-submitted mail data through a filehandle that may be affected by binmode.
+------------------------------------------------------------------------
+r518626 | jm | 2007-03-15 13:37:37 +0000 (Thu, 15 Mar 2007) | 1 line
+
+bug 5371: sa-update could produce updates that load files in the wrong order; sort alphanumerically to avoid this
+------------------------------------------------------------------------
+r518615 | jm | 2007-03-15 13:01:09 +0000 (Thu, 15 Mar 2007) | 1 line
+
+follow some good advice from Perl::Critic; "return undef" should be just "return" due to odd behaviour in wantarray mode
+------------------------------------------------------------------------
+r518521 | jm | 2007-03-15 08:50:02 +0000 (Thu, 15 Mar 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r518443 | dos | 2007-03-15 02:21:34 +0000 (Thu, 15 Mar 2007) | 1 line
+
+add clear_msa_networks to tests where needed
+------------------------------------------------------------------------
+r518194 | jm | 2007-03-14 15:49:45 +0000 (Wed, 14 Mar 2007) | 1 line
+
+oops, redefining an argument
+------------------------------------------------------------------------
+r518187 | jm | 2007-03-14 15:38:32 +0000 (Wed, 14 Mar 2007) | 1 line
+
+refactor some shared code from spamd_hup.t, spamd_kill_restart.t and spamd_kill_restart_rr.t into SATest.pm; add new more-raceproof spamd_hup logic to other two tests, too
+------------------------------------------------------------------------
+r518167 | jm | 2007-03-14 15:00:34 +0000 (Wed, 14 Mar 2007) | 1 line
+
+add some more sanity checks on pid file size
+------------------------------------------------------------------------
+r518147 | jm | 2007-03-14 14:00:03 +0000 (Wed, 14 Mar 2007) | 1 line
+
+another attempt at a race-resistant spamd SIGHUP test case
+------------------------------------------------------------------------
+r518146 | jm | 2007-03-14 13:59:37 +0000 (Wed, 14 Mar 2007) | 1 line
+
+add timestamped logs to the spamd test suite
+------------------------------------------------------------------------
+r518117 | jm | 2007-03-14 12:40:07 +0000 (Wed, 14 Mar 2007) | 1 line
+
+add alternative fitness function: distance from a target false-positive rate.  This is easier to predict, and produces better GA results in fewer generations in 10-pass cross-validation tests.  However, it's not actually active yet in runGA; next time the GA is run, it will be worthwhile switching to this
+------------------------------------------------------------------------
+r518111 | jm | 2007-03-14 12:31:49 +0000 (Wed, 14 Mar 2007) | 1 line
+
+GA improvements.  remove long-vestigial USE_LOG_SCORE_EVALUATION and exhaustive_eval code; make maxiter a command-line parameter; add a digit to the percentage counters in the output; silence some inscrutable noise in the output; and make the checkpoints output more frequently
+------------------------------------------------------------------------
+r518108 | jm | 2007-03-14 12:21:28 +0000 (Wed, 14 Mar 2007) | 1 line
+
+bring 10-pass cross-validation driver script up to date with current runGA practices
+------------------------------------------------------------------------
+r518071 | jm | 2007-03-14 08:50:01 +0000 (Wed, 14 Mar 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r517847 | jm | 2007-03-13 20:12:46 +0000 (Tue, 13 Mar 2007) | 1 line
+
+work around noisy and spurious test failures on solaris with perl 5.6.1
+------------------------------------------------------------------------
+r517835 | jm | 2007-03-13 20:00:42 +0000 (Tue, 13 Mar 2007) | 1 line
+
+use STDIN instead of STDERR to determine if progress bars are appropriate; this is more std UNIXy, and also avoids 'stty: : No such device or address' errors on Solaris if a command is run < /dev/null
+------------------------------------------------------------------------
+r517750 | jm | 2007-03-13 16:09:42 +0000 (Tue, 13 Mar 2007) | 1 line
+
+this should be an info, so people can know the compiled rules are in use
+------------------------------------------------------------------------
+r517684 | jm | 2007-03-13 13:23:14 +0000 (Tue, 13 Mar 2007) | 1 line
+
+fix re2c code to support partially-overlapping patterns; e.g. 'abc' and 'bcd' in the string 'abcd'. do this by backtracking after each match to one char after the start of the match
+------------------------------------------------------------------------
+r517592 | jm | 2007-03-13 08:50:05 +0000 (Tue, 13 Mar 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r517533 | duncf | 2007-03-13 05:15:22 +0000 (Tue, 13 Mar 2007) | 2 lines
+
+Fix logic error in score-ranges-from-freqs
+
+------------------------------------------------------------------------
+r517315 | duncf | 2007-03-12 18:14:28 +0000 (Mon, 12 Mar 2007) | 3 lines
+
+Looks like "learn" is the proper tflag for BAYES rules (i.e. rules
+ignored in sets 2 and 3)
+
+------------------------------------------------------------------------
+r517311 | duncf | 2007-03-12 17:59:30 +0000 (Mon, 12 Mar 2007) | 1 line
+
+Fix logic error in parse-rules-for-masses, add bayes tflags to BAYES rules
+------------------------------------------------------------------------
+r517209 | jm | 2007-03-12 13:26:02 +0000 (Mon, 12 Mar 2007) | 1 line
+
+fix t/rule_multiple.t failures; tflags multiple support had been broken by the code which merged dup rules together, and also by another bug in got_hit()
+------------------------------------------------------------------------
+r517190 | jm | 2007-03-12 12:24:04 +0000 (Mon, 12 Mar 2007) | 1 line
+
+add to sa-compile doco
+------------------------------------------------------------------------
+r517133 | jm | 2007-03-12 08:50:01 +0000 (Mon, 12 Mar 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r517051 | jm | 2007-03-11 23:46:52 +0000 (Sun, 11 Mar 2007) | 1 line
+
+aha. rules that are not 'tflags multiple' should be able to get a 'value' of 2 when in use as meta subrules
+------------------------------------------------------------------------
+r516901 | jm | 2007-03-11 13:41:15 +0000 (Sun, 11 Mar 2007) | 1 line
+
+support another way perl 5.8.x outputs escape sequences from BodyRuleBaseExtractor
+------------------------------------------------------------------------
+r516873 | jm | 2007-03-11 08:50:01 +0000 (Sun, 11 Mar 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r516709 | jm | 2007-03-10 14:02:07 +0000 (Sat, 10 Mar 2007) | 1 line
+
+store a perl copy of the bases from the compilation step in the 'compiled' area, too; improve sa-compile documentation
+------------------------------------------------------------------------
+r516707 | jm | 2007-03-10 13:33:58 +0000 (Sat, 10 Mar 2007) | 1 line
+
+better UI for the time-consuming part of sa-compile; use progress bars, issue info() lines
+------------------------------------------------------------------------
+r516666 | jm | 2007-03-10 08:50:01 +0000 (Sat, 10 Mar 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r516606 | jm | 2007-03-09 23:47:54 +0000 (Fri, 09 Mar 2007) | 1 line
+
+sa-compile now outputs a status line after extracting base strings
+------------------------------------------------------------------------
+r516581 | jm | 2007-03-09 22:20:08 +0000 (Fri, 09 Mar 2007) | 1 line
+
+support \033 escapes in sa-compile for __ISO_JP_2022_DELIM
+------------------------------------------------------------------------
+r516532 | jm | 2007-03-09 20:07:17 +0000 (Fri, 09 Mar 2007) | 1 line
+
+fix quite a few bugs in the body-rule base string extraction plugin, and add test cases for the bugs fixed
+------------------------------------------------------------------------
+r516332 | jm | 2007-03-09 08:50:02 +0000 (Fri, 09 Mar 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r516156 | jm | 2007-03-08 19:28:37 +0000 (Thu, 08 Mar 2007) | 1 line
+
+oops, stray /
+------------------------------------------------------------------------
+r516154 | jm | 2007-03-08 19:19:31 +0000 (Thu, 08 Mar 2007) | 1 line
+
+bug 5352: use zero-space lookbehind assertion to avoid ACM hosts
+------------------------------------------------------------------------
+r516072 | jm | 2007-03-08 15:28:26 +0000 (Thu, 08 Mar 2007) | 1 line
+
+remove obsolete and unused dot_star and dot_plus code; write bases to a file named by the ruleset and priority, instead of overwriting one file, much more useful for the --keep-tmps case; and cd to / before running the rm -rf command in the non-keep-tmps case, to hopefully fix Sidney's bug
+------------------------------------------------------------------------
+r516070 | jm | 2007-03-08 15:27:10 +0000 (Thu, 08 Mar 2007) | 1 line
+
+BodyRuleBaseExtractor issue: two rules with the same word as longest base string would sometimes overlap, resulting in one rule being discarded from the base string; fix
+------------------------------------------------------------------------
+r515972 | jm | 2007-03-08 08:50:01 +0000 (Thu, 08 Mar 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r515732 | dos | 2007-03-07 20:07:32 +0000 (Wed, 07 Mar 2007) | 1 line
+
+change all tab indentations to a pair of spaces
+------------------------------------------------------------------------
+r515725 | dos | 2007-03-07 20:00:43 +0000 (Wed, 07 Mar 2007) | 1 line
+
+bug 5348: add 25_asn.cf for ASN plugin and cleanup/clairify plugin POD
+------------------------------------------------------------------------
+r515643 | jm | 2007-03-07 16:57:02 +0000 (Wed, 07 Mar 2007) | 1 line
+
+oops, typo
+------------------------------------------------------------------------
+r515640 | jm | 2007-03-07 16:53:53 +0000 (Wed, 07 Mar 2007) | 1 line
+
+absorb meaningless warnings
+------------------------------------------------------------------------
+r515632 | jm | 2007-03-07 16:15:50 +0000 (Wed, 07 Mar 2007) | 1 line
+
+Change BodyRuleBaseExtractor plugin to use perl's built-in regexp parser, 'perl -Mre=debug'.  This renders the code a lot more reliable, and it can now parse a wider range of regexps than before.   Improve Rule2XSBody diagnostics, in particular around which compiled regexp DFA is being loaded, and reasons why it discards some compiled rules; Remove some superfluous escaping from sa-compile.raw; and add several new test cases for BodyRuleBaseExtractor
+------------------------------------------------------------------------
+r515626 | jm | 2007-03-07 16:12:28 +0000 (Wed, 07 Mar 2007) | 1 line
+
+mass-check should use blib before lib, so that @@LOCAL_STATE_DIR@@ and so on are correctly interpolated
+------------------------------------------------------------------------
+r515540 | jm | 2007-03-07 11:42:03 +0000 (Wed, 07 Mar 2007) | 1 line
+
+add an UPGRADE section for 3.2.0, listing the 127/8-trusted issue and the new msa_networks setting; more to follow, no doubt
+------------------------------------------------------------------------
+r515496 | jm | 2007-03-07 08:50:01 +0000 (Wed, 07 Mar 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r515298 | jm | 2007-03-06 21:00:54 +0000 (Tue, 06 Mar 2007) | 43 lines
+
+A couple of enhancements to Plugin::DKIM from Mark Martinec:
+
+'prompted by recent enhancements to the underlying module Mail::DKIM, which now
+also supports DomainKeys signatures in addition to DKIM signatures, and is
+being actively maintained, unlike Mail::DomainKeys.
+
+- separate a signature verification from fetching a policy, which makes it
+  possible to avoid one DNS lookups (by not fetching a policy) for each
+  unverified message by setting score to 0 for all policy-related rules
+  (DKIM_POLICY_SIGNALL, DKIM_POLICY_SIGNSOME, and DKIM_POLICY_TESTING).
+
+
+- let the check_dkim_testing() also take into account a testing flag
+  in a public key, not just the one in a policy record (still lacks
+  the final support in Mail::DKIM (missing a documented method),
+  but the plugin is now ready). This is an equivalent change that
+  was already made to Plugin::DomainKeys.
+
+
+- skip fetching a policy (SSP) if a signature does verify, according
+  to draft-allman-dkim-ssp-02: If the message contains a valid Originator
+  Signature, no Sender Signing Practices check need be performed:
+  the Verifier SHOULD NOT look up the Sender Signing Practices
+  and the message SHOULD be considered non-Suspicious.
+  This is an equivalent change that was already made
+  to Plugin::DomainKeys.
+
+- make some debugging messages more informative or concise;
+
+- bug fix: protect fetching/parsing a policy record by eval { }
+  to prevent a syntax error in a policy record from invalidating
+  an already verified good signature;
+
+- bug fix: if an identity tag (i=) is missing (this tag is optional),
+  it should default to an '@' prepended to a domain (d=),
+  according to draft-ietf-dkim-base-09; previously dkim whitelisting
+  check was skipped when identity was not explicit ('i' tag missing);
+
+- squash code in _check_dkim_whitelist() in half by factoring out
+  duplicate code sections
+
+
+
+------------------------------------------------------------------------
+r515260 | jm | 2007-03-06 19:19:29 +0000 (Tue, 06 Mar 2007) | 1 line
+
+try out the Cool Tools perl on the zone
+------------------------------------------------------------------------
+r515222 | jm | 2007-03-06 17:36:12 +0000 (Tue, 06 Mar 2007) | 1 line
+
+make it clear that Mail::DKIM is better than Mail::DomainKeys
+------------------------------------------------------------------------
+r515103 | jm | 2007-03-06 12:34:50 +0000 (Tue, 06 Mar 2007) | 1 line
+
+bug 5352: trivial rule fix to avoid HELO_DYNAMIC_DHCP hits on all mail via the ACM mail server
+------------------------------------------------------------------------
+r515028 | jm | 2007-03-06 08:50:02 +0000 (Tue, 06 Mar 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r514669 | jm | 2007-03-05 13:56:59 +0000 (Mon, 05 Mar 2007) | 1 line
+
+fix more SVN breakage with home dirs on the zone
+------------------------------------------------------------------------
+r514663 | jm | 2007-03-05 13:09:48 +0000 (Mon, 05 Mar 2007) | 1 line
+
+optimisations; no need to do a lot of the work performed for the ham case
+------------------------------------------------------------------------
+r514605 | jm | 2007-03-05 08:50:01 +0000 (Mon, 05 Mar 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r514401 | jm | 2007-03-04 13:44:08 +0000 (Sun, 04 Mar 2007) | 1 line
+
+escape more bits from the output code file; uncomment some testing code lines; and fix '--sudo' mode to run more of the build process as non-root
+------------------------------------------------------------------------
+r514400 | jm | 2007-03-04 13:42:46 +0000 (Sun, 04 Mar 2007) | 1 line
+
+oops. Rule2XSBody was looking at the wrong rendering of the body string; 'rawbody' instead of 'body'. fix
+------------------------------------------------------------------------
+r514375 | jm | 2007-03-04 08:50:01 +0000 (Sun, 04 Mar 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r514103 | jm | 2007-03-03 08:50:02 +0000 (Sat, 03 Mar 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r513827 | jm | 2007-03-02 16:23:14 +0000 (Fri, 02 Mar 2007) | 1 line
+
+free up some more RAM
+------------------------------------------------------------------------
+r513818 | jm | 2007-03-02 15:53:02 +0000 (Fri, 02 Mar 2007) | 1 line
+
+add recent additions to list of 3LDs via URIBL, thanks Dallas
+------------------------------------------------------------------------
+r513816 | jm | 2007-03-02 15:51:52 +0000 (Fri, 02 Mar 2007) | 1 line
+
+avoid file descriptor leak if 'mass_check_skip_message' hook is used
+------------------------------------------------------------------------
+r513691 | jm | 2007-03-02 10:21:49 +0000 (Fri, 02 Mar 2007) | 1 line
+
+bug 5362: add Mail::SPF as an optional module, and document its relationship to Mail::SPF::Query
+------------------------------------------------------------------------
+r513418 | jm | 2007-03-01 17:45:29 +0000 (Thu, 01 Mar 2007) | 1 line
+
+bug 5360: spamd --daemonize fails to start if the MySQL or SQL BayesStore backends are in use, due to SIGPIPE delivered before signal handlers are set up.  fix
+------------------------------------------------------------------------
+r513348 | jm | 2007-03-01 14:29:40 +0000 (Thu, 01 Mar 2007) | 1 line
+
+fix SVN failures on zone apps; explicitly set HOME env var for all daemons, since otherwise they will attempt to read the wrong SVN authorization files and fail all operations that involve the 'rulesrc' external
+------------------------------------------------------------------------
+r513343 | jm | 2007-03-01 14:21:21 +0000 (Thu, 01 Mar 2007) | 1 line
+
+svnpath is a Debianism, not available on the zones
+------------------------------------------------------------------------
+r513309 | jm | 2007-03-01 13:23:27 +0000 (Thu, 01 Mar 2007) | 1 line
+
+fix to use current SVN, not locked to version 1.1.4, for nightly mass-check tagging
+------------------------------------------------------------------------
+r512851 | jm | 2007-02-28 17:16:53 +0000 (Wed, 28 Feb 2007) | 1 line
+
+preparing to build 3.2.0pre2 PRERELEASE
+------------------------------------------------------------------------
+r512747 | jm | 2007-02-28 13:13:31 +0000 (Wed, 28 Feb 2007) | 1 line
+
+update STATISTICS files to list freqs against entire mass-check set, not the 1/10th test set
+------------------------------------------------------------------------
+r512746 | jm | 2007-02-28 13:12:48 +0000 (Wed, 28 Feb 2007) | 1 line
+
+update Changes file
+------------------------------------------------------------------------
 r512705 | jm | 2007-02-28 11:18:29 +0000 (Wed, 28 Feb 2007) | 1 line
 
 STATISTICS files should include the full freqs report, on the entire training log set, not the 1/10th test set
