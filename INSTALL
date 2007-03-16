@@ -93,9 +93,9 @@ http://wiki.apache.org/spamassassin/SingleUserUnixInstall
 	make
 	make install
 
-Please see the file PACKAGING, sections "Changing paths in the Makefile"
-and "Setting further options on the command line" for more informations
-on available command line variables.
+   Please see the file PACKAGING, sections "Changing paths in the Makefile"
+   and "Setting further options on the command line" for more informations
+   on available command line variables.
 
 4. If you already use procmail, skip to step 6.  If not, ensure procmail
    is installed using "which procmail" or install it from www.procmail.org.
@@ -112,11 +112,11 @@ on available command line variables.
 :0fw: spamassassin.lock
 | /home/user/bin/spamassassin
 
-The above line filters all incoming mail through SpamAssassin and tags
-probable spam with a unique header.  If you would prefer to have spam
-blocked and saved to a file called "caughtspam" in your home directory,
-instead of passed through and tagged, append this directly below the above
-lines:
+   The above line filters all incoming mail through SpamAssassin and tags
+   probable spam with a unique header.  If you would prefer to have spam
+   blocked and saved to a file called "caughtspam" in your home directory,
+   instead of passed through and tagged, append this directly below the above
+   lines:
 
 :0:
 * ^X-Spam-Status: Yes
