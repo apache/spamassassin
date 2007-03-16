@@ -44,8 +44,14 @@ SPAMASSASSIN RELEASE PROCEDURE
 
     svn status
 
-  (It should return no text; any files marked "M" have been locally
-  modified, and should be "svn revert"ed before you continue.)
+  The output should look like this:
+
+  X      rulesrc
+
+  Performing status on external item at 'rulesrc'
+
+  (no "M" or "C" files; any files marked "M" have been locally modified,
+  and should be "svn revert"ed before you continue.)
 
 - edit lib/Mail/SpamAssassin.pm and comment the $IS_DEVEL_BUILD
   line.   Ensure the correct version number is present in $VERSION
