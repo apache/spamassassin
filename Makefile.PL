@@ -331,8 +331,13 @@ DESTDIR_BUG
 }
 
 
-# All the $(*MAN1*) stuff is empty/zero if Perl was Configured with -Dman1dir=none
-unless($Config{installman1dir}) {
+# All the $(*MAN1*) stuff is empty/zero if Perl was Configured with -Dman1dir=none;
+# however, support site/vendor man1 dirs (bug 5338)
+unless($Config{installman1dir}
+    || $Config{installsiteman1dir}
+    || $Config{installvendorman1dir})
+{
+  warn "not installing man pages in man1; no man1 dir found";
   delete $makefile{MAN1PODS};
 }
 
