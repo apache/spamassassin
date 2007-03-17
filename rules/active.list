@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-fredt bb-jm bb-zmi cthielen daf dos jm theo wtogami zmi
+# with results from: bb-doc bb-fredt bb-jm bb-zmi cthielen daf dos jm theo wtogami
 
 # tflags userconf
 ALL_TRUSTED
@@ -143,9 +143,6 @@ FB_ADD_INCHES
 FB_ANA_TRIM
 
 # good enough
-FB_C0MPANY
-
-# good enough
 FB_CASINO
 
 # good enough
@@ -192,6 +189,9 @@ FB_NO_SCRIP_NEEDED
 
 # good enough
 FB_ODD_SPACED_MONEY
+
+# good enough
+FB_P1LL
 
 # good enough
 FB_PIPEDOLLAR
@@ -503,9 +503,6 @@ FU_MIDER
 FU_UKGEOCITIES
 
 # good enough
-FU_URI_TRACKER_T
-
-# good enough
 GEO_QUERY_STRING
 
 # tflags userconf
@@ -573,6 +570,9 @@ HELO_OEM
 
 # tflags userconf
 HIGH_CODEPAGE_URI
+
+# good enough
+HS_DRUG_DOLLAR_1
 
 # good enough
 HS_FORGED_OE_FW
@@ -877,6 +877,9 @@ STOCK_PRICES
 # good enough
 STOX_AND_PRICE
 
+# good enough
+STOX_REPLY_TYPE
+
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
@@ -964,6 +967,12 @@ TVD_VISIT_PHARMA
 # good enough
 TVD_VIS_HIDDEN
 
+# good enough
+AXB_MIME_IMG830
+
+# good enough
+CTYPE_1SPACE_GIF
+
 # tflags net
 RCVD_IN_DNSWL_HI
 
@@ -990,6 +999,18 @@ RCVD_IN_WHOIS_INVALID
 
 # tflags net
 RCVD_IN_XBL
+
+# good enough
+TVD_FW_GRAPHIC_ID1
+
+# good enough
+TVD_FW_GRAPHIC_ID2
+
+# good enough
+TVD_PH_7
+
+# good enough
+TVD_SINGLE_SPAN_DIV
 
 # tflags userconf
 UNPARSEABLE_RELAY
