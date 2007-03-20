@@ -272,6 +272,7 @@ EOT
     $pms->{rule_errors}++;
   }
   else {
+    dbg("rules: compiled ".$ruletype." tests");
     goto run_compiled_method;
   }
 }
