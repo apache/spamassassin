@@ -230,6 +230,12 @@ sub hit_rule {
   my $scan = $params->{permsgstatus};
   my $rule = $params->{rulename};
 
+  # don't s/c if we're linting
+  return if ($scan->{lint_rules});
+
+  # don't s/c if we're in compile_now()
+  return if ($self->{am_compiling});
+
   my $sctype = $scan->{conf}->{shortcircuit}->{$rule};
   return unless $sctype;
 
@@ -290,6 +296,16 @@ sub parsed_metadata {
 sub have_shortcircuited {
   my ($self, $params) = @_;
   return (exists $params->{permsgstatus}->{shortcircuit_type}) ? 1 : 0;
+}
+
+sub compile_now_start {
+  my ($self, $params) = @_;
+  $self->{am_compiling} = 1;
+}
+
+sub compile_now_finish {
+  my ($self, $params) = @_;
+  delete $self->{am_compiling};
 }
 
 1;
