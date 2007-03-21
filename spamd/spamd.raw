@@ -1321,13 +1321,22 @@ sub handle_setuid_to_user {
   }
   warn("spamd: still running as root: user not specified with -u, "
        . "not found, or set to root, falling back to nobody" );
-  my ($uid, $gid) = (getpwnam('nobody'))[2,3];
+
+  my ($name, $pwd, $uid, $gid, $quota, $comment, $gcos, $dir, $etc) =
+      getpwnam('nobody');
   
   $) = "$gid $gid";                   # eGID
   $> = $uid;                          # eUID
   if (!defined($uid) || ($> != $uid and $> != ($uid - 2**32))) {
     die("spamd: setuid to nobody failed");
   }
+
+  $spamtest->signal_user_changed(
+    {
+      username => $name,
+      user_dir => $dir
+    }
+  );
 }
 
 sub parse_body {
