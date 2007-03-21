@@ -1320,7 +1320,7 @@ sub handle_setuid_to_user {
     die("spamd: in paranoid mode, still running as root: closing connection");
   }
   warn("spamd: still running as root: user not specified with -u, "
-       . "not found, or set to root, falling back to nobody" );
+       . "not found, or set to root, falling back to nobody\n");
 
   my ($name, $pwd, $uid, $gid, $quota, $comment, $gcos, $dir, $etc) =
       getpwnam('nobody');
