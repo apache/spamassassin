@@ -1306,9 +1306,6 @@ B<sa-update> [options]
 
 Options:
 
-  --updatedir path        Directory to place updates, defaults to the
-                          SpamAssassin site rules directory
-                          (default: /var/lib/spamassassin/<version>)
   --channel channel       Retrieve updates from this channel
                           Use multiple times for multiple channels
   --channelfile file      Retrieve updates from the channels in the file
@@ -1323,6 +1320,9 @@ Options:
                           --gpgkey and --gpgkeyfile options)
   --import file           Import GPG key(s) from file into sa-update's
                           keyring. Use multiple times for multiple files
+  --updatedir path        Directory to place updates, defaults to the
+                          SpamAssassin site rules directory
+                          (default: /var/lib/spamassassin/<version>)
   -D, --debug [area=n,...]  Print debugging messages
   -V, --version           Print version
   -h, --help              Print usage message
@@ -1339,14 +1339,6 @@ Update archives are verified by default using SHA1 hashes and GPG signatures.
 =head1 OPTIONS
 
 =over 4
-
-=item B<--updatedir>
-
-By default, C<sa-update> will use the system-wide rules update directory:
-
-  @@LOCAL_STATE_DIR@@/spamassassin/@@VERSION@@
-
-If the updates should be stored in another location, specify it here.
 
 =item B<--channel>
 
@@ -1435,6 +1427,19 @@ To import multiple keys, use the option multiple times.  i.e.:
 	sa-update --import channel1-GPG.KEY --import channel2-GPG.KEY
 
 Note: use of this option automatically enables GPG verification.
+
+=item B<--updatedir>
+
+By default, C<sa-update> will use the system-wide rules update directory:
+
+  @@LOCAL_STATE_DIR@@/spamassassin/@@VERSION@@
+
+If the updates should be stored in another location, specify it here.
+
+Note that use of this option is not recommended; if you're just using sa-update
+to download updated rulesets for a scanner, and sa-update is placing updates in
+the wrong directory, you probably need to rebuild SpamAssassin with different
+C<Makefile.PL> arguments, instead of overriding sa-update's runtime behaviour.
 
 =item B<-D> [I<area,...>], B<--debug> [I<area,...>]
 
