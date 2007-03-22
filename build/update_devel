@@ -54,8 +54,8 @@ zip   -rv - $DISTDNAME     > $DISTVNAME.zip     || exit $?
 for ext in tar.bz2 tar.gz zip ; do
   cp $DISTVNAME.$ext $DEVDIR
 
-  build/md5sum.pl $DISTVNAME.$ext > $DEVDIR/$DISTVNAME.$ext.md5  || exit $?
-  build/sha1sum.pl $DISTVNAME.$ext > $DEVDIR/$DISTVNAME.$ext.sha1 || exit $?
+  perl build/md5sum.pl $DISTVNAME.$ext > $DEVDIR/$DISTVNAME.$ext.md5  || exit $?
+  perl build/sha1sum.pl $DISTVNAME.$ext > $DEVDIR/$DISTVNAME.$ext.sha1 || exit $?
 
   rm -f $DISTVNAME.$ext.asc*
   if [ -d $HOME/sabuildtools/sasigningkey ]; then
