@@ -4,14 +4,15 @@ SPAMASSASSIN DEVELOPMENT SNAPSHOT PROCEDURE
 - cd to the directory for the codebase you want the devel tree to
   come from
 
-    ssh minotaur.apache.org
+    ssh people.apache.org
     cd [checkedoutdir]
 
 - ensure the required code and data is available for the build scripts:
 
     $HOME/sabuildtools
 
-  All can be copied (or symlinked) from ~jm on minotaur if required.
+  All can be copied (or symlinked) from ~jm on people.apache.org if
+  required.
 
 - ensure your PATH is correct, with the right perl FIRST in the path:
 
@@ -26,11 +27,10 @@ SPAMASSASSIN DEVELOPMENT SNAPSHOT PROCEDURE
 SPAMASSASSIN RELEASE PROCEDURE
 ==============================
 
-- cd to the directory for the codebase you want the release to
-  come from
+- First off, log in to people.apache.org for some preliminary tool
+  checks.
 
-    ssh minotaur.apache.org
-    cd [checkedoutdir]
+    ssh people.apache.org
 
 - ensure the required code and data is available for the build scripts:
   see above.
@@ -39,9 +39,15 @@ SPAMASSASSIN RELEASE PROCEDURE
 
     PATH=$HOME/sabuildtools/perl584/bin:$HOME/sabuildtools/bin:$PATH
 
-- Run "svn status" to ensure you're building/releasing from a pristine
+
+
+- In your own, writable, checkout (this may be on another host instead
+  of people.apache.org, such as your home machine):
+
+  Run "svn status" to ensure you're building/releasing from a pristine
   checkout:
 
+    cd [checkedoutdir]
     svn status
 
   The output should look like this:
@@ -98,7 +104,18 @@ SPAMASSASSIN RELEASE PROCEDURE
     replace with the correct rev number for the point you want to start at
     if different.
 
-- Check in the updated Changes file.
+- run "make distcheck" to ensure all files are included in the
+  distribution that should be, and to ensure all files that are listed
+  in the MANIFEST also exist in SVN.
+
+    make distcheck
+
+- run "make disttest" to ensure all tests pass once the distribution
+  is fully packaged.  (this'll take a minute or two.)
+
+    make disttest < /dev/null
+
+- Check in the updated Changes file, and SpamAssassin.pm.
 
     svn commit -m "preparing to release X.Y.Z"
 
@@ -132,16 +149,19 @@ SPAMASSASSIN RELEASE PROCEDURE
   release in progress, you need to "svn delete" the previous copy of the
   tag, otherwise it'll create a subdirectory instead of overwriting.
 
-- run "make distcheck" to ensure all files are included in the
-  distribution that should be, and to ensure all files that are listed
-  in the MANIFEST also exist in SVN.
 
-    make distcheck
 
-- run "make disttest" to ensure all tests pass once the distribution
-  is fully packaged.  (this'll take a minute or two.)
+- In your checkout on people.apache.org (may be read-only):
 
-    make disttest < /dev/null
+  Check out the code from the tag you just made:
+
+    repo=https://svn.apache.org/repos/asf/spamassassin
+    rm -rf ~/relbuild
+    svn co $repo/tags/spamassassin_release_3_2_0_pre_2 ~/relbuild
+    cd ~/relbuild
+
+  Run "svn status" to ensure you're building/releasing from a pristine
+  checkout, as before.
 
 - run "./build/update_stable" to build the tar.gz files.
 

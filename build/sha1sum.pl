@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 use Digest::SHA1 qw/sha1_hex/;
 
 $/=undef;
