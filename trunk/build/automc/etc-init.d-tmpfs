@@ -1,0 +1,42 @@
+#!/bin/sh
+
+. /etc/profile
+
+start() {
+    echo "Mounting tmpfs: "
+    [ -d /export/home/bbmass/tmpfs ] || mkdir -p /export/home/bbmass/tmpfs
+    mount -F tmpfs swap /export/home/bbmass/tmpfs
+    rm -f /tmpfs
+    ln -s /export/home/bbmass/tmpfs /tmpfs
+
+    chmod 1777 /export/home/bbmass/tmpfs
+    mkdir /tmpfs/aicache
+    chmod 1777 /tmpfs/aicache
+    echo "Done."
+}
+
+stop() {
+    umount /export/home/bbmass/tmpfs
+    chmod 0700 /export/home/bbmass/tmpfs
+}
+
+case "$1" in
+	start)
+	    start
+	    ;;
+	
+	stop)
+	    stop
+	    ;;
+	
+	restart)
+	    stop; sleep 2; start
+	    ;;
+	
+	*)
+	    echo $"Usage: $0 {start|stop|restart|condrestart}"
+	    exit 1
+
+esac
+
+exit 0

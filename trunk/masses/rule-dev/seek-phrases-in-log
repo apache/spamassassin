@@ -1,0 +1,318 @@
+#!/usr/bin/perl
+
+=head1 NAME
+
+seek-phrases-in-log - extract good-looking rules from a text-dump mc log
+
+=cut
+
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+
+# ---------------------------------------------------------------------------
+
+my $MAX_TEXT_IN_MESSAGE = 32678;        # bytes of message text examined
+
+my $REQUIRE_PERCENT_SPAM_HITS = 0.5;    # % hitrate reqd to list
+
+# ---------------------------------------------------------------------------
+
+use warnings;
+use strict;
+
+my $fh = shift @ARGV;
+my $fs = shift @ARGV;
+die "usage: phrase-extract-in-log hamlog spamlog" unless ($fs && $fh);
+
+my %word2sym = ('' => '');
+my %sym2word = ('' => '');
+my $sym_acc = 'a';      # symbols are represented using IDs from this counter
+my $msgcount = 0;
+
+my @text_string = ();
+my %ngram_count = ();
+my %msg_subset_hit = ();
+
+warn "reading $fs...\n";
+open IN, "<$fs" or die "cannot open spam log $fs";
+while (<IN>) {
+  /^text: (.*)$/ and proc_text_spam($1);
+}
+close IN;
+warn "n-grams active: ".(scalar keys %ngram_count)."\n";
+
+warn "reading $fh...\n";
+open IN, "<$fh" or die "cannot open ham log $fh";
+while (<IN>) {
+  /^text: (.*)$/ and proc_text_ham($1);
+}
+close IN;
+warn "n-grams active: ".(scalar keys %ngram_count)."\n";
+
+undef %word2sym;     # free this, no longer needed
+
+summarise();
+exit;
+
+
+sub proc_text_spam {
+  my ($text) = @_;
+
+  # we only need to chop off the end of spam samples
+  if (length($text) > $MAX_TEXT_IN_MESSAGE) {
+    $text = substr $text, 0, $MAX_TEXT_IN_MESSAGE;      # chop!
+  }
+
+  # we only need to save spam samples in memory, ignore ham samples
+  push @text_string, $text;
+
+  my $cp = pack "l", $msgcount;
+  $msgcount++;
+
+  my $w1 = '';
+  my $w2 = '';
+  my $w3 = '';
+
+  my %tokens = ();
+  foreach my $w (split(' ', $text)) {
+    # if (length $w > 20) { $w = "sk:".substr($w, 0, 5); }
+
+    $w3 = $w2;
+    $w2 = $w1;
+
+    $w1 = $word2sym{$w};
+    if (!$w1) {
+      $word2sym{$w} = $w1 = $sym_acc;
+      $sym2word{$sym_acc} = $w;
+      $sym_acc++;
+    }
+
+    # simple bayesian N-grams to start
+    $tokens{"$w3.$w2.$w1"} = $tokens{"$w3.$w2"} = 1;
+  }
+  
+  # deal with leftovers
+  if ($w2 && $w1) {
+    $tokens{"$w2.$w1"} = 1;
+  }
+
+  foreach my $tok (keys %tokens) {
+    # incr the counter for this token
+    $ngram_count{$tok}++;
+    $msg_subset_hit{$tok} .= $cp;    # the message subset hit by this tok
+  }
+}
+
+sub proc_text_ham {
+  my ($text) = @_;
+
+  my $w1 = '';
+  my $w2 = '';
+  my $w3 = '';
+
+  my %tokens = ();
+  foreach my $w (split(' ', $text)) {
+    $w3 = $w2;
+    $w2 = $w1;
+
+    $w1 = $word2sym{$w};
+    if (!$w1) {
+      # since we're deleting, there's no need to add new words
+      # to the dictionary; just use the final $sym_acc to mean
+      # "unknown ham word", and don't increment it
+      $word2sym{$w} = $w1 = $sym_acc;
+    }
+
+    $tokens{"$w3.$w2.$w1"} = $tokens{"$w3.$w2"} = 1;
+  }
+  
+  if ($w2 && $w1) {
+    $tokens{"$w2.$w1"} = 1;
+  }
+
+  foreach my $tok (keys %tokens) {
+    # we're not tracking hits; we're killing false positives. 
+    # as soon as a single FP appears, kill all record of that token,
+    # it cannot be used
+    delete $ngram_count{$tok};
+    delete $msg_subset_hit{$tok};
+  }
+}
+
+sub summarise {
+  warn "summarizing...\n";
+
+  # hash all msg_subset_hit lists; we don't need the full data, so this
+  # saves space
+  foreach my $id (keys %msg_subset_hit) {
+    $msg_subset_hit{$id} = unpack("%32C*", $msg_subset_hit{$id});
+  }
+
+  # note: we don't care about stuff that hits *any* ham at all
+  my $msg_count_spam = scalar @text_string;
+  $msg_count_spam ||= 0.000001;
+
+  my %all_patterns_for_set = ();
+
+  foreach my $id (keys %ngram_count) {
+    my $count = $ngram_count{$id};
+    my $bad;
+
+    # must occur more than once!
+    if ($count <= 1) {
+      $bad++;
+    }
+    # require N% spam hits
+    elsif (($count*100) / $msg_count_spam < $REQUIRE_PERCENT_SPAM_HITS) {
+      $bad++;
+    }
+
+    if ($bad) {
+      # we don't need to remember anything about this pattern after here
+      delete $ngram_count{$id};
+      delete $msg_subset_hit{$id};
+      next;
+    }
+
+    my $set = $msg_subset_hit{$id};
+    $all_patterns_for_set{$set} ||= [];
+    push @{$all_patterns_for_set{$set}}, decode_sym2words($id);
+  }
+
+  warn "message subsets found: ".(scalar keys %all_patterns_for_set)."\n";
+
+  my %done_set = ();
+
+  printf ("%6s  %6s  %6s   %s\n", "RATIO", "SPAM%", "HAM%", "DATA");
+  $| = 1;
+  foreach my $id (sort {
+                      $ngram_count{$a} <=> $ngram_count{$b}
+                  } keys %ngram_count)
+  {
+    my $set = $msg_subset_hit{$id};
+    next if $done_set{$set}; $done_set{$set}++;
+
+    # we now have several patterns.  see if we can expand them sideways
+    # to make the pattern bigger, and collapse into a smaller number of
+    # pats at the same time
+    my $pats = collapse_pats($all_patterns_for_set{$set});
+    # my $pats = collapse_pats_basic($all_patterns_for_set{$set});
+
+    printf "%6.3f  %6.3f  %6.3f  %s\n",
+        1.0, ($ngram_count{$id}*100) / $msg_count_spam, 0, $pats;
+  }
+}
+
+sub decode_sym2words {
+  my $ids = shift;
+  my $r;
+  if ($ids =~ /^([^.]*)\.([^.]*)\.([^.]*)$/) {
+    $r = "$sym2word{$1} $sym2word{$2} $sym2word{$3}";
+  }
+  elsif ($ids =~ /^([^.]*)\.([^.]*)$/) {
+    $r = "$sym2word{$1} $sym2word{$2}";
+  }
+  else {
+    warn "bad decode_sym2words format: '$ids'";
+  }
+  $r =~ s/^\s+//;
+  return $r;
+}
+
+sub collapse_pats_basic {
+  return '/'. join ('/, /', map { s/\//[SLASH]/gs; $_; } @{$_[0]}). '/';
+}
+
+sub collapse_pats {
+  my $pataryref = $_[0];
+  my @ret = ();
+
+  while (1) {
+    my $pat = shift(@{$pataryref});
+    last unless defined($pat);
+
+    # warn "JMD $pat";
+    $pat =~ s/^\s+//;
+
+    my @hits = grep /\Q$pat\E/, @text_string;
+    if (scalar @hits == 0) {
+      warn "supposed pattern /$pat/ is 0-hitter";
+      push @ret, "[*]$pat";
+      next;
+    }
+
+    # we don't have all day!
+    my $pat_maxlen = $MAX_TEXT_IN_MESSAGE;
+    my $s = $hits[0];
+
+    # Now, expand the pattern using a BLAST-style algorithm
+
+    # expand towards start of string
+    while (1) {
+      my $l = length($pat);
+      last if ($l > $pat_maxlen);     # too long
+
+      my $found;
+      if ($s =~ /(.)\Q$pat\E/s) { $found = $1; }
+
+      if (!defined $found) {
+        # start of string.  break
+        last;
+      }
+
+      # give up if there are a differing number of hits for the new pat
+      my $newpat = $found.$pat;
+      if (scalar (grep /\Q$newpat\E/, @text_string) != scalar @hits) { last; }
+
+      $pat = $newpat;     # and carry on
+    }
+    # warn "JMD $pat";
+
+    # expand towards end of string
+    while (1) {
+      if (length($pat) > $pat_maxlen || $s !~ /\Q$pat\E(.)/s) {
+        # end of string.  break
+        last;
+      }
+
+      my $newpat = $pat.$1;
+      if (scalar (grep /\Q$newpat\E/, @text_string) != scalar @hits) { last; }
+
+      $pat = $newpat;     # and carry on
+    }
+    # warn "JMD $pat";
+
+    # now remove subsumed patterns
+    @{$pataryref} = grep { $pat !~ /\Q$_\E/s } @{$pataryref};
+
+    # warn "JMD $pat";
+    # skip recording this if it's already inside one of the results
+    next if grep { $_ =~ /\Q$pat\E/s } @ret;
+
+    # also, remove cases where this pattern contains previous results
+    @ret = grep { $pat !~ /\Q$_\E/s } @ret;
+
+    # warn "JMD $pat";
+    push (@ret, $pat);
+  }
+
+  # TODO: http://en.wikipedia.org/wiki/Needleman-Wunsch_algorithm
+
+  return '/'.join ('/, /', map { s/\//\\\//gs; $_; } @ret).'/';
+}
+
+

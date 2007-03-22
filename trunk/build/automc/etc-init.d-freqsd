@@ -1,0 +1,55 @@
+#!/bin/sh
+
+. /etc/profile
+prog=freqsd
+
+HOME=/home/automc
+export HOME
+
+start() {
+    echo "Starting $prog: " 
+
+    cd /export/home/automc/svn/spamassassin
+    rm /export/home/automc/freqsd/log
+
+    HOME=/export/home/automc
+    export HOME
+
+    su automc -c "./build/automc/freqsd -pidfile /export/home/automc/freqsd/pid" \
+	> /export/home/automc/freqsd/log 2>&1 \
+	< /dev/null &
+
+    echo
+    return 0
+}
+
+stop() {
+    cd /export/home/automc/svn/spamassassin
+    su automc -c "./build/automc/freqsd -pidfile /export/home/automc/freqsd/pid -kill"
+
+    # sleep 1
+    # pkill -15 -f automc/freqsd            # just in case
+    sleep 1
+    pkill -15 -u automc
+}
+
+case "$1" in
+	start)
+	    start
+	    ;;
+	
+	stop)
+	    stop
+	    ;;
+	
+	restart)
+	    stop; sleep 2; start
+	    ;;
+	
+	*)
+	    echo $"Usage: $0 {start|stop|restart|condrestart}"
+	    exit 1
+
+esac
+
+exit 0

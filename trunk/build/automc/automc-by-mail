@@ -1,0 +1,127 @@
+#!/local/perl586/bin/perl
+
+use LWP::Simple;
+use MIME::Parser;
+
+# feel free to add your name here -- or that of anyone you want
+# to allow to use this system
+my $ALLOWED_MAIL_PEOPLE = qr/^(?:
+
+		jm\@jmason\.org|
+		quinlan\@pathname\.com|
+                maddoc\@maddoc\.net|
+                lwilton\@earthlink\.net|
+		duncf\@debian\.org|
+                chris\@iloaf\.com
+
+	)/isx;
+
+# where the files are saved
+my $OUT_DIR = "/export/home/bbmass/bymail";
+
+# URL used to trigger the buildbot to build
+my $BB_URL = 'http://buildbot.spamassassin.org/preflight/__SLAVE__'.
+		'/force?username=mail&comments=__WHY__';
+
+my $WHY = 'rules received via email';
+
+# name of the Buildbot slaves to trigger
+my @SLAVES = qw(
+
+	  	mc-fast mc-med mc-slow mc-slower
+
+	);
+
+my $EXTRACT_LOG = "$OUT_DIR/extract.log";
+my $LATEST_CF =   "$OUT_DIR/latest.cf";
+
+# ---------------------------------------------------------------------------
+
+use strict;
+use warnings;
+
+open (STDOUT, ">$EXTRACT_LOG") or die "cannot redir STDOUT to $EXTRACT_LOG";
+open (STDERR, ">&STDOUT") or die "cannot redir STDERR";
+chmod 0666, $EXTRACT_LOG;
+
+my $parser = new MIME::Parser;
+(-d "$OUT_DIR/tmp") || mkdir("$OUT_DIR/tmp", 0700);
+$parser->output_dir("$OUT_DIR/tmp");
+
+my $ent = $parser->parse(\*STDIN) or die "parse failed\n";
+
+print "Parsed message:
+---------------------------------------------------------------------------\n";
+$ent->print(\*STDOUT);
+print "[EOM]
+---------------------------------------------------------------------------\n";
+
+my $from = $ent->head()->get("From");
+if ($from =~ /<(.*?)>/) {
+  $from = $1;
+}
+else {
+  $from =~ s/\s*\(.*?\)\s*//;
+}
+
+# TODO: less stupid auth using SPF.  this doesn't really matter all that much,
+# however, since we lint any submitted rules before using them, which should
+# catch dangerous stuff, and that lint takes place in an unpriv chroot.
+#
+if ($from !~ $ALLOWED_MAIL_PEOPLE) {
+  print "$from is not on the 'allowed' list, ignoring";
+  goto done;
+}
+
+foreach my $part ($ent->parts) {
+  my $ctype = $part->head->get("Content-Type") || ''; chomp $ctype;
+  my $disp = $part->head->get("Content-Disposition") || ''; chomp $disp;
+  my $desc = $part->head->get("Content-Description") || ''; chomp $desc;
+
+  my $fname;
+  if ($desc && $desc =~ /\S/) {
+    $fname = $desc;
+  } elsif ($disp && $disp =~ /filename=\"([^\"]+)\"/) {
+    $fname = $1;
+  } elsif ($disp && $disp =~ /filename=\'([^\']+)\'/) {
+    $fname = $1;
+  } elsif ($disp && $disp =~ /filename=([^\;\s]+)/) {
+    $fname = $1;
+  }
+  $fname =~ s/^\s*//; $fname =~ s/\s*$//;
+
+  print "part: fname=$fname, type=$ctype, disp=$disp\n";
+
+  if ($ctype !~ /^text.plain\b/) {
+    print "skipping part: not text/plain\n";
+    next;
+  }
+
+  if (!$fname || $fname !~ /\.cf$/) {
+    print "skipping part: filename doesn't end in '.cf'\n";
+    next;
+  }
+
+  open (SAVE, ">$LATEST_CF") or die "cannot save to $LATEST_CF";
+
+  print SAVE $part->bodyhandle()->as_string();
+  close SAVE or die "cannot write to $LATEST_CF";
+  chmod 0666, "$LATEST_CF";
+
+  system ("ls -l $LATEST_CF");
+
+  foreach my $slave (@SLAVES) {
+    my $url = $BB_URL;
+    my $why = $WHY; $why =~ s/\s+/%20/gs;
+    $url =~ s/__SLAVE__/$slave/gs;
+    $url =~ s/__WHY__/$why/gs;
+
+    print "invoking force-build: $url\n";
+    get($url);
+  }
+}
+
+done:
+$ent->purge();
+exit;
+

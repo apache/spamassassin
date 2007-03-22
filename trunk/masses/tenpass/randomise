@@ -1,0 +1,22 @@
+#!/usr/bin/perl -w
+
+srand ($$^time);
+
+@lines = ();
+while (<>) {
+  push (@lines, $_);
+}
+
+@lines = sort byrand @lines;
+@lines = sort byrand @lines;
+@lines = sort byrand @lines;
+print join ('', @lines);
+exit;
+
+sub byrand {
+  my $x = rand();
+  ($x < .3333) && return -1;
+  ($x < .6666) && return 0;
+  1;
+}
+

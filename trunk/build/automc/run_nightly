@@ -1,0 +1,67 @@
+#!/bin/sh
+#
+# driver for nightly mass-checks on the zone. run from cron as:
+# 10 9,10 * * * /export/home/automc/svn/spamassassin/build/automc/run_nightly > /var/www/buildbot.spamassassin.org/bbmass/nightly_masschecks.txt 2>&1
+#
+# details: http://wiki.apache.org/spamassassin/NightlyMassCheck
+
+# add usernames who you want to do nightlies for here:
+nightly_users="
+  doc
+  jm
+  fredt
+  zmi
+"
+
+# and where the $HOMEs are:
+nightly_trees="/export/home/bbmass/mc-nightly"
+
+
+# Ensure we're running after 0900 UTC; complex due to daylight savings. If
+# we're running in the 08xx UTC hour-space, sleep for 1 hour; when we wake, we
+# will be in 09xx.  By doing it this way, we'll work both for (a) mass-checks
+# set to run from cron at 09xx (cron doesn't understand DST/UTC issues) and (b)
+# mass-checks starting at other times that != 09xx.
+(
+  TIME="%e,%U,%S"; TZ=UTC; export TIME TZ
+  if date | egrep '^... ... .. 08:'; then
+    date; echo "sleeping for 1 hour to compensate for DST"
+    sleep 3600 ; date
+  fi
+)
+
+. /etc/profile
+
+# create the targets files:
+/export/home/automc/svn/spamassassin/build/automc/populate_cor_nightly
+
+echo "run_nightly starting at" ; date
+realhome=/export/home/bbmass
+
+# and run each mass-check using "corpus-nightly"
+for user in $nightly_users ; do
+  dir="$nightly_trees/$user"
+
+  echo "Starting corpus-nightly for $user ($dir)"
+
+  (
+    HOME=$dir
+
+    # ensure we use the user-wide SVN permissions and server identities,
+    # otherwise we won't be able to perform noninteractive SVN ops
+    rm -rf $dir/.subversion 
+    ln -s $realhome/.subversion $dir/.subversion 
+
+    # oh Solaris, you really suck
+    PERL=/local/perl586/bin/perl
+    TMPDIR=/tmpfs
+
+    export HOME PERL TMPDIR
+
+    # use bash to work around Solaris breakage
+    nice bash $dir/svn/masses/rule-qa/corpus-nightly
+
+  ) 2>&1 | tee "$dir/corpus-nightly.log"
+
+done
+

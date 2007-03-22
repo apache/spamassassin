@@ -1,0 +1,210 @@
+Return-Path: <procmail-admin@Lists.RWTH-Aachen.DE>
+Delivered-To: maillist@jg555.com
+Received: from localhost.localdomain (localhost.localdomain [127.0.0.1])
+ by mail.jg555.com (Postfix) with ESMTP id 0197E43E6
+ for <maillist@jg555.com>; Wed, 10 Jul 2002 08:21:12 -0700 (PDT)
+Date: Wed, 10 Jul 2002 11:18:57 -0400 (EDT)
+Errors-To: procmail-admin@Lists.RWTH-Aachen.DE
+From: Poohba <poohba@blkpoohba.dyndns.org>
+List-Archive: <http://MailMan.RWTH-Aachen.DE/pipermail/procmail/>
+List-Help:
+List-Id: discussion of the procmail program <procmail.lists.RWTH-Aachen.DE>
+List-Post:
+List-Subscribe: <http://MailMan.RWTH-Aachen.DE/mailman/listinfo/procmail>,
+
+List-Unsubscribe: <http://MailMan.RWTH-Aachen.DE/mailman/listinfo/procmail>,
+
+Message-id: <Pine.LNX.4.44.0207101108110.8814-100000@blkpoohba.dyndns.org>
+Precedence: bulk
+Received: from mail.jg555.com (localhost.localdomain [127.0.0.1])
+ by localhost.localdomain (AvMailGate-2.0.0.6) id 15806-73863AE7;
+ Wed, 10 Jul 2002 08:20:56 -0700
+Received: from r220-1.rz.RWTH-Aachen.DE (r220-1.rz.RWTH-Aachen.DE [134.130.3.31])
+ by mail.jg555.com (Postfix) with ESMTP id 2C0B143E4
+ for <maillist@jg555.com>; Wed, 10 Jul 2002 08:20:55 -0700 (PDT)
+Received: from r220-1.rz.RWTH-Aachen.DE (relay2.RWTH-Aachen.DE [134.130.3.1])
+ by r220-1.rz.RWTH-Aachen.DE (8.10.1/8.11.3-2) with ESMTP id g6AFKR824557;
+ Wed, 10 Jul 2002 17:20:27 +0200 (MEST)
+Received: from nets2.rz.RWTH-Aachen.DE (nets2.rz.RWTH-Aachen.DE [137.226.144.243])
+ by r220-1.rz.RWTH-Aachen.DE (8.10.1/8.11.3/8) with ESMTP id g6AFKO224514;
+ Wed, 10 Jul 2002 17:20:24 +0200 (MEST)
+Received: from nets2.rz.RWTH-Aachen.DE (localhost [127.0.0.1])
+ by nets2.rz.RWTH-Aachen.DE (8.9.1a/8.9.1/1) with ESMTP id RAA06668;
+ Wed, 10 Jul 2002 17:17:47 +0200 (MET DST)
+Received: from ue250-1.rz.RWTH-Aachen.DE (ue250-1.rz.RWTH-Aachen.DE [134.130.3.33])
+ by nets2.rz.RWTH-Aachen.DE (8.9.1a/8.9.1/1) with ESMTP id RAA06646
+ for <procmail@lists.RWTH-Aachen.DE>; Wed, 10 Jul 2002 17:15:50 +0200 (MET DST)
+Received: from ue250-1.rz.RWTH-Aachen.DE (relay1.RWTH-Aachen.DE [134.130.3.3])
+ by ue250-1.rz.RWTH-Aachen.DE (8.12.1/8.11.3-3) with ESMTP id g6AFFm1I005140
+ for <procmail@lists.RWTH-Aachen.DE>; Wed, 10 Jul 2002 17:15:49 +0200 (MEST)
+Received: from mails.rz.rwth-aachen.de (mails.rz.RWTH-Aachen.DE [134.130.1.251])
+ by ue250-1.rz.RWTH-Aachen.DE (8.12.1/8.11.3/23) with ESMTP id g6AFFm8W005132
+ for <procmail@lists.RWTH-Aachen.DE>; Wed, 10 Jul 2002 17:15:48 +0200 (MEST)
+Received: from ue250-1.rz.RWTH-Aachen.DE ("port 34611"@ue250-1.rz.RWTH-Aachen.DE [134.130.3.33])
+ by mails.rz.rwth-aachen.de
+ (Sun Internet Mail Server sims.4.0.2000.10.12.16.25.p8)
+ with ESMTP id <0GZ100BMXH2CP5@mails.rz.rwth-aachen.de> for
+ procmail@lists.RWTH-Aachen.DE
+ (ORCPT rfc822;procmail@informatik.rwth-aachen.de); Wed,
+ 10 Jul 2002 17:15:48 +0200 (MET DST)
+Received: from ue250-1.rz.RWTH-Aachen.DE (relay1.RWTH-Aachen.DE [134.130.3.3])
+ by ue250-1.rz.RWTH-Aachen.DE (8.12.1/8.11.3-3) with ESMTP id g6AFFk1I005103
+ for <procmail@informatik.rwth-aachen.de>; Wed,
+ 10 Jul 2002 17:15:47 +0200 (MEST)
+Received: from hera.cuci.nl (hera.cuci.nl [212.125.128.1])
+ by ue250-1.rz.RWTH-Aachen.DE (8.12.1/8.11.3/23) with ESMTP id g6AFFh8W005075
+ for <procmail@informatik.rwth-aachen.de>; Wed,
+ 10 Jul 2002 17:15:46 +0200 (MEST)
+Received: from mail6.nc.rr.com (fe6.southeast.rr.com [24.93.67.53])
+ by hera.cuci.nl (BuGless_3.01) with ESMTP id g6AFFbnt030550 for
+ <procmail-users@procmail.org>; Wed, 10 Jul 2002 17:15:38 +0200
+Received: from rdu26-72-228.nc.rr.com ([66.26.72.228])
+ by mail6.nc.rr.com  with Microsoft SMTPSVC(5.5.1877.757.75); Wed,
+ 10 Jul 2002 11:13:33 -0400
+Sender: procmail-admin@Lists.RWTH-Aachen.DE
+Subject: *****SPAM***** Running a script
+To: Procmail List <procmail-users@procmail.org>
+X-AntiVirus: OK! AntiVir MailGate Version 2.0.0.6
+  at server.jg555.com has not found any known virus in this email.
+X-BeenThere: procmail@lists.RWTH-Aachen.DE
+X-Mailman-Version: 2.0.11
+X-Sanitizer: JG555.com mail filter
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset="US-ASCII"
+X-Spam-Status: Yes, hits=5.4 required=5.0
+ tests=FROM_NAME_NO_SPACES,DOUBLE_CAPSWORD,NO_MX_FOR_FROM,
+       MSG_ID_ADDED_BY_MTA_2,RCVD_IN_MULTIHOP_DSBL,
+       X_RCVD_IN_UNCONFIRMED_DSBL,FUDGE_MULTIHOP_RELAY
+ version=2.31
+X-Spam-Flag: YES
+X-Spam-Level: *****
+X-Spam-Checker-Version: SpamAssassin 2.31 (devel $Id: SpamAssassin.pm,v
+1.94.2.2 2002/06/20 17:20:29 hughescr Exp $)
+
+
+----- Original Message -----
+From: <bugzilla-daemon@hughes-family.org>
+To: <giffordj@linkline.com>
+Sent: Wednesday, July 10, 2002 10:00 AM
+Subject: [Bug 531 <show_bug.cgi?id=531>] New: whitelist_to problem
+
+
+> http://www.hughes-family.org/bugzilla/show_bug.cgi?id=531
+>
+>            Summary: whitelist_to problem
+>            Product: Spamassassin
+>            Version: 2.31
+>           Platform: Other
+>         OS/Version: other
+>             Status: NEW
+>           Severity: normal
+>           Priority: P2
+>          Component: spamassassin
+>         AssignedTo: spamassassin-devel@lists.sourceforge.net
+>         ReportedBy: giffordj@linkline.com
+>
+>
+> I have seen the following problem with the whitelist_to. I have
+> list@dshield.org in my local.cf file. But when the email gets processed,
+it
+> ends up with a spam header. If you need more examples I have them.
+>
+> whitelist_to list@dshield.org is in my local.cf file
+>
+> here is a header from an email.
+>
+> Return-Path: <list-admin@dshield.org>
+> Delivered-To: maillist@jg555.com
+> Received: from localhost.localdomain (localhost.localdomain [127.0.0.1])
+> by mail.jg555.com (Postfix) with ESMTP id E8FD14636
+> for <maillist@jg555.com>; Wed, 10 Jul 2002 09:58:25 -0700 (PDT)
+> Cc: list@dshield.org, intrusions@incidents.org
+> Date: Wed, 10 Jul 2002 09:25:45 -0700
+> Errors-To: list-admin@dshield.org
+> From: John Sage <jsage@finchhaven.com>
+> In-Reply-To:
+<2D00AD0E4D36D411BD300008C786E42409558EF0@Denntex021.qwest.net>;
+> from Donald.Smith@qwest.com on Wed, Jul 10, 2002 at 08:05:10AM -0600
+> List-Archive: <http://www.dshield.org/pipermail/list/>
+> List-Help:
+> List-Id: General DShield Discussion List <list.dshield.org>
+> List-Post:
+> List-Subscribe: <http://www.dshield.org/mailman/listinfo/list>,
+>
+> List-Unsubscribe: <http://www.dshield.org/mailman/listinfo/list>,
+>
+> Message-ID: <20020710092545.D20950@finchhaven.com>
+> Precedence: bulk
+> Received: from mail.jg555.com (localhost.localdomain [127.0.0.1])
+> by localhost.localdomain (AvMailGate-2.0.0.6) id 04801-76401F47;
+> Wed, 10 Jul 2002 09:58:01 -0700
+> Received: from iceman2.incidents.org (unknown [63.100.47.43])
+> by mail.jg555.com (Postfix) with SMTP id 01D944528
+> for <maillist@jg555.com>; Wed, 10 Jul 2002 09:58:01 -0700 (PDT)
+> Received: (qmail 22665 invoked by uid 504); 10 Jul 2002 16:58:00 -0000
+> Received: from localhost (HELO iceman2.incidents.org) (127.0.0.1)
+>   by 0 with SMTP; 10 Jul 2002 16:58:00 -0000
+> Received: (qmail 20596 invoked by uid 504); 10 Jul 2002 16:57:45 -0000
+> Received: from unknown (HELO viper.incidents.org) (10.36.0.4)
+>   by 0 with SMTP; 10 Jul 2002 16:57:46 -0000
+> Received: from localhost.localdomain (viper2 [127.0.0.1])
+> by viper.incidents.org (8.11.6/8.11.6) with ESMTP id g6AFvDU11201;
+> Wed, 10 Jul 2002 11:57:13 -0400
+> Received: from iceman2.incidents.org (63-100-47-43.secsup.org
+[63.100.47.43]
+> (may be forged))
+> by viper.incidents.org (8.11.6/8.11.6) with SMTP id g6AFPmU10449
+> for <list@viper.uunet>; Wed, 10 Jul 2002 11:25:48 -0400
+> Received: (qmail 25261 invoked by uid 504); 10 Jul 2002 16:25:57 -0000
+> Received: from unknown (HELO dshield.org) (10.36.0.9)
+>   by 0 with SMTP; 10 Jul 2002 16:25:57 -0000
+> Received: (from dshield@localhost)
+> by dshield.org (8.11.6/8.11.6) id g6AGPvI04259
+> for list@viper.uunet; Wed, 10 Jul 2002 12:25:57 -0400
+> Received: from iceman2.incidents.org (63-100-47-43.secsup.org
+[63.100.47.43]
+> (may be forged))
+> by dshield.org (8.11.6/8.11.6) with SMTP id g6AGPve04252
+> for <list@dshield.org>; Wed, 10 Jul 2002 12:25:57 -0400
+> Received: (qmail 25248 invoked by uid 504); 10 Jul 2002 16:25:57 -0000
+> Received: from mtiwmhc23.worldnet.att.net (204.127.131.48)
+>   by 0 with SMTP; 10 Jul 2002 16:25:57 -0000
+> Received: from sparky.finchhaven.net ([12.82.128.223])
+>           by mtiwmhc23.worldnet.att.net
+>           (InterMail vM.4.01.03.27 201-229-121-127-20010626) with ESMTP
+>           id
+>
+<20020710162554.PZHG5870.mtiwmhc23.worldnet.att.net@sparky.finchhaven.net>;
+>           Wed, 10 Jul 2002 16:25:54 +0000
+> Received: (from root@localhost)
+> by sparky.finchhaven.net (8.11.2/8.11.2) id g6AGPj809404;
+> Wed, 10 Jul 2002 09:25:45 -0700
+> References:
+<2D00AD0E4D36D411BD300008C786E42409558EF0@Denntex021.qwest.net>
+> Reply-To: list@dshield.org
+> Sender: list-admin@dshield.org
+> Subject: [Dshield] Re: 1524 -> 1524 TTLS
+> To: "Smith, Donald " <Donald.Smith@qwest.com>
+> User-Agent: Mutt/1.2.5i
+> X-AntiVirus: OK! AntiVir MailGate Version 2.0.0.6
+> at server.jg555.com has not found any known virus in this email.
+> X-BeenThere: list@dshield.org
+> X-Envelope-To: list@dshield.org
+> X-Mailman-Version: 2.0.11
+> X-Sanitizer: JG555.com mail filter
+> MIME-Version: 1.0
+> Content-Type: text/plain; charset="us-ascii"
+> Content-Disposition: inline
+> X-Spam-Status: No, hits=-6.2 required=5.0
+> tests=IN_REP_TO,MAY_BE_FORGED,USER_IN_WHITELIST_TO,
+>       MSG_ID_ADDED_BY_MTA_2
+> version=2.31
+> X-Spam-Level:
+>
+>
+>
+> ------- You are receiving this mail because: -------
+> You reported the bug, or are watching the reporter.
+>
+>
+

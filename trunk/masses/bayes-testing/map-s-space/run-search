@@ -1,0 +1,99 @@
+#!/usr/bin/perl -w
+
+$USE_CHI_COMBINING = 0;
+
+# use 1 bucket's set for speed, just to get going:
+#$SPAMLOG  = "/raid/bayestest/results/bucket1/spam.log";
+#$HAMLOG   = "/raid/bayestest/results/bucket1/nonspam.log";
+# or use the lot, slow but more accurate:
+$SPAMLOG  = "/raid/bayestest/results/spam_all.log";
+$HAMLOG   = "/raid/bayestest/results/nonspam_all.log";
+
+my $searchspaces = {
+ ROBINSON_S_CONSTANT => [ 0.0, 0.75 ],
+ ROBINSON_X => [ 0.0, 0.75 ],
+};
+
+my $count;
+$|=1;
+srand(23);
+for ($count = 0; $count < 1000; $count++) {
+  my $rands = rand_constants();
+  write_constants($rands);
+  run_test($count);
+  parse_log($rands, $count);
+}
+exit;
+
+sub rand_constants {
+  my $rands = { };
+  foreach (keys %{$searchspaces}) {
+    my $lo = $searchspaces->{$_}->[0];
+    my $hi = $searchspaces->{$_}->[1];
+
+    $rands->{$_} = rand($hi-$lo) + $lo;
+  }
+  return $rands;
+}
+
+sub write_constants {
+  my $rands = shift;
+  open (OUT, ">constants.pl");
+  print OUT "
+    use constant ROBINSON_S_CONSTANT => $rands->{ROBINSON_S_CONSTANT};
+    use constant ROBINSON_X => $rands->{ROBINSON_X};
+    use constant ROBINSON_MIN_PROB_STRENGTH => 0.27;
+    use constant PROB_BOUND_LOWER => 0.001;
+    use constant PROB_BOUND_UPPER => 0.999;
+    use constant N_SIGNIFICANT_TOKENS => 150;
+    use constant USE_CHI_COMBINING => $USE_CHI_COMBINING;
+  1;
+  ";
+  close OUT;
+}
+
+
+sub run_test {
+  my $count = shift;
+
+  mkdir ("logs");
+  system ("./bayes-analyse-from-raw-counts $SPAMLOG $HAMLOG ".
+	    "> logs/log.$count 2>&1");
+}
+
+sub parse_log {
+  my $rands = shift;
+  my $count = shift;
+  my $r = { };
+
+  open (IN, "< logs/log.$count");
+  while (<IN>) {
+    /optimization for hamcutoff=(\S+), spamcutoff=(\S+): cost=\$\s*(\S+)/ or next;
+    $r->{hamcutoff} = $1;
+    $r->{spamcutoff} = $2;
+    $r->{cost} = $3;
+
+    $_ = <IN>;
+    $_ = <IN>; s/\s+/ /gs; /FP: (\S+) \S+ FN: (\S+) /;
+    $r->{fp} = $1;
+    $r->{fn} = $2;
+
+    $_ = <IN>; s/\s+/ /gs; /Unsure: (\S+) \S+ .ham: (\S+) \S+ spam: (\S+) /;
+    $r->{unsure} = $1;
+    $r->{unham} = $2;
+    $r->{unspam} = $3;
+
+    last;
+  }
+  close IN;
+
+  my $line = "$count";
+  foreach my $key (sort keys %{$rands}) {
+    $line .= " $key $rands->{$key}";
+  }
+  foreach my $key (sort keys %{$r}) {
+    $line .= " $key $r->{$key}";
+  }
+  print $line, "\n";
+  sleep 1;
+}
