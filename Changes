@@ -1,4 +1,36 @@
 ------------------------------------------------------------------------
+r520892 | jm | 2007-03-22 02:01:15 +1200 (Thu, 22 Mar 2007) | 1 line
+
+remove ugly and superfluous line number from 'falling back to nobody' warning
+------------------------------------------------------------------------
+r520881 | jm | 2007-03-22 01:30:05 +1200 (Thu, 22 Mar 2007) | 1 line
+
+bug 5365: spamd child falling back to 'nobody' due to unknown username passed from spamc, attempts to read previous user's bayes dbs (and fails).  fixed
+------------------------------------------------------------------------
+r520820 | jm | 2007-03-21 21:41:04 +1200 (Wed, 21 Mar 2007) | 1 line
+
+deprioritise --updatedir, and recommend strongly that it not be used
+------------------------------------------------------------------------
+r520455 | jm | 2007-03-21 04:00:04 +1200 (Wed, 21 Mar 2007) | 1 line
+
+shortcircuiting during compile_now() meant that part of the ruleset went uncompiled until the first message was scanned in each spamd child. fix
+------------------------------------------------------------------------
+r520453 | jm | 2007-03-21 03:58:51 +1200 (Wed, 21 Mar 2007) | 1 line
+
+note when rulesets are compiled; helps debugging
+------------------------------------------------------------------------
+r520388 | jm | 2007-03-21 01:50:13 +1200 (Wed, 21 Mar 2007) | 1 line
+
+update with 2 new buildbots, thanks to Matthias Leisi <matthias at leisi.net>
+------------------------------------------------------------------------
+r519015 | jm | 2007-03-17 04:46:13 +1300 (Sat, 17 Mar 2007) | 1 line
+
+cut 3.2.0-pre3 pre-release tarball; back to dev mode for the trunk
+------------------------------------------------------------------------
+r518998 | jm | 2007-03-17 04:07:41 +1300 (Sat, 17 Mar 2007) | 1 line
+
+preparing to relase 3.2.0-pre3
+------------------------------------------------------------------------
 r518982 | jm | 2007-03-16 14:09:14 +0000 (Fri, 16 Mar 2007) | 1 line
 
 bug 5338: check Config{installsiteman1dir} and Config{installvendorman1dir} as well as Config{installman1dir}, otherwise we can wind up not installing many of the important man pages when we should do so
