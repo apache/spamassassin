@@ -147,7 +147,10 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   Note that if you have to re-run this command later to fix a broken
   release in progress, you need to "svn delete" the previous copy of the
-  tag, otherwise it'll create a subdirectory instead of overwriting.
+  tag, otherwise it'll create a subdirectory instead of overwriting:
+
+    svn delete -m "removing previous, broken tag" \
+        $repo/tags/spamassassin_release_3_2_0_rc_1
 
 
 
@@ -159,9 +162,6 @@ SPAMASSASSIN RELEASE PROCEDURE
     rm -rf ~/relbuild
     svn co $repo/tags/spamassassin_release_3_2_0_pre_2 ~/relbuild
     cd ~/relbuild
-
-  Run "svn status" to ensure you're building/releasing from a pristine
-  checkout, as before.
 
 - run "./build/update_stable" to build the tar.gz files.
 
@@ -188,14 +188,16 @@ SPAMASSASSIN RELEASE PROCEDURE
   included in the vote mail) and request a vote on the development mailing
   list to make the release.  Post the URL, md5sums/sha1sums, and proposed
   release announcement mail.  
-  
-  Three +1 votes are required to make the release official.  The release
+
+  Pre-releases and RCs require just lazy consensus -- ie. no objections.
+
+- (for a full release) You need 3 +1's from PMC members. The release
   manager (that's you) may vote as well.  Once there are three or more +1
   votes, you may proceed.
 
-- (for a full release) You need 3 +1's from PMC members.
-
-- SVN commit the release files, including 'Changes':
+- Edit lib/Mail/SpamAssassin.pm, and uncomment the $IS_DEVEL_BUILD line.
+  SVN commit it (and the release announcement file from above, if
+  you made one):
 
 	svn commit -m "X.Y.Z RELEASED"
 
@@ -212,9 +214,8 @@ SPAMASSASSIN RELEASE PROCEDURE
   for their minor version number.  In the example above, b3_1_0 is the
   branch for the stable 3.1.x releases.
 
-- In the new development codeline, edit lib/Mail/SpamAssassin.pm, bump the
-  $VERSION line to the correct version, and uncomment the $IS_DEVEL_BUILD
-  line.
+- In the new development codeline, edit lib/Mail/SpamAssassin.pm
+  and bump the $VERSION line to the correct version.
 
 - In the new development codeline, edit spamassassin.spec, and bump the
   version number in the "%define real_version" line.
