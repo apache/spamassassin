@@ -95,7 +95,7 @@ use vars qw{
 };
 
 $VERSION = "3.002000";      # update after release (same format as perl $])
-# $IS_DEVEL_BUILD = 1;        # change for release versions
+$IS_DEVEL_BUILD = 1;        # change for release versions
 
 # Used during the prerelease/release-candidate part of the official release
 # process. If you hacked up your SA, you should add a version_tag to your .cf
@@ -1898,6 +1898,23 @@ sub copy_config {
     dbg ("config: copying current conf to backup");
   }
   return $self->{conf}->clone($source, $dest);
+}
+
+###########################################################################
+
+=item @plugins = $f->get_loaded_plugins_list ( )
+
+Return the list of plugins currently loaded by this SpamAssassin object's
+configuration; each entry in the list is an object of type
+C<Mail::SpamAssassin::Plugin>.
+
+(This API was added in SpamAssassin 3.2.0.)
+
+=cut
+
+sub get_loaded_plugins_list {
+  my ($self) = @_;
+  return $self->{plugins}->get_loaded_plugins_list();
 }
 
 
