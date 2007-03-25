@@ -220,6 +220,13 @@ sub callback {
 
 ###########################################################################
 
+sub get_loaded_plugins_list {
+  my ($self) = @_;
+  return @{$self->{plugins}};
+}
+
+###########################################################################
+
 sub finish {
   my $self = shift;
   delete $self->{cbs};

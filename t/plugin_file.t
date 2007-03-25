@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("plugin_file");
-use Test; BEGIN { plan tests => 7 };
+use Test; BEGIN { plan tests => 9 };
 
 # ---------------------------------------------------------------------------
 
@@ -13,6 +13,9 @@ q{ MY_TEST_PLUGIN }, 'plugin_called',
 q{ registered myTestPlugin }, 'registered',
 q{ myTestPlugin eval test called }, 'test_called',
 q{ myTestPlugin finishing }, 'plugin_finished',
+
+q{ test: plugins loaded: Mail::SpamAssassin::Plugin::AWL=HASH }, 'plugins_loaded',
+q{ myTestPlugin=HASH }, 'plugins_loaded2',
 
 );
 

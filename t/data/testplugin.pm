@@ -40,6 +40,10 @@ sub check_test_plugin {
   my ($self, $permsgstatus) = @_;
   print "myTestPlugin eval test called: $self\n";
 
+  print "test: plugins loaded: ".
+        join(" ", sort $self->{main}->get_loaded_plugins_list()).
+        "\n";
+
   my $file = $ENV{'SPAMD_PLUGIN_COUNTER_FILE'};
   if ($file) {
     open (IN, "<$file") or warn;
