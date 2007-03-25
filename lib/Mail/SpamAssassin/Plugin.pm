@@ -920,9 +920,9 @@ Output an informational message C<$message>, if the SpamAssassin object
 is running with informational messages turned on.
 
 I<NOTE:> This function is not available in the package namespace
-of general plugins and can't be called via $self->dbg().  If a
+of general plugins and can't be called via $self->info().  If a
 plugin wishes to output debug information, it should call
-C<Mail::SpamAssassin::Plugin::dbg($msg)>.
+C<Mail::SpamAssassin::Plugin::info($msg)>.
 
 =cut
 
