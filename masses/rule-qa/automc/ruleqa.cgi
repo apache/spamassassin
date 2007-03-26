@@ -271,11 +271,15 @@ sub show_view {
 sub show_default_header {
   my ($self, $title) = @_;
 
+  # replaced with use of main, off-zone host:
+  # <!-- <link href="/ruleqa.css" rel="stylesheet" type="text/css"> <script src="http://ruleqa.spamassassin.org/sorttable.js"></script> --> 
+
   my $hdr = q{<html><head>
   <title>}.$title.q{</title>
 
-  <link href="/ruleqa.css" rel="stylesheet" type="text/css">
-  <script src="http://ruleqa.spamassassin.org/sorttable.js"></script>
+  <link href="http://SpamAssassin.apache.org/ruleqa/ruleqa.css" rel="stylesheet" type="text/css">
+  <script src="http://SpamAssassin.apache.org/ruleqa/sorttable.js"></script>
+
   <script type="text/javascript"><!--
 
     function hide_header(id) {document.getElementById(id).style.display="none";}
