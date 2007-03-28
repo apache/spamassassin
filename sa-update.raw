@@ -1334,7 +1334,16 @@ configuration, based on channels.  The default channel is
 I<updates.spamassassin.org>, which has updated rules since the previous
 release.
 
-Update archives are verified by default using SHA1 hashes and GPG signatures.
+Update archives are verified using SHA1 hashes and GPG signatures, by default.
+
+Note that C<sa-update> will not restart C<spamd> or otherwise cause
+a scanner to reload the now-updated ruleset automatically.  Instead,
+C<sa-update> is typically used in something like the following manner:
+
+        sa-update && /etc/init.d/spamassassin reload
+
+This works because C<sa-update> only returns an exit status of C<0> if
+it has successfully downloaded and installed an updated ruleset.
 
 =head1 OPTIONS
 
@@ -1352,7 +1361,7 @@ multiple times, once per channel.  i.e.:
 =item B<--channelfile>
 
 Similar to the B<--channel> option, except specify the additional channels in a
-file instead of on the commandline.  This is extremely useful when there are a
+file instead of on the commandline.  This is useful when there are a
 lot of additional channels.
 
 =item B<--checkonly>
@@ -1432,7 +1441,7 @@ Note: use of this option automatically enables GPG verification.
 
 By default, C<sa-update> will use the system-wide rules update directory:
 
-  @@LOCAL_STATE_DIR@@/spamassassin/@@VERSION@@
+        @@LOCAL_STATE_DIR@@/spamassassin/@@VERSION@@
 
 If the updates should be stored in another location, specify it here.
 
