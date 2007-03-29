@@ -2304,7 +2304,7 @@ sub get_envelope_from {
     # Warn them if it's configured, but not there or not usable.
     if (defined $envf) {
       chomp $envf;
-      warn("message: envelope_sender_header '$self->{conf}->{envelope_sender_header}: $envf' is not an FQDN, ignoring");
+      dbg("message: envelope_sender_header '$self->{conf}->{envelope_sender_header}: $envf' is not an FQDN, ignoring");
     } else {
       dbg("message: envelope_sender_header '".$self->{conf}->{envelope_sender_header}."' not found in message");
     }
