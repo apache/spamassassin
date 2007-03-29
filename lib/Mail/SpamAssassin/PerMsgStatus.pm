@@ -2299,11 +2299,12 @@ sub get_envelope_from {
   if (defined $self->{conf}->{envelope_sender_header}) {
     # make sure we get the most recent copy - there can be only one EnvelopeSender.
     $envf = $self->get($self->{conf}->{envelope_sender_header}.":addr");
-    goto ok if defined $envf && ($envf =~ /\@/ || $envf =~ /^<>$/);
+    # ok if it contains an "@" sign, or is "" (ie. "<>" without the < and >)
+    goto ok if defined $envf && ($envf =~ /\@/ || $envf =~ /^$/);
     # Warn them if it's configured, but not there or not usable.
     if (defined $envf) {
       chomp $envf;
-      dbg("message: envelope_sender_header '$self->{conf}->{envelope_sender_header}: $envf' is not an FQDN, ignoring");
+      warn("message: envelope_sender_header '$self->{conf}->{envelope_sender_header}: $envf' is not an FQDN, ignoring");
     } else {
       dbg("message: envelope_sender_header '".$self->{conf}->{envelope_sender_header}."' not found in message");
     }
