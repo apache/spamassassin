@@ -126,7 +126,6 @@ sub add_child {
 sub child_exited {
   my ($self, $pid) = @_;
 
-warn "JMD bug5313 child_exited $pid";
   dbg("prefork: child $pid: just exited");
   delete $self->{kids}->{$pid};
 
@@ -162,14 +161,12 @@ sub child_error_kill {
   kill 'INT' => $pid
     or warn "prefork: kill of failed child $pid failed: $!\n";
 
-warn "JMD bug5313 deleting sock: ".unpack("b*", ${$self->{backchannel}->{selector}});
   $self->{backchannel}->delete_socket_for_child($pid);
 
   if (defined $sock && defined $sock->fileno()) {
     $self->{backchannel}->remove_from_selector($sock);
   }
 
-warn "JMD bug5313 deleting sock: ".unpack("b*", ${$self->{backchannel}->{selector}});
   if ($sock) {
     $sock->close;
   }
@@ -245,7 +242,6 @@ sub main_server_poll {
 
   $timer->run(sub {
 
-warn "JMD bug5313 child_just_exited = 0";
     # right before select() syscall, but after alarm(), eval scope, etc.
     $self->{child_just_exited} = 0;     
     ($nfound, $timeleft) = select($rout=$rin, undef, $eout=$rin, $tout);
@@ -409,7 +405,6 @@ sub read_one_message_from_child_socket {
     my $fno = $sock->fileno;
     if (defined $fno) {
       $self->{backchannel}->remove_from_selector($sock);
-warn "JMD bug5313 $sock/$fno removed from selector";
       $sock->close();
     }
 
