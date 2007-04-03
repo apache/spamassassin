@@ -850,15 +850,19 @@ sub parse_content_type {
   $ct =~ s/^\s+//;				# strip leading whitespace
   $ct =~ s/;.*$//s;				# strip everything after first ';'
   $ct =~ s@^([^/]+(?:/[^/\s]*)?).*$@$1@s;	# only something/something ...
-  # strip inappropriate chars
-  $ct =~ tr/\000-\040\177-\377\042\050\051\054\056\072-\077\100\133-\135//d;
   $ct = lc $ct;
 
-  # bug 4298: If at this point we don't have a content-type, assume text/plain
-  # also, if the content-type is simply "text" or "text/", assume text/plain
-  if (!$ct || $ct =~ /^text\/?$/) {
+  # bug 4298: If at this point we don't have a content-type, assume text/plain;
+  # also, bug 5399: if the content-type *starts* with "text", and isn't in a 
+  # list of known bad/non-plain formats, do likewise.
+  if (!$ct ||
+        ($ct =~ /^text\b/ && $ct !~ /^text\/(?:x-vcard|calendar|html)$/))
+  {
     $ct = "text/plain";
   }
+
+  # strip inappropriate chars (bug 5399: after the text/plain fixup)
+  $ct =~ tr/\000-\040\177-\377\042\050\051\054\056\072-\077\100\133-\135//d;
 
   # Now that the header has been parsed, return the requested information.
   # In scalar context, just the MIME type, in array context the
