@@ -54,6 +54,23 @@ use constant PFORDER_ACCEPT      => 10;
 
 ###########################################################################
 
+# change to 1 to enable the below test instrumentation points
+use constant SUPPORT_TEST_INSTRUMENTATION => 0;
+
+# test instrumentation point: simulate random child failures in 1 in
+# every N lookups
+our $TEST_MODE_CAUSE_RANDOM_KID_FAILURES = 0;
+
+# test instrumentation point: simulate child->parent and parent->child
+# write failures (needing retries) once in every N syswrite()s
+our $TEST_MODE_CAUSE_RANDOM_WRITE_RETRIES = 0;
+
+# test instrumentation point: simulate ping failures (for unspecified
+# reasons) once in every N pings
+our $TEST_MODE_CAUSE_RANDOM_PING_FAILURES = 0;
+
+###########################################################################
+
 # we use the following protocol between the master and child processes to
 # control when they accept/who accepts: server tells a child to accept with a
 # PF_ACCEPT_ORDER, child responds with "B$pid\n" when it's busy, and "I$pid\n"
@@ -109,6 +126,8 @@ sub add_child {
 sub child_exited {
   my ($self, $pid) = @_;
 
+warn "JMD bug5313 child_exited $pid";
+  dbg("prefork: child $pid: just exited");
   delete $self->{kids}->{$pid};
 
   # note this for the select()-caller's benefit
@@ -143,7 +162,14 @@ sub child_error_kill {
   kill 'INT' => $pid
     or warn "prefork: kill of failed child $pid failed: $!\n";
 
+warn "JMD bug5313 deleting sock: ".unpack("b*", ${$self->{backchannel}->{selector}});
   $self->{backchannel}->delete_socket_for_child($pid);
+
+  if (defined $sock && defined $sock->fileno()) {
+    $self->{backchannel}->remove_from_selector($sock);
+  }
+
+warn "JMD bug5313 deleting sock: ".unpack("b*", ${$self->{backchannel}->{selector}});
   if ($sock) {
     $sock->close;
   }
@@ -219,7 +245,9 @@ sub main_server_poll {
 
   $timer->run(sub {
 
-    $self->{child_just_exited} = 0;
+warn "JMD bug5313 child_just_exited = 0";
+    # right before select() syscall, but after alarm(), eval scope, etc.
+    $self->{child_just_exited} = 0;     
     ($nfound, $timeleft) = select($rout=$rin, undef, $eout=$rin, $tout);
     $selerr = $!;
 
@@ -340,15 +368,23 @@ sub main_ping_kids {
 
   $self->{server_last_ping} = $now;
 
+  keys %{$self->{backchannel}->{kids}};     # reset each() iterator
   my ($sock, $kid);
   while (($kid, $sock) = each %{$self->{backchannel}->{kids}}) {
     # if the file handle is still defined ping the child
     # bug 4852: if not, we've run into a race condition with the child's
     # SIGCHLD handler... try killing again just in case something else happened
-    if (defined $sock && defined $sock->fileno) {
+
+    if (SUPPORT_TEST_INSTRUMENTATION && $TEST_MODE_CAUSE_RANDOM_PING_FAILURES &&
+              rand $TEST_MODE_CAUSE_RANDOM_PING_FAILURES < 1)
+    {
+      warn "prefork: TEST_MODE_CAUSE_RANDOM_PING_FAILURES simulating ping failure";
+    }
+    elsif (defined $sock && defined $sock->fileno) {
       $self->syswrite_with_retry($sock, PF_PING_ORDER, $kid, 3) and next;
       warn "prefork: write of ping failed to $kid fd=".$sock->fileno.": ".$!;
-    } else {
+    }
+    else {
       warn "prefork: cannot ping $kid, file handle not defined, child likely ".
 	   "to still be processing SIGCHLD handler after killing itself\n";
     }
@@ -372,7 +408,8 @@ sub read_one_message_from_child_socket {
     # stop it being select'd
     my $fno = $sock->fileno;
     if (defined $fno) {
-      vec(${$self->{backchannel}->{selector}}, $fno, 1) = 0;
+      $self->{backchannel}->remove_from_selector($sock);
+warn "JMD bug5313 $sock/$fno removed from selector";
       $sock->close();
     }
 
@@ -409,6 +446,13 @@ sub order_idle_child_to_accept {
   if (defined $kid)
   {
     my $sock = $self->{backchannel}->get_socket_for_child($kid);
+
+    if (SUPPORT_TEST_INSTRUMENTATION && $TEST_MODE_CAUSE_RANDOM_KID_FAILURES) {
+      if (rand $TEST_MODE_CAUSE_RANDOM_KID_FAILURES < 1) {
+        $sock = undef; warn "prefork: TEST_MODE_CAUSE_RANDOM_KID_FAILURES simulating no socket for kid $kid";
+      }
+    }
+
     if (!$sock)
     {
       # this should not happen, but if it does, trap it here
@@ -506,7 +550,7 @@ sub report_backchannel_socket {
   my ($self, $str) = @_;
   my $sock = $self->{backchannel}->get_parent_socket();
   $self->syswrite_with_retry($sock, $str, 'parent')
-        or write "syswrite() to parent failed: $!";
+        or die "syswrite() to parent failed: $!";
 }
 
 sub wait_for_orders {
@@ -639,7 +683,16 @@ retry_write:
     }
   }
 
-  my $nbytes = $sock->syswrite($buf);
+  my $nbytes;
+  if (SUPPORT_TEST_INSTRUMENTATION && $TEST_MODE_CAUSE_RANDOM_WRITE_RETRIES &&
+            rand $TEST_MODE_CAUSE_RANDOM_WRITE_RETRIES < 1)
+  {
+    warn "prefork: TEST_MODE_CAUSE_RANDOM_WRITE_RETRIES simulating write failure";
+    $nbytes = undef; $! = &Errno::EAGAIN;
+  }
+  else {
+    $nbytes = $sock->syswrite($buf);
+  }
 
   if (!defined $nbytes) {
     unless ((exists &Errno::EAGAIN && $! == &Errno::EAGAIN)

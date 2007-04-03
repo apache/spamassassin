@@ -99,9 +99,22 @@ sub setup_backchannel_parent_post_fork {
 
 sub add_to_selector {
   my ($self, $fh) = @_;
+  if (!defined $fh) {
+    warn "undef fh in add_to_selector"; return;
+  }
   my $fno = fileno($fh);
   $self->{fileno_to_fh}->{$fno} = $fh;
   vec (${$self->{selector}}, $fno, 1) = 1;
+}
+
+sub remove_from_selector {
+  my ($self, $fh) = @_;
+  if (!defined $fh) {
+    warn "undef fh in remove_from_selector"; return;
+  }
+  my $fno = fileno($fh);
+  delete $self->{fileno_to_fh}->{$fno};
+  vec (${$self->{selector}}, $fno, 1) = 0;
 }
 
 sub select_vec_to_fh_list {
