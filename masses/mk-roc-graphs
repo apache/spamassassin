@@ -222,6 +222,8 @@ sub evaluate_scores {
 
 __DATA__
 
+# Suggested commands to plot data from this script:
+
 # ham score distribution:
 ./mk-roc-graphs --scoreset=3  > dat
 gnuplot
@@ -239,6 +241,13 @@ plot [-5:40] [] "dat" using 1:3 with boxes
 gnuplot
 set grid
 plot [0:0.1] [0:0.1] "dat" using 6:7 with linesp
+
+# For a ROC curve, as shown in the literature
+./mk-roc-graphs --scoreset=3 > dat
+set grid
+set xlabel "False Positives (1.0 = 100%)"
+set ylabel "True Positives (1.0 = 100%)"
+plot "dat" using 6:5 with linesp
 
 # same, but tighter:
 ./mk-roc-graphs --scoreset=3  > dat
