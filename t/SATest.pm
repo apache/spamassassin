@@ -613,15 +613,21 @@ sub patterns_run_cb {
 }
 
 sub ok_all_patterns {
+  my ($dont_ok) = shift;
+
   my $wasfailure = 0;
   foreach my $pat (sort keys %patterns) {
     my $type = $patterns{$pat};
     print "\tChecking $type\n";
     if (defined $found{$type}) {
-      ok ($found{$type} == 1) or warn "Found more than once: $type\n";
+      if (!$dont_ok) {
+        ok ($found{$type} == 1) or warn "Found more than once: $type\n";
+      }
     } else {
       warn "\tNot found: $type = $pat\n";
-      ok (0);                     # keep the right # of tests
+      if (!$dont_ok) {
+        ok (0);                     # keep the right # of tests
+      }
       $wasfailure++;
     }
   }
@@ -630,12 +636,12 @@ sub ok_all_patterns {
     print "\tChecking for anti-pattern $type\n";
     if (defined $found_anti{$type}) {
       warn "\tFound anti-pattern: $type = $pat\n";
-      ok (0);
+      if (!$dont_ok) { ok (0); }
       $wasfailure++;
     }
     else
     {
-      ok (1);
+      if (!$dont_ok) { ok (1); }
     }
   }
 
