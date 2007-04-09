@@ -62,10 +62,6 @@ score CTYPE_8SPACE_GIF 2.606 3.744 2.325 1.627 # n=2
 score CUM_SHOT 2.799 2.796 2.632 2.799
 score CURR_PRICE 4.161 2.659 1.412 1.588 # n=2
 score DATE_SPAMWARE_Y2K 2.057 1.031 2.912 2.883
-score DC_GIF_UNO_LARGO 4.199 3.787 2.908 2.275 # n=2
-score DC_IMAGE_SPAM_HTML 0.001 # n=2
-score DC_IMAGE_SPAM_TEXT 0.001 0.001 0.000 0.001 # n=2
-score DC_PNG_UNO_LARGO 2.053 2.092 1.950 0.558 # n=2
 score DEAR_FRIEND 2.649 2.696 2.699 2.699
 score DEAR_HOMEOWNER 2.564 2.398 2.815 3.099 # n=2
 score DEAR_SOMETHING 2.799 2.234 1.721 1.605
@@ -872,6 +868,18 @@ score UNRESOLVED_TEMPLATE 2.801 3.325 3.499 3.132
 
 # ok_locales
 score CHARSET_FARAWAY_HEADER 3.200
+
+endif
+
+###########################################################################
+
+ifplugin Mail::SpamAssassin::Plugin::ImageInfo
+# <gen:mutable>
+score DC_GIF_UNO_LARGO 4.199 3.787 2.908 2.275 # n=2
+score DC_IMAGE_SPAM_HTML 0.001 # n=2
+score DC_IMAGE_SPAM_TEXT 0.001 0.001 0.000 0.001 # n=2
+score DC_PNG_UNO_LARGO 2.053 2.092 1.950 0.558 # n=2
+# </gen:mutable>
 
 endif
 
