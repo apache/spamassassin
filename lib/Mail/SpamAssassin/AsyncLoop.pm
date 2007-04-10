@@ -66,7 +66,7 @@ sub new {
 
 =item $obj = $async->start_lookup($obj)
 
-Register the start a long-running asynchronous lookup operation. C<$obj>
+Register the start of a long-running asynchronous lookup operation. C<$obj>
 is a hash reference containing the following items:
 
 =over 4
