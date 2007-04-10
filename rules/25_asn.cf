@@ -24,12 +24,12 @@
 ###########################################################################
 
 # Requires the Mail::SpamAssassin::Plugin::ASN plugin be loaded.
-# This plugin defines two tags, "_ASN_" and "_ASNCIDR_", which will be
-# populated with ASN and route info, respectively.  See the plugin's POD
-# docs for more info.
+
+# This plugin queries asn.routeviews.org for ASN and route info and adds a
+# header containing the data returned so that it can be used by the bayes
+# tokenizer.  See the plugin's POD docs for more info.
 
 ifplugin Mail::SpamAssassin::Plugin::ASN
-  header          ASN_LOOKUP eval:asn_lookup('asn.routeviews.org', 2)
-  # Add a header so that bayes can tokenize the ASN data
-  add_header      all ASN _ASN_ _ASNCIDR_
+ asn_lookup asn.routeviews.org _ASN_ _ASNCIDR_
+ add_header all ASN _ASN_ _ASNCIDR_
 endif	# Mail::SpamAssassin::Plugin::ASN
