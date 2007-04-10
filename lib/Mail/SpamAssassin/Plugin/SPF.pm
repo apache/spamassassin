@@ -332,7 +332,7 @@ sub _check_spf {
 
 	# http://www.openspf.org/RFC_4408#header-field
 	# wtf - for some reason something is sticking an extra space between the header name and field value
-	if ($hdr =~ /^received-spf:\s+(pass|neutral|(?:soft)?fail|none)\b(?:.*\bidentity=(helo|m(?:ail)?from)\b)?/i) {
+	if ($hdr =~ /^received-spf:\s+(pass|neutral|(?:soft)?fail|none)\b(?:.*\bidentity=(\S+?);?\b)?/i) {
 	  my $result = lc($1);
 
 	  my $identity = '';	# we assume it's a mfrom check if we can't tell otherwise
