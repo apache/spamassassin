@@ -27,7 +27,9 @@ Mail::SpamAssassin::Plugin::ASN - SpamAssassin plugin to look up the Autonomous 
 
  loadplugin Mail::SpamAssassin::Plugin::ASN
 
- header ASN_LOOKUP eval:asn_lookup('asn.routeviews.org', 2)
+ asn_lookup asn.routeviews.org _ASN_ _ASNCIDR_
+
+ add_header all ASN _ASN_ _ASNCIDR_
 
 =head1 DESCRIPTION
 
@@ -40,12 +42,10 @@ zone (see C<ftp://ftp.routeviews.org/dnszones/>).
 
 =head1 TEMPLATE TAGS
 
-This plugin adds two tags, C<_ASN_> and C<_ASNCIDR_>, which can be
-used in places where such tags can usually be used.  For example:
+This plugin allows you to create template tags containing the connecting
+IP's AS number and route info for that AS number.
 
- add_header all ASN _ASN_ _ASNCIDR_
-
-may add something like:
+The default config will add a header that looks like this:
 
  X-Spam-ASN: AS24940 213.239.192.0/18
 
@@ -66,15 +66,6 @@ trigger for a particular message.
 B<Note> that in most cases you should not score on the ASN data directly.
 Bayes learning will probably trigger on the _ASNCIDR_ tag, but probably not
 very well on the _ASN_ tag alone.
-
-B<Note> that the zone to lookup the ASN data in must be given as the
-first parameter to the asn_lookup eval function.  This is especially 
-important if you use a locally mirrored zone.
-
-B<Note> the second parameter to asn_lookup is the number of queries to start.
-This should be set to somewhere between 2 and 5 but may depend on your local
-nameserver configuration.  If you run a local mirror, setting this to 1 should
-probably be enough.
 
 =head1 SEE ALSO
 
@@ -108,103 +99,162 @@ sub new {
   my $self = $class->SUPER::new($mailsa);
   bless ($self, $class);
   
-  $self->register_eval_rule("asn_lookup");
+  $self->set_config($mailsa->{conf});
 
   return $self;
 }
 
-sub asn_lookup {
-  my ($self, $scanner, $zone, $num_lookups) = @_;
-  if (!$scanner->is_dns_available()) {
-    $self->{dns_not_available} = 1;
-    return;
-  } else {
-    # due to re-testing dns may become available after being unavailable
-    $self->{dns_not_available} = 0;
-  }
+###########################################################################
 
-  # Default to empty strings; otherwise, the tags will be left as _ASN_
-  # and _ASNCIDR_ which may confuse bayes learning, I suppose.
-  $scanner->{tag_data}->{ASN} = '';
-  $scanner->{tag_data}->{ASNCIDR} = '';
+sub set_config {
+  my ($self, $conf) = @_;
+  my @cmds = ();
 
-  # We need to grab this here since the check_tick event does not
-  # get *our* name, but the name of whatever rule is currently
-  # being worked on.
-  $scanner->{myname} = $scanner->get_current_eval_rule_name();
+=head1 USER SETTINGS
 
-  my $ip = '';
-  foreach my $relay (@{$scanner->{relays_untrusted}}) {
-    if ($relay->{ip_private}) {
-      dbg("ASN: skipping untrusted relay $relay->{ip}, it's private");
-    } else {
-      $ip = $relay->{ip};
-      last;
+=over 4
+
+=item asn_lookup asn-zone.example.com [ _ASNTAG_ _ASNCIDRTAG_ ]
+
+Use this to lookup the ASN info for first external IP address in the specified
+zone and add the AS number to the first specified tag and routing info to the
+second specified tag.
+
+If no tags are specified the AS number will be added to the _ASN_ tag and the
+routing info will be added to the _ASNCIDR_ tag.  You must specify either none
+or both of the tags.  Tags must start and end with an underscore.
+
+If two or more I<asn_lookup>s use the same set of template tags, the results of
+their lookups will be appended to each other in the template tag values in no
+particular order.  Duplicate results will be omitted when combining results.
+In a similar fashion, you can also use the same template tag for both the AS
+number tag and the routing info tag.
+
+Examples:
+
+  asn_lookup asn.routeviews.org
+
+  asn_lookup asn.routeviews.org _ASN_ _ASNCIDR_
+  asn_lookup myview.example.com _MYASN_ _MYASNCIDR_
+
+  asn_lookup asn.routeviews.org _COMBINEDASN_ _COMBINEDASNCIDR_
+  asn_lookup myview.example.com _COMBINEDASN_ _COMBINEDASNCIDR_
+
+  asn_lookup in1tag.example.net _ASNDATA_ _ASNDATA_
+
+=cut
+
+  push (@cmds, {
+    setting => 'asn_lookup',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      unless (defined $value && $value !~ /^$/) {
+        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
+      unless ($value =~ /^(\S+?)\.?(?:\s+_(\S+)_\s+_(\S+)_)?$/) {
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+      my $zone = $1.'.';
+      my $asn_tag = (defined $2 ? $2 : 'ASN');
+      my $route_tag = (defined $3 ? $3 : 'ASNCIDR');
+
+      push @{$self->{main}->{conf}->{asnlookups}}, { zone=>$zone, asn_tag=>$asn_tag, route_tag=>$route_tag };
     }
-  }
-  
-  if ($ip eq '') {
-    dbg("ASN: $scanner->{myname}: No IP address from relays_external");
-    return;
-  } else {
-    dbg("ASN: $scanner->{myname}: external IP address $ip");
-  }
-  
-  my $lookup = '';
-  if ($ip =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) {
-    $lookup = "$4.$3.$2.$1.$zone";
-  }
-  
-  if ($lookup eq '') {
-    dbg("ASN: $scanner->{myname}: $ip does not look like an IP address");
-    return;
-  } else {
-    dbg("ASN: $scanner->{myname}: will look up $lookup");
-  }
+  });
 
-  # DNS magic - start the lookup and have the Net::DNS package
-  # store the result in our own structure
-  for (my $i = 0; $i < $num_lookups; $i++) {
-    $scanner->{main}->{resolver}->bgsend($lookup, 'TXT', undef, sub {
-      my $pkt = shift;
-      my $id = shift;
-      $scanner->{asnlookup} = $pkt;
-    });
-  }
-  
-  return;
+  $conf->{parser}->register_commands(\@cmds);
 }
 
-sub check_tick {
+# ---------------------------------------------------------------------------
+
+sub parsed_metadata {
   my ($self, $opts) = @_;
 
-  return if ($self->{dns_not_available});
+  my $scanner = $opts->{permsgstatus};
+  my $conf = $self->{main}->{conf};
 
-  my $pms = $opts->{permsgstatus};
+  unless ($conf->{asnlookups}) {
+    dbg("asn: no asn_lookup configured, skipping ASN lookups");
+    return; # no asn_lookups mean no tags need to be initialized
+  }
 
-  # This will be defined if Net::DNS had something to deliver (see
-  # ->bgsend() in sub asn_lookup() above)
-  if ($pms->{asnlookup}) {
+  # get reversed IP-quad of last external relay to lookup
+  # don't return until we've initialized the template tags
+  my $reversed_ip_quad;
+  my $relay = $scanner->{relays_external}->[0];
+  if (!$scanner->is_dns_available()) {
+    dbg("asn: DNS is not available, skipping ASN checks");
+  } elsif ($relay->{ip_private}) {
+    dbg("asn: first external relay is a private IP, skipping ASN check");
+  } else {
+    if (defined $relay->{ip} && $relay->{ip} =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) {
+      $reversed_ip_quad = "$4.$3.$2.$1";
+      dbg("asn: using first external relay IP for lookups: $relay->{ip}");
+    } else {
+      dbg("asn: could not parse IP from first external relay, skipping ASN check");
+    }
+  }
+
+  # random note: we use arrays and array indices rather than hashes and hash
+  # keys in case someone wants the same zone added to multiple sets of tags
+  my $index = 0;
+  foreach my $entry (@{$conf->{asnlookups}}) {
+    # initialize the tag data so that if no result is returned from the DNS
+    # query we won't end up with a missing tag
+    unless (defined $scanner->{tag_data}->{$entry->{asn_tag}}) {
+      $scanner->{tag_data}->{$entry->{asn_tag}} = '';
+    }
+    unless (defined $scanner->{tag_data}->{$entry->{route_tag}}) {
+      $scanner->{tag_data}->{$entry->{route_tag}} = '';
+    }
+    next unless $reversed_ip_quad;
   
-    # The regular Net::DNS dance around RRs; make sure to delete
-    # the asnlookup structure, otherwise we would re-do on each
-    # call of check_tick
-    my $packet = delete $pms->{asnlookup};
-    my @answer = $packet->answer;
-    foreach my $rr (@answer) {
-      dbg("ASN: $pms->{myname}: lookup result packet: " . $rr->string);
-      if ($rr->type eq 'TXT') {
-        my @items = split(/ /, $rr->txtdata);
-        $pms->{tag_data}->{ASN} = sprintf('AS%s', $items[0]);
-        my $c = sprintf('%s/%s ', $items[1], $items[2]);
-        if (!($pms->{tag_data}->{ASNCIDR} =~ /$c/)) {
-          $pms->{tag_data}->{ASNCIDR} .= $c;
+    # do the DNS query, have the callback process the result rather than poll for them later
+    my $zone_index = $index;
+    my $id = $scanner->{main}->{resolver}->bgsend("${reversed_ip_quad}.$entry->{zone}", 'TXT', undef, sub {
+      my $pkt = shift;
+      $self->process_dns_result($scanner, $pkt, $zone_index);
+    });
+
+    $scanner->{async}->start_lookup({ key=>"asnlookup-${zone_index}-$entry->{zone}", id=>$id, type=>'TXT' });
+    dbg("asn: launched DNS TXT query for ${reversed_ip_quad}.$entry->{zone} in background");
+
+    $index++;
+  }
+}
+
+sub process_dns_result {
+  my ($self, $scanner, $response, $zone_index) = @_;
+
+  my $conf = $self->{main}->{conf};
+
+  my $zone = $conf->{asnlookups}[$zone_index]->{zone};
+  my $asn_tag = $conf->{asnlookups}[$zone_index]->{asn_tag};
+  my $route_tag = $conf->{asnlookups}[$zone_index]->{route_tag};
+
+  my @answer = $response->answer;
+
+  foreach my $rr (@answer) {
+    dbg("asn: $zone: lookup result packet: '".$rr->string."'");
+    if ($rr->type eq 'TXT') {
+      my @items = split(/ /, $rr->txtdata);
+      unless ($#items == 2) {
+        dbg("asn: TXT query response format unknown, ignoring zone: $zone response: '".$rr->txtdata."'");
+        next;
+      }
+      unless ($scanner->{tag_data}->{$asn_tag} =~ /\bAS$items[0]\b/) {
+        if ($scanner->{tag_data}->{$asn_tag}) {
+          $scanner->{tag_data}->{$asn_tag} .= " AS$items[0]";
+        } else {
+          $scanner->{tag_data}->{$asn_tag} = "AS$items[0]";
         }
-        
-        # We are calling the internal _handle_hit because we want the
-        # score to be zero, but still show it up in the report
-        # 20061217 - disabled,will give score anyway :/
-        # $pms->_handle_hit($pms->{myname}, 0.001, sprintf('AS%s %s/%s', @items));
+      }
+      unless ($scanner->{tag_data}->{$route_tag} =~ m{\b$items[1]/$items[2]\b}) {
+        if ($scanner->{tag_data}->{$route_tag}) {
+          $scanner->{tag_data}->{$route_tag} .= " $items[1]/$items[2]";
+        } else {
+          $scanner->{tag_data}->{$route_tag} = "$items[1]/$items[2]";
+        }
       }
     }
   }
