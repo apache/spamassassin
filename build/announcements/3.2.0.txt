@@ -122,22 +122,6 @@ Plugins:
 
  * core EvalTests code moved into various plugins.
 
-== Removed ==
-
- * Rule QA Stuff: removed, it's not part of the distributed code
-
- * The Great Rules Directory reorg: removed, it's only visible in SVN
-
- * bug 4700: certain privileged configuration settings can inject code, due to a bad fix for bug 3846.  Back that out: already in 3.1.x
-
- * decided to add a public function to set the rendered information instead of expecting plugins to nastily muck with our internal data...  bad juju: an implementation detail I think, not too important
-
- * Bump HTML::Parser minimum version to prevent errors, and to support charset normalization: I don't think we need to call this out when it's dealt with in the INSTALL file
-
- * ArchiveIterator/mass-check cleanups: too vague, can fall under "misc bug fixes"
-
- * mass-check client/server mode: mass-check isn't distributed in the release files
-
  * Plus lots of Bug Fixes.
 
 
