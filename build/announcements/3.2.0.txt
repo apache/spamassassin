@@ -45,51 +45,100 @@ installation notes.
 Summary of major changes since 3.1.x
 ------------------------------------
 
-- Added new plugin Bayes -- New Bayes Evaluations.
+Changes to the core code:
 
-- Added new plugin BodyEval -- New Body Evaluations.
+ * trusted_networks/internal_networks new fixes and behaviors: 
+   SpamAssassin now by default uses 127.0.0.1 as a trusted network.   
 
-- Added new plugin BodyRuleBaseExtractor -- New rule extract "bases" from body rules.
+ * bug 3109: short-circuiting of 'definite ham' or 'definite spam' messages based on individual short-circuit rules using the 'shortcircuit' setting, by Dallas Engelken <dallase /at/ nmgi.com>.
 
-- Added new plugin Check -- New Checks.
+ * bug 5305: implement msa_networks for ISPs to specify their Mail Submission Agents, and extend network trust accordingly.
 
-- Added new plugin DNSEval -- New DNS Evaluations.
+ * bug 4636: Add support for charset normalization, so rules can be written in UTF-8 to match text in other charsets.
 
-- Added new plugin HeaderEval -- New Header Evaluations.
+ * sa-compile: compilation of SpamAssassin rules into a fast parallel-matching DFA, implemented in native code.
 
-- Added new plugin HTMLEval -- New Evaluation for HTML.
+ * tflags multiple: allow rules to match multiple times.
 
-- Added new plugin HTTPSMismatch -- New check for HTTP mis-matchs.
+ * bug 4589: allow M::SA::Message to use IO::File objects to read in message (same as GLOB).
 
-- Added new plugin MIMEEval -- New MIME Evaluation checks.
+ * bug 4363: if a message uses CRLF for line endings, we should use it as well, otherwise stay with LF as usual; important for Windows users.
 
-- Added new plugin OneLineBodyRuleType -- New Body Rule Type.
+ * bug 4515: content preview was omitting first paragraph when no Subject: header was present.
 
-- Added new plugin RelayEval -- New Evaluation for Relays.
+ * Received header parsing updates/fixes/additions.
 
-- Added new plugin Rule2XSBody -- Speeds up SpamAssassin by compiling regexps.
+ * sa-update stuffs [TODO: need something more specific here]
 
-- Added new plugin Shortcircuit -- New short-circuit evaluation for certain rules.
+ * Bugs 4606, 4609: Adjust MIME parsing limits for nested multipart/* and message/rfc822 MIME parts.
 
-- Added new plugin URIDetail -- New test for URI's using detailed URI Information.
+ * bug 3466: do the bayes expiry after results have been passed back to the client from spamd, helps avoid client timeouts, etc.
 
-- Added new plugin URIEval -- New URI Evaluations.
+ * Removed dependency on Text::Wrap CPAN module.
 
-- Added new plugin VBounce -- New Virus Bounce 'rescue' 
+Spamc / spamd:
 
-- Added new plugin WLBLEval -- New Wwhitelist Blacklist Options
+ * bug 4603: Mail::SpamAssassin::Spamd::Apache2 -- mod_perl2 module, implementing spamd as a mod_perl module, contributed as a Google Summer of Code project by Radoslaw Zielinski.
 
-- New sa-compile added. This speeds up SpamAssassin by compiling regexps.
+ * spamc: Add '-K' option to ping spamd.
 
-- Various new rules added.
+ * bug 3991: spamd can now listen on UNIX domain, TCP, and SSL sockets simultaneously.  Command-line semantics extended slightly, although fully backwards compatibly; add the --ssl-port switch to allow TCP and SSL listening at the same time.
 
-- Various old rules removed.
+ * more complete IPv6 support.
 
-- Bug Fixes.
+ * spamc: add '-z' switch, which compresses mails to be scanned using zlib compression; very useful for long-distance use of spamc over the internet.
 
+ * bug 5296: spamc '--headers' switch, which scans messages and transmits back just rewritten headers.  This is more bandwidth-efficient than the normal mode of scanning, but only works for 'report_safe 0'.
+ 
+ * Bump spamc/spamd's protocol version to 1.4, to reflect new HEADERS verb used for '--headers'.
 
+Mail::SpamAssassin modules and API:
 
-- [TODO]
+ * bug 4517: rule instrumentation plugin hooks, to measure performance, from John Gardiner Myers <jgmyers /at/ proofpoint.com>.
+
+ * add two features to core rule-parsing code; 1. optional behaviour to recurse through subdirs looking for .cf/.pre's, to support rules compilers working on rulesrc dir.  2. call back into invoking code on lint failure, so rule compiler can detect which rules exactly fail the lint check.
+
+ * bug 5206: detect duplicate rules, and silently merge them internally for greater efficiency.
+
+ * bug 5243: add Plugin::register_method_priority() API, allowing plugins to control the relative ordering of plugin callbacks relative to other plugins' implementations.
+
+ * Reduced memory footprint.
+
+Plugins:
+
+ * bug 5236: Support Mail::SPF replacement for Mail::SPF::Query.
+
+ * DomainKeys/DKIM stuffs [TODO: need something more specific here]
+
+ * bug 5127: allow mimeheader :raw rules to match newlines and folded-header whitespace in MIME header strings.
+
+ * bug 4770: add ASN.pm plugin, contributed by Matthias Leisi <matthias at leisi.net>
+
+ * bug 5271: move ImageInfo ruleset into 3.2.0 core rules, thanks to Dallas Engelken <dallase /at/ nmgi.com>.
+
+ * VBounce ruleset and plugin: detect spurious bounce messages sent by broken mail systems in response to spam or viruses.  (Based on Tim Jackson's "bogus-virus-warnings.cf" ruleset.)
+
+ * Move rule functionality and checking into separate Check plugin, allowing third parties to implement alternative scanner core algorithms.
+
+ * core EvalTests code moved into various plugins.
+
+== Removed ==
+
+ * Rule QA Stuff: removed, it's not part of the distributed code
+
+ * The Great Rules Directory reorg: removed, it's only visible in SVN
+
+ * bug 4700: certain privileged configuration settings can inject code, due to a bad fix for bug 3846.  Back that out: already in 3.1.x
+
+ * decided to add a public function to set the rendered information instead of expecting plugins to nastily muck with our internal data...  bad juju: an implementation detail I think, not too important
+
+ * Bump HTML::Parser minimum version to prevent errors, and to support charset normalization: I don't think we need to call this out when it's dealt with in the INSTALL file
+
+ * ArchiveIterator/mass-check cleanups: too vague, can fall under "misc bug fixes"
+
+ * mass-check client/server mode: mass-check isn't distributed in the release files
+
+ * Plus lots of Bug Fixes.
 
 
 A more detailed change log can be read here:
