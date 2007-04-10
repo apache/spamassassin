@@ -347,8 +347,8 @@ mapped to 'sendinghost.spamassassin.org', you should specify
 C<sendinghost.spamassassin.org> or just C<spamassassin.org> here.
 
 Note that this requires that C<internal_networks> be correct.  For simple cases,
-it will be, but for a complex network, or running with DNS checks off
-or with C<-L>, you may get better results by setting that parameter.
+it will be, but for a complex network you may get better results by setting that
+parameter.
 
 e.g.
 
