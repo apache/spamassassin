@@ -98,7 +98,7 @@ else
     WINLIBS        => 'ws2_32.lib',
     SSLLIBS        => 'ssleay32.lib libeay32.lib',
 
-    SPAMC_FILES    => join(' ', 'spamc.c',catfile('replace', 'getopt.c')),
+    SPAMC_FILES    => 'spamc.c getopt.c',
     LIBSPAMC_FILES => 'libspamc.c utils.c',
   );
 
