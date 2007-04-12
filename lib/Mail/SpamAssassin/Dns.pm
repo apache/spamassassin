@@ -104,7 +104,6 @@ sub do_rbl_lookup {
   # only make a specific query once
   if (!$existing) {
     dbg("dns: launching DNS $type query for $host in background");
-    $self->{query_launch_time} = time;
 
     my $ent = {
       key => $key,
@@ -171,8 +170,6 @@ sub do_dns_lookup {
 
   $ent->{id} = $id;     # tie up the loose end
   $self->{async}->start_lookup($ent);
-
-  $self->{query_launch_time} = time;
 }
 
 ###########################################################################
@@ -331,9 +328,9 @@ sub process_dnsbl_set {
 sub harvest_until_rule_completes {
   my ($self, $rule) = @_;
 
-  return if !defined $self->{query_launch_time};
+  return if !defined $self->{async}->get_last_start_lookup_time();
 
-  my $deadline = $self->{conf}->{rbl_timeout} + $self->{query_launch_time};
+  my $deadline = $self->{conf}->{rbl_timeout} + $self->{async}->get_last_start_lookup_time();
   my $now = time;
 
   my @left = $self->{async}->get_pending_lookups();
@@ -351,7 +348,7 @@ sub harvest_until_rule_completes {
     # dynamic timeout
     my $dynamic = (int($self->{conf}->{rbl_timeout}
                       * (1 - (($total - scalar @left) / $total) ** 2) + 0.5)
-                  + $self->{query_launch_time});
+                  + $self->{async}->get_last_start_lookup_time());
     $deadline = $dynamic if ($dynamic < $deadline);
     $now = time;
   }
@@ -360,9 +357,9 @@ sub harvest_until_rule_completes {
 sub harvest_dnsbl_queries {
   my ($self) = @_;
 
-  return if !defined $self->{query_launch_time};
+  return if !defined $self->{async}->get_last_start_lookup_time();
 
-  my $deadline = $self->{conf}->{rbl_timeout} + $self->{query_launch_time};
+  my $deadline = $self->{conf}->{rbl_timeout} + $self->{async}->get_last_start_lookup_time();
   my $now = time;
 
   my @left = $self->{async}->get_pending_lookups();
@@ -376,7 +373,7 @@ sub harvest_dnsbl_queries {
     # dynamic timeout
     my $dynamic = (int($self->{conf}->{rbl_timeout}
                       * (1 - (($total - scalar @left) / $total) ** 2) + 0.5)
-                  + $self->{query_launch_time});
+                  + $self->{async}->get_last_start_lookup_time());
     $deadline = $dynamic if ($dynamic < $deadline);
     $now = time;    # and loop again
   }
@@ -393,7 +390,7 @@ sub harvest_dnsbl_queries {
     elsif (defined @{$query->{rules}}) {
       $string = join(",", grep defined, @{$query->{rules}});
     }
-    my $delay = time - $self->{query_launch_time};
+    my $delay = time - $self->{async}->get_last_start_lookup_time();
     dbg("dns: timeout for $string after $delay seconds");
   }
 
@@ -422,7 +419,6 @@ sub rbl_finish {
 
   $self->set_rbl_tag_data();
 
-  delete $self->{query_launch_time};
   delete $self->{dnscache};
   delete $self->{dnspost};
   delete $self->{dnsuri};
