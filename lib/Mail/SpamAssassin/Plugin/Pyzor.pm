@@ -89,6 +89,29 @@ Whether to use Pyzor, if it is available.
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL
   });
 
+=item pyzor_max NUMBER		(default: 5)
+
+This option sets how often a message's body checksum must have been
+reported to the Pyzor server before SpamAssassin will consider the Pyzor
+check as matched.
+
+As most clients should not be auto-reporting these checksums, you should
+set this to a relatively low value, e.g. C<5>.
+
+=cut
+
+  push (@cmds, {
+    setting => 'pyzor_max',
+    default => 5,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
+  });
+
+=back
+
+=head1 ADMINISTRATOR OPTIONS
+
+=over 4
+
 =item pyzor_timeout n		(default: 3.5)
 
 How many seconds you wait for Pyzor to complete, before scanning continues
@@ -114,32 +137,10 @@ removing one of them.
 
   push (@cmds, {
     setting => 'pyzor_timeout',
+    is_admin => 1,
     default => 3.5,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
   });
-
-=item pyzor_max NUMBER		(default: 5)
-
-This option sets how often a message's body checksum must have been
-reported to the Pyzor server before SpamAssassin will consider the Pyzor
-check as matched.
-
-As most clients should not be auto-reporting these checksums, you should
-set this to a relatively low value, e.g. C<5>.
-
-=cut
-
-  push (@cmds, {
-    setting => 'pyzor_max',
-    default => 5,
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
-  });
-
-=back
-
-=head1 ADMINISTRATOR OPTIONS
-
-=over 4
 
 =item pyzor_options options
 

@@ -26,7 +26,7 @@ rules apply to all URIs found in the message.
 
   loadplugin    Mail::SpamAssassin::Plugin::URIDetail
 
-=head1 CONFIGURATION
+=head1 RULE DEFINITIONS AND PRIVILEGED SETTINGS
 
 The format for defining a rule is as follows:
 
@@ -99,6 +99,7 @@ sub set_config {
 
   push (@cmds, {
     setting => 'uri_detail',
+    is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
 

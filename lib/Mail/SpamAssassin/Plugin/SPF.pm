@@ -79,19 +79,6 @@ sub set_config {
 
 =over 4
 
-=item spf_timeout n		(default: 5)
-
-How many seconds to wait for an SPF query to complete, before scanning
-continues without the SPF result.
-
-=cut
-
-  push (@cmds, {
-    setting => 'spf_timeout',
-    default => 5,
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
-  });
-
 =item whitelist_from_spf add@ress.com
 
 Use this to supplement the whitelist_from addresses with a check against the
@@ -136,6 +123,20 @@ these are often targets for spammer spoofing.
 =head1 ADMINISTRATOR OPTIONS
 
 =over 4
+
+=item spf_timeout n		(default: 5)
+
+How many seconds to wait for an SPF query to complete, before scanning
+continues without the SPF result.
+
+=cut
+
+  push (@cmds, {
+    setting => 'spf_timeout',
+    is_admin => 1,
+    default => 5,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
+  });
 
 =item do_not_use_mail_spf (0|1)		(default: 0)
 

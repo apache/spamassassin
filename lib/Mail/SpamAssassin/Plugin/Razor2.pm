@@ -102,6 +102,12 @@ Whether to use Razor2, if it is available.
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
 
+=back
+
+=head1 ADMINISTRATOR SETTINGS
+
+=over 4
+
 =item razor_timeout n		(default: 5)
 
 How many seconds you wait for Razor to complete before you go on without
@@ -111,6 +117,7 @@ the results
 
   push(@cmds, {
     setting => 'razor_timeout',
+    is_admin => 1,
     default => 5,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
@@ -124,6 +131,7 @@ Currently this is left to Razor to decide.
 
   push(@cmds, {
     setting => 'razor_config',
+    is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
   });
 

@@ -31,7 +31,19 @@ domain names from those, querying their NS records in DNS, resolving
 the hostnames used therein, and querying various DNS blocklists for
 those IP addresses.  This is quite effective.
 
-=head1 CONFIGURATION
+=head1 USER SETTINGS
+
+=over 4
+
+=item uridnsbl_skip_domain domain1 domain2 ...
+
+Specify a domain, or a number of domains, which should be skipped for the
+URIBL checks.  This is very useful to specify very common domains which are
+not going to be listed in URIBLs.
+
+=back
+
+=head1 RULE DEFINITIONS AND PRIVILEGED SETTINGS
 
 =over 4
 
@@ -88,6 +100,12 @@ Example:
   urirhssub   URIBL_RHSBL_4    rhsbl.example.org.   A    127.0.0.4
   urirhssub   URIBL_RHSBL_8    rhsbl.example.org.   A    8
 
+=back
+
+=head1 ADMINISTRATOR SETTINGS
+
+=over 4
+
 =item uridnsbl_timeout N		(default: 2)
 
 Specify the maximum number of seconds to wait for a result before
@@ -97,12 +115,6 @@ DNS timeout applied for DNSBL lookups on IPs found in the Received headers.
 =item uridnsbl_max_domains N		(default: 20)
 
 The maximum number of domains to look up.
-
-=item uridnsbl_skip_domain domain1 domain2 ...
-
-Specify a domain, or a number of domains, which should be skipped for the
-URIBL checks.  This is very useful to specify very common domains which are
-not going to be listed in URIBLs.
 
 =back
 
@@ -285,18 +297,21 @@ sub set_config {
 
   push(@cmds, {
     setting => 'uridnsbl_timeout',
+    is_admin => 1,
     default => 3,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
 
   push(@cmds, {
     setting => 'uridnsbl_max_domains',
+    is_admin => 1,
     default => 20,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
 
   push (@cmds, {
     setting => 'uridnsbl',
+    is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value =~ /^(\S+)\s+(\S+)\s+(\S+)$/) {
@@ -319,6 +334,7 @@ sub set_config {
 
   push (@cmds, {
     setting => 'urirhsbl',
+    is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value =~ /^(\S+)\s+(\S+)\s+(\S+)$/) {
@@ -341,6 +357,7 @@ sub set_config {
 
   push (@cmds, {
     setting => 'urirhssub',
+    is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value =~ /^(\S+)\s+(\S+)\s+(\S+)\s+(\d{1,10}|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/) {

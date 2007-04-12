@@ -94,19 +94,6 @@ sub set_config {
 
 =over 4
 
-=item dkim_timeout n             (default: 5)
-
-How many seconds to wait for a DKIM query to complete, before
-scanning continues without the DKIM result.
-
-=cut
-
-  push (@cmds, {
-    setting => 'dkim_timeout',
-    default => 5,
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
-  });
-
 =item whitelist_from_dkim add@ress.com [identity]
 
 Use this to supplement the whitelist_from addresses with a check to make sure
@@ -185,6 +172,26 @@ these are often targets for spammer spoofing.
       $self->{parser}->add_to_addrlist_rcvd ('def_whitelist_from_dkim',
 						$address, $identity);
     }
+  });
+
+=back
+
+=head1 ADMINISTRATOR SETTINGS
+
+=over 4
+
+=item dkim_timeout n             (default: 5)
+
+How many seconds to wait for a DKIM query to complete, before
+scanning continues without the DKIM result.
+
+=cut
+
+  push (@cmds, {
+    setting => 'dkim_timeout',
+    is_admin => 1,
+    default => 5,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
   });
 
   $conf->{parser}->register_commands(\@cmds);
