@@ -63,9 +63,12 @@ SPAMASSASSIN RELEASE PROCEDURE
   line.   Ensure the correct version number is present in $VERSION
   and $EXTRA_VERSION.
 
-  Prerelease versions are formatted like this -- "pre4" -- in
-  $EXTRA_VERSION, and $IS_DEVEL_BUILD is left as 1 instead of commented.
-  When referred to in full, it's "3.1.0-pre4".
+  Prereleases: formatted like this: "pre4" -- in $EXTRA_VERSION, and
+  $IS_DEVEL_BUILD is left as 1 instead of commented. When referred to in
+  full, it's "3.1.0-pre4".
+
+  Release candidates: formatted like this: "rc2" -- in $EXTRA_VERSION, and
+  $IS_DEVEL_BUILD is commented. When referred to in full, it's "3.1.0-rc2".
 
   [NOTE: when editing files in these instructions, you may have to
   use another checkout somewhere else, check in the changes there,
@@ -170,7 +173,10 @@ SPAMASSASSIN RELEASE PROCEDURE
 - take a copy of the MD5sum line output.
 
 - by default, they're written to ~/site/released/ .
-  Copy them to wherever you want, yourself.
+  Copy them to wherever you want, yourself:
+
+    mkdir -p ~/public_html/devel
+    mv ~/site/released/Mail-SpamAssassin-3.2.0-rc2.* ~/public_html/devel
 
 - test the tar.gz and zip files!  redo until they work!! ;)
 
@@ -184,10 +190,11 @@ SPAMASSASSIN RELEASE PROCEDURE
     vi !$
 
 - (for any rc, prerelease, or full release) Place the tarballs in a
-  discreet location (discreet means not linked from downloads, but
-  included in the vote mail) and request a vote on the development mailing
-  list to make the release.  Post the URL, md5sums/sha1sums, and proposed
-  release announcement mail.  
+  discreet location (discreet means not linked from the "downloads" page
+  of the website, but included in the vote mail) and request a vote on the
+  development mailing list to make the release.  Post the URL,
+  md5sums/sha1sums, and proposed release announcement mail to the dev
+  list. 
 
   Pre-releases and RCs require just lazy consensus -- ie. no objections.
 

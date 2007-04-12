@@ -44,7 +44,7 @@ Changes to the core code:
 
  * new behavior for trusted_networks/internal_networks: the 127.* network is now always considered trusted and internal, regardless of configuration.
 
- * bug 3109: short-circuiting of 'definite ham' or 'definite spam' messages based on individual short-circuit rules using the 'shortcircuit' setting, by Dallas Engelken <dallase /at/ nmgi.com>.
+ * bug 3109: short-circuiting of 'definite ham' or 'definite spam' messages based on individual short-circuit rules using the 'shortcircuit' setting, by Dallas Engelken <dallase /at/ uribl.com>.
 
  * bug 5305: implement 'msa_networks', for ISPs to specify their Mail Submission Agents, and extend network trust accordingly.
 
@@ -110,7 +110,7 @@ Plugins:
 
  * bug 4770: add ASN.pm plugin, contributed by Matthias Leisi <matthias at leisi.net>
 
- * bug 5271: move ImageInfo ruleset into 3.2.0 core rules, thanks to Dallas Engelken <dallase /at/ nmgi.com>.
+ * bug 5271: move ImageInfo ruleset into 3.2.0 core rules, thanks to Dallas Engelken <dallase /at/ uribl.com>.
 
  * VBounce ruleset and plugin: detect spurious bounce messages sent by broken mail systems in response to spam or viruses.  (Based on Tim Jackson's "bogus-virus-warnings.cf" ruleset.)
 
