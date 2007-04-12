@@ -389,6 +389,17 @@ sub set_config {
     }
   });
 
+  # obsolete
+  push(@cmds, {
+    setting => 'uridnsbl_timeout',
+    code => sub {
+      # not a lint_warn(), since it's pretty harmless and we don't want
+      # to break stuff like sa-update
+      warn("config: 'uridnsbl_timeout' is obsolete, use 'rbl_timeout' instead");
+      return 0;
+    }
+  });
+
   $conf->{parser}->register_commands(\@cmds);
 }
 
