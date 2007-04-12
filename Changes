@@ -1,4 +1,308 @@
 ------------------------------------------------------------------------
+r527871 | jm | 2007-04-12 10:20:11 +0000 (Thu, 12 Apr 2007) | 1 line
+
+traditional sorting of MANIFEST
+------------------------------------------------------------------------
+r527868 | jm | 2007-04-12 09:56:08 +0000 (Thu, 12 Apr 2007) | 1 line
+
+add a new, aggressive multi-process spamd preforking stress-test.  skipped by default, unless 'run_spamd_prefork_stress_test' is set to 'y' in t/config
+------------------------------------------------------------------------
+r527859 | jm | 2007-04-12 09:42:35 +0000 (Thu, 12 Apr 2007) | 1 line
+
+add a deprecation message for 'uridnsbl_timeout'; since it was a public config setting in released code, there's a good chance users are using it, and removing it entirely would result in lint errors for them
+------------------------------------------------------------------------
+r527840 | jm | 2007-04-12 08:50:02 +0000 (Thu, 12 Apr 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r527787 | dos | 2007-04-12 06:26:14 +0000 (Thu, 12 Apr 2007) | 1 line
+
+bah, twice today
+------------------------------------------------------------------------
+r527786 | dos | 2007-04-12 06:25:50 +0000 (Thu, 12 Apr 2007) | 12 lines
+
+bug 5384: uridnsbl interaction with skip_rbl_checks in 3.2.0, differing behavior from 3.1.8
+
+ - remove the uridnsbl_timeout option, it wasn't being used ever since the
+   M::SA::AsyncLoop code was implemented
+
+ - move the "query_launch_time" from M::SA::Dns into M::SA::AsyncLoop and have
+   it set whenever $async->start_lookup is called so that code dealing with DNS
+   timeouts isn't scattered all over the place (and via undocumented methods)
+
+ - add a method to M::SA::AsyncLoop to get the start time of the last DNS query
+   so that M::SA::Dns can (continue to) take care of timing out DNS queries
+
+------------------------------------------------------------------------
+r527741 | dos | 2007-04-12 01:29:10 +0000 (Thu, 12 Apr 2007) | 1 line
+
+stray bit
+------------------------------------------------------------------------
+r527740 | dos | 2007-04-12 01:28:35 +0000 (Thu, 12 Apr 2007) | 49 lines
+
+bug 5410: config options that cause DNS lookups should be privileged
+          (and timeouts should require admin privs)
+
+The following config options (all offered by plugins) can now only be used in
+user_pref files (or equivalent) if allow_user_rules is enabled:
+
+  MIMEHeader.pm:    setting => 'mimeheader',
+
+  ReplaceTags.pm:    setting => 'replace_tag',
+  ReplaceTags.pm:    setting => 'replace_pre',
+  ReplaceTags.pm:    setting => 'replace_inter',
+  ReplaceTags.pm:    setting => 'replace_post',
+  ReplaceTags.pm:    setting => 'replace_rules',
+  ReplaceTags.pm:    setting => 'replace_start',
+  ReplaceTags.pm:    setting => 'replace_end',
+
+  URIDetail.pm:    setting => 'uri_detail',
+
+  URIDNSBL.pm:    setting => 'uridnsbl',
+  URIDNSBL.pm:    setting => 'urirhsbl',
+  URIDNSBL.pm:    setting => 'urirhssub',
+
+
+The following config options (all offered by plugins) can now only be used in
+site config files:
+
+  ASN.pm:    setting => 'asn_lookup',
+
+  DCC.pm:    setting => 'dcc_timeout',
+
+  DKIM.pm:    setting => 'dkim_timeout',
+
+  DomainKeys.pm:    setting => 'domainkeys_timeout',
+
+  Pyzor.pm:    setting => 'pyzor_timeout',
+
+  Razor2.pm:    setting => 'razor_timeout',
+  Razor2.pm:    setting => 'razor_config',
+
+  SPF.pm:    setting => 'spf_timeout',
+
+  URIDNSBL.pm:    setting => 'uridnsbl_timeout',
+  URIDNSBL.pm:    setting => 'uridnsbl_max_domains',
+
+
+The following config option can now only be used in site config files:
+
+  Conf.pm:    setting => 'rbl_timeout',
+
+------------------------------------------------------------------------
+r527640 | jm | 2007-04-11 20:01:48 +0000 (Wed, 11 Apr 2007) | 1 line
+
+welcome, Doc, to the PMC ;)
+------------------------------------------------------------------------
+r527636 | jm | 2007-04-11 19:48:06 +0000 (Wed, 11 Apr 2007) | 1 line
+
+fix spamc building on Win32 -- there's no replace/getopt.c anymore, just getopt.c
+------------------------------------------------------------------------
+r527418 | jm | 2007-04-11 08:50:02 +0000 (Wed, 11 Apr 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r527324 | maddoc | 2007-04-10 22:10:32 +0000 (Tue, 10 Apr 2007) | 1 line
+
+Changes to 3.2.0.txt
+------------------------------------------------------------------------
+r527323 | maddoc | 2007-04-10 22:03:13 +0000 (Tue, 10 Apr 2007) | 1 line
+
+Changes to 3.2.0.txt
+------------------------------------------------------------------------
+r527306 | dos | 2007-04-10 21:26:56 +0000 (Tue, 10 Apr 2007) | 1 line
+
+make sure we don't use an unknown identity as a mfrom identity... just like I wrote in the POD
+------------------------------------------------------------------------
+r527265 | dos | 2007-04-10 19:52:47 +0000 (Tue, 10 Apr 2007) | 1 line
+
+be a little more flexible with whitespace when re-using received-spf headers
+------------------------------------------------------------------------
+r527248 | dos | 2007-04-10 18:57:25 +0000 (Tue, 10 Apr 2007) | 1 line
+
+trust algorithm no longer uses DNS, remove -L reference from whitelist_from_rcvd Conf POD
+------------------------------------------------------------------------
+r527228 | dos | 2007-04-10 18:04:25 +0000 (Tue, 10 Apr 2007) | 1 line
+
+add missing 'of' in AsyncLoop POD
+------------------------------------------------------------------------
+r527062 | jm | 2007-04-10 08:50:04 +0000 (Tue, 10 Apr 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r527045 | dos | 2007-04-10 06:55:09 +0000 (Tue, 10 Apr 2007) | 18 lines
+
+Most of the ASN plugin re-written:
+
+ - remove potentially abusive duplicate lookup option
+   (if you *really* need to query for the same thing two or more times in
+    order to get a response, just duplicate the asn_lookup config lines)
+
+ - re-implement the asn_lookup as an actual config option instead of a header
+   eval function
+
+ - allow for queries against more than one zone at a time
+
+ - make the template tag names configurable
+
+ - register the query with AsyncLoop
+
+ - process the results via the callback rather than polling
+
+
+------------------------------------------------------------------------
+r526708 | jm | 2007-04-09 10:57:14 +0000 (Mon, 09 Apr 2007) | 1 line
+
+bug 5408: ImageInfo rules weren't protected correctly by 'ifplugin' scoping
+------------------------------------------------------------------------
+r526706 | jm | 2007-04-09 10:53:39 +0000 (Mon, 09 Apr 2007) | 1 line
+
+bug 5407: add ldaps support to configuration LDAP support
+------------------------------------------------------------------------
+r526674 | jm | 2007-04-09 08:50:03 +0000 (Mon, 09 Apr 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r526536 | jm | 2007-04-08 08:50:02 +0000 (Sun, 08 Apr 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r526412 | jm | 2007-04-07 08:50:02 +0000 (Sat, 07 Apr 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r526102 | jm | 2007-04-06 08:50:01 +0000 (Fri, 06 Apr 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r525941 | duncf | 2007-04-05 19:31:14 +0000 (Thu, 05 Apr 2007) | 1 line
+
+Add explanation of how to plot "real" ROC graphs (as shown in the literature) in mk-roc-graphs
+------------------------------------------------------------------------
+r525807 | jm | 2007-04-05 12:44:49 +0000 (Thu, 05 Apr 2007) | 1 line
+
+support ok_all_patterns() variant where it just checks all patterns and returns a success value, instead of calling ok()
+------------------------------------------------------------------------
+r525764 | jm | 2007-04-05 08:50:02 +0000 (Thu, 05 Apr 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r525460 | jm | 2007-04-04 08:50:01 +0000 (Wed, 04 Apr 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r525240 | jm | 2007-04-03 18:44:11 +0000 (Tue, 03 Apr 2007) | 1 line
+
+update mimeparse test to take text/foo content-type parsing change into account; text/richtext is now parsed as text/plain
+------------------------------------------------------------------------
+r525238 | jm | 2007-04-03 18:35:55 +0000 (Tue, 03 Apr 2007) | 1 line
+
+remove bug 5313 debugging log messages
+------------------------------------------------------------------------
+r525237 | jm | 2007-04-03 18:34:21 +0000 (Tue, 03 Apr 2007) | 1 line
+
+bug 5313: fix spamd 'prefork: select returned -1, recovering: Bad file descriptor' error.  do this by ensuring FDs are fully cleaned up (and removed from the selector bitvec) if a child is killed, and a few other related cleanups, to fully clarify the code.  also, fix a case where write errors from child to parent were not being caught or logged, due to incorrect use of write() instead of die().  finally, add test instrumentation code, allowing simulation of certain reported system errors.  Note: this checkin also contains additional debugging log messages
+------------------------------------------------------------------------
+r525228 | jm | 2007-04-03 18:14:43 +0000 (Tue, 03 Apr 2007) | 1 line
+
+bug 5399: add two additional required test message files
+------------------------------------------------------------------------
+r525227 | jm | 2007-04-03 18:14:30 +0000 (Tue, 03 Apr 2007) | 1 line
+
+bug 5399: add two additional required test message files
+------------------------------------------------------------------------
+r525224 | jm | 2007-04-03 18:08:44 +0000 (Tue, 03 Apr 2007) | 1 line
+
+bug 5399: if the content-type starts with /^text\b/i, and isn't in a list of already-dealt-with types, treat it as text/plain to emulate silly MUA behaviour
+------------------------------------------------------------------------
+r525090 | jm | 2007-04-03 08:50:01 +0000 (Tue, 03 Apr 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r524746 | jm | 2007-04-02 08:50:02 +0000 (Mon, 02 Apr 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r524559 | jm | 2007-04-01 08:50:01 +0000 (Sun, 01 Apr 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r524391 | jm | 2007-03-31 08:50:01 +0000 (Sat, 31 Mar 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r523994 | jm | 2007-03-30 08:50:01 +0000 (Fri, 30 Mar 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r523743 | jm | 2007-03-29 15:20:01 +0000 (Thu, 29 Mar 2007) | 1 line
+
+bug 4747: oops, put this back to a dbg()
+------------------------------------------------------------------------
+r523738 | jm | 2007-03-29 15:13:02 +0000 (Thu, 29 Mar 2007) | 1 line
+
+bug 4747: actually fix the 'Return-Path: <>' case; the search pattern for <> was incorrect, since get() returns the header value without the < and >, so the empty string
+------------------------------------------------------------------------
+r523730 | jm | 2007-03-29 14:52:48 +0000 (Thu, 29 Mar 2007) | 1 line
+
+bug 4747: silence noisy warnings produced with a null sender (Return-Path: <>) when always_trust_envelope_sender was set to 1, and envelope_sender_header was set to Return-Path
+------------------------------------------------------------------------
+r523626 | jm | 2007-03-29 08:50:02 +0000 (Thu, 29 Mar 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r523403 | jm | 2007-03-28 16:38:58 +0000 (Wed, 28 Mar 2007) | 1 line
+
+improve sa-update documentation a little, to cleanup some text and note '&& reload' idiom
+------------------------------------------------------------------------
+r523232 | jm | 2007-03-28 08:50:01 +0000 (Wed, 28 Mar 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r523025 | jm | 2007-03-27 18:33:24 +0000 (Tue, 27 Mar 2007) | 1 line
+
+bug 5388: do not attempt to work with TCP connections that did not complete the accept() process, and are not connected
+------------------------------------------------------------------------
+r522813 | jm | 2007-03-27 08:50:01 +0000 (Tue, 27 Mar 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r522559 | jm | 2007-03-26 16:05:14 +0000 (Mon, 26 Mar 2007) | 1 line
+
+use off-zone hosting for static files
+------------------------------------------------------------------------
+r522458 | jm | 2007-03-26 08:50:01 +0000 (Mon, 26 Mar 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r522258 | jm | 2007-03-25 13:04:54 +0000 (Sun, 25 Mar 2007) | 1 line
+
+add new public API: Mail::SA::get_loaded_plugins_list(), to allow callers to get a list of the currently-loaded plugin objects
+------------------------------------------------------------------------
+r522255 | jm | 2007-03-25 12:52:35 +0000 (Sun, 25 Mar 2007) | 1 line
+
+fix typo
+------------------------------------------------------------------------
+r522178 | jm | 2007-03-25 08:50:01 +0000 (Sun, 25 Mar 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r521993 | jm | 2007-03-24 08:50:02 +0000 (Sat, 24 Mar 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r521869 | jm | 2007-03-23 19:00:27 +0000 (Fri, 23 Mar 2007) | 1 line
+
+minor changes to bring build notes up to speed with current practice
+------------------------------------------------------------------------
+r521628 | jm | 2007-03-23 08:50:01 +0000 (Fri, 23 Mar 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r521275 | jm | 2007-03-22 14:04:55 +0000 (Thu, 22 Mar 2007) | 1 line
+
+preparing to release 3.2.0 release candidate 1, attempt number 2
+------------------------------------------------------------------------
 r521273 | jm | 2007-03-22 13:58:25 +0000 (Thu, 22 Mar 2007) | 1 line
 
 argh, minotaur keeps changing under our feet; we need to move the build procedure to another host. /usr/local/bin/perl has disappeared; s/local\//g in build scripts
