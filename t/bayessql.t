@@ -3,7 +3,6 @@
 use lib '.'; use lib 't';
 use SATest;
 use Test;
-use Symbol qw(delete_package);
 
 use constant TEST_ENABLED => conf_bool('run_bayes_sql_tests');
 use constant HAS_DBI => eval { require DBI; }; # for our cleanup stuff
@@ -79,9 +78,6 @@ $sa->finish_learner();
 
 undef $sa;
 
-# this removes the loaded plugin from this scope so we can reload it again later
-delete_package("validuserplugin");
-
 sa_t_init("bayes");
 
 tstlocalrules ("
@@ -104,9 +100,6 @@ ok(!$sa->{bayes_scanner}->{store}->tie_db_writable());
 $sa->finish_learner();
 
 undef $sa;
-
-# this removes the loaded plugin from this scope so we can reload it again later
-delete_package("validuserplugin");
 
 sa_t_init("bayes");
 
