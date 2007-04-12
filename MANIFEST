@@ -84,6 +84,7 @@ lib/Mail/SpamAssassin/Plugin/HTMLEval.pm
 lib/Mail/SpamAssassin/Plugin/HTTPSMismatch.pm
 lib/Mail/SpamAssassin/Plugin/Hashcash.pm
 lib/Mail/SpamAssassin/Plugin/HeaderEval.pm
+lib/Mail/SpamAssassin/Plugin/ImageInfo.pm
 lib/Mail/SpamAssassin/Plugin/MIMEEval.pm
 lib/Mail/SpamAssassin/Plugin/MIMEHeader.pm
 lib/Mail/SpamAssassin/Plugin/OneLineBodyRuleType.pm
@@ -127,6 +128,7 @@ rules/20_dynrdns.cf
 rules/20_fake_helo_tests.cf
 rules/20_head_tests.cf
 rules/20_html_tests.cf
+rules/20_imageinfo.cf
 rules/20_meta_tests.cf
 rules/20_net_tests.cf
 rules/20_phrases.cf
@@ -336,6 +338,8 @@ t/data/spam/015
 t/data/spam/016
 t/data/spam/017
 t/data/spam/018
+t/data/spam/badctype1
+t/data/spam/badctype2
 t/data/spam/badmime.txt
 t/data/spam/badmime2.txt
 t/data/spam/base64.txt
@@ -452,6 +456,7 @@ t/spamd_port.t
 t/spamd_prefork_stress.t
 t/spamd_prefork_stress_2.t
 t/spamd_prefork_stress_3.t
+t/spamd_prefork_stress_4.t
 t/spamd_protocol_10.t
 t/spamd_report.t
 t/spamd_report_ifspam.t
@@ -474,6 +479,7 @@ t/strip_no_subject.t
 t/stripmarkup.t
 t/tainted_msg.t
 t/test_dir
+t/text_bad_ctype.t
 t/trust_path.t
 t/uri.t
 t/uri_html.t
@@ -486,9 +492,3 @@ t/whitelist_from.t
 t/whitelist_subject.t
 t/whitelist_to.t
 t/zz_cleanup.t
-lib/Mail/SpamAssassin/Plugin/ImageInfo.pm
-rules/20_imageinfo.cf
-t/text_bad_ctype.t
-t/data/spam/badctype1
-t/data/spam/badctype2
-t/spamd_prefork_stress_4.t
