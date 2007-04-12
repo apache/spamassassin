@@ -106,17 +106,16 @@ Example:
 
 =over 4
 
-=item uridnsbl_timeout N		(default: 2)
-
-Specify the maximum number of seconds to wait for a result before
-giving up on the lookup.  Note that this is in addition to the normal
-DNS timeout applied for DNSBL lookups on IPs found in the Received headers.
-
 =item uridnsbl_max_domains N		(default: 20)
 
 The maximum number of domains to look up.
 
 =back
+
+=head1 NOTES
+
+The C<uridnsbl_timeout> option has been obsoleted by the C<rbl_timeout>
+option.  See the C<Mail::SpamAssassin::Conf> POD for details on C<rbl_timeout>.
 
 =cut
 
@@ -294,13 +293,6 @@ sub parsed_metadata {
 sub set_config {
   my($self, $conf) = @_;
   my @cmds = ();
-
-  push(@cmds, {
-    setting => 'uridnsbl_timeout',
-    is_admin => 1,
-    default => 3,
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
-  });
 
   push(@cmds, {
     setting => 'uridnsbl_max_domains',

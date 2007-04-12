@@ -122,6 +122,7 @@ sub start_lookup {
 
   $self->{queries_started}++;
   $self->{pending_lookups}->{$ent->{key}} = $ent;
+  $self->{last_start_lookup_time} = time;
   $ent;
 }
 
@@ -285,6 +286,7 @@ sub abort_remaining_lookups {
 
     delete $pending->{$key};
   }
+  delete $self->{last_start_lookup_time};
   $self->{main}->{resolver}->bgabort();
 }
 
@@ -323,6 +325,21 @@ sub report_id_complete {
   my ($self, $id) = @_;
   $self->{finished}->{$id} = undef;
 }
+
+# ---------------------------------------------------------------------------
+
+=item $time = $async->get_last_start_lookup_time()
+
+Get the time of the last call to C<start_lookup()>.  If C<start_lookup()> was
+never called or C<abort_remaining_lookups()> has been called
+C<get_last_start_lookup_time()> will return undef.
+
+=cut
+
+sub get_last_start_lookup_time {
+  my ($self) = @_;
+  return $self->{last_start_lookup_time};
+}  
 
 # ---------------------------------------------------------------------------
 
