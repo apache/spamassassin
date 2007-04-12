@@ -167,7 +167,7 @@ sub set_config {
   my ($self, $conf) = @_;
   my @cmds = ();
 
-=head1 CONFIGURATION
+=head1 RULE DEFINITIONS AND PRIVILEGED SETTINGS
 
 =over 4
 
@@ -182,6 +182,7 @@ put them inside the rule itself for greater flexibility.
 
   push(@cmds, {
     setting => 'replace_tag',
+    is_priv => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
   });
 
@@ -194,6 +195,7 @@ placed before each tag that is replaced.
 
   push(@cmds, {
     setting => 'replace_pre',
+    is_priv => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
   });
 
@@ -206,6 +208,7 @@ placed between each two immediately adjacent tags that are replaced.
 
   push(@cmds, {
     setting => 'replace_inter',
+    is_priv => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
   });
 
@@ -218,6 +221,7 @@ placed after each tag that is replaced.
 
   push(@cmds, {
     setting => 'replace_post',
+    is_priv => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
   });
 
@@ -231,6 +235,7 @@ body, header, uri, full, rawbody tests are supported.
 
   push(@cmds, {
     setting => 'replace_rules',
+    is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       unless (defined $value && $value !~ /^$/) {
@@ -256,12 +261,14 @@ enclosed by the start and end strings are found and replaced.
 
   push(@cmds, {
     setting => 'replace_start',
+    is_priv => 1,
     default => '<',
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
   });
 
   push(@cmds, {
     setting => 'replace_end',
+    is_priv => 1,
     default => '>',
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
   });

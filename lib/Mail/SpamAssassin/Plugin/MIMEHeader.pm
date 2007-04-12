@@ -29,7 +29,7 @@ MIMEHeader - perform regexp tests against MIME headers
 This plugin allows regexp rules to be written against MIME headers in the
 message.
 
-=head1 CONFIGURATION
+=head1 RULE DEFINITIONS AND PRIVILEGED SETTINGS
 
 =over 4
 
@@ -96,6 +96,7 @@ sub set_config {
 
   push (@cmds, {
     setting => 'mimeheader',
+    is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value !~ /^(\S+)\s+(\S+)\s*([\=\!]\~)\s*(.+)$/) {

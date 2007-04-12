@@ -102,19 +102,6 @@ sub set_config {
 
 =over 4
 
-=item domainkeys_timeout n             (default: 5)
-
-How many seconds to wait for a DomainKeys query to complete, before
-scanning continues without the DomainKeys result.
-
-=cut
-
-  push (@cmds, {
-    setting => 'domainkeys_timeout',
-    default => 5,
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
-  });
-
 =item whitelist_from_dk add@ress.com [signing domain name]
 
 Use this to supplement the whitelist_from addresses with a check to make sure
@@ -193,6 +180,26 @@ these are often targets for spammer spoofing.
       $self->{parser}->add_to_addrlist_rcvd ('def_whitelist_from_dk',
 						$address, $signer);
     }
+  });
+
+=back
+
+=head1 ADMINISTRATOR SETTINGS
+
+=over 4
+
+=item domainkeys_timeout n             (default: 5)
+
+How many seconds to wait for a DomainKeys query to complete, before
+scanning continues without the DomainKeys result.
+
+=cut
+
+  push (@cmds, {
+    setting => 'domainkeys_timeout',
+    is_admin => 1,
+    default => 5,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
   });
 
   $conf->{parser}->register_commands(\@cmds);

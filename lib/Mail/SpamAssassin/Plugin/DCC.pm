@@ -98,19 +98,6 @@ Whether to use DCC, if it is available.
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
   });
 
-=item dcc_timeout n		(default: 8)
-
-How many seconds you wait for DCC to complete, before scanning continues
-without the DCC results.
-
-=cut
-
-  push (@cmds, {
-    setting => 'dcc_timeout',
-    default => 8,
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
-  });
-
 =item dcc_body_max NUMBER
 
 =item dcc_fuz1_max NUMBER
@@ -149,6 +136,20 @@ The default is C<999999> for all these options.
 =head1 ADMINISTRATOR OPTIONS
 
 =over 4
+
+=item dcc_timeout n		(default: 8)
+
+How many seconds you wait for DCC to complete, before scanning continues
+without the DCC results.
+
+=cut
+
+  push (@cmds, {
+    setting => 'dcc_timeout',
+    is_admin => 1,
+    default => 8,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+  });
 
 =item dcc_home STRING
 

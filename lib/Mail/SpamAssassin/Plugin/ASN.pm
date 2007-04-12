@@ -110,7 +110,7 @@ sub set_config {
   my ($self, $conf) = @_;
   my @cmds = ();
 
-=head1 USER SETTINGS
+=head1 ADMINISTRATOR SETTINGS
 
 =over 4
 
@@ -146,6 +146,7 @@ Examples:
 
   push (@cmds, {
     setting => 'asn_lookup',
+    is_admin => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       unless (defined $value && $value !~ /^$/) {
