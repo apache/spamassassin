@@ -347,12 +347,12 @@ void train (int num_epochs, double learning_rate) {
 /* compute the error gradient for the logsig node with least squares error */
 #ifdef LEAST_SQUARES_ERROR
 			error = is_spam[random_test] - y_out;
-			delta = y_out * (1-y_out) * error / (num_tests_hit[random_test]+1) * learning_rate;
+			delta = y_out * (1-y_out) * error / (1+num_mutable) * learning_rate;
 #else
 /* compute the error gradient for the tanh node with entropic error */
 #ifdef ENTROPIC_ERROR
 			error = (2.0*is_spam[random_test]-1) - y_out;
-			delta = error / (num_tests_hit[random_test]+1) * learning_rate;
+			delta = error / (1+num_mutable) * learning_rate;
 #endif
 #endif
 	
