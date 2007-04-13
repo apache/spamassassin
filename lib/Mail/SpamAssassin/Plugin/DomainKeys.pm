@@ -28,14 +28,14 @@ Signature:
  header DK_VERIFIED              eval:check_domainkeys_verified()
 
 Policy:
-   Note that DK policy record is only fetched if DK_VERIFIED is false
-   to save signing domain from unnecessary DNS queries,
+   Note that DK policy record is only fetched if DK_VERIFIED is
+   false to save a signing domain from unnecessary DNS queries,
    as recommended (SHOULD) by draft-delany-domainkeys-base.
-   Rules DK_POLICY_* should preferably not be relied upon when DK_VERIFIED
-   is true, although they will return false in current implementation
-   when a policy record is not fetched, except for DK_POLICY_TESTING,
-   which is true if t=y appears in a public key record OR in a policy
-   record (when available).
+   Rules DK_POLICY_* should preferably not be relied upon when
+   DK_VERIFIED is true, although they will return false in current
+   implementation when a policy record is not fetched, except for
+   DK_POLICY_TESTING, which is true if t=y appears in a public key
+   record OR in a policy record (when available).
  header DK_POLICY_TESTING        eval:check_domainkeys_testing()
  header DK_POLICY_SIGNSOME       eval:check_domainkeys_signsome()
  header DK_POLICY_SIGNALL        eval:check_domainkeys_signall()
@@ -51,6 +51,21 @@ This is the DomainKeys plugin and it needs lots more documentation.
 Note that if the C<Mail::SpamAssassin::Plugin::DKIM> plugin is installed with
 C<Mail::DKIM> version 0.20 or later, that plugin will also perform Domain Key
 lookups on DomainKey-Signature headers, in which case this plugin is redundant.
+
+
+Here is author's note from module C<Mail::DomainKeys> version 1.0:
+
+  THIS MODULE IS OFFICIALLY UNSUPPORTED.
+
+  Please move on to DKIM like a responsible Internet user.  I have.
+
+  I will leave this module here on CPAN for a while, just in case someone
+  has grown to depend on it.  It is apparent that DK will not be the way
+  of the future. Thus, it is time to put this module to ground before it
+  causes any further harm.
+
+  Thanks for your support,
+  Anthony
 
 =cut
 
