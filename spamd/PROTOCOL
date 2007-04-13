@@ -155,7 +155,7 @@ To revoke a ham message:
 TELL SPAMC/1.3\r\n
 Message-class: spam\r\n
 Set: local\r\n
-Remove: remote\r\n
+Remove: remove\r\n
 
 HEADERS returns the same as PROCESS, up to and including the double-newline
 separator between message headers and body -- but stops there.  It was
