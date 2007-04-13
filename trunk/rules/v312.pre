@@ -1,0 +1,25 @@
+# This is the right place to customize your installation of SpamAssassin.
+#
+# See 'perldoc Mail::SpamAssassin::Conf' for details of what can be
+# tweaked.
+#
+# This file was installed during the installation of SpamAssassin 3.1.2,
+# and contains plugin loading commands for the new plugins added in that
+# release.  It will not be overwritten during future SpamAssassin installs,
+# so you can modify it to enable some disabled-by-default plugins below,
+# if you so wish.
+#
+###########################################################################
+
+###########################################################################
+# experimental plugins
+
+# DKIM - perform DKIM verification
+#
+# Mail::DKIM module required for use, see INSTALL for more information.
+# 
+# Note that if C<Mail::DKIM> version 0.20 or later is installed, this
+# renders the DomainKeys plugin redundant.
+#
+#loadplugin Mail::SpamAssassin::Plugin::DKIM
+

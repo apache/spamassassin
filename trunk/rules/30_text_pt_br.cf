@@ -1,0 +1,58 @@
+# Arquivo de configuração básica do SpamAssassin
+#
+# Tradução para portugues do Brazil v1.0 
+# Feita por Marcelo Cruzeta ZOE Informática
+#
+# Por Favor, não modifique este arquivo, pois suas mudanças serão sobrescritas com
+# o próximo update. Use /etc/mail/spamassassin/local.cf para isso.
+# Veja 'perldoc Mail::SpamAssassin::Conf' para detalhes.
+#
+# Este programa é um software gratuito; você pode distribuí-lo e/ou modificá-lo
+# sob os termos de ambos Artistic License ou the GNU General
+# Public License como publicado por Free Software Foundation; seja a
+# versão 1 da licença, ou (sua opção) qualquer versão posterior.
+#
+# Veja o arquivo "License" no topo do pacote SpamAssassin
+# para mais detalhes.
+#
+###########################################################################
+
+# character set
+lang pt_BR report_charset iso-8859-1
+
+# Modelo padrão. Tente manter menor que 78 colunas (dentro dos pontos abaixo).
+#      ........................................................................
+lang pt_BR clear_report_template
+lang pt_BR report O programa detetor de Spam ZOE, rodando no servidor "_HOSTNAME_",
+lang pt_BR report identificou este e-mail como um spam.  A mensagem original foi atachada
+lang pt_BR report  a este e-mail para ser lida, (caso não seja um spam) ou para bloquear 
+lang pt_BR report e-mails futuros similares a este.  Caso tenha alguma pergunta, veja
+lang pt_BR report _CONTACTADDRESS_ para detalhes.
+lang pt_BR report 
+lang pt_BR report Visualização Prévia:  _PREVIEW_
+lang pt_BR report 
+lang pt_BR report Detalhes da análise:   (_HITS_ points, _REQD_ required)
+lang pt_BR report
+lang pt_BR report " pts regra              descrição"
+lang pt_BR report  ---- ---------------------- --------------------------------------------------
+lang pt_BR report _SUMMARY_
+#      ........................................................................
+
+# um 'endereço de contato' que os usuários devem usar para mais info. (muda
+# _CONTACTADDRESS_ acima, se presente)
+lang pt_BR report_contact	seu endereço para contato
+
+
+###########################################################################
+
+# Modelo para reportar mensagem insegura para ler.
+#
+#             ......................................................................
+lang pt_BR clear_unsafe_report_template
+lang pt_BR unsafe_report A mensagem original não é completamente texto, pode ser inseguro
+lang pt_BR unsafe_report abrí-la com um programa de e-mail; é possível que possa conter virus,
+lang pt_BR unsafe_report ou confirmar que seu endereço de e-mail possa receber spam.
+lang pt_BR unsafe_report Caso queira lê-la, é mais seguro salvar como texto e abir com um editor.
+#             ......................................................................
+
+###########################################################################

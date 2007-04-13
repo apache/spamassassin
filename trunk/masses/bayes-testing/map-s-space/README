@@ -1,0 +1,33 @@
+
+How to use this stuff: (Nov 26 2002 jm)
+----------------------
+
+- edit your copy of Bayes.pm so that $self->{log_raw_counts} = 1; .  This will
+  cause the Bayes code to write the raw counts to stdout, so that the
+  bayes-analyse-from-raw-counts script can dump a cost calculation and
+  histogram very quickly, while still recalculating the probabilities with
+  different values for the constants, and using different combining techniques.
+
+- Next, run a 10-pass cross-validation run using bayes-10pcv-driver on your
+  test corpus.
+
+- Edit run-search and change the system()s around line 41 to refer to the
+  spam_all.log and nonspam_all.log files from the run above.
+
+- To test with chi-squared combining, edit the run-search script and change
+  $USE_CHI_COMBINING to 1 instead of 0.
+
+- Run
+
+	./run-search | tee search.results
+
+  This will pick random values for the constants in question, run
+  bayes-analyse-from-raw-counts for that combination, and dump a line
+  with the resulting cost figures.
+
+- While this is running -- or at the end after 1k iterations, if you're very
+  patient -- run gnuplot, and paste in the commands from gnuplot.cmds.  This
+  will map the surface representing the cost figures for each combination of
+  the constants.
+
+

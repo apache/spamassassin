@@ -1,0 +1,32 @@
+#!/bin/sh
+
+# Cron script for "release".  see "build/nightlymc/crontab.txt"
+
+TZ=UTC; export TZ
+DIR=$HOME/versions/cvshead
+SVN=/opt/subversion-current/bin/svn
+SVNVERS=/opt/subversion-current/bin/svnversion
+
+if [ ! -d $DIR ]; then
+  echo "Whaaaa?!?  No directory?" >&2
+  exit 2
+fi
+
+cd $DIR
+$SVN update > /dev/null
+if [ $? -ne 0 ]; then
+  echo "Problem doing svn update" >&2
+  exit 1
+fi
+
+RREV=`$SVNVERS .`
+REV=`echo $RREV | awk -F: '{print $1}' | tr -cd '[0-9]'`
+DATE=`date "+%Y-%m-%d"`
+
+# If there's something awkward about the rev number, alert!
+if [ "$RREV" != "$REV" ]; then
+  echo "'$RREV' and '$REV' aren't equal!" >&2
+  exit 1
+fi
+
+echo "$DATE\t$REV"

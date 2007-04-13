@@ -1,0 +1,108 @@
+From julliard@winehq.com Wed Sep  4 19:07:34 2002
+Received: (qmail 27859 invoked by uid 1001); 5 Sep 2002 02:25:41 -0000
+Received: from pop.pi.sbcglobal.net [207.115.63.84]
+	by localhost with POP3 (fetchmail-5.9.11 polling pop.sbcglobal.net account matt_relay)
+	for matt@localhost (single-drop); Wed, 04 Sep 2002 19:25:41 -0700 (PDT)
+Received: from vm4-ext.prodigy.net by vm4 with SMTP; Wed,  4 Sep 2002 22:26:20 -0400
+X-Originating-IP: [64.49.198.145]
+Received: from mail1.mailwizards.com (mail1.mailwizards.com [64.49.198.145])
+	by vm4-ext.prodigy.net (8.12.3 da nor stuldap/8.12.3) with ESMTP id g852QJix196066
+	for <matt_relay@sbcglobal.net>; Wed, 4 Sep 2002 22:26:19 -0400
+Received: from wine.codeweavers.com (wine.codeweavers.com [198.144.4.3])
+	by mail1.mailwizards.com (8.11.4/MW-2.03) with ESMTP id g852QIu06714
+	for <matt@nightrealms.com>; Wed, 4 Sep 2002 21:26:18 -0500 (CDT)
+Received: from localhost.localdomain (wine [127.0.0.1])
+	by wine.codeweavers.com (8.11.6/8.11.6) with ESMTP id g852ClF25431;
+	Wed, 4 Sep 2002 21:12:47 -0500
+Received: from mail.wine.dyndns.org (12-235-88-76.client.attbi.com [12.235.88.76])
+	by wine.codeweavers.com (8.11.6/8.11.6) with ESMTP id g8527bF25126
+	for <wine-announce@winehq.com>; Wed, 4 Sep 2002 21:07:37 -0500
+Received: from mail.wine.dyndns.org (julliard@localhost [127.0.0.1])
+	by mail.wine.dyndns.org (8.12.3/8.12.3/Debian -4) with ESMTP id g8527Z0a029784
+	for <wine-announce@winehq.com>; Wed, 4 Sep 2002 19:07:35 -0700
+Received: (from julliard@localhost)
+	by mail.wine.dyndns.org (8.12.3/8.12.3/Debian -4) id g8527Zmq029780;
+	Wed, 4 Sep 2002 19:07:35 -0700
+To: wine-announce@winehq.com
+Subject: Wine release 20020904
+From: Alexandre Julliard <julliard@winehq.com>
+Message-ID: <87elc9xk7t.fsf@mail.wine.dyndns.org>
+Lines: 48
+User-Agent: Gnus/5.0808 (Gnus v5.8.8) XEmacs/21.4 (Common Lisp)
+MIME-Version: 1.0
+Content-Type: text/plain;
+  charset=us-ascii
+Sender: wine-announce-admin@winehq.com
+Errors-To: wine-announce-admin@winehq.com
+X-BeenThere: wine-announce@winehq.com
+X-Mailman-Version: 2.0
+Precedence: bulk
+Reply-To: wine-devel@winehq.com
+List-Help: <mailto:wine-announce-request@winehq.com?subject=help>
+List-Post: <mailto:wine-announce@winehq.com>
+List-Subscribe: <http://www.winehq.com/mailman/listinfo/wine-announce>,
+	<mailto:wine-announce-request@winehq.com?subject=subscribe>
+List-Id: Wine Announcements <wine-announce.winehq.com>
+List-Unsubscribe: <http://www.winehq.com/mailman/listinfo/wine-announce>,
+	<mailto:wine-announce-request@winehq.com?subject=unsubscribe>
+List-Archive: <http://www.winehq.com/hypermail/wine-announce/>
+Date: 04 Sep 2002 19:07:34 -0700
+X-DCC-wanadoo-be-Metrics: kagome 1016; Body=1 Fuz1=1 Fuz2=1
+X-Spam-Status: No, hits=-2.9 required=5.0
+	tests=KNOWN_MAILING_LIST,SPAM_PHRASE_03_05,SUBJ_HAS_UNIQ_ID,
+	      USER_AGENT
+	version=2.50-cvs
+X-Spam-Level: 
+Status: R 
+X-Status: N
+
+This is release 20020904 of Wine, a free implementation of Windows on
+Unix.  This is still a developers only release.  There are many bugs
+and unimplemented features.  Most applications still do not work
+correctly.
+
+Patches should be submitted to "wine-patches@winehq.com".  Please don't
+forget to include a ChangeLog entry.
+
+WHAT'S NEW with Wine-20020904: (see ChangeLog for details)
+	- Much improved PowerPC support.
+	- More correct locale definitions.
+	- Progress on the conversion of handle types to pointers.
+	- Many Visio and Quicken fixes merged from Crossover.
+	- Lots of bug fixes.
+
+See the README file in the distribution for installation instructions.
+
+Because of lags created by using mirror, this message may reach you before
+the release is available at the ftp sites.  The sources will be available
+from the following locations:
+
+  http://www.ibiblio.org/pub/Linux/ALPHA/wine/development/Wine-20020904.tar.gz
+  ftp://ftp.infomagic.com/pub/mirrors/linux/sunsite/ALPHA/wine/development/Wine-20020904.tar.gz
+  ftp://ftp.fu-berlin.de/unix/linux/mirrors/sunsite.unc.edu/ALPHA/wine/development/Wine-20020904.tar.gz
+  ftp://orcus.progsoc.uts.edu.au/pub/Wine/development/Wine-20020904.tar.gz
+
+It should also be available from any other site that mirrors ibiblio.org.
+For more download locations, see http://ftpsearch.lycos.com. These
+locations also hold pre-built documentation packages in various
+formats: wine-doc-html.tar.gz, wine-doc-txt.tar.gz, wine-doc.pdf.gz
+and wine-doc.ps.gz.
+
+You can also get the current source directly from the CVS tree. Check
+http://www.winehq.com/development/ for details.
+
+If you submitted a patch, please check to make sure it has been
+included in the new release.
+
+If you want to receive by mail a patch against the previous release
+when a new one is released, you can subscribe to the mailing list at
+http://tiger.informatik.hu-berlin.de/cgi-bin/mailman/listinfo/wine-patches.
+
+Wine is available thanks to the work of many people. See the file
+AUTHORS in the distribution for the complete list.
+
+--
+Alexandre Julliard
+julliard@winehq.com
+
+

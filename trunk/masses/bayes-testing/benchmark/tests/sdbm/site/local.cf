@@ -1,0 +1,11 @@
+bayes_store_module                 Mail::SpamAssassin::BayesStore::SDBM
+
+use_auto_whitelist 0
+
+bayes_auto_expire 0
+
+bayes_path @@BAYESPATH@@
+
+lock_method flock
+
+#bayes_auto_learn 0

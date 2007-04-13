@@ -1,0 +1,155 @@
+From: 
+To: users at SpamAssassin.apache.org
+Cc: dev at SpamAssassin.apache.org
+Subject: ANNOUNCE: SpamAssassin 3.1.0-rc1 release candidate available!
+
+*** THIS IS A RELEASE CANDIDATE ONLY, NOT THE FINAL 3.1.0 RELEASE ***
+
+SpamAssassin 3.1.0-rc1 is released!  SpamAssassin 3.1.0 is a major update.
+SpamAssassin is a mail filter which uses advanced statistical and
+heuristic tests to identify spam (also known as unsolicited bulk email).
+
+This is a release candidate, and NOT the general availability release (yet.)
+We think it's pretty rock solid, however. ;)
+
+
+Highlights of the release
+-------------------------
+
+- Apache preforking algorithm adopted; number of spamd child processes is now
+  scaled, according to demand.  This provides better VM behaviour when not
+  under peak load.
+
+- added PostgreSQL, MySQL 4.1+, and local SDBM file Bayes storage modules. SQL
+  storage is now recommended for Bayes, instead of DB_File. NDBM_File support
+  has been dropped due to a major bug in that module.
+
+- detect legitimate SMTP AUTH submission, to avoid false positives on
+  Dynablock-style rules.
+
+- new plugins: DomainKeys (off by default), MIMEHeader: a new plugin to perform
+  tests against header in internal MIME structure, ReplaceTags: plugin by Felix
+  Bauer to support fuzzy text matching, WhiteListSubject: plugin added to
+  support user whitelists by Subject header.
+
+- Razor: disable Razor2 support by default per our policy, since the service is
+  not free for non-personal use.  It's trivial to reenable (by editing
+  '/etc/mail/spamassassin/v310.pre').
+
+- DCC: disable DCC for similar reasons, due to new license terms.
+
+- Net::DNS bug: high load caused answer packets to be mixed up and delivered as
+  answers to the wrong request, causing false positives.  worked around.
+
+- DNSBL lookups and other DNS operations are now more efficient, by using a
+  custom single-socket event-based model instead of Net::DNS.
+
+
+Downloading
+-----------
+
+Pick it up from:
+
+  http://people.apache.org/~jm/devel/Mail-SpamAssassin-3.1.0-rc1.tar.gz
+  http://people.apache.org/~jm/devel/Mail-SpamAssassin-3.1.0-rc1.tar.bz2
+  http://people.apache.org/~jm/devel/Mail-SpamAssassin-3.1.0-rc1.zip
+
+md5sum:
+
+  c41126e515eacc5480d6d44498d5b99d  Mail-SpamAssassin-3.1.0-rc1.tar.bz2
+  196a22f1a9d27792d8388fbc6f1b522f  Mail-SpamAssassin-3.1.0-rc1.tar.gz
+  1763521a992ebd45c46ca1dcab586474  Mail-SpamAssassin-3.1.0-rc1.zip
+
+sha1sum:
+
+  17145041222d607d1591eb5cffdff80fdd55cd6c  Mail-SpamAssassin-3.1.0-rc1.tar.bz2
+  904c9b67498ec456c674545c15d0c4f89950a9da  Mail-SpamAssassin-3.1.0-rc1.tar.gz
+  f6d5d50abc70a4cedde3bc50715848aba1c3a4e4  Mail-SpamAssassin-3.1.0-rc1.zip
+
+The release files also have a .asc accompanying them.  The file serves
+as an external GPG signature for the given release file.  The signing
+key is available via the wwwkeys.pgp.net key server, as well as
+http://spamassassin.apache.org/released/GPG-SIGNING-KEY
+
+The key information is:
+
+pub  1024D/265FA05B 2003-06-09 SpamAssassin Signing Key <release@spamassassin.org>
+     Key fingerprint =3D 26C9 00A4 6DD4 0CD5 AD24  F6D7 DEE0 1987 265F A05B
+
+
+Important installation notes
+----------------------------
+
+- see the INSTALL and UPGRADE files in the distribution.
+
+
+Summary of major changes since 3.0.x
+------------------------------------
+
+- Apache preforking algorithm adopted; number of spamd child processes is now
+  scaled, according to demand.  This provides better VM behaviour when not
+  under peak load.
+
+- Inclusion of sa-update script which will allow for updates of rules and
+  scores in between code releases.
+
+- added PostgreSQL, MySQL 4.1+, and local SDBM file Bayes storage modules. SQL
+  storage is now recommended for Bayes, instead of DB_File. NDBM_File support
+  has been dropped due to a major bug in that module.
+
+- detect legitimate SMTP AUTH submission, to avoid false positives on
+  Dynablock-style rules.
+
+- new Advance Fee Fraud (419 scam) rules.
+
+- removed use of the Storable module, due to several reported hangs on SMP
+  Linux machines.
+
+- Converted several rule/engine components into Plugins such as:
+  AccessDB, AWL, Pyzor, Razor2, DCC, Bayes AutoLearn Determination, etc.
+
+- new plugins: DomainKeys (off by default), MIMEHeader: a new plugin to perform
+  tests against header in internal MIME structure, ReplaceTags: plugin by Felix
+  Bauer to support fuzzy text matching, WhiteListSubject: plugin added to
+  support user whitelists by Subject header.
+
+- TextCat language guesser moved to a plugin.  (This means "ok_languages"
+  is no longer part of the core engine by default.)
+
+- Razor: disable Razor2 support by default per our policy, since the
+  service is not free for non-personal use.  It's trivial to reenable.
+
+- DCC: disable DCC for similar reasons, due to new license terms.
+
+- Net::DNS bug: high load caused answer packets to be mixed up and delivered as
+  answers to the wrong request, causing false positives.  worked around.
+
+- DNSBL lookups and other DNS operations are now more efficient, by using a
+  custom single-socket event-based model instead of Net::DNS.
+
+- add support for accreditation services, including Habeas v2.
+
+- better URI parsing -- many evasion tricks now caught.
+
+- URIBL lookups are prioritized based on the location in the message
+  the URI was found.
+
+- mass-check now supports reusing realtime DNSBL hit results, and sample-based
+  Bayes autolearning emulation, to reduce complexity.
+
+- sa-learn, spamassassin and mass-check now have optional progress bars.
+
+- modify header ordering for DomainKeys compatibility, by placing markup
+  headers at the top of the message instead at the bottom of the list.
+
+- spamd/spamc now support remote Bayes training, and reporting spam.
+
+- spamc now supports reading its flags from a configuration file using the -F
+  switch, contributed by John Madden.
+
+- added SPF-based whitelisting.
+
+- Polish rules contributed by Radoslaw Stachowiak.
+
+- many rule changes and additions.
+

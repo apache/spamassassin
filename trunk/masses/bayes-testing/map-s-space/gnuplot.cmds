@@ -1,0 +1,26 @@
+# Draw a surface map of ROBINSON_S v. ROBINSON_X v. cost using gnuplot.
+set title 'Lower costs are better.  Note: contours are drawn on base of graph'
+set xlabel 'ROBINSON_S'; set ylabel 'ROBINSON_X'; set zlabel 'cost'
+set surface; set contour base
+set ticslevel 0.1; set grid; set mxtics; set mytics
+set dgrid3d 15,15,5
+set view 30, 190, 1, 1.2
+
+# These map my set very well, but since the cost figures vary based on corpus
+# size you will need to change them.  Leave this out for the first run, then
+# figure out where the lowest-cost areas lie, and write the range based on
+# that.  You want to illustrate the low ranges well and ignore the high ones.
+
+# Values for Robinson-naive-Bayesian combining (aka "Gary combining"):
+set cntrparam levels discrete 77, 78, 79, 80, 81, 82, 85, 90
+
+# Values for chi-combining:
+set cntrparam levels discrete 103, 104, 105, 106, 107, 110, 115
+
+# Finally, draw it!
+splot "search.results" using 3:5:7 with linespoints
+
+# or to file:
+set terminal png small color; set output 'graph.png'
+splot "search.results" using 3:5:7 with linespoints
+

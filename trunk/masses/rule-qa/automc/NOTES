@@ -1,0 +1,35 @@
+
+Workflow for automc:
+
+- bugs have the string "NEEDSMC" placed in their text
+
+- these crons are set up:
+
+50 0,1,2 * * *  /home/jm/ftp/spamassassin/automc/RUNME.before
+0 14 * * *      /home/jm/ftp/spamassassin/automc/RUNME.after
+
+- scrape-bugzilla is run at 0850 UTC
+  - and creates a new rules file "rules/70_bugzilla.cf"
+  - checks it in
+  - saves a temporary data file, containing:
+    - the names of rules created
+    - the bug numbers
+    - other state
+
+- nightly mass-check run happens
+  (http://wiki.apache.org/spamassassin/NightlyMassCheck)
+
+- output full analyzed results to somewhere like
+  http://www.pathname.com/~corpus/HTML.age
+  datestamped so they can be viewed (months) later
+
+- post-comments is run at 2200 UTC
+  - load the data file from scraper
+  - add comment "DONEMC [commentnum]" to the bugs
+    - greps out those rules' freqs and adds them to comment
+    - adds link to CGI viewer app
+
+- you must do 1 commit as the "automc" userid interactively,
+  so that the credentials are cached for that user
+
+

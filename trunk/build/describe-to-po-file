@@ -1,0 +1,129 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+my $wantlang = shift @ARGV;
+
+my $localcharset = 'iso-8859-1';
+
+my %locales = (
+  'en' => { },
+  'local' => { }
+);
+
+foreach my $loc (qw(local en)) {
+  $locales{$loc}{desc} = { };
+  $locales{$loc}{tmpl} = { };
+  $locales{$loc}{tmpl}{unsafe_report} = '';
+  $locales{$loc}{tmpl}{report} = '';
+}
+
+while (<>) {
+  s/#.*$//g; s/^\s+//; s/\s+$//; next if /^$/;
+
+  # make all the foo-bar stuff foo_bar
+  1 while s/^(\S+)-/$1_/g;
+  1 while s/^(lang\s+\S+\s+\S+)-/$1_/g;
+
+  my $lang = '';
+  my $loc = 'en';
+
+  if (s/^lang\s+(\S+)\s+//) {
+    $lang = $1;
+    if ($lang ne $wantlang) { next; }
+    $loc = 'local';
+  }
+
+  if (/^report_charset\s+(\S+)$/) {
+    $localcharset = $1;
+  }
+
+  elsif (/^describe\s+(\S+)\s+(.*?)$/) {
+    $locales{$loc}{desc}{$1} = $2;
+  }
+
+  elsif (/^clear_report_template$/) {
+    $locales{$loc}{tmpl}{report} = '';
+  }
+  elsif (/^clear_unsafe_report_template$/) {
+    $locales{$loc}{tmpl}{unsafe_report} = '';
+  }
+  elsif (/^report\s+(.*?)$/) {
+    $locales{$loc}{tmpl}{report} .= "$1\n";
+  }
+  elsif (/^unsafe_report\s+(.*?)$/) {
+    $locales{$loc}{tmpl}{unsafe_report} .= "$1\n";
+  }
+
+  else {
+    next;
+  }
+}
+
+print q{
+# SpamAssassin PO file
+#
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2005-05-13 18:38-0700\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=} . $localcharset . q{\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+};
+
+foreach my $reptype (qw(report unsafe_report)) {
+  $locales{'local'}{tmpl}{$reptype} ||= '';
+
+  my $en = $locales{en}{tmpl}{$reptype} || '';
+  my $local = $locales{'local'}{tmpl}{$reptype} || '';
+
+  $en =~ s/\n/\"\n\"/gs;
+  $local =~ s/\n/\"\n\"/gs;
+
+  print qq{
+# $reptype block
+msgid ""
+"$en"
+msgstr ""
+"$local"
+  };
+}
+
+foreach my $rule (sort keys %{$locales{en}{desc}}) {
+  $locales{'local'}{desc}{$rule} ||= '';
+
+  my $en = $locales{en}{desc}{$rule};
+  my $local = $locales{'local'}{desc}{$rule};
+
+  print qq{
+# description for rule: $rule
+msgid "$en"
+msgstr "$local"
+  };
+}
+

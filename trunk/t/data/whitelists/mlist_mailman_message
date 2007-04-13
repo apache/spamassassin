@@ -1,0 +1,95 @@
+Received: from usw-sf-list2.yyyyyyyyyyyy.net (usw-sf-fw2.yyyyyyyyyyyy.net
+     [216.136.171.252]) by dogma.slashnull.org (8.11.6/8.11.6) with ESMTP id
+     g7HFlZ603002 for <zzzzzz-sa@zzzzzz.org>; Sat, 17 Aug 2002 16:47:35 +0100
+Received: from usw-sf-list1-b.yyyyyyyyyyyy.net ([10.3.1.13]
+     helo=usw-sf-list1.yyyyyyyyyyyy.net) by usw-sf-list2.yyyyyyyyyyyy.net with
+     esmtp (Exim 3.31-VA-mm2 #1 (Debian)) id 17g5m8-000654-00; Sat,
+     17 Aug 2002 08:46:04 -0700
+Received: from dogma.slashnull.org ([212.17.35.15]) by
+     usw-sf-list1.yyyyyyyyyyyy.net with esmtp (Exim 3.31-VA-mm2 #1 (Debian)) id
+     17g5lM-0005xL-00 for <SpamAssassin-talk@lists.yyyyyyyyyyyy.net>;
+     Sat, 17 Aug 2002 08:45:16 -0700
+Received: (from apache@localhost) by dogma.slashnull.org (8.11.6/8.11.6)
+     id g7HFj8h02977; Sat, 17 Aug 2002 16:45:08 +0100
+X-Authentication-Warning: dogma.slashnull.org: apache set sender to
+     zzzzzz@zzzzzz.org using -f
+Received: from 194.125.173.146 (SquirrelMail authenticated user zzzzzz) by
+     zzzzzz.org with HTTP; Sat, 17 Aug 2002 16:45:08 +0100 (IST)
+Message-Id: <33025.194.125.173.146.1029599108.squirrel@zzzzzz.org>
+From: "Justin Mason" <zzzzzz@zzzzzz.org>
+To: SpamAssassin-talk@lists.yyyyyyyyyyyy.net
+X-Mailer: SquirrelMail (version 1.0.6)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
+Subject: [SAtalk] spam-phrases existing algo
+Sender: spamassassin-talk-admin@lists.yyyyyyyyyyyy.net
+Errors-To: spamassassin-talk-admin@lists.yyyyyyyyyyyy.net
+X-Beenthere: spamassassin-talk@lists.yyyyyyyyyyyy.net
+X-Mailman-Version: 2.0.9-sf.net
+Precedence: bulk
+List-Help: <mailto:spamassassin-talk-request@lists.yyyyyyyyyyyy.net?subject=help>
+List-Post: <mailto:spamassassin-talk@lists.yyyyyyyyyyyy.net>
+List-Subscribe: <https://lists.yyyyyyyyyyyy.net/lists/listinfo/spamassassin-talk>,
+     <mailto:spamassassin-talk-request@lists.yyyyyyyyyyyy.net?subject=subscribe>
+List-Id: Talk about SpamAssassin <spamassassin-talk.lists.yyyyyyyyyyyy.net>
+List-Unsubscribe: <https://lists.yyyyyyyyyyyy.net/lists/listinfo/spamassassin-talk>,
+     <mailto:spamassassin-talk-request@lists.yyyyyyyyyyyy.net?subject=unsubscribe>
+List-Archive: <http://www.geocrawler.com/redir-sf.php3?list=spamassassin-talk>
+X-Original-Date: Sat, 17 Aug 2002 16:45:08 +0100 (IST)
+Date: Sat, 17 Aug 2002 16:45:08 +0100 (IST)
+
+BTW, I should not that this algorithm Paul Graham uses is
+very close to what we've got in spam-phrases code already.
+
+To turn it into pcode:
+
+  mass-check for spamphrases:
+
+    - get mail body, strip HTML, attachments and mail formatting
+    - strip stopwords ("to", "of", "a" etc.)
+    - find pairs of 3-20 letter words
+    - foreach pair:
+      - skip pair if one word is in stoplist of common terms
+      - ++ the frequency of that word-pair
+
+  settle-phrases -- turn mass-check results into a spamphrases file
+
+    - read all spam word-pairs, let NS = number of word-pairs
+    - read all nonspam word-pairs, let NN = number of word-pairs
+    - let bias = NS / NN (compensates for different corpus size)
+    - foreach nonspam word-pair:
+      - wpfreq = (freq in spam) - (frequency in nonspam * bias)
+    - foreach spam word-pair:
+      - if (wordpair was not found in nonspam):
+        - wpfreq *= 10
+    - note the highest score of all rules
+
+  scoring of an incoming message:
+
+    - get mail body, strip HTML, attachments and mail formatting
+    - strip stopwords ("to", "of", "a" etc.)
+    - find pairs of 3-20 letter words
+    - foreach pair:
+      - score += ((wpfreq*10) / highest_score_of_all_rules)
+    - foreach "!" found in text:
+      - score++
+    - return result as "spam phrase score".
+
+So it's quite close to PG's algo, but he also tracks the non-spam
+word-pairs -- which we don't do for SpamAssassin, because they
+overfit to the mass-checker's nonspam mail corpus (generally
+names of friends, etc.)
+
+--j.
+
+
+
+-------------------------------------------------------
+This sf.net email is sponsored by: OSDN - Tired of that same old
+cell phone?  Get a new here for FREE!
+https://www.inphonic.com/r.asp?r=yyyyyyyyyyyy&refcode1=vs3390
+_______________________________________________
+Spamassassin-talk mailing list
+Spamassassin-talk@lists.yyyyyyyyyyyy.net
+https://lists.yyyyyyyyyyyy.net/lists/listinfo/spamassassin-talk
