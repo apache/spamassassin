@@ -168,6 +168,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - run "./build/update_stable" to build the tar.gz files.
 
+    PATH=$HOME/sabuildtools/perl584/bin:$HOME/sabuildtools/bin:$PATH
     ./build/update_stable
 
 - take a copy of the MD5sum line output.
