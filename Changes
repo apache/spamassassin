@@ -1,4 +1,44 @@
 ------------------------------------------------------------------------
+r528438 | sidney | 2007-04-13 11:02:26 +0000 (Fri, 13 Apr 2007) | 1 line
+
+bug 5416: fix bad test for not connected that should use undef which failed when connected() returned 0
+------------------------------------------------------------------------
+r528391 | jm | 2007-04-13 08:50:02 +0000 (Fri, 13 Apr 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r528255 | jm | 2007-04-12 22:15:57 +0000 (Thu, 12 Apr 2007) | 1 line
+
+bug 5414: remove calls to Symbol::delete_package() that are causing t/bayessql.t test to fail
+------------------------------------------------------------------------
+r528065 | dos | 2007-04-12 17:56:23 +0000 (Thu, 12 Apr 2007) | 1 line
+
+set exec prop on runPerceptron
+------------------------------------------------------------------------
+r527994 | hstern | 2007-04-12 15:51:36 +0000 (Thu, 12 Apr 2007) | 1 line
+
+Backing out accidental commit to perceptron.c.  svn commit -m never again
+------------------------------------------------------------------------
+r527990 | hstern | 2007-04-12 15:49:14 +0000 (Thu, 12 Apr 2007) | 1 line
+
+Removing myself from the active committers list.
+------------------------------------------------------------------------
+r527963 | jm | 2007-04-12 14:50:28 +0000 (Thu, 12 Apr 2007) | 1 line
+
+for next rc or the release -- update build instructions a little; remove the 3.2.0.txt announcement, and remove it from MANIFEST, since it's too complicated trying to update it *and* put it in the distribution tarball; update Dallas' email address for the change log; and set trunk back into dev mode, since the current tarball is being voted on from the rc2 tag.
+------------------------------------------------------------------------
+r527931 | jm | 2007-04-12 13:20:05 +0000 (Thu, 12 Apr 2007) | 1 line
+
+forgot the Subject line's PRERELEASE warning
+------------------------------------------------------------------------
+r527926 | jm | 2007-04-12 13:12:09 +0000 (Thu, 12 Apr 2007) | 1 line
+
+add rc2 announcement
+------------------------------------------------------------------------
+r527901 | jm | 2007-04-12 12:37:03 +0000 (Thu, 12 Apr 2007) | 1 line
+
+preparing to release 3.2.0rc2
+------------------------------------------------------------------------
 r527871 | jm | 2007-04-12 10:20:11 +0000 (Thu, 12 Apr 2007) | 1 line
 
 traditional sorting of MANIFEST
