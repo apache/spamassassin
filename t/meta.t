@@ -46,7 +46,7 @@ for (my $scoreset = 0; $scoreset < 4; $scoreset++) {
     require "log/rules-$scoreset.pl";
   };
   if ($@) {
-    warn "tmp/rules.pl is unparseable: $@";
+    warn "log/rules-$scoreset.pl is unparseable: $@";
     warn "giving up on test.";
     ok(1);
     ok(1);
