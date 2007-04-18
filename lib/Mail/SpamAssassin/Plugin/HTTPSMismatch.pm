@@ -42,7 +42,9 @@ sub new {
   return $self;
 }
 
-# <a href="http://baboz-njeryz.de/">https://bankofamerica.com/</a>
+# [lt]a href="http://baboz-njeryz.de/"[gt]https://bankofamerica.com/[lt]/a[gt]
+# ("<" and ">" replaced with "[lt]" and "[gt]" to avoid Kaspersky Desktop AV
+# false positive ;)
 sub check_https_http_mismatch {
   my ($self, $permsgstatus, undef, $minanchors, $maxanchors) = @_;
 
