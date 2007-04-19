@@ -693,14 +693,14 @@ sub rewrite_report_safe {
     $to ||= "\n";
     my $tag = $self->_replace_tags($self->{conf}->{rewrite_header}->{To});
     $tag =~ s/\n/ /gs; # strip tag's newlines
-    $to =~ s/(?:\t\Q(${tag})\E)?$/\t(${tag})/
+    $to =~ s/(?:\t\Q(${tag})\E)?$/\t(${tag})/;
   }
 
   if ($self->{conf}->{rewrite_header}->{From}) {
     $from ||= "\n";
     my $tag = $self->_replace_tags($self->{conf}->{rewrite_header}->{From});
     $tag =~ s/\n+//gs; # strip tag's newlines
-    $from =~ s/(?:\t\Q(${tag})\E)?$/\t(${tag})/
+    $from =~ s/(?:\t\Q(${tag})\E)?$/\t(${tag})/;
   }
 
   # add report headers to message
