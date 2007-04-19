@@ -290,7 +290,8 @@ sub taint_var {
 
   # $^X is apparently "always tainted".  We can use this to render
   # a string tainted as follows:
-  $v .= $^X; $v =~ s/${^X}$//;
+  my $tainter = substr ($^X."_", 0, 1);     # get 1 tainted char
+  $v .= $tainter; chop $v;      # then add and remove it
 
   return $v;
 }
