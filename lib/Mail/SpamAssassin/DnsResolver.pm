@@ -43,7 +43,7 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::Logger;
 
 use IO::Socket::INET;
-use Errno qw(EADDRINUSE);
+use Errno qw(EADDRINUSE EACCES);
 
 use constant HAS_SOCKET_INET6 => eval { require IO::Socket::INET6; };
 
@@ -221,7 +221,7 @@ sub connect_sock {
     $errno = $!;
     if (defined $sock) {  # ok, got it
       last;
-    } elsif ($! == EADDRINUSE) {  # in use, let's try another source port
+    } elsif ($! == EADDRINUSE || $! == EACCES) {  # in use, let's try another source port
       dbg("dns: UDP port $lport already in use, trying another port");
     } else {
       warn "Error creating a DNS resolver socket: $errno";
