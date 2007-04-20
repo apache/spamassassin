@@ -330,6 +330,7 @@ for(my $elem = 0; $elem <= $#targets; $elem++) {
 
       local $/ = undef;    # go into slurp mode
       ( $tempfile, $handle ) = Mail::SpamAssassin::Util::secure_tmpfile();
+      binmode $handle;
       print {$handle} <STDIN>;
       close $handle;
 

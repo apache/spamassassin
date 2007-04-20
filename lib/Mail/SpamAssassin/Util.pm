@@ -972,6 +972,7 @@ sub secure_tmpfile {
     # instead, we require O_EXCL|O_CREAT to guarantee us proper
     # ownership of our file, read the open(2) man page
     if (sysopen($tmpfile, $reportfile, O_RDWR|O_CREAT|O_EXCL, 0600)) {
+      binmode $tmpfile;
       last;
     }
 

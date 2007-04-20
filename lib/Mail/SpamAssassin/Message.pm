@@ -111,7 +111,7 @@ sub new {
   $self->{pristine_headers} =	'';
   $self->{pristine_body} =	'';
   $self->{mime_boundary_state} = {};
-  $self->{line_ending} =	"\n";
+  $self->{line_ending} =	"\012";
 
   bless($self,$class);
 
