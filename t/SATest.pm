@@ -63,7 +63,7 @@ sub sa_t_init {
   $salearn ||= "$perl_cmd ../sa-learn.raw";
 
   $spamdhost = $ENV{'SPAMD_HOST'};
-  $spamdhost ||= "localhost";
+  $spamdhost ||= "127.0.0.1";
   $spamdport = $ENV{'SPAMD_PORT'};
   $spamdport ||= probably_unused_spamd_port();
 
@@ -420,6 +420,11 @@ sub start_spamd {
   if ($spamd_extra_args !~ /(?:-p\s*[0-9]+|-o|--socketpath)/) {
     push(@spamd_args,
       qq{-p}, $spamdport,
+    );
+  }
+  if ($spamd_extra_args !~ /(?:--socketpath)/) {
+    push(@spamd_args,
+      qq{-A}, $spamdhost,
     );
   }
 
