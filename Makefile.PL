@@ -1140,7 +1140,7 @@ spamd/spamd: spamd/spamd.raw
 	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@
 
 build_rules: 
-	[ ! -d rulesrc ] || $(PERL) build/mkrules --src rulesrc --out rules --manifest MANIFEST --manifestskip MANIFEST.SKIP
+	$(PERL) build/mkrules --exit_on_no_src --src rulesrc --out rules --manifest MANIFEST --manifestskip MANIFEST.SKIP
 
 SPAMC_MAKEFILE  = spamc/Makefile
 MAKE_SPAMC      = $(MAKE) -f $(SPAMC_MAKEFILE)
