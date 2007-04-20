@@ -41,7 +41,8 @@ tstlocalrules ("
     loadplugin myTestPlugin ../../data/taintcheckplugin.pm
 ");
 
-$ENV{'PATH'} = '/bin:/usr/bin';
+use Mail::SpamAssassin::Util;
+Mail::SpamAssassin::Util::untaint_var(\%ENV);
 
 ok (sarun ("-L -t < data/spam/gtube.eml", \&patterns_run_cb));
 ok_all_patterns();
