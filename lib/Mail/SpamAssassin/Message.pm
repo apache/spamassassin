@@ -108,6 +108,7 @@ sub new {
 
   my $self = $class->SUPER::new({normalize=>$normalize});
 
+  $self->{tmpfiles} =           [];
   $self->{pristine_headers} =	'';
   $self->{pristine_body} =	'';
   $self->{mime_boundary_state} = {};
@@ -523,6 +524,12 @@ sub finish {
   # Clean ourself up
   $self->finish_metadata();
 
+  # delete temporary files
+  if ($self->{'tmpfiles'}) {
+    unlink @{$self->{'tmpfiles'}};
+    delete $self->{'tmpfiles'};
+  }
+
   # These will only be in the root Message node
   delete $self->{'mime_boundary_state'};
   delete $self->{'mbox_sep'};
@@ -552,6 +559,15 @@ sub finish {
       push(@toclean, @{$part->{'body_parts'}});
       delete $part->{'body_parts'};
     }
+  }
+}
+
+# also use a DESTROY method, just to ensure (as much as possible) that
+# temporary files are deleted even if the finish() method is omitted
+sub DESTROY {
+  my $self = shift;
+  if ($self->{'tmpfiles'}) {
+    unlink @{$self->{'tmpfiles'}};
   }
 }
 
@@ -861,12 +877,10 @@ sub _parse_normal {
     ($filepath, $msg->{'raw'}) = Mail::SpamAssassin::Util::secure_tmpfile();
 
     if ($filepath) {
-      # The temp file was created, let's try to delete it now
-      if (!unlink $filepath) {
-        # We couldn't delete the file, so abort trying to make the temp file.
-        close($msg->{'raw'});
-	unlink $filepath; # try again with the file closed
-      }
+      # The temp file was created, add it to the list of pending deletions
+      # we cannot just delete immediately in the POSIX idiom, as this is
+      # unportable (to win32 at least)
+      push @{$self->{tmpfiles}}, $filepath;
       $msg->{'raw'}->print(@{$body});
     }
   }

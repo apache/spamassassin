@@ -7,6 +7,7 @@ BEGIN {
 
   if (-e 'test_dir') {            # running from test directory, not ..
     unshift(@INC, '../blib/lib');
+    unshift(@INC, '../lib');
   }
 }
 
