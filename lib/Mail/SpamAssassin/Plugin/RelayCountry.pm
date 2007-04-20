@@ -69,7 +69,7 @@ sub extract_metadata {
     $reg = IP::Country::Fast->new();
   };
   if ($@) {
-    dbg("metadata: failed to load 'IP::Country::Fast', skipping");
+    dbg("metadata: failed to load 'IP::Country::Fast', skipping ($@)");
     return 1;
   }
 

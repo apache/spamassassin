@@ -247,7 +247,7 @@ sub add {
       dbg("logger: successfully added $name method\n");
       return 1;
     }
-    warn("logger: failed to add $name method\n");
+    warn("logger: failed to add $name method ($@)\n");
     return 0;
   }
 

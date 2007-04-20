@@ -522,7 +522,7 @@ sub _check_spf {
     };
 
     if ($@) {
-      dbg("spf: cannot create Mail::SPF::Request object");
+      dbg("spf: cannot create Mail::SPF::Request object ($@)");
       return;
     }
 
@@ -559,7 +559,7 @@ sub _check_spf {
     };
 
     if ($@) {
-      dbg("spf: cannot create Mail::SPF::Query object: $@");
+      dbg("spf: cannot create Mail::SPF::Query object ($@)");
       return;
     }
 
