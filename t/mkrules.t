@@ -3,6 +3,7 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("mkrules");
 use Test; BEGIN { plan tests => 81 };
+use File::Copy;
 use File::Path;
 
 # ---------------------------------------------------------------------------
@@ -398,8 +399,7 @@ sub mkrun {
 
 sub save_tdir {
   rmtree("$tdir.${Test::ntest}");
-  system("mv $tdir $tdir.${Test::ntest}");
-  if ($? >> 8 == 0) {
+  if (move( "$tdir", "$tdir.${Test::ntest}")) {
     print "\ttest output tree copied to $tdir.${Test::ntest}\n";
   }
 }
