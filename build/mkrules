@@ -23,7 +23,7 @@
 # http://wiki.apache.org/spamassassin/RulesProjPromotion 
 
 sub usage {
-  die "build/mkrules [--src srcdir] [--out outputdir]\n";
+  die "build/mkrules [--src srcdir] [--exit_on_no_src] [--out outputdir]\n";
 }
 
 my $RULE_KEYWORDS_RE = qr{
@@ -47,7 +47,7 @@ use vars qw(
     @opt_srcs $opt_out $opt_sandboxout $opt_manifest
     $opt_manifestskip $opt_listpromotable $opt_active
     $opt_activeout $default_file_header
-    $opt_rulemetadata
+    $opt_rulemetadata $opt_exit_on_no_src
 );
 GetOptions("src=s" => \@opt_srcs,
     "out=s",
@@ -57,6 +57,7 @@ GetOptions("src=s" => \@opt_srcs,
     "manifest=s",
     "manifestskip=s",
     "rulemetadata=s",
+    "exit_on_no_src",
   );
 
 if (!@opt_srcs) {
@@ -80,6 +81,18 @@ if (!$opt_active && -f "rules/active.list") {
   $opt_active = "rules/active.list";
 }
 
+if ($opt_exit_on_no_src) {
+  my $foundone = 0;
+  foreach my $src (@opt_srcs) {
+    if (-d $src) { $foundone++; last; }
+  }
+
+  if (!$foundone) {
+    print "no source directory found: exiting\n";
+    exit 0;
+  }
+}
+# else
 die "no src" unless (@opt_srcs >= 1);
 
 my $promolist;
