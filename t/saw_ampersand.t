@@ -47,11 +47,22 @@ tryone (1, "");
 
 print "\ntrying net with only local rule plugins\n";
 
-# TODO: unportable
-system "perl -pi.bak -e 's/^loadplugin/###loadplugin/g' ".
-                " log/localrules.tmp/*.pre log/test_rules_copy/*.pre";
 
-($? >> 8 != 0) and die "perl failed";
+# kill all 'loadplugin' lines
+foreach my $file 
+        (<log/localrules.tmp/*.pre>, <log/test_rules_copy/*.pre>) #*/
+{
+  rename $file, "$file.bak" or die "rename $file failed";
+  open IN, "<$file.bak" or die "cannot read $file.bak";
+  open OUT, ">$file" or die "cannot write $file";
+  while (<IN>) {
+    s/^loadplugin/###loadplugin/g;
+    print OUT;
+  }
+  close IN;
+  close OUT;
+}
+
 
 my $plugins = q{
   loadplugin Mail::SpamAssassin::Plugin::Check
