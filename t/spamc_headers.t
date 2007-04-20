@@ -1,9 +1,9 @@
 #!/usr/bin/perl
 
 use lib '.'; use lib 't';
-use SATest; sa_t_init("spamc_A");
+use SATest; sa_t_init("spamc_headers");
 
-use Test; plan tests => ($NO_SPAMC_EXE ? 0 : 5);
+use Test; plan tests => ($SKIP_SPAMC_TESTS ? 0 : 5);
 exit if $NO_SPAMC_EXE;
 
 # ---------------------------------------------------------------------------
