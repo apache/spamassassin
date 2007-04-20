@@ -380,7 +380,8 @@ if ( not defined $opt{'socketpath'} ) {
 # ident-based spamc user authentication
 if ( $opt{'auth-ident'} ) {
   eval { require Net::Ident };
-  die "spamd: ident-based authentication requested, but Net::Ident is unavailable\n" if ($@);
+  die "spamd: ident-based authentication requested, but Net::Ident is unavailable ($@)\n"
+    if ($@);
 
   $opt{'ident-timeout'} = undef if $opt{'ident-timeout'} <= 0.0;
   import Net::Ident qw(ident_lookup);
@@ -391,7 +392,7 @@ $opt{'server-key'}  ||= "$LOCAL_RULES_DIR/certs/server-key.pem";
 $opt{'server-cert'} ||= "$LOCAL_RULES_DIR/certs/server-cert.pem";
 if ( $listen_ssl ) {
   eval { require IO::Socket::SSL };
-  die "spamd: SSL encryption requested, but IO::Socket::SSL is unavailable\n"
+  die "spamd: SSL encryption requested, but IO::Socket::SSL is unavailable ($@)\n"
     if ($@);
 
   if ( !-e $opt{'server-key'} ) {
@@ -1965,7 +1966,7 @@ sub got_compress_header {
   if ($value =~ /zlib/i) {
     eval { require Compress::Zlib; };
     if ($@) {
-      protocol_error("(compression not supported, Compress::Zlib not installed)");
+      protocol_error("(compression not supported, Compress::Zlib not installed: $@)");
       return 0;
     }
     $hdrs->{compress_zlib} = 1;

@@ -107,7 +107,7 @@ sub load {
    };
 
    if ($@) {
-     warn "ldap: failed to load user scores from LDAP server, ignored\n";
+     warn "ldap: failed to load user scores from LDAP server, ignored ($@)\n";
    }
 }
 

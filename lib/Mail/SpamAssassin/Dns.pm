@@ -456,7 +456,7 @@ sub lookup_ns {
       $nsrecords = $self->{dnscache}->{NS}->{$dom} = [ @nses ];
     };
     if ($@) {
-      dbg("dns: NS lookup failed horribly, perhaps bad resolv.conf setting?");
+      dbg("dns: NS lookup failed horribly, perhaps bad resolv.conf setting? ($@)");
       return undef;
     }
   }
@@ -490,7 +490,7 @@ sub lookup_mx {
       $mxrecords = $self->{dnscache}->{MX}->{$dom} = [ @ips ];
     };
     if ($@) {
-      dbg("dns: MX lookup failed horribly, perhaps bad resolv.conf setting?");
+      dbg("dns: MX lookup failed horribly, perhaps bad resolv.conf setting? ($@)");
       return undef;
     }
   }
@@ -549,7 +549,7 @@ sub lookup_ptr {
     };
 
     if ($@) {
-      dbg("dns: PTR lookup failed horribly, perhaps bad resolv.conf setting?");
+      dbg("dns: PTR lookup failed horribly, perhaps bad resolv.conf setting? ($@)");
       return undef;
     }
   }
@@ -591,7 +591,7 @@ sub lookup_a {
     };
 
     if ($@) {
-      dbg("dns: A lookup failed horribly, perhaps bad resolv.conf setting?");
+      dbg("dns: A lookup failed horribly, perhaps bad resolv.conf setting? ($@)");
       return undef;
     }
   }
