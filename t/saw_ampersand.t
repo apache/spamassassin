@@ -25,9 +25,11 @@ use Test;
 use Carp qw(croak);
 
 our $RUN_THIS_TEST;
+use constant HAS_MODULE => eval { require Devel::SawAmpersand; };
 
 BEGIN {
-  $RUN_THIS_TEST = conf_bool('run_saw_ampersand_test');
+  $RUN_THIS_TEST = conf_bool('run_saw_ampersand_test')
+                    && HAS_MODULE;
   plan tests => (!$RUN_THIS_TEST ? 0 : 41) 
 };
 
