@@ -1,4 +1,144 @@
 ------------------------------------------------------------------------
+r531438 | jm | 2007-04-23 11:26:30 +0000 (Mon, 23 Apr 2007) | 1 line
+
+trivial: change saw_ampersand test to both (a) require the t/config setting be set to 'y' AND (b) the Devel::SawAmpersand module be installed
+------------------------------------------------------------------------
+r531381 | jm | 2007-04-23 08:50:02 +0000 (Mon, 23 Apr 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r531157 | jm | 2007-04-22 08:50:01 +0000 (Sun, 22 Apr 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r530997 | jm | 2007-04-21 08:50:01 +0000 (Sat, 21 Apr 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r530950 | sidney | 2007-04-20 23:58:58 +0000 (Fri, 20 Apr 2007) | 1 line
+
+replace nonportable use of system mv with File::Copy::move
+------------------------------------------------------------------------
+r530922 | sidney | 2007-04-20 21:09:50 +0000 (Fri, 20 Apr 2007) | 1 line
+
+use correct test for whether to run spamc tests. use correct name for test in sa_t_init
+------------------------------------------------------------------------
+r530907 | jm | 2007-04-20 20:16:26 +0000 (Fri, 20 Apr 2007) | 1 line
+
+replace unportable perl command with workalike, but win32-portable, code in tests
+------------------------------------------------------------------------
+r530905 | jm | 2007-04-20 20:15:38 +0000 (Fri, 20 Apr 2007) | 1 line
+
+skip this test on Win32; CMD.EXE can't deal with spaces in the switches
+------------------------------------------------------------------------
+r530900 | jm | 2007-04-20 19:46:03 +0000 (Fri, 20 Apr 2007) | 1 line
+
+more win32 portability: Win32 requires a full ENV{PATH} for this test to pass
+------------------------------------------------------------------------
+r530889 | jm | 2007-04-20 19:10:57 +0000 (Fri, 20 Apr 2007) | 1 line
+
+bug 5430: deleting the temporary file while keeping it open is a POSIX idiom, unsupported on Win32.  replace with an unlink when the Message object is finish()ed or freed
+------------------------------------------------------------------------
+r530795 | jm | 2007-04-20 13:14:48 +0000 (Fri, 20 Apr 2007) | 1 line
+
+bug 5344: use binmode() when creating temp files so that line endings are preserved sanely; add more test cases
+------------------------------------------------------------------------
+r530770 | jm | 2007-04-20 12:33:09 +0000 (Fri, 20 Apr 2007) | 1 line
+
+bug 5420: Solaris sometimes reports EACCES if ports are in use, as well as EADDRINUSE.  support this
+------------------------------------------------------------------------
+r530769 | jm | 2007-04-20 12:31:51 +0000 (Fri, 20 Apr 2007) | 1 line
+
+bug 4481: always report $@ error messages where appropriate
+------------------------------------------------------------------------
+r530767 | jm | 2007-04-20 12:29:25 +0000 (Fri, 20 Apr 2007) | 1 line
+
+bug 4834: allow builders to call tests with 'make test SPAMD_HOST=[ipaddress]', to deal with FreeBSD jails which don't allow the tests to open TCP connections from a source address of 127.0.0.1
+------------------------------------------------------------------------
+r530764 | jm | 2007-04-20 12:25:18 +0000 (Fri, 20 Apr 2007) | 1 line
+
+bug 5427: replace unportable [ -d rulesrc ] idiom in Makefile
+------------------------------------------------------------------------
+r530762 | jm | 2007-04-20 12:24:02 +0000 (Fri, 20 Apr 2007) | 1 line
+
+bug 5344: add test case for the win32 line-endings bug
+------------------------------------------------------------------------
+r530698 | jm | 2007-04-20 08:50:03 +0000 (Fri, 20 Apr 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r530418 | jm | 2007-04-19 13:58:37 +0000 (Thu, 19 Apr 2007) | 1 line
+
+fix Win32 bug, whereby the path to the perl interpreter was winding up in headers of messages processed using 'report_safe 1', due to broken code which added that path as a means of tainting a variable, then failed to remove it properly again
+------------------------------------------------------------------------
+r530417 | jm | 2007-04-19 13:57:12 +0000 (Thu, 19 Apr 2007) | 1 line
+
+trivial: ensure statements end in ';'
+------------------------------------------------------------------------
+r530334 | jm | 2007-04-19 08:50:02 +0000 (Thu, 19 Apr 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r530112 | jm | 2007-04-18 18:10:11 +0000 (Wed, 18 Apr 2007) | 1 line
+
+trivial: avoid silly false positive by Kaspersky Desktop AV, reported by Alex
+------------------------------------------------------------------------
+r529923 | jm | 2007-04-18 08:50:02 +0000 (Wed, 18 Apr 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r529529 | jm | 2007-04-17 08:50:02 +0000 (Tue, 17 Apr 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r529273 | jm | 2007-04-16 14:48:14 +0000 (Mon, 16 Apr 2007) | 1 line
+
+Kevin A. McGrail joins the PMC, too; welcome Kevin
+------------------------------------------------------------------------
+r529182 | jm | 2007-04-16 09:29:50 +0000 (Mon, 16 Apr 2007) | 1 line
+
+note that this odd failure case does occasionally happen and seems harmless
+------------------------------------------------------------------------
+r529172 | jm | 2007-04-16 08:50:01 +0000 (Mon, 16 Apr 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r528942 | jm | 2007-04-15 08:50:02 +0000 (Sun, 15 Apr 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r528869 | dos | 2007-04-14 20:23:34 +0000 (Sat, 14 Apr 2007) | 1 line
+
+set exec prop on log-grep-recent
+------------------------------------------------------------------------
+r528785 | jm | 2007-04-14 08:50:01 +0000 (Sat, 14 Apr 2007) | 1 line
+
+promotions validated
+------------------------------------------------------------------------
+r528653 | sidney | 2007-04-13 20:38:22 +0000 (Fri, 13 Apr 2007) | 1 line
+
+bug 5417: correct file name in a warning message
+------------------------------------------------------------------------
+r528557 | jm | 2007-04-13 17:12:30 +0000 (Fri, 13 Apr 2007) | 1 line
+
+bug 5403: trivial documentation fix: note that Mail::DomainKeys is officially unsupported, and quote the author of that module's thoughts on the matter in the SpamAssassin plugin's POD doc
+------------------------------------------------------------------------
+r528556 | jm | 2007-04-13 17:09:00 +0000 (Fri, 13 Apr 2007) | 1 line
+
+bug 5398: 'remove' typoed as 'remote'. trivial fix
+------------------------------------------------------------------------
+r528467 | jm | 2007-04-13 12:34:40 +0000 (Fri, 13 Apr 2007) | 1 line
+
+3.2.0-rc2 up for voting; back to development mode for trunk
+------------------------------------------------------------------------
+r528457 | jm | 2007-04-13 12:23:07 +0000 (Fri, 13 Apr 2007) | 1 line
+
+preparing to re-cut 3.2.0-rc2 release, to take the place of the unreleased 3.2.0-rc2 tarballs
+------------------------------------------------------------------------
+r528456 | jm | 2007-04-13 12:22:05 +0000 (Fri, 13 Apr 2007) | 1 line
+
+explicitly skip release announcement text files
+------------------------------------------------------------------------
 r528438 | sidney | 2007-04-13 11:02:26 +0000 (Fri, 13 Apr 2007) | 1 line
 
 bug 5416: fix bad test for not connected that should use undef which failed when connected() returned 0
