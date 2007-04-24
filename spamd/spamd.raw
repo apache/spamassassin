@@ -2566,7 +2566,7 @@ Options:
  --siteconfigpath=path             Path for site configs
  --cf='config line'                Additional line of configuration
  -d, --daemonize                   Daemonize
- -h, --help                        Print usage message.
+ -h, --help                        Print usage message
  -i [ipaddr], --listen-ip=ipaddr   Listen on the IP ipaddr
  --ipv4only, --ipv4-only, --ipv4   Disable attempted use of ipv6 for DNS
  -p port, --port=port              Listen on specified port
@@ -2610,6 +2610,7 @@ Options:
  --socketowner=name                Set UNIX domain socket file's owner
  --socketgroup=name                Set UNIX domain socket file's group
  --socketmode=mode                 Set UNIX domain socket file's mode
+ -V, --version                     Print version and exit
 
 =head1 DESCRIPTION
 
@@ -2684,6 +2685,10 @@ Detach from starting process and run in background (daemonize).
 =item B<-h>, B<--help>
 
 Print a brief help message, then exit without further action.
+
+=item B<-V>, B<--version>
+
+Print version information, then exit without further action.
 
 =item B<-i> [I<ipaddress>], B<--listen-ip>[=I<ipaddress>], B<--ip-address>[=I<ipaddress>]
 
