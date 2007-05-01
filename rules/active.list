@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-fredt bb-jm bb-zmi cthielen daf dos jm theo wtogami zmi
+# with results from: bb-doc bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -152,6 +152,9 @@ FAKE_REPLY_C
 FB_ADD_INCHES
 
 # good enough
+FB_ALMOST_SEX
+
+# good enough
 FB_ANA_TRIM
 
 # good enough
@@ -165,6 +168,9 @@ FB_EMAIL_HIER
 
 # good enough
 FB_GAPPY_ADDRESS
+
+# good enough
+FB_GVR
 
 # good enough
 FB_HG_H_CAP
@@ -219,6 +225,9 @@ FB_TO_STOP_DISTRO
 
 # good enough
 FB_ULTRA_ALLURE
+
+# good enough
+FB_WORD1_END_DOLLAR
 
 # good enough
 FB_YOURSELF_MASTER
@@ -905,6 +914,9 @@ SUBJECT_NEEDS_ENCODING
 SUBJ_RE_NUM
 
 # good enough
+TEMPLATE_203_RCVD
+
+# good enough
 TT_MSGID_TRUNC
 
 # good enough
@@ -936,9 +948,6 @@ TVD_FUZZY_SYMBOL
 
 # good enough
 TVD_PH_REC
-
-# good enough
-TVD_PH_SUBJ_URGENT
 
 # good enough
 TVD_PP_PHISH
@@ -980,13 +989,10 @@ TVD_VISIT_PHARMA
 TVD_VIS_HIDDEN
 
 # good enough
-AXB_MIME_IMG830
+KAM_STOCKTIP14
 
 # good enough
-CTYPE_1SPACE_GIF
-
-# good enough
-FB_WORD1_END_DOLLAR
+OEBOUND
 
 # tflags net
 RCVD_IN_DNSWL_HI
@@ -1016,13 +1022,10 @@ RCVD_IN_WHOIS_INVALID
 RCVD_IN_XBL
 
 # good enough
-TEMPLATE_203_RCVD
+TVD_APP_LOAN
 
 # good enough
-TVD_FW_GRAPHIC_ID1
-
-# good enough
-TVD_FW_GRAPHIC_ID2
+TVD_PH_SUBJ_META
 
 # tflags userconf
 UNPARSEABLE_RELAY
