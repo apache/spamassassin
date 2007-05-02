@@ -1,0 +1,129 @@
+To: users, dev, announce
+Subject: ANNOUNCE: Apache SpamAssassin 3.2.0 available
+
+Apache SpamAssassin 3.2.0 is now available!  This is the official release,
+and contains a significant number of changes and major enhancements --
+please use it!
+
+Downloads are available from:
+  http://spamassassin.apache.org/downloads.cgi?update=200705021400
+
+md5sum of archive files:
+6840e3be132e2c3cbf66298b0227e880  Mail-SpamAssassin-3.2.0.tar.bz2
+aed988bb6cf463afc868a64d4cd771a3  Mail-SpamAssassin-3.2.0.tar.gz
+484045c69499b2fa59f024179f1f49c2  Mail-SpamAssassin-3.2.0.zip
+
+sha1sum of archive files:
+2fb864f01fc1c287e6f6e62fab8338f32cd20fb1  Mail-SpamAssassin-3.2.0.tar.bz2
+af3941ab4f9548107d06966780ba71f751ab0216  Mail-SpamAssassin-3.2.0.tar.gz
+bf785d7088371ad3beafe6084bf296ee3434038c  Mail-SpamAssassin-3.2.0.zip
+
+The release files also have a .asc accompanying them.  The file serves
+as an external GPG signature for the given release file.  The signing
+key is available via the wwwkeys.pgp.net key server, as well as
+http://spamassassin.apache.org/released/GPG-SIGNING-KEY
+
+The key information is:
+
+pub 1024D/265FA05B 2003-06-09 SpamAssassin Signing Key <release@spamassassin.org>
+    Key fingerprint = 26C9 00A4 6DD4 0CD5 AD24  F6D7 DEE0 1987 265F A05B
+
+See the INSTALL and UPGRADE files in the distribution for important
+installation notes.
+
+Summary of major changes since 3.1.8
+------------------------------------
+
+Changes to the core code:
+
+ * new behavior for trusted_networks/internal_networks: the 127.* network is now always considered trusted and internal, regardless of configuration.
+
+ * bug 3109: short-circuiting of 'definite ham' or 'definite spam' messages based on individual short-circuit rules using the 'shortcircuit' setting, by Dallas Engelken <dallase /at/ uribl.com>.
+
+ * bug 5305: implement 'msa_networks', for ISPs to specify their Mail Submission Agents, and extend network trust accordingly.
+
+ * bug 4636: Add support for charset normalization, so rules can be written in UTF-8 to match text in other charsets.
+
+ * sa-compile: compilation of SpamAssassin rules into a fast parallel-matching DFA, implemented in native code.
+
+ * "tflags multiple": allow writing of rules that count multiple hits in a single message.
+
+ * bug 4363: if a message uses CRLF for line endings, we should use it as well, otherwise stay with LF as usual; important for Windows users.
+
+ * bug 4515: content preview was omitting first paragraph when no Subject: header was present.
+
+ * The third-party modules used by sa-update are now required by the SpamAssassin package, instead of being optional.
+
+ * Bug 5165: 'sa-update --checkonly' added to check for updates without applying them; thanks to <anomie /at/ users.sourceforge.net>
+
+ * Bugs 4606, 4609: Adjust MIME parsing limits for nested multipart/* and message/rfc822 MIME parts.
+
+ * bug 5295: add 'whitelist_auth', to whitelist addresses that send mail using sender-authorization systems like SPF, Domain Keys, and DKIM
+
+ * Removed dependency on Text::Wrap CPAN module.
+
+ * Received header parsing updates/fixes/additions.
+
+Spamc / spamd:
+
+ * bug 4603: Mail::SpamAssassin::Spamd::Apache2 -- mod_perl2 module, implementing spamd as a mod_perl module, contributed as a Google Summer of Code project by Radoslaw Zielinski.
+
+ * bug 3991: spamd can now listen on UNIX domain, TCP, and SSL sockets simultaneously.  Command-line semantics extended slightly, although fully backwards compatibly; add the --ssl-port switch to allow TCP and SSL listening at the same time.
+
+ * bug 3466: do Bayes expiration, if required, after results have been passed back to the client from spamd; this helps avoid client timeouts.
+
+ * more complete IPv6 support.
+
+ * spamc: Add '-K' switch, to ping spamd.
+
+ * spamc: add '-z' switch, which compresses mails to be scanned using zlib compression; very useful for long-distance use of spamc over the internet.
+
+ * bug 5296: spamc '--headers' switch, which scans messages and transmits back just rewritten headers.  This is more bandwidth-efficient than the normal mode of scanning, but only works for 'report_safe 0'.
+ 
+ * Bump spamd's protocol version to 1.4, to reflect new HEADERS verb used for '--headers'.
+
+Mail::SpamAssassin modules and API:
+
+ * bug 4589: allow M::SA::Message to use IO::File objects to read in message (same as GLOB).
+
+ * bug 4517: rule instrumentation plugin hooks, to measure performance, from John Gardiner Myers <jgmyers /at/ proofpoint.com>.
+
+ * add two features to core rule-parsing code; 1. optional behaviour to recurse through subdirs looking for .cf/.pre's, to support rules compilers working on rulesrc dir.  2. call back into invoking code on lint failure, so rule compiler can detect which rules exactly fail the lint check.
+
+ * bug 5206: detect duplicate rules, and silently merge them internally for greater efficiency.
+
+ * bug 5243: add Plugin::register_method_priority() API, allowing plugins to control the relative ordering of plugin callbacks relative to other plugins' implementations.
+
+ * Reduced memory footprint.
+
+Plugins:
+
+ * bug 5236: Support Mail::SPF replacement for Mail::SPF::Query.
+
+ * bug 5127: allow mimeheader :raw rules to match newlines and folded-header whitespace in MIME header strings.
+
+ * bug 4770: add ASN.pm plugin, contributed by Matthias Leisi <matthias at leisi.net>
+
+ * bug 5271: move ImageInfo ruleset into 3.2.0 core rules, thanks to Dallas Engelken <dallase /at/ uribl.com>.
+
+ * VBounce ruleset and plugin: detect spurious bounce messages sent by broken mail systems in response to spam or viruses.  (Based on Tim Jackson's "bogus-virus-warnings.cf" ruleset.)
+
+ * DomainKeys/DKIM: Mail::DKIM is now preferred over Mail::DomainKeys, since the latter module is no longer actively maintained, and Mail::DKIM can handle both DomainKeys and DKIM signatures.
+
+ * DKIM: separate signature verification from fetching a policy: can save a DNS lookup for each unverified message by setting score to 0 for all policy-related rules (DKIM_POLICY_SIGNALL, DKIM_POLICY_SIGNSOME, and DKIM_POLICY_TESTING). (thanks to Mark Martinec)
+
+ * DKIM: support testing flags in the public key, as well as in the policy record. (thanks to Mark Martinec)
+
+ * DKIM: skip fetching a policy (SSP) if a signature does verify, according to draft-allman-dkim-ssp-02 (thanks to Mark Martinec)
+
+ * Move rule functionality and checking into separate Check plugin, allowing third parties to implement alternative scanner core algorithms.
+
+ * core EvalTests code moved into various plugins.
+
+* Plus lots of miscellaneous bug fixes.
+
+
+A more detailed change log can be read here:
+
+http://svn.apache.org/repos/asf/spamassassin/tags/spamassassin_release_3_2_0/Changes
+
