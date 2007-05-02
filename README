@@ -36,10 +36,10 @@ Once identified, the mail can then be optionally tagged as spam for
 later filtering using the user's own mail user-agent application.
 
 SpamAssassin typically differentiates successfully between spam and
-non-spam in between 95% and 100% of cases, depending on what kind of
-mail you get and your training of its Bayesian filter.  Specifically,
-SpamAssassin has been shown to produce around 0.9% false negatives (spam
-that was missed) and around 0.1% false positives (ham incorrectly marked
+non-spam in between 95% and 100% of cases, depending on what kind of mail
+you get and your training of its Bayesian filter.  Specifically,
+SpamAssassin has been shown to produce around 1.5% false negatives (spam
+that was missed) and around 0.06% false positives (ham incorrectly marked
 as spam).  See the rules/STATISTICS*.txt files for more information.
 
 SpamAssassin also includes plugins to support reporting spam messages
@@ -103,6 +103,13 @@ default locations that SpamAssassin will look at the end.
 
 	Distributed configuration files, with all defaults.  Do not modify
 	these, as they are overwritten when you upgrade.
+
+  - /var/lib/spamassassin/*/*.cf:
+
+        Local state directory; updated rulesets, overriding the
+        distributed configuration files, downloaded using "sa-update". Do
+        not modify these, as they are overwritten when you run
+        "sa-update".
 
   - /etc/mail/spamassassin/*.cf:
 
@@ -302,9 +309,8 @@ disabled tests include:
   - DCC: depends on non-open-source software (disabled in init.pre)
   - DomainKeys: experimental (disabled in init.pre)
   - MAPS: commercial service (disabled in 50_scores.cf)
-  - MSExec: experimental (disabled in init.pre)
-  - Razor2: depends on service that is not always free (disabled in init.pre)
   - TextCat: slow (disabled in init.pre)
+  - various optional plugins, disabled for speed (disabled in *.pre)
 
 To turn on tests disabled in 50_scores.cf, simply assign them a non-zero
 score, e.g. by adding score lines to your ~/.spamassassin/user_prefs file.
