@@ -216,7 +216,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
     repo=https://svn.apache.org/repos/asf/spamassassin
     svn copy $repo/tags/spamassassin_release_3_1_0 \
-           $repo/branches/b3_1_0
+           $repo/branches/3.1
 
   "trunk" is SVN's concept of head.  Typically, our branches are named
   for their minor version number.  In the example above, b3_1_0 is the
@@ -296,23 +296,25 @@ SPAMASSASSIN RELEASE PROCEDURE
         cd /www/spamassassin.apache.org
         webmake -F
 
-- update the 'doc' tree in the SpamAssassin website:
+- update the 'doc' tree in the SpamAssassin website (WARNING: if you're
+  moving to a new major release, x.y.0, you need to edit
+  'build/update_website_docs' beforehand and set the "vers" line):
 
         cd /www/spamassassin.apache.org
         svn up
-        svn delete --force full/3.1.x
+        svn delete --force full/3.2.x
         svn commit -m "removing old doc tree from website" full
 
         cd [checkedoutdir]
         build/update_website_docs
 
         cd /www/spamassassin.apache.org
-        svn add full/3.1.x
+        svn add full/3.2.x
         svn commit -m "updating new doc tree on website" full
 
 - and check the entire website into SVN (see bug 4998 for reasons why).
   Note that you may need to resolve conflicts and ensure the contents of
-  'full/3.1.x' are all added successfully:
+  'full/3.2.x' are all added successfully:
 
         svn up
         svn commit -m "added new release to website"
@@ -320,19 +322,19 @@ SPAMASSASSIN RELEASE PROCEDURE
 - Release a new rules update matching the released code:
 
     ssh spamassassin.zones.apache.org
-    sudo -u updatesd \
+    sudo -H -u updatesd \
         /home/updatesd/svn/spamassassin/build/mkupdates/run_nightly
-    sudo -u updatesd \
+    sudo -H -u updatesd \
         /home/updatesd/svn/spamassassin/build/mkupdates/run_part2
 
 - update the tag used to point to "current release":
 
     repo=https://svn.apache.org/repos/asf/spamassassin
     svn delete -m "updating for new release" \
-	$repo/tags/spamassassin_current_release_3.1.x
+	$repo/tags/spamassassin_current_release_3.2.x
     svn copy -m "updating for new release" \
-	$repo/tags/spamassassin_release_3_1_7 \
-	$repo/tags/spamassassin_current_release_3.1.x
+	$repo/tags/spamassassin_release_3_2_0 \
+	$repo/tags/spamassassin_current_release_3.2.x
 
 - upload release tarball to CPAN at http://pause.cpan.org/:
 
