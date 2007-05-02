@@ -1,7 +1,7 @@
 #!/bin/sh
 
 WEBDIR=/www/spamassassin.apache.org
-vers=3.2.x
+vers=3.1.x
 
 if [ -z "$PERL" ]; then
   if [ -x /home/jm/perl584/bin/perl ]; then
@@ -28,15 +28,7 @@ tar cf - \
         --exclude='o' --exclude='out' \
         --exclude='tst' \
         --exclude='blib' --exclude='Mail-SpamAssassin-*' \
-        . | ( cd $fulldir/dist ; tar xf - )
+        doc | ( cd $fulldir/dist ; tar xf - )
         
-(
-  cd $fulldir/dist
-  tar cf docbak doc
-  make clean distclean
-  tar xvf docbak
-  rm -f docbak
-)
-
 chmod -R g+w $fulldir/dist
 
