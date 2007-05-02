@@ -41,31 +41,11 @@ If you are running AFS, you may also need to specify INSTALLSITELIB and
 SITELIBEXP.
 
 Note that you can upgrade SpamAssassin using these instructions, as long
-as you take care to read the caveats in the file UPGRADES.   Upgrading
+as you take care to read the caveats in the file UPGRADE.   Upgrading
 will not delete your learnt Bayes data or local rule modifications.
 
 If you're using SunOS 4.1.x, see
 http://wiki.spamassassin.org/w/BuildingOnSunOS4 for build tips.
-
-
-Note for Perl 5.8 Users (incl Red Hat 8)
-----------------------------------------
-
-Perl 5.8 now uses Unicode internally by default, which causes trouble for
-SpamAssassin (and almost all other reasonably complex pieces of perl
-code!).
-
-We've worked around this in most places, as far as we know, but there may
-still be some issues.  In addition, there is a speed hit, which it would
-be nice to avoid.
-
-Setting the LANG environment variable before any invocation of
-SpamAssassin sometimes seems to help fix it, like so:
-
-  export LANG=en_US
-
-Notably, the LANG setting must not include "utf8".   However, some folks
-have reported that this makes no difference. ;)
 
 
 Installing SpamAssassin for Personal Use (Not System-Wide)
