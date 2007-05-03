@@ -160,7 +160,7 @@ if (defined $opt{'updatedir'}) {
   $opt{'updatedir'} = Mail::SpamAssassin::Util::untaint_file_path($opt{'updatedir'});
 }
 else {
-  $opt{'updatedir'} = $SA->sed_path('__local_state_dir__/compiled/__version__');
+  $opt{'updatedir'} = $spamtest->sed_path('__local_state_dir__/compiled/__version__');
 }
 my $installdir = $opt{'updatedir'};
 if ((!defined $opt{'list'})
