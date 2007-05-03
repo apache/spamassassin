@@ -661,7 +661,7 @@ C<re2c> can match strings much faster than perl code, by constructing a DFA to
 match many simple strings in parallel, and compiling that to native object
 code.  Not all SpamAssassin rules are amenable to this conversion, however.
 
-This requires C<re2c> version 0.10.x (see C<http://re2c.org/>), and the C
+This requires C<re2c> (see C<http://re2c.org/>), and the C
 compiler used to build Perl XS modules, be installed.
 
 Note that running this, and creating a compiled ruleset, will have no
