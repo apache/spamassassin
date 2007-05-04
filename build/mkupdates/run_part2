@@ -150,6 +150,12 @@ svn copy -m 'promotions validated' . $tagurl < /dev/null
 svnrev=`(grep 'Last Changed Rev: ' $tmpdir/svn || exit 1) | \
         sed -e 's/^.*: //'`
 
+if [ "$svnrev" == "" ] ; then
+  echo "missing SVN revision"
+  cat $tmpdir/svn
+  exit 5
+fi
+
 if [ "$svnrev" -lt 1 ] ; then
   echo "bad SVN revision: $svnrev"
   cat $tmpdir/svn
