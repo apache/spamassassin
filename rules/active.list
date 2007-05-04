@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-fredt bb-jm bb-zmi daf jm theo
+# with results from: bb-doc bb-fredt bb-jm bb-zmi daf dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -155,6 +155,9 @@ FB_ADD_INCHES
 FB_ALMOST_SEX
 
 # good enough
+FB_ANA_TRIM
+
+# good enough
 FB_CIALIS_LEO3
 
 # good enough
@@ -165,9 +168,6 @@ FB_EMAIL_HIER
 
 # good enough
 FB_GAPPY_ADDRESS
-
-# good enough
-FB_GVR
 
 # good enough
 FB_HG_H_CAP
@@ -197,13 +197,7 @@ FB_MED1CAT
 FB_MEDS_PERCENT
 
 # good enough
-FB_NOT_PHONE_NUM1
-
-# good enough
 FB_NO_SCRIP_NEEDED
-
-# good enough
-FB_P1LL
 
 # good enough
 FB_PIPEDOLLAR
@@ -228,6 +222,9 @@ FB_TO_STOP_DISTRO
 
 # good enough
 FB_ULTRA_ALLURE
+
+# good enough
+FB_WORD1_END_DOLLAR
 
 # good enough
 FB_YOURSELF_MASTER
@@ -336,6 +333,9 @@ FM_LIKE_STOCKS
 
 # good enough
 FM_LUX_GIFTS_REDUCED
+
+# good enough
+FM_MANY_DRUG_WORDS
 
 # good enough
 FM_MORTGAGE4PLUS
@@ -645,9 +645,6 @@ NO_RELAYS
 
 # good enough
 NULL_IN_BODY
-
-# good enough
-OEBOUND
 
 # good enough
 OUTLOOK_3416
@@ -989,10 +986,13 @@ TVD_VISIT_PHARMA
 TVD_VIS_HIDDEN
 
 # good enough
+AXB_MIME_IMG830
+
+# good enough
 AXB_RCVD_ZOOBSEND
 
 # good enough
-FH_FROM_RND_1
+CTYPE_1SPACE_GIF
 
 # tflags net
 RCVD_IN_DNSWL_HI
@@ -1022,16 +1022,13 @@ RCVD_IN_WHOIS_INVALID
 RCVD_IN_XBL
 
 # good enough
-TVD_APP_LOAN
+TVD_FW_GRAPHIC_ID1
 
 # good enough
-TVD_PH_SUBJ_ACCOUNTS_PRE
+TVD_FW_GRAPHIC_ID2
 
 # good enough
 TVD_PH_SUBJ_META
-
-# good enough
-TVD_SINGLE_SPAN_DIV
 
 # tflags userconf
 UNPARSEABLE_RELAY
