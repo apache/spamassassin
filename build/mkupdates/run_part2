@@ -68,6 +68,7 @@ rm -rf $tmpdir; mkdir -p $tmpdir         || exit $?
 # to what's installed
 # TODO: this *would* be performed in a checkout of the desired
 # version's branch.  right now we're only using 1 version though
+make clean
 $PERL Makefile.PL PREFIX=$tmpdir < /dev/null || exit $?
 make                                     || exit $?
 
