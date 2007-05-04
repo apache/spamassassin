@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi
+# with results from: bb-doc bb-fredt bb-jm bb-zmi daf jm theo
 
 # tflags userconf
 ALL_TRUSTED
@@ -155,9 +155,6 @@ FB_ADD_INCHES
 FB_ALMOST_SEX
 
 # good enough
-FB_ANA_TRIM
-
-# good enough
 FB_CIALIS_LEO3
 
 # good enough
@@ -200,7 +197,13 @@ FB_MED1CAT
 FB_MEDS_PERCENT
 
 # good enough
+FB_NOT_PHONE_NUM1
+
+# good enough
 FB_NO_SCRIP_NEEDED
+
+# good enough
+FB_P1LL
 
 # good enough
 FB_PIPEDOLLAR
@@ -227,9 +230,6 @@ FB_TO_STOP_DISTRO
 FB_ULTRA_ALLURE
 
 # good enough
-FB_WORD1_END_DOLLAR
-
-# good enough
 FB_YOURSELF_MASTER
 
 # good enough
@@ -249,6 +249,9 @@ FH_FAKE_RCVD_LINE
 
 # good enough
 FH_FROMEML_NOTLD
+
+# good enough
+FH_FROM_CASH
 
 # good enough
 FH_FROM_GIVEAWAY
@@ -335,9 +338,6 @@ FM_LIKE_STOCKS
 FM_LUX_GIFTS_REDUCED
 
 # good enough
-FM_MANY_DRUG_WORDS
-
-# good enough
 FM_MORTGAGE4PLUS
 
 # good enough
@@ -375,9 +375,6 @@ FRAGMENTED_MESSAGE
 
 # good enough
 FRT_DISCOUNT
-
-# good enough
-FRT_DOLLAR
 
 # good enough
 FRT_GUARANTEE1
@@ -606,6 +603,12 @@ KAM_LOTTO2
 
 # good enough
 KAM_LOTTO3
+
+# tflags publish
+KAM_STOCKOTC
+
+# tflags publish
+KAM_STOCKTIP15
 
 # good enough
 LONG_TERM_PRICE
@@ -941,6 +944,9 @@ TVD_FUZZY_SYMBOL
 TVD_PH_REC
 
 # good enough
+TVD_PH_SUBJ_ACCOUNTS_POST
+
+# good enough
 TVD_PP_PHISH
 
 # good enough
@@ -980,7 +986,16 @@ TVD_VISIT_PHARMA
 TVD_VIS_HIDDEN
 
 # good enough
-OEBOUND
+AXB_MIME_IMG830
+
+# good enough
+AXB_RCVD_ZOOBSEND
+
+# good enough
+CTYPE_1SPACE_GIF
+
+# good enough
+FH_FROM_RND_1
 
 # tflags net
 RCVD_IN_DNSWL_HI
@@ -1008,6 +1023,24 @@ RCVD_IN_WHOIS_INVALID
 
 # tflags net
 RCVD_IN_XBL
+
+# good enough
+TVD_APP_LOAN
+
+# good enough
+TVD_FW_GRAPHIC_ID1
+
+# good enough
+TVD_FW_GRAPHIC_ID2
+
+# good enough
+TVD_PH_SUBJ_ACCOUNTS_PRE
+
+# good enough
+TVD_PH_SUBJ_META
+
+# good enough
+TVD_SINGLE_SPAN_DIV
 
 # tflags userconf
 UNPARSEABLE_RELAY
