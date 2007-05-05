@@ -6,13 +6,13 @@ use strict;
 use Getopt::Long;
 
 use vars qw(
-    $corpusdir
+    $realcorpusdir
     $opt_override
     $opt_tag
 );
 GetOptions(
     "tag=s" => \$opt_tag,
-    "dir=s" => \$corpusdir,
+    "dir=s" => \$realcorpusdir,
     "override=s" => \$opt_override,
 );
 
@@ -51,11 +51,23 @@ my $output_revpath;
 &configure;
 &init;
 
-if ($corpusdir) {
-  print "reading logs from '$corpusdir'\n";
-}
-else {
-  $corpusdir = $opt{corpus};
+my $corpusdir;
+
+if ($realcorpusdir) {
+  print "reading logs from '$realcorpusdir'\n";
+
+  # create a temp dir to hold hard links to the files we're working on.  This
+  # is used so that the rsyncd can upload new source files, replacing
+  # our work files, without affecting us.  use hard links for speed and
+  # efficiency
+  $corpusdir = "$opt{tmp}/parse.$$";
+  mkdir $corpusdir or die "cannot mkdir $corpusdir";
+  push @tmps, $corpusdir;
+  print "using $corpusdir to hold temporary links to processed logs\n";
+
+} else {
+  $realcorpusdir = $opt{corpus};
+  $corpusdir = $realcorpusdir;      # no need to take copies
   &update_rsync;
 }
 
@@ -84,7 +96,7 @@ sub configure {
 }
 
 sub clean_up {
-  system "rm -f $opt{tmp}/*.$$ ".join(' ', @tmps);
+  system "rm -rf $opt{tmp}/*.$$ ".join(' ', @tmps);
 }
 
 sub init {
@@ -97,7 +109,7 @@ sub init {
 }
 
 sub update_rsync {
-  chdir $corpusdir;
+  chdir $realcorpusdir;
 
   # allow non-running of rsync under some circumstances
   if ($opt{rsync_command}) {
@@ -134,19 +146,19 @@ sub update_rsync {
 }
 
 sub locate {
-  opendir(CORPUS, $corpusdir);
+  opendir(CORPUS, $realcorpusdir);
   @files = sort readdir(CORPUS);
   closedir(CORPUS);
 
   @files = grep {
-    /^(?:spam|ham)-(?:net-)?[-\w]+\.log$/ && -f "$corpusdir/$_" && -M _ < 10 
+    /^(?:spam|ham)-(?:net-)?[-\w]+\.log$/ && -f "$realcorpusdir/$_" && -M _ < 10 
   } @files;
 
   foreach my $file (@files) {
     my $tag = 0;
     my $headers = '';
 
-    open(FILE, "$corpusdir/$file") or warn "cannot read $corpusdir/$file";
+    open(FILE, "$realcorpusdir/$file") or warn "cannot read $realcorpusdir/$file";
     while (my $line = <FILE>) {
       last if $line !~ /^#/;
       $headers .= $line;
@@ -168,18 +180,18 @@ sub locate {
     }
     close(FILE);
 
-    my @s = stat("$corpusdir/$file");
+    my @s = stat("$realcorpusdir/$file");
     $filesize{$file} = $s[7];
     $mtime{$file} = $s[9];
 
     if (!defined $time{$file}) {
-      warn "$corpusdir/$file: no time found, ignored\n"; next;
+      warn "$realcorpusdir/$file: no time found, ignored\n"; next;
     }
     if (!defined $revision{$file}) {
-      warn "$corpusdir/$file: no revision found, ignored\n"; next;
+      warn "$realcorpusdir/$file: no revision found, ignored\n"; next;
     }
     if ($revision{$file} eq 'unknown') {
-      warn "$corpusdir/$file: not tagged with a revision, ignored\n"; next;
+      warn "$realcorpusdir/$file: not tagged with a revision, ignored\n"; next;
     }
 
     my $daterev = mk_daterev($time{$file},$revision{$file},$opt_tag);
@@ -189,13 +201,16 @@ sub locate {
 
     if ($file =~ /-net-/) {
       $is_net_daterev{$daterev} = 1;
-      print "$corpusdir/$file: rev=$daterev time=$time{$file} (set 1)\n";
+      print "$realcorpusdir/$file: rev=$daterev time=$time{$file} (set 1)\n";
     }
     else {
-      print "$corpusdir/$file: rev=$daterev time=$time{$file} (set 0)\n";
+      print "$realcorpusdir/$file: rev=$daterev time=$time{$file} (set 0)\n";
     }
 
     get_rulemetadata_for_revision($daterev, $revision{$file});
+
+    link ("$realcorpusdir/$file", "$corpusdir/$file")
+            or die "cannot ln $realcorpusdir/$file to $corpusdir";
   }
 }
 
