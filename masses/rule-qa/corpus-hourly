@@ -56,6 +56,12 @@ my $make_links;
 
 if ($realcorpusdir) {
   print "reading logs from '$realcorpusdir'\n";
+  $make_links = 0;
+  $corpusdir = $realcorpusdir;      # no need to take copies
+
+} else {
+  $realcorpusdir = $opt{corpus};
+  &update_rsync;
 
   # create a temp dir to hold hard links to the files we're working on.  This
   # is used so that the rsyncd can upload new source files, replacing
@@ -64,14 +70,9 @@ if ($realcorpusdir) {
   $corpusdir = "$opt{tmp}/parse.$$";
   mkdir $corpusdir or die "cannot mkdir $corpusdir";
   push @tmps, $corpusdir;
-  print "using $corpusdir to hold temporary links to processed logs\n";
+  print "copying logs from '$realcorpusdir'\n";
+  print "using $corpusdir to hold temporary copies\n";
   $make_links = 1;
-
-} else {
-  $realcorpusdir = $opt{corpus};
-  $corpusdir = $realcorpusdir;      # no need to take copies
-  $make_links = 0;
-  &update_rsync;
 }
 
 &locate;
