@@ -52,6 +52,7 @@ my $output_revpath;
 &init;
 
 my $corpusdir;
+my $make_links;
 
 if ($realcorpusdir) {
   print "reading logs from '$realcorpusdir'\n";
@@ -64,10 +65,12 @@ if ($realcorpusdir) {
   mkdir $corpusdir or die "cannot mkdir $corpusdir";
   push @tmps, $corpusdir;
   print "using $corpusdir to hold temporary links to processed logs\n";
+  $make_links = 1;
 
 } else {
   $realcorpusdir = $opt{corpus};
   $corpusdir = $realcorpusdir;      # no need to take copies
+  $make_links = 0;
   &update_rsync;
 }
 
@@ -209,8 +212,10 @@ sub locate {
 
     get_rulemetadata_for_revision($daterev, $revision{$file});
 
-    link ("$realcorpusdir/$file", "$corpusdir/$file")
+    if ($make_links) {
+      link ("$realcorpusdir/$file", "$corpusdir/$file")
             or die "cannot ln $realcorpusdir/$file to $corpusdir";
+    }
   }
 }
 
