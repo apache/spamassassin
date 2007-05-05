@@ -820,6 +820,8 @@ sub compute_overlaps_for_rule {
 sub _print_overlap_ratios {
   my ($r1, $hash1, $hash2, $type) = @_;
 
+  return unless defined $r1;
+
   if ($opt_d) {
     print qq{ <overlap class='$type'> };
   }
@@ -833,6 +835,7 @@ sub _print_overlap_ratios {
     foreach my $r2 (split(' ', $rules)) {
       $r2 =~ s/\[(.*?)\]$//;
       my $reverse_ratio = $1 || 0;
+      next unless defined $r2;
 
       if ($opt_d) {
         print qq{
