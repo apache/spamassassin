@@ -825,13 +825,14 @@ sub _print_overlap_ratios {
   }
 
   foreach my $ratio (sort { $b <=> $a } keys %$hash1) {
+    $ratio ||= 0;
     last if ($ratio < 20);     # 20% cutoff
     my $rules = _prettify_overlap_rules($r1, $hash1->{$ratio});
     next if ($rules eq '');
 
     foreach my $r2 (split(' ', $rules)) {
       $r2 =~ s/\[(.*?)\]$//;
-      my $reverse_ratio = $1;
+      my $reverse_ratio = $1 || 0;
 
       if ($opt_d) {
         print qq{
