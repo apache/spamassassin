@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-fredt bb-jm bb-zmi daf dos jm theo zmi
+# with results from: bb-doc bb-fredt bb-jm bb-zmi cthielen daf dos jm theo
 
 # tflags userconf
 ALL_TRUSTED
@@ -9,6 +9,9 @@ APOSTROPHE_FROM
 
 # tflags userconf
 AWL
+
+# good enough
+AXB_RCVD_ZOOBSEND
 
 # good enough
 AXB_XMID_1212
@@ -155,9 +158,6 @@ FB_ADD_INCHES
 FB_ALMOST_SEX
 
 # good enough
-FB_ANA_TRIM
-
-# good enough
 FB_CIALIS_LEO3
 
 # good enough
@@ -248,9 +248,6 @@ FH_FAKE_RCVD_LINE
 FH_FROMEML_NOTLD
 
 # good enough
-FH_FROM_CASH
-
-# good enough
 FH_FROM_GIVEAWAY
 
 # good enough
@@ -333,9 +330,6 @@ FM_LIKE_STOCKS
 
 # good enough
 FM_LUX_GIFTS_REDUCED
-
-# good enough
-FM_MANY_DRUG_WORDS
 
 # good enough
 FM_MORTGAGE4PLUS
@@ -509,9 +503,6 @@ FU_MIDER
 FU_UKGEOCITIES
 
 # good enough
-FU_URI_TRACKER_T
-
-# good enough
 GEO_QUERY_STRING
 
 # tflags userconf
@@ -645,9 +636,6 @@ NO_RELAYS
 
 # good enough
 NULL_IN_BODY
-
-# good enough
-OEBOUND
 
 # good enough
 OUTLOOK_3416
@@ -938,16 +926,10 @@ TVD_ENVFROM_APOST
 TVD_FINGER_02
 
 # good enough
-TVD_FLOAT_GENERAL
-
-# good enough
 TVD_FUZZY_SYMBOL
 
 # good enough
 TVD_PH_REC
-
-# good enough
-TVD_PH_SUBJ_ACCOUNTS_POST
 
 # good enough
 TVD_PP_PHISH
@@ -989,7 +971,10 @@ TVD_VISIT_PHARMA
 TVD_VIS_HIDDEN
 
 # good enough
-AXB_RCVD_ZOOBSEND
+AXB_MIME_IMG830
+
+# good enough
+CTYPE_1SPACE_GIF
 
 # tflags net
 RCVD_IN_DNSWL_HI
@@ -1019,7 +1004,10 @@ RCVD_IN_WHOIS_INVALID
 RCVD_IN_XBL
 
 # good enough
-TVD_PH_SUBJ_META
+TVD_FW_GRAPHIC_ID1
+
+# good enough
+TVD_FW_GRAPHIC_ID2
 
 # tflags userconf
 UNPARSEABLE_RELAY
