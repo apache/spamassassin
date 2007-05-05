@@ -22,7 +22,7 @@ $opt_tag ||= 'n';       # nightly is the default
 use File::Path;
 use File::Copy;
 use Time::ParseDate;
-use Cwd;
+use Cwd 'abs_path';
 use POSIX qw(nice strftime);
 
 use constant WEEK => 60*60*24;
@@ -78,11 +78,12 @@ if ($realcorpusdir) {
 &locate;
 &current;
 &clean_up;
+exit;
 
 sub configure {
   # does rough equivalent of source
   open(C, $configuration) || die "open failed: $configuration: $!\n";
-  my $pwd = getcwd;
+  my $pwd = Cwd::getcwd;
 
   # add 'override' options
   my @lines = (<C>, split(/\|/, $opt_override));
@@ -100,6 +101,7 @@ sub configure {
 }
 
 sub clean_up {
+  chdir "/";
   system "rm -rf $opt{tmp}/*.$$ ".join(' ', @tmps);
 }
 
@@ -366,7 +368,7 @@ sub gen_class {
     print OUT "# spam results used for $daterev $class $age: " . join(" ", @spam) . "\n";
     print OUT "# ".log_metadata_xml($daterev, @ham, @spam)."\n";
 
-    push (@tmps, $tmpfname);
+    push (@tmps, abs_path($tmpfname));
 
     my $flags = "";
     $flags = "-t net -s 1" if $class eq "NET";
