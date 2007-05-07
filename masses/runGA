@@ -103,7 +103,7 @@ pwd
 date
 
 # TODO: use -f $FPRATE instead of -b $HAM_PREFERENCE
-./garescorer -b $HAM_PREFERENCE -e $EPOCHS -t $THRESHOLD
+./garescorer -b $HAM_PREFERENCE -e $EPOCHS -t $THRESHOLD || exit $?
 
 # POST-GA COMMANDS:
 
