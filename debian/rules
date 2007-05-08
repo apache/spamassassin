@@ -65,7 +65,7 @@ binary-arch: build install
 #	dh_testversion
 	dh_testdir
 	dh_testroot
-	dh_installdocs BUGS README ldap/README ldap/README.testing spamc/README.win spamc/README.qmail spamd/README.vpopmail spamd/README sql/README.awl sql/README.bayes sql/README
+	dh_installdocs README ldap/README ldap/README.testing spamc/README.win spamc/README.qmail spamd/README.vpopmail spamd/README sql/README.awl sql/README.bayes sql/README
 	dh_installexamples
 	dh_installmenu
 #	dh_installemacsen
