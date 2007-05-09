@@ -365,13 +365,10 @@ version is too low for them to be used.
 
     If you plan to use Vipul's Razor, note that versions up to and
     including version 2.82 include a bug that will slow down the entire
-    perl interpreter.  This bug has more details, and a patch:
-
-    http://issues.apache.org/SpamAssassin/show_bug.cgi?id=5312
+    perl interpreter.  Version 2.83 or later fixes this.
 
     If you do not plan to use this plugin, be sure to comment out
-    its loadplugin line in "/etc/mail/spamassassin/v310.pre".  This
-    will ensure that the slowdown will not affect you.
+    its loadplugin line in "/etc/mail/spamassassin/v310.pre".
 
 
 What Next?
