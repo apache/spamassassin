@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-fredt bb-jm bb-zmi cthielen daf dos theo zmi
+# with results from: bb-doc bb-fredt bb-jm bb-zmi daf dos theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -113,10 +113,19 @@ DOS_FIX_MY_URI
 DOS_LET_GO_JOB
 
 # good enough
+DOS_PROVISION4
+
+# good enough
+DOS_REPORT_FIN_INC
+
+# good enough
 DOS_STOCK_BAT
 
 # good enough
 DOS_STOCK_CDYV_GENERIC
+
+# good enough
+DOS_STOCK_INCOME_STATEMENT
 
 # good enough
 DOS_YOUR_PLACE
@@ -140,9 +149,6 @@ DYN_RDNS_SHORT_HELO_IMAGE
 ENV_AND_HDR_SPF_MATCH
 
 # good enough
-FAKE_REPLY_C
-
-# good enough
 FB_ADD_INCHES
 
 # good enough
@@ -150,6 +156,9 @@ FB_ALMOST_SEX
 
 # good enough
 FB_ANA_TRIM
+
+# good enough
+FB_C0MPANY
 
 # good enough
 FB_CIALIS_LEO3
@@ -186,6 +195,9 @@ FB_LETTERS_21B
 
 # good enough
 FB_LOWER_PAYM
+
+# good enough
+FB_MED1CAT
 
 # good enough
 FB_MEDS_PERCENT
@@ -254,6 +266,9 @@ FH_FROM_GIVEAWAY
 FH_FROM_HOODIA
 
 # good enough
+FH_FROM_RND_1
+
+# good enough
 FH_HELO_ALMOST_IP
 
 # good enough
@@ -308,6 +323,9 @@ FH_MSGID_XXX
 FH_XMAIL_REPLACE
 
 # good enough
+FH_XMAIL_RND_833
+
+# good enough
 FM_DDDD_TIMES_2
 
 # good enough
@@ -327,6 +345,9 @@ FM_LIKE_STOCKS
 
 # good enough
 FM_MANY_DRUG_WORDS
+
+# good enough
+FM_MORTGAGE4PLUS
 
 # good enough
 FM_MORTGAGE5PLUS
@@ -366,6 +387,9 @@ FRAGMENTED_MESSAGE
 
 # good enough
 FRT_DISCOUNT
+
+# good enough
+FRT_ERECTION
 
 # good enough
 FRT_GUARANTEE1
@@ -434,7 +458,7 @@ FS_AT_NO_COST
 FS_ERECTION
 
 # good enough
-FS_LARGE_PERCENT2
+FS_LOWER_YOUR
 
 # good enough
 FS_LOW_RATES
@@ -923,6 +947,9 @@ TVD_FUZZY_SYMBOL
 TVD_PH_REC
 
 # good enough
+TVD_PH_SUBJ_ACCOUNTS_POST
+
+# good enough
 TVD_PH_SUBJ_META
 
 # good enough
@@ -964,42 +991,6 @@ TVD_VISIT_PHARMA
 # good enough
 TVD_VIS_HIDDEN
 
-# good enough
-AXB_MIME_IMG830
-
-# good enough
-CTYPE_1SPACE_GIF
-
-# good enough
-DOS_PROVISION4
-
-# good enough
-DOS_REPORT_FIN_INC
-
-# good enough
-DOS_STOCK_INCOME_STATEMENT
-
-# good enough
-FB_MED1CAT
-
-# good enough
-FH_FROM_RND_1
-
-# good enough
-FH_XMAIL_RND_833
-
-# good enough
-FM_MORTGAGE4PLUS
-
-# good enough
-FRT_ERECTION
-
-# good enough
-FS_LOWER_YOUR
-
-# good enough
-OEBOUND
-
 # tflags net
 RCVD_IN_DNSWL_HI
 
@@ -1028,10 +1019,7 @@ RCVD_IN_WHOIS_INVALID
 RCVD_IN_XBL
 
 # good enough
-TVD_FW_GRAPHIC_ID1
-
-# good enough
-TVD_FW_GRAPHIC_ID2
+TVD_PH_SUBJ_META_ALL
 
 # tflags userconf
 UNPARSEABLE_RELAY
