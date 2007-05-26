@@ -70,6 +70,16 @@ sub finish_parsing_end {
   $self->setup_test_set ($conf, $conf->{body_tests}, 'body');
 }
 
+sub compile_now_start {
+  my ($self) = @_;
+  # call info here (and no earlier) so that the message appears in the syslog
+  # but not on stderr when we start spamd
+  if (exists $self->{compiled_rules_log_msg_text}) {
+    info("zoom: $self->{compiled_rules_log_msg_text}") unless (would_log('dbg', 'zoom'));
+    delete $self->{compiled_rules_log_msg_text};
+  }
+}
+
 sub setup_test_set {
   my ($self, $conf, $test_set, $ruletype) = @_;
   foreach my $pri (keys %{$test_set}) {
@@ -148,8 +158,9 @@ sub setup_test_set_pri {
     my $pc_zoomed   = ($found / ($totalhasrules || .001)) * 100;
     $pc_zoomed   = int($pc_zoomed * 1000) / 1000;
 
-    info("zoom: able to use $found/$totalhasrules '$ruletype' compiled ".
-        "rules ($pc_zoomed\%)");
+    $self->{compiled_rules_log_msg_text} = "able to use $found/".
+        "$totalhasrules '$ruletype' compiled rules ($pc_zoomed\%)";
+    dbg("zoom: $self->{compiled_rules_log_msg_text}");
 
     # TODO: issue a warning for low counts?
     # TODO: inhibit rule2xs scanning entirely for low counts?
