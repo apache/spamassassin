@@ -1,7 +1,7 @@
 # SpamAssassin score file
 #
 # Please don't modify this file as your changes will be overwritten with
-# the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
+# the next update. Use /home/updatesd/tmp/stage/3.2.0/etc/mail/spamassassin/local.cf instead.
 # See 'perldoc Mail::SpamAssassin::Conf' for details.
 #
 # <@LICENSE>
@@ -48,8 +48,6 @@ score BAD_ENC_HEADER 3.499 2.870 1.947 1.810
 score BANG_GUAR 2.002 1.237 1.500 0.939
 score BANG_OPRAH 0 # n=0 n=1 n=2 n=3
 score BANKING_LAWS 3.099 3.096 2.900 2.002 # n=2
-score BASE64_LENGTH_78_79 3.699 3.699 3.133 2.783 # n=2
-score BASE64_LENGTH_79_INF 3.900 2.763 2.962 1.496 # n=2
 score BILLION_DOLLARS 2.658 0.001 1.603 1.875
 score BODY_ENHANCEMENT 1.799 1.608 1.499 0.309
 score BODY_ENHANCEMENT2 1.659 0.714 0.122 0.001
@@ -58,7 +56,6 @@ score CONFIRMED_FORGED 0 # n=0 n=1 n=2 n=3
 score CORRUPT_FROM_LINE_IN_HDRS 0.001
 score CTYPE_001C_A 2.299 2.319 1.500 1.498 # n=2
 score CTYPE_001C_B 0 # n=1 n=3
-score CTYPE_8SPACE_GIF 2.606 3.744 2.325 1.627 # n=2
 score CUM_SHOT 2.799 2.796 2.632 2.799
 score CURR_PRICE 4.161 2.659 1.412 1.588 # n=2
 score DATE_SPAMWARE_Y2K 2.057 1.031 2.912 2.883
@@ -69,7 +66,6 @@ score DEAR_WINNER 3.199 3.196 3.199 3.197 # n=2
 score DIET_1 2.472 0.336 1.442 0.083
 score DIGEST_MULTIPLE 0 0.001 0 0.001 # n=0 n=2
 score DIV_CENTER_A_HREF 3.799 3.795 3.799 2.590 # n=2
-score DNS_FROM_DOB 0 0.341 0 0.732 # n=0 n=2
 score DNS_FROM_OPENWHOIS 0 2.431 0 1.130 # n=0 n=2
 score DOS_FIX_MY_URI 0 # n=1 n=3
 score DOS_LET_GO_JOB 0 # n=1 n=3
@@ -264,35 +260,6 @@ score FROM_LOCAL_NOVOWEL 3.199 3.196 3.199 3.196
 score FROM_NO_USER 2.199 0.499 2.081 1.483
 score FROM_OFFERS 2.601 1.145 2.699 0.001
 score FROM_STARTS_WITH_NUMS 2.302 0.723 1.232 1.499
-score FRT_ADOBE2 0 # n=1 n=3
-score FRT_BIGGERMEM1 0.000 0.001 1.205 1.782 # n=2
-score FRT_DIPLOMA 0 # n=1 n=3
-score FRT_DISCOUNT 2.999 2.996 1.498 1.810 # n=2
-score FRT_DOLLAR 2.529 2.596 2.133 2.366 # n=2
-score FRT_ESTABLISH2 0 # n=1 n=3
-score FRT_FUCK2 0 # n=1 n=3
-score FRT_GUARANTEE1 2.503 2.819 2.144 1.253 # n=2
-score FRT_INVESTOR 0 # n=1 n=3
-score FRT_LEVITRA 0.001 0.745 1.685 1.814 # n=2
-score FRT_MEETING 2.700 2.699 2.699 2.699 # n=2
-score FRT_OFFER2 2.700 1.590 1.097 1.287 # n=2
-score FRT_OPPORTUN2 2.699 2.699 2.699 2.689 # n=2
-score FRT_PENIS1 3.799 3.074 3.002 2.486 # n=2
-score FRT_PRICE 3.699 2.531 3.072 3.491 # n=2
-score FRT_REFINANCE1 2.799 2.727 0.994 0.921 # n=2
-score FRT_ROLEX 3.099 3.096 3.099 3.096 # n=2
-score FRT_SEXUAL 3.199 3.196 3.199 3.142 # n=2
-score FRT_SOMA 0 # n=1 n=3
-score FRT_SOMA2 0 # n=1 n=3
-score FRT_STRONG1 3.699 2.919 2.712 2.976 # n=2
-score FRT_STRONG2 1.302 0.001 2.745 3.096 # n=2
-score FRT_SYMBOL 1.902 3.561 2.587 2.943 # n=2
-score FRT_TODAY2 2.523 2.460 3.246 2.382 # n=2
-score FRT_VALIUM1 3.096 3.049 0.664 1.590 # n=2
-score FRT_VALIUM2 1.903 1.933 1.328 1.301 # n=2
-score FRT_WEIGHT2 2.529 2.930 3.099 2.121 # n=2
-score FRT_XANAX1 3.799 3.799 2.265 2.423 # n=2
-score FRT_XANAX2 0.001 # n=2
 score FR_3TAG_3TAG 2.405 0.998 2.599 1.053 # n=2
 score FR_ALMOST_VIAG2 2.402 2.376 2.051 1.990 # n=2
 score FR_CANTSEETEXT 0 # n=1 n=3
@@ -321,7 +288,6 @@ score FS_TEEN_BAD 2.501 2.596 2.441 2.549 # n=2
 score FS_TIP_DDD 0.001 0.021 1.726 0.101 # n=2
 score FS_WILL_HELP 3.299 3.299 3.299 3.296 # n=2
 score FS_WITH_SMALL 0 # n=1 n=3
-score FUZZY_MERIDIA 0.001 0.778 1.936 2.374 # n=2
 score FU_COMMON_SUBS2 2.403 2.057 2.136 1.498 # n=2
 score FU_ENDS_NUMS_DOTS_CLK 3.200 3.196 3.199 3.196 # n=2
 score FU_END_ET 3.599 3.599 3.599 3.500 # n=2
@@ -335,7 +301,6 @@ score GEO_QUERY_STRING 2.699 2.696 2.699 2.696 # n=2
 score GUARANTEED_100_PERCENT 0.571 0.965 0.001 0.012
 score HDR_ORDER_FTSDMCXX_001C 0.001 1.937 0.001 0.001 # n=2
 score HDR_ORDER_FTSDMCXX_BAT 2.965 2.739 3.986 3.193 # n=2
-score HEADER_COUNT_SUBJECT 3.099 3.099 3.100 3.096 # n=2
 score HEADER_SPAM 3.399 3.396 3.399 3.396
 score HELO_DYNAMIC_CHELLO_NL 3.600 3.599 3.599 3.595
 score HELO_DYNAMIC_DHCP 2.298 1.520 1.536 1.398
@@ -367,7 +332,6 @@ score HS_PHARMA_1 0.000 0.000 3.000 1.000 # n=1
 score HS_SUBJ_NEW_SOFTWARE 1.118 0.253 2.395 3.599 # n=2
 score HS_SUBJ_ONLINE_PHARMACEUTICAL 0 0 0.001 0.001 # n=1 n=2 n=3
 score HS_UPLOADED_SOFTWARE 0.001 1.504 2.346 1.885 # n=2
-score HTML_IFRAME_SRC 0.001 0.001 0.000 0.043 # n=2
 score HTML_MIME_NO_HTML_TAG 1.661 1.052 0.036 0.097
 score HTML_MISSING_CTYPE 2.699 2.380 1.705 2.095
 score HTML_SHORT_CENTER 0.001
@@ -375,7 +339,6 @@ score HTML_SHORT_LINK_IMG_1 2.450 1.078 0.001 0.001
 score HTML_SHORT_LINK_IMG_2 0.153 0.239 0.001 0.001
 score HTML_SHORT_LINK_IMG_3 0.299 0.556 0.001 0.001
 score HTML_TITLE_SUBJ_DIFF 0.498 0.805 1.176 1.217
-score HTTPS_HTTP_MISMATCH 0 # n=1 n=3
 score HTTP_77 3.199 0.001 3.199 1.414
 score HTTP_ESCAPED_HOST 0.001 0.001 0.071 0.134
 score HTTP_EXCESSIVE_ESCAPES 2.701 0.964 1.500 0.001
@@ -432,7 +395,6 @@ score MSGID_SPAM_CAPS 4.199 4.195 4.199 4.195
 score MSGID_SPAM_LETTERS 2.861 1.637 0.866 1.188
 score MSGID_YAHOO_CAPS 1.197 0.448 2.921 3.107
 score MSOE_MID_WRONG_CASE 0.800 0.699 1.280 0.820 # n=2
-score MULTIPART_ALT_NON_TEXT 2.699 2.696 2.699 2.696 # n=2
 score MULTI_FORGED 0 # n=0 n=1 n=2 n=3
 score NA_DOLLARS 2.385 1.129 1.506 1.329
 score NONEXISTENT_CHARSET 0 # n=0 n=1 n=2 n=3
@@ -447,8 +409,6 @@ score OBSCURED_EMAIL 1.899 0.012 0.000 0.001
 score ONE_TIME 0 # n=0 n=1 n=2 n=3
 score ONLINE_PHARMACY 2.701 1.484 0.057 0.001
 score OUTLOOK_3416 1.702 1.695 1.821 1.744 # n=2
-score PART_CID_STOCK 2.396 1.231 1.217 1.635 # n=2
-score PART_CID_STOCK_LESS 0.001 0.001 0.774 0.384 # n=2
 score PERCENT_RANDOM 2.624 3.196 2.117 3.196
 score PLING_QUERY 2.160 1.333 1.400 1.390
 score PREST_NON_ACCREDITED 0 # n=0 n=1 n=2 n=3
@@ -526,14 +486,6 @@ score TVD_EB_PHISH 2.703 2.996 2.999 2.999 # n=2
 score TVD_ENVFROM_APOST 4.199 3.307 0.465 0.088 # n=2
 score TVD_FINGER_02 2.796 2.720 3.199 2.134 # n=2
 score TVD_FLOAT_GENERAL 3.599 1.114 0.591 0.001 # n=2
-score TVD_FUZZY_DEGREE 0 # n=1 n=3
-score TVD_FUZZY_FINANCE 0 # n=1 n=2 n=3
-score TVD_FUZZY_FIXED_RATE 0 # n=1 n=3
-score TVD_FUZZY_MICROCAP 0 # n=1 n=3
-score TVD_FUZZY_PHARMACEUTICAL 0 # n=1 n=2 n=3
-score TVD_FUZZY_SYMBOL 3.099 1.435 2.086 1.699 # n=2
-score TVD_FW_GRAPHIC_NAME_LONG 2.600 2.389 0.949 1.080 # n=2
-score TVD_FW_GRAPHIC_NAME_MID 2.385 1.205 0.145 0.543 # n=2
 score TVD_INCREASE_SIZE 0 # n=1 n=2 n=3
 score TVD_LINK_SAVE 0 # n=1 n=2 n=3
 score TVD_PH_BODY_ACCOUNTS_PRE 0 # n=1 n=3
@@ -553,8 +505,6 @@ score TVD_RCVD_SPACE_BRACKET 0 # n=1 n=3
 score TVD_SECTION 2.956 3.317 1.541 3.499 # n=2
 score TVD_SILLY_URI_OBFU 0 # n=1 n=3
 score TVD_SPACED_SUBJECT_WORD3 2.802 3.599 2.276 2.412 # n=2
-score TVD_SPACE_RATIO 2.899 2.899 2.307 2.219 # n=2
-score TVD_STOCK1 4.199 3.792 4.199 3.753 # n=2
 score TVD_SUBJ_ACC_NUM 0 # n=1 n=2 n=3
 score TVD_SUBJ_FINGER_03 0 # n=1 n=2 n=3
 score TVD_SUBJ_OWE 3.199 3.196 3.199 3.196 # n=2
@@ -566,18 +516,6 @@ score UNCLOSED_BRACKET 2.687 2.083 1.580 2.206
 score UPPERCASE_50_75 0.001 0.490 0.001 0.001
 score UPPERCASE_75_100 2.402 1.930 1.127 1.528
 score URG_BIZ 2.384 0.667 1.511 1.585
-score URIBL_COMPLETEWHOIS 0 # n=1 n=3
-score URIBL_RHS_ABUSE 0 # n=1 n=3
-score URIBL_RHS_AHBL 0 # n=1 n=3
-score URIBL_RHS_BOGUSMX 0 # n=1 n=3
-score URIBL_RHS_DOB 0 0.901 0 1.083 # n=0 n=2
-score URIBL_RHS_DSN 0 # n=1 n=3
-score URIBL_RHS_POST 0 # n=1 n=3
-score URIBL_RHS_TLD_WHOIS 0 # n=1 n=3
-score URIBL_RHS_URIBL_BLACK 0 # n=1 n=3
-score URIBL_RHS_URIBL_GREY 0 # n=1 n=3
-score URIBL_RHS_WHOIS 0 # n=1 n=3
-score URIBL_XS_SURBL 0 # n=1 n=3
 score URI_HEX 1.777 1.316 1.395 0.368
 score URI_L_PHP 3.099 3.096 3.099 2.905 # n=2
 score URI_NOVOWEL 2.899 2.543 1.764 1.620
@@ -588,45 +526,6 @@ score US_DOLLARS_3 2.342 1.165 1.046 0.630
 score VIA_GAP_GRA 2.203 1.053 2.004 0.133
 score WEIRD_PORT 1.599 1.499 1.089 0.001
 score WEIRD_QUOTING 2.799 2.796 1.428 1.396
-score WHOIS_1AND1PR 0 # n=1 n=2 n=3
-score WHOIS_AITPRIV 0 3.995 0 3.510 # n=0 n=2
-score WHOIS_CONTACTPRIV 0 2.696 0 2.696 # n=0 n=2
-score WHOIS_DMNBYPROXY 0 0.260 0 0.478 # n=0 n=2
-score WHOIS_DOMESCROW 0 0.000 0 1.000 # n=1 n=2
-score WHOIS_DOMPRIVCORP 0 0.000 0 1.000 # n=1 n=2
-score WHOIS_DREAMPRIV 0 0.000 0 1.000 # n=1 n=2
-score WHOIS_DROA 0 # n=1 n=2 n=3
-score WHOIS_DYNADOT 0 0.000 0 1.000 # n=1 n=2
-score WHOIS_FINEXE 0 0.000 0 1.000 # n=1 n=2
-score WHOIS_GKGPROXY 0 # n=1 n=2 n=3
-score WHOIS_IDSHIELD 0 # n=1 n=2 n=3
-score WHOIS_IDTHEFTPROT 0 # n=1 n=2 n=3
-score WHOIS_KATZ 0 # n=1 n=2 n=3
-score WHOIS_LISTINGAG 0 # n=1 n=2 n=3
-score WHOIS_LNOA 0 # n=1 n=2 n=3
-score WHOIS_MAPNAME 0 # n=1 n=2 n=3
-score WHOIS_MONIKER_PRIV 0 2.596 0 2.596 # n=0 n=2
-score WHOIS_MYPRIVREG 0 0.156 0 1.499 # n=0 n=2
-score WHOIS_NAMEKING 0 1.477 0 1.409 # n=0 n=2
-score WHOIS_NAMESECURE 0 # n=1 n=2 n=3
-score WHOIS_NETID 0 0.000 0 1.000 # n=1 n=2
-score WHOIS_NETSOLPR 0 0.001 0 0.001 # n=0 n=2
-score WHOIS_NOLDC 0 # n=1 n=2 n=3
-score WHOIS_NOMINET 0 0.000 0 1.000 # n=1 n=2
-score WHOIS_PRIVACYPOST 0 0.647 0 0.001 # n=0 n=2
-score WHOIS_PRIVDOMAIN 0 0.000 0 1.000 # n=1 n=2
-score WHOIS_PRIVPROT 0 2.801 0 1.501 # n=0 n=2
-score WHOIS_REGISTER4LESS 0 0.000 0 1.000 # n=1 n=2
-score WHOIS_REGISTERFLY 0 3.196 0 1.645 # n=0 n=2
-score WHOIS_REGTEK 0 0.000 0 1.000 # n=1 n=2
-score WHOIS_SAFENAMES 0 0.000 0 1.000 # n=1 n=2
-score WHOIS_SECINFOSERV 0 # n=1 n=2 n=3
-score WHOIS_SECUREWHOIS 0 2.696 0 2.696 # n=0 n=2
-score WHOIS_SPAMFREE 0 # n=1 n=2 n=3
-score WHOIS_SRSPLUS 0 # n=1 n=2 n=3
-score WHOIS_UNLISTED 0 2.170 0 2.839 # n=0 n=2
-score WHOIS_WHOISGUARD 0 3.399 0 2.025 # n=0 n=2
-score WHOIS_WHOISPROT 0 0.000 0 1.000 # n=1 n=2
 score WITH_LC_SMTP 0 # n=0 n=1 n=2 n=3
 score XMAILER_MIMEOLE_OL_015D5 0.663 0.907 1.030 1.007 # n=2
 score XMAILER_MIMEOLE_OL_07794 0.755 1.613 3.299 2.221 # n=2
@@ -692,6 +591,8 @@ ifplugin Mail::SpamAssassin::Plugin::BodyEval
 score BLANK_LINES_80_90 0 # n=0 n=1 n=2 n=3
 score MPART_ALT_DIFF 2.498 1.143 1.456 0.739
 score MPART_ALT_DIFF_COUNT 2.899 1.882 1.500 1.110
+score TVD_SPACE_RATIO 2.899 2.899 2.307 2.219 # n=2
+score TVD_STOCK1 4.199 3.792 4.199 3.753 # n=2
 # </gen:mutable>
 endif
 
@@ -708,6 +609,7 @@ score HTML_FONT_LOW_CONTRAST 0.131 0.543 0.663 0.124
 score HTML_FONT_SIZE_HUGE 0.804 0.389 0.001 0.057
 score HTML_FONT_SIZE_LARGE 0.147 0.001 0.001 0.001
 score HTML_FORMACTION_MAILTO 0 # n=0 n=1 n=2 n=3
+score HTML_IFRAME_SRC 0.001 0.001 0.000 0.043 # n=2
 score HTML_IMAGE_ONLY_04 2.502 1.462 1.875 2.041
 score HTML_IMAGE_ONLY_08 2.554 2.432 2.045 1.787
 score HTML_IMAGE_ONLY_12 2.552 2.245 2.779 2.460
@@ -749,6 +651,7 @@ endif
 
 ifplugin Mail::SpamAssassin::Plugin::DNSEval
 # <gen:mutable>
+score DNS_FROM_DOB 0 0.341 0 0.732 # n=0 n=2
 score RCVD_IN_BL_SPAMCOP_NET 0 2.188 0 1.960 # n=0 n=2
 score RCVD_IN_DOB 0 0.835 0 1.103 # n=0 n=2
 score RCVD_IN_DSBL 0 0.753 0 0.961 # n=0 n=2
@@ -851,6 +754,7 @@ score FORGED_HOTMAIL_RCVD2 1.947 1.117 1.498 1.502
 score FORGED_YAHOO_RCVD 2.299 1.408 1.889 2.297
 score FROM_ILLEGAL_CHARS 2.922 3.999 3.999 3.995
 score HEADER_COUNT_CTYPE 2.699 0.671 2.390 3.026
+score HEADER_COUNT_SUBJECT 3.099 3.099 3.100 3.096 # n=2
 score HEAD_ILLEGAL_CHARS 3.799 3.729 3.799 3.622
 score LOCALPART_IN_SUBJECT 2.499 2.497 1.641 2.020
 score MISSING_HEADERS 1.899 1.581 1.500 1.292
@@ -887,6 +791,8 @@ endif
 
 ifplugin Mail::SpamAssassin::Plugin::MIMEEval
 # <gen:mutable>
+score BASE64_LENGTH_78_79 3.699 3.699 3.133 2.783 # n=2
+score BASE64_LENGTH_79_INF 3.900 2.763 2.962 1.496 # n=2
 score MIME_BAD_ISO_CHARSET 3.363 2.831 2.768 0.346
 score MIME_BASE64_BLANKS 0.221 0.001 0.016 0.041
 score MIME_BASE64_TEXT 2.701 2.796 1.709 1.753
@@ -894,6 +800,7 @@ score MIME_HTML_MOSTLY 0.001
 score MIME_HTML_ONLY 2.299 1.672 1.925 1.457
 score MIME_QP_LONG_LINE 2.499 1.819 1.500 1.396
 score MISSING_MIME_HB_SEP 2.599 2.699 2.205 2.119
+score MULTIPART_ALT_NON_TEXT 2.699 2.696 2.699 2.696 # n=2
 # </gen:mutable>
 
 # ok_locales
@@ -934,6 +841,7 @@ ifplugin Mail::SpamAssassin::Plugin::URIEval
 # <gen:mutable>
 score HTTPS_IP_MISMATCH 2.697 2.896 2.899 2.897
 # </gen:mutable>
+score URI_TRUNCATED 0.001
 endif
 
 ###########################################################################
@@ -966,7 +874,6 @@ endif
 score NO_RECEIVED -0.001
 
 # Informational rule, URI parsing encountered an overlong URI
-score URI_TRUNCATED 0.001
 
 # Informational rule, typically means corrupt corpus/input
 score NO_HEADERS_MESSAGE 0.001
@@ -1062,13 +969,64 @@ endif # Mail::SpamAssassin::Plugin::SPF
 ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
 # <gen:mutable>
 score URIBL_AB_SURBL 0 1.613 0 1.860 # n=0 n=2
+score URIBL_COMPLETEWHOIS 0 # n=1 n=3
 score URIBL_JP_SURBL 0 2.857 0 1.501 # n=0 n=2
 score URIBL_OB_SURBL 0 2.132 0 1.500 # n=0 n=2
 score URIBL_PH_SURBL 0 2.035 0 1.787 # n=0 n=2
+score URIBL_RHS_ABUSE 0 # n=1 n=3
+score URIBL_RHS_AHBL 0 # n=1 n=3
+score URIBL_RHS_BOGUSMX 0 # n=1 n=3
+score URIBL_RHS_DOB 0 0.901 0 1.083 # n=0 n=2
+score URIBL_RHS_DSN 0 # n=1 n=3
+score URIBL_RHS_POST 0 # n=1 n=3
+score URIBL_RHS_TLD_WHOIS 0 # n=1 n=3
+score URIBL_RHS_URIBL_BLACK 0 # n=1 n=3
+score URIBL_RHS_URIBL_GREY 0 # n=1 n=3
+score URIBL_RHS_WHOIS 0 # n=1 n=3
 score URIBL_SBL 0 2.468 0 1.499 # n=0 n=2
 score URIBL_SC_SURBL 0 2.523 0 0.474 # n=0 n=2
 score URIBL_WS_SURBL 0 2.100 0 1.500 # n=0 n=2
 score URIBL_BLACK 0 1.961 0 1.955 # n=0 n=2
+score URIBL_XS_SURBL 0 # n=1 n=3
+score WHOIS_1AND1PR 0 # n=1 n=2 n=3
+score WHOIS_AITPRIV 0 3.995 0 3.510 # n=0 n=2
+score WHOIS_CONTACTPRIV 0 2.696 0 2.696 # n=0 n=2
+score WHOIS_DMNBYPROXY 0 0.260 0 0.478 # n=0 n=2
+score WHOIS_DOMESCROW 0 0.000 0 1.000 # n=1 n=2
+score WHOIS_DOMPRIVCORP 0 0.000 0 1.000 # n=1 n=2
+score WHOIS_DREAMPRIV 0 0.000 0 1.000 # n=1 n=2
+score WHOIS_DROA 0 # n=1 n=2 n=3
+score WHOIS_DYNADOT 0 0.000 0 1.000 # n=1 n=2
+score WHOIS_FINEXE 0 0.000 0 1.000 # n=1 n=2
+score WHOIS_GKGPROXY 0 # n=1 n=2 n=3
+score WHOIS_IDSHIELD 0 # n=1 n=2 n=3
+score WHOIS_IDTHEFTPROT 0 # n=1 n=2 n=3
+score WHOIS_KATZ 0 # n=1 n=2 n=3
+score WHOIS_LISTINGAG 0 # n=1 n=2 n=3
+score WHOIS_LNOA 0 # n=1 n=2 n=3
+score WHOIS_MAPNAME 0 # n=1 n=2 n=3
+score WHOIS_MONIKER_PRIV 0 2.596 0 2.596 # n=0 n=2
+score WHOIS_MYPRIVREG 0 0.156 0 1.499 # n=0 n=2
+score WHOIS_NAMEKING 0 1.477 0 1.409 # n=0 n=2
+score WHOIS_NAMESECURE 0 # n=1 n=2 n=3
+score WHOIS_NETID 0 0.000 0 1.000 # n=1 n=2
+score WHOIS_NETSOLPR 0 0.001 0 0.001 # n=0 n=2
+score WHOIS_NOLDC 0 # n=1 n=2 n=3
+score WHOIS_NOMINET 0 0.000 0 1.000 # n=1 n=2
+score WHOIS_PRIVACYPOST 0 0.647 0 0.001 # n=0 n=2
+score WHOIS_PRIVDOMAIN 0 0.000 0 1.000 # n=1 n=2
+score WHOIS_PRIVPROT 0 2.801 0 1.501 # n=0 n=2
+score WHOIS_REGISTER4LESS 0 0.000 0 1.000 # n=1 n=2
+score WHOIS_REGISTERFLY 0 3.196 0 1.645 # n=0 n=2
+score WHOIS_REGTEK 0 0.000 0 1.000 # n=1 n=2
+score WHOIS_SAFENAMES 0 0.000 0 1.000 # n=1 n=2
+score WHOIS_SECINFOSERV 0 # n=1 n=2 n=3
+score WHOIS_SECUREWHOIS 0 2.696 0 2.696 # n=0 n=2
+score WHOIS_SPAMFREE 0 # n=1 n=2 n=3
+score WHOIS_SRSPLUS 0 # n=1 n=2 n=3
+score WHOIS_UNLISTED 0 2.170 0 2.839 # n=0 n=2
+score WHOIS_WHOISGUARD 0 3.399 0 2.025 # n=0 n=2
+score WHOIS_WHOISPROT 0 0.000 0 1.000 # n=1 n=2
 # </gen:mutable>
 score URIBL_GREY 0.25
 score URIBL_RED 0.001
@@ -1077,6 +1035,35 @@ endif # Mail::SpamAssassin::Plugin::URIDNSBL
 # ReplaceTags
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 # <gen:mutable>
+score FRT_ADOBE2 0 # n=1 n=3
+score FRT_BIGGERMEM1 0.000 0.001 1.205 1.782 # n=2
+score FRT_DIPLOMA 0 # n=1 n=3
+score FRT_DISCOUNT 2.999 2.996 1.498 1.810 # n=2
+score FRT_DOLLAR 2.529 2.596 2.133 2.366 # n=2
+score FRT_ESTABLISH2 0 # n=1 n=3
+score FRT_FUCK2 0 # n=1 n=3
+score FRT_GUARANTEE1 2.503 2.819 2.144 1.253 # n=2
+score FRT_INVESTOR 0 # n=1 n=3
+score FRT_LEVITRA 0.001 0.745 1.685 1.814 # n=2
+score FRT_MEETING 2.700 2.699 2.699 2.699 # n=2
+score FRT_OFFER2 2.700 1.590 1.097 1.287 # n=2
+score FRT_OPPORTUN2 2.699 2.699 2.699 2.689 # n=2
+score FRT_PENIS1 3.799 3.074 3.002 2.486 # n=2
+score FRT_PRICE 3.699 2.531 3.072 3.491 # n=2
+score FRT_REFINANCE1 2.799 2.727 0.994 0.921 # n=2
+score FRT_ROLEX 3.099 3.096 3.099 3.096 # n=2
+score FRT_SEXUAL 3.199 3.196 3.199 3.142 # n=2
+score FRT_SOMA 0 # n=1 n=3
+score FRT_SOMA2 0 # n=1 n=3
+score FRT_STRONG1 3.699 2.919 2.712 2.976 # n=2
+score FRT_STRONG2 1.302 0.001 2.745 3.096 # n=2
+score FRT_SYMBOL 1.902 3.561 2.587 2.943 # n=2
+score FRT_TODAY2 2.523 2.460 3.246 2.382 # n=2
+score FRT_VALIUM1 3.096 3.049 0.664 1.590 # n=2
+score FRT_VALIUM2 1.903 1.933 1.328 1.301 # n=2
+score FRT_WEIGHT2 2.529 2.930 3.099 2.121 # n=2
+score FRT_XANAX1 3.799 3.799 2.265 2.423 # n=2
+score FRT_XANAX2 0.001 # n=2
 score FUZZY_AFFORDABLE 0 # n=0 n=1 n=2 n=3
 score FUZZY_AMBIEN 1.520 0.962 0.195 1.026
 score FUZZY_BILLION 0 # n=0 n=1 n=2 n=3
@@ -1085,6 +1072,7 @@ score FUZZY_CREDIT 1.696 0.522 0.740 1.238
 score FUZZY_ERECT 2.529 0.708 1.736 0.804
 score FUZZY_GUARANTEE 2.496 0.962 2.899 1.252
 score FUZZY_MEDICATION 0.307 0.001 2.637 2.717
+score FUZZY_MERIDIA 0.001 0.778 1.936 2.374 # n=2
 score FUZZY_MILLION 2.173 2.325 1.797 2.529
 score FUZZY_MONEY 2.799 2.796 2.799 2.799
 score FUZZY_MORTGAGE 3.299 3.296 3.036 1.880
@@ -1108,6 +1096,12 @@ score SUBJECT_FUZZY_MEDS 3.800 2.812 3.799 3.799
 score SUBJECT_FUZZY_PENIS 3.099 1.308 3.100 3.096
 score SUBJECT_FUZZY_TION 1.100 0.410 0.749 0.156
 score SUBJECT_FUZZY_VPILL 3.300 3.299 2.933 3.297
+score TVD_FUZZY_DEGREE 0 # n=1 n=3
+score TVD_FUZZY_FINANCE 0 # n=1 n=2 n=3
+score TVD_FUZZY_FIXED_RATE 0 # n=1 n=3
+score TVD_FUZZY_MICROCAP 0 # n=1 n=3
+score TVD_FUZZY_PHARMACEUTICAL 0 # n=1 n=2 n=3
+score TVD_FUZZY_SYMBOL 3.099 1.435 2.086 1.699 # n=2
 # </gen:mutable>
 endif # Mail::SpamAssassin::Plugin::ReplaceTags
 
@@ -1164,3 +1158,39 @@ score RDNS_DYNAMIC          0.1
 # bug 5110: lock to a static score to avoid FPs
 score EXTRA_MPART_TYPE	    1.0
 
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+# <gen:mutable>
+score CTYPE_8SPACE_GIF 2.606 3.744 2.325 1.627 # n=2
+# </gen:mutable>
+endif
+
+ifplugin Mail::SpamAssassin::Plugin::HTTPSMismatch
+# <gen:mutable>
+score HTTPS_HTTP_MISMATCH 0 # n=1 n=3
+# </gen:mutable>
+endif
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+# <gen:mutable>
+score PART_CID_STOCK 2.396 1.231 1.217 1.635 # n=2
+# </gen:mutable>
+endif
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+# <gen:mutable>
+score PART_CID_STOCK_LESS 0.001 0.001 0.774 0.384 # n=2
+# </gen:mutable>
+endif
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+# <gen:mutable>
+score TVD_FW_GRAPHIC_NAME_LONG 2.600 2.389 0.949 1.080 # n=2
+# </gen:mutable>
+endif
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+# <gen:mutable>
+score TVD_FW_GRAPHIC_NAME_MID 2.385 1.205 0.145 0.543 # n=2
+# </gen:mutable>
+endif

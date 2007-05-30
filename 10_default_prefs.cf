@@ -1,7 +1,7 @@
 # SpamAssassin basic config file
 #
 # Please don't modify this file as your changes will be overwritten with
-# the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
+# the next update. Use /home/updatesd/tmp/stage/3.2.0/etc/mail/spamassassin/local.cf instead.
 # See 'perldoc Mail::SpamAssassin::Conf' for details.
 #
 # <@LICENSE>
@@ -44,7 +44,7 @@ report _SUMMARY_
 
 # A 'contact address' users should contact for more info. (replaces
 # _CONTACTADDRESS_ above if present)
-report_contact	@@CONTACT_ADDRESS@@
+report_contact	the administrator of that system
 
 ###########################################################################
 

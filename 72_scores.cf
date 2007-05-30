@@ -1,0 +1,27 @@
+score AXB_RCVD_ZOOBSEND              3.577 0.000 3.577 0.000
+score AXB_XTIDX_CHAIN                0.233 3.890 0.233 3.890
+score DOS_PROVISION4                 1.000 0.907 1.000 0.907
+score DOS_REPORT_FIN_INC             1.359 0.929 1.359 0.929
+score DOS_STOCK_CDYV_GENERIC         4.299 4.199 4.299 4.199
+score DOS_STOCK_INCOME_STATEMENT     0.810 0.327 0.810 0.327
+score FB_MED1CAT                     1.363 1.504 1.363 1.504
+score FB_MEDS_PERCENT                0.765 1.000 0.765 1.000
+score FB_WORD1_END_DOLLAR            0.251 0.001 0.251 0.001
+score FH_XMAIL_RND_833               1.065 0.001 1.065 0.001
+score FM_MORTGAGE4PLUS               1.191 2.347 1.191 2.347
+score FS_LOWER_YOUR                  1.655 1.000 1.655 1.000
+score FS_WEIGHT_LOSS                 0.811 1.000 0.811 1.000
+score KAM_LOTTO1                     2.747 2.899 2.747 2.899
+score KAM_LOTTO2                     1.513 1.571 1.513 1.571
+score KAM_LOTTO3                     1.566 0.627 1.566 0.627
+score STOX_RCVD_N_NN_N               4.199 3.971 4.199 3.971
+score TEMPLATE_203_RCVD              1.000 0.000 1.000 0.000
+score TVD_PH_SUBJ_META               1.000 0.000 1.000 0.000
+
+ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
+score FRT_OPPORTUN1                  2.215 1.000 2.215 1.000
+endif
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+score OEBOUND                        2.779 0.000 2.779 0.000
+endif
