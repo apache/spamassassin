@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-fredt bb-jm bb-zmi daf dos jm theo zmi
+# with results from: bb-doc bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -105,9 +105,6 @@ DNS_FROM_RFC_DSN
 
 # tflags net
 DNS_FROM_SECURITYSAGE
-
-# good enough
-DOS_LET_GO_JOB
 
 # good enough
 DOS_PROVISION4
@@ -956,10 +953,10 @@ TVD_PH_REC
 TVD_PH_SUBJ_ACCOUNTS_POST
 
 # good enough
-TVD_PH_SUBJ_META
+TVD_PH_SUBJ_ACCOUNTS_PRE
 
 # good enough
-TVD_PH_SUBJ_META_ALL
+TVD_PH_SUBJ_META
 
 # good enough
 TVD_PH_SUBJ_URGENT
@@ -1000,6 +997,15 @@ TVD_VISIT_PHARMA
 # good enough
 TVD_VIS_HIDDEN
 
+# good enough
+AXB_MIME_IMG830
+
+# good enough
+CTYPE_1SPACE_GIF
+
+# good enough
+OEBOUND
+
 # tflags net
 RCVD_IN_DNSWL_HI
 
@@ -1028,7 +1034,10 @@ RCVD_IN_WHOIS_INVALID
 RCVD_IN_XBL
 
 # good enough
-TVD_PH_SUBJ_ACCOUNTS_PRE
+TVD_FW_GRAPHIC_ID1
+
+# good enough
+TVD_FW_GRAPHIC_ID2
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1239,6 +1248,9 @@ XMAILER_MIMEOLE_OL_3857F
 
 # good enough
 XMAILER_MIMEOLE_OL_3AC1D
+
+# good enough
+XMAILER_MIMEOLE_OL_3D61D
 
 # good enough
 XMAILER_MIMEOLE_OL_465CD
