@@ -2189,26 +2189,6 @@ tflags          URIBL_RHS_TLD_WHOIS     net
 endif
 ##} URIBL_RHS_TLD_WHOIS
 
-##{ URIBL_RHS_URIBL_BLACK
-
-ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
-urirhssub       URIBL_RHS_URIBL_BLACK   multi.uribl.com.        A       2
-body            URIBL_RHS_URIBL_BLACK   eval:check_uridnsbl('URIBL_RHS_URIBL_BLACK')
-describe        URIBL_RHS_URIBL_BLACK   Contains an URI listed in [black] uribl.com
-tflags          URIBL_RHS_URIBL_BLACK   net
-endif
-##} URIBL_RHS_URIBL_BLACK
-
-##{ URIBL_RHS_URIBL_GREY
-
-ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
-urirhssub       URIBL_RHS_URIBL_GREY    multi.uribl.com.        A       4
-body            URIBL_RHS_URIBL_GREY    eval:check_uridnsbl('URIBL_RHS_URIBL_GREY')
-describe        URIBL_RHS_URIBL_GREY    Contains an URI listed in [grey] uribl.com
-tflags          URIBL_RHS_URIBL_GREY    net
-endif
-##} URIBL_RHS_URIBL_GREY
-
 ##{ URIBL_RHS_WHOIS
 
 ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
