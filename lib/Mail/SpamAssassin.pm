@@ -1468,6 +1468,9 @@ sub init {
 
   # Go and parse the config!
   $self->{conf}->{main} = $self;
+  if (would_log('dbg', 'config_text') > 1) {
+    dbg('config_text: '.$self->{config_text});
+  }
   $self->{conf}->parse_rules ($self->{config_text});
   $self->{conf}->finish_parsing ();
   delete $self->{conf}->{main};	# to allow future GC'ing
