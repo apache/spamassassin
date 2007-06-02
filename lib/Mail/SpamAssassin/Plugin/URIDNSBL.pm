@@ -362,9 +362,7 @@ sub set_config {
           is_rhsbl => 1, is_subrule => 1
         };
         $self->{uridnsbl_subs}->{$zone} ||= { };
-        $self->{uridnsbl_subs}->{$zone}->{$subrule} = {
-          rulename => $rulename
-        };
+        push (@{$self->{uridnsbl_subs}->{$zone}->{$subrule}->{rulenames}}, $rulename);
       }
       elsif ($value =~ /^$/) {
         return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
@@ -599,17 +597,19 @@ sub complete_dnsbl_lookup {
     else {
       foreach my $subtest (keys (%{$uridnsbl_subs}))
       {
-        my $subrulename = $uridnsbl_subs->{$subtest}->{rulename};
-
         if ($subtest eq $rdatastr) {
-          $self->got_dnsbl_hit($scanner, $ent, $rdatastr, $dom, $subrulename);
+          foreach my $subrulename (@{$uridnsbl_subs->{$subtest}->{rulenames}}) {
+            $self->got_dnsbl_hit($scanner, $ent, $rdatastr, $dom, $subrulename);
+          }
         }
         # bitmask
         elsif ($subtest =~ /^\d+$/) {
 	  if ($rdatastr =~ m/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/ &&
 	      Mail::SpamAssassin::Util::my_inet_aton($rdatastr) & $subtest)
           {
-            $self->got_dnsbl_hit($scanner, $ent, $rdatastr, $dom, $subrulename);
+            foreach my $subrulename (@{$uridnsbl_subs->{$subtest}->{rulenames}}) {
+              $self->got_dnsbl_hit($scanner, $ent, $rdatastr, $dom, $subrulename);
+            }
           }
         }
       }
