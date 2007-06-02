@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-fredt bb-jm bb-zmi daf dos jm theo zmi
+# with results from: bb-doc bb-fredt bb-jm bb-zmi daf jm theo
 
 # tflags userconf
 ALL_TRUSTED
@@ -147,9 +147,6 @@ FB_ADD_INCHES
 
 # good enough
 FB_ALMOST_SEX
-
-# good enough
-FB_ANA_TRIM
 
 # good enough
 FB_BROKEN_PHNUM
@@ -341,9 +338,6 @@ FM_FRM_RN_L_BRACK
 FM_LIKE_STOCKS
 
 # good enough
-FM_MANY_DRUG_WORDS
-
-# good enough
 FM_MORTGAGE4PLUS
 
 # good enough
@@ -386,9 +380,6 @@ FRAGMENTED_MESSAGE
 FRT_DISCOUNT
 
 # good enough
-FRT_DOLLAR
-
-# good enough
 FRT_ERECTION
 
 # good enough
@@ -396,6 +387,9 @@ FRT_GUARANTEE1
 
 # good enough
 FRT_LEVITRA
+
+# good enough
+FRT_OFFER2
 
 # good enough
 FRT_OPPORTUN1
@@ -455,9 +449,6 @@ FS_AT_NO_COST
 FS_ERECTION
 
 # good enough
-FS_LARGE_PERCENT2
-
-# good enough
 FS_LOWER_YOUR
 
 # good enough
@@ -495,9 +486,6 @@ FS_WILL_HELP
 
 # good enough
 FUZZY_MERIDIA
-
-# good enough
-FU_COMMON_SUBS2
 
 # good enough
 FU_ENDS_NUMS_DOTS_CLK
@@ -585,9 +573,6 @@ HELO_OEM
 
 # tflags userconf
 HIGH_CODEPAGE_URI
-
-# good enough
-HS_DRUG_DOLLAR_1
 
 # good enough
 HS_INDEX_PARAM
@@ -989,9 +974,6 @@ TVD_RCVD_SINGLE
 TVD_SECTION
 
 # good enough
-TVD_SPACED_SUBJECT_WORD3
-
-# good enough
 TVD_STOCK1
 
 # good enough
@@ -999,6 +981,15 @@ TVD_VISIT_PHARMA
 
 # good enough
 TVD_VIS_HIDDEN
+
+# good enough
+AXB_MIME_IMG830
+
+# good enough
+CTYPE_1SPACE_GIF
+
+# good enough
+OEBOUND
 
 # tflags net
 RCVD_IN_DNSWL_HI
@@ -1026,6 +1017,12 @@ RCVD_IN_WHOIS_INVALID
 
 # tflags net
 RCVD_IN_XBL
+
+# good enough
+TVD_FW_GRAPHIC_ID1
+
+# good enough
+TVD_FW_GRAPHIC_ID2
 
 # tflags userconf
 UNPARSEABLE_RELAY
