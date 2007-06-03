@@ -88,6 +88,7 @@ GetOptions(
   'configpath|config-file|config-dir|c|C=s' => \$opt{'configpath'},
   'prefspath|prefs-file|p=s'                => \$opt{'prefspath'},
   'siteconfigpath=s'                        => \$opt{'siteconfigpath'},
+  'updatedir=s'                             => \$opt{'updatedir'},
   'cf=s'                                    => \@{$opt{'cf'}},
   'debug|D:s'       => \$opt{'debug'},
   'help|h|?'        => \$opt{'help'},
@@ -155,7 +156,13 @@ $spamtest->{bases_can_use_quantifiers} = 0;
 $spamtest->{bases_can_use_char_classes} = 0;
 $spamtest->{bases_split_out_alternations} = 1;
 
-my $installdir = $spamtest->sed_path('__local_state_dir__/compiled/__version__');
+if (defined $opt{'updatedir'}) {
+  $opt{'updatedir'} = Mail::SpamAssassin::Util::untaint_file_path($opt{'updatedir'});
+}
+else {
+  $opt{'updatedir'} = $spamtest->sed_path('__local_state_dir__/compiled/__version__');
+}
+my $installdir = $opt{'updatedir'};
 if ((!defined $opt{'list'})
         && !$opt{'sudo'}
         && -d $installdir && !-w $installdir)
@@ -637,6 +644,8 @@ Options:
                                 Set user preferences file
   --siteconfigpath=path         Path for site configs
                                 (default: /etc/mail/spamassassin)
+  --updatedir=path              Directory to place updates
+                      (default: /var/lib/spamassassin/compiled/<version>)
   --cf='config line'            Additional line of configuration
   -D, --debug [area=n,...]	Print debugging messages
   -V, --version			Print version
@@ -652,7 +661,7 @@ C<re2c> can match strings much faster than perl code, by constructing a DFA to
 match many simple strings in parallel, and compiling that to native object
 code.  Not all SpamAssassin rules are amenable to this conversion, however.
 
-This requires C<re2c> version 0.10.x (see C<http://re2c.org/>), and the C
+This requires C<re2c> (see C<http://re2c.org/>), and the C
 compiler used to build Perl XS modules, be installed.
 
 Note that running this, and creating a compiled ruleset, will have no
@@ -689,6 +698,19 @@ Ignore the default directories (usually C</usr/share/spamassassin> or similar).
 
 Use the specified path for locating site-specific configuration files.  Ignore
 the default directories (usually C</etc/mail/spamassassin> or similar).
+
+=item B<--updatedir>
+
+By default, C<sa-compile> will use the system-wide rules update directory:
+
+        @@LOCAL_STATE_DIR@@/spamassassin/compiled/@@VERSION@@
+
+If the updates should be stored in another location, specify it here.
+
+Note that use of this option is not recommended; if sa-compile is placing the
+compiled rules the wrong directory, you probably need to rebuild SpamAssassin
+with different C<Makefile.PL> arguments, instead of overriding sa-compile's
+runtime behaviour.
 
 =item B<--cf='config line'>
 
