@@ -2459,6 +2459,14 @@ sub preload_modules_with_tmp_homedir {
 
   dbg("spamd: Preloading modules with HOME=$tmphome");
 
+  # bug 5379: spamd won't start if the temp preloading dir exists;
+  # be sure to remove it just in case 
+  if (-d $tmpsadir) {
+    rmdir( $tmpsadir ) or die "spamd: $tmpsadir not empty: $!";
+  }
+  if (-d $tmphome) {
+    rmdir( $tmphome ) or die "spamd: $tmphome not empty: $!";
+  }
   mkdir( $tmphome,  0700 ) or die "spamd: cannot create $tmphome: $!";
   mkdir( $tmpsadir, 0700 ) or die "spamd: cannot create $tmpsadir: $!";
   $ENV{HOME} = $tmphome;
