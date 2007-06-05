@@ -921,7 +921,7 @@ endif # Mail::SpamAssassin::Plugin::SPF
 # DKIM
 ifplugin Mail::SpamAssassin::Plugin::DKIM
 score DKIM_POLICY_SIGNALL 0.001
-score DKIM_POLICY_SIGNSOME 0.001
+score DKIM_POLICY_SIGNSOME 0
 score DKIM_POLICY_TESTING 0.001
 score DKIM_SIGNED 0.001
 score DKIM_VERIFIED -0.001
@@ -930,7 +930,7 @@ endif # Mail::SpamAssassin::Plugin::DKIM
 # DomainKeys
 ifplugin Mail::SpamAssassin::Plugin::DomainKeys
 score DK_POLICY_SIGNALL 0.001
-score DK_POLICY_SIGNSOME 0.001
+score DK_POLICY_SIGNSOME 0
 score DK_POLICY_TESTING 0.001
 score DK_SIGNED 0.001
 score DK_VERIFIED -0.001
