@@ -119,7 +119,8 @@ sub check_whitelist_bounce_relays {
   # skip past the headers
   my $foundnlnl = 0;
   foreach my $line ($pristine =~ /^(.*)$/gm) {
-    if ($line =~ /^$/) {
+    # note: do not use any re match here, it'll reset /g
+    if ($line eq "" || $line eq "\012" || $line eq "\015\012") {
       $foundnlnl = 1; last;
     }
   }
