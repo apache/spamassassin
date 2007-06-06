@@ -542,6 +542,8 @@ combine_args(char *config_file, int argc, char **argv,
 
 	tok = option;
 	while((tok = strtok(tok, " ")) != NULL) {
+       if(tok[0] == '\n')
+          break;
 	    for(i=strlen(tok); i>0; i--) {
 	        if(tok[i] == '\n')
 		    tok[i] = '\0';
