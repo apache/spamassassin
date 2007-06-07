@@ -116,7 +116,7 @@ endif # Mail::SpamAssassin::Plugin::TextCat
 # Mail which scores outside this range will be fed back into SpamAssassin's
 # learning system automatically, to train the Bayesian scanner.
 ifplugin Mail::SpamAssassin::Plugin::AutoLearnThreshold
-bayes_auto_learn_threshold_nonspam	-1.0
+bayes_auto_learn_threshold_nonspam	0.1
 bayes_auto_learn_threshold_spam		12.0
 endif # Mail::SpamAssassin::Plugin::AutoLearnThreshold
 
