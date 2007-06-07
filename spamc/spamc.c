@@ -196,7 +196,9 @@ print_usage(void)
     usg("  -h, --help          Print this help message and exit.\n");
     usg("  -V, --version       Print spamc version and exit.\n");
     usg("  -K                  Keepalive check of spamd.\n");
+#ifdef HAVE_ZLIB_H
     usg("  -z                  Compress mail message sent to spamd.\n");
+#endif
     usg("  -f                  (Now default, ignored.)\n");
 
     usg("\n");
@@ -446,7 +448,12 @@ read_args(int argc, char **argv,
             }
             case 'z':
             {
+#ifdef HAVE_ZLIB_H
                 flags |= SPAMC_USE_ZLIB;
+#else
+                libspamc_log(flags, LOG_ERR, "spamc -z support not available");
+                ret = EX_USAGE;
+#endif
                 break;
             }
             case 0:
