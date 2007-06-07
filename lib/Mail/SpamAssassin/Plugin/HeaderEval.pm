@@ -348,7 +348,7 @@ sub _check_for_forged_hotmail_received_headers {
 
   if ($self->gated_through_received_hdr_remover($pms)) { return; }
 
-  if ($rcvd =~ /from (\S*\.)?hotmail.com \(\S+\.hotmail(?:\.msn)?\.com[ \)]/ && $ip)
+  if ($rcvd =~ /from (?:\S*\.)?hotmail.com \(\S+\.hotmail(?:\.msn)?\.com[ \)]/ && $ip)
                 { return; }
   if ($rcvd =~ /from \S*\.hotmail.com \(\[$IP_ADDRESS\][ \):]/ && $ip)
                 { return; }
