@@ -226,7 +226,7 @@ header __VBOUNCE_DOMINO1 Subject =~ /^Report to Sender/
 body __VBOUNCE_DOMINO2 /^Incident Information:/
 header __VBOUNCE_RAV Subject =~ /^RAV Anti.?Virus scan results/
 
-body __VBOUNCE_ATTACHMENT0     /(?:Attachment.{0,40}was Deleted|Virus.{1,40}was found|the infected attachment)/i
+body __VBOUNCE_ATTACHMENT0     /(?:Attachment.{0,40}was Deleted|the infected attachment)/
 # Bart says: it appears that _ATTACHMENT0 is an alternate for _NAV -- both match the same messages.
 
 body __VBOUNCE_AVREPORT0       /(antivirus system report|the antivirus module has|illegal attachment|Unrepairable Virus Detected)/i
