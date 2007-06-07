@@ -1243,6 +1243,8 @@ sub _get_tag {
 
             AUTOLEARN => sub { return $self->get_autolearn_status(); },
 
+            AUTOLEARNSCORE => sub { return $self->get_autolearn_points(); },
+
             TESTS => sub {
               my $arg = (shift || ',');
               return (join($arg, sort(@{$self->{test_names_hit}})) || "none");
