@@ -2967,6 +2967,7 @@ optional, and the default is shown below.
                    SMTP handover
  _AUTOLEARN_       autolearn status ("ham", "no", "spam", "disabled",
                    "failed", "unavailable")
+ _AUTOLEARNSCORE_  portion of message score used by autolearn
  _TESTS(,)_        tests hit separated by "," (or other separator)
  _TESTSSCORES(,)_  as above, except with scores appended (eg. AWL=-3.0,...)
  _SUBTESTS(,)_     subtests (start with "__") hit separated by ","
