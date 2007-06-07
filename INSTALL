@@ -263,6 +263,11 @@ version is too low for them to be used.
     Net::DNS version 0.58 or higher is required to use Mail::SPF.
     Net::DNS version 0.34 or higher is required to use Mail::SPF::Query.
 
+    If using Mail::SPF note that NetAddr::IP (required by Mail::SPF)
+    versions up to and including version 4.006 include a bug that will
+    slow down the entire perl interpreter.  NetAddr::IP version 4.007 or
+    later fixes this.
+
 
   - IP::Country::Fast (from CPAN)
 
