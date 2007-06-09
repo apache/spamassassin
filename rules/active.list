@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc bb-fredt bb-jm bb-zmi cthielen daf dos theo zmi
+# with results from: bb-doc bb-fredt bb-jm bb-zmi daf dos jm theo
 
 # tflags userconf
 ALL_TRUSTED
@@ -15,6 +15,9 @@ AXB_RCVD_ZOOBSEND
 
 # good enough
 AXB_RCVD_ZOONAT
+
+# good enough
+AXB_XMID_1212
 
 # good enough
 AXB_XMID_1510
@@ -143,22 +146,10 @@ DYN_RDNS_SHORT_HELO_IMAGE
 ENV_AND_HDR_SPF_MATCH
 
 # good enough
-FAKE_REPLY_C
-
-# good enough
-FB_ADD_INCHES
-
-# good enough
 FB_ALMOST_SEX
 
 # good enough
-FB_ANA_TRIM
-
-# good enough
 FB_BROKEN_PHNUM
-
-# good enough
-FB_C0MPANY
 
 # good enough
 FB_CIALIS_LEO3
@@ -338,9 +329,6 @@ FM_FRM_RN_L_BRACK
 FM_LIKE_STOCKS
 
 # good enough
-FM_MANY_DRUG_WORDS
-
-# good enough
 FM_MORTGAGE4PLUS
 
 # good enough
@@ -357,9 +345,6 @@ FM_RE_HELLO_SPAM
 
 # good enough
 FM_ROLEX_ADS
-
-# good enough
-FM_SCHOOLING
 
 # good enough
 FM_SCHOOL_DIPLOMA
@@ -381,9 +366,6 @@ FRAGMENTED_MESSAGE
 
 # good enough
 FRT_DISCOUNT
-
-# good enough
-FRT_DOLLAR
 
 # good enough
 FRT_ERECTION
@@ -497,9 +479,6 @@ FS_WILL_HELP
 FUZZY_MERIDIA
 
 # good enough
-FU_COMMON_SUBS2
-
-# good enough
 FU_ENDS_NUMS_DOTS_CLK
 
 # good enough
@@ -585,9 +564,6 @@ HELO_OEM
 
 # tflags userconf
 HIGH_CODEPAGE_URI
-
-# good enough
-HS_DRUG_DOLLAR_1
 
 # good enough
 HS_INDEX_PARAM
@@ -950,6 +926,9 @@ TVD_FLOAT_GENERAL
 TVD_PH_REC
 
 # good enough
+TVD_PH_SUBJ_ACCOUNTS_POST
+
+# good enough
 TVD_PH_SUBJ_META
 
 # good enough
@@ -977,9 +956,6 @@ TVD_RCVD_SINGLE
 TVD_SECTION
 
 # good enough
-TVD_SPACED_SUBJECT_WORD3
-
-# good enough
 TVD_STOCK1
 
 # good enough
@@ -987,6 +963,15 @@ TVD_VISIT_PHARMA
 
 # good enough
 TVD_VIS_HIDDEN
+
+# good enough
+AXB_MIME_IMG830
+
+# good enough
+CTYPE_1SPACE_GIF
+
+# good enough
+OEBOUND
 
 # tflags net
 RCVD_IN_DNSWL_HI
@@ -1014,6 +999,18 @@ RCVD_IN_WHOIS_INVALID
 
 # tflags net
 RCVD_IN_XBL
+
+# good enough
+TVD_FW_GRAPHIC_ID1
+
+# good enough
+TVD_FW_GRAPHIC_ID2
+
+# good enough
+TVD_PH_SUBJ_ACCOUNTS_PRE
+
+# good enough
+TVD_PH_SUBJ_META_ALL
 
 # tflags userconf
 UNPARSEABLE_RELAY
