@@ -45,3 +45,9 @@ bayes_sql_password=
 # this to "y".
 run_spamd_prefork_stress_test=n
 
+# ---------------------------------------------------------------------------
+
+# The "root_*.t" tests require root privileges, and may create files in
+# the filesystem as part of the test.  Disabled by default.
+run_root_tests=n
+
