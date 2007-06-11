@@ -122,6 +122,10 @@ SPAMASSASSIN RELEASE PROCEDURE
 
     svn commit -m "preparing to release X.Y.Z"
 
+  (If you are privately preparing a security release, and don't wish to
+  perform commits to public SVN repos, you can omit this step until
+  later.)
+
 - SVN tag the release files.  This is done using "svn copy".
   For a maintainance release (x.y.1, x.y.2):
 
@@ -148,6 +152,10 @@ SPAMASSASSIN RELEASE PROCEDURE
   a branch really) of whatever the latest branch revision to be the new
   base of the tag release.
 
+  (If you are privately preparing a security release, and don't wish to
+  perform commits to public SVN repos, you can omit this step until
+  later.)
+
   Note that if you have to re-run this command later to fix a broken
   release in progress, you need to "svn delete" the previous copy of the
   tag, otherwise it'll create a subdirectory instead of overwriting:
@@ -166,10 +174,17 @@ SPAMASSASSIN RELEASE PROCEDURE
     svn co $repo/tags/spamassassin_release_3_2_0_pre_2 ~/relbuild
     cd ~/relbuild
 
+  (If you are privately preparing a security release, you will need
+  to ensure that the code in this build directory matches up using
+  some other mechanism, since SVN is public.)
+
 - run "./build/update_stable" to build the tar.gz files.
 
     PATH=$HOME/sabuildtools/perl584/bin:$HOME/sabuildtools/bin:$PATH
     ./build/update_stable
+
+  if you get "gpg-agent" errors about not connecting to the PIN entry
+  module, you didn't update your $PATH.
 
 - take a copy of the MD5sum line output.
 
@@ -202,6 +217,9 @@ SPAMASSASSIN RELEASE PROCEDURE
 - (for a full release) You need 3 +1's from PMC members. The release
   manager (that's you) may vote as well.  Once there are three or more +1
   votes, you may proceed.
+
+- If you've been doing some steps in private, for a security release,
+  now's the time to perform them publicly; tagging etc.
 
 - Edit lib/Mail/SpamAssassin.pm, and uncomment the $IS_DEVEL_BUILD line.
   SVN commit it (and the release announcement file from above, if
