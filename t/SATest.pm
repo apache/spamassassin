@@ -146,6 +146,8 @@ sub sa_t_init {
 
   $ENV{'TEST_DIR'} = $cwd;
   $testname = $tname;
+
+  $current_user = (getpwuid($>))[0];
 }
 
 # a port number between 32768 and 65535; used to allow multiple test
