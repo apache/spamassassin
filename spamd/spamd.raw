@@ -489,14 +489,28 @@ elsif ($log_facility eq 'file') {
 # support setuid() to user unless:
 # run with -u
 # we're not root
-# doing --vpopmail
+# doing --vpopmail or --virtual-config-dir
 # we disable user-config
 my $setuid_to_user = (
 	$opt{'username'} ||
 	$> != 0 ||
 	$opt{'vpopmail'} ||
-	(!$opt{'user-config'} && !($opt{'setuid-with-sql'}||$opt{'setuid-with-ldap'}))
-	) ? 0 : 1;
+	$opt{'virtual-config-dir'}
+      ) ? 0 : 1;
+
+dbg("spamd: will perform setuids? $setuid_to_user");
+
+if ( $opt{'vpopmail'} ) {
+  if ( !$opt{'username'} ) {
+    die "spamd: cannot use --vpopmail without -u\n";
+  }
+}
+
+if ( $opt{'virtual-config-dir'} ) {
+  if ( !$opt{'username'} ) {
+    die "spamd: cannot use --virtual-config-dir without -u\n";
+  }
+}
 
 # always copy the config, later code may disable
 my $copy_config_p = 1;
@@ -1463,18 +1477,8 @@ sub check {
     $compress_zlib = $hdrs->{compress_zlib};
   }
 
-  handle_setuid_to_user if ($setuid_to_user && $> == 0);
-
-  if ( $opt{'sql-config'} && !defined($current_user) ) {
-    unless ( handle_user_sql('nobody') ) {
-      service_unavailable_error("Error fetching user preferences via SQL");
-      return 0;
-    }
-  }
-
-  if ( $opt{'ldap-config'} && !defined($current_user) ) {
-    handle_user_ldap('nobody');
-  }
+  return 0 unless do_user_handling();
+  if ($> == 0) { die "spamd: still running as root! dying"; }
 
   my $resp = "EX_OK";
 
@@ -1669,6 +1673,9 @@ sub dotell {
   my $expected_length = $hdrs->{expected_length};
   my $compress_zlib = $hdrs->{compress_zlib};
 
+  return 0 unless do_user_handling();
+  if ($> == 0) { die "spamd: still running as root! dying"; }
+
   if (!$opt{tell}) {
     service_unavailable_error("TELL commands have not been enabled.");
     return 0;
@@ -1683,8 +1690,6 @@ sub dotell {
     protocol_error("Unable to set remote and remove remote in the same operation.");
     return 0;
   }
-
-  &handle_setuid_to_user if ($setuid_to_user && $> == 0);
 
   if ($opt{'sql-config'} && !defined($current_user)) {
     unless (handle_user_sql('nobody')) {
@@ -1789,6 +1794,26 @@ sub dotell {
 
 ###########################################################################
 
+sub do_user_handling {
+  if ($setuid_to_user && $> == 0) {
+    handle_setuid_to_user();
+  }
+
+  if ( $opt{'sql-config'} && !defined($current_user) ) {
+    unless ( handle_user_sql('nobody') ) {
+      service_unavailable_error("Error fetching user preferences via SQL");
+      return 0;
+    }
+  }
+
+  if ( $opt{'ldap-config'} && !defined($current_user) ) {
+    handle_user_ldap('nobody');
+  }
+
+  dbg ("spamd: running as uid $>");
+  return 1;
+}
+
 # generalised header parser.  
 sub parse_headers {
   my ($hdrs, $client) = @_;
@@ -1891,9 +1916,12 @@ sub got_user_header {
       handle_user_setuid_with_ldap($current_user);
       $setuid_to_user = 1;    # as above
     }
+    else {
+      handle_user_setuid_basic($current_user);
+    }
   }
   else {
-    handle_user($current_user);
+    handle_user_setuid_basic($current_user);
     if ( $opt{'sql-config'} ) {
       unless ( handle_user_sql($current_user) ) {
         service_unavailable_error("Error fetching user preferences via SQL");
@@ -2016,7 +2044,7 @@ sub auth_ident {
   return 1;
 }
 
-sub handle_user {
+sub handle_user_setuid_basic {
   my $username = shift;
 
   #
@@ -2055,6 +2083,14 @@ sub handle_user {
     }
   }
 
+  if ($opt{'user-config'}) {
+    handle_user_set_user_prefs($dir, $username);
+  }
+}
+
+sub handle_user_set_user_prefs {
+  my ($dir, $username) = @_;
+
   #
   # If vpopmail config enabled then set $dir to virtual homedir
   #
@@ -2076,33 +2112,14 @@ sub handle_user {
   }
   my $cf_file = $dir . "/.spamassassin/user_prefs";
 
-  #
-  # If vpopmail config enabled then pass virtual homedir onto create_default_cf_needed
-  #
-  if ( $opt{'vpopmail'} ) {
-    if ( !$opt{'username'} ) {
-      warn "spamd: cannot use vpopmail without -u\n";
+  create_default_cf_if_needed( $cf_file, $username, $dir );
+  $spamtest->read_scoreonly_config($cf_file);
+  $spamtest->signal_user_changed(
+    {
+      username => $username,
+      user_dir => $dir
     }
-    create_default_cf_if_needed( $cf_file, $username, $dir );
-    $spamtest->read_scoreonly_config($cf_file);
-    $spamtest->signal_user_changed(
-      {
-        username => $username,
-        user_dir => $dir
-      }
-    );
-
-  }
-  else {
-    create_default_cf_if_needed( $cf_file, $username, $dir );
-    $spamtest->read_scoreonly_config($cf_file);
-    $spamtest->signal_user_changed(
-      {
-        username => $username,
-        user_dir => $dir
-      }
-    );
-  }
+  );
 
   return 1;
 }
@@ -2788,6 +2805,8 @@ SQL- or LDAP-based configuration.
 The pattern B<must> expand to an absolute directory when spamd is running
 daemonized (B<-d>).
 
+Currently, use of this without B<-u> is not supported. This inhibits setuid.
+
 =item B<-r> I<pidfile>, B<--pidfile>=I<pidfile>
 
 Write the process ID of the spamd parent to the file specified by I<pidfile>.
@@ -2801,7 +2820,7 @@ this allows spamd to lookup/create user_prefs in the vpopmail user's own
 maildir.  This option is useful for vpopmail virtual users who do not have an
 entry in the system /etc/passwd file.
 
-Currently, use of this without B<-u> is not supported.
+Currently, use of this without B<-u> is not supported. This inhibits setuid.
 
 =item B<-s> I<facility>, B<--syslog>=I<facility>
 
