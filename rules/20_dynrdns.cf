@@ -187,7 +187,7 @@ header __RDNS_DYNAMIC_TTNET   X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns=\S+[\-\.]
 # i253064.ppp.asahi-net.or.jp
 # u035201.ppp.asahi-net.or.jp
 # w158034.ppp.asahi-net.or.jp
-header __RDNS_DYNAMIC_ASAHI   X-Spam-Relays-Untrusted =~ s/^[^\]]+ [a-z][0-9]+\.ppp\.asahi-net\.or\.jp/i
+header __RDNS_DYNAMIC_ASAHI   X-Spam-Relays-Untrusted =~ /^[^\]]+ [a-z][0-9]+\.ppp\.asahi-net\.or\.jp/i
 
 ###########################################################################
 
