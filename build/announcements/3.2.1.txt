@@ -1,0 +1,86 @@
+To: users, dev, announce
+Subject: ANNOUNCE: Apache SpamAssassin 3.2.1 available
+
+Apache SpamAssassin 3.2.1 is now available!  This is a maintenance and
+security release of the 3.2.x branch.  It is highly recommended that
+people upgrade to this version from 3.2.0.
+
+Downloads are available from:
+  http://spamassassin.apache.org/downloads.cgi?update=200706081100
+
+The release file will also be available via CPAN in the near future.
+
+  md5sum of archive files:
+  7b2fdbcdca5e9a181d4bb1b17663c138  Mail-SpamAssassin-3.2.1.tar.bz2
+  a7d51294c565999da01f212e5ad2a031  Mail-SpamAssassin-3.2.1.tar.gz
+  e058ed0dfe82ee62f617c12cc02e538b  Mail-SpamAssassin-3.2.1.zip
+
+  sha1sum of archive files:
+  3095b38d90d0362c4e47e117fb612778a2ac362b  Mail-SpamAssassin-3.2.1.tar.bz2
+  fbb5f538238e188f985c8e6672dad531fa035eea  Mail-SpamAssassin-3.2.1.tar.gz
+  d6566975544cd706052d310481d7a100ffce14d1  Mail-SpamAssassin-3.2.1.zip
+
+The release files also have a .asc accompanying them.  The file serves
+as an external GPG signature for the given release file.  The signing
+key is available via the wwwkeys.pgp.net key server, as well as
+http://spamassassin.apache.org/released/GPG-SIGNING-KEY
+
+The key information is:
+
+pub 1024D/265FA05B 2003-06-09 SpamAssassin Signing Key <release@spamassassin.org>
+    Key fingerprint = 26C9 00A4 6DD4 0CD5 AD24  F6D7 DEE0 1987 265F A05B
+
+
+3.2.1 is a major bug-fix release, including a potential local DoS.  The
+major highlights are:
+
+- bug 5480: fix for CVE-2007-2873: a local user symlink-attack DoS
+  vulnerability. It only affects systems where spamd is run as root, is used
+  with vpopmail or virtual users via the "-v"/"--vpopmail" OR
+  "--virtual-config-dir" switch, AND with the "-x"/"--no-user-config AND
+  WITHOUT the "-u"/"--username" switch AND with the "-l"/"--allow-tell" switch.
+  This is not default on any distro package, and is not a common configuration.
+  More details of the vulnerability can be read at
+  <http://spamassassin.apache.org/advisories/cve-2007-2873.txt>.
+
+- bug 5488: zero some rules causing false positives: FH_HOST_EQ_D_D_D_DB and
+  FH_HOST_EQ_D_D_D_D.
+
+- bug 5257: re-raise autolearn ham threshold to 1.0; the lower value
+  used in 3.2.0 was creating problems.
+
+- bug 5422: in spamd, deleting hash entries from the SIGCHLD signal handler is
+  unsafe, causes corruption of the data structure, and results in 'prefork:
+  ordered child N to accept, but they reported state '1', killing rogue'
+  errors.  fix.
+
+- bug 5102: tighten up regexp for FORGED_HOTMAIL_RCVD to avoid some FPs.
+
+- bug 5457: spamc build and test should handle not having zlib available.
+
+- bug 5379: spamd could crash at startup if its preloading temporary directory
+  already exists. fix.
+
+- bug 4616: spamc config can cause command line options to be ignored. fix.
+
+- bug 5485: zero score DK/DKIM_POLICY_SIGNSOME rules since they'll always fire
+  due to defaults (unless there's an explicit SIGNALL policy).
+
+- bug 5492: VBounce rule was looking in header instead of body for whitelisted
+  relays. fix.
+
+- bug 5487: prevent multiple "urirhssub"s using the same zone from overwriting
+  each other.
+
+- bug 5432 - Change default in Win32 build to not build spamc.
+
+- bug 5446: add --updatedir option to sa-compile and remove inaccurate re2c
+  required version info from pod.
+
+- bug 5436: add omitted "ifplugin" statements to the configuration, which would
+  otherwise cause lint errors if the default plugins were disabled.
+
+- bug 5477: prevent Rule2XSBody info message from appearing on stderr during
+  spamd startup.
+
+
