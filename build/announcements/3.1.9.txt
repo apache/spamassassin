@@ -1,0 +1,53 @@
+To: users, dev, announce
+Subject: ANNOUNCE: Apache SpamAssassin 3.1.9 available!
+
+Apache SpamAssassin 3.1.9 is now available!  This is a maintenance and
+security release of the 3.1.x branch.  It is highly recommended that
+people upgrade to this version from 3.0.x or 3.1.x.
+
+Downloads are available from:
+   http://spamassassin.apache.org/downloads.cgi?update=200706081100
+
+The release file will also be available via CPAN in the near future.
+
+  md5sum of archive files:
+  ad5d812b1a04228f3dc3147ebd649bb3  Mail-SpamAssassin-3.1.9.tar.bz2
+  c0a6dc8564e60bf50d1792e4edc18e97  Mail-SpamAssassin-3.1.9.tar.gz
+  a1ed25d0878d102c17a91233ee741f87  Mail-SpamAssassin-3.1.9.zip
+
+  sha1sum of archive files:
+  bed85f0b7e269253e925831015f11809009080eb  Mail-SpamAssassin-3.1.9.tar.bz2
+  181e0ca4e0568bb51e955b8b8e4595313fb7de8b  Mail-SpamAssassin-3.1.9.tar.gz
+  c5f87a454ce4562558fd1af9ea71b7b858899f3e  Mail-SpamAssassin-3.1.9.zip
+
+The release files also have a .asc accompanying them.  The file serves
+as an external GPG signature for the given release file.  The signing
+key is available via the wwwkeys.pgp.net key server, as well as
+http://spamassassin.apache.org/released/GPG-SIGNING-KEY
+
+The key information is:
+
+pub  1024D/265FA05B 2003-06-09 SpamAssassin Signing Key <release@spamassassin.org>
+      Key fingerprint = 26C9 00A4 6DD4 0CD5 AD24  F6D7 DEE0 1987 265F A05B
+
+
+3.1.9 is a major bug-fix release, including a potential local DoS.  The major
+highlights are:
+
+- bug 5480: fix for CVE-2007-2873: a local user symlink-attack DoS
+  vulnerability. It only affects systems where spamd is run as root, is used
+  with vpopmail or virtual users via the "-v"/"--vpopmail" OR
+  "--virtual-config-dir" switch, AND with the "-x"/"--no-user-config AND
+  WITHOUT the "-u"/"--username" switch AND with the "-l"/"--allow-tell" switch.
+  This is not default on any distro package, and is not a common configuration.
+  More details of the vulnerability can be read at
+  <http://spamassassin.apache.org/advisories/cve-2007-2873.txt>.
+
+- bug 5353 - meta rule parsing should handle not equal ("!=") syntax.
+
+- set the score for URI_TRUNCATED to 0.001.
+
+- bug 5337: change the start order for Fedora such that spamd starts before the
+  MTA.
+
+
