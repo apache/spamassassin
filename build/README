@@ -199,7 +199,11 @@ SPAMASSASSIN RELEASE PROCEDURE
 - Write the release announcement mail!  This is a simple matter of copying
   the previous release's announcement, updating the version numbers and
   links, fixing the MD5 and SHA1 checksums in this mail, and summarising
-  the important changes from the Changes file.
+  the important changes from the Changes file.  
+  
+  Warning: you must send this using a "From:" address @apache.org,
+  otherwise it will be silently discarded at the ASF instead of being
+  delivered to the announce list.
 
     cp build/announcements/3.1.7.txt build/announcements/3.1.8.txt
     svn add !$
