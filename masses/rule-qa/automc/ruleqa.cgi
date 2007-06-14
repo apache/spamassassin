@@ -735,8 +735,11 @@ sub read_freqs_file {
 
   my $file = $self->{datadir}.$key;
   if (!open (IN, "<$file")) {
-    warn "cannot read $file";
-    return;
+    $file =~ s/'//gs;
+    if (!-f "$file.gz" || !open (IN, "gunzip -cd < '$file.gz' |")) {
+      warn "cannot read $file";
+      return;
+    }
   }
 
   $self->{freqs_head}{$key}=<IN>;
