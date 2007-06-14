@@ -345,9 +345,13 @@ sub harvest_until_rule_completes {
     $self->{main}->call_plugins ("check_tick", { permsgstatus => $self });
     @left = $self->{async}->get_pending_lookups();
 
+    # complete_lookups could cause a change in get_last_start_lookup_time
+    $deadline = $self->{conf}->{rbl_timeout} +
+                $self->{async}->get_last_start_lookup_time();
+
     # dynamic timeout
     my $dynamic = (int($self->{conf}->{rbl_timeout}
-                      * (1 - (($total - scalar @left) / $total) ** 2) + 0.5)
+                      * (1 - 0.7*(($total - @left) / $total) ** 2) + 1)
                   + $self->{async}->get_last_start_lookup_time());
     $deadline = $dynamic if ($dynamic < $deadline);
     $now = time;
@@ -370,9 +374,15 @@ sub harvest_dnsbl_queries {
     $self->{main}->call_plugins ("check_tick", { permsgstatus => $self });
     @left = $self->{async}->get_pending_lookups();
 
+    # complete_lookups() may have called completed_callback, which may call
+    # start_lookup() again (like in URIDNSBL), so get_last_start_lookup_time
+    # may have changed and deadline needs to be recomputed
+    $deadline = $self->{conf}->{rbl_timeout} +
+                $self->{async}->get_last_start_lookup_time();
+
     # dynamic timeout
     my $dynamic = (int($self->{conf}->{rbl_timeout}
-                      * (1 - (($total - scalar @left) / $total) ** 2) + 0.5)
+                      * (1 - 0.7*(($total - @left) / $total) ** 2) + 1)
                   + $self->{async}->get_last_start_lookup_time());
     $deadline = $dynamic if ($dynamic < $deadline);
     $now = time;    # and loop again
