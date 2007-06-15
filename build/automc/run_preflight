@@ -26,10 +26,10 @@ $pwd =~ /slaves\/([-_A-Za-z0-9]+)\//; if ($1) {
 
 my %mass_check_args = (
 
-  'mc-fast' =>      '--tail=1000',
-  'mc-med' =>       '--tail=6000  --head=5000',
-  'mc-slow' =>      '--tail=16000 --head=10000',
-  'mc-slower' =>    '--tail=36000 --head=20000',
+  'mc-fast' =>      '--tail=2000',
+  'mc-med' =>       '--tail=12000 --head=10000',
+  'mc-slow' =>      '--tail=22000 --head=10000',
+  'mc-slower' =>    '--tail=42000 --head=20000',
 
 );
 
