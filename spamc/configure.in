@@ -199,11 +199,11 @@ fi
 dnl ----------------------------------------------------------------------
 
 # we cheat, since we *know* we have Perl installed ;)
-CCDLFLAGS=`perl -e 'use Config; print $Config::Config{ccdlflags}'`
+CCCDLFLAGS=`perl -e 'use Config; print $Config::Config{cccdlflags}'`
 LDDLFLAGS=`perl -e 'use Config; print $Config::Config{lddlflags}'`
 AC_SUBST([SSLLIBS])
 AC_SUBST([SSLCFLAGS])
-AC_SUBST(CCDLFLAGS)
+AC_SUBST(CCCDLFLAGS)
 AC_SUBST(LDDLFLAGS)
 AC_SUBST(HAVE_SHUT_RD)
 

@@ -309,7 +309,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP EGREP SSLLIBS SSLCFLAGS CCDLFLAGS LDDLFLAGS HAVE_SHUT_RD LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP EGREP SSLLIBS SSLCFLAGS CCCDLFLAGS LDDLFLAGS HAVE_SHUT_RD LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -4726,7 +4726,7 @@ fi
 
 
 # we cheat, since we *know* we have Perl installed ;)
-CCDLFLAGS=`perl -e 'use Config; print $Config::Config{ccdlflags}'`
+CCCDLFLAGS=`perl -e 'use Config; print $Config::Config{cccdlflags}'`
 LDDLFLAGS=`perl -e 'use Config; print $Config::Config{lddlflags}'`
 
 
@@ -5360,7 +5360,7 @@ s,@CPP@,$CPP,;t t
 s,@EGREP@,$EGREP,;t t
 s,@SSLLIBS@,$SSLLIBS,;t t
 s,@SSLCFLAGS@,$SSLCFLAGS,;t t
-s,@CCDLFLAGS@,$CCDLFLAGS,;t t
+s,@CCCDLFLAGS@,$CCCDLFLAGS,;t t
 s,@LDDLFLAGS@,$LDDLFLAGS,;t t
 s,@HAVE_SHUT_RD@,$HAVE_SHUT_RD,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
