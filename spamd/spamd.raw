@@ -101,6 +101,8 @@ use File::Spec 0.8;
 use File::Path;
 use Carp ();
 
+use constant RUNNING_ON_MACOS => ($^O =~ /^darwin/oi);
+
 # Check to make sure the script version and the module version matches.
 # If not, die here!  Also, deal with unchanged VERSION macro.
 if ($Mail::SpamAssassin::VERSION ne '@@VERSION@@' && '@@VERSION@@' ne "\@\@VERSION\@\@") {
@@ -1036,24 +1038,13 @@ sub spawn {
         $ugid = getgrnam( $opt{'groupname'} ) || $ugid;
       }
 
-      # Change GID
-      $) = "$ugid $ugid";    # effective gid
-      $( = $ugid;            # real gid
+      # bug 5518: assignments to $) and $( don't always work on all platforms
+      # bug 3900: assignments to $> and $< problems with BSD perl bug
+      # use the POSIX functions to hide the platform specific workarounds 
+      POSIX::setgid($ugid);  # set effective and real gid
+      POSIX::setuid($uuid);  # set effective and real UID
 
-      # Change UID
-      $> = $uuid;            # effective uid
-      $< = $uuid;            # real uid. we now cannot setuid anymore
-
-      # bug 3900: BSD perl bug. see comment in setuid_to_euid() in
-      # Mail::SA::Util on the same issue.
-      if ($< != $uuid) {
-        dbg("spamd: initial attempt to change real uid failed, trying BSD workaround");
-
-        $> = $<;              # revert euid to ruid
-        $< = $uuid;           # change ruid to target
-        $> = $uuid;           # change euid back to target
-      }
-
+      # keep the sanity check to catch problems like bug 3900 just in case
       if ( $> != $uuid and $> != ( $uuid - 2**32 ) ) {
         die "spamd: setuid to uid $uuid failed\n";
       }

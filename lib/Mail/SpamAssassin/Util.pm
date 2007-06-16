@@ -1333,21 +1333,11 @@ sub setuid_to_euid {
 
   if ($< != $touid) {
     dbg("util: changing real uid from $< to match effective uid $touid");
-    $< = $touid; # try the simple method first
+    # bug 3586: kludges needed to work around platform dependent behavior assigning to $<
+    #  The POSIX functions deal with that so just use it here
+    POSIX::setuid($touid);
 
-    # bug 3586: Some perl versions, typically those on a BSD-based
-    # platform, require RUID==EUID (and presumably == 0) before $<
-    # can be changed.  So this is a kluge for us to get around the
-    # typical spamd-ish behavior of: $< = 0, $> = someuid ...
-    if ( $< != $touid ) {
-      dbg("util: initial attempt to change real uid failed, trying BSD workaround");
-
-      $> = $<;			# revert euid to ruid
-      $< = $touid;		# change ruid to target
-      $> = $touid;		# change euid back to target
-    }
-
-    # Check that we have now accomplished the setuid
+    # Check that we have now accomplished the setuid: catch bug 3586 if it comes back
     if ($< != $touid) {
       # keep this fatal: it's a serious security problem if it fails
       die "util: setuid $< to $touid failed!";
