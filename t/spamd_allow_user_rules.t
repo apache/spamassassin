@@ -36,7 +36,7 @@ print OUT "
 ";
 close OUT;
 
-ok (start_spamd ("--virtual-config-dir=log/virtualconfig/%u -L -u $current_user"));
+ok (start_spamd ("--virtual-config-dir=log/virtualconfig/%u -L -u $spamd_run_as_user"));
 ok (spamcrun ("-u testuser < data/spam/009", \&patterns_run_cb));
 ok (stop_spamd ());
 
