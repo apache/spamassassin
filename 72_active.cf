@@ -3169,6 +3169,11 @@ body     __PHD			/PhD/i
 body     __PREAPPROVEDFVGT	/pre-approved/i
 
 ifplugin Mail::SpamAssassin::Plugin::DNSEval
+header  __RCVD_IN_DNSWL         eval:check_rbl('dnswl-firsttrusted', 'list.dnswl.org.')
+tflags  __RCVD_IN_DNSWL         nice net
+endif
+
+ifplugin Mail::SpamAssassin::Plugin::DNSEval
 header __RCVD_IN_DOB            eval:check_rbl('dob', 'dob.sibl.support-intelligence.net.', '255')
 describe __RCVD_IN_DOB          Received via relay in new domain (Day Old Bread)
 tflags __RCVD_IN_DOB            net
