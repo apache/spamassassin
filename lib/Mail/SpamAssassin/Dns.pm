@@ -333,11 +333,20 @@ sub harvest_until_rule_completes {
   my $deadline = $self->{conf}->{rbl_timeout} + $self->{async}->get_last_start_lookup_time();
   my $now = time;
 
+  # should not give up before at least attempting to collect some responses
+  # even if previous checks already exceeded rbl_timeout
+  my $notbefore = $now + 1.2;  # at least 1 second from now (time is integer)
+
   my @left = $self->{async}->get_pending_lookups();
   my $total = scalar @left;
 
-  while (($now < $deadline) && !$self->{async}->complete_lookups(1))
+  while ( (($now < $deadline) || ($now < $notbefore)) &&
+          !$self->{async}->complete_lookups(1))
   {
+    dbg(sprintf("dns: harvest_until_rule_completes: on extended time, ".
+                "overdue by %.3f s, still %.3f s",
+        $now-$deadline, $notbefore-$now))  if $now >= $deadline;
+
     if ($self->is_rule_complete($rule)) {
       return 1;
     }
@@ -345,9 +354,13 @@ sub harvest_until_rule_completes {
     $self->{main}->call_plugins ("check_tick", { permsgstatus => $self });
     @left = $self->{async}->get_pending_lookups();
 
+    # complete_lookups could cause a change in get_last_start_lookup_time
+    $deadline = $self->{conf}->{rbl_timeout} +
+                $self->{async}->get_last_start_lookup_time();
+
     # dynamic timeout
     my $dynamic = (int($self->{conf}->{rbl_timeout}
-                      * (1 - (($total - scalar @left) / $total) ** 2) + 0.5)
+                      * (1 - 0.7*(($total - @left) / $total) ** 2) + 1)
                   + $self->{async}->get_last_start_lookup_time());
     $deadline = $dynamic if ($dynamic < $deadline);
     $now = time;
@@ -362,17 +375,33 @@ sub harvest_dnsbl_queries {
   my $deadline = $self->{conf}->{rbl_timeout} + $self->{async}->get_last_start_lookup_time();
   my $now = time;
 
+  # should not give up before at least attempting to collect some responses
+  # (which may have arrived by now), even if previous checks (like Razor,
+  # dcc, Botnet, rules) already exceeded rbl_timeout
+  my $notbefore = $now + 1.2;  # at least 1 second from now (time is integer)
+
   my @left = $self->{async}->get_pending_lookups();
   my $total = scalar @left;
 
-  while (($now < $deadline) && !$self->{async}->complete_lookups(1))
+  while ( (($now < $deadline) || ($now < $notbefore)) &&
+          !$self->{async}->complete_lookups(1))
   {
+    dbg(sprintf("dns: harvest_dnsbl_queries: on extended time, ".
+                "overdue by %.3f s, still %.3f s",
+        $now-$deadline, $notbefore-$now))  if $now >= $deadline;
+
     $self->{main}->call_plugins ("check_tick", { permsgstatus => $self });
     @left = $self->{async}->get_pending_lookups();
 
+    # complete_lookups() may have called completed_callback, which may call
+    # start_lookup() again (like in URIDNSBL), so get_last_start_lookup_time
+    # may have changed and deadline needs to be recomputed
+    $deadline = $self->{conf}->{rbl_timeout} +
+                $self->{async}->get_last_start_lookup_time();
+
     # dynamic timeout
     my $dynamic = (int($self->{conf}->{rbl_timeout}
-                      * (1 - (($total - scalar @left) / $total) ** 2) + 0.5)
+                      * (1 - 0.7*(($total - @left) / $total) ** 2) + 1)
                   + $self->{async}->get_last_start_lookup_time());
     $deadline = $dynamic if ($dynamic < $deadline);
     $now = time;    # and loop again
