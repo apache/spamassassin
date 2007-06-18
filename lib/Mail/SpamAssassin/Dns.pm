@@ -411,15 +411,12 @@ sub harvest_dnsbl_queries {
 
   # timeouts
   @left = $self->{async}->get_pending_lookups();
+  $now = time;
   for my $query (@left) {
-    my $string = '';
-    if (defined @{$query->{sets}}) {
-      $string = join(",", grep defined, @{$query->{sets}});
-    }
-    elsif (defined @{$query->{rules}}) {
-      $string = join(",", grep defined, @{$query->{rules}});
-    }
-    my $delay = time - $self->{async}->get_last_start_lookup_time();
+    my $string = join(", ", grep { defined }
+                      map { ref $query->{$_} ? @{$query->{$_}} : $query->{$_} }
+                      qw(sets rules rulename type key) );
+    my $delay = $now - $self->{async}->get_last_start_lookup_time();
     dbg("dns: timeout for $string after $delay seconds");
   }
 
