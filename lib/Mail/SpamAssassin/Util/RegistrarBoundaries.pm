@@ -1,4 +1,5 @@
 # The (extremely complex) rules for domain delegation.
+# Note that really, this should be called "RegistryBoundaries"; see bug 4605
 
 # <@LICENSE>
 # Licensed to the Apache Software Foundation (ASF) under one or more
@@ -51,11 +52,12 @@ foreach (qw/
   eu
   jobs travel
   xxx
+  mobi asia cat tel
   /) { 
   $VALID_TLDS{$_} = 1;
 }
 
-# to resort a line, pump all of same TLD into:
+# to resort this, pump the whole list through:
 #  perl -e '$/=undef; $_=<>; foreach(split) { ($a,$b) = split(/\./, $_, 2); push @{$t{$b}}, $_; } foreach (sort keys %t) { print "  ",join(" ", sort @{$t{$_}}),"\n" }'
 #
 # http://www.neustar.us/policies/docs/rfc_1480.txt
@@ -78,16 +80,18 @@ foreach(qw/
   com.bm edu.bm gov.bm net.bm org.bm
   adm.br adv.br agr.br am.br arq.br art.br ato.br bio.br bmd.br cim.br cng.br cnt.br com.br coop.br ecn.br edu.br eng.br esp.br etc.br eti.br far.br fm.br fnd.br fot.br fst.br g12.br ggf.br gov.br imb.br ind.br inf.br jor.br lel.br mat.br med.br mil.br mus.br net.br nom.br not.br ntr.br odo.br org.br ppg.br pro.br psc.br psi.br qsl.br rec.br slg.br sp.br srv.br tmp.br trd.br tur.br tv.br vet.br zlg.br
   com.bs net.bs org.bs
+  co.bw org.bw
+  com.bz org.bz net.bz
   ab.ca bc.ca gc.ca mb.ca nb.ca nf.ca nl.ca ns.ca nt.ca nu.ca on.ca pe.ca qc.ca sk.ca yk.ca
   co.ck edu.ck gov.ck net.ck org.ck
   ac.cn ah.cn bj.cn com.cn cq.cn edu.cn gd.cn gov.cn gs.cn gx.cn gz.cn hb.cn he.cn hi.cn hk.cn hl.cn hn.cn jl.cn js.cn ln.cn mo.cn net.cn nm.cn nx.cn org.cn qh.cn sc.cn sh.cn sn.cn sx.cn tj.cn tw.cn xj.cn xz.cn yn.cn zj.cn
   arts.co com.co edu.co firm.co gov.co info.co int.co mil.co nom.co org.co rec.co store.co web.co
-  lkd.co.im plc.co.im
   au.com br.com cn.com de.com eu.com gb.com hu.com no.com qc.com ru.com sa.com se.com uk.com us.com uy.com za.com
   ac.cr co.cr ed.cr fi.cr go.cr or.cr sa.cr
   com.cu net.cu org.cu
   ac.cy com.cy gov.cy net.cy org.cy
   co.dk
+  com.dm net.dm org.dm
   art.do com.do edu.do gob.do gov.do mil.do net.do org.do sld.do web.do
   art.dz ass.dz com.dz edu.dz gov.dz net.dz org.dz pol.dz
   com.ec edu.ec fin.ec gov.ec k12.ec med.ec mil.ec net.ec org.ec
@@ -105,6 +109,7 @@ foreach(qw/
   com.gt edu.gt gob.gt ind.gt mil.gt net.gt org.gt
   com.gu edu.gu gov.gu mil.gu net.gu org.gu
   com.hk edu.hk gov.hk idv.hk net.hk org.hk
+  com.hr from.hr iz.hr
   2000.hu agrar.hu bolt.hu casino.hu city.hu co.hu erotica.hu erotika.hu film.hu forum.hu games.hu hotel.hu info.hu ingatlan.hu jogasz.hu konyvelo.hu lakas.hu media.hu news.hu org.hu priv.hu reklam.hu sex.hu shop.hu sport.hu suli.hu szex.hu tm.hu tozsde.hu utazas.hu video.hu
   ac.id co.id go.id mil.id net.id or.id
   ac.il co.il gov.il idf.il k12.il muni.il net.il org.il
@@ -136,7 +141,7 @@ foreach(qw/
   com.ni edu.ni gob.ni net.ni nom.ni org.ni
   tel.no
   com.np edu.np gov.np net.np org.np
-  fax.nr mob.nr mobil.nr mobile.nr tel.nr tlf.nr
+  fax.nr mob.nr mobil.nr mobile.nr tel.nr tlf.nr co.nr
   ac.nz co.nz cri.nz geek.nz gen.nz govt.nz iwi.nz maori.nz mil.nz net.nz org.nz school.nz
   ac.om biz.om co.om com.om edu.om gov.om med.om mod.om museum.om net.om org.om pro.om
   dk.org eu.org
@@ -203,7 +208,7 @@ foreach (qw/
 =item ($hostname, $domain) = split_domain ($fqdn)
 
 Cut a fully-qualified hostname into the hostname part and the domain
-part, splitting at the DNS registrar boundary.
+part, splitting at the DNS registry boundary.
 
 Examples:
 
@@ -245,9 +250,10 @@ sub split_domain {
 	# demon.co.uk
 	# esc.edu.ar
 	# [^\.]+\.${US_STATES}\.us
-	if ($domparts[2] eq 'uk' || $domparts[2] eq 'ar') {
+	if ($domparts[2] eq 'uk' || $domparts[2] eq 'ar' || $domparts[2] eq 'im') {
 	  my $temp = join('.', @domparts);
-	  last if ($temp eq 'demon.co.uk' || $temp eq 'esc.edu.ar');
+	  last if ($temp eq 'demon.co.uk' || $temp eq 'esc.edu.ar' ||
+	  	   $temp eq 'lkd.co.im' || $temp eq 'plc.co.im');
 	}
 	elsif ($domparts[2] eq 'us') {
           last if ($US_STATES{$domparts[1]});
