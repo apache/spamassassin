@@ -27,6 +27,11 @@ unlink('log/user_state/bayes_toks');
 # ensure it is writable by all
 use File::Path; mkpath("log/user_state"); chmod 01777, "log/user_state";
 
+# use SDBM so we do not need DB_File
+tstlocalrules ("
+        bayes_store_module Mail::SpamAssassin::BayesStore::SDBM
+");
+
 ok(start_spamd("-L --allow-tell"));
 
 ok(spamcrun("-lx -L ham < data/spam/001", \&patterns_run_cb));
