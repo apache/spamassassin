@@ -21,11 +21,16 @@ q{ Message successfully } => 'learned',
 $spamc = "sudo -u nobody $spamc";
 
 # remove these first
-unlink('log/user_state/bayes_seen');
-unlink('log/user_state/bayes_toks');
+unlink('log/user_state/bayes_seen.dir');
+unlink('log/user_state/bayes_toks.dir');
 
 # ensure it is writable by all
 use File::Path; mkpath("log/user_state"); chmod 01777, "log/user_state";
+
+# use SDBM so we do not need DB_File
+tstlocalrules ("
+        bayes_store_module Mail::SpamAssassin::BayesStore::SDBM
+");
 
 ok(start_spamd("-L --allow-tell --create-prefs -x --paranoid"));
 
@@ -35,8 +40,8 @@ ok_all_patterns();
 ok(stop_spamd());
 
 # ensure these are not owned by root
-ok check_owner('log/user_state/bayes_seen');
-ok check_owner('log/user_state/bayes_toks');
+ok check_owner('log/user_state/bayes_seen.dir');
+ok check_owner('log/user_state/bayes_toks.dir');
 
 sub check_owner {
   my $f = shift;
