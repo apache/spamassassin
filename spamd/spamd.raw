@@ -2038,12 +2038,11 @@ sub auth_ident {
 sub handle_user_setuid_basic {
   my $username = shift;
 
-  #
-  # If vpopmail config enabled then look up userinfo for vpopmail uid
-  # as defined by $opt{'username'} or as passed via $username
+  # If $opt{'username'} in use, then look up userinfo for that uid;
+  # otherwise use what was passed via $username
   #
   my $userid = '';
-  if ( $opt{'vpopmail'} && $opt{'username'} ) {
+  if ( $opt{'username'} ) {
     $userid = $opt{'username'};
   }
   else {
