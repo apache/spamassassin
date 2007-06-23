@@ -155,7 +155,8 @@ sub sa_t_init {
   $ENV{'TEST_DIR'} = $cwd;
   $testname = $tname;
 
-  $spamd_run_as_user = (getpwuid($>))[0];
+  require Mail::SpamAssassin::Util;
+  $spamd_run_as_user = (Mail::SpamAssassin::Util::portable_getpwuid($>))[0];
   if ($> == 0) {
     $spamd_run_as_user = "nobody";
   }
