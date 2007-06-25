@@ -235,6 +235,10 @@ struct transport
     int retry_sleep;
 };
 
+/* Initialise and setup transport-specific context for the connection
+ * to spamd.  Note that this may leak a small amount of string data for
+ * the remote hostname (bug 5531) if called repeatedly; use
+ *  transport_cleanup() to clean this up. */
 extern void transport_init(struct transport *tp);
 extern int transport_setup(struct transport *tp, int flags);
 
@@ -290,5 +294,13 @@ int process_message(struct transport *tp, char *username,
 		    const int check_only, const int safe_fallback);
 
 void libspamc_log(int flags, int level, char *msg, ...);
+
+/* Cleanup the resources allocated for storing details of the transport.
+ * Added in SpamAssassin 3.3.0. */
+void transport_cleanup(struct transport *tp);
+
+/* define a preprocessor symbol so that calling code can tell if the
+ * transport_cleanup() API function is available. */
+#define SPAMC_HAS_TRANSPORT_CLEANUP
 
 #endif

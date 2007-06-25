@@ -581,12 +581,6 @@ static int _try_to_connect_tcp(const struct transport *tp, int *sockptr)
         sleep(retry_sleep);
     } /* for(numloops...) */
 
-#ifdef SPAMC_HAS_ADDRINFO
-    for(numloops=0;numloops<tp->nhosts;numloops++) {
-        freeaddrinfo(tp->hosts[numloops]);
-    }
-#endif
-
     libspamc_log(tp->flags, LOG_ERR,
               "connection attempt to spamd aborted after %d retries",
               connect_retries);
@@ -1761,7 +1755,6 @@ static void _randomize_hosts(struct transport *tp)
     while (rnum-- > 0) {
         tmp = tp->hosts[0];
 
-        /* TODO: free using freeaddrinfo() */
         for (i = 1; i < tp->nhosts; i++)
             tp->hosts[i - 1] = tp->hosts[i];
 
@@ -2016,6 +2009,29 @@ nexthost:
     
     /* oops, unknown transport type */
     return EX_OSERR;
+}
+
+/*
+* transport_cleanup()
+*
+*	Given a "transport" object that says how we're to connect to the
+*	spam daemon, delete and free any buffers allocated so that it
+*       can be discarded without causing a memory leak.
+*/
+void transport_cleanup(struct transport *tp)
+{
+
+#ifdef SPAMC_HAS_ADDRINFO
+  int i;
+
+  for(i=0;i<tp->nhosts;i++) {
+      if (tp->hosts[i] != NULL) {
+          freeaddrinfo(tp->hosts[i]);
+          tp->hosts[i] = NULL;
+      }
+  }
+#endif
+
 }
 
 /* --------------------------------------------------------------------------- */
