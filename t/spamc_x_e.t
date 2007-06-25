@@ -3,9 +3,7 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamc_x_e");
 
-# only run for localhost!
-our $DO_RUN = conf_bool('run_net_tests')
-                    && !$SKIP_SPAMD_TESTS;
+our $DO_RUN = !$SKIP_SPAMD_TESTS;
 
 use Test; plan tests => ($DO_RUN ? 7 : 0);
 
@@ -23,7 +21,7 @@ stop_spamd();
 
 %patterns = ( );
 %anti_patterns = ( 'Fine' => 'Fine' );
-$spamdhost = '0.0.0.1'; # cause "connection failed" errors
+$spamdhost = '255.255.255.255'; # cause "connection failed" errors
 
 ok !spamcrun("-x -e /bin/echo Fine < data/nice/001", \&patterns_run_cb);
 ok ok_all_patterns();
