@@ -508,8 +508,8 @@ static int _try_to_connect_tcp(const struct transport *tp, int *sockptr)
              * safely use as an "always fail" test case */
             if (!strcmp(host, "255.255.255.255")) {
               libspamc_log(tp->flags, LOG_ERR,
-			 "connect to spamd on %s failed broadcast addr",
-			 host);
+                          "connect to spamd on %s failed, broadcast addr",
+                          host);
               status = -1;
             }
             else {
@@ -540,8 +540,8 @@ static int _try_to_connect_tcp(const struct transport *tp, int *sockptr)
              * safely use as an "always fail" test case */
             if (!strcmp(ipaddr, "255.255.255.255")) {
               libspamc_log(tp->flags, LOG_ERR,
-			 "connect to spamd on %s failed, broadcast addr",
-			 ipaddr);
+                          "connect to spamd on %s failed, broadcast addr",
+                          ipaddr);
               status = -1;
             }
             else {

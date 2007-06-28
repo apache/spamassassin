@@ -5,7 +5,7 @@ use SATest; sa_t_init("spamc_x_E_R");
 
 our $DO_RUN = !$SKIP_SPAMD_TESTS;
 
-use Test; plan tests => ($DO_RUN ? 31 : 0);
+use Test; plan tests => ($DO_RUN ? 49 : 0);
 
 exit unless $DO_RUN;
 
@@ -45,6 +45,47 @@ stop_spamd(); # just to be sure
 
 # ----------------------------------------------------------------------
 # error conditions
+# max-size of 512 bytes; EX_TOOBIG, pass through message despite -x
+
+%patterns = (
+  q{ Subject: There yours for FREE!}, 'subj',
+);
+%anti_patterns = (
+  q{ X-Spam-Flag: }, 'flag',
+);
+
+# this should have exit code == 0, and pass through the full
+# unfiltered text
+clear_pattern_counters();
+ok(scrun("-s 512 -x < data/spam/001", \&patterns_run_cb));
+ok ok_all_patterns();
+
+# this should have exit code == 0, and pass through the full
+# unfiltered text
+clear_pattern_counters();
+ok(scrun("-s 512 -x -E < data/spam/001", \&patterns_run_cb));
+ok ok_all_patterns();
+
+%patterns = (
+  q{ 0/0 }, '0/0',
+);
+%anti_patterns = (
+  q{ Subject: There yours for FREE!}, 'subj',
+  q{ X-Spam-Flag: }, 'flag',
+);
+
+# this should have exit code == 0, and emit "0/0"
+clear_pattern_counters();
+ok(scrun("-s 512 -x -R < data/spam/001", \&patterns_run_cb));
+ok ok_all_patterns();
+
+# this should have exit code == 0, and emit "0/0"
+clear_pattern_counters();
+ok(scrun("-s 512 -x -E -R < data/spam/001", \&patterns_run_cb));
+ok ok_all_patterns();
+
+# ----------------------------------------------------------------------
+
 $spamdhost = '255.255.255.255'; # cause "connection failed" errors
 
 # these should have exit code == 0
@@ -77,6 +118,3 @@ ok ok_all_patterns();
 clear_pattern_counters();
 ok(scrunwantfail("--connect-retries 1 -x -E < data/spam/001", \&patterns_run_cb));
 ok ok_all_patterns();
-
-# ----------------------------------------------------------------------
-
