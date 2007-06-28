@@ -709,8 +709,8 @@ main(int argc, char *argv[])
     struct transport trans;
     struct message m;
     int out_fd = -1;
-    int result;
-    int ret;
+    int result = EX_SOFTWARE;
+    int ret = EX_SOFTWARE;
     int extratype = 0;
     int islearned = 0;
     int isreported = 0;
@@ -928,13 +928,11 @@ main(int argc, char *argv[])
 
 /* FAIL: */
     result = m.is_spam;
-    if ((flags & SPAMC_CHECK_ONLY) && result != EX_TOOBIG) {
-        get_output_fd(&out_fd);
-	/* probably, the write to stdout failed; we can still report exit code */
-	message_cleanup(&m);
-	ret = result;
+    if (ret != EX_OK) {
+        result = ret;
     }
-    else if (flags & (SPAMC_LEARN|SPAMC_PING) ) {
+
+    if (flags & (SPAMC_LEARN|SPAMC_PING) ) {
         get_output_fd(&out_fd);
         message_cleanup(&m);
     }
@@ -950,7 +948,7 @@ main(int argc, char *argv[])
         }
         else {
             /* bug 5412: spamc -x should not output the message on error */
-            if ((flags & SPAMC_SAFE_FALLBACK) && ret != EX_TOOBIG) {
+            if ((flags & SPAMC_SAFE_FALLBACK) || result == EX_TOOBIG) {
                 get_output_fd(&out_fd);
                 message_dump(STDIN_FILENO, out_fd, &m);
             }
@@ -959,7 +957,7 @@ main(int argc, char *argv[])
 
 	message_cleanup(&m);
 	if (ret == EX_TOOBIG) {
-	    ret = 0;
+	    ret = EX_OK;    /* too big always means exit(0) -- bug 5412 */
 	}
 	else if (flags & SPAMC_SAFE_FALLBACK) {
 	    ret = EX_OK;
