@@ -971,6 +971,7 @@ sub run_eval_tests {
 }
 EOT
 
+  undef &{$methodname};
   eval $evalstr;
 
   if ($@) {
