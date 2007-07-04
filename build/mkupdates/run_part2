@@ -16,25 +16,20 @@ cd /home/updatesd/svn/spamassassin
 PERL=/local/perl586/bin/perl
 export PERL 
 
-# [May  2 2007 jm: note that this is now NOT pushing tarballs to users via
-# sa-update; this script is outputting to buildbot.spamassassin.org/updatedev/
-# and 0.2.3.updates.dev.spamassassin.org .]
-
 # download stage, where update tarballs are deposited for downloaders
 #
-# dev, testing:
-stagedir=/var/www/buildbot.spamassassin.org/updatedev
-# live:
-## stagedir=/var/www/buildbot.spamassassin.org/updatestage
+stagedir=/var/www/buildbot.spamassassin.org/updatestage
 
 # directory where "0.2.3" and other version-specific files live.
 # it's assumed that the *real* zone $INCLUDEs files from this dir.
 # it must be writable by the user this script runs as.
 #
 # dev, testing:
-dnsdir=/var/named/updates.dev.spamassassin.org.d
+# dnsdir=/var/named/updates.dev.spamassassin.org.d
 # live:
 # dnsdir=/var/named/updates.spamassassin.org.d
+#
+dnsdir=/var/named/updates.spamassassin.org.d
 
 # directory where "counter", "soa_line.tmpl", "soa_line" live.
 # it's assumed that the *real* zone $INCLUDEs files from this dir.
