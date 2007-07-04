@@ -162,10 +162,7 @@ sub sa_t_init {
   $ENV{'TEST_DIR'} = $cwd;
   $testname = $tname;
 
-  $spamd_run_as_user = (getpwuid($>))[0];
-  if ($> == 0) {
-    $spamd_run_as_user = "nobody";
-  }
+  $spamd_run_as_user = ($RUNNING_ON_WINDOWS || ($> == 0)) ? "nobody" : (getpwuid($>))[0] ;
 }
 
 # a port number between 32768 and 65535; used to allow multiple test
