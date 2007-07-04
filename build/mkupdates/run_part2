@@ -124,9 +124,8 @@ $PERL build/sha1sum.pl $tmpdir/update.tgz > $tmpdir/update.tgz.sha1  || exit $?
 # rev of *our* codebase may appear under multiple rev#s, as other projects
 # check their changes in.
 
-tagver=3.2.x
 tagstamp=`perl -e 'use POSIX qw(strftime); print strftime "%Y%m%d%H%M%S", localtime time;'`
-tagurl=https://svn.apache.org/repos/asf/spamassassin/tags/sa-update_${tagver}_${tagstamp}
+tagurl=https://svn.apache.org/repos/asf/spamassassin/tags/sa-update_${version}_${tagstamp}
 
 svn up
 svn copy -m 'promotions validated' . $tagurl < /dev/null
