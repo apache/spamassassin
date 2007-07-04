@@ -205,6 +205,8 @@ my @ORIG_ARGV = Mail::SpamAssassin::Util::untaint_var( \@ARGV );
 # somehow -- untaint the dir to be on the safe side.
 my $ORIG_CWD = Mail::SpamAssassin::Util::untaint_var( Cwd::cwd() );
 
+prepare_for_sighup_restart();
+
 # Parse the command line
 Getopt::Long::Configure("bundling");
 GetOptions(
@@ -961,28 +963,7 @@ while (1) {
     $scaling->main_server_poll($opt{'server-scale-period'});
   }
 
-  if ( defined $got_sighup ) {
-    if (defined($opt{'pidfile'})) {
-      unlink($opt{'pidfile'}) || warn "spamd: cannot unlink $opt{'pidfile'}: $!\n";
-    }
-
-    # leave Client fds active, and do not kill children; they can still
-    # service clients until they exit.  But restart the listener anyway.
-    # And close the logfile, so the new instance can reopen it.
-    Mail::SpamAssassin::Logger::close_log();
-    chdir($ORIG_CWD)
-      || die "spamd: restart failed: chdir failed: ${ORIG_CWD}: $!\n";
-
-    # ensure we re-run spamd using the right perl interpreter, and
-    # with the right switches (taint mode and warnings) (bug 5255)
-    my $perl = Mail::SpamAssassin::Util::untaint_var($^X);
-    my @execs = ( $perl, "-T", "-w", $ORIG_ARG0, @ORIG_ARGV );
-    warn "spamd: restarting using '" . join (' ', @execs) . "'\n";
-    exec @execs;
-
-    # should not get past that...
-    die "spamd: restart failed: exec failed: " . join (' ', @execs) . ": $!\n";
-  }
+  ( defined $got_sighup ) and do_sighup_restart();
 
   for (my $i = keys %children; $i < $childlimit; $i++) {
     spawn();
@@ -2561,6 +2542,51 @@ sub map_server_sockets {
       ((defined $fd_inet ? 1 : 0) +
       (defined $fd_unix ? 1 : 0) +
       (defined $fd_ssl  ? 1 : 0)) > 1;
+}
+
+# do this in advance, since we want to minimize work when SIGHUP
+# is received
+my $perl_from_hashbang_line;
+sub prepare_for_sighup_restart {
+  # it'd be great if we could introspect the interpreter to figure this
+  # out, but bizarrely it seems unavailable.
+  if (open (IN, "<$ORIG_ARG0")) {
+    my $l = <IN>;
+    close IN;
+    if ($l && $l =~ /^#!\s*(\S+)\s*.*?$/) {
+      $perl_from_hashbang_line = $1;
+    }
+  }
+}
+
+sub do_sighup_restart {
+  if (defined($opt{'pidfile'})) {
+    unlink($opt{'pidfile'}) || warn "spamd: cannot unlink $opt{'pidfile'}: $!\n";
+  }
+
+  # leave Client fds active, and do not kill children; they can still
+  # service clients until they exit.  But restart the listener anyway.
+  # And close the logfile, so the new instance can reopen it.
+  Mail::SpamAssassin::Logger::close_log();
+  chdir($ORIG_CWD)
+    or die "spamd: restart failed: chdir failed: ${ORIG_CWD}: $!\n";
+
+  # ensure we re-run spamd using the right perl interpreter, and
+  # with the right switches (taint mode and warnings) (bug 5255)
+  my $perl = Mail::SpamAssassin::Util::untaint_var($^X);
+  my @execs = ( $perl, "-T", "-w", $ORIG_ARG0, @ORIG_ARGV );
+
+  if ($perl eq $perl_from_hashbang_line) {
+    # we're using the same perl as the script uses on the #! line;
+    # we can safely just exec the script
+    @execs = ( $ORIG_ARG0, @ORIG_ARGV );
+  }
+
+  warn "spamd: restarting using '" . join (' ', @execs) . "'\n";
+  exec @execs;
+
+  # should not get past that...
+  die "spamd: restart failed: exec failed: " . join (' ', @execs) . ": $!\n";
 }
 
 __DATA__
