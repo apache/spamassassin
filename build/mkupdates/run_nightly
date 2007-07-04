@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # driver for cron.
-# 30 8 * * * bash /home/updatesd/svn/spamassassin/build/mkupdates/run_nightly > /var/www/buildbot.spamassassin.org/bbmass/mkupdates.txt 2>&1
+# 30 8 * * * bash /home/updatesd/svn/spamassassin/build/mkupdates/run_nightly > /var/www/buildbot.spamassassin.org/updatesd/mkupdates.txt 2>&1
 
 set -x
 
@@ -48,7 +48,7 @@ cat /home/updatesd/LATEST
 
 # cycle the logfiles; keep 6 (3 days worth I think)
 (
-  cd /var/www/buildbot.spamassassin.org/bbmass
+  cd /var/www/buildbot.spamassassin.org/updatesd
   rm mkupdates_6.txt
   mv mkupdates_5.txt  mkupdates_6.txt
   mv mkupdates_4.txt  mkupdates_5.txt
