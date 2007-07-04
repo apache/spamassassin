@@ -460,6 +460,12 @@ EOT
 	      newSVpvn_share(wordstart, cp-wordstart, (U32)0));
   }
 
+EOT
+
+  # use a buffer string here instead of writing direct to the file,
+  # so we can prepend 'extern' statements (bug 5534)
+  my $xscode = <<"EOT";
+
 MODULE = $modname  PACKAGE = $modname
 
 PROTOTYPES: DISABLE
@@ -481,13 +487,21 @@ scan(psv)
 	pstart = (unsigned char *) SvPVutf8(psv, plen);
 	pend = pstart + plen;
 	results = (AV *) sv_2mortal((SV *) newAV());
+
 EOT
 
   for (1..$numscans) {
     my $funcname = $cprefix."_scan".$_;
 
-    print $re <<EOT;
+    $xscode =
+        # prepend this chunk
+        qq{
+
 	  extern char *${funcname} (unsigned char **);
+
+        }.$xscode.
+        # and append this one
+        qq{
 
 	  cursor = pstart;
 	  while (cursor < pend) {
@@ -495,10 +509,12 @@ EOT
 	      split_and_add(results, match);
 	    }
 	  }
-EOT
+
+        };
 
   }
 
+  print $re $xscode;
   print $re <<EOT;
 	  RETVAL = newRV((SV *) results);
       OUTPUT:
