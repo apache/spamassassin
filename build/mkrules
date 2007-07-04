@@ -141,6 +141,14 @@ foreach my $f (keys %{$needs_compile}) {
   }
 }
 
+# check mtime on the active.list file, too
+{
+  my @st = stat $opt_active;
+  if ($st[9] && $st[9] > $newest_src_mtime) {
+    $newest_src_mtime = $st[9];
+  }
+}
+
 # check mtimes, and also require that the two required output files
 # really do exist
 if ($newest_src_mtime && $newest_out_mtime
