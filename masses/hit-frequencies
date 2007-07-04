@@ -690,6 +690,7 @@ sub readlogs {
         ($caught, $score, $restofline) = split(\' \', $_, 3);
         next unless ($caught =~ /^[Y\.]$/ && $restofline);
         (undef, $rules) = split(/ /, $restofline, 3);
+	my %freq_mesg = ();
     ';
 
     if ($opt_f) {
@@ -722,7 +723,7 @@ sub readlogs {
 
       $evalstr .= '
         foreach my $r (split(/,/, $rules)) {
-          $freq_spam{$r}++;
+          $freq_spam{$r}++ unless $freq_mesg{$r}++;
           '.$hmapstr.$smapstr.'
         }
         $num_spam++;
@@ -743,7 +744,7 @@ sub readlogs {
 
       $evalstr .= '
         foreach my $r (split(/,/, $rules)) {
-          $freq_ham{$r}++;
+          $freq_ham{$r}++ unless $freq_mesg{$r}++;
           '.$hmapstr.$smapstr.'
         }
         $num_ham++;
