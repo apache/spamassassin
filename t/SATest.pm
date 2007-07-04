@@ -19,6 +19,7 @@ BEGIN {
   our $NO_SPAMC_EXE;
   our $SKIP_SPAMC_TESTS;
   our $SSL_AVAILABLE;
+  our $SKIP_SETUID_NOBODY_TESTS = 0;
 
 }
 
@@ -91,6 +92,11 @@ sub sa_t_init {
   # if running as root, ensure "nobody" can write to it too
   if ($> == 0) {
     $tmp_dir_mode = 0777;
+    umask 022;  # ensure correct permissions on files and dirs created here
+    # Bug 5529 initial fix: For now don't run a test as root if it has a problem resuting from setuid nobody
+    # FIXME: Eventually we can actually test setuid nobody and accessing ./log to make this test more fine grained
+    #  and we can create an accessible temp dir that some of the tests can use. But for now just skip those tests.
+    $SKIP_SETUID_NOBODY_TESTS = 1;
   } else {
     $tmp_dir_mode = 0755;
   }
@@ -110,6 +116,7 @@ sub sa_t_init {
   # rmtree ("log");
 
   mkdir ("log", 0755);
+  chmod (0755, "log"); # set in case log already exists with wrong permissions
 
   rmtree ("log/user_state");
   rmtree ("log/outputdir.tmp");
