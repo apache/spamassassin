@@ -179,23 +179,19 @@ foreach my $plistkey (sort keys %$plist) {
   next unless ($mailsa->{conf}->{descriptions}->{$name}
         || $mailsa->{conf}->{scores}->{$name});
 
-  # we now require "publish" tflags (bug 5545)
+  # "nopublish" tflags
   my $tfs = $mailsa->{conf}->{tflags}->{$name};
-  next unless $tfs;
+  if ($tfs) {
+    next if ($tfs =~ /\bnopublish\b/);
 
-  # not if there's "nopublish"
-  next if ($tfs =~ /\bnopublish\b/);
-
-  # and not if there is no "publish" tflag
-  next unless ($tfs =~ /\bpublish\b/);
-
-  # all of these tflags force publication;
-  # include "net", since otherwise this script has to be aware
-  # what day of the week it is for weekly net/non-net mass-checks!
-  # very messy.  TODO?
-  if ($tfs =~ /\b(userconf|learn|net)\b/) {
-    $notes = "tflags ".$1;
-    goto publish;
+    # all of these tflags force publication;
+    # include "net", since otherwise this script has to be aware
+    # what day of the week it is for weekly net/non-net mass-checks!
+    # very messy.  TODO?
+    if ($tfs =~ /\b(publish|userconf|learn|net)\b/) {
+      $notes = "tflags ".$1;
+      goto publish;
+    }
   }
 
   # ignore rules that are not marked as promotable
