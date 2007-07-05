@@ -1,5 +1,8 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: bb-doc daf dos jm theo
+# with results from: bb-doc bb-fredt bb-jm bb-zmi daf dos jm theo zmi
+
+# good enough
+AXB_MIME_IMG830
 
 # good enough
 AXB_RCVD_ZOOBSEND
@@ -26,7 +29,13 @@ CORRUPT_FROM_LINE_IN_HDRS
 CTYPE_001C_A
 
 # good enough
+CTYPE_1SPACE_GIF
+
+# good enough
 CURR_PRICE
+
+# good enough
+DEAR_HOMEOWNER
 
 # tflags net
 DNS_FROM_OPENWHOIS
@@ -84,6 +93,9 @@ MIME_BOUND_EQ_REL
 
 # good enough
 MSOE_MID_WRONG_CASE
+
+# good enough
+OEBOUND
 
 # good enough
 OUTLOOK_3416
