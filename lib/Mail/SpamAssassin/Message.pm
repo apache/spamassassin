@@ -834,6 +834,19 @@ sub _parse_multipart {
     push ( @{$part_array}, $_ );
   }
 
+  # Look for a message epilogue
+  # originally ignored whitespace:   0.185   0.2037   0.0654    0.757   0.00   0.00  TVD_TAB
+  # ham FPs were all "." on a line by itself.
+  # spams seem to only have NULL chars afterwards ?
+  if ($line_count) {
+    for(; $line_count > 0; $line_count--) {
+      if ($body->[-$line_count] =~ /[^\s.]/) {
+        $self->{mime_epilogue} = 1;
+        last;
+      }
+    }
+  }
+
 }
 
 =item _parse_normal()
