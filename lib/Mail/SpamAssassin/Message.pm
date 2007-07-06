@@ -809,6 +809,9 @@ sub _parse_multipart {
           my ( $key, $value ) = split ( /:\s*/, $header, 2 );
           $part_msg->header( $key, $value );
         }
+	else {
+	  $self->{'missing_mime_headers'} = 1;
+	}
         $in_body = 1;
 
 	# if there's a blank line separator, that's good.  if there isn't,
@@ -841,7 +844,7 @@ sub _parse_multipart {
   if ($line_count) {
     for(; $line_count > 0; $line_count--) {
       if ($body->[-$line_count] =~ /[^\s.]/) {
-        $self->{mime_epilogue} = 1;
+        $self->{mime_epilogue_exists} = 1;
         last;
       }
     }
