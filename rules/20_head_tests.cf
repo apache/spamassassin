@@ -147,9 +147,15 @@ describe DATE_SPAMWARE_Y2K	Date header uses unusual Y2K formatting
 # as noted on the dev@ list, ":60" is valid for seconds when there's a leap
 # second (12/31/2005 for instance), so let's accept that as valid.  ISO 8601
 # apparently allows for it.
+# there were a few whitespace issues in the original RE, and I wanted to avoid my
+# two common, but yes invalid, date headers.  specifically / \(GMT\)$/ and
+# / 0000 GMT$/.  dos has / "GMT"$/ - tvd
+# 2.229   2.7267   0.0517    0.981   0.86    0.00  INVALID_DATE
+# 2.263   2.7486   0.1368    0.953   0.78    0.00  INVALID_DATE_OLD
+#
 # WRT the tests, remember that ok and fail are reversed -- so valid dates
 # should be "fail" and invalid dates should be "ok".
-header INVALID_DATE		Date !~ /^\s*(?:(?i:Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s)?\s*(?:[12]\d|3[01]|0?[1-9])\s+(?i:Jan|Feb|Ma[ry]|Apr|Ju[nl]|Aug|Sep|Oct|Nov|Dec)\s+(?:19[7-9]\d|2\d{3})\s+(?:[01]?\d|2[0-3])\:[0-5]\d(?::(?:[0-5]\d|60))?\s+(?:[AP]M\s+)?(?:[+-][0-9]{4}|UT|[A-Z]{2,3}T)(?:\s+\(.*\))?\s*$/ [if-unset: Wed, 31 Jul 2002 16:41:57 +0200]
+header INVALID_DATE		Date !~ /^\s*(?:(?i:Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s)?\s*(?:[12]\d|3[01]|0?[1-9])\s+(?i:Jan|Feb|Ma[ry]|Apr|Ju[nl]|Aug|Sep|Oct|Nov|Dec)\s+(?:19[7-9]\d|2\d{3})\s+(?:[01]?\d|2[0-3])\:[0-5]\d(?::(?:[0-5]\d|60))?(?:\s+[AP]M)?(?:\s+(?:[+-][0-9]{4}|UT|[A-Z]{2,3}T|0000 GMT|"GMT"))?(?:\s*\(.*\))?\s*$/ [if-unset: Wed, 31 Jul 2002 16:41:57 +0200]
 describe INVALID_DATE		Invalid Date: header (not RFC 2822)
 test INVALID_DATE fail    Sat, 31 Dec 2005 23:59:60 -0500
 test INVALID_DATE fail    Wed, 31 Jul 2002 16:41:57 +0200

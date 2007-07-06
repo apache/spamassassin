@@ -47,7 +47,6 @@ sub new {
   $self->register_eval_rule("check_for_uppercase");
   $self->register_eval_rule("check_ma_non_text");
   $self->register_eval_rule("check_base64_length");
-  $self->register_eval_rule("check_mime_epilogue");
 
   return $self;
 }
@@ -506,12 +505,6 @@ sub _check_base64_length {
   }
   
   return $result;
-}
-
-sub check_mime_epilogue {
-  my $self = shift;
-  my $pms  = shift;
-  return defined $pms->{msg}->{mime_epilogue};
 }
 
 1;
