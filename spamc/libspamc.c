@@ -504,7 +504,18 @@ static int _try_to_connect_tcp(const struct transport *tp, int *sockptr)
                       family, host, port, numloops + 1, connect_retries);
 #endif
 
-            status = timeout_connect(mysock, res->ai_addr, res->ai_addrlen);
+            /* this is special-cased so that we have an address we can
+             * safely use as an "always fail" test case */
+            if (!strcmp(host, "255.255.255.255")) {
+              libspamc_log(tp->flags, LOG_ERR,
+                          "connect to spamd on %s failed, broadcast addr",
+                          host);
+              status = -1;
+            }
+            else {
+              status = timeout_connect(mysock, res->ai_addr, res->ai_addrlen);
+            }
+
 #else
 	    struct sockaddr_in addrbuf;
 	    const char *ipaddr;
@@ -524,11 +535,21 @@ static int _try_to_connect_tcp(const struct transport *tp, int *sockptr)
 			 "dbg: connect(AF_INET) to spamd at %s (try #%d of %d)",
 			 ipaddr, numloops + 1, connect_retries);
 #endif
-	    
-	    status =
-	      timeout_connect(mysock, (struct sockaddr *) &addrbuf, sizeof(addrbuf));
-#endif
 
+            /* this is special-cased so that we have an address we can
+             * safely use as an "always fail" test case */
+            if (!strcmp(ipaddr, "255.255.255.255")) {
+              libspamc_log(tp->flags, LOG_ERR,
+                          "connect to spamd on %s failed, broadcast addr",
+                          ipaddr);
+              status = -1;
+            }
+            else {
+              status = timeout_connect(mysock, (struct sockaddr *) &addrbuf,
+                        sizeof(addrbuf));
+            }
+
+#endif
 
             if (status != 0) {
                   origerr = spamc_get_errno();

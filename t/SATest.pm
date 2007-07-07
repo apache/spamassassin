@@ -316,11 +316,15 @@ sub scrun {
 sub scrunwithstderr {
   spamcrun (@_, 1);
 }
+sub scrunwantfail {
+  spamcrun (@_, 1, 1);
+}
 
 sub spamcrun {
   my $args = shift;
   my $read_sub = shift;
   my $capture_stderr = shift;
+  my $expect_failure = shift;
 
   if (defined $ENV{'SC_ARGS'}) {
     $args = $ENV{'SC_ARGS'} . " ". $args;
@@ -350,13 +354,19 @@ sub spamcrun {
   }
 
   $sa_exitcode = ($?>>8);
-  if ($sa_exitcode != 0) { stop_spamd(); return undef; }
+  if (!$expect_failure) {
+    if ($sa_exitcode != 0) { stop_spamd(); return undef; }
+  }
 
   %found = ();
   %found_anti = ();
   &checkfile ("d.$testname/out.${Test::ntest}", $read_sub) if (defined $read_sub);
 
-  ($sa_exitcode == 0);
+  if ($expect_failure) {
+    ($sa_exitcode != 0);
+  } else {
+    ($sa_exitcode == 0);
+  }
 }
 
 sub spamcrun_background {
