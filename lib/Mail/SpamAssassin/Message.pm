@@ -717,6 +717,13 @@ sub _parse_multipart {
       if ($body->[$line] =~ /^--\Q$boundary\E\s*$/) {
 	# Make note that we found the opening boundary
 	$self->{mime_boundary_state}->{$boundary} = 1;
+
+	# if the line after the opening boundary isn't a header, flag it.
+	# we need to make sure that there's actually another line though.
+	if ($line+1 < $tmp_line && $body->[$line+1] !~ /^[\041-\071\073-\176]+:/) {
+	  $self->{'missing_mime_headers'} = 1;
+	}
+
         last;
       }
     }
@@ -774,10 +781,18 @@ sub _parse_multipart {
       # rfc 1521 says /^--boundary--$/, some MUAs may just require /^--boundary--/
       # but this causes problems with horizontal lines when the boundary is
       # made up of dashes as well, etc.
-      if (defined $boundary && $line =~ /^--\Q${boundary}\E--\s*$/) {
-	# Make a note that we've seen the end boundary
-	$self->{mime_boundary_state}->{$boundary}--;
-        last;
+      if (defined $boundary) {
+        if ($line =~ /^--\Q${boundary}\E--\s*$/) {
+	  # Make a note that we've seen the end boundary
+	  $self->{mime_boundary_state}->{$boundary}--;
+          last;
+        }
+	elsif ($line_count && $body->[-$line_count] !~ /^[\041-\071\073-\176]+:/) {
+          # if we aren't on an end boundary and there are still lines left, it
+	  # means we hit a new start boundary.  therefore, the next line ought
+	  # to be a mime header.  if it's not, mark it.
+	  $self->{'missing_mime_headers'} = 1;
+	}
       }
 
       # make sure we start with a new clean node
@@ -791,7 +806,7 @@ sub _parse_multipart {
 
     if (!$in_body) {
       # s/\s+$//;   # bug 5127: don't clean this up (yet)
-      if (m/^[\041-\071\073-\176]+:/) {
+      if (/^[\041-\071\073-\176]+:/) {
         if ($header) {
           my ( $key, $value ) = split ( /:\s*/, $header, 2 );
           $part_msg->header( $key, $value );
@@ -799,7 +814,7 @@ sub _parse_multipart {
         $header = $_;
 	next;
       }
-      elsif (/^[ \t]/) {
+      elsif (/^[ \t]/ && $header) {
         # $_ =~ s/^\s*//;   # bug 5127, again
         $header .= $_;
 	next;
@@ -809,9 +824,6 @@ sub _parse_multipart {
           my ( $key, $value ) = split ( /:\s*/, $header, 2 );
           $part_msg->header( $key, $value );
         }
-	else {
-	  $self->{'missing_mime_headers'} = 1;
-	}
         $in_body = 1;
 
 	# if there's a blank line separator, that's good.  if there isn't,
