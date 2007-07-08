@@ -592,7 +592,7 @@ Options:
  --restore <filename>  Restore a database from filename
  -u username, --username=username
                        Override username taken from the runtime
-                       environment
+                       environment, used with SQL
  -C path, --configpath=path, --config-file=path
                        Path to standard configuration dir
  -p prefs, --prefspath=file, --prefs-file=file
@@ -740,7 +740,7 @@ Print help message and exit.
 
 If specified this username will override the username taken from the runtime
 environment.  You can use this option to specify users in a virtual user
-configuration.
+configuration when using SQL as the Bayes backend.
 
 NOTE: This option will not change to the given I<username>, it will only attempt
 to act on behalf of that user.  Because of this you will need to have proper
