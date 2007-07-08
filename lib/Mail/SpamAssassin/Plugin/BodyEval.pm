@@ -240,7 +240,7 @@ sub _check_stock_info {
   my ($type, $rnd) = $part->rendered();
   return unless $type;
 
-  foreach ( $rnd =~ /^\s*([^:\n]{3,30})\s*:\s*\S/mg ) {
+  foreach ( $rnd =~ /^\s*([^:\s][^:\n]{2,29})\s*:\s*\S/mg ) {
     my $str = lc $_;
     $str =~ tr/a-z//cd;
     #$str =~ s/([a-z])0([a-z])/$1o$2/g;
