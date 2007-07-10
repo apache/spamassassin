@@ -269,6 +269,14 @@ describe URI_TRUNCATED Message contained a URI which was truncated
 score URI_TRUNCATED 0.001
 endif
 
+# 2007/07/10
+# 0.269   0.3293   0.0000    1.000   0.76    0.00  TVD_PDF_FINGER01
+rawbody __TVD_BODY		/\S{4}/
+header __TVD_MIME_CT_MM		Content-Type =~ /^multipart\/mixed/i
+meta __TVD_MIME_ATT		__TVD_MIME_ATT_AP || __TVD_MIME_ATT_AOPDF
+meta TVD_PDF_FINGER01		__TVD_MIME_CT_MM && __TVD_MIME_ATT_TP && __TVD_MIME_ATT && !__TVD_BODY
+describe TVD_PDF_FINGER01	Mail matches standard pdf spam fingerprint
+
 ###########################################################################
 # ReplaceTags rules
 
@@ -316,6 +324,7 @@ replace_rules TVD_FUZZY_DEGREE
 
 endif
 
+
 ###########################################################################
 # MIMEHeader Rules
 
@@ -344,6 +353,9 @@ mimeheader __PART_CID_STOCK_LESS    Content-ID =~ /^<00[a-f0-9]{10}\$[a-f0-9]{8}
 meta PART_CID_STOCK_LESS (__ANY_IMAGE_ATTACH&&__PART_CID_STOCK_LESS)
 describe PART_CID_STOCK_LESS Has a spammy image attachment (by Content-ID, more specific)
 
+mimeheader __TVD_MIME_ATT_TP    Content-Type =~ /^text\/plain/i
+mimeheader __TVD_MIME_ATT_AP    Content-Type =~ /^application\/pdf/i
+mimeheader __TVD_MIME_ATT_AOPDF Content-Type =~ /^application\/octet-stream.*\.pdf/i
 endif # Mail::SpamAssassin::Plugin::MIMEHeader
 
 ###########################################################################
