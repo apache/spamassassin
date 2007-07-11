@@ -110,7 +110,7 @@ run("cd $sadir/masses && ".
     " $mcargs_s > $tmpdir/w.s");
 
 run("perl -w $sadir/masses/rule-dev/seek-phrases-in-log ".
-        "$tmpdir/w.h $tmpdir/w.s > $tmpdir/result");
+        "--ham $tmpdir/w.h --spam $tmpdir/w.s > $tmpdir/result");
 
 run("cat $tmpdir/result");
 exit;

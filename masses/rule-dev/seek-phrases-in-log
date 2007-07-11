@@ -25,18 +25,43 @@ seek-phrases-in-log - extract good-looking rules from a text-dump mc log
 
 # ---------------------------------------------------------------------------
 
-my $MAX_TEXT_IN_MESSAGE = 32678;        # bytes of message text examined
+sub usage {
+  die "
+usage: seek-phrases-in-log [--reqhitrate n] [--reqpatlength n]
+   [--rules] [--maxtextread n] --ham hamlog --spam spamlog
 
-my $REQUIRE_PERCENT_SPAM_HITS = 0.5;    # % hitrate reqd to list
+--reqhitrate: percentage hit-rate against spam required (default: 0.5)
+--reqpatlength: required pattern length, in characters (default: 0)
+--maxtextread: bytes of message text examined (default: 32768)
+--rules: generate SpamAssassin rule output (default: 0)
+";
+}
 
 # ---------------------------------------------------------------------------
 
 use warnings;
 use strict;
+use Getopt::Long qw(:config no_ignore_case);
 
-my $fh = shift @ARGV;
-my $fs = shift @ARGV;
-die "usage: phrase-extract-in-log hamlog spamlog" unless ($fs && $fh);
+my %opt = ();
+$opt{reqhitrate} = 0.5;
+$opt{reqpatlength} = 0;
+$opt{maxtextread} = 32768;
+$opt{rules} = 0;
+
+my $fs;
+my $fh;
+my @files = ();
+GetOptions(
+        "rules" => \$opt{rules},
+        "reqhitrate=s" => \$opt{reqhitrate},
+        "reqpatlength=s" => \$opt{reqpatlength},
+        "ham=s" => \$fh,
+        "spam=s" => \$fs,
+        'help' => \&usage
+) or usage();
+
+usage() unless ($fs && $fh);
 
 my %word2sym = ('' => '');
 my %sym2word = ('' => '');
@@ -73,8 +98,8 @@ sub proc_text_spam {
   my ($text) = @_;
 
   # we only need to chop off the end of spam samples
-  if (length($text) > $MAX_TEXT_IN_MESSAGE) {
-    $text = substr $text, 0, $MAX_TEXT_IN_MESSAGE;      # chop!
+  if (length($text) > $opt{maxtextread}) {
+    $text = substr $text, 0, $opt{maxtextread};      # chop!
   }
 
   # we only need to save spam samples in memory, ignore ham samples
@@ -177,7 +202,7 @@ sub summarise {
       $bad++;
     }
     # require N% spam hits
-    elsif (($count*100) / $msg_count_spam < $REQUIRE_PERCENT_SPAM_HITS) {
+    elsif (($count*100) / $msg_count_spam < $opt{reqhitrate}) {
       $bad++;
     }
 
@@ -196,11 +221,12 @@ sub summarise {
   warn "message subsets found: ".(scalar keys %all_patterns_for_set)."\n";
 
   my %done_set = ();
+  my @done_pats = ();
 
   printf ("%6s  %6s  %6s   %s\n", "RATIO", "SPAM%", "HAM%", "DATA");
   $| = 1;
   foreach my $id (sort {
-                      $ngram_count{$a} <=> $ngram_count{$b}
+                      $ngram_count{$b} <=> $ngram_count{$a}
                   } keys %ngram_count)
   {
     my $set = $msg_subset_hit{$id};
@@ -209,11 +235,41 @@ sub summarise {
     # we now have several patterns.  see if we can expand them sideways
     # to make the pattern bigger, and collapse into a smaller number of
     # pats at the same time
-    my $pats = collapse_pats($all_patterns_for_set{$set});
-    # my $pats = collapse_pats_basic($all_patterns_for_set{$set});
+    my @pats = collapse_pats($all_patterns_for_set{$set});
+    # my @pats = collapse_pats_basic($all_patterns_for_set{$set});
 
-    printf "%6.3f  %6.3f  %6.3f  %s\n",
+    # now check to see if any of these pats have been subsumed in an
+    # already-output pattern (one with more hits!)
+    my @pats_new = ();
+    foreach my $pat (@pats) {
+      my $subsumed = 0;
+      foreach my $done (@done_pats) {
+        if ($pat =~ /\Q${done}\E/) { $subsumed=1; last; }
+      }
+      if (!$subsumed) { push @pats_new, $pat; }
+    }
+    @pats = @pats_new;
+
+    # if we have no non-subsumed pats at this stage, skip this set
+    next unless @pats;
+
+    push @done_pats, @pats;
+
+    if ($opt{rules}) {
+      printf "# %6.3f  %6.3f  %6.3f\n",
+        1.0, ($ngram_count{$id}*100) / $msg_count_spam, 0;
+
+      foreach my $pat (@pats) {
+        $pat =~ s/([\\\/\.\(\)\[\]\+\*\@\%\$])/\\$1/gs;
+        my $name = generate_rule_name($pat);
+        print "body SEEK_${name}  /$pat/\n";
+      }
+
+    } else {
+      my $pats = '/'.join ('/, /', map { s/\//\\\//gs; $_; } @pats).'/';
+      printf "%6.3f  %6.3f  %6.3f  %s\n",
         1.0, ($ngram_count{$id}*100) / $msg_count_spam, 0, $pats;
+    }
   }
 }
 
@@ -234,7 +290,7 @@ sub decode_sym2words {
 }
 
 sub collapse_pats_basic {
-  return '/'. join ('/, /', map { s/\//[SLASH]/gs; $_; } @{$_[0]}). '/';
+  return @{$_[0]};
 }
 
 sub collapse_pats {
@@ -256,7 +312,7 @@ sub collapse_pats {
     }
 
     # we don't have all day!
-    my $pat_maxlen = $MAX_TEXT_IN_MESSAGE;
+    my $pat_maxlen = $opt{maxtextread};
     my $s = $hits[0];
 
     # Now, expand the pattern using a BLAST-style algorithm
@@ -312,7 +368,22 @@ sub collapse_pats {
 
   # TODO: http://en.wikipedia.org/wiki/Needleman-Wunsch_algorithm
 
-  return '/'.join ('/, /', map { s/\//\\\//gs; $_; } @ret).'/';
+  if ($opt{reqpatlength}) {
+    @ret = grep { length($_) >= $opt{reqpatlength} } @ret;
+    return unless @ret;
+  }
+
+  return @ret;
+}
+
+sub generate_rule_name {
+  my $str = shift;
+  use Digest::SHA1 qw(sha1_base64);
+  $str = sha1_base64($str);
+  $str =~ s/^(.{6}).*$/$1/gs;
+  $str =~ tr/a-z/A-Z/;
+  $str =~ s/[^A-Z0-9]/_/gs;
+  return $str;
 }
 
 
