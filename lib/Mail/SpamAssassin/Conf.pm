@@ -3391,7 +3391,8 @@ sub regression_tests {
 ###########################################################################
 
 sub finish_parsing {
-  my ($self) = shift; $self->{parser}->finish_parsing();
+  my ($self, $user) = @_;
+  $self->{parser}->finish_parsing($user);
 }
 
 ###########################################################################

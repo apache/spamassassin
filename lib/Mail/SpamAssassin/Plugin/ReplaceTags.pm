@@ -163,6 +163,11 @@ sub finish_parsing_end {
   dbg("replacetags: done replacing tags");
 }
 
+sub user_conf_parsing_end {
+  my ($self, $opts) = @_;
+  return $self->finish_parsing_end($opts);
+}
+
 sub set_config {
   my ($self, $conf) = @_;
   my @cmds = ();

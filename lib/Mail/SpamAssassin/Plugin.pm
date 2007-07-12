@@ -200,8 +200,8 @@ system-wide.
 
 =item $plugin->finish_parsing_end ( { options ... } )
 
-Signals that the configuration parsing has just finished, and SpamAssassin
-is nearly ready to check messages.
+Signals that the system-wide configuration parsing has just finished, and
+SpamAssassin is nearly ready to check messages.
 
 C<options> is a reference to a hash containing these options:
 
@@ -219,6 +219,25 @@ SpamAssassin will not change from release to release.  In particular to
 this plugin hook, if you modify the rules data structures in a
 third-party plugin, all bets are off until such time that an API is
 present for modifying that configuration data.
+
+=item $plugin->user_conf_parsing_end ( { options ... } )
+
+Signals that the per-user configuration parsing has just finished, and
+SpamAssassin is nearly ready to check messages.   If C<allow_user_rules>
+is enabled in the configuration, it is possible that additional rules
+have been added in the user configuration file, since the
+C<finish_parsing_end> plugin hook invocation was called.
+
+C<options> is a reference to a hash containing these options:
+
+=over 4
+
+=item conf
+
+The C<Mail::SpamAssassin::Conf> object on which the configuration
+data should be stored.
+
+=back
 
 =item $plugin->signal_user_changed ( { options ... } )
 

@@ -680,12 +680,20 @@ sub set_template_clear {
 ###########################################################################
 
 sub finish_parsing {
-  my ($self) = @_;
+  my ($self, $isuserconf) = @_;
   my $conf = $self->{conf};
+
+  # note: this function is called once for system-wide configuration
+  # with $isuserconf set to 0, then again for user conf with $isuserconf set to 1.
 
   $self->trace_meta_dependencies();
   $self->fix_priorities();
-  $self->find_dup_rules();          # must be after fix_priorities()
+
+  # don't do this if allow_user_rules is active, since it deletes entries
+  # from {tests}
+  if (!$conf->{allow_user_rules}) {
+    $self->find_dup_rules();          # must be after fix_priorities()
+  }
 
   dbg("conf: finish parsing");
 
@@ -759,13 +767,19 @@ sub finish_parsing {
 
   $self->lint_trusted_networks();
 
-  # named this way just in case we ever want a "finish_parsing_start"
-  $conf->{main}->call_plugins("finish_parsing_end", { conf => $conf });
+  if (!$isuserconf) {
+    # named this way just in case we ever want a "finish_parsing_start"
+    $conf->{main}->call_plugins("finish_parsing_end", { conf => $conf });
+  } else {
+    $conf->{main}->call_plugins("user_conf_parsing_end", { conf => $conf });
+  }
 
-  # free up stuff we no longer need
-  delete $conf->{tests};
-  delete $conf->{priority};
-  delete $conf->{test_types};
+  if (!$conf->{allow_user_rules}) {
+    # free up stuff we no longer need
+    delete $conf->{tests};
+    delete $conf->{priority};
+    delete $conf->{test_types};
+  }
 }
 
 sub trace_meta_dependencies {
