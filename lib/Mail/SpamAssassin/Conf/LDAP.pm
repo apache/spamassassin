@@ -130,7 +130,7 @@ sub load_with_ldap {
   my @attr   = $uri->attributes;
   my $scope  = $uri->scope;
   my $filter = $uri->filter;
-  my $schema = $uri->schema;
+  my $scheme = $uri->scheme;
   my %extn   = $uri->extensions; # unused
 
   $filter =~ s/__USERNAME__/$username/g;
@@ -157,7 +157,7 @@ sub load_with_ldap {
 
   my $ldap = Net::LDAP->new ("$host:$port",
                 onerror => "warn",
-                schema => $schema);
+                scheme => $scheme);
 
   if (!defined($ldapuser) && !defined($ldappass)) {
     $ldap->bind;
