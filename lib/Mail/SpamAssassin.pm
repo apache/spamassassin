@@ -1101,10 +1101,8 @@ sub read_scoreonly_config {
 
   $self->{conf}->{main} = $self;
   $self->{conf}->parse_scores_only ($text);
-  if ($self->{conf}->{allow_user_rules}) {
-      dbg("config: finishing parsing!");
-      $self->{conf}->finish_parsing();
-  }
+  $self->{conf}->finish_parsing(1);
+
   delete $self->{conf}->{main};	# to allow future GC'ing
 }
 
@@ -1472,7 +1470,7 @@ sub init {
     dbg('config_text: '.$self->{config_text});
   }
   $self->{conf}->parse_rules ($self->{config_text});
-  $self->{conf}->finish_parsing ();
+  $self->{conf}->finish_parsing(0);
   delete $self->{conf}->{main};	# to allow future GC'ing
 
   undef $self->{config_text};   # ensure it's actually freed
