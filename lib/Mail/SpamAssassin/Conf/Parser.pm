@@ -111,6 +111,13 @@ user.)
 Set to 1 if this value occurs frequently in the config. this means it's looked
 up first for speed.
 
+=item accessor
+
+Set to a string containing the perl code of a method to get the configuration
+value. The string C<${SETTING}> will be replaced with the name of the setting.
+Optional; if C<type> is defined, an accessor suitable for that type of
+data will be provided automatically.
+
 =back
 
 =head1 METHODS
@@ -156,6 +163,63 @@ sub new {
 
 ###########################################################################
 
+# Implementations for default accessors.
+# access a scalar configuration setting. e.g.:
+#   my $val = $conf->cf_foo_bar();
+my $cf_accessor_scalar_value = '
+
+  sub cf_${SETTING} {
+    if (defined $_[0]->{tiers}->[1]->{${SETTING}}) {
+      return $_[0]->{tiers}->[1]->{${SETTING}};
+    } else {
+      return $_[0]->{tiers}->[0]->{${SETTING}};
+    }
+  }
+
+';
+
+# access a hash key=>value configuration setting. e.g.:
+#   my $val = $conf->cf_foo_bar("baz");
+my $cf_accessor_hash_key_value = '
+
+  sub cf_${SETTING} {
+    if (defined $_[0]->{tiers}->[1]->{${SETTING}}->{$_[1]}) {
+      return $_[0]->{tiers}->[1]->{${SETTING}}->{$_[1]};
+    } else {
+      return $_[0]->{tiers}->[0]->{${SETTING}}->{$_[1]};
+    }
+  }
+
+';
+
+# access a whitelist/blacklist address-list hash in its entirety. e.g.:
+#   my $hashref = $conf->cf_foo_bar();
+#   foreach my $addr (keys %{$hashref}) {
+#     do something with $hashref->{$addr}
+#   }
+# TODO: it would be more efficient to fix calling code to iterate
+# through the tiers instead of using this API.
+my $cf_accessor_addrlist_value = '
+
+  sub cf_${SETTING} {
+    if (defined $_[0]->{tiers}->[1]->{${SETTING}}) {
+      # return the user configuration whitelists and system-wide stuff
+      return \(
+          %{$_[0]->{tiers}->[1]->{${SETTING}}},
+          %{$_[0]->{tiers}->[0]->{${SETTING}}}
+        );
+    } else {
+      # just the system-wide stuff
+      return \(
+          %{$_[0]->{tiers}->[0]->{${SETTING}}}
+        );
+    }
+  }
+
+';
+
+###########################################################################
+
 sub register_commands {
   my($self, $arrref) = @_;
   my $conf = $self->{conf};
@@ -174,6 +238,8 @@ sub set_defaults_from_command_list {
     if (exists($cmd->{default})) {
       $conf->{$cmd->{setting}} = $cmd->{default};
     }
+
+    $self->setup_accessor($cmd);
   }
 }
 
@@ -556,6 +622,55 @@ sub set_default_scores {
       for my $index (0..3) {
         $conf->{scoreset}->[$index]->{$k} = $set_score;
       }
+    }
+  }
+}
+
+###########################################################################
+
+sub setup_accessor {
+  my ($self, $cmd) = @_;
+
+  # find a default accessor method, if possible
+  if (!defined $cmd->{accessor} && $cmd->{type}) {
+    my $type = $cmd->{type};
+    if ($type == $Mail::SpamAssassin::Conf::CONF_TYPE_STRING) {
+      $cmd->{accessor} = $cf_accessor_scalar_value;
+    }
+    elsif ($type == $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL) {
+      $cmd->{accessor} = $cf_accessor_scalar_value;
+    }
+    elsif ($type == $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC) {
+      $cmd->{accessor} = $cf_accessor_scalar_value;
+    }
+    elsif ($type == $Mail::SpamAssassin::Conf::CONF_TYPE_TEMPLATE) {
+      $cmd->{accessor} = $cf_accessor_scalar_value;
+    }
+    elsif ($type == $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE) {
+      $cmd->{accessor} = $cf_accessor_hash_key_value;
+    }
+    elsif ($type == $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST) {
+      $cmd->{accessor} = $cf_accessor_addrlist_value;
+    }
+  }
+  
+  # now eval the accessor
+  # note: (accessor == "") means do not generate any accessor method
+  my $methodname = "Mail::SpamAssassin::Conf::cf_".$cmd->{setting};
+  if ($cmd->{accessor} && !defined &{$methodname})
+  {
+    my $evalstr = $cmd->{accessor};
+    $evalstr =~ s/\$\{SETTING\}/$cmd->{setting}/gs;
+    eval "package Mail::SpamAssassin::Conf; ".$evalstr;
+
+    if ($@) {
+      die "config: failed to parse accessor: $@\n";
+      return;
+    }
+
+    if (!defined &{$methodname}) {
+      die "config: accessor $methodname not created\n";
+      return;
     }
   }
 }
