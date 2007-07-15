@@ -1,0 +1,60 @@
+#!/bin/bash
+# Run this script manually from the zones machine ala:
+#
+# sudo -u updatesd ./update-rules 3.2
+#
+# You will have wanted to already validate that the files in the branch have
+# no lint problems, etc.  This script simply takes the branch data and creates
+# the update for you.
+#
+
+shopt -s nullglob
+
+if [ "$USER" != "updatesd" ]; then
+  echo "Need to be updatesd!" >&2
+  exit 2
+fi
+
+# sudo doesn't necessarily do this for us ...
+HOME=`awk -F: '/^updatesd:/ { print $6 }' /etc/passwd`
+export HOME
+
+VERS=$1
+if [ -z "$VERS" -o \( "$VERS" != "3.1" -a "$VERS" != "3.2" \) ]; then
+  echo "Usage: $0 <VERSION (3.1, 3.2)>" >&2
+  exit 1
+fi
+
+DIR=/tmp/upd-$$
+rm -rf $DIR || exit 1
+
+SOURCE=svn.apache.org/repos/asf/spamassassin/rules/branches/$VERS
+
+tagstamp=`date "+%Y%m%d%H%M%S"`
+DEST=svn.apache.org/repos/asf/spamassassin/tags/sa-update_${VERS}_${tagstamp}
+svn cp --username jm --non-interactive -m "tagging latest update release for $VERS" https://$SOURCE https://$DEST || exit 1
+
+svn -q co http://$DEST $DIR || exit 1
+#V=`svn info $DIR | awk '/^Last Changed Rev:/ { print $4 }'`
+V=`svnversion $DIR`
+cd $DIR
+tar cf /tmp/$V.tar *.pre *.cf || exit 1
+cd /tmp
+rm -rf $DIR
+gzip -9 $V.tar || exit 1
+cd /var/www/buildbot.spamassassin.org/updatestage
+rm -f $V.tar.gz*
+mv /tmp/$V.tar.gz .
+/local/gnupg-1.4.2/bin/gpg --batch --homedir /home/updatesd/key -bas $V.tar.gz
+/local/perl586/bin/perl /home/updatesd/svn/spamassassin/build/sha1sum.pl $V.tar.gz > $V.tar.gz.sha1
+chmod 0444 $V.tar.* 
+
+if [ $VERS = 3.1 ]; then
+  echo '0.1.3 A 127.0.0.1' > /var/named/updates.spamassassin.org.d/3.1.0
+else
+  cat /dev/null > /var/named/updates.spamassassin.org.d/${VERS}.0
+fi
+REVVERS=`echo $VERS | awk -F. '{print $2 "." $1}'`
+echo '*.'$REVVERS' TXT "'$V'"' >> /var/named/updates.spamassassin.org.d/${VERS}.0
+
+/home/updatesd/svn/spamassassin/build/mkupdates/tick_zone_serial
