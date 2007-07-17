@@ -59,7 +59,7 @@ header __LAST_UNTRUSTED_RELAY_NO_AUTH X-Spam-Relays-Untrusted =~ /^[^\]]+ auth= 
 # 12-218-225-223.client.mchsi.com [12.218.225.223]
 # pptp-81-30-186-139.ufanet.ru [81.30.186.139]
 # (require an alpha first, as legit HELO'ing-as-IP-address is hit otherwise)
-header __RDNS_DYNAMIC_IPADDR X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns=[a-z]\S*\d+[^\d\s]\d+[^\d\s]\d+[^\d\s]\d+[^\d\s][^\.]*\.\S+\.\S+/i
+header __RDNS_DYNAMIC_IPADDR X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns=\S*\d+[^\d\s]\d+[^\d\s]\d+[^\d\s]\d+\S*\.\S+\.\S+/i
 describe __RDNS_DYNAMIC_IPADDR Relay HELO'd using suspicious hostname (IP addr 1)
 
 # dhcp024-210-034-053.columbus.rr.com [24.210.34.53]
