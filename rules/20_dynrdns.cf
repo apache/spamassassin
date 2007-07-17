@@ -113,9 +113,6 @@ describe __RDNS_DYNAMIC_YAHOOBB Relay HELO'd using suspicious hostname (YahooBB)
 header __RDNS_DYNAMIC_OOL X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns=\S+\.dyn\.optonline\.net/
 describe __RDNS_DYNAMIC_OOL Relay HELO'd using suspicious hostname (OptOnline)
 
-header __RDNS_DYNAMIC_IPADDR2 X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns=\d+[^\d\s]\d+[^\d\s]\d+[^\d\s]\d+[^\d\s][^\.]*\.\S+\.\S+/i
-describe __RDNS_DYNAMIC_IPADDR2 Relay HELO'd using suspicious hostname (IP addr 2)
-
 # wiley-170-10231.roadrunner.nf.net [205.251.210.249]
 header __RDNS_DYNAMIC_RR2   X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns=[a-z]+-\d{1,3}-\d{1,5}\.roadrunner/i
 describe __RDNS_DYNAMIC_RR2 Relay HELO'd using suspicious hostname (RR 2)
@@ -197,7 +194,7 @@ header __RDNS_DYNAMIC_ASAHI   X-Spam-Relays-Untrusted =~ /^[^\]]+ [a-z][0-9]+\.p
 
 ###########################################################################
 
-meta RDNS_DYNAMIC   (__LAST_UNTRUSTED_RELAY_NO_AUTH && (__RDNS_DYNAMIC_IPADDR || __RDNS_DYNAMIC_DHCP || __RDNS_DYNAMIC_HCC || __RDNS_DYNAMIC_ATTBI || __RDNS_DYNAMIC_ROGERS || __RDNS_DYNAMIC_ADELPHIA || __RDNS_DYNAMIC_DIALIN || __RDNS_DYNAMIC_HEXIP || __RDNS_DYNAMIC_SPLIT_IP || __RDNS_DYNAMIC_YAHOOBB || __RDNS_DYNAMIC_OOL || __RDNS_DYNAMIC_IPADDR2 || __RDNS_DYNAMIC_RR2   || __RDNS_DYNAMIC_COMCAST || __RDNS_DYNAMIC_TELIA || __RDNS_DYNAMIC_VTR || __RDNS_DYNAMIC_CHELLO_NO  || __RDNS_DYNAMIC_CHELLO_NL  || __RDNS_DYNAMIC_VELOX  || __RDNS_DYNAMIC_NTL  || __RDNS_DYNAMIC_HOME_NL  || __RDNS_DYNAMIC_TDS || __RDNS_DYNAMIC_VIRTUA || __RDNS_DYNAMIC_SPACELAN || __RDNS_INDICATOR_DYN || __RDNS_INDICATOR_RES || __RDNS_INDICATOR_TYPE2 || __RDNS_DYNAMIC_TTNET || __RDNS_DYNAMIC_ASAHI))
+meta RDNS_DYNAMIC   (__LAST_UNTRUSTED_RELAY_NO_AUTH && (__RDNS_DYNAMIC_IPADDR || __RDNS_DYNAMIC_DHCP || __RDNS_DYNAMIC_HCC || __RDNS_DYNAMIC_ATTBI || __RDNS_DYNAMIC_ROGERS || __RDNS_DYNAMIC_ADELPHIA || __RDNS_DYNAMIC_DIALIN || __RDNS_DYNAMIC_HEXIP || __RDNS_DYNAMIC_SPLIT_IP || __RDNS_DYNAMIC_YAHOOBB || __RDNS_DYNAMIC_OOL || __RDNS_DYNAMIC_RR2   || __RDNS_DYNAMIC_COMCAST || __RDNS_DYNAMIC_TELIA || __RDNS_DYNAMIC_VTR || __RDNS_DYNAMIC_CHELLO_NO  || __RDNS_DYNAMIC_CHELLO_NL  || __RDNS_DYNAMIC_VELOX  || __RDNS_DYNAMIC_NTL  || __RDNS_DYNAMIC_HOME_NL  || __RDNS_DYNAMIC_TDS || __RDNS_DYNAMIC_VIRTUA || __RDNS_DYNAMIC_SPACELAN || __RDNS_INDICATOR_DYN || __RDNS_INDICATOR_RES || __RDNS_INDICATOR_TYPE2 || __RDNS_DYNAMIC_TTNET || __RDNS_DYNAMIC_ASAHI))
 describe RDNS_DYNAMIC Delivered to trusted network by host with dynamic-looking rDNS
 
 header RDNS_NONE    X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns= /
