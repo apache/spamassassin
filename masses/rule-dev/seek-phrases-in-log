@@ -108,6 +108,8 @@ sub proc_text_spam {
   my $cp = pack "l", $msgcount;
   $msgcount++;
 
+  (($msgcount % 1000) == 999) and discard_hapaxes();
+
   my $w1 = '';
   my $w2 = '';
   my $w3 = '';
@@ -142,6 +144,19 @@ sub proc_text_spam {
   }
 }
 
+sub discard_hapaxes {
+  my $killed = 0;
+  foreach my $tok (keys %ngram_count) {
+    if ($ngram_count{$tok} == 1) {
+      delete $ngram_count{$tok};
+      delete $msg_subset_hit{$tok};
+      $killed++;
+    }
+  }
+  warn "shrunk dbs: $killed hapaxes killed, kept ".
+                    (scalar keys %ngram_count)." entries\n";
+}
+
 sub proc_text_ham {
   my ($text) = @_;
 
@@ -159,7 +174,7 @@ sub proc_text_ham {
       # since we're deleting, there's no need to add new words
       # to the dictionary; just use the final $sym_acc to mean
       # "unknown ham word", and don't increment it
-      $word2sym{$w} = $w1 = $sym_acc;
+      $w1 = $sym_acc;
     }
 
     $tokens{"$w3.$w2.$w1"} = $tokens{"$w3.$w2"} = 1;
@@ -236,7 +251,7 @@ sub summarise {
     # to make the pattern bigger, and collapse into a smaller number of
     # pats at the same time
     my @pats = collapse_pats($all_patterns_for_set{$set});
-    # my @pats = collapse_pats_basic($all_patterns_for_set{$set});
+    # my @pats = @{$all_patterns_for_set{$set}};
 
     # now check to see if any of these pats have been subsumed in an
     # already-output pattern (one with more hits!)
@@ -260,7 +275,7 @@ sub summarise {
         1.0, ($ngram_count{$id}*100) / $msg_count_spam, 0;
 
       foreach my $pat (@pats) {
-        $pat =~ s/([\\\/\.\(\)\[\]\+\*\@\%\$])/\\$1/gs;
+        $pat =~ s/([!-+\`\^\~\\\/\|\.\(\)\[\]\@])/\\$1/gs;
         my $name = generate_rule_name($pat);
         print "body SEEK_${name}  /$pat/\n";
       }
@@ -287,10 +302,6 @@ sub decode_sym2words {
   }
   $r =~ s/^\s+//;
   return $r;
-}
-
-sub collapse_pats_basic {
-  return @{$_[0]};
 }
 
 sub collapse_pats {
