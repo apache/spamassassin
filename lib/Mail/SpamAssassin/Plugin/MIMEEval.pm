@@ -68,7 +68,7 @@ sub check_for_faraway_charset {
 
   my $type = $pms->get('Content-Type');
 
-  my @locales = Mail::SpamAssassin::Util::get_my_locales($self->{main}->{conf}->{ok_locales});
+  my @locales = Mail::SpamAssassin::Util::get_my_locales($self->{main}->{conf}->cf_ok_locales);
 
   return 0 if grep { $_ eq "all" } @locales;
 
@@ -196,7 +196,7 @@ sub _check_mime_header {
     }
 
     if (! $pms->{mime_faraway_charset}) {
-      my @l = Mail::SpamAssassin::Util::get_my_locales($self->{main}->{conf}->{ok_locales});
+      my @l = Mail::SpamAssassin::Util::get_my_locales($self->{main}->{conf}->cf_ok_locales);
 
       if (!(grep { $_ eq "all" } @l) &&
 	  !Mail::SpamAssassin::Locales::is_charset_ok_for_locales($charset, @l))

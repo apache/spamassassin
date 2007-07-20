@@ -82,6 +82,8 @@ use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::Conf::Parser;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Util::TieOneStringHash;
+use Mail::SpamAssassin::Util::TwoTierHash;
+use Mail::SpamAssassin::Util::TwoTierArray;
 use File::Spec;
 
 use strict;
@@ -242,7 +244,7 @@ it from running.
 	}
       }
 
-      if ($relative && !exists $self->{scoreset}->[0]->{$rule}) {
+      if ($relative && !defined($self->get_score_for_rule($rule))) {
         info("config: score: relative score without previous setting in " .
 	  "configuration");
         return $INVALID_VALUE;
@@ -256,11 +258,16 @@ it from running.
 
         # Set the actual scoreset values appropriately
         for my $index (0..3) {
-          my $score = $relative ?
-            $self->{scoreset}->[$index]->{$rule} + $scores[$index] :
-            $scores[$index];
-
-          $self->{scoreset}->[$index]->{$rule} = $score + 0.0;
+          my $score;
+          if ($relative) {
+            my $base = (defined $self->{tiers}->[1]->{scoreset}->[$index]->{$rule})
+                          ? $self->{tiers}->[1]->{scoreset}->[$index]->{$rule}
+                          : $self->{tiers}->[0]->{scoreset}->[$index]->{$rule};
+            $score = $base + $scores[$index] + 0.0;
+          } else {
+            $score = $scores[$index] + 0.0;
+          }
+          $self->{activetier}->{scoreset}->[$index]->{$rule} = $score;
         }
       }
     }
@@ -661,14 +668,16 @@ header.
       # We only deal with From, Subject, and To ...
       elsif ($hdr =~ /^(?:From|Subject|To)$/) {
 	unless (defined $string && $string =~ /\S/) {
-	  delete $self->{rewrite_header}->{$hdr};
+          # undef => "deleted". we cannot really delete since that
+          # will kill lower tiers
+          $self->{activetier}->{rewrite_header}->{$hdr} = undef;
 	  return;
 	}
 
 	if ($hdr ne 'Subject') {
           $string =~ tr/()/[]/;
 	}
-        $self->{rewrite_header}->{$hdr} = $string;
+        $self->{activetier}->{rewrite_header}->{$hdr} = $string;
         return;
       }
       else {
@@ -676,7 +685,8 @@ header.
 	info("config: rewrite_header: ignoring $hdr, not From, Subject, or To");
 	return $INVALID_VALUE;
       }
-    }
+    },
+    type => $CONF_TYPE_HASH_KEY_VALUE
   });
 
 =item add_header { spam | ham | all } header_name string
@@ -735,10 +745,10 @@ not be changed or removed):
       $hline = join("\\", @line);
       chop($hline);  # remove dummy newline again
       if (($type eq "ham") || ($type eq "all")) {
-        $self->{headers_ham}->{$name} = $hline;
+        $self->{activetier}->{headers_ham}->{$name} = $hline;
       }
       if (($type eq "spam") || ($type eq "all")) {
-        $self->{headers_spam}->{$name} = $hline;
+        $self->{activetier}->{headers_spam}->{$name} = $hline;
       }
     }
   });
@@ -770,10 +780,10 @@ determine that SpamAssassin is running.
       return if ( $name eq "Checker-Version" );
 
       if (($type eq "ham") || ($type eq "all")) {
-        delete $self->{headers_ham}->{$name};
+        $self->{activetier}->{headers_ham}->{$name} = undef;
       }
       if (($type eq "spam") || ($type eq "all")) {
-        delete $self->{headers_spam}->{$name};
+        $self->{activetier}->{headers_spam}->{$name} = undef;
       }
     }
   });
@@ -795,11 +805,13 @@ determine that SpamAssassin is running.
     setting => 'clear_headers',
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      for my $name (keys %{ $self->{headers_ham} }) {
-        delete $self->{headers_ham}->{$name} if $name ne "Checker-Version";
-      }
-      for my $name (keys %{ $self->{headers_spam} }) {
-        delete $self->{headers_spam}->{$name} if $name ne "Checker-Version";
+
+      foreach my $type (qw(headers_ham headers_spam)) {
+        for my $name ($self->get_all_tier_keys($type)) {
+          next if ($name eq "Checker-Version");
+          # override/replace all others with undef
+          $self->{activetier}->{$type}->{$name} = undef;
+        }
       }
     }
   });
@@ -842,11 +854,12 @@ the original mail into tagged messages.
         return $INVALID_VALUE;
       }
 
-      $self->{report_safe} = $value+0;
-      if (! $self->{report_safe}) {
-        $self->{headers_spam}->{"Report"} = "_REPORT_";
+      $self->{activetier}->{report_safe} = $value+0;
+      if (! $self->{activetier}->{report_safe}) {
+        $self->{activetier}->{headers_spam}->{"Report"} = "_REPORT_";
       }
-    }
+    },
+    type => $CONF_TYPE_BOOL
   });
 
 =back
@@ -942,8 +955,9 @@ Unicode.  Requires the Encode::Detect module, HTML::Parser version
 	    return $INVALID_VALUE;
 	}
 
-	$self->{normalize_charset} = 1;
-    }
+	$self->{activetier}->{normalize_charset} = 1;
+    },
+    type => $CONF_TYPE_BOOL
   });
 
 
@@ -1023,9 +1037,9 @@ Otherwise this host, and all further hosts, are consider untrusted.
 	return $MISSING_REQUIRED_VALUE;
       }
       foreach my $net (split (/\s+/, $value)) {
-        $self->{trusted_networks}->add_cidr ($net);
+        $self->{activetier}->{trusted_networks}->add_cidr ($net);
       }
-      $self->{trusted_networks_configured} = 1;
+      $self->{activetier}->{trusted_networks_configured} = 1;
     }
   });
 
@@ -1039,8 +1053,8 @@ Empty the list of trusted networks.
     setting => 'clear_trusted_networks',
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      $self->{trusted_networks} = $self->new_netset();
-      $self->{trusted_networks_configured} = 0;
+      $self->{activetier}->{trusted_networks} = $self->new_netset();
+      $self->{activetier}->{trusted_networks_configured} = 0;
     }
   });
 
@@ -1080,9 +1094,9 @@ Note: 127/8 is always included in internal_networks, regardless of your config.
 	return $MISSING_REQUIRED_VALUE;
       }
       foreach my $net (split (/\s+/, $value)) {
-        $self->{internal_networks}->add_cidr ($net);
+        $self->{activetier}->{internal_networks}->add_cidr ($net);
       }
-      $self->{internal_networks_configured} = 1;
+      $self->{activetier}->{internal_networks_configured} = 1;
     }
   });
 
@@ -1096,8 +1110,8 @@ Empty the list of internal networks.
     setting => 'clear_internal_networks',
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      $self->{internal_networks} = $self->new_netset();
-      $self->{internal_networks_configured} = 0;
+      $self->{activetier}->{internal_networks} = $self->new_netset();
+      $self->{activetier}->{internal_networks_configured} = 0;
     }
   });
 
@@ -1138,9 +1152,9 @@ external relays being trusted.
 	return $MISSING_REQUIRED_VALUE;
       }
       foreach my $net (split (/\s+/, $value)) {
-        $self->{msa_networks}->add_cidr ($net);
+        $self->{activetier}->{msa_networks}->add_cidr ($net);
       }
-      $self->{msa_networks_configured} = 1;
+      $self->{activetier}->{msa_networks_configured} = 1;
     }
   });
 
@@ -1154,8 +1168,8 @@ Empty the list of msa networks.
     setting => 'clear_msa_networks',
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      $self->{msa_networks} = Mail::SpamAssassin::NetSet->new(); # not new_netset
-      $self->{msa_networks_configured} = 0;
+      $self->{activetier}->{msa_networks} = Mail::SpamAssassin::NetSet->new(); # not new_netset
+      $self->{activetier}->{msa_networks_configured} = 0;
     }
   });
 
@@ -1212,18 +1226,19 @@ minimum limit on file descriptors be raised to at least 256 for safety.
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value =~ /^test(?::\s+.+)?$/) {
-        $self->{dns_available} = $value;
+        $self->{activetier}->{dns_available} = $value;
       }
       elsif ($value =~ /^(?:yes|1)$/) {
-        $self->{dns_available} = 'yes';
+        $self->{activetier}->{dns_available} = 'yes';
       }
       elsif ($value =~ /^(?:no|0)$/) {
-        $self->{dns_available} = 'no';
+        $self->{activetier}->{dns_available} = 'no';
       }
       else {
         return $INVALID_VALUE;
       }
-    }
+    },
+    type => $CONF_TYPE_STRING
   });
 
 =item dns_test_interval n   (default: 600 seconds)
@@ -1239,8 +1254,9 @@ time in number of seconds will tell SpamAssassin how often to retest for working
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value !~ /^\d+$/) { return $INVALID_VALUE; }
-      $self->{dns_test_interval} = $value;
-    }
+      $self->{activetier}->{dns_test_interval} = $value;
+    },
+    type => $CONF_TYPE_NUMERIC
   });
 
 =back
@@ -1316,7 +1332,7 @@ setting.  Example:
       if ($value eq '') {
         return $MISSING_REQUIRED_VALUE;
       }
-      push (@{$self->{bayes_ignore_headers}}, split(/\s+/, $value));
+      push (@{$self->{activetier}->{bayes_ignore_headers}}, split(/\s+/, $value));
     }
   });
 
@@ -1533,10 +1549,11 @@ win32 depending on the platform in use.
         return $INVALID_VALUE;
       }
       
-      $self->{lock_method} = $value;
+      $self->{activetier}->{lock_method} = $value;
       # recreate the locker
       $self->{main}->create_locker();
-    }
+    },
+    type => $CONF_TYPE_STRING
   });
 
 =item fold_headers ( 0 | 1 )        (default: 1)
@@ -1574,7 +1591,7 @@ separated by spaces, or you can just use multiple lines.
       if ($value eq '') {
         return $MISSING_REQUIRED_VALUE;
       }
-      push(@{$self->{report_safe_copy_headers}}, split(/\s+/, $value));
+      push(@{$self->{activetier}->{report_safe_copy_headers}}, split(/\s+/, $value));
     }
   });
 
@@ -1799,7 +1816,8 @@ existing system rule from a C<user_prefs> file with C<spamd>.
 
       $self->{allow_user_rules} = $value+0;
       dbg("config: " . ($self->{allow_user_rules} ? "allowing":"not allowing") . " user rules!");
-    }
+    },
+    type => $CONF_TYPE_BOOL
   });
 
 =item redirector_pattern	/pattern/modifiers
@@ -1834,7 +1852,7 @@ Example: http://chkpt.zdnet.com/chkpt/whatever/spammer.domain/yo/dude
       $pattern = "(?".$3.")".$pattern if $3;
       $pattern = qr/$pattern/;
 
-      push @{$self->{main}->{conf}->{redirector_patterns}}, $pattern;
+      push @{$self->{activetier}->{redirector_patterns}}, $pattern;
       # dbg("config: adding redirector regex: " . $value);
     }
   });
@@ -2070,7 +2088,7 @@ name.
       }
       elsif ($value =~ /^(\S+)\s+exists:(.*)$/) {
         $self->{parser}->add_test ($1, "$2 =~ /./", $TYPE_HEAD_TESTS);
-        $self->{descriptions}->{$1} = "Found a $2 header";
+        $self->{activetier}->{descriptions}->{$1} = "Found a $2 header";
       }
       else {
 	my @values = split(/\s+/, $value, 2);
@@ -3081,78 +3099,26 @@ sub new {
   my $self = {
     main => shift,
     registered_commands => [],
+    plugins_loaded => { },
+    eval_plugins => { },
+    errors => 0,
   }; bless ($self, $class);
 
   $self->{parser} = Mail::SpamAssassin::Conf::Parser->new($self);
+
+  # create a new config tier for the basic, system-wide config
+  $self->{tiers}->[0] = $self->new_tier();
+  $self->{activetier} = $self->{tiers}->[0];
+  $self->create_lookup_doublehashes();
+
+  # and populate some defaults:
   $self->{parser}->register_commands($self->set_default_commands());
 
-  $self->{errors} = 0;
-  $self->{plugins_loaded} = { };
-
-  $self->{tests} = { };
-  $self->{test_types} = { };
-  $self->{scoreset} = [ {}, {}, {}, {} ];
-  $self->{scoreset_current} = 0;
-  $self->set_score_set (0);
-  $self->{tflags} = { };
-  $self->{source_file} = { };
-
-  # keep descriptions in a slow but space-efficient single-string
-  # data structure
-  tie %{$self->{descriptions}}, 'Mail::SpamAssassin::Util::TieOneStringHash'
-    or warn "tie failed";
-
-  # after parsing, tests are refiled into these hashes for each test type.
-  # this allows e.g. a full-text test to be rewritten as a body test in
-  # the user's user_prefs file.
-  $self->{body_tests} = { };
-  $self->{uri_tests}  = { };
-  $self->{uri_evals}  = { }; # not used/implemented yet
-  $self->{head_tests} = { };
-  $self->{head_evals} = { };
-  $self->{body_evals} = { };
-  $self->{full_tests} = { };
-  $self->{full_evals} = { };
-  $self->{rawbody_tests} = { };
-  $self->{rawbody_evals} = { };
-  $self->{meta_tests} = { };
-  $self->{eval_plugins} = { };
-  $self->{duplicate_rules} = { };
-
-  # testing stuff
-  $self->{regression_tests} = { };
-
-  $self->{rewrite_header} = { };
-  $self->{user_rules_to_compile} = { };
-  $self->{user_defined_rules} = { };
-  $self->{headers_spam} = { };
-  $self->{headers_ham} = { };
-
-  $self->{bayes_ignore_headers} = [ ];
-  $self->{bayes_ignore_from} = { };
-  $self->{bayes_ignore_to} = { };
-
-  $self->{whitelist_auth} = { };
-  $self->{whitelist_from} = { };
-  $self->{whitelist_allows_relays} = { };
-  $self->{blacklist_from} = { };
-
-  $self->{blacklist_to} = { };
-  $self->{whitelist_to} = { };
-  $self->{more_spam_to} = { };
-  $self->{all_spam_to} = { };
-
-  $self->{trusted_networks} = $self->new_netset();
-  $self->{internal_networks} = $self->new_netset();
-  $self->{msa_networks} = Mail::SpamAssassin::NetSet->new(); # not new_netset
-  $self->{trusted_networks_configured} = 0;
-  $self->{internal_networks_configured} = 0;
-
   # Make sure we add in X-Spam-Checker-Version
-  $self->{headers_spam}->{"Checker-Version"} =
+  $self->{tiers}->[0]->{headers_spam}->{"Checker-Version"} =
                 "SpamAssassin _VERSION_ (_SUBVERSION_) on _HOSTNAME_";
-  $self->{headers_ham}->{"Checker-Version"} =
-                $self->{headers_spam}->{"Checker-Version"};
+  $self->{tiers}->[0]->{headers_ham}->{"Checker-Version"} =
+                $self->{tiers}->[0]->{headers_spam}->{"Checker-Version"};
 
   # these should potentially be settable by end-users
   # perhaps via plugin?
@@ -3163,15 +3129,154 @@ sub new {
 
   $self->{encapsulated_content_description} = 'original message before SpamAssassin';
 
+  # testing stuff
+  $self->{regression_tests} = { };
+
   $self;
+}
+
+sub new_tier {
+  my ($self) = @_;
+
+  my $tier = { };
+
+  # the guideline is, if a config setting is something that can be set
+  # in the user config file, and should be discarded for scanning as
+  # another user -- it should be stored in a tier rather than on $self.
+
+  $tier->{tests} = { };
+  $tier->{test_types} = { };
+  $tier->{scoreset} = [ {}, {}, {}, {} ];
+  $tier->{tflags} = { };
+  $tier->{source_file} = { };
+  $tier->{meta_dependencies} = { };
+
+  # keep descriptions in a slow but space-efficient single-string
+  # data structure
+  tie %{$tier->{descriptions}}, 'Mail::SpamAssassin::Util::TieOneStringHash'
+    or warn "tie failed";
+
+  # after parsing, tests are refiled into these hashes for each test type.
+  # this allows e.g. a full-text test to be rewritten as a body test in
+  # the user's user_prefs file.
+  $tier->{body_tests} = { };
+  $tier->{uri_tests}  = { };
+  $tier->{uri_evals}  = { }; # not used/implemented yet
+  $tier->{head_tests} = { };
+  $tier->{head_evals} = { };
+  $tier->{body_evals} = { };
+  $tier->{full_tests} = { };
+  $tier->{full_evals} = { };
+  $tier->{rawbody_tests} = { };
+  $tier->{rawbody_evals} = { };
+  $tier->{meta_tests} = { };
+  $tier->{duplicate_rules} = { };
+
+  $tier->{rewrite_header} = { };
+  $tier->{user_rules_to_compile} = { };
+  $tier->{user_defined_rules} = { };
+  $tier->{headers_spam} = { };
+  $tier->{headers_ham} = { };
+  $tier->{priorities} = { };
+
+  $tier->{bayes_ignore_headers} = [ ];
+  $tier->{bayes_ignore_from} = { };
+  $tier->{bayes_ignore_to} = { };
+
+  $tier->{whitelist_auth} = { };
+  $tier->{whitelist_from} = { };
+  $tier->{whitelist_allows_relays} = { };
+  $tier->{blacklist_from} = { };
+
+  $tier->{blacklist_to} = { };
+  $tier->{whitelist_to} = { };
+  $tier->{more_spam_to} = { };
+  $tier->{all_spam_to} = { };
+
+  $tier->{trusted_networks} = $self->new_netset();
+  $tier->{internal_networks} = $self->new_netset();
+  $tier->{msa_networks} = Mail::SpamAssassin::NetSet->new(); # not new_netset
+  $tier->{trusted_networks_configured} = 0;
+  $tier->{internal_networks_configured} = 0;
+
+  $tier->{scoreset_current} = 0;
+  $self->set_score_set (0);
+
+  return $tier;
+}
+
+# create a new config tier for user configuration
+sub push_tier {
+  my ($self) = @_;
+  $self->{tiers}->[1] = $self->new_tier();
+  $self->{activetier} = $self->{tiers}->[1];
+  $self->create_lookup_doublehashes();
+}
+
+# and delete it once the user is no longer active
+sub pop_tier {
+  my ($self) = @_;
+  delete $self->{tiers}->[1];
+  $self->{activetier} = $self->{tiers}->[0];
+}
+
+# create "double-hash" lookup structures that point into the 2 tiers of
+# config data, providing a transparent UI so that calling code doesn't have
+# to know the gritty details in many cases
+sub create_lookup_doublehashes {
+  my ($self) = @_;
+  foreach my $hash (qw(
+
+      tflags meta_dependencies source_file priorities rewrite_header
+      headers_spam headers_ham duplicate_rules rules_to_replace
+      test_types priority
+
+    ))
+  {
+    $self->new_two_tier_hash($hash);
+  }
+  foreach my $hash (qw(
+
+      report_safe_copy_headers redirector_patterns
+
+    ))
+  {
+    $self->new_two_tier_array($hash);
+  }
+}
+
+sub new_two_tier_hash {
+  my ($self, $name, $t0, $t1) = @_;
+  if (!defined $t0) {
+    $t0 = $self->{tiers}->[0]->{$name} = { };
+  }
+  if (!defined $t1) {
+    $t1 = $self->{tiers}->[1]->{$name} = { };
+  }
+  delete $self->{$name};
+  tie %{$self->{$name}}, 'Mail::SpamAssassin::Util::TwoTierHash', $t0, $t1
+      or warn "tie failed";
+}
+
+sub new_two_tier_array {
+  my ($self, $name, $t0, $t1) = @_;
+  if (!defined $t0) {
+    $t0 = $self->{tiers}->[0]->{$name} = [ ];
+  }
+  if (!defined $t1) {
+    $t1 = $self->{tiers}->[1]->{$name} = [ ];
+  }
+  delete $self->{$name};
+  tie @{$self->{$name}}, 'Mail::SpamAssassin::Util::TwoTierArray', $t0, $t1
+      or warn "tie failed";
 }
 
 sub mtime {
   my $self = shift;
   if (@_) {
-    $self->{mtime} = shift;
+    $self->{activetier}->{mtime} = shift;
   }
-  return $self->{mtime};
+  return $self->{activetier}->{mtime};
 }
 
 ###########################################################################
@@ -3190,77 +3295,47 @@ sub parse_rules {
 
 sub set_score_set {
   my ($self, $set) = @_;
-  $self->{scores} = $self->{scoreset}->[$set];
-  $self->{scoreset_current} = $set;
+  $self->{activetier}->{scoreset_current} = $set;
+
+  # use TwoTierHash objects to represent certain hashes; lookups
+  # in these "hashes" will fall through correctly to the other tiers.
+  $self->new_two_tier_hash('scores',
+            $self->{tiers}->[0]->{scoreset}->[$set],
+            $self->{tiers}->[1]->{scoreset}->[$set]);
+
   dbg("config: score set $set chosen.");
 }
 
 sub get_score_set {
   my($self) = @_;
-  return $self->{scoreset_current};
-}
-
-sub get_rule_types {
-  my ($self) = @_;
-  return @rule_types;
-}
-
-sub get_rule_keys {
-  my ($self, $test_type, $priority) = @_;
-
-  # special case rbl_evals since they do not have a priority
-  if ($test_type eq 'rbl_evals') {
-    return keys(%{$self->{$test_type}});
-  }
-
-  if (defined($priority)) {
-    return keys(%{$self->{$test_type}->{$priority}});
-  }
-  else {
-    my @rules;
-    foreach my $pri (keys(%{$self->{priorities}})) {
-      push(@rules, keys(%{$self->{$test_type}->{$pri}}));
-    }
-    return @rules;
-  }
-}
-
-sub get_rule_value {
-  my ($self, $test_type, $rulename, $priority) = @_;
-
-  # special case rbl_evals since they do not have a priority
-  if ($test_type eq 'rbl_evals') {
-    return keys(%{$self->{$test_type}->{$rulename}});
-  }
-
-  if (defined($priority)) {
-    return $self->{$test_type}->{$priority}->{$rulename};
-  }
-  else {
-    foreach my $pri (keys(%{$self->{priorities}})) {
-      if (exists($self->{$test_type}->{$pri}->{$rulename})) {
-        return $self->{$test_type}->{$pri}->{$rulename};
-      }
-    }
-    return undef; # if we get here we didn't find the rule
-  }
+  return $self->{activetier}->{scoreset_current};
 }
 
 sub delete_rule {
-  my ($self, $test_type, $rulename, $priority) = @_;
+  my ($self, $type, $rulename, $priority) = @_;
 
   # special case rbl_evals since they do not have a priority
-  if ($test_type eq 'rbl_evals') {
-    return delete($self->{$test_type}->{$rulename});
+  if ($type eq 'rbl_evals') {
+    if ($self->{tiers}->[1]->{$type}->{$rulename}) {
+      return delete $self->{tiers}->[1]->{$type}->{$rulename};
+    } else {
+      return delete $self->{tiers}->[0]->{$type}->{$rulename};
+    }
   }
 
   if (defined($priority)) {
-    return delete($self->{$test_type}->{$priority}->{$rulename});
+    if ($self->{tiers}->[1]->{$type}->{$priority}->{$rulename}) {
+      return delete $self->{tiers}->[1]->{$type}->{$priority}->{$rulename};
+    } else {
+      return delete $self->{tiers}->[0]->{$type}->{$priority}->{$rulename};
+    }
   }
   else {
-    foreach my $pri (keys(%{$self->{priorities}})) {
-      if (exists($self->{$test_type}->{$pri}->{$rulename})) {
-        return delete($self->{$test_type}->{$pri}->{$rulename});
+    foreach my $pri ($self->get_all_tier_keys("priorities")) {
+      if ($self->{tiers}->[1]->{$type}->{$pri}->{$rulename}) {
+        return delete $self->{tiers}->[1]->{$type}->{$pri}->{$rulename};
+      } else {
+        return delete $self->{tiers}->[0]->{$type}->{$pri}->{$rulename};
       }
     }
     return undef; # if we get here we didn't find the rule
@@ -3330,33 +3405,9 @@ sub add_meta_depends {
 } # add_meta_depends()
 
 sub is_rule_active {
-  my ($self, $test_type, $rulename, $priority) = @_;
-
-  # special case rbl_evals since they do not have a priority
-  if ($test_type eq 'rbl_evals') {
-    return 0 unless ($self->{$test_type}->{$rulename});
-    return ($self->{scores}->{$rulename});
-  }
-
-  # first determine if the rule is defined
-  if (defined($priority)) {
-    # we have a specific priority
-    return 0 unless ($self->{$test_type}->{$priority}->{$rulename});
-  }
-  else {
-    # no specific priority so we must loop over all currently defined
-    # priorities to see if the rule is defined
-    my $found_p = 0;
-    foreach my $pri (keys %{$self->{priorities}}) {
-      if ($self->{$test_type}->{$pri}->{$rulename}) {
-        $found_p = 1;
-        last;
-      }
-    }
-    return 0 unless ($found_p);
-  }
-
-  return ($self->{scores}->{$rulename});
+  my ($self, $type, $rulename, $priority) = @_;
+  return 0 unless ($self->get_rule_value($type, $rulename, $priority));
+  return $self->get_score_for_rule($rulename);
 }
 
 ###########################################################################
@@ -3398,10 +3449,135 @@ sub finish_parsing {
 }
 
 ###########################################################################
+# Tiering-aware accessor methods
+
+sub get_all_tier_keys {
+  my ($self, $hashname) = @_;
+  if (defined $self->{tiers}->[1]->{$hashname}) {
+    return Mail::SpamAssassin::Util::uniq_list(
+            keys %{ $self->{tiers}->[0]->{$hashname} },
+            keys %{ $self->{tiers}->[1]->{$hashname} }
+          );
+  } else {
+    return keys %{ $self->{tiers}->[0]->{$hashname} };
+  }
+}
+
+sub get_all_tier_lists {
+  my ($self, $listname) = @_;
+  my $l0 = $self->{tiers}->[0]->{$listname};
+  my $l1 = $self->{tiers}->[1]->{$listname};
+  if ($l1) {
+    if ($l0) {
+      return Mail::SpamAssassin::Util::uniq_list(@{$l0}, @{$l1});
+    } else {
+      return @{ $l1 };
+    }
+  } else {
+    if ($l0) {
+      return @{ $l0 };
+    } else {
+      return ();
+    }
+  }
+}
+
+sub tier_lookup {
+  my ($self, $hashname, $rule) = @_;
+  # note: exists(), not defined(), since this way we can "delete" the
+  # data from a lower tier by overriding it with undef
+  if (exists $self->{tiers}->[1]->{$hashname}->{$rule}) {
+    return $self->{tiers}->[1]->{$hashname}->{$rule};
+  } else {
+    return $self->{tiers}->[0]->{$hashname}->{$rule};
+  }
+}
 
 sub get_description_for_rule {
   my ($self, $rule) = @_;
-  return $self->{descriptions}->{$rule};
+  return $self->tier_lookup("descriptions", $rule);
+}
+
+sub get_tflags_for_rule {
+  my ($self, $rule) = @_;
+  return $self->{tflags}->{$rule} || '';    # always provide a string default
+}
+
+sub get_score_for_rule {
+  my ($self, $rule) = @_;
+  return $self->{scores}->{$rule};
+}
+
+sub get_score_in_scoreset {
+  my ($self, $rule, $set) = @_;
+  if ($self->{tiers}->[1]->{scoreset}->[$set]->{$rule}) {
+    return $self->{tiers}->[1]->{scoreset}->[$set]->{$rule};
+  } else {
+    return $self->{tiers}->[0]->{scoreset}->[$set]->{$rule};
+  }
+}
+
+sub get_rule_types {
+  my ($self) = @_;
+  return @rule_types;
+}
+
+sub get_rule_keys {
+  my ($self, $type, $priority) = @_;
+
+  my @rules;
+  if ($type eq 'rbl_evals') {
+    # special case rbl_evals since they do not have a priority
+    push @rules, keys(%{$self->{tiers}->[0]->{$type}});
+    push @rules, keys(%{$self->{tiers}->[1]->{$type}});
+  }
+  elsif (defined($priority)) {
+    push @rules, keys(%{$self->{tiers}->[0]->{$type}->{$priority}});
+    push @rules, keys(%{$self->{tiers}->[1]->{$type}->{$priority}});
+  }
+  else {
+    foreach my $pri ($self->get_all_tier_keys("priorities")) {
+      push @rules, keys(%{$self->{tiers}->[0]->{$type}->{$pri}});
+      push @rules, keys(%{$self->{tiers}->[1]->{$type}->{$pri}});
+    }
+  }
+  return @rules;
+}
+
+sub get_rule_value {
+  my ($self, $type, $rulename, $priority) = @_;
+
+  # special case rbl_evals since they do not have a priority
+  if ($type eq 'rbl_evals') {
+    if ($self->{tiers}->[1]->{$type}->{$rulename}) {
+      return keys %{$self->{tiers}->[1]->{$type}->{$rulename}};
+    } else {
+      return keys %{$self->{tiers}->[0]->{$type}->{$rulename}};
+    }
+  }
+
+  if (defined($priority)) {
+    if ($self->{tiers}->[1]->{$type}->{$priority}->{$rulename}) {
+      return $self->{tiers}->[1]->{$type}->{$priority}->{$rulename};
+    } else {
+      return $self->{tiers}->[0]->{$type}->{$priority}->{$rulename};
+    }
+  }
+  else {
+    foreach my $pri ($self->get_all_tier_keys("priorities")) {
+      if ($self->{tiers}->[1]->{$type}->{$pri}->{$rulename}) {
+        return $self->{tiers}->[1]->{$type}->{$pri}->{$rulename};
+      } else {
+        return $self->{tiers}->[0]->{$type}->{$pri}->{$rulename};
+      }
+    }
+    return undef; # if we get here we didn't find the rule
+  }
+}
+
+sub get_all_priorities {
+  my ($self) = @_;
+  return $self->get_all_tier_keys('priorities');
 }
 
 ###########################################################################
@@ -3415,7 +3591,7 @@ sub maybe_header_only {
     return 1;
 
   } elsif ($type == $TYPE_META_TESTS) {
-    my $tflags = $self->{tflags}->{$rulename}; $tflags ||= '';
+    my $tflags = $self->get_tflags_for_rule($rulename);
     if ($tflags =~ m/\bnet\b/i) {
       return 0;
     } else {
@@ -3438,7 +3614,7 @@ sub maybe_body_only {
     return 1;
 
   } elsif ($type == $TYPE_META_TESTS) {
-    my $tflags = $self->{tflags}->{$rulename}; $tflags ||= '';
+    my $tflags = $self->get_tflags_for_rule($rulename);
     if ($tflags =~ m/\bnet\b/i) {
       return 0;
     } else {
@@ -3554,9 +3730,9 @@ sub free_uncompiled_rule_source {
   if (!$self->{main}->{keep_config_parsing_metadata} &&
         !$self->{allow_user_rules})
   {
-    delete $self->{if_stack};
-    delete $self->{source_file};
-    delete $self->{meta_dependencies};
+    delete $self->{activetier}->{if_stack};
+    delete $self->{activetier}->{source_file};
+    delete $self->{activetier}->{meta_dependencies};
   }
 }
 
@@ -3571,7 +3747,8 @@ sub new_netset {
 
 sub finish {
   my ($self) = @_;
-  untie %{$self->{descriptions}};
+  if ($self->{tiers}->[0]->{descriptions}) { untie %{$self->{tiers}->[0]->{descriptions}}; }
+  if ($self->{tiers}->[1]->{descriptions}) { untie %{$self->{tiers}->[1]->{descriptions}}; }
   %{$self} = ();
 }
 

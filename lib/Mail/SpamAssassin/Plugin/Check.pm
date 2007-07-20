@@ -159,6 +159,7 @@ sub finish_tests {
 sub run_rbl_eval_tests {
   my ($self, $pms) = @_;
   my ($rulename, $pat, @args);
+  my $conf = $pms->{conf};
 
   # XXX - possible speed up, moving this check out of the subroutine into Check->new()
   if ($self->{main}->{local_tests_only}) {
@@ -166,8 +167,9 @@ sub run_rbl_eval_tests {
     return 0;
   }
 
-  while (my ($rulename, $test) = each %{$pms->{conf}->{rbl_evals}}) {
-    my $score = $pms->{conf}->{scores}->{$rulename};
+  foreach my $rulename ($conf->get_rule_keys('rbl_evals')) {
+    my $test = $conf->get_rule_value('rbl_evals', $rulename);
+    my $score = $conf->get_score_for_rule($rulename);
     next unless $score;
 
     $pms->{test_log_msgs} = ();        # clear test state
@@ -233,7 +235,8 @@ run_compiled_method:
   if (defined $opts{pre_loop_body}) {
     $opts{pre_loop_body}->($self, $pms, $conf, %nopts);
   }
-  while (my($rulename, $test) = each %{$opts{testhash}->{$priority}}) {
+  foreach my $rulename ($conf->get_rule_keys($opts{confhashname}, $priority)) {
+    my $test = $conf->get_rule_value($opts{confhashname}, $rulename, $priority);
     $opts{loop_body}->($self, $pms, $conf, $rulename, $test, %nopts);
   }
   if (defined $opts{post_loop_body}) {
@@ -302,7 +305,7 @@ sub do_meta_tests {
   $self->run_generic_tests ($pms, $priority,
     consttype => $Mail::SpamAssassin::Conf::TYPE_META_TESTS,
     type => 'meta',
-    testhash => $pms->{conf}->{meta_tests},
+    confhashname => 'meta_tests',
     args => [ ],
     loop_body => sub
   {
@@ -331,7 +334,7 @@ sub do_meta_tests {
         # warnings; this is better than adding a 0 to a hash for every
         # rule referred to in a meta...
         $meta{$rulename} .= "(\$h->{'$token'} || 0) ";
-      
+ 
         if (!exists $conf->{scores}->{$token}) {
           dbg("rules: meta test $rulename has undefined dependency '$token'");
         }
@@ -388,14 +391,16 @@ sub do_meta_tests {
         if (!defined $conf->{meta_dependencies}->{ $metas[$i] }) {
           warn "no meta_dependencies defined for $metas[$i]";
         }
-        my $alldeps = join ' ', grep {
-                ($tflags->{$_}||'') =~ /\bnet\b/
-              } split (' ', $conf->{meta_dependencies}->{ $metas[$i] } );
+        else {
+          my $alldeps = join ' ', grep {
+                  ($tflags->{$_}||'') =~ /\bnet\b/
+                } split (' ', $conf->{meta_dependencies}->{ $metas[$i] } );
 
-        if ($alldeps ne '') {
-          $self->add_evalstr ('
-            $self->ensure_rules_are_complete(q{'.$metas[$i].'}, qw{'.$alldeps.'});
-          ');
+          if ($alldeps ne '') {
+            $self->add_evalstr ('
+              $self->ensure_rules_are_complete(q{'.$metas[$i].'}, qw{'.$alldeps.'});
+            ');
+          }
         }
 
         # Add this meta rule to the eval line
@@ -437,7 +442,7 @@ sub do_head_tests {
   $self->run_generic_tests ($pms, $priority,
     consttype => $Mail::SpamAssassin::Conf::TYPE_HEAD_TESTS,
     type => 'head',
-    testhash => $pms->{conf}->{head_tests},
+    confhashname => 'head_tests',
     args => [ ],
     loop_body => sub
   {
@@ -547,7 +552,7 @@ sub do_body_tests {
   $self->run_generic_tests ($pms, $priority,
     consttype => $Mail::SpamAssassin::Conf::TYPE_BODY_TESTS,
     type => 'body',
-    testhash => $pms->{conf}->{body_tests},
+    confhashname => 'body_tests',
     args => [ @$textary ],
     loop_body => sub
   {
@@ -619,7 +624,7 @@ sub do_uri_tests {
   $self->run_generic_tests ($pms, $priority,
     consttype => $Mail::SpamAssassin::Conf::TYPE_URI_TESTS,
     type => 'uri',
-    testhash => $pms->{conf}->{uri_tests},
+    confhashname => 'uri_tests',
     args => [ @uris ],
     loop_body => sub
   {
@@ -686,7 +691,7 @@ sub do_rawbody_tests {
   $self->run_generic_tests ($pms, $priority,
     consttype => $Mail::SpamAssassin::Conf::TYPE_RAWBODY_TESTS,
     type => 'rawbody',
-    testhash => $pms->{conf}->{rawbody_tests},
+    confhashname => 'rawbody_tests',
     args => [ @$textary ],
     loop_body => sub
   {
@@ -756,7 +761,7 @@ sub do_full_tests {
   $self->run_generic_tests ($pms, $priority,
     consttype => $Mail::SpamAssassin::Conf::TYPE_FULL_TESTS,
     type => 'full',
-    testhash => $pms->{conf}->{full_tests},
+    confhashname => 'full_tests',
     args => [ $fullmsgref ],
     pre_loop_body => sub
   {
@@ -789,35 +794,32 @@ sub do_head_eval_tests {
   my ($self, $pms, $priority) = @_;
   return unless (defined($pms->{conf}->{head_evals}->{$priority}));
   $self->run_eval_tests ($pms, $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS,
-			 $pms->{conf}->{head_evals}->{$priority}, '', $priority);
+            'head_evals', '', $priority);
 }
 
 sub do_body_eval_tests {
   my ($self, $pms, $priority, $bodystring) = @_;
   return unless (defined($pms->{conf}->{body_evals}->{$priority}));
   $self->run_eval_tests ($pms, $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS,
-			 $pms->{conf}->{body_evals}->{$priority}, 'BODY: ',
-			 $priority, $bodystring);
+            'body_evals', 'BODY: ', $priority, $bodystring);
 }
 
 sub do_rawbody_eval_tests {
   my ($self, $pms, $priority, $bodystring) = @_;
   return unless (defined($pms->{conf}->{rawbody_evals}->{$priority}));
   $self->run_eval_tests ($pms, $Mail::SpamAssassin::Conf::TYPE_RAWBODY_EVALS,
-			 $pms->{conf}->{rawbody_evals}->{$priority}, 'RAW: ',
-			 $priority, $bodystring);
+            'rawbody_evals', 'RAW: ', $priority, $bodystring);
 }
 
 sub do_full_eval_tests {
   my ($self, $pms, $priority, $fullmsgref) = @_;
   return unless (defined($pms->{conf}->{full_evals}->{$priority}));
   $self->run_eval_tests($pms, $Mail::SpamAssassin::Conf::TYPE_FULL_EVALS,
-			$pms->{conf}->{full_evals}->{$priority}, '',
-			$priority, $fullmsgref);
+            'full_evals', '', $priority, $fullmsgref);
 }
 
 sub run_eval_tests {
-  my ($self, $pms, $testtype, $evalhash, $prepend2desc, $priority, @extraevalargs) = @_;
+  my ($self, $pms, $testtype, $confhashname, $prepend2desc, $priority, @extraevalargs) = @_;
  
   return if $self->{main}->call_plugins("have_shortcircuited",
                                         { permsgstatus => $pms });
@@ -867,7 +869,7 @@ sub run_eval_tests {
     };
   }
 
-  while (my ($rulename, $test) = each %{$evalhash})  { 
+  foreach my $rulename ($conf->get_rule_keys($confhashname, $priority)) {
     if ($tflagsref->{$rulename}) {
       # If the rule is a net rule, and we are in a non-net scoreset, skip it.
       if ($tflagsref->{$rulename} =~ /\bnet\b/) {
@@ -879,6 +881,7 @@ sub run_eval_tests {
       }
     }
  
+    my $test = $conf->get_rule_value($confhashname, $rulename, $priority);
     my ($function, $argstr) = ($test,'');
     if ($test =~ s/^([^,]+)(,.*)$//gs) {
       ($function, $argstr) = ($1,$2);

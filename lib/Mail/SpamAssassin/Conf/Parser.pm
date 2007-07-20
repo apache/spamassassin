@@ -64,10 +64,15 @@ The type of this setting:
            - $CONF_TYPE_HASH_KEY_VALUE: hash key/value pair,
              like "describe" or tflags
 
-If this is set, a 'code' block is assigned based on the type.
+If this is set, a 'code' block is assigned based on the type, if
+none already exists, and an accessor of the right type will be used
+for the generated $conf->cf_setting() method.
 
 Note that C<$CONF_TYPE_HASH_KEY_VALUE>-type settings require that the
 value be non-empty, otherwise they'll produce a warning message.
+
+If a type is omitted, a default accessor will be generated using the
+$CONF_TYPE_STRING type.
 
 =item code
 
@@ -166,7 +171,7 @@ sub new {
 # Implementations for default accessors.
 # access a scalar configuration setting. e.g.:
 #   my $val = $conf->cf_foo_bar();
-my $cf_accessor_scalar_value = '
+our $cf_accessor_scalar_value = '
 
   sub cf_${SETTING} {
     if (defined $_[0]->{tiers}->[1]->{${SETTING}}) {
@@ -180,10 +185,13 @@ my $cf_accessor_scalar_value = '
 
 # access a hash key=>value configuration setting. e.g.:
 #   my $val = $conf->cf_foo_bar("baz");
-my $cf_accessor_hash_key_value = '
+# note use of "exists" instead of "defined"; this is deliberate so that
+# "deletion" of a sys-level setting can take place at user-level,
+# by setting val to undef
+our $cf_accessor_hash_key_value = '
 
   sub cf_${SETTING} {
-    if (defined $_[0]->{tiers}->[1]->{${SETTING}}->{$_[1]}) {
+    if (exists $_[0]->{tiers}->[1]->{${SETTING}}->{$_[1]}) {
       return $_[0]->{tiers}->[1]->{${SETTING}}->{$_[1]};
     } else {
       return $_[0]->{tiers}->[0]->{${SETTING}}->{$_[1]};
@@ -199,7 +207,7 @@ my $cf_accessor_hash_key_value = '
 #   }
 # TODO: it would be more efficient to fix calling code to iterate
 # through the tiers instead of using this API.
-my $cf_accessor_addrlist_value = '
+our $cf_accessor_addrlist_value = '
 
   sub cf_${SETTING} {
     if (defined $_[0]->{tiers}->[1]->{${SETTING}}) {
@@ -236,7 +244,7 @@ sub set_defaults_from_command_list {
     # note! exists, not defined -- we want to be able to set
     # "undef" default values.
     if (exists($cmd->{default})) {
-      $conf->{$cmd->{setting}} = $cmd->{default};
+      $conf->{activetier}->{$cmd->{setting}} = $cmd->{default};
     }
 
     $self->setup_accessor($cmd);
@@ -590,14 +598,18 @@ sub lint_check {
 
   if ($conf->{lint_rules}) {
     # Check for description and score issues in lint fashion
-    while ( my $k = each %{$conf->{descriptions}} ) {
-      if (!exists $conf->{tests}->{$k}) {
+    foreach my $k ($conf->get_all_tier_keys('descriptions')) {
+      if (!exists $conf->{tiers}->[0]->{tests}->{$k}
+        && !exists $conf->{tiers}->[1]->{tests}->{$k})
+      {
         $self->lint_warn("config: warning: description exists for non-existent rule $k\n", $k);
       }
     }
 
-    while ( my($sk) = each %{$conf->{scores}} ) {
-      if (!exists $conf->{tests}->{$sk}) {
+    foreach my $sk ($conf->get_all_tier_keys('scores')) {
+      if (!exists $conf->{tiers}->[0]->{tests}->{$sk}
+        && !exists $conf->{tiers}->[1]->{tests}->{$sk})
+      {
         $self->lint_warn("config: warning: score set for non-existent rule $sk\n", $sk);
       }
     }
@@ -613,14 +625,17 @@ sub set_default_scores {
   my ($self) = @_;
   my $conf = $self->{conf};
 
-  while ( my $k = each %{$conf->{tests}} ) {
-    if ( ! exists $conf->{scores}->{$k} ) {
+  my $ss = $conf->{activetier}->{scoreset};
+  while ( my $k = each %{$conf->{activetier}->{tests}} ) {
+    if ( ! exists $ss->[0]->{$k} ) {
       # T_ rules (in a testing probationary period) get low, low scores
       my $set_score = ($k =~/^T_/) ? 0.01 : 1.0;
 
-      $set_score = -$set_score if ( ($conf->{tflags}->{$k}||'') =~ /\bnice\b/ );
+      if ($conf->get_tflags_for_rule($k) =~ /\bnice\b/) {
+        $set_score = -$set_score;
+      }
       for my $index (0..3) {
-        $conf->{scoreset}->[$index]->{$k} = $set_score;
+        $ss->[$index]->{$k} = $set_score;
       }
     }
   }
@@ -632,9 +647,10 @@ sub setup_accessor {
   my ($self, $cmd) = @_;
 
   # find a default accessor method, if possible
-  if (!defined $cmd->{accessor} && $cmd->{type}) {
-    my $type = $cmd->{type};
-    if ($type == $Mail::SpamAssassin::Conf::CONF_TYPE_STRING) {
+  if (!defined $cmd->{accessor}) {
+    my $type = $cmd->{accessortype} || $cmd->{type};
+
+    if (!$type || $type == $Mail::SpamAssassin::Conf::CONF_TYPE_STRING) {
       $cmd->{accessor} = $cf_accessor_scalar_value;
     }
     elsif ($type == $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL) {
@@ -716,7 +732,7 @@ sub set_numeric_value {
     return $Mail::SpamAssassin::Conf::INVALID_VALUE;
   }
 
-  $conf->{$key} = $value+0.0;
+  $conf->{activetier}->{$key} = $value+0.0;
 }
 
 sub set_bool_value {
@@ -739,7 +755,7 @@ sub set_bool_value {
     return $Mail::SpamAssassin::Conf::INVALID_VALUE;
   }
 
-  $conf->{$key} = $value+0;
+  $conf->{activetier}->{$key} = $value+0;
 }
 
 sub set_string_value {
@@ -749,7 +765,7 @@ sub set_string_value {
     return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
   }
 
-  $conf->{$key} = $value;
+  $conf->{activetier}->{$key} = $value;
 }
 
 sub set_hash_key_value {
@@ -760,7 +776,7 @@ sub set_hash_key_value {
     return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
   }
 
-  $conf->{$key}->{$k} = $v;
+  $conf->{activetier}->{$key}->{$k} = $v;
 }
 
 sub set_addrlist_value {
@@ -784,12 +800,12 @@ sub remove_addrlist_value {
 sub set_template_append {
   my ($conf, $key, $value, $line) = @_;
   if ( $value =~ /^"(.*?)"$/ ) { $value = $1; }
-  $conf->{$key} .= $value."\n";
+  $conf->{activetier}->{$key} .= $value."\n";
 }
 
 sub set_template_clear {
   my ($conf, $key, $value, $line) = @_;
-  $conf->{$key} = '';
+  $conf->{activetier}->{$key} = '';
 }
 
 ###########################################################################
@@ -812,10 +828,10 @@ sub finish_parsing {
 
   dbg("conf: finish parsing");
 
-  while (my ($name, $text) = each %{$conf->{tests}}) {
-    my $type = $conf->{test_types}->{$name};
+  while (my ($name, $text) = each %{$conf->{activetier}->{tests}}) {
+    my $type = $conf->{activetier}->{test_types}->{$name};
     my $priority = $conf->{priority}->{$name} || 0;
-    $conf->{priorities}->{$priority}++;
+    $conf->{activetier}->{priorities}->{$priority}++;
 
     # eval type handling
     if (($type & 1) == 1) {
@@ -827,24 +843,24 @@ sub finish_parsing {
           # we've already warned about this
         }
         elsif ($type == $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS) {
-          $conf->{body_evals}->{$priority}->{$name} = $packed;
+          $conf->{activetier}->{body_evals}->{$priority}->{$name} = $packed;
         }
         elsif ($type == $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS) {
-          $conf->{head_evals}->{$priority}->{$name} = $packed;
+          $conf->{activetier}->{head_evals}->{$priority}->{$name} = $packed;
         }
         elsif ($type == $Mail::SpamAssassin::Conf::TYPE_RBL_EVALS) {
           # We don't do priorities for $Mail::SpamAssassin::Conf::TYPE_RBL_EVALS
           # we also use the arrayref instead of the packed string
-          $conf->{rbl_evals}->{$name} = [ $function, @$argsref ];
+          $conf->{activetier}->{rbl_evals}->{$name} = [ $function, @$argsref ];
         }
         elsif ($type == $Mail::SpamAssassin::Conf::TYPE_RAWBODY_EVALS) {
-          $conf->{rawbody_evals}->{$priority}->{$name} = $packed;
+          $conf->{activetier}->{rawbody_evals}->{$priority}->{$name} = $packed;
         }
         elsif ($type == $Mail::SpamAssassin::Conf::TYPE_FULL_EVALS) {
-          $conf->{full_evals}->{$priority}->{$name} = $packed;
+          $conf->{activetier}->{full_evals}->{$priority}->{$name} = $packed;
         }
         #elsif ($type == $Mail::SpamAssassin::Conf::TYPE_URI_EVALS) {
-        #  $conf->{uri_evals}->{$priority}->{$name} = $packed;
+        #  $conf->{activetier}->{uri_evals}->{$priority}->{$name} = $packed;
         #}
         else {
           $self->lint_warn("unknown type $type for $name: $text", $name);
@@ -857,22 +873,22 @@ sub finish_parsing {
     # non-eval tests
     else {
       if ($type == $Mail::SpamAssassin::Conf::TYPE_BODY_TESTS) {
-        $conf->{body_tests}->{$priority}->{$name} = $text;
+        $conf->{activetier}->{body_tests}->{$priority}->{$name} = $text;
       }
       elsif ($type == $Mail::SpamAssassin::Conf::TYPE_HEAD_TESTS) {
-        $conf->{head_tests}->{$priority}->{$name} = $text;
+        $conf->{activetier}->{head_tests}->{$priority}->{$name} = $text;
       }
       elsif ($type == $Mail::SpamAssassin::Conf::TYPE_META_TESTS) {
-        $conf->{meta_tests}->{$priority}->{$name} = $text;
+        $conf->{activetier}->{meta_tests}->{$priority}->{$name} = $text;
       }
       elsif ($type == $Mail::SpamAssassin::Conf::TYPE_URI_TESTS) {
-        $conf->{uri_tests}->{$priority}->{$name} = $text;
+        $conf->{activetier}->{uri_tests}->{$priority}->{$name} = $text;
       }
       elsif ($type == $Mail::SpamAssassin::Conf::TYPE_RAWBODY_TESTS) {
-        $conf->{rawbody_tests}->{$priority}->{$name} = $text;
+        $conf->{activetier}->{rawbody_tests}->{$priority}->{$name} = $text;
       }
       elsif ($type == $Mail::SpamAssassin::Conf::TYPE_FULL_TESTS) {
-        $conf->{full_tests}->{$priority}->{$name} = $text;
+        $conf->{activetier}->{full_tests}->{$priority}->{$name} = $text;
       }
       else {
         $self->lint_warn("unknown type $type for $name: $text", $name);
@@ -891,25 +907,25 @@ sub finish_parsing {
 
   if (!$conf->{allow_user_rules}) {
     # free up stuff we no longer need
-    delete $conf->{tests};
-    delete $conf->{priority};
-    delete $conf->{test_types};
+    delete $conf->{activetier}->{tests};
+    delete $conf->{activetier}->{priority};
+    delete $conf->{activetier}->{test_types};
   }
 }
 
 sub trace_meta_dependencies {
   my ($self) = @_;
   my $conf = $self->{conf};
-  $conf->{meta_dependencies} = { };
+  %{$conf->{activetier}->{meta_dependencies}} = ( ); 
 
-  foreach my $name (keys %{$conf->{tests}}) {
-    next unless ($conf->{test_types}->{$name}
+  foreach my $name (keys %{$conf->{activetier}->{tests}}) {
+    next unless ($conf->{activetier}->{test_types}->{$name}
                     == $Mail::SpamAssassin::Conf::TYPE_META_TESTS);
 
     my $deps = [ ];
     my $alreadydone = { };
     $self->_meta_deps_recurse($conf, $name, $name, $deps, $alreadydone);
-    $conf->{meta_dependencies}->{$name} = join (' ', @{$deps});
+    $conf->{activetier}->{meta_dependencies}->{$name} = join (' ', @{$deps});
   }
 }
 
@@ -921,7 +937,7 @@ sub _meta_deps_recurse {
   $alreadydone->{$name} = 1;
 
   # Obviously, don't trace empty or nonexistent rules
-  my $rule = $conf->{tests}->{$name};
+  my $rule = $conf->{activetier}->{tests}->{$name};
   return unless $rule;
 
   # Lex the rule into tokens using a rather simple RE method ...
@@ -933,7 +949,7 @@ sub _meta_deps_recurse {
     # has to be an alpha+numeric token
     next if ($token =~ /^(?:\W+|[+-]?\d+(?:\.\d+)?)$/);
     # and has to be a rule name
-    next unless exists $conf->{tests}->{$token};
+    next unless exists $conf->{activetier}->{tests}->{$token};
 
     # add and recurse
     push @{$deps}, $token;
@@ -945,8 +961,8 @@ sub fix_priorities {
   my ($self) = @_;
   my $conf = $self->{conf};
 
-  die unless $conf->{meta_dependencies};    # order requirement
-  my $pri = $conf->{priority};
+  die unless $conf->{activetier}->{meta_dependencies};    # order requirement
+  my $pri = $conf->{activetier}->{priority};
 
   # sort into priority order, lowest first -- this way we ensure that if we
   # rearrange the pri of a rule early on, we cannot accidentally increase its
@@ -957,7 +973,7 @@ sub fix_priorities {
   {
     # we only need to worry about meta rules -- they are the
     # only type of rules which depend on other rules
-    my $deps = $conf->{meta_dependencies}->{$rule};
+    my $deps = $conf->{activetier}->{meta_dependencies}->{$rule};
     next unless (defined $deps);
 
     my $basepri = $pri->{$rule};
@@ -977,9 +993,9 @@ sub find_dup_rules {
 
   my %names_for_text = ();
   my %dups = ();
-  while (my ($name, $text) = each %{$conf->{tests}}) {
-    my $type = $conf->{test_types}->{$name};
-    my $tf = ($conf->{tflags}->{$name}||''); $tf =~ s/\s+/ /gs;
+  while (my ($name, $text) = each %{$conf->{activetier}->{tests}}) {
+    my $type = $conf->{activetier}->{test_types}->{$name};
+    my $tf = $conf->get_tflags_for_rule($name); $tf =~ s/\s+/ /gs;
     # ensure similar, but differently-typed, rules are not marked as dups;
     # take tflags into account too due to "tflags multiple"
     $text = "$type\t$text\t$tf";
@@ -997,7 +1013,7 @@ sub find_dup_rules {
     my $first_pri;
     my @names = sort {$a cmp $b} split(' ', $names_for_text{$text});
     foreach my $name (@names) {
-      my $priority = $conf->{priority}->{$name} || 0;
+      my $priority = $conf->{activetier}->{priority}->{$name} || 0;
 
       if (!defined $first || $priority < $first_pri) {
         $first_pri = $priority;
@@ -1010,11 +1026,11 @@ sub find_dup_rules {
     foreach my $name (@names) {
       next if $name eq $first;
       push @dups, $name;
-      delete $conf->{tests}->{$name};
+      delete $conf->{activetier}->{tests}->{$name};
     }
 
     dbg("rules: $first merged duplicates: ".join(' ', @dups));
-    $conf->{duplicate_rules}->{$first} = \@dups;
+    $conf->{activetier}->{duplicate_rules}->{$first} = \@dups;
   }
 }
 
@@ -1058,17 +1074,28 @@ sub lint_trusted_networks {
   my ($self) = @_;
   my $conf = $self->{conf};
 
+  # if we're in tier 1 (user configs) copy the booleans from the lower
+  # tier
+  if ($conf->{activetier} == $conf->{tiers}->[1]) {
+    $conf->{tiers}->[1]->{trusted_networks_configured} ||=
+                        $conf->{tiers}->[0]->{trusted_networks_configured};
+    $conf->{tiers}->[1]->{internal_networks_configured} ||=
+                        $conf->{tiers}->[0]->{internal_networks_configured};
+  }
+
   # validate trusted_networks and internal_networks, bug 4760.
   # check that all internal_networks are listed in trusted_networks
   # too.  do the same for msa_networks, but check msa_networks against
   # internal_networks if trusted_networks aren't defined
 
-  my ($nt, $matching_against);
-  if ($conf->{trusted_networks_configured}) {
-    $nt = $conf->{trusted_networks};
+  my ($nt0, $nt1, $matching_against);
+  if ($conf->{activetier}->{trusted_networks_configured}) {
+    $nt0 = $conf->{tiers}->[0]->{trusted_networks};
+    $nt1 = $conf->{tiers}->[1]->{trusted_networks};
     $matching_against = 'trusted_networks';
-  } elsif ($conf->{internal_networks_configured}) {
-    $nt = $conf->{internal_networks};
+  } elsif ($conf->{activetier}->{internal_networks_configured}) {
+    $nt0 = $conf->{tiers}->[0]->{internal_networks};
+    $nt1 = $conf->{tiers}->[1]->{internal_networks};
     $matching_against = 'internal_networks';
   } else {
     return;
@@ -1084,7 +1111,11 @@ sub lint_trusted_networks {
 
     foreach my $net (@{$net_list->{nets}}) {
       # don't check to see if an excluded network is included - that's senseless
-      if (!$net->{exclude} && !$nt->contains_net($net)) {
+      if (!$net->{exclude}
+                && !($nt0 && $nt0->contains_net($net))
+                && !($nt1 && $nt1->contains_net($net))
+        )
+      {
         my $msg = "$matching_against doesn't contain $net_type entry '".
                   ($net->{as_string})."'";
 
@@ -1153,24 +1184,24 @@ sub add_test {
     return unless $self->is_meta_valid($name, $text);
   }
 
-  $conf->{tests}->{$name} = $text;
-  $conf->{test_types}->{$name} = $type;
+  $conf->{activetier}->{tests}->{$name} = $text;
+  $conf->{activetier}->{test_types}->{$name} = $type;
   if ($type == $Mail::SpamAssassin::Conf::TYPE_META_TESTS) {
-    $conf->{priority}->{$name} ||= 500;
+    $conf->{activetier}->{priority}->{$name} ||= 500;
   }
   else {
-    $conf->{priority}->{$name} ||= 0;
+    $conf->{activetier}->{priority}->{$name} ||= 0;
   }
-  $conf->{priority}->{$name} ||= 0;
-  $conf->{source_file}->{$name} = $self->{currentfile};
+  $conf->{activetier}->{priority}->{$name} ||= 0;
+  $conf->{activetier}->{source_file}->{$name} = $self->{currentfile};
 
   if ($self->{main}->{keep_config_parsing_metadata}) {
-    $conf->{if_stack}->{$name} = $self->get_if_stack_as_string();
+    $conf->{activetier}->{if_stack}->{$name} = $self->get_if_stack_as_string();
   }
 
   if ($self->{scoresonly}) {
-    $conf->{user_rules_to_compile}->{$type} = 1;
-    $conf->{user_defined_rules}->{$name} = 1;
+    $conf->{activetier}->{user_rules_to_compile}->{$type} = 1;
+    $conf->{activetier}->{user_defined_rules}->{$name} = 1;
   }
 }
 
@@ -1294,7 +1325,7 @@ sub add_to_addrlist {
     $re =~ s/([^\*\?_a-zA-Z0-9])/\\$1/g;	# escape any possible metachars
     $re =~ tr/?/./;				# "?" -> "."
     $re =~ s/\*+/\.\*/g;			# "*" -> "any string"
-    $conf->{$singlelist}->{$addr} = "^${re}\$";
+    $conf->{activetier}->{$singlelist}->{$addr} = "^${re}\$";
   }
 }
 
@@ -1303,17 +1334,25 @@ sub add_to_addrlist_rcvd {
   my $conf = $self->{conf};
 
   $addr = lc $addr;
-  if ($conf->{$listname}->{$addr}) {
-    push @{$conf->{$listname}->{$addr}{domain}}, $domain;
+  if ($conf->{activetier}->{$listname}->{$addr}) {
+    push @{$conf->{activetier}->{$listname}->{$addr}{domain}}, $domain;
+  }
+  elsif ($conf->{tiers}->[0]->{$listname}->{$addr}) {
+    # copy entry from a lower tier so we can extend it
+    $conf->{activetier}->{$listname}->{$addr}{re} =
+            $conf->{tiers}->[0]->{$listname}->{$addr}{re};
+    @{$conf->{activetier}->{$listname}->{$addr}{domain}} =
+            @{$conf->{tiers}->[0]->{$listname}->{$addr}{domain}};
   }
   else {
+    # create a new entry
     my $re = $addr;
     $re =~ s/[\000\\\(]/_/gs;			# paranoia
     $re =~ s/([^\*\?_a-zA-Z0-9])/\\$1/g;	# escape any possible metachars
     $re =~ tr/?/./;				# "?" -> "."
     $re =~ s/\*+/\.\*/g;			# "*" -> "any string"
-    $conf->{$listname}->{$addr}{re} = "^${re}\$";
-    $conf->{$listname}->{$addr}{domain} = [ $domain ];
+    $conf->{activetier}->{$listname}->{$addr}{re} = "^${re}\$";
+    $conf->{activetier}->{$listname}->{$addr}{domain} = [ $domain ];
   }
 }
 
@@ -1322,7 +1361,7 @@ sub remove_from_addrlist {
   my $conf = $self->{conf};
 
   foreach my $addr (@addrs) {
-    delete($conf->{$singlelist}->{$addr});
+    delete $conf->{activetier}->{$singlelist}->{$addr};
   }
 }
 
@@ -1331,7 +1370,7 @@ sub remove_from_addrlist_rcvd {
   my $conf = $self->{conf};
 
   foreach my $addr (@addrs) {
-    delete($conf->{$listname}->{$addr});
+    delete $conf->{activetier}->{$listname}->{$addr};
   }
 }
 

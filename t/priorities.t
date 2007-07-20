@@ -99,7 +99,7 @@ ok assert_rule_pri 'FOO1', -28;
 sub assert_rule_pri {
   my ($r, $pri) = @_;
 
-  if (defined $conf->{rbl_evals}->{$r}) {
+  if (defined $conf->{activetier}->{rbl_evals}->{$r}) {
     # ignore rbl_evals; they do not use the priority system at all
     return 1;
   }
@@ -109,11 +109,11 @@ sub assert_rule_pri {
     full_evals rawbody_evals head_evals body_evals
   ))
   {
-    if (defined $conf->{$ruletype}->{$pri}->{$r}) {
+    if (defined $conf->{activetier}->{$ruletype}->{$pri}->{$r}) {
       return 1;
     }
-    foreach my $foundpri (keys %{$conf->{priorities}}) {
-      next unless (defined $conf->{$ruletype}->{$foundpri}->{$r});
+    foreach my $foundpri (keys %{$conf->{activetier}->{priorities}}) {
+      next unless (defined $conf->{activetier}->{$ruletype}->{$foundpri}->{$r});
       warn "FAIL: rule '$r' not found at priority $pri; found at $foundpri\n";
       return 0;
     }

@@ -89,7 +89,7 @@ sub html_charset_faraway {
 
   return 0 unless exists $pms->{html}{charsets};
 
-  my @locales = Mail::SpamAssassin::Util::get_my_locales($pms->{conf}->{ok_locales});
+  my @locales = Mail::SpamAssassin::Util::get_my_locales($pms->{conf}->cf_ok_locales);
   return 0 if grep { $_ eq "all" } @locales;
 
   my $okay = 0;

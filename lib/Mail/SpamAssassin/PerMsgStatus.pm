@@ -178,7 +178,7 @@ sub check {
   $self->{score} = (sprintf "%0.3f", $self->{score}) + 0;
   
   dbg("check: is spam? score=".$self->{score}.
-                        " required=".$self->{conf}->{required_score});
+                        " required=".$self->{conf}->cf_required_score);
   dbg("check: tests=".$self->get_names_of_tests_hit());
   dbg("check: subtests=".$self->get_names_of_subtests_hit());
   $self->{is_spam} = $self->is_spam();
@@ -204,8 +204,8 @@ so that future similar mails will be caught.
 sub learn {
   my ($self) = @_;
 
-  if (!$self->{conf}->{bayes_auto_learn} ||
-      !$self->{conf}->{use_bayes} ||
+  if (!$self->{conf}->cf_bayes_auto_learn ||
+      !$self->{conf}->cf_use_bayes ||
       $self->{disable_auto_learning})
   {
     $self->{auto_learn_status} = "disabled";
@@ -323,9 +323,8 @@ sub _get_autolearn_points {
 
   # This function needs to use use sum($score[scoreset % 2]) not just {score}.
   # otherwise we shift what we autolearn on and it gets really wierd.  - tvd
-  my $orig_scoreset = $self->{conf}->get_score_set();
+  my $orig_scoreset = $self->{conf}->get_score_set;
   my $new_scoreset = $orig_scoreset;
-  my $scores = $self->{conf}->{scores};
 
   if (($orig_scoreset & 2) == 0) { # we don't need to recompute
     dbg("learn: auto-learn: currently using scoreset $orig_scoreset");
@@ -333,10 +332,8 @@ sub _get_autolearn_points {
   else {
     $new_scoreset = $orig_scoreset & ~2;
     dbg("learn: auto-learn: currently using scoreset $orig_scoreset, recomputing score based on scoreset $new_scoreset");
-    $scores = $self->{conf}->{scoreset}->[$new_scoreset];
   }
 
-  my $tflags = $self->{conf}->{tflags};
   my $points = 0;
 
   # Just in case this function is called multiple times, clear out the
@@ -346,33 +343,36 @@ sub _get_autolearn_points {
   $self->{head_only_points} = 0;
 
   foreach my $test (@{$self->{test_names_hit}}) {
+    my $score = $self->{conf}->get_score_in_scoreset($test, $new_scoreset);
+    my $tf = $self->{conf}->get_tflags_for_rule($test);
+
     # According to the documentation, noautolearn, userconf, and learn
     # rules are ignored for autolearning.
-    if (exists $tflags->{$test}) {
-      next if $tflags->{$test} =~ /\bnoautolearn\b/;
-      next if $tflags->{$test} =~ /\buserconf\b/;
+    if ($tf) {
+      next if $tf =~ /\b(?:noautolearn|userconf)\b/;
 
       # Keep track of the learn points for an additional autolearn check.
       # Use the original scoreset since it'll be 0 in sets 0 and 1.
-      if ($tflags->{$test} =~ /\blearn\b/) {
+      if ($tf =~ /\blearn\b/) {
 	# we're guaranteed that the score will be defined
-        $self->{learned_points} += $self->{conf}->{scoreset}->[$orig_scoreset]->{$test};
+        $self->{learned_points} +=
+            $self->{conf}->get_score_in_scoreset($test, $orig_scoreset);
 	next;
       }
     }
 
     # ignore tests with 0 score in this scoreset
-    next if ($scores->{$test} == 0);
+    next if ($score == 0);
 
     # Go ahead and add points to the proper locations
     if (!$self->{conf}->maybe_header_only ($test)) {
-      $self->{body_only_points} += $scores->{$test};
+      $self->{body_only_points} += $score;
     }
     if (!$self->{conf}->maybe_body_only ($test)) {
-      $self->{head_only_points} += $scores->{$test};
+      $self->{head_only_points} += $score;
     }
 
-    $points += $scores->{$test};
+    $points += $score;
   }
 
   # Figure out the final value we'll use for autolearning
@@ -395,7 +395,7 @@ spam-like.
 sub is_spam {
   my ($self) = @_;
   # changed to test this so sub-tests can ask "is_spam" during a run
-  return ($self->{score} >= $self->{conf}->{required_score});
+  return ($self->{score} >= $self->{conf}->cf_required_score);
 }
 
 ###########################################################################
@@ -463,14 +463,11 @@ return the score required for a mail to be considered spam.
 
 sub get_required_score {
   my ($self) = @_;
-  return $self->{conf}->{required_score};
+  return $self->{conf}->cf_required_score;
 }
 
 # left as backward compatibility
-sub get_required_hits {
-  my ($self) = @_;
-  return $self->{conf}->{required_score};
-}
+sub get_required_hits { return $_[0]->get_required_score(); }
 
 ###########################################################################
 
@@ -504,7 +501,7 @@ sub get_report {
 
   if (!exists $self->{'report'}) {
     my $report;
-    $report = $self->{conf}->{report_template};
+    $report = $self->{conf}->cf_report_template;
     $report ||= '(no report template found)';
 
     $report = $self->_replace_tags($report);
@@ -619,7 +616,7 @@ sub rewrite_mail {
 
   my $msg = $self->{msg}->get_mbox_separator() || '';
 
-  if ($self->{is_spam} && $self->{conf}->{report_safe}) {
+  if ($self->{is_spam} && $self->{conf}->cf_report_safe) {
     $msg .= $self->rewrite_report_safe();
   }
   else {
@@ -656,8 +653,8 @@ sub rewrite_report_safe {
 
   # the report charset
   my $report_charset = "; charset=iso-8859-1";
-  if ($self->{conf}->{report_charset}) {
-    $report_charset = "; charset=" . $self->{conf}->{report_charset};
+  if ($self->{conf}->cf_report_charset) {
+    $report_charset = "; charset=" . $self->{conf}->cf_report_charset;
   }
 
   # the SpamAssassin report
@@ -764,7 +761,7 @@ sub rewrite_report_safe {
   my $ct = $self->{msg}->get_header("Content-Type");
   if (defined $ct && $ct ne '' && $ct !~ m{text/plain}i) {
     $disposition = "attachment";
-    $report .= $self->_replace_tags($self->{conf}->{unsafe_report_template});
+    $report .= $self->_replace_tags($self->{conf}->cf_unsafe_report_template);
     # if we wanted to defang the attachment, this would be the place
   }
   else {
@@ -772,7 +769,7 @@ sub rewrite_report_safe {
   }
 
   my $type = "message/rfc822";
-  $type = "text/plain" if $self->{conf}->{report_safe} > 1;
+  $type = "text/plain" if $self->{conf}->cf_report_safe > 1;
 
   my $description = $self->{conf}->{'encapsulated_content_description'};
 
@@ -842,7 +839,7 @@ sub rewrite_no_report_safe {
       my $created_subject = 0;
       my $subject = $self->{msg}->get_pristine_header('Subject');
       if (!defined($subject) && $self->{is_spam}
-            && exists $self->{conf}->{rewrite_header}->{'Subject'})
+            && defined $self->{conf}->{rewrite_header}->{'Subject'})
       {
         push(@pristine_headers, "Subject: \n");
         $created_subject = 1;
@@ -940,7 +937,7 @@ sub _process_header {
   $hdr_data = $self->_replace_tags($hdr_data);
   $hdr_data =~ s/(?:\r?\n)+$//; # make sure there are no trailing newlines ...
 
-  if ($self->{conf}->{fold_headers}) {
+  if ($self->{conf}->cf_fold_headers) {
     if ($hdr_data =~ /\n/) {
       $hdr_data =~ s/\s*\n\s*/\n\t/g;
       return $hdr_data;
@@ -1144,7 +1141,7 @@ sub _get_tag_value_for_score {
 
 sub _get_tag_value_for_required_score {
   my $self  = shift;
-  return sprintf("%2.1f", $self->{conf}->{required_score});
+  return sprintf("%2.1f", $self->{conf}->cf_required_score);
 }
 
 sub _get_tag {
@@ -1170,8 +1167,8 @@ sub _get_tag {
             SUBVERSION => sub { $Mail::SpamAssassin::SUB_VERSION },
 
             HOSTNAME => sub {
-	      $self->{conf}->{report_hostname} ||
-	      Mail::SpamAssassin::Util::fq_hostname();
+	      $self->{conf}->cf_report_hostname ||
+	            Mail::SpamAssassin::Util::fq_hostname();
 	    },
 
 	    REMOTEHOSTNAME => sub {
@@ -1198,7 +1195,7 @@ sub _get_tag {
               return $lasthop ? $lasthop->{helo} : '';
             },
 
-            CONTACTADDRESS => sub { $self->{conf}->{report_contact}; },
+            CONTACTADDRESS => sub { $self->{conf}->cf_report_contact; },
 
             BAYES => sub {
               defined($self->{bayes_score}) ?
@@ -1259,11 +1256,10 @@ sub _get_tag {
               my $arg = (shift || ",");
               my $line = '';
               foreach my $test (sort @{$self->{test_names_hit}}) {
-                if (!$line) {
-                  $line .= $test . "=" . $self->{conf}->{scores}->{$test};
-                } else {
-                  $line .= $arg . $test . "=" . $self->{conf}->{scores}->{$test};
+                if ($line) {
+                  $line .= $arg;
                 }
+                $line .= $test . "=" . $self->{conf}->get_score_for_rule($test);
               }
               return $line ? $line : 'none';
             },
@@ -2298,17 +2294,18 @@ sub get_envelope_from {
   # Rely on the 'envelope-sender-header' header if the user has configured one.
   # Assume that because they have configured it, their MTA will always add it.
   # This will prevent us falling through and picking up inappropriate headers.
-  if (defined $self->{conf}->{envelope_sender_header}) {
+  if (defined $self->{conf}->cf_envelope_sender_header) {
+    my $hdr = $self->{conf}->cf_envelope_sender_header;
     # make sure we get the most recent copy - there can be only one EnvelopeSender.
-    $envf = $self->get($self->{conf}->{envelope_sender_header}.":addr");
+    $envf = $self->get($hdr.":addr");
     # ok if it contains an "@" sign, or is "" (ie. "<>" without the < and >)
     goto ok if defined $envf && ($envf =~ /\@/ || $envf =~ /^$/);
     # Warn them if it's configured, but not there or not usable.
     if (defined $envf) {
       chomp $envf;
-      dbg("message: envelope_sender_header '$self->{conf}->{envelope_sender_header}: $envf' is not an FQDN, ignoring");
+      dbg("message: envelope_sender_header '$hdr: $envf' is not an FQDN, ignoring");
     } else {
-      dbg("message: envelope_sender_header '".$self->{conf}->{envelope_sender_header}."' not found in message");
+      dbg("message: envelope_sender_header '$hdr' not found in message");
     }
     # Couldn't get envelope-sender using the configured header.
     return;

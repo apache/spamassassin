@@ -349,7 +349,7 @@ sub new {
     $self->{username} = (Mail::SpamAssassin::Util::portable_getpwuid ($>))[0];
   }
 
-  $self->create_locker();
+  $self->create_locker(1);
 
   $self->{resolver} = Mail::SpamAssassin::DnsResolver->new($self);
 
@@ -357,16 +357,19 @@ sub new {
 }
 
 sub create_locker {
-  my ($self) = @_;
+  my ($self, $withoutconf) = @_;
 
   my $class;
-  my $m = $self->{conf}->{lock_method};
+  my $m;
+  if (!$withoutconf) {
+    $m = $self->{conf}->cf_lock_method;
+  }
 
   # let people choose what they want -- even if they may not work on their
   # OS.  (they could be using cygwin!)
-  if ($m eq 'win32') { $class = 'Win32'; }
-  elsif ($m eq 'flock') { $class = 'Flock'; }
-  elsif ($m eq 'nfssafe') { $class = 'UnixNFSSafe'; }
+  if ($m && $m eq 'win32') { $class = 'Win32'; }
+  elsif ($m && $m eq 'flock') { $class = 'Flock'; }
+  elsif ($m && $m eq 'nfssafe') { $class = 'UnixNFSSafe'; }
   else {
     # OS-specific defaults
     if (Mail::SpamAssassin::Util::am_running_on_windows()) {
