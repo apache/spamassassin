@@ -28,12 +28,13 @@ seek-phrases-in-log - extract good-looking rules from a text-dump mc log
 sub usage {
   die "
 usage: seek-phrases-in-log [--reqhitrate n] [--reqpatlength n]
-   [--rules] [--maxtextread n] --ham hamlog --spam spamlog
+   [--rules] [--ruleprefix FOO] [--maxtextread n] --ham hamlog --spam spamlog
 
 --reqhitrate: percentage hit-rate against spam required (default: 0.5)
 --reqpatlength: required pattern length, in characters (default: 0)
 --maxtextread: bytes of message text examined (default: 32768)
 --rules: generate SpamAssassin rule output (default: 0)
+--ruleprefix: specify prefix string for rules (default: 'SEEK_')
 ";
 }
 
@@ -48,12 +49,14 @@ $opt{reqhitrate} = 0.5;
 $opt{reqpatlength} = 0;
 $opt{maxtextread} = 32768;
 $opt{rules} = 0;
+$opt{ruleprefix} = 'SEEK_';
 
 my $fs;
 my $fh;
 my @files = ();
 GetOptions(
         "rules" => \$opt{rules},
+        "ruleprefix" => \$opt{ruleprefix},
         "reqhitrate=s" => \$opt{reqhitrate},
         "reqpatlength=s" => \$opt{reqpatlength},
         "ham=s" => \$fh,
@@ -277,7 +280,7 @@ sub summarise {
       foreach my $pat (@pats) {
         $pat =~ s/([!-+\`\^\~\\\/\|\.\(\)\[\]\@])/\\$1/gs;
         my $name = generate_rule_name($pat);
-        print "body SEEK_${name}  /$pat/\n";
+        print "body $opt{ruleprefix}${name}  /$pat/\n";
       }
 
     } else {
