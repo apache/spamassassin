@@ -4,10 +4,10 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_plugin");
 
 use constant numtests => 6;
-use Test; BEGIN { plan tests => ((!$SKIP_SPAMD_TESTS && !$RUNNING_ON_WINDOWS) ?
-                        numtests : 0) };
+use Test; plan tests => (($SKIP_SPAMD_TESTS || $RUNNING_ON_WINDOWS || $SKIP_SETUID_NOBODY_TESTS) ?
+                        0 : numtests);
 
-exit unless (!$SKIP_SPAMD_TESTS && !$RUNNING_ON_WINDOWS);
+exit unless !($SKIP_SPAMD_TESTS || $RUNNING_ON_WINDOWS || $SKIP_SETUID_NOBODY_TESTS);
 
 # ---------------------------------------------------------------------------
 
