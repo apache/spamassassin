@@ -385,6 +385,9 @@ sub do_meta_tests {
 
         # If we depend on network tests, call ensure_rules_are_complete()
         # to block until they are
+        if (!defined $conf->{meta_dependencies}->{ $metas[$i] }) {
+          warn "no meta_dependencies defined for $metas[$i]";
+        }
         my $alldeps = join ' ', grep {
                 ($tflags->{$_}||'') =~ /\bnet\b/
               } split (' ', $conf->{meta_dependencies}->{ $metas[$i] } );
