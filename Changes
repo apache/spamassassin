@@ -1,4 +1,133 @@
 ------------------------------------------------------------------------
+r558682 | jm | 2007-07-23 10:23:09 +0000 (Mon, 23 Jul 2007) | 3 lines
+
+bug 5449: allow_user_rules causes Rule2XSBody plugin
+to emit spurious warnings; fix.  also, add a new 'user_conf_parsing_end' plugin
+hook, which is called after the per-user configuration is parsed
+------------------------------------------------------------------------
+r556494 | felicity | 2007-07-16 02:10:49 +0000 (Mon, 16 Jul 2007) | 1 line
+
+reduce backtracking in regexp for improved performance on some matches
+------------------------------------------------------------------------
+r556490 | felicity | 2007-07-16 02:02:56 +0000 (Mon, 16 Jul 2007) | 2 lines
+
+Use the GPG in ~/sabuildtools because the default one is broken
+
+------------------------------------------------------------------------
+r554333 | felicity | 2007-07-08 07:30:58 +0000 (Sun, 08 Jul 2007) | 1 line
+
+bug 5182: update the sa-learn doc to mention that -u is only usable w/ sql
+------------------------------------------------------------------------
+r554237 | jm | 2007-07-07 18:24:47 +0000 (Sat, 07 Jul 2007) | 4 lines
+
+bug 5412: 'spamc -x -R' always returned 0, instead
+of the exit code, on error.  Bug 5478: in addition, 'spamc -x -e /command' would
+still run the command, even if errors meant that the filtered text would be
+unavailable, which contradicted -x.  fixed
+------------------------------------------------------------------------
+r553694 | sidney | 2007-07-06 01:47:14 +0000 (Fri, 06 Jul 2007) | 1 line
+
+bug 5545: revert r553327 which I never should have committed, back to previous 'tflags publish' behaviour
+------------------------------------------------------------------------
+r553327 | sidney | 2007-07-04 20:41:30 +0000 (Wed, 04 Jul 2007) | 1 line
+
+bug5545: switch 3.2 updates to require tflags publish
+------------------------------------------------------------------------
+r553325 | sidney | 2007-07-04 20:31:13 +0000 (Wed, 04 Jul 2007) | 1 line
+
+bug5419: kill -HUP of pidof spamd causes the ps name to change from spamd to perl
+------------------------------------------------------------------------
+r553320 | sidney | 2007-07-04 20:12:16 +0000 (Wed, 04 Jul 2007) | 1 line
+
+bug5546: mkrules doesn't take mod time of rules/active.list file into account
+------------------------------------------------------------------------
+r553318 | sidney | 2007-07-04 20:08:07 +0000 (Wed, 04 Jul 2007) | 1 line
+
+bug5535: fix make test problem in Windows caused by nonportable use of getpwuid
+------------------------------------------------------------------------
+r553317 | sidney | 2007-07-04 20:04:23 +0000 (Wed, 04 Jul 2007) | 1 line
+
+bug5534: fix compile warning in sa-compile
+------------------------------------------------------------------------
+r553316 | sidney | 2007-07-04 19:57:43 +0000 (Wed, 04 Jul 2007) | 1 line
+
+bug5462: add file that I forgot to svn add before checkin of rev 553314
+------------------------------------------------------------------------
+r553314 | sidney | 2007-07-04 19:49:58 +0000 (Wed, 04 Jul 2007) | 1 line
+
+bug5462: fix spamc -H randomisation that was broken
+------------------------------------------------------------------------
+r553313 | sidney | 2007-07-04 19:44:12 +0000 (Wed, 04 Jul 2007) | 1 line
+
+bug 5522: spamd -x -u was attempting to switch uid to the username passed from spamc, contradicting the documentation.  fix
+------------------------------------------------------------------------
+r553310 | sidney | 2007-07-04 19:34:34 +0000 (Wed, 04 Jul 2007) | 1 line
+
+bug5529: fix make tests running under root, needed for CPAN installs to work
+------------------------------------------------------------------------
+r553307 | sidney | 2007-07-04 19:29:11 +0000 (Wed, 04 Jul 2007) | 1 line
+
+bug 5518: use POSIX for setguid and setgrid because it handles platforms that our less portable code was breaking in make test
+------------------------------------------------------------------------
+r552442 | jm | 2007-07-02 09:31:44 +0000 (Mon, 02 Jul 2007) | 1 line
+
+bug 5445: body eval tests defined in user_rules cause 'Subroutine _eval_tests_type11_prineg400_set3 redefined' warnings; fix
+------------------------------------------------------------------------
+r550539 | jm | 2007-06-25 16:29:10 +0000 (Mon, 25 Jun 2007) | 1 line
+
+bug 5531: transport_setup() leaks a small amount of memory each time it's called; document this in a comment
+------------------------------------------------------------------------
+r549171 | dos | 2007-06-20 17:52:24 +0000 (Wed, 20 Jun 2007) | 1 line
+
+bug 5450: add __RCVD_IN_DNSWL to 72_active.cf
+------------------------------------------------------------------------
+r548570 | felicity | 2007-06-19 03:52:33 +0000 (Tue, 19 Jun 2007) | 1 line
+
+bug 5355: add in new entries for RegistrarBoundaries
+------------------------------------------------------------------------
+r548401 | jm | 2007-06-18 16:30:30 +0000 (Mon, 18 Jun 2007) | 2 lines
+
+bug 5509: improve URIBL timeout debugging messages,
+thanks to Mark Martinec
+------------------------------------------------------------------------
+r548399 | jm | 2007-06-18 16:29:40 +0000 (Mon, 18 Jun 2007) | 1 line
+
+bug 5515: libsslspamc.so & libsslspamc.so can not build without -fPIC, but we were picking up the wrong CFLAGS to do this. fix
+------------------------------------------------------------------------
+r548396 | jm | 2007-06-18 16:27:22 +0000 (Mon, 18 Jun 2007) | 1 line
+
+bug 5511: fix network lookup timeouts, where lookups were being lost once a timeout was hit; also fix code to match documentation on rbl_timeout's scaling and minimum duration of 1 second; and attempt to collect already-received DNS responses when the timeout is reached. thanks to Mark Martinec
+------------------------------------------------------------------------
+r548391 | jm | 2007-06-18 16:19:35 +0000 (Mon, 18 Jun 2007) | 1 line
+
+bug 5110: fix test suite to support running as root, now that spamd will automatically fall back to 'nobody' privs; this was breaking CPAN installation
+------------------------------------------------------------------------
+r548187 | dos | 2007-06-18 03:27:29 +0000 (Mon, 18 Jun 2007) | 1 line
+
+bug 5501: zero score for FH_HAS_XID
+------------------------------------------------------------------------
+r547235 | jm | 2007-06-14 12:43:41 +0000 (Thu, 14 Jun 2007) | 1 line
+
+reset IS_DEVEL_BUILD for the 3.2.2 release
+------------------------------------------------------------------------
+r546256 | jm | 2007-06-11 20:15:48 +0000 (Mon, 11 Jun 2007) | 1 line
+
+add 3.2.1 build announcement
+------------------------------------------------------------------------
+r546255 | jm | 2007-06-11 20:15:43 +0000 (Mon, 11 Jun 2007) | 1 line
+
+update MANIFEST to include new test files
+------------------------------------------------------------------------
+r546244 | jm | 2007-06-11 20:13:51 +0000 (Mon, 11 Jun 2007) | 1 line
+
+3.2.1 RELEASED
+------------------------------------------------------------------------
+r546243 | jm | 2007-06-11 20:13:45 +0000 (Mon, 11 Jun 2007) | 3 lines
+
+bug 5480: fix CVE-2007-2873, a local user symlink-attack DoS
+vulnerability in spamd when '--allow-tell' is used.  Full details at
+ http://spamassassin.apache.org/advisories/cve-2007-2873.txt
+------------------------------------------------------------------------
 r545288 | sidney | 2007-06-07 19:59:41 +0000 (Thu, 07 Jun 2007) | 1 line
 
 bug5488: zero some rules causing FPs
