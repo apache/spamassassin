@@ -1,0 +1,79 @@
+To: users, dev, announce
+Subject: ANNOUNCE: Apache SpamAssassin 3.2.2 available
+
+Apache SpamAssassin 3.2.2 is now available!  This is a maintenance
+release of the 3.2.x branch.
+
+Downloads are available from:
+  http://spamassassin.apache.org/downloads.cgi
+
+The release file will also be available via CPAN in the near future.
+
+  md5sum of archive files:
+  7423a1bca96b932d321882fc6092080b  Mail-SpamAssassin-3.2.2.tar.bz2
+  87b2a8852f125060f781922c3663525f  Mail-SpamAssassin-3.2.2.tar.gz
+  8dd32339bf82591b50c9eb307745c8fa  Mail-SpamAssassin-3.2.2.zip
+  
+  sha1sum of archive files:
+  6dfaa36eb8e500f9315cf2461fbd3229ae92a2c7  Mail-SpamAssassin-3.2.2.tar.bz2
+  e8ea034fa4f695607af0e596c86c5daf82f234e0  Mail-SpamAssassin-3.2.2.tar.gz
+  e9a9723bb1cbadaded2340ef0aa86a0329f03783  Mail-SpamAssassin-3.2.2.zip
+
+The release files also have a .asc accompanying them.  The file serves
+as an external GPG signature for the given release file.  The signing
+key is available via the wwwkeys.pgp.net key server, as well as
+http://spamassassin.apache.org/released/GPG-SIGNING-KEY
+
+The key information is:
+
+pub 1024D/265FA05B 2003-06-09 SpamAssassin Signing Key <release@spamassassin.org>
+    Key fingerprint = 26C9 00A4 6DD4 0CD5 AD24  F6D7 DEE0 1987 265F A05B
+
+
+3.2.2 is a minor bug-fix release.  Summary of changes:
+
+- bug 5548: Certain mail input can take a long time to scan with 100% CPU
+  utilisation, due to backtracking in a rule's regexp. fix
+
+- bugs 5510, 5518, 5529: fix 'make test' when running as root, needed for CPAN
+
+- bug 5419: kill -HUP of pidof spamd causes the ps name to change from spamd
+  to perl. fixed
+
+- bug 5535: 'make test' errors in Windows caused by nonportable use of
+  getpwuid
+
+- bug 5462: multiple DNS records for a host name should allow use of spamd -H
+  for load balancing installs to work
+
+- bugs 5509, 5511: fix network lookup timeouts, where lookups were being lost
+  once a timeout was hit; also fix code to match documentation on
+  rbl_timeout's scaling and minimum duration of 1 second; and attempt to
+  collect already-received DNS responses when the timeout is reached; improve
+  related debugging output. Thanks to Mark Martinec
+
+- bugs 5412, 5478, 5522: Fix problems using the spamc -x option with certain
+  other options; 'spamc -x -R' always returned 0, instead of the exit code, on
+  error.  Bug 5478: in addition, 'spamc -x -e /command' would still run the
+  command, even if errors meant that the filtered text would be unavailable,
+  which contradicted -x.
+
+- bug 5445: body eval tests defined in user_rules cause ugly 'Subroutine
+  _eval_tests_type11_prineg400_set3 redefined' warnings
+
+- bug 5355: add in new entries for RegistrarBoundaries
+
+- bug 5515: libsslspamc.so & libsslspamc.so can not build without -fPIC, but
+  we were picking up the wrong CFLAGS to do this.
+
+- bug 5501: zero score for FH_HAS_XID
+
+- bug 5449: allow_user_rules causes sa-compile / Rule2XSBody plugin to emit
+  spurious warnings; fix.  also, add a new 'user_conf_parsing_end' plugin
+  hook, which is called after the per-user configuration is parsed
+
+- bug 5182: update the sa-learn doc to mention that -u is only usable w/ sql
+
+- bug 5534: fix harmless-but-ugly C compiler warning in sa-compile
+
+
