@@ -82,6 +82,13 @@ sub sa_t_init {
 
   read_config();
 
+  # if running as root, ensure "nobody" can write to it too
+  if ($> == 0) {
+    $tmp_dir_mode = 0777;
+  } else {
+    $tmp_dir_mode = 0755;
+  }
+
   $NO_SPAMC_EXE = ($RUNNING_ON_WINDOWS &&
                    !$ENV{'SPAMC_SCRIPT'} &&
                    !(-e "../spamc/spamc.exe"));
@@ -130,7 +137,8 @@ sub sa_t_init {
   # create an empty .prefs file
   open (PREFS, ">>log/test_default.cf"); close PREFS;
 
-  mkdir("log/user_state",0755);
+  mkdir("log/user_state",$tmp_dir_mode);
+  chmod ($tmp_dir_mode, "log/user_state");  # unaffected by umask
 
   $home = $ENV{'HOME'};
   $home ||= $ENV{'WINDIR'} if (defined $ENV{'WINDIR'});
@@ -139,7 +147,10 @@ sub sa_t_init {
   $ENV{'TEST_DIR'} = $cwd;
   $testname = $tname;
 
-  $current_user = (getpwuid($>))[0];
+  $spamd_run_as_user = (getpwuid($>))[0];
+  if ($> == 0) {
+    $spamd_run_as_user = "nobody";
+  }
 }
 
 # a port number between 32768 and 65535; used to allow multiple test
@@ -231,9 +242,7 @@ sub sarun {
   my $post_redir = '';
   $args =~ s/ 2\>\&1$// and $post_redir = ' 2>&1';
 
-  rmtree ("log/outputdir.tmp"); # some tests use this
-  mkdir ("log/outputdir.tmp", 0755);
-
+  recreate_outputdir_tmp();
   %found = ();
   %found_anti = ();
 
@@ -265,8 +274,7 @@ sub salearnrun {
   my $args = shift;
   my $read_sub = shift;
 
-  rmtree ("log/outputdir.tmp"); # some tests use this
-  mkdir ("log/outputdir.tmp", 0755);
+  recreate_outputdir_tmp();
 
   %found = ();
   %found_anti = ();
@@ -372,6 +380,12 @@ sub sdrun {
   1;
 }
 
+sub recreate_outputdir_tmp {
+  rmtree ("log/outputdir.tmp"); # some tests use this
+  mkdir ("log/outputdir.tmp", $tmp_dir_mode);
+  chmod ($tmp_dir_mode, "log/outputdir.tmp");  # unaffected by umask
+}
+
 sub start_spamd {
 
   return if $SKIP_SPAMD_TESTS;
@@ -380,8 +394,7 @@ sub start_spamd {
 
   return if (defined($spamd_pid) && $spamd_pid > 0);
 
-  rmtree ("log/outputdir.tmp"); # some tests use this
-  mkdir ("log/outputdir.tmp", 0755);
+  recreate_outputdir_tmp();
 
   if (defined $ENV{'SD_ARGS'}) {
     $spamd_extra_args = $ENV{'SD_ARGS'} . " ". $spamd_extra_args;
