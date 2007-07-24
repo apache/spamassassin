@@ -242,7 +242,10 @@ sub summarise {
   my %done_set = ();
   my @done_pats = ();
 
-  printf ("%6s  %6s  %6s   %s\n", "RATIO", "SPAM%", "HAM%", "DATA");
+  if (!$opt{rules}) {
+    printf ("%6s  %6s  %6s   %s\n", "RATIO", "SPAM%", "HAM%", "DATA");
+  }
+
   $| = 1;
   foreach my $id (sort {
                       $ngram_count{$b} <=> $ngram_count{$a}
