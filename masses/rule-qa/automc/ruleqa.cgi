@@ -290,6 +290,14 @@ sub show_default_header {
 
   </head><body>
 
+       <h1> SpamAssassin Rule QA</h1>
+       <p>
+         Shortcut to mass-checks:
+         <a href="/last-preflight/">[most recent preflight]</a>,
+         <a href="/today/">[today's nightly]</a>,
+         <a href="/last-night/">[last night's nightly]</a>
+       </p>
+
   };
   return $hdr;
 }
