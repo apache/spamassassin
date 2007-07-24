@@ -59,6 +59,7 @@ GetOptions(
         "ruleprefix" => \$opt{ruleprefix},
         "reqhitrate=s" => \$opt{reqhitrate},
         "reqpatlength=s" => \$opt{reqpatlength},
+        "maxtextread=s" => \$opt{maxtextread},
         "ham=s" => \$fh,
         "spam=s" => \$fs,
         'help' => \&usage
