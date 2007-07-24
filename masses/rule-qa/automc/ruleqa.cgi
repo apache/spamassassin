@@ -296,6 +296,8 @@ sub show_default_header {
          <a href="/last-preflight/">[most recent preflight]</a>,
          <a href="/today/">[today's nightly]</a>,
          <a href="/last-night/">[last night's nightly]</a>
+         | <a href="http://bbmass.spamassassin.org:8011/">view
+         preflight mass-checks in progress</a>
        </p>
 
   };
