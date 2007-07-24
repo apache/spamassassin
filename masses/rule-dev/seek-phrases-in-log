@@ -56,7 +56,7 @@ my $fh;
 my @files = ();
 GetOptions(
         "rules" => \$opt{rules},
-        "ruleprefix" => \$opt{ruleprefix},
+        "ruleprefix=s" => \$opt{ruleprefix},
         "reqhitrate=s" => \$opt{reqhitrate},
         "reqpatlength=s" => \$opt{reqpatlength},
         "maxtextread=s" => \$opt{maxtextread},
@@ -149,16 +149,16 @@ sub proc_text_spam {
 }
 
 sub discard_hapaxes {
-  my $killed = 0;
+  my $before = (scalar keys %ngram_count);
   foreach my $tok (keys %ngram_count) {
     if ($ngram_count{$tok} == 1) {
       delete $ngram_count{$tok};
       delete $msg_subset_hit{$tok};
-      $killed++;
     }
   }
-  warn "shrunk dbs: $killed hapaxes killed, kept ".
-                    (scalar keys %ngram_count)." entries\n";
+  my $after = (scalar keys %ngram_count);
+  my $killed = ($after - $before);
+  warn "shrunk dbs: $killed hapaxes killed, kept $after entries\n";
 }
 
 sub proc_text_ham {
