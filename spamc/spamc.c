@@ -196,7 +196,9 @@ print_usage(void)
     usg("  -h, --help          Print this help message and exit.\n");
     usg("  -V, --version       Print spamc version and exit.\n");
     usg("  -K                  Keepalive check of spamd.\n");
+#ifdef HAVE_ZLIB_H
     usg("  -z                  Compress mail message sent to spamd.\n");
+#endif
     usg("  -f                  (Now default, ignored.)\n");
 
     usg("\n");
@@ -446,7 +448,12 @@ read_args(int argc, char **argv,
             }
             case 'z':
             {
+#ifdef HAVE_ZLIB_H
                 flags |= SPAMC_USE_ZLIB;
+#else
+                libspamc_log(flags, LOG_ERR, "spamc -z support not available");
+                ret = EX_USAGE;
+#endif
                 break;
             }
             case 0:
@@ -542,6 +549,8 @@ combine_args(char *config_file, int argc, char **argv,
 
 	tok = option;
 	while((tok = strtok(tok, " ")) != NULL) {
+       if(tok[0] == '\n')
+          break;
 	    for(i=strlen(tok); i>0; i--) {
 	        if(tok[i] == '\n')
 		    tok[i] = '\0';
@@ -700,8 +709,8 @@ main(int argc, char *argv[])
     struct transport trans;
     struct message m;
     int out_fd = -1;
-    int result;
-    int ret;
+    int result = EX_SOFTWARE;
+    int ret = EX_SOFTWARE;
     int extratype = 0;
     int islearned = 0;
     int isreported = 0;
@@ -918,44 +927,44 @@ main(int argc, char *argv[])
     free(username);
 
 /* FAIL: */
-    get_output_fd(&out_fd);
-
+#if 1
     result = m.is_spam;
-    if ((flags & SPAMC_CHECK_ONLY) && result != EX_TOOBIG) {
-	/* probably, the write to stdout failed; we can still report exit code */
-	message_cleanup(&m);
-	ret = result;
+    if (ret != EX_OK) {
+        result = ret;
     }
-    else if (flags & (SPAMC_CHECK_ONLY | SPAMC_REPORT | SPAMC_REPORT_IFSPAM)) {
-	full_write(out_fd, 1, "0/0\n", 4);
-	message_cleanup(&m);
-	ret = EX_NOTSPAM;
-    }
-    else if (flags & (SPAMC_LEARN|SPAMC_PING) ) {
+#endif
+    if (flags & (SPAMC_LEARN|SPAMC_PING) ) {
+        get_output_fd(&out_fd);
         message_cleanup(&m);
-    }
-    else if (flags & SPAMC_SYMBOLS) {
-	/* bug 4991: -y should only output a blank line on connection failure */
-	full_write(out_fd, 1, "\n", 1);
-        message_cleanup(&m);
-        if (use_exit_code) {
-            ret = result;
-        }
-	else if (flags & SPAMC_SAFE_FALLBACK) {
-	    ret = EX_OK;
-	}
     }
     else {
-	message_dump(STDIN_FILENO, out_fd, &m);
+        if (flags & (SPAMC_CHECK_ONLY | SPAMC_REPORT | SPAMC_REPORT_IFSPAM)) {
+            get_output_fd(&out_fd);
+            full_write(out_fd, 1, "0/0\n", 4);
+        }
+        else if (flags & SPAMC_SYMBOLS) {
+            /* bug 4991: -y should only output a blank line on connection failure */
+            get_output_fd(&out_fd);
+            full_write(out_fd, 1, "\n", 1);
+        }
+        else {
+            /* bug 5412: spamc -x should not output the message on error */
+            if ((flags & SPAMC_SAFE_FALLBACK) || result == EX_TOOBIG) {
+                get_output_fd(&out_fd);
+                message_dump(STDIN_FILENO, out_fd, &m);
+            }
+            /* else, do NOT get_output_fd() (bug 5478) */
+        }
+
 	message_cleanup(&m);
 	if (ret == EX_TOOBIG) {
-	    ret = 0;
+	    ret = EX_OK;    /* too big always means exit(0) -- bug 5412 */
 	}
-        else if (use_exit_code) {
-            ret = result;
-        }
 	else if (flags & SPAMC_SAFE_FALLBACK) {
 	    ret = EX_OK;
+        }
+        else if (use_exit_code) {
+            ret = result;
 	}
     }
     

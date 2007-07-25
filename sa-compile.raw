@@ -88,6 +88,7 @@ GetOptions(
   'configpath|config-file|config-dir|c|C=s' => \$opt{'configpath'},
   'prefspath|prefs-file|p=s'                => \$opt{'prefspath'},
   'siteconfigpath=s'                        => \$opt{'siteconfigpath'},
+  'updatedir=s'                             => \$opt{'updatedir'},
   'cf=s'                                    => \@{$opt{'cf'}},
   'debug|D:s'       => \$opt{'debug'},
   'help|h|?'        => \$opt{'help'},
@@ -155,7 +156,13 @@ $spamtest->{bases_can_use_quantifiers} = 0;
 $spamtest->{bases_can_use_char_classes} = 0;
 $spamtest->{bases_split_out_alternations} = 1;
 
-my $installdir = $spamtest->sed_path('__local_state_dir__/compiled/__version__');
+if (defined $opt{'updatedir'}) {
+  $opt{'updatedir'} = Mail::SpamAssassin::Util::untaint_file_path($opt{'updatedir'});
+}
+else {
+  $opt{'updatedir'} = $spamtest->sed_path('__local_state_dir__/compiled/__version__');
+}
+my $installdir = $opt{'updatedir'};
 if ((!defined $opt{'list'})
         && !$opt{'sudo'}
         && -d $installdir && !-w $installdir)
@@ -453,6 +460,12 @@ EOT
 	      newSVpvn_share(wordstart, cp-wordstart, (U32)0));
   }
 
+EOT
+
+  # use a buffer string here instead of writing direct to the file,
+  # so we can prepend 'extern' statements (bug 5534)
+  my $xscode = <<"EOT";
+
 MODULE = $modname  PACKAGE = $modname
 
 PROTOTYPES: DISABLE
@@ -474,13 +487,21 @@ scan(psv)
 	pstart = (unsigned char *) SvPVutf8(psv, plen);
 	pend = pstart + plen;
 	results = (AV *) sv_2mortal((SV *) newAV());
+
 EOT
 
   for (1..$numscans) {
     my $funcname = $cprefix."_scan".$_;
 
-    print $re <<EOT;
+    $xscode =
+        # prepend this chunk
+        qq{
+
 	  extern char *${funcname} (unsigned char **);
+
+        }.$xscode.
+        # and append this one
+        qq{
 
 	  cursor = pstart;
 	  while (cursor < pend) {
@@ -488,10 +509,12 @@ EOT
 	      split_and_add(results, match);
 	    }
 	  }
-EOT
+
+        };
 
   }
 
+  print $re $xscode;
   print $re <<EOT;
 	  RETVAL = newRV((SV *) results);
       OUTPUT:
@@ -637,6 +660,8 @@ Options:
                                 Set user preferences file
   --siteconfigpath=path         Path for site configs
                                 (default: /etc/mail/spamassassin)
+  --updatedir=path              Directory to place updates
+                      (default: /var/lib/spamassassin/compiled/<version>)
   --cf='config line'            Additional line of configuration
   -D, --debug [area=n,...]	Print debugging messages
   -V, --version			Print version
@@ -652,7 +677,7 @@ C<re2c> can match strings much faster than perl code, by constructing a DFA to
 match many simple strings in parallel, and compiling that to native object
 code.  Not all SpamAssassin rules are amenable to this conversion, however.
 
-This requires C<re2c> version 0.10.x (see C<http://re2c.org/>), and the C
+This requires C<re2c> (see C<http://re2c.org/>), and the C
 compiler used to build Perl XS modules, be installed.
 
 Note that running this, and creating a compiled ruleset, will have no
@@ -690,6 +715,19 @@ Ignore the default directories (usually C</usr/share/spamassassin> or similar).
 Use the specified path for locating site-specific configuration files.  Ignore
 the default directories (usually C</etc/mail/spamassassin> or similar).
 
+=item B<--updatedir>
+
+By default, C<sa-compile> will use the system-wide rules update directory:
+
+        @@LOCAL_STATE_DIR@@/spamassassin/compiled/@@VERSION@@
+
+If the updates should be stored in another location, specify it here.
+
+Note that use of this option is not recommended; if sa-compile is placing the
+compiled rules the wrong directory, you probably need to rebuild SpamAssassin
+with different C<Makefile.PL> arguments, instead of overriding sa-compile's
+runtime behaviour.
+
 =item B<--cf='config line'>
 
 Add additional lines of configuration directly from the command-line, parsed
@@ -707,10 +745,9 @@ Produce debugging output.  If no areas are listed, all debugging information is
 printed.  Diagnostic output can also be enabled for each area individually;
 I<area> is the area of the code to instrument.
 
-For more information about which areas (also known as channels) are available,
-please see the documentation at:
-
-	C<http://wiki.apache.org/spamassassin/DebugChannels>
+For more information about which areas (also known as channels) are
+available, please see the documentation at
+L<http://wiki.apache.org/spamassassin/DebugChannels>.
 
 =item B<-h>, B<--help>
 

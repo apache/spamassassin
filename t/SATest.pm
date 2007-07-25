@@ -19,6 +19,7 @@ BEGIN {
   our $NO_SPAMC_EXE;
   our $SKIP_SPAMC_TESTS;
   our $SSL_AVAILABLE;
+  our $SKIP_SETUID_NOBODY_TESTS = 0;
 
 }
 
@@ -88,6 +89,18 @@ sub sa_t_init {
 
   read_config();
 
+  # if running as root, ensure "nobody" can write to it too
+  if ($> == 0) {
+    $tmp_dir_mode = 0777;
+    umask 022;  # ensure correct permissions on files and dirs created here
+    # Bug 5529 initial fix: For now don't run a test as root if it has a problem resuting from setuid nobody
+    # FIXME: Eventually we can actually test setuid nobody and accessing ./log to make this test more fine grained
+    #  and we can create an accessible temp dir that some of the tests can use. But for now just skip those tests.
+    $SKIP_SETUID_NOBODY_TESTS = 1;
+  } else {
+    $tmp_dir_mode = 0755;
+  }
+
   if (!$NO_SPAMD_REQUIRED) {
     $NO_SPAMC_EXE = ($RUNNING_ON_WINDOWS &&
                    !$ENV{'SPAMC_SCRIPT'} &&
@@ -103,6 +116,7 @@ sub sa_t_init {
   # rmtree ("log");
 
   mkdir ("log", 0755);
+  chmod (0755, "log"); # set in case log already exists with wrong permissions
 
   rmtree ("log/user_state");
   rmtree ("log/outputdir.tmp");
@@ -138,7 +152,8 @@ sub sa_t_init {
   # create an empty .prefs file
   open (PREFS, ">>log/test_default.cf"); close PREFS;
 
-  mkdir("log/user_state",0755);
+  mkdir("log/user_state",$tmp_dir_mode);
+  chmod ($tmp_dir_mode, "log/user_state");  # unaffected by umask
 
   $home = $ENV{'HOME'};
   $home ||= $ENV{'WINDIR'} if (defined $ENV{'WINDIR'});
@@ -146,6 +161,8 @@ sub sa_t_init {
 
   $ENV{'TEST_DIR'} = $cwd;
   $testname = $tname;
+
+  $spamd_run_as_user = ($RUNNING_ON_WINDOWS || ($> == 0)) ? "nobody" : (getpwuid($>))[0] ;
 }
 
 # a port number between 32768 and 65535; used to allow multiple test
@@ -239,9 +256,7 @@ sub sarun {
   my $post_redir = '';
   $args =~ s/ 2\>\&1$// and $post_redir = ' 2>&1';
 
-  rmtree ("log/outputdir.tmp"); # some tests use this
-  mkdir ("log/outputdir.tmp", 0755);
-
+  recreate_outputdir_tmp();
   clear_pattern_counters();
 
   if (defined $ENV{'SA_ARGS'}) {
@@ -273,8 +288,7 @@ sub salearnrun {
   my $args = shift;
   my $read_sub = shift;
 
-  rmtree ("log/outputdir.tmp"); # some tests use this
-  mkdir ("log/outputdir.tmp", 0755);
+  recreate_outputdir_tmp();
 
   %found = ();
   %found_anti = ();
@@ -302,11 +316,15 @@ sub scrun {
 sub scrunwithstderr {
   spamcrun (@_, 1);
 }
+sub scrunwantfail {
+  spamcrun (@_, 1, 1);
+}
 
 sub spamcrun {
   my $args = shift;
   my $read_sub = shift;
   my $capture_stderr = shift;
+  my $expect_failure = shift;
 
   if (defined $ENV{'SC_ARGS'}) {
     $args = $ENV{'SC_ARGS'} . " ". $args;
@@ -336,13 +354,19 @@ sub spamcrun {
   }
 
   $sa_exitcode = ($?>>8);
-  if ($sa_exitcode != 0) { stop_spamd(); return undef; }
+  if (!$expect_failure) {
+    if ($sa_exitcode != 0) { stop_spamd(); return undef; }
+  }
 
   %found = ();
   %found_anti = ();
   &checkfile ("d.$testname/out.${Test::ntest}", $read_sub) if (defined $read_sub);
 
-  ($sa_exitcode == 0);
+  if ($expect_failure) {
+    ($sa_exitcode != 0);
+  } else {
+    ($sa_exitcode == 0);
+  }
 }
 
 sub spamcrun_background {
@@ -383,6 +407,12 @@ sub sdrun {
   1;
 }
 
+sub recreate_outputdir_tmp {
+  rmtree ("log/outputdir.tmp"); # some tests use this
+  mkdir ("log/outputdir.tmp", $tmp_dir_mode);
+  chmod ($tmp_dir_mode, "log/outputdir.tmp");  # unaffected by umask
+}
+
 # out: $spamd_stderr
 sub start_spamd {
   die "NO_SPAMD_REQUIRED in start_spamd! oops" if $NO_SPAMD_REQUIRED;
@@ -392,8 +422,7 @@ sub start_spamd {
 
   return if (defined($spamd_pid) && $spamd_pid > 0);
 
-  rmtree ("log/outputdir.tmp"); # some tests use this
-  mkdir ("log/outputdir.tmp", 0755);
+  recreate_outputdir_tmp();
 
   if (defined $ENV{'SD_ARGS'}) {
     $spamd_extra_args = $ENV{'SD_ARGS'} . " ". $spamd_extra_args;

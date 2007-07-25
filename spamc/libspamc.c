@@ -504,7 +504,18 @@ static int _try_to_connect_tcp(const struct transport *tp, int *sockptr)
                       family, host, port, numloops + 1, connect_retries);
 #endif
 
-            status = timeout_connect(mysock, res->ai_addr, res->ai_addrlen);
+            /* this is special-cased so that we have an address we can
+             * safely use as an "always fail" test case */
+            if (!strcmp(host, "255.255.255.255")) {
+              libspamc_log(tp->flags, LOG_ERR,
+                          "connect to spamd on %s failed, broadcast addr",
+                          host);
+              status = -1;
+            }
+            else {
+              status = timeout_connect(mysock, res->ai_addr, res->ai_addrlen);
+            }
+
 #else
 	    struct sockaddr_in addrbuf;
 	    const char *ipaddr;
@@ -524,11 +535,21 @@ static int _try_to_connect_tcp(const struct transport *tp, int *sockptr)
 			 "dbg: connect(AF_INET) to spamd at %s (try #%d of %d)",
 			 ipaddr, numloops + 1, connect_retries);
 #endif
-	    
-	    status =
-	      timeout_connect(mysock, (struct sockaddr *) &addrbuf, sizeof(addrbuf));
-#endif
 
+            /* this is special-cased so that we have an address we can
+             * safely use as an "always fail" test case */
+            if (!strcmp(ipaddr, "255.255.255.255")) {
+              libspamc_log(tp->flags, LOG_ERR,
+                          "connect to spamd on %s failed, broadcast addr",
+                          ipaddr);
+              status = -1;
+            }
+            else {
+              status = timeout_connect(mysock, (struct sockaddr *) &addrbuf,
+                        sizeof(addrbuf));
+            }
+
+#endif
 
             if (status != 0) {
                   origerr = spamc_get_errno();
@@ -1740,6 +1761,7 @@ static void _randomize_hosts(struct transport *tp)
     while (rnum-- > 0) {
         tmp = tp->hosts[0];
 
+        /* TODO: free using freeaddrinfo() */
         for (i = 1; i < tp->nhosts; i++)
             tp->hosts[i - 1] = tp->hosts[i];
 
@@ -1765,7 +1787,7 @@ static void _randomize_hosts(struct transport *tp)
 int transport_setup(struct transport *tp, int flags)
 {
 #ifdef SPAMC_HAS_ADDRINFO
-    struct addrinfo hints, *res; 
+    struct addrinfo hints, *res, *addrp; 
     char port[6];
 #else
     struct hostent *hp;
@@ -1878,6 +1900,13 @@ int transport_setup(struct transport *tp, int flags)
                 case EAI_FAIL: /*name server returned permanent error*/
                     errbits |= 2;
                     break;
+                default:
+                    /* should not happen, all errors are checked above */
+                    free(hostlist);
+                    return EX_OSERR;
+                }
+                goto nexthost; /* try next host in list */
+            }
 #else
             if ((hp = gethostbyname(hostname)) == NULL) {
                 int origerr = h_errno; /* take a copy before syslog() */
@@ -1892,7 +1921,6 @@ int transport_setup(struct transport *tp, int flags)
                 case NO_RECOVERY:
                     errbits |= 2;
                     break;
-#endif
                 default:
                     /* should not happen, all errors are checked above */
                     free(hostlist);
@@ -1900,16 +1928,18 @@ int transport_setup(struct transport *tp, int flags)
                 }
                 goto nexthost; /* try next host in list */
             }
+#endif
             
             /* If we have no hosts at all */
 #ifdef SPAMC_HAS_ADDRINFO
-            if(res == NULL) {
+            if(res == NULL)
 #else
             if (hp->h_addr_list[0] == NULL
              || hp->h_length != sizeof tp->hosts[0]
-             || hp->h_addrtype != AF_INET) {
+             || hp->h_addrtype != AF_INET)
                 /* no hosts/bad size/wrong family */
 #endif
+            {
                 errbits |= 1;
                 goto nexthost; /* try next host in list */
             }
@@ -1926,8 +1956,12 @@ int transport_setup(struct transport *tp, int flags)
                      TRANSPORT_MAX_HOSTS);
                break;
             }
-            tp->hosts[tp->nhosts] = res;
-            tp->nhosts++;
+            for (addrp = res; addrp != NULL; ) {
+                tp->hosts[tp->nhosts] = addrp;
+                addrp = addrp->ai_next;     /* before NULLing ai_next */
+                tp->hosts[tp->nhosts]->ai_next = NULL;
+                tp->nhosts++;
+            }
 #else
             for (addrp = hp->h_addr_list; *addrp; addrp++) {
                 if (tp->nhosts == TRANSPORT_MAX_HOSTS) {

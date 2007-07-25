@@ -59,7 +59,7 @@ for ext in tar.bz2 tar.gz zip ; do
 
   rm -f $DISTVNAME.$ext.asc*
   if [ -d $HOME/sabuildtools/sasigningkey ]; then
-    gpg --homedir $HOME/sabuildtools/sasigningkey -bsa $DISTVNAME.$ext || exit $?
+    $HOME/sabuildtools/bin/gpg --homedir $HOME/sabuildtools/sasigningkey -bsa $DISTVNAME.$ext || exit $?
     mv $DISTVNAME.$ext.asc $DEVDIR/$DISTVNAME.$ext.asc || exit $?
   fi
 

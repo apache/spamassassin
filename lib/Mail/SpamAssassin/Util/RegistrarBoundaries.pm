@@ -52,7 +52,7 @@ foreach (qw/
   eu
   jobs travel
   xxx
-  mobi
+  mobi asia cat tel
   /) { 
   $VALID_TLDS{$_} = 1;
 }
@@ -141,7 +141,7 @@ foreach(qw/
   com.ni edu.ni gob.ni net.ni nom.ni org.ni
   tel.no
   com.np edu.np gov.np net.np org.np
-  fax.nr mob.nr mobil.nr mobile.nr tel.nr tlf.nr
+  fax.nr mob.nr mobil.nr mobile.nr tel.nr tlf.nr co.nr
   ac.nz co.nz cri.nz geek.nz gen.nz govt.nz iwi.nz maori.nz mil.nz net.nz org.nz school.nz
   ac.om biz.om co.om com.om edu.om gov.om med.om mod.om museum.om net.om org.om pro.om
   dk.org eu.org

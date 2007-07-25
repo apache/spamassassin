@@ -235,6 +235,10 @@ struct transport
     int retry_sleep;
 };
 
+/* Initialise and setup transport-specific context for the connection
+ * to spamd.  Note that this may leak a small amount of string data for
+ * the remote hostname (bug 5531) if called repeatedly; SpamAssassin
+ * 3.3.0 will include a new API to free this leakage. */
 extern void transport_init(struct transport *tp);
 extern int transport_setup(struct transport *tp, int flags);
 

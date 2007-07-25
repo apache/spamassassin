@@ -351,7 +351,7 @@ if (RUNNING_ON_WINDOWS) {
   if (!defined $opt{'build_spamc'}) {
     $opt{'build_spamc'} = bool(prompt(
       "Build spamc.exe (environment must be set up for C compiler)? (y/n)",
-      'y'));
+      'n'));
   } else {
     $opt{'build_spamc'} = bool($opt{'build_spamc'});
   }

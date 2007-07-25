@@ -1,7 +1,7 @@
 #!/bin/sh
 
 WEBDIR=/www/spamassassin.apache.org
-vers=3.1.x
+vers=3.2.x
 
 if [ -z "$PERL" ]; then
   if [ -x /home/jm/perl584/bin/perl ]; then
@@ -18,8 +18,8 @@ $PERL Makefile.PL PERL=$PERL < /dev/null
 make
 make text_html_doc || exit 1
 
-rm -rf $fulldir/dist
-mkdir $fulldir/dist
+rm -rf $fulldir/doc
+mkdir $fulldir
 tar cf - \
         --exclude=CVS --exclude='.#*'  \
         --exclude=.svn \
@@ -28,15 +28,7 @@ tar cf - \
         --exclude='o' --exclude='out' \
         --exclude='tst' \
         --exclude='blib' --exclude='Mail-SpamAssassin-*' \
-        . | ( cd $fulldir/dist ; tar xf - )
+        doc | ( cd $fulldir ; tar xf - )
         
-(
-  cd $fulldir/dist
-  tar cf docbak doc
-  make clean distclean
-  tar xvf docbak
-  rm -f docbak
-)
-
-chmod -R g+w $fulldir/dist
+chmod -R g+w $fulldir
 

@@ -36,7 +36,7 @@ use base qw( Exporter );
 
 @PFSTATE_VARS = qw(
   PFSTATE_ERROR PFSTATE_STARTING PFSTATE_IDLE PFSTATE_BUSY PFSTATE_KILLED
-  PFORDER_ACCEPT 
+  PFORDER_ACCEPT PFSTATE_GOT_SIGCHLD
 );
 
 %EXPORT_TAGS = (
@@ -49,6 +49,7 @@ use constant PFSTATE_STARTING    => 0;
 use constant PFSTATE_IDLE        => 1;
 use constant PFSTATE_BUSY        => 2;
 use constant PFSTATE_KILLED      => 3;
+use constant PFSTATE_GOT_SIGCHLD => 4;
 
 use constant PFORDER_ACCEPT      => 10;
 
@@ -127,13 +128,28 @@ sub child_exited {
   my ($self, $pid) = @_;
 
   dbg("prefork: child $pid: just exited");
-  delete $self->{kids}->{$pid};
+
+  # defer removal from the list until after return from the signal
+  # handler; it seems that we may be corrupting the list structure
+  # by deleting the {kids} hash entry from a sig handler. (bug 5422)
+  $self->set_child_state ($pid, PFSTATE_GOT_SIGCHLD);
 
   # note this for the select()-caller's benefit
   $self->{child_just_exited} = 1;
+}
+ 
+sub post_sigchld_cleanup {
+  my ($self) = @_;
+  my @pids = grep { $self->{kids}->{$_} == PFSTATE_GOT_SIGCHLD }
+        keys %{$self->{kids}};
+  return unless @pids;
 
-  # remove the child from the backchannel list, too
-  $self->{backchannel}->delete_socket_for_child($pid);
+  foreach my $pid (@pids) {
+    delete $self->{kids}->{$pid};       # remove from list
+
+    # remove the child from the backchannel list, too
+    $self->{backchannel}->delete_socket_for_child($pid);
+  }
 
   # ensure we recompute, so that we don't try to tell that child to
   # accept a request, only to find that it's died in the meantime.
@@ -180,7 +196,8 @@ sub set_child_state {
   # I keep misreading this -- so: this says, if the child is starting, or is
   # dying, or it has an entry in the {kids} hash, then allow the state to be
   # set.  otherwise the update can be ignored.
-  if ($state == PFSTATE_STARTING || $state == PFSTATE_KILLED || exists $self->{kids}->{$pid})
+  if ($state == PFSTATE_STARTING || $state == PFSTATE_KILLED ||
+        $state == PFSTATE_GOT_SIGCHLD || exists $self->{kids}->{$pid})
   {
     $self->{kids}->{$pid} = $state;
     dbg("prefork: child $pid: entering state $state");
@@ -232,6 +249,9 @@ sub main_server_poll {
     $self->vec_all(\$rin, $self->{server_fileno}, 0);
   }
 
+  # clean up any fresh zombies before we select()
+  $self->post_sigchld_cleanup();
+
   my ($rout, $eout, $nfound, $timeleft, $selerr);
 
   # use alarm to back up select()'s built-in alarm, to debug Theo's bug.
@@ -248,6 +268,9 @@ sub main_server_poll {
     $selerr = $!;
 
   });
+
+  # in case any kids exited during select()
+  $self->post_sigchld_cleanup();
 
   # bug 4696: under load, the process can go for such a long time without
   # being context-switched in, that when it does return the alarm() fires
@@ -756,6 +779,9 @@ sub adapt_num_children {
     }
     elsif ($k == PFSTATE_KILLED) {
       $statestr .= 'K';
+    }
+    elsif ($k == PFSTATE_GOT_SIGCHLD) {
+      $statestr .= 'Z';
     }
     elsif ($k == PFSTATE_ERROR) {
       $statestr .= 'E';

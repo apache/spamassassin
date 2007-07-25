@@ -101,6 +101,8 @@ use File::Spec 0.8;
 use File::Path;
 use Carp ();
 
+use constant RUNNING_ON_MACOS => ($^O =~ /^darwin/oi);
+
 # Check to make sure the script version and the module version matches.
 # If not, die here!  Also, deal with unchanged VERSION macro.
 if ($Mail::SpamAssassin::VERSION ne '@@VERSION@@' && '@@VERSION@@' ne "\@\@VERSION\@\@") {
@@ -202,6 +204,8 @@ my @ORIG_ARGV = Mail::SpamAssassin::Util::untaint_var( \@ARGV );
 # daemonize() switches to the root later on and we need to come back here
 # somehow -- untaint the dir to be on the safe side.
 my $ORIG_CWD = Mail::SpamAssassin::Util::untaint_var( Cwd::cwd() );
+
+prepare_for_sighup_restart();
 
 # Parse the command line
 Getopt::Long::Configure("bundling");
@@ -489,14 +493,28 @@ elsif ($log_facility eq 'file') {
 # support setuid() to user unless:
 # run with -u
 # we're not root
-# doing --vpopmail
+# doing --vpopmail or --virtual-config-dir
 # we disable user-config
 my $setuid_to_user = (
 	$opt{'username'} ||
 	$> != 0 ||
 	$opt{'vpopmail'} ||
-	(!$opt{'user-config'} && !($opt{'setuid-with-sql'}||$opt{'setuid-with-ldap'}))
-	) ? 0 : 1;
+	$opt{'virtual-config-dir'}
+      ) ? 0 : 1;
+
+dbg("spamd: will perform setuids? $setuid_to_user");
+
+if ( $opt{'vpopmail'} ) {
+  if ( !$opt{'username'} ) {
+    die "spamd: cannot use --vpopmail without -u\n";
+  }
+}
+
+if ( $opt{'virtual-config-dir'} ) {
+  if ( !$opt{'username'} ) {
+    die "spamd: cannot use --virtual-config-dir without -u\n";
+  }
+}
 
 # always copy the config, later code may disable
 my $copy_config_p = 1;
@@ -945,28 +963,7 @@ while (1) {
     $scaling->main_server_poll($opt{'server-scale-period'});
   }
 
-  if ( defined $got_sighup ) {
-    if (defined($opt{'pidfile'})) {
-      unlink($opt{'pidfile'}) || warn "spamd: cannot unlink $opt{'pidfile'}: $!\n";
-    }
-
-    # leave Client fds active, and do not kill children; they can still
-    # service clients until they exit.  But restart the listener anyway.
-    # And close the logfile, so the new instance can reopen it.
-    Mail::SpamAssassin::Logger::close_log();
-    chdir($ORIG_CWD)
-      || die "spamd: restart failed: chdir failed: ${ORIG_CWD}: $!\n";
-
-    # ensure we re-run spamd using the right perl interpreter, and
-    # with the right switches (taint mode and warnings) (bug 5255)
-    my $perl = Mail::SpamAssassin::Util::untaint_var($^X);
-    my @execs = ( $perl, "-T", "-w", $ORIG_ARG0, @ORIG_ARGV );
-    warn "spamd: restarting using '" . join (' ', @execs) . "'\n";
-    exec @execs;
-
-    # should not get past that...
-    die "spamd: restart failed: exec failed: " . join (' ', @execs) . ": $!\n";
-  }
+  ( defined $got_sighup ) and do_sighup_restart();
 
   for (my $i = keys %children; $i < $childlimit; $i++) {
     spawn();
@@ -1022,24 +1019,13 @@ sub spawn {
         $ugid = getgrnam( $opt{'groupname'} ) || $ugid;
       }
 
-      # Change GID
-      $) = "$ugid $ugid";    # effective gid
-      $( = $ugid;            # real gid
+      # bug 5518: assignments to $) and $( don't always work on all platforms
+      # bug 3900: assignments to $> and $< problems with BSD perl bug
+      # use the POSIX functions to hide the platform specific workarounds 
+      POSIX::setgid($ugid);  # set effective and real gid
+      POSIX::setuid($uuid);  # set effective and real UID
 
-      # Change UID
-      $> = $uuid;            # effective uid
-      $< = $uuid;            # real uid. we now cannot setuid anymore
-
-      # bug 3900: BSD perl bug. see comment in setuid_to_euid() in
-      # Mail::SA::Util on the same issue.
-      if ($< != $uuid) {
-        dbg("spamd: initial attempt to change real uid failed, trying BSD workaround");
-
-        $> = $<;              # revert euid to ruid
-        $< = $uuid;           # change ruid to target
-        $> = $uuid;           # change euid back to target
-      }
-
+      # keep the sanity check to catch problems like bug 3900 just in case
       if ( $> != $uuid and $> != ( $uuid - 2**32 ) ) {
         die "spamd: setuid to uid $uuid failed\n";
       }
@@ -1463,18 +1449,8 @@ sub check {
     $compress_zlib = $hdrs->{compress_zlib};
   }
 
-  handle_setuid_to_user if ($setuid_to_user && $> == 0);
-
-  if ( $opt{'sql-config'} && !defined($current_user) ) {
-    unless ( handle_user_sql('nobody') ) {
-      service_unavailable_error("Error fetching user preferences via SQL");
-      return 0;
-    }
-  }
-
-  if ( $opt{'ldap-config'} && !defined($current_user) ) {
-    handle_user_ldap('nobody');
-  }
+  return 0 unless do_user_handling();
+  if ($> == 0) { die "spamd: still running as root! dying"; }
 
   my $resp = "EX_OK";
 
@@ -1669,6 +1645,9 @@ sub dotell {
   my $expected_length = $hdrs->{expected_length};
   my $compress_zlib = $hdrs->{compress_zlib};
 
+  return 0 unless do_user_handling();
+  if ($> == 0) { die "spamd: still running as root! dying"; }
+
   if (!$opt{tell}) {
     service_unavailable_error("TELL commands have not been enabled.");
     return 0;
@@ -1683,8 +1662,6 @@ sub dotell {
     protocol_error("Unable to set remote and remove remote in the same operation.");
     return 0;
   }
-
-  &handle_setuid_to_user if ($setuid_to_user && $> == 0);
 
   if ($opt{'sql-config'} && !defined($current_user)) {
     unless (handle_user_sql('nobody')) {
@@ -1789,6 +1766,26 @@ sub dotell {
 
 ###########################################################################
 
+sub do_user_handling {
+  if ($setuid_to_user && $> == 0) {
+    handle_setuid_to_user();
+  }
+
+  if ( $opt{'sql-config'} && !defined($current_user) ) {
+    unless ( handle_user_sql('nobody') ) {
+      service_unavailable_error("Error fetching user preferences via SQL");
+      return 0;
+    }
+  }
+
+  if ( $opt{'ldap-config'} && !defined($current_user) ) {
+    handle_user_ldap('nobody');
+  }
+
+  dbg ("spamd: running as uid $>");
+  return 1;
+}
+
 # generalised header parser.  
 sub parse_headers {
   my ($hdrs, $client) = @_;
@@ -1891,9 +1888,12 @@ sub got_user_header {
       handle_user_setuid_with_ldap($current_user);
       $setuid_to_user = 1;    # as above
     }
+    else {
+      handle_user_setuid_basic($current_user);
+    }
   }
   else {
-    handle_user($current_user);
+    handle_user_setuid_basic($current_user);
     if ( $opt{'sql-config'} ) {
       unless ( handle_user_sql($current_user) ) {
         service_unavailable_error("Error fetching user preferences via SQL");
@@ -2016,15 +2016,14 @@ sub auth_ident {
   return 1;
 }
 
-sub handle_user {
+sub handle_user_setuid_basic {
   my $username = shift;
 
-  #
-  # If vpopmail config enabled then look up userinfo for vpopmail uid
-  # as defined by $opt{'username'} or as passed via $username
+  # If $opt{'username'} in use, then look up userinfo for that uid;
+  # otherwise use what was passed via $username
   #
   my $userid = '';
-  if ( $opt{'vpopmail'} && $opt{'username'} ) {
+  if ( $opt{'username'} ) {
     $userid = $opt{'username'};
   }
   else {
@@ -2055,6 +2054,14 @@ sub handle_user {
     }
   }
 
+  if ($opt{'user-config'}) {
+    handle_user_set_user_prefs($dir, $username);
+  }
+}
+
+sub handle_user_set_user_prefs {
+  my ($dir, $username) = @_;
+
   #
   # If vpopmail config enabled then set $dir to virtual homedir
   #
@@ -2076,33 +2083,14 @@ sub handle_user {
   }
   my $cf_file = $dir . "/.spamassassin/user_prefs";
 
-  #
-  # If vpopmail config enabled then pass virtual homedir onto create_default_cf_needed
-  #
-  if ( $opt{'vpopmail'} ) {
-    if ( !$opt{'username'} ) {
-      warn "spamd: cannot use vpopmail without -u\n";
+  create_default_cf_if_needed( $cf_file, $username, $dir );
+  $spamtest->read_scoreonly_config($cf_file);
+  $spamtest->signal_user_changed(
+    {
+      username => $username,
+      user_dir => $dir
     }
-    create_default_cf_if_needed( $cf_file, $username, $dir );
-    $spamtest->read_scoreonly_config($cf_file);
-    $spamtest->signal_user_changed(
-      {
-        username => $username,
-        user_dir => $dir
-      }
-    );
-
-  }
-  else {
-    create_default_cf_if_needed( $cf_file, $username, $dir );
-    $spamtest->read_scoreonly_config($cf_file);
-    $spamtest->signal_user_changed(
-      {
-        username => $username,
-        user_dir => $dir
-      }
-    );
-  }
+  );
 
   return 1;
 }
@@ -2459,6 +2447,14 @@ sub preload_modules_with_tmp_homedir {
 
   dbg("spamd: Preloading modules with HOME=$tmphome");
 
+  # bug 5379: spamd won't start if the temp preloading dir exists;
+  # be sure to remove it just in case 
+  if (-d $tmpsadir) {
+    rmdir( $tmpsadir ) or die "spamd: $tmpsadir not empty: $!";
+  }
+  if (-d $tmphome) {
+    rmdir( $tmphome ) or die "spamd: $tmphome not empty: $!";
+  }
   mkdir( $tmphome,  0700 ) or die "spamd: cannot create $tmphome: $!";
   mkdir( $tmpsadir, 0700 ) or die "spamd: cannot create $tmpsadir: $!";
   $ENV{HOME} = $tmphome;
@@ -2546,6 +2542,51 @@ sub map_server_sockets {
       ((defined $fd_inet ? 1 : 0) +
       (defined $fd_unix ? 1 : 0) +
       (defined $fd_ssl  ? 1 : 0)) > 1;
+}
+
+# do this in advance, since we want to minimize work when SIGHUP
+# is received
+my $perl_from_hashbang_line;
+sub prepare_for_sighup_restart {
+  # it'd be great if we could introspect the interpreter to figure this
+  # out, but bizarrely it seems unavailable.
+  if (open (IN, "<$ORIG_ARG0")) {
+    my $l = <IN>;
+    close IN;
+    if ($l && $l =~ /^#!\s*(\S+)\s*.*?$/) {
+      $perl_from_hashbang_line = $1;
+    }
+  }
+}
+
+sub do_sighup_restart {
+  if (defined($opt{'pidfile'})) {
+    unlink($opt{'pidfile'}) || warn "spamd: cannot unlink $opt{'pidfile'}: $!\n";
+  }
+
+  # leave Client fds active, and do not kill children; they can still
+  # service clients until they exit.  But restart the listener anyway.
+  # And close the logfile, so the new instance can reopen it.
+  Mail::SpamAssassin::Logger::close_log();
+  chdir($ORIG_CWD)
+    or die "spamd: restart failed: chdir failed: ${ORIG_CWD}: $!\n";
+
+  # ensure we re-run spamd using the right perl interpreter, and
+  # with the right switches (taint mode and warnings) (bug 5255)
+  my $perl = Mail::SpamAssassin::Util::untaint_var($^X);
+  my @execs = ( $perl, "-T", "-w", $ORIG_ARG0, @ORIG_ARGV );
+
+  if ($perl eq $perl_from_hashbang_line) {
+    # we're using the same perl as the script uses on the #! line;
+    # we can safely just exec the script
+    @execs = ( $ORIG_ARG0, @ORIG_ARGV );
+  }
+
+  warn "spamd: restarting using '" . join (' ', @execs) . "'\n";
+  exec @execs;
+
+  # should not get past that...
+  die "spamd: restart failed: exec failed: " . join (' ', @execs) . ": $!\n";
 }
 
 __DATA__
@@ -2780,6 +2821,8 @@ SQL- or LDAP-based configuration.
 The pattern B<must> expand to an absolute directory when spamd is running
 daemonized (B<-d>).
 
+Currently, use of this without B<-u> is not supported. This inhibits setuid.
+
 =item B<-r> I<pidfile>, B<--pidfile>=I<pidfile>
 
 Write the process ID of the spamd parent to the file specified by I<pidfile>.
@@ -2793,7 +2836,7 @@ this allows spamd to lookup/create user_prefs in the vpopmail user's own
 maildir.  This option is useful for vpopmail virtual users who do not have an
 entry in the system /etc/passwd file.
 
-Currently, use of this without B<-u> is not supported.
+Currently, use of this without B<-u> is not supported. This inhibits setuid.
 
 =item B<-s> I<facility>, B<--syslog>=I<facility>
 

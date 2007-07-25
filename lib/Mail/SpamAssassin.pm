@@ -94,7 +94,7 @@ use vars qw{
   @site_rules_path
 };
 
-$VERSION = "3.002000";      # update after release (same format as perl $])
+$VERSION = "3.002002";      # update after release (same format as perl $])
 # $IS_DEVEL_BUILD = 1;        # change for release versions
 
 # Used during the prerelease/release-candidate part of the official release
@@ -1101,10 +1101,8 @@ sub read_scoreonly_config {
 
   $self->{conf}->{main} = $self;
   $self->{conf}->parse_scores_only ($text);
-  if ($self->{conf}->{allow_user_rules}) {
-      dbg("config: finishing parsing!");
-      $self->{conf}->finish_parsing();
-  }
+  $self->{conf}->finish_parsing(1);
+
   delete $self->{conf}->{main};	# to allow future GC'ing
 }
 
@@ -1469,7 +1467,7 @@ sub init {
   # Go and parse the config!
   $self->{conf}->{main} = $self;
   $self->{conf}->parse_rules ($self->{config_text});
-  $self->{conf}->finish_parsing ();
+  $self->{conf}->finish_parsing(0);
   delete $self->{conf}->{main};	# to allow future GC'ing
 
   undef $self->{config_text};   # ensure it's actually freed
