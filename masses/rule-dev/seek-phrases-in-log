@@ -82,6 +82,13 @@ while (<IN>) {
   /^text: (.*)$/ and proc_text_spam($1);
 }
 close IN;
+
+# only do this if we have read enough spam messages, otherwise we could
+# discard tokens for which reqhitrate has been achieved
+if ($msgcount > 2 * (100 / $opt{reqhitrate})) {
+  discard_hapaxes();
+}
+
 warn "n-grams active: ".(scalar keys %ngram_count)."\n";
 
 warn "reading $fh...\n";
@@ -151,13 +158,13 @@ sub proc_text_spam {
 sub discard_hapaxes {
   my $before = (scalar keys %ngram_count);
   foreach my $tok (keys %ngram_count) {
-    if ($ngram_count{$tok} == 1) {
+    if ($ngram_count{$tok} <= 1) {
       delete $ngram_count{$tok};
       delete $msg_subset_hit{$tok};
     }
   }
   my $after = (scalar keys %ngram_count);
-  my $killed = ($after - $before);
+  my $killed = ($before - $after);
   warn "shrunk dbs: $killed hapaxes killed, kept $after entries\n";
 }
 
@@ -281,7 +288,8 @@ sub summarise {
       printf "# %6.3f  %6.3f  %6.3f\n",
         1.0, ($ngram_count{$id}*100) / $msg_count_spam, 0;
 
-      foreach my $pat (@pats) {
+      # sort, to ensure ordering always remains the same
+      foreach my $pat (sort @pats) {
         $pat =~ s/([!-+\`\^\~\\\/\|\.\(\)\[\]\@])/\\$1/gs;
         my $name = generate_rule_name($pat);
         print "body $opt{ruleprefix}${name}  /$pat/\n";
