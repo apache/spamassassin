@@ -872,8 +872,9 @@ sub _prettify_overlap_rules {
 
     my $code = $rules{$rule}->{code};
     @rules = grep {
-      s/\[.*\]$//;
-      $code !~ /\b\Q$_\E\b/;
+      my $tmp = $_;
+      $tmp =~ s/\[.*\]$//;
+      $code !~ /\b\Q${tmp}\E\b/;
     } @rules;
   }
 
