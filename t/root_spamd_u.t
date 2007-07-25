@@ -10,7 +10,7 @@ use constant TEST_ENABLED => conf_bool('run_root_tests');
 use constant IS_ROOT => eval { ($> == 0); };
 use constant RUN_TESTS => (TEST_ENABLED && IS_ROOT);
 
-BEGIN { plan tests => (RUN_TESTS ? 14 : 0) };
+BEGIN { plan tests => (RUN_TESTS ? 11 : 0) };
 exit unless RUN_TESTS;
 
 # ---------------------------------------------------------------------------
