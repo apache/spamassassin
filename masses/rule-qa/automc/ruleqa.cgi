@@ -38,7 +38,6 @@ exit;
 package Mail::SpamAssassin::CGI::RuleQaApp;
 use CGI;
 use CGI::Carp 'fatalsToBrowser';
-use Template;
 use Date::Manip;
 use XML::Simple;
 use URI::Escape;
@@ -64,12 +63,12 @@ sub new {
   my $self = { };
 
   $self->{q} = CGI->new();
-  $self->{ttk} = Template->new();
 
   $self->{id_counter} = 0;
   $self->{include_embedded_freqs_xml} = 1;
   $self->{cgi_param_order} = [ ];
   $self->{cgi_params} = { };
+  $self->{now} = time();
 
   bless ($self, $class);
 
@@ -186,7 +185,7 @@ sub ui_get_daterev {
     }
     elsif ($self->{daterev} eq 'today') {
       $self->{daterev} = $self->get_daterev_by_date(
-            POSIX::strftime "%Y%m%d", gmtime ((time + DATEREV_ADJ)));
+            POSIX::strftime "%Y%m%d", gmtime (($self->{now} + DATEREV_ADJ)));
       $self->{q}->param('daterev', $self->{daterev});  # make it absolute
     }
     elsif ($self->{daterev} =~ /^(20\d\d[01]\d\d\d)$/) {
@@ -454,7 +453,8 @@ sub show_default_view {
   }
 
   # debug: log the chosen sets parameters etc.
-  print "<!-- ",
+  if (0) {
+    print "<!-- ",
                "{s}{new} = $self->{s}{new}\n",
                "{s}{age} = $self->{s}{age}\n",
                "{s}{all} = $self->{s}{all}\n",
@@ -462,6 +462,7 @@ sub show_default_view {
                "{s}{scoremap} = $self->{s}{scoremap}\n",
                "{s}{xml} = $self->{s}{xml}\n",
        "-->\n";
+  }
 
   $self->show_all_sets_for_daterev($self->{daterev}, $self->{daterev});
 
@@ -597,7 +598,7 @@ sub get_last_night_daterev {
   # to be "last night", for purposes of rule-update generation.
 
   my $notafter = POSIX::strftime "%Y%m%d",
-        gmtime ((time + DATEREV_ADJ) - (12*60*60));
+        gmtime (($self->{now} + DATEREV_ADJ) - (12*60*60));
   return $self->get_daterev_by_date($notafter);
 }
 
@@ -931,7 +932,7 @@ sub get_freqs_for_rule {
     }
 
     if ($mtime) {      # bug 4985
-      my $target = time - ($mtime * 24 * 60 * 60);
+      my $target = $self->{now} - ($mtime * 24 * 60 * 60);
       @rules = grep {
            # !$md->{$_} or !$md->{$_}->{srcmtime} or
           $md->{$_}->{srcmtime} and
@@ -1015,9 +1016,8 @@ sub set_freqs_templates {
   };
 
   $FREQS_LINE_TEXT_TEMPLATE =
-       qq{[% USE format %][% fmt = format('%7s') %][% fm6 = format('%6s') %]}.
-       qq{[% fmt(MSECS) %]  [% fmt(SPAMPC) %]  [% fmt(HAMPC) %]  }.
-       qq{[% fm6(SO) %]  [% fm6(RANK) %]  [% fm6(SCORE) %]  }.
+       qq{[% MSECS %]  [% SPAMPC %]  [% HAMPC %]  }.
+       qq{[% SO %]  [% RANK %]  [% SCORE %]  }.
        qq{[% NAME %] [% USERNAME %] [% AGE %] }.
        "\n";
 
@@ -1124,29 +1124,36 @@ sub output_freqs_data_line {
       $score = '(n/a)';
     }
 
-    $self->{ttk}->process($template, {
+    my $SPAMPCDETAIL = $self->create_spampc_detail(
+                        $line->{spampc}, 1, $header_context, $line);
+    my $HAMPCDETAIL = $self->create_spampc_detail(
+                        $line->{hampc}, 0, $header_context, $line);
+    my $SPAMLOGLINK = $self->create_mclog_link(
+                        $line->{spampc}, 1, $header_context, $line);
+    my $HAMLOGLINK = $self->create_mclog_link(
+                        $line->{hampc}, 0, $header_context, $line);
+
+stat("/LINE_".__LINE__);
+    $self->process_template($template, {
         RULEDETAIL => $detailurl,
-        MSECS => $line->{msecs},
-        SPAMPC => $line->{spampc},
-        HAMPC => $line->{hampc},
-        SPAMPCDETAIL => $self->create_spampc_detail(
-                        $line->{spampc}, 1, $header_context, $line),
-        HAMPCDETAIL => $self->create_spampc_detail(
-                        $line->{hampc}, 0, $header_context, $line),
-        SPAMLOGLINK => $self->create_mclog_link(
-                        $line->{spampc}, 1, $header_context, $line),
-        HAMLOGLINK => $self->create_mclog_link(
-                        $line->{hampc}, 0, $header_context, $line),
-        SO => $line->{so},
-        RANK => $line->{rank},
-        SCORE => $score,
+        MSECS => sprintf("%7s", $line->{msecs}),
+        SPAMPC => sprintf("%7s", $line->{spampc}),
+        HAMPC => sprintf("%7s", $line->{hampc}),
+        SPAMPCDETAIL => $SPAMPCDETAIL,
+        HAMPCDETAIL => $HAMPCDETAIL,
+        SPAMLOGLINK => $SPAMLOGLINK,
+        HAMLOGLINK => $HAMLOGLINK,
+        SO => sprintf("%6s", $line->{so}),
+        RANK => sprintf("%6s", $line->{rank}),
+        SCORE => sprintf("%6s", $score),
         NAME => $line->{name},
         NAMEREF => $self->create_detail_url($line->{name}),
         NAMEREFENCD => uri_escape($self->create_detail_url($line->{name})),
         USERNAME => $line->{username} || '',
         AGE => $line->{age} || '',
         PROMO => $line->{promotable},
-    }, \$out) or die $self->{ttk}->error();
+    }, \$out);
+stat("/LINE_".__LINE__);
 
     $self->{line_counter}++;
   }
@@ -1156,9 +1163,9 @@ sub output_freqs_data_line {
     my $ovl = $obj->{scoremap} || '';
     #   scoremap spam: 16  12.11%  777 ****
 
-    $self->{ttk}->process(\$FREQS_EXTRA_TEMPLATE, {
+    $self->process_template(\$FREQS_EXTRA_TEMPLATE, {
         EXTRA => $ovl,
-    }, \$out) or die $self->{ttk}->error();
+    }, \$out);
   }
 
   # add overlap using the FREQS_EXTRA_TEMPLATE if it's present
@@ -1177,23 +1184,45 @@ sub output_freqs_data_line {
         $str;
       }gem;
 
-    $self->{ttk}->process(\$FREQS_EXTRA_TEMPLATE, {
+    $self->process_template(\$FREQS_EXTRA_TEMPLATE, {
         EXTRA => $ovl,
-    }, \$out) or die $self->{ttk}->error();
+    }, \$out);
   }
 
   return $out;
 }
 
+# get rid of slow, overengineered Template::Toolkit.  This replacement
+# is extremely simple-minded, but doesn't call time() on every invocation,
+# which makes things just a little bit faster
+sub process_template {
+  my ($self, $tmplref, $keys, $outref) = @_;
+  my $buf = $$tmplref;
+  foreach my $k (keys %{$keys}) {
+    $buf =~ s/\[\% \Q$k\E \%\]/$keys->{$k}/gs;
+  }
+  $$outref .= $buf;
+}
+
 sub create_detail_url {
   my ($self, $rulename) = @_;
-  my @parms = (
-         $self->get_params_except(qw(
-          rule s_age s_overlap s_all s_detail daterev
-        )), 
-        "daterev=".$self->{daterev}, "rule=".uri_escape($rulename), "s_detail=1",
-      );
-  return $self->assemble_url(@parms);
+
+  if (!$self->{create_detail_url_template}) {
+    my @parms = (
+          $self->get_params_except(qw(
+           rule s_age s_overlap s_all s_detail daterev
+         )),
+         "daterev=".$self->{daterev},
+         "s_detail=1",
+         "rule=__create_detail_url_template__",
+       );
+    $self->{create_detail_url_template} = $self->assemble_url(@parms);
+  }
+
+  my $ret = $self->{create_detail_url_template};
+  $rulename = uri_escape($rulename);
+  $ret =~ s/__create_detail_url_template__/${rulename}/gs;
+  return $ret;
 }
 
 sub gen_rule_link {
