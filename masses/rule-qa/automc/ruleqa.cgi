@@ -1133,7 +1133,6 @@ sub output_freqs_data_line {
     my $HAMLOGLINK = $self->create_mclog_link(
                         $line->{hampc}, 0, $header_context, $line);
 
-stat("/LINE_".__LINE__);
     $self->process_template($template, {
         RULEDETAIL => $detailurl,
         MSECS => sprintf("%7s", $line->{msecs}),
@@ -1153,7 +1152,6 @@ stat("/LINE_".__LINE__);
         AGE => $line->{age} || '',
         PROMO => $line->{promotable},
     }, \$out);
-stat("/LINE_".__LINE__);
 
     $self->{line_counter}++;
   }
