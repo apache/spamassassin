@@ -16,8 +16,8 @@ prog=bbmass
 runall () {
     su buildbot -c "buildbot $1 /export/home/buildbot/bots/bbmass"
     nice su bbmass -c "buildbot $1 /export/home/bbmass/slaves/mc-fast"
-    nice su bbmass -c "buildbot $1 /export/home/bbmass/slaves/mc-slow"
-    nice su bbmass -c "buildbot $1 /export/home/bbmass/slaves/mc-slower"
+    ## nice su bbmass -c "buildbot $1 /export/home/bbmass/slaves/mc-slow"
+    ## nice su bbmass -c "buildbot $1 /export/home/bbmass/slaves/mc-slower"
 }
 
 start() {
