@@ -69,6 +69,9 @@ header __IMS_MSGID		MESSAGEID =~ /^<[A-F\d]{36,40}\@\S+>$/m
 meta FORGED_MUA_IMS		(__IMS_MUA && !__IMS_MSGID && !__UNUSABLE_MSGID)
 describe FORGED_MUA_IMS		Forged mail pretending to be from IMS
 
+# Message ID format introduced by Vista MAPI, maybe also Windows 2003 Server SP2
+header __VISTA_MSGID		MESSAGEID =~ /^<[A-F\d]{32}\@\S+>$/m
+
 # Outlook Express 4, 5, and 6
 header __OE_MUA			X-Mailer =~ /\bOutlook Express [456]\./
 header __OE_MSGID_1		MESSAGEID =~ /^<[A-Za-z0-9-]{7}[A-Za-z0-9]{20}\@hotmail\.com>$/m
@@ -79,7 +82,7 @@ meta __FORGED_OE		(__OE_MUA && !__OE_MSGID_1 && !__OE_MSGID_2 && !__OE_MSGID_3 &
 # Outlook versions that usually use "dollar signs"
 header __OUTLOOK_DOLLARS_MUA	X-Mailer =~ /^Microsoft Outlook(?: 8| CWS, Build 9|, Build 10)\./
 header __OUTLOOK_DOLLARS_OTHER	MESSAGEID =~ /^<\!\~\!/m
-meta __FORGED_OUTLOOK_DOLLARS	(__OUTLOOK_DOLLARS_MUA && !__OE_MSGID_2 && !__OUTLOOK_DOLLARS_OTHER && !__IMS_MSGID && !__UNUSABLE_MSGID)
+meta __FORGED_OUTLOOK_DOLLARS	(__OUTLOOK_DOLLARS_MUA && !__OE_MSGID_2 && !__OUTLOOK_DOLLARS_OTHER && !__VISTA_MSGID && !__IMS_MSGID && !__UNUSABLE_MSGID)
 
 # use new meta rules to implement FORGED_MUA_OUTLOOK rule from 2.60
 meta FORGED_MUA_OUTLOOK		(__FORGED_OE || __FORGED_OUTLOOK_DOLLARS)
