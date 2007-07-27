@@ -376,7 +376,10 @@ sub show_default_view {
 <p>
   <div class='ui_label'>
     Show only rules from files modified in the
-    <a href='!mtime=1!'>last day</a>, <a href='!mtime=7!'>last week</a>
+    <a href='!mtime=1!'>last day</a>,
+    <a href='!mtime=2!'>2</a>,
+    <a href='!mtime=3!'>3</a>,
+    <a href='!mtime=7!'>last week</a>
   </div>
 </p>
 
