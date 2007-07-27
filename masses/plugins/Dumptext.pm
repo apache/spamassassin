@@ -15,7 +15,8 @@ sub new {
 sub check_end {
   my ($self, $opts) = @_;
   my $array = $opts->{permsgstatus}->get_decoded_stripped_body_text_array();
-  my $str = join (' ', @$array);
+  my $str = join ('[p]', @$array);
+  $str =~ s/\n+//gs;
   $str =~ s/\s+/ /gs;
 
   # ignore the M:SpamAssassin:compile() test message
