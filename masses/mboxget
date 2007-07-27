@@ -94,7 +94,11 @@ while (<>) {
   s/^[^\s:]+://;  # filenames, from "grep foo *"
 
   if (/^[Y\.]\s+-?\d+\s+(\S+)\s+\S+/) {
-    # mass-check format
+    # mass-check format: . 0 /home/jm/Mail/Spam2/3475 FOO_BAR,BAZ
+    handle_input($1);
+  }
+  elsif (/^[Y\.]\s+-?\d+\s+(\S+)\s*$/) {
+    # mass-check format: . 0 /home/jm/Mail/Spam2/3475
     handle_input($1);
   }
   else {
