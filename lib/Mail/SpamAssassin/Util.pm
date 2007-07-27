@@ -1336,6 +1336,7 @@ sub setuid_to_euid {
     # bug 3586: kludges needed to work around platform dependent behavior assigning to $<
     #  The POSIX functions deal with that so just use it here
     POSIX::setuid($touid);
+    $< = $touid; $> = $touid;       # bug 5574
 
     # Check that we have now accomplished the setuid: catch bug 3586 if it comes back
     if ($< != $touid) {
