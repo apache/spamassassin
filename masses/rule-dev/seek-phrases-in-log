@@ -121,31 +121,33 @@ sub proc_text_spam {
 
   (($msgcount % 1000) == 999) and discard_hapaxes();
 
-  my $w1 = '';
-  my $w2 = '';
-  my $w3 = '';
-
   my %tokens = ();
-  foreach my $w (split(' ', $text)) {
-    # if (length $w > 20) { $w = "sk:".substr($w, 0, 5); }
+  foreach my $line (split(/\[p\]/, $text)) {
+    my $w1 = '';
+    my $w2 = '';
+    my $w3 = '';
 
-    $w3 = $w2;
-    $w2 = $w1;
+    foreach my $w (split(' ', $line)) {
+      # if (length $w > 20) { $w = "sk:".substr($w, 0, 5); }
 
-    $w1 = $word2sym{$w};
-    if (!$w1) {
-      $word2sym{$w} = $w1 = $sym_acc;
-      $sym2word{$sym_acc} = $w;
-      $sym_acc++;
+      $w3 = $w2;
+      $w2 = $w1;
+
+      $w1 = $word2sym{$w};
+      if (!$w1) {
+        $word2sym{$w} = $w1 = $sym_acc;
+        $sym2word{$sym_acc} = $w;
+        $sym_acc++;
+      }
+
+      # simple bayesian N-grams to start
+      $tokens{"$w3.$w2.$w1"} = $tokens{"$w3.$w2"} = 1;
     }
-
-    # simple bayesian N-grams to start
-    $tokens{"$w3.$w2.$w1"} = $tokens{"$w3.$w2"} = 1;
-  }
-  
-  # deal with leftovers
-  if ($w2 && $w1) {
-    $tokens{"$w2.$w1"} = 1;
+    
+    # deal with leftovers
+    if ($w2 && $w1) {
+      $tokens{"$w2.$w1"} = 1;
+    }
   }
 
   foreach my $tok (keys %tokens) {
@@ -349,7 +351,7 @@ sub collapse_pats {
       last if ($l > $pat_maxlen);     # too long
 
       my $found;
-      if ($s =~ /(.)\Q$pat\E/s) { $found = $1; }
+      if ($s =~ /(.)\Q$pat\E/s && $s !~ /\[p\]\Q$pat\E/s) { $found = $1; }
 
       if (!defined $found) {
         # start of string.  break
@@ -366,7 +368,10 @@ sub collapse_pats {
 
     # expand towards end of string
     while (1) {
-      if (length($pat) > $pat_maxlen || $s !~ /\Q$pat\E(.)/s) {
+      if (length($pat) > $pat_maxlen
+         || $s =~ /\Q$pat\E\[p\]/s
+         || $s !~ /\Q$pat\E(.)/s)
+      {
         # end of string.  break
         last;
       }
