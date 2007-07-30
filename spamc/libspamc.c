@@ -530,6 +530,10 @@ static int _try_to_connect_tcp(const struct transport *tp, int *sockptr)
 	    addrbuf.sin_addr = tp->hosts[hostix];
 	    
 	    ipaddr = inet_ntoa(addrbuf.sin_addr);
+
+            /* make a copy in host, for logging (bug 5577) */
+            strncpy (host, ipaddr, sizeof(host) - 1);
+
 #ifdef DO_CONNECT_DEBUG_SYSLOGS
 	    libspamc_log(tp->flags, LOG_DEBUG,
 			 "dbg: connect(AF_INET) to spamd at %s (try #%d of %d)",
