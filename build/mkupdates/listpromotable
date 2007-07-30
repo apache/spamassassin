@@ -194,6 +194,11 @@ foreach my $plistkey (sort keys %$plist) {
     }
   }
 
+  # rule was from a file marked with "#testrules" (bug 5545)
+  # note: this is after "tflags publish" support, so you can override
+  # it on a rule-by-rule basis anyway
+  next if ($mailsa->{conf}->{testrules}->{$name});
+
   # ignore rules that are not marked as promotable
   next unless ($obj->{promo});
 
