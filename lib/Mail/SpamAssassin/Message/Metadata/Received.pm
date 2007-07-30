@@ -403,6 +403,14 @@ sub parse_received_line {
       return 0;
     }
 
+    # AOL WebMail headers
+    if (/aol\.com/ && /with HTTP \(WebMailUI\)/) {
+      # Received: from 82.135.198.129 by FWM-M18.sysops.aol.com (64.12.168.82) with HTTP (WebMailUI); Tue, 19 Jun 2007 11:16:54 -0400
+      if(/(${IP_ADDRESS}) by (\S+) \(${IP_ADDRESS}\) with HTTP \(WebMailUI\)/) {
+        $ip = $1; $by = $2; goto enough;
+      }
+    }
+
     # catch MS-ish headers here
     if (/ SMTPSVC/) {
       # MS servers using this fmt do not lookup the rDNS.
