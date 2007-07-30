@@ -95,7 +95,8 @@ describe FORGED_MUA_EUDORA	Forged mail pretending to be from Eudora
   
 # Mar 26 2003 jm: AOL MUAs add a Received line, and do not use "real names" in
 # From or To headers, as far as I can see, quinlan: also see bug 1426
-header __AOL_FROM		From:addr =~ /\@(?:aol|cs)\.com$/i
+# Jul 30 2007 jm: bug 5475: AOL now has many other sites
+header __AOL_FROM		From:addr =~ /\@(?:aol|cs)\./i
 meta FORGED_MUA_AOL_FROM	(__AOL_MUA && !__AOL_FROM)
 describe FORGED_MUA_AOL_FROM	Forged mail pretending to be from AOL (by From)
 
