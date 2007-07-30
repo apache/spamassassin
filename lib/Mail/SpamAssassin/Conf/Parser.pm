@@ -240,9 +240,18 @@ sub parse {
   my @conf_lines = split (/\n/, $_[1]);
   my $line;
   $self->{if_stack} = \@if_stack;
+  $self->{file_scoped_attrs} = { };
+
+  my $keepmetadata = $conf->{main}->{keep_config_parsing_metadata};
 
   while (defined ($line = shift @conf_lines)) {
     local ($1);         # bug 3838: prevent random taint flagging of $1
+
+    # bug 5545: used to support testing rules in the ruleqa system
+    if ($keepmetadata && $line =~ /^\#testrules/) {
+      $self->{file_scoped_attrs}->{testrules}++;
+      next;
+    }
 
     $line =~ s/(?<!\\)#.*$//; # remove comments
     $line =~ s/\\#/#/g; # hash chars are escaped, so unescape them
@@ -274,6 +283,8 @@ sub parse {
       }
 
       if ($value =~ /^end\s/) {
+        $self->{file_scoped_attrs} = { };
+
         if (scalar @if_stack > 0) {
           my $cond = pop @if_stack;
 
@@ -1049,8 +1060,12 @@ sub add_test {
   $conf->{priority}->{$name} ||= 0;
   $conf->{source_file}->{$name} = $self->{currentfile};
 
-  if ($self->{main}->{keep_config_parsing_metadata}) {
+  if ($conf->{main}->{keep_config_parsing_metadata}) {
     $conf->{if_stack}->{$name} = $self->get_if_stack_as_string();
+
+    if ($self->{file_scoped_attrs}->{testrules}) {
+      $conf->{testrules}->{$name} = 1;   # used in build/mkupdates/listpromotable
+    }
   }
 
   if ($self->{scoresonly}) {
