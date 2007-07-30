@@ -350,6 +350,10 @@ Note that this requires that C<internal_networks> be correct.  For simple cases,
 it will be, but for a complex network you may get better results by setting that
 parameter.
 
+It also requires that your mail exchangers be configured to perform DNS
+reverse lookups on the connecting host's IP address, and to record the
+result in the generated Received: header.
+
 e.g.
 
   whitelist_from_rcvd joe@example.com  example.com
