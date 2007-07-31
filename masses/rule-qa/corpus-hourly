@@ -33,6 +33,13 @@ nice(15);
 # http://wiki.apache.org/spamassassin/DateRev for more details.
 use constant DATEREV_ADJ => - (8 * 60 * 60);
 
+# what's the max age of mail we will accept data from? (in weeks)
+# TODO: maybe this should be in ~/.corpus
+my $OLDEST_HAM_WEEKS    = 52 * 5;       # 5 years
+my $OLDEST_SPAM_WEEKS    = 6 * 4;       # 6 months
+
+# ---------------------------------------------------------------------------
+
 my $configuration = "$ENV{HOME}/.corpus";
 my %opt;
 my %revision = ();
@@ -238,14 +245,23 @@ sub sort_all {
   return $n;
 }
 
-sub time_filter {
-  my ($after, $before) = @_;
-  if (/time=(\d+)/) {
-	return (($time_start - $1 >= WEEK * $after) &&
-		($time_start - $1 < WEEK * $before));
+sub time_filter_fileset {
+  my ($fileary, $outname, $after, $before) = @_;
+  open(TMP, "> $outname") or warn "cannot write $outname";
+  for my $file (@{$fileary}) {
+    open(IN, $file) or warn "cannot read $file";
+
+    while (<IN>) {
+      if (/time=(\d+)/) {
+        print TMP if (($time_start - $1 >= WEEK * $after) &&
+                      ($time_start - $1 < WEEK * $before));
+      }
+    }
+    close(IN);
   }
-  return 0;
+  close (TMP);
 }
+
 
 sub current {
   my $classes = $opt{output_classes};
@@ -406,20 +422,29 @@ sub gen_class {
       chdir "$opt{tree}/masses" or die "cannot chdir $opt{tree}/masses";
       for my $user (sort keys %spam) {
         next unless $ham{$user};
-        system("cat $corpusdir/$ham{$user} >> $opt{tmp}/ham.log.$$");
-        system("cat $corpusdir/$spam{$user} >> $opt{tmp}/spam.log.$$");
-        open(IN, "./hit-frequencies -TxpaP $flags $corpusdir/$spam{$user} $corpusdir/$ham{$user} |");
+
+        time_filter_fileset([ "$corpusdir/$ham{$user}" ],
+                "$opt{tmp}/ham.log.$$", $OLDEST_HAM_WEEKS, 0);
+        time_filter_fileset([ "$corpusdir/$spam{$user}" ],
+                "$opt{tmp}/spam.log.$$", $OLDEST_SPAM_WEEKS, 0);
+
+        open(IN, "./hit-frequencies -TxpaP $flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
         while(<IN>) {
           chomp;
           push @output, "$_:$user\n";
         }
         close(IN);
+
+        system("cat $opt{tmp}/ham.log.$$ >> $opt{tmp}/hamall.log.$$");
+        system("cat $opt{tmp}/spam.log.$$ >> $opt{tmp}/spamall.log.$$");
       }
-      open(IN, "./hit-frequencies -TxpaP $flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
+
+      open(IN, "./hit-frequencies -TxpaP $flags $opt{tmp}/spamall.log.$$ $opt{tmp}/hamall.log.$$ |");
       while(<IN>) {
         push @output, $_;
       }
       close(IN);
+
       for (sort sort_all @output) { print OUT; }
     }
     elsif ($age eq "age") {
@@ -429,18 +454,9 @@ sub gen_class {
         my ($after, $before) = split(/-/, $which);
         # get and filter logs
         chdir $corpusdir;
-        for my $type (("ham", "spam")) {
-          open(TMP, "> $opt{tmp}/$type.log.$$");
-          my @array = ($type eq "ham") ? @ham : @spam;
-          for my $file (@array) {
-            open(IN, $file) or warn "cannot read $file";
-            while (<IN>) {
-              print TMP $_ if time_filter($after, $before);
-            }
-            close(IN);
-          }
-          close (TMP);
-        }
+        time_filter_fileset(\@ham, "$opt{tmp}/ham.log.$$", $after, $before);
+        time_filter_fileset(\@spam, "$opt{tmp}/spam.log.$$", $after, $before);
+
         # print out by age
         chdir "$opt{tree}/masses" or die "cannot chdir $opt{tree}/masses";
         open(IN, "./hit-frequencies -TxpaP $flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
@@ -454,8 +470,8 @@ sub gen_class {
     }
     elsif (@ham && @spam) {
       # get logs
-      system("cat " . join(" ", @ham) . " > $opt{tmp}/ham.log.$$");
-      system("cat " . join(" ", @spam) . " > $opt{tmp}/spam.log.$$");
+      time_filter_fileset(\@ham, "$opt{tmp}/ham.log.$$", $OLDEST_HAM_WEEKS, 0);
+      time_filter_fileset(\@spam, "$opt{tmp}/spam.log.$$", $OLDEST_SPAM_WEEKS, 0);
 
       chdir "$opt{tree}/masses" or die "cannot chdir $opt{tree}/masses";
       open(IN, "./hit-frequencies -TxpaP $flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
@@ -558,4 +574,3 @@ sub get_rulemetadata_for_revision {
     warn "'$cmd' failed";
   }
 }
-
