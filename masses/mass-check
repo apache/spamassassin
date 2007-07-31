@@ -109,8 +109,9 @@ usage: mass-check [options] target ...
   the target format is: <class>:<format>:<location>
   <class>       is "spam" or "ham"
   <format>      is "dir", "file", "mbx", "mbox", or "detect"
-                (see 'perldoc Mail::SpamAssassin::ArchiveIterator)
   <location>    is a file or directory name.  globbing of ~ and * is supported
+
+(see http://wiki.apache.org/spamassassin/MassCheck for more details.)
 
 EOF
   exit($status);
