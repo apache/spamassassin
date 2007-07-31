@@ -108,7 +108,7 @@ close PREFS or die "cannot create 'spamassassin/user_prefs' file: $! $@";
 run "/local/bbmasstools/masschroot $perl ".
     "mass-check -c=tstrules --cache -j=1 ".
     "--noisy --deencap='petuniapress.com' ".
-    "--cachedir=/tmpfs/aicache ".
+    "--cachedir=/tmpfs/aicache_bbmass ".
     "--after='6 months ago' ".
     $mass_check_args{$slavename}." ".
     "ham:detect:/export/home/bbmass/rawcor/*/ham/* ".
