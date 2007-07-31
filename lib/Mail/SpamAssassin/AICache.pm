@@ -159,9 +159,9 @@ sub finish {
     }
     close(CACHE);
 
-    rename $oldf, $bakf or warn "mv $oldf $bakf failed: $!";
+    rename $oldf, $bakf;
     rename $newf, $oldf or warn "mv $newf $oldf failed: $!";
-    unlink $bakf        or warn "rm $bakf failed: $!";
+    unlink $bakf;
   }
   else {
     warn "Can't write AI cache file ($newf): $!";
