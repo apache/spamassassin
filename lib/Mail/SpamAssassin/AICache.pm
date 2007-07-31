@@ -112,7 +112,10 @@ sub check {
 
   return $self->{cache} unless $name;
 
-  return if ($self->{type} eq 'dir' && (stat($name))[9] > $self->{cache_mtime});
+  # for dir collections: just use the info on a file, if an entry
+  # exists for that file.  it's very unlikely that a file will be
+  # changed to contain a different Date header, and it's slow to check.
+  # return if ($self->{type} eq 'dir' && (stat($name))[9] > $self->{cache_mtime});
 
   $name = $self->canon($name);
   return $self->{cache}->{$name};
@@ -134,26 +137,34 @@ sub update {
 sub finish {
   my ($self) = @_;
 
-  # Cache is dirty, so write out new file
-  if ($self->{dirty})
-  {
-    # create enclosing dir tree, if required
-    eval {
-      mkpath(dirname($self->{cache_file}));
-    };
-    if ($@) {
-      warn "Can't mkpath for AI cache file (".$self->{cache_file}."): $@ $!";
-    }
+  return undef unless $self->{dirty};
 
-    if (open(CACHE, ">" . $self->{cache_file})) {
-      while(my($k,$v) = each %{$self->{cache}}) {
-	print CACHE "$k\t$v\n";
-      }
-      close(CACHE);
+  # Cache is dirty, so write out new file
+
+  # create enclosing dir tree, if required
+  eval {
+    mkpath(dirname($self->{cache_file}));
+  };
+  if ($@) {
+    warn "Can't mkpath for AI cache file (".$self->{cache_file}."): $@ $!";
+  }
+
+  # use trad unix 3-phase swapover, for safety
+  my $bakf = $self->{cache_file}.".bak";
+  my $oldf = $self->{cache_file};
+  my $newf = $self->{cache_file}.".new";
+  if (open(CACHE, ">$newf")) {
+    while(my($k,$v) = each %{$self->{cache}}) {
+      print CACHE "$k\t$v\n";
     }
-    else {
-      warn "Can't write AI cache file (".$self->{cache_file}."): $!";
-    }
+    close(CACHE);
+
+    rename $oldf, $bakf or warn "mv $oldf $bakf failed: $!";
+    rename $newf, $oldf or warn "mv $newf $oldf failed: $!";
+    unlink $bakf        or warn "rm $bakf failed: $!";
+  }
+  else {
+    warn "Can't write AI cache file ($newf): $!";
   }
 
   return undef;

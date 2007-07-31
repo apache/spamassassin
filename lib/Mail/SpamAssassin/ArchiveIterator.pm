@@ -650,7 +650,7 @@ sub _scan_directory {
   }
   closedir(DIR);
 
-  @files = grep { -f } map { "$folder/$_" } @files;
+  @files = map { "$folder/$_" } @files;
 
   if (!@files) {
     # this is not a problem; no need to warn about it
@@ -674,13 +674,20 @@ sub _scan_file {
 
   $self->_bump_scan_progress();
 
-  my @s = stat($mail);
-  return unless $self->_message_is_useful_by_file_modtime($s[9]);
+  # only perform these stat() operations if we're not using a cache;
+  # it's faster to perform lookups in the cache, and more accurate
+  if (!defined $AICache) {
+    my @s = stat($mail);
+    return unless $self->_message_is_useful_by_file_modtime($s[9]);
+  }
 
   my $date = AI_TIME_UNKNOWN;
-
   if ($self->{determine_receive_date}) {
     unless (defined $AICache and $date = $AICache->check($mail)) {
+      # silently skip directories/non-files; some folders may
+      # contain extraneous dirs etc.
+      next if (!-f $mail);      
+
       my $header;
       if (!_mail_open($mail)) {
         $self->{access_problem} = 1;
