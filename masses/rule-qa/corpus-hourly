@@ -280,8 +280,6 @@ sub current {
       }
       $rev = $1;
 
-      print STDERR "generating: $class.$age for $daterev\n";
-
       if ($class eq "NET") {
         next unless $is_net_daterev{$daterev};
       }
@@ -294,7 +292,7 @@ sub current {
 sub gen_class {
   my ($daterev, $rev, $class, $age) = @_;
 
-  print STDERR "\ngenerating $daterev $class.$age:\n";
+  print STDERR "\ngenerating: $opt{html}/$daterev/$class.$age\n";
 
   return if ($class eq "NET" && $age !~ /^(?:new|all|age|7day)$/);
 
@@ -331,7 +329,6 @@ sub gen_class {
   }
 
   my $dir = create_outputdir($daterev);
-
   my $fname = "$dir/$class.$age";
 
   # now, if the target file already exists, check to see if it's newer
