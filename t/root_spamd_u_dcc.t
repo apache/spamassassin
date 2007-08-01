@@ -22,7 +22,10 @@ exit unless RUN_TESTS;
             );
 
 tstpre ("
-loadplugin Mail::SpamAssassin::Plugin::DCC
+
+  loadplugin Mail::SpamAssassin::Plugin::DCC
+  dcc_timeout 30
+
 ");
 
 ok sarun ("-t -D info -r < data/spam/gtubedcc.eml 2>&1", \&patterns_run_cb);
