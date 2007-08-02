@@ -254,7 +254,7 @@ sub time_filter_fileset {
     while (<IN>) {
       if (/time=(\d+)/) {
         print TMP if (($time_start - $1 >= WEEK * $after) &&
-                      ($time_start - $1 < WEEK * $before));
+                      (!$before || ($time_start - $1 < WEEK * $before)));
       }
     }
     close(IN);
