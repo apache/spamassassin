@@ -149,22 +149,23 @@ sub finish {
     warn "Can't mkpath for AI cache file (".$self->{cache_file}."): $@ $!";
   }
 
-  # use trad unix 3-phase swapover, for safety
-  my $bakf = $self->{cache_file}.".bak";
-  my $oldf = $self->{cache_file};
-  my $newf = $self->{cache_file}.".new";
-  if (open(CACHE, ">$newf")) {
-    while(my($k,$v) = each %{$self->{cache}}) {
-      print CACHE "$k\t$v\n";
-    }
-    close(CACHE);
-
-    rename $oldf, $bakf;
-    rename $newf, $oldf or warn "mv $newf $oldf failed: $!";
-    unlink $bakf;
+  my $towrite = '';
+  while(my($k,$v) = each %{$self->{cache}}) {
+    $towrite .= "$k\t$v\n";
   }
-  else {
-    warn "Can't write AI cache file ($newf): $!";
+
+  {
+    # ignore signals while we're writing this file
+    local $SIG{'INT'} = 'IGNORE';
+    local $SIG{'TERM'} = 'IGNORE';
+
+    if (!(open(CACHE, ">".$self->{cache_file})
+          && print CACHE $towrite
+          && close(CACHE)))
+    {
+      warn "Can't write AI cache file (".$self->{cache_file}."): $!";
+      # TODO: should we delete it/clean it up?
+    }
   }
 
   return undef;
