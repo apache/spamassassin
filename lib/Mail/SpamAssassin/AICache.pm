@@ -159,12 +159,15 @@ sub finish {
     local $SIG{'INT'} = 'IGNORE';
     local $SIG{'TERM'} = 'IGNORE';
 
-    if (!(open(CACHE, ">".$self->{cache_file})
-          && print CACHE $towrite
-          && close(CACHE)))
+    if (!open(CACHE, ">".$self->{cache_file}))
     {
-      warn "Can't write AI cache file (".$self->{cache_file}."): $!";
+      warn "open AI cache file failed (".$self->{cache_file}."): $!";
       # TODO: should we delete it/clean it up?
+    }
+    else {
+      print CACHE $towrite;
+      close CACHE
+            or warn "close AI cache file failed (".$self->{cache_file}."): $!";
     }
   }
 
