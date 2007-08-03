@@ -248,8 +248,8 @@ sub sort_all {
 sub time_filter_fileset {
   my ($fileary, $outname, $after, $before) = @_;
 
-  my $timet_before = ($before ? ($time_start - ($before * WEEK)) : undef);
-  my $timet_after  = ($after ? ($time_start - ($after * WEEK)) : undef);
+  my $timet_before = (defined $before ? ($time_start - ($before * WEEK)) : undef);
+  my $timet_after  = (defined $after ? ($time_start - ($after * WEEK)) : undef);
 
   open(TMP, "> $outname") or warn "cannot write $outname";
   for my $file (@{$fileary}) {
@@ -425,9 +425,9 @@ sub gen_class {
         next unless $ham{$user};
 
         time_filter_fileset([ "$corpusdir/$ham{$user}" ],
-                "$opt{tmp}/ham.log.$$", $OLDEST_HAM_WEEKS, 0);
+                "$opt{tmp}/ham.log.$$", $OLDEST_HAM_WEEKS, undef);
         time_filter_fileset([ "$corpusdir/$spam{$user}" ],
-                "$opt{tmp}/spam.log.$$", $OLDEST_SPAM_WEEKS, 0);
+                "$opt{tmp}/spam.log.$$", $OLDEST_SPAM_WEEKS, undef);
 
         open(IN, "./hit-frequencies -TxpaP $flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
         while(<IN>) {
@@ -471,8 +471,8 @@ sub gen_class {
     }
     elsif (@ham && @spam) {
       # get logs
-      time_filter_fileset(\@ham, "$opt{tmp}/ham.log.$$", $OLDEST_HAM_WEEKS, 0);
-      time_filter_fileset(\@spam, "$opt{tmp}/spam.log.$$", $OLDEST_SPAM_WEEKS, 0);
+      time_filter_fileset(\@ham, "$opt{tmp}/ham.log.$$", $OLDEST_HAM_WEEKS, undef);
+      time_filter_fileset(\@spam, "$opt{tmp}/spam.log.$$", $OLDEST_SPAM_WEEKS, undef);
 
       chdir "$opt{tree}/masses" or die "cannot chdir $opt{tree}/masses";
       open(IN, "./hit-frequencies -TxpaP $flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
