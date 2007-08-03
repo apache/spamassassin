@@ -1067,7 +1067,8 @@ sub create_spampc_detail {
   my ($self, $percent, $isspam, $ctx, $line) = @_;
 
   # optimization: no need to look anything up if it's 0.0000%
-  if ($percent == 0.0) { return qq{ 0\&nbsp;messages }; }
+  # disabled; this info may be pretty useful after all
+  ## if ($percent == 0.0) { return qq{ 0\&nbsp;messages }; }
 
   my $who = $line->{username} || $line->{age};
   my $obj;
