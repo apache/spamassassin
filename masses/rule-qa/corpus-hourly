@@ -25,7 +25,7 @@ use Time::ParseDate;
 use Cwd 'abs_path';
 use POSIX qw(nice strftime);
 
-use constant WEEK => 60*60*24;
+use constant WEEK => 7*60*60*24;
 nice(15);
 
 # daterevs -- e.g. "20060429/r239832-r" -- are aligned to 0800 UTC, just before
@@ -248,16 +248,15 @@ sub sort_all {
 sub time_filter_fileset {
   my ($fileary, $outname, $after, $before) = @_;
 
-  my $timet_before = (defined $before ? ($time_start - ($before * WEEK)) : undef);
-  my $timet_after  = (defined $after ? ($time_start - ($after * WEEK)) : undef);
+  my $timet_before = (defined $before ? ($time_start - ($before * WEEK)) : $time_start+1);
+  my $timet_after  = (defined $after ? ($time_start - ($after * WEEK)) : 0);
 
   open(TMP, "> $outname") or warn "cannot write $outname";
   for my $file (@{$fileary}) {
     open(IN, $file) or warn "cannot read $file";
     while (<IN>) {
       next unless /\btime=(\d+)/;
-      next if (defined($timet_after) && $1 < $timet_after);
-      next if (defined($timet_before) && $1 > $timet_before);
+      next if ($1 < $timet_after || $1 > $timet_before);
       print TMP;
     }
     close IN;
@@ -451,7 +450,7 @@ sub gen_class {
       my @output;
 
       for my $which (("0-1", "1-2", "2-3", "3-6")) {
-        my ($after, $before) = split(/-/, $which);
+        my ($before, $after) = split(/-/, $which);
         # get and filter logs
         chdir $corpusdir;
         time_filter_fileset(\@ham, "$opt{tmp}/ham.log.$$", $after, $before);
