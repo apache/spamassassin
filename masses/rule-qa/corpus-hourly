@@ -247,19 +247,23 @@ sub sort_all {
 
 sub time_filter_fileset {
   my ($fileary, $outname, $after, $before) = @_;
+
+  my $timet_before = ($before ? ($time_start - ($before * WEEK)) : undef);
+  my $timet_after  = ($after ? ($time_start - ($after * WEEK)) : undef);
+
   open(TMP, "> $outname") or warn "cannot write $outname";
   for my $file (@{$fileary}) {
     open(IN, $file) or warn "cannot read $file";
-
     while (<IN>) {
       if (/time=(\d+)/) {
-        print TMP if (($time_start - $1 >= WEEK * $after) &&
-                      (!$before || ($time_start - $1 < WEEK * $before)));
+        next if (defined($timet_after) && $1 < $timet_after);
+        next if (defined($timet_before) && $1 > $timet_before);
+        print TMP;
       }
     }
-    close(IN);
+    close IN;
   }
-  close (TMP);
+  close TMP;
 }
 
 
