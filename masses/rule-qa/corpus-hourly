@@ -255,15 +255,14 @@ sub time_filter_fileset {
   for my $file (@{$fileary}) {
     open(IN, $file) or warn "cannot read $file";
     while (<IN>) {
-      if (/time=(\d+)/) {
-        next if (defined($timet_after) && $1 < $timet_after);
-        next if (defined($timet_before) && $1 > $timet_before);
-        print TMP;
-      }
+      next unless /\btime=(\d+)/;
+      next if (defined($timet_after) && $1 < $timet_after);
+      next if (defined($timet_before) && $1 > $timet_before);
+      print TMP;
     }
     close IN;
   }
-  close TMP;
+  close TMP or warn "failed to close $outname";
 }
 
 
