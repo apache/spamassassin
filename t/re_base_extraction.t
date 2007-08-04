@@ -22,10 +22,34 @@ BEGIN {
   if (-e 't/test_dir') { chdir 't'; } 
   if (-e 'test_dir') { unshift(@INC, '../blib/lib'); }
 
-  plan tests => 117;
+  plan tests => 122;
 
 };
 use lib '../lib';
+
+# ---------------------------------------------------------------------------
+
+1 and try_extraction ('
+
+  body FOO /fooBar/
+  body FOOI /fooBar/i
+  body FOODOTSTAR /fooBar.*BAZ/
+  body FOODOTSTAR2 /fooBar(?:BAZ|blarg)/
+
+', {
+    base_extract => 1,
+    bases_must_be_casei => 0,
+    bases_can_use_alternations => 0,
+    bases_can_use_quantifiers => 0,
+    bases_can_use_char_classes => 0,
+    bases_split_out_alternations => 1
+}, [
+
+  'fooBar:FOO,[l=0] FOODOTSTAR,[l=1]',
+  'fooBarBAZ:FOO,[l=0] FOODOTSTAR,[l=1] FOODOTSTAR2,[l=0]',
+  'fooBarblarg:FOO,[l=0] FOODOTSTAR,[l=1] FOODOTSTAR2,[l=0]',
+
+], [ ]);
 
 # ---------------------------------------------------------------------------
 
