@@ -22,10 +22,34 @@ BEGIN {
   if (-e 't/test_dir') { chdir 't'; } 
   if (-e 'test_dir') { unshift(@INC, '../blib/lib'); }
 
-  plan tests => 112;
+  plan tests => 117;
 
 };
 use lib '../lib';
+
+# ---------------------------------------------------------------------------
+
+1 and try_extraction ('
+
+  body FOO /foobar/
+  body FOOI /foobar/i
+  body FOODOTSTAR /foobar.*BAZ/i
+  body FOODOTSTAR2 /foobar(?:BAZ|blarg)/i
+
+', {
+    base_extract => 1,
+    bases_must_be_casei => 1,
+    bases_can_use_alternations => 0,
+    bases_can_use_quantifiers => 0,
+    bases_can_use_char_classes => 0,
+    bases_split_out_alternations => 1
+}, [
+
+  'foobar:FOO,[l=1] FOODOTSTAR,[l=1] FOOI,[l=0]',
+  'foobarbaz:FOO,[l=1] FOODOTSTAR,[l=1] FOODOTSTAR2,[l=0] FOOI,[l=0]',
+  'foobarblarg:FOO,[l=1] FOODOTSTAR,[l=1] FOODOTSTAR2,[l=0] FOOI,[l=0]',
+
+], [ ]);
 
 # ---------------------------------------------------------------------------
 
@@ -42,10 +66,10 @@ use lib '../lib';
     bases_split_out_alternations => 1
 }, [
 
-  'bbbb:FOO',
-  'dddd by:FOO',
-  'dddd eeee by:FOO',
-  'aaaa:FOO'
+  'bbbb:FOO,[l=0]',
+  'dddd by:FOO,[l=0]',
+  'dddd eeee by:FOO,[l=0]',
+  'aaaa:FOO,[l=0]'
 
 ], [ ]);
 
@@ -62,7 +86,7 @@ use lib '../lib';
     bases_can_use_char_classes => 0,
     bases_split_out_alternations => 1
 }, [
-    'refinanc:TEST5',
+    'refinanc:TEST5,[l=1]',
 ], [ ]);
 
 # ---------------------------------------------------------------------------
@@ -81,9 +105,9 @@ use lib '../lib';
     bases_split_out_alternations => 1
 }, [
 
-    'food:TEST2',
-    'food bar:TEST2 TEST3',
-    'foody bar:TEST2 TEST3',
+    'food:TEST2,[l=1]',
+    'food bar:TEST2,[l=1] TEST3,[l=1]',
+    'foody bar:TEST2,[l=1] TEST3,[l=1]',
 
 ], [ ]);
 
@@ -104,47 +128,47 @@ use lib '../lib';
     bases_split_out_alternations => 1
 }, [
 
-  'accident:__SARE_FRAUD_BADTHINGS',
-  'all funds will be returned:__SARE_FRAUD_BADTHINGS',
-  'asasinated:__FRAUD_PTS',
-  'asasination:__FRAUD_PTS',
-  'asassinated:__FRAUD_PTS',
-  'asassination:__FRAUD_PTS',
-  'assasinated:__FRAUD_PTS',
-  'assasination:__FRAUD_PTS',
-  'assassinate:__SARE_FRAUD_BADTHINGS',
-  'assassinated:__FRAUD_PTS __SARE_FRAUD_BADTHINGS',
-  'assassination:__FRAUD_PTS',
-  'assylum:__SARE_FRAUD_BADTHINGS',
-  'asylum:__SARE_FRAUD_BADTHINGS',
-  'before they both died:__SARE_FRAUD_BADTHINGS',
-  'brutal acts:__SARE_FRAUD_BADTHINGS',
-  'cancer:__SARE_FRAUD_BADTHINGS',
-  'coup attempt:__SARE_FRAUD_BADTHINGS',
-  'crash:__SARE_FRAUD_BADTHINGS',
-  'disaster:__SARE_FRAUD_BADTHINGS',
-  'disease:__SARE_FRAUD_BADTHINGS',
-  'due to the current:__SARE_FRAUD_BADTHINGS',
-  'exile:__SARE_FRAUD_BADTHINGS',
-  'fled:__SARE_FRAUD_BADTHINGS',
-  'flee:__SARE_FRAUD_BADTHINGS',
-  'have been frozen:__SARE_FRAUD_BADTHINGS',
-  'impeach:__SARE_FRAUD_BADTHINGS',
-  'killed:__FRAUD_PTS __SARE_FRAUD_BADTHINGS',
-  'killing:__FRAUD_PTS',
-  'land dispute:__SARE_FRAUD_BADTHINGS',
-  'murder:__FRAUD_PTS __SARE_FRAUD_BADTHINGS',
-  'over-invoice:__SARE_FRAUD_BADTHINGS',
-  'plane:__SARE_FRAUD_BADTHINGS',
-  'poisoned by:__SARE_FRAUD_BADTHINGS',
-  'poisoned to death by:__SARE_FRAUD_BADTHINGS',
-  'political crisis:__SARE_FRAUD_BADTHINGS',
-  'relocate:__SARE_FRAUD_BADTHINGS',
-  'since the demise:__SARE_FRAUD_BADTHINGS',
-  'slay:__SARE_FRAUD_BADTHINGS',
-  'train:__SARE_FRAUD_BADTHINGS',
-  'war veterans:__FRAUD_PTS',
-  'wreck:__SARE_FRAUD_BADTHINGS',
+  'accident:__SARE_FRAUD_BADTHINGS,[l=1]',
+  'all funds will be returned:__SARE_FRAUD_BADTHINGS,[l=1]',
+  'asasinated:__FRAUD_PTS,[l=1]',
+  'asasination:__FRAUD_PTS,[l=1]',
+  'asassinated:__FRAUD_PTS,[l=1]',
+  'asassination:__FRAUD_PTS,[l=1]',
+  'assasinated:__FRAUD_PTS,[l=1]',
+  'assasination:__FRAUD_PTS,[l=1]',
+  'assassinate:__SARE_FRAUD_BADTHINGS,[l=1]',
+  'assassinated:__FRAUD_PTS,[l=1] __SARE_FRAUD_BADTHINGS,[l=1]',
+  'assassination:__FRAUD_PTS,[l=1]',
+  'assylum:__SARE_FRAUD_BADTHINGS,[l=1]',
+  'asylum:__SARE_FRAUD_BADTHINGS,[l=1]',
+  'before they both died:__SARE_FRAUD_BADTHINGS,[l=1]',
+  'brutal acts:__SARE_FRAUD_BADTHINGS,[l=1]',
+  'cancer:__SARE_FRAUD_BADTHINGS,[l=1]',
+  'coup attempt:__SARE_FRAUD_BADTHINGS,[l=1]',
+  'crash:__SARE_FRAUD_BADTHINGS,[l=1]',
+  'disaster:__SARE_FRAUD_BADTHINGS,[l=1]',
+  'disease:__SARE_FRAUD_BADTHINGS,[l=1]',
+  'due to the current:__SARE_FRAUD_BADTHINGS,[l=1]',
+  'exile:__SARE_FRAUD_BADTHINGS,[l=1]',
+  'fled:__SARE_FRAUD_BADTHINGS,[l=1]',
+  'flee:__SARE_FRAUD_BADTHINGS,[l=1]',
+  'have been frozen:__SARE_FRAUD_BADTHINGS,[l=1]',
+  'impeach:__SARE_FRAUD_BADTHINGS,[l=1]',
+  'killed:__FRAUD_PTS,[l=1] __SARE_FRAUD_BADTHINGS,[l=1]',
+  'killing:__FRAUD_PTS,[l=1]',
+  'land dispute:__SARE_FRAUD_BADTHINGS,[l=1]',
+  'murder:__FRAUD_PTS,[l=1] __SARE_FRAUD_BADTHINGS,[l=1]',
+  'over-invoice:__SARE_FRAUD_BADTHINGS,[l=1]',
+  'plane:__SARE_FRAUD_BADTHINGS,[l=1]',
+  'poisoned by:__SARE_FRAUD_BADTHINGS,[l=1]',
+  'poisoned to death by:__SARE_FRAUD_BADTHINGS,[l=1]',
+  'political crisis:__SARE_FRAUD_BADTHINGS,[l=1]',
+  'relocate:__SARE_FRAUD_BADTHINGS,[l=1]',
+  'since the demise:__SARE_FRAUD_BADTHINGS,[l=1]',
+  'slay:__SARE_FRAUD_BADTHINGS,[l=1]',
+  'train:__SARE_FRAUD_BADTHINGS,[l=1]',
+  'war veterans:__FRAUD_PTS,[l=1]',
+  'wreck:__SARE_FRAUD_BADTHINGS,[l=1]',
 
 ], [ ]);
 
@@ -159,6 +183,7 @@ use lib '../lib';
 (!$running_perl56) and try_extraction ('
 
   body VIRUS_WARNING345                /(This message contained attachments that have been blocked by Guinevere|This is an automatic message from the Guinevere Internet Antivirus Scanner)\./
+  body VIRUS_WARNING345I                /(This message contained attachments that have been blocked by Guinevere|This is an automatic message from the Guinevere Internet Antivirus Scanner)\./i
 
 ', {
     base_extract => 1,
@@ -169,8 +194,8 @@ use lib '../lib';
     bases_split_out_alternations => 1
 }, [
 
-  'this is an automatic message from the guinevere internet ant:VIRUS_WARNING345',
-  'this message contained attachments that have been blocked by:VIRUS_WARNING345'
+  'this is an automatic message from the guinevere internet ant:VIRUS_WARNING345,[l=1] VIRUS_WARNING345I,[l=0]',
+  'this message contained attachments that have been blocked by:VIRUS_WARNING345,[l=1] VIRUS_WARNING345I,[l=0]'
 
 ], [ ]);
 
@@ -188,11 +213,12 @@ try_extraction ('
     bases_split_out_alternations => 1
 }, [
 
-  'cialis:FOO',
-  'soma:FOO',
-  'valium:FOO',
-  'viagra:FOO',
-  'xanax:FOO'
+  # TODO: it would be great if these were correctly recognised as non-lossy
+  'cialis:FOO,[l=1]',
+  'soma:FOO,[l=1]',
+  'valium:FOO,[l=1]',
+  'viagra:FOO,[l=1]',
+  'xanax:FOO,[l=1]'
 
 ], [ ]);
 
@@ -210,7 +236,7 @@ try_extraction ('
     bases_split_out_alternations => 1
 }, [
 
-    'records :FOO'
+    'records :FOO,[l=1]'
 
 ], [ ]);
 
@@ -232,11 +258,11 @@ try_extraction ('
 }, [
 
 
-    'foo bar:TEST1A',
-    'food:TEST2',
-    'fooish bar:TEST1A',
-    'mailings:EXCUSE_REMOVE',
-    'offers:EXCUSE_REMOVE',
+    'foo bar:TEST1A,[l=1]',
+    'food:TEST2,[l=1]',
+    'fooish bar:TEST1A,[l=1]',
+    'mailings:EXCUSE_REMOVE,[l=1]',
+    'offers:EXCUSE_REMOVE,[l=1]',
 
 ], [ ]);
 
@@ -256,11 +282,11 @@ try_extraction ('
     bases_split_out_alternations => 1
 }, [
 
-    'food:TEST2',
-    'mailfood:EXCUSE_REMOVE TEST2',
-    'mailings:EXCUSE_REMOVE',
-    'oblargs:EXCUSE_REMOVE',
-    'offers:EXCUSE_REMOVE',
+    'food:TEST2,[l=1]',
+    'mailfood:EXCUSE_REMOVE,[l=1] TEST2,[l=1]',
+    'mailings:EXCUSE_REMOVE,[l=1]',
+    'oblargs:EXCUSE_REMOVE,[l=1]',
+    'offers:EXCUSE_REMOVE,[l=1]',
 
 ], [ ]);
 
@@ -290,26 +316,26 @@ try_extraction ('
     bases_split_out_alternations => 1
 }, [
 
-    'fo bar:TEST1B',
-    'foo bar:FOO TEST1 TEST1A TEST1B',
-    'to be removed from:EXCUSE_REMOVE',
-    'nslt:KAM_STOCKTIP15',
-    'nano superlattice technology:KAM_STOCKTIP15',
-    'fooish bar:TEST1 TEST1A TEST1B',
-    'act now:TEST4',
-    'food:TEST2',
-    'food bar:TEST2 TEST3',
-    'foody bar:TEST2 TEST3',
-    'refinanc:TEST5',
-    'target::TEST6',
-    'target price::TEST6',
-    'current::TEST6',
-    'current price::TEST6',
+    'fo bar:TEST1B,[l=1]',
+    'foo bar:FOO,[l=1] TEST1,[l=1] TEST1A,[l=1] TEST1B,[l=1]',
+    'to be removed from:EXCUSE_REMOVE,[l=1]',
+    'nslt:KAM_STOCKTIP15,[l=1]',
+    'nano superlattice technology:KAM_STOCKTIP15,[l=1]',
+    'fooish bar:TEST1,[l=1] TEST1A,[l=1] TEST1B,[l=1]',
+    'act now:TEST4,[l=1]',
+    'food:TEST2,[l=1]',
+    'food bar:TEST2,[l=1] TEST3,[l=1]',
+    'foody bar:TEST2,[l=1] TEST3,[l=1]',
+    'refinanc:TEST5,[l=1]',
+    'target::TEST6,[l=1]',
+    'target price::TEST6,[l=1]',
+    'current::TEST6,[l=1]',
+    'current price::TEST6,[l=1]',
 
 ], [
 
     # we do not want to see these
-    '!credit:TEST7'
+    '!credit:TEST7,[l=1]',
 
 ]);
 
@@ -334,15 +360,15 @@ try_extraction ('
     bases_split_out_alternations => 0
 }, [
 
-    'foo bar:FOO',
-    'to be removed from:EXCUSE_REMOVE',
+    'foo bar:FOO,[l=1]',
+    'to be removed from:EXCUSE_REMOVE,[l=1]',
 ],[
 
-    'foo bar:FOO TEST1',
-    'foo bar:FOO TEST2',
-    'nano superlattice technology:KAM_STOCKTIP15',
-    'fooish bar:TEST1',
-    'fooish bar:TEST2'
+    'foo bar:FOO TEST1,[l=1]',
+    'foo bar:FOO TEST2,[l=1]',
+    'nano superlattice technology:KAM_STOCKTIP15,[l=1]',
+    'fooish bar:TEST1,[l=1]',
+    'fooish bar:TEST2,[l=1]',
 
 ]);
 

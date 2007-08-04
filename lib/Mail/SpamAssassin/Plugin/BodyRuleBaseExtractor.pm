@@ -133,9 +133,10 @@ sub extract_set_pri {
 
     my ($qr, $mods) = $self->simplify_and_qr_regexp($rule);
 
+    my $lossy;
     my @bases;
     eval {  # catch die()s
-      @bases = $self->extract_hints($rule, $qr, $mods);
+      ($lossy, @bases) = $self->extract_hints($rule, $qr, $mods);
     };
     $@ and dbg("giving up on regexp: $@");
 
@@ -165,7 +166,9 @@ sub extract_set_pri {
 
       foreach my $base (@bases) {
         next if $subsumed{$base};
-        push @good_bases, { base => $base, orig => $rule, name => $name };
+        push @good_bases, {
+            base => $base, orig => $rule, name => "$name,[l=$lossy]"
+          };
       }
       $yes++;
     }
@@ -327,6 +330,8 @@ sub simplify_and_qr_regexp {
     }
   }
 
+  my $lossy = 0;
+
   # now: simplify aspects of the regexp.  Bear in mind that we can
   # simplify as long as we cause the regexp to become more general;
   # more hits is OK, since false positives will be discarded afterwards
@@ -335,13 +340,15 @@ sub simplify_and_qr_regexp {
 
   if ($main->{bases_must_be_casei}) {
     $rule = lc $rule;
-    $mods =~ s/i//;
+
+    $lossy = 1;
+    $mods =~ s/i// and $lossy = 0;
 
     # always case-i: /A(?i:ct) N(?i:ow)/ => /Act Now/
-    $rule =~ s/(?<!\\)\(\?i\:(.*?)\)/$1/gs;
+    $rule =~ s/(?<!\\)\(\?i\:(.*?)\)/$1/gs and $lossy++;
 
     # always case-i: /A(?-i:ct)/ => /Act/
-    $rule =~ s/(?<!\\)\(\?-i\:(.*?)\)/$1/gs;
+    $rule =~ s/(?<!\\)\(\?-i\:(.*?)\)/$1/gs and $lossy++;
 
     # remove (?i)
     $rule =~ s/\(\?i\)//gs;
@@ -352,25 +359,27 @@ sub simplify_and_qr_regexp {
   }
 
   # remove /m and /s modifiers
-  $mods =~ s/m//;
-  $mods =~ s/s//;
+  $mods =~ s/m// and $lossy++;
+  $mods =~ s/s// and $lossy++;
 
   # remove (^|\b)'s
   # T_KAM_STOCKTIP23 /(EXTREME INNOVATIONS|(^|\b)EXTI($|\b))/is
-  $rule =~ s/\(\^\|\\b\)//gs;
-  $rule =~ s/\(\$\|\\b\)//gs;
-  $rule =~ s/\(\\b\|\^\)//gs;
-  $rule =~ s/\(\\b\|\$\)//gs;
+  $rule =~ s/\(\^\|\\b\)//gs and $lossy++;
+  $rule =~ s/\(\$\|\\b\)//gs and $lossy++;
+  $rule =~ s/\(\\b\|\^\)//gs and $lossy++;
+  $rule =~ s/\(\\b\|\$\)//gs and $lossy++;
 
   # remove (?!credit)
-  $rule =~ s/\(\?\![^\)]+\)//gs;
+  $rule =~ s/\(\?\![^\)]+\)//gs and $lossy++;
 
   # remove \b's
-  $rule =~ s/(?<!\\)\\b//gs;
+  $rule =~ s/(?<!\\)\\b//gs and $lossy++;
 
   # remove the "?=" trick
   # (?=[dehklnswxy])(horny|nasty|hot|wild|young|....etc...)
   $rule =~ s/\(\?\=\[[^\]]+\]\)//gs;
+
+  $mods .= "L" if $lossy;
   ($rule, $mods);
 }
 
@@ -383,6 +392,9 @@ sub extract_hints {
   my $main = $self->{main};
   my $orig = $rule;
 
+  my $lossy = 0;
+  $mods =~ s/L// and $lossy++;
+
   # if there are anchors, give up; we can't get much 
   # faster than these anyway
   die "anchors" if $rule =~ /^\(?(?:\^|\\A)/;
@@ -390,7 +402,7 @@ sub extract_hints {
   # die "anchors" if $rule =~ /(?:\$|\\Z)\)?$/;
   # just remove end-of-string anchors; they're slow so could gain
   # from our speedup
-  $rule =~ s/(?<!\\)(?:\$|\\Z)\)?$//;
+  $rule =~ s/(?<!\\)(?:\$|\\Z)\)?$// and $lossy++;
 
   # simplify (?:..) to (..)
   $main->{bases_allow_noncapture_groups} or
@@ -561,6 +573,11 @@ sub extract_hints {
       else {
         # not an /^EXACT/; clear the buffer
         $add_candidate->();
+        if ($item !~ /^(?:END|CLOSE\d|MINMOD)$/)
+        {
+          $lossy = 1;
+          DEBUG_RE_PARSING and warn "item $item makes regexp lossy";
+        }
       }
       $prevop = $op;
     }
@@ -576,7 +593,7 @@ sub extract_hints {
   }
 
   DEBUG_RE_PARSING and warn "longest base strings: /".join("/", @longests)."/";
-  return @longests;
+  return ($lossy, @longests);
 }
 
 ###########################################################################
