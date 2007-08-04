@@ -131,11 +131,10 @@ sub extract_set_pri {
     # TODO: need cleaner way to do this
     next if ($conf->{rules_to_replace}->{$name});
 
-    my ($qr, $mods) = $self->simplify_and_qr_regexp($rule);
+    my ($lossy, @bases);
 
-    my $lossy;
-    my @bases;
     eval {  # catch die()s
+      my ($qr, $mods) = $self->simplify_and_qr_regexp($rule);
       ($lossy, @bases) = $self->extract_hints($rule, $qr, $mods);
     };
     $@ and dbg("giving up on regexp: $@");
@@ -356,6 +355,12 @@ sub simplify_and_qr_regexp {
   else {
     die "case-i" if $rule =~ /\(\?i\)/;
     die "case-i" if $mods =~ /i/;
+
+    # always case-i: /A(?i:ct) N(?i:ow)/ => /Act Now/
+    $rule =~ s/(?<!\\)\(\?i\:(.*?)\)/$1/gs and die "case-i";
+
+    # we're already non-case-i so this is a no-op: /A(?-i:ct)/ => /Act/
+    $rule =~ s/(?<!\\)\(\?-i\:(.*?)\)/$1/gs;
   }
 
   # remove /m and /s modifiers
@@ -588,7 +593,8 @@ sub extract_hints {
       # all unrolled versions must have a long string, otherwise
       # we cannot reliably match all variants of the rule
     } else {
-      push @longests, lc $longestexact;
+      push @longests, ($main->{bases_must_be_casei}) ?
+                            lc $longestexact : $longestexact;
     }
   }
 
