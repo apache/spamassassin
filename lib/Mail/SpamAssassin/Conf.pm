@@ -2745,7 +2745,8 @@ C<SELECT preference, value FROM _TABLE_ WHERE username = _USERNAME_ OR username 
 
 =item user_scores_ldap_username
 
-This is the Bind DN used to connect to the LDAP server.
+This is the Bind DN used to connect to the LDAP server.  It defaults
+to the empty string (""), allowing anonymous binding to work.
 
 Example: C<cn=master,dc=koehntopp,dc=de>
 
@@ -2754,13 +2755,14 @@ Example: C<cn=master,dc=koehntopp,dc=de>
   push (@cmds, {
     setting => 'user_scores_ldap_username',
     is_admin => 1,
-    default => 'username',
+    default => '',
     type => $CONF_TYPE_STRING
   });
 
 =item user_scores_ldap_password
 
-This is the password used to connect to the LDAP server.
+This is the password used to connect to the LDAP server.  It defaults
+to the empty string ("").
 
 =cut
 
