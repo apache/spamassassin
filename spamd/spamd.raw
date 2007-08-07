@@ -1024,10 +1024,11 @@ sub spawn {
       # use the POSIX functions to hide the platform specific workarounds 
       POSIX::setgid($ugid);  # set effective and real gid
       POSIX::setuid($uuid);  # set effective and real UID
+      $< = $uuid; $> = $uuid;   # bug 5574
 
       # keep the sanity check to catch problems like bug 3900 just in case
       if ( $> != $uuid and $> != ( $uuid - 2**32 ) ) {
-        die "spamd: setuid to uid $uuid failed\n";
+        die "spamd: setuid to uid $uuid failed (> = $>, < = $<)\n";
       }
     }
 
