@@ -890,6 +890,7 @@ sub run_eval_tests {
     }
  
     $evalstr .= '
+    if ($scoresptr->{q#'.$rulename.'#}) {
       $rulename = q#'.$rulename.'#;
       $self->{test_log_msgs} = ();
     ';
@@ -947,7 +948,7 @@ sub run_eval_tests {
         $self->got_hit($rulename, $prepend2desc, ruletype => "eval", value => $result);
         '.$dbgstr.'
       }
-
+    }
     ';
   }
 
@@ -963,6 +964,7 @@ sub run_eval_tests {
     sub ${methodname} {
       my (\$self, \@extraevalargs) = \@_;
 
+      my \$scoresptr = \$self->{conf}->{scores};
       my \$prepend2desc = q#$prepend2desc#;
       my \$rulename;
       my \$result;
