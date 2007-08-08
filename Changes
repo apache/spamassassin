@@ -1,4 +1,70 @@
 ------------------------------------------------------------------------
+r563591 | jm | 2007-08-07 17:49:55 +0000 (Tue, 07 Aug 2007) | 1 line
+
+bug 5107: change default user_scores_ldap_username to be the null string, allowing anonymous binding; fix 'schema' syntax error in LDAP config support
+------------------------------------------------------------------------
+r563590 | jm | 2007-08-07 17:49:08 +0000 (Tue, 07 Aug 2007) | 1 line
+
+zeroing an 'eval' rule's score did not stop it running.  fix, thanks to Richard Birkett <richard+spamassassin at musicbox.net>
+------------------------------------------------------------------------
+r563526 | jm | 2007-08-07 15:36:14 +0000 (Tue, 07 Aug 2007) | 1 line
+
+add Matt's suggested helpful documentation comment to .pre files
+------------------------------------------------------------------------
+r563523 | jm | 2007-08-07 15:28:02 +0000 (Tue, 07 Aug 2007) | 1 line
+
+bug 5574: fix new setuid code to work with perl 5.6.1, and to support DCC and Pyzor in all releases of perl
+------------------------------------------------------------------------
+r563522 | jm | 2007-08-07 15:23:32 +0000 (Tue, 07 Aug 2007) | 2 lines
+
+bug 5475: fix FORGED_MUA_AOL_FROM to allow
+<*@{aol,cs}.*> addresses instead of just <*@{aol,cs}.com>
+------------------------------------------------------------------------
+r563521 | jm | 2007-08-07 15:22:48 +0000 (Tue, 07 Aug 2007) | 2 lines
+
+bug 5544: ALL_TRUSTED is immutable, mark this
+explicitly by putting it in an immutable section
+------------------------------------------------------------------------
+r563519 | jm | 2007-08-07 15:21:26 +0000 (Tue, 07 Aug 2007) | 1 line
+
+bug 5397: RDNS_DYNAMIC should never fire on a PTR with 'static' in it; thanks to Martin Blapp <mbr at freebsd.org>.  bug 5563: RDNS_DYNAMIC rules use order-dependent fields where it is unsafe to depend on this, fix.  bug 5564: __RDNS_DYNAMIC_IPADDR does not hit all of its test patterns, fix.
+------------------------------------------------------------------------
+r562563 | sidney | 2007-08-03 19:42:15 +0000 (Fri, 03 Aug 2007) | 1 line
+
+increase dcc timeout used in test. default caused bogus errors on some high latency or slow networks
+------------------------------------------------------------------------
+r560956 | jm | 2007-07-30 12:57:27 +0000 (Mon, 30 Jul 2007) | 1 line
+
+clarify documentation to note clearly that MXes must perform DNS name resolution, for whitelist_from_rcvd to work
+------------------------------------------------------------------------
+r560934 | jm | 2007-07-30 12:07:40 +0000 (Mon, 30 Jul 2007) | 1 line
+
+doc fix: cpan uploads cannot handle .tar.bz2, note this
+------------------------------------------------------------------------
+r560059 | sidney | 2007-07-27 01:52:42 +0000 (Fri, 27 Jul 2007) | 1 line
+
+bug 5571: allow for new message id format we have seen from Vista or Windows 2003 Server MAPI
+------------------------------------------------------------------------
+r559432 | jm | 2007-07-25 12:45:08 +0000 (Wed, 25 Jul 2007) | 1 line
+
+starting 3.2.3
+------------------------------------------------------------------------
+r559431 | jm | 2007-07-25 12:44:48 +0000 (Wed, 25 Jul 2007) | 1 line
+
+3.2.2 RELEASED
+------------------------------------------------------------------------
+r558764 | jm | 2007-07-23 14:59:57 +0000 (Mon, 23 Jul 2007) | 1 line
+
+draft 3.2.2 announcement text
+------------------------------------------------------------------------
+r558759 | jm | 2007-07-23 14:54:25 +0000 (Mon, 23 Jul 2007) | 1 line
+
+trivial: fix build script to output md5/sha1 lines indented in the same style as the release announcement mails use
+------------------------------------------------------------------------
+r558751 | jm | 2007-07-23 14:45:44 +0000 (Mon, 23 Jul 2007) | 1 line
+
+preparing to release 3.2.2
+------------------------------------------------------------------------
 r558682 | jm | 2007-07-23 10:23:09 +0000 (Mon, 23 Jul 2007) | 3 lines
 
 bug 5449: allow_user_rules causes Rule2XSBody plugin
