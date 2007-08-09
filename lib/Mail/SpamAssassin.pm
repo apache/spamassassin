@@ -94,7 +94,7 @@ use vars qw{
   @site_rules_path
 };
 
-$VERSION = "3.002003";      # update after release (same format as perl $])
+$VERSION = "3.002004";      # update after release (same format as perl $])
 $IS_DEVEL_BUILD = 1;        # change for release versions
 
 # Used during the prerelease/release-candidate part of the official release
