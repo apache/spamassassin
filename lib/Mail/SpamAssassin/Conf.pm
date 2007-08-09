@@ -350,6 +350,10 @@ Note that this requires that C<internal_networks> be correct.  For simple cases,
 it will be, but for a complex network you may get better results by setting that
 parameter.
 
+It also requires that your mail exchangers be configured to perform DNS
+reverse lookups on the connecting host's IP address, and to record the
+result in the generated Received: header.
+
 e.g.
 
   whitelist_from_rcvd joe@example.com  example.com
@@ -2741,7 +2745,8 @@ C<SELECT preference, value FROM _TABLE_ WHERE username = _USERNAME_ OR username 
 
 =item user_scores_ldap_username
 
-This is the Bind DN used to connect to the LDAP server.
+This is the Bind DN used to connect to the LDAP server.  It defaults
+to the empty string (""), allowing anonymous binding to work.
 
 Example: C<cn=master,dc=koehntopp,dc=de>
 
@@ -2750,13 +2755,14 @@ Example: C<cn=master,dc=koehntopp,dc=de>
   push (@cmds, {
     setting => 'user_scores_ldap_username',
     is_admin => 1,
-    default => 'username',
+    default => '',
     type => $CONF_TYPE_STRING
   });
 
 =item user_scores_ldap_password
 
-This is the password used to connect to the LDAP server.
+This is the password used to connect to the LDAP server.  It defaults
+to the empty string ("").
 
 =cut
 

@@ -336,7 +336,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 	$repo/tags/spamassassin_release_3_2_0 \
 	$repo/tags/spamassassin_current_release_3.2.x
 
-- upload release tarball to CPAN at http://pause.cpan.org/:
+- upload release .tar.gz (not .bz2) tarball to CPAN at http://pause.cpan.org/:
 
         https://pause.perl.org/pause/authenquery?ACTION=add_uri
 
@@ -367,5 +367,9 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - Approve the posting to the announce list (the list admins will get a
   mail indicating how to do this.)
+
+- Add the new version to the Bugzilla versions list:
+
+        http://issues.apache.org/SpamAssassin/editversions.cgi?product=Spamassassin&action=add
 
 // vim:tw=74:

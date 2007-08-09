@@ -21,9 +21,9 @@ done
 set +x
 echo
 
-echo "md5sum of archive files:"
-cat $RELDIR/$DISTVNAME.*.md5
-
-echo "sha1sum of archive files:"
-cat $RELDIR/$DISTVNAME.*.sha1
+echo "  md5sum of archive files:"
+cat $RELDIR/$DISTVNAME.*.md5 | sed -e 's/^/  /'
+echo
+echo "  sha1sum of archive files:"
+cat $RELDIR/$DISTVNAME.*.sha1 | sed -e 's/^/  /'
 
