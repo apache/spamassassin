@@ -1,0 +1,56 @@
+To: users, dev, announce
+From: [don't forget to use your @apache.org address]
+Subject: ANNOUNCE: Apache SpamAssassin 3.2.3 available
+
+Apache SpamAssassin 3.2.3 is now available!  This is a maintenance
+release of the 3.2.x branch.
+
+Downloads are available from:
+  http://spamassassin.apache.org/downloads.cgi
+
+The release file will also be available via CPAN in the near future.
+
+  md5sum of archive files:
+  e9a5fd94dead0fca3f26fb3feb0c8e57  Mail-SpamAssassin-3.2.3.tar.bz2
+  2e356b70b9458b44a828c19f6e816521  Mail-SpamAssassin-3.2.3.tar.gz
+  6ea8ef7f37e4b305217fa8074dd2219e  Mail-SpamAssassin-3.2.3.zip
+
+  sha1sum of archive files:
+  53199e0218d2f93043fcdca4db3f164f1f9f7cbc  Mail-SpamAssassin-3.2.3.tar.bz2
+  93337a5cf6cc6f4980307c08ad65575fa08d1f54  Mail-SpamAssassin-3.2.3.tar.gz
+  0eca91718518547323f43b5473d1362032edb592  Mail-SpamAssassin-3.2.3.zip
+
+The release files also have a .asc file accompanying them.  The file serves as
+an external GPG signature for the given release file.  The signing key is
+available via the wwwkeys.pgp.net key server, as well as at:
+http://spamassassin.apache.org/released/GPG-SIGNING-KEY
+
+The key information is:
+
+pub 1024D/265FA05B 2003-06-09 SpamAssassin Signing Key <release@spamassassin.org>
+    Key fingerprint = 26C9 00A4 6DD4 0CD5 AD24  F6D7 DEE0 1987 265F A05B
+
+
+3.2.3 is a major bug-fix release.  Summary of changes:
+
+- bug 5574: fix new setuid code to work with perl 5.6.1, and to support DCC and
+  Pyzor in all releases of perl
+
+- bug 5107: change default 'user_scores_ldap_username' to be the null string,
+  allowing anonymous binding; fix 'schema' syntax error in LDAP config support
+
+- zeroing an 'eval' rule's score did not stop it running.  fix, thanks to
+  Richard Birkett <richard+spamassassin at musicbox.net>
+
+- bug 5571: allow for new message ID format we have seen from Vista or Windows
+  2003 Server MAPI to avoid false positives
+
+- bug 5397: RDNS_DYNAMIC should never fire on a PTR with 'static' in it; thanks
+  to Martin Blapp <mbr at freebsd.org>.  bug 5563: RDNS_DYNAMIC rules use
+  order-dependent fields where it is unsafe to depend on this, fix.  bug 5564:
+  __RDNS_DYNAMIC_IPADDR does not hit all of its test patterns, fix.
+
+- bug 5475: fix FORGED_MUA_AOL_FROM to allow <*@{aol,cs}.*> addresses instead
+  of just <*@{aol,cs}.com>
+
+
