@@ -288,6 +288,7 @@ sub parse_received_headers {
 sub parse_received_line {
   my ($self) = shift;
   local ($_) = shift;
+  local ($1,$2,$3,$4,$5,$6);
 
   s/\s+/ /g;
   s/^ //;
@@ -333,7 +334,8 @@ sub parse_received_line {
 
   # Received: from virtual-access.org by bolero.conactive.com ; Thu, 20 Feb 2003 23:32:58 +0100
   # Received: FROM ca-ex-bridge1.nai.com BY scwsout1.nai.com ; Fri Feb 07 10:18:12 2003 -0800
-  if (/^from \S+ by [^\s;]+ ?;/i) { return 0; }
+  # but not: Received: from [86.122.158.69] by mta2.iomartmail.com; Thu, 2 Aug 2007 21:50:04 -0200
+  if (/^from (\S+) by [^\s;]+ ?;/i && $1 !~ /^\[[\d.]+\]$/) { return 0; }
 
 # ---------------------------------------------------------------------------
 
