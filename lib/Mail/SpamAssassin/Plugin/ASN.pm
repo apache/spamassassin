@@ -190,7 +190,7 @@ sub parsed_metadata {
   } else {
     if (defined $relay->{ip} && $relay->{ip} =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) {
       $reversed_ip_quad = "$4.$3.$2.$1";
-      dbg("asn: using first external relay IP for lookups: $relay->{ip}");
+      dbg("asn: using first external relay IP for lookups: %s", $relay->{ip});
     } else {
       dbg("asn: could not parse IP from first external relay, skipping ASN check");
     }
@@ -212,13 +212,19 @@ sub parsed_metadata {
   
     # do the DNS query, have the callback process the result rather than poll for them later
     my $zone_index = $index;
+    my $key = "asnlookup-${zone_index}-$entry->{zone}";
     my $id = $scanner->{main}->{resolver}->bgsend("${reversed_ip_quad}.$entry->{zone}", 'TXT', undef, sub {
-      my $pkt = shift;
+      my ($pkt, $id, $timestamp) = @_;
+      $scanner->{async}->set_response_packet($id, $pkt, $key, $timestamp);
       $self->process_dns_result($scanner, $pkt, $zone_index);
     });
-
-    $scanner->{async}->start_lookup({ key=>"asnlookup-${zone_index}-$entry->{zone}", id=>$id, type=>'TXT' });
-    dbg("asn: launched DNS TXT query for ${reversed_ip_quad}.$entry->{zone} in background");
+    my $ent = {
+      key=>$key, id=>$id, type=>'TXT',
+    # timeout => ...   # defaults to $scanner->{conf}->{rbl_timeout}
+    };
+    $scanner->{async}->start_lookup($ent);
+    dbg("asn: launched DNS TXT query for %s.%s in background",
+        $reversed_ip_quad, $entry->{zone});
 
     $index++;
   }
@@ -236,11 +242,12 @@ sub process_dns_result {
   my @answer = $response->answer;
 
   foreach my $rr (@answer) {
-    dbg("asn: $zone: lookup result packet: '".$rr->string."'");
+    dbg("asn: %s: lookup result packet: '%s'", $zone, $rr->string);
     if ($rr->type eq 'TXT') {
       my @items = split(/ /, $rr->txtdata);
       unless ($#items == 2) {
-        dbg("asn: TXT query response format unknown, ignoring zone: $zone response: '".$rr->txtdata."'");
+        dbg("asn: TXT query response format unknown, ignoring zone: %s, ".
+            "response: '%s'", $zone, $rr->txtdata);
         next;
       }
       unless ($scanner->{tag_data}->{$asn_tag} =~ /\bAS$items[0]\b/) {
