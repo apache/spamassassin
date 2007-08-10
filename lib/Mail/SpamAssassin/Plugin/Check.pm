@@ -91,29 +91,41 @@ sub check_main {
       $pms->{resolver}->finish_socket() if $pms->{resolver};
     }
 
+    $pms->harvest_completed_queries();
     # allow other, plugin-defined rule types to be called here
     $self->{main}->call_plugins ("check_rules_at_priority",
         { permsgstatus => $pms, priority => $priority, checkobj => $self });
 
     # do head tests
     $self->do_head_tests($pms, $priority);
+    $pms->harvest_completed_queries();
     $self->do_head_eval_tests($pms, $priority);
+    $pms->harvest_completed_queries();
 
     $self->do_body_tests($pms, $priority, $decoded);
+    $pms->harvest_completed_queries();
     $self->do_uri_tests($pms, $priority, @uris);
+    $pms->harvest_completed_queries();
     $self->do_body_eval_tests($pms, $priority, $decoded);
+    $pms->harvest_completed_queries();
   
     $self->do_rawbody_tests($pms, $priority, $bodytext);
+    $pms->harvest_completed_queries();
     $self->do_rawbody_eval_tests($pms, $priority, $bodytext);
+    $pms->harvest_completed_queries();
   
     $self->do_full_tests($pms, $priority, \$fulltext);
+    $pms->harvest_completed_queries();
     $self->do_full_eval_tests($pms, $priority, \$fulltext);
+    $pms->harvest_completed_queries();
 
     $self->do_meta_tests($pms, $priority);
+    $pms->harvest_completed_queries();
 
     # we may need to call this more often than once through the loop, but
     # it needs to be done at least once, either at the beginning or the end.
     $self->{main}->call_plugins ("check_tick", { permsgstatus => $pms });
+    $pms->harvest_completed_queries();
   }
 
   # sanity check, it is possible that no rules >= HARVEST_DNSBL_PRIORITY ran so the harvest
