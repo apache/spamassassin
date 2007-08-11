@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: axb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi
+# with results from: bb-fredt bb-jm bb-zmi cthielen jm theo
 
 # good enough
 AB_TEST_PDF1
@@ -269,6 +269,9 @@ FH_XMAIL_REPLACE
 FM_DOESNT_SAY_STOCK
 
 # good enough
+FM_FAKE_HELO_HOTMAIL
+
+# good enough
 FM_FAKE_HELO_VERIZON
 
 # good enough
@@ -279,9 +282,6 @@ FM_LIKE_STOCKS
 
 # good enough
 FM_MORTGAGE3PLUS
-
-# good enough
-FM_MORTGAGE5PLUS
 
 # good enough
 FM_RATSIGN_1106
@@ -309,6 +309,9 @@ FRT_DISCOUNT
 
 # good enough
 FRT_ERECTION
+
+# good enough
+FRT_GUARANTEE1
 
 # good enough
 FRT_LEVITRA
@@ -389,9 +392,6 @@ FS_REPLICA
 FS_REPLICAWATCH
 
 # good enough
-FS_START_DOYOU2
-
-# good enough
 FS_START_LOSE
 
 # good enough
@@ -408,9 +408,6 @@ FUZZY_MERIDIA
 
 # good enough
 FU_ENDS_NUMS_DOTS_CLK
-
-# good enough
-FU_LONG_QUERY3
 
 # tflags userconf
 GTUBE
@@ -454,6 +451,9 @@ HDR_ORDER_FTSDMCXX_001C
 # good enough
 HDR_ORDER_FTSDMCXX_BAT
 
+# good enough
+HEADER_COUNT_SUBJECT
+
 # tflags userconf
 HEAD_LONG
 
@@ -485,6 +485,12 @@ HTML_CHARSET_FARAWAY
 JM_RCVD_QMAILV1
 
 # good enough
+JM_SEEK_57V9JU
+
+# good enough
+JM_SEEK_948XEW
+
+# good enough
 JM_SEEK_BLB3_4
 
 # good enough
@@ -494,22 +500,34 @@ JM_SEEK_DV6VDK
 JM_SEEK_ICZPZW
 
 # good enough
+JM_SEEK_JBBCXG
+
+# good enough
+JM_SEEK_KCDP2T
+
+# good enough
+JM_SEEK_OUGJAY
+
+# good enough
+JM_SEEK_OZNQZS
+
+# good enough
 JM_SEEK_SUQW9W
 
 # good enough
-JM_SEEK_UNAC6F
+JM_SEEK_WBHDZB
 
 # good enough
-JM_SEEK_WBHDZB
+JM_SEEK_WJOQN7
+
+# good enough
+JM_SEEK_XGH9HJ
 
 # good enough
 JM_SEEK_YURMY4
 
 # good enough
 JM_SEEK_YWME93
-
-# good enough
-JM_SEEK_ZCBTFC
 
 # good enough
 KAM_LOTTO1
@@ -564,6 +582,9 @@ OUTLOOK_3416
 
 # good enough
 PART_CID_STOCK
+
+# good enough
+PART_CID_STOCK_LESS
 
 # tflags net
 PYZOR_CHECK
@@ -851,6 +872,12 @@ TVD_FINGER_02
 TVD_PDF_FINGER01
 
 # good enough
+TVD_PH_REC
+
+# good enough
+TVD_PH_SUBJ_ACCOUNTS_POST
+
+# good enough
 TVD_PH_SUBJ_SEC_MEASURES
 
 # good enough
@@ -881,97 +908,31 @@ TVD_STOCK1
 TVD_VISIT_PHARMA
 
 # good enough
-AXB_MIME_IMG830
-
-# good enough
-CTYPE_1SPACE_GIF
-
-# good enough
-JM_SEEK_1HR4GE
-
-# good enough
-JM_SEEK_1JZND8
-
-# good enough
-JM_SEEK_1RM0CE
-
-# good enough
 JM_SEEK_3NSLMM
 
 # good enough
-JM_SEEK_57V9JU
+JM_SEEK_HF9U_I
 
 # good enough
-JM_SEEK_6EKOEG
+JM_SEEK_JLSJHA
 
 # good enough
-JM_SEEK_6IU7KY
-
-# good enough
-JM_SEEK_7JGZ2D
-
-# good enough
-JM_SEEK_948XEW
-
-# good enough
-JM_SEEK_C6EZZ1
-
-# good enough
-JM_SEEK_EQGW9L
-
-# good enough
-JM_SEEK_F4HNOC
-
-# good enough
-JM_SEEK_G6YTZC
-
-# good enough
-JM_SEEK_GO4Y2U
-
-# good enough
-JM_SEEK_GYZISS
-
-# good enough
-JM_SEEK_JBBCXG
-
-# good enough
-JM_SEEK_KCDP2T
-
-# good enough
-JM_SEEK_OLJ0GT
-
-# good enough
-JM_SEEK_OUGJAY
-
-# good enough
-JM_SEEK_OZNQZS
+JM_SEEK_NJMQGF
 
 # good enough
 JM_SEEK_SI9KNO
 
 # good enough
-JM_SEEK_UEYYTP
+JM_SEEK_T_0M67
 
 # good enough
-JM_SEEK_UTCYSK
+JM_SEEK_UMKYIA
 
 # good enough
-JM_SEEK_VDKXPT
+JM_SEEK_YF6Y1U
 
 # good enough
-JM_SEEK_VS7U_B
-
-# good enough
-JM_SEEK_WJOQN7
-
-# good enough
-JM_SEEK_XGH9HJ
-
-# good enough
-JM_SEEK_X_NASY
-
-# good enough
-JM_SEEK_YCQW2R
+JM_SEEK__WGPFB
 
 # tflags net
 RCVD_IN_DSBL
@@ -987,6 +948,15 @@ RCVD_IN_WHOIS_INVALID
 
 # tflags net
 RCVD_IN_XBL
+
+# good enough
+TVD_FW_GRAPHIC_ID1
+
+# good enough
+TVD_PH_7
+
+# good enough
+TVD_PH_SUBJ_META_ALL
 
 # tflags net
 URIBL_L1SPEWS
@@ -1217,6 +1187,9 @@ XMAILER_MIMEOLE_OL_07794
 XMAILER_MIMEOLE_OL_09BB4
 
 # good enough
+XMAILER_MIMEOLE_OL_1ECD5
+
+# good enough
 XMAILER_MIMEOLE_OL_20C99
 
 # good enough
@@ -1298,6 +1271,9 @@ XMAILER_MIMEOLE_OL_B30D1
 XMAILER_MIMEOLE_OL_B4B40
 
 # good enough
+XMAILER_MIMEOLE_OL_B9B11
+
+# good enough
 XMAILER_MIMEOLE_OL_BC7E6
 
 # good enough
@@ -1323,6 +1299,9 @@ XMAILER_MIMEOLE_OL_F6D01
 
 # good enough
 XMAILER_MIMEOLE_OL_FF5C8
+
+# good enough
+X_LIBRARY
 
 # tflags net
 __DNS_FROM_RFC_ABUSE
