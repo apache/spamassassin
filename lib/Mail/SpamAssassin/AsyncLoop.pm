@@ -393,7 +393,7 @@ sub report_id_complete {
 =item $time = $async->last_poll_responses_time()
 
 Get the time of the last call to C<poll_responses()> (which is called
-from C<complete_lookups()).  If C<poll_responses()> was never called or
+from C<complete_lookups()>.  If C<poll_responses()> was never called or
 C<abort_remaining_lookups()> has been called C<last_poll_responses_time()>
 will return undef.
 
