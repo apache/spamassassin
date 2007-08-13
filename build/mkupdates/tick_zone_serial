@@ -10,7 +10,7 @@
 
 set -x
 
-cd /home/updatesd/svn/spamassassin
+[ -d /home/updatesd/svn/spamassassin ] && cd /home/updatesd/svn/spamassassin
 
 
 . /etc/profile
@@ -22,6 +22,9 @@ export PERL
 # it must be writable by the user this script runs as.
 #
 soadir=/var/named/spamassassin.org.d
+if [ "$#" -gt 0 ]; then
+  soadir="$1"
+fi
 
 # ---------------------------------------------------------------------------
 
@@ -52,6 +55,7 @@ soafile=$soadir/soa_line
 rm -f $soafile.bak \
       $soafile.new
 
+touch $soafile # this must exist
 if sed -e 's/__SERIAL__/'"$newserial"'/' \
 	< $soafile.tmpl > $soafile.new && \
     [ -s $soafile.new ] && \
@@ -66,6 +70,7 @@ fi
 
 
 # trigger a named reload of that changed zone
-sudo rndc reload  || exit $?
+zone=`perl -e '$_=join("", <STDIN>); /^\s*(\S+)/ and print $1' < $soafile`
+sudo rndc reload $zone || exit $?
 
 exit 0
