@@ -94,7 +94,7 @@ use constant LOCALHOST => qr/
 		      # as a string
 		      localhost(?:\.localdomain)?
 		    |
-		      \b(?<!:)	# ensure no "::" IPv4 marker before this one
+		      \b(?<!:)	# ensure no "::" IPv6 marker before this one
 		      # plain IPv4
 		      127\.0\.0\.1 \b
 		    |
@@ -145,7 +145,7 @@ use constant LOCALHOST => qr/
 			# 0000 in third up to (including) seventh omitted
 			(?:0{1,4}:){2}(?::0{1,4}){0,4}:	0{0,3}1
 			|
-			# 0000 in fouth up to (including) seventh omiited
+			# 0000 in fouth up to (including) seventh omitted
 			(?:0{1,4}:){3}(?::0{1,4}){0,3}:	0{0,3}1
 			|
 			# 0000 in fifth up to (including) seventh omitted
@@ -237,7 +237,7 @@ use constant IP_ADDRESS => qr/
 			# 0000 in third up to (including) seventh omitted
 			(?:[a-f0-9]{1,4}:){2}(?::[a-f0-9]{1,4}){1,5}
 			|
-			# 0000 in fouth up to (including) seventh omiited
+			# 0000 in fouth up to (including) seventh omitted
 			(?:[a-f0-9]{1,4}:){3}(?::[a-f0-9]{1,4}){1,4}
 			|
 			# 0000 in fifth up to (including) seventh omitted
@@ -249,7 +249,7 @@ use constant IP_ADDRESS => qr/
 			# 0000 in seventh omitted
 			(?:[a-f0-9]{1,4}:){6}:[a-f0-9]{1,4}
 			|
-			# :: (the unspecified addreess 0:0:0:0:0:0:0:0)
+			# :: (the unspecified address 0:0:0:0:0:0:0:0)
 			# dos: I don't expect to see this address in a header, and
 			# it may cause non-address strings to match, but we'll
 			# include it for now since it is valid

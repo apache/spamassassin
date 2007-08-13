@@ -258,9 +258,10 @@ sub update {
 public instance () final ([Integer $num_done])
 
 Description:
-This method should be called once all processing has finished.  It will print out the final msgs per sec
-calculation and the total time taken.  You can optionally pass in a num_done value, otherwise it will use
-the value calculated from the last call to update.
+This method should be called once all processing has finished.
+It will print out the final msgs per sec calculation and the total time taken.
+You can optionally pass in a num_done value, otherwise it will use the value
+calculated from the last call to update.
 
 =cut
 

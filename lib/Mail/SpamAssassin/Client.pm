@@ -429,7 +429,7 @@ private instance (IO::Socket) _create_connection ()
 
 Description:
 This method sets up a proper IO::Socket connection based on the arguments
-used when greating the client object.
+used when creating the client object.
 
 On failure, it sets an internal error code and returns undef.
 

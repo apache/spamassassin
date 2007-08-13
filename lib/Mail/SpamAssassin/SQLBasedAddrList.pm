@@ -50,7 +50,7 @@ CREATE TABLE awl (
   PRIMARY KEY (username, email, ip)
 )
 
-You're table definition may change depending on which database driver
+Your table definition may change depending on which database driver
 you choose.  There is a config option to override the table name.
 
 This module introduces several new config variables:

@@ -91,7 +91,7 @@ are OK. Multiple C<whitelist_from_spf> lines are also OK.
 The headers checked for whitelist_from_spf addresses are the same headers
 used for SPF checks (Envelope-From, Return-Path, X-Envelope-From, etc).
 
-Since this whitelist requires an SPF check to be made network tests must be
+Since this whitelist requires an SPF check to be made, network tests must be
 enabled. It is also required that your trust path be correctly configured.
 See the section on C<trusted_networks> for more info on trust paths.
 

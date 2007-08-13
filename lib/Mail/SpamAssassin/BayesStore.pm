@@ -630,8 +630,8 @@ sub tok_get {
 public instance (\@) tok_get_all (@ @tokens)
 
 Description:
-This method retrieves the specified tokens (C<@tokens>) from storage and returns
-an array ref of arrays spam count, ham acount and last access time.
+This method retrieves the specified tokens (C<@tokens>) from storage and
+returns an array ref of arrays spam count, ham count and last access time.
 
 =cut
 
@@ -682,7 +682,7 @@ sub multi_tok_count_change {
 public instance (Integer, Integer) nspam_nham_get ()
 
 Description:
-This method retrieves the total number of spam and the total number of spam
+This method retrieves the total number of spam and the total number of ham
 currently under storage.
 
 =cut
@@ -821,7 +821,7 @@ sub clear_database {
 public instance (Boolean) backup_database ()
 
 Description:
-This method will dump the users database in a marchine readable format.
+This method will dump the users database in a machine readable format.
 
 =cut
 

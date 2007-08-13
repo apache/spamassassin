@@ -155,7 +155,7 @@ sub check_rbl_backend {
   my @fullips = map { $_->{ip} } @{$pms->{relays_untrusted}};
 
   # now, make a list of all the IPs in the external set, for use in
-  # notfirsthop testing.  this will often be more IPs than found
+  # notfirsthop testing.  This will often be more IPs than found
   # in @fullips.  It includes the IPs that are trusted, but
   # not in internal_networks.
   my @fullexternal = map {

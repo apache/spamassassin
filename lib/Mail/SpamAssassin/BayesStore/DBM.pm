@@ -1001,7 +1001,7 @@ sub get_running_expire_tok {
 sub set_running_expire_tok {
   my ($self) = @_;
 
-  # update the lock and and running expire magic token
+  # update the lock and running expire magic token
   $self->{bayes}->{main}->{locker}->refresh_lock ($self->{locked_file});
   $self->{db_toks}->{$RUNNING_EXPIRE_MAGIC_TOKEN} = time();
 }
@@ -1022,7 +1022,7 @@ sub tok_count_change {
   $atime = 0 unless defined $atime;
 
   if ($self->{bayes}->{main}->{learn_to_journal}) {
-    # we can't store the SHA1 binary value in the journal to convert it
+    # we can't store the SHA1 binary value in the journal, so convert it
     # to a printable value that can be converted back later
     my $encoded_tok = unpack("H*",$tok);
     $self->defer_update ("c $ds $dh $atime $encoded_tok");
@@ -1038,7 +1038,7 @@ sub multi_tok_count_change {
 
   foreach my $tok (keys %{$tokens}) {
     if ($self->{bayes}->{main}->{learn_to_journal}) {
-      # we can't store the SHA1 binary value in the journal to convert it
+      # we can't store the SHA1 binary value in the journal, so convert it
       # to a printable value that can be converted back later
       my $encoded_tok = unpack("H*",$tok);
       $self->defer_update ("c $ds $dh $atime $encoded_tok");
@@ -1066,7 +1066,7 @@ sub nspam_nham_change {
 
 sub tok_touch {
   my ($self, $tok, $atime) = @_;
-  # we can't store the SHA1 binary value in the journal to convert it
+  # we can't store the SHA1 binary value in the journal, so convert it
   # to a printable value that can be converted back later
   my $encoded_tok = unpack("H*", $tok);
   $self->defer_update ("t $atime $encoded_tok");
@@ -1076,7 +1076,7 @@ sub tok_touch_all {
   my ($self, $tokens, $atime) = @_;
 
   foreach my $token (@{$tokens}) {
-    # we can't store the SHA1 binary value in the journal to convert it
+    # we can't store the SHA1 binary value in the journal, so convert it
     # to a printable value that can be converted back later
     my $encoded_tok = unpack("H*", $token);
     $self->defer_update ("t $atime $encoded_tok");
@@ -1168,7 +1168,7 @@ sub get_magic_re {
   return qr/^\*\*[A-Z]+$/;
 }
 
-# provide a more generalized public insterface into the journal sync
+# provide a more generalized public interface into the journal sync
 
 sub sync {
   my ($self, $opts) = @_;

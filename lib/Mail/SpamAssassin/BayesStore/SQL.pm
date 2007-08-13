@@ -152,7 +152,7 @@ sub tie_db_readonly {
 public instance (Boolean) tie_db_writable ()
 
 Description:
-This method ensures that the database connetion is properly setup
+This method ensures that the database connection is properly setup
 and working. If necessary it will initialize a users bayes variables
 so that they can begin using the database immediately.
 
@@ -203,7 +203,7 @@ sub tie_db_writable {
 public instance () untie_db ()
 
 Description:
-This method is unused for the SQL based implementation.
+Disconnects from an SQL server.
 
 =cut
 
@@ -370,9 +370,9 @@ sub token_expiration {
 
   # If we didn't remove any tokens, the oldest token age wouldn't have changed
   if ($deleted) {
-    # Now lets update the oldest_token_age value, shouldn't need to worry about
-    # newest_token_age. There is a slight race condition here, but the chance is
-    # small that we'll insert a new token with such an old atime
+    # Now let's update the oldest_token_age value, shouldn't need to worry
+    # about newest_token_age. There is a slight race condition here, but the
+    # chance is small that we'll insert a new token with such an old atime
     my $oldest_token_age = $self->_get_oldest_token_age();
 
     $sql = "UPDATE bayes_vars SET oldest_token_age = ? WHERE id = ?";
@@ -951,7 +951,7 @@ public instance (Boolean) multi_tok_count_change (Integer $spam_count,
 
 Description:
 This method takes a C<$spam_count> and C<$ham_count> and adds it to all
-of the tokens in the C<$tokens> hash ref along with updating each tokens
+of the tokens in the C<$tokens> hash ref along with updating each token's
 atime with C<$atime>.
 
 =cut
@@ -1162,7 +1162,7 @@ sub tok_touch_all {
 public instance (Boolean) cleanup ()
 
 Description:
-This method peroms any cleanup necessary before moving onto the next
+This method perfoms any cleanup necessary before moving onto the next
 operation.
 
 =cut
@@ -1261,7 +1261,7 @@ Description:
 This method deletes all records for a particular user.
 
 Callers should be aware that any errors returned by this method
-could causes the database to be inconsistent for the given user.
+could cause the database to be inconsistent for the given user.
 
 =cut
 
@@ -1315,7 +1315,7 @@ sub clear_database {
 public instance (Boolean) backup_database ()
 
 Description:
-This method will dump the users database in a marchine readable format.
+This method will dump the users database in a machine readable format.
 
 =cut
 
@@ -1909,7 +1909,7 @@ sub _put_token {
       # XXX - future optimization, since we have the existing spam/ham counts
       # we can make an educated guess on if the count would reach 0, for
       # instance, if we are decreasing spam_count but spam_count is currently
-      # > 1000, then there is no possible why this update or any others that
+      # > 1000, then there is no possible way this update or any others that
       # might currently be happening could reduce that value to 0, so there
       # would be no need to set the needs_cleanup flag
       $self->{needs_cleanup} = 1;
@@ -2081,7 +2081,7 @@ sub _put_tokens {
 	# XXX - future optimization, since we have the existing spam/ham counts
 	# we can make an educated guess on if the count would reach 0, for
 	# instance, if we are decreasing spam_count but spam_count is currently
-	# > 1000, then there is no possible why this update or any others that
+	# > 1000, then there is no possible way this update or any others that
 	# might currently be happening could reduce that value to 0, so there
 	# would be no need to set the needs_cleanup flag
 	$self->{needs_cleanup} = 1;

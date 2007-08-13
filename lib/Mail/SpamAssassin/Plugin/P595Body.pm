@@ -174,7 +174,7 @@ sub finish {
 
   my $miss = $self->{rule2xs_misses};
   foreach my $r (sort { $miss->{$a} <=> $miss->{$b} } keys %{$miss}) {
-    dbg "zoom: ".$miss->{$r}." misses for rule2xs rule $r\n";
+    dbg("zoom: %s misses for rule2xs rule %s", $miss->{$r},$r);
   }
 }
 

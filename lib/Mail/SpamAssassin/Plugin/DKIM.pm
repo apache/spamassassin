@@ -27,16 +27,13 @@ Mail::SpamAssassin::Plugin::DKIM - perform DKIM verification tests
 
 =head1 DESCRIPTION
 
-This SpamAssassin plugin implements DKIM lookups as described by the current
-draft specs: draft-ietf-dkim-base-10, as well as DomainKeys lookups, as
-described in draft-delany-domainkeys-base-06, thanks to the support for both
-types of signatures by newer versions of module Mail::DKIM (0.22 or later).
+This SpamAssassin plugin implements DKIM lookups as described by the RFC 4871,
+as well as DomainKeys lookups, as described by RFC 4870, thanks to the support
+for both types of signatures by newer versions of module Mail::DKIM (0.22 or
+later).
 
 It requires the C<Mail::DKIM> CPAN module to operate. Many thanks to Jason Long
 for that module.
-
-Note that if C<Mail::DKIM> version 0.20 or later is installed, this plugin will
-also perform Domain Key lookups on DomainKey-Signature headers.
 
 =head1 SEE ALSO
 
@@ -111,7 +108,7 @@ If no identity parameter is specified the domain of the address parameter
 specified will be used instead.
 
 The From: address is obtained from a signed part of the message (ie. the
-"From:" header), not from envelope data that is possible to forge.
+"From:" header field), not from envelope data.
 
 Since this whitelist requires an DKIM check to be made, network tests must be
 enabled.
@@ -128,7 +125,7 @@ Examples:
 
 Same as C<whitelist_from_dkim>, but used for the default whitelist entries
 in the SpamAssassin distribution.  The whitelist score is lower, because
-these are often targets for spammer spoofing.
+these are often targets for abuse of public mailers which sign their mail.
 
 =cut
 

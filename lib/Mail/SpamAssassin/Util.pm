@@ -30,6 +30,10 @@ change at any point, and it's expected that they'll only be used by other
 Mail::SpamAssassin modules. (TODO: we should probably revisit this if
 it's useful for plugin development.)
 
+NOTE: Utility functions should not be changing global variables such
+as $_, $1, $2, ... $/, etc. unless explicitly documented.  If these
+variables are in use by these functions, they should be localized.
+
 =over 4
 
 =cut

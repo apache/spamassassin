@@ -116,9 +116,9 @@ sub set_config {
 
 =item asn_lookup asn-zone.example.com [ _ASNTAG_ _ASNCIDRTAG_ ]
 
-Use this to lookup the ASN info for first external IP address in the specified
-zone and add the AS number to the first specified tag and routing info to the
-second specified tag.
+Use this to lookup the ASN info in the specified zone for the first external
+IP address and add the AS number to the first specified tag and routing info
+to the second specified tag.
 
 If no tags are specified the AS number will be added to the _ASN_ tag and the
 routing info will be added to the _ASNCIDR_ tag.  You must specify either none

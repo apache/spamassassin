@@ -34,7 +34,6 @@ use vars qw (
 # "su" Extra from http://www.iana.org/root-whois/
 # http://www.iana.org/gtld/gtld.htm
 # http://www.iana.org/arpa-dom/
-# "eu" just in case, for the future
 foreach (qw/
   ac ad ae af ag ai al am an ao aq ar as at au aw az ax ba bb bd be bf bg bh bi 
   bj bm bn bo br bs bt bv bw by bz ca cc cd cf cg ch ci ck cl cm cn co cr cs cu 

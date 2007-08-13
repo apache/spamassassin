@@ -386,7 +386,7 @@ sub _normalize {
 
   if ($charset && $charset !~ /^us-ascii$/i &&
       ($detected || 'none') !~ /^(?:UTF|EUC|ISO-2022|Shift_JIS|Big5|GB)/i) {
-      dbg("Using labeled charset $charset");
+      dbg("message: Using labeled charset $charset");
       $converter = Encode::find_encoding($charset);
   }
 
@@ -394,7 +394,7 @@ sub _normalize {
 
   return $data unless $converter;
 
-  dbg("Converting...");
+  dbg("message: Converting...");
 
   my $rv = $converter->decode($data, 0);
   utf8::downgrade($rv, 1);
