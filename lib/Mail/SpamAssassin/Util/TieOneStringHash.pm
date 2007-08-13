@@ -38,7 +38,7 @@ our @ISA = qw();
 # writes are slowest, reads are slow, but memory usage is very low
 # compared to a "real" hash table -- in other words, this is perfect
 # for infrequently-read data that has to be kept around but should
-# not affect memory usage as little as possible.
+# affect memory usage as little as possible.
 
 my $UNDEF_VALUE = "_UNDEF_\001";
 

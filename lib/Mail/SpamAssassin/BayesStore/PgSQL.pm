@@ -757,7 +757,7 @@ sub tok_touch_allold {
 public instance (Boolean) cleanup ()
 
 Description:
-This method peroms any cleanup necessary before moving onto the next
+This method perfoms any cleanup necessary before moving onto the next
 operation.
 
 =cut
@@ -926,7 +926,7 @@ sub _put_token {
     # XXX - future optimization, since we have the existing spam/ham counts
     # we can make an educated guess on if the count would reach 0, for
     # instance, if we are decreasing spam_count but spam_count is currently
-    # > 1000, then there is no possible why this update or any others that
+    # > 1000, then there is no possible way this update or any others that
     # might currently be happening could reduce that value to 0, so there
     # would be no need to set the needs_cleanup flag
     $self->{needs_cleanup} = 1;
@@ -989,7 +989,7 @@ sub _put_tokens {
     # XXX - future optimization, since we have the existing spam/ham counts
     # we can make an educated guess on if the count would reach 0, for
     # instance, if we are decreasing spam_count but spam_count is currently
-    # > 1000, then there is no possible why this update or any others that
+    # > 1000, then there is no possible way this update or any others that
     # might currently be happening could reduce that value to 0, so there
     # would be no need to set the needs_cleanup flag
     $self->{needs_cleanup} = 1;

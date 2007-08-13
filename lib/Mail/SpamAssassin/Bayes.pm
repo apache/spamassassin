@@ -1015,7 +1015,7 @@ sub sync {
 
 ###########################################################################
 
-# compute the probability that that token is spammish
+# compute the probability that a token is spammish
 sub compute_prob_for_token {
   my ($self, $token, $ns, $nn, $s, $n) = @_;
 

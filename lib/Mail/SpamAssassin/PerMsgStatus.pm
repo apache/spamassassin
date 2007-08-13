@@ -2351,8 +2351,7 @@ sub get_envelope_from {
     }
   }
 
-  # procmailrc notes this, amavisd are adding it, we recommend it
-  # (although we now recommend adding to Received instead)
+  # procmailrc notes this (we now recommend adding it to Received instead)
   if ($envf = $self->get ("X-Envelope-From")) {
     # heuristic: this could have been relayed via a list which then used
     # a *new* Envelope-from.  check
@@ -2375,7 +2374,13 @@ sub get_envelope_from {
     }
   }
 
-  # Postfix, sendmail, also mentioned in RFC821
+  # Postfix, sendmail, amavisd-new, ...
+  # RFC 2821 requires it:
+  #   When the delivery SMTP server makes the "final delivery" of a
+  #   message, it inserts a return-path line at the beginning of the mail
+  #   data.  This use of return-path is required; mail systems MUST support
+  #   it.  The return-path line preserves the information in the <reverse-
+  #   path> from the MAIL command.
   if ($envf = $self->get ("Return-Path")) {
     # heuristic: this could have been relayed via a list which then used
     # a *new* Envelope-from.  check
@@ -2510,8 +2515,9 @@ sub all_from_addrs {
     # bug 2292: Used to use find_all_addrs_in_line() with the same
     # headers, but the would catch addresses in comments which caused
     # FNs for things like whitelist_from.  Since all of these are From
-    # headers, there should only be 1 address in each anyway, so use the
-    # :addr code...
+    # headers, there should only be 1 address in each anyway (not exactly
+    # true, RFC 2822 allows multiple addresses in a From header field),
+    # so use the :addr code...
     # bug 3366: some addresses come in as 'foo@bar...', which is invalid.
     # so deal with the multiple periods.
     ## no critic

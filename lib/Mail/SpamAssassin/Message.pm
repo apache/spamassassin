@@ -838,7 +838,7 @@ sub _parse_multipart {
     }
 
     # we run into a perl bug if the lines are astronomically long (probably
-    # due to lots of regexp backtracking); so cut short any individual line
+    # due to lots of regexp backtracking); so split any individual line
     # over MAX_BODY_LINE_LENGTH bytes in length.  This can wreck HTML
     # totally -- but IMHO the only reason a luser would use
     # MAX_BODY_LINE_LENGTH-byte lines is to crash filters, anyway.

@@ -74,8 +74,8 @@ used in the URIBL lookup, so the domain C<foo.bar.com> will look up
 C<bar.com.uriblzone.net>, and C<foo.bar.co.uk> will look up
 C<bar.co.uk.uriblzone.net>.
 
-If a URI consists IP address instead of a hostname, the IP address is looked
-up (using the standard reversed quads method) in each C<rhsbl_zone>.
+If an URI consists of an IP address instead of a hostname, the IP address is
+looked up (using the standard reversed quads method) in each C<rhsbl_zone>.
 
 Example:
 

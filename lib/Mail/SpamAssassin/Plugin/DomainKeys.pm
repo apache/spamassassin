@@ -30,7 +30,7 @@ Signature:
 Policy:
    Note that DK policy record is only fetched if DK_VERIFIED is
    false to save a signing domain from unnecessary DNS queries,
-   as recommended (SHOULD) by draft-delany-domainkeys-base.
+   as recommended (SHOULD) by RFC 4870.
    Rules DK_POLICY_* should preferably not be relied upon when
    DK_VERIFIED is true, although they will return false in current
    implementation when a policy record is not fetched, except for
@@ -134,7 +134,7 @@ If no signing domain name parameter is specified the domain of the address
 parameter specified will be used instead.
 
 The From: address is obtained from a signed part of the message (ie. the
-"From:" header), not from envelope data that is possible to forge.
+"From:" header), not from envelope data.
 
 Since this whitelist requires a DomainKeys check to be made, network tests must
 be enabled.
@@ -151,7 +151,7 @@ Examples:
 
 Same as C<whitelist_from_dk>, but used for the default whitelist entries
 in the SpamAssassin distribution.  The whitelist score is lower, because
-these are often targets for spammer spoofing.
+these are often targets for abuse of public mailers which sign their mail.
 
 =cut
 

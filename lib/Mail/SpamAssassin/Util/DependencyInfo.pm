@@ -147,7 +147,7 @@ my @OPTIONAL_MODULES = (
   module => 'Mail::DomainKeys',
   version => '0.00',
   desc => 'If this module is installed, and you enable the DomainKeys plugin,
-  SpamAssassin will perform Domain Key lookups when Domain Key
+  SpamAssassin will perform DomainKey lookups when DomainKey
   information is present in the message headers.  (Note that new versions
   of Mail::DKIM render this module superfluous.)'
 },
@@ -164,37 +164,37 @@ my @OPTIONAL_MODULES = (
   version => '0.00',
   desc => 'If you intend to use SpamAssassin with an SQL database backend for
   user configuration data, Bayes storage, or other storage, you will need
-  to have these installed; both the basic DBI module and the driver for
+  to have these installed; both the basic DBI module and the DBD driver for
   your database.',
 },
 {
   module => 'Getopt::Long',
   version => '2.32',        # min version was included in 5.8.0, which works
-  desc => 'The "sa-stats.pl" script included in "tools", used to generate
+  desc => 'The "sa-stats.pl" program included in "tools", used to generate
   summary reports from spamd\'s syslog messages, requires this version
   of Getopt::Long or newer.',
 },
 {
   module => 'LWP::UserAgent',
   version => '0.00',
-  desc => 'The "sa-update" script requires this module to make HTTP requests.',
+  desc => 'The "sa-update" program requires this module to make HTTP requests.',
 },
 {
   module => 'HTTP::Date',
   version => '0.00',
-  desc => 'The "sa-update" script requires this module to make HTTP
+  desc => 'The "sa-update" program requires this module to make HTTP
   If-Modified-Since GET requests.',
 },
 {
   module => 'Archive::Tar',
   version => '1.23',
-  desc => 'The "sa-update" script requires this module to access tar update
+  desc => 'The "sa-update" program requires this module to access tar update
   archive files.',
 },
 {
   module => 'IO::Zlib',
   version => '1.04',
-  desc => 'The "sa-update" script requires this module to access compressed
+  desc => 'The "sa-update" program requires this module to access compressed
   update archive files.',
 },
 {

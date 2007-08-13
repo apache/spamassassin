@@ -204,9 +204,9 @@ already set score.  ie: '(3)' means increase the score for this
 rule by 3 points in all score sets.  '(3) (0) (3) (0)' means increase
 the score for this rule by 3 in score sets 0 and 2 only.
 
-If no score is given for a test by the end of the configuration, a
-default score is assigned: a score of 1.0 is used for all tests,
-except those who names begin with 'T_' (this is used to indicate a
+If no score is given for a test by the end of the configuration,
+a default score is assigned: a score of 1.0 is used for all tests,
+except those whose names begin with 'T_' (this is used to indicate a
 rule in testing) which receive 0.01.
 
 Note that test names which begin with '__' are indirect rules used
@@ -572,7 +572,7 @@ that it first verifies that the message was sent by an authorized sender for
 the address, before whitelisting.
 
 Authorization is performed using one of the installed sender-authorization
-schemes: SPF (using C<Mail::SpamAssassin::Plugins::SPF>), Domain Keys (using
+schemes: SPF (using C<Mail::SpamAssassin::Plugins::SPF>), DomainKeys (using
 C<Mail::SpamAssassin::Plugins::DomainKeys>), or DKIM (using
 C<Mail::SpamAssassin::Plugins::DKIM>).  Note that those plugins must be active,
 and working, for this to operate.
@@ -728,7 +728,7 @@ not be changed or removed):
         $hline = $1;
       }
       my @line = split(
-                  /\\\\/,     # split at backslashes,
+                  /\\\\/,     # split at double backslashes,
                   $hline."\n" # newline needed to make trailing backslashes work
                 );
       map {
@@ -990,7 +990,7 @@ Examples:
    trusted_networks !10.0.1.5 10.0.1/24   # all in 10.0.1.* but not 10.0.1.5
 
 This operates additively, so a C<trusted_networks> line after another one
-will result in all those networks becoming trusted.  To clear out the
+will append new entries to the list of trusted networks.  To clear out the
 existing entries, use C<clear_trusted_networks>.
 
 If C<trusted_networks> is not set and C<internal_networks> is, the value
@@ -1058,14 +1058,15 @@ C<trusted_networks>, above.
 This value is used when checking 'dial-up' or dynamic IP address
 blocklists, in order to detect direct-to-MX spamming.
 
-Trusted relays that accept mail directly from dial-up connections should
-not be listed in C<internal_networks>. List them only in
+Trusted relays that accept mail directly from dial-up connections
+(i.e. are also performing a role of mail submission agents - MSA)
+should not be listed in C<internal_networks>. List them only in
 C<trusted_networks>.
 
 If C<trusted_networks> is set and C<internal_networks> is not, the value
 of C<trusted_networks> will be used for this parameter.
 
-If neither C<trusted_networks> or C<internal_networks> is set, no addresses
+If neither C<trusted_networks> nor C<internal_networks> is set, no addresses
 will be considered local; in other words, any relays past the machine where
 SpamAssassin is running will be considered external.
 
@@ -1107,14 +1108,14 @@ Empty the list of internal networks.
 
 =item msa_networks ip.add.re.ss[/mask] ...   (default: none)
 
-The networks or hosts are acting as MSAs in your setup.  B<MSA> means
-that the relay hosts on these networks accept mail from your own users
-and authenticates them appropriately.  These relays will never accept
-mail from hosts that aren't authenticated in some way.  Examples of
-authentication include, IP lists, SMTP AUTH, POP-before-SMTP, etc.
+The networks or hosts which are acting as MSAs in your setup (but not also as
+MX relays).  B<MSA> means that the relay hosts on these networks accept mail
+from your own users and authenticates them appropriately.  These relays
+will never accept mail from hosts that aren't authenticated in some way.
+Examples of authentication include, IP lists, SMTP AUTH, POP-before-SMTP, etc.
 
 All relays found in the message headers after the MSA relay will take
-on the same trusted and internal classifcations as the MSA relay itself,
+on the same trusted and internal classifications as the MSA relay itself,
 as defined by your I<trusted_networks> and I<internal_networks> configuration.
 
 For example, if the MSA relay is trusted and internal so will all of the
@@ -1545,13 +1546,14 @@ win32 depending on the platform in use.
 
 =item fold_headers ( 0 | 1 )        (default: 1)
 
-By default,  headers added by SpamAssassin will be whitespace folded.
+By default, headers added by SpamAssassin will be whitespace folded.
 In other words, they will be broken up into multiple lines instead of
-one very long one and each other line will have a tabulator prepended
-to mark it as a continuation of the preceding one.
+one very long one and each continuation line will have a tabulator
+prepended to mark it as a continuation of the preceding one.
 
 The automatic wrapping can be disabled here.  Note that this can generate very
-long lines.
+long lines.  RFC 2822 required that header lines do not exceed 998 characters
+(not counting the final CRLF).
 
 =cut
 
@@ -1603,8 +1605,8 @@ in some mailserver configurations.  (More discussion of this can be found
 in bug 2142 and bug 4747 in the SpamAssassin BugZilla.)
 
 To avoid this heuristic failure, the C<envelope_sender_header> setting may be
-helpful.  Name the header that your MTA adds to messages containing the address
-used at the MAIL FROM step of the SMTP transaction.
+helpful.  Name the header that your MTA or MDA adds to messages containing the
+address used at the MAIL FROM step of the SMTP transaction.
 
 If the header in question contains C<E<lt>> or C<E<gt>> characters at the start
 and end of the email address in the right-hand side, as in the SMTP
@@ -1910,8 +1912,9 @@ on how to set this.
 
 =item C<MESSAGEID> is a symbol meaning all Message-Id's found in the message;
 some mailing list software moves the real 'Message-Id' to 'Resent-Message-Id'
-or 'X-Message-Id', then uses its own one in the 'Message-Id' header.  The value
-returned for this symbol is the text from all 3 headers, separated by newlines.
+or to 'X-Message-Id', then uses its own one in the 'Message-Id' header.
+The value returned for this symbol is the text from all 3 headers, separated
+by newlines.
 
 =item C<X-Spam-Relays-Untrusted>, C<X-Spam-Relays-Trusted>,
 C<X-Spam-Relays-Internal> and C<X-Spam-Relays-External> represent a portable,
@@ -2236,8 +2239,8 @@ rule names, and that there is no C<XOR> operator.
 
 =item meta SYMBOLIC_TEST_NAME boolean arithmetic expression
 
-Can also define a boolean arithmetic expression in terms of other
-tests, with an unhit test having the value "0" and a hit test having a
+Can also define an arithmetic expression in terms of other tests,
+with an unhit test having the value "0" and a hit test having a
 nonzero value.  The value of a hit meta test is that of its arithmetic
 expression.  The value of a hit eval test is that returned by its
 method.  The value of a hit header, body, rawbody, uri, or full test
@@ -2529,7 +2532,8 @@ The file mode bits used for the Bayesian filtering database files.
 
 Make sure you specify this using the 'x' mode bits set, as it may also be used
 to create directories.  However, if a file is created, the resulting file will
-not have any execute bits set (the umask is set to 111).
+not have any execute bits set (the umask is set to 111). The argument is a
+string of octal digits, it is converted to a numeric value internally.
 
 =cut
 
@@ -2636,7 +2640,7 @@ used to connect.  Example: C<DBI:mysql:spamassassin:localhost>
 
 If you load user scores from an LDAP directory, this will set the DSN used to
 connect. You have to write the DSN as an LDAP URL, the components being the
-host and port to connect to, the base DN for the seasrch, the scope of the
+host and port to connect to, the base DN for the search, the scope of the
 search (base, one or sub), the single attribute being the multivalued attribute
 used to hold the configuration data (space separated pairs of key and value,
 just as in a file) and finally the filter being the expression used to filter
@@ -2714,7 +2718,7 @@ value may be null.
 
 =back
 
-The query must be one one continuous line in order to parse correctly.
+The query must be one continuous line in order to parse correctly.
 
 Here are several example queries, please note that these are broken up
 for easy reading, in your config it should be one continuous line.
@@ -2841,12 +2845,12 @@ the filesystem.
 Include configuration lines from C<filename>.   Relative paths are considered
 relative to the current configuration file or user preferences file.
 
-=item if (conditional perl expression)
+=item if (boolean perl expression)
 
 Used to support conditional interpretation of the configuration
-file. Lines between this and a corresponding C<else> or C<endif> line,
-will be ignored unless the conditional expression evaluates as true
-(in the perl sense; that is, defined and non-0).
+file. Lines between this and a corresponding C<else> or C<endif> line
+will be ignored unless the expression evaluates as true
+(in the perl sense; that is, defined and non-0 and non-empty string).
 
 The conditional accepts a limited subset of perl for security -- just enough to
 perform basic arithmetic comparisons.  The following input is accepted:
@@ -2900,7 +2904,7 @@ An alias for C<if plugin(PluginModuleName)>.
 Used to support conditional interpretation of the configuration
 file. Lines between this and a corresponding C<endif> line,
 will be ignored unless the conditional expression evaluates as false
-(in the perl sense; that is, not defined and 0).
+(in the perl sense; that is, not defined and not 0 and non-empty string).
 
 =item require_version n.nnnnnn
 
@@ -3070,7 +3074,7 @@ distances that are greater than 9.)
 ###########################################################################
 
 # settings that were once part of core, but are now in (possibly-optional)
-# bundled plugins. these will be warned about, but do not generate a fatal
+# bundled plugins. These will be warned about, but do not generate a fatal
 # error when "spamassassin --lint" is run like a normal syntax error would.
 
 @MIGRATED_SETTINGS = qw{

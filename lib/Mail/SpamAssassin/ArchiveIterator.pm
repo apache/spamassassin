@@ -68,8 +68,8 @@ Mail::SpamAssassin::ArchiveIterator - find and process messages one at a time
 
 The Mail::SpamAssassin::ArchiveIterator module will go through a set
 of mbox files, mbx files, and directories (with a single message per
-file) and generate a list of messages.  It will then call the wanted
-and results functions appropriately per message.
+file) and generate a list of messages.  It will then call the C<wanted_sub>
+and C<result_sub> functions appropriately per message.
 
 =head1 METHODS
 

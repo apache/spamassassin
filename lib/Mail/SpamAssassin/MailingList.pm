@@ -63,7 +63,7 @@ sub detect_ml_ezmlm {
 #  List-Archive: 
 #  X-Mailman-Version: \d
 #
-# However, for for mailing list membership reminders, most of
+# However, for mailing list membership reminders, most of
 # those headers are gone, so we identify on the following:
 #
 #  Subject: ...... mailing list memberships reminder  (v1)
