@@ -69,8 +69,7 @@ else
 fi
 
 
-# trigger a named reload of that changed zone
-zone=`perl -e '$_=join("", <STDIN>); /^\s*(\S+)/ and print $1' < $soafile`
-sudo rndc reload $zone || exit $?
+# trigger a named reload
+sudo rndc reload || exit $?
 
 exit 0
