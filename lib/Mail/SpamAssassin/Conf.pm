@@ -1205,10 +1205,6 @@ You can however specify your own list by specifying
 
 Please note, the DNS test queries for NS records.
 
-SpamAssassin's network rules are run in parallel.  This can cause overhead in
-terms of the number of file descriptors required; it is recommended that the
-minimum limit on file descriptors be raised to at least 256 for safety.
-
 =cut
 
   push (@cmds, {
