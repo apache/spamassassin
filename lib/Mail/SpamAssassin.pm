@@ -1374,7 +1374,7 @@ method is called.
 sub finish {
   my ($self) = @_;
 
-  my $timer = $self->time_method("finish");
+  $self->timer_start("finish");
   $self->call_plugins("finish_tests", { conf => $self->{conf},
                                         main => $self });
 
@@ -1388,6 +1388,7 @@ sub finish {
 
   $self->{resolver}->finish();
 
+  $self->timer_end("finish");
   %{$self} = ();
 }
 
@@ -1396,6 +1397,7 @@ sub finish {
 
 sub timer_start {
   my ($self, $name) = @_;
+  return unless (would_log('dbg', 'timing'));
 
   if (would_log('dbg', 'timing') > 1) {
     dbg("timing: '$name' starting");
@@ -1412,9 +1414,15 @@ sub timer_start {
 
 sub timer_end {
   my ($self, $name) = @_;
+  return unless (would_log('dbg', 'timing'));
 
-  $self->{timers}->{$name}->{end} = time;
   my $t = $self->{timers}->{$name};
+  $t->{end} = time;
+
+  if (!$t->{start}) {
+    warn "timer_end('$name') with no timer_start";
+    return;
+  }
 
   # add to any existing elapsed time for this event, since
   # we may call the same timer name multiple times -- this is ok,
@@ -1429,12 +1437,12 @@ sub timer_end {
 
 sub time_method {
   my ($self, $name) = @_;
+  return unless (would_log('dbg', 'timing'));
   return Mail::SpamAssassin::Util::ScopedTimer->new($self, $name);
 }
 
 sub timer_report {
   my ($self) = @_;
-
   return '' unless would_log('dbg', 'timing');
 
   my $earliest = undef;
