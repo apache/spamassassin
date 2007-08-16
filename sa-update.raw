@@ -1077,11 +1077,13 @@ sub http_get {
     $text ||= "(no body)";
     $text =~ s/\s+/ /gs;
 
-    dbg ("http: request failed, retrying: " . $response->status_line.": ".$text);
+    dbg ("http: GET $url request failed, retrying: " .
+                    $response->status_line.": ".$text);
   }
 
   # this should be a user-readable warning without --debug
-  warn "http: request failed: " . $response->status_line.": ".$text."\n";
+  warn "http: GET $url request failed: " .
+                    $response->status_line.": ".$text."\n";
   return;
 }
 
