@@ -256,6 +256,8 @@ sub _check_dkim_signature {
   $scan->{dkim_verified} = 0;
   $scan->{dkim_key_testing} = 0;
 
+  my $timer = $self->{main}->time_method("check_dkim_signature");
+
   my $message = Mail::DKIM::Verifier->new_object();
   if (!$message) {
     dbg("dkim: cannot create Mail::DKIM::Verifier");
@@ -345,6 +347,8 @@ sub _check_dkim_policy {
   # must check the message first to obtain signer, domain, and verif. status
   $self->_check_dkim_signature($scan) unless $scan->{dkim_checked_signature};
   my $message = $scan->{dkim_object};
+
+  my $timer = $self->{main}->time_method("check_dkim_policy");
 
   if (!$message) {
     dbg("dkim: policy: dkim object not available (programming error?)");

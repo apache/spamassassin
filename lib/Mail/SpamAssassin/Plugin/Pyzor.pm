@@ -236,6 +236,8 @@ sub check_pyzor {
   # initialize valid tags
   $permsgstatus->{tag_data}->{PYZOR} = "";
 
+  my $timer = $self->{main}->time_method("check_pyzor");
+
   $self->get_pyzor_interface();
   return 0 unless $self->{pyzor_available};
 

@@ -288,6 +288,8 @@ sub check_for_def_spf_whitelist_from {
 sub _check_spf {
   my ($self, $scanner, $ishelo) = @_;
 
+  my $timer = $self->{main}->time_method("check_spf");
+
   # we can re-use results from any *INTERNAL* Received-SPF header in the message...
   # we can't use results from trusted but external hosts since (i) spf checks are
   # supposed to be done "on the domain boundary", (ii) even if an external header 

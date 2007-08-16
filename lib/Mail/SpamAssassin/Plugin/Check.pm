@@ -69,6 +69,8 @@ sub check_main {
     # happen in Conf.pm when we switch a rules from one priority to another
     next unless ($pms->{conf}->{priorities}->{$priority} > 0);
 
+    my $timer = $self->{main}->time_method("tests_pri_".$priority);
+
     # if shortcircuiting is hit, we skip all other priorities...
     last if $self->{main}->call_plugins("have_shortcircuited", { permsgstatus => $pms });
 
@@ -840,9 +842,7 @@ sub run_eval_tests {
   # clean up priority value so it can be used in a subroutine name 
   my $clean_priority;
   ($clean_priority = $priority) =~ s/-/neg/;
-
   my $scoreset = $conf->get_score_set();
-
   my $package_name = __PACKAGE__;
 
   my $methodname = '_eval_tests'.
