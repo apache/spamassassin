@@ -269,13 +269,17 @@ sub summarise {
     my @pats = collapse_pats($all_patterns_for_set{$set});
     # my @pats = @{$all_patterns_for_set{$set}};
 
+    @pats = quote_all_metas(@pats);
+    @pats = subsume_with_dotstars(@pats);
+    @pats = ensure_reqpatlength(@pats);
+
     # now check to see if any of these pats have been subsumed in an
     # already-output pattern (one with more hits!)
     my @pats_new = ();
     foreach my $pat (@pats) {
       my $subsumed = 0;
       foreach my $done (@done_pats) {
-        if ($pat =~ /\Q${done}\E/) { $subsumed=1; last; }
+        if ($pat =~ /${done}/) { $subsumed=1; last; }
       }
       if (!$subsumed) { push @pats_new, $pat; }
     }
@@ -292,7 +296,6 @@ sub summarise {
 
       # sort, to ensure ordering always remains the same
       foreach my $pat (sort @pats) {
-        $pat =~ s/([!-+\`\^\~\\\/\|\.\(\)\[\]\@])/\\$1/gs;
         my $name = generate_rule_name($pat);
         print "body $opt{ruleprefix}${name}  /$pat/\n";
       }
@@ -397,13 +400,72 @@ sub collapse_pats {
     push (@ret, $pat);
   }
 
-  # TODO: http://en.wikipedia.org/wiki/Needleman-Wunsch_algorithm
+  return @ret;
+}
 
+sub quote_all_metas {
+  return map {
+    s/([!-+\`\?\^\~\\\/\|\.\(\)\[\]\@])/\\$1/gs; $_;
+  } @_;
+}
+
+sub subsume_with_dotstars {
+  my @ret = @_;
+
+  # attempt to resolve . and .*
+  my @working = @ret;
+  @ret = ();
+
+  while (1) {
+    my $p1 = shift(@working);
+    last unless defined($p1);
+
+    my @hits = grep /$p1/, @text_string;
+    if (scalar @hits == 0) {
+      warn "supposed pattern /$p1/ is 0-hitter";
+      push @ret, "[BROKEN: 0 hitter]$p1";
+      next;
+    }
+
+    foreach my $p2 (@working) {
+      next if ($p1 eq $p2);
+
+      DOTLOOP: for my $dotstar 
+            ( ".", ".?", ".{0,3}", ".{0,5}", ".{0,20}", ".{0,40}" )
+      {
+        my $newpatcapture = $p1."(".$dotstar.")".$p2;
+        my $newpat        = $p1.$dotstar.$p2;
+
+        # drop the attempt if any of the existing hits becomes a miss,
+        # or the .* includes a paragraph boundary in any of the hits
+        foreach my $t (@hits) {
+          next DOTLOOP if ($t !~ /$newpatcapture/);
+          next DOTLOOP if ($1 =~ /\[p\]/);
+        }
+        next if (scalar (grep /$newpat/, @text_string) != scalar @hits);
+
+        # it works! yay
+
+        # TODO: for /./, see if we can capture the options and
+        # construct a /[oO0]/ char class instead
+        $p1 = $newpat;
+      }
+    }
+
+    # skip recording this if it's already inside one of the results
+    next if grep { $_ =~ /\Q$p1\E/s } @ret;
+
+    push (@ret, $p1);
+  }
+  return @ret;
+}
+
+sub ensure_reqpatlength {
+  my @ret = @_;
   if ($opt{reqpatlength}) {
     @ret = grep { length($_) >= $opt{reqpatlength} } @ret;
-    return unless @ret;
+    return () unless @ret;
   }
-
   return @ret;
 }
 
