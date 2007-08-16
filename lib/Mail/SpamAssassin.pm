@@ -1435,6 +1435,8 @@ sub time_method {
 sub timer_report {
   my ($self) = @_;
 
+  return '' unless would_log('dbg', 'timing');
+
   my $earliest = undef;
   my $latest = undef;
   foreach my $t (values %{$self->{timers}}) {
