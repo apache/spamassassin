@@ -1446,7 +1446,7 @@ sub timer_report {
     }
   }
   my $total = sprintf("%.2f", ($latest - $earliest) * 1000);
-  $total ||= 0.000001; # avoid div by 0
+  if ($total + 0 == 0) { $total = 0.000001; } # avoid div by 0
 
   my @str = ();
   foreach my $name (@{$self->{timers_order}}) {
