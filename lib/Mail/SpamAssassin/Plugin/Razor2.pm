@@ -382,6 +382,8 @@ sub check_razor2 {
   return unless $self->{razor2_available};
   return unless $self->{main}->{conf}->{use_razor2};
 
+  my $timer = $self->{main}->time_method("check_razor2");
+
   my $return;
   my @results = ();
 

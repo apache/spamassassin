@@ -221,6 +221,8 @@ sub learn {
     return;
   }
 
+  my $timer = $self->{main}->time_method("learn");
+
   $self->{main}->call_plugins ("autolearn", {
       permsgstatus => $self,
       isspam => $isspam
@@ -504,6 +506,8 @@ sub get_report {
 
   if (!exists $self->{'report'}) {
     my $report;
+
+    my $timer = $self->{main}->time_method("get_report");
     $report = $self->{conf}->{report_template};
     $report ||= '(no report template found)';
 
@@ -617,6 +621,7 @@ above headers added/modified.
 sub rewrite_mail {
   my ($self) = @_;
 
+  my $timer = $self->{main}->time_method("rewrite_mail");
   my $msg = $self->{msg}->get_mbox_separator() || '';
 
   if ($self->{is_spam} && $self->{conf}->{report_safe}) {
@@ -1355,6 +1360,7 @@ sub get_current_eval_rule_name {
 sub extract_message_metadata {
   my ($self) = @_;
   
+  my $timer = $self->{main}->time_method("extract_message_metadata");
   $self->{msg}->extract_message_metadata($self);
 
   foreach my $item (qw(
@@ -1846,6 +1852,8 @@ sub get_uri_detail_list {
     return $self->{uri_detail_list};
   }
 
+  my $timer = $self->{main}->time_method("get_uri_detail_list");
+
   $self->{uri_domain_count} = 0;
 
   # do this so we're sure metadata->html is setup
@@ -2032,6 +2040,8 @@ sub ensure_rules_are_complete {
     next if ($self->is_rule_complete($r));
 
     dbg("rules: meta rule $metarule depends on pending rule $r, blocking");
+    my $timer = $self->{main}->time_method("wait_for_pending_rules");
+
     my $start = time;
     $self->harvest_until_rule_completes($r);
     my $elapsed = time - $start;

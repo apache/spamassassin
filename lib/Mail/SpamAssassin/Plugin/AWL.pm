@@ -319,6 +319,8 @@ sub check_from_in_auto_whitelist {
 
     return 0 unless ($pms->{conf}->{use_auto_whitelist});
 
+    my $timer = $self->{main}->time_method("check_awl");
+
     local $_ = lc $pms->get('From:addr');
     return 0 unless /\S/;
 

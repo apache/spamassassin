@@ -370,6 +370,8 @@ sub check_dcc {
     return 1;
   }
 
+  my $timer = $self->{main}->time_method("check_dcc");
+
   # initialize valid tags
   $permsgstatus->{tag_data}->{DCCB} = "";
   $permsgstatus->{tag_data}->{DCCR} = "";

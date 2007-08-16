@@ -73,6 +73,7 @@ use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::Message;
 use Mail::SpamAssassin::PluginHandler;
 use Mail::SpamAssassin::DnsResolver;
+use Mail::SpamAssassin::Util::ScopedTimer;
 
 use Errno qw(ENOENT EACCES);
 use File::Basename;
@@ -414,6 +415,9 @@ and C<Mail::SpamAssassin::Message::Node> POD.
 sub parse {
   my($self, $message, $parsenow) = @_;
   $self->init(1);
+
+  my $timer = $self->time_method("parse");
+
   my $msg = Mail::SpamAssassin::Message->new({message=>$message, parsenow=>$parsenow, normalize=>$self->{conf}->{normalize_charset}});
 
   # bug 5069: The goal here is to get rendering plugins to do things
@@ -448,6 +452,7 @@ sub check {
   $self->init(1);
   my $msg = Mail::SpamAssassin::PerMsgStatus->new($self, $mail_obj);
   $msg->check();
+  dbg($self->timer_report());
   $msg;
 }
 
@@ -673,6 +678,7 @@ sub signal_user_changed {
   my $opts = shift;
   my $set = 0;
 
+  my $timer = $self->time_method("signal_user_changed");
   dbg("info: user has changed");
 
   if (defined $opts && $opts->{username}) {
@@ -758,6 +764,7 @@ sub report_as_spam {
   local ($_);
 
   $self->init(1);
+  my $timer = $self->time_method("report_as_spam");
 
   # learn as spam if enabled
   if ( $self->{conf}->{bayes_learn_during_report} ) {
@@ -799,6 +806,7 @@ sub revoke_as_spam {
   local ($_);
 
   $self->init(1);
+  my $timer = $self->time_method("revoke_as_spam");
 
   # learn as nonspam
   $self->learn ($mail, undef, 0, 0);
@@ -934,6 +942,7 @@ sub remove_spamassassin_markup {
   my ($self, $mail_obj) = @_;
   local ($_);
 
+  my $timer = $self->time_method("remove_spamassassin_markup");
   my $mbox = $mail_obj->get_mbox_separator() || '';
 
   dbg("markup: removing markup");
@@ -1087,6 +1096,7 @@ the administrator settings.
 sub read_scoreonly_config {
   my ($self, $filename) = @_;
 
+  my $timer = $self->time_method("read_scoreonly_config");
   if (!open(IN,"<$filename")) {
     # the file may not exist; this should not be verbose
     dbg("config: read_scoreonly_config: cannot open \"$filename\": $!");
@@ -1124,6 +1134,7 @@ the Mail::SpamAssassin object.
 sub load_scoreonly_sql {
   my ($self, $username) = @_;
 
+  my $timer = $self->time_method("load_scoreonly_sql");
   my $src = Mail::SpamAssassin::Conf::SQL->new ($self);
   $self->{username} = $username;
   unless ($src->load($username)) {
@@ -1151,6 +1162,7 @@ sub load_scoreonly_ldap {
   my ($self, $username) = @_;
 
   dbg("config: load_scoreonly_ldap($username)");
+  my $timer = $self->time_method("load_scoreonly_ldap");
   my $src = Mail::SpamAssassin::Conf::LDAP->new ($self);
   $self->{username} = $username;
   $src->load($username);
@@ -1202,6 +1214,7 @@ by a configuration option.  By default, this is disabled.
 sub compile_now {
   my ($self, $use_user_prefs, $deal_with_userstate) = @_;
 
+  my $timer = $self->time_method("compile_now");
   # tell plugins we are here
   $self->call_plugins("compile_now_start",
 		      { use_user_prefs => $use_user_prefs,
@@ -1343,6 +1356,7 @@ sub lint_rules {
   $self->{syntax_errors} += $status->{rule_errors};
   $status->finish();
   $mail->finish();
+  dbg($self->timer_report());
 
   return ($self->{syntax_errors});
 }
@@ -1360,6 +1374,7 @@ method is called.
 sub finish {
   my ($self) = @_;
 
+  my $timer = $self->time_method("finish");
   $self->call_plugins("finish_tests", { conf => $self->{conf},
                                         main => $self });
 
@@ -1374,6 +1389,73 @@ sub finish {
   $self->{resolver}->finish();
 
   %{$self} = ();
+}
+
+###########################################################################
+# timers: bug 5356
+
+sub timer_start {
+  my ($self, $name) = @_;
+
+  if (would_log('dbg', 'timing') > 1) {
+    dbg("timing: '$name' starting");
+  }
+
+  if (!exists $self->{timers}->{$name}) {
+    push @{$self->{timers_order}}, $name;
+  }
+  
+  $self->{timers}->{$name}->{start} = time;
+  # hopefully Time::HiRes::time().  note that this will reset any
+  # existing, unstopped timer of that name; that's ok
+}
+
+sub timer_end {
+  my ($self, $name) = @_;
+
+  $self->{timers}->{$name}->{end} = time;
+  my $t = $self->{timers}->{$name};
+
+  # add to any existing elapsed time for this event, since
+  # we may call the same timer name multiple times -- this is ok,
+  # as long as they are not nested
+  $t->{elapsed} = sprintf("%.2f",
+            (($t->{end} - $t->{start}) * 1000) + ($t->{elapsed} || 0));
+
+  if (would_log('dbg', 'timing') > 1) {
+    dbg("timing: '$name' ended after ".$t->{elapsed}." msecs");
+  }
+}
+
+sub time_method {
+  my ($self, $name) = @_;
+  return Mail::SpamAssassin::Util::ScopedTimer->new($self, $name);
+}
+
+sub timer_report {
+  my ($self) = @_;
+
+  my $earliest = undef;
+  my $latest = undef;
+  foreach my $t (values %{$self->{timers}}) {
+    if (!defined($earliest) || $earliest > $t->{start}) {
+      $earliest = $t->{start};
+    }
+    if (!defined($latest) || $latest < $t->{end}) {
+      $latest = $t->{end};
+    }
+  }
+  my $total = sprintf("%.2f", ($latest - $earliest) * 1000);
+  $total ||= 0.000001; # avoid div by 0
+
+  my @str = ();
+  foreach my $name (@{$self->{timers_order}}) {
+    my $elapsed = ($self->{timers}->{$name}->{elapsed}||0);
+    my $pc = sprintf ("%.1f", ($elapsed / $total) * 100.0);
+    push @str, "$name: $elapsed ($pc\%)";
+  }
+
+  return "timing: total $total msecs - ".join(", ", @str);
 }
 
 ###########################################################################
@@ -1393,6 +1475,7 @@ sub init {
     return;
   }
 
+  my $timer = $self->time_method("init");
   # Note that this PID has run init()
   $self->{_initted} = $$;
 
@@ -1923,7 +2006,6 @@ sub get_loaded_plugins_list {
   my ($self) = @_;
   return $self->{plugins}->get_loaded_plugins_list();
 }
-
 
 1;
 __END__
