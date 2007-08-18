@@ -969,7 +969,6 @@ sub write_cachefile {
   open (CACHE, ">$cachefile") or warn "cannot write to $cachefile";
   print CACHE $dump->Dump, ";1;";
   close CACHE or warn "cannot close $cachefile";
-  warn "JMD $cachefile";
 }
 
 1;
