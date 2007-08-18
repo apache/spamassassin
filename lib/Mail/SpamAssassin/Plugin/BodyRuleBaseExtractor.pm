@@ -142,7 +142,13 @@ NEXT_RULE:
     if (defined $cent) {
       if (defined $cent->{g}) {
         dbg("zoom: YES (cached) $rule");
-        push @good_bases, @{$cent->{g}};
+        foreach my $ent (@{$cent->{g}}) {
+          # note: we have to copy these, since otherwise later
+          # modifications corrupt the cached data
+          push @good_bases, {
+            base => $ent->{base}, orig => $ent->{orig}, name => $ent->{name}
+          };
+        }
         $yes++;
       }
       else {
