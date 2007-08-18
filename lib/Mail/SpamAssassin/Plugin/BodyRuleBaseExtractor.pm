@@ -31,6 +31,8 @@ use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Util::Progress;
 
+use Data::Dumper;
+
 use strict;
 use warnings;
 use bytes;
@@ -103,7 +105,7 @@ sub extract_set_pri {
   my @failed = ();
   my $yes = 0;
   my $no = 0;
-
+  my $count = 0;
   my $start = time;
   $self->{main} = $conf->{main};	# for use in extract_hints()
   info ("extracting from rules of type $ruletype");
@@ -115,21 +117,45 @@ sub extract_set_pri {
   # require this many chars in a base string for it to be viable
   my $min_chars = 3;
 
-  my $count = 0;
   my $progress;
-
   $self->{show_progress} and $progress = Mail::SpamAssassin::Util::Progress->new({
                 total => scalar keys %{$rules},
                 itemtype => 'rules',
               });
 
+  my $cached = { };
+  my $cachefile;
+
+  if ($self->{main}->{bases_cache_dir}) {
+    $cachefile = $self->{main}->{bases_cache_dir}."/rules.$ruletype";
+    $cached = $self->read_cachefile($cachefile);
+  }
+
+NEXT_RULE:
   foreach my $name (keys %{$rules}) {
-    my $rule = $rules->{$name};
     $self->{show_progress} and $progress->update(++$count);
+
+    my $rule = $rules->{$name};
+    my $cachekey = join "#", $name, $rule;
+
+    my $cent = $cached->{rule_bases}->{$cachekey};
+    if (defined $cent) {
+      if (defined $cent->{g}) {
+        dbg("zoom: YES (cached) $rule");
+        push @good_bases, @{$cent->{g}};
+        $yes++;
+      }
+      else {
+        dbg("zoom: NO (cached) $rule");
+        push @failed, { orig => $rule };    # no need to cache this
+        $no++;
+      }
+      next NEXT_RULE;
+    }
 
     # ignore ReplaceTags rules
     # TODO: need cleaner way to do this
-    next if ($conf->{rules_to_replace}->{$name});
+    goto NO if ($conf->{rules_to_replace}->{$name});
 
     my ($lossy, @bases);
 
@@ -163,17 +189,26 @@ sub extract_set_pri {
         }
       }
 
+      my @forcache = ();
       foreach my $base (@bases) {
         next if $subsumed{$base};
         push @good_bases, {
             base => $base, orig => $rule, name => "$name,[l=$lossy]"
           };
+        # *separate* copies for cache -- we modify the @good_bases entry
+        push @forcache, {
+            base => $base, orig => $rule, name => "$name,[l=$lossy]"
+          };
       }
+
+      $cached->{rule_bases}->{$cachekey} = { g => \@forcache };
       $yes++;
     }
     else {
+NO:
       dbg("zoom: NO $rule");
       push @failed, { orig => $rule };
+      $cached->{rule_bases}->{$cachekey} = { };
       $no++;
     }
   }
@@ -230,9 +265,9 @@ sub extract_set_pri {
     $self->{show_progress} and $progress->update(++$count);
 
     my $base1 = $set1->{base};
-    my $orig1 = $set1->{orig};
     my $name1 = $set1->{name};
     next if ($base1 eq '' or $name1 eq '');
+    my $orig1 = $set1->{orig};
 
     $conf->{base_orig}->{$ruletype}->{$name1} = $orig1;
 
@@ -283,19 +318,17 @@ sub extract_set_pri {
 
   foreach my $base (keys %bases) {
     # uniq the list, since there are probably dup rules listed
-    my @list = split (' ', $bases{$base});
-    my @uniqed;
-
-    {
-      my %u=(); @uniqed = grep {defined} map {
-        if (exists $u{$_}) { undef; } else { $u{$_}=undef;$_; }
-      } @list; undef %u;
+    my %u = ();
+    for my $i (split ' ', $bases{$base}) {
+      next if exists $u{$i}; undef $u{$i}; 
     }
-
-    my $key  = join ' ', sort @uniqed;
-    $conf->{base_string}->{$ruletype}->{$base} = $key;
+    $conf->{base_string}->{$ruletype}->{$base} = join ' ', sort keys %u;
   }
   $self->{show_progress} and $progress->final();
+
+  if ($cachefile) {
+    $self->write_cachefile ($cachefile, $cached);
+  }
 
   my $elapsed = time - $start;
   info ("$ruletype: ".
@@ -902,5 +935,35 @@ sub get_perl {
 }
 
 ###########################################################################
+
+sub read_cachefile {
+  my ($self, $cachefile) = @_;
+  if (open(IN, "<".$cachefile)) {
+    my $str = join("", <IN>);
+    close IN;
+    $str =~ /^(.*)$/s;
+    my $untainted = $1;
+
+    my $VAR1;                 # Data::Dumper
+    if (eval $untainted) {
+      return $VAR1;        # Data::Dumper's naming
+    }
+  }
+  return { };
+}
+
+sub write_cachefile {
+  my ($self, $cachefile, $cached) = @_;
+
+  my $dump = Data::Dumper->new ([ $cached ]);
+  $dump->Deepcopy(1);
+  $dump->Purity(1);
+  $dump->Indent(1);
+  mkdir ($self->{main}->{bases_cache_dir});
+  open (CACHE, ">$cachefile") or warn "cannot write to $cachefile";
+  print CACHE $dump->Dump, ";1;";
+  close CACHE or warn "cannot close $cachefile";
+  warn "JMD $cachefile";
+}
 
 1;
