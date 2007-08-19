@@ -267,44 +267,67 @@ NO:
                 itemtype => 'bases',
               });
 
+  # this bit is annoyingly O(N^2).  Rewrite the data -- the @good_bases
+  # array -- into a more efficient format, using arrays and with a little
+  # bit of precomputation, to go (quite a bit) faster
+
+  my @rewritten = ();
+  foreach my $set1 (@good_bases) {
+    my $base = $set1->{base};
+    next if (!$base || !$set1->{name});
+    push @rewritten, [
+      $base,                # 0
+      $set1->{name},        # 1
+      $set1->{orig},        # 2
+      length $base,         # 3
+      qr/\Q$base\E/,        # 4
+      0                     # 5, has_multiple flag
+    ];
+  }
+  @good_bases = @rewritten;
+
   foreach my $set1 (@good_bases) {
     $self->{show_progress} and $progress->update(++$count);
 
-    my $base1 = $set1->{base};
-    my $name1 = $set1->{name};
-    next if ($base1 eq '' or $name1 eq '');
-    my $orig1 = $set1->{orig};
-
+    my $base1 = $set1->[0]; next unless $base1;
+    my $name1 = $set1->[1];
+    my $orig1 = $set1->[2];
     $conf->{base_orig}->{$ruletype}->{$name1} = $orig1;
+    my $len1 = $set1->[3];
 
     foreach my $set2 (@good_bases) {
       next if ($set1 == $set2);
 
-      my $base2 = $set2->{base};
-      my $name2 = $set2->{name};
+      my $base2 = $set2->[0]; next unless $base2;
+      my $name2 = $set2->[1];
 
       # clobber exact dups; this can happen if a regexp outputs the 
       # same base string multiple times
-      if ($orig1 eq $set2->{orig} &&
-          $base1 eq $base2 &&
-          $name1 eq $name2)
+      if ($base1 eq $base2 &&
+          $name1 eq $name2 &&
+          $orig1 eq $set2->[2])
       {
-        $set2->{name} = '';       # clobber
-        $set2->{base} = '';
+        $set2->[0] = '';       # clobber
+        next;
       }
 
+      # skip if it's too short to contain the other base string
+      next if ($len1 < $set2->[3]);
+
       # skip if either already contains the other rule's name
-      next if ($name1 =~ /\b\Q$name2\E\b/);
-      next if ($name2 =~ /\b\Q$name1\E\b/);
+      # optimize: this can only happen if the base has more than
+      # one rule already attached, ie [5]
+      next if ($set1->[5] && $name1 =~ /\b\Q$name2\E\b/);
+      next if ($set2->[5] && $name2 =~ /\b\Q$name1\E\b/);
 
-      next if ($base2 eq '');
-      next if (length $base1 < length $base2);
-      next if ($base1 !~ /\Q$base2\E/);
+      # and finally check to see if it *does* contain the other base string
+      next if ($base1 !~ $set2->[4]);
 
-      $set1->{name} .= " ".$name2;
+      $set1->[1] .= " ".$name2;
+      $set1->[5] = 1;
 
       # base2 is just a subset of base1
-      # dbg("zoom: subsuming '$base2' into '$base1': $set1->{name}");
+      # dbg("zoom: subsuming '$base2' into '$base1': $set1->[1]");
     }
   }
 
@@ -313,14 +336,16 @@ NO:
   # the above search hasn't found.  Collapse them here with a hash
   my %bases = ();
   foreach my $set (@good_bases) {
-    my $base = $set->{base};
+    my $base = $set->[0];
     next unless $base;
+
     if (defined $bases{$base}) {
-      $bases{$base} .= " ".$set->{name};
+      $bases{$base} .= " ".$set->[1];
     } else {
-      $bases{$base} = $set->{name};
+      $bases{$base} = $set->[1];
     }
   }
+  undef @good_bases;
 
   foreach my $base (keys %bases) {
     # uniq the list, since there are probably dup rules listed
