@@ -161,7 +161,8 @@ sub check {
   {
     # did anything happen?  if not, this is fatal
     if (!$self->{main}->have_plugin("check_main")) {
-      die "check: no loaded plugin implements 'check_main': cannot scan!";
+      die "check: no loaded plugin implements 'check_main': cannot scan!\n".
+            "Check the necessary '.pre' files are in the config directory.\n";
     }
   }
 
