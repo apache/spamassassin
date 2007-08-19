@@ -277,7 +277,7 @@ sub check_for_def_dk_whitelist_from {
 sub _check_domainkeys {
   my ($self, $scan) = @_;
 
-  my $timer = $self->{main}->time_method("check_domainkeys");
+  my $timemethod = $self->{main}->time_method("check_domainkeys");
 
   $scan->{domainkeys_checked} = 0;
   $scan->{domainkeys_signed} = 0;
