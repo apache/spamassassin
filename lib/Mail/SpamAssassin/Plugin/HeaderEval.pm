@@ -116,7 +116,7 @@ sub check_for_faraway_charset_in_headers {
   my ($self, $pms) = @_;
   my $hdr;
 
-  my @locales = Mail::SpamAssassin::Util::get_my_locales($self->{main}->{conf}->cf_ok_locales);
+  my @locales = Mail::SpamAssassin::Util::get_my_locales($self->{main}->{conf}->{ok_locales});
 
   return 0 if grep { $_ eq "all" } @locales;
 

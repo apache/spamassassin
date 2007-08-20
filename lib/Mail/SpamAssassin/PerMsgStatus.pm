@@ -178,7 +178,7 @@ sub check {
   $self->{score} = (sprintf "%0.3f", $self->{score}) + 0;
   
   dbg("check: is spam? score=".$self->{score}.
-                        " required=".$self->{conf}->cf_required_score);
+                        " required=".$self->{conf}->{required_score});
   dbg("check: tests=".$self->get_names_of_tests_hit());
   dbg("check: subtests=".$self->get_names_of_subtests_hit());
   $self->{is_spam} = $self->is_spam();
@@ -204,8 +204,8 @@ so that future similar mails will be caught.
 sub learn {
   my ($self) = @_;
 
-  if (!$self->{conf}->cf_bayes_auto_learn ||
-      !$self->{conf}->cf_use_bayes ||
+  if (!$self->{conf}->{bayes_auto_learn} ||
+      !$self->{conf}->{use_bayes} ||
       $self->{disable_auto_learning})
   {
     $self->{auto_learn_status} = "disabled";
@@ -395,7 +395,7 @@ spam-like.
 sub is_spam {
   my ($self) = @_;
   # changed to test this so sub-tests can ask "is_spam" during a run
-  return ($self->{score} >= $self->{conf}->cf_required_score);
+  return ($self->{score} >= $self->{conf}->{required_score});
 }
 
 ###########################################################################
@@ -463,7 +463,7 @@ return the score required for a mail to be considered spam.
 
 sub get_required_score {
   my ($self) = @_;
-  return $self->{conf}->cf_required_score;
+  return $self->{conf}->{required_score};
 }
 
 # left as backward compatibility
@@ -501,7 +501,7 @@ sub get_report {
 
   if (!exists $self->{'report'}) {
     my $report;
-    $report = $self->{conf}->cf_report_template;
+    $report = $self->{conf}->{report_template};
     $report ||= '(no report template found)';
 
     $report = $self->_replace_tags($report);
@@ -616,7 +616,7 @@ sub rewrite_mail {
 
   my $msg = $self->{msg}->get_mbox_separator() || '';
 
-  if ($self->{is_spam} && $self->{conf}->cf_report_safe) {
+  if ($self->{is_spam} && $self->{conf}->{report_safe}) {
     $msg .= $self->rewrite_report_safe();
   }
   else {
@@ -653,8 +653,8 @@ sub rewrite_report_safe {
 
   # the report charset
   my $report_charset = "; charset=iso-8859-1";
-  if ($self->{conf}->cf_report_charset) {
-    $report_charset = "; charset=" . $self->{conf}->cf_report_charset;
+  if ($self->{conf}->{report_charset}) {
+    $report_charset = "; charset=" . $self->{conf}->{report_charset};
   }
 
   # the SpamAssassin report
@@ -761,7 +761,7 @@ sub rewrite_report_safe {
   my $ct = $self->{msg}->get_header("Content-Type");
   if (defined $ct && $ct ne '' && $ct !~ m{text/plain}i) {
     $disposition = "attachment";
-    $report .= $self->_replace_tags($self->{conf}->cf_unsafe_report_template);
+    $report .= $self->_replace_tags($self->{conf}->{unsafe_report_template});
     # if we wanted to defang the attachment, this would be the place
   }
   else {
@@ -769,7 +769,7 @@ sub rewrite_report_safe {
   }
 
   my $type = "message/rfc822";
-  $type = "text/plain" if $self->{conf}->cf_report_safe > 1;
+  $type = "text/plain" if $self->{conf}->{report_safe} > 1;
 
   my $description = $self->{conf}->{'encapsulated_content_description'};
 
@@ -937,7 +937,7 @@ sub _process_header {
   $hdr_data = $self->_replace_tags($hdr_data);
   $hdr_data =~ s/(?:\r?\n)+$//; # make sure there are no trailing newlines ...
 
-  if ($self->{conf}->cf_fold_headers) {
+  if ($self->{conf}->{fold_headers}) {
     if ($hdr_data =~ /\n/) {
       $hdr_data =~ s/\s*\n\s*/\n\t/g;
       return $hdr_data;
@@ -1141,7 +1141,7 @@ sub _get_tag_value_for_score {
 
 sub _get_tag_value_for_required_score {
   my $self  = shift;
-  return sprintf("%2.1f", $self->{conf}->cf_required_score);
+  return sprintf("%2.1f", $self->{conf}->{required_score});
 }
 
 sub _get_tag {
@@ -1167,7 +1167,7 @@ sub _get_tag {
             SUBVERSION => sub { $Mail::SpamAssassin::SUB_VERSION },
 
             HOSTNAME => sub {
-	      $self->{conf}->cf_report_hostname ||
+	      $self->{conf}->{report_hostname} ||
 	            Mail::SpamAssassin::Util::fq_hostname();
 	    },
 
@@ -1195,7 +1195,7 @@ sub _get_tag {
               return $lasthop ? $lasthop->{helo} : '';
             },
 
-            CONTACTADDRESS => sub { $self->{conf}->cf_report_contact; },
+            CONTACTADDRESS => sub { $self->{conf}->{report_contact}; },
 
             BAYES => sub {
               defined($self->{bayes_score}) ?
@@ -2294,8 +2294,8 @@ sub get_envelope_from {
   # Rely on the 'envelope-sender-header' header if the user has configured one.
   # Assume that because they have configured it, their MTA will always add it.
   # This will prevent us falling through and picking up inappropriate headers.
-  if (defined $self->{conf}->cf_envelope_sender_header) {
-    my $hdr = $self->{conf}->cf_envelope_sender_header;
+  my $hdr = $self->{conf}->{envelope_sender_header};
+  if (defined $hdr) {
     # make sure we get the most recent copy - there can be only one EnvelopeSender.
     $envf = $self->get($hdr.":addr");
     # ok if it contains an "@" sign, or is "" (ie. "<>" without the < and >)

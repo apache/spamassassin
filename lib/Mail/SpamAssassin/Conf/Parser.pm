@@ -64,15 +64,10 @@ The type of this setting:
            - $CONF_TYPE_HASH_KEY_VALUE: hash key/value pair,
              like "describe" or tflags
 
-If this is set, a 'code' block is assigned based on the type, if
-none already exists, and an accessor of the right type will be used
-for the generated $conf->cf_setting() method.
+If this is set, a 'code' block is assigned based on the type.
 
 Note that C<$CONF_TYPE_HASH_KEY_VALUE>-type settings require that the
 value be non-empty, otherwise they'll produce a warning message.
-
-If a type is omitted, a default accessor will be generated using the
-$CONF_TYPE_STRING type.
 
 =item code
 
@@ -115,13 +110,6 @@ user.)
 
 Set to 1 if this value occurs frequently in the config. this means it's looked
 up first for speed.
-
-=item accessor
-
-Set to a string containing the perl code of a method to get the configuration
-value. The string C<${SETTING}> will be replaced with the name of the setting.
-Optional; if C<type> is defined, an accessor suitable for that type of
-data will be provided automatically.
 
 =back
 
@@ -168,66 +156,6 @@ sub new {
 
 ###########################################################################
 
-# Implementations for default accessors.
-# access a scalar configuration setting. e.g.:
-#   my $val = $conf->cf_foo_bar();
-our $cf_accessor_scalar_value = '
-
-  sub cf_${SETTING} {
-    if (defined $_[0]->{tiers}->[1]->{${SETTING}}) {
-      return $_[0]->{tiers}->[1]->{${SETTING}};
-    } else {
-      return $_[0]->{tiers}->[0]->{${SETTING}};
-    }
-  }
-
-';
-
-# access a hash key=>value configuration setting. e.g.:
-#   my $val = $conf->cf_foo_bar("baz");
-# note use of "exists" instead of "defined"; this is deliberate so that
-# "deletion" of a sys-level setting can take place at user-level,
-# by setting val to undef
-our $cf_accessor_hash_key_value = '
-
-  sub cf_${SETTING} {
-    if (exists $_[0]->{tiers}->[1]->{${SETTING}}->{$_[1]}) {
-      return $_[0]->{tiers}->[1]->{${SETTING}}->{$_[1]};
-    } else {
-      return $_[0]->{tiers}->[0]->{${SETTING}}->{$_[1]};
-    }
-  }
-
-';
-
-# access a whitelist/blacklist address-list hash in its entirety. e.g.:
-#   my $hashref = $conf->cf_foo_bar();
-#   foreach my $addr (keys %{$hashref}) {
-#     do something with $hashref->{$addr}
-#   }
-# TODO: it would be more efficient to fix calling code to iterate
-# through the tiers instead of using this API.
-our $cf_accessor_addrlist_value = '
-
-  sub cf_${SETTING} {
-    if (defined $_[0]->{tiers}->[1]->{${SETTING}}) {
-      # return the user configuration whitelists and system-wide stuff
-      return \(
-          %{$_[0]->{tiers}->[1]->{${SETTING}}},
-          %{$_[0]->{tiers}->[0]->{${SETTING}}}
-        );
-    } else {
-      # just the system-wide stuff
-      return \(
-          %{$_[0]->{tiers}->[0]->{${SETTING}}}
-        );
-    }
-  }
-
-';
-
-###########################################################################
-
 sub register_commands {
   my($self, $arrref) = @_;
   my $conf = $self->{conf};
@@ -244,10 +172,8 @@ sub set_defaults_from_command_list {
     # note! exists, not defined -- we want to be able to set
     # "undef" default values.
     if (exists($cmd->{default})) {
-      $conf->{activetier}->{$cmd->{setting}} = $cmd->{default};
+      $conf->{$cmd->{setting}} = $cmd->{default};
     }
-
-    $self->setup_accessor($cmd);
   }
 }
 
@@ -643,56 +569,6 @@ sub set_default_scores {
 
 ###########################################################################
 
-sub setup_accessor {
-  my ($self, $cmd) = @_;
-
-  # find a default accessor method, if possible
-  if (!defined $cmd->{accessor}) {
-    my $type = $cmd->{accessortype} || $cmd->{type};
-
-    if (!$type || $type == $Mail::SpamAssassin::Conf::CONF_TYPE_STRING) {
-      $cmd->{accessor} = $cf_accessor_scalar_value;
-    }
-    elsif ($type == $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL) {
-      $cmd->{accessor} = $cf_accessor_scalar_value;
-    }
-    elsif ($type == $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC) {
-      $cmd->{accessor} = $cf_accessor_scalar_value;
-    }
-    elsif ($type == $Mail::SpamAssassin::Conf::CONF_TYPE_TEMPLATE) {
-      $cmd->{accessor} = $cf_accessor_scalar_value;
-    }
-    elsif ($type == $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE) {
-      $cmd->{accessor} = $cf_accessor_hash_key_value;
-    }
-    elsif ($type == $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST) {
-      $cmd->{accessor} = $cf_accessor_addrlist_value;
-    }
-  }
-  
-  # now eval the accessor
-  # note: (accessor == "") means do not generate any accessor method
-  my $methodname = "Mail::SpamAssassin::Conf::cf_".$cmd->{setting};
-  if ($cmd->{accessor} && !defined &{$methodname})
-  {
-    my $evalstr = $cmd->{accessor};
-    $evalstr =~ s/\$\{SETTING\}/$cmd->{setting}/gs;
-    eval "package Mail::SpamAssassin::Conf; ".$evalstr;
-
-    if ($@) {
-      die "config: failed to parse accessor: $@\n";
-      return;
-    }
-
-    if (!defined &{$methodname}) {
-      die "config: accessor $methodname not created\n";
-      return;
-    }
-  }
-}
-
-###########################################################################
-
 sub setup_default_code_cb {
   my ($self, $cmd) = @_;
   my $type = $cmd->{type};
@@ -732,7 +608,7 @@ sub set_numeric_value {
     return $Mail::SpamAssassin::Conf::INVALID_VALUE;
   }
 
-  $conf->{activetier}->{$key} = $value+0.0;
+  $conf->{$key} = $value+0.0;
 }
 
 sub set_bool_value {
@@ -755,7 +631,7 @@ sub set_bool_value {
     return $Mail::SpamAssassin::Conf::INVALID_VALUE;
   }
 
-  $conf->{activetier}->{$key} = $value+0;
+  $conf->{$key} = $value+0;
 }
 
 sub set_string_value {
@@ -765,7 +641,7 @@ sub set_string_value {
     return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
   }
 
-  $conf->{activetier}->{$key} = $value;
+  $conf->{$key} = $value;
 }
 
 sub set_hash_key_value {

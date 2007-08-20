@@ -36,13 +36,27 @@ sub TIEHASH {
   my $class = shift;
   my $h0 = shift;
   my $h1 = shift;
-  my $self = { h0 => $h0, h1 => $h1 };
+
+  my $self = {
+    h0 => $h0,
+    h1 => $h1,
+    activetier => $h1
+  };
   return bless $self, $class;
 }
 
 sub STORE {
   my ($self, $k, $v) = @_;
-  $self->{h1}->{$k} = $v;
+  if ($k eq 'ACTIVETIER') {
+    if ($v == 0) {
+      $self->{activetier} = $self->{h0};
+    } else {
+      $self->{activetier} = $self->{h1};
+    }
+  }
+  else {
+    $self->{activetier}->{$k} = $v;
+  }
   1;
 }
 
@@ -68,7 +82,7 @@ sub EXISTS {
 
 sub DELETE {
   my ($self, $k) = @_;
-  return delete $self->{h1}->{$k};
+  return delete $self->{activetier}->{$k};
 }
 
 sub FIRSTKEY {
@@ -92,12 +106,12 @@ sub NEXTKEY {
 
 sub CLEAR {
   my ($self) = @_;
-  $self->{h1} = { };
+  %{$self->{activetier}} = ( );
 }
 
 sub SCALAR {
   my ($self) = @_;
-  return scalar $self->{h1};
+  return scalar $self->{activetier};
 }
 
 1;

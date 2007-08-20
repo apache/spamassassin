@@ -330,7 +330,7 @@ sub harvest_until_rule_completes {
 
   return if !defined $self->{async}->get_last_start_lookup_time();
 
-  my $deadline = $self->{conf}->cf_rbl_timeout + $self->{async}->get_last_start_lookup_time();
+  my $deadline = $self->{conf}->{rbl_timeout} + $self->{async}->get_last_start_lookup_time();
   my $now = time;
 
   # should not give up before at least attempting to collect some responses
@@ -355,11 +355,11 @@ sub harvest_until_rule_completes {
     @left = $self->{async}->get_pending_lookups();
 
     # complete_lookups could cause a change in get_last_start_lookup_time
-    $deadline = $self->{conf}->cf_rbl_timeout +
+    $deadline = $self->{conf}->{rbl_timeout} +
                 $self->{async}->get_last_start_lookup_time();
 
     # dynamic timeout
-    my $dynamic = (int($self->{conf}->cf_rbl_timeout
+    my $dynamic = (int($self->{conf}->{rbl_timeout}
                       * (1 - 0.7*(($total - @left) / $total) ** 2) + 1)
                   + $self->{async}->get_last_start_lookup_time());
     $deadline = $dynamic if ($dynamic < $deadline);
@@ -372,7 +372,7 @@ sub harvest_dnsbl_queries {
 
   return if !defined $self->{async}->get_last_start_lookup_time();
 
-  my $deadline = $self->{conf}->cf_rbl_timeout + $self->{async}->get_last_start_lookup_time();
+  my $deadline = $self->{conf}->{rbl_timeout} + $self->{async}->get_last_start_lookup_time();
   my $now = time;
 
   # should not give up before at least attempting to collect some responses
@@ -396,11 +396,11 @@ sub harvest_dnsbl_queries {
     # complete_lookups() may have called completed_callback, which may call
     # start_lookup() again (like in URIDNSBL), so get_last_start_lookup_time
     # may have changed and deadline needs to be recomputed
-    $deadline = $self->{conf}->cf_rbl_timeout +
+    $deadline = $self->{conf}->{rbl_timeout} +
                 $self->{async}->get_last_start_lookup_time();
 
     # dynamic timeout
-    my $dynamic = (int($self->{conf}->cf_rbl_timeout
+    my $dynamic = (int($self->{conf}->{rbl_timeout}
                       * (1 - 0.7*(($total - @left) / $total) ** 2) + 1)
                   + $self->{async}->get_last_start_lookup_time());
     $deadline = $dynamic if ($dynamic < $deadline);
@@ -628,8 +628,8 @@ sub lookup_a {
 
 sub is_dns_available {
   my ($self) = @_;
-  my $dnsopt = $self->{conf}->cf_dns_available;
-  my $dnsint = $self->{conf}->cf_dns_test_interval || 600;
+  my $dnsopt = $self->{conf}->{dns_available};
+  my $dnsint = $self->{conf}->{dns_test_interval} || 600;
   my @domains;
 
   $LAST_DNS_CHECK ||= 0;

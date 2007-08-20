@@ -1549,7 +1549,7 @@ win32 depending on the platform in use.
         return $INVALID_VALUE;
       }
       
-      $self->{activetier}->{lock_method} = $value;
+      $self->{lock_method} = $value;
       # recreate the locker
       $self->{main}->create_locker();
     },
@@ -3096,13 +3096,20 @@ distances that are greater than 9.)
 sub new {
   my $class = shift;
   $class = ref($class) || $class;
-  my $self = {
-    main => shift,
-    registered_commands => [],
-    plugins_loaded => { },
-    eval_plugins => { },
-    errors => 0,
-  }; bless ($self, $class);
+
+  my $self;
+  tie %{$self}, 'Mail::SpamAssassin::Util::TwoTierHash', { }, { }
+      or warn "tie failed";
+  $self->{ACTIVETIER} = 0;
+
+  # anything set here is now set in tier 0; that includes other
+  # hashes, in which *other* things can be set in turn
+  $self->{main} = shift;
+  $self->{registered_commands} = [];
+  $self->{plugins_loaded} = {};
+  $self->{eval_plugins} = {};
+  $self->{errors} = 0;
+  bless ($self, $class);
 
   $self->{parser} = Mail::SpamAssassin::Conf::Parser->new($self);
 
@@ -3115,10 +3122,10 @@ sub new {
   $self->{parser}->register_commands($self->set_default_commands());
 
   # Make sure we add in X-Spam-Checker-Version
-  $self->{tiers}->[0]->{headers_spam}->{"Checker-Version"} =
+  $self->{headers_spam}->{"Checker-Version"} =
                 "SpamAssassin _VERSION_ (_SUBVERSION_) on _HOSTNAME_";
-  $self->{tiers}->[0]->{headers_ham}->{"Checker-Version"} =
-                $self->{tiers}->[0]->{headers_spam}->{"Checker-Version"};
+  $self->{headers_ham}->{"Checker-Version"} =
+                $self->{headers_spam}->{"Checker-Version"};
 
   # these should potentially be settable by end-users
   # perhaps via plugin?
@@ -3211,12 +3218,15 @@ sub push_tier {
   $self->{tiers}->[1] = $self->new_tier();
   $self->{activetier} = $self->{tiers}->[1];
   $self->create_lookup_doublehashes();
+  $self->{ACTIVETIER} = 1;
 }
 
 # and delete it once the user is no longer active
 sub pop_tier {
   my ($self) = @_;
   delete $self->{tiers}->[1];
+  $self = {};       # clears the top tier
+  $self->{ACTIVETIER} = 0;
   $self->{activetier} = $self->{tiers}->[0];
 }
 

@@ -124,8 +124,8 @@ sub autolearn_discriminator {
 
   # Figure out min/max for autolearning.
   # Default to specified auto_learn_threshold settings
-  my $min = $conf->cf_bayes_auto_learn_threshold_nonspam;
-  my $max = $conf->cf_bayes_auto_learn_threshold_spam;
+  my $min = $conf->{bayes_auto_learn_threshold_nonspam};
+  my $max = $conf->{bayes_auto_learn_threshold_spam};
 
   # Find out what score we should consider this message to have ...
   my $score = $scan->get_autolearn_points();
