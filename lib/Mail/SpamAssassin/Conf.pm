@@ -3101,6 +3101,7 @@ sub new {
   tie %{$self}, 'Mail::SpamAssassin::Util::TwoTierHash', { }, { }
       or warn "tie failed";
   $self->{ACTIVETIER} = 0;
+  bless ($self, $class);
 
   # anything set here is now set in tier 0; that includes other
   # hashes, in which *other* things can be set in turn
@@ -3109,23 +3110,27 @@ sub new {
   $self->{plugins_loaded} = {};
   $self->{eval_plugins} = {};
   $self->{errors} = 0;
-  bless ($self, $class);
+  $self->{need_lookup_doublehash} = [];
 
   $self->{parser} = Mail::SpamAssassin::Conf::Parser->new($self);
 
   # create a new config tier for the basic, system-wide config
   $self->{tiers}->[0] = $self->new_tier();
   $self->{activetier} = $self->{tiers}->[0];
-  $self->create_lookup_doublehashes();
 
   # and populate some defaults:
   $self->{parser}->register_commands($self->set_default_commands());
+
+  # create the lookup "hashes". this must be after register_commands()
+  $self->create_lookup_doublehashes();
 
   # Make sure we add in X-Spam-Checker-Version
   $self->{headers_spam}->{"Checker-Version"} =
                 "SpamAssassin _VERSION_ (_SUBVERSION_) on _HOSTNAME_";
   $self->{headers_ham}->{"Checker-Version"} =
                 $self->{headers_spam}->{"Checker-Version"};
+
+  $self->{scoreset_current} = 0;
 
   # these should potentially be settable by end-users
   # perhaps via plugin?
@@ -3206,7 +3211,6 @@ sub new_tier {
   $tier->{trusted_networks_configured} = 0;
   $tier->{internal_networks_configured} = 0;
 
-  $tier->{scoreset_current} = 0;
   $self->set_score_set (0);
 
   return $tier;
@@ -3221,6 +3225,8 @@ sub push_tier {
 
   $self->{ACTIVETIER} = 1;
   %{$self} = ();       # creates a new top tier
+
+  $self->set_score_set($self->{scoreset_current});
 }
 
 # and delete it once the user is no longer active
@@ -3232,6 +3238,8 @@ sub pop_tier {
   delete $self->{tiers}->[1];
   $self->{activetier} = $self->{tiers}->[0];
   $self->create_lookup_doublehashes();
+
+  $self->set_score_set($self->{scoreset_current});
 }
 
 # create "double-hash" lookup structures that point into the 2 tiers of
@@ -3243,12 +3251,16 @@ sub create_lookup_doublehashes {
 
       tflags meta_dependencies source_file priorities rewrite_header
       headers_spam headers_ham duplicate_rules rules_to_replace
-      test_types priority bayes_ignore_to bayes_ignore_from
+      test_types priority
 
-    ))
+    ), @{$self->{need_lookup_doublehash}})
   {
     $self->new_two_tier_hash($hash);
   }
+      # TODO: these should be automatic
+      # whitelist_from blacklist_from
+      # bayes_ignore_to bayes_ignore_from
+
   foreach my $hash (qw(
 
       report_safe_copy_headers redirector_patterns

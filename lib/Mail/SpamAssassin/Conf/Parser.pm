@@ -174,6 +174,12 @@ sub set_defaults_from_command_list {
     if (exists($cmd->{default})) {
       $conf->{$cmd->{setting}} = $cmd->{default};
     }
+
+    if ($cmd->{type} &&
+        $cmd->{type} == $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST)
+    {
+      push @{$conf->{need_lookup_doublehash}}, $cmd->{setting};
+    }
   }
 }
 
@@ -1236,8 +1242,9 @@ sub remove_from_addrlist {
   my ($self, $singlelist, @addrs) = @_;
   my $conf = $self->{conf};
 
+  # set to undef instead of delete, to hide any existing values in lower tiers
   foreach my $addr (@addrs) {
-    delete $conf->{activetier}->{$singlelist}->{$addr};
+    $conf->{activetier}->{$singlelist}->{$addr} = undef;
   }
 }
 
@@ -1246,7 +1253,7 @@ sub remove_from_addrlist_rcvd {
   my $conf = $self->{conf};
 
   foreach my $addr (@addrs) {
-    delete $conf->{activetier}->{$listname}->{$addr};
+    $conf->{activetier}->{$listname}->{$addr} = undef;
   }
 }
 
