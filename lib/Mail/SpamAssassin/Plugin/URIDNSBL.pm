@@ -414,10 +414,7 @@ sub query_domain {
   $scanner->{uridnsbl_seen_domain}->{$dom} = 1;
   $self->log_dns_result("querying domain $dom");
 
-  my $obj = {
-    querystart => time,
-    dom => $dom
-  };
+  my $obj = { dom => $dom };
 
   my $single_dnsbl = 0;
   if ($dom =~ /^\d+\.\d+\.\d+\.\d+$/) {
