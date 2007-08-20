@@ -3219,6 +3219,8 @@ sub new_tier {
 # create a new config tier for user configuration
 sub push_tier {
   my ($self) = @_;
+  dbg ("config: pushing new tier");
+
   $self->{tiers}->[1] = $self->new_tier();
   $self->{activetier} = $self->{tiers}->[1];
   $self->create_lookup_doublehashes();
@@ -3232,6 +3234,8 @@ sub push_tier {
 # and delete it once the user is no longer active
 sub pop_tier {
   my ($self) = @_;
+  dbg ("config: popping tier");
+
   %{$self} = ();       # clears the top tier entirely
   $self->{ACTIVETIER} = 0;
 
@@ -3271,15 +3275,11 @@ sub create_lookup_doublehashes {
 sub new_two_tier_hash {
   my ($self, $name, $t0, $t1) = @_;
   if (!defined $t0) {
-    if (!defined $self->{tiers}->[0]->{$name}) {
-      $self->{tiers}->[0]->{$name} = { };
-    }
+    $self->{tiers}->[0]->{$name} ||= { };
     $t0 = $self->{tiers}->[0]->{$name};
   }
   if (!defined $t1) {
-    if (!defined $self->{tiers}->[1]->{$name}) {
-      $self->{tiers}->[1]->{$name} = { };
-    }
+    $self->{tiers}->[1]->{$name} ||= { };
     $t1 = $self->{tiers}->[1]->{$name};
   }
 
@@ -3332,7 +3332,7 @@ sub parse_rules {
 
 sub set_score_set {
   my ($self, $set) = @_;
-  $self->{activetier}->{scoreset_current} = $set;
+  $self->{scoreset_current} = $set;
 
   # use TwoTierHash objects to represent certain hashes; lookups
   # in these "hashes" will fall through correctly to the other tiers.
@@ -3345,7 +3345,7 @@ sub set_score_set {
 
 sub get_score_set {
   my($self) = @_;
-  return $self->{activetier}->{scoreset_current};
+  return $self->{scoreset_current};
 }
 
 sub delete_rule {

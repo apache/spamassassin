@@ -40,7 +40,7 @@ sub TIEHASH {
   my $self = {
     h0 => $h0,
     h1 => $h1,
-    activetier => $h1
+    activetier => $h0
   };
   return bless $self, $class;
 }

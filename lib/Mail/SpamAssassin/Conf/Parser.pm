@@ -682,12 +682,12 @@ sub remove_addrlist_value {
 sub set_template_append {
   my ($conf, $key, $value, $line) = @_;
   if ( $value =~ /^"(.*?)"$/ ) { $value = $1; }
-  $conf->{activetier}->{$key} .= $value."\n";
+  $conf->{$key} .= $value."\n";
 }
 
 sub set_template_clear {
   my ($conf, $key, $value, $line) = @_;
-  $conf->{activetier}->{$key} = '';
+  $conf->{$key} = '';
 }
 
 ###########################################################################

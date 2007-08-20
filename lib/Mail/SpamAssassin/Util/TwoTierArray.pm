@@ -31,6 +31,7 @@ our @ISA = qw(Tie::Array);
 # and all reads from tier 1, and if not found there, tier 0.  In
 # effect tier 1 overrides tier 0.  Note that writes will NEVER affect
 # tier 0; create a new object to modify the contents of that tier.
+# This is different from how TwoTierHash works (which can be written to)
 
 ###########################################################################
 
@@ -48,7 +49,7 @@ sub TIEARRAY {
 sub STORE {
   my ($self, $i, $v) = @_;
   my $a0size = scalar @{$self->{a0}};
-  if ($i > $a0size) {
+  if ($i >= $a0size) {
     $self->{a1}->[$i - $a0size] = $v;
   } else {
     # a write to the a0 area! we cannot do this!
@@ -59,7 +60,7 @@ sub STORE {
 sub FETCH {
   my ($self, $i) = @_;
   my $a0size = scalar @{$self->{a0}};
-  if ($i > $a0size) {
+  if ($i >= $a0size) {
     return $self->{a1}->[$i - $a0size];
   } else {
     return $self->{a0}->[$i];

@@ -792,34 +792,31 @@ sub do_full_tests {
 
 sub do_head_eval_tests {
   my ($self, $pms, $priority) = @_;
-  return unless (defined($pms->{conf}->{head_evals}->{$priority}));
   $self->run_eval_tests ($pms, $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS,
             'head_evals', '', $priority);
 }
 
 sub do_body_eval_tests {
   my ($self, $pms, $priority, $bodystring) = @_;
-  return unless (defined($pms->{conf}->{body_evals}->{$priority}));
   $self->run_eval_tests ($pms, $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS,
             'body_evals', 'BODY: ', $priority, $bodystring);
 }
 
 sub do_rawbody_eval_tests {
   my ($self, $pms, $priority, $bodystring) = @_;
-  return unless (defined($pms->{conf}->{rawbody_evals}->{$priority}));
   $self->run_eval_tests ($pms, $Mail::SpamAssassin::Conf::TYPE_RAWBODY_EVALS,
             'rawbody_evals', 'RAW: ', $priority, $bodystring);
 }
 
 sub do_full_eval_tests {
   my ($self, $pms, $priority, $fullmsgref) = @_;
-  return unless (defined($pms->{conf}->{full_evals}->{$priority}));
   $self->run_eval_tests($pms, $Mail::SpamAssassin::Conf::TYPE_FULL_EVALS,
             'full_evals', '', $priority, $fullmsgref);
 }
 
 sub run_eval_tests {
-  my ($self, $pms, $testtype, $confhashname, $prepend2desc, $priority, @extraevalargs) = @_;
+  my ($self, $pms, $testtype, $confhashname,
+            $prepend2desc, $priority, @extraevalargs) = @_;
  
   return if $self->{main}->call_plugins("have_shortcircuited",
                                         { permsgstatus => $pms });
