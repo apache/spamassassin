@@ -3218,16 +3218,20 @@ sub push_tier {
   $self->{tiers}->[1] = $self->new_tier();
   $self->{activetier} = $self->{tiers}->[1];
   $self->create_lookup_doublehashes();
+
   $self->{ACTIVETIER} = 1;
+  %{$self} = ();       # creates a new top tier
 }
 
 # and delete it once the user is no longer active
 sub pop_tier {
   my ($self) = @_;
-  delete $self->{tiers}->[1];
-  $self = {};       # clears the top tier
+  %{$self} = ();       # clears the top tier entirely
   $self->{ACTIVETIER} = 0;
+
+  delete $self->{tiers}->[1];
   $self->{activetier} = $self->{tiers}->[0];
+  $self->create_lookup_doublehashes();
 }
 
 # create "double-hash" lookup structures that point into the 2 tiers of
@@ -3239,7 +3243,7 @@ sub create_lookup_doublehashes {
 
       tflags meta_dependencies source_file priorities rewrite_header
       headers_spam headers_ham duplicate_rules rules_to_replace
-      test_types priority
+      test_types priority bayes_ignore_to bayes_ignore_from
 
     ))
   {
@@ -3258,11 +3262,18 @@ sub create_lookup_doublehashes {
 sub new_two_tier_hash {
   my ($self, $name, $t0, $t1) = @_;
   if (!defined $t0) {
-    $t0 = $self->{tiers}->[0]->{$name} = { };
+    if (!defined $self->{tiers}->[0]->{$name}) {
+      $self->{tiers}->[0]->{$name} = { };
+    }
+    $t0 = $self->{tiers}->[0]->{$name};
   }
   if (!defined $t1) {
-    $t1 = $self->{tiers}->[1]->{$name} = { };
+    if (!defined $self->{tiers}->[1]->{$name}) {
+      $self->{tiers}->[1]->{$name} = { };
+    }
+    $t1 = $self->{tiers}->[1]->{$name};
   }
+
   delete $self->{$name};
   tie %{$self->{$name}}, 'Mail::SpamAssassin::Util::TwoTierHash', $t0, $t1
       or warn "tie failed";
@@ -3271,11 +3282,18 @@ sub new_two_tier_hash {
 sub new_two_tier_array {
   my ($self, $name, $t0, $t1) = @_;
   if (!defined $t0) {
-    $t0 = $self->{tiers}->[0]->{$name} = [ ];
+    if (!defined $self->{tiers}->[0]->{$name}) {
+      $self->{tiers}->[0]->{$name} = [ ];
+    }
+    $t0 = $self->{tiers}->[0]->{$name};
   }
   if (!defined $t1) {
-    $t1 = $self->{tiers}->[1]->{$name} = [ ];
+    if (!defined $self->{tiers}->[1]->{$name}) {
+      $self->{tiers}->[1]->{$name} = [ ];
+    }
+    $t1 = $self->{tiers}->[1]->{$name};
   }
+
   delete $self->{$name};
   tie @{$self->{$name}}, 'Mail::SpamAssassin::Util::TwoTierArray', $t0, $t1
       or warn "tie failed";
