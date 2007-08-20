@@ -279,7 +279,11 @@ sub tie_db_writable {
     my $name = $path.'_'.$dbname;
     my $db_var = 'db_'.$dbname;
     dbg("bayes: tie-ing to DB file R/W $name");
-    tie %{$self->{$db_var}},$self->DBM_MODULE,$name, O_RDWR|O_CREAT,
+
+    ($self->DBM_MODULE eq 'DB_File') and
+         Mail::SpamAssassin::Util::avoid_db_file_locking_bug ($name);
+
+    tie %{$self->{$db_var}},$self->DBM_MODULE, $name, O_RDWR|O_CREAT,
 		 (oct($main->{conf}->{bayes_file_mode}) & 0666)
        or goto failed_to_tie;
   }
