@@ -3257,9 +3257,6 @@ sub create_lookup_doublehashes {
   {
     $self->new_two_tier_hash($hash);
   }
-      # TODO: these should be automatic
-      # whitelist_from blacklist_from
-      # bayes_ignore_to bayes_ignore_from
 
   foreach my $hash (qw(
 
