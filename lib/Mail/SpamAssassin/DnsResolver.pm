@@ -133,10 +133,7 @@ sub load_resolver {
       $self->{res}->persistent_udp(0);  # bug 3997
     }
     1;
-  } or do {
-    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-    dbg("dns: eval failed: %s", $eval_stat);
-  };
+  };   #  or warn "dns: eval failed: $@ $!\n";
 
   dbg("dns: no ipv6") if $force_ipv4;
   dbg("dns: is Net::DNS::Resolver available? %s",

@@ -141,7 +141,7 @@ NEXT_RULE:
     my $cent = $cached->{rule_bases}->{$cachekey};
     if (defined $cent) {
       if (defined $cent->{g}) {
-        dbg("zoom: YES (cached) %s", $rule);
+        dbg("zoom: YES (cached) $rule");
         foreach my $ent (@{$cent->{g}}) {
           # note: we have to copy these, since otherwise later
           # modifications corrupt the cached data
@@ -152,7 +152,7 @@ NEXT_RULE:
         $yes++;
       }
       else {
-        dbg("zoom: NO (cached) %s", $rule);
+        dbg("zoom: NO (cached) $rule");
         push @failed, { orig => $rule };    # no need to cache this
         $no++;
       }
@@ -168,11 +168,8 @@ NEXT_RULE:
     eval {  # catch die()s
       my ($qr, $mods) = $self->simplify_and_qr_regexp($rule);
       ($lossy, @bases) = $self->extract_hints($rule, $qr, $mods);
-      1;
-    } or do {
-      my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-      dbg("zoom: giving up on regexp: %s", $eval_stat);
     };
+    $@ and dbg("giving up on regexp: $@");
 
     # if any of the extracted hints in a set are too short, the entire
     # set is invalid; this is because each set of N hints represents just
@@ -185,7 +182,7 @@ NEXT_RULE:
     }
 
     if ($minlen && @bases) {
-      # dbg("zoom: YES <base>%s</base> <origrule>%s</origrule>", $base,$rule);
+      # dbg("zoom: YES <base>$base</base> <origrule>$rule</origrule>");
 
       # figure out if we have e.g. ["foo", "foob", "foobar"]; in this
       # case, we only need to track ["foo"].
@@ -215,7 +212,7 @@ NEXT_RULE:
     }
     else {
 NO:
-      dbg("zoom: NO %s", $rule);
+      dbg("zoom: NO $rule");
       push @failed, { orig => $rule };
       $cached->{rule_bases}->{$cachekey} = { };
       $no++;
@@ -224,8 +221,9 @@ NO:
 
   $self->{show_progress} and $progress->final();
 
-  dbg("zoom: %s: found %d usable base strings in %d rules, skipped %d rules",
-      $ruletype, scalar(@good_bases), $yes,$no);
+  dbg ("$ruletype: found ".(scalar @good_bases).
+        " usable base strings in ".
+        "$yes rules, skipped $no rules");
 
   # NOTE: re2c will attempt to provide the longest pattern that matched; e.g.
   # ("food" =~ "foo" / "food") will return "food".  So therefore if a pattern
@@ -329,7 +327,7 @@ NO:
       $set1->[5] = 1;
 
       # base2 is just a subset of base1
-      # dbg("zoom: subsuming '%s' into '%s': %s", $base2,$base1,$set1->[1]);
+      # dbg("zoom: subsuming '$base2' into '$base1': $set1->[1]");
     }
   }
 

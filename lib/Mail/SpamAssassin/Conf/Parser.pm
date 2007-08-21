@@ -860,8 +860,7 @@ sub fix_priorities {
     foreach my $dep (split ' ', $deps) {
       my $deppri = $pri->{$dep};
       if ($deppri > $basepri) {
-        dbg("rules: %s (pri %s) requires %s (pri %s): fixed",
-            $rule,$basepri, $dep,$deppri);
+        dbg("rules: $rule (pri $basepri) requires $dep (pri $deppri): fixed");
         $pri->{$dep} = $basepri;
       }
     }
@@ -910,7 +909,7 @@ sub find_dup_rules {
       delete $conf->{tests}->{$name};
     }
 
-    dbg("rules: %s merged duplicates: %s", $first, join(' ', @dups));
+    dbg("rules: $first merged duplicates: ".join(' ', @dups));
     $conf->{duplicate_rules}->{$first} = \@dups;
   }
 }
@@ -1115,11 +1114,13 @@ sub is_meta_valid {
   if (eval $evalstr) {
     return 1;
   }
-  my $err = $@ ne '' ? $@ : "errno=$!";  chomp $err;
-  $err =~ s/\s+(?:at|near)\b.*//s;
-  $err =~ s/Illegal division by zero/division by zero possible/i;
-  $self->lint_warn("config: invalid expression for rule $name: \"$rule\": $err\n", $name);
-  return 0;
+  if ($@) {
+    my $err = $@;
+    $err =~ s/\s+(?:at|near)\b.*//s;
+    $err =~ s/Illegal division by zero/division by zero possible/i;
+    $self->lint_warn("config: invalid expression for rule $name: \"$rule\": $err\n", $name);
+    return 0;
+  }
 }
 
 sub is_delimited_regexp_valid {
@@ -1173,7 +1174,8 @@ sub is_regexp_valid {
   if (eval { ("" =~ m#${re}#); 1; }) {
     return 1;
   }
-  my $err = $@ ne '' ? $@ : "errno=$!";  chomp $err;
+
+  my $err = $@;
   $err =~ s/ at .*? line \d.*$//;
   $self->lint_warn("config: invalid regexp for rule $name: $origre: $err\n", $name);
   return 0;
@@ -1244,7 +1246,7 @@ sub fix_path_relative_to_current_file {
   if (!File::Spec->file_name_is_absolute ($path)) {
     my ($vol, $dirs, $file) = File::Spec->splitpath ($self->{currentfile});
     $path = File::Spec->catpath ($vol, $dirs, $path);
-    dbg("config: fixed relative path: %s", $path);
+    dbg("config: fixed relative path: $path");
   }
   return $path;
 }

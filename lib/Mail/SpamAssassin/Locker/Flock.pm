@@ -65,18 +65,16 @@ sub safe_lock {
   }
   umask $umask; # we've created the file, so reset umask
 
-  dbg("locker: safe_lock: created %s", $lock_file);
+  dbg("locker: safe_lock: created $lock_file");
 
   my $unalarmed = 0;
   my $oldalarm = 0;
 
   # use a SIGALRM-based timer -- more efficient than second-by-second
   # sleeps
-  my $eval_stat;
   eval {
     local $SIG{ALRM} = sub { die "alarm\n" };
-    dbg("locker: safe_lock: trying to get lock on %s with %s timeout",
-        $path,$max_retries);
+    dbg("locker: safe_lock: trying to get lock on $path with $max_retries timeout");
 
     # max_retries is basically seconds! so use it for the timeout
     $oldalarm = alarm $max_retries;
@@ -86,7 +84,7 @@ sub safe_lock {
       alarm $oldalarm;
       $unalarmed = 1; # avoid calling alarm(0) twice
 
-      dbg("locker: safe_lock: link to %s: link ok", $lock_file);
+      dbg("locker: safe_lock: link to $lock_file: link ok");
       $is_locked = 1;
 
       # just to be nice: let people know when it was locked
@@ -98,18 +96,16 @@ sub safe_lock {
       $self->{lock_fhs} ||= { };
       $self->{lock_fhs}->{$path} = $fh;
     }
-    1;
-  } or do {
-    $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
   };
 
-  $unalarmed or alarm $oldalarm; # if we die'd above, need to reset here
+  my $err = $@;
 
-  if (defined $eval_stat) {
-    if ($eval_stat =~ /alarm/) {
-      dbg("locker: safe_lock: timed out after %s seconds", $max_retries);
+  $unalarmed or alarm $oldalarm; # if we die'd above, need to reset here
+  if ($err) {
+    if ($err =~ /alarm/) {
+      dbg("locker: safe_lock: timed out after $max_retries seconds");
     } else {
-      die "locker: safe_lock: $eval_stat";
+      die "locker: safe_lock: $err";
     }
   }
 
@@ -122,8 +118,7 @@ sub safe_unlock {
   my ($self, $path) = @_;
 
   if (!exists $self->{lock_fhs} || !defined $self->{lock_fhs}->{$path}) {
-    dbg("locker: safe_unlock: no lock handle for %s - already unlocked?",
-        $path);
+    dbg("locker: safe_unlock: no lock handle for $path - already unlocked?");
     return;
   }
 
@@ -133,7 +128,7 @@ sub safe_unlock {
   flock ($fh, LOCK_UN);
   $fh->close();
 
-  dbg("locker: safe_unlock: unlocked %s.mutex", $path);
+  dbg("locker: safe_unlock: unlocked $path.mutex");
 
   # do NOT unlink! this would open a race, whereby:
   #
@@ -167,7 +162,7 @@ sub refresh_lock {
   $fh->print ("$$\n");
   $fh->flush ();
 
-  dbg("locker: refresh_lock: refresh %s.mutex", $path);
+  dbg("locker: refresh_lock: refresh $path.mutex");
 }
 
 ###########################################################################

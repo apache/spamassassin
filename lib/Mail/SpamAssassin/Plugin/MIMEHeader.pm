@@ -141,13 +141,11 @@ sub set_config {
         }
       ';
 
-      eval
-        $evalcode . '; 1'
-      or do {
-        my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-        warn "mimeheader: plugin error: $eval_stat";
+      eval $evalcode;
+      if ($@) {
+        warn "mimeheader: plugin error: $@";
         return $Mail::SpamAssassin::Conf::INVALID_VALUE;
-      };
+      }
 
       $pluginobj->register_eval_rule($evalfn);
 
