@@ -139,6 +139,7 @@ sub _run {      # private
   # it will not require malloc() be called if it fires
   my $timedout = 0;
 
+  my $eval_stat;
   eval {
     # note use of local to ensure closed scope here
     local $SIG{ALRM} = sub { $timedout++; die "__alarm__ignore__\n" };
@@ -158,9 +159,10 @@ sub _run {      # private
     # still worth avoiding anyway.
 
     alarm 0;
+    1;
+  } or do {
+    $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
   };
-
-  my $err = $@;
 
   if (defined $oldalarm) {
     # now, we could have died from a SIGALRM == timed out.  if so,
@@ -169,15 +171,13 @@ sub _run {      # private
     alarm $oldalarm;
   }
 
-  if ($err) {
-    if ($err =~ /__alarm__ignore__/) {
+  if (defined $eval_stat) {
+    if ($eval_stat =~ /__alarm__ignore__/) {
       $self->{timed_out} = 1;
+    } elsif ($and_catch) {
+      return $eval_stat;
     } else {
-      if ($and_catch) {
-        return $@;
-      } else {
-        die $@;             # propagate any "real" errors
-      }
+      die $eval_stat;             # propagate any "real" errors
     }
   } elsif ($timedout) {
     # this happens occasionally; haven't figured out why.  seems

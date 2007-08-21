@@ -78,11 +78,13 @@ sub new {
       eval '
   	    require '.$type.';
             $factory = '.$type.'->new();
-           ';
-      if ($@) { 
-	warn "auto-whitelist: $@";
+            1;
+           '
+      or do {
+        my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+	warn "auto-whitelist: $eval_stat";
 	undef $factory;
-      }
+      };
       $main->set_persistent_address_list_factory($factory) if $factory;
     }
     else {

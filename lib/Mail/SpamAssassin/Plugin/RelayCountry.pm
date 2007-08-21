@@ -67,11 +67,13 @@ sub extract_metadata {
   eval {
     require IP::Country::Fast;
     $reg = IP::Country::Fast->new();
-  };
-  if ($@) {
-    dbg("metadata: failed to load 'IP::Country::Fast', skipping ($@)");
+    1;
+  } or do {
+    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    dbg("metadata: failed to load '%s', skipping (%s)",
+        'IP::Country::Fast', $eval_stat);
     return 1;
-  }
+  };
 
   my $msg = $opts->{msg};
 
@@ -84,7 +86,7 @@ sub extract_metadata {
 
   chop $countries;
   $msg->put_metadata("X-Relay-Countries", $countries);
-  dbg("metadata: X-Relay-Countries: $countries");
+  dbg("metadata: X-Relay-Countries: %s", $countries);
 
   return 1;
 }
