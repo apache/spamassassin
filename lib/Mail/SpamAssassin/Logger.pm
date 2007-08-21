@@ -238,32 +238,17 @@ sub add {
   my $name = lc($params{method});
   my $class = ucfirst($name);
 
-  eval 'use Mail::SpamAssassin::Logger::'.$class.'; 1'
-  or do {
-    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-    die "logger: add $class failed: $eval_stat";
-  };
+  eval 'use Mail::SpamAssassin::Logger::'.$class.';';
+  ($@) and die "logger: add $class failed: $@";
 
   if (!exists $LOG_SA{method}->{$name}) {
-    my $object;
-    my $eval_stat;
-    eval '$object = Mail::SpamAssassin::Logger::'.$class.'->new(%params); 1'
-    or do {
-      $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-      undef $object;  # just in case
-    };
-    if (!$object) {
-      if (!defined $eval_stat) {
-        $eval_stat = "Mail::SpamAssassin::Logger::$class->new ".
-                     "failed to return an object";
-      }
-      warn("logger: failed to add $name method: $eval_stat\n");
-    }
-    else {
+    my $object = eval 'Mail::SpamAssassin::Logger::'.$class.'->new(%params);';
+    if (!$@ && $object) {
       $LOG_SA{method}->{$name} = $object;
       dbg("logger: successfully added $name method\n");
       return 1;
     }
+    warn("logger: failed to add $name method ($@)\n");
     return 0;
   }
 

@@ -209,23 +209,20 @@ sub expire_old_tokens {
   my ($self, $opts) = @_;
   my $ret;
 
-  my $eval_stat;
   eval {
     local $SIG{'__DIE__'};	# do not run user die() traps in here
     if ($self->tie_db_writable()) {
       $ret = $self->expire_old_tokens_trapped ($opts);
     }
-    1;
-  } or do {
-    $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
   };
+  my $err = $@;
 
   if (!$self->{bayes}->{main}->{learn_caller_will_untie}) {
     $self->untie_db();
   }
 
-  if (defined $eval_stat) {	# if we died, untie the dbs.
-    warn "bayes: expire_old_tokens: $eval_stat\n";
+  if ($err) {		# if we died, untie the dbs.
+    warn "bayes: expire_old_tokens: $err\n";
     return 0;
   }
   $ret;
