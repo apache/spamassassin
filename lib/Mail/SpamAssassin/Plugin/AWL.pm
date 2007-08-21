@@ -351,7 +351,7 @@ sub check_from_in_auto_whitelist {
 
    # Create the AWL object
     my $whitelist;
-    my $evalok = eval {
+    eval {
       $whitelist = Mail::SpamAssassin::AutoWhitelist->new($pms->{main});
 
       # check
@@ -388,14 +388,13 @@ sub check_from_in_auto_whitelist {
 
       $whitelist->finish();
       1;
-    };
-
-    if (!$evalok) {
-      warn("auto-whitelist: open of auto-whitelist file failed: $@");
+    } or do {
+      my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+      warn("auto-whitelist: open of auto-whitelist file failed: $eval_stat\n");
       # try an unlock, in case we got that far
       eval { $whitelist->finish(); } if $whitelist;
       return 0;
-    }
+    };
 
     dbg("auto-whitelist: post auto-whitelist score: ".$pms->{score});
 
@@ -428,13 +427,13 @@ sub blacklist_address {
       $status = 1;
     }
     $whitelist->finish();
-  };
-
-  if ($@) {
-    warn("auto-whitelist: open of auto-whitelist file failed: $@");
+    1;
+  } or do {
+    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    warn("auto-whitelist: open of auto-whitelist file failed: $eval_stat\n");
     eval { $whitelist->finish(); };
     return 0;
-  }
+  };
 
   return $status;
 }
@@ -465,13 +464,13 @@ sub whitelist_address {
     }
 
     $whitelist->finish();
-  };
-
-  if ($@) {
-    warn("auto-whitelist: open of auto-whitelist file failed: $@");
+    1;
+  } or do {
+    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    warn("auto-whitelist: open of auto-whitelist file failed: $eval_stat\n");
     eval { $whitelist->finish(); };
     return 0;
-  }
+  };
 
   return $status;
 }
@@ -502,13 +501,13 @@ sub remove_address {
     }
   
     $whitelist->finish();
-  };
-
-  if ($@) {
-    warn("auto-whitelist: open of auto-whitelist file failed: $@");
+    1;
+  } or do {
+    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    warn("auto-whitelist: open of auto-whitelist file failed: $eval_stat\n");
     eval { $whitelist->finish(); };
     return 0;
-  }
+  };
 
   return $status;
 }

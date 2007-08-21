@@ -72,36 +72,43 @@ sub init {
 
   my $log_socket = $self->{log_socket};
 
-  dbg("logger: trying to connect to syslog/${log_socket}...\n");
+  dbg("logger: trying to connect to syslog/%s...", $log_socket);
+  my $eval_stat;
   eval {
-    defined(setlogsock($log_socket)) || die "logger: $!";
-    dbg("logger: opening syslog with $log_socket socket");
+    defined(setlogsock($log_socket))
+      or die "setlogsock($log_socket) failed: $!";
+    dbg("logger: opening syslog with %s", $log_socket socket);
     # the next call is required to actually open the socket
     openlog($self->{ident}, 'cons,pid,ndelay', $self->{log_facility});
+    1;
+  } or do {
+    $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    dbg("logger: connection to syslog/%s failed: %s", $log_socket,$eval_stat);
   };
-  my $err = $@;
-  chomp($err);
 
   # Solaris sometimes doesn't support UNIX-domain syslog sockets apparently;
   # the same is true for perl 5.6.0 build on an early version of Red Hat 7!
   # In these cases we try it with INET instead.
-  if ($err and $log_socket ne 'inet') {
-    dbg("logger: connection to syslog/${log_socket} failed: $err\n"
-	. "trying to connect to syslog/inet...");
+  if (defined($eval_stat) && $log_socket ne 'inet') {
+    dbg("logger: trying to connect to syslog/inet...");
+    undef $eval_stat;
     eval {
-      defined(setlogsock('inet')) || die "logger: $!";
-      dbg("logger: failed to setlogsock(${log_socket}): $err");
+      defined(setlogsock('inet')) or die "setlogsock('inet') failed: $!";
       dbg("logger: opening syslog using inet socket");
       openlog($self->{ident}, 'cons,pid,ndelay', $self->{log_facility});
+      1;
+    } or do {
+      $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+      dbg("logger: connection to syslog/inet failed: %s", $eval_stat);
     };
   }
 
   # we failed!
-  if ($@) {
+  if (defined $eval_stat) {
     return 0;
   }
   else {
-    dbg("logger: successfully connected to syslog/${log_socket}");
+    dbg("logger: successfully connected to syslog/%s", $log_socket);
     return 1;
   }
 }
@@ -129,15 +136,20 @@ sub log_message {
   # child_handler().   otherwise we can get into a loop if syslog()
   # forks a process -- as it does in syslog-ng apparently! (bug 3625)
   $Mail::SpamAssassin::Logger::LOG_SA{INHIBIT_LOGGING_IN_SIGCHLD_HANDLER} = 1;
-  eval { syslog($level, "%s", $msg); };
+  my $eval_stat;
+  eval {
+    syslog($level, "%s", $msg); 1;
+  } or do {
+    $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+  };
   $Mail::SpamAssassin::Logger::LOG_SA{INHIBIT_LOGGING_IN_SIGCHLD_HANDLER} = 0;
 
-  if ($@) {
+  if (defined $eval_stat) {
     if ($self->check_syslog_sigpipe($msg)) {
       # dealt with
     }
     else {
-      warn "logger: syslog failed: $@"; # includes a \n
+      warn "logger: syslog failed: $eval_stat\n";
 
       # only write this warning once, it gets annoying fast
       if (!$self->{already_done_failure_warning}) {
@@ -172,7 +184,7 @@ sub check_syslog_sigpipe {
 
     # now report what happend
     $msg = "SIGPIPE received, reopening log socket";
-    dbg("log: $msg");
+    dbg("log: %s", $msg);
     syslog('info', "%s", $msg);
 
     # if we've received multiple sigpipes, logging is probably still broken.
@@ -183,9 +195,10 @@ sub check_syslog_sigpipe {
 
     $self->{SIGPIPE_RECEIVED} = 0;
     return 1;
-  };
-
-  if ($@) {     # something died?  that's not good.
+    1;  # just to not forget a good habit
+  } or do {  # something died?  that's not good.
+    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    dbg("log: failure in check_syslog_sigpipe: %s", $eval_stat);
     $self->syslog_incr_failure_counter();
   }
 }

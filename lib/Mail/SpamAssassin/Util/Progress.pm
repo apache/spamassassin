@@ -142,8 +142,13 @@ sub init_bar {
   # The ideal case would be if they happen to have Term::ReadKey installed
   if (!defined($term_size) && HAS_TERM_READKEY) {
     my $term_readkey_term_size;
-    eval { $term_readkey_term_size = (Term::ReadKey::GetTerminalSize($self->{fh}))[0] };
-    unless ($@) { # an error will just keep the default
+    eval {
+      $term_readkey_term_size =
+        (Term::ReadKey::GetTerminalSize($self->{fh}))[0];
+      1;
+    } or do {  # an error will just keep the default
+      my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+      # dbg("progress: Term::ReadKey::GetTerminalSize failed: %s", $eval_stat);
       # GetTerminalSize might have returned an empty array, so check the
       # value and set if it exists, if not we keep the default
       $term_size = $term_readkey_term_size if ($term_readkey_term_size);

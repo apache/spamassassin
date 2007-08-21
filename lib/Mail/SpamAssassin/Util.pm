@@ -85,17 +85,19 @@ use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
 
     clean_path_in_taint_mode();
     if ( !$displayed_path++ ) {
-      dbg("util: current PATH is: ".join($Config{'path_sep'},File::Spec->path()));
+      dbg("util: current PATH is: %s",
+          join($Config{'path_sep'}, File::Spec->path()));
     }
     foreach my $path (File::Spec->path()) {
       my $fname = File::Spec->catfile ($path, $filename);
       if ( -f $fname ) {
         if (-x $fname) {
-          dbg("util: executable for $filename was found at $fname");
+          dbg("util: executable for %s was found at %s", $filename,$fname);
           return $fname;
         }
         else {
-          dbg("util: $filename was found at $fname, but isn't executable");
+          dbg("util: %s was found at %s, but isn't executable",
+              $filename,$fname);
         }
       }
     }
@@ -133,31 +135,31 @@ use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
       $dir = File::Spec->canonpath($1);
 
       if (!File::Spec->file_name_is_absolute($dir)) {
-	dbg("util: PATH included '$dir', which is not absolute, dropping");
+	dbg("util: PATH included '%s', which is not absolute, dropping", $dir);
 	next;
       }
       elsif (!(@stat=stat($dir))) {
-	dbg("util: PATH included '$dir', which doesn't exist, dropping");
+	dbg("util: PATH included '%s', which doesn't exist, dropping", $dir);
 	next;
       }
       elsif (!-d _) {
-	dbg("util: PATH included '$dir', which isn't a directory, dropping");
+	dbg("util: PATH included '%s', which isn't a directory, dropping", $dir);
 	next;
       }
       elsif (($stat[2]&2) != 0) {
         # World-Writable directories are considered insecure.
         # We could be more paranoid and check all of the parent directories as well,
         # but it's good for now.
-	dbg("util: PATH included '$dir', which is world writable, dropping");
+	dbg("util: PATH included '%s', which is world writable, dropping", $dir);
 	next;
       }
 
-      dbg("util: PATH included '$dir', keeping");
+      dbg("util: PATH included '%s', keeping", $dir);
       push(@path, $dir);
     }
 
     $ENV{'PATH'} = join($Config{'path_sep'}, @path);
-    dbg("util: final PATH set to: ".$ENV{'PATH'});
+    dbg("util: final PATH set to: %s", $ENV{'PATH'});
   }
 }
 
@@ -186,7 +188,7 @@ sub am_running_in_taint_mode {
     # seriously mind-bending perl
     $AM_TAINTED = not eval { eval "1 || $blank" || 1 };
   }
-  dbg("util: running in taint mode? ". ($AM_TAINTED ? "yes" : "no"));
+  dbg("util: running in taint mode? %s", $AM_TAINTED ? "yes" : "no");
   return $AM_TAINTED;
 }
 
@@ -399,7 +401,7 @@ sub parse_rfc822_date {
   } elsif (s/ (\d+) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{2,3}) / /i) {
     $dd = $1; $mon = lc($2); $yyyy = $3;
   } else {
-    dbg("util: time cannot be parsed: $date");
+    dbg("util: time cannot be parsed: %s", $date);
     return undef;
   }
 
@@ -439,17 +441,17 @@ sub parse_rfc822_date {
 
   # Fudge invalid times so that we get a usable date.
   if ($ss > 59) { 
-    dbg("util: second after supported range, forcing second to 59: $date");  
+    dbg("util: second after supported range, forcing second to 59: %s", $date);
     $ss = 59;
   } 
 
   if ($mm > 59) { 
-    dbg("util: minute after supported range, forcing minute to 59: $date");
+    dbg("util: minute after supported range, forcing minute to 59: %s", $date);
     $mm = 59;
   }
 
   if ($hh > 23) { 
-    dbg("util: hour after supported range, forcing hour to 23: $date"); 
+    dbg("util: hour after supported range, forcing hour to 23: %s", $date);
     $hh = 23;
   }
 
@@ -461,7 +463,7 @@ sub parse_rfc822_date {
     $max_dd = (!($yyyy % 4) && (($yyyy % 100) || !($yyyy % 400))) ? 29 : 28;
   }
   if ($dd > $max_dd) {
-    dbg("util: day is too high, incrementing date to next valid date: $date");
+    dbg("util: day is too high, incrementing date to next valid date: %s", $date);
     $dd = 1;
     $mmm++;
     if ($mmm > 12) {
@@ -473,23 +475,24 @@ sub parse_rfc822_date {
   # Time::Local (v1.10 at least) throws warnings when the dates cause
   # a 32-bit overflow.  So force a min/max for year.
   if ($yyyy > 2037) {
-    dbg("util: year after supported range, forcing year to 2037: $date");
+    dbg("util: year after supported range, forcing year to 2037: %s", $date);
     $yyyy = 2037;
   }
   elsif ($yyyy < 1970) {
-    dbg("util: year before supported range, forcing year to 1970: $date");
+    dbg("util: year before supported range, forcing year to 1970: %s", $date);
     $yyyy = 1971;
   }
 
   my $time;
   eval {		# could croak
     $time = timegm($ss, $mm, $hh, $dd, $mmm-1, $yyyy);
-  };
-
-  if ($@) {
-    dbg("util: time cannot be parsed: $date, $yyyy-$mmm-$dd $hh:$mm:$ss");
+    1;
+  } or do {
+    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    dbg("util: time cannot be parsed: %s, %s-%s-%s %s:%s:%s, %s",
+        $date, $yyyy,$mmm,$dd, $hh,$mm,$ss, $eval_stat);
     return undef;
-  }
+  };
 
   if ($tzoff =~ /([-+])(\d\d)(\d\d)$/)	# convert to seconds difference
   {
@@ -673,15 +676,16 @@ sub portable_getpwuid {
     return Mail::SpamAssassin::Util::_getpwuid_wrapper(@_);
   }
 
+  my $sts;
   if (!RUNNING_ON_WINDOWS) {
-    eval ' sub _getpwuid_wrapper { getpwuid($_[0]); } ';
+    $sts = eval ' sub _getpwuid_wrapper { getpwuid($_[0]); }; 1 ';
   } else {
     dbg("util: defining getpwuid() wrapper using 'unknown' as username");
-    eval ' sub _getpwuid_wrapper { _fake_getpwuid($_[0]); } ';
+    $sts = eval ' sub _getpwuid_wrapper { _fake_getpwuid($_[0]); }; 1 ';
   }
-
-  if ($@) {
-    warn "util: failed to define getpwuid() wrapper: $@\n";
+  if (!$sts) {
+    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    warn "util: failed to define getpwuid() wrapper: $eval_stat\n";
   } else {
     return Mail::SpamAssassin::Util::_getpwuid_wrapper(@_);
   }
@@ -1187,8 +1191,9 @@ sub uri_list_canonify {
 	foreach (@{$redirector_patterns}) {
 	  if ("$proto$host$rest" =~ $_) {
 	    next unless defined $1;
-	    dbg("uri: parsed uri pattern: $_");
-	    dbg("uri: parsed uri found: $1 in redirector: $proto$host$rest");
+	    dbg("uri: parsed uri pattern: %s", $_);
+	    dbg("uri: parsed uri found: %s in redirector: %s%s%s",
+                $1, $proto,$host,$rest);
 	    push (@uris, $1);
 	    last;
 	  }
@@ -1337,7 +1342,7 @@ sub setuid_to_euid {
   my $touid = $>;
 
   if ($< != $touid) {
-    dbg("util: changing real uid from $< to match effective uid $touid");
+    dbg("util: changing real uid from %s to match effective uid $touid", $<);
     # bug 3586: kludges needed to work around platform dependent behavior assigning to $<
     #  The POSIX functions deal with that so just use it here
     POSIX::setuid($touid);
@@ -1402,7 +1407,7 @@ sub helper_app_pipe_open_unix {
 
   # go setuid...
   setuid_to_euid();
-  dbg("util: setuid: ruid=$< euid=$>");
+  dbg("util: setuid: ruid=%s euid=%s", $<, $>);
 
   # now set up the fds.  due to some wierdness, we may have to ensure that we
   # *really* close the correct fd number, since some other code may have
@@ -1569,7 +1574,7 @@ sub avoid_db_file_locking_bug {
   my $db_tmpfile = File::Spec->catfile($parentdir,'__db.'.basename($path));
 
   if (-e $db_tmpfile) {
-    dbg("Berkeley DB bug work-around: cleaning tmp file $db_tmpfile");
+    dbg("Berkeley DB bug work-around: cleaning tmp file %s", $db_tmpfile);
     if (!unlink($db_tmpfile)) {
       die "cannot remove Berkeley DB tmp file $db_tmpfile: $!\n";
     }

@@ -100,12 +100,12 @@ sub load {
      local $SIG{'__DIE__'} = sub { die "$_[0]"; };
      require DBI;
      load_with_dbi($self, $username, $dsn);
-   };
-
-   if ($@) {
-     warn "config: failed to load user ($username) scores from SQL database: $@\n";
+     1;
+   } or do {
+     my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+     warn "config: failed to load user ($username) scores from SQL database: $eval_stat\n";
      return 0;
-   }
+   };
    return 1;
 }
 

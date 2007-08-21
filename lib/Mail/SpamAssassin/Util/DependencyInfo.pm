@@ -265,16 +265,17 @@ sub long_diagnostics {
 sub try_module {
   my ($required, $moddef, $summref) = @_;
 
-  eval "use $moddef->{module} $moddef->{version};";
-  if (!$@) {
+  if (eval "use $moddef->{module} $moddef->{version}; 1") {
     return;
-  }
+  };
 
   my $not_installed = 0;
-  eval "use $moddef->{module};";
-  if ($@) {
+  my $eval_stat;
+  eval "use $moddef->{module}; 1"
+  or do {
     $not_installed = 1;
-  }
+    $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+  };
 
   my $pretty_name = $moddef->{alt_name} || $moddef->{module};
   my $pretty_version = ($moddef->{version} > 0 ?
@@ -285,7 +286,8 @@ sub try_module {
   if ($not_installed) {
     $errtype = "is not installed.";
   } else {
-    $errtype = "is installed,\nbut is not an up-to-date version.";
+    $errtype = "is installed,\nbut is not an up-to-date version.\n".
+               "\t($eval_stat)";
   }
 
   print "\n", ("*" x 75), "\n";

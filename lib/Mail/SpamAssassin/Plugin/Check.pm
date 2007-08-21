@@ -74,7 +74,7 @@ sub check_main {
     # if shortcircuiting is hit, we skip all other priorities...
     last if $self->{main}->call_plugins("have_shortcircuited", { permsgstatus => $pms });
 
-    dbg("check: running tests for priority: $priority");
+    dbg("check: running tests for priority: %s", $priority);
 
     # only harvest the dnsbl queries once priority HARVEST_DNSBL_PRIORITY
     # has been reached and then only run once
@@ -190,14 +190,14 @@ sub run_rbl_eval_tests {
 
     my $result;
     eval {
-       $result = $pms->$function($rulename, @args);
-    };
-
-    if ($@) {
-      warn "rules: failed to run $rulename RBL test, skipping:\n" . "\t($@)\n";
+      $result = $pms->$function($rulename, @args);  1;
+    } or do {
+      my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+      warn sprintf("rules: failed to run %s RBL test, skipping:\n\t(%s)\n",
+                   $rulename,$eval_stat);
       $pms->{rule_errors}++;
       next;
-    }
+    };
   }
 }
 
@@ -210,7 +210,7 @@ sub run_generic_tests {
                                         { permsgstatus => $pms });
 
   my $ruletype = $opts{type};
-  dbg("rules: running ".$ruletype." tests; score so far=".$pms->{score});
+  dbg("rules: running %s tests; score so far=%s", $ruletype, $pms->{score});
   $pms->{test_log_msgs} = ();        # clear test state
 
   my $conf = $pms->{conf};
@@ -279,14 +279,15 @@ EOT
   delete $self->{evalstr};
   delete $self->{evalstr2}; # free up some RAM before we eval()
 
-  ## dbg ("rules: eval code to compile: $evalstr");
-  eval $evalstr;
-  if ($@) {
-    warn("rules: failed to compile $ruletype tests, skipping:\n\t($@)\n");
+  ## dbg ("rules: eval code to compile: %s", $evalstr);
+  if (!eval($evalstr . '; 1')) {
+    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    warn sprintf("rules: failed to compile %s tests, skipping:\n\t(%s)\n",
+                 $ruletype,$eval_stat);
     $pms->{rule_errors}++;
   }
   else {
-    dbg("rules: compiled ".$ruletype." tests");
+    dbg("rules: compiled %s tests", $ruletype);
     goto run_compiled_method;
   }
 }
@@ -347,7 +348,8 @@ sub do_meta_tests {
         $meta{$rulename} .= "(\$h->{'$token'} || 0) ";
       
         if (!exists $conf->{scores}->{$token}) {
-          dbg("rules: meta test $rulename has undefined dependency '$token'");
+          dbg("rules: meta test %s has undefined dependency '%s'",
+              $rulename,$token);
         }
         elsif ($conf->{scores}->{$token} == 0) {
           # bug 5040: net rules in a non-net scoreset
@@ -875,7 +877,7 @@ sub run_eval_tests {
   my $dbgstr = q{ };
   if (would_log('dbg')) {
     $dbgstr = q{
-      dbg("rules: ran eval rule $rulename ======> got hit ($result)");
+      dbg("rules: ran eval rule %s ======> got hit (%s)", $rulename,$result);
     };
   }
 
@@ -937,9 +939,10 @@ sub run_eval_tests {
     $evalstr .= '
 
       eval {
-        $result = $self->' . $function . ' (@extraevalargs '. $argstr .' );
+        $result = $self->' . $function . ' (@extraevalargs '. $argstr .' );  1;
+      } or do {
+        $self->handle_eval_rule_errors($rulename);
       };
-      if ($@) { $self->handle_eval_rule_errors($rulename); }
 
     ';
 
@@ -989,10 +992,9 @@ sub run_eval_tests {
 EOT
 
   undef &{$methodname};
-  eval $evalstr;
-
-  if ($@) {
-    warn "rules: failed to compile eval tests, skipping some: $@\n";
+  if (!eval($evalstr . '; 1')) {
+    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    warn "rules: failed to compile eval tests, skipping some: $eval_stat\n";
     $self->{rule_errors}++;
   }
   else {

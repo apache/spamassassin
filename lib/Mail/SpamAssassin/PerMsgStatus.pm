@@ -178,10 +178,10 @@ sub check {
   # add 0 to force it back to numeric representation instead of string.
   $self->{score} = (sprintf "%0.3f", $self->{score}) + 0;
   
-  dbg("check: is spam? score=".$self->{score}.
-                        " required=".$self->{conf}->{required_score});
-  dbg("check: tests=".$self->get_names_of_tests_hit());
-  dbg("check: subtests=".$self->get_names_of_subtests_hit());
+  dbg("check: is spam? score=%s required=%s",
+      $self->{score}, $self->{conf}->{required_score});
+  dbg("check: tests=%s", $self->get_names_of_tests_hit());
+  dbg("check: subtests=%s", $self->get_names_of_subtests_hit());
   $self->{is_spam} = $self->is_spam();
 
   $self->{main}->{resolver}->bgabort();
@@ -232,6 +232,7 @@ sub learn {
   # bug 3704: temporarily override learn's ability to re-learn a message
   my $orig_learner = $self->{main}->init_learner({ "no_relearn" => 1 });
 
+  my $eval_stat;
   eval {
     my $learnstatus = $self->{main}->learn ($self->{msg}, undef, $isspam, 0);
     if ($learnstatus->did_learn()) {
@@ -244,13 +245,15 @@ sub learn {
     if (exists $self->{main}->{bayes_scanner}) {
       $self->{main}->{bayes_scanner}->sanity_check_is_untied();
     }
+  } or do {
+    $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
   };
 
   # reset learner options to their original values
   $self->{main}->init_learner($orig_learner);
 
-  if ($@) {
-    dbg("learn: auto-learning failed: $@");
+  if (defined $eval_stat) {
+    dbg("learn: auto-learning failed: %s", $eval_stat);
     $self->{auto_learn_status} = "failed";
   }
 }
@@ -331,11 +334,12 @@ sub _get_autolearn_points {
   my $scores = $self->{conf}->{scores};
 
   if (($orig_scoreset & 2) == 0) { # we don't need to recompute
-    dbg("learn: auto-learn: currently using scoreset $orig_scoreset");
+    dbg("learn: auto-learn: currently using scoreset %s", $orig_scoreset);
   }
   else {
     $new_scoreset = $orig_scoreset & ~2;
-    dbg("learn: auto-learn: currently using scoreset $orig_scoreset, recomputing score based on scoreset $new_scoreset");
+    dbg("learn: auto-learn: currently using scoreset %s, recomputing ".
+        "score based on scoreset %s", $orig_scoreset, $new_scoreset);
     $scores = $self->{conf}->{scoreset}->[$new_scoreset];
   }
 
@@ -380,8 +384,8 @@ sub _get_autolearn_points {
 
   # Figure out the final value we'll use for autolearning
   $points = (sprintf "%0.3f", $points) + 0;
-  dbg("learn: auto-learn: message score: ".$self->{score}.", computed score for autolearn: $points");
-
+  dbg("learn: auto-learn: message score: %s, computed score for autolearn: %s",
+      $self->{score}, $points);
   $self->{autolearn_points} = $points;
 }
 
@@ -936,7 +940,7 @@ sub qp_encode_header {
 
   $text = '=?'.$cs.'?Q?'.$text.'?=';
 
-  dbg("markup: encoding header in $cs: $text");
+  dbg("markup: encoding header in %s: %s", $cs,$text);
   return $text;
 }
 
@@ -1890,13 +1894,13 @@ sub get_uri_detail_list {
     }
 
     if (would_log('dbg', 'uri') == 2) {
-      dbg("uri: html uri found, $uri");
+      dbg("uri: html uri found, %s", $uri);
       foreach my $nuri (@tmp) {
-        dbg("uri: cleaned html uri, $nuri");
+        dbg("uri: cleaned html uri, %s", $nuri);
       }
       if ($info->{domains}) {
         foreach my $domain (keys %{$info->{domains}}) {
-          dbg("uri: html domain, $domain");
+          dbg("uri: html domain, %s", $domain);
         }
       }
     }
@@ -1928,13 +1932,13 @@ sub get_uri_detail_list {
     }
 
     if (would_log('dbg', 'uri') == 2) {
-      dbg("uri: parsed uri found of type $type, $uri");
+      dbg("uri: parsed uri found of type %s, %s", $type,$uri);
       foreach my $nuri (@uris) {
-        dbg("uri: cleaned parsed uri, $nuri");
+        dbg("uri: cleaned parsed uri, %s", $nuri);
       }
       if ($info->{domains}) {
         foreach my $domain (keys %{$info->{domains}}) {
-          dbg("uri: parsed domain, $domain");
+          dbg("uri: parsed domain, %s", $domain);
         }
       }
     }
@@ -2037,10 +2041,10 @@ sub ensure_rules_are_complete {
   # @_ is now the list of rules
 
   foreach my $r (@_) {
-    # dbg("rules: meta rule depends on net rule $r");
+    # dbg("rules: meta rule depends on net rule %s", $r);
     next if ($self->is_rule_complete($r));
 
-    dbg("rules: meta rule $metarule depends on pending rule $r, blocking");
+    dbg("rules: meta rule $metarule depends on pending rule %s, blocking", $r);
     my $timer = $self->{main}->time_method("wait_for_pending_rules");
 
     my $start = time;
@@ -2048,10 +2052,11 @@ sub ensure_rules_are_complete {
     my $elapsed = time - $start;
 
     if (!$self->is_rule_complete($r)) {
-      dbg ("rules: rule $r is still not complete; exited early?");
+      dbg("rules: rule %s is still not complete; exited early?", $r);
     }
     elsif ($elapsed > 0) {
-      info("rules: $r took $elapsed seconds to complete, for $metarule");
+      info("rules: %s took %s seconds to complete, for %s",
+           $r,$elapsed,$metarule);
     }
   }
 }
@@ -2098,12 +2103,12 @@ sub register_plugin_eval_glue {
 	1;
 }
 ENDOFEVAL
-  eval $evalstr;    ## no critic
-
-  if ($@) {
-    warn "rules: failed to run header tests, skipping some: $@\n";
+  eval $evalstr . '; 1'   ## no critic
+  or do {
+    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    warn "rules: failed to run header tests, skipping some: $eval_stat\n";
     $self->{rule_errors}++;
-  }
+  };
 
   # ensure this method is deleted if finish_tests() is called
   push (@TEMPORARY_METHODS, $function);
@@ -2317,9 +2322,11 @@ sub get_envelope_from {
     # Warn them if it's configured, but not there or not usable.
     if (defined $envf) {
       chomp $envf;
-      dbg("message: envelope_sender_header '$self->{conf}->{envelope_sender_header}: $envf' is not an FQDN, ignoring");
+      dbg("message: envelope_sender_header '%s: %s' is not an FQDN, ignoring",
+          $self->{conf}->{envelope_sender_header}, $envf);
     } else {
-      dbg("message: envelope_sender_header '".$self->{conf}->{envelope_sender_header}."' not found in message");
+      dbg("message: envelope_sender_header '%s' not found in message",
+          $self->{conf}->{envelope_sender_header});
     }
     # Couldn't get envelope-sender using the configured header.
     return;
@@ -2545,7 +2552,7 @@ sub all_from_addrs {
   my %addrs = map { $_ => 1 } @addrs;
   @addrs = keys %addrs;
 
-  dbg("eval: all '*From' addrs: " . join(" ", @addrs));
+  dbg("eval: all '*From' addrs: %s", join(" ", @addrs));
   $self->{all_from_addrs} = \@addrs;
   return @addrs;
 }
@@ -2599,7 +2606,7 @@ sub all_to_addrs {
     # noted some in <http://www.ii.com/internet/robots/procmail/qs/#envelope>
   }
 
-  dbg("eval: all '*To' addrs: " . join(" ", @addrs));
+  dbg("eval: all '*To' addrs: %s", join(" ", @addrs));
   $self->{all_to_addrs} = \@addrs;
   return @addrs;
 
