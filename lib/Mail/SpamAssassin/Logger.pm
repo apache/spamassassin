@@ -176,7 +176,7 @@ This is used for all low priority debugging messages.
 
 sub dbg {
   return unless $LOG_SA{level} >= DBG;
-  _log("dbg", @_);
+  _log(DBG, @_);
 }
 
 =item info("facility: message")
@@ -189,32 +189,38 @@ messages are typically logged when SpamAssassin is run as a daemon.
 
 sub info {
   return unless $LOG_SA{level} >= INFO;
-  _log("info", @_);
+  _log(INFO, @_);
 }
 
 # remember to avoid deep recursion, my friend
 sub _log {
-  my ($level, $message, @args) = @_;
-  my $facility = "generic";
-  local ($1,$2);
-  if ($message =~ /^(\S+?): (.*)/s) {
+  my $facility;
+  local ($1);
+
+  # it's faster to access this as the $_[1] alias, and not to perform
+  # string mods until we're sure we actually want to log anything
+  if ($_[1] =~ /^([^:]+?): /) {
     $facility = $1;
-    $message = $2;
+  } else {
+    $facility = "generic";
   }
 
-  # only debug specific facilities
-  # log all info, warn, and error messages
-  if ($level eq "dbg") {
+  # log all info, warn, and error messages;
+  # only debug if asked to
+  if ($_[0] == DBG) {
     return unless ($LOG_SA{facility}->{all} ||
 		   $LOG_SA{facility}->{$facility});
   }
+
+  my ($level, $message, @args) = @_;
+  $message =~ s/^([^:]+?): //;
 
   if (@args && index($message,'%') >= 0) { $message = sprintf($message,@args) }
   $message =~ s/\n+$//s;
   $message =~ s/^/${facility}: /mg;
 
   # no reason to go through warn()
-  log_message($level, $message);
+  log_message(($level == INFO ? "info" : "dbg"), $message);
 }
 
 =item add(method => 'syslog', socket => $socket, facility => $facility)
