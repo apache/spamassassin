@@ -72,6 +72,7 @@ sub safe_lock {
 
   # use a SIGALRM-based timer -- more efficient than second-by-second
   # sleeps
+  my $eval_stat;
   eval {
     local $SIG{ALRM} = sub { die "alarm\n" };
     dbg("locker: safe_lock: trying to get lock on $path with $max_retries timeout");
@@ -96,16 +97,18 @@ sub safe_lock {
       $self->{lock_fhs} ||= { };
       $self->{lock_fhs}->{$path} = $fh;
     }
+    1;
+  } or do {
+    $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
   };
 
-  my $err = $@;
-
   $unalarmed or alarm $oldalarm; # if we die'd above, need to reset here
-  if ($err) {
-    if ($err =~ /alarm/) {
+
+  if (defined $eval_stat) {
+    if ($eval_stat =~ /alarm/) {
       dbg("locker: safe_lock: timed out after $max_retries seconds");
     } else {
-      die "locker: safe_lock: $err";
+      die "locker: safe_lock: $eval_stat\n";
     }
   }
 

@@ -232,6 +232,7 @@ sub learn {
   # bug 3704: temporarily override learn's ability to re-learn a message
   my $orig_learner = $self->{main}->init_learner({ "no_relearn" => 1 });
 
+  my $eval_stat;
   eval {
     my $learnstatus = $self->{main}->learn ($self->{msg}, undef, $isspam, 0);
     if ($learnstatus->did_learn()) {
@@ -244,13 +245,15 @@ sub learn {
     if (exists $self->{main}->{bayes_scanner}) {
       $self->{main}->{bayes_scanner}->sanity_check_is_untied();
     }
+  } or do {
+    $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
   };
 
   # reset learner options to their original values
   $self->{main}->init_learner($orig_learner);
 
-  if ($@) {
-    dbg("learn: auto-learning failed: $@");
+  if (defined $eval_stat) {
+    dbg("learn: auto-learning failed: $eval_stat");
     $self->{auto_learn_status} = "failed";
   }
 }
@@ -2048,7 +2051,7 @@ sub ensure_rules_are_complete {
     my $elapsed = time - $start;
 
     if (!$self->is_rule_complete($r)) {
-      dbg ("rules: rule $r is still not complete; exited early?");
+      dbg("rules: rule $r is still not complete; exited early?");
     }
     elsif ($elapsed > 0) {
       info("rules: $r took $elapsed seconds to complete, for $metarule");
@@ -2098,12 +2101,12 @@ sub register_plugin_eval_glue {
 	1;
 }
 ENDOFEVAL
-  eval $evalstr;    ## no critic
-
-  if ($@) {
-    warn "rules: failed to run header tests, skipping some: $@\n";
+  eval $evalstr . '; 1'   ## no critic
+  or do {
+    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    warn "rules: failed to run header tests, skipping some: $eval_stat\n";
     $self->{rule_errors}++;
-  }
+  };
 
   # ensure this method is deleted if finish_tests() is called
   push (@TEMPORARY_METHODS, $function);
@@ -2317,9 +2320,11 @@ sub get_envelope_from {
     # Warn them if it's configured, but not there or not usable.
     if (defined $envf) {
       chomp $envf;
-      dbg("message: envelope_sender_header '$self->{conf}->{envelope_sender_header}: $envf' is not an FQDN, ignoring");
+      dbg("message: envelope_sender_header '%s: %s' is not an FQDN, ignoring",
+          $self->{conf}->{envelope_sender_header}, $envf);
     } else {
-      dbg("message: envelope_sender_header '".$self->{conf}->{envelope_sender_header}."' not found in message");
+      dbg("message: envelope_sender_header '%s' not found in message",
+          $self->{conf}->{envelope_sender_header});
     }
     # Couldn't get envelope-sender using the configured header.
     return;

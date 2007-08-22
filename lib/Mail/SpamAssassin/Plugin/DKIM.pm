@@ -274,12 +274,12 @@ sub _check_dkim_signature {
       $line =~ s/\r?$/\015\012/s;       # ensure \015\012 ending
       $message->PRINT($line);
     }
-  };
-
-  if ($@) {             # intercept die() exceptions and render safe
-    dbg ("dkim: verification failed, intercepted error: $@");
+    1;
+  } or do {  # intercept die() exceptions and render safe
+    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    dbg("dkim: verification failed, intercepted error: $eval_stat");
     return 0;           # cannot verify message
-  }
+  };
 
   my $timeout = $scan->{conf}->{dkim_timeout};
 
@@ -290,7 +290,8 @@ sub _check_dkim_signature {
     $message->CLOSE();      # the action happens here
 
     $scan->{dkim_address} = ($message->message_originator ? $message->message_originator->address() : '');
-    dbg("dkim: originator address: ".($scan->{dkim_address} ? $scan->{dkim_address} : 'none'));
+    dbg("dkim: originator address: %s",
+        $scan->{dkim_address} ? $scan->{dkim_address} : 'none');
 
     $scan->{dkim_identity} = '';
     if ($message->signature) {
@@ -370,12 +371,14 @@ sub _check_dkim_policy {
       dbg("dkim: policy: performing lookup");
 
       my $policy;
-      eval { $policy = $message->fetch_author_policy };
-      if ($@ ne '') {
+      eval {
+        $policy = $message->fetch_author_policy;  1;
+      } or do {
         # fetching or parsing a policy may throw an error, ignore such policy
-        chomp($@); dbg("dkim: policy: fetch or parse failed: $@");
+        my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+        dbg("dkim: policy: fetch or parse failed: $eval_stat");
         undef $policy;
-      }
+      };
       if (!$policy) {
         dbg("dkim: policy: none");
       } else {
@@ -419,11 +422,13 @@ sub _check_dkim_whitelist {
   }
 
   unless ($scanner->{dkim_address}) {
-    dbg("dkim: ". ($default ? "def_" : "") ."whitelist_from_dkim: could not find originator address");
+    dbg("dkim: %swhitelist_from_dkim: could not find originator address",
+        $default ? "def_" : "");
     return;
   }
   unless ($scanner->{dkim_identity}) {
-    dbg("dkim: ". ($default ? "def_" : "") ."whitelist_from_dkim: could not find identity");
+    dbg("dkim: %swhitelist_from_dkim: could not find identity",
+        $default ? "def_" : "");
     return;
   }
 
@@ -451,34 +456,34 @@ sub _check_dkim_whitelist {
   if ($default) {
     if ($scanner->{def_dkim_whitelist_from}) {
       if ($self->check_dkim_verified($scanner)) {
-        dbg("dkim: address: $scanner->{dkim_address} identity: ".
-          "$scanner->{dkim_identity} is in user's DEF_WHITELIST_FROM_DKIM and ".
-          "passed DKIM verification");
+        dbg("dkim: address: %s identity: %s is in user's ".
+            "DEF_WHITELIST_FROM_DKIM and passed DKIM verification",
+          $scanner->{dkim_address}, $scanner->{dkim_identity});
       } else {
-        dbg("dkim: address: $scanner->{dkim_address} identity: ".
-	  "$scanner->{dkim_identity} is in user's DEF_WHITELIST_FROM_DKIM but ".
-	  "failed DKIM verification");
+        dbg("dkim: address: %s identity: %s is in user's ".
+            "DEF_WHITELIST_FROM_DKIM but failed DKIM verification",
+          $scanner->{dkim_address}, $scanner->{dkim_identity});
 	$scanner->{def_dkim_whitelist_from} = 0;
       }
     } else {
-      dbg("dkim: address: $scanner->{dkim_address} identity: ".
-	  "$scanner->{dkim_identity} is not in user's DEF_WHITELIST_FROM_DKIM");
+      dbg("dkim: address: %s identity: %s is not in user's DEF_WHITELIST_FROM_DKIM",
+          $scanner->{dkim_address}, $scanner->{dkim_identity});
     }
   } else {
     if ($scanner->{dkim_whitelist_from}) {
       if ($self->check_dkim_verified($scanner)) {
-	dbg("dkim: address: $scanner->{dkim_address} identity: ".
-	  "$scanner->{dkim_identity} is in user's WHITELIST_FROM_DKIM and ".
-	  "passed DKIM verification");
+	dbg("dkim: address: %s identity: %s is in user's ".
+            "WHITELIST_FROM_DKIM and passed DKIM verification",
+            $scanner->{dkim_address}, $scanner->{dkim_identity});
       } else {
-	dbg("dkim: address: $scanner->{dkim_address} identity: ".
-	  "$scanner->{dkim_identity} is in user's WHITELIST_FROM_DKIM but ".
-	  "failed DKIM verification");
+	dbg("dkim: address: %s identity: %s is in user's ".
+            "WHITELIST_FROM_DKIM but failed DKIM verification",
+            $scanner->{dkim_address}, $scanner->{dkim_identity});
 	$scanner->{dkim_whitelist_from} = 0;
       }
     } else {
-      dbg("dkim: address: $scanner->{dkim_address} identity: ".
-	  "$scanner->{dkim_identity} is not in user's WHITELIST_FROM_DKIM");
+      dbg("dkim: address: %s identity: %s is not in user's WHITELIST_FROM_DKIM",
+          $scanner->{dkim_address}, $scanner->{dkim_identity});
     }
   }
 }

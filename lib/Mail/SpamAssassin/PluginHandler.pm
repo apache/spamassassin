@@ -198,10 +198,11 @@ sub callback {
 
     eval {
       $ret = &$methodref ($plugin, @_);
+      1;
+    } or do {
+      my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+      warn "plugin: eval failed: $eval_stat\n";
     };
-    if ($@) {
-      warn "plugin: eval failed: $@";
-    }
 
     if ($ret) {
       #dbg("plugin: ${plugin}->${methodref} => $ret");

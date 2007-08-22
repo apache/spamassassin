@@ -186,7 +186,7 @@ sub am_running_in_taint_mode {
     # seriously mind-bending perl
     $AM_TAINTED = not eval { eval "1 || $blank" || 1 };
   }
-  dbg("util: running in taint mode? ". ($AM_TAINTED ? "yes" : "no"));
+  dbg("util: running in taint mode? %s", $AM_TAINTED ? "yes" : "no");
   return $AM_TAINTED;
 }
 
@@ -484,12 +484,12 @@ sub parse_rfc822_date {
   my $time;
   eval {		# could croak
     $time = timegm($ss, $mm, $hh, $dd, $mmm-1, $yyyy);
-  };
-
-  if ($@) {
-    dbg("util: time cannot be parsed: $date, $yyyy-$mmm-$dd $hh:$mm:$ss");
+    1;
+  } or do {
+    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    dbg("util: time cannot be parsed: $date, $yyyy-$mmm-$dd $hh:$mm:$ss, $eval_stat");
     return undef;
-  }
+  };
 
   if ($tzoff =~ /([-+])(\d\d)(\d\d)$/)	# convert to seconds difference
   {
@@ -673,15 +673,16 @@ sub portable_getpwuid {
     return Mail::SpamAssassin::Util::_getpwuid_wrapper(@_);
   }
 
+  my $sts;
   if (!RUNNING_ON_WINDOWS) {
-    eval ' sub _getpwuid_wrapper { getpwuid($_[0]); } ';
+    $sts = eval ' sub _getpwuid_wrapper { getpwuid($_[0]); }; 1 ';
   } else {
     dbg("util: defining getpwuid() wrapper using 'unknown' as username");
-    eval ' sub _getpwuid_wrapper { _fake_getpwuid($_[0]); } ';
+    $sts = eval ' sub _getpwuid_wrapper { _fake_getpwuid($_[0]); }; 1 ';
   }
-
-  if ($@) {
-    warn "util: failed to define getpwuid() wrapper: $@\n";
+  if (!$sts) {
+    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    warn "util: failed to define getpwuid() wrapper: $eval_stat\n";
   } else {
     return Mail::SpamAssassin::Util::_getpwuid_wrapper(@_);
   }

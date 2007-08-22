@@ -190,14 +190,14 @@ sub run_rbl_eval_tests {
 
     my $result;
     eval {
-       $result = $pms->$function($rulename, @args);
-    };
-
-    if ($@) {
-      warn "rules: failed to run $rulename RBL test, skipping:\n" . "\t($@)\n";
+      $result = $pms->$function($rulename, @args);  1;
+    } or do {
+      my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+      warn "rules: failed to run $rulename RBL test, skipping:\n".
+           "\t($eval_stat)\n";
       $pms->{rule_errors}++;
       next;
-    }
+    };
   }
 }
 
@@ -210,7 +210,7 @@ sub run_generic_tests {
                                         { permsgstatus => $pms });
 
   my $ruletype = $opts{type};
-  dbg("rules: running ".$ruletype." tests; score so far=".$pms->{score});
+  dbg("rules: running $ruletype tests; score so far=".$pms->{score});
   $pms->{test_log_msgs} = ();        # clear test state
 
   my $conf = $pms->{conf};
@@ -280,13 +280,14 @@ EOT
   delete $self->{evalstr2}; # free up some RAM before we eval()
 
   ## dbg ("rules: eval code to compile: $evalstr");
-  eval $evalstr;
-  if ($@) {
-    warn("rules: failed to compile $ruletype tests, skipping:\n\t($@)\n");
+  if (!eval($evalstr . '; 1')) {
+    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    warn "rules: failed to compile $ruletype tests, skipping:\n".
+         "\t($eval_stat)\n";
     $pms->{rule_errors}++;
   }
   else {
-    dbg("rules: compiled ".$ruletype." tests");
+    dbg("rules: compiled $ruletype tests");
     goto run_compiled_method;
   }
 }
@@ -937,9 +938,10 @@ sub run_eval_tests {
     $evalstr .= '
 
       eval {
-        $result = $self->' . $function . ' (@extraevalargs '. $argstr .' );
+        $result = $self->' . $function . ' (@extraevalargs '. $argstr .' );  1;
+      } or do {
+        $self->handle_eval_rule_errors($rulename);
       };
-      if ($@) { $self->handle_eval_rule_errors($rulename); }
 
     ';
 
@@ -989,10 +991,9 @@ sub run_eval_tests {
 EOT
 
   undef &{$methodname};
-  eval $evalstr;
-
-  if ($@) {
-    warn "rules: failed to compile eval tests, skipping some: $@\n";
+  if (!eval($evalstr . '; 1')) {
+    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    warn "rules: failed to compile eval tests, skipping some: $eval_stat\n";
     $self->{rule_errors}++;
   }
   else {

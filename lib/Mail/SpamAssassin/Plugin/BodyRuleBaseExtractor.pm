@@ -168,8 +168,11 @@ NEXT_RULE:
     eval {  # catch die()s
       my ($qr, $mods) = $self->simplify_and_qr_regexp($rule);
       ($lossy, @bases) = $self->extract_hints($rule, $qr, $mods);
+      1;
+    } or do {
+      my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+      dbg("zoom: giving up on regexp: $eval_stat");
     };
-    $@ and dbg("giving up on regexp: $@");
 
     # if any of the extracted hints in a set are too short, the entire
     # set is invalid; this is because each set of N hints represents just
@@ -221,9 +224,8 @@ NO:
 
   $self->{show_progress} and $progress->final();
 
-  dbg ("$ruletype: found ".(scalar @good_bases).
-        " usable base strings in ".
-        "$yes rules, skipped $no rules");
+  dbg("zoom: $ruletype: found ".(scalar @good_bases).
+      " usable base strings in $yes rules, skipped $no rules");
 
   # NOTE: re2c will attempt to provide the longest pattern that matched; e.g.
   # ("food" =~ "foo" / "food") will return "food".  So therefore if a pattern

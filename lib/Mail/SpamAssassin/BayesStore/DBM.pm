@@ -1195,13 +1195,16 @@ sub _sync_journal {
     return 0;
   }
 
+  my $eval_stat;
   eval {
     local $SIG{'__DIE__'};	# do not run user die() traps in here
     if ($self->tie_db_writable()) {
       $ret = $self->_sync_journal_trapped($opts, $path);
     }
+    1;
+  } or do {
+    $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
   };
-  my $err = $@;
 
   # ok, untie from write-mode if we can
   if (!$self->{bayes}->{main}->{learn_caller_will_untie}) {
@@ -1209,8 +1212,8 @@ sub _sync_journal {
   }
 
   # handle any errors that may have occurred
-  if ($err) {
-    warn "bayes: $err\n";
+  if (defined $eval_stat) {
+    warn "bayes: $eval_stat\n";
     return 0;
   }
 
@@ -1413,6 +1416,7 @@ sub perform_upgrade {
   my ($self, $opts) = @_;
   my $ret = 0;
 
+  my $eval_stat;
   eval {
     local $SIG{'__DIE__'};	# do not run user die() traps in here
 
@@ -1458,14 +1462,16 @@ sub perform_upgrade {
     else {
       print "import failed, original files saved with \"old\" prefix\n";
     }
+    1;
+  } or do {
+    $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
   };
-  my $err = $@;
 
   $self->untie_db();
 
   # if we died, untie the dbm files
-  if ($err) {
-    warn "bayes: perform_upgrade: $err\n";
+  if (defined $eval_stat) {
+    warn "bayes: perform_upgrade: $eval_stat\n";
     return 0;
   }
   $ret;
@@ -1486,15 +1492,19 @@ sub upgrade_old_dbm_files_trapped {
     # modules directly.
     # Note: (bug 2390), the 'use' needs to be on the same line as the eval
     # for RPM dependency checks to work properly.  It's lame, but...
+    my $eval_stat;
     eval 'use ' . $dbm . ';
       tie %in, "' . $dbm . '", $filename, O_RDONLY, 0600;
       %{ $output } = %in;
       $count = scalar keys %{ $output };
       untie %in;
-    ';
-    if ($@) {
-      print "$dbm: $dbm module not installed, nothing copied\n";
-      dbg("bayes: error was: $@");
+      1;
+    ' or do {
+      $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    };
+    if (defined $eval_stat) {
+      print "$dbm: $dbm module not installed(?), nothing copied: $eval_stat\n";
+      dbg("bayes: error was: $eval_stat");
     }
     elsif ($count == 0) {
       print "$dbm: no database of that kind found, nothing copied\n";

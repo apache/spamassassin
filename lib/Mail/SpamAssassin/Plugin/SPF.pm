@@ -365,7 +365,8 @@ sub _check_spf {
 
 	  # and the result
 	  $scanner->{"spf_${identity}${result}"} = 1;
-	  dbg("spf: re-using ".($identity ? 'helo' : 'mfrom')." result from Received-SPF header: $result");
+	  dbg("spf: re-using %s result from Received-SPF header: %s",
+              ($identity ? 'helo' : 'mfrom'), $result);
 
 	  # if we've got *both* the mfrom and helo results we're done
 	  return if ($scanner->{spf_checked} && $scanner->{spf_helo_checked});
@@ -386,6 +387,7 @@ sub _check_spf {
 
   # select the SPF module we're going to use
   unless (defined $self->{has_mail_spf}) {
+    my $eval_stat;
     eval {
       die("Mail::SPF disabled by admin setting\n") if $scanner->{conf}->{do_not_use_mail_spf};
 
@@ -398,18 +400,22 @@ sub _check_spf {
       $self->{spf_server} = Mail::SPF::Server->new(
 				hostname     => $scanner->get_tag('HOSTNAME'),
 				dns_resolver => $self->{main}->{resolver} );
+      1;
+    } or do {
+      $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
     };
 
-    unless ($@) {
+    if (!defined($eval_stat)) {
       dbg("spf: using Mail::SPF for SPF checks");
       $self->{has_mail_spf} = 1;
     } else {
       # strip the @INC paths... users are going to see it and think there's a problem even though
       # we're going to fall back to Mail::SPF::Query (which will display the same paths if it fails)
-      $@ =~ s#^Can't locate Mail/SPFd.pm in \@INC .*#Can't locate Mail/SPFd.pm#;
-      dbg("spf: cannot load Mail::SPF module or create Mail::SPF::Server object: $@");
+      $eval_stat =~ s#^Can't locate Mail/SPFd.pm in \@INC .*#Can't locate Mail/SPFd.pm#;
+      dbg("spf: cannot load Mail::SPF module or create Mail::SPF::Server object: $eval_stat");
       dbg("spf: attempting to use legacy Mail::SPF::Query module instead");
 
+      undef $eval_stat;
       eval {
 	die("Mail::SPF::Query disabled by admin setting\n") if $scanner->{conf}->{do_not_use_mail_spf_query};
 
@@ -418,13 +424,16 @@ sub _check_spf {
 	  die "Mail::SPF::Query 1.996 or later required, this is ".
 	    (defined $Mail::SPF::Query::VERSION ? $Mail::SPF::Query::VERSION : 'unknown')."\n";
 	}
+        1;
+      } or do {
+        $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
       };
 
-      unless ($@) {
+      if (!defined($eval_stat)) {
 	dbg("spf: using Mail::SPF::Query for SPF checks");
 	$self->{has_mail_spf} = 0;
       } else {
-	dbg("spf: cannot load Mail::SPF::Query module: $@");
+	dbg("spf: cannot load Mail::SPF::Query module: $eval_stat");
 	dbg("spf: one of Mail::SPF or Mail::SPF::Query is required for SPF checks, SPF checks disabled");
 	$self->{no_spf_module} = 1;
 	return;
@@ -458,7 +467,8 @@ sub _check_spf {
 
   my $lasthop = $self->_get_relay($scanner);
   if (!defined $lasthop) {
-    dbg("spf: no suitable relay for spf use found, skipping SPF". ($ishelo ? '-helo' : '') ." check");
+    dbg("spf: no suitable relay for spf use found, skipping SPF%s check",
+        $ishelo ? '-helo' : '');
     return;
   }
 
@@ -484,7 +494,8 @@ sub _check_spf {
       # we already dbg'd that we couldn't get an Envelope-From and can't do SPF
       return;
     }
-    dbg("spf: checking EnvelopeFrom (helo=".($helo ? $helo : '').", ip=$ip, envfrom=$scanner->{sender})");
+    dbg("spf: checking EnvelopeFrom (helo=%s, ip=%s, envfrom=%s)",
+        ($helo ? $helo : ''), $ip, $scanner->{sender});
   }
 
   # this test could probably stand to be more strict, but try to test
@@ -509,8 +520,8 @@ sub _check_spf {
     my $identity = $ishelo ? $helo : ($scanner->{sender}); # || $helo);
 
     unless ($identity) {
-      dbg("spf: cannot determine ".($ishelo ? 'helo' : 'mfrom').
-	  " identity, skipping ".($ishelo ? 'helo' : 'mfrom')." SPF check");
+      dbg("spf: cannot determine %s identity, skipping %s SPF check",
+          ($ishelo ? 'helo' : 'mfrom'),  ($ishelo ? 'helo' : 'mfrom') );
       return;
     }
     $helo ||= 'unknown';  # only used for macro expansion in the mfrom explanation
@@ -521,12 +532,12 @@ sub _check_spf {
 					  identity      => $identity,
 					  ip_address    => $ip,
 					  helo_identity => $helo );
-    };
-
-    if ($@) {
-      dbg("spf: cannot create Mail::SPF::Request object ($@)");
+      1;
+    } or do {
+      my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+      dbg("spf: cannot create Mail::SPF::Request object: $eval_stat");
       return;
-    }
+    };
 
     my $timeout = $scanner->{conf}->{spf_timeout};
 
@@ -558,12 +569,12 @@ sub _check_spf {
 				    helo => $helo,
 				    debug => 0,
 				    trusted => 0);
-    };
-
-    if ($@) {
-      dbg("spf: cannot create Mail::SPF::Query object ($@)");
+      1;
+    } or do {
+      my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+      dbg("spf: cannot create Mail::SPF::Query object: $eval_stat");
       return;
-    }
+    };
 
     my $timeout = $scanner->{conf}->{spf_timeout};
 
