@@ -242,8 +242,11 @@ sub new {
     eval '
       require '.$module.';
       $store = '.$module.'->new($self);
-    ';
-    if ($@) { die $@; }
+      1;
+    ' or do {
+      my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+      die "bayes: (in new) $eval_stat\n";
+    };
     $self->{store} = $store;
   }
   else {
@@ -714,13 +717,12 @@ sub learn {
         $self->{store}->untie_db();
       }
     }
-  };
-
-  if ($@) {		# if we died, untie the dbs.
-    my $failure = $@;
+    1;
+  } or do {		# if we died, untie the dbs.
+    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
     $self->{store}->untie_db();
-    die "bayes: $failure";
-  }
+    die "bayes: (in learn) $eval_stat\n";
+  };
 
   return $ret;
 }
@@ -848,13 +850,12 @@ sub forget {
         $self->{store}->untie_db();
       }
     }
-  };
-
-  if ($@) {		# if we died, untie the dbs.
-    my $failure = $@;
+    1;
+  } or do {		# if we died, untie the dbs.
+    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
     $self->{store}->untie_db();
-    die "bayes: $failure";
-  }
+    die "bayes: (in forget) $eval_stat\n";
+  };
 
   return $ret;
 }

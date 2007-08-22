@@ -383,7 +383,11 @@ sub create_locker {
   eval '
     use Mail::SpamAssassin::Locker::'.$class.';
     $self->{locker} = new Mail::SpamAssassin::Locker::'.$class.' ($self);
-  '; ($@) and die $@;
+    1;
+  ' or do {
+    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    die "Mail::SpamAssassin::Locker::$class error: $eval_stat\n";
+  };
 
   if (!defined $self->{locker}) { die "locker: oops! no locker"; }
 }
@@ -1431,7 +1435,7 @@ sub timer_end {
             (($t->{end} - $t->{start}) * 1000) + ($t->{elapsed} || 0));
 
   if (would_log('dbg', 'timing') > 1) {
-    dbg("timing: '$name' ended after ".$t->{elapsed}." msecs");
+    dbg("timing: '%s' ended after %.0f msecs", $name, $t->{elapsed});
   }
 }
 
@@ -1672,7 +1676,12 @@ sub get_and_create_userstate_dir {
 
   if (!-d $fname) {
     # not being able to create the *dir* is not worth a warning at all times
-    eval { mkpath($fname, 0, 0700) } or dbg("config: mkdir $fname failed: $@ $!\n");
+    eval {
+      mkpath($fname, 0, 0700);  1;
+    } or do {
+      my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+      dbg("config: mkdir $fname failed: $eval_stat");
+    };
   }
 
   $fname;

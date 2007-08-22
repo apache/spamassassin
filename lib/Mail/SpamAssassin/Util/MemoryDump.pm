@@ -125,9 +125,11 @@ sub census_arena {
 
       $objcount{ref $val}++;
     }
-
+    1;
+  } or do {
+    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    warn "census: $eval_stat\n";
   };
-  ($@) and warn "census: ".$@;
 
   foreach my $id (sort { $objcount{$b} <=> $objcount{$a} } keys %objcount) {
     my $c = $objcount{$id};
@@ -175,8 +177,11 @@ sub dump_obj {
     my $dump = Dumper($obj);
     $dump =~ s/ {8}/  /gs;
     print DUMP $dump;
+    1;
+  } or do {
+    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    warn "dump: $eval_stat\n";
   };
-  ($@) and warn "dump: ".$@;
 
   close DUMP or warn "close failed";
   warn "MEMDEBUG_dump_obj end: wrote to $name\n";

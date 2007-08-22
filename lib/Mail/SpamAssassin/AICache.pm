@@ -144,10 +144,11 @@ sub finish {
   # create enclosing dir tree, if required
   eval {
     mkpath(dirname($self->{cache_file}));
+    1;
+  } or do {
+    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    warn "Can't mkpath for AI cache file ($self->{cache_file}): $eval_stat\n";
   };
-  if ($@) {
-    warn "Can't mkpath for AI cache file (".$self->{cache_file}."): $@ $!";
-  }
 
   my $towrite = '';
   while(my($k,$v) = each %{$self->{cache}}) {

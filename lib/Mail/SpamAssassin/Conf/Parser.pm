@@ -1114,13 +1114,11 @@ sub is_meta_valid {
   if (eval $evalstr) {
     return 1;
   }
-  if ($@) {
-    my $err = $@;
-    $err =~ s/\s+(?:at|near)\b.*//s;
-    $err =~ s/Illegal division by zero/division by zero possible/i;
-    $self->lint_warn("config: invalid expression for rule $name: \"$rule\": $err\n", $name);
-    return 0;
-  }
+  my $err = $@ ne '' ? $@ : "errno=$!";  chomp $err;
+  $err =~ s/\s+(?:at|near)\b.*//s;
+  $err =~ s/Illegal division by zero/division by zero possible/i;
+  $self->lint_warn("config: invalid expression for rule $name: \"$rule\": $err\n", $name);
+  return 0;
 }
 
 sub is_delimited_regexp_valid {
@@ -1174,8 +1172,7 @@ sub is_regexp_valid {
   if (eval { ("" =~ m#${re}#); 1; }) {
     return 1;
   }
-
-  my $err = $@;
+  my $err = $@ ne '' ? $@ : "errno=$!";  chomp $err;
   $err =~ s/ at .*? line \d.*$//;
   $self->lint_warn("config: invalid regexp for rule $name: $origre: $err\n", $name);
   return 0;
