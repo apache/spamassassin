@@ -288,7 +288,7 @@ sub try_module {
   } else {
     $errtype = "is installed,\nbut is not an up-to-date version.";
   }
-  dbg("dependency: $eval_stat");
+  # dbg("dependency: $eval_stat");
 
   print "\n", ("*" x 75), "\n";
   if ($required) {
