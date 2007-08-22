@@ -423,6 +423,11 @@ sub rule_file_compile {
       }
       # non-sandbox rules always use the same name
 
+      # comment "score" lines for sandbox rules (bug 5558)
+      if ($type eq 'score' && $rules->{$name}->{issandbox}) {
+        $orig =~ s/^/#/g;
+      }
+
       if (!$rules->{$name}) { $rules->{$name} = rule_entry_create(); }
       $rules->{$name}->{issandbox} = $issandbox;
       $rules->{$name}->{origname} = $origname;
