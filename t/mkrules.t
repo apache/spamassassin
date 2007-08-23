@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("mkrules");
-use Test; BEGIN { plan tests => 81 };
+use Test; BEGIN { plan tests => 89 };
 use File::Copy;
 use File::Path;
 
@@ -69,6 +69,37 @@ write_file("$tdir/MANIFEST.SKIP", [ "foo2\n" ]);
 write_file("$tdir/rules/active.list", [ "NOT_GOOD\n" ]);
 write_file("$tdir/rulesrc/sandbox/foo/20_foo.cf", [
     "body GOOD /foo/\n",
+    "describe GOOD desc_found\n"
+]);
+
+ok (mkrun ("--src $tdir/rulesrc --out $tdir/rules --manifest $tdir/MANIFEST --manifestskip $tdir/MANIFEST.SKIP --active $tdir/rules/active.list 2>&1", \&patterns_run_cb));
+checkfile("$tdir/rules/72_active.cf", \&patterns_run_cb);
+checkfile("$tdir/rules/70_sandbox.cf", \&patterns_run_cb);
+ok ok_all_patterns();
+save_tdir();
+
+# ---------------------------------------------------------------------------
+print " non-promotion of an inactive rule with score set\n\n";
+
+%patterns = (
+  '70_sandbox.cf: WARNING: not listed in manifest file' => manif_found,
+  "body T_GOOD /foo/"   => rule_line_1,
+  "describe T_GOOD desc_found"  => rule_line_2,
+  "#score T_GOOD 4.0"  => score_good,
+);
+%anti_patterns = (
+  "describe GOOD desc_found"  => rule_line_2,
+  "score GOOD 4.0"  => score,
+);
+
+mkpath ([ "$tdir/rulesrc/sandbox/foo", "$tdir/rules" ]);
+
+write_file("$tdir/MANIFEST", [ ]);
+write_file("$tdir/MANIFEST.SKIP", [ "foo2\n" ]);
+write_file("$tdir/rules/active.list", [ "NOT_GOOD\n" ]);
+write_file("$tdir/rulesrc/sandbox/foo/20_foo.cf", [
+    "body GOOD /foo/\n",
+    "score GOOD 4.0\n",
     "describe GOOD desc_found\n"
 ]);
 
