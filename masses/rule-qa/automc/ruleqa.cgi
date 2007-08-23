@@ -110,7 +110,7 @@ sub ui_parse_url_base {
 # fix $self->{url_abs} to be correct for the "entire website is web app" case,
 # as CGI.pm gets that wrong, too!
 
-  if ($self->{url_abs} =~ m,^/(?:20\d|last-preflight|last-night|today),) {
+  if ($self->{url_abs} =~ m,^/(?:20\d|last-preflight|last-night|\d+-days-ago|today),) {
     $self->{url_with_path} = $self->{url_abs};
     $self->{url_abs} = "/";
   } else {
@@ -177,7 +177,11 @@ sub ui_get_daterev {
 
     # all of these ignore "b" preflight mass-checks, btw
     if ($self->{daterev} eq 'last-night') {
-      $self->{daterev} = $self->get_last_night_daterev();
+      $self->{daterev} = $self->get_daterev_for_days_ago(1);
+      $self->{q}->param('daterev', $self->{daterev});  # make it absolute
+    }
+    elsif ($self->{daterev} =~ /^(\d+)-days-ago$/) {
+      $self->{daterev} = $self->get_daterev_for_days_ago($1);
       $self->{q}->param('daterev', $self->{daterev});  # make it absolute
     }
     elsif ($self->{daterev} eq 'last-preflight') {
@@ -197,7 +201,7 @@ sub ui_get_daterev {
       $self->{daterev} = "$1-$2-$3";
     } else {
       # default: last-night's
-      $self->{daterev} = $self->get_last_night_daterev();
+      $self->{daterev} = $self->get_daterev_for_days_ago(1);
     }
   }
 
@@ -594,14 +598,14 @@ sub date_in_direction {
   return undef;       # couldn't find one
 }
 
-sub get_last_night_daterev {
-  my ($self) = @_;
+sub get_daterev_for_days_ago {
+  my ($self, $days) = @_;
 
   # don't use a daterev after (now - 12 hours); that's too recent
   # to be "last night", for purposes of rule-update generation.
 
   my $notafter = POSIX::strftime "%Y%m%d",
-        gmtime (($self->{now} + DATEREV_ADJ) - (12*60*60));
+        gmtime ((($self->{now} + DATEREV_ADJ) + (12*60*60)) - (24*60*60*$days));
   return $self->get_daterev_by_date($notafter);
 }
 
