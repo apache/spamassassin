@@ -19,52 +19,78 @@ my @def_plugins = map {
 
 my $PROMOTABLE_PLUGINS_RE = "^" . join("|", @def_plugins) . "\$";
 
+# number of days to look back; if a rule isn't listed as promotable on
+# all of these days, it won't be listed.  (we grant an exception for
+# new rules that didn't exist on previous days, however, so new rules
+# can be published quickly to handle sudden outbreaks without requiring
+# manual update work)
+my @DAYS_REQUIRED = (1, 2, 3);
+
 ###########################################################################
 
 my $cgi_url = "http://ruleqa.spamassassin.org/";
-my $doc;
-my $cache = 'ruleqa.cache';
+my @doc = ();
+my $cache = 'ruleqa.cache.';
+my $submitters = '';
 
-my $url;
-if (!$FROM_CACHE || !-f $cache) {
-  $url = $cgi_url."last-night?xml=1";
-  $doc = get ($url);
-  if (!$doc) {
-    die "HTTP get failed: $doc\n";
-  }
+my $url;        # tracks the last day used
+my $dayoffset = 0;
+foreach my $day (@DAYS_REQUIRED) {
+  if (!$FROM_CACHE || !-f $cache.$day) {
 
-  if ($MAKE_CACHE) {
-    open(O, ">$cache"); print O $doc; close O;
+with_new_offset:
+    $url = $cgi_url.($day+$dayoffset)."-days-ago?xml=1";
+    warn "HTTP get: $url\n";
+
+    $doc[$day] = get ($url);
+    if (!$doc[$day]) {
+      die "HTTP get failed: $doc[$day]\n";
+    }
+
+    if ($MAKE_CACHE) {
+      open(O, ">$cache$day"); print O $doc[$day]; close O;
+    }
   }
-}
-else {
-  open(I, "<$cache") or die; $doc = join('',<I>); close I;
-}
+  else {
+    open(I, "<$cache$day") or die; $doc[$day] = join('',<I>); close I;
+  }
 
 ###########################################################################
 
-# the HTML looks like:
-# 
-#   <span class="daterev_masscheck_description" class="mcviewing">
-#   ...
-#   <em><span class="mcsubmitters"> ....... </span></em>
-#   ...
-#   </span>
-#
-# in other words, the machine-parseable metadata is embedded in the HTML
-# as a microformat.
+  # the HTML looks like:
+  # 
+  #   <span class="daterev_masscheck_description" class="mcviewing">
+  #   ...
+  #   <em><span class="mcsubmitters"> ....... </span></em>
+  #   ...
+  #   </span>
+  #
+  # in other words, the machine-parseable metadata is embedded in the HTML
+  # as a microformat.
 
-my $submitters = '';
-if ($doc =~ m{
-        <span\s+class="daterev_masscheck_description\smcviewing"
-        .{0,400}
-        <span\s+class="mcsubmitters">\s*(.*?)\s*</span>
-      }sx)
-{
-  $submitters = $1;
-}
-else {
-  loghtml_die("failed to find 'mcviewing' and 'mcsubmitters' microformats");
+  if ($doc[$day] =~ m{
+          <span\s+class="daterev_masscheck_description\smcviewing"
+          .{0,400}
+          <span\s+class="mcsubmitters">\s*(.*?)\s*</span>
+        }sx)
+  {
+    my $daysubs = $1;
+
+    # ignore days when the mass-check sets contain a --net log, since
+    # it's the weekly --net run.  That generally contains a much
+    # smaller set of logs (since it takes longer to run mass-check --net)
+    # so the results are untrustworthy.
+    if ($daysubs =~ /(?:^|\s)net-/) {
+      warn "day $day contains a --net mass-check! offsetting by an extra day\n";
+      $dayoffset++; goto with_new_offset;
+    }
+
+    ($submitters ne '') and $submitters .= "; ";
+    $submitters .= "day $day: $daysubs";
+  }
+  else {
+    loghtml_die("no 'mcviewing', 'mcsubmitters' microformats on day $day");
+  }
 }
 
 ###########################################################################
@@ -73,30 +99,28 @@ else {
 # <spc>8.7654</spc><hpc>0.2056</hpc><so>0.977</so>
 # <detailhref>ruleqa%3Fdaterev%3Dlast-night%26rule%3D__HIGHBITS%26s_detail%3D1</detailhref></rule>
 
-my $plist = { };
-while ($doc =~ m!<rule>(.*?)</rule>!xg) {
-  my $xml = $1;
-  my $obj = { };
+my $plist;
+foreach my $day (@DAYS_REQUIRED) {
+  while ($doc[$day] =~ m!<rule>(.*?)</rule>!xg) {
+    my $xml = $1;
+    my $obj = { };
 
-  while ($xml =~ s!<([A-Za-z0-9_]+)>(.*?)</\1>!!) {
-    $obj->{$1} = $2;
+    while ($xml =~ s!<([A-Za-z0-9_]+)>(.*?)</\1>!!) {
+      $obj->{$1} = $2;
+    }
+    while ($xml =~ s!<([A-Za-z0-9_]+)\s+esc=["']1["']>(.*?)</\1>!!) {
+      $obj->{$1} = uri_unescape($2);
+    }
+
+    my $name = $obj->{test};
+    $obj->{detailhref} = $cgi_url.$obj->{detailhref};
+
+    $plist->[$day]->{$name} = $obj;
   }
-  while ($xml =~ s!<([A-Za-z0-9_]+)\s+esc=["']1["']>(.*?)</\1>!!) {
-    $obj->{$1} = uri_unescape($2);
+
+  if (!scalar keys %{$plist->[$day]}) {
+    loghtml_die("no rules found? on day $day");
   }
-
-  my $name = $obj->{test};
-  $obj->{detailhref} = $cgi_url.$obj->{detailhref};
-
-  $plist->{$name} = $obj;
-}
-
-if (!scalar keys %$plist) {
-  loghtml_die("no rules found?");
-}
-
-sub loghtml_die {
-  die "$_[0]\nURL: $url\ngot:\n$doc\n";
 }
 
 ###########################################################################
@@ -154,9 +178,10 @@ if (scalar @spcs < 2) {
   die "not generating results; less than 3 submitter results available!\n";
 }
 
-foreach my $plistkey (sort keys %$plist) {
+# base most of our decisions off day 1 (last night's mass-checks)
+foreach my $plistkey (sort keys %{$plist->[1]}) {
   my $name = $plistkey;
-  my $obj = $plist->{$plistkey};
+  my $plistobj = $plist->[1]->{$plistkey};
   my $notes = '';
 
   # rules in sandboxes without a T_ prefix, will be renamed during the
@@ -199,8 +224,12 @@ foreach my $plistkey (sort keys %$plist) {
   # it on a rule-by-rule basis anyway
   next if ($mailsa->{conf}->{testrules}->{$name});
 
-  # ignore rules that are not marked as promotable
-  next unless ($obj->{promo});
+  # ignore rules that are not marked as promotable in ANY of the days.
+  # ie a rule must be promotable in all 3, to be listed.  (Also allow
+  # rules that weren't in existence in the earlier mass-checks.)
+  next unless ($plist->[1]->{$plistkey}->{promo});
+  next unless ($plist->[2]->{$plistkey}->{promo} or !defined($plist->[2]->{$plistkey}));
+  next unless ($plist->[3]->{$plistkey}->{promo} or !defined($plist->[3]->{$plistkey}));
 
   # only rules from "rulesrc" dirs
   my $src = $mailsa->{conf}->{source_file}->{$name};
@@ -224,11 +253,16 @@ foreach my $plistkey (sort keys %$plist) {
   next if $skip;
 
   # don't output the ever-changing bits of data
-  # $notes = "spam=$obj->{spc} ham=$obj->{hpc} so=$obj->{so}";
+  # $notes = "spam=$plistobj->{spc} ham=$plistobj->{hpc} so=$plistobj->{so}";
   $notes = "good enough";
 
 publish:
 
   print "\n# $notes\n$name\n";
+}
+exit;
+
+sub loghtml_die {
+  die "$_[0]\nURL: $url\n";
 }
 
