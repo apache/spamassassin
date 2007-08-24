@@ -216,7 +216,6 @@ sub complete_lookups {
   my ($self, $timeout, $allow_aborting_of_expired) = @_;
   my $alldone = 0;
   my $anydone = 0;
-  my $waiting_time = 0;
   my $allexpired = 1;
   my %typecount;
 
@@ -234,8 +233,7 @@ sub complete_lookups {
       # dbg("async: before select, timeout=%.1f", $timeout)  if $timeout > 0;
       $self->{last_poll_responses_time} = $now;
       my $nfound;
-      ($nfound, $waiting_time) =
-        $self->{main}->{resolver}->poll_responses($timeout);
+      $nfound = $self->{main}->{resolver}->poll_responses($timeout);
       dbg("async: select found %s responses ready", !$nfound ? 'no' : $nfound);
     }
 
@@ -307,7 +305,7 @@ sub complete_lookups {
     $alldone = 1;      # abort remaining
   };
 
-  return wantarray ? ($alldone,$anydone,$waiting_time) : $alldone;
+  return wantarray ? ($alldone,$anydone) : $alldone;
 }
 
 # ---------------------------------------------------------------------------

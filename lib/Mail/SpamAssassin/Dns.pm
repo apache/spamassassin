@@ -331,14 +331,12 @@ sub harvest_until_rule_completes {
 
   dbg("dns: harvest_until_rule_completes");
   my $result = 0;
-  my $total_waiting_time = 0;
 
   for (my $first=1;  ; $first=0) {
     # complete_lookups() may call completed_callback(), which may
     # call start_lookup() again (like in Plugin::URIDNSBL)
-    my ($alldone,$anydone,$waiting_time) =
+    my ($alldone,$anydone) =
       $self->{async}->complete_lookups($first ? 0 : 1.0,  1);
-    $total_waiting_time += $waiting_time;
 
     $result = 1  if $self->is_rule_complete($rule);
     last  if $result || $alldone;
@@ -346,8 +344,6 @@ sub harvest_until_rule_completes {
     dbg("dns: harvest_until_rule_completes - check_tick");
     $self->{main}->call_plugins ("check_tick", { permsgstatus => $self });
   }
-  dbg("dns: timing: %.3f s sleeping in harvest_until_rule_completes",
-      $total_waiting_time)  if $total_waiting_time > 0;
 
   return $result;
 }
@@ -356,10 +352,8 @@ sub harvest_dnsbl_queries {
   my ($self) = @_;
 
   dbg("dns: harvest_dnsbl_queries");
-  my $total_waiting_time = 0;
 
   for (my $first=1;  ; $first=0) {
-
     # complete_lookups() may call completed_callback(), which may
     # call start_lookup() again (like in Plugin::URIDNSBL)
 
@@ -367,9 +361,8 @@ sub harvest_dnsbl_queries {
     # complete_lookups a chance to ripe any available results and
     # abort overdue requests, without needlessly waiting for more
 
-    my ($alldone,$anydone,$waiting_time) =
+    my ($alldone,$anydone) =
       $self->{async}->complete_lookups($first ? 0 : 1.0,  1);
-    $total_waiting_time += $waiting_time;
 
     last  if $alldone;
 
@@ -381,8 +374,6 @@ sub harvest_dnsbl_queries {
   $self->{async}->abort_remaining_lookups();
   $self->{async}->log_lookups_timing();
   $self->mark_all_async_rules_complete();
-  dbg("dns: timing: %.3f s sleeping in harvest_dnsbl_queries",
-      $total_waiting_time)  if $total_waiting_time > 0;
   1;
 }
 
