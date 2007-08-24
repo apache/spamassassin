@@ -1997,6 +1997,8 @@ sub copy_config {
     return 0;
   }
 
+  my $timer = $self->time_method("copy_config");
+
   # let the Conf object itself do all the heavy lifting.  It's better
   # than having this class know all about that class' internals...
   if (defined $source) {
