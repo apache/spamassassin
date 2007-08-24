@@ -89,7 +89,7 @@ print " non-promotion of an inactive rule with score set\n\n";
 );
 %anti_patterns = (
   "describe GOOD desc_found"  => rule_line_2,
-  "score GOOD 4.0"  => score,
+  "score GOOD 4.0"  => 'score',
 );
 
 mkpath ([ "$tdir/rulesrc/sandbox/foo", "$tdir/rules" ]);
