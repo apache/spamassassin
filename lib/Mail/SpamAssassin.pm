@@ -456,7 +456,7 @@ sub check {
   $self->init(1);
   my $msg = Mail::SpamAssassin::PerMsgStatus->new($self, $mail_obj);
   $msg->check();
-  dbg($self->timer_report());
+  dbg("timing: " . $self->timer_report())  if would_log('dbg', 'timing');
   $msg;
 }
 
@@ -1360,8 +1360,7 @@ sub lint_rules {
   $self->{syntax_errors} += $status->{rule_errors};
   $status->finish();
   $mail->finish();
-  dbg($self->timer_report());
-
+  dbg("timing: " . $self->timer_report())  if would_log('dbg', 'timing');
   return ($self->{syntax_errors});
 }
 
@@ -1401,11 +1400,11 @@ sub finish {
 
 sub timer_start {
   my ($self, $name) = @_;
-  return unless (would_log('dbg', 'timing'));
 
-  if (would_log('dbg', 'timing') > 1) {
-    dbg("timing: '$name' starting");
-  }
+# return unless (would_log('dbg', 'timing'));
+# if (would_log('dbg', 'timing') > 1) {
+#   dbg("timing: '$name' starting");
+# }
 
   if (!exists $self->{timers}->{$name}) {
     push @{$self->{timers_order}}, $name;
@@ -1418,7 +1417,7 @@ sub timer_start {
 
 sub timer_end {
   my ($self, $name) = @_;
-  return unless (would_log('dbg', 'timing'));
+# return unless (would_log('dbg', 'timing'));
 
   my $t = $self->{timers}->{$name};
   $t->{end} = time;
@@ -1436,20 +1435,19 @@ sub timer_end {
   if (defined $t->{elapsed}) { $t->{elapsed} += $dt }
   else { $t->{elapsed} = $dt }
 
-  if (would_log('dbg', 'timing') > 1) {
-    dbg("timing: '%s' ended after %.0f ms", $name, $t->{elapsed} * 1000);
-  }
+# if (would_log('dbg', 'timing') > 1) {
+#   dbg("timing: '%s' ended after %.0f ms", $name, $t->{elapsed} * 1000);
+# }
 }
 
 sub time_method {
   my ($self, $name) = @_;
-  return unless (would_log('dbg', 'timing'));
+# return unless (would_log('dbg', 'timing'));
   return Mail::SpamAssassin::Util::ScopedTimer->new($self, $name);
 }
 
 sub timer_report {
   my ($self) = @_;
-  return '' unless would_log('dbg', 'timing');
 
   my $earliest = undef;
   my $latest = undef;
@@ -1470,7 +1468,7 @@ sub timer_report {
     push @str, sprintf("%s: $fmt (%.1f%%)", $name, $elapsed*1000, $pc);
   }
 
-  return sprintf("timing: total %.0f ms - %s", $total*1000, join(", ", @str));
+  return sprintf("total %.0f ms - %s", $total*1000, join(", ", @str));
 }
 
 ###########################################################################
