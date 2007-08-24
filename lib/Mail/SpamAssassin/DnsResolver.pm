@@ -397,23 +397,23 @@ sub poll_responses {
   return if $self->{no_resolver};
   return if !$self->{sock};
   my $cnt = 0;
-  my $waiting_time = 0;
 
   my $rin = $self->{sock_as_vec};
   my $rout;
 
   for (;;) {
-    my $now_before = time;
-    my ($nfound, $timeleft) = select($rout=$rin, undef, undef, $timeout);
+    my ($nfound, $timeleft);
+    { my $timer;  # collects timestamp when variable goes out of scope
+      if (!defined($timeout) || $timeout > 0)
+        { $timer = $self->{main}->time_method("poll_dns_idle") }
+      ($nfound, $timeleft) = select($rout=$rin, undef, undef, $timeout);
+    }
     if (!defined $nfound || $nfound < 0) {
       warn "dns: select failed: $!";
       return;
     }
 
     my $now = time;
-    if ($now > $now_before && (!defined($timeout) || $timeout > 0)) {
-      $waiting_time += $now - $now_before;
-    }
     $timeout = 0;  # next time around collect whatever is available, then exit
     last  if $nfound == 0;
 
@@ -442,7 +442,7 @@ sub poll_responses {
     }
   }
 
-  return wantarray ? ($cnt, $waiting_time) : $cnt;
+  return $cnt;
 }
 
 ###########################################################################

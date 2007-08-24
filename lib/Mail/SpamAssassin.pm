@@ -1464,9 +1464,10 @@ sub timer_report {
   my $total = $latest - $earliest;
   my @str = ();
   foreach my $name (@{$self->{timers_order}}) {
-    my $elapsed = ($self->{timers}->{$name}->{elapsed}||0);
+    my $elapsed = $self->{timers}->{$name}->{elapsed} || 0;
     my $pc = $total <= 0 || $elapsed >= $total ? 100 : ($elapsed/$total)*100;
-    push @str, sprintf("%s: %.0f (%.1f%%)", $name, $elapsed*1000, $pc);
+    my $fmt = $elapsed >= 0.002 ? "%.0f" : "%.2f";
+    push @str, sprintf("%s: $fmt (%.1f%%)", $name, $elapsed*1000, $pc);
   }
 
   return sprintf("timing: total %.0f ms - %s", $total*1000, join(", ", @str));
