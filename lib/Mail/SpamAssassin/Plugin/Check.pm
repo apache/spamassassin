@@ -803,6 +803,7 @@ sub do_full_tests {
 sub do_head_eval_tests {
   my ($self, $pms, $priority) = @_;
   return unless (defined($pms->{conf}->{head_evals}->{$priority}));
+  dbg("rules: running head_eval tests; score so far=".$pms->{score});
   $self->run_eval_tests ($pms, $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS,
 			 $pms->{conf}->{head_evals}->{$priority}, '', $priority);
 }
@@ -810,6 +811,7 @@ sub do_head_eval_tests {
 sub do_body_eval_tests {
   my ($self, $pms, $priority, $bodystring) = @_;
   return unless (defined($pms->{conf}->{body_evals}->{$priority}));
+  dbg("rules: running body_eval tests; score so far=".$pms->{score});
   $self->run_eval_tests ($pms, $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS,
 			 $pms->{conf}->{body_evals}->{$priority}, 'BODY: ',
 			 $priority, $bodystring);
@@ -818,6 +820,7 @@ sub do_body_eval_tests {
 sub do_rawbody_eval_tests {
   my ($self, $pms, $priority, $bodystring) = @_;
   return unless (defined($pms->{conf}->{rawbody_evals}->{$priority}));
+  dbg("rules: running rawbody_eval tests; score so far=".$pms->{score});
   $self->run_eval_tests ($pms, $Mail::SpamAssassin::Conf::TYPE_RAWBODY_EVALS,
 			 $pms->{conf}->{rawbody_evals}->{$priority}, 'RAW: ',
 			 $priority, $bodystring);
@@ -826,6 +829,7 @@ sub do_rawbody_eval_tests {
 sub do_full_eval_tests {
   my ($self, $pms, $priority, $fullmsgref) = @_;
   return unless (defined($pms->{conf}->{full_evals}->{$priority}));
+  dbg("rules: running full_eval tests; score so far=".$pms->{score});
   $self->run_eval_tests($pms, $Mail::SpamAssassin::Conf::TYPE_FULL_EVALS,
 			$pms->{conf}->{full_evals}->{$priority}, '',
 			$priority, $fullmsgref);
