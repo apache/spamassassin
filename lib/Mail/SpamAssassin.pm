@@ -1431,11 +1431,13 @@ sub timer_end {
   # add to any existing elapsed time for this event, since
   # we may call the same timer name multiple times -- this is ok,
   # as long as they are not nested
-  $t->{elapsed} = sprintf("%.2f",
-            (($t->{end} - $t->{start}) * 1000) + ($t->{elapsed} || 0));
+  my $dt = $t->{end} - $t->{start};
+  $dt = 0  if $dt < 0;  # tolerate clock jumps, just in case
+  if (defined $t->{elapsed}) { $t->{elapsed} += $dt }
+  else { $t->{elapsed} = $dt }
 
   if (would_log('dbg', 'timing') > 1) {
-    dbg("timing: '%s' ended after %.0f msecs", $name, $t->{elapsed});
+    dbg("timing: '%s' ended after %.0f ms", $name, $t->{elapsed} * 1000);
   }
 }
 
@@ -1459,17 +1461,15 @@ sub timer_report {
       $latest = $t->{end};
     }
   }
-  my $total = sprintf("%.2f", ($latest - $earliest) * 1000);
-  if ($total + 0 == 0) { $total = 0.000001; } # avoid div by 0
-
+  my $total = $latest - $earliest;
   my @str = ();
   foreach my $name (@{$self->{timers_order}}) {
     my $elapsed = ($self->{timers}->{$name}->{elapsed}||0);
-    my $pc = sprintf ("%.1f", ($elapsed / $total) * 100.0);
-    push @str, "$name: $elapsed ($pc\%)";
+    my $pc = $total <= 0 || $elapsed >= $total ? 100 : ($elapsed/$total)*100;
+    push @str, sprintf("%s: %.0f (%.1f%%)", $name, $elapsed*1000, $pc);
   }
 
-  return "timing: total $total msecs - ".join(", ", @str);
+  return sprintf("timing: total %.0f ms - %s", $total*1000, join(", ", @str));
 }
 
 ###########################################################################
