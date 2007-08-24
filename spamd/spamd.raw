@@ -1109,6 +1109,7 @@ sub spawn {
       }
       undef $current_user;
 
+      dbg("timing: " . $spamtest->timer_report()) if would_log('dbg', 'timing');
     }
 
     # If the child lives to get here, it will die ...  Muhaha.
@@ -1625,8 +1626,6 @@ sub check {
 
   $status->finish();    # added by jm to allow GC'ing
   $mail->finish();
-
-  dbg("timing: " . $spamtest->timer_report())  if would_log('dbg', 'timing');
 
   # ensure we didn't accidentally fork (bug 4370)
   if ($starting_self_pid != $$) {
