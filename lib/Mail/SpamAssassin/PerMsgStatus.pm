@@ -1288,6 +1288,10 @@ sub _get_tag {
 	      return $self->get($hdr);
 	    },
 
+            TIMING => sub {
+              return $self->{main}->timer_report();
+            },
+
           );
 
   my $data = "";
