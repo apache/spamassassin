@@ -442,6 +442,11 @@ sub gen_class {
         system("cat $opt{tmp}/spam.log.$$ >> $opt{tmp}/spamall.log.$$");
       }
 
+      if (-z "$opt{tmp}/hamall.log.$$" && -z "$opt{tmp}/spamall.log.$$") {
+        warn "time_filter_fileset() returned empty logs. not creating freqs!";
+        return;     # we'll try again later
+      }
+
       open(IN, "./hit-frequencies -TxpaP $flags $opt{tmp}/spamall.log.$$ $opt{tmp}/hamall.log.$$ |");
       while(<IN>) {
         /\s0\s+0\s+0.500\s+0.00\s+0.00\s+\(all messages\)/ and $no_msgs = 1;
