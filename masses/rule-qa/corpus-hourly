@@ -267,13 +267,14 @@ sub time_filter_fileset {
 
 sub current {
   my $classes = $opt{output_classes};
-  $classes ||= "DETAILS.new DETAILS.all DETAILS.age HTML.new HTML.all HTML.age NET.new NET.all NET.age";
+  $classes ||= "DETAILS.new DETAILS.all DETAILS.age NET.new NET.all NET.age";
 
   foreach my $entry (split(' ', $classes)) {
     $entry =~ /^(\S+)\.(\S+)$/;
     my $class = $1;
     my $age = $2;
     if (!$age) { warn "no age in $entry"; next; }
+    if ($class eq 'HTML') { warn "class HTML in $entry obsolete, ignored"; next; }
 
     foreach my $daterev (sort keys %logs_by_daterev) {
       my $rev;
@@ -387,7 +388,6 @@ sub gen_class {
 
     my $flags = "";
     $flags = "-t net -s 1" if $class eq "NET";
-    $flags = "-M HTML_MESSAGE" if $class eq "HTML";
     $flags = "-o" if $class eq "OVERLAP";
     $flags = "-S" if $class eq "SCOREMAP";
     if ($opt{rules_dir}) {
