@@ -223,19 +223,50 @@ sub complete_lookups {
   $self->{queries_started} = 0;
   $self->{queries_completed} = 0;
 
+  my $now = time;
+
+  if (defined $timeout && $timeout > 0 &&
+      %$pending && $self->{total_queries_started} > 0)
+  {
+    # shrink 'select' timeout if a caller specified unnecessarily long
+    # value, beyond the latest deadline of any outstanding request;
+    # can save needless wait time (up to 1 second in harvest_dnsbl_queries)
+    my $timeout_shrink_factor =
+           1 - 0.7 * ( ($self->{total_queries_completed} /
+                        $self->{total_queries_started}) ** 2 );
+    my $max_deadline;
+    while (my($key,$ent) = each %$pending) {
+      my $dt = $ent->{timeout};
+      if ($dt > 1.0) {  # only allow shrinking of timeouts over 1 second
+        $dt *= $timeout_shrink_factor;
+        $dt = 1.0  if $dt < 1.0;  # don't shrink below 1 second
+      }
+      my $deadline = $ent->{start_time} + $dt;
+      if (!defined $max_deadline || $deadline > $max_deadline) {
+        $max_deadline = $deadline;
+      }
+    }
+    my $sufficient_timeout = $max_deadline - $now;
+    $sufficient_timeout = 0  if $sufficient_timeout < 0;
+    if (defined $max_deadline && $timeout > $sufficient_timeout) {
+      dbg("async: reducing select timeout from %.1f to %.1f s",
+          $timeout, $sufficient_timeout);
+      $timeout = $sufficient_timeout;
+    }
+  }
+
   # trap this loop in an eval { } block, as Net::DNS could throw
   # die()s our way; in particular, process_dnsbl_results() has
   # thrown die()s before (bug 3794).
   eval {
-    my $now = time;
 
-    if (%$pending) {  # anything to do?
-      # dbg("async: before select, timeout=%.1f", $timeout)  if $timeout > 0;
+    if (%$pending) {  # any outstanding requests still?
       $self->{last_poll_responses_time} = $now;
-      my $nfound;
-      $nfound = $self->{main}->{resolver}->poll_responses($timeout);
-      dbg("async: select found %s responses ready", !$nfound ? 'no' : $nfound);
+      my $nfound = $self->{main}->{resolver}->poll_responses($timeout);
+      dbg("async: select found %s responses ready (t.o.=%.1f)",
+          !$nfound ? 'no' : $nfound,  $timeout);
     }
+    $now = time;  # capture new timestamp, after possible sleep in 'select'
 
     while (my($key,$ent) = each %$pending) {
       my $id = $ent->{id};
@@ -249,16 +280,15 @@ sub complete_lookups {
         $ent->{finish_time} = $now  if !defined $ent->{finish_time};
         $ent->{response_packet} = delete $self->{finished}->{$id};
 
-        dbg("async: query completed in %.3f s: %s",
-            $ent->{finish_time} - $ent->{start_time}, $ent->{display_id});
+        my $elapsed = $ent->{finish_time} - $ent->{start_time};
+        dbg("async: completed in %.3f s: %s", $elapsed, $ent->{display_id});
+        $self->{timing_by_query}->{". $key"} += $elapsed;
 
         if (defined $ent->{completed_callback}) {
           $ent->{completed_callback}->($ent);
         }
         $self->{queries_completed}++;
         $self->{total_queries_completed}++;
-        $self->{timing_by_query}->{". $key"} +=
-          $ent->{finish_time} - $ent->{start_time};
         delete $pending->{$key};
       }
     }
@@ -273,8 +303,11 @@ sub complete_lookups {
 
       while (my($key,$ent) = each %$pending) {
         $typecount{$ent->{type}}++;
-        my $dt = $ent->{timeout} * $timeout_shrink_factor;
-        $dt = 1.0  if $dt < 1.0;  # don't shrink allowed time below 1 second
+        my $dt = $ent->{timeout};
+        if ($dt > 1.0) {  # only allow shrinking of timeouts over 1 second
+          $dt *= $timeout_shrink_factor;
+          $dt = 1.0  if $dt < 1.0;  # don't shrink below 1 second
+        }
         $allexpired = 0  if $now <= $ent->{start_time} + $dt;
       }
       dbg("async: queries completed: %d, started: %d",
@@ -326,7 +359,7 @@ sub abort_remaining_lookups {
     dbg("async: aborting after %.3f s, %s: %s",
         $now - $ent->{start_time},
         defined $ent->{timeout} && $now > $ent->{start_time} + $ent->{timeout}
-          ? 'past original deadline' : 'shrunk deadline',
+          ? 'past original deadline' : 'deadline shrunk',
         $ent->{display_id} );
     $foundcnt++;
     $self->{timing_by_query}->{"X $key"} = $now - $ent->{start_time};
