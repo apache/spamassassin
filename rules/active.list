@@ -1,11 +1,23 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-fredt bb-jm bb-zmi cthielen daf dos theo; day 2: axb jm zmi; day 3: axb bb-fredt bb-jm bb-zmi cthielen daf dos theo zmi
+# with results from: day 1: axb bb-fredt bb-jm bb-zmi cthielen jm; day 2: bb-fredt bb-jm bb-zmi cthielen daf dos theo; day 3: axb jm zmi
 
 # tflags userconf
 ALL_TRUSTED
 
 # tflags userconf
 AWL
+
+# good enough
+AXB_XMID_1212
+
+# good enough
+AXB_XMID_1510
+
+# good enough
+AXB_XMID_OEGOESNULL
+
+# good enough
+BASE64_LENGTH_78_79
 
 # tflags learn
 BAYES_00
@@ -43,6 +55,9 @@ CHARSET_FARAWAY_HEADER
 # tflags userconf
 CORRUPT_FROM_LINE_IN_HDRS
 
+# good enough
+DEAR_WINNER
+
 # tflags net
 DIGEST_MULTIPLE
 
@@ -64,11 +79,140 @@ DNS_FROM_RFC_DSN
 # tflags net
 DNS_FROM_SECURITYSAGE
 
+# good enough
+DYN_RDNS_AND_INLINE_IMAGE
+
+# good enough
+DYN_RDNS_SHORT_HELO_HTML
+
+# good enough
+DYN_RDNS_SHORT_HELO_IMAGE
+
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
 
+# good enough
+FAKE_REPLY_C
+
+# good enough
+FB_CIALIS_LEO3
+
+# good enough
+FB_INDEPEND_RWD
+
+# good enough
+FB_LETTERS_21B
+
+# good enough
+FB_LOWER_PAYM
+
+# good enough
+FB_QUALITY_REPLICA
+
+# good enough
+FB_REPLIC_CAP
+
+# good enough
+FB_SOFTTABS
+
+# good enough
+FB_TO_STOP_DISTRO
+
+# good enough
+FB_YOUR_REFI
+
+# good enough
+FH_BAD_OEV1441
+
+# good enough
+FH_DATE_IS_19XX
+
+# good enough
+FH_DATE_PAST_20XX
+
+# good enough
+FH_FAKE_RCVD_LINE
+
+# good enough
+FH_FROM_CASH
+
+# good enough
+FH_HELO_ALMOST_IP
+
+# good enough
+FH_HELO_ENDS_DOT
+
+# good enough
+FH_HELO_EQ_610HEX
+
+# good enough
+FH_HELO_EQ_CHARTER
+
+# good enough
+FH_HELO_EQ_D_D_D_D
+
+# good enough
+FH_HOST_ALMOST_IP
+
+# good enough
+FH_HOST_EQ_DYNAMICIP
+
+# good enough
+FH_HOST_EQ_PACBELL_D
+
+# good enough
+FH_HOST_EQ_VERIZON_P
+
+# good enough
+FH_MSGID_000000
+
+# good enough
+FH_MSGID_XXBLAH
+
+# good enough
+FM_FAKE_HELO_VERIZON
+
+# good enough
+FM_RATSIGN_1106
+
+# good enough
+FM_RE_HELLO_SPAM
+
+# good enough
+FM_SEX_HELODDDD
+
+# good enough
+FM_XMAIL_F_OUT
+
 # tflags userconf
 FRAGMENTED_MESSAGE
+
+# good enough
+FRT_OPPORTUN2
+
+# good enough
+FRT_PRICE
+
+# good enough
+FRT_STRONG1
+
+# good enough
+FRT_STRONG2
+
+# good enough
+FRT_SYMBOL
+
+# good enough
+FR_ALMOST_VIAG2
+
+# good enough
+FS_REPLICA
+
+# good enough
+FS_REPLICAWATCH
+
+# good enough
+FS_WILL_HELP
 
 # tflags userconf
 GTUBE
@@ -106,8 +250,17 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
+# good enough
+HDR_ORDER_FTSDMCXX_BAT
+
 # tflags userconf
 HEAD_LONG
+
+# good enough
+HELO_LH_LD
+
+# good enough
+HELO_LOCALHOST
 
 # tflags userconf
 HIGH_CODEPAGE_URI
@@ -115,11 +268,26 @@ HIGH_CODEPAGE_URI
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
+# good enough
+JM_RCVD_QMAILV1
+
+# good enough
+JM_TORA_XM
+
 # tflags publish
 KAM_STOCKOTC
 
 # tflags publish
 KAM_STOCKTIP15
+
+# good enough
+LOTTERY_1
+
+# good enough
+L_SPAM_TOOL_13
+
+# good enough
+MID_DEGREES
 
 # tflags userconf
 MIME_CHARSET_FARAWAY
@@ -136,6 +304,12 @@ NO_RECEIVED
 # tflags userconf
 NO_RELAYS
 
+# good enough
+NULL_IN_BODY
+
+# good enough
+OUTLOOK_3416
+
 # tflags net
 PYZOR_CHECK
 
@@ -150,6 +324,12 @@ RAZOR2_CF_RANGE_E8_51_100
 
 # tflags net
 RAZOR2_CHECK
+
+# good enough
+RCVD_FORGED_WROTE
+
+# good enough
+RCVD_FORGED_WROTE2
 
 # tflags net
 RCVD_IN_BL_SPAMCOP_NET
@@ -331,17 +511,104 @@ RCVD_IN_XBL
 # tflags net
 ROUND_THE_WORLD
 
+# good enough
+SB_GIF_AND_NO_URIS
+
+# good enough
+SHORT_HELO_AND_INLINE_IMAGE
+
+# good enough
+SPAMMY_XMAILER
+
 # tflags userconf
 SPF_HELO_PASS
 
 # tflags userconf
 SPF_PASS
 
+# good enough
+STOX_REPLY_TYPE
+
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
 # tflags userconf
 SUBJECT_IN_WHITELIST
+
+# good enough
+SUBJ_RE_NUM
+
+# good enough
+TT_OBSCURED_VIAGRA
+
+# good enough
+TVD_EB_PHISH
+
+# good enough
+TVD_FINGER_02
+
+# good enough
+TVD_QUAL_MEDS
+
+# good enough
+TVD_RCVD_IP
+
+# good enough
+TVD_RCVD_IP4
+
+# good enough
+TVD_STOCK1
+
+# good enough
+TVD_VISIT_PHARMA
+
+# good enough
+AXB_MIME_IMG830
+
+# good enough
+AXB_RCVD_ZOOBSEND
+
+# good enough
+AXB_RCVD_ZOONAT
+
+# good enough
+AXB_XTIDX_CHAIN
+
+# good enough
+CARD_DIRECT_WWW_ADDRESS
+
+# good enough
+DOS_STOCK_CDYV_GENERIC
+
+# good enough
+FB_MED1CAT
+
+# good enough
+FB_REPLICA_ROLEX
+
+# good enough
+FB_SMALL_PEN
+
+# good enough
+FM_MORTGAGE3PLUS
+
+# good enough
+FRT_OPPORTUN1
+
+# good enough
+JM_SOUGHT
+
+# good enough
+KAM_LOTTO1
+
+# good enough
+KAM_LOTTO2
+
+# good enough
+KAM_LOTTO3
+
+# good enough
+LOTTERY_PH_004470
 
 # tflags net
 RCVD_IN_DSBL
@@ -357,6 +624,18 @@ RCVD_IN_WHOIS_INVALID
 
 # tflags net
 RCVD_IN_XBL
+
+# good enough
+STOX_META_5
+
+# good enough
+STOX_RCVD_N_NN_N
+
+# good enough
+TVD_PDF_FINGER01
+
+# good enough
+TVD_PDF_FINGER01_JO
 
 # tflags net
 URIBL_L1SPEWS
@@ -579,6 +858,54 @@ WHOIS_WHOISGUARD
 
 # tflags net
 WHOIS_WHOISPROT
+
+# good enough
+XMAILER_MIMEOLE_OL_015D5
+
+# good enough
+XMAILER_MIMEOLE_OL_09BB4
+
+# good enough
+XMAILER_MIMEOLE_OL_20C99
+
+# good enough
+XMAILER_MIMEOLE_OL_22B61
+
+# good enough
+XMAILER_MIMEOLE_OL_3857F
+
+# good enough
+XMAILER_MIMEOLE_OL_3AC1D
+
+# good enough
+XMAILER_MIMEOLE_OL_3D61D
+
+# good enough
+XMAILER_MIMEOLE_OL_4B815
+
+# good enough
+XMAILER_MIMEOLE_OL_4BF4C
+
+# good enough
+XMAILER_MIMEOLE_OL_72641
+
+# good enough
+XMAILER_MIMEOLE_OL_83BF7
+
+# good enough
+XMAILER_MIMEOLE_OL_8627E
+
+# good enough
+XMAILER_MIMEOLE_OL_91287
+
+# good enough
+XMAILER_MIMEOLE_OL_A50F8
+
+# good enough
+XMAILER_MIMEOLE_OL_B4B40
+
+# good enough
+XMAILER_MIMEOLE_OL_CAC8F
 
 # tflags net
 __DNS_FROM_RFC_ABUSE
