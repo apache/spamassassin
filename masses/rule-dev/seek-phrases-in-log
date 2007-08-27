@@ -31,6 +31,7 @@ usage: seek-phrases-in-log [--reqhitrate n] [--reqpatlength n]
    [--rules] [--ruleprefix FOO] [--maxtextread n] --ham hamlog --spam spamlog
 
 --reqhitrate: percentage hit-rate against spam required (default: 0.5)
+   (multiple values can be specified, separated by spaces)
 --reqpatlength: required pattern length, in characters (default: 0)
 --maxtextread: bytes of message text examined (default: 32768)
 --rules: generate SpamAssassin rule output (default: 0)
@@ -66,6 +67,13 @@ GetOptions(
 ) or usage();
 
 usage() unless ($fs && $fh);
+
+my @hitratethresholds = ();
+if ($opt{reqhitrate} =~ /\S\s+\S/) {        # multiple values
+  @hitratethresholds = reverse sort {$a<=>$b} split (' ', $opt{reqhitrate});
+  $opt{reqhitrate} = pop @hitratethresholds;  # the lowest
+  # @hitratethresholds is now sorted, highest to lowest
+}
 
 my %word2sym = ('' => '');
 my %sym2word = ('' => '');
@@ -271,6 +279,7 @@ sub summarise {
 
     @pats = quote_all_metas(@pats);
     @pats = subsume_with_dotstars(@pats);
+    @pats = expand_with_dots(@pats);
     @pats = ensure_reqpatlength(@pats);
 
     # now check to see if any of these pats have been subsumed in an
@@ -289,6 +298,13 @@ sub summarise {
     next unless @pats;
 
     push @done_pats, @pats;
+
+    if (defined($hitratethresholds[0]) &&
+        ($ngram_count{$id}*100) / $msg_count_spam < $hitratethresholds[0])
+    {
+      print "# passed hit-rate threshold: $hitratethresholds[0]\n";
+      shift @hitratethresholds;
+    }
 
     if ($opt{rules}) {
       printf "# %6.3f  %6.3f  %6.3f\n",
@@ -384,7 +400,6 @@ sub collapse_pats {
 
       $pat = $newpat;     # and carry on
     }
-    # warn "JMD $pat";
 
     # now remove subsumed patterns
     @{$pataryref} = grep { $pat !~ /\Q$_\E/s } @{$pataryref};
@@ -410,11 +425,10 @@ sub quote_all_metas {
 }
 
 sub subsume_with_dotstars {
-  my @ret = @_;
+  my @working = @_;
 
   # attempt to resolve . and .*
-  my @working = @ret;
-  @ret = ();
+  my @ret = ();
 
   while (1) {
     my $p1 = shift(@working);
@@ -458,6 +472,64 @@ sub subsume_with_dotstars {
     push (@ret, $p1);
   }
   return @ret;
+}
+
+sub expand_with_dots {
+  my @working = @_;
+  my @ret = ();
+
+  my $pat_maxlen = $opt{maxtextread};
+  while (1) {
+    my $p1 = shift(@working);
+    last unless defined($p1);
+
+    my @hits = grep /$p1/, @text_string;
+    if (scalar @hits == 0) {
+      warn "supposed pattern /$p1/ is 0-hitter";
+      push @ret, "[BROKEN: 0 hitter]$p1";
+      next;
+    }
+
+    my $s = $hits[0];
+
+    # expand towards end of string (with .)
+    while (1) {
+      last if (length($p1) >= $pat_maxlen);
+
+      if ($s !~ /$p1\[p\]/s && $s =~ /$p1(.)/s)
+      {
+        my $extn = $1; quote_all_metas($extn);
+        my $newpat = $p1.$extn;
+        if (scalar (grep /$newpat/, @text_string) == scalar @hits) {
+          $p1 = $newpat; next;
+        }
+      }
+
+      if ($s !~ /$p1.?\[p\]/s && $s =~ /$p1[^\\](.)/s)
+      {
+        my $extn = $1; quote_all_metas($extn);
+        my $newpat = $p1.".".$extn;
+        if (scalar (grep /$newpat/, @text_string) == scalar @hits) {
+          $p1 = $newpat; next;
+        }
+      }
+
+      if ($s !~ /$p1.{0,2}\[p\]/s && $s =~ /$p1[^\\][^\\](.)/s)
+      {
+        my $extn = $1; quote_all_metas($extn);
+        my $newpat = $p1."..".$extn;
+        if (scalar (grep /$newpat/, @text_string) == scalar @hits) {
+          $p1 = $newpat; next;
+        }
+      }
+
+      last;
+    }
+
+    push (@ret, $p1);
+  }
+
+  @ret;
 }
 
 sub ensure_reqpatlength {
