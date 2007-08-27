@@ -58,3 +58,7 @@ cat /home/updatesd/LATEST
   mv mkupdates.txt    mkupdates_1.txt
 )
 
+# create a list of "bad" rules in the current sandboxes, updated daily
+$PERL ~/ftp/spamassassin/masses/rule-qa/list-bad-rules \
+    > /var/www/ruleqa.spamassassin.org/reports/badrules.txt
+
