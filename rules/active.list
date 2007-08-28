@@ -1,8 +1,11 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb bb-fredt bb-jm bb-zmi cthielen jm; day 2: bb-fredt bb-jm bb-zmi cthielen daf dos theo; day 3: axb jm zmi
+# with results from: day 1: axb bb-fredt bb-jm bb-zmi cthielen daf jm theo zmi; day 2: axb bb-fredt bb-jm bb-zmi cthielen jm; day 3: bb-fredt bb-jm bb-zmi cthielen daf dos theo
 
 # tflags userconf
 ALL_TRUSTED
+
+# good enough
+APOSTROPHE_FROM
 
 # tflags userconf
 AWL
@@ -46,6 +49,9 @@ BAYES_95
 # tflags learn
 BAYES_99
 
+# good enough
+CARD_DIRECT_WWW_ADDRESS
+
 # tflags userconf
 CHARSET_FARAWAY
 
@@ -78,6 +84,9 @@ DNS_FROM_RFC_DSN
 
 # tflags net
 DNS_FROM_SECURITYSAGE
+
+# good enough
+DRUGS_STOCK_MIMEOLE
 
 # good enough
 DYN_RDNS_AND_INLINE_IMAGE
@@ -170,6 +179,9 @@ FH_MSGID_000000
 FH_MSGID_XXBLAH
 
 # good enough
+FH_MSGID_XXX
+
+# good enough
 FM_FAKE_HELO_VERIZON
 
 # good enough
@@ -189,6 +201,9 @@ FRAGMENTED_MESSAGE
 
 # good enough
 FRT_OPPORTUN2
+
+# good enough
+FRT_PENIS1
 
 # good enough
 FRT_PRICE
@@ -257,13 +272,22 @@ HDR_ORDER_FTSDMCXX_BAT
 HEAD_LONG
 
 # good enough
+HELO_LH_HOME
+
+# good enough
 HELO_LH_LD
 
 # good enough
 HELO_LOCALHOST
 
+# good enough
+HELO_OEM
+
 # tflags userconf
 HIGH_CODEPAGE_URI
+
+# good enough
+HS_INDEX_PARAM
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -282,6 +306,9 @@ KAM_STOCKTIP15
 
 # good enough
 LOTTERY_1
+
+# good enough
+LOTTERY_PH_004470
 
 # good enough
 L_SPAM_TOOL_13
@@ -527,6 +554,18 @@ SPF_HELO_PASS
 SPF_PASS
 
 # good enough
+STOCK_IMG_CTYPE
+
+# good enough
+STOCK_IMG_HDR_FROM
+
+# good enough
+STOCK_IMG_HTML
+
+# good enough
+STOX_META_5
+
+# good enough
 STOX_REPLY_TYPE
 
 # tflags userconf
@@ -545,7 +584,16 @@ TT_OBSCURED_VIAGRA
 TVD_EB_PHISH
 
 # good enough
+TVD_ENVFROM_APOST
+
+# good enough
 TVD_FINGER_02
+
+# good enough
+TVD_PDF_FINGER01_JO
+
+# good enough
+TVD_PH_SUBJ_URGENT
 
 # good enough
 TVD_QUAL_MEDS
@@ -563,52 +611,10 @@ TVD_STOCK1
 TVD_VISIT_PHARMA
 
 # good enough
-AXB_MIME_IMG830
+FB_MORE_SEMEN
 
 # good enough
-AXB_RCVD_ZOOBSEND
-
-# good enough
-AXB_RCVD_ZOONAT
-
-# good enough
-AXB_XTIDX_CHAIN
-
-# good enough
-CARD_DIRECT_WWW_ADDRESS
-
-# good enough
-DOS_STOCK_CDYV_GENERIC
-
-# good enough
-FB_MED1CAT
-
-# good enough
-FB_REPLICA_ROLEX
-
-# good enough
-FB_SMALL_PEN
-
-# good enough
-FM_MORTGAGE3PLUS
-
-# good enough
-FRT_OPPORTUN1
-
-# good enough
-JM_SOUGHT
-
-# good enough
-KAM_LOTTO1
-
-# good enough
-KAM_LOTTO2
-
-# good enough
-KAM_LOTTO3
-
-# good enough
-LOTTERY_PH_004470
+FS_YOUR_PRESCRIP
 
 # tflags net
 RCVD_IN_DSBL
@@ -626,16 +632,7 @@ RCVD_IN_WHOIS_INVALID
 RCVD_IN_XBL
 
 # good enough
-STOX_META_5
-
-# good enough
-STOX_RCVD_N_NN_N
-
-# good enough
-TVD_PDF_FINGER01
-
-# good enough
-TVD_PDF_FINGER01_JO
+TT_OBSCURED_XANAX
 
 # tflags net
 URIBL_L1SPEWS
@@ -863,6 +860,9 @@ WHOIS_WHOISPROT
 XMAILER_MIMEOLE_OL_015D5
 
 # good enough
+XMAILER_MIMEOLE_OL_07794
+
+# good enough
 XMAILER_MIMEOLE_OL_09BB4
 
 # good enough
@@ -870,6 +870,9 @@ XMAILER_MIMEOLE_OL_20C99
 
 # good enough
 XMAILER_MIMEOLE_OL_22B61
+
+# good enough
+XMAILER_MIMEOLE_OL_25340
 
 # good enough
 XMAILER_MIMEOLE_OL_3857F
@@ -887,7 +890,22 @@ XMAILER_MIMEOLE_OL_4B815
 XMAILER_MIMEOLE_OL_4BF4C
 
 # good enough
+XMAILER_MIMEOLE_OL_4EEDB
+
+# good enough
+XMAILER_MIMEOLE_OL_4F240
+
+# good enough
+XMAILER_MIMEOLE_OL_58CB5
+
+# good enough
+XMAILER_MIMEOLE_OL_6554A
+
+# good enough
 XMAILER_MIMEOLE_OL_72641
+
+# good enough
+XMAILER_MIMEOLE_OL_812FF
 
 # good enough
 XMAILER_MIMEOLE_OL_83BF7
@@ -899,13 +917,40 @@ XMAILER_MIMEOLE_OL_8627E
 XMAILER_MIMEOLE_OL_91287
 
 # good enough
+XMAILER_MIMEOLE_OL_9B90B
+
+# good enough
 XMAILER_MIMEOLE_OL_A50F8
+
+# good enough
+XMAILER_MIMEOLE_OL_ADFF7
+
+# good enough
+XMAILER_MIMEOLE_OL_B30D1
 
 # good enough
 XMAILER_MIMEOLE_OL_B4B40
 
 # good enough
+XMAILER_MIMEOLE_OL_BC7E6
+
+# good enough
 XMAILER_MIMEOLE_OL_CAC8F
+
+# good enough
+XMAILER_MIMEOLE_OL_CF0C0
+
+# good enough
+XMAILER_MIMEOLE_OL_F3B05
+
+# good enough
+XMAILER_MIMEOLE_OL_F475E
+
+# good enough
+XMAILER_MIMEOLE_OL_F6D01
+
+# good enough
+XMAILER_MIMEOLE_OL_FF5C8
 
 # tflags net
 __DNS_FROM_RFC_ABUSE
