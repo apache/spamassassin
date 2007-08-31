@@ -48,11 +48,12 @@ nice(15);
 my $OLDEST_HAM_WEEKS    = 52 * 5;       # 5 years
 my $OLDEST_SPAM_WEEKS    = 6 * 4;       # 6 months
 
-# daterevs -- e.g. "20060429/r239832-r" -- are aligned to 0800 UTC, just before
+# daterevs -- e.g. "20060429-r239832-r" -- are aligned to 0800 UTC, just before
 # the time of day when the mass-check tagging occurs; see
 # http://wiki.apache.org/spamassassin/DateRev for more details.
-use constant DATEREV_ADJ => - (8 * 60 * 60);
-use constant WEEK => (7*60*60*24);
+use constant DATEREV_ADJ => -(8 * 60 * 60);
+use constant WEEK => (7 * 60 * 60 * 24);
+use constant OLDEST_DATEREV_SEARCHED => (24 * 60 * 60 * 30);	# 1 month
 
 # ---------------------------------------------------------------------------
 
@@ -64,11 +65,11 @@ $opt_dir ||= $conf{corpus};
 $opt_datadir ||= $conf{html};
 
 # logfile metadata
-my %time = ();
-my %dateline = ();
-my %revision = ();
-my %filesize = ();
-my %mtime = ();
+my %log_timet = ();
+my %log_startdate = ();
+my %log_revision = ();
+my %log_filesize = ();
+my %log_mtime = ();
 my $time_start = time;
 my $output_revpath;
 
@@ -76,11 +77,15 @@ my %logs_by_daterev = ();
 my %is_net_daterev = ();
 
 my @tmps = ();
-$SIG{INT} = sub { clean_up(); die "SIGINT"; };
-$SIG{TERM} = sub { clean_up(); die "SIGTERM"; };
+$SIG{INT} = sub { clean_up(); warn "SIGINT"; exit 23; };
+$SIG{TERM} = sub { clean_up(); warn "SIGTERM"; exit 23; };
 $ENV{TIME} = '%e,%U,%S';
 
-$opt_copylogs and copylogs();
+if ($opt_copylogs) {
+  copylogs();
+  %logs_by_daterev = ();
+}
+
 mk_reports();
 clean_up();
 exit;
@@ -121,14 +126,14 @@ sub copylogs {
   } @files;
 
   foreach my $file (sort @files) {
-    parse_file_metadata($file);
+    parse_file_metadata($opt_dir, $file, 0);
   }
 
   foreach my $daterev (sort keys %logs_by_daterev) {
-    print STDERR "\ncopying to: $opt_datadir/$daterev/LOGS.all\n";
-
     my @ham = grep { /^ham/ } @{$logs_by_daterev{$daterev}};
     my @spam = grep { /^spam/ } @{$logs_by_daterev{$daterev}};
+    my $drdir = $daterev; $drdir =~ s/-/\//;
+    print STDERR "\ncopying to: $opt_datadir/$drdir/LOGS.all\n";
     print STDERR "input h: " . join(' ', @ham) . "\n";
     print STDERR "input s: " . join(' ', @spam) . "\n";
 
@@ -142,10 +147,19 @@ sub copylogs {
 
       my $targetfreshness = (-M $zf);
       my $srcfreshness = (-M $srcf);
-      next if ($targetfreshness > $srcfreshness && !-z $zf);
+      if (!defined ($srcfreshness)) {
+        warn "no srcfile found! $srcf";
+      }
+      if (defined($targetfreshness)
+		&& $targetfreshness < $srcfreshness 
+		&& !-z $zf)
+      {
+	print "already copied: $zf\n";
+        next;
+      }
 
       my $when = scalar localtime time;
-      print "creating: $zf\nstarted $when...\n";
+      print "copying: $zf\nstarted $when...\n";
 
       system("gzip -c < '$srcf' > '$zf.$$'");
       if ($? >> 8 != 0) {
@@ -158,7 +172,7 @@ sub copylogs {
     }
 
     my $when = scalar localtime time;
-    print "created: $bytes bytes, finished at $when\n";
+    print "copied: $bytes bytes, finished at $when\n";
   }
 }
 
@@ -168,14 +182,15 @@ sub mk_reports {
   # find each daterev's data directory:
   # /home/automc/corpus/html/20070609/r545837-b/
 
-  my $threshold_date = return strftime("%Y%m%d", gmtime(time - (24*60*60*30)));
-  foreach my $datedir (<$conf{html}/*>) {
+  my $threshold_date = strftime("%Y%m%d", gmtime(time - OLDEST_DATEREV_SEARCHED));
+
+  foreach my $datedir (<$opt_datadir/*>) {
     next unless ($datedir =~ /\/(2\d+)$/);
     next if ($threshold_date && $1 < $threshold_date);
 
     foreach my $revdir (<$datedir/r*>) {
       if ($opt_daterev) {
-        $revdir =~ m!/(2\d+/r\d+-\S)$!;
+        $revdir =~ m!/(2\d+/r\d+-\S+)$!;
         my $dr = $1;
         $dr =~ s!/!-!g;
         if ($dr ne $opt_daterev) {
@@ -204,13 +219,12 @@ sub report_dir {
   } @files;
 
   foreach my $file (sort @files) {
-    parse_file_metadata($file);
+    parse_file_metadata($dir, $file, 1);
   }
-
 
   foreach my $daterev (sort keys %logs_by_daterev) {
     my $rev;
-    if ($daterev !~ /\/r(\d+)/) {
+    if ($daterev !~ /-r(\d+)/) {
       warn "bad daterev: $daterev"; next;
     }
     $rev = $1;
@@ -224,7 +238,7 @@ sub report_dir {
       eval {
         gen_class ($daterev, $rev, $class, $age);
         1;
-      } or warn "gen_class failed: $@ $!";
+      } or warn "gen_class failed: $@";
     }
   }
 }
@@ -233,26 +247,25 @@ our $no_msgs;
 sub gen_class {
   my ($daterev, $rev, $class, $age) = @_;
 
-  $daterev =~ /r(\d+)/;
-  get_rulemetadata_for_revision($daterev, $1);
-
-  my $reportdir = "$opt_datadir/$daterev";
-  print STDERR "\ngenerating: $reportdir/$class.$age\n";
-
   my @ham = grep { /LOGS\.all-ham/ } @{$logs_by_daterev{$daterev}};
   my @spam = grep { /LOGS\.all-spam/ } @{$logs_by_daterev{$daterev}};
-
-  print STDERR "input h: " . join(' ', @ham) . "\n";
-  print STDERR "input s: " . join(' ', @spam) . "\n";
-
-  # net vs. local
   if ($class eq "NET") {
     @ham = grep { /-net-/ } @ham;
     @spam = grep { /-net-/ } @spam;
   }
+  if ($opt_tag eq 'b') {
+    @ham = grep { /-mc-/ } @ham;
+    @spam = grep { /-mc-/ } @spam;
+  }
+  else {
+    @ham = grep { !/-mc-/ } @ham;
+    @spam = grep { !/-mc-/ } @spam;
+  }
 
-  print STDERR "selected h: " . join(' ', @ham) . "\n";
-  print STDERR "selected s: " . join(' ', @spam) . "\n";
+  my $drdir = $daterev; $drdir =~ s/-/\//;
+  print STDERR "\ngenerating: $opt_datadir/$drdir/$class.$age\n";
+  print STDERR "input h: " . join(' ', @ham) . "\n";
+  print STDERR "input s: " . join(' ', @spam) . "\n";
 
   # we cannot continue if we have no files that match the criteria...
   # demand at least 1 ham and 1 spam file
@@ -260,6 +273,10 @@ sub gen_class {
     die "not enough files found matching criteria ($daterev $class $age)\n";
   }
 
+  $daterev =~ /r(\d+)/;
+  get_rulemetadata_for_revision($daterev, $1);
+
+  # not really creating here; it already exists by now due to copylogs()
   my $dir = create_outputdir($daterev);
   my $fname = "$dir/$class.$age";
 
@@ -270,9 +287,16 @@ sub gen_class {
     my $needsrebuild = 0;
 
     foreach my $srcfile (@spam, @ham) {
-      my $srcfreshness = (-M "$opt_dir/$srcfile");
-      if ($targetfreshness > $srcfreshness) {     # src is fresher
-        print "$fname is older than $opt_dir/$srcfile: $targetfreshness > $srcfreshness\n";
+      my $srcfreshness = (-M "$dir/$srcfile");
+      if (!defined ($srcfreshness)) {
+        warn "no srcfile found! $dir/$srcfile";
+	last;
+      }
+      if (defined($targetfreshness) && defined($srcfreshness)
+		 && $targetfreshness > $srcfreshness)
+      {
+        # src is fresher
+        print "$fname is older than $dir/$srcfile: $targetfreshness > $srcfreshness\n";
         $needsrebuild = 1;
         last;
       }
@@ -290,17 +314,14 @@ sub gen_class {
 };
   my $bytes = 0;
 
-  my $tmpfname = "$dir/$fname.$$";
+  my $tmpfname = "$fname.$$";
 
   open(OUT, "> $tmpfname") or warn "cannot write to $tmpfname";
-  print OUT "# ham results used for $daterev $class $age: ".join(" ", @ham)."\n";
-  print OUT "# spam results used for $daterev $class $age: ".join(" ", @spam)."\n";
-  print OUT "# ".log_metadata_xml($daterev, @ham, @spam)."\n";
-
-  push @tmps, Cwd::abs_path($tmpfname);
+  push @tmps, $tmpfname;
+  print OUT log_metadata($daterev, $class, $age, \@ham, \@spam);
 
   my @pathspam = map { "$dir/$_" } @spam;
-  my @pathham = map { "$dir/$_" } @spam;
+  my @pathham = map { "$dir/$_" } @ham;
 
   my $flags = "";
   $flags = "-t net -s 1" if $class eq "NET";
@@ -329,11 +350,12 @@ sub gen_class {
   if ($age eq "all") {
     my %spam;
     my %ham;
-    for my $file (@pathspam) {
-      $spam{$1} = $file if ($file =~ m/-(\w[-\w]+)\.log$/);
+    # LOGS.all-spam-bb-jm.log.gz
+    for my $f (@pathspam) {
+      $spam{$1} = $f if ($f =~ m/LOGS.all-spam-(\w[-\w]+)\.log/);
     }
-    for my $file (@pathham) {
-      $ham{$1} = $file if ($file =~ m/-(\w[-\w]+)\.log$/);
+    for my $f (@pathham) {
+      $ham{$1} = $f if ($f =~ m/LOGS.all-ham-(\w[-\w]+)\.log/);
     }
     if (scalar keys %spam <= 0 || scalar keys %ham <= 0) {
       warn "no files found for $class.$age"; return;
@@ -343,9 +365,9 @@ sub gen_class {
     my $tmp_all_s = $tmp_s.".all.$$";
     for my $user (sort keys %spam) {
       next unless $ham{$user};
-      time_filter_fileset([ "$opt_dir/$ham{$user}" ],
+      time_filter_fileset([ "$dir/$ham{$user}" ],
               $tmp_h, $OLDEST_HAM_WEEKS, undef);
-      time_filter_fileset([ "$opt_dir/$spam{$user}" ],
+      time_filter_fileset([ "$dir/$spam{$user}" ],
               $tmp_s, $OLDEST_SPAM_WEEKS, undef);
 
       push @output, run_hit_frequencies($flags, $user, $tmp_s, $tmp_h);
@@ -431,6 +453,20 @@ sub run_hit_frequencies {
   return @output;
 }
 
+sub log_metadata {
+  my ($daterev, $class, $age, $ham, $spam) = @_;
+
+  # LOGS.all-ham-bb-jm.log.gz => ham-bb-jm.log
+  my @h_nice = map { my $x = $_; $x=~s/^LOGS\.all-//; $x=~s/\.gz$//; $x } @$ham;
+  my @s_nice = map { my $x = $_; $x=~s/^LOGS\.all-//; $x=~s/\.gz$//; $x } @$spam;
+
+  my $out = "";
+  $out .= "# ham results used for $daterev $class $age: ".join(" ", @h_nice)."\n";
+  $out .= "# spam results used for $daterev $class $age: ".join(" ", @s_nice)."\n";
+  $out .= "# ".log_metadata_xml($daterev, @$ham, @$spam)."\n";
+  return $out;
+}
+
 # ---------------------------------------------------------------------------
 
 sub sort_all {
@@ -459,7 +495,7 @@ sub time_filter_fileset {
 
   for my $file (@{$fileary}) {
     if ($file =~ /\.gz$/) {
-      open(FILE, "gunzip -cd < '$file' |") or warn "cannot gunzip $file";
+      open(IN, "gunzip -cd < '$file' |") or warn "cannot gunzip $file";
     } else {
       open(IN, $file) or warn "cannot read $file";
     }
@@ -476,15 +512,19 @@ sub time_filter_fileset {
 # ---------------------------------------------------------------------------
 
 sub parse_file_metadata {
+  my $dir = shift;
   my $file = shift;
+  my $usecache = shift;
+
+# TODO: if $usecache, keep this metadata in a cache object
 
   my $tag = 0;
   my $headers = '';
 
   if ($file =~ /\.gz$/) {
-    open(FILE, "gunzip -cd < '$opt_dir/$file' |") or warn "cannot read $opt_dir/$file";
+    open(FILE, "gunzip -cd < '$dir/$file' |") or warn "cannot read $dir/$file";
   } else {
-    open(FILE, "$opt_dir/$file") or warn "cannot read $opt_dir/$file";
+    open(FILE, "$dir/$file") or warn "cannot read $dir/$file";
   }
 
   while (my $line = <FILE>) {
@@ -496,43 +536,44 @@ sub parse_file_metadata {
       my $timet = Time::ParseDate::parsedate($datepre.$hh.$datepost,
                   GMT => 1, PREFER_PAST => 1);
 
-      $time{$file} = $timet;
+      $log_timet{$file} = $timet;
     }
     elsif ($line =~ m/^# Date:\s*(\S+)/) {
       # a better way to do the above.  TODO: parse it instead
-      $dateline{$file} = $1;
+      $log_startdate{$file} = $1;
     }
     elsif ($line =~ m/^# SVN revision:\s*(\S+)/) {
-      $revision{$file} = $1;
+      $log_revision{$file} = $1;
     }
   }
+
   close(FILE);
 
-  my @s = stat("$opt_dir/$file");
-  $filesize{$file} = $s[7];
-  $mtime{$file} = $s[9];
+  my @s = stat("$dir/$file");
+  $log_filesize{$file} = $s[7];
+  $log_mtime{$file} = $s[9];
 
-  if (!defined $time{$file}) {
-    warn "$opt_dir/$file: no time found, ignored\n"; next;
+  if (!defined $log_timet{$file}) {
+    warn "$dir/$file: no time found, ignored\n"; return;
   }
-  if (!defined $revision{$file}) {
-    warn "$opt_dir/$file: no revision found, ignored\n"; next;
+  if (!defined $log_revision{$file}) {
+    warn "$dir/$file: no revision found, ignored\n"; return;
   }
-  if ($revision{$file} eq 'unknown') {
-    warn "$opt_dir/$file: not tagged with a revision, ignored\n"; next;
+  if ($log_revision{$file} eq 'unknown') {
+    warn "$dir/$file: not tagged with a revision, ignored\n"; return;
   }
 
-  my $daterev = mk_daterev($time{$file},$revision{$file},$opt_tag);
+  my $daterev = mk_daterev($log_timet{$file}, $log_revision{$file}, $opt_tag);
 
   $logs_by_daterev{$daterev} ||= [ ];
-  push (@{$logs_by_daterev{$daterev}}, $file);
+  push @{$logs_by_daterev{$daterev}}, $file;
 
   if ($file =~ /-net-/) {
     $is_net_daterev{$daterev} = 1;
-    print "$opt_dir/$file: rev=$daterev time=$time{$file} (set 1)\n";
+    print "$dir/$file: rev=$daterev time=$log_timet{$file} (set 1)\n";
   }
   else {
-    print "$opt_dir/$file: rev=$daterev time=$time{$file} (set 0)\n";
+    print "$dir/$file: rev=$daterev time=$log_timet{$file} (set 0)\n";
   }
 }
 
@@ -540,12 +581,14 @@ sub parse_file_metadata {
 
 sub mk_daterev {
   my ($timet, $rev, $tag) = @_;
-  return strftime("%Y%m%d", gmtime($timet + DATEREV_ADJ)) . "/r$rev-$tag";
+  return strftime("%Y%m%d", gmtime($timet + DATEREV_ADJ)) . "-r$rev-$tag";
 }
 
 sub create_outputdir {
   my ($revpath) = @_;
-  my $dir = $conf{html} .'/'. $revpath;
+
+  $revpath =~ s/-/\//;
+  my $dir = $opt_datadir .'/'. $revpath;
 
   # print "output dir: $dir\n";
   if (!-d $dir) {
@@ -576,13 +619,19 @@ sub log_metadata_xml {
 
   # this is extracted into the info.xml file later by the gen_info_xml script
   foreach my $f (@files) {
+    my $nice_f = $f;
+
+    # LOGS.all-ham-bb-jm.log.gz => ham-bb-jm.log
+    $nice_f =~ s/^LOGS\.all-//;
+    $nice_f =~ s/\.gz$//;
+
     $str .= qq{
-      <mclogmd file='$f'>
+      <mclogmd file='$nice_f'>
         <daterev>$daterev</daterev>
-        <rev>$revision{$f}</rev>
-        <fsize>$filesize{$f}</fsize>
-        <mcstartdate>$dateline{$f}</mcstartdate>
-        <mtime>$mtime{$f}</mtime>
+        <rev>$log_revision{$f}</rev>
+        <fsize>$log_filesize{$f}</fsize>
+        <mcstartdate>$log_startdate{$f}</mcstartdate>
+        <mtime>$log_mtime{$f}</mtime>
       </mclogmd>
     };
   }
@@ -603,7 +652,7 @@ sub get_rulemetadata_for_revision {
     my $origwd = Cwd::getcwd;
     chdir "$conf{tree}/masses" or die "cannot chdir $conf{tree}/masses";
 
-    my $cmd = "$./rule-qa/get-rulemetadata-for-revision ".
+    my $cmd = "rule-qa/get-rulemetadata-for-revision ".
                       "--rev=$rev --outputdir='$dir'";
 
     system($cmd);

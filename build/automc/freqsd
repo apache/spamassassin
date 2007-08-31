@@ -33,8 +33,8 @@ umask(002);
 # by using IPC::DirQueue,
 
 # the parent process continually generates the faster reports
-my $parent_reports = "LOGS.all DETAILS.new DETAILS.all DETAILS.age ".
-  "NET.new NET.all NET.age SCOREMAP.new";
+my $parent_reports = "DETAILS.new DETAILS.all DETAILS.age ".
+		"NET.new NET.all NET.age SCOREMAP.new";
 
 # the child process generates the slow reports
 my $child_reports = "OVERLAP.new";
@@ -161,13 +161,13 @@ sub child_loop {
   if ($job && $job->{metadata}->{dir}) {
     logit "starting buildbot-requested slow reports";
     run ("cd masses/rule-qa; ./mk-ruleqa-reports ".
-          "--reports='$reports' --copylogs ".
+          "--reports='$child_reports' --copylogs ".
           "--tag=b --dir ".$job->{metadata}->{dir});
   }
   else {
     logit "starting rsync slow reports";
     run ("cd masses/rule-qa; ./mk-ruleqa-reports ".
-          "--reports='$reports' ".
+          "--reports='$child_reports' ".
           "--tag=n");
 
     # recreate the corpus link-farm
