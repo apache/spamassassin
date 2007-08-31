@@ -59,7 +59,9 @@ with_new_offset:
     }
 
     if ($MAKE_CACHE) {
-      open(O, ">$cache$day"); print O $doc[$day]; close O;
+      if (open(O, ">$cache$day")) {
+        print O $doc[$day]; close O;
+      }
     }
   }
   else {
