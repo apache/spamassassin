@@ -520,10 +520,7 @@ sub parse_file_metadata {
   if ($usecache && open (CACHE, "<$dir/LOGS.metadata")) {
     while (<CACHE>) {
       /^\Q$file\E\|(.*)$/ or next;
-      my $data = $1;
-      chop $data;
-
-      foreach my $kvpair (split (/\|/, $data)) {
+      foreach my $kvpair (split (/\|/, $1)) {
         $kvpair =~ /^(.*?)=(.*)$/; $cached->{$1} = $2;
       }
       last;     # use the first cached set
