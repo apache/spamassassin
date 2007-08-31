@@ -65,11 +65,7 @@ $opt_dir ||= $conf{corpus};
 $opt_datadir ||= $conf{html};
 
 # logfile metadata
-my %log_timet = ();
-my %log_startdate = ();
-my %log_revision = ();
-my %log_filesize = ();
-my %log_mtime = ();
+my %logmd = ();
 my $time_start = time;
 my $output_revpath;
 
@@ -516,64 +512,96 @@ sub parse_file_metadata {
   my $file = shift;
   my $usecache = shift;
 
-# TODO: if $usecache, keep this metadata in a cache object
-
-  my $tag = 0;
-  my $headers = '';
-
-  if ($file =~ /\.gz$/) {
-    open(FILE, "gunzip -cd < '$dir/$file' |") or warn "cannot read $dir/$file";
-  } else {
-    open(FILE, "$dir/$file") or warn "cannot read $dir/$file";
-  }
-
-  while (my $line = <FILE>) {
-    last if $line !~ /^#/;
-    $headers .= $line;
-    if ($line =~ /, on (... ... .. )(..)(:..:.. ... ....)/) {
-      my ($datepre, $hh, $datepost) = ($1,$2,$3);
-
-      my $timet = Time::ParseDate::parsedate($datepre.$hh.$datepost,
-                  GMT => 1, PREFER_PAST => 1);
-
-      $log_timet{$file} = $timet;
-    }
-    elsif ($line =~ m/^# Date:\s*(\S+)/) {
-      # a better way to do the above.  TODO: parse it instead
-      $log_startdate{$file} = $1;
-    }
-    elsif ($line =~ m/^# SVN revision:\s*(\S+)/) {
-      $log_revision{$file} = $1;
-    }
-  }
-
-  close(FILE);
-
   my @s = stat("$dir/$file");
-  $log_filesize{$file} = $s[7];
-  $log_mtime{$file} = $s[9];
+  my $fsize = $s[7];
+  my $mtime = $s[9];
 
-  if (!defined $log_timet{$file}) {
+  my $cached = { };
+  if ($usecache && open (CACHE, "<$dir/LOGS.metadata")) {
+    while (<CACHE>) {
+      /^\Q$file\E\|(.*)$/ or next;
+      my $data = $1;
+      chop $data;
+
+      foreach my $kvpair (split (/\|/, $data)) {
+        $kvpair =~ /^(.*?)=(.*)$/; $cached->{$1} = $2;
+      }
+      last;     # use the first cached set
+    }
+    close CACHE;
+  }
+
+  if ($cached->{time_t} && $cached->{fsize} == $fsize
+                && $cached->{mtime} == $mtime)
+  {
+    # hooray, we can use the cached copy
+    $logmd{$file} = $cached;
+  }
+  else {
+    # read it from the gzipped logfile
+    $logmd{$file}->{fsize} = $fsize;
+    $logmd{$file}->{mtime} = $mtime;
+
+    if ($file =~ /\.gz$/) {
+      open(FILE, "gunzip -cd < '$dir/$file' |") or warn "cannot read $dir/$file";
+    } else {
+      open(FILE, "$dir/$file") or warn "cannot read $dir/$file";
+    }
+    while (my $line = <FILE>) {
+      last if $line !~ /^#/;
+      if ($line =~ /, on (... ... .. )(..)(:..:.. ... ....)/) {
+        my ($datepre, $hh, $datepost) = ($1,$2,$3);
+
+        my $timet = Time::ParseDate::parsedate($datepre.$hh.$datepost,
+                    GMT => 1, PREFER_PAST => 1);
+
+        $logmd{$file}->{time_t} = $timet;
+      }
+      elsif ($line =~ m/^# Date:\s*(\S+)/) {
+        # a better way to do the above.  TODO: parse it instead
+        $logmd{$file}->{startdate} = $1;
+      }
+      elsif ($line =~ m/^# SVN revision:\s*(\S+)/) {
+        $logmd{$file}->{revision} = $1;
+      }
+    }
+    close(FILE);
+
+    # and write to the cache
+    if ($usecache) {
+      my $line = "$file";
+      foreach my $k (keys %{$logmd{$file}}) { 
+        $line .= "|".$k."=".$logmd{$file}->{$k};
+      }
+      if (open (CACHE, ">>$dir/LOGS.metadata")) {
+        print CACHE $line."\n";
+        close CACHE or unlink "$dir/LOGS.metadata";
+      }
+    }
+  }
+
+  if (!defined $logmd{$file}->{time_t}) {
     warn "$dir/$file: no time found, ignored\n"; return;
   }
-  if (!defined $log_revision{$file}) {
+  if (!defined $logmd{$file}->{revision}) {
     warn "$dir/$file: no revision found, ignored\n"; return;
   }
-  if ($log_revision{$file} eq 'unknown') {
+  if ($logmd{$file}->{revision} eq 'unknown') {
     warn "$dir/$file: not tagged with a revision, ignored\n"; return;
   }
 
-  my $daterev = mk_daterev($log_timet{$file}, $log_revision{$file}, $opt_tag);
+  my $daterev = mk_daterev($logmd{$file}->{time_t},
+                        $logmd{$file}->{revision}, $opt_tag);
 
   $logs_by_daterev{$daterev} ||= [ ];
   push @{$logs_by_daterev{$daterev}}, $file;
 
   if ($file =~ /-net-/) {
     $is_net_daterev{$daterev} = 1;
-    print "$dir/$file: rev=$daterev time=$log_timet{$file} (set 1)\n";
+    print "$dir/$file: rev=$daterev time=$logmd{$file}->{time_t} (set 1)\n";
   }
   else {
-    print "$dir/$file: rev=$daterev time=$log_timet{$file} (set 0)\n";
+    print "$dir/$file: rev=$daterev time=$logmd{$file}->{time_t} (set 0)\n";
   }
 }
 
@@ -628,10 +656,10 @@ sub log_metadata_xml {
     $str .= qq{
       <mclogmd file='$nice_f'>
         <daterev>$daterev</daterev>
-        <rev>$log_revision{$f}</rev>
-        <fsize>$log_filesize{$f}</fsize>
-        <mcstartdate>$log_startdate{$f}</mcstartdate>
-        <mtime>$log_mtime{$f}</mtime>
+        <rev>$logmd{$f}->{revision}</rev>
+        <fsize>$logmd{$f}->{fsize}</fsize>
+        <mcstartdate>$logmd{$f}->{startdate}</mcstartdate>
+        <mtime>$logmd{$f}->{mtime}</mtime>
       </mclogmd>
     };
   }
