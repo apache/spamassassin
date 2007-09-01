@@ -136,7 +136,7 @@ sub start_lookup {
   $ent->{display_id} =  # identifies entry in debug logging and similar
     join(", ", grep { defined }
                map { ref $ent->{$_} ? @{$ent->{$_}} : $ent->{$_} }
-               qw(sets rules rulename type key) ),
+               qw(sets rules rulename type key) );
 
   $self->{queries_started}++;
   $self->{total_queries_started}++;
