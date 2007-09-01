@@ -157,7 +157,7 @@ sub have_callback {
     # nope.  run through all registered plugins and see which ones
     # implement this type of callback.  sort by priority
 
-    my %subsbypri = ();
+    my %subsbypri;
     foreach my $plugin (@{$self->{plugins}}) {
       my $methodref = $plugin->can ($subname);
       if (defined $methodref) {
@@ -170,7 +170,7 @@ sub have_callback {
       }
     }
 
-    my @subs = ();
+    my @subs;
     foreach my $pri (sort { $a <=> $b } keys %subsbypri) {
       push @subs, @{$subsbypri{$pri}};
     }

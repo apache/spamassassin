@@ -92,7 +92,7 @@ C<would_log> below).
 sub add_facilities {
   my ($facilities) = @_;
 
-  my @facilities = ();
+  my @facilities;
   if (ref ($facilities) eq '') {
     if (defined $facilities && $facilities ne '0') {
       @facilities = split(/,/, $facilities);

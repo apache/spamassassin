@@ -120,7 +120,7 @@ sub new {
 
 sub set_config {
   my($self, $conf) = @_;
-  my @cmds = ();
+  my @cmds;
 
   push(@cmds, {
     setting => 'use_hashcash',

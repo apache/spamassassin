@@ -106,7 +106,7 @@ sub find_parts {
     $depth = 1;
   }
   
-  my @ret = ();
+  my @ret;
   my @search = ( $self );
 
   while (my $part = shift @search) {
@@ -514,7 +514,7 @@ sub content_summary {
   my($self) = @_;
 
   my @ret = ( [ $self->{'type'} ] );
-  my @search = ( );
+  my @search;
 
   if (exists $self->{'body_parts'}) {
     my $count = @{$self->{'body_parts'}};
@@ -664,7 +664,7 @@ sub get_all_headers {
   $raw ||= 0;
   $include_mbox ||= 0;
 
-  my @lines = ();
+  my @lines;
 
   # precalculate destination positions based on order of appearance
   my $i = 0;

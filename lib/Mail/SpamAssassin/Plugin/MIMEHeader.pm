@@ -90,7 +90,7 @@ sub new {
 
 sub set_config {
   my($self, $conf) = @_;
-  my @cmds = ();
+  my @cmds;
 
   my $pluginobj = $self;        # allow use inside the closure below
 

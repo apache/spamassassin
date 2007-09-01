@@ -101,8 +101,8 @@ sub extract_set {
 sub extract_set_pri {
   my ($self, $conf, $rules, $ruletype) = @_;
 
-  my @good_bases = ();
-  my @failed = ();
+  my @good_bases;
+  my @failed;
   my $yes = 0;
   my $no = 0;
   my $count = 0;
@@ -189,7 +189,7 @@ NEXT_RULE:
 
       # figure out if we have e.g. ["foo", "foob", "foobar"]; in this
       # case, we only need to track ["foo"].
-      my %subsumed = ();
+      my %subsumed;
       foreach my $base1 (@bases) {
         foreach my $base2 (@bases) {
           if ($base1 ne $base2 && $base1 =~ /\Q$base2\E/) {
@@ -198,7 +198,7 @@ NEXT_RULE:
         }
       }
 
-      my @forcache = ();
+      my @forcache;
       foreach my $base (@bases) {
         next if $subsumed{$base};
         push @good_bases, {
@@ -273,7 +273,7 @@ NO:
   # array -- into a more efficient format, using arrays and with a little
   # bit of precomputation, to go (quite a bit) faster
 
-  my @rewritten = ();
+  my @rewritten;
   foreach my $set1 (@good_bases) {
     my $base = $set1->{base};
     next if (!$base || !$set1->{name});
@@ -336,7 +336,7 @@ NO:
   # we can still have duplicate cases; __FRAUD_PTS and __SARE_FRAUD_BADTHINGS
   # both contain "killed" for example, pointing at different rules, which
   # the above search hasn't found.  Collapse them here with a hash
-  my %bases = ();
+  my %bases;
   foreach my $set (@good_bases) {
     my $base = $set->[0];
     next unless $base;
@@ -351,7 +351,7 @@ NO:
 
   foreach my $base (keys %bases) {
     # uniq the list, since there are probably dup rules listed
-    my %u = ();
+    my %u;
     for my $i (split ' ', $bases{$base}) {
       next if exists $u{$i}; undef $u{$i}; 
     }
@@ -538,7 +538,7 @@ sub extract_hints {
   #
   DEBUG_RE_PARSING and warn "Mre=debug output: $opsstr";
 
-  my @ops = ();
+  my @ops;
   foreach my $op (split(/\n/s, $opsstr)) {
     next unless $op;
     if ($op =~ /^\s+\d+: (\s*)([A-Z]\w+)\b(.*)(?:\(\d+\))?$/) {
@@ -580,7 +580,7 @@ sub extract_hints {
   }
 
   # now find the longest DFA-friendly string in each unrolled version
-  my @longests = ();
+  my @longests;
   foreach my $opsarray (@unrolled) {
     my $longestexact = '';
     my $buf = '';
@@ -676,7 +676,7 @@ sub unroll_branches {
   die "too deep" if ($depth++ > 5);
 
   my @ops = (@{$opslist});      # copy
-  my @pre_branch_ops = ();
+  my @pre_branch_ops;
   my $branch_spcs;
   my $trie_spcs;
   my $open_spcs;
@@ -789,8 +789,8 @@ sub unroll_branches {
 
   # otherwise we're at the start of a new branch set
   # /(foo|bar(baz|argh)boo)gab/
-  my @alts = ();
-  my @in_this_branch = ();
+  my @alts;
+  my @in_this_branch;
 
   DEBUG_RE_PARSING and warn "entering branch: ".
         "open='".(defined $open_spcs ? $open_spcs : 'undef')."' ".
@@ -880,7 +880,7 @@ sub unroll_branches {
   }
 
   # now recurse, to unroll the remaining branches (if any exist)
-  my @rets = ();
+  my @rets;
   foreach my $alt (@alts) {
     push @rets, $self->unroll_branches($depth, $alt);
   }

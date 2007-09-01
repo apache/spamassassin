@@ -615,7 +615,7 @@ sub untie_db {
 sub calculate_expire_delta {
   my ($self, $newest_atime, $start, $max_expire_mult) = @_;
 
-  my %delta = (); # use a hash since an array is going to be very sparse
+  my %delta;  # use a hash since an array is going to be very sparse
 
   # do the first pass, figure out atime delta
   my ($tok, $packed);
@@ -1229,7 +1229,7 @@ sub _sync_journal_trapped {
   my $started = time();
   my $count = 0;
   my $total_count = 0;
-  my %tokens = ();
+  my %tokens;
   my $showdots = $opts->{showdots};
   my $retirepath = $path.".old";
 

@@ -233,7 +233,7 @@ atime for token expiration.
 sub calculate_expire_delta {
   my ($self, $newest_atime, $start, $max_expire_mult) = @_;
 
-  my %delta = (); # use a hash since an array is going to be very sparse
+  my %delta;  # use a hash since an array is going to be very sparse
 
   return %delta unless (defined($self->{_dbh}));
 

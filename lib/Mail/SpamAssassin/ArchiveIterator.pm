@@ -436,7 +436,7 @@ sub _scan_targets {
       next;
     }
 
-    my %opts = ();
+    my %opts;
     if (ref $target eq 'HASH') {
       # e.g. { target => $target, opt_foo => 1, opt_bar => 0.4 ... }
       foreach my $k (keys %{$target}) {

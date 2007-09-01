@@ -487,7 +487,7 @@ sub get_all_metadata {
   if (!$self->{metadata}) {
     warn "metadata: oops! get_all_metadata() called after finish_metadata()"; return;
   }
-  my @ret = ();
+  my @ret;
   foreach my $key (sort keys %{$self->{metadata}->{strings}}) {
     push (@ret, "$key: " . $self->{metadata}->{strings}->{$key} . "\n");
   }
@@ -1106,7 +1106,7 @@ sub get_decoded_body_text_array {
 # ---------------------------------------------------------------------------
 
 sub split_into_array_of_short_lines {
-  my @result = ();
+  my @result;
   foreach my $line (split (/^/m, $_[0])) {
     while (length ($line) > MAX_BODY_LINE_LENGTH) {
       # try splitting "nicely" so that we don't chop an url in half or

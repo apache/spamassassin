@@ -446,8 +446,8 @@ sub do_meta_tests {
 sub do_head_tests {
   my ($self, $pms, $priority) = @_;
   # hash to hold the rules, "header\tdefault value" => rulename
-  my %ordered = ();
-  my %testcode = ();
+  my %ordered;
+  my %testcode;
 
   $self->run_generic_tests ($pms, $priority,
     consttype => $Mail::SpamAssassin::Conf::TYPE_HEAD_TESTS,

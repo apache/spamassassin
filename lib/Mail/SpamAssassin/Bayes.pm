@@ -345,7 +345,7 @@ sub tokenize_line {
   my $region = $_[3];
   local ($_) = $_[1];
 
-  my @rettokens = ();
+  my @rettokens;
 
   # include quotes, .'s and -'s for URIs, and [$,]'s for Nigerian-scam strings,
   # and ISO-8859-15 alphas.  Do not split on @'s; better results keeping it.
@@ -459,7 +459,7 @@ sub tokenize_line {
 sub tokenize_headers {
   my ($self, $msg) = @_;
 
-  my %parsed = ();
+  my %parsed;
 
   my %user_ignore;
   $user_ignore{lc $_} = 1 for @{$self->{main}->{conf}->{bayes_ignore_headers}};
@@ -642,7 +642,7 @@ sub pre_chew_addr_header {
   local ($_);
 
   my @addrs = $self->{main}->find_all_addrs_in_line ($val);
-  my @toks = ();
+  my @toks;
   foreach (@addrs) {
     push (@toks, $self->tokenize_mail_addrs ($_));
   }
@@ -653,7 +653,7 @@ sub tokenize_mail_addrs {
   my ($self, $addr) = @_;
 
   ($addr =~ /(.+)\@(.+)$/) or return ();
-  my @toks = ();
+  my @toks;
   push(@toks, "U*".$1, "D*".$2);
   $_ = $2; while (s/^[^\.]+\.(.+)$/$1/gs) { push(@toks, "D*".$1); }
   return @toks;
@@ -928,7 +928,7 @@ sub forget_trapped {
 sub get_msgid {
   my ($self, $msg) = @_;
 
-  my @msgid = ();
+  my @msgid;
 
   my $msgid = $msg->get_header("Message-Id");
   if (defined $msgid && $msgid ne '' && $msgid !~ /^\s*<\s*(?:\@sa_generated)?>.*$/) {
@@ -1185,7 +1185,7 @@ sub scan {
 
   my $tokensdata = $self->{store}->tok_get_all(keys %{$msgtokens});
 
-  my %pw = ();
+  my %pw;
 
   foreach my $tokendata (@{$tokensdata}) {
     my ($token, $tok_spam, $tok_ham, $atime) = @{$tokendata};
@@ -1221,7 +1221,7 @@ sub scan {
   # now take the $count most significant tokens and calculate probs using
   # Robinson's formula.
   my $count = N_SIGNIFICANT_TOKENS;
-  my @sorted = ();
+  my @sorted;
 
   my @touch_tokens;
   my $tinfo_spammy = $permsgstatus->{bayes_token_info_spammy} = [];

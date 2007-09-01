@@ -88,7 +88,7 @@ sub new {
 
 sub set_config {
   my ($self, $conf) = @_;
-  my @cmds = ();
+  my @cmds;
 
 =item use_razor2 (0|1)		(default: 1)
 
@@ -142,7 +142,7 @@ sub razor2_access {
   my ($self, $fulltext, $type) = @_;
   my $timeout = $self->{main}->{conf}->{razor_timeout};
   my $return = 0;
-  my @results = ();
+  my @results;
 
   my $debug = $type eq 'check' ? 'razor2' : 'reporter';
 
@@ -385,7 +385,7 @@ sub check_razor2 {
   my $timer = $self->{main}->time_method("check_razor2");
 
   my $return;
-  my @results = ();
+  my @results;
 
   # TODO: check for cache header, set results appropriately
 
