@@ -915,7 +915,7 @@ sub add_all_addresses_to_blacklist {
 
   $self->init(1);
 
-  my @addrlist = ();
+  my @addrlist;
   my @hdrs = $mail_obj->get_header ('From');
   if ($#hdrs >= 0) {
     push (@addrlist, $self->find_all_addrs_in_line (join (" ", @hdrs)));
@@ -1235,7 +1235,7 @@ sub compile_now {
   # Backup default values which deal with userstate.
   # This is done so we can create any new files in, presumably, a temp dir.
   # see bug 2762 for more details.
-  my %backup = ();
+  my %backup;
   if (defined $deal_with_userstate && $deal_with_userstate) {
     while(my($k,$v) = each %{$self->{conf}}) {
       $backup{$k} = $v if (defined $v && !ref($v) && $v =~/__userstate__/);
@@ -1460,7 +1460,7 @@ sub timer_report {
     }
   }
   my $total = $latest - $earliest;
-  my @str = ();
+  my @str;
   foreach my $name (@{$self->{timers_order}}) {
     my $elapsed = $self->{timers}->{$name}->{elapsed} || 0;
     my $pc = $total <= 0 || $elapsed >= $total ? 100 : ($elapsed/$total)*100;
@@ -1849,7 +1849,7 @@ sub _get_cf_pre_files_in_dir {
   my ($self, $dir, $type) = @_;
 
   if ($self->{config_tree_recurse}) {
-    my @cfs = ();
+    my @cfs;
 
     # use "eval" to avoid loading File::Find unless this is specified
     eval {
@@ -1901,7 +1901,7 @@ sub find_all_addrs_in_mail {
 
   $self->init(1);
 
-  my @addrlist = ();
+  my @addrlist;
   foreach my $header (qw(To From Cc Reply-To Sender
   				Errors-To Mail-Followup-To))
   {
@@ -1915,8 +1915,8 @@ sub find_all_addrs_in_mail {
     push (@addrlist, $self->find_all_addrs_in_line ($line));
   }
 
-  my @ret = ();
-  my %done = ();
+  my @ret;
+  my %done;
 
   foreach $_ (@addrlist) {
     s/^mailto://;       # from Outlook "forwarded" message
@@ -1934,8 +1934,8 @@ sub find_all_addrs_in_line {
   my $ID_PATTERN   = '[-a-z0-9_\+\:\=\!\#\$\%\&\*\^\?\{\}\|\~\/\.]+';
   my $HOST_PATTERN = '[-a-z0-9_\+\:\/]+';
 
-  my @addrs = ();
-  my %seen = ();
+  my @addrs;
+  my %seen;
   while ($line =~ s/(?:mailto:)?\s*
 	      ($ID_PATTERN \@
 	      $HOST_PATTERN(?:\.$HOST_PATTERN)+)//oix) 
@@ -1972,7 +1972,7 @@ so that the object will use its current configuration.  i.e.:
   my $spamtest = Mail::SpamAssassin->new( ... );
 
   # backup configuration to %conf_backup
-  my %conf_backup = ();
+  my %conf_backup;
   $spamtest->copy_config(undef, \%conf_backup) ||
     die "config: error returned from copy_config!\n";
 

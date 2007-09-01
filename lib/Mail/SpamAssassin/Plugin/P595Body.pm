@@ -146,7 +146,7 @@ sub run_body_fast_scan {
       my @caught = $trie_re_sub->($line);
       next unless (scalar @caught > 0);
 
-      my %alreadydone = ();
+      my %alreadydone;
       foreach my $rulename (@caught) {
         {
           # only try each rule once per line

@@ -201,7 +201,7 @@ sub parsed_metadata {
   my $skip_domains = $scanner->{main}->{conf}->{uridnsbl_skip_domains};
 
   # list of arrays to use in order
-  my @uri_ordered = ();
+  my @uri_ordered;
 
   # Generate the full list of html-parsed domains.
   my $uris = $scanner->get_uri_detail_list();
@@ -255,7 +255,7 @@ sub parsed_metadata {
 
   # at this point, @uri_ordered is an ordered array of uri hashes
 
-  my %domlist = ();
+  my %domlist;
   my $umd = $scanner->{main}->{conf}->{uridnsbl_max_domains};
   while (keys %domlist < $umd && @uri_ordered) {
     my $array = shift @uri_ordered;
@@ -292,7 +292,7 @@ sub parsed_metadata {
 
 sub set_config {
   my($self, $conf) = @_;
-  my @cmds = ();
+  my @cmds;
 
   push(@cmds, {
     setting => 'uridnsbl_max_domains',
@@ -571,7 +571,7 @@ sub complete_dnsbl_lookup {
   my ($self, $scanner, $ent, $dnsblip) = @_;
 
   my $conf = $scanner->{conf};
-  my @subtests = ();
+  my @subtests;
   my $rulename = $ent->{rulename};
   my $rulecf = $conf->{uridnsbls}->{$rulename};
 

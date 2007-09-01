@@ -150,7 +150,7 @@ sub set_default_commands {
   # see "perldoc Mail::SpamAssassin::Conf::Parser" for details on this fmt.
   # push each config item like this, to avoid a POD bug; it can't just accept
   # ( { ... }, { ... }, { ...} ) otherwise POD parsing dies.
-  my @cmds = ();
+  my @cmds;
 
 =head2 SCORING OPTIONS
 
@@ -3297,7 +3297,7 @@ sub trim_rules {
     push(@rules_to_keep, $self->add_meta_depends($meta))
   }
 
-  my %rules_to_keep_hash = ();
+  my %rules_to_keep_hash;
 
   foreach my $rule (@rules_to_keep) {
     $rules_to_keep_hash{$rule} = 1;
@@ -3314,7 +3314,7 @@ sub trim_rules {
 sub add_meta_depends {
   my ($self, $meta) = @_;
 
-  my @rules = ();
+  my @rules;
   my @tokens = $self->get_rule_value('meta_tests', $meta) =~ m/(\w+)/g;
 
   @tokens = grep(!/^\d+$/, @tokens);
@@ -3496,7 +3496,7 @@ sub clone {
     internal_networks trusted_networks msa_networks 
   );
 
-  my %done = ();
+  my %done;
 
   # special cases.  first, skip anything that cannot be changed
   # by users, and the stuff we take care of here

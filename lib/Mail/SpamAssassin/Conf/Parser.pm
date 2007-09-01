@@ -235,8 +235,8 @@ sub parse {
 
   $self->{currentfile} = '(no file)';
   my $skip_parsing = 0;
-  my @curfile_stack = ();
-  my @if_stack = ();
+  my @curfile_stack;
+  my @if_stack;
   my @conf_lines = split (/\n/, $_[1]);
   my $line;
   $self->{if_stack} = \@if_stack;
@@ -871,8 +871,8 @@ sub find_dup_rules {
   my ($self) = @_;
   my $conf = $self->{conf};
 
-  my %names_for_text = ();
-  my %dups = ();
+  my %names_for_text;
+  my %dups;
   while (my ($name, $text) = each %{$conf->{tests}}) {
     my $type = $conf->{test_types}->{$name};
     my $tf = ($conf->{tflags}->{$name}||''); $tf =~ s/\s+/ /gs;
@@ -902,7 +902,7 @@ sub find_dup_rules {
     }
     # $first is now the earliest-occurring rule. mark others as dups
 
-    my @dups = ();
+    my @dups;
     foreach my $name (@names) {
       next if $name eq $first;
       push @dups, $name;
@@ -975,7 +975,7 @@ sub lint_trusted_networks {
     next if $net_type eq $matching_against;
 
     my $replace_nets;
-    my @valid_net_list = ();
+    my @valid_net_list;
     my $net_list = $conf->{$net_type};
 
     foreach my $net (@{$net_list->{nets}}) {

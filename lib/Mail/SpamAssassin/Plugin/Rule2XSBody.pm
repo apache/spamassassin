@@ -112,7 +112,7 @@ sub setup_test_set_pri {
   $conf->{skip_body_rules}   ||= { };
   $conf->{need_one_line_sub} ||= { };
 
-  my %longname = ();
+  my %longname;
   foreach my $nameandflags (keys %{$hasrules}) {
     my $name = $nameandflags; $name =~ s/,\[.*?\]$//;
     $longname{$name} = $nameandflags;
@@ -223,7 +223,7 @@ sub run_body_fast_scan {
       # way to support this and still work with UTF-8 ok
       my $results = &{$modname.'::scan'}(lc $line);
 
-      my %alreadydone = ();
+      my %alreadydone;
       foreach my $ruleandflags (@{$results})
       {
         # only try each rule once per line

@@ -526,7 +526,7 @@ my $childlimit;           # max number of kids allowed
 my $timeout_tcp;          # socket timeout (connect->headers), 0=no timeout
 my $timeout_child;        # processing timeout (headers->finish), 0=no timeout
 my $clients_per_child;    # number of clients each child should process
-my %children = ();        # current children
+my %children;             # current children
 
 if ( defined $opt{'max-children'} ) {
   $childlimit = $opt{'max-children'};
@@ -644,7 +644,7 @@ if (!$opt{'round-robin'})
 my $listeninfo = compose_listen_info_string();
 
 sub compose_listen_info_string {
-  my @listeninfo = ();
+  my @listeninfo;
 
   if ( $listen_unix ) {
     push @listeninfo, "UNIX domain socket " . $opt{'socketpath'};
@@ -904,8 +904,8 @@ $spamtest->finish_learner();
 # If we're going to be switching users in check(), let's backup the
 # fresh configuration now for later restoring ...  MUST be placed after
 # the M::SA creation.
-my %conf_backup = ();
-my %msa_backup = ();
+my %conf_backup;
+my %msa_backup;
 
 if ($copy_config_p) {
   foreach( 'username', 'user_dir', 'userstate_dir', 'learn_to_journal' ) {

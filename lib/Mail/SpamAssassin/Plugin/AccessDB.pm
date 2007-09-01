@@ -91,7 +91,7 @@ sub check_access_database {
   $path = $self->{main}->sed_path ($path);
   dbg("accessdb: tie-ing to DB file R/O in $path");
   if (tie %access,"DB_File",$path, O_RDONLY) {
-    my @lookfor = ();
+    my @lookfor;
 
     # Look for "From:" versions as well!
     foreach my $from ($pms->all_from_addrs()) {
@@ -136,7 +136,7 @@ sub check_access_database {
     }
 
     my $retval = 0;
-    my %cache = ();
+    my %cache;
     foreach (@lookfor) {
       next if ($cache{$_}++);
       dbg("accessdb: looking for $_");

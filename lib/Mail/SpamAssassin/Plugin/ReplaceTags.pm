@@ -170,7 +170,7 @@ sub user_conf_parsing_end {
 
 sub set_config {
   my ($self, $conf) = @_;
-  my @cmds = ();
+  my @cmds;
 
 =head1 RULE DEFINITIONS AND PRIVILEGED SETTINGS
 

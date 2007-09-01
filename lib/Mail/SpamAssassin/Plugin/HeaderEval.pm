@@ -190,7 +190,7 @@ sub check_for_unique_subject_id {
 # Does not include triplets only found in proper names, or in the Latin
 # and Greek terms that might be found in a larger dictionary
 
-my %triplets = ();
+my %triplets;
 my $triplets_loaded = 0;
 
 sub word_is_in_dictionary {
@@ -1052,7 +1052,7 @@ sub check_messageid_not_usable {
 # Return true if the count of $hdr headers are within the given range
 sub check_header_count_range {
   my ($self, $pms, $hdr, $min, $max) = @_;
-  my %uniq = ();
+  my %uniq;
   my @hdrs = grep(!$uniq{$_}++, $pms->{msg}->get_header ($hdr));
   return (scalar @hdrs >= $min && scalar @hdrs <= $max);
 }

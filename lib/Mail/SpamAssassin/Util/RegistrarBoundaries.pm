@@ -230,7 +230,7 @@ sub split_domain {
 
     # Split scalar domain into components
     my @domparts = split(/\./, $domain);
-    my @hostname = ();
+    my @hostname;
 
     while (@domparts > 1) { # go until we find the TLD
       if (@domparts == 4) {

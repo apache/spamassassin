@@ -423,7 +423,7 @@ sub body_charset_is_likely_to_fp {
   # koi8-r etc.
   #
   $self->_check_attachments($pms) unless exists $pms->{mime_checked_attachments};
-  my @charsets = ();
+  my @charsets;
   my $type = $pms->get('Content-Type');
   $type = get_charset_from_ct_line ($type);
   if (defined $type) {

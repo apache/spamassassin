@@ -238,7 +238,7 @@ sub _check_whitelist_rcvd {
   # we can only match this if we have at least 1 trusted or untrusted header
   return 0 unless ($pms->{num_relays_untrusted}+$pms->{num_relays_trusted} > 0);
 
-  my @relays = ();
+  my @relays;
   # try the untrusted one first
   if ($pms->{num_relays_untrusted} > 0) {
     @relays = $pms->{relays_untrusted}->[0];

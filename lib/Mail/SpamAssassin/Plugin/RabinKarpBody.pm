@@ -141,7 +141,7 @@ sub run_body_fast_scan {
       my $results = RabinKarpAccel::scan_string($rkhashes, lc $line);
       next unless $results;
 
-      my %alreadydone = ();
+      my %alreadydone;
       foreach my $rulename (@{$results})
       {
         # only try each rule once per line

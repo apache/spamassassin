@@ -124,7 +124,7 @@ use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
     delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};
 
     # Go through and clean the PATH out
-    my @path = ();
+    my @path;
     my @stat;
     foreach my $dir (File::Spec->path()) {
       next unless $dir;
@@ -883,8 +883,8 @@ sub parse_content_type {
 sub url_encode {
   my ($url) = @_;
   my (@characters) = split(/(\%[0-9a-fA-F]{2})/, $url);
-  my (@unencoded) = ();
-  my (@encoded) = ();
+  my (@unencoded);
+  my (@encoded);
 
   foreach (@characters) {
     # escaped character set ...
@@ -1102,7 +1102,7 @@ sub uri_list_canonify {
   my($redirector_patterns, @uris) = @_;
 
   # make sure we catch bad encoding tricks
-  my @nuris = ();
+  my @nuris;
   for my $uri (@uris) {
     # we're interested in http:// and so on, skip mailto: and
     # email addresses with no protocol

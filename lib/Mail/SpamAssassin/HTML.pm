@@ -123,7 +123,7 @@ sub html_end {
 
   delete $self->{text_style};
 
-  my @uri = ();
+  my @uri;
 
   # add the canonified version of each uri to the detail list
   if (defined $self->{uri}) {

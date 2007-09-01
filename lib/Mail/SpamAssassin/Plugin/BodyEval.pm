@@ -95,8 +95,8 @@ sub _multipart_alternative_difference {
 
   # Go through each of the multipart parts
   foreach my $part (@ma) {
-    my %html = ();
-    my %text = ();
+    my %html;
+    my %text;
 
     # limit our search to text-based parts
     my @txt = $part->find_parts(qr@^text\b@i);
@@ -235,7 +235,7 @@ sub _check_stock_info {
   return if (!@parts);
 
   # Go through each of the multipart parts
-  my %hits = ();
+  my %hits;
   my $part = $parts[0];
   my ($type, $rnd) = $part->rendered();
   return unless $type;

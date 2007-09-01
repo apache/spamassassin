@@ -70,8 +70,8 @@ sub check_start {
 
 sub ip_list_uniq_and_strip_private {
   my ($self, @origips) = @_;
-  my @ips = ();
-  my %seen = ();
+  my @ips;
+  my %seen;
   my $IP_PRIVATE = IP_PRIVATE;
   foreach my $ip (@origips) {
     next unless $ip;
@@ -167,7 +167,7 @@ sub check_rbl_backend {
   # X-Sender-Ip: could be worth using (very low occurance for me)
   # X-Sender: has a very low bang-for-buck for me
   my $IP_ADDRESS = IP_ADDRESS;
-  my @originating = ();
+  my @originating;
   for my $header ('X-Originating-IP', 'X-Apparently-From') {
     my $str = $pms->get($header);
     next unless $str;
@@ -216,7 +216,7 @@ sub check_rbl_backend {
     # And if name is foo-untrusted, check any untrusted IP address.
     elsif ($set =~ /-(first|un)trusted$/)
     {
-      my @tips = ();
+      my @tips;
       foreach my $ip (@originating) {
         if ($ip && !$trusted->contains_ip($ip)) {
           push(@tips, $ip);
@@ -231,7 +231,7 @@ sub check_rbl_backend {
     }
     else
     {
-      my @tips = ();
+      my @tips;
       foreach my $ip (@originating) {
         if ($ip && !$trusted->contains_ip($ip)) {
           push(@tips, $ip);

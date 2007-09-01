@@ -1119,7 +1119,7 @@ sub set_spamd_result_item {
 # called by spamd
 sub get_spamd_result_log_items {
   my ($self) = @_;
-  my @ret = ();
+  my @ret;
   foreach my $ref (@{$self->{spamd_result_log_items}}) {
     push @ret, &$ref;
   }
@@ -1794,7 +1794,7 @@ sub get_uri_list {
     return @{$self->{uri_list}};
   }
 
-  my @uris = ();
+  my @uris;
   # $self->{redirect_num} = 0;
 
   # get URIs from HTML parsing
@@ -1914,7 +1914,7 @@ sub get_uri_detail_list {
     $detail->{$uri}->{types}->{$type} = 1;
     my $info = $detail->{$uri};
 
-    my @uris = ();
+    my @uris;
     
     if (!exists $info->{cleaned}) {
       if ($type eq 'parsed') {
@@ -2585,7 +2585,7 @@ sub all_to_addrs {
     $rcvd =~ s/\n+/\n/gs;
 
     my @rcvdlines = split(/\n/, $rcvd, 4); pop @rcvdlines; # forget last one
-    my @rcvdaddrs = ();
+    my @rcvdaddrs;
     foreach my $line (@rcvdlines) {
       if ($line =~ / for (\S+\@\S+);/) { push (@rcvdaddrs, $1); }
     }
