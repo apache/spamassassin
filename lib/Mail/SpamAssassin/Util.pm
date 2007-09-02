@@ -385,7 +385,7 @@ sub local_tz {
 
 sub parse_rfc822_date {
   my ($date) = @_;
-  local ($_);
+  local ($_); local ($1,$2,$3,$4);
   my ($yyyy, $mmm, $dd, $hh, $mm, $ss, $mon, $tzoff);
 
   # make it a bit easier to match
@@ -438,7 +438,7 @@ sub parse_rfc822_date {
   $hh ||= 0; $mm ||= 0; $ss ||= 0; $dd ||= 0; $mmm ||= 0; $yyyy ||= 0;
 
   # Fudge invalid times so that we get a usable date.
-  if ($ss > 59) { 
+  if ($ss > 59) {  # rfc2822 does recognize leap seconds, not handled here
     dbg("util: second after supported range, forcing second to 59: $date");  
     $ss = 59;
   } 
@@ -470,15 +470,15 @@ sub parse_rfc822_date {
     }
   }
 
-  # Time::Local (v1.10 at least) throws warnings when the dates cause
-  # a 32-bit overflow.  So force a min/max for year.
+  # Time::Local (v1.10 at least, also 1.17) throws warnings when dates cause
+  # a signed 32-bit integer overflow.  So force a min/max for year.
   if ($yyyy > 2037) {
     dbg("util: year after supported range, forcing year to 2037: $date");
     $yyyy = 2037;
   }
   elsif ($yyyy < 1970) {
     dbg("util: year before supported range, forcing year to 1970: $date");
-    $yyyy = 1971;
+    $yyyy = 1970;
   }
 
   my $time;
@@ -496,6 +496,8 @@ sub parse_rfc822_date {
     $tzoff = (($2 * 60) + $3) * 60;
     if ($1 eq '-') {
       $time += $tzoff;
+    } elsif ($time < $tzoff) {  # careful with year 1970 and '+' time zones
+      $time = 0;
     } else {
       $time -= $tzoff;
     }
