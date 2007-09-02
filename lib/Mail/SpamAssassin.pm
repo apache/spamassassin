@@ -1398,6 +1398,13 @@ sub finish {
 ###########################################################################
 # timers: bug 5356
 
+# discard all timers, start afresh
+sub timer_reset {
+  my ($self) = @_;
+  delete $self->{timers};
+  delete $self->{timers_order};
+}
+
 sub timer_start {
   my ($self, $name) = @_;
 
