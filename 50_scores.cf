@@ -816,7 +816,6 @@ endif
 
 ifplugin Mail::SpamAssassin::Plugin::RelayEval
 # <gen:mutable>
-score ALL_TRUSTED -1.360 -1.440 -1.665 -1.800
 score FAKE_HELO_EMAIL_COM 0 # n=0 n=1 n=2 n=3
 score FAKE_HELO_EXCITE 2.599 2.552 2.599 2.598
 score FAKE_HELO_LYCOS 2.459 2.432 2.497 2.599
@@ -832,6 +831,9 @@ score RCVD_NUMERIC_HELO 2.599 2.599 2.272 2.067
 # Informational rules about Received header parsing
 score NO_RELAYS -0.001
 score UNPARSEABLE_RELAY 0.001
+
+# immutable (due to tflags userconf), see bug 5544
+score ALL_TRUSTED -1.360 -1.440 -1.665 -1.800
 
 endif
 
