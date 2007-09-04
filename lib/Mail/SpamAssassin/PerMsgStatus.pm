@@ -245,6 +245,7 @@ sub learn {
     if (exists $self->{main}->{bayes_scanner}) {
       $self->{main}->{bayes_scanner}->sanity_check_is_untied();
     }
+    1;
   } or do {
     $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
   };
