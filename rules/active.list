@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi; day 2: bb-fredt bb-jm bb-zmi cthielen daf dos jm theo; day 3: axb bb-fredt bb-jm bb-zmi cthielen daf jm theo zmi
+# with results from: day 1: axb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi; day 2: axb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi; day 3: bb-fredt bb-jm bb-zmi cthielen daf dos jm theo
 
 # tflags userconf
 ALL_TRUSTED
@@ -224,6 +224,9 @@ FH_HOST_EQ_VERIZON_P
 FH_MSGID_000000
 
 # good enough
+FH_MSGID_01C67
+
+# good enough
 FH_MSGID_REPLACE
 
 # good enough
@@ -342,6 +345,9 @@ FUZZY_MERIDIA
 
 # good enough
 FU_ENDS_NUMS_DOTS_CLK
+
+# good enough
+FU_LONG_QUERY3
 
 # tflags userconf
 GTUBE
@@ -771,9 +777,6 @@ TVD_STOCK1
 
 # good enough
 TVD_VISIT_PHARMA
-
-# good enough
-AXB_MIME_IMG830
 
 # good enough
 FB_MORE_SEMEN
