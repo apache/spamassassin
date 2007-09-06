@@ -200,7 +200,7 @@ sub parsed_metadata {
   # don't keep dereferencing this
   my $skip_domains = $scanner->{main}->{conf}->{uridnsbl_skip_domains};
 
-  # list of arrays to use in order
+  # list of hashes to use in order
   my @uri_ordered;
 
   # Generate the full list of html-parsed domains.
