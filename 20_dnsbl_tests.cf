@@ -248,32 +248,26 @@ tflags RCVD_IN_BL_SPAMCOP_NET	net
 # ---------------------------------------------------------------------------
 # NOTE: commercial tests, see README file for details
 
-header RCVD_IN_MAPS_RBL		eval:check_rbl('rbl', 'blackholes.mail-abuse.org.')
-describe RCVD_IN_MAPS_RBL	Relay in RBL, http://www.mail-abuse.org/rbl/
+header RCVD_IN_MAPS_RBL		eval:check_rbl('rblplus', 'activationcode.r.mail-abuse.com.', '1')
+describe RCVD_IN_MAPS_RBL	Relay in RBL, http://www.mail-abuse.com/enduserinfo_rbl.html
 tflags RCVD_IN_MAPS_RBL		net
 
-header RCVD_IN_MAPS_DUL		eval:check_rbl('dialup-lastexternal', 'dialups.mail-abuse.org.')
-describe RCVD_IN_MAPS_DUL	Relay in DUL, http://www.mail-abuse.org/dul/
+header RCVD_IN_MAPS_DUL		eval:check_rbl('rblplus-lastexternal', 'activationcode.r.mail-abuse.com.', '2')
+describe RCVD_IN_MAPS_DUL	Relay in DUL, http://www.mail-abuse.com/enduserinfo_dul.html
 tflags RCVD_IN_MAPS_DUL		net
 
-header RCVD_IN_MAPS_RSS		eval:check_rbl('rss', 'relays.mail-abuse.org.')
-describe RCVD_IN_MAPS_RSS	Relay in RSS, http://www.mail-abuse.org/rss/
+header RCVD_IN_MAPS_RSS		eval:check_rbl_sub('rblplus', '4')
+describe RCVD_IN_MAPS_RSS	Relay in RSS, http://www.mail-abuse.com/enduserinfo_rss.html
 tflags RCVD_IN_MAPS_RSS		net
 
-header RCVD_IN_MAPS_NML		eval:check_rbl('nml', 'nonconfirm.mail-abuse.org.')
-describe RCVD_IN_MAPS_NML	Relay in NML, http://www.mail-abuse.org/nml/
+header RCVD_IN_MAPS_OPS		eval:check_rbl_sub('rblplus', '8')
+describe RCVD_IN_MAPS_OPS	Relay in OPS, http://www.mail-abuse.com/enduserinfo_ops.html
+tflags RCVD_IN_MAPS_OPS		net
+
+# The NML isn't part of the RBL+ and I find any documentation for it - is it dead?
+header RCVD_IN_MAPS_NML		eval:check_rbl('nml', 'nonconfirm.mail-abuse.com.')
+describe RCVD_IN_MAPS_NML	Relay in NML, http://www.mail-abuse.com/enduserinfo_nml.html
 tflags RCVD_IN_MAPS_NML		net
-
-# if you're subscribed to RBL+, then comment out the above rules (just the
-# "header" lines, not the "describe" or "tflags" lines) and uncomment the
-# below lines
-#header RCVD_IN_MAPS_RBL	eval:check_rbl('rblplus', 'rbl-plus.mail-abuse.org.', '1')
-#header RCVD_IN_MAPS_DUL	eval:check_rbl('rblplus-lastexternal', 'rbl-plus.mail-abuse.org.', '2')
-#header RCVD_IN_MAPS_RSS	eval:check_rbl_sub('rblplus', '4')
-#header RCVD_IN_MAPS_OPS	eval:check_rbl_sub('rblplus', '8')
-#describe RCVD_IN_MAPS_OPS	Relay in OPS, http://www.mail-abuse.org/ops/
-#tflags RCVD_IN_MAPS_OPS	net
-
 
 # ---------------------------------------------------------------------------
 
