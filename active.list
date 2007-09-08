@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi; day 2: axb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi; day 3: axb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi
+# with results from: day 1: bb-fredt bb-jm bb-zmi cthielen daf dos jm theo; day 2: axb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi; day 3: axb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -89,6 +89,9 @@ DNS_FROM_RFC_DSN
 DNS_FROM_SECURITYSAGE
 
 # good enough
+DOS_OUTLOOK_TO_MX
+
+# good enough
 DRUGS_STOCK_MIMEOLE
 
 # good enough
@@ -102,9 +105,6 @@ DYN_RDNS_SHORT_HELO_IMAGE
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
-
-# good enough
-FAKE_REPLY_A1
 
 # good enough
 FAKE_REPLY_C
@@ -138,9 +138,6 @@ FB_LETTERS_21B
 
 # good enough
 FB_LOWER_PAYM
-
-# good enough
-FB_NOT_PHONE_NUM1
 
 # good enough
 FB_NOT_PHONE_NUM3
@@ -349,9 +346,6 @@ FU_ENDS_NUMS_DOTS_CLK
 # good enough
 FU_LONG_QUERY3
 
-# good enough
-GEO_QUERY_STRING
-
 # tflags userconf
 GTUBE
 
@@ -426,6 +420,9 @@ HTML_CHARSET_FARAWAY
 
 # good enough
 JM_RCVD_QMAILV1
+
+# good enough
+JM_SOUGHT_2
 
 # good enough
 JM_SOUGHT_3
@@ -782,16 +779,73 @@ TVD_STOCK1
 TVD_VISIT_PHARMA
 
 # good enough
-DOS_OUTLOOK_TO_MX
+AB_TEST_PDF1
 
 # good enough
-FB_MORE_SEMEN
+AXB_MIME_IMG830
 
 # good enough
-FS_YOUR_PRESCRIP
+AXB_RCVD_ZOOBSEND
 
 # good enough
-JM_SOUGHT_2
+AXB_RCVD_ZOONAT
+
+# good enough
+AXB_XTIDX_CHAIN
+
+# good enough
+BC_ENCODED_PDF
+
+# good enough
+DOS_OE_TO_MX
+
+# good enough
+DOS_OUTLOOK_TO_MX_IMAGE
+
+# good enough
+DOS_STOCK_CDYV_GENERIC
+
+# good enough
+FB_B0NUS
+
+# good enough
+FB_MED1CAT
+
+# good enough
+FB_SMALL_PEN
+
+# good enough
+FB_WITHOUT_PRESC
+
+# good enough
+FM_MORTGAGE3PLUS
+
+# good enough
+FRT_ERECTION
+
+# good enough
+FRT_OPPORTUN1
+
+# good enough
+FS_ABIGGER
+
+# good enough
+FS_LOWER_YOUR
+
+# good enough
+FS_LOW_INTMOR
+
+# good enough
+FS_WEIGHT_LOSS
+
+# good enough
+KAM_LOTTO1
+
+# good enough
+KAM_LOTTO2
+
+# good enough
+KAM_LOTTO3
 
 # tflags net
 RCVD_IN_DSBL
@@ -809,7 +863,13 @@ RCVD_IN_WHOIS_INVALID
 RCVD_IN_XBL
 
 # good enough
-TT_OBSCURED_XANAX
+STOX_RCVD_N_NN_N
+
+# good enough
+TVD_ENHANCE
+
+# good enough
+TVD_PDF_FINGER01
 
 # tflags net
 URIBL_L1SPEWS
