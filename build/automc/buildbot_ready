@@ -136,20 +136,10 @@ sub do_stop {
   run ("mv ham.log $logdir/ham-$slave.log");
   run ("mv spam.log $logdir/spam-$slave.log");
 
-  # ensure those log files are readable by the freqsd, and writable
-  # by "automc" so they can be deleted later
-  run ("chmod 775 $logdir");
-  run ("chmod 664 $logdir/ham-$slave.log $logdir/spam-$slave.log");
+  # my $hname = `uname -n`;
 
-  # run our fast report generator
-  $ENV{HOME} = $BBMHOME;
-  umask(002);
-
-  run ("$REPORTSCRIPTSADIR/masses/rule-qa/corpus-hourly --dir $logdir --tag b");
-  run ("$REPORTSCRIPTSADIR/masses/rule-qa/automc/gen_info_xml");
-
-  # enqueue a request for the slow stuff with the report-generation daemon
-  run ("$REPORTSCRIPTSADIR/build/automc/freqsd --enq $logdir");
+  # run our script to process those logs
+  run ("$REPORTSCRIPTSADIR/build/automc/post_mc_proc_logs $logdir $slave");
 }
 
 # ---------------------------------------------------------------------------
