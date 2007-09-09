@@ -13,9 +13,12 @@ chmod 644 $logdir/ham-$slave.log $logdir/spam-$slave.log
 export HOME
 umask 002
 
+cd $REPORTSCRIPTSADIR/masses
+
 # run fast report generation right now
-$REPORTSCRIPTSADIR/masses/rule-qa/corpus-hourly --dir $logdir --tag b
-$REPORTSCRIPTSADIR/masses/rule-qa/automc/gen_info_xml
+./rule-qa/corpus-hourly --dir $logdir --tag b
+./rule-qa/automc/gen_info_xml
 
 # enqueue a request for the slow stuff with the report-generation daemon
 $REPORTSCRIPTSADIR/build/automc/freqsd --enq $logdir
+
