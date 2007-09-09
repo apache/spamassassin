@@ -241,4 +241,3 @@ sub kill_lock {
   return unless $got_lock;
   unlink $got_lock or warn "singleton lock: unlink $got_lock failed: $!";
 }
-
