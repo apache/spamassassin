@@ -136,10 +136,21 @@ sub do_stop {
   run ("mv ham.log $logdir/ham-$slave.log");
   run ("mv spam.log $logdir/spam-$slave.log");
 
-  # my $hname = `uname -n`;
+  my $hname = `uname -n`;
 
-  # run our script to process those logs
-  run ("$REPORTSCRIPTSADIR/build/automc/post_mc_proc_logs $logdir $slave");
+  if ($hname =~ /vmsa/) {
+    # need to transfer the logs (using ssh+tar+gz), then run script
+    run ("( cd $BBMHOME ; ".
+        "tar cfz - tmp/logs-r$rev | ".
+        "ssh bbmass\@spamassassin.zones.apache.org /usr/sfw/bin/gtar xvfz - )");
+
+    run ("ssh bbmass\@spamassassin.zones.apache.org ".
+        "$REPORTSCRIPTSADIR/build/automc/post_mc_proc_logs $logdir $slave");
+  }
+  else {
+    # run our script to process those logs
+    run ("$REPORTSCRIPTSADIR/build/automc/post_mc_proc_logs $logdir $slave");
+  }
 }
 
 # ---------------------------------------------------------------------------
