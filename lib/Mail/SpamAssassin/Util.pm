@@ -257,11 +257,13 @@ sub untaint_hostname {
 #  untaint_var(\%ENV);
 #
 sub untaint_var {
+  no re 'taint';  # override a possible  use re 'taint'  from outer scope
   local ($_) = @_;
   return undef unless defined;
 
   unless (ref) {
-    /^(.*)$/s;
+    local($1); # avoid Perl taint bug: tainted global $1 propagates taintedness
+    /^(.*)\z/s;
     return $1;
   }
   elsif (ref eq 'ARRAY') {
@@ -293,12 +295,9 @@ sub taint_var {
   my ($v) = @_;
   return $v unless defined $v;      # can't taint "undef"
 
-  # $^X is apparently "always tainted".  We can use this to render
-  # a string tainted as follows:
-  my $tainter = substr ($^X."_", 0, 1);     # get 1 tainted char
-  $v .= $tainter; chop $v;      # then add and remove it
-
-  return $v;
+  # $^X is apparently "always tainted".
+  # Concatenating an empty tainted string taints the result.
+  return $v . substr($^X, 0, 0);
 }
 
 ###########################################################################
