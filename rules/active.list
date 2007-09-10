@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: bb-fredt bb-jm bb-zmi cthielen daf dos jm theo; day 2: axb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi; day 3: axb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi
+# with results from: day 1: axb bb-fredt bb-jm bb-zmi cthielen daf theo zmi; day 2: bb-fredt bb-jm bb-zmi cthielen daf dos jm theo; day 3: axb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -89,7 +89,13 @@ DNS_FROM_RFC_DSN
 DNS_FROM_SECURITYSAGE
 
 # good enough
+DOS_OE_TO_MX
+
+# good enough
 DOS_OUTLOOK_TO_MX
+
+# good enough
+DOS_OUTLOOK_TO_MX_IMAGE
 
 # good enough
 DRUGS_STOCK_MIMEOLE
@@ -221,9 +227,6 @@ FH_HOST_EQ_VERIZON_P
 FH_MSGID_000000
 
 # good enough
-FH_MSGID_01C67
-
-# good enough
 FH_MSGID_REPLACE
 
 # good enough
@@ -282,9 +285,6 @@ FRT_OPPORTUN2
 
 # good enough
 FRT_PENIS1
-
-# good enough
-FRT_PRICE
 
 # good enough
 FRT_REFINANCE1
@@ -779,70 +779,16 @@ TVD_STOCK1
 TVD_VISIT_PHARMA
 
 # good enough
-AB_TEST_PDF1
+AXB_MIME_IMG830
 
 # good enough
-AXB_RCVD_ZOOBSEND
+DOS_OE_TO_MX_IMAGE
 
 # good enough
-AXB_RCVD_ZOONAT
+FB_MORE_SEMEN
 
 # good enough
-AXB_XTIDX_CHAIN
-
-# good enough
-BC_ENCODED_PDF
-
-# good enough
-DOS_OE_TO_MX
-
-# good enough
-DOS_OUTLOOK_TO_MX_IMAGE
-
-# good enough
-DOS_STOCK_CDYV_GENERIC
-
-# good enough
-FB_B0NUS
-
-# good enough
-FB_MED1CAT
-
-# good enough
-FB_SMALL_PEN
-
-# good enough
-FB_WITHOUT_PRESC
-
-# good enough
-FM_MORTGAGE3PLUS
-
-# good enough
-FRT_ERECTION
-
-# good enough
-FRT_OPPORTUN1
-
-# good enough
-FS_ABIGGER
-
-# good enough
-FS_LOWER_YOUR
-
-# good enough
-FS_LOW_INTMOR
-
-# good enough
-FS_WEIGHT_LOSS
-
-# good enough
-KAM_LOTTO1
-
-# good enough
-KAM_LOTTO2
-
-# good enough
-KAM_LOTTO3
+FS_YOUR_PRESCRIP
 
 # tflags net
 RCVD_IN_DSBL
@@ -860,13 +806,7 @@ RCVD_IN_WHOIS_INVALID
 RCVD_IN_XBL
 
 # good enough
-STOX_RCVD_N_NN_N
-
-# good enough
-TVD_ENHANCE
-
-# good enough
-TVD_PDF_FINGER01
+TT_OBSCURED_XANAX
 
 # tflags net
 URIBL_L1SPEWS
