@@ -21,8 +21,11 @@
 
 package Mail::SpamAssassin::Constants;
 
+use strict;
+use warnings;
+
 use vars qw (
-	@BAYES_VARS @IP_VARS @SA_VARS
+	@BAYES_VARS @IP_VARS @SA_VARS %EXPORT_TAGS @EXPORT_OK
 );
 
 use base qw( Exporter );
