@@ -237,6 +237,7 @@ sub new {
 
   if ($self->{conf}->{bayes_store_module}) {
     my $module = $self->{conf}->{bayes_store_module};
+    $module = Mail::SpamAssassin::Util::untaint_var($module);  # good enough?
     my $store;
 
     eval '

@@ -205,7 +205,9 @@ sub _run_hashcash_for_one_string {
   $hc =~ s/\s+//gs;       # remove whitespace from multiline, folded tokens
 
   # untaint the string for paranoia, making sure not to allow \n \0 \' \"
-  $hc =~ /^([-A-Za-z0-9\xA0-\xFF:_\/\%\@\.\,\= \*\+\;]+)$/; $hc = $1;
+  if ($hc =~ /^[-A-Za-z0-9\xA0-\xFF:_\/\%\@\.\,\= \*\+\;]+$/) {
+    $hc = Mail::SpamAssassin::Util::untaint_var($hc);
+  }
   if (!$hc) { return 0; }
 
   my ($ver, $bits, $date, $rsrc, $exts, $rand, $trial);
