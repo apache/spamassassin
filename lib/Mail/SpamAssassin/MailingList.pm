@@ -25,7 +25,7 @@ package Mail::SpamAssassin::PerMsgStatus;
 use strict;
 use warnings;
 use bytes;
-
+use re 'taint';
 
 sub detect_mailing_list {
     my ($self) = @_;

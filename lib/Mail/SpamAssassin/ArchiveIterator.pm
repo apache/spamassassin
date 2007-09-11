@@ -22,6 +22,7 @@ package Mail::SpamAssassin::ArchiveIterator;
 use strict;
 use warnings;
 use bytes;
+use re 'taint';
 
 use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::Constants qw(:sa);

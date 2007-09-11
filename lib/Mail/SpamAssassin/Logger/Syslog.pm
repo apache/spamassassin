@@ -32,6 +32,7 @@ package Mail::SpamAssassin::Logger::Syslog;
 use strict;
 use warnings;
 use bytes;
+use re 'taint';
 use Mail::SpamAssassin::Logger;
 use Sys::Syslog qw(:DEFAULT setlogsock);
 use POSIX qw(:sys_wait_h);

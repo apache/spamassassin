@@ -44,6 +44,7 @@ package Mail::SpamAssassin::AutoWhitelist;
 use strict;
 use warnings;
 use bytes;
+use re 'taint';
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Logger;

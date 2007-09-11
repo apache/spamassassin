@@ -37,6 +37,7 @@ package Mail::SpamAssassin::BayesStore::PgSQL;
 use strict;
 use warnings;
 use bytes;
+use re 'taint';
 
 use Mail::SpamAssassin::BayesStore::SQL;
 use Mail::SpamAssassin::Logger;

@@ -44,6 +44,7 @@ package Mail::SpamAssassin::Message::Metadata;
 use strict;
 use warnings;
 use bytes;
+use re 'taint';
 
 use Mail::SpamAssassin::Dns;
 use Mail::SpamAssassin::PerMsgStatus;

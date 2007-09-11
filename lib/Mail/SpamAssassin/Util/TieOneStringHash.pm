@@ -21,6 +21,7 @@ package Mail::SpamAssassin::Util::TieOneStringHash;
 
 use strict;
 use warnings;
+use re 'taint';
 use Carp qw(croak);
 
 our @ISA = qw();

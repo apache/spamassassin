@@ -41,6 +41,7 @@ use File::Basename;
 
 use strict;
 use warnings;
+use re 'taint';
 
 =item new()
 

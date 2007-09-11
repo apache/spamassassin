@@ -29,6 +29,7 @@ package Mail::SpamAssassin::Bayes::Combine;
 use strict;
 use warnings;
 use bytes;
+use re 'taint';
 
 use POSIX qw(frexp);
 use constant LN2 => log(2);

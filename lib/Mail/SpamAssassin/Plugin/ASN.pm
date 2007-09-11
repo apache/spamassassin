@@ -86,6 +86,7 @@ been performed.
 package Mail::SpamAssassin::Plugin::ASN;
 
 use strict;
+use re 'taint';
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;

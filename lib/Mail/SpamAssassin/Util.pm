@@ -43,6 +43,7 @@ package Mail::SpamAssassin::Util;
 use strict;
 use warnings;
 use bytes;
+use re 'taint';
 
 use Mail::SpamAssassin::Logger;
 

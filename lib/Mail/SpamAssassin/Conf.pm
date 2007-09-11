@@ -87,6 +87,7 @@ use File::Spec;
 use strict;
 use warnings;
 use bytes;
+use re 'taint';
 
 use vars qw{
   @ISA $VERSION

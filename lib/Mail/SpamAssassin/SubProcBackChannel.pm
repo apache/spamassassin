@@ -22,6 +22,7 @@ package Mail::SpamAssassin::SubProcBackChannel;
 use strict;
 use warnings;
 use bytes;
+use re 'taint';
 
 use IO::Socket;
 use Mail::SpamAssassin::Util;

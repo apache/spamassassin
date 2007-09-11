@@ -22,6 +22,7 @@ package Mail::SpamAssassin::Util::ScopedTimer;
 use strict;
 use warnings;
 use bytes;
+use re 'taint';
 
 our @ISA = qw();
 

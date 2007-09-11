@@ -36,6 +36,7 @@ package Mail::SpamAssassin::Util::MemoryDump;
 use strict;
 use warnings;
 use bytes;
+use re 'taint';
 require Exporter;
 
 our @ISA = qw(Exporter);

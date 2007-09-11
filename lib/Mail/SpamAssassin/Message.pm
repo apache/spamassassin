@@ -44,6 +44,7 @@ package Mail::SpamAssassin::Message;
 
 use strict;
 use warnings;
+use re 'taint';
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Message::Node;
@@ -362,7 +363,9 @@ sub get_pristine_header {
   return $self->{pristine_headers} unless $hdr;
   my(@ret) = $self->{pristine_headers} =~ /^\Q$hdr\E:[ \t]+(.*?\n(?![ \t]))/smgi;
   if (@ret) {
-    # ensure the response retains taintedness (bug 5283)
+    # ensure the response retains taintedness (bug 5283);
+    # Note: this is already ensured by the:  use re 'taint'
+    # in this module and is probably redundant now.
     if (wantarray) {
       return map {
                 Mail::SpamAssassin::Util::taint_var($_);

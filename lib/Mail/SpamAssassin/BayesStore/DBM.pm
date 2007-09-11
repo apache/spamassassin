@@ -21,6 +21,7 @@ use strict;
 use warnings;
 use bytes;
 use Fcntl;
+use re 'taint';
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Util;
