@@ -99,11 +99,13 @@ sub set_config {
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
+      local ($1,$2,$3,$4);
       if ($value !~ /^(\S+)\s+(\S+)\s*([\=\!]\~)\s*(.+)$/) {
         return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
 
-      my $rulename = $1;
+      # provide stricter syntax for rule name!?
+      my $rulename = Mail::SpamAssassin::Util::untaint_var($1);
       my $hdrname = $2;
       my $negated = ($3 eq '!~') ? 1 : 0;
       my $pattern = $4;

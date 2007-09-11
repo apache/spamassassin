@@ -129,8 +129,11 @@ use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
     foreach my $dir (File::Spec->path()) {
       next unless $dir;
 
-      $dir =~ /^(.+)$/; # untaint, then clean ( 'foo/./bar' -> 'foo/bar', etc. )
-      $dir = File::Spec->canonpath($1);
+      # untaint if at least 1 char and no NL (is the restriction intentional?)
+      local ($1);
+      $dir = untaint_var($1)  if $dir =~ /^(.+)$/;
+      # then clean ( 'foo/./bar' -> 'foo/bar', etc. )
+      $dir = File::Spec->canonpath($dir);
 
       if (!File::Spec->file_name_is_absolute($dir)) {
 	dbg("util: PATH included '$dir', which is not absolute, dropping");
@@ -212,15 +215,16 @@ sub untaint_file_path {
   return unless defined($path);
   return '' if ($path eq '');
 
+  local ($1);
   # Barry Jaspan: allow ~ and spaces, good for Windows.  Also return ''
   # if input is '', as it is a safe path.
   my $chars = '-_A-Za-z\xA0-\xFF0-9\.\%\@\=\+\,\/\\\:';
   my $re = qr/^\s*([$chars][${chars}~ ]*)$/o;
 
   if ($path =~ $re) {
-    return $1;
+    return untaint_var($1);
   } else {
-    warn "util: cannot untaint path: \"$path\"\n";
+    warn "util: refusing to untaint suspicious path: \"$path\"\n";
     return $path;
   }
 }
@@ -236,8 +240,8 @@ sub untaint_hostname {
   #   $domain = qq<$label(?:\.$label)*>;
   #   length($host) <= 255 && $host =~ /^($domain)$/
   # expanded (no variables in the re) because of a tainting bug in Perl 5.8.0
-  if (length($host) <= 255 && $host =~ /^([a-z\d](?:[a-z\d-]{0,61}[a-z\d])?(?:\.[a-z\d](?:[a-z\d-]{0,61}[a-z\d])?)*)$/i) {
-    return $1;
+  if (length($host) <= 255 && $host =~ /^[a-z\d](?:[a-z\d-]{0,61}[a-z\d])?(?:\.[a-z\d](?:[a-z\d-]{0,61}[a-z\d])?)*$/i) {
+    return untaint_var($host);
   }
   else {
     warn "util: cannot untaint hostname: \"$host\"\n";
@@ -955,8 +959,7 @@ If it cannot open a file after 20 tries, it returns C<undef>.
 
 # thanks to http://www2.picante.com:81/~gtaylor/autobuse/ for this code
 sub secure_tmpfile {
-  my $tmpdir = Mail::SpamAssassin::Util::untaint_file_path(
-                $ENV{'TMPDIR'} || File::Spec->tmpdir());
+  my $tmpdir = untaint_file_path($ENV{'TMPDIR'} || File::Spec->tmpdir());
 
   if (!$tmpdir) {
     # Note: we would prefer to keep this fatal, as not being able to
@@ -1018,7 +1021,7 @@ If it cannot create a directory after 20 tries, it returns C<undef>.
 
 # stolen from secure_tmpfile()
 sub secure_tmpdir {
-  my $tmpdir = Mail::SpamAssassin::Util::untaint_file_path(File::Spec->tmpdir());
+  my $tmpdir = untaint_file_path(File::Spec->tmpdir());
 
   if (!$tmpdir) {
     # Note: we would prefer to keep this fatal, as not being able to

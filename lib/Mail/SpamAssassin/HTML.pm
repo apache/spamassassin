@@ -224,7 +224,7 @@ sub parse {
   $self->{closed_extra} = 0;
   $self->{text} = [];		# rendered text
 
-  $self->{length} += $1 if (length($text) =~ m/^(\d+)$/);	# untaint
+  $self->{length} += Mail::SpamAssassin::Util::untaint_var(length($text));
 
   # NOTE: We *only* need to fix the rendering when we verify that it
   # differs from what people see in their MUA.  Testing is best done with

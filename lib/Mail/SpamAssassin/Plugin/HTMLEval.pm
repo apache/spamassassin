@@ -117,13 +117,15 @@ sub html_test {
 
 sub html_eval {
   my ($self, $pms, undef, $test, $rawexpr) = @_;
-  $rawexpr =~ /^([\<\>\=\!\-\+ 0-9]+)$/; my $expr = $1;
-
+  my $expr;
+  if ($rawexpr =~ /^[\<\>\=\!\-\+ 0-9]+$/) {
+    $expr = Mail::SpamAssassin::Util::untaint_var($rawexpr);
+  }
   # workaround bug 3320: wierd perl bug where additional, very explicit
   # untainting into a new var is required.
   my $tainted = $pms->{html}{$test};
   return unless defined($tainted);
-  $tainted =~ /^(.*)$/; my $val = $1;
+  my $val = Mail::SpamAssassin::Util::untaint_var($tainted);
 
   # just use the value in $val, don't copy it needlessly
   return eval "\$val $expr";

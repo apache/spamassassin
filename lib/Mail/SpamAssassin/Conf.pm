@@ -232,6 +232,7 @@ it from running.
       # Figure out if we're doing relative scores, remove the parens if we are
       my $relative = 0;
       foreach (@scores) {
+        local ($1);
         if (s/^\((-?\d+(?:\.\d+)?)\)$/$1/) {
 	  $relative = 1;
 	}
@@ -719,6 +720,7 @@ not be changed or removed):
     setting => 'add_header',
     code => sub {
       my ($self, $key, $value, $line) = @_;
+      local ($1,$2,$3);
       if ($value !~ /^(ham|spam|all)\s+([A-Za-z0-9_-]+)\s+(.*?)\s*$/) {
         return $INVALID_VALUE;
       }
@@ -766,6 +768,7 @@ determine that SpamAssassin is running.
     setting => 'remove_header',
     code => sub {
       my ($self, $key, $value, $line) = @_;
+      local ($1,$2);
       if ($value !~ /^(ham|spam|all)\s+([A-Za-z0-9_-]+)\s*$/) {
         return $INVALID_VALUE;
       }
@@ -1831,6 +1834,7 @@ Example: http://chkpt.zdnet.com/chkpt/whatever/spammer.domain/yo/dude
       }
 
       # convert to qr// while including modifiers
+      local ($1,$2,$3);
       $value =~ /^m?(\W)(.*)(?:\1|>|}|\)|\])(.*?)$/;
       my $pattern = $2;
       $pattern = "(?".$3.")".$pattern if $3;
@@ -2061,6 +2065,7 @@ name.
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
+      local ($1,$2);
       if ($value =~ /^(\S+)\s+(?:rbl)?eval:(.*)$/) {
         my ($name, $fn) = ($1, $2);
 
@@ -2110,6 +2115,7 @@ Define a body eval test.  See above.
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
+      local ($1,$2);
       if ($value =~ /^(\S+)\s+eval:(.*)$/) {
         $self->{parser}->add_test ($1, $2, $TYPE_BODY_EVALS);
       }
@@ -2178,6 +2184,7 @@ Define a raw-body eval test.  See above.
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
+      local ($1,$2);
       if ($value =~ /^(\S+)\s+eval:(.*)$/) {
         $self->{parser}->add_test ($1, $2, $TYPE_RAWBODY_EVALS);
       } else {
@@ -2211,6 +2218,7 @@ Define a full message eval test.  See above.
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
+      local ($1,$2);
       if ($value =~ /^(\S+)\s+eval:(.*)$/) {
         $self->{parser}->add_test ($1, $2, $TYPE_FULL_EVALS);
       } else {
@@ -2405,6 +2413,7 @@ general running of SpamAssassin.
     code => sub {
       return unless defined($Mail::SpamAssassin::Conf::COLLECT_REGRESSION_TESTS);
       my ($self, $key, $value, $line) = @_;
+      local ($1,$2,$3);
       if ($value !~ /^(\S+)\s+(ok|fail)\s+(.*)$/) { return $INVALID_VALUE; }
       $self->{parser}->add_regression_test($1, $2, $3);
     }
@@ -2557,6 +2566,7 @@ module.
     default => '',
     code => sub {
       my ($self, $key, $value, $line) = @_;
+      local ($1);
       if ($value !~ /^([_A-Za-z0-9:]+)$/) { return $INVALID_VALUE; }
       $self->{bayes_store_module} = $1;
     }
@@ -2795,13 +2805,18 @@ See C<Mail::SpamAssassin::Plugin> for more details on writing plugins.
       if ($value eq '') {
         return $MISSING_REQUIRED_VALUE;
       }
+      my ($package, $path);
+      local ($1,$2);
       if ($value =~ /^(\S+)\s+(\S+)$/) {
-        $self->load_plugin ($1, $2);
-      } elsif ($value =~ /^(?:\S+)$/) {
-        $self->load_plugin ($value);
+        ($package, $path) = ($1, $2);
+      } elsif ($value =~ /^\S+$/) {
+        ($package, $path) = ($value, undef);
       } else {
 	return $INVALID_VALUE;
       }
+      # is blindly untainting safe?  it is no worse than before
+      $_ = Mail::SpamAssassin::Util::untaint_var($_)  for ($package,$path);
+      $self->load_plugin ($package, $path);
     }
   });
 
@@ -2820,13 +2835,18 @@ the filesystem.
       if ($value eq '') {
         return $MISSING_REQUIRED_VALUE;
       }
+      my ($package, $path);
+      local ($1,$2);
       if ($value =~ /^(\S+)\s+(\S+)$/) {
-        $self->load_plugin ($1, $2, 1);
-      } elsif ($value =~ /^(?:\S+)$/) {
-        $self->load_plugin ($value, undef, 1);
+        ($package, $path) = ($1, $2);
+      } elsif ($value =~ /^\S+$/) {
+        ($package, $path) = ($value, undef);
       } else {
 	return $INVALID_VALUE;
       }
+      # is blindly untainting safe?  it is no worse than before
+      $_ = Mail::SpamAssassin::Util::untaint_var($_)  for ($package,$path);
+      $self->load_plugin ($package, $path, 1);
     }
   });
 
@@ -3460,7 +3480,11 @@ sub load_plugin {
   if ($path) {
     $path = $self->{parser}->fix_path_relative_to_current_file($path);
   }
-  $self->{main}->{plugins}->load_plugin ($package, $path, $silent);
+  # it wouldn't hurt to do some checking on validity of $package
+  # and $path before untainting them
+  $self->{main}->{plugins}->load_plugin (
+    Mail::SpamAssassin::Util::untaint_var($package),  # safe???
+    $path, $silent);
 }
 
 sub load_plugin_succeeded {

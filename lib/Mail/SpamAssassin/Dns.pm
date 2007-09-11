@@ -301,10 +301,8 @@ sub process_dnsbl_set {
 	$subtest =~ s/\bS(\d+)\b/\$sb{$1}/;
       }
 
-      # untaint. doing the usual $subtest=$1 doesn't work! (bug 3325)
-      $subtest =~ /^(.*)$/;
-      my $untainted = $1;
-      $subtest = $untainted;
+      # untaint. (bug 3325)
+      $subtest = Mail::SpamAssassin::Util::untaint_var($subtest);
 
       $self->got_hit($rule, "SenderBase: ", ruletype => "dnsbl") if !$undef && eval $subtest;
     }

@@ -266,11 +266,11 @@ sub parse {
     $key = lc $key;
     # convert all dashes in setting name to underscores.
     $key =~ s/-/_/g;
-
-    # Do a better job untainting this info ...
     $value = '' unless defined($value);
-    $value =~ /^(.*)$/;
-    $value = $1;
+
+#   # Do a better job untainting this info ...
+#   # $value = Mail::SpamAssassin::Util::untaint_var($value);
+#   Do NOT blindly untaint now, do it carefully later when semantics is known!
 
     my $parse_error;       # undef by default, may be overridden
 
@@ -482,8 +482,8 @@ sub handle_conditional {
   my $eval = '';
   my $bad = 0;
   foreach my $token (@tokens) {
-    if ($token =~ /^(\W+|[+-]?\d+(?:\.\d+)?)$/) {
-      $eval .= $1." ";          # note: untaints!
+    if ($token =~ /^\W+|[+-]?\d+(?:\.\d+)?$/) {
+      $eval .= Mail::SpamAssassin::Util::untaint_var($token) . " ";
     }
     elsif ($token eq 'plugin') {
       # replace with method call
@@ -492,8 +492,8 @@ sub handle_conditional {
     elsif ($token eq 'version') {
       $eval .= $Mail::SpamAssassin::VERSION." ";
     }
-    elsif ($token =~ /^(\w[\w\:]+)$/) { # class name
-      $eval .= "\"$1\" ";       # note: untaints!
+    elsif ($token =~ /^\w[\w\:]+$/) { # class name
+      $eval .= '"' . Mail::SpamAssassin::Util::untaint_var($token) . '" ';
     }
     else {
       $bad++;
@@ -611,8 +611,8 @@ sub set_numeric_value {
   unless ($value =~ /^-?\d+(?:\.\d+)?$/) {
     return $Mail::SpamAssassin::Conf::INVALID_VALUE;
   }
-
-  $conf->{$key} = $value+0.0;
+  # it is safe to untaint now that we now the syntax is a valid number
+  $conf->{$key} = Mail::SpamAssassin::Util::untaint_var($value) + 0.0;
 }
 
 sub set_bool_value {
@@ -624,18 +624,17 @@ sub set_bool_value {
 
   # bug 4462: allow yes/1 and no/0 for boolean values
   $value = lc $value;
-  if ($value eq 'yes') {
+  if ($value eq 'yes' || $value eq '1') {
     $value = 1;
   }
-  elsif ($value eq 'no') {
+  elsif ($value eq 'no' || $value eq '0') {
     $value = 0;
   }
-
-  unless ($value =~ /^[01]$/) {
+  else {
     return $Mail::SpamAssassin::Conf::INVALID_VALUE;
   }
 
-  $conf->{$key} = $value+0;
+  $conf->{$key} = $value;
 }
 
 sub set_string_value {
@@ -645,7 +644,7 @@ sub set_string_value {
     return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
   }
 
-  $conf->{$key} = $value;
+  $conf->{$key} = $value;  # keep tainted
 }
 
 sub set_hash_key_value {
@@ -656,7 +655,7 @@ sub set_hash_key_value {
     return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
   }
 
-  $conf->{$key}->{$k} = $v;
+  $conf->{$key}->{$k} = $v;  # keep tainted
 }
 
 sub set_addrlist_value {
@@ -665,7 +664,7 @@ sub set_addrlist_value {
   unless (defined $value && $value !~ /^$/) {
     return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
   }
-  $conf->{parser}->add_to_addrlist ($key, split (' ', $value));
+  $conf->{parser}->add_to_addrlist ($key, split (' ', $value));  # keep tainted
 }
 
 sub remove_addrlist_value {
@@ -680,7 +679,7 @@ sub remove_addrlist_value {
 sub set_template_append {
   my ($conf, $key, $value, $line) = @_;
   if ( $value =~ /^"(.*?)"$/ ) { $value = $1; }
-  $conf->{$key} .= $value."\n";
+  $conf->{$key} .= $value."\n";  # keep tainted
 }
 
 sub set_template_clear {
@@ -832,7 +831,7 @@ sub _meta_deps_recurse {
     next unless exists $conf->{tests}->{$token};
 
     # add and recurse
-    push @{$deps}, $token;
+    push(@{$deps}, Mail::SpamAssassin::Util::untaint_var($token));
     $self->_meta_deps_recurse($conf, $toprule, $token, $deps, $alreadydone);
   }
 }
@@ -1091,6 +1090,7 @@ sub is_meta_valid {
   my ($self, $name, $rule) = @_;
 
   my $meta = '';
+  $rule = Mail::SpamAssassin::Util::untaint_var($rule); # must be careful below
 
   # Lex the rule into tokens using a rather simple RE method ...
   my $lexer = ARITH_EXPRESSION_LEXER;
@@ -1141,6 +1141,7 @@ sub is_regexp_valid {
   my $origre = $re;
   my $safere = $re;
   my $mods = '';
+  local ($1,$2);
   if ($re =~ s/^m{//) {
     $re =~ s/}([a-z]*)$//; $mods = $1;
   }

@@ -974,8 +974,7 @@ sub read_cachefile {
   if (open(IN, "<".$cachefile)) {
     my $str = join("", <IN>);
     close IN;
-    $str =~ /^(.*)$/s;
-    my $untainted = $1;
+    my $untainted = Mail::SpamAssassin::Util::untaint_var($str);
 
     my $VAR1;                 # Data::Dumper
     if (eval $untainted) {
