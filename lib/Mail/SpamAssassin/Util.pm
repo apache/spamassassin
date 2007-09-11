@@ -1378,7 +1378,8 @@ sub force_die {
   # note use of eval { } scope in logging -- paranoia to ensure that a broken
   # $SIG{__WARN__} implementation will not interfere with the flow of control
   # here, where we *have* to die.
-  eval { warn $msg; };
+  eval { warn $msg };  # hmm, STDERR may no longer be open
+  eval { dbg("util: force_die: $msg") };
 
   POSIX::_exit(1);  # avoid END and destructor processing 
   kill('KILL',$$);  # still kicking? die! 
@@ -1387,11 +1388,17 @@ sub force_die {
 sub helper_app_pipe_open_unix {
   my ($fh, $stdinfile, $duperr2out, @cmdline) = @_;
 
+  my $pid;
   # do a fork-open, so we can setuid() back
-  my $pid = open ($fh, '-|');
+  eval {
+    $pid = open ($fh, '-|');  1;
+  } or do {
+    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    die "util: cannot fork: $eval_stat";
+  };
   if (!defined $pid) {
     # acceptable to die() here, calling code catches it
-    die "util: cannot fork: $!";
+    die "util: cannot open a pipe to a forked process: $!";
   }
 
   if ($pid != 0) {
@@ -1399,75 +1406,77 @@ sub helper_app_pipe_open_unix {
   }
 
   # else, child process.  
-  # from now on, we cannot die(), as a parent-process eval { } scope
-  # could intercept it! use force_die() instead  (bug 4370, cmt 2)
 
-  # go setuid...
-  setuid_to_euid();
-  dbg("util: setuid: ruid=$< euid=$>");
+  # from now on, we cannot die(), it could create a cloned process
+  # use force_die() instead  (bug 4370, cmt 2)
+  eval {
+    # go setuid...
+    setuid_to_euid();
+    dbg("util: setuid: ruid=$< euid=$>");
 
-  # now set up the fds.  due to some wierdness, we may have to ensure that we
-  # *really* close the correct fd number, since some other code may have
-  # redirected the meaning of STDOUT/STDIN/STDERR it seems... (bug 3649). use
-  # POSIX::close() for that. it's safe to call close() and POSIX::close() on
-  # the same fd; the latter is a no-op in that case.
+    # now set up the fds.  due to some wierdness, we may have to ensure that
+    # we *really* close the correct fd number, since some other code may have
+    # redirected the meaning of STDOUT/STDIN/STDERR it seems... (bug 3649).
+    # use POSIX::close() for that. it's safe to call close() and POSIX::close()
+    # on the same fd; the latter is a no-op in that case.
 
-  if (!$stdinfile) {              # < $tmpfile
-    # ensure we have *some* kind of fd 0.
-    $stdinfile = "/dev/null";
-  }
-
-  my $f = fileno(STDIN);
-  close STDIN;
-
-  # sanity: was that the *real* STDIN? if not, close that one too ;)
-  if ($f != 0) {
-    POSIX::close(0);
-  }
-
-  open (STDIN, "<$stdinfile") or force_die "util: cannot open $stdinfile: $!";
-
-  # this should be impossible; if we just closed fd 0, UNIX
-  # fd behaviour dictates that the next fd opened (the new STDIN)
-  # will be the lowest unused fd number, which should be 0.
-  # so die with a useful error if this somehow isn't the case.
-  if (fileno(STDIN) != 0) {
-    force_die "util: setuid: oops: fileno(STDIN) [".fileno(STDIN)."] != 0";
-  }
-
-  # ensure STDOUT is open.  since we just created a pipe to ensure this, it has
-  # to be open to that pipe, and if it isn't, something's seriously screwy.
-  # Update: actually, this fails! see bug 3649 comment 37.  For some reason,
-  # fileno(STDOUT) can be 0; possibly because open("-|") didn't change the fh
-  # named STDOUT, instead changing fileno(1) directly.  So this is now
-  # commented.
-  # if (fileno(STDOUT) != 1) {
-  # die "setuid: oops: fileno(STDOUT) [".fileno(STDOUT)."] != 1";
-  # }
-
-  if ($duperr2out) {             # 2>&1
-    my $f = fileno(STDERR);
-    close STDERR;
-
-    # sanity: was that the *real* STDERR? if not, close that one too ;)
-    if ($f != 2) {
-      POSIX::close(2);
+    if (!$stdinfile) {              # < $tmpfile
+      # ensure we have *some* kind of fd 0.
+      $stdinfile = "/dev/null";
     }
 
-    open (STDERR, ">&STDOUT") or force_die "util: dup STDOUT failed: $!";
+    my $f = fileno(STDIN);
+    close STDIN;
 
-    # STDERR must be fd 2 to be useful to subprocesses! (bug 3649)
-    if (fileno(STDERR) != 2) {
-      force_die "util: oops: fileno(STDERR) [".fileno(STDERR)."] != 2";
+    # sanity: was that the *real* STDIN? if not, close that one too ;)
+    if ($f != 0) {
+      POSIX::close(0);
     }
-  }
 
-  exec @cmdline;
-  warn "util: exec failed: $!";
+    open (STDIN, "<$stdinfile") or die "cannot open $stdinfile: $!";
+
+    # this should be impossible; if we just closed fd 0, UNIX
+    # fd behaviour dictates that the next fd opened (the new STDIN)
+    # will be the lowest unused fd number, which should be 0.
+    # so die with a useful error if this somehow isn't the case.
+    if (fileno(STDIN) != 0) {
+      die "oops: fileno(STDIN) [".fileno(STDIN)."] != 0";
+    }
+
+    # Ensure STDOUT is open. As we just created a pipe to ensure this, it has
+    # to be open to that pipe, and if it isn't, something's seriously screwy.
+    # Update: actually, this fails! see bug 3649 comment 37.  For some reason,
+    # fileno(STDOUT) can be 0; possibly because open("-|") didn't change the fh
+    # named STDOUT, instead changing fileno(1) directly.  So this is now
+    # commented.
+    # if (fileno(STDOUT) != 1) {
+    # die "setuid: oops: fileno(STDOUT) [".fileno(STDOUT)."] != 1";
+    # }
+
+    if ($duperr2out) {             # 2>&1
+      my $f = fileno(STDERR);
+      close STDERR;
+
+      # sanity: was that the *real* STDERR? if not, close that one too ;)
+      if ($f != 2) {
+        POSIX::close(2);
+      }
+
+      open (STDERR, ">&STDOUT") or die "dup STDOUT failed: $!";
+
+      # STDERR must be fd 2 to be useful to subprocesses! (bug 3649)
+      if (fileno(STDERR) != 2) {
+        die "oops: fileno(STDERR) [".fileno(STDERR)."] != 2";
+      }
+    }
+
+    exec @cmdline;
+    die "exec failed: $!";
+  };
+  my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
 
   # bug 4370: we really have to exit here; break any eval traps
-  POSIX::_exit(1);  # avoid END and destructor processing 
-  kill('KILL',$$);  # still kicking? die! 
+  force_die("util: failed to spawn a process: $eval_stat");
   die;  # must be a die() otherwise -w will complain
 }
 
