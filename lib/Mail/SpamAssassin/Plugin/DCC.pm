@@ -411,7 +411,7 @@ sub dccifd_lookup {
   my $right;
   my $timeout = $self->{main}->{conf}->{dcc_timeout};
   my $sockpath = $self->{main}->{conf}->{dcc_dccifd_path};
-  my $opts = $self->{main}->{conf}->{dccifd_options} || '';
+  my @opts = split(' ',$self->{main}->{conf}->{dcc_options});
 
   $count{body} = 0;
   $count{fuz1} = 0;
@@ -428,7 +428,7 @@ sub dccifd_lookup {
       Peer => $sockpath) || dbg("dcc: failed to open socket") && die;
 
     # send the options and other parameters to the daemon
-    $sock->print("header " . $opts . "\n") || dbg("dcc: failed write") && die; # options
+    $sock->print("header " . join(" ",@opts) . "\n") || dbg("dcc: failed write") && die; # options
     $sock->print($client . "\n") || dbg("dcc: failed write") && die; # client
     $sock->print($helo . "\n") || dbg("dcc: failed write") && die; # HELO value
     $sock->print("\n") || dbg("dcc: failed write") && die; # sender
@@ -535,13 +535,17 @@ sub dccproc_lookup {
     # note: not really tainted, this came from system configuration file
     my $path = Mail::SpamAssassin::Util::untaint_file_path($self->{main}->{conf}->{dcc_path});
 
-    my $opts = $self->{main}->{conf}->{dcc_options} || '';
-    $opts = "-a " . $client . " " . $opts if $client;
+    my @opts = split(' ',$self->{main}->{conf}->{dcc_options});
+    Mail::SpamAssassin::Util::untaint_var(\@opts);
 
-    dbg("dcc: opening pipe: " . join(' ', $path, "-H", "-x", "0", $opts, "< $tmpf"));
+    unshift(@opts, "-a", Mail::SpamAssassin::Util::untaint_var($client))
+      if $client ne '';
+
+    dbg("dcc: opening pipe: %s",
+         join(' ', $path, "-H", "-x", "0", @opts, "< $tmpf"));
 
     $pid = Mail::SpamAssassin::Util::helper_app_pipe_open(*DCC,
-	$tmpf, 1, $path, "-H", "-x", "0", split(' ', $opts));
+             $tmpf, 1, $path, "-H", "-x", "0", @opts);
     $pid or die "$!\n";
 
     my @null = <DCC>;
@@ -685,7 +689,8 @@ sub dccifd_report {
   my ($self, $options, $fulltext, $client, $helo) = @_;
   my $timeout = $self->{main}->{conf}->{dcc_timeout};
   my $sockpath = $self->{main}->{conf}->{dcc_dccifd_path};
-  my $opts = $self->{main}->{conf}->{dccifd_options} || ''; # instead of header use whatever the report option is
+  # instead of header use whatever the report option is
+  my @opts = split(' ',$self->{main}->{conf}->{dcc_options});
 
   $options->{report}->enter_helper_run_mode();
   my $timer = Mail::SpamAssassin::Timeout->new({ secs => $timeout });
@@ -698,7 +703,7 @@ sub dccifd_report {
                                      Peer => $sockpath) || dbg("report: dccifd failed to open socket") && die;
 
     # send the options and other parameters to the daemon
-    $sock->print("spam " . $opts . "\n") || dbg("report: dccifd failed write") && die; # options
+    $sock->print("spam " . join(" ",@opts) . "\n") || dbg("report: dccifd failed write") && die; # options
     $sock->print($client . "\n") || dbg("report: dccifd failed write") && die; # client
     $sock->print($helo . "\n") || dbg("report: dccifd failed write") && die; # HELO value
     $sock->print("\n") || dbg("report: dccifd failed write") && die; # sender
@@ -741,11 +746,13 @@ sub dcc_report {
 
   # note: not really tainted, this came from system configuration file
   my $path = Mail::SpamAssassin::Util::untaint_file_path($options->{report}->{conf}->{dcc_path});
+  my @opts = split(' ',$self->{main}->{conf}->{dcc_options});
+  Mail::SpamAssassin::Util::untaint_var(\@opts);
 
-  my $opts = $options->{report}->{conf}->{dcc_options} || '';
+  # get the metadata from the message so we can pass the external relay info
 
-  # get the metadata from the message so we can pass the external relay information
-  $opts = "-a " . $client . " " . $opts if $client;
+  unshift(@opts, "-a", Mail::SpamAssassin::Util::untaint_var($client))
+    if $client ne '';
 
   my $timer = Mail::SpamAssassin::Timeout->new({ secs => $timeout });
 
@@ -754,10 +761,11 @@ sub dcc_report {
 
     local $SIG{PIPE} = sub { die "__brokenpipe__ignore__\n" };
 
-    dbg("report: opening pipe: " . join(' ', $path, "-H", "-t", "many", "-x", "0", $opts, "< $tmpf"));
+    dbg("report: opening pipe: %s",
+        join(' ', $path, "-H", "-t", "many", "-x", "0", @opts, "< $tmpf"));
 
     my $pid = Mail::SpamAssassin::Util::helper_app_pipe_open(*DCC,
-        $tmpf, 1, $path, "-H", "-t", "many", "-x", "0", split(' ', $opts));
+                $tmpf, 1, $path, "-H", "-t", "many", "-x", "0", @opts);
     $pid or die "$!\n";
 
     my @ignored = <DCC>;
