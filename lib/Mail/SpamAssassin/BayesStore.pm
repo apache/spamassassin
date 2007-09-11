@@ -31,6 +31,7 @@ package Mail::SpamAssassin::BayesStore;
 use strict;
 use warnings;
 use bytes;
+use re 'taint';
 use Mail::SpamAssassin::Logger;
 
 # TODO: if we ever get tuits, it'd be good to make these POD

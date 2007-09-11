@@ -45,6 +45,7 @@ package Mail::SpamAssassin::Util::Progress;
 use strict;
 use warnings;
 use bytes;
+use re 'taint';
 
 use constant HAS_TERM_READKEY => eval { require Term::ReadKey };
 

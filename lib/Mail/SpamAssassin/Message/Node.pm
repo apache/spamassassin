@@ -36,6 +36,7 @@ package Mail::SpamAssassin::Message::Node;
 
 use strict;
 use warnings;
+use re 'taint';
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Constants qw(:sa);

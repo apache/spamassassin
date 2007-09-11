@@ -51,6 +51,7 @@ package Mail::SpamAssassin::PerMsgStatus;
 
 use strict;
 use warnings;
+use re 'taint';
 
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::AsyncLoop;

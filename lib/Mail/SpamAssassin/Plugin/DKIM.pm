@@ -52,6 +52,7 @@ use Mail::SpamAssassin::Timeout;
 use strict;
 use warnings;
 use bytes;
+use re 'taint';
 
 # Have to do this so that RPM doesn't find these as required perl modules.
 BEGIN { require Mail::DKIM; require Mail::DKIM::Verifier; }

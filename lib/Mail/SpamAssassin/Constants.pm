@@ -23,6 +23,7 @@ package Mail::SpamAssassin::Constants;
 
 use strict;
 use warnings;
+use re 'taint';
 
 use vars qw (
 	@BAYES_VARS @IP_VARS @SA_VARS %EXPORT_TAGS @EXPORT_OK

@@ -29,6 +29,7 @@ package Mail::SpamAssassin::Bayes::Combine;
 use strict;
 use warnings;
 use bytes;
+use re 'taint';
 
 ###########################################################################
 

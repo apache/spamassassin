@@ -20,6 +20,7 @@
 
 use strict;
 use warnings;
+use re 'taint';
 
 package Mail::SpamAssassin::HTML;
 

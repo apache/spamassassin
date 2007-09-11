@@ -23,6 +23,7 @@ package Mail::SpamAssassin::Util::RegistrarBoundaries;
 use strict;
 use warnings;
 use bytes;
+use re 'taint';
 
 use vars qw (
   @ISA %TWO_LEVEL_DOMAINS %US_STATES %VALID_TLDS

@@ -20,6 +20,7 @@ package Mail::SpamAssassin::Locker::Flock;
 use strict;
 use warnings;
 use bytes;
+use re 'taint';
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Locker;

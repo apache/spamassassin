@@ -21,6 +21,7 @@ package Mail::SpamAssassin::NetSet;
 use strict;
 use warnings;
 use bytes;
+use re 'taint';
 
 use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::Logger;

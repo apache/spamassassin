@@ -20,6 +20,7 @@ package Mail::SpamAssassin::DBBasedAddrList;
 use strict;
 use warnings;
 use bytes;
+use re 'taint';
 use Fcntl;
 
 use Mail::SpamAssassin::PersistentAddrList;

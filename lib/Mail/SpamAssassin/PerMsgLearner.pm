@@ -49,6 +49,7 @@ package Mail::SpamAssassin::PerMsgLearner;
 use strict;
 use warnings;
 use bytes;
+use re 'taint';
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::PerMsgStatus;

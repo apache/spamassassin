@@ -21,6 +21,7 @@ use Mail::SpamAssassin::Constants qw(:sa);
 
 use strict;
 use warnings;
+use re 'taint';
 
 use vars qw(@ISA @TEMPORARY_METHODS);
 @ISA = qw(Mail::SpamAssassin::Plugin);

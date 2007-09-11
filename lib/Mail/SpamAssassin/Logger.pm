@@ -42,6 +42,7 @@ require Exporter;
 use strict;
 use warnings;
 use bytes;
+use re 'taint';
 
 @ISA = qw(Exporter);
 @EXPORT = qw(dbg info would_log);

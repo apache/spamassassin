@@ -34,6 +34,7 @@ BEGIN {
 
 use strict;
 use warnings;
+use re 'taint';
 
 # Big Ugly Hack; purpose: don't force requirement on IO::Socket::INET6
 BEGIN {

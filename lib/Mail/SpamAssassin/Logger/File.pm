@@ -32,6 +32,7 @@ package Mail::SpamAssassin::Logger::File;
 use strict;
 use warnings;
 use bytes;
+use re 'taint';
 use Mail::SpamAssassin::Logger;
 
 use vars qw(@ISA);

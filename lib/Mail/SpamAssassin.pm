@@ -61,6 +61,7 @@ package Mail::SpamAssassin;
 use strict;
 use warnings;
 use bytes;
+use re 'taint';
 
 require 5.006_001;
 

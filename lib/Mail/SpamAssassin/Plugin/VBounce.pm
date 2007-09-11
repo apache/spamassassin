@@ -31,6 +31,7 @@ use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use strict;
 use warnings;
+use re 'taint';
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
