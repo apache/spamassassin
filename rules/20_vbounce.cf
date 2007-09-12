@@ -86,7 +86,7 @@ meta __BOUNCE_AUTO_GENERATED     ((__AUTO_GEN_AS||__AUTO_GEN_MS||__AUTO_GEN_3||_
 header __BOUNCE_Y_AUTOGEN     Subject =~ /^Yahoo! Auto Response/
 header __BOUNCE_SYMANTEC      Subject =~ /^Returned mail.{0,5}(?:Error During Delivery|see transcript for details|)$/i
 header __BOUNCE_X_ERR_STAT    X-Error-Status =~ /User unknown/
-header   __BOUNCE_RETURNED Subject =~ /^Returned mail: User unknown/
+header   __BOUNCE_RETURNED Subject =~ /^Returned mail: (?:User unknown|unreachable recipients)/
 header   __BOUNCE_MAILDELFAIL Subject =~ /^Mail delivery failed: /
 header   __BOUNCE_MSGDELFAIL Subject =~ /^Message Delivery Failure/
 body     __BOUNCE_ESMTP /^This messages was created automatically by mail delivery software/
@@ -109,10 +109,15 @@ header   __BOUNCE_ADDR_ERR Subject =~ /^e-mail addressing error \(/
 header   __BOUNCE_NO_VAL Subject =~ /^No valid recipient in /
 header   __BOUNCE_DATA_FORMAT Subject =~ /^Returned mail: Data format error$/
 header   __BOUNCE_COULD_NOT Subject =~ /^Mail could not be delivered$/
-header   __BOUNCE_UNDEL_MSG Subject =~ /^Undeliverable Message$/
+header   __BOUNCE_UNDEL_MSG Subject =~ /^Undeliverable (?:Message|Mail)$/
 header   __BOUNCE_CTYPE Content-Type =~ /\bmultipart\/report\b/
-header __BOUNCE_DEL_FAIL     Subject =~ /^Delivery Failure Notification/
+header   __BOUNCE_DEL_FAIL  Subject =~ /^Delivery Failure Notification/
 header   __BOUNCE_STAT_FAIL Subject =~ /^Delivery Status Notification/
+
+header __BOUNCE_NOTIF Subject =~ /^Notification d\'.tat de la distribution$/
+header __BOUNCE_RET_MAIL Subject =~ /^Returned Mail$/
+header __BOUNCE_DEL_FAIL Subject =~ /^DELIVERY FAILURE/i
+header __BOUNCE_MAIL_DEL_FAIL Subject =~ /^Mail Delivery Failure$/
 
 # Return-path: <delete@errmail.kagoya.net>
 # 'Invalid e-mail address.'
@@ -126,7 +131,7 @@ header __BOUNCE_INTERSCAN   From =~ /\bInterscan MSS Notification\b/
 body __BOUNCE_NO_RESEND  /\bPlease do not resend your original message\./
 
 
-meta BOUNCE_MESSAGE         __HAVE_BOUNCE_RELAYS && (!__MY_SERVERS_FOUND && (__BOUNCE_FROM_DAEMON || __BOUNCE_RPATH_NULL || __BOUNCE_RPATH_MD || __BOUNCE_AUTO_GENERATED || __BOUNCE_Y_AUTOGEN || __BOUNCE_SYMANTEC || __BOUNCE_X_ERR_STAT || __BOUNCE_RETURNED || __BOUNCE_MAILDELFAIL || __BOUNCE_MSGDELFAIL || __BOUNCE_ESMTP || __BOUNCE_OOO_1 || __BOUNCE_OOO_2 || __BOUNCE_NEVER_SEE || __BOUNCE_NONWORKING || __BOUNCE_UNDELIVERABLE || __BOUNCE_UNDELIVERABLE_ML || __BOUNCE_NOTDEL || __BOUNCE_CTYPE || __BOUNCE_DEL_FAIL || __BOUNCE_STAT_FAIL || __BOUNCE_ADDR_ERR || __BOUNCE_NO_VAL || __BOUNCE_DATA_FORMAT || __BOUNCE_COULD_NOT || __BOUNCE_UNDEL_MSG || __BOUNCE_OOO_H1 || __BOUNCE_OOO_H2 || __BOUNCE_OOO_H3 || __BOUNCE_RPATH_ERRMAIL || __BOUNCE_OOO_3 || __BOUNCE_INTERSCAN || __BOUNCE_ETRUST || __BOUNCE_AUTO_RESPONSE || __BOUNCE_AUTO_RESPOND || __BOUNCE_NO_RESEND))
+meta BOUNCE_MESSAGE         __HAVE_BOUNCE_RELAYS && (!__MY_SERVERS_FOUND && (__BOUNCE_FROM_DAEMON || __BOUNCE_RPATH_NULL || __BOUNCE_RPATH_MD || __BOUNCE_AUTO_GENERATED || __BOUNCE_Y_AUTOGEN || __BOUNCE_SYMANTEC || __BOUNCE_X_ERR_STAT || __BOUNCE_RETURNED || __BOUNCE_MAILDELFAIL || __BOUNCE_MSGDELFAIL || __BOUNCE_ESMTP || __BOUNCE_OOO_1 || __BOUNCE_OOO_2 || __BOUNCE_NEVER_SEE || __BOUNCE_NONWORKING || __BOUNCE_UNDELIVERABLE || __BOUNCE_UNDELIVERABLE_ML || __BOUNCE_NOTDEL || __BOUNCE_CTYPE || __BOUNCE_DEL_FAIL || __BOUNCE_STAT_FAIL || __BOUNCE_ADDR_ERR || __BOUNCE_NO_VAL || __BOUNCE_DATA_FORMAT || __BOUNCE_COULD_NOT || __BOUNCE_UNDEL_MSG || __BOUNCE_OOO_H1 || __BOUNCE_OOO_H2 || __BOUNCE_OOO_H3 || __BOUNCE_RPATH_ERRMAIL || __BOUNCE_OOO_3 || __BOUNCE_INTERSCAN || __BOUNCE_ETRUST || __BOUNCE_AUTO_RESPONSE || __BOUNCE_AUTO_RESPOND || __BOUNCE_NO_RESEND || __BOUNCE_NOTIF || __BOUNCE_RET_MAIL || __BOUNCE_DEL_FAIL || __BOUNCE_MAIL_DEL_FAIL))
 
 describe BOUNCE_MESSAGE     MTA bounce message
 
@@ -171,8 +176,9 @@ meta __CRBOUNCE_HEADER    (__AUTO_GEN_XBT || __AUTO_GEN_BBTL)
 header __CRBOUNCE_EXI   X-ExiSpam =~ /ExiSpam/
 
 header __CRBOUNCE_UNVERIF   Subject =~ /^Unverified email to /
+header __CRBOUNCE_BLOCKED   Subject =~ /^\*\*Message you sent blocked by our bulk email filter\*\*$/
 
-meta CRBOUNCE_MESSAGE       !__MY_SERVERS_FOUND && (__CRBOUNCE_UOL || __CRBOUNCE_VERIF || __CRBOUNCE_RP || __CRBOUNCE_VANQ || __CRBOUNCE_HEADER || __CRBOUNCE_QURB || __CRBOUNCE_0SPAM || __CRBOUNCE_GETRESP || __CRBOUNCE_TMDA || __CRBOUNCE_ASK || __CRBOUNCE_EXI || __CRBOUNCE_PREC_SPAM || __CRBOUNCE_SZ || __CRBOUNCE_SPAMLION || __CRBOUNCE_MIB || __CRBOUNCE_SI || __CRBOUNCE_UNVERIF || __CRBOUNCE_RP_2)
+meta CRBOUNCE_MESSAGE       !__MY_SERVERS_FOUND && (__CRBOUNCE_UOL || __CRBOUNCE_VERIF || __CRBOUNCE_RP || __CRBOUNCE_VANQ || __CRBOUNCE_HEADER || __CRBOUNCE_QURB || __CRBOUNCE_0SPAM || __CRBOUNCE_GETRESP || __CRBOUNCE_TMDA || __CRBOUNCE_ASK || __CRBOUNCE_EXI || __CRBOUNCE_PREC_SPAM || __CRBOUNCE_SZ || __CRBOUNCE_SPAMLION || __CRBOUNCE_MIB || __CRBOUNCE_SI || __CRBOUNCE_UNVERIF || __CRBOUNCE_RP_2 || __CRBOUNCE_BLOCKED)
 
 describe CRBOUNCE_MESSAGE   Challenge-response bounce message
 
