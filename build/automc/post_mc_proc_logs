@@ -5,6 +5,7 @@ slave="$2"
 
 HOME=/export/home/bbmass
 REPORTSCRIPTSADIR=/export/home/automc/svn/spamassassin
+. /etc/profile
 
 # ensure all files are readable for freqsd (uid=automc)
 chmod 755 $logdir
