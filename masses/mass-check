@@ -71,6 +71,8 @@ usage: mass-check [options] target ...
 		to retry having a client scan the message.  you need to use
 		this option if it's possible that messages will be removed
 		from your corpus while a scan is in progress.
+  --cs_ssl      use SSL to encrypt on-the-wire client-server traffic
+                (requires IO::Socket::SSL)
 
   log options
   -o            write all logs to stdout
@@ -133,6 +135,7 @@ use vars qw($opt_c $opt_p $opt_f $opt_j $opt_n $opt_o $opt_all $opt_bayes
 	    $total_messages $statusevery $opt_cachedir $opt_scanprob
 	    $opt_client $opt_cs_max $opt_cs_max_retries $opt_cs_timeout
 	    $opt_cs_paths_only $opt_server %postdata %real $svn_revision
+            $opt_cs_ssl
 	    $tmpfd %reuse %orig_conf %reuse_conf $reuse_rules_loaded_p);
 
 use FindBin;
@@ -155,7 +158,9 @@ use Getopt::Long;
 use POSIX qw(strftime);
 use constant HAS_TIME_PARSEDATE => eval { require Time::ParseDate; };
 use constant HAS_IO_ZLIB => eval { require IO::Zlib; };
+use constant HAS_IO_SOCKET_SSL => eval { require IO::Socket::SSL; };
 use Config; 
+
 
 # default settings
 $opt_c = "$FindBin::Bin/../rules";
@@ -178,7 +183,7 @@ GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug:s",
 	   "deencap=s", "logmem", "learn=i", "reuse", "lint", "cache",
            "cachedir=s", "noisy", "scanprob=f",
 	   "server=s", "cs_max=i", "cs_max_retries=i", "cs_timeout=i",
-	   "cs_paths_only", "client=s",
+	   "cs_paths_only", "client=s", "cs_ssl",
 	   "before=s" => \&deal_with_before_after,
 	   "after=s" => \&deal_with_before_after,
            'cf=s' => \@{$opt_cf},
@@ -192,6 +197,10 @@ GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug:s",
 # We need IO::Zlib for client-server mode!
 if ( ($opt_client || $opt_server) && ! HAS_IO_ZLIB ) {
   die "IO::Zlib required for client/server mode!\n";
+}
+
+if ($opt_cs_ssl && ! HAS_IO_SOCKET_SSL ) {
+  die "IO::Socket::SSL required for --cs_ssl!\n";
 }
 
 # rules.pl is for the --reuse option, score set doesn't matter
@@ -1523,12 +1532,30 @@ sub server_mode {
   $opt_cs_max ||= 1000;
   $opt_cs_timeout ||= 60 * 5;
 
-  my $serv_socket = IO::Socket::INET->new(
-    LocalAddr => $opt_server,
-    Proto => 'tcp',
-    Listen => 5,
-    ReuseAddr => 1,
-  );
+  my $serv_socket;
+
+  if ($opt_cs_ssl) {
+    # IO::Socket::SSL isn't that smart
+    $opt_server =~ s/:(\d+)$//;
+    my $port = $1;
+    $serv_socket = IO::Socket::SSL->new(
+            LocalAddr => $opt_server,
+            LocalPort => $port,
+            ReuseAddr => 1,
+            Listen => 5,
+            SSL_verify_mode => 0x00,
+            SSL_version => "TLSv1",
+            SSL_key_file => "spamassassin/server-key.pem",
+            SSL_cert_file => "sspamassassin/server-cert.pem",
+          );
+  }
+  else {
+    $serv_socket = IO::Socket::INET->new(
+            LocalAddr => $opt_server,
+            ReuseAddr => 1,
+            Listen => 5,
+          );
+  }
 
   die "Could not create socket: $!\n" unless $serv_socket;
 
@@ -1704,7 +1731,12 @@ sub client_mode {
     my $POSTDATA = join('&', map { post_encode($_) . '=' . post_encode($postdata{$_}) } keys %postdata);
 
     # connect to server
-    my $socket = IO::Socket::INET->new($host);
+    my $socket;
+    if ($opt_cs_ssl) {
+      $socket = IO::Socket::SSL->new($host);
+    } else {
+      $socket = IO::Socket::INET->new($host);
+    }
 
     # last if connection fails
     last unless ($socket);
