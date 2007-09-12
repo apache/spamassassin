@@ -1736,6 +1736,7 @@ sub client_mode {
       $socket = IO::Socket::SSL->new(
 		PeerAddr => $host,
 		SSL_version => "TLSv1",
+		SSL_use_cert => 1,
 		SSL_key_file => "spamassassin/client-key.pem",
 		SSL_cert_file => "spamassassin/client-cert.pem",
 	      );
