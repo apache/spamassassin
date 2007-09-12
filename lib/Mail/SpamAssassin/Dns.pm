@@ -426,6 +426,12 @@ sub load_resolver {
   return $self->{resolver}->load_resolver();
 }
 
+sub clear_resolver {
+  my ($self) = @_;
+  $self->{main}->{resolver}->{res} = undef;
+  return 0;
+}
+
 sub lookup_ns {
   my ($self, $dom) = @_;
 
@@ -646,6 +652,7 @@ sub is_dns_available {
     }
   }
 
+  $self->clear_resolver();
   goto done unless $self->load_resolver();
 
   if ($dnsopt =~ /test:\s+(.+)$/) {
@@ -667,6 +674,7 @@ sub is_dns_available {
   # Try the different nameservers here in case the first one is not woorking
   
   my @nameservers = $self->{resolver}->nameservers();
+  my @good_nameservers = ();
   dbg("dns: testing resolver nameservers: %s", join(", ", @nameservers));
   my $ns;
   while( $ns  = shift(@nameservers)) {
@@ -679,6 +687,7 @@ sub is_dns_available {
           dbg("dns: NS lookup of %s using %s succeeded => DNS available ".
               "(set dns_available to override)", $domain,$ns);
           $IS_DNS_AVAILABLE = 1;
+          push(@good_nameservers, $ns);
           last;
         }
         else {
@@ -694,13 +703,21 @@ sub is_dns_available {
         last; 
       }
     }
-    last if $IS_DNS_AVAILABLE;
-    dbg("dns: NS lookups failed, removing nameserver %s from list", $ns);
     $self->{resolver}->nameservers(@nameservers);
     $self->{resolver}->connect_sock(); # reconnect socket to new nameserver
   }
 
-  dbg("dns: all NS queries failed => DNS unavailable (set dns_available to override)") if ($IS_DNS_AVAILABLE == 0);
+  if ($IS_DNS_AVAILABLE == 1)
+  {
+    if ($self->{conf}->{dns_options}->{rotate}) {
+      Mail::SpamAssassin::Util::fisher_yates_shuffle(\@good_nameservers);
+    }
+    dbg("dns: NS list: ".join(", ", @good_nameservers));
+    $self->{resolver}->nameservers(@good_nameservers);
+    $self->{resolver}->connect_sock();
+  } else {
+    dbg("dns: all NS queries failed => DNS unavailable (set dns_available to override)");
+  }
 
 done:
   # jm: leaving this in!
