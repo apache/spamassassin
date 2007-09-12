@@ -1546,7 +1546,7 @@ sub server_mode {
             SSL_verify_mode => 0x00,
             SSL_version => "TLSv1",
             SSL_key_file => "spamassassin/server-key.pem",
-            SSL_cert_file => "sspamassassin/server-cert.pem",
+            SSL_cert_file => "spamassassin/server-cert.pem",
           );
   }
   else {
