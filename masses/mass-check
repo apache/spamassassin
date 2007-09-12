@@ -72,7 +72,8 @@ usage: mass-check [options] target ...
 		this option if it's possible that messages will be removed
 		from your corpus while a scan is in progress.
   --cs_ssl      use SSL to encrypt on-the-wire client-server traffic
-                (requires IO::Socket::SSL)
+                (requires IO::Socket::SSL, see
+                http://wiki.apache.org/spamassassin/SslMassCheck for more)
 
   log options
   -o            write all logs to stdout
@@ -1543,7 +1544,8 @@ sub server_mode {
             LocalPort => $port,
             ReuseAddr => 1,
             Listen => 5,
-            SSL_verify_mode => 0x00,
+            SSL_verify_mode => 0x02,
+            SSL_use_cert => 1,
             SSL_version => "TLSv1",
             SSL_key_file => "spamassassin/server-key.pem",
             SSL_cert_file => "spamassassin/server-cert.pem",
