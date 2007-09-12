@@ -1733,7 +1733,12 @@ sub client_mode {
     # connect to server
     my $socket;
     if ($opt_cs_ssl) {
-      $socket = IO::Socket::SSL->new($host);
+      $socket = IO::Socket::SSL->new(
+		PeerAddr => $host,
+		SSL_version => "TLSv1",
+		SSL_key_file => "spamassassin/client-key.pem",
+		SSL_cert_file => "spamassassin/client-cert.pem",
+	      );
     } else {
       $socket = IO::Socket::INET->new($host);
     }
