@@ -75,7 +75,7 @@ sub new {
   else {
     my $type = $main->{conf}->{auto_whitelist_factory};
     if ($type =~ /^([_A-Za-z0-9:]+)$/) {
-      $type = $1;
+      $type = Mail::SpamAssassin::Util::untaint_var($type);
       eval '
   	    require '.$type.';
             $factory = '.$type.'->new();
