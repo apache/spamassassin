@@ -66,11 +66,6 @@ usage: mass-check [options] target ...
 		server, only ask for paths to the messages and not the
 		messages themselves.  useful when the client and server
 		have the same paths to the corpus data.
-  --cs_max_retries N
-		only used in server mode.  set the maximum number of times
-		to retry having a client scan the message.  you need to use
-		this option if it's possible that messages will be removed
-		from your corpus while a scan is in progress.
   --cs_ssl      use SSL to encrypt on-the-wire client-server traffic
                 (requires IO::Socket::SSL, see
                 http://wiki.apache.org/spamassassin/SslMassCheck for more)
@@ -134,8 +129,8 @@ use vars qw($opt_c $opt_p $opt_f $opt_j $opt_n $opt_o $opt_all $opt_bayes
 	    $opt_logmem $opt_after $opt_before $opt_rewrite $opt_deencap
 	    $opt_learn $opt_reuse $opt_lint $opt_cache $opt_noisy $opt_cf
 	    $total_messages $statusevery $opt_cachedir $opt_scanprob
-	    $opt_client $opt_cs_max $opt_cs_max_retries $opt_cs_timeout
-	    $opt_cs_paths_only $opt_server %postdata %real $svn_revision
+	    $opt_client $opt_cs_max $opt_cs_timeout $opt_cs_paths_only
+	    $opt_server %postdata %real $svn_revision
             $opt_cs_ssl
 	    $tmpfd %reuse %orig_conf %reuse_conf $reuse_rules_loaded_p);
 
@@ -183,7 +178,7 @@ GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug:s",
 	   "rules=s", "restart=i", "loguris",
 	   "deencap=s", "logmem", "learn=i", "reuse", "lint", "cache",
            "cachedir=s", "noisy", "scanprob=f",
-	   "server=s", "cs_max=i", "cs_max_retries=i", "cs_timeout=i",
+	   "server=s", "cs_max=i", "cs_timeout=i",
 	   "cs_paths_only", "client=s", "cs_ssl",
 	   "before=s" => \&deal_with_before_after,
 	   "after=s" => \&deal_with_before_after,
@@ -1102,7 +1097,7 @@ sub handle_http_request {
 # Returns: scalar path to gzip file
 #
 sub generate_messages {
-  my($msgs, $timestamps, $msgsout, $paths_only, $retries) = @_;
+  my($msgs, $timestamps, $msgsout, $paths_only) = @_;
 
   # Hold the message numbers we'll be sending out
   my @tosend = ();
@@ -1130,35 +1125,8 @@ sub generate_messages {
       delete $timestamps->{$_};
     }
 
-    # skip any messages that we've already retried enough
-    if ($opt_cs_max_retries) {
-      my @goodtosend;
-      for (my $i = 0; $i < @tosend; $i++) {
-        if (exists $retries->{$tosend[$i]} && $retries->{$tosend[$i]} == $opt_cs_max_retries) {
-          if ($opt_noisy) {
-            my $data = $msgsout->{$tosend[$i]}->{'data'};
-            my $path = ($iter->_run_message($data))[3];
-            print 'status: skipping '.
-              (defined $path ? $path : '(unknown message path)')." after $opt_cs_max_retries retries\n";
-          }
-          delete $msgsout->{$tosend[$i]};
-        } else {
-          push @goodtosend, $tosend[$i];
-        }
-      }
-      @tosend = @goodtosend;
-      @goodtosend = ();
-    }
-
     # Ok, we have enough messages so we can stop now.
     last if (@tosend == $msgs);
-  }
-
-  # keep track of how many times we've retried a message
-  if ($opt_cs_max_retries) {
-    foreach (@tosend) {
-      $retries->{$_}++;
-    }
   }
 
   # if we still have the temp file with the input messages open, we'll fillup
@@ -1202,23 +1170,15 @@ sub generate_messages {
     # 1- server message number in text format
     # 2- server index string, binary packed format
     # 3- message content -- unless paths_only
+    send_line($gzfd, $num) || die "mass-check: error when writing to gz temp file\n";
+
     my $data = $msgsout->{$num}->{'data'};
+    send_line($gzfd, $data) || die "mass-check: error when writing to gz temp file\n";
+
     if (!$paths_only) {
       my $msg = ($iter->_run_message($data))[4];
-      unless ($msg) {
-        # skip the message on error, the retry limit code will take care of not
-        # getting stuck in a loop trying to send this message
-        warn "mass-check: error getting message to send, skipping message for now\n";
-        die "mass-check: cannot continue without --cs_max_retries N option to handle message errors\n" unless $opt_cs_max_retries;
-        next;
-      }
-      send_line($gzfd, $num) || die "mass-check: error when writing to gz temp file\n";
-      send_line($gzfd, $data) || die "mass-check: error when writing to gz temp file\n";
       send_line($gzfd, join('', @{$msg})) ||
         die "mass-check: error when writing to gz temp file\n";
-    } else {
-      send_line($gzfd, $num) || die "mass-check: error when writing to gz temp file\n";
-      send_line($gzfd, $data) || die "mass-check: error when writing to gz temp file\n";
     }
   }
 
@@ -1568,7 +1528,6 @@ sub server_mode {
   # Setup out "what messages have been sent out" hashes
   my $timestamps = {};
   my $msgsout = { 'curnum' => 0 };
-  my $retries = {};
 
   # Generate an IO::Select object and put the server socket on the queue
   my $select = IO::Select->new( $serv_socket );
@@ -1618,7 +1577,7 @@ sub server_mode {
 	      print "client requested ".$postdata->{'max_messages'}." messages\n";
 	    }
 
-	    $messages = generate_messages($msgnum, $timestamps, $msgsout, $postdata->{'paths_only'}, $retries);
+	    $messages = generate_messages($msgnum, $timestamps, $msgsout, $postdata->{'paths_only'});
 	  }
 
           # $messages will contain the path to the gzip file if there are
