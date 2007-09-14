@@ -18,15 +18,16 @@
 # HTML decoding TODOs
 # - add URIs to list for faster URI testing
 
+package Mail::SpamAssassin::HTML;
+
 use strict;
 use warnings;
 use re 'taint';
 
-package Mail::SpamAssassin::HTML;
-
 use HTML::Parser 3.43 ();
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Constants qw(:sa);
+use Mail::SpamAssassin::Util qw(untaint_var);
 
 use vars qw($re_loose $re_strict $re_other @ISA @EXPORT @EXPORT_OK);
 
@@ -224,8 +225,7 @@ sub parse {
   $self->{closed_body} = 0;
   $self->{closed_extra} = 0;
   $self->{text} = [];		# rendered text
-
-  $self->{length} += Mail::SpamAssassin::Util::untaint_var(length($text));
+  $self->{length} += untaint_var(length($text));
 
   # NOTE: We *only* need to fix the rendering when we verify that it
   # differs from what people see in their MUA.  Testing is best done with

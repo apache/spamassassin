@@ -54,6 +54,7 @@ use re 'taint';
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Util qw(untaint_var);
 
 # pick ONLY ONE of these combining implementations.
 use Mail::SpamAssassin::Bayes::CombineChi;
@@ -238,7 +239,7 @@ sub new {
 
   if ($self->{conf}->{bayes_store_module}) {
     my $module = $self->{conf}->{bayes_store_module};
-    $module = Mail::SpamAssassin::Util::untaint_var($module);  # good enough?
+    $module = untaint_var($module);  # good enough?
     my $store;
 
     eval '

@@ -29,6 +29,7 @@ package Mail::SpamAssassin::Plugin::BodyRuleBaseExtractor;
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Util qw(untaint_var);
 use Mail::SpamAssassin::Util::Progress;
 
 use Data::Dumper;
@@ -134,7 +135,7 @@ sub extract_set_pri {
 
 NEXT_RULE:
   foreach my $name (keys %{$rules}) {
-    $self->{show_progress} and $progress->update(++$count);
+    $self->{show_progress} and $progress and $progress->update(++$count);
 
     my $rule = $rules->{$name};
     my $cachekey = join "#", $name, $rule;
@@ -223,7 +224,7 @@ NO:
     }
   }
 
-  $self->{show_progress} and $progress->final();
+  $self->{show_progress} and $progress and $progress->final();
 
   dbg("zoom: $ruletype: found ".(scalar @good_bases).
       " usable base strings in $yes rules, skipped $no rules");
@@ -290,7 +291,7 @@ NO:
   @good_bases = @rewritten;
 
   foreach my $set1 (@good_bases) {
-    $self->{show_progress} and $progress->update(++$count);
+    $self->{show_progress} and $progress and $progress->update(++$count);
 
     my $base1 = $set1->[0]; next unless $base1;
     my $name1 = $set1->[1];
@@ -358,7 +359,7 @@ NO:
     }
     $conf->{base_string}->{$ruletype}->{$base} = join ' ', sort keys %u;
   }
-  $self->{show_progress} and $progress->final();
+  $self->{show_progress} and $progress and $progress->final();
 
   if ($cachefile) {
     $self->write_cachefile ($cachefile, $cached);
@@ -975,7 +976,7 @@ sub read_cachefile {
   if (open(IN, "<".$cachefile)) {
     my $str = join("", <IN>);
     close IN;
-    my $untainted = Mail::SpamAssassin::Util::untaint_var($str);
+    my $untainted = untaint_var($str);
 
     my $VAR1;                 # Data::Dumper
     if (eval $untainted) {

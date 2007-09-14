@@ -17,13 +17,15 @@
 
 package Mail::SpamAssassin::Plugin::MIMEEval;
 
-use Mail::SpamAssassin::Plugin;
-use Mail::SpamAssassin::Locales;
-use Mail::SpamAssassin::Constants qw(:sa CHARSETS_LIKELY_TO_FP_AS_CAPS);
 use strict;
 use warnings;
 use bytes;
 use re 'taint';
+
+use Mail::SpamAssassin::Plugin;
+use Mail::SpamAssassin::Locales;
+use Mail::SpamAssassin::Constants qw(:sa CHARSETS_LIKELY_TO_FP_AS_CAPS);
+use Mail::SpamAssassin::Util qw(untaint_var);
 
 use vars qw(@ISA);
 @ISA = qw(Mail::SpamAssassin::Plugin);

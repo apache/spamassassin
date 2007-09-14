@@ -43,14 +43,16 @@ DCC.
 
 package Mail::SpamAssassin::Plugin::DCC;
 
-use Mail::SpamAssassin::Plugin;
-use Mail::SpamAssassin::Logger;
-use Mail::SpamAssassin::Timeout;
-use IO::Socket;
 use strict;
 use warnings;
 use bytes;
 use re 'taint';
+
+use Mail::SpamAssassin::Plugin;
+use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Timeout;
+use Mail::SpamAssassin::Util qw(untaint_var);
+use IO::Socket;
 
 use vars qw(@ISA);
 @ISA = qw(Mail::SpamAssassin::Plugin);
@@ -537,10 +539,9 @@ sub dccproc_lookup {
     my $path = Mail::SpamAssassin::Util::untaint_file_path($self->{main}->{conf}->{dcc_path});
 
     my @opts = split(' ',$self->{main}->{conf}->{dcc_options});
-    Mail::SpamAssassin::Util::untaint_var(\@opts);
+    untaint_var(\@opts);
 
-    unshift(@opts, "-a", Mail::SpamAssassin::Util::untaint_var($client))
-      if $client ne '';
+    unshift(@opts, "-a", untaint_var($client))  if $client ne '';
 
     dbg("dcc: opening pipe: %s",
          join(' ', $path, "-H", "-x", "0", @opts, "< $tmpf"));
@@ -748,12 +749,11 @@ sub dcc_report {
   # note: not really tainted, this came from system configuration file
   my $path = Mail::SpamAssassin::Util::untaint_file_path($options->{report}->{conf}->{dcc_path});
   my @opts = split(' ',$self->{main}->{conf}->{dcc_options});
-  Mail::SpamAssassin::Util::untaint_var(\@opts);
+  untaint_var(\@opts);
 
   # get the metadata from the message so we can pass the external relay info
 
-  unshift(@opts, "-a", Mail::SpamAssassin::Util::untaint_var($client))
-    if $client ne '';
+  unshift(@opts, "-a", untaint_var($client))  if $client ne '';
 
   my $timer = Mail::SpamAssassin::Timeout->new({ secs => $timeout });
 
