@@ -14,14 +14,14 @@ This plugin provides the primary message check functionality.
 
 package Mail::SpamAssassin::Plugin::Check;
 
+use strict;
+use warnings;
+use re 'taint';
+
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::Constants qw(:sa);
-
-use strict;
-use warnings;
-use re 'taint';
 
 use vars qw(@ISA @TEMPORARY_METHODS);
 @ISA = qw(Mail::SpamAssassin::Plugin);
@@ -323,7 +323,7 @@ sub do_meta_tests {
     loop_body => sub
   {
     my ($self, $pms, $conf, $rulename, $rule, %opts) = @_;
-    $rule = Mail::SpamAssassin::Util::untaint_var($rule);  # presumably checked
+    $rule = untaint_var($rule);  # presumably checked
 
     # Lex the rule into tokens using a rather simple RE method ...
     my $lexer = ARITH_EXPRESSION_LEXER;
@@ -459,7 +459,7 @@ sub do_head_tests {
   {
     my ($self, $pms, $conf, $rulename, $rule, %opts) = @_;
     my $def = '';
-    $rule = Mail::SpamAssassin::Util::untaint_var($rule);  # presumably checked
+    $rule = untaint_var($rule);  # presumably checked
     my ($hdrname, $testtype, $pat) =
         $rule =~ /^\s*(\S+)\s*(\=|\!)\~\s*(\S.*?\S)\s*$/;
 
@@ -569,7 +569,7 @@ sub do_body_tests {
     loop_body => sub
   {
     my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
-    $pat = Mail::SpamAssassin::Util::untaint_var($pat);  # presumably checked
+    $pat = untaint_var($pat);  # presumably checked
     my $sub;
     if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
     {
@@ -642,7 +642,7 @@ sub do_uri_tests {
     loop_body => sub
   {
     my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
-    $pat = Mail::SpamAssassin::Util::untaint_var($pat);  # presumably checked
+    $pat = untaint_var($pat);  # presumably checked
     my $sub;
     if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/) {
       $loopid++;
@@ -710,7 +710,7 @@ sub do_rawbody_tests {
     loop_body => sub
   {
     my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
-    $pat = Mail::SpamAssassin::Util::untaint_var($pat);  # presumably checked
+    $pat = untaint_var($pat);  # presumably checked
     my $sub;
     if (($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
     {
@@ -788,7 +788,7 @@ sub do_full_tests {
                 loop_body => sub
   {
     my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
-    $pat = Mail::SpamAssassin::Util::untaint_var($pat);  # presumably checked
+    $pat = untaint_var($pat);  # presumably checked
     $self->add_evalstr ('
       if ($scoresptr->{q{'.$rulename.'}}) {
         pos $$fullmsgref = 0;
@@ -902,7 +902,7 @@ sub run_eval_tests {
       }
     }
  
-    $test = Mail::SpamAssassin::Util::untaint_var($test);  # presumably checked
+    $test = untaint_var($test);  # presumably checked
     my ($function, $argstr) = ($test,'');
     if ($test =~ s/^([^,]+)(,.*)$//gs) {
       ($function, $argstr) = ($1,$2);
@@ -1022,8 +1022,7 @@ EOT
 sub hash_line_for_rule {
   my ($self, $pms, $rulename) = @_;
   return sprintf("\n#line 1 \"%s, rule %s,\"",
-                 Mail::SpamAssassin::Util::untaint_var(
-                   $pms->{conf}->{source_file}->{$rulename}),
+                 untaint_var($pms->{conf}->{source_file}->{$rulename}),
                  $rulename);
 }
 

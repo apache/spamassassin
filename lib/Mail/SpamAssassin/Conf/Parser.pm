@@ -124,6 +124,7 @@ package Mail::SpamAssassin::Conf::Parser;
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Util qw(untaint_var);
 
 use strict;
 use warnings;
@@ -270,7 +271,7 @@ sub parse {
     $value = '' unless defined($value);
 
 #   # Do a better job untainting this info ...
-#   # $value = Mail::SpamAssassin::Util::untaint_var($value);
+#   # $value = untaint_var($value);
 #   Do NOT blindly untaint now, do it carefully later when semantics is known!
 
     my $parse_error;       # undef by default, may be overridden
@@ -484,7 +485,7 @@ sub handle_conditional {
   my $bad = 0;
   foreach my $token (@tokens) {
     if ($token =~ /^\W+|[+-]?\d+(?:\.\d+)?$/) {
-      $eval .= Mail::SpamAssassin::Util::untaint_var($token) . " ";
+      $eval .= untaint_var($token) . " ";
     }
     elsif ($token eq 'plugin') {
       # replace with method call
@@ -494,7 +495,7 @@ sub handle_conditional {
       $eval .= $Mail::SpamAssassin::VERSION." ";
     }
     elsif ($token =~ /^\w[\w\:]+$/) { # class name
-      $eval .= '"' . Mail::SpamAssassin::Util::untaint_var($token) . '" ';
+      $eval .= '"' . untaint_var($token) . '" ';
     }
     else {
       $bad++;
@@ -613,7 +614,7 @@ sub set_numeric_value {
     return $Mail::SpamAssassin::Conf::INVALID_VALUE;
   }
   # it is safe to untaint now that we now the syntax is a valid number
-  $conf->{$key} = Mail::SpamAssassin::Util::untaint_var($value) + 0.0;
+  $conf->{$key} = untaint_var($value) + 0.0;
 }
 
 sub set_bool_value {
@@ -832,7 +833,7 @@ sub _meta_deps_recurse {
     next unless exists $conf->{tests}->{$token};
 
     # add and recurse
-    push(@{$deps}, Mail::SpamAssassin::Util::untaint_var($token));
+    push(@{$deps}, untaint_var($token));
     $self->_meta_deps_recurse($conf, $toprule, $token, $deps, $alreadydone);
   }
 }
@@ -1091,7 +1092,7 @@ sub is_meta_valid {
   my ($self, $name, $rule) = @_;
 
   my $meta = '';
-  $rule = Mail::SpamAssassin::Util::untaint_var($rule); # must be careful below
+  $rule = untaint_var($rule);  # must be careful below
 
   # Lex the rule into tokens using a rather simple RE method ...
   my $lexer = ARITH_EXPRESSION_LEXER;

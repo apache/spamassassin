@@ -55,7 +55,7 @@ use vars qw (
 require Exporter;
 
 @ISA = qw(Exporter);
-@EXPORT = qw(local_tz base64_decode);
+@EXPORT = qw(local_tz base64_decode untaint_var);
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Util::RegistrarBoundaries;
@@ -262,7 +262,7 @@ sub untaint_hostname {
 #  untaint_var(\%ENV);
 #
 sub untaint_var {
-  no re 'taint';  # override a possible  use re 'taint'  from outer scope
+  no re 'taint';  # override a  "use re 'taint'"  from outer scope
   local ($_) = @_;
   return undef unless defined;
 

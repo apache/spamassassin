@@ -83,16 +83,19 @@ not have any execute bits set (the umask is set to 111).
 
 package Mail::SpamAssassin::Plugin::Hashcash;
 
-use Mail::SpamAssassin::Plugin;
-use Mail::SpamAssassin::Logger;
-use Digest::SHA1 qw(sha1);
-use Fcntl;
-use File::Path;
-use File::Basename;
 use strict;
 use warnings;
 use bytes;
 use re 'taint';
+
+use Mail::SpamAssassin::Plugin;
+use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Util qw(untaint_var);
+
+use Digest::SHA1 qw(sha1);
+use Fcntl;
+use File::Path;
+use File::Basename;
 
 use vars qw(@ISA);
 @ISA = qw(Mail::SpamAssassin::Plugin);
@@ -207,7 +210,7 @@ sub _run_hashcash_for_one_string {
 
   # untaint the string for paranoia, making sure not to allow \n \0 \' \"
   if ($hc =~ /^[-A-Za-z0-9\xA0-\xFF:_\/\%\@\.\,\= \*\+\;]+$/) {
-    $hc = Mail::SpamAssassin::Util::untaint_var($hc);
+    $hc = untaint_var($hc);
   }
   if (!$hc) { return 0; }
 

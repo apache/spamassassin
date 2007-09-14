@@ -89,6 +89,7 @@ use Mail::SpamAssassin::NetSet;
 use Mail::SpamAssassin::SubProcBackChannel;
 use Mail::SpamAssassin::SpamdForkScaling qw(:pfstates);
 use Mail::SpamAssassin::Logger qw(:DEFAULT log_message);
+use Mail::SpamAssassin::Util qw(untaint_var);
 use Mail::SpamAssassin::Timeout;
 
 use Getopt::Long;
@@ -194,17 +195,17 @@ Mail::SpamAssassin::Util::am_running_in_taint_mode();
 # First clean PATH and untaint the environment -- need to do this before
 # Cwd::cwd(), else it will croak.
 Mail::SpamAssassin::Util::clean_path_in_taint_mode();
-Mail::SpamAssassin::Util::untaint_var( \%ENV );
+untaint_var( \%ENV );
 
 # The zeroth argument will be replaced in daemonize().
-my $ORIG_ARG0 = Mail::SpamAssassin::Util::untaint_var($0);
+my $ORIG_ARG0 = untaint_var($0);
 
 # Getopt::Long clears all arguments it processed (untaint both @ARGVs here!)
-my @ORIG_ARGV = Mail::SpamAssassin::Util::untaint_var( \@ARGV );
+my @ORIG_ARGV = untaint_var( \@ARGV );
 
 # daemonize() switches to the root later on and we need to come back here
 # somehow -- untaint the dir to be on the safe side.
-my $ORIG_CWD = Mail::SpamAssassin::Util::untaint_var( Cwd::cwd() );
+my $ORIG_CWD = untaint_var( Cwd::cwd() );
 
 prepare_for_sighup_restart();
 
@@ -2576,7 +2577,7 @@ sub do_sighup_restart {
 
   # ensure we re-run spamd using the right perl interpreter, and
   # with the right switches (taint mode and warnings) (bug 5255)
-  my $perl = Mail::SpamAssassin::Util::untaint_var($^X);
+  my $perl = untaint_var($^X);
   my @execs = ( $perl, "-T", "-w", $ORIG_ARG0, @ORIG_ARGV );
 
   if ($perl eq $perl_from_hashbang_line) {

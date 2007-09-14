@@ -1438,7 +1438,7 @@ sub perform_upgrade {
       die "bayes: unable to find bayes_toks and bayes_seen, stopping\n";
     }
     # untaint @files (already safe after grep)
-    Mail::SpamAssassin::Util::untaint_var(\@files);
+    untaint_var(\@files);
  	 
     for (@files) {
       my $src = "$dir/$_";

@@ -48,6 +48,7 @@ use re 'taint';
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Util qw(untaint_var);
 
 use vars	qw{
   	@ISA
@@ -75,7 +76,7 @@ sub new {
   else {
     my $type = $main->{conf}->{auto_whitelist_factory};
     if ($type =~ /^([_A-Za-z0-9:]+)$/) {
-      $type = Mail::SpamAssassin::Util::untaint_var($type);
+      $type = untaint_var($type);
       eval '
   	    require '.$type.';
             $factory = '.$type.'->new();

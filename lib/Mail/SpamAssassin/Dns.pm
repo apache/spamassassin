@@ -20,18 +20,20 @@ package Mail::SpamAssassin::Dns;
 
 package Mail::SpamAssassin::PerMsgStatus;
 
-use Mail::SpamAssassin::Conf;
-use Mail::SpamAssassin::PerMsgStatus;
-use Mail::SpamAssassin::AsyncLoop;
-use Mail::SpamAssassin::Constants qw(:ip);
-use File::Spec;
-use IO::Socket;
-use POSIX ":sys_wait_h";
-
 use strict;
 use warnings;
 use bytes;
 use re 'taint';
+
+use Mail::SpamAssassin::Conf;
+use Mail::SpamAssassin::PerMsgStatus;
+use Mail::SpamAssassin::AsyncLoop;
+use Mail::SpamAssassin::Constants qw(:ip);
+use Mail::SpamAssassin::Util qw(untaint_var);
+
+use File::Spec;
+use IO::Socket;
+use POSIX ":sys_wait_h";
 
 use vars qw{
   $KNOWN_BAD_DIALUP_RANGES @EXISTING_DOMAINS $IS_DNS_AVAILABLE $LAST_DNS_CHECK $VERSION
@@ -303,7 +305,7 @@ sub process_dnsbl_set {
       }
 
       # untaint. (bug 3325)
-      $subtest = Mail::SpamAssassin::Util::untaint_var($subtest);
+      $subtest = untaint_var($subtest);
 
       $self->got_hit($rule, "SenderBase: ", ruletype => "dnsbl") if !$undef && eval $subtest;
     }

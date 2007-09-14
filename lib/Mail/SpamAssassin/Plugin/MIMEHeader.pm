@@ -57,13 +57,15 @@ including pristine whitespace, instead.
 
 package Mail::SpamAssassin::Plugin::MIMEHeader;
 
-use Mail::SpamAssassin::Plugin;
-use Mail::SpamAssassin::Conf;
-use Mail::SpamAssassin::Logger;
 use strict;
 use warnings;
 use bytes;
 use re 'taint';
+
+use Mail::SpamAssassin::Plugin;
+use Mail::SpamAssassin::Conf;
+use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Util qw(untaint_var);
 
 use vars qw(@ISA @TEMPORARY_METHODS);
 @ISA = qw(Mail::SpamAssassin::Plugin);
@@ -106,7 +108,7 @@ sub set_config {
       }
 
       # provide stricter syntax for rule name!?
-      my $rulename = Mail::SpamAssassin::Util::untaint_var($1);
+      my $rulename = untaint_var($1);
       my $hdrname = $2;
       my $negated = ($3 eq '!~') ? 1 : 0;
       my $pattern = $4;
