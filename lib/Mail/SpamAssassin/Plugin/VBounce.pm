@@ -151,9 +151,3 @@ sub _relay_is_in_list {
 }
 
 1;
-__DATA__
-
-=back
-
-=cut
-
