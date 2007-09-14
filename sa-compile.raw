@@ -23,6 +23,10 @@ my $LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';    # substituted at 'make' time
 my $LOCAL_STATE_DIR = '@@LOCAL_STATE_DIR@@';    # substituted at 'make' time
 use lib '@@INSTALLSITELIB@@';                   # substituted at 'make' time
 
+use strict;
+use warnings;
+use re 'taint';
+
 use File::Spec;
 use Config;
 
@@ -51,10 +55,8 @@ BEGIN {                          # see comments in "spamassassin.raw" for doco
   }
 }
 
-use strict;
-use warnings;
-
 use Mail::SpamAssassin;
+use Mail::SpamAssassin::Util qw(untaint_var);
 use Getopt::Long;
 use File::Copy;
 use File::Path;
@@ -295,8 +297,7 @@ sub get_perl {
     $perl = $Config{perlpath};
     $perl =~ s|/[^/]*$|/$^X|;
   }
-  $perl =~ /^(.*)$/;
-  return $1;
+  return untaint_var($perl);
 }
 
 ##############################################################################
@@ -312,8 +313,9 @@ sub rule2xs {
 # read ruleset name from the first line in the file
   my $ruleset_name;
   $_ = <$fh>;
+  local ($1);
   if (/^name\s+(\S+)/) {
-    $ruleset_name = $1;
+    $ruleset_name = untaint_var($1);
   }
 
   if (!$modname) {
@@ -366,6 +368,7 @@ EOT
     while (<$fh>) {
       next if /^#/;
 
+      local ($1,$2);
       if (/^orig\s+(\S+)\s+(.*)$/) {
 	my $name = $1;
 	my $regexp = $2;
@@ -605,6 +608,7 @@ sub fixup_re {
   my $TOK = qr([\"\\]);
 
   my $STATE;
+  local ($1,$2);
   while ($re =~ /\G(.*?)($TOK)/gc) {
     my $pre = $1;
     my $tok = $2;
