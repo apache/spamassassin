@@ -145,6 +145,7 @@ use lib "$FindBin::Bin/../blib/lib";
 eval "use bytes";
 use IO::Select;
 use IO::Socket;
+use Socket qw();
 use Mail::SpamAssassin::ArchiveIterator;
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Logger;
@@ -1493,14 +1494,18 @@ sub server_mode {
   $opt_cs_max ||= 1000;
   $opt_cs_timeout ||= 60 * 5;
 
-  my $serv_socket;
+  # IO::Socket::SSL isn't that smart
+  $opt_server =~ s/:(\d+)$//;
+  my $port = $1;
 
+  # ::SSL needs resolved hostnames, at least on Solaris. note: not IPv6-aware
+  my $localaddr = (gethostbyname($opt_server))[4] || $opt_server;
+  $localaddr = Socket::inet_ntoa($localaddr);
+
+  my $serv_socket;
   if ($opt_cs_ssl) {
-    # IO::Socket::SSL isn't that smart
-    $opt_server =~ s/:(\d+)$//;
-    my $port = $1;
     $serv_socket = IO::Socket::SSL->new(
-            LocalAddr => $opt_server,
+            LocalAddr => $localaddr,
             LocalPort => $port,
             ReuseAddr => 1,
             Listen => 5,
@@ -1513,7 +1518,8 @@ sub server_mode {
   }
   else {
     $serv_socket = IO::Socket::INET->new(
-            LocalAddr => $opt_server,
+            LocalAddr => $localaddr,
+            LocalPort => $port,
             ReuseAddr => 1,
             Listen => 5,
           );
