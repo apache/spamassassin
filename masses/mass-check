@@ -1656,21 +1656,23 @@ sub client_mode {
   $opt_cs_max ||= 1000;
   $opt_cs_timeout ||= 60 * 2;
 
-  my($host, $uri);
+  my($host, $port, $uri);
 
   if ($opt_client =~ /^http:\/\/([^\/]+)(\/.*)?/) {
     ($host, $uri) = ($1,$2);
-  }
-  else {
+  } else {
     $host = $opt_client;
     if ($host =~ /^:/) {
       $host = 'localhost'.$host;
     }
   }
-  my($http_host) = split(/:/, $host);
+  ($host, $port) = split(/:/, $host);
 
   die "No host found in opt_client" unless $host;
   $uri ||= "/";
+
+  # ::SSL needs resolved hostnames, at least on Solaris. note: not IPv6-aware
+  $host = Socket::inet_ntoa(Socket::inet_aton($host));
 
   # use this to track how many messages we ought to be requesting
   # start at 100 to get warmed up
@@ -1702,13 +1704,17 @@ sub client_mode {
     if ($opt_cs_ssl) {
       $socket = IO::Socket::SSL->new(
 		PeerAddr => $host,
+		PeerPort => $port,
 		SSL_version => "TLSv1",
 		SSL_use_cert => 1,
 		SSL_key_file => "spamassassin/client-key.pem",
 		SSL_cert_file => "spamassassin/client-cert.pem",
 	      );
     } else {
-      $socket = IO::Socket::INET->new($host);
+      $socket = IO::Socket::INET->new(
+		PeerAddr => $host,
+		PeerPort => $port
+              );
     }
 
     # last if connection fails
@@ -1718,7 +1724,7 @@ sub client_mode {
 
     # make request, include and then drop results if there are any
     my $result = http_make_request($socket, 'POST', $uri, {
-      'Host'		=> $http_host,
+      'Host'		=> $host,
       'Content-Type'	=> 'application/x-www-form-urlencoded',
       'Content-Length'	=> length($POSTDATA),
       },
