@@ -687,7 +687,7 @@ sub _scan_file {
     unless (defined $AICache and $date = $AICache->check($mail)) {
       # silently skip directories/non-files; some folders may
       # contain extraneous dirs etc.
-      next if (!-f $mail);      
+      return if (!-f $mail);      
 
       my $header;
       if (!_mail_open($mail)) {
