@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi; day 2: axb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi; day 3: axb bb-fredt bb-jm bb-zmi cthielen daf jm theo zmi
+# with results from: day 1: bb-fredt bb-jm bb-zmi cthielen daf dos jm; day 2: axb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi; day 3: axb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -101,6 +101,9 @@ DOS_OUTLOOK_TO_MX
 DOS_OUTLOOK_TO_MX_IMAGE
 
 # good enough
+DOS_STOCK_BAT
+
+# good enough
 DRUGS_STOCK_MIMEOLE
 
 # good enough
@@ -116,16 +119,7 @@ DYN_RDNS_SHORT_HELO_IMAGE
 ENV_AND_HDR_SPF_MATCH
 
 # good enough
-FAKE_REPLY_C
-
-# good enough
 FB_ACHIEVE_BACH
-
-# good enough
-FB_ADD_INCHES
-
-# good enough
-FB_CASINO
 
 # good enough
 FB_CIALIS_LEO3
@@ -134,16 +128,10 @@ FB_CIALIS_LEO3
 FB_GVR
 
 # good enough
-FB_HEY_BRO_COMMA
-
-# good enough
 FB_INDEPEND_RWD
 
 # good enough
 FB_LETTERS_21B
-
-# good enough
-FB_LOWER_PAYM
 
 # good enough
 FB_NO_SCRIP_NEEDED
@@ -153,9 +141,6 @@ FB_QUALITY_REPLICA
 
 # good enough
 FB_REPLIC_CAP
-
-# good enough
-FB_SAVE_PERSC
 
 # good enough
 FB_SOFTTABS
@@ -180,9 +165,6 @@ FH_DATE_PAST_20XX
 
 # good enough
 FH_FAKE_RCVD_LINE
-
-# good enough
-FH_FROMEML_NOTLD
 
 # good enough
 FH_FROM_CASH
@@ -236,9 +218,6 @@ FM_DOESNT_SAY_STOCK
 FM_FAKE_HELO_VERIZON
 
 # good enough
-FM_RE_HELLO_SPAM
-
-# good enough
 FM_SCHOOL_DIPLOMA
 
 # good enough
@@ -272,6 +251,9 @@ FRT_OPPORTUN2
 FRT_PENIS1
 
 # good enough
+FRT_PRICE
+
+# good enough
 FRT_REFINANCE1
 
 # good enough
@@ -287,12 +269,6 @@ FRT_STRONG1
 FRT_SYMBOL
 
 # good enough
-FRT_XANAX1
-
-# good enough
-FRT_XANAX2
-
-# good enough
 FR_ALMOST_VIAG2
 
 # good enough
@@ -300,9 +276,6 @@ FS_EJACULA
 
 # good enough
 FS_ERECTION
-
-# good enough
-FS_OBFU_PRMCY
 
 # good enough
 FS_REPLICA
@@ -320,13 +293,7 @@ FS_WILL_HELP
 FUZZY_MERIDIA
 
 # good enough
-FU_ENDS_NUMS_DOTS_CLK
-
-# good enough
 FU_LONG_QUERY3
-
-# good enough
-GEO_QUERY_STRING
 
 # tflags userconf
 GTUBE
@@ -677,12 +644,6 @@ STOCK_IMG_HTML
 STOCK_IMG_OUTLOOK
 
 # good enough
-STOX_AND_PRICE
-
-# good enough
-STOX_META_5
-
-# good enough
 STOX_REPLY_TYPE
 
 # tflags userconf
@@ -692,16 +653,7 @@ SUBJECT_IN_BLACKLIST
 SUBJECT_IN_WHITELIST
 
 # good enough
-SUBJ_RE_NUM
-
-# good enough
-TT_OBSCURED_VALIUM
-
-# good enough
 TT_OBSCURED_VIAGRA
-
-# good enough
-TVD_APPROVED
 
 # good enough
 TVD_DEAR_HOMEOWNER
@@ -719,19 +671,13 @@ TVD_FINGER_02
 TVD_PDF_FINGER01_JO
 
 # good enough
+TVD_PH_SUBJ_ACCOUNTS_POST
+
+# good enough
 TVD_PH_SUBJ_URGENT
 
 # good enough
 TVD_QUAL_MEDS
-
-# good enough
-TVD_RCVD_IP
-
-# good enough
-TVD_RCVD_IP4
-
-# good enough
-TVD_RCVD_SINGLE
 
 # good enough
 TVD_STOCK1
@@ -740,13 +686,55 @@ TVD_STOCK1
 TVD_VISIT_PHARMA
 
 # good enough
-AXB_MIME_IMG830
+AB_TEST_PDF1
 
 # good enough
-FB_MORE_SEMEN
+AXB_RCVD_ZOOBSEND
 
 # good enough
-FS_YOUR_PRESCRIP
+AXB_RCVD_ZOONAT
+
+# good enough
+AXB_XTIDX_CHAIN
+
+# good enough
+BC_ENCODED_PDF
+
+# tflags publish
+DOS_ANAL_SPAM_MAILER
+
+# good enough
+DOS_STOCK_CDYV_GENERIC
+
+# good enough
+FB_B0NUS
+
+# good enough
+FB_MED1CAT
+
+# good enough
+FB_SMALL_PEN
+
+# good enough
+FM_MORTGAGE3PLUS
+
+# good enough
+FRT_ERECTION
+
+# good enough
+FRT_OPPORTUN1
+
+# good enough
+FS_ABIGGER
+
+# good enough
+KAM_LOTTO1
+
+# good enough
+KAM_LOTTO2
+
+# good enough
+KAM_LOTTO3
 
 # tflags net
 RCVD_IN_DSBL
@@ -761,7 +749,10 @@ RCVD_IN_SORBS_DUL
 RCVD_IN_XBL
 
 # good enough
-TT_OBSCURED_XANAX
+STOX_RCVD_N_NN_N
+
+# good enough
+TVD_PDF_FINGER01
 
 # tflags net
 URIBL_L1SPEWS
@@ -1049,9 +1040,6 @@ XMAILER_MIMEOLE_OL_83BF7
 XMAILER_MIMEOLE_OL_8627E
 
 # good enough
-XMAILER_MIMEOLE_OL_8E893
-
-# good enough
 XMAILER_MIMEOLE_OL_91287
 
 # good enough
@@ -1059,9 +1047,6 @@ XMAILER_MIMEOLE_OL_9B90B
 
 # good enough
 XMAILER_MIMEOLE_OL_A50F8
-
-# good enough
-XMAILER_MIMEOLE_OL_A842E
 
 # good enough
 XMAILER_MIMEOLE_OL_ADFF7
@@ -1089,9 +1074,6 @@ XMAILER_MIMEOLE_OL_EF20B
 
 # good enough
 XMAILER_MIMEOLE_OL_F3B05
-
-# good enough
-XMAILER_MIMEOLE_OL_F475E
 
 # good enough
 XMAILER_MIMEOLE_OL_F6D01
