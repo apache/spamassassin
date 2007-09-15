@@ -48,14 +48,15 @@ use re 'taint';
 use Mail::SpamAssassin::Logger;
 
 use vars qw (
-  @ISA @EXPORT
+  @ISA @EXPORT @EXPORT_OK
   $AM_TAINTED
 );
 
 require Exporter;
 
 @ISA = qw(Exporter);
-@EXPORT = qw(local_tz base64_decode untaint_var);
+@EXPORT = ();
+@EXPORT_OK = qw(&local_tz &base64_decode &untaint_var);
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Util::RegistrarBoundaries;
