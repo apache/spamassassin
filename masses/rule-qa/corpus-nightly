@@ -14,6 +14,7 @@ renice 10 -p $$
 if [ "x${PERL:-}" = x ] ; then
   PERL=perl
 fi
+export PERL
 
 set -x
 set -e
@@ -131,7 +132,22 @@ fi
 
 date | tee test.start
 
-$PERL mass-check $opts
+if [ "${clienthosts:-}" = "" ] ; then
+
+  # local mass-check
+  $PERL mass-check $opts
+
+else
+
+  # client-server mode
+  for host in $clienthosts ; do
+    rule-qa/nightly-slave-start $host
+  done
+
+  $PERL mass-check --server $serverhost $opts
+
+  # the slaves will exit when the server mass-check does
+fi
 
 date | tee test.end
 

@@ -1,0 +1,32 @@
+#!/bin/sh
+
+echo "Using ssh-nightly-slave settings from $HOME/.corpus"
+. $HOME/.corpus
+
+host="$1"
+
+# use $PERL from env if unset
+[ "x${PERL:-}" = x ] && PERL=perl
+set -x
+set -e
+
+tar=tar
+[ -x /usr/sfw/bin/gtar ] && tar=/usr/sfw/bin/gtar
+
+cd $tree
+$tar cfz $tmp/tf \
+        --exclude="*.log" \
+        --exclude=".svn" \
+        --exclude="tmp" \
+        .
+
+# note: use of "tree" means that this is single-threaded; we cannot
+# run parallel mass-checks with e.g. different revs, all distributed
+# to the same slave hosts.  this is ok for now though since we
+# don't have the CPU power to do that anyway
+
+ssh $host rm -rf tree \; mkdir tree \; cd tree \; tar xvfz - < $tmp/tf
+
+ssh -f $host cd tree/masses \; \
+    ./mass-check --cs_ssl --client $serverhost --noisy &
+
