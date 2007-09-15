@@ -288,7 +288,8 @@ sub summarise {
     foreach my $pat (@pats) {
       my $subsumed = 0;
       foreach my $done (@done_pats) {
-        if ($pat =~ /${done}/) { $subsumed=1; last; }
+        if ($pat eq $done || $pat =~ /\Q${done}\E/) { $subsumed=1; last; }
+	push @done_pats, $pat;
       }
       if (!$subsumed) { push @pats_new, $pat; }
     }
@@ -296,8 +297,6 @@ sub summarise {
 
     # if we have no non-subsumed pats at this stage, skip this set
     next unless @pats;
-
-    push @done_pats, @pats;
 
     if (defined($hitratethresholds[0]) &&
         ($ngram_count{$id}*100) / $msg_count_spam < $hitratethresholds[0])
