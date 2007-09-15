@@ -1687,6 +1687,9 @@ sub client_mode {
     die "Can't create tempdir" unless $tmpdir;
   }
 
+  my $made_conn_once = 0;
+  my $conn_retries = 60;        # 1 hour
+
   # keep going until something stops us.
   while (1) {
     # if the number of messages to request is too much, bring it down
@@ -1717,9 +1720,25 @@ sub client_mode {
               );
     }
 
-    # last if connection fails
-    last unless ($socket);
+    if (!$socket) {
+      # if we haven't yet made a connection, keep retrying;
+      # this is probably the server still in "scan stage"
+      if (!$made_conn_once) {
+        if ($conn_retries-- >= 0) {
+          print "Failed to connect; sleeping for retry\n" if ($opt_noisy);
+          sleep 60;
+          next;
+        } else {
+          print "Failed to connect, giving up\n" if ($opt_noisy);
+          last;
+        }
+      }
 
+      # last if connection fails after scanning something
+      last;
+    }
+
+    $made_conn_once = 1;
     print "Requesting $msgnum messages from server\n" if ($opt_noisy);
 
     # make request, include and then drop results if there are any
