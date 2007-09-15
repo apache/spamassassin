@@ -20,7 +20,7 @@ use re 'taint';
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
-use Mail::SpamAssassin::Util;
+use Mail::SpamAssassin::Util qw(untaint_var);
 use Mail::SpamAssassin::Constants qw(:sa);
 
 use vars qw(@ISA @TEMPORARY_METHODS);

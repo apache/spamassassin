@@ -24,7 +24,7 @@ use Fcntl;
 use re 'taint';
 
 use Mail::SpamAssassin;
-use Mail::SpamAssassin::Util;
+use Mail::SpamAssassin::Util qw(untaint_var);
 use Mail::SpamAssassin::BayesStore;
 use Mail::SpamAssassin::Logger;
 use Digest::SHA1 qw(sha1);
