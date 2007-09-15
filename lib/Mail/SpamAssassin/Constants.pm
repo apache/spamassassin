@@ -25,34 +25,38 @@ use strict;
 use warnings;
 use re 'taint';
 
-use vars qw (
+BEGIN {
+  use Exporter ();
+  use vars qw(@ISA);
+  @ISA = qw(Exporter);
+
+  use vars qw (
 	@BAYES_VARS @IP_VARS @SA_VARS %EXPORT_TAGS @EXPORT_OK
-);
+  );
 
-use base qw( Exporter );
-
-@IP_VARS = qw(
+  @IP_VARS = qw(
 	IP_IN_RESERVED_RANGE IP_PRIVATE LOCALHOST IPV4_ADDRESS IP_ADDRESS
-);
-@BAYES_VARS = qw(
+  );
+  @BAYES_VARS = qw(
 	DUMP_MAGIC DUMP_TOKEN DUMP_BACKUP 
-);
-# These are generic constants that may be used across several modules
-@SA_VARS = qw(
+  );
+  # These are generic constants that may be used across several modules
+  @SA_VARS = qw(
 	HARVEST_DNSBL_PRIORITY MBX_SEPARATOR
 	MAX_BODY_LINE_LENGTH MAX_HEADER_KEY_LENGTH MAX_HEADER_VALUE_LENGTH
 	MAX_HEADER_LENGTH ARITH_EXPRESSION_LEXER AI_TIME_UNKNOWN
 	CHARSETS_LIKELY_TO_FP_AS_CAPS MAX_URI_LENGTH
-);
+  );
 
-%EXPORT_TAGS = (
+  %EXPORT_TAGS = (
 	bayes => [ @BAYES_VARS ],
         ip => [ @IP_VARS ],
         sa => [ @SA_VARS ],
         all => [ @BAYES_VARS, @IP_VARS, @SA_VARS ],
-);
+  );
 
-@EXPORT_OK = ( @BAYES_VARS, @IP_VARS, @SA_VARS );
+  @EXPORT_OK = ( @BAYES_VARS, @IP_VARS, @SA_VARS );
+}
 
 # BAYES_VARS
 use constant DUMP_MAGIC  => 1;

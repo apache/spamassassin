@@ -37,11 +37,12 @@ use strict;
 use warnings;
 use bytes;
 use re 'taint';
-require Exporter;
 
-our @ISA = qw(Exporter);
-our @EXPORT_OK = qw(MEMDEBUG MEMDEBUG_dump_obj);
-
+BEGIN {
+  use Exporter ();
+  our @ISA = qw(Exporter);
+  our @EXPORT_OK = qw(MEMDEBUG MEMDEBUG_dump_obj);
+}
 our $COUNTER = 0;
 
 use Devel::Peek qw();

@@ -88,6 +88,7 @@ use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::Conf::Parser;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Util::TieOneStringHash;
+use Mail::SpamAssassin::Util qw(untaint_var);
 use File::Spec;
 
 use vars qw{
@@ -2839,7 +2840,7 @@ See C<Mail::SpamAssassin::Plugin> for more details on writing plugins.
 	return $INVALID_VALUE;
       }
       # is blindly untainting safe?  it is no worse than before
-      $_ = Mail::SpamAssassin::Util::untaint_var($_)  for ($package,$path);
+      $_ = untaint_var($_)  for ($package,$path);
       $self->load_plugin ($package, $path);
     }
   });
@@ -2869,7 +2870,7 @@ the filesystem.
 	return $INVALID_VALUE;
       }
       # is blindly untainting safe?  it is no worse than before
-      $_ = Mail::SpamAssassin::Util::untaint_var($_)  for ($package,$path);
+      $_ = untaint_var($_)  for ($package,$path);
       $self->load_plugin ($package, $path, 1);
     }
   });
@@ -3506,8 +3507,7 @@ sub load_plugin {
   }
   # it wouldn't hurt to do some checking on validity of $package
   # and $path before untainting them
-  $self->{main}->{plugins}->load_plugin(
-    Mail::SpamAssassin::Util::untaint_var($package), $path, $silent);
+  $self->{main}->{plugins}->load_plugin(untaint_var($package), $path, $silent);
 }
 
 sub load_plugin_succeeded {
