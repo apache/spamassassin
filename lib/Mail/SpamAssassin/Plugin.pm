@@ -919,7 +919,7 @@ sub inhibit_further_callbacks {
 }
 
 1;
-__DATA__
+__END__
 
 =head1 LOGGING
 
