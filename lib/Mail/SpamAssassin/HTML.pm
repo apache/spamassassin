@@ -29,14 +29,7 @@ use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::Util qw(untaint_var);
 
-BEGIN {
-  use Exporter ();
-  use vars qw(@ISA @EXPORT @EXPORT_OK);
-  @ISA = qw(HTML::Parser Exporter);
-  @EXPORT = qw(get_results name_to_rgb);
-  @EXPORT_OK = qw();
-  use vars qw($re_loose $re_strict $re_other);
-}
+our @ISA = qw(HTML::Parser);
 
 # elements defined by the HTML 4.01 and XHTML 1.0 DTDs (do not change them!)
 # does not include XML
