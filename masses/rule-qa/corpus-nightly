@@ -140,6 +140,12 @@ if [ "${clienthosts:-}" = "" ] ; then
 else
 
   # client-server mode
+
+  # copy the certs from their storage dir; this is not checked
+  # in, since that would allow third-party hosts to connect to
+  # the master server and "steal" scanned mails
+  cp /local/bbmasstools/mass-check-certs/*.pem spamassassin/
+
   for host in $clienthosts ; do
     rule-qa/nightly-slave-start $host
   done
