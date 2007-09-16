@@ -150,7 +150,7 @@ else
     rule-qa/nightly-slave-start $host
   done
 
-  $PERL mass-check --noisy --progress --server $serverhost $opts
+  $PERL mass-check --noisy --progress --cs_ssl --server $serverhost $opts
 
   # the slaves will exit when the server mass-check does
 fi
