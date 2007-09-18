@@ -488,6 +488,7 @@ sub extract_hints {
   $rule =~ s/(?<!\\)(\w)\?/\($1\|\)/gs;
 
   my ($tmpf, $tmpfh) = Mail::SpamAssassin::Util::secure_tmpfile();
+  untaint_var(\$tmpf);
 
   # attempt to find a safe regexp delimiter...
   # TODO: would prob be easier to just read this from $rawrule
@@ -965,8 +966,8 @@ sub get_perl {
     $perl = $Config{perlpath};
     $perl =~ s|/[^/]*$|/$^X|;
   }
-  $perl =~ /^(.*)$/;
-  return $1;
+  untaint_var(\$perl);
+  return $perl;
 }
 
 ###########################################################################
