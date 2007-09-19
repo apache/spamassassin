@@ -1167,17 +1167,23 @@ sub generate_messages {
 
   # Generate an archive in the temp file
   foreach my $num (@tosend) {
+    my $data = $msgsout->{$num}->{'data'};
+    my $msg;
+    if (!$paths_only) {
+      $msg = ($iter->_run_message($data))[4];
+      if (!$msg) {
+        warn "mass-check: _run_message returned undef! skipping";
+        next;
+      }
+    }
+
     # Archive format, gzip compressed file w/ 3 parts per message:
     # 1- server message number in text format
     # 2- server index string, binary packed format
     # 3- message content -- unless paths_only
     send_line($gzfd, $num) || die "mass-check: error when writing to gz temp file\n";
-
-    my $data = $msgsout->{$num}->{'data'};
     send_line($gzfd, $data) || die "mass-check: error when writing to gz temp file\n";
-
     if (!$paths_only) {
-      my $msg = ($iter->_run_message($data))[4];
       send_line($gzfd, join('', @{$msg})) ||
         die "mass-check: error when writing to gz temp file\n";
     }
