@@ -528,7 +528,7 @@ EOT
 
 	  cursor = pstart;
 	  while (cursor < pend) {
-	    while (match = ${funcname} (\&cursor)) {
+	    while ((match = ${funcname} (\&cursor)) != NULL) {
 	      split_and_add(results, match);
 	    }
 	  }
