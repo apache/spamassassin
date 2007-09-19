@@ -321,17 +321,19 @@ NO:
       # skip if either already contains the other rule's name
       # optimize: this can only happen if the base has more than
       # one rule already attached, ie [5]
-      next if ($set1->[5] && $name1 =~ /\b\Q$name2\E\b/);
-      next if ($set2->[5] && $name2 =~ /\b\Q$name1\E\b/);
+      next if ($set2->[5] && $name2 =~ /(?: |^)\Q$name1\E(?: |$)/);
+
+      # don't use $name1 here, since another base in the set2 loop
+      # may have added $name2 since we set that
+      next if ($set1->[5] && $set1->[1] =~ /(?: |^)\Q$name2\E(?: |$)/);
 
       # and finally check to see if it *does* contain the other base string
       next if ($base1 !~ $set2->[4]);
 
+      # base2 is just a subset of base1
+      dbg("zoom: subsuming '$base2' ($name2) into '$base1': [1]=$set1->[1] [5]=$set1->[5]");
       $set1->[1] .= " ".$name2;
       $set1->[5] = 1;
-
-      # base2 is just a subset of base1
-      # dbg("zoom: subsuming '$base2' into '$base1': $set1->[1]");
     }
   }
 
