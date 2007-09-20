@@ -26,5 +26,5 @@ ssh $host rm -rf $clienttree \; mkdir $clienttree
 ssh $host cd $clienttree \; tar xvfz - < $tmp/tf
 
 ssh -f $host cd $clienttree/masses \; \
-    ./mass-check --cs_ssl --client $serverhost &
+    TZ=UTC ./mass-check --cs_ssl --client $serverhost &
 
