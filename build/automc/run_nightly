@@ -58,6 +58,14 @@ for user in $nightly_users ; do
 
     export HOME PERL TMPDIR
 
+    # create the .corpus file, keeping the rsync password secret;
+    # the string __RSYNC_PASSWORD__ will be replaced with the
+    # contents of /export/home/bbmass/mc-nightly/USERNAME/rsync_password
+    rsync_password=`cat $dir/rsync_password`
+    sed -e 's/__RSYNC_PASSWORD__/'"$rsync_password"'/g' \
+            < $dir/svn/build/nightlymc/corpus.$user \
+            > $dir/.corpus
+
     # use bash to work around Solaris breakage
     nice bash $dir/svn/masses/rule-qa/corpus-nightly
 
