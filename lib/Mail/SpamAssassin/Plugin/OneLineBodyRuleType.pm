@@ -76,7 +76,6 @@ package Mail::SpamAssassin::Plugin::Check;
 
 sub do_one_line_body_tests {
   my ($self, $pms, $priority) = @_;
-  my $loopid = 0;
 
   # TODO: should have a consttype for plugin-defined "alien" rule types,
   # probably something like TYPE_ALIEN_TESTS.  it's only used as a key
@@ -90,12 +89,11 @@ sub do_one_line_body_tests {
     loop_body => sub
   {
     my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
-    my $sub;
     $pat = untaint_var($pat);
+    my $sub;
 
     if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
     {
-      $loopid++;                 # support multiple matches
       $sub = '
       pos $_[1] = 0;
       '.$self->hash_line_for_rule($pms, $rulename).'
