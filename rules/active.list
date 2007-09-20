@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb bb-fredt bb-zmi cthielen daf dos jm theo zmi; day 2: axb cthielen daf dos jm theo zmi; day 3: axb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi
+# with results from: day 1: axb bb-fredt bb-zmi cthielen daf dos jm theo zmi; day 2: axb bb-fredt bb-zmi cthielen daf dos jm theo zmi; day 3: axb cthielen daf dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -95,6 +95,15 @@ DOS_ANAL_SPAM_MAILER
 DOS_OE_TO_MX
 
 # good enough
+DOS_OE_TO_MX_IMAGE
+
+# good enough
+DOS_OUTLOOK_TO_MX
+
+# good enough
+DOS_OUTLOOK_TO_MX_IMAGE
+
+# good enough
 DOS_STOCK_BAT
 
 # good enough
@@ -113,6 +122,9 @@ DYN_RDNS_SHORT_HELO_IMAGE
 ENV_AND_HDR_SPF_MATCH
 
 # good enough
+FAKE_REPLY_A1
+
+# good enough
 FAKE_REPLY_C
 
 # good enough
@@ -120,6 +132,9 @@ FB_ACHIEVE_BACH
 
 # good enough
 FB_ADD_INCHES
+
+# good enough
+FB_CASINO
 
 # good enough
 FB_CIALIS_LEO3
@@ -149,7 +164,13 @@ FB_QUALITY_REPLICA
 FB_REPLIC_CAP
 
 # good enough
+FB_SAVE_PERSC
+
+# good enough
 FB_SOFTTABS
+
+# good enough
+FB_STRONGER_EJ
 
 # good enough
 FB_TO_STOP_DISTRO
@@ -240,6 +261,9 @@ FM_XMAIL_F_OUT
 
 # tflags userconf
 FRAGMENTED_MESSAGE
+
+# good enough
+FRT_BEFORE
 
 # good enough
 FRT_BIGGERMEM1
@@ -692,6 +716,9 @@ TVD_ENVFROM_APOST
 TVD_FINGER_02
 
 # good enough
+TVD_PDF_FINGER01_JO
+
+# good enough
 TVD_PH_SUBJ_ACCOUNTS_POST
 
 # good enough
@@ -716,49 +743,46 @@ TVD_STOCK1
 TVD_VISIT_PHARMA
 
 # good enough
-AXB_MIME_IMG830
+AB_TEST_PDF1
 
 # good enough
-DOS_OE_TO_MX_IMAGE
+AXB_RCVD_ZOOBSEND
 
 # good enough
-DOS_OUTLOOK_TO_MX
+AXB_RCVD_ZOONAT
 
 # good enough
-DOS_OUTLOOK_TO_MX_IMAGE
+AXB_XTIDX_CHAIN
 
 # good enough
-DOS_STOCK_CDYV_GENERIC
+BC_ENCODED_PDF
 
 # good enough
-FAKE_REPLY_A1
+FB_B0NUS
 
 # good enough
-FB_CASINO
+FB_SMALL_PEN
 
 # good enough
-FB_MED1CAT
+FM_MORTGAGE3PLUS
 
 # good enough
-FB_SAVE_PERSC
+FRT_ERECTION
 
 # good enough
-FB_STRONGER_EJ
+FRT_OPPORTUN1
 
 # good enough
-FB_WITHOUT_PRESC
+FS_ABIGGER
 
 # good enough
-FRT_BEFORE
+KAM_LOTTO1
 
 # good enough
-FS_LOW_INTMOR
+KAM_LOTTO2
 
 # good enough
-FS_WEIGHT_LOSS
-
-# good enough
-FS_YOUR_PRESCRIP
+KAM_LOTTO3
 
 # tflags net
 RCVD_IN_DSBL
@@ -773,13 +797,7 @@ RCVD_IN_SORBS_DUL
 RCVD_IN_XBL
 
 # good enough
-TVD_ENHANCE
-
-# good enough
-TVD_PDF_FINGER01
-
-# good enough
-TVD_PDF_FINGER01_JO
+STOX_RCVD_N_NN_N
 
 # tflags net
 URIBL_L1SPEWS
