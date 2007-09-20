@@ -484,7 +484,7 @@ sub handle_conditional {
   my $eval = '';
   my $bad = 0;
   foreach my $token (@tokens) {
-    if ($token =~ /^\W+|[+-]?\d+(?:\.\d+)?$/) {
+    if ($token =~ /^\W+|^[+-]?\d+(?:\.\d+)?$/) {
       $eval .= untaint_var($token) . " ";
     }
     elsif ($token eq 'plugin') {
@@ -518,6 +518,7 @@ sub handle_conditional {
     # leave $skip_parsing as-is; we may not be parsing anyway in this block.
     # in other words, support nested 'if's and 'require_version's
   } else {
+    warn "config: error in $key - $eval: $@" if $@ ne '';
     $$skip_parsing_ref = 1;
   }
 }
