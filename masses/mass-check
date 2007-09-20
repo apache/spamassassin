@@ -1102,6 +1102,7 @@ sub generate_messages {
 
   # Hold the message numbers we'll be sending out
   my @tosend = ();
+  my @sent = ();
 
   # Find out if any of the messages we sent out before need to be sent out
   # again because we haven't seen a response within the timeout.
@@ -1171,15 +1172,33 @@ sub generate_messages {
     # 1- server message number in text format
     # 2- server index string, binary packed format
     # 3- message content -- unless paths_only
-    send_line($gzfd, $num) || die "mass-check: error when writing to gz temp file\n";
-
     my $data = $msgsout->{$num}->{'data'};
-    send_line($gzfd, $data) || die "mass-check: error when writing to gz temp file\n";
-
     if (!$paths_only) {
       my $msg = ($iter->_run_message($data))[4];
-      send_line($gzfd, join('', @{$msg})) ||
-        die "mass-check: error when writing to gz temp file\n";
+      if ($msg) {
+        send_line($gzfd, $num) || die "mass-check: error when writing to gz temp file\n";
+        send_line($gzfd, $data) || die "mass-check: error when writing to gz temp file\n";
+        send_line($gzfd, join('', @{$msg})) ||
+          die "mass-check: error when writing to gz temp file\n";
+        push @sent, $num;
+      } else {
+        # if the message has an error (probably due to it being removed sometime during the
+        # run) we need to send a blank message (that we'll ignore the results for due to the
+        # bogus message number (0) in its place since we have already added the line telling
+        # the client how many messages to expect
+        # NOTE: for some reason the client doesn't seem to even scan these messages (which is
+        # fine)... if it were to it probably wouldn't be great for bayes enabled mass-checks
+        send_line($gzfd, 0) || die "mass-check: error when writing to gz temp file\n";
+        send_line($gzfd, 'msg-error') || die "mass-check: error when writing to gz temp file\n";
+        send_line($gzfd, 'empty-message-will-cause-client-to-hang') ||
+          die "mass-check: error when writing to gz temp file\n";
+        delete $msgsout->{$num};
+      }
+    } else {
+      send_line($gzfd, $num) || die "mass-check: error when writing to gz temp file\n";
+      send_line($gzfd, $data) || die "mass-check: error when writing to gz temp file\n";
+      # the client deals with missing messages on its own (sort of)
+      push @sent, $num;
     }
   }
 
@@ -1187,16 +1206,16 @@ sub generate_messages {
 
   # update timestamp entries
   my $ts = time;
-  foreach (@tosend) {
+  foreach (@sent) {
     $msgsout->{$_}->{'timestamp'} = $ts;
   }
 
   # conveniently, this list should be the only thing sent out w/ this
   # timestamp, so just set the reference appropriately. :)
-  $timestamps->{$ts} = \@tosend;
+  $timestamps->{$ts} = \@sent;
 
   if ($opt_noisy) {
-    print "generated ".scalar(@tosend)." messages\n";
+    print "generated ".scalar(@sent)." messages from initial ".scalar(@tosend)." messages\n";
   }
 
   return $gzpath;
