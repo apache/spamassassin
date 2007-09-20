@@ -8,7 +8,7 @@ package Mail::SpamAssassin::Plugin::OneLineBodyRuleType;
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
-use Mail::SpamAssassin::Util;
+use Mail::SpamAssassin::Util qw(untaint_var);
 use Mail::SpamAssassin::Constants qw(:sa);
 
 use strict;
@@ -91,6 +91,7 @@ sub do_one_line_body_tests {
   {
     my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
     my $sub;
+    $pat = untaint_var($pat);
 
     if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
     {
