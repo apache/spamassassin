@@ -1,0 +1,11 @@
+opts_weekly="--net --cache --cachedir=/tmpfs/aicache_nightly --restart=500 --after="15552000" --tail=15000 --net -j 8 -f /home/bbmass/mc-nightly/targets.zmi"
+opts_nightly="--cache --cachedir=/tmpfs/aicache_nightly --restart=500 --after="15552000" --tail=15000 -f /home/bbmass/mc-nightly/targets.zmi"
+tmp=$HOME/tmp
+tree=$HOME/svn
+prefs_weekly=$HOME/user_prefs.weekly
+prefs_nightly=$HOME/user_prefs.nightly
+username=bb-zmi
+password=__RSYNC_PASSWORD__
+serverhost=spamassassin.zones.apache.org:38894
+clienthosts=mccli@vmsa.apache.org
+clienttree=nightlymc_zmi
