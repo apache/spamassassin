@@ -37,3 +37,59 @@ mimeheader __TVD_MIME_ATT_AOPDF Content-Type =~ /^application\/octet-stream.*\.p
 endif # Mail::SpamAssassin::Plugin::MIMEHeader
 
 
+# 2007/09/20
+meta CARD_DIRECT_WWW_ADDRESS	(__CARD_DIRECT_WWW_ADDRESS && !__LEGIT_MARLO_CARD)
+body __CARD_DIRECT_WWW_ADDRESS	/card's direct www address below while you are connected to the Internet/
+body __LEGIT_MARLO_CARD		/At our Card Pick Up site, enter BOTH the Directory/
+score CARD_DIRECT_WWW_ADDRESS	1.577
+
+header DOS_ANAL_SPAM_MAILER	X-mailer =~ /^[A-Z][a-z]{6}e \d\.\d{2}$/
+describe DOS_ANAL_SPAM_MAILER	X-mailer pattern common to anal porn site spam
+score DOS_ANAL_SPAM_MAILER	2.0
+
+meta __DOS_DIRECT_TO_MX		__DOS_SINGLE_EXT_RELAY && !__DOS_HAS_LIST_ID && !__DOS_HAS_LIST_UNSUB && !__DOS_HAS_MAILING_LIST && !__DOS_RELAYED_EXT
+header __DOS_HAS_LIST_ID	exists:List-ID
+header __DOS_HAS_LIST_UNSUB	exists:List-Unsubscribe
+header __DOS_HAS_MAILING_LIST	exists:Mailing-List
+header __DOS_RELAYED_EXT	ALL-EXTERNAL =~ /(?:^|\n)[Rr][eE][cC][eE][iI][vV][eE][dD]:\s.+\n[Rr][eE][cC][eE][iI][vV][eE][dD]:\s/s
+header __DOS_SINGLE_EXT_RELAY	X-Spam-Relays-External =~ /^\[ [^\]]+ \]$/
+
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+
+mimeheader __ANY_IMAGE_ATTACH	Content-Type =~ /image\/(?:gif|jpeg|png)/
+
+meta DOS_OE_TO_MX_IMAGE		__OE_MUA && __DOS_DIRECT_TO_MX && __ANY_IMAGE_ATTACH
+describe DOS_OE_TO_MX_IMAGE	Direct to MX with OE headers and an image
+score DOS_OE_TO_MX_IMAGE	3.0
+
+meta DOS_OUTLOOK_TO_MX_IMAGE		__ANY_OUTLOOK_MUA && !__OE_MUA && __DOS_DIRECT_TO_MX && __ANY_IMAGE_ATTACH
+describe DOS_OUTLOOK_TO_MX_IMAGE	Direct to MX with Outlook headers and an image
+score DOS_OUTLOOK_TO_MX_IMAGE		1.059
+
+endif # Mail::SpamAssassin::Plugin::MIMEHeader
+
+meta DOS_OE_TO_MX		__OE_MUA && __DOS_DIRECT_TO_MX && !DOS_OE_TO_MX_IMAGE
+describe DOS_OE_TO_MX		Delivered direct to MX with OE headers
+score DOS_OE_TO_MX		2.75
+
+meta DOS_OUTLOOK_TO_MX		__ANY_OUTLOOK_MUA && !__OE_MUA && __DOS_DIRECT_TO_MX && !DOS_OUTLOOK_TO_MX_IMAGE
+describe DOS_OUTLOOK_TO_MX	Delivered direct to MX with Outlook headers
+score DOS_OUTLOOK_TO_MX		1.0
+
+body FB_CASINO			/(?!casino)Ca[\$s5][i1\|]n[o0]/i
+describe FB_CASINO		Phrase: ca$ino
+score FB_CASINO			1.075
+
+ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
+
+body FRT_BEFORE			/<inter SP2><post P2>\b(?!before)<B><E><F><O><R><E>\b/i
+describe FRT_BEFORE		ReplaceTags: Before
+score FRT_BEFORE		2.381
+
+endif # Mail::SpamAssassin::Plugin::ReplaceTags
+
+meta LOTTERY_PH_004470		(__AFF_004470_NUMBER && __AFF_LOTTERY)
+body __AFF_004470_NUMBER	/(?:\+|00|011)\W{0,3}44\W{0,3}0?\W{0,3}70/
+body __AFF_LOTTERY		/(?:lottery|winner)/i
+score LOTTERY_PH_004470		2.015
+
