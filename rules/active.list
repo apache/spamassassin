@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb bb-fredt bb-zmi cthielen daf dos jm theo zmi; day 2: axb bb-fredt bb-zmi cthielen daf dos jm theo zmi; day 3: axb cthielen daf dos jm theo zmi
+# with results from: day 1: axb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi; day 2: axb bb-fredt bb-zmi cthielen daf dos jm theo zmi; day 3: axb bb-fredt bb-zmi cthielen daf dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -120,9 +120,6 @@ DYN_RDNS_SHORT_HELO_IMAGE
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
-
-# good enough
-FAKE_REPLY_A1
 
 # good enough
 FAKE_REPLY_C
@@ -299,6 +296,9 @@ FRT_SYMBOL
 FRT_XANAX1
 
 # good enough
+FRT_XANAX2
+
+# good enough
 FR_ALMOST_VIAG2
 
 # good enough
@@ -468,6 +468,18 @@ OUTLOOK_3416
 
 # tflags net
 PYZOR_CHECK
+
+# tflags net
+RAZOR2_CF_RANGE_51_100
+
+# tflags net
+RAZOR2_CF_RANGE_E4_51_100
+
+# tflags net
+RAZOR2_CF_RANGE_E8_51_100
+
+# tflags net
+RAZOR2_CHECK
 
 # good enough
 RCVD_BAD_ID
@@ -743,46 +755,25 @@ TVD_STOCK1
 TVD_VISIT_PHARMA
 
 # good enough
-AB_TEST_PDF1
+AXB_MIME_IMG830
 
 # good enough
-AXB_RCVD_ZOOBSEND
+DOS_STOCK_CDYV_GENERIC
 
 # good enough
-AXB_RCVD_ZOONAT
+FB_MED1CAT
 
 # good enough
-AXB_XTIDX_CHAIN
+FB_WITHOUT_PRESC
 
 # good enough
-BC_ENCODED_PDF
+FS_LOW_INTMOR
 
 # good enough
-FB_B0NUS
+FS_WEIGHT_LOSS
 
 # good enough
-FB_SMALL_PEN
-
-# good enough
-FM_MORTGAGE3PLUS
-
-# good enough
-FRT_ERECTION
-
-# good enough
-FRT_OPPORTUN1
-
-# good enough
-FS_ABIGGER
-
-# good enough
-KAM_LOTTO1
-
-# good enough
-KAM_LOTTO2
-
-# good enough
-KAM_LOTTO3
+FS_YOUR_PRESCRIP
 
 # tflags net
 RCVD_IN_DSBL
@@ -797,7 +788,10 @@ RCVD_IN_SORBS_DUL
 RCVD_IN_XBL
 
 # good enough
-STOX_RCVD_N_NN_N
+TVD_ENHANCE
+
+# good enough
+TVD_PDF_FINGER01
 
 # tflags net
 URIBL_L1SPEWS
