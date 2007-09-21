@@ -1598,7 +1598,7 @@ sub avoid_db_file_locking_bug {
 
 sub fisher_yates_shuffle {
   my ($deck) = @_;
-  for (my $i = $#{$deck}; $i >= 0; $i--) {
+  for (my $i = $#{$deck}; $i > 0; $i--) {
     my $j = int rand($i+1);
     @$deck[$i,$j] = @$deck[$j,$i];
   }
