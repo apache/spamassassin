@@ -189,25 +189,6 @@ tflags __DNS_FROM_RFC_WHOIS     net
 #reuse __DNS_FROM_RFC_WHOIS DNS_FROM_RFC_WHOIS
 
 # ---------------------------------------------------------------------------
-# CompleteWhois blacklists
-
-header __RCVD_IN_WHOIS		eval:check_rbl('whois', 'combined-HIB.dnsiplists.completewhois.com.')
-tflags __RCVD_IN_WHOIS		net
-
-header RCVD_IN_WHOIS_BOGONS	eval:check_rbl_sub('whois', '127.0.0.2')
-describe RCVD_IN_WHOIS_BOGONS	CompleteWhois: sender on bogons IP block
-tflags RCVD_IN_WHOIS_BOGONS	net
-
-header RCVD_IN_WHOIS_HIJACKED	eval:check_rbl_sub('whois', '127.0.0.3')
-describe RCVD_IN_WHOIS_HIJACKED	CompleteWhois: sender on hijacked IP block
-tflags RCVD_IN_WHOIS_HIJACKED	net
-
-header RCVD_IN_WHOIS_INVALID	eval:check_rbl('whois-lastexternal', 'combined-HIB.dnsiplists.completewhois.com.', '127.0.0.4')
-describe RCVD_IN_WHOIS_INVALID	CompleteWhois: sender on invalid IP block
-tflags RCVD_IN_WHOIS_INVALID	net
-#reuse RCVD_IN_WHOIS_INVALID	RCVD_IN_RFC_IPWHOIS
-
-# ---------------------------------------------------------------------------
 # Now, single zone BLs follow:
 
 # DSBL catches open relays, badly-installed CGI scripts and open SOCKS and
