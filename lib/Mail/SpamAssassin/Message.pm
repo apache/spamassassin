@@ -362,20 +362,13 @@ sub get_pristine_header {
   
   return $self->{pristine_headers} unless $hdr;
   my(@ret) = $self->{pristine_headers} =~ /^\Q$hdr\E:[ \t]+(.*?\n(?![ \t]))/smgi;
-  if (@ret) {
-    # ensure the response retains taintedness (bug 5283);
-    # Note: this is already ensured by the:  use re 'taint'
-    # in this module and is probably redundant now.
-    if (wantarray) {
-      return map {
-                Mail::SpamAssassin::Util::taint_var($_);
-              } @ret;
-    } else {
-      return Mail::SpamAssassin::Util::taint_var($ret[-1]);
-    }
-  }
-  else {
+  # taintedness is retained by "use re 'taint'" (fix in bug 5283 now redundant)
+  if (!@ret) {
     return $self->get_header($hdr);
+  } elsif (wantarray) {
+    return @ret;
+  } else {
+    return $ret[-1];
   }
 }
 
