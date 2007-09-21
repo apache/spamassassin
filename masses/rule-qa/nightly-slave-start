@@ -25,6 +25,7 @@ $tar cfz $tmp/tf \
 ssh $host rm -rf $clienttree \; mkdir $clienttree
 ssh $host cd $clienttree \; tar xvfz - < $tmp/tf
 
+# --noisy so we get sent/rcvd byte counts
 ssh -f $host cd $clienttree/masses \; \
-    TZ=UTC ./mass-check --cs_ssl --client $serverhost &
+    TZ=UTC ./mass-check --noisy --cs_ssl --client $serverhost &
 
