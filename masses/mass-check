@@ -1506,7 +1506,7 @@ sub send_line {
   foreach ( @_ ) {
     my $length = pack("V", length $_);
     $fd->print($length.$_) || return 0;
-    $sent_bytes += $length + 4;
+    $sent_bytes += (length $_) + 4;
   }
 
   return 1;
