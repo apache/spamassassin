@@ -541,7 +541,8 @@ sub dccproc_lookup {
     my @opts = split(' ',$self->{main}->{conf}->{dcc_options});
     untaint_var(\@opts);
 
-    unshift(@opts, "-a", untaint_var($client))  if $client ne '';
+    unshift(@opts, "-a",
+            untaint_var($client))  if defined $client && $client ne '';
 
     dbg("dcc: opening pipe: %s",
          join(' ', $path, "-H", "-x", "0", @opts, "< $tmpf"));
@@ -753,7 +754,8 @@ sub dcc_report {
 
   # get the metadata from the message so we can pass the external relay info
 
-  unshift(@opts, "-a", untaint_var($client))  if $client ne '';
+  unshift(@opts, "-a",
+          untaint_var($client))  if defined $client && $client ne '';
 
   my $timer = Mail::SpamAssassin::Timeout->new({ secs => $timeout });
 
