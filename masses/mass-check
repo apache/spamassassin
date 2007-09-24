@@ -1716,7 +1716,10 @@ sub client_mode {
   }
 
   my $made_conn_once = 0;
-  my $conn_retries = 60;        # 1 hour
+
+  # 6 hours; it can take the SpamAssassin zone this long to perform the
+  # scan stage if the ArchiveIterator cache is cold
+  my $conn_retries = 60 * 6;
 
   # keep going until something stops us.
   while (1) {
