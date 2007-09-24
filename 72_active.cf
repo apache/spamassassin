@@ -2110,16 +2110,6 @@ tflags          T_WHOIS_MONIKER_ROLS  net
 endif
 ##} T_WHOIS_MONIKER_ROLS
 
-##{ URIBL_COMPLETEWHOIS
-
-ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
-uridnsbl        URIBL_COMPLETEWHOIS     combined-HIB.dnsiplists.completewhois.com.      A
-body            URIBL_COMPLETEWHOIS     eval:check_uridnsbl('URIBL_COMPLETEWHOIS')
-describe        URIBL_COMPLETEWHOIS     URI in combined-HIB.dnsiplists.completewhois.com
-tflags          URIBL_COMPLETEWHOIS     net
-endif
-##} URIBL_COMPLETEWHOIS
-
 ##{ URIBL_RHS_ABUSE
 
 ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
