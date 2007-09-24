@@ -331,7 +331,7 @@ NO:
       next if ($base1 !~ $set2->[4]);
 
       # base2 is just a subset of base1
-      dbg("zoom: subsuming '$base2' ($name2) into '$base1': [1]=$set1->[1] [5]=$set1->[5]");
+      # dbg("zoom: subsuming '$base2' ($name2) into '$base1': [1]=$set1->[1] [5]=$set1->[5]");
       $set1->[1] .= " ".$name2;
       $set1->[5] = 1;
     }
