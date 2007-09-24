@@ -694,8 +694,6 @@ score RCVD_IN_SORBS_SMTP 0 # n=0 n=1 n=2 n=3
 score RCVD_IN_SORBS_SOCKS 0 0.182 0 0.801 # n=0 n=2
 score RCVD_IN_SORBS_WEB 0 1.117 0 0.619 # n=0 n=2
 score RCVD_IN_SORBS_ZOMBIE 0 # n=0 n=1 n=2 n=3
-score RCVD_IN_WHOIS_BOGONS 0 # n=0 n=1 n=2 n=3
-score RCVD_IN_WHOIS_INVALID 0 1.199 0 0.400 # n=0 n=2
 score RCVD_IN_XBL 0 2.896 0 3.033 # n=0 n=2
 score RCVD_IN_PBL 0 0.509 0 0.905 # n=0 n=2
 score DNS_FROM_AHBL_RHSBL 0 2.025 0 0.692 # n=0 n=2
@@ -703,7 +701,6 @@ score DNS_FROM_RFC_BOGUSMX 0 2.125 0 1.482 # n=0 n=2
 score DNS_FROM_RFC_DSN 0 2.527 0 1.495 # n=0 n=2
 score DNS_FROM_SECURITYSAGE 0 0.127 0 0.001 # n=0 n=2
 score NO_DNS_FOR_FROM 0 1.407 0 1.496 # n=0 n=2
-score RCVD_IN_WHOIS_HIJACKED 0 1.000 0 1.000 # n=2
 # </gen:mutable>
 
 # Bonded Sender: http://www.bondedsender.com/ 
@@ -971,7 +968,6 @@ endif # Mail::SpamAssassin::Plugin::SPF
 ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
 # <gen:mutable>
 score URIBL_AB_SURBL 0 1.613 0 1.860 # n=0 n=2
-score URIBL_COMPLETEWHOIS 0 # n=1 n=3
 score URIBL_JP_SURBL 0 2.857 0 1.501 # n=0 n=2
 score URIBL_OB_SURBL 0 2.132 0 1.500 # n=0 n=2
 score URIBL_PH_SURBL 0 2.035 0 1.787 # n=0 n=2
