@@ -93,13 +93,6 @@ header __HAS_X_MAILING_LIST	exists:X-Mailing-List
 meta FORGED_MUA_EUDORA          (__EUDORA_MUA && !__EUDORA_MSGID && !__UNUSABLE_MSGID && !__HAS_X_LOOP && !__HAS_X_MAILING_LIST)
 describe FORGED_MUA_EUDORA	Forged mail pretending to be from Eudora
   
-# Mar 26 2003 jm: AOL MUAs add a Received line, and do not use "real names" in
-# From or To headers, as far as I can see, quinlan: also see bug 1426
-# Jul 30 2007 jm: bug 5475: AOL now has many other sites
-header __AOL_FROM		From:addr =~ /\@(?:aol|cs)\./i
-meta FORGED_MUA_AOL_FROM	(__AOL_MUA && !__AOL_FROM)
-describe FORGED_MUA_AOL_FROM	Forged mail pretending to be from AOL (by From)
-
 # From private mail with developers.  Some top tips here!
 header __THEBAT_MUA		X-Mailer =~ /The Bat!/
 header __THEBAT_MUA_V1		X-Mailer =~ /^The Bat! \(v1\./
@@ -171,16 +164,12 @@ meta __USER_AGENT_APPLEMAIL	!__CTYPE_HTML && __X_MAILER_APPLEMAIL && (__MSGID_AP
 # 2003-02-23: quinlan
 # some useful meta rule sub-elements
 header __CTYPE_HTML		Content-Type =~ /text\/html/i
-header __ANY_AOL_MUA		X-Mailer =~ /^AOL\b/
 header __ANY_IMS_MUA		X-Mailer =~ /^Internet Mail Service\b/
 header __ANY_OUTLOOK_MUA	X-Mailer =~ /^Microsoft Outlook\b/
 
 header __ANY_QUALCOMM_MUA       X-Mailer =~ /\bQUALCOMM\b/
 meta FORGED_QUALCOMM_TAGS	(__ANY_QUALCOMM_MUA && __MIME_HTML && !__TAG_EXISTS_HTML)
 describe FORGED_QUALCOMM_TAGS	QUALCOMM mailers can't send HTML in this format
-
-meta FORGED_AOL_TAGS		(__ANY_AOL_MUA && __MIME_HTML && !__TAG_EXISTS_HTML)
-describe FORGED_AOL_TAGS	AOL mailers can't send HTML in this format
 
 meta FORGED_IMS_TAGS		(!__YAHOO_BULK && __ANY_IMS_MUA && __MIME_HTML && !(__TAG_EXISTS_HTML && __TAG_EXISTS_HEAD && __TAG_EXISTS_META && __TAG_EXISTS_BODY))
 describe FORGED_IMS_TAGS	IMS mailers can't send HTML in this format
