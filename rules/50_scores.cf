@@ -973,7 +973,6 @@ endif # Mail::SpamAssassin::Plugin::SPF
 ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
 # <gen:mutable>
 score URIBL_AB_SURBL 0 1.613 0 1.860 # n=0 n=2
-score URIBL_COMPLETEWHOIS 0 # n=1 n=3
 score URIBL_JP_SURBL 0 2.857 0 1.501 # n=0 n=2
 score URIBL_OB_SURBL 0 2.132 0 1.500 # n=0 n=2
 score URIBL_PH_SURBL 0 2.035 0 1.787 # n=0 n=2
