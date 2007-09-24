@@ -195,12 +195,17 @@ header __RDNS_DYNAMIC_ASAHI   X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns=[a-z][0-9
 # exceptions (bug 5397):
 header  __RDNS_STATIC         X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns=\S*(?:static|fixip)/i
 
+# bug 5586:
+header __CGATE_RCVD       Received =~ /by \S+ \(CommuniGate Pro/
+
+header __RDNS_NONE  X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns= /
+
 ###########################################################################
 
 meta RDNS_DYNAMIC   (__LAST_UNTRUSTED_RELAY_NO_AUTH && !__RDNS_STATIC && (__RDNS_DYNAMIC_IPADDR || __RDNS_DYNAMIC_DHCP || __RDNS_DYNAMIC_HCC || __RDNS_DYNAMIC_ATTBI || __RDNS_DYNAMIC_ROGERS || __RDNS_DYNAMIC_ADELPHIA || __RDNS_DYNAMIC_DIALIN || __RDNS_DYNAMIC_HEXIP || __RDNS_DYNAMIC_SPLIT_IP || __RDNS_DYNAMIC_YAHOOBB || __RDNS_DYNAMIC_OOL || __RDNS_DYNAMIC_RR2   || __RDNS_DYNAMIC_COMCAST || __RDNS_DYNAMIC_TELIA || __RDNS_DYNAMIC_VTR || __RDNS_DYNAMIC_CHELLO_NO  || __RDNS_DYNAMIC_CHELLO_NL  || __RDNS_DYNAMIC_VELOX  || __RDNS_DYNAMIC_NTL  || __RDNS_DYNAMIC_HOME_NL  || __RDNS_DYNAMIC_TDS || __RDNS_DYNAMIC_VIRTUA || __RDNS_DYNAMIC_SPACELAN || __RDNS_INDICATOR_DYN || __RDNS_INDICATOR_RES || __RDNS_INDICATOR_TYPE2 || __RDNS_DYNAMIC_TTNET || __RDNS_DYNAMIC_ASAHI))
 describe RDNS_DYNAMIC Delivered to trusted network by host with dynamic-looking rDNS
 
-header RDNS_NONE    X-Spam-Relays-Untrusted =~ /^[^\]]+ rdns= /
+meta RDNS_NONE      (__RDNS_NONE && !__CGATE_RCVD)
 describe RDNS_NONE  Delivered to trusted network by a host with no rDNS
 
 
