@@ -526,7 +526,7 @@ sub setup_sig_handlers {
 
 sub kill_handler {
   my ($sig) = @_;
-  info("spamassassin: killed by SIG$sig");
+  warn "spamassassin: killed by SIG$sig\n";
   if ($mail) {
     $mail->finish();      # bug 5626: remove temp files etc.
     $mail = undef;
