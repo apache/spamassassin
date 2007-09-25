@@ -146,13 +146,14 @@ else
   # the master server and "steal" scanned mails
   cp /local/bbmasstools/mass-check-certs/*.pem spamassassin/
 
-  for host in $clienthosts ; do
-    rule-qa/nightly-slave-start $host
-  done
+  $PERL mass-check --noisy --progress --cs_ssl --server $serverhost \
+    --run_post_scan="./rule-qa/nightly-slaves-start $clienthosts" \
+    $opts
 
-  $PERL mass-check --noisy --progress --cs_ssl --server $serverhost $opts
-
-  # the slaves will exit when the server mass-check does
+  # the slaves will be started if the "run" stage is started, and
+  # will exit when the server mass-check does (they "phone home"
+  # to the specified server host/port and exit if that disappears
+  # for a long time)
 fi
 
 date | tee test.end
