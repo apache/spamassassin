@@ -23,7 +23,8 @@ $tar cfz $tmp/tf \
 [ "$clienttree" = "" ] && clienttree=tree
 
 ssh $host rm -rf $clienttree \; mkdir $clienttree
-ssh $host cd $clienttree \; tar xvfz - < $tmp/tf
+ssh $host cd $clienttree \; tar xfz - < $tmp/tf
+# TODO: should we do a fresh build?
 
 # --noisy so we get sent/rcvd byte counts
 ssh -f $host cd $clienttree/masses \; \
