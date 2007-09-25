@@ -80,12 +80,20 @@ $LOG_SA{method}->{stderr} = Mail::SpamAssassin::Logger::Stderr->new();
 Enable debug logging for specific facilities.  Each facility is the area
 of code to debug.  Facilities can be specified as a hash reference (the
 key names are used), an array reference, an array, or a comma-separated
-scalar string.
+scalar string. Facility names are case-sensitive.
 
-If "all" is listed, then all debug facilities are enabled.  Higher
-priority informational messages that are suitable for logging in normal
-circumstances are available with an area of "info".  Some very verbose
-messages require the facility to be specifically enabled (see
+If "all" is listed, then all debug facilities are implicitly enabled,
+except for those explicitly disabled.  A facility name may be preceded
+by a "no" (case-insensitive), which explicitly disables it, overriding
+the "all".  For example: all,norules,noconfig,nodcc.  When facility names
+are given as an ordered list (array or scalar, not a hash), the last entry
+applies, e.g. 'nodcc,dcc,dcc,noddc' is equivalent to 'nodcc'.  Note that
+currently no facility name starts with a "no", it is advised to keep this
+practice with newly added facility names to make life easier.
+
+Higher priority informational messages that are suitable for logging in
+normal circumstances are available with an area of "info".  Some very
+verbose messages require the facility to be specifically enabled (see
 C<would_log> below).
 
 =cut
@@ -107,9 +115,12 @@ sub add_facilities {
   }
   @facilities = grep(/^\S+$/, @facilities);
   if (@facilities) {
-    $LOG_SA{facility}->{$_} = 1 for @facilities;
+    for my $fac (@facilities) {
+      local ($1,$2);
+      $LOG_SA{facility}->{$2} = !defined($1)  if $fac =~ /^(no)?(.+)\z/si;
+    }
     # turn on debugging if facilities other than "info" are enabled
-    if (keys %{ $LOG_SA{facility} } > 1 || !$LOG_SA{facility}->{info}) {
+    if (grep { !/^info\z/ && !/^no./si } keys %{ $LOG_SA{facility} }) {
       $LOG_SA{level} = DBG if $LOG_SA{level} < DBG;
     }
     else {
@@ -209,8 +220,9 @@ sub _log {
   # log all info, warn, and error messages;
   # only debug if asked to
   if ($_[0] == DBG) {
-    return unless ($LOG_SA{facility}->{all} ||
-		   $LOG_SA{facility}->{$facility});
+    return unless
+      exists $LOG_SA{facility}->{$facility} ? $LOG_SA{facility}->{$facility}
+                                            : $LOG_SA{facility}->{all};
   }
 
   my ($level, $message, @args) = @_;
@@ -318,7 +330,8 @@ sub would_log {
   if ($level eq "dbg") {
     return 0 if $LOG_SA{level} < DBG;
     return 1 if !$facility;
-    return 2 if $LOG_SA{facility}->{$facility};
+    return ($LOG_SA{facility}->{$facility} ? 2 : 0)
+      if exists $LOG_SA{facility}->{$facility};
     return 1 if $LOG_SA{facility}->{all};
     return 0;
   }
