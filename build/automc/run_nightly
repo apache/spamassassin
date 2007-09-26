@@ -63,9 +63,9 @@ for user in $nightly_users ; do
     # contents of /export/home/bbmass/mc-nightly/USERNAME/rsync_password
     rsync_password=`cat $dir/rsync_password`
     clienthosts=`cat $dir/svn/build/nightlymc/clienthosts`
-    sed -e \
-            's/__RSYNC_PASSWORD__/'"$rsync_password"'/g' \
-            's/__CLIENTHOSTS__/'"$clienthosts"'/g' \
+    sed \
+            -e 's/__RSYNC_PASSWORD__/'"$rsync_password"'/g' \
+            -e 's/__CLIENTHOSTS__/'"$clienthosts"'/g' \
             < $dir/svn/build/nightlymc/corpus.$user \
             > $dir/.corpus
 
