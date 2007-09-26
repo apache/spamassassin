@@ -62,13 +62,12 @@ for user in $nightly_users ; do
     # the string __RSYNC_PASSWORD__ will be replaced with the
     # contents of /export/home/bbmass/mc-nightly/USERNAME/rsync_password
     perl -pe '
-      s/__RSYNC_PASSWORD__/ incfile("rsync_password") /eg;
-      s/__CLIENTHOSTS__/ incfile("svn/build/nightlymc/clienthosts") /eg;
+      s{__RSYNC_PASSWORD__}{ incfile("rsync_password") }eg;
+      s{__CLIENTHOSTS__}{ incfile("svn/build/nightlymc/clienthosts") }eg;
 
       sub incfile {
         my $file = shift;
-        my $new=`cat '"$dir"'/$file`;
-        $new =~ s/\s+/ /gs;
+        my $new=`cat '"$dir"'/$file`; $new =~ s/\s+/ /gs;
         return $new;
       }
     ' $dir/svn/build/nightlymc/corpus.$user > $dir/.corpus
