@@ -73,6 +73,7 @@ usage: mass-check [options] target ...
   --cs_ssl      use SSL to encrypt on-the-wire client-server traffic
                 (requires IO::Socket::SSL, see
                 http://wiki.apache.org/spamassassin/SslMassCheck for more)
+  --cs_verbose  Log network bandwidth utilization figures
 
   log options
   -o            write all logs to stdout
@@ -135,7 +136,7 @@ use vars qw($opt_c $opt_p $opt_f $opt_j $opt_n $opt_o $opt_all $opt_bayes
 	    $total_messages $statusevery $opt_cachedir $opt_scanprob
 	    $opt_client $opt_cs_max $opt_cs_timeout $opt_cs_paths_only
 	    $opt_server %postdata %real $svn_revision
-            $opt_cs_ssl $opt_run_post_scan
+            $opt_cs_ssl $opt_run_post_scan $opt_cs_verbose
 	    $tmpfd %reuse %orig_conf %reuse_conf $reuse_rules_loaded_p);
 
 use FindBin;
@@ -187,7 +188,7 @@ GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug:s",
 	   "deencap=s", "logmem", "learn=i", "reuse", "lint", "cache",
            "cachedir=s", "noisy", "scanprob=f",
 	   "server=s", "cs_max=i", "cs_timeout=i",
-	   "cs_paths_only", "client=s", "cs_ssl",
+	   "cs_paths_only", "client=s", "cs_ssl", "cs_verbose",
 	   "before=s" => \&deal_with_before_after,
 	   "after=s" => \&deal_with_before_after,
            'cf=s' => \@{$opt_cf},
@@ -463,7 +464,7 @@ if (defined $opt_rewrite) {
 
 $spamtest->finish();
 
-if (($opt_client || $opt_server) && $opt_noisy) {
+if (($opt_client || $opt_server) && $opt_cs_verbose) {
   warn "network I/O: sent=$sent_bytes, received=$rcvd_bytes\n";
 }
 
