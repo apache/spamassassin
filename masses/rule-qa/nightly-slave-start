@@ -22,11 +22,24 @@ $tar cfz $tmp/tf \
 
 [ "$clienttree" = "" ] && clienttree=tree
 
-ssh $host rm -rf $clienttree \; mkdir $clienttree
-ssh $host cd $clienttree \; tar xfz - < $tmp/tf
-# TODO: should we do a fresh build?
+ssh $host \
+    rm -rf $clienttree \; \
+    mkdir $clienttree \; \
+    cd $clienttree \; \
+    tar xfz - < $tmp/tf 
 
-# --noisy so we get sent/rcvd byte counts
+# source /etc/profile to get a full $PATH, including /usr/local/bin
+# (some hosts need to use /usr/local/bin/perl instead of /usr/bin/perl).
+# rebuild to compile the blib modules for this platform.
+
+ssh $host \
+    . /etc/profile \; \
+    perl Makefile.PL \; \
+    make clean \; \
+    perl Makefile.PL \; \
+    make < /dev/null
+
 ssh -f $host cd $clienttree/masses \; \
-    TZ=UTC ./mass-check --noisy --cs_ssl --client $serverhost &
+    . /etc/profile \; \
+    TZ=UTC ./mass-check --cs_ssl --cs_verbose --client $serverhost &
 
