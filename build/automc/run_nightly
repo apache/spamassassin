@@ -62,10 +62,15 @@ for user in $nightly_users ; do
     # the string __RSYNC_PASSWORD__ will be replaced with the
     # contents of /export/home/bbmass/mc-nightly/USERNAME/rsync_password
     perl -pe '
-      my $rsync_password=`cat $dir/rsync_password`;
-      my $clienthosts=`cat $dir/svn/build/nightlymc/clienthosts`;
-      s/__RSYNC_PASSWORD__/$rsync_password/g;
-      s/__CLIENTHOSTS__/$clienthosts/g;
+      s/__RSYNC_PASSWORD__/ incfile("rsync_password") /eg;
+      s/__CLIENTHOSTS__/ incfile("svn/build/nightlymc/clienthosts") /eg;
+
+      sub incfile {
+        my $file = shift;
+        my $new=`cat '"$dir"'/$file`;
+        $new =~ s/\s+/ /gs;
+        return $new;
+      }
     ' $dir/svn/build/nightlymc/corpus.$user > $dir/.corpus
 
     # use bash to work around Solaris breakage
