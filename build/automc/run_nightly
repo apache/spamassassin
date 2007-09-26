@@ -68,7 +68,7 @@ for user in $nightly_users ; do
       sub incfile {
         my $file = shift;
         my $new=`cat '"$dir"'/$file`; $new =~ s/\s+/ /gs;
-        return $new;
+        return "\"".$new."\"";
       }
     ' $dir/svn/build/nightlymc/corpus.$user > $dir/.corpus
 
