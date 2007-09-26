@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb bb-fredt bb-zmi cthielen daf dos jm theo zmi; day 2: axb cthielen daf dos jm theo zmi; day 3: axb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi
+# with results from: day 1: axb bb-fredt bb-zmi cthielen daf dos jm theo zmi; day 2: axb bb-fredt bb-zmi cthielen daf dos jm theo zmi; day 3: axb cthielen daf dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -269,6 +269,9 @@ FRT_BIGGERMEM1
 FRT_DISCOUNT
 
 # good enough
+FRT_DOLLAR
+
+# good enough
 FRT_LEVITRA
 
 # good enough
@@ -309,6 +312,9 @@ FS_ERECTION
 
 # good enough
 FS_MORE_CONFIDENT
+
+# good enough
+FS_NO_SCRIP
 
 # good enough
 FS_OBFU_PRMCY
@@ -752,46 +758,28 @@ TVD_STOCK1
 TVD_VISIT_PHARMA
 
 # good enough
-AB_TEST_PDF1
+AXB_MIME_IMG830
 
 # good enough
-AXB_RCVD_ZOOBSEND
+DOS_STOCK_CDYV_GENERIC
 
 # good enough
-AXB_RCVD_ZOONAT
+FAKE_REPLY_A1
 
 # good enough
-AXB_XTIDX_CHAIN
+FB_MED1CAT
 
 # good enough
-BC_ENCODED_PDF
+FB_WITHOUT_PRESC
 
 # good enough
-FB_B0NUS
+FS_LOW_INTMOR
 
 # good enough
-FB_SMALL_PEN
+FS_WEIGHT_LOSS
 
 # good enough
-FM_MORTGAGE3PLUS
-
-# good enough
-FRT_ERECTION
-
-# good enough
-FRT_OPPORTUN1
-
-# good enough
-FS_ABIGGER
-
-# good enough
-KAM_LOTTO1
-
-# good enough
-KAM_LOTTO2
-
-# good enough
-KAM_LOTTO3
+FS_YOUR_PRESCRIP
 
 # tflags net
 RCVD_IN_DSBL
@@ -806,7 +794,10 @@ RCVD_IN_SORBS_DUL
 RCVD_IN_XBL
 
 # good enough
-STOX_RCVD_N_NN_N
+TVD_ENHANCE
+
+# good enough
+TVD_PDF_FINGER01
 
 # tflags net
 URIBL_L1SPEWS
@@ -825,9 +816,6 @@ URIBL_AB_SURBL
 
 # tflags net
 URIBL_BLACK
-
-# tflags net
-URIBL_COMPLETEWHOIS
 
 # tflags net
 URIBL_GREY
