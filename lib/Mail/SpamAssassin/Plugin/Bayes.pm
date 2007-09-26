@@ -48,7 +48,9 @@ sub check_bayes {
   return 0 if (!$pms->{conf}->{use_bayes} || !$pms->{conf}->{use_bayes_rules});
 
   if (!exists ($pms->{bayes_score})) {
-    $pms->{bayes_score} = $self->{main}->{bayes_scanner}->scan ($pms, $pms->{msg});
+    my $timer = $self->{main}->time_method("check_bayes");
+    $pms->{bayes_score} =
+      $self->{main}->{bayes_scanner}->scan ($pms, $pms->{msg});
   }
 
   if (defined $pms->{bayes_score} &&
