@@ -3,7 +3,7 @@ Using A SQL Database for Bayesian Storage Module
 -------------------------------------------------------
 
 SpamAssassin can now store users' bayesian filter data in a SQL
-database. The  most common use for a system like this would be for
+database.  The most common use for a system like this would be for
 users to be able to have per user bayesian filter data on systems
 where users may not have a home directory to store the data.
 
@@ -50,7 +50,7 @@ the format as listed above.  <driver> should be the DBD driver that
 you have installed to access your database (initially tested with
 MySQL, PostgreSQL, and SQLite).  <database> must be the name of the
 database that you created to store the bayes data tables. <hostname>
-is the name of the host that contains the SQL database  server.
+is the name of the host that contains the SQL database server.
 <port> is the optional port number where your database server is
 listening.
 
@@ -73,8 +73,9 @@ Requirements
 In order for SpamAssassin to work with your SQL database, you must
 have the perl DBI module installed, AS WELL AS the DBD driver/module
 for your specific database.  For example, if using MySQL as your
-RDBMS, you must have the DBD::mysql module installed.  Check CPAN for
-the latest versions of DBI and your database driver/module. 
+RDBMS, you must have the DBD::mysql module installed, a PostgreSQL
+database requires DBD::Pg.  Check CPAN for latest versions of DBI
+and your database driver/module. 
 
 The BayesStore::SQL module was tested with:
 
@@ -82,8 +83,8 @@ DBI-1.38
 DBD-mysql-2.9002
 perl v5.8.0
 
-But older versions should work fine as the SQL code in SpamAssassin is as 
-simple as could be.
+But older (and newer) versions should work fine as the SQL code in
+SpamAssassin is as simple as could be.
 
 NOTE: Some users have reported problems using DBD::Pg v1.22. There appears
 to be a bug in how parameters are quoted in that version, we recommend you
@@ -131,10 +132,6 @@ and then:
 
 psql -U <username> -f bayes_pg.sql <databasename>
 
-(If you are using older versions of PostgreSQL, such as version 7.4.x, you may
-need to patch this.  See
-http://issues.apache.org/SpamAssassin/show_bug.cgi?id=4653 )
-
 From a security viewpoint, it is wise to grant the minimum privileges
 needed to the user on the bayes tables.  These grants largely depend
 on your system policies but here are some example grants to get you
@@ -159,7 +156,7 @@ foreground, and will output debug message to the terminal. You should
 then test spamd with a message by calling spamc.  You can use the
 sample-spam.txt file with the following command:
 
-cat sample-spam.txt | spamc
+spamc < sample-spam.txt
 
 Watch the debug output from spamd and look for the following debug
 line:
@@ -210,4 +207,3 @@ o Run 'sa-learn --restore backup.txt' to restore your bayes data to
 NOTE: sa-learn must be run as the user who's data you are loading, or
       you must make use of the bayes_sql_override_username config
       option.
-

@@ -60,13 +60,18 @@ CREATE OR REPLACE FUNCTION least_int (integer, integer)
  AS 'SELECT CASE WHEN $1 < $2 THEN $1 ELSE $2 END;'
  LANGUAGE SQL;
 
-CREATE OR REPLACE FUNCTION put_tokens(inuserid INTEGER,
-                                      intokenary BYTEA[],
-                                      inspam_count INTEGER,
-                                      inham_count INTEGER,
-                                      inatime INTEGER)
+CREATE OR REPLACE FUNCTION put_tokens(INTEGER,
+                                      BYTEA[],
+                                      INTEGER,
+                                      INTEGER,
+                                      INTEGER)
 RETURNS VOID AS ' 
 DECLARE
+  inuserid      ALIAS FOR $1;
+  intokenary    ALIAS FOR $2;
+  inspam_count  ALIAS FOR $3;
+  inham_count   ALIAS FOR $4;
+  inatime       ALIAS FOR $5;
   _token BYTEA;
   new_tokens INTEGER := 0;
 BEGIN
@@ -97,11 +102,11 @@ BEGIN
            newest_token_age = greatest_int(newest_token_age, inatime),
            oldest_token_age = least_int(oldest_token_age, inatime)
      WHERE id = inuserid;
-  ELSEIF new_tokens > 0 AND NOT inatime > 0 THEN
+  ELSIF new_tokens > 0 AND NOT inatime > 0 THEN
     UPDATE bayes_vars
        SET token_count = token_count + new_tokens
      WHERE id = inuserid;
-  ELSEIF NOT new_tokens > 0 AND inatime > 0 THEN
+  ELSIF NOT new_tokens > 0 AND inatime > 0 THEN
     UPDATE bayes_vars
        SET newest_token_age = greatest_int(newest_token_age, inatime),
            oldest_token_age = least_int(oldest_token_age, inatime)
