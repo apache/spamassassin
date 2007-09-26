@@ -1583,13 +1583,17 @@ sub get_my_locales {
 sub avoid_db_file_locking_bug {
   my ($path) = @_;
 
-  my $parentdir = dirname($path);
-  my $db_tmpfile = File::Spec->catfile($parentdir,'__db.'.basename($path));
+  my $db_tmpfile = untaint_file_path(File::Spec->catfile(dirname($path),
+                        '__db.'.basename($path)));
 
-  if (-e $db_tmpfile) {
-    dbg("Berkeley DB bug work-around: cleaning tmp file $db_tmpfile");
-    if (!unlink($db_tmpfile)) {
-      die "cannot remove Berkeley DB tmp file $db_tmpfile: $!\n";
+  # delete "__db.[DBNAME]" and "__db.[DBNAME].*"
+  foreach my $tfile ($db_tmpfile, <$db_tmpfile.*>) {
+    my $file = untaint_file_path($tfile);
+    next unless (-e $file);
+
+    dbg("Berkeley DB bug work-around: cleaning tmp file $file");
+    if (!unlink($file)) {
+      die "cannot remove Berkeley DB tmp file $file: $!\n";
     }
   }
 }
