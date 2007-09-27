@@ -657,7 +657,9 @@ sub start_lookup {
     id => $id,
     completed_callback => sub {
       my $ent = shift;
-      $self->completed_lookup_callback ($scanner, $ent);
+      if (defined $ent->{response_packet}) {  # not aborted or empty
+        $self->completed_lookup_callback ($scanner, $ent);
+      }
     }
   };
   $scanner->{async}->start_lookup($ent);
