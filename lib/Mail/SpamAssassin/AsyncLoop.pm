@@ -110,8 +110,16 @@ The code reference will be called with one argument, the C<$ent> object.
 
 =item completed_callback (optional)
 
-A code reference, which will be called when the lookup has been reported as
-complete via C<set_response_packet()> or C<report_id_complete()>.
+A code reference which will be called when an asynchronous task (e.g. a
+DNS lookup) is completed, either normally, or aborted, e.g. by a timeout.
+
+When a task has been reported as completed via C<set_response_packet()>
+the response (as provided to C<set_response_packet()>) is stored in
+$ent->{response_packet} (possibly undef, its semantics is defined by the
+caller). When completion is reported via C<report_id_complete()> or a
+task was aborted, the $ent->{response_packet} is guaranteed to be undef.
+If it is necessary to distinguish between the last two cases, the
+$ent->{status} may be examined for a string 'ABORTING' or 'FINISHED'.
 
 The code reference will be called with one argument, the C<$ent> object.
 
@@ -131,6 +139,7 @@ sub start_lookup {
   my $now = time;
   my $key = $ent->{key};
   my $id  = $ent->{id};
+  $ent->{status} = 'STARTED';
   $ent->{start_time} = $now  if !defined $ent->{start_time};
   $ent->{timeout} =
     $self->{main}->{conf}->{rbl_timeout}  if !defined $ent->{timeout};
@@ -271,23 +280,26 @@ sub complete_lookups {
 
     while (my($key,$ent) = each %$pending) {
       my $id = $ent->{id};
-
+      my $finished = exists $self->{finished}->{$id};
+      if ($finished) {
+        $anydone = 1;
+        delete $self->{finished}->{$id};
+        $ent->{status} = 'FINISHED';
+        $ent->{finish_time} = $now  if !defined $ent->{finish_time};
+      }
       # call a "poll_callback" sub, if one exists
       if (defined $ent->{poll_callback}) {
         $ent->{poll_callback}->($ent);
       }
-      if (exists $self->{finished}->{$id}) {
-        $anydone = 1;
-        $ent->{finish_time} = $now  if !defined $ent->{finish_time};
-        $ent->{response_packet} = delete $self->{finished}->{$id};
-
+      if ($finished) {
         my $elapsed = $ent->{finish_time} - $ent->{start_time};
         dbg("async: completed in %.3f s: %s", $elapsed, $ent->{display_id});
-        $self->{timing_by_query}->{". $key"} += $elapsed;
 
+        # call a "completed_callback" sub, if one exists
         if (defined $ent->{completed_callback}) {
           $ent->{completed_callback}->($ent);
         }
+        $self->{timing_by_query}->{". $key"} += $elapsed;
         $self->{queries_completed}++;
         $self->{total_queries_completed}++;
         delete $pending->{$key};
@@ -364,6 +376,13 @@ sub abort_remaining_lookups {
         $ent->{display_id} );
     $foundcnt++;
     $self->{timing_by_query}->{"X $key"} = $now - $ent->{start_time};
+
+    if (defined $ent->{completed_callback}) {
+      $ent->{finish_time} = $now  if !defined $ent->{finish_time};
+      $ent->{response_packet} = undef;
+      $ent->{status} = 'ABORTING';
+      $ent->{completed_callback}->($ent);
+    }
     delete $pending->{$key};
   }
   dbg("async: aborted %d remaining lookups", $foundcnt)  if $foundcnt > 0;
@@ -390,12 +409,13 @@ should be called, but not both.
 
 sub set_response_packet {
   my ($self, $id, $pkt, $key, $timestamp) = @_;
-  $self->{finished}->{$id} = $pkt;
+  $self->{finished}->{$id} = 1;  # only key existence matters, any value
   $timestamp = time  if !defined $timestamp;
   my $ent = $self->{pending_lookups}->{$key};
   $id eq $ent->{id}
     or die "set_response_packet: PANIC - mismatched id $id, $ent->{id}";
   $ent->{finish_time} = $timestamp;
+  $ent->{response_packet} = $pkt;
   1;
 }
 
@@ -411,13 +431,7 @@ should be called, but not both.
 
 sub report_id_complete {
   my ($self, $id, $key, $timestamp) = @_;
-  $self->{finished}->{$id} = undef;
-  $timestamp = time  if !defined $timestamp;
-  my $ent = $self->{pending_lookups}->{$key};
-  $id eq $ent->{id}
-    or die "report_id_complete: PANIC - mismatched id $id, $ent->{id}";
-  $ent->{finish_time} = $timestamp;
-  1;
+  $self->set_response_packet($id, undef, $key, $timestamp);
 }
 
 # ---------------------------------------------------------------------------
