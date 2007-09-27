@@ -33,13 +33,15 @@ ssh $host \
 # rebuild to compile the blib modules for this platform.
 
 ssh $host \
+    cd $clienttree \; \
     . /etc/profile \; \
     perl Makefile.PL \; \
     make clean \; \
     perl Makefile.PL \; \
     make < /dev/null
 
-ssh -f $host cd $clienttree/masses \; \
+ssh -f $host \
+    cd $clienttree/masses \; \
     . /etc/profile \; \
     TZ=UTC ./mass-check --cs_ssl --cs_verbose --client $serverhost &
 
