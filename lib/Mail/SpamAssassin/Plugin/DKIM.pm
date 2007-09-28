@@ -28,9 +28,9 @@ Mail::SpamAssassin::Plugin::DKIM - perform DKIM verification tests
 =head1 DESCRIPTION
 
 This SpamAssassin plugin implements DKIM lookups as described by the RFC 4871,
-as well as DomainKeys lookups, as described by RFC 4870, thanks to the support
-for both types of signatures by newer versions of module Mail::DKIM (0.22 or
-later).
+as well as historical DomainKeys lookups, as described by RFC 4870, thanks
+to the support for both types of signatures by newer versions of module
+Mail::DKIM (0.22 or later).
 
 It requires the C<Mail::DKIM> CPAN module to operate. Many thanks to Jason Long
 for that module.
@@ -40,6 +40,55 @@ for that module.
 C<Mail::DKIM>, C<Mail::SpamAssassin::Plugin>
 
   http://jason.long.name/dkimproxy/
+  http://tools.ietf.org/rfc/rfc4871.txt
+  http://tools.ietf.org/rfc/rfc4870.txt
+  http://www.ietf.org/internet-drafts/draft-ietf-dkim-ssp-01.txt
+  http://www.ietf.org/internet-drafts/draft-ietf-dkim-overview-05.txt
+
+=head1 A BRIEF INTRODUCTION TO TERMINOLOGY
+
+B<Originator Address> is the author's e-mail address in a "From:" header field.
+
+A message may carry one or more B<signatures> (signature header fields),
+each signature carries an B<identity> (the i= tag) telling who provided it
+and how it can be verified.
+
+Only B<valid signatures> matter (i.e. verified signatures), all invalid
+signatures can be and MUST be ignored (making a distinction here can provide
+advantage to malicious senders or spam senders, as faking an invalid signature
+is trivial).
+
+A valid signature (one or more) whose identity matches I<Originator Address>
+is called B<Originator Signature> (or sometimes a I<First-Party Signature>),
+and is normally acceptable to recipients unconditionally (that doesn't say
+anything about the merits of a message, it just tells the message is coming
+from where it claims to be coming).
+
+A I<valid signature> which is I<not an Originator Signature> is called a
+B<Third-Party Signature> (e.g. supplied by a mailing list or re-mailer).
+
+It is up to a recipient (the verifier) to decide which I<Third-Party
+Signatures> are acceptable to him (e.g. those provided by a reputable
+mailing list server with good anti-spam measures) and which are not.
+Such signatures are called B<Verifier Acceptable Third-Party Signatures>.
+
+There exists a mechanism called B<DKIM Sender Signing Practices> (SSP),
+by which an I<Originator> (i.e. a mail author or his sending mailer) can
+tell recipients (verifiers) about his signing practices (previously called
+signing policy). An Internet Draft is approaching ratification stage,
+but is not there yet. This plugin does not yet fully implement it.
+
+Having a proof a message is coming from where it claims to be coming
+is an essential stone in anti-phishing and anti-spam protection, but
+is not sufficient by itself. Some B<reputation scheme> is needed, a
+community-based reputation scheme would be useful, but is not available
+for the time being. Currently it is up to verifiers to organize it for
+themselves, e.g. in a form of I<DKIM-based whitelisting>, as provided by
+this plugin. The mechanism allows to whitelist an I<Originator Signature>
+as well as selected I<Third-Party Signatures>.
+
+For details please consult RFC 4871, draft-ietf-dkim-ssp-01 (or later)
+and draft-ietf-dkim-overview-05 (or later).
 
 =cut
 
@@ -92,37 +141,53 @@ sub set_config {
 
 =over 4
 
-=item whitelist_from_dkim add@ress.com [identity]
+=item whitelist_from_dkim originator@example.com [signing-identity]
 
 Use this to supplement the whitelist_from addresses with a check to make sure
-the message has been signed by a Domain Keys Identified Mail (DKIM) signature
-that can be verified against the From: domain's DKIM public key.
+the message with a given From: author's address (originator address) carries
+a valid Domain Keys Identified Mail (DKIM) signature by a verifier-acceptable
+signing-identity (the i= tag). Signature verification is based on a signing
+identity's DKIM public key, fetched by a DNS lookup from a domain specified
+in a d= tag of a signature.
 
-In order to support optional identities, only one whitelist entry is allowed
-per line, exactly like C<whitelist_from_rcvd>.  Multiple C<whitelist_from_dkim>
-lines are allowed.  File-glob style meta characters are allowed for the From:
-address, just like with C<whitelist_from_rcvd>.  The optional identity
-parameter must match from the right-most side, also like in
-C<whitelist_from_rcvd>.
+In order to support multiple optional verifier-acceptable signing identities
+(e.g. signatures supplied by mailing lists), only one whitelist entry
+is allowed per line, exactly like C<whitelist_from_rcvd>. Multiple
+C<whitelist_from_dkim> lines are allowed. File-glob style meta characters
+are allowed for the From: address, just like with C<whitelist_from_rcvd>.
 
-If no identity parameter is specified the domain of the address parameter
-specified will be used instead.
+If no signing identity (second parameter) is specified, the only acceptable
+signature will be an originator signature (not a third-party signature).
+An originator signature is a signature where the signing identity matches
+the originator address (i.e. the address in a From header field).  If the
+signing identity does not include a localpart, then only the domains must
+match; otherwise, the two addresses must be identical. Note that there is
+no subdomain stripping magic, a match on domain must be exact.
 
-The From: address is obtained from a signed part of the message (ie. the
-"From:" header field), not from envelope data.
+The originator address is obtained from the "From:" header field, which
+should be in a signed part of the message.
 
-Since this whitelist requires an DKIM check to be made, network tests must be
-enabled.
+Since this whitelist requires a DKIM check to be made, network tests must
+be enabled.
 
-Examples:
+Examples of whitelisting based on an originator signature:
 
   whitelist_from_dkim joe@example.com
   whitelist_from_dkim *@corp.example.com
+  whitelist_from_dkim *@gmail.com
 
-  whitelist_from_dkim jane@example.net  example.org
-  whitelist_from_dkim dick@example.net  richard@example.net
+Examples of whitelisting based on an third-party signatures:
 
-=item def_whitelist_from_dkim add@ress.com [identity]
+  whitelist_from_dkim rick@example.net     richard@example.net
+  whitelist_from_dkim rick@sub.example.net example.net
+  whitelist_from_dkim jane@example.net     example.org
+  whitelist_from_dkim *@*                  spamassassin.apache.org
+  whitelist_from_dkim *@*                  postfix.org
+
+(the last two examples illustrate singing by mailing lists, although the
+featured mailing lists are not currently re-signing mailing list traffic)
+
+=item def_whitelist_from_dkim originator@example.com [signing-identity]
 
 Same as C<whitelist_from_dkim>, but used for the default whitelist entries
 in the SpamAssassin distribution.  The whitelist score is lower, because
@@ -134,6 +199,7 @@ these are often targets for abuse of public mailers which sign their mail.
     setting => 'whitelist_from_dkim',
     code => sub {
       my ($self, $key, $value, $line) = @_;
+      local ($1,$2);
       unless (defined $value && $value !~ /^$/) {
         return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       }
@@ -141,20 +207,21 @@ these are often targets for abuse of public mailers which sign their mail.
         return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
       my $address = $1;
-      my $identity = (defined $2 ? $2 : $1);
-
-      unless (defined $2) {
-	$identity =~ s/^.*(@.*)$/$1/;
+      my $identity = '';  # when empty only originator signature is acceptable
+      if (defined $2) {   # explicit additional acceptable signing identity
+        $identity = $2;
+        $identity = '@' . $identity  if $identity !~ /\@/;
       }
-      $self->{parser}->add_to_addrlist_rcvd ('whitelist_from_dkim',
-						$address, $identity);
+      $self->{parser}->add_to_addrlist_rcvd('whitelist_from_dkim',
+                                            $address, $identity);
     }
   });
 
   push (@cmds, {
-    setting => 'def_whitelist_from_dkim',,
+    setting => 'def_whitelist_from_dkim',
     code => sub {
       my ($self, $key, $value, $line) = @_;
+      local ($1,$2);
       unless (defined $value && $value !~ /^$/) {
         return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       }
@@ -162,13 +229,13 @@ these are often targets for abuse of public mailers which sign their mail.
         return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
       my $address = $1;
-      my $identity = (defined $2 ? $2 : $1);
-
-      unless (defined $2) {
-	$identity =~ s/^.*(@.*)$/$1/;
+      my $identity = '';  # when empty only originator signature is acceptable
+      if (defined $2) {   # explicit additional acceptable signing identity
+        $identity = $2;
+        $identity = '@' . $identity  if $identity !~ /\@/;
       }
-      $self->{parser}->add_to_addrlist_rcvd ('def_whitelist_from_dkim',
-						$address, $identity);
+      $self->{parser}->add_to_addrlist_rcvd('def_whitelist_from_dkim',
+                                            $address, $identity);
     }
   });
 
@@ -236,15 +303,17 @@ sub check_dkim_testing {
 }
 
 sub check_for_dkim_whitelist_from {
-  my ($self, $scanner) = @_;
-  $self->_check_dkim_whitelist($scanner, 0) unless $scanner->{dkim_whitelist_from_checked};
-  $scanner->{dkim_whitelist_from};
+  my ($self, $scan) = @_;
+  $self->_check_dkim_whitelist($scan, 0)
+    unless $scan->{dkim_whitelist_from_checked};
+  $scan->{dkim_whitelist_from};
 }
 
 sub check_for_def_dkim_whitelist_from {
-  my ($self, $scanner) = @_;
-  $self->_check_dkim_whitelist($scanner, 1) unless $scanner->{def_dkim_whitelist_from_checked};
-  $scanner->{def_dkim_whitelist_from};
+  my ($self, $scan) = @_;
+  $self->_check_dkim_whitelist($scan, 1)
+    unless $scan->{def_dkim_whitelist_from_checked};
+  $scan->{def_dkim_whitelist_from};
 }
 
 # ---------------------------------------------------------------------------
@@ -290,7 +359,8 @@ sub _check_dkim_signature {
     dbg("dkim: performing public key lookup and signature verification");
     $message->CLOSE();      # the action happens here
 
-    $scan->{dkim_address} = ($message->message_originator ? $message->message_originator->address() : '');
+    $scan->{dkim_address} = !$message->message_originator ? ''
+                              : $message->message_originator->address();
     dbg("dkim: originator address: %s",
         $scan->{dkim_address} ? $scan->{dkim_address} : 'none');
 
@@ -304,12 +374,14 @@ sub _check_dkim_signature {
       if ($scan->{dkim_identity} eq '') {
         $scan->{dkim_identity} = '@' . $message->signature->domain();
       }
-      dbg("dkim: signature identity: ".$scan->{dkim_identity});
+      dbg("dkim: signing identity: ".$scan->{dkim_identity});
     }
 
     my $result = $message->result();
     my $detail = $message->result_detail();
-    dbg("dkim: signature verification result: $detail");
+    # let the result stand out more clearly in the log, use uppercase
+    dbg("dkim: signature verification result: %s",
+        $detail eq 'none' ? $detail : uc $detail);
 
     # extract the actual lookup results
     if ($result eq 'pass') {
@@ -410,120 +482,164 @@ sub _check_dkim_policy {
 }
 
 sub _check_dkim_whitelist {
-  my ($self, $scanner, $default) = @_;
+  my ($self, $scan, $default) = @_;
 
-  return unless $scanner->is_dns_available();
+  return unless $scan->is_dns_available();
 
-  # trigger a DKIM check so we can get address/identity info,
-  # if verification failed only continue if we want the debug info
-  unless ($self->check_dkim_verified($scanner)) {
-    unless (would_log("dbg", "dkim")) {
-      return;
-    }
+  # trigger a DKIM check so we can get address/identity info
+  unless ($self->check_dkim_verified($scan)) {
+    return;
   }
 
-  unless ($scanner->{dkim_address}) {
+  unless ($scan->{dkim_address}) {
     dbg("dkim: %swhitelist_from_dkim: could not find originator address",
         $default ? "def_" : "");
     return;
   }
-  unless ($scanner->{dkim_identity}) {
-    dbg("dkim: %swhitelist_from_dkim: could not find identity",
+  unless ($scan->{dkim_identity}) {
+    dbg("dkim: %swhitelist_from_dkim: could not find signing identity",
         $default ? "def_" : "");
     return;
   }
 
   if ($default) {
-    $scanner->{def_dkim_whitelist_from_checked} = 1;
-    $scanner->{def_dkim_whitelist_from} =
-                    $self->_wlcheck_domain($scanner,'def_whitelist_from_dkim');
+    $scan->{def_dkim_whitelist_from_checked} = 1;
+    $scan->{def_dkim_whitelist_from} =
+      $self->_wlcheck_acceptable_signature($scan,'def_whitelist_from_dkim');
 
-    if (!$scanner->{def_dkim_whitelist_from}) {
-      $scanner->{def_dkim_whitelist_from} =
-                    $self->_wlcheck_no_domain($scanner,'def_whitelist_auth');
+    if (!$scan->{def_dkim_whitelist_from}) {
+      $scan->{def_dkim_whitelist_from} =
+        $self->_wlcheck_originator_signature($scan,'def_whitelist_auth');
     }
-  } else {
-    $scanner->{dkim_whitelist_from_checked} = 1;
-    $scanner->{dkim_whitelist_from} =
-                    $self->_wlcheck_domain($scanner,'whitelist_from_dkim');
 
-    if (!$scanner->{dkim_whitelist_from}) {
-      $scanner->{dkim_whitelist_from} =
-                    $self->_wlcheck_no_domain($scanner,'whitelist_auth');
+  } else {
+    $scan->{dkim_whitelist_from_checked} = 1;
+    $scan->{dkim_whitelist_from} =
+      $self->_wlcheck_acceptable_signature($scan,'whitelist_from_dkim');
+
+    if (!$scan->{dkim_whitelist_from}) {
+      $scan->{dkim_whitelist_from} =
+        $self->_wlcheck_originator_signature($scan,'whitelist_auth');
     }
   }
 
-  # if the message doesn't pass DKIM validation, it can't pass an DKIM whitelist
-  if ($default) {
-    if ($scanner->{def_dkim_whitelist_from}) {
-      if ($self->check_dkim_verified($scanner)) {
-        dbg("dkim: address: %s identity: %s is in user's ".
-            "DEF_WHITELIST_FROM_DKIM and passed DKIM verification",
-          $scanner->{dkim_address}, $scanner->{dkim_identity});
+  # if the message doesn't pass DKIM validation, it can't pass DKIM whitelist
+  if ($default) {  # DEF_DKIM_WHITELIST_FROM
+    if ($scan->{def_dkim_whitelist_from}) {
+      if ($self->check_dkim_verified($scan)) {  # double-check just in case
+        dbg("dkim: originator %s, signing identity %s, found in ".
+            "def_whitelist_from_dkim and passed DKIM verification",
+          $scan->{dkim_address}, $scan->{dkim_identity});
       } else {
-        dbg("dkim: address: %s identity: %s is in user's ".
-            "DEF_WHITELIST_FROM_DKIM but failed DKIM verification",
-          $scanner->{dkim_address}, $scanner->{dkim_identity});
-	$scanner->{def_dkim_whitelist_from} = 0;
+        $scan->{def_dkim_whitelist_from} = 0;
       }
-    } else {
-      dbg("dkim: address: %s identity: %s is not in user's DEF_WHITELIST_FROM_DKIM",
-          $scanner->{dkim_address}, $scanner->{dkim_identity});
     }
-  } else {
-    if ($scanner->{dkim_whitelist_from}) {
-      if ($self->check_dkim_verified($scanner)) {
-	dbg("dkim: address: %s identity: %s is in user's ".
-            "WHITELIST_FROM_DKIM and passed DKIM verification",
-            $scanner->{dkim_address}, $scanner->{dkim_identity});
+#   else {
+#     dbg("dkim: originator %s, signing identity %s, ".
+#         "not in def_whitelist_from_dkim",
+#         $scan->{dkim_address}, $scan->{dkim_identity});
+#   }
+  } else {  # DKIM_WHITELIST_FROM
+    if ($scan->{dkim_whitelist_from}) {
+      if ($self->check_dkim_verified($scan)) {  # double-check just in case
+        dbg("dkim: originator %s, signing identity %s, found in ".
+            "whitelist_from_dkim and passed DKIM verification",
+            $scan->{dkim_address}, $scan->{dkim_identity});
       } else {
-	dbg("dkim: address: %s identity: %s is in user's ".
-            "WHITELIST_FROM_DKIM but failed DKIM verification",
-            $scanner->{dkim_address}, $scanner->{dkim_identity});
-	$scanner->{dkim_whitelist_from} = 0;
+        $scan->{dkim_whitelist_from} = 0;
       }
-    } else {
-      dbg("dkim: address: %s identity: %s is not in user's WHITELIST_FROM_DKIM",
-          $scanner->{dkim_address}, $scanner->{dkim_identity});
     }
+#   else {
+#     dbg("dkim: originator %s, signing identity %s, ".
+#         "not in whitelist_from_dkim",
+#         $scan->{dkim_address}, $scan->{dkim_identity});
+#   }
   }
 }
 
-
-sub _wlcheck_domain {
+# check for an originator signature(s), as well as for additional
+# verifier-acceptable signatures if provided in a config as a second
+# parameter on dkim whitelist entries
+#
+sub _wlcheck_acceptable_signature {
   my ($self, $scan, $wl) = @_;
-
   foreach my $white_addr (keys %{$scan->{conf}->{$wl}}) {
     my $re = qr/$scan->{conf}->{$wl}->{$white_addr}{re}/i;
-    foreach my $domain (@{$scan->{conf}->{$wl}->{$white_addr}{domain}}) {
-      $self->_wlcheck_one_dom($scan, $wl, $white_addr, $domain, $re) and return 1;
+    # check for the originator signature is implied
+    $self->_wlcheck_one($scan, $wl, $white_addr, undef, $re) and return 1;
+    # walk through all additional verifier-acceptable signing identities
+    foreach my $acceptable_identity
+            (@{$scan->{conf}->{$wl}->{$white_addr}{domain}}) {
+      next if !defined $acceptable_identity || $acceptable_identity eq '';
+      $self->_wlcheck_one($scan, $wl, $white_addr, $acceptable_identity, $re)
+        and return 1;
     }
   }
   return 0;
 }
 
-sub _wlcheck_one_dom {
-  my ($self, $scan, $wl, $white_addr, $domain, $re) = @_;
-  if ($scan->{dkim_address} =~ $re) {
-    if ($scan->{dkim_identity} =~ /(?:^|\.|(?:@(?!@)|(?=@)))\Q${domain}\E$/i)
-    {
-      dbg("dkim: address: $scan->{dkim_address} matches $wl $re $domain");
-      return 1;
-    }
-  }
-  return 0;
-}
-
-# use a traditional whitelist_from-style addrlist, and infer the
-# domain from each address on the fly.  Note: don't pre-parse and
-# store the domains; that's inefficient memory-wise and only saves 1 m//
-sub _wlcheck_no_domain {
+# use a traditional whitelist_from-style addrlist, the only acceptable DKIM
+# signature is an Originator Signature.  Note: don't pre-parse and store the
+# domains; that's inefficient memory-wise and only saves one m//
+#
+sub _wlcheck_originator_signature {
   my ($self, $scan, $wl) = @_;
-
   foreach my $white_addr (keys %{$scan->{conf}->{$wl}}) {
-    my $domain = ($white_addr =~ /\@(.*?)$/) ? $1 : $white_addr;
     my $re = $scan->{conf}->{$wl}->{$white_addr};
-    $self->_wlcheck_one_dom($scan, $wl, $white_addr, $domain, $re) and return 1;
+    if ($scan->{dkim_address} =~ $re) {
+      $self->_wlcheck_one($scan, $wl, $white_addr, undef, $re) and return 1;
+    }
+  }
+  return 0;
+}
+
+sub _wlcheck_one {
+  my ($self, $scan, $wl, $white_addr, $acceptable_identity, $re) = @_;
+
+  # The $acceptable_identity is a verifier-acceptable signing identity.
+  # When $acceptable_identity is undef or an empty string it implies an
+  # originator signature check.
+
+  my $originator = $scan->{dkim_address};
+  if ($originator =~ $re) {  # originator address does match a whitelist entry
+    # but does it carry a signature of a verifier-acceptable signing identity?
+    my $identity = $scan->{dkim_identity};  # TODO: support multiple signatures
+
+    local($1);
+    if (!defined $acceptable_identity || $acceptable_identity eq '') {
+      # checking for originator signature
+      #
+      # An "Originator Signature" is any Valid Signature where the signing
+      # identity matches the Originator Address. If the signing identity
+      # does not include a localpart, then only the domains must match;
+      # otherwise, the two addresses must be identical.
+      #
+      my $originator_matching_part = $originator;
+      if ($identity =~ /^\@/) {  # no localpart in signing identity
+        $originator_matching_part =~ s/^.*?(\@[^\@]*)?$/$1/s; # strip localpart
+      }
+      if (lc($originator_matching_part) eq lc($identity)) {
+        dbg("dkim: originator signature from %s, signing identity %s, ".
+            "matches %s %s", $originator, $identity, $wl, $re);
+        return 1;
+      }
+    }
+
+    else {
+      if ($acceptable_identity !~ /\@/) {  # ensure domain part, possibly empty
+        $acceptable_identity = '@' . $acceptable_identity;
+      }
+      my $identity_matching_part = $identity;
+      if ($acceptable_identity =~ /^\@/) {  # no localpart, just domain?
+        $identity_matching_part =~ s/^.*?(\@[^\@]*)?\z/$1/s;  # strip localpart
+      }
+      if (lc($identity_matching_part) eq lc($acceptable_identity)) {
+        dbg("dkim: originator %s, signing identity %s, ".
+            "verifier-acceptable (%s), matches %s %s",
+            $originator, $identity, $acceptable_identity, $wl, $re);
+        return 1;
+      }
+    }
   }
   return 0;
 }
