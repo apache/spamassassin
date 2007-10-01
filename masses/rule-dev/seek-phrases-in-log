@@ -289,8 +289,8 @@ sub summarise {
       my $subsumed = 0;
       foreach my $done (@done_pats) {
         if ($pat eq $done || $pat =~ /\Q${done}\E/) { $subsumed=1; last; }
-	push @done_pats, $pat;
       }
+      push @done_pats, $pat;
       if (!$subsumed) { push @pats_new, $pat; }
     }
     @pats = @pats_new;
