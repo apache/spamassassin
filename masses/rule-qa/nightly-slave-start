@@ -38,7 +38,7 @@ ssh $host \
     perl Makefile.PL \; \
     make clean \; \
     perl Makefile.PL \; \
-    make < /dev/null
+    make < /dev/null > $tmp/remote_build.$host.log 2>&1
 
 ssh -f $host \
     cd $clienttree/masses \; \
