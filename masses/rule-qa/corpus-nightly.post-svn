@@ -9,7 +9,7 @@
 RSYNC_PASSWORD=$password ; export RSYNC_PASSWORD
 
 # use $PERL from env if unset
-if [ "x${PERL:-}" = x ] ; then PERL=perl ; fi
+[ "x${PERL:-}" = x ] && PERL=perl
 export PERL
 
 set -x
@@ -26,7 +26,7 @@ cd $tree || exit 5
 
 # build
 $PERL Makefile.PL < /dev/null
-make
+make > $tmp/build.log
 
 # call ext command, if required
 if [ "x${pre_mass_check_command:-}" != x ] ; then
