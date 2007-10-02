@@ -57,4 +57,23 @@ fi
 REVVERS=`echo $VERS | awk -F. '{print $2 "." $1}'`
 echo '*.'$REVVERS' TXT "'$V'"' >> /var/named/updates.spamassassin.org.d/${VERS}.0
 
-/home/updatesd/svn/spamassassin/build/mkupdates/tick_zone_serial
+# use the at queue to give the mirrors time to get the new update so that
+# sa-update clients don't get a 404 from all of the mirrors
+while true;
+do
+  JOBID=`at -q n -l | perl -e 'readline(STDIN) =~ /^(\d+\..)/; print $1'`
+  if [ "$JOBID" != '' ]; then
+    echo "Removing job from at queue: $JOBID"
+    at -r $JOBID
+  else
+    break
+  fi
+done
+
+echo '/home/updatesd/svn/spamassassin/build/mkupdates/tick_zone_serial' | at -q n now + 15 minutes
+
+if [ "`at -q n -l`" != '' ]; then
+  echo 'DNS zone reload scheduled'
+else
+  echo 'FAILED to schedule reload of DNS zone'
+fi
