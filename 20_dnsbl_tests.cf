@@ -257,18 +257,25 @@ tflags RCVD_IN_MAPS_NML		net
 
 
 # ---------------------------------------------------------------------------
+# Section for DNS WL related lookups below.
 
-# Section for DNS WL related lookups below:
-
+# Sender Score Certified (formerly Bonded Sender, hence the legacy rule names):
+# http://www.senderscorecertified.com/ 
 header RCVD_IN_BSP_TRUSTED	eval:check_rbl_txt('bsp-firsttrusted', 'sa-trusted.bondedsender.org.', '(?i:bonded)')
-describe RCVD_IN_BSP_TRUSTED	Sender is in Bonded Sender Program (trusted relay)
+describe RCVD_IN_BSP_TRUSTED	Sender is in Sender Score Certified (trusted relay)
 tflags RCVD_IN_BSP_TRUSTED	net nice
 #reuse RCVD_IN_BSP_TRUSTED
 
 header RCVD_IN_BSP_OTHER	eval:check_rbl_txt('bsp-untrusted', 'sa-other.bondedsender.org.', '(?i:bonded)')
-describe RCVD_IN_BSP_OTHER	Sender is in Bonded Sender Program (other relay)
+describe RCVD_IN_BSP_OTHER	Sender is in Sender Score Certified (other relay)
 tflags RCVD_IN_BSP_OTHER	net nice
 #reuse RCVD_IN_BSP_OTHER
+
+# confirmed-opt-in list; see bug 5476
+header RCVD_IN_SSC_TRUSTED_COI    eval:check_rbl('ssc-firsttrusted', 'plus.bondedsender.org.')
+describe RCVD_IN_SSC_TRUSTED_COI  Sender is in Sender Score Certified (confirmed opt-in)
+tflags RCVD_IN_SSC_TRUSTED_COI    net nice
+#reuse RCVD_IN_SSC_TRUSTED_COI
 
 # ---------------------------------------------------------------------------
 
