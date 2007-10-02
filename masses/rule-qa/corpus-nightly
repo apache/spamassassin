@@ -5,19 +5,14 @@
 echo "Using corpus-nightly settings from $HOME/.corpus"
 . $HOME/.corpus
 
-RSYNC_PASSWORD=$password 
-export RSYNC_PASSWORD
-
-renice 10 -p $$
-
 # use $PERL from env if unset
-if [ "x${PERL:-}" = x ] ; then
-  PERL=perl
-fi
+[ "x${PERL:-}" = x ] && PERL=perl
 export PERL
 
 set -x
 set -e
+
+renice 10 -p $$
 
 # ensure we're running after 0900 UTC; complex due to daylight savings.
 # If we're running in the 08xx UTC hour-space, sleep for 1 hour; when
