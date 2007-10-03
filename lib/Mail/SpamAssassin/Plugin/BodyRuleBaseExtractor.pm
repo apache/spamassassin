@@ -52,6 +52,7 @@ use constant DEBUG_RE_PARSING => 0;     # noisy!
 # $main->{bases_can_use_quantifiers} = 0; # /foo.*bar/ or /foo*bar/ or /foooo?bar/
 # $main->{bases_can_use_char_classes} = 0; # /fo[opqr]bar/
 # $main->{bases_split_out_alternations} = 1; # /(foo|bar|baz)/ => ["foo", "bar", "baz"]
+# $main->{base_quiet} = 0;      # silences progress output
 
 # TODO: it would be nice to have a clean API to pass such settings
 # through to plugins instead of hanging them off $main
@@ -65,7 +66,7 @@ sub new {
   my $self = $class->SUPER::new($mailsaobject);
   bless ($self, $class);
 
-  $self->{show_progress} = 1;           # default
+  $self->{show_progress} = !$mailsaobject->{base_quiet};
 
   # $self->test(); exit;
   return $self;
@@ -85,7 +86,9 @@ sub extract_bases {
   my $main = $conf->{main};
   if (!$main->{base_extract}) { return; }
 
-  info("base extraction starting.  this can take a while...");
+  $self->{show_progress} and
+        info("base extraction starting.  this can take a while...");
+
   $self->extract_set($conf, $conf->{body_tests}, 'body');
 }
 
@@ -110,7 +113,7 @@ sub extract_set_pri {
   my $count = 0;
   my $start = time;
   $self->{main} = $conf->{main};	# for use in extract_hints()
-  info ("extracting from rules of type $ruletype");
+  $self->{show_progress} and info ("extracting from rules of type $ruletype");
 
   # attempt to find good "base strings" (simplified regexp subsets) for each
   # regexp.  We try looking at the regexp from both ends, since there
@@ -368,7 +371,7 @@ NO:
   }
 
   my $elapsed = time - $start;
-  info ("$ruletype: ".
+  $self->{show_progress} and info ("$ruletype: ".
             (scalar keys %{$conf->{base_string}->{$ruletype}}).
             " base strings extracted in $elapsed seconds\n");
 }

@@ -87,6 +87,7 @@ Getopt::Long::Configure(
 GetOptions(
   'list'		=> \$opt{'list'},
   'sudo'		=> \$opt{'sudo'},
+  'quiet'               => \$opt{'quiet'},
   'keep-tmps'		=> \$opt{'keep-tmps'},
 
   'configpath|config-file|config-dir|c|C=s' => \$opt{'configpath'},
@@ -131,6 +132,8 @@ if (defined $opt{'debug'}) {
 # at least info
 $opt{'debug'} ||= 'info';
 
+my $quiet = $opt{'quiet'} || 0;
+
 # ensure the body-rule base extractor plugin is loaded, we use that
 my $post_config = q(
   loadplugin Mail::SpamAssassin::Plugin::BodyRuleBaseExtractor
@@ -160,6 +163,7 @@ $spamtest->{bases_can_use_alternations} = 0;
 $spamtest->{bases_can_use_quantifiers} = 0;
 $spamtest->{bases_can_use_char_classes} = 0;
 $spamtest->{bases_split_out_alternations} = 1;
+$spamtest->{base_quiet} = $quiet;
 
 if (defined $opt{'updatedir'}) {
   $opt{'updatedir'} = Mail::SpamAssassin::Util::untaint_file_path($opt{'updatedir'});
@@ -251,14 +255,21 @@ sub compile_base_strings {
 
     # compile it...
 
-    chdir $dirpath; print "cd $dirpath\n";
+    chdir $dirpath; 
+    $quiet or print "cd $dirpath\n";
     rule2xs($basespath);
 
-    run(get_perl()." Makefile.PL ".
-          "PREFIX=$dirpath/ignored INSTALLSITEARCH=$installdir");
+    my $log = "";
+    if ($quiet) {
+      $log = ">>$dirpath/log";
+      open (ZERO, ">$dirpath/log"); close ZERO; # empty it
+    }
 
-    run("make");
-    run($sudo."make install");	# into $installdir
+    run(get_perl()." Makefile.PL ".
+          "PREFIX=$dirpath/ignored INSTALLSITEARCH=$installdir $log");
+
+    run("make $log");
+    run($sudo."make install $log");	# into $installdir
 
     # and generate the bases.pl file, for perl consumers
 
@@ -273,7 +284,8 @@ sub compile_base_strings {
   }
 
   if (!$opt{'keep-tmps'}) {
-    chdir '/'; print "cd /\n";      # saves trouble on MacOS, possibly
+    chdir '/'; 
+    $quiet or print "cd /\n";      # saves trouble on MacOS, possibly
     run($sudo."rm -rf $dirpath");       # cleanup
   }
   else {
@@ -283,9 +295,15 @@ sub compile_base_strings {
 
 sub run {
   my @cmd = @_;
-  print join(' ',@cmd)."\n";
+  $quiet or print join(' ',@cmd)."\n";
   system(@cmd);
-  ($?>>8 != 0) and die "command failed!";
+  if ($?>>8 != 0) {
+    if ($quiet) {
+      die "command '".join(' ',@cmd)."' failed!";
+    } else {
+      die "command failed!";
+    }
+  }
 }
 
 sub get_perl {
@@ -332,7 +350,8 @@ sub rule2xs {
 
   $force and rmtree $PATH;
   mkdir $PATH or (!$force and die "mkdir($PATH): $!");
-  chdir $PATH; print "cd $PATH\n";
+  chdir $PATH;
+  $quiet or print "cd $PATH\n";
 
   my $cprefix = $modname; $cprefix =~ s/[^A-ZA-z0-9]+/_/gs;
 
@@ -725,6 +744,10 @@ the C extension code.
 
 Use C<sudo(8)> to run code as 'root' when writing files to the compiled-rules
 storage area (which is C<@@LOCAL_STATE_DIR@@/compiled/@@VERSION@@> by default).
+
+=item B<--quiet>
+
+Produce less diagnostic output.  Errors will still be displayed.
 
 =item B<--keep-tmps>
 
