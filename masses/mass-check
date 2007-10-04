@@ -1194,7 +1194,7 @@ sub generate_messages {
       if ($msg) {
         send_line($gzfd, $num) || die "mass-check: error when writing to gz temp file\n";
         send_line($gzfd, $data) || die "mass-check: error when writing to gz temp file\n";
-        send_line($gzfd, join('', @{$msg})) ||
+        send_line($gzfd, (defined $msg ? join('', @{$msg}) : '')) ||
           die "mass-check: error when writing to gz temp file\n";
         push @sent, $num;
       } else {
