@@ -431,6 +431,7 @@ if (!$opt_client) {
   }
 
   status("completed scan stage, $total_messages messages") if ($opt_progress);
+  showdots_finish();
 }
 
 ###########################################################################
@@ -1669,7 +1670,8 @@ sub server_mode {
     }
 
     if ($opt_noisy) {
-      status(scalar(keys %{$msgsout}).' messages outstanding');
+      status((exists $msgsout->{'curnum'} ? (scalar(keys %{$msgsout})-1) :
+              scalar(keys %{$msgsout})).' messages outstanding');
     }
 
 
@@ -1774,7 +1776,7 @@ sub client_mode {
     }
 
     $made_conn_once = 1;
-    status("Requesting $msgnum messages from server") if ($opt_noisy);
+    status("requesting $msgnum messages from server") if ($opt_noisy);
 
     # make request, include and then drop results if there are any
     my $result = http_make_request($socket, 'POST', $uri, {
@@ -1795,7 +1797,7 @@ sub client_mode {
     }
     elsif ($result eq 'finished') {
       # the server said that we're done
-      status('Server has no more work, exiting.') if ($opt_noisy);
+      status('server has no more work, exiting.') if ($opt_noisy);
       last;
     }
     elsif ($result eq '') {
@@ -1907,7 +1909,7 @@ sub client_mode {
         status('completed run stage');
       }
 
-      status('Completed run in '.($time_end-$time_start).' seconds') if ($opt_noisy);
+      status('completed run in '.($time_end-$time_start).' seconds') if ($opt_noisy);
       $msgnum = int($msgnum * $opt_cs_timeout / ($time_end-$time_start)) || 1;
     }
   }
