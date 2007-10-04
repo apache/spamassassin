@@ -430,8 +430,8 @@ if (!$opt_client) {
     die "mass-check: no messages to process\n";
   }
 
-  status("completed scan stage, $total_messages messages") if ($opt_progress);
   showdots_finish();
+  status("completed scan stage, $total_messages messages") if ($opt_progress);
 }
 
 ###########################################################################
