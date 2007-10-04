@@ -162,6 +162,7 @@ use constant HAS_TIME_PARSEDATE => eval { require Time::ParseDate; };
 use constant HAS_IO_ZLIB => eval { require IO::Zlib; };
 use constant HAS_IO_SOCKET_SSL => eval { require IO::Socket::SSL; };
 use Config; 
+use constant HAS_TIME_HI_RES => eval { require Time::HiRes; };
 
 
 # default settings
@@ -1221,6 +1222,21 @@ sub generate_messages {
 
   # update timestamp entries
   my $ts = time;
+
+  # make sure the timestamp is unique!  without Time::HiRes it is trivial and
+  # common to have two reissueings of timedout messages in the same second
+  # with Time::HiRes we'll check anyway since we'll waste less time checking
+  # for uniqueness than one of us will waste debugging a report of mass-check
+  # not completing due to someone's wacky clock (some (non-para-)virtualized
+  # servers will have their clocks go forward and backward
+  while (exists $timestamps->{$ts}) {
+    if (HAS_TIME_HI_RES) {
+      $ts = time;
+    } else {
+      $ts += 0.01;
+    }
+  }
+
   foreach (@sent) {
     $msgsout->{$_}->{'timestamp'} = $ts;
   }
