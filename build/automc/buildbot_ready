@@ -159,7 +159,7 @@ sub do_stop {
 # ---------------------------------------------------------------------------
 
 sub get_current_svn_revision {
-  open (SVNINFO, "(svn info --non-interactive || svn info) < /dev/null 2>&1 |");
+  open (SVNINFO, "(svn info --non-interactive rulesrc || svn info rulesrc ) < /dev/null 2>&1 |");
 
   # note: use 'Last Changed Rev' instead of 'Revision'.  Because we share
   # an SVN repository with other projects, this means that the same
