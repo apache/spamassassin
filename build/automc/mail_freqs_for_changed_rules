@@ -117,8 +117,8 @@ while (<FREQS>) {
 }
 close FREQS;
 
-$mcname = `pwd`;
-$mcname =~ /\/(mc-[^\/]*)\/ and $mcname = $1;
+my $mcname = `pwd`;
+$mcname =~ /\/(mc-[^\/]*)\// and $mcname = $1;
 
 # ---------------------------------------------------------------------------
 # output each of the found rules' freqs
