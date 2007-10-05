@@ -64,7 +64,7 @@ while (!eof DIFF) {
   last unless $file;        # EOF
 
   if ($file !~ /\.cf$/i) {
-    print "ignored file $file\n";
+    print "no rules in non-rule file $file\n";
     next;
   }
 
@@ -87,11 +87,11 @@ close DIFF or die "svn diff failed";
 
 my @rules = sort keys %poss_rules;
 if (@rules <= 0) {
-  print "no rules found, ignoring.\n";
+  print "no rules found in checkin, ignoring.\n";
   exit 0;
 }
 
-print "possible rules: ".join(' ', @rules)."\n";
+# print "mailing about changed/new rules: ".join(' ', @rules)."\n";
 my $files = join (' ', @files);
 
 # ---------------------------------------------------------------------------
@@ -107,13 +107,18 @@ $xml =~ /<msg>\s*(.*?)\s*<\/msg>/s; my $svn_msg = $1;
 # ---------------------------------------------------------------------------
 # and the freqs we just built
 my %freqs = ();
+my $freqs_hdr = '';
 open (FREQS, "<$freqsfile")
         or warn "cannot open '$freqsfile'";
 while (<FREQS>) {
+  / (?:\(all messages|SPAM\%)/ and $freqs_hdr .= $_;
   /(.* )(\S+)\s*$/ or next;
   $freqs{$2} = $1.$2;
 }
 close FREQS;
+
+$mcname = `pwd`;
+$mcname =~ /\/(mc-[^\/]*)\/ and $mcname = $1;
 
 # ---------------------------------------------------------------------------
 # output each of the found rules' freqs
@@ -127,7 +132,8 @@ Files: $files
 Log:
 $svn_msg
 
-";
+Freqs for those rules in '$mcname' mass-check:
+$freqs_hdr";
 
 foreach my $r (@rules) {
   next unless ($freqs{$r});
@@ -135,7 +141,6 @@ foreach my $r (@rules) {
 }
 
 $tomail .= "
-
 More: $rurl
 ";
 
