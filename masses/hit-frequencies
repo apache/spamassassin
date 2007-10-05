@@ -30,7 +30,7 @@ use vars qw {
   $sorting
 };
 
-GetOptions("c|cffile=s@" => \$opt_c,
+GetOptions("c|cffile=s" => \$opt_c,
 	   "s|scoreset=i" => \$opt_s, # ,, pacify stupid emacs cperl mode
 	   "f|falses" => \$opt_f,
 	   "a|all" => \$opt_a,
@@ -317,6 +317,8 @@ my %uranks;
 # rules that we want to look at
 $freq{$_}++ for keys %freq_ham;
 $freq{$_}++ for keys %freq_spam;
+# if a rule exists in the config, we want it in the output too
+$freq{$_}++ for keys %rules;
 
 my $test;
 foreach $test (keys %freq) {
