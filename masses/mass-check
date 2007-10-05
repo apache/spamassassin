@@ -57,6 +57,10 @@ usage: mass-check [options] target ...
                 use server mode, running on the given hostname and port
   --client=host:port
   		use client mode, connecting to the given hostname and port
+  --cs_conn_retries=N
+		only used in client mode. set the number of times to retry
+		the initial connection to the server, while waiting 60
+		seconds between connection attempts, default is 60 retries
   --cs_max=N
   		at most, only ever request (client)/give out (server) a
 		maximum of N messages (defaults to 1000)
@@ -134,8 +138,8 @@ use vars qw($opt_c $opt_p $opt_f $opt_j $opt_n $opt_o $opt_all $opt_bayes
 	    $opt_logmem $opt_after $opt_before $opt_rewrite $opt_deencap
 	    $opt_learn $opt_reuse $opt_lint $opt_cache $opt_noisy $opt_cf
 	    $total_messages $statusevery $opt_cachedir $opt_scanprob
-	    $opt_client $opt_cs_max $opt_cs_timeout $opt_cs_paths_only
-	    $opt_server %postdata %real $svn_revision
+	    $opt_client $opt_cs_conn_retries $opt_cs_max $opt_cs_timeout
+	    $opt_cs_paths_only $opt_server %postdata %real $svn_revision
             $opt_cs_ssl $opt_run_post_scan $opt_cs_verbose
 	    $tmpfd %reuse %orig_conf %reuse_conf $reuse_rules_loaded_p);
 
@@ -188,7 +192,7 @@ GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug:s",
 	   "rules=s", "restart=i", "loguris", "run_post_scan=s",
 	   "deencap=s", "logmem", "learn=i", "reuse", "lint", "cache",
            "cachedir=s", "noisy", "scanprob=f",
-	   "server=s", "cs_max=i", "cs_timeout=i",
+	   "server=s", "cs_max=i", "cs_timeout=i", "cs_conn_retries=i",
 	   "cs_paths_only", "client=s", "cs_ssl", "cs_verbose",
 	   "before=s" => \&deal_with_before_after,
 	   "after=s" => \&deal_with_before_after,
@@ -1708,6 +1712,7 @@ sub server_mode {
 sub client_mode {
   $opt_cs_max ||= 1000;
   $opt_cs_timeout ||= 60 * 2;
+  $opt_cs_conn_retries ||= 60;            # 1 hour
 
   my($host, $port, $uri);
 
@@ -1741,7 +1746,6 @@ sub client_mode {
   }
 
   my $made_conn_once = 0;
-  my $conn_retries = 60;            # 1 hour
 
   # keep going until something stops us.
   while (1) {
@@ -1777,12 +1781,12 @@ sub client_mode {
       # if we haven't yet made a connection, keep retrying;
       # this is probably the server still in "scan stage"
       if (!$made_conn_once) {
-        if ($conn_retries-- >= 0) {
-          status('Failed to connect; sleeping for retry') if ($opt_noisy);
+        if ($opt_cs_conn_retries-- > 0) {
+          status('failed to connect, sleeping for retry') if ($opt_noisy);
           sleep 60;
           next;
         } else {
-          status('Failed to connect, giving up') if ($opt_noisy);
+          status('failed to connect, giving up') if ($opt_noisy);
           last;
         }
       }
