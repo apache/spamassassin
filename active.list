@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: alexb cthielen daf dos jm theo zmi; day 2: alexb bb-fredt cthielen daf dos jm theo zmi; day 3: alexb cthielen daf dos jm theo zmi
+# with results from: day 1: alexb bb-fredt bb-zmi cthielen daf dos jm theo zmi; day 2: alexb cthielen daf dos jm theo zmi; day 3: alexb bb-fredt cthielen daf dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -815,12 +815,6 @@ RCVD_IN_XBL
 STOX_RCVD_N_NN_N
 
 # tflags net
-URIBL_L1SPEWS
-
-# tflags net
-URIBL_L2SPEWS
-
-# tflags net
 WHOIS_MONIKER_ROLE
 
 # tflags userconf
@@ -848,34 +842,10 @@ URIBL_PH_SURBL
 URIBL_RED
 
 # tflags net
-URIBL_RHS_ABUSE
-
-# tflags net
 URIBL_RHS_AHBL
 
 # tflags net
-URIBL_RHS_BOGUSMX
-
-# tflags net
 URIBL_RHS_DOB
-
-# tflags net
-URIBL_RHS_DSN
-
-# tflags net
-URIBL_RHS_POST
-
-# tflags net
-URIBL_RHS_TLD_WHOIS
-
-# tflags net
-URIBL_RHS_URIBL_BLACK
-
-# tflags net
-URIBL_RHS_URIBL_GREY
-
-# tflags net
-URIBL_RHS_WHOIS
 
 # tflags net
 URIBL_SBL
@@ -885,9 +855,6 @@ URIBL_SC_SURBL
 
 # tflags net
 URIBL_WS_SURBL
-
-# tflags net
-URIBL_XS_SURBL
 
 # tflags userconf
 USER_IN_ALL_SPAM_TO
