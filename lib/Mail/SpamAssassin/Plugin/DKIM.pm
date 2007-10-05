@@ -35,6 +35,16 @@ Mail::DKIM (0.22 or later).
 It requires the C<Mail::DKIM> CPAN module to operate. Many thanks to Jason Long
 for that module.
 
+=head1 TAGS
+
+The following tag is added to the set available for use in reports, headers,
+other plugins, etc.:
+
+  _DKIMIDENTITY_    verified signing identity (the 'i' tag) from a signature;
+                    Note there may be more than one signature in a message,
+                    currently they are all provided as a space-separated list,
+                    although this behaviour is likely to be changed.
+
 =head1 SEE ALSO
 
 C<Mail::DKIM>, C<Mail::SpamAssassin::Plugin>
@@ -238,16 +248,16 @@ sub check_dkim_testing {
 
 sub check_for_dkim_whitelist_from {
   my ($self, $scan) = @_;
-  $self->_check_dkim_whitelist($scan, 0)
-    unless $scan->{dkim_whitelist_from_checked};
-  $scan->{dkim_whitelist_from};
+  $self->_check_dkim_whitelist($scan) unless $scan->{whitelist_checked};
+  return $scan->{match_in_whitelist_from_dkim} || 
+         $scan->{match_in_whitelist_auth};
 }
 
 sub check_for_def_dkim_whitelist_from {
   my ($self, $scan) = @_;
-  $self->_check_dkim_whitelist($scan, 1)
-    unless $scan->{def_dkim_whitelist_from_checked};
-  $scan->{def_dkim_whitelist_from};
+  $self->_check_dkim_whitelist($scan) unless $scan->{whitelist_checked};
+  return $scan->{match_in_def_whitelist_from_dkim} || 
+         $scan->{match_in_def_whitelist_auth};
 }
 
 # ---------------------------------------------------------------------------
@@ -295,24 +305,31 @@ sub _check_dkim_signature {
 
     $scan->{dkim_address} = !$message->message_originator ? ''
                               : $message->message_originator->address();
-    dbg("dkim: originator address: ".
+    dbg("dkim: originator: ".
         ($scan->{dkim_address} ? $scan->{dkim_address} : 'none'));
 
-    $scan->{dkim_identity} = '';
-    if ($message->signature) {
+    $scan->{dkim_signatures} = [];
+    foreach my $signature (grep { defined } ($message->signature) ) {
       # i=  Identity of the user or agent (e.g., a mailing list manager) on
       #     behalf of which this message is signed (dkim-quoted-printable;
       #     OPTIONAL, default is an empty local-part followed by an "@"
       #     followed by the domain from the "d=" tag).
-      $scan->{dkim_identity} = $message->signature->identity();
-      dbg("dkim: signing identity: ".$scan->{dkim_identity}.
-          ", signing domain: ".$message->signature->domain());
-      if ($scan->{dkim_identity} eq '') {
-        $scan->{dkim_identity} = '@' . $message->signature->domain();
-      } elsif ($scan->{dkim_identity} !~ /\@/) {
-        $scan->{dkim_identity} = '@' . $scan->{dkim_identity};
+      my $identity = $signature->identity;
+      dbg("dkim: signing identity: %s, d=%s, a=%s, c=%s",
+          $identity, $signature->domain,
+          $signature->algorithm, scalar($signature->canonicalization));
+      if ($identity eq '') {  # just in case
+        $identity = '@' . $signature->domain;
+        $signature->identity($identity);
+      } elsif ($identity !~ /\@/) {  # just in case
+        $identity = '@' . $identity;
+        $signature->identity($identity);
       }
+      push(@{$scan->{dkim_signatures}}, $signature);
     }
+    $scan->set_tag('DKIMIDENTITY',
+      join(" ", map  { $_->identity }
+                grep { $_->result eq 'pass' } @{$scan->{dkim_signatures}}) );
 
     my $result = $message->result();
     my $detail = $message->result_detail();
@@ -419,79 +436,53 @@ sub _check_dkim_policy {
 }
 
 sub _check_dkim_whitelist {
-  my ($self, $scan, $default) = @_;
+  my ($self, $scan) = @_;
 
+  $scan->{whitelist_checked} = 1;
   return unless $scan->is_dns_available();
-
-  # trigger a DKIM check so we can get address/identity info
-  my $verified = $self->check_dkim_verified($scan);
-
-  return unless $verified || would_log("dbg","dkim");
-  # continue if verification succeeded or we want the debug info
-
-  unless ($scan->{dkim_address}) {
-    dbg("dkim: %swhitelist_from_dkim: could not find originator address",
-        $default ? "def_" : "");
-    return;
-  }
-
-  my $identity = $scan->{dkim_identity};
-  unless ($identity) {
-  # (useless double debug line, we already reported if there is no signature)
-  # dbg("dkim: %swhitelist_from_dkim: no signature", $default ? "def_" : "");
-    return;
-  }
-
-  if ($default) {
-    $scan->{def_dkim_whitelist_from_checked} = 1;
-    $scan->{def_dkim_whitelist_from} =
-      $self->_wlcheck_acceptable_signature($scan,'def_whitelist_from_dkim');
-
-    if (!$scan->{def_dkim_whitelist_from}) {
-      $scan->{def_dkim_whitelist_from} =
-        $self->_wlcheck_originator_signature($scan,'def_whitelist_auth');
-    }
-
-  } else {
-    $scan->{dkim_whitelist_from_checked} = 1;
-    $scan->{dkim_whitelist_from} =
-      $self->_wlcheck_acceptable_signature($scan,'whitelist_from_dkim');
-
-    if (!$scan->{dkim_whitelist_from}) {
-      $scan->{dkim_whitelist_from} =
-        $self->_wlcheck_originator_signature($scan,'whitelist_auth');
-    }
-  }
-
-  # prepare summary info string to be used for logging
-  my $info = $identity eq '' ? 'no' : $verified ? 'verified' : 'failed';
-  my $originator_matching_part = $scan->{dkim_address};  # address in 'From'
-  if ($identity =~ /^\@/) {  # empty localpart in signing identity
-    local($1);
-    $originator_matching_part =~ s/^.*?(\@[^\@]*)?$/$1/s;  # strip localpart
-  }
-  $info .= lc $identity eq lc $originator_matching_part ? ' originator'
-                                                        : ' third-party';
-  $info .= " signature by id $identity, originator $scan->{dkim_address}";
 
   # if the message doesn't pass DKIM validation, it can't pass DKIM whitelist
 
-  if ($default) {
-    if ($scan->{def_dkim_whitelist_from}) {
-      dbg("dkim: $info, found in DEF_WHITELIST_FROM_DKIM" .
-          ($verified ? '' : ' but ignored') );
-      if (!$verified) { $scan->{def_dkim_whitelist_from} = 0 }
-    } else {
-      dbg("dkim: $info, not in DEF_WHITELIST_FROM_DKIM");
+  # trigger a DKIM check so we can get address/identity info
+  # continue if verification succeeded or we want the debug info
+  return unless $self->check_dkim_verified($scan) || would_log("dbg","dkim");
+
+  my $originator = $scan->{dkim_address};
+  unless ($originator) {
+    dbg("dkim: check_dkim_whitelist: could not find originator address");
+    return;
+  }
+
+  my @acceptable_identity_tuples;
+  # collect whitelist entries matching the originator from all lists
+  $self->_wlcheck_acceptable_signature($scan, \@acceptable_identity_tuples,
+                                       'def_whitelist_from_dkim');
+  $self->_wlcheck_originator_signature($scan, \@acceptable_identity_tuples,
+                                       'def_whitelist_auth');
+  $self->_wlcheck_acceptable_signature($scan, \@acceptable_identity_tuples,
+                                       'whitelist_from_dkim');
+  $self->_wlcheck_originator_signature($scan, \@acceptable_identity_tuples,
+                                       'whitelist_auth');
+  # now do all the matching in one go, against all signatures in a message
+  my($any_match_at_all, $any_match_by_wl_ref) =
+    _wlcheck_list($self, $scan, \@acceptable_identity_tuples);
+
+  my(@verif,@fail);
+  foreach my $wl (keys %$any_match_by_wl_ref) {
+    my $match = $any_match_by_wl_ref->{$wl};
+    if (defined $match) {
+      $scan->{"match_in_$wl"} = 1  if $match;
+      if ($match) { push(@verif,$wl) } else { push(@fail,$wl) }
     }
+  }
+  if (@verif) {
+    dbg("dkim: originator %s, WHITELISTED by %s",
+         $originator, join(", ",@verif));
+  } elsif (@fail) {
+    dbg("dkim: originator %s, found in %s BUT IGNORED",
+         $originator, join(", ",@fail));
   } else {
-    if ($scan->{dkim_whitelist_from}) {
-      dbg("dkim: $info, found in WHITELIST_FROM_DKIM" .
-          ($verified ? '' : ' but ignored') );
-      if (!$verified) { $scan->{dkim_whitelist_from} = 0 }
-    } else {
-      dbg("dkim: $info, not in WHITELIST_FROM_DKIM");
-    }
+    dbg("dkim: originator %s, not in any dkim whitelist", $originator);
   }
 }
 
@@ -499,18 +490,16 @@ sub _check_dkim_whitelist {
 # identity in a whitelist implies checking for an originator signature
 #
 sub _wlcheck_acceptable_signature {
-  my ($self, $scan, $wl) = @_;
+  my ($self, $scan, $acceptable_identity_tuples_ref, $wl) = @_;
+  my $originator = $scan->{dkim_address};
   foreach my $white_addr (keys %{$scan->{conf}->{$wl}}) {
     my $re = qr/$scan->{conf}->{$wl}->{$white_addr}{re}/i;
-    if ($scan->{dkim_address} =~ $re) {
-      foreach my $acceptable_identity
-              (@{$scan->{conf}->{$wl}->{$white_addr}{domain}}) {
-        $self->_wlcheck_one($scan, $wl, $white_addr, $acceptable_identity, $re)
-          and return 1;
+    if ($originator =~ $re) {
+      foreach my $acc_id (@{$scan->{conf}->{$wl}->{$white_addr}{domain}}) {
+        push(@$acceptable_identity_tuples_ref, [$acc_id,$wl,$re] );
       }
     }
   }
-  return 0;
 }
 
 # use a traditional whitelist_from -style addrlist, the only acceptable DKIM
@@ -518,69 +507,99 @@ sub _wlcheck_acceptable_signature {
 # domains; that's inefficient memory-wise and only saves one m//
 #
 sub _wlcheck_originator_signature {
-  my ($self, $scan, $wl) = @_;
+  my ($self, $scan, $acceptable_identity_tuples_ref, $wl) = @_;
+  my $originator = $scan->{dkim_address};
   foreach my $white_addr (keys %{$scan->{conf}->{$wl}}) {
     my $re = $scan->{conf}->{$wl}->{$white_addr};
-    if ($scan->{dkim_address} =~ $re) {
-      $self->_wlcheck_one($scan, $wl, $white_addr, undef, $re) and return 1;
+    if ($originator =~ $re) {
+      push(@$acceptable_identity_tuples_ref, [undef,$wl,$re] );
     }
   }
-  return 0;
 }
 
-sub _wlcheck_one {
-  my ($self, $scan, $wl, $white_addr, $acceptable_identity, $re) = @_;
+sub _wlcheck_list {
+  my ($self, $scan, $acceptable_identity_tuples_ref) = @_;
 
-  # The $acceptable_identity is a verifier-acceptable signing identity.
-  # When $acceptable_identity is undef or an empty string it implies an
-  # originator signature check.
-
-  my $matches = 0;
+  my %any_match_by_wl;
+  my $any_match_at_all = 0;
+  my $expiration_supported = Mail::DKIM->VERSION > 0.28 ? 1 : 0;
   my $originator = $scan->{dkim_address};  # address in a 'From' header field
-  my $identity = $scan->{dkim_identity};   # TODO: support multiple signatures
-  if ($originator =~ $re) {
-    # originator address does match a whitelist entry (or we are debugging),
-    # but does it carry a signature of a verifier-acceptable signing identity?
 
-    # An "Originator Signature" is any Valid Signature where the signing
-    # identity matches the Originator Address. If the signing identity
-    # does not include a localpart, then only the domains must match;
-    # otherwise, the two addresses must be identical.
+  # walk through all signatures present in a message
+  foreach my $signature (@{$scan->{dkim_signatures}}) {
+    local ($1,$2);
 
-    local($1,$2);
+    my $verified = $signature->result eq 'pass';
+
+    my $expiration_time;
+    $expiration_time = $signature->expiration  if $expiration_supported;
+    my $expired = defined $expiration_time &&
+                  $expiration_time =~ /^\d{1,12}\z/ && time > $expiration_time;
+
+    my $identity = $signature->identity;
+    # split identity into local part and domain
+    $identity =~ /^ (.*?) \@ ([^\@]*) $/xs;
+    my($identity_mbx, $identity_dom) = ($1,$2);
+
     my $originator_matching_part = $originator;
     if ($identity =~ /^\@/) {  # empty localpart in signing identity
-      $originator_matching_part =~ s/^.*?(\@[^\@]*)?$/$1/s;  # strip localpart
+      $originator_matching_part =~ s/^.*?(\@[^\@]*)?$/$1/s; # strip localpart
     }
-    if (!defined $acceptable_identity || $acceptable_identity eq '') {
-      # checking for originator signature
-      $matches = 1  if lc $identity eq lc $originator_matching_part;
-    } else {  # checking for verifier-acceptable signature
-      if ($acceptable_identity !~ /\@/) {
-        $acceptable_identity = '@' . $acceptable_identity;
-      }
-      # split into local part and domain
-      $identity            =~ /^ (.*?) \@ ([^\@]*) $/xs;
-      my($actual_id_mbx, $actual_id_dom) = ($1,$2);
-      $acceptable_identity =~ /^ (.*?) \@ ([^\@]*) $/xs;
-      my($accept_id_mbx, $accept_id_dom) = ($1,$2);
 
-      # let's take a liberty and compare local parts case-insensitively
-      if ($accept_id_mbx ne '') {  # local part exists, full id must match
-        $matches = 1  if lc $identity eq lc $acceptable_identity;
-      } else {  # any local part in signing identity is acceptable
-                # as long as domain matches or is a subdomain
-        $matches = 1  if $actual_id_dom =~ /(^|\.)\Q$accept_id_dom\Q/i;
+    my $info = '';  # summary info string to be used for logging
+    $info .= ($verified ? 'VERIFIED' : 'FAILED').($expired ? ' EXPIRED' : '');
+    $info .= lc $identity eq lc $originator_matching_part ? ' originator'
+                                                          : ' third-party';
+    $info .= " signature by id " . $identity;
+
+    foreach my $entry (@$acceptable_identity_tuples_ref) {
+      my($acceptable_identity, $wl, $re) = @$entry;
+      # $re and $wl are here for logging purposes only, $re already checked.
+      # The $acceptable_identity is a verifier-acceptable signing identity.
+      # When $acceptable_identity is undef or an empty string it implies an
+      # originator signature check.
+
+      my $matches = 0;
+      if (!defined $acceptable_identity || $acceptable_identity eq '') {
+
+        # An "Originator Signature" is any Valid Signature where the signing
+        # identity matches the Originator Address. If the signing identity
+        # does not include a localpart, then only the domains must match;
+        # otherwise, the two addresses must be identical.
+
+        # checking for originator signature
+        $matches = 1  if lc $identity eq lc $originator_matching_part;
       }
+      else {  # checking for verifier-acceptable signature
+        if ($acceptable_identity !~ /\@/) {
+          $acceptable_identity = '@' . $acceptable_identity;
+        }
+        # split into local part and domain
+        $acceptable_identity =~ /^ (.*?) \@ ([^\@]*) $/xs;
+        my($accept_id_mbx, $accept_id_dom) = ($1,$2);
+
+        # let's take a liberty and compare local parts case-insensitively
+        if ($accept_id_mbx ne '') {  # local part exists, full id must match
+          $matches = 1  if lc $identity eq lc $acceptable_identity;
+        } else {  # any local part in signing identity is acceptable
+                  # as long as domain matches or is a subdomain
+          $matches = 1  if $identity_dom =~ /(^|\.)\Q$accept_id_dom\Q/i;
+        }
+      }
+      if ($matches) {
+        dbg("dkim: $info, originator $originator, MATCHES $wl $re");
+        # a defined value indicates at least a match, not necessarily verified
+        $any_match_by_wl{$wl} = 0  if !exists $any_match_by_wl{$wl};
+      }
+      # only valid signature can cause whitelisting
+      $matches = 0  if !$verified || $expired;
+
+      $any_match_by_wl{$wl} = $any_match_at_all = 1  if $matches;
     }
-    if ($matches && would_log("dbg","dkim")) {
-      my $verified = $self->check_dkim_verified($scan);
-      my $info = $identity eq '' ? 'no' : $verified ? 'verified' : 'failed';
-      dbg("dkim: $info signature by id $identity, originator $originator ".
-          " matches $wl $re");
-    }
+    dbg("dkim: $info, originator $originator, no verified matches")
+      if !$any_match_at_all;
   }
-  return $matches;
+  return ($any_match_at_all, \%any_match_by_wl);
 }
 
 1;
