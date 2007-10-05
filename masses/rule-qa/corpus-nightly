@@ -10,9 +10,10 @@ echo "Using corpus-nightly settings from $HOME/.corpus"
 export PERL
 
 set -x
-set -e
 
-renice 10 -p $$
+renice -n +10 -p $$
+
+set -e          # after renice, which typically fails
 
 # ensure we're running after 0900 UTC; complex due to daylight savings.
 # If we're running in the 08xx UTC hour-space, sleep for 1 hour; when
