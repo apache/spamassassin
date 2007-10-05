@@ -125,7 +125,10 @@ sub do_stop {
   print "    $rurl\n\n";
   print "QUICK FREQS REPORT (this mass-check only):\n\n";
 
-  system ("$perl hit-frequencies -c tstrules -x -p -T -s 0");
+  system ("$perl hit-frequencies -c tstrules -a -x -p -T -s 0 > ../freqs");
+  system ("cat ../freqs");
+  system ("( cd .. ; ".
+        "$perl ./build/automc/mail_freqs_for_changed_rules '$rurl' freqs )");
 
   print "\n\nBUILDING SLOW REPORTS:\n\n";
 
