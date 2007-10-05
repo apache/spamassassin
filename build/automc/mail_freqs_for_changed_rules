@@ -136,8 +136,9 @@ Freqs for those rules in '$mcname' mass-check:
 $freqs_hdr";
 
 foreach my $r (@rules) {
-  next unless ($freqs{$r});
-  $tomail .= $freqs{$r}."\n";
+  my $f = $freqs{$r} || $freqs{"T_".$r};
+  next unless $f;
+  $tomail .= $f."\n";
 }
 
 $tomail .= "
