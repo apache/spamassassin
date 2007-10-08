@@ -393,11 +393,13 @@ sub abort_remaining_lookups {
 
 # ---------------------------------------------------------------------------
 
-=item $async->set_response_packet($id, $pkt)
+=item $async->set_response_packet($id, $pkt, $key, $timestamp)
 
 Register a "response packet" for a given query.  C<$id> is the ID for the
 query, and must match the C<id> supplied in C<start_lookup()>. C<$pkt> is the
-packet object for the response.
+packet object for the response. A parameter C<$key> identifies an entry in a
+hash %{$self->{pending_lookups}} where the object which spawned this query can
+be found, and through which futher information about the query is accessible.
 
 If this was called, C<$pkt> will be available in the C<completed_callback>
 function as C<$ent-<gt>{response_packet}>.
@@ -411,15 +413,29 @@ sub set_response_packet {
   my ($self, $id, $pkt, $key, $timestamp) = @_;
   $self->{finished}->{$id} = 1;  # only key existence matters, any value
   $timestamp = time  if !defined $timestamp;
-  my $ent = $self->{pending_lookups}->{$key};
-  $id eq $ent->{id}
-    or die "set_response_packet: PANIC - mismatched id $id, $ent->{id}";
-  $ent->{finish_time} = $timestamp;
-  $ent->{response_packet} = $pkt;
+  my $pending = $self->{pending_lookups};
+  if (!defined $key) {  # backwards compatibility with 3.2.3 and older plugins
+    # a third-party plugin did not provide $key in a call, search for it:
+    for my $tkey (keys %$pending) {
+      if ($id eq $pending->{$tkey}->{id}) { $key = $tkey; last }
+    }
+    dbg("async: searching for lookup with id $id, found $key");
+  }
+  if (!defined $key) {
+    info("async: no key, response packet not remembered, id $id");
+  } else {
+    my $ent = $pending->{$key};
+    if ($id ne $ent->{id}) {
+      info("async: ignoring response, mismatched id $id, $ent->{id}");
+    } else {
+      $ent->{finish_time} = $timestamp;
+      $ent->{response_packet} = $pkt;
+    }
+  }
   1;
 }
 
-=item $async->report_id_complete($id,$key)
+=item $async->report_id_complete($id,$key,$key,$timestamp)
 
 Register that a query has completed, and is no longer "pending". C<$id> is the
 ID for the query, and must match the C<id> supplied in C<start_lookup()>.
