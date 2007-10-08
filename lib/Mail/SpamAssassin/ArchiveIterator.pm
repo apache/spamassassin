@@ -124,6 +124,10 @@ in the C<wanted_sub> callback below.  Set this to 0 to avoid this;
 it's a good idea to set this to 0 if you can, as it imposes a performance
 hit.
 
+=item opt_skip_empty_messages
+
+Set to 1 if you want to skip corrupt, 0-byte messages.  The default is 0.
+
 =item opt_cache
 
 Set to 0 (default) if you don't want to use cached information to help speed
@@ -699,6 +703,9 @@ sub _scan_file {
         $header .= $_;
       }
       close(INPUT);
+
+      return if ($self->{opt_skip_empty_messages} && $header eq '');
+
       $date = Mail::SpamAssassin::Util::receive_date($header);
       if (defined $AICache) {
         $AICache->update($mail, $date);
@@ -707,6 +714,9 @@ sub _scan_file {
 
     return if !$self->_message_is_useful_by_date($date);
     return if !$self->_scanprob_says_scan();
+  }
+  else {
+    return if ($self->{opt_skip_empty_messages} && (-z $mail));
   }
 
   &{$bkfunc}($self, $date, $class, 'f', $mail);
@@ -793,6 +803,7 @@ sub _scan_mailbox {
 	  $where = tell INPUT;
         }
         if ($header) {
+          next if ($self->{opt_skip_empty_messages} && $header eq '');
           $self->_bump_scan_progress();
 	  $info->{$offset} = Mail::SpamAssassin::Util::receive_date($header);
 	}
@@ -895,8 +906,10 @@ sub _scan_mbx {
 	    $header .= $_;
 	  }
 
-          $self->_bump_scan_progress();
-	  $info->{$offset} = Mail::SpamAssassin::Util::receive_date($header);
+          if (!($self->{opt_skip_empty_messages} && $header eq '')) {
+            $self->_bump_scan_progress();
+            $info->{$offset} = Mail::SpamAssassin::Util::receive_date($header);
+          }
 
 	  # go onto the next message
 	  seek(INPUT, $offset + $size, 0);
