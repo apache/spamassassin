@@ -416,8 +416,12 @@ sub set_response_packet {
   my $pending = $self->{pending_lookups};
   if (!defined $key) {  # backwards compatibility with 3.2.3 and older plugins
     # a third-party plugin did not provide $key in a call, search for it:
-    for my $tkey (keys %$pending) {
-      if ($id eq $pending->{$tkey}->{id}) { $key = $tkey; last }
+    if ($id eq $pending->{$id}->{id}) {  # I feel lucky, key==id ?
+      $key = $id;
+    } else {  # then again, maybe not, be more systematic
+      for my $tkey (keys %$pending) {
+        if ($id eq $pending->{$tkey}->{id}) { $key = $tkey; last }
+      }
     }
     dbg("async: searching for lookup with id $id, found $key");
   }

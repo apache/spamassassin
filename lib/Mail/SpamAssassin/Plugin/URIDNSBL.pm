@@ -481,7 +481,7 @@ sub complete_ns_lookup {
   my ($self, $scanner, $ent, $dom) = @_;
 
   my $packet = $ent->{response_packet};
-  my @answer = $packet->answer;
+  my @answer = !defined $packet ? () : $packet->answer;
 
   my $IPV4_ADDRESS = IPV4_ADDRESS;
   my $IP_PRIVATE = IP_PRIVATE;
@@ -526,7 +526,9 @@ sub lookup_a_record {
 sub complete_a_lookup {
   my ($self, $scanner, $ent, $hname) = @_;
 
-  foreach my $rr ($ent->{response_packet}->answer) {
+  my $packet = $ent->{response_packet};
+  my @answer = !defined $packet ? () : $packet->answer;
+  foreach my $rr (@answer) {
     my $str = $rr->string;
     $self->log_dns_result ("A for NS $hname: $str");
 
@@ -577,7 +579,7 @@ sub complete_dnsbl_lookup {
   my $rulecf = $conf->{uridnsbls}->{$rulename};
 
   my $packet = $ent->{response_packet};
-  my @answer = $packet->answer;
+  my @answer = !defined $packet ? () : $packet->answer;
 
   my $uridnsbl_subs = $conf->{uridnsbl_subs}->{$ent->{zone}};
   foreach my $rr (@answer)
