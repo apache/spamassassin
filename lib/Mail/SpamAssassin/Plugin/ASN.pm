@@ -240,7 +240,7 @@ sub process_dns_result {
   my $asn_tag = $conf->{asnlookups}[$zone_index]->{asn_tag};
   my $route_tag = $conf->{asnlookups}[$zone_index]->{route_tag};
 
-  my @answer = $response->answer;
+  my @answer = !defined $response ? () : $response->answer;
 
   foreach my $rr (@answer) {
     dbg("asn: %s: lookup result packet: '%s'", $zone, $rr->string);
