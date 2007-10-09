@@ -706,13 +706,14 @@ sub server_sock_setup {
   # retry 3 times to bind to the listening socket; 3 seconds delay,
   # max, but should allow a little time for any existing shutting-down
   # server to complete shutdown
-  for my $retry (1 .. 3) {
+  my $lastretry = 10;
+  for my $retry (1 .. $lastretry) {
     if ($retry > 1) { sleep 1; }
 
     eval { $sub->(); };
     last unless ($@);       # success => break
 
-    if ($retry == 3) {
+    if ($retry == $lastretry) {
       die $@;               # this is fatal
     } else {
       warn "server socket setup failed, retry $retry: $@";
