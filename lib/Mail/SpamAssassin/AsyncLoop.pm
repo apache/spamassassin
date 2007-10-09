@@ -280,23 +280,25 @@ sub complete_lookups {
 
     while (my($key,$ent) = each %$pending) {
       my $id = $ent->{id};
+      if (defined $ent->{poll_callback}) {  # call a "poll_callback" if exists
+        # be nice, provide fresh info to a callback routine
+        $ent->{status} = 'FINISHED'  if exists $self->{finished}->{$id};
+        # a callback might call set_response_packet() or report_id_complete()
+      # dbg("async: calling poll_callback on key $key");
+        $ent->{poll_callback}->($ent);
+      }
       my $finished = exists $self->{finished}->{$id};
       if ($finished) {
         $anydone = 1;
         delete $self->{finished}->{$id};
         $ent->{status} = 'FINISHED';
         $ent->{finish_time} = $now  if !defined $ent->{finish_time};
-      }
-      # call a "poll_callback" sub, if one exists
-      if (defined $ent->{poll_callback}) {
-        $ent->{poll_callback}->($ent);
-      }
-      if ($finished) {
         my $elapsed = $ent->{finish_time} - $ent->{start_time};
         dbg("async: completed in %.3f s: %s", $elapsed, $ent->{display_id});
 
         # call a "completed_callback" sub, if one exists
         if (defined $ent->{completed_callback}) {
+        # dbg("async: calling completed_callback on key $key");
           $ent->{completed_callback}->($ent);
         }
         $self->{timing_by_query}->{". $key"} += $elapsed;
@@ -423,14 +425,14 @@ sub set_response_packet {
         if ($id eq $pending->{$tkey}->{id}) { $key = $tkey; last }
       }
     }
-    dbg("async: searching for lookup with id $id, found $key");
+    dbg("async: got response on id $id, search found key $key");
   }
   if (!defined $key) {
     info("async: no key, response packet not remembered, id $id");
   } else {
     my $ent = $pending->{$key};
     if ($id ne $ent->{id}) {
-      info("async: ignoring response, mismatched id $id, $ent->{id}");
+      info("async: ignoring response, mismatched id $id, expected $ent->{id}");
     } else {
       $ent->{finish_time} = $timestamp;
       $ent->{response_packet} = $pkt;
