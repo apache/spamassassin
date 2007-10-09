@@ -106,7 +106,7 @@ sub do_rbl_lookup {
 
   # only make a specific query once
   if (!$existing) {
-    dbg("dns: launching DNS %s query for %s in background", $type,$host);
+    dbg("dns: launching DNS $type query for $host in background");
 
     my $ent = {
       key => $key,
@@ -155,7 +155,7 @@ sub do_dns_lookup {
   # only make a specific query once
   return if $self->{async}->get_lookup($key);
 
-  dbg("dns: launching DNS %s query for %s in background", $type,$host);
+  dbg("dns: launching DNS $type query for $host in background");
 
   my $ent = {
     key => $key,
@@ -225,7 +225,7 @@ sub dnsbl_uri {
     my $uri = "dns:$qname" . (@vals ? "?" . join(";", @vals) : "");
     push @{ $self->{dnsuri}->{$uri} }, $rdatastr;
 
-    dbg("dns: hit <%s> %s", $uri,$rdatastr);
+    dbg("dns: hit <$uri> $rdatastr");
   }
 }
 
@@ -288,7 +288,7 @@ sub process_dnsbl_set {
     elsif ($subtest =~ s/^sb://) {
       # SB rules are not available to users
       if ($self->{conf}->{user_defined_rules}->{$rule}) {
-        dbg("dns: skipping rule '%s': not supported when user-defined", $rule);
+        dbg("dns: skipping rule '$rule': not supported when user-defined");
         next;
       }
 
@@ -441,7 +441,7 @@ sub lookup_ns {
   return if ($self->server_failed_to_respond_for_domain ($dom));
 
   my $nsrecords;
-  dbg("dns: looking up NS for '%s'", $dom);
+  dbg("dns: looking up NS for '$dom'");
 
   if (exists $self->{dnscache}->{NS}->{$dom}) {
     $nsrecords = $self->{dnscache}->{NS}->{$dom};
@@ -474,7 +474,7 @@ sub lookup_mx {
   return if ($self->server_failed_to_respond_for_domain ($dom));
 
   my $mxrecords;
-  dbg("dns: looking up MX for '%s'", $dom);
+  dbg("dns: looking up MX for '$dom'");
 
   if (exists $self->{dnscache}->{MX}->{$dom}) {
     $mxrecords = $self->{dnscache}->{MX}->{$dom};
@@ -509,7 +509,7 @@ sub lookup_mx_exists {
   if (!defined $recs) { return undef; }
   if (scalar @{$recs}) { $ret = 1; }
 
-  dbg("dns: MX for '%s' exists? %s", $dom,$ret);
+  dbg("dns: MX for '$dom' exists? $ret");
   return $ret;
 }
 
@@ -525,13 +525,13 @@ sub lookup_ptr {
   my $IP_PRIVATE = IP_PRIVATE;
 
   if ($dom =~ /${IP_PRIVATE}/) {
-    dbg("dns: IP is private, not looking up PTR: %s", $dom);
+    dbg("dns: IP is private, not looking up PTR: $dom");
     return undef;
   }
 
   return if ($self->server_failed_to_respond_for_domain ($dom));
 
-  dbg("dns: looking up PTR record for '%s'", $dom);
+  dbg("dns: looking up PTR record for '$dom'");
   my $name = '';
 
   if (exists $self->{dnscache}->{PTR}->{$dom}) {
@@ -555,7 +555,7 @@ sub lookup_ptr {
       return undef;
     };
   }
-  dbg("dns: PTR for '%s': '%s'", $dom,$name);
+  dbg("dns: PTR for '$dom': '$name'");
 
   # note: undef is never returned, unless DNS is unavailable.
   return $name;
@@ -572,7 +572,7 @@ sub lookup_a {
 
   return if ($self->server_failed_to_respond_for_domain ($name));
 
-  dbg("dns: looking up A records for '%s'", $name);
+  dbg("dns: looking up A records for '$name'");
   my @addrs;
 
   if (exists $self->{dnscache}->{A}->{$name}) {
@@ -598,7 +598,7 @@ sub lookup_a {
     };
   }
 
-  dbg("dns: A records for '%s': %s", $name, join(' ',@addrs));
+  dbg("dns: A records for '$name': " . join(' ',@addrs));
   return @addrs;
 }
 
@@ -659,9 +659,9 @@ sub is_dns_available {
 
   if ($dnsopt =~ /test:\s+(.+)$/) {
     my $servers=$1;
-    dbg("dns: servers: %s", $servers);
+    dbg("dns: servers: $servers");
     @domains = split (/\s+/, $servers);
-    dbg("dns: looking up NS records for user specified servers: %s",
+    dbg("dns: looking up NS records for user specified servers: " .
         join(", ", @domains));
   } else {
     @domains = @EXISTING_DOMAINS;
@@ -671,36 +671,35 @@ sub is_dns_available {
   # next test fails?  could be because the ethernet cable has
   # simply fallen out ;)
 
-  # Net::DNS::Resolver scans a list of nameservers when it does a foreground query
-  # but only uses the first in a background query like we use.
-  # Try the different nameservers here in case the first one is not woorking
+  # Net::DNS::Resolver scans a list of nameservers when it does a foreground
+  # query but only uses the first in a background query like we use.
+  # Try the different nameservers here in case the first one is not working
   
   my @nameservers = $self->{resolver}->nameservers();
   my @good_nameservers = ();
-  dbg("dns: testing resolver nameservers: %s", join(", ", @nameservers));
+  dbg("dns: testing resolver nameservers: " . join(", ", @nameservers));
   my $ns;
   while( $ns  = shift(@nameservers)) {
     for(my $retry = 3; $retry > 0 and $#domains>-1; $retry--) {
       my $domain = splice(@domains, rand(@domains), 1);
-      dbg("dns: trying (%d) %s...", $retry,$domain);
+      dbg("dns: trying ($retry) $domain...");
       my $result = $self->lookup_ns($domain);
       if(defined $result) {
         if (scalar @$result > 0) {
-          dbg("dns: NS lookup of %s using %s succeeded => DNS available ".
-              "(set dns_available to override)", $domain,$ns);
+          dbg("dns: NS lookup of $domain using $ns succeeded => DNS available".
+              " (set dns_available to override)");
           $IS_DNS_AVAILABLE = 1;
           push(@good_nameservers, $ns);
           last;
         }
         else {
-          dbg("dns: NS lookup of %s using %s failed, no results found",
-              $domain,$ns);
+          dbg("dns: NS lookup of $domain using $ns failed, no results found");
           next;
         }
       }
       else {
-        dbg("dns: NS lookup of %s using %s failed horribly, ".
-            "may not be a valid nameserver", $domain,$ns);
+        dbg("dns: NS lookup of $domain using $ns failed horribly, ".
+            "may not be a valid nameserver");
         $IS_DNS_AVAILABLE = 0; # should already be 0, but let's be sure.
         last; 
       }
@@ -723,7 +722,7 @@ sub is_dns_available {
 
 done:
   # jm: leaving this in!
-  dbg("dns: is DNS available? %s", $IS_DNS_AVAILABLE);
+  dbg("dns: is DNS available? " . $IS_DNS_AVAILABLE);
   return $IS_DNS_AVAILABLE;
 }
 
@@ -732,8 +731,7 @@ done:
 sub server_failed_to_respond_for_domain {
   my ($self, $dom) = @_;
   if ($self->{dns_server_too_slow}->{$dom}) {
-    dbg("dns: server for '%s' failed to reply previously, not asking again",
-        $dom);
+    dbg("dns: server for '$dom' failed to reply previously, not asking again");
     return 1;
   }
   return 0;
@@ -741,7 +739,7 @@ sub server_failed_to_respond_for_domain {
 
 sub set_server_failed_to_respond_for_domain {
   my ($self, $dom) = @_;
-  dbg("dns: server for '%s' failed to reply, marking as bad", $dom);
+  dbg("dns: server for '$dom' failed to reply, marking as bad");
   $self->{dns_server_too_slow}->{$dom} = 1;
 }
 
@@ -815,13 +813,13 @@ sub cleanup_kids {
 
 sub register_async_rule_start {
   my ($self, $rule) = @_;
-  dbg("dns: %s lookup start", $rule);
+  dbg("dns: $rule lookup start");
   $self->{rule_to_rblkey}->{$rule} = '*ASYNC_START';
 }
 
 sub register_async_rule_finish {
   my ($self, $rule) = @_;
-  dbg("dns: %s lookup finished", $rule);
+  dbg("dns: $rule lookup finished");
   delete $self->{rule_to_rblkey}->{$rule};
 }
 
@@ -835,22 +833,22 @@ sub is_rule_complete {
 
   my $key = $self->{rule_to_rblkey}->{$rule};
   if (!defined $key) {
-    # dbg("dns: %s lookup complete, not in list", $rule);
+    # dbg("dns: $rule lookup complete, not in list");
     return 1;
   }
 
   if ($key eq '*ASYNC_START') {
-    dbg("dns: %s lookup not yet complete", $rule);
+    dbg("dns: $rule lookup not yet complete");
     return 0;       # not yet complete
   }
 
   my $obj = $self->{async}->get_lookup($key);
   if (!defined $obj) {
-    dbg("dns: %s lookup complete, $key no longer pending", $rule);
+    dbg("dns: $rule lookup complete, $key no longer pending");
     return 1;
   }
 
-  dbg("dns: %s lookup not yet complete", $rule);
+  dbg("dns: $rule lookup not yet complete");
   return 0;         # not yet complete
 }
 
