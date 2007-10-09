@@ -786,8 +786,8 @@ sub compute_overlaps_for_rule {
     # require that both rules have at least 1 hit
     next unless ($freq_spam{$r1} && $freq_spam{$r2});
 
-    my ($a1ina2, $a2ina1) = _hmap_to_overlap_ratio ($r1, $r2,
-                                    $hmap_spam{$r1}, $hmap_spam{$r2});
+    my ($a1ina2, $a2ina1) = _hmap_to_overlap_ratio ($r2, $r1,
+                                    $hmap_spam{$r2}, $hmap_spam{$r1});
     
     if (exists $overlaps_spam1{$a1ina2})
     { $overlaps_spam1{$a1ina2} .= " ".$r2."[$a2ina1]"; }
@@ -805,7 +805,7 @@ sub compute_overlaps_for_rule {
     next unless ($freq_ham{$r1} && $freq_ham{$r2});
 
     my ($a1ina2, $a2ina1) = _hmap_to_overlap_ratio ($r1, $r2,
-                                    $hmap_ham{$r1}, $hmap_ham{$r2});
+                                    $hmap_ham{$r2}, $hmap_ham{$r1});
     
     if (exists $overlaps_ham1{$a1ina2})
     { $overlaps_ham1{$a1ina2} .= " ".$r2."[$a2ina1]"; }
