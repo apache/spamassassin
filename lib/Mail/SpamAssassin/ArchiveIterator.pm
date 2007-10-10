@@ -693,7 +693,7 @@ sub _scan_file {
       # contain extraneous dirs etc.
       return if (!-f $mail);      
 
-      my $header;
+      my $header = '';
       if (!_mail_open($mail)) {
         $self->{access_problem} = 1;
         return;
