@@ -147,6 +147,13 @@ sub ui_get_url_switches {
   $self->{s}{detail} = $self->get_url_switch('s_detail', 0);
   $self->{s}{g_over_time} = $self->get_url_switch('s_g_over_time', 0);
 
+  # "?q=FOO" is a shortcut for "?rule=FOO&s_detail=1"; good for shortcuts
+  my $q = $self->{q}->param("q");
+  if ($q) {
+    $self->{q}->param(-name=>"rule", -value=>$q);
+    $self->{s}{detail} = 1;
+  }
+
   $self->{s}{xml} = $self->get_url_switch('xml', 0);
   $self->{include_embedded_freqs_xml} = $self->{s}{xml};
 
