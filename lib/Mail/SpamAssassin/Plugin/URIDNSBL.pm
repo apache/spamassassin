@@ -654,7 +654,7 @@ sub start_lookup {
 
   my $ent = {
     key => $key,
-    timeout => $scanner->{conf}->{rbl_timeout},
+    timeout_initial => $scanner->{conf}->{rbl_timeout},
     type => "URI-".$type,
     id => $id,
     completed_callback => sub {

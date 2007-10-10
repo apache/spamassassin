@@ -123,6 +123,28 @@ $ent->{status} may be examined for a string 'ABORTING' or 'FINISHED'.
 
 The code reference will be called with one argument, the C<$ent> object.
 
+=item timeout_initial (optional)
+
+An initial value of elapsed time for which we are willing to wait for a
+response (time in seconds, floating point value is allowed). When elapsed
+time since a query started exceeds the timeout value and there are no other
+queries to wait for, the query is aborted. The actual timeout value may
+shrink dynamically by some factor from a timeout_initial value, the factor
+is derived from a number of queries that have already completed, but the
+value can not fall below timeout_min (see next parameter).
+
+If a caller does not explicitly provide this parameter or its value is
+undefined, a default initial timeout value is settable by a configuration
+variable rbl_timeout.
+
+If value of the timeout_initial parameter is already below timeout_min,
+it is pushed up to timeout_min.
+
+=item timeout_min (optional)
+
+A lower bound (in seconds) below which the timeout value can not be
+reduced by a dynamic timeout shrinkage formula.  Defaults to 1 second.
+
 =back
 
 C<$obj> is returned by this method.
@@ -141,8 +163,13 @@ sub start_lookup {
   my $id  = $ent->{id};
   $ent->{status} = 'STARTED';
   $ent->{start_time} = $now  if !defined $ent->{start_time};
-  $ent->{timeout} =
-    $self->{main}->{conf}->{rbl_timeout}  if !defined $ent->{timeout};
+
+  $ent->{timeout_min} = 1  if !defined $ent->{timeout_min};  # limits shrinkage
+  my $timeout = $ent->{timeout_initial};
+  $timeout = $self->{main}->{conf}->{rbl_timeout}  if !defined $timeout;
+  $timeout = $ent->{timeout_min}  if $timeout < $ent->{timeout_min};
+  $ent->{timeout_initial} = $timeout;
+
   $ent->{display_id} =  # identifies entry in debug logging and similar
     join(", ", grep { defined }
                map { ref $ent->{$_} ? @{$ent->{$_}} : $ent->{$_} }
@@ -152,8 +179,8 @@ sub start_lookup {
   $self->{total_queries_started}++;
   $self->{pending_lookups}->{$key} = $ent;
 
-  dbg("async: starting: %s (timeout %.1f s)",
-      $ent->{display_id}, $ent->{timeout});
+  dbg("async: starting: %s (timeout %.1fs, min %.1fs)",
+      $ent->{display_id}, $ent->{timeout_initial}, $ent->{timeout_min});
   $ent;
 }
 
@@ -246,11 +273,9 @@ sub complete_lookups {
                         $self->{total_queries_started}) ** 2 );
     my $max_deadline;
     while (my($key,$ent) = each %$pending) {
-      my $dt = $ent->{timeout};
-      if ($dt > 1.0) {  # only allow shrinking of timeouts over 1 second
-        $dt *= $timeout_shrink_factor;
-        $dt = 1.0  if $dt < 1.0;  # don't shrink below 1 second
-      }
+      my $dt = $ent->{timeout_initial} * $timeout_shrink_factor;
+      # don't shrink below a timeout's lower bound
+      $dt = $ent->{timeout_min}  if $dt < $ent->{timeout_min};
       my $deadline = $ent->{start_time} + $dt;
       if (!defined $max_deadline || $deadline > $max_deadline) {
         $max_deadline = $deadline;
@@ -318,11 +343,9 @@ sub complete_lookups {
 
       while (my($key,$ent) = each %$pending) {
         $typecount{$ent->{type}}++;
-        my $dt = $ent->{timeout};
-        if ($dt > 1.0) {  # only allow shrinking of timeouts over 1 second
-          $dt *= $timeout_shrink_factor;
-          $dt = 1.0  if $dt < 1.0;  # don't shrink below 1 second
-        }
+        my $dt = $ent->{timeout_initial} * $timeout_shrink_factor;
+        # don't shrink below a timeout's lower bound
+        $dt = $ent->{timeout_min}  if $dt < $ent->{timeout_min};
         $allexpired = 0  if $now <= $ent->{start_time} + $dt;
       }
       dbg("async: queries completed: %d, started: %d",
@@ -373,8 +396,9 @@ sub abort_remaining_lookups {
   while (my($key,$ent) = each %$pending) {
     dbg("async: aborting after %.3f s, %s: %s",
         $now - $ent->{start_time},
-        defined $ent->{timeout} && $now > $ent->{start_time} + $ent->{timeout}
-          ? 'past original deadline' : 'deadline shrunk',
+        (defined $ent->{timeout_initial} &&
+         $now > $ent->{start_time} + $ent->{timeout_initial}
+           ? 'past original deadline' : 'deadline shrunk'),
         $ent->{display_id} );
     $foundcnt++;
     $self->{timing_by_query}->{"X $key"} = $now - $ent->{start_time};
