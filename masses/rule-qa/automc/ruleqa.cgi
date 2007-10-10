@@ -295,12 +295,14 @@ sub show_default_header {
 
        <h1> SpamAssassin Rule QA</h1>
        <p>
-         Shortcut to mass-checks:
-         <a href="/last-preflight/">[most recent preflight]</a>,
-         <a href="/today/">[today's nightly]</a>,
-         <a href="/last-night/">[last night's nightly]</a>
-         | <a href="http://bbmass.spamassassin.org:8011/">view
-         preflight mass-checks in progress</a>
+         Shortcut to mass-checks: <a href="/today/">today's nightly run</a>,
+         <a href="/last-night/">last night's nightly run</a>,
+         <a href="/last-preflight/">most recent preflight</a>
+         -- <a href="http://bbmass.spamassassin.org:8011/">view
+         preflight mass-checks in progress</a> --
+         <a href="http://buildbot.spamassassin.org:8010/">'make test'
+         buildbots</a> --
+         <a href="http://wiki.apache.org/spamassassin/RuleQaApp">help</a>
        </p>
 
   };
