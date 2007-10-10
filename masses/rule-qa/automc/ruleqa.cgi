@@ -350,30 +350,35 @@ sub show_default_view {
 
         !daylinkstable!
 
+        <tr>
+        <td colspan="3">
+        <div class='ui_label'>
+          Longer lists: <a href="!shortdatelist!">+/- 2 days</a> --
+          <a href="!longdatelist!">most recent 1000</a> --
+          <a href="!fulldatelist!">full list</a>
+        </div>
+        </td>
+        </tr>
+
     </table>
 
   <table width='100%'>
   <tr>
-  <td width='90%'>
+  <td width='100%'>
   <div class='ui_label'>
     <a href="http://wiki.apache.org/spamassassin/DateRev">DateRev</a>
-    to display (UTC timezone):</div><input
-            type='textfield' name='daterev' value="!daterev!">
-    <br/>
+    to display (UTC timezone):
+       <input type='textfield' name='daterev' value="!daterev!">
+  </div><br/>
   <div class='ui_label'>
-    (Select a recent nightly mass-check by date:
-    <a href='!daterev=last-night!'>last-night</a>,
-    <a href='!daterev=today!'>today</a>, or
-    enter 'YYYYMMDD' in the DateRev text field for a specific date;
-    or <a href='!daterev=last-preflight!'>last-preflight</a> for
+    (Or, select a recent nightly mass-check by date by entering
+    'YYYYMMDD' in the DateRev text field for a specific date, or
+    select <a href='!daterev=last-night!'>last-night</a> or
+    <a href='!daterev=today!'>today</a>. Also,
+    <a href='!daterev=last-preflight!'>last-preflight</a> for
     the most recent 'preflight' mass-check.)
   </div>
   </td>
-  <td width='10%'><div align='right' class='ui_label'>
-    <a href="!shortdatelist!">(Nearby&nbsp;List)</a><br/>
-    <a href="!longdatelist!">(Longer&nbsp;List)</a><br/>
-    <a href="!fulldatelist!">(Full&nbsp;List)</a><br/>
-  </div></td>
   </tr>
   </table>
 
@@ -444,9 +449,9 @@ sub show_default_view {
         }ges;
 
   my $dranchor = "r".$self->{daterev}; $dranchor =~ s/[^A-Za-z0-9]/_/gs;
-  my $sdlurl = $self->gen_switch_url("shortdatelist", 1)."#".$dranchor;
-  my $ldlurl = $self->gen_switch_url("longdatelist", 1)."#".$dranchor;
-  my $fdlurl = $self->gen_switch_url("longdatelist", 1).'&perpage=999999#'.$dranchor;
+  my $sdlurl = $self->gen_toplevel_url("shortdatelist", 1)."#".$dranchor;
+  my $ldlurl = $self->gen_toplevel_url("longdatelist", 1)."#".$dranchor;
+  my $fdlurl = $self->gen_toplevel_url("longdatelist", 1).'&perpage=999999#'.$dranchor;
 
   $tmpl =~ s/!longdatelist!/$ldlurl/gs;
   $tmpl =~ s/!fulldatelist!/$fdlurl/gs;
@@ -1264,7 +1269,6 @@ sub gen_switch_url {
   my @parms =  $self->get_params_except($switch);
   $newval ||= '';
   if (!defined $switch) { warn "switch '$switch'='$newval' undef value"; }
-  # if (!defined $newval) { warn "newval '$switch'='$newval' undef value"; }
   push (@parms, $switch."=".$newval);
   return $self->assemble_url(@parms);
 }
@@ -1272,6 +1276,18 @@ sub gen_switch_url {
 sub gen_this_url {
   my ($self) = @_;
   my @parms =  $self->get_params_except("__nonexistent__");
+  return $self->assemble_url(@parms);
+}
+
+sub gen_toplevel_url {
+  my ($self, $switch, $newval) = @_;
+
+  my @parms =  $self->get_params_except($switch, qw(
+              rule s_age s_overlap s_all s_detail daterev
+            ));
+  $newval ||= '';
+  if (!defined $switch) { warn "switch '$switch'='$newval' undef value"; }
+  push (@parms, $switch."=".$newval);
   return $self->assemble_url(@parms);
 }
 
@@ -1337,6 +1353,7 @@ sub precache_params {
   @{$self->{cgi_param_order}} = $self->{q}->param();
   foreach my $k (@{$self->{cgi_param_order}}) {
     next unless defined ($k);
+    next if ($k eq 'q');        # a shortcut, ignore for future refs
     my $v = $self->{q}->param($k);
     if (!defined $v) { $v = ''; }
     $self->{cgi_params}{$k} = "$k=".uri_escape($v);
