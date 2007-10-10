@@ -307,13 +307,12 @@ sub show_default_header {
 
        <h1> SpamAssassin Rule QA</h1>
        <p>
-         Shortcut to mass-checks: <a href="/today/">today's nightly run</a>,
-         <a href="/last-night/">last night's nightly run</a>,
-         <a href="/last-preflight/">most recent preflight</a>
-         -- <a href="http://bbmass.spamassassin.org:8011/">view
-         preflight mass-checks in progress</a> --
-         <a href="http://buildbot.spamassassin.org:8010/">'make test'
-         buildbots</a> --
+         <a href="http://bbmass.spamassassin.org:8011/">View
+         preflight mass-checks</a>
+        &nbsp;|&nbsp;
+         <a href="http://buildbot.spamassassin.org:8010/">View
+        'make test' buildbots</a>
+        &nbsp;|&nbsp;
          <a href="http://wiki.apache.org/spamassassin/RuleQaApp">help</a>
        </p>
 
@@ -335,26 +334,26 @@ sub show_default_view {
   my $tmpl = q{
 
   <div class='updateform'>
+
   <form action="!THISURL!" method="GET">
     <table style="padding-left: 0px" class='datetable'>
-
-        <tr>
-        <td colspan="3">
-        <div class='ui_label'>
-          <a href="http://wiki.apache.org/spamassassin/DateRev">DateRev</a>
-          Lists: <a href="/">Just current daterev</a> --
-          <a href="!shortdatelist!">daterevs +/- 2 days</a> --
-          <a href="!longdatelist!">most recent 1000</a> --
-          <a href="!fulldatelist!">full list</a>
-        </div>
-        </td>
-        </tr>
 
         <tr>
         <th> Commit </th>
         <th> Preflight Mass-Checks </th>
         <th> Nightly Mass-Checks </th>
         <th> Network Mass-Checks </th>
+        </tr>
+
+        <tr>
+        <td colspan="4">
+        <div class='ui_label'>
+          List <a href="/">just current daterev</a> /
+          <a href="!shortdatelist!">all daterevs within 2 days</a> /
+          <a href="!longdatelist!">most recent 1000</a> /
+          <a href="!fulldatelist!">full list</a>
+        </div>
+        </td>
         </tr>
 
         !daylinkstable!
@@ -367,14 +366,13 @@ sub show_default_view {
   <div class='ui_label'>
     Or, <a href="http://wiki.apache.org/spamassassin/DateRev">DateRev</a>
     to display: <input type='textfield' name='daterev' value="!daterev!">
-  </div><br/>
+  </div>
   <div class='ui_label'>
     Or, select a recent nightly mass-check by date by entering
-    'YYYYMMDD' in the DateRev text field for a specific date, or
-    select <a href='!daterev=last-night!'>last-night</a> or
-    <a href='!daterev=today!'>today</a>. Also,
-    <a href='!daterev=last-preflight!'>last-preflight</a> for
-    the most recent 'preflight' mass-check.
+    'YYYYMMDD' in the DateRev text field for a specific date,
+    or <a href='!daterev=last-night!'>last night's nightly run</a>,
+    <a href='!daterev=today!'>today's nightly run</a>, or
+    <a href='!daterev=last-preflight!'>the most recent 'preflight' mass-check</a>.
   </div>
   </td>
   </tr>
@@ -389,14 +387,15 @@ sub show_default_view {
     <input type='textfield' size='60' name='rule' value="!rule!"><br/>
     <br/>
   <div class='ui_label'>
-    Show only rules from files whose paths contain this string:<br/>
+    Show only rules from source files whose paths contain this string:<br/>
   </div>
     <input type='textfield' size='60' name='srcpath' value="!srcpath!"><br/>
     <br/>
-    <input type='checkbox' name='s_detail' id='s_detail' !s_detail!><label
+
+    <!-- <input type='checkbox' name='s_detail' id='s_detail' !s_detail!><label
         for='s_detail' class='ui_label'>Display full details: message age in weeks, by contributor, as score-map, overlaps with other rules, freshness graphs
         </label><br/>
-    <br/>
+    <br/> -->
 
 <p>
   <div class='ui_label'>
@@ -417,20 +416,12 @@ sub show_default_view {
   my @drs = ();
   {
     my $origdr = $self->{daterev} || $self->{daterevs}->[-1];
-    $origdr =~ /^(\d+)[\/-]/;
+    $origdr =~ /^(\d+)[\/-](\S+)[\/-]/;
     my $date = $1;
+    my $rev = $2;
 
-    my ($dr_after, $dr_before);
-    if (!$self->{s_shortdatelist}) {
-      # include *just* the current day
-      $dr_after = $date;
-      $dr_before = $date;
-    }
-    else {
-      # unless 'shortdatelist' is set; in that case, +/- 2 days
-      $dr_after = date_offset($date, -2);
-      $dr_before = date_offset($date, 2);
-    }
+    my $dr_after = date_offset($date, -2);
+    my $dr_before = date_offset($date, 2);
 
     my $origidx;
     foreach my $dr (@{$self->{daterevs}}) {
@@ -442,15 +433,24 @@ sub show_default_view {
       push @drs, $dr;
 
       if ($dr eq $origdr) {
-        $origidx = scalar @drs;
+        $origidx = scalar @drs - 1;
       }
     }
 
     # if we're doing the default UI -- ie. looking at a mass-check --
     # cut it down to just a couple around it, for brevity
     if (!$self->{s_shortdatelist} && defined($origidx)) {
-      if ($origidx < @drs - 1) { splice @drs, $origidx+1; }
-      if ($origidx > 1) { splice @drs, 0, $origidx-1; }
+      my $i = $origidx;
+      while ($i < @drs-1 && $drs[$i] =~ /^${date}-${rev}-/) { $i++; }
+      my $nextrev = $drs[$i]; $nextrev =~ s/-[a-z]$//;
+      while ($i < @drs-1 && $drs[$i] =~ /^${nextrev}-/) { $i++; }
+      if ($i < @drs-1) { splice @drs, $i; }
+
+      $i = $origidx;
+      while ($i > 0 && $drs[$i] =~ /^${date}-${rev}-/) { $i--; }
+      my $prevrev = $drs[$i]; $prevrev =~ s/-[a-z]$//;
+      while ($i > 0 && $drs[$i] =~ /^${prevrev}-/) { $i--; }
+      if ($i > 0) { splice @drs, 0, $i+1; }
     }
   }
 
