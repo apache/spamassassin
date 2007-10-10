@@ -139,6 +139,9 @@ sub parent_loop {
   # and the XML indices
   run ("cd masses ; ./rule-qa/automc/gen_info_xml");
 
+  # and the ruleqa CGI page's cache
+  run("./masses/rule-qa/automc/ruleqa.cgi -refresh");
+
   logit "completed faster reports";
   if ($job) { $job->finish(); }
 }
