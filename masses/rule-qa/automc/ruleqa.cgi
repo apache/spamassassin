@@ -116,7 +116,7 @@ sub ui_parse_url_base {
 # fix $self->{url_abs} to be correct for the "entire website is web app" case,
 # as CGI.pm gets that wrong, too!
 
-  if ($self->{url_abs} =~ m,^/(?:20\d|last-preflight|last-night|\d+-days-ago|today),) {
+  if ($self->{url_abs} =~ m,^/(?:20\d|last-net|last-preflight|last-night|\d+-days-ago|today),) {
     $self->{url_with_path} = $self->{url_abs};
     $self->{url_abs} = "/";
   } else {
@@ -194,7 +194,7 @@ sub ui_get_daterev {
     }
     elsif ($self->{daterev} =~ /^(\d+)-days-ago$/) {
       $self->{daterev} = $self->get_daterev_for_days_ago($1);
-      $self->{q}->param('daterev', $self->{daterev});  # make it absolute
+      $self->{q}->param('daterev', $self->{daterev});
     }
     elsif ($self->{daterev} eq 'last-preflight') {
       $self->{daterev} = undef;
@@ -202,12 +202,16 @@ sub ui_get_daterev {
     elsif ($self->{daterev} eq 'today') {
       $self->{daterev} = $self->get_daterev_by_date(
             POSIX::strftime "%Y%m%d", gmtime (($self->{now} + DATEREV_ADJ)));
-      $self->{q}->param('daterev', $self->{daterev});  # make it absolute
+      $self->{q}->param('daterev', $self->{daterev});
+    }
+    elsif ($self->{daterev} eq 'last-net') {
+      $self->{daterev} = $self->get_last_net_daterev();
+      $self->{q}->param('daterev', $self->{daterev});
     }
     elsif ($self->{daterev} =~ /^(20\d\d[01]\d\d\d)$/) {
       # a date
       $self->{daterev} = $self->get_daterev_by_date($1);
-      $self->{q}->param('daterev', $self->{daterev});  # make it absolute
+      $self->{q}->param('daterev', $self->{daterev});
     }
     elsif ($self->{daterev} =~ /(\d+)[\/-](r\d+)-(\S+)/ && $2) {
       $self->{daterev} = "$1-$2-$3";
@@ -371,7 +375,8 @@ sub show_default_view {
     Or, select a recent nightly mass-check by date by entering
     'YYYYMMDD' in the DateRev text field for a specific date,
     or <a href='!daterev=last-night!'>last night's nightly run</a>,
-    <a href='!daterev=today!'>today's nightly run</a>, or
+    <a href='!daterev=today!'>today's nightly run</a>,
+    or <a href='!daterev=last-net!'>the most recent --net run</a>, or
     <a href='!daterev=last-preflight!'>the most recent 'preflight' mass-check</a>.
   </div>
   </td>
@@ -655,6 +660,17 @@ sub get_daterev_by_date {
 
     next if ($t->{date} + 0 > $notafter);
     return $dr if ($t->{tag} eq 'n');
+  }
+  return undef;
+}
+
+sub get_last_net_daterev {
+  my ($self) = @_;
+
+  foreach my $dr (reverse @{$self->{daterevs}}) {
+    my $t = $self->get_daterev_metadata($dr);
+    next unless $t;
+    return $dr if ($t->{includes_net});
   }
   return undef;
 }
