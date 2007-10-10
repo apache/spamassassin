@@ -4,9 +4,7 @@ BBMHOME=/export/home/bbmass
 
 # clean up our temporary dir
 cd $BBMHOME/tmp
-find . -mtime +7 | sort -r > o
-xargs rm -f < o
-xargs rmdir < o
+find . -type d -mtime +7 -print | xargs rm -rf
 
 # clean out old copies of mass-check logs
 # 180 days = ~6 months
