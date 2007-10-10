@@ -14,9 +14,6 @@ our %FREQS_FILENAMES = (
     'DETAILS.age' => 'set 0, broken down by message age in weeks',
     'DETAILS.all' => 'set 0, broken down by contributor',
     'DETAILS.new' => 'set 0, in aggregate',
-    # 'HTML.age' => 'set 0, by message age, HTML messages only',
-    # 'HTML.all' => 'set 0, by contributor, HTML messages only',
-    # 'HTML.new' => 'set 0, in aggregate, HTML messages only',
     'NET.age' => 'set 1 (network), by message age in weeks',
     'NET.all' => 'set 1 (network), by contributor',
     'NET.new' => 'set 1 (network), in aggregate',
@@ -342,6 +339,18 @@ sub show_default_view {
     <table style="padding-left: 0px" class='datetable'>
 
         <tr>
+        <td colspan="3">
+        <div class='ui_label'>
+          <a href="http://wiki.apache.org/spamassassin/DateRev">DateRev</a>
+          Lists: <a href="/">Just current daterev</a> --
+          <a href="!shortdatelist!">daterevs +/- 2 days</a> --
+          <a href="!longdatelist!">most recent 1000</a> --
+          <a href="!fulldatelist!">full list</a>
+        </div>
+        </td>
+        </tr>
+
+        <tr>
         <th> Commit </th>
         <th> Preflight Mass-Checks </th>
         <th> Nightly Mass-Checks </th>
@@ -350,33 +359,22 @@ sub show_default_view {
 
         !daylinkstable!
 
-        <tr>
-        <td colspan="3">
-        <div class='ui_label'>
-          Longer lists: <a href="!shortdatelist!">+/- 2 days</a> --
-          <a href="!longdatelist!">most recent 1000</a> --
-          <a href="!fulldatelist!">full list</a>
-        </div>
-        </td>
-        </tr>
-
     </table>
 
   <table width='100%'>
   <tr>
   <td width='100%'>
   <div class='ui_label'>
-    <a href="http://wiki.apache.org/spamassassin/DateRev">DateRev</a>
-    to display (UTC timezone):
-       <input type='textfield' name='daterev' value="!daterev!">
+    Or, <a href="http://wiki.apache.org/spamassassin/DateRev">DateRev</a>
+    to display: <input type='textfield' name='daterev' value="!daterev!">
   </div><br/>
   <div class='ui_label'>
-    (Or, select a recent nightly mass-check by date by entering
+    Or, select a recent nightly mass-check by date by entering
     'YYYYMMDD' in the DateRev text field for a specific date, or
     select <a href='!daterev=last-night!'>last-night</a> or
     <a href='!daterev=today!'>today</a>. Also,
     <a href='!daterev=last-preflight!'>last-preflight</a> for
-    the most recent 'preflight' mass-check.)
+    the most recent 'preflight' mass-check.
   </div>
   </td>
   </tr>
@@ -434,6 +432,7 @@ sub show_default_view {
       $dr_before = date_offset($date, 2);
     }
 
+    my $origidx;
     foreach my $dr (@{$self->{daterevs}}) {
       next unless ($dr =~ /^(\d+)[\/-]/);
       my $date = $1;
@@ -441,6 +440,17 @@ sub show_default_view {
       next unless ($date >= $dr_after);
       next unless ($date <= $dr_before);
       push @drs, $dr;
+
+      if ($dr eq $origdr) {
+        $origidx = scalar @drs;
+      }
+    }
+
+    # if we're doing the default UI -- ie. looking at a mass-check --
+    # cut it down to just a couple around it, for brevity
+    if (!$self->{s_shortdatelist} && defined($origidx)) {
+      if ($origidx < @drs - 1) { splice @drs, $origidx+1; }
+      if ($origidx > 1) { splice @drs, 0, $origidx-1; }
     }
   }
 
