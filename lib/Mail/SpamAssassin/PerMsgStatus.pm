@@ -1551,7 +1551,7 @@ sub _get {
 
   # ALL: entire raw headers
   if ($request eq 'ALL') {
-    $result = $self->{msg}->get_all_headers(1);
+    $result = $self->{msg}->get_pristine_header();
   }
   # ALL-TRUSTED: entire trusted raw headers
   elsif ($request eq 'ALL-TRUSTED') {
