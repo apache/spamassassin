@@ -8,8 +8,6 @@ use strict;
 use warnings;
 use bytes;
 
-my $self = Mail::SpamAssassin::CGI::RuleQaApp->new();
-
 my $PERL_INTERP = $^X;
 
 our %FREQS_FILENAMES = (
@@ -26,6 +24,9 @@ our %FREQS_FILENAMES = (
     'OVERLAP.new' => 'set 0, overlaps between rules',
 );
 
+my $refresh_cache = ($ARGV[0] eq '-refresh');
+
+my $self = Mail::SpamAssassin::CGI::RuleQaApp->new();
 $self->ui_parse_url_base();
 $self->ui_get_url_switches();
 $self->ui_get_daterev();
@@ -76,8 +77,16 @@ sub new {
   $self->set_freqs_templates();
   $self->read_automc_global_conf();
 
-  $self->precache_params();
+  die "no directory set in automc config for 'html'" unless $AUTOMC_CONF{html};
+  $self->{cachefile} = "$AUTOMC_CONF{html}/ruleqa.cache";
 
+  if ($refresh_cache) {
+    $self->refresh_cache();
+    exit;
+  }
+
+  $self->read_cache();
+  $self->precache_params();
   return $self;
 }
 
@@ -169,8 +178,7 @@ sub ui_get_daterev {
   # when and what
   $self->{daterev} = $self->{q}->param('daterev') || '';
 
-  # all known date/revision combos.  warning: could get slow in future
-  @{$self->{daterevs}} = $self->get_all_daterevs();
+  $self->{daterevs} = $self->{cached}->{daterevs};
 
   # sanitise daterev string
   if (defined $self->{daterev}) {
@@ -356,7 +364,8 @@ sub show_default_view {
   </td>
   <td width='10%'><div align='right' class='ui_label'>
     <a href="!shortdatelist!">(Nearby&nbsp;List)</a><br/>
-    <a href="!longdatelist!">(Full&nbsp;List)</a><br/>
+    <a href="!longdatelist!">(Longer&nbsp;List)</a><br/>
+    <a href="!fulldatelist!">(Full&nbsp;List)</a><br/>
   </div></td>
   </tr>
   </table>
@@ -401,12 +410,14 @@ sub show_default_view {
     $origdr =~ /^(\d+)[\/-]/;
     my $date = $1;
 
-    # include *just* the current day
-    my $dr_after = $date;
-    my $dr_before = $date;
-
-    # unless 'shortdatelist' is set; in that case, +/- 2 days
-    if ($self->{s_shortdatelist}) {
+    my ($dr_after, $dr_before);
+    if (!$self->{s_shortdatelist}) {
+      # include *just* the current day
+      $dr_after = $date;
+      $dr_before = $date;
+    }
+    else {
+      # unless 'shortdatelist' is set; in that case, +/- 2 days
       $dr_after = date_offset($date, -2);
       $dr_before = date_offset($date, 2);
     }
@@ -426,10 +437,12 @@ sub show_default_view {
         }ges;
 
   my $dranchor = "r".$self->{daterev}; $dranchor =~ s/[^A-Za-z0-9]/_/gs;
-  my $ldlurl = $self->gen_switch_url("longdatelist", 1)."#".$dranchor;
   my $sdlurl = $self->gen_switch_url("shortdatelist", 1)."#".$dranchor;
+  my $ldlurl = $self->gen_switch_url("longdatelist", 1)."#".$dranchor;
+  my $fdlurl = $self->gen_switch_url("longdatelist", 1).'&perpage=999999#'.$dranchor;
 
   $tmpl =~ s/!longdatelist!/$ldlurl/gs;
+  $tmpl =~ s/!fulldatelist!/$fdlurl/gs;
   $tmpl =~ s/!shortdatelist!/$sdlurl/gs;
   $tmpl =~ s/!THISURL!/$self->{cgi_url}/gs;
   $tmpl =~ s/!daterev!/$self->{daterev}/gs;
@@ -1354,97 +1367,8 @@ sub get_datadir_for_daterev {
 }
 
 sub get_daterev_metadata {
-  my ($self, $dr, $ignore_logmds) = @_;
-
-  if ($self->{daterev_metadata}->{$dr}) {
-    return $self->{daterev_metadata}->{$dr};
-  }
-
-  my $meta = $self->{daterev_metadata}->{$dr} = { };
-
-  $meta->{daterev} = $dr;
-
-  my $dranchor = "r".$dr; $dranchor =~ s/[^A-Za-z0-9]/_/gs;
-  $meta->{dranchor} = $dranchor;
-
-  my $fname = $self->get_datadir_for_daterev($dr)."/info.xml";
-  my $fastfname = $self->get_datadir_for_daterev($dr)."/fastinfo.xml";
-
-  $dr =~ /^(\d+)-r(\d+)-(\S+)$/;
-  my $date = $1;
-  my $rev = $2;
-  my $tag = $3;
-
-  if (-f $fname && -f $fastfname) {
-    eval {
-      my $info = XMLin($fname);
-      my $fastinfo = XMLin($fastfname);
-      # use Data::Dumper; print Dumper $info;
-
-      my $mds_as_text;
-      if ($fastinfo->{mclogmds} && !$ignore_logmds) {
-        $mds_as_text = $self->get_mds_as_text($fastinfo->{mclogmds});
-      }
-
-      my $cdate = $info->{checkin_date};
-      $cdate =~ s/T(\S+)\.\d+Z$/ $1/;
-
-      my $drtitle = ($info->{msg} ? $info->{msg} : '');
-      $drtitle =~ s/[\"\'\&\>\<]/ /gs;
-      $drtitle =~ s/\s+/ /gs;
-      $drtitle =~ s/^(.{0,160}).*$/$1/gs;
-
-      if ($rev ne $fastinfo->{rev}) {
-	warn "dr and fastinfo disagree: ($rev ne $fastinfo->{rev})";
-      }
-
-      $meta->{rev} = $rev;
-      $meta->{cdate} = $cdate;
-      $meta->{drtitle} = $drtitle;
-      $meta->{mds_as_text} = $mds_as_text || '';
-      $meta->{includes_net} = $fastinfo->{includes_net};
-      $meta->{date} = $fastinfo->{date};
-      $meta->{submitters} = $fastinfo->{submitters};
-      $meta->{author} = $info->{author};
-      $meta->{tag} = $tag;
-
-      my $type;
-      if ($meta->{tag} && $meta->{tag} eq 'b') {
-        $type = 'preflight';
-      } elsif ($meta->{includes_net}) {
-        $type = 'net';
-      } else {
-        $type = 'nightly';
-      }
-      $meta->{type} = $type;
-
-    };
-
-    if ($@) {
-      warn "daterev info.xml: $@";
-    } else {
-      return $meta;
-    }
-  }
-
-  # if that failed, just use the info that can be gleaned from the
-  # daterev itself.
-  my $drtitle = "(no info)";
-
-  {
-      $meta->{rev} = $rev;
-      $meta->{cdate} = $date;
-      $meta->{drtitle} = '(no info available yet)';
-      $meta->{mds_as_text} = "";
-      $meta->{includes_net} = 0;
-      $meta->{date} = $date;
-      $meta->{submitters} = "";
-      $meta->{author} = "nobody";
-      $meta->{tag} = $tag;
-      $meta->{type} = 'preflight';  # default
-  }
-
-  return $meta;
+  my ($self, $dr) = @_;
+  return $self->{cached}->{daterev_metadata}->{$dr} || { };
 }
 
 sub get_mds_as_text {
@@ -1498,8 +1422,8 @@ sub get_mds_as_text {
 }
 
 sub get_daterev_code_description {
-  my ($self, $dr, $ignore_logmds) = @_;
-  my $meta = $self->get_daterev_metadata($dr, $ignore_logmds);
+  my ($self, $dr) = @_;
+  my $meta = $self->get_daterev_metadata($dr);
 
   return qq{
 
@@ -1519,8 +1443,8 @@ sub get_daterev_code_description {
 }
 
 sub get_daterev_masscheck_description {
-  my ($self, $dr, $ignore_logmds) = @_;
-  my $meta = $self->get_daterev_metadata($dr, $ignore_logmds);
+  my ($self, $dr) = @_;
+  my $meta = $self->get_daterev_metadata($dr);
   my $net = $meta->{includes_net} ? "[net]" : "";
 
   my $isvishtml = '';
@@ -1528,6 +1452,11 @@ sub get_daterev_masscheck_description {
   if ($self->{daterev} eq $dr) {
     $isvishtml = '<b>(Viewing)</b>';
     $isvisclass = 'mcviewing';
+  }
+
+  my $mds_as_text = '';
+  if ($meta->{mclogmds}) {
+    $mds_as_text = $self->get_mds_as_text($meta->{mclogmds}) || '';
   }
 
   return qq{
@@ -1541,7 +1470,7 @@ sub get_daterev_masscheck_description {
           </strong></a> $isvishtml
       </p><p>
         <em><span class="mcsubmitters">$meta->{submitters}</span></em>
-        $meta->{mds_as_text}</x>
+        $mds_as_text</x>
       </p>
       <!-- <span class="mctype">$meta->{type}</span> -->
       <!-- <span class="mcwasnet">$net</span> -->
@@ -1555,12 +1484,12 @@ sub get_daterev_masscheck_description {
 }
 
 sub get_daterev_html_table {
-  my ($self, $daterev_list, $ignore_logmds, $reverse) = @_;
+  my ($self, $daterev_list, $reverse) = @_;
 
   my $rows = { };
   foreach my $dr (@{$daterev_list}) {
     next unless $dr;
-    my $meta = $self->get_daterev_metadata($dr, $ignore_logmds);
+    my $meta = $self->get_daterev_metadata($dr);
 
     my $colidx;
     my $type = $meta->{type};
@@ -1572,9 +1501,9 @@ sub get_daterev_html_table {
       $colidx = 1;
     }
 
-    # use the commit-date, rather than the mass-check date as the row key
-    $rows->{$meta->{cdate}} ||= [ ];
-    $rows->{$meta->{cdate}}->[$colidx] = $meta;
+    # use the rev number as the row key
+    $rows->{$meta->{rev}} ||= [ ];
+    $rows->{$meta->{rev}}->[$colidx] = $meta;
   }
 
   my @rowkeys = sort keys %{$rows};
@@ -1598,12 +1527,12 @@ sub get_daterev_html_table {
 
             <tr class='daterevtr'>
 
-      }, $self->gen_daterev_html_commit_td($meta, $ignore_logmds);
+      }, $self->gen_daterev_html_commit_td($meta);
 
     foreach my $col (0 .. 2) {
       $meta = $row->[$col];
       if ($meta) {
-        push @html, $self->gen_daterev_html_table_td($meta, $ignore_logmds);
+        push @html, $self->gen_daterev_html_table_td($meta);
       }
       else {
         push @html, qq{
@@ -1624,7 +1553,7 @@ sub get_daterev_html_table {
 }
 
 sub gen_daterev_html_commit_td {
-  my ($self, $meta, $ignore_logmds) = @_;
+  my ($self, $meta) = @_;
 
   my $dr = $meta->{daterev};
   my @parms = $self->get_params_except(qw(
@@ -1632,14 +1561,14 @@ sub gen_daterev_html_commit_td {
         ));
   my $drhref = $self->assemble_url("daterev=".$dr, @parms);
 
-  my $text = $self->get_daterev_code_description($dr, $ignore_logmds) || '';
+  my $text = $self->get_daterev_code_description($dr) || '';
   $text =~ s/!drhref!/$drhref/gs;
 
   return $text;
 }
 
 sub gen_daterev_html_table_td {
-  my ($self, $meta, $ignore_logmds) = @_;
+  my ($self, $meta) = @_;
 
   my $dr = $meta->{daterev};
   my @parms = $self->get_params_except(qw(
@@ -1647,7 +1576,7 @@ sub gen_daterev_html_table_td {
         ));
   my $drhref = $self->assemble_url("daterev=".$dr, @parms);
 
-  my $text = $self->get_daterev_masscheck_description($dr, $ignore_logmds) || '';
+  my $text = $self->get_daterev_masscheck_description($dr) || '';
   $text =~ s/!drhref!/$drhref/gs;
   return $text;
 }
@@ -1658,9 +1587,9 @@ sub show_daterev_selector_page {
   my $title = "Rule QA: all recent mass-check results";
   print $self->show_default_header($title);
 
-  my $max_listings = 300;
+  my $max_listings = $self->{q}->param('perpage') || 1000;	# def. 1000
   my @drs = @{$self->{daterevs}};
-  if (scalar @drs > $max_listings) {
+  if ($max_listings > 0 && scalar @drs > $max_listings) {
     splice @drs, 0, -$max_listings;
   }
 
@@ -1716,6 +1645,131 @@ sub get_rule_metadata {
   # if that failed, just return empty
   $meta->{rulemds} = {};
   return $meta;
+}
+
+# ---------------------------------------------------------------------------
+
+sub read_cache {
+  my ($self) = @_;
+  if (open(IN, "<".$self->{cachefile})) {
+    my $str = join("", <IN>);
+    close IN;
+
+    my $VAR1;                 # Data::Dumper
+    if (eval $str) {
+      $self->{cached} = $VAR1;        # Data::Dumper's naming
+      return;
+    }
+  }
+
+  $self->{cached} = { };
+}
+
+# ---------------------------------------------------------------------------
+
+sub refresh_cache {
+  my ($self) = @_;
+
+  $self->{cached} = { };
+
+  # all known date/revision combos.
+  @{$self->{cached}->{daterevs}} = $self->get_all_daterevs();
+
+  foreach my $dr (@{$self->{cached}->{daterevs}}) {
+    $self->refresh_daterev_metadata($dr);
+  }
+
+  use Data::Dumper;
+  my $dump = Data::Dumper->new ([ $self->{cached} ]);
+  $dump->Deepcopy(1);
+  $dump->Purity(1);
+  $dump->Indent(1);
+  my $text = $dump->Dump.";1;";
+
+  open (OUT, ">$self->{cachefile}") or die "cannot write $self->{cachefile}";
+  print OUT $text;
+  close OUT or die "cannot write $self->{cachefile}";
+}
+
+sub refresh_daterev_metadata {
+  my ($self, $dr) = @_;
+
+  my $meta = $self->{cached}->{daterev_metadata}->{$dr} = { };
+  $meta->{daterev} = $dr;
+
+  my $dranchor = "r".$dr; $dranchor =~ s/[^A-Za-z0-9]/_/gs;
+  $meta->{dranchor} = $dranchor;
+
+  $dr =~ /^(\d+)-r(\d+)-(\S+)$/;
+  my $date = $1;
+  my $rev = $2;
+  my $tag = $3;
+
+  my $fname = $self->get_datadir_for_daterev($dr)."/info.xml";
+  my $fastfname = $self->get_datadir_for_daterev($dr)."/fastinfo.xml";
+
+  if (-f $fname && -f $fastfname) {
+    eval {
+      my $fastinfo = XMLin($fastfname);
+      $meta->{rev} = $rev;
+      $meta->{tag} = $tag;
+      $meta->{mclogmds} = $fastinfo->{mclogmds};
+      $meta->{includes_net} = $fastinfo->{includes_net};
+      $meta->{date} = $fastinfo->{date};
+      $meta->{submitters} = $fastinfo->{submitters};
+
+      if ($rev ne $fastinfo->{rev}) {
+	warn "dr and fastinfo disagree: ($rev ne $fastinfo->{rev})";
+      }
+
+      my $type;
+      if ($meta->{tag} && $meta->{tag} eq 'b') {
+        $type = 'preflight';
+      } elsif ($meta->{includes_net}) {
+        $type = 'net';
+      } else {
+        $type = 'nightly';
+      }
+      $meta->{type} = $type;
+
+
+      my $info = XMLin($fname);
+      # use Data::Dumper; print Dumper $info;
+      my $cdate = $info->{checkin_date};
+      $cdate =~ s/T(\S+)\.\d+Z$/ $1/;
+
+      my $drtitle = ($info->{msg} ? $info->{msg} : '');
+      $drtitle =~ s/[\"\'\&\>\<]/ /gs;
+      $drtitle =~ s/\s+/ /gs;
+      $drtitle =~ s/^(.{0,160}).*$/$1/gs;
+
+      $meta->{cdate} = $cdate;
+      $meta->{drtitle} = $drtitle;
+      $meta->{author} = $info->{author};
+    };
+
+    if ($@) {
+      warn "daterev info.xml: $@";
+    }
+
+    return $meta;
+  }
+
+  # if that failed, just use the info that can be gleaned from the
+  # daterev itself.
+  my $drtitle = "(no info)";
+
+  {
+      $meta->{rev} = $rev;
+      $meta->{cdate} = $date;
+      $meta->{drtitle} = '(no info available yet)';
+      $meta->{includes_net} = 0;
+      $meta->{date} = $date;
+      $meta->{submitters} = "";
+      $meta->{author} = "nobody";
+      $meta->{tag} = $tag;
+      $meta->{type} = 'preflight';  # default
+  }
 }
 
 =cut
