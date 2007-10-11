@@ -75,7 +75,7 @@ Specifically, C<*> and C<?> are allowed, but all other metacharacters are not.
 Regular expressions are not used for security reasons.
 
 Multiple addresses per line, separated by spaces, is OK.  Multiple
-C<whitelist_from> lines is also OK.
+C<whitelist_bounce_relays> lines are also OK.
 
 
 =cut
