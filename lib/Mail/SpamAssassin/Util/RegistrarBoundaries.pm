@@ -64,38 +64,45 @@ foreach (qw/
 # data from http://spamcheck.freeapp.net/two-level-tlds , in turn from
 # http://www.bestregistrar.com/help/ccTLD.htm
 # http://www.hkdnr.net.hk/instructions/new_domain.html
+# bug 5677
 foreach(qw/
 
   com.ac edu.ac gov.ac mil.ac net.ac org.ac
   ac.ae co.ae com.ae gov.ae net.ae org.ae pro.ae sch.ae
   com.ai edu.ai gov.ai org.ai
+  com.al edu.al gov.al net.al org.al
   com.ar edu.ar gov.ar int.ar mil.ar net.ar org.ar uba.ar
   e164.arpa
   ac.at co.at gv.at or.at priv.at
-  asn.au com.au conf.au csiro.au edu.au gov.au id.au info.au net.au org.au otc.au oz.au telememo.au
+  act.au asn.au com.au conf.au csiro.au edu.au gov.au id.au info.au net.au nsw.au nt.au org.au otc.au oz.au qld.au sa.au tas.au telememo.au vic.au wa.au
   com.az net.az org.az
+  co.ba com.ba edu.ba gov.ba mil.ba net.ba org.ba rs.ba unbi.ba unsa.ba
   com.bb net.bb org.bb
+  ac.bd com.bd edu.bd gov.bd mil.bd net.bd
   ac.be belgie.be dns.be fgov.be
   com.bh edu.bh gov.bh net.bh org.bh
   com.bm edu.bm gov.bm net.bm org.bm
+  com.bn edu.bn net.bn org.bn
+  com.bo edu.bo gob.bo gov.bo int.bo mil.bo net.bo org.bo tv.bo
   adm.br adv.br agr.br am.br arq.br art.br ato.br bio.br bmd.br cim.br cng.br cnt.br com.br coop.br ecn.br edu.br eng.br esp.br etc.br eti.br far.br fm.br fnd.br fot.br fst.br g12.br ggf.br gov.br imb.br ind.br inf.br jor.br lel.br mat.br med.br mil.br mus.br net.br nom.br not.br ntr.br odo.br org.br ppg.br pro.br psc.br psi.br qsl.br rec.br slg.br sp.br srv.br tmp.br trd.br tur.br tv.br vet.br zlg.br
   com.bs net.bs org.bs
   co.bw org.bw
-  com.bz org.bz net.bz
+  com.bz net.bz org.bz
   ab.ca bc.ca gc.ca mb.ca nb.ca nf.ca nl.ca ns.ca nt.ca nu.ca on.ca pe.ca qc.ca sk.ca yk.ca
   co.ck edu.ck gov.ck net.ck org.ck
   ac.cn ah.cn bj.cn com.cn cq.cn edu.cn gd.cn gov.cn gs.cn gx.cn gz.cn hb.cn he.cn hi.cn hk.cn hl.cn hn.cn jl.cn js.cn ln.cn mo.cn net.cn nm.cn nx.cn org.cn qh.cn sc.cn sh.cn sn.cn sx.cn tj.cn tw.cn xj.cn xz.cn yn.cn zj.cn
-  arts.co com.co edu.co firm.co gov.co info.co int.co mil.co nom.co org.co rec.co store.co web.co
+  arts.co com.co edu.co firm.co gov.co info.co int.co mil.co net.co nom.co org.co rec.co store.co web.co
+  lkd.co.im plc.co.im
   au.com br.com cn.com de.com eu.com gb.com hu.com no.com qc.com ru.com sa.com se.com uk.com us.com uy.com za.com
   ac.cr co.cr ed.cr fi.cr go.cr or.cr sa.cr
-  com.cu net.cu org.cu
+  com.cu edu.cu gov.cu info.cu net.cu org.cu
   ac.cy com.cy gov.cy net.cy org.cy
   co.dk
   com.dm net.dm org.dm
   art.do com.do edu.do gob.do gov.do mil.do net.do org.do sld.do web.do
   art.dz ass.dz com.dz edu.dz gov.dz net.dz org.dz pol.dz
   com.ec edu.ec fin.ec gov.ec k12.ec med.ec mil.ec net.ec org.ec
-  com.ee fie.ee med.ee org.ee pri.ee
+  co.ee com.ee edu.ee fie.ee med.ee org.ee pri.ee
   com.eg edu.eg eun.eg gov.eg net.eg org.eg sci.eg
   com.er edu.er gov.er ind.er mil.er net.er org.er
   com.es edu.es gob.es nom.es org.es
@@ -105,28 +112,31 @@ foreach(qw/
   aeroport.fr assedic.fr asso.fr avocat.fr avoues.fr barreau.fr cci.fr chambagri.fr chirurgiens-dentistes.fr com.fr experts-comptables.fr geometre-expert.fr gouv.fr greta.fr huissier-justice.fr medecin.fr nom.fr notaires.fr pharmacien.fr port.fr prd.fr presse.fr tm.fr veterinaire.fr
   com.ge edu.ge gov.ge mil.ge net.ge org.ge pvt.ge
   ac.gg alderney.gg co.gg gov.gg guernsey.gg ind.gg ltd.gg net.gg org.gg sark.gg sch.gg
+  com.gh edu.gh gov.gh mil.gh org.gh
   com.gr edu.gr gov.gr net.gr org.gr
   com.gt edu.gt gob.gt ind.gt mil.gt net.gt org.gt
   com.gu edu.gu gov.gu mil.gu net.gu org.gu
   com.hk edu.hk gov.hk idv.hk net.hk org.hk
   com.hr from.hr iz.hr
-  2000.hu agrar.hu bolt.hu casino.hu city.hu co.hu erotica.hu erotika.hu film.hu forum.hu games.hu hotel.hu info.hu ingatlan.hu jogasz.hu konyvelo.hu lakas.hu media.hu news.hu org.hu priv.hu reklam.hu sex.hu shop.hu sport.hu suli.hu szex.hu tm.hu tozsde.hu utazas.hu video.hu
-  ac.id co.id go.id mil.id net.id or.id
+  2000.hu ac.hu agrar.hu bolt.hu casino.hu city.hu co.hu edu.hu erotica.hu erotika.hu film.hu forum.hu games.hu gov.hu hotel.hu info.hu ingatlan.hu jogasz.hu konyvelo.hu lakas.hu media.hu news.hu org.hu priv.hu reklam.hu sex.hu shop.hu sport.hu suli.hu szex.hu tm.hu tozsde.hu utazas.hu video.hu
+  ac.id co.id go.id mil.id net.id or.id sch.id web.id
   ac.il co.il gov.il idf.il k12.il muni.il net.il org.il
   ac.im co.im gov.im net.im nic.im org.im
-  ac.in co.in ernet.in firm.in gen.in gov.in ind.in mil.in net.in nic.in org.in res.in
+  ac.in co.in edu.in ernet.in firm.in gen.in gov.in ind.in mil.in net.in nic.in org.in res.in
   ac.ir co.ir gov.ir id.ir net.ir org.ir sch.ir
+  edu.it gov.it
   ac.je co.je gov.je ind.je jersey.je ltd.je net.je org.je sch.je
   com.jo edu.jo gov.jo mil.jo net.jo org.jo
   ac.jp ad.jp aichi.jp akita.jp aomori.jp chiba.jp co.jp ed.jp ehime.jp fukui.jp fukuoka.jp fukushima.jp gifu.jp go.jp gov.jp gr.jp gunma.jp hiroshima.jp hokkaido.jp hyogo.jp ibaraki.jp ishikawa.jp iwate.jp kagawa.jp kagoshima.jp kanagawa.jp kanazawa.jp kawasaki.jp kitakyushu.jp kobe.jp kochi.jp kumamoto.jp kyoto.jp lg.jp matsuyama.jp mie.jp miyagi.jp miyazaki.jp nagano.jp nagasaki.jp nagoya.jp nara.jp ne.jp net.jp niigata.jp oita.jp okayama.jp okinawa.jp or.jp org.jp osaka.jp saga.jp saitama.jp sapporo.jp sendai.jp shiga.jp shimane.jp shizuoka.jp takamatsu.jp tochigi.jp tokushima.jp tokyo.jp tottori.jp toyama.jp utsunomiya.jp wakayama.jp yamagata.jp yamaguchi.jp yamanashi.jp yokohama.jp
+  ac.ke co.ke go.ke new.ke or.ke sc.ke
   com.kh edu.kh gov.kh mil.kh net.kh org.kh per.kh
-  ac.kr co.kr go.kr kyonggi.kr ne.kr or.kr pe.kr re.kr seoul.kr
+  ac.kr busan.kr chungbuk.kr chungnam.kr co.kr daegu.kr daejeon.kr es.kr gangwon.kr go.kr gwangju.kr gyeongbuk.kr gyeonggi.kr gyeongnam.kr hs.kr incheon.kr jeju.kr jeonbuk.kr jeonnam.kr kg.kr kyonggi.kr mil.kr ms.kr ne.kr or.kr pe.kr re.kr sc.kr seoul.kr ulsan.kr
   com.kw edu.kw gov.kw net.kw org.kw
   com.la net.la org.la
   com.lb edu.lb gov.lb mil.lb net.lb org.lb
   com.lc edu.lc gov.lc net.lc org.lc
   asn.lv com.lv conf.lv edu.lv gov.lv id.lv mil.lv net.lv org.lv
-  com.ly net.ly org.ly
+  biz.ly com.ly edu.ly gov.ly id.ly med.ly net.ly org.ly plc.ly sch.ly
   ac.ma co.ma net.ma org.ma press.ma
   com.mk
   com.mm edu.mm gov.mm net.mm org.mm
@@ -141,7 +151,7 @@ foreach(qw/
   com.ni edu.ni gob.ni net.ni nom.ni org.ni
   tel.no
   com.np edu.np gov.np net.np org.np
-  fax.nr mob.nr mobil.nr mobile.nr tel.nr tlf.nr
+  biz.nr com.nr edu.nr fax.nr gov.nr info.nr mob.nr mobil.nr mobile.nr net.nr org.nr tel.nr tlf.nr
   ac.nz co.nz cri.nz geek.nz gen.nz govt.nz iwi.nz maori.nz mil.nz net.nz org.nz school.nz
   ac.om biz.om co.om com.om edu.om gov.om med.om mod.om museum.om net.om org.om pro.om
   dk.org eu.org
@@ -150,14 +160,14 @@ foreach(qw/
   ac.pg com.pg net.pg
   com.ph mil.ph net.ph ngo.ph org.ph
   biz.pk com.pk edu.pk fam.pk gob.pk gok.pk gon.pk gop.pk gos.pk gov.pk net.pk org.pk web.pk
-  agro.pl aid.pl atm.pl auto.pl biz.pl com.pl edu.pl gmina.pl gsm.pl info.pl mail.pl media.pl miasta.pl mil.pl net.pl nieruchomosci.pl nom.pl org.pl pc.pl powiat.pl priv.pl realestate.pl rel.pl sex.pl shop.pl sklep.pl sos.pl szkola.pl targi.pl tm.pl tourism.pl travel.pl turystyka.pl
+  agro.pl aid.pl atm.pl auto.pl bialystok.pl biz.pl com.pl edu.pl gda.pl gdansk.pl gmina.pl gov.pl gsm.pl info.pl katowice.pl krakow.pl lodz.pl lublin.pl mail.pl media.pl miasta.pl mil.pl net.pl ngo.pl nieruchomosci.pl nom.pl olsztyn.pl opole.pl org.pl pc.pl powiat.pl poznan.pl priv.pl realestate.pl rel.pl sex.pl shop.pl sklep.pl slupsk.pl sos.pl szczecin.pl szkola.pl targi.pl tm.pl torun.pl tourism.pl travel.pl turystyka.pl warszawa.pl waw.pl wroc.pl wroclaw.pl za.pl zgora.pl
   edu.ps gov.ps plo.ps sec.ps
   com.pt edu.pt gov.pt int.pt net.pt nome.pt org.pt publ.pt
   com.py edu.py net.py org.py
   com.qa edu.qa gov.qa net.qa org.qa
   asso.re com.re nom.re
   arts.ro com.ro firm.ro info.ro nom.ro nt.ro org.ro rec.ro store.ro tm.ro www.ro
-  com.ru gov.ru net.ru org.ru pp.ru
+  com.ru gov.ru int.ru msk.ru net.ru org.ru pp.ru
   com.sa edu.sa gov.sa med.sa net.sa org.sa pub.sa sch.sa
   com.sb edu.sb gov.sb net.sb org.sb
   com.sd edu.sd gov.sd med.sd net.sd org.sd sch.sd
@@ -167,13 +177,15 @@ foreach(qw/
   co.st com.st consulado.st edu.st embaixada.st gov.st mil.st net.st org.st principe.st saotome.st store.st
   com.sv edu.sv gob.sv org.sv red.sv
   com.sy gov.sy net.sy org.sy
-  ac.th co.th go.th net.th or.th
+  at.tf bg.tf ca.tf ch.tf cz.tf de.tf edu.tf eu.tf int.tf net.tf pl.tf ru.tf sg.tf us.tf
+  ac.th co.th go.th in.th mi.th net.th or.th
   com.tn edunet.tn ens.tn fin.tn gov.tn ind.tn info.tn intl.tn nat.tn net.tn org.tn rnrt.tn rns.tn rnu.tn tourism.tn
   bbs.tr com.tr edu.tr gen.tr gov.tr k12.tr mil.tr net.tr org.tr
   aero.tt at.tt au.tt be.tt biz.tt ca.tt co.tt com.tt coop.tt de.tt dk.tt edu.tt es.tt eu.tt fr.tt gov.tt info.tt int.tt it.tt jobs.tt mobi.tt museum.tt name.tt net.tt nic.tt org.tt pro.tt se.tt travel.tt uk.tt us.tt
   co.tv
   com.tw edu.tw gove.tw idv.tw net.tw org.tw
-  com.ua edu.ua gov.ua net.ua org.ua
+  ac.tz co.tz go.tz ne.tz or.tz
+  cherkassy.ua chernigov.ua chernovtsy.ua ck.ua cn.ua co.ua com.ua crimea.ua cv.ua dn.ua dnepropetrovsk.ua donetsk.ua dp.ua edu.ua gov.ua if.ua in.ua ivano-frankivsk.ua kh.ua kharkov.ua kherson.ua khmelnitskiy.ua kiev.ua kirovograd.ua km.ua kr.ua ks.ua kv.ua lg.ua lugansk.ua lutsk.ua lviv.ua mk.ua net.ua nikolaev.ua od.ua odessa.ua org.ua pl.ua poltava.ua rovno.ua rv.ua sebastopol.ua sumy.ua te.ua ternopil.ua uzhgorod.ua vinnica.ua vn.ua zaporizhzhe.ua zhitomir.ua zp.ua zt.ua
   ac.ug co.ug go.ug or.ug
   ac.uk co.uk edu.uk gov.uk ltd.uk me.uk mod.uk net.uk nhs.uk nic.uk org.uk plc.uk police.uk sch.uk
   dni.us fed.us
