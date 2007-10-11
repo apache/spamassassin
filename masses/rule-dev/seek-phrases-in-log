@@ -28,7 +28,8 @@ seek-phrases-in-log - extract good-looking rules from a text-dump mc log
 sub usage {
   die "
 usage: seek-phrases-in-log [--reqhitrate n] [--reqpatlength n]
-   [--rules] [--ruleprefix FOO] [--maxtextread n] --ham hamlog --spam spamlog
+   [--rules] [--ruletype 'type'] [--ruleprefix FOO]
+   [--maxtextread n] --ham hamlog --spam spamlog
 
 --reqhitrate: percentage hit-rate against spam required (default: 0.5)
    (multiple values can be specified, separated by spaces)
@@ -36,6 +37,7 @@ usage: seek-phrases-in-log [--reqhitrate n] [--reqpatlength n]
 --maxtextread: bytes of message text examined (default: 32768)
 --rules: generate SpamAssassin rule output (default: 0)
 --ruleprefix: specify prefix string for rules (default: 'SEEK_')
+--ruletype 'type': generate rules of type: 'header', 'body'
 ";
 }
 
@@ -44,6 +46,7 @@ usage: seek-phrases-in-log [--reqhitrate n] [--reqpatlength n]
 use warnings;
 use strict;
 use Getopt::Long qw(:config no_ignore_case);
+sub logmsg;
 
 my %opt = ();
 $opt{reqhitrate} = 0.5;
@@ -51,6 +54,7 @@ $opt{reqpatlength} = 0;
 $opt{maxtextread} = 32768;
 $opt{rules} = 0;
 $opt{ruleprefix} = 'SEEK_';
+$opt{ruletype} = 'body';
 
 my $fs;
 my $fh;
@@ -60,6 +64,7 @@ GetOptions(
         "ruleprefix=s" => \$opt{ruleprefix},
         "reqhitrate=s" => \$opt{reqhitrate},
         "reqpatlength=s" => \$opt{reqpatlength},
+        "ruletype=s" => \$opt{ruletype},
         "maxtextread=s" => \$opt{maxtextread},
         "ham=s" => \$fh,
         "spam=s" => \$fs,
@@ -84,7 +89,7 @@ my @text_string = ();
 my %ngram_count = ();
 my %msg_subset_hit = ();
 
-warn "reading $fs...\n";
+logmsg "reading $fs...\n";
 open IN, "<$fs" or die "cannot open spam log $fs";
 while (<IN>) {
   /^text: (.*)$/ and proc_text_spam($1);
@@ -97,15 +102,15 @@ if ($msgcount > 2 * (100 / $opt{reqhitrate})) {
   discard_hapaxes();
 }
 
-warn "n-grams active: ".(scalar keys %ngram_count)."\n";
+logmsg "n-grams active: ".(scalar keys %ngram_count)."\n";
 
-warn "reading $fh...\n";
+logmsg "reading $fh...\n";
 open IN, "<$fh" or die "cannot open ham log $fh";
 while (<IN>) {
   /^text: (.*)$/ and proc_text_ham($1);
 }
 close IN;
-warn "n-grams active: ".(scalar keys %ngram_count)."\n";
+logmsg "n-grams active: ".(scalar keys %ngram_count)."\n";
 
 undef %word2sym;     # free this, no longer needed
 
@@ -120,6 +125,8 @@ sub proc_text_spam {
   if (length($text) > $opt{maxtextread}) {
     $text = substr $text, 0, $opt{maxtextread};      # chop!
   }
+
+  $text =~ s/  +/ /gs;			# single spaces, please
 
   # we only need to save spam samples in memory, ignore ham samples
   push @text_string, $text;
@@ -175,7 +182,7 @@ sub discard_hapaxes {
   }
   my $after = (scalar keys %ngram_count);
   my $killed = ($before - $after);
-  warn "shrunk dbs: $killed hapaxes killed, kept $after entries\n";
+  logmsg "shrunk dbs: $killed hapaxes killed, kept $after entries\n";
 }
 
 sub proc_text_ham {
@@ -215,7 +222,7 @@ sub proc_text_ham {
 }
 
 sub summarise {
-  warn "summarizing...\n";
+  logmsg "summarizing...\n";
 
   # hash all msg_subset_hit lists; we don't need the full data, so this
   # saves space
@@ -254,7 +261,7 @@ sub summarise {
     push @{$all_patterns_for_set{$set}}, decode_sym2words($id);
   }
 
-  warn "message subsets found: ".(scalar keys %all_patterns_for_set)."\n";
+  logmsg "message subsets found: ".(scalar keys %all_patterns_for_set)."\n";
 
   my %done_set = ();
   my @done_pats = ();
@@ -264,12 +271,18 @@ sub summarise {
   }
 
   $| = 1;
+  my $count = 0;
+  my $count_out = 0;
   foreach my $id (sort {
                       $ngram_count{$b} <=> $ngram_count{$a}
                   } keys %ngram_count)
   {
     my $set = $msg_subset_hit{$id};
     next if $done_set{$set}; $done_set{$set}++;
+
+    if ($count++ % 200 == 0) {
+      logmsg "working on message subset $count ($count_out)...\n";
+    }
 
     # we now have several patterns.  see if we can expand them sideways
     # to make the pattern bigger, and collapse into a smaller number of
@@ -281,19 +294,31 @@ sub summarise {
     @pats = subsume_with_dotstars(@pats);
     @pats = expand_with_dots(@pats);
     @pats = ensure_reqpatlength(@pats);
+    # at this point, patterns are all valid regexps
 
     # now check to see if any of these pats have been subsumed in an
     # already-output pattern (one with more hits!)
     my @pats_new = ();
     foreach my $pat (@pats) {
       my $subsumed = 0;
-      foreach my $done (@done_pats) {
-        if ($pat eq $done || $pat =~ /\Q${done}\E/) { $subsumed=1; last; }
+      foreach my $done (@done_pats, @pats_new) {
+	# pattern == existing pattern, or existing pattern is contained by
+	# pattern, or pattern is contained in existing pattern
+        if ($pat eq $done || $pat =~ /\Q${done}\E/ || $done =~ /\Q${pat}\E/)
+					{ $subsumed=1; last; }
+	# or one pattern contains the other (but interpreted as a regexp!)
+	# this deals with /foo.{0,10} bar/ vs /foo ish bar/
+	if ($pat =~ /$done/) { $subsumed=1; last; }
+	if ($done =~ /$pat/) { $subsumed=1; last; }
       }
-      push @done_pats, $pat;
-      if (!$subsumed) { push @pats_new, $pat; }
+      next if $subsumed;
+
+      # add to the current list
+      push @pats_new, $pat;
     }
+
     @pats = @pats_new;
+    push @done_pats, @pats_new;
 
     # if we have no non-subsumed pats at this stage, skip this set
     next unless @pats;
@@ -312,13 +337,23 @@ sub summarise {
       # sort, to ensure ordering always remains the same
       foreach my $pat (sort @pats) {
         my $name = generate_rule_name($pat);
-        print "body $opt{ruleprefix}${name}  /$pat/\n";
+
+	if ($opt{ruletype} eq 'header') {
+	  # deal with header-specific munging.
+	  # "\[\\n\]" is the result of "[\n]", at this stage
+	  $pat =~ s/\Q\[\\n\]\E/\\n/gs;
+	  $pat =~ s/\Q\[\\t\]\E/\\t/gs;
+	}
+
+        print "$opt{ruletype} $opt{ruleprefix}${name}  /$pat/\n";
+	$count_out++;
       }
 
     } else {
       my $pats = '/'.join ('/, /', map { s/\//\\\//gs; $_; } @pats).'/';
       printf "%6.3f  %6.3f  %6.3f  %s\n",
         1.0, ($ngram_count{$id}*100) / $msg_count_spam, 0, $pats;
+      $count_out++;
     }
   }
 }
@@ -353,7 +388,8 @@ sub collapse_pats {
     my @hits = grep /\Q$pat\E/, @text_string;
     if (scalar @hits == 0) {
       warn "supposed pattern /$pat/ is 0-hitter";
-      push @ret, "[*]$pat";
+      warn "JMD strings:\n  ".join("\n  ", @text_string)."\n";
+      push @ret, "[BROKEN: 0 hitter]$pat";
       next;
     }
 
@@ -419,7 +455,8 @@ sub collapse_pats {
 
 sub quote_all_metas {
   return map {
-    s/([!-+\`\?\^\~\\\/\|\.\{\}\(\)\[\]\@])/\\$1/gs; $_;
+    s/([!-+\`\?\^\~\\\/\|\.\{\}\(\)\[\]\@])/\\$1/gs;
+    $_;
   } @_;
 }
 
@@ -550,4 +587,6 @@ sub generate_rule_name {
   return $str;
 }
 
-
+sub logmsg {
+  warn "".(scalar localtime time).": $_[0]\n";
+}
