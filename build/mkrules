@@ -270,7 +270,7 @@ sub src_wanted {
   return if (!-f $path);
   
   # limit what will be copied from sandboxes
-  return if ($path =~ /sandbox/ && !/(?:\d.*\.cf|\.pm)$/i);
+  return if ($path =~ /(?:sandbox|scores)/ && !/(?:\d.*\.cf|\.pm)$/i);
 
   # a bit of sanity please - no svn metadata ;)
   return if ($path =~ /\.svn/);
