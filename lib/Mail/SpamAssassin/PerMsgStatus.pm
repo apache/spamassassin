@@ -1015,7 +1015,7 @@ sub bayes_report_make_list {
   my $amt = $limit < @$info ? $limit : @$info;
   return "" unless $amt;
 
-  my $Bayes = $self->{main}{bayes_scanner};
+  my $Bayes = $self->{main}->call_plugins("learner_get_implementation");
   return "Bayes not available" unless defined $Bayes;
   my $ns = $self->{bayes_nspam};
   my $nh = $self->{bayes_nham};
