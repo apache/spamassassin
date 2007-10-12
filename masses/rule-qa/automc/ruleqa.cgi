@@ -376,7 +376,7 @@ sub show_default_view {
     'YYYYMMDD' in the DateRev text field for a specific date,
     or <a href='!daterev=last-night!'>last night's nightly run</a>,
     <a href='!daterev=today!'>today's nightly run</a>,
-    or <a href='!daterev=last-net!'>the most recent --net run</a>, or
+    <a href='!daterev=last-net!'>the most recent --net run</a>, or
     <a href='!daterev=last-preflight!'>the most recent 'preflight' mass-check</a>.
   </div>
   </td>
