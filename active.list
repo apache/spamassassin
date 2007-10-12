@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: alexb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi; day 2: alexb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi; day 3: alexb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi
+# with results from: day 1: alexb bb-fredt bb-jm bb-zmi daf dos jm theo zmi; day 2: alexb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi; day 3: alexb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -218,6 +218,9 @@ FH_HOST_ALMOST_IP
 FH_HOST_EQ_DYNAMICIP
 
 # good enough
+FH_HOST_EQ_D_D_D_D
+
+# good enough
 FH_HOST_EQ_PACBELL_D
 
 # good enough
@@ -239,6 +242,9 @@ FH_MSGID_XXX
 FH_XMAIL_REPLACE
 
 # good enough
+FM_DDDD_TIMES_2
+
+# good enough
 FM_DOESNT_SAY_STOCK
 
 # good enough
@@ -252,6 +258,9 @@ FM_SCHOOL_DIPLOMA
 
 # good enough
 FM_SEX_HELODDDD
+
+# good enough
+FM_SEX_HOSTDDDD
 
 # good enough
 FM_SUBJ_APPROVE
@@ -401,7 +410,13 @@ HS_INDEX_PARAM
 HTML_CHARSET_FARAWAY
 
 # good enough
+JM_0800_GMT
+
+# good enough
 JM_FAKE_PSMTP_RCVD
+
+# good enough
+JM_GMT_RCVD
 
 # good enough
 JM_I_FEEL_LUCKY
@@ -749,25 +764,37 @@ TVD_STOCK1
 TVD_VISIT_PHARMA
 
 # good enough
-AXB_MIME_IMG830
+AXB_RCVD_ZOOBSEND
 
 # good enough
-FB_MED1CAT
+AXB_RCVD_ZOONAT
 
 # good enough
-FB_WITHOUT_PRESC
+AXB_XTIDX_CHAIN
 
 # good enough
-FS_YOUR_PRESCRIP
+FB_SMALL_PEN
 
 # good enough
-JM_0800_GMT
+FM_MORTGAGE3PLUS
 
 # good enough
-JM_GMT_RCVD
+FRT_ERECTION
 
 # good enough
-JM_HDRORDER_CTYPE
+FRT_OPPORTUN1
+
+# good enough
+FS_ABIGGER
+
+# good enough
+KAM_LOTTO1
+
+# good enough
+KAM_LOTTO2
+
+# good enough
+KAM_LOTTO3
 
 # tflags net
 RCVD_IN_DSBL
@@ -780,9 +807,6 @@ RCVD_IN_SORBS_DUL
 
 # tflags net
 RCVD_IN_XBL
-
-# good enough
-TVD_PDF_FINGER01
 
 # tflags net
 WHOIS_MONIKER_ROLE
