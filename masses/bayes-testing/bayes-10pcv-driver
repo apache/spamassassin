@@ -49,6 +49,7 @@ rm -rf $results $tmpdir
 mkdir -p $results $tmpdir/rules
 cp ../rules/23_bayes.cf $tmpdir/rules
 cp ../rules/50*.cf $tmpdir/rules
+cp ../rules/*.pre $tmpdir/rules         # ensure we have plugins
 
 # tell SpamAssassin to use this path for DBs
 # TODO: for tests of these settings, read from a test-specific file
