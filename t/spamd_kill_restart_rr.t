@@ -46,7 +46,7 @@ for $retry (0 .. 9) {
   start_spamd("-D -L --round-robin -r ${pid_file}");
 
   dbgprint "Waiting for spamd at pid $pid1 to restart...\n";
-  wait_for_file_to_appear ($pid_file, 20);
+  wait_for_file_to_appear ($pid_file, 40);
   ok (-e $pid_file) or warn "$pid_file does not exist post restart";
   ok (!-z $pid_file) or warn "$pid_file is empty post restart";
   ok ($pid2 = read_from_pidfile($pid_file));
