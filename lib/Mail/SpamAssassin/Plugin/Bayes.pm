@@ -241,7 +241,9 @@ sub new {
 
 sub finish {
   my $self = shift;
-  $self->{store}->untie_db();
+  if ($self->{store}) {
+    $self->{store}->untie_db();
+  }
   %{$self} = ();
 }
 
