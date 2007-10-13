@@ -59,6 +59,7 @@ bayes_path                $tmpdir/dbs/bayes
 bayes_auto_learn          0
 bayes_min_ham_num         10
 bayes_min_spam_num        10
+bayes_store_module Mail::SpamAssassin::BayesStore::SDBM
 
 " > $tmpdir/rules/30bayes_path.cf
 mkdir $tmpdir/dbs
