@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: alexb bb-fredt bb-jm bb-zmi daf dos jm theo zmi; day 2: alexb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi; day 3: alexb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi
+# with results from: day 1: alexb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi; day 2: alexb bb-fredt bb-jm bb-zmi daf dos jm theo zmi; day 3: alexb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -275,6 +275,9 @@ FRAGMENTED_MESSAGE
 FRT_BEFORE
 
 # good enough
+FRT_BIGGERMEM1
+
+# good enough
 FRT_DISCOUNT
 
 # good enough
@@ -314,6 +317,9 @@ FS_EJACULA
 FS_ERECTION
 
 # good enough
+FS_LARGE_PERCENT2
+
+# good enough
 FS_MORE_CONFIDENT
 
 # good enough
@@ -333,9 +339,6 @@ FUZZY_MERIDIA
 
 # good enough
 FU_LONG_QUERY3
-
-# good enough
-GEO_QUERY_STRING
 
 # tflags userconf
 GTUBE
@@ -764,37 +767,19 @@ TVD_STOCK1
 TVD_VISIT_PHARMA
 
 # good enough
-AXB_RCVD_ZOOBSEND
+AXB_MIME_IMG830
 
 # good enough
-AXB_RCVD_ZOONAT
+FB_B0NUS
 
 # good enough
-AXB_XTIDX_CHAIN
+FB_MED1CAT
 
 # good enough
-FB_SMALL_PEN
+FS_YOUR_PRESCRIP
 
 # good enough
-FM_MORTGAGE3PLUS
-
-# good enough
-FRT_ERECTION
-
-# good enough
-FRT_OPPORTUN1
-
-# good enough
-FS_ABIGGER
-
-# good enough
-KAM_LOTTO1
-
-# good enough
-KAM_LOTTO2
-
-# good enough
-KAM_LOTTO3
+GAMES
 
 # tflags net
 RCVD_IN_DSBL
@@ -807,6 +792,9 @@ RCVD_IN_SORBS_DUL
 
 # tflags net
 RCVD_IN_XBL
+
+# good enough
+TVD_PDF_FINGER01
 
 # tflags net
 WHOIS_MONIKER_ROLE
