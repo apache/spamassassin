@@ -980,7 +980,7 @@ sub dump_db_toks {
     # We have the value already, so just unpack it.
     my ($ts, $th, $atime) = $self->tok_unpack ($tokvalue);
     
-    my $prob = $self->{bayes}->compute_prob_for_token($tok, $vars[1], $vars[2], $ts, $th);
+    my $prob = $self->{bayes}->_compute_prob_for_token($tok, $vars[1], $vars[2], $ts, $th);
     $prob ||= 0.5;
     
     my $encoded_tok = unpack("H*",$tok);
