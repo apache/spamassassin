@@ -1432,13 +1432,13 @@ sub _opportunistic_calls {
 
     # sync will bring the DB R/W as necessary, and the expire will remove
     # the running_expire token, may untie as well.
-    $self->sync(1,1);
+    $self->{main}->{bayes_scanner}->sync(1,1);
   }
   elsif ( $self->{store}->sync_due() ) {
     dbg("bayes: opportunistic call found journal sync due");
 
     # sync will bring the DB R/W as necessary, may untie as well
-    $self->sync(1,0);
+    $self->{main}->{bayes_scanner}->sync(1,0);
 
     # We can only remove the running_expire token if we're doing R/W
     if ($self->{store}->db_writable()) {
