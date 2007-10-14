@@ -2610,6 +2610,77 @@ module.
     }
   });
 
+=item osbf_path /path/filename	(default: ~/.spamassassin/osbf)
+
+This is the directory and filename for Bayes databases.  Several databases
+will be created, with this as the base directory and filename, with C<_toks>,
+C<_seen>, etc. appended to the base.  The default setting results in files
+called C<~/.spamassassin/osbf_seen>, C<~/.spamassassin/osbf_toks>, etc.
+
+By default, each user has their own in their C<~/.spamassassin> directory with
+mode 0700/0600.  For system-wide SpamAssassin use, you may want to reduce disk
+space usage by sharing this across all users.  However, Bayes appears to be
+more effective with individual user databases.
+
+=cut
+
+  push (@cmds, {
+    setting => 'osbf_path',
+    is_admin => 1,
+    default => '__userstate__/osbf',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      unless (defined $value && $value !~ /^$/) {
+	return $MISSING_REQUIRED_VALUE;
+      }
+      if (-d $value) {
+	return $INVALID_VALUE;
+      }
+     $self->{osbf_path} = $value;
+    }
+  });
+
+=item osbf_file_mode		(default: 0700)
+
+The file mode bits used for the Bayesian filtering database files.
+
+Make sure you specify this using the 'x' mode bits set, as it may also be used
+to create directories.  However, if a file is created, the resulting file will
+not have any execute bits set (the umask is set to 111). The argument is a
+string of octal digits, it is converted to a numeric value internally.
+
+=cut
+
+  push (@cmds, {
+    setting => 'osbf_file_mode',
+    is_admin => 1,
+    default => '0700',
+    type => $CONF_TYPE_NUMERIC
+  });
+
+=item osbf_store_module Name::Of::BayesStore::Module
+
+If this option is set, the module given will be used as an alternate
+to the default osbf storage mechanism.  It must conform to the
+published storage specification (see
+Mail::SpamAssassin::BayesStore). For example, set this to
+Mail::SpamAssassin::BayesStore::SQL to use the generic SQL storage
+module.
+
+=cut
+
+  push (@cmds, {
+    setting => 'osbf_store_module',
+    is_admin => 1,
+    default => '',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      local ($1);
+      if ($value !~ /^([_A-Za-z0-9:]+)$/) { return $INVALID_VALUE; }
+      $self->{osbf_store_module} = $1;
+    }
+  });
+
 =item bayes_sql_dsn DBI::databasetype:databasename:hostname:port
 
 Used for BayesStore::SQL storage implementation.
