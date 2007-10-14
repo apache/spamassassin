@@ -27,40 +27,40 @@ require_version @@VERSION@@
 
 ###########################################################################
 
-ifplugin Mail::SpamAssassin::Plugin::Bayes
+ifplugin Mail::SpamAssassin::Plugin::OSBF
 
-body BAYES_00		eval:check_bayes('0.00', '0.01')
-body BAYES_05		eval:check_bayes('0.01', '0.05')
-body BAYES_20		eval:check_bayes('0.05', '0.20')
-body BAYES_40		eval:check_bayes('0.20', '0.40')
+body OSBF_00		eval:check_osbf('0.00', '0.01')
+body OSBF_05		eval:check_osbf('0.01', '0.05')
+body OSBF_20		eval:check_osbf('0.05', '0.20')
+body OSBF_40		eval:check_osbf('0.20', '0.40')
 
 # note: tread carefully around 0.5... the Bayesian classifier
 # will use that for anything it's unsure about, or if it's untrained.
-body BAYES_50		eval:check_bayes('0.40', '0.60')
+body OSBF_50		eval:check_osbf('0.40', '0.60')
 
-body BAYES_60		eval:check_bayes('0.60', '0.80')
-body BAYES_80		eval:check_bayes('0.80', '0.95')
-body BAYES_95		eval:check_bayes('0.95', '0.99')
-body BAYES_99		eval:check_bayes('0.99', '1.00')
+body OSBF_60		eval:check_osbf('0.60', '0.80')
+body OSBF_80		eval:check_osbf('0.80', '0.95')
+body OSBF_95		eval:check_osbf('0.95', '0.99')
+body OSBF_99		eval:check_osbf('0.99', '1.00')
 
-tflags BAYES_00		nice learn
-tflags BAYES_05		nice learn
-tflags BAYES_20		nice learn
-tflags BAYES_40		nice learn
-tflags BAYES_50		learn
-tflags BAYES_60		learn
-tflags BAYES_80		learn
-tflags BAYES_95		learn
-tflags BAYES_99		learn
+tflags OSBF_00		nice learn
+tflags OSBF_05		nice learn
+tflags OSBF_20		nice learn
+tflags OSBF_40		nice learn
+tflags OSBF_50		learn
+tflags OSBF_60		learn
+tflags OSBF_80		learn
+tflags OSBF_95		learn
+tflags OSBF_99		learn
 
-describe BAYES_00	Bayes spam probability is 0 to 1%
-describe BAYES_05	Bayes spam probability is 1 to 5%
-describe BAYES_20	Bayes spam probability is 5 to 20%
-describe BAYES_40	Bayes spam probability is 20 to 40%
-describe BAYES_50	Bayes spam probability is 40 to 60%
-describe BAYES_60	Bayes spam probability is 60 to 80%
-describe BAYES_80	Bayes spam probability is 80 to 95%
-describe BAYES_95	Bayes spam probability is 95 to 99%
-describe BAYES_99	Bayes spam probability is 99 to 100%
+describe OSBF_00	OSBF spam probability is 0 to 1%
+describe OSBF_05	OSBF spam probability is 1 to 5%
+describe OSBF_20	OSBF spam probability is 5 to 20%
+describe OSBF_40	OSBF spam probability is 20 to 40%
+describe OSBF_50	OSBF spam probability is 40 to 60%
+describe OSBF_60	OSBF spam probability is 60 to 80%
+describe OSBF_80	OSBF spam probability is 80 to 95%
+describe OSBF_95	OSBF spam probability is 95 to 99%
+describe OSBF_99	OSBF spam probability is 99 to 100%
 
 endif

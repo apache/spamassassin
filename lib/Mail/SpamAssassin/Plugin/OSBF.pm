@@ -197,7 +197,7 @@ sub new {
   $self->{conf} = $main->{conf};
   $self->{use_ignores} = 1;
 
-  $self->register_eval_rule("check_bayes");
+  $self->register_eval_rule("check_osbf");
   $self;
 }
 
@@ -224,14 +224,16 @@ sub learner_get_implementation {
 
 ###########################################################################
 
-sub check_bayes {
+sub check_osbf {
   my ($self, $pms, $fulltext, $min, $max) = @_;
 
   return 0 if (!$pms->{conf}->{use_learner});
   return 0 if (!$pms->{conf}->{use_bayes} || !$pms->{conf}->{use_bayes_rules});
 
+  # TODO: osbf_score?
+
   if (!exists ($pms->{bayes_score})) {
-    my $timer = $self->{main}->time_method("check_bayes");
+    my $timer = $self->{main}->time_method("check_osbf");
     $pms->{bayes_score} = $self->scan($pms, $pms->{msg});
   }
 
@@ -723,6 +725,11 @@ sub scan {
   my @touch_tokens = ();
   my $log_each_token = (would_log('dbg', 'osbf') > 1);
 
+  # A variant of the Winnow classifier algorithm, as described in
+  # section 2 of _Combining Winnow and Orthogonal Sparse Bigrams
+  # for Incremental Spam Filtering_, Siefkes, Assis, Chhabra
+  # and Yerazunis.
+
   my %pw;
   my $total_spam = 0;
   my $total_ham = 0;
@@ -731,13 +738,7 @@ sub scan {
     if (!defined $tok_spam || !defined $tok_ham) {
       ($tok_spam, $tok_ham, undef) = $self->{store}->tok_get ($token);
     }
-    next if ($tok_spam == 0 && $tok_ham == 0);
-
-    # A variant of the Winnow classifier algorithm, as described in
-    # section 2 of _Combining Winnow and Orthogonal Sparse Bigrams
-    # for Incremental Spam Filtering_, Siefkes, Assis, Chhabra
-    # and Yerazunis.
-
+    next if ($tok_spam == 0 && $tok_ham == 0);  # both not found
     my $w_spam = $tok_spam || 1.0;
     my $w_ham = $tok_ham || 1.0;
     $total_spam += $w_spam;

@@ -47,7 +47,7 @@ rm -rf $results $tmpdir
 
 # now, just copy in the Bayes ruleset
 mkdir -p $results $tmpdir/rules
-cp ../rules/23_bayes.cf $tmpdir/rules
+cp ../rules/23_*.cf $tmpdir/rules
 cp ../rules/50*.cf $tmpdir/rules
 cp ../rules/*.pre $tmpdir/rules         # ensure we have plugins
 
