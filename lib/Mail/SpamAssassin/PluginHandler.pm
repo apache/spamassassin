@@ -77,6 +77,16 @@ sub new {
 sub load_plugin {
   my ($self, $package, $path, $silent) = @_;
 
+  # Don't load the same plugin twice!
+  # Do this *before* calling ->new(), otherwise eval rules will be
+  # registered on a nonexistent object
+  foreach my $old_plugin (@{$self->{plugins}}) {
+    if (ref($old_plugin) eq $package) {
+      dbg("plugin: did not register $package, already registered");
+      return;
+    }
+  }
+
   my $ret;
   if ($path) {
     # bug 3717:
@@ -119,14 +129,6 @@ sub load_plugin {
 
   if ($@ || !$plugin) {
     warn "plugin: failed to create instance of plugin $package: $@\n";
-  }
-
-  # Don't load the same plugin twice!
-  foreach my $old_plugin (@{$self->{plugins}}) {
-    if (ref($old_plugin) eq ref($plugin)) {
-      dbg("plugin: did not register $plugin, already registered");
-      return;
-    }
   }
 
   if ($plugin) {
