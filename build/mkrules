@@ -420,13 +420,13 @@ sub rule_file_compile {
       my $origname = $name;
       if ($issandbox) {
         $name = sandbox_rule_name_avoid_collisions($name, $f);
+        # comment "score" lines for sandbox rules (bug 5558)
+        # if the scores were found in the sandbox and not in, say, 'scores'
+        if ($type eq 'score' && $rules->{$name}->{issandbox}) {
+          $orig =~ s/^/#/g;
+        }
       }
-      # non-sandbox rules always use the same name
-
-      # comment "score" lines for sandbox rules (bug 5558)
-      if ($type eq 'score' && $rules->{$name}->{issandbox}) {
-        $orig =~ s/^/#/g;
-      }
+      # non-sandbox rules always use the same name and get to use their scores
 
       if (!$rules->{$name}) { $rules->{$name} = rule_entry_create(); }
       $rules->{$name}->{issandbox} = $issandbox;
