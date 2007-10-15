@@ -1491,7 +1491,7 @@ sub http_make_request {
   return 'finished' if ($headers{'finished'});
 
   my $gzpath = '';
-  if ($headers{'content-length'}) {
+  if ($headers{'content-type'} eq 'application/x-gzip') {
     my $gzfd;
     ($gzpath, $gzfd) = Mail::SpamAssassin::Util::secure_tmpfile();
     die "Can't make tempfile, exiting" unless $gzpath;
