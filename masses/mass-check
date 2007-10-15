@@ -1054,6 +1054,7 @@ sub handle_http_request {
   # read in the request (POST / HTTP/1.0)
   my $line = $socket->getline();
   $line ||= '';
+  $rcvd_bytes += length($line);
   $line =~ s/\r\n$//;
 
   my ($type, $URI, $VERS) = $line =~ /^([a-zA-Z]+)\s+(\S+)(?:\s*(\S+))/;
@@ -1070,6 +1071,7 @@ sub handle_http_request {
   do {
     $line = $socket->getline();
     last unless defined $line;
+    $rcvd_bytes += length($line);
     $line =~ s/\r\n$//;
 
     if ($line) {
@@ -1081,6 +1083,7 @@ sub handle_http_request {
   # if this is a POST request w/ content-length, there'll be a payload, deal
   # with it.
   if ($type eq 'POST' && $headers->{'content-length'}) {
+    $rcvd_bytes += $headers->{'content-length'};
     my $pd;
     $socket->read($pd, $headers->{'content-length'});
     $pd =~ s/[\r\n]+$//; # a hack for manual requests/telnet/etc
@@ -1418,28 +1421,54 @@ sub run_through_messages {
 sub http_response {
   my($socket, $result, $headers, $data) = @_;
 
+  $headers->{'Content-Length'} = length $data;
+
   print $socket
     "HTTP/1.0 $result\r\n",
     "Pragma: no-cache\r\n",
     "Server: mass-check/$svn_revision\r\n",
-    map { "$_: ".$headers->{$_}."\r\n" } keys %{$headers};
-  print $socket "\r\n";
+    (map { "$_: ".$headers->{$_}."\r\n" } keys %{$headers}), "\r\n";
   print $socket $data;
+
+  if ($opt_cs_verbose) {
+    $sent_bytes += length(
+      "HTTP/1.0 $result\r\n".
+      "Pragma: no-cache\r\n".
+      "Server: mass-check/$svn_revision\r\n");
+    # length of a map output isn't what the other end claims to see
+    while (my($f,$v) = each %{$headers}) {
+      $sent_bytes += length($f) + length($v) + 4;
+    }
+    $sent_bytes += 2 + length($data);
+  }
 }
 
 # the client needs to make a request to the server on a given socket.
 sub http_make_request {
   my($socket, $type, $uri, $headers, $data) = @_;
 
+  $headers->{'Content-Length'} = length $data;
+
   print $socket
     "$type $uri HTTP/1.0\r\n",
     "User-Agent: mass-check/$svn_revision\r\n",
-    map { "$_: ".$headers->{$_}."\r\n" } keys %{$headers};
-  print $socket "\r\n";
+    (map { "$_: ".$headers->{$_}."\r\n" } keys %{$headers}), "\r\n";
   print $socket $data;
+
+  if ($opt_cs_verbose) {
+    $sent_bytes += length(
+      "$type $uri HTTP/1.0\r\n".
+      "User-Agent: mass-check/$svn_revision\r\n");
+    # length of a map output isn't what the other end claims to see
+    while (my($f,$v) = each %{$headers}) {
+      $sent_bytes += length($f) + length($v) + 4;
+    }
+    $sent_bytes += 2 + length($data);
+  }
 
   # parse the response that the server sends us
   my $line = $socket->getline() || '';
+  $rcvd_bytes += length($line);
   my(undef, $code, $string) = split(/\s+/, $line, 3);
   return unless $code == 200;
 
@@ -1447,6 +1476,7 @@ sub http_make_request {
   do {
     $line = $socket->getline();
     last unless defined $line;
+    $rcvd_bytes += length($line);
     $line =~ s/\r\n$//;
 
     if ($line) {
@@ -1454,6 +1484,7 @@ sub http_make_request {
       $headers{lc $k} = $v;
     }
   } while ($line !~ /^$/);
+  $rcvd_bytes += $headers{'content-length'} if $headers{'content-length'};
 
   # the server has sent us notification that it's going to exit, so let's
   # follow suit.
@@ -1526,7 +1557,6 @@ sub read_line {
   # read in the rest of the single message
   $fd->read($msg, $length) || return;
 
-  $rcvd_bytes += $length + 4;
   return $msg;
 }
 
@@ -1535,7 +1565,6 @@ sub send_line {
   foreach ( @_ ) {
     my $length = pack("V", length $_);
     $fd->print($length.$_) || return 0;
-    $sent_bytes += (length $_) + 4;
   }
 
   return 1;
@@ -1653,7 +1682,6 @@ sub server_mode {
 	    http_response($socket, "200 OK", {
 	      'Content-Type' => 'application/x-gzip',
 	      'Content-Encoding' => 'x-gzip',
-	      "Content-Length" => (-s $messages),
 	      },
 	      scalar <MSG>);
 
@@ -1803,7 +1831,6 @@ sub client_mode {
     my $result = http_make_request($socket, 'POST', $uri, {
       'Host'		=> $host,
       'Content-Type'	=> 'application/x-www-form-urlencoded',
-      'Content-Length'	=> length($POSTDATA),
       },
       $POSTDATA
     );
