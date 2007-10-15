@@ -724,13 +724,14 @@ sub scan {
 
   my @touch_tokens = ();
   my $log_each_token = (would_log('dbg', 'osbf') > 1);
+  my $keep_pw = $self->{main}->have_plugin("bayes_scan");
+  my %pw;
 
   # A variant of the Winnow classifier algorithm, as described in
   # section 2 of _Combining Winnow and Orthogonal Sparse Bigrams
   # for Incremental Spam Filtering_, Siefkes, Assis, Chhabra
   # and Yerazunis.
 
-  my %pw;
   my $total_spam = 0;
   my $total_ham = 0;
   foreach my $tokendata (@{$tokensdata}) {
@@ -747,12 +748,12 @@ sub scan {
     # update the atime on this token, it proved useful
     push(@touch_tokens, $token);
 
-dbg("osbf: token '$msgtokens->{$token}' => s=$tok_spam / h=$tok_ham");
+# dbg("osbf: token '$msgtokens->{$token}' => s=$tok_spam / h=$tok_ham");
     if ($log_each_token) {
       dbg("osbf: token '$msgtokens->{$token}' => s=$tok_spam / h=$tok_ham");
     }
 
-    $pw{$token} = {
+    $keep_pw and $pw{$token} = {
       prob => 0.5,
       spam_count => $w_spam,      # TODO, does this make sense?
       ham_count => $w_ham,
