@@ -107,6 +107,7 @@ sub do_rbl_lookup {
 
     my $ent = {
       key => $key,
+      zone => $host,  # may serve to fetch other per-zone settings
       type => "DNSBL-".$type,
       sets => [ ],  # filled in below
       rules => [ ], # filled in below
@@ -114,10 +115,9 @@ sub do_rbl_lookup {
     };
 
     my $id = $self->{resolver}->bgsend($host, $type, undef, sub {
-        my $pkt = shift;
-        my $id = shift;
+        my ($pkt, $id, $timestamp) = @_;
         $self->process_dnsbl_result($ent, $pkt);
-        $self->{async}->report_id_complete($id);
+        $self->{async}->report_id_complete($id,$key,$timestamp);
       });
 
     $ent->{id} = $id;     # tie up the loose end
@@ -156,16 +156,16 @@ sub do_dns_lookup {
 
   my $ent = {
     key => $key,
+    zone => $host,  # may serve to fetch other per-zone settings
     type => "DNSBL-".$type,
     rules => [ $rule ],
     # id is filled in after we send the query below
   };
 
   my $id = $self->{resolver}->bgsend($host, $type, undef, sub {
-      my $pkt = shift;
-      my $id = shift;
+      my ($pkt, $id, $timestamp) = @_;
       $self->process_dnsbl_result($ent, $pkt);
-      $self->{async}->report_id_complete($id);
+      $self->{async}->report_id_complete($id,$key,$timestamp);
     });
 
   $ent->{id} = $id;     # tie up the loose end
@@ -328,101 +328,78 @@ sub process_dnsbl_set {
 sub harvest_until_rule_completes {
   my ($self, $rule) = @_;
 
-  return if !defined $self->{async}->get_last_start_lookup_time();
+  dbg("dns: harvest_until_rule_completes");
+  my $result = 0;
+  my $total_waiting_time = 0;
 
-  my $deadline = $self->{conf}->{rbl_timeout} + $self->{async}->get_last_start_lookup_time();
-  my $now = time;
+  for (my $first=1;  ; $first=0) {
+    # complete_lookups() may call completed_callback(), which may
+    # call start_lookup() again (like in Plugin::URIDNSBL)
+    my ($alldone,$anydone,$waiting_time) =
+      $self->{async}->complete_lookups($first ? 0 : 1.0,  1);
+    $total_waiting_time += $waiting_time;
 
-  # should not give up before at least attempting to collect some responses
-  # even if previous checks already exceeded rbl_timeout
-  my $notbefore = $now + 1.2;  # at least 1 second from now (time is integer)
+    $result = 1  if $self->is_rule_complete($rule);
+    last  if $result || $alldone;
 
-  my @left = $self->{async}->get_pending_lookups();
-  my $total = scalar @left;
-
-  while ( (($now < $deadline) || ($now < $notbefore)) &&
-          !$self->{async}->complete_lookups(1))
-  {
-    dbg(sprintf("dns: harvest_until_rule_completes: on extended time, ".
-                "overdue by %.3f s, still %.3f s",
-        $now-$deadline, $notbefore-$now))  if $now >= $deadline;
-
-    if ($self->is_rule_complete($rule)) {
-      return 1;
-    }
-
+    dbg("dns: harvest_until_rule_completes - check_tick");
     $self->{main}->call_plugins ("check_tick", { permsgstatus => $self });
-    @left = $self->{async}->get_pending_lookups();
-
-    # complete_lookups could cause a change in get_last_start_lookup_time
-    $deadline = $self->{conf}->{rbl_timeout} +
-                $self->{async}->get_last_start_lookup_time();
-
-    # dynamic timeout
-    my $dynamic = (int($self->{conf}->{rbl_timeout}
-                      * (1 - 0.7*(($total - @left) / $total) ** 2) + 1)
-                  + $self->{async}->get_last_start_lookup_time());
-    $deadline = $dynamic if ($dynamic < $deadline);
-    $now = time;
   }
+  dbg("dns: timing: %.3f s sleeping in harvest_until_rule_completes",
+      $total_waiting_time)  if $total_waiting_time > 0;
+
+  return $result;
 }
 
 sub harvest_dnsbl_queries {
   my ($self) = @_;
 
-  return if !defined $self->{async}->get_last_start_lookup_time();
+  dbg("dns: harvest_dnsbl_queries");
+  my $total_waiting_time = 0;
 
-  my $deadline = $self->{conf}->{rbl_timeout} + $self->{async}->get_last_start_lookup_time();
-  my $now = time;
+  for (my $first=1;  ; $first=0) {
 
-  # should not give up before at least attempting to collect some responses
-  # (which may have arrived by now), even if previous checks (like Razor,
-  # dcc, Botnet, rules) already exceeded rbl_timeout
-  my $notbefore = $now + 1.2;  # at least 1 second from now (time is integer)
+    # complete_lookups() may call completed_callback(), which may
+    # call start_lookup() again (like in Plugin::URIDNSBL)
 
-  my @left = $self->{async}->get_pending_lookups();
-  my $total = scalar @left;
+    # the first time around we specify a 0 timeout, which gives
+    # complete_lookups a chance to ripe any available results and
+    # abort overdue requests, without needlessly waiting for more
 
-  while ( (($now < $deadline) || ($now < $notbefore)) &&
-          !$self->{async}->complete_lookups(1))
-  {
-    dbg(sprintf("dns: harvest_dnsbl_queries: on extended time, ".
-                "overdue by %.3f s, still %.3f s",
-        $now-$deadline, $notbefore-$now))  if $now >= $deadline;
+    my ($alldone,$anydone,$waiting_time) =
+      $self->{async}->complete_lookups($first ? 0 : 1.0,  1);
+    $total_waiting_time += $waiting_time;
 
+    last  if $alldone;
+
+    dbg("dns: harvest_dnsbl_queries - check_tick");
     $self->{main}->call_plugins ("check_tick", { permsgstatus => $self });
-    @left = $self->{async}->get_pending_lookups();
-
-    # complete_lookups() may have called completed_callback, which may call
-    # start_lookup() again (like in URIDNSBL), so get_last_start_lookup_time
-    # may have changed and deadline needs to be recomputed
-    $deadline = $self->{conf}->{rbl_timeout} +
-                $self->{async}->get_last_start_lookup_time();
-
-    # dynamic timeout
-    my $dynamic = (int($self->{conf}->{rbl_timeout}
-                      * (1 - 0.7*(($total - @left) / $total) ** 2) + 1)
-                  + $self->{async}->get_last_start_lookup_time());
-    $deadline = $dynamic if ($dynamic < $deadline);
-    $now = time;    # and loop again
   }
 
-  dbg("dns: success for " . ($total - @left) . " of $total queries");
-
-  # timeouts
-  @left = $self->{async}->get_pending_lookups();
-  $now = time;
-  for my $query (@left) {
-    my $string = join(", ", grep { defined }
-                      map { ref $query->{$_} ? @{$query->{$_}} : $query->{$_} }
-                      qw(sets rules rulename type key) );
-    my $delay = $now - $self->{async}->get_last_start_lookup_time();
-    dbg("dns: timeout for $string after $delay seconds");
-  }
-
-  # and explicitly abort anything left
+  # explicitly abort anything left
   $self->{async}->abort_remaining_lookups();
+  $self->{async}->log_lookups_timing();
   $self->mark_all_async_rules_complete();
+  dbg("dns: timing: %.3f s sleeping in harvest_dnsbl_queries",
+      $total_waiting_time)  if $total_waiting_time > 0;
+  1;
+}
+
+# collect and process whatever DNS responses have already arrived,
+# don't waste time waiting for more, don't poll too often.
+# don't abort any queries even if overdue, 
+sub harvest_completed_queries {
+  my ($self) = @_;
+
+  # don't bother collecting responses too often
+  my $last_poll_time = $self->{async}->last_poll_responses_time();
+  return if defined $last_poll_time && time - $last_poll_time < 0.1;
+
+  my ($alldone,$anydone) = $self->{async}->complete_lookups(0, 0);
+  if ($anydone) {
+    dbg("dns: harvested completed queries");
+#   $self->{main}->call_plugins ("check_tick", { permsgstatus => $self });
+  }
 }
 
 sub set_rbl_tag_data {
@@ -480,11 +457,12 @@ sub lookup_ns {
 	}
       }
       $nsrecords = $self->{dnscache}->{NS}->{$dom} = [ @nses ];
-    };
-    if ($@) {
-      dbg("dns: NS lookup failed horribly, perhaps bad resolv.conf setting? ($@)");
+      1;
+    } or do {
+      my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+      dbg("dns: NS lookup failed horribly, perhaps bad resolv.conf setting? ($eval_stat)");
       return undef;
-    }
+    };
   }
 
   $nsrecords;
@@ -514,11 +492,12 @@ sub lookup_mx {
       }
 
       $mxrecords = $self->{dnscache}->{MX}->{$dom} = [ @ips ];
-    };
-    if ($@) {
-      dbg("dns: MX lookup failed horribly, perhaps bad resolv.conf setting? ($@)");
+      1;
+    } or do {
+      my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+      dbg("dns: MX lookup failed horribly, perhaps bad resolv.conf setting? ($eval_stat)");
       return undef;
-    }
+    };
   }
 
   $mxrecords;
@@ -572,12 +551,12 @@ sub lookup_ptr {
       }
 
       $name = $self->{dnscache}->{PTR}->{$dom} = $name;
-    };
-
-    if ($@) {
-      dbg("dns: PTR lookup failed horribly, perhaps bad resolv.conf setting? ($@)");
+      1;
+    } or do {
+      my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+      dbg("dns: PTR lookup failed horribly, perhaps bad resolv.conf setting? ($eval_stat)");
       return undef;
-    }
+    };
   }
   dbg("dns: PTR for '$dom': '$name'");
 
@@ -614,12 +593,12 @@ sub lookup_a {
 	}
       }
       $self->{dnscache}->{A}->{$name} = [ @addrs ];
-    };
-
-    if ($@) {
-      dbg("dns: A lookup failed horribly, perhaps bad resolv.conf setting? ($@)");
+      1;
+    } or do {
+      my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+      dbg("dns: A lookup failed horribly, perhaps bad resolv.conf setting? ($eval_stat)");
       return undef;
-    }
+    };
   }
 
   dbg("dns: A records for '$name': ".join (' ', @addrs));
@@ -639,7 +618,8 @@ sub is_dns_available {
   # working DNS and our check interval time has passed
   if ($dnsopt eq "test" && $diff > $dnsint) {
     $IS_DNS_AVAILABLE = undef;
-    dbg("dns: is_dns_available() last checked $diff seconds ago; re-checking");
+    dbg("dns: is_dns_available() last checked %.1f seconds ago; re-checking",
+        $diff);
   }
 
   return $IS_DNS_AVAILABLE if (defined $IS_DNS_AVAILABLE);

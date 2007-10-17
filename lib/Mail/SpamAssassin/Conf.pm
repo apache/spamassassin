@@ -2411,25 +2411,35 @@ general running of SpamAssassin.
     }
   });
 
-=item rbl_timeout n		(default: 15)
+=item rbl_timeout t [t_min] [zone]		(default: 15 3)
 
-All DNS queries are made at the beginning of a check and we try to read the
-results at the end.  This value specifies the maximum period of time to wait
-for an DNS query.  If most of the DNS queries have succeeded for a particular
-message, then SpamAssassin will not wait for the full period to avoid wasting
-time on unresponsive server(s).  For the default 15 second timeout, here is a
-chart of queries remaining versus the effective timeout in seconds:
+All DNS queries are made at the beginning of a check and we try to read
+the results at the end.  This value specifies the maximum period of time
+(in seconds) to wait for an DNS query.  If most of the DNS queries have
+succeeded for a particular message, then SpamAssassin will not wait for
+the full period to avoid wasting time on unresponsive server(s), but will
+shrink the timeout according to a percentage of queries already completed.
+As the number of queries remaining approaches 0, the timeout value will
+gradually approach a t_min value, which is an optional second parameter
+and defaults to 0.2 * t.  If t is smaller than t_min, the initial timeout
+is set to t_min.  Here is a chart of queries remaining versus the timeout
+in seconds, for the default 15 second / 3 second timeout setting:
 
-  queries left    100%  90%  80%  70%  60%  50%  40%  30%  20%  10%  0%
-  timeout          15   15   14   14   13   11   10    8    5    3   0
+  queries left  100%  90%  80%  70%  60%  50%  40%  30%  20%  10%   0%
+  timeout        15   14.9 14.5 13.9 13.1 12.0 10.7  9.1  7.3  5.3  3
 
-In addition, whenever the effective timeout is lowered due to additional query
-results returning, the remaining queries are always given at least one more
-second before timing out, but the wait time will never exceed rbl_timeout.
+For example, if 20 queries are made at the beginning of a message check
+and 16 queries have returned (leaving 20%), the remaining 4 queries should
+finish within 7.3 seconds since their query started or they will be timed out.
+Note that timed out queries are only aborted when there is nothing else left
+for SpamAssassin to do - long evaluation of other rules may grant queries
+additional time.
 
-For example, if 20 queries are made at the beginning of a message check and 16
-queries have returned (leaving 20%), the remaining 4 queries must finish
-within 5 seconds of the beginning of the check or they will be timed out.
+If a parameter 'zone' is specified (it must end with a letter, which
+distinguishes it from other numeric parametrs), then the setting only
+applies to DNS queries against the specified DNS domain (host, domain or
+RBL (sub)zone).  Matching is case-insensitive, the actual domain may be a
+subdomain of the specified zone.
 
 =cut
 
@@ -2437,7 +2447,29 @@ within 5 seconds of the beginning of the check or they will be timed out.
     setting => 'rbl_timeout',
     is_admin => 1,
     default => 15,
-    type => $CONF_TYPE_NUMERIC
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      unless (defined $value && $value !~ /^$/) {
+	return $MISSING_REQUIRED_VALUE;
+      }
+      local ($1,$2,$3);
+      unless ($value =~ /^        ( [+-]? \d+ (?: \. \d*)? )
+                          (?: \s+ ( [+-]? \d+ (?: \. \d*)? ) )?
+                          (?: \s+ (\S* [a-zA-Z]) )? $/xs) {
+	return $INVALID_VALUE;
+      }
+      my $zone = $3;
+      if (!defined $zone) {  # a global setting
+        $self->{rbl_timeout}     = $1+0;
+        $self->{rbl_timeout_min} = $2+0  if defined $2;
+      }
+      else {  # per-zone settings
+        $zone =~ s/^\.//;  $zone =~ s/\.$//;  # strip leading and trailing dot
+        $zone = lc $zone;
+        $self->{by_zone}{$zone}{rbl_timeout}     = $1+0;
+        $self->{by_zone}{$zone}{rbl_timeout_min} = $2+0  if defined $2;
+      }
+    }
   });
 
 =item util_rb_tld tld1 tld2 ...
