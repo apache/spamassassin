@@ -1081,11 +1081,28 @@ sub handle_http_request {
   } while ($line !~ /^$/);
 
   # if this is a POST request w/ content-length, there'll be a payload, deal
-  # with it.
+  # with it.  we only support compressed payloads.
   if ($type eq 'POST' && $headers->{'content-length'}) {
     $rcvd_bytes += $headers->{'content-length'};
-    my $pd;
-    $socket->read($pd, $headers->{'content-length'});
+    my $pd = '';
+    if ($headers->{'content-encoding'} eq 'x-gzip') {
+      my ($gzpath, $gzfd) = Mail::SpamAssassin::Util::secure_tmpfile();
+      die "Can't make tempfile, exiting" unless $gzpath;
+
+      my $rd;
+      $socket->read($rd, $headers->{'content-length'}) || die "mass-check: error reading in data from client\n";
+      print $gzfd $rd;
+      $gzfd->close;
+
+      my $fd = IO::Zlib->new($gzpath, "rb");
+      die "Can't open temp result file: $!" unless $fd;
+
+      $pd = read_line($fd);
+      $fd->close;
+      undef $fd;
+      $gzfd->close;
+      unlink $gzpath;
+    }
     $pd =~ s/[\r\n]+$//; # a hack for manual requests/telnet/etc
 
     # key1=value1&key2=value2...
@@ -1785,8 +1802,18 @@ sub client_mode {
     $postdata{'max_messages'} = $msgnum;
     $postdata{'paths_only'} = 1 if ($opt_cs_paths_only);
 
+    # compress the results
+    my($gzpath, $gzfd) = Mail::SpamAssassin::Util::secure_tmpfile();
+    die "Can't make tempfile, exiting" unless $gzpath;
+    $gzfd->close;
+
+    $gzfd = IO::Zlib->new($gzpath, 'wb') || die "Can't create temp gzip file: $!";
+
     # the actual POST data string
-    my $POSTDATA = join('&', map { post_encode($_) . '=' . post_encode($postdata{$_}) } keys %postdata);
+    send_line($gzfd, join('&', map { post_encode($_) . '=' . post_encode($postdata{$_}) } keys %postdata)) || 
+      die "mass-check: error when writing to gz temp file\n";
+    $gzfd->close;
+    %postdata = ();
 
     # connect to server
     my $socket;
@@ -1828,14 +1855,34 @@ sub client_mode {
     status("requesting $msgnum messages from server") if ($opt_noisy);
 
     # make request, include and then drop results if there are any
-    my $result = http_make_request($socket, 'POST', $uri, {
-      'Host'		=> $host,
-      'Content-Type'	=> 'application/x-www-form-urlencoded',
-      },
-      $POSTDATA
-    );
-    %postdata = ();
-    undef $POSTDATA;
+    my $result;
+    if (open(RESULTS, $gzpath)) {
+      binmode(RESULTS);
+
+      my $POSTDATA;
+      {
+        # slurp here, rather than into an anonymous variable in the
+        # http_make_request call so that we don't end up slurping the
+        # response from the server too
+        local $/ = undef; # slurp
+        $POSTDATA = scalar <RESULTS>;
+      }
+
+      $result = http_make_request($socket, 'POST', $uri, {
+        'Host'		=> $host,
+        'Content-Type'	=> 'application/x-www-form-urlencoded',
+        'Content-Encoding' => 'x-gzip',
+        },
+        $POSTDATA
+      );
+
+      close(RESULTS);
+      unlink $gzpath;
+      undef $gzfd;
+      undef $POSTDATA;
+    } else {
+      die "Can't make tempfile, exiting" unless $gzpath;
+    }
 
     # If we received messages to run through, go ahead and do it.
     # otherwise, just sleep for the timeout length and try again
