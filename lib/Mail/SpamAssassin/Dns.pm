@@ -110,7 +110,7 @@ sub do_rbl_lookup {
 
     my $ent = {
       key => $key,
-      timeout_initial => $self->{conf}->{rbl_timeout},
+      zone => $host,  # serves to fetch other per-zone settings
       type => "DNSBL-".$type,
       sets => [ ],  # filled in below
       rules => [ ], # filled in below
@@ -159,7 +159,7 @@ sub do_dns_lookup {
 
   my $ent = {
     key => $key,
-    timeout_initial => $self->{conf}->{rbl_timeout},
+    zone => $host,  # serves to fetch other per-zone settings
     type => "DNSBL-".$type,
     rules => [ $rule ],
     # id is filled in after we send the query below
