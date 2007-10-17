@@ -1000,27 +1000,34 @@ sub remove_running_expire_tok {
 # db abstraction: allow deferred writes, since we will be frequently
 # writing while checking.
 
-sub multi_tok_value_change {
-  my ($self, $weights, $atime) = @_;
+sub tok_count_change {
+  my ($self, $ds, $dh, $tok, $atime) = @_;
 
   $atime = 0 unless defined $atime;
 
-  foreach my $tok (keys %{$weights}) {
-    my $w = $weights->{$tok};
-    if ($self->{osbf}->{main}->{learn_to_journal}) {
+  if ($self->{bayes}->{main}->{learn_to_journal}) {
+    # we can't store the SHA1 binary value in the journal, so convert it
+    # to a printable value that can be converted back later
+    my $encoded_tok = unpack("H*",$tok);
+    $self->defer_update ("c $ds $dh $atime $encoded_tok");
+  } else {
+    $self->tok_sync_counters ($ds, $dh, $atime, $tok);
+  }
+}
+
+sub multi_tok_count_change {
+  my ($self, $ds, $dh, $tokens, $atime) = @_;
+
+  $atime = 0 unless defined $atime;
+
+  foreach my $tok (keys %{$tokens}) {
+    if ($self->{bayes}->{main}->{learn_to_journal}) {
       # we can't store the SHA1 binary value in the journal, so convert it
       # to a printable value that can be converted back later
       my $encoded_tok = unpack("H*",$tok);
-      $self->defer_update ("v $w->[0] $w->[1] $atime $encoded_tok");
-
-      # TODO: may have to disable learn to journal with Winnow. a learn op
-      # needs to update the token's value before the next learn op, since if
-      # the new value is large enough, it may avoid requiring future weight
-      # modifications on later learns.  If we defer writing new weights, then
-      # those weights will always be modified (until the next sync).
-
+      $self->defer_update ("c $ds $dh $atime $encoded_tok");
     } else {
-      $self->tok_sync_values ($w->[0], $w->[1], $atime, $tok);
+      $self->tok_sync_counters ($ds, $dh, $atime, $tok);
     }
   }
 }
@@ -1246,14 +1253,14 @@ sub _sync_journal_trapped {
       if (/^t (\d+) (.+)$/) { # Token timestamp update, cache resultant entries
 	my $tok = pack("H*",$2);
 	$tokens{$tok} = $1+0 if (!exists $tokens{$tok} || $1+0 > $tokens{$tok});
-      } elsif (/^v (-?[\.\d]+) (-?[\.\d]+) (\d+) (.+)$/) { # token value update
-	my $tok = pack("H*",$4);
-	$self->tok_sync_values ($1+0, $2+0, $3+0, $tok);
-	$count++;
+      } elsif (/^c (-?\d+) (-?\d+) (\d+) (.+)$/) { # Add/full token update
+        my $tok = pack("H*",$4);
+        $self->tok_sync_counters ($1+0, $2+0, $3+0, $tok);
+        $count++;
       } elsif (/^n (-?\d+) (-?\d+)$/) { # update ham/spam count
 	$self->tok_sync_nspam_nham ($1+0, $2+0);
 	$count++;
-      } elsif (/^m ([hsf]\S*) (.+)$/) { # update msgid seen database
+      } elsif (/^m ([hsf]) (.+)$/) { # update msgid seen database
 	if ($1 eq "f") {
 	  $self->_seen_delete_direct($2);
 	}
@@ -1314,9 +1321,16 @@ sub tok_touch_token {
   $self->tok_put ($tok, $ts, $th, $atime);
 }
 
-sub tok_sync_values {
-  my ($self, $ws, $wh, $atime, $tok) = @_;
-  $self->tok_put ($tok, $ws, $wh, $atime);
+sub tok_sync_counters {
+  my ($self, $ds, $dh, $atime, $tok) = @_;
+  my ($ts, $th, $oldatime) = $self->tok_get ($tok);
+  $ts += $ds; if ($ts < 0) { $ts = 0; }
+  $th += $dh; if ($th < 0) { $th = 0; }
+
+  # Don't roll the atime of tokens backwards ...
+  $atime = $oldatime if ($oldatime > $atime);
+
+  $self->tok_put ($tok, $ts, $th, $atime);
 }
 
 sub tok_put {
@@ -1831,14 +1845,6 @@ sub tok_unpack {
   my ($self, $value) = @_;
   $value ||= 0;
 
-  {
-    # TODO
-    my ($packed, $ts, $th, $atime);
-    ($packed, $ts, $th, $atime) = unpack("CFFS", $value);
-    return ($ts || 0, $th || 0, $atime || 0);
-  }
-
-
   my ($packed, $atime) = unpack("CV", $value);
 
   if (($packed & FORMAT_FLAG) == ONE_BYTE_FORMAT) {
@@ -1847,13 +1853,7 @@ sub tok_unpack {
 		$atime || 0);
   }
   elsif (($packed & FORMAT_FLAG) == TWO_LONGS_FORMAT) {
-    my ($packed, $ts, $th, $atime);
-    if ($self->{db_version} >= 1) {
-      ($packed, $ts, $th, $atime) = unpack("CVVV", $value);
-    }
-    elsif ($self->{db_version} == 0) {
-      ($packed, $ts, $th, $atime) = unpack("CLLS", $value);
-    }
+    my ($packed, $ts, $th, $atime) = unpack("CVVV", $value);
     return ($ts || 0, $th || 0, $atime || 0);
   }
   # other formats would go here...
@@ -1866,12 +1866,6 @@ sub tok_unpack {
 sub tok_pack {
   my ($self, $ts, $th, $atime) = @_;
   $ts ||= 0; $th ||= 0; $atime ||= 0;
-  {
-    # TODO
-    return pack ("CFFS", TWO_LONGS_FORMAT, $ts, $th, $atime);
-  }
-
-
   if ($ts < 8 && $th < 8) {
     return pack ("CV", ONE_BYTE_FORMAT | ($ts << 3) | $th, $atime);
   } else {

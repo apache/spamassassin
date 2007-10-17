@@ -52,7 +52,7 @@ use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Util qw(untaint_var);
 
-use Mail::SpamAssassin::Bayes::CombineChi;
+use Mail::SpamAssassin::Bayes::CombineNaiveBayes;
 
 use Digest::SHA1 qw(sha1 sha1_hex);
 
@@ -169,19 +169,13 @@ use constant ADD_INVIZ_TOKENS_NO_PREFIX => 0;
 # How many seconds should the opportunistic_expire lock be valid?
 $OPPORTUNISTIC_LOCK_VALID = 300;
 
-# Should we use the Robinson f(w) equation from
-# http://radio.weblogs.com/0101454/stories/2002/09/16/spamDetection.html ?
-# It gives better results, in that scores are more likely to distribute
-# into the <0.5 range for nonspam and >0.5 for spam.
-use constant USE_ROBINSON_FX_EQUATION_FOR_LOW_FREQS => 1;
+# How many of the most significant tokens should we use for the p(w)
+# calculation?
+use constant N_SIGNIFICANT_TOKENS => 999;
 
 # How many significant tokens are required for a classifier score to
 # be considered usable?
 use constant REQUIRE_SIGNIFICANT_TOKENS_TO_SCORE => -1;
-
-# How long a token should we hold onto?  (note: German speakers typically
-# will require a longer token than English ones.)
-use constant MAX_TOKEN_LENGTH => 15;
 
 ###########################################################################
 
@@ -405,66 +399,16 @@ sub _learn_trapped {
   #
   $msgatime = time if ( $msgatime - time > 86400 );
 
+  # we don't use the weights when training
   my $tokens = $self->tokenize($msg, $msgdata);
 
-  my $tokensdata = $self->{store}->tok_get_all(keys %{$tokens});
-  my $total_spam = 0;
-  my $total_ham = 0;
-  my $weights = ();
-  foreach my $tokendata (@{$tokensdata}) {
-    my ($token, $tok_spam, $tok_ham, $atime) = @{$tokendata};
-    if (!defined $tok_spam || !defined $tok_ham) {
-      ($tok_spam, $tok_ham, undef) = $self->{store}->tok_get ($token);
-    }
-    if ($tok_spam != 0 || $tok_ham != 0) {
-      # add the token to the classification
-      $total_spam += ($tok_spam || 1.0);
-      $total_ham += ($tok_ham || 1.0);
-    }
-
-    # store the weights, even if this is a previously unknown token;
-    # we'll be updating them if we decide to learn
-    $weights->{$token} = [ $tok_spam || 1.0, $tok_ham || 1.0 ];
-  }
-
-  my $div = (scalar keys %$weights || 0.00001);
-  $total_spam /= $div;
-  $total_ham /= $div;
-
-  # 5% "thick threshold" separation, see section 2.1 of the Winnow paper
-  my $skip_train;
   if ($isspam) {
-    $skip_train = ($total_spam > 1.05 && $total_ham < 0.95);
+    $self->{store}->multi_tok_count_change(1, 0, $tokens, $msgatime);
   } else {
-    $skip_train = ($total_ham > 1.05 && $total_spam < 0.95);
+    $self->{store}->multi_tok_count_change(0, 1, $tokens, $msgatime);
   }
 
-  if ($skip_train) {
-    # the message was classified correctly, with good margins; we
-    # don't need to train on it
-    dbg("osbf: skipping train, classified as h=$total_ham s=$total_spam");
-
-  } else {
-    dbg("osbf: needs train, classified as h=$total_ham s=$total_spam");
-    my $mult_spam = 1;
-    my $mult_ham = 1;
-    my $hist_spam = '.';    # symbol saved in 'seen' file to record history
-    my $hist_ham = '.';
-    if ($isspam) {
-      if ($total_spam < 1.05) { $mult_spam = 1.23; $hist_spam = '+'; }
-      if ($total_ham > 0.95) { $mult_ham = 0.83;   $hist_ham = '-'; }
-    } else {
-      if ($total_spam > 0.95) { $mult_spam = 0.83; $hist_spam = '-'; }
-      if ($total_ham < 1.05) { $mult_ham = 1.23;   $hist_ham = '+'; }
-    }
-    $self->modify_weights($mult_spam, $mult_ham, $weights, $msgatime);
-
-    # only write a "seen" entry if we actually trained on it.
-    # record which way we changed the entries ($hist_*)
-    $self->{store}->seen_put ($msgid,
-            ($isspam ? 's' : 'h').$hist_spam.$hist_ham);
-  }
-
+  $self->{store}->seen_put ($msgid, ($isspam ? 's' : 'h'));
   $self->{store}->cleanup();
 
   $self->{main}->call_plugins("bayes_learn", { toksref => $tokens,
@@ -476,15 +420,6 @@ sub _learn_trapped {
   dbg("osbf: learned '$msgid', atime: $msgatime");
 
   1;
-}
-
-sub modify_weights {
-  my ($self, $mult_spam, $mult_ham, $weights, $msgatime) = @_;
-  foreach my $w (keys %$weights) {
-    if ($mult_spam != 1) { $weights->{$w}->[0] *= $mult_spam; }
-    if ($mult_ham  != 1) { $weights->{$w}->[1] *= $mult_ham; }
-  }
-  $self->{store}->multi_tok_value_change($weights, $msgatime);
 }
 
 ###########################################################################
@@ -499,9 +434,6 @@ sub forget_message {
 
   my $msgdata = $self->get_body_from_msg ($msg);
   my $ret;
-
-  # Winnow cannot support learning to journal
-  $self->{main}->{learn_to_journal} = 0;
 
   # we still tie for writing here, since we write to the seen db
   # synchronously
@@ -540,8 +472,6 @@ sub _forget_trapped {
   my ($self, $msg, $msgdata, $msgid) = @_;
   my @msgid = ( $msgid );
   my $isspam;
-  my $hist_spam;
-  my $hist_ham;
 
   if (!defined $msgid) {
     @msgid = $self->get_msgid($msg);
@@ -551,8 +481,6 @@ sub _forget_trapped {
     my $seen = $self->{store}->seen_get ($msgid);
 
     if (defined ($seen)) {
-      $seen =~ /^(.)(.)(.)/;
-      $seen = $1;
       if ($seen eq 's') {
         $isspam = 1;
       } elsif ($seen eq 'h') {
@@ -562,8 +490,6 @@ sub _forget_trapped {
         return 0;
       }
 
-      $hist_spam = $2;
-      $hist_ham = $3;
       # messages should only be learned once, so stop if we find a msgid
       # which was seen before
       last;
@@ -585,36 +511,13 @@ sub _forget_trapped {
     $self->{store}->nspam_nham_change (0, -1);
   }
 
+  # we don't use the weights when training
   my $tokens = $self->tokenize($msg, $msgdata);
 
-  my $tokensdata = $self->{store}->tok_get_all(keys %{$tokens});
-  my $total_spam = 0;
-  my $total_ham = 0;
-  my $weights = ();
-  foreach my $tokendata (@{$tokensdata}) {
-    my ($token, $tok_spam, $tok_ham, $atime) = @{$tokendata};
-    if (!defined $tok_spam || !defined $tok_ham) {
-      ($tok_spam, $tok_ham, undef) = $self->{store}->tok_get ($token);
-    }
-
-    # ignore unknown tokens, we don't need to forget them if we
-    # never learned them in the first place
-    if ($tok_spam && $tok_ham) {
-      $weights->{$token} = [ $tok_spam, $tok_ham ];
-    }
-  }
-
-  # unlike in the "learn" case, we don't run a classify; we always need to
-  # modify the weights for a forgetting, since we're reversing the effects of a
-  # previous learn which definitely took place
-  {
-    my $mult_spam = 1;
-    my $mult_ham = 1;
-    if    ($hist_spam eq '+') { $mult_spam = 1/1.23; }
-    elsif ($hist_spam eq '-') { $mult_spam = 1/0.83; }
-    if    ($hist_ham  eq '+') { $mult_ham  = 1/1.23; }
-    elsif ($hist_ham  eq '-') { $mult_ham  = 1/0.83; }
-    $self->modify_weights($mult_spam, $mult_ham, $weights);
+  if ($isspam) {
+    $self->{store}->multi_tok_count_change (-1, 0, $tokens);
+  } else {
+    $self->{store}->multi_tok_count_change (0, -1, $tokens);
   }
 
   $self->{store}->seen_delete ($msgid);
@@ -719,54 +622,36 @@ sub scan {
   dbg("osbf: corpus size: nspam = $ns, nham = $nn");
 
   my $msgdata = $self->_get_msgdata_from_permsgstatus ($permsgstatus);
-  my $msgtokens = $self->tokenize($msg, $msgdata);
+  my ($msgtokens, $tokweights) = $self->tokenize($msg, $msgdata);
   my $tokensdata = $self->{store}->tok_get_all(keys %{$msgtokens});
 
-  my @touch_tokens = ();
-  my $log_each_token = (would_log('dbg', 'osbf') > 1);
-  my $keep_pw = $self->{main}->have_plugin("bayes_scan");
+  ## my $keep_pw = $self->{main}->have_plugin("bayes_scan");
   my %pw;
 
-  # A variant of the Winnow classifier algorithm, as described in
-  # section 2 of _Combining Winnow and Orthogonal Sparse Bigrams
-  # for Incremental Spam Filtering_, Siefkes, Assis, Chhabra
-  # and Yerazunis.
-
-  my $total_spam = 0;
-  my $total_ham = 0;
   foreach my $tokendata (@{$tokensdata}) {
     my ($token, $tok_spam, $tok_ham, $atime) = @{$tokendata};
-    if (!defined $tok_spam || !defined $tok_ham) {
-      ($tok_spam, $tok_ham, undef) = $self->{store}->tok_get ($token);
-    }
-    next if ($tok_spam == 0 && $tok_ham == 0);  # both not found
-    my $w_spam = $tok_spam || 1.0;
-    my $w_ham = $tok_ham || 1.0;
-    $total_spam += $w_spam;
-    $total_ham += $w_ham;
 
-    # update the atime on this token, it proved useful
-    push(@touch_tokens, $token);
+    my $prob = $self->_compute_prob_for_token($token, $ns, $nn,
+                $tok_spam, $tok_ham, $tokweights->{$token});
+    next unless defined $prob;
 
-# dbg("osbf: token '$msgtokens->{$token}' => s=$tok_spam / h=$tok_ham");
-    if ($log_each_token) {
-      dbg("osbf: token '$msgtokens->{$token}' => s=$tok_spam / h=$tok_ham");
-    }
-
-    $keep_pw and $pw{$token} = {
-      prob => 0.5,
-      spam_count => $w_spam,      # TODO, does this make sense?
-      ham_count => $w_ham,
+    $pw{$token} = {
+      prob => $prob,
+      spam_count => $tok_spam,
+      ham_count => $tok_ham,
       atime => $atime
     };
   }
 
   # If none of the tokens were found in the DB, we're going to skip
   # this message...
-  if (!scalar @touch_tokens) {
-    dbg("osbf: cannot use osbf on this message; none of the tokens were found in the database");
+  if (!keys %pw) {
+    dbg("bayes: cannot use osbf on this message; none of the tokens were found in the database");
     goto skip;
   }
+
+  my $tcount_total = keys %{$msgtokens};
+  my $tcount_learned = keys %pw;
 
   # Figure out the message receive time (used as atime below)
   # If the message atime comes back as being in the future, something's
@@ -776,12 +661,65 @@ sub scan {
   my $now = time;
   $msgatime = $now if ( $msgatime > $now );
 
-  # warn "JMD s=$total_spam h=$total_ham";
-  if ($total_ham > $total_spam) {
-    $score = 0.0;
-  } else {
-    $score = 1.0;
+  # now take the $count most significant tokens and calculate probs using
+  # Robinson's formula.
+  my $count = N_SIGNIFICANT_TOKENS;
+  my @sorted;
+
+  my @touch_tokens;
+  my $tinfo_spammy = $permsgstatus->{bayes_token_info_spammy} = [];
+  my $tinfo_hammy = $permsgstatus->{bayes_token_info_hammy} = [];
+
+  my %tok_strength = map { $_ => (abs($pw{$_}->{prob} - 0.5)) } keys %pw;
+  my $log_each_token = (would_log('dbg', 'osbf') > 1);
+
+  foreach my $tok (sort {
+              $tok_strength{$b} <=> $tok_strength{$a}
+            } keys %pw)
+  {
+    if ($count-- < 0) { last; }
+    # next if ($tok_strength{$tok} <
+    # $Mail::SpamAssassin::Bayes::Combine::MIN_PROB_STRENGTH);
+
+    my $pw = $pw{$tok}->{prob};
+
+    # What's more expensive, scanning headers for HAMMYTOKENS and
+    # SPAMMYTOKENS tags that aren't there or collecting data that
+    # won't be used?  Just collecting the data is certainly simpler.
+    #
+    my $raw_token = $msgtokens->{$tok} || "(unknown)";
+    my $s = $pw{$tok}->{spam_count};
+    my $n = $pw{$tok}->{ham_count};
+    my $a = $pw{$tok}->{atime};
+
+    if ($pw < 0.5) {
+      push @$tinfo_hammy,  [$raw_token,$pw,$s,$n,$a];
+    } else {
+      push @$tinfo_spammy, [$raw_token,$pw,$s,$n,$a];
+    }
+
+    push (@sorted, $pw);
+
+    # update the atime on this token, it proved useful
+    push(@touch_tokens, $tok);
+
+    # dbg("osbf: token '$raw_token' => $pw");
+    if ($log_each_token) {
+      dbg("osbf: token '$raw_token' => $pw");
+    }
   }
+
+  if (!@sorted || (REQUIRE_SIGNIFICANT_TOKENS_TO_SCORE > 0 &&
+        $#sorted <= REQUIRE_SIGNIFICANT_TOKENS_TO_SCORE))
+  {
+    dbg("osbf: cannot use osbf on this message; not enough usable tokens found");
+    goto skip;
+  }
+
+  $score = Mail::SpamAssassin::Bayes::Combine::combine($ns, $nn, \@sorted);
+
+  # Couldn't come up with a probability?
+  goto skip unless defined $score;
 
   dbg("osbf: score = $score");
 
@@ -794,11 +732,11 @@ sub scan {
   $permsgstatus->{bayes_nham} = $nn;
 
   $self->{main}->call_plugins("bayes_scan", { toksref => $msgtokens,
-					      probsref => \%pw,
-					      score => $score,
-					      msgatime => $msgatime,
-					      significant_tokens => \@touch_tokens,
-					    });
+                                              probsref => \%pw,
+                                              score => $score,
+                                              msgatime => $msgatime,
+                                              significant_tokens => \@touch_tokens,
+                                            });
 
 skip:
   if (!defined $score) {
@@ -827,6 +765,13 @@ skip:
     $self->{store}->untie_db();
   }
 
+  $permsgstatus->{tag_data}{BAYESTCHAMMY} =
+                        ($tinfo_hammy ? scalar @{$tinfo_hammy} : 0);
+  $permsgstatus->{tag_data}{BAYESTCSPAMMY} =
+                        ($tinfo_spammy ? scalar @{$tinfo_spammy} : 0);
+  $permsgstatus->{tag_data}{BAYESTCLEARNED} = $tcount_learned;
+  $permsgstatus->{tag_data}{BAYESTC} = $tcount_total;
+
   return $score;
 }
 
@@ -847,7 +792,7 @@ sub learner_dump_database {
 
   my($sb,$ns,$nh,$nt,$le,$oa,$bv,$js,$ad,$er,$na) = @vars;
 
-  my $template = '%3.3f %10f %10f %10u  %s'."\n";
+  my $template = '%3.3f %10u %10u %10u  %s'."\n";
 
   if ( $magic ) {
     printf ($template, 0.0, 0, $bv, 0, 'non-token data: osbf db version');
@@ -981,13 +926,23 @@ sub tokenize {
   # Go ahead and uniq the array, skip null tokens (can happen sometimes)
   # generate an SHA1 hash and take the lower 40 bits as our token
   my %tokens;
+  my %weights;
   foreach my $token (@tokens) {
     next unless length($token); # skip 0 length tokens
-    $tokens{substr(sha1($token), -5)} = $token;
+
+    my $distance;
+    if ($token =~ s/^([0-5])://) {   # remove token OSB distance
+      $distance = $1;
+    }
+
+    next unless length($token); # skip still 0-length tokens
+    my $hash = substr(sha1($token), -5);
+    $tokens{$hash} = $token;
+    $weights{$hash} = $distance;
   }
 
   # return the keys == tokens ...
-  return \%tokens;
+  return (\%tokens, \%weights);
 }
 
 sub _tokenize_line {
@@ -1054,11 +1009,12 @@ sub _tokenize_line {
     $w2 = $w1;
     $w1 = $tokprefix.$token;
 
-    # here's the OSB (orthogonal sparse bigrams) part:
+    # here's the OSB (orthogonal sparse bigrams) part.
+    # record intra-token distance for weighting, too
     push (@rettokens, $w2.' '.$w1);
-    push (@rettokens, $w3.' '.$w1);
-    push (@rettokens, $w4.' '.$w1);
-    push (@rettokens, $w5.' '.$w1);
+    push (@rettokens, '1:'.$w3.' '.$w1);    
+    push (@rettokens, '2:'.$w4.' '.$w1);
+    push (@rettokens, '3:'.$w5.' '.$w1);
   }
 
   return @rettokens;
@@ -1265,58 +1221,65 @@ sub _tokenize_mail_addrs {
 
 ###########################################################################
 
+our $distance_weights = [ 3125, 256, 27, 4 ];
+
 # compute the probability that a token is spammish
 sub _compute_prob_for_token {
-  my ($self, $token, $ns, $nn, $s, $n) = @_;
+  my ($self, $token, $ns, $nn, $s, $n, $distance) = @_;
 
   # we allow the caller to give us the token information, just
   # to save a potentially expensive lookup
   if (!defined($s) || !defined($n)) {
     ($s, $n, undef) = $self->{store}->tok_get ($token);
   }
-
   return if ($s == 0 && $n == 0);
 
-  if (!USE_ROBINSON_FX_EQUATION_FOR_LOW_FREQS) {
-    return if ($s + $n < 10);      # ignore low-freq tokens
-  }
+  # we can't do anything if we haven't trained on any ham/spam
+  return if ( $ns == 0 || $nn == 0 );   
 
-  if (!$self->{use_hapaxes}) {
-    return if ($s + $n < 2);
+  # weighting for OSB sparse features
+  my $weight;
+  if (defined $distance) {
+    $weight = $distance_weights->[$distance];
   }
+  $weight ||= $distance_weights->[0];
 
-  return if ( $ns == 0 || $nn == 0 );
+  # apply the EDDC algorithm, specifically the part from section 4
+  # of the osbf-eddc.pdf paper
+
+  # normalized count of docs containing feature in spam/ham;
+  # normalize to [0..100] range
+  my $NDfs = ($s * 100) / $ns;
+  my $NDfh = ($n * 100) / $nn;
+
+  # these values are as dictated in the EDDC paper, except for K3;
+  # normally that should be 8, but 1 allows strong tokens to reach
+  # 0.99 instead of 0.125, which makes more sense for us
+  my $K1 = 0.25;       
+  my $K2 = 10;
+  my $K3 = 1;
+
+  my $Sumf = $s + $n; die "assert: Sumf == 0" unless $Sumf;
+  my $WdotSumf = $weight * $Sumf;
+
+  # the resulting confidence factor equation
+  my $CF = ((((($NDfs - $NDfh) ** 2) + ($NDfs * $NDfh) - ($K1 / $Sumf))
+              / (($NDfs + $NDfh) ** 2)) ** $K2)
+            * ($WdotSumf / (1 + $K3 * $WdotSumf));
 
   my $ratios = ($s / $ns);
   my $ration = ($n / $nn);
-
   my $prob;
 
   if ($ratios == 0 && $ration == 0) {
     warn "osbf: oops? ratios == ration == 0";
     return;
   } else {
-    $prob = ($ratios) / ($ration + $ratios);
+    $prob = ($ratios / ($ration + $ratios));
+    $prob = ($prob - 0.5) * $CF + 0.5;  # apply EDDC
   }
 
-  if (USE_ROBINSON_FX_EQUATION_FOR_LOW_FREQS) {
-    # use Robinson's f(x) equation for low-n tokens, instead of just
-    # ignoring them
-    my $robn = $s+$n;
-    $prob = ($Mail::SpamAssassin::Bayes::Combine::FW_S_DOT_X + ($robn * $prob))
-                             /
-            ($Mail::SpamAssassin::Bayes::Combine::FW_S_CONSTANT + $robn);
-  }
-
-  # 'log_raw_counts' is used to log the raw data for the Bayes equations during
-  # a mass-check, allowing the S and X constants to be optimized quickly
-  # without requiring re-tokenization of the messages for each attempt. There's
-  # really no need for this code to be uncommented in normal use, however.   It
-  # has never been publicly documented, so commenting it out is fine. ;)
-
-  ## if ($self->{log_raw_counts}) {
-  ## $self->{raw_counts} .= " s=$s,n=$n ";
-  ## }
+  # warn "JMD $s/$ns $n/$nn cf=$CF p=$prob";
 
   return $prob;
 }
