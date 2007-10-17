@@ -77,7 +77,7 @@ usage: mass-check [options] target ...
   --cs_ssl      use SSL to encrypt on-the-wire client-server traffic
                 (requires IO::Socket::SSL, see
                 http://wiki.apache.org/spamassassin/SslMassCheck for more)
-  --cs_verbose  Log network bandwidth utilization figures
+  --cs_verbose  Log network bandwidth utilization figures and other statistics
 
   log options
   -o            write all logs to stdout
@@ -184,6 +184,9 @@ $opt_cf = [];
 
 my $rcvd_bytes = 0;
 my $sent_bytes = 0;
+my $t_first_msg = 0;
+my $t_last_msg = 0;
+my $msgs_processed = 0;
 
 my @ORIG_ARGV = @ARGV;
 GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug:s",
@@ -455,7 +458,9 @@ else {
     server_mode();
   }
   else {
+    $t_first_msg = time;
     run_through_messages();
+    $t_last_msg = time;
   }
 
   status('completed run stage') if ($opt_progress);
@@ -471,8 +476,13 @@ if (defined $opt_rewrite) {
 
 $spamtest->finish();
 
-if (($opt_client || $opt_server) && $opt_cs_verbose) {
-  warn "network I/O: sent=$sent_bytes, received=$rcvd_bytes\n";
+if ($opt_cs_verbose) {
+  if ($opt_client || $opt_server) {
+    warn "network I/O: sent=$sent_bytes, received=$rcvd_bytes\n";
+  }
+  warn "processed $msgs_processed messages in ".($t_last_msg - $t_first_msg).
+       ' seconds ('.(sprintf("%.1f", ($msgs_processed / ($t_last_msg - $t_first_msg) * 3.6))).
+       " kmsgs/hr)\n";
 }
 
 # exit status: did we check at least one message correctly?
@@ -1306,6 +1316,8 @@ sub handle_post_results {
       # prep to get rid of the cached entries
       $timestamps{$msgsout->{$k}->{'timestamp'}}->{$k} = 1;
       delete $msgsout->{$k};
+
+      $msgs_processed++;
     }
   }
 
@@ -1342,6 +1354,7 @@ sub run_through_messages {
       }
       $total_count++;
     }
+    $msgs_processed += $total_count;
   }
   # more than one process or one process with restarts
   else {
@@ -1427,6 +1440,7 @@ sub run_through_messages {
         start_children($opt_j, \@child, \@pid, $select);
       }
     }
+    $msgs_processed += $total_count;
 
     # reap children
     reap_children($opt_j, \@child, \@pid);
@@ -1692,6 +1706,7 @@ sub server_mode {
           # $messages will contain the path to the gzip file if there are
 	  # messages to send out.
           if ($messages && open(MSG, $messages)) {
+	    $t_first_msg = time unless $t_first_msg;
 	    binmode(MSG);
 	    local $/ = undef;  # go go slurp mode
 
@@ -1715,6 +1730,7 @@ sub server_mode {
 	      "Finished" => 1,
 	      },
 	      'We are all done');
+            $t_last_msg = time;
 	  }
 	  else {
 	    # when in doubt, treat this like a GET
@@ -1883,6 +1899,7 @@ sub client_mode {
     } else {
       die "Can't make tempfile, exiting" unless $gzpath;
     }
+    $t_last_msg = time;
 
     # If we received messages to run through, go ahead and do it.
     # otherwise, just sleep for the timeout length and try again
@@ -1904,6 +1921,7 @@ sub client_mode {
     else {
       # we got messages, so deal with them.
       my $time_start = time;
+      $t_first_msg = $time_start unless $t_first_msg;
 
       # postdata will hold our results, real will hold the original message
       # data from the server's scan mode.
