@@ -2444,7 +2444,7 @@ general running of SpamAssassin.
     }
   });
 
-=item rbl_timeout  t  [t_min]  [zone]		(default: 15 3)
+=item rbl_timeout t [t_min] [zone]		(default: 15 3)
 
 All DNS queries are made at the beginning of a check and we try to read
 the results at the end.  This value specifies the maximum period of time
