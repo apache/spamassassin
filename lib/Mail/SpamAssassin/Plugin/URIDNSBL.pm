@@ -471,7 +471,7 @@ sub lookup_domain_ns {
   return if $scanner->{async}->get_lookup($key);
 
   # dig $dom ns
-  my $ent = $self->start_lookup($scanner, 'NS',
+  my $ent = $self->start_lookup($scanner, $dom, 'NS',
                                 $self->res_bgsend($scanner, $dom, 'NS', $key),
                                 $key);
   $ent->{obj} = $obj;
@@ -517,7 +517,7 @@ sub lookup_a_record {
   return if $scanner->{async}->get_lookup($key);
 
   # dig $hname a
-  my $ent = $self->start_lookup($scanner, 'A',
+  my $ent = $self->start_lookup($scanner, $hname, 'A',
                                 $self->res_bgsend($scanner, $hname, 'A', $key),
                                 $key);
   $ent->{obj} = $obj;
@@ -562,7 +562,7 @@ sub lookup_single_dnsbl {
   my $item = $lookupstr.".".$dnsbl;
 
   # dig $ip txt
-  my $ent = $self->start_lookup($scanner, 'DNSBL',
+  my $ent = $self->start_lookup($scanner, $item, 'DNSBL',
                               $self->res_bgsend($scanner, $item, $qtype, $key),
                               $key);
   $ent->{obj} = $obj;
@@ -650,11 +650,11 @@ sub got_dnsbl_hit {
 # ---------------------------------------------------------------------------
 
 sub start_lookup {
-  my ($self, $scanner, $type, $id, $key) = @_;
+  my ($self, $scanner, $zone, $type, $id, $key) = @_;
 
   my $ent = {
     key => $key,
-    timeout_initial => $scanner->{conf}->{rbl_timeout},
+    zone => $zone,  # serves to fetch other per-zone settings
     type => "URI-".$type,
     id => $id,
     completed_callback => sub {

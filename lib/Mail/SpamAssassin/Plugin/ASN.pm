@@ -213,15 +213,16 @@ sub parsed_metadata {
   
     # do the DNS query, have the callback process the result rather than poll for them later
     my $zone_index = $index;
+    my $zone = $reversed_ip_quad . '.' . $entry->{zone};
     my $key = "asnlookup-${zone_index}-$entry->{zone}";
-    my $id = $scanner->{main}->{resolver}->bgsend("${reversed_ip_quad}.$entry->{zone}", 'TXT', undef, sub {
+    my $id = $scanner->{main}->{resolver}->bgsend($zone, 'TXT', undef, sub {
       my ($pkt, $id, $timestamp) = @_;
       $scanner->{async}->set_response_packet($id, $pkt, $key, $timestamp);
       $self->process_dns_result($scanner, $pkt, $zone_index);
     });
     my $ent = {
       key=>$key, id=>$id, type=>'TXT',
-    # timeout => ...   # defaults to $scanner->{conf}->{rbl_timeout}
+      zone => $zone,  # serves to fetch other per-zone settings
     };
     $scanner->{async}->start_lookup($ent);
     dbg("asn: launched DNS TXT query for %s.%s in background",
