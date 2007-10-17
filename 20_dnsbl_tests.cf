@@ -212,12 +212,6 @@ describe DNS_FROM_AHBL_RHSBL	Envelope sender listed in dnsbl.ahbl.org
 tflags DNS_FROM_AHBL_RHSBL	net
 #reuse DNS_FROM_AHBL_RHSBL
 
-# another domain-based blacklist
-header DNS_FROM_SECURITYSAGE	eval:check_rbl_envfrom('securitysage', 'blackhole.securitysage.com.')
-describe DNS_FROM_SECURITYSAGE	Envelope sender in blackholes.securitysage.com
-tflags DNS_FROM_SECURITYSAGE	net
-#reuse DNS_FROM_SECURITYSAGE
-
 # ---------------------------------------------------------------------------
 # NOTE: donation tests, see README file for details
 
