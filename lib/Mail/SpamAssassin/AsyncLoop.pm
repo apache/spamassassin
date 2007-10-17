@@ -133,7 +133,8 @@ The code reference will be called with one argument, the C<$ent> object.
 =item zone (optional)
 
 A zone specification (typically a DNS zone name - e.g. host, domain, or RBL)
-which is used as a key to look up per-zone settings (currently both timeouts).
+which may be used as a key to look up per-zone settings. No semantics on this
+parameter is imposed by this module. Currently used to fetch by-zone timeouts.
 
 =item timeout_initial (optional)
 
@@ -203,7 +204,7 @@ sub start_lookup {
   $t_init = $self->{main}->{conf}->{rbl_timeout}  if !defined $t_init;
   $t_init = 0  if !defined $t_init;      # last-resort default, just in case
 
-  my $t_end  = $ent->{timeout_min};      # application-specified has precedence
+  my $t_end = $ent->{timeout_min};       # application-specified has precedence
   $t_end = $settings->{rbl_timeout_min}  if $settings && !defined $t_end;
   $t_end = 0.2 * $t_init  if !defined $t_end;
   $t_end = 0  if $t_end < 0;  # just in case
@@ -317,7 +318,8 @@ sub complete_lookups {
       my $t_init = $ent->{timeout_initial};
       my $dt = $t_init - ($t_init - $ent->{timeout_min}) * $r2;
       my $deadline = $ent->{start_time} + $dt;
-      $max_deadline = $deadline  if $deadline > $max_deadline;
+      $max_deadline = $deadline  if !defined $max_deadline ||
+                                    $deadline > $max_deadline;
     }
     if (defined $max_deadline) {
       # adjust to timer resolution, only deals with 1s and with fine resolution
