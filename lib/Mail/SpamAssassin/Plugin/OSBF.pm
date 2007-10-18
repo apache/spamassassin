@@ -610,15 +610,9 @@ sub scan {
   $self->{main}->{learn_caller_will_untie} = 1;
 
   goto skip if ($self->{main}->{bayes_scanner}->ignore_message($permsgstatus));
-
   goto skip unless $self->learner_is_scan_available();
 
   my ($ns, $nn) = $self->{store}->nspam_nham_get();
-
-  ## if ($self->{log_raw_counts}) { # see _compute_prob_for_token()
-  ## $self->{raw_counts} = " ns=$ns nn=$nn ";
-  ## }
-
   dbg("osbf: corpus size: nspam = $ns, nham = $nn");
 
   my $msgdata = $self->_get_msgdata_from_permsgstatus ($permsgstatus);
@@ -703,7 +697,7 @@ sub scan {
     # update the atime on this token, it proved useful
     push(@touch_tokens, $tok);
 
-    # dbg("osbf: token '$raw_token' => $pw");
+    # dbg("osbf: JMD token '$raw_token' => $pw");
     if ($log_each_token) {
       dbg("osbf: token '$raw_token' => $pw");
     }
@@ -1247,17 +1241,16 @@ sub _compute_prob_for_token {
   # apply the EDDC algorithm, specifically the part from section 4
   # of the osbf-eddc.pdf paper
 
-  # normalized count of docs containing feature in spam/ham;
-  # normalize to [0..100] range
-  my $NDfs = ($s * 100) / $ns;
-  my $NDfh = ($n * 100) / $nn;
+  # normalized count of docs containing feature in spam/ham
+  my $NDfs = ($s * 10000) / $ns;
+  my $NDfh = ($n * 10000) / $nn;
 
   # these values are as dictated in the EDDC paper, except for K3;
   # normally that should be 8, but 1 allows strong tokens to reach
   # 0.99 instead of 0.125, which makes more sense for us
-  my $K1 = 0.25;       
+  my $K1 = 0.25;
   my $K2 = 10;
-  my $K3 = 1;
+  my $K3 = 4;
 
   my $Sumf = $s + $n; die "assert: Sumf == 0" unless $Sumf;
   my $WdotSumf = $weight * $Sumf;
