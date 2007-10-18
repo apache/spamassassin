@@ -414,7 +414,10 @@ my %data = (
   '[ ip=217.145.101.130 rdns=gate.jakob.de helo=gate2.jakob.de by=vps832469583.serverpool.info ident= envfrom=support@verleihshop.de intl=0 id=1H3KFP-0005pI-08 auth= msa=0 ]',
 
   'from dslb-082-083-045-064.pools.arcor-ip.net (EHLO homepc) [82.83.45.64] by mail.gmx.net (mp010) with SMTP; 03 Feb 2007 13:13:47 +0100' =>
-  '[ ip=82.83.45.64 rdns=dslb-082-083-045-064.pools.arcor-ip.net helo=homepc by=mail.gmx.net ident= envfrom= intl=0 id= auth= msa=0 ]'
+  '[ ip=82.83.45.64 rdns=dslb-082-083-045-064.pools.arcor-ip.net helo=homepc by=mail.gmx.net ident= envfrom= intl=0 id= auth= msa=0 ]',
+
+  'from [86.122.158.69] by mta2.iomartmail.com; Thu, 2 Aug 2007 21:50:04 -0200' =>
+  '[ ip=86.122.158.69 rdns= helo=!86.122.158.69! by=mta2.iomartmail.com ident= envfrom= id= auth= msa=0 ]',
 
 );
 
