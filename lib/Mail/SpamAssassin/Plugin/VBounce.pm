@@ -114,19 +114,8 @@ sub check_whitelist_bounce_relays {
   # now check any "message/anything" attachment MIME parts, too.
   # don't use the more efficient find_parts() method until bug 5331 is
   # fixed, otherwise we'll miss some messages due to their MIME structure
-  
-  my $pristine = $pms->{msg}->get_pristine();
-  # skip past the headers
-  my $foundnlnl = 0;
-  foreach my $line ($pristine =~ /^(.*)$/gm) {
-    # note: do not use any re match here, it'll reset /g
-    if ($line eq "" || $line eq "\012" || $line eq "\015\012") {
-      $foundnlnl = 1; last;
-    }
-  }
-  return 0 unless $foundnlnl;
 
-  # and now through the pristine body
+  my $pristine = $pms->{msg}->get_pristine_body();
   foreach my $line ($pristine =~ /^(.*)$/gm) {
     next unless $line && ($line =~ /Received: /);
     while ($line =~ / (\S+\.\S+) /g) {
