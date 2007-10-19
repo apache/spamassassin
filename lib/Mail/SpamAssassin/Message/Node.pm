@@ -43,6 +43,8 @@ use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::HTML;
 use Mail::SpamAssassin::Logger;
 
+use Encode;
+
 =item new()
 
 Generates an empty Node object and returns it.  Typically only called
@@ -398,7 +400,10 @@ sub _normalize {
   dbg("message: Converting...");
 
   my $rv = $converter->decode($data, 0);
-  utf8::downgrade($rv, 1);
+
+  # turn characters into octets if needed
+  $rv = Encode::encode('utf8',$rv)  if Encode::is_utf8($rv);
+
   return $rv
 }
 
