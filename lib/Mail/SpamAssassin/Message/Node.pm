@@ -43,7 +43,7 @@ use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::HTML;
 use Mail::SpamAssassin::Logger;
 
-use Encode;
+use Encode ();
 
 =item new()
 
