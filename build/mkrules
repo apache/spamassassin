@@ -270,7 +270,7 @@ sub src_wanted {
   return if (!-f $path);
   
   # limit what will be copied from sandboxes
-  return if ($path =~ /sandbox/ && !/(?:\d.*\.cf|\.pm)$/i);
+  return if ($path =~ /(?:sandbox|scores)/ && !/(?:\d.*\.cf|\.pm)$/i);
 
   # a bit of sanity please - no svn metadata ;)
   return if ($path =~ /\.svn/);
@@ -343,7 +343,12 @@ sub read_all_rules {
       plugin_file_compile($entry);
     }
     elsif ($entry->{dir} =~ /sandbox/) {
-      rule_file_compile($f, $t, $entry->{filename}, 1);
+      rule_file_compile($f, $t, $entry->{filename},
+                { issandbox => 1 });
+    }
+    elsif ($entry->{dir} =~ /scores/) {
+      rule_file_compile($f, $t, $entry->{filename},
+                { issandbox => 1, isscores => 1 });
     }
     elsif ($entry->{dir} =~ /extra/) {
       # 'extra' rulesets; not built by default (TODO)
@@ -352,7 +357,7 @@ sub read_all_rules {
     else {
       # rules in "core" and "lang" are always copied
       if ($needs_rebuild) {
-        rule_file_compile($f, $t, $entry->{filename}, 0);
+        rule_file_compile($f, $t, $entry->{filename}, { });
       }
     }
   }
@@ -373,7 +378,9 @@ sub read_all_rules {
 # appended to the rule name, sanitised.
 
 sub rule_file_compile {
-  my ($f, $t, $filename, $issandbox) = @_;
+  my ($f, $t, $filename, $flags) = @_;
+  my $issandbox = $flags->{issandbox};
+  my $isscores = $flags->{isscores};
 
   open (IN, "<$f") or die "cannot read $f";
 
@@ -423,8 +430,17 @@ sub rule_file_compile {
       }
       # non-sandbox rules always use the same name
 
+      # comment "score" lines for sandbox rules (bug 5558)
+      # use generated scores, though, if the rule is active
+      if ($type eq 'score' && $issandbox &&
+        !($isscores && $active_rules->{$name}))
+      {
+        $orig =~ s/^/#/g;
+      }
+
       if (!$rules->{$name}) { $rules->{$name} = rule_entry_create(); }
       $rules->{$name}->{issandbox} = $issandbox;
+      $rules->{$name}->{isscores} = $isscores;
       $rules->{$name}->{origname} = $origname;
       $rules->{$name}->{cond} ||= $current_conditional;
       $rules->{$name}->{text} .= $current_comments . $orig;
@@ -765,8 +781,10 @@ sub pubfile_for_rule {
   if (!$pubfile) {
     if ($active_rules->{$name}      # is active
         || $rules->{$name}->{forceactive}   # or is forced to be
-        || (!$rules->{$name}->{found_definition} && !$rules->{$name}->{iscommand}))
+        || (!$rules->{$name}->{found_definition} && !$rules->{$name}->{iscommand}
+            && !$rules->{$name}->{isscores}))
                 # or is a rule-related setting in reference to an unknown rule
+                # but isn't a generated score
     {
       $pubfile = $opt_out.'/'.$opt_activeout;
     }
