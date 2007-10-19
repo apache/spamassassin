@@ -343,10 +343,12 @@ sub read_all_rules {
       plugin_file_compile($entry);
     }
     elsif ($entry->{dir} =~ /sandbox/) {
-      rule_file_compile($f, $t, $entry->{filename}, 1, 0);
+      rule_file_compile($f, $t, $entry->{filename},
+                { issandbox => 1 });
     }
     elsif ($entry->{dir} =~ /scores/) {
-      rule_file_compile($f, $t, $entry->{filename}, 1, 1);
+      rule_file_compile($f, $t, $entry->{filename},
+                { issandbox => 1, isscores => 1 });
     }
     elsif ($entry->{dir} =~ /extra/) {
       # 'extra' rulesets; not built by default (TODO)
@@ -355,7 +357,7 @@ sub read_all_rules {
     else {
       # rules in "core" and "lang" are always copied
       if ($needs_rebuild) {
-        rule_file_compile($f, $t, $entry->{filename}, 0, 0);
+        rule_file_compile($f, $t, $entry->{filename}, { });
       }
     }
   }
@@ -376,7 +378,9 @@ sub read_all_rules {
 # appended to the rule name, sanitised.
 
 sub rule_file_compile {
-  my ($f, $t, $filename, $issandbox, $isscores) = @_;
+  my ($f, $t, $filename, $flags) = @_;
+  my $issandbox = $flags->{issandbox};
+  my $isscores = $flags->{isscores};
 
   open (IN, "<$f") or die "cannot read $f";
 
