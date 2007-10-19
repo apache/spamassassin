@@ -18,6 +18,10 @@ q{ X-Spam-Flag: YES}, 'flag',
 
 );
 
+tstlocalrules("
+      use_auto_whitelist 0
+    ");
+
 my $sockpath = mk_safe_tmpdir()."/spamd.sock";
 start_spamd("-D -L --socketpath=$sockpath");
 ok (spamcrun ("-U $sockpath < data/spam/001", \&patterns_run_cb));
