@@ -43,8 +43,6 @@ use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::HTML;
 use Mail::SpamAssassin::Logger;
 
-use Encode ();
-
 =item new()
 
 Generates an empty Node object and returns it.  Typically only called
