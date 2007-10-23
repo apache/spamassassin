@@ -68,6 +68,12 @@ while (!eof DIFF) {
     next;
   }
 
+  # ignore nightly rule score generation output
+  if ($file eq 'rulesrc/scores/72_scores.cf') {
+    print "only scores in file: $file\n";
+    next;
+  }
+
   # ok, we're reading the diff for a rules file.
   push @files, $file;
   while (<DIFF>) {
