@@ -710,8 +710,7 @@ sub scan {
     goto skip;
   }
 
-  $score = bcr_combine($ns, $nn, \@sorted);
-  # $score = Mail::SpamAssassin::Bayes::Combine::combine($ns, $nn, \@sorted);
+  $score = Mail::SpamAssassin::Bayes::Combine::combine($ns, $nn, \@sorted);
 
   # Couldn't come up with a probability?
   goto skip unless defined $score;
@@ -768,47 +767,6 @@ skip:
   $permsgstatus->{tag_data}{BAYESTC} = $tcount_total;
 
   return $score;
-}
-
-# combine using the Bayes chain rule algorithm described in the
-# EDDC paper
-
-sub bcr_combine {
-  my ($ns, $nn, $probary) = @_;
-
-  my $PCs = $ns / ($ns + $nn);        # P(Ci) where i = "spam"
-  my $PCh = $nn / ($ns + $nn);        # P(Ci) where i = "ham"
-  if ($ns + $nn == 0) {
-    return;         # cannot combine without both ham *and* spam
-  }
-
-  my $Ps = 0.5;                       # accumulators
-  my $Ph = 0.5;
-  foreach my $p (@$probary) {
-    # note: the denominator is
-    #
-    #   Sum (i=1 .. m) ( P (Fj | Ci) . P (Ci) )
-    #
-    # we only have two classes, s and h, with P(f | s) = $p, P(f | h) = 1-$p
-    #
-    #   => ($p) * $PCs + (1-$p) * $PCh
-
-    my $invp = 1-$p;
-    my $denom = $p * $PCs + $invp * $PCh;
-    $Ps *=    $p / $denom;
-    $Ph *= $invp / $denom;
-
-    # avoid underflow; if they've become ~0, reset to a non-0 value
-    # so that further multiplications still work
-    if ($Ps == 0) { $Ps = 1e-300; }
-    if ($Ph == 0) { $Ph = 1e-300; }
-  }
-
-  # pick the lowest value (a tip from
-  # http://www.bgl.nu/bogofilter/BcrFisher.html )
-  if ($Ph < $Ps) { $Ps = 1-$Ph; } else { $Ph = 1-$Ps; }
-
-  return $Ps;
 }
 
 ###########################################################################
@@ -972,9 +930,12 @@ sub tokenize {
     }
 
     next unless length($token); # skip still 0-length tokens
+
     my $hash = substr(sha1($token), -5);
     $tokens{$hash} = $token;
-    $weights{$hash} = $distance;
+
+    # only set this once, based on what we see first
+    $weights{$hash} ||= $distance;
   }
 
   # return the keys == tokens ...
@@ -990,8 +951,13 @@ sub _tokenize_line {
   my $magic_re = $self->{store}->get_magic_re();
   my ($w1,$w2,$w3,$w4,$w5) = ('','','','','');
 
+  # jm: changes from the CRM-114/osbf-lua standard:
+  # - add "*" to start, allowing "UD*org" decomposed address tokens
+  # - add "=" to middle, allowing "intl=0" tokens in X-Spam-Relays hdrs
+
   my @words = ($_[1] =~
-      /([^\p{Z}\p{C}][\/!?#]?[-\p{L}\p{M}\p{N}]*(?:['"=;]|\/?>|:\/*)?)/g);
+      /([^\p{Z}\p{C}][\*\/!\?#]?[-!=\p{L}\p{M}\p{N}]*(?:['"=;]|\/?>|:\/*)?)/g);
+
   foreach my $token (@words)
   {
     next if ($token =~ /^[\.\,]+$/);    # just punctuation
