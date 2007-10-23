@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: daf; day 2: alexb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi; day 3: alexb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi
+# with results from: day 1: alexb bb-fredt bb-jm bb-zmi cthielen daf jm theo zmi; day 2: daf; day 3: alexb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -105,6 +105,9 @@ ENV_AND_HDR_SPF_MATCH
 
 # good enough
 FB_ADD_INCHES
+
+# good enough
+FB_ALMOST_SEX
 
 # good enough
 FB_CIALIS_LEO3
@@ -354,9 +357,6 @@ HS_INDEX_PARAM
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
-
-# good enough
-JM_RCVD_QMAILV1
 
 # good enough
 JM_SOUGHT_1
@@ -653,6 +653,9 @@ SUBJECT_IN_WHITELIST
 SUBJ_RE_NUM
 
 # good enough
+TT_MSGID_TRUNC
+
+# good enough
 TT_OBSCURED_VIAGRA
 
 # good enough
@@ -680,13 +683,67 @@ TVD_STOCK1
 TVD_VISIT_PHARMA
 
 # good enough
-AXB_MIME_IMG830
+AXB_RCVD_ZOOBSEND
 
 # good enough
-FB_B0NUS
+AXB_RCVD_ZOONAT
 
 # good enough
-FB_MED1CAT
+AXB_XTIDX_CHAIN
+
+# tflags publish
+DOS_ANAL_SPAM_MAILER
+
+# good enough
+DOS_FORGED_RCVD_QUADS
+
+# good enough
+FB_SMALL_PEN
+
+# good enough
+FM_MORTGAGE3PLUS
+
+# good enough
+FRT_ERECTION
+
+# good enough
+FRT_OPPORTUN1
+
+# good enough
+FS_ABIGGER
+
+# good enough
+JM_0800_GMT
+
+# good enough
+JM_FAKE_PSMTP_RCVD
+
+# good enough
+JM_GMT_RCVD
+
+# good enough
+JM_I_FEEL_LUCKY
+
+# good enough
+JM_NICE_GIRL
+
+# good enough
+JM_PPYH
+
+# good enough
+JM_PPYH_2
+
+# good enough
+JM_STORM_ECARD
+
+# good enough
+KAM_LOTTO1
+
+# good enough
+KAM_LOTTO2
+
+# good enough
+KAM_LOTTO3
 
 # tflags net
 RCVD_IN_DSBL
@@ -699,9 +756,6 @@ RCVD_IN_SORBS_DUL
 
 # tflags net
 RCVD_IN_XBL
-
-# good enough
-TVD_PDF_FINGER01
 
 # tflags net
 WHOIS_MONIKER_ROLE
