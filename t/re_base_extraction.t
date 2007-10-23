@@ -22,7 +22,7 @@ BEGIN {
   if (-e 't/test_dir') { chdir 't'; } 
   if (-e 'test_dir') { unshift(@INC, '../blib/lib'); }
 
-  plan tests => 122;
+  plan tests => 125;
 
 };
 use lib '../lib';
@@ -225,6 +225,29 @@ use lib '../lib';
 
 # ---------------------------------------------------------------------------
 
+# also not suitable for perl 5.6.x
+($running_perl56) and ok(1);
+($running_perl56) and ok(1);
+($running_perl56) and ok(1);
+(!$running_perl56) and try_extraction ('
+
+  body FOO /foobar\x{e2}\x{82}\x{ac}baz/
+
+', {
+    base_extract => 1,
+    bases_must_be_casei => 0,
+    bases_can_use_alternations => 0,
+    bases_can_use_quantifiers => 0,
+    bases_can_use_char_classes => 0,
+    bases_split_out_alternations => 1
+}, [
+
+  'foobar:FOO,[l=0]',
+
+], [ ]);
+
+# ---------------------------------------------------------------------------
+
 try_extraction ('
     body FOO /(?:Viagra|Valium|Xanax|Soma|Cialis){2}/i
 
@@ -408,8 +431,9 @@ sub try_extraction {
     site_rules_filename => "log/test_default.cf",
     userprefs_filename  => "log/userprefs.cf",
     local_tests_only    => 1,
-    debug             => $debug,
-    dont_copy_prefs   => 1,
+    debug               => $debug,
+    dont_copy_prefs     => 1,
+    base_quiet          => 1,
   });
   ok($sa);
 
