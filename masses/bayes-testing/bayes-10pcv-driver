@@ -166,6 +166,9 @@ for bucket in 1 2 3 4 5 6 7 8 9 10 ; do
 
   time sa-learn --sync --config-file=$tmpdir/rules
 
+  # take a copy of the trained Bayes DBs, gzipped
+  ( cd $tmpdir ; tar cf - dbs | gzip -c > $rdir/dbs.tgz )
+
   if [ $INTERLEAVE_TESTS = 1 ] ; then
     # now split the ham and spam test bucket into 10 sub-buckets,
     # so we interleave ham and spam while testing. important for
@@ -220,7 +223,10 @@ for bucket in 1 2 3 4 5 6 7 8 9 10 ; do
 	> $rdir/thresholds.static
 
   # remove these, they're too big.
-  rm -f $rdir/hbucketlearn $rdir/sbucketlearn $rdir/hbuckettest $rdir/sbuckettest
+  rm -f $rdir/hbucketlearn $rdir/sbucketlearn
+
+  # but keep these to find FPs/FNs later
+  gzip $rdir/hbuckettest $rdir/sbuckettest
 
 done
 echo -n "Done test..." ; date
@@ -238,7 +244,7 @@ cat $results/bucket*/nonspam.log > $results/nonspam_all.log
 	> $results/thresholds_all
 ./bayes-testing/bayes-static-thresholds \
 	$results/spam_all.log $results/nonspam_all.log \
-	> $results/thresholds.static
+	> $results/thresholds_all.static
 
 echo "Done."
 ls -l $results
