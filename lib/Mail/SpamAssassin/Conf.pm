@@ -1484,7 +1484,7 @@ syncing will not occur.
     type => $CONF_TYPE_NUMERIC
   });
 
-=item bayes_expiry_max_db_size		(default: 150000)
+=item bayes_expiry_max_db_size		(default: 500000)
 
 What should be the maximum size of the Bayes tokens database?  When expiry
 occurs, the Bayes system will keep either 75% of the maximum value, or
@@ -1495,7 +1495,7 @@ equivalent to a 8Mb database file.
 
   push (@cmds, {
     setting => 'bayes_expiry_max_db_size',
-    default => 150000,
+    default => 500000,
     type => $CONF_TYPE_NUMERIC
   });
 

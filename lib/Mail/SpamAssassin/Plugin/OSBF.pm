@@ -627,6 +627,7 @@ sub scan {
 
     my $prob = $self->_compute_prob_for_token($token, $ns, $nn,
                 $tok_spam, $tok_ham, $tokweights->{$token});
+# dbg("osbf: JMD token '$msgtokens->{$token}' => ".(defined $prob ? (sprintf "%3.5f", $prob) : '??'));
     next unless defined $prob;
 
     $pw{$token} = {
@@ -667,9 +668,9 @@ sub scan {
   my %tok_strength = map { $_ => (abs($pw{$_}->{prob} - 0.5)) } keys %pw;
   my $log_each_token = (would_log('dbg', 'osbf') > 1);
 
-  foreach my $tok (sort {
-              $tok_strength{$b} <=> $tok_strength{$a}
-            } keys %pw)
+  foreach my $tok (
+        sort { $tok_strength{$b} <=> $tok_strength{$a} }
+        keys %pw)
   {
     if ($count-- < 0) { last; }
     # next if ($tok_strength{$tok} <
@@ -697,9 +698,9 @@ sub scan {
     # update the atime on this token, it proved useful
     push(@touch_tokens, $tok);
 
-    # dbg("osbf: JMD token '$raw_token' => $pw");
+    # dbg("osbf: JMD token '$raw_token' => ".(sprintf "%3.5f", $pw));
     if ($log_each_token) {
-      dbg("osbf: token '$raw_token' => $pw");
+      dbg("osbf: token '$raw_token' => ".(sprintf "%3.5f", $pw));
     }
   }
 
@@ -955,14 +956,15 @@ sub _tokenize_line {
   # - add "*" to start, allowing "UD*org" decomposed address tokens
   # - add "=" to middle, allowing "intl=0" tokens in X-Spam-Relays hdrs
 
-  my @words = ($_[1] =~
-      /([^\p{Z}\p{C}][\*\/!\?#]?[-!=\p{L}\p{M}\p{N}]*(?:['"=;]|\/?>|:\/*)?)/g);
+  # my @words = ($_[1] =~
+  # /([^\p{Z}\p{C}][\*\/!\?#]?[-!=\p{L}\p{M}\p{N}]*(?:['"=;]|\/?>|:\/*)?)/g);
+  my @words = split(' ', $_[1]);
 
   foreach my $token (@words)
   {
-    next if ($token =~ /^[\.\,]+$/);    # just punctuation
-    # $token =~ s/^[-'"\.,]+//;        # trim non-alphanum chars at start or end
-    # $token =~ s/[-'"\.,]+$//;        # so we don't get loads of '"foo' tokens
+    $token =~ s/^[-'"\.,]+//;        # trim non-alphanum chars at start or end
+    $token =~ s/[-'"\.,]+$//;        # so we don't get loads of '"foo' tokens
+    next if ($token eq '');         # all-punctuation
 
     # Skip false magic tokens
     # TVD: we need to do a defined() check since SQL doesn't have magic
