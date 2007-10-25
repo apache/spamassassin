@@ -2119,6 +2119,8 @@ sub client_mode {
     }
 
     if (!$socket) {
+      unlink $gzpath;
+      undef $gzfd;
       # if we haven't yet made a connection, keep retrying;
       # this is probably the server still in "scan stage"
       if (!$made_conn_once) {
