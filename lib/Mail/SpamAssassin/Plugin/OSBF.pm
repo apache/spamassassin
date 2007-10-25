@@ -687,10 +687,12 @@ sub scan {
     my $n = $pw{$tok}->{ham_count};
     my $a = $pw{$tok}->{atime};
 
+    if (0) {    # TODO
     if ($pw < 0.5) {
       push @$tinfo_hammy,  [$raw_token,$pw,$s,$n,$a];
     } else {
       push @$tinfo_spammy, [$raw_token,$pw,$s,$n,$a];
+    }
     }
 
     push (@sorted, $pw);
@@ -931,12 +933,9 @@ sub tokenize {
     }
 
     next unless length($token); # skip still 0-length tokens
-
     my $hash = substr(sha1($token), -5);
     $tokens{$hash} = $token;
-
-    # only set this once, based on what we see first
-    $weights{$hash} ||= $distance;
+    $weights{$hash} = $distance;
   }
 
   # return the keys == tokens ...
@@ -952,19 +951,13 @@ sub _tokenize_line {
   my $magic_re = $self->{store}->get_magic_re();
   my ($w1,$w2,$w3,$w4,$w5) = ('','','','','');
 
-  # jm: changes from the CRM-114/osbf-lua standard:
-  # - add "*" to start, allowing "UD*org" decomposed address tokens
-  # - add "=" to middle, allowing "intl=0" tokens in X-Spam-Relays hdrs
-
-  # my @words = ($_[1] =~
-  # /([^\p{Z}\p{C}][\*\/!\?#]?[-!=\p{L}\p{M}\p{N}]*(?:['"=;]|\/?>|:\/*)?)/g);
-  my @words = split(' ', $_[1]);
-
+  my @words = ($_[1] =~
+      /([^\p{Z}\p{C}][\/!?#]?[-\p{L}\p{M}\p{N}]*(?:['"=;]|\/?>|:\/*)?)/g);
   foreach my $token (@words)
   {
-    $token =~ s/^[-'"\.,]+//;        # trim non-alphanum chars at start or end
-    $token =~ s/[-'"\.,]+$//;        # so we don't get loads of '"foo' tokens
-    next if ($token eq '');         # all-punctuation
+    next if ($token =~ /^[\.\,]+$/);    # just punctuation
+    # $token =~ s/^[-'"\.,]+//;        # trim non-alphanum chars at start or end
+    # $token =~ s/[-'"\.,]+$//;        # so we don't get loads of '"foo' tokens
 
     # Skip false magic tokens
     # TVD: we need to do a defined() check since SQL doesn't have magic
