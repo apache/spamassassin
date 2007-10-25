@@ -245,6 +245,10 @@ if ($opt_reuse) {
   }
 
   require $rules_path;
+  unless (-s $rules_path > 130) {
+    die '--reuse configuration error detected; rules.pl file size is too small'.
+        ' ('.(-s $rules_path)." bytes)\nrules.pl path: $rules_path\n";
+  }
 }
 
 if ($opt_noisy) {
