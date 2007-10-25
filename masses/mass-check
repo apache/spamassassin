@@ -264,9 +264,14 @@ if ($opt_client && $opt_cs_cache && !$opt_cs_cachedir) {
 }  
 
 if ($opt_server && $opt_cs_schedule_cache && !$opt_n) {
-  warn "You must enable -n when using --cs_schedule_cache.  Sorting of the\n".
-       "scheduled cache is not supported.\n";
-  exit;
+  warn '*'x74 ."\n";
+  warn '*'. ' 'x72 ."*\n";
+  warn "*   Corpus will be run un-sorted but with date stamp loggging which is   *\n";
+  warn "*   needed for score generation log selection but is not available when  *\n";
+  warn "*   using the -n option.  This may affect the results of any bayes and   *\n";
+  warn "*   AWL tests run during this mass-check.                                *\n";
+  warn '*'. ' 'x72 ."*\n";
+  warn '*'x74 ."\n";
 }
 
 if ($opt_cs_schedule_cache && !HAS_DB_FILE) {
