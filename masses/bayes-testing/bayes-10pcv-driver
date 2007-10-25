@@ -77,6 +77,10 @@ restore_dbs () {
   echo "Restoring full learned DBs..."
   ( cd $tmpdir; rm -rf dbs; tar xf learned-all.tar )
 }
+runcmd () {
+  echo "$*"
+  time $*
+}
 
 if [ $LEARN_ALL_THEN_FORGET_TEST_SET = 1 ] ; then
 
@@ -88,14 +92,14 @@ if [ $LEARN_ALL_THEN_FORGET_TEST_SET = 1 ] ; then
 
   (
   echo -n "Learning from all ham buckets..." ; date
-  time sa-learn --ham --randseed=1 --no-sync $learnargs \
+  runcmd sa-learn --ham --randseed=1 --no-sync $learnargs \
 	  --showdots --mbox --config-file=$tmpdir/rules $testdir/cor/ham/*
 
   echo -n "Learning from all spam buckets..." ; date
-  time sa-learn --spam --randseed=1 --no-sync $learnargs \
+  runcmd sa-learn --spam --randseed=1 --no-sync $learnargs \
 	  --showdots --mbox --config-file=$tmpdir/rules $testdir/cor/spam/*
 
-  time sa-learn --sync $learnargs --config-file=$tmpdir/rules
+  runcmd sa-learn --sync $learnargs --config-file=$tmpdir/rules
 
   echo -n "Done learning. " ; date
   ) 2>&1 | tee $results/learn.log
@@ -141,30 +145,30 @@ for bucket in 1 2 3 4 5 6 7 8 9 10 ; do
 
   if [ $LEARN_ALL_THEN_FORGET_TEST_SET = 1 ] ; then
     echo "Forgetting contents of test ham bucket..."
-    time sa-learn --forget --config-file=$tmpdir/rules --showdots \
+    runcmd sa-learn --forget --config-file=$tmpdir/rules --showdots \
 			  --mbox $rdir/hbuckettest
 
     echo "Forgetting contents of test spam bucket..."
-    time sa-learn --forget --config-file=$tmpdir/rules --showdots \
+    runcmd sa-learn --forget --config-file=$tmpdir/rules --showdots \
 			  --mbox $rdir/sbuckettest
 
   else
     echo "Learning contents of learn ham bucket..."
-    time sa-learn --ham --randseed=1 --no-sync $learnargs \
+    runcmd sa-learn --ham --randseed=1 --no-sync $learnargs \
 	    --showdots --mbox --config-file=$tmpdir/rules $rdir/hbucketlearn
 
     echo "Learning contents of learn spam bucket..."
-    time sa-learn --spam --randseed=1 --no-sync $learnargs \
+    runcmd sa-learn --spam --randseed=1 --no-sync $learnargs \
 	    --showdots --mbox --config-file=$tmpdir/rules $rdir/sbucketlearn
 
-    time sa-learn --sync $learnargs --config-file=$tmpdir/rules
+    runcmd sa-learn --sync $learnargs --config-file=$tmpdir/rules
 
     echo "Dumping bayes DB..."
     ( cd .. ; sa-learn --dump --dbpath=$tmpdir/dbs/bayes ) \
 	  > $rdir/bayes_db.dump
   fi
 
-  time sa-learn --sync --config-file=$tmpdir/rules
+  runcmd sa-learn --sync --config-file=$tmpdir/rules
 
   # take a copy of the trained Bayes DBs, gzipped
   ( cd $tmpdir ; tar cf - dbs | gzip -c > $rdir/dbs.tgz )
@@ -199,12 +203,12 @@ for bucket in 1 2 3 4 5 6 7 8 9 10 ; do
 
   else
     echo "Running mass-check on ham bucket..."
-    time ./mass-check -c=$tmpdir/rules -p=$tmpdir/rules --showdots \
+    runcmd ./mass-check -c=$tmpdir/rules -p=$tmpdir/rules --showdots \
 	  --bayes --mbox $rdir/hbuckettest \
 	  > $rdir/nonspam.log
 
     echo "Running mass-check on spam bucket..."
-    time ./mass-check -c=$tmpdir/rules -p=$tmpdir/rules --showdots \
+    runcmd ./mass-check -c=$tmpdir/rules -p=$tmpdir/rules --showdots \
 	  --bayes --mbox $rdir/sbuckettest \
 	  > $rdir/spam.log
   fi
