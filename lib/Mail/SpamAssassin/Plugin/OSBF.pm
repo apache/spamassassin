@@ -935,7 +935,15 @@ sub tokenize {
     next unless length($token); # skip still 0-length tokens
     my $hash = substr(sha1($token), -5);
     $tokens{$hash} = $token;
-    $weights{$hash} = $distance;
+
+    # set the weight to be the lowest distance for that token
+    if (defined $distance) {
+      if (!(defined $weights{$hash})
+            || ($weights{$hash} > $distance)) 
+      {
+        $weights{$hash} = $distance;
+      }
+    }
   }
 
   # return the keys == tokens ...
