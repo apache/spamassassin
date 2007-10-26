@@ -46,6 +46,7 @@ ifplugin Mail::SpamAssassin::Plugin::DNSEval
 header __RCVD_IN_NJABL		eval:check_rbl('njabl', 'combined.njabl.org.')
 describe __RCVD_IN_NJABL	Received via a relay in combined.njabl.org
 tflags __RCVD_IN_NJABL		net
+#reuse __RCVD_IN_NJABL
 
 header RCVD_IN_NJABL_RELAY	eval:check_rbl_sub('njabl', '127.0.0.2')
 describe RCVD_IN_NJABL_RELAY	NJABL: sender is confirmed open relay
@@ -84,6 +85,7 @@ tflags RCVD_IN_NJABL_PROXY	net
 header __RCVD_IN_SORBS		eval:check_rbl('sorbs', 'dnsbl.sorbs.net.')
 describe __RCVD_IN_SORBS	SORBS: sender is listed in SORBS
 tflags __RCVD_IN_SORBS		net
+#reuse __RCVD_IN_SORBS
 
 header RCVD_IN_SORBS_HTTP	eval:check_rbl_sub('sorbs', '127.0.0.2')
 describe RCVD_IN_SORBS_HTTP	SORBS: sender is open HTTP proxy server
@@ -140,6 +142,7 @@ tflags RCVD_IN_SORBS_DUL	net
 header __RCVD_IN_ZEN            eval:check_rbl('zen', 'zen.spamhaus.org.')
 describe __RCVD_IN_ZEN          Received via a relay in Spamhaus Zen
 tflags __RCVD_IN_ZEN            net
+#reuse __RCVD_IN_ZEN
 
 # SBL is the Spamhaus Block List: http://www.spamhaus.org/sbl/
 header RCVD_IN_SBL              eval:check_rbl_sub('zen', '127.0.0.2')
