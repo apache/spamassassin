@@ -67,9 +67,7 @@ tflags SPF_HELO_PASS		nice userconf
 #reuse SPF_HELO_PASS
 #reuse SPF_HELO_FAIL
 #reuse SPF_HELO_SOFTFAIL
-
-# new in 3.1, cannot be reused until 3.2
-# SPF_NEUTRAL
-# SPF_HELO_NEUTRAL
+#reuse SPF_NEUTRAL
+#reuse SPF_HELO_NEUTRAL
 
 endif   # Mail::SpamAssassin::Plugin::SPF
