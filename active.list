@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: alexb bb-fredt bb-jm bb-zmi cthielen daf dos theo zmi; day 2: alexb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi; day 3: alexb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi
+# with results from: day 1: alexb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi; day 2: alexb bb-fredt bb-jm bb-zmi cthielen daf dos theo zmi; day 3: alexb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -758,16 +758,40 @@ TVD_UNDER_VALUED
 TVD_VISIT_PHARMA
 
 # good enough
-AXB_MIME_IMG830
+AXB_RCVD_ZOOBSEND
 
 # good enough
-FB_B0NUS
+AXB_RCVD_ZOONAT
 
 # good enough
-FB_MED1CAT
+AXB_XTIDX_CHAIN
 
 # good enough
-FB_STRONGER_EJ
+DOS_FORGED_RCVD_QUADS
+
+# good enough
+FB_SMALL_PEN
+
+# good enough
+FM_MORTGAGE3PLUS
+
+# good enough
+FRT_ERECTION
+
+# good enough
+FRT_OPPORTUN1
+
+# good enough
+FS_ABIGGER
+
+# good enough
+KAM_LOTTO1
+
+# good enough
+KAM_LOTTO2
+
+# good enough
+KAM_LOTTO3
 
 # tflags net
 RCVD_IN_DSBL
@@ -780,9 +804,6 @@ RCVD_IN_SORBS_DUL
 
 # tflags net
 RCVD_IN_XBL
-
-# good enough
-TVD_PDF_FINGER01
 
 # tflags net
 WHOIS_MONIKER_ROLE
