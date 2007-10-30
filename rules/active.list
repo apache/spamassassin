@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: alexb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi; day 2: alexb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi; day 3: alexb bb-fredt bb-jm bb-zmi cthielen daf dos theo zmi
+# with results from: day 1: alexb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi; day 2: alexb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi; day 3: alexb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -51,6 +51,9 @@ BAYES_95
 
 # tflags learn
 BAYES_99
+
+# good enough
+BUG5704_PUMP_N_DUMP_RATWARE
 
 # good enough
 CARD_DIRECT_WWW_ADDRESS
@@ -105,6 +108,9 @@ DOS_STOCK_BAT
 
 # good enough
 DRUGS_STOCK_MIMEOLE
+
+# good enough
+DVLABS_GOZI_PDF
 
 # good enough
 DYN_RDNS_AND_INLINE_IMAGE
@@ -749,6 +755,9 @@ TVD_RCVD_IP
 TVD_RCVD_IP4
 
 # good enough
+TVD_RCVD_SINGLE
+
+# good enough
 TVD_STOCK1
 
 # good enough
@@ -758,22 +767,40 @@ TVD_UNDER_VALUED
 TVD_VISIT_PHARMA
 
 # good enough
-AXB_MIME_IMG830
+AXB_RCVD_ZOOBSEND
 
 # good enough
-BUG5704_PUMP_N_DUMP_RATWARE
+AXB_RCVD_ZOONAT
 
 # good enough
-DVLABS_GOZI_PDF
+AXB_XTIDX_CHAIN
 
 # good enough
-FB_B0NUS
+DOS_FORGED_RCVD_QUADS
 
 # good enough
-FB_MED1CAT
+FB_SMALL_PEN
 
 # good enough
-FB_REPLICA_ROLEX
+FM_MORTGAGE3PLUS
+
+# good enough
+FRT_ERECTION
+
+# good enough
+FRT_OPPORTUN1
+
+# good enough
+FS_ABIGGER
+
+# good enough
+KAM_LOTTO1
+
+# good enough
+KAM_LOTTO2
+
+# good enough
+KAM_LOTTO3
 
 # tflags net
 RCVD_IN_DSBL
@@ -786,9 +813,6 @@ RCVD_IN_SORBS_DUL
 
 # tflags net
 RCVD_IN_XBL
-
-# good enough
-TVD_PDF_FINGER01
 
 # tflags net
 WHOIS_MONIKER_ROLE
