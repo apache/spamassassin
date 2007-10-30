@@ -398,10 +398,7 @@ sub _normalize {
   dbg("message: Converting...");
 
   my $rv = $converter->decode($data, 0);
-
-  # turn characters into octets if needed
-  $rv = Encode::encode('utf8',$rv)  if Encode::is_utf8($rv);
-
+  utf8::downgrade($rv, 1);
   return $rv
 }
 
