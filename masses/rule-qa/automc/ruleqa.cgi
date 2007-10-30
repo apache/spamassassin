@@ -985,7 +985,6 @@ sub get_freqs_for_rule {
 
     if ($srcpath) {    # bug 4984
       @rules = grep {
-           # !$md->{$_} or !$md->{$_}->{src} or
           $md->{$_}->{src} and
              ($md->{$_}->{src} =~ /\Q$srcpath\E/);
          } @rules;
@@ -994,7 +993,6 @@ sub get_freqs_for_rule {
     if ($mtime) {      # bug 4985
       my $target = $self->{now} - ($mtime * 24 * 60 * 60);
       @rules = grep {
-           # !$md->{$_} or !$md->{$_}->{srcmtime} or
           $md->{$_}->{srcmtime} and
              ($md->{$_}->{srcmtime} >= $target);
          } @rules;
@@ -1229,9 +1227,25 @@ sub output_freqs_data_line {
 
   # add overlap using the FREQS_EXTRA_TEMPLATE if it's present
   if ($obj->{overlap}) {
-    my $ovl = $obj->{overlap} || '';
+    $self->process_template(\$FREQS_EXTRA_TEMPLATE, {
+        EXTRA => $self->format_overlap($obj->{overlap} || '')
+    }, \$out);
+  }
 
-    $ovl =~ s{^(\s+overlap\s+(?:ham|spam):\s+\d+% )(\S.+?)$}{
+  return $out;
+}
+
+sub format_overlap {
+  my ($self, $ovl) = @_;
+
+  # list the subrules last; they're noisy and typically nonuseful
+  my $out_fullrules = '';
+  my $out_subrules = '';
+
+  foreach my $line (split(/^/m, $ovl)) {
+    my $issubrule = ($line =~ /\d+\%\s+of __/);
+
+    $line =~ s{^(\s+overlap\s+(?:ham|spam):\s+\d+% )(\S.+?)$}{
         my $str = "$1";
         foreach my $rule (split(' ', $2)) {
           if ($rule =~ /^(?:[a-z]{1,6}|\d+\%)$/) {    # "of", "hits" etc.
@@ -1243,12 +1257,15 @@ sub output_freqs_data_line {
         $str;
       }gem;
 
-    $self->process_template(\$FREQS_EXTRA_TEMPLATE, {
-        EXTRA => $ovl,
-    }, \$out);
+    if ($issubrule) {
+      $out_subrules .= $line;
+    } else {
+      $out_fullrules .= $line;
+    }
   }
 
-  return $out;
+  return "OVERLAP WITH FULL RULES:\n".$out_fullrules."\n".
+        "OVERLAP WITH SUBRULES:\n".$out_subrules;
 }
 
 # get rid of slow, overengineered Template::Toolkit.  This replacement
