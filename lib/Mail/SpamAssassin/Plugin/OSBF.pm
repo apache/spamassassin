@@ -718,6 +718,9 @@ sub scan {
   # Couldn't come up with a probability?
   goto skip unless defined $score;
 
+  # HACK HACK scale to a better range, since EDDC seems to bias low
+  $score *= 1.1; $score = 1.0 if $score > 1.0;
+
   dbg("osbf: score = $score");
 
   # no need to call tok_touch_all unless there were significant
@@ -925,10 +928,8 @@ sub tokenize {
   my %tokens;
   my %weights;
   foreach my $token (@tokens) {
-    next unless length($token); # skip 0 length tokens
-
-    my $distance;
-    if ($token =~ s/^([0-5])://) {   # remove token OSB distance
+    my $distance = '0';     # OSB bigram token distance; default to 0
+    if ($token && $token =~ s/^([0-5])://) {
       $distance = $1;
     }
 
@@ -937,12 +938,10 @@ sub tokenize {
     $tokens{$hash} = $token;
 
     # set the weight to be the lowest distance for that token
-    if (defined $distance) {
-      if (!(defined $weights{$hash})
-            || ($weights{$hash} > $distance)) 
-      {
-        $weights{$hash} = $distance;
-      }
+    if (!(defined $weights{$hash})
+          || ($weights{$hash} > $distance))
+    {
+      $weights{$hash} = $distance;
     }
   }
 
