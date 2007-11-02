@@ -107,10 +107,24 @@ sub parse_received_headers {
     }
   }
 
+  my $IP_ADDRESS = IP_ADDRESS;
   my $IP_PRIVATE = IP_PRIVATE;
   my $LOCALHOST = LOCALHOST;
 
-  foreach my $line ( $msg->get_header('Received') ) {
+  my @hdrs = $msg->get_header('Received');
+
+  # Now add the single line headers like X-Originating-IP. (bug 5680)
+  # we convert them into synthetic "Received" headers so we can share
+  # code below.
+  for my $header ('X-Yahoo-Post-IP', 'X-Originating-IP',
+                    'X-Apparently-From', 'X-SenderIP')
+  {
+    my $str = $msg->get_header($header);
+    next unless ($str && $str =~ m/($IP_ADDRESS)/);
+    push @hdrs, "from X-Originating-IP: $1\n";
+  }
+
+  foreach my $line ( @hdrs ) {
 
     # qmail-scanner support hack: we may have had one of these set from the
     # previous (read: more recent) Received header.   if so, add it on to this
@@ -1022,6 +1036,12 @@ sub parse_received_line {
 	$rdns = $1;
       }
       goto enough;
+    }
+
+    # a synthetic header, generated internally:
+    # Received: X-Originating-IP: 1.2.3.4
+    if (/^X-Originating-IP: (\S+)$/) {
+      $ip = $1; $by = ''; goto enough;
     }
 
     ## STUFF TO IGNORE ##
