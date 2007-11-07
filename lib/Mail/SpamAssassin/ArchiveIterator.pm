@@ -669,6 +669,13 @@ sub _scan_directory {
     $self->_scan_file($class, $mail, $bkfunc);
   }
 
+  # recurse into directories
+  foreach my $file (@files) {
+    if (-d $file) {
+      $self->_scan_directory($class, $file, $bkfunc);
+    }
+  }
+
   if (defined $AICache) {
     $AICache = $AICache->finish();
   }
