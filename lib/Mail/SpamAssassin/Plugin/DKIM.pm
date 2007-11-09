@@ -37,13 +37,17 @@ for that module.
 
 =head1 TAGS
 
-The following tag is added to the set available for use in reports, headers,
-other plugins, etc.:
+The following tags are added to the set, available for use in reports,
+headers, other plugins, etc.:
 
-  _DKIMIDENTITY_    verified signing identity (the 'i' tag) from a signature;
-                    Note there may be more than one signature in a message,
-                    currently they are all provided as a space-separated list,
-                    although this behaviour is likely to be changed.
+  _DKIMIDENTITY_  verified signing identities (the 'i' tag) from signatures;
+  _DKIMDOMAIN_    verified signing domains (the 'd' tag) from signatures;
+
+Identities and domains from signatures which failed verification are not
+included in these tags. Duplicates are eliminated (e.g. when there are two or
+more valid signatures from the same signer, only one copy makes it into a tag).
+Note that there may be more than one signature in a message - currently they
+are provided as a space-separated list, although this behaviour may change.
 
 =head1 SEE ALSO
 
@@ -309,7 +313,13 @@ sub _check_dkim_signature {
         ($scan->{dkim_address} ? $scan->{dkim_address} : 'none'));
 
     $scan->{dkim_signatures} = [];
-    foreach my $signature (grep { defined } ($message->signature) ) {
+
+    # versions before 0.29 only provided a public interface to fetch one
+    # signature, new versions allow access to all signatures of a message
+    my @signatures = Mail::DKIM->VERSION >= 0.29 ? $message->signatures
+                                                 : $message->signature;
+    @signatures = grep { defined } @signatures;  # just in case
+    foreach my $signature (@signatures) {
       # i=  Identity of the user or agent (e.g., a mailing list manager) on
       #     behalf of which this message is signed (dkim-quoted-printable;
       #     OPTIONAL, default is an empty local-part followed by an "@"
@@ -318,19 +328,22 @@ sub _check_dkim_signature {
       dbg("dkim: signing identity: %s, d=%s, a=%s, c=%s",
           $identity, $signature->domain,
           $signature->algorithm, scalar($signature->canonicalization));
-      if ($identity eq '') {  # just in case
+      if (!defined $identity || $identity eq '') {  # just in case
         $identity = '@' . $signature->domain;
         $signature->identity($identity);
       } elsif ($identity !~ /\@/) {  # just in case
         $identity = '@' . $identity;
         $signature->identity($identity);
       }
-      push(@{$scan->{dkim_signatures}}, $signature);
     }
-    $scan->set_tag('DKIMIDENTITY',
-      join(" ", map  { $_->identity }
-                grep { $_->result eq 'pass' } @{$scan->{dkim_signatures}}) );
-
+    $scan->{dkim_signatures} = \@signatures;
+    { my (%seen1,%seen2);
+      my @v_sign = grep { $_->result eq 'pass' } @signatures;
+      $scan->set_tag('DKIMIDENTITY',
+              join(" ", grep { !$seen1{$_}++ } map { $_->identity } @v_sign));
+      $scan->set_tag('DKIMDOMAIN',
+              join(" ", grep { !$seen2{$_}++ } map { $_->domain } @v_sign));
+    }
     my $result = $message->result();
     my $detail = $message->result_detail();
     # let the result stand out more clearly in the log, use uppercase
@@ -522,7 +535,7 @@ sub _wlcheck_list {
 
   my %any_match_by_wl;
   my $any_match_at_all = 0;
-  my $expiration_supported = Mail::DKIM->VERSION > 0.28 ? 1 : 0;
+  my $expiration_supported = Mail::DKIM->VERSION >= 0.29 ? 1 : 0;
   my $originator = $scan->{dkim_address};  # address in a 'From' header field
 
   # walk through all signatures present in a message
