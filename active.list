@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: alexb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi; day 2: alexb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi; day 3: alexb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi
+# with results from: day 1: alexb bb-fredt bb-jm bb-zmi cthielen dos theo zmi; day 2: alexb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi; day 3: alexb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -89,9 +89,6 @@ DNS_FROM_RFC_DSN
 DOS_ANAL_SPAM_MAILER
 
 # good enough
-DOS_FORGED_RCVD_QUADS
-
-# good enough
 DOS_OE_TO_MX
 
 # good enough
@@ -161,13 +158,13 @@ FB_LOWER_PAYM
 FB_NO_SCRIP_NEEDED
 
 # good enough
+FB_P1LL
+
+# good enough
 FB_QUALITY_REPLICA
 
 # good enough
 FB_REPLIC_CAP
-
-# good enough
-FB_SAVE_PERSC
 
 # good enough
 FB_SOFTTABS
@@ -260,9 +257,6 @@ FRT_LEVITRA
 FRT_PENIS1
 
 # good enough
-FRT_ROLEX
-
-# good enough
 FRT_SEXUAL
 
 # good enough
@@ -273,9 +267,6 @@ FRT_SYMBOL
 
 # good enough
 FRT_XANAX1
-
-# good enough
-FR_WATCHES_HTTP
 
 # good enough
 FS_DOLLAR_BONUS
@@ -350,9 +341,6 @@ HASHCASH_2SPEND
 HASHCASH_HIGH
 
 # good enough
-HDR_ORDER_FTSDMCXX_001C
-
-# good enough
 HDR_ORDER_FTSDMCXX_BAT
 
 # tflags userconf
@@ -378,9 +366,6 @@ HIGH_CODEPAGE_URI
 
 # good enough
 HS_FORGED_OE_FW
-
-# good enough
-HS_INDEX_PARAM
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -697,9 +682,6 @@ STOX_AND_PRICE
 # good enough
 STOX_META_5
 
-# good enough
-STOX_REPLY_TYPE
-
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
@@ -708,9 +690,6 @@ SUBJECT_IN_WHITELIST
 
 # good enough
 SUBJ_RE_NUM
-
-# good enough
-TT_MSGID_TRUNC
 
 # good enough
 TT_OBSCURED_VIAGRA
@@ -725,6 +704,9 @@ TVD_FINGER_02
 TVD_PH_SUBJ_URGENT
 
 # good enough
+TVD_PP_PHISH
+
+# good enough
 TVD_QUAL_MEDS
 
 # good enough
@@ -734,19 +716,43 @@ TVD_RCVD_IP
 TVD_RCVD_IP4
 
 # good enough
-TVD_RCVD_SINGLE
-
-# good enough
 TVD_STOCK1
 
 # good enough
 TVD_VISIT_PHARMA
 
 # good enough
-FB_MED1CAT
+AXB_MIME_IMG830
 
 # good enough
-FB_REPLICA_ROLEX
+AXB_RCVD_ZOOBSEND
+
+# good enough
+AXB_RCVD_ZOONAT
+
+# good enough
+AXB_XTIDX_CHAIN
+
+# good enough
+FB_SMALL_PEN
+
+# good enough
+FM_MORTGAGE3PLUS
+
+# good enough
+FRT_ERECTION
+
+# good enough
+FRT_OPPORTUN1
+
+# good enough
+FS_ABIGGER
+
+# good enough
+KAM_LOTTO1
+
+# good enough
+KAM_LOTTO2
 
 # tflags net
 RCVD_IN_DSBL
@@ -762,6 +768,9 @@ RCVD_IN_XBL
 
 # tflags net
 WHOIS_MONIKER_ROLE
+
+# good enough
+YAHOO_RDS_REDIR
 
 # tflags userconf
 UNPARSEABLE_RELAY
