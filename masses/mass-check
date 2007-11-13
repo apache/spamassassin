@@ -181,7 +181,7 @@ use constant HAS_IO_ZLIB => eval { require IO::Zlib; };
 use constant HAS_IO_SOCKET_SSL => eval { require IO::Socket::SSL; };
 use Config; 
 use constant HAS_TIME_HI_RES => eval { require Time::HiRes; };
-use constant HAS_DB_FILE => eval { require DB_File; };
+use constant HAS_SDBM_FILE => eval { require SDBM_File; };
 
 
 # default settings
@@ -276,8 +276,8 @@ if ($opt_server && $opt_cs_schedule_cache && !$opt_n) {
   warn '*'x74 ."\n";
 }
 
-if ($opt_cs_schedule_cache && !HAS_DB_FILE) {
-  warn "--cs_schedule_cache requires the Perl module DB_File.\n";
+if ($opt_cs_schedule_cache && !HAS_SDBM_FILE) {
+  warn "--cs_schedule_cache requires the Perl module SDBM_File.\n";
   exit;
 }
 
@@ -500,9 +500,9 @@ if (!$opt_client) {
     push @cache_tmp_files, $dbpath;
 
     {
-      no strict; # DB_File is optional, avoid strict subs warnings
-      tie %{$server_caches{'to_process'}}, "DB_File", $dbpath,
-        DB_File::O_RDWR|DB_File::O_CREAT, 0600, $DB_File::DB_HASH ||
+      no strict; # SDBM_File is optional, avoid strict subs warnings
+      tie %{$server_caches{'to_process'}}, "SDBM_File", $dbpath,
+        SDBM_File::O_RDWR|SDBM_File::O_CREAT, 0600 ||
           die "Cannot tie hash to file $dbpath: $!";
     }
 
@@ -513,9 +513,9 @@ if (!$opt_client) {
     push @cache_tmp_files, $dbpath;
   
     {
-      no strict; # DB_File is optional, avoid strict subs warnings
-      tie %{$server_caches{'not_cached'}}, "DB_File", $dbpath,
-        DB_File::O_RDWR|DB_File::O_CREAT, 0600, $DB_File::DB_HASH ||
+      no strict; # SDBM_File is optional, avoid strict subs warnings
+      tie %{$server_caches{'not_cached'}}, "SDBM_File", $dbpath,
+        SDBM_File::O_RDWR|SDBM_File::O_CREAT, 0600 ||
           die "Cannot tie hash to file $dbpath: $!";
     }
 
@@ -526,9 +526,9 @@ if (!$opt_client) {
     push @cache_tmp_files, $dbpath;
 
     {
-      no strict; # DB_File is optional, avoid strict subs warnings
-      tie %{$server_caches{'cache_count'}}, "DB_File", $dbpath,
-        DB_File::O_RDWR|DB_File::O_CREAT, 0600, $DB_File::DB_HASH ||
+      no strict; # SDBM_File is optional, avoid strict subs warnings
+      tie %{$server_caches{'cache_count'}}, "SDBM_File", $dbpath,
+        SDBM_File::O_RDWR|SDBM_File::O_CREAT, 0600 ||
           die "Cannot tie hash to file $dbpath: $!";
     }
 
@@ -1229,9 +1229,9 @@ sub handle_http_request {
             push @cache_tmp_files, $dbpath;
 
             {
-              no strict; # DB_File is optional, avoid strict subs warnings
-              tie %{$client_caches{$headers->{'client-id'}}}, "DB_File", $dbpath,
-                DB_File::O_RDWR|DB_File::O_CREAT, 0600, $DB_File::DB_HASH ||
+              no strict; # SDBM_File is optional, avoid strict subs warnings
+              tie %{$client_caches{$headers->{'client-id'}}}, "SDBM_File", $dbpath,
+                SDBM_File::O_RDWR|SDBM_File::O_CREAT, 0600 ||
                   die "Cannot tie hash to file $dbpath: $!\n";
             }
 
