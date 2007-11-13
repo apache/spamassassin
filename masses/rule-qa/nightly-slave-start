@@ -43,5 +43,7 @@ ssh $host \
 ssh -f $host \
     cd $clienttree/masses \; \
     . /etc/profile \; \
-    TZ=UTC perl mass-check --cs_ssl --cs_verbose --client $serverhost &
+    TZ=UTC perl mass-check \
+        --cs_ssl --cs_verbose --cs_cache --cs_cachedir=./cs_cache \
+        --client $serverhost &
 
