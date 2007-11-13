@@ -176,10 +176,12 @@ use File::Copy;
 use File::Spec;
 use Getopt::Long;
 use POSIX qw(strftime);
+use Fcntl qw(O_RDWR O_CREAT);;
+use Config; 
+
 use constant HAS_TIME_PARSEDATE => eval { require Time::ParseDate; };
 use constant HAS_IO_ZLIB => eval { require IO::Zlib; };
 use constant HAS_IO_SOCKET_SSL => eval { require IO::Socket::SSL; };
-use Config; 
 use constant HAS_TIME_HI_RES => eval { require Time::HiRes; };
 use constant HAS_SDBM_FILE => eval { require SDBM_File; };
 
@@ -502,7 +504,7 @@ if (!$opt_client) {
     {
       no strict; # SDBM_File is optional, avoid strict subs warnings
       tie %{$server_caches{'to_process'}}, "SDBM_File", $dbpath,
-        SDBM_File::O_RDWR|SDBM_File::O_CREAT, 0600 ||
+        O_RDWR|O_CREAT, 0600 ||
           die "Cannot tie hash to file $dbpath: $!";
     }
 
@@ -515,7 +517,7 @@ if (!$opt_client) {
     {
       no strict; # SDBM_File is optional, avoid strict subs warnings
       tie %{$server_caches{'not_cached'}}, "SDBM_File", $dbpath,
-        SDBM_File::O_RDWR|SDBM_File::O_CREAT, 0600 ||
+        O_RDWR|O_CREAT, 0600 ||
           die "Cannot tie hash to file $dbpath: $!";
     }
 
@@ -528,7 +530,7 @@ if (!$opt_client) {
     {
       no strict; # SDBM_File is optional, avoid strict subs warnings
       tie %{$server_caches{'cache_count'}}, "SDBM_File", $dbpath,
-        SDBM_File::O_RDWR|SDBM_File::O_CREAT, 0600 ||
+        O_RDWR|O_CREAT, 0600 ||
           die "Cannot tie hash to file $dbpath: $!";
     }
 
@@ -1231,7 +1233,7 @@ sub handle_http_request {
             {
               no strict; # SDBM_File is optional, avoid strict subs warnings
               tie %{$client_caches{$headers->{'client-id'}}}, "SDBM_File", $dbpath,
-                SDBM_File::O_RDWR|SDBM_File::O_CREAT, 0600 ||
+                O_RDWR|O_CREAT, 0600 ||
                   die "Cannot tie hash to file $dbpath: $!\n";
             }
 
