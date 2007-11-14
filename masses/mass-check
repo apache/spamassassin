@@ -2578,8 +2578,10 @@ sub generate_queue {
     # for ease of memory, we'll play with pointers
     $messages = $iter->{s};
     undef $iter->{s};
-    push(@{$messages}, @{$iter->{h}});
-    undef $iter->{h};
+    if ($iter->{h}) {
+      push(@{$messages}, @{$iter->{h}});
+      undef $iter->{h};
+    }
   }
   else {
     # OPT_N == 0 means sort on message receive date
