@@ -5,6 +5,9 @@ echo "Using ssh-nightly-slave settings from $HOME/.corpus"
 
 host="$1"
 
+host=`echo "$1" | perl -ne 's/-j(\d+)$//;print'`
+opts=`echo "$1" | perl -ne 's/-j(\d+)$// and print "-j $1"'`
+
 # use $PERL from env if unset
 [ "x${PERL:-}" = x ] && PERL=perl
 set -x
@@ -47,5 +50,6 @@ ssh -f $host \
     . /etc/profile \; \
     TZ=UTC perl mass-check \
         --cs_ssl --cs_verbose --cs_schedule_cache --cs_cachedir=../../cs_cache \
+        $opts \
         --client $serverhost &
 
