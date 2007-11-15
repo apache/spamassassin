@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: alexb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi; day 2: alexb bb-fredt bb-jm bb-zmi cthielen dos theo zmi; day 3: alexb bb-fredt bb-jm bb-zmi cthielen dos theo zmi
+# with results from: day 1: alexb bb-fredt bb-zmi cthielen dos jm theo zmi; day 2: alexb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi; day 3: alexb bb-fredt bb-jm bb-zmi cthielen dos theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -282,6 +282,9 @@ FS_MORE_CONFIDENT
 
 # good enough
 FS_NO_SCRIP
+
+# good enough
+FS_OBFU_PRMCY
 
 # good enough
 FS_REPLICA
@@ -719,13 +722,40 @@ TVD_RCVD_IP4
 TVD_VISIT_PHARMA
 
 # good enough
+AXB_MIME_IMG830
+
+# good enough
+AXB_RCVD_ZOOBSEND
+
+# good enough
+AXB_RCVD_ZOONAT
+
+# good enough
+AXB_XTIDX_CHAIN
+
+# good enough
 DOS_FORGED_RCVD_QUADS
 
 # good enough
-FB_MED1CAT
+FB_SMALL_PEN
 
 # good enough
-FB_REPLICA_ROLEX
+FM_MORTGAGE3PLUS
+
+# good enough
+FRT_ERECTION
+
+# good enough
+FRT_OPPORTUN1
+
+# good enough
+FS_ABIGGER
+
+# good enough
+KAM_LOTTO1
+
+# good enough
+KAM_LOTTO2
 
 # tflags net
 RCVD_IN_DSBL
