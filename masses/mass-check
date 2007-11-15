@@ -1444,9 +1444,8 @@ sub generate_messages {
         }
       }
     }
-
-    # close the tmpfd, etc so that the main loop knows we're done
-    if ($msgs_processed == $total_messages) {
+    else {
+      # close the tmpfd, etc so that the main loop knows we're done
       delete $msgsout->{'curnum'};
       close $tmpfd;
       undef $tmpfd;
@@ -2520,6 +2519,12 @@ sub result_client {
   }
   else {
     warn ">> WTH!?  result is not in the correct format: $result\n";
+    # 20071114: bit of a hack
+    # prevent malformed cs_client message result lines from preventing the
+    # cs_server running in cs_schedule cache mode from completing
+    # TODO: find out how result lines get malformed (malformed result lines
+    # will still hang any cs_server not running with cs_schedule_cache)
+    $msgs_processed++ if $opt_cs_schedule_cache;
   }
 }
 
