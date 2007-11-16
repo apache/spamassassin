@@ -287,6 +287,7 @@ if ($opt{'remove-addr-from-whitelist'} ||
     die "spamassassin: oops! unhandled whitelist operation";
   }
 
+  $spamtest->finish();
   exit(0);
 }
 
@@ -382,6 +383,8 @@ if ( $opt{'report'} || $opt{'revoke'} || $doing_whitelist_operation ) {
 
 # if the eval died from something, report it here and return an error.
 if ($@) { die $@; }
+
+$spamtest->finish()  if $spamtest;
 
 # Ok, exit!
 exit( $exitvalue || 0 );
