@@ -1495,12 +1495,14 @@ sub generate_messages {
           # the client how many messages to expect
           # NOTE: for some reason the client doesn't seem to even scan these messages (which is
           # fine)... if it were to it probably wouldn't be great for bayes enabled mass-checks
+          my $data = Mail::SpamAssassin::ArchiveIterator::_index_pack(0, 's', 'f', 'msg-error');
           send_line($gzfd, 0) || die "mass-check: error when writing to gz temp file\n";
-          send_line($gzfd, 'msg-error') || die "mass-check: error when writing to gz temp file\n";
+          send_line($gzfd, $data) || die "mass-check: error when writing to gz temp file\n";
           send_line($gzfd, '1') || die "mass-check: error when writing to gz temp file\n";
           send_line($gzfd, 'empty-message-will-cause-client-to-hang') ||
             die "mass-check: error when writing to gz temp file\n";
           delete $msgsout->{$num};
+          $msgs_processed++ if $opt_cs_schedule_cache;
         }
       } else {
         send_line($gzfd, $num) || die "mass-check: error when writing to gz temp file\n";
@@ -2381,7 +2383,7 @@ sub client_mode {
             }
           }
 
-          # if the cache failed try a temp file instead
+          # if the messages isn't in our cache use the supplied path instead
           if (!$opt_cs_cache || !$cache_success) {
 	    # in paths_only mode, there's no kluging between formats since we're
 	    # reading the same corpus, however we do still need to track server
