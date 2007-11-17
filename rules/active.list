@@ -1,11 +1,8 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: alexb cthielen dos theo zmi; day 2: alexb bb-fredt bb-zmi cthielen dos jm theo zmi; day 3: alexb bb-fredt bb-jm bb-zmi cthielen daf dos jm theo zmi
+# with results from: day 1: alexb bb-fredt bb-jm cthielen dos jm theo zmi; day 2: alexb cthielen dos theo zmi; day 3: alexb bb-fredt bb-zmi cthielen dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
-
-# good enough
-APOSTROPHE_FROM
 
 # tflags userconf
 AWL
@@ -240,9 +237,6 @@ FM_XMAIL_F_OUT
 
 # tflags userconf
 FRAGMENTED_MESSAGE
-
-# good enough
-FRT_BEFORE
 
 # good enough
 FRT_DISCOUNT
@@ -726,6 +720,9 @@ FB_MED1CAT
 
 # good enough
 FB_REPLICA_ROLEX
+
+# good enough
+JM_HPGI
 
 # tflags net
 RCVD_IN_DSBL
