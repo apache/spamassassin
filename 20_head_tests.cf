@@ -456,8 +456,11 @@ header MISSING_HEADERS		eval:check_for_missing_to_header()
 describe MISSING_HEADERS	Missing To: header
 
 # this variant is local, using the Received hdr itself...
+# it's still marked "tflags net" though since it uses the same underlying
+# code and can trigger lookup_ptr() using "mass-check --reuse" without "--net"
 header ROUND_THE_WORLD_LOCAL	eval:check_for_round_the_world_received_helo()
 describe ROUND_THE_WORLD_LOCAL	Received: says mail sent around the world (HELO)
+tflags ROUND_THE_WORLD_LOCAL	net
 
 header DATE_IN_PAST_03_06	eval:check_for_shifted_date('-6', '-3')
 describe DATE_IN_PAST_03_06	Date: is 3 to 6 hours before Received: date
