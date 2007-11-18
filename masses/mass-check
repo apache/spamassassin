@@ -250,6 +250,7 @@ if ($opt_reuse) {
   }
 
   require $rules_path;
+  unlink $rules_path;
 }
 
 if ($opt_noisy) {
@@ -331,6 +332,30 @@ if (!$opt_client) {
   usage(1) if !@targets;
 }
 
+if ($opt_reuse) {
+  # if we have --reuse, don't bother testing DNS; we shouldn't be hitting
+  # the wire at all, and in fact we may be running without a net connection
+  push @{$opt_cf}, "dns_available yes\n";
+
+  # --reuse without --net means we need to just zero ALL net rules; skip net
+  # lookups entirely except for the reused ones.  Do this before constructing
+  # the Mail::SpamAssassin object to ensure no network-rules stuff is compiled
+  # in compile_now().  (This config is for the reuse=no case.  We create a
+  # reuse=yes config after compile_now().)
+  if (!$opt_net) {
+    my @zero = (sort grep {
+          (ref($rules{$_}) eq 'HASH')
+                && $rules{$_}->{tflags}
+                && $rules{$_}->{tflags} =~ /\bnet\b/; 
+        } keys %rules);
+
+    foreach my $r (@zero) {
+      push @{$opt_cf}, "score $r 0\n";
+      # warn "--reuse/!--net zeroed $r";
+    }
+  }
+}
+
 my $spamtest = new Mail::SpamAssassin ({
   'debug'              			=> $opt_debug,
   'rules_filename'     			=> $opt_c,
@@ -348,49 +373,36 @@ my $spamtest = new Mail::SpamAssassin ({
   LOCAL_RULES_DIR      			=> '',
 });
 
-$spamtest->compile_now(1);
+$spamtest->compile_now(0);      # 0 since we will be reading more configs
 $spamtest->read_scoreonly_config("$FindBin::Bin/mass-check.cf");
 
 # generated user_prefs
 if ($opt_reuse) {
-
-  # --reuse without --net means we need to just zero ALL net rules;
-  # skip net lookups entirely except for the reused ones.  This
-  # config is for the reuse=no case.
-  if (!$opt_net) {
-    zero_scores_for_rules (sort grep {
-          (ref($rules{$_}) eq 'HASH')
-                && $rules{$_}->{tflags}
-                && $rules{$_}->{tflags} =~ /\bnet\b/; 
-        } keys %rules);
-  }
-
   # copy current prefs if it exists
   $spamtest->copy_config(undef, \%orig_conf);
 
   # zeroed scores to reuse_prefs
-  zero_scores_for_rules (sort grep {
+  my @zero = (sort grep {
           defined $reuse{$_}->{skip} 
         } keys %reuse);
+  zero_rule_scores(@zero);
 
   $spamtest->copy_config(undef, \%reuse_conf);
   $reuse_rules_loaded_p = 1;
 }
 
-sub zero_scores_for_rules {
+sub zero_rule_scores {
   my @zero = @_;
 
-  # TODO: this should use a file in ./tmp/, not something that could
-  # accidentally be loaded later
-  open(PREFS, ">$opt_p/reuse_prefs") 
-        or die "Unable to open $opt_p/reuse_prefs: $!\n".
+  my $pfile = "$FindBin::Bin/tmp/reuse_prefs";
+  open(PREFS, ">$pfile") or die "Unable to open $pfile: $!\n".
             "Needed for --reuse to work properly";
-
   for my $rule (@zero) {
     print PREFS "score $rule 0\n";
   }
-  close(PREFS);
-  $spamtest->read_scoreonly_config("$opt_p/reuse_prefs");
+  close PREFS or die "failed to write $pfile";
+  $spamtest->read_scoreonly_config($pfile);
+  unlink $pfile;
 }
 
 my $who = `id -un 2>/dev/null`;
@@ -728,35 +740,38 @@ sub wanted {
   # parse the message, and force it to complete
   my $ma = $spamtest->parse($dataref, 1);
 
-  # remove SpamAssassin markup, if present and the mail was spam
+  # get X-Spam-Status: header for rule hit resue
   my $x_spam_status;
   if ($opt_reuse) {
-    # get X-Spam-Status: header for rule hit resue
     $x_spam_status = $ma->get_header("X-Spam-Status");
-  }
-
-  my @previous; # previous hits, only set if $opt_reuse
-  if ($x_spam_status) {
     $x_spam_status =~ s/,\s+/,/gs;
-    if ($x_spam_status =~ m/tests=(\S*)/
+  }
+  my @previous; # previous hits, only set if $opt_reuse
+
+  if ($opt_reuse) {
+    if ($x_spam_status
+        && $x_spam_status =~ m/tests=(\S*)/
         && $x_spam_status !~ /\bshortcircuit=(?:ham|spam|default)\b/)
     {
       push @previous, split(/,/, $1);
 
       # we found previous tests, so move the reuse config into place
       unless ($reuse_rules_loaded_p) {
-	$spamtest->copy_config(\%reuse_conf, undef);
-	$reuse_rules_loaded_p = 1;
+        $spamtest->copy_config(\%reuse_conf, undef);
+        $reuse_rules_loaded_p = 1;
+        dbg "mass-check: reusing hits";
+      }
+    }
+    else {
+      if ($reuse_rules_loaded_p) {
+        $spamtest->copy_config(\%orig_conf, undef);
+        $reuse_rules_loaded_p = 0;
+        dbg "mass-check: not reusing hits";
       }
     }
   }
-  elsif ($opt_reuse) {
-    if ($reuse_rules_loaded_p) {
-      $spamtest->copy_config(\%orig_conf, undef);
-      $reuse_rules_loaded_p = 0;
-    }
-  }
 
+  # remove SpamAssassin markup, if present and the mail was spam
   my $header = $ma->get_header("Received");
   if ($header && $header =~ /\bwith SpamAssassin\b/) {
     if (!$opt_deencap || message_should_be_deencapped($ma)) {
@@ -861,9 +876,17 @@ sub wanted {
 
   if ($reuse_rules_loaded_p) {
     push(@extra, "reuse=yes");
-  }
-  else {
+  } else {
     push(@extra, "reuse=no");
+  }
+
+  # log the scoreset we're in
+  {
+    my $set = 0;
+    if ($opt_net) { $set |= 1; }
+    if ($reuse_rules_loaded_p) { $set |= 1; }
+    if ($status && defined $status->{bayes_score}) { $set |= 2; }
+    push(@extra, "set=".$set);
   }
 
   if ($opt_client) {
