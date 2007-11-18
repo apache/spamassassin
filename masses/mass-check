@@ -363,7 +363,6 @@ if ($opt_reuse) {
                 && $rules{$_}->{tflags}
                 && $rules{$_}->{tflags} =~ /\bnet\b/; 
         } keys %rules);
-    zero_scores_for_rules (@s);
   }
 
   # copy current prefs if it exists
