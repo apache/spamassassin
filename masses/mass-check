@@ -744,7 +744,7 @@ sub wanted {
   my $x_spam_status;
   if ($opt_reuse) {
     $x_spam_status = $ma->get_header("X-Spam-Status");
-    $x_spam_status =~ s/,\s+/,/gs;
+    $x_spam_status and $x_spam_status =~ s/,\s+/,/gs;
   }
   my @previous; # previous hits, only set if $opt_reuse
 
