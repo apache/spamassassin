@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: alexb bb-fredt bb-jm bb-zmi cthielen dos jm; day 2: alexb bb-fredt bb-jm cthielen dos jm theo zmi; day 3: alexb bb-fredt bb-jm cthielen dos jm theo zmi
+# with results from: day 1: alexb cthielen dos jm zmi; day 2: alexb bb-fredt bb-jm bb-zmi cthielen dos jm theo zmi; day 3: alexb bb-fredt bb-jm cthielen dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -78,6 +78,9 @@ DNS_FROM_RFC_DSN
 
 # tflags publish
 DOS_ANAL_SPAM_MAILER
+
+# good enough
+DOS_FORGED_RCVD_QUADS
 
 # good enough
 DOS_OE_TO_MX
@@ -185,6 +188,9 @@ FH_HOST_EQ_PACBELL_D
 FH_HOST_EQ_VERIZON_P
 
 # good enough
+FH_HOST_IN_ADDRARPA
+
+# good enough
 FH_MSGID_XXX
 
 # good enough
@@ -207,9 +213,6 @@ FRT_PENIS1
 
 # good enough
 FRT_SEXUAL
-
-# good enough
-FR_ALMOST_VIAG2
 
 # good enough
 FS_ABIGGER
@@ -366,9 +369,6 @@ NO_RECEIVED
 
 # tflags userconf
 NO_RELAYS
-
-# good enough
-NULL_IN_BODY
 
 # good enough
 OUTLOOK_3416
@@ -613,9 +613,6 @@ STOCK_IMG_HDR_FROM
 # good enough
 STOCK_IMG_HTML
 
-# good enough
-STOX_REPLY_TYPE_WITHOUT_QUOTES
-
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
@@ -624,12 +621,6 @@ SUBJECT_IN_WHITELIST
 
 # good enough
 TT_OBSCURED_VIAGRA
-
-# good enough
-TVD_FINGER_02
-
-# good enough
-TVD_PH_SUBJ_URGENT
 
 # good enough
 TVD_PP_PHISH
@@ -641,10 +632,10 @@ TVD_QUAL_MEDS
 TVD_RCVD_IP4
 
 # good enough
-DOS_FORGED_RCVD_QUADS
+TVD_RCVD_SINGLE
 
 # good enough
-FH_HOST_IN_ADDRARPA
+FB_REPLICA_ROLEX
 
 # tflags net
 RCVD_IN_DSBL
@@ -933,9 +924,6 @@ XMAILER_MIMEOLE_OL_F475E
 
 # good enough
 XMAILER_MIMEOLE_OL_F6D01
-
-# good enough
-XMAILER_MIMEOLE_OL_FF5C8
 
 # tflags net
 __DNS_FROM_RFC_ABUSE
