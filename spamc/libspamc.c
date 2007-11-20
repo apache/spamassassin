@@ -1038,6 +1038,10 @@ _zlib_compress (char *m_msg, int m_msg_len,
 
 #ifndef HAVE_LIBZ
 
+    UNUSED_VARIABLE(m_msg);
+    UNUSED_VARIABLE(m_msg_len);
+    UNUSED_VARIABLE(zlib_buf);
+    UNUSED_VARIABLE(zlib_bufsiz);
     UNUSED_VARIABLE(rc);
     UNUSED_VARIABLE(len);
     UNUSED_VARIABLE(totallen);
@@ -1376,7 +1380,7 @@ int message_filter(struct transport *tp, const char *username,
 	}
 
 
-	if (len + m->out_len > (m->priv->alloced_size-1)) {
+	if ((int) len + (int) m->out_len > (m->priv->alloced_size - 1)) {
 	    failureval = EX_TOOBIG;
 	    goto failure;
 	}
