@@ -1540,17 +1540,10 @@ sub generate_messages {
           push @sent, $num;
         } else {
           # if the message has an error (probably due to it being removed sometime during the
-          # run) we need to send a blank message (that we'll ignore the results for due to the
-          # bogus message number (0) in its place since we have already added the line telling
-          # the client how many messages to expect
-          # NOTE: for some reason the client doesn't seem to even scan these messages (which is
-          # fine)... if it were to it probably wouldn't be great for bayes enabled mass-checks
-          my $data = Mail::SpamAssassin::ArchiveIterator::_index_pack(0, 's', 'f', 'msg-error');
+          # run) we send a message number of 0 to indicate to the client that the server had an
+          # error retrieving the message; we need to do this since we have already added the
+          # line telling the client how many messages to expect
           send_line($gzfd, 0) || die "mass-check: error when writing to gz temp file\n";
-          send_line($gzfd, $data) || die "mass-check: error when writing to gz temp file\n";
-          send_line($gzfd, '1') || die "mass-check: error when writing to gz temp file\n";
-          send_line($gzfd, 'empty-message-will-cause-client-to-hang') ||
-            die "mass-check: error when writing to gz temp file\n";
           delete $msgsout->{$num};
           $msgs_processed++ if $opt_cs_schedule_cache;
         }
@@ -2307,6 +2300,8 @@ sub client_mode {
       for(my $i = 0 ; $i < $total_messages; $i++ ) {
         my $num = read_line($gzfd);
 	last unless defined $num;
+
+        next unless $num; # a message number of 0 indicates a msg-error on the server
 
         my $index = read_line($gzfd);
 	last unless defined $index;
