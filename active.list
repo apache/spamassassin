@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: alexb cthielen dos jm zmi; day 2: alexb bb-fredt bb-jm bb-zmi cthielen dos jm theo zmi; day 3: alexb bb-fredt bb-jm cthielen dos jm theo zmi
+# with results from: day 1: alexb cthielen dos jm zmi; day 2: alexb cthielen dos jm zmi; day 3: alexb bb-fredt bb-jm bb-zmi cthielen dos jm theo zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -78,9 +78,6 @@ DNS_FROM_RFC_DSN
 
 # tflags publish
 DOS_ANAL_SPAM_MAILER
-
-# good enough
-DOS_FORGED_RCVD_QUADS
 
 # good enough
 DOS_OE_TO_MX
@@ -840,9 +837,6 @@ XMAILER_MIMEOLE_OL_015D5
 
 # good enough
 XMAILER_MIMEOLE_OL_07794
-
-# good enough
-XMAILER_MIMEOLE_OL_09BB4
 
 # good enough
 XMAILER_MIMEOLE_OL_20C99
