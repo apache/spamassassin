@@ -1401,7 +1401,7 @@ sub generate_messages {
 
         # we got a result, so assign it a number (curnum) and store the data
         # appropriately, then add the new number to the queue.
-        my $num = $msgsout->{'curnum'}++;
+        my $num = ++$msgsout->{'curnum'};
         $msgsout->{$num}->{'data'} = $msg;
         push(@tosend, $num);
       }
@@ -1426,7 +1426,7 @@ sub generate_messages {
 
         # we got a result, so assign it a number (curnum) and store the data
         # appropriately, then add the new number to the queue.
-        my $num = $msgsout->{'curnum'}++;
+        my $num = ++$msgsout->{'curnum'};
         $msgsout->{$num}->{'data'} = $server_caches{'to_process'}{$path};
         push(@tosend, [ $num, 1 ]);
         delete $server_caches{'to_process'}{$path};
@@ -1443,7 +1443,7 @@ sub generate_messages {
              (my($path, undef) = each %{$server_caches{'not_cached'}})) {
         # we got a result, so assign it a number (curnum) and store the data
         # appropriately, then add the new number to the queue.
-        my $num = $msgsout->{'curnum'}++;
+        my $num = ++$msgsout->{'curnum'};
         $msgsout->{$num}->{'data'} = $server_caches{'to_process'}{$path};
         push(@tosend, [ $num, 0 ]);
         delete $server_caches{'to_process'}{$path};
@@ -1457,7 +1457,7 @@ sub generate_messages {
              (my($path, undef) = each %{$client_caches{$client_id}})) {
         # we got a result, so assign it a number (curnum) and store the data
         # appropriately, then add the new number to the queue.
-        my $num = $msgsout->{'curnum'}++;
+        my $num = ++$msgsout->{'curnum'};
         $msgsout->{$num}->{'data'} = $server_caches{'to_process'}{$path};
         push(@tosend, [ $num, 1 ]);
         delete $server_caches{'to_process'}{$path};
@@ -1481,7 +1481,7 @@ sub generate_messages {
              (my($path, $msg) = each %{$server_caches{'to_process'}})) {
         # we got a result, so assign it a number (curnum) and store the data
         # appropriately, then add the new number to the queue.
-        my $num = $msgsout->{'curnum'}++;
+        my $num = ++$msgsout->{'curnum'};
         $msgsout->{$num}->{'data'} = $server_caches{'to_process'}{$path};
         push(@tosend, [ $num, 0 ]);
         delete $server_caches{'to_process'}{$path};
@@ -2327,23 +2327,23 @@ sub client_mode {
                           # TODO: the entire mass-check script should probably use umask 0077;
 
               mkdir $opt_cs_cachedir; # mkdir won't bitch if it already exists, that's ok
-              if (-d $opt_cs_cachedir && $d[3] =~ m{^/?(.*(?![^\\]\\)/)(.+)$}) {
+              if (-d $opt_cs_cachedir && $d[3] =~ m{^/?(.*(?![^\\]\\)/)?(.+)$}) {
                 my ($path, $filename) = ($1, $2);
                 my $dir = '';
+                $path ||= '';
                 while ($path =~ m#((?![^\\]\\)[^/]+/)#gc) {
                   $dir .= $1;
                   mkdir "$opt_cs_cachedir/$dir";
                 }
-                chop $dir; # chop the trailing slash to make the following code more readable
                 if (-d "$opt_cs_cachedir/$dir") {
-                  if (open(OUT, ">$opt_cs_cachedir/$dir/$filename")) {
+                  if (open(OUT, ">$opt_cs_cachedir/$dir$filename")) {
                     print OUT $msg;
                     close $msg;
 
                     $cache_success = 1;
                   }
                   else {
-                    warn "Can't create/write message cache file $opt_cs_cachedir/$dir/$filename: $!";
+                    warn "Can't create/write message cache file $opt_cs_cachedir/$dir$filename: $!";
                   }
                 }
               }
@@ -2396,14 +2396,14 @@ sub client_mode {
                           # TODO: the entire mass-check script should probably use umask 0077;
 
               mkdir $opt_cs_cachedir; # mkdir won't bitch if it already exists, that's ok
-              if (-d $opt_cs_cachedir && $d[3] =~ m{^/?(.*(?![^\\]\\)/)(.+)$}) {
+              if (-d $opt_cs_cachedir && $d[3] =~ m{^/?(.*(?![^\\]\\)/)?(.+)$}) {
                 my ($path, $filename) = ($1, $2);
                 my $dir = '';
+                $path ||= '';
                 while ($path =~ m#((?![^\\]\\)[^/]+/)#gc) {
                   $dir .= $1;
                   mkdir "$opt_cs_cachedir/$dir";
                 }
-                chop $dir; # chop the trailing slash to make the following code more readable
                 if (-d "$opt_cs_cachedir/$dir") {
                   # copy the file to the local cache for use next (and this) time
                   if (copy($d[3], "$opt_cs_cachedir/$d[3]")) {
