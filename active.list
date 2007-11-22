@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: alexb cthielen dos jm zmi; day 2: alexb cthielen dos jm zmi; day 3: alexb bb-fredt bb-jm bb-zmi cthielen dos jm theo zmi
+# with results from: day 1: alexb cthielen dos zmi; day 2: alexb cthielen dos jm zmi; day 3: alexb cthielen dos jm zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -125,6 +125,9 @@ FAKE_HELO_MSN
 FAKE_HELO_YAHOO_CA
 
 # good enough
+FB_ALMOST_SEX
+
+# good enough
 FB_CIALIS_LEO3
 
 # good enough
@@ -203,10 +206,16 @@ FM_XMAIL_F_OUT
 FRAGMENTED_MESSAGE
 
 # good enough
+FRT_DOLLAR
+
+# good enough
 FRT_OPPORTUN1
 
 # good enough
 FRT_PENIS1
+
+# good enough
+FRT_PRICE
 
 # good enough
 FRT_SEXUAL
@@ -291,6 +300,9 @@ HELO_OEM
 
 # tflags userconf
 HIGH_CODEPAGE_URI
+
+# good enough
+HS_INDEX_PARAM
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -601,15 +613,6 @@ SPF_PASS
 # tflags net
 SPF_SOFTFAIL
 
-# good enough
-STOCK_IMG_CTYPE
-
-# good enough
-STOCK_IMG_HDR_FROM
-
-# good enough
-STOCK_IMG_HTML
-
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
@@ -626,13 +629,7 @@ TVD_PP_PHISH
 TVD_QUAL_MEDS
 
 # good enough
-TVD_RCVD_IP4
-
-# good enough
-TVD_RCVD_SINGLE
-
-# good enough
-FB_REPLICA_ROLEX
+FB_YOUR_WOMAN
 
 # tflags net
 RCVD_IN_DSBL
@@ -839,9 +836,6 @@ XMAILER_MIMEOLE_OL_015D5
 XMAILER_MIMEOLE_OL_07794
 
 # good enough
-XMAILER_MIMEOLE_OL_20C99
-
-# good enough
 XMAILER_MIMEOLE_OL_22B61
 
 # good enough
@@ -849,9 +843,6 @@ XMAILER_MIMEOLE_OL_25340
 
 # good enough
 XMAILER_MIMEOLE_OL_3857F
-
-# good enough
-XMAILER_MIMEOLE_OL_3AC1D
 
 # good enough
 XMAILER_MIMEOLE_OL_465CD
@@ -906,9 +897,6 @@ XMAILER_MIMEOLE_OL_C65FA
 
 # good enough
 XMAILER_MIMEOLE_OL_CF0C0
-
-# good enough
-XMAILER_MIMEOLE_OL_EF20B
 
 # good enough
 XMAILER_MIMEOLE_OL_F3B05
