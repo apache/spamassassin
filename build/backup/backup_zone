@@ -21,13 +21,14 @@ tarup () {
   name=$2
 
   tar=tar; [ -x /usr/sfw/bin/gtar ] && tar=/usr/sfw/bin/gtar
+  excludedir=`dirname $0`
 
   (
     cd "$dir"
 
-    nice -20 $tar --create --file=-              \
-        --sparse --exclude-from=$DIR/excludes   \
-        --label="Backup of $dir at `date`"      \
+    nice -20 $tar --create --file=-  \
+        --sparse --exclude-from=$excludedir/excludes   \
+        --label="Backup of $dir at `date`"  \
         . | nice -20 gzip -2
 
   ) > $name.tgz 2>$name.log
