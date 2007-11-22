@@ -28,12 +28,10 @@ tarup () {
   chmod 600 $name.tgz $name.log
 
   (
-    cd "$dir"
-
     nice -20 $tar --create --file=-  \
         --sparse --exclude-from=$excludedir/excludes   \
         --label="Backup of $dir at `date`"  \
-        . | nice -20 gzip -2
+        "$dir" | nice -20 gzip -2
 
   ) > $name.tgz 2>$name.log
 }
