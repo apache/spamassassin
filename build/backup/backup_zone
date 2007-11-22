@@ -2,6 +2,10 @@
 #
 # a basic backup script for the stuff on the zone; we can't check it all
 # in due to (a) volume and (b) embedded rsync passwords in .corpus files etc.
+#
+# run as root, a la
+#
+#    sudo /home/automc/svn/spamassassin/build/backup/backup_zone
 
 bupdir=/home/jm/backups/spamassassin.zones.apache.org
 
@@ -16,10 +20,12 @@ tarup () {
   dir="$1"
   name=$2
 
+  tar=tar; [ -x /usr/sfw/bin/gtar ] && tar=/usr/sfw/bin/gtar
+
   (
     cd "$dir"
 
-    nice -20 tar --create --file=-              \
+    nice -20 $tar --create --file=-              \
         --sparse --exclude-from=$DIR/excludes   \
         --label="Backup of $dir at `date`"      \
         . | nice -20 gzip -2
