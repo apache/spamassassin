@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: alexb cthielen dos zmi; day 2: alexb cthielen dos jm zmi; day 3: alexb cthielen dos jm zmi
+# with results from: day 1: alexb cthielen dos jm zmi; day 2: alexb cthielen dos zmi; day 3: alexb cthielen dos jm zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -149,6 +149,9 @@ FB_SMALL_PEN
 FB_SOFTTABS
 
 # good enough
+FB_YOUR_WOMAN
+
+# good enough
 FH_BAD_OEV1441
 
 # good enough
@@ -204,12 +207,6 @@ FM_XMAIL_F_OUT
 
 # tflags userconf
 FRAGMENTED_MESSAGE
-
-# good enough
-FRT_DOLLAR
-
-# good enough
-FRT_OPPORTUN1
 
 # good enough
 FRT_PENIS1
@@ -629,7 +626,10 @@ TVD_PP_PHISH
 TVD_QUAL_MEDS
 
 # good enough
-FB_YOUR_WOMAN
+DOS_FORGED_RCVD_QUADS
+
+# good enough
+FM_MORTGAGE3PLUS
 
 # tflags net
 RCVD_IN_DSBL
