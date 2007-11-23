@@ -2603,7 +2603,7 @@ string of octal digits, it is converted to a numeric value internally.
     setting => 'bayes_file_mode',
     is_admin => 1,
     default => '0700',
-    type => $CONF_TYPE_NUMERIC
+    type => $CONF_TYPE_STRING
   });
 
 =item bayes_store_module Name::Of::BayesStore::Module
