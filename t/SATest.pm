@@ -578,7 +578,17 @@ sub create_saobj {
 
   return $sa;
 }
-  
+
+sub create_clientobj {
+  my $args = shift;
+
+  # We'll assume that the test has setup INC correctly
+  require Mail::SpamAssassin::Client;
+
+  my $client = Mail::SpamAssassin::Client->new($args);
+
+  return $client;
+}
 
 # ---------------------------------------------------------------------------
 
