@@ -24,9 +24,18 @@ NOTE: This interface is alpha at best, and almost guaranteed to change
 
 =head1 SYNOPSIS
 
-  my $client = new Mail::SpamAssassin::Client({port => 783,
-                                               host => 'localhost',
-                                               username => 'someuser'});
+  my $client = new Mail::SpamAssassin::Client({
+                                port => 783,
+                                host => 'localhost',
+                                username => 'someuser'});
+  or
+
+  my $client = new Mail::SpamAssassin::Client({
+                                socketpath => '/path/to/socket',
+                                username => 'someuser'});
+
+  Optionally takes timeout, which is applied to IO::Socket for the
+  initial connection.  If not supplied, it defaults to 30 seconds.
 
   if ($client->ping()) {
     print "Ping is ok\n";
@@ -82,6 +91,10 @@ sub new {
 
   if ($args->{username}) {
     $self->{username} = $args->{username};
+  }
+
+  if ($args->{timeout}) {
+    $self->{timeout} = $args->{timeout} || 30;
   }
 
   bless($self, $class);
@@ -252,8 +265,8 @@ sub learn {
 
   return undef unless ($resp_code == 0);
 
-  my $did_set;
-  my $did_remove;
+  my $did_set = '';
+  my $did_remove = '';
 
   while ($line = <$remote>) {
     if ($line =~ /DidSet: (.*)/i) {
@@ -443,12 +456,14 @@ sub _create_connection {
   if ($self->{socketpath}) {
     $remote = IO::Socket::UNIX->new( Peer => $self->{socketpath},
 				     Type => SOCK_STREAM,
+				     Timeout => $self->{timeout},
 				   );
   }
   else {
     $remote = IO::Socket::INET->new( Proto     => "tcp",
 				     PeerAddr  => $self->{host},
 				     PeerPort  => $self->{port},
+				     Timeout   => $self->{timeout},
 				   );
   }
 
