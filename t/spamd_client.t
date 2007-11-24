@@ -22,7 +22,7 @@ use constant HAS_SDBM_FILE => eval { require SDBM_File; };
 
 our $DO_RUN = !$SKIP_SPAMD_TESTS;
 
-my $num_tests = 14;
+my $num_tests = 18;
 
 # UNIX socket tests
 if (!$RUNNING_ON_WINDOWS) {
@@ -78,12 +78,39 @@ ok($result->{message});
 patterns_run_cb($result->{message});
 ok_all_patterns();
 
+clear_pattern_counters();
+%patterns = (
+q{ X-Spam-Flag: YES}, 'flag',
+);
+
+%anti_patterns = (
+q{ XJS*C4JDBQADN1.NSBN3*2IDNEN*GTUBE-STANDARD-ANTI-UBE-TEST-EMAIL*C.34X }, 'gtube string',
+);
+
+$result = $client->headers($testmsg);
+
+ok($result);
+
+ok($result->{message});
+
+patterns_run_cb($result->{message});
+ok_all_patterns();
+
 ok(stop_spamd());
 
-clear_pattern_counters();
-$spamd_already_killed = undef;
-
 if (!$RUNNING_ON_WINDOWS) {
+
+  clear_pattern_counters();
+  $spamd_already_killed = undef;
+
+  %patterns = (
+    q{ X-Spam-Flag: YES}, 'flag',
+    q{ BODY: Generic Test for Unsolicited Bulk Email }, 'gtube',
+    q{ XJS*C4JDBQADN1.NSBN3*2IDNEN*GTUBE-STANDARD-ANTI-UBE-TEST-EMAIL*C.34X }, 'gtube string',
+      );
+
+  %anti_patterns = ();
+
   my $sockpath = mk_safe_tmpdir()."/spamd.sock";
   ok(start_spamd("-L --socketpath=$sockpath"));
 
