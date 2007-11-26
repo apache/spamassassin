@@ -162,6 +162,7 @@ sub load_with_dbi {
 	   delete $main->{conf}->{main};
 	 }
 	 $sth->finish();
+	 undef $sth;
        }
        else {
 	 die "config: SQL error: $sql\n".$sth->errstr."\n";
