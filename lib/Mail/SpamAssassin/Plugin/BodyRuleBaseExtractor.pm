@@ -615,7 +615,7 @@ sub extract_hints {
           # a high Unicode codepoint, interpreted by perl 5.8.x.  cut and stop
           $add_candidate->();
         }
-        if (length $1 >= 55 && $buf =~ s/\.\.\.$//) {
+        if ($1 && length $1 >= 55 && $buf =~ s/\.\.\.$//) {
           # perl 5.8.x truncates with a "..." here!  cut and stop
           $add_candidate->();
         }
