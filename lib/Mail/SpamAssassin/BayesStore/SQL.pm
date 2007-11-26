@@ -349,7 +349,7 @@ sub token_expiration {
       goto token_expiration_final;
     }
 
-    $deleted = $rows;
+    $deleted = ($rows eq '0E0') ? 0 : $rows;
   }
 
   # Update the magic tokens as appropriate
