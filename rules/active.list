@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: cthielen zmi; day 2: alexb cthielen dos jm zmi; day 3: alexb cthielen dos jm zmi
+# with results from: day 1: alexb cthielen dos jm zmi; day 2: cthielen zmi; day 3: alexb cthielen dos jm zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -523,8 +523,35 @@ TVD_PP_PHISH
 # good enough
 TVD_QUAL_MEDS
 
+# tflags publish
+DOS_ANAL_SPAM_MAILER
+
 # good enough
-AXB_MIME_IMG830
+DOS_FORGED_RCVD_QUADS
+
+# good enough
+DOS_OE_TO_MX
+
+# good enough
+DOS_OUTLOOK_TO_MX
+
+# good enough
+DVLABS_GOZI_PDF
+
+# good enough
+FB_SMALL_PEN
+
+# good enough
+FS_ABIGGER
+
+# good enough
+JM_0800_GMT
+
+# good enough
+KB_DATE_CONTAINS_TAB
+
+# good enough
+KB_FAKED_THE_BAT
 
 # tflags net
 RCVD_IN_DSBL
@@ -723,6 +750,9 @@ WHOIS_WHOISGUARD
 
 # tflags net
 WHOIS_WHOISPROT
+
+# good enough
+XMAILER_MIMEOLE_OL_09BB4
 
 # good enough
 XMAILER_MIMEOLE_OL_22B61
