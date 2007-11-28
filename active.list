@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: alexb cthielen dos jm zmi; day 2: cthielen zmi; day 3: alexb cthielen dos jm zmi
+# with results from: day 1: bb-fredt cthielen dos jm zmi; day 2: alexb bb-jm cthielen jm zmi; day 3: cthielen zmi
 
 # tflags userconf
 ALL_TRUSTED
@@ -73,11 +73,20 @@ DNS_FROM_RFC_BOGUSMX
 # tflags net
 DNS_FROM_RFC_DSN
 
+# tflags publish
+DOS_ANAL_SPAM_MAILER
+
+# good enough
+DOS_FORGED_RCVD_QUADS
+
 # good enough
 DOS_OE_TO_MX_IMAGE
 
 # good enough
 DOS_OUTLOOK_TO_MX_IMAGE
+
+# good enough
+DVLABS_GOZI_PDF
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
@@ -116,9 +125,6 @@ FB_SOFTTABS
 FH_BAD_OEV1441
 
 # good enough
-FH_DATE_IS_19XX
-
-# good enough
 FH_DATE_PAST_20XX
 
 # good enough
@@ -143,13 +149,13 @@ FM_XMAIL_F_OUT
 FRAGMENTED_MESSAGE
 
 # good enough
+FRT_BIGGERMEM1
+
+# good enough
 FRT_PRICE
 
 # good enough
 FRT_SEXUAL
-
-# good enough
-FS_EJACULA
 
 # good enough
 FS_REPLICA
@@ -159,9 +165,6 @@ FS_REPLICAWATCH
 
 # good enough
 FS_WILL_HELP
-
-# good enough
-FU_LONG_QUERY3
 
 # tflags userconf
 GTUBE
@@ -218,13 +221,13 @@ HS_INDEX_PARAM
 HTML_CHARSET_FARAWAY
 
 # good enough
+JM_0800_GMT
+
+# good enough
 JM_FAKE_PSMTP_RCVD
 
 # good enough
 JM_GMT_RCVD
-
-# good enough
-JM_NICE_GIRL
 
 # good enough
 JM_SOUGHT_1
@@ -499,15 +502,6 @@ SPF_PASS
 # tflags net
 SPF_SOFTFAIL
 
-# good enough
-STOCK_IMG_CTYPE
-
-# good enough
-STOCK_IMG_HDR_FROM
-
-# good enough
-STOCK_IMG_HTML
-
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
@@ -518,40 +512,10 @@ SUBJECT_IN_WHITELIST
 TT_OBSCURED_VIAGRA
 
 # good enough
-TVD_PP_PHISH
-
-# good enough
 TVD_QUAL_MEDS
 
-# tflags publish
-DOS_ANAL_SPAM_MAILER
-
 # good enough
-DOS_FORGED_RCVD_QUADS
-
-# good enough
-DOS_OE_TO_MX
-
-# good enough
-DOS_OUTLOOK_TO_MX
-
-# good enough
-DVLABS_GOZI_PDF
-
-# good enough
-FB_SMALL_PEN
-
-# good enough
-FS_ABIGGER
-
-# good enough
-JM_0800_GMT
-
-# good enough
-KB_DATE_CONTAINS_TAB
-
-# good enough
-KB_FAKED_THE_BAT
+TVD_VISIT_PHARMA
 
 # tflags net
 RCVD_IN_DSBL
@@ -756,9 +720,6 @@ XMAILER_MIMEOLE_OL_09BB4
 
 # good enough
 XMAILER_MIMEOLE_OL_22B61
-
-# good enough
-XMAILER_MIMEOLE_OL_3857F
 
 # good enough
 XMAILER_MIMEOLE_OL_3AC1D
