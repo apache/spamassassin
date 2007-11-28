@@ -494,12 +494,15 @@ elsif ($log_facility eq 'file') {
 # run with -u
 # we're not root
 # doing --vpopmail or --virtual-config-dir
-# we disable user-config
+# using --sql-config or --ldap-config
+# (unless we're also using --setuid-with-sql or --setuid-with-ldap)
 my $setuid_to_user = (
-	$opt{'username'} ||
-	$> != 0 ||
-	$opt{'vpopmail'} ||
-	$opt{'virtual-config-dir'}
+        $opt{'username'} ||
+        $> != 0 ||
+        $opt{'vpopmail'} ||
+        $opt{'virtual-config-dir'} ||
+        ($opt{'sql-config'} && !$opt{'setuid-with-sql'}) ||
+        ($opt{'ldap-config'} && !$opt{'setuid-with-ldap'})
       ) ? 0 : 1;
 
 dbg("spamd: will perform setuids? $setuid_to_user");
@@ -513,6 +516,18 @@ if ( $opt{'vpopmail'} ) {
 if ( $opt{'virtual-config-dir'} ) {
   if ( !$opt{'username'} ) {
     die "spamd: cannot use --virtual-config-dir without -u\n";
+  }
+}
+
+if ($opt{'sql-config'} && !$opt{'setuid-with-sql'}) {
+  if ( !$opt{'username'} ) {
+    die "spamd: cannot use --sql-config without -u\n";
+  }
+}
+
+if ($opt{'ldap-config'} && !$opt{'setuid-with-ldap'}) {
+  if ( !$opt{'username'} ) {
+    die "spamd: cannot use --ldap-config without -u\n";
   }
 }
 
@@ -2749,7 +2764,6 @@ If the B<--ssl> switch is used, and B<--ssl-port> is set, then unencrypted
 connections will be accepted on the B<--port> at the same time as encrypted
 connections are accepted at B<--ssl-port>.
 
-
 =item B<-q>, B<--sql-config>
 
 Turn on SQL lookups even when per-user config files have been disabled
@@ -2760,10 +2774,17 @@ database.
 If your spamc client does not support sending the C<User:> header,
 like C<exiscan>, then the SQL username used will always be B<nobody>.
 
+This inhibits the setuid() behavior, so the C<-u> option is
+required. If you want the setuid() behaviour, use C<-Q> or
+C<--setuid-with-sql> instead.
+
 =item B<--ldap-config>
 
 Turn on LDAP lookups. This is completely analog to C<--sql-config>,
 only it is using an LDAP server.
+
+Like C<--sql-config>, this disables the setuid behavior, and requires
+C<-u>. If you want it, use C<--setuid-with-ldap> instead.
 
 =item B<-Q>, B<--setuid-with-sql>
 
