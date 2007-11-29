@@ -497,7 +497,7 @@ elsif ($log_facility eq 'file') {
 # we're not root
 # doing --vpopmail or --virtual-config-dir
 # using --sql-config or --ldap-config
-# (unless we're also using --setid-with-sql or --setuid-with-ldap)
+# (unless we're also using --setuid-with-sql or --setuid-with-ldap)
 my $setuid_to_user = (
         $opt{'username'} ||
         $> != 0 ||
