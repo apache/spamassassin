@@ -270,7 +270,11 @@ sub src_wanted {
   return if (!-f $path);
   
   # limit what will be copied from sandboxes
-  return if ($path =~ /(?:sandbox|scores)/ && !/(?:\d.*\.cf|\.pm)$/i);
+  return if ($path =~ /\bsandbox\b/ && !/(?:\d.*\.cf|\.pm)$/i);
+
+  # don't use generated scores; they can be out of sync with what is currently
+  # in the sandboxes or the most current active.list file at any given time
+  return if ($path =~ /\bscores\b/);
 
   # a bit of sanity please - no svn metadata ;)
   return if ($path =~ /\.svn/);
