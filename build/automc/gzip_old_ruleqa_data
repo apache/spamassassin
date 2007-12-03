@@ -1,0 +1,7 @@
+#!/bin/sh
+
+cd /export/home/automc/corpus/html
+exec find . -mtime +200 -name '*.???' -print | \
+        egrep '(age|all|new)$' | \
+        xargs gzip -9
+
