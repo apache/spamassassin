@@ -458,7 +458,7 @@ static int _try_to_connect_tcp(const struct transport *tp, int *sockptr)
     if (connect_retries == 0) {
       connect_retries = 3;
     }
-    if (retry_sleep == 0) {
+    if (retry_sleep < 0) {
       retry_sleep = 1;
     }
 
@@ -1729,6 +1729,7 @@ void transport_init(struct transport *tp)
     tp->type = TRANSPORT_LOCALHOST;
     tp->port = 783;
     tp->flags = 0;
+    tp->retry_sleep = -1;
 }
 
 /*
