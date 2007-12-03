@@ -73,7 +73,7 @@ foreach(qw/
   com.af edu.af gov.af net.af
   co.ag com.ag net.ag nom.ag org.ag
   com.ai edu.ai gov.ai net.ai off.ai org.ai
-  com.al edu.al gov.al inima.al net.al org.al soros.al tirana.al uniti.al upt.al
+  com.al edu.al gov.al net.al org.al
   com.an edu.an net.an org.an
   co.ao ed.ao gv.ao it.ao og.ao pb.ao
   com.ar edu.ar gov.ar int.ar mil.ar net.ar org.ar
@@ -98,21 +98,19 @@ foreach(qw/
   gov.by mil.by
   com.bz net.bz org.bz
   ab.ca bc.ca gc.ca mb.ca nb.ca nf.ca nl.ca ns.ca nt.ca nu.ca on.ca pe.ca qc.ca sk.ca yk.ca
-  com.cd net.cd org.cd
-  com.ch gov.ch net.ch org.ch
   co.ck edu.ck gov.ck net.ck org.ck
   ac.cn ah.cn bj.cn com.cn cq.cn edu.cn fj.cn gd.cn gov.cn gs.cn gx.cn gz.cn ha.cn hb.cn he.cn hi.cn hk.cn hl.cn hn.cn jl.cn js.cn jx.cn ln.cn mo.cn net.cn nm.cn nx.cn org.cn qh.cn sc.cn sd.cn sh.cn sn.cn sx.cn tj.cn tw.cn xj.cn xz.cn yn.cn zj.cn
   arts.co com.co edu.co firm.co gov.co info.co int.co mil.co net.co nom.co org.co rec.co store.co web.co
   lkd.co.im ltd.co.im plc.co.im
-  ac.com au.com br.com cn.com de.com eu.com gb.com hu.com no.com qc.com ru.com sa.com se.com uk.com us.com uy.com za.com
+  au.com br.com cn.com de.com eu.com gb.com hu.com no.com qc.com ru.com sa.com se.com uk.com us.com uy.com za.com
   ac.cr co.cr ed.cr fi.cr go.cr or.cr sa.cr
-  com.cu edu.cu gov.cu inf.cu info.cu net.cu org.cu
+  com.cu edu.cu gov.cu inf.cu net.cu org.cu
   gov.cx
-  ac.cy biz.cy com.cy ekloges.cy gov.cy info.cy ltd.cy name.cy net.cy org.cy parliament.cy press.cy pro.cy tm.cy
+  ac.cy biz.cy com.cy ekloges.cy gov.cy ltd.cy name.cy net.cy org.cy parliament.cy press.cy pro.cy tm.cy
   co.dk
   com.dm edu.dm gov.dm net.dm org.dm
   art.do com.do edu.do gob.do gov.do mil.do net.do org.do sld.do web.do
-  art.dz ass.dz asso.dz com.dz edu.dz gov.dz net.dz org.dz pol.dz
+  art.dz asso.dz com.dz edu.dz gov.dz net.dz org.dz pol.dz
   com.ec edu.ec fin.ec gov.ec info.ec k12.ec med.ec mil.ec net.ec org.ec pro.ec
   co.ee com.ee edu.ee fie.ee med.ee org.ee pri.ee
   com.eg edu.eg eun.eg gov.eg mil.eg net.eg org.eg sci.eg
@@ -159,12 +157,10 @@ foreach(qw/
   com.la net.la org.la
   com.lb edu.lb gov.lb mil.lb net.lb org.lb
   com.lc edu.lc gov.lc net.lc org.lc
-  com.li gov.li net.li org.li
   assn.lk com.lk edu.lk gov.lk grp.lk hotel.lk int.lk ltd.lk net.lk ngo.lk org.lk sch.lk soc.lk web.lk
   com.lr edu.lr gov.lr net.lr org.lr
   co.ls org.ls
   gov.lt mil.lt
-  gov.lu mil.lu net.lu org.lu
   asn.lv com.lv conf.lv edu.lv gov.lv id.lv mil.lv net.lv org.lv
   biz.ly com.ly edu.ly gov.ly id.ly med.ly net.ly org.ly plc.ly sch.ly
   ac.ma co.ma gov.ma net.ma org.ma press.ma
@@ -173,7 +169,7 @@ foreach(qw/
   army.mil navy.mil
   com.mk org.mk
   com.mm edu.mm gov.mm net.mm org.mm
-  com.mn edu.mn gov.mn museum.mn org.mn
+  edu.mn gov.mn org.mn
   com.mo edu.mo gov.mo net.mo org.mo
   music.mobi weather.mobi
   com.mt edu.mt gov.mt net.mt org.mt tm.mt uu.mt
@@ -234,7 +230,7 @@ foreach(qw/
   ac.tz co.tz go.tz ne.tz or.tz
   cherkassy.ua chernigov.ua chernovtsy.ua ck.ua cn.ua co.ua com.ua crimea.ua cv.ua dn.ua dnepropetrovsk.ua donetsk.ua dp.ua edu.ua gov.ua if.ua in.ua ivano-frankivsk.ua kh.ua kharkov.ua kherson.ua khmelnitskiy.ua kiev.ua kirovograd.ua km.ua kr.ua ks.ua kv.ua lg.ua lugansk.ua lutsk.ua lviv.ua mk.ua net.ua nikolaev.ua od.ua odessa.ua org.ua pl.ua poltava.ua rovno.ua rv.ua sebastopol.ua sumy.ua te.ua ternopil.ua uzhgorod.ua vinnica.ua vn.ua zaporizhzhe.ua zhitomir.ua zp.ua zt.ua
   ac.ug co.ug go.ug ne.ug or.ug sc.ug
-  ac.uk bl.uk british-library.uk co.uk edu.uk gov.uk icnet.uk jet.uk ltd.uk me.uk mil.uk mod.uk national-library-scotland.uk nel.uk net.uk nhs.uk nic.uk nls.uk org.uk parliament.uk plc.uk police.uk sch.uk
+  ac.uk bl.uk british-library.uk co.uk edu.uk gov.uk icnet.uk jet.uk ltd.uk me.uk mod.uk national-library-scotland.uk net.uk nhs.uk nic.uk nls.uk org.uk parliament.uk plc.uk police.uk sch.uk
   ak.us al.us ar.us az.us ca.us co.us ct.us dc.us de.us dni.us fed.us fl.us ga.us hi.us ia.us id.us il.us in.us isa.us kids.us ks.us ky.us la.us ma.us md.us me.us mi.us mn.us mo.us ms.us mt.us nc.us nd.us ne.us nh.us nj.us nm.us nsn.us nv.us ny.us oh.us ok.us or.us pa.us ri.us sc.us sd.us tn.us tx.us ut.us va.us vt.us wa.us wi.us wv.us wy.us
   com.uy edu.uy gub.uy mil.uy net.uy org.uy
   vatican.va
