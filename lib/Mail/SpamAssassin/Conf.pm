@@ -3564,10 +3564,13 @@ sub clone {
     $dest = $self;
   }
 
-  # keys that should not be copied in ->clone()
+  # keys that should not be copied in ->clone().
+  # bug 4179: include user_rules_to_compile, so that if a user rule
+  # is defined, its method will be recompiled for future scans in
+  # order to *remove* the generated method calls
   my @NON_COPIED_KEYS = qw(
     main eval_plugins plugins_loaded registered_commands sed_path_cache parser
-    scoreset scores
+    scoreset scores user_rules_to_compile
   );
 
   # keys that should can be copied using a ->clone() method, in ->clone()
@@ -3586,6 +3589,26 @@ sub clone {
 
   foreach my $var (@NON_COPIED_KEYS) {
     $done{$var} = undef;
+  }
+
+  # bug 4179: be smarter about cloning the rule-type structures;
+  # some are like this: $self->{type}->{priority}->{name} = 'value';
+  # which is an extra level that the below code won't deal with
+  foreach my $t (@rule_types) {
+    foreach my $k (keys %{$source->{$t}}) {
+      my $v = $source->{$t}->{$k};
+      my $i = ref $v;
+      if ($i eq 'HASH') {
+        %{$dest->{$t}->{$k}} = %{$v};
+      }
+      elsif ($i eq 'ARRAY') {
+        @{$dest->{$t}->{$k}} = @{$v};
+      }
+      else {
+        $dest->{$t}->{$k} = $v;
+      }
+    }
+    $done{$t} = undef;
   }
 
   # and now, copy over all the rest -- the less complex cases.
