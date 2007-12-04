@@ -461,6 +461,7 @@ describe MISSING_HEADERS	Missing To: header
 header ROUND_THE_WORLD_LOCAL	eval:check_for_round_the_world_received_helo()
 describe ROUND_THE_WORLD_LOCAL	Received: says mail sent around the world (HELO)
 tflags ROUND_THE_WORLD_LOCAL	net
+#reuse ROUND_THE_WORLD_LOCAL
 
 header DATE_IN_PAST_03_06	eval:check_for_shifted_date('-6', '-3')
 describe DATE_IN_PAST_03_06	Date: is 3 to 6 hours before Received: date
