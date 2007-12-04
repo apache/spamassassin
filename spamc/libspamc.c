@@ -1192,6 +1192,9 @@ int message_filter(struct transport *tp, const char *username,
     }
 
     m->is_spam = EX_TOOBIG;
+
+    if (m->outbuf != NULL)
+        free(m->outbuf);
     m->priv->alloced_size = m->max_len + EXPANSION_ALLOWANCE + 1;
     if ((m->outbuf = malloc(m->priv->alloced_size)) == NULL) {
 	failureval = EX_OSERR;
@@ -1505,6 +1508,9 @@ int message_tell(struct transport *tp, const char *username, int flags,
     }
 
     m->is_spam = EX_TOOBIG;
+
+    if (m->outbuf != NULL)
+        free(m->outbuf);
     m->priv->alloced_size = m->max_len + EXPANSION_ALLOWANCE + 1;
     if ((m->outbuf = malloc(m->priv->alloced_size)) == NULL) {
 	failureval = EX_OSERR;
