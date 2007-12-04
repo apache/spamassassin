@@ -106,27 +106,28 @@
 
 /* log to stderr */
 #define SPAMC_LOG_TO_STDERR   (1<<22)
+#define SPAMC_LOG_TO_CALLBACK (1<<21)
 
 /* Nov 24, 2004 NP: added learning support */
-#define SPAMC_LEARN	      (1<<21)
+#define SPAMC_LEARN	      (1<<20)
 
 /* May 5, 2005 NP: added list reporting support */
-#define SPAMC_REPORT_MSG      (1<<20)
+#define SPAMC_REPORT_MSG      (1<<19)
 
 /* Oct 21, 2005 sidney: added ping test */
-#define SPAMC_PING      (1<<19)
+#define SPAMC_PING      (1<<18)
 
 /* Jan 1, 2007 sidney: added SSL protocol versions */
 /* no flags means use default of SSL_v23 */
 /* Set both flags to specify TSL_v1 */
-#define SPAMC_SSLV2 (1<<18)
-#define SPAMC_SSLV3 (1<<17)
+#define SPAMC_SSLV2 (1<<17)
+#define SPAMC_SSLV3 (1<<16)
 
 /* Nov 30, 2006 jm: add -z, zlib support */
-#define SPAMC_USE_ZLIB        (1<<16)
+#define SPAMC_USE_ZLIB        (1<<15)
 
 /* Jan 16, 2007 jm: get markup headers from spamd */
-#define SPAMC_HEADERS         (1<<15)
+#define SPAMC_HEADERS         (1<<14)
 
 #define SPAMC_MESSAGE_CLASS_SPAM 1
 #define SPAMC_MESSAGE_CLASS_HAM  2
@@ -292,6 +293,11 @@ void message_cleanup(struct message *m);
 int process_message(struct transport *tp, char *username,
 		    int max_size, int in_fd, int out_fd,
 		    const int check_only, const int safe_fallback);
+
+void register_spamc_header_callback(const struct message *m, void (*func)(struct message *m, int flags, char *buf, int len));
+void register_spamd_header_callback(const struct message *m, void (*func)(struct message *m, int flags, const char *buf, int len));
+
+void register_libspamc_log_callback(void (*function)(int flags, int level, char *msg, va_list args));
 
 void libspamc_log(int flags, int level, char *msg, ...);
 
