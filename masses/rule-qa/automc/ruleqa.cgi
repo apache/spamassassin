@@ -21,7 +21,7 @@ our %FREQS_FILENAMES = (
     'OVERLAP.new' => 'set 0, overlaps between rules',
 );
 
-my $refresh_cache = ($ARGV[0] eq '-refresh');
+my $refresh_cache = ($ARGV[0] and $ARGV[0] eq '-refresh');
 
 my $self = Mail::SpamAssassin::CGI::RuleQaApp->new();
 $self->ui_parse_url_base();
