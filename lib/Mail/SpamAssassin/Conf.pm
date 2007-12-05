@@ -3204,7 +3204,7 @@ sub new {
   $self->{regression_tests} = { };
 
   $self->{rewrite_header} = { };
-  $self->{user_rules_to_compile} = { };
+  $self->{want_rebuild_for_type} = { };
   $self->{user_defined_rules} = { };
   $self->{headers_spam} = { };
   $self->{headers_ham} = { };
@@ -3565,12 +3565,12 @@ sub clone {
   }
 
   # keys that should not be copied in ->clone().
-  # bug 4179: include user_rules_to_compile, so that if a user rule
+  # bug 4179: include want_rebuild_for_type, so that if a user rule
   # is defined, its method will be recompiled for future scans in
   # order to *remove* the generated method calls
   my @NON_COPIED_KEYS = qw(
     main eval_plugins plugins_loaded registered_commands sed_path_cache parser
-    scoreset scores user_rules_to_compile
+    scoreset scores want_rebuild_for_type
   );
 
   # keys that should can be copied using a ->clone() method, in ->clone()
