@@ -26,9 +26,10 @@ $tar cfz $tmp/tf \
 [ "$clienttree" = "" ] && clienttree=tree
 
 # a rather rough-and-ready way to ensure any hangover mass-checks
-# from the previous set are killed, before we start these ones
+# from the previous set are killed, before we start these ones;
+# ||true ensures we carry on even if this fails
 ssh $host \
-    killall perl
+    killall perl || true
 
 ssh $host \
     rm -rf $clienttree/code \; \
