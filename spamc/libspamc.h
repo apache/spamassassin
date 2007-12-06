@@ -106,28 +106,30 @@
 
 /* log to stderr */
 #define SPAMC_LOG_TO_STDERR   (1<<22)
-#define SPAMC_LOG_TO_CALLBACK (1<<21)
 
 /* Nov 24, 2004 NP: added learning support */
-#define SPAMC_LEARN	      (1<<20)
+#define SPAMC_LEARN	      (1<<21)
 
 /* May 5, 2005 NP: added list reporting support */
-#define SPAMC_REPORT_MSG      (1<<19)
+#define SPAMC_REPORT_MSG      (1<<20)
 
 /* Oct 21, 2005 sidney: added ping test */
-#define SPAMC_PING      (1<<18)
+#define SPAMC_PING      (1<<19)
 
 /* Jan 1, 2007 sidney: added SSL protocol versions */
 /* no flags means use default of SSL_v23 */
 /* Set both flags to specify TSL_v1 */
-#define SPAMC_SSLV2 (1<<17)
-#define SPAMC_SSLV3 (1<<16)
+#define SPAMC_SSLV2 (1<<18)
+#define SPAMC_SSLV3 (1<<17)
 
 /* Nov 30, 2006 jm: add -z, zlib support */
-#define SPAMC_USE_ZLIB        (1<<15)
+#define SPAMC_USE_ZLIB        (1<<16)
 
 /* Jan 16, 2007 jm: get markup headers from spamd */
-#define SPAMC_HEADERS         (1<<14)
+#define SPAMC_HEADERS         (1<<15)
+
+/* December 5, 2007 duncf: send log messages to callback */
+#define SPAMC_LOG_TO_CALLBACK (1<<14)
 
 #define SPAMC_MESSAGE_CLASS_SPAM 1
 #define SPAMC_MESSAGE_CLASS_HAM  2
