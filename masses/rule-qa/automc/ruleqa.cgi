@@ -1238,13 +1238,13 @@ sub output_freqs_data_line {
 }
 
 sub generate_scoremap_chart {
-  my ($smap, $outref) = @_;
+  my ($self, $smap, $outref) = @_;
 
   my %chart;
   foreach my $l (split (/^/m, $smap)) {
     #   scoremap spam: 16  12.11%  777 ****
-    /^\s*scoremap\s+(\S+):\s+(\S+)\s+(\S+)\%\s+\d+/
-            or warn "failed to parse scoremap line: $l";
+    $l =~ /^\s*scoremap\s+(\S+):\s+(\S+)\s+(\S+)\%\s+\d+/
+            or $$outref .= "chart: failed to parse scoremap line: $l<br>";
 
     my ($type, $idx, $pc) = ($1,$2,$3);
     next unless $type;
@@ -1253,27 +1253,49 @@ sub generate_scoremap_chart {
   }
 
   my %uniq=();
+  my $max_y = 0;
   for my $i (keys %{$chart{'spam'}}, keys %{$chart{'ham'}}) {
     next if exists $uniq{$i}; undef $uniq{$i};
+    if (($chart{'spam'}{$i}||0) > $max_y) { $max_y = $chart{'spam'}{$i}; }
+    if (($chart{'ham'}{$i}||0)  > $max_y) { $max_y = $chart{'ham'}{$i}; }
   }
+  $max_y ||= 0.001;
+
   my @idxes = sort { $a <=> $b } keys %uniq;
-  if (!scalar @idxes) { @idxes = ( 0 ); }
+  my $max_x;
+  if (!scalar @idxes) {
+    $max_x = 1; @idxes = ( 0 );
+  } else {
+    $max_x = $idxes[scalar(@idxes) - 1];
+  }
+  my $min_x = $idxes[0];
   
-  my @ycoords_s = map { $chart{'spam'}{$_}||0 } @idxes;
-  my @ycoords_h = map { $chart{'ham'}{$_}||0 } @idxes;
+  # normalize to [0,100] and set default to 0
+  my @ycoords_s = map { sprintf "%.2f", (100/$max_y) * ($chart{'spam'}{$_}||0) } @idxes;
+  my @ycoords_h = map { sprintf "%.2f", (100/$max_y) * ($chart{'ham'}{$_}||0) } @idxes;
+  my @xcoords   = map { sprintf "%.2f", (100/$max_x) * $_ } @idxes;
+
+  my $thresh_x;
+  foreach my $i (@xcoords) {
+    if ($i >= 5) { $thresh_x = $i; last; }
+  }
 
   # http://code.google.com/apis/chart/ , woo
   my $chartsetup = 
       "cht=lxy"             # line chart with x- and y-axis coords
-      ."chd=t:".join(",", @idxes)."|".join(",", @ycoords_h)
-                .join(",", @idxes)."|".join(",", @ycoords_s)
-      ."chts=ff0000,18"
-      ."chdl=Ham|Spam"
-      ."chco=ff0000,0000ff"
-      ."chf=c,lg,90,76a4fb,0.5,ffffff,0|bg,s,eeeeee"
-      ."chxt=x,y";
+      ."\&amp;chs=400x200"
+      ."\&amp;chd=t:".join(",", @xcoords)."|".join(",", @ycoords_h)
+                 ."|".join(",", @xcoords)."|".join(",", @ycoords_s)
+      ."\&amp;chts=ff0000,18"
+      ."\&amp;chdl=Ham|Spam"
+      ."\&amp;chco=ff0000,0000ff,00ff00"
+      ."\&amp;chls=3,1,0"
+      ."\&amp;chm=V,00ff00,0,$thresh_x,1"
+      ."\&amp;chxl=0:|$min_x+points|$max_x+points|1:|0\%|$max_y\%"
+      ."\&amp;chxt=x,y";
 
-  return "<img src='http://chart.apis.google.com/chart?$chartsetup' />\n";
+  $$outref .= "<p><img src='http://chart.apis.google.com/chart?$chartsetup' 
+		width='400' height='200' align='right' /></p>\n";
 }
 
 sub format_overlap {
