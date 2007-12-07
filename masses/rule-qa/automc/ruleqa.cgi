@@ -1217,12 +1217,14 @@ sub output_freqs_data_line {
 
   # add scoremap using the FREQS_EXTRA_TEMPLATE if it's present
   if ($obj->{scoremap}) {
-    my $ovl = $obj->{scoremap} || '';
+    my $smap = $obj->{scoremap} || '';
     #   scoremap spam: 16  12.11%  777 ****
 
     $self->process_template(\$FREQS_EXTRA_TEMPLATE, {
-        EXTRA => $ovl,
+        EXTRA => $smap,
     }, \$out);
+
+    $self->generate_scoremap_chart($smap, \$out);
   }
 
   # add overlap using the FREQS_EXTRA_TEMPLATE if it's present
@@ -1233,6 +1235,45 @@ sub output_freqs_data_line {
   }
 
   return $out;
+}
+
+sub generate_scoremap_chart {
+  my ($smap, $outref) = @_;
+
+  my %chart;
+  foreach my $l (split (/^/m, $smap)) {
+    #   scoremap spam: 16  12.11%  777 ****
+    /^\s*scoremap\s+(\S+):\s+(\S+)\s+(\S+)\%\s+\d+/
+            or warn "failed to parse scoremap line: $l";
+
+    my ($type, $idx, $pc) = ($1,$2,$3);
+    next unless $type;
+
+    $chart{$type}{$idx} = $pc;
+  }
+
+  my %uniq=();
+  for my $i (keys %{$chart{'spam'}}, keys %{$chart{'ham'}}) {
+    next if exists $uniq{$i}; undef $uniq{$i};
+  }
+  my @idxes = sort { $a <=> $b } keys %uniq;
+  if (!scalar @idxes) { @idxes = ( 0 ); }
+  
+  my @ycoords_s = map { $chart{'spam'}{$_}||0 } @idxes;
+  my @ycoords_h = map { $chart{'ham'}{$_}||0 } @idxes;
+
+  # http://code.google.com/apis/chart/ , woo
+  my $chartsetup = 
+      "cht=lxy"             # line chart with x- and y-axis coords
+      ."chd=t:".join(",", @idxes)."|".join(",", @ycoords_h)
+                .join(",", @idxes)."|".join(",", @ycoords_s)
+      ."chts=ff0000,18"
+      ."chdl=Ham|Spam"
+      ."chco=ff0000,0000ff"
+      ."chf=c,lg,90,76a4fb,0.5,ffffff,0|bg,s,eeeeee"
+      ."chxt=x,y";
+
+  return "<img src='http://chart.apis.google.com/chart?$chartsetup' />\n";
 }
 
 sub format_overlap {
