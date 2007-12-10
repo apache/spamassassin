@@ -538,7 +538,7 @@ sub dccproc_lookup {
     # note: not really tainted, this came from system configuration file
     my $path = Mail::SpamAssassin::Util::untaint_file_path($self->{main}->{conf}->{dcc_path});
 
-    my @opts = split(' ',$self->{main}->{conf}->{dcc_options});
+    my @opts = split(' ',$self->{main}->{conf}->{dcc_options}||'');
     untaint_var(\@opts);
 
     unshift(@opts, "-a",
