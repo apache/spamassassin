@@ -90,8 +90,8 @@ sub new {
 # Learn the message as spam.
 # 
 # C<$id> is an optional message-identification string, used internally
-# to tag the message.  If it is C<undef>, the Message-Id of the message
-# will be used.  It should be unique to that message.
+# to tag the message.  If it is C<undef>, one will be generated.
+# It should be unique to that message.
 # 
 # This is a semi-private API; callers should use
 # C<$spamtest-E<gt>learn($mail,$id,$isspam,$forget)> instead.
@@ -117,8 +117,8 @@ sub learn_spam {
 # Learn the message as ham.
 # 
 # C<$id> is an optional message-identification string, used internally
-# to tag the message.  If it is C<undef>, the Message-Id of the message
-# will be used.  It should be unique to that message.
+# to tag the message.  If it is C<undef>, one will be generated.
+# It should be unique to that message.
 # 
 # This is a semi-private API; callers should use
 # C<$spamtest-E<gt>learn($mail,$id,$isspam,$forget)> instead.
@@ -141,8 +141,8 @@ sub learn_ham {
 # Forget about a previously-learned message.
 # 
 # C<$id> is an optional message-identification string, used internally
-# to tag the message.  If it is C<undef>, the Message-Id of the message
-# will be used.  It should be unique to that message.
+# to tag the message.  If it is C<undef>, one will be generated.
+# It should be unique to that message.
 # 
 # This is a semi-private API; callers should use
 # C<$spamtest-E<gt>learn($mail,$id,$isspam,$forget)> instead.

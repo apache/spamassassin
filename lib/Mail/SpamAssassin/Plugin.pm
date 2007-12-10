@@ -837,6 +837,105 @@ sub finish {
   %{$self} = ();
 }
 
+=item $plugin->learner_new ()
+
+Used to support human-trained probabilistic classifiers like the BAYES_* ruleset.
+Called when a new C<Mail::SpamAssassin::Bayes> object has been created; typically
+when a new user's scan is about to start.
+
+=item $plugin->learn_message ()
+
+Train the classifier with a training message.
+
+=over 4
+
+=item isspam
+
+1 if the message is spam, 0 if it's non-spam.
+
+=item msg
+
+The message's C<Mail::SpamAssassin::Message> object.
+
+=item id
+
+An optional message-identification string, used internally to tag the message.
+If it is C<undef>, one will be generated.  It should be unique to that message.
+
+=back
+
+=item $plugin->forget_message ()
+
+Tell the classifier to 'forget' its training about a specific message.
+
+=over 4
+
+=item msg
+
+The message's C<Mail::SpamAssassin::Message> object.
+
+=item id
+
+An optional message-identification string, used internally to tag the message.
+If it is C<undef>, one will be generated.  It should be unique to that message.
+
+=back
+
+=item $plugin->learner_sync ()
+
+Tell the classifier to 'sync' any pending changes against the current 
+user's training database.  This is called by C<sa-learn --sync>.
+
+=item $plugin->learner_expire_old_training ()
+
+Tell the classifier to perform infrequent, time-consuming cleanup of
+the current user's training database.  This is called by C<sa-learn
+--force-expire>.
+
+=item $plugin->learner_is_scan_available ()
+
+Should return 1 if it is possible to use the current user's training data for
+a message-scan operation, or 0 otherwise.
+
+=item $plugin->learner_dump_database ()
+
+Dump information about the current user's training data to C<stdout>.
+This is called by C<sa-learn --dump>.
+
+=over 4
+
+=item magic
+
+Set to 1 if "magic" name-value metadata should be dumped.
+
+=item toks
+
+Set to 1 if the database of tokens should be dumped.
+
+=item regex
+
+Either C<undef> to dump all tokens, or a value which specifies a regular expression
+subset of the tokens to dump.
+
+=back
+
+=item $plugin->learner_get_implementation ()
+
+Get the implementing Plugin object for the learner; used to support some
+self-test APIs in the test suite.   (You don't need to implement this.)
+
+=item $plugin->learner_close ()
+
+Close any open databases.
+
+=over 4
+
+=item quiet
+
+Set to 1 if warning messages should be suppressed.
+
+=back
+
 =head1 HELPER APIS
 
 These methods provide an API for plugins to register themselves
