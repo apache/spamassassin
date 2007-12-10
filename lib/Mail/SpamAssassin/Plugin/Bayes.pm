@@ -1397,7 +1397,7 @@ sub _compute_prob_for_token {
 # fear that might require the solution to a cubic equation, and I
 # just don't have the time for that now.
 
-sub compute_declassification_distance {
+sub _compute_declassification_distance {
   my ($self, $Ns, $Nn, $ns, $nn, $prob) = @_;
 
   return 0 if $ns == 0 && $nn == 0;
@@ -1532,7 +1532,7 @@ sub bayes_report_make_list {
   join ', ', map {
     my($t,$prob,$s,$h,$u) = @$_;
     my $a = int(($now - $u)/(3600 * 24));
-    my $d = $self->compute_declassification_distance($ns,$nh,$s,$h,$prob);
+    my $d = $self->_compute_declassification_distance($ns,$nh,$s,$h,$prob);
     my $p = sprintf "%.3f", $prob;
     my $n = $s + $h;
     my ($c,$o) = $prob < 0.5 ? ($h,$s) : ($s,$h);
