@@ -48,7 +48,7 @@ use constant HAS_DBI => eval { require DBI; };
 
 =head2 new
 
-public class (Mail::SpamAssassin::BayesStore::SQL) new (Mail::Spamassassin::Bayes $bayes)
+public class (Mail::SpamAssassin::BayesStore::SQL) new (Mail::Spamassassin::Plugin::Bayes $bayes)
 
 Description:
 This methods creates a new instance of the Mail::SpamAssassin::BayesStore::SQL
